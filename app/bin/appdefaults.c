@@ -57,13 +57,13 @@ static int GetLocalMeasureSystem(struct appDefault *ptrDefault,
 static int GetLocalDistanceFormat(struct appDefault *ptrDefault,
                                   const void *additionalData);
 static const char *GetLocalPopularScale(struct appDefault *ptrDefault,
-                                  const void *additionalData);
+                                        const void *additionalData);
 static double GetLocalRoomSize(struct appDefault *ptrDefault,
                                const void *additionalData);
 static const char *GetParamFullPath(struct appDefault *ptrDefault,
-                              const void *additionalData);
+                                    const void *additionalData);
 static const char *GetParamPrototype(struct appDefault *ptrDefault,
-                               const void *additionalData);
+                                     const void *additionalData);
 
 /**
  * List of application default settings. As this is searched by binary search, the list has to be kept sorted

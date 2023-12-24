@@ -75,25 +75,25 @@ EXPORT const char* GetCurCommandName()
 	return commandList[curCommand].helpKey;
 }
 
-/** 
+/**
  * Decide whether command is available in the current application mode.
- * Basically track modifications are not available in Train Mode, file 
+ * Basically track modifications are not available in Train Mode, file
  * operations are always available and train control ops are available in
- * train mode only. 
+ * train mode only.
  * The specific logic was developed with the help of Wolfram Alpha:
  * CNF | ((NOT m) OR o OR t) AND(m OR (NOT o) OR t)
- * 
+ *
  * \param mode		application mode
  * \param options	availability options
- * \return			true for enabled, false if disabled	
+ * \return			true for enabled, false if disabled
  */
 
 EXPORT bool IsCommandEnabled(long mode, long options)
 {
 	if (((mode == MODE_DESIGN) || (options & IC_MODETRAIN_ONLY) ||
-		(options & IC_MODETRAIN_TOO)) &&
-		((mode == MODE_TRAIN) || !(options & IC_MODETRAIN_ONLY)) ||
-		(options & IC_MODETRAIN_TOO)) {
+	     (options & IC_MODETRAIN_TOO)) &&
+	    ((mode == MODE_TRAIN) || !(options & IC_MODETRAIN_ONLY)) ||
+	    (options & IC_MODETRAIN_TOO)) {
 		return true;
 	}
 
@@ -118,8 +118,9 @@ EXPORT void EnableCommands(void)
 				enable = FALSE;
 			}
 			if (commandList[inx].enabled != enable) {
-				if (commandList[inx].buttInx >= 0)
+				if (commandList[inx].buttInx >= 0) {
 					ToolbarButtonEnable(commandList[inx].buttInx, enable );
+				}
 				for (minx = 0; minx < NUM_CMDMENUS; minx++)
 					if (commandList[inx].menu[minx]) {
 						wMenuPushEnable(commandList[inx].menu[minx], enable);
@@ -148,13 +149,15 @@ EXPORT void Reset(void)
 	LOG(log_command, 2,
 	    ( "COMMAND CANCEL %s\n", commandList[curCommand].helpKey ))
 	commandList[curCommand].cmdProc( C_CANCEL, zero);
-	if (commandList[curCommand].buttInx >= 0)
+	if (commandList[curCommand].buttInx >= 0) {
 		ToolbarButtonBusy(commandList[curCommand].buttInx, FALSE);
+	}
 	curCommand = (preSelect ? selectCmdInx : describeCmdInx);
 	wSetCursor(mainD.d, preSelect ? defaultCursor : wCursorQuestion);
 	commandContext = commandList[curCommand].context;
-	if (commandList[curCommand].buttInx >= 0)
+	if (commandList[curCommand].buttInx >= 0) {
 		ToolbarButtonBusy(commandList[curCommand].buttInx, TRUE);
+	}
 
 	DYNARR_RESET( trkSeg_t, tempSegs_da );
 
@@ -468,8 +471,9 @@ EXPORT void DoCommandB(void * data)
 		    ( "COMMAND FINISH %s\n", commandList[curCommand].helpKey ))
 		rc = commandList[curCommand].cmdProc( C_FINISH, zero);
 	}
-	if (commandList[curCommand].buttInx >= 0)
+	if (commandList[curCommand].buttInx >= 0) {
 		ToolbarButtonBusy(commandList[curCommand].buttInx, FALSE);
+	}
 
 	if (recordF) {
 		fprintf(recordF, "COMMAND %s\n", commandList[inx].helpKey + 3);
@@ -482,14 +486,14 @@ EXPORT void DoCommandB(void * data)
 	// vs. filled circle)
 
 	if (commandList[curCommand].buttInx >= 0) {
-			ToolbarUpdateButton(commandList[curCommand].buttInx,
-				curCommand, (char *)commandList[curCommand].icon,
-				commandList[curCommand].helpKey, I2VP(curCommand));
+		ToolbarUpdateButton(commandList[curCommand].buttInx,
+		                    curCommand, (char *)commandList[curCommand].icon,
+		                    commandList[curCommand].helpKey, I2VP(curCommand));
 		ToolbarButtonBusy(commandList[curCommand].buttInx, TRUE);
 	}
-		
+
 	LOG(log_command, 1,
-		("COMMAND START %s\n", commandList[curCommand].helpKey));
+	    ("COMMAND START %s\n", commandList[curCommand].helpKey));
 	wSetCursor(mainD.d,defaultCursor);
 	rc = commandList[curCommand].cmdProc( C_START, pos);
 	LOG(log_command, 4, ( "    COMMAND returns %d\n", rc ))

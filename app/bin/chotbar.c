@@ -596,11 +596,11 @@ EXPORT void LayoutHotBar( void * redraw )
 	buttonWidth = wControlGetWidth((wControl_p)hotBarLeftB);
 	buttonHeight = wControlGetHeight((wControl_p)hotBarLeftB);
 	wControlSetPos( (wControl_p)hotBarLeftB, HOTBAR_LEFT,
-		ToolbarGetHeight() +(hbHeight-buttonHeight)/2 );
+	                ToolbarGetHeight() +(hbHeight-buttonHeight)/2 );
 	wControlSetPos( (wControl_p)hotBarRightB, winWidth-20-buttonWidth+HOTBAR_LEFT+1,
-		ToolbarGetHeight() +(hbHeight-buttonHeight)/2 );
+	                ToolbarGetHeight() +(hbHeight-buttonHeight)/2 );
 	wControlSetPos( (wControl_p)hotBarD.d, buttonWidth+HOTBAR_LEFT+1,
-		ToolbarGetHeight());
+	                ToolbarGetHeight());
 	wDrawSetSize( hotBarD.d, winWidth-20-buttonWidth*2, hbHeight+2, redraw );
 	hotBarD.size.x = ((double)(winWidth-20
 	                           -buttonWidth*2))/hotBarD.dpi*hotBarD.scale;

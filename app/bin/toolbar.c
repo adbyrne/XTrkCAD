@@ -31,10 +31,10 @@
 EXPORT void ToolbarLayout(void* unused);
 
 struct sToolbarState {
-    int previousGroup;          // control variable for change control ops
-    int layerButton;            // number of layer controls shown
-    wWinPix_t nextX;            // drawing position for next control
-    wWinPix_t rowHeight;        // height of row
+	int previousGroup;          // control variable for change control ops
+	int layerButton;            // number of layer controls shown
+	wWinPix_t nextX;            // drawing position for next control
+	wWinPix_t rowHeight;        // height of row
 };
 
 // local function prototypes
@@ -76,12 +76,12 @@ static wWinPix_t toolbarHeight = 0;
 // toolbar button list
 #define BUTTON_MAX (250)
 static struct {
-    wControl_p control;
-    wBool_t enabled;
-    wWinPix_t x, y;
-    long options;
-    int group;
-    wIndex_t cmdInx;
+	wControl_p control;
+	wBool_t enabled;
+	wWinPix_t x, y;
+	long options;
+	int group;
+	wIndex_t cmdInx;
 } buttonList[BUTTON_MAX];
 EXPORT int buttonCnt = 0; // TODO-misc-refactor
 
@@ -89,30 +89,30 @@ EXPORT int buttonCnt = 0; // TODO-misc-refactor
 // control the order of the button groups inside the toolbar
 
 struct buttonGroups {
-    char*   label;          // display label
-    int     group;          // id of group
-    bool    biggap;         // control distance to previous group
+	char*   label;          // display label
+	int     group;          // id of group
+	bool    biggap;         // control distance to previous group
 };
 
 static struct buttonGroups allToolbarGroups[] = {
-    {N_("File Buttons"),            BG_FILE, false},
-    {N_("Print Buttons"),           BG_PRINT, false},
-    {N_("Import/Export Buttons"),   BG_EXPORTIMPORT, false},
-    {N_("Zoom Buttons"),            BG_ZOOM, false},
-    {N_("Undo Buttons"),            BG_UNDO, false},
-    {N_("Easement Button"),         BG_EASE, false},
-    {N_("SnapGrid Buttons"),        BG_SNAP, false},
-    {N_("Create Track Buttons"),    BG_TRKCRT, true},
-    {N_("Layout Control Elements"), BG_CONTROL, true},
-    {N_("Modify Track Buttons"),    BG_TRKMOD, false},
-    {N_("Properties/Select"),       BG_SELECT, false},
-    {N_("Track Group Buttons"),     BG_TRKGRP, false},
-    {N_("Train Group Buttons"),     BG_TRAIN, true},
-    {N_("Create Misc Buttons"),     BG_MISCCRT, false},
-    {N_("Ruler Button"),            BG_RULER, false},
-    {N_("Layer Buttons"),           BG_LAYER, true},
-    {N_("Hot Bar"),                 BG_HOTBAR},
-    {NULL, 0L}
+	{N_("File Buttons"),            BG_FILE, false},
+	{N_("Print Buttons"),           BG_PRINT, false},
+	{N_("Import/Export Buttons"),   BG_EXPORTIMPORT, false},
+	{N_("Zoom Buttons"),            BG_ZOOM, false},
+	{N_("Undo Buttons"),            BG_UNDO, false},
+	{N_("Easement Button"),         BG_EASE, false},
+	{N_("SnapGrid Buttons"),        BG_SNAP, false},
+	{N_("Create Track Buttons"),    BG_TRKCRT, true},
+	{N_("Layout Control Elements"), BG_CONTROL, true},
+	{N_("Modify Track Buttons"),    BG_TRKMOD, false},
+	{N_("Properties/Select"),       BG_SELECT, false},
+	{N_("Track Group Buttons"),     BG_TRKGRP, false},
+	{N_("Train Group Buttons"),     BG_TRAIN, true},
+	{N_("Create Misc Buttons"),     BG_MISCCRT, false},
+	{N_("Ruler Button"),            BG_RULER, false},
+	{N_("Layer Buttons"),           BG_LAYER, true},
+	{N_("Hot Bar"),                 BG_HOTBAR},
+	{NULL, 0L}
 };
 
 #define COUNTTOOLBARGROUPS (COUNT(allToolbarGroups)-1)
@@ -126,11 +126,11 @@ static void SelectAllGroups(void* unused);
 static void InvertSelection(void* unused);
 
 static paramData_t toolbarPLs[] = {
-    { PD_TOGGLE, &toggleSet, "toolbarset", 0, NULL},
+	{ PD_TOGGLE, &toggleSet, "toolbarset", 0, NULL},
 #define I_SELECTALL     (1)
-    { PD_BUTTON, SelectAllGroups, "selectall", PDO_DLGBOXEND, NULL, N_("Select All") },
+	{ PD_BUTTON, SelectAllGroups, "selectall", PDO_DLGBOXEND, NULL, N_("Select All") },
 #define I_INVERT        (2)
-    { PD_BUTTON, InvertSelection, "invert", PDO_DLGHORZ, NULL, N_("Invert Selection")}
+	{ PD_BUTTON, InvertSelection, "invert", PDO_DLGHORZ, NULL, N_("Invert Selection")}
 };
 
 static paramGroup_t toolbarPG = { "toolbar", PGO_RECORD, toolbarPLs,
@@ -148,21 +148,21 @@ static paramGroup_t toolbarPG = { "toolbar", PGO_RECORD, toolbarPLs,
 static void
 InitializeToolbarDialog(void)
 {
-    char** labels = MyMalloc((COUNT(allToolbarGroups)) * sizeof(char*));
+	char** labels = MyMalloc((COUNT(allToolbarGroups)) * sizeof(char*));
 
-    for (int i = 0; i < COUNT(allToolbarGroups); i++) {
-        labels[i] = allToolbarGroups[i].label;
-    }
-    toolbarPLs[0].winData = labels;
+	for (int i = 0; i < COUNT(allToolbarGroups); i++) {
+		labels[i] = allToolbarGroups[i].label;
+	}
+	toolbarPLs[0].winData = labels;
 
-    ParamRegister(&toolbarPG);
+	ParamRegister(&toolbarPG);
 }
 
 static void ToolbarChange(long changes)
 {
-    if ((changes & CHANGE_TOOLBAR)) {
-        MainProc(mainW, wResize_e, NULL, NULL);
-    }
+	if ((changes & CHANGE_TOOLBAR)) {
+		MainProc(mainW, wResize_e, NULL, NULL);
+	}
 }
 
 /**
@@ -173,9 +173,9 @@ static void ToolbarChange(long changes)
  */
 static void SelectAllGroups(void* unused)
 {
-    toggleSet = ~(0UL);
+	toggleSet = ~(0UL);
 
-    ParamLoadControls(&toolbarPG);
+	ParamLoadControls(&toolbarPG);
 }
 
 /**
@@ -186,9 +186,9 @@ static void SelectAllGroups(void* unused)
  */
 static void InvertSelection(void* unused)
 {
-    toggleSet ^= ~(0UL);
+	toggleSet ^= ~(0UL);
 
-    ParamLoadControls(&toolbarPG);
+	ParamLoadControls(&toolbarPG);
 }
 
 /**
@@ -200,17 +200,17 @@ static void InvertSelection(void* unused)
 
 static void ToolbarOk(void* unused)
 {
-    toolbarSet = 0;
+	toolbarSet = 0;
 
-    for (int i = 0; i < COUNTTOOLBARGROUPS; i++) {
-        if (toggleSet & (1UL << i)) {
-            toolbarSet = SETBIT(toolbarSet, allToolbarGroups[i].group);
-        }
-    }
-    SaveToolbarConfig();
-    ToolbarLayout(unused);
-    MainProc(mainW, wResize_e, NULL, NULL);
-    wHide(toolbarW);
+	for (int i = 0; i < COUNTTOOLBARGROUPS; i++) {
+		if (toggleSet & (1UL << i)) {
+			toolbarSet = SETBIT(toolbarSet, allToolbarGroups[i].group);
+		}
+	}
+	SaveToolbarConfig();
+	ToolbarLayout(unused);
+	MainProc(mainW, wResize_e, NULL, NULL);
+	wHide(toolbarW);
 }
 
 /**
@@ -223,21 +223,21 @@ static void ToolbarOk(void* unused)
 
 EXPORT void DoToolbar(void* unused)
 {
-    if (!toolbarW) {
-        InitializeToolbarDialog();
-        toolbarW = ParamCreateDialog(&toolbarPG,
-                                     MakeWindowTitle(_("Toolbar Options")), _("OK"), ToolbarOk, wHide,
-                                     TRUE, NULL, 0, NULL);
-    }
+	if (!toolbarW) {
+		InitializeToolbarDialog();
+		toolbarW = ParamCreateDialog(&toolbarPG,
+		                             MakeWindowTitle(_("Toolbar Options")), _("OK"), ToolbarOk, wHide,
+		                             TRUE, NULL, 0, NULL);
+	}
 
-    toggleSet = 0;
-    for (int i = 0; i < COUNTTOOLBARGROUPS; i++) {
-        if (ISBITSET(toolbarSet, allToolbarGroups[i].group)) {
-            toggleSet = SETBIT(toggleSet, i);
-        }
-    }
-    ParamLoadControls(&toolbarPG);
-    wShow(toolbarW);
+	toggleSet = 0;
+	for (int i = 0; i < COUNTTOOLBARGROUPS; i++) {
+		if (ISBITSET(toolbarSet, allToolbarGroups[i].group)) {
+			toggleSet = SETBIT(toggleSet, i);
+		}
+	}
+	ParamLoadControls(&toolbarPG);
+	wShow(toolbarW);
 }
 
 /**
@@ -250,10 +250,10 @@ EXPORT void DoToolbar(void* unused)
 EXPORT bool
 ToolbarIsGroupVisible(int group)
 {
-    CHECK(group > 0);
-    CHECK(group <= COUNTTOOLBARGROUPS);
+	CHECK(group > 0);
+	CHECK(group <= COUNTTOOLBARGROUPS);
 
-    return(ISGROUPVISIBLE(group));
+	return(ISGROUPVISIBLE(group));
 }
 
 /**
@@ -265,7 +265,7 @@ ToolbarIsGroupVisible(int group)
 EXPORT wWinPix_t
 ToolbarGetHeight(void)
 {
-    return(toolbarHeight);
+	return(toolbarHeight);
 }
 
 /**
@@ -275,7 +275,7 @@ ToolbarGetHeight(void)
 EXPORT void
 ToolbarSetHeight(wWinPix_t newHeight)
 {
-    toolbarHeight = newHeight;
+	toolbarHeight = newHeight;
 }
 
 /**
@@ -288,13 +288,14 @@ ToolbarSetHeight(wWinPix_t newHeight)
 bool
 IsButtonVisible(int group, long mode, long options, long layerButtons)
 {
-    if (group == BG_LAYER) {
-        if (layerButtons < layerCount+FIXEDLAYERCONTROLS)
-            return true;
-        else
-            return false;
-    }
-    return(IsCommandEnabled(mode, options));
+	if (group == BG_LAYER) {
+		if (layerButtons < layerCount+FIXEDLAYERCONTROLS) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	return(IsCommandEnabled(mode, options));
 }
 
 /**
@@ -305,105 +306,100 @@ IsButtonVisible(int group, long mode, long options, long layerButtons)
 
 static void ToolbarButtonPlace(struct sToolbarState *tbState, wIndex_t inx)
 {
-    wWinPix_t w, h, offset;
-    wWinPix_t width;
-    wWinPix_t gap = GROUP_DISTANCE;
-    int currentGroup = buttonList[inx].group;
+	wWinPix_t w, h, offset;
+	wWinPix_t width;
+	wWinPix_t gap = GROUP_DISTANCE;
+	int currentGroup = buttonList[inx].group;
 
-    wWinGetSize(mainW, &width, &h);
+	wWinGetSize(mainW, &width, &h);
 
-    if (buttonList[inx].control) {
-        if (tbState->rowHeight <= 0) {
-            tbState->rowHeight = wControlGetHeight(buttonList[inx].control);
-            toolbarHeight = tbState->rowHeight + 5;
-        }
+	if (buttonList[inx].control) {
+		if (tbState->rowHeight <= 0) {
+			tbState->rowHeight = wControlGetHeight(buttonList[inx].control);
+			toolbarHeight = tbState->rowHeight + 5;
+		}
 
-        if (currentGroup != tbState->previousGroup) {
-            for (int i = 0; i < COUNTTOOLBARGROUPS; i++) {
-                if (allToolbarGroups[i].group == currentGroup &&
-                        allToolbarGroups[i].biggap) {
-                    gap = GROUP_BIG_DISTANCE;
-                }
-            }
-        }
+		if (currentGroup != tbState->previousGroup) {
+			for (int i = 0; i < COUNTTOOLBARGROUPS; i++) {
+				if (allToolbarGroups[i].group == currentGroup &&
+				    allToolbarGroups[i].biggap) {
+					gap = GROUP_BIG_DISTANCE;
+				}
+			}
+		}
 
-        if ((ISGROUPVISIBLE(currentGroup)) &&
-                IsButtonVisible(currentGroup, programMode,
-                                buttonList[inx].options, tbState->layerButton ))
-        {
-            if (currentGroup != tbState->previousGroup) {
-                tbState->nextX += gap;
-                tbState->previousGroup = currentGroup;
-            }
-            w = wControlGetWidth(buttonList[inx].control);
-            h = wControlGetHeight(buttonList[inx].control);
-            if (h < tbState->rowHeight) {
-                offset = (h - tbState->rowHeight) / 2;
-                h = tbState->rowHeight;  //Uniform
-            }
-            else {
-                offset = 0;
-            }
-            if (inx < buttonCnt - 1 &&
-                    (buttonList[inx + 1].options & IC_ABUT)) {
-                w += wControlGetWidth(buttonList[inx + 1].control);
-            }
-            if (tbState->nextX + w > width - TOOLBAR_MARGIN) {
-                tbState->nextX = 5;
-                toolbarHeight += h + 5;
-            }
-            if ((currentGroup == BG_LAYER) &&
-                    tbState->layerButton >= FIXEDLAYERCONTROLS &&
-                    GetLayerHidden(tbState->layerButton - FIXEDLAYERCONTROLS)) {
-                wControlShow(buttonList[inx].control, FALSE);
-                tbState->layerButton++;
-            }
-            else {
-                wWinPix_t newX = tbState->nextX;
-                wWinPix_t newY = toolbarHeight - (h + 5 + offset);
+		if ((ISGROUPVISIBLE(currentGroup)) &&
+		    IsButtonVisible(currentGroup, programMode,
+		                    buttonList[inx].options, tbState->layerButton )) {
+			if (currentGroup != tbState->previousGroup) {
+				tbState->nextX += gap;
+				tbState->previousGroup = currentGroup;
+			}
+			w = wControlGetWidth(buttonList[inx].control);
+			h = wControlGetHeight(buttonList[inx].control);
+			if (h < tbState->rowHeight) {
+				offset = (h - tbState->rowHeight) / 2;
+				h = tbState->rowHeight;  //Uniform
+			} else {
+				offset = 0;
+			}
+			if (inx < buttonCnt - 1 &&
+			    (buttonList[inx + 1].options & IC_ABUT)) {
+				w += wControlGetWidth(buttonList[inx + 1].control);
+			}
+			if (tbState->nextX + w > width - TOOLBAR_MARGIN) {
+				tbState->nextX = 5;
+				toolbarHeight += h + 5;
+			}
+			if ((currentGroup == BG_LAYER) &&
+			    tbState->layerButton >= FIXEDLAYERCONTROLS &&
+			    GetLayerHidden(tbState->layerButton - FIXEDLAYERCONTROLS)) {
+				wControlShow(buttonList[inx].control, FALSE);
+				tbState->layerButton++;
+			} else {
+				wWinPix_t newX = tbState->nextX;
+				wWinPix_t newY = toolbarHeight - (h + 5 + offset);
 
-                // count number of shown layer buttons
-                if (currentGroup == BG_LAYER) {
-                    tbState->layerButton++;
-                }
-                if ((newX != buttonList[inx].x) || (newY != buttonList[inx].y)) {
-                    wControlShow(buttonList[inx].control, FALSE);
+				// count number of shown layer buttons
+				if (currentGroup == BG_LAYER) {
+					tbState->layerButton++;
+				}
+				if ((newX != buttonList[inx].x) || (newY != buttonList[inx].y)) {
+					wControlShow(buttonList[inx].control, FALSE);
 
-                    wControlSetPos(buttonList[inx].control, newX,
-                                   newY);
-                }
-                buttonList[inx].x = newX;
-                buttonList[inx].y = newY;
-                tbState->nextX += wControlGetWidth(buttonList[inx].control);
-                wControlShow(buttonList[inx].control, TRUE);
-            }
-        }
-        else {
-            wControlShow(buttonList[inx].control, FALSE);
-        }
-    }
+					wControlSetPos(buttonList[inx].control, newX,
+					               newY);
+				}
+				buttonList[inx].x = newX;
+				buttonList[inx].y = newY;
+				tbState->nextX += wControlGetWidth(buttonList[inx].control);
+				wControlShow(buttonList[inx].control, TRUE);
+			}
+		} else {
+			wControlShow(buttonList[inx].control, FALSE);
+		}
+	}
 }
 
 EXPORT void ToolbarLayout(void* data)
 {
-    int inx;
-    struct sToolbarState state = {
-        .previousGroup = 0,
-        .nextX = 0,
-        .layerButton = 0,
-        .rowHeight = 0,
-    };
+	int inx;
+	struct sToolbarState state = {
+		.previousGroup = 0,
+		.nextX = 0,
+		.layerButton = 0,
+		.rowHeight = 0,
+	};
 
-    for (inx = 0; inx < buttonCnt; inx++) {
-        ToolbarButtonPlace(&state, inx);
-    }
+	for (inx = 0; inx < buttonCnt; inx++) {
+		ToolbarButtonPlace(&state, inx);
+	}
 
-    if (ISBITSET(toolbarSet, BG_HOTBAR)) {
-        LayoutHotBar(data);
-    }
-    else {
-        HideHotBar();
-    }
+	if (ISBITSET(toolbarSet, BG_HOTBAR)) {
+		LayoutHotBar(data);
+	} else {
+		HideHotBar();
+	}
 }
 
 /**
@@ -415,8 +411,8 @@ EXPORT void ToolbarLayout(void* data)
 
 EXPORT void ToolbarButtonBusy(wIndex_t button, wBool_t busy)
 {
-    wButtonSetBusy((wButton_p)buttonList[button].control,
-                   busy);
+	wButtonSetBusy((wButton_p)buttonList[button].control,
+	               busy);
 }
 
 /**
@@ -428,8 +424,8 @@ EXPORT void ToolbarButtonBusy(wIndex_t button, wBool_t busy)
 
 EXPORT void ToolbarButtonEnable(wIndex_t button, wBool_t enable)
 {
-    wControlActive(buttonList[button].control,
-                   enable);
+	wControlActive(buttonList[button].control,
+	               enable);
 }
 
 /**
@@ -440,12 +436,12 @@ EXPORT void ToolbarButtonEnable(wIndex_t button, wBool_t enable)
 
 EXPORT void ToolbarButtonEnableIfSelect(bool selected)
 {
-    for (int inx = 0; inx < buttonCnt; inx++) {
-        if (buttonList[inx].cmdInx < 0
-                && (buttonList[inx].options & IC_SELECTED)) {
-            ToolbarButtonEnable(inx, selected );
-        }
-    }
+	for (int inx = 0; inx < buttonCnt; inx++) {
+		if (buttonList[inx].cmdInx < 0
+		    && (buttonList[inx].options & IC_SELECTED)) {
+			ToolbarButtonEnable(inx, selected );
+		}
+	}
 }
 
 /**
@@ -459,16 +455,16 @@ EXPORT void ToolbarButtonEnableIfSelect(bool selected)
 
 EXPORT void ToolbarControlAdd(wControl_p control, long options, int cmdGroup)
 {
-    CHECK(buttonCnt < BUTTON_MAX - 1);
-    buttonList[buttonCnt].enabled = TRUE;
-    buttonList[buttonCnt].options = options;
-    buttonList[buttonCnt].group = cmdGroup;
-    buttonList[buttonCnt].x = 0;
-    buttonList[buttonCnt].y = 0;
-    buttonList[buttonCnt].control = control;
-    buttonList[buttonCnt].cmdInx = -1;
-    wControlShow(control, FALSE);
-    buttonCnt++;
+	CHECK(buttonCnt < BUTTON_MAX - 1);
+	buttonList[buttonCnt].enabled = TRUE;
+	buttonList[buttonCnt].options = options;
+	buttonList[buttonCnt].group = cmdGroup;
+	buttonList[buttonCnt].x = 0;
+	buttonList[buttonCnt].y = 0;
+	buttonList[buttonCnt].control = control;
+	buttonList[buttonCnt].cmdInx = -1;
+	wControlShow(control, FALSE);
+	buttonCnt++;
 }
 
 /**
@@ -481,10 +477,10 @@ EXPORT void ToolbarControlAdd(wControl_p control, long options, int cmdGroup)
 
 EXPORT void ToolbarButtonCommandLink(wIndex_t button, int command)
 {
-    if (button >= 0 && buttonList[button].cmdInx == -1) {
-        // set button back-link
-        buttonList[button].cmdInx = commandCnt;
-    }
+	if (button >= 0 && buttonList[button].cmdInx == -1) {
+		// set button back-link
+		buttonList[button].cmdInx = commandCnt;
+	}
 }
 
 /**
@@ -503,14 +499,14 @@ EXPORT void ToolbarUpdateButton(wIndex_t button, wIndex_t command,
                                 const char * helpKey,
                                 void * context)
 {
-    if (buttonList[button].cmdInx != command) {
-        wButtonSetLabel((wButton_p) buttonList[button].control,icon);
-        wControlSetHelp(buttonList[button].control,
-                        GetBalloonHelpStr(helpKey));
-        wControlSetContext(buttonList[button].control,
-                           context);
-        buttonList[button].cmdInx = command;
-    }
+	if (buttonList[button].cmdInx != command) {
+		wButtonSetLabel((wButton_p) buttonList[button].control,icon);
+		wControlSetHelp(buttonList[button].control,
+		                GetBalloonHelpStr(helpKey));
+		wControlSetContext(buttonList[button].control,
+		                   context);
+		buttonList[button].cmdInx = command;
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -522,28 +518,28 @@ EXPORT void ToolbarUpdateButton(wIndex_t button, wIndex_t command,
  */
 EXPORT void PlaybackButtonMouse(wIndex_t buttInx)
 {
-    wWinPix_t cmdX, cmdY;
-    coOrd pos;
+	wWinPix_t cmdX, cmdY;
+	coOrd pos;
 
-    if (buttInx < 0 || buttInx >= buttonCnt) {
-        return;
-    }
-    if (buttonList[buttInx].control == NULL) {
-        return;
-    }
-    cmdX = buttonList[buttInx].x + 17;
-    cmdY = toolbarHeight - (buttonList[buttInx].y + 17)
-           + (wWinPix_t)(mainD.size.y / mainD.scale * mainD.dpi) + 30;
+	if (buttInx < 0 || buttInx >= buttonCnt) {
+		return;
+	}
+	if (buttonList[buttInx].control == NULL) {
+		return;
+	}
+	cmdX = buttonList[buttInx].x + 17;
+	cmdY = toolbarHeight - (buttonList[buttInx].y + 17)
+	       + (wWinPix_t)(mainD.size.y / mainD.scale * mainD.dpi) + 30;
 
-    mainD.Pix2CoOrd(&mainD, cmdX, cmdY, &pos);
-    MovePlaybackCursor(&mainD, pos, TRUE, buttonList[buttInx].control);
-    if (playbackTimer == 0) {
-        wButtonSetBusy((wButton_p)buttonList[buttInx].control, TRUE);
-        wFlush();
-        wPause(500);
-        wButtonSetBusy((wButton_p)buttonList[buttInx].control, FALSE);
-        wFlush();
-    }
+	mainD.Pix2CoOrd(&mainD, cmdX, cmdY, &pos);
+	MovePlaybackCursor(&mainD, pos, TRUE, buttonList[buttInx].control);
+	if (playbackTimer == 0) {
+		wButtonSetBusy((wButton_p)buttonList[buttInx].control, TRUE);
+		wFlush();
+		wPause(500);
+		wButtonSetBusy((wButton_p)buttonList[buttInx].control, FALSE);
+		wFlush();
+	}
 }
 
 /**
@@ -554,14 +550,14 @@ EXPORT void PlaybackButtonMouse(wIndex_t buttInx)
 
 EXPORT void ToolbarButtonPlayback(wIndex_t buttonInx)
 {
-    wWinPix_t cmdX, cmdY;
-    coOrd pos;
+	wWinPix_t cmdX, cmdY;
+	coOrd pos;
 
-    cmdX = buttonList[buttonInx].x + 17;
-    cmdY = toolbarHeight - (buttonList[buttonInx].y + 17)
-           + (wWinPix_t)(mainD.size.y / mainD.scale * mainD.dpi) + 30;
-    mainD.Pix2CoOrd(&mainD, cmdX, cmdY, &pos);
-    MovePlaybackCursor(&mainD, pos, TRUE, buttonList[buttonInx].control);
+	cmdX = buttonList[buttonInx].x + 17;
+	cmdY = toolbarHeight - (buttonList[buttonInx].y + 17)
+	       + (wWinPix_t)(mainD.size.y / mainD.scale * mainD.dpi) + 30;
+	mainD.Pix2CoOrd(&mainD, cmdX, cmdY, &pos);
+	MovePlaybackCursor(&mainD, pos, TRUE, buttonList[buttonInx].control);
 }
 
 /**
@@ -572,10 +568,10 @@ EXPORT void ToolbarButtonPlayback(wIndex_t buttonInx)
 static void
 SaveToolbarConfig(void)
 {
-    wPrefSetInteger(TOOLBAR_SECTION, TOOLBAR_VARIABLE, toolbarSet);
-    if (recordF)
-        fprintf(recordF, "PARAMETER %s %s %ld", TOOLBAR_SECTION,
-                TOOLBAR_VARIABLE, toolbarSet);
+	wPrefSetInteger(TOOLBAR_SECTION, TOOLBAR_VARIABLE, toolbarSet);
+	if (recordF)
+		fprintf(recordF, "PARAMETER %s %s %ld", TOOLBAR_SECTION,
+		        TOOLBAR_VARIABLE, toolbarSet);
 
 }
 
@@ -588,20 +584,20 @@ SaveToolbarConfig(void)
 EXPORT void
 ToolbarLoadConfig(void)
 {
-    unsigned long maxToolbarSet = (1 << COUNTTOOLBARGROUPS) - 1;
-    unsigned long toolbarSetIni;
+	unsigned long maxToolbarSet = (1 << COUNTTOOLBARGROUPS) - 1;
+	unsigned long toolbarSetIni;
 
-    wPrefGetInteger(TOOLBAR_SECTION, TOOLBAR_VARIABLE, &toolbarSetIni,
-                    TOOLBARSET_INIT);
+	wPrefGetInteger(TOOLBAR_SECTION, TOOLBAR_VARIABLE, &toolbarSetIni,
+	                TOOLBARSET_INIT);
 
-    toolbarSet = toolbarSetIni & maxToolbarSet;
+	toolbarSet = toolbarSetIni & maxToolbarSet;
 
-    // unused but saved to stay compatible
-    wPrefSetInteger(TOOLBAR_SECTION, "max-toolbarset", maxToolbarSet);
+	// unused but saved to stay compatible
+	wPrefSetInteger(TOOLBAR_SECTION, "max-toolbarset", maxToolbarSet);
 
-    if (recordF)
-        fprintf(recordF, "PARAMETER %s %s %lX -> %lX", TOOLBAR_SECTION,
-                TOOLBAR_VARIABLE, toolbarSetIni, toolbarSet);
+	if (recordF)
+		fprintf(recordF, "PARAMETER %s %s %lX -> %lX", TOOLBAR_SECTION,
+		        TOOLBAR_VARIABLE, toolbarSetIni, toolbarSet);
 }
 
 /**
@@ -611,7 +607,7 @@ ToolbarLoadConfig(void)
 
 EXPORT void InitToolbar(void)
 {
-    RegisterChangeNotification(ToolbarChange);
+	RegisterChangeNotification(ToolbarChange);
 
-    ToolbarLoadConfig();
+	ToolbarLoadConfig();
 }

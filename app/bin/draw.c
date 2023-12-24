@@ -3242,7 +3242,7 @@ EXPORT void DrawInit( int initialZoom )
 
 //	InitColor();
 	wWinGetSize( mainW, &w, &h );
-	
+
 	h = h - (ToolbarGetHeight() +max(textHeight,infoHeight)+10);
 	if ( w <= 0 ) { w = 1; }
 	if ( h <= 0 ) { h = 1; }
