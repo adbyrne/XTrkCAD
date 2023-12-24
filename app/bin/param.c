@@ -52,7 +52,7 @@ EXPORT wWinPix_t DlgSepTop = 12;
 EXPORT wWinPix_t DlgSepBottom = 12;
 static wWinPix_t DlgSepMid = 18;
 static wWinPix_t DlgSepNarrow = 6;
-static wWinPix_t DlgSepWide = 12;
+//static wWinPix_t DlgSepWide = 12;
 static wWinPix_t DlgSepFrmLeft = 4;
 static wWinPix_t DlgSepFrmRight = 4;
 static wWinPix_t DlgSepFrmTop = 4;
@@ -388,7 +388,7 @@ static void FormatFraction(
         int digits,
         BOOL_T rational,
         FLOAT_T valF,
-        char * unitFmt )
+        const char * unitFmt )
 {
 	char * cp = *cpp;
 	long integ;

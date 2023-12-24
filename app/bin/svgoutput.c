@@ -428,7 +428,6 @@ static int DoExportSVGTracks(
         char ** fileName,
         void * data)
 {
-	DynString command = NaS;
 	SVGDocument *svg;
 	SVGParent *svgData;
 	BOOL_T all = (selectedTrackCount == 0);

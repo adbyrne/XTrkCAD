@@ -37,10 +37,11 @@
 
 #include "include/toolbar.h"
 
-static paramData_t menuPLs[101] = { /*{PD_LONG, &toolbarSet NULL, "toolbarset"},*/ 
-	{PD_LONG, &curTurnoutEp, "cur-turnout-ep"} 
+static paramData_t menuPLs[101] = {
+	{PD_LONG, NULL, "toolbarset", PDO_NOPREF},
+	{PD_LONG, &curTurnoutEp, "cur-turnout-ep"}
 };
-static paramGroup_t menuPG = { "misc", PGO_RECORD, menuPLs, 0 };
+static paramGroup_t menuPG = { "misc", PGO_RECORD, menuPLs, 2 };
 
 static void InitCmdExport( void );
 
@@ -770,6 +771,7 @@ static void MiscMenuItemCreate(wMenu_p m1, wMenu_p m2, const char * name,
 		GetBalloonHelpStr(name);
 	}
 	menuPG.paramCnt++;
+	CHECK( menuPG.paramCnt < COUNT(menuPLs) );
 }
 
 
@@ -802,7 +804,7 @@ static addButtonCallBack_t paramFilesCallback;
 
 EXPORT void CreateMenus(void)
 {
-	wMenu_p fileM, editM, viewM, optionM, windowM, macroM, helpM, 
+	wMenu_p fileM, editM, viewM, optionM, windowM, macroM, helpM,
 	        manageM, addM, changeM, drawM;
 	wMenu_p zoomM, zoomSubM;
 
@@ -1142,7 +1144,7 @@ EXPORT void CreateMenus(void)
 
 	InitToolbar();
 	MiscMenuItemCreate(viewM, NULL, "cmdToolbarOpt", _("&Toolbar Options..."),
-		0L, DoToolbar, IC_MODETRAIN_TOO, NULL);
+	                   0L, DoToolbar, IC_MODETRAIN_TOO, NULL);
 
 	cmdGroup = BG_EASE;
 	InitCmdEasement();

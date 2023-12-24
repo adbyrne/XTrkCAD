@@ -27,7 +27,7 @@
 #define BG_EXPORTIMPORT (16)
 #define BG_PRINT		(17)
 
-static void SaveToolbarConfig(void);
+extern void InitToolbar(void);
 extern void ToolbarLayout(void* data);
 extern void DoToolbar(void* unused);
 extern bool ToolbarIsGroupVisible(int group);

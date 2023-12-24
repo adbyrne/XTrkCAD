@@ -2100,7 +2100,7 @@ static int lbmap_height[3] = { 16, 24, 32 };
 static int lbit0_width[3] = { 6, 10, 14 };
 static int lbit1_width[3] = { 4, 5, 6 };
 
-static int lbits_top[3] = { 3, 4, 6 };
+//static int lbits_top[3] = { 3, 4, 6 };
 static int lbits_height[3] = { 10, 15, 20 };
 
 #include "bitmaps/layer_num.inc"

@@ -652,7 +652,7 @@ int main(int argc, char* argv[])
 	char name[100];
 	char* temp;
 	char* ext;
-	int i = 0, j = 0;
+//	int i = 0, j = 0;
 	int icon;
 
 #ifdef DEBUGPRINT

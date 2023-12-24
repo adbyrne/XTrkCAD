@@ -1844,12 +1844,14 @@ static DIST_T BezierMathDistance( coOrd * pos, coOrd p[4], int segments,
 	return dd;
 }
 
+#ifdef LATER
 static coOrd BezierMathFindNearestPoint(coOrd *pos, coOrd p[4], int segments)
 {
 	double t = 0.0;
 	BezierMathDistance(pos, p, segments, &t);
 	return BezierPointByParameter(p, t);
 }
+#endif
 
 void BezierSlice(coOrd input[], coOrd output[], double t)
 {
@@ -1935,6 +1937,7 @@ double BezierAddLengthIfClose(coOrd start[4], double error)
 
 }
 
+#ifdef LATER
 /**
  * Use recursive splitting to get close approximation ot length of bezier
  *
@@ -1945,6 +1948,7 @@ static double BezierMathLength(coOrd p[4], double error)
 	return BezierAddLengthIfClose(p, error);  /* kick off recursion */
 
 }
+#endif
 
 coOrd  BezierFirstDerivative(coOrd p[4], double t)
 {
@@ -1986,6 +1990,7 @@ coOrd BezierSecondDerivative(coOrd p[4], double t)
 	return v;
 }
 
+#ifdef LATER
 /**
  * Get curvature of a Bezier at a point
 */
@@ -2030,4 +2035,4 @@ static double BezierMathMinRadius(coOrd p[4])
 	if (curv >= 1000.0 || curv <= 0.001 ) { return 0.0; }
 	return 1/curv;
 }
-
+#endif

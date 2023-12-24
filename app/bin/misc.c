@@ -1021,8 +1021,8 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	char * initialFile = NULL;
 	const char * pref;
 	coOrd roomSize;
-	long oldToolbarMax;
-	long newToolbarMax;
+	/*	long oldToolbarMax;
+		long newToolbarMax; */
 	char *cp;
 	char buffer[STR_SIZE];
 	unsigned int i;
@@ -1138,12 +1138,12 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	InitAppDefaults();
 
 	ToolbarLoadConfig();
-/*	newToolbarMax = (1 << BG_COUNT) - 1;
-	wPrefGetInteger("misc", "toolbarset", &toolbarSet, newToolbarMax);
-	wPrefGetInteger("misc", "max-toolbarset", &oldToolbarMax, 0);
-	toolbarSet |= newToolbarMax & ~oldToolbarMax;
-	wPrefSetInteger("misc", "max-toolbarset", newToolbarMax);
-	wPrefSetInteger("misc", "toolbarset", toolbarSet); */
+	/*	newToolbarMax = (1 << BG_COUNT) - 1;
+		wPrefGetInteger("misc", "toolbarset", &toolbarSet, newToolbarMax);
+		wPrefGetInteger("misc", "max-toolbarset", &oldToolbarMax, 0);
+		toolbarSet |= newToolbarMax & ~oldToolbarMax;
+		wPrefSetInteger("misc", "max-toolbarset", newToolbarMax);
+		wPrefSetInteger("misc", "toolbarset", toolbarSet); */
 
 	LOG1(log_init, ( "fontInit\n"))
 

@@ -56,9 +56,6 @@ static trknoteData_t noteTypes[] = {
 
 static long curNoteType;
 
-static unsigned layerSave;
-static 	coOrd posSave;
-
 #define NOTETYPESCOUNT COUNT(noteTypes)
 
 
@@ -519,7 +516,6 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 {
 	static coOrd oldPos;
 	static int state_on = FALSE;
-	track_p trk;
 
 	switch (action) {
 	case C_START:

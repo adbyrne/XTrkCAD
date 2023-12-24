@@ -24,6 +24,7 @@ if(UNIX)
         add_link_options("-pthread")
    endif()
 
+    add_compile_options("-Wall")
     # glib 2.0 deprecated GTypeDebugFlags and GTimeVal, gtk2 has not been updated
     add_compile_options("-Wno-deprecated-declarations")
 endif()

@@ -1,14 +1,14 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2023 THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+# German translations for xtrkcad package.
+# Copyright (C) 2023 Martin Fischer
+# This file is distributed under the same license as the xtrkcad package.
+# Martin Fischer <m_fischer@users.sourceforge.net>, 2021.
 #
 # Translators:
 # Adam J M Richards <adamjmrichards@gmail.com>, 2021
 # Martin Fischer <m_fischer@users.sourceforge.net>, 2021
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
+"Project-Id-Version: xtrkcad 5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-09-22 10:19+0200\n"
 "PO-Revision-Date: 2023-11-05 10:25+0100\n"

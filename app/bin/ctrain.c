@@ -94,7 +94,7 @@ static void ControllerDialogSyncAll(void);
 static STATUS_T CmdTrain(wAction_t, coOrd);
 static wMenu_p trainPopupM;
 static wMenuPush_p trainPopupMI[11];
-static track_p followTrain;
+static track_p followTrain = NULL;
 static coOrd followCenter;
 static BOOL_T trainsTimeoutPending;
 static enum { TRAINS_STOP, TRAINS_RUN, TRAINS_IDLE, TRAINS_PAUSE } trainsState;
@@ -1397,7 +1397,6 @@ static struct {
 
 
 long trainPause = 200;
-static track_p followTrain = NULL;
 static void DrawAllCars(track_p trk)
 {
 	track_p car;
@@ -2955,6 +2954,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 }
 
 
+#ifdef LATER
 /*
  *
  */
@@ -2965,6 +2965,7 @@ static STATUS_T CmdCarDescAction(
 {
 	return CmdTrain(action, pos);
 }
+#endif
 
 #include "bitmaps/train.xpm3"
 #include "bitmaps/exit.xpm3"
@@ -3030,7 +3031,6 @@ static void TrainFunc(
 	coOrd pos0, pos1;
 	ANGLE_T angle0, angle1;
 	EPINX_T ep0, ep1;
-	char describe_str[STR_SIZE];
 
 	if (trainFuncCar == NULL) {
 		fprintf(stderr, "trainFunc: trainFuncCar==NULL\n");

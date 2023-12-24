@@ -93,7 +93,7 @@ char * GetNextLine( void );
 #define END_MESSAGE	"END$MESSAGE"
 wBool_t IsEND( char * sEnd );
 
-BOOL_T GetArgs( char *, char *, ... );
+BOOL_T GetArgs( char *, const char *, ... );
 char * ReadMultilineText();
 BOOL_T ParseRoomSize( char *, coOrd * );
 int InputError( char *, BOOL_T, ... );
