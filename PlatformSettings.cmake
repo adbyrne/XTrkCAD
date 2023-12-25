@@ -52,11 +52,14 @@ if(WIN32)
         set( XTRKCAD_ARCH_SUBDIR "x86")
 	endif ()
 
-	set(CMAKE_C_FLAGS_DEBUG "/D_DEBUG /MDd /Zi /Ob0 /Od /RTC1" CACHE STRING "Flags used by the compiler during debug builds" FORCE)
-	set(CMAKE_C_FLAGS_MINSIZEREL "/MD /O1 /Ob1 /D NDEBUG" CACHE STRING "Flags used by the compiler during release minumum size builds" FORCE)
-	set(CMAKE_C_FLAGS_RELEASE "/MD /O2 /Ob2 /D NDEBUG" CACHE STRING "Flags used by the compiler during release builds" FORCE)
-	set(CMAKE_C_FLAGS_RELWITHDEBINFO "/MDd /Zi /O2 /Ob1 /D NDEBUG" CACHE STRING "Flags used by the compiler during release with debug info builds" FORCE)
+	add_compile_options(
+		"$<$<CONFIG:DEBUG>:/W3>"
+	)
 
-	add_definitions(-DWINDOWS)
-	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+	add_compile_definitions(
+		"$<$<CONFIG:DEBUG>:_DEBUG>"
+	)
+
+	add_compile_definitions(WINDOWS)
+	add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 endif()
