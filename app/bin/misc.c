@@ -373,9 +373,6 @@ EXPORT char * ConvertToEscapedText(const char * text)
 		text_i++;
 	}
 	cout[cout_i] = '\0';
-#ifdef UTFCONVERT
-	wSystemToUTF8(cout, cout, (unsigned int)cnt);
-#endif // UTFCONVERT
 
 	return cout;
 }
