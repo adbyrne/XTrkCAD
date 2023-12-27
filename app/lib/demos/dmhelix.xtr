@@ -28,7 +28,7 @@ PARAMETER helix vertSep 0.0
 MESSAGE
 _________________________________________
 
-We will be creating a helix with a Elevation Difference of 12", Grade of 1.5% and limit the Vertical Separation to at least 2".
+We will be creating a helix with a Elevation Difference of 12 inches, Grade of 1.5 percent and limit the Vertical Separation to at least 2 inches.
 END
 STEP
 MESSAGE
@@ -52,7 +52,7 @@ STEP
 MESSAGE
 _________________________________________
 
-Next set the Grade to 1.5%
+Next set the Grade to 1.5 percent
 Notice how this causes the Radius to change.
 END
 STEP
@@ -85,7 +85,7 @@ BIGPAUSE
 MESSAGE
 _________________________________________
 
-Lastly change the Vertical Separation to 2.5".  The number of Turns will change to 4 and the grade increase to almost 3%.
+Lastly change the Vertical Separation to 2.5 inches.  The number of Turns will change to 4 and the grade increase to almost 3 percent.
 
 Note: the Vertical Separation will be increased.  This value is the Elevation Difference (12.0) divided by the total number of turns.  The total number of turns is 4.25: 4 whole Turns plus a quarter turn for the Angular Separation.
 END
@@ -176,7 +176,7 @@ REDRAW
 MESSAGE
 _________________________________________
 
-We have set the elevations to 1" and 13" to produce a grade of 3.0% with 2.8" between coils.
+We have set the elevations to 1 inch and 13 inches to produce a grade of 3.0 percent with 2.8 inches between coils.
 
 You can use the <Describe> command to change the number of Turns or the Elevations at either end of the Helix.  This will affect the Grade and Vertical Separation.
 END

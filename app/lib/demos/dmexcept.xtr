@@ -31,7 +31,7 @@ RESET
 MESSAGE
 XTrackCAD can help find tracks that are curved too sharply or are too steep.  These tracks are Exception tracks and are drawn in the Exception track color.
 
-In this example we have a curved track with radius of 9" and a straight track with a grade of 3.8%.
+In this example we have a curved track with radius of 9 inches and a straight track with a grade of 3.8 percent.
  
 END
 STEP
@@ -39,7 +39,7 @@ PARAMETER misc cmdLayout
 MESSAGE
 _________________________________________
 
-The Layout dialog shows the Minimum Track Radius is 9" and the Maximum Track Grade is 5%.
+The Layout dialog shows the Minimum Track Radius is 9 inches and the Maximum Track Grade is 5 percent.
 END
 STEP
 PARAMETER layout mintrackradius 9.000000
