@@ -95,8 +95,6 @@ typedef struct extraDataCompound_t {
 	drawLineType_e lineType;
 } extraDataCompound_t;
 
-extern TRKTYP_T T_CAR;
-
 extern DIST_T curBarScale;
 extern dynArr_t turnoutInfo_da;
 extern dynArr_t structureInfo_da;

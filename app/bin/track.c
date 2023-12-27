@@ -173,9 +173,6 @@ EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track,
 	q0.y -= 1.0;
 	q1.y += 1.0;
 	TRK_ITERATE( trk ) {
-		if ( GetTrkType(trk) == T_CAR ) {
-			continue;
-		}
 		if ( track && !IsTrack(trk) ) {
 			continue;
 		}
