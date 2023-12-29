@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-27 10:09+0100\n"
-"PO-Revision-Date: 2023-12-27 10:48+0100\n"
+"POT-Creation-Date: 2023-12-29 09:20+0100\n"
+"PO-Revision-Date: 2023-12-29 09:22+0100\n"
 "Last-Translator: Martin Fischer <m_fischer@users.sf.net>\n"
 "Language-Team: German (Germany) (https://www.transifex.com/xtrackcad/"
 "teams/112853/de_DE/)\n"
@@ -24,25 +24,25 @@ msgstr ""
 "X-Generator: Poedit 3.4\n"
 
 #: ../bin/archive.c:154 ../bin/archive.c:161 ../bin/archive.c:190
-#: ../bin/archive.c:215 ../bin/archive.c:270 ../bin/archive.c:284
-#: ../bin/archive.c:294 ../bin/archive.c:348 ../bin/archive.c:384
-#: ../bin/archive.c:400 ../bin/archive.c:410 ../bin/archive.c:433
+#: ../bin/archive.c:215 ../bin/archive.c:270 ../bin/archive.c:285
+#: ../bin/archive.c:296 ../bin/archive.c:350 ../bin/archive.c:387
+#: ../bin/archive.c:403 ../bin/archive.c:413 ../bin/archive.c:436
 #: ../bin/cblock.c:505 ../bin/cswitchmotor.c:500 ../bin/dbench.c:147
 #: ../bin/dbitmap.c:427 ../bin/dcar.c:4894 ../bin/dcar.c:5093
 #: ../bin/dcar.c:5103 ../bin/dcar.c:5150 ../bin/dcar.c:5158 ../bin/dcar.c:5176
 #: ../bin/dcar.c:5191 ../bin/dcar.c:5196 ../bin/dcar.c:5225 ../bin/dcar.c:5395
 #: ../bin/directory.c:44 ../bin/directory.c:79 ../bin/directory.c:86
 #: ../bin/directory.c:117 ../bin/directory.c:133 ../bin/dxfoutput.c:205
-#: ../bin/fileio.c:224 ../bin/fileio.c:677 ../bin/fileio.c:835
-#: ../bin/fileio.c:897 ../bin/fileio.c:1022 ../bin/fileio.c:1091
-#: ../bin/fileio.c:1097 ../bin/fileio.c:1189 ../bin/fileio.c:1202
-#: ../bin/fileio.c:1631 ../bin/fileio.c:1680 ../bin/fileio.c:1733
-#: ../bin/macro.c:166 ../bin/macro.c:855 ../bin/macro.c:1010
-#: ../bin/macro.c:1029 ../bin/macro.c:1329 ../bin/param.c:2402
-#: ../bin/paramfile.c:258 ../bin/paramfilelist.c:458 ../bin/track.c:1104
-#: ../bin/track.c:1344 ../bin/track.c:1366 ../bin/track.c:1785
-#: ../bin/track.c:1990 ../bin/track.c:2000 ../bin/track.c:2005
-#: ../bin/track.c:2020 ../bin/track.c:2047 ../bin/track.c:2105
+#: ../bin/fileio.c:222 ../bin/fileio.c:675 ../bin/fileio.c:833
+#: ../bin/fileio.c:895 ../bin/fileio.c:1020 ../bin/fileio.c:1089
+#: ../bin/fileio.c:1095 ../bin/fileio.c:1187 ../bin/fileio.c:1200
+#: ../bin/fileio.c:1629 ../bin/fileio.c:1678 ../bin/fileio.c:1731
+#: ../bin/macro.c:167 ../bin/macro.c:856 ../bin/macro.c:1011
+#: ../bin/macro.c:1030 ../bin/macro.c:1330 ../bin/param.c:2403
+#: ../bin/paramfile.c:258 ../bin/paramfilelist.c:458 ../bin/track.c:1107
+#: ../bin/track.c:1347 ../bin/track.c:1369 ../bin/track.c:1788
+#: ../bin/track.c:1993 ../bin/track.c:2003 ../bin/track.c:2008
+#: ../bin/track.c:2023 ../bin/track.c:2050 ../bin/track.c:2108
 msgid "Continue"
 msgstr "Weiter"
 
@@ -195,7 +195,7 @@ msgstr "Steuer-Arms 1 ist zu kurz, bitte nochmal versuchen"
 #: ../bin/csensor.c:160 ../bin/csensor.c:389 ../bin/csignal.c:236
 #: ../bin/csignal.c:499 ../bin/csignal.c:510 ../bin/csignal.c:536
 #: ../bin/cswitchmotor.c:89 ../bin/cswitchmotor.c:108 ../bin/cswitchmotor.c:228
-#: ../bin/dcontmgm.c:79 ../bin/dlayer.c:543
+#: ../bin/dcontmgm.c:79 ../bin/dlayer.c:544
 msgid "Name"
 msgstr "Name"
 
@@ -211,20 +211,20 @@ msgstr "Segmente"
 
 #: ../bin/cblock.c:171 ../bin/cdraw.c:560 ../bin/cdraw.c:1573
 #: ../bin/cdraw.c:1720 ../bin/cdraw.c:2843 ../bin/cdraw.c:3070
-#: ../bin/cdraw.c:3109 ../bin/ctodesgn.c:177 ../bin/ctodesgn.c:178
-#: ../bin/ctodesgn.c:179 ../bin/ctodesgn.c:180 ../bin/ctodesgn.c:192
-#: ../bin/ctodesgn.c:193 ../bin/ctodesgn.c:242 ../bin/ctodesgn.c:245
-#: ../bin/ctodesgn.c:268 ../bin/ctodesgn.c:273 ../bin/ctodesgn.c:314
-#: ../bin/ctodesgn.c:321 ../bin/ctodesgn.c:323 ../bin/ctodesgn.c:348
-#: ../bin/ctodesgn.c:353 ../bin/ctodesgn.c:393 ../bin/ctodesgn.c:400
-#: ../bin/ctodesgn.c:401 ../bin/ctodesgn.c:426 ../bin/ctodesgn.c:429
-#: ../bin/ctodesgn.c:432 ../bin/ctodesgn.c:475 ../bin/ctodesgn.c:479
-#: ../bin/ctodesgn.c:486 ../bin/ctodesgn.c:487 ../bin/ctodesgn.c:488
-#: ../bin/ctodesgn.c:514 ../bin/ctodesgn.c:516 ../bin/ctodesgn.c:538
-#: ../bin/ctodesgn.c:540 ../bin/ctodesgn.c:563 ../bin/ctodesgn.c:565
-#: ../bin/ctodesgn.c:599 ../bin/ctodesgn.c:625 ../bin/ctodesgn.c:650
-#: ../bin/ctodesgn.c:674 ../bin/ctodesgn.c:720 ../bin/ctodesgn.c:743
-#: ../bin/ctodesgn.c:744 ../bin/ctrain.c:182 ../bin/tbezier.c:296
+#: ../bin/cdraw.c:3109 ../bin/ctodesgn.c:179 ../bin/ctodesgn.c:180
+#: ../bin/ctodesgn.c:181 ../bin/ctodesgn.c:182 ../bin/ctodesgn.c:194
+#: ../bin/ctodesgn.c:195 ../bin/ctodesgn.c:244 ../bin/ctodesgn.c:247
+#: ../bin/ctodesgn.c:270 ../bin/ctodesgn.c:275 ../bin/ctodesgn.c:316
+#: ../bin/ctodesgn.c:323 ../bin/ctodesgn.c:325 ../bin/ctodesgn.c:350
+#: ../bin/ctodesgn.c:355 ../bin/ctodesgn.c:395 ../bin/ctodesgn.c:402
+#: ../bin/ctodesgn.c:403 ../bin/ctodesgn.c:428 ../bin/ctodesgn.c:431
+#: ../bin/ctodesgn.c:434 ../bin/ctodesgn.c:477 ../bin/ctodesgn.c:481
+#: ../bin/ctodesgn.c:488 ../bin/ctodesgn.c:489 ../bin/ctodesgn.c:490
+#: ../bin/ctodesgn.c:516 ../bin/ctodesgn.c:518 ../bin/ctodesgn.c:540
+#: ../bin/ctodesgn.c:542 ../bin/ctodesgn.c:565 ../bin/ctodesgn.c:567
+#: ../bin/ctodesgn.c:601 ../bin/ctodesgn.c:627 ../bin/ctodesgn.c:652
+#: ../bin/ctodesgn.c:676 ../bin/ctodesgn.c:722 ../bin/ctodesgn.c:745
+#: ../bin/ctodesgn.c:746 ../bin/ctrain.c:184 ../bin/tbezier.c:296
 #: ../bin/tcornu.c:332 ../bin/tcurve.c:404 ../bin/tstraigh.c:91
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:186
 msgid "Length"
@@ -253,43 +253,43 @@ msgstr "Endpunkt 2: X,Y"
 #: ../bin/compound.c:785 ../bin/compound.c:801 ../bin/compound.c:835
 #: ../bin/cprint.c:746 ../bin/cprint.c:1312 ../bin/cprint.c:1445
 #: ../bin/cpull.c:531 ../bin/cpull.c:546 ../bin/cpull.c:548 ../bin/cpull.c:550
-#: ../bin/cpull.c:721 ../bin/cselect.c:2029 ../bin/csensor.c:192
+#: ../bin/cpull.c:721 ../bin/cselect.c:2096 ../bin/csensor.c:192
 #: ../bin/csensor.c:204 ../bin/csensor.c:446 ../bin/csnap.c:591
 #: ../bin/csnap.c:733 ../bin/csignal.c:266 ../bin/csignal.c:678
 #: ../bin/csignal.c:748 ../bin/cstruct.c:1041 ../bin/cstruct.c:1180
 #: ../bin/cswitchmotor.c:257 ../bin/cswitchmotor.c:269
 #: ../bin/cswitchmotor.c:281 ../bin/cswitchmotor.c:293
 #: ../bin/cswitchmotor.c:570 ../bin/cswitchmotor.c:608
-#: ../bin/cswitchmotor.c:746 ../bin/cswitchmotor.c:777 ../bin/ctext.c:172
-#: ../bin/ctodesgn.c:211 ../bin/ctodesgn.c:1309 ../bin/ctodesgn.c:2138
-#: ../bin/ctodesgn.c:2255 ../bin/ctodesgn.c:2578 ../bin/ctrain.c:205
+#: ../bin/cswitchmotor.c:746 ../bin/cswitchmotor.c:777 ../bin/ctext.c:164
+#: ../bin/ctodesgn.c:213 ../bin/ctodesgn.c:1311 ../bin/ctodesgn.c:2140
+#: ../bin/ctodesgn.c:2257 ../bin/ctodesgn.c:2580 ../bin/ctrain.c:207
 #: ../bin/cturnout.c:2973 ../bin/cturnout.c:3123 ../bin/cundo.c:260
 #: ../bin/cundo.c:266 ../bin/dbitmap.c:157 ../bin/dbitmap.c:232
 #: ../bin/dbitmap.c:473 ../bin/dcar.c:4125 ../bin/dcar.c:4297
 #: ../bin/dcar.c:4302 ../bin/dcar.c:4306 ../bin/dcar.c:4312 ../bin/dcar.c:4662
-#: ../bin/dcar.c:4778 ../bin/dcar.c:5215 ../bin/dcmpnd.c:419
-#: ../bin/dcmpnd.c:435 ../bin/dcmpnd.c:582 ../bin/dcustmgm.c:219
+#: ../bin/dcar.c:4778 ../bin/dcar.c:5215 ../bin/dcmpnd.c:420
+#: ../bin/dcmpnd.c:436 ../bin/dcmpnd.c:583 ../bin/dcustmgm.c:219
 #: ../bin/dcustmgm.c:226 ../bin/dcustmgm.c:236 ../bin/dcustmgm.c:261
-#: ../bin/dease.c:251 ../bin/dlayer.c:336 ../bin/dlayer.c:373
-#: ../bin/dlayer.c:842 ../bin/dlayer.c:1392 ../bin/dlayer.c:1398
-#: ../bin/dlayer.c:1404 ../bin/doption.c:202 ../bin/doption.c:287
-#: ../bin/doption.c:497 ../bin/doption.c:500 ../bin/doption.c:504
-#: ../bin/doption.c:516 ../bin/doption.c:591 ../bin/dprmfile.c:431
-#: ../bin/draw.c:2986 ../bin/fileio.c:180 ../bin/fileio.c:595
-#: ../bin/fileio.c:727 ../bin/fileio.c:730 ../bin/fileio.c:736
-#: ../bin/fileio.c:806 ../bin/fileio.c:1044 ../bin/layout.c:553
-#: ../bin/layout.c:819 ../bin/layout.c:994 ../bin/macro.c:1133
-#: ../bin/macro.c:1138 ../bin/macro.c:1216 ../bin/macro.c:1294
-#: ../bin/macro.c:1542 ../bin/macro.c:1563 ../bin/menu.c:272 ../bin/menu.c:283
-#: ../bin/menu.c:294 ../bin/menu.c:459 ../bin/menu.c:497 ../bin/menu.c:607
-#: ../bin/misc.c:491 ../bin/misc.c:1054 ../bin/misc.c:1063 ../bin/misc.c:1083
-#: ../bin/misc.c:1089 ../bin/misc.c:1274 ../bin/param.c:787 ../bin/param.c:2132
-#: ../bin/param.c:2274 ../bin/param.c:2278 ../bin/param.c:2410
-#: ../bin/param.c:2418 ../bin/paramfile.c:336 ../bin/paramfile.c:339
+#: ../bin/dease.c:251 ../bin/dlayer.c:337 ../bin/dlayer.c:374
+#: ../bin/dlayer.c:843 ../bin/dlayer.c:1393 ../bin/dlayer.c:1399
+#: ../bin/dlayer.c:1405 ../bin/doption.c:197 ../bin/doption.c:282
+#: ../bin/doption.c:492 ../bin/doption.c:495 ../bin/doption.c:499
+#: ../bin/doption.c:511 ../bin/doption.c:586 ../bin/dprmfile.c:431
+#: ../bin/draw.c:2987 ../bin/fileio.c:178 ../bin/fileio.c:593
+#: ../bin/fileio.c:725 ../bin/fileio.c:728 ../bin/fileio.c:734
+#: ../bin/fileio.c:804 ../bin/fileio.c:1042 ../bin/layout.c:554
+#: ../bin/layout.c:820 ../bin/layout.c:995 ../bin/macro.c:1134
+#: ../bin/macro.c:1139 ../bin/macro.c:1217 ../bin/macro.c:1295
+#: ../bin/macro.c:1543 ../bin/macro.c:1564 ../bin/menu.c:203 ../bin/menu.c:214
+#: ../bin/menu.c:225 ../bin/menu.c:390 ../bin/menu.c:428 ../bin/menu.c:538
+#: ../bin/misc.c:492 ../bin/misc.c:1055 ../bin/misc.c:1064 ../bin/misc.c:1084
+#: ../bin/misc.c:1090 ../bin/misc.c:1276 ../bin/param.c:788 ../bin/param.c:2133
+#: ../bin/param.c:2275 ../bin/param.c:2279 ../bin/param.c:2411
+#: ../bin/param.c:2419 ../bin/paramfile.c:336 ../bin/paramfile.c:339
 #: ../bin/paramfile.c:345 ../bin/paramfile.c:371 ../bin/paramfile.c:400
 #: ../bin/paramfile.c:406 ../bin/paramfilelist.c:131 ../bin/paramfilelist.c:183
 #: ../bin/paramfilelist.c:236 ../bin/scale.c:305 ../bin/scale.c:948
-#: ../bin/scale.c:1084 ../bin/tease.c:1167 ../bin/track.c:1801
+#: ../bin/scale.c:1084 ../bin/tease.c:1167 ../bin/track.c:1804
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:677
 msgid "Ok"
 msgstr "Ok"
@@ -350,24 +350,24 @@ msgid "Really delete block %s?"
 msgstr "Soll der Block %s wirklich gelöscht werden?"
 
 #: ../bin/cblock.c:767 ../bin/ccornu.c:2952 ../bin/ccornu.c:3176
-#: ../bin/cdraw.c:130 ../bin/cgroup.c:1162 ../bin/command.c:390
-#: ../bin/command.c:397 ../bin/command.c:458 ../bin/cpull.c:673
-#: ../bin/csignal.c:725 ../bin/cswitchmotor.c:700 ../bin/ctodesgn.c:2891
-#: ../bin/ctodesgn.c:3505 ../bin/ctrain.c:2606 ../bin/dcar.c:4245
+#: ../bin/cdraw.c:130 ../bin/cgroup.c:1162 ../bin/command.c:400
+#: ../bin/command.c:407 ../bin/command.c:467 ../bin/cpull.c:673
+#: ../bin/csignal.c:725 ../bin/cswitchmotor.c:700 ../bin/ctodesgn.c:2893
+#: ../bin/ctodesgn.c:3507 ../bin/ctrain.c:2607 ../bin/dcar.c:4245
 #: ../bin/dcar.c:4343 ../bin/dcar.c:4433 ../bin/dcar.c:4459 ../bin/dcar.c:4843
 #: ../bin/dcar.c:5284 ../bin/dcustmgm.c:162 ../bin/dcontmgm.c:167
-#: ../bin/track.c:1803 ../bin/track.c:1905 ../bin/track.c:1923
+#: ../bin/track.c:1806 ../bin/track.c:1908 ../bin/track.c:1926
 msgid "Yes"
 msgstr "Ja"
 
 #: ../bin/cblock.c:767 ../bin/ccornu.c:2953 ../bin/ccornu.c:3177
-#: ../bin/cdraw.c:130 ../bin/cgroup.c:1162 ../bin/command.c:390
-#: ../bin/command.c:397 ../bin/command.c:458 ../bin/cpull.c:674
-#: ../bin/csignal.c:725 ../bin/cswitchmotor.c:700 ../bin/ctodesgn.c:2891
-#: ../bin/ctodesgn.c:3505 ../bin/ctrain.c:2606 ../bin/dcar.c:4245
+#: ../bin/cdraw.c:130 ../bin/cgroup.c:1162 ../bin/command.c:400
+#: ../bin/command.c:407 ../bin/command.c:467 ../bin/cpull.c:674
+#: ../bin/csignal.c:725 ../bin/cswitchmotor.c:700 ../bin/ctodesgn.c:2893
+#: ../bin/ctodesgn.c:3507 ../bin/ctrain.c:2607 ../bin/dcar.c:4245
 #: ../bin/dcar.c:4343 ../bin/dcar.c:4433 ../bin/dcar.c:4459 ../bin/dcar.c:4843
 #: ../bin/dcar.c:5284 ../bin/dcustmgm.c:162 ../bin/dcontmgm.c:168
-#: ../bin/track.c:1803 ../bin/track.c:1905 ../bin/track.c:1923
+#: ../bin/track.c:1806 ../bin/track.c:1908 ../bin/track.c:1926
 msgid "No"
 msgstr "Nein"
 
@@ -650,7 +650,7 @@ msgstr ""
 "entfernt"
 
 #: ../bin/ccornu.c:3118 ../bin/ccornu.c:3241 ../bin/cturnout.c:352
-#: ../bin/paramfilelist.c:113
+#: ../bin/paramfilelist.c:113 ../bin/toolbar.c:229
 msgid "OK"
 msgstr "Ok"
 
@@ -814,12 +814,12 @@ msgstr "Höhenunterschied"
 #: ../bin/ccurve.c:727 ../bin/cdraw.c:559 ../bin/cdraw.c:1585
 #: ../bin/cdraw.c:1732 ../bin/cdraw.c:2850 ../bin/cdraw.c:3050
 #: ../bin/cdraw.c:3064 ../bin/compound.c:723 ../bin/compound.c:728
-#: ../bin/compound.c:733 ../bin/compound.c:738 ../bin/ctodesgn.c:187
-#: ../bin/ctodesgn.c:188 ../bin/ctodesgn.c:189 ../bin/ctodesgn.c:190
-#: ../bin/ctodesgn.c:317 ../bin/ctodesgn.c:320 ../bin/ctodesgn.c:322
-#: ../bin/ctodesgn.c:396 ../bin/ctodesgn.c:397 ../bin/ctodesgn.c:402
-#: ../bin/ctodesgn.c:478 ../bin/ctodesgn.c:482 ../bin/ctodesgn.c:483
-#: ../bin/ctodesgn.c:489 ../bin/ctodesgn.c:696 ../bin/tbezier.c:285
+#: ../bin/compound.c:733 ../bin/compound.c:738 ../bin/ctodesgn.c:189
+#: ../bin/ctodesgn.c:190 ../bin/ctodesgn.c:191 ../bin/ctodesgn.c:192
+#: ../bin/ctodesgn.c:319 ../bin/ctodesgn.c:322 ../bin/ctodesgn.c:324
+#: ../bin/ctodesgn.c:398 ../bin/ctodesgn.c:399 ../bin/ctodesgn.c:404
+#: ../bin/ctodesgn.c:480 ../bin/ctodesgn.c:484 ../bin/ctodesgn.c:485
+#: ../bin/ctodesgn.c:491 ../bin/ctodesgn.c:698 ../bin/tbezier.c:285
 #: ../bin/tbezier.c:292 ../bin/tcornu.c:326 ../bin/tcurve.c:401
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:187
 msgid "Radius"
@@ -942,7 +942,7 @@ msgid "Circle from Center"
 msgstr "Kreis um Mittelpunkt"
 
 #: ../bin/ccontrol.c:169 ../bin/csensor.c:161 ../bin/csignal.c:237
-#: ../bin/ctrain.c:180
+#: ../bin/ctrain.c:182
 msgid "Position"
 msgstr "Position"
 
@@ -1025,7 +1025,7 @@ msgid "Height"
 msgstr "Seitenhöhe"
 
 #: ../bin/cdraw.c:562 ../bin/cdraw.c:1580 ../bin/cdraw.c:1704
-#: ../bin/cdraw.c:2845 ../bin/cdraw.c:3110 ../bin/ctrain.c:183
+#: ../bin/cdraw.c:2845 ../bin/cdraw.c:3110 ../bin/ctrain.c:185
 #: ../bin/dcar.c:2344 ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:192
 msgid "Width"
 msgstr "Breite"
@@ -1038,7 +1038,7 @@ msgstr "Drehpunkt"
 msgid "Point Count"
 msgstr "Anzahl der Punkte"
 
-#: ../bin/cdraw.c:565 ../bin/cdraw.c:2823 ../bin/ctodesgn.c:209
+#: ../bin/cdraw.c:565 ../bin/cdraw.c:2823 ../bin/ctodesgn.c:211
 #: ../bin/tbezier.c:299
 msgid "Line Width"
 msgstr "Strichdicke"
@@ -1049,9 +1049,9 @@ msgid "Line Type"
 msgstr "Linienart"
 
 #: ../bin/cdraw.c:567 ../bin/cdraw.c:2825 ../bin/cdraw.c:2827
-#: ../bin/cdraw.c:2927 ../bin/cdraw.c:2960 ../bin/cmisc.c:121 ../bin/ctext.c:67
-#: ../bin/ctext.c:145 ../bin/ctodesgn.c:210 ../bin/dcar.c:2340
-#: ../bin/dlayer.c:545 ../bin/doption.c:591
+#: ../bin/cdraw.c:2927 ../bin/cdraw.c:2960 ../bin/cmisc.c:121 ../bin/ctext.c:59
+#: ../bin/ctext.c:137 ../bin/ctodesgn.c:212 ../bin/dcar.c:2340
+#: ../bin/dlayer.c:546 ../bin/doption.c:586
 msgid "Color"
 msgstr "Farbe"
 
@@ -1064,7 +1064,7 @@ msgid "Open End"
 msgstr "Offenes Ende"
 
 #: ../bin/cdraw.c:570 ../bin/cmisc.c:144 ../bin/cmisc.c:145 ../bin/cmisc.c:146
-#: ../bin/cmisc.c:147 ../bin/ctext.c:69 ../bin/ctext.c:146
+#: ../bin/cmisc.c:147 ../bin/ctext.c:61 ../bin/ctext.c:138
 msgid "Boxed"
 msgstr "Eingerahmt"
 
@@ -1089,11 +1089,11 @@ msgstr "Textursprung: X,Y"
 msgid "Text Angle"
 msgstr "Textwinkel"
 
-#: ../bin/cdraw.c:576 ../bin/ctext.c:65 ../bin/ctext.c:144
+#: ../bin/cdraw.c:576 ../bin/ctext.c:57 ../bin/ctext.c:136
 msgid "Font Size"
 msgstr "Schriftgröße"
 
-#: ../bin/cdraw.c:577 ../bin/cdraw.c:1324 ../bin/ctext.c:273
+#: ../bin/cdraw.c:577 ../bin/cdraw.c:1324 ../bin/ctext.c:265
 msgid "Text"
 msgstr "Text"
 
@@ -1110,7 +1110,7 @@ msgid "Rotate By"
 msgstr "Drehen um"
 
 #: ../bin/cdraw.c:581 ../bin/compound.c:749 ../bin/cturntbl.c:277
-#: ../bin/doption.c:101 ../bin/doption.c:102 ../bin/tbezier.c:301
+#: ../bin/doption.c:96 ../bin/doption.c:97 ../bin/tbezier.c:301
 #: ../bin/tcornu.c:334 ../bin/tcurve.c:410 ../bin/tease.c:536
 #: ../bin/tstraigh.c:95 ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:757
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:758
@@ -1136,7 +1136,7 @@ msgid "Layer"
 msgstr "Ebene"
 
 #: ../bin/cdraw.c:1057 ../bin/cmisc.c:233 ../bin/cmodify.c:379
-#: ../bin/compound.c:848 ../bin/ctrain.c:218
+#: ../bin/compound.c:848 ../bin/ctrain.c:220
 msgid "Change Track"
 msgstr "Gleis ändern"
 
@@ -1192,12 +1192,12 @@ msgid "%s(%d) Layer=%d"
 msgstr "%s (%d) Ebene=%d"
 
 #: ../bin/cdraw.c:1355 ../bin/cdraw.c:2930 ../bin/compound.c:1156
-#: ../bin/doption.c:96 ../bin/tbezier.c:519
+#: ../bin/doption.c:91 ../bin/tbezier.c:519
 msgid "Solid"
 msgstr "Gefüllt"
 
 #: ../bin/cdraw.c:1356 ../bin/cdraw.c:2932 ../bin/compound.c:1157
-#: ../bin/doption.c:93 ../bin/tbezier.c:520
+#: ../bin/doption.c:88 ../bin/tbezier.c:520
 msgid "Dash"
 msgstr "Gestrichelt"
 
@@ -1242,15 +1242,15 @@ msgstr "Groß"
 #: ../bin/cdraw.c:3071 ../bin/cdraw.c:3092 ../bin/cdraw.c:3096
 #: ../bin/compound.c:721 ../bin/compound.c:726 ../bin/compound.c:731
 #: ../bin/compound.c:736 ../bin/compound.c:742 ../bin/cprint.c:156
-#: ../bin/csignal.c:238 ../bin/csignal.c:516 ../bin/ctodesgn.c:195
-#: ../bin/ctodesgn.c:196 ../bin/ctodesgn.c:197 ../bin/ctodesgn.c:199
-#: ../bin/ctodesgn.c:243 ../bin/ctodesgn.c:269 ../bin/ctodesgn.c:271
-#: ../bin/ctodesgn.c:315 ../bin/ctodesgn.c:318 ../bin/ctodesgn.c:349
-#: ../bin/ctodesgn.c:352 ../bin/ctodesgn.c:394 ../bin/ctodesgn.c:399
-#: ../bin/ctodesgn.c:427 ../bin/ctodesgn.c:431 ../bin/ctodesgn.c:476
-#: ../bin/ctodesgn.c:480 ../bin/ctodesgn.c:485 ../bin/ctodesgn.c:515
-#: ../bin/ctodesgn.c:539 ../bin/ctodesgn.c:564 ../bin/ctodesgn.c:697
-#: ../bin/ctrain.c:181 ../bin/tease.c:529
+#: ../bin/csignal.c:238 ../bin/csignal.c:516 ../bin/ctodesgn.c:197
+#: ../bin/ctodesgn.c:198 ../bin/ctodesgn.c:199 ../bin/ctodesgn.c:201
+#: ../bin/ctodesgn.c:245 ../bin/ctodesgn.c:271 ../bin/ctodesgn.c:273
+#: ../bin/ctodesgn.c:317 ../bin/ctodesgn.c:320 ../bin/ctodesgn.c:351
+#: ../bin/ctodesgn.c:354 ../bin/ctodesgn.c:396 ../bin/ctodesgn.c:401
+#: ../bin/ctodesgn.c:429 ../bin/ctodesgn.c:433 ../bin/ctodesgn.c:478
+#: ../bin/ctodesgn.c:482 ../bin/ctodesgn.c:487 ../bin/ctodesgn.c:517
+#: ../bin/ctodesgn.c:541 ../bin/ctodesgn.c:566 ../bin/ctodesgn.c:699
+#: ../bin/ctrain.c:183 ../bin/tease.c:529
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:183
 msgid "Angle"
 msgstr "Winkel"
@@ -1464,125 +1464,125 @@ msgstr "Polylinie"
 msgid "Draw PolyLine"
 msgstr "Zeichne Polylinie"
 
-#: ../bin/cdraw.c:3231
+#: ../bin/cdraw.c:3229
 msgid "Straight Objects"
 msgstr "Gerade Objekte"
 
-#: ../bin/cdraw.c:3231
+#: ../bin/cdraw.c:3229
 msgid "Draw Straight Objects"
 msgstr "Zeichne gerade Objekte"
 
-#: ../bin/cdraw.c:3232
+#: ../bin/cdraw.c:3230
 msgid "Curved Lines"
 msgstr "Gebogene Linien"
 
-#: ../bin/cdraw.c:3232
+#: ../bin/cdraw.c:3230
 msgid "Draw Curved Lines"
 msgstr "Zeichne gebogene Linien"
 
-#: ../bin/cdraw.c:3233
+#: ../bin/cdraw.c:3231
 msgid "Circle Lines"
 msgstr "Kreislinien"
 
-#: ../bin/cdraw.c:3233
+#: ../bin/cdraw.c:3231
 msgid "Draw Circles"
 msgstr "Zeichne Kreise"
 
-#: ../bin/cdraw.c:3234
+#: ../bin/cdraw.c:3232
 msgid "Shapes"
 msgstr "Formen"
 
-#: ../bin/cdraw.c:3234
+#: ../bin/cdraw.c:3232
 msgid "Draw Shapes"
 msgstr "Zeichne Formen"
 
-#: ../bin/cdraw.c:3536
+#: ../bin/cdraw.c:3534
 msgid "Close Polygon - 'g'"
 msgstr "Schließe Polygon - 'g'"
 
-#: ../bin/cdraw.c:3538
+#: ../bin/cdraw.c:3536
 msgid "Make PolyLine - 'l'"
 msgstr "Erstelle Polylinie - 'I'"
 
-#: ../bin/cdraw.c:3540
+#: ../bin/cdraw.c:3538
 msgid "Fill Polygon - 'f'"
 msgstr "Gefülltes Polygon - 'f'"
 
-#: ../bin/cdraw.c:3542
+#: ../bin/cdraw.c:3540
 msgid "Empty Polygon - 'u'"
 msgstr "Leeres Polygon - 'u'."
 
-#: ../bin/cdraw.c:3545
+#: ../bin/cdraw.c:3543
 msgid "Points Mode - 'p'"
 msgstr "Punkte-Modus - 'p"
 
-#: ../bin/cdraw.c:3548
+#: ../bin/cdraw.c:3546
 msgid "Delete Selected Point - 'Del'"
 msgstr "Ausgewählten Punkt löschen - 'Entf'."
 
-#: ../bin/cdraw.c:3549
+#: ../bin/cdraw.c:3547
 msgid "Vertex Point - 'v'"
 msgstr "Eckpunkt - 'v"
 
-#: ../bin/cdraw.c:3551
+#: ../bin/cdraw.c:3549
 msgid "Round Corner - 'r'"
 msgstr "Runde Ecke - 'r'."
 
-#: ../bin/cdraw.c:3553
+#: ../bin/cdraw.c:3551
 msgid "Smooth Corner - 's'"
 msgstr "Abgerundete Ecke - 's"
 
-#: ../bin/cdraw.c:3556 ../bin/cselect.c:3734
+#: ../bin/cdraw.c:3554 ../bin/cselect.c:3909
 msgid "LineType..."
 msgstr "Linienart..."
 
-#: ../bin/cdraw.c:3557 ../bin/cselect.c:3735
+#: ../bin/cdraw.c:3555 ../bin/cselect.c:3910
 msgid "Solid Line"
 msgstr "Durchgezogene Linie"
 
-#: ../bin/cdraw.c:3559 ../bin/cselect.c:3737
+#: ../bin/cdraw.c:3557 ../bin/cselect.c:3912
 msgid "Dashed Line"
 msgstr "Gestrichelte Linie"
 
-#: ../bin/cdraw.c:3561 ../bin/cselect.c:3739
+#: ../bin/cdraw.c:3559 ../bin/cselect.c:3914
 msgid "Dotted Line"
 msgstr "Gepunktete Linie"
 
-#: ../bin/cdraw.c:3563
+#: ../bin/cdraw.c:3561
 msgid "Dash-Dot Line"
 msgstr "Strich-Punkt Linie"
 
-#: ../bin/cdraw.c:3565
+#: ../bin/cdraw.c:3563
 msgid "Dash-Dot-Dot Line"
 msgstr "Strich-Punkt-Punkt Linie"
 
-#: ../bin/cdraw.c:3567
+#: ../bin/cdraw.c:3565
 msgid "Center-Dot Line"
 msgstr "Mittellinie"
 
-#: ../bin/cdraw.c:3569
+#: ../bin/cdraw.c:3567
 msgid "Phantom-Dot Line"
 msgstr "Verborgene Linie"
 
-#: ../bin/cdraw.c:3572
+#: ../bin/cdraw.c:3570
 msgid "Origin Mode - 'o'"
 msgstr "Bezugs-Modus - \"o\"."
 
-#: ../bin/cdraw.c:3574
+#: ../bin/cdraw.c:3572
 msgid "Reset Origin - '0'"
 msgstr "Bezugspunkt zurücksetzen - '0'."
 
-#: ../bin/cdraw.c:3576
+#: ../bin/cdraw.c:3574
 msgid "Origin to Selected - 'l'"
 msgstr "Ausgewählter als Bezugspunkt - 'l'."
 
-#: ../bin/cdraw.c:3578
+#: ../bin/cdraw.c:3576
 msgid "Origin to Middle - 'm'"
 msgstr "Bezugs-Modus - \"m\"."
 
 #: ../bin/celev.c:42 ../bin/cprint.c:117 ../bin/cprofile.c:1531
 #: ../bin/csplit.c:201 ../bin/csplit.c:210 ../bin/dease.c:68
-#: ../bin/doption.c:94 ../bin/doption.c:96
+#: ../bin/doption.c:89 ../bin/doption.c:91
 msgid "None"
 msgstr "Kein"
 
@@ -1620,7 +1620,7 @@ msgid "Elevation"
 msgstr "Höhe"
 
 #: ../bin/celev.c:385 ../bin/cmisc.c:467 ../bin/dcustmgm.c:407
-#: ../bin/dcontmgm.c:308 ../bin/dlayer.c:2071 ../bin/dpricels.c:167
+#: ../bin/dcontmgm.c:308 ../bin/dlayer.c:2072 ../bin/dpricels.c:167
 #: ../bin/filenoteui.c:253 ../bin/linknoteui.c:169
 #: ../bin/paramfilesearch_ui.c:477 ../bin/textnoteui.c:137
 msgid "Done"
@@ -1717,17 +1717,17 @@ msgid "Turntable/TransferTable/DblSlipSwith?"
 msgstr "Drehscheibe/Schiebebühne/Doppelte Kreuzungsweiche?"
 
 #: ../bin/cgroup.c:700 ../bin/compound.c:744 ../bin/cstruct.c:65
-#: ../bin/ctodesgn.c:201 ../bin/ctodesgn.c:3209 ../bin/cturnout.c:84
-#: ../bin/dcar.c:2305 ../bin/dcar.c:4694 ../bin/dcar.c:4700 ../bin/dcmpnd.c:483
+#: ../bin/ctodesgn.c:203 ../bin/ctodesgn.c:3211 ../bin/cturnout.c:84
+#: ../bin/dcar.c:2305 ../bin/dcar.c:4694 ../bin/dcar.c:4700 ../bin/dcmpnd.c:484
 #: ../bin/dcustmgm.c:45 ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:417
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:656
 msgid "Manufacturer"
 msgstr "Hersteller"
 
 #: ../bin/cgroup.c:701 ../bin/cmisc.c:467 ../bin/cstruct.c:65
-#: ../bin/ctodesgn.c:3210 ../bin/ctodesgn.c:3211 ../bin/ctrain.c:184
+#: ../bin/ctodesgn.c:3212 ../bin/ctodesgn.c:3213 ../bin/ctrain.c:186
 #: ../bin/cturnout.c:84 ../bin/dcar.c:2321 ../bin/dcar.c:4695
-#: ../bin/dcar.c:4701 ../bin/dcmpnd.c:484 ../bin/dcustmgm.c:46
+#: ../bin/dcar.c:4701 ../bin/dcmpnd.c:485 ../bin/dcustmgm.c:46
 #: ../bin/denum.c:188 ../bin/denum.c:189 ../bin/denum.c:194
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:418
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:650
@@ -1735,7 +1735,7 @@ msgstr "Hersteller"
 msgid "Description"
 msgstr "Beschreibung"
 
-#: ../bin/cgroup.c:702 ../bin/dcmpnd.c:485
+#: ../bin/cgroup.c:702 ../bin/dcmpnd.c:486
 msgid "#"
 msgstr "Nr."
 
@@ -1895,8 +1895,8 @@ msgstr "Das zweite Gleis kann nur über Cornu-Kurven verbunden werden"
 msgid "Second "
 msgstr "Zweite "
 
-#: ../bin/cjoin.c:1380 ../bin/track.c:2395 ../bin/track.c:2434
-#: ../bin/track.c:2509
+#: ../bin/cjoin.c:1380 ../bin/track.c:2398 ../bin/track.c:2437
+#: ../bin/track.c:2512
 msgid "Connecting "
 msgstr "Verbinde "
 
@@ -1920,7 +1920,7 @@ msgstr "Linien zusammenfügen"
 msgid "Middle"
 msgstr "Mittel"
 
-#: ../bin/cmisc.c:55 ../bin/macro.c:70
+#: ../bin/cmisc.c:55 ../bin/macro.c:71
 msgid "End"
 msgstr "Ende"
 
@@ -1933,7 +1933,7 @@ msgid "Select track to describe +Shift for Frozen"
 msgstr ""
 "Zu beschreibendes Gleis auswählen, mit Umschalt-Taste für fixierte Elemente"
 
-#: ../bin/cmisc.c:691 ../bin/doption.c:245
+#: ../bin/cmisc.c:691 ../bin/doption.c:240
 msgid "Properties"
 msgstr "Eigenschaften"
 
@@ -1974,13 +1974,13 @@ msgstr "Gleis verlängern"
 msgid "Modify"
 msgstr "Verändern"
 
-#: ../bin/cmodify.c:895 ../bin/cselect.c:3664 ../bin/cselect.c:3686
-#: ../bin/menu.c:937 ../bin/menu.c:939
+#: ../bin/cmodify.c:895 ../bin/cselect.c:3839 ../bin/cselect.c:3861
+#: ../bin/menu.c:869 ../bin/menu.c:871
 msgid "Zoom In"
 msgstr "Zoom größer"
 
-#: ../bin/cmodify.c:896 ../bin/cselect.c:3669 ../bin/cselect.c:3687
-#: ../bin/menu.c:941 ../bin/menu.c:943
+#: ../bin/cmodify.c:896 ../bin/cselect.c:3844 ../bin/cselect.c:3862
+#: ../bin/menu.c:873 ../bin/menu.c:875
 msgid "Zoom Out"
 msgstr "Zoom kleiner"
 
@@ -1996,7 +1996,7 @@ msgstr "Notiz"
 msgid "Replace this text with your layout notes"
 msgstr "Ersetzen Sie diesen Text durch Ihre Notizen"
 
-#: ../bin/command.c:388 ../bin/command.c:395
+#: ../bin/command.c:398 ../bin/command.c:405
 msgid ""
 "Cancelling the current command will undo the changes\n"
 "you are currently making. Do you want to do the update instead?"
@@ -2004,14 +2004,14 @@ msgstr ""
 "Beim Abbruch der aktuellen Operation werden alle aktuellen Änderungen "
 "verworfen. Möchten Sie stattdessen aktualisieren?"
 
-#: ../bin/command.c:390 ../bin/command.c:458 ../bin/cprint.c:1445
-#: ../bin/dbitmap.c:428 ../bin/filenoteui.c:157 ../bin/param.c:3013
-#: ../bin/svgoutput.c:460
+#: ../bin/command.c:400 ../bin/command.c:467 ../bin/cprint.c:1445
+#: ../bin/dbitmap.c:428 ../bin/filenoteui.c:157 ../bin/param.c:3014
+#: ../bin/svgoutput.c:459
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:675
 msgid "Cancel"
 msgstr "Abbruch"
 
-#: ../bin/command.c:456
+#: ../bin/command.c:465
 msgid ""
 "Cancelling the current command will undo the changes\n"
 "you are currently making. Do you want to update?"
@@ -2055,7 +2055,7 @@ msgstr "Ausgangspunkt: X,Y"
 
 #: ../bin/compound.c:746 ../bin/cstruct.c:65 ../bin/cturnout.c:84
 #: ../bin/dcar.c:4694 ../bin/dcar.c:4700 ../bin/dcustmgm.c:46
-#: ../bin/doption.c:99 ../bin/doption.c:100
+#: ../bin/doption.c:94 ../bin/doption.c:95
 msgid "Part No"
 msgstr "Teilenr"
 
@@ -2081,7 +2081,7 @@ msgid "%s (%d) Layer= %d %s"
 msgstr "%s (%d): Ebene=%d %s"
 
 #: ../bin/cparalle.c:49 ../bin/cparalle.c:98 ../bin/cparalle.c:140
-#: ../bin/ctodesgn.c:600 ../bin/ctodesgn.c:626 ../bin/ctodesgn.c:651
+#: ../bin/ctodesgn.c:602 ../bin/ctodesgn.c:628 ../bin/ctodesgn.c:653
 #: ../bin/tcurve.c:403
 msgid "Separation"
 msgstr "Zwischenraum"
@@ -2126,12 +2126,12 @@ msgstr "Querformat"
 
 #: ../bin/cprint.c:111 ../bin/cswitchmotor.c:90 ../bin/cswitchmotor.c:109
 #: ../bin/cswitchmotor.c:229 ../bin/dbench.c:75 ../bin/dease.c:68
-#: ../bin/doption.c:93 ../bin/doption.c:95 ../bin/macro.c:1416
+#: ../bin/doption.c:88 ../bin/doption.c:90 ../bin/macro.c:1417
 msgid "Normal"
 msgstr "Normal"
 
 #: ../bin/cprint.c:111 ../bin/cswitchmotor.c:91 ../bin/cswitchmotor.c:110
-#: ../bin/cswitchmotor.c:230 ../bin/ctrain.c:1011 ../bin/ctrain.c:1324
+#: ../bin/cswitchmotor.c:230 ../bin/ctrain.c:1013 ../bin/ctrain.c:1326
 msgid "Reverse"
 msgstr "Rückwärts"
 
@@ -2151,7 +2151,7 @@ msgstr "Seitennummern"
 msgid "Ignore Page Margins"
 msgstr "Übergehe Seitenränder"
 
-#: ../bin/cprint.c:116 ../bin/csnap.c:733 ../bin/doption.c:559
+#: ../bin/cprint.c:116 ../bin/csnap.c:733 ../bin/doption.c:554
 msgid "Snap Grid"
 msgstr "Fangraster"
 
@@ -2228,12 +2228,13 @@ msgstr "Zurücksetzen"
 msgid "Setup"
 msgstr "Einstellungen"
 
-#: ../bin/cprint.c:158 ../bin/cselect.c:3675 ../bin/menu.c:974
+#: ../bin/cprint.c:158 ../bin/cselect.c:3850 ../bin/menu.c:906
+#: ../bin/toolbar.c:131
 msgid "Select All"
 msgstr "Alles auswählen"
 
-#: ../bin/cprint.c:159 ../bin/cprofile.c:708 ../bin/layout.c:671
-#: ../bin/misc.c:725
+#: ../bin/cprint.c:159 ../bin/cprofile.c:708 ../bin/layout.c:672
+#: ../bin/misc.c:726
 msgid "Clear"
 msgstr "Löschen"
 
@@ -2260,7 +2261,7 @@ msgstr "Druckmaßstab 1:%ld Raum %s x %s Modellmaßstab %s Datei %s"
 msgid "Print Margins"
 msgstr "Druckbegrenzungen"
 
-#: ../bin/cprint.c:1440 ../bin/cprofile.c:710 ../bin/ctodesgn.c:3147
+#: ../bin/cprint.c:1440 ../bin/cprofile.c:710 ../bin/ctodesgn.c:3149
 #: ../bin/denum.c:51
 msgid "Print"
 msgstr "Drucken"
@@ -2286,7 +2287,7 @@ msgstr "Höhenprofil"
 msgid "%s Profile: %s"
 msgstr "%s Höhenprofil: %s"
 
-#: ../bin/cprofile.c:704 ../bin/menu.c:225
+#: ../bin/cprofile.c:704 ../bin/menu.c:156
 msgid "Change"
 msgstr "Ändern"
 
@@ -2413,350 +2414,350 @@ msgstr "Lineal"
 msgid "Protractor"
 msgstr "Winkelmesser"
 
-#: ../bin/cselect.c:688
+#: ../bin/cselect.c:707
 msgid "Change Track Width"
 msgstr "Gleisbreite ändern"
 
-#: ../bin/cselect.c:714
+#: ../bin/cselect.c:733
 msgid "Change Line Type"
 msgstr "Linienstil ändern"
 
-#: ../bin/cselect.c:739
+#: ../bin/cselect.c:758
 msgid "Delete only works in Select Mode"
 msgstr "Löschen funktioniert nur im Auswahlmodus"
 
-#: ../bin/cselect.c:755
+#: ../bin/cselect.c:776
 msgid "Delete Tracks"
 msgstr "Gleise löschen"
 
-#: ../bin/cselect.c:862
+#: ../bin/cselect.c:883
 msgid "Hide Tracks (Tunnel)"
 msgstr "Gleise verbergen (Tunnel)"
 
-#: ../bin/cselect.c:882
+#: ../bin/cselect.c:903
 msgid "Bridge Tracks "
 msgstr "Brückengleise "
 
-#: ../bin/cselect.c:900
+#: ../bin/cselect.c:921
 msgid "Roadbed Tracks "
 msgstr "Gleisbett"
 
-#: ../bin/cselect.c:918
+#: ../bin/cselect.c:939
 msgid "Ties Tracks "
 msgstr "Schwellengleise "
 
-#: ../bin/cselect.c:956 ../bin/menu.c:1118
+#: ../bin/cselect.c:977 ../bin/menu.c:1050
 msgid "Move To Current Layer"
 msgstr "Auf aktuelle Ebene verschieben"
 
-#: ../bin/cselect.c:1010 ../bin/menu.c:1303
+#: ../bin/cselect.c:1033 ../bin/menu.c:1236
 msgid "Clear Elevations"
 msgstr "Höhen löschen"
 
-#: ../bin/cselect.c:1056
+#: ../bin/cselect.c:1079
 msgid "Add Elevations"
 msgstr "Höhen hinzufügen"
 
-#: ../bin/cselect.c:1072
+#: ../bin/cselect.c:1095
 msgid "Refresh Compound"
 msgstr "Zusammenstellung aktualisieren"
 
-#: ../bin/cselect.c:1471
+#: ../bin/cselect.c:1506
 msgid "Cornu too tight - it was deleted"
 msgstr "Cornu ist zu eng und wurde gelöscht"
 
-#: ../bin/cselect.c:1526
+#: ../bin/cselect.c:1563
 msgid "Move To Join"
 msgstr "Verbinde durch Verschieben"
 
-#: ../bin/cselect.c:1735
+#: ../bin/cselect.c:1790
 msgid "Drag to move selected tracks - Shift+Ctrl+Arrow micro-steps the move"
 msgstr ""
 "Ziehen um die ausgewählten Gleise zu verschieben - mit "
 "Umschalt+Strg+Pfeiltasten um feine Stufen verschieben"
 
-#: ../bin/cselect.c:1756 ../bin/cselect.c:1890 ../bin/cselect.c:2295
+#: ../bin/cselect.c:1811 ../bin/cselect.c:1954 ../bin/cselect.c:2382
 msgid "Move Tracks"
 msgstr "Gleise verschieben"
 
-#: ../bin/cselect.c:1939
+#: ../bin/cselect.c:2004
 msgid "Align: Click on a selected object to be aligned"
 msgstr ""
 "Ausrichten: Auf ausgewähltes Objekt klicken, das ausgerichtet werden soll"
 
-#: ../bin/cselect.c:1978
+#: ../bin/cselect.c:2043
 msgid "Drag to rotate selected tracks, Shift+RightClick for QuickRotate Menu"
 msgstr ""
 "Ziehen um die ausgewählten Gleise zu rotieren, Umschalt-Taste und "
 "Rechtsklicken um das Schnellauswahlmenü öffnen"
 
-#: ../bin/cselect.c:1994 ../bin/cselect.c:2370
+#: ../bin/cselect.c:2059 ../bin/cselect.c:2463
 msgid "Rotate Tracks"
 msgstr "Gleise drehen"
 
-#: ../bin/cselect.c:2009
+#: ../bin/cselect.c:2074
 msgid "Center of Rotation snapped to Turntable center"
 msgstr ""
 "Der Mittelpunkt der Drehscheibe wird als Mittelpunkt der Rotation genutzt"
 
-#: ../bin/cselect.c:2055 ../bin/cselect.c:2090
+#: ../bin/cselect.c:2124 ../bin/cselect.c:2161
 #, c-format
 msgid "Angle %0.3f"
 msgstr "Winkel %0.3f"
 
-#: ../bin/cselect.c:2154
+#: ../bin/cselect.c:2232
 #, c-format
 msgid "Angle %0.3f #%ld"
 msgstr "Winkel %0.3f #%ld"
 
-#: ../bin/cselect.c:2156
+#: ../bin/cselect.c:2234
 #, c-format
 msgid "Angle %0.3f %s"
 msgstr "Winkel %0.3f %s"
 
-#: ../bin/cselect.c:2162
+#: ../bin/cselect.c:2240
 msgid "Origin Set. Drag away to set start angle"
 msgstr "Ausgangspunkt gesetzt. Zum Einstellen des Startwinkels wegziehen"
 
-#: ../bin/cselect.c:2177
+#: ../bin/cselect.c:2255
 msgid "Align: Click on the 2nd unselected object"
 msgstr "Ausrichten: Klicken Sie auf das zweite, nicht ausgewählte Objekt"
 
-#: ../bin/cselect.c:2307
+#: ../bin/cselect.c:2394
 msgid "In module layer:"
 msgstr "In Modulebene:"
 
-#: ../bin/cselect.c:2315
+#: ../bin/cselect.c:2406
 msgid "Frozen Layer:"
 msgstr "Fixierte Ebene:"
 
-#: ../bin/cselect.c:2319
+#: ../bin/cselect.c:2410
 msgid "Not found"
 msgstr "Nicht gefunden"
 
-#: ../bin/cselect.c:2356
+#: ../bin/cselect.c:2449
 msgid "Multiple Selected"
 msgstr "Mehrfachauswahl"
 
-#: ../bin/cselect.c:2383
+#: ../bin/cselect.c:2476
 msgid "Toggle Detail"
 msgstr "Detail umschalten"
 
-#: ../bin/cselect.c:2399
+#: ../bin/cselect.c:2492
 msgid "Toggle Label"
 msgstr "Beschriftung umschalten"
 
-#: ../bin/cselect.c:2572
+#: ../bin/cselect.c:2689
 msgid "Elevation description"
 msgstr "Beschreibung der Höhe"
 
-#: ../bin/cselect.c:2579
+#: ../bin/cselect.c:2696
 msgid "Hidden description - 's' to Show, 'd' Details"
 msgstr "Verborgene  Beschreibung - 's' zum Anzeigen, 'd' für Details"
 
-#: ../bin/cselect.c:2582
+#: ../bin/cselect.c:2699
 msgid "Shown description - 'h' to Hide"
 msgstr "Sichtbare Beschreibung  - Verbergen mit 'h'"
 
-#: ../bin/cselect.c:2590
+#: ../bin/cselect.c:2707
 msgid "Select and drag a description"
 msgstr "Beschreibung auswählen und verschieben"
 
-#: ../bin/cselect.c:2632
+#: ../bin/cselect.c:2753
 msgid "Hidden Label - Drag to reveal"
 msgstr "Verborgene Beschriftung - Ziehen zum Aufdecken"
 
-#: ../bin/cselect.c:2634
+#: ../bin/cselect.c:2755
 msgid "Drag label"
 msgstr "Beschriftung ziehen"
 
-#: ../bin/cselect.c:2644
+#: ../bin/cselect.c:2765
 msgid "Move Label"
 msgstr "Beschreibung verschieben"
 
-#: ../bin/cselect.c:2683
+#: ../bin/cselect.c:2804
 msgid "To Hide, use Context Menu"
 msgstr "Zum Verbergen verwenden Sie das Kontextmenü"
 
-#: ../bin/cselect.c:2717 ../bin/cselect.c:3715
+#: ../bin/cselect.c:2842 ../bin/cselect.c:3890
 msgid "Show/Hide Description"
 msgstr "Beschreibung anzeigen/verbergen"
 
-#: ../bin/cselect.c:2720
+#: ../bin/cselect.c:2845
 msgid "Toggle Detailed Description"
 msgstr "Detaillierte Beschreibung umschalten"
 
-#: ../bin/cselect.c:2804
+#: ../bin/cselect.c:2929
 msgid "Drag to mark mirror line"
 msgstr "Ziehen um die Spiegelachse zu erstellen"
 
-#: ../bin/cselect.c:2815
+#: ../bin/cselect.c:2940
 #, c-format
 msgid "Angle %0.2f"
 msgstr "Winkel %0.2f"
 
-#: ../bin/cselect.c:2818
+#: ../bin/cselect.c:2943
 msgid "Flip Tracks"
 msgstr "Gleise spiegeln"
 
-#: ../bin/cselect.c:3014 ../bin/cselect.c:3215
+#: ../bin/cselect.c:3145 ../bin/cselect.c:3369
 msgid "Track is in Frozen Layer"
 msgstr "Das Gleis ist auf einer fixierten Ebene"
 
-#: ../bin/cselect.c:3188
+#: ../bin/cselect.c:3340
 msgid "Select track"
 msgstr "Gleis auswählen"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/v5_3_0_beta1/app/lib/xtrkcad.xtq:439
-#: ../bin/cselect.c:3627 ../bin/dcar.c:1765 ../bin/doption.c:245
+#: ../bin/cselect.c:3802 ../bin/dcar.c:1765 ../bin/doption.c:240
 #: ../../../../build/v_5_3_0_beta1/app/i18n/custmsg.h:1190
 msgid "Select"
 msgstr "Auswählen"
 
-#: ../bin/cselect.c:3654 ../bin/cselect.c:3683 ../bin/menu.c:932
+#: ../bin/cselect.c:3829 ../bin/cselect.c:3858 ../bin/menu.c:864
 msgid "Undo"
 msgstr "Rückgängig"
 
-#: ../bin/cselect.c:3655 ../bin/cselect.c:3684 ../bin/menu.c:934
+#: ../bin/cselect.c:3830 ../bin/cselect.c:3859 ../bin/menu.c:866
 msgid "Redo"
 msgstr "Wiederholen"
 
-#: ../bin/cselect.c:3665 ../bin/cselect.c:3688 ../bin/draw.c:3500
+#: ../bin/cselect.c:3840 ../bin/cselect.c:3863 ../bin/draw.c:3501
 msgid "Zoom to extents - 'e'"
 msgstr "Auf Fenstergröße anpassen- 'e'"
 
-#: ../bin/cselect.c:3667 ../bin/draw.c:3522 ../bin/menu.c:1163
+#: ../bin/cselect.c:3842 ../bin/draw.c:3523 ../bin/menu.c:1095
 msgid "&Zoom"
 msgstr "&Zoom"
 
-#: ../bin/cselect.c:3670 ../bin/draw.c:3520
+#: ../bin/cselect.c:3845 ../bin/draw.c:3521
 msgid "Pan to Origin - 'o'/'0'"
 msgstr "Ausschnitt auf Ursprung zurücksetzen - 'o'/'0'"
 
-#: ../bin/cselect.c:3672 ../bin/cselect.c:3692
+#: ../bin/cselect.c:3847 ../bin/cselect.c:3867
 msgid "Pan Center Here - 'c'"
 msgstr "Hier zentrieren - 'c'."
 
-#: ../bin/cselect.c:3677 ../bin/menu.c:977 ../bin/menu.c:1126
+#: ../bin/cselect.c:3852 ../bin/menu.c:909 ../bin/menu.c:1058
 msgid "Select Current Layer"
 msgstr "Aktuelle Ebene auswählen"
 
-#: ../bin/cselect.c:3690
+#: ../bin/cselect.c:3865
 msgid "Zoom to selected - 's'"
 msgstr "Zoom auf Auswahl - 's'"
 
-#: ../bin/cselect.c:3696 ../bin/menu.c:979
+#: ../bin/cselect.c:3871 ../bin/menu.c:911
 msgid "Deselect All"
 msgstr "Alles Abwählen"
 
-#: ../bin/cselect.c:3699
+#: ../bin/cselect.c:3874
 msgid "Properties -'?'"
 msgstr "Eigenschaften -'?'"
 
-#: ../bin/cselect.c:3701
+#: ../bin/cselect.c:3876
 msgid "Modify/Activate Track"
 msgstr "Gleis bearbeiten"
 
-#: ../bin/cselect.c:3704 ../bin/menu.c:965
+#: ../bin/cselect.c:3879 ../bin/menu.c:897
 msgid "Cut"
 msgstr "Ausschneiden"
 
-#: ../bin/cselect.c:3705 ../bin/menu.c:967
+#: ../bin/cselect.c:3880 ../bin/menu.c:899
 msgid "Copy"
 msgstr "Kopiere"
 
-#: ../bin/cselect.c:3706 ../bin/fileio.c:1730 ../bin/menu.c:969
+#: ../bin/cselect.c:3881 ../bin/fileio.c:1728 ../bin/menu.c:901
 msgid "Paste"
 msgstr "Einfügen"
 
-#: ../bin/cselect.c:3707 ../bin/menu.c:971
+#: ../bin/cselect.c:3882 ../bin/menu.c:903
 msgid "Clone"
 msgstr "Klonen"
 
-#: ../bin/cselect.c:3709
+#: ../bin/cselect.c:3884
 msgid "Rotate..."
 msgstr "Drehen..."
 
-#: ../bin/cselect.c:3711
+#: ../bin/cselect.c:3886
 msgid "Align"
 msgstr "Ausrichten"
 
-#: ../bin/cselect.c:3717 ../bin/menu.c:1142
+#: ../bin/cselect.c:3892 ../bin/menu.c:1074
 msgid "Ties/NoTies"
 msgstr "Mit / ohne Schwellen"
 
-#: ../bin/cselect.c:3719
+#: ../bin/cselect.c:3894
 msgid "Hide/NoHide"
 msgstr "Zeigen/Verbergen"
 
-#: ../bin/cselect.c:3721
+#: ../bin/cselect.c:3896
 msgid "Bridge/NoBridge"
 msgstr "Brücke"
 
-#: ../bin/cselect.c:3723
+#: ../bin/cselect.c:3898
 msgid "Roadbed/NoRoadbed"
 msgstr "Mit/ohne Gleisbett"
 
-#: ../bin/cselect.c:3725
+#: ../bin/cselect.c:3900
 msgid "NoTies/Ties"
 msgstr "Ohne / mit Schwellen"
 
-#: ../bin/cselect.c:3727
+#: ../bin/cselect.c:3902
 msgid "Thickness..."
 msgstr "Dicke..."
 
-#: ../bin/cselect.c:3728 ../bin/menu.c:1150
+#: ../bin/cselect.c:3903 ../bin/menu.c:1082
 msgid "Thin Tracks"
 msgstr "Dünne Gleise"
 
-#: ../bin/cselect.c:3730 ../bin/menu.c:1152
+#: ../bin/cselect.c:3905 ../bin/menu.c:1084
 msgid "Medium Tracks"
 msgstr "Mittlere Gleise"
 
-#: ../bin/cselect.c:3732 ../bin/menu.c:1154
+#: ../bin/cselect.c:3907 ../bin/menu.c:1086
 msgid "Thick Tracks"
 msgstr "Dicke Gleise"
 
-#: ../bin/cselect.c:3741
+#: ../bin/cselect.c:3916
 msgid "Dash-Dotted Line"
 msgstr "Gestrichelte Linie"
 
-#: ../bin/cselect.c:3743
+#: ../bin/cselect.c:3918
 msgid "Dash-Dot-Dotted Line"
 msgstr "Strich-Punkt-gestrichelte Linie"
 
-#: ../bin/cselect.c:3746
+#: ../bin/cselect.c:3921
 msgid "Move To Front"
 msgstr "Nach vorne"
 
-#: ../bin/cselect.c:3747
+#: ../bin/cselect.c:3922
 msgid "Move To Back"
 msgstr "Nach hinten"
 
-#: ../bin/cselect.c:3749
+#: ../bin/cselect.c:3924
 msgid "Group"
 msgstr "Gruppieren"
 
-#: ../bin/cselect.c:3750
+#: ../bin/cselect.c:3925
 msgid "UnGroup"
 msgstr "Gruppierung auflösen"
 
-#: ../bin/cselect.c:3796
+#: ../bin/cselect.c:3971
 msgid "Move Description"
 msgstr "Beschreibungen verschieben"
 
-#: ../bin/cselect.c:3804 ../bin/menu.c:294 ../bin/menu.c:986
+#: ../bin/cselect.c:3979 ../bin/menu.c:225 ../bin/menu.c:918
 msgid "Move"
 msgstr "Verschieben"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/v5_3_0_beta1/app/lib/xtrkcad.xtq:484
-#: ../bin/cselect.c:3807 ../bin/menu.c:271 ../bin/menu.c:988
+#: ../bin/cselect.c:3982 ../bin/menu.c:202 ../bin/menu.c:920
 #: ../../../../build/v_5_3_0_beta1/app/i18n/custmsg.h:1280
 msgid "Rotate"
 msgstr "Drehen"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/v5_3_0_beta1/app/lib/xtrkcad.xtq:485
-#: ../bin/cselect.c:3810 ../bin/dcar.c:2327
+#: ../bin/cselect.c:3985 ../bin/dcar.c:2327
 #: ../../../../build/v_5_3_0_beta1/app/i18n/custmsg.h:1282
 msgid "Flip"
 msgstr "Spiegeln"
@@ -2996,8 +2997,8 @@ msgstr "Gleisgerade: Länge=%s Winkel=%0.3f"
 msgid "Straight Track"
 msgstr "Gleisgerade"
 
-#: ../bin/cstruct.c:67 ../bin/cturnout.c:86 ../bin/doption.c:93
-#: ../bin/doption.c:250
+#: ../bin/cstruct.c:67 ../bin/cturnout.c:86 ../bin/doption.c:88
+#: ../bin/doption.c:245
 msgid "Hide"
 msgstr "Verstecken"
 
@@ -3049,7 +3050,7 @@ msgstr ""
 "Ziehen mit linker Maustaste zum Verschieben, mit Strg-Links oder rechter zum "
 "Drehen, Leerzeichen oder Eingabetaste zum Festlegen, Esc zum Abbrechen"
 
-#: ../bin/cstruct.c:1031 ../bin/cturnout.c:2963 ../bin/param.c:3013
+#: ../bin/cstruct.c:1031 ../bin/cturnout.c:2963 ../bin/param.c:3014
 msgid "Close"
 msgstr "Schließen"
 
@@ -3147,419 +3148,419 @@ msgstr "Weichenantrieb"
 msgid "Deleting Switch Motor %s"
 msgstr "Weichenantrieb %s löschen"
 
-#: ../bin/ctext.c:194 ../bin/ctext.c:242
+#: ../bin/ctext.c:186 ../bin/ctext.c:234
 msgid "Create Text"
 msgstr "Erstelle Text"
 
-#: ../bin/ctext.c:277
+#: ../bin/ctext.c:269
 msgid "Fonts..."
 msgstr "Schriftarten..."
 
-#: ../bin/ctodesgn.c:139
+#: ../bin/ctodesgn.c:141
 msgid "Frog #"
 msgstr "Herzstück Steigung"
 
-#: ../bin/ctodesgn.c:139
+#: ../bin/ctodesgn.c:141
 msgid "Degrees"
 msgstr "Grad"
 
-#: ../bin/ctodesgn.c:140
+#: ../bin/ctodesgn.c:142
 msgid "Dual Path"
 msgstr "Zwei Positionen"
 
-#: ../bin/ctodesgn.c:140
+#: ../bin/ctodesgn.c:142
 msgid "Quad Path"
 msgstr "Vier Positionen"
 
-#: ../bin/ctodesgn.c:182 ../bin/ctodesgn.c:183 ../bin/ctodesgn.c:184
-#: ../bin/ctodesgn.c:185 ../bin/ctodesgn.c:244 ../bin/ctodesgn.c:270
-#: ../bin/ctodesgn.c:272 ../bin/ctodesgn.c:316 ../bin/ctodesgn.c:319
-#: ../bin/ctodesgn.c:350 ../bin/ctodesgn.c:351 ../bin/ctodesgn.c:395
-#: ../bin/ctodesgn.c:398 ../bin/ctodesgn.c:428 ../bin/ctodesgn.c:430
-#: ../bin/ctodesgn.c:477 ../bin/ctodesgn.c:481 ../bin/ctodesgn.c:484
-#: ../bin/ctodesgn.c:742
+#: ../bin/ctodesgn.c:184 ../bin/ctodesgn.c:185 ../bin/ctodesgn.c:186
+#: ../bin/ctodesgn.c:187 ../bin/ctodesgn.c:246 ../bin/ctodesgn.c:272
+#: ../bin/ctodesgn.c:274 ../bin/ctodesgn.c:318 ../bin/ctodesgn.c:321
+#: ../bin/ctodesgn.c:352 ../bin/ctodesgn.c:353 ../bin/ctodesgn.c:397
+#: ../bin/ctodesgn.c:400 ../bin/ctodesgn.c:430 ../bin/ctodesgn.c:432
+#: ../bin/ctodesgn.c:479 ../bin/ctodesgn.c:483 ../bin/ctodesgn.c:486
+#: ../bin/ctodesgn.c:744
 msgid "Offset"
 msgstr "Abstand"
 
-#: ../bin/ctodesgn.c:203 ../bin/ctodesgn.c:3204 ../bin/ctodesgn.c:3205
+#: ../bin/ctodesgn.c:205 ../bin/ctodesgn.c:3206 ../bin/ctodesgn.c:3207
 msgid "Left Description"
 msgstr "Beschreibung, links"
 
-#: ../bin/ctodesgn.c:204 ../bin/ctodesgn.c:207
+#: ../bin/ctodesgn.c:206 ../bin/ctodesgn.c:209
 msgid " #"
 msgstr " Nr."
 
-#: ../bin/ctodesgn.c:206 ../bin/ctodesgn.c:3203
+#: ../bin/ctodesgn.c:208 ../bin/ctodesgn.c:3205
 msgid "Right Description"
 msgstr "Beschreibung, rechts"
 
-#: ../bin/ctodesgn.c:208
+#: ../bin/ctodesgn.c:210
 msgid "Roadbed Width"
 msgstr "Breite des Gleisbettes"
 
-#: ../bin/ctodesgn.c:212 ../bin/denum.c:52
+#: ../bin/ctodesgn.c:214 ../bin/denum.c:52
 msgid "Print Setup"
 msgstr "Druckeinstellungen"
 
-#: ../bin/ctodesgn.c:242
+#: ../bin/ctodesgn.c:244
 msgid "Diverging Length"
 msgstr "Länge des Abzweigs"
 
-#: ../bin/ctodesgn.c:243
+#: ../bin/ctodesgn.c:245
 msgid "Diverging Angle"
 msgstr "Winkel des Abzweigs"
 
-#: ../bin/ctodesgn.c:244
+#: ../bin/ctodesgn.c:246
 msgid "Diverging Offset"
 msgstr "Abstand des Abzweigs"
 
-#: ../bin/ctodesgn.c:245
+#: ../bin/ctodesgn.c:247
 msgid "Overall Length"
 msgstr "Gesamtlänge"
 
-#: ../bin/ctodesgn.c:257
+#: ../bin/ctodesgn.c:259
 msgid "Regular Turnout"
 msgstr "Normale Weiche"
 
-#: ../bin/ctodesgn.c:268 ../bin/ctodesgn.c:314
+#: ../bin/ctodesgn.c:270 ../bin/ctodesgn.c:316
 msgid "Inner Length"
 msgstr "Innenlänge"
 
-#: ../bin/ctodesgn.c:269 ../bin/ctodesgn.c:315
+#: ../bin/ctodesgn.c:271 ../bin/ctodesgn.c:317
 msgid "Inner Angle"
 msgstr "Innenwinkel"
 
-#: ../bin/ctodesgn.c:270 ../bin/ctodesgn.c:316
+#: ../bin/ctodesgn.c:272 ../bin/ctodesgn.c:318
 msgid "Inner Offset"
 msgstr "Innenabstand"
 
-#: ../bin/ctodesgn.c:271 ../bin/ctodesgn.c:318
+#: ../bin/ctodesgn.c:273 ../bin/ctodesgn.c:320
 msgid "Outer Angle"
 msgstr "Außenwinkel"
 
-#: ../bin/ctodesgn.c:272 ../bin/ctodesgn.c:319
+#: ../bin/ctodesgn.c:274 ../bin/ctodesgn.c:321
 msgid "Outer Offset"
 msgstr "Außenabstand"
 
-#: ../bin/ctodesgn.c:273 ../bin/ctodesgn.c:321
+#: ../bin/ctodesgn.c:275 ../bin/ctodesgn.c:323
 msgid "Outer Length"
 msgstr "Außenlänge"
 
-#: ../bin/ctodesgn.c:302
+#: ../bin/ctodesgn.c:304
 msgid "Curved Turnout"
 msgstr "Bogenweiche"
 
-#: ../bin/ctodesgn.c:317
+#: ../bin/ctodesgn.c:319
 msgid "Inner Radius"
 msgstr "Innenradius"
 
-#: ../bin/ctodesgn.c:320
+#: ../bin/ctodesgn.c:322
 msgid "Outer Radius"
 msgstr "Außenradius"
 
-#: ../bin/ctodesgn.c:322 ../bin/ctodesgn.c:402 ../bin/ctodesgn.c:489
+#: ../bin/ctodesgn.c:324 ../bin/ctodesgn.c:404 ../bin/ctodesgn.c:491
 msgid "Toe Radius"
 msgstr "Anfangsradius"
 
-#: ../bin/ctodesgn.c:323 ../bin/ctodesgn.c:401
+#: ../bin/ctodesgn.c:325 ../bin/ctodesgn.c:403
 msgid "Toe Length"
 msgstr "Anfangslänge"
 
-#: ../bin/ctodesgn.c:336
+#: ../bin/ctodesgn.c:338
 msgid "Cornu Curved Turnout"
 msgstr "Cornu-Bogenweiche"
 
-#: ../bin/ctodesgn.c:348 ../bin/ctodesgn.c:393 ../bin/ctodesgn.c:426
-#: ../bin/ctodesgn.c:475
+#: ../bin/ctodesgn.c:350 ../bin/ctodesgn.c:395 ../bin/ctodesgn.c:428
+#: ../bin/ctodesgn.c:477
 msgid "Left Length"
 msgstr "Linke Länge"
 
-#: ../bin/ctodesgn.c:349 ../bin/ctodesgn.c:394 ../bin/ctodesgn.c:427
-#: ../bin/ctodesgn.c:476
+#: ../bin/ctodesgn.c:351 ../bin/ctodesgn.c:396 ../bin/ctodesgn.c:429
+#: ../bin/ctodesgn.c:478
 msgid "Left Angle"
 msgstr "Linker Winkel"
 
-#: ../bin/ctodesgn.c:350 ../bin/ctodesgn.c:395 ../bin/ctodesgn.c:428
-#: ../bin/ctodesgn.c:477
+#: ../bin/ctodesgn.c:352 ../bin/ctodesgn.c:397 ../bin/ctodesgn.c:430
+#: ../bin/ctodesgn.c:479
 msgid "Left Offset"
 msgstr "Linker Abstand"
 
-#: ../bin/ctodesgn.c:351 ../bin/ctodesgn.c:398 ../bin/ctodesgn.c:430
-#: ../bin/ctodesgn.c:484
+#: ../bin/ctodesgn.c:353 ../bin/ctodesgn.c:400 ../bin/ctodesgn.c:432
+#: ../bin/ctodesgn.c:486
 msgid "Right Offset"
 msgstr "Rechter Abstand"
 
-#: ../bin/ctodesgn.c:352 ../bin/ctodesgn.c:399 ../bin/ctodesgn.c:431
-#: ../bin/ctodesgn.c:485
+#: ../bin/ctodesgn.c:354 ../bin/ctodesgn.c:401 ../bin/ctodesgn.c:433
+#: ../bin/ctodesgn.c:487
 msgid "Right Angle"
 msgstr "Rechter Winkel"
 
-#: ../bin/ctodesgn.c:353 ../bin/ctodesgn.c:400 ../bin/ctodesgn.c:432
-#: ../bin/ctodesgn.c:486
+#: ../bin/ctodesgn.c:355 ../bin/ctodesgn.c:402 ../bin/ctodesgn.c:434
+#: ../bin/ctodesgn.c:488
 msgid "Right Length"
 msgstr "Rechte Länge"
 
-#: ../bin/ctodesgn.c:381
+#: ../bin/ctodesgn.c:383
 msgid "Wye Turnout"
 msgstr "Außenbogenweiche"
 
-#: ../bin/ctodesgn.c:396 ../bin/ctodesgn.c:478
+#: ../bin/ctodesgn.c:398 ../bin/ctodesgn.c:480
 msgid "Left Radius"
 msgstr "Linker Radius"
 
-#: ../bin/ctodesgn.c:397 ../bin/ctodesgn.c:483
+#: ../bin/ctodesgn.c:399 ../bin/ctodesgn.c:485
 msgid "Right Radius"
 msgstr "Rechter Radius"
 
-#: ../bin/ctodesgn.c:414
+#: ../bin/ctodesgn.c:416
 msgid "Cornu Wye Turnout"
 msgstr "Cornu-Außenbogenweiche"
 
-#: ../bin/ctodesgn.c:463
+#: ../bin/ctodesgn.c:465
 msgid "3-way Turnout"
 msgstr "Dreiwegweiche"
 
-#: ../bin/ctodesgn.c:479
+#: ../bin/ctodesgn.c:481
 msgid "Center Length"
 msgstr "Länge des Mittelgleis"
 
-#: ../bin/ctodesgn.c:480
+#: ../bin/ctodesgn.c:482
 msgid "Center Angle"
 msgstr "Winkel des Mittelgleis"
 
-#: ../bin/ctodesgn.c:481 ../bin/dcar.c:2348
+#: ../bin/ctodesgn.c:483 ../bin/dcar.c:2348
 msgid "Center Offset"
 msgstr "Abstand des Mittelgleis"
 
-#: ../bin/ctodesgn.c:482
+#: ../bin/ctodesgn.c:484
 msgid "Center Radius"
 msgstr "Radius des Mittelgleis"
 
-#: ../bin/ctodesgn.c:487
+#: ../bin/ctodesgn.c:489
 msgid "Toe Length Left"
 msgstr "Anfangslänge links"
 
-#: ../bin/ctodesgn.c:488
+#: ../bin/ctodesgn.c:490
 msgid "Toe Length Right"
 msgstr "Anfangslänge rechts"
 
-#: ../bin/ctodesgn.c:502
+#: ../bin/ctodesgn.c:504
 msgid "Cornu 3-way Turnout"
 msgstr "Cornu-Dreiwegweiche"
 
-#: ../bin/ctodesgn.c:527
+#: ../bin/ctodesgn.c:529
 msgid "Crossing"
 msgstr "Kreuzung"
 
-#: ../bin/ctodesgn.c:552
+#: ../bin/ctodesgn.c:554
 msgid "Single Slipswitch"
 msgstr "Einfache Kreuzungsweiche"
 
-#: ../bin/ctodesgn.c:587
+#: ../bin/ctodesgn.c:589
 msgid "Double Slipswitch"
 msgstr "Doppelte Kreuzungsweiche"
 
-#: ../bin/ctodesgn.c:612
+#: ../bin/ctodesgn.c:614
 msgid "Right Crossover"
 msgstr "Rechter Gleiswechsel"
 
-#: ../bin/ctodesgn.c:638
+#: ../bin/ctodesgn.c:640
 msgid "Left Crossover"
 msgstr "Linker Gleiswechsel"
 
-#: ../bin/ctodesgn.c:663
+#: ../bin/ctodesgn.c:665
 msgid "Double Crossover"
 msgstr "Doppelter Gleiswechsel"
 
-#: ../bin/ctodesgn.c:685
+#: ../bin/ctodesgn.c:687
 msgid "Straight Section"
 msgstr "Gerader Abschnitt"
 
-#: ../bin/ctodesgn.c:697
+#: ../bin/ctodesgn.c:699
 msgid "Angle (Degrees)"
 msgstr "Winkel (Grad)"
 
-#: ../bin/ctodesgn.c:708
+#: ../bin/ctodesgn.c:710
 msgid "Curved Section"
 msgstr "Gebogener Abschnitt"
 
-#: ../bin/ctodesgn.c:731
+#: ../bin/ctodesgn.c:733
 msgid "Bumper Section"
 msgstr "Prellbock"
 
-#: ../bin/ctodesgn.c:742 ../bin/denum.c:124 ../bin/denum.c:193
+#: ../bin/ctodesgn.c:744 ../bin/denum.c:124 ../bin/denum.c:193
 #: ../bin/denum.c:230 ../bin/denum.c:231
 msgid "Count"
 msgstr "Anzahl"
 
-#: ../bin/ctodesgn.c:743
+#: ../bin/ctodesgn.c:745
 msgid "Radius1"
 msgstr "Radius 1"
 
-#: ../bin/ctodesgn.c:744
+#: ../bin/ctodesgn.c:746
 msgid "Radius2"
 msgstr "Radius 2"
 
-#: ../bin/ctodesgn.c:827
+#: ../bin/ctodesgn.c:829
 msgid "Turntable Section"
 msgstr "Drehscheibenabschnitt"
 
-#: ../bin/ctodesgn.c:2777
+#: ../bin/ctodesgn.c:2779
 #, c-format
 msgid "%s Designer"
 msgstr "%s Designer"
 
-#: ../bin/ctodesgn.c:2780
+#: ../bin/ctodesgn.c:2782
 #, c-format
 msgid "%s %d x %d (of %d x %d)"
 msgstr "%s %d x %d (von %d x %d)"
 
-#: ../bin/ctodesgn.c:2780
+#: ../bin/ctodesgn.c:2782
 msgid "Page"
 msgstr "Seite"
 
-#: ../bin/ctodesgn.c:2788
+#: ../bin/ctodesgn.c:2790
 msgid "Frog Number"
 msgstr "Herzstücksteigung"
 
-#: ../bin/ctodesgn.c:3147
+#: ../bin/ctodesgn.c:3149
 msgid "Turnout Designer"
 msgstr "Weichendesigner"
 
-#: ../bin/ctodesgn.c:3160
+#: ../bin/ctodesgn.c:3162
 #, c-format
 msgid "%s %s Designer"
 msgstr "%s %s Designer"
 
-#: ../bin/ctrain.c:179 ../bin/dcar.c:2360 ../bin/dcar.c:4694 ../bin/dcar.c:4700
+#: ../bin/ctrain.c:181 ../bin/dcar.c:2360 ../bin/dcar.c:4694 ../bin/dcar.c:4700
 msgid "Index"
 msgstr "Verzeichnis"
 
-#: ../bin/ctrain.c:185
+#: ../bin/ctrain.c:187
 msgid "Report Marks"
 msgstr "Bahngesellschaft"
 
-#: ../bin/ctrain.c:273
+#: ../bin/ctrain.c:275
 msgid "Car"
 msgstr "Wagen"
 
-#: ../bin/ctrain.c:728
+#: ../bin/ctrain.c:730
 msgid "Follow"
 msgstr "Folgen"
 
-#: ../bin/ctrain.c:729
+#: ../bin/ctrain.c:731
 msgid "Auto Reverse"
 msgstr "Automat. Wenden"
 
-#: ../bin/ctrain.c:748 ../bin/dcar.c:5686
+#: ../bin/ctrain.c:750 ../bin/dcar.c:5686
 msgid "Find"
 msgstr "Finden"
 
-#: ../bin/ctrain.c:754 ../bin/ctrain.c:1011 ../bin/ctrain.c:1324
+#: ../bin/ctrain.c:756 ../bin/ctrain.c:1013 ../bin/ctrain.c:1326
 msgid "Forward"
 msgstr "Vorwärts"
 
-#: ../bin/ctrain.c:756 ../bin/ctrain.c:3235 ../bin/dcar.c:5093
-#: ../bin/dcar.c:5103 ../bin/dcar.c:5225 ../bin/fileio.c:224 ../bin/macro.c:64
-#: ../bin/track.c:1366
+#: ../bin/ctrain.c:758 ../bin/ctrain.c:3237 ../bin/dcar.c:5093
+#: ../bin/dcar.c:5103 ../bin/dcar.c:5225 ../bin/fileio.c:222 ../bin/macro.c:65
+#: ../bin/track.c:1369
 msgid "Stop"
 msgstr "Anhalten"
 
-#: ../bin/ctrain.c:952 ../bin/ctrain.c:981
+#: ../bin/ctrain.c:954 ../bin/ctrain.c:983
 msgid "Crashed"
 msgstr "Entgleist"
 
-#: ../bin/ctrain.c:954
+#: ../bin/ctrain.c:956
 msgid "Not on Track"
 msgstr "Nicht auf einem Gleis"
 
-#: ../bin/ctrain.c:958
+#: ../bin/ctrain.c:960
 msgid "Trains Paused"
 msgstr "Züge angehalten"
 
-#: ../bin/ctrain.c:960
+#: ../bin/ctrain.c:962
 msgid "Running"
 msgstr "Fährt"
 
-#: ../bin/ctrain.c:965
+#: ../bin/ctrain.c:967
 msgid "End of Track"
 msgstr "Ende des Gleis"
 
-#: ../bin/ctrain.c:969
+#: ../bin/ctrain.c:971
 msgid "Open Turnout"
 msgstr "Weiche ist gesperrt"
 
-#: ../bin/ctrain.c:973
+#: ../bin/ctrain.c:975
 msgid "Manual Stop"
 msgstr "Von Hand angehalten"
 
-#: ../bin/ctrain.c:977
+#: ../bin/ctrain.c:979
 msgid "No Room"
 msgstr "Kein Platz"
 
-#: ../bin/ctrain.c:985
+#: ../bin/ctrain.c:987
 msgid "Unknown Status"
 msgstr "Unbekannter Zustand"
 
-#: ../bin/ctrain.c:995
+#: ../bin/ctrain.c:997
 msgid "No trains"
 msgstr "Keine Züge"
 
-#: ../bin/ctrain.c:1375
+#: ../bin/ctrain.c:1377
 msgid "Train Control XXX"
 msgstr "Zugsteuerung XXX"
 
-#: ../bin/ctrain.c:1376
+#: ../bin/ctrain.c:1378
 #, c-format
 msgid "Train Control %d"
 msgstr "Zugsteuerung %d"
 
-#: ../bin/ctrain.c:1378
+#: ../bin/ctrain.c:1380
 msgid "Train Control"
 msgstr "Zugsteuerung"
 
-#: ../bin/ctrain.c:3198 ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:156
+#: ../bin/ctrain.c:3200 ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:156
 msgid "Run Trains"
 msgstr "Zugbetrieb"
 
-#: ../bin/ctrain.c:3217
+#: ../bin/ctrain.c:3219
 msgid "Uncouple"
 msgstr "Entkuppeln"
 
-#: ../bin/ctrain.c:3219
+#: ../bin/ctrain.c:3221
 msgid "Flip Car"
 msgstr "Wagen umdrehen"
 
-#: ../bin/ctrain.c:3222
+#: ../bin/ctrain.c:3224
 msgid "Clearance Lines On"
 msgstr "Begrenzungslinien an"
 
-#: ../bin/ctrain.c:3225
+#: ../bin/ctrain.c:3227
 msgid "Clearance Lines Off"
 msgstr "Begrenzungslinien aus"
 
-#: ../bin/ctrain.c:3227
+#: ../bin/ctrain.c:3229
 msgid "Flip Train"
 msgstr "Zug umdrehen"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/v5_3_0_beta1/app/lib/xtrkcad.xtq:438
-#: ../bin/ctrain.c:3229 ../../../../build/v_5_3_0_beta1/app/i18n/custmsg.h:1188
+#: ../bin/ctrain.c:3231 ../../../../build/v_5_3_0_beta1/app/i18n/custmsg.h:1188
 msgid "Describe"
 msgstr "Beschreibe"
 
-#: ../bin/ctrain.c:3231
+#: ../bin/ctrain.c:3233
 msgid "MU Master"
 msgstr "Mehrtraktionssteuerung"
 
-#: ../bin/ctrain.c:3234
+#: ../bin/ctrain.c:3236
 msgid "Change Direction"
 msgstr "Richtung ändern"
 
-#: ../bin/ctrain.c:3238
+#: ../bin/ctrain.c:3240
 msgid "Remove Car"
 msgstr "Wagen entfernen"
 
-#: ../bin/ctrain.c:3241
+#: ../bin/ctrain.c:3243
 msgid "Remove Train"
 msgstr "Zug entfernen"
 
@@ -3591,7 +3592,7 @@ msgstr "Veränderbare Gleise verbinden"
 msgid "splitTurnout: can't find segment"
 msgstr "Weiche auftrennen: Gleissegment nicht gefunden"
 
-#: ../bin/cturnout.c:1511 ../bin/track.c:2380 ../bin/track.c:2502
+#: ../bin/cturnout.c:1511 ../bin/track.c:2383 ../bin/track.c:2505
 #: ../bin/tstraigh.c:838
 msgid "Drag to change track length"
 msgstr "Ziehen um die Gleislänge zu ändern"
@@ -3627,7 +3628,7 @@ msgstr "Winkel = %0.3f (%s)"
 
 #: ../bin/cturnout.c:2962
 msgid "Add Fixed-Track"
-msgstr ""
+msgstr "Festgleis zufügen"
 
 #: ../bin/cturnout.c:2981
 msgid "Pick turnout and active End Point, then place on the layout"
@@ -4082,7 +4083,7 @@ msgid "Numbers"
 msgstr "Nummern"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/v5_3_0_beta1/app/lib/xtrkcad.xtq:487
-#: ../bin/dcar.c:2376 ../bin/dcar.c:4697 ../bin/trknote.c:594
+#: ../bin/dcar.c:2376 ../bin/dcar.c:4697 ../bin/trknote.c:590
 #: ../../../../build/v_5_3_0_beta1/app/i18n/custmsg.h:1286
 msgid "Notes"
 msgstr "Notizen"
@@ -4220,7 +4221,7 @@ msgid "New Car Part"
 msgstr "Neues Wagenmuster"
 
 #: ../bin/dcar.c:4694 ../bin/dcar.c:4700 ../bin/dcustmgm.c:46
-#: ../bin/dlayer.c:561 ../bin/layout.c:662 ../bin/scale.c:845
+#: ../bin/dlayer.c:562 ../bin/layout.c:663 ../bin/scale.c:845
 msgid "Scale"
 msgstr "Maßstab"
 
@@ -4275,11 +4276,11 @@ msgid "Edit"
 msgstr "Bearbeiten"
 
 #: ../bin/dcar.c:4732 ../bin/dcar.c:5654 ../bin/dcustmgm.c:60
-#: ../bin/dcontmgm.c:90 ../bin/menu.c:992
+#: ../bin/dcontmgm.c:90 ../bin/menu.c:924
 msgid "Delete"
 msgstr "Löschen"
 
-#: ../bin/dcar.c:4736 ../bin/fileio.c:1631
+#: ../bin/dcar.c:4736 ../bin/fileio.c:1629
 msgid "Export"
 msgstr "Export"
 
@@ -4287,7 +4288,7 @@ msgstr "Export"
 msgid "List"
 msgstr "Auflisten"
 
-#: ../bin/dcar.c:4894 ../bin/dcar.c:5686 ../bin/menu.c:1416
+#: ../bin/dcar.c:4894 ../bin/dcar.c:5686 ../bin/menu.c:1349
 msgid "Car Inventory"
 msgstr "Wagenverzeichnis"
 
@@ -4315,7 +4316,7 @@ msgstr "Regal"
 msgid "Shelve"
 msgstr "Regal"
 
-#: ../bin/dcmpnd.c:73 ../bin/dlayer.c:590 ../bin/menu.c:364 ../bin/menu.c:398
+#: ../bin/dcmpnd.c:73 ../bin/dlayer.c:591 ../bin/menu.c:295 ../bin/menu.c:329
 msgid "Load"
 msgstr "Laden"
 
@@ -4354,29 +4355,29 @@ msgstr "Überspringen"
 msgid "%d Track(s) refreshed"
 msgstr "%d Gleise bearbeitet"
 
-#: ../bin/dcmpnd.c:419
+#: ../bin/dcmpnd.c:420
 msgid "Refresh Turnout/Structure"
 msgstr "Weichen/Gebäude neu laden"
 
-#: ../bin/dcmpnd.c:423
+#: ../bin/dcmpnd.c:424
 msgid "Choose a Turnout/Structure to replace:"
 msgstr "Zu ersetzende Weiche / Gebäude auswählen:"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/v5_3_0_beta1/app/lib/xtrkcad.xtq:457
-#: ../bin/dcmpnd.c:436 ../bin/doption.c:94
+#: ../bin/dcmpnd.c:437 ../bin/doption.c:89
 #: ../../../../build/v_5_3_0_beta1/app/i18n/custmsg.h:1226
 msgid "Turnouts"
 msgstr "Weichen"
 
-#: ../bin/dcmpnd.c:436
+#: ../bin/dcmpnd.c:437
 msgid "Structures"
 msgstr "Gebäude"
 
-#: ../bin/dcmpnd.c:467
+#: ../bin/dcmpnd.c:468
 msgid "Choose another Turnout/Structure to replace:"
 msgstr "Eine andere zu ersetzende Weiche / zu ersetzendes Gebäude auswählen:"
 
-#: ../bin/dcmpnd.c:582
+#: ../bin/dcmpnd.c:583
 msgid "Rename Object"
 msgstr "Objekt umbenennen"
 
@@ -4498,610 +4499,610 @@ msgstr "Erweitert"
 msgid "Total"
 msgstr "Summe"
 
-#: ../bin/dlayer.c:541
+#: ../bin/dlayer.c:542
 msgid "Select Layer:"
 msgstr "Ebene auswählen:"
 
-#: ../bin/dlayer.c:547
+#: ../bin/dlayer.c:548
 msgid "Use Color"
 msgstr "Farbe benutzen"
 
-#: ../bin/dlayer.c:549
+#: ../bin/dlayer.c:550
 msgid "Visible"
 msgstr "Sichtbar"
 
-#: ../bin/dlayer.c:551
+#: ../bin/dlayer.c:552
 msgid "Frozen"
 msgstr "Fixiert"
 
-#: ../bin/dlayer.c:553
+#: ../bin/dlayer.c:554
 msgid "On Map"
 msgstr "Auf der Karte"
 
-#: ../bin/dlayer.c:555
+#: ../bin/dlayer.c:556
 msgid "Module"
 msgstr "Modul"
 
-#: ../bin/dlayer.c:557
+#: ../bin/dlayer.c:558
 msgid "No Button"
 msgstr "Keine Schaltfläche"
 
-#: ../bin/dlayer.c:559
+#: ../bin/dlayer.c:560
 msgid "Inherit"
 msgstr "Erben"
 
-#: ../bin/dlayer.c:563 ../bin/layout.c:664
+#: ../bin/dlayer.c:564 ../bin/layout.c:665
 msgid "     Gauge"
 msgstr "   Spurweite"
 
-#: ../bin/dlayer.c:565 ../bin/layout.c:666
+#: ../bin/dlayer.c:566 ../bin/layout.c:667
 msgid "Min Track Radius"
 msgstr "Mindestgleisradius"
 
-#: ../bin/dlayer.c:567 ../bin/layout.c:667
+#: ../bin/dlayer.c:568 ../bin/layout.c:668
 msgid "  Max Track Grade (%)"
 msgstr " Maximale Gleissteigung (%)"
 
-#: ../bin/dlayer.c:569
+#: ../bin/dlayer.c:570
 msgid "Tie Length"
 msgstr "Schwellenlänge"
 
-#: ../bin/dlayer.c:571
+#: ../bin/dlayer.c:572
 msgid "  Width"
 msgstr "   Breite"
 
-#: ../bin/dlayer.c:573
+#: ../bin/dlayer.c:574
 msgid "  Spacing"
 msgstr " Abstand"
 
-#: ../bin/dlayer.c:575
+#: ../bin/dlayer.c:576
 msgid "Layer Actions"
 msgstr "Ebenenaktionen"
 
-#: ../bin/dlayer.c:577
+#: ../bin/dlayer.c:578
 msgid "Add Layer"
 msgstr "Ebene erstellen"
 
-#: ../bin/dlayer.c:579
+#: ../bin/dlayer.c:580
 msgid "Delete Layer"
 msgstr "Ebene löschen"
 
-#: ../bin/dlayer.c:581
+#: ../bin/dlayer.c:582
 msgid "Default Values"
 msgstr "Standardwerte"
 
-#: ../bin/dlayer.c:582
+#: ../bin/dlayer.c:583
 msgid "Number of Layer Buttons"
 msgstr "Anzahl der Schaltflächen für Ebenen"
 
-#: ../bin/dlayer.c:584
+#: ../bin/dlayer.c:585
 msgid "Linked Layers"
 msgstr "Verknüpfte Ebenen"
 
-#: ../bin/dlayer.c:586
+#: ../bin/dlayer.c:587
 msgid "Settings when Current"
 msgstr "Einstellungen wenn aktiv"
 
-#: ../bin/dlayer.c:588
+#: ../bin/dlayer.c:589
 msgid "Object Count:"
 msgstr "Anzahl der Objekte:"
 
-#: ../bin/dlayer.c:589
+#: ../bin/dlayer.c:590
 msgid "All Layer Preferences"
 msgstr "Einstellungen für alle Ebenen"
 
-#: ../bin/dlayer.c:591 ../bin/macro.c:1431
+#: ../bin/dlayer.c:592 ../bin/macro.c:1432
 msgid "Save"
 msgstr "Speichern"
 
-#: ../bin/dlayer.c:592
+#: ../bin/dlayer.c:593
 msgid "Defaults"
 msgstr "Standardwerte"
 
-#: ../bin/dlayer.c:710 ../bin/dlayer.c:1563 ../bin/dlayer.c:1581
-#: ../bin/dlayer.c:1651
+#: ../bin/dlayer.c:711 ../bin/dlayer.c:1564 ../bin/dlayer.c:1582
+#: ../bin/dlayer.c:1652
 msgid "Main"
 msgstr "Haupt"
 
-#: ../bin/dlayer.c:842
+#: ../bin/dlayer.c:843
 msgid "Layer must not have any objects in it."
 msgstr "Die Ebene darf keine Objekte enthalten."
 
-#: ../bin/dlayer.c:1007 ../bin/dlayer.c:1452 ../bin/dlayer.c:1584
-#: ../bin/dlayer.c:1653
+#: ../bin/dlayer.c:1008 ../bin/dlayer.c:1453 ../bin/dlayer.c:1585
+#: ../bin/dlayer.c:1654
 msgid "Show/Hide Layer"
 msgstr "Ebene anzeigen/verbergen"
 
-#: ../bin/dlayer.c:2071
+#: ../bin/dlayer.c:2072
 msgid "Layers"
 msgstr "Ebenen"
 
-#: ../bin/dlayer.c:2334 ../bin/menu.c:960
+#: ../bin/dlayer.c:2335 ../bin/menu.c:892
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:17
 msgid "Show/Hide Background"
 msgstr "Hintergrund zeigen"
 
-#: ../bin/doption.c:92
+#: ../bin/doption.c:87
 msgid "Auto Pan"
 msgstr "Automatischer Ausschnitt"
 
-#: ../bin/doption.c:94
+#: ../bin/doption.c:89
 msgid "All"
 msgstr "Alle"
 
-#: ../bin/doption.c:95
+#: ../bin/doption.c:90
 msgid "Thick"
 msgstr "Dick"
 
-#: ../bin/doption.c:95
+#: ../bin/doption.c:90
 msgid "Exception"
 msgstr "Ausnahmegleis"
 
-#: ../bin/doption.c:96
+#: ../bin/doption.c:91
 msgid "Outline"
 msgstr "Umriss"
 
-#: ../bin/doption.c:97
+#: ../bin/doption.c:92
 msgid "Off"
 msgstr "Aus"
 
-#: ../bin/doption.c:97
+#: ../bin/doption.c:92
 msgid "On"
 msgstr "An"
 
-#: ../bin/doption.c:98
+#: ../bin/doption.c:93
 msgid "Track Descriptions"
 msgstr "Gleisbeschreibungen"
 
-#: ../bin/doption.c:98
+#: ../bin/doption.c:93
 msgid "Lengths"
 msgstr "Längen"
 
-#: ../bin/doption.c:98
+#: ../bin/doption.c:93
 msgid "EndPt Elevations"
 msgstr "Endpunkt höher"
 
-#: ../bin/doption.c:98
+#: ../bin/doption.c:93
 msgid "Track Elevations"
 msgstr "Gleishöhen"
 
-#: ../bin/doption.c:98
+#: ../bin/doption.c:93
 msgid "Cars"
 msgstr "Wagen"
 
-#: ../bin/doption.c:99 ../bin/doption.c:100
+#: ../bin/doption.c:94 ../bin/doption.c:95
 msgid "Descr"
 msgstr "Beschreibung"
 
-#: ../bin/doption.c:100
+#: ../bin/doption.c:95
 msgid "Manuf"
 msgstr "Hersteller"
 
-#: ../bin/doption.c:101 ../bin/doption.c:102
+#: ../bin/doption.c:96 ../bin/doption.c:97
 msgid "Object"
 msgstr "Objekt"
 
-#: ../bin/doption.c:103
+#: ../bin/doption.c:98
 msgid "Live Map"
 msgstr "Dynamische Karte"
 
-#: ../bin/doption.c:104
+#: ../bin/doption.c:99
 msgid "Hide Trains On Hidden Track"
 msgstr "Verberge Züge auf verborgenem Gleis"
 
-#: ../bin/doption.c:105
+#: ../bin/doption.c:100
 msgid "Constrain Drawing Area to Room boundaries"
 msgstr "Den Zeichenbereich auf die Raumgröße beschränken"
 
-#: ../bin/doption.c:106
+#: ../bin/doption.c:101
 msgid "Don't Hide System Cursor when program cursor is active"
 msgstr "Systemcursor nicht verbergen, wenn der Anwendungscursor aktiv ist"
 
-#: ../bin/doption.c:110
+#: ../bin/doption.c:105
 msgid "Color Track"
 msgstr "Farbiges Gleis"
 
-#: ../bin/doption.c:111
+#: ../bin/doption.c:106
 msgid "Color Draw"
 msgstr "Farbige Objekte"
 
-#: ../bin/doption.c:112
+#: ../bin/doption.c:107
 msgid "Draw Tunnel"
 msgstr "Zeichne Tunnel"
 
-#: ../bin/doption.c:113
+#: ../bin/doption.c:108
 msgid "Draw EndPts"
 msgstr "Zeichne Endpunkte"
 
-#: ../bin/doption.c:114
+#: ../bin/doption.c:109
 msgid "Draw Unconnected EndPts"
 msgstr "Zeichne offene Endpunkte"
 
-#: ../bin/doption.c:115
+#: ../bin/doption.c:110
 msgid "Draw Ties"
 msgstr "Schwellen zeichnen"
 
-#: ../bin/doption.c:116
+#: ../bin/doption.c:111
 msgid "Draw Centers"
 msgstr "Mittelpunkt zeichnen"
 
-#: ../bin/doption.c:117
+#: ../bin/doption.c:112
 msgid "Two Rail Scale"
 msgstr "Maßstab für Gleis"
 
-#: ../bin/doption.c:118
+#: ../bin/doption.c:113
 msgid "Map Scale"
 msgstr "Kartenmaßstab"
 
-#: ../bin/doption.c:124
+#: ../bin/doption.c:119
 msgid "Label Enable"
 msgstr "Beschriftungen zeigen"
 
-#: ../bin/doption.c:125
+#: ../bin/doption.c:120
 msgid "Label Scale"
 msgstr "Maßstab der Beschriftungen"
 
-#: ../bin/doption.c:126
+#: ../bin/doption.c:121
 msgid "Label Font Size"
 msgstr "Größe für Beschriftungen"
 
-#: ../bin/doption.c:127
+#: ../bin/doption.c:122
 msgid "Hot Bar Labels"
 msgstr "Schnellauswahl Beschriftungen"
 
-#: ../bin/doption.c:128
+#: ../bin/doption.c:123
 msgid "Layout Labels"
 msgstr "Anlagenbeschriftungen"
 
-#: ../bin/doption.c:129
+#: ../bin/doption.c:124
 msgid "List Labels"
 msgstr "Listenüberschriften"
 
-#: ../bin/doption.c:132
+#: ../bin/doption.c:127
 msgid "Car Labels"
 msgstr "Wagenbeschriftungen"
 
-#: ../bin/doption.c:133
+#: ../bin/doption.c:128
 msgid "Train Update Delay"
 msgstr "Aktualisierungsintervalle"
 
-#: ../bin/doption.c:176
+#: ../bin/doption.c:171
 msgid "Turning off AutoSave"
 msgstr "Automatisches Sichern aus"
 
-#: ../bin/doption.c:187
+#: ../bin/doption.c:182
 msgid "Turning on CheckPointing"
 msgstr "Sicherungskopien aktivieren"
 
-#: ../bin/doption.c:201
+#: ../bin/doption.c:196
 msgid "Display Options"
 msgstr "Anzeigeoptionen"
 
-#: ../bin/doption.c:203
+#: ../bin/doption.c:198
 msgid "Proto"
 msgstr "Vorbild"
 
-#: ../bin/doption.c:205
+#: ../bin/doption.c:200
 msgid "Proto/Manuf"
 msgstr "Vorbild/Hersteller"
 
-#: ../bin/doption.c:208
+#: ../bin/doption.c:203
 msgid "Proto/Manuf/Part Number"
 msgstr "Vorbild/Hersteller/Bestellnr."
 
-#: ../bin/doption.c:210
+#: ../bin/doption.c:205
 msgid "Proto/Manuf/Partno/Item"
 msgstr "Vorbild/Hersteller/Bestellnr. /lfd. Nr."
 
-#: ../bin/doption.c:211
+#: ../bin/doption.c:206
 msgid "Manuf/Proto"
 msgstr "Hersteller/Vorbild"
 
-#: ../bin/doption.c:214
+#: ../bin/doption.c:209
 msgid "Manuf/Proto/Part Number"
 msgstr "Hersteller/Vorbild/Bestellnr."
 
-#: ../bin/doption.c:216
+#: ../bin/doption.c:211
 msgid "Manuf/Proto/Partno/Item"
 msgstr "Hersteller/Vorbild/Bestellnr./lfd. Nr."
 
-#: ../bin/doption.c:246
+#: ../bin/doption.c:241
 msgid "Single item selected, +Ctrl Add to selection"
 msgstr "Nur aktuelles Element wird ausgewählt, +Strg um Auswahl zu erweitern"
 
-#: ../bin/doption.c:246
+#: ../bin/doption.c:241
 msgid "Add to selection, +Ctrl Single item selected"
 msgstr "Auswahl erweitern,  +Strg Nur aktuelles Element"
 
-#: ../bin/doption.c:247
+#: ../bin/doption.c:242
 msgid "Deselect all on select nothing"
 msgstr "Auswahl durch Klicken auf einen leeren Bereich rücksetzen"
 
-#: ../bin/doption.c:252
+#: ../bin/doption.c:247
 msgid "Normal: Command List, Shift: Command Options"
 msgstr "Normal: Befehlsliste, Umschalt: Befehlsoptionen"
 
-#: ../bin/doption.c:252
+#: ../bin/doption.c:247
 msgid "Normal: Command Options, Shift: Command List"
 msgstr "Normal: Befehlsoptionen, Umschalt: Befehlsliste"
 
-#: ../bin/doption.c:255
+#: ../bin/doption.c:250
 msgid "Default Command"
 msgstr "Standardbefehl"
 
-#: ../bin/doption.c:257
+#: ../bin/doption.c:252
 msgid "Hide Selection Window"
 msgstr "Verberge Auswahlfenster"
 
-#: ../bin/doption.c:259
+#: ../bin/doption.c:254
 msgid "Right Click"
 msgstr "Rechte Maustaste"
 
-#: ../bin/doption.c:260
+#: ../bin/doption.c:255
 msgid "Select Mode"
 msgstr "Auswahlmodus"
 
-#: ../bin/doption.c:286
+#: ../bin/doption.c:281
 msgid "Command Options"
 msgstr "Befehlsoptionen"
 
-#: ../bin/doption.c:310
+#: ../bin/doption.c:305
 msgid "16 px"
 msgstr "16 px"
 
-#: ../bin/doption.c:310
+#: ../bin/doption.c:305
 msgid "24 px"
 msgstr "24 px"
 
-#: ../bin/doption.c:310
+#: ../bin/doption.c:305
 msgid "32 px"
 msgstr "32 px"
 
-#: ../bin/doption.c:311
+#: ../bin/doption.c:306
 msgid "English"
 msgstr "Englisch"
 
-#: ../bin/doption.c:311
+#: ../bin/doption.c:306
 msgid "Metric"
 msgstr "Metrisch"
 
-#: ../bin/doption.c:312
+#: ../bin/doption.c:307
 msgid "Polar"
 msgstr "Polar"
 
-#: ../bin/doption.c:312
+#: ../bin/doption.c:307
 msgid "Cartesian"
 msgstr "Kartesisch"
 
-#: ../bin/doption.c:313
+#: ../bin/doption.c:308
 msgid "Balloon Help"
 msgstr "Sprechblasen"
 
-#: ../bin/doption.c:314
+#: ../bin/doption.c:309
 msgid "Show FlexTrack in HotBar"
 msgstr "Flexgleis in der Auswahlleiste anzeigen"
 
-#: ../bin/doption.c:315
+#: ../bin/doption.c:310
 msgid "Load Last Layout"
 msgstr "Letzten Gleisplan laden"
 
-#: ../bin/doption.c:315
+#: ../bin/doption.c:310
 msgid "Start New Layout"
 msgstr "Neuen Gleisplan beginnen"
 
-#: ../bin/doption.c:318
+#: ../bin/doption.c:313
 msgid "Icon Size"
 msgstr "Icon Größe"
 
-#: ../bin/doption.c:319
+#: ../bin/doption.c:314
 msgid "Angles"
 msgstr "Winkel"
 
-#: ../bin/doption.c:321
+#: ../bin/doption.c:316
 msgid "Units"
 msgstr "Einheiten"
 
-#: ../bin/doption.c:323
+#: ../bin/doption.c:318
 msgid "Length Format"
 msgstr "Längenformat"
 
-#: ../bin/doption.c:324
+#: ../bin/doption.c:319
 msgid "Min Track Length"
 msgstr "Mindestgleislänge"
 
-#: ../bin/doption.c:325
+#: ../bin/doption.c:320
 msgid "Connection Distance"
 msgstr "Verbindungs Abstand"
 
-#: ../bin/doption.c:326
+#: ../bin/doption.c:321
 msgid "Connection Angle"
 msgstr "Verbindungs Winkel"
 
-#: ../bin/doption.c:327
+#: ../bin/doption.c:322
 msgid "Turntable Angle"
 msgstr "Drehscheibenwinkel"
 
-#: ../bin/doption.c:328
+#: ../bin/doption.c:323
 msgid "Max Coupling Speed"
 msgstr "Max. Ankuppelgeschwindigkeit"
 
-#: ../bin/doption.c:331
+#: ../bin/doption.c:326
 msgid "Drag Distance"
 msgstr "Zeichne Entfernung"
 
-#: ../bin/doption.c:332
+#: ../bin/doption.c:327
 msgid "Drag Timeout"
 msgstr "Abriss Zeitverzögerung"
 
-#: ../bin/doption.c:333
+#: ../bin/doption.c:328
 msgid "Min Grid Spacing"
 msgstr "Mindestrasterabstand"
 
-#: ../bin/doption.c:335
+#: ../bin/doption.c:330
 msgid "Check Point Frequency"
 msgstr "Häufigkeit der Sicherungskopie"
 
-#: ../bin/doption.c:337
+#: ../bin/doption.c:332
 msgid "Autosave Checkpoint Frequency"
 msgstr "Häufigkeit der automatischen Sicherung"
 
-#: ../bin/doption.c:338
+#: ../bin/doption.c:333
 msgid "On Program Startup"
 msgstr "Beim Programmstart"
 
-#: ../bin/doption.c:348 ../bin/doption.c:352 ../bin/doption.c:370
+#: ../bin/doption.c:343 ../bin/doption.c:347 ../bin/doption.c:365
 msgid "999.999"
 msgstr "999.999"
 
-#: ../bin/doption.c:349
+#: ../bin/doption.c:344
 msgid "999.999999"
 msgstr "999.999999"
 
-#: ../bin/doption.c:350
+#: ../bin/doption.c:345
 msgid "999.99999"
 msgstr "999,999999"
 
-#: ../bin/doption.c:351
+#: ../bin/doption.c:346
 msgid "999.9999"
 msgstr "999,9999"
 
-#: ../bin/doption.c:353 ../bin/doption.c:371
+#: ../bin/doption.c:348 ../bin/doption.c:366
 msgid "999.99"
 msgstr "999.99"
 
-#: ../bin/doption.c:354 ../bin/doption.c:372
+#: ../bin/doption.c:349 ../bin/doption.c:367
 msgid "999.9"
 msgstr "999.9"
 
-#: ../bin/doption.c:355
+#: ../bin/doption.c:350
 msgid "999 7/8"
 msgstr "999 7/8"
 
-#: ../bin/doption.c:356
+#: ../bin/doption.c:351
 msgid "999 63/64"
 msgstr "999 63/64"
 
-#: ../bin/doption.c:357
+#: ../bin/doption.c:352
 msgid "999' 11.999\""
 msgstr "999' 11.999\""
 
-#: ../bin/doption.c:358
+#: ../bin/doption.c:353
 msgid "999' 11.99\""
 msgstr "999' 11.99\""
 
-#: ../bin/doption.c:359
+#: ../bin/doption.c:354
 msgid "999' 11.9\""
 msgstr "999' 11.9\""
 
-#: ../bin/doption.c:360
+#: ../bin/doption.c:355
 msgid "999' 11 7/8\""
 msgstr "999' 11 7/8\""
 
-#: ../bin/doption.c:361
+#: ../bin/doption.c:356
 msgid "999' 11 63/64\""
 msgstr "999' 11 63/64\""
 
-#: ../bin/doption.c:362
+#: ../bin/doption.c:357
 msgid "999ft 11.999in"
 msgstr "999ft 11.999in"
 
-#: ../bin/doption.c:363
+#: ../bin/doption.c:358
 msgid "999ft 11.99in"
 msgstr "999ft 11.99in"
 
-#: ../bin/doption.c:364
+#: ../bin/doption.c:359
 msgid "999ft 11.9in"
 msgstr "999ft 11.9in"
 
-#: ../bin/doption.c:365
+#: ../bin/doption.c:360
 msgid "999ft 11 7/8in"
 msgstr "999ft 11 7/8in"
 
-#: ../bin/doption.c:366
+#: ../bin/doption.c:361
 msgid "999ft 11 63/64in"
 msgstr "999ft 11 63/64in"
 
-#: ../bin/doption.c:373
+#: ../bin/doption.c:368
 msgid "999.999mm"
 msgstr "999.999mm"
 
-#: ../bin/doption.c:374
+#: ../bin/doption.c:369
 msgid "999.99mm"
 msgstr "999.99mm"
 
-#: ../bin/doption.c:375
+#: ../bin/doption.c:370
 msgid "999.9mm"
 msgstr "999.9mm"
 
-#: ../bin/doption.c:376
+#: ../bin/doption.c:371
 msgid "999.999cm"
 msgstr "999.999cm"
 
-#: ../bin/doption.c:377
+#: ../bin/doption.c:372
 msgid "999.99cm"
 msgstr "999.99cm"
 
-#: ../bin/doption.c:378
+#: ../bin/doption.c:373
 msgid "999.9cm"
 msgstr "999.9cm"
 
-#: ../bin/doption.c:379
+#: ../bin/doption.c:374
 msgid "999.999m"
 msgstr "999.999m"
 
-#: ../bin/doption.c:380
+#: ../bin/doption.c:375
 msgid "999.99m"
 msgstr "999.99m"
 
-#: ../bin/doption.c:381
+#: ../bin/doption.c:376
 msgid "999.9m"
 msgstr "999.9m"
 
-#: ../bin/doption.c:516
+#: ../bin/doption.c:511
 msgid "Preferences"
 msgstr "Einstellungen"
 
-#: ../bin/doption.c:560
+#: ../bin/doption.c:555
 msgid "Marker"
 msgstr "Markierung"
 
-#: ../bin/doption.c:561
+#: ../bin/doption.c:556
 msgid "Border"
 msgstr "Rahmen"
 
-#: ../bin/doption.c:562
+#: ../bin/doption.c:557
 msgid "Primary Axis"
 msgstr "Hauptachse"
 
-#: ../bin/doption.c:563
+#: ../bin/doption.c:558
 msgid "Secondary Axis"
 msgstr "Nebenachse"
 
-#: ../bin/doption.c:564
+#: ../bin/doption.c:559
 msgid "Normal Track"
 msgstr "Normales Gleis"
 
-#: ../bin/doption.c:565
+#: ../bin/doption.c:560
 msgid "Selected Track"
 msgstr "Ausgewähltes Gleis"
 
-#: ../bin/doption.c:566
+#: ../bin/doption.c:561
 msgid "Profile Path"
 msgstr "Höhenlinie"
 
-#: ../bin/doption.c:567
+#: ../bin/doption.c:562
 msgid "Exception Track"
 msgstr "Ausnahmegleis"
 
-#: ../bin/doption.c:568
+#: ../bin/doption.c:563
 msgid "Track Ties"
 msgstr "Gleisschwellen"
 
-#: ../bin/doption.c:569
+#: ../bin/doption.c:564
 msgid "Bridge Base"
 msgstr "Brückenkopf"
 
-#: ../bin/doption.c:570
+#: ../bin/doption.c:565
 msgid "Track Roadbed"
 msgstr "Gleisbett"
 
@@ -5162,47 +5163,47 @@ msgstr "Lade Parameter"
 msgid "Parameter files (*.xtp)|*.xtp"
 msgstr "Parameterdateien (*.xtp)|*.xtp"
 
-#: ../bin/draw.c:2352
+#: ../bin/draw.c:2353
 msgid "Macro Zoom Mode"
 msgstr "Makro-Zoom-Modus"
 
-#: ../bin/draw.c:2360
+#: ../bin/draw.c:2361
 msgid "Scale 1:1 - Use Ctrl+ to go to Macro Zoom Mode"
 msgstr "Maßstab 1:1 - Mit Strg+ in den Makro-Zoom wechseln"
 
-#: ../bin/draw.c:2365
+#: ../bin/draw.c:2366
 msgid "Preset Zoom In Value selected. Shift+Ctrl+PageDwn to reset value"
 msgstr ""
 "Der gespeicherte untere Zoom-Faktor wird benutzt, Durch Umschalt+Strg+Bild "
 "runter zurücksetzen"
 
-#: ../bin/draw.c:2369
+#: ../bin/draw.c:2370
 #, c-format
 msgid "Zoom In Program Value %ld:1, Shift+PageDwn to use"
 msgstr ""
 "Programmierter Zoom Größer Wert %ld:1, Verwenden mit Umschalt+Bild runter"
 
-#: ../bin/draw.c:2450
+#: ../bin/draw.c:2451
 msgid "At Maximum Zoom Out"
 msgstr "Maximal rausgezoomt"
 
-#: ../bin/draw.c:2457
+#: ../bin/draw.c:2458
 msgid "Preset Zoom Out Value selected. Shift+Ctrl+PageUp to reset value"
 msgstr ""
 "Der gespeicherte obere Zoom-Faktor wird benutzt, Durch Umschalt+Strg+Bild "
 "hoch zurücksetzen"
 
-#: ../bin/draw.c:2461
+#: ../bin/draw.c:2462
 #, c-format
 msgid "Zoom Out Program Value %ld:1 set, Shift+PageUp to use"
 msgstr ""
 "Programmierter Zoom Größer Wert %ld:1, Verwenden mit Umschalt+Bild hoch"
 
-#: ../bin/draw.c:3281
+#: ../bin/draw.c:3282
 msgid "Map"
 msgstr "Karte"
 
-#: ../bin/draw.c:3323
+#: ../bin/draw.c:3324
 msgid ""
 "Left-Drag to pan, Ctrl+Left-Drag to zoom, 0 to set origin to zero, 1-9 to "
 "zoom#, e to set to extents"
@@ -5211,25 +5212,25 @@ msgstr ""
 "Strg+Ziehen mit der linken Maustaste zum Zoomen, 0 um den Ursprung auf Null "
 "zu setzen, 1-9 zum Zoomfaktor, e um an die Fenstergröße anzupassen"
 
-#: ../bin/draw.c:3330
+#: ../bin/draw.c:3331
 msgid "Pan Mode - drag point to new position"
 msgstr "Ausschnitt wählen - Punkt an die neue Position ziehen"
 
-#: ../bin/draw.c:3337
+#: ../bin/draw.c:3338
 msgid "Zoom Mode - drag area to zoom"
 msgstr "Zoom Modus -auf den ausgewählten Bereich zoomen"
 
-#: ../bin/draw.c:3365
+#: ../bin/draw.c:3366
 msgid "Can't move any further in that direction"
 msgstr "In diese Richtung können Sie nicht weiter gehen"
 
-#: ../bin/draw.c:3368
+#: ../bin/draw.c:3369
 msgid "Left click to pan, right click to zoom, 'o' for origin, 'e' for extents"
 msgstr ""
 "Linksklicken zum Verschieben, Rechtsklicken zum Zoomen, 'o' für Ursprung, "
 "'e' für Anpassen an Fenstergröße"
 
-#: ../bin/draw.c:3407
+#: ../bin/draw.c:3408
 msgid ""
 "Left Drag to Pan, +CTRL to Zoom, 0 to set Origin to 0,0, 1-9 to Zoom#, e to "
 "set to Extent"
@@ -5238,47 +5239,47 @@ msgstr ""
 "Zoomen, 0 zum Setzen des Ursprungs auf 0,0, 1-9 zum Zoomfaktor, e um an die "
 "Fenstergröße anzupassen"
 
-#: ../bin/draw.c:3486
+#: ../bin/draw.c:3487
 msgid "Pan/Zoom"
 msgstr "Verschieben/Zoomen"
 
-#: ../bin/draw.c:3502
+#: ../bin/draw.c:3503
 msgid "Zoom to 1:1 - '1'"
 msgstr "Auf 1:1 vergrößern - '1'."
 
-#: ../bin/draw.c:3504
+#: ../bin/draw.c:3505
 msgid "Zoom to 1:2 - '2'"
 msgstr "Auf 1:2 vergrößern - '2'."
 
-#: ../bin/draw.c:3506
+#: ../bin/draw.c:3507
 msgid "Zoom to 1:3 - '3'"
 msgstr "Auf 1:3 vergrößern - '3'."
 
-#: ../bin/draw.c:3508
+#: ../bin/draw.c:3509
 msgid "Zoom to 1:4 - '4'"
 msgstr "Auf 1:4 vergrößern - '4'."
 
-#: ../bin/draw.c:3510
+#: ../bin/draw.c:3511
 msgid "Zoom to 1:5 - '5'"
 msgstr "Auf 1:5 vergrößern - '5'."
 
-#: ../bin/draw.c:3512
+#: ../bin/draw.c:3513
 msgid "Zoom to 1:6 - '6'"
 msgstr "Auf 1:6 vergrößern - '6'."
 
-#: ../bin/draw.c:3514
+#: ../bin/draw.c:3515
 msgid "Zoom to 1:7 - '7'"
 msgstr "Auf 1:7 vergrößern - '7'."
 
-#: ../bin/draw.c:3516
+#: ../bin/draw.c:3517
 msgid "Zoom to 1:8 - '8'"
 msgstr "Auf 1:8 vergrößern - '8'."
 
-#: ../bin/draw.c:3518
+#: ../bin/draw.c:3519
 msgid "Zoom to 1:9 - '9'"
 msgstr "Auf 1:9 vergrößern - '9'."
 
-#: ../bin/draw.c:3524
+#: ../bin/draw.c:3525
 msgid "Pan center here - 'c'"
 msgstr "Hier zentrieren - 'c'."
 
@@ -5382,7 +5383,7 @@ msgstr "Ziehen um die Kante zu verschieben"
 msgid "Export to DXF"
 msgstr "Export nach DXF"
 
-#: ../bin/fileio.c:223
+#: ../bin/fileio.c:221
 msgid ""
 "\n"
 "Do you want to continue?"
@@ -5390,74 +5391,74 @@ msgstr ""
 "\n"
 "Wollen Sie fortsetzen?"
 
-#: ../bin/fileio.c:595
+#: ../bin/fileio.c:593
 #, c-format
 msgid "putTitle: title too long: %s"
 msgstr "putTitle: Titel ist zu lang: %s"
 
-#: ../bin/fileio.c:627
+#: ../bin/fileio.c:625
 msgid "Unnamed Trackplan"
 msgstr "Unbenannter Gleisplan"
 
-#: ../bin/fileio.c:628
+#: ../bin/fileio.c:626
 msgid " (R/O)"
 msgstr " (Nur lesen)"
 
-#: ../bin/fileio.c:779
+#: ../bin/fileio.c:777
 msgid "Unknown layout file object - skip until next good object?"
 msgstr ""
 "Unbekanntes Layout-Dateiobjekt - überspringen bis zum nächsten guten Objekt?"
 
-#: ../bin/fileio.c:835 ../bin/fileio.c:1022
+#: ../bin/fileio.c:833 ../bin/fileio.c:1020
 msgid "Track"
 msgstr "Gleis"
 
-#: ../bin/fileio.c:836
+#: ../bin/fileio.c:834
 msgid "Not Found"
 msgstr "Nicht gefunden"
 
-#: ../bin/fileio.c:1265
+#: ../bin/fileio.c:1263
 msgid "AutoSave Tracks As"
 msgstr "AutoSichern des Gleisplans als"
 
-#: ../bin/fileio.c:1280
+#: ../bin/fileio.c:1278
 msgid "Save Tracks"
 msgstr "Gleise speichern"
 
-#: ../bin/fileio.c:1297
+#: ../bin/fileio.c:1295
 msgid "Save Tracks As"
 msgstr "Gleise speichern unter"
 
-#: ../bin/fileio.c:1309
+#: ../bin/fileio.c:1307
 msgid "Open Tracks"
 msgstr "Gleise einlesen"
 
-#: ../bin/fileio.c:1323
+#: ../bin/fileio.c:1321
 msgid "Example Tracks"
 msgstr "Beispielgleise"
 
-#: ../bin/fileio.c:1400
+#: ../bin/fileio.c:1398
 msgid "File AutoSaved"
 msgstr "Automatisch gesichert"
 
-#: ../bin/fileio.c:1575
+#: ../bin/fileio.c:1573
 #, c-format
 msgid "Module - %s"
 msgstr "Modul - %s"
 
-#: ../bin/fileio.c:1580 ../bin/fileio.c:1601
+#: ../bin/fileio.c:1578 ../bin/fileio.c:1599
 msgid "Import Tracks"
 msgstr "Gleise importieren"
 
-#: ../bin/fileio.c:1601
+#: ../bin/fileio.c:1599
 msgid "Import Module"
 msgstr "Modul importieren"
 
-#: ../bin/fileio.c:1659
+#: ../bin/fileio.c:1657
 msgid "Export Tracks"
 msgstr "Gleise exportieren"
 
-#: ../bin/fileio.c:1680
+#: ../bin/fileio.c:1678
 msgid "Clipboard"
 msgstr "Zwischenablage"
 
@@ -5516,80 +5517,80 @@ msgstr "Dokument anhängen"
 msgid "Gettext initialized (PACKAGE=%s, LOCALEDIR=%s, LC_ALL=%s).\n"
 msgstr "Gettext initialisiert (PACKAGE=%s, LOCALEDIR=%s, LC_ALL=%s).\n"
 
-#: ../bin/layout.c:553 ../bin/layout.c:994
+#: ../bin/layout.c:554 ../bin/layout.c:995
 #, c-format
 msgid "Unable to load Image File - %s"
 msgstr "Grafikdatei kann nicht geladen werden - %s"
 
-#: ../bin/layout.c:630
+#: ../bin/layout.c:631
 msgid "Load Background"
 msgstr "Hintergrund laden"
 
-#: ../bin/layout.c:657
+#: ../bin/layout.c:658
 msgid "Room Width"
 msgstr "Zimmerbreite"
 
-#: ../bin/layout.c:658
+#: ../bin/layout.c:659
 msgid "    Height"
 msgstr "    -länge"
 
-#: ../bin/layout.c:659
+#: ../bin/layout.c:660
 msgid "Layout Title"
 msgstr "Gleisplantitel"
 
-#: ../bin/layout.c:660
+#: ../bin/layout.c:661
 msgid "Subtitle"
 msgstr "Untertitel"
 
-#: ../bin/layout.c:669
+#: ../bin/layout.c:670
 msgid "Background File Path"
 msgstr "Hintergrundbild"
 
-#: ../bin/layout.c:670
+#: ../bin/layout.c:671
 msgid "Browse ..."
 msgstr "Durchsuchen..."
 
-#: ../bin/layout.c:673
+#: ../bin/layout.c:674
 msgid "Background PosX,Y"
 msgstr "Hintergrund Position X,Y"
 
-#: ../bin/layout.c:677
+#: ../bin/layout.c:678
 msgid "Background Size"
 msgstr "Größe des Hintergrunds"
 
-#: ../bin/layout.c:679
+#: ../bin/layout.c:680
 msgid "Background Screen %"
 msgstr "Hintergrund-Transparenz %"
 
-#: ../bin/layout.c:681
+#: ../bin/layout.c:682
 msgid "Background Angle"
 msgstr "Winkel des Hintergrund"
 
-#: ../bin/layout.c:682
+#: ../bin/layout.c:683
 msgid "Named Settings File"
 msgstr "Benannte Einstellungsdatei"
 
-#: ../bin/layout.c:683
+#: ../bin/layout.c:684
 msgid "Write"
 msgstr "Schreiben"
 
-#: ../bin/layout.c:684
+#: ../bin/layout.c:685
 msgid "Read"
 msgstr "Lesen"
 
-#: ../bin/layout.c:818
+#: ../bin/layout.c:819
 msgid "Layout Options"
 msgstr "Gleisplanoptionen"
 
-#: ../bin/layout.c:1052
+#: ../bin/layout.c:1053
 msgid "Read Settings"
 msgstr "Einstellungen lesen"
 
-#: ../bin/layout.c:1053 ../bin/layout.c:1087
+#: ../bin/layout.c:1054 ../bin/layout.c:1088
 msgid "Settings File (*.xset)|*.xset"
 msgstr "Einstellungsdatei (*.xset)|*.xset"
 
-#: ../bin/layout.c:1086
+#: ../bin/layout.c:1087
 msgid "Write Settings"
 msgstr "Einstellungen speichern"
 
@@ -5599,7 +5600,7 @@ msgstr "URL"
 
 #: ../bin/linknoteui.c:230
 #, fuzzy
-msgid "Update Webink"
+msgid "Update Weblink"
 msgstr "Weblink aktualisieren"
 
 #: ../bin/linknoteui.c:248
@@ -5607,224 +5608,156 @@ msgstr "Weblink aktualisieren"
 msgid "Create Weblink"
 msgstr "Weblink erstellen"
 
-#: ../bin/macro.c:67
+#: ../bin/macro.c:68
 msgid "Message"
 msgstr "Mitteilung"
 
-#: ../bin/macro.c:166
+#: ../bin/macro.c:167
 msgid "Recording"
 msgstr "Aufzeichnen"
 
-#: ../bin/macro.c:206 ../../../../build/v_5_3_0_beta1/app/i18n/custmsg.h:1309
+#: ../bin/macro.c:207 ../../../../build/v_5_3_0_beta1/app/i18n/custmsg.h:1309
 msgid "End of Playback.  Hit Step to exit\n"
 msgstr "Ende der Aufzeichnung. Schritt zum Beenden drücken\n"
 
-#: ../bin/macro.c:271
+#: ../bin/macro.c:272
 msgid "Record"
 msgstr "Aufzeichnen"
 
-#: ../bin/macro.c:686
+#: ../bin/macro.c:687
 msgid "Step"
 msgstr "Schritt"
 
-#: ../bin/macro.c:689 ../bin/macro.c:1560
+#: ../bin/macro.c:690 ../bin/macro.c:1561
 msgid "Next"
 msgstr "Nächster"
 
-#: ../bin/macro.c:692 ../bin/misc.c:696 ../bin/track.c:1104
+#: ../bin/macro.c:693 ../bin/misc.c:697 ../bin/track.c:1107
 msgid "Quit"
 msgstr "Verlassen"
 
-#: ../bin/macro.c:695 ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:631
+#: ../bin/macro.c:696 ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:631
 msgid "Speed"
 msgstr "Geschwindigkeit"
 
-#: ../bin/macro.c:855 ../bin/track.c:1344
+#: ../bin/macro.c:856 ../bin/track.c:1347
 msgid "Regression"
 msgstr "Regression"
 
-#: ../bin/macro.c:1010 ../bin/macro.c:1410
+#: ../bin/macro.c:1011 ../bin/macro.c:1411
 msgid "Demo"
 msgstr "Demo"
 
-#: ../bin/macro.c:1219
+#: ../bin/macro.c:1220
 #, c-format
 msgid "Elapsed time %lu\n"
 msgstr "Abgelaufene Zeit %lu\n"
 
-#: ../bin/macro.c:1329
+#: ../bin/macro.c:1330
 msgid "Playback"
 msgstr "Wiedergabe"
 
-#: ../bin/macro.c:1414
+#: ../bin/macro.c:1415
 msgid "Slowest"
 msgstr "Langsamste"
 
-#: ../bin/macro.c:1415
+#: ../bin/macro.c:1416
 msgid "Slow"
 msgstr "Langsame"
 
-#: ../bin/macro.c:1417
+#: ../bin/macro.c:1418
 msgid "Fast"
 msgstr "Schnelle"
 
-#: ../bin/macro.c:1418
+#: ../bin/macro.c:1419
 msgid "Faster"
 msgstr "Schnellere"
 
-#: ../bin/macro.c:1419
+#: ../bin/macro.c:1420
 msgid "Fastest"
 msgstr "Schnellste"
 
-#: ../bin/macro.c:1542
+#: ../bin/macro.c:1543
 msgid "Can not find PARAMETER playback proc"
 msgstr "Kann die PARAMETER Wiedergabeprozedur nicht finden"
 
-#: ../bin/menu.c:130
-msgid "File Buttons"
-msgstr "Aktionen für Dateien"
-
-#: ../bin/menu.c:130
-msgid "Print Buttons"
-msgstr "Aktionen für Druck"
-
-#: ../bin/menu.c:130
-msgid "Import/Export Buttons"
-msgstr "Import/Export Aktionen"
-
-#: ../bin/menu.c:131
-msgid "Zoom Buttons"
-msgstr "Aktionen für Zoom"
-
-#: ../bin/menu.c:131
-msgid "Undo Buttons"
-msgstr "Aktionen für Rückgängig/Wiederholen"
-
-#: ../bin/menu.c:131
-msgid "Easement Button"
-msgstr "Aktionen für Übergangsbogen"
-
-#: ../bin/menu.c:131
-msgid "SnapGrid Buttons"
-msgstr "Aktionen für Fangraster"
-
-#: ../bin/menu.c:132
-msgid "Create Track Buttons"
-msgstr "Aktionen um Gleise zu erstellen"
-
-#: ../bin/menu.c:132
-msgid "Layout Control Elements"
-msgstr "Aktionen zur Anlagensteuerung"
-
-#: ../bin/menu.c:133
-msgid "Modify Track Buttons"
-msgstr "Verändere Gleise"
-
-#: ../bin/menu.c:133
-msgid "Properties/Select"
-msgstr "Eigenschaften/Auswählen"
-
-#: ../bin/menu.c:134
-msgid "Track Group Buttons"
-msgstr "Aktionen um Objekte zusammzufassen und zu organisieren"
-
-#: ../bin/menu.c:134
-msgid "Train Group Buttons"
-msgstr "Zugbetrieb starten oder beenden"
-
-#: ../bin/menu.c:135
-msgid "Create Misc Buttons"
-msgstr "Werkzeuge zum Zeichnen/Schrift"
-
-#: ../bin/menu.c:135
-msgid "Ruler Button"
-msgstr "Lineal"
-
-#: ../bin/menu.c:136
-msgid "Layer Buttons"
-msgstr "Ebenen"
-
-#: ../bin/menu.c:136
-msgid "Hot Bar"
-msgstr "Schnellauswahl"
-
-#: ../bin/menu.c:225 ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:82
+#: ../bin/menu.c:156 ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:82
 msgid "Change Elevations"
 msgstr "Höhen ändern"
 
-#: ../bin/menu.c:250
+#: ../bin/menu.c:181
 msgid "Angle:"
 msgstr "Winkel:"
 
-#: ../bin/menu.c:255
+#: ../bin/menu.c:186
 msgid "Indexes:"
 msgstr "Kennziffern:"
 
-#: ../bin/menu.c:262
+#: ../bin/menu.c:193
 msgid "Move X:"
 msgstr "Verschieben X:"
 
-#: ../bin/menu.c:263
+#: ../bin/menu.c:194
 msgid "Move Y:"
 msgstr "Verschieben Y:"
 
-#: ../bin/menu.c:282
+#: ../bin/menu.c:213
 msgid "Select Index"
 msgstr "Kennziffer auswählen"
 
-#: ../bin/menu.c:330
+#: ../bin/menu.c:261
 msgid "Enter Move ..."
 msgstr "Verschiebung eingeben..."
 
-#: ../bin/menu.c:336
+#: ../bin/menu.c:267
 msgid "Select Track Index ..."
 msgstr "Gleiskennziffer auswählen ..."
 
-#: ../bin/menu.c:343
+#: ../bin/menu.c:274
 msgid "180 "
 msgstr "180 "
 
-#: ../bin/menu.c:344
+#: ../bin/menu.c:275
 msgid "90  CW"
 msgstr "90 Uhrzeiger"
 
-#: ../bin/menu.c:345
+#: ../bin/menu.c:276
 msgid "45  CW"
 msgstr "45 Uhrzeiger"
 
-#: ../bin/menu.c:346
+#: ../bin/menu.c:277
 msgid "30  CW"
 msgstr "30 Uhrzeiger"
 
-#: ../bin/menu.c:347
+#: ../bin/menu.c:278
 msgid "15  CW"
 msgstr "15 Uhrzeiger"
 
-#: ../bin/menu.c:348
+#: ../bin/menu.c:279
 msgid "15  CCW"
 msgstr "15 gegen Uhr"
 
-#: ../bin/menu.c:349
+#: ../bin/menu.c:280
 msgid "30  CCW"
 msgstr "30 gehen Uhr"
 
-#: ../bin/menu.c:350
+#: ../bin/menu.c:281
 msgid "45  CCW"
 msgstr "45 gegen Uhr"
 
-#: ../bin/menu.c:351
+#: ../bin/menu.c:282
 msgid "90  CCW"
 msgstr "90 gegen Uhr"
 
-#: ../bin/menu.c:352
+#: ../bin/menu.c:283
 msgid "Enter Angle ..."
 msgstr "Winkel eingeben..."
 
-#: ../bin/menu.c:369
+#: ../bin/menu.c:300
 msgid "examples"
 msgstr "Beispiele"
 
-#: ../bin/menu.c:378
+#: ../bin/menu.c:309
 msgid ""
 "Do you want to return to the last saved state?\n"
 "\n"
@@ -5834,45 +5767,45 @@ msgstr ""
 "Durch das Zurücksetzen werden alle Änderungen seit dem letzten Speichern "
 "verloren gehen."
 
-#: ../bin/menu.c:380
+#: ../bin/menu.c:311
 msgid "&Revert"
 msgstr "Zurücksetzen"
 
-#: ../bin/menu.c:380 ../bin/misc.c:660
+#: ../bin/menu.c:311 ../bin/misc.c:661
 msgid "&Cancel"
 msgstr "&Abbruch"
 
-#: ../bin/menu.c:433
+#: ../bin/menu.c:364
 msgid "XTrackCAD Font"
 msgstr "XTrackCAD Font"
 
-#: ../bin/menu.c:459
+#: ../bin/menu.c:390
 msgid "Sticky Commands"
 msgstr "Wiederholte Befehle"
 
-#: ../bin/menu.c:478
+#: ../bin/menu.c:409
 msgid "Test Mallocs"
 msgstr "Test Mallocs"
 
-#: ../bin/menu.c:497
+#: ../bin/menu.c:428
 msgid "Debug"
 msgstr "Fehlersuche (Debug)"
 
-#: ../bin/menu.c:582
+#: ../bin/menu.c:513
 msgid "No Messages"
 msgstr "Keine Nachrichten"
 
-#: ../bin/menu.c:606
+#: ../bin/menu.c:537
 #, c-format
 msgid "No help for %s"
 msgstr "Hilfe für %s nicht gefunden"
 
-#: ../bin/menu.c:656
+#: ../bin/menu.c:587
 #, c-format
 msgid "No balloon help for %s\n"
 msgstr "Kein Tooltip für %s vorhanden\n"
 
-#: ../bin/menu.c:658 ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:694
+#: ../bin/menu.c:589 ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:694
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:695
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:697
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:698
@@ -5935,379 +5868,379 @@ msgstr "Kein Tooltip für %s vorhanden\n"
 msgid "No Help"
 msgstr "Keine Hilfe vorhanden"
 
-#: ../bin/menu.c:884
+#: ../bin/menu.c:816
 msgid "&File"
 msgstr "&Datei"
 
-#: ../bin/menu.c:885
+#: ../bin/menu.c:817
 msgid "&Edit"
 msgstr "&Bearbeiten"
 
-#: ../bin/menu.c:886
+#: ../bin/menu.c:818
 msgid "&View"
 msgstr "&Ansicht"
 
-#: ../bin/menu.c:887
+#: ../bin/menu.c:819
 msgid "&Add"
 msgstr "&Hinzufügen"
 
-#: ../bin/menu.c:888
+#: ../bin/menu.c:820
 msgid "&Change"
 msgstr "&Ändern"
 
-#: ../bin/menu.c:889
+#: ../bin/menu.c:821
 msgid "&Draw"
 msgstr "&Zeichnen"
 
-#: ../bin/menu.c:890
+#: ../bin/menu.c:822
 msgid "&Manage"
 msgstr "&Verwalten"
 
-#: ../bin/menu.c:891
+#: ../bin/menu.c:823
 msgid "&Options"
 msgstr "&Optionen"
 
-#: ../bin/menu.c:892
+#: ../bin/menu.c:824
 msgid "&Macro"
 msgstr "&Makro"
 
-#: ../bin/menu.c:893
+#: ../bin/menu.c:825
 msgid "&Window"
 msgstr "&Fenster"
 
-#: ../bin/menu.c:894
+#: ../bin/menu.c:826
 msgid "&Help"
 msgstr "&Hilfe"
 
-#: ../bin/menu.c:930
+#: ../bin/menu.c:862
 msgid "Context Commands"
 msgstr "Kontextbefehle"
 
-#: ../bin/menu.c:931
+#: ../bin/menu.c:863
 msgid "Shift Context Commands"
 msgstr "Umsch+Kontextbefehle"
 
-#: ../bin/menu.c:945 ../bin/menu.c:947
+#: ../bin/menu.c:877 ../bin/menu.c:879
 msgid "Zoom Extents"
 msgstr "Zoom Anpassen"
 
-#: ../bin/menu.c:950 ../bin/menu.c:1185
+#: ../bin/menu.c:882 ../bin/menu.c:1117
 msgid "Enable SnapGrid"
 msgstr "Fangraster aktivieren"
 
-#: ../bin/menu.c:952
+#: ../bin/menu.c:884
 msgid "SnapGrid Show"
 msgstr "Fangraster anzeigen"
 
-#: ../bin/menu.c:955
+#: ../bin/menu.c:887
 msgid " Enable Magnetic Snap"
 msgstr " Ein/Aus Magnetischer Schnapper"
 
-#: ../bin/menu.c:957 ../bin/menu.c:1207
+#: ../bin/menu.c:889 ../bin/menu.c:1139
 msgid "Show/Hide Map"
 msgstr "Karte anzeigen/verbergen"
 
-#: ../bin/menu.c:981 ../bin/menu.c:983
+#: ../bin/menu.c:913 ../bin/menu.c:915
 msgid "Select Track Index..."
 msgstr "Gleiskennziffer auswählen..."
 
-#: ../bin/menu.c:995 ../bin/menu.c:996
+#: ../bin/menu.c:927 ../bin/menu.c:928
 msgid "Add..."
 msgstr "Hinzufügen..."
 
-#: ../bin/menu.c:999 ../bin/menu.c:1000
+#: ../bin/menu.c:931 ../bin/menu.c:932
 msgid "More..."
 msgstr "Weiter..."
 
-#: ../bin/menu.c:1005
+#: ../bin/menu.c:937
 msgid "&New ..."
 msgstr "&Neu..."
 
-#: ../bin/menu.c:1007
+#: ../bin/menu.c:939
 msgid "&Open ..."
 msgstr "&Öffnen..."
 
-#: ../bin/menu.c:1011 ../bin/misc.c:660
+#: ../bin/menu.c:943 ../bin/misc.c:661
 msgid "&Save"
 msgstr "&Speichern"
 
-#: ../bin/menu.c:1013
+#: ../bin/menu.c:945
 msgid "Save &As ..."
 msgstr "Speichern &unter..."
 
-#: ../bin/menu.c:1015
+#: ../bin/menu.c:947
 msgid "Revert"
 msgstr "Neu laden"
 
-#: ../bin/menu.c:1028
+#: ../bin/menu.c:960
 msgid "P&rint Setup ..."
 msgstr "Druckereinstellungen..."
 
-#: ../bin/menu.c:1036
+#: ../bin/menu.c:968
 msgid "&Import"
 msgstr "Import"
 
-#: ../bin/menu.c:1038
+#: ../bin/menu.c:970
 msgid "Import &Module"
 msgstr "Modul importieren"
 
-#: ../bin/menu.c:1041
+#: ../bin/menu.c:973
 msgid "Export to &Bitmap"
 msgstr "Export als Bitmap"
 
-#: ../bin/menu.c:1044
+#: ../bin/menu.c:976
 msgid "E&xport"
 msgstr "Export"
 
-#: ../bin/menu.c:1046
+#: ../bin/menu.c:978
 msgid "Export D&XF"
 msgstr "Export als DXF"
 
-#: ../bin/menu.c:1050
+#: ../bin/menu.c:982
 msgid "Export S&VG"
 msgstr "S&VG Export"
 
-#: ../bin/menu.c:1056
+#: ../bin/menu.c:988
 msgid "Parameter &Files ..."
 msgstr "Parameterdateien..."
 
-#: ../bin/menu.c:1058
+#: ../bin/menu.c:990
 msgid "No&tes ..."
 msgstr "Notizen..."
 
-#: ../bin/menu.c:1065
+#: ../bin/menu.c:997
 msgid "E&xit"
 msgstr "Beenden"
 
-#: ../bin/menu.c:1102
+#: ../bin/menu.c:1034
 msgid "&Undo"
 msgstr "Rückgängig"
 
-#: ../bin/menu.c:1104
+#: ../bin/menu.c:1036
 msgid "R&edo"
 msgstr "Wiederholen"
 
-#: ../bin/menu.c:1107
+#: ../bin/menu.c:1039
 msgid "Cu&t"
 msgstr "Ausschneiden"
 
-#: ../bin/menu.c:1109
+#: ../bin/menu.c:1041
 msgid "&Copy"
 msgstr "Kopieren"
 
-#: ../bin/menu.c:1111
+#: ../bin/menu.c:1043
 msgid "&Paste"
 msgstr "Einfügen"
 
-#: ../bin/menu.c:1113
+#: ../bin/menu.c:1045
 msgid "C&lone"
 msgstr "K&lonen"
 
-#: ../bin/menu.c:1115
+#: ../bin/menu.c:1047
 msgid "De&lete"
 msgstr "Löschen"
 
-#: ../bin/menu.c:1123
+#: ../bin/menu.c:1055
 msgid "Select &All"
 msgstr "Alles auswählen"
 
-#: ../bin/menu.c:1127
+#: ../bin/menu.c:1059
 msgid "Select By Index"
 msgstr "Kennziffern auswählen"
 
-#: ../bin/menu.c:1129
+#: ../bin/menu.c:1061
 msgid "&Deselect All"
 msgstr "Alles abwählen"
 
-#: ../bin/menu.c:1131
+#: ../bin/menu.c:1063
 msgid "&Invert Selection"
 msgstr "Auswahl umkehren"
 
-#: ../bin/menu.c:1134
+#: ../bin/menu.c:1066
 msgid "Select Stranded Track"
 msgstr "Vereinzelte Gleise auswählen"
 
-#: ../bin/menu.c:1136
+#: ../bin/menu.c:1068
 msgid "Tu&nnel"
 msgstr "Tunnel"
 
-#: ../bin/menu.c:1138
+#: ../bin/menu.c:1070
 msgid "B&ridge"
 msgstr "B&rücke"
 
-#: ../bin/menu.c:1140
+#: ../bin/menu.c:1072
 msgid "&Roadbed"
 msgstr "&Gleisbett"
 
-#: ../bin/menu.c:1144
+#: ../bin/menu.c:1076
 msgid "Move to &Front"
 msgstr "Nach vorne"
 
-#: ../bin/menu.c:1146
+#: ../bin/menu.c:1078
 msgid "Move to &Back"
 msgstr "Nach hinten"
 
-#: ../bin/menu.c:1161
+#: ../bin/menu.c:1093
 msgid "Zoom &In"
 msgstr "Zoom größer"
 
-#: ../bin/menu.c:1164
+#: ../bin/menu.c:1096
 msgid "Zoom &Out"
 msgstr "Zoom kleiner"
 
-#: ../bin/menu.c:1167
+#: ../bin/menu.c:1099
 msgid "Zoom &Extents"
 msgstr "Zoom G&esamt"
 
-#: ../bin/menu.c:1178
+#: ../bin/menu.c:1110
 msgid "&Redraw"
 msgstr "Neu zeichnen"
 
-#: ../bin/menu.c:1180
+#: ../bin/menu.c:1112
 msgid "Redraw All"
 msgstr "Alles neu zeichnen"
 
-#: ../bin/menu.c:1187
+#: ../bin/menu.c:1119
 msgid "Show SnapGrid"
 msgstr "Fangraster zeigen"
 
-#: ../bin/menu.c:1198
+#: ../bin/menu.c:1130
 msgid "Enable Magnetic Snap"
 msgstr "Magnetisches Fangen aktivieren"
 
-#: ../bin/menu.c:1213
-msgid "&Tool Bar"
-msgstr "Werkzeugleiste anpassen"
+#: ../bin/menu.c:1146
+msgid "&Toolbar Options..."
+msgstr "Konfiguration der Werkzeugleiste..."
 
-#: ../bin/menu.c:1247 ../bin/menu.c:1248
+#: ../bin/menu.c:1180 ../bin/menu.c:1181
 msgid "Control Element"
 msgstr "Steuerungselement"
 
-#: ../bin/menu.c:1280
+#: ../bin/menu.c:1213
 msgid "Change Scale"
 msgstr "Maßstab ändern"
 
-#: ../bin/menu.c:1296
+#: ../bin/menu.c:1229
 msgid "Raise/Lower Elevations"
 msgstr "Höhen auf/ab"
 
-#: ../bin/menu.c:1305
+#: ../bin/menu.c:1238
 msgid "Recompute Elevations"
 msgstr "Höhen neu berechnen"
 
-#: ../bin/menu.c:1323
+#: ../bin/menu.c:1256
 msgid "L&ayout ..."
 msgstr "Gleisplan..."
 
-#: ../bin/menu.c:1325
+#: ../bin/menu.c:1258
 msgid "&Display ..."
 msgstr "Anzeige..."
 
-#: ../bin/menu.c:1327
+#: ../bin/menu.c:1260
 msgid "Co&mmand ..."
 msgstr "Befehl..."
 
-#: ../bin/menu.c:1329
+#: ../bin/menu.c:1262
 msgid "&Easements ..."
 msgstr "Übergangsbögen..."
 
-#: ../bin/menu.c:1332
+#: ../bin/menu.c:1265
 msgid "&Fonts ..."
 msgstr "Schri&ftarten..."
 
-#: ../bin/menu.c:1334
+#: ../bin/menu.c:1267
 msgid "Stic&ky ..."
 msgstr "Dauerhaft..."
 
-#: ../bin/menu.c:1339
+#: ../bin/menu.c:1272
 msgid "&Debug ..."
 msgstr "&Fehlersuche..."
 
-#: ../bin/menu.c:1342
+#: ../bin/menu.c:1275
 msgid "&Preferences ..."
 msgstr "Einstellungen..."
 
-#: ../bin/menu.c:1344
+#: ../bin/menu.c:1277
 msgid "&Colors ..."
 msgstr "Farben..."
 
-#: ../bin/menu.c:1350
+#: ../bin/menu.c:1283
 msgid "&Record ..."
 msgstr "Aufzeichnen..."
 
-#: ../bin/menu.c:1352
+#: ../bin/menu.c:1285
 msgid "&Play Back ..."
 msgstr "Wiedergeben..."
 
-#: ../bin/menu.c:1358
+#: ../bin/menu.c:1291
 msgid "Main window"
 msgstr "Hauptfenster"
 
-#: ../bin/menu.c:1372
+#: ../bin/menu.c:1305
 msgid "Recent Messages"
 msgstr "Letzte Mitteilungen"
 
-#: ../bin/menu.c:1379
+#: ../bin/menu.c:1312
 msgid "Tip of the Day..."
 msgstr "Tipp des Tages..."
 
-#: ../bin/menu.c:1381
+#: ../bin/menu.c:1314
 msgid "&Demos"
 msgstr "&Demos"
 
-#: ../bin/menu.c:1382
+#: ../bin/menu.c:1315
 msgid "Examples..."
 msgstr "Beispiele..."
 
-#: ../bin/menu.c:1386 ../bin/smalldlg.c:210
+#: ../bin/menu.c:1319 ../bin/smalldlg.c:210
 msgid "About"
 msgstr "Über"
 
-#: ../bin/menu.c:1399
+#: ../bin/menu.c:1332
 msgid "Tur&nout Designer..."
 msgstr "Weichendesigner..."
 
-#: ../bin/menu.c:1402
+#: ../bin/menu.c:1335
 msgid "Layout &Control Elements"
 msgstr "Steuerungselemente"
 
-#: ../bin/menu.c:1404
+#: ../bin/menu.c:1337
 msgid "&Group"
 msgstr "&Gruppierung"
 
-#: ../bin/menu.c:1406
+#: ../bin/menu.c:1339
 msgid "&Ungroup"
 msgstr "Gruppierung aufheben"
 
-#: ../bin/menu.c:1410
+#: ../bin/menu.c:1343
 msgid "Custom defined parts..."
 msgstr "Eigene Teile..."
 
-#: ../bin/menu.c:1413
+#: ../bin/menu.c:1346
 msgid "Update Turnouts and Structures"
 msgstr "Weichen und Gebäude aktualisieren"
 
-#: ../bin/menu.c:1422
+#: ../bin/menu.c:1355
 msgid "Layers ..."
 msgstr "Ebenen..."
 
-#: ../bin/menu.c:1426
+#: ../bin/menu.c:1359
 msgid "Parts &List ..."
 msgstr "Teile&liste..."
 
-#: ../bin/menu.c:1429
+#: ../bin/menu.c:1362
 msgid "Price List..."
 msgstr "Preisliste..."
 
-#: ../bin/menu.c:1458 ../bin/menu.c:1459
+#: ../bin/menu.c:1391 ../bin/menu.c:1392
 msgid "Import/Export"
 msgstr "Import/Export"
 
-#: ../bin/misc.c:487 ../bin/misc.c:491
+#: ../bin/misc.c:488 ../bin/misc.c:492
 msgid "ABORT"
 msgstr "ABBRUCH"
 
-#: ../bin/misc.c:490
+#: ../bin/misc.c:491
 msgid ""
 "\n"
 "Do you want to save your layout?"
@@ -6315,7 +6248,7 @@ msgstr ""
 "\n"
 "Wollen Sie Ihren Gleisplan speichern?"
 
-#: ../bin/misc.c:658
+#: ../bin/misc.c:659
 msgid ""
 "Save changes to the layout design before closing?\n"
 "\n"
@@ -6327,11 +6260,11 @@ msgstr ""
 "Wenn Sie jetzt nicht speichern, werden Ihre nicht gespeicherten Änderungen "
 "verworfen."
 
-#: ../bin/misc.c:660
+#: ../bin/misc.c:661
 msgid "&Don't Save"
 msgstr "&Nicht speichern"
 
-#: ../bin/misc.c:991
+#: ../bin/misc.c:992
 msgid ""
 "Program was not terminated properly. Do you want to resume working on the "
 "previous trackplan?"
@@ -6339,135 +6272,135 @@ msgstr ""
 "Das Programm wurde nicht ordnungsgemäß beendet. Wollen Sie die Bearbeitung "
 "des vorherigen Gleisplans fortsetzen?"
 
-#: ../bin/misc.c:992
+#: ../bin/misc.c:993
 msgid "Resume"
 msgstr "Fortsetzen"
 
-#: ../bin/misc.c:992
+#: ../bin/misc.c:993
 msgid "Resume with New Name"
 msgstr "Wiederaufnahme mit neuem Namen"
 
-#: ../bin/misc.c:992
+#: ../bin/misc.c:993
 msgid "Ignore Checkpoint"
 msgstr "Sicherungskopie ignorieren"
 
-#: ../bin/misc.c:995
+#: ../bin/misc.c:996
 #, c-format
 msgid "Reload Checkpoint Selected\n"
 msgstr "Ausgewählte Sicherungskopie laden\n"
 
-#: ../bin/misc.c:997
+#: ../bin/misc.c:998
 #, c-format
 msgid "Reload Checkpoint With New Name Selected\n"
 msgstr "Sicherungskopie mit neuem Namen laden\n"
 
-#: ../bin/misc.c:999
+#: ../bin/misc.c:1000
 #, c-format
 msgid "Ignore Checkpoint Selected\n"
 msgstr "Ausgewählte Sicherungskopie ignorieren\n"
 
-#: ../bin/misc.c:1121
+#: ../bin/misc.c:1122
 #, c-format
 msgid "Unnamed Trackplan - %s(%s)"
 msgstr "Unbenannter Gleisplan - %s(%s)"
 
-#: ../bin/misc.c:1175
+#: ../bin/misc.c:1177
 msgid "Initializing commands"
 msgstr "Initialisiere Befehle"
 
-#: ../bin/misc.c:1184
+#: ../bin/misc.c:1186
 msgid "Initializing menus"
 msgstr "Initialisiere Menüs"
 
-#: ../bin/misc.c:1216
+#: ../bin/misc.c:1218
 msgid "Reading parameter files"
 msgstr "Einlesen der Parameterdateien"
 
-#: ../bin/misc.c:1260
+#: ../bin/misc.c:1262
 msgid "Initialization complete"
 msgstr "Initialisierung beendet"
 
-#: ../bin/param.c:76
+#: ../bin/param.c:77
 msgid "Unexpected End Of String"
 msgstr "Unerwartetes Zeichenkettenende"
 
-#: ../bin/param.c:83
+#: ../bin/param.c:84
 msgid "Expected digit"
 msgstr "Erwartete Ziffer"
 
-#: ../bin/param.c:91
+#: ../bin/param.c:92
 msgid "Overflow"
 msgstr "Überlauf"
 
-#: ../bin/param.c:140
+#: ../bin/param.c:141
 msgid "Divide by 0"
 msgstr "Division durch 0"
 
-#: ../bin/param.c:148
+#: ../bin/param.c:149
 msgid "Expected /"
 msgstr "Erwartet /"
 
-#: ../bin/param.c:233
+#: ../bin/param.c:234
 msgid "Invalid Units Indicator"
 msgstr "Ungültige Maßeinheit"
 
-#: ../bin/param.c:261
+#: ../bin/param.c:262
 msgid "Expected End Of String"
 msgstr "Zeichenkettenende erwartet"
 
-#: ../bin/param.c:289 ../bin/param.c:1528
+#: ../bin/param.c:290 ../bin/param.c:1529
 #, c-format
 msgid "Invalid Number"
 msgstr "Ungültige Zahl"
 
-#: ../bin/param.c:349
+#: ../bin/param.c:350
 msgid "End Of String"
 msgstr "Ende der Zeichenkette"
 
-#: ../bin/param.c:1486
+#: ../bin/param.c:1487
 #, c-format
 msgid "Enter a value > %ld"
 msgstr "Einen Wert größer als %ld eingeben"
 
-#: ../bin/param.c:1489
+#: ../bin/param.c:1490
 #, c-format
 msgid "Enter a value < %ld"
 msgstr "Einen Wert kleiner als %ld eingeben"
 
-#: ../bin/param.c:1491
+#: ../bin/param.c:1492
 #, c-format
 msgid "Enter a value between %ld and %ld"
 msgstr "Einen Wert zwischen %ld und %ld eingeben"
 
-#: ../bin/param.c:1568
+#: ../bin/param.c:1569
 #, c-format
 msgid "Enter a value > %s"
 msgstr "Einen Wert größer als %s eingeben"
 
-#: ../bin/param.c:1572
+#: ../bin/param.c:1573
 #, c-format
 msgid "Enter a value < %s"
 msgstr "Einen Wert kleiner als %s eingeben"
 
-#: ../bin/param.c:1575
+#: ../bin/param.c:1576
 #, c-format
 msgid "Enter a value between %s and %s"
 msgstr "Einen Wert zwischen %s und %s eingeben"
 
-#: ../bin/param.c:1674
+#: ../bin/param.c:1675
 msgid "String cannot be blank"
 msgstr "Text kann nicht leer sein"
 
-#: ../bin/param.c:1689
+#: ../bin/param.c:1690
 #, c-format
 msgid "String is too long, Max length is %u"
 msgstr "Der Text ist zu lang. Die maximale Länge beträgt %u"
 
-#: ../bin/param.c:1823
+#: ../bin/param.c:1824
 msgid "Invalid input(s), please correct the hilighted field(s)"
 msgstr "Ungültige Eingabe(n), bitte die markierten Felder korrigieren"
 
-#: ../bin/param.c:3043
+#: ../bin/param.c:3044
 msgid "Help"
 msgstr "Hilfe"
 
@@ -6801,65 +6734,65 @@ msgstr "Ersetzen Sie diesen Text durch Ihre Notizen"
 msgid "Create Text Note"
 msgstr "Erstelle Textnotiz"
 
-#: ../bin/track.c:290
+#: ../bin/track.c:293
 msgid "No track or structure pieces are present in layout"
 msgstr "Im Gleisplan sind keine Gleis- oder Gebäudeelemente vorhanden"
 
-#: ../bin/track.c:292
+#: ../bin/track.c:295
 msgid "No track or structure pieces are selected"
 msgstr "Es werden keine Gleis- oder Gebäudeelemente ausgewählt"
 
-#: ../bin/track.c:1461
+#: ../bin/track.c:1464
 msgid "Move Objects Above"
 msgstr "Objekte nach oben"
 
-#: ../bin/track.c:1481
+#: ../bin/track.c:1484
 msgid "Mode Objects Below"
 msgstr "Objekte nach unten"
 
-#: ../bin/track.c:1785
+#: ../bin/track.c:1788
 msgid "Audit"
 msgstr "Protokoll"
 
-#: ../bin/track.c:1990
+#: ../bin/track.c:1993
 #, c-format
 msgid "Connecting a car to a non-car T%d T%d"
 msgstr "Verbinde einen Wagen  (T%d) mit einem sonstiges Objekt (T%d)"
 
-#: ../bin/track.c:2000 ../bin/track.c:2005
+#: ../bin/track.c:2003 ../bin/track.c:2008
 #, c-format
 msgid "Connecting a non-track(%d) to (%d)"
 msgstr "Verbinde ein sonstiges Objekt (%d) mit einem Gleis (%d)"
 
-#: ../bin/track.c:2047
+#: ../bin/track.c:2050
 #, c-format
 msgid "Disconnecting a car from a non-car T%d T%d"
 msgstr "Einen Wagen von einem anderen Objekt abkuppeln T%d T%d"
 
-#: ../bin/track.c:2081
+#: ../bin/track.c:2084
 msgid "Join Abutting Tracks"
 msgstr "Aneinander grenzende Gleise verbinden"
 
-#: ../bin/track.c:2407 ../bin/track.c:2444
+#: ../bin/track.c:2410 ../bin/track.c:2447
 msgid "Inside turnout track"
 msgstr "Inneres Weichengleis"
 
-#: ../bin/track.c:2425
+#: ../bin/track.c:2428
 #, c-format
 msgid "Curve: Length=%s Radius=%0.3f Arc=%0.3f"
 msgstr "Bogen: Länge = %s Radius=%0.3f Winkel = %0.3f"
 
-#: ../bin/track.c:2452 ../bin/track.c:2517 ../bin/tstraigh.c:853
+#: ../bin/track.c:2455 ../bin/track.c:2520 ../bin/tstraigh.c:853
 #, c-format
 msgid "Straight: Length=%s Angle=%0.3f"
 msgstr "Gerade: Länge=%s Winkel=%0.3f"
 
-#: ../bin/track.c:3374
+#: ../bin/track.c:3377
 #, c-format
 msgid "[%0.2f,%0.2f] A%0.2f"
 msgstr "[%0.2f,%0.2f] A%0.2f"
 
-#: ../bin/track.c:3378
+#: ../bin/track.c:3381
 #, c-format
 msgid "[%0.2f,%0.2f] A%0.2f\n"
 msgstr ""
@@ -6878,15 +6811,15 @@ msgstr "Weblink"
 msgid "Weblink"
 msgstr "Weblink"
 
-#: ../bin/trknote.c:526 ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:113
+#: ../bin/trknote.c:522 ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:113
 msgid "Place a note on the layout"
 msgstr "Eine Notiz auf den Gleisplan setzen"
 
-#: ../bin/trknote.c:540
+#: ../bin/trknote.c:536
 msgid "New Note"
 msgstr "Neue Notiz"
 
-#: ../bin/trknote.c:594
+#: ../bin/trknote.c:590
 msgid "Add notes"
 msgstr "Notizen hinzufügen"
 
@@ -6911,7 +6844,85 @@ msgstr "Gleisgerade verlängern"
 msgid "Straight "
 msgstr "Gerade "
 
-#: ../bin/svgoutput.c:484
+#: ../bin/toolbar.c:98
+msgid "File Buttons"
+msgstr "Aktionen für Dateien"
+
+#: ../bin/toolbar.c:99
+msgid "Print Buttons"
+msgstr "Aktionen für Druck"
+
+#: ../bin/toolbar.c:100
+msgid "Import/Export Buttons"
+msgstr "Import/Export Aktionen"
+
+#: ../bin/toolbar.c:101
+msgid "Zoom Buttons"
+msgstr "Aktionen für Zoom"
+
+#: ../bin/toolbar.c:102
+msgid "Undo Buttons"
+msgstr "Aktionen für Rückgängig/Wiederholen"
+
+#: ../bin/toolbar.c:103
+msgid "Easement Button"
+msgstr "Aktionen für Übergangsbogen"
+
+#: ../bin/toolbar.c:104
+msgid "SnapGrid Buttons"
+msgstr "Aktionen für Fangraster"
+
+#: ../bin/toolbar.c:105
+msgid "Create Track Buttons"
+msgstr "Aktionen um Gleise zu erstellen"
+
+#: ../bin/toolbar.c:106
+msgid "Layout Control Elements"
+msgstr "Aktionen zur Anlagensteuerung"
+
+#: ../bin/toolbar.c:107
+msgid "Modify Track Buttons"
+msgstr "Verändere Gleise"
+
+#: ../bin/toolbar.c:108
+msgid "Properties/Select"
+msgstr "Eigenschaften/Auswählen"
+
+#: ../bin/toolbar.c:109
+msgid "Track Group Buttons"
+msgstr "Aktionen um Objekte zusammzufassen und zu organisieren"
+
+#: ../bin/toolbar.c:110
+msgid "Train Group Buttons"
+msgstr "Zugbetrieb starten oder beenden"
+
+#: ../bin/toolbar.c:111
+msgid "Create Misc Buttons"
+msgstr "Werkzeuge zum Zeichnen/Schrift"
+
+#: ../bin/toolbar.c:112
+msgid "Ruler Button"
+msgstr "Lineal"
+
+#: ../bin/toolbar.c:113
+msgid "Layer Buttons"
+msgstr "Ebenen"
+
+#: ../bin/toolbar.c:114
+msgid "Hot Bar"
+msgstr "Schnellauswahl"
+
+#: ../bin/toolbar.c:133
+#, fuzzy
+msgid "Invert Selection"
+msgstr "Auswahl umkehren"
+
+#: ../bin/toolbar.c:229
+#, fuzzy
+msgid "Toolbar Options"
+msgstr "Konfiguration der Werkzeugleiste"
+
+#: ../bin/svgoutput.c:483
 msgid "Export to SVG"
 msgstr "Als SVG exportieren"
 
@@ -14553,7 +14564,7 @@ msgstr "Menüs"
 
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:229
 #, fuzzy
-msgid "Tile, Filename and Window Manager buttons"
+msgid "Title, Filename and Window Manager buttons"
 msgstr "Tile, Filename and Window Manager buttons"
 
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:230
@@ -14809,7 +14820,7 @@ msgstr "Liste der individuell entwickelten Festgleise und Gebäude"
 
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:299
 msgid "Change description, manufacturer or part number."
-msgstr ""
+msgstr "Beschreibung, Hersteller oder Teilenummer ändern"
 
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:300
 msgid "Remove selected entries"
@@ -15057,7 +15068,7 @@ msgstr "Kennziffern in der Teileliste anzeigen"
 
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:398
 msgid "Save the note and close window"
-msgstr ""
+msgstr "Notiz speichern und das Fenster schließen"
 
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:399
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:400
@@ -15079,15 +15090,15 @@ msgstr "Den Titel für die Datei eingeben"
 
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:403
 msgid "Enter the path and name of the file"
-msgstr ""
+msgstr "Den Pfad und den Namen der Datein eingeben"
 
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:404
 msgid "Open the document in the default application"
-msgstr ""
+msgstr "Öffne das Dokument in der Standardanwendung"
 
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:405
 msgid "Select the file from your system"
-msgstr ""
+msgstr "Wähle eine Datei aus"
 
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:406
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:409
@@ -15386,7 +15397,7 @@ msgstr ""
 
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:479
 msgid "Save the link and close window"
-msgstr ""
+msgstr "Speichere die Verknüpfung und schließe das Fenster"
 
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:483
 msgid "Enter the title of the linked webpage"
@@ -15398,7 +15409,7 @@ msgstr "Die URL für die Webseite eingeben"
 
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:485
 msgid "Open the webpage in your browser"
-msgstr ""
+msgstr "Öffne die Webseite in deinem Browser"
 
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:486
 msgid "Move by X"
@@ -15898,11 +15909,11 @@ msgstr "Dialogfenster aktualisieren und schließen"
 
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:616
 msgid "Set layer for the note"
-msgstr ""
+msgstr "Wähle die Ebene für die Notiz"
 
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:619
-msgid "Enter your addiional information here"
-msgstr ""
+msgid "Enter your additional information here"
+msgstr "Weitere Information hier eingeben"
 
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:620
 msgid "Useful information about the program"
@@ -15921,20 +15932,21 @@ msgid "Show the previous Tip of the Day"
 msgstr "Gehe zum vorherigen Tipp des Tages"
 
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:625
-msgid "List of butten groups and their state in the toolbar"
-msgstr ""
+#, fuzzy
+msgid "List of button groups and their state in the toolbar"
+msgstr "Zeige alle Schaltflächen-Gruppen an"
 
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:626
 msgid "Set all button groups visible in toolbar"
-msgstr ""
+msgstr "Zeige alle Schaltflächen-Gruppen an"
 
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:627
 msgid "Invert the visibility of button groups"
-msgstr ""
+msgstr "Kehre die Sichtbarkeit der Schaltflächen-Gruppen um"
 
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:628
 msgid "Close dialog and configure the toolbar"
-msgstr ""
+msgstr "Schließe den Dialog und passe die Werkzeugleiste an"
 
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:629
 msgid "List of Cars"
@@ -16143,6 +16155,9 @@ msgstr "Drucker auswählen"
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:693
 msgid "Print test page"
 msgstr "Testseite drucken"
+
+#~ msgid "&Tool Bar"
+#~ msgstr "Werkzeugleiste anpassen"
 
 #~ msgid "Predefined Track"
 #~ msgstr "Vordefiniertes Gleis"
