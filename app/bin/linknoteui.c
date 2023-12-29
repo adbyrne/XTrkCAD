@@ -227,7 +227,7 @@ void DescribeLinkNote(track_p trk, char * str, CSIZE_T len)
 	strscpy( linkNoteData.title, xx->noteData.linkData.title,
 	         sizeof linkNoteData.title );
 
-	CreateEditLinkDialog(_("Update Webink"));
+	CreateEditLinkDialog(_("Update Weblink"));
 }
 
 /**
