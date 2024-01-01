@@ -160,6 +160,7 @@ typedef struct {
 	paramOldData_t oldD, demoD;
 	wBool_t enter_pressed;
 	wBool_t bInvalid;
+	wBool_t bShown;
 } paramData_t, *paramData_p;
 
 
@@ -277,6 +278,5 @@ void ParamDialogOkActive( paramGroup_p, int );
 
 void ParamResetInvalid( wWin_p win );
 
-#define ParamControlShow( PG, INX, SHOW ) \
-		wControlShow( ((PG)->paramPtr)[INX].control, SHOW )
+void ParamControlShow( paramGroup_t *, wIndex_t, wBool_t );
 #endif

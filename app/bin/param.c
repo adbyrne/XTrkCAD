@@ -1813,6 +1813,9 @@ EXPORT wBool_t ParamCheckInputs(
 		if ( p->bInvalid == FALSE ) {
 			continue;
 		}
+		if ( p->bShown == FALSE ) {
+			continue;
+		}
 		LOG( log_paraminput, 1, ( "   %s: Invalid\n", p->nameStr ) );
 		bInvalid = TRUE;
 	}
@@ -2003,6 +2006,15 @@ EXPORT void ParamResetInvalid(
 		}
 	}
 }
+
+
+EXPORT void ParamControlShow( paramGroup_p pg, wIndex_t inx, wBool_t bShow )
+{
+	paramData_p p = &pg->paramPtr[inx];
+	wControlShow( p->control, bShow );
+	p->bShown = bShow;
+}
+
 
 static void ParamPlayback( char * line )
 {
@@ -2582,6 +2594,7 @@ static void ParamCreateControl(
 	default:
 		CHECK(FALSE);
 	}
+	pd->bShown = TRUE;
 
 }
 
