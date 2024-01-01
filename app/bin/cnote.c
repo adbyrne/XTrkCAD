@@ -75,6 +75,14 @@ void DoNote(void * unused)
 	wShow(noteW);
 }
 
+/**
+ * Save the main layout note to file. The note text is converted to
+ * UTF-8 if this is configured at compile time. Before saving characters that
+ * have special meanings in the XTC file (eg. ") are escaped.
+ * 
+ * \param f	open layout file
+ * \return 
+ */
 
 BOOL_T WriteMainNote(FILE* f)
 {
@@ -91,7 +99,6 @@ BOOL_T WriteMainNote(FILE* f)
 			noteText = out;
 		}
 #endif // UTFCONVERT
-
 
 		char * sText = ConvertToEscapedText( noteText );
 		rc &= fprintf(f, "NOTE MAIN 0 0 0 0 0 \"%s\"\n", sText )>0;
@@ -133,6 +140,7 @@ BOOL_T ReadMainNote(char *line)
 	} else {
 		mainText = sNote;
 	}
+
 	return TRUE;
 }
 

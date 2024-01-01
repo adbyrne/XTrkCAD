@@ -1591,13 +1591,28 @@ EXPORT BOOL_T WriteSegsEnd(
 				               segs[i].u.p.pts[j].pt_type ) > 0;
 			break;
 		case SEG_TEXT: /* 0pf0fq */
-			escaped_text = ConvertToEscapedText(segs[i].u.t.string);
+			char* trackText;
+#ifdef UTFCONVERT
+			char* out = NULL;
+			if (RequiresConvToUTF8(segs[i].u.t.string)) {
+				size_t cnt = strlen(segs[i].u.t.string) * 2 + 1;
+				out = MyMalloc(cnt);
+				wSystemToUTF8(segs[i].u.t.string, out, (unsigned int)cnt);
+				trackText = out;
+			}
+#else
+			trackText = segs[i].u.t.string;
+#endif // UTFCONVERT
+			escaped_text = ConvertToEscapedText(trackText);
 			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %d %0.6f \"%s\"\n",
 			               segs[i].type, wDrawGetRGB(segs[i].color),
 			               segs[i].u.t.pos.x, segs[i].u.t.pos.y, segs[i].u.t.angle,
 			               segs[i].u.t.boxed,
 			               segs[i].u.t.fontSize, escaped_text ) > 0;
 			MyFree(escaped_text);
+#ifdef UTFCONVERT
+			MyFree(out);
+#endif
 			break;
 		}
 	}
