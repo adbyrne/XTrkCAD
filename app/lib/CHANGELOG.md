@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [5.3.0 Beta 2]
+
+## Bugs
+BUG 541 New Car Protoype dialog box has stopped working.
+Add german translations
+UTF-8 fixes for main note
+Initial window size on multi monitor setups spans all monitors, …
+BUG 535 simple line not visible
+Improve tooltips for custom management
+
 ## [5.3.0 Beta 1]
 
 ## Bugs
