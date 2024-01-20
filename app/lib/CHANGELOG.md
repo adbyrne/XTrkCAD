@@ -14,6 +14,22 @@ Initial window size on multi monitor setups spans all monitors, …
 BUG 535 simple line not visible
 Improve tooltips for custom management
 
+## Parameters
+Any-DCC-Concepts Point Motors.xtp'
+Any-ModelRailroadBenchwork.xtp
+'HO-Atlas Code 100 Track.xtp'
+'HO - Atlas Custom Line Track Assemblies.xtp'
+HO-Busch.xtp
+HO-Peco-Code70USA.xtp
+'HO-Walthers Cornerstone 1.xtp'
+'HO-Walthers DCC Code 83.xtp'
+N-walthers-n.xtp
+params.xtc
+ProcessXTP.log
+'S_ACG_All Aboard Panels.xtp'
+'S_ACG_American Flyer Track.xtp'
+'S_ACG_Pike-Master Track.xtp'
+
 ## [5.3.0 Beta 1]
 
 ## Bugs
