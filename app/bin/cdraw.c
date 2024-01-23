@@ -1628,6 +1628,9 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 
 	switch(action&0xFF) {     //Remove Text value
 	case C_START:
+		for (int inx = 0; inx < COUNT(drawModPLs); ++inx ) {
+			drawModPLs[inx].option |= PDO_DLGIGNORE;
+		}
 		drawModCmdContext.type = xx->segs[0].type;
 		switch(drawModCmdContext.type) {
 		case SEG_POLY:
@@ -1688,6 +1691,8 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 					if (drawModCmdContext.prev_inx >= 0) {
 						controls[0] = drawModLengthPD.control;
 						controls[1] = drawModRelAnglePD.control;
+						drawModLengthPD.option &= ~PDO_DLGIGNORE;
+						drawModRelAnglePD.option &= ~PDO_DLGIGNORE;
 						controls[2] = NULL;
 						labels[0] = N_("Seg Lth");
 						labels[1] = N_("Rel Ang");
@@ -1700,6 +1705,8 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 				} else  {
 					controls[0] = drawModWidthPD.control;
 					controls[1] = drawModHeightPD.control;
+					drawModWidthPD.option &= ~PDO_DLGIGNORE;
+					drawModHeightPD.option &= ~PDO_DLGIGNORE;
 					controls[2] = NULL;
 					labels[0] = N_("Width");
 					labels[1] = N_("Height");
@@ -1716,6 +1723,8 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 			case SEG_TBLEDGE:
 				controls[0] = drawModLengthPD.control;
 				controls[1] = drawModAnglePD.control;
+				drawModLengthPD.option &= ~PDO_DLGIGNORE;
+				drawModAnglePD.option &= ~PDO_DLGIGNORE;
 				controls[2] = NULL;
 				labels[0] = N_("Length");
 				labels[1] = N_("Angle");
@@ -1728,6 +1737,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 			case SEG_CRVLIN:
 			case SEG_FILCRCL:
 				controls[0] = drawModRadiusPD.control;
+				drawModRadiusPD.option &= ~PDO_DLGIGNORE;
 				controls[1] = NULL;
 				labels[0] = N_("Radius");
 				if ((drawModCmdContext.type == SEG_CRVLIN) && xx->segs[0].u.c.a1>0.0

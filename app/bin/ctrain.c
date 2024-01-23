@@ -2593,6 +2593,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 	int dir;
 	struct extraDataCar_t * xx=NULL;
 	wWinPix_t w, h;
+	char msg[STR_SIZE];
 
 	switch (action) {
 	case C_START:
@@ -2833,6 +2834,8 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 			}
 
 			trainHighlighted = trk0;
+			DescribeTrack( trk0, msg, sizeof msg );
+			InfoMessage( msg );
 
 			trk0 = FindMasterLoco(trk0, NULL);
 
