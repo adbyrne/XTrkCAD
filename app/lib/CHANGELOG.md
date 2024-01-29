@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ## [5.3.0 Beta 2]
 
 ## Bugs
+BUG 544 In 'Run Trains' mode, stock summary no longer displayed in Status Bar when left-click on object
+BUG fix 547 Fleischmann HO turntable error
 BUG 541 New Car Protoype dialog box has stopped working.
 Add german translations
 UTF-8 fixes for main note
@@ -20,6 +22,8 @@ Any-ModelRailroadBenchwork.xtp
 'HO-Atlas Code 100 Track.xtp'
 'HO - Atlas Custom Line Track Assemblies.xtp'
 HO-Busch.xtp
+HO-fl-model.xtp
+HO-fl-profi.xtp
 HO-Peco-Code70USA.xtp
 'HO-Walthers Cornerstone 1.xtp'
 'HO-Walthers DCC Code 83.xtp'
