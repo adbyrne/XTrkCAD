@@ -172,7 +172,7 @@ static char zoomLabel[] = "Zoom: ";
 
 static struct {
 	char * name;
-	double value;
+	DIST_T value;
 	wMenuRadio_p pdRadio;
 	wMenuRadio_p btRadio;
 	wMenuRadio_p ctxRadio1;
@@ -185,11 +185,21 @@ static struct {
 	{ "1:6", 1.0 / 6.0 },
 	{ "1:5", 1.0 / 5.0 },
 	{ "1:4", 1.0 / 4.0 },
+	{ "1:3.5", 1.0 / 3.5 },
 	{ "1:3", 1.0 / 3.0 },
+	{ "1:2.5", 1.0 / 2.5 },
 	{ "1:2", 1.0 / 2.0 },
+	{ "1:1.75", 1.0 / 1.75 },
+	{ "1:1.5", 1.0 / 1.5 },
+	{ "1:1.25", 1.0 / 1.25 },
 	{ "1:1", 1.0 },
+	{ "1.25:1", 1.25 },
+	{ "1.5:1", 1.5 },
+	{ "1.75:1", 1.75 },
 	{ "2:1", 2.0 },
+	{ "2.5:1", 2.5 },
 	{ "3:1", 3.0 },
+	{ "3.5:1", 3.5 },
 	{ "4:1", 4.0 },
 	{ "5:1", 5.0 },
 	{ "6:1", 6.0 },
@@ -1333,11 +1343,12 @@ static void SetInfoBar( void )
 
 static void InfoScale( void )
 {
-	if (mainD.scale >= 1) {
-		sprintf( message, "%s%0.0f:1", zoomLabel, mainD.scale );
+	if (mainD.scale >= 1.0) {
+		sprintf( message, "%s%.4g:1", zoomLabel, lround(mainD.scale*4.0)/4.0 );
 	} else {
-		sprintf( message, "%s1:%0.0f", zoomLabel, floor(1/mainD.scale+0.5) );
+		sprintf( message, "%s1:%.4g", zoomLabel, lround((1.0/mainD.scale)*4.0)/4.0 );
 	}
+
 	wStatusSetValue( infoD.scale_m, message );
 }
 
@@ -2196,27 +2207,21 @@ EXPORT void InitCmdZoom( wMenu_p zoomM, wMenu_p zoomSubM, wMenu_p ctxMenu1,
 	int inx;
 
 	for ( inx=0; inx<COUNT( zoomList ); inx++ ) {
-		if( (zoomList[ inx ].value >= 1.0 && zoomList[ inx ].value<=10 ) ||
-		    (ceil(log2(zoomList[ inx ].value)) == floor(log2(zoomList[ inx ].value)))) {
-			if (zoomM) {
-				zoomList[inx].btRadio = wMenuRadioCreate( zoomM, "cmdZoom", zoomList[inx].name,
-				                        0, DoZoom, (&(zoomList[inx].value)));
-			}
-			if( zoomSubM ) {
-				zoomList[inx].pdRadio = wMenuRadioCreate( zoomSubM, "cmdZoom",
-				                        zoomList[inx].name, 0, DoZoom, (&(zoomList[inx].value)));
-			}
-			if (panMenu) {
-				zoomList[inx].panRadio = wMenuRadioCreate( panMenu, "cmdZoom",
-				                         zoomList[inx].name, 0, DoZoom, (&(zoomList[inx].value)));
-			}
+		if (zoomM) {
+			zoomList[inx].btRadio = wMenuRadioCreate( zoomM, "cmdZoom", zoomList[inx].name,
+									0, DoZoom, (&(zoomList[inx].value)));
 		}
-		if ((zoomList[inx].value >=1.0 && zoomList[inx].value <= 10.0)
-		    || (ceil(log2(zoomList[ inx ].value)) == floor(log2(zoomList[ inx ].value)))) {
-			if (ctxMenu1) {
-				zoomList[inx].ctxRadio1 = wMenuRadioCreate( ctxMenu1, "cmdZoom",
+		if( zoomSubM ) {
+			zoomList[inx].pdRadio = wMenuRadioCreate( zoomSubM, "cmdZoom",
+									zoomList[inx].name, 0, DoZoom, (&(zoomList[inx].value)));
+		}
+		if (panMenu) {
+			zoomList[inx].panRadio = wMenuRadioCreate( panMenu, "cmdZoom",
+									 zoomList[inx].name, 0, DoZoom, (&(zoomList[inx].value)));
+		}
+		if (ctxMenu1) {
+			zoomList[inx].ctxRadio1 = wMenuRadioCreate( ctxMenu1, "cmdZoom",
 				                          zoomList[inx].name, 0, DoZoom, (&(zoomList[inx].value)));
-			}
 		}
 	}
 }
@@ -2231,10 +2236,9 @@ EXPORT void InitCmdZoom( wMenu_p zoomM, wMenu_p zoomSubM, wMenu_p ctxMenu1,
 static void SetZoomRadio( DIST_T scale )
 {
 	int inx;
-	long curScale = (long)scale;
 
 	for ( inx=0; inx<COUNT( zoomList ); inx++ ) {
-		if( curScale == zoomList[inx].value ) {
+		if( scale == zoomList[inx].value ) {
 			if (zoomList[inx].btRadio) {
 				wMenuRadioSetActive( zoomList[inx].btRadio );
 			}
@@ -2282,13 +2286,29 @@ static int NearestScaleInx ( DIST_T scale, BOOL_T larger )
 {
 	int inx;
 
-	for ( inx=0; inx<COUNT( zoomList ); inx++ ) {
-		if( scale == zoomList[inx].value ) {
-			return inx;
+	//scale = rintf(scale*4.0)/4.0;
+
+	if (larger) {
+		for ( inx=0; inx<COUNT( zoomList )-1; inx++ ) {
+			if( scale == zoomList[inx].value ) {
+				return inx;
+			}
+			if (scale < zoomList[inx].value) {
+				return inx;
+			}
 		}
-		if (scale < zoomList[inx].value) { return inx; }
+		return inx-1;
+	} else {
+		for ( inx=COUNT( zoomList)-1; inx>=0; inx-- ) {
+			if( scale == zoomList[inx].value ) {
+				return inx;
+			}
+			if (scale > zoomList[inx].value ) {
+				return inx;
+			}
+		}
 	}
-	return inx-1;
+	return 0;
 }
 
 /**
@@ -2302,18 +2322,29 @@ static void DoNewScale( DIST_T scale )
 {
 	char tmp[20];
 
+	static BOOL_T in_use = 0; //lock for recursion to avoid additional setting.
+
+	if (in_use) return;
+
+	in_use = 1; //set lock
+
 	if (scale > MAX_MAIN_SCALE) {
 		scale = MAX_MAIN_SCALE;
 	}
 
+	if (scale < zoomList[0].value) {
+		scale = zoomList[0].value;
+	}
+
 	tempD.scale = mainD.scale = scale;
 	mainD.dpi = wDrawGetDPI( mainD.d );
-	if ( scale > 1.0 && scale <= 12.0 ) {
-		mainD.dpi = floor( (mainD.dpi + scale/2)/scale) * scale;
-	}
+	//if ( scale > 1.0 && scale <= 12.0 ) {
+	//	mainD.dpi = floor( (mainD.dpi + scale/2)/scale) * scale;
+	//}
 	tempD.dpi = mainD.dpi;
 
-	SetZoomRadio( scale );
+	SetZoomRadio( scale );  //This routine causes a re-drive of the DoNewScale.
+
 	InfoScale();
 	SetMainSize();
 	PanHere( I2VP(1) );
@@ -2324,6 +2355,7 @@ static void DoNewScale( DIST_T scale )
 		fprintf( recordF, "ORIG %0.3f %0.3f %0.3f\n",
 		         mainD.scale, mainD.orig.x, mainD.orig.y );
 	}
+	in_use=0;  //release lock
 }
 
 
@@ -2341,7 +2373,7 @@ EXPORT void DoZoomUp( void * mode )
 	LOG( log_zoom, 2, ( "DoZoomUp KS:%x\n", MyGetKeyState() ) );
 	if ( mode != NULL || (MyGetKeyState()&WKEY_SHIFT) == 0) {
 		i = ScaleInx( mainD.scale );
-		if (i < 0) { i = NearestScaleInx(mainD.scale, TRUE); }
+		if (i < 0) { i = NearestScaleInx(mainD.scale, FALSE); }
 		/*
 		 * Zooming into macro mode happens when we are at scale 1:1.
 		 * To jump into macro mode, the CTRL-key has to be pressed and held.
@@ -2443,7 +2475,7 @@ EXPORT void DoZoomDown( void  * mode)
 	if ( mode != NULL || (MyGetKeyState()&WKEY_SHIFT) == 0 ) {
 		i = ScaleInx( mainD.scale );
 		if (i < 0) { i = NearestScaleInx(mainD.scale, TRUE); }
-		if( i>= 0 && i < ( COUNT( zoomList ) - 1 )) {
+		if( i >= 0 && i < ( COUNT( zoomList ) - 1 )) {
 			InfoMessage("");
 			DoNewScale( zoomList[ i + 1 ].value );
 		} else {
