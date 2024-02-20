@@ -7,6 +7,7 @@
 #ifdef WINDOWS
 #include <stdio.h>
 #define FILE_SEP_CHAR "\\"
+#include "getline.h"
 #else
 #define FILE_SEP_CHAR "/"
 #endif
@@ -864,6 +865,16 @@ wWinPix_t wStatusGetHeight(long flags);
 
 void wStatusSetValue(wStatus_p b, const char * arg);
 void wStatusSetWidth(wStatus_p b, wWinPix_t width);
+
+/*------------------------------------------------------------------------------
+ *
+ * System-Information
+ */
+
+char* wGetTempPath(void);
+char* wGetOSVersion(void);
+char* wGetProfileFilename(void);
+char* wGetUserID(void);
 
 /*-------------------------------------------------------------------------------
  * User Preferences

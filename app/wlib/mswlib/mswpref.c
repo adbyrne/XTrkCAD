@@ -113,7 +113,7 @@ const char * wGetAppWorkDir( void )
 
 const char *wGetUserHomeDir( void )
 {
-	if (SHGetSpecialFolderPath( NULL, mswTmpBuff, CSIDL_PERSONAL, 0 ) == 0 ) {
+	if (SHGetSpecialFolderPath( NULL, mswTmpBuff, CSIDL_PROFILE, 0 ) == 0 ) {
 		wNoticeEx( NT_ERROR, "Cannot get user's home directory", "Exit", NULL );
 		wExit(0);
 		return( NULL );
