@@ -875,6 +875,7 @@ char* wGetTempPath(void);
 char* wGetOSVersion(void);
 char* wGetProfileFilename(void);
 char* wGetUserID(void);
+const char* wGetUserHomeRootDir(void);
 
 /*-------------------------------------------------------------------------------
  * User Preferences

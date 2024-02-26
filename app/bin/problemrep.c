@@ -182,7 +182,7 @@ FilterConfigLine(DynString *result, char* in)
 	if (!clean) {
 		clean = ReplaceDirectoryName(result, in, wGetAppWorkDir(), "<<workdir>>");
 		if (!clean) {
-			clean = ReplaceDirectoryName(result, in, wGetUserHomeDir(), "<<home>>");
+			clean = ReplaceDirectoryName(result, in, wGetUserHomeRootDir(), "<<home>>");
 		}
 	}
 
