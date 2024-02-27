@@ -876,6 +876,7 @@ char* wGetOSVersion(void);
 char* wGetProfileFilename(void);
 char* wGetUserID(void);
 const char* wGetUserHomeRootDir(void);
+const char *wGetPlatformVersion(void);
 
 /*-------------------------------------------------------------------------------
  * User Preferences

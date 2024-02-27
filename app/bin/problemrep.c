@@ -31,6 +31,8 @@
 	#include <FreeImage.h>
 	#define CONFIG_DELIMITER '='
 #else
+	#define strnicmp strncasecmp
+	#define stricmp	strcasecmp 
 	#define CONFIG_DELIMITER ':'
 #endif // WINDOWS
 
@@ -61,8 +63,12 @@ static char *
 CreateTempDirectory()
 {
 	char* dir;
+#ifdef WINDOWS	
 	struct _stat fileStatus;
-	
+#else	
+	struct stat fileStatus;
+#endif
+
 	dir = wGetTempPath();
 
 	if (!stat(dir, (struct stat *const) &fileStatus)) {
@@ -70,7 +76,7 @@ CreateTempDirectory()
 			return(dir);
 	} 
 	else {
-		mkdir(dir, 0x600);
+		mkdir(dir, 0700);
 	}
 	
 	return MyStrdup(dir);
@@ -99,6 +105,7 @@ SaveSystemInfo(char* dir)
 		fprintf(fh, "FreeImage: %s\n", FreeImage_GetVersion());
 #else
 		// get gtk version
+		fprintf(fh, "GTK Version: %s", wGetPlatformVersion() );
 #endif // WINDOWS
 
 		fclose(fh);
@@ -128,6 +135,7 @@ ReplaceDirectoryName(DynString *result, char* in, const char* dir, char* replace
 
 	value = strchr(in, CONFIG_DELIMITER);
 	if (value) {
+		value++;		// skip leading whitespace
 		if (!strnicmp(value + 1, dir, strlen(dir))) {
 			DynStringNCatCStr(result, value + 1 - in, in);
 			DynStringCatCStrs(result, replace, value + 1 + strlen(dir), NULL);
@@ -228,12 +236,15 @@ PickupConfigFile(char *srcfile, char* destdir)
 		bool res;
 		while (!feof(fhRead)) {
 			getline(&lineptr, &linelen, fhRead);
+			char x = lineptr[strlen(lineptr)-1];
+			if(lineptr[strlen(lineptr)-1] == '\n')
+				lineptr[strlen(lineptr)-1] = '\0';
 			res = FilterConfigLine(&configLine, lineptr);
 			if (res) {
-				fputs(DynStringToCStr(&configLine), fhWrite);
+				fprintf(fhWrite, "%s\n", DynStringToCStr(&configLine));
 			}
 			else {
-				fputs(lineptr, fhWrite);
+				fprintf(fhWrite, "%s\n", lineptr);
 			}
 		}
 		free(lineptr);
@@ -432,7 +443,6 @@ PickupLayoutFile(char* dir)
 		GetLayoutFilename(), NULL);
 
 	ProblemrepUpdateW(_("Add layout file %s\n"), GetLayoutFullPath());
-
 	fhRead = fopen(GetLayoutFullPath(), "r");
 	fhWrite = fopen(DynStringToCStr(&destFile), "w");
 
@@ -533,7 +543,7 @@ ProblemDataCollect()
 	ret = PickupLayoutFile(tempDirectory);
 
 	MakeFullpath(&subdirectory, tempDirectory, "workdir", NULL);
-	mkdir(subdirectory, 0x600);
+	mkdir(subdirectory, 0700);
 	if (ret) {
 		ret = PickupCustomFile(subdirectory);
 	}
@@ -547,7 +557,7 @@ ProblemDataCollect()
 	subdirectory = NULL;
 
 	MakeFullpath(&subdirectory, tempDirectory, "params", NULL);
-	mkdir(subdirectory, 0x600);
+	mkdir(subdirectory, 0700);
 
 	for (int i = 0; i < GetParamFileCount(); i++) {
 		char* file = GetParamFileName(i);
@@ -572,7 +582,6 @@ ProblemDataCollect()
 
 	DYNARR_FREE(char*, configFiles_da);
 }
-
 
 void
 DoProblemCollect(void* unused)

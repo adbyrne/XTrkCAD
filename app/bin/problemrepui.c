@@ -66,14 +66,23 @@ void ProblemrepUpdateW(char* fmt, ...)
 	int length;
 	char* buffer;
 	va_list args;
+	va_list argsc;
 	va_start(args, fmt);
+	va_copy(argsc, args);
 
 	length = vsnprintf(NULL, 0, fmt, args);
-	buffer = MyMalloc(length + 1);
+	buffer = MyMalloc(length + sizeof(NULL));
+	va_end(args);
+
 	if (buffer) {
-		length = vsnprintf(buffer, length+1, fmt, args);
+		memset(buffer, 0, length +sizeof(NULL));
+		//something goes wrong with GNU C, so re-initialize the args value
+		//va_start(args, fmt);
+		length = vsnprintf(buffer, length+sizeof(NULL), fmt, argsc);
 		wTextAppend(PROBLEMREP_T, buffer);
+		
 	}
+	va_end(argsc);
 	MyFree(buffer);
 }
 

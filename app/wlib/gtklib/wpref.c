@@ -48,6 +48,8 @@ extern char wConfigName[];
 static char appLibDir[BUFSIZ];
 static char appWorkDir[BUFSIZ];
 static char userHomeDir[BUFSIZ];
+
+static char *profileFile;
 
 
 /*
@@ -248,6 +250,46 @@ dynArr_t prefs_da;
 wBool_t prefInitted = FALSE;
 
 /**
+ * Define the name of the configuration file. Needed size is calculated, allocated and 
+ * initialized with the filename
+ * 
+ * \param name overwrite default configuration 
+ */
+
+void static
+wlibSetProfileFilename(char *name)
+{
+	char *workDir;
+
+	workDir = wGetAppWorkDir();
+	if (name && name[0]) {
+		size_t length;
+		length = snprintf(profileFile, 0, "%s", name);
+		profileFile = malloc(length + sizeof(NULL));
+		snprintf( profileFile, length, "%s", name );
+	} else {
+		size_t length; 
+		length = snprintf(profileFile, 0, "%s/%s.rc", workDir, wConfigName );
+		profileFile = malloc(length + sizeof(NULL));
+		length = snprintf(profileFile, length+sizeof(NULL), "%s/%s.rc", workDir, wConfigName );
+	}
+}
+
+
+/**
+ * Get the name of the configuration file.
+ *
+ * \return pointer to the filename.
+ *
+ */
+
+char *
+wGetProfileFilename()
+{
+	return(profileFile);
+}
+
+/**
  * Read the configuration file into memory
  */
 
@@ -259,13 +301,15 @@ static void readPrefs( char * name, wBool_t update )
 	prefs_t * p;
 
 	prefInitted = TRUE;
-	workDir = wGetAppWorkDir();
-	if (name && name[0]) {
-		sprintf( tmp, "%s", name );
-	} else {
-		sprintf( tmp, "%s/%s.rc", workDir, wConfigName );
-	}
-	prefFile = fopen( tmp, "r" );
+	wlibSetProfileFilename(name);
+
+	// workDir = wGetAppWorkDir();
+	// if (name && name[0]) {
+	// 	sprintf( tmp, "%s", name );
+	// } else {
+	// 	sprintf( tmp, "%s/%s.rc", workDir, wConfigName );
+	// }
+	prefFile = fopen( profileFile, "r" );
 	if (prefFile == NULL) {
 		// First run, no .rc file yet
 		return;
@@ -504,13 +548,9 @@ void wPrefFlush(
 		return;
 	}
 
-	workDir = wGetAppWorkDir();
-	if (name && name[0]) {
-		snprintf( tmp, sizeof(tmp), "%s", name );
-	} else {
-		snprintf( tmp, sizeof(tmp), "%s/%s.rc", workDir, wConfigName );
-	}
-	prefFile = fopen( tmp, "w" );
+	wlibSetProfileFilename(name);
+
+	prefFile = fopen( profileFile, "w" );
 	if (prefFile == NULL) {
 		// Can not write pref file
 		size_t n = BUFSIZ+32-1-strlen(tmp);
