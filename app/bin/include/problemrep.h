@@ -26,8 +26,6 @@
 //problemrep.c
 
 static void SaveSystemInfo(char* dir);
-static unsigned CollectFiles(char* dest);
-static void RemovePrivateData(char* dir);
 static void ZipProblemData(char* src);
 static void ProblemDataCollect();
 void DoProblemCollect(void* unused);

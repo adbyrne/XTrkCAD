@@ -241,7 +241,7 @@ PickupConfigFile(char *srcfile, char* destdir)
 	if (fhRead && fhWrite) {
 		char* lineptr = NULL;
 		size_t linelen = 0;
-		bool res;
+
 		while (!feof(fhRead)) {
 			char* section;
 			char* name;
@@ -251,7 +251,7 @@ PickupConfigFile(char *srcfile, char* destdir)
 			getline(&lineptr, &linelen, fhRead);
 			wPrefTokenize(lineptr, &section, &name, &value);
 			if (name && value) {
-				res = FilterConfigLine(&configLine, name, value);
+				FilterConfigLine(&configLine, name, value);
 			}
 
 			// calculate maximum possible length of resulting line 
@@ -369,7 +369,6 @@ static void
 FilterLayers(FILE *out, char* work)
 {
 	DynString result;
-	bool isSet = false;
 	bool clean;
 
 	DynStringMalloc(&result, FILENAME_MAX );
@@ -474,11 +473,10 @@ PickupLayoutFile(char* dir)
 	if (fhRead && fhWrite) {
 		char* lineptr = NULL;
 		size_t linelen = 0;
-		bool res;
 		while (!feof(fhRead)) {
 			getline(&lineptr, &linelen, fhRead);
 			if (!feof(fhRead)) {
-				res = FilterLayoutLine(fhWrite, lineptr);
+				FilterLayoutLine(fhWrite, lineptr);
 			}
 		}
 		free(lineptr);
@@ -551,7 +549,6 @@ void
 ProblemDataCollect()
 {
 	char* tempDirectory;
-	char* destDirectory = NULL;
 	char* subdirectory = NULL;
 	bool ret;
 

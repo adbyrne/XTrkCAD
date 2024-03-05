@@ -259,7 +259,7 @@ wBool_t prefInitted = FALSE;
 void static
 wlibSetProfileFilename(char *name)
 {
-	char *workDir;
+	const char *workDir;
 
 	workDir = wGetAppWorkDir();
 	if (name && name[0]) {
@@ -296,19 +296,12 @@ wGetProfileFilename()
 static void readPrefs( char * name, wBool_t update )
 {
 	char tmp[BUFSIZ+32], *np, *vp, *cp;
-	const char * workDir;
 	FILE * prefFile;
 	prefs_t * p;
 
 	prefInitted = TRUE;
 	wlibSetProfileFilename(name);
 
-	// workDir = wGetAppWorkDir();
-	// if (name && name[0]) {
-	// 	sprintf( tmp, "%s", name );
-	// } else {
-	// 	sprintf( tmp, "%s/%s.rc", workDir, wConfigName );
-	// }
 	prefFile = fopen( profileFile, "r" );
 	if (prefFile == NULL) {
 		// First run, no .rc file yet
@@ -541,7 +534,6 @@ void wPrefFlush(
 {
 	prefs_t * p;
 	char tmp[BUFSIZ+32];
-	const char *workDir;
 	FILE * prefFile;
 
 	if (!prefInitted) {
@@ -591,4 +583,47 @@ void wPrefReset(
 		}
 	}
 	prefs_da.cnt = 0;
+}
+
+/**
+ * Split a line from the config file ie. rc ini-file into separate tokens. The
+ * line is split into sections, name of value and value following. Pointers
+ * to the respective token are returned. These are zero-terminated. 
+ * If a token is not present, NULL is returned instead. 
+ * The input line is modified.
+ * 
+ * \param line		input line, modified during excution of function
+ * \param section	section if present
+ * \param name		name of config value if present
+ * \param value		name of value if present
+ */
+void 
+wPrefTokenize(char* line, char** section, char** name, char** value)
+{
+	*section = NULL;
+	*name = NULL;
+	*value = NULL;
+
+	*section = strtok(line, ".");
+	*name = strtok(NULL, ":");
+	*value = strtok(NULL, " \n");
+
+}
+
+/**
+ * A valid line for a config file is created from the individual elements. 
+ * Values not need for specific statement are ignored. Eg. when section is 
+ * present, name and value are not used. 
+ * The caller has to make sure, that the return buffer is large enough.
+ * 
+ * \param section	section, first token, dellimited with '.'
+ * \param name		name, left side of ':'
+ * \param value		value, right side of ':'
+ * \param result	pointer to buffer for formated line. 
+ */
+
+void 
+wPrefFormatLine(char* section, char* name, char* value, char* result)
+{
+	sprintf(result, "%s.%s: %s", section, name, value);
 }
