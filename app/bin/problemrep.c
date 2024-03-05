@@ -128,21 +128,20 @@ SaveSystemInfo(char* dir)
 static bool
 ReplaceDirectoryName(DynString *result, char* in, const char* dir, char* replace)
 {
-	char* value;
 	bool rc = false;
 
 	DynStringClear(result);
 
-	value = strchr(in, CONFIG_DELIMITER);
-	if (value) {
-		value++;		// skip leading whitespace
-		if (!strnicmp(value + 1, dir, strlen(dir))) {
-			DynStringNCatCStr(result, value + 1 - in, in);
-			DynStringCatCStrs(result, replace, value + 1 + strlen(dir), NULL);
-			rc = true;
-		}
+#ifdef WINDOWS
+	rc = strnicmp(in, dir, strlen(dir));
+#else
+	rc = strncmp(in, dir, strlen(dir));
+#endif // WINDOWS
+
+	if(!rc) {
+		DynStringCatCStrs(result, replace, in + strlen(dir), NULL);
 	}
-	return(rc);
+	return(!rc);
 }
 
 /**
@@ -166,37 +165,44 @@ ReplaceUserID(DynString* result, char* in, char* replace)
 		DynStringCatCStrs(result, replace, user + strlen(user), NULL);
 		rc = true;
 	}
+	
 	return(rc);
 }
 
 /**
  * Replace directory names in a configuration value with the appropriate 
  * symbolic name for that directory. 
+ * The name of the config value is ignored at the moment, but could be used
+ * for refined logic
  * 
  * \param result	pointer to DynString for modified value
- * \param in		line from config file
+ * \param name		name of configuration value
+ * \param value		the value 
  * \return 
  */
-
 static bool
-FilterConfigLine(DynString *result, char* in)
+FilterConfigLine(DynString *result, char* name, char *value)
 {
 	bool clean;
 
-	clean = ReplaceDirectoryName(result, in, wGetAppLibDir(), "<<applibdir>>");
+	clean = ReplaceDirectoryName(result, value, wGetAppLibDir(), "<<applibdir>>");
 	
 	// NOTE: the order of these calls is important, possible subdirs of a 
 	// homedir must be checked first
 	if (!clean) {
-		clean = ReplaceDirectoryName(result, in, wGetAppWorkDir(), "<<workdir>>");
+		clean = ReplaceDirectoryName(result, value, wGetAppWorkDir(), "<<workdir>>");
 		if (!clean) {
-			clean = ReplaceDirectoryName(result, in, wGetUserHomeRootDir(), "<<home>>");
+			clean = ReplaceDirectoryName(result, value, wGetUserHomeRootDir(), "<<home>>");
 		}
 	}
 
 	// replace any remaining references to the current userid
 	if (!clean) {
-		clean = ReplaceUserID(result, in, "<<user>>");
+		clean = ReplaceUserID(result, value, "<<user>>");
+	}
+
+	if (!clean) {
+		DynStringCatCStr(result, value);
 	}
 
 	return(clean);
@@ -210,6 +216,8 @@ FilterConfigLine(DynString *result, char* in)
  * \param	destdir	destination directory 
  * \return	true
  */
+
+#define DELIMITER_COUNT (4)		// count of delimiter chars in config line
 
 static bool
 PickupConfigFile(char *srcfile, char* destdir)
@@ -235,17 +243,34 @@ PickupConfigFile(char *srcfile, char* destdir)
 		size_t linelen = 0;
 		bool res;
 		while (!feof(fhRead)) {
+			char* section;
+			char* name;
+			char* value;
+			size_t totalLength;
+
 			getline(&lineptr, &linelen, fhRead);
-			char x = lineptr[strlen(lineptr)-1];
-			if(lineptr[strlen(lineptr)-1] == '\n')
-				lineptr[strlen(lineptr)-1] = '\0';
-			res = FilterConfigLine(&configLine, lineptr);
-			if (res) {
-				fprintf(fhWrite, "%s\n", DynStringToCStr(&configLine));
+			wPrefTokenize(lineptr, &section, &name, &value);
+			if (name && value) {
+				res = FilterConfigLine(&configLine, name, value);
 			}
-			else {
-				fprintf(fhWrite, "%s\n", lineptr);
+
+			// calculate maximum possible length of resulting line 
+			totalLength = (section ? strlen(section): 0) +
+				(name ? strlen(name): 0) +
+				(value ? strlen(value): 0) + DELIMITER_COUNT;
+
+			// increase buffer size by 256  byte if too small 
+			if (totalLength > linelen) {
+				size_t newLen = ((totalLength + 256) & (~0xff));
+				lineptr = realloc(lineptr, newLen);
+				if (!lineptr) {
+					AbortProg("!lineptr", __FILE__, __LINE__, "Can't realloc memory");
+				}
+				linelen = newLen;
 			}
+
+			wPrefFormatLine(section, name, DynStringToCStr(&configLine), lineptr);
+			fprintf(fhWrite, "%s\n", lineptr);
 		}
 		free(lineptr);
 		fclose(fhRead);
