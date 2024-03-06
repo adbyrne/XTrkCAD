@@ -623,7 +623,7 @@ wPrefTokenize(char* line, char** section, char** name, char** value)
  */
 
 void 
-wPrefFormatLine(char* section, char* name, char* value, char* result)
+wPrefFormatLine(const char* section, const char* name, const char* value, char* result)
 {
 	sprintf(result, "%s.%s: %s", section, name, value);
 }
