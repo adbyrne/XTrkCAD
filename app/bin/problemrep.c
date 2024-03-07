@@ -482,12 +482,6 @@ PickupLayoutFile(char* dir)
     fhRead = fopen(GetLayoutFullPath(), "r");
     fhWrite = fopen(DynStringToCStr(&destFile), "w");
 
-    if (fhRead && fhWrite) {
-        char* lineptr = NULL;
-        size_t linelen = 0;
-        while (!feof(fhRead)) {
-            getline(&lineptr, &linelen, fhRead);
-            if (!feof(fhRead)) {
 	if (fhRead && fhWrite) {
 		char* lineptr = NULL;
 		size_t linelen = 0;
@@ -496,7 +490,7 @@ PickupLayoutFile(char* dir)
 			if (!feof(fhRead)) {
 				FilterLayoutLine(fhWrite, lineptr);
             }
-        }
+        }    
         free(lineptr);
         fclose(fhRead);
         fclose(fhWrite);
@@ -569,7 +563,13 @@ ProblemDataCollect()
     char* tempDirectory;
     char* subdirectory = NULL;
     bool ret;
+    char *filename = GetLayoutFullPath();
 
+    if(*filename == '\0') {
+        ProblemrepUpdateW(_("No layout design loaded! Operation is cancelled.\n"));
+        return;
+    }
+ 
     if (!ProblemSaveLayout()) {
         return;
     }
