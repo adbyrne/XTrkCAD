@@ -562,6 +562,12 @@ ProblemDataCollect()
     char* tempDirectory;
     char* subdirectory = NULL;
     bool ret;
+    char* filename = GetLayoutFullPath();
+
+    if (*filename == '\0') {
+        ProblemrepUpdateW(_("No layout design loaded! Operation is cancelled.\n"));
+        return;
+    }
 
     if (!ProblemSaveLayout()) {
         return;
