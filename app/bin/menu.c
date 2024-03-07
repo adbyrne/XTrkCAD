@@ -31,6 +31,7 @@
 #include "fileio.h"
 #include "layout.h"
 #include "param.h"
+#include "include/problemrep.h"
 #include "smalldlg.h"
 #include "common-ui.h"
 #include "ctrain.h"
@@ -1385,6 +1386,9 @@ EXPORT void CreateMenus(void)
 	wMenuSeparatorCreate(helpM);
 	wMenuPushCreate(helpM, "about", _("About"), 0,
 	                CreateAboutW, NULL);
+
+	wMenuPushCreate(helpM, "problemrep", _("Collect Problem Info"), 0,
+		DoProblemCollect, NULL);
 
 	/*
 	 * MANAGE MENU
