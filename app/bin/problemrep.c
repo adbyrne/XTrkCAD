@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <time.h>
 
 #ifdef WINDOWS
 	#include <Windows.h>
@@ -42,6 +43,7 @@
 #include "fileio.h"
 #include "layout.h"
 #include "misc.h"
+#include "include/paramfilelist.h"
 #include "paths.h"
 #include "version.h"
 
@@ -68,11 +70,17 @@ CreateTempDirectory()
 			return(dir);
 	} 
 	else {
-		mkdir(dir, 0);
+		mkdir(dir, 0x600);
 	}
 	
 	return MyStrdup(dir);
 }
+
+/**
+ * Save version information about the operating environment to a file.
+ * 
+ * \param dir	destination directory
+ */
 
 void
 SaveSystemInfo(char* dir)
@@ -100,7 +108,7 @@ SaveSystemInfo(char* dir)
 
 /**
  * Replace the directory name in a configuration file line. Assumption is that
- * the name of the directory starts after the '='
+ * the name of the directory starts after the '=' (Windows) or ':' (UNIX)
  *  
  * \para  result	pointer to DynString for result, DynString is cleared if
  *					directory was not found
@@ -129,6 +137,14 @@ ReplaceDirectoryName(DynString *result, char* in, const char* dir, char* replace
 	return(rc);
 }
 
+/**
+ * Find the user id in a string and replace it with a placeholer.
+ * 
+ * \param result	resulting string DynFree() after use
+ * \param in		string to search in 
+ * \param replace	replacement string
+ * \return			true if found and replaced
+ */
 
 static bool
 ReplaceUserID(DynString* result, char* in, char* replace)
@@ -139,7 +155,7 @@ ReplaceUserID(DynString* result, char* in, char* replace)
 
 	if (user) {
 		DynStringNCatCStr(result, user - in, in);
-		DynStringCatCStrs(result, replace, user + strlen(wGetUserID()), NULL);
+		DynStringCatCStrs(result, replace, user + strlen(user), NULL);
 		rc = true;
 	}
 	return(rc);
@@ -460,10 +476,33 @@ PickupCustomFile(char* dest)
 	return(rc==0);
 }
 
+/**
+ * Create a zip file from the collected information. The zip file is created
+ * in the same directory as the layout design. A unique name is generated from
+ * the current date and time.
+ * 
+ * \param src	directory with collected information
+ */
+
 static void
-ZipProblemData(char* dest, char* src)
+ZipProblemData(char* src)
 {
-	CreateArchive(src, "D:\\temp\\bugreport.zip");
+	char* dest = MyStrdup(GetLayoutFullPath());
+	char* out;
+	char *filename = strrchr(dest, PATH_SEPARATOR[0]) + 1;
+	struct tm* currentTime;
+	time_t clock;
+	char timestamp[80];
+
+	time(&clock);
+	currentTime = gmtime(&clock);
+	strftime(timestamp, 80, "pd-%y%m%dT%H%M%S.zip", currentTime);
+
+	*filename = '\0';
+
+	MakeFullpath(&out, dest, timestamp, NULL);
+	CreateArchive(src, out);
+	free(out);
 }
 
 void
@@ -471,6 +510,7 @@ ProblemDataCollect()
 {
 	char* tempDirectory;
 	char* destDirectory = NULL;
+	char* subdirectory = NULL;
 	bool ret;
 	
 	tempDirectory = CreateTempDirectory();
@@ -481,15 +521,34 @@ ProblemDataCollect()
 
 	ret = PickupLayoutFile(tempDirectory);
 
+	MakeFullpath(&subdirectory, tempDirectory, "workdir", NULL);
+	mkdir(subdirectory, 0x600);
 	if (ret) {
-		ret = PickupCustomFile(tempDirectory);
+		ret = PickupCustomFile(subdirectory);
 	}
 
 	for (int i = 0; i < configFiles_da.cnt; i++) {
 		char *file = configFile(i);
-		PickupConfigFile(file, tempDirectory);
+		PickupConfigFile(file, subdirectory);
 		MyFree(file);
 	}
+	free(subdirectory);
+	subdirectory = NULL;
+
+	MakeFullpath(&subdirectory, tempDirectory, "params", NULL);
+	mkdir(subdirectory, 0x600);
+
+	for (int i = 0; i < GetParamFileCount(); i++) {
+		char* file = GetParamFileName(i);
+		if (strncmp(file, wGetAppLibDir(), strlen(wGetAppLibDir()))) {
+			char* destfile;
+			MakeFullpath(&destfile, subdirectory, FindFilename(file), NULL);
+			Copyfile(file, destfile);
+			free(destfile);
+		}
+	}
+	free(subdirectory);
+	subdirectory = NULL;
 
 	if (ret) {
 		ZipProblemData(destDirectory, tempDirectory);
