@@ -840,12 +840,14 @@ wBool_t wPrefGetFloatBasic(const char *section, const char *name,
 wBool_t wPrefGetFloatExt(const char *section, const char *name, double *result,
                          double defaultValue);
 
-const char * wPrefGetSectionItem( const char * sectionName, wIndex_t * index,
-                                  const char ** name );
+//const char * wPrefGetSectionItem( const char * sectionName, wIndex_t * index,
+//                                  const char ** name );
 void wPrefFlush( char * name);
-void wPrefReset(		void );
+void wPrefReset( void );
+void wPrefTokenize(char* line, char** section, char** name, char** value);
+void wPrefFormatLine(char* section, char* name, char* value, char* result);
 
-void CleanupCustom( void );
+//void CleanupCustom( void );
 
 /*------------------------------------------------------------------------------
  *
