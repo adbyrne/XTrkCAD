@@ -845,7 +845,8 @@ wBool_t wPrefGetFloatExt(const char *section, const char *name, double *result,
 void wPrefFlush( char * name);
 void wPrefReset( void );
 void wPrefTokenize(char* line, char** section, char** name, char** value);
-void wPrefFormatLine(char* section, char* name, char* value, char* result);
+void wPrefFormatLine(const char* section, const char* name,
+                    const char* value, char* result);
 
 //void CleanupCustom( void );
 

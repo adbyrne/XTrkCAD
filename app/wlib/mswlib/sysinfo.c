@@ -42,50 +42,50 @@ static char buffer[MAX_PATH + 1];
 /**
  * Return the path to a temporary directory. The directory is not created.
  * The result is put into a buffer and is only valid immediately after the call.
- * 
+ *
  * \return pointer to fully qualified directory path
  */
 
 char *
 wGetTempPath()
 {
-	unsigned retChars;
+    unsigned retChars;
 
-	retChars = GetTempPath(MAX_PATH + 1, buffer);
+    retChars = GetTempPath(MAX_PATH + 1, buffer);
 
-	if (retChars <= MAX_PATH + 1) {
-		char str[20];
-		strcat(buffer, "xtc");
-		itoa(getpid(), str, 10);
-		strcat(buffer, str);
-	}
+    if (retChars <= MAX_PATH + 1) {
+        char str[20];
+        strcat(buffer, "xtc");
+        itoa(getpid(), str, 10);
+        strcat(buffer, str);
+    }
 
-	return(buffer);
+    return(buffer);
 }
 
 /**
- * Get the Windows version. This function uses the Windows ver command to 
+ * Get the Windows version. This function uses the Windows ver command to
  * retrieve the OS version. The result is put into a buffer and is only
  * valid immediately after the call.
- * 
+ *
  * \return buffer containing the zero terminated string
- * 
+ *
  */
 
 char *
 wGetOSVersion()
 {
-	FILE* pPipe;
-	pPipe = _popen("ver", "r");
+    FILE* pPipe;
+    pPipe = _popen("ver", "r");
 
-	while (fgets(buffer, sizeof(buffer), pPipe))
-		;
+    while (fgets(buffer, sizeof(buffer), pPipe))
+        ;
 
-	if (buffer[strlen(buffer) -1]  == '\n')
-		buffer[strlen(buffer) -1 ] = '\0';
-	_pclose(pPipe);
+    if (buffer[strlen(buffer) -1]  == '\n')
+        buffer[strlen(buffer) -1 ] = '\0';
+    _pclose(pPipe);
 
-	return(buffer);
+    return(buffer);
 }
 
 /**
@@ -98,7 +98,7 @@ wGetOSVersion()
 char *
 wGetProfileFilename()
 {
-	return(mswProfileFile);
+    return(mswProfileFile);
 }
 
 /**
@@ -112,27 +112,27 @@ wGetProfileFilename()
 char *
 wGetUserID()
 {
-	DWORD bufferSize = sizeof(buffer);
+    DWORD bufferSize = sizeof(buffer);
 
-	GetUserName(buffer, &bufferSize);
+    GetUserName(buffer, &bufferSize);
 
-	return(buffer);
+    return(buffer);
 }
 
 /** Get the user's profile directory. Other than on UNIX Windows differentiates
- * between the home directory and and the profile directory. 
+ * between the home directory and and the profile directory.
  *
  * \return    pointer to the user's profile directory
  */
 
 const char* wGetUserHomeRootDir(void)
 {
-	if (SHGetSpecialFolderPath(NULL, mswTmpBuff, CSIDL_PROFILE, 0) == 0) {
-		wNoticeEx(NT_ERROR, "Cannot get user's profile directory", "Exit", NULL);
-		wExit(0);
-		return(NULL);
-	}
-	else {
-		return(mswTmpBuff);
-	}
+    if (SHGetSpecialFolderPath(NULL, mswTmpBuff, CSIDL_PROFILE, 0) == 0) {
+        wNoticeEx(NT_ERROR, "Cannot get user's profile directory", "Exit", NULL);
+        wExit(0);
+        return(NULL);
+    }
+    else {
+        return(mswTmpBuff);
+    }
 }

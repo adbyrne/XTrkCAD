@@ -20,6 +20,15 @@ The \f{Help Menu} displays information on various topics. The contents of the me
 
 The \f{Recent Messages} command opens a cascading menu containing recent error messages and notices you have received. Selecting one of them displays additional information about the message (\K{messageList}).
 
+The \f{Collect Problem Info} command helps you to put together the information and files that might help the developers to analyze and fix possible bugs.
+
+\dd \G{png.d/problemdata.png}
+
+\dd \e{Collect Problem Info}
+
+The command removes userids and other private information from the files. The results are stored in a compressed (zip-)  file and placed in the same
+directory as the affected layout file. 
+
 \dd \G{png.d/dtipofday.png}
 
 \dd \e{Tip of The Day}
