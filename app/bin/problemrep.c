@@ -49,6 +49,10 @@
 #include "paths.h"
 #include "version.h"
 
+static void SaveSystemInfo(char* dir);
+static void ZipProblemData(const char* src);
+static void ProblemDataCollect();
+
 static dynArr_t configFiles_da;
 #define configFile(N) DYNARR_N(char *,configFiles_da,N)
 

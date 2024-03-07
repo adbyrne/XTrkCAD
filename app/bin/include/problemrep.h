@@ -25,9 +25,6 @@
 
 //problemrep.c
 
-static void SaveSystemInfo(char* dir);
-static void ZipProblemData(char* src);
-static void ProblemDataCollect();
 void DoProblemCollect(void* unused);
 
 // problemrepui.c

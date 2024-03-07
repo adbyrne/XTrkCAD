@@ -39,12 +39,12 @@ static char *buffer;
 char *
 wGetTempPath()
 {
-	gchar *tempDir = g_get_tmp_dir();
+	gchar const *tempDir = g_get_tmp_dir();
 	gchar *path;
 	gchar pidString[20];
 
 	g_snprintf(pidString, 20, "xtc%d", getpid());
-	path = g_build_path("/", tempDir, pidString);
+	path = g_build_path("/", tempDir, pidString, (char *)0);
 
 	if(buffer) {
 		g_free(buffer);
@@ -103,7 +103,7 @@ wGetOSVersion()
 char *
 wGetUserID()
 {
-	gchar *name;
+	const gchar *name;
 
 	name = g_get_user_name();
 
