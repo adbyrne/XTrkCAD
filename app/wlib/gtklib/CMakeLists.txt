@@ -29,6 +29,7 @@ target_sources(xtrkcad-wlib
 	single.c
 	splash.c
     statusbar.c
+	sysinfo.c
 	text.c
 	timer.c
 	tooltip.c	
