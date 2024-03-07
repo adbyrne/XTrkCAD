@@ -186,6 +186,7 @@ target_sources(xtrkcad-lib
     paths.c
     paths.h
     problemrep.c
+    problemrepui.c
 	scale.c
 	scale.h
     shortentext.c

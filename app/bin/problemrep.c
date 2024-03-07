@@ -217,6 +217,8 @@ PickupConfigFile(char *srcfile, char* destdir)
 	DynStringCatCStrs(&destFile, destdir, FILE_SEP_CHAR,
 		FindFilename(srcfile), NULL);
 
+	ProblemrepUpdateW(_("Get settings file %s\n"), srcfile);
+
 	fhRead = fopen(srcfile, "r");
 	fhWrite = fopen(DynStringToCStr(&destFile), "w");
 
@@ -427,7 +429,9 @@ PickupLayoutFile(char* dir)
 	DynStringMalloc(&layoutLine, STR_SIZE);
 
 	DynStringCatCStrs(&destFile, dir, FILE_SEP_CHAR,
-		FindFilename(GetLayoutFilename()), NULL);
+		GetLayoutFilename(), NULL);
+
+	ProblemrepUpdateW(_("Add layout file %s\n"), GetLayoutFullPath());
 
 	fhRead = fopen(GetLayoutFullPath(), "r");
 	fhWrite = fopen(DynStringToCStr(&destFile), "w");
@@ -467,6 +471,7 @@ PickupCustomFile(char* dest)
 
 	MakeFullpath(&inFile, wGetAppWorkDir(), "xtrkcad.cus", NULL);
 	MakeFullpath(&outFile, dest, "xtrkcad.cus", NULL);
+	ProblemrepUpdateW(_("Add custom parameter definitions\n"));
 
 	rc = Copyfile(inFile, outFile);
 
@@ -501,6 +506,8 @@ ZipProblemData(char* src)
 	*filename = '\0';
 
 	MakeFullpath(&out, dest, timestamp, NULL);
+	ProblemrepUpdateW(_("Create zip archive %s\n"), out);
+
 	CreateArchive(src, out);
 	free(out);
 }
@@ -512,6 +519,10 @@ ProblemDataCollect()
 	char* destDirectory = NULL;
 	char* subdirectory = NULL;
 	bool ret;
+
+	if (!ProblemSaveLayout()) {
+		return;
+	}
 	
 	tempDirectory = CreateTempDirectory();
 	SaveSystemInfo(tempDirectory);
@@ -540,8 +551,11 @@ ProblemDataCollect()
 
 	for (int i = 0; i < GetParamFileCount(); i++) {
 		char* file = GetParamFileName(i);
+		
 		if (strncmp(file, wGetAppLibDir(), strlen(wGetAppLibDir()))) {
 			char* destfile;
+			ProblemrepUpdateW(_("Get local parameter file %s\n"), file);
+
 			MakeFullpath(&destfile, subdirectory, FindFilename(file), NULL);
 			Copyfile(file, destfile);
 			free(destfile);
@@ -551,7 +565,7 @@ ProblemDataCollect()
 	subdirectory = NULL;
 
 	if (ret) {
-		ZipProblemData(destDirectory, tempDirectory);
+		ZipProblemData(tempDirectory);
 
 		DeleteDirectory(tempDirectory);
 	}
@@ -563,5 +577,7 @@ ProblemDataCollect()
 void
 DoProblemCollect(void* unused)
 {
+	ProblemrepCreateW(NULL);
+
 	ProblemDataCollect();
 }

@@ -317,6 +317,19 @@ void SetLayoutBackGroundScreen(int screen)
 }
 
 /**
+ * Get changed-State of layout.
+ * 
+ * \return	true if changed
+ */
+
+BOOL_T
+GetLayoutChanged(void)
+{
+	return(changed > 0);
+}
+
+
+/**
 * Return the full filename.
 *
 * \return    pointer to the full filename, should not be modified or freed

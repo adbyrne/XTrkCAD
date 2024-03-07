@@ -105,16 +105,15 @@ const char * wGetAppWorkDir( void )
 	return appWorkDirName;
 }
 
-/** Get the user's home directory.  The environment variable HOME is
- * assumed to contain the proper directory.
+/** Get the user's Documents directory.  
  *
- * \return    pointer to the user's home directory
+ * \return    pointer to the user's Documents directory
  */
 
 const char *wGetUserHomeDir( void )
 {
-	if (SHGetSpecialFolderPath( NULL, mswTmpBuff, CSIDL_PROFILE, 0 ) == 0 ) {
-		wNoticeEx( NT_ERROR, "Cannot get user's home directory", "Exit", NULL );
+	if (SHGetSpecialFolderPath( NULL, mswTmpBuff, CSIDL_PERSONAL, 0 ) == 0 ) {
+		wNoticeEx( NT_ERROR, "Cannot get user's documents directory", "Exit", NULL );
 		wExit(0);
 		return( NULL );
 	} else {

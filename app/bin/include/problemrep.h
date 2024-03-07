@@ -23,12 +23,20 @@
 #ifndef HAVE_PROBLEMREP_H
 #define HAVE_PROBLEMREP_H
 
+//problemrep.c
+
 static void SaveSystemInfo(char* dir);
 static unsigned CollectFiles(char* dest);
 static void RemovePrivateData(char* dir);
-static void ZipProblemData(char* dest, char* src);
+static void ZipProblemData(char* src);
 static void ProblemDataCollect();
 void DoProblemCollect(void* unused);
+
+// problemrepui.c
+
+void ProblemrepCreateW(void* ptr);
+void ProblemrepUpdateW(char* text, ...);
+int ProblemSaveLayout(void);
 
 #endif // !HAVE_PROBLEMREP_H
 
