@@ -7,6 +7,7 @@
 #ifdef WINDOWS
 #include <stdio.h>
 #define FILE_SEP_CHAR "\\"
+#include "getline.h"
 #else
 #define FILE_SEP_CHAR "/"
 #endif
@@ -839,12 +840,15 @@ wBool_t wPrefGetFloatBasic(const char *section, const char *name,
 wBool_t wPrefGetFloatExt(const char *section, const char *name, double *result,
                          double defaultValue);
 
-const char * wPrefGetSectionItem( const char * sectionName, wIndex_t * index,
-                                  const char ** name );
+//const char * wPrefGetSectionItem( const char * sectionName, wIndex_t * index,
+//                                  const char ** name );
 void wPrefFlush( char * name);
-void wPrefReset(		void );
+void wPrefReset( void );
+void wPrefTokenize(char* line, char** section, char** name, char** value);
+void wPrefFormatLine(const char* section, const char* name,
+                    const char* value, char* result);
 
-void CleanupCustom( void );
+//void CleanupCustom( void );
 
 /*------------------------------------------------------------------------------
  *
@@ -864,6 +868,18 @@ wWinPix_t wStatusGetHeight(long flags);
 
 void wStatusSetValue(wStatus_p b, const char * arg);
 void wStatusSetWidth(wStatus_p b, wWinPix_t width);
+
+/*------------------------------------------------------------------------------
+ *
+ * System-Information
+ */
+
+char* wGetTempPath(void);
+char* wGetOSVersion(void);
+char* wGetProfileFilename(void);
+char* wGetUserID(void);
+const char* wGetUserHomeRootDir(void);
+const char *wGetPlatformVersion(void);
 
 /*-------------------------------------------------------------------------------
  * User Preferences

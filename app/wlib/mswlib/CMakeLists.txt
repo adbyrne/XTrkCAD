@@ -33,9 +33,11 @@ target_sources(xtrkcad-wlib
 		mswtext.c
 		gwin32.c
 		simple-gettext.c
+		sysinfo.c
 		utf8conv.c	
 		mswint.h
 		dynarr.h
+		getline/getline.c
 	)
 
 target_link_libraries(xtrkcad-wlib 
