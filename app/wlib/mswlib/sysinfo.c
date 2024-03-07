@@ -26,9 +26,16 @@
 
 #include <Windows.h>
 #include <fileapi.h>
+#include <shlobj.h>
+#include <Shlwapi.h>
 
 #include <wlib.h>
 #include "mswint.h"
+
+#ifdef WINDOWS
+#define itoa(a,b,c) _itoa(a,b,c)
+#define getpid() _getpid()
+#endif
 
 static char buffer[MAX_PATH + 1];
 
@@ -110,4 +117,22 @@ wGetUserID()
 	GetUserName(buffer, &bufferSize);
 
 	return(buffer);
+}
+
+/** Get the user's profile directory. Other than on UNIX Windows differentiates
+ * between the home directory and and the profile directory. 
+ *
+ * \return    pointer to the user's profile directory
+ */
+
+const char* wGetUserHomeRootDir(void)
+{
+	if (SHGetSpecialFolderPath(NULL, mswTmpBuff, CSIDL_PROFILE, 0) == 0) {
+		wNoticeEx(NT_ERROR, "Cannot get user's profile directory", "Exit", NULL);
+		wExit(0);
+		return(NULL);
+	}
+	else {
+		return(mswTmpBuff);
+	}
 }
