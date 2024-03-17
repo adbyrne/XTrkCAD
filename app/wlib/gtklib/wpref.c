@@ -606,7 +606,9 @@ wPrefTokenize(char* line, char** section, char** name, char** value)
 
 	*section = strtok(line, ".");
 	*name = strtok(NULL, ":");
-	*value = strtok(NULL, " \n");
+	*value = strtok(NULL, "\n");
+	if(*value)
+		g_strstrip(*value);
 
 }
 

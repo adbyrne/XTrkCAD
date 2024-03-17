@@ -189,6 +189,8 @@ FilterConfigLine(DynString *result, char* name, char *value)
 {
     bool clean;
 
+    DynStringClear(result);
+
     clean = ReplaceDirectoryName(result, value, wGetAppLibDir(),
                                  "<<applibdir>>");
 
@@ -255,30 +257,35 @@ PickupConfigFile(char *srcfile, char* destdir)
             char* value;
             size_t totalLength;
 
-            getline(&lineptr, &linelen, fhRead);
+            if(getline(&lineptr, &linelen, fhRead)==-1) {
+                continue;
+            }
+
             wPrefTokenize(lineptr, &section, &name, &value);
-            if (name && value) {
-				FilterConfigLine(&configLine, name, value);
-            }
+            if (name && value)
+            {
+                FilterConfigLine(&configLine, name, value);
 
-            // calculate maximum possible length of resulting line
-            totalLength = (section ? strlen(section): 0) +
-                          (name ? strlen(name): 0) +
-                          (value ? strlen(value): 0) + DELIMITER_COUNT;
+                // calculate maximum possible length of resulting line
+                totalLength = (section ? strlen(section) : 0) +
+                              (name ? strlen(name) : 0) +
+                              (value ? strlen(value) : 0) + DELIMITER_COUNT;
 
-            // increase buffer size by 256  byte if too small
-            if (totalLength > linelen) {
-                size_t newLen = ((totalLength + 256) & (~0xff));
-                lineptr = realloc(lineptr, newLen);
-                if (!lineptr) {
-                    AbortProg("!lineptr", __FILE__, __LINE__,
-                              "Can't realloc memory");
+                // increase buffer size by 256  byte if too small
+                if (totalLength > linelen)
+                {
+                    size_t newLen = ((totalLength + 256) & (~0xff));
+                    lineptr = realloc(lineptr, newLen);
+                    if (!lineptr)
+                    {
+                        AbortProg("!lineptr", __FILE__, __LINE__,
+                                  "Can't realloc memory");
+                    }
+                    linelen = newLen;
                 }
-                linelen = newLen;
+                wPrefFormatLine(section, name, DynStringToCStr(&configLine),
+                                lineptr);
             }
-
-            wPrefFormatLine(section, name, DynStringToCStr(&configLine),
-                            lineptr);
             fprintf(fhWrite, "%s\n", lineptr);
         }
         free(lineptr);

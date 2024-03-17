@@ -208,6 +208,7 @@
 		{"line": "menuWindow", "contents": "Window menu" },
 		{"line": "menuHelp", "contents": "Help menu" },
 		{"line": "menuHelpRecentMessages", "contents": "Recent error messages and explanations" },
+		{"line": "menuHelpProblemrep", "contents": "Create ZIP file with problem data"},
 		{"line": "hotBarLeft", "contents": "Move Hot Bar left" },
 		{"line": "hotBarRight", "contents": "Move Hot Bar right" },
 		{"line": "infoBarCount", "contents": "Total track count" },
