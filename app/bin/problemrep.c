@@ -283,9 +283,9 @@ PickupConfigFile(char *srcfile, char* destdir)
                     }
                     linelen = newLen;
                 }
-                wPrefFormatLine(section, name, DynStringToCStr(&configLine),
-                                lineptr);
+                value = DynStringToCStr(&configLine);
             }
+            wPrefFormatLine(section, name, value, lineptr);
             fprintf(fhWrite, "%s\n", lineptr);
         }
         free(lineptr);
