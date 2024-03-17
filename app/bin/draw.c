@@ -2209,19 +2209,19 @@ EXPORT void InitCmdZoom( wMenu_p zoomM, wMenu_p zoomSubM, wMenu_p ctxMenu1,
 	for ( inx=0; inx<COUNT( zoomList ); inx++ ) {
 		if (zoomM) {
 			zoomList[inx].btRadio = wMenuRadioCreate( zoomM, "cmdZoom", zoomList[inx].name,
-									0, DoZoom, (&(zoomList[inx].value)));
+			                        0, DoZoom, (&(zoomList[inx].value)));
 		}
 		if( zoomSubM ) {
 			zoomList[inx].pdRadio = wMenuRadioCreate( zoomSubM, "cmdZoom",
-									zoomList[inx].name, 0, DoZoom, (&(zoomList[inx].value)));
+			                        zoomList[inx].name, 0, DoZoom, (&(zoomList[inx].value)));
 		}
 		if (panMenu) {
 			zoomList[inx].panRadio = wMenuRadioCreate( panMenu, "cmdZoom",
-									 zoomList[inx].name, 0, DoZoom, (&(zoomList[inx].value)));
+			                         zoomList[inx].name, 0, DoZoom, (&(zoomList[inx].value)));
 		}
 		if (ctxMenu1) {
 			zoomList[inx].ctxRadio1 = wMenuRadioCreate( ctxMenu1, "cmdZoom",
-				                          zoomList[inx].name, 0, DoZoom, (&(zoomList[inx].value)));
+			                          zoomList[inx].name, 0, DoZoom, (&(zoomList[inx].value)));
 		}
 	}
 }
@@ -2324,7 +2324,7 @@ static void DoNewScale( DIST_T scale )
 
 	static BOOL_T in_use = 0; //lock for recursion to avoid additional setting.
 
-	if (in_use) return;
+	if (in_use) { return; }
 
 	in_use = 1; //set lock
 

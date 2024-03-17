@@ -66,24 +66,24 @@ static dynArr_t configFiles_da;
 static char *
 CreateTempDirectory()
 {
-    char* dir;
+	char* dir;
 #ifdef WINDOWS
-    struct _stat fileStatus;
+	struct _stat fileStatus;
 #else
-    struct stat fileStatus;
+	struct stat fileStatus;
 #endif
 
-    dir = wGetTempPath();
+	dir = wGetTempPath();
 
-    if (!stat(dir, (struct stat *const) &fileStatus)) {
-        if (fileStatus.st_mode & S_IFDIR)
-            return(dir);
-    }
-    else {
-        mkdir(dir, 0700);
-    }
+	if (!stat(dir, (struct stat *const) &fileStatus)) {
+		if (fileStatus.st_mode & S_IFDIR) {
+			return(dir);
+		}
+	} else {
+		mkdir(dir, 0700);
+	}
 
-    return MyStrdup(dir);
+	return MyStrdup(dir);
 }
 
 /**
@@ -95,26 +95,26 @@ CreateTempDirectory()
 void
 SaveSystemInfo(char* dir)
 {
-    FILE* fh;
-    char* fileName=NULL;
+	FILE* fh;
+	char* fileName=NULL;
 
-    MakeFullpath(&fileName, dir, "versions.txt", NULL);
+	MakeFullpath(&fileName, dir, "versions.txt", NULL);
 
-    if (fileName) {
-        fh = fopen(fileName, "w");
+	if (fileName) {
+		fh = fopen(fileName, "w");
 
-        fprintf(fh, "XTrackCAD: %s\n", VERSION);
-        fprintf(fh, "OS: %s\n", wGetOSVersion());
+		fprintf(fh, "XTrackCAD: %s\n", VERSION);
+		fprintf(fh, "OS: %s\n", wGetOSVersion());
 #ifdef WINDOWS
-        fprintf(fh, "FreeImage: %s\n", FreeImage_GetVersion());
+		fprintf(fh, "FreeImage: %s\n", FreeImage_GetVersion());
 #else
-        // get gtk version
-        fprintf(fh, "GTK Version: %s", wGetPlatformVersion() );
+		// get gtk version
+		fprintf(fh, "GTK Version: %s", wGetPlatformVersion() );
 #endif // WINDOWS
 
-        fclose(fh);
-    }
-    free(fileName);
+		fclose(fh);
+	}
+	free(fileName);
 }
 
 /**
@@ -130,22 +130,23 @@ SaveSystemInfo(char* dir)
  */
 
 static bool
-ReplaceDirectoryName(DynString *result, char* in, const char* dir, char* replace)
+ReplaceDirectoryName(DynString *result, char* in, const char* dir,
+                     char* replace)
 {
-    bool rc = false;
+	bool rc = false;
 
-    DynStringClear(result);
+	DynStringClear(result);
 
 #ifdef WINDOWS
-    rc = strnicmp(in, dir, strlen(dir));
+	rc = strnicmp(in, dir, strlen(dir));
 #else
-    rc = strncmp(in, dir, strlen(dir));
+	rc = strncmp(in, dir, strlen(dir));
 #endif // WINDOWS
 
-    if(!rc) {
-        DynStringCatCStrs(result, replace, in + strlen(dir), NULL);
-    }
-    return(!rc);
+	if(!rc) {
+		DynStringCatCStrs(result, replace, in + strlen(dir), NULL);
+	}
+	return(!rc);
 }
 
 /**
@@ -160,17 +161,17 @@ ReplaceDirectoryName(DynString *result, char* in, const char* dir, char* replace
 static bool
 ReplaceUserID(DynString* result, char* in, char* replace)
 {
-    char* user = strstr(in, wGetUserID());
-    bool rc = false;
-    DynStringClear(result);
+	char* user = strstr(in, wGetUserID());
+	bool rc = false;
+	DynStringClear(result);
 
-    if (user) {
-        DynStringNCatCStr(result, user - in, in);
-        DynStringCatCStrs(result, replace, user + strlen(user), NULL);
-        rc = true;
-    }
+	if (user) {
+		DynStringNCatCStr(result, user - in, in);
+		DynStringCatCStrs(result, replace, user + strlen(user), NULL);
+		rc = true;
+	}
 
-    return(rc);
+	return(rc);
 }
 
 /**
@@ -187,34 +188,34 @@ ReplaceUserID(DynString* result, char* in, char* replace)
 static bool
 FilterConfigLine(DynString *result, char* name, char *value)
 {
-    bool clean;
+	bool clean;
 
-    DynStringClear(result);
+	DynStringClear(result);
 
-    clean = ReplaceDirectoryName(result, value, wGetAppLibDir(),
-                                 "<<applibdir>>");
+	clean = ReplaceDirectoryName(result, value, wGetAppLibDir(),
+	                             "<<applibdir>>");
 
-    // NOTE: the order of these calls is important, possible subdirs of a
-    // homedir must be checked first
-    if (!clean) {
-        clean = ReplaceDirectoryName(result, value, wGetAppWorkDir(),
-                                     "<<workdir>>");
-        if (!clean) {
-            clean = ReplaceDirectoryName(result, value, wGetUserHomeRootDir(),
-                                         "<<home>>");
-        }
-    }
+	// NOTE: the order of these calls is important, possible subdirs of a
+	// homedir must be checked first
+	if (!clean) {
+		clean = ReplaceDirectoryName(result, value, wGetAppWorkDir(),
+		                             "<<workdir>>");
+		if (!clean) {
+			clean = ReplaceDirectoryName(result, value, wGetUserHomeRootDir(),
+			                             "<<home>>");
+		}
+	}
 
-    // replace any remaining references to the current userid
-    if (!clean) {
-        clean = ReplaceUserID(result, value, "<<user>>");
-    }
+	// replace any remaining references to the current userid
+	if (!clean) {
+		clean = ReplaceUserID(result, value, "<<user>>");
+	}
 
-    if (!clean) {
-        DynStringCatCStr(result, value);
-    }
+	if (!clean) {
+		DynStringCatCStr(result, value);
+	}
 
-    return(clean);
+	return(clean);
 }
 
 /**
@@ -231,71 +232,68 @@ FilterConfigLine(DynString *result, char* name, char *value)
 static bool
 PickupConfigFile(char *srcfile, char* destdir)
 {
-    FILE* fhRead;
-    FILE* fhWrite;
-    DynString configLine;
-    DynString destFile;
+	FILE* fhRead;
+	FILE* fhWrite;
+	DynString configLine;
+	DynString destFile;
 
-    DynStringMalloc(&destFile, FILENAME_MAX);
-    DynStringMalloc(&configLine, FILENAME_MAX);
+	DynStringMalloc(&destFile, FILENAME_MAX);
+	DynStringMalloc(&configLine, FILENAME_MAX);
 
-    DynStringCatCStrs(&destFile, destdir, FILE_SEP_CHAR,
-                      FindFilename(srcfile), NULL);
+	DynStringCatCStrs(&destFile, destdir, FILE_SEP_CHAR,
+	                  FindFilename(srcfile), NULL);
 
-    ProblemrepUpdateW(_("Get settings file %s\n"), srcfile);
+	ProblemrepUpdateW(_("Get settings file %s\n"), srcfile);
 
-    fhRead = fopen(srcfile, "r");
-    fhWrite = fopen(DynStringToCStr(&destFile), "w");
+	fhRead = fopen(srcfile, "r");
+	fhWrite = fopen(DynStringToCStr(&destFile), "w");
 
-    if (fhRead && fhWrite) {
-        char* lineptr = NULL;
-        size_t linelen = 0;
+	if (fhRead && fhWrite) {
+		char* lineptr = NULL;
+		size_t linelen = 0;
 
-        while (!feof(fhRead)) {
-            char* section;
-            char* name;
-            char* value;
-            size_t totalLength;
+		while (!feof(fhRead)) {
+			char* section;
+			char* name;
+			char* value;
+			size_t totalLength;
 
-            if(getline(&lineptr, &linelen, fhRead)==-1) {
-                continue;
-            }
+			if(getline(&lineptr, &linelen, fhRead)==-1) {
+				continue;
+			}
 
-            wPrefTokenize(lineptr, &section, &name, &value);
-            if (name && value)
-            {
-                FilterConfigLine(&configLine, name, value);
+			wPrefTokenize(lineptr, &section, &name, &value);
+			if (name && value) {
+				FilterConfigLine(&configLine, name, value);
 
-                // calculate maximum possible length of resulting line
-                totalLength = (section ? strlen(section) : 0) +
-                              (name ? strlen(name) : 0) +
-                              (value ? strlen(value) : 0) + DELIMITER_COUNT;
+				// calculate maximum possible length of resulting line
+				totalLength = (section ? strlen(section) : 0) +
+				              (name ? strlen(name) : 0) +
+				              (value ? strlen(value) : 0) + DELIMITER_COUNT;
 
-                // increase buffer size by 256  byte if too small
-                if (totalLength > linelen)
-                {
-                    size_t newLen = ((totalLength + 256) & (~0xff));
-                    lineptr = realloc(lineptr, newLen);
-                    if (!lineptr)
-                    {
-                        AbortProg("!lineptr", __FILE__, __LINE__,
-                                  "Can't realloc memory");
-                    }
-                    linelen = newLen;
-                }
-                value = DynStringToCStr(&configLine);
-            }
-            wPrefFormatLine(section, name, value, lineptr);
-            fprintf(fhWrite, "%s\n", lineptr);
-        }
-        free(lineptr);
-        fclose(fhRead);
-        fclose(fhWrite);
-    }
-    DynStringFree(&configLine);
-    DynStringFree(&destFile);
+				// increase buffer size by 256  byte if too small
+				if (totalLength > linelen) {
+					size_t newLen = ((totalLength + 256) & (~0xff));
+					lineptr = realloc(lineptr, newLen);
+					if (!lineptr) {
+						AbortProg("!lineptr", __FILE__, __LINE__,
+						          "Can't realloc memory");
+					}
+					linelen = newLen;
+				}
+				value = DynStringToCStr(&configLine);
+			}
+			wPrefFormatLine(section, name, value, lineptr);
+			fprintf(fhWrite, "%s\n", lineptr);
+		}
+		free(lineptr);
+		fclose(fhRead);
+		fclose(fhWrite);
+	}
+	DynStringFree(&configLine);
+	DynStringFree(&destFile);
 
-    return(true);
+	return(true);
 }
 
 /**
@@ -309,16 +307,17 @@ PickupConfigFile(char *srcfile, char* destdir)
  */
 
 static bool
-FilterDirectoryName(DynString* result, char* dir, const char* search, char* replace)
+FilterDirectoryName(DynString* result, char* dir, const char* search,
+                    char* replace)
 {
-    bool rc = false;
-    if (!strnicmp(dir, search, strlen(search))) {
-        DynStringReset(result);
-        DynStringCatCStrs(result, replace, dir + strlen(search), NULL);
-        rc = true;
-    }
+	bool rc = false;
+	if (!strnicmp(dir, search, strlen(search))) {
+		DynStringReset(result);
+		DynStringCatCStrs(result, replace, dir + strlen(search), NULL);
+		rc = true;
+	}
 
-    return(rc);
+	return(rc);
 }
 
 /**
@@ -334,44 +333,43 @@ FilterDirectoryName(DynString* result, char* dir, const char* search, char* repl
 static void
 FilterLayoutNote(FILE* out, char* work)
 {
-    DynString result;
-    bool isDocument = false;
-    char* token;
+	DynString result;
+	bool isDocument = false;
+	char* token;
 
-    DynStringMalloc(&result, FILENAME_MAX);
+	DynStringMalloc(&result, FILENAME_MAX);
 
-    fprintf(out, "NOTE ");
+	fprintf(out, "NOTE ");
 
-    for (int i = 0; i < 8; i++) {
-        token = strtok(NULL, " \t");
-        fprintf(out, "%s ", token);
-    }
+	for (int i = 0; i < 8; i++) {
+		token = strtok(NULL, " \t");
+		fprintf(out, "%s ", token);
+	}
 
-    if (token && !strcmp(token, "2")) {
-        isDocument = true;
-    }
-    // filename is next
-    token = strtok(NULL, " \t\"");
+	if (token && !strcmp(token, "2")) {
+		isDocument = true;
+	}
+	// filename is next
+	token = strtok(NULL, " \t\"");
 
-    char * filename = ConvertFromEscapedText(token);
+	char * filename = ConvertFromEscapedText(token);
 
-    if (isDocument && FilterDirectoryName(&result, filename,
-                                          wGetUserHomeDir(), "<<home>>")) {
-        MyFree(filename);
-        filename = ConvertToEscapedText(DynStringToCStr(&result));
-        fprintf(out, "\"%s\"", filename);
-    }
-    else {
-        fprintf(out, "\"%s\"", token);
-    }
+	if (isDocument && FilterDirectoryName(&result, filename,
+	                                      wGetUserHomeDir(), "<<home>>")) {
+		MyFree(filename);
+		filename = ConvertToEscapedText(DynStringToCStr(&result));
+		fprintf(out, "\"%s\"", filename);
+	} else {
+		fprintf(out, "\"%s\"", token);
+	}
 
-    MyFree(filename);
-    filename = NULL;
+	MyFree(filename);
+	filename = NULL;
 
-    token = strtok(NULL, "\n");
-    fprintf(out, "%s\n", token);
+	token = strtok(NULL, "\n");
+	fprintf(out, "%s\n", token);
 
-    DynStringFree(&result);
+	DynStringFree(&result);
 }
 
 /**
@@ -385,44 +383,42 @@ FilterLayoutNote(FILE* out, char* work)
 static void
 FilterLayers(FILE *out, char* work)
 {
-    DynString result;
+	DynString result;
 
-    DynStringMalloc(&result, FILENAME_MAX );
+	DynStringMalloc(&result, FILENAME_MAX );
 
-    char* token = strtok(NULL, " \t");
-    if (token ) {
-        if (!stricmp(token, "SET")) {
-            char* filename;
-            bool clean;
+	char* token = strtok(NULL, " \t");
+	if (token ) {
+		if (!stricmp(token, "SET")) {
+			char* filename;
+			bool clean;
 
-            fprintf(out, "%s ", token);
-            token = strtok(NULL, " \t");
-            fprintf(out, "%s ",token);
-            token = strtok(NULL, "\"");
-            filename = ConvertFromEscapedText(token);
+			fprintf(out, "%s ", token);
+			token = strtok(NULL, " \t");
+			fprintf(out, "%s ",token);
+			token = strtok(NULL, "\"");
+			filename = ConvertFromEscapedText(token);
 
-            DYNARR_APPEND(char*, configFiles_da, 1);
-            configFile(configFiles_da.cnt - 1) = MyStrdup(filename);
+			DYNARR_APPEND(char*, configFiles_da, 1);
+			configFile(configFiles_da.cnt - 1) = MyStrdup(filename);
 
-            clean = FilterDirectoryName(&result, filename, wGetUserHomeDir(),
-                                        "<<home>>");
-            if (clean) {
-                MyFree(filename);
-                filename = ConvertToEscapedText(DynStringToCStr(&result));
-                fprintf(out, "\"%s\"\n", filename);
-            }
-            else {
-                fprintf(out, "\"%s\"\n", token);
-            }
-            MyFree(filename);
+			clean = FilterDirectoryName(&result, filename, wGetUserHomeDir(),
+			                            "<<home>>");
+			if (clean) {
+				MyFree(filename);
+				filename = ConvertToEscapedText(DynStringToCStr(&result));
+				fprintf(out, "\"%s\"\n", filename);
+			} else {
+				fprintf(out, "\"%s\"\n", token);
+			}
+			MyFree(filename);
 
-        }
-        else {
-            const char* remainder = token + strlen(token) + 1;
-            fprintf(out, "%s %s", token, remainder );
-        }
-    }
-    DynStringFree(&result);
+		} else {
+			const char* remainder = token + strlen(token) + 1;
+			fprintf(out, "%s %s", token, remainder );
+		}
+	}
+	DynStringFree(&result);
 }
 
 /**
@@ -437,30 +433,30 @@ FilterLayers(FILE *out, char* work)
 static bool
 FilterLayoutLine(FILE *out, const char* in)
 {
-    char* workCopy = MyStrdup(in);
-    char* token;
+	char* workCopy = MyStrdup(in);
+	char* token;
 
-    token = strtok(workCopy, " \t\n");
-    if (token) {
-        bool done = false;
-        if (!stricmp(token, "LAYERS")) {
-            // handle LAYERS
-            fprintf(out, "%s ", token);
-            FilterLayers(out, workCopy);
-            done = true;
-        }
-        if (!stricmp(token, "NOTE")) {
-            // handle NOTE document
-            FilterLayoutNote(out, workCopy);
-            done = true;
-        }
-        if (!done) {
-            fputs(in, out);
-        }
-    }
+	token = strtok(workCopy, " \t\n");
+	if (token) {
+		bool done = false;
+		if (!stricmp(token, "LAYERS")) {
+			// handle LAYERS
+			fprintf(out, "%s ", token);
+			FilterLayers(out, workCopy);
+			done = true;
+		}
+		if (!stricmp(token, "NOTE")) {
+			// handle NOTE document
+			FilterLayoutNote(out, workCopy);
+			done = true;
+		}
+		if (!done) {
+			fputs(in, out);
+		}
+	}
 
-    MyFree(workCopy);
-    return(true);
+	MyFree(workCopy);
+	return(true);
 }
 
 /**
@@ -474,20 +470,20 @@ FilterLayoutLine(FILE *out, const char* in)
 static bool
 PickupLayoutFile(char* dir)
 {
-    FILE* fhRead;
-    FILE* fhWrite;
-    DynString layoutLine;
-    DynString destFile;
+	FILE* fhRead;
+	FILE* fhWrite;
+	DynString layoutLine;
+	DynString destFile;
 
-    DynStringMalloc(&destFile, FILENAME_MAX);
-    DynStringMalloc(&layoutLine, STR_SIZE);
+	DynStringMalloc(&destFile, FILENAME_MAX);
+	DynStringMalloc(&layoutLine, STR_SIZE);
 
-    DynStringCatCStrs(&destFile, dir, FILE_SEP_CHAR,
-                      GetLayoutFilename(), NULL);
+	DynStringCatCStrs(&destFile, dir, FILE_SEP_CHAR,
+	                  GetLayoutFilename(), NULL);
 
-    ProblemrepUpdateW(_("Add layout file %s\n"), GetLayoutFullPath());
-    fhRead = fopen(GetLayoutFullPath(), "r");
-    fhWrite = fopen(DynStringToCStr(&destFile), "w");
+	ProblemrepUpdateW(_("Add layout file %s\n"), GetLayoutFullPath());
+	fhRead = fopen(GetLayoutFullPath(), "r");
+	fhWrite = fopen(DynStringToCStr(&destFile), "w");
 
 	if (fhRead && fhWrite) {
 		char* lineptr = NULL;
@@ -496,15 +492,15 @@ PickupLayoutFile(char* dir)
 			getline(&lineptr, &linelen, fhRead);
 			if (!feof(fhRead)) {
 				FilterLayoutLine(fhWrite, lineptr);
-            }
-        }    
-        free(lineptr);
-        fclose(fhRead);
-        fclose(fhWrite);
-    }
-    DynStringFree(&layoutLine);
-    DynStringFree(&destFile);
-    return(true);
+			}
+		}
+		free(lineptr);
+		fclose(fhRead);
+		fclose(fhWrite);
+	}
+	DynStringFree(&layoutLine);
+	DynStringFree(&destFile);
+	return(true);
 }
 
 /**
@@ -517,20 +513,20 @@ PickupLayoutFile(char* dir)
 static bool
 PickupCustomFile(char* dest)
 {
-    char* inFile;
-    char* outFile;
-    bool rc;
+	char* inFile;
+	char* outFile;
+	bool rc;
 
-    MakeFullpath(&inFile, wGetAppWorkDir(), "xtrkcad.cus", NULL);
-    MakeFullpath(&outFile, dest, "xtrkcad.cus", NULL);
-    ProblemrepUpdateW(_("Add custom parameter definitions\n"));
+	MakeFullpath(&inFile, wGetAppWorkDir(), "xtrkcad.cus", NULL);
+	MakeFullpath(&outFile, dest, "xtrkcad.cus", NULL);
+	ProblemrepUpdateW(_("Add custom parameter definitions\n"));
 
-    rc = Copyfile(inFile, outFile);
+	rc = Copyfile(inFile, outFile);
 
-    free(inFile);
-    free(outFile);
+	free(inFile);
+	free(outFile);
 
-    return(rc==0);
+	return(rc==0);
 }
 
 /**
@@ -544,96 +540,96 @@ PickupCustomFile(char* dest)
 static void
 ZipProblemData(const char* src)
 {
-    char* dest = MyStrdup(GetLayoutFullPath());
-    char* out;
-    char *filename = strrchr(dest, PATH_SEPARATOR[0]) + 1;
-    struct tm* currentTime;
-    time_t clock;
-    char timestamp[80];
+	char* dest = MyStrdup(GetLayoutFullPath());
+	char* out;
+	char *filename = strrchr(dest, PATH_SEPARATOR[0]) + 1;
+	struct tm* currentTime;
+	time_t clock;
+	char timestamp[80];
 
-    time(&clock);
-    currentTime = gmtime(&clock);
-    strftime(timestamp, 80, "pd-%y%m%dT%H%M%S.zip", currentTime);
+	time(&clock);
+	currentTime = gmtime(&clock);
+	strftime(timestamp, 80, "pd-%y%m%dT%H%M%S.zip", currentTime);
 
-    *filename = '\0';
+	*filename = '\0';
 
-    MakeFullpath(&out, dest, timestamp, NULL);
-    ProblemrepUpdateW(_("Create zip archive %s\n"), out);
+	MakeFullpath(&out, dest, timestamp, NULL);
+	ProblemrepUpdateW(_("Create zip archive %s\n"), out);
 
-    CreateArchive(src, out);
-    free(out);
+	CreateArchive(src, out);
+	free(out);
 }
 
 void
 ProblemDataCollect()
 {
-    char* tempDirectory;
-    char* subdirectory = NULL;
-    bool ret;
-    char *filename = GetLayoutFullPath();
+	char* tempDirectory;
+	char* subdirectory = NULL;
+	bool ret;
+	char *filename = GetLayoutFullPath();
 
-    if(*filename == '\0') {
-        ProblemrepUpdateW(_("No layout design loaded! Operation is cancelled.\n"));
-        return;
-    }
- 
-    if (!ProblemSaveLayout()) {
-        return;
-    }
+	if(*filename == '\0') {
+		ProblemrepUpdateW(_("No layout design loaded! Operation is cancelled.\n"));
+		return;
+	}
 
-    tempDirectory = CreateTempDirectory();
-    SaveSystemInfo(tempDirectory);
+	if (!ProblemSaveLayout()) {
+		return;
+	}
 
-    DYNARR_APPEND(char *, configFiles_da, 1);
-    configFile(configFiles_da.cnt - 1) = MyStrdup(wGetProfileFilename());
+	tempDirectory = CreateTempDirectory();
+	SaveSystemInfo(tempDirectory);
 
-    ret = PickupLayoutFile(tempDirectory);
+	DYNARR_APPEND(char *, configFiles_da, 1);
+	configFile(configFiles_da.cnt - 1) = MyStrdup(wGetProfileFilename());
 
-    MakeFullpath(&subdirectory, tempDirectory, "workdir", NULL);
-    mkdir(subdirectory, 0700);
-    if (ret) {
-        ret = PickupCustomFile(subdirectory);
-    }
+	ret = PickupLayoutFile(tempDirectory);
 
-    for (int i = 0; i < configFiles_da.cnt; i++) {
-        char *file = configFile(i);
-        PickupConfigFile(file, subdirectory);
-        MyFree(file);
-    }
-    free(subdirectory);
-    subdirectory = NULL;
+	MakeFullpath(&subdirectory, tempDirectory, "workdir", NULL);
+	mkdir(subdirectory, 0700);
+	if (ret) {
+		ret = PickupCustomFile(subdirectory);
+	}
 
-    MakeFullpath(&subdirectory, tempDirectory, "params", NULL);
-    mkdir(subdirectory, 0700);
+	for (int i = 0; i < configFiles_da.cnt; i++) {
+		char *file = configFile(i);
+		PickupConfigFile(file, subdirectory);
+		MyFree(file);
+	}
+	free(subdirectory);
+	subdirectory = NULL;
 
-    for (int i = 0; i < GetParamFileCount(); i++) {
-        char* file = GetParamFileName(i);
+	MakeFullpath(&subdirectory, tempDirectory, "params", NULL);
+	mkdir(subdirectory, 0700);
 
-        if (strncmp(file, wGetAppLibDir(), strlen(wGetAppLibDir()))) {
-            char* destfile;
-            ProblemrepUpdateW(_("Get local parameter file %s\n"), file);
+	for (int i = 0; i < GetParamFileCount(); i++) {
+		char* file = GetParamFileName(i);
 
-            MakeFullpath(&destfile, subdirectory, FindFilename(file), NULL);
-            Copyfile(file, destfile);
-            free(destfile);
-        }
-    }
-    free(subdirectory);
-    subdirectory = NULL;
+		if (strncmp(file, wGetAppLibDir(), strlen(wGetAppLibDir()))) {
+			char* destfile;
+			ProblemrepUpdateW(_("Get local parameter file %s\n"), file);
 
-    if (ret) {
-        ZipProblemData(tempDirectory);
+			MakeFullpath(&destfile, subdirectory, FindFilename(file), NULL);
+			Copyfile(file, destfile);
+			free(destfile);
+		}
+	}
+	free(subdirectory);
+	subdirectory = NULL;
 
-        DeleteDirectory(tempDirectory);
-    }
+	if (ret) {
+		ZipProblemData(tempDirectory);
 
-    DYNARR_FREE(char*, configFiles_da);
+		DeleteDirectory(tempDirectory);
+	}
+
+	DYNARR_FREE(char*, configFiles_da);
 }
 
 void
 DoProblemCollect(void* unused)
 {
-    ProblemrepCreateW(NULL);
+	ProblemrepCreateW(NULL);
 
-    ProblemDataCollect();
+	ProblemDataCollect();
 }

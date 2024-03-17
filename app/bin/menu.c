@@ -1375,7 +1375,7 @@ EXPORT void CreateMenus(void)
 	                                 ShowMessageHelp);
 	wMenuListAdd(messageList_ml, 0, _(MESSAGE_LIST_EMPTY), NULL);
 	wMenuPushCreate(helpM, "menuHelpProblemrep", _("Collect Problem Info"), 0,
-		DoProblemCollect, NULL);
+	                DoProblemCollect, NULL);
 
 	/* tip of the day */
 	wMenuSeparatorCreate( helpM );
