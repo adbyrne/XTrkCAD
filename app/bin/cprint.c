@@ -1173,7 +1173,7 @@ static BOOL_T PrintPage(
 		clipOrig.x = clipOrig.y = 0;
 		clipSize.x = maxPageSize.x/printScale;
 		clipSize.y = maxPageSize.y/printScale;
-		GetRoomSize( &roomSize );
+		roomSize = mapD.size;
 		if (printGaudy) {
 			PrintGaudyBox( roomSize );
 			if ((!printRotate) || rotateCW) {

@@ -33,6 +33,7 @@
 #include "include/paramfilelist.h"
 #include "paths.h"
 #include "smalldlg.h"
+#include "include/toolbar.h"
 #include "track.h"
 #include "common-ui.h"
 
@@ -372,9 +373,6 @@ EXPORT char * ConvertToEscapedText(const char * text)
 		text_i++;
 	}
 	cout[cout_i] = '\0';
-#ifdef UTFCONVERT
-	wSystemToUTF8(cout, cout, (unsigned int)cnt);
-#endif // UTFCONVERT
 
 	return cout;
 }
@@ -685,7 +683,8 @@ EXPORT bool Confirm(char * label2, doSaveCallBack_p after)
 static void DoQuitAfter(void)
 {
 	changed = 0;
-	CleanupFiles();  //Get rid of checkpoint if we quit.
+	CleanupCheckpointFiles();  //Get rid of checkpoint if we quit.
+	CleanupTempArchive();		// removefiels used for archive handling
 	SaveState();
 }
 /**
@@ -1019,8 +1018,8 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	char * initialFile = NULL;
 	const char * pref;
 	coOrd roomSize;
-	long oldToolbarMax;
-	long newToolbarMax;
+	/*	long oldToolbarMax;
+		long newToolbarMax; */
 	char *cp;
 	char buffer[STR_SIZE];
 	unsigned int i;
@@ -1135,12 +1134,13 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	             displayHeight, -1, -1, -1);
 	InitAppDefaults();
 
-	newToolbarMax = (1 << BG_COUNT) - 1;
-	wPrefGetInteger("misc", "toolbarset", &toolbarSet, newToolbarMax);
-	wPrefGetInteger("misc", "max-toolbarset", &oldToolbarMax, 0);
-	toolbarSet |= newToolbarMax & ~oldToolbarMax;
-	wPrefSetInteger("misc", "max-toolbarset", newToolbarMax);
-	wPrefSetInteger("misc", "toolbarset", toolbarSet);
+	ToolbarLoadConfig();
+	/*	newToolbarMax = (1 << BG_COUNT) - 1;
+		wPrefGetInteger("misc", "toolbarset", &toolbarSet, newToolbarMax);
+		wPrefGetInteger("misc", "max-toolbarset", &oldToolbarMax, 0);
+		toolbarSet |= newToolbarMax & ~oldToolbarMax;
+		wPrefSetInteger("misc", "max-toolbarset", newToolbarMax);
+		wPrefSetInteger("misc", "toolbarset", toolbarSet); */
 
 	LOG1(log_init, ( "fontInit\n"))
 
@@ -1164,6 +1164,8 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	/*
 	 * INITIALIZE
 	 */
+	LOG1(log_init, ( "initColor\n" ))
+	InitColor();
 	LOG1(log_init, ( "initInfoBar\n" ))
 	InitInfoBar();
 	wSetSplashInfo("Scale Init...");
@@ -1192,8 +1194,6 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 		return NULL;
 	}
 
-	/* initialize the layers */
-	DefaultLayerProperties();
 	LOG1(log_init, ( "loadFileList\n" ))
 	LoadFileList();
 	//CreateDebugW();
@@ -1201,8 +1201,7 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	/*
 	 * TIDY UP
 	 */
-	InitColor();
-	if (toolbarSet&(1<<BG_HOTBAR)) {
+	if (ToolbarIsGroupVisible(BG_HOTBAR)) {
 		LayoutHotBar( NULL );
 	} else {
 		LayoutHotBar( NULL );   /* Must run once to set it up */
@@ -1225,6 +1224,11 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	if (!ParamFileListInit()) {
 		return NULL;
 	}
+
+	/* initialize the layers */
+	LOG1(log_init, ("DefaultLayerProperties"));
+	DefaultLayerProperties();
+
 	// LOG1(log_init, ("!ParamFileListInit()\n"))
 
 	CommandInit();
@@ -1240,13 +1244,10 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 
 	// get the preferred scale from the configuration file
 	pref = wPrefGetString("misc", "scale");
-	if (!pref)
+	if ( pref == NULL || DoSetScale( pref ) == FALSE ) {
 		// if preferred scale was not set (eg. during initial run), initialize to a default value
-	{
-		pref = DEFAULT_SCALE;
+		DoSetScale( DEFAULT_SCALE );
 	}
-	strcpy(buffer, pref);
-	DoSetScale(buffer);
 
 	/* see whether last layout should be reopened on startup */
 	wPrefGetInteger("DialogItem", "pref-onstartup", &onStartup, 0);

@@ -1,12 +1,9 @@
 execute_process(
 	COMMAND "@HTML_HELP_COMPILER@" xtrkcad.hhp
 	RESULT_VARIABLE results
-	OUTPUT_VARIABLE output
 	ERROR_VARIABLE error
 	)
 
-message(STATUS "${output}")
-
-if(${error})
-	message(STATUS "Creating chm failed! ${error}")
+if(NOT "${results}" STREQUAL "1")
+	message(FATAL_ERROR "Creating chm failed! ${error}")
 endif()

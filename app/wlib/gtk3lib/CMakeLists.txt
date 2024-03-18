@@ -31,13 +31,12 @@ target_sources(xtrkcad-wlib
  	notice.c
  	opendocument.c
  	pixbuf.c
- 	print.c
  	pulldnmenu.c
+	recentuse.c
 	single.c
  	splash.c
-    statusbar.c
+    	statusbar.c
  	text.c
- 	timer.c
  	tooltip.c	
  	treeview.c
  	util.c
@@ -45,6 +44,13 @@ target_sources(xtrkcad-wlib
  	wpref.c
 	wlibpaths.c
 )
+
+if(UNIX)
+	target_sources(xtrkcad-wlib
+		PRIVATE
+			timer.c
+			print.c )
+endif()
 
 # help system is OS and build specific, add appropriate source files
 if(APPLE)
@@ -79,21 +85,37 @@ endif()
 
 # GTK 
 find_package (GTK3 REQUIRED)
-# configure for GTK's native Unix print
-find_package (GTKUnixPrint3 REQUIRED)
 
 target_include_directories(xtrkcad-wlib
 	PRIVATE
 	${GTK3_INCLUDE_DIRS}
-	${GTK_UNIX_PRINT3_INCLUDE_DIRS}
 )
+
+message(STATUS "Include Dirs: ${GTK3_INCLUDE_DIRS}")
+
 target_link_libraries(xtrkcad-wlib 
 	PRIVATE
 	dynstring
 	wrapbox
-	${GTK_UNIX_PRINT3_LIBRARIES}
 	${GTK3_LIBRARIES}
 )
+
+message(STATUS "Libraries: ${GTK3_LIBRARIES}")
+
+# configure for GTK's native Unix print
+if(UNIX)
+	find_package (GTKUnixPrint3 REQUIRED)
+	
+	target_include_directories(xtrkcad-wlib
+		PRIVATE
+		${GTK_UNIX_PRINT3_INCLUDE_DIRS}
+	)
+
+	target_link_libraries(xtrkcad-wlib 
+		PRIVATE
+		${GTK_UNIX_PRINT3_LIBRARIES}
+	)
+endif()
 
 # add dependency to webkit if configured
 if (APPLE)

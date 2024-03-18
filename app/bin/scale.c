@@ -42,6 +42,8 @@
 #define SCALE_DEMO	(-1)
 #define SCALE_ANY	(-2)
 #define SCALE_MULTI	(-3)
+#define SCALE_UNKNOWN	(-4)
+#define SCALE_ERROR	(-5)
 
 typedef struct {
 	char * scale;
@@ -50,7 +52,6 @@ typedef struct {
 	DIST_T R[3];
 	DIST_T X[3];
 	DIST_T L[3];
-	wIndex_t index;
 	DIST_T length;
 	BOOL_T tieDataValid;
 	tieData_t tieData;
@@ -58,6 +59,7 @@ typedef struct {
 typedef scaleInfo_t * scaleInfo_p;
 static dynArr_t scaleInfo_da;
 #define scaleInfo(N) DYNARR_N( scaleInfo_t, scaleInfo_da, N )
+static SCALEINX_T scaleInfo_cnt=0;
 
 typedef struct {
 	char *in_scales;
@@ -76,14 +78,12 @@ static tieData_t tieData_demo = {
 	32.0/160.0
 };
 
-//EXPORT SCALEINX_T curScaleInx = -1;
 EXPORT DIST_T curScaleRatio;
 EXPORT char * curScaleName;
 static scaleInfo_p curScale;
 /** @prefs [misc] include same gauge turnouts=1 Unknown */
 EXPORT long includeSameGaugeTurnouts = FALSE;
 static SCALEINX_T demoScaleInx = -1;
-static int nUnknownScale = 0;
 
 
 /** this struct holds a gauge description */
@@ -106,6 +106,48 @@ static dynArr_t scaleDesc_da;
 
 
 static BOOL_T DoSetScaleDesc( SCALEINX_T scaleInx );
+
+static int log_scale = 0;
+
+/**
+ * Get the scale info for index
+ *
+ * This is over-engineered but we somehow end up with
+ * out of range inx
+ */
+// Substitute layout scale if scaleInx is invalid
+static SCALEINX_T altScaleInx = -1;
+static scaleInfo_p GetScaleInfo( SCALEINX_T scaleInx )
+{
+	if ( scaleInx >= 0 && scaleInx < scaleInfo_da.cnt ) {
+		// Good index
+		LOG( log_scale, 5, ( "      GetScaleInfo-1(%d)\n", scaleInx ) );
+		return &scaleInfo( scaleInx );
+	}
+	if ( altScaleInx >= 0 ) {
+		// Previously seen bad index
+		LOG( log_scale, 4, ( "      GetScaleInfo-2(%d)\n", scaleInx ) );
+		return &scaleInfo( altScaleInx );
+	}
+	// Bad index
+	altScaleInx = GetLayoutCurScale();
+	int rc = NoticeMessage( MSG_BAD_SCALE_INDEX, curScaleName, "Unknown",
+	                        scaleInx, curScaleName );
+	if ( rc == 1 ) {
+		// User ok with using layout scale
+		LOG( log_scale, 3, ( "      GetScaleInfo-3(%d)\n", scaleInx ) );
+		return &scaleInfo( altScaleInx );
+	}
+	// Clone existing layout scale as 'Unknown'
+	DYNARR_APPEND( scaleInfo_t, scaleInfo_da, 1 );
+	scaleInfo_p si = &DYNARR_LAST( scaleInfo_t, scaleInfo_da );
+	*si = scaleInfo(altScaleInx);
+	altScaleInx = scaleInfo_da.cnt-1;
+	si->scale = MyStrdup( "Unknown" );
+	LOG( log_scale, 3, ( "      GetScaleInfo-4(%d)\n", scaleInx ) );
+	//DoSetScaleDesc( scaleInfo_da.cnt-1 );
+	return si;
+}
 
 
 /**
@@ -139,30 +181,23 @@ EXPORT SCALEINX_T GetScaleInx( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx )
 }
 EXPORT DIST_T GetScaleTrackGauge( SCALEINX_T si )
 {
-	if (si >=0 && si<scaleInfo_da.cnt) {
-		return scaleInfo(si).gauge;
-	} else { return 1.0; }
+	return GetScaleInfo(si)->gauge;
 }
 
 EXPORT DIST_T GetScaleRatio( SCALEINX_T si )
 {
-	if (si >=0 && si<scaleInfo_da.cnt) {
-		return scaleInfo(si).ratio;
-	} else { return 1.0; }
+	return GetScaleInfo(si)->ratio;
 }
 
 EXPORT char * GetScaleName( SCALEINX_T si )
 {
-	if ( si == -1 ) {
+	if ( si == SCALE_DEMO ) {
 		return "DEMO";
 	}
 	if ( si == SCALE_ANY ) {
 		return "*";
-	} else if ( si < 0 || si >= scaleInfo_da.cnt ) {
-		return "Unknown";
-	} else {
-		return scaleInfo(si).scale;
 	}
+	return GetScaleInfo(si)->scale;
 }
 
 EXPORT void GetScaleEasementValues( DIST_T * R, DIST_T * L )
@@ -176,10 +211,7 @@ EXPORT void GetScaleEasementValues( DIST_T * R, DIST_T * L )
 
 EXPORT DIST_T GetScaleMinRadius( SCALEINX_T si )
 {
-	if ( si < 0 || si >= scaleInfo_da.cnt ) {
-		return 0;
-	}
-	return scaleInfo(si).R[0];
+	return GetScaleInfo(si)->R[0];
 }
 
 
@@ -193,12 +225,10 @@ EXPORT tieData_t GetScaleTieData( SCALEINX_T si )
 	scaleInfo_p s;
 	DIST_T defLength;
 
-	if ( si == -1 ) {
-		return tieData_demo;
-	} else if ( si < 0 || si >= scaleInfo_da.cnt ) {
+	if ( si == SCALE_DEMO ) {
 		return tieData_demo;
 	}
-	s = &scaleInfo(si);
+	s = GetScaleInfo(si);
 	if ( !s->tieDataValid ) {
 		sprintf( message, "tiedata-%s", s->scale );
 		defLength = (96.0-54.0)/s->ratio+s->gauge;
@@ -213,13 +243,16 @@ EXPORT tieData_t GetScaleTieData( SCALEINX_T si )
 		s->tieData.valid = TRUE;
 		s->tieDataValid = TRUE;
 	}
-	return scaleInfo(si).tieData;
+	return s->tieData;
 }
 
 void
 SetScaleGauge(SCALEDESCINX_T desc, GAUGEINX_T gauge)
 {
-	SetLayoutCurScale( GetScaleInx( desc, gauge ) );
+	SCALEINX_T scaleInx = GetScaleInx( desc, gauge );
+	LOG( log_scale, 1, ( "SetScaleGauge(%d)\n", scaleInx ) );
+	CHECK( 0 <= scaleInx && scaleInx < scaleInfo_cnt );
+	SetLayoutCurScale( scaleInx );
 }
 
 static BOOL_T
@@ -236,32 +269,50 @@ SetScaleDescGauge(SCALEINX_T scaleInx)
 
 EXPORT SCALEINX_T LookupScale( const char * name )
 {
-	wIndex_t si;
+	wIndex_t scaleInx;
 	DIST_T gauge;
+	LOG( log_scale, 2, ( "  LookupScale(%s)", name ) );
 	if ( strcmp( name, "*" ) == 0 ) {
+		LOG( log_scale, 2, ( " .any = %d\n", SCALE_ANY ) );
 		return SCALE_ANY;
 	}
-	for ( si=0; si<scaleInfo_da.cnt; si++ ) {
-		if (strcmp( scaleInfo(si).scale, name ) == 0) {
-			return si;
+	for ( scaleInx=0; scaleInx<scaleInfo_da.cnt; scaleInx++ ) {
+		if (strcmp( scaleInfo(scaleInx).scale, name ) == 0) {
+			LOG( log_scale, 2, ( " .name = %d\n", scaleInx ) );
+			if ( scaleInx >= scaleInfo_cnt ) {
+				// Bogus scale
+				return GetLayoutCurScale();
+			} else {
+				return scaleInx;
+			}
 		}
 	}
 	if ( isdigit((unsigned char)name[0]) ) {
 		gauge = atof( name );
-		for ( si=0; si<scaleInfo_da.cnt; si++ ) {
-			if (scaleInfo(si).gauge == gauge) {
-				return si;
+		for ( scaleInx=0; scaleInx<scaleInfo_da.cnt; scaleInx++ ) {
+			if (scaleInfo(scaleInx).gauge == gauge) {
+				LOG( log_scale, 2, ( " .gauge = %d\n", scaleInx ) );
+				return scaleInx;
 			}
 		}
 	}
-	NoticeMessage( MSG_BAD_SCALE_NAME, "Ok", NULL, name, sProdNameLower );
-	nUnknownScale++;
-	si = scaleInfo_da.cnt;
-	DYNARR_APPEND( scaleInfo_t, scaleInfo_da, 10 );
-	scaleInfo(si) = scaleInfo(0);
-	scaleInfo(si).scale = MyStrdup( name );
-	DoSetScaleDesc( si );
-	return si;
+	if ( inPlayback ) {
+		// Invalid SCALE in recording/demo: abort
+		InputError( _("Invalid Scale: playback aborted\n  SCALE %s"), FALSE, name );
+		return GetLayoutCurScale();
+	}
+	// Bad name - create a dummy scale
+	NoticeMessage( MSG_BAD_SCALE_NAME, _("Ok"), NULL,
+	               name, curScaleName );
+	// Clone existing layout scale for dummy
+	DYNARR_APPEND( scaleInfo_t, scaleInfo_da, 1 );
+	scaleInfo_p scaleInfoP = &DYNARR_LAST( scaleInfo_t, scaleInfo_da );
+	*scaleInfoP = scaleInfo(GetLayoutCurScale());
+	scaleInfoP->scale = MyStrdup( name );
+	LOG( log_scale, 2, ( " .new = %d\n", scaleInfo_da.cnt-1 ) );
+	//DoSetScaleDesc( scaleInfo_da.cnt-1 );
+//	return scaleInfo_da.cnt-1;
+	return GetLayoutCurScale();
 }
 
 /*
@@ -378,53 +429,40 @@ EXPORT BOOL_T
 GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx,
                GAUGEINX_T *gaugeInx)
 {
-	int i, j;
-	char *scaleName = GetScaleName( scaleInx );
-	DIST_T scaleRatio = GetScaleRatio( scaleInx );
-	dynArr_t gauges_da;
-	DYNARR_INIT( gaugeInfo_t, gauges_da );
 
-	for( i = 0; i < scaleDesc_da.cnt; i++ ) {
-		char *t = strchr( scaleDesc(i).scaleDescStr, ' ' );
-		/* are the first characters (which describe the scale) identical? */
-		if( !strncmp( scaleDesc(i).scaleDescStr, scaleName,
-		              t - scaleDesc(i).scaleDescStr )) {
-			/* if yes, are we talking about the same ratio */
-			if( GetScaleRatio( GetScaleInx( i, 0 ) ) == scaleRatio ) {
-				/* yes, we found the right scale descriptor, so now look for the gauge */
-				*scaleDescInx = i;
-				gauges_da = scaleDesc(i).gauges_da;
-				*gaugeInx = 0;
-				for( j = 0; j < gauges_da.cnt; j++ ) {
-					gaugeInfo_p ptr = &(DYNARR_N( gaugeInfo_t, gauges_da, j ));
-					if ( ptr->scaleInx == scaleInx ) {
-						*gaugeInx = j;
-						break;
-					}
-				}
-				break;
+	if ( scaleInx > scaleInfo_cnt ) {
+		*scaleDescInx = SCALE_UNKNOWN;
+		*gaugeInx = SCALE_UNKNOWN;
+		return FALSE;
+	}
+
+	for( SCALEDESCINX_T sdx = 0; sdx < scaleDesc_da.cnt; sdx++ ) {
+		scaleDesc_p scaleDescP = &DYNARR_N(scaleDesc_t, scaleDesc_da, sdx );
+		dynArr_t* gaugesDAP = &scaleDescP->gauges_da;
+		for( GAUGEINX_T gx = 0; gx < gaugesDAP->cnt; gx++ ) {
+			gaugeInfo_p gp = &(DYNARR_N( gaugeInfo_t, *gaugesDAP, gx ));
+			if ( gp->scaleInx == scaleInx ) {
+				*scaleDescInx = sdx;
+				*gaugeInx = gx;
+				return TRUE;
 			}
 		}
 	}
-
-	return TRUE;
+	*scaleDescInx = SCALE_UNKNOWN;
+	*gaugeInx = SCALE_UNKNOWN;
+	return FALSE;
 }
 
 /**
  * Setup XTrkCad for the newly selected scale/gauge combination.
  *
- * \param newScaleInx IN the index of the selected scale/gauge combination
  */
 
 static void
-SetScale( SCALEINX_T newScaleInx )
+SetScale( void )
 {
-	if (newScaleInx < 0 || newScaleInx >= scaleInfo_da.cnt) {
-		NoticeMessage( MSG_BAD_SCALE_INDEX, _("Ok"), NULL, (int)newScaleInx );
-		return;
-	}
-	SetLayoutCurScale((SCALEINX_T)newScaleInx );
-	curScale = &scaleInfo(newScaleInx);
+	SCALEINX_T newScaleInx = GetLayoutCurScale();
+	curScale = GetScaleInfo( newScaleInx );
 	trackGauge = curScale->gauge;
 	curScaleRatio = curScale->ratio;
 	curScaleName = curScale->scale;
@@ -450,32 +488,47 @@ SetScale( SCALEINX_T newScaleInx )
  * \returns TRUE if valid, FALSE otherwise
  */
 
-EXPORT BOOL_T DoSetScale(
-        char * newScale )
-{
-	SCALEINX_T scale;
-	char * cp;
-	BOOL_T found = FALSE;
+static struct {
+	SCALEINX_T altScaleInx;
+	wIndex_t scaleInfo_cnt;
+} setScaleState;
 
-	if ( newScale != NULL ) {
-		cp = newScale+strlen(newScale)-1;
-		while ( *cp=='\n' || *cp==' ' || *cp=='\t' ) { cp--; }
-		cp[1] = '\0';
-		while (isspace((unsigned char)*newScale)) { newScale++; }
-		for (scale = 0; scale<scaleInfo_da.cnt; scale++) {
-			if (strcasecmp( scaleInfo(scale).scale, newScale ) == 0) {
-				SetLayoutCurScale(scale);
-				found = TRUE;
-				break;
-			}
-		}
-		// was a valid scale given?
-		if( found ) {
-			DoChangeNotification( CHANGE_SCALE );
-		}
+EXPORT BOOL_T DoSetScale(
+        const char * newScale )
+{
+	SCALEINX_T scaleInx;
+
+	if ( inPlayback ) {
+		// Save old state in case we are in playback
+		setScaleState.altScaleInx = altScaleInx;
+		setScaleState.scaleInfo_cnt = scaleInfo_cnt;
+		// Reset invalid scale check
+		altScaleInx = -1;
+		DYNARR_SET( scaleInfo_t, scaleInfo_da, scaleInfo_cnt );
+	} else if ( inPlaybackQuit ) {
+		// Restore state after playback
+		altScaleInx = setScaleState.altScaleInx;
+		scaleInfo_cnt = setScaleState.scaleInfo_cnt;
+	} else {
+		// Reset invalid scale check
+		altScaleInx = -1;
+		DYNARR_SET( scaleInfo_t, scaleInfo_da, scaleInfo_cnt );
 	}
 
-	return found;
+	scaleInx = LookupScale( newScale );
+	if ( scaleInx == SCALE_ANY ) {
+		// Don't know how this could happen
+		scaleInx = GetLayoutCurScale();
+	}
+	if ( scaleInx >= scaleInfo_cnt ) {
+		// Trying to set to unknown scale
+		scaleInx = GetLayoutCurScale();
+	}
+	LOG( log_scale, 1, ( "DoSetScale(%s) = %d\n", newScale, scaleInx ) );
+	CHECK( 0 <= scaleInx && scaleInx < scaleInfo_cnt );
+	SetLayoutCurScale( scaleInx );
+	DoChangeNotification( CHANGE_SCALE );
+	return TRUE;
 }
 
 /**
@@ -581,12 +634,14 @@ static BOOL_T AddScale(
 		}
 	}
 
-	DYNARR_APPEND( scaleInfo_t, scaleInfo_da, 10 );
+	// The increment size should be > # SCALEs in xtrkcad.xtq
+	DYNARR_APPEND( scaleInfo_t, scaleInfo_da, 100 );
 	s = &scaleInfo(scaleInfo_da.cnt-1);
 	s->scale = MyStrdup( scale );
 	s->ratio = ratio;
 	s->gauge = gauge;
-	s->index = -1;
+	// Remember last defined scale
+	scaleInfo_cnt = scaleInfo_da.cnt;
 	for (i=0; i<3; i++) {
 		s->R[i] = R[i]/ratio;
 		s->X[i] = X[i]/ratio;
@@ -757,7 +812,7 @@ EXPORT void ScaleLengthEnd( void )
 EXPORT void LoadScaleList( wList_p scaleList )
 {
 	wIndex_t inx;
-	for (inx=0; inx<scaleDesc_da.cnt-(extraButtons?0:1)-nUnknownScale; inx++) {
+	for (inx=0; inx<scaleDesc_da.cnt-(extraButtons?0:1); inx++) {
 		wListAddValue( scaleList, scaleDesc(inx).scaleDescStr, NULL, I2VP(inx) );
 	}
 }
@@ -774,7 +829,7 @@ EXPORT void LoadGaugeList( wList_p gaugeList, SCALEDESCINX_T scale )
 static void ScaleChange( long changes )
 {
 	if (changes & CHANGE_SCALE) {
-		SetScale( GetLayoutCurScale() );
+		SetScale();
 	}
 }
 
@@ -1046,6 +1101,10 @@ EXPORT void DoRescale( void * unused )
 	} else if ( SCALE_MULTI == rescaleFromScaleInx ) {
 		strcpy( rescaleFromScaleStr, "Multi-Scale" );
 		strcpy( rescaleFromGaugeStr, "" );
+		strcpy( rescaleFromGaugeStr, "" );
+	} else if ( SCALE_UNKNOWN == rescaleFromScaleInx ) {
+		strcpy( rescaleFromScaleStr, "Unknown" );
+		strcpy( rescaleFromGaugeStr, "" );
 	} else {
 		scaleDesc_t* scaleDescP = &scaleDesc(rescaleFromScaleInx);
 		strcpy( rescaleFromScaleStr, scaleDescP->scaleDescStr );
@@ -1091,4 +1150,5 @@ EXPORT void ScaleInit( void )
 	wPrefGetInteger( "misc", "include same gauge turnouts",
 	                 &includeSameGaugeTurnouts, 1 );
 	ParamRegister( &rescalePG );
+	log_scale = LogFindIndex( "scale" );
 }

@@ -29,6 +29,7 @@
 #include "track.h"
 #include "fileio.h"
 #include "cselect.h"
+#include "include/toolbar.h"
 
 #define MINTRACKRADIUSPREFS "minTrackRadius"
 #define MAXTRACKGRADEPREFS "maxTrackGrade"
@@ -70,7 +71,7 @@ struct sDataLayout {
 };
 
 static struct sDataLayout thisLayout = {
-	{ "", "", -1, 0, 0, 0.0, 0.0, {0.0, 0.0}, "", {0.0, 0.0}, 0.0, 0, 0.0},
+	{ "", "", 0, 0, 0, 0.0, 0.0, {0.0, 0.0}, "", {0.0, 0.0}, 0.0, 0, 0.0},
 	NaS,
 	NaS,
 	NULL,
@@ -1003,7 +1004,7 @@ LayoutBackGroundInit(BOOL_T clear)
 /**
  * Read the settings defined in the file from sections [misc] and [DialogItem]
  * @param files Number of files chosen
- * @param fileName Filename(s) shosen. Only the first is used
+ * @param fileName Filename(s) chosen. Only the first is used
  * @param data Not used
  * @return TRUE (always)
 */
@@ -1031,7 +1032,7 @@ EXPORT int DoSettingsRead(
 	wPrefGetInteger("DialogItem","cmdopt-selectzero",&selectZero,selectZero);
 
 	//Get Toolbar showing
-	wPrefGetInteger( "misc", "toolbarset",&toolbarSet,toolbarSet);
+	ToolbarLoadConfig();
 
 	LayoutBackGroundInit( FALSE );
 

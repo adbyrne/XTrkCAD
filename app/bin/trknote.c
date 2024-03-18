@@ -49,15 +49,12 @@ typedef struct {
 #include "bitmaps/sticky-doc.xpm3"
 
 static trknoteData_t noteTypes[] = {
-	{ sticky_note_xpm3, OP_NOTETEXT, N_("Note"), N_("Comment"), "cmdTextNote", ACCL_NOTE },
+	{ sticky_note_xpm3, OP_NOTETEXT, N_("Note"), N_("Text Note"), "cmdTextNote", ACCL_NOTE },
 	{ sticky_link_xpm3, OP_NOTELINK, N_("Link"), N_("Weblink"), "cmdLinkNote", 0L },
 	{ sticky_doc_xpm3, OP_NOTEFILE, N_("Document"), N_("Document"), "cmdFileNote", 0L },
 };
 
 static long curNoteType;
-
-static unsigned layerSave;
-static 	coOrd posSave;
 
 #define NOTETYPESCOUNT COUNT(noteTypes)
 
@@ -519,7 +516,6 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 {
 	static coOrd oldPos;
 	static int state_on = FALSE;
-	track_p trk;
 
 	switch (action) {
 	case C_START:

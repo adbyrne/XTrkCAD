@@ -16,74 +16,74 @@
 
 The \f{Add Menu} has all the actions related to adding track pieces to the layout.
 
-\dd \i\f{Straight Track} \c{Ctrl+G} - lay straight track pieces of arbitrary lengths
+\dd \i{Straight Track} \c{Ctrl+G} - lay straight track pieces of arbitrary lengths
 
 \u000
 
-\dd \i\f{Curve Track} - lay curved track pieces using different modes for selecting start and endpoints and radius (\K{cmdCurve}).
+\dd \i{Curve Track} - lay curved track pieces using different modes for selecting start and endpoints and radius (\K{cmdCurve}).
 
 \dd \G{png.d/maddcurve.png}
 
 \u000
 
-\dd \i\f{Circle Track} \I{Track, Circle} - place a circle of track by selecting radius, tangent and or center (\K{cmdCircle}).
+\dd \i{Circle Track} \I{Track, Circle} - place a circle of track by selecting radius, tangent and or center (\K{cmdCircle}).
 
 \dd \G{png.d/maddcircle.png}
 
 \u000
 
-\dd \i\f{Parallel} - \I{Parallel Track} \I{Track, Parallel} \I{Parallel Line} \I{Line, Parallel}
+\dd \i{Parallel} - \I{Parallel Track} \I{Track, Parallel} \I{Parallel Line} \I{Line, Parallel}
 create parallel track or line to existing flex-track, straight or curved track. (\K{cmdParallel})
 
 \dd \G{png.d/maddparallel.png}
 
 \u000
 
-\dd \i\f{Predefined Track} \I{Track, Predefined} \c{Ctrl+T} - select a turnout or a piece of fixed track and place on layout.
+\dd \i{Fixed-track} \I{Track, Fixed} \c{Ctrl+T} - select a piece of \f{Fixed-track} and place on layout.
 
 \u000
 
-\dd \i\f{Hand-laid Turnout} \I{Turnout, Hand-laid} \c{Ctrl+Shift+I} - lay a turnout in place on the layout. (\K{cmdHandLaidTurnout})
+\dd \i{Hand-laid Turnout} \I{Turnout, Hand-laid} \c{Ctrl+Shift+I} - lay a turnout in place on the layout. (\K{cmdHandLaidTurnout})
 
 \u000
 
-\dd \i\f{Structure} \c{Ctrl+Shift+C} - Add a predefined structure to the layout.
+\dd \i{Structure} \c{Ctrl+Shift+C} - Add a predefined structure to the layout.
 
 \u000
 
-\dd \i\f{Helix} \c{Ctrl+Shift+H} - Add a helix. (\K{cmdHelix})
+\dd \i{Helix} \c{Ctrl+Shift+H} - Add a helix. (\K{cmdHelix})
 
 \u000
 
-\dd \i\f{Custom Turntable} \I{Turntable, Custom} \c{Ctrl+Shift+N} - Place a turntable. (\K{cmdTurntable})
+\dd \i{Custom Turntable} \I{Turntable, Custom} \c{Ctrl+Shift+N} - Place a turntable. (\K{cmdTurntable})
 
 \u000
 
-\dd \i\f{Control Element} - Create a control element.
+\dd \i{Control Element} - Create a control element.
 
 \u000
 
-\dd \i\f{Block} \I{Control Element, Block} - Create a block. (\K{cmdBlock})
+\dd \i{Block} \I{Control Element, Block} - Create a block. (\K{cmdBlock})
 
 \u000
 
-\dd \i\f{Switchmotor} \I{Control Element, Switchmotor} - Create a switchmotor. (\K{cmdSwitchmotor})
+\dd \i{Switchmotor} \I{Control Element, Switchmotor} - Create a switchmotor. (\K{cmdSwitchmotor})
 
 \u000
 
-\dd \i\f{Signal} \I{Control Element, Signal} - Create a signal. (\K{cmdSignal})
+\dd \i{Signal} \I{Control Element, Signal} - Create a signal. (\K{cmdSignal})
 
 \u000
 
-\dd \i\f{Control} \I{Control Element, Control} - Create a control. (\K{cmdControl})
+\dd \i{Control} \I{Control Element, Control} - Create a control. (\K{cmdControl})
 
 \u000
 
-\dd \i\f{Sensor} \I{Control Element, Sensor} - Create a sensor. (\K{cmdSensor})
+\dd \i{Sensor} \I{Control Element, Sensor} - Create a sensor. (\K{cmdSensor})
 
 \rule
 
-\S{cmdCircle} Circle Track
+\S{cmdCircle} \i{Circle Track}
 
 \G{png.d/maddcircle.png}
 
@@ -122,7 +122,7 @@ You can join to and from circles, after which they become curved tracks.
 
 \rule
 
-\S2{cmdCircleFixedRadius} Circle Fixed Radius
+\S2{cmdCircleFixedRadius} \i{Circle Fixed Radius}
 
 \G{png.d/bcircl1.png}
 
@@ -131,7 +131,7 @@ You can join to and from circles, after which they become curved tracks.
 
 \rule
 
-\S2{cmdCircleTangent} Circle Fixed Tangent
+\S2{cmdCircleTangent} \i{Circle Fixed Tangent}
 
 \G{png.d/bcircl2.png}
 
@@ -139,7 +139,7 @@ You can join to and from circles, after which they become curved tracks.
 
 \rule
 
-\S2{cmdCircleCenter} Circle From Center
+\S2{cmdCircleCenter} \i{Circle From Center}
 
 \G{png.d/bcircl3.png}
 
@@ -147,7 +147,7 @@ You can join to and from circles, after which they become curved tracks.
 
 \rule
 
-\S{cmdCurve} Curved Track
+\S{cmdCurve} \i{Curved Track}
 
 \G{png.d/maddcurve.png}
 
@@ -210,7 +210,7 @@ For Beziers and Cornus, the active control point will be drawn in red and the av
 
 \rule
 
-\S2{cmdCurveEndPt} Curved Track from End Point
+\S2{cmdCurveEndPt} \i{Curved Track from End Point}
 
 \G{png.d/bcurve1.png}
 
@@ -226,7 +226,7 @@ If Magnetic Snap does not find a end, if \f{SnapGrid} is enabled, the ends will 
 
 \rule
 
-\S2{cmdCurveTangent} Curved track from Tangent
+\S2{cmdCurveTangent} \i{Curved track from Tangent}
 
 \G{png.d/bcurve2.png}
 
@@ -240,7 +240,7 @@ If Magnetic Snap does not find a end, if \f{SnapGrid} is enabled, the end will s
 
 \rule
 
-\S2{cmdCurveCenter} Curved Track From Center
+\S2{cmdCurveCenter} \i{Curved Track From Center}
 
 \G{png.d/bcurve3.png}
 
@@ -253,7 +253,7 @@ If Magnetic Snap does not find a end, if \f{SnapGrid} is enabled, the end will s
 
 \rule
 
-\S2{cmdCurveChord} Curved Track from Chord
+\S2{cmdCurveChord} \i{Curved Track from Chord}
 
 \G{png.d/bcurve4.png}
 
@@ -267,7 +267,7 @@ If Magnetic Snap does not find a end, if \f{SnapGrid} is enabled, the end will s
 
 \rule
 
-\S2{cmdBezier} Curved Bezier Track
+\S2{cmdBezier} \i{Curved Bezier Track}
 
 \G{png.d/bezier.png}
 
@@ -282,7 +282,7 @@ If Magnetic Snap does not find a end, if \f{SnapGrid} is enabled, the end will s
 
 \rule
 
-\S2{cmdCornu} Create Cornu Track
+\S2{cmdCornu} \i{Create Cornu Track}
 
 \G{png.d/bcornu.png}
 
@@ -314,7 +314,7 @@ If the end is not connected, an anchor will enable the end-angle and radius to b
 \u000
 
 
-\S{cmdHandLaidTurnout} Hand-laid Turnouts
+\S{cmdHandLaidTurnout} \i{Hand-laid Turnouts}
 
 \G{png.d/bhndldto.png}
 
@@ -339,7 +339,7 @@ Note: the drawing is an approximation to show the location of the \e{Points} and
 \rule
 
 
-\S{cmdHelix} Helix Track
+\S{cmdHelix} \i{Helix Track}
 
 \G{png.d/bhelix.png}
 
@@ -366,7 +366,7 @@ You can join to a helix in the same way you join to a circle.  However, once joi
 A label for the helix is drawn at it's the center.  If the elevations are set (either by a Defined Elevation point or connecting to a Defined Elevation point) for the two ends of the helix then the label contains the computed grade and vertical separation between layers as well as the number of turns and total length.  The label can be moved or turned off by the Move Label (\K{cmdMoveLabel}) command.
 
 
-\S{cmdParallel} Parallel Track or Line
+\S{cmdParallel} \i{Parallel Track or Line}
 
 \dd \G{png.d/maddparallel.png}
 
@@ -384,7 +384,7 @@ You can pick between two Parallel Commands:
 
 \rule
 
-\S2{cmdParallelTrack} Parallel Track
+\S2{cmdParallelTrack} \i{Parallel Track}
 
 \G{png.d/bparallel.png}
 
@@ -412,7 +412,7 @@ These endpoints will be automatically connected.
 
 \rule
 
-\S2{cmdParallelLine} Parallel Lines
+\S2{cmdParallelLine} \i{Parallel Lines}
 
 \G{png.d/bparalleline.png}
 
@@ -422,7 +422,7 @@ Select the Track or Line you want to parallel with \c{Left-Click}, and the new p
 
 \rule
 
-\S{cmdStraight} Straight Track
+\S{cmdStraight} \i{Straight Track}
 
 \G{png.d/bstraigh.png}
 
@@ -434,11 +434,11 @@ If the Snap Grid (\K{cmdGrid}) is enabled then the endpoints will be constrained
 \rule
 
 
-\S{cmdStructure} Structure
+\S{cmdStructure} \i{Structure}
 
 \G{png.d/bstruct.png}
 
-The \f{Structure} command places diagrams of structures (buildings, bridges and other scenic elements) on the layout.  The operation is similar to the Turnout (\K{cmdTurnout}) command.
+The \f{Structure} command places diagrams of structures (buildings, bridges and other scenic elements) on the layout.  The operation is similar to the Fixed-track (\K{cmdNewFixedTrack}) command.
 
 \G{png.d/strsel.png}
 
@@ -448,33 +448,33 @@ The \f{Structure Selection} dialog will disappear while dragging on the layout i
 
 See the Hot Bar (\K{cmdHotBar}) command for details on placing Structures on the layout.
 
-\f{Structures} are placed on the layout in same way as \f{turnouts} except that there is no \e{Active endpoint} and structures do not align with existing tracks.
+\f{Structures} are placed on the layout in same way as \f{Fixed-tracks} except that there is no \e{Active endpoint} and structures do not align with existing tracks.
 
 \rule
 
 
-\S{cmdTurnout} Turnouts
+\S{cmdNewFixedTrack} \i{Fixed-track}
 
 \G{png.d/bturnout.png}
 
-Turnouts (and sectional track) are created by the \f{Turnout} command \I{Created by Turnout Command}.  When you select the turnout command, the \f{Turnout Selection} dialog is displayed which contains a list of available turnouts and sectional track for the current scale (\K{cmdLayout}) and a diagram of the selected turnout.
+Fixed-track objects (Turnouts, Sectional Tracks and Grouped Object) are added by the \f{Fixed-track} command, and the \f{Selection} dialog is displayed which contains a list of available turnouts, sectional tracks and grouped objects for the current scale (\K{cmdLayout}) and a diagram of the selected turnout.
 
 You can use the Parameter File Dialog (\K{cmdPrmfile}) to control what turnouts are available.
 
 \G{png.d/turnsel.png}
 
-Select a turnout from the scrolling list by \c{Left-Click}ing on it. Move to the Layout and \c{Left-Click} where the turnout should be placed. The Turnout will snap to nearby flextracks or open endpoints. By \c{Left-Drag}ing you can move the turnout around. Additional \c{Left-Click}s change the way the turnout is placed.
+Select a turnout from the scrolling list by \c{Left-Click}ing on it. Move to the Layout and \c{Left-Click} where the turnout should be placed. The Turnout will snap to nearby flex-tracks or open endpoints. By \c{Left-Drag}ing you can move the turnout around. Additional \c{Left-Click}s change the way the turnout is placed.
 
 The \f{New} button invokes the Turnout Designer (\K{cmdTurnoutNew}) dialog.  This button displays a pop-up-menu list of various types of turnouts and sectional track.
 
 The \f{Turnout Selection} window will disappear while dragging on the layout if the \f{Hide} Check Box on the dialog is set.  This is useful if you have a small screen.
 
-See the Hot Bar (\K{cmdHotBar}) command for details on placing Turnouts on the layout.
+See the Hot Bar (\K{cmdHotBar}) command for details on placing Fixed-tracks on the layout.
 
 \rule
 
 
-\S{cmdTurntable} Turntables
+\S{cmdTurntable} \i{Turntables}
 
 \G{png.d/bturntbl.png}
 
@@ -490,7 +490,7 @@ The \f{Turntable Angle} control on the Preferences (\K{cmdPref}) dialog controls
 
 \rule
 
-\S{cmdBlock} Block
+\S{cmdBlock} \i{Block}
 
 \G{png.d/bblock.png}
 
@@ -513,7 +513,7 @@ information, etc.
 
 \rule
 
-\S{cmdSwitchmotor} Switchmotor
+\S{cmdSwitchmotor} \i{Switchmotor}
 
 \G{png.d/bswitchmotor.png}
 
@@ -537,7 +537,7 @@ could be code snippets or I/O device address information, etc.
 
 \rule
 
-\S{cmdSignal} Signal
+\S{cmdSignal} \i{Signal}
 
 \G{png.d/bsignal.png}
 
@@ -561,7 +561,7 @@ causes the aspect to be displayed.
 
 \rule
 
-\S{cmdControl} Control
+\S{cmdControl} \i{Control}
 
 \G{png.d/bcontrol.png}
 
@@ -581,7 +581,7 @@ software to actually effect the state on the control (on or off).
 
 \rule
 
-\S{cmdSensor} Sensor
+\S{cmdSensor} \i{Sensor}
 
 \G{png.d/bsensor.png}
 

@@ -26,19 +26,19 @@ The \f{View Menu} shows commands affecting the display of the \f{Main Canvas} (\
 
 \u000
 
-\dd \f{Show Snap-Grid} - Toggles display of the \f{Snap Grid} on and off.
+\dd \f{Show Snap-Grid} - \I{Snap Grid} Toggles display of the \f{Snap Grid} on and off.
 
 \u000
 
-\dd \f{Magnetic Snap On/Off} - Toggles Magnets (\K{cmdMagneticSnap}) for Add Operations on and off.  The magnets make tracks auto-align and shapes touch when the cursor or object is close.  They can be defeated on each operation by holding down \e{Alt}.  If the Magnets are off, holding down \e{Alt} will enable them.
+\dd \f{Magnetic Snap On/Off} - Toggles \i{Magnetic Snap} (\K{cmdMagneticSnap}) for Add Operations on and off.  The magnets make tracks auto-align and shapes touch when the cursor or object is close.  They can be defeated on each operation by holding down \e{Alt}.  If the Magnets are off, holding down \e{Alt} will enable them.
 
 \u000
 
-\dd \G{png.d/bmap.png} \f{ Show/Hide Map} - Toggles display of the \f{Map Window} on and off.
+\dd \G{png.d/bmap.png} \f{ Show/Hide Map} - Toggles display of the \f{Map Window} \I{Map Window} on and off.
 
 \u000
 
-\dd \f{Tool-bar} - Command button groups displayed on the \f{Tool-bar} are selected using the Tool-bar Configuration Menu (\K{toolbarM}).
+\dd \f{Toolbar Options} - Command button groups displayed on the \f{Toolbar} are selected using the Toolbar Options Dialog (\K{toolbarOpts}).
 
 \u000
 
@@ -84,7 +84,7 @@ This enables snapping to be inhibited for a single part of an operation (or conv
 
 \rule
 
-\S{cmdGrid} Grid Dialog
+\S{cmdGrid} \i{Grid Dialog}
 
 The \f{Grid} dialog, displayed by \f{Change Grid} on the View (\K{viewM}) menu, specifies the origin, angle and other parameters of the Snap Grid.  
 The Snap Grid can sbe used to snap the position of the cursor during the \f{Curve} (\K{cmdCurve}), \f{Circle} (\K{cmdCircle}), \f{Cornu} (\K{cmdCornu}), \f{Modify} (\K{cmdModify}), \f{Straight} (\K{cmdStraight}), \f{Draw} (\K{cmdDraw}) and \f{Turntable} (\K{cmdTurntable}) commands.
@@ -125,11 +125,12 @@ Whether the Snap Grid is drawn is controlled by the \f{Show} check-box.  Also, i
 
 \rule
 
-\S{toolbarM}Tool-bar Configuration
+\S{toolbarOpts} \i{Toolbar Options}
 
-\G{png.d/mtoolbar.png}
+\G{png.d/toolbopt.png}
 
-Command button groups displayed on the \f{Tool-bar} are selected using the Tool-bar Configuration Menu (\K{toolbarM}). If none of the command button groups are selected, the \f{Tool-bar} is not shown.
+Command button groups displayed on the \f{Toolbar} are selected using the Toolbar Options Dialog (\K{toolbarOpts}). If none of the command button groups are selected, the \f{Toolbar} is not shown.
+\f{Select All} quickly selects all button groups for display. \f{Invert} inverts the current selection eg. displayed groups will be switched off and vice versa.
 
 \rule
 
@@ -177,8 +178,7 @@ Pressing the middle Zoom button on the Tool Bar pop-ups a list of Zoom factors t
 
 \u000
 
-\dd The Pan function can be accessed using the Mouse Wheel with \e{Shift} of the \e{Mouse Middle Button}. Adding \e{Ctrl} as well as \e{Shift} chnages Up to Left and Down to Right. 
-Pan Left and Right can also be driven by the Horizontal Mouse Wheel (if available) or the Scroll Left/Right Guestures (if mapped by the Operating System).
+\dd See \f{Main Window Overview} (\K{mainW}) for details on how to \f{Pan} the \f{Main Canvas}.
 
 \rule
 

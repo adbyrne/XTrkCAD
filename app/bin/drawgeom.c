@@ -1679,7 +1679,7 @@ static STATUS_T DrawGeomPolyModify(
 			return C_CONTINUE;
 		}
 		if ((action>>8 == 'l') && (tempSegs(0).type == SEG_POLY)
-		    && (tempSegs(0).u.p.polyType == FREEFORM)) {
+		    && (tempSegs(0).u.p.polyType != POLYLINE)) {
 			tempSegs(0).u.p.polyType = POLYLINE;
 			context->subtype=POLYLINE;
 			context->open = TRUE;
@@ -1689,18 +1689,16 @@ static STATUS_T DrawGeomPolyModify(
 		if ((action>>8 == 'f') && (tempSegs(0).type == SEG_POLY)
 		    && (tempSegs(0).u.p.polyType != POLYLINE )) {
 			tempSegs(0).type = SEG_FILPOLY;
-			tempSegs(0).u.p.polyType = FREEFORM;
 			context->type =  SEG_FILPOLY;
-			context->subtype=FREEFORM;
+			context->subtype=tempSegs(0).u.p.polyType;
 			context->filled = TRUE;
 			CreatePolyAnchors( -1);
 			return C_CONTINUE;
 		}
 		if ((action>>8 == 'u') && (tempSegs(0).type == SEG_FILPOLY) ) {
 			tempSegs(0).type = SEG_POLY;
-			tempSegs(0).u.p.polyType = FREEFORM;
 			context->type =  SEG_POLY;
-			context->subtype=FREEFORM;
+			context->subtype=tempSegs(0).u.p.polyType;
 			context->filled = FALSE;
 			CreatePolyAnchors( -1);
 			return C_CONTINUE;
@@ -2093,6 +2091,7 @@ STATUS_T DrawGeomModify(
 				CreateBoxAnchors(-1,&context->segPtr[segInx].u.p.pts[0]);
 				context->p0 = points(0).pt;
 				context->p1 = points(1).pt;
+
 			}
 			break;
 		case SEG_TEXT:
@@ -2747,6 +2746,18 @@ STATUS_T DrawGeomModify(
 
 		if (action>>8 == 'o') {
 			MenuMode(I2VP(1));
+		}
+		if (context->subtype == RECTANGLE) {
+			switch (action>>8) {
+			case 'f':
+				tempSegs(0).type = SEG_FILPOLY;
+				context->type = SEG_FILPOLY;
+				break;
+			case 'u':
+				tempSegs(0).type = SEG_POLY;
+				context->type = SEG_POLY;
+				break;
+			}
 		}
 
 		if (action>>8 != 32 && action>>8 != 13) { return C_CONTINUE; }

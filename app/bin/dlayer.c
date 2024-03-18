@@ -31,6 +31,7 @@
 #include "track.h"
 #include "include/partcatalog.h"
 #include "include/stringxtc.h"
+#include "include/toolbar.h"
 #include "common-ui.h"
 
 /*****************************************************************************
@@ -103,7 +104,7 @@ typedef struct {
 	ANGLE_T maxTrackGrade;              /**< maximum track grade */
 	tieData_t tieData;                  /**< tie data structure */
 	long objCount;						/**< number of objects on layer */
-	dynArr_t layerLinkList;				/**< other layers that show/hide with this one */
+	dynArr_t layerLinkList;				/**< other layers that show/hide with this one, 1-based index */
 	char settingsName[STR_SHORT_SIZE];  /**< name of settings file to load when this is current */
 } layer_t;
 
@@ -350,6 +351,7 @@ EXPORT void FlipLayer( void * layerVP )
 
 	/* Set visible on related layers other than current */
 	for (int i = 0; i < layers[layer].layerLinkList.cnt; i++) {
+		// .layerLinkList values are 1-based layer indices
 		int l = DYNARR_N(int, layers[layer].layerLinkList, i) - 1;
 		if ((l != curLayer) && (l >= 0) && (l < NUM_LAYERS)) {
 			layers[l].visible = layers[layer].visible;
@@ -405,6 +407,7 @@ void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
 
 	/* Set visible on related layers other than current */
 	for (int i = 0; i < layers[curLayer].layerLinkList.cnt; i++) {
+		// .layerLinkList values are 1-based layer indices
 		int l = DYNARR_N(int, layers[curLayer].layerLinkList, i) - 1;
 		if (l != curLayer && l >= 0 && l < NUM_LAYERS) {
 			layers[l].visible = layers[curLayer].visible;
@@ -1801,7 +1804,7 @@ BOOL_T ReadLayers(char * line)
 		if (!GetArgs(line + 4, "dq", &inx, &layerLinkList)) {
 			return FALSE;
 		}
-		PutLayerListArray(inx - 1, layerLinkList);
+		PutLayerListArray(inx, layerLinkList);
 		return TRUE;
 	}
 
@@ -1876,8 +1879,8 @@ BOOL_T ReadLayers(char * line)
 	layers[inx].inherit = inherit;
 	GetScaleGauge(sclInx, &layers[inx].scaleDescInx, &layers[inx].gaugeInx);
 
-	colorTrack = ColorFlags & 1; //Make sure globals are set
-	colorDraw = ColorFlags & 2;
+	colorTrack = ( ColorFlags & 1 ) ? 1 : 0; //Make sure globals are set
+	colorDraw = ( ColorFlags & 2 ) ? 1 : 0;
 
 	if (inx < NUM_BUTTONS && !layers[inx].button_off) {
 		if (strlen(name) > 0) {
@@ -1963,7 +1966,7 @@ BOOL_T WriteLayers(FILE * f)
 	fprintf(f, "LAYERS CURRENT %u\n", curLayer);
 
 	for (inx = 0; inx < NUM_LAYERS; inx++) {
-		unsigned int layerInx = inx + 1;
+		unsigned int layerInx = inx;
 		GetLayerLinkString(inx, layerLinkList);
 		if (IsLayerConfigured(inx) && strlen(layerLinkList) > 0) {
 			fprintf(f, "LAYERS LINK %u \"%s\"\n", layerInx, layerLinkList);
@@ -2097,7 +2100,7 @@ static int lbmap_height[3] = { 16, 24, 32 };
 static int lbit0_width[3] = { 6, 10, 14 };
 static int lbit1_width[3] = { 4, 5, 6 };
 
-static int lbits_top[3] = { 3, 4, 6 };
+//static int lbits_top[3] = { 3, 4, 6 };
 static int lbits_height[3] = { 10, 15, 20 };
 
 #include "bitmaps/layer_num.inc"
@@ -2120,7 +2123,7 @@ static char** show_layer_digits[3][10] = {
  */
 #define ONE_PIXEL v *= 2; if (v > 128) { show_layer_bits[xx + yy] = b; xx += 1; v = 1; b = 0; }
 
-void InitLayers(void)
+void InitLayers(int cmdGroup)
 {
 	unsigned int i;
 	wPrefGetInteger(PREFSECT, "layer-button-count", &layerCount, layerCount);
@@ -2323,7 +2326,7 @@ void InitLayers(void)
 	setLayerL = wDropListCreate(mainW, 0, 0, "cmdLayerSet", NULL, 0, 10, 200, NULL,
 	                            SetCurrLayer, NULL);
 	wControlSetBalloonText((wControl_p)setLayerL, GetBalloonHelpStr("cmdLayerSet"));
-	AddToolbarControl((wControl_p)setLayerL, IC_MODETRAIN_TOO);
+	ToolbarControlAdd((wControl_p)setLayerL, IC_MODETRAIN_TOO, cmdGroup );
 
 	backgroundB = AddToolbarButton("cmdBackgroundShow",
 	                               wIconCreatePixMap(background_xpm3[iconSize]), 0,

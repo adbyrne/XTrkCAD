@@ -23,7 +23,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef WIN32
+#include <Windows.h>
+#else
 #include <unistd.h>
+#endif
 
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
@@ -1304,17 +1308,15 @@ wWin_p wWinPopupCreate(
 
 
 /**
- * Terminates the applicaton with code <rc>. Before closing the main window
- * call back is called with wQuit_e. The program is terminated without exiting
- * the main message loop.
+ * Terminates the applicaton. Before closing the main window
+ * call back is called with wQuit_e. 
  *
  * \param rc IN exit code
  * \return    never returns
  */
 
 
-void wExit(
-    int rc)		/* Application return code */
+void wExit(int rc)		/* Application return code */
 {
     wWin_p win;
 
@@ -1330,6 +1332,5 @@ void wExit(
     if (gtkMainW && gtkMainW->winProc != NULL) {
         gtkMainW->winProc(gtkMainW, wQuit_e, NULL, gtkMainW->data);
     }
-    gtk_main_quit();
-    //exit(rc);
+    g_application_quit(wlibGetApp());
 }

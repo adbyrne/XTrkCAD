@@ -33,6 +33,7 @@
 #include "track.h"
 #include "version.h"
 #include "common-ui.h"
+#include "include/toolbar.h"
 
 #ifdef UTFCONVERT
 #include "include/utf8convert.h"
@@ -745,8 +746,8 @@ static void PlaybackQuit( void )
 	ClearTracks();
 	checkPtMark = changed = 0;
 	RestoreTrackState();
-	inPlaybackQuit = FALSE;
 	DoSetScale( oldScaleName );
+	inPlaybackQuit = FALSE;
 	DoChangeNotification( CHANGE_ALL );
 	CloseDemoWindows();
 	curDemo = -1;
@@ -1512,7 +1513,7 @@ static char * demoInitParams[] = {
 	"GROUP misc",
 	"sticky set 67108479", /* 0x3fffe7f - all but Helix and Turntable */
 	"GROUP sticky",
-	"turnout hide 0",
+	"newFixedTrack hide 0",
 	"layer button-count 10",
 	"cmdopt selectmode 0",
 	"cmdopt selectzero 1",

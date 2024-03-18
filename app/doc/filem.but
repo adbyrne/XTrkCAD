@@ -168,7 +168,7 @@ This id is derived from the filename by removing all spaces and sticking the wor
 
 \rule
 
-\S{cmdImport} Import
+\S{cmdImport} \i{Import}
 
 \G{png.d/bimport.png}
 
@@ -180,7 +180,7 @@ After importing the objects from the file, the imported objects are in selected 
 
 \rule
 
-\S{cmdImportM} Import as Module
+\S{cmdImportM} \i{Import as Module}
 
 \G{png.d/bimportxtc.png}
 
@@ -417,7 +417,7 @@ If you make printouts in strips at different angles at 1:1 (to follow tracks aro
 
 \rule
 
-\S{printSetup} Printer Setup
+\S{printSetup} \i{Printer Setup}
 
 \S2{Linux} \i{Linux}
 

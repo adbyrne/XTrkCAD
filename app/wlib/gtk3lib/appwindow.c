@@ -40,6 +40,21 @@
 
 static struct wWindow_t *appMainWindow;
 
+GtkAccelGroup* 
+wlibAppWinGetAccelGroup()
+{
+	return(appMainWindow->accelGroup);
+}
+
+static gboolean
+on_widget_deleted(GtkWidget* window, GdkEvent* event, gpointer userData)
+{
+	if (appMainWindow->winProc) {
+		return(appMainWindow->winProc(appMainWindow, wClose_e, userData, NULL ));
+	}
+	return FALSE;
+}
+
 /**
  * Initialize the application's main window. This function does the necessary
  * initialization of the application including creation of the main window.
@@ -103,6 +118,11 @@ static struct wWindow_t *appMainWindow;
 	 gtk_application_add_window(wlibGetApp(),
 								GTK_WINDOW(appMainWindow->oc.widget));
 
+	 // create the accelerator group
+	 appMainWindow->accelGroup = gtk_accel_group_new();
+	 gtk_window_add_accel_group(GTK_WINDOW(appMainWindow->oc.widget),
+		 appMainWindow->accelGroup);
+
 	 gtk_window_set_title(GTK_WINDOW(appMainWindow->oc.widget), labelStr);
 
 	 if (option & F_MENUBAR)
@@ -118,6 +138,9 @@ static struct wWindow_t *appMainWindow;
 	 {
 		 //        appMainWindow->toolbar =  createToolbar(toolbarContainer);
 	 }
+
+	 g_signal_connect(G_OBJECT(appMainWindow->oc.widget),
+		 "delete-event", G_CALLBACK(on_widget_deleted), NULL);
 
 	 gtk_widget_show_all(appMainWindow->oc.widget);
 

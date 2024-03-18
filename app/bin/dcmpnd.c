@@ -397,7 +397,8 @@ EXPORT BOOL_T RefreshCompound(
 			}
 			if ( IsParamValid(to->paramFileIndex) &&
 			     to->segCnt > 0 &&
-			     (FIT_NONE != CompatibleScale( GetTrkEndPtCnt(trk)>0, to->scaleInx, scale ) )) {
+			     (FIT_NONE != CompatibleScale( GetTrkEndPtCnt(trk)>0?FIT_TURNOUT:FIT_STRUCTURE,
+			                                   to->scaleInx, scale ) )) {
 				if ( RefreshCompound1( trk, refreshSpecial(inx).to ) ) {
 					if ( strcasecmp( xx->title, to->title ) != 0 ) {
 						MyFree( xx->title );

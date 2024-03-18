@@ -52,14 +52,14 @@ static void FileDlgUpdate(
         int inx,
         void * valueP);
 
-static paramFloatRange_t r_1000_1000 = { -1000.0, 1000.0, 80 };
+static paramFloatRange_t noRangeCheck = { 0.0, 0.0, 80, PDO_NORANGECHECK_HIGH | PDO_NORANGECHECK_LOW };
 
 // static char *toggleLabels[] = { N_("Copy to archive"), NULL };
-static paramData_t fileEditPLs[] = {
+static paramData_t fileNotePLs[] = {
 #define I_ORIGX (0)
-	/*0*/ { PD_FLOAT, &fileNoteData.pos.x, "origx", PDO_DIM|PDO_NOPREF, &r_1000_1000, N_("Position X") },
+	/*0*/ { PD_FLOAT, &fileNoteData.pos.x, "origx", PDO_DIM|PDO_NOPREF, &noRangeCheck, N_("Position X") },
 #define I_ORIGY (1)
-	/*1*/ { PD_FLOAT, &fileNoteData.pos.y, "origy", PDO_DIM|PDO_NOPREF, &r_1000_1000, N_("Position Y") },
+	/*1*/ { PD_FLOAT, &fileNoteData.pos.y, "origy", PDO_DIM|PDO_NOPREF, &noRangeCheck, N_("Position Y") },
 #define I_LAYER (2)
 	/*2*/ { PD_DROPLIST, &fileNoteData.layer, "layer", PDO_NOPREF, I2VP(150), "Layer", 0 },
 #define I_TITLE (3)
@@ -75,8 +75,8 @@ static paramData_t fileEditPLs[] = {
 
 };
 
-static paramGroup_t fileEditPG = { "fileEdit", 0, fileEditPLs, COUNT( fileEditPLs ) };
-static wWin_p fileEditW;
+static paramGroup_t fileNotePG = { "fileNote", 0, fileNotePLs, COUNT( fileNotePLs ) };
+static wWin_p fileNoteW;
 
 BOOL_T IsFileNote(track_p trk)
 {
@@ -116,10 +116,10 @@ int LoadDocumentFile(
         char ** fileName,
         void * data)
 {
-	wControlActive(fileEditPLs[I_OPEN].control, TRUE);
-	ParamDialogOkActive(&fileEditPG, TRUE);
+	wControlActive(fileNotePLs[I_OPEN].control, TRUE);
+	ParamDialogOkActive(&fileNotePG, TRUE);
 	strscpy(fileNoteData.path, *fileName, PATHMAXIMUMLENGTH );
-	ParamLoadControl(&fileEditPG, I_PATH);
+	ParamLoadControl(&fileNotePG, I_PATH);
 
 	return(0);
 }
@@ -136,9 +136,9 @@ static void NoteFileBrowse(void * junk)
 
 	wFilSelect(documentFile_fs, GetCurrentPath(DOCUMENTPATHKEY));
 
-	wControlActive(fileEditPLs[I_OPEN].control,
+	wControlActive(fileNotePLs[I_OPEN].control,
 	               (strlen(fileNoteData.path) ? TRUE : FALSE));
-	FileDlgUpdate( &fileEditPG, I_PATH, NULL );
+	FileDlgUpdate( &fileNotePG, I_PATH, NULL );
 	return;
 }
 
@@ -156,8 +156,8 @@ static void NoteFileOpen(char *fileName)
 	} else {
 		wNoticeEx(NT_ERROR, _("The file doesn't exist or cannot be read!"), _("Cancel"),
 		          NULL);
-		if (fileEditW) {
-			wControlActive(fileEditPLs[I_OPEN].control, FALSE);
+		if (fileNoteW) {
+			wControlActive(fileNotePLs[I_OPEN].control, FALSE);
 		}
 	}
 }
@@ -184,7 +184,7 @@ FileDlgUpdate(
 		break;
 	case I_PATH:
 		if (!IsFileValid(fileNoteData.path)) {
-			paramData_p p = &fileEditPLs[I_PATH];
+			paramData_p p = &fileNotePLs[I_PATH];
 			p->bInvalid = TRUE;
 			wWinPix_t h = wControlGetHeight(p->control);
 			wControlSetBalloon( p->control, 0, h, "Document path is invalid" );
@@ -205,7 +205,7 @@ static void
 FileEditCancel( wWin_p junk)
 {
 	ResetIfNotSticky();
-	wHide(fileEditW);
+	wHide(fileNoteW);
 }
 /**
  * Handle OK button: make sure the entered filename is syntactically valid, update
@@ -231,7 +231,7 @@ FileEditOK(void *junk)
 	xx->noteData.fileData.path = MyStrdup( fileNoteData.path );
 	SetBoundingBox( trk, xx->pos, xx->pos );
 	DrawNewTrack( trk );
-	wHide(fileEditW);
+	wHide(fileNoteW);
 	ResetIfNotSticky();
 	SetFileChanged();
 }
@@ -246,9 +246,9 @@ FileEditOK(void *junk)
 static void CreateEditFileDialog(char * windowTitle)
 {
 
-	if (!fileEditW) {
-		ParamRegister(&fileEditPG);
-		fileEditW = ParamCreateDialog(&fileEditPG,
+	if (!fileNoteW) {
+		ParamRegister(&fileNotePG);
+		fileNoteW = ParamCreateDialog(&fileNotePG,
 		                              "",
 		                              _("Done"), FileEditOK,
 		                              FileEditCancel, TRUE, NULL,
@@ -256,14 +256,14 @@ static void CreateEditFileDialog(char * windowTitle)
 		                              FileDlgUpdate);
 	}
 
-	wWinSetTitle(fileEditPG.win, MakeWindowTitle(windowTitle));
+	wWinSetTitle(fileNotePG.win, MakeWindowTitle(windowTitle));
 
-	FillLayerList((wList_p)fileEditPLs[I_LAYER].control);
-	ParamLoadControls(&fileEditPG);
-	wControlActive(fileEditPLs[I_OPEN].control,
+	FillLayerList((wList_p)fileNotePLs[I_LAYER].control);
+	ParamLoadControls(&fileNotePG);
+	wControlActive(fileNotePLs[I_OPEN].control,
 	               (IsFileValid(fileNoteData.path)?TRUE:FALSE));
 
-	wShow(fileEditW);
+	wShow(fileNoteW);
 }
 
 /**
@@ -315,7 +315,7 @@ void DescribeFileNote(track_p trk, char * str, CSIZE_T len)
 	strscpy( fileNoteData.path, xx->noteData.fileData.path,
 	         sizeof fileNoteData.path );
 
-	CreateEditFileDialog(_("Update document"));
+	CreateEditFileDialog(_("Update Document"));
 }
 
 /**
@@ -335,5 +335,5 @@ void NewFileNoteUI(coOrd pos)
 	strscpy( fileNoteData.title, tmpPtrText, sizeof fileNoteData.title );
 	strscpy( fileNoteData.path, "", sizeof fileNoteData.path );
 
-	CreateEditFileDialog( _("Attach document"));
+	CreateEditFileDialog( _("Attach Document"));
 }

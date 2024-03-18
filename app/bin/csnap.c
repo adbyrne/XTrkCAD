@@ -120,13 +120,13 @@ void static DrawGridPoint(
 	      p0.y < 0.0 || p0.y > size->y ) ) {
 		return;
 	}
-	DIST_T r;
+//	DIST_T r;
 	nDrawGridPoints++;
-	if ( bigdot ) {
-		r = (bigdot_width+0.5)/2 - 0.5;
-	} else {
-		r = 0.75;
-	}
+//	if ( bigdot ) {
+//		r = (bigdot_width+0.5)/2 - 0.5;
+//	} else {
+//		r = 0.75;
+//	}
 	coOrd sz;
 	sz.x = sz.y = (bigdot?2.5:1.5)/dpi;
 	p0.x -= 1.0/dpi;

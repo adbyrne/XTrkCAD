@@ -334,7 +334,7 @@ EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep,
 	track_p trk1;
 	DIST_T elev0, grade;
 	ANGLE_T a=0;
-	int style = BOX_BOX;
+	int style = BOX_BOX_BACKGROUND;
 	BOOL_T gradeOk = TRUE;
 	char *elevStr;
 

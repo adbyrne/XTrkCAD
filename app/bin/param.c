@@ -28,6 +28,7 @@
 #include "param.h"
 #include "track.h"
 #include "common-ui.h"
+#include "include/toolbar.h"
 
 /* Bogus reg vars */
 EXPORT int paramLevel = 1;
@@ -51,7 +52,7 @@ EXPORT wWinPix_t DlgSepTop = 12;
 EXPORT wWinPix_t DlgSepBottom = 12;
 static wWinPix_t DlgSepMid = 18;
 static wWinPix_t DlgSepNarrow = 6;
-static wWinPix_t DlgSepWide = 12;
+//static wWinPix_t DlgSepWide = 12;
 static wWinPix_t DlgSepFrmLeft = 4;
 static wWinPix_t DlgSepFrmRight = 4;
 static wWinPix_t DlgSepFrmTop = 4;
@@ -387,7 +388,7 @@ static void FormatFraction(
         int digits,
         BOOL_T rational,
         FLOAT_T valF,
-        char * unitFmt )
+        const char * unitFmt )
 {
 	char * cp = *cpp;
 	long integ;
@@ -2972,14 +2973,11 @@ static void ParamDlgProc(
 		}
 		break;
 	case wResize_e:
-		if (win == mapW) {
-			if ( !bInReadTracks ) {
-				pg->changeProc(pg, wResize_e, NULL);
-			}
-		} else {
-			LOG( log_paramLayout, 1, ( "ParamDlgProc %d/n", iResizeCnt++ ) );
-			LayoutControls( pg, ParamPositionControl, NULL, NULL );
+		if (win == mapW && bInReadTracks ) {
+			break;
 		}
+		LOG( log_paramLayout, 1, ( "ParamDlgProc %d/n", iResizeCnt++ ) );
+		LayoutControls( pg, ParamPositionControl, NULL, NULL );
 		break;
 	default:
 		break;

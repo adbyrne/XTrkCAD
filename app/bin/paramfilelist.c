@@ -143,10 +143,11 @@ static BOOL_T UpdateParamFiles(void)
 					// Get old CONTENTS->FILENAME mapping
 					char * cp = wPrefGetString("Parameter File Map", newContents);
 					if ( cp ) {
-						LOG1( log_paramupdate, ( "  Upd CONTENTS %s (was %s)\n", newContents,
-						                         cp?cp:"<>" ) );
+						LOG1( log_paramupdate, ( "ParmUpdate:  Upd CONTENTS %s (was %s) -> %s\n",
+						                         newContents,
+						                         cp?cp:"<>", fileNameP ) );
 					} else {
-						LOG1( log_paramupdate, ( "  New CONTENTS %s\n", newContents ) );
+						LOG1( log_paramupdate, ( "ParmUpdate:  New CONTENTS %s\n", newContents ) );
 					}
 					// Update CONTENTS->FILENAME mapping
 					wPrefSetString("Parameter File Map", newContents, fileNameP);
@@ -156,7 +157,6 @@ static BOOL_T UpdateParamFiles(void)
 					LOG1( log_paramupdate, ( "  Old CONTENTS %s\n", oldContents ) );
 					// Check 'Parameter Files Names' map
 					for (int fileNo = 1; ; fileNo++) {
-//				char *fileName;
 						char fileNoS[4+9+1];
 						sprintf(fileNoS, "File%d", fileNo);
 						char * prevContents = wPrefGetString("Parameter File Names", fileNoS);
@@ -166,7 +166,8 @@ static BOOL_T UpdateParamFiles(void)
 						}
 						if ( strcmp( oldContents, prevContents ) == 0 ) {
 							// Update contents index map
-							LOG1( log_paramupdate, ( "  Found at %d\n", fileNo ) );
+							LOG1( log_paramupdate, ( "ParamUpdate:  Found at %s -> %s\n", fileNoS,
+							                         newContents ) );
 							wPrefSetString( "Parameter File Names", fileNoS, newContents );
 							break;
 						}
@@ -185,6 +186,7 @@ static BOOL_T UpdateParamFiles(void)
 		free(fileNameP);
 	}
 	fclose(updateF);
+	LOG1( log_paramupdate, ( "Param updatetime -> %d\n", updateTime ) );
 	wPrefSetInteger("file", "updatetime", updateTime);
 	return TRUE;
 }
@@ -238,9 +240,22 @@ void LoadParamFileList(void)
 
 		// Rewire to the latest system level
 #define SHAREPARAMS (PATH_SEPARATOR "share" PATH_SEPARATOR "xtrkcad" PATH_SEPARATOR "params" PATH_SEPARATOR)
+#define SHAREBETAPARAMS (PATH_SEPARATOR "share" PATH_SEPARATOR "xtrkcad-beta" PATH_SEPARATOR "params" PATH_SEPARATOR)
 		if ((share= strstr(fileName,SHAREPARAMS))) {
 			share += strlen(SHAREPARAMS);
+		}
+#ifndef WINDOWS
+#ifndef __APPLE__
+		if ( share == NULL &&
+		     (share= strstr(fileName,SHAREBETAPARAMS))) {
+			share += strlen(SHAREBETAPARAMS);
+		}
+#endif
+#endif
+		if ( share ) {
 			MakeFullpath(&fileName, wGetAppLibDir(), "params", share, NULL);
+			LOG1( log_paramupdate, ( "Param LoadParamList: %s -> %s\n", contents,
+			                         fileName ) );
 			wPrefSetString("Parameter File Map", contents, fileName);
 		}
 
@@ -300,12 +315,20 @@ void SaveParamFileList(void)
 					*cp = ' ';
 				}
 			}
+			LOG1( log_paramupdate, ( "Param SaveFileList:  %s -> %s\n", message,
+			                         contents ) );
 			wPrefSetString("Parameter File Names", message, contents);
+			LOG1( log_paramupdate, ( "Param                %s -> %s\n", contents,
+			                         paramFileInfo(fileInx).name ) );
 			wPrefSetString("Parameter File Map", contents, paramFileInfo(fileInx).name);
 			if (paramFileInfo(fileInx).favorite) {
 				sprintf(message, FAVORITEKEY, favorites);
+				LOG1( log_paramupdate, ( "Param Favorite                %s -> %d\n", message,
+				                         fileNo ) );
 				wPrefSetInteger(FAVORITESECTION, message, fileNo);
 				sprintf(message, FAVORITEDELETED, fileNo);
+				LOG1( log_paramupdate, ( "Param                        %s -> %d\n", message,
+				                         paramFileInfo(fileInx).deleted ) );
 				wPrefSetInteger(FAVORITESECTION, message, paramFileInfo(fileInx).deleted);
 				favorites++;
 			}
@@ -313,7 +336,10 @@ void SaveParamFileList(void)
 		}
 	}
 	sprintf(message, "File%d", fileNo);
+	LOG1( log_paramupdate, ( "Param SaveFileList:  %s -> <>\n", message ) );
 	wPrefSetString("Parameter File Names", message, "");
+	LOG1( log_paramupdate, ( "Param Favorite       %s -> %d\n", FAVORITETOTALS,
+	                         favorites ) );
 	wPrefSetInteger(FAVORITESECTION, FAVORITETOTALS, favorites);
 }
 
@@ -374,6 +400,8 @@ int LoadParamFile(
 				}
 			}
 
+			LOG1( log_paramupdate, ( "Param Load: %s -> %s\n", curContents,
+			                         paramFileInfo(curParamFileIndex).name) );
 			wPrefSetString("Parameter File Map", curContents,
 			               paramFileInfo(curParamFileIndex).name);
 		} else {
@@ -381,7 +409,13 @@ int LoadParamFile(
 		}
 	}
 	//Only set the ParamFileDir if not the system directory
-	if (!strstr(fileName[i-1],SHAREPARAMS)) {
+	if ( (!strstr(fileName[i-1],SHAREPARAMS))
+#ifndef WINDOWS
+#ifndef __APPLE__
+	     && (!strstr(fileName[i-1],SHAREBETAPARAMS))
+#endif
+#endif
+	   ) {
 		SetParamFileDir(fileName[i - 1]);
 	}
 	curParamFileIndex = PARAM_CUSTOM;

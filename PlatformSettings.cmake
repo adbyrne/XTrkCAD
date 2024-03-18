@@ -21,13 +21,27 @@ if(UNIX)
     else()
         set(XTRKCAD_USE_GETTEXT_DEFAULT ON)
         set(XTRKCAD_USE_BROWSER_DEFAULT ON)
+        add_compile_options("-pthread")
+        add_link_options("-pthread")
    endif()
+
+    add_compile_options("-Wall")
+    # glib 2.0 deprecated GTypeDebugFlags and GTimeVal, gtk2 has not been updated
+    add_compile_options("-Wno-deprecated-declarations")
 endif()
 
 # Set Win64 flag when a 64 bit build is selected
 if(WIN32)
+	include(FindPkgConfig)
+	pkg_check_modules(GTK3 REQUIRED "gtk+-3.0")
+
 	set(XTRKCAD_USE_GETTEXT_DEFAULT ON)
 	set(XTRKCAD_USE_GTK_DEFAULT OFF)
+	set(XTRKCAD_GTK3_EXPERIMENT OFF)
+
+	if(GTK3_FOUND)
+		set(XTRKCAD_GTK3_EXPERIMENT ON)
+	endif()	
 
 	# determine processor target architecture
 	if (CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -47,11 +61,14 @@ if(WIN32)
         set( XTRKCAD_ARCH_SUBDIR "x86")
 	endif ()
 
-	set(CMAKE_C_FLAGS_DEBUG "/D_DEBUG /MT /Zi /Ob0 /Od /RTC1" CACHE STRING "Flags used by the compiler during debug builds" FORCE)
-	set(CMAKE_C_FLAGS_MINSIZEREL "/MT /O1 /Ob1 /D NDEBUG" CACHE STRING "Flags used by the compiler during release minumum size builds" FORCE)
-	set(CMAKE_C_FLAGS_RELEASE "/MT /O2 /Ob2 /D NDEBUG" CACHE STRING "Flags used by the compiler during release builds" FORCE)
-	set(CMAKE_C_FLAGS_RELWITHDEBINFO "/MT /Zi /O2 /Ob1 /D NDEBUG" CACHE STRING "Flags used by the compiler during release with debug info builds" FORCE)
+	add_compile_options(
+		"$<$<CONFIG:DEBUG>:/W3>"
+	)
 
-	add_definitions(-DWINDOWS)
-	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+	add_compile_definitions(
+		"$<$<CONFIG:DEBUG>:_DEBUG>"
+	)
+
+	add_compile_definitions(WINDOWS)
+	add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 endif()

@@ -25,6 +25,7 @@
 #include "ccornu.h"
 #include "track.h"
 #include "draw.h"
+#include "include/toolbar.h"
 
 EXPORT DIST_T curBarScale = -1;
 EXPORT long hotBarLabels = 0;
@@ -87,7 +88,7 @@ static void HotBarHighlight( int inx, DIST_T fixed_x )
 	}
 	orig.y = 0;
 	size.x = hotBarMap(inx).w - 2.0/hotBarD.dpi;
-	size.y = toolbarHeight;
+	size.y = ToolbarGetHeight();
 #ifdef LATER
 	printf( "HotBarHilite fixed_x:%0.3f X0:%d/%0.3f X:%d/%0.3f+%0.3f X=%0.3f\n",
 	        fixed_x,
@@ -302,6 +303,17 @@ static void SelectHotBar( wDraw_p d, void * context, wAction_t action,
 		return;
 	}
 #endif
+
+	if ( ( action & 0xff ) == wActionText ) {
+		int key = (int)(action >> 8);
+		if ( key >= '0' && key <= '9') {
+			DoHotBarJump( key );
+		} else if ( key == 0x1B ) {
+			ConfirmReset( FALSE );
+		}
+		return;
+	}
+
 	if ( (action&0xFF) ==  wActionRUp ) {
 		wMenuPopupShow( hotbarPopupM );
 		return;
@@ -370,25 +382,6 @@ static void SelectHotBar( wDraw_p d, void * context, wAction_t action,
 		case wAccelKey_Down:
 			break;
 		default:
-			break;
-		}
-		break;
-	case wActionText:
-		switch (action >> 8) {
-		case '0':
-		case '1':
-		case '2':
-		case '3':
-		case '4':
-		case '5':
-		case '6':
-		case '7':
-		case '8':
-		case '9':
-			DoHotBarJump( action >> 8 );
-			break;
-		case 0x1B:
-			ConfirmReset(FALSE);
 			break;
 		}
 		break;
@@ -593,7 +586,7 @@ EXPORT void LayoutHotBar( void * redraw )
 		bm_p = wIconCreateBitMap( 16, 16, turnbarr_bits, wDrawColorBlack );
 		hotBarRightB = wButtonCreate( mainW, 0, 0, "hotBarRight", (char*)bm_p,
 		                              BO_ICON|BO_REPEAT, 0, DoHotBarRight, NULL );
-		hotBarD.d = wDrawCreate( mainW, 0, 0, NULL, BD_NOCAPTURE|BD_NOFOCUS, 100,
+		hotBarD.d = wDrawCreate( mainW, 0, 0, NULL, 0, 100,
 		                         hbHeight, NULL, RedrawHotBar, SelectHotBar );
 		hotBarD.dpi = wDrawGetDPI( hotBarD.d );
 		hotBarD.scale = 1.0;
@@ -603,11 +596,11 @@ EXPORT void LayoutHotBar( void * redraw )
 	buttonWidth = wControlGetWidth((wControl_p)hotBarLeftB);
 	buttonHeight = wControlGetHeight((wControl_p)hotBarLeftB);
 	wControlSetPos( (wControl_p)hotBarLeftB, HOTBAR_LEFT,
-	                toolbarHeight+(hbHeight-buttonHeight)/2 );
+	                ToolbarGetHeight() +(hbHeight-buttonHeight)/2 );
 	wControlSetPos( (wControl_p)hotBarRightB, winWidth-20-buttonWidth+HOTBAR_LEFT+1,
-	                toolbarHeight+(hbHeight-buttonHeight)/2 );
+	                ToolbarGetHeight() +(hbHeight-buttonHeight)/2 );
 	wControlSetPos( (wControl_p)hotBarD.d, buttonWidth+HOTBAR_LEFT+1,
-	                toolbarHeight );
+	                ToolbarGetHeight());
 	wDrawSetSize( hotBarD.d, winWidth-20-buttonWidth*2, hbHeight+2, redraw );
 	hotBarD.size.x = ((double)(winWidth-20
 	                           -buttonWidth*2))/hotBarD.dpi*hotBarD.scale;
@@ -621,7 +614,7 @@ EXPORT void LayoutHotBar( void * redraw )
 	} else if (!redraw) {
 		RedrawHotBar( NULL, NULL, 0, 0 );
 	}
-	toolbarHeight += hbHeight+3;
+	ToolbarSetHeight( ToolbarGetHeight() + hbHeight+3 );
 }
 
 void HideHotBar( void )

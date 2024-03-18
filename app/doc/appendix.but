@@ -107,8 +107,6 @@ Menu and sub-menu items are indicated by \e{File>Open}, which means select the \
 
 \f{Edit Box} - an area where you can enter a String, Integer or Floating Point value.
 
-\f{FlexTrack} - an automatic object on the ToolBar that creates a Cornu Track element
-
 \f{Highlighted} - an area on the Canvas which is in inverse-video.
 
 \f{Left-Click} - same as \e{Click}, used in contexts where \e{Right-Click} is also used.
@@ -166,7 +164,21 @@ curves were variously called easements, Talbot or Euler spirals.
 
 \f{Error Message} - an error message displayed in the Status Bar (\K{mainW}) accompanied by a beep.
 
-\f{Flex-track} -  Prefabricated flexible sections of track used on a layout. It usually comes in straight, three-foot-long sections which can be bent or shaped as needed. This term is also used for hand-laid track.
+\#{TODO}
+
+\I{Fixed-track}\f{Fixed-track} -
+These include Turnouts, Sectional tracks and Grouped objects.
+They are defined in Parameter Files (\K{cmdPrmfile}), or created using the \f{Turnout Designer} (\K{cmdTurnoutNew}) or the \f{Group} (\K{cmdGroup}) command.
+They are selected for placement on the layout using the \f{Hot Bar} (\K{cmdHotBar}) or the \f{Fixed-Track} (\K{cmdNewFixedTrack}) dialog.
+They can not be directly altered, but can be decomposed with the \f{Ungroup} (\K{cmdUngroup}) command and some cases trimed (\K{splitDivide}).
+
+\I{Flex-track}\f{Flex-track} -
+Flexible sections of track used on a layout.
+It usually comes in straight, three-foot-long sections which can be bent or shaped as needed.
+These include Straight, Curved, Easements, Cornu and Bezier tracks.
+This term is also used for hand-laid track.
+They are created by invoking the corresponding command and dragging on the layout.
+\f{Easements} (\K{cmdEasement}) are created automatically when joining tracks.
 
 \f{Frog} - the place on a turnout track where one rail crosses the other.
 
@@ -182,11 +194,10 @@ curves were variously called easements, Talbot or Euler spirals.
 
 \f{Points} - the part of the Turnout that moves to select a path.
 
-\f{Reverse Curve} - a piece of track which curves in one direction then changes direction without any appreciable length of straight track between the two curves.
-
-\f{S-Curve} - a curve which bends in one direction and then the other, forming an S-like shape.
+\f{S-Curve} - (aka \f{Reverse Curve}) a curve which bends in one direction and then the other, forming an S-like shape, without any appreciable length of straight track between the two curves
 
 \f{Sectional Track} - prefabricated track which cannot be bent, split or changed.
+A type of \f{Fixed-Track}.
 
 \f{Selected Endpoint} - when selecting track for various reasons the selected endpoint is the one closest to the selection point.
 
@@ -195,6 +206,8 @@ curves were variously called easements, Talbot or Euler spirals.
 \f{Track Segment} - any piece of flex-track, turnout or sectional track.
 
 \f{Turnout} - A piece of track that allows a train to go from one track to another. Called a switch on a real railroad. Referred to by number. For example, a no. 6 turnout spreads one unit for each six units of travel measured from the frog (the point at which two rails join to form a V).
+
+Turnouts are a type of 'Fixed-track' which includes Sectional Tracks and Grouped Objects.
 
 \b In \e{XTrackCAD}, \e{Turnouts} also include sectional Tracks, crossings and forms of prefabricated (non-flex) track.
 
@@ -265,7 +278,7 @@ or virtual track circuit in a Tower-LCC or similar device.
 
 \u000
 
-\dd \e{Notices} and \e{Error messages} that might be encounter are listed here with a explanation. The \f{Recent Messages} menu item on the \f{Help} (\K{helpM}) menu contains a list of the most recent messages.  Selecting one of the entries presents information on the particular message.
+\dd \e{Notices} and \e{Error messages} that might be encountered are listed here with a explanation. The \f{Recent Messages} menu item on the \f{Help} (\K{helpM}) menu contains a list of the most recent messages.  Selecting one of the entries presents information on the particular message.
 
 \u000
 

@@ -84,7 +84,7 @@ set(SOURCEFILES
 	"${wlib_SOURCE_DIR}/mswlib/mswmisc.c"
 	"${messagefile_BINARY_DIR}/messages.h"
 	"${CMAKE_CURRENT_BINARY_DIR}/custmsg.h"
-	"${XTrkCAD_BINARY_DIR}/app/bin/bllnhlp.c"
+	"${XTrkCAD_BINARY_DIR}/app/help/bllnhlp.c"
 )
 
 foreach( file ${SOURCEFILES})

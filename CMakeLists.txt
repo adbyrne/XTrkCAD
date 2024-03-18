@@ -1,6 +1,8 @@
-project(XTrkCAD)
+# Main CMake file for XTrackCAD
 
 cmake_minimum_required(VERSION 3.20.0)
+project(XTrkCAD)
+
 cmake_policy(SET CMP0076 NEW)
 cmake_policy(SET CMP0079 NEW)
 
@@ -48,15 +50,13 @@ find_package(Pandoc)
 
 # For handling and creation of bitmaps the FreeImage library is required
 find_package(FreeImage REQUIRED)
-# make sure that the DLL can be found during build
-if(WIN32)
-	cmake_path(GET FREEIMAGE_SHAREDLIB PARENT_PATH parentpath )
-	set(ENV{path} "${parentpath};$ENV{PATH}")
-endif()
+
+if(XTRKCAD_GTK3_EXPERIMENT)
+	pkg_check_modules(GTK3 QUIET "gtk+-3.0")
+endif()	
 
 # check for GTK+ 2.0
 if(UNIX)
-	pkg_check_modules(GTK3 QUIET "gtk+-3.0")
     pkg_check_modules(GTK QUIET "gtk+-2.0")
 	if(NOT GTK_FOUND AND NOT GTK3_FOUND)
 		message(FATAL_ERROR "ERROR: no GTK modules found!")
@@ -71,6 +71,12 @@ endif()
 if(WIN32 AND NOT XTRKCAD_USE_GTK)
 	# use the Windows HTMLHelp tool
 	find_package(HTMLHelp REQUIRED)
+	if(XTRKCAD_GTK3_EXPERIMENT AND GTK3_FOUND)
+		message(STATUS "Building GTK3 Experimental")	
+		set(XTRKCAD_GTK3_WLIB ON)
+	else()
+		message(FATAL_ERROR "ERROR: no GTK modules for Win32 found!")	
+	endif()
 endif(WIN32 AND NOT XTRKCAD_USE_GTK)
 
 # 

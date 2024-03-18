@@ -50,7 +50,7 @@ Some commands display controls on the Status Line (\K{mainW}) to change line wid
 
 \rule
 
-\S{cmdDrawCircles} Circles and Filled Circles
+\S{cmdDrawCircles} \i{Circles and Filled Circles}
 
 \G{png.d/mdrawcircles.png}
 
@@ -75,7 +75,7 @@ The \f{Circle Line Width} field is a scaled dimension in inches if >0. If 0 it i
 
 \rule
 
-\S2{cmdDrawCircleTangent} Draw Circle from Tangent
+\S2{cmdDrawCircleTangent} \i{Draw Circle from Tangent}
 
 \G{png.d/dcircle3.png}
 
@@ -83,7 +83,7 @@ The \f{Circle Line Width} field is a scaled dimension in inches if >0. If 0 it i
 
 \rule
 
-\S2{cmdDrawCircleCenter} Draw Circle from Center
+\S2{cmdDrawCircleCenter} \i{Draw Circle from Center}
 
 \G{png.d/dcircle2.png}
 
@@ -91,7 +91,7 @@ The \f{Circle Line Width} field is a scaled dimension in inches if >0. If 0 it i
 
 \rule
 
-\S2{cmdDrawFilledCircleTangent} Draw Filled Circle from Tangent
+\S2{cmdDrawFilledCircleTangent} \i{Draw Filled Circle from Tangent}
 
 \G{png.d/dflcrcl3.png}
 
@@ -99,7 +99,7 @@ The \f{Circle Line Width} field is a scaled dimension in inches if >0. If 0 it i
 
 \rule
 
-\S2{cmdDrawFilledCircleCenter} Draw Filled Circle from Center
+\S2{cmdDrawFilledCircleCenter} \i{Draw Filled Circle from Center}
 
 \G{png.d/dflcrcl2.png}
 
@@ -107,7 +107,7 @@ The \f{Circle Line Width} field is a scaled dimension in inches if >0. If 0 it i
 
 \rule
 
-\S{cmdDrawCurves} Curved Lines
+\S{cmdDrawCurves} \i{Curved Lines}
 
 \G{png.d/mdrawcurve.png}
 
@@ -148,7 +148,7 @@ To adjust the curve with the mouse, \e{Left-Click} and \e{Left-Drag} an end or a
 
 \rule
 
-\S2{cmdDrawCurveEndPt} Draw Curve from End Point
+\S2{cmdDrawCurveEndPt} \i{Draw Curve from End Point}
 
 \G{png.d/dcurve1.png} 
 
@@ -161,7 +161,7 @@ suppressed if \f{Alt} is held. The second end will act similarly.
 
 \rule
 
-\S2{cmdDrawCurveTangent} Draw Curve from Tangent
+\S2{cmdDrawCurveTangent} \i{Draw Curve from Tangent}
 
 \G{png.d/dcurve2.png} 
 
@@ -176,7 +176,7 @@ To complete the command, drag on the red arrows to adjust the curve from the ini
 
 \rule
 
-\S2{cmdDrawCurveCenter} Draw Curve from Center
+\S2{cmdDrawCurveCenter} \i{Draw Curve from Center}
 
 \G{png.d/dcurve3.png} 
 
@@ -185,7 +185,7 @@ suppressed if \f{Alt} is held.
 
 \rule
 
-\S2{cmdDrawCurveChord} Draw Curve from Chord
+\S2{cmdDrawCurveChord} \i{Draw Curve from Chord}
 
 \G{png.d/dcurve4.png} 
 
@@ -199,7 +199,7 @@ To complete the command, drag on the red arrows to adjust the curve.
 
 \rule
 
-\S2{cmdDrawBezierCurve} Draw Bezier Curve
+\S2{cmdDrawBezierCurve} \i{Draw Bezier Curve}
 
 \G{png.d/dbezier.png} 
 
@@ -210,7 +210,7 @@ The first and second ends will act like \K{cmdDrawCurveEndPt} with \f{MagneticSn
 
 \rule
 
-\S{cmdNote} Note Variants
+\S{cmdNote} \i{Note Variants}
 
 \G{png.d/mnote.png}
 
@@ -228,7 +228,7 @@ The \f{Note} command allows you to
 
 \rule
 
-\S2{cmdTextNote} Plain Text
+\S2{cmdTextNote} \i{Text Note}
 
 \G{png.d/bnote.png} \G{png.d/iconnote.png} Click and drag on the Main Canvas (\K{mainW}) to place the note.
 
@@ -241,7 +241,7 @@ When in \f{Properties} (\K{cmdDescribe}) mode, clicking on a \e{Note} will displ
 
 \rule
 
-\S2{cmdLinkNote} Weblink
+\S2{cmdLinkNote} \i{Weblink}
 
 \G{png.d/blink.png} \G{png.d/iconlink.png} Similar to text notes you can place a weblink on the layout.
 
@@ -261,7 +261,7 @@ Double clicking on a weblink icon opens the website in your default browser.
 
 \rule
 
-\S2{cmdFileNote} Document
+\S2{cmdFileNote} \i{Document}
 
 \G{png.d/bfile.png} \G{png.d/iconfile.png} Similar to text notes you can place a reference to a file on the layout.
 
@@ -279,7 +279,7 @@ Double clicking on a document reference icon opens the document  in the default 
 \rule
 
 
-\S{cmdRuler} Ruler
+\S{cmdRuler} \i{Ruler}
 
 \G{png.d/bruler.png}
 
@@ -291,7 +291,7 @@ Subsequent clicks on the \f{Ruler} button will hide or display the ruler.
 
 \rule
 
-\S{cmdAngle} Protractor
+\S{cmdAngle} \i{Protractor}
 
 \G{png.d/bangle.png}
 
@@ -306,7 +306,7 @@ The points of the \e{Protractor} can be modified using the \f{Modify} (\K{cmdMod
 \rule
  
 
-\S{cmdDrawShapes} Shapes
+\S{cmdDrawShapes} \i{Draw Shapes}
 
 \G{png.d/mdrawshapes.png}
 
@@ -342,7 +342,7 @@ Note that \K{cmdModify} can be used on a Polygon or a Polyline after it has been
 
 \rule
 
-\S2{cmdDrawBox} Draw Box
+\S2{cmdDrawBox} \i{Draw Box}
 
 \G{png.d/dbox.png}
 
@@ -355,7 +355,7 @@ The \f{Box Line Width} field is a scaled dimension in inches if >0. If 0 it is a
 
 \rule
 
-\S2{cmdDrawFilledBox} Draw Filled Box
+\S2{cmdDrawFilledBox} \i{Draw Filled Box}
 
 \G{png.d/dfilbox.png}
 
@@ -365,7 +365,7 @@ The \f{Box Line Width} field is a scaled dimension in inches if >0. If 0 it is a
 
 \rule
 
-\S2{cmdDrawPolygon} Draw Polygon
+\S2{cmdDrawPolygon} \i{Draw Polygon}
 
 \G{png.d/dpoly.png}
 
@@ -392,7 +392,7 @@ On the first polygon side this will be at a multiple of 90 degrees to the axes. 
 
 \rule
 
-\S2{cmdDrawFilledPolygon} Draw Filled Polygon
+\S2{cmdDrawFilledPolygon} \i{Draw Filled Polygon}
 
 \G{png.d/dfilbox.png}
 
@@ -422,7 +422,7 @@ On the first polygon side this will be at a multiple of 90 degrees to the axes. 
 
 \rule
 
-\S2{cmdDrawPolyline} Draw PolyLine
+\S2{cmdDrawPolyline} \i{Draw PolyLine}
 
 \G{png.d/dpolylin.png} 
 
@@ -459,7 +459,7 @@ On the first polyline segemnt this will be at a multiple of 90 degrees to the ax
 
 \rule
 
-\S{cmdDrawStraights} Straight Objects
+\S{cmdDrawStraights} \i{Straight Objects}
 
 \G{png.d/mdrawstraight.png}
 
@@ -473,13 +473,13 @@ Straight Objects are created by a \e{Left+Drag} (\K{windowTerms}) on the layout.
 
 \u000
 
-\dd (\K{cmdDrawBench}). Creates \i\f{Bench-work} using different types and orientation of lumber.
+\dd (\K{cmdDrawBench}). Creates \i{Bench-work} using different types and orientation of lumber.
 
 \u000
 
 \dd (\K{cmdDrawTableEdge}). Creates a \f{Table Edge}
 
-\S2{cmdDrawLine} Draw Straight Line
+\S2{cmdDrawLine} \i{Draw Straight Line}
 
 \G{png.d/dline.png} 
 
@@ -500,7 +500,7 @@ Even if \c{Esc} is pressed, the line will already exist, it can be removed with 
 
 \rule
 
-\S2{cmdDrawDimLine} Draw Dimension Line
+\S2{cmdDrawDimLine} \i{Draw Dimension Line}
 
 \G{png.d/ddimlin.png} 
 
@@ -512,11 +512,11 @@ suppressed if \f{Alt} is held.
 
 If \c{Ctrl} is held down during \c{Left+Drag} the line will snap the angle of the new side to a multiple of 90 degrees.
 
-\S2{cmdDrawBench} Draw Benchwork.
+\S2{cmdDrawBench} \i{Draw Benchwork}
 
 \G{png.d/dbench.png} 
 
-Creates \i\f{Bench-work} using different types and orientation of lumber.
+Creates \i{Bench-work} using different types and orientation of lumber.
 
 \i{Bench-work Notes}
 
@@ -541,7 +541,7 @@ Pressing \c{Enter} or \c{Tab} with the cursor in these boxes will apply the valu
 Pressing \c{Shift+Tab} on the drawing surface will remove the current object and allow a new one to be drawn.
 Even if \c{Esc} is pressed, the benchwork will already exist, it can be removed with \f{Undo}.  
 
-\S2{cmdDrawTableEdge} Draw Table Edge
+\S2{cmdDrawTableEdge} \i{Draw Table Edge}
 
 \G{png.d/dtbledge.png} 
 
@@ -560,7 +560,7 @@ Even if \c{Esc} is pressed, the edge will already exist, it can be removed with 
 
 \rule
 
-\S{DrawOrigin} Draw Objects Origin
+\S{DrawOrigin} \i{Draw Objects Origin}
 
 Some objects will a natural rotation point within them. By setting the object origin to this point, subsequent rotation will be about that point and not the layout origin. 
 This is referred to as a \e{Relative} origin and will be present if the origin is non-zero.
@@ -584,7 +584,7 @@ In Origin Mode (entered using \c{'o'} or the Context Menu, there are certain sho
 \dd \c{'m'} Move the Relative Origin to the middle of the shape (centeroid). 
 
 
-\S{cmdText} Text
+\S{cmdText} \i{Text}
 
 \G{png.d/btext.png}
 

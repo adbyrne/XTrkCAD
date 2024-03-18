@@ -1,7 +1,7 @@
 VERSION 2
 DEMOINIT
 ORIG 4.000 0.000 0.000
-PARAMETER turnout hide 1
+PARAMETER newFixedTrack hide 1
 STRAIGHT 1 DEMO 1
 	E 2.050000 1.050000 270.000000
 	T 3 14.883333 1.050017 90.000000
@@ -35,7 +35,7 @@ STEP
 COMMAND TurnoutHotBar
 ##PARAMETER turnout list 0
 ##PARAMETER turnout hide 0
-PARAMETER GROUP turnout
+PARAMETER GROUP newFixedTrack
 HOTBARSELECT Peco-55	Medium Right	SL-E395F
 MESSAGE
 _________________________________________

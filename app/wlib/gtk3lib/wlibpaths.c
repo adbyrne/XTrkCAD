@@ -32,8 +32,8 @@
 #define GTK_DISABLE_DEPRECATED
 #define GSEAL_ENABLE
 
-#include <gtk/gtk.h>
-#include <gdk/gdk.h>
+#include <glib.h>
+#include <glib/gstdio.h>
 
 #include "wlib.h"
 #include "gtkint.h"
@@ -74,9 +74,12 @@ IsExistingDirectory( char *name)
 
 /**
  * Find the directory where configuration files, help, demos etc are installed.
- *  The search order is:
+ *
+ * Windows: the directory is expected to be at ..\share\xtrkcad
+ * 
+ * Unix: The search order is:
  *  1. Directory specified by the XTRKCADLIB environment variable
- *  2. relative path ../xtrkcad from the instalaltion directory
+ *  2. relative path ../xtrkcad from the installation directory
  *  3. /usr/share/xtrkcad
  *  4. /usr/local/share/xtrkcad
  *  if no directory can be found, the program terminates
@@ -84,7 +87,26 @@ IsExistingDirectory( char *name)
  *  \return pointer to directory name
  */
 
+#ifdef WIN32
+const char* wGetAppLibDir(void)
+{
+	gchar* moduleDir;
+	GString* libDir;
 
+	if (appLibDir != NULL) {
+		return appLibDir;
+	}
+
+	moduleDir = g_win32_get_package_installation_directory_of_module(NULL);
+	libDir = g_string_new(moduleDir);
+	g_string_append(libDir, "\\..\\share\\xtrkcad");
+	appLibDir = g_canonicalize_filename(libDir->str, NULL);
+	g_free(moduleDir);
+	g_string_free(libDir, TRUE);
+
+	return(appLibDir);
+}
+#else // WIN32
 const char * wGetAppLibDir( void )
 {
 	char * cp, *ep;
@@ -130,7 +152,7 @@ const char * wGetAppLibDir( void )
 	searchDirs[option] = NULL;
 
 	appLibDir = NULL;
-	for(int i = 1; i < option; i++) {
+	for(unsigned int i = 1; i < option; i++) {
 		if(IsExistingDirectory(searchDirs[ i ])) {
 			appLibDir = g_strdup(searchDirs[ i ]);
 			break;
@@ -160,12 +182,12 @@ const char * wGetAppLibDir( void )
 		wExit(1);
 	}
 
-	for(int i = 0; i < option; i++) {
+	for(unsigned int i = 0; i < option; i++) {
 		g_free(searchDirs[ i ]);
 	}
 	return(appLibDir);
 }
-
+#endif //WIN32
 /**
  * Get the working directory for the application. This directory is used for storing
  * internal files including rc files. If it doesn't exist, the directory is created
@@ -188,7 +210,7 @@ const char * wGetAppWorkDir(
 	appWorkDir = g_strdup_printf( "%s/.%s", homeDir, wlibGetAppName());
 
 	if (!IsExistingDirectory(appWorkDir)) {
-		if ( mkdir( appWorkDir, 0777 ) == -1 ) {
+		if ( g_mkdir( appWorkDir, 0777 ) == -1 ) {
 			gchar *tmp;
 			tmp = g_strdup_printf(  _("Cannot create %s"), appWorkDir );
 			wNoticeEx( NT_ERROR, tmp, _("Exit"), NULL );
@@ -218,21 +240,21 @@ const char * wGetAppWorkDir(
 }
 
 /**
- * Get the user's home directory. The environment variable HOME is
- * assumed to contain the proper directory.
+ * Get the user's home directory. 
  *
  * \return    pointer to the user's home directory
  */
 
 const char *wGetUserHomeDir( void )
 {
-	char *homeDir;
+	const char *homeDir;
 
 	if( userHomeDir ) {
 		return userHomeDir;
 	}
 
-	if ((homeDir = getenv( "HOME" )) == NULL) {
+	homeDir = g_get_home_dir();
+ 	if (homeDir == NULL) {
 		wNoticeEx( NT_ERROR, _("HOME is not set"), _("Exit"), NULL);
 		wExit(0);
 	} else {

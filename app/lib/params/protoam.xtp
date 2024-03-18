@@ -70,6 +70,7 @@
 #
 #############################################################################################
 CONTENTS North American Rolling-Stock Prototype Cars
+CONTENTS North American Prototypes
 CARPROTO "Box, 40'" 0 30100 486.500 126.000 0 0 368.000 518.500
 	F3 255 0.000000 4
 		0.000000 0.000000 0

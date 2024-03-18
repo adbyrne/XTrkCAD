@@ -29,7 +29,7 @@
 
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
-
+#define _USE_MATH_DEFINES // for C
 #include <math.h>
 
 #include "gtkint.h"

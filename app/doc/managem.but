@@ -55,7 +55,7 @@ The \f{Manage Menu} shows commands affecting the \f{Main Canvas} (\K{mainW}).
 
 \rule
 
-\S{cmdCarinv} Car Inventory
+\S{cmdCarinv} \i{Car Inventory}
 
 This dialog is used to manage your list of cars and locomotives.
 
@@ -124,9 +124,9 @@ The \f{Import} and \f{Export} buttons read and write a \e{Comma-Separated-Value 
 
 \lcont{
 
-\b 0x0001 - Locomotive
+\b 0x0001 - Body Mounted Couplers
 
-\b 0x0002 - Body Mounted Couplers
+\b 0x0002 - Locomotive
 
 \b Other bits can be ignored
 
@@ -172,7 +172,7 @@ The \f{List} button creates a text file listing your inventory.
 
 \rule
 
-\S2{cmdCarpart} Car Item Dialog
+\S2{cmdCarpart} \i{Car Item Dialog}
 
 This dialog is invoked from the \f{Car Inventory} (\K{cmdCarinv}) and the \f{Custom Management} (\K{cmdCustmgm}) dialogs.
 
@@ -220,7 +220,7 @@ The dialog contains:
 
 \rule
 
-\S2{carpart} \f{Car Part Dialog}
+\S2{carpart} \i{Car Part Dialog}
 
 This dialog is similar the the \f{Car Item} dialog except that the \f{Car Item Information} section is not displayed.  The \f{Manufacturer} Drop Down List is editable so you can enter a new manufacturer, and you must enter a \f{Part Number}.  If you are adding a new car part, the \f{Part Number} field will be incremented (if it is a numeric value) so you can enter a number of car parts.
 
@@ -267,7 +267,7 @@ See NMRA TN-7 Curved Track Centerline and Obstacle Clearance Calculation Methodo
 
 \rule
 
-\S2{carprototype} \f{Car Prototype Dialog}
+\S2{carprototype} \i{Car Prototype Dialog}
 
 This dialog is used to create or edit prototype definitions.
 
@@ -291,7 +291,7 @@ Unlike the other dialogs, dimensions in this dialog are in prototype units.  Whe
 
 \rule
 
-\S{cmdCustmgm} Custom Management
+\S{cmdCustmgm} \i{Custom Management}
 
 The \f{Custom Management} dialog allows you change the properties of turnouts, sectional track, structures, car parts and prototypes you have designed with the \f{Turnout Designer} (\K{cmdTurnoutNew}), \f{Group} (\K{cmdGroup}) or \f{Car} (\K{cmdCarpart}) commands.  You can also move selected objects to a \f{Parameter File} (\K{cmdPrmfile}).
 
@@ -317,7 +317,7 @@ The \f{New} buttons invokes the Car (\K{cmdCarpart}) dialog to create a new \f{C
 
 \rule
 
-\S{cmdContmgm} Layout Control Elements Dialog
+\S{cmdContmgm} \i{Layout Control Elements Dialog}
 
 This dialog is used to manage layout control elements (blocks, switchmotors, and signals).
 
@@ -347,7 +347,7 @@ either from their Hotbar menus or from the Add menu.
 The \f{Edit} button allows for editing a control element. And the \f{Delete} button 
 deletes the selected element(s).
 
-\S{cmdGroup} Group Dialog
+\S{cmdGroup} \i{Group Dialog}
 
 The \f{Group} command combines the selected (\K{cmdSelect}) Lines and Shapes (\K{cmdDraw}) to create structures (\K{cmdHotBar}).  You can give the structure (\K{cmdHotBar}) a title consisting of Manufacturer, Description and Part Number on the \f{Group} dialog.
 
@@ -355,7 +355,7 @@ The \f{Group} command combines the selected (\K{cmdSelect}) Lines and Shapes (\K
 
 The title will be pre-populated with the title of the last \f{Structure} you \f{ungrouped} (\K{manageM}).
 
-You can include \f{Turnouts}, \f{Sectional}, \f{Straight} or \f{Curved} tracks in the selected objects which allows you to add cosmetic details to a \f{Turnout} definitions, or create a new \f{Turnout} definition. This can also be used to if there are fixed track locations on a structure, like on an engine shed.
+You can include \f{Turnouts}, \f{Sectional}, \f{Straight} or \f{Curved} tracks in the selected objects which allows you to add cosmetic details to a \f{Turnout} definitions, or create a new \f{Turnout} definition. This can also be used to if there are fixed-track locations on a structure, like on an engine shed.
 
 \f{Group} is intended to operate on simple groups of track segments.  If you intend to group a large number of track segments, you should consider using \f{Import Module} (see \K{cmdLayer}),
 
@@ -399,7 +399,7 @@ A Turntable can have many distinct paths but only one would be valid at any time
 
 \rule
 
-\S{cmdLayer} Layers Dialog
+\S{cmdLayer} \i{Layers Dialog}
 
 Each object is contained in a layer - which is a custom group of objects that do not have a particular visual order, but can be treated as a set for certain commands.  
 Objects which are created independently of other objects (such as straight tracks (\K{cmdStraight}) or text (\K{cmdText})) are created in the current layer.  
@@ -453,7 +453,7 @@ The \f{Layer Buttons} on the Tool-bar (\K{mainW}) control which layer is the \f{
 
 The current layer is selected by picking a value from the drop down layer list.  If the Layer you've selected was not visible, it will be shown.
 
-You can hide (or show if not visible) the different layers by pushing one of the \f{Layer Buttons} on the Tool-bar (if you have configured the tool-bar (\K{toolbarM}) to show the Layer buttons).  If a layer is not visible then the corresponding layer button will be raised.  The active or current layer cannot be hidden.
+You can hide (or show if not visible) the different layers by pushing one of the \f{Layer Buttons} on the Toolbar (if you have configured the toolbar (\K{toolbarOpts}) to show the Layer buttons).  If a layer is not visible then the corresponding layer button will be raised.  The active or current layer cannot be hidden.
 
 The color of each layer button shows the color that will be used to draw tracks or draw objects in that layer, if you have selected the \f{Color Layers} (\K{cmdDisplay}) on the \f{Display} dialog. The \f{Use Color} button allows this layer to opt in or out - which can be usefu if you want to color other layers but a layer contains pre-colored objects (like Structures or Scenery).
  
@@ -465,7 +465,7 @@ Objects are drawn on the map window, if the Layer they are on has \f{On Map} che
 
 \rule
 
-\S{cmdEnum} Parts List
+\S{cmdEnum} \i{Parts List} \I{Enumerate}
 
 The \f{Parts List} command produces a list of all selected (\K{cmdSelect}) turnouts, sectional track and bench-work. It also computes total length of selected flex-track.
 
@@ -487,7 +487,7 @@ Hint: you can use the \f{Parts List} command to measure the length of selected f
 
 \rule
 
-\S{cmdPricelist} Price List
+\S{cmdPricelist} \i{Price List}
 
 The \f{Price List} dialog allows entry of prices for Turnouts, Sectional Track and Structures.  Only those objects from loaded Parameter Files (\K{cmdPrmfile}) or \e{Custom Designs} for the current Scale (\K{cmdLayout}) are listed.
 
@@ -495,13 +495,13 @@ The \f{Price List} dialog allows entry of prices for Turnouts, Sectional Track a
 
 The price of a selected object can be changed in the \e{Cost} edit box that's located above the "Price" column.
 
-The price of a length of \e{Flex Track} for the current Scale (\K{cmdLayout}) is listed at the bottom of the dialog.  You can specify the \e{Length} in \e{Inches} or \e{Centimeters}.  To specify the price for other \e{Scales} change Scale (\K{cmdLayout}) on the Layout (\K{cmdLayout}) window.
+The price of a length of \e{Flex-Track} for the current Scale (\K{cmdLayout}) is listed at the bottom of the dialog.  You can specify the \e{Length} in \e{Inches} or \e{Centimeters}.  To specify the price for other \e{Scales} change Scale (\K{cmdLayout}) on the Layout (\K{cmdLayout}) window.
 
 The Parts List (\K{cmdEnum}) dialog lists prices for selected objects if the \e{Prices} check box on the dialog window is selected.
 
 \rule
 
-\S{cmdTrain} Train
+\S{cmdTrain} \i{Train Mode} \I{Simulation}
 
 \G{png.d/btrain.png} The \f{Train} command lets you place and run Trains on the layout.
 
@@ -580,6 +580,12 @@ The Hot Bar becomes the \f{Shelf}.
 
 \u000
 
+\dt \e{Change Reporting number of Car on Layout}
+
+\dd To change the reporting number, Right-Click over the Car and then select \e{Describe} and update the field. This value will be shown in the car if Labels are shown and in the \e{Train Control} Window.
+
+\u000
+
 \dt \e{Trains}
 
 \dd A Train consists of one or more Locomotives coupled to other Cars.  One Locomotive will be the \e{MU Master} for the Train.  The \e{MU Master} can be changed by Right-Clicking on a Locomotive and selecting \e{MU Master} from the pop-up menu.  The \e{MU Master} is drawn with a solid Yellow head light indicating the direction is moving.  If a Train is split by uncoupling between Locomotives, then two Trains will be created, each with their own \e{MU Master}.
@@ -592,7 +598,7 @@ The Hot Bar becomes the \f{Shelf}.
 
 \u000
 
-\dd The \e{Train Control} dialog is used to set the speed and direction of Trains.  The dialog contains a list of Trains (listed by their \e{MU Master} Locomotive).  Before each Train on the list is either a Red circle (indicating the Train is stopped) or a Green circle (indicating the Train is moving).
+\dd The \e{Train Control} dialog is used to set the speed and direction of Trains.  The dialog contains a list of Trains (listed by their \e{MU Master} Locomotive reporting number).  Before each Train on the list is either a Red circle (indicating the Train is stopped) or a Green circle (indicating the Train is moving).
 
 \u000
 
@@ -666,13 +672,13 @@ The Hot Bar becomes the \f{Shelf}.
 
 \rule
 
-\S{cmdTurnoutNew} Turnout Designer
+\S{cmdTurnoutNew} \i{Turnout Designer}
 
 The \f{Turnout Designer} allows you to define new turnouts and sectional track pieces.
 
 \G{png.d/mmanageturnoutdesign.png}
 
-The Turnout Designer sub-menu is pictured above. As demonstrated by the sub-menu a number of different dialogs are available for creation of custom turnout and sectional track components. New turnouts and sectional track is added to Custom Management (\K{cmdCustmgm}) and Turnout Manager (\K{cmdTurnout}) using the \f{Turnout Designer}.
+The Turnout Designer sub-menu is pictured above. As demonstrated by the sub-menu a number of different dialogs are available for creation of custom turnout and sectional track components. New turnouts and sectional track is added to Custom Management (\K{cmdCustmgm}) and Turnout Manager (\K{cmdNewFixedTrack}) using the \f{Turnout Designer}.
 
 The follow dialog is for a regular turnout.
 
@@ -720,7 +726,7 @@ The rail height (\e{Code}) can be added to the \f{Manufacturer}, e.g., Peco-55, 
 
 The scale is the current scale from the \f{Scale Drop Down List} on the \f{Layout} dialog (\K{cmdLayout}).  
 
-\f{Manufacturer}, \f{Description} and \f{Part Number (#)} comprise the title of the turnout.  These values are used in the \f{Turnout Selection dialog} (\K{cmdTurnout}) and the \f{Parts List} (\K{cmdEnum}).  For regular and curved turnouts there are separate \f{Descriptions} and \f{Part Numbers} for the right and left hand turnouts.
+\f{Manufacturer}, \f{Description} and \f{Part Number (#)} comprise the title of the turnout.  These values are used in the \f{Turnout Selection dialog} (\K{cmdNewFixedTrack}) and the \f{Parts List} (\K{cmdEnum}).  For regular and curved turnouts there are separate \f{Descriptions} and \f{Part Numbers} for the right and left hand turnouts.
 
 The \f{Print} button prints a full size diagram of the turnout.  You can use this to check your dimensions and make any required changes.  You should expect to make several printouts as you refine your dimensions.
 
@@ -728,7 +734,7 @@ The \f{OK} button completes the design.  The new turnout is added to the list in
 
 The \f{Cancel} button removes the \f{Turnout Designer} dialog.
 
-\e{Creating \i{Turnout Designs}}
+\e{Creating Turnout Designs}
 
 \b It is best to start by marking the endpoints of the turnout on a piece of paper.  Extend the curved leg of the turnout (try attaching a straight sectional track) and measure the angle.  Frog numbers are easiest to calculate.
 
@@ -748,7 +754,7 @@ The \f{Cancel} button removes the \f{Turnout Designer} dialog.
 
 \rule
 
-\S{cmdRefreshSpecial} Update Turnouts and Structures
+\S{cmdRefreshSpecial} \i{Update Turnouts and Structures}
 
 This command updates (or refreshes) selected turnouts, sectional tracks and structures on your layout with the current definitions from the loaded parameter files (\K{cmdPrmfile}).  Each selected object that is found in a parameter file is updated with the current definition.
 
@@ -760,7 +766,7 @@ If an object has been updated then it is unselected, otherwise it will remain se
 
 \rule
 
-\S{cmdUngroup} Ungroup
+\S{cmdUngroup} \i{Ungroup}
 
 \f{Ungroup} allows existing definitions to be modified and the resulting objects recombined with the \f{Group} (\K{cmdGroup}) command to update the definition.  Turnouts are composed of individual straight and curved segments.  Segments that form the points (\K{generalTerms}) of the turnout remain combined as an \e{Ungrouped Turnout}, and the other segments are replaced by straight and curved tracks.
 

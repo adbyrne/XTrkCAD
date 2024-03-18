@@ -135,7 +135,6 @@ extern long drawCount;
 extern BOOL_T drawEnable;
 extern long currRedraw;
 extern long constrainMain;
-extern long mapScale;
 extern long liveMap;
 extern long descriptionFontSize;
 
@@ -234,14 +233,15 @@ extern drawFuncs_t printDrawFuncs;
 
 void DrawHilight(drawCmd_p, coOrd, coOrd, BOOL_T add);
 void DrawHilightPolygon(drawCmd_p, coOrd *, int);
-#define BOX_NONE		(0)
-#define BOX_UNDERLINE	(1)
-#define BOX_BOX			(2)
-#define BOX_INVERT		(3)
-#define BOX_ARROW		(4)
-#define BOX_BACKGROUND	(5)
-#define BOX_ARROW_BACKGROUND (6)
-#define BOX_BOX_BACKGROUND (7)
+#define BOX_NONE		(0)         // do not draw a frame around text
+#define BOX_UNDERLINE	(1)         // draw underline under text only
+#define BOX_BOX			(2)         // draw a frame around text
+#define BOX_INVERT		(3)         // invert colors, text is drawn gray
+#define BOX_ARROW		(4)         // box has a connector
+#define BOX_BACKGROUND	(5)         // draw box with backgound only, no frame    
+#define BOX_ARROW_BACKGROUND (6)    // box has a connector and background
+#define BOX_BOX_BACKGROUND (7)      // draw complete frame and background
+
 void DrawBoxedString(int, drawCmd_p, coOrd, char *, wFont_p, wFontSize_t,
                      wDrawColor, ANGLE_T);
 void DrawMultiLineTextSize(drawCmd_p dp, char * text, wFont_p fp,
@@ -256,7 +256,6 @@ void TranslateBackground(drawCmd_p drawP, POS_T origX, POS_T origY,
                          wWinPix_t* posX,
                          wWinPix_t* posY, wWinPix_t* pWidth);
 BOOL_T SetRoomSize(coOrd);
-void GetRoomSize(coOrd *);
 void DoRedraw(void);
 void SetMainSize(void);
 void MainRedraw(void);

@@ -91,6 +91,7 @@ struct  wWindow_t {
 	wWinCallBack_p winProc;        /**< window procedure */
 	GtkWidget *menubar;
 	GtkWidget *toolbar;
+	GtkAccelGroup *accelGroup;
 };
 
 //typedef struct wWindow_t * wWindow_p;
@@ -189,6 +190,9 @@ struct wIcon_t {
 extern char wConfigName[];
 extern wDrawColor wDrawColorWhite;
 extern wDrawColor wDrawColorBlack;
+
+/* appwindow.c*/
+GtkAccelGroup* wlibAppWinGetAccelGroup(void);
 
 /* basicdraw.c */
 
@@ -346,6 +350,30 @@ char *wlibGetAppName(void);
 GtkApplication *wlibGetApp(void);
 
 /* menu.c */
+
+
+
+typedef enum { M_MENU, M_SEPARATOR, M_PUSH, M_LIST, M_LISTITEM, M_TOGGLE, M_RADIO } mtype_e;
+typedef enum { MM_BUTT, MM_MENU, MM_SUBMENU } mmtype_e;
+
+struct menuObjCommon {
+	mtype_e mtype;			/**< menu entry type */
+	mmtype_e mmtype;
+	GtkWidget* menu_item;
+	wMenu_p parentMenu;
+};
+
+struct wMenu_t {
+	struct wObjCommon oc;
+	struct menuObjCommon mc;
+	mmtype_e mmtype;
+	GtkWidget* menu;
+	GSList* radioGroup;			/* radio button group */
+	wMenuTraceCallBack_p traceFunc;
+	void* traceData;
+};
+
+
 int getMlistOrigin(wMenuList_p ml, GList **pChildren);
 
 /* misc.c */

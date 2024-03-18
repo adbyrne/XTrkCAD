@@ -1975,6 +1975,15 @@ EXPORT void CarItemFindCouplerMountPoint(
 #endif
 }
 
+EXPORT void CarItemPos(
+        carItem_p item,
+        coOrd * pos	)
+{
+	pos->x = item->pos.x;
+	pos->y = item->pos.y;
+}
+
+
 
 EXPORT void CarItemSize(
         carItem_p item,
@@ -1984,12 +1993,24 @@ EXPORT void CarItemSize(
 	size->y = item->dim.carWidth;
 }
 
+EXPORT void CarItemSetNumber(carItem_p item, char * number)
+{
+	if (item->data.number && number[0]) {
+		MyFree(item->data.number);
+	}
+	if (number[0]) {
+		item->data.number = MyStrdup(number);
+	}
+}
+
 
 EXPORT char * CarItemNumber(
         carItem_p item )
 {
 	return item->data.number;
 }
+
+
 
 
 static DIST_T CarItemTruckCenter(
@@ -2098,26 +2119,6 @@ EXPORT void CarItemPlace(
 	dists[0] = dists[1] = CarItemCoupledLength(item)/2.0;
 }
 
-//static dynArr_t clearance;
-
-static void ClearClearancePoints(void)
-{
-	//DYNARR_RESET(trkSeg_t,clearance);
-}
-
-static void CreateClearancePoint(coOrd pos, int position)
-{
-	//DYNARR_APPEND(trkSeg_t,clearance,1);
-
-}
-
-static void DrawClearancePoints(void)
-{
-	//for (int i=0;i<clearance.cnt;i++) {
-	//DrawSegs();
-	//}
-}
-
 
 static int drawCarTrucks = 0;
 EXPORT void CarItemDraw(
@@ -2168,40 +2169,7 @@ EXPORT void CarItemDraw(
 	}
 
 	if (pencils) {
-		ClearClearancePoints();
-		coOrd posm1,posm2;
-		Translate( &posm1, item->pos, item->angle-90, -size.y/2.0 );
-		Translate( &posm2, item->pos, item->angle+90, -size.y/2.0 );
-		coOrd posm1a = posm1;
-		coOrd posm2a = posm2;
-		if (GetTrkDistance(traverse, &posm1a)>GetTrkDistance(traverse, &posm2a)) {
-			CreateClearancePoint(posm1,1);
-		} else {
-			CreateClearancePoint(posm2,2);
-		}
-
-		coOrd pose1,pose2;
-		Translate( &pose1, item->pos, item->angle, size.x/2.0 );
-		Translate( &pose1, pose1, item->angle-90, -size.y/2.0 );
-		Translate( &pose2, pose1, item->angle+90, -size.y );
-
-		traverseTrack_t traverseTrk;
-		traverseTrk.trk = traverse;
-		traverseTrk.pos = item->pos;
-		traverseTrk.angle = item->angle;
-		TraverseTrack2(&traverseTrk,size.x/2.0);
-		coOrd pose1a = pose1;
-		coOrd pose2a = pose2;
-		if (GetTrkDistance(traverseTrk.trk, &pose1a)>GetTrkDistance(traverseTrk.trk,
-		                &pose2a)) {
-			CreateClearancePoint(pose1,3);
-		} else {
-			CreateClearancePoint(pose2,4);
-		}
-
-
-		DrawClearancePoints();
-
+// No code for pencils
 	}
 
 	if ( drawCarTrucks ) {
@@ -4201,7 +4169,8 @@ static void CarDlgUpdate(
 
 	if ( checkTruckCenter && carDlgDim.carLength > 0 ) {
 		if ( carDlgTruckOffsetL > 0 || carDlgTruckOffsetR > 0 ) {
-			carDlgDim.truckCenter = carDlgTruckOffsetL + carDlgTruckOffsetR;
+			carDlgDim.truckCenter = carDlgDim.carLength - ( carDlgTruckOffsetL +
+			                        carDlgTruckOffsetR );
 			carDlgDim.truckCenterOffset = (carDlgTruckOffsetR - carDlgTruckOffsetL)/2;
 		} else {
 			carDlgDim.truckCenter = carDlgDim.carLength * 0.75;

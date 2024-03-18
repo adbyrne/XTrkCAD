@@ -2597,6 +2597,8 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		if (Da.state == NONE) {    //First point not created
 			if (Da.cmdType == cornuCmdCreateTrack || Da.cmdType == cornuCmdHotBar) {
 				InfoMessage("Place 1st end point of Cornu track");
+			} else if (Da.cmdType == cornuJoinTrack) {
+				return C_CONTINUE;
 			} else {
 				InfoMessage("Place 1st end point of Cornu track on unconnected end-point");
 			}

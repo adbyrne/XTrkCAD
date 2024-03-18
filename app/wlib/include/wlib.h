@@ -19,7 +19,7 @@ char *bind_textdomain_codeset(char *domainname, char *codeset );
 char *textdomain( char *domainname );
 char *gettext( const char *msgid );
 
-char *g_win32_getlocale (void);
+//char *g_win32_getlocale (void);
 #endif
 
 // conversion routines to and from UTF-8
@@ -254,7 +254,7 @@ typedef enum {
 	wRedraw_e
 }
 winProcEvent;
-typedef void (*wWinCallBack_p)( wWin_p, winProcEvent, void *, void * );
+typedef bool (*wWinCallBack_p)( wWindow_p, winProcEvent, void *, void * );
 
 /* Creation Options */
 #define F_AUTOSIZE	(1L<<1)
@@ -575,7 +575,10 @@ typedef int wAction_t;
 #define wActionScrollDown (15)
 #define wActionScrollLeft (16)
 #define wActionScrollRight (17)
-#define wActionLast		wActionScrollRight
+#define wActionMDown (18)
+#define wActionMDrag (19)
+#define wActionMUp (20)
+#define wActionLast		wActionMUp
 
 
 #define wRGB(R,G,B)\
@@ -699,7 +702,6 @@ const char * wPrintGetName(	void );
  *
  * Menus
  */
-
 #define WACCL_BASE	(1000)
 #define WALT		(1<<10)
 #define WCTL		(1<<11)
@@ -749,7 +751,7 @@ void wDoAccelHelp( wAccelKey_e key, void * );
 
 /* Creation CallBacks */
 typedef void (*wMenuCallBack_p)( void * );
-typedef void (*wMenuListCallBack_p)( int, const char *, void * );
+typedef void (*wMenuListCallBack_p)( int index, const char *label, void * data);
 typedef void (*wMenuCallBack_p)( void * );
 typedef void (*wAccelKeyCallBack_p)( wAccelKey_e, void * );
 typedef void (*wMenuTraceCallBack_p)( wMenu_p, const char *, void * );
@@ -766,15 +768,17 @@ wMenuPush_p wMenuPushCreate(	wMenu_p, const char *, const char *, long,
 wMenuRadio_p wMenuRadioCreate(	wMenu_p, const char *, const char *, long,
                                 wMenuCallBack_p, void * );
 
-wMenu_p wMenuMenuCreate(	wMenu_p, const char *, const char * );
+wMenu_p wMenuMenuCreate(wMenu_p m, const char* helpStr, const char* labelStr);
 wMenu_p wMenuPopupCreate(	wWin_p, const char * );
 void wMenuSeparatorCreate(	wMenu_p );
-wMenuList_p wMenuListCreate(	wMenu_p, const char *, int, wMenuListCallBack_p );
+wMenuList_p wMenuListCreate(wMenu_p m, const char* helpStr, int max,
+    wMenuListCallBack_p action);
 void wMenuRadioSetActive( wMenuRadio_p );
+
 void wMenuPushEnable(		wMenuPush_p, wBool_t );
 void wMenuListAdd(		wMenuList_p, int, const char *, const void * );
 void wMenuListDelete(		wMenuList_p, const char * );
-const char * wMenuListGet(	wMenuList_p, int, void ** );
+const char* wMenuListGet(wMenuList_p ml, unsigned int index, void** data);
 void wMenuListClear(		wMenuList_p );
 
 wMenuToggle_p wMenuToggleCreate(	wMenu_p, const char *, const char *, long,

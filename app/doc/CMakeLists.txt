@@ -114,40 +114,54 @@ if(XTRKCAD_USE_GTK)
 
 # Otherwise, we're using the Win32 back-end, so generate a compiled HTML help file
 else()
-	target_sources(helpsystem
-		PRIVATE
-			${CMAKE_CURRENT_SOURCE_DIR}/chmconf.but
-	)
-	file(GLOB IMAGE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/png.d/*)
+    find_package(HTMLHelp)
 
-	#
-	# Use the Microsoft HTML Help Workshop to create a chm file
-	# 
-	# Clean the working directory
-	# Copy the image files and the CSS
-	# Create the sources for the Help Workshop using halibut
-	# Build the chm file
-	# Add the chm file to the installation 
-	add_custom_target(help-chm ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/html/index.html)
-	set_target_properties(
-   		help-chm
-   		PROPERTIES FOLDER HelpDocs
-	)
-	get_target_property(halibut_sources helpsystem SOURCES)
-	add_custom_command(
-		TARGET help-chm
-		DEPENDS halibut helpsystem ${IMAGE_SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad_win.css
-		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
-		COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/clean-html.cmake
-		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/png.d ${CMAKE_CURRENT_BINARY_DIR}/html/png.d
-		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad_win.css ${CMAKE_CURRENT_BINARY_DIR}/html
-		COMMAND halibut ${halibut_sources} 
-		COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/hhc.cmake
-	)
+    if("${HTML_HELP_COMPILER}" STRGREATER "")
+        target_sources(helpsystem
+                    PRIVATE
+                    ${CMAKE_CURRENT_SOURCE_DIR}/chmconf.but
+        )
+    	file(GLOB IMAGE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/png.d/*)
 
-	install(
-		FILES ${CMAKE_CURRENT_BINARY_DIR}/html/xtrkcad.chm
-        DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
+		#
+		# Use the Microsoft HTML Help Workshop to create a chm file
+		# 
+		# Clean the working directory
+		# Copy the image files and the CSS
+		# Create the sources for the Help Workshop using halibut
+		# Build the chm file
+		# Add the chm file to the installation 
+
+		add_custom_target(help-chm ALL DEPENDS ${halibut_sources})
+		set_target_properties(
+			help-chm
+			PROPERTIES FOLDER HelpDocs
+		)
+		get_target_property(halibut_sources helpsystem SOURCES)
+		
+		# hhc exits with non-zero code even on success
+		# workaround is to create an external cmake script that
+		# invokes hhc and handle its specific exit code
+		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/hhc.cmake.in"
+					   "${CMAKE_CURRENT_BINARY_DIR}/hhc.cmake"
+						@ONLY)	
+
+		add_custom_command(
+			TARGET help-chm
+			DEPENDS halibut helpsystem ${IMAGE_SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad_win.css
+			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
+			COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/clean-html.cmake
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/png.d ${CMAKE_CURRENT_BINARY_DIR}/html/png.d
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad_win.css ${CMAKE_CURRENT_BINARY_DIR}/html
+			COMMAND halibut ${halibut_sources} 
+			COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/hhc.cmake
 		)
 
+		install(
+			FILES ${CMAKE_CURRENT_BINARY_DIR}/html/xtrkcad.chm
+			DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
+		)
+	else()
+		message(STATUS "HTML Help Workshop not found! CHM Help will not be created.")	
+	endif()
 endif()

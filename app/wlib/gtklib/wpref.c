@@ -26,6 +26,7 @@
 #include <ctype.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <errno.h>
 
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
@@ -82,7 +83,12 @@ const char * wGetAppLibDir( void )
 	for (cp=wlibGetAppName(),ep=envvar; *cp; cp++,ep++) {
 		*ep = toupper(*cp);
 	}
-	strcpy( ep, "LIB" );
+#ifndef __APPLE__
+	if ( strstr( XTRKCAD_VERSION, "Beta" ) != NULL ) {
+		strcat( ep, "BETA" );
+	}
+#endif
+	strcat( ep, "LIB" );
 	ep = getenv( envvar );
 	if (ep != NULL) {
 		if ((stat( ep, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
@@ -165,6 +171,11 @@ const char * wGetAppWorkDir(
 		wExit(0);
 	}
 	sprintf( appWorkDir, "%s/.%s", homeDir, wlibGetAppName() );
+#ifndef __APPLE__
+	if ( strstr( XTRKCAD_VERSION, "Beta" ) != NULL ) {
+		strcat( appWorkDir, "-beta" );
+	}
+#endif
 	if ( (dirp = opendir(appWorkDir)) != NULL ) {
 		closedir(dirp);
 	} else {
@@ -256,6 +267,7 @@ static void readPrefs( char * name, wBool_t update )
 	}
 	prefFile = fopen( tmp, "r" );
 	if (prefFile == NULL) {
+		// First run, no .rc file yet
 		return;
 	}
 	while ( ( fgets(tmp, sizeof tmp, prefFile) ) != NULL ) {
@@ -500,6 +512,11 @@ void wPrefFlush(
 	}
 	prefFile = fopen( tmp, "w" );
 	if (prefFile == NULL) {
+		// Can not write pref file
+		size_t n = BUFSIZ+32-1-strlen(tmp);
+		strncat( tmp, ": ", n );
+		strncat( tmp, strerror(errno), n-2 );
+		wNoticeEx( NT_ERROR, tmp, "Ok", NULL );
 		return;
 	}
 

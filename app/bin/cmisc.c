@@ -38,7 +38,7 @@ static descUpdate_t descUpdateFunc;
 static coOrd descOrig, descSize;
 static POS_T descBorder;
 static wDrawColor descColor = 0;
-static BOOL_T descUndoStarted;
+EXPORT BOOL_T descUndoStarted;
 static BOOL_T descNeedDrawHilite;
 static wWinPix_t describeW_posy;
 static int describe_row;
@@ -315,7 +315,12 @@ static void DescOk(void * junk)
 	}
 
 	descNeedDrawHilite = FALSE;
-	Reset(); // DescOk
+	if (programMode == MODE_DESIGN) {
+		Reset(); // DescOk
+	} else {
+		descNeedDrawHilite = FALSE;
+		wSetCursor(mainD.d,defaultCursor);
+	}
 }
 
 
@@ -489,8 +494,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 
 		label = _(ddp->label);
 		ddp->posy = describeW_posy;
-		ddp->control0 = AssignParamToDescribeDialog(ddp, ddp->valueP, label,
-		                (ddp->type == DESC_POS?3:3));
+		ddp->control0 = AssignParamToDescribeDialog(ddp, ddp->valueP, label, 3);
 		if (ddp->type != DESC_LAYER) {
 			wControlActive(ddp->control0, (!(ddp->mode&DESC_RO)));
 		}

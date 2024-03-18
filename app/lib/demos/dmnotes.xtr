@@ -20,7 +20,7 @@ STEP
 #RESET
 #MOUSE 6920 9.917 7.167
 #MOUSE 3336 9.917 7.167
-PARAMETER textEdit ok
+PARAMETER textNote ok
 MESSAGE
 _________________________________________
 
@@ -32,7 +32,7 @@ MOUSE 2 9.917 7.167
 MOUSE 4 9.917 7.167
 STEP
 #MOUSE 6920 9.917 7.167
-PARAMETER textEdit ok
+PARAMETER textNote ok
 
 MESSAGE
 _________________________________________
@@ -53,7 +53,7 @@ _________________________________________
 This is a File Note.  You can specify the Title of the File and its location
 END
 STEP
-PARAMETER fileEdit cancel
+PARAMETER fileNote cancel
 MOUSE 6920 7.917 7.167
 RESET
 
@@ -67,7 +67,7 @@ _________________________________________
 This is a Web Link Note.  You can specify the Title of the Link and its URL
 END
 STEP
-PARAMETER linkEdit cancel
+PARAMETER linkNote cancel
 MOUSE 6920 5.917 7.167
 RESET
 

@@ -26,7 +26,12 @@
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
-#include <unistd.h>
+#ifdef WIN32
+	#define _USE_MATH_DEFINES // for C
+	#include <Windows.h>
+#else
+	#include <unistd.h>
+#endif
 #include <string.h>
 #include <math.h>
 

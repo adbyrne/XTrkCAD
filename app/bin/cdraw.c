@@ -30,6 +30,7 @@
 #include "tbezier.h"
 #include "misc.h"
 #include "cselect.h"
+#include "cundo.h"
 #include "common-ui.h"
 
 static wMenu_p drawModDelMI;
@@ -111,6 +112,8 @@ EXPORT void UpdateFontSizeList(
         wIndex_t listInx )
 {
 	long fontSize;
+	long largeFontSize;
+	wPrefGetInteger( "misc", "large-font-size", &largeFontSize, 500 );
 
 	if ( listInx >= 0 ) {
 		*fontSizeR = VP2L( wListGetItemContext( list, listInx ));
@@ -123,9 +126,13 @@ EXPORT void UpdateFontSizeList(
 				sprintf( message, "%ld", *fontSizeR );
 				wListSetValue( list, message );
 			} else {
-				if ( fontSize <= 500
+				if ( fontSize <= largeFontSize
 				     || NoticeMessage( MSG_LARGE_FONT, _("Yes"), _("No") ) > 0 ) {
 
+					if ( fontSize > largeFontSize ) {
+						largeFontSize = fontSize;
+						wPrefSetInteger( "misc", "large-font-size", largeFontSize );
+					}
 					*fontSizeR = fontSize;
 					/* inform gtkfont dialog from change */
 					wSetSelectedFontSize((wFontSize_t)fontSize);
@@ -994,7 +1001,6 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		if(drawData.filled) {
 			if (segPtr->type == SEG_POLY) {
 				segPtr->type = SEG_FILPOLY;
-				segPtr->u.p.polyType = FREEFORM;
 				drawData.open = FALSE;
 				drawDesc[OP].mode = DESC_RO|DESC_CHANGE;
 			}
@@ -1006,7 +1012,6 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		} else {
 			if (segPtr->type == SEG_FILPOLY) {
 				segPtr->type = SEG_POLY;
-				segPtr->u.p.polyType = FREEFORM;
 				drawData.open = FALSE;
 				drawDesc[OP].mode = DESC_CHANGE;
 			}
@@ -1043,9 +1048,16 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		segPtr->u.t.boxed = drawData.boxed;
 		break;
 	case TX:
-		if ( wTextGetModified((wText_p)drawDesc[TX].control0 )) {
+		if ( wTextGetModified((wText_p)drawDesc[TX].control0 ) ||
+		     inPlayback ) {
 			int len = wTextGetSize((wText_p)drawDesc[TX].control0);
-			MyFree( segPtr->u.t.string );
+			// TODO - minor memory leak, but this allows Undo on text object.  See BUG-527
+			// MyFree( segPtr->u.t.string );
+			if ( !descUndoStarted ) {
+				UndoStart( _("Change Track"), "Change Track");
+				descUndoStarted = TRUE;
+			}
+			UndoModify( trk );
 			if (len>STR_HUGE_SIZE-8) {                   //Truncate string to max
 				len = STR_HUGE_SIZE-8;
 				ErrorMessage( MSG_TEXT_TOO_LONG );
@@ -1764,20 +1776,22 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		wMenuPushEnable( drawModPhantom, TRUE);
 		if (!drawModCmdContext.rotate_state && (drawModCmdContext.type == SEG_POLY
 		                                        || drawModCmdContext.type == SEG_FILPOLY)) {
-			wMenuPushEnable( drawModDel,drawModCmdContext.prev_inx>=0);
-			if ((!drawModCmdContext.open && drawModCmdContext.prev_inx>=0) ||
-			    ((drawModCmdContext.prev_inx>0)
-			     && (drawModCmdContext.prev_inx<drawModCmdContext.max_inx))) {
-				wMenuPushEnable( drawModRound,TRUE);
-				wMenuPushEnable( drawModVertex, TRUE);
-				wMenuPushEnable( drawModSmooth, TRUE);
-			}
 			wMenuPushEnable( drawModFill, (!drawModCmdContext.open)
 			                 && (!drawModCmdContext.filled));
 			wMenuPushEnable( drawModEmpty, (!drawModCmdContext.open)
 			                 && (drawModCmdContext.filled));
-			wMenuPushEnable( drawModClose, drawModCmdContext.open);
-			wMenuPushEnable( drawModOpen, !drawModCmdContext.open);
+			if (drawModCmdContext.subtype != RECTANGLE) {
+				wMenuPushEnable( drawModDel,drawModCmdContext.prev_inx>=0);
+				if ((!drawModCmdContext.open && drawModCmdContext.prev_inx>=0) ||
+				    ((drawModCmdContext.prev_inx>0)
+				     && (drawModCmdContext.prev_inx<drawModCmdContext.max_inx))) {
+					wMenuPushEnable( drawModRound,TRUE);
+					wMenuPushEnable( drawModVertex, TRUE);
+					wMenuPushEnable( drawModSmooth, TRUE);
+					wMenuPushEnable( drawModClose, drawModCmdContext.open);
+					wMenuPushEnable( drawModOpen, !drawModCmdContext.open);
+				}
+			}
 		}
 		wMenuPushEnable( drawModOrigin,drawModCmdContext.rotate_state);
 		wMenuPushEnable( drawModLast,drawModCmdContext.rotate_state
@@ -3210,8 +3224,6 @@ typedef struct {
 	wIndex_t cmdInx;
 	int curr;
 } drawStuff_t;
-static drawStuff_t drawStuff[4];
-
 
 static drawStuff_t drawStuff[4] = {
 	{ "cmdDrawLineSetCmd", N_("Straight Objects"), N_("Draw Straight Objects"), 4, dlineCmds },

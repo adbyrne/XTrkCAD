@@ -40,8 +40,8 @@
 
 wWin_p gtkMainW;
 
-#define MIN_WIN_WIDTH 150
-#define MIN_WIN_HEIGHT 150
+#define MIN_WIN_WIDTH 50
+#define MIN_WIN_HEIGHT 50
 
 #define SECTIONWINDOWSIZE  "gtklib window size"
 #define SECTIONWINDOWPOS   "gtklib window pos"

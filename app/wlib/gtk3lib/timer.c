@@ -22,7 +22,13 @@
  */
 
 #include <stdio.h>
+#ifdef WIN32
+#include <time.h>
+#include <winsock.h>
+#else
 #include <sys/time.h>
+#endif
+
 #include <signal.h>
 
 #define GTK_DISABLE_SINGLE_INCLUDES

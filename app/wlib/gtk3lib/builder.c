@@ -6,7 +6,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+#ifdef WIN32
+	#include <windows.h>
+	#define PATH_MAX _MAX_PATH
+#else
+	#include <unistd.h>
+#endif
 
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
@@ -53,17 +58,13 @@ wlibFileNameFromDialog( const char *dialog )
 #ifdef NDEBUG
 	GString *filename = g_string_new(wGetAppLibDir());
 #else
-	char * cwd = malloc(PATH_MAX);
-	getcwd(cwd, PATH_MAX );
-	GString *filename = g_string_new( cwd);
+	gchar* cwd = g_get_current_dir();
+	GString *filename = g_string_new(cwd);
+	g_free(cwd);
 #endif  //NDEBUG    
 	g_string_append(filename, "/ui/");
 	g_string_append(filename, dialog );
 	g_string_append(filename, ".glade");
-
-#ifndef NDEBUG
-	free(cwd);
-#endif
 
 	return( filename );
 }
@@ -109,7 +110,6 @@ wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr,
                         long option, void *data )
 {
 	wWin_p w;
-	int h;
 	GString *filename;
 	w = wlibAlloc(NULL, winType, 0, 0, labelStr, sizeof *w, data);
 	w->busy = TRUE;

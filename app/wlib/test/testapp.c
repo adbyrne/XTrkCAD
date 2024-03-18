@@ -38,53 +38,80 @@
 
 long dontHideCursor = 0;
 
+wMenuList_p menuList;
+
 /**
  *	doFile: callback funtion for file submenu 
  */
 
 void doFile( void * cmd )
 {
-   switch ((int)cmd) {
+	static int recent = 1;
+	char buffer[20];
+
+      switch ((int)cmd) {
 		case 1:
+			sprintf(buffer, "Recent %d", recent++);
+			wMenuListAdd(menuList, 0, buffer, "data for recent x");
 			break;				/* push test */
 		case 2:
+			printf("Menu toggle changed!\n");
 			break;				/* toggle test */
-		case 3: 		
+		case 3: 
+			printf("Active radio button changed!\n");
 			break;				/* Radio test */
-   	case 0:					/* 'Quit ' */
+   		case 0:					/* 'Quit ' */
 			wExit( 0 );			/* terminate application */
     }
 }
+
+/**
+ * RecentusedCallback.
+ * 
+ * \param data	pointer to item data 
+ */
+
+wMenuListCallBack_p
+RecentUsedCallback(int unused, char *label, char* data)
+{
+	printf("Recent used: %s - %s\n", label, data);
+}
+
 
 void TestMenu( wWindow_p mainW)
 {
 	wMenu_p menu1;
 	wMenu_p menu2;
+	wMenu_p menu3;
+	wMenu_p menu4;
 
 	/* add a submenu */ 	
     menu1 = wMenuBarAdd( mainW, 		/* parent window */
 						NULL, 			/* help topic */
-						"File" 			/* submenu title */
+						"_File" 			/* submenu title */
 						);	
 
 	/* create a menuitem in submenu */
 	wMenuPushCreate( 	menu1, 				/* parent menu */
 							NULL, 				/* help topic */
-							"Test", 				/* submenu title */
-							0, 					/* accelerator key */
+							"Add to MRU", 				/* submenu title */
+							WCTL+'a', 					/* accelerator key */
 							doFile, 				/* callback funtion */
 							(void*)1 			/* pointer to user data */
 						 );									
 	
+	menu4 = wMenuMenuCreate(menu1, NULL, "Recently used");
+ 	menuList = wMenuListCreate(menu4, NULL, 10, RecentUsedCallback);
 
 	/* create a separator before 'Quit' */	
+ 
 	wMenuSeparatorCreate( menu1 );
 	
 	/* create a menuitem in submenu */
 	wMenuPushCreate( 	menu1, 				/* parent menu */
 							NULL, 				/* help topic */
-							"Quit", 				/* submenu title */
-							0, 					/* accelerator key */
+							"_Quit", 				/* submenu title */
+							WALT+'x',					/* accelerator key */
 							doFile, 				/* callback funtion */
 							(void*)0 			/* pointer to user data */
 						 );									
@@ -92,13 +119,13 @@ void TestMenu( wWindow_p mainW)
 	/* create a second submenu */
     menu2 = wMenuBarAdd( mainW, 		/* parent window */
 						 NULL, 			/* help topic */
-						"Help" 			/* submenu title */
+						"_Checks" 			/* submenu title */
 					    );	
 
 	wMenuToggleCreate(menu2,
 				NULL,
 				"Active",
-				0,
+				WALT+'a',
 				1, 
 				doFile,
 				(void *)2
@@ -125,31 +152,51 @@ void TestMenu( wWindow_p mainW)
 	wMenuToggleEnable( mt, FALSE );
 
 	wMenuSeparatorCreate( menu2 );
+
+	menu3 = wMenuMenuCreate(menu2, NULL, "Radio Buttons");
 	
-	wMenuRadioCreate(menu2,
+	wMenuRadioCreate(menu3,
 				NULL,
 				"Radio 1",
-				0,
+				WCTL+'1',
 				doFile,
 				(void *)3
 				);
 
-	wMenuRadioCreate(menu2,
+	wMenuRadioCreate(menu3,
 				NULL,
 				"Radio 2",
-				0,
+				WCTL + '2',
 				doFile,
 				(void *)3
 				);
 
-	wMenuRadioCreate(menu2,
+	wMenuRadioCreate(menu3,
 				NULL,
 				"Radio 3",
-				0,
+				WCTL + '3',
 				doFile,
 				(void *)3
 				);
 
+ }
+
+static
+bool mainCallBack(wWindow_p window, winProcEvent ev, void *data1, void *data2 )
+{
+	int result;
+	switch (ev) {
+	case wClose_e:
+  		result = wNotice3("Close application without saving?", "_Yes", "_Save", "_ No");
+		printf("Exit warning result=%d\n", result);
+		if (result != 1)
+			return TRUE;
+		else
+			return FALSE;
+		break;
+	default:
+		return FALSE;
+	}
 }
 
 wWindow_p wMain( int argc, char * argv[] )
@@ -166,6 +213,7 @@ wWindow_p wMain( int argc, char * argv[] )
 	wInitAppName(APPNAME);
 
 	printf("%s\n", wGetUserHomeDir());
+	printf("%s\n", wGetAppLibDir());
 
 #ifdef TEST_SPLASH
 	/* add a splash window */
@@ -184,7 +232,7 @@ wWindow_p wMain( int argc, char * argv[] )
 									WINDOWTITLE, /* window title */
 									APPNAME, 	/* window name */	
 									F_RESIZE|F_MENUBAR, /* options */
-									NULL, 		/* window callback function */
+									mainCallBack, 		/* window callback function */
 									NULL 			/* pointer to user data */
 									);
 

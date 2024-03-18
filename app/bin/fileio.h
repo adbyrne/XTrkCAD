@@ -93,7 +93,7 @@ char * GetNextLine( void );
 #define END_MESSAGE	"END$MESSAGE"
 wBool_t IsEND( char * sEnd );
 
-BOOL_T GetArgs( char *, char *, ... );
+BOOL_T GetArgs( char *, const char *, ... );
 char * ReadMultilineText();
 BOOL_T ParseRoomSize( char *, coOrd * );
 int InputError( char *, BOOL_T, ... );
@@ -118,7 +118,8 @@ void DoLoad( void );
 void DoExamples( void );
 void DoFileList( int, char *, void * );
 void TryCheckPoint( void );
-void CleanupFiles( void );
+void CleanupCheckpointFiles( void );
+void CleanupTempArchive( void );
 int ExistsCheckpoint( void );
 int LoadCheckpoint( BOOL_T );
 void DoImport( void * typeVP );
@@ -150,6 +151,7 @@ void FileInit( void );
 
 BOOL_T MacroInit( void );
 
+int Copyfile( const char * fn1, const char * fn2);
 void SetCLocale();
 void SetUserLocale();
 

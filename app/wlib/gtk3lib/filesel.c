@@ -25,7 +25,11 @@
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
-#include <unistd.h>
+#ifdef WIN32
+#include <Windows.h>
+#else
+	#include <unistd.h>
+#endif
 #include <string.h>
 
 #define GTK_DISABLE_SINGLE_INCLUDES

@@ -177,6 +177,7 @@ target_sources(xtrkcad-lib
     misc.c
     misc.h
     note.h
+    param.c
     param.h
     paramfile.c
     paramfilelist.c
@@ -210,6 +211,7 @@ target_sources(xtrkcad-lib
 	trkseg.h
     trkseg.c
     tstraigh.c
+    toolbar.c
     turnout.c
     uthash.h
     utility.c
@@ -224,18 +226,6 @@ target_sources(xtrkcad-lib
     include/stringxtc.h
     include/utlist.h
 )
-
-if(XTRKCAD_GTK3_WLIB)
-    target_sources(xtrkcad-lib
-        PRIVATE
-        paramgrid.c
-    )    
-else()
-    target_sources(xtrkcad-lib
-	    PRIVATE
-        param.c
-    )    
-endif()
 
 # add UTF-8 conversion utilities on Windows
 
@@ -276,7 +266,8 @@ else()
     target_link_libraries(xtrkcad-lib 
         PRIVATE 
         Libzip::Libzip 
-        FreeImage::FreeImage)
+        FreeImage::FreeImage 
+        Zlib::Zlib)
 endif()
 
 #
@@ -298,15 +289,6 @@ if(XTRKCAD_CREATE_SVG)
             PRIVATE 
             MiniXML::mxml
         )
-		# copy the MiniXML DLL to the build directory for easier debugging		
-	    add_custom_command(
-			TARGET xtrkcad POST_BUILD
-			COMMAND ${CMAKE_COMMAND} -E copy ${MINIXML_SHAREDLIB} ${CMAKE_CURRENT_BINARY_DIR}
-	    )
-        # add dll to install package
-	    install(FILES ${MINIXML_SHAREDLIB}
-        	DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
-	    )
 	endif()
 	if(UNIX)
 		if (APPLE OR NOT ${MINIXML_STATIC_LIBRARY})
@@ -390,9 +372,9 @@ if(NOT WIN32)
 else()
 	# copy dlls into the build dir for easier debugging
     COPYDLLTOBUILD(${FREEIMAGE_SHAREDLIB})
-    COPYDLLTOBUILD(${LIBZIP_SHAREDLIB})
-    COPYDLLTOBUILD(${ZLIB_SHAREDLIB})
-
+#    COPYDLLTOBUILD(${LIBZIP_SHAREDLIB})
+#    COPYDLLTOBUILD(${ZLIB_SHAREDLIB})
+    set(ENV{path} "${CMAKE_CURRENT_BINARY_DIR};$ENV{PATH}")
 	# add dll to install package
 	install(
 	    FILES ${LIBZIP_SHAREDLIB}
