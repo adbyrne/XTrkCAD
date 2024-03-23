@@ -801,21 +801,21 @@ void wAttachAccelKey( wAccelKey_e, int, wAccelKeyCallBack_p, void * );
  * File Selection
  */
 
-#define FS_MULTIPLEFILES	1
-#define FS_PICTURES         2
+#define FSO_MULTIPLEFILES	1
+#define FSO_PICTURES        2
 
 struct wFilSel_t;
 typedef enum {
 	FS_SAVE,
 	FS_LOAD,
 	FS_UPDATE
-}
-wFilSelMode_e;
-typedef int (*wFilSelCallBack_p)( int files, char ** fileName, void * );
-struct wFilSel_t * wFilSelCreate(wWin_p, wFilSelMode_e, int, const char *,
-                                 const char *,
-                                 wFilSelCallBack_p, void * );
-int wFilSelect(			struct wFilSel_t *, const char * );
+} wFilSelMode_e;
+
+typedef int (*wFilSelCallBack_p)( int files, char ** fileName, void * data);
+struct wFilSel_t* wFilSelCreate(wWindow_p w, wFilSelMode_e mode, int opt, 
+    const char* title, const char* pattList, wFilSelCallBack_p action, 
+    void* data);
+int wFilSelect(struct wFilSel_t* fs, const char* dirName);
 
 
 /*------------------------------------------------------------------------------

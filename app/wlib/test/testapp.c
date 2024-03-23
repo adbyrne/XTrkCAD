@@ -29,6 +29,11 @@
 #define APPNAME "testapp"
 #define WINDOWTITLE "Test Application"
 
+#define FILEPATTERN "All XTrackCAD Files (*.xtc,*.xtce)|*.xtc;*.xtce|" \
+		               "XTrackCAD Trackplan (*.xtc)|*.xtc|" \
+		               "XTrackCAD Extended Trackplan (*.xtce)|*.xtce|" \
+		               "All Files (*)|*"
+
 // #define TEST_ARGV
 // #define TEST_SPLASH
 #define TEST_PULLDOWNMENU
@@ -71,12 +76,80 @@ void doFile( void * cmd )
  * \param data	pointer to item data 
  */
 
-wMenuListCallBack_p
+void
 RecentUsedCallback(int unused, char *label, char* data)
 {
 	printf("Recent used: %s - %s\n", label, data);
 }
 
+
+static struct wFilSel_t* loadFile_fs = NULL;
+static struct wFilSel_t* saveFile_fs = NULL;
+static struct wFilSel_t* pictureFile_fs = NULL;
+
+int LoadData(
+	int cnt,
+	char** fileName,
+	void* data)
+{
+	for (int i = 0; i < cnt; i++) {
+		printf("File no. %d is %s\n", i, fileName[i]);
+	}
+	return(0);
+}
+
+void
+OpenForLoad(void* data)
+{
+	wFilSelect(loadFile_fs, ".");
+}
+
+void
+OpenPictures(void* data)
+{
+	wFilSelect(pictureFile_fs, ".");
+}
+
+void
+OpenForSave(void* data)
+{
+	wFilSelect(saveFile_fs, ".");
+}
+
+
+
+void
+LoadFileSelector(wWindow_p mainW, wMenu_p parent)
+{
+	wMenuPushCreate(parent, "menuFile-load", "Open ...", WCTL+'o',
+		OpenForLoad, NULL);
+
+	if (loadFile_fs == NULL) 
+		loadFile_fs = wFilSelCreate(mainW, FS_LOAD, FSO_MULTIPLEFILES, "Open Tracks",
+			FILEPATTERN, LoadData, NULL);
+}
+
+void
+PixmapFileSelector(wWindow_p mainW, wMenu_p parent)
+{
+	wMenuPushCreate(parent, "menuFile-load", "Open Pictures...", WCTL + 'p',
+		OpenPictures, NULL);
+
+	if(pictureFile_fs == NULL)
+		pictureFile_fs = wFilSelCreate(mainW, FS_LOAD, FSO_PICTURES, "Open Pictures",
+			NULL, LoadData, NULL);
+}
+
+void
+SaveFileSelector(wWindow_p mainW, wMenu_p parent)
+{
+	wMenuPushCreate(parent, "menuFile-save", "Save ...", WCTL + 's',
+		OpenForSave, NULL);
+
+	if (saveFile_fs == NULL)
+		saveFile_fs = wFilSelCreate(mainW, FS_SAVE, 0, "_Save Tracks",
+			FILEPATTERN, LoadData, NULL);
+}
 
 void TestMenu( wWindow_p mainW)
 {
@@ -90,6 +163,12 @@ void TestMenu( wWindow_p mainW)
 						NULL, 			/* help topic */
 						"_File" 			/* submenu title */
 						);	
+
+ 	LoadFileSelector(mainW, menu1);
+	PixmapFileSelector(mainW, menu1);
+	SaveFileSelector(mainW, menu1);
+
+	wMenuSeparatorCreate(menu1);
 
 	/* create a menuitem in submenu */
 	wMenuPushCreate( 	menu1, 				/* parent menu */
@@ -212,8 +291,12 @@ wWindow_p wMain( int argc, char * argv[] )
 
 	wInitAppName(APPNAME);
 
+#ifdef PATH
+
 	printf("%s\n", wGetUserHomeDir());
 	printf("%s\n", wGetAppLibDir());
+
+#endif // PATH
 
 #ifdef TEST_SPLASH
 	/* add a splash window */

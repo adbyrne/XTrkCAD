@@ -92,6 +92,7 @@ struct  wWindow_t {
 	GtkWidget *menubar;
 	GtkWidget *toolbar;
 	GtkAccelGroup *accelGroup;
+	GtkWidget* gtkWindow;
 };
 
 //typedef struct wWindow_t * wWindow_p;

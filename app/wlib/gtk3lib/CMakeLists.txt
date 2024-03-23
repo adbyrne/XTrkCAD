@@ -20,7 +20,7 @@ target_sources(xtrkcad-wlib
  	control.c
 	drawcairo.c
 	droplist.c	
- 	filesel.c
+ 	fileselector.c
  	font.c
  	help.c
  	lines.c
@@ -35,7 +35,7 @@ target_sources(xtrkcad-wlib
 	recentuse.c
 	single.c
  	splash.c
-    	statusbar.c
+    statusbar.c
  	text.c
  	tooltip.c	
  	treeview.c
