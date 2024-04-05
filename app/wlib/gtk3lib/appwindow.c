@@ -46,6 +46,12 @@ wlibAppWinGetAccelGroup()
 	return(appMainWindow->accelGroup);
 }
 
+GtkContainer *
+wlibAppWinGetStatusbar()
+{
+	return(appMainWindow->statusbar);
+}
+
 static gboolean
 on_widget_deleted(GtkWidget* window, GdkEvent* event, gpointer userData)
 {
@@ -107,11 +113,11 @@ on_widget_deleted(GtkWidget* window, GdkEvent* event, gpointer userData)
 	 appMainWindow->oc.name = g_strdup(nameStr);
 	 appMainWindow->winProc = winProc;
 
-	 mainBuilder = gtk_builder_new_from_resource(
+	 appMainWindow->builder = gtk_builder_new_from_resource(
 		 XTRKCAD_RESOURCE_PATH
 		 "appwindow.ui");
 
-	 appMainWindow->oc.widget = GTK_WIDGET(gtk_builder_get_object(mainBuilder,
+	 appMainWindow->oc.widget = GTK_WIDGET(gtk_builder_get_object(appMainWindow->builder,
 																  "main"));
 
 	 // this is the main application window
@@ -127,24 +133,27 @@ on_widget_deleted(GtkWidget* window, GdkEvent* event, gpointer userData)
 
 	 if (option & F_MENUBAR)
 	 {
-		 appMainWindow->menubar = GTK_WIDGET(gtk_builder_get_object(mainBuilder,
+		 appMainWindow->menubar = GTK_WIDGET(gtk_builder_get_object(appMainWindow->builder,
 																	"menubar"));
 	 }
 
 	 GtkContainer *toolbarContainer;
-	 toolbarContainer = GTK_CONTAINER(gtk_builder_get_object(mainBuilder,
+	 toolbarContainer = GTK_CONTAINER(gtk_builder_get_object(appMainWindow->builder,
 															 "toolbar"));
 	 if (toolbarContainer)
 	 {
 		 //        appMainWindow->toolbar =  createToolbar(toolbarContainer);
 	 }
 
+	 GtkContainer *statusbar = GTK_CONTAINER(gtk_builder_get_object(appMainWindow->builder,
+		 "statusbar"));
+	 {
+		 appMainWindow->statusbar = statusbar;
+	 }
+
 	 g_signal_connect(G_OBJECT(appMainWindow->oc.widget),
 		 "delete-event", G_CALLBACK(on_widget_deleted), NULL);
 
 	 gtk_widget_show_all(appMainWindow->oc.widget);
-
-	 //	wlibCreateCustomStyle();
-
 	 return appMainWindow;
  }

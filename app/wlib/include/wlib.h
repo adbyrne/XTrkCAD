@@ -873,11 +873,8 @@ void CleanupCustom( void );
  */
 
 wStatus_p wStatusCreate(
-        wWin_p	parent,
-        wWinPix_t	x,
-        wWinPix_t	y,
+        wWindow_p	parent,
         const char 	* labelStr,
-        wWinPix_t	width,
         const char	*message );
 
 wWinPix_t wStatusGetWidth(const char *testString);

@@ -24,10 +24,6 @@
  *
  */
 
-
-#include <stdlib.h>
-#include <string.h>
-
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
 #define GTK_DISABLE_DEPRECATED
@@ -39,10 +35,7 @@
 #include "gtkint.h"
 
 struct wStatus_t {
-    WOBJ_COMMON
     GtkWidget * labelWidget;
-    const char * message;
-    wWinPix_t labelWidth;
 };
 
 /**
@@ -57,18 +50,13 @@ void wStatusSetValue(
     wStatus_p b,
     const char * arg)
 {
-    if (b->widget == 0) {
-        abort();
+    if (!b || b->labelWidget == 0) {
+        return;
     }
 
-    if (gtk_entry_get_max_length(GTK_ENTRY(b->labelWidget))<strlen(arg)) {
-        gtk_entry_set_max_length(GTK_ENTRY(b->labelWidget), strlen(arg));
-        gtk_entry_set_width_chars(GTK_ENTRY(b->labelWidget), strlen(arg));
-    }
-
-    gtk_entry_set_text(GTK_ENTRY(b->labelWidget), wlibConvertInput(arg));
-    gtk_widget_queue_draw (GTK_WIDGET(b->labelWidget));
+    gtk_label_set_text(GTK_LABEL(b->labelWidget), wlibConvertInput(arg));
 }
+
 /**
  * Create a window for a simple text.
  *
@@ -83,27 +71,20 @@ void wStatusSetValue(
  */
 
 wStatus_p wStatusCreate(
-        wWin_p	parent,
-        wWinPix_t	x,
-        wWinPix_t	y,
+        wWindow_p	parent,
         const char 	* labelStr,
-        wWinPix_t	width,
         const char	*message)
 {
 	wStatus_p b;
-	GtkRequisition requisition;
 
-	b = (wStatus_p)wlibAlloc(parent, B_STATUS, x, y, NULL, sizeof *b, NULL);
-    b->labelWidget = wlibWidgetFromIdWarn(b->parent, labelStr);
-	b->fromTemplate = TRUE;
-	b->template_id = strdup(labelStr);
-	b->message = message;
-	gtk_entry_set_text(GTK_ENTRY(b->labelWidget),
+    b = (wStatus_p)g_malloc(sizeof(struct wStatus_t));
+
+    b->labelWidget = wlibWidgetFromIdWarn(parent, labelStr);
+
+	gtk_label_set_text(GTK_LABEL(b->labelWidget),
 		                   message?wlibConvertInput(message):"");
-//	gtk_widget_show_all(b->labelWidget);
-	b->widget = wlibGetWidgetFromName(b->parent, labelStr, "box", FALSE);
-	gtk_widget_show_all(b->widget);
 
+	gtk_widget_show(b->labelWidget);
 	return b;
 }
 
@@ -117,22 +98,24 @@ wStatus_p wStatusCreate(
 wWinPix_t
 wStatusGetWidth(const char *testString)
 {
-    GtkWidget *entry;
-    GtkRequisition min_req, nat_req;
+    printf("Function at line %d in %s is not implemented!", __LINE__, __FILE__);
+    return(0);
+ //   GtkWidget *entry;
+ //   GtkRequisition min_req, nat_req;
 
-    entry = gtk_entry_new();
-    g_object_ref_sink(entry);
+ //   entry = gtk_entry_new();
+ //   g_object_ref_sink(entry);
 
-    gtk_entry_set_has_frame(GTK_ENTRY(entry), FALSE);
-    gtk_entry_set_width_chars(GTK_ENTRY(entry), strlen(testString));
-    gtk_entry_set_max_length(GTK_ENTRY(entry), strlen(testString));
+ //   gtk_entry_set_has_frame(GTK_ENTRY(entry), FALSE);
+ //   gtk_entry_set_width_chars(GTK_ENTRY(entry), strlen(testString));
+ //   gtk_entry_set_max_length(GTK_ENTRY(entry), strlen(testString));
 
- //   gtk_widget_get_preferred_size(entry, NULL, &requisition);
-    gtk_widget_get_preferred_size(entry, &min_req, &nat_req);
-    gtk_widget_destroy(entry);
-    g_object_unref(entry);
+ ////   gtk_widget_get_preferred_size(entry, NULL, &requisition);
+ //   gtk_widget_get_preferred_size(entry, &min_req, &nat_req);
+ //   gtk_widget_destroy(entry);
+ //   g_object_unref(entry);
 
-    return (nat_req.width);
+ //   return (nat_req.width);
 }
 
 /**
@@ -146,63 +129,65 @@ static int fonts_set = 0;
 wWinPix_t wStatusGetHeight(
     long flags)
 {
-    GtkWidget * temp;
+    printf("Function at line %d in %s is not implemented!", __LINE__, __FILE__);
+    return(0);
+  //  GtkWidget * temp;
 
-    if (!(flags&COMBOBOX)) {
-		temp = gtk_entry_new();	 //To get size of text itself
-        gtk_entry_set_has_frame(GTK_ENTRY(temp), FALSE);
-    } else {
-        temp = gtk_combo_box_text_new();    //to get max size of an object in infoBar
-    }
-    g_object_ref_sink(temp);
+  //  if (!(flags&COMBOBOX)) {
+		//temp = gtk_entry_new();	 //To get size of text itself
+  //      gtk_entry_set_has_frame(GTK_ENTRY(temp), FALSE);
+  //  } else {
+  //      temp = gtk_combo_box_text_new();    //to get max size of an object in infoBar
+  //  }
+  //  g_object_ref_sink(temp);
 
-    if (wMessageSetFont(flags))	{
-		if (!fonts_set) {
-			GtkStyleContext *context;
-			GtkCssProvider *smallProvider = gtk_css_provider_new();
-			GtkCssProvider *largeProvider = gtk_css_provider_new();
-			/* get the current font descriptor */
-			context = gtk_widget_get_style_context(temp);
-			static const char smallStyle[] = " .smallLabel { font-size: 70% } ";
+  //  if (wMessageSetFont(flags))	{
+		//if (!fonts_set) {
+		//	GtkStyleContext *context;
+		//	GtkCssProvider *smallProvider = gtk_css_provider_new();
+		//	GtkCssProvider *largeProvider = gtk_css_provider_new();
+		//	/* get the current font descriptor */
+		//	context = gtk_widget_get_style_context(temp);
+		//	static const char smallStyle[] = " .smallLabel { font-size: 70% } ";
 
-			gtk_css_provider_load_from_data (smallProvider,
-			                                 smallStyle, -1, NULL);
-			gtk_style_context_add_provider(context,
-			                               GTK_STYLE_PROVIDER(smallProvider),
-			                               GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+		//	gtk_css_provider_load_from_data (smallProvider,
+		//	                                 smallStyle, -1, NULL);
+		//	gtk_style_context_add_provider(context,
+		//	                               GTK_STYLE_PROVIDER(smallProvider),
+		//	                               GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
-			static const char largeStyle[] = " .largeLabel{ font-size: 140% }  ";
+		//	static const char largeStyle[] = " .largeLabel{ font-size: 140% }  ";
 
-			gtk_css_provider_load_from_data (largeProvider,
-			                                 largeStyle, -1, NULL);
-			gtk_style_context_add_provider(context,
-			                               GTK_STYLE_PROVIDER(largeProvider),
-			                               GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+		//	gtk_css_provider_load_from_data (largeProvider,
+		//	                                 largeStyle, -1, NULL);
+		//	gtk_style_context_add_provider(context,
+		//	                               GTK_STYLE_PROVIDER(largeProvider),
+		//	                               GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
 
-			fonts_set = 1;
+		//	fonts_set = 1;
 
-		}
+		//}
 
-		/* set the new font size */
-		GtkStyleContext * context = gtk_widget_get_style_context(GTK_WIDGET(temp));
-		if (flags & BM_LARGE) {
-			gtk_style_context_add_class(context, "largeLabel");
-		} else {
-			gtk_style_context_add_class(context, "smallLabel");
-		}
-    }
+		///* set the new font size */
+		//GtkStyleContext * context = gtk_widget_get_style_context(GTK_WIDGET(temp));
+		//if (flags & BM_LARGE) {
+		//	gtk_style_context_add_class(context, "largeLabel");
+		//} else {
+		//	gtk_style_context_add_class(context, "smallLabel");
+		//}
+  //  }
 
-    if (flags&1L) {
-        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(temp),"Test");
-    }
+  //  if (flags&1L) {
+  //      gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(temp),"Test");
+  //  }
 
-    GtkRequisition temp_requisition;
-     gtk_widget_get_preferred_size(temp, NULL, &temp_requisition);
-    //g_object_ref_sink(temp);
-    //g_object_unref(temp);
-    gtk_widget_destroy(temp);
-    return temp_requisition.height;
+  //  GtkRequisition temp_requisition;
+  //   gtk_widget_get_preferred_size(temp, NULL, &temp_requisition);
+  //  //g_object_ref_sink(temp);
+  //  //g_object_unref(temp);
+  //  gtk_widget_destroy(temp);
+  //  return temp_requisition.height;
 }
 
 /**
@@ -217,6 +202,9 @@ void wStatusSetWidth(
     wStatus_p b,
     wWinPix_t width)
 {
-    b->labelWidth = width;
-    gtk_widget_set_size_request(b->widget, width, -1);
+	printf("Function at line %d in %s is not implemented!", __LINE__, __FILE__);
+	return;
+
+ //   b->labelWidth = width;
+ //   gtk_widget_set_size_request(b->labelWidget, width, -1);
 }

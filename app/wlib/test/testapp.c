@@ -37,6 +37,7 @@
 // #define TEST_ARGV
 // #define TEST_SPLASH
 #define TEST_PULLDOWNMENU
+#define TEST_STATUSBAR
 
 #define TRUE  (1)
 #define FALSE (0)
@@ -44,6 +45,7 @@
 long dontHideCursor = 0;
 
 wMenuList_p menuList;
+wStatus_p statusMsg;
 
 /**
  *	doFile: callback funtion for file submenu 
@@ -60,10 +62,12 @@ void doFile( void * cmd )
 			wMenuListAdd(menuList, 0, buffer, "data for recent x");
 			break;				/* push test */
 		case 2:
-			printf("Menu toggle changed!\n");
+//			printf("Menu toggle changed!\n");
+			wStatusSetValue(statusMsg, "Menu toggle changed!");
 			break;				/* toggle test */
 		case 3: 
-			printf("Active radio button changed!\n");
+//			printf("Active radio button changed!\n");
+			wStatusSetValue(statusMsg, "Active radio button changed!");
 			break;				/* Radio test */
    		case 0:					/* 'Quit ' */
 			wExit( 0 );			/* terminate application */
@@ -260,6 +264,26 @@ void TestMenu( wWindow_p mainW)
 
  }
 
+void
+TestStatusbar(wWindow_p mainWindow)
+{
+	wStatusCreate(mainWindow,
+		"statusbarPosX",
+		"X: 0");
+
+	wStatusCreate(mainWindow,
+		"statusbarPosY",
+		"Y: 0");
+
+	wStatusCreate(mainWindow,
+		"statusbarScale",
+		"Scale: 1/87");
+
+	statusMsg = wStatusCreate(mainWindow,
+		"statusbarMessage",
+		"Statusbar was created successfully...");
+
+}
 static
 bool mainCallBack(wWindow_p window, winProcEvent ev, void *data1, void *data2 )
 {
@@ -323,6 +347,10 @@ wWindow_p wMain( int argc, char * argv[] )
 
 #ifdef TEST_PULLDOWNMENU
 	TestMenu(mainW);
+#endif
+
+#ifdef TEST_STATUSBAR
+	TestStatusbar(mainW);
 #endif
 
 	

@@ -36,6 +36,7 @@ add_custom_command(
     MAIN_DEPENDENCY ${RESOURCE_XML}
     DEPENDS
         appwindow.ui
+        xtrackcad.css
 )
 
 # define target

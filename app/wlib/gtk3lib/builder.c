@@ -64,7 +64,7 @@ wlibFileNameFromDialog( const char *dialog )
 #endif  //NDEBUG    
 	g_string_append(filename, "/ui/");
 	g_string_append(filename, dialog );
-	g_string_append(filename, ".glade");
+	g_string_append(filename, ".ui");
 
 	return( filename );
 }
@@ -156,7 +156,7 @@ wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr,
  * \param IN ignore_failure	If object can't be found, shall we continue?
  */
 GtkWidget *
-wlibGetWidgetFromName( wWin_p parent, const char *dialogname,
+wlibGetWidgetFromName( wWindow_p parent, const char *dialogname,
                        const char *suffix, wBool_t ignore_failure )
 
 {
@@ -188,7 +188,7 @@ wlibGetWidgetFromName( wWin_p parent, const char *dialogname,
 }
 
 GtkWidget *
-wlibWidgetFromIdWarn(wWin_p win, const char *id)
+wlibWidgetFromIdWarn(wWindow_p win, const char *id)
 {
 	GtkWidget *wi = wlibWidgetFromId(win, id);
 	if (!wi)
@@ -218,7 +218,7 @@ wlibWidgetFromIdWarn(wWin_p win, const char *id)
  */
 
 GtkWidget *
-wlibWidgetFromId( wWin_p win, const char *id)
+wlibWidgetFromId( wWindow_p win, const char *id)
 {
 	GString *name = g_string_new(id);
 
