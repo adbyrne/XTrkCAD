@@ -1444,6 +1444,16 @@ static void ChangeMapScale()
 	wWinPix_t w, h;
 	FLOAT_T fw, fh;
 
+	// Restrict map size to 1/2 of screen
+	FLOAT_T fScaleW = mapD.size.x / ( displayWidth * 0.5 / mapD.dpi );
+	FLOAT_T fScaleH = mapD.size.y / ( displayHeight * 0.5 / mapD.dpi );
+	FLOAT_T fScale = ceil( max( fScaleW, fScaleH ) );
+	if ( fScale > mapD.scale ) {
+		LOG( log_mapsize, 2, ( "  ChangeMapScale incr scale from %0.3f to %0.3f\n",
+					mapD.scale, fScale ) );
+		mapD.scale = fScale;
+	}
+
 	fw = (((mapD.size.x/mapD.scale)*mapD.dpi) + 0.5)+2;
 	fh = (((mapD.size.y/mapD.scale)*mapD.dpi) + 0.5)+2;
 

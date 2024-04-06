@@ -49,6 +49,8 @@
 
 EXPORT int iconSize = 0;
 
+EXPORT wWinPix_t displayWidth;
+EXPORT wWinPix_t displayHeight;
 EXPORT wWin_p mainW;
 
 EXPORT char message[STR_HUGE_SIZE];
@@ -1022,8 +1024,6 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	char *cp;
 	char buffer[STR_SIZE];
 	unsigned int i;
-	wWinPix_t displayWidth;
-	wWinPix_t displayHeight;
 	BOOL_T bRunTests = FALSE;
 
 	strcpy(buffer, sProdNameLower);
