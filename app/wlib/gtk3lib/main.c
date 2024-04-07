@@ -66,7 +66,6 @@ wlibGetApp()
 	return(app);
 }
 
-static char* style = ".statusbar { background-image: none; background-color: rgb(192, 192, 192); color: white;}";
 
 static void
 LoadStyles(void)
@@ -74,10 +73,9 @@ LoadStyles(void)
     	GtkCssProvider* cssProvider = gtk_css_provider_new();
 	GError* error = NULL;
 	
-	gtk_css_provider_load_from_data(cssProvider, style, strlen(style), &error);
-	//gtk_css_provider_load_from_resource(cssProvider,
-	//	XTRKCAD_RESOURCE_PATH
-	//	"xtrackcad.css");
+	gtk_css_provider_load_from_resource(cssProvider,
+		XTRKCAD_RESOURCE_PATH
+		"xtrackcad.css");
 
  	gtk_style_context_add_provider_for_screen(gdk_screen_get_default(), 
 		cssProvider, 

@@ -20,10 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdlib.h>
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
+#include <math.h>
 
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
@@ -47,7 +44,7 @@
  */
 #define WLIB_FONT_DEBUG 0
 
-static gchar sampleText[] = "AbCdE0129!@$&()[]{}";
+#define SAMPLETEXT  "AbCdE0129!@$&()[]{}"
 
 static GtkWidget *fontSelectionDialog;
 
@@ -112,6 +109,8 @@ static void fontSelectionDialogCallback(GtkFontChooserDialog
 
 static wBool_t fontInitted = FALSE;
 
+/** \todo Choose better default fonts for GTK3 */
+
 static wBool_t fontInit()
 {
     const char *fontNames[] = {
@@ -146,7 +145,8 @@ static wBool_t fontInit()
             return FALSE;
         }
 
-        const char *fontName = wPrefGetString("font", "name");
+//        const char *fontName = wPrefGetStringBasic("font", "name");
+        const char* fontName = NULL;
         curFont->fontDescription = pango_font_description_from_string(
                                        fontName ? fontName : "helvetica 18");
         absoluteFontSize = (int) PANGO_PIXELS(pango_font_description_get_size(
@@ -188,24 +188,18 @@ PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget,
                                        wDrawPix_t *descent_p,
 				       wDrawPix_t *baseline_p)
 {
+
+    g_assert(cairo!=NULL);
+
     if (!fontInitted) {
         fontInit();
     }
 
     PangoLayout *layout = NULL;
     gchar *utf8 = wlibConvertInput(s);
-    /* RPH -- pango_cairo_create_layout() is missing in CentOS 4.8.
-              CentOS 4.8 only has GTK 2.4.13 and Pango 1.6.0 and does not have
-              libpangocairo at all.
-              pango_cairo_create_layout() was introduced with Pango 1.10. */
-#if PANGO_VERSION_MAJOR >= 1 && PANGO_VERSION_MINOR >= 10
 
-    if (cairo != NULL) {
-        layout = pango_cairo_create_layout((cairo_t *) cairo);
-        pango_layout_set_text(layout, utf8, -1);
-    } else
-#endif
-        layout = gtk_widget_create_pango_layout(widget, utf8);
+    layout = pango_cairo_create_layout((cairo_t *) cairo);
+    pango_layout_set_text(layout, utf8, -1);
 
     PangoFontDescription *fontDescription = (fp ? fp : curFont)->fontDescription;
     PangoContext *context;
@@ -283,14 +277,12 @@ void wSelectFont(
         gtk_window_set_position(GTK_WINDOW(fontSelectionDialog), GTK_WIN_POS_MOUSE);
         gtk_window_set_modal(GTK_WINDOW(fontSelectionDialog), TRUE);
         gtk_font_chooser_set_preview_text(GTK_FONT_CHOOSER(
-                    fontSelectionDialog), sampleText);
+                    fontSelectionDialog), SAMPLETEXT);
         g_signal_connect(G_OBJECT(fontSelectionDialog), "response",
                          G_CALLBACK(fontSelectionDialogCallback), NULL);
         g_signal_connect(G_OBJECT(fontSelectionDialog), "destroy",
                          G_CALLBACK(gtk_widget_destroyed), &fontSelectionDialog);
     }
-
-    // gtk_window_set_title(GTK_WINDOW(fontSelectionDialog), title);
 
     if (curFont != NULL) {
         gchar *fontName;
@@ -352,7 +344,7 @@ wFontSize_t wSelectedFontSize(void)
 
 void wSetSelectedFontSize(wFontSize_t size)
 {
-    absoluteFontSize = size;
+    absoluteFontSize = lround(size);
 }
 
 /**

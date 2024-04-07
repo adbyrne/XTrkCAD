@@ -155,12 +155,34 @@ SaveFileSelector(wWindow_p mainW, wMenu_p parent)
 			FILEPATTERN, LoadData, NULL);
 }
 
+void
+SelectFont(void* unused)
+{
+	wSelectFont("Choose font");
+}
+
+void
+CreateMenuDialog(wWindow_p mainW)
+{
+	wMenu_p menu;
+	/* create a second submenu */
+	menu = wMenuBarAdd(mainW, 		/* parent window */
+					NULL, 			/* help topic */
+					"_Dialogs"		/* submenu title */
+	);
+
+	wMenuPushCreate(menu, "menuDialog-font", "Font Chooser...", WCTL + 'f',
+		SelectFont, NULL);
+
+}
+
 void TestMenu( wWindow_p mainW)
 {
 	wMenu_p menu1;
 	wMenu_p menu2;
 	wMenu_p menu3;
 	wMenu_p menu4;
+	wMenu_p menu;
 
 	/* add a submenu */ 	
     menu1 = wMenuBarAdd( mainW, 		/* parent window */
@@ -261,6 +283,8 @@ void TestMenu( wWindow_p mainW)
 				doFile,
 				(void *)3
 				);
+
+	CreateMenuDialog(mainW);
 
  }
 
