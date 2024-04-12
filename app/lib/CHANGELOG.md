@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [5.3.0 GA]
+
+## Bugs
+BUG 543: Removal of user info from xtrkcad files
+Bug fix #551 Spliting a bezier line aborts
+BUG 552 Xtrk/cAD crashes when downsizing layout dimensions#552 Xtrk/cAD crashes when downsizing layout dimensions
+
 ## [5.3.0 Beta 2]
 
 ## Bugs
