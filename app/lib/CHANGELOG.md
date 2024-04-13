@@ -7,39 +7,39 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ## [5.3.0 GA]
 
 ## Bugs
-BUG 543: Removal of user info from xtrkcad files
-Bug fix #551 Spliting a bezier line aborts
-BUG 552 Xtrk/cAD crashes when downsizing layout dimensions#552 Xtrk/cAD crashes when downsizing layout dimensions
++ BUG 543: Removal of user info from xtrkcad files
++ Bug fix #551 Spliting a bezier line aborts
++ BUG 552 Xtrk/cAD crashes when downsizing layout dimensions#552 Xtrk/cAD crashes when downsizing layout dimensions
 
 ## [5.3.0 Beta 2]
 
 ## Bugs
-BUG 544 In 'Run Trains' mode, stock summary no longer displayed in Status Bar when left-click on object
-BUG fix 547 Fleischmann HO turntable error
-BUG 541 New Car Protoype dialog box has stopped working.
-Add german translations
-UTF-8 fixes for main note
-Initial window size on multi monitor setups spans all monitors, …
-BUG 535 simple line not visible
-Improve tooltips for custom management
++ BUG 544 In 'Run Trains' mode, stock summary no longer displayed in Status Bar when left-click on object
++ BUG fix 547 Fleischmann HO turntable error
++ BUG 541 New Car Protoype dialog box has stopped working.
++ Add german translations
++ UTF-8 fixes for main note
++ Initial window size on multi monitor setups spans all monitors, …
++ BUG 535 simple line not visible
++ Improve tooltips for custom management
 
 ## Parameters
-Any-DCC-Concepts Point Motors.xtp'
-Any-ModelRailroadBenchwork.xtp
-'HO-Atlas Code 100 Track.xtp'
-'HO - Atlas Custom Line Track Assemblies.xtp'
-HO-Busch.xtp
-HO-fl-model.xtp
-HO-fl-profi.xtp
-HO-Peco-Code70USA.xtp
-'HO-Walthers Cornerstone 1.xtp'
-'HO-Walthers DCC Code 83.xtp'
-N-walthers-n.xtp
-params.xtc
-ProcessXTP.log
-'S_ACG_All Aboard Panels.xtp'
-'S_ACG_American Flyer Track.xtp'
-'S_ACG_Pike-Master Track.xtp'
++ Any-DCC-Concepts Point Motors.xtp'
++ Any-ModelRailroadBenchwork.xtp
++ 'HO-Atlas Code 100 Track.xtp'
++ 'HO - Atlas Custom Line Track Assemblies.xtp'
++ HO-Busch.xtp
++ HO-fl-model.xtp
++ HO-fl-profi.xtp
++ HO-Peco-Code70USA.xtp
++ 'HO-Walthers Cornerstone 1.xtp'
++ 'HO-Walthers DCC Code 83.xtp'
++ N-walthers-n.xtp
++ params.xtc
++ ProcessXTP.log
++ 'S_ACG_All Aboard Panels.xtp'
++ 'S_ACG_American Flyer Track.xtp'
++ 'S_ACG_Pike-Master Track.xtp'
 
 ## [5.3.0 Beta 1]
 
