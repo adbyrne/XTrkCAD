@@ -606,7 +606,9 @@ wPrefTokenize(char* line, char** section, char** name, char** value)
 
 	*section = strtok(line, ".");
 	*name = strtok(NULL, ":");
-	*value = strtok(NULL, " \n");
+	*value = strtok(NULL, "\n");
+	if(*value)
+		g_strstrip(*value);
 
 }
 
@@ -625,5 +627,8 @@ wPrefTokenize(char* line, char** section, char** name, char** value)
 void 
 wPrefFormatLine(const char* section, const char* name, const char* value, char* result)
 {
+	if (!value || *value == '\0') {
+		value = "";
+	}
 	sprintf(result, "%s.%s: %s", section, name, value);
 }

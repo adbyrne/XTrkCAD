@@ -319,7 +319,7 @@ void SetLayoutBackGroundScreen(int screen)
 
 /**
  * Get changed-State of layout.
- * 
+ *
  * \return	true if changed
  */
 

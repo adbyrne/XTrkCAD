@@ -355,6 +355,10 @@ void
 wPrefFormatLine(const char* section, const char* name, 
                 const char* value, char* result)
 {
+    if (!value || *value == '\0') {
+        value = "";
+    }
+
     if (section) {
         sprintf(result, "[%s]", section);
     }

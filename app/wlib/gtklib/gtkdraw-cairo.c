@@ -1065,23 +1065,26 @@ static const char * actionNames[] = { "None", "Move", "LDown", "LDrag", "LUp", "
 static int scrollTimer;
 static int timer_busy_count;
 static wAction_t lastAction;
+static int timer_interval = 500; // Start at 0.5 secs
 
 static int ScrollTimerPop(wDraw_p bd)
 {
 
-	if (timer_busy_count>1) {
-		timer_busy_count = 0;
-		scrollTimer = 0;
-	} else {
-		timer_busy_count++;
-		return TRUE;
-	}
+	if (timer_busy_count>4)
+		timer_interval = 250;  //If lots of events 0.25 secs next time
+	if (timer_busy_count<1)
+		timer_interval = 500;  //If few events 0.5 secs next time
+
+
 	if (drawVerbose >= 2) {
 		printf( "%s-Pop\n", actionNames[lastAction] );
 	}
-	bd->action( bd, bd->context, lastAction, (wDrawPix_t)0, (wDrawPix_t)0 );
+	scrollTimer = 0;
+	timer_busy_count = 0;
+	// Don't do the action as may no longer be scrolling
+	// bd->action( bd, bd->context, lastAction, (wDrawPix_t)0, (wDrawPix_t)0 );
 
-	return FALSE;
+	return FALSE;  //Stops timer re-popping
 }
 
 
@@ -1134,18 +1137,6 @@ static gint draw_scroll_event(
 			        newEventX, newEventY, oldEventX, oldEventY );
 
 
-
-		if (scrollTimer) {					// Already have a timer
-			lastAction = action;
-			return TRUE;
-		} else {
-			lastAction = action;
-			timer_busy_count = 0;
-			scrollTimer = g_timeout_add(25,(GSourceFunc)ScrollTimerPop,bd);   // 25ms delay
-			return TRUE;
-		}
-
-
 	} else {
 
 		switch( event->direction ) {
@@ -1164,7 +1155,20 @@ static gint draw_scroll_event(
 		default:
 			break;
 		}
+
 	}
+
+	if (event->time < GDK_CURRENT_TIME) return TRUE;  //Ignore past events
+
+		if (scrollTimer) {					// Already have a timer
+			timer_busy_count++;
+			lastAction = action;
+			return TRUE;
+		} else {
+			lastAction = action;
+			timer_busy_count = 0;
+			scrollTimer = g_timeout_add(timer_interval,(GSourceFunc)ScrollTimerPop,bd);   // 250ms delay
+		}
 
 	if (action != 0) {
 		if (drawVerbose >= 2) {
