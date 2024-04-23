@@ -168,9 +168,9 @@ void wInitAppName(char *appName);
 const char * wGetAppLibDir(			void );
 const char * wGetAppWorkDir(			void );
 const char * wGetUserHomeDir( void );
-wBool_t wCheckExecutable(		void );
 
-void wBeep(			void );
+void wSetAudio(bool setting);
+void wBeep( void );
 wBool_t wNotice(		const char *, const char *, const char * );
 int wNotice3(			const char *, const char *, const char *, const char * );
 void wHelp(			const char * );
