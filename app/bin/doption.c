@@ -50,6 +50,7 @@ static void UpdateChkPtInterval(long);
 static wIndex_t distanceFormatInx;
 
 EXPORT long enableBalloonHelp = 1;
+EXPORT long enableAudio = 1;
 
 EXPORT long showFlexTrack = 1;
 
@@ -307,6 +308,7 @@ static char * unitsLabels[] = { N_("English"), N_("Metric"), NULL };
 static char * angleSystemLabels[] = { N_("Polar"), N_("Cartesian"), NULL };
 static char * enableBalloonHelpLabels[] = { N_("Balloon Help"), NULL };
 static char * enableFlexTrackLabels[] = { N_("Show FlexTrack in HotBar"), NULL };
+static char * enableAudioLabels[] = { N_("Enable audio signals"), NULL };
 static char * startOptions[] = { N_("Load Last Layout"), N_("Start New Layout"), NULL };
 
 static paramData_t prefPLs[] = {
@@ -322,13 +324,14 @@ static paramData_t prefPLs[] = {
 	{ PD_FLOAT, &turntableAngle, "turntable-angle", PDO_NOPSHUPD, &r0_180, N_("Turntable Angle") },
 	{ PD_LONG, &maxCouplingSpeed, "coupling-speed-max", PDO_NOPSHUPD, &i10_100, N_("Max Coupling Speed"), 0 },
 	{ PD_TOGGLE, &enableBalloonHelp, "balloonhelp", PDO_NOPSHUPD, enableBalloonHelpLabels, "", BC_HORZ },
+	{ PD_TOGGLE, &enableAudio, "setaudio", PDO_NOPSHUPD, enableAudioLabels, "", BC_HORZ },
 	{ PD_TOGGLE, &showFlexTrack, "showflextrack", PDO_NOPSHUPD, enableFlexTrackLabels, "", BC_HORZ},
 	{ PD_LONG, &dragPixels, "dragpixels", PDO_NOPSHUPD|PDO_DRAW, &i1_1000, N_("Drag Distance") },
 	{ PD_LONG, &dragTimeout, "dragtimeout", PDO_NOPSHUPD|PDO_DRAW, &i1_1000, N_("Drag Timeout") },
 	{ PD_LONG, &minGridSpacing, "mingridspacing", PDO_NOPSHUPD|PDO_DRAW, &i1_100, N_("Min Grid Spacing"), 0, 0 },
-#define I_CHKPT		(14)
+#define I_CHKPT		(15)
 	{ PD_LONG, &checkPtInterval, "checkpoint", PDO_NOPSHUPD|PDO_FILE, &i0_10000, N_("Check Point Frequency") },
-#define I_AUTOSAVE		(15)
+#define I_AUTOSAVE		(16)
 	{ PD_LONG, &autosaveChkPoints, "autosave", PDO_NOPSHUPD|PDO_FILE, &i0_99, N_("Autosave Checkpoint Frequency") },
 	{ PD_RADIO, &onStartup, "onstartup", PDO_NOPSHUPD, startOptions, N_("On Program Startup"), 0, NULL }
 };
@@ -498,6 +501,9 @@ static void PrefOk( void * junk )
 	if(changes & CHANGE_ICONSIZE) {
 		NoticeMessage( MSG_ICON_SIZE_RESTART, _("Ok"), NULL ) ;
 	}
+
+	wPrefSetInteger("misc", "audio", enableAudio);
+	wSetAudio(enableAudio);
 
 	wHide( prefW );
 	DoChangeNotification(changes);

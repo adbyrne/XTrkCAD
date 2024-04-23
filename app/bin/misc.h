@@ -234,6 +234,7 @@ void EnumerateEnd(void);
 
 /* doption.c */
 extern long enableBalloonHelp;
+extern long enableAudio;
 long GetDistanceFormat( void );
 
 /* cblock.c */

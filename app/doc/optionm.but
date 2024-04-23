@@ -423,6 +423,10 @@ This dialog controls some parameters which likely will not be changed frequently
 
 \u000
 
+\dd \f{Enable Audio Signals} - turns on beeps for positive confirmations and warnings.
+
+\u000
+
 \dd \f{Show Flex-track} - disables the display or \f{Flex-track} (\K{generalTerms}) which is shown on the left of the Toolbar.
 
 \u000
