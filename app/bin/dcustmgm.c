@@ -193,6 +193,14 @@ static void CustMgmContentsOk( void * junk )
 	wHide( custMgmContentsPG.win );
 }
 
+/**
+ * Save custom parameter definitions to a parameter file.
+ * 
+ * \param files		count of filenames, must be 1
+ * \param fileName	array of filenames, one member only
+ * \param data		unused
+ * \return			TRUE on success, FALSE in case of failure
+ */
 
 static int CustomDoExport(
         int files,
@@ -211,7 +219,7 @@ static int CustomDoExport(
 		return FALSE;
 	}
 
-	SetCurrentPath( PARAMETERPATHKEY, fileName[ 0 ] );
+	SetCurrentPath( CUSTOMPATHKEY, fileName[ 0 ] );
 	rc = access( fileName[ 0 ], F_OK );
 	if ( rc != -1 ) {
 		rc = access( fileName[ 0 ], W_OK );
