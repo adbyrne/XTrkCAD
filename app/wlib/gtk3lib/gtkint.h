@@ -88,14 +88,17 @@ struct wObjCommon {
 
 struct  wWindow_t {
 	struct wObjCommon oc;
-	wWinCallBack_p winProc;        /**< window procedure */
-	GtkWidget *menubar;
-	GtkWidget *toolbar;
-	GtkContainer* statusbar;
-	GtkAccelGroup *accelGroup;
-	GtkWidget* gtkWindow;
-	GtkBuilder* builder;
+	wWinCallBack_p winProc;     /**< window procedure */
+	GtkWidget *menubar;			/** GTK menubar handle if present */
+	GtkWidget *toolbar;			/** GTK toolbar handle if present */
+	GtkContainer* statusbar;	/** GTK statusbar handle if present */
+	GtkAccelGroup *accelGroup;	/** accelerator group connected to Window */
+	GtkWidget* gtkWindow;		/**< the GTK window */
+	GtkBuilder* builder;		/**< builder used to create the window */
+	const char* name;			/**< unique name for window */
 };
+
+/** /todo Check necessity of above fields */
 
 //typedef struct wWindow_t * wWindow_p;
 
@@ -196,6 +199,7 @@ extern wDrawColor wDrawColorBlack;
 
 /* appwindow.c*/
 GtkAccelGroup* wlibAppWinGetAccelGroup(void);
+GtkWidget* wlibAppWinGetMain(void);
 
 /* basicdraw.c */
 

@@ -1,7 +1,6 @@
 # Setup GTK3 UI library...
 
-add_subdirectory(glade)
-add_subdirectory(wrapbox)
+add_subdirectory(ui)
 
 target_include_directories(xtrkcad-wlib 
 	PRIVATE 
@@ -18,6 +17,7 @@ target_sources(xtrkcad-wlib
  	button.c
  	color.c
  	control.c
+	dialog.c
 	drawcairo.c
 	droplist.c	
  	fileselector.c
@@ -42,14 +42,20 @@ target_sources(xtrkcad-wlib
  	util.c
  	window.c
  	wpref.c
-	wlibpaths.c
 )
+
+if(WIN32)
+	target_sources(xtrkcad-wlib
+		PRIVATE
+		win32/w32paths.c)
+endif()
 
 if(UNIX)
 	target_sources(xtrkcad-wlib
 		PRIVATE
 			timer.c
-			print.c )
+			print.c 
+			unix/ixpaths.c)
 endif()
 
 # help system is OS and build specific, add appropriate source files
@@ -96,7 +102,6 @@ message(STATUS "Include Dirs: ${GTK3_INCLUDE_DIRS}")
 target_link_libraries(xtrkcad-wlib 
 	PRIVATE
 	dynstring
-	wrapbox
 	${GTK3_LIBRARIES}
 )
 

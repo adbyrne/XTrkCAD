@@ -22,7 +22,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-
+#include <stdlib.h>
+#include <malloc.h>
 #include <stdio.h>
 #include "wlib.h"
 
@@ -46,6 +47,10 @@ long dontHideCursor = 0;
 
 wMenuList_p menuList;
 wStatus_p statusMsg;
+
+//
+//------------------------- Pulldown Menu ------------------------------------
+//
 
 /**
  *	doFile: callback funtion for file submenu 
@@ -86,6 +91,9 @@ RecentUsedCallback(int unused, char *label, char* data)
 	printf("Recent used: %s - %s\n", label, data);
 }
 
+//
+//------------------------- File selection -----------------------------------
+//
 
 static struct wFilSel_t* loadFile_fs = NULL;
 static struct wFilSel_t* saveFile_fs = NULL;
@@ -120,8 +128,6 @@ OpenForSave(void* data)
 	wFilSelect(saveFile_fs, ".");
 }
 
-
-
 void
 LoadFileSelector(wWindow_p mainW, wMenu_p parent)
 {
@@ -155,10 +161,94 @@ SaveFileSelector(wWindow_p mainW, wMenu_p parent)
 			FILEPATTERN, LoadData, NULL);
 }
 
+
+//
+//----------------------- Font Selection -------------------------------------
+//
+
 void
 SelectFont(void* unused)
 {
 	wSelectFont("Choose font");
+}
+
+bool
+DialogProc(wWindow_p window, winProcEvent event, void *data, void *data2)
+{	
+	char* cause;
+	switch (event) {
+	case wAccept_e:
+		cause = "OK";
+		break;
+	case wCancel_e:
+		cause = "Cancel";
+		break;
+	default:
+		cause = "Unknown";
+		break;
+	}
+
+	printf("Dialog was closed with %s\n", cause);
+
+	return(TRUE);
+}
+
+void
+BasicDialog(void* unused)
+{
+	wWinDialogCreate(NULL,
+		"basicdialog-help",
+		"Basic Dialog Test",
+		"basicdialog",
+		0L,
+		DialogProc,
+		NULL);
+}
+
+wText_p text;
+
+bool
+NoteDialogProc(wWindow_p window, winProcEvent event, void* data, void* data2)
+{
+	int textSize;
+	char* textString;
+
+	switch (event) {
+	case wAccept_e:
+		if (wTextGetModified(text)) {
+			textSize = wTextGetSize(text);
+			if (textSize) {
+				textString = malloc(textSize);
+				wTextGetText(text, textString, textSize);
+				printf("Entered Text: %s\n", textString);
+				free(textString);
+			}
+			else {
+				printf("Nothing entered!\n");
+			}
+		}
+		break;
+	default:
+		break;
+	}
+	wWindowShow(window, false);
+
+	return(true);
+}
+
+void
+NoteDialog(void* unused)
+{
+	wWindow_p dialog = wWinDialogCreate(NULL,
+		"note-text",
+		"Notes",
+		"note",
+		0L,
+		NoteDialogProc,
+		NULL);
+
+	text = wTextCreate(dialog, 0, 0, "note-text", "Enter notes here... ", 
+		BO_USETEMPLATE, 0, 0);
 }
 
 void
@@ -173,6 +263,12 @@ CreateMenuDialog(wWindow_p mainW)
 
 	wMenuPushCreate(menu, "menuDialog-font", "Font Chooser...", WCTL + 'f',
 		SelectFont, NULL);
+
+	wMenuPushCreate(menu, "basicdialog", "Basic Dialog", WCTL + 'b',
+		BasicDialog, NULL);
+
+	wMenuPushCreate(menu, "notedialog", "Notes...", WCTL + 'n',
+		NoteDialog, NULL);
 
 }
 

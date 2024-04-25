@@ -251,7 +251,9 @@ typedef enum {
 	wResize_e,
 	wState_e,
 	wQuit_e,
-	wRedraw_e
+	wRedraw_e,
+    wCancel_e,
+    wAccept_e
 }
 winProcEvent;
 typedef bool (*wWinCallBack_p)( wWindow_p, winProcEvent, void *, void * );
@@ -285,9 +287,14 @@ wWindow_p wWinMainCreate(
         wWinCallBack_p winProc,	    /* Call back function */
         void * data);
 
-wWin_p wWinPopupCreate(		wWin_p, wWinPix_t, wWinPix_t, const char *,
-                                const char *, const char *,
-                                long, wWinCallBack_p, void * );
+wWindow_p wWinDialogCreate(wWindow_p parent, const char* helpStr, const char* titleStr,
+    const char* nameStr, long option, wWinCallBack_p winProc, void* data);
+
+void wWindowShow(wWindow_p win, bool state);
+
+//wWin_p wWinPopupCreate(		wWin_p, wWinPix_t, wWinPix_t, const char *,
+//                                const char *, const char *,
+//                                long, wWinCallBack_p, void * );
 
 wWindow_p wMain(			int, char *[] );
 void wWinSetBigIcon(		wWin_p, wIcon_p );
@@ -334,6 +341,7 @@ wBool_t wWinIsTemplated(wWin_p win);
 #define BO_ENTER    0
 #define BO_REPEAT   (1L<<11)
 #define BO_IGNFOCUS	(1L<<12)
+#define BO_USETEMPLATE (1L<<13)
 
 wWinPix_t wLabelWidth(		const char * );
 const char * wControlGetHelp(		wControl_p );
@@ -499,22 +507,22 @@ wLine_p wLineCreate(		wWin_p, const char *, int, wLines_t *);
 #define BT_DOBOLD	(1L<<21)
 #define BT_TOP		(1L<<20)	/* Show the top of the text */
 
-wText_p wTextCreate(		wWin_p, wWinPix_t, wWinPix_t, const char *, const char *,
-                                long,
-                                wWinPix_t, wWinPix_t );
-void wTextClear(		wText_p );
-void wTextAppend(		wText_p, const char * );
-void wTextSetReadonly(		wText_p, wBool_t );
-int wTextGetSize(		wText_p );
-void wTextGetText(		wText_p, char *, int );
-wBool_t wTextGetModified(	wText_p );
-void wTextReadFile(		wText_p, const char * );
-wBool_t wTextSave(		wText_p, const char * );
-wBool_t wTextPrint(		wText_p );
-void wTextSetSize(		wText_p, wWinPix_t, wWinPix_t );
-void wTextComputeSize(		wText_p, wWinPix_t, wWinPix_t, wWinPix_t *,
-                                wWinPix_t * );
-void wTextSetPosition(		wText_p bt, int pos );
+wText_p wTextCreate(wWindow_p parent, wWinPix_t x, wWinPix_t y,
+    const char* helpStr, const char* labelStr, long option,
+    wWinPix_t width, wWinPix_t	height);
+
+void wTextClear(wText_p bt);
+void wTextAppend(wText_p bt, const char* text);
+wBool_t wTextSave(wText_p bt, const char* fileName);
+wBool_t wTextPrint(wText_p bt);
+int wTextGetSize(wText_p bt);
+void wTextGetText(wText_p bt, char* text, int len);
+void wTextSetReadonly(wText_p bt, wBool_t ro);
+wBool_t wTextGetModified(wText_p bt);
+void wTextSetSize(wText_p bt, wWinPix_t w, wWinPix_t h);
+void wTextComputeSize(wText_p bt, wWinPix_t rows, wWinPix_t cols,
+    wWinPix_t* width,wWinPix_t* height);
+void wTextSetPosition( wText_p bt, int pos );
 
 
 /*------------------------------------------------------------------------------
