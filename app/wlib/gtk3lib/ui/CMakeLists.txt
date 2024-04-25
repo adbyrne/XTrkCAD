@@ -4,6 +4,11 @@ set (RESOURCE_XML wlib.gresource.xml)
 set (RESOURCES_C resources.c)
 set (RESOURCES_H resources.h)
 
+set(UI_FILES 
+    appwindow.ui
+    basicdialog.ui
+    note.ui)
+
 # find the tool
 find_program(RESOURCE_COMPILER NAMES glib-compile-resources REQUIRED)
 
@@ -35,7 +40,7 @@ add_custom_command(
     VERBATIM
     MAIN_DEPENDENCY ${RESOURCE_XML}
     DEPENDS
-        appwindow.ui
+        ${UI_FILES}
         xtrackcad.css
 )
 

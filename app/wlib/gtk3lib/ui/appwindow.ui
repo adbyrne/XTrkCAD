@@ -25,6 +25,40 @@
           </packing>
         </child>
         <child>
+          <object class="GtkScrolledWindow">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="propagate-natural-height">True</property>
+            <property name="hscrollbar-policy">GTK_POLICY_NEVER</property>
+            <property name="vscrollbar-policy">GTK_POLICY_AUTOMATIC</property>
+            <child>
+              <object class="GtkFlowBox">
+                <property name="visible">True</property>
+                <property name="valign">GTK_ALIGN_START</property>
+                <property name="max-children-per-line">80</property>
+                <property name="selection-mode">GTK_SELECTION_NONE</property>
+                <property name="expand">False</property>
+                <child>
+                  <object class="GtkButton">
+                    <property name="visible">True</property>
+                    <property name="label">Mist!</property>
+                  </object>
+                </child>  
+                <child>
+                  <object class="GtkButton">
+                    <property name="label">Test</property>
+                    <property name="visible">True</property>
+                  </object>
+                </child>
+              </object>
+            </child>   
+          </object>
+          <packing>
+            <property name="left-attach">0</property>
+            <property name="top-attach">1</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkBox" id="hotbar">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
@@ -202,9 +236,6 @@
             <property name="left-attach">0</property>
             <property name="top-attach">3</property>
           </packing>
-        </child>
-        <child>
-          <placeholder/>
         </child>
       </object>
     </child>

@@ -2,6 +2,8 @@
 <gresources>
   <gresource prefix="@XTRKCAD_RESOURCE_ROOT@">
     <file preprocess="xml-stripblanks">appwindow.ui</file>
+    <file preprocess="xml-stripblanks">basicdialog.ui</file>
+    <file preprocess="xml-stripblanks">note.ui</file>
     <file>xtrackcad.css</file>  
   </gresource>
 </gresources>
