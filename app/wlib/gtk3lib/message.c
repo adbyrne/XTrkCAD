@@ -42,10 +42,7 @@
  */
 
 struct wMessage_t {
-	WOBJ_COMMON
 	GtkWidget * labelWidget;
-	const char * message;
-	wWinPix_t labelWidth;
 };
 
 /**
@@ -60,7 +57,7 @@ void wMessageSetValue(
         wMessage_p b,
         const char * arg)
 {
-	if (b->widget == 0) {
+	if (b->labelWidget == NULL) {
 		abort();
 	}
 
@@ -79,8 +76,8 @@ void wMessageSetWidth(
         wMessage_p b,
         wWinPix_t width)
 {
-	b->labelWidth = width;
-	gtk_widget_set_size_request(b->widget, width, -1);
+	//b->labelWidth = width;
+	gtk_widget_set_size_request(b->labelWidget, width, -1);
 }
 
 /**
@@ -150,89 +147,61 @@ wWinPix_t wMessageGetHeight(
 }
 
 /**
- * Create a window for a simple text.
+ * Create a widget for a simple text.
  *
- * \param IN parent Handle of parent window
- * \param IN x position in x direction
- * \param IN y position in y direction
- * \param IN labelStr ???
- * \param IN width horizontal size of window
- * \param IN message message to display ( null terminated )
- * \param IN flags display options
- * \return handle for created window
+ * \param IN parent		Handle of parent window
+ * \param IN x			position in x direction
+ * \param IN y			position in y direction
+ * \param IN labelStr	identifier
+ * \param IN width		horizontal column span of widget
+ * \param IN message	message to display ( null terminated )
+ * \param IN flags		display options
+ * \return handle for created widget
  */
 
 wMessage_p wMessageCreateEx(
-    wWin_p	parent,
-    wWinPix_t	x,
-    wWinPix_t	y,
-    const char 	* labelStr,
-    wWinPix_t	width,
-    const char	*message,
-    long flags)
+        wWindow_p	parent,
+        wWinPix_t	x,
+        wWinPix_t	y,
+        const char* labelStr,
+        wWinPix_t	width,
+        const char* message,
+        long flags)
 {
 	wMessage_p b;
-	GtkRequisition requisition;
-	GtkStyle *stylecontext;
-	PangoFontDescription *fontDesc;
-	int fontSize;
-	b = (wMessage_p)wlibAlloc(parent, B_MESSAGE, x, y, NULL, sizeof *b, NULL);
-	wlibComputePos((wControl_p)b);
-	b->message = message;
-	b->labelWidth = width;
-	/* do we need to set a special font? */
-	if (wMessageSetFont(flags))	{
-		if (!fonts_set) {
-			GtkStyleContext *context;
-			GtkCssProvider *smallProvider = gtk_css_provider_new();
-			GtkCssProvider *largeProvider = gtk_css_provider_new();
-			/* get the current font descriptor */
-			context = gtk_widget_get_style_context(b->labelWidget);
+	b = g_malloc0(sizeof(struct wMessage_t));
 
-			static const char smallStyle[] = " .smallLabel { font-size: 70% } ";
+	if (flags & BO_USETEMPLATE) {
+		/** \todo handle label in a template */
+	} else {
+		GtkGrid* grid = GTK_GRID(wlibWidgetFromIdWarn(parent, "layoutgrid"));
 
-			gtk_css_provider_load_from_data (smallProvider,
-			                                 smallStyle, -1, NULL);
-			gtk_style_context_add_provider(context,
-			                               GTK_STYLE_PROVIDER(smallProvider),
-			                               GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+		b->labelWidget = gtk_label_new(message);
 
-			static const char largeStyle[] = " .largeLabel { font-size: 140% } ";
-
-			gtk_css_provider_load_from_data (largeProvider,
-			                                 largeStyle, -1, NULL);
-			gtk_style_context_add_provider(context,
-			                               GTK_STYLE_PROVIDER(largeProvider),
-			                               GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-			fonts_set = 1;
+		/* do we need to set a special font? */
+		if (wMessageSetFont(flags)) {
+			/* set the new font size */
+			GtkStyleContext* context = gtk_widget_get_style_context(GTK_WIDGET(
+			                                   b->labelWidget));
+			if (flags & BM_LARGE) {
+				gtk_style_context_add_class(context, "largeLabel");
+			} else {
+				gtk_style_context_add_class(context, "smallLabel");
+			}
 		}
-		/* set the new font size */
-		GtkStyleContext * context = gtk_widget_get_style_context(GTK_WIDGET(
-		                                    b->labelWidget));
-		if (flags & BM_LARGE) {
-			gtk_style_context_add_class(context, "largeLabel");
-		} else {
-			gtk_style_context_add_class(context, "smallLabel");
+
+		gtk_grid_attach(grid, b->labelWidget, x, y, width, 1);
+
+		if (flags & BM_ALIGNRIGHT) {
+			gtk_label_set_xalign(b->labelWidget, 1.0);
 		}
-	}
+		if (flags & BM_ALIGNLEFT) {
+			gtk_label_set_xalign(b->labelWidget, 0.0);
+		}
 
 
-		b->widget = gtk_fixed_new();
-		GtkRequisition min_requisition,natural_requisition;
-		gtk_widget_get_preferred_size (b->labelWidget,&min_requisition,
-		                               &natural_requisition);
-		gtk_container_add(GTK_CONTAINER(b->widget), b->labelWidget);
-		gtk_widget_set_size_request(b->widget, width?width:natural_requisition.width,
-		                            natural_requisition.height);
-		wlibControlGetSize((wControl_p)b);
-		gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
-		gtk_widget_show(b->widget);
 		gtk_widget_show(b->labelWidget);
-		wlibAddButton((wControl_p)b);
-		/* Reset font size to normal */
-		if (wMessageSetFont(flags))	{
-			pango_font_description_set_size(fontDesc, fontSize * PANGO_SCALE);
-		}
+	}
 
 	return b;
 }

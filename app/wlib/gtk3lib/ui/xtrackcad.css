@@ -3,3 +3,11 @@
     background-color: rgb(192, 192, 192);
     color: white;
 }
+
+.smallLabel { 
+    font-size: 70% 
+}
+
+.largeLabel { 
+    font-size: 140% 
+}

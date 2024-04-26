@@ -251,6 +251,37 @@ NoteDialog(void* unused)
 		BO_USETEMPLATE, 0, 0);
 }
 
+bool
+SimpleDynamicProc(wWindow_p window, winProcEvent event, void* data, void* data2)
+{
+	wWindowShow(window, false);
+
+	return(true);
+}
+
+void
+SimpleDynamic(void* unused)
+{
+	wMessage_p msg;
+
+	wWindow_p dialog = wWinDialogCreate(NULL,
+		"simple-dyn",
+		"Simple Dynamic",
+		"basicdialog",
+		0L,
+		SimpleDynamicProc,
+		NULL);
+
+	msg = wMessageCreateEx(dialog, 0, 0, "testmsg", 1, "Long label text", 0);
+
+	msg = wMessageCreateEx(dialog, 0, 1, "testmsg", 1, "Label 2", BM_LARGE | BM_ALIGNRIGHT);
+
+	msg = wMessageCreateEx(dialog, 0, 2, "", 1, "Label 3", BM_SMALL | BM_ALIGNLEFT);
+
+	msg = wMessageCreate(dialog, 0, 3, "", 1, "Label 3");
+
+}
+
 void
 CreateMenuDialog(wWindow_p mainW)
 {
@@ -269,6 +300,9 @@ CreateMenuDialog(wWindow_p mainW)
 
 	wMenuPushCreate(menu, "notedialog", "Notes...", WCTL + 'n',
 		NoteDialog, NULL);
+
+	wMenuPushCreate(menu, "simpledyn", "Simple dynamic...", WCTL + 's',
+		SimpleDynamic, NULL);
 
 }
 
