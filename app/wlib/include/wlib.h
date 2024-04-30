@@ -71,8 +71,10 @@ typedef struct wDrawBitMap_t * wDrawBitMap_p;
 typedef struct wFont_t      * wFont_p;
 typedef struct wBitmap_t	* wBitmap_p;
 typedef struct wStatus_t    * wStatus_p;
+typedef struct wColorButton_t* wColorButton_p;
+
 typedef int wDrawWidth;
-typedef int wDrawColor;
+typedef unsigned long wDrawColor;
 
 typedef struct {
 	const char * name;
@@ -467,15 +469,19 @@ void wListSetEditable(		wList_p, wBool_t );
 
 #define BM_LARGE (1L<<24)
 #define BM_SMALL (1L<<25)
+#define BM_ALIGNCENTER (0)
+#define BM_ALIGNRIGHT (1L<<26)
+#define BM_ALIGNLEFT (1L<<27)
 #define COMBOBOX (1L)
 
 #define wMessageSetFont( x ) ( x & (BM_LARGE | BM_SMALL ))
 
 #define wMessageCreate( w, p1, p2, l, p3, m ) wMessageCreateEx( w, p1, p2, l, p3, m, 0 )
-wMessage_p wMessageCreateEx(	wWin_p, wWinPix_t, wWinPix_t, const char *,
-                                wWinPix_t, const char *, long );
 
-void wMessageSetValue(		wMessage_p, const char * );
+wMessage_p wMessageCreateEx( wWindow_p parent, wWinPix_t x, wWinPix_t y,
+    const char* labelStr, wWinPix_t width, const char* message,long flags);
+
+void wMessageSetValue( wMessage_p, const char * );
 void wMessageSetWidth(		wMessage_p, wWinPix_t );
 wWinPix_t wMessageGetWidth( const char *testString );
 wWinPix_t wMessageGetHeight( long );
@@ -834,11 +840,21 @@ int wFilSelect(struct wFilSel_t* fs, const char* dirName);
 typedef void (*wColorSelectButtonCallBack_p)( void *, wDrawColor );
 
 wBool_t wColorSelect( const char *, wDrawColor * );
-wButton_p wColorSelectButtonCreate( wWin_p, wWinPix_t, wWinPix_t, const char *,
-                                    const char *,
-                                    long, wWinPix_t, wDrawColor *, wColorSelectButtonCallBack_p, void * );
-void wColorSelectButtonSetColor( wButton_p, wDrawColor );
-wDrawColor wColorSelectButtonGetColor( wButton_p );
+
+wColorButton_p wColorSelectButtonCreate(
+    wWindow_p	parent,
+    wWinPix_t	x,
+    wWinPix_t	y,
+    const char* helpStr,
+    const char* labelStr,
+    long 	option,
+    wWinPix_t 	width,
+    wDrawColor* valueP,
+    wColorSelectButtonCallBack_p action,
+    void* data);
+
+void wColorSelectButtonSetColor( wColorButton_p bb, wDrawColor color );
+wDrawColor wColorSelectButtonGetColor( wColorButton_p bb);
 
 /*------------------------------------------------------------------------------
  *

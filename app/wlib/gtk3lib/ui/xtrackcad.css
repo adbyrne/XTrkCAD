@@ -1,13 +1,21 @@
+
+/* background and text colors  for status bar */
 .statusbar {
     background-image: none;
     background-color: rgb(192, 192, 192);
     color: white;
 }
 
+/* define font sizes for labels */
 .smallLabel { 
     font-size: 70% 
 }
 
 .largeLabel { 
     font-size: 140% 
+}
+
+/* color buttons have no border */
+button.color {
+    border: none
 }

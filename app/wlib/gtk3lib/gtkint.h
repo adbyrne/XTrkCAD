@@ -297,6 +297,14 @@ struct wButton_t {
 
 /* color.c */
 
+struct wColorButton_t{
+	GtkWidget* widget;
+	wDrawColor* valueP;
+	const char* labelStr;
+	wColorSelectButtonCallBack_p action;
+	void* data;
+};
+
 typedef struct {
     unsigned char red;
     unsigned char green;
