@@ -489,7 +489,9 @@ PickupLayoutFile(char* dir)
 		char* lineptr = NULL;
 		size_t linelen = 0;
 		while (!feof(fhRead)) {
-			getline(&lineptr, &linelen, fhRead);
+			if ( getline(&lineptr, &linelen, fhRead) == -1 ) {
+				break;
+			};
 			if (!feof(fhRead)) {
 				FilterLayoutLine(fhWrite, lineptr);
 			}

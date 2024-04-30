@@ -160,7 +160,7 @@ LoadLayoutMaxGradePref(char* scaleName, double defaultValue)
 static void
 CopyLayoutTitle(char* dest, char *src)
 {
-	strncpy(dest, src, TITLEMAXLEN);
+	strncpy(dest, src, TITLEMAXLEN - 1);
 	*(dest + TITLEMAXLEN - 1) = '\0';
 }
 
