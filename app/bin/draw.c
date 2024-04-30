@@ -1901,7 +1901,7 @@ EXPORT void DrawRuler(
 	long inch, lastInch;
 	DIST_T len;
 	int digit;
-	char quote;
+	char quote = ' ';
 	char message[STR_SHORT_SIZE];
 	coOrd d_orig, d_size;
 	wFontSize_t fs;
@@ -2427,7 +2427,7 @@ EXPORT void DoZoomExtents( void * mode)
 			return;
 		}
 		track_p trk = NULL;
-		coOrd bot, top;
+		coOrd bot = {0.0, 0.0}, top = {0.0, 0.0};
 		BOOL_T first = TRUE;
 		while ( TrackIterate( &trk ) ) {
 			if(GetTrkSelected(trk)) {

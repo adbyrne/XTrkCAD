@@ -45,7 +45,7 @@ static struct {
 	coOrd pos;
 	ANGLE_T angle;
 	long size;
-	wIndex_t fontSizeInx;
+	long fontSizeInx;
 	char text[STR_HUGE_SIZE];
 	wDrawColor color;
 	BOOL_T boxed;
@@ -119,7 +119,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 			ParamCreateControls(&textPG, TextDlgUpdate);
 			LoadFontSizeList((wList_p)textPD.control, Dt.size);
 			ParamRegister(&textPG);
-			Dt.size = GetFontSize(Dt.fontSizeInx);
+			Dt.size = GetFontSize((long int)Dt.fontSizeInx);
 		}
 		Dt.size = (long)wSelectedFontSize();
 		Dt.fontSizeInx = GetFontSizeIndex(Dt.size);

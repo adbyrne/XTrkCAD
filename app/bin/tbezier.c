@@ -1227,7 +1227,7 @@ BOOL_T GetTracksFromBezierSegment(trkSeg_p bezSeg, track_p newTracks[2],
 	if (bezSeg->type != SEG_BEZTRK) { return FALSE; }
 	for (int i=0; i<bezSeg->bezSegs.cnt; i++) {
 		trkSeg_p seg = &DYNARR_N(trkSeg_t,bezSeg->bezSegs,i);
-		track_p new_trk;
+		track_p new_trk = NULL;
 		if (seg->type == SEG_CRVTRK) {
 			new_trk = NewCurvedTrack(seg->u.c.center,fabs(seg->u.c.radius),seg->u.c.a0,
 			                         seg->u.c.a1,0);

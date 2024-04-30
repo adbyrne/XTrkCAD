@@ -1811,7 +1811,8 @@ static char * CarItemHotbarProc(
 			/*wListSetValue( (wList_p)newCarPLs[0].control, "Select a car" );*/
 			wListSetIndex( (wList_p)newCarPLs[0].control, 0 );
 			cp = CarItemHotbarProc( HB_BARTITLE, I2VP(carItemInx), NULL, NULL );
-			strncpy( newCarLabel1, cp, sizeof newCarLabel1 );
+			strncpy( newCarLabel1, cp, sizeof(newCarLabel1) -1);
+			newCarLabel1[sizeof(newCarLabel1) -1] = 0;
 			ParamLoadControls( &newCarPG );
 			ParamGroupRecord( &newCarPG );
 

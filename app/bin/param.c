@@ -304,7 +304,7 @@ FLOAT_T DecodeDistance(
         wString_p strCtrl,
         BOOL_T * validP)
 {
-	FLOAT_T valF;
+	FLOAT_T valF = 0.0;
 	char *cp1, *cpN, c1;
 	// CAST_AWAY_CONST: we temporarily replace *cpN with a NULL and later restore
 	cp1 = cpN = CAST_AWAY_CONST wStringGetValue(strCtrl);
@@ -3022,7 +3022,7 @@ wWin_p ParamCreateDialog(
         long winOption,
         paramChangeProc changeProc )
 {
-	char helpStr[STR_SHORT_SIZE];
+	char helpStr[STR_SHORT_SIZE] = "";
 	wWinPix_t w0, h0;
 	char * cancelLabel = (winOption&PD_F_ALT_CANCELLABEL?_("Close"):_("Cancel"));
 
