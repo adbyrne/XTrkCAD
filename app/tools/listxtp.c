@@ -64,6 +64,7 @@ int
 main( int argc, char **argv )
 {
 	char buffer[ 512 ];
+	char buffer1[ 512 ];
 	int found;
 	DIR *d;
 	struct dirent *ent;
@@ -151,9 +152,9 @@ main( int argc, char **argv )
 						char *bp;
 						buffer[ strlen( buffer ) - 1 ] = '\0';
 						bp = buffer;
-						sprintf( buffer, "%s (%s)", bp + strlen( CONTENTSCOMMAND ) + 1, ent->d_name );
-						results[ cnt ] = malloc( strlen( buffer ) + 1 );
-						strcpy( results[ cnt ], buffer );
+						sprintf( buffer1, "%s (%s)", bp + strlen( CONTENTSCOMMAND ) + 1, ent->d_name );
+						results[ cnt ] = malloc( strlen( buffer1 ) + 1 );
+						strcpy( results[ cnt ], buffer1 );
 						cnt++;
 						if( cnt == MAX_FILES ) {
 							fprintf( stderr, "Error: too many files\n" );
