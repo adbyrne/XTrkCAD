@@ -453,8 +453,10 @@ static void EditSensorDialog()
 		sensorEditScript[0] = '\0';
 	} else {
 		xx = GetsensorData ( sensorEditTrack );
-		strncpy(sensorEditName,xx->name,STR_SHORT_SIZE);
-		strncpy(sensorEditScript,xx->script,STR_LONG_SIZE);
+		strncpy(sensorEditName,xx->name,STR_SHORT_SIZE - 1);
+		sensorEditName[STR_SHORT_SIZE - 1] = '\0';
+		strncpy(sensorEditScript,xx->script,STR_LONG_SIZE - 1);
+		sensorEditScript[STR_LONG_SIZE - 1] = '\0';
 		sensorEditOrig = xx->orig;
 	}
 	ParamLoadControls( &sensorEditPG );
