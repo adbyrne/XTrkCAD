@@ -365,7 +365,7 @@ wButton_p wButtonCreateForToolbar(
 		}
 		gtk_box_pack_start(GTK_BOX(last_inner_box),GTK_WIDGET(b->widget),FALSE, FALSE,
 		                   0);
-		egg_wrap_box_insert_child(EGG_WRAP_BOX(w->toolbar), last_inner_box, -1, 0 );
+//		egg_wrap_box_insert_child(EGG_WRAP_BOX(w->toolbar), last_inner_box, -1, 0 );
 	}
     
 	b->inToolbar = TRUE;
@@ -495,12 +495,6 @@ wButton_p wButtonCreate(
  *****************************************************************************
  */
 
-struct wChoice_t {
-    WOBJ_COMMON
-    long *valueP;
-    wChoiceCallBack_p action;
-    int recursion;
-};
 
 
 /**
@@ -584,47 +578,9 @@ long wRadioGetValue(
     return choiceGetValue(bc);
 }
 
-/**
- * Set a group of toggle buttons from a bitfield
- *
- * \param bc IN button group
- * \param value IN bitfield
- */
-
-void wToggleSetValue(
-    wChoice_p bc,		/* Toggle box */
-    long value)		/* Values */
-{
-    GList * child, * children;
-    long inx;
-    bc->recursion++;
-
-    for (children=child=gtk_container_get_children(GTK_CONTAINER(bc->widget)),inx=0;
-            child; child=child->next,inx++) {
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(child->data),
-                                     (value&(1<<inx))!=0);
-    }
-
-    if (children) {
-        g_list_free(children);
-    }
-
-    bc->recursion--;
-}
 
 
-/**
- * Get the active buttons from a group of toggle buttons
- *
- * \param b IN
- * \returns
- */
 
-long wToggleGetValue(
-    wChoice_p b)		/* Toggle box */
-{
-    return choiceGetValue(b);
-}
 
 /**
  * Signal handler for button selection in radio buttons and toggle
@@ -794,101 +750,3 @@ wChoice_p wRadioCreate(
     return b;
 }
 
-/**
- * Create a group of toggle buttons.
- *
- * \param parent IN parent window
- * \param x IN X-position
- * \param y IN Y-position
- * \param helpStr IN Help string
- * \param labelStr IN Label
- * \param option IN Options
- * \param labels IN Labels
- * \param valueP IN Selected value
- * \param action IN Callback
- * \param data IN User data as context
- * \returns toggle button widget
- */
-
-wChoice_p wToggleCreate(
-    wWin_p	parent,
-    wWinPix_t	x,
-    wWinPix_t	y,
-    const char 	* helpStr,
-    const char	* labelStr,
-    long	option,
-    const char * const * labels,
-    long	*valueP,
-    wChoiceCallBack_p action,
-    void 	*data)
-{
-    wChoice_p b;
-    const char * const * label;
-
-    if ((option & BC_NOBORDER)==0) {
-        if (x>=0) {
-            x++;
-        } else {
-            x--;
-        }
-
-        if (y>=0) {
-            y++;
-        } else {
-            y--;
-        }
-    }
-
-    b = wlibAlloc(parent, B_TOGGLE, x, y, labelStr, sizeof *b, data);
-    b->option = option;
-    b->action = action;
-    wlibComputePos((wControl_p)b);
-
-    ((wControl_p)b)->outline = FALSE;
-
-    if (option&BC_HORZ) {
-        b->widget = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, 0);
-    } else {
-        b->widget = gtk_box_new( GTK_ORIENTATION_VERTICAL, 0);
-    }
-
-    if (b->widget == 0) {
-        abort();
-    }
-
-    gtk_box_set_homogeneous(GTK_BOX(b->widget), FALSE);
-    
-    for (label=labels; *label; label++) {
-        GtkWidget *butt;
-
-        butt = gtk_check_button_new_with_label(_(*label));
-        gtk_box_pack_start(GTK_BOX(b->widget), butt, TRUE, TRUE, 0);
-        gtk_widget_show(butt);
-        g_signal_connect(G_OBJECT(butt), "toggled",
-                         G_CALLBACK(pushChoice), b);
-        g_signal_connect_after(G_OBJECT(b->widget), "draw",
-            					G_CALLBACK(drawButton), b);
-        wlibAddHelpString(butt, helpStr);
-    }
-
-    if (valueP) {
-        wToggleSetValue(b, *valueP);
-    }
-
-    if ((option & BC_NOBORDER)==0) {
-        b->repaintProc = choiceRepaint;
-        b->w += 2;
-        b->h += 2;
-    }
-
-    gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
-    wlibControlGetSize((wControl_p)b);
-
-    if (labelStr) {
-        b->labelW = wlibAddLabel((wControl_p)b, labelStr);
-    }
-
-    gtk_widget_show(b->widget);
-    wlibAddButton((wControl_p)b);
-    return b;
-}

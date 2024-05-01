@@ -480,6 +480,9 @@ void wlibStringUpdate();
 /* timer.c */
 void wlibSetTrigger(wControl_p b, setTriggerCallback_p trigger);
 
+/* toggle.c */
+
+
 /* tooltip.c */
 #define HELPDATAKEY "HelpDataKey"
 void wlibAddHelpString(GtkWidget *widget, const char *helpStr);

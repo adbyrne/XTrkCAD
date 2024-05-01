@@ -11,37 +11,39 @@ target_sources(xtrkcad-wlib
 	PRIVATE 
 	appwindow.c
 	basicdraw.c
+ 	color.c
+ 	fileselector.c
+ 	main.c
+ 	message.c
+ 	splash.c
+ 	pulldnmenu.c
+	recentuse.c
+	statusbar.c
+ 	text.c
+	toggle.c
+ 	wpref.c
+
 	bitmap.c
  	boxes.c
 	builder.c
- 	button.c
- 	color.c
+# 	button.c
  	control.c
 	dialog.c
 	drawcairo.c
 	droplist.c	
- 	fileselector.c
  	font.c
  	help.c
  	lines.c
  	list.c
  	liststore.c
- 	main.c
- 	message.c
  	notice.c
  	opendocument.c
  	pixbuf.c
- 	pulldnmenu.c
-	recentuse.c
 	single.c
- 	splash.c
-    statusbar.c
- 	text.c
  	tooltip.c	
  	treeview.c
  	util.c
  	window.c
- 	wpref.c
 )
 
 if(WIN32)

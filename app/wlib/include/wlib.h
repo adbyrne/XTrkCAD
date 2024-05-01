@@ -155,9 +155,12 @@ long wToggleGetValue(wChoice_p b);
 wChoice_p wRadioCreate(wWin_p parent, wWinPix_t x, wWinPix_t y,
                        const char *helpStr, const char *labelStr, long option,
                        const char * const *labels, long *valueP, wChoiceCallBack_p action, void *data);
-wChoice_p wToggleCreate(wWin_p parent, wWinPix_t x, wWinPix_t y,
+
+wChoice_p wToggleCreate(wWindow_p parent, wWinPix_t x, wWinPix_t y,
                         const char *helpStr, const char *labelStr, long option,
-                        const char * const *labels, long *valueP, wChoiceCallBack_p action, void *data);
+                        const char * const *labels, long *valueP, 
+                        wChoiceCallBack_p action, void *data);
+
 void wButtonToolBarRedraw(wWin_p win);
 wButton_p wButtonCreateForToolbar(wWin_p  w, wWinPix_t x, wWinPix_t	y,const char *helpStr, const char *labelStr, long option, wWinPix_t width, wButtonCallBack_p action, void * data);
 

@@ -259,10 +259,17 @@ SimpleDynamicProc(wWindow_p window, winProcEvent event, void* data, void* data2)
 	return(true);
 }
 
+char* toggleLabels1[] = { "Prices", NULL };
+long toggle1;
+
+char* toggleLabels2[] = { "Toggle 1", "Toggle 2", "Toggle 3", NULL };
+long toggle2;
+
 void
 SimpleDynamic(void* unused)
 {
 	wMessage_p msg;
+	wDrawColor color = 0xFF00FF;
 
 	wWindow_p dialog = wWinDialogCreate(NULL,
 		"simple-dyn",
@@ -272,14 +279,21 @@ SimpleDynamic(void* unused)
 		SimpleDynamicProc,
 		NULL);
 
-	msg = wMessageCreateEx(dialog, 0, 0, "testmsg", 1, "Long label text", 0);
+	msg = wMessageCreateEx(dialog, 0, 0, "testmsg", 1, "Single toggle", BM_ALIGNRIGHT);
 
-	msg = wMessageCreateEx(dialog, 0, 1, "testmsg", 1, "Label 2", BM_LARGE | BM_ALIGNRIGHT);
+	msg = wMessageCreateEx(dialog, 0, 1, "testmsg", 1, "Multiple toggles", BM_LARGE | BM_ALIGNRIGHT);
 
 	msg = wMessageCreateEx(dialog, 0, 2, "", 1, "Label 3", BM_SMALL | BM_ALIGNLEFT);
 
-	msg = wMessageCreate(dialog, 0, 3, "", 1, "Label 3");
+	msg = wMessageCreate(dialog, 0, 3, "", 1, "Label 4");
 
+	wMessageCreate(dialog, 0, 4, "", 1, "Color chooser");
+
+	wColorSelectButtonCreate(dialog, 1, 4, "", "Select cool color..", 0, 1, &color, NULL, NULL);
+
+	wToggleCreate(dialog, 1, 0, "singletoggle", NULL, BC_NOBORDER | BC_HORZ, toggleLabels1, toggle1, NULL, NULL);
+
+	wToggleCreate(dialog, 1, 1, "multitoggle", NULL, 0, toggleLabels2, toggle2, NULL, NULL);
 }
 
 void

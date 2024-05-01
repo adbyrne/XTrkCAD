@@ -1,0 +1,247 @@
+/*****************************************************************//**
+ * \file   toggle.c
+ * \brief  Toggle controls (checkboxes)
+ * 
+ * \author mf
+ * \date   May 2024
+ *********************************************************************/
+
+ /*  XTrkCad - Model Railroad CAD
+  *  Copyright (C) 2005 Dave Bullis
+  *
+  *  This program is free software; you can redistribute it and/or modify
+  *  it under the terms of the GNU General Public License as published by
+  *  the Free Software Foundation; either version 2 of the License, or
+  *  (at your option) any later version.
+  *
+  *  This program is distributed in the hope that it will be useful,
+  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  *  GNU General Public License for more details.
+  *
+  *  You should have received a copy of the GNU General Public License
+  *  along with this program; if not, write to the Free Software
+  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+  */
+
+
+#define GTK_DISABLE_SINGLE_INCLUDES
+#define GDK_DISABLE_DEPRECATED
+#define GTK_DISABLE_DEPRECATED
+#define GSEAL_ENABLE
+
+#include <gtk/gtk.h>
+#include <gdk/gdk.h>
+
+#include "gtkint.h"
+#include "i18n.h"
+
+/**
+ * \todo Check usage of labelStr
+ */
+struct wChoice_t {
+    GtkWidget* widget;
+    long* valueP;
+    wChoiceCallBack_p action;
+    char* labelStr;
+    void* data;
+};
+
+
+/**
+ * Get the state of a group of buttons. If the group consists of
+ * radio buttons, the return value is the index of the selected button
+ * or -1 for none. If toggle buttons are checked, a bit is set for each
+ * button that is active.
+ *
+ * \param bc IN
+ * \returns state of group
+ */
+
+static long toggleGetValue(
+    wChoice_p bc)
+{
+    GList* child;
+    GList* children;
+    long value = 0;
+    long inx;
+
+    for (children = child = gtk_container_get_children(GTK_CONTAINER(bc->widget)), inx = 0;
+        child; child = child->next, inx++) {
+        if (gtk_toggle_button_get_active(child->data)) {
+            value |= (1 << inx);
+        }
+    }
+
+    if (children) {
+        g_list_free(children);
+    }
+
+    return value;
+}
+
+/**
+ * Set a group of toggle buttons from a bitfield
+ *
+ * \param bc IN button group
+ * \param value IN bitfield
+ */
+
+void wToggleSetValue(
+    wChoice_p bc,		/* Toggle box */
+    long value)		/* Values */
+{
+    GList* child, * children;
+    long inx;
+
+    for (children = child = gtk_container_get_children(GTK_CONTAINER(bc->widget)), inx = 0;
+        child; child = child->next, inx++) {
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(child->data),
+            (value & (1 << inx)) != 0);
+    }
+
+    if (children) {
+        g_list_free(children);
+    }
+}
+
+
+/**
+ * Get the active buttons from a group of toggle buttons
+ *
+ * \param b IN
+ * \returns
+ */
+
+long wToggleGetValue(
+    wChoice_p b)		/* Toggle box */
+{
+    return toggleGetValue(b);
+}
+
+/**
+ * Signal handler for button selection in radio buttons and toggle
+ * button group
+ *
+ * \param widget IN the button group
+ * \param b IN user data (button group????)
+ * \returns always 1
+ */
+
+static int toggled(
+    GtkWidget* widget,
+    gpointer b)
+{
+    wChoice_p bc = (wChoice_p)b;
+    long value = toggleGetValue(bc);
+
+    if (debugWindow >= 2) {
+        printf("%s choice pushed = %ld\n", bc->labelStr ? bc->labelStr : "No label",
+            value);
+    }
+
+    if (bc->valueP) {
+        *bc->valueP = value;
+    }
+
+    if (bc->action) {
+        bc->action(value, bc->data);
+    }
+
+    return TRUE;
+}
+
+
+/**
+ * Create a group of toggle buttons.
+ *  
+ * ### Usage in dialogs
+ *
+ * - Generated: yes
+ * \todo Add builder support
+ *
+ * ### Options
+ * 
+ * BC_HORZ
+ * : buttons are arranged horizontally
+ * 
+ * \param parent    IN parent window
+ * \param x,y       IN position in grid
+ * \param helpStr   IN Help string
+ * \param labelStr  IN Label for group
+ * \param option    IN Options
+ * \param labels    IN Labels for individual buttons
+ * \param valueP    IN Selected value
+ * \param action    IN Callback
+ * \param data      IN User data as context
+ * \returns toggle button widget
+ */
+
+wChoice_p wToggleCreate(
+    wWindow_p	parent,
+    wWinPix_t	x,
+    wWinPix_t	y,
+    const char* helpStr,
+    const char* labelStr,
+    long	option,
+    const char* const* labels,
+    long* valueP,
+    wChoiceCallBack_p action,
+    void* data)
+{
+    wChoice_p b;
+    
+    b = g_malloc0(sizeof(struct wChoice_t));
+    b->action = action;
+
+    if (option & BO_USETEMPLATE) {
+        /**  */
+    }
+    else {
+        GtkGrid* grid = GTK_GRID(wlibWidgetFromIdWarn(parent, "layoutgrid"));
+
+        if (option & BC_HORZ) {
+            b->widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+        }
+        else {
+            b->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, 6);
+        }
+
+        if (b->widget == 0) {
+            abort();
+        }
+
+        if (!(option & BC_NOBORDER)) {
+            GtkStyleContext* context = gtk_widget_get_style_context(GTK_WIDGET(
+                b->widget));
+            gtk_style_context_add_class(context, "framed");
+        }
+        gtk_box_set_homogeneous(GTK_BOX(b->widget), FALSE);
+
+        for (const char* const* label = labels; *label; label++) {
+            GtkWidget* butt;
+
+            butt = gtk_check_button_new_with_label(_(*label));
+
+            gtk_box_pack_start(GTK_BOX(b->widget), butt, TRUE, TRUE, 0);
+
+            g_signal_connect(G_OBJECT(butt), "toggled",
+                G_CALLBACK(toggled), b);
+
+            wlibAddHelpString(butt, helpStr);
+        }
+
+        if (valueP) {
+            wToggleSetValue(b, *valueP);
+        }
+
+        if (labelStr) {
+            wlibAddLabel((wControl_p)b, labelStr);
+        }
+
+        gtk_grid_attach(grid, b->widget, x, y, 1, 1);
+        
+        gtk_widget_show_all(b->widget);
+    }
+    return b;
+}
