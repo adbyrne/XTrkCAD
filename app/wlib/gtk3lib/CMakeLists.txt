@@ -17,6 +17,7 @@ target_sources(xtrkcad-wlib
  	message.c
  	splash.c
  	pulldnmenu.c
+	radio.c
 	recentuse.c
 	statusbar.c
  	text.c

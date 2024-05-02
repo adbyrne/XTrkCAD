@@ -22,5 +22,5 @@ button.color {
 
 /* framed box */
 box.framed {
-    border:1 solid rgb(192, 192, 192)
+    border:1px solid rgb(192, 192, 192)
 }

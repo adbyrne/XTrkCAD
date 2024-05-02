@@ -174,8 +174,6 @@ wMessage_p wMessageCreateEx(
 	if (flags & BO_USETEMPLATE) {
 		/** \todo handle label in a template */
 	} else {
-		GtkGrid* grid = GTK_GRID(wlibWidgetFromIdWarn(parent, "layoutgrid"));
-
 		b->labelWidget = gtk_label_new(message);
 
 		/* do we need to set a special font? */
@@ -190,7 +188,7 @@ wMessage_p wMessageCreateEx(
 			}
 		}
 
-		gtk_grid_attach(grid, b->labelWidget, x, y, width, 1);
+		wlibBasicGridAttach(parent, b->labelWidget, x, y, width, 1);
 
 		if (flags & BM_ALIGNRIGHT) {
 			gtk_label_set_xalign(b->labelWidget, 1.0);

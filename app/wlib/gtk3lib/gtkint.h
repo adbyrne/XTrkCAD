@@ -320,6 +320,10 @@ GdkRGBA wlibGetColor(wDrawColor color, wBool_t normal);
 /* control.c */
 wBool_t wControlExpose (GtkWidget * widget, cairo_t *cr, wControl_p b);
 
+/* dialog.c */
+void wlibBasicGridAttach(wWindow_p parent, GtkWidget *widget, unsigned xPos,
+	unsigned yPos, unsigned colSpan, unsigned rowSpan);
+
 /* droplist.c */
 enum columns {
 	LISTCOL_DATA,			/**< user data not for display */
@@ -482,6 +486,17 @@ void wlibSetTrigger(wControl_p b, setTriggerCallback_p trigger);
 
 /* toggle.c */
 
+
+/**
+ * \todo Check usage of labelStr
+ */
+struct wChoice_t {
+	GtkWidget* widget;
+	long* valueP;
+	wChoiceCallBack_p action;
+	char* labelStr;
+	void* data;
+};
 
 /* tooltip.c */
 #define HELPDATAKEY "HelpDataKey"

@@ -36,16 +36,6 @@
 #include "gtkint.h"
 #include "i18n.h"
 
-/**
- * \todo Check usage of labelStr
- */
-struct wChoice_t {
-    GtkWidget* widget;
-    long* valueP;
-    wChoiceCallBack_p action;
-    char* labelStr;
-    void* data;
-};
 
 
 /**
@@ -193,13 +183,12 @@ wChoice_p wToggleCreate(
     
     b = g_malloc0(sizeof(struct wChoice_t));
     b->action = action;
+    b->valueP = valueP;
 
     if (option & BO_USETEMPLATE) {
         /**  */
     }
     else {
-        GtkGrid* grid = GTK_GRID(wlibWidgetFromIdWarn(parent, "layoutgrid"));
-
         if (option & BC_HORZ) {
             b->widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
         }
@@ -239,7 +228,7 @@ wChoice_p wToggleCreate(
             wlibAddLabel((wControl_p)b, labelStr);
         }
 
-        gtk_grid_attach(grid, b->widget, x, y, 1, 1);
+        wlibBasicGridAttach(parent, b->widget, x, y, 1, 1);
         
         gtk_widget_show_all(b->widget);
     }

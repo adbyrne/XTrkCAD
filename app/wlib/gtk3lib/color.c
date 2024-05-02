@@ -255,8 +255,6 @@ wColorButton_p wColorSelectButtonCreate(
 
 		*/
 	} else {
-		GtkGrid* grid = GTK_GRID(wlibWidgetFromIdWarn(parent, "layoutgrid"));
-
 		b->widget = gtk_color_button_new();
 		if (!b->widget) { exit(4); }
 
@@ -277,7 +275,7 @@ wColorButton_p wColorSelectButtonCreate(
 		gtk_widget_set_hexpand(b->widget, FALSE);
 		gtk_widget_set_vexpand(b->widget, FALSE);
 
-		gtk_grid_attach(grid, b->widget, x, y, width, 1);
+		wlibBasicGridAttach(parent, b->widget, x, y, width, 1);
 		gtk_widget_show(b->widget);
 	}
 

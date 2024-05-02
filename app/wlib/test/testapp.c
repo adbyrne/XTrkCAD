@@ -263,7 +263,11 @@ char* toggleLabels1[] = { "Prices", NULL };
 long toggle1;
 
 char* toggleLabels2[] = { "Toggle 1", "Toggle 2", "Toggle 3", NULL };
-long toggle2;
+long toggle2 = 3;
+
+char* radioLabels[] = { "FM", "AM", NULL };
+long radio1 = 1;
+long radio2 = 0;
 
 void
 SimpleDynamic(void* unused)
@@ -273,7 +277,7 @@ SimpleDynamic(void* unused)
 
 	wWindow_p dialog = wWinDialogCreate(NULL,
 		"simple-dyn",
-		"Simple Dynamic",
+		"Simple Generated",
 		"basicdialog",
 		0L,
 		SimpleDynamicProc,
@@ -291,9 +295,13 @@ SimpleDynamic(void* unused)
 
 	wColorSelectButtonCreate(dialog, 1, 4, "", "Select cool color..", 0, 1, &color, NULL, NULL);
 
-	wToggleCreate(dialog, 1, 0, "singletoggle", NULL, BC_NOBORDER | BC_HORZ, toggleLabels1, toggle1, NULL, NULL);
+	wToggleCreate(dialog, 1, 0, "singletoggle", NULL, BC_NOBORDER | BC_HORZ, toggleLabels1, &toggle1, NULL, NULL);
 
-	wToggleCreate(dialog, 1, 1, "multitoggle", NULL, 0, toggleLabels2, toggle2, NULL, NULL);
+	wToggleCreate(dialog, 1, 1, "multitoggle", NULL, 0, toggleLabels2, &toggle2, NULL, NULL);
+
+	wRadioCreate(dialog, 1, 2, "radio", NULL, 0, radioLabels, &radio1, NULL, NULL);
+
+	wRadioCreate(dialog, 1, 3, "radio", NULL, BC_NOBORDER | BC_HORZ, radioLabels, &radio2, NULL, NULL);
 }
 
 void
@@ -315,7 +323,7 @@ CreateMenuDialog(wWindow_p mainW)
 	wMenuPushCreate(menu, "notedialog", "Notes...", WCTL + 'n',
 		NoteDialog, NULL);
 
-	wMenuPushCreate(menu, "simpledyn", "Simple dynamic...", WCTL + 's',
+	wMenuPushCreate(menu, "simpledyn", "Simply generated...", WCTL + 's',
 		SimpleDynamic, NULL);
 
 }
