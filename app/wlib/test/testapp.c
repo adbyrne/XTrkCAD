@@ -259,6 +259,19 @@ SimpleDynamicProc(wWindow_p window, winProcEvent event, void* data, void* data2)
 	return(true);
 }
 
+wEntryCallBack_p
+EntryCallBack(char* string, wEntry_p entry)
+{
+	printf("Entered <%s>\n", string);
+
+	if (!strcmp(string, "err")) {
+		return(FALSE);
+	}
+	else {
+		return(TRUE);
+	}
+}
+
 char* toggleLabels1[] = { "Prices", NULL };
 long toggle1;
 
@@ -268,6 +281,8 @@ long toggle2 = 3;
 char* radioLabels[] = { "FM", "AM", NULL };
 long radio1 = 1;
 long radio2 = 0;
+
+char* entryText = "default";
 
 void
 SimpleDynamic(void* unused)
@@ -302,6 +317,10 @@ SimpleDynamic(void* unused)
 	wRadioCreate(dialog, 1, 2, "radio", NULL, 0, radioLabels, &radio1, NULL, NULL);
 
 	wRadioCreate(dialog, 1, 3, "radio", NULL, BC_NOBORDER | BC_HORZ, radioLabels, &radio2, NULL, NULL);
+
+	wEntryCreate(dialog, 1, 6, "textentry", NULL, 0L, 10, entryText, 10, EntryCallBack, NULL);
+
+	printf("Final entry: <%s>\n", entryText);
 }
 
 void

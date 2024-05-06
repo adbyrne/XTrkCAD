@@ -51,7 +51,7 @@ typedef struct wWin_t       * wWin_p;
 typedef struct wWindow_t    * wWindow_p;
 typedef struct wControl_t   * wControl_p;
 typedef struct wButton_t    * wButton_p;
-typedef struct wString_t    * wString_p;
+typedef struct wEntry_t     * wEntry_p;
 typedef struct wInteger_t   * wInteger_p;
 typedef struct wFloat_t     * wFloat_p;
 typedef struct wList_t      * wList_p;
@@ -373,17 +373,16 @@ void wControlLinkedActive( wControl_p b, int active );
  * String entry
  */
 
-#define BS_TRIM			(1<<12)
+//#define BS_TRIM			(1<<12)
 /* Creation CallBacks */
-typedef void (*wStringCallBack_p)( const char *, void *);
-wString_p wStringCreate(	wWin_p, wWinPix_t, wWinPix_t, const char *,
-                                const char *, long,
-                                wWinPix_t, char *, wIndex_t, wStringCallBack_p,
-                                void * );
-void wStringSetValue(		wString_p, const char * );
-void wStringSetWidth(		wString_p, wWinPix_t );
-const char * wStringGetValue(		wString_p );
+typedef bool (*wEntryCallBack_p)(const char* enteredString, void* userData);
 
+wEntry_p wEntryCreate(wWindow_p parent, wWinPix_t x, wWinPix_t y, 
+    const char* helpStr, const char* labelStr, long option, wWinPix_t width, 
+    char* valueP, wIndex_t valueL, wEntryCallBack_p action, void* data);
+void wEntrySetValue(wEntry_p control, const char* value );
+void wEntrySetWidth(wEntry_p cntrol, wWinPix_t width);
+const char* wEntryGetValue(wEntry_p control);
 
 /*------------------------------------------------------------------------------
  *

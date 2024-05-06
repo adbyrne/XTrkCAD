@@ -12,6 +12,7 @@ target_sources(xtrkcad-wlib
 	appwindow.c
 	basicdraw.c
  	color.c
+	entry.c
  	fileselector.c
  	main.c
  	message.c
@@ -40,7 +41,7 @@ target_sources(xtrkcad-wlib
  	notice.c
  	opendocument.c
  	pixbuf.c
-	single.c
+
  	tooltip.c	
  	treeview.c
  	util.c

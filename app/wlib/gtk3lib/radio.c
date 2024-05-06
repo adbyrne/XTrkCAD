@@ -132,6 +132,17 @@ static int radioChoice(
 /**
  * Create a group of radio buttons.
  *
+ *  * ### Usage in dialogs
+ *
+ * - Generated: yes
+ *
+ * ### Options
+ * BC_HORIZONTAL
+ * : align buttons in horizontal direction, 
+ * 
+ * BC_NOBORDER
+ * : do not draw a frame around buttons
+ * 
  * \param parent IN parent window
  * \param x IN X-position
  * \param y IN Y-position
