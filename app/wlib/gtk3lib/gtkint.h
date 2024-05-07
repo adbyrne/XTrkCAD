@@ -280,20 +280,20 @@ bool wlibExistsTemplate(const char *name);
 void wlibSetLabel(GtkWidget *widget, long option, const char *labelStr, GtkLabel **labelG, GtkWidget **imageG);
 void wlibButtonDoAction(wButton_p bb);
 
-struct wButton_t {
-    WOBJ_COMMON
-    GtkLabel * labelG;
-    GtkWidget * imageG;
-    wButtonCallBack_p action;
-    int busy;
-    int recursion;
-    long timer_id;
-    int timer_count;
-    int timer_state;
-	GtkRevealer * reveal; 
-	int inToolbar; 
-	GtkWidget * separator;
-};
+//struct wButton_t {
+//    WOBJ_COMMON
+//    GtkLabel * labelG;
+//    GtkWidget * imageG;
+//    wButtonCallBack_p action;
+//    int busy;
+//    int recursion;
+//    long timer_id;
+//    int timer_count;
+//    int timer_state;
+//	GtkRevealer * reveal; 
+//	int inToolbar; 
+//	GtkWidget * separator;
+//};
 
 /* color.c */
 

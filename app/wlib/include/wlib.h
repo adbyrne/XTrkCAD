@@ -145,9 +145,12 @@ typedef void (*wChoiceCallBack_p)( long, void * );
 
 void wButtonSetLabel(wButton_p bb, const char *labelStr);
 void wButtonSetBusy(wButton_p bb, int value);
-wButton_p wButtonCreate(wWin_p parent, wWinPix_t x, wWinPix_t y,
-                        const char *helpStr, const char *labelStr, long option, wWinPix_t width,
-                        wButtonCallBack_p action, void *data);
+wButton_p wButtonCreate(wWindow_p parent, wWinPix_t x, wWinPix_t y,
+    const char *helpStr, const char *labelStr, long option, 
+    wWinPix_t width, wButtonCallBack_p action, void *data);
+
+/** Radio buttons radio.c */
+
 void wRadioSetValue(wChoice_p bc, long value);
 long wRadioGetValue(wChoice_p bc);
 void wToggleSetValue(wChoice_p bc, long value);

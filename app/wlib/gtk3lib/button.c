@@ -1,9 +1,9 @@
 /** \file button.c
- * Toolbar button creation and handling
+ * Button creation and handling
  */
 
 /*  XTrkCad - Model Railroad CAD
- *  Copyright (C) 2005 Dave Bullis
+ *  Copyright (C) 2005 Dave Bullis, 2024 Martin Fischer
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,9 +20,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
 #define GTK_DISABLE_DEPRECATED
@@ -31,13 +28,14 @@
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 
-#include "wrapbox/eggwrapbox.h"
 #include "gtkint.h"
 #include "i18n.h"
 
-#define MIN_BUTTON_WIDTH (80)
-#define MIN_BUTTON_HEIGHT (30)
-
+struct wButton_t {
+	GtkWidget* widget;
+	wButtonCallBack_p action;
+	void* data;
+};
 /*
  *****************************************************************************
  *
@@ -47,100 +45,96 @@
  */
 
 /**
- * Set the state of the button
+ * Set the status of the button
  *
- * \param bb IN the button
- * \param value IN TRUE for active, FALSE for inactive
+ * \param bb    IN the button
+ * \param value IN TRUE for pressed in, FALSE for raised
  */
 
 void wButtonSetBusy(wButton_p bb, int value)
 {
-    bb->recursion++;
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bb->widget), value);
-    bb->recursion--;
-    bb->busy = value;
-    if (!value) {
-    	if (bb->timer_id) {
-    		g_source_remove(bb->timer_id);
-    		bb->timer_id = 0;
-    	}
-    	bb->timer_state = -1;
-    }
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bb->widget), value);
 }
 
 /**
- * Set the label of a button, does also allow to set an icon
+ * Set the label of a button, does also allow to set an icon.
+ * If BO_ICON is set, labelStr is interpreted as pointer to XPM or XBM images
  *
- * \param widget IN
- * \param option IN
- * \param labelStr IN
- * \param labelG IN
- * \param imageG IN
+ * \param widget    IN  the button
+ * \param option    IN
+ * \param labelStr  IN  the pixel data or the label text
+ * \param labelG    IN
+ * \param imageG    IN
+ *
+ * \todo Check usage for large icons and for text labels
  */
 
 void wlibSetLabel(
-    GtkWidget *widget,
-    long option,
-    const char * labelStr,
-    GtkLabel * * labelG,
-    GtkWidget * * imageG)
+        GtkWidget *widget,
+        long option,
+        const char * labelStr,
+        GtkLabel * * labelG,
+        GtkWidget * * imageG)
 {
-    wIcon_p bm;
-//    GdkBitmap * mask;
+	wIcon_p bm;
 
-    if (widget == 0) {
-        abort();
-    }
+	if (widget == 0) {
+		abort();
+	}
 
-    if (labelStr) {
-        if (option&BO_ICON) {
-            GdkPixbuf *pixbuf;
+	if (labelStr) {
+		if (option&BO_ICON) {
+			GdkPixbuf *pixbuf;
 
-            bm = (wIcon_p)labelStr;
+			bm = (wIcon_p)labelStr;
 
-            if (bm->gtkIconType == gtkIcon_pixmap) {
-                pixbuf = gdk_pixbuf_new_from_xpm_data((const char**)bm->bits);
-            } else {
-                pixbuf = wlibPixbufFromXBM( bm );
-            }
-            double scaleicon;
-            wPrefGetFloatBasic(PREFSECTION, LARGEICON, &scaleicon, 1.0);
-            if (scaleicon<1.0) scaleicon=1.0;
-            if (scaleicon>2.0) scaleicon=2.0;
-            GdkPixbuf *pixbuf2 =
-            		gdk_pixbuf_scale_simple(pixbuf, gdk_pixbuf_get_width(pixbuf)*scaleicon, gdk_pixbuf_get_height(pixbuf)*scaleicon, GDK_INTERP_BILINEAR);
-            g_object_ref_sink(pixbuf);
-            g_object_unref((gpointer)pixbuf);
-            if (*imageG==NULL) {
-                *imageG = gtk_image_new_from_pixbuf(pixbuf2);
-                gtk_container_add(GTK_CONTAINER(widget), *imageG);
-                gtk_widget_show(*imageG);
-            } else {
-                gtk_image_set_from_pixbuf(GTK_IMAGE(*imageG), pixbuf2);
-            }
-            g_object_ref_sink(pixbuf2);
-            g_object_unref((gpointer)pixbuf2);
-        } else {
-            if (*labelG==NULL) {
-                *labelG = (GtkLabel*)gtk_label_new(wlibConvertInput(labelStr));
-                gtk_container_add(GTK_CONTAINER(widget), (GtkWidget*)*labelG);
-                gtk_widget_show((GtkWidget*)*labelG);
-            } else {
-                gtk_label_set_text(*labelG, wlibConvertInput(labelStr));
-            }
-        }
-    }
+			if (bm->gtkIconType == gtkIcon_pixmap) {
+				pixbuf = gdk_pixbuf_new_from_xpm_data((const char**)bm->bits);
+			} else {
+				pixbuf = wlibPixbufFromXBM( bm );
+			}
+			double scaleicon;
+			wPrefGetFloatBasic(PREFSECTION, LARGEICON, &scaleicon, 1.0);
+			if (scaleicon<1.0) { scaleicon=1.0; }
+			if (scaleicon>2.0) { scaleicon=2.0; }
+			GdkPixbuf *pixbuf2 =
+			        gdk_pixbuf_scale_simple(pixbuf, gdk_pixbuf_get_width(pixbuf)*scaleicon,
+			                                gdk_pixbuf_get_height(pixbuf)*scaleicon, GDK_INTERP_BILINEAR);
+			g_object_ref_sink(pixbuf);
+			g_object_unref((gpointer)pixbuf);
+			if (*imageG==NULL) {
+				*imageG = gtk_image_new_from_pixbuf(pixbuf2);
+				gtk_container_add(GTK_CONTAINER(widget), *imageG);
+				gtk_widget_show(*imageG);
+			} else {
+				gtk_image_set_from_pixbuf(GTK_IMAGE(*imageG), pixbuf2);
+			}
+			g_object_ref_sink(pixbuf2);
+			g_object_unref((gpointer)pixbuf2);
+		} else {
+			if (*labelG==NULL) {
+				*labelG = (GtkLabel*)gtk_label_new(wlibConvertInput(labelStr));
+				gtk_container_add(GTK_CONTAINER(widget), (GtkWidget*)*labelG);
+				gtk_widget_show((GtkWidget*)*labelG);
+			} else {
+				gtk_label_set_text(*labelG, wlibConvertInput(labelStr));
+			}
+		}
+	}
 }
 
 /**
  * Change only the text label of a button
+ *
  * \param bb IN button handle
  * \param labelStr IN new label string
+ *
+ * \todo Make SetLabel work
  */
 
 void wButtonSetLabel(wButton_p bb, const char * labelStr)
 {
-    wlibSetLabel(bb->widget, bb->option, labelStr, &bb->labelG, &bb->imageG);
+	gtk_button_set_label(bb->widget, labelStr);
 }
 
 /**
@@ -150,154 +144,28 @@ void wButtonSetLabel(wButton_p bb, const char * labelStr)
  */
 
 void wlibButtonDoAction(
-    wButton_p bb)
+        wButton_p bb)
 {
-    if (bb->action) {
-        bb->action(bb->data);
-    }
+	if (bb->action) {
+		bb->action(bb->data);
+	}
 }
 
-
 /**
- * Signal handler for button push
+ * Signal handler for button click
  * \param widget IN the widget or NULL for autorepeat
  * \param value IN the button handle (same as widget???)
  */
 
-static void pushButt(
-    GtkWidget *widget,
-    gpointer value)
+static void buttonClick(
+        GtkWidget *widget,
+        gpointer value)
 {
-    wButton_p b = (wButton_p)value;
+	wButton_p b = (wButton_p)value;
 
-    if (debugWindow >= 2) {
-        printf("%s button pushed\n", b->labelStr?b->labelStr:"No label");
-    }
-
-    if (b->recursion) {
-        return;
-    }
-
-    wlibStringUpdate();
-    if (b->action) {
-        b->action(b->data);
-    }
-
-
-}
-
-void wButtonToolBarRedraw(wWin_p win)
-{
-	gtk_widget_queue_resize(win->toolbar);
-}
-
-#define REPEAT_STAGE0_DELAY 500
-#define REPEAT_STAGE1_DELAY 150
-#define REPEAT_STAGE2_DELAY 100
-
-/* Timer callback function! */
-static int timer_func ( void * data)
-{
-	wButton_p bb = (wButton_p)data;
-   if (bb->timer_id == 0) {
-	   bb->timer_state = -1;
-	   return FALSE;
-   }
-   /* Autorepeat state machine */
-   switch (bb->timer_state) {
-      case 0: /* Enable slow auto-repeat */
-         g_source_remove(bb->timer_id);
-         bb->timer_id = 0;
-         bb->timer_state = 1;
-         bb->timer_id = g_timeout_add( REPEAT_STAGE1_DELAY, timer_func, bb);
-         bb->timer_count = 0;
-         break;
-      case 1: /* Check if it's time for fast repeat yet */
-         if (bb->timer_count++ > 10)
-            bb->timer_state = 2;
-         break;
-      case 2: /* Start fast auto-repeat */
-         g_source_remove(bb->timer_id);
-         bb->timer_id = 0;
-         bb->timer_state = 3;
-         bb->timer_id = g_timeout_add( REPEAT_STAGE2_DELAY, timer_func, bb);
-         break;
-      case 3:
-    	  break;
-      default:
-    	 g_source_remove(bb->timer_id);
-    	 bb->timer_id = 0;
-    	 bb->timer_state = -1;
-    	 return FALSE;
-         break;
-   }
-
-   pushButt(NULL,bb);
-
-   return TRUE;
-
-}
-
-static gint pressButt(
-		GtkWidget *widget,
-		GdkEventButton *event,
-		wButton_p bb) {
-
-	if ( debugWindow >= 1 )
-		printf( "buttonPress: %s\n", bb->labelStr );
-	if (bb->recursion) {
-		return TRUE;
-
+	if (b->action) {
+		b->action(b->data);
 	}
-
-
-	if (bb->option & BO_REPEAT)  {
-		/* Remove an existing timer */
-		if (bb->timer_id)
-		  g_source_remove(bb->timer_id);
-
-	   /* Setup a timer */
-	   bb->timer_id = g_timeout_add( REPEAT_STAGE0_DELAY, timer_func, bb);
-	   bb->timer_state = 0;
-
-	}
-
-	if (!bb->busy) {
-		bb->recursion++;
-		int sensitive = gtk_widget_get_sensitive (GTK_WIDGET(bb->widget));
-		if (sensitive)
-			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bb->widget), TRUE);
-		bb->recursion--;
-	}
-
-
-	return TRUE;
-
-}
-
-static gint releaseButt(
-		GtkWidget *widget,
-		GdkEventButton *event,
-		wButton_p bb) {
-
-	if ( debugWindow >= 1 )
-		printf( "buttonRelease: %s\n", bb->labelStr );
-	/* Remove any existing timer */
-	if (bb->timer_id) {
-	  g_source_remove(bb->timer_id);
-	  bb->timer_id = 0;
-	}
-
-	bb->timer_state = -1;
-
-	pushButt(widget,bb);   //Do here to simulate "clicked"
-
-	if (!bb->busy) {
-		bb->recursion++;
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bb->widget), FALSE);
-		bb->recursion--;
-	}
-	return TRUE;
 }
 
 
@@ -305,117 +173,26 @@ static gint releaseButt(
  * Called after expose event default hander - allows the button to be outlined
  */
 static wBool_t drawButton(
-		GtkWidget *widget,
-		cairo_t *cr,
+        GtkWidget *widget,
+        cairo_t *cr,
         gpointer g)
 {
 	return wControlExpose(widget, cr, (wControl_p)g);
 }
 
-static GtkWidget * last_inner_box;
 
-/**
- * \brief Create button to go into a toolbar
- * 
- * \param w 
- * \param x 
- * \param y 
- * \param helpStr 
- * \param labelStr 
- * \param option 
- * \param width 
- * \param action 
- * \param data 
- * \return wButton_p 
- */
-wButton_p wButtonCreateForToolbar(
-        wWin_p  w,
-        wWinPix_t	x,
-        wWinPix_t	y,
-        const char 	* helpStr,
-        const char	* labelStr,
-        long 	option,
-        wWinPix_t width,
-        wButtonCallBack_p action,
-        void 	* data)
-{
-	wButton_p b;
-	b = wlibAlloc(w, B_BUTTON, x, y, labelStr, sizeof *b, data);
-
-    wlibAddButtonToolbar(b);
-
-	b->option = option;
-	b->action = action;
-
-	b->widget = (GtkWidget *)gtk_toggle_button_new();
-
-	// b->reveal = (GtkRevealer *)gtk_revealer_new();
-	// gtk_container_add(GTK_CONTAINER(b->reveal),
-	//                    b->widget);  /*Add a revealer to allow show/noshow */
-    // gtk_revealer_set_reveal_child (b->reveal, TRUE );
-
-	if ((option&BO_ABUT) && last_inner_box) { /* Add revealer into last Child Box if ABUT */
-		gtk_box_pack_start(GTK_BOX(last_inner_box),GTK_WIDGET(b->widget),FALSE, FALSE,
-		                   0);
-	} else {
-		last_inner_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0); /*New Box*/
-		if (option&BO_GAP) {
-			b->separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-			gtk_box_pack_start(GTK_BOX(last_inner_box),b->separator,FALSE,FALSE,0);
-		}
-		gtk_box_pack_start(GTK_BOX(last_inner_box),GTK_WIDGET(b->widget),FALSE, FALSE,
-		                   0);
-//		egg_wrap_box_insert_child(EGG_WRAP_BOX(w->toolbar), last_inner_box, -1, 0 );
-	}
-    
-	b->inToolbar = TRUE;
-
-	if (option&BO_ICON) {
-		GdkPixbuf *pixbuf;
-
-		wIcon_p bm;
-
-		bm = (wIcon_p)labelStr;
-
-		if (bm->gtkIconType == gtkIcon_pixmap) {
-			pixbuf = gdk_pixbuf_new_from_xpm_data((const char**)bm->bits);
-		} else {
-			pixbuf = wlibPixbufFromXBM( bm );
-		}
-		b->imageG = gtk_image_new_from_pixbuf(pixbuf);
-		gtk_button_set_image(GTK_BUTTON(b->widget),b->imageG);
-		g_object_unref((gpointer)pixbuf);
-
-	} else {
-
-		gtk_button_set_label(GTK_BUTTON(b->widget),wlibConvertInput(labelStr));
-	}
-
-	if (option & BB_DEFAULT) {
-		gtk_widget_set_can_default(b->widget, TRUE);
-		gtk_widget_grab_default(b->widget);
-		gtk_window_set_default(GTK_WINDOW(w->gtkwin), b->widget);
-	}
-
-	wlibAddHelpString(b->widget, helpStr);
-	wlibAddButton((wControl_p)b);
-
-	g_signal_connect(b->widget, "clicked",
-	                 G_CALLBACK(pushButt), b);
-
-	if (!b->inToolbar) {
-		gtk_widget_set_size_request(b->widget, MIN_BUTTON_WIDTH, MIN_BUTTON_HEIGHT);
-	}
-
- //   gtk_widget_show_all(b->widget);
-    gtk_widget_show_all(w->toolbar);
-	return b;
-
-}
 
 /**
  * Create a button
+ *  
+ * ### Usage in dialogs
  *
+ * - Generated: yes
+ *
+ * ### Options
+ * BB_DEFAULT
+ * : set button as default for dialog
+ * 
  * \param parent IN parent window
  * \param x IN X-position
  * \param y IN Y-position
@@ -429,324 +206,56 @@ wButton_p wButtonCreateForToolbar(
  */
 
 wButton_p wButtonCreate(
-    wWin_p	parent,
-    wWinPix_t	x,
-    wWinPix_t	y,
-    const char 	* helpStr,
-    const char	* labelStr,
-    long 	option,
-    wWinPix_t 	width,
-    wButtonCallBack_p action,
-    void 	* data)
+        wWindow_p	parent,
+        wWinPix_t	x,
+        wWinPix_t	y,
+        const char 	* helpStr,
+        const char	* labelStr,
+        long 	option,
+        wWinPix_t 	width,
+        wButtonCallBack_p action,
+        void 	* data)
 {
-    wButton_p b;
-    if (option&BO_ICON)  //The labelStr here is a wIcon_p
-    	b = wlibAlloc(parent, B_BUTTON, x, y, " ", sizeof *b, data);
-    else
-    	b = wlibAlloc(parent, B_BUTTON, x, y, labelStr, sizeof *b, data);
-    b->option = option;
-    b->action = action;
-    wlibComputePos((wControl_p)b);
+	wButton_p b;
 
-    b->widget = gtk_toggle_button_new();
-    g_signal_connect(G_OBJECT(b->widget), "button_press_event",
-    		             G_CALLBACK(pressButt), b);
-    g_signal_connect(G_OBJECT(b->widget), "button_release_event",
-        		         G_CALLBACK(releaseButt), b);
-    //g_signal_connect(GTK_OBJECT(b->widget), "clicked",
-    //                     G_CALLBACK(pushButt), b);
-    g_signal_connect_after(G_OBJECT(b->widget), "draw",
-    					G_CALLBACK(drawButton), b);
-    if (width > 0) {
-        gtk_widget_set_size_request(b->widget, width, -1);
-    }
+	b = g_malloc0(sizeof(struct wButton_t));
 
-    if( labelStr ){
-        wButtonSetLabel(b, labelStr);
-    }
+	b->action = action;
+	b->data = data;
 
-    gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
+	if (option & BO_USETEMPLATE) {
+		/** \todo buttons created by builder */
+	} else {
+		b->widget = GTK_WIDGET(gtk_toggle_button_new());
 
-    if (option & BB_DEFAULT) {
-        gtk_widget_set_can_default(b->widget, TRUE);
-        gtk_widget_grab_default(b->widget);
-        gtk_window_set_default(GTK_WINDOW(parent->gtkwin), b->widget);
-    }
+		g_signal_connect(G_OBJECT(b->widget), "clicked",
+		                 G_CALLBACK(buttonClick), b);
 
-    wlibControlGetSize((wControl_p)b);
+		if (width > 0) {
+			gtk_widget_set_size_request(b->widget, width, -1);
+		}
 
-    if (width == 0 && b->w < MIN_BUTTON_WIDTH && (b->option&BO_ICON)==0) {
-        b->w = MIN_BUTTON_WIDTH;
-        gtk_widget_set_size_request(b->widget, b->w, b->h);
-    }
+		if (labelStr) {
+			wButtonSetLabel(b, labelStr);
+		}
 
-    gtk_widget_show(b->widget);
-    wlibAddButton((wControl_p)b);
-    wlibAddHelpString(b->widget, helpStr);
-    return b;
-}
+		wlibBasicGridAttach(parent, b->widget, x, y, width, 1);
 
-
-/*
- *****************************************************************************
- *
- * Choice Boxes
- *
- *****************************************************************************
- */
+		if (option & BB_DEFAULT) {
+			gtk_widget_set_can_default(b->widget, TRUE);
+			gtk_widget_grab_default(b->widget);
+			gtk_window_set_default(GTK_WINDOW(parent->gtkWindow), b->widget);
+		}
 
-
-
-/**
- * Get the state of a group of buttons. If the group consists of
- * radio buttons, the return value is the index of the selected button
- * or -1 for none. If toggle buttons are checked, a bit is set for each
- * button that is active.
- *
- * \param bc IN
- * \returns state of group
- */
-
-static long choiceGetValue(
-    wChoice_p bc)
-{
-    GList * child, * children;
-    long value, inx;
-
-    if (bc->type == B_TOGGLE) {
-        value = 0;
-    } else {
-        value = -1;
-    }
-
-    for (children=child=gtk_container_get_children(GTK_CONTAINER(bc->widget)),inx=0;
-            child; child=child->next,inx++) {
-        if (gtk_toggle_button_get_active(child->data)) {
-            if (bc->type == B_TOGGLE) {
-                value |= (1<<inx);
-            } else {
-                value = inx;
-            }
-        }
-    }
-
-    if (children) {
-        g_list_free(children);
-    }
-
-    return value;
-}
-
-/**
- * Set the active radio button in a group
- *
- * \param bc IN button group
- * \param value IN index of active button
- */
-
-void wRadioSetValue(
-    wChoice_p bc,		/* Radio box */
-    long value)		/* Value */
-{
-    GList * child, * children;
-    long inx;
-
-    for (children=child=gtk_container_get_children(GTK_CONTAINER(bc->widget)),inx=0;
-            child; child=child->next,inx++) {
-        if (inx == value) {
-            bc->recursion++;
-            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(child->data), TRUE);
-            bc->recursion--;
-        }
-    }
-
-    if (children) {
-        g_list_free(children);
-    }
-}
-
-/**
- * Get the active button from a group of radio buttons
- *
- * \param bc IN
- * \returns
- */
-
-long wRadioGetValue(
-    wChoice_p bc)		/* Radio box */
-{
-    return choiceGetValue(bc);
+		gtk_widget_show(b->widget);
+	}
+	wlibAddHelpString(b->widget, helpStr);
+	return b;
 }
 
 
 
 
 
-/**
- * Signal handler for button selection in radio buttons and toggle
- * button group
- *
- * \param widget IN the button group
- * \param b IN user data (button group????)
- * \returns always 1
- */
 
-static int pushChoice(
-    GtkWidget *widget,
-    gpointer b)
-{
-    wChoice_p bc = (wChoice_p)b;
-    long value = choiceGetValue(bc);
-
-    if (debugWindow >= 2) {
-        printf("%s choice pushed = %ld\n", bc->labelStr?bc->labelStr:"No label",
-               value);
-    }
-
-    if (bc->type == B_RADIO &&
-            !(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))) {
-        return 1;
-    }
-
-    if (bc->recursion) {
-        return 1;
-    }
-
-    if (bc->valueP) {
-        *bc->valueP = value;
-    }
-
-    if (bc->action) {
-        bc->action(value, bc->data);
-    }
-
-    return 1;
-}
-
-/**
- * Signal handler used to draw a frame around a widget, used to visually
- * group several buttons together
- *
- * \param b IN  widget
- */
-
-static void choiceRepaint(
-    wControl_p b)
-{
-    wChoice_p bc = (wChoice_p)b;
-
-    if (gtk_widget_get_visible(b->widget)) {
-        wlibDrawBox(bc->parent, wBoxBelow, bc->realX-1, bc->realY-1, bc->w+1, bc->h+1);
-    }
-}
-
-/**
- * Create a group of radio buttons.
- *
- * \param parent IN parent window
- * \param x IN X-position
- * \param y IN Y-position
- * \param helpStr IN Help string
- * \param labelStr IN Label
- * \param option IN Options
- * \param labels IN Labels
- * \param valueP IN Selected value
- * \param action IN Callback
- * \param data IN User data as context
- * \returns radio button widget
- */
-
-wChoice_p wRadioCreate(
-    wWin_p	parent,
-    wWinPix_t	x,
-    wWinPix_t	y,
-    const char 	* helpStr,
-    const char	* labelStr,
-    long	option,
-    const char	* const *labels,
-    long	*valueP,
-    wChoiceCallBack_p action,
-    void 	*data)
-{
-    wChoice_p b;
-    const char * const * label;
-    GtkWidget *butt0=NULL, *butt;
-
-    if ((option & BC_NOBORDER)==0) {
-        if (x>=0) {
-            x++;
-        } else {
-            x--;
-        }
-
-        if (y>=0) {
-            y++;
-        } else {
-            y--;
-        }
-    }
-
-    b = wlibAlloc(parent, B_RADIO, x, y, labelStr, sizeof *b, data);
-    b->option = option;
-    b->action = action;
-    b->valueP = valueP;
-    wlibComputePos((wControl_p)b);
-
-    ((wControl_p)b)->outline = FALSE;
-
-    if (option&BC_HORZ) {
-        b->widget = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, 0 ); //gtk_hbox_new(FALSE, 0);
-    } else {
-        b->widget = gtk_box_new( GTK_ORIENTATION_VERTICAL, 0);
-    }
-
-    if (b->widget == 0) {
-        abort();
-    }
-
-    gtk_box_set_homogeneous(GTK_BOX(b->widget), FALSE );
-
-    for (label=labels; *label; label++) {
-        butt = gtk_radio_button_new_with_label(
-                   butt0?gtk_radio_button_get_group(GTK_RADIO_BUTTON(butt0)):NULL, _(*label));
-
-        if (butt0==NULL) {
-            butt0 = butt;
-        }
-
-        gtk_box_pack_start(GTK_BOX(b->widget), butt, TRUE, TRUE, 0);
-        gtk_widget_show(butt);
-        g_signal_connect(G_OBJECT(butt), "toggled",
-                         G_CALLBACK(pushChoice), b);
-        g_signal_connect_after(G_OBJECT(b->widget), "draw",
-            					G_CALLBACK(drawButton), b);
-        wlibAddHelpString(butt, helpStr);
-    }
-
-    if (option & BB_DEFAULT) {
-        gtk_widget_set_can_default(b->widget, TRUE);
-        gtk_widget_grab_default(b->widget);
-    }
-
-    if (valueP) {
-        wRadioSetValue(b, *valueP);
-    }
-
-    if ((option & BC_NOBORDER)==0) {
-        b->repaintProc = choiceRepaint;
-        b->w += 2;
-        b->h += 2;
-    }
-
-    gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
-    wlibControlGetSize((wControl_p)b);
-
-    if (labelStr) {
-        b->labelW = wlibAddLabel((wControl_p)b, labelStr);
-    }
-
-    gtk_widget_show(b->widget);
-    wlibAddButton((wControl_p)b);
-    return b;
-}
 

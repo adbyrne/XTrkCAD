@@ -272,6 +272,20 @@ EntryCallBack(char* string, wEntry_p entry)
 	}
 }
 
+wButton_p button; 
+
+wButtonCallBack_p
+ButtonAction(void* data)
+{
+	static bool clicked = 0;
+	if (!clicked)
+		wButtonSetLabel(button, "Clicked!");
+	else
+		wButtonSetLabel(button, "Click me!");
+
+	clicked = !clicked;
+}
+
 char* toggleLabels1[] = { "Prices", NULL };
 long toggle1;
 
@@ -321,6 +335,8 @@ SimpleDynamic(void* unused)
 	wEntryCreate(dialog, 1, 6, "textentry", NULL, 0L, 10, entryText, 10, EntryCallBack, NULL);
 
 	printf("Final entry: <%s>\n", entryText);
+
+	button = wButtonCreate(dialog, 1, 7, "testbutton", "Button", 0L, 1, ButtonAction, NULL);
 }
 
 void
