@@ -148,6 +148,35 @@ wWinPix_t wMessageGetHeight(
 
 /**
  * Create a widget for a simple text.
+ * 
+ * ### Usage in dialogs
+ *
+ * - Dynamic supported
+ * - Builder todo
+ *
+ * ### Options
+ * Default
+ * : center label in normal font
+ *
+ * BM_LARGE
+ * : use large font
+ *
+ * BM_SMALL
+ * : use small font
+ *
+ * BM_ALIGNRIGHT
+ * : Right align label
+ *
+ * BM_ALIGNLEFT
+ * : Left align label
+ *
+ * ### CSS
+ *
+ * .largeLabel
+ * : Style for large font
+ *
+ * .smallLabel
+ * : Style for small font
  *
  * \param IN parent		Handle of parent window
  * \param IN x			position in x direction
