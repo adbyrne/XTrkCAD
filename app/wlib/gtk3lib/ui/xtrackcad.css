@@ -27,5 +27,5 @@ box.framed {
 
 /* invalid value in entry */
 entry.error {
-    border: 2px solid red
+    border: 1px solid red
 }
