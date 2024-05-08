@@ -2,16 +2,31 @@
  * Gtk.Builder functions
  */
 
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#ifdef WIN32
-	#include <windows.h>
-	#define PATH_MAX _MAX_PATH
-#else
-	#include <unistd.h>
-#endif
+ /*  XTrkCad - Model Railroad CAD
+  *  Copyright (C) 2005 Dave Bullis, 2018 Martin Fischer
+  *
+  *  This program is free software; you can redistribute it and/or modify
+  *  it under the terms of the GNU General Public License as published by
+  *  the Free Software Foundation; either version 2 of the License, or
+  *  (at your option) any later version.
+  *
+  *  This program is distributed in the hope that it will be useful,
+  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  *  GNU General Public License for more details.
+  *
+  *  You should have received a copy of the GNU General Public License
+  *  along with this program; if not, write to the Free Software
+  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+  */
+
+
+//#ifdef WIN32
+//	#include <windows.h>
+//	#define PATH_MAX _MAX_PATH
+//#else
+//	#include <unistd.h>
+//#endif
 
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
@@ -24,24 +39,6 @@
 
 #include "gtkint.h"
 
-/*
- * Copyright (C) 2018 Martin Fischer
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- */
-
 /**
  * Create UI path and filename from dialog name. Returned filename has to be
  * g_string_freed by caller.
@@ -49,7 +46,6 @@
  * \param dialog IN name of dialog
  * \return filename
  */
-
 
 GString *
 wlibFileNameFromDialog( const char *dialog )
@@ -76,7 +72,6 @@ wlibFileNameFromDialog( const char *dialog )
  * \return true if exists, false otherwise
  */
 
-
 bool
 wlibExistsTemplate(const char *name)
 {
@@ -93,8 +88,11 @@ wlibExistsTemplate(const char *name)
 }
 
 /*
- * Load the GTK builder object for this window. The filename is assumed to be the same as the nameStr and the window object id.
- *
+ * Load the GTK builder object for this window. The filename is assumed to be 
+ * the same as the nameStr and the window object id.
+ * In the window object the builder field will be set with the loaded object 
+ * and the gtkwin field populated
+ * 
  * \param IN winType passed through to wlibAlloc
  * \param IN labelStr the name that will be shown in the title of the window
  * \param IN nameStr the name to look up
@@ -102,7 +100,6 @@ wlibExistsTemplate(const char *name)
  * \param INOUT data passed through to wlibAlloc
  * \return the window object pointer
  *
- * In the window object the builder field will be set with the loaded object and the gtkwin field populated
  */
 
 wWin_p
@@ -116,10 +113,9 @@ wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr,
 	w->option = option;
 	w->resizeTimer = 0;
 
-
 	filename = wlibFileNameFromDialog( nameStr );
 
-	w->template_id = strdup(nameStr);
+	w->template_id = g_strdup(nameStr);
 
 	w->builder = gtk_builder_new_from_file(filename->str);
 	if( !w->builder ) {
@@ -143,7 +139,7 @@ wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr,
 		           NULL );
 		exit(1);
 	}
-	w->widget = w->gtkwin;      /**<TODO: w->widget was used for the fixed grid, not needed anymore */
+	w->widget = w->gtkwin;      /**< \TODO: w->widget was used for the fixed grid, not needed anymore */
 	g_string_free(filename, TRUE);
 
 	return w;
@@ -220,10 +216,10 @@ wlibWidgetFromIdWarn(wWindow_p win, const char *id)
 GtkWidget *
 wlibWidgetFromId( wWindow_p win, const char *id)
 {
-	GString *name = g_string_new(id);
+//	GString *name = g_string_new(id);
 
-	GObject * wi = gtk_builder_get_object(win->builder, name->str);
-	g_string_free(name, TRUE);
+	GObject * wi = gtk_builder_get_object(win->builder, id);
+//	g_string_free(name, TRUE);
 	return (GtkWidget *)wi;
 }
 
@@ -249,4 +245,3 @@ wlibAddContentFromTemplate( wWin_p win, const char *nameStr)
 	}
 
 }
-
