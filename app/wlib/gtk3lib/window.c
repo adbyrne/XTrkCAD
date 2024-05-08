@@ -588,7 +588,9 @@ void wWinDoCancel(
 
     for (b=win->first; b; b=b->next) {
         if ((b->type == B_BUTTON) && (b->option & BB_CANCEL)) {
-            wlibButtonDoAction((wButton_p)b);
+            //if (b->action) {
+            //    b->action(b->data);
+
         }
     }
 }
@@ -933,15 +935,15 @@ wlibCreateCustomStyle(void)
  * Default width and height are replaced by values stored in the configuration
  * file (.rc)
  *
- * \param parent IN parent window
- * \param winType IN type of window
- * \param x IN default width
- * \param y IN default height
- * \param labelStr IN window title
- * \param nameStr IN name of window
- * \param option IN misc options for placement and sizing of window
- * \param winProc IN window procedure
- * \param data IN additional data to pass to the window procedure
+ * \param parent    IN parent window
+ * \param winType   IN type of window
+ * \param x         IN default width
+ * \param y         IN default height
+ * \param labelStr  IN window title
+ * \param nameStr   IN name of window
+ * \param option    IN misc options for placement and sizing of window
+ * \param winProc   IN window procedure
+ * \param data      IN additional data to pass to the window procedure
  * \return  the newly created window
  */
 
@@ -1263,47 +1265,6 @@ wWin_p wlibCreateFromTemplate(
 	gtk_widget_show_all(w->gtkwin);
 
 	return w;
-}
-
-/**
- * Create a new popup window.
- *
- * \param parent IN Parent window (may be NULL)
- * \param x IN Initial window width
- * \param y IN Initial window height
- * \param helpStr IN Help topic string
- * \param labelStr IN Window title
- * \param nameStr IN Window name
- * \param option IN Options
- * \param winProc IN call back function
- * \param data IN User context information
- * \return    handle for new window
- */
-
-wWin_p wWinPopupCreate(
-    wWin_p parent,
-    wWinPix_t x,
-    wWinPix_t y,
-    const char * helpStr,
-    const char * labelStr,
-    const char * nameStr,
-    long option,
-    wWinCallBack_p winProc,
-    void * data)
-{
-    wWin_p win;
-
-    if (parent == NULL) {
-        if (gtkMainW == NULL) {
-            abort();
-        }
-
-        parent = gtkMainW;
-    }
-
-    win = wWinCommonCreate(parent, W_POPUP, x, y, labelStr, nameStr, option,
-                           winProc, data);
-    return win;
 }
 
 

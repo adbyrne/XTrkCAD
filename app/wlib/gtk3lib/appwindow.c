@@ -39,6 +39,11 @@
 #include "xtrkcad-config.h"
 
 static struct wWindow_t *appMainWindow;
+GtkWidget *
+wlibAppWinGetMain()
+{
+	return(appMainWindow->oc.widget);
+}
 
 GtkAccelGroup* 
 wlibAppWinGetAccelGroup()
@@ -56,8 +61,14 @@ static gboolean
 on_widget_deleted(GtkWidget* window, GdkEvent* event, gpointer userData)
 {
 	if (appMainWindow->winProc) {
-		return(appMainWindow->winProc(appMainWindow, wClose_e, userData, NULL ));
+		bool rc = appMainWindow->winProc(appMainWindow, wClose_e, userData, NULL);
+ 		if (!rc) {
+			wPrefFlush("");
+		}
+		return(rc);
 	}
+
+	wPrefFlush("");
 	return FALSE;
 }
 

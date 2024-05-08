@@ -41,6 +41,7 @@ if(WIN32)
 
 	if(GTK3_FOUND)
 		set(XTRKCAD_GTK3_EXPERIMENT ON)
+		set(XTRKCAD_USE_BROWSER ON)
 	endif()	
 
 	# determine processor target architecture

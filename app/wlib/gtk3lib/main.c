@@ -94,7 +94,8 @@ startup(GtkApplication *app)
 	LoadStyles();
 
 	window = wMain(argc, argv );
-	
+	wPrefFlush("");
+
 	g_strfreev(argv);
 }
 
