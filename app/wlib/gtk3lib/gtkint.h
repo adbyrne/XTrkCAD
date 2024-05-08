@@ -154,24 +154,6 @@ struct wControl_t {
 		
 typedef struct wListItem_t * wListItem_p;
 
-struct wList_t {
-		WOBJ_COMMON
-//		GtkWidget *list;
-		int count;
-		int number;
-		int colCnt;
-		wWinPix_t *colWidths;
-		wBool_t *colRightJust;
-		GtkListStore *listStore;
-		GtkWidget  *treeView;
-		int last;
-		wWinPix_t listX;
-		long * valueP;
-		wListCallBack_p action;
-		int recursion;
-		int editted;
-		int editable;
-		};
 
 
 struct wListItem_t {

@@ -286,6 +286,12 @@ ButtonAction(void* data)
 	clicked = !clicked;
 }
 
+wListCallBack_p
+ComboBoxAction(unsigned inx, char* string, unsigned inx2, void* data, void* data2)
+{
+	printf("Selected from combo box: %s\n", string);
+}
+
 char* toggleLabels1[] = { "Prices", NULL };
 long toggle1;
 
@@ -297,6 +303,9 @@ long radio1 = 1;
 long radio2 = 0;
 
 char* entryText = "default";
+
+char* comboLines[] = { "Line 1", "Line 2", "Line 3" };
+#define COMBOLINES (sizeof(comboLines) / sizeof(  char *))
 
 void
 SimpleDynamic(void* unused)
@@ -337,6 +346,12 @@ SimpleDynamic(void* unused)
 	printf("Final entry: <%s>\n", entryText);
 
 	button = wButtonCreate(dialog, 1, 7, "testbutton", "Button", 0L, 1, ButtonAction, NULL);
+
+	wList_p	combo = wComboBoxCreate(dialog, 1, 8, "combobox", NULL, 0L, 0, 1, NULL, ComboBoxAction, NULL);
+
+	for (int i = 0; i < COMBOLINES; i++) { 
+		wComboBoxAddValue(combo, comboLines[i], NULL);
+	}
 }
 
 void

@@ -11,7 +11,9 @@ target_sources(xtrkcad-wlib
 	PRIVATE 
 	appwindow.c
 	basicdraw.c
- 	color.c
+	button.c
+	color.c
+	combobox.c	
 	entry.c
  	fileselector.c
  	main.c
@@ -28,22 +30,22 @@ target_sources(xtrkcad-wlib
 	bitmap.c
  	boxes.c
 	builder.c
-# 	button.c
+
  	control.c
 	dialog.c
 	drawcairo.c
-	droplist.c	
+
  	font.c
  	help.c
  	lines.c
- 	list.c
+ #	list.c
  	liststore.c
  	notice.c
  	opendocument.c
  	pixbuf.c
 
  	tooltip.c	
- 	treeview.c
+ #	treeview.c
  	util.c
  	window.c
 )

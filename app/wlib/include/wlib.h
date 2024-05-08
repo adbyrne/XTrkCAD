@@ -436,9 +436,12 @@ wList_p wListCreate(		wWin_p, wWinPix_t, wWinPix_t, const char *, const char *,
                                 long,
                                 long, wWinPix_t, int, wWinPix_t *, wBool_t *, const char **, long *,
                                 wListCallBack_p, void * );
-wList_p wDropListCreate(	wWin_p, wWinPix_t, wWinPix_t, const char *,
-                                const char *, long,
-                                long, wWinPix_t, long *, wListCallBack_p, void * );
+
+wList_p wComboBoxCreate(wWindow_p parent, wWinPix_t x, wWinPix_t y,
+    const char* helpStr, const char* labelStr, long option, long	number,
+    wWinPix_t width, long* valueP, wListCallBack_p action, void* data);
+
+void wComboBoxAddValue(wList_p b, char* text, void * data);
 
 wList_p wComboListCreate(wWin_p parent, wWinPix_t x, wWinPix_t y,
                          const char *helpStr, const char *labelStr, long option, long number,
