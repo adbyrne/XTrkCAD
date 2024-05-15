@@ -312,6 +312,33 @@ enum columns {
 	LISTCOL_BITMAP,         /**< bitmap column */
 	LISTCOL_TEXT, 			/**< starting point for text columns */
 };
+
+/**
+ * \todo partly convert to union for combobox vs.listbox. treeView is valid for 
+ * listBox, editted and last for combobox
+ * union {
+ *		struct {
+ * 			int editted;
+ *			int last;
+ *		} cd;
+ *		struct {
+ *			GkTreeView *treeView
+ *		} tv;
+ * } listData;
+ */
+
+struct wList_t {
+	wType_e type;
+	GtkWidget* widget;
+	GtkListStore* listStore;
+	GtkTreeView* treeView;
+	long* valueP;
+	void* data;
+	int editted;
+	int last;
+	wListCallBack_p action;
+};
+
 GtkWidget *wlibNewDropList(GtkListStore *ls, int editable);
 
 wIndex_t wDropListGetCount(wList_p b);
@@ -343,8 +370,8 @@ void *wlibListStoreGetContext(GtkListStore *ls, int inx);
 void wlibListStoreClear(GtkListStore *listStore);
 GtkListStore *wlibNewListStore(int colCnt);
 void wlibListStoreSetPixbuf(GtkListStore *ls, GtkTreeIter *iter, GdkPixbuf *pixbuf);
-int wlibListStoreAddData(GtkListStore *ls, GdkPixbuf *pixbuf, int cols, wListItem_p id);
-int wlibListStoreUpdateValues(GtkListStore *ls, int row, int cols, char *labels, wIcon_p bm);
+int wlibListStoreAddData(GtkListStore *ls, GdkPixbuf *pixbuf, wListItem_p id);
+int wlibListStoreUpdateValues(GtkListStore *ls, int row, char *labels, wIcon_p bm);
 
 /* main.c */
 char *wlibGetAppName(void);
@@ -487,10 +514,10 @@ void wlibHelpHideBalloon();
 
 /* treeview.c */
 void wlibTreeViewSetSelected(wList_p b, int index);
-GtkWidget *wlibNewTreeView(GtkListStore *ls, int showTitles, int multiSelection);
-int wlibTreeViewAddColumns(GtkWidget *tv, int count);
-int wlibAddColumnTitles(GtkWidget *tv, const char **titles);
-int wlibTreeViewAddData(GtkWidget *tv, int cols, char *label, GdkPixbuf *pixbuf, wListItem_p userData);
+GtkTreeView *wlibNewTreeView(GtkListStore *ls, int showTitles, int multiSelection);
+int wlibTreeViewAddColumns(GtkTreeView *tv, int count);
+int wlibAddColumnTitles(GtkTreeView *tv, const char **titles);
+int wlibTreeViewAddData(GtkTreeView *tv, char *label, GdkPixbuf *pixbuf, wListItem_p userData);
 void wlibTreeViewAddRow(wList_p b, char *label, wIcon_p bm, wListItem_p id_p);
 gboolean changeSelection(GtkTreeSelection *selection, GtkTreeModel *model, GtkTreePath *path, gboolean path_currently_selected, gpointer data);
 

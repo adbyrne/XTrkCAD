@@ -19,11 +19,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
 #define GTK_DISABLE_DEPRECATED
@@ -37,12 +32,11 @@
 #include "i18n.h"
 
 struct listSearch {
-    const char *search;
-    char *result;
-    int row;
+	const char *search;
+	char *result;
+	int row;
 };
 
-
 /*
  *****************************************************************************
  *
@@ -59,21 +53,12 @@ struct listSearch {
  */
 
 void wListClear(
-    wList_p b)
+        wList_p b)
 {
-    assert(b!= NULL);
+	g_assert(b!= NULL);
 
-    b->recursion++;
-
-    if (b->type == B_DROPLIST) {
-        wDropListClear(b);
-    } else {
-        wTreeViewClear(b);
-    }
-
-    b->recursion--;
-    b->last = -1;
-    b->count = 0;
+	wlibListStoreClear(b->listStore);
+	b->last = -1;
 }
 
 /**
@@ -84,23 +69,20 @@ void wListClear(
  */
 
 void wListSetIndex(
-    wList_p b,
-    int element)
+        wList_p b,
+        int element)
 {
-    if (b->widget == 0) {
-        abort();
-    }
+	if (b->widget == 0) {
+		abort();
+	}
 
-    b->recursion++;
+	if (b->type == B_DROPLIST) {
+		wComboBoxSetIndex(b, element);
+	} else {
+		wlibTreeViewSetSelected(b, element);
+	}
 
-    if (b->type == B_DROPLIST) {
-        wDropListSetIndex(b, element);
-    } else {
-        wlibTreeViewSetSelected(b, element);
-    }
-
-    b->last = element;
-    b->recursion--;
+	b->last = element;
 }
 
 /**
@@ -121,23 +103,23 @@ int
 CompareListData(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter,
                 gpointer data)
 {
-    wListItem_p id_p;
-    struct listSearch *search = (struct listSearch *)data;
+	wListItem_p id_p;
+	struct listSearch *search = (struct listSearch *)data;
 
-    gtk_tree_model_get(model,
-                       iter,
-                       LISTCOL_DATA,
-                       &id_p,
-                       -1);
+	gtk_tree_model_get(model,
+	                   iter,
+	                   LISTCOL_DATA,
+	                   &id_p,
+	                   -1);
 
-    if (id_p && id_p->label && !strcmp(id_p->label, search->search)) {
-        search->result = (char *)id_p->label;
-        return TRUE;
-    } else {
-        search->result = NULL;
-        search->row++;
-        return FALSE;
-    }
+	if (id_p && id_p->label && !strcmp(id_p->label, search->search)) {
+		search->result = (char *)id_p->label;
+		return TRUE;
+	} else {
+		search->result = NULL;
+		search->row++;
+		return FALSE;
+	}
 }
 
 /**
@@ -149,25 +131,25 @@ CompareListData(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter,
  */
 
 wIndex_t wListFindValue(
-    wList_p b,
-    const char * val)
+        wList_p b,
+        const char * val)
 {
-    struct listSearch thisSearch;
+	struct listSearch thisSearch;
 
-    assert(b!=NULL);
-    assert(b->listStore!=NULL);
+	g_assert(b!=NULL);
+	g_assert(b->listStore!=NULL);
 
-    thisSearch.search = val;
-    thisSearch.row = 0;
+	thisSearch.search = val;
+	thisSearch.row = 0;
 
-    gtk_tree_model_foreach(GTK_TREE_MODEL(b->listStore), CompareListData,
-                           (void *)&thisSearch);
+	gtk_tree_model_foreach(GTK_TREE_MODEL(b->listStore), CompareListData,
+	                       (void *)&thisSearch);
 
-    if (!thisSearch.result) {
-        return -1;
-    } else {
-        return thisSearch.row;
-    }
+	if (!thisSearch.result) {
+		return -1;
+	} else {
+		return thisSearch.row;
+	}
 }
 
 /**
@@ -178,13 +160,13 @@ wIndex_t wListFindValue(
  */
 
 wIndex_t wListGetCount(
-    wList_p b)
+        wList_p b)
 {
-    if (b->type == B_DROPLIST) {
-        return wDropListGetCount(b);
-    } else {
-        return wTreeViewGetCount(b);
-    }
+	if (b->type == B_DROPLIST) {
+		return wDropListGetCount(b);
+	} else {
+		return wTreeViewGetCount(b);
+	}
 }
 
 /**
@@ -196,18 +178,18 @@ wIndex_t wListGetCount(
  */
 
 void * wListGetItemContext(
-    wList_p b,
-    wIndex_t inx)
+        wList_p b,
+        wIndex_t inx)
 {
-    if (inx < 0) {
-        return NULL;
-    }
+	if (inx < 0) {
+		return NULL;
+	}
 
-    if (b->type == B_DROPLIST) {
-        return wDropListGetItemContext(b, inx);
-    } else {
-        return wTreeViewGetItemContext(b, inx);
-    }
+	if (b->type == B_DROPLIST) {
+		return wDropListGetItemContext(b, inx);
+	} else {
+		return wTreeViewGetItemContext(b, inx);
+	}
 }
 
 /**
@@ -221,57 +203,62 @@ void * wListGetItemContext(
  */
 
 wIndex_t wListGetValues(
-    wList_p bl,
-    char * labelStr,
-    int labelSize,
-    void * * listDataRet,
-    void * * itemDataRet)
+        wList_p bl,
+        char * labelStr,
+        int labelSize,
+        void * * listDataRet,
+        void * * itemDataRet)
 {
-    wListItem_p id_p;
-    wIndex_t inx = bl->last;
-    const char * entry_value = "";
-    void * item_data = NULL;
-
-    assert(bl != NULL);
-    assert(bl->listStore != NULL);
-
-    if (bl->type == B_DROPLIST && bl->editted) {
-        entry_value = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(
-                                             bl->widget))));
-	    item_data = NULL;
-        inx = bl->last = -1;
-    } else {
-    	//Make sure in range
-    	if (bl->last > bl->count-1) bl->last = bl->count-1;
-    	inx = bl->last;
+	wListItem_p id_p;
+	wIndex_t inx = bl->last;
+	const char * entry_value = "";
+	void * item_data = NULL;
 
 
-        if (inx >= 0) {
-            id_p = wlibListStoreGetContext(bl->listStore, inx);
+	g_assert(bl != NULL);
+	g_assert(bl->listStore != NULL);
 
-            if (id_p==NULL) {
-                fprintf(stderr, "wListGetValues - id_p == NULL\n");
-                bl->last = -1;
-            } else {
-                entry_value = id_p->label;
-                item_data = id_p->itemData;
-            }
-        }
-    }
+	if (bl->type == B_DROPLIST && bl->editted) {
+		entry_value = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(
+		                bl->widget))));
+		item_data = NULL;
+		inx = bl->last = -1;
+	} else {
+		int count = gtk_tree_model_iter_n_children(
+		                    GTK_TREE_MODEL(bl->listStore), NULL);
+		//Make sure in range
+		if (bl->last > count-1) {
+			bl->last = count-1;
+		}
+		inx = bl->last;
 
-    if (labelStr) {
-        strncpy(labelStr, entry_value, labelSize);
-    }
 
-    if (listDataRet) {
-        *listDataRet = bl->data;
-    }
+		if (inx >= 0) {
+			id_p = wlibListStoreGetContext(bl->listStore, inx);
 
-    if (itemDataRet) {
-        *itemDataRet = item_data;
-    }
+			if (id_p==NULL) {
+				fprintf(stderr, "wListGetValues - id_p == NULL\n");
+				bl->last = -1;
+			} else {
+				entry_value = id_p->label;
+				item_data = id_p->itemData;
+			}
+		}
+	}
 
-    return bl->last;
+	if (labelStr) {
+		strncpy(labelStr, entry_value, labelSize);
+	}
+
+	if (listDataRet) {
+		*listDataRet = bl->data;
+	}
+
+	if (itemDataRet) {
+		*itemDataRet = item_data;
+	}
+
+	return bl->last;
 }
 
 /**
@@ -282,22 +269,22 @@ wIndex_t wListGetValues(
  */
 
 wBool_t wListGetItemSelected(
-    wList_p b,
-    wIndex_t inx)
+        wList_p b,
+        wIndex_t inx)
 {
-    wListItem_p id_p;
+	wListItem_p id_p;
 
-    if (inx < 0) {
-        return FALSE;
-    }
+	if (inx < 0) {
+		return FALSE;
+	}
 
-    id_p = wlibListStoreGetContext(b->listStore, inx);
+	id_p = wlibListStoreGetContext(b->listStore, inx);
 
-    if (id_p) {
-        return id_p->selected;
-    } else {
-        return FALSE;
-    }
+	if (id_p) {
+		return id_p->selected;
+	} else {
+		return FALSE;
+	}
 }
 
 /**
@@ -308,16 +295,17 @@ wBool_t wListGetItemSelected(
  */
 
 wIndex_t wListGetSelectedCount(
-    wList_p b)
+        wList_p b)
 {
-    wIndex_t selcnt, inx;
+	wIndex_t selcnt, inx;
+	int count = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(b->listStore), NULL);
 
-    for (selcnt=inx=0; inx<b->count; inx++)
-        if (wListGetItemSelected(b, inx)) {
-            selcnt++;
-        }
+	for (selcnt=inx=0; inx<count; inx++)
+		if (wListGetItemSelected(b, inx)) {
+			selcnt++;
+		}
 
-    return selcnt;
+	return selcnt;
 }
 
 /**
@@ -329,26 +317,12 @@ wIndex_t wListGetSelectedCount(
 
 void wListSelectAll(wList_p bl)
 {
-    wIndex_t inx;
-    GtkTreeSelection *selection;
+	GtkTreeSelection *selection;
 
-    assert(bl != NULL);
-    // mark all items selected
-    selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(bl->treeView));
-    gtk_tree_selection_select_all(selection);
-
-    // and synchronize the internal data structures
-    wListGetCount(bl);
-
-    for (inx=0; inx<bl->count; inx++) {
-        wListItem_p ldp;
-
-        ldp = wlibListStoreGetContext(bl->listStore, inx);
-
-        if (ldp) {
-            ldp->selected = TRUE;
-        }
-    }
+	g_assert(bl != NULL);
+	// mark all items selected
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(bl->treeView));
+	gtk_tree_selection_select_all(selection);
 }
 
 /**
@@ -363,25 +337,22 @@ void wListSelectAll(wList_p bl)
  */
 
 wBool_t wListSetValues(
-    wList_p b,
-    wIndex_t row,
-    const char * labelStr,
-    wIcon_p bm,
-    void *itemData)
+        wList_p b,
+        wIndex_t row,
+        const char * labelStr,
+        wIcon_p bm,
+        void *itemData)
 
 {
-    assert(b->listStore != NULL);
+	g_assert(b->listStore != NULL);
 
-    b->recursion++;
+	if (b->type == B_DROPLIST) {
+		wDropListSetValues(b, row, labelStr, bm, itemData);
+	} else {
+		wlibListStoreUpdateValues(b->listStore, row, (char *)labelStr, bm);
+	}
 
-    if (b->type == B_DROPLIST) {
-        wDropListSetValues(b, row, labelStr, bm, itemData);
-    } else {
-        wlibListStoreUpdateValues(b->listStore, row, b->colCnt, (char *)labelStr, bm);
-    }
-
-    b->recursion--;
-    return TRUE;
+	return TRUE;
 }
 
 /**
@@ -391,32 +362,32 @@ wBool_t wListSetValues(
  */
 
 void wListDelete(
-    wList_p b,
-    wIndex_t inx)
+        wList_p b,
+        wIndex_t inx)
 
 {
-    GtkTreeIter iter;
+	GtkTreeIter iter;
 
-    assert(b->listStore != 0);
-    assert(b->type != B_DROPLIST);
-    b->recursion++;
+	g_assert(b->listStore != 0);
+	g_assert(b->type != B_DROPLIST);
 
-    if (b->type == B_DROPLIST) {
-        wNotice("Deleting from dropboxes is not implemented!", "Continue", NULL);
-    } else {
-        gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->listStore),
-                                      &iter,
-                                      NULL,
-                                      inx);
-        gtk_list_store_remove(b->listStore, &iter);
-        b->count--;
-    }
+	if (b->type == B_DROPLIST) {
+		wNotice("Deleting from dropboxes is not implemented!", "Continue", NULL);
+	} else {
+		gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->listStore),
+		                              &iter,
+		                              NULL,
+		                              inx);
+		gtk_list_store_remove(b->listStore, &iter);
+	}
 
-    if (b->last == inx-1) b->last = -1;
-    else if (b->last >= inx) b->last = -1;
+	if (b->last == inx-1) {
+		b->last = -1;
+	} else if (b->last >= inx) {
+		b->last = -1;
+	}
 
-    b->recursion--;
-    return;
+	return;
 }
 
 /**
@@ -429,29 +400,30 @@ void wListDelete(
  */
 
 int wListGetColumnWidths(
-    wList_p bl,
-    int colCnt,
-    wWinPix_t * colWidths)
+        wList_p bl,
+        int colCnt,
+        wWinPix_t * colWidths)
 {
-    int inx;
+	//int inx;
 
-    if (bl->type != B_LIST) {
-        return 0;
-    }
+	//if (bl->type != B_LIST) {
+	//    return 0;
+	//}
 
-    if (bl->colWidths == NULL) {
-        return 0;
-    }
+	//if (bl->colWidths == NULL) {
+	//    return 0;
+	//}
 
-    for (inx=0; inx<colCnt; inx++) {
-        if (inx < bl->colCnt) {
-            colWidths[inx] = bl->colWidths[inx];
-        } else {
-            colWidths[inx] = 0;
-        }
-    }
+	//for (inx=0; inx<colCnt; inx++) {
+	//    if (inx < bl->colCnt) {
+	//        colWidths[inx] = bl->colWidths[inx];
+	//    } else {
+	//        colWidths[inx] = 0;
+	//    }
+	//}
 
-    return bl->colCnt;
+	//return bl->colCnt;
+	return(0);
 }
 
 /**
@@ -465,45 +437,40 @@ int wListGetColumnWidths(
  */
 
 wIndex_t wListAddValue(
-    wList_p b,
-    const char * labelStr,
-    wIcon_p bm,
-    void * itemData)
+        wList_p b,
+        const char * labelStr,
+        wIcon_p bm,
+        void * itemData)
 {
-    wListItem_p id_p;
+	wListItem_p id_p;
+	wIndex_t count;
 
-    assert(b != NULL);
+	g_assert(b != NULL);
 
-    b->recursion++;
+	id_p = (wListItem_p)g_malloc(sizeof *id_p);
+	memset(id_p, 0, sizeof *id_p);
+	id_p->itemData = itemData;
+	id_p->active = TRUE;
 
-    id_p = (wListItem_p)g_malloc(sizeof *id_p);
-    memset(id_p, 0, sizeof *id_p);
-    id_p->itemData = itemData;
-    id_p->active = TRUE;
+	if (labelStr == NULL) {
+		labelStr = "";
+	}
 
-    if (labelStr == NULL) {
-        labelStr = "";
-    }
+	id_p->label = g_strdup(labelStr);
+	id_p->listP = b;
 
-    id_p->label = strdup(labelStr);
-    id_p->listP = b;
+	if (b->type == B_DROPLIST) {
+		wDropListAddValue(b, (char *)labelStr, id_p);
+	} else {
+		wlibTreeViewAddRow(b, (char *)labelStr, bm, id_p);
+	}
 
-    if (b->type == B_DROPLIST) {
-        wDropListAddValue(b, (char *)labelStr, id_p);
-    } else {
-        wlibTreeViewAddRow(b, (char *)labelStr, bm, id_p);
-    }
+	count = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(b->listStore), NULL);
+	if (count == 1) {
+		b->last = 0;
+	}
 
-    //free(id_p->label);
-
-    b->count++;
-    b->recursion--;
-
-    if (b->count == 1) {
-        b->last = 0;
-    }
-
-    return b->count-1;
+	return count-1;
 }
 
 
@@ -517,14 +484,123 @@ wIndex_t wListAddValue(
 
 void wListSetSize(wList_p bl, wWinPix_t w, wWinPix_t h)
 {
-    if (bl->type == B_DROPLIST) {
-        gtk_widget_set_size_request(bl->widget, w, -1);
-    } else {
-        gtk_widget_set_size_request(bl->widget, w, h);
-    }
+	//if (bl->type == B_DROPLIST) {
+	//    gtk_widget_set_size_request(bl->widget, w, -1);
+	//} else {
+	//    gtk_widget_set_size_request(bl->widget, w, h);
+	//}
 
-    bl->w = w;
-    bl->h = h;
+	//bl->w = w;
+	//bl->h = h;
+}
+
+/**
+ * Create a multi column list box.
+ * if colCnt is set to zero, a single text column is created as default
+ *
+ * ### Usage in dialogs
+ *
+ * - Generated: yes
+ *
+ * ### Options
+ * BL_MANY
+ * : allow selection of multiple entries
+ *
+ * \param parent IN     parent window
+ * \param x,y  IN       position
+ * \param helpStr IN    help string
+ * \param labelStr IN   label
+ * \param option IN     options
+ * \param number IN     number of displayed entries
+ * \param width IN      width of list
+ * \param colCnt IN     number of columns
+ * \param colWidths IN  width of columns
+ * \param colRightJust IN justification of columns
+ * \param colTitles IN  array of titles for columns
+ * \param valueP IN     selected index
+ * \param action IN     callback
+ * \param data IN       context
+ * \returns created list box
+ */
+
+wList_p wListCreate(
+        wWindow_p	parent,
+        wWinPix_t	x,
+        wWinPix_t	y,
+        const char* helpStr,
+        const char* labelStr,
+        long	option,
+        long	number,
+        wWinPix_t	width,
+        int	colCnt,
+        wWinPix_t* colWidths,
+        wBool_t* colRightJust,
+        const char** colTitles,
+        long* valueP,
+        wListCallBack_p action,
+        void* data)
+{
+	wList_p bl;
+	static wWinPix_t zeroPos = 0;
+
+	g_assert(width != 0);
+
+	bl = g_malloc0(sizeof(struct wList_t));
+	bl->valueP = valueP;
+	bl->action = action;
+
+
+	if (option & BO_USETEMPLATE) {
+		/** \todo Implement builder support */
+	} else {
+		GtkTreeSelection* sel;
+
+		if (colCnt <= 0) {
+			colCnt = 1;
+			colWidths = &zeroPos;
+		}
+
+		//bl->colCnt = colCnt;
+		//bl->colWidths = (wWinPix_t*)malloc(colCnt * sizeof * (wWinPix_t*)0);
+		//memcpy(bl->colWidths, colWidths, colCnt * sizeof * (wWinPix_t*)0);
+
+		/* create the data structure for data */
+		bl->listStore = wlibNewListStore(colCnt);
+		/* create the widget for the list store */
+		bl->treeView = wlibNewTreeView(bl->listStore,
+		                               colTitles != NULL,
+		                               option & BL_MANY);
+
+		sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(bl->treeView));
+
+		gtk_tree_selection_set_select_function(sel,
+		                                       changeSelection,
+		                                       bl,
+		                                       NULL);
+
+		wlibTreeViewAddColumns(bl->treeView, colCnt);
+
+		wlibAddColumnTitles(bl->treeView, colTitles);
+
+		//   wlibComputePos((wControl_p)bl);
+
+		bl->widget = gtk_scrolled_window_new(NULL, NULL);
+		gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(bl->widget),
+		                               GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+
+		gtk_container_add(GTK_CONTAINER(bl->widget), GTK_WIDGET(bl->treeView));
+		//   gtk_widget_set_size_request(bl->widget, width, (number + 1) * ROW_HEIGHT);
+
+		if (labelStr) {
+			// bl->labelW = wlibAddLabel((wControl_p)bl, labelStr);
+		}
+	}
+	gtk_widget_show_all(bl->widget);
+
+	wlibAddButton((wControl_p)bl);
+	wlibAddHelpString(bl->widget, helpStr);
+
+	return bl;
 }
 
 /**
@@ -538,20 +614,20 @@ void wListSetSize(wList_p bl, wWinPix_t w, wWinPix_t h)
  */
 
 wList_p wComboListCreate(
-    wWin_p	parent,		/* Parent window */
-    wWinPix_t	x,		/* X-position */
-    wWinPix_t	y,		/* Y-position */
-    const char 	* helpStr,	/* Help string */
-    const char	* labelStr,	/* Label */
-    long	option,		/* Options */
-    long	number,		/* Number of displayed list entries */
-    wWinPix_t	width,		/* Width */
-    long	*valueP,	/* Selected index */
-    wListCallBack_p action,	/* Callback */
-    void 	*data)		/* Context */
+        wWin_p	parent,		/* Parent window */
+        wWinPix_t	x,		/* X-position */
+        wWinPix_t	y,		/* Y-position */
+        const char 	* helpStr,	/* Help string */
+        const char	* labelStr,	/* Label */
+        long	option,		/* Options */
+        long	number,		/* Number of displayed list entries */
+        wWinPix_t	width,		/* Width */
+        long	*valueP,	/* Selected index */
+        wListCallBack_p action,	/* Callback */
+        void 	*data)		/* Context */
 {
-    wNotice("ComboLists are not implemented!", "Abort", NULL);
-    abort();
+	wNotice("ComboLists are not implemented!", "Abort", NULL);
+	abort();
 }
 
 

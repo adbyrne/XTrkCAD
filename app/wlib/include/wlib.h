@@ -431,17 +431,17 @@ typedef void (*wListCallBack_p)( wIndex_t, const char *, wIndex_t, void *,
 
 
 /* lists, droplists and combo boxes */
-
-wList_p wListCreate(		wWin_p, wWinPix_t, wWinPix_t, const char *, const char *,
-                                long,
-                                long, wWinPix_t, int, wWinPix_t *, wBool_t *, const char **, long *,
-                                wListCallBack_p, void * );
+wList_p wListCreate(wWindow_p	parent, wWinPix_t x, wWinPix_t y,
+    const char* helpStr, const char* labelStr, long option, long number,
+    wWinPix_t width, int colCnt, wWinPix_t* colWidths, wBool_t* colRightJust,
+    const char** colTitles, long* valueP, wListCallBack_p action, void* data);
 
 wList_p wComboBoxCreate(wWindow_p parent, wWinPix_t x, wWinPix_t y,
     const char* helpStr, const char* labelStr, long option, long	number,
     wWinPix_t width, long* valueP, wListCallBack_p action, void* data);
 
 void wComboBoxAddValue(wList_p b, char* text, void * data);
+void wComboBoxSetIndex(wList_p b, int val);
 
 wList_p wComboListCreate(wWin_p parent, wWinPix_t x, wWinPix_t y,
                          const char *helpStr, const char *labelStr, long option, long number,

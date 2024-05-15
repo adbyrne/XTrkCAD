@@ -24,10 +24,6 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
 
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
@@ -39,9 +35,6 @@
 #include <gdk/gdk.h>
 
 #include "gtkint.h"
-//#include "i18n.h"
-
-#define ROW_HEIGHT (15)
 
 /**
  * Get the count of columns in list
@@ -53,22 +46,9 @@
 int
 wTreeViewGetCount(wList_p b)
 {
-    return b->count;
+	return(gtk_tree_view_get_n_columns(b->treeView));
 }
 
-/**
- * Clear the list
- *
- * \param b IN widget
- */
-
-void
-wTreeViewClear(wList_p b)
-{
-    assert(b != NULL);
-
-    wlibListStoreClear(b->listStore);
-}
 
 /**
  * Get the user data for a list element
@@ -81,16 +61,17 @@ wTreeViewClear(wList_p b)
 void *
 wTreeViewGetItemContext(wList_p b, int row)
 {
-    wListItem_p id_p;
+	wListItem_p id_p;
 
-    id_p = wlibListItemGet(b->listStore, row, NULL);
+	id_p = wlibListItemGet(b->listStore, row, NULL);
 
-    if (id_p) {
-        return id_p->itemData;
-    } else {
-        return NULL;
-    }
+	if (id_p) {
+		return id_p->itemData;
+	} else {
+		return NULL;
+	}
 }
+
 
 /**
  * Returns the current selected list entry.
@@ -100,12 +81,11 @@ wTreeViewGetItemContext(wList_p b, int row)
  * \returns row of selected entry or -1 if none is selected
  */
 
-wIndex_t wListGetIndex(
-    wList_p b)
+wIndex_t wListGetIndex(wList_p b)
 {
-    assert(b!=NULL);
+	g_assert(b!=NULL);
 
-    return b->last;
+	return b->last;
 }
 
 /**
@@ -119,93 +99,61 @@ wIndex_t wListGetIndex(
 void
 wlibTreeViewSetSelected(wList_p b, int index)
 {
-    GtkTreeSelection *sel;
-    GtkTreeIter iter;
+	GtkTreeSelection *sel;
+	GtkTreeIter iter;
 
-    wListItem_p id_p;
+	sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(b->treeView));
 
-    sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(b->treeView));
+	// unselect current selection if one exists
+	if (gtk_tree_selection_count_selected_rows(sel)) {
+		gtk_tree_selection_unselect_all(sel);
 
-    if (gtk_tree_selection_count_selected_rows(sel)) {
-		int inx;
-        
-        gtk_tree_selection_unselect_all(sel);
+	}
 
-        // and synchronize the internal data structures
-        wTreeViewGetCount(b);
-
-        for (inx=0; inx<b->count; inx++) {
-            id_p = wlibListItemGet(b->listStore, inx, NULL);
-            id_p->selected = FALSE;
-        }
-    }
-
-    if (index != -1) {
+	if (index != -1) {
 		gint childs;
-		
+
 		childs = gtk_tree_model_iter_n_children (GTK_TREE_MODEL(b->listStore),
-											NULL );
+		         NULL );
 
 		if(index < childs) {
 			gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->listStore),
-										&iter,
-										NULL,
-										index);
+			                              &iter,
+			                              NULL,
+			                              index);
 			gtk_tree_selection_select_iter(sel,
-										&iter);
-
-			id_p = wlibListItemGet(b->listStore, index, NULL);
-	
-			if (id_p) {
-				id_p->selected = TRUE;
-			}
-		}	
-    }
+			                               &iter);
+		}
+	}
 }
 
 /**
  * Create a new tree view for a list store. Titles are enabled optionally.
  *
- * \param ls IN list store
- * \param showTitles IN add column titles
+ * \param ls IN         list store
+ * \param showTitles IN add column header
  * \param multiSelection IN enable selecting multiple rows
- * \returns
+ * \returns the treeview
  */
 
-GtkWidget *
+GtkTreeView *
 wlibNewTreeView(GtkListStore *ls, int showTitles, int multiSelection)
 {
-    GtkWidget *treeView;
-    GtkTreeSelection *sel;
-    assert(ls != NULL);
+	GtkTreeView *treeView;
+	GtkTreeSelection *sel;
+	g_assert(ls != NULL);
 
-    /* create and configure the tree view */
-    treeView = gtk_tree_view_new_with_model(GTK_TREE_MODEL(ls));
-    gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(treeView), showTitles);
+	/* create and configure the tree view */
+	treeView = GTK_TREE_VIEW(gtk_tree_view_new_with_model(GTK_TREE_MODEL(ls)));
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(treeView), showTitles);
 
-    /* set up selection handling */
-    sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeView));
-    gtk_tree_selection_set_mode(sel,
-                                (multiSelection)?GTK_SELECTION_MULTIPLE:GTK_SELECTION_BROWSE);
+	/* set up selection handling */
+	sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeView));
+	gtk_tree_selection_set_mode(sel,
+	                            (multiSelection)?GTK_SELECTION_MULTIPLE:GTK_SELECTION_BROWSE);
 
-    return (treeView);
+	return (treeView);
 }
-
-
-#if 0
-static int changeListColumnWidth(
-    GtkTreeViewColumn * column,
-    void * width)
-{
-    //wList_p bl = (wList_p)data;
-
-    //if (bl->recursion)
-    //return 0;
-    //if ( col >= 0 && col < bl->colCnt )
-    //bl->colWidths[col] = width;
-    return 0;
-}
-#endif
 
 /**
  * Create and initialize a column in treeview. Initially all columns are
@@ -219,22 +167,21 @@ static int changeListColumnWidth(
  */
 
 static void
-wlibAddColumn(GtkWidget *tv, int visibility, GtkCellRenderer *renderer,
+wlibAddColumn(GtkTreeView *tv, int visibility, GtkCellRenderer *renderer,
               char *attribute, int value)
 {
-    GtkTreeViewColumn *column;
+	GtkTreeViewColumn *column;
 
-    column = gtk_tree_view_column_new();
-    gtk_tree_view_column_pack_start(column,
-                                    renderer,
-                                    TRUE);
-    gtk_tree_view_column_add_attribute(column, renderer, attribute, value);
-    gtk_tree_view_column_set_visible(column, visibility);
-    gtk_tree_view_column_set_resizable(column, TRUE);
+	column = gtk_tree_view_column_new();
+	gtk_tree_view_column_pack_start(column,
+	                                renderer,
+	                                TRUE);
+	gtk_tree_view_column_add_attribute(column, renderer, attribute, value);
+	gtk_tree_view_column_set_visible(column, visibility);
+	gtk_tree_view_column_set_resizable(column, TRUE);
 
-    gtk_tree_view_append_column(GTK_TREE_VIEW(tv), column);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tv), column);
 
-//	g_signal_connect( column, "notify::width", G_CALLBACK(changeListColumnWidth), tv );
 }
 
 /**
@@ -247,24 +194,24 @@ wlibAddColumn(GtkWidget *tv, int visibility, GtkCellRenderer *renderer,
  */
 
 int
-wlibTreeViewAddColumns(GtkWidget *tv, int count)
+wlibTreeViewAddColumns(GtkTreeView *tv, int count)
 {
-    GtkCellRenderer *renderer;
-    int i;
+	GtkCellRenderer *renderer;
+	int i;
 
-    assert(tv != NULL);
-    renderer = gtk_cell_renderer_pixbuf_new();
-    /* first visible column is used for bitmaps */
-    wlibAddColumn(tv, FALSE, renderer, "pixbuf", LISTCOL_BITMAP);
+	g_assert(tv != NULL);
+	renderer = gtk_cell_renderer_pixbuf_new();
+	/* first visible column is used for bitmaps */
+	wlibAddColumn(tv, FALSE, renderer, "pixbuf", LISTCOL_BITMAP);
 
-    renderer = gtk_cell_renderer_text_new();
+	renderer = gtk_cell_renderer_text_new();
 
-    /* add renderers to all columns */
-    for (i = 0; i < count; i++) {
-        wlibAddColumn(tv, TRUE, renderer, "text", i + LISTCOL_TEXT);
-    }
+	/* add renderers to all columns */
+	for (i = 0; i < count; i++) {
+		wlibAddColumn(tv, TRUE, renderer, "text", i + LISTCOL_TEXT);
+	}
 
-    return i;
+	return i;
 }
 
 /**
@@ -276,28 +223,28 @@ wlibTreeViewAddColumns(GtkWidget *tv, int count)
  */
 
 int
-wlibAddColumnTitles(GtkWidget *tv, const char **titles)
+wlibAddColumnTitles(GtkTreeView *tv, const char **titles)
 {
-    int i = 0;
+	int i = 0;
 
-    assert(tv != NULL);
+	g_assert(tv != NULL);
 
-    if (titles) {
-        while (*titles) {
-		    GtkTreeViewColumn *column;
-		    
-            column = gtk_tree_view_get_column(GTK_TREE_VIEW(tv), i + 1);
+	if (titles) {
+		while (*titles) {
+			GtkTreeViewColumn *column;
 
-            if (column) {
-                gtk_tree_view_column_set_title(column, titles[ i ]);
-                i++;
-            } else {
-                break;
-            }
-        }
-    }
+			column = gtk_tree_view_get_column(GTK_TREE_VIEW(tv), i + 1);
 
-    return i;
+			if (column) {
+				gtk_tree_view_column_set_title(column, titles[ i ]);
+				i++;
+			} else {
+				break;
+			}
+		}
+	}
+
+	return i;
 }
 
 /**
@@ -312,24 +259,23 @@ wlibAddColumnTitles(GtkWidget *tv, const char **titles)
  */
 
 int
-wlibTreeViewAddData(GtkWidget *tv, int cols, char *label, GdkPixbuf *pixbuf,
+wlibTreeViewAddData(GtkTreeView *tv, char *label, GdkPixbuf *pixbuf,
                     wListItem_p userData)
 {
-    GtkListStore *listStore = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(
-                                  tv)));
+	GtkListStore *listStore = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(
+	                                  tv)));
 
-    wlibListStoreAddData(listStore, pixbuf, cols, userData);
+	wlibListStoreAddData(listStore, pixbuf, userData);
 
-    if (pixbuf) {
-	    GtkTreeViewColumn *column;
-	    
-        // first column in list store has pixbuf
-        column = gtk_tree_view_get_column(GTK_TREE_VIEW(tv), 0);
-        gtk_tree_view_column_set_visible(column,
-                                         TRUE);
-    }
-    return 0;
+	if (pixbuf) {
+		GtkTreeViewColumn *column;
 
+		// first column in list store has pixbuf
+		column = gtk_tree_view_get_column(GTK_TREE_VIEW(tv), 0);
+		gtk_tree_view_column_set_visible(column,
+		                                 TRUE);
+	}
+	return 0;
 }
 
 /**
@@ -346,29 +292,25 @@ wlibTreeViewAddData(GtkWidget *tv, int cols, char *label, GdkPixbuf *pixbuf,
 void
 wlibTreeViewAddRow(wList_p b, char *label, wIcon_p bm, wListItem_p id_p)
 {
-    GtkAdjustment *adj;
-    GdkPixbuf *pixbuf = NULL;
+	GtkAdjustment *adj;
+	GdkPixbuf *pixbuf = NULL;
 
-    if (bm) {
-        pixbuf = wlibMakePixbuf(bm);
-    }
+	if (bm) {
+		pixbuf = wlibMakePixbuf(bm);
+	}
 
-    wlibTreeViewAddData(b->treeView, b->colCnt, (char *)label, pixbuf, id_p);
+	wlibTreeViewAddData(b->treeView, (char *)label, pixbuf, id_p);
 
-    adj = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(b->widget));
+	adj = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(b->widget));
+	b->last = gtk_tree_model_iter_n_children(gtk_tree_view_get_model(GTK_TREE_VIEW(
+	                  b->treeView)), NULL);
 
-    if (gtk_adjustment_get_upper(adj) < gtk_adjustment_get_step_increment(adj) *
-            (b->count+1)) {
-        gtk_adjustment_set_upper(adj,
-                                 gtk_adjustment_get_upper(adj) +
-                                 gtk_adjustment_get_step_increment(adj));
-        //gtk_adjustment_changed(adj);
-    }
-
-    b->last = gtk_tree_model_iter_n_children(gtk_tree_view_get_model(GTK_TREE_VIEW(
-                  b->treeView)),
-              NULL);
-
+	if (gtk_adjustment_get_upper(adj) < gtk_adjustment_get_step_increment(adj) *
+	    b->last+1) {
+		gtk_adjustment_set_upper(adj,
+		                         gtk_adjustment_get_upper(adj) +
+		                         gtk_adjustment_get_step_increment(adj));
+	}
 }
 
 /**
@@ -392,144 +334,35 @@ changeSelection(GtkTreeSelection *selection,
                 gboolean path_currently_selected,
                 gpointer data)
 {
-    GtkTreeIter iter;
-    GValue value = { 0 };
-    wListItem_p id_p = NULL;
-    wList_p bl = (wList_p)data;
-    int row;
-    char *text;
+	GtkTreeIter iter;
+	GValue value = { 0 };
+	wListItem_p id_p = NULL;
+	wList_p bl = (wList_p)data;
+	long row;
+	char *text;
 
-    text = gtk_tree_path_to_string(path);
-    row = atoi(text);
-    g_free(text);
+	text = gtk_tree_path_to_string(path);
+	row = (long)g_ascii_strtoll(text, NULL, 10);
+	g_free(text);
 
-    gtk_tree_model_get_iter(model, &iter, path);
-    gtk_tree_model_get_value(model, &iter, LISTCOL_DATA, &value);
+	gtk_tree_model_get_iter(model, &iter, path);
+	gtk_tree_model_get_value(model, &iter, LISTCOL_DATA, &value);
 
-    id_p = g_value_get_pointer(&value);
-    id_p->selected = !path_currently_selected;
+	id_p = g_value_get_pointer(&value);
+	id_p->selected = !path_currently_selected;
 
-    if (id_p->selected) {
-        bl->last = row;
+	if (id_p->selected) {
+		bl->last = row;
 
-        if (bl->valueP) {
-            *bl->valueP = row;
-        }
+		if (bl->valueP) {
+			*bl->valueP = row;
+		}
 
-        if (bl->action) {
-            bl->action(row, id_p->label, 1, bl->data, id_p->itemData);
-        }
-    }
+		if (bl->action) {
+			bl->action(row, id_p->label, 1, bl->data, id_p->itemData);
+		}
+	}
 
-    return TRUE;
+	return TRUE;
 }
 
-/**
- * Create a multi column list box.
- *
- * \param parent IN parent window
- * \param x IN X-position
- * \param y IN Y-position
- * \param helpStr IN Help string
- * \param labelStr IN Label
- * \param option IN Options
- * \param number IN Number of displayed entries
- * \param width IN Width of list
- * \param colCnt IN Number of columns
- * \param colWidths IN Width of columns
- * \param colRightJust IN justification of columns
- * \param colTitles IN array of titles for columns
- * \param valueP IN Selected index
- * \param action IN Callback
- * \param data IN Context
- * \returns created list box
- */
-
-wList_p wListCreate(
-    wWin_p	parent,
-    wWinPix_t	x,
-    wWinPix_t	y,
-    const char 	* helpStr,
-    const char	* labelStr,
-    long	option,
-    long	number,
-    wWinPix_t	width,
-    int	colCnt,
-    wWinPix_t	* colWidths,
-    wBool_t * colRightJust,
-    const char 	** colTitles,
-    long	*valueP,
-    wListCallBack_p action,
-    void 	*data)
-{
-    GtkTreeSelection *sel;
-    wList_p bl;
-    static wWinPix_t zeroPos = 0;
-
-    assert(width != 0);
-
-    bl = (wList_p)wlibAlloc(parent, B_LIST, x, y, labelStr, sizeof *bl, data);
-    bl->option = option;
-    bl->number = number;
-    bl->count = 0;
-    bl->last = -1;
-    bl->valueP = valueP;
-    bl->action = action;
-    bl->listX = bl->realX;
-
-    if (colCnt <= 0) {
-        colCnt = 1;
-        colWidths = &zeroPos;
-    }
-
-    bl->colCnt = colCnt;
-    bl->colWidths = (wWinPix_t*)malloc(colCnt * sizeof *(wWinPix_t*)0);
-    memcpy(bl->colWidths, colWidths, colCnt * sizeof *(wWinPix_t*)0);
-
-    /* create the data structure for data */
-    bl->listStore = wlibNewListStore(colCnt);
-    /* create the widget for the list store */
-    bl->treeView = wlibNewTreeView(bl->listStore,
-                                   colTitles != NULL,
-                                   option & BL_MANY);
-
-
-    sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(bl->treeView));
-
-    gtk_tree_selection_set_select_function(sel,
-                                           changeSelection,
-                                           bl,
-                                           NULL);
-
-    wlibTreeViewAddColumns(bl->treeView, colCnt);
-
-    wlibAddColumnTitles(bl->treeView, colTitles);
-
-    wlibComputePos((wControl_p)bl);
-
-    bl->widget = gtk_scrolled_window_new(NULL, NULL);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(bl->widget),
-                                   GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-
-    gtk_container_add(GTK_CONTAINER(bl->widget), bl->treeView);
-//    gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(bl->widget),
-//                                          bl->treeView);
-
-    gtk_widget_set_size_request(bl->widget, width, (number+1)*ROW_HEIGHT);
-
-///	g_signal_connect( GTK_OBJECT(bl->list), "resize_column", G_CALLBACK(changeListColumnWidth), bl );
-
-    gtk_widget_show_all(bl->widget);
-
-    gtk_fixed_put(GTK_FIXED(parent->widget), bl->widget, bl->realX, bl->realY);
-    wlibControlGetSize((wControl_p)bl);
-
-    if (labelStr) {
-        bl->labelW = wlibAddLabel((wControl_p)bl, labelStr);
-    }
-
-    wlibAddButton((wControl_p)bl);
-    wlibAddHelpString(bl->widget, helpStr);
-
-    return bl;
-}

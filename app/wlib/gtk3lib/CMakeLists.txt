@@ -16,6 +16,8 @@ target_sources(xtrkcad-wlib
 	combobox.c	
 	entry.c
  	fileselector.c
+	list.c
+	liststore.c
  	main.c
  	message.c
  	splash.c
@@ -25,6 +27,7 @@ target_sources(xtrkcad-wlib
 	statusbar.c
  	text.c
 	toggle.c
+	treeview.c
  	wpref.c
 
 	bitmap.c
@@ -38,14 +41,12 @@ target_sources(xtrkcad-wlib
  	font.c
  	help.c
  	lines.c
- #	list.c
- 	liststore.c
  	notice.c
  	opendocument.c
  	pixbuf.c
 
  	tooltip.c	
- #	treeview.c
+ 	treeview.c
  	util.c
  	window.c
 )
