@@ -21,12 +21,6 @@
   */
 
 
-//#ifdef WIN32
-//	#include <windows.h>
-//	#define PATH_MAX _MAX_PATH
-//#else
-//	#include <unistd.h>
-//#endif
 
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
@@ -216,10 +210,7 @@ wlibWidgetFromIdWarn(wWindow_p win, const char *id)
 GtkWidget *
 wlibWidgetFromId( wWindow_p win, const char *id)
 {
-//	GString *name = g_string_new(id);
-
 	GObject * wi = gtk_builder_get_object(win->builder, id);
-//	g_string_free(name, TRUE);
 	return (GtkWidget *)wi;
 }
 
