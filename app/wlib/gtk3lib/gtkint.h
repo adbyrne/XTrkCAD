@@ -250,7 +250,8 @@ void wlibBasicDrawFillCircle(
 void wlibDrawBox(wWin_p win, wBoxType_e style, wWinPix_t x, wWinPix_t y, wWinPix_t w, wWinPix_t h);
 
 /* builder.c */
-wWin_p wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr, long option, void *data );
+wWindow_p wlibDialogFromTemplate( int winType, const char *labelStr, 
+	const char *nameStr, long option, void *data );
 GString *wlibFileNameFromDialog( const char *dialog );
 GtkWidget *wlibGetWidgetFromName( wWindow_p parent, const char *dialogname, const char *suffix, wBool_t ignore_failures );
 GtkWidget *wlibWidgetFromId( wWindow_p win, const char *id );

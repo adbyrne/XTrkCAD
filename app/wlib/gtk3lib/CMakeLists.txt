@@ -46,7 +46,6 @@ target_sources(xtrkcad-wlib
  	pixbuf.c
 
  	tooltip.c	
- 	treeview.c
  	util.c
  	window.c
 )

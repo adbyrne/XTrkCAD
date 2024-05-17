@@ -96,20 +96,16 @@ wlibExistsTemplate(const char *name)
  *
  */
 
-wWin_p
+wWindow_p
 wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr,
                         long option, void *data )
 {
-	wWin_p w;
+	wWindow_p w;
 	GString *filename;
-	w = wlibAlloc(NULL, winType, 0, 0, labelStr, sizeof *w, data);
-	w->busy = TRUE;
-	w->option = option;
-	w->resizeTimer = 0;
+	w = g_malloc0(sizeof(struct wWindow_t));
+	w->oc.type = winType;
 
 	filename = wlibFileNameFromDialog( nameStr );
-
-	w->template_id = g_strdup(nameStr);
 
 	w->builder = gtk_builder_new_from_file(filename->str);
 	if( !w->builder ) {
@@ -121,10 +117,9 @@ wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr,
 		           NULL );
 		exit(1);
 	}
-	w->gtkwin = (GtkWidget *)gtk_builder_get_object(w->builder,
+	w->oc.widget = (GtkWidget *)gtk_builder_get_object(w->builder,
 	                nameStr);
-	w->fromTemplate = TRUE;
-	if (!w->gtkwin) {
+	if (!w->oc.widget) {
 		GString *errorMessage = g_string_new("Could not find window object ");
 		g_string_append( errorMessage, nameStr);
 		wNoticeEx( NT_ERROR,
@@ -133,7 +128,7 @@ wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr,
 		           NULL );
 		exit(1);
 	}
-	w->widget = w->gtkwin;      /**< \TODO: w->widget was used for the fixed grid, not needed anymore */
+	w->gtkWindow = w->oc.widget;      /**< \TODO: w->widget was used for the fixed grid, not needed anymore */
 	g_string_free(filename, TRUE);
 
 	return w;
