@@ -354,6 +354,11 @@ SimpleDynamic(void* unused)
 	}
 }
 
+void Notice(void* unused)
+{
+	wNotice3("What do you want to do now?", "Continue", "Cancel", "Leave");
+}
+
 void
 CreateMenuDialog(wWindow_p mainW)
 {
@@ -487,6 +492,20 @@ void TestMenu( wWindow_p mainW)
 				);
 
 	CreateMenuDialog(mainW);
+
+	menu3 = wMenuBarAdd(mainW, 		/* parent window */
+		NULL, 			/* help topic */
+		"_Notice" 			/* submenu title */
+	);
+
+	wMenuPushCreate(menu3, 				/* parent menu */
+		NULL, 				/* help topic */
+		"3 Button Notice", 				/* submenu title */
+		WCTL + '3', 					/* accelerator key */
+		Notice, 				/* callback funtion */
+		(void*)3 			/* pointer to user data */
+	);
+
 
  }
 
