@@ -143,7 +143,7 @@ typedef void (*wChoiceCallBack_p)( long, void * );
 #define BC_NONE 	(1L<<19)
 #define BC_NOBORDER 	(1L<<15)
 
-void wButtonSetLabel(wButton_p bb, const char *labelStr);
+void wButtonSetLabel(wButton_p bb, unsigned isIcon, const char *labelStr);
 void wButtonSetBusy(wButton_p bb, int value);
 wButton_p wButtonCreate(wWindow_p parent, wWinPix_t x, wWinPix_t y,
     const char *helpStr, const char *labelStr, long option, 

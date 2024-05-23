@@ -124,17 +124,32 @@ void wlibSetLabel(
 }
 
 /**
- * Change only the text label of a button
+ * Change the label of a button. This can be used to set the text or set a
+ * icon inside the button.
+ * The icon has to be in XPM format.
  *
- * \param bb IN button handle
- * \param labelStr IN new label string
+ * \param bb		IN button handle
+ * \param isIcon	IN label has to be interpreted as image
+ * \param labelStr	IN new label string
  *
- * \todo Make SetLabel work
+ * \todo icons in XBM format 
  */
 
-void wButtonSetLabel(wButton_p bb, const char * labelStr)
+void wButtonSetLabel(wButton_p bb, unsigned isIcon, const char * labelStr)
 {
-	gtk_button_set_label(bb->widget, labelStr);
+	if (isIcon) {
+		GdkPixbuf* pixbuf;
+		pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)labelStr);
+		if (pixbuf) {
+			GtkWidget* image = gtk_image_new_from_pixbuf(pixbuf);
+			gtk_container_add(GTK_CONTAINER(bb->widget), image);
+			g_object_ref_sink(pixbuf);
+			g_object_unref((gpointer)pixbuf);
+			gtk_widget_show(image);
+		}
+	} else {
+		gtk_button_set_label(GTK_BUTTON(bb->widget), labelStr);
+	}
 }
 
 /**
@@ -184,7 +199,7 @@ static wBool_t drawButton(
 
 /**
  * Create a button
- *  
+ *
  * ### Usage in dialogs
  *
  * - Generated: yes
@@ -192,7 +207,9 @@ static wBool_t drawButton(
  * ### Options
  * BB_DEFAULT
  * : set button as default for dialog
- * 
+ * BO_ICON
+ * : use an icon instead of label, label must point to a xpm in memory
+ *
  * \param parent IN parent window
  * \param x IN X-position
  * \param y IN Y-position
@@ -203,6 +220,10 @@ static wBool_t drawButton(
  * \param action IN Callback
  * \param data IN User data as context
  * \returns button widget
+ *
+ * \todo replace XBM format (layer buttons) or add support in buttons.
+ * layer buttons are created in dlayer.c
+ *
  */
 
 wButton_p wButtonCreate(
@@ -236,7 +257,7 @@ wButton_p wButtonCreate(
 		}
 
 		if (labelStr) {
-			wButtonSetLabel(b, labelStr);
+			wButtonSetLabel(b, option & BO_ICON, labelStr);
 		}
 
 		wlibBasicGridAttach(parent, b->widget, x, y, width, 1);

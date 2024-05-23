@@ -48,6 +48,67 @@ long dontHideCursor = 0;
 wMenuList_p menuList;
 wStatus_p statusMsg;
 
+static char* map_x16[] = {
+	"16 16 41 1",
+	" 	c	None",
+	"0	c	#4c4c4c",
+	"1	c	#b040b0",
+	"2	c	#18c0f0",
+	"3	c	#f0a01d",
+	"4	c	#787058",
+	"5	c	#7ac8e0",
+	"6	c	#d8a098",
+	"7	c	#386870",
+	"8	c	#d060b0",
+	"9	c	#702860",
+	"A	c	#808080",
+	"B	c	#8890c0",
+	"C	c	#d8a040",
+	"D	c	#48b8d8",
+	"E	c	#606060",
+	"F	c	#e828b0",
+	"G	c	#705830",
+	"H	c	#c890c8",
+	"I	c	#706050",
+	"J	c	#777678",
+	"K	c	#e548b5",
+	"L	c	#e0b872",
+	"M	c	#d89830",
+	"N	c	#686767",
+	"O	c	#707070",
+	"P	c	#8c8c8c",
+	"Q	c	#3cc8e8",
+	"R	c	#6d4060",
+	"S	c	#585858",
+	"T	c	#eba02c",
+	"U	c	#d87cc0",
+	"V	c	#e6a84c",
+	"W	c	#686878",
+	"X	c	#e834b8",
+	"Y	c	#78726e",
+	"Z	c	#506870",
+	"a	c	#a090c0",
+	"b	c	#48c6e8",
+	"c	c	#25c0f0",
+	"d	c	#e060c0",
+	"          J     ",
+	"OOO     ANSNA   ",
+	"O  JJ PE  I  EA ",
+	"O    0   LG3L  J",
+	"Y VT N   TN VV J",
+	"4C  TGV3T N  3 J",
+	"O    I6K  N  T Y",
+	"O    RFdX N  LMY",
+	"Y8XXKR  UFNQ25 J",
+	"Oa   N   URb cBJ",
+	"JD2b Z   b9H X1W",
+	"O   b7c5c5NXK  J",
+	"O    N Q  0    J",
+	" AN  N  EA  N  J",
+	"   ANSOA     PEN",
+	"     J          " };
+
+
 //
 //------------------------- Pulldown Menu ------------------------------------
 //
@@ -279,9 +340,9 @@ ButtonAction(void* data)
 {
 	static bool clicked = 0;
 	if (!clicked)
-		wButtonSetLabel(button, "Clicked!");
+		wButtonSetLabel(button, false, "Clicked!");
 	else
-		wButtonSetLabel(button, "Click me!");
+		wButtonSetLabel(button, false, "Click me!");
 
 	clicked = !clicked;
 }
@@ -352,6 +413,8 @@ SimpleDynamic(void* unused)
 	for (int i = 0; i < COMBOLINES; i++) { 
 		wComboBoxAddValue(combo, comboLines[i], NULL);
 	}
+
+ 	button = wButtonCreate(dialog, 1, 9, "bitmapbutton", map_x16, BO_ICON, 1, NULL, NULL);
 }
 
 void Notice(void* unused)
