@@ -42,7 +42,7 @@ static struct wWindow_t *appMainWindow;
 GtkWidget *
 wlibAppWinGetMain()
 {
-	return(appMainWindow->oc.widget);
+	return(appMainWindow->gtkWindow);
 }
 
 GtkAccelGroup* 
@@ -101,7 +101,6 @@ on_widget_deleted(GtkWidget* window, GdkEvent* event, gpointer userData)
  {
 	 char *pos;
 	 long isMaximized;
-	 GtkBuilder *mainBuilder;
 
 	 pos = strchr(name, ';');
 
@@ -120,27 +119,27 @@ on_widget_deleted(GtkWidget* window, GdkEvent* event, gpointer userData)
 	 wDrawColorBlack = wDrawFindColor(0x000000);
 
 	 appMainWindow = g_malloc(sizeof(struct wWindow_t));
-	 appMainWindow->oc.helpTopic = g_strdup(helpStr);
-	 appMainWindow->oc.name = g_strdup(nameStr);
+	 appMainWindow->helpTopic = g_strdup(helpStr);
+	 appMainWindow->name = g_strdup(nameStr);
 	 appMainWindow->winProc = winProc;
 
 	 appMainWindow->builder = gtk_builder_new_from_resource(
 		 XTRKCAD_RESOURCE_PATH
 		 "appwindow.ui");
 
-	 appMainWindow->oc.widget = GTK_WIDGET(gtk_builder_get_object(appMainWindow->builder,
+	 appMainWindow->gtkWindow = GTK_WIDGET(gtk_builder_get_object(appMainWindow->builder,
 																  "main"));
 
 	 // this is the main application window
 	 gtk_application_add_window(wlibGetApp(),
-								GTK_WINDOW(appMainWindow->oc.widget));
+								GTK_WINDOW(appMainWindow->gtkWindow));
 
 	 // create the accelerator group
 	 appMainWindow->accelGroup = gtk_accel_group_new();
-	 gtk_window_add_accel_group(GTK_WINDOW(appMainWindow->oc.widget),
+	 gtk_window_add_accel_group(GTK_WINDOW(appMainWindow->gtkWindow),
 		 appMainWindow->accelGroup);
 
-	 gtk_window_set_title(GTK_WINDOW(appMainWindow->oc.widget), labelStr);
+	 gtk_window_set_title(GTK_WINDOW(appMainWindow->gtkWindow), labelStr);
 
 	 if (option & F_MENUBAR)
 	 {
@@ -162,9 +161,11 @@ on_widget_deleted(GtkWidget* window, GdkEvent* event, gpointer userData)
 		 appMainWindow->statusbar = statusbar;
 	 }
 
-	 g_signal_connect(G_OBJECT(appMainWindow->oc.widget),
+	 GtkDrawingArea* drawingArea = GTK_DRAWING_AREA(gtk_builder_get_object(appMainWindow->builder, "maindraw"));
+
+	 g_signal_connect(G_OBJECT(appMainWindow->gtkWindow),
 		 "delete-event", G_CALLBACK(on_widget_deleted), NULL);
 
-	 gtk_widget_show_all(appMainWindow->oc.widget);
+	 gtk_widget_show_all(appMainWindow->gtkWindow);
 	 return appMainWindow;
  }

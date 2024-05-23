@@ -86,16 +86,18 @@ struct wObjCommon {
 	gchar *labelStr;
 };
 
-struct  wWindow_t {
-	struct wObjCommon oc;
+struct  wWindow_t {	
+	wType_e type;
 	wWinCallBack_p winProc;     /**< window procedure */
-	GtkWidget *menubar;			/** GTK menubar handle if present */
-	GtkWidget *toolbar;			/** GTK toolbar handle if present */
-	GtkContainer* statusbar;	/** GTK statusbar handle if present */
-	GtkAccelGroup *accelGroup;	/** accelerator group connected to Window */
+	GtkWidget *menubar;			/**< GTK menubar handle if present */
+	GtkWidget *toolbar;			/**< GTK toolbar handle if present */
+	GtkContainer* statusbar;	/**< GTK statusbar handle if present */
+	GtkAccelGroup *accelGroup;	/**< accelerator group connected to Window */
+	GtkDrawingArea* drawingArea;/**< the drawing area */
 	GtkWidget* gtkWindow;		/**< the GTK window */
-	GtkBuilder* builder;		/**< builder used to create the window */
+	GtkBuilder* builder;
 	const char* name;			/**< unique name for window */
+	const char* helpTopic;
 };
 
 /** /todo Check necessity of above fields */

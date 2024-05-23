@@ -207,7 +207,7 @@ wWinDialogCreate(wWindow_p parent,
         parentWindow = wlibAppWinGetMain();
     }
     else {
-        parentWindow = parent->oc.widget;
+        parentWindow = parent->gtkWindow;
     }
 
     RestoreWindow(dialog, nameStr);

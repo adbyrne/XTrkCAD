@@ -103,7 +103,7 @@ wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr,
 	wWindow_p w;
 	GString *filename;
 	w = g_malloc0(sizeof(struct wWindow_t));
-	w->oc.type = winType;
+	w->type = winType;
 
 	filename = wlibFileNameFromDialog( nameStr );
 
@@ -117,9 +117,9 @@ wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr,
 		           NULL );
 		exit(1);
 	}
-	w->oc.widget = (GtkWidget *)gtk_builder_get_object(w->builder,
+	w->gtkWindow = (GtkWidget *)gtk_builder_get_object(w->builder,
 	                nameStr);
-	if (!w->oc.widget) {
+	if (!w->gtkWindow) {
 		GString *errorMessage = g_string_new("Could not find window object ");
 		g_string_append( errorMessage, nameStr);
 		wNoticeEx( NT_ERROR,
@@ -128,7 +128,6 @@ wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr,
 		           NULL );
 		exit(1);
 	}
-	w->gtkWindow = w->oc.widget;      /**< \TODO: w->widget was used for the fixed grid, not needed anymore */
 	g_string_free(filename, TRUE);
 
 	return w;
