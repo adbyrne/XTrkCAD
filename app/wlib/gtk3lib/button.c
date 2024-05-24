@@ -67,6 +67,7 @@ void wButtonSetBusy(wButton_p bb, int value)
  * \param imageG    IN
  *
  * \todo Check usage for large icons and for text labels
+ * \todo is scaling of the icon still used?
  */
 
 void wlibSetLabel(
@@ -98,8 +99,10 @@ void wlibSetLabel(
 			if (scaleicon<1.0) { scaleicon=1.0; }
 			if (scaleicon>2.0) { scaleicon=2.0; }
 			GdkPixbuf *pixbuf2 =
-			        gdk_pixbuf_scale_simple(pixbuf, gdk_pixbuf_get_width(pixbuf)*scaleicon,
-			                                gdk_pixbuf_get_height(pixbuf)*scaleicon, GDK_INTERP_BILINEAR);
+			        gdk_pixbuf_scale_simple(pixbuf, 
+						(int)(gdk_pixbuf_get_width(pixbuf)*scaleicon),
+			            (int)(gdk_pixbuf_get_height(pixbuf)*scaleicon),
+						GDK_INTERP_BILINEAR);
 			g_object_ref_sink(pixbuf);
 			g_object_unref((gpointer)pixbuf);
 			if (*imageG==NULL) {

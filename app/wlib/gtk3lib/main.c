@@ -66,11 +66,15 @@ wlibGetApp()
 	return(app);
 }
 
+/**
+ * Load CSS definitions from resource. Name of the CSS-file is xtrackcad.css
+ * 
+ */
 
 static void
 LoadStyles(void)
 {	
-    	GtkCssProvider* cssProvider = gtk_css_provider_new();
+   	GtkCssProvider* cssProvider = gtk_css_provider_new();
 	GError* error = NULL;
 	
 	gtk_css_provider_load_from_resource(cssProvider,
@@ -78,10 +82,10 @@ LoadStyles(void)
 		"xtrackcad.css");
 
  	gtk_style_context_add_provider_for_screen(gdk_screen_get_default(), 
-		cssProvider, 
+		GTK_STYLE_PROVIDER(cssProvider), 
 		GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
- }
+}
 
 static void 
 startup(GtkApplication *app)

@@ -88,27 +88,27 @@ dialog_configure_event(GtkWidget* self, GdkEventConfigure * event, void* userdat
  * \param name      name of window 
  */
 static void
-RestoreWindow(GtkWidget* window, char* name)
+RestoreWindow(GtkWidget* window, const char* name)
 {
     char *winSize = wPrefGetStringBasic(name, "size");
     char* winPos = wPrefGetStringBasic(name, "pos");
     gchar** parsedString;
-    int x = 0;
-    int y = 0;
-    int width = 0;
-    int height = 0;
+    gint x = 0;
+    gint y = 0;
+    gint width = 0;
+    gint height = 0;
 
     if (winPos) {
         parsedString = g_strsplit(winPos, " ", 2);
-        x = g_ascii_strtoll(parsedString[0], NULL, 10);
-        y = g_ascii_strtoll(parsedString[1], NULL, 10);
+        x = (gint)g_ascii_strtoll(parsedString[0], NULL, 10);
+        y = (gint)g_ascii_strtoll(parsedString[1], NULL, 10);
         g_strfreev(parsedString);
     }
 
     if (winSize) {
         parsedString = g_strsplit(winSize, " ", 2);
-        width = g_ascii_strtoll(parsedString[0], NULL, 10);
-        height = g_ascii_strtoll(parsedString[1], NULL, 10);
+        width = (gint)g_ascii_strtoll(parsedString[0], NULL, 10);
+        height = (gint)g_ascii_strtoll(parsedString[1], NULL, 10);
         g_strfreev(parsedString);
     }
 
@@ -264,13 +264,13 @@ static wWin_p wWinPopupCreate(
 {
     wWin_p win;
 
-    if (parent == NULL) {
-        if (gtkMainW == NULL) {
-            abort();
-        }
+    //if (parent == NULL) {
+    //    if (gtkMainW == NULL) {
+    //        abort();
+    //    }
 
-        parent = gtkMainW;
-    }
+    //    parent = gtkMainW;
+    //}
 
     printf("%s:%d not implemented\n", __FILE__, __LINE__);
 
