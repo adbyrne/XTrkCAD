@@ -175,7 +175,7 @@ wChoice_p wRadioCreate(
 	b->action = action;
 	b->valueP = valueP;
 
-	if (option & BO_USETEMPLATE) {
+	if (option & BO_USEBUILDER) {
 		/** \todo use builder */
 
 	} else {

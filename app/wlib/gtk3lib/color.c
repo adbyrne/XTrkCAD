@@ -250,7 +250,7 @@ wColorButton_p wColorSelectButtonCreate(
 
 	b = g_malloc0(sizeof(struct wColorButton_t));
 
-	if (option & BO_USETEMPLATE) {
+	if (option & BO_USEBUILDER) {
 		/** 
 
 		*/

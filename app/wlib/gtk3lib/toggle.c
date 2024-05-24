@@ -185,7 +185,7 @@ wChoice_p wToggleCreate(
     b->action = action;
     b->valueP = valueP;
 
-    if (option & BO_USETEMPLATE) {
+    if (option & BO_USEBUILDER) {
         /**  */
     }
     else {

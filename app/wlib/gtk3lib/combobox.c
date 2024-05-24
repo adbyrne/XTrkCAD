@@ -391,7 +391,7 @@ wList_p wComboBoxCreate(
 	b->action = action;
 	b->last = -1;
 
-	if(option & BO_USETEMPLATE) {
+	if(option & BO_USEBUILDER) {
 		/** \todo Implement builder support */
 	} else {
 

@@ -238,7 +238,7 @@ wEntry_p wEntryCreate(
 	b->action = action;
 	b->valueL = valueL;
 
-	if (option & BO_USETEMPLATE) {
+	if (option & BO_USEBUILDER) {
 		/** \todo use builder */
 
 	} else {

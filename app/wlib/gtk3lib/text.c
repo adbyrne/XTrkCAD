@@ -591,7 +591,7 @@ wTextCreate(wWindow_p	parent,
 
 	bt->option = option;
 
-	if (option & BO_USETEMPLATE) {
+	if (option & BO_USEBUILDER) {
 		bt->widget = wlibGetWidgetFromName(parent, helpStr, "scrollwindow", FALSE);
 		bt->text = wlibWidgetFromIdWarn(parent, helpStr);
 
@@ -653,7 +653,7 @@ wTextCreate(wWindow_p	parent,
 		wlibSetPlaceholder(bt);
 	}
 
-	if (!(option & BO_USETEMPLATE)) {
+	if (!(option & BO_USEBUILDER)) {
 		/* place the widget in a fixed position of the parent */
 		//gtk_fixed_put(GTK_FIXED(parent->widget), bt->widget, bt->realX, bt->realY);
 		//wlibControlGetSize((wControl_p)bt);

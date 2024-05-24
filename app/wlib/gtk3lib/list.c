@@ -550,7 +550,7 @@ wList_p wListCreate(
 	bl->action = action;
 
 
-	if (option & BO_USETEMPLATE) {
+	if (option & BO_USEBUILDER) {
 		/** \todo Implement builder support */
 	} else {
 		GtkTreeSelection* sel;

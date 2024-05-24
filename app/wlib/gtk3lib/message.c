@@ -200,7 +200,7 @@ wMessage_p wMessageCreateEx(
 	wMessage_p b;
 	b = g_malloc0(sizeof(struct wMessage_t));
 
-	if (flags & BO_USETEMPLATE) {
+	if (flags & BO_USEBUILDER) {
 		/** \todo handle label in a template */
 	} else {
 		b->labelWidget = gtk_label_new(message);

@@ -244,7 +244,7 @@ wButton_p wButtonCreate(
 	b->action = action;
 	b->data = data;
 
-	if (option & BO_USETEMPLATE) {
+	if (option & BO_USEBUILDER) {
 		/** \todo buttons created by builder */
 	} else {
 		b->widget = GTK_WIDGET(gtk_toggle_button_new());

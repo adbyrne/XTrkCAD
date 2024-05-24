@@ -309,7 +309,7 @@ NoteDialog(void* unused)
 		NULL);
 
 	text = wTextCreate(dialog, 0, 0, "note-text", "Enter notes here... ", 
-		BO_USETEMPLATE, 0, 0);
+		BO_USEBUILDER, 0, 0);
 }
 
 bool
