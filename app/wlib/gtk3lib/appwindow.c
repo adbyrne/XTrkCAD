@@ -63,13 +63,53 @@ on_widget_deleted(GtkWidget* window, GdkEvent* event, gpointer userData)
 	if (appMainWindow->winProc) {
 		bool rc = appMainWindow->winProc(appMainWindow, wClose_e, userData, NULL);
  		if (!rc) {
-			wPrefFlush("");
+			wPrefFlush(NULL);
 		}
 		return(rc);
 	}
 
 	wPrefFlush("");
 	return FALSE;
+}
+
+/**
+ * This signal handler sets the maximum height of the scrolled window to the 
+ * height needed by the toolbar.
+ * 
+ * \param self, param allocation IN see GTK3 documentation
+ * \param user_data	IN the scrolled window 
+ */
+
+void
+signalSizeAlloc(GtkWidget* self,
+	GtkAllocation* allocation,
+	gpointer user_data)
+{
+	gtk_scrolled_window_set_max_content_height(GTK_SCROLLED_WINDOW(user_data), 
+		allocation->height);
+}
+
+/**
+ * Create the toolbar area of the main window. This is placed inside the
+ * scrolled window passed as the parameter. To make sure that only the 
+ * minimum necessary height is allocated to that scrolled window, a signal
+ * handler is set up. 
+ * 
+ * \param toolbarScrolled IN the scrolled window
+ * \return a FlowboxContainer for the toolbar widgets
+ */
+
+GtkWidget *
+CreateToolbar(GtkScrolledWindow* toolbarScrolled)
+{
+	GtkFlowBox* toolbar;
+
+	toolbar = GTK_FLOW_BOX(gtk_builder_get_object(appMainWindow->builder,
+		"toolbar"));
+	g_signal_connect(toolbar, "size-allocate", G_CALLBACK(signalSizeAlloc), 
+		toolbarScrolled);
+
+	return(GTK_WIDGET(toolbar));
 }
 
 /**
@@ -147,12 +187,12 @@ on_widget_deleted(GtkWidget* window, GdkEvent* event, gpointer userData)
 																	"menubar"));
 	 }
 
-	 GtkContainer *toolbarContainer;
-	 toolbarContainer = GTK_CONTAINER(gtk_builder_get_object(appMainWindow->builder,
-															 "toolbar"));
-	 if (toolbarContainer)
+	 GtkScrolledWindow *scrolled;
+	 scrolled = GTK_SCROLLED_WINDOW(gtk_builder_get_object(appMainWindow->builder,
+															 "toolbarWindow"));
+	 if (scrolled)
 	 {
-		 //        appMainWindow->toolbar =  createToolbar(toolbarContainer);
+		 appMainWindow->toolbar =  CreateToolbar(scrolled);
 	 }
 
 	 GtkContainer *statusbar = GTK_CONTAINER(gtk_builder_get_object(appMainWindow->builder,
