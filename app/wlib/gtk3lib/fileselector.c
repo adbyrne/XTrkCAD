@@ -32,15 +32,16 @@
 #include "i18n.h"
 
 struct wFilSel_t {
-    GtkFileChooserNative * window; 		/**<  file selector handle*/
-    wFilSelCallBack_p action; 			/**<  */
-    void * data;
-    GPtrArray* filters;					/**<  file type filters */
-    wFilSelMode_e mode;					/**< used for load or save */
-    int opt; 							/**< see FSO_ options */
-    const char * title; 				/**< dialog box title */
-    wWindow_p parent; 					/**< parent window */
-    char *defaultExtension; 			/**< to use if no extension specified */
+	wType_e type;                       /**< */
+	GtkFileChooserNative * window; 		/**<  file selector handle*/
+	wFilSelCallBack_p action; 			/**<  */
+	void * data;
+	GPtrArray* filters;					/**<  file type filters */
+	wFilSelMode_e mode;					/**< used for load or save */
+	int opt; 							/**< see FSO_ options */
+	const char * title; 				/**< dialog box title */
+	wWindow_p parent; 					/**< parent window */
+	char *defaultExtension; 			/**< to use if no extension specified */
 };
 
 /**
@@ -56,36 +57,35 @@ struct wFilSel_t {
 static void
 CreateFilters(struct wFilSel_t* fileSelect, const char* filterPattern)
 {
-    fileSelect->filters = g_ptr_array_new();
+	fileSelect->filters = g_ptr_array_new();
 
-    if (fileSelect->opt & FSO_PICTURES) {
-        GtkFileFilter* filter = gtk_file_filter_new();
-        gtk_file_filter_set_name(filter, "Supported Image Formats");
-        gtk_file_filter_add_pixbuf_formats(filter);
-        g_ptr_array_add(fileSelect->filters, (gpointer)filter);
+	if (fileSelect->opt & FSO_PICTURES) {
+		GtkFileFilter* filter = gtk_file_filter_new();
+		gtk_file_filter_set_name(filter, "Supported Image Formats");
+		gtk_file_filter_add_pixbuf_formats(filter);
+		g_ptr_array_add(fileSelect->filters, (gpointer)filter);
 
-        filter = gtk_file_filter_new();
-        gtk_file_filter_add_pattern(filter, "*");
-        gtk_file_filter_set_name(filter, "All files");
+		filter = gtk_file_filter_new();
+		gtk_file_filter_add_pattern(filter, "*");
+		gtk_file_filter_set_name(filter, "All files");
 
-        g_ptr_array_add(fileSelect->filters, (gpointer)filter);
-    }
-    else {
-        char* patternList = g_strdup(filterPattern);
-        char* name = strtok(patternList, "|");
+		g_ptr_array_add(fileSelect->filters, (gpointer)filter);
+	} else {
+		char* patternList = g_strdup(filterPattern);
+		char* name = strtok(patternList, "|");
 
-        while (name) {
-            char* pattern;
-            GtkFileFilter* filter = gtk_file_filter_new();
+		while (name) {
+			char* pattern;
+			GtkFileFilter* filter = gtk_file_filter_new();
 
-            gtk_file_filter_set_name(filter, name);
-            pattern = strtok(NULL, "|");
-            gtk_file_filter_add_pattern(filter, pattern);
-            g_ptr_array_add(fileSelect->filters, (gpointer)filter);
-            name = strtok(NULL, "|");
-        }
-        g_free(patternList);
-    }
+			gtk_file_filter_set_name(filter, name);
+			pattern = strtok(NULL, "|");
+			gtk_file_filter_add_pattern(filter, pattern);
+			g_ptr_array_add(fileSelect->filters, (gpointer)filter);
+			name = strtok(NULL, "|");
+		}
+		g_free(patternList);
+	}
 }
 
 /**
@@ -97,10 +97,10 @@ CreateFilters(struct wFilSel_t* fileSelect, const char* filterPattern)
 static void
 AddFilters(struct wFilSel_t* selector)
 {
-    for (unsigned int i = 0; i < selector->filters->len; i++) {
-        gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(selector->window),
-                                    GTK_FILE_FILTER(g_ptr_array_index(selector->filters, i)));
-    }
+	for (unsigned int i = 0; i < selector->filters->len; i++) {
+		gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(selector->window),
+		                            GTK_FILE_FILTER(g_ptr_array_index(selector->filters, i)));
+	}
 }
 
 /**
@@ -127,30 +127,31 @@ AddFilters(struct wFilSel_t* selector)
  */
 
 struct wFilSel_t * wFilSelCreate(
-    wWindow_p w,
-    wFilSelMode_e mode,
-    int opt,
-    const char * title,
-    const char * pattList,
-    wFilSelCallBack_p action,
-    void * data )
+        wWindow_p w,
+        wFilSelMode_e mode,
+        int opt,
+        const char * title,
+        const char * pattList,
+        wFilSelCallBack_p action,
+        void * data )
 {
-    struct wFilSel_t	*fs;
+	struct wFilSel_t	*fs;
 
-    fs = (struct wFilSel_t*)g_malloc0(sizeof *fs);
+	fs = (struct wFilSel_t*)g_malloc0(sizeof *fs);
 
-    fs->parent = w;
-    fs->window = 0;
-    fs->mode = mode;
-    fs->opt = opt;
-    fs->title = g_strdup( title );
-    fs->action = action;
-    fs->data = data;
+	fs->type = W_FILESELECT;
+	fs->parent = w;
+	fs->window = 0;
+	fs->mode = mode;
+	fs->opt = opt;
+	fs->title = g_strdup( title );
+	fs->action = action;
+	fs->data = data;
 
-    if (pattList || (opt & FSO_PICTURES)) {
-        CreateFilters(fs, pattList);
-    }
-    return fs;
+	if (pattList || (opt & FSO_PICTURES)) {
+		CreateFilters(fs, pattList);
+	}
+	return fs;
 }
 
 /**
@@ -163,72 +164,73 @@ struct wFilSel_t * wFilSelCreate(
 
 int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 {
-    char name[1024];
-    char *host;
-    char *file;
-    GError *err = NULL;
 
-    if (fs->window == NULL) {
+	g_assert(fs->type == W_FILESELECT);
 
-        fs->window = gtk_file_chooser_native_new(fs->title,
-                     NULL,
-                     (fs->mode == FS_LOAD ? GTK_FILE_CHOOSER_ACTION_OPEN :
-                      GTK_FILE_CHOOSER_ACTION_SAVE),
-                     (fs->mode == FS_LOAD ? ("Open") : ("Save")),
-                     ("Cancel"));
+	if (fs->window == NULL) {
 
-        if (fs->window==0) abort();
+		fs->window = gtk_file_chooser_native_new(fs->title,
+		             NULL,
+		             (fs->mode == FS_LOAD ? GTK_FILE_CHOOSER_ACTION_OPEN :
+		              GTK_FILE_CHOOSER_ACTION_SAVE),
+		             (fs->mode == FS_LOAD ? ("Open") : ("Save")),
+		             ("Cancel"));
 
-        if (fs->mode == FS_SAVE) {
-            // get confirmation before overwriting an existing file
-            gtk_file_chooser_set_do_overwrite_confirmation(
-                GTK_FILE_CHOOSER(fs->window), true);
-        }
+		if (fs->window==0) { abort(); }
 
-        if (fs->opt & FSO_MULTIPLEFILES) {
-            gtk_file_chooser_set_select_multiple(
-                GTK_FILE_CHOOSER(fs->window), true);
-        }
+		if (fs->mode == FS_SAVE) {
+			// get confirmation before overwriting an existing file
+			gtk_file_chooser_set_do_overwrite_confirmation(
+			        GTK_FILE_CHOOSER(fs->window), true);
+		}
 
-        if (fs->filters) {
-            AddFilters(fs);
-        }
+		if (fs->opt & FSO_MULTIPLEFILES) {
+			gtk_file_chooser_set_select_multiple(
+			        GTK_FILE_CHOOSER(fs->window), true);
+		}
 
-        // Add possible shortcut to the demo folder
-        // gtk_file_chooser_add_shortcut_folder(fs->window, "\\XtrackCAD\\share\\demos", NULL);
+		if (fs->filters) {
+			AddFilters(fs);
+		}
 
-    }
-    strcpy( name, dirName );
+		// Add possible shortcut to the demo folder
+		// gtk_file_chooser_add_shortcut_folder(fs->window, "\\XtrackCAD\\share\\demos", NULL);
 
-    gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER(fs->window), name );
+	}
 
-    int resp = gtk_native_dialog_run( GTK_NATIVE_DIALOG( fs->window ));
+	gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER(fs->window), dirName );
 
-    if( resp == GTK_RESPONSE_ACCEPT || resp == GTK_RESPONSE_APPLY) {
-        char **fileNames;
-        GSList *fileNameList;
+	int resp = gtk_native_dialog_run( GTK_NATIVE_DIALOG( fs->window ));
 
-        fileNameList = gtk_file_chooser_get_uris( GTK_FILE_CHOOSER(fs->window) );
-        fileNames = g_malloc0( sizeof(char *) * g_slist_length (fileNameList) );
+	if( resp == GTK_RESPONSE_ACCEPT || resp == GTK_RESPONSE_APPLY) {
+		char **fileNames;
+		GSList *fileNameList;
 
-        for (unsigned i=0; i < g_slist_length (fileNameList); i++ ) {
-            file = g_filename_from_uri( g_slist_nth_data( fileNameList, i ),
-                                        &host, &err );
+		fileNameList = gtk_file_chooser_get_uris( GTK_FILE_CHOOSER(fs->window) );
+		fileNames = g_malloc0( sizeof(char *) * g_slist_length (fileNameList) );
 
-            fileNames[ i ] = file;
-            g_free( g_slist_nth_data ( fileNameList, i));
-        }
+		for (unsigned i=0; i < g_slist_length (fileNameList); i++ ) {
+			char* host;
+			char* file;
+			GError* err = NULL;
 
-        if (fs->action) {
-            fs->action( g_slist_length(fileNameList), fileNames, fs->data );
-        }
+			file = g_filename_from_uri( g_slist_nth_data( fileNameList, i ),
+			                            &host, &err );
 
-        for(unsigned i=0; i < g_slist_length(fileNameList); i++) {
-            g_free( fileNames[ i ]);
-        }
-        g_free( fileNames );
-        g_slist_free (fileNameList);
-    }
+			fileNames[ i ] = file;
+			g_free( g_slist_nth_data ( fileNameList, i));
+		}
 
-    return true;
+		if (fs->action) {
+			fs->action( g_slist_length(fileNameList), fileNames, fs->data );
+		}
+
+		for(unsigned i=0; i < g_slist_length(fileNameList); i++) {
+			g_free( fileNames[ i ]);
+		}
+		g_free( fileNames );
+		g_slist_free (fileNameList);
+	}
+
+	return true;
 }

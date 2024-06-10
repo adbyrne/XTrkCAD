@@ -84,6 +84,71 @@ typedef struct {
 extern long debugWindow;
 extern long wDebugFont;
 
+/*----------------------------------------------------------------------------
+ * Application main window 
+ */
+
+ /* Creation CallBacks */
+typedef enum {
+    wClose_e,
+    wResize_e,
+    wState_e,
+    wQuit_e,
+    wRedraw_e,
+    wCancel_e,
+    wAccept_e
+}
+winProcEvent;
+typedef bool (*wWinCallBack_p)(wWindow_p, winProcEvent, void*, void*);
+
+/* Creation Options */
+#define F_AUTOSIZE	(1L<<1)
+#define F_HEADER 	(1L<<2)
+#define F_RESIZE 	(1L<<3)
+#define F_BLOCK  	(1L<<4)
+#define F_MENUBAR 	(1L<<5)
+#define F_NOTAB		(1L<<8)
+#define F_RECALLPOS	(1L<<9)
+#define F_RECALLSIZE	(1L<<10)
+#define F_TOP		(1L<<11)
+#define F_CENTER	(1L<<12)
+#define F_HIDE		(1L<<13)
+#define F_MAXIMIZE  (1L<<14)
+#define F_RESTRICT  (1L<<15)
+#define F_NOTTRANSIENT (1L<<16)
+
+wWindow_p wWinMainCreate(
+    const char* name,	        /* Application name */
+    wWinPix_t x,		        /* Initial window width */
+    wWinPix_t y,		        /* Initial window height */
+    const char* helpStr,	    /* Help topic string */
+    const char* labelStr,	    /* Window title */
+    const char* nameStr,	    /* Window name */
+    long option,		        /* Options */
+    wWinCallBack_p winProc,	    /* Call back function */
+    void* data);
+
+/*------------------------------------------------------------------------------
+ *
+ * File Selection
+ */
+
+#define FSO_MULTIPLEFILES	1
+#define FSO_PICTURES        2
+
+struct wFilSel_t;
+typedef enum {
+    FS_SAVE,
+    FS_LOAD,
+    FS_UPDATE
+} wFilSelMode_e;
+
+typedef int (*wFilSelCallBack_p)(int files, char** fileName, void* data);
+struct wFilSel_t* wFilSelCreate(wWindow_p w, wFilSelMode_e mode, int opt,
+    const char* title, const char* pattList, wFilSelCallBack_p action,
+    void* data);
+int wFilSelect(struct wFilSel_t* fs, const char* dirName);
+
 /*------------------------------------------------------------------------------
  *
  * Bitmap Controls bitmap.c
@@ -164,8 +229,8 @@ wChoice_p wToggleCreate(wWindow_p parent, wWinPix_t x, wWinPix_t y,
                         const char * const *labels, long *valueP, 
                         wChoiceCallBack_p action, void *data);
 
-void wButtonToolBarRedraw(wWin_p win);
-wButton_p wButtonCreateForToolbar(wWin_p  w, wWinPix_t x, wWinPix_t	y,const char *helpStr, const char *labelStr, long option, wWinPix_t width, wButtonCallBack_p action, void * data);
+//void wButtonToolBarRedraw(wWin_p win);
+wButton_p wButtonCreateForToolbar(wWindow_p  w, wWinPix_t x, wWinPix_t	y,const char *helpStr, const char *labelStr, long option, wWinPix_t width, wButtonCallBack_p action, void * data);
 
 
 /*------------------------------------------------------------------------------
@@ -253,47 +318,9 @@ FILE * wFileOpen(		const char *, const char * );
  * Main and Popup Windows
  */
 
-/* Creation CallBacks */
-typedef enum {
-	wClose_e,
-	wResize_e,
-	wState_e,
-	wQuit_e,
-	wRedraw_e,
-    wCancel_e,
-    wAccept_e
-}
-winProcEvent;
-typedef bool (*wWinCallBack_p)( wWindow_p, winProcEvent, void *, void * );
 
-/* Creation Options */
-#define F_AUTOSIZE	(1L<<1)
-#define F_HEADER 	(1L<<2)
-#define F_RESIZE 	(1L<<3)
-#define F_BLOCK  	(1L<<4)
-#define F_MENUBAR 	(1L<<5)
-#define F_NOTAB		(1L<<8)
-#define F_RECALLPOS	(1L<<9)
-#define F_RECALLSIZE	(1L<<10)
-#define F_TOP		(1L<<11)
-#define F_CENTER	(1L<<12)
-#define F_HIDE		(1L<<13)
-#define F_MAXIMIZE  (1L<<14)
-#define F_RESTRICT  (1L<<15)
-#define F_NOTTRANSIENT (1L<<16)
 
-//Application main window
 
-wWindow_p wWinMainCreate(
-        const char * name,	    /* Application name */
-        wWinPix_t x,		    /* Initial window width */
-        wWinPix_t y,		    /* Initial window height */
-        const char * helpStr,	    /* Help topic string */
-        const char * labelStr,	    /* Window title */
-        const char * nameStr,	    /* Window name */
-        long option,		    /* Options */
-        wWinCallBack_p winProc,	    /* Call back function */
-        void * data);
 
 wWindow_p wWinDialogCreate(wWindow_p parent, const char* helpStr, const char* titleStr,
     const char* nameStr, long option, wWinCallBack_p winProc, void* data);
@@ -817,28 +844,6 @@ void wMenuSetTraceCallBack(	wMenu_p, wMenuTraceCallBack_p, void * );
 wBool_t wMenuAction(		wMenu_p, const char * );
 
 void wAttachAccelKey( wAccelKey_e, int, wAccelKeyCallBack_p, void * );
-
-/*------------------------------------------------------------------------------
- *
- * File Selection
- */
-
-#define FSO_MULTIPLEFILES	1
-#define FSO_PICTURES        2
-
-struct wFilSel_t;
-typedef enum {
-	FS_SAVE,
-	FS_LOAD,
-	FS_UPDATE
-} wFilSelMode_e;
-
-typedef int (*wFilSelCallBack_p)( int files, char ** fileName, void * data);
-struct wFilSel_t* wFilSelCreate(wWindow_p w, wFilSelMode_e mode, int opt, 
-    const char* title, const char* pattList, wFilSelCallBack_p action, 
-    void* data);
-int wFilSelect(struct wFilSel_t* fs, const char* dirName);
-
 
 /*------------------------------------------------------------------------------
  *
