@@ -26,12 +26,10 @@
             <action-widget response="GTK_RESPONSE_CANCEL">id_cancel</action-widget>
             <action-widget response="GTK_RESPONSE_OK" default="true">id_ok</action-widget>
         </action-widgets>
-
         <child internal-child="vbox">
             <object class="GtkBox">
                 <property name="can-focus">False</property>
                 <property name="orientation">vertical</property>
-
                 <child>
                     <object class="GtkBox">
                         <property name="visible">True</property>
