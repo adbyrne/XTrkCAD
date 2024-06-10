@@ -130,6 +130,7 @@
             <property name="visible">True</property>
             <property name="margin-bottom">18</property>
             <property name="spacing">6</property>
+            <property name="halign">start</property>
             <child>
               <object class="GtkButton" id="selectall">
                 <property name="label" translatable="yes">Select _All</property>
