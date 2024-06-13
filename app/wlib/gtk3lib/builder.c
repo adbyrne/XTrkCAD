@@ -94,6 +94,7 @@ wlibExistsTemplate(const char *name)
  * \param INOUT data passed through to wlibAlloc
  * \return the window object pointer
  *
+ * \todo Check signature for unused parameters
  */
 
 wWindow_p

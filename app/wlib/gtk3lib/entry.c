@@ -43,6 +43,7 @@
  */
 
 struct wEntry_t {
+	wType_e	type;				//< type
 	GtkWidget* widget;			//< the entry widget
 	void* data;					//< context data
 	char* valueP;				//< location of entered value
@@ -194,9 +195,10 @@ static int stringFocusOutEvent(
 /**
  * Create a single line entry field for a string value
  *
- *  * ### Usage in dialogs
+ * ### Usage in dialogs, created by
  *
- * - Generated: yes
+ * - runtime: yes
+ * - builder: yes
  *
  * ### Options
  * BO_READONLY
@@ -209,7 +211,7 @@ static int stringFocusOutEvent(
  * \param 	labelStr IN label
  * \param	option	IN	option
  * \param	width	IN	width of entry field
- * \param	valueP	IN	default value
+ * \param	valueP	IN	initial value
  * \param	valueL	IN 	maximum length of entry in chars
  * \param	action	IN	application callback function
  * \param 	data	IN	application context data
@@ -234,13 +236,13 @@ wEntry_p wEntryCreate(
 	// create and initialize the widget
 
 	b = g_malloc0(sizeof(struct wEntry_t));
+	b->type = B_TEXT;
 	b->valueP = valueP;
 	b->action = action;
 	b->valueL = valueL;
 
-	if (option & BO_USEBUILDER) {
-		/** \todo use builder */
-
+	if (parent->builder) {
+		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
 	} else {
 		// create the gtk entry field and set maximum length if desired
 		b->widget = (GtkWidget*)gtk_entry_new();
@@ -271,9 +273,6 @@ wEntry_p wEntryCreate(
 
 	g_signal_connect(G_OBJECT(b->widget), "focus-out-event",
 	                 G_CALLBACK(stringFocusOutEvent), b);
-
-	//if (option&BO_ENTER)
-	// g_signal_connect(G_OBJECT(b->widget), "activate", G_CALLBACK(stringActivated), b);
 
 	gtk_widget_add_events(b->widget, GDK_FOCUS_CHANGE_MASK);
 

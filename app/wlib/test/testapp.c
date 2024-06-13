@@ -26,6 +26,7 @@
 #include <malloc.h>
 #include <stdio.h>
 #include "wlib.h"
+#include <string.h>
 
 #define APPNAME "testapp"
 #define WINDOWTITLE "Test Application"
@@ -39,12 +40,16 @@
 // #define TEST_SPLASH
 #define TEST_PULLDOWNMENU
 #define TEST_STATUSBAR
+#define TEST_TOOLBAR
+//#define TEST_DRAW
 
 #define TRUE  (1)
 #define FALSE (0)
 
 long dontHideCursor = 0;
 
+
+wWindow_p mainW;
 wMenuList_p menuList;
 wStatus_p statusMsg;
 
@@ -108,6 +113,108 @@ static char* map_x16[] = {
 	"   ANSOA     PEN",
 	"     J          " };
 
+static char* ballgreen[] = {
+"16 16 16 1",
+" 	c None",
+".	c #292929",
+"+	c #292B29",
+"@	c #29322B",
+"#	c #365233",
+"$	c #2D432E",
+"%	c #57A572",
+"&	c #B0D6C1",
+"*	c #3F9159",
+"=	c #7EC097",
+"-	c #296932",
+";	c #2D8840",
+">	c #2C9231",
+",	c #44C530",
+"'	c #45BA32",
+")	c #7BF737",
+"    .+@#$@+.    ",
+"   +$%&&&&%$+   ",
+"  +#&&&&&&&&*+  ",
+" +#=&===&&&==#+ ",
+".@%%%%%%%%%%%*@.",
+"+-;%%;*%**%%%*$+",
+"@-**;*;;;;;;*;-@",
+"@--;-;;;;;;;;;-@",
+"@---->>>;->>---$",
+"@->->>>>>;>>;--@",
+"+->>>>,>>,>>>>-+",
+".$>>>,,,,,,>>>@.",
+" +->',,)),,,>-+ ",
+"  +#,)))))),>+  ",
+"   +#,)))),$+   ",
+"    .+$##$+.    " };
+
+static char* yellowstar[] = {
+"16 16 48 1",
+" 	c None",
+".	c #AB9600",
+"+	c #AE9900",
+"@	c #D0B600",
+"#	c #DBC000",
+"$	c #FFDF02",
+"%	c #FFDF00",
+"&	c #A28D00",
+"*	c #766700",
+"=	c #A59000",
+"-	c #B09A00",
+";	c #BBA400",
+">	c #C5AC00",
+",	c #DFC300",
+"'	c #FFE111",
+")	c #FFE00A",
+"!	c #D2B800",
+"~	c #AC9700",
+"{	c #9B8800",
+"]	c #948100",
+"^	c #9D8A00",
+"/	c #F6D700",
+"(	c #FFE004",
+"_	c #FFE31D",
+":	c #FFE10F",
+"<	c #F2D400",
+"[	c #E5C800",
+"}	c #917F00",
+"|	c #CEB500",
+"1	c #FFE10E",
+"2	c #FCDC00",
+"3	c #F0D200",
+"4	c #C7AE00",
+"5	c #CCB300",
+"6	c #FADB00",
+"7	c #BEA600",
+"8	c #EED100",
+"9	c #ECCF00",
+"0	c #E6CA00",
+"a	c #B8A100",
+"b	c #988500",
+"c	c #DABE00",
+"d	c #A38F00",
+"e	c #B69F00",
+"f	c #897800",
+"g	c #BFA700",
+"h	c #8D7B00",
+"i	c #877600",
+"                ",
+"                ",
+"                ",
+"       .+       ",
+"       @#       ",
+"       $%&      ",
+" *=-;>,')!~={]  ",
+"  ^#/('_:$<[@}  ",
+"    |%)1)234    ",
+"     52%6<7     ",
+"     ,8390a     ",
+"    bccd;c|     ",
+"    &ef  bg}    ",
+"    h      i    ",
+"                ",
+"                " };
+
 
 //
 //------------------------- Pulldown Menu ------------------------------------
@@ -159,6 +266,7 @@ RecentUsedCallback(int unused, char *label, char* data)
 static struct wFilSel_t* loadFile_fs = NULL;
 static struct wFilSel_t* saveFile_fs = NULL;
 static struct wFilSel_t* pictureFile_fs = NULL;
+static struct wFilSel_t* uiFile_fs;
 
 int LoadData(
 	int cnt,
@@ -320,7 +428,7 @@ SimpleDynamicProc(wWindow_p window, winProcEvent event, void* data, void* data2)
 	return(true);
 }
 
-wEntryCallBack_p
+bool
 EntryCallBack(char* string, wEntry_p entry)
 {
 	printf("Entered <%s>\n", string);
@@ -422,6 +530,102 @@ void Notice(void* unused)
 	wNotice3("What do you want to do now?", "Continue", "Cancel", "Leave");
 }
 
+/*----------------------------------------------------------------------------
+* Load and show a UI file from disk
+*/ 
+
+int LoadDesign(
+	int cnt,
+	char** fileName,
+	void* menuList)
+{
+	wWindow_p dialog;
+	printf("UI File is %s\n", fileName[0]);
+	wMenuListAdd((wMenuList_p)menuList, 0, fileName[0], NULL);
+
+	dialog = wWinDialogCreate(mainW, "", "UI Viewer", fileName[0], DO_FILESYSTEM,
+		SimpleDynamicProc, NULL);
+	
+	return(0);
+}
+
+void
+RecentUsedDesigns(int unused, char* label, char* data)
+{
+	wWindow_p dialog;
+
+	printf("Recently used design: %s - %s\n", label, data);
+	dialog = wWinDialogCreate(mainW, "", "UI Viewer", label, DO_FILESYSTEM,
+		SimpleDynamicProc, NULL);
+}
+
+void Viewer(void* menuDesigns)
+{
+	if (uiFile_fs == NULL) {
+
+
+		uiFile_fs = wFilSelCreate(mainW, FS_LOAD, 0, "Open Designs",
+			"UI Designs|*.ui", LoadDesign, menuDesigns);
+	}
+
+	wFilSelect(uiFile_fs, ".");
+}
+
+/*----------------------------------------------------------------------------
+* Load and show a dialog from disk, fields can be populated for tests
+*/
+
+wWindow_p DialogViewer(char * builder)
+{
+	wWindow_p dialog;
+
+	dialog = wWinDialogCreate(mainW, "", NULL, (char *)builder, 
+		DO_FILESYSTEM | BO_USEBUILDER,
+		SimpleDynamicProc, NULL);
+
+	return(dialog);
+}
+
+char entry1[80] = "Name";
+char entry2[80] = "Script";
+
+bool
+TestLength(char* value, void* data)
+{
+	if (strlen(value) < 4)
+		return(false);
+	else
+		return(true);
+}
+
+void TextFieldTest(void* builder)
+{
+	wEntry_p widget1;
+	wEntry_p widget2;
+	wWindow_p dialog = DialogViewer((char*)builder);
+
+	widget1 = wEntryCreate(dialog, 0, 0, "name", NULL, 0L, 0, entry1, sizeof(entry1) - 1, TestLength, NULL);
+
+	widget2 = wEntryCreate(dialog, 0, 0, "script", NULL, 0L, 0, entry2, sizeof(entry2) - 1, TestLength, NULL);
+}
+
+long choiceSelect;
+
+wChoiceCallBack_p
+ChoiceCallback(long value, void* unused)
+{
+	printf("Choice callback: value=%ld\n", value);
+}
+
+void CheckboxTest(void* builderFile)
+{
+	wChoice_p choice;
+	wWindow_p dialog = DialogViewer((char*)builderFile);
+	
+	choice = wToggleCreate(dialog, 0, 0, "label", NULL, BO_USEBUILDER, NULL, &choiceSelect, ChoiceCallback, NULL);
+	wToggleSetValue(choice, 1L);
+}
+
 void
 CreateMenuDialog(wWindow_p mainW)
 {
@@ -446,7 +650,7 @@ CreateMenuDialog(wWindow_p mainW)
 
 }
 
-void TestMenu( wWindow_p mainW)
+void TestMenu(wWindow_p mainW)
 {
 	wMenu_p menu1;
 	wMenu_p menu2;
@@ -454,105 +658,105 @@ void TestMenu( wWindow_p mainW)
 	wMenu_p menu4;
 	wMenu_p menu;
 
-	/* add a submenu */ 	
-    menu1 = wMenuBarAdd( mainW, 		/* parent window */
-						NULL, 			/* help topic */
-						"_File" 			/* submenu title */
-						);	
+	/* add a submenu */
+	menu1 = wMenuBarAdd(mainW, 		/* parent window */
+		NULL, 			/* help topic */
+		"_File" 			/* submenu title */
+	);
 
- 	LoadFileSelector(mainW, menu1);
+	LoadFileSelector(mainW, menu1);
 	PixmapFileSelector(mainW, menu1);
 	SaveFileSelector(mainW, menu1);
 
 	wMenuSeparatorCreate(menu1);
 
 	/* create a menuitem in submenu */
-	wMenuPushCreate( 	menu1, 				/* parent menu */
-							NULL, 				/* help topic */
-							"Add to MRU", 				/* submenu title */
-							WCTL+'a', 					/* accelerator key */
-							doFile, 				/* callback funtion */
-							(void*)1 			/* pointer to user data */
-						 );									
-	
-	menu4 = wMenuMenuCreate(menu1, NULL, "Recently used");
- 	menuList = wMenuListCreate(menu4, NULL, 10, RecentUsedCallback);
+	wMenuPushCreate(menu1, 				/* parent menu */
+		NULL, 				/* help topic */
+		"Add to MRU", 				/* submenu title */
+		WCTL + 'a', 					/* accelerator key */
+		doFile, 				/* callback funtion */
+		(void*)1 			/* pointer to user data */
+	);
 
-	/* create a separator before 'Quit' */	
- 
-	wMenuSeparatorCreate( menu1 );
-	
+	menu4 = wMenuMenuCreate(menu1, NULL, "Recently used");
+	menuList = wMenuListCreate(menu4, NULL, 10, RecentUsedCallback);
+
+	/* create a separator before 'Quit' */
+
+	wMenuSeparatorCreate(menu1);
+
 	/* create a menuitem in submenu */
-	wMenuPushCreate( 	menu1, 				/* parent menu */
-							NULL, 				/* help topic */
-							"_Quit", 				/* submenu title */
-							WALT+'x',					/* accelerator key */
-							doFile, 				/* callback funtion */
-							(void*)0 			/* pointer to user data */
-						 );									
+	wMenuPushCreate(menu1, 				/* parent menu */
+		NULL, 				/* help topic */
+		"_Quit", 				/* submenu title */
+		WALT + 'x',					/* accelerator key */
+		doFile, 				/* callback funtion */
+		(void*)0 			/* pointer to user data */
+	);
 
 	/* create a second submenu */
-    menu2 = wMenuBarAdd( mainW, 		/* parent window */
-						 NULL, 			/* help topic */
-						"_Checks" 			/* submenu title */
-					    );	
+	menu2 = wMenuBarAdd(mainW, 		/* parent window */
+		NULL, 			/* help topic */
+		"_Checks" 			/* submenu title */
+	);
 
 	wMenuToggleCreate(menu2,
-				NULL,
-				"Active",
-				WALT+'a',
-				1, 
-				doFile,
-				(void *)2
-				);
+		NULL,
+		"Active",
+		WALT + 'a',
+		1,
+		doFile,
+		(void*)2
+	);
 
 	wMenuToggleCreate(menu2,
-				NULL,
-				"Inactive",
-				0,
-				0, 
-				doFile,
-				(void *)2
-				);
+		NULL,
+		"Inactive",
+		0,
+		0,
+		doFile,
+		(void*)2
+	);
 
 	wMenuToggle_p mt = wMenuToggleCreate(menu2,
-				NULL,
-				"Disabled",
-				0,
-				0, 
-				doFile,
-				(void *)2
-				);
+		NULL,
+		"Disabled",
+		0,
+		0,
+		doFile,
+		(void*)2
+	);
 
-	wMenuToggleEnable( mt, FALSE );
+	wMenuToggleEnable(mt, FALSE);
 
-	wMenuSeparatorCreate( menu2 );
+	wMenuSeparatorCreate(menu2);
 
 	menu3 = wMenuMenuCreate(menu2, NULL, "Radio Buttons");
-	
-	wMenuRadioCreate(menu3,
-				NULL,
-				"Radio 1",
-				WCTL+'1',
-				doFile,
-				(void *)3
-				);
 
 	wMenuRadioCreate(menu3,
-				NULL,
-				"Radio 2",
-				WCTL + '2',
-				doFile,
-				(void *)3
-				);
+		NULL,
+		"Radio 1",
+		WCTL + '1',
+		doFile,
+		(void*)3
+	);
 
 	wMenuRadioCreate(menu3,
-				NULL,
-				"Radio 3",
-				WCTL + '3',
-				doFile,
-				(void *)3
-				);
+		NULL,
+		"Radio 2",
+		WCTL + '2',
+		doFile,
+		(void*)3
+	);
+
+	wMenuRadioCreate(menu3,
+		NULL,
+		"Radio 3",
+		WCTL + '3',
+		doFile,
+		(void*)3
+	);
 
 	CreateMenuDialog(mainW);
 
@@ -569,8 +773,33 @@ void TestMenu( wWindow_p mainW)
 		(void*)3 			/* pointer to user data */
 	);
 
+	menu = wMenuBarAdd(mainW, NULL, "_UI Designs");
+	wMenu_p menuRecent;
+	wMenuList_p menuDesigns;
+	menuRecent = wMenuMenuCreate((wMenu_p)menu, NULL, "Recently used");
+	menuDesigns = wMenuListCreate(menuRecent, NULL, 10, RecentUsedDesigns);
 
- }
+	wMenuPushCreate(menu,
+		NULL,
+		"UI _Viewer",
+		NULL,
+		Viewer,
+		menuDesigns);
+
+	wMenuPushCreate(menu,
+		NULL,
+		"Text Entries",
+		NULL,
+		TextFieldTest,
+		"block.ui");
+
+	wMenuPushCreate(menu,
+		NULL,
+		"Toggle, Multiline",
+		NULL,
+		CheckboxTest,
+		"tip.ui");
+}
 
 void
 TestStatusbar(wWindow_p mainWindow)
@@ -592,6 +821,20 @@ TestStatusbar(wWindow_p mainWindow)
 		"Statusbar was created successfully...");
 
 }
+
+void
+TestToolbar(wWindow_p mainWindow)
+{
+  	wButton_p button = 	wButtonCreateForToolbar(mainWindow, 0, 0, "", map_x16,
+		0, 0, NULL, NULL);
+
+	button = wButtonCreateForToolbar(mainWindow, 0, 0, "", ballgreen,
+		BO_GAP, 0, NULL, NULL);
+
+	button = wButtonCreateForToolbar(mainWindow, 0, 0, "", yellowstar,
+		0, 0, NULL, NULL);
+}
+
 static
 bool mainCallBack(wWindow_p window, winProcEvent ev, void *data1, void *data2 )
 {
@@ -613,7 +856,6 @@ bool mainCallBack(wWindow_p window, winProcEvent ev, void *data1, void *data2 )
 wWindow_p wMain( int argc, char * argv[] )
 {
 
-	wWindow_p mainW;
 #ifdef TEST_ARGV
 	printf("testapp: argc: %d\n", argc);
 
@@ -661,6 +903,9 @@ wWindow_p wMain( int argc, char * argv[] )
 	TestStatusbar(mainW);
 #endif
 
+#ifdef TEST_TOOLBAR
+	TestToolbar(mainW);
+#endif
 	
 #ifdef TEST_SPLASH	
 	char buffer[ 80 ];

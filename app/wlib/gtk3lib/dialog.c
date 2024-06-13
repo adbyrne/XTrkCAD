@@ -168,14 +168,23 @@ wWindowShow(wWindow_p win, bool state)
 /**
  * Create a dialog window from a XML ui definition.
  * 
- * \param parent
- * \param helpStr
- * \param titleStr
- * \param nameStr
- * \param option
- * \param winProc
- * \param data
- * \return 
+ * ### Usage in dialogs
+ *
+ * - Generated: used to load the basic dialog 
+ * - Builder: yes
+ *
+ * ### Options
+ * BO_FILESYSTEM
+ * : nameStr is the full path for a XML ui file with "ui" extension
+ *  
+ * \param parent    IN  parent window for new dialog
+ * \param helpStr   IN  help topic 
+ * \param titleStr  IN  dialog title
+ * \param nameStr   IN  dialog id
+ * \param option    IN  see above
+ * \param winProc   IN dialog procedure
+ * \param data      IN  user data for dialog procedure
+ * \return          dialog handle on success, NULL on failure
  */
 
 wWindow_p
@@ -190,18 +199,43 @@ wWinDialogCreate(wWindow_p parent,
     GtkWidget* dialog;
     GtkBuilder* builder;
     GtkWidget* parentWindow;
+    gchar* resourcePath;
+    char* tempStr = NULL;
+
     wWindow_p winDialog = g_malloc0(sizeof(struct wWindow_t));
 
-    gchar* resourcePath = g_strconcat(XTRKCAD_RESOURCE_PATH, 
-        nameStr, 
-        ".ui", 
-        NULL);
+    if (option & DO_FILESYSTEM) {
+        resourcePath = g_strdup(nameStr);
+        builder = gtk_builder_new_from_file(resourcePath);
+        tempStr = g_path_get_basename(resourcePath);
+        tempStr[strlen(tempStr) - 3] = '\0';
+        nameStr = tempStr;
+    }
+    else {
+        resourcePath = g_strconcat(XTRKCAD_RESOURCE_PATH,
+            nameStr,
+            ".ui",
+            NULL);
+        builder = gtk_builder_new_from_resource(resourcePath);
+    }
 
-    builder = gtk_builder_new_from_resource(resourcePath);
     dialog = GTK_WIDGET(gtk_builder_get_object(builder, nameStr));
-
     g_free(resourcePath);
     resourcePath = NULL;
+
+    if (!dialog)
+    {
+        GString* errorMessage = g_string_new("Dialog id is not: ");
+        g_string_append_printf(errorMessage, "%s", nameStr);
+        wNoticeEx(NT_ERROR,
+            errorMessage->str,
+            "OK",
+            NULL);
+        g_string_free(errorMessage, TRUE);
+        g_free(tempStr);
+        return(NULL);
+    }
+    g_free(tempStr);
 
     if (parent == NULL) {
         parentWindow = wlibAppWinGetMain();
@@ -230,7 +264,14 @@ wWinDialogCreate(wWindow_p parent,
     winDialog->gtkWindow = dialog;
     winDialog->name = g_strdup(nameStr);
     winDialog->winProc = winProc;
-    winDialog->builder = builder;
+
+    if (option & BO_USEBUILDER) {
+        winDialog->builder = builder;
+    }
+    else {
+        winDialog->builder = NULL;
+        g_object_unref(builder);
+    }
 
     return(winDialog);
 }
