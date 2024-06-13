@@ -1,6 +1,10 @@
-/** \file text.c
- * multi line text entry widget
- */
+/**
+* \file   text.c
+* \brief  Multi line text entry widget
+*
+* \author mf
+* \date   May 2024
+*/
 
 /*  XTrkCad - Model Railroad CAD
  *  Copyright (C) 2005 Dave Bullis
@@ -20,7 +24,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <string.h>
 #include <stdio.h>
 
 #define GTK_DISABLE_SINGLE_INCLUDES
@@ -52,6 +55,7 @@
  */
 
 struct wText_t {
+	wType_e type;
 	gchar* placeholder;
 	GtkTextTag* placeholderTag;
 	int changed;
@@ -513,7 +517,7 @@ void wTextComputeSize(wText_p bt, wWinPix_t rows, wWinPix_t cols,
 
 void wTextSetPosition(wText_p bt, int pos)
 {
-	/* TODO TextSetPosition */
+	/* \TODO TextSetPosition */
 }
 
 /**
@@ -561,6 +565,18 @@ static void userActivityStarts(GtkTextBuffer* self, wText_p textField)
 /**
  * Create a multiline text entry field
  *
+ * When used with builder, the multiline text widget has to be placed inside
+ * a scrolledwindow with id scrollwindow.
+ *
+ * ### Usage in dialogs, created by
+ *
+ * - runtime: no
+ * - builder: yes
+ *
+ * ### Options
+ * BO_READONLY
+ * : set entry field to read only
+ *
  * \param parent IN parent window
  * \param x IN x position
  * \param Y IN y position
@@ -572,6 +588,8 @@ static void userActivityStarts(GtkTextBuffer* self, wText_p textField)
  * \param action IN Button callback procedure
  * \param data IN ???
  * \return 	bb handle for created text widget
+ *
+ * \todo Options BT_HSCROLL, BT_CHARUNITS, BT_FIXEDFONT, BT_TOP
  */
 
 wText_p
@@ -588,11 +606,11 @@ wTextCreate(wWindow_p	parent,
 	GtkTextBuffer* tb;
 	// create the widget
 	bt = g_malloc0(sizeof(struct wText_t));
-
+	bt->type = B_TEXT;
 	bt->option = option;
 
 	if (option & BO_USEBUILDER) {
-		bt->widget = wlibGetWidgetFromName(parent, helpStr, "scrollwindow", FALSE);
+		bt->widget = wlibWidgetFromIdWarn(parent, "scrollwindow");
 		bt->text = wlibWidgetFromIdWarn(parent, helpStr);
 
 		if (bt->option & BO_READONLY) {

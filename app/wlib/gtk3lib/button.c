@@ -1,7 +1,10 @@
-/** \file button.c
- * Button creation and handling
- */
-
+/**
+* \file	button.c
+* \brief	Buttons
+*
+* \author mf
+* \date   May 2024
+*/
 /*  XTrkCad - Model Railroad CAD
  *  Copyright (C) 2005 Dave Bullis, 2024 Martin Fischer
  *
@@ -32,6 +35,7 @@
 #include "i18n.h"
 
 struct wButton_t {
+	wType_e type;
 	GtkWidget* widget;
 	wButtonCallBack_p action;
 	void* data;
@@ -99,10 +103,10 @@ void wlibSetLabel(
 			if (scaleicon<1.0) { scaleicon=1.0; }
 			if (scaleicon>2.0) { scaleicon=2.0; }
 			GdkPixbuf *pixbuf2 =
-			        gdk_pixbuf_scale_simple(pixbuf, 
-						(int)(gdk_pixbuf_get_width(pixbuf)*scaleicon),
-			            (int)(gdk_pixbuf_get_height(pixbuf)*scaleicon),
-						GDK_INTERP_BILINEAR);
+			        gdk_pixbuf_scale_simple(pixbuf,
+			                                (int)(gdk_pixbuf_get_width(pixbuf)*scaleicon),
+			                                (int)(gdk_pixbuf_get_height(pixbuf)*scaleicon),
+			                                GDK_INTERP_BILINEAR);
 			g_object_ref_sink(pixbuf);
 			g_object_unref((gpointer)pixbuf);
 			if (*imageG==NULL) {
@@ -135,7 +139,7 @@ void wlibSetLabel(
  * \param isIcon	IN label has to be interpreted as image
  * \param labelStr	IN new label string
  *
- * \todo icons in XBM format 
+ * \todo icons in XBM format
  */
 
 void wButtonSetLabel(wButton_p bb, unsigned isIcon, const char * labelStr)
@@ -198,14 +202,13 @@ static wBool_t drawButton(
 	return wControlExpose(widget, cr, (wControl_p)g);
 }
 
-
-
 /**
  * Create a button
  *
- * ### Usage in dialogs
+ * ### Usage in dialogs, created by
  *
- * - Generated: yes
+ * - runtime: yes
+ * - builder: yes
  *
  * ### Options
  * BB_DEFAULT
@@ -243,17 +246,14 @@ wButton_p wButtonCreate(
 	wButton_p b;
 
 	b = g_malloc0(sizeof(struct wButton_t));
-
+	b->type = B_BUTTON;
 	b->action = action;
 	b->data = data;
 
 	if (option & BO_USEBUILDER) {
-		/** \todo buttons created by builder */
+		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
 	} else {
 		b->widget = GTK_WIDGET(gtk_toggle_button_new());
-
-		g_signal_connect(G_OBJECT(b->widget), "clicked",
-		                 G_CALLBACK(buttonClick), b);
 
 		if (width > 0) {
 			gtk_widget_set_size_request(b->widget, width, -1);
@@ -273,7 +273,87 @@ wButton_p wButtonCreate(
 
 		gtk_widget_show(b->widget);
 	}
+
+	g_signal_connect(G_OBJECT(b->widget), "clicked",
+	                 G_CALLBACK(buttonClick), b);
+
 	wlibAddHelpString(b->widget, helpStr);
+	return b;
+}
+
+/**
+ * Create a toolbar button
+ *
+ * ### Usage in dialogs
+ *
+ * - Generated: yes
+ * - builder: not required
+ *
+ * ### Options
+ * BO_GAP
+ * : leave some space after the button. Technically this is an invisible
+ * separator
+ *
+ * \param parent IN		application main window
+ * \param x,y  IN		unused
+ * \param helpStr IN	help string
+ * \param icon IN		pointer to icon (XPM)
+ * \param option IN		options
+ * \param width IN		unused
+ * \param action IN		callback
+ * \param data IN		user data as context
+ * \returns button widget
+ *
+ * \todo replace XBM format (layer buttons) or add support in buttons.
+ * layer buttons are created in dlayer.c
+ *
+ */
+
+wButton_p wButtonCreateForToolbar(
+        wWindow_p	parent,
+        wWinPix_t	x,
+        wWinPix_t	y,
+        const char* helpStr,
+        const char* labelStr,
+        long 	option,
+        wWinPix_t 	width,
+        wButtonCallBack_p action,
+        void* data)
+{
+	wButton_p b;
+	GtkStyleContext* context;
+
+	/**
+	 * \todo make sure that parent is appmainwindow.
+	 */
+	b = g_malloc0(sizeof(struct wButton_t));
+
+	b->action = action;
+	b->data = data;
+
+	b->widget = GTK_WIDGET(gtk_toggle_button_new());
+	context = gtk_widget_get_style_context(GTK_WIDGET(b->widget));
+	gtk_style_context_add_class(context, "flat-button");
+
+	g_signal_connect(G_OBJECT(b->widget), "clicked",
+	                 G_CALLBACK(buttonClick), b);
+
+	wButtonSetLabel(b, BO_ICON, labelStr);
+
+	gtk_container_add(GTK_CONTAINER(parent->toolbar), b->widget);
+	gtk_widget_show(b->widget);
+
+	context = gtk_widget_get_style_context(GTK_WIDGET(parent->toolbar));
+	//gtk_style_context_remove_class(context, "image-button");
+	char* styles = gtk_style_context_to_string(context, 2);
+	if (option & BO_GAP) {
+		GtkWidget* separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
+		gtk_container_add(GTK_CONTAINER(parent->toolbar), separator);
+		gtk_widget_show(separator);
+	}
+
+	wlibAddHelpString(b->widget, helpStr);
+
 	return b;
 }
 

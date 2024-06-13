@@ -130,6 +130,21 @@ wWindow_p wWinMainCreate(
 
 /*------------------------------------------------------------------------------
  *
+ * String entry
+ */
+
+ /* Creation CallBacks */
+typedef bool (*wEntryCallBack_p)(const char* enteredString, void* userData);
+
+wEntry_p wEntryCreate(wWindow_p parent, wWinPix_t x, wWinPix_t y,
+    const char* helpStr, const char* labelStr, long option, wWinPix_t width,
+    char* valueP, wIndex_t valueL, wEntryCallBack_p action, void* data);
+void wEntrySetValue(wEntry_p control, const char* value);
+void wEntrySetWidth(wEntry_p cntrol, wWinPix_t width);
+const char* wEntryGetValue(wEntry_p control);
+
+/*------------------------------------------------------------------------------
+ *
  * File Selection
  */
 
@@ -149,6 +164,86 @@ struct wFilSel_t* wFilSelCreate(wWindow_p w, wFilSelMode_e mode, int opt,
     void* data);
 int wFilSelect(struct wFilSel_t* fs, const char* dirName);
 
+/*------------------------------------------------------------------------------
+ *
+ * Text
+ */
+
+ /* Creation Options */
+#define BT_HSCROLL 	(1L<<24)
+#define BT_CHARUNITS	(1L<<23)
+#define BT_FIXEDFONT	(1L<<22)
+#define BT_TOP		(1L<<20)	/* Show the top of the text */
+
+wText_p wTextCreate(wWindow_p parent, wWinPix_t x, wWinPix_t y,
+    const char* helpStr, const char* labelStr, long option,
+    wWinPix_t width, wWinPix_t	height);
+
+void wTextClear(wText_p bt);
+void wTextAppend(wText_p bt, const char* text);
+wBool_t wTextSave(wText_p bt, const char* fileName);
+wBool_t wTextPrint(wText_p bt);
+int wTextGetSize(wText_p bt);
+void wTextGetText(wText_p bt, char* text, int len);
+void wTextSetReadonly(wText_p bt, wBool_t ro);
+wBool_t wTextGetModified(wText_p bt);
+void wTextSetSize(wText_p bt, wWinPix_t w, wWinPix_t h);
+void wTextComputeSize(wText_p bt, wWinPix_t rows, wWinPix_t cols,
+    wWinPix_t* width, wWinPix_t* height);
+void wTextSetPosition(wText_p bt, int pos);
+
+/*------------------------------------------------------------------------------
+ *
+ * Buttons, toggles and radiobuttons button.c
+ *
+ */
+
+/* Creation Options */
+#define BB_DEFAULT	(1L<<5)
+#define BB_CANCEL	(1L<<6)
+#define BB_HELP (1L<<7)
+
+/* Creation CallBacks */
+typedef void (*wChoiceCallBack_p)(long, void*);
+
+/* Creation Options */
+#define BC_ICON 	(1L<<0)
+#define BC_HORZ 	(1L<<22)
+#define BC_NONE 	(1L<<19)
+#define BC_NOBORDER 	(1L<<15)
+
+/**  Buttons button.c */
+
+/* Creation CallBacks */
+typedef void (*wButtonCallBack_p)(void*);
+
+void wButtonSetLabel(wButton_p bb, unsigned isIcon, const char* labelStr);
+void wButtonSetBusy(wButton_p bb, int value);
+wButton_p wButtonCreate(wWindow_p parent, wWinPix_t x, wWinPix_t y,
+    const char* helpStr, const char* labelStr, long option,
+    wWinPix_t width, wButtonCallBack_p action, void* data);
+
+wButton_p wButtonCreateForToolbar(wWindow_p  w, wWinPix_t x, wWinPix_t	y, const char* helpStr, const char* labelStr, long option, wWinPix_t width, wButtonCallBack_p action, void* data);
+
+/** Radio buttons radio.c */
+
+void wRadioSetValue(wChoice_p bc, long value);
+long wRadioGetValue(wChoice_p bc);
+wChoice_p wRadioCreate(wWin_p parent, wWinPix_t x, wWinPix_t y,
+    const char* helpStr, const char* labelStr, long option,
+    const char* const* labels, long* valueP, wChoiceCallBack_p action, void* data);
+
+/** Toggle buttons toggle.c */
+
+void wToggleSetValue(wChoice_p bc, long value);
+long wToggleGetValue(wChoice_p b);
+wChoice_p wToggleCreate(wWindow_p parent, wWinPix_t x, wWinPix_t y,
+    const char* helpStr, const char* labelStr, long option,
+    const char* const* labels, long* valueP,
+    wChoiceCallBack_p action, void* data);
+
+ /* = *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= */
+  
 /*------------------------------------------------------------------------------
  *
  * Bitmap Controls bitmap.c
@@ -185,52 +280,7 @@ void wlibDrawBox(wWin_p win, wBoxType_e style, wWinPix_t x, wWinPix_t y,
 wBox_p wBoxCreate(wWin_p parent, wWinPix_t bx, wWinPix_t by,
                   const char *labelStr, wBoxType_e boxTyp, wWinPix_t bw, wWinPix_t bh);
 
-/*------------------------------------------------------------------------------
- *
- * Buttons, toggles and radiobuttons button.c
- *
- */
 
-/* Creation CallBacks */
-typedef void (*wButtonCallBack_p)( void * );
-
-/* Creation Options */
-#define BB_DEFAULT	(1L<<5)
-#define BB_CANCEL	(1L<<6)
-#define BB_HELP (1L<<7)
-
-/* Creation CallBacks */
-typedef void (*wChoiceCallBack_p)( long, void * );
-
-/* Creation Options */
-#define BC_ICON 	(1L<<0)
-#define BC_HORZ 	(1L<<22)
-#define BC_NONE 	(1L<<19)
-#define BC_NOBORDER 	(1L<<15)
-
-void wButtonSetLabel(wButton_p bb, unsigned isIcon, const char *labelStr);
-void wButtonSetBusy(wButton_p bb, int value);
-wButton_p wButtonCreate(wWindow_p parent, wWinPix_t x, wWinPix_t y,
-    const char *helpStr, const char *labelStr, long option, 
-    wWinPix_t width, wButtonCallBack_p action, void *data);
-
-/** Radio buttons radio.c */
-
-void wRadioSetValue(wChoice_p bc, long value);
-long wRadioGetValue(wChoice_p bc);
-void wToggleSetValue(wChoice_p bc, long value);
-long wToggleGetValue(wChoice_p b);
-wChoice_p wRadioCreate(wWin_p parent, wWinPix_t x, wWinPix_t y,
-                       const char *helpStr, const char *labelStr, long option,
-                       const char * const *labels, long *valueP, wChoiceCallBack_p action, void *data);
-
-wChoice_p wToggleCreate(wWindow_p parent, wWinPix_t x, wWinPix_t y,
-                        const char *helpStr, const char *labelStr, long option,
-                        const char * const *labels, long *valueP, 
-                        wChoiceCallBack_p action, void *data);
-
-//void wButtonToolBarRedraw(wWin_p win);
-wButton_p wButtonCreateForToolbar(wWindow_p  w, wWinPix_t x, wWinPix_t	y,const char *helpStr, const char *labelStr, long option, wWinPix_t width, wButtonCallBack_p action, void * data);
 
 
 /*------------------------------------------------------------------------------
@@ -318,9 +368,7 @@ FILE * wFileOpen(		const char *, const char * );
  * Main and Popup Windows
  */
 
-
-
-
+#define DO_FILESYSTEM 1
 
 wWindow_p wWinDialogCreate(wWindow_p parent, const char* helpStr, const char* titleStr,
     const char* nameStr, long option, wWinCallBack_p winProc, void* data);
@@ -398,21 +446,6 @@ void wControlHilite(		wControl_p, wBool_t );
 void wControlLinkedSet( wControl_p b1, wControl_p b2 );
 void wControlLinkedActive( wControl_p b, int active );
 
-/*------------------------------------------------------------------------------
- *
- * String entry
- */
-
-//#define BS_TRIM			(1<<12)
-/* Creation CallBacks */
-typedef bool (*wEntryCallBack_p)(const char* enteredString, void* userData);
-
-wEntry_p wEntryCreate(wWindow_p parent, wWinPix_t x, wWinPix_t y, 
-    const char* helpStr, const char* labelStr, long option, wWinPix_t width, 
-    char* valueP, wIndex_t valueL, wEntryCallBack_p action, void* data);
-void wEntrySetValue(wEntry_p control, const char* value );
-void wEntrySetWidth(wEntry_p cntrol, wWinPix_t width);
-const char* wEntryGetValue(wEntry_p control);
 
 /*------------------------------------------------------------------------------
  *
@@ -536,34 +569,7 @@ typedef struct {
 wLine_p wLineCreate(		wWin_p, const char *, int, wLines_t *);
 
 
-/*------------------------------------------------------------------------------
- *
- * Text
- */
 
-/* Creation Options */
-#define BT_HSCROLL 	(1L<<24)
-#define BT_CHARUNITS	(1L<<23)
-#define BT_FIXEDFONT	(1L<<22)
-#define BT_DOBOLD	(1L<<21)
-#define BT_TOP		(1L<<20)	/* Show the top of the text */
-
-wText_p wTextCreate(wWindow_p parent, wWinPix_t x, wWinPix_t y,
-    const char* helpStr, const char* labelStr, long option,
-    wWinPix_t width, wWinPix_t	height);
-
-void wTextClear(wText_p bt);
-void wTextAppend(wText_p bt, const char* text);
-wBool_t wTextSave(wText_p bt, const char* fileName);
-wBool_t wTextPrint(wText_p bt);
-int wTextGetSize(wText_p bt);
-void wTextGetText(wText_p bt, char* text, int len);
-void wTextSetReadonly(wText_p bt, wBool_t ro);
-wBool_t wTextGetModified(wText_p bt);
-void wTextSetSize(wText_p bt, wWinPix_t w, wWinPix_t h);
-void wTextComputeSize(wText_p bt, wWinPix_t rows, wWinPix_t cols,
-    wWinPix_t* width,wWinPix_t* height);
-void wTextSetPosition( wText_p bt, int pos );
 
 
 /*------------------------------------------------------------------------------
