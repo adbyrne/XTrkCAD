@@ -1136,32 +1136,6 @@ wlibAddButtonToolbar(wButton_p button)
  * \return GtkWidget* 
  */
 
-static GtkWidget *
-createToolbar(GtkContainer *container)
-{
-    GtkWidget *toolbar;
-	toolbar = egg_wrap_box_new (EGG_WRAP_ALLOCATE_FREE,
-	                            EGG_WRAP_BOX_SPREAD_START,
-	                            EGG_WRAP_BOX_SPREAD_START,
-	                            2, 2);
-	egg_wrap_box_set_minimum_line_children (EGG_WRAP_BOX (toolbar), 15);
-	egg_wrap_box_set_natural_line_children (EGG_WRAP_BOX (toolbar), 60);
-	gtk_widget_set_hexpand(toolbar,TRUE);
-    gtk_container_add(container, toolbar);
-
-	GdkScreen * screen = gdk_screen_get_default();
-	GtkCssProvider * provider = gtk_css_provider_new();
-	GtkStyleContext * context = gtk_widget_get_style_context(toolbar);
-		
-    static const char style[] = ".image-button {min-width:5px } ";
-	gtk_css_provider_load_from_data(provider, style, strlen(style), NULL);
-	gtk_style_context_add_provider_for_screen(screen,
-	                GTK_STYLE_PROVIDER(provider),
-	                GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-
-    return(toolbar);
-}
-
 /**
  * Create a window.
  * Default width and height are replaced by values stored in the configuration

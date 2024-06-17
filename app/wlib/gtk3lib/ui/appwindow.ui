@@ -34,7 +34,7 @@
                     <property name="valign">GTK_ALIGN_START</property>
                     <property name="max-children-per-line">80</property>
                     <property name="selection-mode">GTK_SELECTION_NONE</property>
-                    <child>
+                    <!-- <child>
                       <object class="GtkButton">
                         <property name="visible">1</property>
                         <property name="label">1</property>
@@ -45,7 +45,7 @@
                         <property name="label">2</property>
                         <property name="visible">1</property>
                       </object>
-                    </child>
+                    </child> -->
                   </object>
                 </child>
               </object>

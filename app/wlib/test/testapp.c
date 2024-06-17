@@ -617,13 +617,28 @@ ChoiceCallback(long value, void* unused)
 	printf("Choice callback: value=%ld\n", value);
 }
 
+wButtonCallBack_p
+ButtonCallback(void* choice)
+{
+	printf("Button clicked %d\n", (int)choice);
+}
+
 void CheckboxTest(void* builderFile)
 {
 	wChoice_p choice;
+	wText_p text;
+
 	wWindow_p dialog = DialogViewer((char*)builderFile);
 	
 	choice = wToggleCreate(dialog, 0, 0, "label", NULL, BO_USEBUILDER, NULL, &choiceSelect, ChoiceCallback, NULL);
 	wToggleSetValue(choice, 1L);
+
+	text = wTextCreate(dialog, 0, 0, "text", NULL, BO_READONLY | BO_USEBUILDER, 0, 0);
+	wTextClear(text);
+	wTextAppend(text, "This is the default text");
+
+	wButtonCreate(dialog, 0, 0, "tip-prev", NULL, BO_USEBUILDER, 0, ButtonCallback,(void *)- 1);
+	wButtonCreate(dialog, 0, 0, "tip-next", NULL, BO_USEBUILDER, 0, ButtonCallback, (void *)1);
 }
 
 void
@@ -795,7 +810,7 @@ void TestMenu(wWindow_p mainW)
 
 	wMenuPushCreate(menu,
 		NULL,
-		"Toggle, Multiline",
+		"Toggle, Multiline Text",
 		NULL,
 		CheckboxTest,
 		"tip.ui");

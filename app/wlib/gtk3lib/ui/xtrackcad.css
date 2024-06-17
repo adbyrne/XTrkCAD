@@ -15,12 +15,24 @@
     font-size: 140% 
 }
 
+flowboxchild > separator {
+    background: @fg_color; 
+    padding: 0px;
+}
+
+.flat-button {
+    border: none; 
+    box-shadow: none;
+    margin: 0px; 
+    padding: 0px;
+}
+
 /* color buttons have no border */
 button.color {
     border: none
 }
 
-/* framed box */
+framed box
 box.framed {
     border:1px solid rgb(192, 192, 192)
 }

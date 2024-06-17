@@ -46,7 +46,7 @@
                         <property name="column_spacing">12</property>
                         <property name="margin-bottom">12</property>
                         <child>
-                            <object class="GtkEntry" id="block-name">
+                            <object class="GtkEntry" id="name">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="max_length">80</property>
@@ -59,7 +59,7 @@
                             </packing>
                         </child>
                         <child>
-                            <object class="GtkEntry" id="block-script">
+                            <object class="GtkEntry" id="script">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="max-length">1024</property>

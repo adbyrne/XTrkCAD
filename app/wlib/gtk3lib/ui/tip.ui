@@ -31,7 +31,6 @@
         <property name="can-focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">6</property>
-
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
@@ -79,7 +78,7 @@
             <property name="halign">fill</property>
             <property name="vexpand">True</property>
             <child>
-              <object class="GtkToggleButton" id="tip-prev">
+              <object class="GtkButton" id="tip-prev">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
@@ -129,7 +128,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToggleButton" id="tip-next">
+              <object class="GtkButton" id="tip-next">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
@@ -160,15 +159,20 @@
           </packing>
         </child>
         <child>
-          <object class="GtkCheckButton">
-            <property name="label" translatable="yes">_Show tip at startup</property>
+          <object class="GtkBox" id="label">
+            <property name="orientation">vertical</property>
             <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">False</property>
-            <property name="use-underline">True</property>
-            <property name="draw-indicator">True</property>
-            <property name="margin-bottom">12</property>
-
+            <child>
+              <object class="GtkCheckButton">
+                <property name="label" translatable="yes">_Show tip at startup</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">False</property>
+                <property name="use-underline">True</property>
+                <property name="draw-indicator">True</property>
+                <property name="margin-bottom">12</property>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>

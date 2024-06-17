@@ -26,11 +26,25 @@
 
 typedef enum { BALLOONHELP, BALLOONHELPI18N } mode_e;
 
+struct messageData {
+    char* line;
+    char* message;
+};
+
+int
+CompareMessages(const struct messageData *msg1, const struct messageData *msg2)
+{
+    return(strcmp(msg1->line, msg2->line));
+}
+
 int process(mode_e mode, char * json, FILE * outFile)
 {
     const cJSON *messages = NULL;
     const cJSON *messageLine = NULL;
+    int cntMessages;
+    int i = 0;
     int status = 0;
+    struct messageData *messageList = NULL;
 
     cJSON *message_json = cJSON_Parse(json);
     if (message_json == NULL) {
@@ -54,30 +68,46 @@ int process(mode_e mode, char * json, FILE * outFile)
 
 
     messages = cJSON_GetObjectItemCaseSensitive(message_json, "messages");
+    cntMessages = cJSON_GetArraySize(messages);
+    messageList = malloc(sizeof(struct messageData) * cntMessages);
+    if (!messageList) {
+        fprintf(stderr, "Could not allocate storage for message list\n");
+        return(1);
+    }
+
     cJSON_ArrayForEach(messageLine, messages) {
-        cJSON *line = cJSON_GetObjectItemCaseSensitive(messageLine, "line");
-        cJSON *contents = cJSON_GetObjectItemCaseSensitive(messageLine, "contents");
+        cJSON* line = cJSON_GetObjectItemCaseSensitive(messageLine, "line");
+        cJSON* contents = cJSON_GetObjectItemCaseSensitive(messageLine, "contents");
 
         if (!cJSON_IsString(line) || !cJSON_IsString(contents)) {
             status = 0;
             goto end;
         }
 
-        if (contents->valuestring != NULL) {
+        messageList[i].line = line->valuestring;
+        messageList[i].message = contents->valuestring;
+        i++;
+    }
+
+    qsort(messageList, cntMessages, sizeof(struct messageData),  CompareMessages);
+
+    for(int i=0; i < cntMessages; i++ ) {
+
+        if (messageList[i].message != NULL) {
             if (mode == BALLOONHELP) {
-                fprintf(outFile, "\t{ \"%s\", \"%s\" },\n", line->valuestring,
-                        contents->valuestring);
+                fprintf(outFile, "\t{ \"%s\", \"%s\" },\n", messageList[i].line,
+                    messageList[i].message);
             } else {
-                if (contents->valuestring[0]) {
-                    fprintf(outFile, "\t{ \"%s\", N_(\"%s\") },\n", line->valuestring,
-                            contents->valuestring);
+                if (messageList[i].message[0]) {
+                    fprintf(outFile, "\t{ \"%s\", N_(\"%s\") },\n", messageList[i].line,
+                        messageList[i].message);
                 } else {
-                    fprintf(outFile, "\t{ \"%s\", \"\" },\n", line->valuestring);
+                     fprintf(outFile, "\t{ \"%s\", \"\" },\n", messageList[i].line);
                 }
             }
         } else {
-            fprintf(outFile, "\t{ \"%s\", \"No help\" },\n", line->valuestring);
-            fprintf(stderr, "INFO: %s has an empty help text\n", line->valuestring);
+            fprintf(outFile, "\t{ \"%s\", \"No help\" },\n", messageList[i].line);
+            fprintf(stderr, "INFO: %s has an empty help text\n", messageList[i].line);
         }
     }
 
