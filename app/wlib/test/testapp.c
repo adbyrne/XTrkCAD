@@ -232,7 +232,7 @@ void doFile( void * cmd )
 	static int recent = 1;
 	char buffer[20];
 
-      switch ((int)cmd) {
+      switch ((uintptr_t)cmd) {
 		case 1:
 			sprintf(buffer, "Recent %d", recent++);
 			wMenuListAdd(menuList, 0, buffer, "data for recent x");
@@ -257,9 +257,9 @@ void doFile( void * cmd )
  */
 
 void
-RecentUsedCallback(int unused, char *label, char* data)
+RecentUsedCallback(int unused, const char *label, void * data)
 {
-	printf("Recent used: %s - %s\n", label, data);
+	printf("Recent used: %s - %s\n", label, (char *)data);
 }
 
 //
@@ -432,7 +432,7 @@ SimpleDynamicProc(wWindow_p window, winProcEvent event, void* data, void* data2)
 }
 
 bool
-EntryCallBack(char* string, wEntry_p entry)
+EntryCallBack(const char* string, wEntry_p entry)
 {
 	printf("Entered <%s>\n", string);
 
@@ -446,7 +446,7 @@ EntryCallBack(char* string, wEntry_p entry)
 
 wButton_p button; 
 
-wButtonCallBack_p
+void
 ButtonAction(void* data)
 {
 	static bool clicked = 0;
@@ -458,8 +458,8 @@ ButtonAction(void* data)
 	clicked = !clicked;
 }
 
-wListCallBack_p
-ComboBoxAction(unsigned inx, char* string, unsigned inx2, void* data, void* data2)
+void
+ComboBoxAction(unsigned inx, const char* string, unsigned inx2, void* data, void* data2)
 {
 	printf("Selected from combo box: %s\n", string);
 }
@@ -525,7 +525,7 @@ SimpleDynamic(void* unused)
 		wComboBoxAddValue(combo, comboLines[i], NULL);
 	}
 
- 	button = wButtonCreate(dialog, 1, 9, "bitmapbutton", map_x16, BO_ICON, 1, NULL, NULL);
+ 	button = wButtonCreate(dialog, 1, 9, "bitmapbutton", (const char *)map_x16, BO_ICON, 1, NULL, NULL);
 }
 
 void Notice(void* unused)
@@ -553,11 +553,11 @@ int LoadDesign(
 }
 
 void
-RecentUsedDesigns(int unused, char* label, char* data)
+RecentUsedDesigns(int unused, const char* label, void * data)
 {
 	wWindow_p dialog;
 
-	printf("Recently used design: %s - %s\n", label, data);
+	printf("Recently used design: %s - %s\n", label, (char *)data);
 	dialog = wWinDialogCreate(mainW, "", "UI Viewer", label, DO_FILESYSTEM,
 		SimpleDynamicProc, NULL);
 }
@@ -593,7 +593,7 @@ char entry1[80] = "Name";
 char entry2[80] = "Script";
 
 bool
-TestLength(char* value, void* data)
+TestLength(const char* value, void* data)
 {
 	if (strlen(value) < 4)
 		return(false);
@@ -614,16 +614,16 @@ void TextFieldTest(void* builder)
 
 long choiceSelect;
 
-wChoiceCallBack_p
+void
 ChoiceCallback(long value, void* unused)
 {
 	printf("Choice callback: value=%ld\n", value);
 }
 
-wButtonCallBack_p
+void
 ButtonCallback(void* choice)
 {
-	printf("Button clicked %d\n", (int)choice);
+	printf("Button clicked %d\n", (int)(uintptr_t)choice);
 }
 
 void CheckboxTest(void* builderFile)
@@ -804,21 +804,21 @@ void TestMenu(wWindow_p mainW)
 	wMenuPushCreate(menu,
 		NULL,
 		"UI _Viewer",
-		NULL,
+		0L,
 		Viewer,
 		menuDesigns);
 
 	wMenuPushCreate(menu,
 		NULL,
 		"Text Entries",
-		NULL,
+		0L,
 		TextFieldTest,
 		"block.ui");
 
 	wMenuPushCreate(menu,
 		NULL,
 		"Toggle, Multiline Text",
-		NULL,
+		0L,
 		CheckboxTest,
 		"tip.ui");
 }
@@ -847,13 +847,13 @@ TestStatusbar(wWindow_p mainWindow)
 void
 TestToolbar(wWindow_p mainWindow)
 {
-  	wButton_p button = 	wButtonCreateForToolbar(mainWindow, 0, 0, "", map_x16,
+  	wButton_p button = 	wButtonCreateForToolbar(mainWindow, 0, 0, "", (const char *)map_x16,
 		0, 0, NULL, NULL);
 
-	button = wButtonCreateForToolbar(mainWindow, 0, 0, "", ballgreen,
+	button = wButtonCreateForToolbar(mainWindow, 0, 0, "", (const char *)ballgreen,
 		BO_GAP, 0, NULL, NULL);
 
-	button = wButtonCreateForToolbar(mainWindow, 0, 0, "", yellowstar,
+	button = wButtonCreateForToolbar(mainWindow, 0, 0, "", (const char *)yellowstar,
 		0, 0, NULL, NULL);
 }
 

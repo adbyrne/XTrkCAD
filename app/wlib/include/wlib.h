@@ -229,7 +229,7 @@ wButton_p wButtonCreateForToolbar(wWindow_p  w, wWinPix_t x, wWinPix_t	y, const 
 
 void wRadioSetValue(wChoice_p bc, long value);
 long wRadioGetValue(wChoice_p bc);
-wChoice_p wRadioCreate(wWin_p parent, wWinPix_t x, wWinPix_t y,
+wChoice_p wRadioCreate(wWindow_p parent, wWinPix_t x, wWinPix_t y,
     const char* helpStr, const char* labelStr, long option,
     const char* const* labels, long* valueP, wChoiceCallBack_p action, void* data);
 
@@ -475,7 +475,7 @@ double wFloatGetValue(		wFloat_p );
  */
 
 /* Creation CallBacks */
-typedef void (*wListCallBack_p)( wIndex_t, const char *, wIndex_t, void *,
+typedef void (*wListCallBack_p)( unsigned int , const char *, unsigned int, void *,
                                  void * );
 
 /* Creation Options */
