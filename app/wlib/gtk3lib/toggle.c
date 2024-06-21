@@ -185,6 +185,7 @@ wChoice_p wToggleCreate(
 	wChoice_p b;
 
 	b = g_malloc0(sizeof(struct wChoice_t));
+	b->type = B_TOGGLE;
 	b->action = action;
 	b->valueP = valueP;
 
@@ -229,6 +230,7 @@ wChoice_p wToggleCreate(
 			                 G_CALLBACK(toggled), b);
 
 			wlibAddHelpString(butt, helpStr);
+			wlibAddTooltip(butt, parent->name, helpStr);
 		}
 
 		if (valueP) {

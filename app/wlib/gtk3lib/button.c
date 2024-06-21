@@ -327,7 +327,7 @@ wButton_p wButtonCreateForToolbar(
 	 * \todo make sure that parent is appmainwindow.
 	 */
 	b = g_malloc0(sizeof(struct wButton_t));
-
+	b->type = B_BUTTON;
 	b->action = action;
 	b->data = data;
 
@@ -353,6 +353,7 @@ wButton_p wButtonCreateForToolbar(
 	}
 
 	wlibAddHelpString(b->widget, helpStr);
+	wlibAddTooltip(b->widget, parent->name, helpStr);
 
 	return b;
 }

@@ -1,5 +1,8 @@
 /** \file tooltip.c
  * Code for tooltip / balloon help functions
+ * 
+ * \todo Balloon.. should be replaced by Tooltip... for clarity
+ * 
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -40,6 +43,8 @@ wBool_t listHelpStrings = FALSE;
 wBool_t listMissingHelpStrings = FALSE;
 
 static wBalloonHelp_t * balloonHelpStrings;
+static int tooltipsCount;
+
 static int enableBalloonHelp = TRUE;
 
 static GtkWidget * balloonF; 	/**< balloon help control for hotbar item */
@@ -70,7 +75,12 @@ wlibHelpHideBalloon()
 
 void wSetBalloonHelp( wBalloonHelp_t * bh )
 {
+	int i;
     balloonHelpStrings = bh;
+	for (i = 0; balloonHelpStrings[i].name != NULL ; i++)
+		;
+
+	tooltipsCount = i;
 }
 
 /**
@@ -237,6 +247,8 @@ void wBalloonHelpUpdate( void )
  *
  * \param widget IN widget
  * \param helpStr IN symbolic link into help system
+ * 
+ * \todo Remove adding tooltip text from here
  */
 
 void wlibAddHelpString(
@@ -272,4 +284,125 @@ void wlibAddHelpString(
     if (listHelpStrings)
         printf( "HELPSTR - %s\n", string );
 
+}
+
+/**
+ * A recursive binary search function. It returns location of x in
+ * given array arr[l..r] is present, otherwise -1
+ * Taken from http://www.geeksforgeeks.org/binary-search/ and modified
+ *
+ * \param arr IN array to search
+ * \param l IN starting index
+ * \param r IN highest index in array
+ * \param key IN key to search
+ * \return index if found, -1 otherwise
+ */
+
+static int binarySearch(wBalloonHelp_t arr[], int l, int r, char* key)
+{
+	if (r >= l) {
+		int mid = l + (r - l) / 2;
+		int res = strcmp(key, arr[mid].name);
+
+		// If the element is present at the middle itself
+		if (!res) {
+			return mid;
+		}
+
+		// If the array size is 1
+		if (r == 0) {
+			return -1;
+		}
+
+		// If element is smaller than mid, then it can only be present
+		// in left subarray
+		if (res < 0) {
+			return binarySearch(arr, l, mid - 1, key);
+		}
+
+		// Else the element can only be present in right subarray
+		return binarySearch(arr, mid + 1, r, key);
+	}
+
+	// We reach here when element is not present in array
+	return -1;
+}
+
+/**
+ * Search for the widgets tooltip in the list of tooltips. Performs a binary
+ * search on the array.
+ * 
+ * \param	field	IN the id of the widget, usually <dialogname>-<widgetname>
+ * \return	index of the tooltip
+ * 
+ * \todo Add i18n (see commented out code line)
+ */
+
+static const char *
+FindTooltip(gchar* field) {
+	wBalloonHelp_t *bhp;
+	int res;
+
+	res = binarySearch(balloonHelpStrings, 0, 
+		tooltipsCount, 
+		field);
+
+	if (res==-1) {
+		return("No help found!");
+	}
+	else {
+
+//		wlibConvertInput(_(balloonHelpStrings[res].value)));
+		return(balloonHelpStrings[res].value);
+	}
+}
+
+/**
+ * Signal handler for tooltips. 
+ * 
+ * \todo check respective option for enable status of tooltips
+ * 
+ * \param self	
+ * \param x
+ * \param y
+ * \param keyboard_mode
+ * \param tooltip
+ * \param user_data	pointer to the tooltip
+ * \return 
+ */
+
+static gboolean
+queryTooltipEvent(GtkWidget* self,
+	gint x,
+	gint y,
+	gboolean keyboard_mode,
+	GtkTooltip* tooltip,
+	gpointer user_data)
+{
+	gtk_tooltip_set_text(tooltip, user_data);
+	return(TRUE);
+}
+
+/**
+ * Enables tooltip for the widget. The dialog name and the widget name are
+ * concatenated. This string is used as search string for the list of 
+ * tooltips. If found tooltip is enabled for the widget using the search 
+ * result.
+ * 
+ * \param widget	IN	the widget
+ * \param dialog	IN	name of parent dialog
+ * \param field		IN	name of widget
+ */
+
+void
+wlibAddTooltip(GtkWidget* widget, char* dialog, char* field)
+{
+	gchar* fieldId = g_strdup_printf("%s-%s", dialog, field);
+
+	if (fieldId) {
+		g_signal_connect(widget, "query-tooltip", G_CALLBACK(queryTooltipEvent), FindTooltip(fieldId));
+		gtk_widget_set_has_tooltip(widget, true);
+	}
+
+	g_free(fieldId);
 }

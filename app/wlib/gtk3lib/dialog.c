@@ -235,7 +235,7 @@ wWinDialogCreate(wWindow_p parent,
         g_free(tempStr);
         return(NULL);
     }
-    g_free(tempStr);
+
 
     if (parent == NULL) {
         parentWindow = wlibAppWinGetMain();
@@ -273,6 +273,7 @@ wWinDialogCreate(wWindow_p parent,
         g_object_unref(builder);
     }
 
+    g_free(tempStr);
     return(winDialog);
 }
 

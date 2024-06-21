@@ -30,6 +30,16 @@
 
 #include "gtkint.h"
 
+
+struct wColorButton_t {
+	wType_e type;
+	GtkWidget* widget;
+	wDrawColor* valueP;
+	const char* labelStr;
+	wColorSelectButtonCallBack_p action;
+	void* data;
+};
+
 wDrawColor wDrawColorWhite;
 wDrawColor wDrawColorBlack;
 
@@ -249,6 +259,7 @@ wColorButton_p wColorSelectButtonCreate(
 	wColorButton_p b;
 
 	b = g_malloc0(sizeof(struct wColorButton_t));
+	b->type = B_COLORBUTTON;
 
 	if (option & BO_USEBUILDER) {
 		/** 

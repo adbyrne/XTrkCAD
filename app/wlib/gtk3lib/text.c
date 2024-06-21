@@ -670,6 +670,7 @@ wTextCreate(wWindow_p	parent,
 		bt->placeholder = g_strdup(labelStr);
 		wlibSetPlaceholder(bt);
 	}
+	wlibAddTooltip(bt->text, parent->name, helpStr);
 
 	if (!(option & BO_USEBUILDER)) {
 		/* place the widget in a fixed position of the parent */

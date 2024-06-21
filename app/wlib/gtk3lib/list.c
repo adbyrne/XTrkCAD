@@ -548,6 +548,7 @@ wList_p wListCreate(
 	bl = g_malloc0(sizeof(struct wList_t));
 	bl->valueP = valueP;
 	bl->action = action;
+	bl->type = B_LIST;
 
 
 	if (option & BO_USEBUILDER) {
@@ -599,6 +600,7 @@ wList_p wListCreate(
 
 	wlibAddButton((wControl_p)bl);
 	wlibAddHelpString(bl->widget, helpStr);
+	wlibAddTooltip(bl->widget, parent->name, helpStr);
 
 	return bl;
 }

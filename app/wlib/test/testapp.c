@@ -28,6 +28,9 @@
 #include "wlib.h"
 #include <string.h>
 
+#define N_ 
+#include "tooltips.h"
+
 #define APPNAME "testapp"
 #define WINDOWTITLE "Test Application"
 
@@ -602,7 +605,7 @@ void TextFieldTest(void* builder)
 {
 	wEntry_p widget1;
 	wEntry_p widget2;
-	wWindow_p dialog = DialogViewer((char*)builder);
+  	wWindow_p dialog = DialogViewer((char*)builder);
 
 	widget1 = wEntryCreate(dialog, 0, 0, "name", NULL, 0L, 0, entry1, sizeof(entry1) - 1, TestLength, NULL);
 
@@ -788,11 +791,15 @@ void TestMenu(wWindow_p mainW)
 		(void*)3 			/* pointer to user data */
 	);
 
+	wSetBalloonHelp(balloonHelp);
+
 	menu = wMenuBarAdd(mainW, NULL, "_UI Designs");
 	wMenu_p menuRecent;
 	wMenuList_p menuDesigns;
 	menuRecent = wMenuMenuCreate((wMenu_p)menu, NULL, "Recently used");
 	menuDesigns = wMenuListCreate(menuRecent, NULL, 10, RecentUsedDesigns);
+
+
 
 	wMenuPushCreate(menu,
 		NULL,

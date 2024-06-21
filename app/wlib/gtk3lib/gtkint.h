@@ -69,7 +69,8 @@ typedef enum {
 		B_RADIO, B_TOGGLE,
 		B_DRAW, B_MENU, B_MULTITEXT, B_MESSAGE, B_LINES,
 		B_MENUITEM, B_BOX,
-		B_BITMAP, B_STATUS } wType_e;
+		B_BITMAP, B_STATUS,
+		B_COLORBUTTON } wType_e;
 
 typedef void (*repaintProcCallback_p)( wControl_p );
 typedef void (*doneProcCallback_p)( wControl_p b );
@@ -265,30 +266,9 @@ bool wlibExistsTemplate(const char *name);
 void wlibSetLabel(GtkWidget *widget, long option, const char *labelStr, GtkLabel **labelG, GtkWidget **imageG);
 void wlibButtonDoAction(wButton_p bb);
 
-//struct wButton_t {
-//    WOBJ_COMMON
-//    GtkLabel * labelG;
-//    GtkWidget * imageG;
-//    wButtonCallBack_p action;
-//    int busy;
-//    int recursion;
-//    long timer_id;
-//    int timer_count;
-//    int timer_state;
-//	GtkRevealer * reveal; 
-//	int inToolbar; 
-//	GtkWidget * separator;
-//};
 
 /* color.c */
 
-struct wColorButton_t{
-	GtkWidget* widget;
-	wDrawColor* valueP;
-	const char* labelStr;
-	wColorSelectButtonCallBack_p action;
-	void* data;
-};
 
 typedef struct {
     unsigned char red;
@@ -503,6 +483,7 @@ void wlibSetTrigger(wControl_p b, setTriggerCallback_p trigger);
  * \todo Check usage of labelStr
  */
 struct wChoice_t {
+	wType_e type;
 	GtkWidget* widget;
 	long* valueP;
 	wChoiceCallBack_p action;
@@ -513,6 +494,7 @@ struct wChoice_t {
 /* tooltip.c */
 #define HELPDATAKEY "HelpDataKey"
 void wlibAddHelpString(GtkWidget *widget, const char *helpStr);
+void wlibAddTooltip(GtkWidget* widget, char* dialog, char* field);
 void wlibHelpHideBalloon();
 
 /* treeview.c */

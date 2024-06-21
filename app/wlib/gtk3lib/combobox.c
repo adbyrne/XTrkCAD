@@ -386,7 +386,7 @@ wList_p wComboBoxCreate(
 	wList_p b;
 
 	b = g_malloc0(sizeof(struct wList_t));
-
+	b->type = B_COMBOLIST;
 	b->valueP = valueP;
 	b->action = action;
 	b->last = -1;
@@ -432,7 +432,7 @@ wList_p wComboBoxCreate(
 		gtk_widget_show(b->widget);
 	}
 	wlibAddHelpString(b->widget, helpStr);
-
+	wlibAddTooltip(b->widget, parent->name, helpStr);
 	return b;
 }
 

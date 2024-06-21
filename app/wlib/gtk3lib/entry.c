@@ -243,7 +243,7 @@ wEntry_p wEntryCreate(
 
 	if (parent->builder) {
 		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
-	} else {
+ 	} else {
 		// create the gtk entry field and set maximum length if desired
 		b->widget = (GtkWidget*)gtk_entry_new();
 		if (b->widget == NULL) { abort(); }
@@ -270,6 +270,7 @@ wEntry_p wEntryCreate(
 	}
 	// link into help
 	wlibAddHelpString(b->widget, helpStr);
+ 	wlibAddTooltip(b->widget, parent->name, helpStr);
 
 	g_signal_connect(G_OBJECT(b->widget), "focus-out-event",
 	                 G_CALLBACK(stringFocusOutEvent), b);
