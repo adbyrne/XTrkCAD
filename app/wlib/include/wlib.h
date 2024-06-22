@@ -255,20 +255,22 @@ typedef struct {
 
 wLine_p wLineCreate(wWindow_p	parent, const char* labelStr, int	count,
     wLines_t* lines);
-
- /* = *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= */
   
 /*------------------------------------------------------------------------------
  *
  * Bitmap Controls bitmap.c
  */
 
-wControl_p wBitmapCreate(wWin_p parent, wWinPix_t x, wWinPix_t y, long options,
-                         const struct wIcon_t * iconP);
+wBitmap_p wBitmapCreate(wWindow_p parent, wWinPix_t x, wWinPix_t y, 
+    long options, const wIcon_p iconP);
+
 wIcon_p wIconCreateBitMap(wWinPix_t w, wWinPix_t h, const char *bits,
                           wDrawColor color);
 wIcon_p wIconCreatePixMap(char *pm[]);
 void wIconSetColor(wIcon_p ip, wDrawColor color);
+
+
+/* = *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= */
 
 /*------------------------------------------------------------------------------
  *

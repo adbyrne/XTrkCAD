@@ -52,7 +52,7 @@ int wNoticeEx(int type,
 	unsigned flag;
 	char *headline;
 	GtkWidget *dialog;
-	GtkWindow *parent = NULL;
+	GtkWindow *parent = GTK_WINDOW(wlibAppWinGetMain());
 
 	switch (type) {
 	case NT_INFORMATION:
@@ -69,10 +69,12 @@ int wNoticeEx(int type,
 		flag = GTK_MESSAGE_ERROR;
 		headline = _("Error");
 		break;
-	}
 
-	if (gtkMainW) {
-		parent = GTK_WINDOW(gtkMainW->gtkwin);
+	default:
+		flag = GTK_MESSAGE_ERROR;
+		headline = _("Invalid call");
+		break;
+
 	}
 
 	wDestroySplash();
@@ -184,6 +186,3 @@ int wNotice3(
 	gtk_widget_destroy(GTK_WIDGET(dialog));
 	return noticeValue;
 }
-
-
-

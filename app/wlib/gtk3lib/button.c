@@ -93,7 +93,7 @@ void wlibSetLabel(
 
 			bm = (wIcon_p)labelStr;
 
-			if (bm->gtkIconType == gtkIcon_pixmap) {
+			if (bm->gtkIconType == ICON_PIXMAP) {
 				pixbuf = gdk_pixbuf_new_from_xpm_data((const char**)bm->bits);
 			} else {
 				pixbuf = wlibPixbufFromXBM( bm );

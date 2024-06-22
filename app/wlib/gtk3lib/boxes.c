@@ -1,5 +1,8 @@
 /** \file boxes.c
  * Window for drawing a rectangle
+ * 
+ * \todo Boxes are used as frames in dialog layout. Occurences should either be
+ * converted to CSS or removed making these functions obsolete
  */
 
 /* 	XTrkCad - Model Railroad CAD
@@ -35,10 +38,10 @@
 
 #include "gtkint.h"
 
-struct wBox_t {
-    WOBJ_COMMON
-    wBoxType_e boxTyp;
-};
+// struct wBox_t {
+//     WOBJ_COMMON
+//     wBoxType_e boxTyp;
+// };
 
 #define B (1)
 #define W (2)
@@ -64,8 +67,9 @@ void wBoxSetSize(
     wWinPix_t w,	
     wWinPix_t h)	
 {
-    b->w = w;
-    b->h = h;
+    fprintf(stderr, "wBoxSetSize() ist not implemented!\n");
+    // b->w = w;
+    // b->h = h;
 }
 
 /**
@@ -89,95 +93,96 @@ void wlibDrawBox(
     wWinPix_t w,
     wWinPix_t h)
 {
-    wWinPix_t x0, y0, x1, y1;
-    GdkWindow * window;
-    GdkDrawingContext * context;
-    cairo_region_t * region;
-    cairo_rectangle_int_t rectangle;
-    cairo_t *cr;
-    static char colors[8][4][2] = {
-        { /* ThinB  */ {B,0}, {B,0}, {B,0}, {B,0} },
-        { /* ThinW  */ {W,0}, {W,0}, {W,0}, {W,0} },
-        { /* AboveW */ {W,0}, {W,0}, {B,0}, {B,0} },
-        { /* BelowW */ {B,0}, {B,0}, {W,0}, {W,0} },
-        { /* ThickB */ {B,B}, {B,B}, {B,B}, {B,B} },
-        { /* ThickW */ {W,W}, {W,W}, {W,W}, {W,W} },
-        { /* RidgeW */ {W,B}, {W,B}, {B,W}, {B,W} },
-        { /* TroughW*/ {B,W}, {B,W}, {W,B}, {W,B} }
-    };
+    fprintf(stderr, "wlibDrawBox() ist not implemented!\n");
+//     wWinPix_t x0, y0, x1, y1;
+//     GdkWindow * window;
+//     GdkDrawingContext * context;
+//     cairo_region_t * region;
+//     cairo_rectangle_int_t rectangle;
+//     cairo_t *cr;
+//     static char colors[8][4][2] = {
+//         { /* ThinB  */ {B,0}, {B,0}, {B,0}, {B,0} },
+//         { /* ThinW  */ {W,0}, {W,0}, {W,0}, {W,0} },
+//         { /* AboveW */ {W,0}, {W,0}, {B,0}, {B,0} },
+//         { /* BelowW */ {B,0}, {B,0}, {W,0}, {W,0} },
+//         { /* ThickB */ {B,B}, {B,B}, {B,B}, {B,B} },
+//         { /* ThickW */ {W,W}, {W,W}, {W,W}, {W,W} },
+//         { /* RidgeW */ {W,B}, {W,B}, {B,W}, {B,W} },
+//         { /* TroughW*/ {B,W}, {B,W}, {W,B}, {W,B} }
+//     };
 
-    if (win->cr) {
-    	cr = win->cr;
-    } else {
-    	window = gtk_widget_get_window(win->widget);
-    	rectangle.x = x;
-    	rectangle.y = y;
-    	rectangle.width = w;
-    	rectangle.height = h;
-    	region = cairo_region_create_rectangle(&rectangle);
-//    	context = gdk_window_begin_draw_frame(window, region);
-//    	cr = gdk_drawing_context_get_cairo_context(context);
-    }
+//     if (win->cr) {
+//     	cr = win->cr;
+//     } else {
+//     	window = gtk_widget_get_window(win->widget);
+//     	rectangle.x = x;
+//     	rectangle.y = y;
+//     	rectangle.width = w;
+//     	rectangle.height = h;
+//     	region = cairo_region_create_rectangle(&rectangle);
+// //    	context = gdk_window_begin_draw_frame(window, region);
+// //    	cr = gdk_drawing_context_get_cairo_context(context);
+//     }
 
-    cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
-    cairo_set_line_join(cr, CAIRO_LINE_JOIN_MITER);
-    cairo_set_line_width(cr, 1.0);
-    x0 = x;
-    x1 = x+w;
-    y0 = y;
-    y1 = y+h;
-    SETCOLOR(style, 0, 0);
-    cairo_move_to(cr, x0, y0);
-    cairo_line_to(cr, x0, y1);
-    cairo_stroke_preserve(cr);
-    SETCOLOR(style, 1, 0);
-    cairo_move_to(cr, x0, y0);
-    cairo_line_to(cr, x1, y0);
-    cairo_stroke_preserve(cr);
-    SETCOLOR(style, 2, 0);
-    cairo_move_to(cr, x1, y1);
-    cairo_line_to(cr, x0+1, y1);
-    cairo_stroke_preserve(cr);
-    SETCOLOR(style, 3, 0);
-    cairo_move_to(cr, x1, y1-1);
-    cairo_line_to(cr, x1, y0+1);
-    cairo_stroke_preserve(cr);
+//     cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
+//     cairo_set_line_join(cr, CAIRO_LINE_JOIN_MITER);
+//     cairo_set_line_width(cr, 1.0);
+//     x0 = x;
+//     x1 = x+w;
+//     y0 = y;
+//     y1 = y+h;
+//     SETCOLOR(style, 0, 0);
+//     cairo_move_to(cr, x0, y0);
+//     cairo_line_to(cr, x0, y1);
+//     cairo_stroke_preserve(cr);
+//     SETCOLOR(style, 1, 0);
+//     cairo_move_to(cr, x0, y0);
+//     cairo_line_to(cr, x1, y0);
+//     cairo_stroke_preserve(cr);
+//     SETCOLOR(style, 2, 0);
+//     cairo_move_to(cr, x1, y1);
+//     cairo_line_to(cr, x0+1, y1);
+//     cairo_stroke_preserve(cr);
+//     SETCOLOR(style, 3, 0);
+//     cairo_move_to(cr, x1, y1-1);
+//     cairo_line_to(cr, x1, y0+1);
+//     cairo_stroke_preserve(cr);
 
-    if (style < wBoxThickB) {
-        if (!win->cr) {
-            cairo_destroy(cr);
-            gdk_window_end_draw_frame(window, context);
-        }
-    	return;
-    }
+//     if (style < wBoxThickB) {
+//         if (!win->cr) {
+//             cairo_destroy(cr);
+//             gdk_window_end_draw_frame(window, context);
+//         }
+//     	return;
+//     }
 
-    x0++;
-    y0++;
-    x1--;
-    y1--;
-    SETCOLOR(style, 0, 1);
-    cairo_move_to(cr, x0, y0);
-    cairo_line_to(cr, x0, y1);
-    cairo_stroke_preserve(cr);
-    SETCOLOR(style, 1, 1);
-    cairo_move_to(cr, x0+1, y0);
-    cairo_line_to(cr, x1, y0);
-    cairo_stroke_preserve(cr);
-    SETCOLOR(style, 2, 1);
-    cairo_move_to(cr, x1, y1);
-    cairo_line_to(cr, x0+1, y1);
-    cairo_stroke_preserve(cr);
-    SETCOLOR(style, 3, 1);
-    cairo_move_to(cr, x1, y1-1);
-    cairo_line_to(cr, x1, y0+1);
-    cairo_stroke_preserve(cr);
-    if (!win->cr) {
-    	cairo_destroy(cr);
-    	g_object_unref(context);
-    	cairo_region_destroy(region);
-    	gdk_window_end_draw_frame(window, context);
-    	g_object_unref(window);
-    }
+//     x0++;
+//     y0++;
+//     x1--;
+//     y1--;
+//     SETCOLOR(style, 0, 1);
+//     cairo_move_to(cr, x0, y0);
+//     cairo_line_to(cr, x0, y1);
+//     cairo_stroke_preserve(cr);
+//     SETCOLOR(style, 1, 1);
+//     cairo_move_to(cr, x0+1, y0);
+//     cairo_line_to(cr, x1, y0);
+//     cairo_stroke_preserve(cr);
+//     SETCOLOR(style, 2, 1);
+//     cairo_move_to(cr, x1, y1);
+//     cairo_line_to(cr, x0+1, y1);
+//     cairo_stroke_preserve(cr);
+//     SETCOLOR(style, 3, 1);
+//     cairo_move_to(cr, x1, y1-1);
+//     cairo_line_to(cr, x1, y0+1);
+//     cairo_stroke_preserve(cr);
+//     if (!win->cr) {
+//     	cairo_destroy(cr);
+//     	g_object_unref(context);
+//     	cairo_region_destroy(region);
+//     	gdk_window_end_draw_frame(window, context);
+//     	g_object_unref(window);
+//     }
 }
 
 /**
@@ -189,9 +194,9 @@ void wlibDrawBox(
 
 static void boxRepaint(wControl_p b)
 {
-    wBox_p bb = (wBox_p)(b);
-    wWin_p win = bb->parent;
-    wlibDrawBox(win, bb->boxTyp, bb->realX, bb->realY, bb->w, bb->h);
+    //wBox_p bb = (wBox_p)(b);
+    //wWin_p win = bb->parent;
+    //wlibDrawBox(win, bb->boxTyp, bb->realX, bb->realY, bb->w, bb->h);
 }
 
 /**
@@ -216,7 +221,8 @@ wBox_p wBoxCreate(
     wWinPix_t	bw,
     wWinPix_t	bh)
 {
-    wBox_p b;
+    fprintf(stderr, "wBoxCreate() is not implemented!\n");
+/*     wBox_p b;
     b = (wBox_p)wlibAlloc(parent, B_BOX, bx, by, labelStr, sizeof *b, NULL);
     wlibComputePos((wControl_p)b);
     b->boxTyp = boxTyp;
@@ -225,4 +231,6 @@ wBox_p wBoxCreate(
     b->repaintProc = boxRepaint;
     wlibAddButton((wControl_p)b);
     return b;
+ */
+    return NULL;
 }

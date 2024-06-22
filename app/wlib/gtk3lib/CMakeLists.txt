@@ -11,6 +11,8 @@ target_sources(xtrkcad-wlib
 	PRIVATE 
 	appwindow.c
 	basicdraw.c
+	bitmap.c
+	boxes.c
 	button.c
 	color.c
 	combobox.c	
@@ -21,7 +23,8 @@ target_sources(xtrkcad-wlib
 	liststore.c
  	main.c
  	message.c
- 	splash.c
+ 	notice.c
+	splash.c
  	pulldnmenu.c
 	radio.c
 	recentuse.c
@@ -31,8 +34,6 @@ target_sources(xtrkcad-wlib
 	treeview.c
  	wpref.c
 
-	bitmap.c
- 	boxes.c
 	builder.c
 
  	control.c
@@ -42,7 +43,6 @@ target_sources(xtrkcad-wlib
  	font.c
  	help.c
 
- 	notice.c
  	opendocument.c
  	pixbuf.c
 

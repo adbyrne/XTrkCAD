@@ -32,12 +32,21 @@
 #include "gtkint.h"
 
 struct wBitmap_t {
-	WOBJ_COMMON
+	wType_e type;
+	GtkWidget* widget;
+	wWindow_p parent;
 };
 
 /**
  * Create a static control for displaying a bitmap.
  *
+ * ### Usage in dialogs, created by
+ *
+ * - runtime: yes
+ * - builder: no
+ *
+ * ### Options
+ * 
  * \param parent IN parent window
  * \param x, y   IN position in parent window
  * \param option IN ignored for now
@@ -45,25 +54,27 @@ struct wBitmap_t {
  * \return    the control
  */
 
-wControl_p
-wBitmapCreate( wWin_p parent, wWinPix_t x, wWinPix_t y, long options, const struct wIcon_t * iconP )
+wBitmap_p
+wBitmapCreate( wWindow_p parent, wWinPix_t x, wWinPix_t y, long options, 
+	const wIcon_p iconP )
 {
 	wBitmap_p bt;
 	GdkPixbuf *pixbuf;
 	GtkWidget *image;
 	
-	bt = wlibAlloc( parent, B_BITMAP, x, y, NULL, sizeof *bt, NULL );
-	bt->w = iconP->w;
-	bt->h = iconP->h;
-	bt->option = options;
-	
+	bt = (wBitmap_p)g_malloc0(sizeof(struct wBitmap_t));
+	bt->type = B_BITMAP;
+	bt->parent = parent;
+
 	/*
 	 * Depending on the platform, parent->widget->window might still be null 
 	 * at this point. The window allocation should be forced before creating
 	 * the pixmap.
+	 * 
+	 * \todo Is this assumption really true? Temporarily assume no
 	 */
-	if ( gtk_widget_get_window( parent->widget ) == NULL )
-		gtk_widget_realize( parent->widget ); /* force allocation, if pending */
+	//if ( gtk_widget_get_window( parent->gtkWindow ) == NULL )
+	//	gtk_widget_realize( parent->gtkWindow ); /* force allocation, if pending */
 	
 	/* create the bitmap from supplied xpm data */
 	pixbuf = gdk_pixbuf_new_from_xpm_data( (const char **)iconP->bits );
@@ -71,16 +82,10 @@ wBitmapCreate( wWin_p parent, wWinPix_t x, wWinPix_t y, long options, const stru
 	image = gtk_image_new_from_pixbuf( pixbuf );
 	gtk_widget_show( image );
 	g_object_unref( (gpointer)pixbuf );
+		
+	wlibBasicGridAttach(parent, bt->widget, x, y, 1, 1);
 	
-	bt->widget = gtk_fixed_new();
-	gtk_widget_show( bt->widget );
-	gtk_container_add( GTK_CONTAINER(bt->widget), image );
-	
-	wlibComputePos( (wControl_p)bt );
-	wlibControlGetSize( (wControl_p)bt );
-	gtk_fixed_put( GTK_FIXED( parent->widget ), bt->widget, bt->realX, bt->realY );
-	
-	return( (wControl_p)bt );
+	return( (wBitmap_p)bt );
 }
 
 /**
@@ -97,7 +102,7 @@ wIcon_p wIconCreateBitMap( wWinPix_t w, wWinPix_t h, const char * bits, wDrawCol
 {
 	wIcon_p ip;
 	ip = (wIcon_p)malloc( sizeof *ip );
-	ip->gtkIconType = gtkIcon_bitmap;
+	ip->gtkIconType = ICON_BITMAP;
 	ip->w = w;
 	ip->h = h;
 	ip->color = color;
@@ -115,7 +120,7 @@ wIcon_p wIconCreatePixMap( char *pm[] )
 {
 	wIcon_p ip;
 	ip = (wIcon_p)malloc( sizeof *ip );
-	ip->gtkIconType = gtkIcon_pixmap;
+	ip->gtkIconType = ICON_PIXMAP;
 	ip->w = 0;
 	ip->h = 0;
 	ip->color = 0;

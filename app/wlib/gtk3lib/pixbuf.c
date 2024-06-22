@@ -53,7 +53,7 @@ GdkPixbuf* wlibMakePixbuf(
 
     assert(ip != NULL);
 
-    if (ip->gtkIconType == gtkIcon_pixmap) {
+    if (ip->gtkIconType == ICON_PIXMAP) {
         pixbuf = gdk_pixbuf_new_from_xpm_data((const char**)ip->bits);
     } else {
 	    const char * bits;

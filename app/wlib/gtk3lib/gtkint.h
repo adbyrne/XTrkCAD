@@ -168,15 +168,6 @@ struct wListItem_t {
 		wList_p listP;
 		};		
 
-#define gtkIcon_bitmap (1)
-#define gtkIcon_pixmap (2)
-struct wIcon_t {
-		int gtkIconType;
-		wWinPix_t w;
-		wWinPix_t h;
-		wDrawColor color;
-		const void * bits;
-		};
 
 extern char wConfigName[];
 extern wDrawColor wDrawColorWhite;
@@ -248,6 +239,17 @@ void wlibBasicDrawFillCircle(
     wDrawColor color,
     wDrawOpts opts);
 
+/* bitmap.c */
+#define ICON_BITMAP (1)
+#define ICON_PIXMAP (2)
+
+struct wIcon_t {
+	int gtkIconType;
+	wWinPix_t w;
+	wWinPix_t h;
+	wDrawColor color;
+	const void* bits;
+};
 
 /* boxes.c */
 void wlibDrawBox(wWin_p win, wBoxType_e style, wWinPix_t x, wWinPix_t y, wWinPix_t w, wWinPix_t h);
