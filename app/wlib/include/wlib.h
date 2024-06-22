@@ -242,6 +242,20 @@ wChoice_p wToggleCreate(wWindow_p parent, wWinPix_t x, wWinPix_t y,
     const char* const* labels, long* valueP,
     wChoiceCallBack_p action, void* data);
 
+/*------------------------------------------------------------------------------
+ *
+ * Lines
+ */
+
+typedef struct {
+    int width;
+    int x0, y0;
+    int x1, y1;
+} wLines_t, * wLines_p;
+
+wLine_p wLineCreate(wWindow_p	parent, const char* labelStr, int	count,
+    wLines_t* lines);
+
  /* = *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= */
   
 /*------------------------------------------------------------------------------
@@ -553,21 +567,6 @@ void wMessageSetValue( wMessage_p, const char * );
 void wMessageSetWidth(		wMessage_p, wWinPix_t );
 wWinPix_t wMessageGetWidth( const char *testString );
 wWinPix_t wMessageGetHeight( long );
-
-
-/*------------------------------------------------------------------------------
- *
- * Lines
- */
-
-typedef struct {
-	int width;
-	int x0, y0;
-	int x1, y1;
-} wLines_t, * wLines_p;
-
-wLine_p wLineCreate(		wWin_p, const char *, int, wLines_t *);
-
 
 
 

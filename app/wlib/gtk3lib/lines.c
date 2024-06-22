@@ -44,10 +44,15 @@
  */
 
 struct wLine_t {
-	WOBJ_COMMON
+	wType_e type;
+	GtkWidget* widget;
+	wWindow_p parent;
 	wBool_t visible;
 	int count;
 	wLines_t * lines;
+	int w;
+	int h;
+	void (*repaintProc)(wControl_p b);
 };
 
 static dynArr_t lines_array;
@@ -121,8 +126,6 @@ void wlibLineShow(
 	bl->visible = visible;
 }
 
-static wBool_t draw_connected;
-
 /**
  * Create a window consisting of several lines
  *
@@ -131,18 +134,21 @@ static wBool_t draw_connected;
  * \param count IN number of lines
  * \param lines IN list of line coordinates
  * \return handle of new window
+ * 
+ * \todo At the moment the widget is not connected to any widget so can't be 
+ * drawn on screen. Check implementation and necessity
  */
 
 wLine_p wLineCreate(
-        wWin_p	parent,
+        wWindow_p	parent,
         const char	* labelStr,
         int	count,
         wLines_t * lines)
 {
 	wLine_p linesWindow;
-	int i;
-	linesWindow = (wLine_p)wlibAlloc(parent, B_LINES, 0, 0, labelStr,
-	                                 sizeof *linesWindow, NULL);
+
+	linesWindow = g_malloc0(sizeof(struct wLine_t));
+	linesWindow->type = B_LINES;
 
 	DYNARR_APPEND(wLine_p,lines_array,10);
 
@@ -151,9 +157,8 @@ wLine_p wLineCreate(
 	linesWindow->visible = TRUE;
 	linesWindow->count = count;
 	linesWindow->lines = lines;
-	linesWindow->w = linesWindow->h = 0;
 
-	for (i=0; i<count; i++) {
+	for (int i=0; i<count; i++) {
 		if (lines[i].x0 > linesWindow->w) {
 			linesWindow->w = lines[i].x0;
 		}
@@ -172,7 +177,6 @@ wLine_p wLineCreate(
 	}
 
 	linesWindow->repaintProc = linesRepaint;
-	wlibAddButton((wControl_p)linesWindow);
 	linesWindow->widget = NULL;
 
 	return linesWindow;

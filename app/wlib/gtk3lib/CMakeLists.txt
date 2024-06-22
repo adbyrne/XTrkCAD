@@ -16,6 +16,7 @@ target_sources(xtrkcad-wlib
 	combobox.c	
 	entry.c
  	fileselector.c
+ 	lines.c
 	list.c
 	liststore.c
  	main.c
@@ -40,7 +41,7 @@ target_sources(xtrkcad-wlib
 
  	font.c
  	help.c
- 	lines.c
+
  	notice.c
  	opendocument.c
  	pixbuf.c
