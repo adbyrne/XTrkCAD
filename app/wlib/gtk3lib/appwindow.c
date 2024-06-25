@@ -111,9 +111,13 @@ signalSizeAlloc(GtkWidget* self,
                 GtkAllocation* allocation,
                 gpointer user_data)
 {
-	allocation->height = 0x10;
-	gtk_scrolled_window_set_max_content_height(GTK_SCROLLED_WINDOW(user_data),
+// 	allocation->height = 0x10;
+	
+	printf("sizeAlloc: %d\n", allocation->height);
+ 	gtk_scrolled_window_set_max_content_height(GTK_SCROLLED_WINDOW(user_data),
 	        allocation->height);
+
+	return(FALSE);
 }
 
 /**
@@ -127,16 +131,17 @@ signalSizeAlloc(GtkWidget* self,
  */
 
 GtkWidget *
-CreateToolbar(GtkScrolledWindow* toolbarScrolled)
+CreateToolbar(GtkScrolledWindow* scrolled)
 {
-	GtkFlowBox* toolbar;
+	GtkFlowBox* flowbox;
+	GtkWidget* viewport;
 
-	toolbar = GTK_FLOW_BOX(gtk_builder_get_object(appMainWindow->builder,
+	flowbox = GTK_FLOW_BOX(gtk_builder_get_object(appMainWindow->builder,
 	                       "toolbar"));
-	g_signal_connect(toolbar, "size-allocate", G_CALLBACK(signalSizeAlloc),
-	                 toolbarScrolled);
+	g_signal_connect(flowbox, "size-allocate", G_CALLBACK(signalSizeAlloc),
+	                 scrolled);
 
-	return(GTK_WIDGET(toolbar));
+	return(GTK_WIDGET(flowbox));
 }
 
 /**
@@ -181,7 +186,7 @@ wWindow_p wWinMainCreate(
 	wDrawColorWhite = wDrawFindColor(0xFFFFFF);
 	wDrawColorBlack = wDrawFindColor(0x000000);
 
-	appMainWindow = g_malloc(sizeof(struct wWindow_t));
+	appMainWindow = g_malloc0(sizeof(struct wWindow_t));
 	appMainWindow->helpTopic = g_strdup(helpStr);
 	appMainWindow->name = g_strdup(nameStr);
 	appMainWindow->winProc = winProc;

@@ -24,6 +24,7 @@ target_sources(xtrkcad-wlib
  	main.c
  	message.c
  	notice.c
+	pixbuf.c
 	splash.c
  	pulldnmenu.c
 	radio.c
@@ -44,7 +45,6 @@ target_sources(xtrkcad-wlib
  	help.c
 
  	opendocument.c
- 	pixbuf.c
 
  	tooltip.c	
  	util.c

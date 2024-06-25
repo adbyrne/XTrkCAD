@@ -24,9 +24,6 @@
  *
  */
 
-#include <stdio.h>
-#include <assert.h>
-
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
 #define GTK_DISABLE_DEPRECATED
@@ -51,7 +48,7 @@ GdkPixbuf* wlibMakePixbuf(
     char line0[40];
     char line2[40];
 
-    assert(ip != NULL);
+    g_assert(ip != NULL);
 
     if (ip->gtkIconType == ICON_PIXMAP) {
         pixbuf = gdk_pixbuf_new_from_xpm_data((const char**)ip->bits);
