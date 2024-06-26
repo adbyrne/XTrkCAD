@@ -269,6 +269,19 @@ long GetChanges(paramGroup_p pg);
 		if ( HS ) GetBalloonHelpStr(HS);
 
 #define PD_F_ALT_CANCELLABEL	(1L<<30)		/**<use Close or Cancel for the discard button */
+
+#define PARAMCANCEL_NEWUNDO
+
+extern void *ParamCancel_Null;		// Cancel button not needed: map, demo
+#ifdef PARAMCANCEL_NEWUNDO
+extern void *ParamCancel_Undo;		// No Cancel button, use Undo to revert
+#else
+void ParamCancel_Undo( wWin_p );	// 
+#endif
+void ParamCancel_Current( wWin_p );	// Cancel leaves values in current state
+void ParamCancel_Reset( wWin_p );	// As above and exits command regardless of Sticky
+void ParamCancel_Restore( wWin_p );	// Cancel restores values to previous state
+
 wWin_p ParamCreateDialog( paramGroup_p, char *, char *, paramActionOkProc,
                           paramActionCancelProc, BOOL_T, paramLayoutProc, long, paramChangeProc );
 void ParamCreateControls( paramGroup_p, paramChangeProc );

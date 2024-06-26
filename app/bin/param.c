@@ -1084,18 +1084,6 @@ static void ParamIntSave(
 	}
 }
 
-#ifdef LATER
-static void ParamSave( paramGroup_p pg )
-{
-	ParamIntSave( pg, 0 );
-}
-
-static long ParamRestore( paramGroup_p pg )
-{
-	return ParamIntRestore( pg, 0 );
-}
-#endif
-
 /****************************************************************************
  *
  *
@@ -1855,6 +1843,46 @@ static void ParamButtonOk( void * groupVP )
 	LOG( log_paraminput, 1, ( "ParamButtonOk -> Ok\n" ) );
 }
 
+/* No Cancel button required
+ */
+EXPORT void *ParamCancel_Null = NULL;
+
+#ifdef PARAMCANCEL_NEWUNDO
+/* No Cancel button, Commnd can be undone
+ */
+EXPORT void *ParamCancel_Undo = NULL;
+#else
+EXPORT void ParamCancel_Undo(
+	wWin_p winP )
+{
+	wHide( winP );
+}
+#endif
+
+/* Cancel button, exits commands leaving control values as current
+ */
+EXPORT void ParamCancel_Current(
+	wWin_p winP )
+{
+	wHide( winP );
+}
+
+/* As above, but always exit command
+ */
+EXPORT void ParamCancel_Reset(
+	wWin_p winP )
+{
+	ResetIfNotSticky();
+	wHide( winP );
+}
+
+/* Cancel button, exits commands restoring control values
+ */
+EXPORT void ParamCancel_Restore(
+	wWin_p winP )
+{
+	wHide( winP );
+}
 
 static void ParamButtonCancel( void * groupVP )
 {
