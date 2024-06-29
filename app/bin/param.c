@@ -21,27 +21,29 @@
  */
 
 #include "common.h"
-#include "compound.h"
-#include "custom.h"
+#include "messages.h"
 #include "fileio.h"
-#include "misc.h"
 #include "param.h"
-#include "track.h"
-#include "common-ui.h"
-#include "include/toolbar.h"
 
-/* Bogus reg vars */
-EXPORT int paramLevel = 1;
-EXPORT int paramLen;
-EXPORT unsigned long paramKey;
-EXPORT char paramId[100];
+#include "include/toolbar.h"
+#include "include/stringxtc.h"
+
+static void SimulateButtonClick(wButton_p p);
+
+// Processing an input file, objects may be incomplete so avoid some ops (MapRedraw)
+static bool bInReadTracks;
+
 EXPORT BOOL_T paramTogglePlaybackHilite;
+static bool paramPlayback;
+static long paramDelay;
+static bool disablePlaybackDelays;
 
 EXPORT char *PREFSECT = "DialogItem";
 EXPORT long angleSystem = 0;
 
 static int paramCheckErrorCount = 0;
 static BOOL_T paramCheckShowErrors = FALSE;
+static FILE* recordParamF;
 
 static int log_paramLayout = 0;
 static int log_paraminput = 0;
@@ -52,7 +54,6 @@ EXPORT wWinPix_t DlgSepTop = 12;
 EXPORT wWinPix_t DlgSepBottom = 12;
 static wWinPix_t DlgSepMid = 18;
 static wWinPix_t DlgSepNarrow = 6;
-//static wWinPix_t DlgSepWide = 12;
 static wWinPix_t DlgSepFrmLeft = 4;
 static wWinPix_t DlgSepFrmRight = 4;
 static wWinPix_t DlgSepFrmTop = 4;
@@ -278,9 +279,7 @@ EXPORT FLOAT_T DecodeFloat(
 {
 	FLOAT_T valF;
 	const char *cp1;
-//	const char *cp0;
 	char *cp2;
-//	cp0 = cp1 = wStringGetValue( strCtrl );
 	cp1 = wStringGetValue( strCtrl );
 	while (isspace((unsigned char)*cp1)) { cp1++; }
 	if ( *cp1 ) {
@@ -807,11 +806,7 @@ EXPORT long ParamUpdate(
 			break;
 		}
 	}
-#ifdef PGPROC
-	if (pg->proc) {
-		pg->proc( PGACT_UPDATE, change );
-	}
-#endif
+
 	return change;
 }
 
@@ -1029,11 +1024,7 @@ static long ParamIntRestore(
 			break;
 		}
 	}
-#ifdef PGPROC
-	if (pg->proc) {
-		pg->proc( PGACT_RESTORE, change );
-	}
-#endif
+
 	return change;
 }
 
@@ -1322,7 +1313,7 @@ EXPORT void ParamGroupRecord(
 	paramData_p p;
 	long rgb;
 
-	if (recordF == NULL) {
+	if (recordParamF == NULL) {
 		return;
 	}
 	for ( p=pg->paramPtr; p<&pg->paramPtr[pg->paramCnt]; p++ ) {
@@ -1337,7 +1328,7 @@ EXPORT void ParamGroupRecord(
 		case PD_LONG:
 		case PD_RADIO:
 		case PD_TOGGLE:
-			fprintf( recordF, "PARAMETER %s %s %ld\n", pg->nameStr, p->nameStr,
+			fprintf( recordParamF, "PARAMETER %s %s %ld\n", pg->nameStr, p->nameStr,
 			         *(long*)p->valueP );
 			break;
 		case PD_LIST:
@@ -1348,20 +1339,20 @@ EXPORT void ParamGroupRecord(
 			} else {
 				message[0] = '\0';
 			}
-			fprintf( recordF, "PARAMETER %s %s %d %s\n", pg->nameStr, p->nameStr,
+			fprintf( recordParamF, "PARAMETER %s %s %d %s\n", pg->nameStr, p->nameStr,
 			         *(wIndex_t*)p->valueP, message );
 			break;
 		case PD_COLORLIST:
 			rgb = wDrawGetRGB( *(wDrawColor*)p->valueP );
-			fprintf( recordF, "PARAMETER %s %s %ld\n",
+			fprintf( recordParamF, "PARAMETER %s %s %ld\n",
 			         pg->nameStr, p->nameStr, rgb );
 			break;
 		case PD_FLOAT:
-			fprintf( recordF, "PARAMETER %s %s %0.3f\n", pg->nameStr, p->nameStr,
+			fprintf( recordParamF, "PARAMETER %s %s %0.3f\n", pg->nameStr, p->nameStr,
 			         *(FLOAT_T*)p->valueP );
 			break;
 		case PD_STRING:
-			fprintf( recordF, "PARAMETER %s %s %s\n", pg->nameStr, p->nameStr,
+			fprintf( recordParamF, "PARAMETER %s %s %s\n", pg->nameStr, p->nameStr,
 			         (char*)p->valueP );
 			break;
 		case PD_MESSAGE:
@@ -1375,18 +1366,24 @@ EXPORT void ParamGroupRecord(
 		}
 	}
 	if (pg->nameStr) {
-		fprintf( recordF, "PARAMETER GROUP %s\n", pg->nameStr );
+		fprintf( recordParamF, "PARAMETER GROUP %s\n", pg->nameStr );
 	}
-	fflush( recordF );
+	fflush( recordParamF );
 }
 
+/**
+ * Start recording parameter activities to a macro file.
+ *
+ * \param macroFile	handle of the opened macro file
+ */
 
-EXPORT void ParamStartRecord( void )
+EXPORT void ParamStartRecord( FILE *macroFile )
 {
 	int inx;
 	paramGroup_p pg;
 
-	if (recordF == NULL) {
+	recordParamF = macroFile;
+	if (recordParamF == NULL) {
 		return;
 	}
 	for ( inx=0; inx<paramGroups_da.cnt; inx++ ) {
@@ -1428,9 +1425,10 @@ EXPORT void ParamSaveAll( void )
 static void ParamButtonPush( void * dp )
 {
 	paramData_p p = (paramData_p)dp;
-	if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
-		fprintf( recordF, "PARAMETER %s %s\n", p->group->nameStr, p->nameStr );
-		fflush( recordF );
+	if (recordParamF && (p->option&PDO_NORECORD)==0 && p->group->nameStr
+	    && p->nameStr) {
+		fprintf( recordParamF, "PARAMETER %s %s\n", p->group->nameStr, p->nameStr );
+		fflush( recordParamF );
 	}
 	if ( (p->option&PDO_NOPSHACT)==0 ) {
 		if ( p->valueP ) {
@@ -1446,10 +1444,11 @@ static void ParamChoicePush( long valL, void * dp )
 {
 	paramData_p p = (paramData_p)dp;
 
-	if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
-		fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr,
+	if (recordParamF && (p->option&PDO_NORECORD)==0 && p->group->nameStr
+	    && p->nameStr) {
+		fprintf( recordParamF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr,
 		         valL );
-		fflush( recordF );
+		fflush( recordParamF );
 	}
 	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP) {
 		*((long*)(p->valueP)) = valL;
@@ -1462,11 +1461,11 @@ static void ParamChoicePush( long valL, void * dp )
 
 static wBool_t ParamIntegerRangeCheck( paramData_p p, long valL )
 {
-	if ( inPlayback ) {
+	if ( paramPlayback ) {
 		return TRUE;
 	}
 	paramIntegerRange_t * irangeP = (paramIntegerRange_t*)p->winData;
-//	wBool_t bInvalid = p->bInvalid;
+
 	if ( ( (irangeP->rangechecks&PDO_NORANGECHECK_HIGH) == 0
 	       && valL > irangeP->high ) ||
 	     ( (irangeP->rangechecks&PDO_NORANGECHECK_LOW) == 0 && valL < irangeP->low ) ) {
@@ -1499,7 +1498,6 @@ static void ParamIntegerPush( const char * val, void * dp )
 	char * cp;
 	const char * value;
 
-//	wBool_t bInvalid = p->bInvalid;
 	if (strlen(val) == 1 && val[strlen(val)-1] == '\n') {
 		value = wStringGetValue((wString_p)p->control);
 		p->enter_pressed = TRUE;
@@ -1526,10 +1524,11 @@ static void ParamIntegerPush( const char * val, void * dp )
 	wControlSetBalloon( p->control, 0, 0, NULL );
 	p->bInvalid = FALSE;
 
-	if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
-		fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr,
+	if (recordParamF && (p->option&PDO_NORECORD)==0 && p->group->nameStr
+	    && p->nameStr) {
+		fprintf( recordParamF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr,
 		         valL );
-		fflush( recordF );
+		fflush( recordParamF );
 	}
 	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP) {
 		*((long*)(p->valueP)) = valL;
@@ -1544,7 +1543,7 @@ static void ParamIntegerPush( const char * val, void * dp )
 
 static wBool_t ParamFloatRangeCheck( paramData_p p, FLOAT_T valF )
 {
-	if ( inPlayback ) {
+	if ( paramPlayback ) {
 		return TRUE;
 	}
 	paramFloatRange_t * frangeP = (paramFloatRange_t*)p->winData;
@@ -1591,7 +1590,6 @@ static void ParamFloatPush( const char * val, void * dp )
 	BOOL_T valid;
 	const char * value;
 
-//	wBool_t bInvalid = p->bInvalid;
 	if (strlen(val) == 1 && val[strlen(val)-1] == '\n') {
 		value = wStringGetValue((wString_p)p->control);
 		p->enter_pressed = TRUE;
@@ -1623,10 +1621,11 @@ static void ParamFloatPush( const char * val, void * dp )
 	wControlSetBalloon( p->control, 0, 0, NULL );
 	p->bInvalid = FALSE;
 
-	if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
-		fprintf( recordF, "PARAMETER %s %s %0.6f\n", p->group->nameStr, p->nameStr,
+	if (recordParamF && (p->option&PDO_NORECORD)==0 && p->group->nameStr
+	    && p->nameStr) {
+		fprintf( recordParamF, "PARAMETER %s %s %0.6f\n", p->group->nameStr, p->nameStr,
 		         valF );
-		fflush( recordF );
+		fflush( recordParamF );
 	}
 	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP) {
 		*((FLOAT_T*)(p->valueP)) = valF;
@@ -1643,9 +1642,11 @@ static void ParamStringPush( const char * val, void * dp )
 	paramData_p p = (paramData_p)dp;
 	const char * value;
 //	wBool_t bInvalid = p->bInvalid;
-	if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
-		fprintf( recordF, "PARAMETER %s %s %s\n", p->group->nameStr, p->nameStr, val );
-		fflush( recordF );
+	if (recordParamF && (p->option&PDO_NORECORD)==0 && p->group->nameStr
+	    && p->nameStr) {
+		fprintf( recordParamF, "PARAMETER %s %s %s\n", p->group->nameStr, p->nameStr,
+		         val );
+		fflush( recordParamF );
 	}
 	if (strlen(val) == 1 && val[strlen(val)-1] == '\n' ) {
 		value = wStringGetValue((wString_p)p->control);
@@ -1656,7 +1657,7 @@ static void ParamStringPush( const char * val, void * dp )
 	}
 	LOG( log_paraminput, 1, ( "ParamStringPush( %s: Enter:%d Val:%s )\n",
 	                          p->nameStr, p->enter_pressed, value ) );
-	if ( ((!inPlayback) && p->option & PDO_NOTBLANK) && value[0] == '\0' ) {
+	if ( ((!paramPlayback) && p->option & PDO_NOTBLANK) && value[0] == '\0' ) {
 		p->bInvalid = TRUE;
 		wControlSetBalloon( p->control, 0, 0, NULL );
 		wWinPix_t h = wControlGetHeight(p->control);
@@ -1699,10 +1700,12 @@ static void ParamListPush( wIndex_t inx, const char * val, wIndex_t op,
 	case PD_LIST:
 	case PD_DROPLIST:
 	case PD_COMBOLIST:
-		if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
-			fprintf( recordF, "PARAMETER %s %s %d %s\n", p->group->nameStr, p->nameStr, inx,
+		if (recordParamF && (p->option&PDO_NORECORD)==0 && p->group->nameStr
+		    && p->nameStr) {
+			fprintf( recordParamF, "PARAMETER %s %s %d %s\n", p->group->nameStr, p->nameStr,
+			         inx,
 			         val );
-			fflush( recordF );
+			fflush( recordParamF );
 		}
 		if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP) {
 			*(wIndex_t*)(p->valueP) = inx;
@@ -1723,9 +1726,9 @@ EXPORT void ParamMenuPush( void * dp )
 {
 	paramData_p p = (paramData_p)dp;
 	const char * groupNameStr = p->group ? p->group->nameStr : "misc";
-	if (recordF && (p->option&PDO_NORECORD)==0 && groupNameStr && p->nameStr) {
-		fprintf( recordF, "PARAMETER %s %s\n", groupNameStr, p->nameStr );
-		fflush( recordF );
+	if (recordParamF && (p->option&PDO_NORECORD)==0 && groupNameStr && p->nameStr) {
+		fprintf( recordParamF, "PARAMETER %s %s\n", groupNameStr, p->nameStr );
+		fflush( recordParamF );
 	}
 	if ( (p->option&PDO_NOPSHACT)==0 && p->valueP ) {
 		((wMenuCallBack_p)(p->valueP))( p->context );
@@ -1747,10 +1750,11 @@ static void ParamColorSelectPush( void * dp, wDrawColor dc )
 		}
 		dc = wDrawFindColor( rgb );
 	}
-	if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
-		fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr,
+	if (recordParamF && (p->option&PDO_NORECORD)==0 && p->group->nameStr
+	    && p->nameStr) {
+		fprintf( recordParamF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr,
 		         wDrawGetRGB(dc) );
-		fflush( recordF );
+		fflush( recordParamF );
 	}
 	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP) {
 		*(wDrawColor*)(p->valueP) = dc;
@@ -1778,11 +1782,11 @@ static void ParamDrawAction( wDraw_p d, void * dp, wAction_t a, wDrawPix_t w,
 	paramDrawData_t * ddp = (paramDrawData_t*)p->winData;
 	coOrd pos;
 	ddp->d->Pix2CoOrd( ddp->d, w, h, &pos );
-	if ( recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr
+	if ( recordParamF && (p->option&PDO_NORECORD)==0 && p->group->nameStr
 	     && p->nameStr) {
-		fprintf( recordF, "PARAMETER %s %s %d %0.3f %0.3f\n", p->group->nameStr,
+		fprintf( recordParamF, "PARAMETER %s %s %d %0.3f %0.3f\n", p->group->nameStr,
 		         p->nameStr, a, pos.x, pos.y );
-		fflush( recordF );
+		fflush( recordParamF );
 	}
 	if ( (p->option&PDO_NOPSHACT)== 0 && ddp->action ) {
 		ddp->action( a, pos );
@@ -1828,9 +1832,9 @@ static void ParamButtonOk( void * groupVP )
 	if ( ! ParamCheckInputs( group, (wControl_p)group->okB ) ) {
 		return;
 	}
-	if ( recordF && group->nameStr ) {
-		fprintf( recordF, "PARAMETER %s %s\n", group->nameStr, "ok" );
-		fflush( recordF );
+	if ( recordParamF && group->nameStr ) {
+		fprintf( recordParamF, "PARAMETER %s %s\n", group->nameStr, "ok" );
+		fflush( recordParamF );
 	}
 
 	if ( group->okProc ) {
@@ -1853,7 +1857,7 @@ EXPORT void *ParamCancel_Null = NULL;
 EXPORT void *ParamCancel_Undo = NULL;
 #else
 EXPORT void ParamCancel_Undo(
-	wWin_p winP )
+        wWin_p winP )
 {
 	wHide( winP );
 }
@@ -1862,7 +1866,7 @@ EXPORT void ParamCancel_Undo(
 /* Cancel button, exits commands leaving control values as current
  */
 EXPORT void ParamCancel_Current(
-	wWin_p winP )
+        wWin_p winP )
 {
 	wHide( winP );
 }
@@ -1870,7 +1874,7 @@ EXPORT void ParamCancel_Current(
 /* As above, but always exit command
  */
 EXPORT void ParamCancel_Reset(
-	wWin_p winP )
+        wWin_p winP )
 {
 	ResetIfNotSticky();
 	wHide( winP );
@@ -1879,7 +1883,7 @@ EXPORT void ParamCancel_Reset(
 /* Cancel button, exits commands restoring control values
  */
 EXPORT void ParamCancel_Restore(
-	wWin_p winP )
+        wWin_p winP )
 {
 	wHide( winP );
 }
@@ -1887,116 +1891,14 @@ EXPORT void ParamCancel_Restore(
 static void ParamButtonCancel( void * groupVP )
 {
 	paramGroup_p group = groupVP;
-	if ( recordF && group->nameStr ) {
-		fprintf( recordF, "PARAMETER %s %s\n", group->nameStr, "cancel" );
-		fflush( recordF );
+	if ( recordParamF && group->nameStr ) {
+		fprintf( recordParamF, "PARAMETER %s %s\n", group->nameStr, "cancel" );
+		fflush( recordParamF );
 	}
 	if ( group->cancelProc ) {
 		group->cancelProc( group->win );
 	}
 }
-
-
-#ifdef LATER
-EXPORT void ParamChange( paramData_p p )
-{
-	FLOAT_T tmpR;
-
-	if (p->valueP==NULL) {
-		return;
-	}
-
-	switch (p->type) {
-	case PD_LONG:
-		if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
-			fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr,
-			         *(long*)p->valueP );
-		}
-#ifdef LATER
-		if ( p->control && (p->option&PDO_NOCONTUPD) == 0 ) {
-			wStringSetValue( (wString_p)p->control, FormatLong( *(long*)p->valueP ) );
-		}
-#endif
-		break;
-	case PD_RADIO:
-		if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
-			fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr,
-			         *(long*)p->valueP );
-		}
-#ifdef LATER
-		if ( p->control && (p->option&PDO_NOCONTUPD) == 0 ) {
-			wRadioSetValue( (wChoice_p)p->control, *(long*)p->valueP );
-		}
-#endif
-		break;
-	case PD_TOGGLE:
-		if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
-			fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr,
-			         *(long*)p->valueP );
-		}
-#ifdef LATER
-		if ( p->control && (p->option&PDO_NOCONTUPD) == 0 ) {
-			wToggleSetValue( (wChoice_p)p->control, *(long*)p->valueP );
-		}
-#endif
-		break;
-	case PD_LIST:
-	case PD_DROPLIST:
-	case PD_COMBOLIST:
-		if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
-			fprintf( recordF, "PARAMETER %s %s %d %s\n", p->group->nameStr, p->nameStr,
-			         *(wIndex_t*)p->valueP, "???" );
-		}
-#ifdef LATER
-		if ( p->control && (p->option&PDO_NOCONTUPD) == 0 ) {
-			wListSetIndex( (wList_p)p->control, *(wIndex_t*)p->valueP );
-		}
-#endif
-		break;
-	case PD_COLORLIST:
-		if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
-			fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr,
-			         rgb );
-		}
-		break;
-	case PD_FLOAT:
-		tmpR = *(FLOAT_T*)p->valueP;
-		if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
-			fprintf( recordF, "PARAMETER %s %s %0.6f\n", p->group->nameStr, p->nameStr,
-			         tmpR );
-		}
-#ifdef LATER
-		if ( p->control && (p->option&PDO_NOCONTUPD) == 0 ) {
-			if (p->option&PDO_DIM)
-#endif
-				if (p->option&PDO_ANGLE) {
-					tmpR = NormalizeAngle( (angleSystem==ANGLE_POLAR)?tmpR:-tmpR );
-				}
-			wStringSetValue( (wString_p)p->control, tmpR );
-		}
-		break;
-	case PD_STRING:
-		if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
-			fprintf( recordF, "PARAMETER %s %s %s\n", p->group->nameStr, p->nameStr,
-			         (char*)p->valueP );
-		}
-#ifdef LATER
-		if ( p->control && (p->option&PDO_NOCONTUPD) == 0 ) {
-			wStringSetValue( (wString_p)p->control, (char*)p->valueP );
-		}
-#endif
-		break;
-	case PD_MESSAGE:
-	case PD_BUTTON:
-	case PD_DRAW:
-	case PD_TEXT:
-	case PD_MENU:
-	case PD_MENUITEM:
-		break;
-	}
-}
-#endif
-
 
 EXPORT void ParamHilite(
         wWin_p win,
@@ -2008,8 +1910,8 @@ EXPORT void ParamHilite(
 	if ( hilite ) {
 		wControlHilite( control, TRUE );
 		wFlush();
-		if ( inPlayback ) {
-			wPause(playbackDelay*4+1);
+		if ( paramPlayback ) {
+			wPause(paramDelay*4+1);
 		}
 	} else {
 		wControlHilite( control, FALSE );
@@ -2044,6 +1946,28 @@ EXPORT void ParamControlShow( paramGroup_p pg, wIndex_t inx, wBool_t bShow )
 	p->bShown = bShow;
 }
 
+/**
+ * .
+ *
+ * \param state
+ */
+void
+ParamSetInPlayback(bool state, long delay)
+{
+	paramPlayback = state;
+	paramDelay = delay;
+}
+
+void SimulateButtonClick(wButton_p control)
+{
+	if (!disablePlaybackDelays && control) {
+		wButtonSetBusy(control, TRUE);
+		wFlush();
+		wPause(500);
+		wButtonSetBusy(control, FALSE);
+		wFlush();
+	}
+}
 
 static void ParamPlayback( char * line )
 {
@@ -2063,17 +1987,7 @@ static void ParamPlayback( char * line )
 	char * valS;
 
 	if ( strncmp( line, "GROUP ", 6 ) == 0 ) {
-#ifdef PGPROC
-		for ( inx=0; inx<paramGroups_da.cnt; inx++ ) {
-			pg = paramGroups(inx);
-			if ( pg->name && strncmp( line+6, pg->name, strlen( pg->name ) ) == 0 ) {
-				if ( pg->proc ) {
-					pg->proc( PGACT_PARAM, pg->action );
-				}
-				pg->action = 0;
-			}
-		}
-#endif
+
 		return;
 	}
 
@@ -2106,13 +2020,7 @@ static void ParamPlayback( char * line )
 				if (p->valueP) {
 					((wButtonCallBack_p)(p->valueP))( p->context );
 				}
-				if (playbackTimer == 0 && p->control) {
-					wButtonSetBusy( (wButton_p)p->control, TRUE );
-					wFlush();
-					wPause( 500 );
-					wButtonSetBusy( (wButton_p)p->control, FALSE );
-					wFlush();
-				}
+				SimulateButtonClick((wButton_p)p->control);
 				break;
 			case PD_LONG:
 				valL = atol( line+len );
@@ -2303,13 +2211,7 @@ static void ParamPlayback( char * line )
 			}
 			button = pg->cancelB;
 		}
-		if ( playbackTimer == 0 && button ) {
-			wButtonSetBusy( button, TRUE );
-			wFlush();
-			wPause( 500 );
-			wButtonSetBusy( button, FALSE );
-			wFlush();
-		}
+		SimulateButtonClick(button);
 		ParamHilite( pg->win, (wControl_p)button, FALSE );
 		if ( !button ) {
 			NoticeMessage( "Unknown PARAM: %s", _("Ok"), NULL, line );
@@ -2499,19 +2401,19 @@ static void ParamCreateControl(
 		floatRangeP = pd->winData;
 		w = floatRangeP->width?floatRangeP->width:100;
 		pd->control = (wControl_p)wStringCreate( win, xx, yy, helpStr, _(pd->winLabel),
-		                pd->winOption, w, NULL, 0, ParamFloatPush, pd );
+		              pd->winOption, w, NULL, 0, ParamFloatPush, pd );
 		break;
 	case PD_LONG:
 		integerRangeP = pd->winData;
 		w = integerRangeP->width?integerRangeP->width:100;
 		pd->control = (wControl_p)wStringCreate( win, xx, yy, helpStr, _(pd->winLabel),
-		                pd->winOption, w, NULL, 0, ParamIntegerPush, pd );
+		              pd->winOption, w, NULL, 0, ParamIntegerPush, pd );
 		break;
 	case PD_STRING:
 		w = pd->winData?(wWinPix_t)VP2L(pd->winData):(wWinPix_t)250;
 		pd->control = (wControl_p)wStringCreate( win, xx, yy, helpStr, _(pd->winLabel),
-		                pd->winOption, w, (pd->option&PDO_NOPSHUPD)?NULL:pd->valueP, 0, ParamStringPush,
-		                pd );
+		              pd->winOption, w, (pd->option&PDO_NOPSHUPD)?NULL:pd->valueP, 0, ParamStringPush,
+		              pd );
 		break;
 	case PD_RADIO:
 		pd->control = (wControl_p)wRadioCreate( win, xx, yy, helpStr, _(pd->winLabel),
@@ -2519,7 +2421,7 @@ static void ParamCreateControl(
 		break;
 	case PD_TOGGLE:
 		pd->control = (wControl_p)wToggleCreate( win, xx, yy, helpStr, _(pd->winLabel),
-		                pd->winOption, pd->winData, NULL, ParamChoicePush, pd );
+		              pd->winOption, pd->winData, NULL, ParamChoicePush, pd );
 		break;
 	case PD_LIST:
 		listDataP = (paramListData_t*)pd->winData;
@@ -2563,18 +2465,18 @@ static void ParamCreateControl(
 	case PD_DROPLIST:
 		w = pd->winData?(wWinPix_t)VP2L(pd->winData):(wWinPix_t)100;
 		pd->control = (wControl_p)wDropListCreate( win, xx, yy, helpStr,
-		                _(pd->winLabel), pd->winOption, 10, w, NULL, ParamListPush, pd );
+		              _(pd->winLabel), pd->winOption, 10, w, NULL, ParamListPush, pd );
 		break;
 	case PD_COMBOLIST:
 		listDataP = (paramListData_t*)pd->winData;
 		pd->control = (wControl_p)wComboListCreate( win, xx, yy, helpStr,
-		                _(pd->winLabel), pd->winOption, listDataP->number, listDataP->width, NULL,
-		                ParamListPush, pd );
+		              _(pd->winLabel), pd->winOption, listDataP->number, listDataP->width, NULL,
+		              ParamListPush, pd );
 		listDataP->height = wControlGetHeight( pd->control );
 		break;
 	case PD_COLORLIST:
 		pd->control = (wControl_p)wColorSelectButtonCreate( win, xx, yy, helpStr,
-		                _(pd->winLabel), pd->winOption, 0, NULL, ParamColorSelectPush, pd );
+		              _(pd->winLabel), pd->winOption, 0, NULL, ParamColorSelectPush, pd );
 		break;
 	case PD_MESSAGE:
 		if ( pd->winData != 0 ) {
@@ -2585,11 +2487,11 @@ static void ParamCreateControl(
 			w = 150;
 		}
 		pd->control = (wControl_p)wMessageCreateEx( win, xx, yy, _(pd->winLabel), w,
-		                pd->valueP?_(pd->valueP):" ", pd->winOption );
+		              pd->valueP?_(pd->valueP):" ", pd->winOption );
 		break;
 	case PD_BUTTON:
 		pd->control = (wControl_p)wButtonCreate( win, xx, yy, helpStr, _(pd->winLabel),
-		                pd->winOption, 0, ParamButtonPush, pd );
+		              pd->winOption, 0, ParamButtonPush, pd );
 		break;
 	case PD_MENU:
 		menu = wMenuCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption );
@@ -2597,7 +2499,7 @@ static void ParamCreateControl(
 		break;
 	case PD_MENUITEM:
 		pd->control = (wControl_p)wMenuPushCreate( menu, helpStr, _(pd->winLabel), 0,
-		                ParamMenuPush, pd );
+		              ParamMenuPush, pd );
 		break;
 	case PD_DRAW:
 		drawDataP = pd->winData;
@@ -2993,6 +2895,25 @@ SkipControl:
 	}
 	LOG( log_paramLayout, 1, ( "LayoutControls:%s orig:%dx%d compute:%dx%d\n",
 	                           group->nameStr, group->origW, group->origH, windowK.term.x, windowK.term.y ) );
+}
+
+/**
+ * Inform about file operation in progress. While files are read, some
+ * operations in the params library must be disabled
+ *
+ * \param state	TRUE if file operation starts, FALSE when done
+ */
+
+EXPORT void
+ParamSetInReadTracks(bool state)
+{
+	bInReadTracks = state;
+}
+
+EXPORT void
+ParamTurnOffDelays(bool disable)
+{
+	disablePlaybackDelays = disable;
 }
 
 

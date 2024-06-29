@@ -42,9 +42,6 @@ extern const char * libDir;
 extern wBool_t bReadOnly;
 extern wBool_t bExample;
 
-// Processing an input file, objects may be incomplete so avoid some ops (MapRedraw)
-extern wBool_t bInReadTracks;
-
 #define PARAM_CUSTOM	(-2)
 #define PARAM_LAYOUT	(-3)
 extern int curParamFileIndex;
@@ -83,7 +80,6 @@ typedef struct {
 extern dynArr_t paramProc_da;
 #define paramProc(N) DYNARR_N( paramProc_t, paramProc_da, N )
 
-void Stripcr( char * );
 char * GetNextLine( void );
 
 #define END_TRK_FILE	"END$TRACKS"
@@ -154,6 +150,7 @@ BOOL_T MacroInit( void );
 int Copyfile( const char * fn1, const char * fn2);
 void SetCLocale();
 void SetUserLocale();
+void LocaleInit();
 
 // Parameter file search
 void DoSearchParams(void * unused);
