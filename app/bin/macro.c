@@ -322,7 +322,8 @@ static wDrawBitMap_p flash_bm;
 static long flashTO = 120;
 static DIST_T PixelsPerStep = 5;
 static long stepTO = 100;
-EXPORT unsigned long playbackTimer;	/** if >0 performance measurement in progress */
+EXPORT unsigned long
+playbackTimer;	/** if >0 performance measurement in progress */
 
 static wBool_t didPause;
 static wBool_t flashTwice = FALSE;
@@ -962,7 +963,7 @@ static void PlaybackSetup( void )
 	nRegressionFail = 0;
 }
 
-void 
+void
 SetInPlayback(wBool_t state)
 {
 	inPlayback = state;
