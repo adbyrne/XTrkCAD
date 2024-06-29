@@ -168,6 +168,7 @@ target_sources(xtrkcad-lib
     layout.h
     levenshtein.c
     linknoteui.c
+    locale.c
     lprintf.c
     macro.c
     manifest.c

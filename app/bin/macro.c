@@ -30,6 +30,7 @@
 #include "misc.h"
 #include "param.h"
 #include "paths.h"
+#include "include/stringxtc.h"
 #include "track.h"
 #include "version.h"
 #include "common-ui.h"
@@ -182,7 +183,7 @@ static int StartRecord( int cnt, char ** pathName, void * context )
 	if ( logTable_da.cnt > 11 ) {
 		lprintf( "StartRecord( %s ) @ %s\n", pathName, ctime(&clock) );
 	}
-	ParamStartRecord();
+	ParamStartRecord(recordF);
 	WriteTracks( recordF, TRUE );
 	WriteLayers( recordF );
 	fprintf( recordF, "REDRAW\n" );
@@ -321,7 +322,7 @@ static wDrawBitMap_p flash_bm;
 static long flashTO = 120;
 static DIST_T PixelsPerStep = 5;
 static long stepTO = 100;
-EXPORT unsigned long playbackTimer;
+EXPORT unsigned long playbackTimer;	/** if >0 performance measurement in progress */
 
 static wBool_t didPause;
 static wBool_t flashTwice = FALSE;
@@ -400,6 +401,8 @@ static void SetPlaybackSpeed(
 	case 5: playbackDelay = 0; break;
 	}
 	playbackSpeed = inx;
+
+	ParamSetInPlayback(inPlayback, playbackDelay);
 }
 
 
@@ -959,6 +962,12 @@ static void PlaybackSetup( void )
 	nRegressionFail = 0;
 }
 
+void 
+SetInPlayback(wBool_t state)
+{
+	inPlayback = state;
+	ParamSetInPlayback(state, playbackDelay);
+}
 
 static void Playback( void )
 {
@@ -974,10 +983,11 @@ static void Playback( void )
 	char *demoFileName = NULL;
 
 	useCurrentLayer = FALSE;
-	inPlayback = TRUE;
+	SetInPlayback( TRUE );
 	EnableButtons( FALSE );
 //	lastCmd = otherCmd;
 	playbackTimer = 0;
+	ParamTurnOffDelays(false);
 	if (demoWinOnTop) {
 		wWinTop( mainW );
 		demoWinOnTop = FALSE;
@@ -1010,7 +1020,7 @@ static void Playback( void )
 			if ( paramFile == NULL ) {
 				NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Demo"), demoFileName,
 				               strerror(errno) );
-				inPlayback = FALSE;
+				SetInPlayback( FALSE );
 				SetUserLocale();
 				return;
 			}
@@ -1031,7 +1041,7 @@ static void Playback( void )
 				               demoFileName );
 				fclose( paramFile );
 				paramFile = NULL;
-				inPlayback = FALSE;
+				SetInPlayback( FALSE );
 				SetUserLocale();
 				return;
 			}
@@ -1060,7 +1070,7 @@ static void Playback( void )
 			/* empty paramLine */
 		} else if (ReadTrack( paramLine ) ) {
 			if ( paramFile == NULL ) {
-				inPlayback = FALSE;
+				SetInPlayback(FALSE );
 				break;
 			}
 		} else if (strncmp( paramLine, "STEP", 5 ) == 0) {
@@ -1082,7 +1092,7 @@ static void Playback( void )
 				wPause( 1000 );
 				EnableButtons( FALSE );
 			} else {
-				inPlayback = FALSE;
+				SetInPlayback(FALSE);
 				SetUserLocale();
 				return;
 			}
@@ -1104,7 +1114,7 @@ static void Playback( void )
 					wWinTop( demoW );
 					demoWinOnTop = TRUE;
 					EnableButtons( TRUE );
-					inPlayback = FALSE;
+					SetInPlayback(FALSE);
 					SetUserLocale();
 					return;
 				}
@@ -1212,6 +1222,7 @@ static void Playback( void )
 			}
 		} else if (strncmp( paramLine, "TIMESTART", 9 ) == 0 ) {
 			playbackTimer = wGetTimer();
+			ParamTurnOffDelays(true);
 		} else if (strncmp( paramLine, "TIMEEND", 7 ) == 0 ) {
 			if (playbackTimer == 0) {
 				NoticeMessage( MSG_PLAYBACK_TIMEEND, _("Ok"), NULL );
@@ -1220,6 +1231,7 @@ static void Playback( void )
 				sprintf( message, _("Elapsed time %lu\n"), playbackTimer );
 				wTextAppend( demoT, message );
 				playbackTimer = 0;
+				ParamTurnOffDelays(false);
 			}
 		} else if (strncmp( paramLine, "MEMSTATS", 8 ) == 0 ) {
 			wTextAppend( demoT, wMemStats() );
@@ -1300,7 +1312,7 @@ static void Playback( void )
 		if (pauseDemo) {
 			EnableButtons( TRUE );
 			pauseDemo = FALSE;
-			inPlayback = FALSE;
+			SetInPlayback(FALSE);
 			SetUserLocale();
 			return;
 		}
@@ -1313,7 +1325,7 @@ static void Playback( void )
 		fclose( documentFile );
 		documentFile = NULL;
 	}
-	inPlayback = FALSE;
+	SetInPlayback(FALSE);
 	PlaybackQuit();
 	SetUserLocale();
 }
@@ -1382,7 +1394,7 @@ static void DoDemoButton( void * command )
 		/* quit */
 		if ( inPlayback ) {
 			// We will exit the loop in Playback() after the current command
-			inPlayback = FALSE;
+			SetInPlayback(FALSE);
 		} else {
 			// We're waiting for the user to press 'Step'
 			PlaybackQuit();

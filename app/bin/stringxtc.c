@@ -143,3 +143,28 @@ XtcStricmp(const char *a, const char *b)
 	return ca - cb;
 }
 
+
+/**
+ * Strip single trailing CR/LF characters from string. Multiple occurences
+ * will be ignored.
+ * 
+ * \param line	string to be checked. CR/LF are removed in place
+ */
+
+void Stripcr(char* line)
+{
+	char* cp;
+	cp = line + strlen(line);
+	if (cp == line) {
+		return;
+	}
+	cp--;
+	if (*cp == '\n') {
+		*cp-- = '\0';
+	}
+	if (cp >= line && *cp == '\r') {
+		*cp = '\0';
+	}
+}
+
+

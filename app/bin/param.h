@@ -245,9 +245,14 @@ long ParamUpdate( paramGroup_p );
 void ParamRegister( paramGroup_p );
 void ParamGroupRecord( paramGroup_p );
 void ParamUpdatePrefs( void );
-void ParamStartRecord( void );
+void ParamStartRecord( FILE *recordF );
 void ParamRestoreAll( void );
 void ParamSaveAll( void );
+void ParamSetInReadTracks(bool state);
+void ParamSetInPlayback(bool state, long delay);
+void ParamTurnOffDelays(bool disable);
+
+
 
 void ParamMenuPush( void * );
 void ParamHilite( wWin_p, wControl_p, BOOL_T );
