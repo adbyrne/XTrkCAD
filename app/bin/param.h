@@ -161,6 +161,7 @@ typedef struct {
 	wBool_t enter_pressed;
 	wBool_t bInvalid;
 	unsigned posColumn, posRow; 	
+	wBool_t bShown;
 } paramData_t, *paramData_p;
 
 
@@ -227,8 +228,8 @@ extern long angleSystem;
 #define DISTFMT_FRACT_NUM		0x0000
 #define DISTFMT_FRACT_FRC		0x0400
 
-FLOAT_T DecodeFloat( wString_p, BOOL_T * );
-FLOAT_T DecodeDistance( wString_p, BOOL_T * );
+FLOAT_T DecodeFloat( wEntry_p entry, BOOL_T * valid);
+FLOAT_T DecodeDistance( wEntry_p entry, BOOL_T * valid);
 char * FormatLong( long );
 char * FormatFloat( FLOAT_T );
 char * FormatDistance( FLOAT_T );
@@ -245,9 +246,14 @@ long ParamUpdate( paramGroup_p );
 void ParamRegister( paramGroup_p );
 void ParamGroupRecord( paramGroup_p );
 void ParamUpdatePrefs( void );
-void ParamStartRecord( void );
+void ParamStartRecord( FILE *recordF );
 void ParamRestoreAll( void );
 void ParamSaveAll( void );
+void ParamSetInReadTracks(bool state);
+void ParamSetInPlayback(bool state, long delay);
+void ParamTurnOffDelays(bool disable);
+
+
 
 void ParamMenuPush( void * );
 void ParamHilite( wWin_p, wControl_p, BOOL_T );
@@ -269,6 +275,19 @@ long GetChanges(paramGroup_p pg);
 		if ( HS ) GetBalloonHelpStr(HS);
 
 #define PD_F_ALT_CANCELLABEL	(1L<<30)		/**<use Close or Cancel for the discard button */
+
+#define PARAMCANCEL_NEWUNDO
+
+extern void *ParamCancel_Null;		// Cancel button not needed: map, demo
+#ifdef PARAMCANCEL_NEWUNDO
+extern void *ParamCancel_Undo;		// No Cancel button, use Undo to revert
+#else
+void ParamCancel_Undo( wWin_p );	// 
+#endif
+void ParamCancel_Current( wWin_p );	// Cancel leaves values in current state
+void ParamCancel_Reset( wWin_p );	// As above and exits command regardless of Sticky
+void ParamCancel_Restore( wWin_p );	// Cancel restores values to previous state
+
 wWin_p ParamCreateDialog( paramGroup_p, char *, char *, paramActionOkProc,
                           paramActionCancelProc, BOOL_T, paramLayoutProc, long, paramChangeProc );
 void ParamCreateControls( paramGroup_p, paramChangeProc );
@@ -278,6 +297,5 @@ void ParamDialogOkActive( paramGroup_p, int );
 
 void ParamResetInvalid( wWin_p win );
 
-#define ParamControlShow( PG, INX, SHOW ) \
-		wControlShow( ((PG)->paramPtr)[INX].control, SHOW )
+void ParamControlShow( paramGroup_t *, wIndex_t, wBool_t );
 #endif

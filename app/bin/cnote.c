@@ -79,9 +79,9 @@ void DoNote(void * unused)
  * Save the main layout note to file. The note text is converted to
  * UTF-8 if this is configured at compile time. Before saving characters that
  * have special meanings in the XTC file (eg. ") are escaped.
- * 
+ *
  * \param f	open layout file
- * \return 
+ * \return
  */
 
 BOOL_T WriteMainNote(FILE* f)

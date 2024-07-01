@@ -1,8 +1,8 @@
-# XTrackCAD Version 5.3.0 Beta2 Release Notes
+# XTrackCAD Version 5.3.0 GA Release Notes
 
-Welcome to the XtrackCAD V5.3.0 Beta2 Release!
+Welcome to the XtrackCAD V5.3.0 GA Release!
 
-V5.3.0 Beta2 contains many bug fixes, new and updated parameter files, new features and enhancements.
+V5.3.0 GA contains many bug fixes, new and updated parameter files, new features and enhancements.
 
 Enjoy!
 
@@ -18,7 +18,7 @@ To report bugs, please use the SourceForge bugs reporting page https://sourcefor
 
 To discuss the Release, please use the user forum https://xtrackcad.groups.io/g/main/topics
 
-# V5.3.0 Beta2 Notes
+# V5.3.0 GA Notes
 
 This file contains installation instructions and up-to-date information regarding XTrackCad.
 
@@ -65,9 +65,9 @@ you can find in the file COPYING.
 
 ## Installation ##
 
-Please see http://xtrkcad-fork.sourceforge.net/Wikka/DownloadInstall.
+Please see https://sourceforge.net/p/xtrkcad-fork/wiki/DownloadInstall/
 
-**Note:** The Linux version has intrduced changes to make co-existance of Beta and GA releases easier.  Please see https://xtrkcad-fork.sourceforge.net/Wikka/LinuxInstall for details.
+**Note:** The Linux version has intrduced changes to make co-existance of Beta and GA releases easier.  Please see https://sourceforge.net/p/xtrkcad-fork/wiki/LinuxInstall/ for details.
 
 
 <a name='Upgrading' />
@@ -87,7 +87,7 @@ versions of XTrackCAD.
 
 ## Building ##
 
-Please see <http://xtrkcad-fork.sourceforge.net/Wikka/BuildNotes>
+Please see <https://sourceforge.net/p/xtrkcad-fork/wiki/BuildNotes/>
 
 
 <a name='Support' />

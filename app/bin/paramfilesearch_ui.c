@@ -133,7 +133,7 @@ int SearchFileListLoad(Catalog *catalog)
 				char * type_copy = MyStrdup(catalogEntry->tag);
 				char * cp = type_copy;
 				char * type = strtok(cp, " \t");
-				SCALE_FIT_TYPE_T fit_type;
+				SCALE_FIT_TYPE_T fit_type = FIT_STRUCTURE;
 				if (strcmp(type,TURNOUTCOMMAND) == 0) {
 					fit_type = FIT_TURNOUT;
 				} else if (strcmp(type,STRUCTURECOMMAND)==0) {

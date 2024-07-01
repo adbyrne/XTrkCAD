@@ -1499,6 +1499,10 @@ EXPORT BOOL_T WriteSegsEnd(
 	BOOL_T rc = TRUE;
 	long option;
 	char * escaped_text;
+	char* trackText;
+#ifdef UTFCONVERT
+	char* out = NULL;
+#endif
 
 	for ( i=0; i<segCnt; i++ ) {
 		switch ( segs[i].type ) {
@@ -1591,9 +1595,7 @@ EXPORT BOOL_T WriteSegsEnd(
 				               segs[i].u.p.pts[j].pt_type ) > 0;
 			break;
 		case SEG_TEXT: /* 0pf0fq */
-			char* trackText;
 #ifdef UTFCONVERT
-			char* out = NULL;
 			if (RequiresConvToUTF8(segs[i].u.t.string)) {
 				size_t cnt = strlen(segs[i].u.t.string) * 2 + 1;
 				out = MyMalloc(cnt);

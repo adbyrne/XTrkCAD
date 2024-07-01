@@ -151,8 +151,7 @@ int main(int argc, char * argv[])
         fseek(inFile, 0, SEEK_SET);
         jsonData = malloc(length + 1);
         if (jsonData) {
-            fread(jsonData, 1, length, inFile);
-            jsonData[length] = '\0';
+            jsonData[ fread(jsonData, 1, length, inFile) ] = '\0';
         }
         fclose(inFile);
     }

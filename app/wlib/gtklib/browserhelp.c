@@ -91,7 +91,7 @@ TopicToUrl(char **helpUrl, const char *topic)
 void wHelp(const char * topic)
 {
 	int rc;
-	char *url;
+	char *url = NULL;
 //    char *currentPath;
 
 	assert(topic != NULL);

@@ -30,6 +30,7 @@
 #include "include/paramfile.h"
 #include "include/paramfilelist.h"
 #include "include/utf8convert.h"
+#include "include/stringxtc.h"
 #include "common-ui.h"
 
 static long paramCheckSum;

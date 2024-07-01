@@ -50,6 +50,8 @@
 
 EXPORT int iconSize = 0;
 
+EXPORT wWinPix_t displayWidth;
+EXPORT wWinPix_t displayHeight;
 EXPORT wWin_p mainW;
 
 EXPORT char message[STR_HUGE_SIZE];
@@ -1008,6 +1010,13 @@ static int OfferCheckpoint( void )
 	return (ret>=0);
 }
 
+void 
+InitAudio()
+{
+	wPrefGetInteger("misc", "audio", &enableAudio, true);
+	wSetAudio(enableAudio);
+}
+
 EXPORT wWin_p wMain(int argc, char * argv[])
 {
 	int c;
@@ -1023,8 +1032,6 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	char *cp;
 	char buffer[STR_SIZE];
 	unsigned int i;
-	wWinPix_t displayWidth;
-	wWinPix_t displayHeight;
 	BOOL_T bRunTests = FALSE;
 
 	strcpy(buffer, sProdNameLower);
@@ -1133,6 +1140,8 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	wSetGeometry(mainW, displayWidth/2, displayWidth, displayHeight/2,
 	             displayHeight, -1, -1, -1);
 	InitAppDefaults();
+
+	InitAudio();
 
 	ToolbarLoadConfig();
 	/*	newToolbarMax = (1 << BG_COUNT) - 1;

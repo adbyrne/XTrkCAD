@@ -31,6 +31,8 @@
  */
 
 extern int iconSize;
+extern wWinPix_t displayWidth;
+extern wWinPix_t displayHeight;
 extern wWin_p mainW;
 extern char message[STR_HUGE_SIZE];
 extern long paramVersion;
@@ -232,6 +234,7 @@ void EnumerateEnd(void);
 
 /* doption.c */
 extern long enableBalloonHelp;
+extern long enableAudio;
 long GetDistanceFormat( void );
 
 /* cblock.c */

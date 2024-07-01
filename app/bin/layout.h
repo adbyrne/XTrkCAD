@@ -45,6 +45,7 @@ void SetLayoutBackGroundScreen(int screen);
 
 int DoSettingsRead(int files, char ** fileName, void * data );
 
+BOOL_T GetLayoutChanged(void);
 char *GetLayoutFullPath(void);
 char *GetLayoutFilename(void);
 char *GetLayoutTitle(void);

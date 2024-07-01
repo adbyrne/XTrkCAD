@@ -157,7 +157,7 @@ static BOOL_T UpdateParamFiles(void)
 					LOG1( log_paramupdate, ( "  Old CONTENTS %s\n", oldContents ) );
 					// Check 'Parameter Files Names' map
 					for (int fileNo = 1; ; fileNo++) {
-						char fileNoS[4+9+1];
+						char fileNoS[4+10+1];
 						sprintf(fileNoS, "File%d", fileNo);
 						char * prevContents = wPrefGetString("Parameter File Names", fileNoS);
 						if (prevContents == NULL || *prevContents == '\0') {

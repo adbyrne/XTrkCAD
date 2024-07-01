@@ -649,7 +649,7 @@ int main(int argc, char* argv[])
 {
 	char buffer[1000];
 	char path[1000];
-	char name[100];
+	char name[1000];
 	char* temp;
 	char* ext;
 //	int i = 0, j = 0;

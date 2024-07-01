@@ -160,7 +160,7 @@ LoadLayoutMaxGradePref(char* scaleName, double defaultValue)
 static void
 CopyLayoutTitle(char* dest, char *src)
 {
-	strncpy(dest, src, TITLEMAXLEN);
+	strncpy(dest, src, TITLEMAXLEN - 1);
 	*(dest + TITLEMAXLEN - 1) = '\0';
 }
 
@@ -316,6 +316,19 @@ void SetLayoutBackGroundScreen(int screen)
 	thisLayout.props.backgroundScreen = screen;
 
 }
+
+/**
+ * Get changed-State of layout.
+ *
+ * \return	true if changed
+ */
+
+BOOL_T
+GetLayoutChanged(void)
+{
+	return(changed > 0);
+}
+
 
 /**
 * Return the full filename.

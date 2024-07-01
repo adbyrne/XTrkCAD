@@ -1219,7 +1219,8 @@ LayerPrefLoad(void)
 
 	if (prefString && prefString[ 0 ]) {
 		char layersSaved[3 * NUM_LAYERS];
-		strncpy(layersSaved, prefString, sizeof(layersSaved));
+		strncpy(layersSaved, prefString, sizeof(layersSaved)-1);
+		layersSaved[sizeof(layersSaved)-1] = 0;
 		prefString = strtok(layersSaved, ",");
 
 		while (prefString) {

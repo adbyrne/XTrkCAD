@@ -39,6 +39,7 @@
 #include "include/paramfile.h"
 #include "include/paramfilelist.h"
 #include "paths.h"
+#include "include/stringxtc.h"
 #include "track.h"
 #include "version.h"
 #include "dynstring.h"
@@ -59,8 +60,8 @@ static coOrd paste_offset, cursor_offset;
 
 EXPORT wBool_t bExample = FALSE;
 EXPORT wBool_t bReadOnly = FALSE;
-EXPORT wBool_t bInReadTracks = FALSE;
 
+static int log_timereadfile = 0;
 
 #ifdef WINDOWS
 #define rename( F1, F2 ) Copyfile( F1, F2 )
@@ -87,52 +88,6 @@ EXPORT int Copyfile( const char * fn1, const char * fn2 )
 	return 0;
 }
 
-//
-// Locale handling
-// SetCLocale is called before reading/writing any data files (.xtc, .xti, .xtq, .cus...)
-// SetUserLocale is called after
-// Calls can be nested: C, C, User, User
-//
-static char * sUserLocale = NULL;	// current user locale
-static long lCLocale = 0;		// locale state: > 0 C locale, <= 0 user locale
-static long nCLocale = 0;		// total # of setlocals calls
-static int log_locale = 0;		// logging
-static int log_timereadfile = 0;
-
-EXPORT void SetCLocale()
-{
-	if ( sUserLocale == NULL ) {
-		sUserLocale = MyStrdup( setlocale( LC_ALL, NULL ) );
-	}
-	if ( lCLocale == 0 ) {
-		LOG( log_locale, 1, ( "Set C Locale: %ld\n", ++nCLocale ) );
-		setlocale(  LC_ALL, "C" );
-#ifdef LC_MESSAGES
-		setlocale( LC_MESSAGES, "");
-#endif
-	}
-	lCLocale++;
-	if ( lCLocale > 1 ) {
-		LOG( log_locale, 3, ( "SetClocale - C! %ld\n", nCLocale) );
-	} else if ( lCLocale < 1 ) {
-		LOG( log_locale, 2, ( "SetClocale - User! %ld\n", nCLocale) );
-	}
-}
-
-EXPORT void SetUserLocale()
-{
-	if ( lCLocale == 1 ) {
-		LOG( log_locale, 1, ( "Set %s Locale: %ld\n", sUserLocale, ++nCLocale ) );
-		setlocale( LC_ALL, sUserLocale );
-	}
-	lCLocale--;
-	if ( lCLocale < 0 ) {
-		LOG( log_locale, 2, ("SetUserLocale - User! %ld\n", nCLocale) );
-	} else if ( lCLocale > 0 ) {
-		LOG( log_locale, 3, ("SetUserLocale - C! %ld\n", nCLocale) );
-	}
-}
-
 
 /****************************************************************************
  *
@@ -151,21 +106,6 @@ EXPORT char * curSubContents;
 
 EXPORT dynArr_t paramProc_da;
 
-EXPORT void Stripcr( char * line )
-{
-	char * cp;
-	cp = line + strlen(line);
-	if (cp == line) {
-		return;
-	}
-	cp--;
-	if (*cp == '\n') {
-		*cp-- = '\0';
-	}
-	if (cp >= line && *cp == '\r') {
-		*cp = '\0';
-	}
-}
 
 EXPORT char * GetNextLine( void )
 {
@@ -285,10 +225,6 @@ EXPORT BOOL_T GetArgs(
 	char ** qp;
 	va_list ap;
 	char * sError = NULL;
-
-	if ( lCLocale < 1 ) {
-		LOG( log_locale, 1, ( "GetArgs: not in C locale\n" ) );
-	}
 
 	cp = line;
 	va_start( ap, format );
@@ -678,7 +614,7 @@ static BOOL_T ReadTrackFile(
 		return FALSE;
 	}
 
-	bInReadTracks = TRUE;
+	ParamSetInReadTracks(TRUE);
 	SetCLocale();
 	checkPtFileNameBackup = NULL;
 	paramLineNum = 0;
@@ -788,7 +724,7 @@ static BOOL_T ReadTrackFile(
 		}
 	}
 
-	bInReadTracks = FALSE;
+	ParamSetInReadTracks(FALSE);
 	if (paramFile) {
 		fclose(paramFile);
 		paramFile = NULL;
@@ -887,8 +823,7 @@ int LoadTracks(
 				fseek(f, 0, SEEK_SET);
 				manifest = malloc(length + 1);
 				if (manifest) {
-					fread(manifest, 1, length, f);
-					manifest[length] = '\0';
+					manifest[ fread(manifest, 1, length, f) ] = '\0';
 				}
 				fclose(f);
 			} else {
@@ -1798,7 +1733,7 @@ EXPORT void FileInit( void )
 
 	SetLayoutFullPath("");
 	MakeFullpath(&clipBoardN, workingDir, sClipboardF, NULL);
-
-	log_locale = LogFindIndex( "locale" );
+	LocaleInit();
+	
 	log_timereadfile = LogFindIndex( "timereadfile" );
 }

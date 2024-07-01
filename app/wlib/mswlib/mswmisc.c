@@ -201,6 +201,8 @@ static char * filterImageFiles[] = { N_("All image files"),
 
 static HICON hWindowIcon;
 
+static bool audioOn;
+
 /*
  *****************************************************************************
  *
@@ -1795,34 +1797,6 @@ void wControlHilite(
  *****************************************************************************
  */
 
-
-void wMessage(
-    wWin_p w,
-    const char * msg,
-    int beep)
-{
-    HDC hDc;
-    int oldRop;
-    wWinPix_t h;
-    RECT rect;
-    LABELFONTDECL
-
-    if (beep) {
-        MessageBeep(0);
-    }
-
-    GetClientRect(w->hWnd, &rect);
-    hDc = GetDC(w->hWnd);
-    oldRop = SetROP2(hDc, R2_WHITE);
-    h = w->h+2;
-    Rectangle(hDc, 0, h, w->w, h);
-    SetROP2(hDc, oldRop);
-    LABELFONTSELECT
-    TextOut(hDc, 0, h, msg, (int)(strlen(msg)));
-    LABELFONTRESET
-    ReleaseDC(w->hWnd, hDc);
-}
-
 /**
  * Open a document using an external application
  *
@@ -2029,10 +2003,27 @@ void mswSetTrigger(
     }
 }
 
+/**
+ * Change audio setting.
+ * 
+ * \param setting   true: beep is on
+ */
+void
+wSetAudio(bool setting)
+{
+    audioOn = (setting > 0);
+}
+
+/**
+ * Sound speaker if audio is enabled.
+ * 
+ */
 
 void wBeep(void)
 {
-    MessageBeep(MB_OK);
+    if (audioOn) {
+        MessageBeep(MB_OK);
+    }
 }
 
 /**
@@ -3011,7 +3002,9 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         /* Not a Draw control */
-        MessageBeep(MB_ICONHAND);
+        if (audioOn) {
+            MessageBeep(MB_ICONHAND);
+        }
         return (LRESULT)0;
         break;
 

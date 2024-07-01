@@ -763,10 +763,14 @@ static void SwitchMotorEditOk ( void * junk )
 static void EditSwitchMotor (track_p trk)
 {
 	switchmotorData_p xx = GetswitchmotorData(trk);
-	strncpy(switchmotorEditName,xx->name,STR_SHORT_SIZE);
-	strncpy(switchmotorEditNormal,xx->normal,STR_LONG_SIZE);
-	strncpy(switchmotorEditReverse,xx->reverse,STR_LONG_SIZE);
-	strncpy(switchmotorEditPointSense,xx->pointsense,STR_LONG_SIZE);
+	strncpy(switchmotorEditName,xx->name,STR_SHORT_SIZE - 1);
+	switchmotorEditName[STR_SHORT_SIZE - 1] = '\0';
+	strncpy(switchmotorEditNormal,xx->normal,STR_LONG_SIZE - 1);
+	switchmotorEditNormal[STR_LONG_SIZE - 1] = '\0';
+	strncpy(switchmotorEditReverse,xx->reverse,STR_LONG_SIZE - 1);
+	switchmotorEditReverse[STR_LONG_SIZE - 1] = '\0';
+	strncpy(switchmotorEditPointSense,xx->pointsense,STR_LONG_SIZE - 1);
+	switchmotorEditPointSense[STR_LONG_SIZE - 1] = '\0';
 	if (xx->turnout == NULL) { switchmotorEditTonum = 0; }
 	else { switchmotorEditTonum = GetTrkIndex(xx->turnout); }
 	switchmotorEditTrack = trk;

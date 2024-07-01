@@ -48,6 +48,8 @@ extern char wConfigName[];
 static char appLibDir[BUFSIZ];
 static char appWorkDir[BUFSIZ];
 static char userHomeDir[BUFSIZ];
+
+static char *profileFile;
 
 
 /*
@@ -248,24 +250,59 @@ dynArr_t prefs_da;
 wBool_t prefInitted = FALSE;
 
 /**
+ * Define the name of the configuration file. Needed size is calculated, allocated and 
+ * initialized with the filename
+ * 
+ * \param name overwrite default configuration 
+ */
+
+void static
+wlibSetProfileFilename(char *name)
+{
+	const char *workDir;
+
+	workDir = wGetAppWorkDir();
+	if (name && name[0]) {
+		size_t length;
+		length = snprintf(profileFile, 0, "%s", name);
+		profileFile = malloc(length + sizeof(NULL));
+		snprintf( profileFile, length, "%s", name );
+	} else {
+		size_t length; 
+		length = snprintf(profileFile, 0, "%s/%s.rc", workDir, wConfigName );
+		profileFile = malloc(length + sizeof(NULL));
+		length = snprintf(profileFile, length+sizeof(NULL), "%s/%s.rc", workDir, wConfigName );
+	}
+}
+
+
+/**
+ * Get the name of the configuration file.
+ *
+ * \return pointer to the filename.
+ *
+ */
+
+char *
+wGetProfileFilename()
+{
+	return(profileFile);
+}
+
+/**
  * Read the configuration file into memory
  */
 
 static void readPrefs( char * name, wBool_t update )
 {
 	char tmp[BUFSIZ+32], *np, *vp, *cp;
-	const char * workDir;
 	FILE * prefFile;
 	prefs_t * p;
 
 	prefInitted = TRUE;
-	workDir = wGetAppWorkDir();
-	if (name && name[0]) {
-		sprintf( tmp, "%s", name );
-	} else {
-		sprintf( tmp, "%s/%s.rc", workDir, wConfigName );
-	}
-	prefFile = fopen( tmp, "r" );
+	wlibSetProfileFilename(name);
+
+	prefFile = fopen( profileFile, "r" );
 	if (prefFile == NULL) {
 		// First run, no .rc file yet
 		return;
@@ -497,20 +534,15 @@ void wPrefFlush(
 {
 	prefs_t * p;
 	char tmp[BUFSIZ+32];
-	const char *workDir;
 	FILE * prefFile;
 
 	if (!prefInitted) {
 		return;
 	}
 
-	workDir = wGetAppWorkDir();
-	if (name && name[0]) {
-		snprintf( tmp, sizeof(tmp), "%s", name );
-	} else {
-		snprintf( tmp, sizeof(tmp), "%s/%s.rc", workDir, wConfigName );
-	}
-	prefFile = fopen( tmp, "w" );
+	wlibSetProfileFilename(name);
+
+	prefFile = fopen( profileFile, "w" );
 	if (prefFile == NULL) {
 		// Can not write pref file
 		size_t n = BUFSIZ+32-1-strlen(tmp);
@@ -551,4 +583,52 @@ void wPrefReset(
 		}
 	}
 	prefs_da.cnt = 0;
+}
+
+/**
+ * Split a line from the config file ie. rc ini-file into separate tokens. The
+ * line is split into sections, name of value and value following. Pointers
+ * to the respective token are returned. These are zero-terminated. 
+ * If a token is not present, NULL is returned instead. 
+ * The input line is modified.
+ * 
+ * \param line		input line, modified during excution of function
+ * \param section	section if present
+ * \param name		name of config value if present
+ * \param value		name of value if present
+ */
+void 
+wPrefTokenize(char* line, char** section, char** name, char** value)
+{
+	*section = NULL;
+	*name = NULL;
+	*value = NULL;
+
+	*section = strtok(line, ".");
+	*name = strtok(NULL, ":");
+	*value = strtok(NULL, "\n");
+	if(*value)
+		g_strstrip(*value);
+
+}
+
+/**
+ * A valid line for a config file is created from the individual elements. 
+ * Values not need for specific statement are ignored. Eg. when section is 
+ * present, name and value are not used. 
+ * The caller has to make sure, that the return buffer is large enough.
+ * 
+ * \param section	section, first token, dellimited with '.'
+ * \param name		name, left side of ':'
+ * \param value		value, right side of ':'
+ * \param result	pointer to buffer for formated line. 
+ */
+
+void 
+wPrefFormatLine(const char* section, const char* name, const char* value, char* result)
+{
+	if (!value || *value == '\0') {
+		value = "";
+	}
+	sprintf(result, "%s.%s: %s", section, name, value);
 }

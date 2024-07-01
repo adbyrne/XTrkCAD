@@ -1,5 +1,6 @@
-/** \file stringutils.c
+/** \file shortentext.c
  * Some assorted string handling functions
+ * \todo Merge with stringxtc.c
  */
 
 /*  XTrackCAD - Model Railroad CAD

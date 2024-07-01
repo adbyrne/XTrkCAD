@@ -667,8 +667,10 @@ static void EditAspectDialog ( wIndex_t inx )
 		signalAspectEditName[0] = '\0';
 		signalAspectEditScript[0] = '\0';
 	} else {
-		strncpy(signalAspectEditName,signalAspect(inx).aspectName,STR_SHORT_SIZE);
-		strncpy(signalAspectEditScript,signalAspect(inx).aspectScript,STR_LONG_SIZE);
+		strncpy(signalAspectEditName,signalAspect(inx).aspectName,STR_SHORT_SIZE-1);
+		signalAspectEditName[STR_SHORT_SIZE-1] = '\0';
+		strncpy(signalAspectEditScript,signalAspect(inx).aspectScript,STR_LONG_SIZE-1);
+		signalAspectEditScript[STR_LONG_SIZE-1] = '\0';
 	}
 	signalAspectEditIndex = inx;
 	if ( !aspectEditW ) {
@@ -757,7 +759,8 @@ static void EditSignalDialog()
 		DYNARR_RESET( signalAspect_p, signalAspect_da );
 	} else {
 		xx = GetsignalData ( signalEditTrack );
-		strncpy(signalEditName,xx->name,STR_SHORT_SIZE);
+		strncpy(signalEditName,xx->name,STR_SHORT_SIZE - 1);
+		signalEditName[STR_SHORT_SIZE - 1] = '\0';
 		signalEditHeadCount = xx->numHeads;
 		signalEditOrig = xx->orig;
 		signalEditAngle = xx->angle;

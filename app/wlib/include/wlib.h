@@ -7,6 +7,7 @@
 #ifdef WINDOWS
 #include <stdio.h>
 #define FILE_SEP_CHAR "\\"
+#include "getline.h"
 #else
 #define FILE_SEP_CHAR "/"
 #endif
@@ -309,9 +310,9 @@ void wInitAppName(char *appName);
 const char * wGetAppLibDir(			void );
 const char * wGetAppWorkDir(			void );
 const char * wGetUserHomeDir( void );
-wBool_t wCheckExecutable(		void );
 
-void wBeep(			void );
+void wSetAudio(bool setting);
+void wBeep( void );
 wBool_t wNotice(		const char *, const char *, const char * );
 int wNotice3(			const char *, const char *, const char *, const char * );
 void wHelp(			const char * );
@@ -904,12 +905,15 @@ wBool_t wPrefGetFloatBasic(const char *section, const char *name,
 wBool_t wPrefGetFloatExt(const char *section, const char *name, double *result,
                          double defaultValue);
 
-const char * wPrefGetSectionItem( const char * sectionName, wIndex_t * index,
-                                  const char ** name );
+//const char * wPrefGetSectionItem( const char * sectionName, wIndex_t * index,
+//                                  const char ** name );
 void wPrefFlush( char * name);
-void wPrefReset(		void );
+void wPrefReset( void );
+void wPrefTokenize(char* line, char** section, char** name, char** value);
+void wPrefFormatLine(const char* section, const char* name,
+                    const char* value, char* result);
 
-void CleanupCustom( void );
+//void CleanupCustom( void );
 
 /*------------------------------------------------------------------------------
  *
@@ -931,6 +935,17 @@ void wStatusClearControls(wWin_p win);
 void wStatusAttachControl(wWin_p win, wControl_p b);
 void wStatusRevealControlSet(wWin_p win, char *id);
 
+/*------------------------------------------------------------------------------
+ *
+ * System-Information
+ */
+
+char* wGetTempPath(void);
+char* wGetOSVersion(void);
+char* wGetProfileFilename(void);
+char* wGetUserID(void);
+const char* wGetUserHomeRootDir(void);
+const char *wGetPlatformVersion(void);
 
 /*-------------------------------------------------------------------------------
  * User Preferences

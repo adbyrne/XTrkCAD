@@ -178,7 +178,7 @@ EXPORT void DrawGrid(
 	DIST_T hMinSpacing=0, vMinSpacing=0;
 	long f;
 	POS_T hMajSpacing_dpi, vMajSpacing_dpi;
-	BOOL_T bigdot;
+	BOOL_T bigdot = FALSE;
 
 	if (hMajSpacing <= 0 && vMajSpacing <= 0) {
 		return;

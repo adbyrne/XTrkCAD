@@ -89,11 +89,11 @@ static void CustomDlgUpdate(
 		lcnt = wListGetCount( (wList_p)pg->paramPtr[inx].control );
 		for ( linx=0;
 		      linx<lcnt && wListGetItemSelected( (wList_p)customPLs[0].control,
-		                      linx ) != TRUE;
+		              linx ) != TRUE;
 		      linx++ );
 		if ( linx < lcnt ) {
 			context = (custMgmContext_p)wListGetItemContext( (wList_p)
-			                pg->paramPtr[inx].control, linx );
+			          pg->paramPtr[inx].control, linx );
 			wButtonSetLabel( (wButton_p)customPLs[I_CUSTOMEDIT].control,
 			                 context->proc( CUSTMGM_CAN_EDIT, context->data )?_("Edit"):_("Rename") );
 			ParamControlActive( &customPG, I_CUSTOMEDIT, TRUE );
@@ -193,6 +193,14 @@ static void CustMgmContentsOk( void * junk )
 	wHide( custMgmContentsPG.win );
 }
 
+/**
+ * Save custom parameter definitions to a parameter file.
+ *
+ * \param files		count of filenames, must be 1
+ * \param fileName	array of filenames, one member only
+ * \param data		unused
+ * \return			TRUE on success, FALSE in case of failure
+ */
 
 static int CustomDoExport(
         int files,
@@ -211,7 +219,7 @@ static int CustomDoExport(
 		return FALSE;
 	}
 
-	SetCurrentPath( PARAMETERPATHKEY, fileName[ 0 ] );
+	SetCurrentPath( CUSTOMPATHKEY, fileName[ 0 ] );
 	rc = access( fileName[ 0 ], F_OK );
 	if ( rc != -1 ) {
 		rc = access( fileName[ 0 ], W_OK );

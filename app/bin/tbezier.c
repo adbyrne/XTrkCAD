@@ -797,22 +797,24 @@ static BOOL_T SplitBezier( track_p trk, coOrd pos, EPINX_T ep,
 	if (track) {
 		trk1 = NewBezierTrack(ep?newr:newl,NULL,0);
 		//Move elev data from ep
+		DIST_T height;
+		int opt;
+		GetTrkEndElev(trk,ep,&opt,&height);
+		UpdateTrkEndElev( trk1, ep, opt, height,
+		                  (opt==ELEV_STATION)?GetTrkEndElevStation(trk,ep):NULL );
 	} else {
 		trk1 = NewBezierLine(ep?newr:newl,NULL,0, xx->segsColor,xx->segsLineWidth);
 	}
-	DIST_T height;
-	int opt;
-	GetTrkEndElev(trk,ep,&opt,&height);
-	UpdateTrkEndElev( trk1, ep, opt, height,
-	                  (opt==ELEV_STATION)?GetTrkEndElevStation(trk,ep):NULL );
 	UndoModify(trk);
 	for (int i=0; i<4; i++) {
 		xx->pos[i] = ep?newl[i]:newr[i];
 	}
 	FixUpBezier(xx->pos,xx,track);
 	ComputeBezierBoundingBox(trk,xx);
-	SetTrkEndPoint( trk, ep, xx->pos[ep?3:0], ep?xx->a1:xx->a0);
-	UpdateTrkEndElev( trk, ep, ELEV_NONE, 0, NULL);
+	if ( track ) {
+		SetTrkEndPoint( trk, ep, xx->pos[ep?3:0], ep?xx->a1:xx->a0);
+		UpdateTrkEndElev( trk, ep, ELEV_NONE, 0, NULL);
+	}
 	*leftover = trk1;
 	*ep0 = 1-ep;
 	*ep1 = ep;
@@ -1225,7 +1227,7 @@ BOOL_T GetTracksFromBezierSegment(trkSeg_p bezSeg, track_p newTracks[2],
 	if (bezSeg->type != SEG_BEZTRK) { return FALSE; }
 	for (int i=0; i<bezSeg->bezSegs.cnt; i++) {
 		trkSeg_p seg = &DYNARR_N(trkSeg_t,bezSeg->bezSegs,i);
-		track_p new_trk;
+		track_p new_trk = NULL;
 		if (seg->type == SEG_CRVTRK) {
 			new_trk = NewCurvedTrack(seg->u.c.center,fabs(seg->u.c.radius),seg->u.c.a0,
 			                         seg->u.c.a1,0);

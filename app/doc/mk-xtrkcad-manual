@@ -1,0 +1,136 @@
+#!/bin/sh
+
+if [ $# -ne 1 ] ; then
+	echo mk-xtrkcad-manual-html SRCDIR
+	echo Run from the root of your build directory
+	echo SRCDIR is the root of your source tree
+	echo Output will be in XTrackCAD_Users_Manual-VERSION.pdf/.html
+	exit 1
+fi
+
+SRCDIR=$1
+BLDDIR=`pwd`
+
+
+# Setup output name
+OUTFILE="XTrackCAD_Users_Manual-"
+VERSION="Unknown"
+if [ -f "${BLDDIR}/xtrkcad-config.h" ] ; then
+	VERSION=`grep XTRKCAD_VERSION ${BLDDIR}/xtrkcad-config.h|\
+		sed -e 's/.*VERSION "//' -e 's/"//'`
+	echo VERSION=$VERSION
+else
+	echo "Unknown Version"
+fi
+OUTFILE="${OUTFILE}${VERSION}"
+
+if [ ! -d ${SRCDIR} ] ; then
+	echo $SRCDIR does not exist
+	exit 1
+fi
+
+
+# Check and setup directories
+# Find .but files
+BUTTDIR="${SRCDIR}/app/doc"
+if [ ! -f ${BUTTDIR}/addm.but ] ; then
+	echo $BUTTDIR does not contain .but files
+	exit 1
+fi
+
+# working/output directory
+if [ ! -d ${BLDDIR} ] ; then
+	echo $BLDDIR does not exist
+	exit 1
+fi
+
+# .html files
+HTMLDIR=${BLDDIR}/app/doc/html
+if [ ! -f ${HTMLDIR}/addM.html ] ; then
+	echo $HTMLDIR does not contain .html files
+	exit 1
+fi
+
+
+# extract .html file names from .but file
+# prepend some headers with 'NEWPAGE '
+# we convert this to html to generate page breaks when printing
+extract() {
+	grep '^\\[ACHS]' $1 |\
+	sed \
+		-e 's/^\\[ACH][0-9]*{/NEWPAGE /' \
+		-e 's/^\\[S][0-9]*{//' \
+		-e 's/}.*//' \
+		-e '/^$/d' \
+	       	-e 's/$/.html/' ;
+}
+
+
+# extract .html refs
+cd $BUTTDIR
+FILES="\
+contents.html \
+`extract intro.but.in` \
+`extract addm.but` \
+`extract changem.but` \
+`extract drawm.but` \
+`extract editm.but` \
+`extract filem.but` \
+`extract helpm.but` \
+`extract hotbar.but` \
+`extract macrom.but` \
+`extract managem.but` \
+`extract optionm.but` \
+`extract statusbar.but` \
+`extract view_winm.but` \
+`extract navigation.but` \
+`extract appendix.but` \
+`extract ${BLDDIR}/app/help/messages.but` \
+`extract upgrade.but` \
+`extract warranty.but` \
+NEWPAGE \
+IndexPage.html"
+#echo $FILES
+#exit
+
+# clean up .html: remove nav line, fix case file names
+# create concatenated .html file
+cd $HTMLDIR
+
+> ${BLDDIR}/${OUTFILE}.html
+for FILE in ${FILES} ; do
+	if [ "${FILE}" = "NEWPAGE" ] ; then
+		# This creates page break when printing from chrome but
+		# NOT when using pandoc.
+		# This is an open problem
+		echo '<div style="break-after:page"></div>' \
+       		>> ${BLDDIR}/${OUTFILE}.html
+	else
+		cat "${FILE}" |\
+	       	grep -v 'Previous.*Next' |\
+		sed \
+			-e 's/bSensor.png/bsensor.png/'\
+			-e 's/bControl.png/bcontrol.png/'\
+			-e 's/iconlink.PNG/iconlink.png/'\
+       		>> ${BLDDIR}/${OUTFILE}.html
+	fi
+done
+#)
+
+
+# convert to .pdf if we have pandoc
+cd $BLDDIR
+if [ -x /usr/bin/pandoc ] ; then
+	cd $SRCDIR/app/doc/
+	pandoc ${BLDDIR}/${OUTFILE}.html \
+		--pdf-engine=pdflatex \
+		--variable "geometry=margin=0.5in" \
+		--variable fontsize=12pt \
+		-o "${BLDDIR}/${OUTFILE}.pdf"
+	echo Output: ${OUTFILE}.pdf
+else
+	# no pandoc: tell user to use chrome
+	echo Output: ${OUTFILE}.html
+	echo "Open with Chrome and Print to File as a PDF, from a directory containing png.d/"
+	echo "You should specify a custom scale of at least 150%"
+fi

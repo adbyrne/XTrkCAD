@@ -3218,7 +3218,7 @@ void DrawHighlightBoxes(BOOL_T highlight_selected, BOOL_T select,
                         track_p not_this)
 {
 	track_p ts = NULL;
-	coOrd origin,max;
+	coOrd origin,max = {0.0, 0.0};
 	BOOL_T first = TRUE;
 	while ( TrackIterate( &ts ) ) {
 		if ( !GetLayerVisible( GetTrkLayer( ts))) {
