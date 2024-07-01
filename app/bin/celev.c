@@ -382,7 +382,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 	case C_START:
 		if ( elevW == NULL ) {
 			elevW = ParamCreateDialog( &elevationPG, MakeWindowTitle(_("Elevation")),
-			                           _("Done"), DoElevDone, wHide, TRUE, LayoutElevW, 0, DoElevUpdate );
+			                           _("Done"), DoElevDone, ParamCancel_Current, TRUE, LayoutElevW, 0, DoElevUpdate );
 		}
 		elevModeV = 0;
 		elevHeightV = 0.0;

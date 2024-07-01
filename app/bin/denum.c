@@ -150,7 +150,7 @@ void EnumerateStart(void)
 	if (enumW == NULL) {
 		ParamRegister( &enumPG );
 		enumW = ParamCreateDialog( &enumPG, MakeWindowTitle(_("Parts List")), NULL,
-		                           NULL, wHide, TRUE, NULL, F_RESIZE, EnumDlgUpdate );
+		                           NULL, ParamCancel_Current, TRUE, NULL, F_RESIZE, EnumDlgUpdate );
 		enumFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Parts List"),
 		                             sPartsListFilePattern, DoEnumSave, NULL );
 	}

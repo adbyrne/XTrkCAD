@@ -231,7 +231,7 @@ static int CustomDoExport(
 	} else {
 		if ( custMgmContentsPG.win == NULL ) {
 			ParamCreateDialog( &custMgmContentsPG, MakeWindowTitle(_("Contents Label")),
-			                   _("Ok"), CustMgmContentsOk, wHide, TRUE, NULL, F_BLOCK, NULL );
+			                   _("Ok"), CustMgmContentsOk, ParamCancel_Current, TRUE, NULL, F_BLOCK, NULL );
 		}
 		custMgmProceed = FALSE;
 		wShow( custMgmContentsPG.win );
@@ -413,7 +413,7 @@ static void DoCustomMgr( void * junk )
 	if (customPG.win == NULL) {
 		ParamCreateDialog( &customPG,
 		                   MakeWindowTitle(_("Manage custom designed parts")), _("Done"), CustomDone,
-		                   wHide, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK, CustomDlgUpdate );
+		                   ParamCancel_Current, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK, CustomDlgUpdate );
 		while(customTypes[ i ] != NULL) {
 			wListAddValue( ((wList_p)customPLs[I_CUSTOMNEWTYPE].control),
 			               customTypes[ i++ ], NULL, NULL );

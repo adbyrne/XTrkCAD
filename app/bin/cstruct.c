@@ -1028,11 +1028,11 @@ static STATUS_T CmdStructure(
 	case C_START:
 		if (structureW == NULL) {
 			structureW = ParamCreateDialog( &structurePG, MakeWindowTitle(_("Structure")),
-			                                _("Close"), (paramActionOkProc)DoStructOk, wHide, TRUE, NULL, F_RESIZE,
+			                                _("Close"), (paramActionOkProc)DoStructOk, ParamCancel_Null, TRUE, NULL, F_RESIZE,
 			                                StructureDlgUpdate );
 			RegisterChangeNotification( structureChange );
 		}
-		ParamDialogOkActive( &structurePG, FALSE );
+		ParamDialogOkActive( &structurePG, TRUE );
 		structureIndex = wListGetIndex( structureListL );
 		structurePtr = curStructure;
 		wShow( structureW );

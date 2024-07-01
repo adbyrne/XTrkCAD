@@ -271,7 +271,7 @@ EXPORT void DoRecord( void * context )
 {
 	if (recordW == NULL) {
 		char * title = MakeWindowTitle(_("Record"));
-		recordW = ParamCreateDialog( &recordPG, title, NULL, NULL, NULL, FALSE, NULL,
+		recordW = ParamCreateDialog( &recordPG, title, NULL, NULL, ParamCancel_Null, FALSE, NULL,
 		                             F_RESIZE, NULL );
 		recordFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, title, sRecordFilePattern,
 		                               StartRecord, NULL );
@@ -1422,7 +1422,7 @@ static void DemoDlgUpdate(
 static void CreateDemoW( void )
 {
 	char * title = MakeWindowTitle(_("Demo"));
-	demoW = ParamCreateDialog( &demoPG, title, NULL, NULL, NULL, FALSE, NULL,
+	demoW = ParamCreateDialog( &demoPG, title, NULL, NULL, ParamCancel_Null, FALSE, NULL,
 	                           F_RESIZE, DemoDlgUpdate );
 
 	wListAddValue( demoSpeedL, _("Slowest"), NULL, I2VP(0) );

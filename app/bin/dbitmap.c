@@ -472,7 +472,7 @@ static void DoOutputBitMap( void* unused )
 		                                   MakeWindowTitle( _( "Export to bitmap" ) ),
 		                                   _( "Ok" ),
 		                                   OutputBitMapOk,
-		                                   wHide,
+		                                   ParamCancel_Current,
 		                                   TRUE,
 		                                   NULL,
 		                                   0,

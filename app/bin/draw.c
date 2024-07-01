@@ -3321,7 +3321,7 @@ EXPORT void DrawInit( int initialZoom )
 	/*h = (wWinPix_t)((mapD.size.y/mapD.scale)*mainD.dpi + 0.5)+2;*/
 	ParamRegister( &mapPG );
 	LOG( log_mapsize, 2, ( "DrawInit/ParamCreateDialog(&mapPG\n" ) );
-	mapW = ParamCreateDialog( &mapPG, MakeWindowTitle(_("Map")), NULL, NULL, NULL,
+	mapW = ParamCreateDialog( &mapPG, MakeWindowTitle(_("Map")), NULL, NULL, ParamCancel_Null,
 	                          FALSE, NULL, F_RESIZE, NULL );
 	ChangeMapScale();
 

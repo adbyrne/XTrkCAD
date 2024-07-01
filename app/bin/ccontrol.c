@@ -487,7 +487,7 @@ static void EditControlDialog()
 		controlEditW = ParamCreateDialog (&controlEditPG,
 		                                  MakeWindowTitle(_("Edit control")),
 		                                  _("Ok"), ControlEditOk,
-		                                  wHide, TRUE, NULL,
+		                                  ParamCancel_Current, TRUE, NULL,
 		                                  F_BLOCK,
 		                                  NULL );
 	}

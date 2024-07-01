@@ -444,7 +444,7 @@ static void EditSensorDialog()
 		sensorEditW = ParamCreateDialog (&sensorEditPG,
 		                                 MakeWindowTitle(_("Edit sensor")),
 		                                 _("Ok"), SensorEditOk,
-		                                 wHide, TRUE, NULL,
+		                                 ParamCancel_Current, TRUE, NULL,
 		                                 F_BLOCK,
 		                                 NULL );
 	}

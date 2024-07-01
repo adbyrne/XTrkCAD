@@ -70,7 +70,7 @@ static void CreateTipW( void )
 	char * cp;
 
 	tipW = ParamCreateDialog( &tipPG, MakeWindowTitle(_("Tip of the Day")), NULL,
-	                          NULL, wHide, FALSE, NULL, F_RESIZE|F_CENTER|PD_F_ALT_CANCELLABEL, NULL );
+	                          NULL, ParamCancel_Current, FALSE, NULL, F_RESIZE|F_CENTER|PD_F_ALT_CANCELLABEL, NULL );
 
 	/* open the tip file */
 	MakeFullpath(&filename, libDir, sTipF, NULL);
@@ -208,7 +208,7 @@ void CreateAboutW(void *ptr)
 		aboutPLs[I_ABOUTDRAW].winData = wIconCreatePixMap(xtc_xpm);
 		ParamRegister(&aboutPG);
 		aboutW = ParamCreateDialog(&aboutPG, MakeWindowTitle(_("About")), NULL, NULL,
-		                           wHide, FALSE, NULL, F_TOP | F_CENTER| PD_F_ALT_CANCELLABEL, NULL);
+		                           ParamCancel_Current, FALSE, NULL, F_TOP | F_CENTER| PD_F_ALT_CANCELLABEL, NULL);
 		ParamLoadMessage(&aboutPG, I_ABOUTVERSION, sAboutProd);
 		wTextAppend(COPYRIGHT_T, DESCRIPTION);
 		wTextAppend(COPYRIGHT_T,

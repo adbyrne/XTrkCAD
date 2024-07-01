@@ -69,14 +69,6 @@ long GetChanges( paramGroup_p pg )
 
 
 
-static void OptionDlgCancel(
-        wWin_p win )
-{
-	wEnableBalloonHelp( (int)enableBalloonHelp );
-	wHide( win );
-}
-
-
 /****************************************************************************
  *
  * Display Dialog
@@ -195,7 +187,7 @@ static void DoDisplay( void * junk )
 {
 	if (displayW == NULL) {
 		displayW = ParamCreateDialog( &displayPG, MakeWindowTitle(_("Display Options")),
-		                              _("Ok"), DisplayOk, OptionDlgCancel, TRUE, NULL, 0, OptionDlgUpdate );
+		                              _("Ok"), DisplayOk, ParamCancel_Restore, TRUE, NULL, 0, OptionDlgUpdate );
 		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto"), NULL,
 		               I2VP(0x0002) );
 		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto/Manuf"),
@@ -280,7 +272,7 @@ static void DoCmdopt( void * junk )
 {
 	if (cmdoptW == NULL) {
 		cmdoptW = ParamCreateDialog( &cmdoptPG, MakeWindowTitle(_("Command Options")),
-		                             _("Ok"), CmdoptOk, OptionDlgCancel, TRUE, NULL, 0, OptionDlgUpdate );
+		                             _("Ok"), CmdoptOk, ParamCancel_Restore, TRUE, NULL, 0, OptionDlgUpdate );
 	}
 	ParamLoadControls( &cmdoptPG );
 	wShow( cmdoptW );
@@ -515,7 +507,7 @@ static void DoPref( void * junk )
 {
 	if (prefW == NULL) {
 		prefW = ParamCreateDialog( &prefPG, MakeWindowTitle(_("Preferences")), _("Ok"),
-		                           PrefOk, wHide, TRUE, NULL, 0, OptionDlgUpdate );
+		                           PrefOk, ParamCancel_Restore, TRUE, NULL, 0, OptionDlgUpdate );
 		LoadDstFmtList();
 	}
 	ParamLoadControls( &prefPG );
@@ -590,7 +582,7 @@ static void DoColor( void * junk )
 {
 	if (colorW == NULL) {
 		colorW = ParamCreateDialog( &colorPG, MakeWindowTitle(_("Color")), _("Ok"),
-		                            ColorOk, wHide, TRUE, NULL, 0, NULL );
+		                            ColorOk, ParamCancel_Restore, TRUE, NULL, 0, NULL );
 	}
 	ParamLoadControls( &colorPG );
 	wShow( colorW );

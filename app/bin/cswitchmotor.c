@@ -605,7 +605,7 @@ static void NewSwitchMotorDialog(track_p trk)
 	if ( !switchmotorW ) {
 		ParamRegister( &switchmotorPG );
 		switchmotorW = ParamCreateDialog (&switchmotorPG,
-		                                  MakeWindowTitle(_("Create switch motor")), _("Ok"), SwitchMotorOk, wHide, TRUE,
+		                                  MakeWindowTitle(_("Create switch motor")), _("Ok"), SwitchMotorOk, ParamCancel_Current, TRUE,
 		                                  NULL, F_BLOCK, NULL );
 		switchmotorD.dpi = mainD.dpi;
 	}
@@ -779,7 +779,7 @@ static void EditSwitchMotor (track_p trk)
 		switchmotorEditW = ParamCreateDialog (&switchmotorEditPG,
 		                                      MakeWindowTitle(_("Edit switch motor")),
 		                                      _("Ok"), SwitchMotorEditOk,
-		                                      wHide, TRUE, NULL, F_BLOCK,
+		                                      ParamCancel_Current, TRUE, NULL, F_BLOCK,
 		                                      NULL );
 	}
 	ParamLoadControls( &switchmotorEditPG );

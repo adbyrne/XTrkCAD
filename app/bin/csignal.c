@@ -678,7 +678,7 @@ static void EditAspectDialog ( wIndex_t inx )
 		aspectEditW = ParamCreateDialog (&aspectEditPG,
 		                                 MakeWindowTitle(_("Edit aspect")),
 		                                 _("Ok"), aspectEditOK,
-		                                 wHide, TRUE, NULL,F_BLOCK,NULL);
+		                                 ParamCancel_Current, TRUE, NULL,F_BLOCK,NULL);
 	}
 	ParamLoadControls( &aspectEditPG );
 	wShow( aspectEditW );

@@ -743,7 +743,9 @@ static void DoPrintMargin( void )
 	if ( customMarginWin == NULL ) {
 		int x=10, y=10;
 		customMarginWin = ParamCreateDialog( &customMarginPG,
-		                                     MakeWindowTitle(_("Print Margins")), _("Ok"), DoPrintMarginOk, NULL, TRUE,
+		                                     MakeWindowTitle(_("Print Margins")),
+		                                     _("Ok"), DoPrintMarginOk,
+		                                     ParamCancel_Null, TRUE,
 		                                     PrintMarginLayout, F_BLOCK, PrintMarginDlgUpdate );
 		if ( customMarginWin == NULL ) {
 			return;
@@ -1438,7 +1440,8 @@ static STATUS_T CmdPrint(
 			}
 			print_d.scale = printScale;
 			printWin = ParamCreateDialog( &printPG, MakeWindowTitle(_("Print")), _("Print"),
-			                              DoPrintPrint, (paramActionCancelProc)Reset, TRUE, NULL, 0, PrintDlgUpdate );
+			                              DoPrintPrint, ParamCancel_Reset,
+			                              TRUE, NULL, 0, PrintDlgUpdate );
 		}
 		sPrinterName = wPrintGetName();
 		while ( *sPrinterName == '\0' ) {
