@@ -2117,7 +2117,6 @@ static void TurnoutDlgUpdate(
 	AddTurnout();
 	curTurnout = to;
 	RedrawTurnout( turnoutD.d, NULL, 0, 0 );
-	/*	ParamDialogOkActive( &turnoutPG, FALSE ); */
 }
 
 

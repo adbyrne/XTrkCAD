@@ -3048,9 +3048,6 @@ static void DoMouse( wAction_t action, coOrd pos )
 		Reset();
 		DoCurCommand( C_START, zero );
 		break;
-	case C_INFO:
-		Reset();
-		break;
 	}
 }
 

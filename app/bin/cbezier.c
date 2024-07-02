@@ -938,7 +938,7 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG)
 		if (Da.state != PICK_POINT) {										//Too early - abandon
 			InfoMessage(_("No changes made"));
 			Da.state = NONE;
-			return C_CANCEL;
+			return C_CONTINUE;
 		}
 		UndoStart( _("Modify Bezier"), "newBezier - CR" );
 		UndoModify( trk );

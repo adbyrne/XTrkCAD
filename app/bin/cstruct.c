@@ -646,7 +646,6 @@ static void StructureDlgUpdate(
 	curStructure = to;
 	ShowPierL();
 	RedrawStructure( structureD.d, NULL, 0, 0 );
-	/* ParamDialogOkActive( &structurePG, FALSE ); */
 }
 
 

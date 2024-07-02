@@ -2085,7 +2085,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos,
 			InfoMessage(_("No changes made"));
 			Da.state = NONE;
 			//DYNARR_FREE(trkSeg_t,Da.crvSegs_da);
-			return C_CANCEL;
+			return C_CONTINUE;
 		}
 		if (!CheckHelix(trk)) {
 			wBeep();
