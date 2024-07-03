@@ -225,17 +225,18 @@ static void StartMoveDialog(void * funcVP)
 	if (moveW == NULL)
 		moveW = ParamCreateDialog(&movePG, MakeWindowTitle(_("Move")), _("Ok"),
 		                          MoveEnterOk, ParamCancel_Undo, FALSE, NULL, 0, NULL);
-	moveValue = zero;
 	ParamLoadControls(&movePG);
 	moveDialogCallBack = func;
-	moveValue = zero;
 	wShow(moveW);
 }
 
 static void MoveEnterOk(void * unused)
 {
 	ParamLoadData(&movePG);
-	moveDialogCallBack(&moveValue);
+	if ( moveValue.x != 0.0 ||
+	     moveValue.y != 0.0 ) {
+		moveDialogCallBack(&moveValue);
+	}
 	wHide(moveW);
 }
 
@@ -249,10 +250,12 @@ static void IndexEnterOk(void * unused)
 static void RotateEnterOk(void * unused)
 {
 	ParamLoadData(&rotatePG);
-	if (angleSystem == ANGLE_POLAR) {
-		rotateDialogCallBack(I2VP(rotateValue * 1000));
-	} else {
-		rotateDialogCallBack(I2VP(rotateValue * 1000));
+	if ( rotateValue != 0.0 ) {
+		if (angleSystem == ANGLE_POLAR) {
+			rotateDialogCallBack(I2VP(rotateValue * 1000));
+		} else {
+			rotateDialogCallBack(I2VP(rotateValue * 1000));
+		}
 	}
 	wHide(rotateW);
 }
@@ -368,10 +371,11 @@ EXPORT void SelectFont(void * unused)
 
 
 EXPORT long stickySet = 0;
+static long stickySet1 = 0;
 static wWin_p stickyW;
 static const char * stickyLabels[33];
 static paramData_t stickyPLs[] = { {
-		PD_TOGGLE, &stickySet, "set", 0,
+		PD_TOGGLE, &stickySet1, "set", 0,
 		stickyLabels
 	}
 };
@@ -381,6 +385,7 @@ static paramGroup_t stickyPG = { "sticky", PGO_RECORD, stickyPLs,
 
 static void StickyOk(void * unused)
 {
+	stickySet = stickySet1;
 	wHide(stickyW);
 }
 
@@ -391,6 +396,7 @@ EXPORT void DoSticky(void * unused)
 		stickyW = ParamCreateDialog(&stickyPG,
 		                            MakeWindowTitle(_("Sticky Commands")), _("Ok"), StickyOk, ParamCancel_Restore,
 		                            TRUE, NULL, 0, NULL);
+	stickySet1 = stickySet;
 	ParamLoadControls(&stickyPG);
 	wShow(stickyW);
 }
