@@ -1097,7 +1097,7 @@ static STATUS_T CmdStructure(
 
 	case C_CANCEL:
 		wHide( structureW );
-		return C_CANCEL;
+		return C_TERMINATE;
 
 	case C_REDRAW:
 	case C_TEXT:

@@ -2963,7 +2963,6 @@ static STATUS_T CmdTurnout(
 			                             F_RESIZE | F_RECALLSIZE | PD_F_ALT_CANCELLABEL, TurnoutDlgUpdate);
 			InitNewTurn(turnoutNewM);
 		}
-		/*		ParamDialogOkActive( &turnoutPG, FALSE ); */
 		turnoutIndex = wListGetIndex(turnoutListL);
 		turnoutPtr = curTurnout;
 		wShow(turnoutW);
