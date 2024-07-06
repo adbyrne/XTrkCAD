@@ -904,7 +904,6 @@ int LoadTracks(
 		RecomputeElevations(NULL);
 		AttachTrains();
 		DoChangeNotification( CHANGE_ALL );
-		DoUpdateTitles();
 		LayerSetCounts();
 	}
 
@@ -1444,7 +1443,6 @@ EXPORT int LoadCheckpoint( BOOL_T sameName )
 		RecomputeElevations(NULL);
 		AttachTrains();
 		DoChangeNotification( CHANGE_ALL );
-		DoUpdateTitles();
 
 	} else { SetLayoutFullPath(""); }
 

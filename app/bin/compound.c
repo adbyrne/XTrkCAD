@@ -1349,7 +1349,6 @@ BOOL_T ReadCompound(
 	char scale[10];
 	char *title;
 	wIndex_t layer;
-	char *cp;
 	long options = 0;
 	long position = 0;
 	long lineType = 0;
@@ -1387,15 +1386,6 @@ BOOL_T ReadCompound(
 		if ( pathCnt <= 1 ) {
 			InputError( "Turnout defn without a Path", TRUE );
 			return FALSE;
-		}
-	}
-	if (paramVersion<6 && strlen( title ) > 2) {
-		cp = strchr( title, '\t' );
-		if (cp != NULL) {
-			cp = strchr( cp, '\t' );
-		}
-		if (cp == NULL) {
-			UpdateTitleMark( title, LookupScale(scale) );
 		}
 	}
 	trk = NewCompound( trkType, index, orig, angle, title, 0, NULL,
