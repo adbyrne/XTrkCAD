@@ -222,7 +222,9 @@ static paramData_t turnDesignPLs[] = {
 static paramGroup_t turnDesignPG = { "turnoutNew", 0, turnDesignPLs, COUNT( turnDesignPLs )  };
 
 static turnoutInfo_t * customTurnout1, * customTurnout2;
-static BOOL_T includeNontrackSegments;
+
+/* Copy non-track segs if there are any (Group & CustMgm/Edit) and user said yes. */
+static BOOL_T includeNontrackSegments = FALSE;
 
 #else
 int doCustomInfoLine = 1;
@@ -3087,7 +3089,7 @@ static void NewTurnOk( void * context )
 		fclose(f);
 	}
 	SetUserLocale();
-	includeNontrackSegments = TRUE;
+	includeNontrackSegments = FALSE;
 	wHide( newTurnW );
 	DoChangeNotification( CHANGE_PARAMS );
 
@@ -3097,13 +3099,6 @@ static void NewTurnOk( void * context )
 
 
 #ifndef MKTURNOUT
-static void NewTurnCancel( wWin_p win )
-{
-	wHide( newTurnW );
-	includeNontrackSegments = TRUE;
-}
-
-
 
 static wWinPix_t turnDesignWidth;
 static wWinPix_t turnDesignHeight;
@@ -3147,7 +3142,7 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 		                I2VP(partnoWidth);
 		partnoWidth += wLabelWidth( " # " );
 		newTurnW = ParamCreateDialog( &turnDesignPG, _("Turnout Designer"), _("Print"),
-		                              NewTurnPrint, NewTurnCancel, TRUE, TurnDesignLayout, F_BLOCK, NULL );
+		                              NewTurnPrint, ParamCancel_Current, TRUE, TurnDesignLayout, F_BLOCK, NULL );
 		for ( inx=0; inx<COUNT( designDescs ); inx++ ) {
 			designDescs[inx]->lineC = wLineCreate( turnDesignPG.win, NULL,
 			                                       designDescs[inx]->lineCnt, designDescs[inx]->lines );
@@ -3267,6 +3262,7 @@ static void ShowTurnoutDesigner( void * context )
 		fprintf( recordF, TURNOUTDESIGNER " SHOW %s\n",
 		         ((toDesignDesc_t*)context)->label );
 	}
+	includeNontrackSegments = FALSE;
 	newTurnScaleName = curScaleName;
 	newTurnTrackGauge = trackGauge;
 	if (context && (curDesign == context)) {
@@ -3502,13 +3498,10 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 		}
 	}
 
-	includeNontrackSegments = TRUE;
-	if ( segsDiff ) {
-		if ( NoticeMessage( MSG_SEGMENTS_DIFFER, _("Yes"), _("No") ) <= 0 ) {
-			includeNontrackSegments = FALSE;
-		}
-	} else {
-		includeNontrackSegments = FALSE;
+	includeNontrackSegments = FALSE;
+	if ( segsDiff &&
+	     NoticeMessage( MSG_SEGMENTS_DIFFER, _("Yes"), _("No") ) > 0 ) {
+		includeNontrackSegments = TRUE;
 	}
 	/*if (recordF)
 		fprintf( recordF, TURNOUTDESIGNER " SHOW %s\n", dp->label );*/
@@ -3529,7 +3522,7 @@ EXPORT void InitNewTurn( wMenu_p m )
 		AddPlaybackProc( message, (playbackProc_p)ShowTurnoutDesigner, designDescs[i] );
 	}
 	newTurnRoadbedColor = wDrawColorBlack;
-	includeNontrackSegments = TRUE;
+	includeNontrackSegments = FALSE;
 	log_cornuturnoutdesigner = LogFindIndex( "cornuturnoutdesigner" );
 }
 #endif
