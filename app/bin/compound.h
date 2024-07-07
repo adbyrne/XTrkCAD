@@ -163,9 +163,12 @@ void DoUngroup( void * unused );
 void DoGroup( void * unused );
 
 /* dcmpnd.c */
+#ifdef UPDATETITLES
+void StartUpdateTitles( void );
 void UpdateTitleMark( char *, SCALEINX_T );
 void DoUpdateTitles( void );
-BOOL_T RefreshCompound( track_p, BOOL_T );
+#endif
+void DoRefreshCompound( void * unused );
 wIndex_t FindListItemByContext( wList_p, void *);
 
 

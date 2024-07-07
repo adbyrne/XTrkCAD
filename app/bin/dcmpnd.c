@@ -30,6 +30,8 @@
 #include "track.h"
 #include "trkendpt.h"
 #include "common-ui.h"
+#include "cselect.h"
+
 
 /*****************************************************************************
  *
@@ -147,6 +149,7 @@ static dynArr_t refreshSpecial_da;
 static wIndex_t refreshSpecialInx;
 static BOOL_T refreshReturnVal;
 static void RefreshSkip( void * junk );
+static void RefreshDone( void * junk );
 static paramListData_t refreshSpecialListData = { 30, 600, 0, NULL, NULL };
 static paramData_t refreshSpecialPLs[] = {
 #define REFRESH_M1		(0)
@@ -157,7 +160,8 @@ static paramData_t refreshSpecialPLs[] = {
 	{ PD_MESSAGE, NULL, NULL, 0/*PDO_DLGRESIZEW*/, I2VP(380) },
 #define REFRESH_L		(3)
 	{ PD_LIST, &refreshSpecialInx, "list", PDO_LISTINDEX|PDO_NOPREF|PDO_DLGRESIZE, &refreshSpecialListData, NULL, BO_READONLY },
-	{ PD_BUTTON, RefreshSkip, "skip", PDO_DLGCMDBUTTON, NULL, N_("Skip") }
+	{ PD_BUTTON, RefreshSkip, "skip", PDO_DLGCMDBUTTON, NULL, N_("Skip") },
+	{ PD_BUTTON, RefreshDone, "done", PDO_DLGCMDBUTTON, NULL, N_("Done") }
 };
 static paramGroup_t refreshSpecialPG = { "refreshSpecial", 0, refreshSpecialPLs, COUNT( refreshSpecialPLs ) };
 static void RefreshSpecialOk(
@@ -165,8 +169,8 @@ static void RefreshSpecialOk(
 {
 	wHide( refreshSpecialPG.win );
 }
-static void RefreshSpecialCancel(
-        wWin_p win )
+static void RefreshDone(
+        void * junk )
 {
 	refreshSpecialInx = -1;
 	refreshReturnVal = FALSE;
@@ -179,7 +183,7 @@ static void RefreshSkip(
 	wHide( refreshSpecialPG.win );
 }
 
-EXPORT BOOL_T RefreshCompound(
+static BOOL_T RefreshCompound(
         track_p trk,
         BOOL_T junk )
 {
@@ -236,8 +240,8 @@ EXPORT BOOL_T RefreshCompound(
 	if ( refreshSpecialPG.win == NULL ) {
 		ParamRegister( &refreshSpecialPG );
 		ParamCreateDialog( &refreshSpecialPG,
-		                   MakeWindowTitle(_("Refresh Turnout/Structure")), _("Ok"), RefreshSpecialOk,
-		                   RefreshSpecialCancel, TRUE, NULL, F_BLOCK|F_RESIZE|F_RECALLSIZE, NULL );
+		                   MakeWindowTitle(_("Refresh Turnout/Structure")), _("Replace"), RefreshSpecialOk,
+		                   ParamCancel_Null, TRUE, NULL, F_BLOCK|F_RESIZE|F_RECALLSIZE, NULL );
 	}
 	ParamLoadMessage( &refreshSpecialPG, REFRESH_M1,
 	                  _("Choose a Turnout/Structure to replace:") );
@@ -287,6 +291,26 @@ EXPORT BOOL_T RefreshCompound(
 		                  _("Choose another Turnout/Structure to replace:") );
 	}
 }
+
+EXPORT void DoRefreshCompound( void * unused )
+{
+	if (SelectedTracksAreFrozen()) {
+		return;
+	}
+	refreshSpecialInx = -1;
+	refreshReturnVal = FALSE;
+	if (selectedTrackCount>0) {
+		UndoStart( _("Refresh Compound"), "refresh compound" );
+		DoSelectedTracks( RefreshCompound );
+		RefreshCompound( NULL, FALSE );
+		UndoEnd();
+		MainRedraw(); // DoRefreshCompound
+	} else {
+		ErrorMessage( MSG_NO_SELECTED_TRK );
+	}
+}
+
+
 
 /*****************************************************************************
  *
@@ -400,7 +424,7 @@ static int CompoundCustMgmProc(
 			if ( !renamePG.win ) {
 				ParamRegister( &renamePG );
 				ParamCreateDialog( &renamePG, MakeWindowTitle(_("Rename Object")), _("Ok"),
-				                   RenameOk, wHide, TRUE, NULL, F_BLOCK, NULL );
+				                   RenameOk, ParamCancel_Current, TRUE, NULL, F_BLOCK, NULL );
 			}
 			ParamLoadControls( &renamePG );
 			wShow( renamePG.win );
