@@ -79,7 +79,7 @@ void wDoAccelHelp(wAccelKey_e key, void * context) {
  *
  */
 
-void wMenuAddHelp(wMenu_p m)
+void wMenuAddHelp(wControl_p m)
 {
     wMenuPushCreate(m, NULL, _("&Contents"), 0, DoHelpMenu, (void*)1);
     wMenuPushCreate(m, NULL, _("Co&mmand Context help"), 0, DoHelpMenu, (void*)3);

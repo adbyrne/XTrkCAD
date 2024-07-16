@@ -33,7 +33,7 @@
 
 #include "xtrkcad-config.h"
 
-static struct wWindow_t *appMainWindow;
+static wControl_p appMainWindow;
 
 /**
  * Get the application's main window.
@@ -44,7 +44,7 @@ static struct wWindow_t *appMainWindow;
 GtkWidget *
 wlibAppWinGetMain()
 {
-	return(appMainWindow->gtkWindow);
+	return(appMainWindow->widget);
 }
 
 /**
@@ -57,7 +57,7 @@ wlibAppWinGetMain()
 GtkAccelGroup*
 wlibAppWinGetAccelGroup()
 {
-	return(appMainWindow->accelGroup);
+	return(appMainWindow->data.window.accelGroup);
 }
 
 /**
@@ -69,7 +69,7 @@ wlibAppWinGetAccelGroup()
 GtkContainer *
 wlibAppWinGetStatusbar()
 {
-	return(appMainWindow->statusbar);
+	return(appMainWindow->data.window.statusbar);
 }
 
 
@@ -86,8 +86,9 @@ wlibAppWinGetStatusbar()
 static gboolean
 on_widget_deleted(GtkWidget* window, GdkEvent* event, gpointer userData)
 {
-	if (appMainWindow->winProc) {
-		bool rc = appMainWindow->winProc(appMainWindow, wClose_e, userData, NULL);
+	if (appMainWindow->data.window.winProc) {
+		bool rc = appMainWindow->data.window.winProc(appMainWindow, 
+			wClose_e, userData, NULL);
 		if (!rc) {
 			wPrefFlush(NULL);
 		}
@@ -136,8 +137,8 @@ CreateToolbar(GtkScrolledWindow* scrolled)
 	GtkFlowBox* flowbox;
 	GtkWidget* viewport;
 
-	flowbox = GTK_FLOW_BOX(gtk_builder_get_object(appMainWindow->builder,
-	                       "toolbar"));
+	flowbox = GTK_FLOW_BOX(gtk_builder_get_object(
+		appMainWindow->data.window.builder,"toolbar"));
 	g_signal_connect(flowbox, "size-allocate", G_CALLBACK(signalSizeAlloc),
 	                 scrolled);
 
@@ -160,7 +161,7 @@ CreateToolbar(GtkScrolledWindow* scrolled)
  * \return    window handle or NULL on error
  */
 
-wWindow_p wWinMainCreate(
+wControl_p wWinMainCreate(
         const char *name,		 /* Application name */
         wWinPix_t x,			 /* Initial window width */
         wWinPix_t y,			 /* Initial window height */
@@ -172,6 +173,7 @@ wWindow_p wWinMainCreate(
         void *data)			 /* User context */
 {
 	char *pos;
+	struct window* wcontrol;
 
 	pos = strchr(name, ';');
 
@@ -187,56 +189,58 @@ wWindow_p wWinMainCreate(
 	wDrawColorBlack = wDrawFindColor(0x000000);
 
 	appMainWindow = g_malloc0(sizeof(struct wWindow_t));
-	appMainWindow->helpTopic = g_strdup(helpStr);
-	appMainWindow->name = g_strdup(nameStr);
-	appMainWindow->winProc = winProc;
-	appMainWindow->type = W_MAIN;
+	appMainWindow = wlibControlNew(W_MAIN, NULL, nameStr, data);
 
-	appMainWindow->builder = gtk_builder_new_from_resource(
+//	appMainWindow->helpTopic = g_strdup(helpStr);
+//	appMainWindow->name = g_strdup(nameStr);
+	wcontrol = WLIB_GET_DATA_PTR(appMainWindow, window);
+	wcontrol->winProc = winProc;
+
+	wcontrol->builder = gtk_builder_new_from_resource(
 	                                 XTRKCAD_RESOURCE_PATH
 	                                 "appwindow.ui");
 
-	appMainWindow->gtkWindow = GTK_WIDGET(gtk_builder_get_object(
-	                appMainWindow->builder,
+	appMainWindow->widget = GTK_WIDGET(gtk_builder_get_object(
+	                wcontrol->builder,
 	                "main"));
 
 	// this is the main application window
 	gtk_application_add_window(wlibGetApp(),
-	                           GTK_WINDOW(appMainWindow->gtkWindow));
+	                           GTK_WINDOW(appMainWindow->widget));
 
 	// create the accelerator group
-	appMainWindow->accelGroup = gtk_accel_group_new();
-	gtk_window_add_accel_group(GTK_WINDOW(appMainWindow->gtkWindow),
-	                           appMainWindow->accelGroup);
+	wcontrol->accelGroup = gtk_accel_group_new();
+	gtk_window_add_accel_group(GTK_WINDOW(appMainWindow->widget),
+	                           wcontrol->accelGroup);
 
-	gtk_window_set_title(GTK_WINDOW(appMainWindow->gtkWindow), labelStr);
+	gtk_window_set_title(GTK_WINDOW(appMainWindow->widget), labelStr);
 
 	if (option & F_MENUBAR) {
-		appMainWindow->menubar = GTK_WIDGET(gtk_builder_get_object(
-		                appMainWindow->builder,
+		wcontrol->menubar = GTK_WIDGET(gtk_builder_get_object(
+		                wcontrol->builder,
 		                "menubar"));
 	}
 
 	GtkScrolledWindow *scrolled;
-	scrolled = GTK_SCROLLED_WINDOW(gtk_builder_get_object(appMainWindow->builder,
+	scrolled = GTK_SCROLLED_WINDOW(gtk_builder_get_object(wcontrol->builder,
 	                               "toolbarWindow"));
 	if (scrolled) {
-		appMainWindow->toolbar =  CreateToolbar(scrolled);
+		wcontrol->toolbar =  CreateToolbar(scrolled);
 	}
 
 	GtkContainer *statusbar = GTK_CONTAINER(gtk_builder_get_object(
-	                appMainWindow->builder,
+	                wcontrol->builder,
 	                "statusbar"));
 	{
-		appMainWindow->statusbar = statusbar;
+		wcontrol->statusbar = statusbar;
 	}
 
 	GtkDrawingArea* drawingArea = GTK_DRAWING_AREA(gtk_builder_get_object(
-	                                      appMainWindow->builder, "maindraw"));
+	                                      wcontrol->builder, "maindraw"));
 
-	g_signal_connect(G_OBJECT(appMainWindow->gtkWindow),
+	g_signal_connect(G_OBJECT(appMainWindow->widget),
 	                 "delete-event", G_CALLBACK(on_widget_deleted), NULL);
 
-	gtk_widget_show_all(appMainWindow->gtkWindow);
+	gtk_widget_show_all(appMainWindow->widget);
 	return appMainWindow;
 }

@@ -47,14 +47,14 @@ struct wStatus_t {
  */
 
 void wStatusSetValue(
-    wStatus_p b,
+    wControl_p b,
     const char * arg)
 {
-    if (!b || b->labelWidget == 0) {
+    if (!b || b->widget == 0) {
         return;
     }
 
-    gtk_label_set_text(GTK_LABEL(b->labelWidget), wlibConvertInput(arg));
+    gtk_label_set_text(GTK_LABEL(b->widget), wlibConvertInput(arg));
 }
 
 /**
@@ -70,21 +70,21 @@ void wStatusSetValue(
  * \return handle for created window
  */
 
-wStatus_p wStatusCreate(
-        wWindow_p	parent,
+wControl_p wStatusCreate(
+        wControl_p	parent,
         const char 	* labelStr,
         const char	*message)
 {
-	wStatus_p b;
+	wControl_p b;
 
-    b = (wStatus_p)g_malloc(sizeof(struct wStatus_t));
+	b = wlibControlNew(B_STATUS, parent, NULL, NULL);
 
-    b->labelWidget = wlibWidgetFromIdWarn(parent, labelStr);
+    b->widget = wlibWidgetFromIdWarn(parent, labelStr);
 
-	gtk_label_set_text(GTK_LABEL(b->labelWidget),
+	gtk_label_set_text(GTK_LABEL(b->widget),
 		                   message?wlibConvertInput(message):"");
 
-	gtk_widget_show(b->labelWidget);
+	gtk_widget_show(b->widget);
 	return b;
 }
 
@@ -199,7 +199,7 @@ wWinPix_t wStatusGetHeight(
  */
 
 void wStatusSetWidth(
-    wStatus_p b,
+    wControl_p b,
     wWinPix_t width)
 {
 	printf("Function at line %d in %s is not implemented!", __LINE__, __FILE__);

@@ -272,7 +272,6 @@ wlibBasicDrawString (wDraw_p bd, wDrawPix_t x, wDrawPix_t y, double a, char *s,
                      wFont_p fp, double fs, double width, double minWidth,
                      wDrawColor color, wDrawOpts opts)
 {
-	char *cp;
 	double x0 = (double) x, y0 = (double) y;
 	int text_height, text_width;
 	double ascent;
@@ -304,7 +303,7 @@ wlibBasicDrawString (wDraw_p bd, wDrawPix_t x, wDrawPix_t y, double a, char *s,
 	// \todo use a getter function instead of double conversion
 	desc = pango_font_description_from_string (wlibFontTranslate (fp));
 
-	pango_font_description_set_size (desc, fs * PANGO_SCALE * bd->scale_text);
+	pango_font_description_set_size (desc, (gint)lround(fs * PANGO_SCALE * bd->scale_text));
 
 	// render the string to a Pango layout
 	pango_layout_set_font_description (layout, desc);
@@ -413,7 +412,7 @@ wlibBasicDrawFillPolygon (wDraw_p bd, wDrawPix_t p[][2], wPolyLine_e type[],
 
 	BasicDrawSetColor (cr, color);
 
-	wDrawPix_t mid0[2], mid1[2], mid2[2], mid3[2], mid4[2];
+	wDrawPix_t mid0[2], mid1[2],  mid3[2], mid4[2];
 
 	for (inx = 0; inx < cnt; inx++) {
 		int j = inx - 1;

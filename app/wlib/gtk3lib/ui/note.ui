@@ -38,7 +38,7 @@
                         <property name="spacing">12</property>
                         <property name="margin-bottom">12</property>
                         <child>
-                            <object class="GtkScrolledWindow" id="note-text.scrollwindow">
+                            <object class="GtkScrolledWindow" id="scrollwindow">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="hexpand">True</property>

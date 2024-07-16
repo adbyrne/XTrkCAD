@@ -34,12 +34,6 @@
 #include "gtkint.h"
 #include "i18n.h"
 
-struct wButton_t {
-	wType_e type;
-	GtkWidget* widget;
-	wButtonCallBack_p action;
-	void* data;
-};
 /*
  *****************************************************************************
  *
@@ -55,7 +49,7 @@ struct wButton_t {
  * \param value IN TRUE for pressed in, FALSE for raised
  */
 
-void wButtonSetBusy(wButton_p bb, int value)
+void wButtonSetBusy(wControl_p bb, int value)
 {
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bb->widget), value);
 }
@@ -142,7 +136,7 @@ void wlibSetLabel(
  * \todo icons in XBM format
  */
 
-void wButtonSetLabel(wButton_p bb, unsigned isIcon, const char * labelStr)
+void wButtonSetLabel(wControl_p bb, unsigned isIcon, const char * labelStr)
 {
 	if (isIcon) {
 		GdkPixbuf* pixbuf;
@@ -166,10 +160,10 @@ void wButtonSetLabel(wButton_p bb, unsigned isIcon, const char * labelStr)
  */
 
 void wlibButtonDoAction(
-        wButton_p bb)
+        wControl_p bb)
 {
-	if (bb->action) {
-		bb->action(bb->data);
+	if (bb->data.button.action) {
+		bb->data.button.action(bb->context);
 	}
 }
 
@@ -183,10 +177,10 @@ static void buttonClick(
         GtkWidget *widget,
         gpointer value)
 {
-	wButton_p b = (wButton_p)value;
+	struct button *b = WLIB_GET_DATA_PTR(((wControl_p)value),button);
 
 	if (b->action) {
-		b->action(b->data);
+		b->action(((wControl_p)value)->context);
 	}
 }
 
@@ -232,8 +226,8 @@ static wBool_t drawButton(
  *
  */
 
-wButton_p wButtonCreate(
-        wWindow_p	parent,
+wControl_p wButtonCreate(
+        wControl_p	parent,
         wWinPix_t	x,
         wWinPix_t	y,
         const char 	* helpStr,
@@ -243,14 +237,14 @@ wButton_p wButtonCreate(
         wButtonCallBack_p action,
         void 	* data)
 {
-	wButton_p b;
+	wControl_p b;
+	struct button* button; 
 
-	b = g_malloc0(sizeof(struct wButton_t));
-	b->type = B_BUTTON;
-	b->action = action;
-	b->data = data;
+	b = wlibControlNew( B_BUTTON, parent, helpStr, data );
+	button = WLIB_GET_DATA_PTR(b, button);
+	button->action = action;
 
-	if (option & BO_USEBUILDER) {
+	if (HASDIALOGBUILDER(parent)) {
 		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
 	} else {
 		b->widget = GTK_WIDGET(gtk_toggle_button_new());
@@ -268,7 +262,7 @@ wButton_p wButtonCreate(
 		if (option & BB_DEFAULT) {
 			gtk_widget_set_can_default(b->widget, TRUE);
 			gtk_widget_grab_default(b->widget);
-			gtk_window_set_default(GTK_WINDOW(parent->gtkWindow), b->widget);
+			gtk_window_set_default(GTK_WINDOW(parent->widget), b->widget);
 		}
 
 		gtk_widget_show(b->widget);
@@ -309,8 +303,8 @@ wButton_p wButtonCreate(
  *
  */
 
-wButton_p wButtonCreateForToolbar(
-        wWindow_p	parent,
+wControl_p wButtonCreateForToolbar(
+        wControl_p	parent,
         wWinPix_t	x,
         wWinPix_t	y,
         const char* helpStr,
@@ -320,42 +314,44 @@ wButton_p wButtonCreateForToolbar(
         wButtonCallBack_p action,
         void* data)
 {
-	wButton_p b;
-	GtkStyleContext* context;
+	//wControl_p b;
+	//struct button* button;
+	//GtkStyleContext* context;
 
-	/**
-	 * \todo make sure that parent is appmainwindow.
-	 */
-	b = g_malloc0(sizeof(struct wButton_t));
-	b->type = B_BUTTON;
-	b->action = action;
-	b->data = data;
+	///**
+	// * \todo make sure that parent is appmainwindow.
+	// */
 
-	b->widget = GTK_WIDGET(gtk_toggle_button_new());
-	context = gtk_widget_get_style_context(GTK_WIDGET(b->widget));
-	gtk_style_context_add_class(context, "flat-button");
+	//b = wlibControlNew(B_BUTTON, data);
+	//button = &(b->data.button);
+	//button->action = action;
 
-	g_signal_connect(G_OBJECT(b->widget), "clicked",
-	                 G_CALLBACK(buttonClick), b);
+	//b->widget = GTK_WIDGET(gtk_toggle_button_new());
+	//context = gtk_widget_get_style_context(GTK_WIDGET(b->widget));
+	//gtk_style_context_add_class(context, "flat-button");
 
-	wButtonSetLabel(b, BO_ICON, labelStr);
+	//g_signal_connect(G_OBJECT(b->widget), "clicked",
+	//                 G_CALLBACK(buttonClick), b);
 
-	gtk_container_add(GTK_CONTAINER(parent->toolbar), b->widget);
-	gtk_widget_show(b->widget);
+	//wButtonSetLabel(b, BO_ICON, labelStr);
 
-	context = gtk_widget_get_style_context(GTK_WIDGET(parent->toolbar));
-	//gtk_style_context_remove_class(context, "image-button");
-	char* styles = gtk_style_context_to_string(context, 2);
-	if (option & BO_GAP) {
-		GtkWidget* separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
-		gtk_container_add(GTK_CONTAINER(parent->toolbar), separator);
-		gtk_widget_show(separator);
-	}
+	//gtk_container_add(GTK_CONTAINER(parent->toolbar), b->widget);
+	//gtk_widget_show(b->widget);
 
-	wlibAddHelpString(b->widget, helpStr);
-	wlibAddTooltip(b->widget, parent->name, helpStr);
+	//context = gtk_widget_get_style_context(GTK_WIDGET(parent->toolbar));
+	////gtk_style_context_remove_class(context, "image-button");
+	//char* styles = gtk_style_context_to_string(context, 2);
+	//if (option & BO_GAP) {
+	//	GtkWidget* separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
+	//	gtk_container_add(GTK_CONTAINER(parent->toolbar), separator);
+	//	gtk_widget_show(separator);
+	//}
 
-	return b;
+	//wlibAddHelpString(b->widget, helpStr);
+	//wlibAddTooltip(b->widget, parent->name, helpStr);
+
+	//return b;
+	return NULL;
 }
 
 

@@ -97,19 +97,21 @@ wlibExistsTemplate(const char *name)
  * \todo Check signature for unused parameters
  */
 
-wWindow_p
+wControl_p
 wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr,
                         long option, void *data )
 {
-	wWindow_p w;
+	wControl_p w;
 	GString *filename;
-	w = g_malloc0(sizeof(struct wWindow_t));
-	w->type = winType;
+	struct window* dcontrol;
+
+	w = wlibControlNew(winType, NULL, nameStr, data);
+	dcontrol = WLIB_GET_DATA_PTR(w, window);
 
 	filename = wlibFileNameFromDialog( nameStr );
 
-	w->builder = gtk_builder_new_from_file(filename->str);
-	if( !w->builder ) {
+	dcontrol->builder = gtk_builder_new_from_file(filename->str);
+	if( !dcontrol->builder ) {
 		GString *errorMessage = g_string_new("Could not load ");
 		g_string_append( errorMessage, filename->str);
 		wNoticeEx( NT_ERROR,
@@ -118,9 +120,9 @@ wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr,
 		           NULL );
 		exit(1);
 	}
-	w->gtkWindow = (GtkWidget *)gtk_builder_get_object(w->builder,
+	w->widget = (GtkWidget *)gtk_builder_get_object(dcontrol->builder,
 	                nameStr);
-	if (!w->gtkWindow) {
+	if (!w->widget) {
 		GString *errorMessage = g_string_new("Could not find window object ");
 		g_string_append( errorMessage, nameStr);
 		wNoticeEx( NT_ERROR,
@@ -141,7 +143,7 @@ wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr,
  * \param IN ignore_failure	If object can't be found, shall we continue?
  */
 GtkWidget *
-wlibGetWidgetFromName( wWindow_p parent, const char *dialogname,
+wlibGetWidgetFromName( wControl_p parent, const char *dialogname,
                        const char *suffix, wBool_t ignore_failure )
 
 {
@@ -173,7 +175,7 @@ wlibGetWidgetFromName( wWindow_p parent, const char *dialogname,
 }
 
 GtkWidget *
-wlibWidgetFromIdWarn(wWindow_p win, const char *id)
+wlibWidgetFromIdWarn(wControl_p win, const char *id)
 {
 	GtkWidget *wi = wlibWidgetFromId(win, id);
 	if (!wi)
@@ -203,9 +205,9 @@ wlibWidgetFromIdWarn(wWindow_p win, const char *id)
  */
 
 GtkWidget *
-wlibWidgetFromId( wWindow_p win, const char *id)
+wlibWidgetFromId( wControl_p win, const char *id)
 {
-	GObject * wi = gtk_builder_get_object(win->builder, id);
+	GObject * wi = gtk_builder_get_object(win->data.window.builder, id);
 	return (GtkWidget *)wi;
 }
 

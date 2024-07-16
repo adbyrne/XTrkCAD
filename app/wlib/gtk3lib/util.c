@@ -144,29 +144,21 @@ GdkPixbuf* wlibPixbufFromXBM(
  * Add a label to an existing widget
  *
  * \param b IN widget
+ * \param x,y IN position in grid
  * \param labelStr IN label to add
  * \returns size of label
  */
 
-int wlibAddLabel(wControl_p b, const char * labelStr)
+void wlibAddLabel(wControl_p b, wWinPix_t x, wWinPix_t y, const char * labelStr)
 {
     GtkRequisition requisition, reqwidget;
 
-    if (labelStr == NULL) {
-        return 0;
+    if (labelStr != NULL) {
+        b->label = gtk_label_new(wlibConvertInput(labelStr));
+        gtk_widget_set_halign(b->label, GTK_ALIGN_END);
+        gtk_widget_show(b->label);
+        wlibBasicGridAttach(b->parent, b->label, x, y, 1, 1);
     }
-
-    b->label = gtk_label_new(wlibConvertInput(labelStr));
-    gtk_widget_get_preferred_size(b->label, NULL, &requisition);
-    if (b->widget)
-       	gtk_widget_get_preferred_size(b->widget, NULL, &reqwidget);
-    else
-       	reqwidget.height = requisition.height;
-    gtk_container_add(GTK_CONTAINER(b->parent->widget), b->label);
-    gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label,
-                   b->realX - requisition.width - 8, b->realY + (reqwidget.height/2 - requisition.height/2));
-    gtk_widget_show(b->label);
-    return requisition.width + 8;
 }
 
 /**
@@ -191,36 +183,38 @@ void * wlibAlloc(
                  int size,
                  void * data)
 {
-    wControl_p w = (wControl_p) malloc(size);
-    char * cp;
-    memset(w, 0, size);
+    printf("Not implemented wlibAlloc() %s %d\n", __FILE__, __LINE__);
+    return(NULL);
+    //wControl_p w = (wControl_p) malloc(size);
+    //char * cp;
+    //memset(w, 0, size);
 
-    if (w == NULL) {
-        abort();
-    }
+    //if (w == NULL) {
+    //    abort();
+    //}
 
-    w->outline = FALSE;
+    //w->outline = FALSE;
 
-    w->type = type;
-    w->parent = parent;
-    w->origX = origX;
-    w->origY = origY;
+    //w->type = type;
+    //w->parent = parent;
+    //w->origX = origX;
+    //w->origY = origY;
 
-    if (labelStr) {
-        cp = (char*) malloc(strlen(labelStr) + 1);
-        w->labelStr = cp;
+    //if (labelStr) {
+    //    cp = (char*) malloc(strlen(labelStr) + 1);
+    //    w->labelStr = cp;
 
-        for (; *labelStr; labelStr++)
-            if (*labelStr != '&') {
-                *cp++ = *labelStr;
-            }
+    //    for (; *labelStr; labelStr++)
+    //        if (*labelStr != '&') {
+    //            *cp++ = *labelStr;
+    //        }
 
-        *cp = 0;
-    }
+    //    *cp = 0;
+    //}
 
-    w->doneProc = NULL;
-    w->data = data;
-    return w;
+    //w->doneProc = NULL;
+    //w->data = data;
+    //return w;
 }
 
 /**
@@ -232,21 +226,22 @@ void * wlibAlloc(
 void wlibComputePos(
                     wControl_p b)
 {
-    wWin_p w = b->parent;
+    printf("Not implemented wlibComputePos() %s %d\n", __FILE__, __LINE__);
+    //wWin_p w = b->parent;
 
-    if (b->origX >= 0) {
-        b->realX = b->origX;
-    }
-    else {
-        b->realX = w->lastX + (-b->origX) - 1;
-    }
+    //if (b->origX >= 0) {
+    //    b->realX = b->origX;
+    //}
+    //else {
+    //    b->realX = w->lastX + (-b->origX) - 1;
+    //}
 
-    if (b->origY >= 0) {
-        b->realY = b->origY + BORDERSIZE + ((w->option & F_MENUBAR) ? w->menu_height : 0);
-    }
-    else {
-        b->realY = w->lastY + (-b->origY) - 1;
-    }
+    //if (b->origY >= 0) {
+    //    b->realY = b->origY + BORDERSIZE + ((w->option & F_MENUBAR) ? w->menu_height : 0);
+    //}
+    //else {
+    //    b->realY = w->lastY + (-b->origY) - 1;
+    //}
 }
 
 /**
@@ -260,8 +255,8 @@ void wlibControlGetSize(
 {
     GtkRequisition requisition;
     gtk_widget_get_preferred_size(b->widget, NULL, &requisition);
-    b->w = requisition.width;
-    b->h = requisition.height;
+ //   b->w = requisition.width;
+ //   b->h = requisition.height;
 }
 
 /**
@@ -272,48 +267,49 @@ void wlibControlGetSize(
 void wlibAddButton(
                    wControl_p b)
 {
-    wWin_p win = b->parent;
-    wBool_t resize = FALSE;
+    printf("Not implemented wlibAddButton() %s %d\n", __FILE__, __LINE__);
+    //wWin_p win = b->parent;
+    //wBool_t resize = FALSE;
 
-    if (win->first == NULL) {
-        win->first = b;
-    }
-    else {
-        win->last->next = b;
-    }
+    //if (win->first == NULL) {
+    //    win->first = b;
+    //}
+    //else {
+    //    win->last->next = b;
+    //}
 
-    win->last = b;
-    b->next = NULL;
-    b->parent = win;
-    win->lastX = b->realX + b->w;
-    win->lastY = b->realY + b->h;
+    //win->last = b;
+    //b->next = NULL;
+    //b->parent = win;
+    //win->lastX = b->realX + b->w;
+    //win->lastY = b->realY + b->h;
 
-    if (win->option & F_AUTOSIZE) {
-        if (win->lastX > win->realX) {
-            win->realX = win->lastX;
+    //if (win->option & F_AUTOSIZE) {
+    //    if (win->lastX > win->realX) {
+    //        win->realX = win->lastX;
 
-            if (win->w != (win->realX + win->origX)) {
-                resize = TRUE;
-                win->w = (win->realX + win->origX);
-            }
-        }
+    //        if (win->w != (win->realX + win->origX)) {
+    //            resize = TRUE;
+    //            win->w = (win->realX + win->origX);
+    //        }
+    //    }
 
-        if (win->lastY > win->realY) {
-            win->realY = win->lastY;
+    //    if (win->lastY > win->realY) {
+    //        win->realY = win->lastY;
 
-            if (win->h != (win->realY + win->origY)) {
-                resize = TRUE;
-                win->h = (win->realY + win->origY);
-            }
-        }
+    //        if (win->h != (win->realY + win->origY)) {
+    //            resize = TRUE;
+    //            win->h = (win->realY + win->origY);
+    //        }
+    //    }
 
-        if (win->shown) {
-            if (resize) {
-                gtk_widget_set_size_request(win->gtkwin, win->w, win->h);
-                gtk_widget_set_size_request(win->widget, win->w, win->h);
-            }
-        }
-    }
+    //    if (win->shown) {
+    //        if (resize) {
+    //            gtk_widget_set_size_request(win->gtkwin, win->w, win->h);
+    //            gtk_widget_set_size_request(win->widget, win->w, win->h);
+    //        }
+    //    }
+    //}
 }
 
 /**
@@ -329,20 +325,21 @@ wControl_p wlibGetControlFromPos(
                                  wWinPix_t x,
                                  wWinPix_t y)
 {
-    wControl_p b;
-    wWinPix_t xx, yy;
+    printf("Not implemented wlibGetControlFromPos() %s %d\n", __FILE__, __LINE__);
+    //wControl_p b;
+    //wWinPix_t xx, yy;
 
-    for (b = win->first; b != NULL; b = b->next) {
-        if (b->widget && gtk_widget_get_visible(b->widget)) {
-            xx = b->realX;
-            yy = b->realY;
+    //for (b = win->first; b != NULL; b = b->next) {
+    //    if (b->widget && gtk_widget_get_visible(b->widget)) {
+    //        xx = b->realX;
+    //        yy = b->realY;
 
-            if (xx <= x && x < xx + b->w &&
-                yy <= y && y < yy + b->h) {
-                return b;
-            }
-        }
-    }
+    //        if (xx <= x && x < xx + b->w &&
+    //            yy <= y && y < yy + b->h) {
+    //            return b;
+    //        }
+    //    }
+    //}
 
     return NULL;
 }

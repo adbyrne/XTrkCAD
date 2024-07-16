@@ -41,9 +41,9 @@
  *****************************************************************************
  */
 
-struct wMessage_t {
-	GtkWidget * labelWidget;
-};
+//struct wMessage_t {
+//	GtkWidget * labelWidget;
+//};
 
 /**
  * Set the message text
@@ -54,14 +54,14 @@ struct wMessage_t {
  */
 
 void wMessageSetValue(
-        wMessage_p b,
+        wControl_p b,
         const char * arg)
 {
-	if (b->labelWidget == NULL) {
+	if (b->widget == NULL) {
 		abort();
 	}
 
-	gtk_label_set_text(GTK_LABEL(b->labelWidget), wlibConvertInput(arg));
+	gtk_label_set_text(GTK_LABEL(b->widget), wlibConvertInput(arg));
 }
 
 /**
@@ -73,11 +73,11 @@ void wMessageSetValue(
  */
 
 void wMessageSetWidth(
-        wMessage_p b,
+        wControl_p b,
         wWinPix_t width)
 {
-	//b->labelWidth = width;
-	gtk_widget_set_size_request(b->labelWidget, width, -1);
+
+	gtk_widget_set_size_request(b->widget, width, -1);
 }
 
 /**
@@ -188,8 +188,8 @@ wWinPix_t wMessageGetHeight(
  * \return handle for created widget
  */
 
-wMessage_p wMessageCreateEx(
-        wWindow_p	parent,
+wControl_p wMessageCreateEx(
+        wControl_p	parent,
         wWinPix_t	x,
         wWinPix_t	y,
         const char* labelStr,
@@ -197,19 +197,21 @@ wMessage_p wMessageCreateEx(
         const char* message,
         long flags)
 {
-	wMessage_p b;
-	b = g_malloc0(sizeof(struct wMessage_t));
+	wControl_p b;
+
+	b = wlibControlNew(B_MESSAGE, parent, NULL, NULL);
+	
 
 	if (flags & BO_USEBUILDER) {
 		/** \todo handle label in a template */
 	} else {
-		b->labelWidget = gtk_label_new(message);
+		b->widget = gtk_label_new(message);
 
 		/* do we need to set a special font? */
 		if (wMessageSetFont(flags)) {
 			/* set the new font size */
-			GtkStyleContext* context = gtk_widget_get_style_context(GTK_WIDGET(
-			                                   b->labelWidget));
+			GtkStyleContext* context = gtk_widget_get_style_context(
+				GTK_WIDGET(b->widget));
 			if (flags & BM_LARGE) {
 				gtk_style_context_add_class(context, "largeLabel");
 			} else {
@@ -217,17 +219,16 @@ wMessage_p wMessageCreateEx(
 			}
 		}
 
-		wlibBasicGridAttach(parent, b->labelWidget, x, y, width, 1);
+		wlibBasicGridAttach(parent, b->widget, x, y, width, 1);
 
 		if (flags & BM_ALIGNRIGHT) {
-			gtk_label_set_xalign(b->labelWidget, 1.0);
+			gtk_label_set_xalign(GTK_LABEL(b->widget), 1.0);
 		}
 		if (flags & BM_ALIGNLEFT) {
-			gtk_label_set_xalign(b->labelWidget, 0.0);
+			gtk_label_set_xalign(GTK_LABEL(b->widget), 0.0);
 		}
 
-
-		gtk_widget_show(b->labelWidget);
+		gtk_widget_show(b->widget);
 	}
 
 	return b;

@@ -44,9 +44,9 @@
  */
 
 int
-wTreeViewGetCount(wList_p b)
+wTreeViewGetCount(wControl_p b)
 {
-	return(gtk_tree_view_get_n_columns(b->treeView));
+	return(gtk_tree_view_get_n_columns(b->data.list.treeView));
 }
 
 
@@ -59,11 +59,11 @@ wTreeViewGetCount(wList_p b)
  */
 
 void *
-wTreeViewGetItemContext(wList_p b, int row)
+wTreeViewGetItemContext(wControl_p b, int row)
 {
 	wListItem_p id_p;
 
-	id_p = wlibListItemGet(b->listStore, row, NULL);
+	id_p = wlibListItemGet(b->data.list.listStore, row, NULL);
 
 	if (id_p) {
 		return id_p->itemData;
@@ -81,11 +81,11 @@ wTreeViewGetItemContext(wList_p b, int row)
  * \returns row of selected entry or -1 if none is selected
  */
 
-wIndex_t wListGetIndex(wList_p b)
+wIndex_t wListGetIndex(wControl_p b)
 {
 	g_assert(b!=NULL);
 
-	return b->last;
+	return b->data.list.last;
 }
 
 /**
@@ -97,12 +97,13 @@ wIndex_t wListGetIndex(wList_p b)
  */
 
 void
-wlibTreeViewSetSelected(wList_p b, int index)
+wlibTreeViewSetSelected(wControl_p b, int index)
 {
 	GtkTreeSelection *sel;
 	GtkTreeIter iter;
+	struct list* lcontrol = WLIB_GET_DATA_PTR(b, list);
 
-	sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(b->treeView));
+	sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(lcontrol->treeView));
 
 	// unselect current selection if one exists
 	if (gtk_tree_selection_count_selected_rows(sel)) {
@@ -113,11 +114,11 @@ wlibTreeViewSetSelected(wList_p b, int index)
 	if (index != -1) {
 		gint childs;
 
-		childs = gtk_tree_model_iter_n_children (GTK_TREE_MODEL(b->listStore),
+		childs = gtk_tree_model_iter_n_children (GTK_TREE_MODEL(lcontrol->listStore),
 		         NULL );
 
 		if(index < childs) {
-			gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->listStore),
+			gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(lcontrol->listStore),
 			                              &iter,
 			                              NULL,
 			                              index);
@@ -290,23 +291,25 @@ wlibTreeViewAddData(GtkTreeView *tv, char *label, GdkPixbuf *pixbuf,
  */
 
 void
-wlibTreeViewAddRow(wList_p b, char *label, wIcon_p bm, wListItem_p id_p)
+wlibTreeViewAddRow(wControl_p b, char *label, wIcon_p bm, wListItem_p id_p)
 {
 	GtkAdjustment *adj;
 	GdkPixbuf *pixbuf = NULL;
+
+	struct list* lcontrol = WLIB_GET_DATA_PTR(b, list);
 
 	if (bm) {
 		pixbuf = wlibMakePixbuf(bm);
 	}
 
-	wlibTreeViewAddData(b->treeView, (char *)label, pixbuf, id_p);
+	wlibTreeViewAddData(lcontrol->treeView, (char *)label, pixbuf, id_p);
 
 	adj = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(b->widget));
-	b->last = gtk_tree_model_iter_n_children(gtk_tree_view_get_model(GTK_TREE_VIEW(
-	                  b->treeView)), NULL);
+	lcontrol->last = gtk_tree_model_iter_n_children(gtk_tree_view_get_model(GTK_TREE_VIEW(
+	                  lcontrol->treeView)), NULL);
 
 	if (gtk_adjustment_get_upper(adj) < gtk_adjustment_get_step_increment(adj) *
-	    b->last+1) {
+	    lcontrol->last+1) {
 		gtk_adjustment_set_upper(adj,
 		                         gtk_adjustment_get_upper(adj) +
 		                         gtk_adjustment_get_step_increment(adj));
@@ -337,9 +340,10 @@ changeSelection(GtkTreeSelection *selection,
 	GtkTreeIter iter;
 	GValue value = { 0 };
 	wListItem_p id_p = NULL;
-	wList_p bl = (wList_p)data;
+	wControl_p bl = (wControl_p)data;
 	long row;
 	char *text;
+	struct list* lcontrol = WLIB_GET_DATA_PTR(((wControl_p)data), list);
 
 	text = gtk_tree_path_to_string(path);
 	row = (long)g_ascii_strtoll(text, NULL, 10);
@@ -352,14 +356,14 @@ changeSelection(GtkTreeSelection *selection,
 	id_p->selected = !path_currently_selected;
 
 	if (id_p->selected) {
-		bl->last = row;
+		lcontrol->last = row;
 
-		if (bl->valueP) {
-			*bl->valueP = row;
+		if (lcontrol->valueP) {
+			*lcontrol->valueP = row;
 		}
 
-		if (bl->action) {
-			bl->action(row, id_p->label, 1, bl->data, id_p->itemData);
+		if (lcontrol->action) {
+			lcontrol->action(row, id_p->label, 1, bl->context, id_p->itemData);
 		}
 	}
 

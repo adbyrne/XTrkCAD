@@ -586,13 +586,13 @@ void wWinDoCancel(
 {
     wControl_p b;
 
-    for (b=win->first; b; b=b->next) {
-        if ((b->type == B_BUTTON) && (b->option & BB_CANCEL)) {
-            //if (b->action) {
-            //    b->action(b->data);
+    //for (b=win->first; b; b=b->next) {
+    //    if ((b->type == B_BUTTON) && (b->option & BB_CANCEL)) {
+    //        //if (b->action) {
+    //        //    b->action(b->data);
 
-        }
-    }
+    //    }
+    //}
 }
 
 /*
@@ -607,17 +607,17 @@ static int window_redraw(
     wWin_p win,
     wBool_t doWinProc)
 {
-    wControl_p b;
+    //wControl_p b;
 
-    if (win==NULL) {
-        return FALSE;
-    }
+    //if (win==NULL) {
+    //    return FALSE;
+    //}
 
-    for (b=win->first; b != NULL; b = b->next) {
-        if (b->repaintProc) {
-            b->repaintProc(b);
-        }
-    }
+    //for (b=win->first; b != NULL; b = b->next) {
+    //    if (b->repaintProc) {
+    //        b->repaintProc(b);
+    //    }
+    //}
 
     return FALSE;
 }
@@ -628,27 +628,27 @@ static gint window_delete_event(
     wWin_p win)
 {
     wControl_p b;
-    /* if you return FALSE in the "delete_event" signal handler,
-     * GTK will emit the "destroy" signal.  Returning TRUE means
-     * you don't want the window to be destroyed.
-     * This is useful for popping up 'are you sure you want to quit ?'
-     * type dialogs. */
+    ///* if you return FALSE in the "delete_event" signal handler,
+    // * GTK will emit the "destroy" signal.  Returning TRUE means
+    // * you don't want the window to be destroyed.
+    // * This is useful for popping up 'are you sure you want to quit ?'
+    // * type dialogs. */
 
-    /* Change TRUE to FALSE and the main window will be destroyed with
-     * a "delete_event". */
+    ///* Change TRUE to FALSE and the main window will be destroyed with
+    // * a "delete_event". */
 
-    for (b = win->first; b; b=b->next)
-        if (b->doneProc) {
-            b->doneProc(b);
-        }
+    //for (b = win->first; b; b=b->next)
+    //    if (b->doneProc) {
+    //        b->doneProc(b);
+    //    }
 
-    if (win->winProc) {
-        win->winProc(win, wClose_e, NULL, win->data);
+    //if (win->winProc) {
+    //    win->winProc(win, wClose_e, NULL, win->data);
 
-        if (win != gtkMainW) {
-            wWinShow(win, FALSE);
-        }
-    }
+    //    if (win != gtkMainW) {
+    //        wWinShow(win, FALSE);
+    //    }
+    //}
 
     return (TRUE);
 }
@@ -844,32 +844,32 @@ static gint window_char_event(
     GdkEventKey *event,
     wWin_p win)
 {
-    wControl_p bb;
+    //wControl_p bb;
 
-    if (catch_shift_ctrl_alt_keys(widget, event, win)) {
-        return FALSE;
-    }
+    //if (catch_shift_ctrl_alt_keys(widget, event, win)) {
+    //    return FALSE;
+    //}
 
-    if (event->type == GDK_KEY_RELEASE) {
-        return FALSE;
-    }
+    //if (event->type == GDK_KEY_RELEASE) {
+    //    return FALSE;
+    //}
 
-    if ( ( event->state & GDK_MODIFIER_MASK ) == 0 ) {
-        if (event->keyval == GDK_KEY_Escape) {
-            for (bb=win->first; bb; bb=bb->next) {
-                if (bb->type == B_BUTTON && (bb->option&BB_CANCEL)) {
-                    wlibButtonDoAction((wButton_p)bb);
-                    return TRUE;
-                }
-            }
-        }
-    }
+    //if ( ( event->state & GDK_MODIFIER_MASK ) == 0 ) {
+    //    if (event->keyval == GDK_KEY_Escape) {
+    //        for (bb=win->first; bb; bb=bb->next) {
+    //            if (bb->type == B_BUTTON && (bb->option&BB_CANCEL)) {
+    //                wlibButtonDoAction((wButton_p)bb);
+    //                return TRUE;
+    //            }
+    //        }
+    //    }
+    //}
 
-    if (wlibHandleAccelKey(event)) {
-        return TRUE;
-    } else {
-        return FALSE;
-    }
+    //if (wlibHandleAccelKey(event)) {
+    //    return TRUE;
+    //} else {
+    //    return FALSE;
+    //}
 }
 
 void wSetGeometry(wWin_p win, wWinPix_t min_width, wWinPix_t max_width, wWinPix_t min_height, wWinPix_t max_height, wWinPix_t base_width, wWinPix_t base_height, double aspect_ratio ) {
@@ -947,8 +947,8 @@ wlibCreateCustomStyle(void)
  * \return  the newly created window
  */
 
-static wWin_p wWinCommonCreate(
-    wWin_p parent,
+static wControl_p wWinCommonCreate(
+    wControl_p parent,
     int winType,
     wWinPix_t x,
     wWinPix_t y,
@@ -958,156 +958,149 @@ static wWin_p wWinCommonCreate(
     wWinCallBack_p winProc,
     void * data)
 {
-    wWin_p w;
-    int h;
-    w = wlibAlloc(NULL, winType, x, y, labelStr, sizeof *w, data);
-    w->busy = TRUE;
-    w->option = option;
-	w->resizeTimer = 0;
-
-
-    h = BORDERSIZE;
-
-    if (w->option&F_MENUBAR) {
-        h += MENUH;
-    }
-
-    if (winType == W_MAIN) {
-        w->gtkwin = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    } else {
-        w->gtkwin = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-
-        if (gtkMainW) {
-        	if (!(w->option&F_NOTTRANSIENT))
-        		gtk_window_set_transient_for(GTK_WINDOW(w->gtkwin),
-        									GTK_WINDOW(gtkMainW->gtkwin));
-        }
-    }
-    getWinSize(w, nameStr);
-    if (winType != W_MAIN) {
-            gtk_widget_set_app_paintable (w->gtkwin,TRUE);
-    }
-
-    if (option & F_HIDE) {
-        gtk_widget_hide(w->gtkwin);
-    }
-
-    /* center window on top of parent window */
-    if (option & F_CENTER) {
-        gtk_window_set_position(GTK_WINDOW(w->gtkwin), GTK_WIN_POS_CENTER_ON_PARENT);
-    }
-
-    w->widget = gtk_fixed_new();
-
-    if (w->widget == 0) {
-        abort();
-    }
-
-    if (w->option&F_MENUBAR) {
-        w->menubar = gtk_menu_bar_new();
-        gtk_container_add(GTK_CONTAINER(w->widget), w->menubar);
-        gtk_widget_show(w->menubar);
-        GtkAllocation allocation;
-        GtkRequisition minSize, natSize;
-        gtk_widget_get_preferred_size (w->menubar, &minSize, &natSize );
-
-        gtk_widget_get_allocation(w->menubar, &allocation);
-        w->menu_height = allocation.height;
-//        gtk_widget_set_size_request(w->menubar, -1, w->menu_height);
-    }
-
-    gtk_container_add(GTK_CONTAINER(w->gtkwin), w->widget);
-
-
-
-
-    if (w->option&F_AUTOSIZE) {
-        w->realX = 0;
-        w->w = MIN_WIN_WIDTH+20;
-        w->realY = h;
-        w->h = MIN_WIN_HEIGHT;
-    } else if (w->origX != 0){
-        w->realX = w->origX;
-        w->realY = w->origY+h;
-
-        w->default_size_x = w->w;
-        w->default_size_y = w->h;
-        //gtk_widget_set_size_request(w->widget, w->w-20, w->h);
-
-        if (w->option&F_MENUBAR) {
-            gtk_widget_set_size_request(w->menubar, w->w-20, MENUH);
-        }
-    }
-    wWinPix_t scr_w, scr_h;
-	wGetDisplaySize(&scr_w, &scr_h);
-	if (scr_w < MIN_WIN_WIDTH) scr_w = MIN_WIN_WIDTH+10;
-	if (scr_h < MIN_WIN_HEIGHT) scr_h = MIN_WIN_HEIGHT;
-	if (winType != W_MAIN) {
-		wSetGeometry(w, MIN_WIN_WIDTH, scr_w-10, MIN_WIN_HEIGHT, scr_h, -1, -1, -1);
-	} else {
-		if (scr_w < MIN_WIN_WIDTH_MAIN+10) scr_w = MIN_WIN_WIDTH_MAIN+200;
-		if (scr_h < MIN_WIN_HEIGHT_MAIN+10) scr_h = MIN_WIN_HEIGHT_MAIN+200;
-		wSetGeometry(w, MIN_WIN_WIDTH_MAIN, scr_w-10, MIN_WIN_HEIGHT_MAIN, scr_h-10, -1, -1, -1);
-     }
-
-
-
-    w->first = w->last = NULL;
-    w->winProc = winProc;
-    g_signal_connect(G_OBJECT(w->gtkwin), "delete_event",
-                     G_CALLBACK(window_delete_event), w);
-    g_signal_connect(G_OBJECT(w->widget), "draw",
-                     G_CALLBACK(fixed_draw_event), w);
-    g_signal_connect(G_OBJECT(w->gtkwin), "configure_event",
-                     G_CALLBACK(window_configure_event), w);
-    g_signal_connect(G_OBJECT(w->gtkwin), "window-state-event",
-                     G_CALLBACK(window_state_event), w);
-    g_signal_connect(G_OBJECT(w->gtkwin), "key_press_event",
-                     G_CALLBACK(window_char_event), w);
-    g_signal_connect(G_OBJECT(w->gtkwin), "key_release_event",
-                     G_CALLBACK(window_char_event), w);
-    gtk_widget_set_events(w->widget, GDK_EXPOSURE_MASK);
-    gtk_widget_set_events(GTK_WIDGET(w->gtkwin),
-                          GDK_EXPOSURE_MASK|GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK);
-
-    if (w->option & F_RESIZE) {
-        gtk_window_set_resizable(GTK_WINDOW(w->gtkwin), TRUE);
-        gtk_window_resize(GTK_WINDOW(w->gtkwin), w->w, w->h);
-    } else {
-        gtk_window_set_resizable(GTK_WINDOW(w->gtkwin), FALSE);
-    }
-
-    w->lastX = 0;
-    w->lastY = h;
-    w->shown = FALSE;
-    w->nameStr = nameStr?strdup(nameStr):NULL;
-
-    if (labelStr) {
-        gtk_window_set_title(GTK_WINDOW(w->gtkwin), labelStr);
-    }
-
-    if (listHelpStrings) {
-        printf("WINDOW - %s\n", nameStr?nameStr:"<NULL>");
-    }
-
-    if (firstWin) {
-        lastWin->next = (wControl_p)w;
-    } else {
-        firstWin = (wControl_p)w;
-    }
-
-    lastWin = (wControl_p)w;
-    gtk_widget_show(w->widget);
-    gtk_widget_realize(w->gtkwin);
-    GtkAllocation allocation;
-    gtk_widget_get_allocation(w->gtkwin, &allocation);
-    w->menu_height = allocation.height;
-
-    w->busy = FALSE;
-
-    if (option&F_MAXIMIZE) {
-    	maximize_at_next_show = TRUE;
-    }
+    wControl_p w = NULL;
+//    struct window* wcontrol;
+//    int h;
+//
+//    w = wlibControlNew(winType, data);
+//    wcontrol = WLIB_GET_DATA_PTR(w, window);
+//
+//    h = BORDERSIZE;
+//    if (option&F_MENUBAR) {
+//        h += MENUH;
+//    }
+//
+//    w->widget = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+//
+//    if (winType != W_MAIN) {
+//        if (gtkMainW) {
+//        	if (!(option&F_NOTTRANSIENT))
+//        		gtk_window_set_transient_for(GTK_WINDOW(w->widget),
+//        									GTK_WINDOW(gtkMainW->gtkwin));
+//        }
+//    }
+//    getWinSize(w, nameStr);
+//    if (winType != W_MAIN) {
+//            gtk_widget_set_app_paintable (w->widget,TRUE);
+//    }
+//
+//    if (option & F_HIDE) {
+//        gtk_widget_hide(w->widget);
+//    }
+//
+//    /* center window on top of parent window */
+//    if (option & F_CENTER) {
+//        gtk_window_set_position(GTK_WINDOW(w->widget), GTK_WIN_POS_CENTER_ON_PARENT);
+//    }
+//
+//    wcontrol->widget = gtk_fixed_new();
+//
+//    if (wcontrol->widget == 0) {
+//        abort();
+//    }
+//
+//    if (option&F_MENUBAR) {
+//        wcontrol->menubar = gtk_menu_bar_new();
+//        gtk_container_add(GTK_CONTAINER(wcontrol->widget), wcontrol->menubar);
+//        gtk_widget_show(wcontrol->menubar);
+//        GtkAllocation allocation;
+//        GtkRequisition minSize, natSize;
+//        gtk_widget_get_preferred_size (wcontrol->menubar, &minSize, &natSize );
+//
+//        gtk_widget_get_allocation(wcontrol->menubar, &allocation);
+////        wcontrol->menu_height = allocation.height;
+////        gtk_widget_set_size_request(w->menubar, -1, w->menu_height);
+//    }
+//
+//    gtk_container_add(GTK_CONTAINER(w->widget), w->widget);
+//
+//    //if (option&F_AUTOSIZE) {
+//    //    w->realX = 0;
+//    //    w->w = MIN_WIN_WIDTH+20;
+//    //    w->realY = h;
+//    //    w->h = MIN_WIN_HEIGHT;
+//    //} else if (w->origX != 0){
+//    //    w->realX = w->origX;
+//    //    w->realY = w->origY+h;
+//
+//    //    w->default_size_x = w->w;
+//    //    w->default_size_y = w->h;
+//    //    //gtk_widget_set_size_request(w->widget, w->w-20, w->h);
+//
+//    //    if (w->option&F_MENUBAR) {
+//    //        gtk_widget_set_size_request(w->menubar, w->w-20, MENUH);
+//    //    }
+//    //}
+// //   wWinPix_t scr_w, scr_h;
+//	//wGetDisplaySize(&scr_w, &scr_h);
+//	//if (scr_w < MIN_WIN_WIDTH) scr_w = MIN_WIN_WIDTH+10;
+//	//if (scr_h < MIN_WIN_HEIGHT) scr_h = MIN_WIN_HEIGHT;
+//	//if (winType != W_MAIN) {
+//	//	wSetGeometry(w, MIN_WIN_WIDTH, scr_w-10, MIN_WIN_HEIGHT, scr_h, -1, -1, -1);
+//	//} else {
+//	//	if (scr_w < MIN_WIN_WIDTH_MAIN+10) scr_w = MIN_WIN_WIDTH_MAIN+200;
+//	//	if (scr_h < MIN_WIN_HEIGHT_MAIN+10) scr_h = MIN_WIN_HEIGHT_MAIN+200;
+//	//	wSetGeometry(w, MIN_WIN_WIDTH_MAIN, scr_w-10, MIN_WIN_HEIGHT_MAIN, scr_h-10, -1, -1, -1);
+// //    }
+//
+//
+//
+// //   w->first = w->last = NULL;
+// //   w->winProc = winProc;
+//    g_signal_connect(G_OBJECT(w->widget), "delete_event",
+//                     G_CALLBACK(window_delete_event), w);
+//    g_signal_connect(G_OBJECT(w->widget), "draw",
+//                     G_CALLBACK(fixed_draw_event), w);
+//    g_signal_connect(G_OBJECT(w->widget), "configure_event",
+//                     G_CALLBACK(window_configure_event), w);
+//    g_signal_connect(G_OBJECT(w->widget), "window-state-event",
+//                     G_CALLBACK(window_state_event), w);
+//    g_signal_connect(G_OBJECT(w->widget), "key_press_event",
+//                     G_CALLBACK(window_char_event), w);
+//    g_signal_connect(G_OBJECT(w->widget), "key_release_event",
+//                     G_CALLBACK(window_char_event), w);
+//    gtk_widget_set_events(w->widget, GDK_EXPOSURE_MASK);
+//    gtk_widget_set_events(GTK_WIDGET(w->widget),
+//                          GDK_EXPOSURE_MASK|GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK);
+//
+//    if (option & F_RESIZE) {
+//        gtk_window_set_resizable(GTK_WINDOW(w->widget), TRUE);
+//        gtk_window_resize(GTK_WINDOW(w->widget), w->w, w->h);
+//    } else {
+//        gtk_window_set_resizable(GTK_WINDOW(w->widget), FALSE);
+//    }
+//
+//    //w->lastX = 0;
+//    //w->lastY = h;
+//    //w->shown = FALSE;
+//    //w->nameStr = nameStr?strdup(nameStr):NULL;
+//
+//    if (labelStr) {
+//        gtk_window_set_title(GTK_WINDOW(w->widget), labelStr);
+//    }
+//
+//    if (listHelpStrings) {
+//        printf("WINDOW - %s\n", nameStr?nameStr:"<NULL>");
+//    }
+//
+//    //if (firstWin) {
+//    //    lastWin->next = (wControl_p)w;
+//    //} else {
+//    //    firstWin = (wControl_p)w;
+//    //}
+//
+//    //lastWin = (wControl_p)w;
+//    gtk_widget_show_all(w->widget);
+//    //gtk_widget_realize(w->gtkwin);
+//    //GtkAllocation allocation;
+//    //gtk_widget_get_allocation(w->gtkwin, &allocation);
+//    //w->menu_height = allocation.height;
+//
+//    //w->busy = FALSE;
+//
+//    if (option&F_MAXIMIZE) {
+//    	maximize_at_next_show = TRUE;
+//    }
 
     return w;
 }
@@ -1153,8 +1146,8 @@ wlibAddButtonToolbar(wButton_p button)
  * \return  the newly created window
  */
 
-wWin_p wlibCreateFromTemplate(
-        wWin_p parent,
+wControl_p wlibCreateFromTemplate(
+        wControl_p parent,
         int winType,
         wWinPix_t x,
         wWinPix_t y,
@@ -1164,79 +1157,74 @@ wWin_p wlibCreateFromTemplate(
         wWinCallBack_p winProc,
         void * data)
 {
-	wWin_p w;
-
+	wControl_p w;
+    struct window *wcontrol;
 	w=wlibDialogFromTemplate( winType, labelStr, nameStr, option, data );
+
+    wcontrol = WLIB_GET_DATA_PTR(w, window);
 
 	/*Find out if there is a fixed element */
 	//w->fixed = GTK_FIXED(wlibGetWidgetFromName(w,nameStr,"fixed",TRUE));
 
 	if (gtkMainW) {
-		gtk_window_set_transient_for(GTK_WINDOW(w->gtkwin),
+		gtk_window_set_transient_for(GTK_WINDOW(w->widget),
 		                             GTK_WINDOW(gtkMainW->gtkwin));
 	}
 
-	if (winType != W_MAIN) {
-		getWinSize(w, nameStr);
-	}
+	//if (winType != W_MAIN) {
+	//	getWinSize(w, nameStr);
+	//}
 
 	if (option & F_HIDE) {
-		gtk_widget_hide(w->gtkwin);
+		gtk_widget_hide(w->widget);
 	}
 
 	/* center window on top of parent window */
 	if (option & F_CENTER) {
-		gtk_window_set_position(GTK_WINDOW(w->gtkwin), GTK_WIN_POS_CENTER_ON_PARENT);
+		gtk_window_set_position(GTK_WINDOW(w->widget), GTK_WIN_POS_CENTER_ON_PARENT);
 	}
 
 
-	if (w->option&F_AUTOSIZE) {
-		w->realX = 0;
-		w->w = 0;
-		w->realY = 0;
-		w->h = 0;
-	} else if (w->origX != 0) {
-		w->w = w->realX = w->origX;
-		w->h = w->realY = w->origY;
+	//if (w->option&F_AUTOSIZE) {
+	//	w->realX = 0;
+	//	w->w = 0;
+	//	w->realY = 0;
+	//	w->h = 0;
+	//} else if (w->origX != 0) {
+	//	w->w = w->realX = w->origX;
+	//	w->h = w->realY = w->origY;
 
-		w->default_size_x = w->w;
-		w->default_size_y = w->h;
-		gtk_widget_set_size_request(w->gtkwin, w->w-20, w->h);
+	//	w->default_size_x = w->w;
+	//	w->default_size_y = w->h;
+	//	gtk_widget_set_size_request(w->gtkwin, w->w-20, w->h);
 
-		if (w->option&F_MENUBAR) {
-			gtk_widget_set_size_request(w->menubar, w->w-20, MENUH);
-		}
-	}
+	//	if (w->option&F_MENUBAR) {
+	//		gtk_widget_set_size_request(w->menubar, w->w-20, MENUH);
+	//	}
+	//}
 	// if (w->option&F_CONSTRAINRESIZE) {
- 	w->winProc = winProc;
+ 	wcontrol->winProc = winProc;
 	// 	g_signal_connect(w->gtkwin, "configure_event",
 	// 	                 G_CALLBACK(window_configure_event), w);
 	// 	w->realX = 0;
 	// 	w->realY = 0;
 	// }
 
-	g_signal_connect(w->gtkwin, "delete_event",
+	g_signal_connect(w->widget, "delete_event",
 	                 G_CALLBACK(window_delete_event), w);
 
 
-	w->nameStr = nameStr?strdup(nameStr):NULL;
+//	w->nameStr = nameStr?strdup(nameStr):NULL;
 
 	if (labelStr) {
-		gtk_window_set_title(GTK_WINDOW(w->gtkwin), labelStr);
+		gtk_window_set_title(GTK_WINDOW(w->widget), labelStr);
 	}
 
 	if (listHelpStrings) {
 		printf("WINDOW - %s\n", nameStr?nameStr:"<NULL>");
 	}
 
-	if (firstWin) {
-		lastWin->next = (wControl_p)w;
-	} else {
-		firstWin = (wControl_p)w;
-	}
-
-	lastWin = (wControl_p)w;
-	gtk_widget_show_all(w->gtkwin);
+	gtk_widget_show_all(w->widget);
 
 	return w;
 }

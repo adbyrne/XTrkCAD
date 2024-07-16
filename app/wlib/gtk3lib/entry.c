@@ -42,14 +42,6 @@
  *****************************************************************************
  */
 
-struct wEntry_t {
-	wType_e	type;				//< type
-	GtkWidget* widget;			//< the entry widget
-	void* data;					//< context data
-	char* valueP;				//< location of entered value
-	unsigned valueL;			//< maximum length of entered value
-	wEntryCallBack_p action;	//< callback
-};
 
 /**
  * Set the string value in a string entry field
@@ -60,7 +52,7 @@ struct wEntry_t {
  */
 
 void wEntrySetValue(
-        wEntry_p b,
+        wControl_p b,
         const char *arg)
 {
 	if (b->widget == NULL) {
@@ -86,7 +78,7 @@ void wEntrySetValue(
  */
 
 void wEntrySetWidth(
-        wEntry_p b,
+        wControl_p b,
         wWinPix_t w)
 {
 	gtk_entry_set_width_chars(GTK_ENTRY(b->widget), w);
@@ -100,7 +92,7 @@ void wEntrySetWidth(
  */
 
 const char *wEntryGetValue(
-        wEntry_p b)
+        wControl_p b)
 {
 	if ( !b->widget ) {
 		abort();
@@ -122,24 +114,27 @@ const char *wEntryGetValue(
 
 static gboolean stringActivated(
         GtkEntry *widget,
-        wEntry_p b)
+        wControl_p b)
 {
 	const char *s;
 	const char * output = "\n";
+	struct entry* entry = NULL;
 
 	if ( !b ) {
 		return( FALSE );
 	}
 
+	entry = WLIB_GET_DATA_PTR(b, entry);
+
 	s = wEntryGetValue(b);
 
-	if (b->valueP) {
-		strcpy(b->valueP, s);
+	if (entry->valueP) {
+		strcpy(entry->valueP, s);
 	}
 
-	if (b->action) {
+	if (entry->action) {
 		//b->enter_pressed = TRUE;
-		b->action( output, b->data);
+		entry->action( output, b->context);
 	}
 
 	// select the complete default value to make editing it easier
@@ -155,7 +150,7 @@ static gboolean stringActivated(
  */
 
 static void
-wlibEntrySetValid(wEntry_p entry, bool valid)
+wlibEntrySetValid(wControl_p entry, bool valid)
 {
 	GtkStyleContext* context = gtk_widget_get_style_context(GTK_WIDGET(
 	                                   entry->widget));
@@ -177,17 +172,19 @@ wlibEntrySetValid(wEntry_p entry, bool valid)
 static int stringFocusOutEvent(
         GtkEntry *widget,
         GdkEvent * event,
-        wEntry_p b)
+        wControl_p b)
 {
-	if (b->action) {
+	struct entry* entry = WLIB_GET_DATA_PTR(b, entry);
+
+	if (entry->action) {
 		const char *s;
 		s = gtk_entry_get_text(GTK_ENTRY(b->widget));
 
-		bool isOK = b->action(s, b->data);
+		bool isOK = entry->action(s, b->context);
 		wlibEntrySetValid(b, isOK);
 	}
-	if (b->valueP) {
-		g_strlcpy(b->valueP, wEntryGetValue(b), b->valueL);
+	if (entry->valueP) {
+		g_strlcpy(entry->valueP, wEntryGetValue(b), entry->valueL);
 	}
 	return FALSE;
 }
@@ -218,8 +215,8 @@ static int stringFocusOutEvent(
  * \return  the created widget
  */
 
-wEntry_p wEntryCreate(
-        wWindow_p	parent,
+wControl_p wEntryCreate(
+        wControl_p	parent,
         wWinPix_t	x,
         wWinPix_t	y,
         const char 	 *helpStr,
@@ -231,17 +228,17 @@ wEntry_p wEntryCreate(
         wEntryCallBack_p action,
         void 	*data)
 {
-	wEntry_p b;
+	wControl_p b;
+	struct entry* entry;
 
 	// create and initialize the widget
+	b = wlibControlNew(B_TEXT, parent, helpStr, data);
+	entry = WLIB_GET_DATA_PTR(b, entry);
+	entry->valueP = valueP;
+	entry->action = action;
+	entry->valueL = valueL;
 
-	b = g_malloc0(sizeof(struct wEntry_t));
-	b->type = B_TEXT;
-	b->valueP = valueP;
-	b->action = action;
-	b->valueL = valueL;
-
-	if (parent->builder) {
+	if (HASDIALOGBUILDER(parent)) {
 		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
  	} else {
 		// create the gtk entry field and set maximum length if desired
@@ -257,8 +254,8 @@ wEntry_p wEntryCreate(
 			gtk_entry_set_width_chars(GTK_ENTRY(b->widget), width);
 		}
 		// if desired, place a label in front of the created widget
-		//if (labelStr)
-		//	b->labelW = wlibAddLabel((wControl_p)b, labelStr);
+		if (labelStr)
+			wlibAddLabel((wControl_p)b, x-1, y, labelStr);
 
 		if (option & BO_READONLY) {
 			gtk_editable_set_editable(GTK_EDITABLE(b->widget), FALSE);
@@ -278,8 +275,8 @@ wEntry_p wEntryCreate(
 	gtk_widget_add_events(b->widget, GDK_FOCUS_CHANGE_MASK);
 
 	// set the default text
-	if (b->valueP) {
-		wEntrySetValue(b, b->valueP);
+	if (entry->valueP) {
+		wEntrySetValue(b, entry->valueP);
 	}
 
 	return b;

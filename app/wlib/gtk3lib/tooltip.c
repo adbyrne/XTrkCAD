@@ -141,98 +141,99 @@ void wControlSetBalloonText(
 void wControlSetBalloon( wControl_p b, wWinPix_t dx, wWinPix_t dy,
                          const char * msg )
 {
-	PangoLayout * layout;
+	printf("Not implemented wControlSetBalloon() %s %d\n", __FILE__, __LINE__);
+	//PangoLayout * layout;
 
-	gint x, y;
-	gint w, h;
-	wWinPix_t xx, yy;
-	const char * msgConverted;
-	GtkRequisition min_size, nat_size;
+	//gint x, y;
+	//gint w, h;
+	//wWinPix_t xx, yy;
+	//const char * msgConverted;
+	//GtkRequisition min_size, nat_size;
 
-	/* return if there is nothing to do */
-	if (balloonVisible && balloonB == b &&
-	    balloonDx == dx && balloonDy == dy && msg != NULL && !balloonMsg[0])
-		if (strcmp(msg,balloonMsg)==0) {
-			return;
-		}
+	///* return if there is nothing to do */
+	//if (balloonVisible && balloonB == b &&
+	//    balloonDx == dx && balloonDy == dy && msg != NULL && !balloonMsg[0])
+	//	if (strcmp(msg,balloonMsg)==0) {
+	//		return;
+	//	}
 
-	/* hide the tooltip */
-	if ( msg == NULL ) {
-		if ( balloonF != NULL && balloonVisible) {
-			gtk_widget_hide( balloonF );
-			balloonVisible = FALSE;
-		}
-		balloonMsg[0] = '\0';
-		return;
-	}
-	msgConverted = wlibConvertInput(msg);
+	///* hide the tooltip */
+	//if ( msg == NULL ) {
+	//	if ( balloonF != NULL && balloonVisible) {
+	//		gtk_widget_hide( balloonF );
+	//		balloonVisible = FALSE;
+	//	}
+	//	balloonMsg[0] = '\0';
+	//	return;
+	//}
+	//msgConverted = wlibConvertInput(msg);
 
-	if ( balloonF == NULL ) {
-		//GtkWidget *alignment;
+	//if ( balloonF == NULL ) {
+	//	//GtkWidget *alignment;
 
-		balloonF = gtk_window_new( GTK_WINDOW_POPUP );
-		gtk_window_set_type_hint( GTK_WINDOW( balloonF), GDK_WINDOW_TYPE_HINT_TOOLTIP );
-		gtk_window_set_decorated (GTK_WINDOW (balloonF), FALSE );
-		gtk_window_set_resizable( GTK_WINDOW (balloonF), FALSE );
-		gtk_window_set_accept_focus(GTK_WINDOW( balloonF), FALSE);
+	//	balloonF = gtk_window_new( GTK_WINDOW_POPUP );
+	//	gtk_window_set_type_hint( GTK_WINDOW( balloonF), GDK_WINDOW_TYPE_HINT_TOOLTIP );
+	//	gtk_window_set_decorated (GTK_WINDOW (balloonF), FALSE );
+	//	gtk_window_set_resizable( GTK_WINDOW (balloonF), FALSE );
+	//	gtk_window_set_accept_focus(GTK_WINDOW( balloonF), FALSE);
 
-		//GtkWidget * alignment = gtk_alignment_new (0.5, 0.5, 1.0, 1.0);
-		//gtk_alignment_set_padding( GTK_ALIGNMENT(alignment), 6, 6, 6, 6 );
+	//	//GtkWidget * alignment = gtk_alignment_new (0.5, 0.5, 1.0, 1.0);
+	//	//gtk_alignment_set_padding( GTK_ALIGNMENT(alignment), 6, 6, 6, 6 );
 
-		//gtk_container_add (GTK_CONTAINER (balloonF), alignment);
+	//	//gtk_container_add (GTK_CONTAINER (balloonF), alignment);
 
-		//gtk_widget_show (alignment);
+	//	//gtk_widget_show (alignment);
 
-		balloonPI = gtk_label_new(msgConverted);
-		gtk_widget_set_halign(balloonPI, GTK_ALIGN_CENTER);
-		gtk_widget_set_valign(balloonPI, GTK_ALIGN_CENTER);
-		gtk_widget_set_hexpand(balloonPI,TRUE);
-		gtk_widget_set_vexpand(balloonPI,TRUE);
-		gtk_container_add( GTK_CONTAINER(balloonF), balloonPI );
-	}
-	gtk_label_set_text( GTK_LABEL(balloonPI), msgConverted );
-	gtk_widget_show_all( balloonPI );
-	gtk_widget_show_all( balloonF );
+	//	balloonPI = gtk_label_new(msgConverted);
+	//	gtk_widget_set_halign(balloonPI, GTK_ALIGN_CENTER);
+	//	gtk_widget_set_valign(balloonPI, GTK_ALIGN_CENTER);
+	//	gtk_widget_set_hexpand(balloonPI,TRUE);
+	//	gtk_widget_set_vexpand(balloonPI,TRUE);
+	//	gtk_container_add( GTK_CONTAINER(balloonF), balloonPI );
+	//}
+	//gtk_label_set_text( GTK_LABEL(balloonPI), msgConverted );
+	//gtk_widget_show_all( balloonPI );
+	//gtk_widget_show_all( balloonF );
 
-	balloonDx = dx;
-	balloonDy = dy;
-	balloonB = b;
-	snprintf(balloonMsg, sizeof(balloonMsg), "%s", msg);
-	gtk_widget_get_preferred_size(balloonPI, &min_size, &nat_size);
-	w = nat_size.width;
-	h = nat_size.height;
+	//balloonDx = dx;
+	//balloonDy = dy;
+	//balloonB = b;
+	//snprintf(balloonMsg, sizeof(balloonMsg), "%s", msg);
+	//gtk_widget_get_preferred_size(balloonPI, &min_size, &nat_size);
+	//w = nat_size.width;
+	//h = nat_size.height;
 
-	gtk_window_get_position( GTK_WINDOW(b->parent->gtkwin), &x, &y);
+	//gtk_window_get_position( GTK_WINDOW(b->parent->gtkwin), &x, &y);
 
 
-	x += b->realX + dx;
-	y += b->realY + b->h - dy;
+	//x += b->realX + dx;
+	//y += b->realY + b->h - dy;
 
-	GdkDisplay * display = gdk_display_get_default();
+	//GdkDisplay * display = gdk_display_get_default();
 
-	GdkMonitor * monitor = gdk_display_get_monitor_at_window(display,
-	                       gtk_widget_get_window(balloonF));
+	//GdkMonitor * monitor = gdk_display_get_monitor_at_window(display,
+	//                       gtk_widget_get_window(balloonF));
 
-	GdkRectangle rect;
-	gdk_monitor_get_geometry(monitor, &rect);
+	//GdkRectangle rect;
+	//gdk_monitor_get_geometry(monitor, &rect);
 
-	xx = rect.width;
-	yy = rect.height;
-	if ( x < 0 ) {
-		x = 0;
-	} else if ( x+w > xx ) {
-		x = xx - w;
-	}
-	if ( y < 0 ) {
-		y = 0;
-	} else if ( y+h > yy ) {
-		y = yy - h ;
-	}
-	gtk_window_move( GTK_WINDOW( balloonF ), x, y );
-	gtk_widget_show_all( balloonF );
-	gtk_widget_show( balloonPI );
+	//xx = rect.width;
+	//yy = rect.height;
+	//if ( x < 0 ) {
+	//	x = 0;
+	//} else if ( x+w > xx ) {
+	//	x = xx - w;
+	//}
+	//if ( y < 0 ) {
+	//	y = 0;
+	//} else if ( y+h > yy ) {
+	//	y = yy - h ;
+	//}
+	//gtk_window_move( GTK_WINDOW( balloonF ), x, y );
+	//gtk_widget_show_all( balloonF );
+	//gtk_widget_show( balloonPI );
 
-	balloonVisible = TRUE;
+	//balloonVisible = TRUE;
 }
 
 /**
@@ -400,7 +401,8 @@ wlibAddTooltip(GtkWidget* widget, char* dialog, char* field)
 	gchar* fieldId = g_strdup_printf("%s-%s", dialog, field);
 
 	if (fieldId) {
-		g_signal_connect(widget, "query-tooltip", G_CALLBACK(queryTooltipEvent), FindTooltip(fieldId));
+		g_signal_connect(widget, "query-tooltip", 
+			G_CALLBACK(queryTooltipEvent), FindTooltip(fieldId));
 		gtk_widget_set_has_tooltip(widget, true);
 	}
 

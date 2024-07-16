@@ -48,7 +48,7 @@
  */
 
 void
-wlibBasicGridAttach(wWindow_p parent, GtkWidget *widget, unsigned xPos,
+wlibBasicGridAttach(wControl_p parent, GtkWidget *widget, unsigned xPos,
     unsigned yPos, unsigned colSpan, unsigned rowSpan) 
 {
     GtkGrid* grid = GTK_GRID(wlibWidgetFromIdWarn(parent, "layoutgrid"));
@@ -68,14 +68,14 @@ wlibBasicGridAttach(wWindow_p parent, GtkWidget *widget, unsigned xPos,
 gboolean
 dialog_configure_event(GtkWidget* self, GdkEventConfigure * event, void* userdata)
 {
-     gchar* posString = NULL;
+    gchar* posString = NULL;
 
     posString = g_strdup_printf("%d %d", event->x, event->y);
-    wPrefSetString(((wWindow_p)userdata)->name, "pos", posString);
+//    wPrefSetString(((wWindow_p)userdata)->name, "pos", posString);
     g_free(posString);
 
     posString = g_strdup_printf("%d %d", event->width, event->height);
-    wPrefSetString(((wWindow_p)userdata)->name, "size", posString);
+//    wPrefSetString(((wWindow_p)userdata)->name, "size", posString);
     g_free(posString);
     
     return FALSE;
@@ -134,7 +134,7 @@ RestoreWindow(GtkWidget* window, const char* name)
  */
 
 void
-response_signal(GtkDialog* self, gint response_id, wWindow_p dialog)
+response_signal(GtkDialog* self, gint response_id, wControl_p dialog)
 {
     winProcEvent event = 0;
     
@@ -151,17 +151,17 @@ response_signal(GtkDialog* self, gint response_id, wWindow_p dialog)
         return;
     }
 
-    dialog->winProc(dialog, event, NULL, NULL);
+    dialog->data.window.winProc(dialog, event, NULL, NULL);
 } 
 
 void
-wWindowShow(wWindow_p win, bool state)
+wWindowShow(wControl_p win, bool state)
 {
     if (state) {
-        gtk_widget_show(win->gtkWindow);
+        gtk_widget_show(win->widget);
     }
     else {
-        gtk_widget_hide(win->gtkWindow);
+        gtk_widget_hide(win->widget);
     }
 }
 
@@ -187,8 +187,8 @@ wWindowShow(wWindow_p win, bool state)
  * \return          dialog handle on success, NULL on failure
  */
 
-wWindow_p
-wWinDialogCreate(wWindow_p parent,
+wControl_p
+wWinDialogCreate(wControl_p parent,
     const char* helpStr,
     const char* titleStr,
     const char* nameStr,
@@ -201,10 +201,14 @@ wWinDialogCreate(wWindow_p parent,
     GtkWidget* parentWindow;
     gchar* resourcePath;
     char* tempStr = NULL;
+    struct window* dcontrol;
 
-    wWindow_p winDialog = g_malloc0(sizeof(struct wWindow_t));
+    wControl_p winDialog = wlibControlNew(W_DIALOG, parent, helpStr, data);
+    dcontrol = WLIB_GET_DATA_PTR(winDialog, window);
 
     if (option & DO_FILESYSTEM) {
+        // in case filename is given, load builder and create a name from 
+        // the base filename without extension
         resourcePath = g_strdup(nameStr);
         builder = gtk_builder_new_from_file(resourcePath);
         tempStr = g_path_get_basename(resourcePath);
@@ -241,7 +245,7 @@ wWinDialogCreate(wWindow_p parent,
         parentWindow = wlibAppWinGetMain();
     }
     else {
-        parentWindow = parent->gtkWindow;
+        parentWindow = parent->widget;
     }
 
     RestoreWindow(dialog, nameStr);
@@ -260,18 +264,12 @@ wWinDialogCreate(wWindow_p parent,
     gtk_window_set_title(GTK_WINDOW(dialog), titleStr);
 
     gtk_widget_show(dialog);
-
-    winDialog->gtkWindow = dialog;
+    dcontrol->option = option & BO_USEBUILDER;
+    winDialog->widget = dialog;
     winDialog->name = g_strdup(nameStr);
-    winDialog->winProc = winProc;
-
-    if (option & BO_USEBUILDER) {
-        winDialog->builder = builder;
-    }
-    else {
-        winDialog->builder = NULL;
-        g_object_unref(builder);
-    }
+    dcontrol->winProc = winProc;
+    dcontrol->builder = builder;
+    dcontrol->option = option & BO_USEBUILDER;
 
     g_free(tempStr);
     return(winDialog);

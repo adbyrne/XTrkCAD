@@ -65,7 +65,7 @@ static long radioGetValue(
  */
 
 void wRadioSetValue(
-        wChoice_p bc,		/* Radio box */
+        wControl_p bc,		/* Radio box */
         long value)		/* Value */
 {
 	GList* children;
@@ -91,9 +91,9 @@ void wRadioSetValue(
  */
 
 long wRadioGetValue(
-        wChoice_p bc)		/* Radio box */
+        wControl_p bc)		/* Radio box */
 {
-	return radioGetValue(bc->widget);
+	return radioGetValue(GTK_RADIO_BUTTON(bc->widget));
 }
 
 /**
@@ -109,21 +109,19 @@ static int radioChoice(
         GtkWidget* widget,
         gpointer b)
 {
-	wChoice_p bc = (wChoice_p)b;
-	long value = radioGetValue(widget);
+	wControl_p bc = (wControl_p)b;
+	long value = radioGetValue(GTK_RADIO_BUTTON(widget));
+	struct radio *rcontrol;
 
-	if (debugWindow >= 2) {
-		printf("%s choice pushed = %ld\n", bc->labelStr ? bc->labelStr : "No label",
-		       value);
-	}
+	rcontrol = WLIB_GET_DATA_PTR(bc, radio);
 
 	if (value != -1) {
-		if (bc->valueP) {
-			*bc->valueP = value;
+		if (rcontrol->valueP) {
+			*rcontrol->valueP = value;
 		}
 
-		if (bc->action) {
-			bc->action(value, bc->data);
+		if (rcontrol->action) {
+			rcontrol->action(value, bc->context);
 		}
 	}
 	return 1;
@@ -156,8 +154,8 @@ static int radioChoice(
  * \returns radio button widget
  */
 
-wChoice_p wRadioCreate(
-        wWindow_p	parent,
+wControl_p wRadioCreate(
+        wControl_p	parent,
         wWinPix_t	x,
         wWinPix_t	y,
         const char* helpStr,
@@ -168,15 +166,14 @@ wChoice_p wRadioCreate(
         wChoiceCallBack_p action,
         void* data)
 {
-	wChoice_p b;
+	wControl_p b;
+	struct radio* rcontrol;
+	b = wlibControlNew(B_RADIO, parent, helpStr, data);
+	rcontrol = WLIB_GET_DATA_PTR(b, radio);
+	rcontrol->action = action;
+	rcontrol->valueP = valueP;
 
-
-	b = g_malloc0(sizeof(struct wChoice_t));
-	b->type = B_RADIO;
-	b->action = action;
-	b->valueP = valueP;
-
-	if (option & BO_USEBUILDER) {
+	if (HASDIALOGBUILDER(parent)) {
 		/** \todo use builder */
 
 	} else {
@@ -229,12 +226,9 @@ wChoice_p wRadioCreate(
 
 		gtk_widget_show_all(b->widget);
 
-		/**
-		 * \todo check usage of label
-		 */
-		//if (labelStr) {
-		//    b->labelW = wlibAddLabel((wControl_p)b, labelStr);
-		//}
+		if (labelStr) {
+		    wlibAddLabel((wControl_p)b, x-1, y, labelStr);
+		}
 	}
 	return b;
 }

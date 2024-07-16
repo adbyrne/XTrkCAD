@@ -30,16 +30,16 @@
 
 #include "gtkint.h"
 
-
-struct wColorButton_t {
-	wType_e type;
-	GtkWidget* widget;
-	wDrawColor* valueP;
-	const char* labelStr;
-	wColorSelectButtonCallBack_p action;
-	void* data;
-};
-
+//
+//struct wColorButton_t {
+//	wType_e type;
+//	GtkWidget* widget;
+//	wDrawColor* valueP;
+//	const char* labelStr;
+//	wColorSelectButtonCallBack_p action;
+//	void* data;
+//};
+//
 wDrawColor wDrawColorWhite;
 wDrawColor wDrawColorBlack;
 
@@ -161,18 +161,18 @@ wlibColorButtonGetColor(GtkColorButton* widget)
  */
 
 static void
-colorChange(GtkColorButton *widget, wColorButton_p user_data)
+colorChange(GtkColorButton *widget, wControl_p user_data)
 {
 	long rgb;
 
 	rgb = wlibColorButtonGetColor(widget);
 
-	if (user_data->valueP) {
-		*(user_data->valueP) = rgb;
+	if (user_data->data.colorbutton.valueP) {
+		*(user_data->data.colorbutton.valueP) = rgb;
 	}
 
-	if (user_data->action) {
-		user_data->action(user_data->data, rgb);
+	if (user_data->data.colorbutton.action) {
+		user_data->data.colorbutton.action(user_data->context, rgb);
 	}
 }
 
@@ -185,7 +185,7 @@ colorChange(GtkColorButton *widget, wColorButton_p user_data)
  */
 
 void wColorSelectButtonSetColor(
-        wColorButton_p bb,
+        wControl_p bb,
         wDrawColor color)
 {
 	GdkRGBA rgba;
@@ -209,7 +209,7 @@ void wColorSelectButtonSetColor(
  */
 
 wDrawColor wColorSelectButtonGetColor(
-        wColorButton_p bb)
+        wControl_p bb)
 {
 	wDrawColor rgb = wlibColorButtonGetColor(GTK_COLOR_BUTTON(bb->widget));
 
@@ -244,8 +244,8 @@ wDrawColor wColorSelectButtonGetColor(
  * 
  */
 
-wColorButton_p wColorSelectButtonCreate(
-        wWindow_p	parent,
+wControl_p wColorSelectButtonCreate(
+        wControl_p	parent,
         wWinPix_t	x,
         wWinPix_t	y,
         const char 	* helpStr,
@@ -256,18 +256,19 @@ wColorButton_p wColorSelectButtonCreate(
         wColorSelectButtonCallBack_p action,
         void 	* data)
 {
-	wColorButton_p b;
+	wControl_p b;
+	struct colorbutton* ccontrol;
 
-	b = g_malloc0(sizeof(struct wColorButton_t));
-	b->type = B_COLORBUTTON;
+	b = wlibControlNew(B_COLORBUTTON,parent, helpStr, data);
+	ccontrol = WLIB_GET_DATA_PTR(b, colorbutton);
 
-	if (option & BO_USEBUILDER) {
+	if (HASDIALOGBUILDER(parent)) {
 		/** 
 
 		*/
 	} else {
 		b->widget = gtk_color_button_new();
-		if (!b->widget) { exit(4); }
+		if (!b->widget) { exit(1); }
 
 		g_signal_connect(b->widget, "color-set",
 			G_CALLBACK(colorChange), b);
@@ -275,11 +276,12 @@ wColorButton_p wColorSelectButtonCreate(
 		if (option & BB_DEFAULT) {
 			gtk_widget_set_can_default(b->widget, TRUE);
 			gtk_widget_grab_default(b->widget);
-			gtk_window_set_default(GTK_WINDOW(parent->gtkWindow), b->widget);
+			gtk_window_set_default(GTK_WINDOW(parent->widget), b->widget);
 		}
 
 		if (labelStr) {
 			gtk_color_button_set_title(GTK_COLOR_BUTTON(b->widget), labelStr);
+			wlibAddLabel(b, x - 1, y, labelStr);
 		}
 
 		gtk_widget_set_size_request(b->widget, 20, 20);
@@ -290,8 +292,7 @@ wColorButton_p wColorSelectButtonCreate(
 		gtk_widget_show(b->widget);
 	}
 
-	b->action = action;
-	b->data = data;
+	ccontrol->action = action;
 
 	wColorSelectButtonSetColor(b, (valueP?*valueP:0));
 

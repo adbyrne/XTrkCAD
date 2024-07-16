@@ -127,7 +127,7 @@ AddFilters(struct wFilSel_t* selector)
  */
 
 struct wFilSel_t * wFilSelCreate(
-        wWindow_p w,
+        wControl_p w,
         wFilSelMode_e mode,
         int opt,
         const char * title,

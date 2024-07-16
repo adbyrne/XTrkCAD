@@ -31,12 +31,6 @@
 
 #include "gtkint.h"
 
-struct wBitmap_t {
-	wType_e type;
-	GtkWidget* widget;
-	wWindow_p parent;
-};
-
 /**
  * Create a static control for displaying a bitmap.
  *
@@ -54,17 +48,17 @@ struct wBitmap_t {
  * \return    the control
  */
 
-wBitmap_p
-wBitmapCreate( wWindow_p parent, wWinPix_t x, wWinPix_t y, long options, 
+wControl_p
+wBitmapCreate( wControl_p parent, wWinPix_t x, wWinPix_t y, long options, 
 	const wIcon_p iconP )
 {
-	wBitmap_p bt;
+	wControl_p bt;
+	struct bitmap* bm;
 	GdkPixbuf *pixbuf;
 	GtkWidget *image;
 	
-	bt = (wBitmap_p)g_malloc0(sizeof(struct wBitmap_t));
-	bt->type = B_BITMAP;
-	bt->parent = parent;
+	bt = wlibControlNew(B_BITMAP, parent, NULL, NULL);
+	bm = WLIB_GET_DATA_PTR(bt, bitmap);
 
 	/*
 	 * Depending on the platform, parent->widget->window might still be null 
@@ -85,7 +79,7 @@ wBitmapCreate( wWindow_p parent, wWinPix_t x, wWinPix_t y, long options,
 		
 	wlibBasicGridAttach(parent, bt->widget, x, y, 1, 1);
 	
-	return( (wBitmap_p)bt );
+	return( (wControl_p)bt );
 }
 
 /**

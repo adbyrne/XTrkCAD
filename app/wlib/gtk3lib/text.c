@@ -54,32 +54,21 @@
  *****************************************************************************
  */
 
-struct wText_t {
-	wType_e type;
-	gchar* placeholder;
-	GtkTextTag* placeholderTag;
-	int changed;
-	long option;
-	GtkWidget* widget;
-	GtkWidget* text;
-};
-
-
 /**
  * set and formats the placeholder text for a empty text field.
  *
  * \param bt edit field
  */
 
-static void wlibSetPlaceholder(wText_p bt)
+static void wlibSetPlaceholder(wControl_p bt)
 {
 	GtkTextIter startIter;
 	GtkTextIter endIter;
-	GtkTextBuffer* tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->text));
+	GtkTextBuffer* tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->data.text.text));
 
-	gtk_text_buffer_set_text(tb, bt->placeholder, -1);
+	gtk_text_buffer_set_text(tb, bt->data.text.placeholder, -1);
 	gtk_text_buffer_get_bounds(tb, &startIter, &endIter);
-	gtk_text_buffer_apply_tag(tb, bt->placeholderTag, &startIter, &endIter);
+	gtk_text_buffer_apply_tag(tb, bt->data.text.placeholderTag, &startIter, &endIter);
 }
 
 /**
@@ -90,17 +79,19 @@ static void wlibSetPlaceholder(wText_p bt)
  * \return
  */
 
-void wTextClear(wText_p bt)
+void wTextClear(wControl_p bt)
 {
 	GtkTextBuffer* tb;
-	tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->text));
+	tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->data.text.text));
 	gtk_text_buffer_set_text(tb, "", -1);
 
-	if (bt->option & BO_READONLY) {
-		gtk_text_view_set_editable(GTK_TEXT_VIEW(bt->text), FALSE);
+	if (bt->data.text.option & BO_READONLY) {
+		gtk_text_view_set_editable(GTK_TEXT_VIEW(bt->data.text.text), FALSE);
 	}
-	wlibSetPlaceholder(bt);
-	bt->changed = FALSE;
+	if (bt->data.text.placeholder) {
+		wlibSetPlaceholder(bt);
+	}
+	bt->data.text.changed = FALSE;
 }
 
 /**
@@ -111,26 +102,25 @@ void wTextClear(wText_p bt)
  * \return
  */
 
-void wTextAppend(wText_p bt,
+void wTextAppend(wControl_p bt,
                  const char* text)
 {
 	GtkTextBuffer* tb;
 	GtkTextIter ti1;
 	GtkTextMark* tm;
 
-
-	if (bt->text == 0) {
+	if (bt->data.text.text == 0) {
 		abort();
 	}
 
-	tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->text));
+	tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->data.text.text));
 	// convert to utf-8
 	text = wlibConvertInput(text);
 	// append to end of buffer
 	gtk_text_buffer_get_end_iter(tb, &ti1);
 	gtk_text_buffer_insert(tb, &ti1, text, -1);
 
-	if (bt->option & BT_TOP) {
+	if (bt->data.text.option & BT_TOP) {
 		// and scroll to start of text
 		gtk_text_buffer_get_start_iter(tb, &ti1);
 	} else {
@@ -138,10 +128,10 @@ void wTextAppend(wText_p bt,
 		gtk_text_buffer_get_end_iter(tb, &ti1);
 	}
 	tm = gtk_text_buffer_create_mark(tb, NULL, &ti1, TRUE);
-	gtk_text_view_scroll_mark_onscreen(GTK_TEXT_VIEW(bt->text), tm);
+	gtk_text_view_scroll_mark_onscreen(GTK_TEXT_VIEW(bt->data.text.text), tm);
 	gtk_text_buffer_delete_mark(tb, tm);
 
-	bt->changed = FALSE;
+	bt->data.text.changed = FALSE;
 }
 
 
@@ -153,21 +143,21 @@ void wTextAppend(wText_p bt,
  * \return    pointer to the converted text
  */
 
-static char* wlibGetText(wText_p bt)
+static char* wlibGetText(wControl_p bt)
 {
 	GtkTextBuffer* tb;
 	GtkTextIter ti1, ti2;
 	char* cp;
 
-	if (bt->text == 0) {
+	if (bt->data.text.text == 0) {
 		abort();
 	}
 
-	tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->text));
+	tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->data.text.text));
 	gtk_text_buffer_get_bounds(tb, &ti1, &ti2);
 	cp = gtk_text_buffer_get_text(tb, &ti1, &ti2, FALSE);
 
-	if (!g_strcmp0(bt->placeholder, cp)) {
+	if (!g_strcmp0(bt->data.text.placeholder, cp)) {
 		*cp = '\0';
 	}
 	return cp;
@@ -181,7 +171,7 @@ static char* wlibGetText(wText_p bt)
  * \return    TRUE is success, FALSE if not
  */
 
-wBool_t wTextSave(wText_p bt, const char* fileName)
+wBool_t wTextSave(wControl_p bt, const char* fileName)
 {
 	FILE* f;
 	char* cp;
@@ -360,7 +350,7 @@ end_print(GtkPrintOperation* operation,
  */
 
 wBool_t wTextPrint(
-        wText_p bt)
+        wControl_p bt)
 {
 	//GtkPrintOperation* operation;
 	//GtkWidget* dialog;
@@ -411,33 +401,30 @@ wBool_t wTextPrint(
  * \return    length of string including terminating \0
  */
 
-int wTextGetSize(wText_p bt)
+int wTextGetSize(wControl_p bt)
 {
 	char* cp = wlibGetText(bt);
-	int len = (int)strlen(cp);
+	int len = (int)strlen(cp) + 1;
 	g_free(cp);
 	return len;
 }
 
 /**
- * Get the  text
+ * Get the entered text. If the entered text is longer than the passed buffer, 
+ * it is truncated and zero terminated.
  *
  * \param bt IN the text widget
  * \param text IN the buffer
- * \param len IN maximum number of bytes to return
+ * \param len IN maximum number of bytes to return, including '\0'
  * \return
  */
 
-void wTextGetText(wText_p bt, char* text, int len)
+void wTextGetText(wControl_p bt, char* text, int len)
 {
 	char* cp;
 	cp = wlibGetText(bt);
 	strncpy(text, cp, len);
-
-	if (len > 0) {
-		text[len - 1] = '\0';
-	}
-
+	text[len - 1] = '\0';
 	g_free(cp);
 }
 
@@ -449,15 +436,15 @@ void wTextGetText(wText_p bt, char* text, int len)
  * \return
  */
 
-void wTextSetReadonly(wText_p bt, wBool_t ro)
+void wTextSetReadonly(wControl_p bt, wBool_t ro)
 {
-	gtk_text_view_set_editable(GTK_TEXT_VIEW(bt->text), !ro);
+	gtk_text_view_set_editable(GTK_TEXT_VIEW(bt->data.text.text	), !ro);
 
-	if (ro) {
-		bt->option |= BO_READONLY;
-	} else {
-		bt->option &= ~BO_READONLY;
-	}
+	//if (ro) {
+	//	bt->option |= BO_READONLY;
+	//} else {
+	//	bt->option &= ~BO_READONLY;
+	//}
 }
 
 /**
@@ -467,9 +454,9 @@ void wTextSetReadonly(wText_p bt, wBool_t ro)
  * \return    TRUE of changed, FALSE otherwise
  */
 
-wBool_t wTextGetModified(wText_p bt)
+wBool_t wTextGetModified(wControl_p bt)
 {
-	return bt->changed;
+	return bt->data.text.changed;
 }
 
 /**
@@ -481,7 +468,7 @@ wBool_t wTextGetModified(wText_p bt)
  * \return
  */
 
-void wTextSetSize(wText_p bt, wWinPix_t w, wWinPix_t h)
+void wTextSetSize(wControl_p bt, wWinPix_t w, wWinPix_t h)
 {
 	gtk_widget_set_size_request(bt->widget, w, h);
 
@@ -499,7 +486,7 @@ void wTextSetSize(wText_p bt, wWinPix_t w, wWinPix_t h)
  * \return
  */
 
-void wTextComputeSize(wText_p bt, wWinPix_t rows, wWinPix_t cols,
+void wTextComputeSize(wControl_p bt, wWinPix_t rows, wWinPix_t cols,
                       wWinPix_t* width,
                       wWinPix_t* height)
 {
@@ -515,7 +502,7 @@ void wTextComputeSize(wText_p bt, wWinPix_t rows, wWinPix_t cols,
  * \return
  */
 
-void wTextSetPosition(wText_p bt, int pos)
+void wTextSetPosition(wControl_p bt, int pos)
 {
 	/* \TODO TextSetPosition */
 }
@@ -528,13 +515,13 @@ void wTextSetPosition(wText_p bt, int pos)
  * \return
  */
 
-static void textChanged(GtkWidget* widget, wText_p bt)
+static void textChanged(GtkWidget* widget, wControl_p bt)
 {
 	if (bt == 0) {
 		return;
 	}
 
-	bt->changed = TRUE;
+	bt->data.text.changed = TRUE;
 }
 /**
  * Signal handler for begin of user activity. Remove the placeholder text if
@@ -548,7 +535,7 @@ static void textChanged(GtkWidget* widget, wText_p bt)
 \todo GTK3 shows warning when pressing delete and placeholder is shown
 */
 
-static void userActivityStarts(GtkTextBuffer* self, wText_p textField)
+static void userActivityStarts(GtkTextBuffer* self, wControl_p textField)
 {
 	GtkTextIter endIter;
 	GtkTextIter startIter;
@@ -556,7 +543,7 @@ static void userActivityStarts(GtkTextBuffer* self, wText_p textField)
 	gtk_text_buffer_get_bounds(self, &startIter, &endIter);
 
 	gchar* text = gtk_text_buffer_get_text(self, &startIter, &endIter, FALSE);
-	if (!g_strcmp0(text, textField->placeholder)) {
+	if (!g_strcmp0(text, textField->data.text.placeholder)) {
 		gtk_text_buffer_delete(self, &startIter, &endIter);
 		gtk_text_buffer_set_text(self, "", -1);
 	}
@@ -592,8 +579,8 @@ static void userActivityStarts(GtkTextBuffer* self, wText_p textField)
  * \todo Options BT_HSCROLL, BT_CHARUNITS, BT_FIXEDFONT, BT_TOP
  */
 
-wText_p
-wTextCreate(wWindow_p	parent,
+wControl_p
+wTextCreate(wControl_p parent,
             wWinPix_t	x,
             wWinPix_t	y,
             const char* helpStr,
@@ -602,23 +589,24 @@ wTextCreate(wWindow_p	parent,
             wWinPix_t	width,
             wWinPix_t	height)
 {
-	wText_p bt;
+	wControl_p bt;
+	struct text* tcontrol;
 	GtkTextBuffer* tb;
 	// create the widget
-	bt = g_malloc0(sizeof(struct wText_t));
-	bt->type = B_TEXT;
-	bt->option = option;
+	bt = wlibControlNew(B_TEXT, parent, helpStr, NULL);
+	tcontrol = WLIB_GET_DATA_PTR(bt, text);
 
-	if (option & BO_USEBUILDER) {
+	if (HASDIALOGBUILDER(parent)) {
 		bt->widget = wlibWidgetFromIdWarn(parent, "scrollwindow");
-		bt->text = wlibWidgetFromIdWarn(parent, helpStr);
+		tcontrol->text = wlibWidgetFromIdWarn(parent, helpStr);
 
-		if (bt->option & BO_READONLY) {
-			gtk_text_view_set_editable(GTK_TEXT_VIEW(bt->text), FALSE);
-			gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(bt->text), FALSE);
+		/** \todo this could better be done in the XML definition */
+		if (option & BO_READONLY) {
+			gtk_text_view_set_editable(GTK_TEXT_VIEW(tcontrol->text), FALSE);
+			gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(tcontrol->text), FALSE);
 		} else {
-			gtk_text_view_set_editable(GTK_TEXT_VIEW(bt->text), TRUE);
-			gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(bt->text), TRUE);
+			gtk_text_view_set_editable(GTK_TEXT_VIEW(tcontrol->text), TRUE);
+			gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(tcontrol->text), TRUE);
 		}
 	} else {
 		//wlibComputePos((wControl_p)bt);
@@ -657,9 +645,9 @@ wTextCreate(wWindow_p	parent,
 
 
 	// get the text buffer and add a bold tag to it
-	tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->text));
+	tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(tcontrol->text));
 	gtk_text_buffer_create_tag(tb, "bold", "weight", PANGO_WEIGHT_BOLD, NULL);
-	bt->placeholderTag = gtk_text_buffer_create_tag(tb, "placeholder", "foreground",
+	tcontrol->placeholderTag = gtk_text_buffer_create_tag(tb, "placeholder", "foreground",
 	                     "grey", NULL);
 
 	g_signal_connect(G_OBJECT(tb), "changed", G_CALLBACK(textChanged), bt);
@@ -667,10 +655,10 @@ wTextCreate(wWindow_p	parent,
 	                 G_CALLBACK(userActivityStarts), bt);
 
 	if (labelStr) {
-		bt->placeholder = g_strdup(labelStr);
+		tcontrol->placeholder = g_strdup(labelStr);
 		wlibSetPlaceholder(bt);
 	}
-	wlibAddTooltip(bt->text, parent->name, helpStr);
+	// wlibAddTooltip(tcontrol->text, parent->name, helpStr);
 
 	if (!(option & BO_USEBUILDER)) {
 		/* place the widget in a fixed position of the parent */
@@ -679,10 +667,12 @@ wTextCreate(wWindow_p	parent,
 		//wlibAddButton((wControl_p)bt);
 	}
 	// show the widgets
-	gtk_widget_show_all(bt->text);
+	gtk_widget_show_all(tcontrol->text);
 	gtk_widget_show_all(bt->widget);
 
 	// wlibAddHelpString(bt->widget, helpStr);
+
+	tcontrol->option = option;
 
 	// done, return the finished widget
 	return bt;

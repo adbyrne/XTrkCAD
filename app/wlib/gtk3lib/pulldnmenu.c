@@ -45,52 +45,6 @@
  *****************************************************************************
  */
 
-
-//typedef struct{	mtype_e mtype;			/**< menu entry type */
-//				GtkWidget *menu_item;
-//				wMenu_p parentMenu;
-//		} MOBJ_COMMON; 					/**< menu item specific data */
-
-// common data for all menu items
-struct wMenuItem_t {
-    struct wObjCommon oc;
-    struct menuObjCommon mc;
-};
-typedef struct wMenuItem_t * wMenuItem_p;
-
-// extend common data for push button item
-struct wMenuPush_t {
-    struct wObjCommon oc;
-    struct menuObjCommon mc;
-    wMenuCallBack_p action;
-    void *data;
-};
-
-// extend common data for toggle button item
-struct wMenuToggle_t {
-    struct wObjCommon oc;
-    struct menuObjCommon mc;
-    wMenuCallBack_p action;
-    void *data;
-};
-
-//extend common data for radio button item
-struct wMenuRadio_t {
-    struct wObjCommon oc;
-    struct menuObjCommon mc;
-    wMenuCallBack_p action;
-    void *data;
-};
-
-
-// a few macros to make access to members easier
-
-#define MMENUITEM( ptr ) 	((ptr)->mc.menu_item)
-#define MPARENT( ptr ) 	((ptr)->mc.parentMenu)
-#define MITEMTYPE( ptr )	((ptr)->mc.mtype)
-
-/*-----------------------------------------------------------------*/
-
 /**
  * Handle activate event for menu items.
  *
@@ -103,22 +57,23 @@ static void pushMenuItem(
     GtkWidget * widget,
     gpointer value )
 {
-    wMenuItem_p m = (wMenuItem_p)value;
-    wMenuToggle_p mt;
+    wControl_p m = (wControl_p)value;
+    struct menuitem *mi = WLIB_GET_DATA_PTR(m, menuitem);
 
-    switch MITEMTYPE( m ) {
+    switch( m->type ){
     case M_PUSH:
-        ((wMenuPush_p)m)->action( ((wMenuPush_p)m)->data );
-        break;
     case M_TOGGLE:
-        mt = (wMenuToggle_p)m;
-        mt->action( mt->data );
+        mi->action( m->context );
         break;
+    //case M_TOGGLE:
+    //    mt = (wMenuToggle_p)m;
+    //    mt->action( mt->data );
+    //    break;
     case M_RADIO:
         /* NOTE: action is only called when radio button is activated,
         not when deactivated */
         if( gtk_check_menu_item_get_active((GtkCheckMenuItem *)widget ) == TRUE )
-            ((wMenuRadio_p)m)->action( ((wMenuRadio_p)m)->data );
+            mi->action(m->context);
         break;
     case M_MENU:
         return;
@@ -239,63 +194,57 @@ static void setAcclKey( GtkWidget* menu_item, int acclKey)
  */
 
 static void CreateMenuItem(
-    wMenu_p m,
-    wMenuItem_p mi,
-    mtype_e mtype,
+    wControl_p m,
+    wControl_p mi,
+    wType_e mtype,
     const char * helpStr,
     const char * labelStr,
     int acclKey )
 {
-    mi->oc.helpTopic = g_strdup(helpStr);
-    mi->oc.labelStr = g_strdup(labelStr);
-
-    MITEMTYPE( mi )= mtype;
+//    MITEMTYPE( mi )= mtype;
 
     switch ( mtype ) {
     case M_SEPARATOR:
-        MMENUITEM( mi ) = gtk_separator_menu_item_new();
+        mi->widget = gtk_separator_menu_item_new();
         break;
     case M_TOGGLE:
-        MMENUITEM( mi ) = gtk_check_menu_item_new_with_mnemonic(
-                              wlibConvertInput(mi->oc.labelStr));
-        g_signal_connect(MMENUITEM(mi), "toggled", G_CALLBACK(pushMenuItem),
+        mi->widget = gtk_check_menu_item_new_with_mnemonic(
+                              wlibConvertInput(labelStr));
+        g_signal_connect(mi->widget, "toggled", G_CALLBACK(pushMenuItem),
                          mi);
         break;
     case M_RADIO:
-        MMENUITEM( mi ) = gtk_radio_menu_item_new_with_mnemonic(m->radioGroup,
-                          wlibConvertInput(mi->oc.labelStr));
-        m->radioGroup = gtk_radio_menu_item_get_group (
-                            GTK_RADIO_MENU_ITEM (MMENUITEM( mi )));
-        g_signal_connect(MMENUITEM(mi), "activate", G_CALLBACK(pushMenuItem),
+        mi->widget = gtk_radio_menu_item_new_with_mnemonic(m->data.menu.radioGroup,
+                          wlibConvertInput(labelStr));
+        m->data.menu.radioGroup = gtk_radio_menu_item_get_group (
+                            GTK_RADIO_MENU_ITEM ( mi->widget ));
+        g_signal_connect(mi->widget, "activate", G_CALLBACK(pushMenuItem),
                          mi);
         break;
     case M_PUSH:
-        MMENUITEM( mi ) = gtk_menu_item_new_with_mnemonic(
-                              wlibConvertInput(mi->oc.labelStr));
-        g_signal_connect(MMENUITEM(mi), "activate",G_CALLBACK(pushMenuItem),
+        mi->widget = gtk_menu_item_new_with_mnemonic(
+                              wlibConvertInput(labelStr));
+        g_signal_connect(mi->widget, "activate",G_CALLBACK(pushMenuItem),
                          mi);
         break;
-    case M_MENU:
-        MMENUITEM(mi) = gtk_menu_item_new_with_mnemonic(
-                            wlibConvertInput(mi->oc.labelStr));
-        break;
+
     default:
         g_abort();
         break;
     }
 
-    if (MMENUITEM( mi )) {
+    if (mi->widget) {
         if (acclKey) {
-            setAcclKey(MMENUITEM(mi), acclKey);
+            setAcclKey(mi->widget, acclKey);
         }
-        gtk_menu_shell_append(GTK_MENU_SHELL(m->menu), MMENUITEM( mi ));
-        gtk_widget_show(GTK_WIDGET(MMENUITEM(mi)));
+        gtk_menu_shell_append(GTK_MENU_SHELL(m->widget), mi->widget);
+        gtk_widget_show(GTK_WIDGET(mi->widget));
     }
 
     if (helpStr != NULL) {
 //		wlibAddHelpString( MMENUITEM( mi ), helpStr );
     }
-    MPARENT( mi ) = m;
+
     return;
 }
 
@@ -313,20 +262,24 @@ static void CreateMenuItem(
  * \return menu entry
  */
 
-wMenuRadio_p wMenuRadioCreate(
-    wMenu_p m,
+wControl_p wMenuRadioCreate(
+    wControl_p m,
     const char * helpStr,
     const char * labelStr,
     long acclKey,
     wMenuCallBack_p action,
     void 	*data )
 {
-    wMenuRadio_p mi = g_malloc(sizeof(struct wMenuRadio_t));
+    struct menuitem* menuitem;
 
-    CreateMenuItem( m, (wMenuItem_p)mi, M_RADIO, helpStr, labelStr, acclKey );
+    wControl_p mi = wlibControlNew(M_RADIO, m, helpStr, data);
+    mi->context = data;
 
-    mi->action = action;
-    mi->data = data;
+    menuitem = WLIB_GET_DATA_PTR(mi, menuitem);
+    menuitem->action = action;
+
+    CreateMenuItem( m, mi, M_RADIO, helpStr, labelStr, acclKey );
+
     return mi;
 }
 
@@ -338,9 +291,9 @@ wMenuRadio_p wMenuRadioCreate(
  */
 
 void wMenuRadioSetActive(
-    wMenuRadio_p mi )
+    wControl_p mi )
 {
-    gtk_check_menu_item_set_active( (GtkCheckMenuItem *)MMENUITEM(mi), TRUE );
+    gtk_check_menu_item_set_active( (GtkCheckMenuItem *)mi->widget, TRUE );
 }
 
 /*
@@ -361,19 +314,22 @@ void wMenuRadioSetActive(
  * \return menu entry
  */
 
-wMenuPush_p wMenuPushCreate(
-    wMenu_p m,
+wControl_p wMenuPushCreate(
+    wControl_p m,
     const char * helpStr,
     const char * labelStr,
     long acclKey,
     wMenuCallBack_p action,
     void 	*data )
 {
-    wMenuPush_p mi = g_malloc(sizeof(struct wMenuPush_t));
+    struct menuitem* menuitem;
 
-    CreateMenuItem( m, (wMenuItem_p)mi, M_PUSH, helpStr, labelStr, acclKey);
-    mi->action = action;
-    mi->data = data;
+    wControl_p mi = wlibControlNew(M_PUSH, m, helpStr, data);
+    menuitem = WLIB_GET_DATA_PTR(mi, menuitem);
+    menuitem->action = action;
+
+    CreateMenuItem( m, mi, M_PUSH, helpStr, labelStr, acclKey);
+    mi->context = data;
 
     return mi;
 }
@@ -387,10 +343,10 @@ wMenuPush_p wMenuPushCreate(
  */
 
 void wMenuPushEnable(
-    wMenuPush_p mi,
+    wControl_p mi,
     wBool_t enable )
 {
-    gtk_widget_set_sensitive( GTK_WIDGET(MMENUITEM( mi )), enable );
+    gtk_widget_set_sensitive( GTK_WIDGET( mi->widget ), enable );
 }
 
 
@@ -404,19 +360,30 @@ void wMenuPushEnable(
  * \return menu entry
  */
 
-wMenu_p wMenuMenuCreate(
-    wMenu_p m,
+wControl_p wMenuMenuCreate(
+    wControl_p m,
     const char * helpStr,
     const char * labelStr )
 {
-    wMenu_p mi = g_malloc(sizeof(struct wMenu_t));
-    mi->radioGroup = NULL;
+    wControl_p mm;
+    struct menu *menu;
+    GtkWidget* submenu;
+    GtkWidget* menuitem;
 
-    CreateMenuItem( m, (wMenuItem_p)mi, M_MENU, helpStr, labelStr, 0);
+    mm = wlibControlNew(M_SUBMENU, m, helpStr, NULL);
+    menu = WLIB_GET_DATA_PTR(mm, menu);
+    menu->radioGroup = NULL;
 
-    mi->menu = gtk_menu_new();
-    gtk_menu_item_set_submenu( GTK_MENU_ITEM(MMENUITEM( mi )), mi->menu );
-    return mi;
+    menuitem = gtk_menu_item_new_with_mnemonic(wlibConvertInput(labelStr));
+
+    submenu = gtk_menu_new();
+    gtk_menu_item_set_submenu( GTK_MENU_ITEM( menuitem ), submenu );
+
+    gtk_menu_shell_append(GTK_MENU_SHELL(m->widget), menuitem);
+    gtk_widget_show(GTK_WIDGET(menuitem));
+
+    mm->widget = submenu;
+    return mm;
 }
 
 
@@ -429,9 +396,9 @@ wMenu_p wMenuMenuCreate(
  */
 
 void wMenuSeparatorCreate(
-    wMenu_p m )
+    wControl_p m )
 {
-    wMenuItem_p mi = g_malloc(sizeof(struct wMenuItem_t ));
+    wControl_p mi = wlibControlNew(M_SEPARATOR, m, NULL, NULL );
 
     CreateMenuItem( m, mi, M_SEPARATOR, NULL, "", 0);
 }
@@ -453,8 +420,8 @@ void wMenuSeparatorCreate(
  * \return menu entry
  */
 
-wMenuToggle_p wMenuToggleCreate(
-    wMenu_p m,
+wControl_p wMenuToggleCreate(
+    wControl_p m,
     const char * helpStr,
     const char * labelStr,
     long acclKey,
@@ -462,12 +429,14 @@ wMenuToggle_p wMenuToggleCreate(
     wMenuCallBack_p action,
     void * data )
 {
-    wMenuToggle_p mt = g_malloc(sizeof(struct wMenuToggle_t));
+    struct menuitem *menuitem;
 
-    CreateMenuItem(m, (wMenuItem_p)mt, M_TOGGLE, helpStr, labelStr, acclKey );
+    wControl_p mt = wlibControlNew(M_TOGGLE, m, helpStr, data);
+    menuitem = WLIB_GET_DATA_PTR(mt, menuitem);
+    menuitem->action = action;
 
-    mt->action = action;
-    mt->data = data;
+    CreateMenuItem(m, mt, M_TOGGLE, helpStr, labelStr, acclKey );
+
     wMenuToggleSet( mt, set );
 
     return mt;
@@ -481,9 +450,9 @@ wMenuToggle_p wMenuToggleCreate(
  */
 
 wBool_t wMenuToggleGet(
-    wMenuToggle_p mt )
+    wControl_p mt )
 {
-    return gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(MMENUITEM( mt )));
+    return gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM( mt->widget ));
 }
 
 /**
@@ -495,14 +464,14 @@ wBool_t wMenuToggleGet(
  */
 
 wBool_t wMenuToggleSet(
-    wMenuToggle_p mt,
+    wControl_p mt,
     wBool_t set )
 {
     wBool_t oldState;
     if (mt==NULL) return 0;
 
-    oldState = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(MMENUITEM( mt )));
-    gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(MMENUITEM( mt )), set );
+    oldState = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM( mt->widget ));
+    gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(mt->widget ), set );
 
     return oldState;
 }
@@ -516,10 +485,10 @@ wBool_t wMenuToggleSet(
  */
 
 void wMenuToggleEnable(
-    wMenuToggle_p mt,
+    wControl_p mt,
     wBool_t enable )
 {
-    gtk_widget_set_sensitive ( GTK_WIDGET(MMENUITEM( mt )), enable );
+    gtk_widget_set_sensitive ( GTK_WIDGET( mt->widget ), enable );
 }
 
 
@@ -596,33 +565,29 @@ wMenu_p wMenuCreate(
  * \return    pointer to the created drop-down menu
  */
 
-wMenu_p wMenuBarAdd(
-    wWindow_p w,
+wControl_p wMenuBarAdd(
+    wControl_p w,
     const char * helpStr,
     const char * labelStr )
 {
-    wMenu_p m;
+    wControl_p m;
+    struct menu* menu;
     GtkWidget *menuItem;
-    static wMenu_p m0 = NULL;
 
-    m = g_malloc(sizeof(struct wMenu_t));
-    m->oc.helpTopic = g_strdup(helpStr);
-    m->oc.labelStr = g_strdup(labelStr);
-    m->mmtype = MM_SUBMENU;
-    m->radioGroup = NULL;
+    m = wlibControlNew(M_SUBMENU, NULL, helpStr, NULL);
+    menu = WLIB_GET_DATA_PTR(m, menu);
+    menu->radioGroup = NULL;
 
     menuItem = gtk_menu_item_new_with_mnemonic(labelStr);
+    gtk_menu_shell_append(GTK_MENU_SHELL(w->data.window.menubar), menuItem);
 
-    m->menu = gtk_menu_new();
-
-    gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuItem), m->menu );
-    gtk_menu_shell_append(GTK_MENU_SHELL(w->menubar), menuItem);
+    m->widget = gtk_menu_new();
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuItem), m->widget );
 
     gtk_widget_show(menuItem);
 
     /* TODO: why is help not supported here? */
     /*gtkAddHelpString( m->panel_item, helpStr );*/
-
     return m;
 }
 
@@ -663,10 +628,10 @@ wMenu_p wMenuPopupCreate(
  * \param mp IN the context menu
  */
 
-void wMenuPopupShow( wMenu_p mp )
-{
-    gtk_menu_popup_at_pointer( GTK_MENU(mp->menu), NULL );
-}
+//void wMenuPopupShow( wMenu_p mp )
+//{
+//    gtk_menu_popup_at_pointer( GTK_MENU(mp->menu), NULL );
+//}
 
 
 /*-----------------------------------------------------------------*/
@@ -680,12 +645,13 @@ void wMenuPopupShow( wMenu_p mp )
  */
 
 void wMenuSetTraceCallBack(
-    wMenu_p m,
+    wControl_p m,
     wMenuTraceCallBack_p func,
     void * data )
 {
-    m->traceFunc = func;
-    m->traceData = data;
+    struct menu* menu = WLIB_GET_DATA_PTR(m, menu);
+    menu->traceFunc = func;
+    menu->traceData = data;
 }
 
 /**
@@ -696,7 +662,7 @@ void wMenuSetTraceCallBack(
  */
 
 wBool_t wMenuAction(
-    wMenu_p m,
+    wControl_p m,
     const char * label )
 {
     // wMenuItem_p mi;

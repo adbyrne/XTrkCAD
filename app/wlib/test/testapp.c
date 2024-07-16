@@ -52,9 +52,9 @@
 long dontHideCursor = 0;
 
 
-wWindow_p mainW;
-wMenuList_p menuList;
-wStatus_p statusMsg;
+wControl_p mainW;
+wControl_p menuList;
+wControl_p statusMsg;
 
 static char* map_x16[] = {
 	"16 16 41 1",
@@ -301,7 +301,7 @@ OpenForSave(void* data)
 }
 
 void
-LoadFileSelector(wWindow_p mainW, wMenu_p parent)
+LoadFileSelector(wControl_p mainW, wControl_p parent)
 {
 	wMenuPushCreate(parent, "menuFile-load", "Open ...", WCTL+'o',
 		OpenForLoad, NULL);
@@ -312,7 +312,7 @@ LoadFileSelector(wWindow_p mainW, wMenu_p parent)
 }
 
 void
-PixmapFileSelector(wWindow_p mainW, wMenu_p parent)
+PixmapFileSelector(wControl_p mainW, wControl_p parent)
 {
 	wMenuPushCreate(parent, "menuFile-load", "Open Pictures...", WCTL + 'p',
 		OpenPictures, NULL);
@@ -323,7 +323,7 @@ PixmapFileSelector(wWindow_p mainW, wMenu_p parent)
 }
 
 void
-SaveFileSelector(wWindow_p mainW, wMenu_p parent)
+SaveFileSelector(wControl_p mainW, wControl_p parent)
 {
 	wMenuPushCreate(parent, "menuFile-save", "Save ...", WCTL + 's',
 		OpenForSave, NULL);
@@ -345,7 +345,7 @@ SelectFont(void* unused)
 }
 
 bool
-DialogProc(wWindow_p window, winProcEvent event, void *data, void *data2)
+DialogProc(wControl_p window, winProcEvent event, void *data, void *data2)
 {	
 	char* cause;
 	switch (event) {
@@ -377,10 +377,10 @@ BasicDialog(void* unused)
 		NULL);
 }
 
-wText_p text;
+wControl_p text;
 
 bool
-NoteDialogProc(wWindow_p window, winProcEvent event, void* data, void* data2)
+NoteDialogProc(wControl_p window, winProcEvent event, void* data, void* data2)
 {
 	int textSize;
 	char* textString;
@@ -411,11 +411,11 @@ NoteDialogProc(wWindow_p window, winProcEvent event, void* data, void* data2)
 void
 NoteDialog(void* unused)
 {
-	wWindow_p dialog = wWinDialogCreate(NULL,
+ 	wControl_p dialog = wWinDialogCreate(NULL,
 		"note-text",
 		"Notes",
 		"note",
-		0L,
+		BO_USEBUILDER,
 		NoteDialogProc,
 		NULL);
 
@@ -424,7 +424,7 @@ NoteDialog(void* unused)
 }
 
 bool
-SimpleDynamicProc(wWindow_p window, winProcEvent event, void* data, void* data2)
+SimpleDynamicProc(wControl_p window, winProcEvent event, void* data, void* data2)
 {
 	wWindowShow(window, false);
 
@@ -444,7 +444,7 @@ EntryCallBack(const char* string, wEntry_p entry)
 	}
 }
 
-wButton_p button; 
+wControl_p button; 
 
 void
 ButtonAction(void* data)
@@ -482,50 +482,48 @@ char* comboLines[] = { "Line 1", "Line 2", "Line 3" };
 void
 SimpleDynamic(void* unused)
 {
-	wMessage_p msg;
+	wControl_p msg;
 	wDrawColor color = 0xFF00FF;
 
-	wWindow_p dialog = wWinDialogCreate(NULL,
+ 	wControl_p dialog = wWinDialogCreate(NULL,
 		"simple-dyn",
 		"Simple Generated",
 		"basicdialog",
-		0L,
+		0,
 		SimpleDynamicProc,
 		NULL);
 
-	msg = wMessageCreateEx(dialog, 0, 0, "testmsg", 1, "Single toggle", BM_ALIGNRIGHT);
-
-	msg = wMessageCreateEx(dialog, 0, 1, "testmsg", 1, "Multiple toggles", BM_LARGE | BM_ALIGNRIGHT);
-
-	msg = wMessageCreateEx(dialog, 0, 2, "", 1, "Label 3", BM_SMALL | BM_ALIGNLEFT);
-
-	msg = wMessageCreate(dialog, 0, 3, "", 1, "Label 4");
-
-	wMessageCreate(dialog, 0, 4, "", 1, "Color chooser");
-
 	wColorSelectButtonCreate(dialog, 1, 4, "", "Select cool color..", 0, 1, &color, NULL, NULL);
 
-	wToggleCreate(dialog, 1, 0, "singletoggle", NULL, BC_NOBORDER | BC_HORZ, toggleLabels1, &toggle1, NULL, NULL);
+	wToggleCreate(dialog, 1, 0, "singletoggle", "Single toggle", BC_NOBORDER | BC_HORZ, toggleLabels1, &toggle1, NULL, NULL);
 
-	wToggleCreate(dialog, 1, 1, "multitoggle", NULL, 0, toggleLabels2, &toggle2, NULL, NULL);
+	wToggleCreate(dialog, 1, 1, "multitoggle", "Multiple toggles", 0, toggleLabels2, &toggle2, NULL, NULL);
 
-	wRadioCreate(dialog, 1, 2, "radio", NULL, 0, radioLabels, &radio1, NULL, NULL);
+	wRadioCreate(dialog, 1, 2, "radio", "Radio vertical", 0, radioLabels, &radio1, NULL, NULL);
 
-	wRadioCreate(dialog, 1, 3, "radio", NULL, BC_NOBORDER | BC_HORZ, radioLabels, &radio2, NULL, NULL);
+	wRadioCreate(dialog, 1, 3, "radio", "Radio horizontal", BC_NOBORDER | BC_HORZ, radioLabels, &radio2, NULL, NULL);
 
-	wEntryCreate(dialog, 1, 6, "textentry", NULL, 0L, 10, entryText, 10, EntryCallBack, NULL);
+	wEntryCreate(dialog, 1, 6, "textentry", "Entry field", 0L, 10, entryText, 10, EntryCallBack, NULL);
 
 	printf("Final entry: <%s>\n", entryText);
 
 	button = wButtonCreate(dialog, 1, 7, "testbutton", "Button", 0L, 1, ButtonAction, NULL);
 
-	wList_p	combo = wComboBoxCreate(dialog, 1, 8, "combobox", NULL, 0L, 0, 1, NULL, ComboBoxAction, NULL);
+	wControl_p	combo = wComboBoxCreate(dialog, 1, 8, "combobox", NULL, 0L, 0, 1, NULL, ComboBoxAction, NULL);
 
 	for (int i = 0; i < COMBOLINES; i++) { 
 		wComboBoxAddValue(combo, comboLines[i], NULL);
 	}
 
  	button = wButtonCreate(dialog, 1, 9, "bitmapbutton", (const char *)map_x16, BO_ICON, 1, NULL, NULL);
+
+	msg = wMessageCreateEx(dialog, 0, 10, "", 1, "Small left label", BM_SMALL | BM_ALIGNLEFT);
+
+	msg = wMessageCreate(dialog, 1, 10, "", 1, "Normal label");
+
+	msg = wMessageCreateEx(dialog, 0, 11, "testmsg", 1, "Right aligned", BM_ALIGNRIGHT);
+
+	msg = wMessageCreateEx(dialog, 1, 11, "testmsg", 1, "Large right aligned", BM_LARGE | BM_ALIGNRIGHT);
 }
 
 void Notice(void* unused)
@@ -542,9 +540,9 @@ int LoadDesign(
 	char** fileName,
 	void* menuList)
 {
-	wWindow_p dialog;
+	wControl_p dialog;
 	printf("UI File is %s\n", fileName[0]);
-	wMenuListAdd((wMenuList_p)menuList, 0, fileName[0], NULL);
+	wMenuListAdd((wControl_p)menuList, 0, fileName[0], NULL);
 
 	dialog = wWinDialogCreate(mainW, "", "UI Viewer", fileName[0], DO_FILESYSTEM,
 		SimpleDynamicProc, NULL);
@@ -555,7 +553,7 @@ int LoadDesign(
 void
 RecentUsedDesigns(int unused, const char* label, void * data)
 {
-	wWindow_p dialog;
+	wControl_p dialog;
 
 	printf("Recently used design: %s - %s\n", label, (char *)data);
 	dialog = wWinDialogCreate(mainW, "", "UI Viewer", label, DO_FILESYSTEM,
@@ -578,9 +576,9 @@ void Viewer(void* menuDesigns)
 * Load and show a dialog from disk, fields can be populated for tests
 */
 
-wWindow_p DialogViewer(char * builder)
+wControl_p DialogViewer(char * builder)
 {
-	wWindow_p dialog;
+	wControl_p dialog;
 
 	dialog = wWinDialogCreate(mainW, "", NULL, (char *)builder, 
 		DO_FILESYSTEM | BO_USEBUILDER,
@@ -602,10 +600,10 @@ TestLength(const char* value, void* data)
 }
 
 void TextFieldTest(void* builder)
-{
-	wEntry_p widget1;
-	wEntry_p widget2;
-  	wWindow_p dialog = DialogViewer((char*)builder);
+{ 
+	wControl_p widget1;
+	wControl_p widget2;
+  	wControl_p dialog = DialogViewer((char*)builder);
 
 	widget1 = wEntryCreate(dialog, 0, 0, "name", NULL, 0L, 0, entry1, sizeof(entry1) - 1, TestLength, NULL);
 
@@ -628,26 +626,26 @@ ButtonCallback(void* choice)
 
 void CheckboxTest(void* builderFile)
 {
-	wChoice_p choice;
-	wText_p text;
+	wControl_p choice;
+	wControl_p text;
 
-	wWindow_p dialog = DialogViewer((char*)builderFile);
+	wControl_p dialog = DialogViewer((char*)builderFile);
 	
-	choice = wToggleCreate(dialog, 0, 0, "label", NULL, BO_USEBUILDER, NULL, &choiceSelect, ChoiceCallback, NULL);
+	choice = wToggleCreate(dialog, 0, 0, "label", NULL, 0, NULL, &choiceSelect, ChoiceCallback, NULL);
 	wToggleSetValue(choice, 1L);
 
-	text = wTextCreate(dialog, 0, 0, "text", NULL, BO_READONLY | BO_USEBUILDER, 0, 0);
+	text = wTextCreate(dialog, 0, 0, "text", NULL, BO_READONLY, 0, 0);
 	wTextClear(text);
 	wTextAppend(text, "This is the default text");
 
-	wButtonCreate(dialog, 0, 0, "tip-prev", NULL, BO_USEBUILDER, 0, ButtonCallback,(void *)- 1);
-	wButtonCreate(dialog, 0, 0, "tip-next", NULL, BO_USEBUILDER, 0, ButtonCallback, (void *)1);
+ 	wButtonCreate(dialog, 0, 0, "tip-prev", NULL, 0, 0, ButtonCallback,(void *)-1);
+	wButtonCreate(dialog, 0, 0, "tip-next", NULL, 0, 0, ButtonCallback, (void *)1);
 }
 
 void
-CreateMenuDialog(wWindow_p mainW)
+CreateMenuDialog(wControl_p mainW)
 {
-	wMenu_p menu;
+	wControl_p menu;
 	/* create a second submenu */
 	menu = wMenuBarAdd(mainW, 		/* parent window */
 					NULL, 			/* help topic */
@@ -668,13 +666,13 @@ CreateMenuDialog(wWindow_p mainW)
 
 }
 
-void TestMenu(wWindow_p mainW)
+void TestMenu(wControl_p mainW)
 {
-	wMenu_p menu1;
-	wMenu_p menu2;
-	wMenu_p menu3;
-	wMenu_p menu4;
-	wMenu_p menu;
+	wControl_p menu1;
+	wControl_p menu2;
+	wControl_p menu3;
+	wControl_p menu4;
+	wControl_p menu;
 
 	/* add a submenu */
 	menu1 = wMenuBarAdd(mainW, 		/* parent window */
@@ -697,7 +695,7 @@ void TestMenu(wWindow_p mainW)
 		(void*)1 			/* pointer to user data */
 	);
 
-	menu4 = wMenuMenuCreate(menu1, NULL, "Recently used");
+ 	menu4 = wMenuMenuCreate(menu1, NULL, "Recently used");
 	menuList = wMenuListCreate(menu4, NULL, 10, RecentUsedCallback);
 
 	/* create a separator before 'Quit' */
@@ -737,7 +735,7 @@ void TestMenu(wWindow_p mainW)
 		(void*)2
 	);
 
-	wMenuToggle_p mt = wMenuToggleCreate(menu2,
+	wControl_p mt = wMenuToggleCreate(menu2,
 		NULL,
 		"Disabled",
 		0,
@@ -750,7 +748,7 @@ void TestMenu(wWindow_p mainW)
 
 	wMenuSeparatorCreate(menu2);
 
-	menu3 = wMenuMenuCreate(menu2, NULL, "Radio Buttons");
+ 	menu3 = wMenuMenuCreate(menu2, NULL, "Radio Buttons");
 
 	wMenuRadioCreate(menu3,
 		NULL,
@@ -794,12 +792,10 @@ void TestMenu(wWindow_p mainW)
 	wSetBalloonHelp(balloonHelp);
 
 	menu = wMenuBarAdd(mainW, NULL, "_UI Designs");
-	wMenu_p menuRecent;
-	wMenuList_p menuDesigns;
-	menuRecent = wMenuMenuCreate((wMenu_p)menu, NULL, "Recently used");
+	wControl_p menuRecent;
+	wControl_p menuDesigns;
+	menuRecent = wMenuMenuCreate(menu, NULL, "Recently used");
 	menuDesigns = wMenuListCreate(menuRecent, NULL, 10, RecentUsedDesigns);
-
-
 
 	wMenuPushCreate(menu,
 		NULL,
@@ -824,7 +820,7 @@ void TestMenu(wWindow_p mainW)
 }
 
 void
-TestStatusbar(wWindow_p mainWindow)
+TestStatusbar(wControl_p mainWindow)
 {
 	wStatusCreate(mainWindow,
 		"statusbarPosX",
@@ -845,9 +841,9 @@ TestStatusbar(wWindow_p mainWindow)
 }
 
 void
-TestToolbar(wWindow_p mainWindow)
+TestToolbar(wControl_p mainWindow)
 {
-  	wButton_p button = 	wButtonCreateForToolbar(mainWindow, 0, 0, "", (const char *)map_x16,
+  	wControl_p button =	wButtonCreateForToolbar(mainWindow, 0, 0, "", (const char *)map_x16,
 		0, 0, NULL, NULL);
 
 	button = wButtonCreateForToolbar(mainWindow, 0, 0, "", (const char *)ballgreen,
@@ -858,7 +854,7 @@ TestToolbar(wWindow_p mainWindow)
 }
 
 static
-bool mainCallBack(wWindow_p window, winProcEvent ev, void *data1, void *data2 )
+bool mainCallBack(wControl_p window, winProcEvent ev, void *data1, void *data2 )
 {
 	int result;
 	switch (ev) {
@@ -875,7 +871,7 @@ bool mainCallBack(wWindow_p window, winProcEvent ev, void *data1, void *data2 )
 	}
 }
 
-wWindow_p wMain( int argc, char * argv[] )
+wControl_p wMain( int argc, char * argv[] )
 {
 
 #ifdef TEST_ARGV

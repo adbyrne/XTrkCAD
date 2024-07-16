@@ -48,7 +48,7 @@
  */
 
 static long toggleGetValue(
-        wChoice_p bc)
+        wControl_p bc)
 {
 	GList* child;
 	GList* children;
@@ -80,7 +80,7 @@ static long toggleGetValue(
  */
 
 void wToggleSetValue(
-        wChoice_p bc,		/* Toggle box */
+        wControl_p bc,		/* Toggle box */
         long value)		/* Values */
 {
 	GList* child, * children;
@@ -107,7 +107,7 @@ void wToggleSetValue(
  */
 
 long wToggleGetValue(
-        wChoice_p b)		/* Toggle box */
+        wControl_p b)		/* Toggle box */
 {
 	return toggleGetValue(b);
 }
@@ -125,20 +125,16 @@ static int toggled(
         GtkWidget* widget,
         gpointer b)
 {
-	wChoice_p bc = (wChoice_p)b;
+	wControl_p bc = (wControl_p)b;
+	struct toggle* tcontrol = WLIB_GET_DATA_PTR(bc, toggle);
 	long value = toggleGetValue(bc);
 
-	if (debugWindow >= 2) {
-		printf("%s choice pushed = %ld\n", bc->labelStr ? bc->labelStr : "No label",
-		       value);
+	if (tcontrol->valueP) {
+		*tcontrol->valueP = value;
 	}
 
-	if (bc->valueP) {
-		*bc->valueP = value;
-	}
-
-	if (bc->action) {
-		bc->action(value, bc->data);
+	if (tcontrol->action) {
+		tcontrol->action(value, bc->context);
 	}
 
 	return TRUE;
@@ -170,8 +166,8 @@ static int toggled(
  * \returns toggle button widget
  */
 
-wChoice_p wToggleCreate(
-        wWindow_p	parent,
+wControl_p wToggleCreate(
+        wControl_p	parent,
         wWinPix_t	x,
         wWinPix_t	y,
         const char* helpStr,
@@ -182,14 +178,15 @@ wChoice_p wToggleCreate(
         wChoiceCallBack_p action,
         void* data)
 {
-	wChoice_p b;
+	wControl_p b;
+	struct toggle* tcontrol;
 
-	b = g_malloc0(sizeof(struct wChoice_t));
-	b->type = B_TOGGLE;
-	b->action = action;
-	b->valueP = valueP;
+	b = wlibControlNew(B_TOGGLE, parent, helpStr, data);
+	tcontrol = WLIB_GET_DATA_PTR(b, toggle);
+	tcontrol->action = action;
+	tcontrol->valueP = valueP;
 
-	if (option & BO_USEBUILDER) {
+	if (HASDIALOGBUILDER(parent)) {
 		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
 		GList* child, * children;
 
@@ -238,7 +235,7 @@ wChoice_p wToggleCreate(
 		}
 
 		if (labelStr) {
-			wlibAddLabel((wControl_p)b, labelStr);
+			wlibAddLabel((wControl_p)b, x-1, y, labelStr);
 		}
 
 		wlibBasicGridAttach(parent, b->widget, x, y, 1, 1);

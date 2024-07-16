@@ -37,6 +37,19 @@
 
 #define  GTKCONTROLHILITEWIDTH (4)
 
+
+wControl_p
+wlibControlNew(wType_e type, wControl_p parent, const char *name, void* context)
+{
+    wControl_p newControl = g_malloc0(sizeof(struct control));
+
+    newControl->type = type;
+    newControl->context = context;
+    newControl->parent = parent;
+    newControl->name = name;
+
+    return(newControl);
+}
 /**
  * Cause the control <b> to be displayed or hidden.
  * Used to hide control (such as a list) while it is being updated.
@@ -115,14 +128,16 @@ void wControlActive(
 wWinPix_t wLabelWidth(
     const char * label)
 {
-    GtkWidget * widget;
-    GtkRequisition requisition;
-    widget = gtk_label_new(wlibConvertInput(label));
-    gtk_widget_get_preferred_size(widget, NULL, &requisition);
-    g_object_ref_sink (widget);
-    gtk_widget_destroy(widget);
-    g_object_unref(widget);
-    return requisition.width+8;
+    printf("Not implemented wLabelWidth %s %d\n", __FILE__, __LINE__);
+    //GtkWidget * widget;
+    //GtkRequisition requisition;
+    //widget = gtk_label_new(wlibConvertInput(label));
+    //gtk_widget_get_preferred_size(widget, NULL, &requisition);
+    //g_object_ref_sink (widget);
+    //gtk_widget_destroy(widget);
+    //g_object_unref(widget);
+    //return requisition.width+8;
+    return 0;
 }
 
 /**
@@ -135,7 +150,11 @@ wWinPix_t wLabelWidth(
 wWinPix_t wControlGetWidth(
     wControl_p b)
 {
-    return b->w;
+    gint width;
+    gint height;
+
+    gtk_window_get_size(GTK_WINDOW(b->widget), &width, &height);
+    return width;
 }
 
 /**
@@ -148,7 +167,11 @@ wWinPix_t wControlGetWidth(
 wWinPix_t wControlGetHeight(
     wControl_p b)
 {
-    return b->h;
+    gint width;
+    gint height;
+
+    gtk_window_get_size(GTK_WINDOW(b->widget), &width, &height);
+    return height;
 }
 
 /**
@@ -161,7 +184,10 @@ wWinPix_t wControlGetHeight(
 wWinPix_t wControlGetPosX(
     wControl_p b)		/* Control */
 {
-    return b->realX;
+    gint x;
+    gint y;
+    gtk_window_get_position(GTK_WINDOW(b->widget), &x, &y);
+    return x;
 }
 
 /**
@@ -174,7 +200,10 @@ wWinPix_t wControlGetPosX(
 wWinPix_t wControlGetPosY(
     wControl_p b)		/* Control */
 {
-    return b->realY - BORDERSIZE - ((b->parent->option&F_MENUBAR)?b->parent->menu_height:0);
+    gint x;
+    gint y;
+    gtk_window_get_position(GTK_WINDOW(b->widget), &x, &y);
+    return y;
 }
 
 /**
@@ -190,23 +219,24 @@ void wControlSetPos(
     wWinPix_t x,
     wWinPix_t y)
 {
-    b->realX = x;
-    b->realY = y + BORDERSIZE + ((b->parent->option&F_MENUBAR)?b->parent->menu_height:0);
+    printf("Not implemented wControlSetPos %s %d\n", __FILE__, __LINE__);
+    //b->realX = x;
+    //b->realY = y + BORDERSIZE + ((b->parent->option&F_MENUBAR)?b->parent->menu_height:0);
 
-    if (b->widget) {
-        gtk_fixed_move(GTK_FIXED(b->parent->widget), b->widget, b->realX, b->realY);
-    }
+    //if (b->widget) {
+    //    gtk_fixed_move(GTK_FIXED(b->parent->widget), b->widget, b->realX, b->realY);
+    //}
 
-    if (b->label) {
-    	GtkRequisition requisition, reqwidget;
-    	gtk_widget_get_preferred_size(b->label, NULL, &requisition);
-    	if (b->widget)
-    	   	gtk_widget_get_preferred_size(b->widget, NULL, &reqwidget);
-    	else
-    	  	reqwidget.height = requisition.height;
-        gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label, b->realX-b->labelW,
-                       b->realY+(reqwidget.height/2 - requisition.height/2));
-    }
+    //if (b->label) {
+    //	GtkRequisition requisition, reqwidget;
+    //	gtk_widget_get_preferred_size(b->label, NULL, &requisition);
+    //	if (b->widget)
+    //	   	gtk_widget_get_preferred_size(b->widget, NULL, &reqwidget);
+    //	else
+    //	  	reqwidget.height = requisition.height;
+    //    gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label, b->realX-b->labelW,
+    //                   b->realY+(reqwidget.height/2 - requisition.height/2));
+    //}
 }
 
 /**
@@ -224,16 +254,17 @@ void wControlSetLabel(
 
     if (b->label) {
         gtk_label_set_text(GTK_LABEL(b->label), wlibConvertInput(labelStr));
-        gtk_widget_get_preferred_size(b->label, NULL, &requisition);
-        if (b->widget)
-        	gtk_widget_get_preferred_size(b->widget, NULL, &reqwidget);
-        else
-        	reqwidget.height = requisition.height;
-        b->labelW = requisition.width+8;
-        gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label, b->realX-b->labelW,
-                       b->realY+(reqwidget.height/2 - requisition.height/2));
+        //gtk_widget_get_preferred_size(b->label, NULL, &requisition);
+        //if (b->widget)
+        //	gtk_widget_get_preferred_size(b->widget, NULL, &reqwidget);
+        //else
+        //	reqwidget.height = requisition.height;
+        //b->labelW = requisition.width+8;
+        //gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label, b->realX-b->labelW,
+        //               b->realY+(reqwidget.height/2 - requisition.height/2));
     } else {
-        b->labelW = wlibAddLabel(b, labelStr);
+        printf("Invalid call to wControlSetLabel()\n");
+//        b->label = wlibAddLabel(b, labelStr);
     }
 }
 
@@ -248,7 +279,7 @@ void wControlSetContext(
     wControl_p b,
     void * context)
 {
-    b->data = context;
+    b->context = context;
 }
 
 /**
@@ -268,22 +299,23 @@ wBool_t wControlExpose (
 		 wControl_p b
 		)
 {
-	GdkWindow * win = gtk_widget_get_window(b->widget);
-    int width = gtk_widget_get_allocated_width ( widget );
-    int height = gtk_widget_get_allocated_height ( widget );
+    printf("Not implemented wControlExpose %s %d\n", __FILE__, __LINE__);
+	//GdkWindow * win = gtk_widget_get_window(b->widget);
+ //   int width = gtk_widget_get_allocated_width ( widget );
+ //   int height = gtk_widget_get_allocated_height ( widget );
 
-	if (b->outline) {
-		cairo_set_source_rgb(cr, 0.23, 0.37, 0.80);
-		cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-		cairo_set_line_width(cr, GTKCONTROLHILITEWIDTH);
-		cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
-		cairo_set_line_join(cr, CAIRO_LINE_JOIN_MITER);
-		cairo_rectangle(cr, 2, 2, width - 2, height - 2 );
-		cairo_stroke(cr);
-	}
+	//if (b->outline) {
+	//	cairo_set_source_rgb(cr, 0.23, 0.37, 0.80);
+	//	cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+	//	cairo_set_line_width(cr, GTKCONTROLHILITEWIDTH);
+	//	cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
+	//	cairo_set_line_join(cr, CAIRO_LINE_JOIN_MITER);
+	//	cairo_rectangle(cr, 2, 2, width - 2, height - 2 );
+	//	cairo_stroke(cr);
+	//}
 
 
-	cairo_destroy(cr);
+	//cairo_destroy(cr);
 
 
     return FALSE;
@@ -301,16 +333,17 @@ void wControlHilite(
     wControl_p b,
     wBool_t hilite)
 {
+    printf("Not implemented wControlHilite %s %d\n", __FILE__, __LINE__);
 //    cairo_t *cr;
 //    int off = GTKCONTROLHILITEWIDTH/2+1;
-    if ( debugWindow >= 1 )
-	    printf( "wControlHIlite( %s, %d )\n", b->labelStr, hilite );
+    //if ( debugWindow >= 1 )
+	   // printf( "wControlHIlite( %s, %d )\n", b->labelStr, hilite );
 
-    if (b->widget == NULL) {
-        return;
-    }
-    b->outline = hilite;
+    //if (b->widget == NULL) {
+    //    return;
+    //}
+    //b->outline = hilite;
 
-    if (b->widget)
-    	gtk_widget_queue_draw(b->widget);
+    //if (b->widget)
+    //	gtk_widget_queue_draw(b->widget);
 }

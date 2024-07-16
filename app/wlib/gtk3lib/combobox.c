@@ -139,15 +139,16 @@ void *wComboBoxGetItemContext(wList_p b, wIndex_t inx)
  */
 
 void wComboBoxAddValue(
-        wList_p b,
+        wControl_p b,
         char *text,
-        wListItem_p data)
+        wControl_p data)
 {
 	GtkTreeIter iter;
+	struct list *list = WLIB_GET_DATA_PTR(b, list);
 
-	gtk_list_store_append(b->listStore, &iter);	// append new row to tree store
+	gtk_list_store_append(list->listStore, &iter);	// append new row to tree store 
 
-	gtk_list_store_set(b->listStore, &iter,
+	gtk_list_store_set(list->listStore, &iter,
 	                   LISTCOL_TEXT, text,
 	                   LISTCOL_DATA, (void *)data,
 	                   -1);
@@ -160,15 +161,16 @@ void wComboBoxAddValue(
  */
 
 void wListSetValue(
-        wList_p bl,
+        wControl_p bl,
         const char * val)
 {
+	struct list* list = WLIB_GET_DATA_PTR(bl, list);
 
-	bl->editted = TRUE;
+	list->editted = TRUE;
 	gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(bl->widget))), val);
 
-	if (bl->action) {
-		bl->action(-1, val, 0, bl->data, NULL);
+	if (list->action) {
+		list->action(-1, val, 0, bl->context, NULL);
 	}
 }
 
@@ -181,7 +183,7 @@ void wListSetValue(
  *
  */
 
-void wComboBoxSetIndex(wList_p b, int val)
+void wComboBoxSetIndex(wControl_p b, int val)
 {
 	gtk_combo_box_set_active(GTK_COMBO_BOX(b->widget), val);
 }
@@ -198,17 +200,18 @@ void wComboBoxSetIndex(wList_p b, int val)
  */
 
 wBool_t wComboBoxSetValues(
-        wList_p b,
+        wControl_p b,
         wIndex_t row,
         const char * labelStr,
         wIcon_p bm,
         void *itemData)
 {
 	GtkTreeIter iter;
+	struct list *lcontrol = WLIB_GET_DATA_PTR(b, list);
 
-	if (gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->listStore), &iter, NULL,
+	if (gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(lcontrol->listStore), &iter, NULL,
 	                                  row)) {
-		gtk_list_store_set(b->listStore,
+		gtk_list_store_set(lcontrol->listStore,
 		                   &iter,
 		                   LISTCOL_TEXT, labelStr,
 		                   -1);
@@ -232,13 +235,13 @@ static int ComboBoxChanged(
         GtkComboBox * comboBox,
         gpointer data)
 {
-	wList_p bl = (wList_p)data;
+	wControl_p bl = (wControl_p)data;
 	GtkTreeIter iter;
+	struct list* lcontrol = WLIB_GET_DATA_PTR(bl, list);
 
 	wIndex_t inx = 0;
 	gchar *string = NULL;
 	wListItem_p listItemP = NULL;
-
 
 	/* Obtain currently selected item from combo box. */
 	if (gtk_combo_box_get_active_iter(GTK_COMBO_BOX(comboBox), &iter)) {
@@ -259,7 +262,7 @@ static int ComboBoxChanged(
 		                   LISTCOL_TEXT, &string,
 		                   LISTCOL_DATA, (void *)&listItemP,
 		                   -1);
-		bl->editted = FALSE;
+		lcontrol->editted = FALSE;
 
 	} else {
 		/* Nothing selected, user is entering text directly */
@@ -273,21 +276,20 @@ static int ComboBoxChanged(
 			return 0;
 		}
 		string = g_strdup(string1);
-		bl->editted = TRUE;
+		lcontrol->editted = TRUE;
 	}
 
 	/* selection changed, store new selections and call back */
-	if (bl->last != inx || bl->editted == TRUE) {
+	if (lcontrol->last != inx || lcontrol->editted == TRUE) {
+		lcontrol->last = inx;
 
-		bl->last = inx;
-
-		if (bl->valueP) {
-			*bl->valueP = inx;
+		if (lcontrol->valueP) {
+			*lcontrol->valueP = inx;
 		}
 
 		/* selection changed -> callback */
-		if (string && bl->action) {
-			bl->action(inx, string, 1, bl->data, listItemP?listItemP->itemData:NULL);
+		if (string && lcontrol->action) {
+			lcontrol->action(inx, string, 1, bl->context, listItemP?listItemP->itemData:NULL);
 		}
 	}
 
@@ -334,13 +336,15 @@ static void ComboBoxEntryEntered(
         gpointer userData)
 {
 	const gchar *text;
+	wControl_p c = userData;
+	struct list* lcontrol = WLIB_GET_DATA_PTR(c, list);
 
 	text = gtk_entry_get_text(entry);
 
 	if (text && *text != '\0') {
 		gchar *copyOfText = g_strdup(text);
-		((wList_p)userData)->editted = TRUE;
-		((wList_p)userData)->action(-1, copyOfText, 1, ((wList_p)userData)->data, NULL);
+		lcontrol->editted = TRUE;
+		lcontrol->action(-1, copyOfText, 1, ((wControl_p)userData)->context, NULL);
 		g_free((gpointer)copyOfText);
 	} else {
 		wBeep();
@@ -370,8 +374,8 @@ static void ComboBoxEntryEntered(
  *	\param IN data      Context
  */
 
-wList_p wComboBoxCreate(
-        wWindow_p	parent,
+wControl_p wComboBoxCreate(
+        wControl_p	parent,
         wWinPix_t	x,
         wWinPix_t	y,
         const char 	* helpStr,
@@ -383,34 +387,35 @@ wList_p wComboBoxCreate(
         wListCallBack_p action,
         void 	*data)
 {
-	wList_p b;
+	wControl_p b;
+	struct list* lcontrol;
 
-	b = g_malloc0(sizeof(struct wList_t));
-	b->type = B_COMBOLIST;
-	b->valueP = valueP;
-	b->action = action;
-	b->last = -1;
+	b = wlibControlNew(B_COMBOBOX, parent, helpStr, data);
+	lcontrol = WLIB_GET_DATA_PTR(b, list);
+	lcontrol->valueP = valueP;
+	lcontrol->action = action;
+	lcontrol->last = -1;
 
 	if(option & BO_USEBUILDER) {
 		/** \todo Implement builder support */
 	} else {
 
 		// create tree store for storing the contents
-		b->listStore = wlibNewListStore(COMBOBOX_TEXTCOLUMNS);
+		lcontrol->listStore = wlibNewListStore(COMBOBOX_TEXTCOLUMNS);
 
-		if (!b->listStore) {
+		if (!lcontrol->listStore) {
 			abort();
 		}
 
 		// create the droplist
-		b->widget = wlibNewComboBox(b->listStore,
+		b->widget = wlibNewComboBox(lcontrol->listStore,
 		                            option & BL_EDITABLE);
 
 		if (b->widget == 0) {
 			abort();
 		}
-		g_object_ref_sink(b->listStore);
-		g_object_unref(G_OBJECT(b->listStore));
+		g_object_ref_sink(lcontrol->listStore);
+		g_object_unref(G_OBJECT(lcontrol->listStore));
 
 		wlibComboBoxAddColumns(b->widget, COMBOBOX_TEXTCOLUMNS);
 
@@ -426,13 +431,13 @@ wList_p wComboBoxCreate(
 		wlibBasicGridAttach(parent, b->widget, x, y, width, 1);
 
 		if (labelStr) {
-			wlibAddLabel((wControl_p)b, labelStr);
+			wlibAddLabel((wControl_p)b, x-1, y, labelStr);
 		}
 
 		gtk_widget_show(b->widget);
 	}
 	wlibAddHelpString(b->widget, helpStr);
-	wlibAddTooltip(b->widget, parent->name, helpStr);
+//	wlibAddTooltip(b->widget, parent->name, helpStr);
 	return b;
 }
 

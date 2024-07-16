@@ -61,20 +61,146 @@ typedef struct {
 } wCursorSurface_t, * wSurface_p;
 #endif
 
+//typedef enum { M_MENU, M_SEPARATOR, M_PUSH, M_LIST, M_LISTITEM, M_TOGGLE, M_RADIO } mtype_e;
 
 typedef enum {
-		W_MAIN, W_POPUP, W_FILESELECT,
+		W_MAIN, W_POPUP, W_FILESELECT, W_DIALOG,
 		B_BUTTON, B_CANCEL, B_POPUP, B_TEXT, B_INTEGER, B_FLOAT,
-		B_LIST, B_DROPLIST, B_COMBOLIST,
+		B_LIST, B_DROPLIST, B_COMBOBOX,
 		B_RADIO, B_TOGGLE,
 		B_DRAW, B_MENU, B_MULTITEXT, B_MESSAGE, B_LINES,
 		B_MENUITEM, B_BOX,
 		B_BITMAP, B_STATUS,
-		B_COLORBUTTON } wType_e;
+		B_COLORBUTTON,
+		M_MENU, M_SUBMENU, M_PUSH, M_TOGGLE, M_RADIO, M_SEPARATOR, M_RECENTUSE
+} wType_e;
 
 typedef void (*repaintProcCallback_p)( wControl_p );
 typedef void (*doneProcCallback_p)( wControl_p b );
 typedef void (*setTriggerCallback_p)( wControl_p b );
+
+
+/*
+ * Definition of data structs for the controls. Combining them into one
+ * union as part of a struct avoids problems with compilers that optimize
+ * using aliasing (eg. gcc or clang)
+ * 
+ * see  https://stackoverflow.com/questions/52749409/multiple-structs-same-fields-that-need-to-be-accessed-in-a-method
+ *
+ */
+
+struct bitmap {
+	char unused;
+};
+
+struct button {
+	wButtonCallBack_p action;
+	void* data;
+};
+
+struct choice {
+	long* valueP;
+	wChoiceCallBack_p action;
+	char* labelStr;
+};
+
+struct colorbutton {
+	wDrawColor* valueP;
+	wColorSelectButtonCallBack_p action;
+};
+
+struct entry {
+	char* valueP;				//< location of entered value
+	unsigned valueL;			//< maximum length of entered value
+	wEntryCallBack_p action;	//< callback
+};
+
+struct list {
+	GtkListStore* listStore;
+	GtkTreeView* treeView;
+	long* valueP;
+	int editted;
+	int last;
+	wListCallBack_p action;
+};
+
+struct menu {
+	GSList* radioGroup;			/* radio button group */
+	wMenuTraceCallBack_p traceFunc;
+	void* traceData;
+};
+
+struct menuitem {
+	wControl_p parentMenu;
+	wMenuCallBack_p action;
+};
+
+struct message {
+	char unused;				//< msvc doesn't allow empty structs
+};
+struct radio {
+	long* valueP;
+	wChoiceCallBack_p action;
+};
+struct toggle {
+	long* valueP;
+	wChoiceCallBack_p action;
+};
+struct recentuse {
+	unsigned max;				// maximum members
+	unsigned current;			// current number of members
+	GSList* elements;			// list of elements
+	GtkWidget** widgets;		// display widgets
+	wMenuListCallBack_p action;
+	wControl_p parentMenu;
+};
+
+struct text {
+	gchar* placeholder;
+	GtkTextTag* placeholderTag;
+	int changed;
+	long option;
+	GtkWidget* text;
+};
+
+struct window {
+	wWinCallBack_p winProc;			/**< window procedure */
+	GtkWidget* menubar;				/**< menubar handle (if exists) */
+	GtkWidget* toolbar;				/**< toolbar handle (if exists) */
+	long option;					/**< creation options for window */
+	GtkBuilder* builder;
+	GtkAccelGroup* accelGroup;		/**< accelerator group if main window */
+	GtkContainer* statusbar;
+};
+
+struct control {
+	wType_e type;
+	GtkWidget* widget;
+	void* context;
+	char* name;
+	wControl_p synonym;
+	wControl_p parent;
+	GtkWidget* label;
+	union {
+		struct bitmap bitmap;
+		struct button button;
+		struct colorbutton colorbutton;
+		struct entry entry;
+		struct choice choice;
+		struct message message;
+		struct text text;
+		struct list list;
+		struct menu menu;
+		struct menuitem menuitem;
+		struct radio radio;
+		struct recentuse recentuse;
+		struct toggle toggle;
+		struct window window;
+	} data;
+};
+
+#define WLIB_GET_DATA_PTR(base, field) (&(base->data.field))
+#define HASDIALOGBUILDER(parent) (parent->data.window.option & BO_USEBUILDER)
 
 struct wObjCommon {
 	wType_e type;			/**< type of control */
@@ -151,9 +277,9 @@ struct wWin_t {
         GtkBuilder *builder;
 		};
 
-struct wControl_t {
-		WOBJ_COMMON
-		};
+//struct wControl_t {
+//		WOBJ_COMMON
+//		};
 		
 typedef struct wListItem_t * wListItem_p;
 
@@ -165,7 +291,7 @@ struct wListItem_t {
 		char * label;
 		GtkLabel * labelG;
 		wBool_t selected;
-		wList_p listP;
+		wControl_p listP;
 		};		
 
 
@@ -255,18 +381,18 @@ struct wIcon_t {
 void wlibDrawBox(wWin_p win, wBoxType_e style, wWinPix_t x, wWinPix_t y, wWinPix_t w, wWinPix_t h);
 
 /* builder.c */
-wWindow_p wlibDialogFromTemplate( int winType, const char *labelStr, 
+wControl_p wlibDialogFromTemplate( int winType, const char *labelStr, 
 	const char *nameStr, long option, void *data );
 GString *wlibFileNameFromDialog( const char *dialog );
-GtkWidget *wlibGetWidgetFromName( wWindow_p parent, const char *dialogname, const char *suffix, wBool_t ignore_failures );
-GtkWidget *wlibWidgetFromId( wWindow_p win, const char *id );
-GtkWidget *wlibWidgetFromIdWarn( wWindow_p win, const char *id );
+GtkWidget *wlibGetWidgetFromName( wControl_p parent, const char *dialogname, const char *suffix, wBool_t ignore_failures );
+GtkWidget *wlibWidgetFromId( wControl_p win, const char *id );
+GtkWidget *wlibWidgetFromIdWarn( wControl_p win, const char *id );
 void wlibAddContentFromTemplate( wWin_p win, const char *nameStr);
 bool wlibExistsTemplate(const char *name);
 
 /* button.c */
 void wlibSetLabel(GtkWidget *widget, long option, const char *labelStr, GtkLabel **labelG, GtkWidget **imageG);
-void wlibButtonDoAction(wButton_p bb);
+void wlibButtonDoAction(wControl_p bb);
 
 
 /* color.c */
@@ -286,9 +412,11 @@ GdkRGBA wlibGetColor(wDrawColor color, wBool_t normal);
 
 /* control.c */
 wBool_t wControlExpose (GtkWidget * widget, cairo_t *cr, wControl_p b);
+wControl_p wlibControlNew(wType_e type, wControl_p parent, const char* name, 
+	void* context);
 
 /* dialog.c */
-void wlibBasicGridAttach(wWindow_p parent, GtkWidget *widget, unsigned xPos,
+void wlibBasicGridAttach(wControl_p parent, GtkWidget *widget, unsigned xPos,
 	unsigned yPos, unsigned colSpan, unsigned rowSpan);
 
 /* droplist.c */
@@ -326,12 +454,12 @@ struct wList_t {
 
 GtkWidget *wlibNewDropList(GtkListStore *ls, int editable);
 
-wIndex_t wDropListGetCount(wList_p b);
+wIndex_t wDropListGetCount(wControl_p b);
 void wDropListClear(wList_p b);
-void *wDropListGetItemContext(wList_p b, wIndex_t inx);
-void wDropListAddValue(wList_p b, char *text, wListItem_p data);
+void *wDropListGetItemContext(wControl_p b, wIndex_t inx);
+void wDropListAddValue(wControl_p b, char *text, wListItem_p data);
 void wDropListSetIndex(wList_p b, int val);
-wBool_t wDropListSetValues(wList_p b, wIndex_t row, const char *labelStr, wIcon_p bm, void *itemData);
+wBool_t wDropListSetValues(wControl_p b, wIndex_t row, const char *labelStr, wIcon_p bm, void *itemData);
 wList_p wDropListCreate(wWin_p parent, wWinPix_t x, wWinPix_t y, const char *helpStr, const char *labelStr, long option, long number, wWinPix_t width, long *valueP, wListCallBack_p action, void *data);
 
 /* filesel.c */
@@ -366,27 +494,6 @@ GtkApplication *wlibGetApp(void);
 
 
 
-typedef enum { M_MENU, M_SEPARATOR, M_PUSH, M_LIST, M_LISTITEM, M_TOGGLE, M_RADIO } mtype_e;
-typedef enum { MM_BUTT, MM_MENU, MM_SUBMENU } mmtype_e;
-
-struct menuObjCommon {
-	mtype_e mtype;			/**< menu entry type */
-	mmtype_e mmtype;
-	GtkWidget* menu_item;
-	wMenu_p parentMenu;
-};
-
-struct wMenu_t {
-	struct wObjCommon oc;
-	struct menuObjCommon mc;
-	mmtype_e mmtype;
-	GtkWidget* menu;
-	GSList* radioGroup;			/* radio button group */
-	wMenuTraceCallBack_p traceFunc;
-	void* traceData;
-};
-
-
 int getMlistOrigin(wMenuList_p ml, GList **pChildren);
 
 /* misc.c */
@@ -399,7 +506,8 @@ typedef struct accelData_t {
 
 
 GdkPixbuf* wlibPixbufFromXBM(wIcon_p ip);
-int wlibAddLabel(wControl_p b, const char *labelStr);
+void wlibAddLabel(wControl_p b, wWinPix_t x, wWinPix_t y,
+	const char* labelStr);
 void *wlibAlloc(wWin_p parent, wType_e type, wWinPix_t origX, wWinPix_t origY, const char *labelStr, int size, void *data);
 void wlibComputePos(wControl_p b);
 void wlibControlGetSize(wControl_p b);
@@ -500,26 +608,28 @@ void wlibAddTooltip(GtkWidget* widget, char* dialog, char* field);
 void wlibHelpHideBalloon();
 
 /* treeview.c */
-void wlibTreeViewSetSelected(wList_p b, int index);
+void wlibTreeViewSetSelected(wControl_p b, int index);
 GtkTreeView *wlibNewTreeView(GtkListStore *ls, int showTitles, int multiSelection);
 int wlibTreeViewAddColumns(GtkTreeView *tv, int count);
 int wlibAddColumnTitles(GtkTreeView *tv, const char **titles);
-int wlibTreeViewAddData(GtkTreeView *tv, char *label, GdkPixbuf *pixbuf, wListItem_p userData);
-void wlibTreeViewAddRow(wList_p b, char *label, wIcon_p bm, wListItem_p id_p);
+int wlibTreeViewAddData(GtkTreeView *tv, char *label, GdkPixbuf *pixbuf, 
+	wListItem_p userData);
+void wlibTreeViewAddRow(wControl_p b, char *label, wIcon_p bm, 
+	wListItem_p id_p);
 gboolean changeSelection(GtkTreeSelection *selection, GtkTreeModel *model, GtkTreePath *path, gboolean path_currently_selected, gpointer data);
 
-int wTreeViewGetCount(wList_p b);
+int wTreeViewGetCount(wControl_p b);
 void wTreeViewClear(wList_p b);
-void *wTreeViewGetItemContext(wList_p b, int row);
+void *wTreeViewGetItemContext(wControl_p b, int row);
 
 /* window.c */
 void wlibDoModal(wWin_p win0, wBool_t modal);
 wBool_t catch_shift_ctrl_alt_keys(GtkWidget *widget, GdkEventKey *event, void *data);
-wWin_p wlibCreateFromTemplate( wWin_p parent, int winType, wWinPix_t x, wWinPix_t y,
+wControl_p wlibCreateFromTemplate( wControl_p parent, int winType, wWinPix_t x, wWinPix_t y,
     const char * labelStr, const char * nameStr, long option,
     wWinCallBack_p winProc, void * data);
 void wlibAddButtonToolbar(wButton_p button);
-
+void wlibBasicGridAttach(wControl_p parent, GtkWidget* widget, unsigned xPos, unsigned yPos, unsigned colSpan, unsigned rowSpan);
 /* wpref.c */
 
 /* wlibpaths.c */
