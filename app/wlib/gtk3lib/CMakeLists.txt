@@ -31,6 +31,7 @@ target_sources(xtrkcad-wlib
 	recentuse.c
 	statusbar.c
  	text.c
+	timer.c
 	toggle.c
 	treeview.c
  	wpref.c

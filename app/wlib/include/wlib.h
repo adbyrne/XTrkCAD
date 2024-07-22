@@ -342,7 +342,7 @@ void wFlush(			void );
 
 typedef void (*wAlarmCallBack_p)( void );
 void wAlarm(			long, wAlarmCallBack_p );
-void wPause(			long );
+void wPause( long duration );
 unsigned long wGetTimer(	void );
 
 void wExit(			int );

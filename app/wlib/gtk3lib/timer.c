@@ -21,15 +21,6 @@
  *
  */
 
-#include <stdio.h>
-#ifdef WIN32
-#include <time.h>
-#include <winsock.h>
-#else
-#include <sys/time.h>
-#endif
-
-#include <signal.h>
 
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
@@ -44,7 +35,7 @@
 
 static wBool_t gtkPaused = FALSE;
 static int alarmTimer = 0;
-static struct timeval startTime;
+//static struct timeval startTime;
 
 static wControl_p triggerControl = NULL;
 static setTriggerCallback_p triggerFunc = NULL;
@@ -107,33 +98,34 @@ void wlibSetTrigger(
 }
 
 /**
- * Pause for <count> milliseconds.
+ * Pause for <count> milliseconds. The function waits for a condition that
+ * is never met. So it blocks until it runs into a timeout.
  *
- * \param count IN
+ * \param duration IN  duration of pause in milliseconds
  */
 
-void wPause(
-    long count)		/* milliseconds */
+void wPause(long duration)		/* milliseconds */
 {
 	while (gtk_events_pending())
 	    gtk_main_iteration();			//Allow GTK to finish before pausing
 
-    struct timeval timeout;
-    sigset_t signal_mask;
-    sigset_t oldsignal_mask;
     gdk_display_sync(gdk_display_get_default());
-    timeout.tv_sec = count/1000;
-    timeout.tv_usec = (count%1000)*1000;
-    sigemptyset(&signal_mask);
-    sigaddset(&signal_mask, SIGIO);
-    sigaddset(&signal_mask, SIGALRM);
-    sigprocmask(SIG_BLOCK, &signal_mask, &oldsignal_mask);
 
-    if (select(0, NULL, NULL, NULL, &timeout) == -1) {
-        perror("wPause:select");
-    }
+    GMutex mutex;
+    GCond cond;
+    gint64 end_time = g_get_monotonic_time() + duration * G_TIME_SPAN_MILLISECOND;
 
-    sigprocmask(SIG_BLOCK, &oldsignal_mask, NULL);
+    g_cond_init(&cond);
+    g_mutex_init(&mutex);
+
+    g_mutex_lock(&mutex);
+
+    g_cond_wait_until(&cond, &mutex, end_time);
+
+    g_mutex_unlock(&mutex);
+
+    g_mutex_clear(&mutex);
+    g_cond_clear(&cond);
 }
 
 /**
@@ -145,9 +137,11 @@ void wPause(
 
 unsigned long wGetTimer(void)
 {
-    struct timeval tv;
-    struct timezone tz;
-    
-    gettimeofday(&tv, &tz);
-    return (tv.tv_sec-startTime.tv_sec+1) * 1000 + tv.tv_usec /1000;
+    printf("Not implemented wGetTimer: %s %d\n", __FILE__, __LINE__);
+    return(0L);
+    //struct timeval tv;
+    //struct timezone tz;
+    //
+    //gettimeofday(&tv, &tz);
+    //return (tv.tv_sec-startTime.tv_sec+1) * 1000 + tv.tv_usec /1000;
 }

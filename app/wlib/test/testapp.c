@@ -250,6 +250,14 @@ void doFile( void * cmd )
     }
 }
 
+void
+doPause(void* unused)
+{
+	printf("Start pause\n");
+	wPause(1000L);
+	printf("End pause\n");
+}
+
 /**
  * RecentusedCallback.
  * 
@@ -772,6 +780,14 @@ void TestMenu(wControl_p mainW)
 		WCTL + '3',
 		doFile,
 		(void*)3
+	);
+
+	wMenuPushCreate(menu2, 				/* parent menu */
+		NULL, 				/* help topic */
+		"Pause", 				/* submenu title */
+		WALT + 'p',					/* accelerator key */
+		doPause, 				/* callback funtion */
+		(void*)0 			/* pointer to user data */
 	);
 
 	CreateMenuDialog(mainW);
