@@ -37,6 +37,8 @@
 #include <sys/types.h>
 #include <time.h>
 
+#include "include\dynarray.h"
+#include "include\xtctypes.h"
 #include "wlib.h"
 
 #ifndef WINDOWS
@@ -108,138 +110,9 @@
 
 #define NUM_LAYERS		(99)
 
-// TYPEDEFS
-
-typedef double FLOAT_T;
-typedef double POS_T;
-typedef double DIST_T;
-typedef double ANGLE_T;
-typedef double LWIDTH_T;
-
 #define SCANF_FLOAT_FORMAT "%lf"
 
-typedef double DOUBLE_T;
-typedef double WDOUBLE_T;
-typedef double FONTSIZE_T;
-
-typedef struct {
-	POS_T x,y;
-} coOrd;
-
-typedef struct {
-	coOrd pt;
-	int pt_type;
-} pts_t;
-
-typedef int INT_T;
-
-typedef int BOOL_T;
-typedef int EPINX_T;
-typedef int CSIZE_T;
-#ifndef WIN32
-typedef int SIZE_T;
-#endif
-typedef int STATE_T;
-typedef int STATUS_T;
-typedef signed char TRKTYP_T;
-typedef int TRKINX_T;
-typedef long DEBUGF_T;
-typedef int REGION_T;
-typedef long SCALEINX_T;
-typedef long GAUGEINX_T;
-typedef long SCALEDESCINX_T;
-
-
 enum paramFileState { PARAMFILE_UNLOADED = 0, PARAMFILE_NOTUSABLE, PARAMFILE_COMPATIBLE, PARAMFILE_FIT, PARAMFILE_MAXSTATE };
-
-// DYNARRAY
-
-typedef struct {
-	int cnt;
-	int max;
-	void * ptr;
-} dynArr_t;
-
-#define CHECK_SIZE(T,DA)
-
-/**
- * Append INCR mambers to DA
- * INCR is > 1 if we plan to add more members soon
- * Increments .cnt for the next member
- * Note: new members may not be empty
- */
-#define DYNARR_APPEND(T,DA,INCR) \
-		{ if ((DA).cnt >= (DA).max) { \
-			(DA).max += (INCR); \
-			CHECK_SIZE((T),(DA)) \
-			(DA).ptr = MyRealloc( (DA).ptr, (DA).max * sizeof *(T*)NULL ); \
-			if ( (DA).ptr == NULL ) \
-				abort(); \
-		} \
-		(DA).cnt++; }
-
-/**
- * Return Last member of DA
- */
-#define DYNARR_LAST(T,DA) \
-		(((T*)(DA).ptr)[(DA).cnt-1])
-/**
- * Return N't member of DA
- */
-#define DYNARR_N(T,DA,N) \
-		(((T*)(DA).ptr)[N])
-/**
- * Logically empty the DA
- * .max and .ptr are untouched
- */
-#define DYNARR_RESET(T,DA) \
-		(DA).cnt=0
-/**
- * Set number of members to N
- * If extending (.cnt > .max ), new values will be 0'd, otherwise not
- */
-#define DYNARR_SET(T,DA,N) \
-		{ if ((DA).max < (N)) { \
-			(DA).max = (N); \
-			CHECK_SIZE((T),(DA)) \
-			(DA).ptr = MyRealloc( (DA).ptr, (DA).max * sizeof *(T*)NULL ); \
-			if ( (DA).ptr == NULL ) \
-				abort(); \
-		} \
-		(DA).cnt = (N); }
-/**
- * Initializes DA to empty when .ptr might be garbage (ie local vars)
- * All fields are cleared
- */
-#define DYNARR_INIT(T,DA) \
-		{ (DA).ptr = NULL; \
-		(DA).max = 0; \
-		(DA).cnt = 0; \
-		}
-/**
- * Initializes DA to empty and frees .ptr
- */
-#define DYNARR_FREE(T,DA) \
-		{ if ((DA).ptr) { \
-			MyFree( (DA).ptr); \
-			(DA).ptr = NULL; \
-		} \
-		(DA).max = 0; \
-		(DA).cnt = 0; }
-/**
- * Removes N'th member from DA
- * (Not used)
- */
-#define DYNARR_REMOVE(T,DA,N) \
-		{ \
-		 { if ((DA).cnt-1 > (N)) { \
-				for (int i=(N);i<(DA).cnt-1;i++) { \
-				(((T*)(DA).ptr)[i])= (((T*)(DA).ptr)[i+1]); \
-				} \
-			} \
-		 } \
-		if ((DA).cnt>=(N)) (DA).cnt--; \
-		}
 
 // Base DotsPerInch
 #define BASE_DPI	(75.0)
@@ -297,8 +170,6 @@ typedef struct {
 #define CAST_AWAY_CONST (char*)
 
 #define TITLEMAXLEN (40)
-
-
 
 // COMMON INCLUDES
 // If you add includes here, please remove them elsewhere

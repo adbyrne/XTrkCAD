@@ -13,6 +13,7 @@ include( CheckSymbolExists )
 # build GA or Beta executable
 set( XTRKCAD_BIN "xtrkcad${XTRKCAD_BETA}" )
 
+add_subdirectory(paramtest)
 add_subdirectory(bitmaps)
 
 add_executable(cnvdsgn cnvdsgn.c utility.c)
@@ -177,6 +178,7 @@ target_sources(xtrkcad-lib
 	menu.c
     misc.c
     misc.h
+    mymalloc.c
     note.h
     param.c
     param.h
@@ -248,12 +250,12 @@ add_dependencies(xtrkcad-lib
     genbitmaps
 )
 
-
 target_include_directories(xtrkcad-lib 
     PUBLIC
 	${messagefile_BINARY_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${xtrkcad-lib_SOURCE_DIR}/include
 )
 
 target_link_libraries(xtrkcad-lib

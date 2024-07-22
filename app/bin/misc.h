@@ -33,7 +33,7 @@
 extern int iconSize;
 extern wWinPix_t displayWidth;
 extern wWinPix_t displayHeight;
-extern wWin_p mainW;
+//extern wWin_p mainW;
 extern char message[STR_HUGE_SIZE];
 extern long paramVersion;
 extern coOrd zero;
@@ -61,16 +61,7 @@ extern long hideSelectionWindow;	// not used
 
 #define wControlBelow( B )		(wControlGetPosY((wControl_p)(B))+wControlGetHeight((wControl_p)(B)))
 #define wControlBeside( B )		(wControlGetPosX((wControl_p)(B))+wControlGetWidth((wControl_p)(B)))
-
-/*
- * Safe Memory etc
- */
-extern BOOL_T TestMallocs( void );
-extern void * MyMalloc( size_t );
-extern void * MyRealloc( void *, size_t );
-extern void MyFree( void * );
-extern void * memdup( void *, size_t );
-extern char * MyStrdup( const char * );
+#include "mymalloc.h"
 
 extern char * ConvertFromEscapedText(const char * text);
 extern char * ConvertToEscapedText(const char * text);
