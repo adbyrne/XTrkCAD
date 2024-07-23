@@ -38,6 +38,8 @@
 
 #include "resources.h"
 
+#define BASICBUILDER_RESOURCE "basicdialog"
+
 /**
  * Place widget into the grid of a basic dialog window.
  * 
@@ -57,38 +59,15 @@ wlibBasicGridAttach(wControl_p parent, GtkWidget *widget, unsigned xPos,
 }
 
 /**
- * Handle configure event. Window position and size are saved
- * 
- * \param self
- * \param event
- * \param userdata  unused
- * \return 
- */
-
-gboolean
-dialog_configure_event(GtkWidget* self, GdkEventConfigure * event, void* userdata)
-{
-    gchar* posString = NULL;
-
-    posString = g_strdup_printf("%d %d", event->x, event->y);
-//    wPrefSetString(((wWindow_p)userdata)->name, "pos", posString);
-    g_free(posString);
-
-    posString = g_strdup_printf("%d %d", event->width, event->height);
-//    wPrefSetString(((wWindow_p)userdata)->name, "size", posString);
-    g_free(posString);
-    
-    return FALSE;
-}
-/**
  * Restore the window position from the INI file. Setting to 0 position or
  * size is not possible, 
  * 
  * \param window    window handle
  * \param name      name of window 
  */
+
 static void
-RestoreWindow(GtkWidget* window, const char* name)
+RestoreWindowSizePos(GtkWidget* window, const char* name)
 {
     char *winSize = wPrefGetStringBasic(name, "size");
     char* winPos = wPrefGetStringBasic(name, "pos");
@@ -123,6 +102,28 @@ RestoreWindow(GtkWidget* window, const char* name)
     }
 }
 
+static
+SaveWindowSizePos(GtkWidget* window, wControl_p control)
+{
+    gint width;
+    gint height;
+    gint x;
+    gint y;
+    gchar* value;
+
+    gtk_window_get_size(GTK_WINDOW(window), &width, &height);
+
+    value = g_strdup_printf("%ld %ld", width, height);
+    wPrefSetString(control->name, "size", value);
+    g_free(value);
+
+    gtk_window_get_position(GTK_WINDOW(window), &x, &y);
+    value = g_strdup_printf("%ld %ld", x, y);
+    wPrefSetString(control->name, "pos", value);
+    g_free(value);
+
+}
+
 /**
  * React on response signal initiated when user presses one of the dialog
  * default buttons. Selecting Help causes the help function to be executed. 
@@ -137,6 +138,8 @@ void
 response_signal(GtkDialog* self, gint response_id, wControl_p dialog)
 {
     winProcEvent event = 0;
+
+    SaveWindowSizePos(self, dialog); 
     
     switch (response_id) {
     case GTK_RESPONSE_OK:
@@ -154,15 +157,94 @@ response_signal(GtkDialog* self, gint response_id, wControl_p dialog)
     dialog->data.window.winProc(dialog, event, NULL, NULL);
 } 
 
-void
-wWindowShow(wControl_p win, bool state)
+/**
+ * Configure a button.
+ * 
+ * \param dialog    the dialog holding the button
+ * \param id        id of the button as defined in the builder file 
+ * \param label     text label. If NULL the button is hidden
+ */
+
+static void
+ConfigureButton(struct window* dialog, const char* id, const char* label)
 {
-    if (state) {
-        gtk_widget_show(win->widget);
+    GtkWidget* button;
+
+    button = GTK_WIDGET(gtk_builder_get_object(dialog->builder, id));
+    if (button && label) {
+        gtk_button_set_label(GTK_BUTTON(button), label);
+        gtk_widget_show(button);
     }
     else {
-        gtk_widget_hide(win->widget);
+        gtk_widget_hide(button);
     }
+}
+
+/**
+ * Configure the control buttons (OK, Cancel, Help) of a dialog. The ids are 
+ * defined by the builder file used for creating the dialog. The label to be
+ * placed into the button can be NULL. In that case the button is hidden.
+ * 
+ * \param dialog        dialog
+ * \param okLabel, cancelLabel, helpLabel the text labels
+ */
+
+void 
+wDialogButtonsConfigure(wControl_p dialog, const char* okLabel, 
+    const char* cancelLabel, const char* helpLabel)
+{
+    ConfigureButton(&dialog->data.window, "id_ok", okLabel);
+    ConfigureButton(&dialog->data.window, "id_cancel", cancelLabel);
+    ConfigureButton(&dialog->data.window, "id_help", helpLabel);
+}
+
+/**
+ * Load a window definition from a file and initialize the .
+ * 
+ * \param window
+ * \param nameStr
+ * \param option
+ * \return 
+ */
+
+static GtkWidget *
+CreateWindowFromBuilder( wControl_p window, const char *nameStr, long option )
+{
+    GtkWidget* dialog;
+    GtkBuilder* builder;
+    char* tempStr = NULL;
+    const char* containerName = NULL;
+    gchar* resourcePath;
+
+    if (option & DO_FILESYSTEM) {
+        // in case filename is given, load builder and create a name from 
+        // the base filename without extension
+        resourcePath = g_strdup(nameStr);
+        builder = gtk_builder_new_from_file(resourcePath);
+        tempStr = g_path_get_basename(resourcePath);
+        tempStr[strlen(tempStr) - 3] = '\0';
+        nameStr = tempStr;
+        containerName = nameStr;
+    }
+    else {
+        containerName = (option & BO_USEBUILDER ? nameStr : BASICBUILDER_RESOURCE);
+        resourcePath = g_strconcat(XTRKCAD_RESOURCE_PATH,
+            containerName,
+            ".ui",
+            NULL);
+        builder = gtk_builder_new_from_resource(resourcePath);
+    }
+
+    dialog = GTK_WIDGET(gtk_builder_get_object(builder, containerName));
+    g_free(resourcePath);
+    resourcePath = NULL;
+
+    window->name = g_strdup(nameStr);
+    window->data.window.builder = builder;
+    window->widget = dialog;
+    g_free(tempStr);
+
+    return(dialog);
 }
 
 /**
@@ -174,8 +256,13 @@ wWindowShow(wControl_p win, bool state)
  * - Builder: yes
  *
  * ### Options
- * BO_FILESYSTEM
+ * DO_FILESYSTEM
  * : nameStr is the full path for a XML ui file with "ui" extension
+ * BO_USEBUILDER
+ * : nameStr is a builder file in the resources that will be used to 
+ * create the complete dialog
+ * default
+ * : the dialog frame including a grid is created from a default ui definition
  *  
  * \param parent    IN  parent window for new dialog
  * \param helpStr   IN  help topic 
@@ -197,35 +284,13 @@ wWinDialogCreate(wControl_p parent,
     void* data)
 {
     GtkWidget* dialog;
-    GtkBuilder* builder;
     GtkWidget* parentWindow;
-    gchar* resourcePath;
-    char* tempStr = NULL;
     struct window* dcontrol;
 
     wControl_p winDialog = wlibControlNew(W_DIALOG, parent, helpStr, data);
     dcontrol = WLIB_GET_DATA_PTR(winDialog, window);
 
-    if (option & DO_FILESYSTEM) {
-        // in case filename is given, load builder and create a name from 
-        // the base filename without extension
-        resourcePath = g_strdup(nameStr);
-        builder = gtk_builder_new_from_file(resourcePath);
-        tempStr = g_path_get_basename(resourcePath);
-        tempStr[strlen(tempStr) - 3] = '\0';
-        nameStr = tempStr;
-    }
-    else {
-        resourcePath = g_strconcat(XTRKCAD_RESOURCE_PATH,
-            nameStr,
-            ".ui",
-            NULL);
-        builder = gtk_builder_new_from_resource(resourcePath);
-    }
-
-    dialog = GTK_WIDGET(gtk_builder_get_object(builder, nameStr));
-    g_free(resourcePath);
-    resourcePath = NULL;
+    dialog = CreateWindowFromBuilder(winDialog, nameStr, option);
 
     if (!dialog)
     {
@@ -236,10 +301,8 @@ wWinDialogCreate(wControl_p parent,
             "OK",
             NULL);
         g_string_free(errorMessage, TRUE);
-        g_free(tempStr);
         return(NULL);
     }
-
 
     if (parent == NULL) {
         parentWindow = wlibAppWinGetMain();
@@ -248,14 +311,11 @@ wWinDialogCreate(wControl_p parent,
         parentWindow = parent->widget;
     }
 
-    RestoreWindow(dialog, nameStr);
+    RestoreWindowSizePos(dialog, nameStr);
 
     if (option & F_CENTER) {
         gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER_ON_PARENT);
     }
-
-    g_signal_connect(G_OBJECT(dialog), "configure_event",
-        G_CALLBACK(dialog_configure_event), winDialog);
 
     g_signal_connect(G_OBJECT(dialog), "response",
         G_CALLBACK(response_signal), winDialog);
@@ -265,13 +325,8 @@ wWinDialogCreate(wControl_p parent,
 
     gtk_widget_show(dialog);
     dcontrol->option = option & BO_USEBUILDER;
-    winDialog->widget = dialog;
-    winDialog->name = g_strdup(nameStr);
     dcontrol->winProc = winProc;
-    dcontrol->builder = builder;
-    dcontrol->option = option & BO_USEBUILDER;
 
-    g_free(tempStr);
     return(winDialog);
 }
 

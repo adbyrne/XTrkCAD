@@ -369,7 +369,7 @@ DialogProc(wControl_p window, winProcEvent event, void *data, void *data2)
 	}
 
 	printf("Dialog was closed with %s\n", cause);
-
+	wControlShow(window, FALSE);
 	return(TRUE);
 }
 
@@ -411,7 +411,7 @@ NoteDialogProc(wControl_p window, winProcEvent event, void* data, void* data2)
 	default:
 		break;
 	}
-	wWindowShow(window, false);
+	wControlShow(window, false);
 
 	return(true);
 }
@@ -434,7 +434,7 @@ NoteDialog(void* unused)
 bool
 SimpleDynamicProc(wControl_p window, winProcEvent event, void* data, void* data2)
 {
-	wWindowShow(window, false);
+	wControlShow(window, false);
 
 	return(true);
 }
@@ -650,6 +650,23 @@ void CheckboxTest(void* builderFile)
 	wButtonCreate(dialog, 0, 0, "tip-next", NULL, 0, 0, ButtonCallback, (void *)1);
 }
 
+void AddElevationTest(void* unused)
+{
+	wControl_p dialog;
+	dialog = wWinDialogCreate(NULL,
+		NULL,
+		"Change Elevations",
+		"addElev",
+		0L,
+		DialogProc,
+		NULL);
+
+	wDialogButtonsConfigure(dialog, "Change", "Cancel", NULL);
+
+	wEntryCreate(dialog, 0, 0, "value", NULL, 0L, 20, NULL, 0, NULL, NULL);
+	wControlShow(dialog, TRUE);
+}
+
 void
 CreateMenuDialog(wControl_p mainW)
 {
@@ -833,6 +850,13 @@ void TestMenu(wControl_p mainW)
 		0L,
 		CheckboxTest,
 		"tip.ui");
+
+	wMenuPushCreate(menu,
+		NULL,
+		"Add Elevation",
+		0L,
+		AddElevationTest,
+		NULL);
 }
 
 void

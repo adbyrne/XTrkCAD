@@ -23,6 +23,7 @@
 #include "common.h"
 #include "messages.h"
 #include "fileio.h"
+#include "mymalloc.h"
 #include "param.h"
 
 #include "include/toolbar.h"
@@ -59,6 +60,11 @@ static wWinPix_t DlgSepFrmRight = 4;
 static wWinPix_t DlgSepFrmTop = 4;
 static wWinPix_t DlgSepFrmBottom = 4;
 
+extern wControl_p mainW;
+
+#define wPrefGetString( section, name ) wPrefGetStringBasic(section, name )
+#define wPrefGetFloat(section, name, result, defaultVal) wPrefGetFloatBasic(section, name, result, defaultVal)
+#define wPrefGetInteger(section, name, result, defaultVal ) wPrefGetIntegerBasic(section, name, result, defaultVal)
 
 /*****************************************************************************
  *

@@ -209,7 +209,7 @@ static int stringFocusOutEvent(
  * \param	option	IN	option
  * \param	width	IN	width of entry field
  * \param	valueP	IN	initial value
- * \param	valueL	IN 	maximum length of entry in chars
+ * \param	fieldLength	IN 	maximum length of entry in chars
  * \param	action	IN	application callback function
  * \param 	data	IN	application context data
  * \return  the created widget
@@ -224,7 +224,7 @@ wControl_p wEntryCreate(
         long	option,
         wWinPix_t	width,
         char	*valueP,
-        wIndex_t valueL,
+        wIndex_t fieldLength,
         wEntryCallBack_p action,
         void 	*data)
 {
@@ -236,7 +236,7 @@ wControl_p wEntryCreate(
 	entry = WLIB_GET_DATA_PTR(b, entry);
 	entry->valueP = valueP;
 	entry->action = action;
-	entry->valueL = valueL;
+	entry->valueL = fieldLength;
 
 	if (HASDIALOGBUILDER(parent)) {
 		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
@@ -245,8 +245,8 @@ wControl_p wEntryCreate(
 		b->widget = (GtkWidget*)gtk_entry_new();
 		if (b->widget == NULL) { abort(); }
 
-		if (valueL) {
-			gtk_entry_set_max_length(GTK_ENTRY(b->widget), valueL);
+		if (fieldLength) {
+			gtk_entry_set_max_length(GTK_ENTRY(b->widget), fieldLength);
 		}
 
 		// set minimum size for widget
@@ -267,7 +267,7 @@ wControl_p wEntryCreate(
 	}
 	// link into help
 	wlibAddHelpString(b->widget, helpStr);
- 	wlibAddTooltip(b->widget, parent->name, helpStr);
+  	wlibAddTooltip(b->widget, parent->name, helpStr);
 
 	g_signal_connect(G_OBJECT(b->widget), "focus-out-event",
 	                 G_CALLBACK(stringFocusOutEvent), b);

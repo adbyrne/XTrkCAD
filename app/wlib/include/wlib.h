@@ -396,9 +396,8 @@ FILE * wFileOpen(		const char *, const char * );
 wControl_p wWinDialogCreate(wControl_p parent, const char* helpStr, const char* titleStr,
     const char* nameStr, long option, wWinCallBack_p winProc, void* data);
 
-
-
-void wWindowShow(wControl_p win, bool state);
+void wDialogButtonsConfigure(wControl_p dialog, const char* okLabel,
+    const char* cancelLabel, const char* helpLabel);
 
 //wWin_p wWinPopupCreate(		wWin_p, wWinPix_t, wWinPix_t, const char *,
 //                                const char *, const char *,

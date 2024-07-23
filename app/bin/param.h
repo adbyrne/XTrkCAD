@@ -53,8 +53,8 @@ typedef enum {
 } parameterType;
 
 // PD_FLOAT modifiers
-#define PDO_DIM				(1L<<0)
-#define PDO_ANGLE			(1L<<1)
+#define PDO_DIM					(1L<<0)		/**< value is a dimension */
+#define PDO_ANGLE				(1L<<1)		/**< value is an angle in degrees */
 #define PDO_SMALLDIM			(1L<<2)
 // PD_STRING modifiers
 #define PDO_NOTBLANK			(1L<<3)
@@ -67,7 +67,7 @@ typedef enum {
 #define PDO_NOUPD		(PDO_NORSTUPD|PDO_NOPSHUPD)
 
 // Override paramGroup pref group
-#define PDO_NOPREF			(1L<<10)
+#define PDO_NOPREF			(1L<<10)		/**< save entered value as default */
 #define PDO_MISC			(1L<<11)
 #define PDO_DRAW			(1L<<12)
 #define PDO_FILE			(1L<<13)
