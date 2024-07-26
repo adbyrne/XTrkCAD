@@ -27,6 +27,7 @@
 #include "param.h"
 #include "shortentext.h"
 #include "track.h"
+#include "cundo.h"
 
 struct {
 	coOrd pos;
@@ -76,16 +77,6 @@ TextDlgUpdate(
 	}
 }
 
-/**
-* Handle Cancel button: restore old values for layer and position
-*/
-
-static void
-TextEditCancel( wWin_p junk )
-{
-	ResetIfNotSticky();
-	wHide(textNoteW);
-}
 
 /**
  * Handle OK button: make sure the entered URL is syntactically valid, update
@@ -101,13 +92,19 @@ TextEditOK(void *junk)
 	if ( trk == NULL ) {
 		// new note
 		trk = NewNote( -1, textNoteData.pos, OP_NOTETEXT );
+	} else {
+		if ( ! descUndoStarted ) {
+			UndoStart( _("Update Text Note"), "Update Text Note" );
+			descUndoStarted = TRUE;
+		}
+		UndoModify( trk );
 	}
 	struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
 	xx->pos = textNoteData.pos;
 	SetTrkLayer( trk, textNoteData.layer );
 
 	int len = wTextGetSize(textEntry);
-	MyFree( xx->noteData.text );
+	UndoDeferFree( xx->noteData.text );
 	xx->noteData.text = (char*)MyMalloc(len + 2);
 	wTextGetText(textEntry, xx->noteData.text, len);
 
@@ -135,7 +132,7 @@ CreateEditTextNote(char *title, char * textData )
 		textNoteW = ParamCreateDialog(&textNotePG,
 		                              "",
 		                              _("Done"), TextEditOK,
-		                              TextEditCancel, TRUE, NULL,
+		                              ParamCancel_Reset, TRUE, NULL,
 		                              F_BLOCK,
 		                              TextDlgUpdate);
 	}
@@ -147,6 +144,7 @@ CreateEditTextNote(char *title, char * textData )
 	wTextSetReadonly(textEntry, FALSE);
 	FillLayerList((wList_p)textNotePLs[I_LAYER].control);
 	ParamLoadControls(&textNotePG);
+	descTitle = title;
 
 	// and show the dialog
 	wShow(textNoteW);

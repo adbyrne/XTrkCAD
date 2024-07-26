@@ -28,6 +28,7 @@
 #include "track.h"
 #include "common-ui.h"
 #include "draw.h"
+#include "note.h"
 
 EXPORT wIndex_t describeCmdInx;
 EXPORT BOOL_T inDescribeCmd;
@@ -42,6 +43,7 @@ EXPORT BOOL_T descUndoStarted;
 static BOOL_T descNeedDrawHilite;
 static wWinPix_t describeW_posy;
 static wWinPix_t describeCmdButtonEnd;
+EXPORT char * descTitle = "<>";
 
 static wMenu_p descPopupM;
 
@@ -230,7 +232,7 @@ static void DescribeUpdate(
 	}
 
 	if (!descUndoStarted) {
-		UndoStart(_("Change Track"), "Change Track");
+		UndoStart( descTitle, "Change Track" );
 		descUndoStarted = TRUE;
 	}
 
@@ -296,30 +298,30 @@ static void DescribeUpdate(
 }
 
 
-static void DescOk(void * junk)
+EXPORT void DescribeDone(void * junk)
 {
-	wHide(describePG.win);
-
-	if (layerValue && *layerValue>=0) {
-		SetTrkLayer(descTrk,
-		            editableLayerList[*layerValue]);  //int found that is really in the parm controls.
+	if (descTrk) {
+		CHECK(!IsTrackDeleted(descTrk));
+		// TODO_CANCEL last arg could be true
+		if ( descUpdateFunc && descTrk && GetTrkType(descTrk) != T_NOTE ) {
+			descUpdateFunc(descTrk, -1, descData, !descUndoStarted);
+		}
+		if (layerValue && *layerValue>=0) {
+			SetTrkLayer(descTrk,
+				    editableLayerList[*layerValue]);
+		}
+		// wipe out reference
+		layerValue = NULL;
+		descTrk = NULL;
 	}
-	layerValue = NULL; 									   // wipe out reference
-	descUpdateFunc(descTrk, -1, descData, !descUndoStarted);
-	descTrk = NULL;
-
+	if (describePG.win && wWinIsVisible(describePG.win)) {
+		wHide(describePG.win);
+	}
 	if (descUndoStarted) {
 		UndoEnd();
 		descUndoStarted = FALSE;
 	}
-
 	descNeedDrawHilite = FALSE;
-	if (programMode == MODE_DESIGN) {
-		Reset(); // DescOk
-	} else {
-		descNeedDrawHilite = FALSE;
-		wSetCursor(mainD.d,defaultCursor);
-	}
 }
 
 
@@ -461,10 +463,11 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 	descData = data;
 	descUpdateFunc = update;
 	describeW_posy = 0;
+	descTitle = title;
 
 	if (describePG.win == NULL) {
 		/* SDB 5.13.2005 */
-		ParamCreateDialog(&describePG, _("Description"), _("Done"), DescOk,
+		ParamCreateDialog(&describePG, _("Description"), _("Done"), DescribeDone,
 				  ParamCancel_Undo,
 		                  TRUE, DescribeLayout, F_RECALLPOS,
 		                  DescribeUpdate);
@@ -561,26 +564,6 @@ static void DescChange(long changes)
  */
 
 
-EXPORT void DescribeCancel(void)
-{
-	if (describePG.win && wWinIsVisible(describePG.win)) {
-		if (descTrk) {
-			CHECK(!IsTrackDeleted(descTrk));
-			descUpdateFunc(descTrk, -1, descData, TRUE);
-			descTrk = NULL;
-
-		}
-
-		wHide(describePG.win);
-
-		if (descUndoStarted) {
-			UndoEnd();
-			descUndoStarted = FALSE;
-		}
-	}
-
-	descNeedDrawHilite = FALSE;
-}
 
 
 EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
@@ -594,6 +577,7 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 		wSetCursor(mainD.d,wCursorQuestion);
 		descUndoStarted = FALSE;
 		trk = NULL;
+		descTrk = NULL;
 		return C_CONTINUE;
 
 	case wActionMove:
@@ -607,38 +591,59 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 
 
 	case C_DOWN:
-		if ((trk = OnTrack(&pos, FALSE, FALSE)) != NULL) {
-			if (GetLayerFrozen(GetTrkLayer(trk)) && !(MyGetKeyState()& WKEY_SHIFT)) {
-				InfoMessage("Track is Frozen, Add Shift to Describe");
-				trk = NULL;
-				return C_CONTINUE;
-			}
-			if (describePG.win && wWinIsVisible(describePG.win) && descTrk) {
-				descUpdateFunc(descTrk, -1, descData, TRUE);
-				descTrk = NULL;
-			}
-
-			descBorder = mainD.scale*0.1;
-
-			if (descBorder < trackGauge) {
-				descBorder = trackGauge;
-			}
-
-			inDescribeCmd = TRUE;
-			GetBoundingBox(trk, &descSize, &descOrig);
-			descOrig.x -= descBorder;
-			descOrig.y -= descBorder;
-			descSize.x -= descOrig.x-descBorder;
-			descSize.y -= descOrig.y-descBorder;
-			descNeedDrawHilite = TRUE;
-			DescribeTrack(trk, msg, 255);
-			inDescribeCmd = FALSE;
-			InfoMessage(msg);
+		if ((trk = OnTrack(&pos, FALSE, FALSE)) == NULL) {
+			// Not a track - ignore
+			return C_CONTINUE;
+		}
+#ifdef TODO_CANCEL
+		if ( trk == descTrk ) {
+			// Same track - ignore
+			return C_CONTINUE;
+		}
+#endif
+		InfoMessage( "" );
+		DescribeDone( NULL );
+		if ( trk == NULL ) {
+			// This should not happen.
+			// Somebody is stomping on trk
+			// Unreproducible.
+			printf( "CmdDescribe: trk is NULL!\n" );
+			return C_CONTINUE;
+		}
+		if (GetLayerFrozen(GetTrkLayer(trk)) && !(MyGetKeyState()& WKEY_SHIFT)) {
+			InfoMessage("Track is Frozen, Add Shift to Describe");
 			trk = NULL;
-		} else {
-			InfoMessage("");
+			return C_CONTINUE;
+		}
+		if (describePG.win && wWinIsVisible(describePG.win) && descTrk) {
+			// finish update
+			descUpdateFunc(descTrk, -1, descData, TRUE);
+			descTrk = NULL;
 		}
 
+		descBorder = mainD.scale*0.1;
+
+		if (descBorder < trackGauge) {
+			descBorder = trackGauge;
+		}
+
+		inDescribeCmd = TRUE;
+		GetBoundingBox(trk, &descSize, &descOrig);
+		descOrig.x -= descBorder;
+		descOrig.y -= descBorder;
+		descSize.x -= descOrig.x-descBorder;
+		descSize.y -= descOrig.y-descBorder;
+		descNeedDrawHilite = TRUE;
+		DescribeTrack(trk, msg, 255);
+		inDescribeCmd = FALSE;
+		InfoMessage(msg);
+		// Ugly code: but Describe Notes do not continue like other objects
+		if ( GetTrkType( trk ) != T_NOTE ) {
+			descTrk = trk;
+		} else {
+			descTrk = NULL;
+		}
+		trk = NULL;
 		return C_CONTINUE;
 
 	case C_REDRAW:
@@ -667,13 +672,16 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 		break;
 
 	case C_CANCEL:
-		DescribeCancel();
+//		DescribeDone( NULL );
 		wSetCursor(mainD.d,defaultCursor);
 		return C_CONTINUE;
 
 	case C_CMDMENU:
 		menuPos = pos;
 		if (!trk) { wMenuPopupShow(descPopupM); }
+		return C_CONTINUE;
+	
+	case C_FINISH:
 		return C_CONTINUE;
 	}
 

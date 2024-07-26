@@ -504,6 +504,7 @@ STATUS_T JointDescriptionMove(track_p trk,wAction_t action,coOrd pos );
 extern wIndex_t describeCmdInx;
 extern BOOL_T inDescribeCmd;
 extern BOOL_T descUndoStarted;
+extern char * descTitle;
 typedef enum { DESC_NULL, DESC_POS, DESC_FLOAT, DESC_ANGLE, DESC_LONG, DESC_COLOR, DESC_DIM, DESC_PIVOT, DESC_LAYER, DESC_STRING, DESC_TEXT, DESC_LIST, DESC_EDITABLELIST, DESC_BOXED } descType;
 #define DESC_RO			(1<<0)
 #define DESC_IGNORE		(1<<1)
@@ -528,7 +529,7 @@ typedef struct {
 } descData_t, * descData_p;
 typedef void (*descUpdate_t)( track_p, int, descData_p, BOOL_T );
 void DoDescribe( char *, track_p, descData_p, descUpdate_t );
-void DescribeCancel( void );
+void DescribeDone( void * );
 BOOL_T UpdateDescStraight( int, int, int, int, int, descData_p, long );
 STATUS_T CmdDescribe(wAction_t,coOrd);
 

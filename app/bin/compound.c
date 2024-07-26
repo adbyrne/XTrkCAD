@@ -854,7 +854,7 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd,
 			DrawCompoundDescription( trk, &mainD, wDrawColorWhite );
 		}
 		/*sprintf( message, "%s\t%s\t%s", manufS, nameS, partnoS );*/
-		if (xx->title) { MyFree(xx->title); }
+		if (xx->title) { UndoDeferFree(xx->title); }
 		xx->title = newTitle;
 		xx->flipped = flipped;
 		xx->ungrouped = ungrouped;

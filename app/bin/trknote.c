@@ -567,7 +567,7 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 		return C_CONTINUE;
 
 	case C_CANCEL:
-		DescribeCancel();
+		DescribeDone( NULL );
 		state_on = FALSE;
 		return C_CONTINUE;
 	}
