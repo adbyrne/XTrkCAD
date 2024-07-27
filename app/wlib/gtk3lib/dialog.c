@@ -56,6 +56,7 @@ wlibBasicGridAttach(wControl_p parent, GtkWidget *widget, unsigned xPos,
     GtkGrid* grid = GTK_GRID(wlibWidgetFromIdWarn(parent, "layoutgrid"));
 
     gtk_grid_attach(grid, widget, xPos, yPos, colSpan, rowSpan);
+    gtk_widget_set_halign(widget, GTK_ALIGN_START);
 }
 
 /**
@@ -150,7 +151,7 @@ response_signal(GtkDialog* self, gint response_id, wControl_p dialog)
         event = wCancel_e;
         break;
     case GTK_RESPONSE_HELP:
-        //wHelp(dialog->nameStr);
+        wHelp(dialog->name);
         return;
     }
 
@@ -215,7 +216,7 @@ CreateWindowFromBuilder( wControl_p window, const char *nameStr, long option )
     char* tempStr = NULL;
     const char* containerName = NULL;
     gchar* resourcePath;
-
+     
     if (option & DO_FILESYSTEM) {
         // in case filename is given, load builder and create a name from 
         // the base filename without extension

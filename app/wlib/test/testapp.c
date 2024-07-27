@@ -667,6 +667,49 @@ void AddElevationTest(void* unused)
 	wControlShow(dialog, TRUE);
 }
 
+void AspectEditTest(void* unused)
+{
+	wControl_p dialog;
+	dialog = wWinDialogCreate(NULL,
+		NULL,
+		"Aspect Edit",
+		"aspectEdit",
+		0L,
+		DialogProc,
+		NULL);
+
+	wDialogButtonsConfigure(dialog, "OK", "Cancel", "Help");
+
+	wEntryCreate(dialog, 1, 0, "name", "Name", 0, 20, NULL, 0, NULL, NULL);
+	wEntryCreate(dialog, 1, 1, "script", "Script", 0, 35, NULL, 0, NULL, NULL);
+	wEntryCreate(dialog, 1, 2, "index", "Aspect Index", BO_READONLY, 20, NULL, 0, NULL, NULL);
+
+	wControlShow(dialog, TRUE);
+}
+
+wDrawColor snapColor = 0x00FF00;
+wDrawColor markerColor = 0x009999;
+
+void
+ColorButtonTest(void* unused)
+{
+	wControl_p dialog;
+	dialog = wWinDialogCreate(NULL,
+		NULL,
+		"Color",
+		"rgbColor",
+		0L,
+		DialogProc,
+		NULL);
+
+	wDialogButtonsConfigure(dialog, "OK", "Cancel", "Help");
+
+	printf("%x\n",wDrawFindColor(0x00ff00));
+	printf("%d\n",wDrawGetRGB(1000));
+	wColorSelectButtonCreate(dialog, 1, 0, "snapgrid", "Snap Grid", 0, 10, &snapColor, NULL, NULL);
+	wColorSelectButtonCreate(dialog, 1, 1, "marker", "Marker", 0, 10, &markerColor, NULL, NULL);
+}
+
 void
 CreateMenuDialog(wControl_p mainW)
 {
@@ -856,6 +899,20 @@ void TestMenu(wControl_p mainW)
 		"Add Elevation",
 		0L,
 		AddElevationTest,
+		NULL);
+
+	wMenuPushCreate(menu,
+		NULL,
+		"Aspect Edit",
+		0L,
+		AspectEditTest,
+		NULL);
+
+	wMenuPushCreate(menu,
+		NULL,
+		"RGB Color",
+		0L,
+		ColorButtonTest,
 		NULL);
 }
 

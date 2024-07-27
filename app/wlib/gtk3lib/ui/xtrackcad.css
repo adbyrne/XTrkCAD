@@ -29,7 +29,11 @@ flowboxchild > separator {
 
 /* color buttons have no border */
 button.color {
-    border: none
+    border: none;
+    box-shadow: none;
+    margin: 0px; 
+    padding: 0px;
+    height: 12px;
 }
 
 framed box

@@ -704,9 +704,7 @@ wBool_t wDrawSetTempMode(	wDraw_p, wBool_t );
 
 void wDrawDelayUpdate(		wDraw_p, wBool_t );
 void wDrawClip(			wDraw_p, wDrawPix_t, wDrawPix_t, wDrawPix_t, wDrawPix_t );
-wDrawColor wDrawColorGray(	int );
-wDrawColor wDrawFindColor(	long );
-long wDrawGetRGB(		wDrawColor );
+
 
 /* Geometry */
 double wDrawGetDPI(		wDraw_p );
@@ -922,8 +920,6 @@ void wAttachAccelKey( wAccelKey_e, int, wAccelKeyCallBack_p, void * );
 /* Creation CallBacks */
 typedef void (*wColorSelectButtonCallBack_p)( void *, wDrawColor );
 
-wBool_t wColorSelect( const char *, wDrawColor * );
-
 wControl_p wColorSelectButtonCreate(
     wControl_p	parent,
     wWinPix_t	x,
@@ -938,6 +934,18 @@ wControl_p wColorSelectButtonCreate(
 
 void wColorSelectButtonSetColor( wControl_p bb, wDrawColor color );
 wDrawColor wColorSelectButtonGetColor( wControl_p bb);
+wDrawColor wDrawColorGray(int percent);
+
+// the following are placeholders for functions that are no longer needed
+// after color palettes were removed. 
+
+#define wDrawFindColor(rgb) \
+_Pragma("message (\"Obsolete function wDrawFindColor used!\")") \
+(rgb)
+
+#define wDrawGetRGB( color ) \
+_Pragma("message (\"Obsolete function wDrawGetRGB used!\")") \
+(color) 
 
 /*------------------------------------------------------------------------------
  *

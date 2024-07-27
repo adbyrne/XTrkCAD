@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+    <requires lib="gtk" version="3.22" />
+    <object class="GtkDialog" id="rgbcolor">
+        <property name="can-focus">False</property>
+        <property name="border-width">12</property>
+        <property name="type-hint">dialog</property>
+        <property name="use-header-bar">0</property>
+        <property name="resizable">False</property>
+        <child type="action">
+            <object class="GtkButton" id="id_cancel">
+                <property name="use-underline">True</property>
+                <property name="label">_Cancel</property>
+                <property name="visible">True</property>
+            </object>
+        </child>
+        <child type="action">
+            <object class="GtkButton" id="id_help">
+                <property name="use-underline">True</property>
+                <property name="label">_Help</property>
+                <property name="visible">True</property>
+            </object>
+        </child>
+        <child type="action">
+            <object class="GtkButton" id="id_ok">
+                <property name="use-underline">True</property>
+                <property name="can-default">True</property>
+                <property name="has-default">True</property>
+                <property name="label">_Done</property>
+                <property name="visible">True</property>
+            </object>
+        </child>
+        <action-widgets>
+            <action-widget response="GTK_RESPONSE_CANCEL">id_cancel</action-widget>
+            <action-widget response="GTK_RESPONSE_HELP">id_help</action-widget>
+            <action-widget response="GTK_RESPONSE_OK" default="true">id_ok</action-widget>
+        </action-widgets>
+        <child internal-child="vbox">
+            <object class="GtkBox">
+                <property name="can-focus">False</property>
+                <property name="orientation">vertical</property>
+                <property name="spacing">12</property>
+                <child>
+                    <object class="GtkFrame">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label-xalign">0</property>
+                        <property name="shadow-type">none</property>
+                        <child type="label">
+                            <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Track</property>
+                                <attributes>
+                                    <attribute name="weight" value="bold" />
+                                </attributes>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="GtkGrid">
+                                <property name="visible">True</property>
+                                <property name="column-spacing">12</property>
+                                <property name="row-spacing">6</property>
+
+                                <child>
+                                    <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Normal Track</property>
+                                        <property name="halign">GTK_ALIGN_END</property>
+                                    </object>
+                                    <packing>
+                                        <property name="left-attach">0</property>
+                                        <property name="top-attach">0</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <object class="GtkColorButton" id="normal">
+                                        <property name="visible">True</property>
+                                    </object>
+                                    <packing>
+                                        <property name="left-attach">1</property>
+                                        <property name="top-attach">0</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Selected Track</property>
+                                        <property name="halign">GTK_ALIGN_END</property>
+                                    </object>
+                                    <packing>
+                                        <property name="left-attach">0</property>
+                                        <property name="top-attach">1</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <object class="GtkColorButton" id="selected">
+                                        <property name="visible">True</property>
+                                    </object>
+                                    <packing>
+                                        <property name="left-attach">1</property>
+                                        <property name="top-attach">1</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Exception Track</property>
+                                        <property name="halign">GTK_ALIGN_END</property>
+                                    </object>
+                                    <packing>
+                                        <property name="left-attach">0</property>
+                                        <property name="top-attach">2</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <object class="GtkColorButton" id="exception">
+                                        <property name="visible">True</property>
+                                    </object>
+                                    <packing>
+                                        <property name="left-attach">1</property>
+                                        <property name="top-attach">2</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Track Ties</property>
+                                        <property name="halign">GTK_ALIGN_END</property>
+                                    </object>
+                                    <packing>
+                                        <property name="left-attach">0</property>
+                                        <property name="top-attach">3</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <object class="GtkColorButton" id="tie">
+                                        <property name="visible">True</property>
+                                    </object>
+                                    <packing>
+                                        <property name="left-attach">1</property>
+                                        <property name="top-attach">3</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Track Roadbed</property>
+                                        <property name="halign">GTK_ALIGN_END</property>
+                                    </object>
+                                    <packing>
+                                        <property name="left-attach">0</property>
+                                        <property name="top-attach">4</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <object class="GtkColorButton" id="roadbed">
+                                        <property name="visible">True</property>
+                                    </object>
+                                    <packing>
+                                        <property name="left-attach">1</property>
+                                        <property name="top-attach">4</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Bridge Base</property>
+                                        <property name="halign">GTK_ALIGN_END</property>
+                                    </object>
+                                    <packing>
+                                        <property name="left-attach">0</property>
+                                        <property name="top-attach">5</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <object class="GtkColorButton" id="bridge">
+                                        <property name="visible">True</property>
+                                    </object>
+                                    <packing>
+                                        <property name="left-attach">1</property>
+                                        <property name="top-attach">5</property>
+                                    </packing>
+                                </child>
+
+                            </object>
+                        </child>
+                    </object>
+                </child>
+                <child>
+                    <object class="GtkFrame">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label-xalign">0</property>
+                        <property name="shadow-type">none</property>
+                        <child type="label">
+                            <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Drawing Area</property>
+                                <attributes>
+                                    <attribute name="weight" value="bold" />
+                                </attributes>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="GtkGrid">
+                                <property name="visible">True</property>
+                                <property name="column-spacing">12</property>
+                                <property name="row-spacing">6</property>
+                                <property name="margin-bottom">12</property>
+                                <child>
+                                    <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Snap Grid</property>
+                                        <property name="halign">GTK_ALIGN_END</property>
+                                    </object>
+                                    <packing>
+                                        <property name="left-attach">0</property>
+                                        <property name="top-attach">0</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <object class="GtkColorButton" id="snapgrid">
+                                        <property name="visible">True</property>
+                                    </object>
+                                    <packing>
+                                        <property name="left-attach">1</property>
+                                        <property name="top-attach">0</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Marker</property>
+                                        <property name="halign">GTK_ALIGN_END</property>
+                                    </object>
+                                    <packing>
+                                        <property name="left-attach">0</property>
+                                        <property name="top-attach">1</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <object class="GtkColorButton" id="marker">
+                                        <property name="visible">True</property>
+                                    </object>
+                                    <packing>
+                                        <property name="left-attach">1</property>
+                                        <property name="top-attach">1</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Border</property>
+                                        <property name="halign">GTK_ALIGN_END</property>
+                                    </object>
+                                    <packing>
+                                        <property name="left-attach">0</property>
+                                        <property name="top-attach">2</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <object class="GtkColorButton" id="border">
+                                        <property name="visible">True</property>
+                                    </object>
+                                    <packing>
+                                        <property name="left-attach">1</property>
+                                        <property name="top-attach">2</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Primary Axis</property>
+                                        <property name="halign">GTK_ALIGN_END</property>
+                                    </object>
+                                    <packing>
+                                        <property name="left-attach">0</property>
+                                        <property name="top-attach">3</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <object class="GtkColorButton"id="crossmajor">
+                                        <property name="visible">True</property>
+                                    </object>
+                                    <packing>
+                                        <property name="left-attach">1</property>
+                                        <property name="top-attach">3</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Secondary Axis</property>
+                                        <property name="halign">GTK_ALIGN_END</property>
+                                    </object>
+                                    <packing>
+                                        <property name="left-attach">0</property>
+                                        <property name="top-attach">4</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <object class="GtkColorButton" id="crossminor">
+                                        <property name="visible">True</property>
+                                    </object>
+                                    <packing>
+                                        <property name="left-attach">1</property>
+                                        <property name="top-attach">4</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Profile Path</property>
+                                        <property name="halign">GTK_ALIGN_END</property>
+                                    </object>
+                                    <packing>
+                                        <property name="left-attach">0</property>
+                                        <property name="top-attach">5</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <object class="GtkColorButton" id="profile">
+                                        <property name="visible">True</property>
+                                    </object>
+                                    <packing>
+                                        <property name="left-attach">1</property>
+                                        <property name="top-attach">5</property>
+                                    </packing>
+                                </child>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+            </object>
+        </child>
+    </object>
+</interface>

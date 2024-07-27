@@ -30,16 +30,6 @@
 
 #include "gtkint.h"
 
-//
-//struct wColorButton_t {
-//	wType_e type;
-//	GtkWidget* widget;
-//	wDrawColor* valueP;
-//	const char* labelStr;
-//	wColorSelectButtonCallBack_p action;
-//	void* data;
-//};
-//
 wDrawColor wDrawColorWhite;
 wDrawColor wDrawColorBlack;
 
@@ -65,33 +55,6 @@ wDrawColor wDrawColorGray(
 	return RGB((percent*256/100), percent*256/100, percent*256/100);
 }
 
-
-/**
- * \todo eliminate as we're not using a palete anymore
- *
- * \param rgb0 IN desired color
- * \return palette index of matching color
- */
-
-wDrawColor wDrawFindColor(
-        long rgb0)
-{
-	return rgb0;
-}
-
-/**
- * \todo eliminate as we're not using a palete anymore
- * Get the RGB code for a palette entry
- *
- * \param color IN the palette index
- * \return RGB code
- */
-
-long wDrawGetRGB(
-        wDrawColor color)
-{
-	return color;
-}
 
 /**
  * Get the color definition from the "index"

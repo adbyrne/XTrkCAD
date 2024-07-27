@@ -112,7 +112,7 @@ const char *wEntryGetValue(
  * \todo Check necessity probably used by BO_ENTER
  */
 
-static gboolean stringActivated(
+static gboolean entryActivated(
         GtkEntry *widget,
         wControl_p b)
 {
@@ -169,21 +169,22 @@ wlibEntrySetValid(wControl_p entry, bool valid)
  * \return
  */
 
-static int stringFocusOutEvent(
+static int entryFocusOutEvent(
         GtkEntry *widget,
         GdkEvent * event,
         wControl_p b)
 {
 	struct entry* entry = WLIB_GET_DATA_PTR(b, entry);
+	bool isOK = TRUE;
 
 	if (entry->action) {
 		const char *s;
 		s = gtk_entry_get_text(GTK_ENTRY(b->widget));
 
-		bool isOK = entry->action(s, b->context);
+		isOK = entry->action(s, b->context);
 		wlibEntrySetValid(b, isOK);
 	}
-	if (entry->valueP) {
+	if (isOK && entry->valueP) {
 		g_strlcpy(entry->valueP, wEntryGetValue(b), entry->valueL);
 	}
 	return FALSE;
@@ -199,7 +200,8 @@ static int stringFocusOutEvent(
  *
  * ### Options
  * BO_READONLY
- * : set entry field to read only
+ * : set entry field to read only. This flag takes priority over the property
+ * set in a builder file.
  *
  * \param 	parent	IN	parent widget
  * \param 	x		IN	x position
@@ -257,10 +259,6 @@ wControl_p wEntryCreate(
 		if (labelStr)
 			wlibAddLabel((wControl_p)b, x-1, y, labelStr);
 
-		if (option & BO_READONLY) {
-			gtk_editable_set_editable(GTK_EDITABLE(b->widget), FALSE);
-		}
-
 		wlibBasicGridAttach(parent, b->widget, x, y, 1, 1);
 		// show
 		gtk_widget_show(b->widget);
@@ -270,10 +268,13 @@ wControl_p wEntryCreate(
   	wlibAddTooltip(b->widget, parent->name, helpStr);
 
 	g_signal_connect(G_OBJECT(b->widget), "focus-out-event",
-	                 G_CALLBACK(stringFocusOutEvent), b);
+	                 G_CALLBACK(entryFocusOutEvent), b);
 
 	gtk_widget_add_events(b->widget, GDK_FOCUS_CHANGE_MASK);
 
+	if (option & BO_READONLY) {
+		gtk_editable_set_editable(GTK_EDITABLE(b->widget), FALSE);
+	}
 	// set the default text
 	if (entry->valueP) {
 		wEntrySetValue(b, entry->valueP);

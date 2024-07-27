@@ -20,20 +20,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdlib.h>
-#include <assert.h>
-#include <string.h>
-
-//#include "misc.h"
-
 #include "gtkint.h"
 #include "i18n.h"
-
-extern wBool_t CheckHelpTopicExists(const char * topic);
-
-#include "dynstring.h"
-
-#define debug 0
 
 #define DEFAULTBROWSERCOMMAND "xdg-open"
 
@@ -44,6 +32,7 @@ extern wBool_t CheckHelpTopicExists(const char * topic);
 								"HTML files are installed properly and can be found via the XTRKCADLIB environment " \
 								"variable.\n Also make sure that the user has sufficient access rights to read these" \
  								"files."
+
 /**
  * Create a fully qualified url from a topic
  *
@@ -52,23 +41,19 @@ extern wBool_t CheckHelpTopicExists(const char * topic);
  */
 
 static void
-TopicToUrl(char **helpUrl, const char *topic)
+TopicToUrl(gchar** helpUrl, const char* topic)
 {
-    DynString url;
-    DynStringMalloc(&url, 16);
+    gchar* temp = g_strdup(topic);
 
-    // build up the url line
-    DynStringCatCStrs(&url,
-                      "file://",
+    temp[0] = g_ascii_toupper(temp[0]);
+
+    *helpUrl = g_strdup_printf( "file://%s/html/cmd%s.html",
                       wGetAppLibDir(),
-                      "/html/",
-                      topic,
-                      ".html",
+                      temp,
                       NULL);
-
-    *helpUrl = strdup(DynStringToCStr(&url));
-    DynStringFree(&url);
+    g_free(temp);
 }
+
 /**
  * Invoke the system's default browser to display help for <topic>. First the
  * system's standard xdg-open command is attempted. If that is not available, the
@@ -80,13 +65,10 @@ TopicToUrl(char **helpUrl, const char *topic)
 void wHelp(const char * topic)
 {
     int rc;
-    char *url;
-    char *currentPath;
+    gchar *url;
 
-    assert(topic != NULL);
-    assert(strlen(topic));
-
-    if (!CheckHelpTopicExists(topic)) return;
+    g_assert(topic != NULL);
+    g_assert(strlen(topic));
 
     TopicToUrl(&url, topic);
 
@@ -96,5 +78,5 @@ void wHelp(const char * topic)
         wNotice(HELPERRORTEXT, _("Cancel"), NULL);
     }
 
-    free(url);
+    g_free(url);
 }
