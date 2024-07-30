@@ -275,17 +275,39 @@ long GetChanges(paramGroup_p pg);
 
 #define PD_F_ALT_CANCELLABEL	(1L<<30)		/**<use Close or Cancel for the discard button */
 
+// How dialogs handle Cancel:
+//
+// Remove Cancel button from dialogs that affect on-layout objects
 #define PARAMCANCEL_NEWUNDO
 
-extern void *ParamCancel_Null;		// Cancel button not needed: map, demo
+// Cancel button not needed: map, demo, print margin,
+extern void *ParamCancel_Null;
+
+// These affect objects on the layout
+// No Cancel button, use Undo to revert: describe, profile, move, rotate
+// undefine PARAMCANCEL_NEWUNDO to re-enable Cancel button
 #ifdef PARAMCANCEL_NEWUNDO
-extern void *ParamCancel_Undo;		// No Cancel button, use Undo to revert
+extern void *ParamCancel_Undo;
 #else
-void ParamCancel_Undo( wWin_p );	// 
+void ParamCancel_Undo( wWin_p );
 #endif
-void ParamCancel_Current( wWin_p );	// Cancel leaves values in current state
-void ParamCancel_Reset( wWin_p );	// As above and exits command regardless of Sticky
-void ParamCancel_Restore( wWin_p );	// Cancel restores values to previous state
+
+// Cancel leaves values in current state
+// Most dialogs
+void ParamCancel_Current( wWin_p );
+
+// As above and exits command regardless of Sticky
+// print, snap, *noteui
+void ParamCancel_Reset( wWin_p );
+
+// Cancel restores values to previous state
+// Done/Ok propagates changed values. Cancel just closes dialog
+void ParamCancel_Restore( wWin_p );
+
+// Pending 
+// Dialogs which haven't been converted yet: work in progress
+// signalEdit, carDlg, layout, paramfilesearch_ui
+#define ParamCancel_Custom( PROC ) PROC
 
 wWin_p ParamCreateDialog( paramGroup_p, char *, char *, paramActionOkProc,
                           paramActionCancelProc, BOOL_T, paramLayoutProc, long, paramChangeProc );

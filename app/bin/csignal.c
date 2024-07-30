@@ -748,7 +748,8 @@ static void EditSignalDialog()
 		signalEditW = ParamCreateDialog (&signalEditPG,
 		                                 MakeWindowTitle(_("Edit signal")),
 		                                 _("Ok"), SignalEditOk,
-		                                 SignalEditCancel, TRUE, NULL,
+		                                 ParamCancel_Custom( SignalEditCancel ),
+						 TRUE, NULL,
 		                                 F_RESIZE|F_RECALLSIZE|F_BLOCK,
 		                                 SignalEditDlgUpdate );
 	}
