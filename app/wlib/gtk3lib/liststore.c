@@ -135,7 +135,7 @@ wlibListStoreClear(GtkListStore *listStore)
 /**
  * Create a list store. The list store will have one column for user
  * data that will not be displayed, a column for a bitmap and <cnt>
- * columns for data.
+ * columns for text strings.
  *
  * \param colCnt IN number of additional columns
  * \returns the list store

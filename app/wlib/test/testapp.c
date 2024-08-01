@@ -670,6 +670,7 @@ void AddElevationTest(void* unused)
 void AspectEditTest(void* unused)
 {
 	wControl_p dialog;
+
 	dialog = wWinDialogCreate(NULL,
 		NULL,
 		"Aspect Edit",
@@ -687,6 +688,35 @@ void AspectEditTest(void* unused)
 	wControlShow(dialog, TRUE);
 }
 
+
+const char* entryList[] = {"Slowest", "Slow", "Normal", "Fast", "Faster", "Fastest", NULL};
+void DemoTest(void* unused)
+{
+	wControl_p dialog;
+	int entries = 0;
+	wControl_p combo;
+
+	dialog = wWinDialogCreate(NULL,
+		NULL,
+		"Demo", 
+		"demo",
+		BO_USEBUILDER,
+		DialogProc,
+		NULL);
+
+	wDialogButtonsConfigure(dialog, "AutoPlay", "Finish", NULL);
+
+	combo = wComboBoxCreate(dialog, 0, 0, "demo-speed", NULL, 0L, 0L, 0, NULL, NULL, NULL);
+
+	while (entryList[entries]) {
+		wComboBoxAddValue(combo, entryList[entries], 0);
+		entries++;
+	}
+	wComboBoxSetIndex(combo, 3);
+
+	wControlShow(dialog, TRUE);
+}
+
 wDrawColor snapColor = 0x00FF00;
 wDrawColor markerColor = 0x009999;
 
@@ -697,7 +727,7 @@ ColorButtonTest(void* unused)
 	dialog = wWinDialogCreate(NULL,
 		NULL,
 		"Color",
-		"rgbColor",
+		"rgbcolor",
 		0L,
 		DialogProc,
 		NULL);
@@ -914,6 +944,14 @@ void TestMenu(wControl_p mainW)
 		0L,
 		ColorButtonTest,
 		NULL);
+
+	wMenuPushCreate(menu,
+		NULL,
+		"Demo",
+		0L,
+		DemoTest,
+		NULL
+	);
 }
 
 void

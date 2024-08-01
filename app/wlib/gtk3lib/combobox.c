@@ -40,23 +40,23 @@
 
 
 /**
- * Add the data columns to the droplist. If dropList has an entry field
+ * Show the data columns in the combobox. If combobox has an entry field
  * the first text column is not added here as this is done by GTK
  * automatically.
  *
- * \param dropList IN
- * \param columns IN
- * \returns number of columns created
+ * \param comboBox	IN	the comboxbox
+ * \param columns	IN	number of text columns to create
+ * \returns number of additional columns added
  */
 
 int
-wlibComboBoxAddColumns(GtkWidget *dropList, int columns)
+wlibComboBoxAddColumns(GtkWidget *comboBox, int columns)
 {
 	int i;
 	int start = 0;
 	GtkCellRenderer *cell;
 
-	if (gtk_combo_box_get_has_entry(GTK_COMBO_BOX(dropList))) {
+	if (gtk_combo_box_get_has_entry(GTK_COMBO_BOX(comboBox))) {
 		start = 1;
 	}
 
@@ -65,10 +65,10 @@ wlibComboBoxAddColumns(GtkWidget *dropList, int columns)
 
 	for (i = start; i < columns; i++) {
 		/* Pack it into the droplist */
-		gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(dropList), cell, TRUE);
+		gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(comboBox), cell, TRUE);
 
 		/* Connect renderer to data source */
-		gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(dropList),
+		gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(comboBox),
 		                               cell,
 		                               "text",
 		                               LISTCOL_TEXT + i,
@@ -79,7 +79,7 @@ wlibComboBoxAddColumns(GtkWidget *dropList, int columns)
 }
 
 /**
- * Get the number of rows in drop list
+ * Get the number of rows in combobox
  *
  * \param b IN widget
  * \return number of rows
@@ -91,9 +91,9 @@ wIndex_t wComboBoxGetCount(wList_p b)
 }
 
 /**
- * Clear the whole droplist
+ * Clear the whole combobox
  *
- * \param b IN the droplist
+ * \param b IN combobox
  * \return
  */
 
@@ -104,9 +104,11 @@ wComboBoxClear(wList_p b)
 }
 
 /**
- * Get the user data / context information for a row in the droplist
- * \param b IN widget
- * \param inx IN row
+ * Get the user data / context information for a row in the combobox. The
+ * context information is stored with the row in a hidden field.
+ *
+ * \param b		IN widget
+ * \param inx	IN row
  * \returns pointer to context information
  */
 
@@ -131,10 +133,10 @@ void *wComboBoxGetItemContext(wList_p b, wIndex_t inx)
 }
 
 /**
- * Add an entry to a dropdown list. Only single text entries are allowed
+ * Add an entry to a combobox list. Only single text entries are allowed
  *
- * \param b IN the widget
- * \param text IN string to add
+ * \param b		IN the combobox
+ * \param text	IN string to add
  * \return    describe the return value
  */
 
@@ -146,7 +148,7 @@ void wComboBoxAddValue(
 	GtkTreeIter iter;
 	struct list *list = WLIB_GET_DATA_PTR(b, list);
 
-	gtk_list_store_append(list->listStore, &iter);	// append new row to tree store 
+	gtk_list_store_append(list->listStore, &iter);	// append new row to tree store
 
 	gtk_list_store_set(list->listStore, &iter,
 	                   LISTCOL_TEXT, text,
@@ -156,8 +158,8 @@ void wComboBoxAddValue(
 
 /**
  * Set the value to the entry field of a combobox
- * \param bl IN
- * \param val IN
+ * \param bl	IN combobox
+ * \param val	IN string to show
  */
 
 void wListSetValue(
@@ -178,8 +180,8 @@ void wListSetValue(
  * Makes the <val>th entry (0-origin) the current selection.
  * If <val> if '-1' then no entry is selected.
  *
- * \param b IN the widget
- * \param val IN the index
+ * \param b		IN combobox
+ * \param val	IN the index
  *
  */
 
@@ -189,13 +191,13 @@ void wComboBoxSetIndex(wControl_p b, int val)
 }
 
 /**
- * Set the values for a row in the droplist
+ * Set the values for a row in the combobox
  *
- * \param b IN drop list widget
- * \param row IN index
- * \param labelStr IN new text
- * \param bm IN ignored
- * \param itemData IN ignored
+ * \param b			IN combobox
+ * \param row		IN index
+ * \param labelStr	IN new text
+ * \param bm		IN ignored
+ * \param itemData	IN ignored
  * \return
  */
 
@@ -209,7 +211,8 @@ wBool_t wComboBoxSetValues(
 	GtkTreeIter iter;
 	struct list *lcontrol = WLIB_GET_DATA_PTR(b, list);
 
-	if (gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(lcontrol->listStore), &iter, NULL,
+	if (gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(lcontrol->listStore), &iter,
+	                                  NULL,
 	                                  row)) {
 		gtk_list_store_set(lcontrol->listStore,
 		                   &iter,
@@ -222,12 +225,12 @@ wBool_t wComboBoxSetValues(
 }
 
 /**
- * Signal handler for the "changed"-signal in combo box.
+ * Signal handler for the "changed"-signal in combobox.
  * Gets the selected text and determines the selected row in the tree model.
  * Or handles user entered text.
  *
- * \param comboBox  IN the combo_box
- * \param data      IN the drop list handle
+ * \param comboBox  IN the combobox
+ * \param data      IN user data / pointer to the control
  * \return
  */
 
@@ -243,11 +246,11 @@ static int ComboBoxChanged(
 	gchar *string = NULL;
 	wListItem_p listItemP = NULL;
 
-	/* Obtain currently selected item from combo box. */
+	/* Obtain currently selected item from combobox. */
 	if (gtk_combo_box_get_active_iter(GTK_COMBO_BOX(comboBox), &iter)) {
 		GtkTreeModel *model;
 
-		/* Obtain data model from combo box. */
+		/* Obtain data model from combobox. */
 		model = gtk_combo_box_get_model(comboBox);
 
 		/* get the selected row */
@@ -289,7 +292,8 @@ static int ComboBoxChanged(
 
 		/* selection changed -> callback */
 		if (string && lcontrol->action) {
-			lcontrol->action(inx, string, 1, bl->context, listItemP?listItemP->itemData:NULL);
+			lcontrol->action(inx, string, 1, bl->context,
+			                 listItemP?listItemP->itemData:NULL);
 		}
 	}
 
@@ -322,12 +326,12 @@ wlibNewComboBox(GtkListStore *ls, int editable)
 }
 
 /**
- * Signal handler for the "changed"-signal in drop list's entry field.
+ * Signal handler for the "changed"-signal in combobox's entry field.
  * Get the entered text and calls the 'action' for handling of entered
  * value.
  * *
- * \param entry IN entry field of the droplist
- * \param data IN the drop list handle
+ * \param entry	IN entry field of the combobox
+ * \param data	IN pointer to control
  * \return
  */
 
@@ -352,24 +356,25 @@ static void ComboBoxEntryEntered(
 }
 
 /**
- * Create a combo box. The combo box is created.
+ * Create a combobox. The combobox is created having one text column.
  *
  * ### Usage in dialogs
  *
  * - Generated: yes
+ * - Builder: yes
  *
  * ### Options
  * BL_EDITABLE
- * : add and edit field to the combo box
+ * : add and edit field to the combobox
  *
  *	\param IN parent    Parent window
  *	\param IN x, y      position
  *	\param IN helpStr   Help string
  *	\param IN labelStr  Label
  *	\param IN option    Options
- *	\param IN number    Number of displayed entries ????
+ *	\param IN number    unused
  *	\param IN width     Width
- *	\param IN valueP    Selected index
+ *	\param IN valueP    selected index
  *	\param IN action    Callback
  *	\param IN data      Context
  */
@@ -396,8 +401,13 @@ wControl_p wComboBoxCreate(
 	lcontrol->action = action;
 	lcontrol->last = -1;
 
-	if(option & BO_USEBUILDER) {
-		/** \todo Implement builder support */
+	if(HASDIALOGBUILDER(parent)) {
+		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
+		lcontrol->listStore = gtk_combo_box_get_model(GTK_COMBO_BOX(b->widget));
+		if (!lcontrol->listStore) {
+			abort();
+		}
+
 	} else {
 
 		// create tree store for storing the contents
@@ -414,19 +424,11 @@ wControl_p wComboBoxCreate(
 		if (b->widget == 0) {
 			abort();
 		}
-		g_object_ref_sink(lcontrol->listStore);
-		g_object_unref(G_OBJECT(lcontrol->listStore));
 
-		wlibComboBoxAddColumns(b->widget, COMBOBOX_TEXTCOLUMNS);
-
-		gtk_combo_box_set_entry_text_column(GTK_COMBO_BOX(b->widget),
-		                                    LISTCOL_TEXT);
 
 		// combo's style
 		//gtk_rc_parse_string("style \"my-style\" { GtkComboBox::appears-as-list = 1 } widget \"*.mycombo\" style \"my-style\"  ");
 		// gtk_widget_set_name(b->widget, "mycombo");
-		g_signal_connect(G_OBJECT(b->widget), "changed",
-		                 G_CALLBACK(ComboBoxChanged), b);
 
 		wlibBasicGridAttach(parent, b->widget, x, y, width, 1);
 
@@ -437,6 +439,18 @@ wControl_p wComboBoxCreate(
 		gtk_widget_show(b->widget);
 	}
 	wlibAddHelpString(b->widget, helpStr);
+
+	g_object_ref_sink(lcontrol->listStore);
+	g_object_unref(G_OBJECT(lcontrol->listStore));
+
+	wlibComboBoxAddColumns(b->widget, COMBOBOX_TEXTCOLUMNS);
+
+	gtk_combo_box_set_entry_text_column(GTK_COMBO_BOX(b->widget),
+	                                    LISTCOL_TEXT);
+
+	g_signal_connect(G_OBJECT(b->widget), "changed",
+	                 G_CALLBACK(ComboBoxChanged), b);
+
 //	wlibAddTooltip(b->widget, parent->name, helpStr);
 	return b;
 }
