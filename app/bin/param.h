@@ -61,7 +61,7 @@ typedef enum {
 
 #define PDO_NORECORD			(1L<<6)
 #define PDO_NOPSHACT			(1L<<7)
-#define PDO_NOPSHUPD			(1L<<8)
+#define PDO_NOPSHUPD			(1L<<8)		/**< do not update the input variable */
 #define PDO_NOUPDACT			(1L<<9)
 #define PDO_NOACT		(PDO_NOPSHACT|PDO_NOUPDACT)
 #define PDO_NOUPD		(PDO_NORSTUPD|PDO_NOPSHUPD)
