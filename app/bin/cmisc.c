@@ -672,7 +672,7 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 		break;
 
 	case C_CANCEL:
-//		DescribeDone( NULL );
+		DescribeDone( NULL );
 		wSetCursor(mainD.d,defaultCursor);
 		return C_CONTINUE;
 
