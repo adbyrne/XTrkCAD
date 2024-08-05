@@ -89,11 +89,11 @@ static void CustomDlgUpdate(
 		lcnt = wListGetCount( (wList_p)pg->paramPtr[inx].control );
 		for ( linx=0;
 		      linx<lcnt && wListGetItemSelected( (wList_p)customPLs[0].control,
-		              linx ) != TRUE;
+		                      linx ) != TRUE;
 		      linx++ );
 		if ( linx < lcnt ) {
 			context = (custMgmContext_p)wListGetItemContext( (wList_p)
-			          pg->paramPtr[inx].control, linx );
+			                pg->paramPtr[inx].control, linx );
 			wButtonSetLabel( (wButton_p)customPLs[I_CUSTOMEDIT].control,
 			                 context->proc( CUSTMGM_CAN_EDIT, context->data )?_("Edit"):_("Rename") );
 			ParamControlActive( &customPG, I_CUSTOMEDIT, TRUE );
@@ -413,7 +413,8 @@ static void DoCustomMgr( void * junk )
 	if (customPG.win == NULL) {
 		ParamCreateDialog( &customPG,
 		                   MakeWindowTitle(_("Manage custom designed parts")), _("Done"), CustomDone,
-		                   ParamCancel_Current, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK, CustomDlgUpdate );
+		                   ParamCancel_Current, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK,
+		                   CustomDlgUpdate );
 		while(customTypes[ i ] != NULL) {
 			wListAddValue( ((wList_p)customPLs[I_CUSTOMNEWTYPE].control),
 			               customTypes[ i++ ], NULL, NULL );

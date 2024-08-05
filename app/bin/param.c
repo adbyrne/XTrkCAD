@@ -2401,19 +2401,19 @@ static void ParamCreateControl(
 		floatRangeP = pd->winData;
 		w = floatRangeP->width?floatRangeP->width:100;
 		pd->control = (wControl_p)wStringCreate( win, xx, yy, helpStr, _(pd->winLabel),
-		              pd->winOption, w, NULL, 0, ParamFloatPush, pd );
+		                pd->winOption, w, NULL, 0, ParamFloatPush, pd );
 		break;
 	case PD_LONG:
 		integerRangeP = pd->winData;
 		w = integerRangeP->width?integerRangeP->width:100;
 		pd->control = (wControl_p)wStringCreate( win, xx, yy, helpStr, _(pd->winLabel),
-		              pd->winOption, w, NULL, 0, ParamIntegerPush, pd );
+		                pd->winOption, w, NULL, 0, ParamIntegerPush, pd );
 		break;
 	case PD_STRING:
 		w = pd->winData?(wWinPix_t)VP2L(pd->winData):(wWinPix_t)250;
 		pd->control = (wControl_p)wStringCreate( win, xx, yy, helpStr, _(pd->winLabel),
-		              pd->winOption, w, (pd->option&PDO_NOPSHUPD)?NULL:pd->valueP, 0, ParamStringPush,
-		              pd );
+		                pd->winOption, w, (pd->option&PDO_NOPSHUPD)?NULL:pd->valueP, 0, ParamStringPush,
+		                pd );
 		break;
 	case PD_RADIO:
 		pd->control = (wControl_p)wRadioCreate( win, xx, yy, helpStr, _(pd->winLabel),
@@ -2421,7 +2421,7 @@ static void ParamCreateControl(
 		break;
 	case PD_TOGGLE:
 		pd->control = (wControl_p)wToggleCreate( win, xx, yy, helpStr, _(pd->winLabel),
-		              pd->winOption, pd->winData, NULL, ParamChoicePush, pd );
+		                pd->winOption, pd->winData, NULL, ParamChoicePush, pd );
 		break;
 	case PD_LIST:
 		listDataP = (paramListData_t*)pd->winData;
@@ -2465,18 +2465,18 @@ static void ParamCreateControl(
 	case PD_DROPLIST:
 		w = pd->winData?(wWinPix_t)VP2L(pd->winData):(wWinPix_t)100;
 		pd->control = (wControl_p)wDropListCreate( win, xx, yy, helpStr,
-		              _(pd->winLabel), pd->winOption, 10, w, NULL, ParamListPush, pd );
+		                _(pd->winLabel), pd->winOption, 10, w, NULL, ParamListPush, pd );
 		break;
 	case PD_COMBOLIST:
 		listDataP = (paramListData_t*)pd->winData;
 		pd->control = (wControl_p)wComboListCreate( win, xx, yy, helpStr,
-		              _(pd->winLabel), pd->winOption, listDataP->number, listDataP->width, NULL,
-		              ParamListPush, pd );
+		                _(pd->winLabel), pd->winOption, listDataP->number, listDataP->width, NULL,
+		                ParamListPush, pd );
 		listDataP->height = wControlGetHeight( pd->control );
 		break;
 	case PD_COLORLIST:
 		pd->control = (wControl_p)wColorSelectButtonCreate( win, xx, yy, helpStr,
-		              _(pd->winLabel), pd->winOption, 0, NULL, ParamColorSelectPush, pd );
+		                _(pd->winLabel), pd->winOption, 0, NULL, ParamColorSelectPush, pd );
 		break;
 	case PD_MESSAGE:
 		if ( pd->winData != 0 ) {
@@ -2487,11 +2487,11 @@ static void ParamCreateControl(
 			w = 150;
 		}
 		pd->control = (wControl_p)wMessageCreateEx( win, xx, yy, _(pd->winLabel), w,
-		              pd->valueP?_(pd->valueP):" ", pd->winOption );
+		                pd->valueP?_(pd->valueP):" ", pd->winOption );
 		break;
 	case PD_BUTTON:
 		pd->control = (wControl_p)wButtonCreate( win, xx, yy, helpStr, _(pd->winLabel),
-		              pd->winOption, 0, ParamButtonPush, pd );
+		                pd->winOption, 0, ParamButtonPush, pd );
 		break;
 	case PD_MENU:
 		menu = wMenuCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption );
@@ -2499,7 +2499,7 @@ static void ParamCreateControl(
 		break;
 	case PD_MENUITEM:
 		pd->control = (wControl_p)wMenuPushCreate( menu, helpStr, _(pd->winLabel), 0,
-		              ParamMenuPush, pd );
+		                ParamMenuPush, pd );
 		break;
 	case PD_DRAW:
 		drawDataP = pd->winData;

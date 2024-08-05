@@ -4598,7 +4598,7 @@ static void DoCarPartDlg( carDlgAction_e *actions )
 	if ( carDlgPG.win == NULL ) {
 		ParamCreateDialog( &carDlgPG, MakeWindowTitle(_("New Car Part")), _("Add"),
 		                   CarDlgOk, ParamCancel_Custom( CarDlgClose ),
-				   TRUE, CarDlgLayout,
+		                   TRUE, CarDlgLayout,
 		                   F_BLOCK|F_RESIZE|F_RECALLSIZE|PD_F_ALT_CANCELLABEL, CarDlgUpdate );
 
 		if ( carDlgDim.carWidth==0 ) {

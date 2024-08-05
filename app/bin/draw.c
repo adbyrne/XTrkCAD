@@ -1451,7 +1451,7 @@ static void ChangeMapScale()
 	FLOAT_T fScale = ceil( max( fScaleW, fScaleH ) );
 	if ( fScale > mapD.scale ) {
 		LOG( log_mapsize, 2, ( "  ChangeMapScale incr scale from %0.3f to %0.3f\n",
-					mapD.scale, fScale ) );
+		                       mapD.scale, fScale ) );
 		mapD.scale = fScale;
 	}
 
@@ -3318,7 +3318,8 @@ EXPORT void DrawInit( int initialZoom )
 	/*h = (wWinPix_t)((mapD.size.y/mapD.scale)*mainD.dpi + 0.5)+2;*/
 	ParamRegister( &mapPG );
 	LOG( log_mapsize, 2, ( "DrawInit/ParamCreateDialog(&mapPG\n" ) );
-	mapW = ParamCreateDialog( &mapPG, MakeWindowTitle(_("Map")), NULL, NULL, ParamCancel_Null,
+	mapW = ParamCreateDialog( &mapPG, MakeWindowTitle(_("Map")), NULL, NULL,
+	                          ParamCancel_Null,
 	                          FALSE, NULL, F_RESIZE, NULL );
 	ChangeMapScale();
 

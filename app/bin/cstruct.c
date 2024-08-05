@@ -1027,7 +1027,9 @@ static STATUS_T CmdStructure(
 	case C_START:
 		if (structureW == NULL) {
 			structureW = ParamCreateDialog( &structurePG, MakeWindowTitle(_("Structure")),
-			                                _("Close"), (paramActionOkProc)DoStructOk, ParamCancel_Null, TRUE, NULL, F_RESIZE,
+			                                _("Close"), (paramActionOkProc)DoStructOk,
+			                                ParamCancel_Null, TRUE, NULL,
+			                                F_RESIZE,
 			                                StructureDlgUpdate );
 			RegisterChangeNotification( structureChange );
 		}

@@ -1010,7 +1010,7 @@ static int OfferCheckpoint( void )
 	return (ret>=0);
 }
 
-void 
+void
 InitAudio()
 {
 	wPrefGetInteger("misc", "audio", &enableAudio, true);

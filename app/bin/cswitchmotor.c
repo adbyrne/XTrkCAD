@@ -605,7 +605,9 @@ static void NewSwitchMotorDialog(track_p trk)
 	if ( !switchmotorW ) {
 		ParamRegister( &switchmotorPG );
 		switchmotorW = ParamCreateDialog (&switchmotorPG,
-		                                  MakeWindowTitle(_("Create switch motor")), _("Ok"), SwitchMotorOk, ParamCancel_Current, TRUE,
+		                                  MakeWindowTitle(_("Create switch motor")),
+		                                  ("Ok"), SwitchMotorOk,
+		                                  ParamCancel_Current, TRUE,
 		                                  NULL, F_BLOCK, NULL );
 		switchmotorD.dpi = mainD.dpi;
 	}

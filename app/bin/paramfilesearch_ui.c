@@ -475,7 +475,7 @@ void DoSearchParams(void * junk)
 
 		searchUiW = ParamCreateDialog(&searchUiPG,
 		                              MakeWindowTitle(_("Choose parameter files")), _("Done"), NULL,
-					      ParamCancel_Custom( SearchUiCancel ),
+		                              ParamCancel_Custom( SearchUiCancel ),
 		                              TRUE, NULL, F_RESIZE | F_RECALLSIZE, SearchUiDlgUpdate);
 
 

@@ -308,7 +308,7 @@ EXPORT void DescribeDone(void * junk)
 		}
 		if (layerValue && *layerValue>=0) {
 			SetTrkLayer(descTrk,
-				    editableLayerList[*layerValue]);
+			            editableLayerList[*layerValue]);
 		}
 		// wipe out reference
 		layerValue = NULL;
@@ -468,7 +468,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 	if (describePG.win == NULL) {
 		/* SDB 5.13.2005 */
 		ParamCreateDialog(&describePG, _("Description"), _("Done"), DescribeDone,
-				  ParamCancel_Undo,
+		                  ParamCancel_Undo,
 		                  TRUE, DescribeLayout, F_RECALLPOS,
 		                  DescribeUpdate);
 		describeCmdButtonEnd = wControlBelow((wControl_p)describePG.helpB);
@@ -680,7 +680,7 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 		menuPos = pos;
 		if (!trk) { wMenuPopupShow(descPopupM); }
 		return C_CONTINUE;
-	
+
 	case C_FINISH:
 		return C_CONTINUE;
 	}

@@ -691,7 +691,7 @@ static void NewBlockDialog()
 		ParamRegister( &blockPG );
 		blockW = ParamCreateDialog (&blockPG, MakeWindowTitle(_("Create Block")),
 		                            _("Ok"), BlockOk, ParamCancel_Current,
-					    TRUE, NULL, F_BLOCK, NULL );
+		                            TRUE, NULL, F_BLOCK, NULL );
 		blockD.dpi = mainD.dpi;
 	}
 	ParamLoadControls( &blockPG );

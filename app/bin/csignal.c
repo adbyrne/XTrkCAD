@@ -749,7 +749,7 @@ static void EditSignalDialog()
 		                                 MakeWindowTitle(_("Edit signal")),
 		                                 _("Ok"), SignalEditOk,
 		                                 ParamCancel_Custom( SignalEditCancel ),
-						 TRUE, NULL,
+		                                 TRUE, NULL,
 		                                 F_RESIZE|F_RECALLSIZE|F_BLOCK,
 		                                 SignalEditDlgUpdate );
 	}

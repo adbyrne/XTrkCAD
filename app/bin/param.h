@@ -304,7 +304,7 @@ void ParamCancel_Reset( wWin_p );
 // Done/Ok propagates changed values. Cancel just closes dialog
 void ParamCancel_Restore( wWin_p );
 
-// Pending 
+// Pending
 // Dialogs which haven't been converted yet: work in progress
 // signalEdit, carDlg, layout, paramfilesearch_ui
 #define ParamCancel_Custom( PROC ) PROC

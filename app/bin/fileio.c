@@ -1732,6 +1732,6 @@ EXPORT void FileInit( void )
 	SetLayoutFullPath("");
 	MakeFullpath(&clipBoardN, workingDir, sClipboardF, NULL);
 	LocaleInit();
-	
+
 	log_timereadfile = LogFindIndex( "timereadfile" );
 }
