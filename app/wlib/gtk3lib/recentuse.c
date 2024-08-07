@@ -32,12 +32,12 @@
 #include "gtkint.h"
 #include "i18n.h"
 
-#define WLISTITEM	"wListItem"		/**< id for object data */
-#define WLISTMENU	"wListMenu"		/**< id for reference to main list data */
+#define WLISTITEM	"wListItem"		/**< id for object attributes */
+#define WLISTMENU	"wListMenu"		/**< id for reference to main list attributes */
 
-struct listentry {					/**< data of items in recently used list */
+struct listentry {					/**< attributes of items in recently used list */
     char* label;				// text label for menu
-    const char* data;			// application data
+    const char* attributes;			// application attributes
 };
 
 /*-----------------------------------------------------------------*/
@@ -51,7 +51,7 @@ struct listentry {					/**< data of items in recently used list */
 static void
 ShowMenuList(struct recentuse *ru)
 {
- //   struct recentuse* ru = WLIB_GET_DATA_PTR(ml, recentuse);
+ //   struct recentuse* ru = CONTROL_GET_ATTRIBUTES_PTR(ml, recentuse);
     if (ru->current == 0) {
         gtk_menu_item_set_label(GTK_MENU_ITEM(ru->widgets[0]), "Empty List");
         gtk_widget_set_sensitive(ru->widgets[0], FALSE);
@@ -93,7 +93,7 @@ static void ActivateListMenuItem(
     if (list->action) {
         (*list->action)(0,
             gtk_menu_item_get_label(GTK_MENU_ITEM(widget)),
-            item->data);
+            item->attributes);
     }
 
     // update order of elements in list
@@ -163,7 +163,7 @@ wControl_p wMenuListCreate(
 {
     struct recentuse *ru;
     wControl_p ml = wlibControlNew(M_RECENTUSE, m, helpStr, NULL);
-    ru = WLIB_GET_DATA_PTR(ml, recentuse);
+    ru = CONTROL_GET_ATTRIBUTES_PTR(ml, recentuse);
     ru->action = action;
     ru->elements = NULL;
     ru->max = max;
@@ -218,13 +218,13 @@ FreeEntry(GSList* list, unsigned element)
  *
  * \param list	Menu list to be modified
  * \param label	label of new entry
- * \param data	data for new entry
+ * \param attributes	attributes for new entry
  */
 
 static int
-PushListEntry(wControl_p list, const char* label, const char* data)
+PushListEntry(wControl_p list, const char* label, const char* attributes)
 {
-    struct recentuse *ru = WLIB_GET_DATA_PTR(list, recentuse);
+    struct recentuse *ru = CONTROL_GET_ATTRIBUTES_PTR(list, recentuse);
     struct listentry *newEntry;
     newEntry = g_malloc0(sizeof( struct listentry));
 
@@ -234,7 +234,7 @@ PushListEntry(wControl_p list, const char* label, const char* data)
     }
 
     newEntry->label = g_strdup(wlibConvertInput(label));
-    newEntry->data = data;
+    newEntry->attributes = attributes;
 
     ru->elements = g_slist_prepend(ru->elements, newEntry);
 
@@ -249,7 +249,7 @@ PushListEntry(wControl_p list, const char* label, const char* data)
  * \param ml 		IN handle for the menu list - the placeholder item
  * \param index 	IN position of new menu item
  * \param labelStr 	IN the menu label for the new item
- * \param data 		IN application data for the new item
+ * \param attributes 		IN application attributes for the new item
  * \return
  */
 
@@ -257,10 +257,10 @@ void wMenuListAdd(
     wControl_p ml,
     int index,
     const char* labelStr,
-    const void* data)
+    const void* attributes)
 {
-    struct recentuse *ru = WLIB_GET_DATA_PTR(ml, recentuse);
-    ru->current = PushListEntry(ml, labelStr, data);
+    struct recentuse *ru = CONTROL_GET_ATTRIBUTES_PTR(ml, recentuse);
+    ru->current = PushListEntry(ml, labelStr, attributes);
 
     ShowMenuList(ru);
 }
@@ -280,16 +280,16 @@ void wMenuListDelete(
 }
 
 /**
- * Get the label and the application data of a specific menu list item
+ * Get the label and the application attributes of a specific menu list item
  *
  * \param ml 	IN menu list
  * \param index IN item within list
- * \param data	OUT	application data
+ * \param attributes	OUT	application attributes
  * \return    item label
  */
 
 const char*
-wMenuListGet(wControl_p ml, unsigned int index, void** data)
+wMenuListGet(wControl_p ml, unsigned int index, void** attributes)
 {
     printf("%s:%d Not implemented!", __FILE__, __LINE__);
 

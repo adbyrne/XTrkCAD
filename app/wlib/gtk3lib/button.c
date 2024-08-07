@@ -60,7 +60,7 @@ void wButtonSetBusy(wControl_p bb, int value)
  *
  * \param widget    IN  the button
  * \param option    IN
- * \param labelStr  IN  the pixel data or the label text
+ * \param labelStr  IN  the pixel attributes or the label text
  * \param labelG    IN
  * \param imageG    IN
  *
@@ -162,8 +162,8 @@ void wButtonSetLabel(wControl_p bb, unsigned isIcon, const char * labelStr)
 void wlibButtonDoAction(
         wControl_p bb)
 {
-	if (bb->data.button.action) {
-		bb->data.button.action(bb->context);
+	if (bb->attributes.button.action) {
+		bb->attributes.button.action(bb->context);
 	}
 }
 
@@ -177,7 +177,7 @@ static void buttonClick(
         GtkWidget *widget,
         gpointer value)
 {
-	struct button *b = WLIB_GET_DATA_PTR(((wControl_p)value),button);
+	struct button *b = CONTROL_GET_ATTRIBUTES_PTR(((wControl_p)value),button);
 
 	if (b->action) {
 		b->action(((wControl_p)value)->context);
@@ -218,7 +218,7 @@ static wBool_t drawButton(
  * \param option IN Options
  * \param width IN Width of button
  * \param action IN Callback
- * \param data IN User data as context
+ * \param attributes IN User attributes as context
  * \returns button widget
  *
  * \todo replace XBM format (layer buttons) or add support in buttons.
@@ -235,13 +235,13 @@ wControl_p wButtonCreate(
         long 	option,
         wWinPix_t 	width,
         wButtonCallBack_p action,
-        void 	* data)
+        void 	* attributes)
 {
 	wControl_p b;
 	struct button* button; 
 
-	b = wlibControlNew( B_BUTTON, parent, helpStr, data );
-	button = WLIB_GET_DATA_PTR(b, button);
+	b = wlibControlNew( B_BUTTON, parent, helpStr, attributes );
+	button = CONTROL_GET_ATTRIBUTES_PTR(b, button);
 	button->action = action;
 
 	if (HASDIALOGBUILDER(parent)) {
@@ -295,7 +295,7 @@ wControl_p wButtonCreate(
  * \param option IN		options
  * \param width IN		unused
  * \param action IN		callback
- * \param data IN		user data as context
+ * \param attributes IN		user attributes as context
  * \returns button widget
  *
  * \todo replace XBM format (layer buttons) or add support in buttons.
@@ -312,7 +312,7 @@ wControl_p wButtonCreateForToolbar(
         long 	option,
         wWinPix_t 	width,
         wButtonCallBack_p action,
-        void* data)
+        void* attributes)
 {
 	//wControl_p b;
 	//struct button* button;
@@ -322,8 +322,8 @@ wControl_p wButtonCreateForToolbar(
 	// * \todo make sure that parent is appmainwindow.
 	// */
 
-	//b = wlibControlNew(B_BUTTON, data);
-	//button = &(b->data.button);
+	//b = wlibControlNew(B_BUTTON, attributes);
+	//button = &(b->attributes.button);
 	//button->action = action;
 
 	//b->widget = GTK_WIDGET(gtk_toggle_button_new());

@@ -155,7 +155,7 @@ response_signal(GtkDialog* self, gint response_id, wControl_p dialog)
         return;
     }
 
-    dialog->data.window.winProc(dialog, event, NULL, NULL);
+    dialog->attributes.window.winProc(dialog, event, NULL, NULL);
 } 
 
 /**
@@ -194,9 +194,9 @@ void
 wDialogButtonsConfigure(wControl_p dialog, const char* okLabel, 
     const char* cancelLabel, const char* helpLabel)
 {
-    ConfigureButton(&dialog->data.window, "id_ok", okLabel);
-    ConfigureButton(&dialog->data.window, "id_cancel", cancelLabel);
-    ConfigureButton(&dialog->data.window, "id_help", helpLabel);
+    ConfigureButton(&dialog->attributes.window, "id_ok", okLabel);
+    ConfigureButton(&dialog->attributes.window, "id_cancel", cancelLabel);
+    ConfigureButton(&dialog->attributes.window, "id_help", helpLabel);
 }
 
 /**
@@ -241,7 +241,7 @@ CreateWindowFromBuilder( wControl_p window, const char *nameStr, long option )
     resourcePath = NULL;
 
     window->name = g_strdup(nameStr);
-    window->data.window.builder = builder;
+    window->attributes.window.builder = builder;
     window->widget = dialog;
     g_free(tempStr);
 
@@ -271,7 +271,7 @@ CreateWindowFromBuilder( wControl_p window, const char *nameStr, long option )
  * \param nameStr   IN  dialog id
  * \param option    IN  see above
  * \param winProc   IN dialog procedure
- * \param data      IN  user data for dialog procedure
+ * \param attributes      IN  user attributes for dialog procedure
  * \return          dialog handle on success, NULL on failure
  */
 
@@ -282,14 +282,14 @@ wWinDialogCreate(wControl_p parent,
     const char* nameStr,
     long option,
     wWinCallBack_p winProc,
-    void* data)
+    void* attributes)
 {
     GtkWidget* dialog;
     GtkWidget* parentWindow;
     struct window* dcontrol;
 
-    wControl_p winDialog = wlibControlNew(W_DIALOG, parent, helpStr, data);
-    dcontrol = WLIB_GET_DATA_PTR(winDialog, window);
+    wControl_p winDialog = wlibControlNew(W_DIALOG, parent, helpStr, attributes);
+    dcontrol = CONTROL_GET_ATTRIBUTES_PTR(winDialog, window);
 
     dialog = CreateWindowFromBuilder(winDialog, nameStr, option);
 
@@ -343,7 +343,7 @@ wWinDialogCreate(wControl_p parent,
  * \param nameStr   IN Window name
  * \param option    IN Options
  * \param winProc   IN call back function
- * \param data      IN User context information
+ * \param attributes      IN User context information
  * \return    handle for new window
  */
 
@@ -356,7 +356,7 @@ static wWin_p wWinPopupCreate(
     const char* nameStr,
     long option,
     wWinCallBack_p winProc,
-    void* data)
+    void* attributes)
 {
     wWin_p win;
 
@@ -371,7 +371,7 @@ static wWin_p wWinPopupCreate(
     printf("%s:%d not implemented\n", __FILE__, __LINE__);
 
     //win = wWinCommonCreate(parent, W_POPUP, x, y, labelStr, nameStr, option,
-    //    winProc, data);
+    //    winProc, attributes);
     return win;
 }
 

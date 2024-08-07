@@ -101,7 +101,7 @@ long wRadioGetValue(
  * button group
  *
  * \param widget IN the button group
- * \param b IN user data (button group????)
+ * \param b IN user attributes (button group????)
  * \returns always 1
  */
 
@@ -113,7 +113,7 @@ static int radioChoice(
 	long value = radioGetValue(GTK_RADIO_BUTTON(widget));
 	struct radio *rcontrol;
 
-	rcontrol = WLIB_GET_DATA_PTR(bc, radio);
+	rcontrol = CONTROL_GET_ATTRIBUTES_PTR(bc, radio);
 
 	if (value != -1) {
 		if (rcontrol->valueP) {
@@ -150,7 +150,7 @@ static int radioChoice(
  * \param labels IN Labels
  * \param valueP IN Selected value
  * \param action IN Callback
- * \param data IN User data as context
+ * \param attributes IN User attributes as context
  * \returns radio button widget
  */
 
@@ -164,12 +164,12 @@ wControl_p wRadioCreate(
         const char* const* labels,
         long* valueP,
         wChoiceCallBack_p action,
-        void* data)
+        void* attributes)
 {
 	wControl_p b;
 	struct radio* rcontrol;
-	b = wlibControlNew(B_RADIO, parent, helpStr, data);
-	rcontrol = WLIB_GET_DATA_PTR(b, radio);
+	b = wlibControlNew(B_RADIO, parent, helpStr, attributes);
+	rcontrol = CONTROL_GET_ATTRIBUTES_PTR(b, radio);
 	rcontrol->action = action;
 	rcontrol->valueP = valueP;
 

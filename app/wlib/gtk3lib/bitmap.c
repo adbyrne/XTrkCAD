@@ -58,7 +58,7 @@ wBitmapCreate( wControl_p parent, wWinPix_t x, wWinPix_t y, long options,
 	GtkWidget *image;
 	
 	bt = wlibControlNew(B_BITMAP, parent, NULL, NULL);
-	bm = WLIB_GET_DATA_PTR(bt, bitmap);
+	bm = CONTROL_GET_ATTRIBUTES_PTR(bt, bitmap);
 
 	/*
 	 * Depending on the platform, parent->widget->window might still be null 
@@ -70,7 +70,7 @@ wBitmapCreate( wControl_p parent, wWinPix_t x, wWinPix_t y, long options,
 	//if ( gtk_widget_get_window( parent->gtkWindow ) == NULL )
 	//	gtk_widget_realize( parent->gtkWindow ); /* force allocation, if pending */
 	
-	/* create the bitmap from supplied xpm data */
+	/* create the bitmap from supplied xpm attributes */
 	pixbuf = gdk_pixbuf_new_from_xpm_data( (const char **)iconP->bits );
 	g_object_ref_sink(pixbuf);
 	image = gtk_image_new_from_pixbuf( pixbuf );

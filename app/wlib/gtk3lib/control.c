@@ -269,7 +269,7 @@ void wControlSetLabel(
 }
 
 /**
- * Set the context ie. additional user data for a control
+ * Set the context ie. additional user attributes for a control
  *
  * \param b IN control
  * \param context IN user date

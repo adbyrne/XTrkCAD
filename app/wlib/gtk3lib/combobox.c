@@ -40,7 +40,7 @@
 
 
 /**
- * Show the data columns in the combobox. If combobox has an entry field
+ * Show the attributes columns in the combobox. If combobox has an entry field
  * the first text column is not added here as this is done by GTK
  * automatically.
  *
@@ -67,7 +67,7 @@ wlibComboBoxAddColumns(GtkWidget *comboBox, int columns)
 		/* Pack it into the droplist */
 		gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(comboBox), cell, TRUE);
 
-		/* Connect renderer to data source */
+		/* Connect renderer to attributes source */
 		gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(comboBox),
 		                               cell,
 		                               "text",
@@ -104,7 +104,7 @@ wComboBoxClear(wList_p b)
 }
 
 /**
- * Get the user data / context information for a row in the combobox. The
+ * Get the user attributes / context information for a row in the combobox. The
  * context information is stored with the row in a hidden field.
  *
  * \param b		IN widget
@@ -115,18 +115,18 @@ wComboBoxClear(wList_p b)
 void *wComboBoxGetItemContext(wList_p b, wIndex_t inx)
 {
 	GtkTreeIter iter;
-	wListItem_p data = NULL;
+	wListItem_p attributes = NULL;
 
 	if (gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->listStore), &iter, NULL,
 	                                  inx)) {
 		gtk_tree_model_get(GTK_TREE_MODEL(b->listStore),
 		                   &iter,
-		                   LISTCOL_DATA, (void *)&data,
+		                   LISTCOL_DATA, (void *)&attributes,
 		                   -1);
 	}
 
-	if (data) {
-		return (data->itemData);
+	if (attributes) {
+		return (attributes->itemData);
 	} else {
 		return (NULL);
 	}
@@ -143,16 +143,16 @@ void *wComboBoxGetItemContext(wList_p b, wIndex_t inx)
 void wComboBoxAddValue(
         wControl_p b,
         char *text,
-        wControl_p data)
+        wControl_p attributes)
 {
 	GtkTreeIter iter;
-	struct list *list = WLIB_GET_DATA_PTR(b, list);
+	struct list *list = CONTROL_GET_ATTRIBUTES_PTR(b, list);
 
 	gtk_list_store_append(list->listStore, &iter);	// append new row to tree store
 
 	gtk_list_store_set(list->listStore, &iter,
 	                   LISTCOL_TEXT, text,
-	                   LISTCOL_DATA, (void *)data,
+	                   LISTCOL_DATA, (void *)attributes,
 	                   -1);
 }
 
@@ -166,7 +166,7 @@ void wListSetValue(
         wControl_p bl,
         const char * val)
 {
-	struct list* list = WLIB_GET_DATA_PTR(bl, list);
+	struct list* list = CONTROL_GET_ATTRIBUTES_PTR(bl, list);
 
 	list->editted = TRUE;
 	gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(bl->widget))), val);
@@ -209,7 +209,7 @@ wBool_t wComboBoxSetValues(
         void *itemData)
 {
 	GtkTreeIter iter;
-	struct list *lcontrol = WLIB_GET_DATA_PTR(b, list);
+	struct list *lcontrol = CONTROL_GET_ATTRIBUTES_PTR(b, list);
 
 	if (gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(lcontrol->listStore), &iter,
 	                                  NULL,
@@ -230,17 +230,17 @@ wBool_t wComboBoxSetValues(
  * Or handles user entered text.
  *
  * \param comboBox  IN the combobox
- * \param data      IN user data / pointer to the control
+ * \param attributes      IN user attributes / pointer to the control
  * \return
  */
 
 static int ComboBoxChanged(
         GtkComboBox * comboBox,
-        gpointer data)
+        gpointer attributes)
 {
-	wControl_p bl = (wControl_p)data;
+	wControl_p bl = (wControl_p)attributes;
 	GtkTreeIter iter;
-	struct list* lcontrol = WLIB_GET_DATA_PTR(bl, list);
+	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(bl, list);
 
 	wIndex_t inx = 0;
 	gchar *string = NULL;
@@ -250,7 +250,7 @@ static int ComboBoxChanged(
 	if (gtk_combo_box_get_active_iter(GTK_COMBO_BOX(comboBox), &iter)) {
 		GtkTreeModel *model;
 
-		/* Obtain data model from combobox. */
+		/* Obtain attributes model from combobox. */
 		model = gtk_combo_box_get_model(comboBox);
 
 		/* get the selected row */
@@ -331,7 +331,7 @@ wlibNewComboBox(GtkListStore *ls, int editable)
  * value.
  * *
  * \param entry	IN entry field of the combobox
- * \param data	IN pointer to control
+ * \param attributes	IN pointer to control
  * \return
  */
 
@@ -341,7 +341,7 @@ static void ComboBoxEntryEntered(
 {
 	const gchar *text;
 	wControl_p c = userData;
-	struct list* lcontrol = WLIB_GET_DATA_PTR(c, list);
+	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(c, list);
 
 	text = gtk_entry_get_text(entry);
 
@@ -376,7 +376,7 @@ static void ComboBoxEntryEntered(
  *	\param IN width     Width
  *	\param IN valueP    selected index
  *	\param IN action    Callback
- *	\param IN data      Context
+ *	\param IN attributes      Context
  */
 
 wControl_p wComboBoxCreate(
@@ -390,13 +390,13 @@ wControl_p wComboBoxCreate(
         wWinPix_t	width,
         long	*valueP,
         wListCallBack_p action,
-        void 	*data)
+        void 	*attributes)
 {
 	wControl_p b;
 	struct list* lcontrol;
 
-	b = wlibControlNew(B_COMBOBOX, parent, helpStr, data);
-	lcontrol = WLIB_GET_DATA_PTR(b, list);
+	b = wlibControlNew(B_COMBOBOX, parent, helpStr, attributes);
+	lcontrol = CONTROL_GET_ATTRIBUTES_PTR(b, list);
 	lcontrol->valueP = valueP;
 	lcontrol->action = action;
 	lcontrol->last = -1;

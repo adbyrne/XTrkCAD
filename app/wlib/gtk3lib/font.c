@@ -75,12 +75,12 @@ static wFont_p curFont = NULL;
  *
  * \param fontSelectionDialog IN dialog
  * \param response IN response code from dialog
- * \param data IN unused
+ * \param attributes IN unused
  * \return
  */
 
 static void fontSelectionDialogCallback(GtkFontChooserDialog
-                                        *fontSelectionDialog, gint response, gpointer data)
+                                        *fontSelectionDialog, gint response, gpointer attributes)
 {
     if (response == GTK_RESPONSE_APPLY || response == GTK_RESPONSE_OK) {
         gchar *fontName;
@@ -247,7 +247,7 @@ void wlibFontDestroyPangoLayout(PangoLayout *layout)
 }
 
 /**
- * Initialize font data
+ * Initialize font attributes
  * \return
  */
 

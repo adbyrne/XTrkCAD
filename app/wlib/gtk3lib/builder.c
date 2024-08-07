@@ -91,7 +91,7 @@ wlibExistsTemplate(const char *name)
  * \param IN labelStr the name that will be shown in the title of the window
  * \param IN nameStr the name to look up
  * \param IN option the creation options
- * \param INOUT data passed through to wlibAlloc
+ * \param INOUT attributes passed through to wlibAlloc
  * \return the window object pointer
  *
  * \todo Check signature for unused parameters
@@ -99,14 +99,14 @@ wlibExistsTemplate(const char *name)
 
 wControl_p
 wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr,
-                        long option, void *data )
+                        long option, void *attributes )
 {
 	wControl_p w;
 	GString *filename;
 	struct window* dcontrol;
 
-	w = wlibControlNew(winType, NULL, nameStr, data);
-	dcontrol = WLIB_GET_DATA_PTR(w, window);
+	w = wlibControlNew(winType, NULL, nameStr, attributes);
+	dcontrol = CONTROL_GET_ATTRIBUTES_PTR(w, window);
 
 	filename = wlibFileNameFromDialog( nameStr );
 
@@ -207,7 +207,7 @@ wlibWidgetFromIdWarn(wControl_p win, const char *id)
 GtkWidget *
 wlibWidgetFromId( wControl_p win, const char *id)
 {
-	GObject * wi = gtk_builder_get_object(win->data.window.builder, id);
+	GObject * wi = gtk_builder_get_object(win->attributes.window.builder, id);
 	return (GtkWidget *)wi;
 }
 

@@ -56,7 +56,7 @@ void wListClear(
         wControl_p b)
 {
 	g_assert(b!= NULL);
-	struct list *lcontrol = WLIB_GET_DATA_PTR(b, list);
+	struct list *lcontrol = CONTROL_GET_ATTRIBUTES_PTR(b, list);
 
 	wlibListStoreClear(lcontrol->listStore);
 	lcontrol->last = -1;
@@ -78,7 +78,7 @@ void wListSetIndex(
 		abort();
 	}
 
-	lcontrol = WLIB_GET_DATA_PTR(b, list);
+	lcontrol = CONTROL_GET_ATTRIBUTES_PTR(b, list);
 
 	if (b->type == B_DROPLIST) {
 		wComboBoxSetIndex(b, element);
@@ -91,7 +91,7 @@ void wListSetIndex(
 
 /**
  * CompareListData is called when a list is searched for a specific
- * data entry. It is called in sequence and does a string compare
+ * attributes entry. It is called in sequence and does a string compare
  * between the label of the current row and the search argument. If
  * identical the label is placed in the search argument.
  * It is a GTK foreach() function.
@@ -99,16 +99,16 @@ void wListSetIndex(
  * \param model IN searched model
  * \param path IN unused
  * \param iter IN current iterator
- * \param data IN/OUT pointer to data structure with search criteria
+ * \param attributes IN/OUT pointer to attributes structure with search criteria
  * \return TRUE if identical, FALSE otherwise
  */
 
 int
 CompareListData(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter,
-                gpointer data)
+                gpointer attributes)
 {
 	wListItem_p id_p;
-	struct listSearch *search = (struct listSearch *)data;
+	struct listSearch *search = (struct listSearch *)attributes;
 
 	gtk_tree_model_get(model,
 	                   iter,
@@ -141,12 +141,12 @@ wIndex_t wListFindValue(
 	struct listSearch thisSearch;
 
 	g_assert(b!=NULL);
-	g_assert(b->data.list.listStore!=NULL);
+	g_assert(b->attributes.list.listStore!=NULL);
 
 	thisSearch.search = val;
 	thisSearch.row = 0;
 
-	gtk_tree_model_foreach(GTK_TREE_MODEL(b->data.list.listStore), CompareListData,
+	gtk_tree_model_foreach(GTK_TREE_MODEL(b->attributes.list.listStore), CompareListData,
 	                       (void *)&thisSearch);
 
 	if (!thisSearch.result) {
@@ -174,11 +174,11 @@ wIndex_t wListGetCount(
 }
 
 /**
- * Get the user data for a list element
+ * Get the user attributes for a list element
  *
  * \param b IN widget
  * \param inx IN row
- * \returns the user data for the specified row
+ * \returns the user attributes for the specified row
  */
 
 void * wListGetItemContext(
@@ -220,9 +220,9 @@ wIndex_t wListGetValues(
 	struct list* lcontrol;
 
 	g_assert(bl != NULL);
-	g_assert(bl->data.list.listStore != NULL);
+	g_assert(bl->attributes.list.listStore != NULL);
 
-	lcontrol = WLIB_GET_DATA_PTR(bl, list);
+	lcontrol = CONTROL_GET_ATTRIBUTES_PTR(bl, list);
 	inx = lcontrol->last;
 
 	if (bl->type == B_DROPLIST && lcontrol->editted) {
@@ -280,7 +280,7 @@ wBool_t wListGetItemSelected(
         wIndex_t inx)
 {
 	wListItem_p id_p;
-	struct list* lcontrol = WLIB_GET_DATA_PTR(b, list);
+	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(b, list);
 
 	if (inx < 0) {
 		return FALSE;
@@ -306,7 +306,7 @@ wIndex_t wListGetSelectedCount(
         wControl_p b)
 {
 	wIndex_t selcnt, inx;
-	struct list* lcontrol = WLIB_GET_DATA_PTR(b, list);
+	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(b, list);
 	int count = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(lcontrol->listStore), NULL);
 
 	for (selcnt=inx=0; inx<count; inx++)
@@ -330,7 +330,7 @@ void wListSelectAll(wControl_p bl)
 
 	g_assert(bl != NULL);
 	// mark all items selected
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(bl->data.list.treeView));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(bl->attributes.list.treeView));
 	gtk_tree_selection_select_all(selection);
 }
 
@@ -341,7 +341,7 @@ void wListSelectAll(wControl_p bl)
  * \param row IN row to change
  * \param labelStr IN string with new tab separated values
  * \param bm IN icon
- * \param itemData IN data for row
+ * \param itemData IN attributes for row
  * \returns TRUE
  */
 
@@ -352,12 +352,12 @@ wBool_t wListSetValues(
         wIcon_p bm,
         void *itemData)
 {
-	g_assert(b->data.list.listStore != NULL);
+	g_assert(b->attributes.list.listStore != NULL);
 
 	if (b->type == B_DROPLIST) {
 		wDropListSetValues(b, row, labelStr, bm, itemData);
 	} else {
-		wlibListStoreUpdateValues(b->data.list.listStore, row, (char *)labelStr, bm);
+		wlibListStoreUpdateValues(b->attributes.list.listStore, row, (char *)labelStr, bm);
 	}
 
 	return TRUE;
@@ -374,9 +374,9 @@ void wListDelete(
         wIndex_t inx)
 {
 	GtkTreeIter iter;
-	struct list* lcontrol = WLIB_GET_DATA_PTR(b, list);
+	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(b, list);
 
-	g_assert(b->data.list.listStore != 0);
+	g_assert(b->attributes.list.listStore != 0);
 
 	if (b->type == B_DROPLIST) {
 		wNotice("Deleting from dropboxes is not implemented!", "Continue", NULL);
@@ -451,7 +451,7 @@ wIndex_t wListAddValue(
 {
 	wListItem_p id_p;
 	wIndex_t count;
-	struct list* lcontrol = WLIB_GET_DATA_PTR(b, list);
+	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(b, list);
 
 	g_assert(b != NULL);
 
@@ -527,7 +527,7 @@ void wListSetSize(wControl_p bl, wWinPix_t w, wWinPix_t h)
  * \param colTitles IN  array of titles for columns
  * \param valueP IN     selected index
  * \param action IN     callback
- * \param data IN       context
+ * \param attributes IN       context
  * \returns created list box
  */
 
@@ -546,7 +546,7 @@ wControl_p wListCreate(
         const char** colTitles,
         long* valueP,
         wListCallBack_p action,
-        void* data)
+        void* attributes)
 {
 	wControl_p bl;
 	struct list* lcontrol;
@@ -554,8 +554,8 @@ wControl_p wListCreate(
 
 	g_assert(width != 0);
 
-	bl = wlibControlNew(B_LIST, parent, helpStr, data);
-	lcontrol = WLIB_GET_DATA_PTR(bl, list);
+	bl = wlibControlNew(B_LIST, parent, helpStr, attributes);
+	lcontrol = CONTROL_GET_ATTRIBUTES_PTR(bl, list);
 	lcontrol->valueP = valueP;
 	lcontrol->action = action;
 
@@ -573,7 +573,7 @@ wControl_p wListCreate(
 		//bl->colWidths = (wWinPix_t*)malloc(colCnt * sizeof * (wWinPix_t*)0);
 		//memcpy(bl->colWidths, colWidths, colCnt * sizeof * (wWinPix_t*)0);
 
-		/* create the data structure for data */
+		/* create the attributes structure for attributes */
 		lcontrol->listStore = wlibNewListStore(colCnt);
 		/* create the widget for the list store */
 		lcontrol->treeView = wlibNewTreeView(lcontrol->listStore,
@@ -634,7 +634,7 @@ wControl_p wComboListCreate(
         wWinPix_t	width,		/* Width */
         long	*valueP,	/* Selected index */
         wListCallBack_p action,	/* Callback */
-        void 	*data)		/* Context */
+        void 	*attributes)		/* Context */
 {
 	wNotice("ComboLists are not implemented!", "Abort", NULL);
 	abort();

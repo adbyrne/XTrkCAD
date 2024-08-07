@@ -106,7 +106,7 @@ const char *wEntryGetValue(
  * current value and then select the whole default value
  *
  * \param widget 	IN the edit field
- * \param b 		IN the widget data structure
+ * \param b 		IN the widget attributes structure
  * \return
  *
  * \todo Check necessity probably used by BO_ENTER
@@ -124,7 +124,7 @@ static gboolean entryActivated(
 		return( FALSE );
 	}
 
-	entry = WLIB_GET_DATA_PTR(b, entry);
+	entry = CONTROL_GET_ATTRIBUTES_PTR(b, entry);
 
 	s = wEntryGetValue(b);
 
@@ -174,7 +174,7 @@ static int entryFocusOutEvent(
         GdkEvent * event,
         wControl_p b)
 {
-	struct entry* entry = WLIB_GET_DATA_PTR(b, entry);
+	struct entry* entry = CONTROL_GET_ATTRIBUTES_PTR(b, entry);
 	bool isOK = TRUE;
 
 	if (entry->action) {
@@ -213,7 +213,7 @@ static int entryFocusOutEvent(
  * \param	valueP	IN	initial value
  * \param	fieldLength	IN 	maximum length of entry in chars
  * \param	action	IN	application callback function
- * \param 	data	IN	application context data
+ * \param 	attributes	IN	application context attributes
  * \return  the created widget
  */
 
@@ -228,14 +228,14 @@ wControl_p wEntryCreate(
         char	*valueP,
         wIndex_t fieldLength,
         wEntryCallBack_p action,
-        void 	*data)
+        void 	*attributes)
 {
 	wControl_p b;
 	struct entry* entry;
 
 	// create and initialize the widget
-	b = wlibControlNew(B_TEXT, parent, helpStr, data);
-	entry = WLIB_GET_DATA_PTR(b, entry);
+	b = wlibControlNew(B_TEXT, parent, helpStr, attributes);
+	entry = CONTROL_GET_ATTRIBUTES_PTR(b, entry);
 	entry->valueP = valueP;
 	entry->action = action;
 	entry->valueL = fieldLength;

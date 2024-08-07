@@ -46,16 +46,16 @@
 int
 wTreeViewGetCount(wControl_p b)
 {
-	return(gtk_tree_view_get_n_columns(b->data.list.treeView));
+	return(gtk_tree_view_get_n_columns(b->attributes.list.treeView));
 }
 
 
 /**
- * Get the user data for a list element
+ * Get the user attributes for a list element
  *
  * \param b IN widget
  * \param inx IN row
- * \returns the user data for the specified row
+ * \returns the user attributes for the specified row
  */
 
 void *
@@ -63,7 +63,7 @@ wTreeViewGetItemContext(wControl_p b, int row)
 {
 	wListItem_p id_p;
 
-	id_p = wlibListItemGet(b->data.list.listStore, row, NULL);
+	id_p = wlibListItemGet(b->attributes.list.listStore, row, NULL);
 
 	if (id_p) {
 		return id_p->itemData;
@@ -85,7 +85,7 @@ wIndex_t wListGetIndex(wControl_p b)
 {
 	g_assert(b!=NULL);
 
-	return b->data.list.last;
+	return b->attributes.list.last;
 }
 
 /**
@@ -101,7 +101,7 @@ wlibTreeViewSetSelected(wControl_p b, int index)
 {
 	GtkTreeSelection *sel;
 	GtkTreeIter iter;
-	struct list* lcontrol = WLIB_GET_DATA_PTR(b, list);
+	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(b, list);
 
 	sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(lcontrol->treeView));
 
@@ -287,7 +287,7 @@ wlibTreeViewAddData(GtkTreeView *tv, char *label, GdkPixbuf *pixbuf,
  * \param b IN the list box
  * \param label IN the text labels
  * \param bm IN bitmap to show at start
- * \param id_p IN user data
+ * \param id_p IN user attributes
  */
 
 void
@@ -296,7 +296,7 @@ wlibTreeViewAddRow(wControl_p b, char *label, wIcon_p bm, wListItem_p id_p)
 	GtkAdjustment *adj;
 	GdkPixbuf *pixbuf = NULL;
 
-	struct list* lcontrol = WLIB_GET_DATA_PTR(b, list);
+	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(b, list);
 
 	if (bm) {
 		pixbuf = wlibMakePixbuf(bm);
@@ -317,9 +317,9 @@ wlibTreeViewAddRow(wControl_p b, char *label, wIcon_p bm, wListItem_p id_p)
 }
 
 /**
- * Function for handling a selection change. The internal data structure
+ * Function for handling a selection change. The internal attributes structure
  * for the changed row is updated. If a handler function for the list
- * is given, the data for the row are retrieved and passed to that
+ * is given, the attributes for the row are retrieved and passed to that
  * function. This is used to update other fields in a dialog (see Price
  * List for an example).
  *
@@ -327,7 +327,7 @@ wlibTreeViewAddRow(wControl_p b, char *label, wIcon_p bm, wListItem_p id_p)
  * \param model IN
  * \param path IN
  * \param path_currently_selected IN
- * \param data IN the list widget
+ * \param attributes IN the list widget
  */
 
 gboolean
@@ -335,15 +335,15 @@ changeSelection(GtkTreeSelection *selection,
                 GtkTreeModel *model,
                 GtkTreePath *path,
                 gboolean path_currently_selected,
-                gpointer data)
+                gpointer attributes)
 {
 	GtkTreeIter iter;
 	GValue value = { 0 };
 	wListItem_p id_p = NULL;
-	wControl_p bl = (wControl_p)data;
+	wControl_p bl = (wControl_p)attributes;
 	long row;
 	char *text;
-	struct list* lcontrol = WLIB_GET_DATA_PTR(((wControl_p)data), list);
+	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(((wControl_p)attributes), list);
 
 	text = gtk_tree_path_to_string(path);
 	row = (long)g_ascii_strtoll(text, NULL, 10);

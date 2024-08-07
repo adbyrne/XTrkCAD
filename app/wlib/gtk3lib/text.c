@@ -64,11 +64,11 @@ static void wlibSetPlaceholder(wControl_p bt)
 {
 	GtkTextIter startIter;
 	GtkTextIter endIter;
-	GtkTextBuffer* tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->data.text.text));
+	GtkTextBuffer* tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->attributes.text.text));
 
-	gtk_text_buffer_set_text(tb, bt->data.text.placeholder, -1);
+	gtk_text_buffer_set_text(tb, bt->attributes.text.placeholder, -1);
 	gtk_text_buffer_get_bounds(tb, &startIter, &endIter);
-	gtk_text_buffer_apply_tag(tb, bt->data.text.placeholderTag, &startIter, &endIter);
+	gtk_text_buffer_apply_tag(tb, bt->attributes.text.placeholderTag, &startIter, &endIter);
 }
 
 /**
@@ -82,16 +82,16 @@ static void wlibSetPlaceholder(wControl_p bt)
 void wTextClear(wControl_p bt)
 {
 	GtkTextBuffer* tb;
-	tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->data.text.text));
+	tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->attributes.text.text));
 	gtk_text_buffer_set_text(tb, "", -1);
 
-	if (bt->data.text.option & BO_READONLY) {
-		gtk_text_view_set_editable(GTK_TEXT_VIEW(bt->data.text.text), FALSE);
+	if (bt->attributes.text.option & BO_READONLY) {
+		gtk_text_view_set_editable(GTK_TEXT_VIEW(bt->attributes.text.text), FALSE);
 	}
-	if (bt->data.text.placeholder) {
+	if (bt->attributes.text.placeholder) {
 		wlibSetPlaceholder(bt);
 	}
-	bt->data.text.changed = FALSE;
+	bt->attributes.text.changed = FALSE;
 }
 
 /**
@@ -109,18 +109,18 @@ void wTextAppend(wControl_p bt,
 	GtkTextIter ti1;
 	GtkTextMark* tm;
 
-	if (bt->data.text.text == 0) {
+	if (bt->attributes.text.text == 0) {
 		abort();
 	}
 
-	tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->data.text.text));
+	tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->attributes.text.text));
 	// convert to utf-8
 	text = wlibConvertInput(text);
 	// append to end of buffer
 	gtk_text_buffer_get_end_iter(tb, &ti1);
 	gtk_text_buffer_insert(tb, &ti1, text, -1);
 
-	if (bt->data.text.option & BT_TOP) {
+	if (bt->attributes.text.option & BT_TOP) {
 		// and scroll to start of text
 		gtk_text_buffer_get_start_iter(tb, &ti1);
 	} else {
@@ -128,10 +128,10 @@ void wTextAppend(wControl_p bt,
 		gtk_text_buffer_get_end_iter(tb, &ti1);
 	}
 	tm = gtk_text_buffer_create_mark(tb, NULL, &ti1, TRUE);
-	gtk_text_view_scroll_mark_onscreen(GTK_TEXT_VIEW(bt->data.text.text), tm);
+	gtk_text_view_scroll_mark_onscreen(GTK_TEXT_VIEW(bt->attributes.text.text), tm);
 	gtk_text_buffer_delete_mark(tb, tm);
 
-	bt->data.text.changed = FALSE;
+	bt->attributes.text.changed = FALSE;
 }
 
 
@@ -149,15 +149,15 @@ static char* wlibGetText(wControl_p bt)
 	GtkTextIter ti1, ti2;
 	char* cp;
 
-	if (bt->data.text.text == 0) {
+	if (bt->attributes.text.text == 0) {
 		abort();
 	}
 
-	tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->data.text.text));
+	tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->attributes.text.text));
 	gtk_text_buffer_get_bounds(tb, &ti1, &ti2);
 	cp = gtk_text_buffer_get_text(tb, &ti1, &ti2, FALSE);
 
-	if (!g_strcmp0(bt->data.text.placeholder, cp)) {
+	if (!g_strcmp0(bt->attributes.text.placeholder, cp)) {
 		*cp = '\0';
 	}
 	return cp;
@@ -195,7 +195,7 @@ wBool_t wTextSave(wControl_p bt, const char* fileName)
  *
  * \param operation IN the GTK print operation
  * \param context IN print context
- * \param pd IN data structure for user data
+ * \param pd IN attributes structure for user attributes
  *
  * \todo Redesign printing of textbox
  */
@@ -236,7 +236,7 @@ begin_print(GtkPrintOperation* operation,
  * \param operation IN the GTK print operation
  * \param context IN print context
  * \param page_nr IN page to print
- * \param pd IN data structure for user data
+ * \param pd IN attributes structure for user attributes
  *
  *
  */
@@ -324,7 +324,7 @@ draw_page(GtkPrintOperation* operation,
  *
  * \param operation IN the GTK print operation
  * \param context IN print context
- * \param pd IN data structure for user data
+ * \param pd IN attributes structure for user attributes
  *
  *
  */
@@ -356,19 +356,19 @@ wBool_t wTextPrint(
 	//GtkWidget* dialog;
 	//GError* error = NULL;
 	//gint res;
-	//struct PrintData* data;
+	//struct PrintData* attributes;
 	///* Create a new print operation, applying saved print settings if they exist. */
 	//operation = gtk_print_operation_new();
 	//WlibApplySettings(operation);
-	//data = malloc(sizeof(struct PrintData));
-	//data->font_size = 10.0;
-	//data->tb = bt;
+	//attributes = malloc(sizeof(struct PrintData));
+	//attributes->font_size = 10.0;
+	//attributes->tb = bt;
 	//g_signal_connect(G_OBJECT(operation), "begin_print",
-	//	G_CALLBACK(begin_print), (gpointer)data);
+	//	G_CALLBACK(begin_print), (gpointer)attributes);
 	//g_signal_connect(G_OBJECT(operation), "draw_page",
-	//	G_CALLBACK(draw_page), (gpointer)data);
+	//	G_CALLBACK(draw_page), (gpointer)attributes);
 	//g_signal_connect(G_OBJECT(operation), "end_print",
-	//	G_CALLBACK(end_print), (gpointer)data);
+	//	G_CALLBACK(end_print), (gpointer)attributes);
 	///* Run the default print operation that will print the selected file. */
 	//res = gtk_print_operation_run(operation,
 	//	GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
@@ -438,7 +438,7 @@ void wTextGetText(wControl_p bt, char* text, int len)
 
 void wTextSetReadonly(wControl_p bt, wBool_t ro)
 {
-	gtk_text_view_set_editable(GTK_TEXT_VIEW(bt->data.text.text	), !ro);
+	gtk_text_view_set_editable(GTK_TEXT_VIEW(bt->attributes.text.text	), !ro);
 
 	//if (ro) {
 	//	bt->option |= BO_READONLY;
@@ -456,7 +456,7 @@ void wTextSetReadonly(wControl_p bt, wBool_t ro)
 
 wBool_t wTextGetModified(wControl_p bt)
 {
-	return bt->data.text.changed;
+	return bt->attributes.text.changed;
 }
 
 /**
@@ -521,7 +521,7 @@ static void textChanged(GtkWidget* widget, wControl_p bt)
 		return;
 	}
 
-	bt->data.text.changed = TRUE;
+	bt->attributes.text.changed = TRUE;
 }
 /**
  * Signal handler for begin of user activity. Remove the placeholder text if
@@ -543,7 +543,7 @@ static void userActivityStarts(GtkTextBuffer* self, wControl_p textField)
 	gtk_text_buffer_get_bounds(self, &startIter, &endIter);
 
 	gchar* text = gtk_text_buffer_get_text(self, &startIter, &endIter, FALSE);
-	if (!g_strcmp0(text, textField->data.text.placeholder)) {
+	if (!g_strcmp0(text, textField->attributes.text.placeholder)) {
 		gtk_text_buffer_delete(self, &startIter, &endIter);
 		gtk_text_buffer_set_text(self, "", -1);
 	}
@@ -573,7 +573,7 @@ static void userActivityStarts(GtkTextBuffer* self, wControl_p textField)
  * \param width IN
  * \param valueP IN Current color ???
  * \param action IN Button callback procedure
- * \param data IN ???
+ * \param attributes IN ???
  * \return 	bb handle for created text widget
  *
  * \todo Options BT_HSCROLL, BT_CHARUNITS, BT_FIXEDFONT, BT_TOP
@@ -594,7 +594,7 @@ wTextCreate(wControl_p parent,
 	GtkTextBuffer* tb;
 	// create the widget
 	bt = wlibControlNew(B_TEXT, parent, helpStr, NULL);
-	tcontrol = WLIB_GET_DATA_PTR(bt, text);
+	tcontrol = CONTROL_GET_ATTRIBUTES_PTR(bt, text);
 
 	if (HASDIALOGBUILDER(parent)) {
 		bt->widget = wlibWidgetFromIdWarn(parent, "scrollwindow");

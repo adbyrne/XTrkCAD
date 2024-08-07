@@ -35,7 +35,7 @@ struct wFilSel_t {
 	wType_e type;                       /**< */
 	GtkFileChooserNative * window; 		/**<  file selector handle*/
 	wFilSelCallBack_p action; 			/**<  */
-	void * data;
+	void * attributes;
 	GPtrArray* filters;					/**<  file type filters */
 	wFilSelMode_e mode;					/**< used for load or save */
 	int opt; 							/**< see FSO_ options */
@@ -104,7 +104,7 @@ AddFilters(struct wFilSel_t* selector)
 }
 
 /**
- * Create a new file selector. Only the internal data structures are
+ * Create a new file selector. Only the internal attributes structures are
  * set up, no dialog is created.
  *
  * If the FSO_PICTURES flag is set in opt , the pattern are automatically
@@ -114,7 +114,7 @@ AddFilters(struct wFilSel_t* selector)
  * callback receives three arguments:
  * - int files number of selected files (1 or more if FS_MULTIPLEFILES)
  * - char ** names an array of files filenames
- * - void * data	the data passed to wFilSelCreate()
+ * - void * attributes	the attributes passed to wFilSelCreate()
  *
  * \param w		IN	parent window
  * \param mode	IN	load or save
@@ -122,7 +122,7 @@ AddFilters(struct wFilSel_t* selector)
  * \param title IN	dialog title
  * \param pattList IN list of filter patterns
  * \param action IN callback
- * \param data IN	see description
+ * \param attributes IN	see description
  * \return    the newly created file selector structure
  */
 
@@ -133,7 +133,7 @@ struct wFilSel_t * wFilSelCreate(
         const char * title,
         const char * pattList,
         wFilSelCallBack_p action,
-        void * data )
+        void * attributes )
 {
 	struct wFilSel_t	*fs;
 
@@ -146,7 +146,7 @@ struct wFilSel_t * wFilSelCreate(
 	fs->opt = opt;
 	fs->title = g_strdup( title );
 	fs->action = action;
-	fs->data = data;
+	fs->attributes = attributes;
 
 	if (pattList || (opt & FSO_PICTURES)) {
 		CreateFilters(fs, pattList);
@@ -222,7 +222,7 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 		}
 
 		if (fs->action) {
-			fs->action( g_slist_length(fileNameList), fileNames, fs->data );
+			fs->action( g_slist_length(fileNameList), fileNames, fs->attributes );
 		}
 
 		for(unsigned i=0; i < g_slist_length(fileNameList); i++) {

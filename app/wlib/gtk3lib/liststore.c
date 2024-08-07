@@ -34,10 +34,10 @@
 #include "gtkint.h"
 
 /**
- * Get data of one row in a list
+ * Get attributes of one row in a list
  * \param b IN list widget
  * \param inx IN row to retrieve
- * \param childR IN list for data (?)
+ * \param childR IN list for attributes (?)
  * \returns
  */
 
@@ -64,11 +64,11 @@ wListItem_p wlibListItemGet(
 }
 
 /**
- * Get the context (user data) for a row in the list store
+ * Get the context (user attributes) for a row in the list store
  *
  * \param ls IN list store
  * \param inx IN row
- * \returns pointer to data
+ * \returns pointer to attributes
  */
 
 void *
@@ -105,7 +105,7 @@ wlibListStoreGetContext(GtkListStore *ls, int inx)
 
 
 /**
- * Clear the list store. All data in the list store will be automatically
+ * Clear the list store. All attributes in the list store will be automatically
  * free'd when the list store is cleared.
  *
  * \param listStore IN
@@ -134,7 +134,7 @@ wlibListStoreClear(GtkListStore *listStore)
 
 /**
  * Create a list store. The list store will have one column for user
- * data that will not be displayed, a column for a bitmap and <cnt>
+ * attributes that will not be displayed, a column for a bitmap and <cnt>
  * columns for text strings.
  *
  * \param colCnt IN number of additional columns

@@ -49,7 +49,7 @@
  * Handle activate event for menu items.
  *
  * \param widget IN widget that emitted the signal
- * \param value  IN application data
+ * \param value  IN application attributes
  * \return
  */
 
@@ -58,7 +58,7 @@ static void pushMenuItem(
     gpointer value )
 {
     wControl_p m = (wControl_p)value;
-    struct menuitem *mi = WLIB_GET_DATA_PTR(m, menuitem);
+    struct menuitem *mi = CONTROL_GET_ATTRIBUTES_PTR(m, menuitem);
 
     switch( m->type ){
     case M_PUSH:
@@ -67,7 +67,7 @@ static void pushMenuItem(
         break;
     //case M_TOGGLE:
     //    mt = (wMenuToggle_p)m;
-    //    mt->action( mt->data );
+    //    mt->action( mt->attributes );
     //    break;
     case M_RADIO:
         /* NOTE: action is only called when radio button is activated,
@@ -214,9 +214,9 @@ static void CreateMenuItem(
                          mi);
         break;
     case M_RADIO:
-        mi->widget = gtk_radio_menu_item_new_with_mnemonic(m->data.menu.radioGroup,
+        mi->widget = gtk_radio_menu_item_new_with_mnemonic(m->attributes.menu.radioGroup,
                           wlibConvertInput(labelStr));
-        m->data.menu.radioGroup = gtk_radio_menu_item_get_group (
+        m->attributes.menu.radioGroup = gtk_radio_menu_item_get_group (
                             GTK_RADIO_MENU_ITEM ( mi->widget ));
         g_signal_connect(mi->widget, "activate", G_CALLBACK(pushMenuItem),
                          mi);
@@ -257,7 +257,7 @@ static void CreateMenuItem(
  * \param labelStr 	IN text for entry
  * \param acclKey 	IN accelerator key to add
  * \param action 	IN callback function
- * \param data 		IN application data
+ * \param attributes 		IN application attributes
  * \param helpStr 	IN
  * \return menu entry
  */
@@ -268,14 +268,14 @@ wControl_p wMenuRadioCreate(
     const char * labelStr,
     long acclKey,
     wMenuCallBack_p action,
-    void 	*data )
+    void 	*attributes )
 {
     struct menuitem* menuitem;
 
-    wControl_p mi = wlibControlNew(M_RADIO, m, helpStr, data);
-    mi->context = data;
+    wControl_p mi = wlibControlNew(M_RADIO, m, helpStr, attributes);
+    mi->context = attributes;
 
-    menuitem = WLIB_GET_DATA_PTR(mi, menuitem);
+    menuitem = CONTROL_GET_ATTRIBUTES_PTR(mi, menuitem);
     menuitem->action = action;
 
     CreateMenuItem( m, mi, M_RADIO, helpStr, labelStr, acclKey );
@@ -310,7 +310,7 @@ void wMenuRadioSetActive(
  * \param labelStr 	IN text for entry
  * \param acclKey 	IN accelerator key to add
  * \param action 	IN callback function
- * \param data 		IN application data
+ * \param attributes 		IN application attributes
  * \return menu entry
  */
 
@@ -320,16 +320,16 @@ wControl_p wMenuPushCreate(
     const char * labelStr,
     long acclKey,
     wMenuCallBack_p action,
-    void 	*data )
+    void 	*attributes )
 {
     struct menuitem* menuitem;
 
-    wControl_p mi = wlibControlNew(M_PUSH, m, helpStr, data);
-    menuitem = WLIB_GET_DATA_PTR(mi, menuitem);
+    wControl_p mi = wlibControlNew(M_PUSH, m, helpStr, attributes);
+    menuitem = CONTROL_GET_ATTRIBUTES_PTR(mi, menuitem);
     menuitem->action = action;
 
     CreateMenuItem( m, mi, M_PUSH, helpStr, labelStr, acclKey);
-    mi->context = data;
+    mi->context = attributes;
 
     return mi;
 }
@@ -371,7 +371,7 @@ wControl_p wMenuMenuCreate(
     GtkWidget* menuitem;
 
     mm = wlibControlNew(M_SUBMENU, m, helpStr, NULL);
-    menu = WLIB_GET_DATA_PTR(mm, menu);
+    menu = CONTROL_GET_ATTRIBUTES_PTR(mm, menu);
     menu->radioGroup = NULL;
 
     menuitem = gtk_menu_item_new_with_mnemonic(wlibConvertInput(labelStr));
@@ -416,7 +416,7 @@ void wMenuSeparatorCreate(
  * \param acclKey 	IN acceleratoor key to add
  * \param set 		IN initial state
  * \param action 	IN callback function
- * \param data 		IN application data
+ * \param attributes 		IN application attributes
  * \return menu entry
  */
 
@@ -427,12 +427,12 @@ wControl_p wMenuToggleCreate(
     long acclKey,
     wBool_t set,
     wMenuCallBack_p action,
-    void * data )
+    void * attributes )
 {
     struct menuitem *menuitem;
 
-    wControl_p mt = wlibControlNew(M_TOGGLE, m, helpStr, data);
-    menuitem = WLIB_GET_DATA_PTR(mt, menuitem);
+    wControl_p mt = wlibControlNew(M_TOGGLE, m, helpStr, attributes);
+    menuitem = CONTROL_GET_ATTRIBUTES_PTR(mt, menuitem);
     menuitem->action = action;
 
     CreateMenuItem(m, mt, M_TOGGLE, helpStr, labelStr, acclKey );
@@ -575,11 +575,11 @@ wControl_p wMenuBarAdd(
     GtkWidget *menuItem;
 
     m = wlibControlNew(M_SUBMENU, NULL, helpStr, NULL);
-    menu = WLIB_GET_DATA_PTR(m, menu);
+    menu = CONTROL_GET_ATTRIBUTES_PTR(m, menu);
     menu->radioGroup = NULL;
 
     menuItem = gtk_menu_item_new_with_mnemonic(labelStr);
-    gtk_menu_shell_append(GTK_MENU_SHELL(w->data.window.menubar), menuItem);
+    gtk_menu_shell_append(GTK_MENU_SHELL(w->attributes.window.menubar), menuItem);
 
     m->widget = gtk_menu_new();
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuItem), m->widget );
@@ -641,17 +641,17 @@ wMenu_p wMenuPopupCreate(
  *
  * \param m 	IN
  * \param func 	IN
- * \param data 	IN
+ * \param attributes 	IN
  */
 
 void wMenuSetTraceCallBack(
     wControl_p m,
     wMenuTraceCallBack_p func,
-    void * data )
+    void * attributes )
 {
-    struct menu* menu = WLIB_GET_DATA_PTR(m, menu);
+    struct menu* menu = CONTROL_GET_ATTRIBUTES_PTR(m, menu);
     menu->traceFunc = func;
-    menu->traceData = data;
+    menu->traceData = attributes;
 }
 
 /**
@@ -676,7 +676,7 @@ wBool_t wMenuAction(
     // 			if ( ((wMenuPush_p)mi)->enabled == FALSE )
     // 				wBeep();
     // 			else
-    // 				((wMenuPush_p)mi)->action( ((wMenuPush_p)mi)->data );
+    // 				((wMenuPush_p)mi)->action( ((wMenuPush_p)mi)->attributes );
     // 			break;
     // 		case M_TOGGLE:
     // 			mt = (wMenuToggle_p)mi;
@@ -684,7 +684,7 @@ wBool_t wMenuAction(
     // 				wBeep();
     // 			} else {
     // 				wMenuToggleSet( mt, !mt->set );
-    // 				mt->action( mt->data );
+    // 				mt->action( mt->attributes );
     // 			}
     // 			break;
     // 		case M_MENU:

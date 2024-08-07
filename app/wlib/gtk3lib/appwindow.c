@@ -57,7 +57,7 @@ wlibAppWinGetMain()
 GtkAccelGroup*
 wlibAppWinGetAccelGroup()
 {
-	return(appMainWindow->data.window.accelGroup);
+	return(appMainWindow->attributes.window.accelGroup);
 }
 
 /**
@@ -69,7 +69,7 @@ wlibAppWinGetAccelGroup()
 GtkContainer *
 wlibAppWinGetStatusbar()
 {
-	return(appMainWindow->data.window.statusbar);
+	return(appMainWindow->attributes.window.statusbar);
 }
 
 
@@ -86,8 +86,8 @@ wlibAppWinGetStatusbar()
 static gboolean
 on_widget_deleted(GtkWidget* window, GdkEvent* event, gpointer userData)
 {
-	if (appMainWindow->data.window.winProc) {
-		bool rc = appMainWindow->data.window.winProc(appMainWindow, 
+	if (appMainWindow->attributes.window.winProc) {
+		bool rc = appMainWindow->attributes.window.winProc(appMainWindow, 
 			wClose_e, userData, NULL);
 		if (!rc) {
 			wPrefFlush(NULL);
@@ -138,7 +138,7 @@ CreateToolbar(GtkScrolledWindow* scrolled)
 	GtkWidget* viewport;
 
 	flowbox = GTK_FLOW_BOX(gtk_builder_get_object(
-		appMainWindow->data.window.builder,"toolbar"));
+		appMainWindow->attributes.window.builder,"toolbar"));
 	g_signal_connect(flowbox, "size-allocate", G_CALLBACK(signalSizeAlloc),
 	                 scrolled);
 
@@ -157,7 +157,7 @@ CreateToolbar(GtkScrolledWindow* scrolled)
  * \param nameStr IN Window name
  * \param option IN options for window creation
  * \param winProc IN pointer to main window procedure
- * \param data IN User context
+ * \param attributes IN User context
  * \return    window handle or NULL on error
  */
 
@@ -170,7 +170,7 @@ wControl_p wWinMainCreate(
         const char *nameStr,	 /* Window name */
         long option,			 /* Options */
         wWinCallBack_p winProc, /* Call back function */
-        void *data)			 /* User context */
+        void *attributes)			 /* User context */
 {
 	char *pos;
 	struct window* wcontrol;
@@ -189,12 +189,13 @@ wControl_p wWinMainCreate(
 	wDrawColorBlack = wDrawFindColor(0x000000);
 
 	appMainWindow = g_malloc0(sizeof(struct wWindow_t));
-	appMainWindow = wlibControlNew(W_MAIN, NULL, nameStr, data);
+	appMainWindow = wlibControlNew(W_MAIN, NULL, nameStr, attributes);
 
 //	appMainWindow->helpTopic = g_strdup(helpStr);
 //	appMainWindow->name = g_strdup(nameStr);
-	wcontrol = WLIB_GET_DATA_PTR(appMainWindow, window);
+	wcontrol = CONTROL_GET_ATTRIBUTES_PTR(appMainWindow, window);
 	wcontrol->winProc = winProc;
+	wcontrol->option = option;
 
 	wcontrol->builder = gtk_builder_new_from_resource(
 	                                 XTRKCAD_RESOURCE_PATH
@@ -235,8 +236,8 @@ wControl_p wWinMainCreate(
 		wcontrol->statusbar = statusbar;
 	}
 
-	GtkDrawingArea* drawingArea = GTK_DRAWING_AREA(gtk_builder_get_object(
-	                                      wcontrol->builder, "maindraw"));
+	//GtkDrawingArea* drawingArea = GTK_DRAWING_AREA(gtk_builder_get_object(
+	//                                      wcontrol->builder, "maindraw"));
 
 	g_signal_connect(G_OBJECT(appMainWindow->widget),
 	                 "delete-event", G_CALLBACK(on_widget_deleted), NULL);

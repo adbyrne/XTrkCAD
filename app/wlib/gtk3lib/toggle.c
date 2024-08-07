@@ -117,7 +117,7 @@ long wToggleGetValue(
  * button group
  *
  * \param widget IN the button group
- * \param b IN user data (button group????)
+ * \param b IN user attributes (button group????)
  * \returns always 1
  */
 
@@ -126,7 +126,7 @@ static int toggled(
         gpointer b)
 {
 	wControl_p bc = (wControl_p)b;
-	struct toggle* tcontrol = WLIB_GET_DATA_PTR(bc, toggle);
+	struct toggle* tcontrol = CONTROL_GET_ATTRIBUTES_PTR(bc, toggle);
 	long value = toggleGetValue(bc);
 
 	if (tcontrol->valueP) {
@@ -162,7 +162,7 @@ static int toggled(
  * \param labels    IN Labels for individual buttons
  * \param valueP    IN Selected value
  * \param action    IN Callback
- * \param data      IN User data as context
+ * \param attributes      IN User attributes as context
  * \returns toggle button widget
  */
 
@@ -176,13 +176,13 @@ wControl_p wToggleCreate(
         const char* const* labels,
         long* valueP,
         wChoiceCallBack_p action,
-        void* data)
+        void* attributes)
 {
 	wControl_p b;
 	struct toggle* tcontrol;
 
-	b = wlibControlNew(B_TOGGLE, parent, helpStr, data);
-	tcontrol = WLIB_GET_DATA_PTR(b, toggle);
+	b = wlibControlNew(B_TOGGLE, parent, helpStr, attributes);
+	tcontrol = CONTROL_GET_ATTRIBUTES_PTR(b, toggle);
 	tcontrol->action = action;
 	tcontrol->valueP = valueP;
 

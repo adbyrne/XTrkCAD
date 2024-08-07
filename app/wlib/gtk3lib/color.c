@@ -130,12 +130,12 @@ colorChange(GtkColorButton *widget, wControl_p user_data)
 
 	rgb = wlibColorButtonGetColor(widget);
 
-	if (user_data->data.colorbutton.valueP) {
-		*(user_data->data.colorbutton.valueP) = rgb;
+	if (user_data->attributes.colorbutton.valueP) {
+		*(user_data->attributes.colorbutton.valueP) = rgb;
 	}
 
-	if (user_data->data.colorbutton.action) {
-		user_data->data.colorbutton.action(user_data->context, rgb);
+	if (user_data->attributes.colorbutton.action) {
+		user_data->attributes.colorbutton.action(user_data->context, rgb);
 	}
 }
 
@@ -199,7 +199,7 @@ wDrawColor wColorSelectButtonGetColor(
  * \param IN width
  * \param IN valueP		current color
  * \param IN action		button callback procedure
- * \param IN data		user data to pass to callback procedure
+ * \param IN attributes		user attributes to pass to callback procedure
  * 
  * \return bb handle for created button
  * 
@@ -217,13 +217,13 @@ wControl_p wColorSelectButtonCreate(
         wWinPix_t 	width,
         wDrawColor *valueP,
         wColorSelectButtonCallBack_p action,
-        void 	* data)
+        void 	* attributes)
 {
 	wControl_p b;
 	struct colorbutton* ccontrol;
 
-	b = wlibControlNew(B_COLORBUTTON,parent, helpStr, data);
-	ccontrol = WLIB_GET_DATA_PTR(b, colorbutton);
+	b = wlibControlNew(B_COLORBUTTON,parent, helpStr, attributes);
+	ccontrol = CONTROL_GET_ATTRIBUTES_PTR(b, colorbutton);
 
 	if (HASDIALOGBUILDER(parent)) {
 		/** 
