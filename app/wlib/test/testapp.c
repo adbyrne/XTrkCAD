@@ -261,13 +261,13 @@ doPause(void* unused)
 /**
  * RecentusedCallback.
  * 
- * \param data	pointer to item data 
+ * \param attributes	pointer to item attributes 
  */
 
 void
-RecentUsedCallback(int unused, const char *label, void * data)
+RecentUsedCallback(int unused, const char *label, void * attributes)
 {
-	printf("Recent used: %s - %s\n", label, (char *)data);
+	printf("Recent used: %s - %s\n", label, (char *)attributes);
 }
 
 //
@@ -282,7 +282,7 @@ static struct wFilSel_t* uiFile_fs;
 int LoadData(
 	int cnt,
 	char** fileName,
-	void* data)
+	void* attributes)
 {
 	for (int i = 0; i < cnt; i++) {
 		printf("File no. %d is %s\n", i, fileName[i]);
@@ -291,19 +291,19 @@ int LoadData(
 }
 
 void
-OpenForLoad(void* data)
+OpenForLoad(void* attributes)
 {
 	wFilSelect(loadFile_fs, ".");
 }
 
 void
-OpenPictures(void* data)
+OpenPictures(void* attributes)
 {
 	wFilSelect(pictureFile_fs, ".");
 }
 
 void
-OpenForSave(void* data)
+OpenForSave(void* attributes)
 {
 	wFilSelect(saveFile_fs, ".");
 }
@@ -353,7 +353,7 @@ SelectFont(void* unused)
 }
 
 bool
-DialogProc(wControl_p window, winProcEvent event, void *data, void *data2)
+DialogProc(wControl_p window, winProcEvent event, void *attributes, void *data2)
 {	
 	char* cause;
 	switch (event) {
@@ -388,7 +388,7 @@ BasicDialog(void* unused)
 wControl_p text;
 
 bool
-NoteDialogProc(wControl_p window, winProcEvent event, void* data, void* data2)
+NoteDialogProc(wControl_p window, winProcEvent event, void* attributes, void* data2)
 {
 	int textSize;
 	char* textString;
@@ -432,7 +432,7 @@ NoteDialog(void* unused)
 }
 
 bool
-SimpleDynamicProc(wControl_p window, winProcEvent event, void* data, void* data2)
+SimpleDynamicProc(wControl_p window, winProcEvent event, void* attributes, void* data2)
 {
 	wControlShow(window, false);
 
@@ -455,7 +455,7 @@ EntryCallBack(const char* string, wEntry_p entry)
 wControl_p button; 
 
 void
-ButtonAction(void* data)
+ButtonAction(void* attributes)
 {
 	static bool clicked = 0;
 	if (!clicked)
@@ -467,7 +467,7 @@ ButtonAction(void* data)
 }
 
 void
-ComboBoxAction(unsigned inx, const char* string, unsigned inx2, void* data, void* data2)
+ComboBoxAction(unsigned inx, const char* string, unsigned inx2, void* attributes, void* data2)
 {
 	printf("Selected from combo box: %s\n", string);
 }
@@ -559,11 +559,11 @@ int LoadDesign(
 }
 
 void
-RecentUsedDesigns(int unused, const char* label, void * data)
+RecentUsedDesigns(int unused, const char* label, void * attributes)
 {
 	wControl_p dialog;
 
-	printf("Recently used design: %s - %s\n", label, (char *)data);
+	printf("Recently used design: %s - %s\n", label, (char *)attributes);
 	dialog = wWinDialogCreate(mainW, "", "UI Viewer", label, DO_FILESYSTEM,
 		SimpleDynamicProc, NULL);
 }
@@ -599,7 +599,7 @@ char entry1[80] = "Name";
 char entry2[80] = "Script";
 
 bool
-TestLength(const char* value, void* data)
+TestLength(const char* value, void* attributes)
 {
 	if (strlen(value) < 4)
 		return(false);
@@ -716,6 +716,19 @@ void DemoTest(void* unused)
 
 	wControlShow(dialog, TRUE);
 }
+void
+DrawAction(wControl_p control, void* context, wAction_t action, wDrawPix_t x, wDrawPix_t y)
+{
+	printf("DrawAction: %d\n", action);
+}
+
+void
+CreateDraw()
+{
+	wControl_p maindrawing;
+
+	maindrawing = wDrawCreate(mainW, 0, 0, "maindraw", 0, 0, 0, NULL, NULL, DrawAction);
+}
 
 wDrawColor snapColor = 0x00FF00;
 wDrawColor markerColor = 0x009999;
@@ -790,7 +803,7 @@ void TestMenu(wControl_p mainW)
 		"Add to MRU", 				/* submenu title */
 		WCTL + 'a', 					/* accelerator key */
 		doFile, 				/* callback funtion */
-		(void*)1 			/* pointer to user data */
+		(void*)1 			/* pointer to user attributes */
 	);
 
  	menu4 = wMenuMenuCreate(menu1, NULL, "Recently used");
@@ -806,7 +819,7 @@ void TestMenu(wControl_p mainW)
 		"_Quit", 				/* submenu title */
 		WALT + 'x',					/* accelerator key */
 		doFile, 				/* callback funtion */
-		(void*)0 			/* pointer to user data */
+		(void*)0 			/* pointer to user attributes */
 	);
 
 	/* create a second submenu */
@@ -877,7 +890,7 @@ void TestMenu(wControl_p mainW)
 		"Pause", 				/* submenu title */
 		WALT + 'p',					/* accelerator key */
 		doPause, 				/* callback funtion */
-		(void*)0 			/* pointer to user data */
+		(void*)0 			/* pointer to user attributes */
 	);
 
 	CreateMenuDialog(mainW);
@@ -892,7 +905,7 @@ void TestMenu(wControl_p mainW)
 		"3 Button Notice", 				/* submenu title */
 		WCTL + '3', 					/* accelerator key */
 		Notice, 				/* callback funtion */
-		(void*)3 			/* pointer to user data */
+		(void*)3 			/* pointer to user attributes */
 	);
 
 	wSetBalloonHelp(balloonHelp);
@@ -952,6 +965,15 @@ void TestMenu(wControl_p mainW)
 		DemoTest,
 		NULL
 	);
+
+	menu = wMenuBarAdd(mainW, NULL, "Drawing");
+
+	wMenuPushCreate(menu,
+		NULL,
+		"Create",
+		0L,
+		CreateDraw,
+		NULL);
 }
 
 void
@@ -1041,9 +1063,9 @@ wControl_p wMain( int argc, char * argv[] )
 									"Help", 		/* help topic */
 									WINDOWTITLE, /* window title */
 									APPNAME, 	/* window name */	
-									F_RESIZE|F_MENUBAR, /* options */
+									BO_USEBUILDER | F_RESIZE|F_MENUBAR, /* options */
 									mainCallBack, 		/* window callback function */
-									NULL 			/* pointer to user data */
+									NULL 			/* pointer to user attributes */
 									);
 
 	// wWinShow( mainW, FALSE );

@@ -15,7 +15,8 @@ target_sources(xtrkcad-wlib
 	boxes.c
 	button.c
 	color.c
-	combobox.c	
+	combobox.c
+	drawcontrol.c
 	entry.c
  	fileselector.c
  	lines.c

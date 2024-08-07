@@ -127,7 +127,7 @@ wControl_p wWinMainCreate(
     const char* nameStr,	    /* Window name */
     long option,		        /* Options */
     wWinCallBack_p winProc,	    /* Call back function */
-    void* data);
+    void* attributes);
 
 /*------------------------------------------------------------------------------
  *
@@ -139,7 +139,7 @@ typedef bool (*wEntryCallBack_p)(const char* enteredString, void* userData);
 
 wControl_p wEntryCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
     const char* helpStr, const char* labelStr, long option, wWinPix_t width,
-    char* valueP, wIndex_t valueL, wEntryCallBack_p action, void* data);
+    char* valueP, wIndex_t valueL, wEntryCallBack_p action, void* attributes);
 void wEntrySetValue(wControl_p control, const char* value);
 void wEntrySetWidth(wControl_p cntrol, wWinPix_t width);
 const char* wEntryGetValue(wControl_p control);
@@ -159,10 +159,10 @@ typedef enum {
     FS_UPDATE
 } wFilSelMode_e;
 
-typedef int (*wFilSelCallBack_p)(int files, char** fileName, void* data);
+typedef int (*wFilSelCallBack_p)(int files, char** fileName, void* attributes);
 struct wFilSel_t* wFilSelCreate(wControl_p w, wFilSelMode_e mode, int opt,
     const char* title, const char* pattList, wFilSelCallBack_p action,
-    void* data);
+    void* attributes);
 int wFilSelect(struct wFilSel_t* fs, const char* dirName);
 
 /*------------------------------------------------------------------------------
@@ -228,9 +228,9 @@ void wButtonSetLabel(wControl_p bb, unsigned isIcon, const char* labelStr);
 void wButtonSetBusy(wControl_p bb, int value);
 wControl_p wButtonCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
     const char* helpStr, const char* labelStr, long option,
-    wWinPix_t width, wButtonCallBack_p action, void* data);
+    wWinPix_t width, wButtonCallBack_p action, void* attributes);
 
-wControl_p wButtonCreateForToolbar(wControl_p  w, wWinPix_t x, wWinPix_t	y, const char* helpStr, const char* labelStr, long option, wWinPix_t width, wButtonCallBack_p action, void* data);
+wControl_p wButtonCreateForToolbar(wControl_p  w, wWinPix_t x, wWinPix_t	y, const char* helpStr, const char* labelStr, long option, wWinPix_t width, wButtonCallBack_p action, void* attributes);
 
 /** Radio buttons radio.c */
 
@@ -239,7 +239,7 @@ long wRadioGetValue(wControl_p bc);
 
 wControl_p wRadioCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
     const char* helpStr, const char* labelStr, long option,
-    const char* const* labels, long* valueP, wChoiceCallBack_p action, void* data);
+    const char* const* labels, long* valueP, wChoiceCallBack_p action, void* attributes);
 
 /** Toggle buttons toggle.c */
 
@@ -248,7 +248,7 @@ long wToggleGetValue(wControl_p b);
 wControl_p wToggleCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
     const char* helpStr, const char* labelStr, long option,
     const char* const* labels, long* valueP,
-    wChoiceCallBack_p action, void* data);
+    wChoiceCallBack_p action, void* attributes);
 
 /*------------------------------------------------------------------------------
  *
@@ -394,7 +394,7 @@ FILE * wFileOpen(		const char *, const char * );
 #define DO_FILESYSTEM 1
 
 wControl_p wWinDialogCreate(wControl_p parent, const char* helpStr, const char* titleStr,
-    const char* nameStr, long option, wWinCallBack_p winProc, void* data);
+    const char* nameStr, long option, wWinCallBack_p winProc, void* attributes);
 
 void wDialogButtonsConfigure(wControl_p dialog, const char* okLabel,
     const char* cancelLabel, const char* helpLabel);
@@ -518,18 +518,18 @@ typedef void (*wListCallBack_p)( unsigned int , const char *, unsigned int, void
 wControl_p wListCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
     const char* helpStr, const char* labelStr, long option, long number,
     wWinPix_t width, int colCnt, wWinPix_t* colWidths, wBool_t* colRightJust,
-    const char** colTitles, long* valueP, wListCallBack_p action, void* data);
+    const char** colTitles, long* valueP, wListCallBack_p action, void* attributes);
 
 wControl_p wComboBoxCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
     const char* helpStr, const char* labelStr, long option, long	number,
-    wWinPix_t width, long* valueP, wListCallBack_p action, void* data);
+    wWinPix_t width, long* valueP, wListCallBack_p action, void* attributes);
 
-void wComboBoxAddValue(wControl_p b, char* text, void * data);
+void wComboBoxAddValue(wControl_p b, char* text, void * attributes);
 void wComboBoxSetIndex(wControl_p b, int row);
 
 wControl_p wComboListCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
                          const char *helpStr, const char *labelStr, long option, long number,
-                         wWinPix_t width, long *valueP, wListCallBack_p action, void *data);
+                         wWinPix_t width, long *valueP, wListCallBack_p action, void *attributes);
 void wListClear(wControl_p b);
 void wListSetIndex(wControl_p b, int element);
 wIndex_t wListFindValue(wControl_p b, const char* val);
@@ -654,9 +654,16 @@ typedef int wAction_t;
 
 
 /* Creation CallBacks */
-typedef void (*wDrawRedrawCallBack_p)( wDraw_p, void *, wWinPix_t, wWinPix_t );
-typedef void (*wDrawActionCallBack_p)(	wDraw_p, void*, wAction_t, wDrawPix_t,
-                                        wDrawPix_t );
+typedef void (*wDrawRedrawCallBack_p)( wControl_p control, 
+                                       void *context, 
+                                       wWinPix_t posX, 
+                                       wWinPix_t posY);
+
+typedef void (*wDrawActionCallBack_p)(	wControl_p control, 
+                                        void* context, 
+                                        wAction_t action, 
+                                        wDrawPix_t posX,
+                                        wDrawPix_t posY);
 
 /* Creation Options */
 #define BD_TICKS	(1L<<25)
@@ -666,9 +673,9 @@ typedef void (*wDrawActionCallBack_p)(	wDraw_p, void*, wAction_t, wDrawPix_t,
 #define BD_MODKEYS  (1L<<29)
 
 /* Create: */
-wDraw_p wDrawCreate(		wWin_p, wWinPix_t, wWinPix_t, const char *, long,
-                                wWinPix_t, wWinPix_t, void *,
-                                wDrawRedrawCallBack_p, wDrawActionCallBack_p );
+wControl_p wDrawCreate(wControl_p parent, wWinPix_t x, wWinPix_t y, 
+    const char* helpStr, long option, wWinPix_t width, wWinPix_t height, 
+    void* context, wDrawRedrawCallBack_p redraw, wDrawActionCallBack_p action);
 
 /* Draw: */
 void wDrawLine(			wDraw_p, wDrawPix_t, wDrawPix_t, wDrawPix_t, wDrawPix_t,
@@ -822,7 +829,7 @@ void wDoAccelHelp( wAccelKey_e key, void * );
 
 /* Creation CallBacks */
 typedef void (*wMenuCallBack_p)( void * );
-typedef void (*wMenuListCallBack_p)( int index, const char *label, const void * data);
+typedef void (*wMenuListCallBack_p)( int index, const char *label, const void * attributes);
 typedef void (*wMenuCallBack_p)( void * );
 typedef void (*wAccelKeyCallBack_p)( wAccelKey_e, void * );
 typedef void (*wMenuTraceCallBack_p)( wMenu_p, const char *, void * );
@@ -841,7 +848,7 @@ wControl_p wMenuPushCreate(
     const char* labelStr,
     long acclKey,
     wMenuCallBack_p action,
-    void* data);
+    void* attributes);
 
 wControl_p wMenuRadioCreate(
     wControl_p m,
@@ -849,7 +856,7 @@ wControl_p wMenuRadioCreate(
     const char* labelStr,
     long acclKey,
     wMenuCallBack_p action,
-    void* data);
+    void* attributes);
 
 wControl_p wMenuMenuCreate(
     wControl_p m,
@@ -869,11 +876,11 @@ void wMenuPushEnable(
 wControl_p wMenuListCreate(wControl_p m, const char* helpStr, int max,
     wMenuListCallBack_p action);
 
-void wMenuListAdd(wControl_p ml, int index, const char* labelStr, const void* data);
-const char* wMenuListGet(wControl_p ml, unsigned int index, void** data);
+void wMenuListAdd(wControl_p ml, int index, const char* labelStr, const void* attributes);
+const char* wMenuListGet(wControl_p ml, unsigned int index, void** attributes);
 void wMenuListClear(wControl_p ml);
 void wMenuListDelete(wControl_p ml, const char* labelStr);
-const char* wMenuListGet(wControl_p ml, unsigned int index, void** data);
+const char* wMenuListGet(wControl_p ml, unsigned int index, void** attributes);
 
 
 wControl_p wMenuToggleCreate(
@@ -883,7 +890,7 @@ wControl_p wMenuToggleCreate(
     long acclKey,
     wBool_t set,
     wMenuCallBack_p action,
-    void* data);
+    void* attributes);
 
 wBool_t wMenuToggleSet(
     wControl_p mt,
@@ -907,7 +914,7 @@ wMenu_p wMenuCreate(wWin_p, wWinPix_t, wWinPix_t, const char*, const char*,
 void wMenuSetTraceCallBack(
     wControl_p m,
     wMenuTraceCallBack_p func,
-    void* data); 
+    void* attributes); 
 
 wBool_t wMenuAction( wControl_p control, const char * label);
 
@@ -930,7 +937,7 @@ wControl_p wColorSelectButtonCreate(
     wWinPix_t 	width,
     wDrawColor* valueP,
     wColorSelectButtonCallBack_p action,
-    void* data);
+    void* attributes);
 
 void wColorSelectButtonSetColor( wControl_p bb, wDrawColor color );
 wDrawColor wColorSelectButtonGetColor( wControl_p bb);
