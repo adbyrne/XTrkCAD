@@ -224,7 +224,7 @@ static char* yellowstar[] = {
 //
 
 /**
- *	doFile: callback funtion for file submenu 
+ *	doFile: callback function for file submenu 
  */
 
 void doFile( void * cmd )
@@ -716,10 +716,23 @@ void DemoTest(void* unused)
 
 	wControlShow(dialog, TRUE);
 }
+
+wControl_p contextMenu;
+
 void
 DrawAction(wControl_p control, void* context, wAction_t action, wDrawPix_t x, wDrawPix_t y)
 {
 	printf("DrawAction: %d\n", action);
+
+	if (action == wActionRUp) {
+		wMenuPopupShow(contextMenu);
+	}
+}
+
+void
+ContextMenuAction(void* unused)
+{
+
 }
 
 void
@@ -728,6 +741,13 @@ CreateDraw()
 	wControl_p maindrawing;
 
 	maindrawing = wDrawCreate(mainW, 0, 0, "maindraw", 0, 0, 0, NULL, NULL, DrawAction);
+
+	contextMenu = wMenuPopupCreate(maindrawing,
+		"Context Menu");
+
+	wMenuPushCreate(contextMenu, NULL, "Test", 0L, ContextMenuAction, NULL);
+	wMenuSeparatorCreate(contextMenu);
+	wMenuToggleCreate(contextMenu, NULL, "Toggle", 0L, TRUE, ContextMenuAction, NULL);
 }
 
 wDrawColor snapColor = 0x00FF00;

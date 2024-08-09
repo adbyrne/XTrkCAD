@@ -493,7 +493,7 @@ static gint draw_char_release_event(
 	default:;
 	}
 
-	catch_shift_ctrl_alt_keys(widget, event, NULL);
+	UpdateModifierKeyState(event);
 
 	if (modKey != wModKey_None && (drawAttributes->option & BD_MODKEYS)) {
 		drawAttributes->action(drawControl, drawControl->context,
@@ -577,7 +577,7 @@ static gint draw_char_event(
 	default:;
 	}
 
-	catch_shift_ctrl_alt_keys(widget, event, NULL);
+	UpdateModifierKeyState(event);
 
 	if (functionKey) {
 		keyboardAction = wActionExtKey + ((int)functionKey << 8);

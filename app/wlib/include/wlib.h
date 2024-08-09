@@ -863,7 +863,10 @@ wControl_p wMenuMenuCreate(
     const char* helpStr,
     const char* labelStr);
 
-// wMenu_p wMenuPopupCreate(	wWin_p, const char * );
+wControl_p wMenuPopupCreate(
+    wControl_p parent,
+    const char* labelStr);
+
 void wMenuSeparatorCreate(
     wControl_p m);
 
@@ -903,7 +906,7 @@ void wMenuToggleEnable(
     wControl_p mt,
     wBool_t enable);
 
-//void wMenuPopupShow(		wMenu_p );
+void wMenuPopupShow(wControl_p mp);
 
 void wMenuAddHelp(		wMenu_p );
 

@@ -187,6 +187,7 @@ struct window {
 	GtkBuilder* builder;
 	GtkAccelGroup* accelGroup;		/**< accelerator group if main window */
 	GtkContainer* statusbar;
+	bool maximize_initially;		
 };
 
 struct control {
@@ -518,7 +519,7 @@ typedef struct accelData_t {
     wAccelKey_e key;
     int modifier;
     wAccelKeyCallBack_p action;
-    void * attributes;
+    void * data;
 } accelData_t;
 
 
@@ -641,7 +642,7 @@ void *wTreeViewGetItemContext(wControl_p b, int row);
 
 /* window.c */
 void wlibDoModal(wWin_p win0, wBool_t modal);
-wBool_t catch_shift_ctrl_alt_keys(GtkWidget *widget, GdkEventKey *event, void *attributes);
+wBool_t UpdateModifierKeyState(GdkEventKey *event);
 wControl_p wlibCreateFromTemplate( wControl_p parent, int winType, wWinPix_t x, wWinPix_t y,
     const char * labelStr, const char * nameStr, long option,
     wWinCallBack_p winProc, void * attributes);

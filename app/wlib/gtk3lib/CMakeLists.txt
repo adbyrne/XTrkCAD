@@ -19,6 +19,7 @@ target_sources(xtrkcad-wlib
 	drawcontrol.c
 	entry.c
  	fileselector.c
+	keystate.c
  	lines.c
 	list.c
 	liststore.c
@@ -26,6 +27,7 @@ target_sources(xtrkcad-wlib
  	message.c
  	notice.c
 	pixbuf.c
+	popupmenu.c
 	splash.c
  	pulldnmenu.c
 	radio.c
@@ -50,7 +52,7 @@ target_sources(xtrkcad-wlib
 
  	tooltip.c	
  	util.c
- 	window.c
+	window.c
 )
 
 if(WIN32)
