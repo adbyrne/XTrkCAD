@@ -25,13 +25,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#define GTK_DISABLE_SINGLE_INCLUDES
-#define GDK_DISABLE_DEPRECATED
-#define GTK_DISABLE_DEPRECATED
-#define GSEAL_ENABLE
 
-#include <gtk/gtk.h>
-#include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 
 #include "gtkint.h"
@@ -49,7 +43,7 @@
  * Handle activate event for menu items.
  *
  * \param widget IN widget that emitted the signal
- * \param value  IN application attributes
+ * \param value  IN application context
  * \return
  */
 
@@ -67,7 +61,7 @@ static void pushMenuItem(
         break;
     //case M_TOGGLE:
     //    mt = (wMenuToggle_p)m;
-    //    mt->action( mt->attributes );
+    //    mt->action( mt->context );
     //    break;
     case M_RADIO:
         /* NOTE: action is only called when radio button is activated,
@@ -257,7 +251,7 @@ static void CreateMenuItem(
  * \param labelStr 	IN text for entry
  * \param acclKey 	IN accelerator key to add
  * \param action 	IN callback function
- * \param attributes 		IN application attributes
+ * \param context	IN application context
  * \param helpStr 	IN
  * \return menu entry
  */
@@ -268,13 +262,11 @@ wControl_p wMenuRadioCreate(
     const char * labelStr,
     long acclKey,
     wMenuCallBack_p action,
-    void 	*attributes )
+    void 	*context )
 {
     struct menuitem* menuitem;
 
-    wControl_p mi = wlibControlNew(M_RADIO, m, helpStr, attributes);
-    mi->context = attributes;
-
+    wControl_p mi = wlibControlNew(M_RADIO, m, helpStr, context);
     menuitem = CONTROL_GET_ATTRIBUTES_PTR(mi, menuitem);
     menuitem->action = action;
 
@@ -310,7 +302,7 @@ void wMenuRadioSetActive(
  * \param labelStr 	IN text for entry
  * \param acclKey 	IN accelerator key to add
  * \param action 	IN callback function
- * \param attributes 		IN application attributes
+ * \param context 	IN application context
  * \return menu entry
  */
 
@@ -320,16 +312,16 @@ wControl_p wMenuPushCreate(
     const char * labelStr,
     long acclKey,
     wMenuCallBack_p action,
-    void 	*attributes )
+    void 	*context )
 {
     struct menuitem* menuitem;
 
-    wControl_p mi = wlibControlNew(M_PUSH, m, helpStr, attributes);
+    wControl_p mi = wlibControlNew(M_PUSH, m, helpStr, context);
     menuitem = CONTROL_GET_ATTRIBUTES_PTR(mi, menuitem);
     menuitem->action = action;
 
     CreateMenuItem( m, mi, M_PUSH, helpStr, labelStr, acclKey);
-    mi->context = attributes;
+    mi->context = context;
 
     return mi;
 }
@@ -416,7 +408,7 @@ void wMenuSeparatorCreate(
  * \param acclKey 	IN acceleratoor key to add
  * \param set 		IN initial state
  * \param action 	IN callback function
- * \param attributes 		IN application attributes
+ * \param context 	IN application context
  * \return menu entry
  */
 
@@ -427,11 +419,11 @@ wControl_p wMenuToggleCreate(
     long acclKey,
     wBool_t set,
     wMenuCallBack_p action,
-    void * attributes )
+    void * context )
 {
     struct menuitem *menuitem;
 
-    wControl_p mt = wlibControlNew(M_TOGGLE, m, helpStr, attributes);
+    wControl_p mt = wlibControlNew(M_TOGGLE, m, helpStr, context);
     menuitem = CONTROL_GET_ATTRIBUTES_PTR(mt, menuitem);
     menuitem->action = action;
 
@@ -594,54 +586,11 @@ wControl_p wMenuBarAdd(
 /*-----------------------------------------------------------------*/
 
 /**
- * Create a popup menu (context menu)
- *
- * \param w 		IN parent window
- * \param labelStr 	IN label
- * \return    the created menu
- */
-
-wMenu_p wMenuPopupCreate(
-    wWin_p w,
-    const char * labelStr )
-{
-    wMenu_p b = NULL;
-    // b = wlibAlloc( w, B_MENU, 0, 0, labelStr, sizeof *b, NULL );
-    // b->mmtype = MM_POPUP;
-    // b->option = 0;
-
-    // b->menu = gtk_menu_new();
-    // b->w = 0;
-    // b->h = 0;
-    // g_signal_connect( G_OBJECT (b->menu), "key_press_event",
-    // 		G_CALLBACK(catch_shift_ctrl_alt_keys), b);
-    // g_signal_connect( G_OBJECT (b->menu), "key_release_event",
-    // 		G_CALLBACK (catch_shift_ctrl_alt_keys), b);
-    // gtk_widget_set_events ( GTK_WIDGET(b->menu), GDK_EXPOSURE_MASK|GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK );
-    printf("%s:%d Not implemented!", __FILE__, __LINE__);
-    return b;
-}
-
-/**
- * Show a context menu
- *
- * \param mp IN the context menu
- */
-
-//void wMenuPopupShow( wMenu_p mp )
-//{
-//    gtk_menu_popup_at_pointer( GTK_MENU(mp->menu), NULL );
-//}
-
-
-/*-----------------------------------------------------------------*/
-
-/**
  * ?? Seems to be related to macro / automatic playback functionality
  *
  * \param m 	IN
  * \param func 	IN
- * \param attributes 	IN
+ * \param context 	IN
  */
 
 void wMenuSetTraceCallBack(
@@ -676,7 +625,7 @@ wBool_t wMenuAction(
     // 			if ( ((wMenuPush_p)mi)->enabled == FALSE )
     // 				wBeep();
     // 			else
-    // 				((wMenuPush_p)mi)->action( ((wMenuPush_p)mi)->attributes );
+    // 				((wMenuPush_p)mi)->action( ((wMenuPush_p)mi)->context );
     // 			break;
     // 		case M_TOGGLE:
     // 			mt = (wMenuToggle_p)mi;
@@ -684,7 +633,7 @@ wBool_t wMenuAction(
     // 				wBeep();
     // 			} else {
     // 				wMenuToggleSet( mt, !mt->set );
-    // 				mt->action( mt->attributes );
+    // 				mt->action( mt->context );
     // 			}
     // 			break;
     // 		case M_MENU:

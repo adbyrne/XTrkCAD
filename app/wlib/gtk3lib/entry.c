@@ -106,7 +106,7 @@ const char *wEntryGetValue(
  * current value and then select the whole default value
  *
  * \param widget 	IN the edit field
- * \param b 		IN the widget attributes structure
+ * \param b 		IN the control
  * \return
  *
  * \todo Check necessity probably used by BO_ENTER
@@ -213,7 +213,7 @@ static int entryFocusOutEvent(
  * \param	valueP	IN	initial value
  * \param	fieldLength	IN 	maximum length of entry in chars
  * \param	action	IN	application callback function
- * \param 	attributes	IN	application context attributes
+ * \param 	context	IN	application context 
  * \return  the created widget
  */
 
@@ -228,13 +228,13 @@ wControl_p wEntryCreate(
         char	*valueP,
         wIndex_t fieldLength,
         wEntryCallBack_p action,
-        void 	*attributes)
+        void 	*context)
 {
 	wControl_p b;
 	struct entry* entry;
 
 	// create and initialize the widget
-	b = wlibControlNew(B_TEXT, parent, helpStr, attributes);
+	b = wlibControlNew(B_TEXT, parent, helpStr, context);
 	entry = CONTROL_GET_ATTRIBUTES_PTR(b, entry);
 	entry->valueP = valueP;
 	entry->action = action;

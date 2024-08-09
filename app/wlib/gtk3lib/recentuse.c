@@ -32,12 +32,12 @@
 #include "gtkint.h"
 #include "i18n.h"
 
-#define WLISTITEM	"wListItem"		/**< id for object attributes */
-#define WLISTMENU	"wListMenu"		/**< id for reference to main list attributes */
+#define WLISTITEM	"wListItem"		/**< id for object context */
+#define WLISTMENU	"wListMenu"		/**< id for reference to main list context */
 
-struct listentry {					/**< attributes of items in recently used list */
+struct listentry {					/**< context of items in recently used list */
     char* label;				// text label for menu
-    const char* attributes;			// application attributes
+    const char* context;			// application context
 };
 
 /*-----------------------------------------------------------------*/
@@ -93,7 +93,7 @@ static void ActivateListMenuItem(
     if (list->action) {
         (*list->action)(0,
             gtk_menu_item_get_label(GTK_MENU_ITEM(widget)),
-            item->attributes);
+            item->context);
     }
 
     // update order of elements in list
@@ -218,11 +218,11 @@ FreeEntry(GSList* list, unsigned element)
  *
  * \param list	Menu list to be modified
  * \param label	label of new entry
- * \param attributes	attributes for new entry
+ * \param context	context for new entry
  */
 
 static int
-PushListEntry(wControl_p list, const char* label, const char* attributes)
+PushListEntry(wControl_p list, const char* label, const char* context)
 {
     struct recentuse *ru = CONTROL_GET_ATTRIBUTES_PTR(list, recentuse);
     struct listentry *newEntry;
@@ -234,7 +234,7 @@ PushListEntry(wControl_p list, const char* label, const char* attributes)
     }
 
     newEntry->label = g_strdup(wlibConvertInput(label));
-    newEntry->attributes = attributes;
+    newEntry->context = context;
 
     ru->elements = g_slist_prepend(ru->elements, newEntry);
 
@@ -249,7 +249,7 @@ PushListEntry(wControl_p list, const char* label, const char* attributes)
  * \param ml 		IN handle for the menu list - the placeholder item
  * \param index 	IN position of new menu item
  * \param labelStr 	IN the menu label for the new item
- * \param attributes 		IN application attributes for the new item
+ * \param context	IN application context for the new item
  * \return
  */
 
@@ -257,10 +257,10 @@ void wMenuListAdd(
     wControl_p ml,
     int index,
     const char* labelStr,
-    const void* attributes)
+    const void* context)
 {
     struct recentuse *ru = CONTROL_GET_ATTRIBUTES_PTR(ml, recentuse);
-    ru->current = PushListEntry(ml, labelStr, attributes);
+    ru->current = PushListEntry(ml, labelStr, context);
 
     ShowMenuList(ru);
 }
@@ -280,11 +280,11 @@ void wMenuListDelete(
 }
 
 /**
- * Get the label and the application attributes of a specific menu list item
+ * Get the label and the application context of a specific menu list item
  *
  * \param ml 	IN menu list
  * \param index IN item within list
- * \param attributes	OUT	application attributes
+ * \param context	OUT	application context
  * \return    item label
  */
 

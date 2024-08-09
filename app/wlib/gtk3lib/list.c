@@ -91,7 +91,7 @@ void wListSetIndex(
 
 /**
  * CompareListData is called when a list is searched for a specific
- * attributes entry. It is called in sequence and does a string compare
+ * context entry. It is called in sequence and does a string compare
  * between the label of the current row and the search argument. If
  * identical the label is placed in the search argument.
  * It is a GTK foreach() function.
@@ -99,7 +99,7 @@ void wListSetIndex(
  * \param model IN searched model
  * \param path IN unused
  * \param iter IN current iterator
- * \param attributes IN/OUT pointer to attributes structure with search criteria
+ * \param context IN/OUT pointer to context structure with search criteria
  * \return TRUE if identical, FALSE otherwise
  */
 
@@ -174,11 +174,11 @@ wIndex_t wListGetCount(
 }
 
 /**
- * Get the user attributes for a list element
+ * Get the user context for a list element
  *
  * \param b IN widget
  * \param inx IN row
- * \returns the user attributes for the specified row
+ * \returns the user context for the specified row
  */
 
 void * wListGetItemContext(
@@ -341,7 +341,7 @@ void wListSelectAll(wControl_p bl)
  * \param row IN row to change
  * \param labelStr IN string with new tab separated values
  * \param bm IN icon
- * \param itemData IN attributes for row
+ * \param itemData IN context for row
  * \returns TRUE
  */
 
@@ -527,7 +527,7 @@ void wListSetSize(wControl_p bl, wWinPix_t w, wWinPix_t h)
  * \param colTitles IN  array of titles for columns
  * \param valueP IN     selected index
  * \param action IN     callback
- * \param attributes IN       context
+ * \param context IN       context
  * \returns created list box
  */
 
@@ -546,7 +546,7 @@ wControl_p wListCreate(
         const char** colTitles,
         long* valueP,
         wListCallBack_p action,
-        void* attributes)
+        void* context)
 {
 	wControl_p bl;
 	struct list* lcontrol;
@@ -554,7 +554,7 @@ wControl_p wListCreate(
 
 	g_assert(width != 0);
 
-	bl = wlibControlNew(B_LIST, parent, helpStr, attributes);
+	bl = wlibControlNew(B_LIST, parent, helpStr, context);
 	lcontrol = CONTROL_GET_ATTRIBUTES_PTR(bl, list);
 	lcontrol->valueP = valueP;
 	lcontrol->action = action;
@@ -573,7 +573,7 @@ wControl_p wListCreate(
 		//bl->colWidths = (wWinPix_t*)malloc(colCnt * sizeof * (wWinPix_t*)0);
 		//memcpy(bl->colWidths, colWidths, colCnt * sizeof * (wWinPix_t*)0);
 
-		/* create the attributes structure for attributes */
+		/* create the attributes structure for context */
 		lcontrol->listStore = wlibNewListStore(colCnt);
 		/* create the widget for the list store */
 		lcontrol->treeView = wlibNewTreeView(lcontrol->listStore,

@@ -40,7 +40,7 @@
 
 
 /**
- * Show the attributes columns in the combobox. If combobox has an entry field
+ * Show the context columns in the combobox. If combobox has an entry field
  * the first text column is not added here as this is done by GTK
  * automatically.
  *
@@ -230,7 +230,7 @@ wBool_t wComboBoxSetValues(
  * Or handles user entered text.
  *
  * \param comboBox  IN the combobox
- * \param attributes      IN user attributes / pointer to the control
+ * \param context      IN user context / pointer to the control
  * \return
  */
 
@@ -331,7 +331,7 @@ wlibNewComboBox(GtkListStore *ls, int editable)
  * value.
  * *
  * \param entry	IN entry field of the combobox
- * \param attributes	IN pointer to control
+ * \param context	IN pointer to control
  * \return
  */
 
@@ -376,7 +376,7 @@ static void ComboBoxEntryEntered(
  *	\param IN width     Width
  *	\param IN valueP    selected index
  *	\param IN action    Callback
- *	\param IN attributes      Context
+ *	\param IN context      Context
  */
 
 wControl_p wComboBoxCreate(
@@ -390,12 +390,12 @@ wControl_p wComboBoxCreate(
         wWinPix_t	width,
         long	*valueP,
         wListCallBack_p action,
-        void 	*attributes)
+        void 	*context)
 {
 	wControl_p b;
 	struct list* lcontrol;
 
-	b = wlibControlNew(B_COMBOBOX, parent, helpStr, attributes);
+	b = wlibControlNew(B_COMBOBOX, parent, helpStr, context);
 	lcontrol = CONTROL_GET_ATTRIBUTES_PTR(b, list);
 	lcontrol->valueP = valueP;
 	lcontrol->action = action;

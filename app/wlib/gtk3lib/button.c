@@ -60,7 +60,7 @@ void wButtonSetBusy(wControl_p bb, int value)
  *
  * \param widget    IN  the button
  * \param option    IN
- * \param labelStr  IN  the pixel attributes or the label text
+ * \param labelStr  IN  the pixel context or the label text
  * \param labelG    IN
  * \param imageG    IN
  *
@@ -218,7 +218,7 @@ static wBool_t drawButton(
  * \param option IN Options
  * \param width IN Width of button
  * \param action IN Callback
- * \param attributes IN User attributes as context
+ * \param context IN User context
  * \returns button widget
  *
  * \todo replace XBM format (layer buttons) or add support in buttons.
@@ -235,12 +235,12 @@ wControl_p wButtonCreate(
         long 	option,
         wWinPix_t 	width,
         wButtonCallBack_p action,
-        void 	* attributes)
+        void 	* context)
 {
 	wControl_p b;
 	struct button* button; 
 
-	b = wlibControlNew( B_BUTTON, parent, helpStr, attributes );
+	b = wlibControlNew( B_BUTTON, parent, helpStr, context );
 	button = CONTROL_GET_ATTRIBUTES_PTR(b, button);
 	button->action = action;
 
@@ -295,7 +295,7 @@ wControl_p wButtonCreate(
  * \param option IN		options
  * \param width IN		unused
  * \param action IN		callback
- * \param attributes IN		user attributes as context
+ * \param context IN		user context as context
  * \returns button widget
  *
  * \todo replace XBM format (layer buttons) or add support in buttons.
@@ -322,8 +322,8 @@ wControl_p wButtonCreateForToolbar(
 	// * \todo make sure that parent is appmainwindow.
 	// */
 
-	//b = wlibControlNew(B_BUTTON, attributes);
-	//button = &(b->attributes.button);
+	//b = wlibControlNew(B_BUTTON, context);
+	//button = &(b->context.button);
 	//button->action = action;
 
 	//b->widget = GTK_WIDGET(gtk_toggle_button_new());

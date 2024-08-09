@@ -68,7 +68,7 @@ wListItem_p wlibListItemGet(
  *
  * \param ls IN list store
  * \param inx IN row
- * \returns pointer to attributes
+ * \returns pointer to context
  */
 
 void *

@@ -140,7 +140,7 @@ response_signal(GtkDialog* self, gint response_id, wControl_p dialog)
 {
     winProcEvent event = 0;
 
-    SaveWindowSizePos(self, dialog); 
+    SaveWindowSizePos(GTK_WIDGET(self), dialog); 
     
     switch (response_id) {
     case GTK_RESPONSE_OK:
@@ -271,7 +271,7 @@ CreateWindowFromBuilder( wControl_p window, const char *nameStr, long option )
  * \param nameStr   IN  dialog id
  * \param option    IN  see above
  * \param winProc   IN dialog procedure
- * \param attributes      IN  user attributes for dialog procedure
+ * \param context      IN  user context for dialog procedure
  * \return          dialog handle on success, NULL on failure
  */
 
@@ -282,13 +282,13 @@ wWinDialogCreate(wControl_p parent,
     const char* nameStr,
     long option,
     wWinCallBack_p winProc,
-    void* attributes)
+    void* context)
 {
     GtkWidget* dialog;
     GtkWidget* parentWindow;
     struct window* dcontrol;
 
-    wControl_p winDialog = wlibControlNew(W_DIALOG, parent, helpStr, attributes);
+    wControl_p winDialog = wlibControlNew(W_DIALOG, parent, helpStr, context);
     dcontrol = CONTROL_GET_ATTRIBUTES_PTR(winDialog, window);
 
     dialog = CreateWindowFromBuilder(winDialog, nameStr, option);
@@ -343,7 +343,7 @@ wWinDialogCreate(wControl_p parent,
  * \param nameStr   IN Window name
  * \param option    IN Options
  * \param winProc   IN call back function
- * \param attributes      IN User context information
+ * \param context      IN User context information
  * \return    handle for new window
  */
 
@@ -371,7 +371,7 @@ static wWin_p wWinPopupCreate(
     printf("%s:%d not implemented\n", __FILE__, __LINE__);
 
     //win = wWinCommonCreate(parent, W_POPUP, x, y, labelStr, nameStr, option,
-    //    winProc, attributes);
+    //    winProc, context);
     return win;
 }
 

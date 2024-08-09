@@ -66,9 +66,9 @@ ExtendPath(void)
                       wGetAppLibDir(),
                       NULL);
 
-    setenv("PATH",
-           DynStringToCStr(&newPath),
-           TRUE);
+    //setenv("PATH",
+    //       DynStringToCStr(&newPath),
+    //       TRUE);
 
     DynStringFree(&newPath);
 
@@ -106,9 +106,9 @@ unsigned wOpenFileExternal(char * filename)
     rc = system(DynStringToCStr(&commandLine));
 
     // restore the PATH
-    setenv("PATH",
-           currentPath,
-           TRUE);
+    //setenv("PATH",
+    //       currentPath,
+    //       TRUE);
 
     free(currentPath);
     DynStringFree(&commandLine);

@@ -35,12 +35,12 @@ struct wFilSel_t {
 	wType_e type;                       /**< */
 	GtkFileChooserNative * window; 		/**<  file selector handle*/
 	wFilSelCallBack_p action; 			/**<  */
-	void * attributes;
+	void * context;
 	GPtrArray* filters;					/**<  file type filters */
 	wFilSelMode_e mode;					/**< used for load or save */
 	int opt; 							/**< see FSO_ options */
 	const char * title; 				/**< dialog box title */
-	wWindow_p parent; 					/**< parent window */
+	wControl_p parent; 					/**< parent window */
 	char *defaultExtension; 			/**< to use if no extension specified */
 };
 
@@ -104,7 +104,7 @@ AddFilters(struct wFilSel_t* selector)
 }
 
 /**
- * Create a new file selector. Only the internal attributes structures are
+ * Create a new file selector. Only the internal structures are
  * set up, no dialog is created.
  *
  * If the FSO_PICTURES flag is set in opt , the pattern are automatically
@@ -114,7 +114,7 @@ AddFilters(struct wFilSel_t* selector)
  * callback receives three arguments:
  * - int files number of selected files (1 or more if FS_MULTIPLEFILES)
  * - char ** names an array of files filenames
- * - void * attributes	the attributes passed to wFilSelCreate()
+ * - void * context	the context passed to wFilSelCreate()
  *
  * \param w		IN	parent window
  * \param mode	IN	load or save
@@ -122,7 +122,7 @@ AddFilters(struct wFilSel_t* selector)
  * \param title IN	dialog title
  * \param pattList IN list of filter patterns
  * \param action IN callback
- * \param attributes IN	see description
+ * \param context IN	see description
  * \return    the newly created file selector structure
  */
 
@@ -133,7 +133,7 @@ struct wFilSel_t * wFilSelCreate(
         const char * title,
         const char * pattList,
         wFilSelCallBack_p action,
-        void * attributes )
+        void * context )
 {
 	struct wFilSel_t	*fs;
 
@@ -146,7 +146,7 @@ struct wFilSel_t * wFilSelCreate(
 	fs->opt = opt;
 	fs->title = g_strdup( title );
 	fs->action = action;
-	fs->attributes = attributes;
+	fs->context = context;
 
 	if (pattList || (opt & FSO_PICTURES)) {
 		CreateFilters(fs, pattList);
@@ -222,7 +222,7 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 		}
 
 		if (fs->action) {
-			fs->action( g_slist_length(fileNameList), fileNames, fs->attributes );
+			fs->action( g_slist_length(fileNameList), fileNames, fs->context );
 		}
 
 		for(unsigned i=0; i < g_slist_length(fileNameList); i++) {

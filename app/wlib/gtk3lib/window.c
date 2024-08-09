@@ -20,15 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#ifdef WIN32
-#include <Windows.h>
-#else
-#include <unistd.h>
-#endif
-
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
 #define GTK_DISABLE_DEPRECATED
@@ -41,7 +32,6 @@
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 
-#include "wrapbox/eggwrapbox.h"
 
 #include "gtkint.h"
 
@@ -59,7 +49,7 @@ wWin_p gtkMainW;
 extern wBool_t listHelpStrings;
 
 static wControl_p firstWin = NULL, lastWin;
-static int keyState;
+
 static wBool_t gtkBlockEnabled = TRUE;
 static wBool_t maximize_at_next_show = FALSE;
 static dynArr_t toolbar_da;
@@ -350,7 +340,7 @@ void wWinShow(
     //}
 
     if (show) {
-        keyState = 0;
+        //keyState = 0;
         getPos(win);
 
         if (win->option & F_AUTOSIZE) {
@@ -678,28 +668,28 @@ static int fixed_draw_event(
     return rc;
 }
 
-static int resizeTime(wWin_p win) {
+static int resizeTime(wControl_p win) {
 
-	if (win->resizeW == win->w && win->resizeH == win->h) {  // If hasn't changed since last
-		if (win->timer_idle_count>3) {
-			win->winProc(win, wResize_e, NULL, win->data);  //Trigger Redraw on last occasion if one-third of a second has elapsed
-			win->timer_idle_count = 0;
-			win->resizeTimer = 0;
-			win->timer_busy_count = 0;
-			return FALSE;						 //Stop Timer and don't resize
-		} else win->timer_idle_count++;
-	}
-	if (win->busy==FALSE && win->winProc) {   //Always drive once
-		if (win->timer_busy_count>10) {
-			 win->winProc(win, wResize_e, NULL, win->data); //Redraw if ten times we saw a change (1 sec)
-			 win->timer_busy_count = 0;
-		} else {
-			win->winProc(win, wResize_e, (void*) 1, win->data); //No Redraw
-			win->timer_busy_count++;
-		}
-	    win->resizeW = win->w;					//Remember this one
-	    win->resizeH = win->h;
-	}
+	//if (win->resizeW == win->w && win->resizeH == win->h) {  // If hasn't changed since last
+	//	if (win->timer_idle_count>3) {
+	//		win->winProc(win, wResize_e, NULL, win->data);  //Trigger Redraw on last occasion if one-third of a second has elapsed
+	//		win->timer_idle_count = 0;
+	//		win->resizeTimer = 0;
+	//		win->timer_busy_count = 0;
+	//		return FALSE;						 //Stop Timer and don't resize
+	//	} else win->timer_idle_count++;
+	//}
+	//if (win->busy==FALSE && win->winProc) {   //Always drive once
+	//	if (win->timer_busy_count>10) {
+	//		 win->winProc(win, wResize_e, NULL, win->data); //Redraw if ten times we saw a change (1 sec)
+	//		 win->timer_busy_count = 0;
+	//	} else {
+	//		win->winProc(win, wResize_e, (void*) 1, win->data); //No Redraw
+	//		win->timer_busy_count++;
+	//	}
+	//    win->resizeW = win->w;					//Remember this one
+	//    win->resizeH = win->h;
+	//}
 	return TRUE;							//Will redrive after another timer interval
 }
 
@@ -769,76 +759,25 @@ static int window_configure_event(
 gboolean window_state_event(
     GtkWidget *widget,
     GdkEventWindowState *event,
-    wWin_p win)
+    wControl_p win)
 {
+    struct window* windowAttributes = CONTROL_GET_ATTRIBUTES_PTR(win, window);
     if (!win) {
         return (FALSE);
     }
 
-    win->maximize_initially = FALSE;
+    windowAttributes->maximize_initially = FALSE;
 
     if (event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED) {
-        win->maximize_initially = TRUE;
+        windowAttributes->maximize_initially = TRUE;
     }
 
-    if (win->busy==FALSE && win->winProc) {
-        win->winProc(win, wState_e, NULL, win->data);
+    if (windowAttributes->winProc) {
+        windowAttributes->winProc(win, wState_e, NULL, windowAttributes);
     }
 
     return TRUE;
 }
-/**
- * Get current state of shift, ctrl or alt keys.
- *
- * \return    or'ed value of WKEY_SHIFT, WKEY_CTRL and WKEY_ALT depending on state
- */
-
-int wGetKeyState(void)
-{
-    return keyState;
-}
-
-wBool_t catch_shift_ctrl_alt_keys(
-    GtkWidget * widget,
-    GdkEventKey *event,
-    void * data)
-{
-    int state = 0;
-    switch (event->keyval ) {
-    case GDK_KEY_Shift_L:
-    case GDK_KEY_Shift_R:
-        state |= WKEY_SHIFT;
-        break;
-
-    case GDK_KEY_Control_L:
-    case GDK_KEY_Control_R:
-        state |= WKEY_CTRL;
-        break;
-
-    case GDK_KEY_Alt_L:
-    case GDK_KEY_Alt_R:
-        state |= WKEY_ALT;
-        break;
-
-    case GDK_KEY_Meta_L:
-    case GDK_KEY_Meta_R:
-	// Pressing SHIFT and then ALT generates a Meta key
-	//printf( "Meta\n" );
-        state |= WKEY_ALT;
-        break;
-    }
-
-    if (state != 0) {
-        if (event->type == GDK_KEY_PRESS) {
-            keyState |= state;
-        } else {
-            keyState &= ~state;
-        }
-        return TRUE;
-    }
-    return FALSE;
-}
-
 static gint window_char_event(
     GtkWidget * widget,
     GdkEventKey *event,
@@ -846,7 +785,7 @@ static gint window_char_event(
 {
     //wControl_p bb;
 
-    //if (catch_shift_ctrl_alt_keys(widget, event, win)) {
+    //if (UpdateModifierKeyState(widget, event, win)) {
     //    return FALSE;
     //}
 
@@ -1161,7 +1100,7 @@ wControl_p wlibCreateFromTemplate(
     struct window *wcontrol;
 	w=wlibDialogFromTemplate( winType, labelStr, nameStr, option, data );
 
-    wcontrol = WLIB_GET_DATA_PTR(w, window);
+    wcontrol = CONTROL_GET_ATTRIBUTES_PTR(w, window);
 
 	/*Find out if there is a fixed element */
 	//w->fixed = GTK_FIXED(wlibGetWidgetFromName(w,nameStr,"fixed",TRUE));
@@ -1236,6 +1175,8 @@ wControl_p wlibCreateFromTemplate(
  *
  * \param rc IN exit code
  * \return    never returns
+ * 
+ * \todo Move to a more appropriate file (main or appwindow?)
  */
 
 
@@ -1253,7 +1194,7 @@ void wExit(int rc)		/* Application return code */
     wPrefFlush("");
 
     if (gtkMainW && gtkMainW->winProc != NULL) {
-        gtkMainW->winProc(gtkMainW, wQuit_e, NULL, gtkMainW->data);
+        // gtkMainW->winProc(gtkMainW, wQuit_e, NULL, gtkMainW->attributes.window);
     }
     g_application_quit(wlibGetApp());
 }

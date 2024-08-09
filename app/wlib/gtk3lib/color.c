@@ -199,7 +199,7 @@ wDrawColor wColorSelectButtonGetColor(
  * \param IN width
  * \param IN valueP		current color
  * \param IN action		button callback procedure
- * \param IN attributes		user attributes to pass to callback procedure
+ * \param IN context		user context to pass to callback procedure
  * 
  * \return bb handle for created button
  * 
@@ -217,12 +217,12 @@ wControl_p wColorSelectButtonCreate(
         wWinPix_t 	width,
         wDrawColor *valueP,
         wColorSelectButtonCallBack_p action,
-        void 	* attributes)
+        void 	* context)
 {
 	wControl_p b;
 	struct colorbutton* ccontrol;
 
-	b = wlibControlNew(B_COLORBUTTON,parent, helpStr, attributes);
+	b = wlibControlNew(B_COLORBUTTON,parent, helpStr, context);
 	ccontrol = CONTROL_GET_ATTRIBUTES_PTR(b, colorbutton);
 
 	if (HASDIALOGBUILDER(parent)) {
