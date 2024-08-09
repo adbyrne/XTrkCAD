@@ -13,7 +13,6 @@ include( CheckSymbolExists )
 # build GA or Beta executable
 set( XTRKCAD_BIN "xtrkcad${XTRKCAD_BETA}" )
 
-add_subdirectory(paramtest)
 add_subdirectory(bitmaps)
 
 add_executable(cnvdsgn cnvdsgn.c utility.c)
