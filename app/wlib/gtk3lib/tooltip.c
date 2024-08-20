@@ -341,7 +341,6 @@ static int binarySearch(wBalloonHelp_t arr[], int l, int r, char* key)
 
 static const char *
 FindTooltip(gchar* field) {
-	wBalloonHelp_t *bhp;
 	int res;
 
 	res = binarySearch(balloonHelpStrings, 0, 

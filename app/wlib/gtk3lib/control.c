@@ -250,7 +250,7 @@ void wControlSetLabel(
     wControl_p b,
     const char * labelStr)
 {
-    GtkRequisition requisition,reqwidget;
+    //GtkRequisition requisition,reqwidget;
 
     if (b->label) {
         gtk_label_set_text(GTK_LABEL(b->label), wlibConvertInput(labelStr));

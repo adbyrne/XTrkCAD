@@ -244,8 +244,8 @@ wControl_p wMessageCreateEx(
 wWinPix_t
 wMessageGetWidth(const char *testString)
 {
-	GtkWidget *entry;
-	GtkRequisition requisition;
+//	GtkWidget *entry;
+//	GtkRequisition requisition;
 
 	return( wLabelWidth(testString));
 //    entry = gtk_entry_new();
