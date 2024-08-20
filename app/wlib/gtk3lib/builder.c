@@ -114,7 +114,7 @@ wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr,
 	if( !dcontrol->builder ) {
 		GString *errorMessage = g_string_new("Could not load ");
 		g_string_append( errorMessage, filename->str);
-		wNoticeEx( NT_ERROR,
+		wNoticeWithIcon( NT_ERROR,
 		           errorMessage->str,
 		           "OK",
 		           NULL );
@@ -125,7 +125,7 @@ wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr,
 	if (!w->widget) {
 		GString *errorMessage = g_string_new("Could not find window object ");
 		g_string_append( errorMessage, nameStr);
-		wNoticeEx( NT_ERROR,
+		wNoticeWithIcon( NT_ERROR,
 		           errorMessage->str,
 		           "OK",
 		           NULL );
@@ -158,7 +158,7 @@ wlibGetWidgetFromName( wControl_p parent, const char *dialogname,
 		if (!ignore_failure) {
 			GString *errorMessage = g_string_new("Could not find widget ");
 			g_string_append( errorMessage, id->str);
-			wNoticeEx( NT_ERROR,
+			wNoticeWithIcon( NT_ERROR,
 			           errorMessage->str,
 			           "OK",
 			           NULL );
@@ -182,7 +182,7 @@ wlibWidgetFromIdWarn(wControl_p win, const char *id)
 	{
 		GString *errorMessage = g_string_new("Could not find widget with id: ");
 		g_string_append_printf(errorMessage, "%s", id);
-		wNoticeEx(NT_ERROR,
+		wNoticeWithIcon(NT_ERROR,
 				  errorMessage->str,
 				  "OK",
 				  NULL);
@@ -223,7 +223,7 @@ wlibAddContentFromTemplate( wWin_p win, const char *nameStr)
 		if (error) {
 			g_string_append(errorMessage,error->message);
 		}
-		wNoticeEx( NT_ERROR,
+		wNoticeWithIcon( NT_ERROR,
 		           errorMessage->str,
 		           "OK",
 		           NULL );

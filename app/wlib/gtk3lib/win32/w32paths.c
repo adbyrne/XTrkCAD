@@ -133,7 +133,7 @@ const char* wGetAppWorkDir(void)
 	}
 
 	if(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, tempDir) != S_OK) {
-		wNoticeEx(NT_ERROR, "Cannot get user's profile directory", "Exit", NULL);
+		wNoticeWithIcon(NT_ERROR, "Cannot get user's profile directory", "Exit", NULL);
 		wExit(0);
 	}
 	else {
@@ -142,7 +142,7 @@ const char* wGetAppWorkDir(void)
 
 		if (!g_file_test(appWorkDir, G_FILE_TEST_IS_DIR )) {
 			if (g_mkdir(appWorkDir, 0x666)) {
-				wNoticeEx(NT_ERROR, "Cannot create user's profile directory", "Exit", NULL);
+				wNoticeWithIcon(NT_ERROR, "Cannot create user's profile directory", "Exit", NULL);
 				wExit(0);
 			}
 		}
@@ -167,7 +167,7 @@ const char *wGetUserHomeDir( void )
 
 	homeDir = g_get_home_dir();
  	if (homeDir == NULL) {
-		wNoticeEx( NT_ERROR, _("HOME is not set"), _("Exit"), NULL);
+		wNoticeWithIcon( NT_ERROR, _("HOME is not set"), _("Exit"), NULL);
 		wExit(0);
 	} else {
 		userHomeDir = g_strdup( homeDir );

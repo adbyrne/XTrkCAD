@@ -48,7 +48,7 @@ wCreateSplash(char *appName, char *appVer)
 {
 	GtkWidget *grid;
 	GtkWidget *image;
-	GtkWidget *label, *label_temp;
+	GtkWidget* label;
 	char *temp;
 	char *logoPath;
 

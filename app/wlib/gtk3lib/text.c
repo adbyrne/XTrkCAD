@@ -178,7 +178,7 @@ wBool_t wTextSave(wControl_p bt, const char* fileName)
 	f = fopen(fileName, "w");
 
 	if (f == NULL) {
-		wNoticeEx(NT_ERROR, fileName, "Ok", NULL);
+		wNoticeWithIcon(NT_ERROR, fileName, "Ok", NULL);
 		return FALSE;
 	}
 

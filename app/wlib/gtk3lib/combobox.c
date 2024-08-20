@@ -403,7 +403,7 @@ wControl_p wComboBoxCreate(
 
 	if(HASDIALOGBUILDER(parent)) {
 		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
-		lcontrol->listStore = gtk_combo_box_get_model(GTK_COMBO_BOX(b->widget));
+		lcontrol->listStore = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(b->widget)));
 		if (!lcontrol->listStore) {
 			abort();
 		}

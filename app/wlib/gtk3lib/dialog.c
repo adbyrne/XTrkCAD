@@ -297,7 +297,7 @@ wWinDialogCreate(wControl_p parent,
     {
         GString* errorMessage = g_string_new("Dialog id is not: ");
         g_string_append_printf(errorMessage, "%s", nameStr);
-        wNoticeEx(NT_ERROR,
+        wNoticeWithIcon(NT_ERROR,
             errorMessage->str,
             "OK",
             NULL);

@@ -151,7 +151,7 @@ static int toggled(
  *
  * ### Options
  *
- * BC_HORZ
+ * BC_HORIZONTAL
  * : buttons are arranged horizontally
  *
  * \param parent    IN parent window
@@ -199,7 +199,7 @@ wControl_p wToggleCreate(
 			g_list_free(children);
 		}
 	} else {
-		if (option & BC_HORZ) {
+		if (option & BC_HORIZONTAL) {
 			b->widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
 		} else {
 			b->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, 6);

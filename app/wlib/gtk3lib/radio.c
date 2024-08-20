@@ -180,7 +180,7 @@ wControl_p wRadioCreate(
 		GtkRadioButton* butt0 = NULL;
 		const char* const* label;
 
-		if (option & BC_HORZ) {
+		if (option & BC_HORIZONTAL) {
 			b->widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
 		} else {
 			b->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, 6);

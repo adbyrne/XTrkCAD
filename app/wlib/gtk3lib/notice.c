@@ -42,7 +42,7 @@
  * \return    True when accept was selected, false otherwise
  */
 
-int wNoticeEx(int type,
+int wNoticeWithIcon(int type,
               const char * msg,
               const char * yes,
               const char * no)

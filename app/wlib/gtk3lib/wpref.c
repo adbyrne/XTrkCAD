@@ -87,7 +87,7 @@ static void readPrefs( char * name, wBool_t update )
 	if(error) {
 		// ignore file does not exist condition, it will be created later
 		if(error->code != G_FILE_ERROR_NOENT) {
-			wNoticeEx( NT_ERROR, error->message, _("Exit"), NULL);
+			wNoticeWithIcon( NT_ERROR, error->message, _("Exit"), NULL);
 		}
 	}
 	g_free( tmp );

@@ -90,7 +90,7 @@ LoadStyles(void)
 static void 
 startup(GtkApplication *app)
 {	
-	wWindow_p window;
+	wControl_p window;
 
 	g_resources_register(wlib_get_resource());
 
