@@ -30,6 +30,7 @@
 
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
+#include "wrapbox/eggwrapbox.h"
 
 #include "gtkint.h"
 #include "i18n.h"
@@ -60,7 +61,7 @@ void wButtonSetBusy(wControl_p bb, int value)
  *
  * \param widget    IN  the button
  * \param option    IN
- * \param labelStr  IN  the pixel context or the label text
+ * \param labelStr  IN  the pixel data or the label text
  * \param labelG    IN
  * \param imageG    IN
  *
@@ -218,7 +219,7 @@ static wBool_t drawButton(
  * \param option IN Options
  * \param width IN Width of button
  * \param action IN Callback
- * \param context IN User context
+ * \param styleContext IN User styleContext
  * \returns button widget
  *
  * \todo replace XBM format (layer buttons) or add support in buttons.
@@ -275,6 +276,28 @@ wControl_p wButtonCreate(
 	return b;
 }
 
+static
+AllocateSquareHandler(GtkWidget* widget, GtkAllocation* allocation, gpointer unused)
+{
+	gint width = allocation->width;
+	gint height = allocation->height;
+
+	width = (width < height ? height : width);
+	gtk_widget_set_size_request(widget, width, height);
+}
+
+static char* down16[] = {
+"7 4 5 1",
+" 	c None",
+".	c #666666",
+"+	c #959595",
+"@	c #6C6C6C",
+"#	c #676767",
+".......",
+"+.....+",
+" +.@#+ ",
+"  +.+  " };
+
 /**
  * Create a toolbar button
  *
@@ -295,7 +318,7 @@ wControl_p wButtonCreate(
  * \param option IN		options
  * \param width IN		unused
  * \param action IN		callback
- * \param context IN		user context as context
+ * \param styleContext IN		user styleContext as styleContext
  * \returns button widget
  *
  * \todo replace XBM format (layer buttons) or add support in buttons.
@@ -312,46 +335,77 @@ wControl_p wButtonCreateForToolbar(
         long 	option,
         wWinPix_t 	width,
         wButtonCallBack_p action,
-        void* attributes)
+        void* context)
 {
-	//wControl_p b;
-	//struct button* button;
-	//GtkStyleContext* context;
+	wControl_p buttonControl;
+	struct button* buttonAttributes;
+	GtkStyleContext* styleContext;
+	GtkAspectFrame* aspectFrame;
 
-	///**
-	// * \todo make sure that parent is appmainwindow.
-	// */
+	/**
+	 * \todo make sure that parent is appmainwindow.
+	 */
 
-	//b = wlibControlNew(B_BUTTON, context);
-	//button = &(b->context.button);
-	//button->action = action;
+	buttonControl = wlibControlNew(B_BUTTON, parent, helpStr, context);
+	buttonAttributes = CONTROL_GET_ATTRIBUTES_PTR(buttonControl,button);
+	buttonAttributes->action = action;
+	buttonControl->widget = GTK_WIDGET(gtk_toggle_button_new());
 
-	//b->widget = GTK_WIDGET(gtk_toggle_button_new());
-	//context = gtk_widget_get_style_context(GTK_WIDGET(b->widget));
-	//gtk_style_context_add_class(context, "flat-button");
+	wButtonSetLabel(buttonControl, BO_ICON, labelStr);
 
-	//g_signal_connect(G_OBJECT(b->widget), "clicked",
-	//                 G_CALLBACK(buttonClick), b);
+	styleContext = gtk_widget_get_style_context(GTK_WIDGET(buttonControl->widget));
+	gtk_style_context_add_class(styleContext, "toolbar-button");
 
-	//wButtonSetLabel(b, BO_ICON, labelStr);
+	aspectFrame = GTK_ASPECT_FRAME(gtk_aspect_frame_new(NULL, 0.5, 0.5, 1.0, FALSE));
+	gtk_widget_show(GTK_WIDGET(aspectFrame));
+	gtk_container_add(GTK_CONTAINER(aspectFrame), buttonControl->widget);
 
-	//gtk_container_add(GTK_CONTAINER(parent->toolbar), b->widget);
-	//gtk_widget_show(b->widget);
+	/** \todo BO_ABUT should be renamed to BO_OVERFLOW_MENU and be included with the button */
+	if (option & BO_ABUT) {
+		GtkWidget* box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+		GtkWidget* downArrowButton = gtk_button_new();
+		GdkPixbuf* pixbuf;
 
-	//context = gtk_widget_get_style_context(GTK_WIDGET(parent->toolbar));
-	////gtk_style_context_remove_class(context, "image-button");
-	//char* styles = gtk_style_context_to_string(context, 2);
-	//if (option & BO_GAP) {
-	//	GtkWidget* separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
-	//	gtk_container_add(GTK_CONTAINER(parent->toolbar), separator);
-	//	gtk_widget_show(separator);
-	//}
+		styleContext = gtk_widget_get_style_context(GTK_WIDGET(downArrowButton));
+		gtk_style_context_add_class(styleContext, "toolbar-button-arrow");
 
-	//wlibAddHelpString(b->widget, helpStr);
-	//wlibAddTooltip(b->widget, parent->name, helpStr);
+		gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(aspectFrame), FALSE, FALSE, 0);
+		gtk_box_pack_start(GTK_BOX(box), downArrowButton, FALSE, FALSE, 0);
+		gtk_widget_set_halign(downArrowButton, GTK_ALIGN_START);
 
-	//return b;
-	return NULL;
+		gtk_widget_show(downArrowButton);
+
+		pixbuf = gdk_pixbuf_new_from_xpm_data((const char**)down16);
+		if (pixbuf) {
+			GtkWidget* image = gtk_image_new_from_pixbuf(pixbuf);
+			gtk_container_add(GTK_CONTAINER(downArrowButton), image);
+			g_object_ref_sink(pixbuf);
+			g_object_unref((gpointer)pixbuf);
+			gtk_widget_show(image);
+		}
+		gtk_widget_show(box);
+		egg_wrap_box_insert_child(EGG_WRAP_BOX(parent->attributes.window.toolbar), box, -1, 0);
+	}
+	else {
+		egg_wrap_box_insert_child(EGG_WRAP_BOX(parent->attributes.window.toolbar), GTK_WIDGET(aspectFrame), -1, 0);
+	}
+
+	gtk_widget_show(buttonControl->widget);
+
+	g_signal_connect(G_OBJECT(buttonControl->widget), "clicked",
+		G_CALLBACK(buttonClick), buttonControl);
+
+	if (option & BO_GAP) {
+		GtkWidget* separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
+
+		egg_wrap_box_insert_child(EGG_WRAP_BOX(parent->attributes.window.toolbar), separator, -1, 0);
+		gtk_widget_show(separator);
+	}
+
+	wlibAddHelpString(buttonControl->widget, helpStr);
+	wlibAddTooltip(buttonControl->widget, parent->name, helpStr);
+
+	return buttonControl;
 }
 
 

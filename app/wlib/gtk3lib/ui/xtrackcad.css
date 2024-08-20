@@ -15,9 +15,33 @@
     font-size: 140% 
 }
 
-flowboxchild > separator {
-    background: @fg_color; 
+.toolbar-button,
+.toolbar-button-arrow {
+    padding: 2px;
+    background-image: none;
+    border-color: transparent;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    margin: 0px;
+    outline: none;
+}
+  
+.toolbar-button:hover, 
+.toolbar-button-arrow:hover {
+    background: lightblue;
+    border-style:solid;
+    border-color:blue;
+}
+
+.toolbar-button-arrow {
     padding: 0px;
+    margin:0px;
+}
+
+.toolbar-separator {
+    padding-left: 4px;
+    padding-right: 4px;
 }
 
 .flat-button {

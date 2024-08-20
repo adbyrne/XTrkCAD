@@ -27,6 +27,7 @@
 
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
+#include "wrapbox/eggwrapbox.h"
 // #include <gdk/gdkkeysyms.h>
 
 #include "gtkint.h"
@@ -118,31 +119,35 @@ signalSizeAlloc(GtkWidget* self,
  	gtk_scrolled_window_set_max_content_height(GTK_SCROLLED_WINDOW(user_data),
 	        allocation->height);
 
-	return(FALSE);
+	return;
 }
 
 /**
- * Create the toolbar area of the main window. This is placed inside the
- * scrolled window passed as the parameter. To make sure that only the
- * minimum necessary height is allocated to that scrolled window, a signal
- * handler is set up.
+ * Create the toolbar container of the main window and place inside the container passed as
+ * parameter.
  *
- * \param toolbarScrolled IN the scrolled window
- * \return a FlowboxContainer for the toolbar widgets
+ * \param toolbarScrolled IN the container
+ * \return a WrapBox Container for the toolbar widgets
  */
 
 GtkWidget *
-CreateToolbar(GtkScrolledWindow* scrolled)
+CreateToolbar(GtkWidget *container)
 {
-	GtkFlowBox* flowbox;
-	GtkWidget* viewport;
+	GtkWidget* toolbar;
 
-	flowbox = GTK_FLOW_BOX(gtk_builder_get_object(
-		appMainWindow->attributes.window.builder,"toolbar"));
-	g_signal_connect(flowbox, "size-allocate", G_CALLBACK(signalSizeAlloc),
-	                 scrolled);
+	toolbar = egg_wrap_box_new(EGG_WRAP_ALLOCATE_FREE,
+		EGG_WRAP_BOX_SPREAD_START,
+		EGG_WRAP_BOX_SPREAD_START,
+		0, 0);
+	egg_wrap_box_set_minimum_line_children(EGG_WRAP_BOX(toolbar), 15);
+	egg_wrap_box_set_natural_line_children(EGG_WRAP_BOX(toolbar), 60);
+	egg_wrap_box_set_horizontal_spacing(EGG_WRAP_BOX(toolbar), 6);
+	gtk_widget_set_name(toolbar, "toolbar");
+	gtk_widget_set_hexpand(toolbar, TRUE);
+	gtk_box_pack_start(GTK_BOX(container), toolbar, FALSE, FALSE, 6);
+	gtk_widget_show_all(toolbar);
 
-	return(GTK_WIDGET(flowbox));
+	return(GTK_WIDGET(toolbar));
 }
 
 /**
@@ -157,7 +162,7 @@ CreateToolbar(GtkScrolledWindow* scrolled)
  * \param nameStr IN Window name
  * \param option IN options for window creation
  * \param winProc IN pointer to main window procedure
- * \param attributes IN User context
+ * \param context IN User context
  * \return    window handle or NULL on error
  */
 
@@ -170,7 +175,7 @@ wControl_p wWinMainCreate(
         const char *nameStr,	 /* Window name */
         long option,			 /* Options */
         wWinCallBack_p winProc, /* Call back function */
-        void *attributes)			 /* User context */
+        void *context)			 /* User context */
 {
 	char *pos;
 	struct window* wcontrol;
@@ -189,7 +194,7 @@ wControl_p wWinMainCreate(
 	wDrawColorBlack = wDrawFindColor(0x000000);
 
 	appMainWindow = g_malloc0(sizeof(struct wWindow_t));
-	appMainWindow = wlibControlNew(W_MAIN, NULL, nameStr, attributes);
+	appMainWindow = wlibControlNew(W_MAIN, NULL, nameStr, context);
 
 //	appMainWindow->helpTopic = g_strdup(helpStr);
 //	appMainWindow->name = g_strdup(nameStr);
@@ -209,7 +214,6 @@ wControl_p wWinMainCreate(
 	gtk_application_add_window(wlibGetApp(),
 	                           GTK_WINDOW(appMainWindow->widget));
 
-	// create the accelerator group
 	wcontrol->accelGroup = gtk_accel_group_new();
 	gtk_window_add_accel_group(GTK_WINDOW(appMainWindow->widget),
 	                           wcontrol->accelGroup);
@@ -222,11 +226,10 @@ wControl_p wWinMainCreate(
 		                "menubar"));
 	}
 
-	GtkScrolledWindow *scrolled;
-	scrolled = GTK_SCROLLED_WINDOW(gtk_builder_get_object(wcontrol->builder,
-	                               "toolbarWindow"));
-	if (scrolled) {
-		wcontrol->toolbar =  CreateToolbar(scrolled);
+	GtkWidget* toolbarbox = GTK_WIDGET(gtk_builder_get_object(wcontrol->builder,
+									"toolbarWindow"));
+	if (toolbarbox) {
+		wcontrol->toolbar =  CreateToolbar(toolbarbox);
 	}
 
 	GtkContainer *statusbar = GTK_CONTAINER(gtk_builder_get_object(
@@ -235,9 +238,6 @@ wControl_p wWinMainCreate(
 	{
 		wcontrol->statusbar = statusbar;
 	}
-
-	//GtkDrawingArea* drawingArea = GTK_DRAWING_AREA(gtk_builder_get_object(
-	//                                      wcontrol->builder, "maindraw"));
 
 	g_signal_connect(G_OBJECT(appMainWindow->widget),
 	                 "delete-event", G_CALLBACK(on_widget_deleted), NULL);

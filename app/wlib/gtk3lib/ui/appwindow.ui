@@ -23,28 +23,10 @@
           </packing>
         </child>
         <child>
-          <object class="GtkScrolledWindow" id="toolbarWindow">
+          <object class="GtkBox" id="toolbarWindow">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="vexpand">False</property>
-            <property name="propagate-natural-height">True</property>
-            <child>
-              <object class="GtkViewport" id="viewport">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="valign">start</property>
-                <property name="vexpand">False</property>
-                <child>
-                  <object class="GtkFlowBox" id="toolbar">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="valign">start</property>
-                    <property name="max-children-per-line">80</property>
-                    <property name="selection-mode">none</property>
-                  </object>
-                </child>
-              </object>
-            </child>
+            <property name="halign">GTK_ALIGN_START</property>
           </object>
           <packing>
             <property name="expand">False</property>

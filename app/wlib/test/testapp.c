@@ -503,13 +503,13 @@ SimpleDynamic(void* unused)
 
 	wColorSelectButtonCreate(dialog, 1, 4, "", "Select cool color..", 0, 1, &color, NULL, NULL);
 
-	wToggleCreate(dialog, 1, 0, "singletoggle", "Single toggle", BC_NOBORDER | BC_HORZ, toggleLabels1, &toggle1, NULL, NULL);
+	wToggleCreate(dialog, 1, 0, "singletoggle", "Single toggle", BC_NOBORDER | BC_HORIZONTAL, toggleLabels1, &toggle1, NULL, NULL);
 
 	wToggleCreate(dialog, 1, 1, "multitoggle", "Multiple toggles", 0, toggleLabels2, &toggle2, NULL, NULL);
 
 	wRadioCreate(dialog, 1, 2, "radio", "Radio vertical", 0, radioLabels, &radio1, NULL, NULL);
 
-	wRadioCreate(dialog, 1, 3, "radio", "Radio horizontal", BC_NOBORDER | BC_HORZ, radioLabels, &radio2, NULL, NULL);
+	wRadioCreate(dialog, 1, 3, "radio", "Radio horizontal", BC_NOBORDER | BC_HORIZONTAL, radioLabels, &radio2, NULL, NULL);
 
 	wEntryCreate(dialog, 1, 6, "textentry", "Entry field", 0L, 10, entryText, 10, EntryCallBack, NULL);
 
@@ -1027,7 +1027,7 @@ TestToolbar(wControl_p mainWindow)
 		BO_GAP, 0, NULL, NULL);
 
 	button = wButtonCreateForToolbar(mainWindow, 0, 0, "", (const char *)yellowstar,
-		0, 0, NULL, NULL);
+		BO_ABUT, 0, NULL, NULL);
 }
 
 static

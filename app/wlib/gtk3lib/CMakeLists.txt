@@ -1,6 +1,7 @@
 # Setup GTK3 UI library...
 
 add_subdirectory(ui)
+add_subdirectory(wrapbox)
 
 target_include_directories(xtrkcad-wlib 
 	PRIVATE 
@@ -113,6 +114,7 @@ message(STATUS "Include Dirs: ${GTK3_INCLUDE_DIRS}")
 target_link_libraries(xtrkcad-wlib 
 	PRIVATE
 	dynstring
+	wrapbox
 	${GTK3_LIBRARIES}
 )
 
