@@ -132,7 +132,7 @@ CreateEditTextNote(char *title, char * textData )
 		textNoteW = ParamCreateDialog(&textNotePG,
 		                              "",
 		                              _("Done"), TextEditOK,
-		                              ParamCancel_Reset, TRUE, NULL,
+		                              ParamCancel_Current, TRUE, NULL,
 		                              F_BLOCK,
 		                              TextDlgUpdate);
 	}

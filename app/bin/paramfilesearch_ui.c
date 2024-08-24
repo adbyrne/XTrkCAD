@@ -414,13 +414,6 @@ static void SearchUiDlgUpdate(
 	}
 }
 
-void
-SearchUiCancel(wWin_p window)
-{
-	ClearCurrentCatalog();
-	wHide(window);
-}
-
 /**
  * Get the system default directory for parameter files. First step is to
  * check the configuration file for a user specific setting. If that is not
@@ -475,7 +468,7 @@ void DoSearchParams(void * junk)
 
 		searchUiW = ParamCreateDialog(&searchUiPG,
 		                              MakeWindowTitle(_("Choose parameter files")), _("Done"), NULL,
-		                              ParamCancel_Custom( SearchUiCancel ),
+		                              ParamCancel_Current,
 		                              TRUE, NULL, F_RESIZE | F_RECALLSIZE, SearchUiDlgUpdate);
 
 

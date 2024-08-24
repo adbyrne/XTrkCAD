@@ -413,7 +413,7 @@ static void DoCustomMgr( void * junk )
 	if (customPG.win == NULL) {
 		ParamCreateDialog( &customPG,
 		                   MakeWindowTitle(_("Manage custom designed parts")), _("Done"), CustomDone,
-		                   ParamCancel_Current, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK,
+		                   ParamCancel_Null, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK,
 		                   CustomDlgUpdate );
 		while(customTypes[ i ] != NULL) {
 			wListAddValue( ((wList_p)customPLs[I_CUSTOMNEWTYPE].control),

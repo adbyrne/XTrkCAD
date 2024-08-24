@@ -248,7 +248,7 @@ static void CreateEditFileDialog(char * windowTitle)
 		fileNoteW = ParamCreateDialog(&fileNotePG,
 		                              "",
 		                              _("Done"), FileEditOK,
-		                              ParamCancel_Reset, TRUE, NULL,
+		                              ParamCancel_Current, TRUE, NULL,
 		                              F_BLOCK,
 		                              FileDlgUpdate);
 	}
