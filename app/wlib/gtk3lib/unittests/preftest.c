@@ -3,11 +3,15 @@
 */
 
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
+#include <setjmp.h>
+
+#include <cmocka.h>
+
 #include <string.h>
 #include <stdio.h>
-#include <setjmp.h>
-#include <cmocka.h>
 
 #include "wlib.h"
 #include "../gtkint.h"
@@ -98,7 +102,7 @@ static void FloatIni(void **state)
 
 
 
-wWin_p wMain(int argc, char **argv)
+wControl_p wMain(int argc, char **argv)
 {
 	const struct CMUnitTest tests[] = {
 		cmocka_unit_test(GetHomeDir),

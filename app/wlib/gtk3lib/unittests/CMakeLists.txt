@@ -18,5 +18,5 @@ add_test(PreferenceTest preftest)
 
 set_target_properties(
 	preftest 
- 	PROPERTIES FOLDER UnitTests
+ 	PROPERTIES FOLDER UnitTestsWLib
 )

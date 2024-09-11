@@ -3,11 +3,15 @@
 */
 
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
+#include <setjmp.h>
+
+#include <cmocka.h>
+
 #include <string.h>
 #include <stdio.h>
-#include <setjmp.h>
-#include <cmocka.h>
 
 #include "../dynstring.h"
 

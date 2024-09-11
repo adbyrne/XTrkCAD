@@ -4,13 +4,17 @@
 
 #include <malloc.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stddef.h>
-#include <string.h>
-#include <stdio.h>
+#include <stdint.h>
 #include <setjmp.h>
+
 #include <cmocka.h>
 
-#include <shortentext.h>
+#include <string.h>
+#include <stdio.h>
+
+#include "../shortentext.h"
 
 #define RESULTSTRING "This is a test!"
 

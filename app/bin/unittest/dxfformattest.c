@@ -3,14 +3,18 @@
 */
 
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stddef.h>
-#include <string.h>
-#include <stdio.h>
+#include <stdint.h>
 #include <setjmp.h>
+
 #include <cmocka.h>
 
+#include <string.h>
+#include <stdio.h>
+
 #include <dynstring.h>
-#include <dxfformat.h>
+#include "../dxfformat.h"
 
 char *sProdNameUpper = "XTRKCAD";
 long units;
