@@ -23,8 +23,6 @@
 #ifndef HAVE_PATHS_H
 #define HAVE_PATHS_H
 
-#define PATH_TYPE_SIZE	10
-
 void SetCurrentPath( const char * pathType,	const char * fileName );
 char *GetCurrentPath(const char *pathType);
 void ConvertPathForward(char *string);

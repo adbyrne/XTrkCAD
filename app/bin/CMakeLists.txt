@@ -13,6 +13,8 @@ include( CheckSymbolExists )
 # build GA or Beta executable
 set( XTRKCAD_BIN "xtrkcad${XTRKCAD_BETA}" )
 
+set( XTRKCAD_CORE_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/include")
+
 add_subdirectory(bitmaps)
 
 add_executable(cnvdsgn cnvdsgn.c utility.c)
@@ -106,7 +108,6 @@ target_sources(xtrkcad-lib
     cnote.c
 	command.c
 	command.h
-    common.h
     common-ui.h
     compound.c
     compound.h
@@ -179,8 +180,6 @@ target_sources(xtrkcad-lib
     misc.h
     mymalloc.c
     note.h
-    param.c
-    param.h
     paramfile.c
     paramfilelist.c
     paramfilesearch_ui.c
@@ -232,6 +231,8 @@ target_sources(xtrkcad-lib
     include/utlist.h
 )
 
+add_subdirectory(DialogParams)
+
 # add UTF-8 conversion utilities on Windows
 
 if(WIN32)
@@ -254,7 +255,7 @@ target_include_directories(xtrkcad-lib
 	${messagefile_BINARY_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${xtrkcad-lib_SOURCE_DIR}/include
+    ${XTRKCAD_CORE_INCLUDE_DIR}
 )
 
 target_link_libraries(xtrkcad-lib

@@ -26,8 +26,8 @@
 #include "mymalloc.h"
 #include "param.h"
 
-#include "include/toolbar.h"
-#include "include/stringxtc.h"
+#include "toolbar.h"
+#include "stringxtc.h"
 
 static void SimulateButtonClick(wButton_p p);
 
@@ -3099,9 +3099,11 @@ EXPORT void ParamInit( void )
 
 	AddPlaybackProc( "PARAMETER", ParamPlayback, NULL );
 	AddPlaybackProc( "PARAMCHECK", ParamCheck, NULL );
+
 	log_paramLayout = LogFindIndex( "paramlayout" );
 	log_paraminput = LogFindIndex( "paraminput" );
-	DYNARR_INIT( paramGroup_p, paramGroups_da );
-	paramGroups_init = TRUE;
 
+	DYNARR_INIT( paramGroup_p, paramGroups_da );
+	
+	paramGroups_init = TRUE;
 }

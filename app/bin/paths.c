@@ -20,12 +20,14 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include <string.h>
 #include <dynstring.h>
-#include "track.h"
-#include "common.h"
 #include "misc.h"
 #include "uthash.h"
 #include "paths.h"
+
+#define PATHS_SECTION "paths"
+#define PATH_TYPE_SIZE	10
 
 struct pathTable {
 	char type[ PATH_TYPE_SIZE]; 			/**< type of path */
@@ -37,8 +39,6 @@ static struct pathTable *paths;
 
 static void AddPath(const char *type, char*path);
 static struct pathTable *FindPath(const char *type);
-
-#define PATHS_SECTION "paths"
 
 /**
 * Find the path for a given type in the hash table
