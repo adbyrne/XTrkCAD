@@ -534,7 +534,7 @@ static paramData_t gridPLs[] = {
 	{	PD_LONG, &grid.Horz.Division, "horzdivision", 0, &i0_1000, N_("Divisions") },
 #define I_HORZENABLE	(3)
 #define gridHorzEnableT ((wChoice_p)gridPLs[I_HORZENABLE].control)
-	{	PD_TOGGLE, &grid.Horz.Enable, "horzenable", 0, gridLabels, N_("Enable"), BC_HORZ|BC_NOBORDER },
+	{	PD_TOGGLE, &grid.Horz.Enable, "horzenable", 0, gridLabels, N_("Enable"), BC_HORIZONTAL|BC_NOBORDER },
 	{	PD_MESSAGE, N_("Vert"), "vert", PDO_DLGNEWCOLUMN|PDO_DLGWIDE, I2VP(60) },
 #define I_VERTSPACING	(5)
 	{	PD_FLOAT, &grid.Vert.Spacing, "vertspacing", PDO_DIM, &r0_999999, NULL },
@@ -542,7 +542,7 @@ static paramData_t gridPLs[] = {
 	{	PD_LONG, &grid.Vert.Division, "vertdivision", 0, &i0_1000, NULL },
 #define I_VERTENABLE	(7)
 #define gridVertEnableT ((wChoice_p)gridPLs[I_VERTENABLE].control)
-	{	PD_TOGGLE, &grid.Vert.Enable, "vertenable", 0, gridLabels, NULL, BC_HORZ|BC_NOBORDER },
+	{	PD_TOGGLE, &grid.Vert.Enable, "vertenable", 0, gridLabels, NULL, BC_HORIZONTAL|BC_NOBORDER },
 #define I_VALUEX		(8)
 	{	PD_FLOAT, &grid.Orig.x, "origx", PDO_DIM|PDO_DLGNEWCOLUMN|PDO_DLGWIDE, &r_1000_1000, N_("X") },
 #define I_VALUEY		(9)
@@ -551,7 +551,7 @@ static paramData_t gridPLs[] = {
 	{	PD_FLOAT, &grid.Angle, "origa", PDO_ANGLE, &r0_360, N_("A") },
 #define I_SHOW			(11)
 #define gridShowT		((wChoice_p)gridPLs[I_SHOW].control)
-	{	PD_TOGGLE, &grid.Show, "show", PDO_DLGIGNORELABELWIDTH, gridLabels, N_("Show"), BC_HORZ|BC_NOBORDER }
+	{	PD_TOGGLE, &grid.Show, "show", PDO_DLGIGNORELABELWIDTH, gridLabels, N_("Show"), BC_HORIZONTAL|BC_NOBORDER }
 };
 
 static paramGroup_t gridPG = { "grid", PGO_RECORD, gridPLs, COUNT( gridPLs ) };

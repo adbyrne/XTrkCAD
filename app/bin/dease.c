@@ -33,7 +33,7 @@ EXPORT DIST_T easementVal = 0.0;
 EXPORT DIST_T easeR = 0.0;
 EXPORT DIST_T easeL = 0.0;
 
-static wButton_p easementB;
+static wControl_p easementB;
 
 static DIST_T easeX = 0.0;
 
@@ -78,7 +78,7 @@ static paramData_t easementPLs[] = {
 	{	PD_FLOAT, &easeX, "x", PDO_DIM|PDO_DLGHORZ, &r0_10, N_("X"), BO_READONLY },
 	{	PD_FLOAT, &easeL, "l", PDO_DIM|PDO_DLGHORZ, &r0_100, N_("L"), BO_READONLY },
 #define I_EASESEL		(4)
-	{	PD_RADIO, &easeM, "radio", PDO_DIM|PDO_NORECORD|PDO_NOPREF|PDO_DLGRESETMARGIN, easementChoiceLabels, NULL, BC_HORZ|BC_NONE }
+	{	PD_RADIO, &easeM, "radio", PDO_DIM|PDO_NORECORD|PDO_NOPREF|PDO_DLGRESETMARGIN, easementChoiceLabels, NULL, BC_HORIZONTAL }
 };
 static paramGroup_t easementPG = { "easement", PGO_RECORD, easementPLs, COUNT( easementPLs ) };
 
@@ -162,7 +162,7 @@ static void SetEasement(
 	/*ParamChange( &easeValPD );*/
 
 	if (easementB) {
-		wButtonSetLabel( easementB, (char*)bm );
+		wButtonSetIcon( easementB, (char*)bm );
 	}
 }
 

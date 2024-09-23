@@ -76,7 +76,7 @@ static wBool_t reverseIcon =
 #endif
 #endif
 
-
+static bool audioOn;
 
 /*
  *****************************************************************************
@@ -353,13 +353,26 @@ wControl_p wlibGetControlFromPos(
  *****************************************************************************
  */
 
+/** 
+* Change audio setting.
+*
+*\param setting   true: beep is on
+*/
+void
+wSetAudio(bool setting)
+{
+    audioOn = (setting > 0);
+}
+
 /**
  * Beep!
  * \return
  */
 void wBeep(void)
 {
-    gdk_display_beep(gdk_display_get_default());
+    if (audioOn) {
+        gdk_display_beep(gdk_display_get_default());
+    }
 }
 
 /**

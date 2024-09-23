@@ -246,7 +246,7 @@ static void UpdateSwitchMotor (track_p trk, int inx, descData_p descUpd,
 	                          needUndoStart))
 	if ( inx == -1 ) {
 		nChanged = norChanged = revChanged = psChanged = changed = FALSE;
-		thename = wStringGetValue( (wString_p)switchmotorDesc[NM].control0 );
+		thename = wEntryGetValue(switchmotorDesc[NM].control0 );
 		if ( strcmp( thename, xx->name ) != 0 ) {
 			nChanged = changed = TRUE;
 			max_str = switchmotorDesc[NM].max_string;
@@ -258,7 +258,7 @@ static void UpdateSwitchMotor (track_p trk, int inx, descData_p descUpd,
 			} else { newName = MyStrdup(thename); }
 		}
 
-		thenormal = wStringGetValue( (wString_p)switchmotorDesc[NOR].control0 );
+		thenormal = wEntryGetValue(switchmotorDesc[NOR].control0 );
 		if ( strcmp( thenormal, xx->normal ) != 0 ) {
 			norChanged = changed = TRUE;
 			max_str = switchmotorDesc[NOR].max_string;
@@ -270,7 +270,7 @@ static void UpdateSwitchMotor (track_p trk, int inx, descData_p descUpd,
 			} else { newNormal = MyStrdup(thenormal); }
 		}
 
-		thereverse = wStringGetValue( (wString_p)switchmotorDesc[REV].control0 );
+		thereverse = wEntryGetValue(switchmotorDesc[REV].control0 );
 		if ( strcmp( thereverse, xx->reverse ) != 0 ) {
 			revChanged = changed = TRUE;
 			max_str = switchmotorDesc[REV].max_string;
@@ -282,7 +282,7 @@ static void UpdateSwitchMotor (track_p trk, int inx, descData_p descUpd,
 			} else { newReverse = MyStrdup(thereverse); }
 		}
 
-		thepointsense = wStringGetValue( (wString_p)switchmotorDesc[PS].control0 );
+		thepointsense = wEntryGetValue(switchmotorDesc[PS].control0 );
 		if ( strcmp( thepointsense, xx->pointsense ) != 0 ) {
 			psChanged = changed = TRUE;
 			max_str = switchmotorDesc[PS].max_string;

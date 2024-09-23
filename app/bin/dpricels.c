@@ -47,7 +47,7 @@ static paramData_t priceListPLs[] = {
 #define priceListCostF			((wFloat_p)priceListPLs[I_PRICELSCOST].control)
 	{	PD_FLOAT, &priceListCostV, "cost", PDO_NOPREF|PDO_NOPSHUPD, &priceListCostData },
 #define I_PRICELSENTRY			(1)
-#define priceListEntryS			((wString_p)priceListPLs[I_PRICELSENTRY].control)
+#define priceListEntryS			( priceListPLs[I_PRICELSENTRY].control)
 	{	PD_STRING, &priceListEntryV, "entry", PDO_NOPREF|PDO_NOPSHUPD|PDO_DLGHORZ, I2VP(400-80-3), NULL, BO_READONLY, NULL, sizeof priceListEntryV },
 #define I_PRICELSLIST			(2)
 #define priceListSelL			((wList_p)priceListPLs[I_PRICELSLIST].control)

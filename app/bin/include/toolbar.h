@@ -16,7 +16,6 @@
 #define BG_TRKMOD		(5)
 #define BG_TRKGRP		(6)
 #define BG_MISCCRT		(7)
-#define BG_RULER		(18)
 #define BG_LAYER		(9)
 #define BG_HOTBAR		(10)
 #define BG_SNAP			(11)
@@ -26,6 +25,8 @@
 #define BG_CONTROL		(15)
 #define BG_EXPORTIMPORT (16)
 #define BG_PRINT		(17)
+#define BG_RULER		(18)
+#define BG_BIGGAP       (1<<15)
 
 extern void InitToolbar(void);
 extern void ToolbarLayout(void* data);

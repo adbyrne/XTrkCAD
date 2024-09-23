@@ -93,7 +93,7 @@ ProblemSaveLayout(void)
 	int rc = TRUE;
 	if (GetLayoutChanged()) {
 
-		rc = wNoticeEx( NT_WARNING,
+		rc = wNoticeWithIcon( NT_WARNING,
 		                _("Trackplan has to be saved first. " \
 		                  "Do you want to do so now ? "),
 		                N_("Save Now..."),

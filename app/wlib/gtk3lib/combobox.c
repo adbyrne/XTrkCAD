@@ -85,9 +85,9 @@ wlibComboBoxAddColumns(GtkWidget *comboBox, int columns)
  * \return number of rows
  */
 
-wIndex_t wComboBoxGetCount(wList_p b)
+wIndex_t wComboBoxGetCount(wControl_p b)
 {
-	return (gtk_tree_model_iter_n_children(GTK_TREE_MODEL(b->listStore), NULL));
+	return (gtk_tree_model_iter_n_children(GTK_TREE_MODEL(b->attributes.list.treeView), NULL));
 }
 
 /**
@@ -112,14 +112,14 @@ wComboBoxClear(wList_p b)
  * \returns pointer to context information
  */
 
-void *wComboBoxGetItemContext(wList_p b, wIndex_t inx)
+void *wComboBoxGetItemContext(wControl_p b, wIndex_t inx)
 {
 	GtkTreeIter iter;
 	wListItem_p attributes = NULL;
 
-	if (gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->listStore), &iter, NULL,
+	if (gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->attributes.list.treeView), &iter, NULL,
 	                                  inx)) {
-		gtk_tree_model_get(GTK_TREE_MODEL(b->listStore),
+		gtk_tree_model_get(GTK_TREE_MODEL(b->attributes.list.treeView),
 		                   &iter,
 		                   LISTCOL_DATA, (void *)&attributes,
 		                   -1);

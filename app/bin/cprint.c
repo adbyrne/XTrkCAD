@@ -130,25 +130,25 @@ static paramData_t printPLs[] = {
 	/*2*/ { PD_BUTTON, PrintMaxPageSize, "max", PDO_DLGHORZ, NULL, N_("Max") },
 	/*3*/ { PD_FLOAT, &newPrintGrid.size.y, "pageh", PDO_DIM|PDO_SMALLDIM|PDO_NORECORD|PDO_NOPREF, &r1_pgsz_y, N_("Height"), 0, I2VP(2) },
 	/*4*/ { PD_BUTTON, PrintSnapShot, "snapshot", PDO_DLGHORZ, NULL, N_("Snap Shot") },
-	/*5*/ { PD_RADIO, &printFormat, "format", 0, printFormatLabels, N_("Page Format"), BC_HORZ|BC_NOBORDER, I2VP(1) },
-	/*6*/ { PD_RADIO, &printOrder, "order", PDO_DLGBOXEND, printOrderLabels, N_("Print Order"), BC_HORZ|BC_NOBORDER },
+	/*5*/ { PD_RADIO, &printFormat, "format", 0, printFormatLabels, N_("Page Format"), BC_HORIZONTAL|BC_NOBORDER, I2VP(1) },
+	/*6*/ { PD_RADIO, &printOrder, "order", PDO_DLGBOXEND, printOrderLabels, N_("Print Order"), BC_HORIZONTAL|BC_NOBORDER },
 	/*7*/ { PD_MESSAGE, N_("Print "), "mess0", PDO_DLGRESETMARGIN| PDO_DLGNOLABELALIGN, I2VP(0) },
-	/*8*/ { PD_TOGGLE, &printGaudy, "style", PDO_DLGNOLABELALIGN, printGaudyLabels, NULL, BC_HORZ|BC_NOBORDER, I2VP(1) },
+	/*8*/ { PD_TOGGLE, &printGaudy, "style", PDO_DLGNOLABELALIGN, printGaudyLabels, NULL, BC_HORIZONTAL|BC_NOBORDER, I2VP(1) },
 #define I_REGMARKS		(9)
-	/*9*/ { PD_TOGGLE, &printRegistrationMarks, "registrationMarks", PDO_DLGNOLABELALIGN, printRegistrationMarksLabels, NULL, BC_HORZ|BC_NOBORDER },
+	/*9*/ { PD_TOGGLE, &printRegistrationMarks, "registrationMarks", PDO_DLGNOLABELALIGN, printRegistrationMarksLabels, NULL, BC_HORIZONTAL|BC_NOBORDER },
 #define I_PAGENUMBERS	(10)
-	/*10*/ { PD_TOGGLE, &printPageNumbers, "pageNumbers", PDO_DLGNOLABELALIGN, printPageNumberLabels, NULL, BC_HORZ | BC_NOBORDER },
+	/*10*/ { PD_TOGGLE, &printPageNumbers, "pageNumbers", PDO_DLGNOLABELALIGN, printPageNumberLabels, NULL, BC_HORIZONTAL | BC_NOBORDER },
 #define I_GRID			(11)
-	/*11*/ { PD_TOGGLE, &printGrid, "grid", PDO_DLGNOLABELALIGN, printGridLabels, NULL, BC_HORZ|BC_NOBORDER },
+	/*11*/ { PD_TOGGLE, &printGrid, "grid", PDO_DLGNOLABELALIGN, printGridLabels, NULL, BC_HORIZONTAL|BC_NOBORDER },
 #define I_RULER			(12)
-	/*12*/ { PD_RADIO, &printRuler, "ruler", 0, printRulerLabels, N_("Rulers:"), BC_HORZ|BC_NOBORDER },
+	/*12*/ { PD_RADIO, &printRuler, "ruler", 0, printRulerLabels, N_("Rulers:"), BC_HORIZONTAL|BC_NOBORDER },
 #define I_CENTERLINE    (13)
-	/*13*/ { PD_TOGGLE, &printCenterLine, "centerLine", PDO_DLGNOLABELALIGN, printCenterLineLabels, NULL, BC_HORZ|BC_NOBORDER },
+	/*13*/ { PD_TOGGLE, &printCenterLine, "centerLine", PDO_DLGNOLABELALIGN, printCenterLineLabels, NULL, BC_HORIZONTAL|BC_NOBORDER },
 #define I_ROADBED		(14)
-	/*14*/{ PD_TOGGLE, &printRoadbed, "roadbed", PDO_DLGNOLABELALIGN, printRoadbedLabels, NULL, BC_HORZ|BC_NOBORDER },
+	/*14*/{ PD_TOGGLE, &printRoadbed, "roadbed", PDO_DLGNOLABELALIGN, printRoadbedLabels, NULL, BC_HORIZONTAL|BC_NOBORDER },
 #define I_ROADBEDWIDTH	(15)
 	/*15*/{ PD_FLOAT, &printRoadbedWidth, "roadbedWidth", PDO_DIM, &r0_, N_("    Width") },
-	/*16*/ { PD_TOGGLE, &bIgnoreMargins, "physsize", PDO_DLGNOLABELALIGN, sIgnoreMarginsLabels, NULL, BC_HORZ | BC_NOBORDER, I2VP(1) },
+	/*16*/ { PD_TOGGLE, &bIgnoreMargins, "physsize", PDO_DLGNOLABELALIGN, sIgnoreMarginsLabels, NULL, BC_HORIZONTAL | BC_NOBORDER, I2VP(1) },
 	/*17*/ { PD_BUTTON, DoPrintMargin, "margin", PDO_DLGHORZ|PDO_DLGBOXEND, NULL, N_("Margins") },
 	/*18*/{ PD_FLOAT, &newPrintGrid.orig.x, "origx", PDO_DIM|PDO_DLGRESETMARGIN, &r_100_99999, N_("Origin: X"), 0, I2VP(2) },
 	/*19*/ { PD_FLOAT, &newPrintGrid.orig.y, "origy", PDO_DIM, &r_100_99999, N_("Y"), 0, I2VP(2) },

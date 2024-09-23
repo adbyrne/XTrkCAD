@@ -26,10 +26,11 @@
 #include "mymalloc.h"
 #include "param.h"
 
+#include "paramprivate.h"
 #include "toolbar.h"
 #include "stringxtc.h"
 
-static void SimulateButtonClick(wButton_p p);
+
 
 // Processing an input file, objects may be incomplete so avoid some ops (MapRedraw)
 static bool bInReadTracks;
@@ -37,17 +38,13 @@ static bool bInReadTracks;
 EXPORT BOOL_T paramTogglePlaybackHilite;
 static bool paramPlayback;
 static long paramDelay;
-static bool disablePlaybackDelays;
+
 
 EXPORT char *PREFSECT = "DialogItem";
 EXPORT long angleSystem = 0;
 
-static int paramCheckErrorCount = 0;
-static BOOL_T paramCheckShowErrors = FALSE;
-static FILE* recordParamF;
 
-static int log_paramLayout = 0;
-static int log_paraminput = 0;
+static FILE* recordParamF;
 
 EXPORT wWinPix_t DlgSepLeft = 12;
 EXPORT wWinPix_t DlgSepRight = 12;
@@ -359,149 +356,6 @@ FLOAT_T DecodeDistance(
 	return valF;
 }
 
-
-#define N_STRING (10)
-static int formatStringInx;					//Index ahead in case of overwrite
-static char formatStrings[N_STRING+1][80];  //Add safety
-
-
-EXPORT char * FormatLong(
-        long valL )
-{
-	if ( ++formatStringInx >= N_STRING ) {
-		formatStringInx = 0;
-	}
-	sprintf( formatStrings[formatStringInx], "%ld", valL );
-	return formatStrings[formatStringInx];
-}
-
-
-EXPORT char * FormatFloat(
-        FLOAT_T valF )
-{
-	if ( ++formatStringInx >= N_STRING ) {
-		formatStringInx = 0;
-	}
-	sprintf( formatStrings[formatStringInx], "%0.3f", valF );
-	return formatStrings[formatStringInx];
-}
-
-
-static void FormatFraction(
-        char ** cpp,
-        BOOL_T printZero,
-        int digits,
-        BOOL_T rational,
-        FLOAT_T valF,
-        const char * unitFmt )
-{
-	char * cp = *cpp;
-	long integ;
-	long f1, f2;
-	char * space = "";
-
-	if ( !rational ) {
-		sprintf( cp, "%0.*f", digits, valF );
-		cp += strlen(cp);
-	} else {
-		integ = (long)floor(valF);
-		valF -= (FLOAT_T)integ;
-		for ( f2=1; digits>0; digits--,f2*=2 );
-		f1 = (long)floor( (valF*(FLOAT_T)f2) + 0.5 );
-		if ( f1 >= f2 ) {
-			f1 -= f2;
-			integ++;
-		}
-		if ( integ != 0 || !printZero ) {
-			sprintf( cp, "%ld", integ );
-			cp += strlen(cp);
-			printZero = FALSE;
-			space = " ";
-		}
-		if ( f2 > 1 && f1 != 0 ) {
-			while ( (f1&1) == 0 ) { f1 /= 2; f2 /= 2; }
-			sprintf( cp, "%s%ld/%ld", space, f1, f2 );
-			cp += strlen(cp);
-		} else if ( printZero ) {
-			*cp++ = '0';
-			*cp = '\0';
-		}
-	}
-	if ( cp != *cpp ) {
-		strcpy( cp, unitFmt );
-		cp += strlen(cp);
-		*cpp = cp;
-	}
-}
-
-
-EXPORT char * FormatDistanceEx(
-        FLOAT_T valF,
-        long distanceFormat )
-{
-	char * cp;
-	int digits;
-	long feet;
-	char * metricInd;
-
-	if ( ++formatStringInx >= N_STRING ) {
-		formatStringInx = 0;
-	}
-	cp = formatStrings[formatStringInx];
-	digits = (int)(distanceFormat&DISTFMT_DECS);
-	valF = PutDim(valF);
-	if ( valF < 0 ) {
-		*cp++ = '-';
-		valF = -valF;
-	}
-	if ( (distanceFormat&DISTFMT_FMT) == DISTFMT_FMT_NONE ) {
-		FormatFraction( &cp, FALSE, digits,
-		                (distanceFormat&DISTFMT_FRACT) == DISTFMT_FRACT_FRC, valF, "" );
-		return formatStrings[formatStringInx];
-	} else if ( units == UNITS_ENGLISH ) {
-		feet = (long)(floor)(valF/12.0);
-		valF -= feet*12.0;
-		if ( feet != 0 ) {
-			sprintf( cp, "%ld%s", feet,
-			         (distanceFormat&DISTFMT_FMT)==DISTFMT_FMT_SHRT?"' ":"ft " );
-			cp += strlen(cp);
-		}
-		if ( feet==0 || valF != 0 ) {
-			FormatFraction( &cp, feet==0, digits,
-			                (distanceFormat&DISTFMT_FRACT) == DISTFMT_FRACT_FRC, valF,
-			                (distanceFormat&DISTFMT_FMT)==DISTFMT_FMT_SHRT?"\"":"in" );
-		}
-	} else {
-		if ( (distanceFormat&DISTFMT_FMT)==DISTFMT_FMT_M ) {
-			valF = valF/100.0;
-			metricInd = "m";
-		} else if ( (distanceFormat&DISTFMT_FMT)==DISTFMT_FMT_MM ) {
-			valF = valF*10.0;
-			metricInd = "mm";
-		} else {
-			metricInd = "cm";
-		}
-		FormatFraction( &cp, FALSE, digits,
-		                (distanceFormat&DISTFMT_FRACT) == DISTFMT_FRACT_FRC, valF, metricInd );
-	}
-	return formatStrings[formatStringInx];
-}
-
-
-EXPORT char * FormatDistance(
-        FLOAT_T valF )
-{
-	return FormatDistanceEx( valF, GetDistanceFormat() );
-}
-
-EXPORT char * FormatSmallDistance(
-        FLOAT_T valF )
-{
-	long format = GetDistanceFormat();
-	format &= ~(DISTFMT_FRACT_FRC|DISTFMT_DECS);
-	format |= 3;
-	return FormatDistanceEx( valF, format );
-}
 
 /*****************************************************************************
  *
@@ -574,7 +428,6 @@ EXPORT void ParamLoadControl(
 		p->oldD.l = *(long*)p->valueP;
 		break;
 	case PD_LIST:
-	case PD_DROPLIST:
 	case PD_COMBOLIST:
 		wListSetIndex( (wList_p)p->control, *(wIndex_t*)p->valueP );
 		p->oldD.l = *(wIndex_t*)p->valueP;
@@ -722,7 +575,6 @@ EXPORT long ParamUpdate(
 			}
 			break;
 		case PD_LIST:
-		case PD_DROPLIST:
 		case PD_COMBOLIST:
 			longV = wListGetIndex( (wList_p)p->control );
 			if (longV != p->oldD.l) {
@@ -863,7 +715,6 @@ void ParamLoadData(
 			break;
 
 		case PD_LIST:
-		case PD_DROPLIST:
 		case PD_COMBOLIST:
 			*(wIndex_t*)p->valueP = wListGetIndex((wList_p)p->control);
 			break;
@@ -965,7 +816,6 @@ static long ParamIntRestore(
 			}
 			break;
 		case PD_LIST:
-		case PD_DROPLIST:
 		case PD_COMBOLIST:
 			if ( *(wIndex_t*)p->valueP != (wIndex_t)oldP->l ) {
 				/*if ((p->option&PDO_NORSTUPD)==0)*/
@@ -1052,7 +902,6 @@ static void ParamIntSave(
 				oldP->l = *(long*)p->valueP;
 				break;
 			case PD_LIST:
-			case PD_DROPLIST:
 			case PD_COMBOLIST:
 				oldP->l = *(wIndex_t*)p->valueP;
 				break;
@@ -1087,9 +936,6 @@ static void ParamIntSave(
  *
  */
 
-static dynArr_t paramGroups_da;
-#define paramGroups(N) DYNARR_N( paramGroup_p, paramGroups_da, N )
-static BOOL_T paramGroups_init = FALSE;
 
 
 
@@ -1161,7 +1007,6 @@ EXPORT void ParamRegister( paramGroup_p pg )
 			}
 			break;
 		case PD_LIST:
-		case PD_DROPLIST:
 		case PD_COMBOLIST:
 			if ( (p->option&PDO_LISTINDEX) ) {
 				if (!wPrefGetInteger( PREFSECT, prefName1, &valL, *(wIndex_t*)p->valueP )) {
@@ -1279,7 +1124,6 @@ EXPORT void ParamUpdatePrefs( void )
 					wPrefSetString( PREFSECT, prefName, message );
 					prefName[len] = '\0';
 				}
-			case PD_DROPLIST:
 			case PD_COMBOLIST:
 				if ( (p->option&PDO_LISTINDEX) ) {
 					wPrefSetInteger( PREFSECT, prefName, *(wIndex_t*)p->valueP );
@@ -1338,7 +1182,6 @@ EXPORT void ParamGroupRecord(
 			         *(long*)p->valueP );
 			break;
 		case PD_LIST:
-		case PD_DROPLIST:
 		case PD_COMBOLIST:
 			if (p->control) {
 				wListGetValues( (wList_p)p->control, message, sizeof message, NULL, NULL );
@@ -1704,7 +1547,6 @@ static void ParamListPush( wIndex_t inx, const char * val, wIndex_t op,
 
 	switch (p->type) {
 	case PD_LIST:
-	case PD_DROPLIST:
 	case PD_COMBOLIST:
 		if (recordParamF && (p->option&PDO_NORECORD)==0 && p->group->nameStr
 		    && p->nameStr) {
@@ -1964,408 +1806,7 @@ ParamSetInPlayback(bool state, long delay)
 	paramDelay = delay;
 }
 
-void SimulateButtonClick(wButton_p control)
-{
-	if (!disablePlaybackDelays && control) {
-		wButtonSetBusy(control, TRUE);
-		wFlush();
-		wPause(500);
-		wButtonSetBusy(control, FALSE);
-		wFlush();
-	}
-}
 
-static void ParamPlayback( char * line )
-{
-	paramGroup_p pg;
-	paramData_p p;
-	long valL;
-	FLOAT_T valF, valF1;
-	size_t len, len1, len2;
-	wIndex_t inx;
-	void * listContext, * itemContext;
-	long rgb;
-	wDrawColor dc;
-	wButton_p button;
-	paramDrawData_t * ddp;
-	wAction_t a;
-	coOrd pos;
-	char * valS;
-
-	if ( strncmp( line, "GROUP ", 6 ) == 0 ) {
-
-		return;
-	}
-
-	for ( inx=0; inx<paramGroups_da.cnt; inx++ ) {
-		pg = paramGroups(inx);
-		if ( pg->nameStr == NULL ) {
-			continue;
-		}
-		len1 = strlen( pg->nameStr );
-		if ( strncmp( pg->nameStr, line, len1 ) != 0 ||
-		     line[len1] != ' ' ) {
-			continue;
-		}
-		for ( p=pg->paramPtr,inx=0; inx<pg->paramCnt; p++,inx++ ) {
-			if ( p->nameStr == NULL ) {
-				continue;
-			}
-			len2 = strlen( p->nameStr );
-			if ( strncmp(p->nameStr, line+len1+1, len2) != 0 ||
-			     (line[len1+1+len2] != ' ' && line[len1+1+len2] != '\0') ) {
-				continue;
-			}
-			len = len1 + 1 + len2 + 1;
-			if ( p->type != PD_DRAW && p->type != PD_MESSAGE && p->type != PD_MENU
-			     && p->type != PD_MENUITEM ) {
-				ParamHilite( p->group->win, p->control, TRUE );
-			}
-			switch (p->type) {
-			case PD_BUTTON:
-				if (p->valueP) {
-					((wButtonCallBack_p)(p->valueP))( p->context );
-				}
-				SimulateButtonClick((wButton_p)p->control);
-				break;
-			case PD_LONG:
-				valL = atol( line+len );
-				if (p->valueP) {
-					*(long*)p->valueP = valL;
-				}
-				if (p->control) {
-					wEntrySetValue( (wEntry_p)p->control, FormatLong( valL ) );
-					wFlush();
-				}
-				if (pg->changeProc) {
-					pg->changeProc( pg, inx, &valL );
-				}
-				break;
-			case PD_RADIO:
-				valL = atol( line+len );
-				if (p->valueP) {
-					*(long*)p->valueP = valL;
-				}
-				if (p->control) {
-					wRadioSetValue( (wChoice_p)p->control, valL );
-					wFlush();
-				}
-				if (pg->changeProc) {
-					pg->changeProc( pg, inx, &valL );
-				}
-				break;
-			case PD_TOGGLE:
-				valL = atol( line+len );
-				if (p->valueP) {
-					*(long*)p->valueP = valL;
-				}
-				if (p->control) {
-					wToggleSetValue( (wChoice_p)p->control, valL );
-					wFlush();
-				}
-				if (pg->changeProc) {
-					pg->changeProc( pg, inx, &valL );
-				}
-				break;
-			case PD_LIST:
-			case PD_DROPLIST:
-			case PD_COMBOLIST:
-				line += len;
-				valL = strtol( line, &valS, 10 );
-				if ( valS ) {
-					valS++;
-				} else {
-					valS = "";
-				}
-				if ( p->control != NULL ) {
-					if ( (p->option&PDO_LISTINDEX) == 0 ) {
-						if ( valL < 0 ) {
-							wListSetValue( (wList_p)p->control, valS );
-						} else {
-							valL = wListFindValue( (wList_p)p->control, valS );
-							if (valL < 0) {
-								NoticeMessage( MSG_PLAYBACK_LISTENTRY, _("Ok"), NULL, line );
-								break;
-							}
-							wListSetIndex( (wList_p)p->control, (wIndex_t)valL );
-						}
-					} else {
-						wListSetIndex( (wList_p)p->control, (wIndex_t)valL );
-					}
-					wFlush();
-					wListGetValues( (wList_p)p->control, message, sizeof message, &listContext,
-					                &itemContext );
-				} else if ( (p->option&PDO_LISTINDEX) == 0 ) {
-					break;
-				}
-				if (p->valueP) {
-					*(wIndex_t*)p->valueP = (wIndex_t)valL;
-				}
-				if (pg->changeProc) {
-					pg->changeProc( pg, inx, &valL );
-				}
-				break;
-			case PD_COLORLIST:
-				line += len;
-				rgb = atol( line );
-				dc = wDrawFindColor( rgb );
-				if ( p->control) {
-					wColorSelectButtonSetColor( (wColorButton_p)p->control, dc );
-				}
-				if (p->valueP) {
-					*(wDrawColor*)p->valueP = dc;
-				}
-				if (pg->changeProc) {
-					/* COLORNOP */
-					pg->changeProc( pg, inx, &valL );
-				}
-				break;
-			case PD_FLOAT:
-				SetCLocale();
-				valF = valF1 = atof( line+len );
-				SetUserLocale();
-				if (p->valueP) {
-					*(FLOAT_T*)p->valueP = valF;
-				}
-				if (p->option&PDO_DIM) {
-					if ( p->option&PDO_SMALLDIM ) {
-						valS = FormatSmallDistance( valF );
-					} else {
-						valS = FormatDistance( valF );
-					}
-				} else {
-					if (p->option&PDO_ANGLE) {
-						valF1 = NormalizeAngle( (angleSystem==ANGLE_POLAR)?valF1:-valF1 );
-					}
-					valS = FormatFloat( valF );
-				}
-				if (p->control) {
-					wEntrySetValue( (wEntry_p)p->control, valS );
-					wFlush();
-				}
-				if (pg->changeProc) {
-					pg->changeProc( pg, inx, &valF );
-				}
-				break;
-			case PD_STRING:
-			case PD_TEXT:
-				line += len;
-				while ( *line == ' ' ) { line++; }
-				Stripcr( line );
-				if (p->valueP) {
-					strcpy( (char*)p->valueP, line );
-				}
-				if (p->control) {
-					if (p->type == PD_STRING) {
-						wEntrySetValue((wEntry_p)p->control, line);
-						p->bInvalid =
-						        (p->option & PDO_NOTBLANK) &&
-						        strlen( line ) == 0;
-					} else {
-						wTextClear((wText_p)p->control);
-						wTextAppend((wText_p)p->control, line);
-					}
-					wFlush();
-				}
-				if (pg->changeProc) {
-					pg->changeProc( pg, inx, line );
-				}
-				break;
-			case PD_DRAW:
-				ddp = (paramDrawData_t*)p->winData;
-				if ( ddp->action == NULL ) {
-					break;
-				}
-				a = (wAction_t)strtol( line+len, &line, 10 );
-				pos.x = strtod( line, &line );
-				pos.y = strtod( line, NULL );
-				PlaybackMouse( ddp->action, ddp->d, a, pos, drawColorBlack );
-				break;
-			case PD_MESSAGE:
-			case PD_MENU:
-			case PD_BITMAP:
-				break;
-			case PD_MENUITEM:
-				if (p->valueP) {
-					if ( (p->option&IC_PLAYBACK_PUSH) != 0 ) {
-						PlaybackButtonMouse( (wIndex_t)VP2L(p->context) );
-					}
-					((wButtonCallBack_p)(p->valueP))( p->context );
-				}
-				break;
-			}
-			if ( p->type != PD_DRAW && p->type != PD_MESSAGE && p->type != PD_MENU
-			     && p->type != PD_MENUITEM ) {
-				ParamHilite( p->group->win, p->control, FALSE );
-			}
-#ifdef HUH
-			pg->action |= p->change;
-#endif
-			return;
-		}
-		button = NULL;
-		if ( strcmp("ok", line+len1+1) == 0 ) {
-			ParamHilite( pg->win, (wControl_p)pg->okB, TRUE );
-			if ( pg->okProc ) {
-				pg->okProc( pg );
-			}
-			button = pg->okB;
-		} else if ( strcmp("cancel", line+len1+1) == 0 ) {
-			ParamHilite( pg->win, (wControl_p)pg->cancelB, TRUE );
-			if ( pg->cancelProc ) {
-				pg->cancelProc( pg->win );
-			}
-			button = pg->cancelB;
-		}
-		SimulateButtonClick(button);
-		ParamHilite( pg->win, (wControl_p)button, FALSE );
-		if ( !button ) {
-			NoticeMessage( "Unknown PARAM: %s", _("Ok"), NULL, line );
-		}
-		return;
-	}
-	NoticeMessage( "Unknown PARAM: %s", _("Ok"), NULL, line );
-}
-
-
-static void ParamCheck( char * line )
-{
-	paramGroup_p pg;
-	paramData_p p;
-	long valL;
-	FLOAT_T valF, diffF;
-	size_t len, len1, len2;
-	wIndex_t inx;
-	void * listContext, * itemContext;
-	char * valS;
-	char * expVal=NULL, * actVal=NULL;
-	char expNum[20], actNum[20];
-	BOOL_T hasError = FALSE;
-	FILE * f;
-
-	for ( inx=0; inx<paramGroups_da.cnt; inx++ ) {
-		pg = paramGroups(inx);
-		if ( pg->nameStr == NULL ) {
-			continue;
-		}
-		len1 = strlen( pg->nameStr );
-		if ( strncmp( pg->nameStr, line, len1 ) != 0 ||
-		     line[len1] != ' ' ) {
-			continue;
-		}
-		for ( p=pg->paramPtr,inx=0; inx<pg->paramCnt; p++,inx++ ) {
-			if ( p->nameStr == NULL ) {
-				continue;
-			}
-			len2 = strlen( p->nameStr );
-			if ( strncmp(p->nameStr, line+len1+1, len2) != 0 ||
-			     (line[len1+1+len2] != ' ' && line[len1+1+len2] != '\0') ) {
-				continue;
-			}
-			if ( p->valueP == NULL ) {
-				return;
-			}
-			len = len1 + 1 + len2 + 1;
-			switch (p->type) {
-			case PD_BUTTON:
-				break;
-			case PD_LONG:
-			case PD_RADIO:
-			case PD_TOGGLE:
-				valL = atol( line+len );
-				if ( *(long*)p->valueP != valL ) {
-					sprintf( expNum, "%ld", valL );
-					sprintf( actNum, "%ld", *(long*)p->valueP );
-					expVal = expNum;
-					actVal = actNum;
-					hasError = TRUE;
-				}
-				break;
-			case PD_LIST:
-			case PD_DROPLIST:
-			case PD_COMBOLIST:
-				line += len;
-				if ( p->control == NULL ) {
-					break;
-				}
-				valL = strtol( line, &valS, 10 );
-				if ( valS ) {
-					if ( valS[0] == ' ' ) {
-						valS++;
-					}
-				} else {
-					valS = "";
-				}
-				if ( (p->option&PDO_LISTINDEX) != 0 ) {
-					if ( *(long*)p->valueP != valL ) {
-						sprintf( expNum, "%ld", valL );
-						sprintf( actNum, "%d", *(wIndex_t*)p->valueP );
-						expVal = expNum;
-						actVal = actNum;
-						hasError = TRUE;
-					}
-				} else {
-					wListGetValues( (wList_p)p->control, message, sizeof message, &listContext,
-					                &itemContext );
-					if ( strcasecmp( message, valS ) != 0 ) {
-						expVal = valS;
-						actVal = message;
-						hasError = TRUE;
-					}
-				}
-				break;
-			case PD_COLORLIST:
-				break;
-			case PD_FLOAT:
-				valF = atof( line+len );
-				diffF = fabs( *(FLOAT_T*)p->valueP - valF );
-				if ( diffF > 0.001 ) {
-					sprintf( expNum, "%0.3f", valF );
-					sprintf( actNum, "%0.3f", *(FLOAT_T*)p->valueP );
-					expVal = expNum;
-					actVal = actNum;
-					hasError = TRUE;
-				}
-				break;
-			case PD_STRING:
-				line += len;
-				while ( *line == ' ' ) { line++; }
-				wEntryGetValue( (wEntry_p)p->control );
-				if ( strcasecmp( line, (char*)p->valueP ) != 0 ) {
-					expVal = line;
-					actVal = (char*)p->valueP;
-					hasError = TRUE;
-				}
-				break;
-			case PD_DRAW:
-			case PD_MESSAGE:
-			case PD_TEXT:
-			case PD_MENU:
-			case PD_MENUITEM:
-			case PD_BITMAP:
-				break;
-			}
-			if ( hasError ) {
-				f = fopen( "error.log", "a" );
-				if ( f==NULL ) {
-					NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, "PARAMCHECK LOG",
-					               "error.log", strerror(errno) );
-				} else {
-					fprintf( f, "CHECK: %s:%d: %s-%s: exp: %s, act=%s\n",
-					         paramFileName, paramLineNum, pg->nameStr, p->nameStr, expVal, actVal );
-					fclose( f );
-				}
-				if ( paramCheckShowErrors ) {
-					NoticeMessage( "CHECK: %d: %s-%s: exp: %s, act=%s", _("Ok"), NULL, paramLineNum,
-					               pg->nameStr, p->nameStr, expVal, actVal );
-				}
-				paramCheckErrorCount++;
-			}
-			return;
-		}
-	}
-	NoticeMessage( "Unknown PARAMCHECK: %s", _("Ok"), NULL, line );
-}
 
 /*
  *
@@ -2468,11 +1909,11 @@ static void ParamCreateControl(
 		                                       listDataP->colTitles, NULL, ParamListPush, pd );
 		listDataP->height = wControlGetHeight( pd->control );
 		break;
-	case PD_DROPLIST:
-		w = pd->winData?(wWinPix_t)VP2L(pd->winData):(wWinPix_t)100;
-		pd->control = (wControl_p)wDropListCreate( win, xx, yy, helpStr,
-		              _(pd->winLabel), pd->winOption, 10, w, NULL, ParamListPush, pd );
-		break;
+	//case PD_COMBOLIST:
+	//	w = pd->winData?(wWinPix_t)VP2L(pd->winData):(wWinPix_t)100;
+	//	pd->control = (wControl_p)wDropListCreate( win, xx, yy, helpStr,
+	//	              _(pd->winLabel), pd->winOption, 10, w, NULL, ParamListPush, pd );
+	//	break;
 	case PD_COMBOLIST:
 		listDataP = (paramListData_t*)pd->winData;
 		pd->control = (wControl_p)wComboListCreate( win, xx, yy, helpStr,
@@ -2526,7 +1967,7 @@ static void ParamCreateControl(
 		break;
 	case PD_BITMAP:
 		iconP = pd->winData;
-		pd->control = (wControl_p)wBitmapCreate( win, xx, yy, pd->winOption, iconP );
+		pd->control = (wControl_p)wBitmapViewCreate( win, xx, yy, pd->winOption, iconP );
 		break;
 	default:
 		CHECK(FALSE);
@@ -2555,8 +1996,7 @@ static void ParamPositionControl(
 		switch (pd->type) {
 		case PD_LIST:
 		case PD_COMBOLIST:
-		case PD_DROPLIST:
-			if ( pd->type == PD_DROPLIST ) {
+			if ( pd->type == PD_COMBOLIST ) {
 				ctlW = pd->winData?(wWinPix_t)VP2L(pd->winData):(wWinPix_t)100;
 				ctlH = wControlGetHeight( pd->control );
 			} else {
@@ -2916,11 +2356,6 @@ ParamSetInReadTracks(bool state)
 	bInReadTracks = state;
 }
 
-EXPORT void
-ParamTurnOffDelays(bool disable)
-{
-	disablePlaybackDelays = disable;
-}
 
 
 static void ParamDlgProc(
@@ -2994,8 +2429,10 @@ wWin_p ParamCreateDialog(
 		winOption |= F_RECALLSIZE;
 	}
 
-	group->win = wWinPopupCreate( mainW, DlgSepRight, DlgSepFrmBottom, helpStr,
-	                              title, group->nameStr, F_AUTOSIZE|winOption, ParamDlgProc, group );
+	//group->win = wWinPopupCreate(mainW, DlgSepRight, DlgSepFrmBottom, helpStr,
+	//	title, group->nameStr, F_AUTOSIZE | winOption, ParamDlgProc, group);
+	group->win = wWinDialogCreate(mainW, helpStr,
+		title, group->nameStr, F_AUTOSIZE | winOption, ParamDlgProc, group);
 
 	if ( okLabel && okProc ) {
 		sprintf( helpStr, "%s-ok", group->nameStr );
@@ -3092,18 +2529,3 @@ EXPORT void ParamCreateControls(
 	pg->changeProc = changeProc;
 }
 
-
-EXPORT void ParamInit( void )
-{
-	if (paramGroups_init) { return; }
-
-	AddPlaybackProc( "PARAMETER", ParamPlayback, NULL );
-	AddPlaybackProc( "PARAMCHECK", ParamCheck, NULL );
-
-	log_paramLayout = LogFindIndex( "paramlayout" );
-	log_paraminput = LogFindIndex( "paraminput" );
-
-	DYNARR_INIT( paramGroup_p, paramGroups_da );
-	
-	paramGroups_init = TRUE;
-}

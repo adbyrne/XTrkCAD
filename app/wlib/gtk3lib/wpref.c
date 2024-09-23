@@ -305,3 +305,61 @@ wPrefReset(void )
 	prefInitted = FALSE;
 	g_key_file_free (prefs);
 }
+
+/**
+ * Split a line from the config file ie. an ini-file into separate tokens. The
+ * line is split into sections, name of value and value following. Pointers
+ * to the respective token are returned. These are zero-terminated.
+ * If a token is not present, NULL is returned instead.
+ * The input line is modified.
+ *
+ * \param line		input line, modified during excution of function
+ * \param section	section if present
+ * \param name		name of config value if present
+ * \param value		name of value if present
+ */
+
+void
+wPrefTokenize(char* line, char** section, char** name, char** value)
+{
+	*section = NULL;
+	*name = NULL;
+	*value = NULL;
+
+	if (*line == '[') {
+		*section = strtok(line, "[]");
+	}
+	else {
+		*name = strtok(line, "=");
+		*value = strtok(NULL, "\n");
+	}
+}
+
+/**
+ * A valid line for a config file is created from the individual elements.
+ * Values not need for specific statement are ignored. Eg. when section is
+ * present, name and value are not used.
+ * The caller has to make sure, that the return buffer is large enough.
+ *
+ * \param section	section, returned inside squared brackets
+ * \param name		name, left side of '='
+ * \param value		value, right side of '='
+ * \param result	pointer to buffer for formated line.
+ */
+
+void
+wPrefFormatLine(const char* section, const char* name,
+	const char* value, char* result)
+{
+	if (!value || *value == '\0') {
+		value = "";
+	}
+
+	if (section) {
+		sprintf(result, "[%s]", section);
+	}
+	else {
+		sprintf(result, "%s=%s", name, value);
+	}
+}
+

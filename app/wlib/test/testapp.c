@@ -459,9 +459,9 @@ ButtonAction(void* attributes)
 {
 	static bool clicked = 0;
 	if (!clicked)
-		wButtonSetLabel(button, false, "Clicked!");
+		wButtonSetLabel(button, "Clicked!");
 	else
-		wButtonSetLabel(button, false, "Click me!");
+		wButtonSetLabel(button, "Click me!");
 
 	clicked = !clicked;
 }

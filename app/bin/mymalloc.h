@@ -4,6 +4,7 @@
 /*
  * Safe Memory etc
  */
+extern void SetMallocLog(void);
 extern BOOL_T TestMallocs(void);
 extern void* MyMalloc(size_t);
 extern void* MyRealloc(void*, size_t);

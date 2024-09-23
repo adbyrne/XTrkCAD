@@ -502,7 +502,7 @@ static trackCmd_t structureCmds = {
 };
 
 static paramData_t pierPLs[] = {
-	{	PD_DROPLIST, &pierListInx, "inx", 0, I2VP(50), N_("Pier Number") }
+	{	PD_COMBOLIST, &pierListInx, "inx", 0, I2VP(50), N_("Pier Number") }
 };
 static paramGroup_t pierPG = { "structure-pier", 0, pierPLs, COUNT( pierPLs ) };
 #define pierL ((wList_p)pierPLs[0].control)

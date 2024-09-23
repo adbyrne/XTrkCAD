@@ -61,7 +61,7 @@ static paramData_t fileNotePLs[] = {
 #define I_ORIGY (1)
 	/*1*/ { PD_FLOAT, &fileNoteData.pos.y, "origy", PDO_DIM|PDO_NOPREF, &noRangeCheck, N_("Position Y") },
 #define I_LAYER (2)
-	/*2*/ { PD_DROPLIST, &fileNoteData.layer, "layer", PDO_NOPREF, I2VP(150), "Layer", 0 },
+	/*2*/ { PD_COMBOLIST, &fileNoteData.layer, "layer", PDO_NOPREF, I2VP(150), "Layer", 0 },
 #define I_TITLE (3)
 	/*3*/ { PD_STRING, &fileNoteData.title, "title", PDO_NOPREF | PDO_NOTBLANK, I2VP(200), N_("Title"), 0, 0, sizeof fileNoteData.title },
 #define I_PATH (4)
@@ -154,7 +154,7 @@ static void NoteFileOpen(char *fileName)
 	if (IsFileValid(fileName)) {
 		wOpenFileExternal(fileName);
 	} else {
-		wNoticeEx(NT_ERROR, _("The file doesn't exist or cannot be read!"), _("Cancel"),
+		wNoticeWithIcon(NT_ERROR, _("The file doesn't exist or cannot be read!"), _("Cancel"),
 		          NULL);
 		if (fileNoteW) {
 			wControlActive(fileNotePLs[I_OPEN].control, FALSE);

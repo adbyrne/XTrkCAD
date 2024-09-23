@@ -186,7 +186,7 @@ static void UpdateBlock (track_p trk, int inx, descData_p descUpd,
 	LOG( log_block, 1, ("*** UpdateBlock(): needUndoStart = %d\n",needUndoStart))
 	if ( inx == -1 ) {
 		nChanged = sChanged = changed = FALSE;
-		thename = wStringGetValue( (wString_p)blockDesc[NM].control0 );
+		thename = wEntryGetValue( blockDesc[NM].control0 );
 
 		if ( !xx->name || strcmp( thename, xx->name ) != 0 ) {
 			nChanged = changed = TRUE;
@@ -199,7 +199,7 @@ static void UpdateBlock (track_p trk, int inx, descData_p descUpd,
 			} else { newName = MyStrdup(thename); }
 		}
 
-		thescript = wStringGetValue( (wString_p)blockDesc[SC].control0 );
+		thescript = wEntryGetValue( blockDesc[SC].control0 );
 		if ( !xx->script || strcmp( thescript, xx->script ) != 0 ) {
 			sChanged = changed = TRUE;
 			max_str = blockDesc[SC].max_string;

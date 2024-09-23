@@ -67,7 +67,7 @@ static paramData_t updateTitlePLs[] = {
 	{	PD_STRING, NULL, "old", PDO_NOPREF, I2VP(400), NULL, BO_READONLY },
 #define I_UPDATELIST	(10)
 #define updateTitleL	((wList_p)updateTitlePLs[I_UPDATELIST].control)
-	{	PD_DROPLIST, NULL, "sel", PDO_NOPREF, I2VP(400) },
+	{	PD_COMBOLIST, NULL, "sel", PDO_NOPREF, I2VP(400) },
 	{	PD_BUTTON, UpdateTitleIgnore, "ignore", PDO_DLGCMDBUTTON, NULL, N_("Ignore") },
 #define I_UPDATELOAD	(12)
 	{	PD_BUTTON, NULL, "load", 0, NULL, N_("Load") }

@@ -23,7 +23,7 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
-#include "common.h"
+#include <common.h>
 
 #ifndef TRUE
 #define TRUE 1

@@ -201,7 +201,7 @@ static void UpdateCar(
 		const char * cp;
 		numberChanged = FALSE;
 
-		cp = wStringGetValue((wString_p)carDesc[NM].control0);
+		cp = wEntryGetValue( carDesc[NM].control0);
 		max_str = sizeof(carData.number);
 		if (max_str && strlen(cp)>max_str) {
 			NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_str-1);
@@ -732,7 +732,7 @@ static char * trainAutoReverseLabels[] = { N_("Auto Reverse"), NULL };
 static paramData_t trainPLs[] = {
 #define I_LIST				(0)
 #ifdef WINDOWS
-	/*0*/ { PD_DROPLIST, NULL, "list", PDO_NOPREF|PDO_NOPSHUPD, I2VP(120), NULL, 0 },
+	/*0*/ { PD_COMBOLIST, NULL, "list", PDO_NOPREF|PDO_NOPSHUPD, I2VP(120), NULL, 0 },
 #else
 	/*0*/ { PD_LIST, NULL, "list", PDO_NOPREF|PDO_NOPSHUPD, &listData, NULL, 0 },
 #endif
@@ -749,9 +749,9 @@ static paramData_t trainPLs[] = {
 #define I_GOTO				(6)
 	{ PD_BUTTON, NULL, "goto", PDO_NOPSHUPD|PDO_NOPREF|PDO_DLGWIDE, NULL, N_("Find") },
 #define I_FOLLOW			(7)
-	{ PD_TOGGLE, NULL, "follow", PDO_NOPREF|PDO_DLGWIDE, trainFollowMeLabels, NULL, BC_HORZ|BC_NOBORDER },
+	{ PD_TOGGLE, NULL, "follow", PDO_NOPREF|PDO_DLGWIDE, trainFollowMeLabels, NULL, BC_HORIZONTAL|BC_NOBORDER },
 #define I_AUTORVRS			(8)
-	{ PD_TOGGLE, NULL, "autoreverse", PDO_NOPREF, trainAutoReverseLabels, NULL, BC_HORZ|BC_NOBORDER },
+	{ PD_TOGGLE, NULL, "autoreverse", PDO_NOPREF, trainAutoReverseLabels, NULL, BC_HORIZONTAL|BC_NOBORDER },
 #define I_DIR				(9)
 	{ PD_BUTTON, NULL, "direction", PDO_NOPREF|PDO_DLGWIDE, NULL, N_("Forward"), 0 },
 #define I_STOP				(10)
@@ -2624,7 +2624,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 		trainHighlighted = NULL;
 		DYNARR_SET(trkSeg_t, tempSegs_da, 8);
 		RestartTrains();
-		wButtonSetLabel(trainPauseB, (char*)goB);
+		wButtonSetIcon(trainPauseB, (char*)goB);
 		trainTime0 = 0;
 		AttachTrains();
 		curTrainDlg->train = NULL;
@@ -2940,7 +2940,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 		/*trainEnable = FALSE;*/
 		if (trainsState != TRAINS_STOP) {
 			trainsState = TRAINS_STOP;
-			wButtonSetLabel(trainPauseB, (char*)stopI);
+			wButtonSetIcon(trainPauseB, (char*)stopI);
 			TrainTimeEndPause();
 		}
 
@@ -2995,7 +2995,7 @@ static void CmdTrainStopGo(void * unused)
 	}
 
 	ControllerDialogSync(curTrainDlg);
-	wButtonSetLabel(trainPauseB, (char*)icon);
+	wButtonSetIcon(trainPauseB, (char*)icon);
 
 	if (recordF) {
 		fprintf(recordF, "TRAINSTOPGO %s\n", trainsState==TRAINS_STOP?"STOP":"GO");

@@ -1363,7 +1363,7 @@ EXPORT int CheckRegressionResult( long regressVersion,char * sFileName,
 			fclose( fRegression );
 			strcat( message, "Continue test?" );
 			if ( ! bQuiet ) {
-				int rc = wNoticeEx( NT_ERROR, message, _("Stop"), _("Continue") );
+				int rc = wNoticeWithIcon( NT_ERROR, message, _("Stop"), _("Continue") );
 				if ( !rc ) {
 					while ( GetNextLine() &&
 					        strncmp( paramLine, "REGRESSION END", 14 ) != 0 )

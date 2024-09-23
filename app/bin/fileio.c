@@ -115,7 +115,7 @@ EXPORT char * GetNextLine( void )
 	}
 	if (fgets( paramLine, sizeof paramLine, paramFile ) == NULL) {
 		sprintf( message, "INPUT ERROR: premature EOF on %s", paramFileName );
-		wNoticeEx( NT_ERROR, message, _("Ok"), NULL );
+		wNoticeWithIcon( NT_ERROR, message, _("Ok"), NULL );
 		if ( paramFile ) {
 			fclose( paramFile );
 			paramFile = NULL;
@@ -159,7 +159,7 @@ EXPORT int InputError(
 		strcpy( mp, paramLine );
 	}
 	strcat( mp, _("\nDo you want to continue?") );
-	if (!(ret = wNoticeEx( NT_ERROR, message, _("Continue"), _("Stop") ))) {
+	if (!(ret = wNoticeWithIcon( NT_ERROR, message, _("Continue"), _("Stop") ))) {
 		if ( paramFile ) {
 			fclose(paramFile);
 			paramFile = NULL;

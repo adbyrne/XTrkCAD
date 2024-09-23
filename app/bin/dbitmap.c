@@ -151,7 +151,7 @@ static int SaveBitmapFile(
 
 	SetCurrentPath( BITMAPPATHKEY, fileName[ 0 ] );
 
-	bitmap_d.d = wBitMapCreate( bitmap_w, bitmap_h, 8 );
+	bitmap_d.d = wBitmapCreate( bitmap_w, bitmap_h, 8 );
 
 	if( !bitmap_d.d ) {
 		NoticeMessage( MSG_WBITMAP_FAILED, _( "Ok" ), NULL );
@@ -228,7 +228,7 @@ static int SaveBitmapFile(
 
 	InfoMessage( _( "Writing bitmap to file" ) );
 
-	if( !wBitMapWriteFile( bitmap_d.d, fileName[0] ) ) {
+	if( !wBitmapWriteFile( bitmap_d.d, fileName[0] ) ) {
 		NoticeMessage( MSG_WBITMAP_FAILED, _( "Ok" ), NULL );
 		result = false;
 	} else {
@@ -237,7 +237,7 @@ static int SaveBitmapFile(
 	}
 
 	wSetCursor( mainD.d, defaultCursor );
-	wBitMapDelete( bitmap_d.d );
+	wBitmapDelete( bitmap_d.d );
 	return result;
 }
 

@@ -1577,7 +1577,7 @@ static long carHotbarModes[] = { 0x0002, 0x0012, 0x0312, 0x4312, 0x0021, 0x0321,
 static long carHotbarContents[] = { 0x0005, 0x0002, 0x0012, 0x0012, 0x0001, 0x0021, 0x0021 };
 static long newCarInx;
 static paramData_t newCarPLs[] = {
-	{ PD_DROPLIST, &newCarInx, "index", PDO_DLGWIDE, I2VP(400), N_("Item") }
+	{ PD_COMBOLIST, &newCarInx, "index", PDO_DLGWIDE, I2VP(400), N_("Item") }
 };
 static paramGroup_t newCarPG = { "train-newcar", 0, newCarPLs, COUNT( newCarPLs ) };
 EXPORT wControl_p newCarControls[2];
@@ -2303,21 +2303,21 @@ static void CarDlgNewProto( void );
 static paramData_t carDlgPLs[] = {
 #define A                       (0)
 #define I_CD_MANUF_LIST         (A+0)
-	{ PD_DROPLIST, &carDlgManufInx, "manuf", PDO_NOPREF, I2VP(350), N_("Manufacturer"), BL_EDITABLE },
+	{ PD_COMBOLIST, &carDlgManufInx, "manuf", PDO_NOPREF, I2VP(350), N_("Manufacturer"), BL_EDITABLE },
 #define I_CD_PROTOTYPE_STR      (A+1)
 	{ PD_STRING, &carDlgProtoStr, "prototype", PDO_NOPREF|PDO_NOTBLANK, I2VP(350), N_("Prototype"), 0, 0, sizeof(carDlgProtoStr)},
 #define I_CD_PROTOKIND_LIST     (A+2)
-	{ PD_DROPLIST, &carDlgKindInx, "protokind-list", PDO_NOPREF, I2VP(125), N_("Prototype"), 0 },
+	{ PD_COMBOLIST, &carDlgKindInx, "protokind-list", PDO_NOPREF, I2VP(125), N_("Prototype"), 0 },
 #define I_CD_PROTOTYPE_LIST     (A+3)
-	{ PD_DROPLIST, &carDlgProtoInx, "prototype-list", PDO_NOPREF|PDO_DLGHORZ, I2VP(225-3), NULL, 0 },
+	{ PD_COMBOLIST, &carDlgProtoInx, "prototype-list", PDO_NOPREF|PDO_DLGHORZ, I2VP(225-3), NULL, 0 },
 #define I_CD_TYPE_LIST          (A+4)
-	{ PD_DROPLIST, &carDlgTypeInx, "type", PDO_NOPREF, I2VP(350), N_("Type"), 0 },
+	{ PD_COMBOLIST, &carDlgTypeInx, "type", PDO_NOPREF, I2VP(350), N_("Type"), 0 },
 #define I_CD_PARTNO_LIST        (A+5)
-	{ PD_DROPLIST, &carDlgPartnoInx, "partno-list", PDO_NOPREF, I2VP(350), N_("Part"), BL_EDITABLE },
+	{ PD_COMBOLIST, &carDlgPartnoInx, "partno-list", PDO_NOPREF, I2VP(350), N_("Part"), BL_EDITABLE },
 #define I_CD_PARTNO_STR         (A+6)
 	{ PD_STRING, &carDlgPartnoStr, "partno", PDO_NOPREF|PDO_NOTBLANK, I2VP(350), N_("Part Number"), 0, 0, sizeof(carDlgPartnoStr)},
 #define I_CD_ISLOCO             (A+7)
-	{ PD_TOGGLE, &carDlgIsLoco, "isLoco", PDO_NOPREF|PDO_DLGWIDE, isLocoLabels, N_("Loco?"), BC_HORZ|BC_NOBORDER },
+	{ PD_TOGGLE, &carDlgIsLoco, "isLoco", PDO_NOPREF|PDO_DLGWIDE, isLocoLabels, N_("Loco?"), BC_HORIZONTAL|BC_NOBORDER },
 #define I_CD_DESC_STR           (A+8)
 	{ PD_STRING, &carDlgDescStr, "desc", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(350), N_("Description"), 0, 0, sizeof(carDlgDescStr)},
 #define I_CD_IMPORT             (A+9)
@@ -2328,11 +2328,11 @@ static paramData_t carDlgPLs[] = {
 	{ PD_BUTTON, NULL, "flip", PDO_DLGHORZ|PDO_DLGWIDE|PDO_DLGBOXEND, 0, N_("Flip") },
 
 #define I_CD_DISPMODE           (A+12)
-	{ PD_RADIO, &carDlgDispMode, "dispmode", PDO_NOPREF|PDO_DLGWIDE, dispmodeLabels, N_("Mode"), BC_HORZ|BC_NOBORDER },
+	{ PD_RADIO, &carDlgDispMode, "dispmode", PDO_NOPREF|PDO_DLGWIDE, dispmodeLabels, N_("Mode"), BC_HORIZONTAL|BC_NOBORDER },
 
 #define B                       (A+13)
 #define I_CD_ROADNAME_LIST      (B+0)
-	{ PD_DROPLIST, &carDlgRoadnameInx, "road", PDO_NOPREF|PDO_DLGWIDE, I2VP(350), N_("Road"), BL_EDITABLE },
+	{ PD_COMBOLIST, &carDlgRoadnameInx, "road", PDO_NOPREF|PDO_DLGWIDE, I2VP(350), N_("Road"), BL_EDITABLE },
 #define I_CD_REPMARK            (B+1)
 	{ PD_STRING, carDlgRepmarkStr, "repmark", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(60), N_("Reporting Mark"), 0, 0, sizeof(carDlgRepmarkStr)},
 #define I_CD_NUMBER             (B+2)
@@ -2348,7 +2348,7 @@ static paramData_t carDlgPLs[] = {
 #define I_CD_TRKOFFSET			(B+7)
 	{ PD_FLOAT, &carDlgDim.truckCenterOffset, "trkCenterOffset", PDO_DIM|PDO_NOPREF|PDO_DLGHORZ|PDO_DLGWIDE, &r9999_9999, N_("Center Offset") },
 #define I_CD_CPLRMNT            (B+8)
-	{ PD_RADIO, &carDlgCouplerMount, "cplrMount", PDO_NOPREF, cplrModeLabels, N_("Coupler Mount"), BC_HORZ|BC_NOBORDER },
+	{ PD_RADIO, &carDlgCouplerMount, "cplrMount", PDO_NOPREF, cplrModeLabels, N_("Coupler Mount"), BC_HORIZONTAL|BC_NOBORDER },
 #define I_CD_CPLDLEN            (B+9)
 	{ PD_FLOAT, &carDlgDim.coupledLength, "cpldLen", PDO_DIM|PDO_NOPREF, &r0d001_99999, N_("Coupled Length") },
 #define I_CD_CPLRLEN            (B+10)
@@ -2364,7 +2364,7 @@ static paramData_t carDlgPLs[] = {
 #define I_CD_CURPRC             (C+2)
 	{ PD_STRING, &carDlgCurrPriceStr, "currPrice", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ|PDO_STRINGLIMITLENGTH, I2VP(50), N_("Current Price"), 0, &carDlgCurrPrice, sizeof(carDlgCurrPriceStr) },
 #define I_CD_COND               (C+3)
-	{ PD_DROPLIST, &carDlgConditionInx, "condition", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ, I2VP(90), N_("Condition") },
+	{ PD_COMBOLIST, &carDlgConditionInx, "condition", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ, I2VP(90), N_("Condition") },
 #define I_CD_PURDAT             (C+4)
 	{ PD_STRING, &carDlgPurchDateStr, "purchDate",  PDO_NOPREF|PDO_DLGWIDE|PDO_STRINGLIMITLENGTH, I2VP(80), N_("Purchase Date"), 0, &carDlgPurchDate, sizeof(carDlgPurchDateStr) },
 #define I_CD_SRVDAT             (C+5)
@@ -2372,7 +2372,7 @@ static paramData_t carDlgPLs[] = {
 #define I_CD_QTY                (C+6)
 	{ PD_LONG, &carDlgQuantity, "quantity", PDO_NOPREF|PDO_DLGWIDE, &i1_9999, N_("Quantity") },
 #define I_CD_MLTNUM             (C+7)
-	{ PD_RADIO, &carDlgMultiNum, "multinum", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ, multinumLabels, N_("Numbers"), BC_HORZ|BC_NOBORDER },
+	{ PD_RADIO, &carDlgMultiNum, "multinum", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ, multinumLabels, N_("Numbers"), BC_HORIZONTAL|BC_NOBORDER },
 #define I_CD_NOTES              (C+8)
 	{ PD_TEXT, NULL, "notes", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGNOLABELALIGN|PDO_DLGRESETMARGIN|PDO_DLGRESIZE, &notesData, N_("Notes") },
 
@@ -4718,10 +4718,10 @@ static char * sortOrders[] = {
 static paramListData_t carInvListData = { 30, 600, COUNT( carInvColumnTitles ), carInvColumnWidths, carInvColumnTitles };
 static paramData_t carInvPLs[] = {
 #define I_CI_SORT		(0)
-	{ PD_DROPLIST, &carInvSort[0], "sort1", PDO_LISTINDEX|0, I2VP(110), N_("Sort By") },
-	{ PD_DROPLIST, &carInvSort[1], "sort2", PDO_LISTINDEX|PDO_DLGHORZ, I2VP(110), "" },
-	{ PD_DROPLIST, &carInvSort[2], "sort3", PDO_LISTINDEX|PDO_DLGHORZ, I2VP(110), "" },
-	{ PD_DROPLIST, &carInvSort[3], "sort4", PDO_LISTINDEX|PDO_DLGHORZ, I2VP(110), "" },
+	{ PD_COMBOLIST, &carInvSort[0], "sort1", PDO_LISTINDEX|0, I2VP(110), N_("Sort By") },
+	{ PD_COMBOLIST, &carInvSort[1], "sort2", PDO_LISTINDEX|PDO_DLGHORZ, I2VP(110), "" },
+	{ PD_COMBOLIST, &carInvSort[2], "sort3", PDO_LISTINDEX|PDO_DLGHORZ, I2VP(110), "" },
+	{ PD_COMBOLIST, &carInvSort[3], "sort4", PDO_LISTINDEX|PDO_DLGHORZ, I2VP(110), "" },
 #define S				(4)
 #define I_CI_LIST		(S+0)
 	{ PD_LIST, &carInvInx, "list", PDO_LISTINDEX|PDO_DLGRESIZE|PDO_DLGNOLABELALIGN|PDO_DLGRESETMARGIN, &carInvListData, NULL, BO_READONLY|BL_MANY },

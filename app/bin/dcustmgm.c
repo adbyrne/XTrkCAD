@@ -51,7 +51,7 @@ static paramData_t customPLs[] = {
 #define customSelL		((wList_p)customPLs[I_CUSTOMLIST].control)
 	{	PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN|PDO_DLGRESIZE|PDO_DLGBOXEND, &customListData, NULL, BL_MANY },
 #define I_CUSTOMNEWTYPE (1)
-	{   PD_DROPLIST, &selectedType, "newtype", PDO_DLGRESETMARGIN | PDO_LISTINDEX, I2VP(150), N_("Create a new ") },
+	{   PD_COMBOLIST, &selectedType, "newtype", PDO_DLGRESETMARGIN | PDO_LISTINDEX, I2VP(150), N_("Create a new ") },
 #define I_CUSTOMNEW     (2)
 	{   PD_BUTTON, CustomNewCar, "newcar", PDO_DLGHORZ| PDO_DLGBOXEND, NULL, N_("Go") },
 #define I_CUSTOMEDIT	(3)

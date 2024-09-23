@@ -192,7 +192,7 @@ static void UpdateControlProperties (  track_p trk, int inx, descData_p
 		break;
 	case -1:
 		changed = nChanged = pChanged = onChanged = offChanged = FALSE;
-		thename = wStringGetValue( (wString_p) controlDesc[NM].control0 );
+		thename = wEntryGetValue( controlDesc[NM].control0 );
 		if (strcmp(thename,xx->name) != 0) {
 			nChanged = changed = TRUE;
 			max_str = controlDesc[NM].max_string;
@@ -205,7 +205,7 @@ static void UpdateControlProperties (  track_p trk, int inx, descData_p
 		}
 
 
-		theonscript = wStringGetValue( (wString_p) controlDesc[ON].control0 );
+		theonscript = wEntryGetValue( controlDesc[ON].control0 );
 		if (strcmp(theonscript,xx->onscript) != 0) {
 			onChanged = changed = TRUE;
 			max_str = controlDesc[ON].max_string;
@@ -217,7 +217,7 @@ static void UpdateControlProperties (  track_p trk, int inx, descData_p
 			} else { newOnScript = MyStrdup(theonscript); }
 		}
 
-		theoffscript = wStringGetValue( (wString_p) controlDesc[OF].control0 );
+		theoffscript = wEntryGetValue( controlDesc[OF].control0 );
 		if (strcmp(theoffscript,xx->offscript) != 0) {
 			offChanged = changed = TRUE;
 			max_str = controlDesc[OF].max_string;

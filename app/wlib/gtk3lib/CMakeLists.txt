@@ -54,12 +54,17 @@ target_sources(xtrkcad-wlib
  	tooltip.c	
  	util.c
 	window.c
+	print.c
 )
 
 if(WIN32)
 	target_sources(xtrkcad-wlib
 		PRIVATE
-		win32/w32paths.c)
+		win32/getline.c
+		win32/getopt.c
+		win32/sysinfo.c
+		win32/w32paths.c
+		win32/utf8conv.c)
 endif()
 
 if(UNIX)
@@ -67,7 +72,8 @@ if(UNIX)
 		PRIVATE
 			timer.c
 			print.c 
-			unix/ixpaths.c)
+			unix/ixpaths.c
+			unix/sysinfo.c)
 endif()
 
 # help system is OS and build specific, add appropriate source files

@@ -126,22 +126,19 @@ void wlibSetLabel(
 }
 
 /**
- * Change the label of a button. This can be used to set the text or set a
- * icon inside the button.
+ * Change the icon of a button.
  * The icon has to be in XPM format.
  *
  * \param bb		IN button handle
- * \param isIcon	IN label has to be interpreted as image
- * \param labelStr	IN new label string
+ * \param iconData	IN icon data
  *
  * \todo icons in XBM format
  */
 
-void wButtonSetLabel(wControl_p bb, unsigned isIcon, const char * labelStr)
+void wButtonSetIcon(wControl_p bb,  const char* iconData)
 {
-	if (isIcon) {
 		GdkPixbuf* pixbuf;
-		pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)labelStr);
+		pixbuf = gdk_pixbuf_new_from_xpm_data((const char**)iconData);
 		if (pixbuf) {
 			GtkWidget* image = gtk_image_new_from_pixbuf(pixbuf);
 			gtk_container_add(GTK_CONTAINER(bb->widget), image);
@@ -149,9 +146,20 @@ void wButtonSetLabel(wControl_p bb, unsigned isIcon, const char * labelStr)
 			g_object_unref((gpointer)pixbuf);
 			gtk_widget_show(image);
 		}
-	} else {
+}
+
+/**
+ * Change the label of a button. This can be used to set the text
+ *
+ * \param bb		IN button handle
+ * \param labelStr	IN new label string
+ *
+ * \todo icons in XBM format
+ */
+
+void wButtonSetLabel(wControl_p bb, const char * labelStr)
+{
 		gtk_button_set_label(GTK_BUTTON(bb->widget), labelStr);
-	}
 }
 
 /**
@@ -255,7 +263,12 @@ wControl_p wButtonCreate(
 		}
 
 		if (labelStr) {
-			wButtonSetLabel(b, option & BO_ICON, labelStr);
+			if (option & BO_ICON) {
+				wButtonSetIcon(b, labelStr);
+			}
+			else {
+				wButtonSetLabel(b, labelStr);
+			}
 		}
 
 		wlibBasicGridAttach(parent, b->widget, x, y, width, 1);
@@ -351,7 +364,7 @@ wControl_p wButtonCreateForToolbar(
 	buttonAttributes->action = action;
 	buttonControl->widget = GTK_WIDGET(gtk_toggle_button_new());
 
-	wButtonSetLabel(buttonControl, BO_ICON, labelStr);
+	wButtonSetIcon(buttonControl, labelStr);
 
 	styleContext = gtk_widget_get_style_context(GTK_WIDGET(buttonControl->widget));
 	gtk_style_context_add_class(styleContext, "toolbar-button");

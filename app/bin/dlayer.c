@@ -345,7 +345,7 @@ EXPORT void FlipLayer( void * layerVP )
 	if (layer < NUM_BUTTONS) {
 		if (!layers[layer].button_off) {
 			wButtonSetBusy(layer_btns[layer], visible != 0);
-			wButtonSetLabel(layer_btns[layer], (char *)show_layer_bmps[layer]);
+			wButtonSetIcon(layer_btns[layer], (char *)show_layer_bmps[layer]);
 		}
 	}
 
@@ -442,7 +442,7 @@ static void SetLayerColor(unsigned int inx, wDrawColor color)
 	if (color != layers[inx].color) {
 		if (inx < NUM_BUTTONS) {
 			wIconSetColor(show_layer_bmps[inx], color);
-			wButtonSetLabel(layer_btns[inx], (char*)show_layer_bmps[inx]);
+			wButtonSetIcon(layer_btns[inx], (char*)show_layer_bmps[inx]);
 		}
 
 		layers[inx].color = color;
@@ -539,29 +539,29 @@ static paramIntegerRange_t i0_20 = { 0, NUM_BUTTONS };
 
 static paramData_t layerPLs[] = {
 #define I_LIST	(0)
-	{ PD_DROPLIST, NULL, "layer", PDO_LISTINDEX, I2VP(250), N_("Select Layer:") },
+	{ PD_COMBOLIST, NULL, "layer", PDO_LISTINDEX, I2VP(250), N_("Select Layer:") },
 #define I_NAME	(1)
 	{ PD_STRING, layerName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH | PDO_DLGBOXEND, I2VP(250 - 54), N_("Name"), 0, 0, sizeof(layerName) },
 #define I_COLOR	(2)
 	{ PD_COLORLIST, &layerColor, "color", PDO_NOPREF, NULL, N_("Color") },
 #define I_USE_COLOR (3)
-	{ PD_TOGGLE, &layerUseColor, "layercolor", PDO_NOPREF | PDO_DLGHORZ, layerColorLabels, N_("Use Color"), BC_HORZ | BC_NOBORDER },
+	{ PD_TOGGLE, &layerUseColor, "layercolor", PDO_NOPREF | PDO_DLGHORZ, layerColorLabels, N_("Use Color"), BC_HORIZONTAL | BC_NOBORDER },
 #define I_VIS	(4)
-	{ PD_TOGGLE, &layerVisible, "visible", PDO_NOPREF, visibleLabels, N_("Visible"), BC_HORZ | BC_NOBORDER },
+	{ PD_TOGGLE, &layerVisible, "visible", PDO_NOPREF, visibleLabels, N_("Visible"), BC_HORIZONTAL | BC_NOBORDER },
 #define I_FRZ	(5)
-	{ PD_TOGGLE, &layerFrozen, "frozen", PDO_NOPREF | PDO_DLGHORZ, frozenLabels, N_("Frozen"), BC_HORZ | BC_NOBORDER },
+	{ PD_TOGGLE, &layerFrozen, "frozen", PDO_NOPREF | PDO_DLGHORZ, frozenLabels, N_("Frozen"), BC_HORIZONTAL | BC_NOBORDER },
 #define I_MAP	(6)
-	{ PD_TOGGLE, &layerOnMap, "onmap", PDO_NOPREF | PDO_DLGHORZ, onMapLabels, N_("On Map"), BC_HORZ | BC_NOBORDER },
+	{ PD_TOGGLE, &layerOnMap, "onmap", PDO_NOPREF | PDO_DLGHORZ, onMapLabels, N_("On Map"), BC_HORIZONTAL | BC_NOBORDER },
 #define I_MOD 	(7)
-	{ PD_TOGGLE, &layerModule, "module", PDO_NOPREF | PDO_DLGHORZ, moduleLabels, N_("Module"), BC_HORZ | BC_NOBORDER },
+	{ PD_TOGGLE, &layerModule, "module", PDO_NOPREF | PDO_DLGHORZ, moduleLabels, N_("Module"), BC_HORIZONTAL | BC_NOBORDER },
 #define I_BUT   (8)
-	{ PD_TOGGLE, &layerNoButton, "button", PDO_NOPREF | PDO_DLGHORZ, noButtonLabels, N_("No Button"), BC_HORZ | BC_NOBORDER },
+	{ PD_TOGGLE, &layerNoButton, "button", PDO_NOPREF | PDO_DLGHORZ, noButtonLabels, N_("No Button"), BC_HORIZONTAL | BC_NOBORDER },
 #define I_DEF   (9)
-	{ PD_TOGGLE, &layerInherit, "inherit", PDO_NOPREF | PDO_DLGHORZ | PDO_DLGBOXEND, defaultLabels, N_("Inherit"), BC_HORZ | BC_NOBORDER },
+	{ PD_TOGGLE, &layerInherit, "inherit", PDO_NOPREF | PDO_DLGHORZ | PDO_DLGBOXEND, defaultLabels, N_("Inherit"), BC_HORIZONTAL | BC_NOBORDER },
 #define I_SCALE (10)
-	{ PD_DROPLIST, &layerScaleDescInx, "scale", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT, I2VP(180), N_("Scale"), 0, I2VP(CHANGE_LAYER) },
+	{ PD_COMBOLIST, &layerScaleDescInx, "scale", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT, I2VP(180), N_("Scale"), 0, I2VP(CHANGE_LAYER) },
 #define I_GAUGE (11)
-	{ PD_DROPLIST, &layerGaugeInx, "gauge", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ, I2VP(180), N_("     Gauge") },
+	{ PD_COMBOLIST, &layerGaugeInx, "gauge", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ, I2VP(180), N_("     Gauge") },
 #define I_MINRADIUSENTRY (12)
 	{ PD_FLOAT, &layerMinRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, N_("Min Track Radius"), 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
 #define I_MAXGRADEENTRY (13)
@@ -584,7 +584,7 @@ static paramData_t layerPLs[] = {
 #define I_LINKLIST (22)
 	{ PD_STRING, layerLinkList, "layerlist", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(250 - 54), N_("Linked Layers"), 0, 0, sizeof(layerLinkList) },
 #define I_SETTINGS (23)
-	{ PD_DROPLIST, NULL, "settings", PDO_LISTINDEX, I2VP(250), N_("Settings when Current") },
+	{ PD_COMBOLIST, NULL, "settings", PDO_LISTINDEX, I2VP(250), N_("Settings when Current") },
 #define I_COUNT (24)
 	{ PD_LONG, &layerObjectCount, "objectCount", PDO_DLGBOXEND, &r_nocheck, N_("Object Count:"), 0, 0 },
 	{ PD_MESSAGE, N_("All Layer Preferences"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
@@ -1576,7 +1576,7 @@ void ResetLayers(void)
 
 
 		if (inx < NUM_BUTTONS) {
-			wButtonSetLabel(layer_btns[inx], (char*)show_layer_bmps[inx]);
+			wButtonSetIcon(layer_btns[inx], (char*)show_layer_bmps[inx]);
 		}
 	}
 
@@ -2324,7 +2324,7 @@ void InitLayers(int cmdGroup)
 	}
 
 	/* layer list for toolbar */
-	setLayerL = wDropListCreate(mainW, 0, 0, "cmdLayerSet", NULL, 0, 10, 200, NULL,
+	setLayerL = wComboListCreate(mainW, 0, 0, "cmdLayerSet", NULL, 0, 10, 200, NULL,
 	                            SetCurrLayer, NULL);
 	wControlSetBalloonText((wControl_p)setLayerL, GetBalloonHelpStr("cmdLayerSet"));
 	ToolbarControlAdd((wControl_p)setLayerL, IC_MODETRAIN_TOO, cmdGroup );

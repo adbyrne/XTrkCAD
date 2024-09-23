@@ -2837,18 +2837,18 @@ static paramData_t drawPLs[] = {
 	{ PD_COLORLIST, &benchColor, "benchcolor", PDO_NORECORD, NULL, N_("Color") },
 #define drawBenchChoicePD		(drawPLs[3])
 #ifdef WINDOWS
-	{ PD_DROPLIST, &benchChoice, "benchlist", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, I2VP(120), N_("Lumber Type") },
+	{ PD_COMBOLIST, &benchChoice, "benchlist", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, I2VP(120), N_("Lumber Type") },
 #else
-	{ PD_DROPLIST, &benchChoice, "benchlist", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, I2VP(145), N_("Lumber Type") },
+	{ PD_COMBOLIST, &benchChoice, "benchlist", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, I2VP(145), N_("Lumber Type") },
 #endif
 #define drawBenchOrientPD		(drawPLs[4])
 #ifdef WINDOWS
-	{ PD_DROPLIST, &benchOrient, "benchorient", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, I2VP(45), "", 0 },
+	{ PD_COMBOLIST, &benchOrient, "benchorient", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, I2VP(45), "", 0 },
 #else
-	{ PD_DROPLIST, &benchOrient, "benchorient", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, I2VP(105), "", 0 },
+	{ PD_COMBOLIST, &benchOrient, "benchorient", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, I2VP(105), "", 0 },
 #endif
 #define drawDimArrowSizePD		(drawPLs[5])
-	{ PD_DROPLIST, &dimArrowSize, "arrowsize", PDO_NORECORD|PDO_LISTINDEX, I2VP(80), N_("Size") },
+	{ PD_COMBOLIST, &dimArrowSize, "arrowsize", PDO_NORECORD|PDO_LISTINDEX, I2VP(80), N_("Size") },
 #define drawLengthPD			(drawPLs[6])
 	{ PD_FLOAT, &drawCmdContext.length, "length", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Length") },
 #define drawWidthPD				(drawPLs[7])
@@ -2859,7 +2859,7 @@ static paramData_t drawPLs[] = {
 #define drawRadiusPD            (drawPLs[9])
 	{ PD_FLOAT, &drawCmdContext.radius, "radius", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Radius") },
 #define drawLineTypePD			(drawPLs[10])
-	{ PD_DROPLIST, &drawCmdContext.lineType, "type", PDO_DIM|PDO_NORECORD|BO_ENTER, I2VP(0), N_("Line Type") },
+	{ PD_COMBOLIST, &drawCmdContext.lineType, "type", PDO_DIM|PDO_NORECORD|BO_ENTER, I2VP(0), N_("Line Type") },
 };
 static paramGroup_t drawPG = { "draw", 0, drawPLs, COUNT( drawPLs ) };
 

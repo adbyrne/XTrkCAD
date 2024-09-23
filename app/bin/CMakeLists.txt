@@ -19,6 +19,11 @@ add_subdirectory(bitmaps)
 
 add_executable(cnvdsgn cnvdsgn.c utility.c)
 
+target_include_directories(cnvdsgn 
+    PUBLIC
+    ${XTRKCAD_CORE_INCLUDE_DIR}
+)
+
 target_link_libraries(cnvdsgn xtrkcad-wlib)
 
 if(NOT WIN32)
@@ -279,7 +284,7 @@ endif()
 #
 # Start building the main program itself
 #
-add_executable(${XTRKCAD_BIN} WIN32 "" )
+add_executable(${XTRKCAD_BIN} "" )
 
 # if SVG export is built and source files and dependency on MiniXML
 

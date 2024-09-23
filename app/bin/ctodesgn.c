@@ -3230,10 +3230,10 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 		}
 
 		w = turnDesignWidth-w;
-		wStringSetWidth( (wString_p)turnDesignPLs[I_TOMANUF].control, w );
+		wEntrySetWidth(  turnDesignPLs[I_TOMANUF].control, w );
 		w -= partnoWidth;
-		wStringSetWidth( (wString_p)turnDesignPLs[I_TOLDESC].control, w );
-		wStringSetWidth( (wString_p)turnDesignPLs[I_TORDESC].control, w );
+		wEntrySetWidth(turnDesignPLs[I_TOLDESC].control, w );
+		wEntrySetWidth(turnDesignPLs[I_TORDESC].control, w );
 		if ( curDesign->type == NTO_CORNU ||
 		     curDesign->type == NTO_CORNUWYE ||
 		     curDesign->type == NTO_CORNU3WAY ) {

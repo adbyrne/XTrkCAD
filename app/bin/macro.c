@@ -697,7 +697,7 @@ static paramData_t demoPLs[] = {
 	{   PD_BUTTON, DoDemoButton, "quit", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("Quit"), BB_CANCEL, I2VP(3) },
 #define I_DEMOSPEED		(3)
 #define demoSpeedL		((wList_p)demoPLs[I_DEMOSPEED].control)
-	{   PD_DROPLIST, &playbackSpeed, "speed", PDO_NORECORD|PDO_LISTINDEX|PDO_DLGHORZ, I2VP(80), N_("Speed") },
+	{   PD_COMBOLIST, &playbackSpeed, "speed", PDO_NORECORD|PDO_LISTINDEX|PDO_DLGHORZ, I2VP(80), N_("Speed") },
 #define I_DEMOTEXT		(4)
 #define demoT			((wText_p)demoPLs[I_DEMOTEXT].control)
 	{   PD_TEXT, NULL, "text", PDO_NORECORD|PDO_DLGRESIZE, &demoTextData, NULL, BT_CHARUNITS|BO_READONLY}
@@ -798,7 +798,7 @@ EXPORT void TakeSnapshot( drawCmd_t * d )
 	}
 	ix = (wWinPix_t)(d->dpi*d->size.x/d->scale);
 	iy = (wWinPix_t)(d->dpi*d->size.y/d->scale);
-	d->d = wBitMapCreate( ix, iy, 8 );
+	d->d = wBitmapCreate( ix, iy, 8 );
 	if (d->d == (wDraw_p)0) {
 		return;
 	}
@@ -816,8 +816,8 @@ EXPORT void TakeSnapshot( drawCmd_t * d )
 	strcpy( message, paramFileName );
 	cp = message+strlen(message)-4;
 	sprintf( cp, "-%4.4d.png", documentSnapshotNum );
-	wBitMapWriteFile( d->d, message );
-	wBitMapDelete( d->d );
+	wBitmapWriteFile( d->d, message );
+	wBitmapDelete( d->d );
 	documentSnapshotNum++;
 	if (documentCopy && documentFile) {
 		cp = FindFilename(message);
@@ -1553,7 +1553,7 @@ static void DemoInitValues( void )
 	strcpy( scaleName, "DEMO" );
 	DoSetScale( scaleName );
 	if ( paramPlaybackProc == NULL ) {
-		wNoticeEx( NT_INFORMATION, _("Can not find PARAMETER playback proc"), _("Ok"),
+		wNoticeWithIcon( NT_INFORMATION, _("Can not find PARAMETER playback proc"), _("Ok"),
 		           NULL );
 		return;
 	}

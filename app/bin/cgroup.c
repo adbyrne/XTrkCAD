@@ -704,8 +704,8 @@ static paramData_t groupPLs[] = {
 #define I_GROUP_ORIGIN_OFFSET 4  /* Need to change if add above */
 	/*4*/ { PD_FLOAT, &groupOriginX, "orig", PDO_DIM, &r_1000_1000, N_("Offset X,Y:")},
 	/*5*/ { PD_FLOAT, &groupOriginY, "origy",PDO_DIM | PDO_DLGHORZ, &r_1000_1000, ""},
-	/*6*/ { PD_TOGGLE, &groupNoCombine, "noCombine", 0, groupNoCombineLabels, "", BC_HORZ|BC_NOBORDER },
-	/*7*/ { PD_TOGGLE, &groupReplace, "replace", 0, groupReplaceLabels, "", BC_HORZ|BC_NOBORDER }
+	/*6*/ { PD_TOGGLE, &groupNoCombine, "noCombine", 0, groupNoCombineLabels, "", BC_HORIZONTAL|BC_NOBORDER },
+	/*7*/ { PD_TOGGLE, &groupReplace, "replace", 0, groupReplaceLabels, "", BC_HORIZONTAL|BC_NOBORDER }
 };
 static paramGroup_t groupPG = { "group", 0, groupPLs, COUNT( groupPLs ) };
 

@@ -137,7 +137,7 @@ wControl_p wWinMainCreate(
  * Bitmap Controls bitmap.c
  */
 
-wControl_p wBitmapCreate(wControl_p parent, 
+wControl_p wBitmapViewCreate(wControl_p parent, 
                          wWinPix_t x, 
                          wWinPix_t y, 
                          long options, 
@@ -157,6 +157,8 @@ void wIconSetColor(wIcon_p ip, wDrawColor color);
 
  /* Creation Options */
 #define BB_DEFAULT	(1L<<5)
+#define BB_CANCEL   (1L<<6)
+#define BB_HELP (1L<<7)
 #define BC_ICON 	(1L<<0)
 #define BC_NOBORDER 	(1L<<15)
 #define BC_HORIZONTAL 	(1L<<22)
@@ -169,7 +171,8 @@ typedef void (*wChoiceCallBack_p)(long, void*);
 /* Creation CallBacks */
 typedef void (*wButtonCallBack_p)(void* choice);
 
-void wButtonSetLabel(wControl_p bb, unsigned isIcon, const char* labelStr);
+void wButtonSetIcon(wControl_p bb, const char* iconData);
+void wButtonSetLabel(wControl_p bb, const char* labelStr);
 void wButtonSetBusy(wControl_p bb, int value);
 wControl_p wButtonCreate(wControl_p parent, 
                         wWinPix_t x, 
@@ -732,6 +735,10 @@ wControl_p wComboBoxCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
 
 void wComboBoxAddValue(wControl_p b, char* text, void * attributes);
 void wComboBoxSetIndex(wControl_p b, int row);
+wIndex_t wComboBoxGetCount(wControl_p b);
+void* wComboBoxGetItemContext(wControl_p b, wIndex_t inx);
+wBool_t wComboBoxSetValues( wControl_p b, wIndex_t row, const char* labelStr, wIcon_p bm,
+    void* itemData); 
 
 wControl_p wComboListCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
                          const char *helpStr, const char *labelStr, long option, long number,
@@ -854,9 +861,9 @@ wDrawBitMap_p wDrawBitMapCreate( wDraw_p, int, int, int, int,
 void wDrawBitMap(		wDraw_p, wDrawBitMap_p, wDrawPix_t, wDrawPix_t,
                                 wDrawColor, wDrawOpts );
 
-wDraw_p wBitMapCreate(		wWinPix_t, wWinPix_t, int );
-wBool_t wBitMapDelete(		wDraw_p );
-wBool_t wBitMapWriteFile(	wDraw_p, const char * );
+wDraw_p wBitmapCreate(		wWinPix_t, wWinPix_t, int );
+wBool_t wBitmapDelete(		wDraw_p );
+wBool_t wBitmapWriteFile(	wDraw_p, const char * );
 
 /* Misc */
 void * wDrawGetContext(		wDraw_p );

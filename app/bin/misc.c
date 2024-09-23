@@ -52,7 +52,7 @@ EXPORT int iconSize = 0;
 
 EXPORT wWinPix_t displayWidth;
 EXPORT wWinPix_t displayHeight;
-EXPORT wWin_p mainW;
+EXPORT wControl_p mainW;
 
 EXPORT char message[STR_HUGE_SIZE];
 static char message2[STR_LONG_SIZE];
@@ -272,11 +272,11 @@ EXPORT void AbortProg(
 	snprintf( message, sizeof message, "%s: %s:%d %s", sCond, sFileName,
 	          iLineNumber, sMsg?sMsg:"" );
 	if (abort2) {
-		wNoticeEx( NT_ERROR, message, _("ABORT"), NULL);
+		wNoticeWithIcon( NT_ERROR, message, _("ABORT"), NULL);
 	} else {
 		abort2 = TRUE;  // no 2nd chance
 		strcat(message, _("\nDo you want to save your layout?"));
-		int rc = wNoticeEx( NT_ERROR, message, _("Ok"), _("ABORT"));
+		int rc = wNoticeWithIcon( NT_ERROR, message, _("Ok"), _("ABORT"));
 		if (rc) {
 			DoSaveAs(abort);
 		} else {
@@ -420,7 +420,7 @@ EXPORT int NoticeMessage2(int playbackRC, const char * format, const char * yes,
 	format = ParseMessage(format);
 	vsnprintf(message2, 1020, format, ap);
 	va_end(ap);
-	return wNoticeEx( NT_INFORMATION, message2, yes, no);
+	return wNoticeWithIcon( NT_INFORMATION, message2, yes, no);
 }
 
 
@@ -802,7 +802,7 @@ InitAudio()
 	wSetAudio(enableAudio);
 }
 
-EXPORT wWin_p wMain(int argc, char * argv[])
+EXPORT wControl_p wMain(int argc, char * argv[])
 {
 	int c;
 	int resumeWork;
@@ -901,7 +901,7 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	extraButtons = (getenv(sEnvExtra) != NULL);
 	LogOpen(logFileName);
 	log_init = LogFindIndex("init");
-	log_malloc = LogFindIndex("malloc");
+	SetMallocLog();
 
 	LOG1(log_init, ( "initCustom\n" ))
 	InitCustom();

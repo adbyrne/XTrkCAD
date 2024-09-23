@@ -255,7 +255,7 @@ static void UpdateSignalProperties ( track_p trk, int inx, descData_p
 	case HD: break;
 	case -1:
 		changed = nChanged = pChanged = oChanged = FALSE;
-		thename = wStringGetValue( (wString_p) signalDesc[NM].control0 );
+		thename = wEntryGetValue( signalDesc[NM].control0 );
 		if (strcmp(thename,xx->name) != 0) {
 			nChanged = changed = TRUE;
 			unsigned int max_str = signalDesc[NM].max_string;

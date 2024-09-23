@@ -181,7 +181,7 @@ static void UpdateSensorProperties (  track_p trk, int inx, descData_p
 		break;
 	case -1:
 		changed = nChanged = pChanged = sChanged = FALSE;
-		thename = wStringGetValue( (wString_p) sensorDesc[NM].control0 );
+		thename = wEntryGetValue(sensorDesc[NM].control0 );
 		if (strcmp(thename,xx->name) != 0) {
 			nChanged = changed = TRUE;
 			max_str = sensorDesc[NM].max_string;
@@ -193,7 +193,7 @@ static void UpdateSensorProperties (  track_p trk, int inx, descData_p
 			} else { newName = MyStrdup(thename); }
 		}
 
-		thescript = wStringGetValue( (wString_p) sensorDesc[SC].control0 );
+		thescript = wEntryGetValue(sensorDesc[SC].control0 );
 		if (strcmp(thescript,xx->script) != 0) {
 			sChanged = changed = TRUE;
 			max_str = sensorDesc[SC].max_string;

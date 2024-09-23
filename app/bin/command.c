@@ -400,7 +400,7 @@ EXPORT int ConfirmReset(BOOL_T retry)
 				                _("Yes"), _("No"), _("Cancel"));
 			else
 				rc =
-				        wNoticeEx( NT_WARNING,
+				        wNoticeWithIcon( NT_WARNING,
 				                   _(
 				                           "Cancelling the current command will undo the changes\n"
 				                           "you are currently making. Do you want to do the update instead?"),

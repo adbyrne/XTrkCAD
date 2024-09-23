@@ -49,7 +49,7 @@ static paramData_t linkNotePLs[] = {
 #define I_ORIGY (1)
 	/*1*/ { PD_FLOAT, &linkNoteData.pos.y, "origy", PDO_DIM|PDO_NOPREF, &noRangeCheck, N_("Position Y") },
 #define I_LAYER (2)
-	/*2*/ { PD_DROPLIST, &linkNoteData.layer, "layer", PDO_NOPREF, I2VP(150), "Layer", 0 },
+	/*2*/ { PD_COMBOLIST, &linkNoteData.layer, "layer", PDO_NOPREF, I2VP(150), "Layer", 0 },
 #define I_TITLE (3)
 	/*3*/ { PD_STRING, &linkNoteData.title, "title", PDO_NOPREF | PDO_NOTBLANK, I2VP(200), N_("Title"), 0, 0, sizeof(linkNoteData.title ) },
 #define I_URL (4)

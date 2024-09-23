@@ -69,7 +69,7 @@ static paramData_t paramFilePLs[] = {
 #define paramFileL				((wList_p)paramFilePLs[I_PRMFILLIST].control)
 	{	PD_LIST, NULL, "inx", PDO_NOPREF | PDO_DLGRESIZE, &paramFileListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
 #define I_PRMFILTOGGLE	(1)
-	{	PD_TOGGLE, &paramFileSel, "mode", 0, paramFileLabels, NULL, BC_HORZ|BC_NOBORDER },
+	{	PD_TOGGLE, &paramFileSel, "mode", 0, paramFileLabels, NULL, BC_HORIZONTAL|BC_NOBORDER },
 #define I_MESSAGE (2)
 	{ PD_MESSAGE, "", "message", 0, I2VP(370) },
     	{ PD_BUTTON, ParamFileSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
@@ -430,7 +430,7 @@ void DoParamFiles(void * junk)
 		paramFileW = ParamCreateDialog(&paramFilePG,
 		                               MakeWindowTitle(_("Parameter Files")), _("Ok"), ParamFileOk, NULL,
 		                               TRUE, NULL, F_RESIZE | F_RECALLSIZE, ParamFileDlgUpdate);
-		paramFile_fs = wFilSelCreate(mainW, FS_LOAD, FS_MULTIPLEFILES,
+		paramFile_fs = wFilSelCreate(mainW, FS_LOAD, FSO_MULTIPLEFILES,
 		                             _("Load Parameters"), _("Parameter files (*.xtp)|*.xtp"), LoadParamFile, NULL);
 	}
 	ParamLoadControls(&paramFilePG);

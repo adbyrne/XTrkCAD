@@ -306,7 +306,7 @@ static void ChkRevert(void * unused)
 	int rc;
 
 	if (changed) {
-		rc = wNoticeEx(NT_WARNING,
+		rc = wNoticeWithIcon(NT_WARNING,
 		               _("Do you want to return to the last saved state?\n\n"
 		                 "Revert will cause all changes done since last save to be lost."),
 		               _("&Revert"), _("&Cancel"));
@@ -536,7 +536,7 @@ static void ShowMessageHelp(int index, const char * label, void * data)
 	cp = strchr(msgSrc, '\t');
 	if (cp == NULL) {
 		sprintf(msgKey, _("No help for %s"), msgSrc);
-		wNoticeEx( NT_INFORMATION, msgKey, _("Ok"), NULL);
+		wNoticeWithIcon( NT_INFORMATION, msgKey, _("Ok"), NULL);
 		return;
 	}
 	memcpy(msgKey, msgSrc, cp - msgSrc);

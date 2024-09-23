@@ -80,7 +80,7 @@ void wListSetIndex(
 
 	lcontrol = CONTROL_GET_ATTRIBUTES_PTR(b, list);
 
-	if (b->type == B_DROPLIST) {
+	if (b->type == B_COMBOBOX) {
 		wComboBoxSetIndex(b, element);
 	} else {
 		wlibTreeViewSetSelected(b, element);
@@ -166,8 +166,8 @@ wIndex_t wListFindValue(
 wIndex_t wListGetCount(
         wControl_p b)
 {
-	if (b->type == B_DROPLIST) {
-		return wDropListGetCount(b);
+	if (b->type == B_COMBOBOX) {
+		return wComboBoxGetCount(b);
 	} else {
 		return wTreeViewGetCount(b);
 	}
@@ -189,8 +189,8 @@ void * wListGetItemContext(
 		return NULL;
 	}
 
-	if (b->type == B_DROPLIST) {
-		return wDropListGetItemContext(b, inx);
+	if (b->type == B_COMBOBOX) {
+		return wComboBoxGetItemContext(b, inx);
 	} else {
 		return wTreeViewGetItemContext(b, inx);
 	}
@@ -225,7 +225,7 @@ wIndex_t wListGetValues(
 	lcontrol = CONTROL_GET_ATTRIBUTES_PTR(bl, list);
 	inx = lcontrol->last;
 
-	if (bl->type == B_DROPLIST && lcontrol->editted) {
+	if (bl->type == B_COMBOBOX && lcontrol->editted) {
 		entry_value = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(
 		                bl->widget))));
 		item_data = NULL;
@@ -354,8 +354,8 @@ wBool_t wListSetValues(
 {
 	g_assert(b->attributes.list.listStore != NULL);
 
-	if (b->type == B_DROPLIST) {
-		wDropListSetValues(b, row, labelStr, bm, itemData);
+	if (b->type == B_COMBOBOX) {
+		wComboBoxSetValues(b, row, labelStr, bm, itemData);
 	} else {
 		wlibListStoreUpdateValues(b->attributes.list.listStore, row, (char *)labelStr, bm);
 	}
@@ -378,7 +378,7 @@ void wListDelete(
 
 	g_assert(b->attributes.list.listStore != 0);
 
-	if (b->type == B_DROPLIST) {
+	if (b->type == B_COMBOBOX) {
 		wNotice("Deleting from dropboxes is not implemented!", "Continue", NULL);
 	} else {
 		gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(lcontrol->listStore),
@@ -467,8 +467,8 @@ wIndex_t wListAddValue(
 	id_p->label = g_strdup(labelStr);
 	id_p->listP = b;
 
-	if (b->type == B_DROPLIST) {
-		wDropListAddValue(b, (char *)labelStr, id_p);
+	if (b->type == B_COMBOBOX) {
+		wComboBoxAddValue(b, (char *)labelStr, id_p);
 	} else {
 		wlibTreeViewAddRow(b, (char *)labelStr, bm, id_p);
 	}

@@ -42,7 +42,7 @@ static paramData_t textNotePLs[] = {
 #define I_ORIGY (1)
 	/*1*/ { PD_FLOAT, &textNoteData.pos.y, "origy", PDO_DIM|PDO_NOPREF, &noRangeCheck, N_("Position Y") },
 #define I_LAYER (2)
-	/*2*/ { PD_DROPLIST, &textNoteData.layer, "layer", PDO_NOPREF, I2VP(150), "Layer", 0 },
+	/*2*/ { PD_COMBOLIST, &textNoteData.layer, "layer", PDO_NOPREF, I2VP(150), "Layer", 0 },
 #define I_TEXT (3)
 	/*3*/ { PD_TEXT, NULL, "text", PDO_NOPREF, &noteTextData, N_("Note") }
 };

@@ -641,7 +641,7 @@ void LayoutBackGroundSave(void)
 */
 static void ImageFileBrowse( void * unused )
 {
-	imageFile_fs = wFilSelCreate( mainW, FS_LOAD, FS_PICTURES, _("Load Background"),
+	imageFile_fs = wFilSelCreate( mainW, FS_LOAD, FSO_PICTURES, _("Load Background"),
 	                              sImageFilePattern, LoadImageFile, NULL );
 
 	wFilSelect( imageFile_fs, GetCurrentPath( BACKGROUNDPATHKEY ) );
@@ -673,9 +673,9 @@ static paramData_t layoutPLs[] = {
 	{ PD_STRING, &thisLayout.props.title1, "title1", PDO_NOPSHUPD | PDO_STRINGLIMITLENGTH, NULL, N_("Layout Title"), 0, 0, sizeof(thisLayout.props.title1)},
 	{ PD_STRING, &thisLayout.props.title2, "title2", PDO_NOPSHUPD | PDO_STRINGLIMITLENGTH, NULL, N_("Subtitle"), 0, 0, sizeof(thisLayout.props.title2)},
 #define SCALEINX (4)
-	{ PD_DROPLIST, &thisLayout.props.curScaleDescInx, "scale", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT, I2VP(180), N_("Scale"), 0, I2VP(CHANGE_SCALE) },
+	{ PD_COMBOLIST, &thisLayout.props.curScaleDescInx, "scale", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT, I2VP(180), N_("Scale"), 0, I2VP(CHANGE_SCALE) },
 #define GAUGEINX (5)
-	{ PD_DROPLIST, &thisLayout.props.curGaugeInx, "gauge", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ, I2VP(180), N_("     Gauge"), 0, I2VP(CHANGE_SCALE) },
+	{ PD_COMBOLIST, &thisLayout.props.curGaugeInx, "gauge", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ, I2VP(180), N_("     Gauge"), 0, I2VP(CHANGE_SCALE) },
 #define MINRADIUSENTRY (6)
 	{ PD_FLOAT, &thisLayout.props.minTrackRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, N_("Min Track Radius"), 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
 	{ PD_FLOAT, &thisLayout.props.maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ, &r0_90, N_("  Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN) },
@@ -906,7 +906,7 @@ LayoutDlgUpdate(
 		wPrefGetFloat("misc", prefString, &thisLayout.props.minTrackRadius, 0.0);
 
 		// put the scale's minimum value into the dialog
-		wStringSetValue((wString_p)layoutPLs[MINRADIUSENTRY].control,
+		wEntrySetValue( layoutPLs[MINRADIUSENTRY].control,
 		                FormatDistance(thisLayout.props.minTrackRadius));
 	}
 	if (inx == BACKGROUNDFILEENTRY) {
@@ -938,7 +938,7 @@ LayoutDlgUpdate(
 	if (inx == BACKGROUNDANGLE) {
 
 		ANGLE_T angle = NormalizeAngle(*(double *)valueP);
-		wStringSetValue((wString_p)layoutPLs[BACKGROUNDANGLE].control,
+		wEntrySetValue( layoutPLs[BACKGROUNDANGLE].control,
 		                FormatFloat(angle));
 		SetLayoutBackGroundAngle(angle);
 		MainRedraw();

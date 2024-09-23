@@ -102,7 +102,7 @@ void wControlActive(
         abort();
     }
 
-    if (b->type == B_LIST || b->type == B_DROPLIST ) {
+    if (b->type == B_LIST ) {
 
     	gtk_widget_set_sensitive(gtk_bin_get_child(GTK_BIN(b->widget)), active);
     	gtk_combo_box_set_button_sensitivity(GTK_COMBO_BOX(b->widget),

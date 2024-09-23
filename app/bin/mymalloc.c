@@ -60,6 +60,11 @@ static unsigned long guard0 = 0xDEADBEEF;
 static unsigned long guard1 = 0xAF00BA8A;
 static int log_malloc;
 
+void SetMallocLog()
+{
+	log_malloc = LogFindIndex("malloc");
+}
+
 static void RecordMalloc(void* p, size_t size)
 {
 

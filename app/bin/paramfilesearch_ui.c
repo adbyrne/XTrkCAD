@@ -62,7 +62,7 @@ static paramData_t searchUiPLs[] = {
 #define I_CLEARBUTTON (2)
 	{ PD_BUTTON, SearchUiClearFilter, "clearfilter", PDO_DLGHORZ, 0, NULL,  BO_ICON, NULL },
 #define I_FITRADIO	(3)
-	{	PD_RADIO, &searchFitMode, "fit", PDO_NOPREF | PDO_DLGBOXEND, searchFitLabels, NULL, BC_HORZ|BC_NOBORDER },
+	{	PD_RADIO, &searchFitMode, "fit", PDO_NOPREF | PDO_DLGBOXEND, searchFitLabels, NULL, BC_HORIZONTAL|BC_NOBORDER },
 #define I_MESSAGE (4)
     { PD_MESSAGE, N_(QUERYPROMPTSTRING), "messagetext", 0, (void *)370 },
 #define I_STATISTICS (5)
@@ -70,7 +70,7 @@ static paramData_t searchUiPLs[] = {
 #define I_RESULTLIST	(6)
 	{	PD_LIST, NULL, "inx", PDO_NOPREF | PDO_DLGRESIZE, &searchUiListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
 #define I_MODETOGGLE	(7)
-	{	PD_TOGGLE, &searchUiMode, "mode", PDO_DLGBOXEND, searchUiLabels, NULL, BC_HORZ|BC_NOBORDER },
+	{	PD_TOGGLE, &searchUiMode, "mode", PDO_DLGBOXEND, searchUiLabels, NULL, BC_HORIZONTAL|BC_NOBORDER },
 #define I_APPLYBUTTON	(8)
 	{	PD_BUTTON, SearchUiApply, "apply", PDO_DLGCMDBUTTON, NULL, N_("Add") },
 #define I_SELECTALLBUTTON (9)
@@ -83,7 +83,7 @@ static paramData_t searchUiPLs[] = {
 #define APPLYBUTTON  ((wButton_p)searchUiPLs[I_APPLYBUTTON].control)
 #define SELECTALLBUTTON  ((wButton_p)searchUiPLs[I_SELECTALLBUTTON].control)
 #define MESSAGETEXT ((wMessage_p)searchUiPLs[I_MESSAGE].control)
-#define QUERYSTRING ((wString_p)searchUiPLs[I_QUERYSTRING].control)
+#define QUERYSTRING ( searchUiPLs[I_QUERYSTRING].control)
 #define SEARCHSTAT ((wMessage_p)searchUiPLs[I_STATISTICS].control)
 #define FITRADIO ((wChoice_p)searchUiPLs[I_FITRADIO].control)
 
@@ -185,7 +185,7 @@ static void SearchUiDefault(void)
 
 	int matches = SearchFileListLoad(
 	                      trackLibrary->catalog);  //Start with system files
-	wStringSetValue(QUERYSTRING, "");
+	wEntrySetValue(QUERYSTRING, "");
 
 	wMessageSetValue(MESSAGETEXT, _(QUERYPROMPTSTRING));
 	DynStringMalloc(&dsSummary, 16);
@@ -285,7 +285,7 @@ static void SearchUiDoSearch(void * ptr)
 
 	ClearCurrentCatalog();
 
-	strcpy(searchUiQuery, wStringGetValue((wString_p)
+	strcpy(searchUiQuery, wEntryGetValue( 
 	                                      searchUiPG.paramPtr[I_QUERYSTRING].control));
 	search = StringTrim(searchUiQuery);
 
@@ -389,7 +389,7 @@ static void SearchUiDlgUpdate(
 	switch (inx) {
 	case I_QUERYSTRING:
 		if (pg->paramPtr[inx].enter_pressed) {
-			strcpy( searchUiQuery, wStringGetValue((wString_p)pg->paramPtr[inx].control) );
+			strcpy( searchUiQuery, wEntryGetValue( pg->paramPtr[inx].control) );
 			SearchUiDoSearch(NULL);
 		}
 		break;
@@ -397,7 +397,7 @@ static void SearchUiDlgUpdate(
 		UpdateSearchUiButton();
 		break;
 	case I_FITRADIO:
-		strcpy( searchUiQuery, wStringGetValue((wString_p)
+		strcpy( searchUiQuery, wEntryGetValue( 
 		                                       pg->paramPtr[I_QUERYSTRING].control) );
 		SearchUiDoSearch(NULL);
 		break;
