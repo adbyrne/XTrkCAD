@@ -208,6 +208,7 @@ wBool_t wBitmapWriteFile(wDraw_p drawingArea, const char* fileName)
 
 wDraw_p wBitmapCreate(wWinPix_t w, wWinPix_t h, int arg)
 {
+	/*
 	wDraw_p bd;
 
 	bd = (wDraw_p)wlibAlloc(gtkMainW, B_DRAW, 0, 0, NULL, sizeof * bd, NULL);
@@ -256,6 +257,9 @@ wDraw_p wBitmapCreate(wWinPix_t w, wWinPix_t h, int arg)
 
 	}
 	return bd;
+	*/
+	printf("Function wBitmapCreate is not implemented: %s %d\n", __FILE__, __LINE__);
+	return(NULL);
 }
 
 

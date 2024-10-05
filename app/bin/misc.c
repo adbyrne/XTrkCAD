@@ -537,9 +537,10 @@ EXPORT void MapWindowShow(int state)
 	if (mapVisible) {
 		DoChangeNotification(CHANGE_MAP);
 	}
-
-	wWinShow(mapW, mapVisible);
-	wButtonSetBusy(mapShowB, (wBool_t) mapVisible);
+	if(mapW)
+		wWinShow(mapW, mapVisible);
+	if(mapShowB)
+		wButtonSetBusy(mapShowB, (wBool_t) mapVisible);
 }
 
 
@@ -922,6 +923,8 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 		return NULL;
 	}
 
+	wWinShow(mainW, TRUE);
+
 	wSetGeometry(mainW, displayWidth/2, displayWidth, displayHeight/2,
 	             displayHeight, -1, -1, -1);
 	InitAppDefaults();
@@ -944,7 +947,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	FileInit();
 
 	wCreateSplash(sProdName, sVersion);
-
+	wFlush();
 	if (!initialFile) {
 		WDOUBLE_T tmp;
 		LOG1(log_init, ( "set roomsize\n" ))
@@ -960,8 +963,8 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	 */
 	LOG1(log_init, ( "initColor\n" ))
 	InitColor();
-	LOG1(log_init, ( "initInfoBar\n" ))
-	InitInfoBar();
+	LOG1(log_init, ("initInfoBar\n"))
+	//InitInfoBar();
 	wSetSplashInfo("Scale Init...");
 	LOG1(log_init, ( "ScaleInit\n" ))
 	ScaleInit();
@@ -995,12 +998,12 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	/*
 	 * TIDY UP
 	 */
-	if (ToolbarIsGroupVisible(BG_HOTBAR)) {
-		LayoutHotBar( NULL );
-	} else {
-		LayoutHotBar( NULL );   /* Must run once to set it up */
-		HideHotBar();           /* Then hide */
-	}
+
+	/**  \todo Create hot bar */
+	//LayoutHotBar(NULL);
+	//if (!ToolbarIsGroupVisible(BG_HOTBAR)) {
+	//	HideHotBar();           /* Then hide */
+	//}
 	LOG1(log_init, ( "drawInit\n" ))
 	DrawInit(initialZoom);
 

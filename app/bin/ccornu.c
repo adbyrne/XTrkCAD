@@ -3276,5 +3276,5 @@ EXPORT void InitCmdCornu( wMenu_p menu )
 	cornuHotBarCmdInx = AddMenuButton(menu, cmdCornuCreate, "cmdCornuCreate", "",
 	                                  NULL, LEVEL0_50, IC_STICKY|IC_POPUP3|IC_WANT_MOVE, 0, NULL);
 	ButtonGroupEnd();
-	ParamCreateControls( &cornuModPG, cornuModDlgUpdate) ;
+	//ParamCreateControls( &cornuModPG, cornuModDlgUpdate) ;
 }

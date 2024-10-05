@@ -38,7 +38,6 @@
 
 #include "resources.h"
 
-#define BASICBUILDER_RESOURCE "basicdialog"
 
 /**
  * Place widget into the grid of a basic dialog window.
@@ -200,55 +199,6 @@ wDialogButtonsConfigure(wControl_p dialog, const char* okLabel,
 }
 
 /**
- * Load a window definition from a file and initialize the .
- * 
- * \param window
- * \param nameStr
- * \param option
- * \return 
- */
-
-static GtkWidget *
-CreateWindowFromBuilder( wControl_p window, const char *nameStr, long option )
-{
-    GtkWidget* dialog;
-    GtkBuilder* builder;
-    char* tempStr = NULL;
-    const char* containerName = NULL;
-    gchar* resourcePath;
-     
-    if (option & DO_FILESYSTEM) {
-        // in case filename is given, load builder and create a name from 
-        // the base filename without extension
-        resourcePath = g_strdup(nameStr);
-        builder = gtk_builder_new_from_file(resourcePath);
-        tempStr = g_path_get_basename(resourcePath);
-        tempStr[strlen(tempStr) - 3] = '\0';
-        nameStr = tempStr;
-        containerName = nameStr;
-    }
-    else {
-        containerName = (option & BO_USEBUILDER ? nameStr : BASICBUILDER_RESOURCE);
-        resourcePath = g_strconcat(XTRKCAD_RESOURCE_PATH,
-            containerName,
-            ".ui",
-            NULL);
-        builder = gtk_builder_new_from_resource(resourcePath);
-    }
-
-    dialog = GTK_WIDGET(gtk_builder_get_object(builder, containerName));
-    g_free(resourcePath);
-    resourcePath = NULL;
-
-    window->name = g_strdup(nameStr);
-    window->attributes.window.builder = builder;
-    window->widget = dialog;
-    g_free(tempStr);
-
-    return(dialog);
-}
-
-/**
  * Create a dialog window from a XML ui definition.
  * 
  * ### Usage in dialogs
@@ -291,7 +241,8 @@ wWinDialogCreate(wControl_p parent,
     wControl_p winDialog = wlibControlNew(W_DIALOG, parent, helpStr, context);
     dcontrol = CONTROL_GET_ATTRIBUTES_PTR(winDialog, window);
 
-    dialog = CreateWindowFromBuilder(winDialog, nameStr, option);
+    dialog = wlibCreateWindowFromBuilder(winDialog, nameStr, option);
+    winDialog->widget = dialog;
 
     if (!dialog)
     {

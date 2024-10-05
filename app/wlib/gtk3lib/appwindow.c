@@ -141,7 +141,7 @@ CreateToolbar(GtkWidget *container)
 		0, 0);
 	egg_wrap_box_set_minimum_line_children(EGG_WRAP_BOX(toolbar), 15);
 	egg_wrap_box_set_natural_line_children(EGG_WRAP_BOX(toolbar), 60);
-	egg_wrap_box_set_horizontal_spacing(EGG_WRAP_BOX(toolbar), 6);
+	egg_wrap_box_set_horizontal_spacing(EGG_WRAP_BOX(toolbar), 0);
 	gtk_widget_set_name(toolbar, "toolbar");
 	gtk_widget_set_hexpand(toolbar, TRUE);
 	gtk_box_pack_start(GTK_BOX(container), toolbar, FALSE, FALSE, 6);

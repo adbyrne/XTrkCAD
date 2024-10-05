@@ -33,6 +33,7 @@ target_sources(xtrkcad-wlib
  	pulldnmenu.c
 	radio.c
 	recentuse.c
+	stack.c
 	statusbar.c
  	text.c
 	timer.c

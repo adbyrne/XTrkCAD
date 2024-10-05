@@ -71,7 +71,7 @@ typedef enum {
 		B_DRAW, B_MENU, B_MULTITEXT, B_MESSAGE, B_LINES,
 		B_MENUITEM, B_BOX,
 		B_BITMAP, B_STATUS,
-		B_COLORBUTTON,
+		B_COLORBUTTON, B_STACK, 
 		M_MENU, M_SUBMENU, M_PUSH, M_TOGGLE, M_RADIO, M_SEPARATOR, M_RECENTUSE
 } wType_e;
 
@@ -171,6 +171,10 @@ struct recentuse {
 	wControl_p parentMenu;
 };
 
+struct stack {
+	void* callback;
+};
+
 struct text {
 	gchar* placeholder;
 	GtkTextTag* placeholderTag;
@@ -212,6 +216,7 @@ struct control {
 		struct menuitem menuitem;
 		struct radio radio;
 		struct recentuse recentuse;
+		struct stack stack;
 		struct toggle toggle;
 		struct window window;
 	} attributes;
@@ -406,6 +411,7 @@ GtkWidget *wlibGetWidgetFromName( wControl_p parent, const char *dialogname, con
 GtkWidget *wlibWidgetFromId( wControl_p win, const char *id );
 GtkWidget *wlibWidgetFromIdWarn( wControl_p win, const char *id );
 void wlibAddContentFromTemplate( wWin_p win, const char *nameStr);
+GtkWidget* wlibCreateWindowFromBuilder(wControl_p window, const char* nameStr, long option);
 bool wlibExistsTemplate(const char *name);
 
 /* button.c */

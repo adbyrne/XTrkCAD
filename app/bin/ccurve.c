@@ -1061,8 +1061,8 @@ EXPORT void InitCmdCurve( wMenu_p menu )
 	               IC_STICKY|IC_POPUP2, ACCL_CIRCLE3, I2VP(2) );
 	ButtonGroupEnd();
 
-	ParamRegister( &circleRadiusPG );
-	ParamCreateControls( &circleRadiusPG, NULL );
+	//ParamRegister( &circleRadiusPG );
+	//ParamCreateControls( &circleRadiusPG, NULL );
 
 }
 

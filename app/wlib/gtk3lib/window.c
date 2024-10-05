@@ -263,28 +263,16 @@ wBool_t wWinIsTemplated(wWin_p win) {
  */
 
 void wWinGetSize(
-    wWin_p win,		/* Window */
+    wControl_p win,		/* Window */
     wWinPix_t * width,		/* Returned window width */
     wWinPix_t * height)	/* Returned window height */
 {
     GtkRequisition requisition;
     wWinPix_t w, h;
-    gtk_widget_get_preferred_size(win->gtkwin, NULL, &requisition);
-    w = win->w;
-    h = win->h;
+    gtk_widget_get_preferred_size(win->widget, NULL, &requisition);
 
-    if (win->option&F_AUTOSIZE) {
-        if (win->realX > w) {
-            w = win->realX;
-        }
-
-        if (win->realY > h) {
-            h = win->realY;
-        }
-    }
-
-    *width = w;
-    *height = h - BORDERSIZE - ((win->option&F_MENUBAR)?win->menu_height:0);
+    *width = requisition.width;
+    *height = requisition.height;
 }
 
 /**
@@ -326,87 +314,94 @@ void wWinSetSize(
  */
 
 void wWinShow(
-    wWin_p win,		/* Window */
+    wControl_p win,		/* Window */
     wBool_t show)		/* Command */
 {
-    GtkRequisition requisition;
-
-    if (debugWindow >= 2) {
-        printf("Set Show %s\n", win->labelStr?win->labelStr:"No label");
-    }
-
-    //if (win->widget == 0) {
-    //    abort();
-    //}
-
     if (show) {
-        //keyState = 0;
-        getPos(win);
-
-        if (win->option & F_AUTOSIZE) {
-        	GtkRequisition min_req,pref_req;
-        	gtk_widget_get_preferred_size(win->gtkwin,&min_req,&pref_req);
-            //gtk_widget_size_request(win->gtkwin, &requisition);
-
- //       	width = win->w;
- //       	height = win->h;
-
-            if (requisition.width != win->w || requisition.height != win->h ) {
-
-//				width = requisition.width;
-//				height = requisition.height;
-
-            	win->w = requisition.width;
-            	win->h = requisition.height;
-
-
-            	gtk_window_set_resizable(GTK_WINDOW(win->gtkwin),TRUE);
-
-                if (win->option&F_MENUBAR) {
-                    gtk_widget_set_size_request(win->menubar, win->w-20, MENUH);
-                    GtkAllocation allocation;
-                    gtk_widget_get_allocation(win->menubar, &allocation);
-                    win->menu_height = allocation.height;
-                }
-            }
-            gtk_window_resize(GTK_WINDOW(win->gtkwin), win->w+10, win->h+10);
-        }
-
-        gtk_window_present(GTK_WINDOW(win->gtkwin));
-
-
-        gdk_window_raise(gtk_widget_get_window(win->gtkwin));
-
-        if (win->shown && win->modalLevel > 0) {
-            gtk_widget_set_sensitive(GTK_WIDGET(win->gtkwin), TRUE);
-        }
-
-        win->shown = show;
-        win->modalLevel = 0;
-
-        if ((!gtkBlockEnabled) || (win->option & F_BLOCK) == 0) {
-            wFlush();
-        } else {
-            wlibDoModal(win, TRUE);
-        }
-        if (maximize_at_next_show) {
-        	gtk_window_maximize(GTK_WINDOW(win->gtkwin));
-        	maximize_at_next_show = FALSE;
-        }
-
-    } else {
-        wFlush();
-        saveSize(win);
-        savePos(win);
-        win->shown = show;
-
-        if (gtkBlockEnabled && (win->option & F_BLOCK) != 0) {
-            wlibDoModal(win, FALSE);
-        }
-
-        gtk_widget_hide(win->gtkwin);
-        //gtk_widget_hide(win->widget);
+        gtk_widget_show(win->widget);
     }
+    else {
+        gtk_widget_hide(win->widget);
+    }
+//
+//    GtkRequisition requisition;
+//
+//    if (debugWindow >= 2) {
+//        printf("Set Show %s\n", win->labelStr?win->labelStr:"No label");
+//    }
+//
+//    //if (win->widget == 0) {
+//    //    abort();
+//    //}
+//
+//    if (show) {
+//        //keyState = 0;
+//        getPos(win);
+//
+//        if (win->option & F_AUTOSIZE) {
+//        	GtkRequisition min_req,pref_req;
+//        	gtk_widget_get_preferred_size(win->gtkwin,&min_req,&pref_req);
+//            //gtk_widget_size_request(win->gtkwin, &requisition);
+//
+// //       	width = win->w;
+// //       	height = win->h;
+//
+//            if (requisition.width != win->w || requisition.height != win->h ) {
+//
+////				width = requisition.width;
+////				height = requisition.height;
+//
+//            	win->w = requisition.width;
+//            	win->h = requisition.height;
+//
+//
+//            	gtk_window_set_resizable(GTK_WINDOW(win->gtkwin),TRUE);
+//
+//                if (win->option&F_MENUBAR) {
+//                    gtk_widget_set_size_request(win->menubar, win->w-20, MENUH);
+//                    GtkAllocation allocation;
+//                    gtk_widget_get_allocation(win->menubar, &allocation);
+//                    win->menu_height = allocation.height;
+//                }
+//            }
+//            gtk_window_resize(GTK_WINDOW(win->gtkwin), win->w+10, win->h+10);
+//        }
+//
+//        gtk_window_present(GTK_WINDOW(win->gtkwin));
+//
+//
+//        gdk_window_raise(gtk_widget_get_window(win->gtkwin));
+//
+//        if (win->shown && win->modalLevel > 0) {
+//            gtk_widget_set_sensitive(GTK_WIDGET(win->gtkwin), TRUE);
+//        }
+//
+//        win->shown = show;
+//        win->modalLevel = 0;
+//
+//        if ((!gtkBlockEnabled) || (win->option & F_BLOCK) == 0) {
+//            wFlush();
+//        } else {
+//            wlibDoModal(win, TRUE);
+//        }
+//        if (maximize_at_next_show) {
+//        	gtk_window_maximize(GTK_WINDOW(win->gtkwin));
+//        	maximize_at_next_show = FALSE;
+//        }
+//
+//    } else {
+//        wFlush();
+//        saveSize(win);
+//        savePos(win);
+//        win->shown = show;
+//
+//        if (gtkBlockEnabled && (win->option & F_BLOCK) != 0) {
+//            wlibDoModal(win, FALSE);
+//        }
+//
+//        gtk_widget_hide(win->gtkwin);
+//        //gtk_widget_hide(win->widget);
+//    }
 }
 
 /**
@@ -617,7 +612,10 @@ static gint window_delete_event(
     GdkEvent *event,
     wWin_p win)
 {
-    wControl_p b;
+ //   wControl_p b;
+
+    gtk_widget_hide(GTK_WINDOW(widget));
+
     ///* if you return FALSE in the "delete_event" signal handler,
     // * GTK will emit the "destroy" signal.  Returning TRUE means
     // * you don't want the window to be destroyed.
@@ -811,7 +809,7 @@ static gint window_char_event(
     //}
 }
 
-void wSetGeometry(wWin_p win, wWinPix_t min_width, wWinPix_t max_width, wWinPix_t min_height, wWinPix_t max_height, wWinPix_t base_width, wWinPix_t base_height, double aspect_ratio ) {
+void wSetGeometry(wControl_p win, wWinPix_t min_width, wWinPix_t max_width, wWinPix_t min_height, wWinPix_t max_height, wWinPix_t base_width, wWinPix_t base_height, double aspect_ratio ) {
 	GdkGeometry hints;
 	GdkWindowHints hintMask = GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE;
     hints.min_width = min_width;
@@ -830,8 +828,8 @@ void wSetGeometry(wWin_p win, wWinPix_t min_width, wWinPix_t max_width, wWinPix_
 	}	
 
 	gtk_window_set_geometry_hints(
-			GTK_WINDOW(win->gtkwin),
-			win->gtkwin,
+			GTK_WINDOW(win->widget),
+			win->widget,
 			&hints,
 			hintMask);
 }
@@ -873,6 +871,13 @@ wlibCreateCustomStyle(void)
  * Create a window.
  * Default width and height are replaced by values stored in the configuration
  * file (.rc)
+ * 
+ * ### Usage in dialogs
+ *
+ * - Runtime: no
+ * - Builder: yes
+ *
+ * ### Options
  *
  * \param parent    IN parent window
  * \param winType   IN type of window
@@ -886,7 +891,7 @@ wlibCreateCustomStyle(void)
  * \return  the newly created window
  */
 
-static wControl_p wWinCommonCreate(
+wControl_p wWindowCreate(
     wControl_p parent,
     int winType,
     wWinPix_t x,
@@ -895,14 +900,27 @@ static wControl_p wWinCommonCreate(
     const char * nameStr,
     long option,
     wWinCallBack_p winProc,
-    void * data)
+    void * context)
 {
-    wControl_p w = NULL;
-//    struct window* wcontrol;
+    wControl_p newWindow = wlibControlNew(W_POPUP, parent, nameStr, context);
+    struct window* windowPrivate = CONTROL_GET_ATTRIBUTES_PTR(newWindow, window);
+
+    newWindow->widget = wlibCreateWindowFromBuilder(newWindow, nameStr, BO_USEBUILDER|  option);
+    windowPrivate->winProc = winProc;
+    windowPrivate->option = option;
+
+    gtk_window_set_title(GTK_WINDOW(newWindow->widget), labelStr);
+
+    g_signal_connect(G_OBJECT(newWindow->widget),
+        "delete-event", G_CALLBACK(window_delete_event), NULL);
+
+    gtk_widget_show_all(newWindow->widget);
+
+//    struct window* windowPrivate;
 //    int h;
 //
 //    w = wlibControlNew(winType, data);
-//    wcontrol = WLIB_GET_DATA_PTR(w, window);
+//    windowPrivate = WLIB_GET_DATA_PTR(w, window);
 //
 //    h = BORDERSIZE;
 //    if (option&F_MENUBAR) {
@@ -932,22 +950,22 @@ static wControl_p wWinCommonCreate(
 //        gtk_window_set_position(GTK_WINDOW(w->widget), GTK_WIN_POS_CENTER_ON_PARENT);
 //    }
 //
-//    wcontrol->widget = gtk_fixed_new();
+//    windowPrivate->widget = gtk_fixed_new();
 //
-//    if (wcontrol->widget == 0) {
+//    if (windowPrivate->widget == 0) {
 //        abort();
 //    }
 //
 //    if (option&F_MENUBAR) {
-//        wcontrol->menubar = gtk_menu_bar_new();
-//        gtk_container_add(GTK_CONTAINER(wcontrol->widget), wcontrol->menubar);
-//        gtk_widget_show(wcontrol->menubar);
+//        windowPrivate->menubar = gtk_menu_bar_new();
+//        gtk_container_add(GTK_CONTAINER(windowPrivate->widget), windowPrivate->menubar);
+//        gtk_widget_show(windowPrivate->menubar);
 //        GtkAllocation allocation;
 //        GtkRequisition minSize, natSize;
-//        gtk_widget_get_preferred_size (wcontrol->menubar, &minSize, &natSize );
+//        gtk_widget_get_preferred_size (windowPrivate->menubar, &minSize, &natSize );
 //
-//        gtk_widget_get_allocation(wcontrol->menubar, &allocation);
-////        wcontrol->menu_height = allocation.height;
+//        gtk_widget_get_allocation(windowPrivate->menubar, &allocation);
+////        windowPrivate->menu_height = allocation.height;
 ////        gtk_widget_set_size_request(w->menubar, -1, w->menu_height);
 //    }
 //
@@ -1041,7 +1059,7 @@ static wControl_p wWinCommonCreate(
 //    	maximize_at_next_show = TRUE;
 //    }
 
-    return w;
+    return newWindow;
 }
 
 typedef struct {

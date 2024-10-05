@@ -3288,7 +3288,7 @@ EXPORT void DrawInit( int initialZoom )
 	h = h - (ToolbarGetHeight() +max(textHeight,infoHeight)+10);
 	if ( w <= 0 ) { w = 1; }
 	if ( h <= 0 ) { h = 1; }
-	tempD.d = mainD.d = wDrawCreate( mainW, 0, ToolbarGetHeight(), "",
+	tempD.d = mainD.d = wDrawCreate( mainW, 0, ToolbarGetHeight(), "maindraw",
 	                                 BD_TICKS|BD_MODKEYS,
 	                                 w, h, &mainD,
 	                                 MainLayoutCB, DoMousew );
@@ -3321,9 +3321,10 @@ EXPORT void DrawInit( int initialZoom )
 	/*h = (wWinPix_t)((mapD.size.y/mapD.scale)*mainD.dpi + 0.5)+2;*/
 	ParamRegister( &mapPG );
 	LOG( log_mapsize, 2, ( "DrawInit/ParamCreateDialog(&mapPG\n" ) );
-	mapW = ParamCreateDialog( &mapPG, MakeWindowTitle(_("Map")), NULL, NULL, NULL,
-	                          FALSE, NULL, F_RESIZE, NULL );
-	ChangeMapScale();
+	/**  \todo Create map */
+	//mapW = ParamCreateDialog( &mapPG, MakeWindowTitle(_("Map")), NULL, NULL, NULL,
+	//                          FALSE, NULL, F_RESIZE, NULL );
+	//ChangeMapScale();
 
 	AddPlaybackProc( "MOUSE ", (playbackProc_p)PlaybackMain, NULL );
 	AddPlaybackProc( "KEY ", (playbackProc_p)PlaybackKey, NULL );

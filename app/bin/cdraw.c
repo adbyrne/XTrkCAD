@@ -3325,9 +3325,9 @@ EXPORT void InitCmdDraw( wMenu_p menu )
 
 	lineColor = wDrawColorBlack;
 	benchColor = wDrawFindColor( wRGB(255,192,0) );
-	ParamCreateControls( &drawPG, DrawDlgUpdate );
+	//ParamCreateControls( &drawPG, DrawDlgUpdate );
 
-	ParamCreateControls( &drawModPG, DrawModDlgUpdate) ;
+	//ParamCreateControls( &drawModPG, DrawModDlgUpdate) ;
 
 	for ( inx1=0; inx1<4; inx1++ ) {
 		dsp = &drawStuff[inx1];
@@ -3341,7 +3341,7 @@ EXPORT void InitCmdDraw( wMenu_p menu )
 		ButtonGroupEnd();
 	}
 
-	ParamRegister( &drawPG );
+	//ParamRegister( &drawPG );
 	RegisterChangeNotification( ChangeDraw );
 
 }

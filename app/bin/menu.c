@@ -347,7 +347,8 @@ EXPORT int MagneticSnap(int state)
 	magneticSnap = state;
 	wPrefSetInteger("misc", "magnets", magneticSnap);
 	wMenuToggleSet(magnetsMI, magneticSnap);
-	wButtonSetBusy(magnetsB, (wBool_t) magneticSnap);
+	if(magnetsB)
+		wButtonSetBusy(magnetsB, (wBool_t) magneticSnap);
 	return oldState;
 }
 
@@ -608,8 +609,8 @@ static void ShowUnusedBalloonHelp( void )
  */
 
 
-EXPORT wButton_p AddToolbarButton(const char * helpStr, wIcon_p icon, long options,
-		wButtonCallBack_p action, void * context) {
+EXPORT wButton_p AddToolbarButton(const char* helpStr, wIcon_p icon, long options,
+	wButtonCallBack_p action, void* context) {
 	wButton_p bb;
 	wIndex_t inx;
 
@@ -625,19 +626,13 @@ EXPORT wButton_p AddToolbarButton(const char * helpStr, wIcon_p icon, long optio
 			}
 		}
 	}
-#ifdef XTRKCAD_GTK3_WLIB
-		long opt = 0L;
-		if (options&IC_ABUT)
-			opt = BO_ABUT;
-		if (cmdGroup&BG_BIGGAP)
-			opt = BO_GAP;
-		bb = wButtonCreateForToolbar(mainW,0,0,helpStr, (char*) icon,
-				opt|BO_ICON, 0, action, context);
-#else
-		bb = wButtonCreate(mainW, 0, 0, helpStr, (char*) icon,
-		BO_ICON/*|((options&IC_CANCEL)?BB_CANCEL:0)*/, 0, action, context);
-	}
-#endif 
+	long opt = 0L;
+	if (options & IC_ABUT)
+		opt = BO_ABUT;
+	if (cmdGroup & BG_BIGGAP)
+		opt = BO_GAP;
+	bb = wButtonCreateForToolbar(mainW, 0, 0, helpStr, icon,
+		opt | BO_ICON, 0, action, context);
 	return bb;
 }
 
@@ -822,17 +817,17 @@ EXPORT void CreateMenus(void)
 	wPrefGetInteger("DialogItem", "pref-iconsize", (long *) &iconSize, 0);
 
 	wSetBalloonHelp( balloonHelp );
-	fileM = wMenuBarAdd(mainW, "menuFile", _("&File"));
-	editM = wMenuBarAdd(mainW, "menuEdit", _("&Edit"));
-	viewM = wMenuBarAdd(mainW, "menuView", _("&View"));
-	addM = wMenuBarAdd(mainW, "menuAdd", _("&Add"));
-	changeM = wMenuBarAdd(mainW, "menuChange", _("&Change"));
-	drawM = wMenuBarAdd(mainW, "menuDraw", _("&Draw"));
-	manageM = wMenuBarAdd(mainW, "menuManage", _("&Manage"));
-	optionM = wMenuBarAdd(mainW, "menuOption", _("&Options"));
-	macroM = wMenuBarAdd(mainW, "menuMacro", _("&Macro"));
-	windowM = wMenuBarAdd(mainW, "menuWindow", _("&Window"));
-	helpM = wMenuBarAdd(mainW, "menuHelp", _("&Help"));
+	fileM = wMenuBarAdd(mainW, "menuFile", _("File"));
+	editM = wMenuBarAdd(mainW, "menuEdit", _("Edit"));
+	viewM = wMenuBarAdd(mainW, "menuView", _("View"));
+	addM = wMenuBarAdd(mainW, "menuAdd", _("Add"));
+	changeM = wMenuBarAdd(mainW, "menuChange", _("Change"));
+	drawM = wMenuBarAdd(mainW, "menuDraw", _("Draw"));
+	manageM = wMenuBarAdd(mainW, "menuManage", _("Manage"));
+	optionM = wMenuBarAdd(mainW, "menuOption", _("Options"));
+	macroM = wMenuBarAdd(mainW, "menuMacro", _("Macro"));
+	windowM = wMenuBarAdd(mainW, "menuWindow", _("Window"));
+	helpM = wMenuBarAdd(mainW, "menuHelp", _("Help"));
 
 	/*
 	 * POPUP MENUS
@@ -1297,9 +1292,10 @@ EXPORT void CreateMenus(void)
 	/*
 	 * WINDOW MENU
 	 */
-	wMenuPushCreate(windowM, "menuWindow", _("Main window"), 0,
-	                (wMenuCallBack_p) wShow, mainW);
-	winList_mi = wMenuListCreate(windowM, "menuWindow", -1, DoShowWindow);
+	// wMenuPushCreate(windowM, "menuWindow", _("Main window"), 0,
+	//                (wMenuCallBack_p) wShow, mainW);
+	/** \todo Create list of windows  */
+	// winList_mi = wMenuListCreate(windowM, "menuWindow", -1, DoShowWindow);
 
 	/*
 	 * HELP MENU
@@ -1379,7 +1375,8 @@ EXPORT void CreateMenus(void)
 	InitCmdDescribe2(changeM);
 	InitCmdPan2(changeM);
 
-	InitLayers(BG_LAYER);
+	/**  \todo Layers for the toolbar */
+	// InitLayers(BG_LAYER);
 
 	cmdGroup = BG_HOTBAR;
 	InitHotBar();

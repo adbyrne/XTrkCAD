@@ -169,8 +169,11 @@ wControl_p wMenuListCreate(
     ru->max = max;
     ru->parentMenu = m;
 
-    CreateListElements(ru->elements, max);
-    CreateListEntries(ru, max);
+    /**  \todo Handle unlimited menu lists */
+    if (max != -1) {
+        CreateListElements(ru->elements, max);
+        CreateListEntries(ru, max);
+    }
 
     ShowMenuList(ru);
 

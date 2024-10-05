@@ -135,10 +135,10 @@ void wlibSetLabel(
  * \todo icons in XBM format
  */
 
-void wButtonSetIcon(wControl_p bb,  const char* iconData)
+void wButtonSetIcon(wControl_p bb,  wIcon_p icon)
 {
 		GdkPixbuf* pixbuf;
-		pixbuf = gdk_pixbuf_new_from_xpm_data((const char**)iconData);
+		pixbuf = gdk_pixbuf_new_from_xpm_data(icon->bits);
 		if (pixbuf) {
 			GtkWidget* image = gtk_image_new_from_pixbuf(pixbuf);
 			gtk_container_add(GTK_CONTAINER(bb->widget), image);
@@ -344,7 +344,7 @@ wControl_p wButtonCreateForToolbar(
         wWinPix_t	x,
         wWinPix_t	y,
         const char* helpStr,
-        const char* labelStr,
+        wIcon_p icon,
         long 	option,
         wWinPix_t 	width,
         wButtonCallBack_p action,
@@ -364,12 +364,12 @@ wControl_p wButtonCreateForToolbar(
 	buttonAttributes->action = action;
 	buttonControl->widget = GTK_WIDGET(gtk_toggle_button_new());
 
-	wButtonSetIcon(buttonControl, labelStr);
+	wButtonSetIcon(buttonControl, icon);
 
 	styleContext = gtk_widget_get_style_context(GTK_WIDGET(buttonControl->widget));
 	gtk_style_context_add_class(styleContext, "toolbar-button");
 
-	aspectFrame = GTK_ASPECT_FRAME(gtk_aspect_frame_new(NULL, 0.5, 0.5, 1.0, FALSE));
+	aspectFrame = GTK_ASPECT_FRAME(gtk_aspect_frame_new(NULL, 0.5, 0.5, 1.0, TRUE));
 	gtk_widget_show(GTK_WIDGET(aspectFrame));
 	gtk_container_add(GTK_CONTAINER(aspectFrame), buttonControl->widget);
 
@@ -392,9 +392,7 @@ wControl_p wButtonCreateForToolbar(
 		if (pixbuf) {
 			GtkWidget* image = gtk_image_new_from_pixbuf(pixbuf);
 			gtk_container_add(GTK_CONTAINER(downArrowButton), image);
-			g_object_ref_sink(pixbuf);
 			g_object_unref((gpointer)pixbuf);
-			gtk_widget_show(image);
 		}
 		gtk_widget_show(box);
 		egg_wrap_box_insert_child(EGG_WRAP_BOX(parent->attributes.window.toolbar), box, -1, 0);

@@ -49,6 +49,9 @@
 #define TRUE  (1)
 #define FALSE (0)
 
+#define CIRCLE_PAGE (1)
+#define STRAIGHTLINE_PAGE (2)
+
 long dontHideCursor = 0;
 
 
@@ -750,6 +753,34 @@ CreateDraw()
 	wMenuToggleCreate(contextMenu, NULL, "Toggle", 0L, TRUE, ContextMenuAction, NULL);
 }
 
+wControl_p mapWindow;
+
+void
+ShowMap(void* unused)
+{
+	if (!mapWindow) {
+		mapWindow = wWindowCreate(mainW, 0, 0, 0, "Map Window", "map", 0L, NULL, NULL);
+	}
+	else {
+		wWinShow(mapWindow, TRUE);
+	}
+}
+
+wControl_p toolWindow;
+wControl_p toolStack;
+
+void
+ShowPage(char *page)
+{
+	if (!toolWindow) {
+		toolWindow = wWindowCreate(mainW, 0, 0, 0, "Tool Settings", "toolwindow", 0L, NULL, NULL);
+		toolStack = wStackCreate(toolWindow, 0, 0, "toolstack", NULL, 0, 0, NULL, NULL);
+	}
+
+	wStackPageShow(toolStack, page);
+
+}
+
 wDrawColor snapColor = 0x00FF00;
 wDrawColor markerColor = 0x009999;
 
@@ -994,6 +1025,32 @@ void TestMenu(wControl_p mainW)
 		0L,
 		CreateDraw,
 		NULL);
+
+	menu = wMenuBarAdd(mainW, NULL, "_Tool Window");
+
+
+	wMenuPushCreate(menu,
+		NULL,
+		"Map Window",
+		0L,
+		ShowMap,
+		0L);
+
+	wMenuPushCreate(menu,
+		NULL,
+		"Circle",
+		0L,
+		ShowPage,
+		"circle");
+
+	wMenuPushCreate(menu,
+		NULL,
+		"Straight Line",
+		0L,
+		ShowPage,
+		"straightline");
+
+
 }
 
 void
@@ -1020,13 +1077,16 @@ TestStatusbar(wControl_p mainWindow)
 void
 TestToolbar(wControl_p mainWindow)
 {
-  	wControl_p button =	wButtonCreateForToolbar(mainWindow, 0, 0, "", (const char *)map_x16,
+  	wControl_p button =	wButtonCreateForToolbar(mainWindow, 0, 0, "", 
+		wIconCreatePixMap((const char *)map_x16),
 		0, 0, NULL, NULL);
 
-	button = wButtonCreateForToolbar(mainWindow, 0, 0, "", (const char *)ballgreen,
+	button = wButtonCreateForToolbar(mainWindow, 0, 0, "", 
+		wIconCreatePixMap((const char *)ballgreen),
 		BO_GAP, 0, NULL, NULL);
 
-	button = wButtonCreateForToolbar(mainWindow, 0, 0, "", (const char *)yellowstar,
+	button = wButtonCreateForToolbar(mainWindow, 0, 0, "", 
+		wIconCreatePixMap((const char *)yellowstar),
 		BO_ABUT, 0, NULL, NULL);
 }
 

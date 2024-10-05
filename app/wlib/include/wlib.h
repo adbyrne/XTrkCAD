@@ -58,14 +58,16 @@ typedef struct wFloat_t     * wFloat_p;
 typedef struct wList_t      * wList_p;
 typedef struct wChoice_t    * wChoice_p;
 typedef struct wDraw_t      * wDraw_p;
-typedef struct wMenu_t      * wMenu_p;
+//typedef struct wMenu_t      * wMenu_p;
+#define wMenu_p wControl_p
 typedef struct wText_t      * wText_p;
 typedef struct wMessage_t   * wMessage_p;
 typedef struct wLine_t      * wLine_p;
 typedef struct wMenuList_t  * wMenuList_p;
 typedef struct wMenuPush_t  * wMenuPush_p;
 typedef struct wMenuRadio_t * wMenuRadio_p;
-typedef struct wMenuToggle_t* wMenuToggle_p;
+//typedef struct wMenuToggle_t* wMenuToggle_p;
+#define wMenuToggle_p wControl_p
 typedef struct wBox_t       * wBox_p;
 typedef struct wIcon_t      * wIcon_p;
 typedef struct wDrawBitMap_t * wDrawBitMap_p;
@@ -171,7 +173,7 @@ typedef void (*wChoiceCallBack_p)(long, void*);
 /* Creation CallBacks */
 typedef void (*wButtonCallBack_p)(void* choice);
 
-void wButtonSetIcon(wControl_p bb, const char* iconData);
+void wButtonSetIcon(wControl_p bb, wIcon_p icon);
 void wButtonSetLabel(wControl_p bb, const char* labelStr);
 void wButtonSetBusy(wControl_p bb, int value);
 wControl_p wButtonCreate(wControl_p parent, 
@@ -189,7 +191,7 @@ wControl_p wButtonCreateForToolbar(wControl_p  w,
                                    wWinPix_t x, 
                                    wWinPix_t y, 
                                    const char* helpStr, 
-                                   const char* labelStr, 
+                                   wIcon_p icon, 
                                    long option, 
                                    wWinPix_t width, 
                                    wButtonCallBack_p action, 
@@ -619,7 +621,7 @@ FILE * wFileOpen(		const char *, const char * );
 wControl_p wMain(			int, char *[] );
 void wWinSetBigIcon(		wWin_p, wIcon_p );
 void wWinSetSmallIcon(		wWin_p, wIcon_p );
-void wWinShow(			wWin_p, wBool_t );
+void wWinShow( wControl_p control, wBool_t visibility);
 wBool_t wWinIsVisible(		wWin_p );
 wBool_t wWinIsMaximized( wWin_p win);
 void wWinGetSize (		wWin_p, wWinPix_t *, wWinPix_t * );
@@ -637,6 +639,17 @@ void wSetGeometry(wWin_p, wWinPix_t min_width, wWinPix_t max_width,
                   wWinPix_t base_height, double aspect_ratio);
 
 void wlibRedraw(wWin_p win);
+
+wControl_p wWindowCreate(
+    wControl_p parent,
+    int winType,
+    wWinPix_t x,
+    wWinPix_t y,
+    const char* labelStr,
+    const char* nameStr,
+    long option,
+    wWinCallBack_p winProc,
+    void* context);
 
 wBool_t wWinIsTemplated(wWin_p win);
 
@@ -1114,6 +1127,15 @@ void wStatusSetWidth(wControl_p b, wWinPix_t width);
 void wStatusClearControls(wWin_p win);
 void wStatusAttachControl(wWin_p win, wControl_p b);
 void wStatusRevealControlSet(wWin_p win, char *id);
+
+/*------------------------------------------------------------------------------
+ *
+ * Stack Container
+ */
+
+void wStackPageShow(wControl_p stack, const char* pageName);
+wControl_p wStackCreate(wControl_p	parent, wWinPix_t	x, wWinPix_t	y, const char* helpStr,
+    const char* labelStr, long 	option, wWinPix_t 	width, wButtonCallBack_p action, void* context);
 
 /*------------------------------------------------------------------------------
  *

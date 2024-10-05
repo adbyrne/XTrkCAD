@@ -658,7 +658,7 @@ static void GridButtonUpdate( long mode0 )
 		wButtonSetBusy( snapGridShow_b, (wBool_t)grid.Show );
 	}
 	if (snapGridEnableMI) {
-		wMenuToggleSet( snapGridEnableMI, grid.Horz.Enable||grid.Vert.Enable );
+		//wMenuToggleSet( snapGridEnableMI, ((grid.Horz.Enable||grid.Vert.Enable) != 0) );
 	}
 	if (snapGridShowMI) {
 		wMenuToggleSet( snapGridShowMI, (wBool_t)grid.Show );

@@ -2324,6 +2324,7 @@ void InitLayers(int cmdGroup)
 	}
 
 	/* layer list for toolbar */
+
 	setLayerL = wComboListCreate(mainW, 0, 0, "cmdLayerSet", NULL, 0, 10, 200, NULL,
 	                            SetCurrLayer, NULL);
 	wControlSetBalloonText((wControl_p)setLayerL, GetBalloonHelpStr("cmdLayerSet"));

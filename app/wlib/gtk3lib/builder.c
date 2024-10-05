@@ -21,7 +21,6 @@
   */
 
 
-
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
 #define GTK_DISABLE_DEPRECATED
@@ -32,6 +31,10 @@
 #include <gdk/gdkkeysyms.h>
 
 #include "gtkint.h"
+
+#include "xtrkcad-config.h"
+
+#define BASICBUILDER_RESOURCE "basicdialog"
 
 /**
  * Create UI path and filename from dialog name. Returned filename has to be
@@ -97,6 +100,8 @@ wlibExistsTemplate(const char *name)
  * \todo Check signature for unused parameters
  */
 
+
+/** \TODO: Refactor - remove unused parameters, rename Dialog to Window */
 wControl_p
 wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr,
                         long option, void *attributes )
@@ -232,4 +237,55 @@ wlibAddContentFromTemplate( wWin_p win, const char *nameStr)
 		exit(1);
 	}
 
+}
+
+
+/**
+ * Load a window definition from a file and initialize the .
+ *
+ * \param window
+ * \param nameStr
+ * \param option
+ * \return
+ */
+
+GtkWidget*
+wlibCreateWindowFromBuilder(wControl_p window, const char* nameStr, long option)
+{
+	GtkWidget* dialog;
+	GtkBuilder* builder;
+	char* tempStr = NULL;
+	const char* containerName = NULL;
+	gchar* resourcePath;
+
+	if (option & DO_FILESYSTEM) {
+		// in case filename is given, load builder and create a name from 
+		// the base filename without extension
+		resourcePath = g_strdup(nameStr);
+		builder = gtk_builder_new_from_file(resourcePath);
+		tempStr = g_path_get_basename(resourcePath);
+		tempStr[strlen(tempStr) - 3] = '\0';
+		nameStr = tempStr;
+		containerName = nameStr;
+	}
+	else {
+		containerName = (option & BO_USEBUILDER ? nameStr : BASICBUILDER_RESOURCE);
+		resourcePath = g_strconcat(XTRKCAD_RESOURCE_PATH,
+			containerName,
+			".ui",
+			NULL);
+		builder = gtk_builder_new_from_resource(resourcePath);
+	}
+
+	dialog = GTK_WIDGET(gtk_builder_get_object(builder, containerName));
+	g_object_unref(dialog);
+	g_free(resourcePath);
+	resourcePath = NULL;
+
+	window->name = g_strdup(nameStr);
+	window->attributes.window.builder = builder;
+	window->widget = dialog;
+	g_free(tempStr);
+
+	return(dialog);
 }

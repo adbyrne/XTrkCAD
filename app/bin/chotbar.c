@@ -557,7 +557,7 @@ EXPORT void InitHotBar( void )
 	wPrefGetInteger( "misc", "hotbar-start", &v, hotBarCurrStart );
 	hotBarCurrStart = (int)v;
 	hotbarPopupM = MenuRegister( "Hotbar Select" );
-	hotBarML = wMenuListCreate( hotbarPopupM, "", -1, HotbarJump );
+	//hotBarML = wMenuListCreate( hotbarPopupM, "", -1, HotbarJump );
 	hotBarHeight = hotBarDrawHeight[iconSize];
 	hotBarFs = hotBarFontSize[iconSize];
 }
