@@ -25,7 +25,7 @@
 
 #include "common.h"
 
-extern wButton_p backgroundB;		/** background visibility control */
+extern wControl_p backgroundB;		/** background visibility control */
 void SetLayoutFullPath(const char *fileName);
 void LoadLayoutMinRadiusPref(char *scaleName, double defaultValue);
 void LoadLayoutMaxGradePref(char *scaleName, double defaultValue);

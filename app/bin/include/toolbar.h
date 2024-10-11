@@ -44,12 +44,12 @@ extern void ToolbarUpdateButton(wIndex_t button, wIndex_t command,
     char* icon, const char* helpKey, void* context);
 extern void ToolbarButtonPlayback(wIndex_t buttonInx);
 extern void ToolbarLoadConfig(void);
-extern void ToolbarControlAdd(wControl_p control, long options, int cmdGroup);
+extern void ToolbarControlAdd(wControl_p parent, wControl_p control, long options, int cmdGroup);
 
 
 wIndex_t AddCommand(procCommand_t cmdProc, const char* helpKey,
     const char* nameStr, wIcon_p icon, int reqLevel, long options, long acclKey,
-    wIndex_t buttInx, long stickyMask, wMenuPush_p cmdMenus[NUM_CMDMENUS],
+    wIndex_t buttInx, long stickyMask, wControl_p cmdMenus[NUM_CMDMENUS],
     void* context);
 
 void PlaybackButtonMouse(wIndex_t);

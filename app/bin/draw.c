@@ -31,6 +31,12 @@
 #include "common-ui.h"
 #include "include/toolbar.h"
 
+#define NUM_INFOCTL (4)
+static wWinPix_t infoHeight;
+static wWinPix_t textHeight;
+
+static wControl_p deferSubstituteControls[NUM_INFOCTL + 1];
+static char* deferSubstituteLabels[NUM_INFOCTL];
 
 EXPORT wIndex_t panCmdInx;
 
@@ -115,8 +121,7 @@ EXPORT DIST_T pixelBins = 80;
  *
  */
 
-static wWinPix_t infoHeight;
-static wWinPix_t textHeight;
+
 EXPORT wWin_p mapW;
 EXPORT BOOL_T mapVisible;
 EXPORT BOOL_T magneticSnap;
@@ -136,22 +141,6 @@ DIST_T closeDist = 0.100;
 
 static wFont_p rulerFp;
 
-static struct {
-	wStatus_p scale_m;
-	wStatus_p count_m;
-	wStatus_p posX_m;
-	wStatus_p posY_m;
-	wStatus_p info_m;
-	wWinPix_t scale_w;
-	wWinPix_t count_w;
-	wWinPix_t pos_w;
-	wWinPix_t info_w;
-	wBox_p scale_b;
-	wBox_p count_b;
-	wBox_p posX_b;
-	wBox_p posY_b;
-	wBox_p info_b;
-} infoD;
 
 EXPORT coOrd oldMarker = { 0.0, 0.0 };
 
@@ -167,9 +156,6 @@ static wDrawPix_t mousePositionx,
 
 static int delayUpdate = 1;
 
-static char xLabel[] = "X: ";
-static char yLabel[] = "Y: ";
-static char zoomLabel[] = "Zoom: ";
 
 static struct {
 	char * name;
@@ -1195,238 +1181,6 @@ static wWinPix_t messageOrControlY = 0;
 static wControl_p curInfoControl[NUM_INFOCTL];
 static wWinPix_t curInfoLabelWidth[NUM_INFOCTL];
 
-/**
- * Determine the width of a mouse pointer position string ( coordinate plus label ).
- *
- * \return width of position string
- */
-static wWinPix_t GetInfoPosWidth( void )
-{
-	wWinPix_t labelWidth;
-
-	DIST_T dist;
-	if ( mapD.size.x > mapD.size.y ) {
-		dist = mapD.size.x;
-	} else {
-		dist = mapD.size.y;
-	}
-	if ( units == UNITS_METRIC ) {
-		dist *= 2.54;
-		if ( dist >= 1000 ) {
-			dist = 9999.999*2.54;
-		} else if ( dist >= 100 ) {
-			dist = 999.999*2.54;
-		} else if ( dist >= 10 ) {
-			dist = 99.999*2.54;
-		}
-	} else {
-		if ( dist >= 100*12 ) {
-			dist = 999.0*12.0+11.0+3.0/4.0-1.0/64.0;
-		} else if ( dist >= 10*12 ) {
-			dist = 99.0*12.0+11.0+3.0/4.0-1.0/64.0;
-		} else if ( dist >= 1*12 ) {
-			dist = 9.0*12.0+11.0+3.0/4.0-1.0/64.0;
-		}
-	}
-
-	labelWidth = (wStatusGetWidth( xLabel ) > wStatusGetWidth(
-	                      yLabel ) ? wStatusGetWidth( xLabel ):wStatusGetWidth( yLabel ));
-
-	return wStatusGetWidth( FormatDistance(dist) ) + labelWidth;
-}
-
-/**
- * Initialize the status line at the bottom of the window.
- *
- */
-
-EXPORT void InitInfoBar( void )
-{
-	wWinPix_t width, height, y, yb, ym, x, boxH;
-	wWinGetSize( mainW, &width, &height );
-	infoHeight = 2 + wStatusGetHeight( COMBOBOX ) + 2 ;
-	textHeight = wStatusGetHeight(0L);
-	y = height - max(infoHeight,textHeight)-10;
-
-#ifdef WINDOWS
-	y -= 19; /* Kludge for MSW */
-#endif
-
-	infoD.pos_w = GetInfoPosWidth();
-	infoD.scale_w = wStatusGetWidth( "999:1" ) + wStatusGetWidth( zoomLabel );
-	/* we do not use the count label for the moment */
-	infoD.count_w = 0;
-	infoD.info_w = width - 20 - infoD.pos_w*2 - infoD.scale_w - infoD.count_w -
-	               45;      // Allow Window to resize down
-	if (infoD.info_w <= 0) {
-		infoD.info_w = 10;
-	}
-	yb = y+info_yb_offset;
-	ym = y+(infoHeight-textHeight)/2;
-	boxH = infoHeight;
-	x = 2;
-	infoD.scale_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.scale_w,
-	                            boxH );
-	infoD.scale_m = wStatusCreate( mainW, x+info_xm_offset, ym, "infoBarScale",
-	                               infoD.scale_w-six, zoomLabel);
-	x += infoD.scale_w + 2;
-	infoD.posX_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.pos_w, boxH );
-	infoD.posX_m = wStatusCreate( mainW, x+info_xm_offset, ym, "infoBarPosX",
-	                              infoD.pos_w-six, xLabel );
-	x += infoD.pos_w + 2;
-	infoD.posY_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.pos_w, boxH );
-	infoD.posY_m = wStatusCreate( mainW, x+info_xm_offset, ym, "infoBarPosY",
-	                              infoD.pos_w-six, yLabel );
-	x += infoD.pos_w + 2;
-	messageOrControlX = x+info_xm_offset;									//Remember Position
-	messageOrControlY = ym;
-	infoD.info_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.info_w, boxH );
-	infoD.info_m = wStatusCreate( mainW, x+info_xm_offset, ym, "infoBarStatus",
-	                              infoD.info_w-six, "" );
-}
-
-
-
-static void SetInfoBar( void )
-{
-	wWinPix_t width, height, y, yb, ym, x, boxH;
-	int inx;
-	static long oldDistanceFormat = -1;
-	long newDistanceFormat;
-	wWinGetSize( mainW, &width, &height );
-	y = height - max(infoHeight,textHeight)-10;
-	newDistanceFormat = GetDistanceFormat();
-	if ( newDistanceFormat != oldDistanceFormat ) {
-		infoD.pos_w = GetInfoPosWidth();
-		wBoxSetSize( infoD.posX_b, infoD.pos_w, infoHeight-3 );
-		wStatusSetWidth( infoD.posX_m, infoD.pos_w-six );
-		wBoxSetSize( infoD.posY_b, infoD.pos_w, infoHeight-3 );
-		wStatusSetWidth( infoD.posY_m, infoD.pos_w-six );
-	}
-	infoD.info_w = width - 20 - infoD.pos_w*2 - infoD.scale_w - infoD.count_w - 40 +
-	               4;
-	if (infoD.info_w <= 0) {
-		infoD.info_w = 10;
-	}
-	yb = y+info_yb_offset;
-	ym = y+(infoHeight-textHeight)/2;
-	boxH = infoHeight;
-	wWinClear( mainW, 0, y, width-20, infoHeight );
-	x = 0;
-	wControlSetPos( (wControl_p)infoD.scale_b, x, yb );
-	wControlSetPos( (wControl_p)infoD.scale_m, x+info_xm_offset, ym );
-	x += infoD.scale_w + 10;
-	wControlSetPos( (wControl_p)infoD.posX_b, x, yb );
-	wControlSetPos( (wControl_p)infoD.posX_m, x+info_xm_offset, ym );
-	x += infoD.pos_w + 5;
-	wControlSetPos( (wControl_p)infoD.posY_b, x, yb );
-	wControlSetPos( (wControl_p)infoD.posY_m, x+info_xm_offset, ym );
-	x += infoD.pos_w + 10;
-	wControlSetPos( (wControl_p)infoD.info_b, x, yb );
-	wControlSetPos( (wControl_p)infoD.info_m, x+info_xm_offset, ym );
-	wBoxSetSize( infoD.info_b, infoD.info_w, boxH );
-	wStatusSetWidth( infoD.info_m, infoD.info_w-six );
-	messageOrControlX = x+info_xm_offset;
-	messageOrControlY = ym;
-	if (curInfoControl[0]) {
-		for ( inx=0; curInfoControl[inx]; inx++ ) {
-			x += curInfoLabelWidth[inx];
-			wWinPix_t y_this = ym + (textHeight/2) - (wControlGetHeight(
-			                           curInfoControl[inx] )/2);
-			wControlSetPos( curInfoControl[inx], x, y_this );
-			x += wControlGetWidth( curInfoControl[inx] )+3;
-			wControlShow( curInfoControl[inx], TRUE );
-		}
-		wControlSetPos( (wControl_p)infoD.info_m, x+info_xm_offset, ym );  //Move to end
-	}
-}
-
-
-static void InfoScale( void )
-{
-	if (mainD.scale >= 1.0) {
-		sprintf( message, "%s%.4g:1", zoomLabel, lround(mainD.scale*4.0)/4.0 );
-	} else {
-		sprintf( message, "%s1:%.4g", zoomLabel, lround((1.0/mainD.scale)*4.0)/4.0 );
-	}
-
-	wStatusSetValue( infoD.scale_m, message );
-}
-
-EXPORT void InfoCount( wIndex_t count )
-{
-	/*
-		sprintf( message, "%d", count );
-		wMessageSetValue( infoD.count_m, message );
-	*/
-}
-
-EXPORT void InfoPos( coOrd pos )
-{
-	sprintf( message, "%s%s", xLabel, FormatDistance(pos.x) );
-	wStatusSetValue( infoD.posX_m, message );
-	sprintf( message, "%s%s", yLabel, FormatDistance(pos.y) );
-	wStatusSetValue( infoD.posY_m, message );
-
-	oldMarker = pos;
-}
-
-static wControl_p deferSubstituteControls[NUM_INFOCTL+1];
-static char * deferSubstituteLabels[NUM_INFOCTL];
-
-EXPORT void InfoSubstituteControls(
-        wControl_p * controls,
-        char ** labels )
-{
-	wWinPix_t x, y;
-	int inx;
-	for ( inx=0; inx<NUM_INFOCTL; inx++ ) {
-		if (curInfoControl[inx]) {
-			wControlShow( curInfoControl[inx], FALSE );
-			curInfoControl[inx] = NULL;
-		}
-		curInfoLabelWidth[inx] = 0;
-		curInfoControl[inx] = NULL;
-	}
-	if ( inError && ( controls!=NULL && controls[0]!=NULL) ) {
-		memcpy( deferSubstituteControls, controls, sizeof deferSubstituteControls );
-		memcpy( deferSubstituteLabels, labels, sizeof deferSubstituteLabels );
-	}
-	if ( inError || controls == NULL || controls[0]==NULL ) {
-		wControlSetPos( (wControl_p)infoD.info_m, messageOrControlX, messageOrControlY);
-		wControlShow( (wControl_p)infoD.info_m, TRUE );
-		return;
-	}
-	//x = wControlGetPosX( (wControl_p)infoD.info_m );
-	x = messageOrControlX;
-	y = messageOrControlY;
-	wStatusSetValue( infoD.info_m, "" );
-	wControlShow( (wControl_p)infoD.info_m, FALSE );
-	for ( inx=0; controls[inx]; inx++ ) {
-		curInfoLabelWidth[inx] = wLabelWidth(_(labels[inx]));
-		x += curInfoLabelWidth[inx];
-#ifdef WINDOWS
-		wWinPix_t	y_this = y + (infoHeight/2) - (textHeight / 2 );
-#else
-		wWinPix_t	y_this = y + (infoHeight / 2) - (wControlGetHeight(
-		                                 controls[inx]) / 2) - 2;
-#endif
-		wControlSetPos( controls[inx], x, y_this );
-		x += wControlGetWidth( controls[inx] );
-		wControlSetLabel( controls[inx], _(labels[inx]) );
-		wControlShow( controls[inx], TRUE );
-		curInfoControl[inx] = controls[inx];
-		x += 3;
-	}
-	wControlSetPos( (wControl_p)infoD.info_m, x, y );
-	curInfoControl[inx] = NULL;
-	deferSubstituteControls[0] = NULL;
-}
-
-EXPORT void SetMessage( char * msg )
-{
-	wStatusSetValue( infoD.info_m, msg );
-}
 
 /**
  * Map Handling
@@ -3331,7 +3085,8 @@ EXPORT void DrawInit( int initialZoom )
 
 	rulerFp = wStandardFont( F_HELV, FALSE, FALSE );
 
-	SetZoomRadio( mainD.scale );
+	/** \todo deactivated temporarily, reenable at the end of main window creation */
+	//SetZoomRadio( mainD.scale );
 	InfoScale();
 	SetInfoBar();
 	InfoPos( zero );

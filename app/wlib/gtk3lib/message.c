@@ -80,6 +80,11 @@ void wMessageSetWidth(
 	gtk_widget_set_size_request(b->widget, width, -1);
 }
 
+
+void wMessageSetLength(wControl_p control, size_t length)
+{
+	gtk_label_set_width_chars(GTK_LABEL(control->widget), (int)length);
+}
 /**
  * Get height of message text
  *

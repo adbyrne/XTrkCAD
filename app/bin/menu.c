@@ -50,17 +50,17 @@ EXPORT wMenu_p demoM;
 EXPORT wMenu_p popup1M, popup2M;
 static wMenu_p popup1aM, popup2aM;
 static wMenu_p popup1mM, popup2mM;
-EXPORT wButton_p undoB;
-EXPORT wButton_p redoB;
-EXPORT wButton_p zoomUpB;
-EXPORT wButton_p zoomDownB;
-EXPORT wButton_p zoomExtentsB;
-EXPORT wButton_p mapShowB;
-static wButton_p magnetsB;
+wControl_p undoB;
+wControl_p redoB;
+wControl_p zoomUpB;
+wControl_p zoomDownB;
+wControl_p zoomExtentsB;
+wControl_p mapShowB;
+static wControl_p magnetsB;
 EXPORT wMenuToggle_p mapShowMI;
 static wMenuToggle_p magnetsMI;
 EXPORT wMenuList_p winList_mi;
-EXPORT wMenuList_p fileList_ml;
+wControl_p fileList_ml;
 EXPORT wMenuToggle_p snapGridEnableMI;
 EXPORT wMenuToggle_p snapGridShowMI;
 
@@ -502,7 +502,7 @@ EXPORT void EnableMenus( void )
 		} else {
 			enable = TRUE;
 		}
-		wMenuPushEnable((wMenuPush_p) menuPG.paramPtr[inx].control, enable);
+		wMenuPushEnable(menuPG.paramPtr[inx].control, enable);
 	}
 }
 /*****************************************************************************
@@ -511,7 +511,7 @@ EXPORT void EnableMenus( void )
  *
  */
 
-static wMenuList_p messageList_ml;
+static wControl_p messageList_ml;
 #define MESSAGE_LIST_EMPTY			N_("No Messages")
 
 EXPORT void MessageListAppend(
@@ -609,9 +609,10 @@ static void ShowUnusedBalloonHelp( void )
  */
 
 
-EXPORT wButton_p AddToolbarButton(const char* helpStr, wIcon_p icon, long options,
-	wButtonCallBack_p action, void* context) {
-	wButton_p bb;
+wControl_p AddToolbarButton(const char* helpStr, wIcon_p icon, long options,
+	wButtonCallBack_p action, void* context) 
+{
+	wControl_p bb;
 	wIndex_t inx;
 
 	GetBalloonHelpStr(helpStr);
@@ -705,7 +706,7 @@ EXPORT wIndex_t AddMenuButton(wMenu_p menu, procCommand_t command,
 		}
 	}
 	long stickyMask = 0;
-	wMenuPush_p cmdMenus[NUM_CMDMENUS] = { NULL, NULL, NULL, NULL };
+	wControl_p cmdMenus[NUM_CMDMENUS] = { NULL, NULL, NULL, NULL };
 	if (nameStr[0] != '\0') {
 		if (options & IC_STICKY) {
 			if (buttonGroupPopupM == NULL || newButtonGroup) {
@@ -758,7 +759,7 @@ EXPORT wIndex_t AddMenuButton(wMenu_p menu, procCommand_t command,
 static void MiscMenuItemCreate(wMenu_p m1, wMenu_p m2, const char * name,
                                const char * label, long acclKey, void * func, long option, void * context)
 {
-	wMenuPush_p mp;
+	wControl_p mp;
 	mp = wMenuPushCreate(m1, name, label, acclKey, ParamMenuPush,
 	                     &menuPLs[menuPG.paramCnt]);
 	if (m2)
@@ -812,22 +813,22 @@ EXPORT void CreateMenus(void)
 	        manageM, addM, changeM, drawM;
 	wMenu_p zoomM, zoomSubM;
 
-	wMenuPush_p zoomInM, zoomOutM, zoomExtentsM;
+	wControl_p zoomInM, zoomOutM, zoomExtentsM;
 
 	wPrefGetInteger("DialogItem", "pref-iconsize", (long *) &iconSize, 0);
 
 	wSetBalloonHelp( balloonHelp );
-	fileM = wMenuBarAdd(mainW, "menuFile", _("File"));
-	editM = wMenuBarAdd(mainW, "menuEdit", _("Edit"));
-	viewM = wMenuBarAdd(mainW, "menuView", _("View"));
-	addM = wMenuBarAdd(mainW, "menuAdd", _("Add"));
-	changeM = wMenuBarAdd(mainW, "menuChange", _("Change"));
-	drawM = wMenuBarAdd(mainW, "menuDraw", _("Draw"));
-	manageM = wMenuBarAdd(mainW, "menuManage", _("Manage"));
-	optionM = wMenuBarAdd(mainW, "menuOption", _("Options"));
-	macroM = wMenuBarAdd(mainW, "menuMacro", _("Macro"));
-	windowM = wMenuBarAdd(mainW, "menuWindow", _("Window"));
-	helpM = wMenuBarAdd(mainW, "menuHelp", _("Help"));
+	fileM = wMenuBarAdd(mainW, "menuFile", _("_File"));
+	editM = wMenuBarAdd(mainW, "menuEdit", _("_Edit"));
+	viewM = wMenuBarAdd(mainW, "menuView", _("_View"));
+	addM = wMenuBarAdd(mainW, "menuAdd", _("_Add"));
+	changeM = wMenuBarAdd(mainW, "menuChange", _("_Change"));
+	drawM = wMenuBarAdd(mainW, "menuDraw", _("_Draw"));
+	manageM = wMenuBarAdd(mainW, "menuManage", _("_Manage"));
+	optionM = wMenuBarAdd(mainW, "menuOption", _("_Options"));
+	macroM = wMenuBarAdd(mainW, "menuMacro", _("Mac_ro"));
+	windowM = wMenuBarAdd(mainW, "menuWindow", _("_Window"));
+	helpM = wMenuBarAdd(mainW, "menuHelp", _("_Help"));
 
 	/*
 	 * POPUP MENUS
@@ -977,13 +978,13 @@ EXPORT void CreateMenus(void)
 	MiscMenuItemCreate(fileM, NULL, "cmdOutputbitmap", _("Export to &Bitmap"),
 	                   ACCL_PRINTBM, OutputBitMapInit(), 0,
 	                   NULL);
-	MiscMenuItemCreate(fileM, NULL, "cmdExport", _("E&xport"), ACCL_EXPORT,
+	MiscMenuItemCreate(fileM, NULL, "cmdExport", _("Export"), ACCL_EXPORT,
 	                   DoExport, IC_SELECTED, NULL);
-	MiscMenuItemCreate(fileM, NULL, "cmdExportDXF", _("Export D&XF"),
+	MiscMenuItemCreate(fileM, NULL, "cmdExportDXF", _("Export DXF"),
 	                   ACCL_EXPORTDXF, DoExportDXF, IC_SELECTED,
 	                   NULL);
 #if XTRKCAD_CREATE_SVG
-	MiscMenuItemCreate( fileM, NULL, "cmdExportSVG", _("Export S&VG"),
+	MiscMenuItemCreate( fileM, NULL, "cmdExportSVG", _("Export SVG"),
 	                    ACCL_EXPORTSVG, DoExportSVG, IC_SELECTED, NULL);
 #endif
 	wMenuSeparatorCreate(fileM);
@@ -1376,7 +1377,7 @@ EXPORT void CreateMenus(void)
 	InitCmdPan2(changeM);
 
 	/**  \todo Layers for the toolbar */
-	// InitLayers(BG_LAYER);
+	InitLayers(BG_LAYER);
 
 	cmdGroup = BG_HOTBAR;
 	InitHotBar();

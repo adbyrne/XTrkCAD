@@ -20,8 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdlib.h>
-
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
 #define GTK_DISABLE_DEPRECATED
@@ -162,7 +160,7 @@ wlibBasicClear (wDraw_p bd)
  */
 
 void
-wlibBasicDrawLine (wDraw_p bd, wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t x1,
+wlibBasicDrawLine (struct draw * bd, wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t x1,
                    wDrawPix_t y1, double width, double minWidth,
                    wDrawLineType_e lineType, wDrawColor color, wDrawOpts opts)
 {
@@ -194,7 +192,7 @@ wlibBasicDrawLine (wDraw_p bd, wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t x1,
  */
 
 void
-wlibBasicDrawArc (wDraw_p bd, wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r,
+wlibBasicDrawArc (struct draw *bd, wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r,
                   double angle0, double angle1, wBool_t drawCenter,
                   double width, double minWidth, wDrawLineType_e lineType,
                   wDrawColor color, wDrawOpts opts)
@@ -403,10 +401,13 @@ wlibBasicDrawFillRectangle (wDraw_p bd, wDrawPix_t x0, wDrawPix_t y0,
  */
 
 void
-wlibBasicDrawFillPolygon (wDraw_p bd, wDrawPix_t p[][2], wPolyLine_e type[],
+wlibBasicDrawFillPolygon (wControl_p drawingArea, wDrawPix_t p[][2], wPolyLine_e type[],
                           int cnt, wDrawColor color, wDrawOpts opts, int fill,
                           int open)
 {
+	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	g_assert(drawingArea->type == B_DRAW);
+
 	int inx;
 	cairo_t *cr = bd->cr;
 
@@ -520,9 +521,12 @@ wlibBasicDrawFillPolygon (wDraw_p bd, wDrawPix_t p[][2], wPolyLine_e type[],
  */
 
 void
-wlibBasicDrawFillCircle (wDraw_p bd, wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r,
+wlibBasicDrawFillCircle (wControl_p drawingArea, wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r,
                          wDrawColor color, wDrawOpts opts)
 {
+	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	g_assert(drawingArea->type == B_DRAW);
+
 	BasicDrawSetColor (bd->cr, color);
 
 	cairo_arc (bd->cr, x0, y0, r, 0.0, 2 * M_PI);

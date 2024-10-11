@@ -70,3 +70,7 @@ box.framed {
 entry.error {
     border: 1px solid red
 }
+
+combobox.toolbar {
+    -GtkComboBox-appears-as-list: 1; 
+}

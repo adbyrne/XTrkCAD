@@ -395,6 +395,7 @@ wControl_p wMessageCreateEx(wControl_p parent,
 
 void wMessageSetValue(wControl_p b, const char* arg);
 void wMessageSetWidth(wControl_p b, wWinPix_t width);
+void wMessageSetLength(wControl_p control, size_t length);
 
 wWinPix_t wMessageGetWidth(const char* testString);
 wWinPix_t wMessageGetHeight(long flags);
@@ -624,7 +625,7 @@ void wWinSetSmallIcon(		wWin_p, wIcon_p );
 void wWinShow( wControl_p control, wBool_t visibility);
 wBool_t wWinIsVisible(		wWin_p );
 wBool_t wWinIsMaximized( wWin_p win);
-void wWinGetSize (		wWin_p, wWinPix_t *, wWinPix_t * );
+void wWinGetSize (		wControl_p window, wWinPix_t * width, wWinPix_t *height );
 void wWinSetSize(		wWin_p, wWinPix_t, wWinPix_t );
 void wWinSetTitle(		wWin_p, const char * );
 void wWinSetBusy(		wWin_p, wBool_t );
@@ -746,6 +747,10 @@ wControl_p wComboBoxCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
     const char* helpStr, const char* labelStr, long option, long	number,
     wWinPix_t width, long* valueP, wListCallBack_p action, void* attributes);
 
+wControl_p wComboBoxCreateForToolbar(wControl_p	parent, const char* helpStr, const char* labelStr,
+    long	option, wWinPix_t	width, long* valueP, wListCallBack_p action,
+    void* context);
+
 void wComboBoxAddValue(wControl_p b, char* text, void * attributes);
 void wComboBoxSetIndex(wControl_p b, int row);
 wIndex_t wComboBoxGetCount(wControl_p b);
@@ -827,65 +832,139 @@ wPolyLine_e;
 
 
 /* Draw: */
-void wDrawLine(			wDraw_p, wDrawPix_t, wDrawPix_t, wDrawPix_t, wDrawPix_t,
-                                wDrawWidth, wDrawLineType_e, wDrawColor,
-                                wDrawOpts );
+void wDrawLine(
+    wControl_p drawingArea,
+    wDrawPix_t x0, wDrawPix_t y0,
+    wDrawPix_t x1, wDrawPix_t y1,
+    wDrawWidth width,
+    wDrawLineType_e lineType,
+    wDrawColor color,
+    wDrawOpts opts);
+
 #define double2wAngle_t( A )	(A)
 typedef double wAngle_t;
-void wDrawArc(			wDraw_p, wDrawPix_t, wDrawPix_t, wDrawPix_t, wAngle_t,
-                                wAngle_t,
-                                int, wDrawWidth, wDrawLineType_e, wDrawColor,
-                                wDrawOpts );
-void wDrawPoint(		wDraw_p, wDrawPix_t, wDrawPix_t, wDrawColor, wDrawOpts );
+void wDrawArc(
+    wControl_p drawingArea,
+    wDrawPix_t x0, wDrawPix_t y0,
+    wDrawPix_t r,
+    wAngle_t angle0,
+    wAngle_t angle1,
+    int drawCenter,
+    wDrawWidth width,
+    wDrawLineType_e lineType,
+    wDrawColor color,
+    wDrawOpts opts);
+
+void wDrawPoint(
+    wControl_p drawingArea,
+    wDrawPix_t x0, wDrawPix_t y0,
+    wDrawColor color,
+    wDrawOpts opts);
+
 #define double2wFontSize_t( FS )	(FS)
 typedef double wFontSize_t;
-void wDrawString(		wDraw_p, wDrawPix_t, wDrawPix_t, wAngle_t, const char *,
-                                wFont_p,
-                                wFontSize_t, wDrawColor, wDrawOpts );
-void wDrawFilledRectangle(	wDraw_p, wDrawPix_t, wDrawPix_t, wDrawPix_t,
-                                wDrawPix_t,
-                                wDrawColor, wDrawOpts );
-void wDrawPolygon(	wDraw_p, wDrawPix_t [][2], wPolyLine_e [], wIndex_t,
-                        wDrawColor, wDrawWidth, wDrawLineType_e,
-                        wDrawOpts, int, int );
-void wDrawFilledCircle(		wDraw_p, wDrawPix_t, wDrawPix_t, wDrawPix_t,
-                                wDrawColor, wDrawOpts );
+void wDrawString(
+    wControl_p drawingArea,
+    wDrawPix_t x, wDrawPix_t y,
+    wAngle_t a,
+    const char* s,
+    wFont_p fp,
+    wFontSize_t fs,
+    wDrawColor color,
+    wDrawOpts opts);
 
-void wDrawGetTextSize(		wDrawPix_t *, wDrawPix_t *, wDrawPix_t *, wDrawPix_t *,
-                                wDraw_p, const char *, wFont_p,
-                                wFontSize_t );
-void wDrawClear(		wDraw_p );
-void wDrawClearTemp(		wDraw_p );
+void wDrawFilledRectangle(
+    wControl_p drawingArea,
+    wDrawPix_t x,
+    wDrawPix_t y,
+    wDrawPix_t w,
+    wDrawPix_t h,
+    wDrawColor color,
+    wDrawOpts opt);
+
+void wDrawPolygon(
+    wControl_p bd,
+    wDrawPix_t p[][2],
+    wPolyLine_e type[],
+    int cnt,
+    wDrawColor color,
+    wDrawWidth dw,
+    wDrawLineType_e lt,
+    wDrawOpts opt,
+    int fill,
+    int open);
+
+void wDrawFilledCircle(
+    wControl_p bd,
+    wDrawPix_t x0,
+    wDrawPix_t y0,
+    wDrawPix_t r,
+    wDrawColor color,
+    wDrawOpts opt);
+
+void wDrawGetTextSize(
+    wDrawPix_t* w,
+    wDrawPix_t* h,
+    wDrawPix_t* d,
+    wDrawPix_t* a,
+    wControl_p drawingArea,
+    const char* s,
+    wFont_p fp,
+    wFontSize_t fs);
+
+void wDrawClear(
+    wControl_p bd);
+
+void wDrawClearTemp(wControl_p drawingArea);
 wBool_t wDrawSetTempMode(	wDraw_p, wBool_t );
 
 void wDrawDelayUpdate(		wDraw_p, wBool_t );
-void wDrawClip(			wDraw_p, wDrawPix_t, wDrawPix_t, wDrawPix_t, wDrawPix_t );
-
+void wDrawClip(wControl_p drawingArea,
+    wDrawPix_t x,
+    wDrawPix_t y,
+    wDrawPix_t w,
+    wDrawPix_t h);
 
 /* Geometry */
 double wDrawGetDPI(		wDraw_p );
-double wDrawGetMaxRadius(	wDraw_p );
-void wDrawSetSize(		wDraw_p, wWinPix_t, wWinPix_t, void * );
-void wDrawGetSize(		wDraw_p, wWinPix_t *, wWinPix_t * );
+double wDrawGetMaxRadius( wControl_p drawingArea);
+void wDrawSetSize(
+    wControl_p drawingArea,
+    wWinPix_t w,
+    wWinPix_t h, void* redraw);
+void wDrawGetSize(
+    wControl_p drawingArea,
+    wWinPix_t* w,
+    wWinPix_t* h);
 
 /* Bitmaps */
-wDrawBitMap_p wDrawBitMapCreate( wDraw_p, int, int, int, int,
-                                 const unsigned char * );
-void wDrawBitMap(		wDraw_p, wDrawBitMap_p, wDrawPix_t, wDrawPix_t,
-                                wDrawColor, wDrawOpts );
+wDrawBitMap_p wDrawBitMapCreate(
+    wControl_p drawingArea,
+    int w,
+    int h,
+    int x,
+    int y,
+    const unsigned char* fbits);
+void wDrawBitMap(
+    wControl_p bd,
+    wDrawBitMap_p bm,
+    wDrawPix_t x, wDrawPix_t y,
+    wDrawColor color,
+    wDrawOpts opts);
 
 wDraw_p wBitmapCreate(		wWinPix_t, wWinPix_t, int );
 wBool_t wBitmapDelete(		wDraw_p );
 wBool_t wBitmapWriteFile(	wDraw_p, const char * );
 
 /* Misc */
-void * wDrawGetContext(		wDraw_p );
+void* wDrawGetContext(
+    wControl_p drawingArea);
 void wDrawSaveImage(		wDraw_p );
 void wDrawRestoreImage(		wDraw_p );
 int wDrawSetBackground(    wDraw_p, char * path, char ** error);
 void wDrawCloneBackground(wDraw_p from, wDraw_p to);
-void wDrawShowBackground(   wDraw_p, wWinPix_t pos_x, wWinPix_t pos_y,
-                            wWinPix_t width, wAngle_t angle, int screen);
+void wDrawShowBackground(wControl_p drawingArea, wWinPix_t pos_x, wWinPix_t pos_y,
+    wWinPix_t size, wAngle_t angle, int screen);
 
 /*------------------------------------------------------------------------------
  *
@@ -1119,7 +1198,7 @@ wControl_p wStatusCreate(wControl_p	parent, const char* labelStr,
     const char* message);
 
 wWinPix_t wStatusGetWidth(const char *testString);
-wWinPix_t wStatusGetHeight(long flags);
+wWinPix_t wStatusSetRequiredHeight(wControl_p label, long flags);
 
 void wStatusSetValue(wControl_p b, const char* arg);
 void wStatusSetWidth(wControl_p b, wWinPix_t width);

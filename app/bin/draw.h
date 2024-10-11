@@ -87,7 +87,7 @@ typedef void (*drawConvertPix2CoOrd)(drawCmd_p, wDrawPix_t, wDrawPix_t,
 typedef void (*drawConvertCoOrd2Pix)(drawCmd_p, coOrd, wDrawPix_t *,
                                      wDrawPix_t *);
 typedef struct drawCmd_t {
-	wDraw_p d;
+	wControl_p d;
 	drawFuncs_t * funcs;
 	unsigned long options;
 	DIST_T scale;

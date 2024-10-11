@@ -38,6 +38,7 @@ struct wStatus_t {
     GtkWidget * labelWidget;
 };
 
+
 /**
  * Set the message text
  *
@@ -98,7 +99,7 @@ wControl_p wStatusCreate(
 wWinPix_t
 wStatusGetWidth(const char *testString)
 {
-    printf("Function at line %d in %s is not implemented!", __LINE__, __FILE__);
+    printf("Function at line %d in %s is not implemented!\n", __LINE__, __FILE__);
     return(0);
  //   GtkWidget *entry;
  //   GtkRequisition min_req, nat_req;
@@ -119,75 +120,31 @@ wStatusGetWidth(const char *testString)
 }
 
 /**
- * Get height of message text
+ * Set height of message text
  *
+ * \todo Are text properties actually used? remove if not
+ * 
+ * \param label IN text label
  * \param flags IN text properties (large or small size)
+ * 
  * \return text height
  */
-static int fonts_set = 0;
 
-wWinPix_t wStatusGetHeight(
-    long flags)
+wWinPix_t 
+wStatusSetRequiredHeight(wControl_p label, long flags)
 {
-    printf("Function at line %d in %s is not implemented!", __LINE__, __FILE__);
-    return(0);
-  //  GtkWidget * temp;
+	PangoContext* pcontext = gtk_widget_get_pango_context(label->widget);
+	PangoFontMetrics* fontMetrics;
+	wWinPix_t height;
+	
+	fontMetrics = pango_context_get_metrics(pcontext, NULL, NULL);
+	height = (wWinPix_t)fontMetrics->height / PANGO_SCALE;
 
-  //  if (!(flags&COMBOBOX)) {
-		//temp = gtk_entry_new();	 //To get size of text itself
-  //      gtk_entry_set_has_frame(GTK_ENTRY(temp), FALSE);
-  //  } else {
-  //      temp = gtk_combo_box_text_new();    //to get max size of an object in infoBar
-  //  }
-  //  g_object_ref_sink(temp);
+	gtk_widget_set_size_request(label->widget, -1, height);
 
-  //  if (wMessageSetFont(flags))	{
-		//if (!fonts_set) {
-		//	GtkStyleContext *context;
-		//	GtkCssProvider *smallProvider = gtk_css_provider_new();
-		//	GtkCssProvider *largeProvider = gtk_css_provider_new();
-		//	/* get the current font descriptor */
-		//	context = gtk_widget_get_style_context(temp);
-		//	static const char smallStyle[] = " .smallLabel { font-size: 70% } ";
+	pango_font_metrics_unref(fontMetrics);
 
-		//	gtk_css_provider_load_from_data (smallProvider,
-		//	                                 smallStyle, -1, NULL);
-		//	gtk_style_context_add_provider(context,
-		//	                               GTK_STYLE_PROVIDER(smallProvider),
-		//	                               GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-
-		//	static const char largeStyle[] = " .largeLabel{ font-size: 140% }  ";
-
-		//	gtk_css_provider_load_from_data (largeProvider,
-		//	                                 largeStyle, -1, NULL);
-		//	gtk_style_context_add_provider(context,
-		//	                               GTK_STYLE_PROVIDER(largeProvider),
-		//	                               GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-
-
-		//	fonts_set = 1;
-
-		//}
-
-		///* set the new font size */
-		//GtkStyleContext * context = gtk_widget_get_style_context(GTK_WIDGET(temp));
-		//if (flags & BM_LARGE) {
-		//	gtk_style_context_add_class(context, "largeLabel");
-		//} else {
-		//	gtk_style_context_add_class(context, "smallLabel");
-		//}
-  //  }
-
-  //  if (flags&1L) {
-  //      gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(temp),"Test");
-  //  }
-
-  //  GtkRequisition temp_requisition;
-  //   gtk_widget_get_preferred_size(temp, NULL, &temp_requisition);
-  //  //g_object_ref_sink(temp);
-  //  //g_object_unref(temp);
-  //  gtk_widget_destroy(temp);
-  //  return temp_requisition.height;
+	return(height);
 }
 
 /**
@@ -202,7 +159,7 @@ void wStatusSetWidth(
     wControl_p b,
     wWinPix_t width)
 {
-	printf("Function at line %d in %s is not implemented!", __LINE__, __FILE__);
+	printf("Function at line %d in %s is not implemented!\n", __LINE__, __FILE__);
 	return;
 
  //   b->labelWidth = width;

@@ -52,7 +52,7 @@ static struct {
 	long options;
 	long stickyMask;
 	long acclKey;
-	wMenuPush_p menu[NUM_CMDMENUS];
+	wControl_p menu[NUM_CMDMENUS];
 	void * context;
 } commandList[COMMAND_MAX];
 
@@ -543,7 +543,7 @@ EXPORT BOOL_T CommandEnabled(wIndex_t cmdInx)
 
 EXPORT wIndex_t AddCommand(procCommand_t cmdProc, const char * helpKey,
                            const char * nameStr, wIcon_p icon, int reqLevel, long options, long acclKey,
-                           wIndex_t buttInx, long stickyMask, wMenuPush_p cmdMenus[NUM_CMDMENUS],
+                           wIndex_t buttInx, long stickyMask, wControl_p cmdMenus[NUM_CMDMENUS],
                            void * context)
 {
 	CHECK( commandCnt < COMMAND_MAX - 1 );

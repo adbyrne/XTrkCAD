@@ -31,6 +31,7 @@
 
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
+#include "wrapbox/eggwrapbox.h"
 
 #include "gtkint.h"
 #include "i18n.h"
@@ -455,3 +456,52 @@ wControl_p wComboBoxCreate(
 	return b;
 }
 
+/**
+ * Create a combobox. The combobox is created having one text column.
+ *
+ * ### Usage in dialogs
+ *
+ * - Builder: yes
+ *
+ *	\param IN parent    Parent window
+ *	\param IN helpStr   Help string
+ *	\param IN labelStr  Label
+ *	\param IN option    Options
+ *	\param IN width     Width
+ *	\param IN valueP    selected index
+ *	\param IN action    Callback
+ *	\param IN context      Context
+ */
+
+wControl_p wComboBoxCreateForToolbar(
+	wControl_p	parent,
+	const char* helpStr,
+	const char* labelStr,
+	long	option,
+	wWinPix_t	width,
+	long* valueP,
+	wListCallBack_p action,
+	void* context)
+{
+	wControl_p b;
+	struct list* lcontrol;
+
+	b = wlibControlNew(B_COMBOBOX, parent, helpStr, context);
+	lcontrol = CONTROL_GET_ATTRIBUTES_PTR(b, list);
+	lcontrol->valueP = valueP;
+	lcontrol->action = action;
+	lcontrol->last = -1;
+
+	if (HASDIALOGBUILDER(parent)) {
+		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
+		lcontrol->listStore = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(b->widget)));
+		if (!lcontrol->listStore) {
+			abort();
+		}
+
+	}
+
+	egg_wrap_box_insert_child(EGG_WRAP_BOX(parent->attributes.window.toolbar), GTK_WIDGET(b->widget), -1, 0);
+
+	return(b);
+}

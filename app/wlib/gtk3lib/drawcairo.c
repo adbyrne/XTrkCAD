@@ -36,6 +36,7 @@
 #include <math.h>
 
 #include <gtk/gtk.h>
+#include "gdk-pixbuf/gdk-pixbuf.h"
 
 // Trace low level drawing actions
 int iDrawLog = 0;
@@ -59,7 +60,7 @@ struct wDrawBitMap_t {
 	const unsigned char * bits;
 };
 
-struct wDraw_t psPrint_d;
+struct draw * psPrint_d;
 
 /*****************************************************************************
  *
@@ -73,9 +74,9 @@ struct wDraw_t psPrint_d;
 #define BBORDER (20)
 
 #define INMAPX(D,X)	(X)
-#define INMAPY(D,Y)	(((D)->h-1) - (Y))
+#define INMAPY(D,Y)	(((D)->height-1) - (Y))
 #define OUTMAPX(D,X)	(X)
-#define OUTMAPY(D,Y)	(((D)->h-1) - (Y))
+#define OUTMAPY(D,Y)	(((D)->height-1) - (Y))
 
 
 /*******************************************************************************
@@ -103,19 +104,22 @@ static unsigned long GtkDrawSetColor(
 }
 
 static cairo_t* gtkDrawCreateCairoContext(
-        wDraw_p bd,
+        wControl_p drawingArea,
         cairo_surface_t * surface,
         wDrawWidth width,
         wDrawLineType_e lineType,
         wDrawColor color,
         wDrawOpts opts )
 {
-	if ( iDrawLog >= 4 )
-		printf( "%ld: gtkDrawCreateCairoContext %s Color:%6lx Clip:%d [%ldx%ld] (%ld+%ld)\n",
-		        lDrawCnt++, (opts&wDrawOptTemp)?"Temp":"Main", color,
-		        bd->clip_set,
-		        bd->realX, bd->realY, bd->w, bd->h );
+	//if ( iDrawLog >= 4 )
+	//	printf( "%ld: gtkDrawCreateCairoContext %s Color:%6lx Clip:%d [%ldx%ld] (%ld+%ld)\n",
+	//	        lDrawCnt++, (opts&wDrawOptTemp)?"Temp":"Main", color,
+	//	        bd->clip_set,
+	//	        bd->realX, bd->realY, bd->w, bd->h );
 	cairo_t * cairo;
+	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+
+	g_assert(drawingArea->type == B_DRAW);
 
 	if (surface) {
 		cairo = cairo_create(surface);
@@ -207,13 +211,13 @@ static cairo_t* gtkDrawCreateCairoContext(
 	}
 	cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
 	GdkRGBA gcolor;
-	bd->lastColor = GtkDrawSetColor( cairo, color, &gcolor );
+	//bd->lastColor = GtkDrawSetColor( cairo, color, &gcolor );
 	cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
 
-	if (bd->clip_set) {
-		cairo_rectangle(cairo,bd->rect.x,bd->rect.y,bd->rect.width,bd->rect.height);
-		cairo_clip(cairo);
-	}
+	//if (bd->clip_set) {
+	//	cairo_rectangle(cairo,bd->rect.x,bd->rect.y,bd->rect.width,bd->rect.height);
+	//	cairo_clip(cairo);
+	//}
 
 	return cairo;
 }
@@ -295,7 +299,7 @@ void wDrawDelayUpdate(
 
 
 void wDrawLine(
-        wDraw_p bd,
+        wControl_p drawingArea,
         wDrawPix_t x0, wDrawPix_t y0,
         wDrawPix_t x1, wDrawPix_t y1,
         wDrawWidth width,
@@ -303,12 +307,14 @@ void wDrawLine(
         wDrawColor color,
         wDrawOpts opts )
 {
+	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	g_assert(drawingArea->type == B_DRAW);
 
-	if ( bd == &psPrint_d ) {
-		wlibBasicDrawLine( bd, x0, y0, x1, y1, width,
-		                   MINLINEWIDTHPRINT, lineType, color, opts );
-		return;
-	}
+	//if ( bd == &psPrint_d ) {
+	//	wlibBasicDrawLine( bd, x0, y0, x1, y1, width,
+	//	                   MINLINEWIDTHPRINT, lineType, color, opts );
+	//	return;
+	//}
 
 	if(bd->drawDestination == EXPORTBITMAP) {
 		wlibBasicDrawLine( bd, x0, y0, x1, y1, width,
@@ -321,14 +327,14 @@ void wDrawLine(
 	x1 = INMAPX(bd,x1);
 	y1 = INMAPY(bd,y1);
 
-	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, width, lineType, color,
+	cairo_t* cairo = gtkDrawCreateCairoContext(drawingArea, NULL, width, lineType, color,
 	                 opts);
 	cairo_move_to(cairo, x0 + 0.5, y0 + 0.5);
 	cairo_line_to(cairo, x1 + 0.5, y1 + 0.5);
 	cairo_stroke(cairo);
 	gtkDrawDestroyCairoContext(cairo);
-	if (bd->widget) {
-		gtk_widget_queue_draw_area(bd->widget,x0>x1?x1:x0,y0>y1?y1:y0,fabs(x1-x0)+1,
+	if (drawingArea->widget) {
+		gtk_widget_queue_draw_area(drawingArea->widget,x0>x1?x1:x0,y0>y1?y1:y0,fabs(x1-x0)+1,
 		                           fabs(y1-y0)+1);
 	}
 
@@ -350,7 +356,7 @@ void wDrawLine(
 
 
 void wDrawArc(
-        wDraw_p bd,
+        wControl_p drawingArea,
         wDrawPix_t x0, wDrawPix_t y0,
         wDrawPix_t r,
         wAngle_t angle0,
@@ -362,12 +368,15 @@ void wDrawArc(
         wDrawOpts opts )
 {
 	int x, y, w, h;
+	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
 
-	if ( bd == &psPrint_d ) {
-		wlibBasicDrawArc( bd, x0, y0, r, angle0, angle1, drawCenter, width,
-		                  MINLINEWIDTHPRINT, lineType, color, opts );
-		return;
-	}
+	g_assert(drawingArea->type == B_DRAW);
+
+	//if ( bd == &psPrint_d ) {
+	//	wlibBasicDrawArc( bd, x0, y0, r, angle0, angle1, drawCenter, width,
+	//	                  MINLINEWIDTHPRINT, lineType, color, opts );
+	//	return;
+	//}
 
 	if(bd->drawDestination == EXPORTBITMAP) {
 		wlibBasicDrawArc( bd, x0, y0, r, angle0, angle1, drawCenter, width,
@@ -382,7 +391,7 @@ void wDrawArc(
 	h = 2*r;
 
 	// now create the new arc
-	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, width, lineType, color,
+	cairo_t* cairo = gtkDrawCreateCairoContext(drawingArea, NULL, width, lineType, color,
 	                 opts);
 	cairo_new_path(cairo);
 
@@ -404,8 +413,8 @@ void wDrawArc(
 	cairo_stroke(cairo);
 
 	gtkDrawDestroyCairoContext(cairo);
-	if (bd->widget && !bd->delayUpdate) {
-		gtk_widget_queue_draw_area(bd->widget,x,y,w,h);
+	if (drawingArea->widget && !bd->delayUpdate) {
+		gtk_widget_queue_draw_area(drawingArea->widget,x,y,w,h);
 	}
 
 
@@ -413,34 +422,37 @@ void wDrawArc(
 }
 
 void wDrawPoint(
-        wDraw_p bd,
+        wControl_p drawingArea,
         wDrawPix_t x0, wDrawPix_t y0,
         wDrawColor color,
         wDrawOpts opts )
 {
+	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	g_assert(drawingArea->type == B_DRAW);
 
-	if ( bd == &psPrint_d ) {
-		/*psPrintArc( x0, y0, r, angle0, angle1, drawCenter, width, lineType, color, opts );*/
-		return;
-	}
+
+	//if ( bd == &psPrint_d ) {
+	//	/*psPrintArc( x0, y0, r, angle0, angle1, drawCenter, width, lineType, color, opts );*/
+	//	return;
+	//}
 
 	if(bd->drawDestination == EXPORTBITMAP) {
 
 		return;
 	}
-	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color,
+	cairo_t* cairo = gtkDrawCreateCairoContext(drawingArea, NULL, 0, wDrawLineSolid, color,
 	                 opts);
 	cairo_new_path(cairo);
 	cairo_arc(cairo, INMAPX(bd, x0), INMAPY(bd, y0), 0.75, 0, 2 * M_PI);
 	cairo_stroke(cairo);
 	gtkDrawDestroyCairoContext(cairo);
-	if (bd->widget && !bd->delayUpdate) {
-		gtk_widget_queue_draw_area(bd->widget,INMAPX(bd,x0-0.75),INMAPY(bd,y0+0.75),2,
+	if (drawingArea->widget && !bd->delayUpdate) {
+		gtk_widget_queue_draw_area(drawingArea->widget,INMAPX(bd,x0-0.75),INMAPY(bd,y0+0.75),2,
 		                           2);
 	}
 
 }
-
+
 /*******************************************************************************
  *
  * Strings
@@ -448,7 +460,7 @@ void wDrawPoint(
  ******************************************************************************/
 
 void wDrawString(
-        wDraw_p bd,
+        wControl_p drawingArea,
         wDrawPix_t x, wDrawPix_t y,
         wAngle_t a,
         const char * s,
@@ -466,12 +478,15 @@ void wDrawString(
 	wDrawPix_t baseline;
 	double angle = -M_PI * a / 180.0;
 
-	if ( bd == &psPrint_d ) {
-		wlibBasicDrawString( bd, x, y, a, (char *) s, fp, fs,
-		                     MINLINEWIDTHPRINT, MINLINEWIDTHPRINT,
-		                     color, opts );
-		return;
-	}
+	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	g_assert(drawingArea->type == B_DRAW);
+
+	//if ( bd == &psPrint_d ) {
+	//	wlibBasicDrawString( bd, x, y, a, (char *) s, fp, fs,
+	//	                     MINLINEWIDTHPRINT, MINLINEWIDTHPRINT,
+	//	                     color, opts );
+	//	return;
+	//}
 
 	if(bd->drawDestination == EXPORTBITMAP) {
 		wlibBasicDrawString( bd, x, y, a, (char *) s, fp, fs,
@@ -487,7 +502,7 @@ void wDrawString(
 	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color,
 	                 opts);
 
-	layout = wlibFontCreatePangoLayout(bd->widget, cairo, fp, fs, s,
+	layout = wlibFontCreatePangoLayout(drawingArea->widget, cairo, fp, fs, s,
 	                                   (wDrawPix_t *) &w, (wDrawPix_t *) &h,
 	                                   (wDrawPix_t *) &ascent, (wDrawPix_t *) &descent, (wDrawPix_t *) &baseline);
 
@@ -508,7 +523,7 @@ void wDrawString(
 	cairo_restore( cairo );
 	gtkDrawDestroyCairoContext(cairo);
 
-	if (bd->delayUpdate || bd->widget == NULL) { return; }
+	if (bd->delayUpdate || drawingArea->widget == NULL) { return; }
 
 	/* recalculate the area to be updated
 	 * for simplicity sake I added plain text height ascent and descent,
@@ -519,8 +534,8 @@ void wDrawString(
 	update_rect.width  = (gint) (w * cos( angle ) + h * sin(angle))+2;
 	update_rect.height = (gint) (h * sin( angle ) + w * cos(angle))+2;
 
-	if (bd->widget && !bd->delayUpdate) {
-		gtk_widget_queue_draw_area(bd->widget, update_rect.x, update_rect.y,
+	if (drawingArea->widget && !bd->delayUpdate) {
+		gtk_widget_queue_draw_area(drawingArea->widget, update_rect.x, update_rect.y,
 		                           update_rect.width, update_rect.height);
 	}
 
@@ -531,7 +546,7 @@ void wDrawGetTextSize(
         wDrawPix_t *h,
         wDrawPix_t *d,
         wDrawPix_t *a,
-        wDraw_p bd,
+        wControl_p drawingArea,
         const char * s,
         wFont_p fp,
         wFontSize_t fs )
@@ -541,18 +556,20 @@ void wDrawGetTextSize(
 	wDrawPix_t ascent;
 	wDrawPix_t descent;
 	wDrawPix_t baseline;
+	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	g_assert(drawingArea->type == B_DRAW);
 
 	*w = 0;
 	*h = 0;
 
 	/* draw text */
-	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid,
+	cairo_t* cairo = gtkDrawCreateCairoContext(drawingArea, NULL, 0, wDrawLineSolid,
 	                 wDrawColorBlack, bd->bTempMode?wDrawOptTemp:0 );
 
 	cairo_identity_matrix(cairo);
 
 	wlibFontDestroyPangoLayout(
-	        wlibFontCreatePangoLayout(bd->widget, cairo, fp, fs, s,
+	        wlibFontCreatePangoLayout(drawingArea->widget, cairo, fp, fs, s,
 	                                  &textWidth, &textHeight,
 	                                  &ascent, &descent, &baseline) );
 
@@ -600,7 +617,7 @@ static void wlibDrawFilled(
 
 
 void wDrawFilledRectangle(
-        wDraw_p bd,
+        wControl_p drawingArea,
         wDrawPix_t x,
         wDrawPix_t y,
         wDrawPix_t w,
@@ -608,11 +625,13 @@ void wDrawFilledRectangle(
         wDrawColor color,
         wDrawOpts opt )
 {
+	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	g_assert(drawingArea->type == B_DRAW);
 
-	if ( bd == &psPrint_d ) {
-		wlibBasicDrawFillRectangle( bd, x, y, w, h, color, opt );
-		return;
-	}
+	//if ( bd == &psPrint_d ) {
+	//	wlibBasicDrawFillRectangle( bd, x, y, w, h, color, opt );
+	//	return;
+	//}
 
 	if(bd->drawDestination == EXPORTBITMAP) {
 		wlibBasicDrawFillRectangle( bd, x, y, w, h, color, opt );
@@ -633,15 +652,15 @@ void wDrawFilledRectangle(
 	wlibDrawFilled( cairo, color, opt );
 
 	gtkDrawDestroyCairoContext(cairo);
-	if (bd->widget && !bd->delayUpdate) {
-		gtk_widget_queue_draw_area(GTK_WIDGET(bd->widget),w>0?x:x+w,h>0?y:y+h,fabs(w)+1,
+	if (drawingArea->widget && !bd->delayUpdate) {
+		gtk_widget_queue_draw_area(GTK_WIDGET(drawingArea->widget),w>0?x:x+w,h>0?y:y+h,fabs(w)+1,
 		                           fabs(h)+1);
 	}
 
 }
 
 void wDrawPolygon(
-        wDraw_p bd,
+        wControl_p drawingArea,
         wDrawPix_t p[][2],
         wPolyLine_e type[],
         int cnt,
@@ -655,11 +674,13 @@ void wDrawPolygon(
 	static int maxCnt = 0;
 	static GdkPoint *points;
 	int i;
+	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	g_assert(drawingArea->type == B_DRAW);
 
-	if ( bd == &psPrint_d ) {
-		wlibBasicDrawFillPolygon( bd, p, type, cnt, color, opt, fill, open );
-		return;
-	}
+	//if ( bd == &psPrint_d ) {
+	//	wlibBasicDrawFillPolygon( bd, p, type, cnt, color, opt, fill, open );
+	//	return;
+	//}
 
 	if(bd->drawDestination == EXPORTBITMAP) {
 		wlibBasicDrawFillPolygon( bd, p, type, cnt, color, opt, fill, open );
@@ -688,7 +709,7 @@ void wDrawPolygon(
 		if (points[i].y < min_y) { min_y = points[i].y; }
 	}
 
-	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, fill?0:dw,
+	cairo_t* cairo = gtkDrawCreateCairoContext(drawingArea, NULL, fill?0:dw,
 	                 fill?wDrawLineSolid:lt, color, opt);
 
 	for(i = 0; i < cnt; ++i) {
@@ -772,15 +793,15 @@ void wDrawPolygon(
 		cairo_stroke(cairo);
 	}
 	gtkDrawDestroyCairoContext(cairo);
-	if (bd->widget && !bd->delayUpdate) {
-		gtk_widget_queue_draw_area(GTK_WIDGET(bd->widget),min_x,min_y,max_x-min_x+1,
+	if (drawingArea->widget && !bd->delayUpdate) {
+		gtk_widget_queue_draw_area(GTK_WIDGET(drawingArea->widget),min_x,min_y,max_x-min_x+1,
 		                           max_y-min_y+1);  //Ensure positive width
 	}
 
 }
 
 void wDrawFilledCircle(
-        wDraw_p bd,
+        wControl_p drawingArea,
         wDrawPix_t x0,
         wDrawPix_t y0,
         wDrawPix_t r,
@@ -788,11 +809,13 @@ void wDrawFilledCircle(
         wDrawOpts opt )
 {
 	int x, y, w, h;
+	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	g_assert(drawingArea->type == B_DRAW);
 
-	if ( bd == &psPrint_d ) {
-		wlibBasicDrawFillCircle( bd, x0, y0, r, color, opt );
-		return;
-	}
+	//if ( bd == &psPrint_d ) {
+	//	wlibBasicDrawFillCircle( bd, x0, y0, r, color, opt );
+	//	return;
+	//}
 
 	if(bd->drawDestination == EXPORTBITMAP) {
 		wlibBasicDrawFillCircle( bd, x0, y0, r, color, opt );
@@ -804,68 +827,79 @@ void wDrawFilledCircle(
 	w = 2*r;
 	h = 2*r;
 
-	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color,
+	cairo_t* cairo = gtkDrawCreateCairoContext(drawingArea, NULL, 0, wDrawLineSolid, color,
 	                 opt);
 	cairo_arc(cairo, INMAPX(bd, x0), INMAPY(bd, y0), r, 0, 2 * M_PI);
 	wlibDrawFilled( cairo, color, opt );
 	gtkDrawDestroyCairoContext(cairo);
 
-	if (bd->widget && !bd->delayUpdate) {
-		gtk_widget_queue_draw_area(bd->widget,x,y,w,h);
+	if (drawingArea->widget && !bd->delayUpdate) {
+		gtk_widget_queue_draw_area(drawingArea->widget,x,y,w,h);
 	}
 
 }
 
-void wDrawClearTemp(wDraw_p bd)
+void wDrawClearTemp(wControl_p drawingArea)
 {
 	//Wipe out temp space with 0 alpha (transparent)
 
+	/**  \todo Clearing the complete area can be simpler */
+	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	g_assert(drawingArea->type == B_DRAW);
+
+	GtkAllocation allocation;
+	gtk_widget_get_allocation(drawingArea->widget, &allocation);
+
 	if ( iDrawLog >= 1 ) {
-		printf( "%ld: wDrawClearTemp %ld+%ld\n", lDrawCnt++, bd->w,
-		        bd->h  );
+		printf( "%ld: wDrawClearTemp %ld+%ld\n", lDrawCnt++, allocation.width, allocation.height  );
 	}
 	cairo_t* cairo = cairo_create(bd->temp_surface);
 
 	cairo_set_source_rgba(cairo, 0.0, 0.0, 0.0, 0.0);
 	cairo_set_operator (cairo, CAIRO_OPERATOR_SOURCE);
 	cairo_move_to(cairo, 0, 0);
-	cairo_rel_line_to(cairo, bd->w, 0);
-	cairo_rel_line_to(cairo, 0, bd->h);
-	cairo_rel_line_to(cairo, -bd->w, 0);
+	cairo_rel_line_to(cairo, allocation.width, 0);
+	cairo_rel_line_to(cairo, 0, allocation.height);
+	cairo_rel_line_to(cairo, -allocation.width, 0);
 	cairo_fill(cairo);
 	cairo_destroy(cairo);
 
-	if (bd->widget && !bd->delayUpdate) {
-		gtk_widget_queue_draw(bd->widget);
+	if (drawingArea->widget && !bd->delayUpdate) {
+		gtk_widget_queue_draw(drawingArea->widget);
 	}
 }
 
 void wDrawClear(
-        wDraw_p bd )
+        wControl_p drawingArea )
 {
 	if ( iDrawLog >= 1 ) {
-		printf( "%ld: wDrawClear %ld+%ld\n", lDrawCnt++, bd->w,
-		        bd->h  );
+		printf( "%ld: wDrawClear\n", lDrawCnt++  );
 	}
+	/**  \todo Clearing the complete area can be simpler */
+	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	g_assert(drawingArea->type == B_DRAW);
 
-	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid,
+	GtkAllocation allocation;
+	gtk_widget_get_allocation(drawingArea->widget, &allocation);
+
+	cairo_t* cairo = gtkDrawCreateCairoContext(drawingArea, NULL, 0, wDrawLineSolid,
 	                 wDrawColorWhite, 0);
 	cairo_move_to(cairo, 0, 0);
-	cairo_rel_line_to(cairo, bd->w, 0);
-	cairo_rel_line_to(cairo, 0, bd->h);
-	cairo_rel_line_to(cairo, -bd->w, 0);
+	cairo_rel_line_to(cairo, allocation.width, 0);
+	cairo_rel_line_to(cairo, 0, allocation.height);
+	cairo_rel_line_to(cairo, -allocation.width, 0);
 	cairo_fill(cairo);
 	gtkDrawDestroyCairoContext(cairo);
-	gtk_widget_queue_draw(bd->widget);
-	wDrawClearTemp(bd);
+	gtk_widget_queue_draw(drawingArea->widget);
+	wDrawClearTemp(drawingArea);
 }
 
 void * wDrawGetContext(
-        wDraw_p bd )
+        wControl_p drawingArea )
 {
-	return bd->context;
+	return drawingArea->context;
 }
-
+
 /*******************************************************************************
  *
  * Bit Maps
@@ -874,13 +908,16 @@ void * wDrawGetContext(
 
 
 wDrawBitMap_p wDrawBitMapCreate(
-        wDraw_p bd,
+        wControl_p drawingArea,
         int w,
         int h,
         int x,
         int y,
         const unsigned char * fbits )
 {
+	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	g_assert(drawingArea->type == B_DRAW);
+
 	wDrawBitMap_p bm;
 
 	bm = (wDrawBitMap_p)malloc( sizeof *bm );
@@ -895,13 +932,15 @@ wDrawBitMap_p wDrawBitMapCreate(
 
 
 void wDrawBitMap(
-        wDraw_p bd,
+        wControl_p drawingArea,
         wDrawBitMap_p bm,
         wDrawPix_t x, wDrawPix_t y,
         wDrawColor color,
         wDrawOpts opts )
 {
 	GdkRectangle update_rect;
+	struct draw *bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	g_assert(drawingArea->type == B_DRAW);
 
 	int i, j, wb;
 	wDrawPix_t xx, yy;
@@ -914,7 +953,7 @@ void wDrawBitMap(
 	wb = (bm->w+7)/8;
 
 
-	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color,
+	cairo_t* cairo = gtkDrawCreateCairoContext(drawingArea, NULL, 0, wDrawLineSolid, color,
 	                 opts);
 	cairo_pixbuf = bd->pixbuf;
 
@@ -979,11 +1018,11 @@ void wDrawBitMap(
 				cairo_rectangle(cairo, xx, yy, 1, 1);
 				cairo_fill(cairo);
 				if ( b && b->type == B_DRAW ) {
-					gtk_widget_queue_draw_area( bd->widget, xx-1, yy-1, 3, 3 );
+					gtk_widget_queue_draw_area( drawingArea->widget, xx-1, yy-1, 3, 3 );
 				}
 			}
 	gtkDrawDestroyCairoContext(cairo);
-	gtk_widget_queue_draw(bd->widget);
+	gtk_widget_queue_draw(drawingArea->widget);
 }
 
 
@@ -1027,15 +1066,19 @@ void wDrawRestoreImage(
 
 
 void wDrawSetSize(
-        wDraw_p bd,
+        wControl_p drawingArea,
         wWinPix_t w,
         wWinPix_t h, void * redraw)
 {
 	wBool_t repaint;
-	if (bd == NULL) {
+	if (drawingArea == NULL) {
 		fprintf(stderr,"resizeDraw: no client data\n");
 		return;
 	}
+
+	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	g_assert(drawingArea->type == B_DRAW);
+
 	if ( iDrawLog >= 1 ) {
 		printf( "%ld: wDrawSetSize %ld+%ld %s\n", lDrawCnt, w, h, redraw?"Redraw":"" );
 	}
@@ -1051,44 +1094,49 @@ void wDrawSetSize(
 		return;
 	}
 
-	repaint = (w != bd->w || h != bd->h);
-	bd->w = w;
-	bd->h = h;
-	gtk_widget_set_size_request( bd->widget, w, h );
+	//repaint = (w != bd->w || h != bd->h);
+	//bd->w = w;
+	//bd->h = h;
+	repaint = TRUE;
+	gtk_widget_set_size_request( drawingArea->widget, w, h );
 	if (repaint) {
 		if (bd->surface) {
 			cairo_surface_destroy(bd->surface);
 		}
 		bd->surface = gdk_window_create_similar_surface(gtk_widget_get_window (
-		                        bd->widget), CAIRO_CONTENT_COLOR_ALPHA, w, h);
+		                        drawingArea->widget), CAIRO_CONTENT_COLOR_ALPHA, w, h);
 
 		if (bd->temp_surface) {
 			cairo_surface_destroy(bd->temp_surface);
 		}
 		bd->temp_surface = gdk_window_create_similar_surface(gtk_widget_get_window (
-		                           bd->widget), CAIRO_CONTENT_COLOR_ALPHA, w, h);
+		                           drawingArea->widget), CAIRO_CONTENT_COLOR_ALPHA, w, h);
 
 
-		wDrawClear( bd );
+		wDrawClear( drawingArea );
 		if (!redraw) {
-			bd->redraw( bd, bd->context, w, h );
+			bd->redraw( drawingArea, drawingArea->context, w, h );
 		}
 	}
 	/*wRedraw( drawControl );*/
-	gtk_widget_queue_draw(bd->widget);
+	gtk_widget_queue_draw(drawingArea->widget);
 }
 
 
 void wDrawGetSize(
-        wDraw_p bd,
+        wControl_p drawingArea,
         wWinPix_t *w,
         wWinPix_t *h )
 {
-	if (bd->widget) {
-		wlibControlGetSize( (wControl_p)bd );
+	if (drawingArea->widget) {
+		wlibControlGetSize( (wControl_p)drawingArea );
 	}
-	*w = bd->w-2;
-	*h = bd->h-2;
+
+	GtkAllocation allocation;
+
+	gtk_widget_get_allocation(drawingArea->widget, &allocation);
+	*w = allocation.width-2;
+	*h = allocation.height-2;
 }
 
 /**
@@ -1108,29 +1156,33 @@ double wDrawGetDPI(
 }
 
 
-double wDrawGetMaxRadius(
-        wDraw_p d )
+double wDrawGetMaxRadius( wControl_p drawingArea )
 {
-	if (d == &psPrint_d) {
-		return 10e9;
-	} else {
-		return 32767.0;
-	}
+	//if (d == &psPrint_d) {
+	//	return 10e9;
+	//} else {
+	//	return 32767.0;
+	//}
+
+	return(32767.0);
 }
 
 
-void wDrawClip(
-        wDraw_p d,
+void wDrawClip(wControl_p drawingArea,
         wDrawPix_t x,
         wDrawPix_t y,
         wDrawPix_t w,
         wDrawPix_t h )
 {
-	d->rect.width = w;
-	d->rect.height = h;
-	d->rect.x = INMAPX( d, x );
-	d->rect.y = INMAPY( d, y ) - d->rect.height;
-	d->clip_set = TRUE;
+	struct draw *d = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	g_assert(drawingArea->type == B_DRAW);
+
+	printf("Function wDrawClip is not implemented: %s %d\n", __FILE__, __LINE__);
+	//d->rect.width = w;
+	//d->rect.height = h;
+	//d->rect.x = INMAPX( d, x );
+	//d->rect.y = INMAPY( d, y ) - d->rect.height;
+	//d->clip_set = TRUE;
 
 }
 
@@ -1179,12 +1231,14 @@ wDrawCloneBackground(wDraw_p from, wDraw_p to)
 	}
 }
 
-void wDrawShowBackground( wDraw_p drawControl, wWinPix_t pos_x, wWinPix_t pos_y,
+void wDrawShowBackground( wControl_p drawingArea, wWinPix_t pos_x, wWinPix_t pos_y,
                           wWinPix_t size, wAngle_t angle, int screen)
 {
+	struct draw* drawControl = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	g_assert(drawingArea->type == B_DRAW);
 
 	if (drawControl->background) {
-		cairo_t* cairo = gtkDrawCreateCairoContext(drawControl, NULL, 0, wDrawLineSolid,
+		cairo_t* cairo = gtkDrawCreateCairoContext(drawingArea, NULL, 0, wDrawLineSolid,
 		                 wDrawColorWhite, drawControl->bTempMode?wDrawOptTemp:0 );
 		cairo_save(cairo);
 		int pixels_width = gdk_pixbuf_get_width(drawControl->background);
@@ -1202,7 +1256,7 @@ void wDrawShowBackground( wDraw_p drawControl, wWinPix_t pos_x, wWinPix_t pos_y,
 		}
 		cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
 		double rad = M_PI*(angle/180);
-		posy = (double)drawControl->h-((pixels_height*fabs(cos(rad))+pixels_width*fabs(sin(
+		posy = (double)drawControl->height-((pixels_height*fabs(cos(rad))+pixels_width*fabs(sin(
 		                               rad)))*scale)-posy;
 		//width = (double)(pixels_width*scale);
 		//height = (double)(pixels_height*scale);

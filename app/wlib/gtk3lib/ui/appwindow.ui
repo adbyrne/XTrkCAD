@@ -146,10 +146,9 @@
             <property name="hexpand">True</property>
             <property name="spacing">6</property>
             <child>
-              <object class="GtkLabel" id="statusbarScale">
+              <object class="GtkLabel" id="infoBarScale">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="width-chars">13</property>
                 <property name="single-line-mode">True</property>
                 <style>
                   <class name="statusbar"/>
@@ -162,10 +161,9 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="statusbarPosX">
+              <object class="GtkLabel" id="infoBarPosX">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="width-chars">13</property>
                 <style>
                   <class name="statusbar"/>
                 </style>
@@ -177,10 +175,9 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="statusbarPosY">
+              <object class="GtkLabel" id="infoBarPosY">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="width-chars">13</property>
                 <style>
                   <class name="statusbar"/>
                 </style>
@@ -192,7 +189,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="statusbarMessage">
+              <object class="GtkLabel" id="infoBarStatus">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="hexpand">True</property>
@@ -220,5 +217,28 @@
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkComboBox" id="cmdLayerSet">
+    <property name="model">layerList</property>
+    <property name="visible">True</property>
+    <style>
+      <class name="toolbar"/>
+    </style>
+    <child>
+      <object class="GtkCellRendererText" id="textfield">
+        <property name="width-chars">20</property>
+      </object>
+      <attributes>
+        <attribute name="text">2</attribute>
+      </attributes>
+    </child>
+  </object>
+  <object class="GtkListStore" id="layerList">
+    <columns>
+      <column type="gpointer" />
+      <column type="gpointer" />
+      <column type="gchararray" />
+
+    </columns>
   </object>
 </interface>

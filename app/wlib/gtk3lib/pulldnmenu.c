@@ -197,6 +197,8 @@ static void CreateMenuItem(
 {
 //    MITEMTYPE( mi )= mtype;
 
+    g_strdelimit(labelStr, "&", '_');
+
     switch ( mtype ) {
     case M_SEPARATOR:
         mi->widget = gtk_separator_menu_item_new();

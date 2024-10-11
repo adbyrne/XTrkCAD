@@ -34,7 +34,7 @@
 
 #include "gtkint.h"
 #include <wlib.h>
-#include "stack.h"
+//#include "stack.h"
 
 void
 wStackPageShow(wControl_p stack, const char* pageName)

@@ -27,15 +27,15 @@
 
 extern wMenu_p demoM;
 extern wMenu_p popup1M, popup2M;
-extern wButton_p undoB;
-extern wButton_p redoB;
-extern wButton_p zoomUpB;
-extern wButton_p zoomDownB;
-extern wButton_p zoomExtentsB;
-extern wButton_p mapShowB;
+extern wControl_p undoB;
+extern wControl_p redoB;
+extern wControl_p zoomUpB;
+extern wControl_p zoomDownB;
+extern wControl_p zoomExtentsB;
+extern wControl_p mapShowB;
 extern wMenuToggle_p mapShowMI;
 extern wMenuList_p winList_mi;
-extern wMenuList_p fileList_ml;
+extern wControl_p fileList_ml;
 extern wMenuToggle_p snapGridEnableMI;
 extern wMenuToggle_p snapGridShowMI;
 
@@ -55,7 +55,7 @@ extern void DoSticky(void * unused);
 extern void EnableMenus( void );
 extern void MessageListAppend( char *, const char * );
 extern const char * GetBalloonHelpStr(const char * helpKey);
-extern wButton_p AddToolbarButton(const char * helpStr, wIcon_p icon,
+extern wControl_p AddToolbarButton(const char * helpStr, wIcon_p icon,
                                   long options,
                                   wButtonCallBack_p action, void * context);
 extern void ButtonGroupBegin(const char * menuTitle, const char * helpKey,

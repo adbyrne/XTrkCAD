@@ -24,6 +24,7 @@
 #define GTKINT_H
 #include "wlib.h"
 
+#include "gdk-pixbuf/gdk-pixbuf.h"
 #include "gdk/gdk.h"
 #include "gtk/gtk.h"
 
@@ -122,6 +123,12 @@ struct draw {
 	long lastX;					//< position of last mouse click
 	long lastY;
 	long option;					//< creation options
+	unsigned drawDestination;
+	unsigned delayUpdate;
+	GdkPixbuf* pixbuf;			/** \todo Check necessity */
+	GdkPixbuf* background;
+	cairo_t* cr;
+	double scale_adjust;		/** \todo Check necessity */
 
 };
 
@@ -330,7 +337,7 @@ GtkWidget* wlibAppWinGetMain(void);
 
 void wlibBasicClear( wDraw_p bd );
 void wlibBasicDrawLine(
-	wDraw_p bd,
+	struct draw * bd,
     wDrawPix_t x0, wDrawPix_t y0,
     wDrawPix_t x1, wDrawPix_t y1,
     double width,
@@ -340,7 +347,7 @@ void wlibBasicDrawLine(
     wDrawOpts opts);
 
 void wlibBasicDrawArc(
-	wDraw_p bd,
+	struct draw * bd,
     wDrawPix_t x0, wDrawPix_t y0,
     wDrawPix_t r,
     double angle0,
@@ -365,7 +372,7 @@ void wlibBasicDrawString(
     wDrawOpts opts);
 
 void wlibBasicDrawFillPolygon(
-	wDraw_p bd,
+	wControl_p bd,
     wDrawPix_t p[][2],
 	wPolyLine_e type[],
     int cnt,
@@ -381,12 +388,12 @@ void wlibBasicDrawFillRectangle(
     wDrawColor color,
     wDrawOpts opts);
 
-void wlibBasicDrawFillCircle(
-	wDraw_p bd,
-    wDrawPix_t x0, wDrawPix_t y0,
-    wDrawPix_t r,
-    wDrawColor color,
-    wDrawOpts opts);
+void wlibBasicDrawFillCircle(wControl_p drawingArea, 
+	wDrawPix_t x0, 
+	wDrawPix_t y0, 
+	wDrawPix_t r,
+	wDrawColor color, 
+	wDrawOpts opts);
 
 /* bitmap.c */
 #define ICON_BITMAP (1)

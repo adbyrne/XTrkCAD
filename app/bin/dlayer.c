@@ -79,10 +79,10 @@ static unsigned int layerSelected = 0;
 static BOOL_T layoutLayerChanged = FALSE;
 
 static wIcon_p show_layer_bmps[NUM_BUTTONS];
-static wButton_p layer_btns[NUM_BUTTONS];	/**< layer buttons on toolbar */
+static wControl_p layer_btns[NUM_BUTTONS];	/**< layer buttons on toolbar */
 
 /** Layer selector on toolbar */
-static wList_p setLayerL;
+static wControl_p setLayerL;
 
 /** Describe the properties of a layer
   * Defaults for layout track grade and min radius are in scale.c: SetScale
@@ -2319,23 +2319,19 @@ void InitLayers(int cmdGroup)
 		                             layerColorTab[i % (COUNT(layerColorTab))]);
 		layers[i].color = layerColorTab[i % (COUNT(layerColorTab))];
 		layers[i].useColor = TRUE;
-
-		MyFree(show_layer_bits);
 	}
 
 	/* layer list for toolbar */
 
-	setLayerL = wComboListCreate(mainW, 0, 0, "cmdLayerSet", NULL, 0, 10, 200, NULL,
-	                            SetCurrLayer, NULL);
+	setLayerL = wComboBoxCreateForToolbar(mainW, "cmdLayerSet", NULL, 0, 100, NULL, SetCurrLayer, NULL);
 	wControlSetBalloonText((wControl_p)setLayerL, GetBalloonHelpStr("cmdLayerSet"));
-	ToolbarControlAdd((wControl_p)setLayerL, IC_MODETRAIN_TOO, cmdGroup );
 
 	backgroundB = AddToolbarButton("cmdBackgroundShow",
 	                               wIconCreatePixMap(background_xpm3[iconSize]), 0,
 	                               BackgroundToggleShow, NULL);
 	/* add the help text */
-	wControlSetBalloonText((wControl_p)backgroundB, _("Show/Hide Background"));
-	wControlActive((wControl_p)backgroundB, FALSE);
+	wControlSetBalloonText(backgroundB, _("Show/Hide Background"));
+	wControlActive(backgroundB, FALSE);
 
 	for (int i = 0; i < NUM_LAYERS; i++) {
 		char *layerName;
@@ -2346,7 +2342,7 @@ void InitLayers(int cmdGroup)
 			layer_btns[i] = AddToolbarButton(message, show_layer_bmps[i], IC_MODETRAIN_TOO,
 			                                 FlipLayer, I2VP(i) );
 			/* set state of button */
-			wButtonSetBusy(layer_btns[i], 1);
+			//wButtonSetBusy(layer_btns[i], 1);
 		}
 
 		layerName = FormatLayerName(i);

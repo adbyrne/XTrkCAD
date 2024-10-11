@@ -964,7 +964,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	LOG1(log_init, ( "initColor\n" ))
 	InitColor();
 	LOG1(log_init, ("initInfoBar\n"))
-	//InitInfoBar();
+	InitInfoBar();
 	wSetSplashInfo("Scale Init...");
 	LOG1(log_init, ( "ScaleInit\n" ))
 	ScaleInit();
@@ -976,6 +976,8 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	ParamInit();
 	LOG1(log_init, ( "initTrkTrack\n" ))
 	InitTrkTrack();
+	LOG1(log_init, ("drawInit\n"))
+	DrawInit(initialZoom);
 
 	/*
 	 * MENUS
@@ -1004,9 +1006,6 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	//if (!ToolbarIsGroupVisible(BG_HOTBAR)) {
 	//	HideHotBar();           /* Then hide */
 	//}
-	LOG1(log_init, ( "drawInit\n" ))
-	DrawInit(initialZoom);
-
 	MacroInit();
 
 	/*

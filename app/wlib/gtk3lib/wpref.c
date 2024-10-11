@@ -56,7 +56,7 @@ static bool prefInitted = false;
 static GKeyFile *prefs;
 
 /**
- * Read the preferences from an ini file iinto memory
+ * Read the preferences from an ini file into memory
  *
  * \param name name of file, if NULL or empty string, the default file is used
  * \param update force update (ignored)

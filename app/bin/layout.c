@@ -522,7 +522,7 @@ BOOL_T backgroundVisible = TRUE;
 
 char * noname = "";
 
-EXPORT wButton_p backgroundB;
+wControl_p backgroundB;
 
 /**
  * @brief Enable background visibility toggle from Menu or Button

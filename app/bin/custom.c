@@ -37,7 +37,7 @@
 
 
 char * sProdName = Product;
-char * sProdNameLower = product;
+char * sProdNameLower = product"-gtk";
 char * sProdNameUpper = PRODUCT;
 
 char * sEnvExtra = PRODUCT "EXTRA";
