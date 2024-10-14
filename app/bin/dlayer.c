@@ -2071,7 +2071,7 @@ static void DoLayer(void * unused)
 {
 	if (layerW == NULL) {
 		layerW = ParamCreateDialog(&layerPG, MakeWindowTitle(_("Layers")), _("Done"),
-		                           LayerOk, wHide, TRUE, NULL, 0, LayerDlgUpdate);
+		                           LayerOk, ParamCancel_Current, TRUE, NULL, 0, LayerDlgUpdate);
 		GetScaleGauge(layerScaleInx, &layerScaleDescInx, &layerGaugeInx);
 		LoadScaleList(scaleL);
 		LoadGaugeList(gaugeL, layerScaleDescInx);

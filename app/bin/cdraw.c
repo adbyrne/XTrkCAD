@@ -1051,10 +1051,9 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		if ( wTextGetModified((wText_p)drawDesc[TX].control0 ) ||
 		     inPlayback ) {
 			int len = wTextGetSize((wText_p)drawDesc[TX].control0);
-			// TODO - minor memory leak, but this allows Undo on text object.  See BUG-527
-			// MyFree( segPtr->u.t.string );
+			UndoDeferFree( segPtr->u.t.string );
 			if ( !descUndoStarted ) {
-				UndoStart( _("Change Track"), "Change Track");
+				UndoStart( _("Change Track"), "Change Text");
 				descUndoStarted = TRUE;
 			}
 			UndoModify( trk );

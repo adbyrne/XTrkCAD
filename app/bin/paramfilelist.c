@@ -31,6 +31,7 @@
 #include "paths.h"
 #include "include/paramfile.h"
 #include "include/paramfilelist.h"
+#include "include/stringxtc.h"
 #include "common-ui.h"
 
 

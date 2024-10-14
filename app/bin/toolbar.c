@@ -226,7 +226,7 @@ EXPORT void DoToolbar(void* unused)
 	if (!toolbarW) {
 		InitializeToolbarDialog();
 		toolbarW = ParamCreateDialog(&toolbarPG,
-		                             MakeWindowTitle(_("Toolbar Options")), _("OK"), ToolbarOk, wHide,
+		                             MakeWindowTitle(_("Toolbar Options")), _("OK"), ToolbarOk, ParamCancel_Restore,
 		                             TRUE, NULL, 0, NULL);
 	}
 

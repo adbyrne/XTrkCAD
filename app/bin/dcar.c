@@ -4597,7 +4597,8 @@ static void DoCarPartDlg( carDlgAction_e *actions )
 
 	if ( carDlgPG.win == NULL ) {
 		ParamCreateDialog( &carDlgPG, MakeWindowTitle(_("New Car Part")), _("Add"),
-		                   CarDlgOk, CarDlgClose, TRUE, CarDlgLayout,
+		                   CarDlgOk, ParamCancel_Custom( CarDlgClose ),
+		                   TRUE, CarDlgLayout,
 		                   F_BLOCK|F_RESIZE|F_RECALLSIZE|PD_F_ALT_CANCELLABEL, CarDlgUpdate );
 
 		if ( carDlgDim.carWidth==0 ) {
@@ -5685,7 +5686,7 @@ EXPORT void DoCarDlg( void * unused )
 	int inx, inx2;
 	if ( carInvPG.win == NULL ) {
 		ParamCreateDialog( &carInvPG, MakeWindowTitle(_("Car Inventory")), _("Find"),
-		                   CarInvDlgFind, wHide, TRUE, NULL,
+		                   CarInvDlgFind, ParamCancel_Current, TRUE, NULL,
 		                   F_BLOCK|F_RESIZE|F_RECALLSIZE|PD_F_ALT_CANCELLABEL, CarInvDlgUpdate );
 		for ( inx=I_CI_SORT; inx<I_CI_SORT+N_SORT; inx++ ) {
 			for ( inx2=0; inx2<COUNT( sortOrders ); inx2++ ) {

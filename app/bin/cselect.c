@@ -678,7 +678,7 @@ EXPORT void DoSelectedTracks( doSelectedTrackCallBack_t doit )
 }
 
 
-static BOOL_T SelectedTracksAreFrozen( void )
+EXPORT BOOL_T SelectedTracksAreFrozen( void )
 {
 	track_p trk;
 	trk = NULL;
@@ -1083,23 +1083,6 @@ EXPORT void AddElevations( DIST_T delta )
 		ErrorMessage( MSG_NO_SELECTED_TRK );
 	}
 	UpdateAllElevations();
-}
-
-
-EXPORT void DoRefreshCompound( void * unused )
-{
-	if (SelectedTracksAreFrozen()) {
-		return;
-	}
-	if (selectedTrackCount>0) {
-		UndoStart( _("Refresh Compound"), "refresh compound" );
-		DoSelectedTracks( RefreshCompound );
-		RefreshCompound( NULL, FALSE );
-		UndoEnd();
-		MainRedraw(); // DoRefreshCompound
-	} else {
-		ErrorMessage( MSG_NO_SELECTED_TRK );
-	}
 }
 
 

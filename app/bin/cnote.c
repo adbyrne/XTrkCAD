@@ -65,7 +65,8 @@ void DoNote(void * unused)
 {
 	if (noteW == NULL) {
 		noteW = ParamCreateDialog(&notePG, MakeWindowTitle(_("Note")), _("Ok"), NoteOk,
-		                          wHide, FALSE, NULL, F_NOTTRANSIENT|F_RESIZE, NULL);
+		                          ParamCancel_Current, FALSE, NULL,
+		                          F_NOTTRANSIENT|F_RESIZE, NULL);
 	}
 
 	wTextClear(noteT);

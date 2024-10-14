@@ -40,7 +40,6 @@ static DIST_T easeX = 0.0;
 static DIST_T Rvalues[3];
 static DIST_T Lvalues[3];
 
-static DIST_T oldEasementVal;
 
 static wIcon_p enone_bm;
 static wIcon_p esharp_bm;
@@ -63,7 +62,6 @@ static wWin_p easementW;
 static void EasementSel( long );
 static void SetEasement( DIST_T, void * );
 static void EasementOk( void );
-static void EasementCancel( void );
 
 static char *easementChoiceLabels[] = { N_("None"), N_("Sharp"), N_("Normal"), N_("Broad"), N_("Cornu"), NULL };
 static paramFloatRange_t r0n1_100 = { -1.0, 100.0, 60 };
@@ -175,13 +173,6 @@ static void EasementOk( void )
 }
 
 
-static void EasementCancel( void )
-{
-	SetEasement( easementVal = oldEasementVal, I2VP(FALSE) );
-	wHide( easementW );
-}
-
-
 static void EasementSel(
         long arg )
 /*
@@ -248,11 +239,10 @@ static void DoEasement( void * unused )
 {
 	if (easementW == NULL) {
 		easementW = ParamCreateDialog( &easementPG, MakeWindowTitle(_("Easement")),
-		                               _("Ok"), (paramActionOkProc)EasementOk, (paramActionCancelProc)EasementCancel,
+		                               _("Ok"), (paramActionOkProc)EasementOk, ParamCancel_Null,
 		                               TRUE, LayoutEasementW, 0, EasementDlgUpdate );
 		SetEasement( easementVal, I2VP(TRUE) );
 	}
-	oldEasementVal = easementVal;
 	wShow( easementW );
 	SetEasement( easementVal, I2VP(TRUE) );
 }

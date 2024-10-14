@@ -2117,7 +2117,6 @@ static void TurnoutDlgUpdate(
 	AddTurnout();
 	curTurnout = to;
 	RedrawTurnout( turnoutD.d, NULL, 0, 0 );
-	/*	ParamDialogOkActive( &turnoutPG, FALSE ); */
 }
 
 
@@ -2958,13 +2957,11 @@ static STATUS_T CmdTurnout(
 
 	case C_START:
 		if (turnoutW == NULL) {
-			/*			turnoutW = ParamCreateDialog( &turnoutPG, MakeWindowTitle("Fixed-Track"), "Ok", , (paramActionCancelProc)Reset, TRUE, NULL, F_RESIZE|F_RECALLSIZE, TurnoutDlgUpdate ); */
 			turnoutW = ParamCreateDialog(&turnoutPG, MakeWindowTitle(_("Add Fixed-Track")),
-			                             _("Close"), (paramActionOkProc)TurnoutOk, wHide, TRUE, NULL,
+			                             _("Close"), (paramActionOkProc)TurnoutOk, ParamCancel_Null, TRUE, NULL,
 			                             F_RESIZE | F_RECALLSIZE | PD_F_ALT_CANCELLABEL, TurnoutDlgUpdate);
 			InitNewTurn(turnoutNewM);
 		}
-		/*		ParamDialogOkActive( &turnoutPG, FALSE ); */
 		turnoutIndex = wListGetIndex(turnoutListL);
 		turnoutPtr = curTurnout;
 		wShow(turnoutW);

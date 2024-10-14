@@ -818,12 +818,6 @@ static void ComputeHelix(
 }
 
 
-static void HelixCancel( wWin_p win )
-{
-	wHide( helixW );
-}
-
-
 static void ChangeHelixW( long changes )
 {
 	if ( (changes & CHANGE_UNITS) &&
@@ -850,7 +844,7 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 		if (helix) {
 			if (helixW == NULL) {
 				helixW = ParamCreateDialog(&helixPG, MakeWindowTitle(_("Helix")), NULL, NULL,
-				                           HelixCancel, TRUE, NULL, 0, ComputeHelix);
+				                           ParamCancel_Current, TRUE, NULL, 0, ComputeHelix);
 			}
 			ParamLoadControls(&helixPG);
 			ParamGroupRecord(&helixPG);

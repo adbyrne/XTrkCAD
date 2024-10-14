@@ -1205,7 +1205,7 @@ static void ChangeMapScale()
 	FLOAT_T fScale = ceil( max( fScaleW, fScaleH ) );
 	if ( fScale > mapD.scale ) {
 		LOG( log_mapsize, 2, ( "  ChangeMapScale incr scale from %0.3f to %0.3f\n",
-					mapD.scale, fScale ) );
+		                       mapD.scale, fScale ) );
 		mapD.scale = fScale;
 	}
 
@@ -2802,9 +2802,6 @@ static void DoMouse( wAction_t action, coOrd pos )
 		Reset();
 		DoCurCommand( C_START, zero );
 		break;
-	case C_INFO:
-		Reset();
-		break;
 	}
 }
 
@@ -3076,7 +3073,7 @@ EXPORT void DrawInit( int initialZoom )
 	ParamRegister( &mapPG );
 	LOG( log_mapsize, 2, ( "DrawInit/ParamCreateDialog(&mapPG\n" ) );
 	/**  \todo Create map */
-	//mapW = ParamCreateDialog( &mapPG, MakeWindowTitle(_("Map")), NULL, NULL, NULL,
+	//mapW = ParamCreateDialog( &mapPG, MakeWindowTitle(_("Map")), NULL, NULL, ParamCancel_Null,
 	//                          FALSE, NULL, F_RESIZE, NULL );
 	//ChangeMapScale();
 

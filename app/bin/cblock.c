@@ -690,7 +690,8 @@ static void NewBlockDialog()
 	if ( !blockW ) {
 		ParamRegister( &blockPG );
 		blockW = ParamCreateDialog (&blockPG, MakeWindowTitle(_("Create Block")),
-		                            _("Ok"), BlockOk, wHide, TRUE, NULL, F_BLOCK, NULL );
+		                            _("Ok"), BlockOk, ParamCancel_Current,
+		                            TRUE, NULL, F_BLOCK, NULL );
 		blockD.dpi = mainD.dpi;
 	}
 	ParamLoadControls( &blockPG );
@@ -862,7 +863,7 @@ static void EditBlock (track_p trk)
 		blockEditW = ParamCreateDialog (&blockEditPG,
 		                                MakeWindowTitle(_("Edit block")),
 		                                _("Ok"), BlockEditOk,
-		                                wHide, TRUE, NULL, F_BLOCK,
+		                                ParamCancel_Current, TRUE, NULL, F_BLOCK,
 		                                NULL );
 	}
 	ParamLoadControls( &blockEditPG );

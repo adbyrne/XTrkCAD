@@ -29,6 +29,7 @@
 #include "paths.h"
 #include "include/stringxtc.h"
 #include "track.h"
+#include "cundo.h"
 
 #define MYMIN(x, y) (((x) < (y)) ? (x) : (y))
 
@@ -198,16 +199,6 @@ FileDlgUpdate(
 
 
 /**
- * Handle Cancel button: restore old values for layer and position
- */
-
-static void
-FileEditCancel( wWin_p junk)
-{
-	ResetIfNotSticky();
-	wHide(fileNoteW);
-}
-/**
  * Handle OK button: make sure the entered filename is syntactically valid, update
  * the layout and close the dialog
  *
@@ -221,13 +212,19 @@ FileEditOK(void *junk)
 	if ( trk == NULL ) {
 		// new file note
 		trk = NewNote( -1, fileNoteData.pos, OP_NOTEFILE );
+	} else {
+		if ( ! descUndoStarted ) {
+			UndoStart( _("Update File Note"), "Update File Note" );
+			descUndoStarted = TRUE;
+		}
+		UndoModify( trk );
 	}
 	struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
 	xx->pos = fileNoteData.pos;
 	SetTrkLayer( trk, fileNoteData.layer );
-	MyFree( xx->noteData.fileData.title );
+	UndoDeferFree( xx->noteData.fileData.title );
+	UndoDeferFree( xx->noteData.fileData.path );
 	xx->noteData.fileData.title = MyStrdup( fileNoteData.title );
-	MyFree( xx->noteData.fileData.path );
 	xx->noteData.fileData.path = MyStrdup( fileNoteData.path );
 	SetBoundingBox( trk, xx->pos, xx->pos );
 	DrawNewTrack( trk );
@@ -251,7 +248,7 @@ static void CreateEditFileDialog(char * windowTitle)
 		fileNoteW = ParamCreateDialog(&fileNotePG,
 		                              "",
 		                              _("Done"), FileEditOK,
-		                              FileEditCancel, TRUE, NULL,
+		                              ParamCancel_Current, TRUE, NULL,
 		                              F_BLOCK,
 		                              FileDlgUpdate);
 	}
@@ -262,6 +259,7 @@ static void CreateEditFileDialog(char * windowTitle)
 	ParamLoadControls(&fileNotePG);
 	wControlActive(fileNotePLs[I_OPEN].control,
 	               (IsFileValid(fileNoteData.path)?TRUE:FALSE));
+	descTitle = windowTitle;
 
 	wShow(fileNoteW);
 }

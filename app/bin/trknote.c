@@ -567,12 +567,12 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 		return C_CONTINUE;
 
 	case C_CANCEL:
-		DescribeCancel();
+		DescribeDone( NULL );
 		state_on = FALSE;
 		return C_CONTINUE;
 	}
 
-	return C_INFO;
+	return C_CONTINUE;
 }
 
 #include "bitmaps/note.xbm"

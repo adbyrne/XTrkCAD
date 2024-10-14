@@ -152,6 +152,7 @@ typedef struct {
 	track_p * oldTail;
 	track_p * newTail;
 	char * label;
+	dynArr_t deferFree_da;
 } undoStack_t, *undoStack_p;
 
 static undoStack_t undoStack[UNDO_STACK_SIZE];
@@ -794,8 +795,6 @@ void UndoStart(
 	int inx;
 	int usp;
 
-	LOG( log_undo, 1, ( "UndoStart[%d] (%s) d:%d u:%d us:"SLOG_FMT"\n", undoHead,
-	                    label, undoHead, doCount, undoCount, undoStream.end ) )
 	if (recordUndo) {
 		va_start( ap, format );
 		vsprintf( buff, format, ap );
@@ -817,6 +816,8 @@ void UndoStart(
 	}
 
 	INC_UNDO_INX(undoHead);
+	LOG( log_undo, 1, ( "UndoStart[%d] (%s) d:%d u:%d us:"SLOG_FMT"\n", undoHead,
+	                    label, doCount, undoCount, undoStream.end ) )
 	us = &undoStack[undoHead];
 
 	SetFileChanged();
@@ -832,6 +833,29 @@ void UndoStart(
 		if (!TrimStream( &undoStream, us->undoEnd )) {
 			return;
 		}
+#ifdef UNDO_DEFER_FREE
+		// We keep a list of objects to be freed when this undoStack entry
+		// is expired, and then free the objects when they can not be referenced
+		// This is tricky
+		// Consider
+		// - Modify the text field of TextNote
+		// - The old text field is added to the deferFree list
+		// - Undo which restores the previous version of the text field
+		// - Modify the text field again
+		// - The old text field is added to the deferFree list again
+		// - Later when the UndoStack expires, we delete the old text field twice!
+		// This is one example of the issues we can hit
+		//
+		// So to resolve this issue, we don't free the old text object,
+		// but live with the memory leak (old versions of text fields)
+		//
+		for ( int inx=0; inx < us->deferFree_da.cnt; inx++ ) {
+			void * p = DYNARR_N( void*, us->deferFree_da, inx );
+			LOG( log_undo, 2, ( "  deferFree free: "SLOG_FMT"\n", p ) );
+			MyFree( p );
+		}
+#endif
+		DYNARR_RESET( void*, us->deferFree_da );
 	} else if (undoCount != 0) {
 		if (recordUndo) { Rprintf( "  Undid N:%d M:%d D:%d\n", us->newCnt, us->modCnt, us->delCnt ); }
 		/* reusing an undid entry */
@@ -866,6 +890,8 @@ void UndoStart(
 		undoStack[inx].newTail = NULL;
 	}
 	us->newTrks = NULL;
+
+
 	undoStack[undoHead].trackCount = trackCount;
 	undoCount = 0;
 	undoActive = TRUE;
@@ -879,6 +905,39 @@ void UndoStart(
 	SetButtons( TRUE, FALSE );
 }
 
+
+/**
+ * Special free() for embedded objects that should preserved for Undo
+ *
+ * See BUG 555, 527
+ *
+ * Scenario:
+ * Some track types (compound) contain references (.title) in their extraData
+ * which Undo doesn't know about.
+ * The caller free's the reference and updates the reference to a new version of the data.
+ * The old data is reallocated
+ * When we Undo the track, the reference is restored to the old data
+ * so the reference (.title) now points to garbage
+ *
+ * The fix is to not free the old data immediately,
+ * but save a reference in UndoStack[].deferFree_da
+ * When the UndoStack[] is reused (in UndoStart) we then free the old memory
+ * (Since is won't be used any more)
+ *
+ * This mechanism can be used for other objects which now use StoreTrackData/ReplaceTrackData
+ *
+ */
+void UndoDeferFree( void * p )
+{
+	undoStack_p us;
+	if ( p == NULL ) {
+		return;
+	}
+	us = &undoStack[undoHead];
+	DYNARR_APPEND( void*, us->deferFree_da, 10 );
+	DYNARR_LAST( void*, us->deferFree_da ) = p;
+	LOG( log_undo, 2, ( "  deferFree defer: "SLOG_FMT"\n", p ) );
+}
 
 /**
  * Record Modify'd track for Undo
@@ -1040,7 +1099,9 @@ void UndoClear( void )
 	ClearStream( &undoStream );
 	ClearStream( &redoStream );
 	for (inx=0; inx<UNDO_STACK_SIZE; inx++) {
-		undoStack[inx].undoStart = undoStack[inx].undoEnd = 0;
+		undoStack_p us = &undoStack[inx];
+		us->undoStart = us->undoEnd = 0;
+		DYNARR_INIT( void*, us->deferFree_da );
 	}
 	SetButtons( FALSE, FALSE );
 }

@@ -37,5 +37,6 @@ BOOL_T UndoDelete( track_p );
 BOOL_T UndoNew( track_p );
 void UndoEnd( void );
 void UndoClear( void );
+void UndoDeferFree( void* );
 
 #endif // !HAVE_CUNDO_H

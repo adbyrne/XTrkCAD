@@ -155,7 +155,7 @@ static void ShowAddElevations(void * unused)
 	if (addElevW == NULL)
 		addElevW = ParamCreateDialog(&addElevPG,
 		                             MakeWindowTitle(_("Change Elevations")), _("Change"), DoAddElev,
-		                             wHide, FALSE, NULL, 0, NULL);
+		                             ParamCancel_Undo, FALSE, NULL, 0, NULL);
 	wShow(addElevW);
 }
 
@@ -201,7 +201,7 @@ static void StartRotateDialog(void * funcVP)
 	rotateDialogCallBack_t func = funcVP;
 	if (rotateW == NULL)
 		rotateW = ParamCreateDialog(&rotatePG, MakeWindowTitle(_("Rotate")),
-		                            _("Ok"), RotateEnterOk, wHide, FALSE, NULL, 0, NULL);
+		                            _("Ok"), RotateEnterOk, ParamCancel_Undo, FALSE, NULL, 0, NULL);
 	ParamLoadControls(&rotatePG);
 	rotateDialogCallBack = func;
 	wShow(rotateW);
@@ -212,7 +212,7 @@ static void StartIndexDialog(void * funcVP)
 	indexDialogCallBack_t func = funcVP;
 	if (indexW == NULL)
 		indexW = ParamCreateDialog(&indexPG, MakeWindowTitle(_("Select Index")),
-		                           _("Ok"), IndexEnterOk, wHide, FALSE, NULL, 0, NULL);
+		                           _("Ok"), IndexEnterOk, ParamCancel_Current, FALSE, NULL, 0, NULL);
 	ParamLoadControls(&indexPG);
 	indexDialogCallBack = func;
 	trackIndex[0] = '\0';
@@ -224,17 +224,19 @@ static void StartMoveDialog(void * funcVP)
 	moveDialogCallBack_t func = funcVP;
 	if (moveW == NULL)
 		moveW = ParamCreateDialog(&movePG, MakeWindowTitle(_("Move")), _("Ok"),
-		                          MoveEnterOk, wHide, FALSE, NULL, 0, NULL);
+		                          MoveEnterOk, ParamCancel_Undo, FALSE, NULL, 0, NULL);
 	ParamLoadControls(&movePG);
 	moveDialogCallBack = func;
-	moveValue = zero;
 	wShow(moveW);
 }
 
 static void MoveEnterOk(void * unused)
 {
 	ParamLoadData(&movePG);
-	moveDialogCallBack(&moveValue);
+	if ( moveValue.x != 0.0 ||
+	     moveValue.y != 0.0 ) {
+		moveDialogCallBack(&moveValue);
+	}
 	wHide(moveW);
 }
 
@@ -248,10 +250,12 @@ static void IndexEnterOk(void * unused)
 static void RotateEnterOk(void * unused)
 {
 	ParamLoadData(&rotatePG);
-	if (angleSystem == ANGLE_POLAR) {
-		rotateDialogCallBack(I2VP(rotateValue * 1000));
-	} else {
-		rotateDialogCallBack(I2VP(rotateValue * 1000));
+	if ( rotateValue != 0.0 ) {
+		if (angleSystem == ANGLE_POLAR) {
+			rotateDialogCallBack(I2VP(rotateValue * 1000));
+		} else {
+			rotateDialogCallBack(I2VP(rotateValue * 1000));
+		}
 	}
 	wHide(rotateW);
 }
@@ -368,10 +372,11 @@ EXPORT void SelectFont(void * unused)
 
 
 EXPORT long stickySet = 0;
+static long stickySet1 = 0;
 static wWin_p stickyW;
 static const char * stickyLabels[33];
 static paramData_t stickyPLs[] = { {
-		PD_TOGGLE, &stickySet, "set", 0,
+		PD_TOGGLE, &stickySet1, "set", 0,
 		stickyLabels
 	}
 };
@@ -381,6 +386,7 @@ static paramGroup_t stickyPG = { "sticky", PGO_RECORD, stickyPLs,
 
 static void StickyOk(void * unused)
 {
+	stickySet = stickySet1;
 	wHide(stickyW);
 }
 
@@ -389,8 +395,9 @@ EXPORT void DoSticky(void * unused)
 {
 	if (!stickyW)
 		stickyW = ParamCreateDialog(&stickyPG,
-		                            MakeWindowTitle(_("Sticky Commands")), _("Ok"), StickyOk, wHide,
+		                            MakeWindowTitle(_("Sticky Commands")), _("Ok"), StickyOk, ParamCancel_Restore,
 		                            TRUE, NULL, 0, NULL);
+	stickySet1 = stickySet;
 	ParamLoadControls(&stickyPG);
 	wShow(stickyW);
 }
@@ -428,7 +435,7 @@ static void CreateDebugW(void)
 	debugPG.paramCnt = debugCnt+1;
 	ParamRegister(&debugPG);
 	debugW = ParamCreateDialog(&debugPG, MakeWindowTitle(_("Debug")), _("Ok"),
-	                           DebugOk, wHide, FALSE, NULL, 0, NULL);
+	                           DebugOk, ParamCancel_Current, FALSE, NULL, 0, NULL);
 	wHide(debugW);
 }
 

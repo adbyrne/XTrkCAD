@@ -28,6 +28,7 @@
 #include "include/stringxtc.h"
 #include "track.h"
 #include "validator.h"
+#include "cundo.h"
 
 #define DEFAULTLINKURL "http://www.xtrkcad.org/"
 #define DEFAULTLINKTITLE "The XTrackCAD Homepage"
@@ -116,16 +117,6 @@ LinkDlgUpdate(
 	}
 }
 
-/**
-* Handle Cancel button: restore old values for layer and position
-*/
-
-static void
-LinkEditCancel( wWin_p junk)
-{
-	ResetIfNotSticky();
-	wHide(linkNoteW);
-}
 
 /**
  * Handle OK button: make sure the entered URL is syntactically valid, update
@@ -141,13 +132,19 @@ LinkEditOK(void *junk)
 	if ( trk == NULL ) {
 		// new note
 		trk = NewNote( -1, linkNoteData.pos, OP_NOTELINK );
+	} else {
+		if ( ! descUndoStarted ) {
+			UndoStart( _("Update Link Note"), "Update Link Note" );
+			descUndoStarted = TRUE;
+		}
+		UndoModify( trk );
 	}
 	struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
 	xx->pos = linkNoteData.pos;
 	SetTrkLayer( trk, linkNoteData.layer );
-	MyFree( xx->noteData.linkData.title );
+	UndoDeferFree( xx->noteData.linkData.title );
+	UndoDeferFree( xx->noteData.linkData.url );
 	xx->noteData.linkData.title = MyStrdup( linkNoteData.title );
-	MyFree( xx->noteData.linkData.url );
 	xx->noteData.linkData.url = MyStrdup( linkNoteData.url );
 	SetBoundingBox( trk, xx->pos, xx->pos );
 	DrawNewTrack( trk );
@@ -167,7 +164,7 @@ CreateEditLinkDialog(char *title)
 		linkNoteW = ParamCreateDialog(&linkNotePG,
 		                              "",
 		                              _("Done"), LinkEditOK,
-		                              LinkEditCancel, TRUE, NULL,
+		                              ParamCancel_Current, TRUE, NULL,
 		                              F_BLOCK,
 		                              LinkDlgUpdate);
 	}
@@ -176,6 +173,7 @@ CreateEditLinkDialog(char *title)
 
 	FillLayerList((wList_p)linkNotePLs[I_LAYER].control);
 	ParamLoadControls(&linkNotePG);
+	descTitle = title;
 
 	// and show the dialog
 	wShow(linkNoteW);

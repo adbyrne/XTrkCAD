@@ -428,7 +428,7 @@ void DoParamFiles(void * junk)
 		ParamRegister(&paramFilePG);
 
 		paramFileW = ParamCreateDialog(&paramFilePG,
-		                               MakeWindowTitle(_("Parameter Files")), _("Ok"), ParamFileOk, NULL,
+		                               MakeWindowTitle(_("Parameter Files")), _("Done"), ParamFileOk, ParamCancel_Null,
 		                               TRUE, NULL, F_RESIZE | F_RECALLSIZE, ParamFileDlgUpdate);
 		paramFile_fs = wFilSelCreate(mainW, FS_LOAD, FSO_MULTIPLEFILES,
 		                             _("Load Parameters"), _("Parameter files (*.xtp)|*.xtp"), LoadParamFile, NULL);

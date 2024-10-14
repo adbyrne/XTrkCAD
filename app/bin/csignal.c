@@ -678,7 +678,7 @@ static void EditAspectDialog ( wIndex_t inx )
 		aspectEditW = ParamCreateDialog (&aspectEditPG,
 		                                 MakeWindowTitle(_("Edit aspect")),
 		                                 _("Ok"), aspectEditOK,
-		                                 wHide, TRUE, NULL,F_BLOCK,NULL);
+		                                 ParamCancel_Current, TRUE, NULL,F_BLOCK,NULL);
 	}
 	ParamLoadControls( &aspectEditPG );
 	wShow( aspectEditW );
@@ -748,7 +748,8 @@ static void EditSignalDialog()
 		signalEditW = ParamCreateDialog (&signalEditPG,
 		                                 MakeWindowTitle(_("Edit signal")),
 		                                 _("Ok"), SignalEditOk,
-		                                 SignalEditCancel, TRUE, NULL,
+		                                 ParamCancel_Custom( SignalEditCancel ),
+		                                 TRUE, NULL,
 		                                 F_RESIZE|F_RECALLSIZE|F_BLOCK,
 		                                 SignalEditDlgUpdate );
 	}

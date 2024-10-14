@@ -1082,7 +1082,7 @@ EXPORT void DoRescale( void * unused )
 {
 	if ( rescalePG.win == NULL ) {
 		ParamCreateDialog( &rescalePG, MakeWindowTitle(_("Rescale")), _("Ok"),
-		                   RescaleDlgOk, wHide, TRUE, NULL, F_BLOCK, RescaleDlgUpdate );
+		                   RescaleDlgOk, ParamCancel_Current, TRUE, NULL, F_BLOCK, RescaleDlgUpdate );
 		LoadScaleList( (wList_p)rescalePLs[I_RESCALE_TO_SCALE].control );
 		LoadGaugeList( (wList_p)rescalePLs[I_RESCALE_TO_GAUGE].control,
 		               GetLayoutCurScaleDesc() ); /* set correct gauge list here */

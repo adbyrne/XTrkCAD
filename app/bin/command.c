@@ -345,7 +345,7 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos)
 	default:
 		break;
 	}
-	if ((rc == C_TERMINATE || rc == C_INFO)
+	if ((rc == C_TERMINATE )
 	    && (commandList[curCommand].options & IC_STICKY)
 	    && (commandList[curCommand].stickyMask & stickySet)) {
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
@@ -371,7 +371,6 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos)
 			break;
 		case C_TERMINATE:
 			InfoMessage("");
-		case C_INFO:
 			Reset();
 			break;
 		}
@@ -411,7 +410,7 @@ EXPORT int ConfirmReset(BOOL_T retry)
 				commandList[curCommand].cmdProc( C_OK, zero);
 				return C_OK;
 			} else if (rc == -1) {
-				return C_CANCEL;
+				return C_ERROR;
 			}
 		} else if (rc == C_TERMINATE) {
 			return C_TERMINATE;
@@ -518,7 +517,6 @@ EXPORT void DoCommandB(void * data)
 #endif
 		break;
 	case C_TERMINATE:
-	case C_INFO:
 		if (rc == C_TERMINATE) {
 			InfoMessage("");
 		}

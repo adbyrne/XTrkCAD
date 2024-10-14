@@ -30,6 +30,7 @@
 #include "track.h"
 #include "trkendpt.h"
 #include "common-ui.h"
+#include "cselect.h"
 
 /*****************************************************************************
  *
@@ -468,6 +469,27 @@ EXPORT BOOL_T RefreshCompound(
 		                  _("Choose another Turnout/Structure to replace:") );
 	}
 }
+
+EXPORT void DoRefreshCompound(void* unused)
+{
+	if (SelectedTracksAreFrozen()) {
+		return;
+	}
+	refreshSpecialInx = -1;
+	refreshReturnVal = FALSE;
+	if (selectedTrackCount > 0) {
+		UndoStart(_("Refresh Compound"), "refresh compound");
+		DoSelectedTracks(RefreshCompound);
+		RefreshCompound(NULL, FALSE);
+		UndoEnd();
+		MainRedraw(); // DoRefreshCompound
+	}
+	else {
+		ErrorMessage(MSG_NO_SELECTED_TRK);
+	}
+}
+
+
 
 /*****************************************************************************
  *

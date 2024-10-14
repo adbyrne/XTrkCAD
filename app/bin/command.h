@@ -81,8 +81,7 @@
 
 #define C_CONTINUE		(100)
 #define C_TERMINATE		(101)
-#define C_INFO			(102)
-#define C_ERROR			(103)
+#define C_ERROR			(102)
 
 /*
  * Command Levels - obsolete

@@ -305,8 +305,10 @@ static void DoControlMgr( void * junk )
 {
 	if (controlPG.win == NULL) {
 		ParamCreateDialog( &controlPG,
-		                   MakeWindowTitle(_("Manage Layout Control Elements")), _("Done"), ControlDone,
-		                   wHide, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK, ControlDlgUpdate );
+		                   MakeWindowTitle(_("Manage Layout Control Elements")),
+		                   _("Done"), ControlDone,
+		                   ParamCancel_Current, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK,
+		                   ControlDlgUpdate );
 	} else {
 		wListClear( controlSelL );
 	}
