@@ -585,7 +585,7 @@ EXPORT void wShow(wWin_p win)
 	wWinShow(win, TRUE);
 }
 
-EXPORT void wHide(wWin_p win)
+EXPORT void wHide(wControl_p win)
 {
 	int inx;
 	wWinShow(win, FALSE);

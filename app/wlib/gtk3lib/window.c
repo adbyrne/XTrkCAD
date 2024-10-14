@@ -463,14 +463,12 @@ void wWinSetTitle(
  */
 
 void wWinSetBusy(
-    wWin_p win,		/* Window */
+    wControl_p win,		/* Window */
     wBool_t busy)		/* Command */
 {
     GdkCursor * cursor;
 
-    if (win->gtkwin == 0) {
-        abort();
-    }
+    g_assert(win->widget != NULL);
 
     if (busy) {
     	GdkDisplay * display = gdk_display_get_default();
@@ -479,13 +477,14 @@ void wWinSetBusy(
         cursor = NULL;
     }
 
-    gdk_window_set_cursor(gtk_widget_get_window(win->gtkwin), cursor);
+    gdk_window_set_cursor(gtk_widget_get_window(win->widget), cursor);
 
     if (cursor) {
         g_object_unref(cursor);
     }
 
-    gtk_widget_set_sensitive(GTK_WIDGET(win->gtkwin), busy==0);
+    /** \todo Check necessity of gtk_widget_set_sensitive */
+    gtk_widget_set_sensitive(GTK_WIDGET(win->widget), busy==0);
 }
 
 /**
@@ -614,7 +613,7 @@ static gint window_delete_event(
 {
  //   wControl_p b;
 
-    gtk_widget_hide(GTK_WINDOW(widget));
+    gtk_widget_hide(widget);
 
     ///* if you return FALSE in the "delete_event" signal handler,
     // * GTK will emit the "destroy" signal.  Returning TRUE means

@@ -628,16 +628,14 @@ wBool_t wWinIsMaximized( wWin_p win);
 void wWinGetSize (		wControl_p window, wWinPix_t * width, wWinPix_t *height );
 void wWinSetSize(		wWin_p, wWinPix_t, wWinPix_t );
 void wWinSetTitle(		wWin_p, const char * );
-void wWinSetBusy(		wWin_p, wBool_t );
+void wWinSetBusy(wControl_p win, wBool_t busy);
 const char * wWinGetTitle(		wWin_p );
 void wWinClear(			wWin_p, wWinPix_t, wWinPix_t, wWinPix_t, wWinPix_t );
 void wMessage(			wWin_p, const char *, wBool_t );
 void wWinTop(			wWin_p );
 void wWinDoCancel(		wWin_p );
 void wWinBlockEnable(		wBool_t );
-void wSetGeometry(wWin_p, wWinPix_t min_width, wWinPix_t max_width,
-                  wWinPix_t min_height, wWinPix_t max_height, wWinPix_t base_width,
-                  wWinPix_t base_height, double aspect_ratio);
+void wSetGeometry(wControl_p win, wWinPix_t min_width, wWinPix_t max_width, wWinPix_t min_height, wWinPix_t max_height, wWinPix_t base_width, wWinPix_t base_height, double aspect_ratio);
 
 void wlibRedraw(wWin_p win);
 
