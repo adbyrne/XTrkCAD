@@ -29,7 +29,7 @@
 
 #include "gtkint.h"
 
-#define LOGOFILENAME "logo.bmp"
+#define LOGOFILENAME "logo.png"
 
 static GtkWidget *window;	/**< splash window handle */
 static GtkLabel *message;	/**< window handle for progress message */
@@ -69,11 +69,11 @@ wCreateSplash(char *appName, char *appVer)
 	gtk_widget_set_margin_bottom(GTK_WIDGET(grid), 12);
 
 	gtk_widget_show(grid);
-	gtk_container_add(GTK_CONTAINER(window), grid);
+	gtk_container_add(GTK_CONTAINER(window), grid); 
 
 	/* add the logo image to the top of the splash window */
-	logoPath = g_strdup_printf("%s/" LOGOFILENAME, wGetAppLibDir());
-	image = gtk_image_new_from_file(logoPath);
+	logoPath = g_strdup_printf("%s/%s", "/bitmaps", LOGOFILENAME);
+	image = gtk_image_new_from_resource(logoPath);
 	gtk_widget_show(image);
 	g_free(logoPath);
 	gtk_grid_attach(GTK_GRID(grid), image, 0, 0, 1, 1);
