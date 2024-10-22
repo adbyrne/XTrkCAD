@@ -230,7 +230,7 @@ struct control {
 };
 
 #define CONTROL_GET_ATTRIBUTES_PTR(base, field) (&(base->attributes.field))
-#define HASDIALOGBUILDER(parent) ((parent)->attributes.window.option & BO_USEBUILDER)
+#define HASDIALOGBUILDER(parent) ((parent)->attributes.window.option & BO_DIALOGFROMBUILDER)
 
 struct wObjCommon {
 	wType_e type;			/**< type of control */
@@ -335,7 +335,7 @@ GtkWidget* wlibAppWinGetMain(void);
 
 /* basicdraw.c */
 
-void wlibBasicClear( wDraw_p bd );
+void wlibBasicClear( struct draw * bd );
 void wlibBasicDrawLine(
 	struct draw * bd,
     wDrawPix_t x0, wDrawPix_t y0,
@@ -360,7 +360,7 @@ void wlibBasicDrawArc(
     wDrawOpts opts);
 
 void wlibBasicDrawString(
-	wDraw_p bd,
+	struct draw * bd,
     wDrawPix_t x, wDrawPix_t y,
     double a,
     char * s,
@@ -372,7 +372,7 @@ void wlibBasicDrawString(
     wDrawOpts opts);
 
 void wlibBasicDrawFillPolygon(
-	wControl_p bd,
+	struct draw * bd,
     wDrawPix_t p[][2],
 	wPolyLine_e type[],
     int cnt,
@@ -382,13 +382,13 @@ void wlibBasicDrawFillPolygon(
 	int open );
 
 void wlibBasicDrawFillRectangle(
-	wDraw_p bd,
+	struct draw * bd,
     wDrawPix_t x0, wDrawPix_t y0,
     wDrawPix_t x1, wDrawPix_t y1,
     wDrawColor color,
     wDrawOpts opts);
 
-void wlibBasicDrawFillCircle(wControl_p drawingArea, 
+void wlibBasicDrawFillCircle(struct draw * drawingArea, 
 	wDrawPix_t x0, 
 	wDrawPix_t y0, 
 	wDrawPix_t r,

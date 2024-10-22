@@ -35,6 +35,11 @@
 #include "gtkint.h"
 #include "i18n.h"
 
+static wBool_t blockCallback;
+#define SetNoCallbackOnClick() (blockCallback = TRUE)
+#define SetCallbackOnClick() (blockCallback = FALSE)
+#define DoCallbackOnClick() (blockCallback == FALSE)
+
 /*
  *****************************************************************************
  *
@@ -52,7 +57,9 @@
 
 void wButtonSetBusy(wControl_p bb, int value)
 {
+	SetNoCallbackOnClick();
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bb->widget), value);
+	SetCallbackOnClick();
 }
 
 /**
@@ -249,7 +256,7 @@ static void buttonClick(
 {
 	struct button *b = CONTROL_GET_ATTRIBUTES_PTR(((wControl_p)value),button);
 
-	if (b->action) {
+	if (b->action && DoCallbackOnClick()) {
 		b->action(((wControl_p)value)->context);
 	}
 }

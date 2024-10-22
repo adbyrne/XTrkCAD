@@ -91,7 +91,7 @@ RestoreWindowSizePos(GtkWidget* window, const char* name)
         g_strfreev(parsedString);
     }
 
-    /** /todo check screen size  */
+    /** \todo check screen size  */
 
     if (width != 0 && height != 0) {
         gtk_window_set_default_size(GTK_WINDOW(window), width, height);
@@ -276,7 +276,7 @@ wWinDialogCreate(wControl_p parent,
     gtk_window_set_title(GTK_WINDOW(dialog), titleStr);
 
     gtk_widget_show(dialog);
-    dcontrol->option = option & BO_USEBUILDER;
+    dcontrol->option = option | BO_DIALOGFROMBUILDER;
     dcontrol->winProc = winProc;
 
     return(winDialog);

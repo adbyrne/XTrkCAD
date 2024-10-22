@@ -9,21 +9,13 @@
     <child type="action">
       <object class="GtkButton" id="id_cancel">
         <property name="use-underline">True</property>
-        <property name="label">_Cancel</property>
-        <property name="visible">True</property>
-      </object>
-    </child>
-    <child type="action">
-      <object class="GtkButton" id="id_ok">
-        <property name="use-underline">True</property>
         <property name="can-default">True</property>
         <property name="label">_Done</property>
         <property name="visible">True</property>
       </object>
     </child>
     <action-widgets>
-      <action-widget response="GTK_RESPONSE_CANCEL">id_cancel</action-widget>
-      <action-widget response="GTK_RESPONSE_OK" default="true">id_ok</action-widget>
+      <action-widget response="GTK_RESPONSE_CANCEL" default="true">id_cancel</action-widget>
     </action-widgets>
     <child internal-child="vbox">
       <object class="GtkBox">
@@ -50,7 +42,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkLabel" id="tip-mess1">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="halign">start</property>
@@ -110,7 +102,7 @@
                 <property name="min-content-width">200</property>
                 <property name="min-content-height">150</property>
                 <child>
-                  <object class="GtkTextView" id="text">
+                  <object class="GtkTextView" id="tip-text">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="editable">False</property>
@@ -159,7 +151,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkBox" id="label">
+          <object class="GtkBox" id="tip-showatstart">
             <property name="orientation">vertical</property>
             <property name="visible">True</property>
             <child>

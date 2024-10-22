@@ -284,24 +284,26 @@ void wWinGetSize(
  */
 
 void wWinSetSize(
-    wWin_p win,		/* Window */
+    wControl_p win,		/* Window */
     wWinPix_t width,		/* Window width */
     wWinPix_t height)		/* Window height */
 {
-    win->busy = TRUE;
-    win->w = width;
-    win->h = height + BORDERSIZE + ((win->option&F_MENUBAR)?MENUH:0);
-    if (win->option&F_RESIZE) {
-       	gtk_window_resize(GTK_WINDOW(win->gtkwin), win->w, win->h);
-    	//gtk_widget_set_size_request(win->widget, win->w-10, win->h-10);
-    }
-    else {
-    	gtk_widget_set_size_request(win->gtkwin, win->w, win->h);
-    	//gtk_widget_set_size_request(win->widget, win->w, win->h);
-    }
+    printf("wWinSetSize is not implemented %s:%d\n", __FILE__, __LINE__);
+    /**  \todo Resize window */
+    //win->busy = TRUE;
+    //win->w = width;
+    //win->h = height + BORDERSIZE + ((win->option&F_MENUBAR)?MENUH:0);
+    //if (win->option&F_RESIZE) {
+    //   	gtk_window_resize(GTK_WINDOW(win->gtkwin), win->w, win->h);
+    //	//gtk_widget_set_size_request(win->widget, win->w-10, win->h-10);
+    //}
+    //else {
+    //	gtk_widget_set_size_request(win->gtkwin, win->w, win->h);
+    //	//gtk_widget_set_size_request(win->widget, win->w, win->h);
+    //}
 
 
-    win->busy = FALSE;
+    //win->busy = FALSE;
 }
 
 /**
@@ -904,7 +906,7 @@ wControl_p wWindowCreate(
     wControl_p newWindow = wlibControlNew(W_POPUP, parent, nameStr, context);
     struct window* windowPrivate = CONTROL_GET_ATTRIBUTES_PTR(newWindow, window);
 
-    newWindow->widget = wlibCreateWindowFromBuilder(newWindow, nameStr, BO_USEBUILDER|  option);
+    newWindow->widget = wlibCreateWindowFromBuilder(newWindow, nameStr, BO_DIALOGFROMBUILDER | option);
     windowPrivate->winProc = winProc;
     windowPrivate->option = option;
 

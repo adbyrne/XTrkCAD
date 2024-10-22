@@ -156,8 +156,8 @@ wWinPix_t wMessageGetHeight(
  * 
  * ### Usage in dialogs
  *
- * - Dynamic supported
- * - Builder todo
+ * - runtime supported
+ * - builder supported
  *
  * ### Options
  * Default
@@ -207,8 +207,8 @@ wControl_p wMessageCreateEx(
 	b = wlibControlNew(B_MESSAGE, parent, NULL, NULL);
 	
 
-	if (flags & BO_USEBUILDER) {
-		/** \todo handle label in a template */
+	if (HASDIALOGBUILDER(parent)) {
+		b->widget = wlibWidgetFromIdWarn(parent, labelStr);
 	} else {
 		b->widget = gtk_label_new(message);
 

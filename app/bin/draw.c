@@ -122,7 +122,7 @@ EXPORT DIST_T pixelBins = 80;
  */
 
 
-EXPORT wWin_p mapW;
+EXPORT wControl_p mapW;
 EXPORT BOOL_T mapVisible;
 EXPORT BOOL_T magneticSnap;
 
@@ -1507,7 +1507,7 @@ EXPORT void MainLayout(
 	DrawMapBoundingBox( TRUE );
 
 	if ( bRedraw ) {
-		MainRedraw();
+//		MainRedraw();
 	}
 
 	if ( bRedraw && wDrawDoTempDraw ) { // Temporary until mswlib supports TempDraw
@@ -2951,7 +2951,7 @@ static paramDrawData_t mapDrawData = { 50, 50, MapRedraw, DoMapPan, &mapD };
 static paramData_t mapPLs[] = {
 	{	PD_DRAW, NULL, "canvas", PDO_DLGRESIZE, &mapDrawData }
 };
-static paramGroup_t mapPG = { "map", PGO_NODEFAULTPROC, mapPLs, COUNT( mapPLs ) };
+static paramGroup_t mapPG = { "map", PGO_NODEFAULTPROC | BO_DIALOGFROMBUILDER, mapPLs, COUNT( mapPLs ) };
 
 
 static void DrawChange( long changes )
@@ -3073,8 +3073,9 @@ EXPORT void DrawInit( int initialZoom )
 	ParamRegister( &mapPG );
 	LOG( log_mapsize, 2, ( "DrawInit/ParamCreateDialog(&mapPG\n" ) );
 	/**  \todo Create map */
-	//mapW = ParamCreateDialog( &mapPG, MakeWindowTitle(_("Map")), NULL, NULL, ParamCancel_Null,
-	//                          FALSE, NULL, F_RESIZE, NULL );
+	mapW = ParamCreateDialog( &mapPG, MakeWindowTitle(_("Map")), NULL, NULL, ParamCancel_Null,
+	                          FALSE, NULL, F_RESIZE, NULL );
+	mapD.d = mapW;
 	//ChangeMapScale();
 
 	AddPlaybackProc( "MOUSE ", (playbackProc_p)PlaybackMain, NULL );

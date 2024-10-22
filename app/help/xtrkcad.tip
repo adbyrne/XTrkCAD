@@ -7,7 +7,7 @@ Set your modeling scale on the "Options|Layout" dialog.  This controls the Turno
 
 A number of example layouts are provided.  These files can be accessed by "Help|Examples".
 
-When installed, the length units are set based on your contry: inches for United States or Canada and centimeters elsewhere.  You can change this on the "Options|Preferences" dialog by choosing between Metric and English.
+When installed, the length units are set based on your country: inches for United States or Canada and centimeters elsewhere.  You can change this on the "Options|Preferences" dialog by choosing between Metric and English.
 
 You can change the overall size of your layout on the "Options|Layout" dialog.
 

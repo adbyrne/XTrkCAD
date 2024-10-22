@@ -28,7 +28,7 @@
 #include "include/utf8convert.h"
 
 static char * mainText = NULL;
-static wWin_p noteW;
+static wControl_p noteW;
 
 static paramTextData_t noteTextData = { 300, 150 };
 static paramData_t notePLs[] = {
@@ -36,7 +36,7 @@ static paramData_t notePLs[] = {
 #define noteT			((wText_p)notePLs[I_NOTETEXT].control)
 	{	PD_TEXT, NULL, "text", PDO_DLGRESIZE, &noteTextData }
 };
-static paramGroup_t notePG = { "note", 0, notePLs, COUNT( notePLs ) };
+static paramGroup_t notePG = { "note", BO_DIALOGFROMBUILDER, notePLs, COUNT( notePLs ) };
 
 
 void ClearNote(void)

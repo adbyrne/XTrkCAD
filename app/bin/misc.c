@@ -558,7 +558,7 @@ EXPORT void DoShowWindow(int index, const char * name, void * data)
 static dynArr_t demoWindows_da;
 #define demoWindows(N) DYNARR_N( wWin_p, demoWindows_da, N )
 
-EXPORT void wShow(wWin_p win)
+EXPORT void wShow(wControl_p win)
 {
 	int inx;
 	if (inPlayback && win != demoW) {
@@ -579,9 +579,9 @@ EXPORT void wShow(wWin_p win)
 			demoWindows(inx) = win;
 		}
 	}
-	if (win != mainW) {
-		wMenuListAdd(winList_mi, -1, wWinGetTitle(win), win);
-	}
+	//if (win != mainW) {
+	//	wMenuListAdd(winList_mi, -1, wWinGetTitle(win), win);
+	//}
 	wWinShow(win, TRUE);
 }
 
@@ -590,6 +590,8 @@ EXPORT void wHide(wControl_p win)
 	int inx;
 	wWinShow(win, FALSE);
 	wWinSetBusy(win, FALSE);
+
+	/**  \todo what is the purpose of the following condition? */
 	if (inMainW && win == aboutW) {
 		return;
 	}
@@ -1029,7 +1031,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 
 	CommandInit();
 	LOG1(log_init, ( "Reset\n" ))
-	Reset();
+	//Reset();
 
 	/*
 	 * SCALE
@@ -1056,7 +1058,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	EnableCommands();
 	LOG1(log_init, ( "Initialization complete\n" ))
 	wSetSplashInfo(_("Initialization complete"));
-	DoChangeNotification( CHANGE_MAIN | CHANGE_MAP);
+	//DoChangeNotification( CHANGE_MAIN | CHANGE_MAP);
 
 	wWinShow(mainW, TRUE);
 	wWinShow(mapW, mapVisible);
@@ -1071,9 +1073,6 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 		if(strstr(XTRKCAD_VERSION,"Beta") != NULL) {
 			NoticeMessage(MSG_BETA_NOTICE, _("Ok"),NULL, XTRKCAD_VERSION);
 		}
-		//else {
-		//    NoticeMessage(_("New version welcome..."),_("Ok"),NULL);
-		//}
 		wPrefSetString("misc", "version", XTRKCAD_VERSION);
 	} else {
 		ShowTip(SHOWTIP_NEXTTIP);
@@ -1107,7 +1106,9 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 		}
 
 	}
-	MainRedraw();
+	wFlush();
+	wWinShow(mainW, TRUE); 
+	//MainRedraw();
 	inMainW = FALSE;
 	if ( bRunTests ) {
 		int nFail = RegressionTestAll();

@@ -41,6 +41,7 @@ typedef enum {
 	PD_TOGGLE,
 	PD_STRING,
 	PD_LIST,
+	PD_DROPLIST,
 	PD_COMBOLIST,
 	PD_BUTTON,
 	PD_COLORLIST,
@@ -181,7 +182,7 @@ typedef void (*paramGroupProc_t) ( long, long );
 typedef void (*paramLayoutProc)( paramData_t *, int, wWinPix_t, wWinPix_t *,
                                  wWinPix_t * );
 typedef void (*paramActionOkProc)( void * );
-typedef void (*paramActionCancelProc)( wWin_p );
+typedef void (*paramActionCancelProc)( wControl_p );
 typedef void (*paramChangeProc)( paramGroup_p, int, void * );
 
 typedef struct paramGroup_t {
@@ -196,7 +197,7 @@ typedef struct paramGroup_t {
 	paramChangeProc changeProc;
 	long action;
 	paramGroupProc_t proc;
-	wWin_p win;
+	wControl_p win;
 	wButton_p okB;
 	wButton_p cancelB;
 	wButton_p helpB;
@@ -207,7 +208,7 @@ typedef struct paramGroup_t {
 
 wIndex_t ColorTabLookup( wDrawColor );
 
-extern char * PREFSECT;
+extern char * prefSect;
 // extern char decodeErrorStr[STR_SHORT_SIZE];
 
 
@@ -228,7 +229,7 @@ extern long angleSystem;
 #define DISTFMT_FRACT_NUM		0x0000
 #define DISTFMT_FRACT_FRC		0x0400
 
-FLOAT_T DecodeFloat( wControl_p entry, BOOL_T * valid);
+FLOAT_T DecodeFloat( wEntry_p entry, BOOL_T * valid);
 FLOAT_T DecodeDistance( wEntry_p entry, BOOL_T * valid);
 char * FormatLong( long );
 char * FormatFloat( FLOAT_T );
@@ -295,7 +296,7 @@ void ParamCancel_Undo(wWin_p);
 
 // Cancel leaves values in current state
 // Most dialogs
-void ParamCancel_Current(wWin_p);
+void ParamCancel_Current(wControl_p window);
 
 // As above and exits command regardless of Sticky
 // print, snap, *noteui
@@ -310,7 +311,7 @@ void ParamCancel_Restore(wWin_p);
 // signalEdit, carDlg, layout, paramfilesearch_ui
 #define ParamCancel_Custom( PROC ) PROC
 
-wWin_p ParamCreateDialog( paramGroup_p, char *, char *, paramActionOkProc,
+wControl_p ParamCreateDialog( paramGroup_p, char *, char *, paramActionOkProc,
                           paramActionCancelProc, BOOL_T, paramLayoutProc, long, paramChangeProc );
 void ParamCreateControls( paramGroup_p, paramChangeProc );
 void ParamLayoutDialog( paramGroup_p );

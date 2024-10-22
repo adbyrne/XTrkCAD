@@ -104,7 +104,7 @@ static unsigned long GtkDrawSetColor(
 }
 
 static cairo_t* gtkDrawCreateCairoContext(
-        wControl_p drawingArea,
+        struct draw * bd,
         cairo_surface_t * surface,
         wDrawWidth width,
         wDrawLineType_e lineType,
@@ -117,9 +117,9 @@ static cairo_t* gtkDrawCreateCairoContext(
 	//	        bd->clip_set,
 	//	        bd->realX, bd->realY, bd->w, bd->h );
 	cairo_t * cairo;
-	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	//struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
 
-	g_assert(drawingArea->type == B_DRAW);
+	//g_assert(drawingArea->type == B_DRAW);
 
 	if (surface) {
 		cairo = cairo_create(surface);
@@ -224,11 +224,12 @@ static cairo_t* gtkDrawCreateCairoContext(
 
 
 wBool_t wDrawSetTempMode(
-        wDraw_p bd,
+        wControl_p bd,
         wBool_t bTemp )
 {
-	wBool_t ret = bd->bTempMode;
-	bd->bTempMode = bTemp;
+
+	wBool_t ret = bd->attributes.draw.bTempMode;
+	bd->attributes.draw.bTempMode = bTemp;
 	if ( ret == FALSE && bTemp == TRUE ) {
 		// Main to Temp drawing
 		wDrawClearTemp( bd );
@@ -279,22 +280,21 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wWinPix_t width,
 #endif
 
 void wDrawDelayUpdate(
-        wDraw_p bd,
+        wControl_p bd,
         wBool_t delay )
 {
 	cairo_rectangle_int_t update_rect;
 
-	if ( (!delay) && bd->delayUpdate ) {
+	if ( (!delay) && bd->attributes.draw.delayUpdate ) {
 		update_rect.x = 0;
 		update_rect.y = 0;
-		update_rect.width = bd->w;
-		update_rect.height = bd->h;
+		wDrawGetSize(bd, &update_rect.width, &update_rect.height);
 		cairo_region_t * cairo_region = cairo_region_create_rectangle(&update_rect);
 		gtk_widget_queue_draw_region(bd->widget, cairo_region);
 		cairo_region_destroy(cairo_region);
 		gtk_widget_queue_draw(bd->widget);
 	}
-	bd->delayUpdate = delay;
+	bd->attributes.draw.delayUpdate = delay;
 }
 
 
@@ -327,7 +327,7 @@ void wDrawLine(
 	x1 = INMAPX(bd,x1);
 	y1 = INMAPY(bd,y1);
 
-	cairo_t* cairo = gtkDrawCreateCairoContext(drawingArea, NULL, width, lineType, color,
+	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, width, lineType, color,
 	                 opts);
 	cairo_move_to(cairo, x0 + 0.5, y0 + 0.5);
 	cairo_line_to(cairo, x1 + 0.5, y1 + 0.5);
@@ -391,7 +391,7 @@ void wDrawArc(
 	h = 2*r;
 
 	// now create the new arc
-	cairo_t* cairo = gtkDrawCreateCairoContext(drawingArea, NULL, width, lineType, color,
+	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, width, lineType, color,
 	                 opts);
 	cairo_new_path(cairo);
 
@@ -440,7 +440,7 @@ void wDrawPoint(
 
 		return;
 	}
-	cairo_t* cairo = gtkDrawCreateCairoContext(drawingArea, NULL, 0, wDrawLineSolid, color,
+	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color,
 	                 opts);
 	cairo_new_path(cairo);
 	cairo_arc(cairo, INMAPX(bd, x0), INMAPY(bd, y0), 0.75, 0, 2 * M_PI);
@@ -563,7 +563,7 @@ void wDrawGetTextSize(
 	*h = 0;
 
 	/* draw text */
-	cairo_t* cairo = gtkDrawCreateCairoContext(drawingArea, NULL, 0, wDrawLineSolid,
+	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid,
 	                 wDrawColorBlack, bd->bTempMode?wDrawOptTemp:0 );
 
 	cairo_identity_matrix(cairo);
@@ -709,7 +709,7 @@ void wDrawPolygon(
 		if (points[i].y < min_y) { min_y = points[i].y; }
 	}
 
-	cairo_t* cairo = gtkDrawCreateCairoContext(drawingArea, NULL, fill?0:dw,
+	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, fill?0:dw,
 	                 fill?wDrawLineSolid:lt, color, opt);
 
 	for(i = 0; i < cnt; ++i) {
@@ -827,7 +827,7 @@ void wDrawFilledCircle(
 	w = 2*r;
 	h = 2*r;
 
-	cairo_t* cairo = gtkDrawCreateCairoContext(drawingArea, NULL, 0, wDrawLineSolid, color,
+	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color,
 	                 opt);
 	cairo_arc(cairo, INMAPX(bd, x0), INMAPY(bd, y0), r, 0, 2 * M_PI);
 	wlibDrawFilled( cairo, color, opt );
@@ -882,7 +882,7 @@ void wDrawClear(
 	GtkAllocation allocation;
 	gtk_widget_get_allocation(drawingArea->widget, &allocation);
 
-	cairo_t* cairo = gtkDrawCreateCairoContext(drawingArea, NULL, 0, wDrawLineSolid,
+	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid,
 	                 wDrawColorWhite, 0);
 	cairo_move_to(cairo, 0, 0);
 	cairo_rel_line_to(cairo, allocation.width, 0);
@@ -953,7 +953,7 @@ void wDrawBitMap(
 	wb = (bm->w+7)/8;
 
 
-	cairo_t* cairo = gtkDrawCreateCairoContext(drawingArea, NULL, 0, wDrawLineSolid, color,
+	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color,
 	                 opts);
 	cairo_pixbuf = bd->pixbuf;
 
@@ -1191,10 +1191,11 @@ void wDrawClip(wControl_p drawingArea,
  * Background
  *
  ******************************************************************************/
-int wDrawSetBackground(    wDraw_p bd, char * path, char ** error)
+int wDrawSetBackground(    wControl_p drawingArea, char * path, char ** error)
 {
-
 	GError *err = NULL;
+	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	assert(drawingArea->type == B_DRAW);
 
 	if (bd->background) {
 		g_object_unref(bd->background);
@@ -1238,7 +1239,7 @@ void wDrawShowBackground( wControl_p drawingArea, wWinPix_t pos_x, wWinPix_t pos
 	g_assert(drawingArea->type == B_DRAW);
 
 	if (drawControl->background) {
-		cairo_t* cairo = gtkDrawCreateCairoContext(drawingArea, NULL, 0, wDrawLineSolid,
+		cairo_t* cairo = gtkDrawCreateCairoContext(drawControl, NULL, 0, wDrawLineSolid,
 		                 wDrawColorWhite, drawControl->bTempMode?wDrawOptTemp:0 );
 		cairo_save(cairo);
 		int pixels_width = gdk_pixbuf_get_width(drawControl->background);

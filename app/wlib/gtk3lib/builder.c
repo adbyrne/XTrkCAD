@@ -269,7 +269,7 @@ wlibCreateWindowFromBuilder(wControl_p window, const char* nameStr, long option)
 		containerName = nameStr;
 	}
 	else {
-		containerName = (option & BO_USEBUILDER ? nameStr : BASICBUILDER_RESOURCE);
+		containerName = (option & BO_DIALOGFROMBUILDER ? nameStr : BASICBUILDER_RESOURCE);
 		resourcePath = g_strconcat(XTRKCAD_RESOURCE_PATH,
 			containerName,
 			".ui",

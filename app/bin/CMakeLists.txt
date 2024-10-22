@@ -185,6 +185,8 @@ target_sources(xtrkcad-lib
     misc.h
     mymalloc.c
     note.h
+    param.c
+    paramwrapper.c
     paramfile.c
     paramfilelist.c
     paramfilesearch_ui.c
@@ -236,7 +238,7 @@ target_sources(xtrkcad-lib
     include/utlist.h
 )
 
-add_subdirectory(dialogparams)
+add_subdirectory(dialogs)
 add_subdirectory(appmainwindow)
 
 # add UTF-8 conversion utilities on Windows

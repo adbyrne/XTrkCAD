@@ -34,8 +34,8 @@
 #include <FreeImage.h>
 #endif
 
-EXPORT wWin_p aboutW;
-static wWin_p tipW;					/**< window handle for tip dialog */
+EXPORT wControl_p aboutW;
+static wControl_p tipW;					/**< window handle for tip dialog */
 
 static long showTipAtStart = 1;		/**< flag for visibility */
 
@@ -47,7 +47,7 @@ static paramTextData_t tipTextData = { 40, 10 };
 
 static paramData_t tipPLs[] = {
 #define I_TIPTEXT		(1)
-#define tipT			((wText_p)tipPLs[I_TIPTEXT].control)
+#define tipT			(tipPLs[I_TIPTEXT].control)
 	{   PD_MESSAGE, N_("Did you know..."), "mess1", 0, NULL, NULL, BM_LARGE },
 	{   PD_TEXT, NULL, "text", PDO_DLGRESIZE, &tipTextData, NULL, BO_READONLY|BT_TOP|BT_CHARUNITS },
 	{   PD_BUTTON, ShowTip, "prev", PDO_DLGRESETMARGIN, NULL, N_("Previous Tip"), 0L, I2VP(SHOWTIP_FORCESHOW | SHOWTIP_PREVTIP) },
@@ -55,7 +55,7 @@ static paramData_t tipPLs[] = {
 	{   PD_TOGGLE, &showTipAtStart, "showatstart", PDO_DLGCMDBUTTON, tipLabels, NULL, BC_NOBORDER }
 };
 
-static paramGroup_t tipPG = { "tip", 0, tipPLs, COUNT( tipPLs ) };
+static paramGroup_t tipPG = { "tip", BO_DIALOGFROMBUILDER, tipPLs, COUNT( tipPLs ) };
 
 /**
  * Create and initialize the tip of the day window. The dialog box is created and the list of tips is loaded
@@ -193,7 +193,7 @@ static paramData_t aboutPLs[] = {
 #define I_ABOUTVERSION			(1)
 	{   PD_MESSAGE, NULL, "mess1", PDO_DLGNEWCOLUMN, NULL, NULL, BM_LARGE },
 #define I_COPYRIGHT				 (2)
-#define COPYRIGHT_T			((wText_p)aboutPLs[I_COPYRIGHT].control)
+#define COPYRIGHT_T			(aboutPLs[I_COPYRIGHT].control)
 	{   PD_TEXT, NULL, "text", PDO_DLGRESIZE, &aboutTextData, NULL, BO_READONLY|BT_TOP|BT_CHARUNITS }
 };
 static paramGroup_t aboutPG = { "about", 0, aboutPLs, COUNT( aboutPLs ) };
@@ -204,8 +204,6 @@ static paramGroup_t aboutPG = { "about", 0, aboutPLs, COUNT( aboutPLs ) };
 
 void CreateAboutW(void *ptr)
 {
-//	char *copyright = sAboutProd;
-
 	if (!aboutW) {
 		aboutPLs[I_ABOUTDRAW].winData = wIconCreatePixMap(xtc_xpm);
 		ParamRegister(&aboutPG);

@@ -334,7 +334,7 @@ EXPORT void FlipLayer( void * layerVP )
 		if (!layers[layer].button_off) {
 			wButtonSetBusy(layer_btns[layer], layers[layer].visible);
 		}
-		NoticeMessage(MSG_LAYER_HIDE, _("Ok"), NULL);
+		NoticeMessage(MSG_LAYER_HIDE, _("ok"), NULL);
 		return;
 	}
 
@@ -342,12 +342,12 @@ EXPORT void FlipLayer( void * layerVP )
 	visible = !layers[layer].visible;
 	layers[layer].visible = visible;
 
-	if (layer < NUM_BUTTONS) {
-		if (!layers[layer].button_off) {
-			wButtonSetBusy(layer_btns[layer], visible != 0);
-			wButtonSetIcon(layer_btns[layer], (char *)show_layer_bmps[layer]);
-		}
-	}
+	//if (layer < NUM_BUTTONS) {
+	//	if (!layers[layer].button_off) {
+	//		wButtonSetBusy(layer_btns[layer], visible != 0);
+	//		wButtonSetIcon(layer_btns[layer], (char *)show_layer_bmps[layer]);
+	//	}
+	//}
 
 	/* Set visible on related layers other than current */
 	for (int i = 0; i < layers[layer].layerLinkList.cnt; i++) {
@@ -361,7 +361,7 @@ EXPORT void FlipLayer( void * layerVP )
 		}
 	}
 
-	RedrawLayer(layer, TRUE);
+	//RedrawLayer(layer, TRUE);
 }
 
 static char lastSettings[STR_SHORT_SIZE];
@@ -2127,7 +2127,7 @@ static char** show_layer_digits[3][10] = {
 void InitLayers(int cmdGroup)
 {
 	unsigned int i;
-	wPrefGetInteger(PREFSECT, "layer-button-count", &layerCount, layerCount);
+	wPrefGetInteger(prefSect, "layer-button-count", &layerCount, layerCount);
 
 	for (i = 0; i < COUNT(layerRawColorTab); i++) {
 		layerColorTab[i] = wDrawFindColor(layerRawColorTab[i]);

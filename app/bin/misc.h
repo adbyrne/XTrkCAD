@@ -91,8 +91,8 @@ extern void MapWindowToggleShow( void * unused );
 extern void MapWindowShow( int state );
 extern void DoShowWindow(int index, const char * name, void * data);
 
-extern void wShow( wWin_p );
-extern void wHide( wWin_p );
+extern void wShow( wControl_p window);
+extern void wHide( wControl_p window );
 extern void CloseDemoWindows( void );
 extern void DefaultProc( wWin_p, winProcEvent, void * );
 typedef void (*changeNotificationCallBack_t)( long );

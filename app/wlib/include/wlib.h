@@ -626,7 +626,7 @@ void wWinShow( wControl_p control, wBool_t visibility);
 wBool_t wWinIsVisible(		wWin_p );
 wBool_t wWinIsMaximized( wWin_p win);
 void wWinGetSize (		wControl_p window, wWinPix_t * width, wWinPix_t *height );
-void wWinSetSize(		wWin_p, wWinPix_t, wWinPix_t );
+void wWinSetSize(		wControl_p, wWinPix_t, wWinPix_t );
 void wWinSetTitle(		wWin_p, const char * );
 void wWinSetBusy(wControl_p win, wBool_t busy);
 const char * wWinGetTitle(		wWin_p );
@@ -669,7 +669,7 @@ wBool_t wWinIsTemplated(wWin_p win);
 #define BO_ENTER    0
 #define BO_REPEAT   (1L<<11)
 #define BO_IGNFOCUS	(1L<<12)
-#define BO_USEBUILDER (1L<<13)
+#define BO_DIALOGFROMBUILDER (1L<<13)
 
 wWinPix_t wLabelWidth(		const char * );
 const char * wControlGetHelp(		wControl_p );
@@ -914,9 +914,9 @@ void wDrawClear(
     wControl_p bd);
 
 void wDrawClearTemp(wControl_p drawingArea);
-wBool_t wDrawSetTempMode(	wDraw_p, wBool_t );
+wBool_t wDrawSetTempMode( wControl_p bd, wBool_t bTemp);
 
-void wDrawDelayUpdate(		wDraw_p, wBool_t );
+void wDrawDelayUpdate(		wControl_p, wBool_t );
 void wDrawClip(wControl_p drawingArea,
     wDrawPix_t x,
     wDrawPix_t y,
@@ -959,7 +959,7 @@ void* wDrawGetContext(
     wControl_p drawingArea);
 void wDrawSaveImage(		wDraw_p );
 void wDrawRestoreImage(		wDraw_p );
-int wDrawSetBackground(    wDraw_p, char * path, char ** error);
+int wDrawSetBackground(wControl_p bd, char* path, char** error);
 void wDrawCloneBackground(wDraw_p from, wDraw_p to);
 void wDrawShowBackground(wControl_p drawingArea, wWinPix_t pos_x, wWinPix_t pos_y,
     wWinPix_t size, wAngle_t angle, int screen);
