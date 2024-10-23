@@ -179,7 +179,22 @@ GdkPixbuf *wlibNewPixbufFromXBM(wIcon_p ip)
 	return(pixbuf);
 }
 
+static GtkWidget *
+AddImageToButton(wControl_p button, GdkPixbuf* pixbuf)
+{
+	GtkWidget* image; 
+	image = gtk_image_new_from_pixbuf(pixbuf);
+	gtk_container_add(GTK_CONTAINER(button->widget), image);
+	g_object_ref_sink(pixbuf);
+	g_object_unref((gpointer)pixbuf);
+	return(image);
+}
 
+static GtkCallback
+DestroyImage(GtkWidget* image, gpointer unused)
+{
+	gtk_widget_destroy(image);
+}
 
 /**
  * Change the icon of a button.
@@ -205,10 +220,9 @@ void wButtonSetIcon(wControl_p bb, wIcon_p icon)
 	}
 
 	if (pixbuf) {
-		image = gtk_image_new_from_pixbuf(pixbuf);
-		gtk_container_add(GTK_CONTAINER(bb->widget), image);
-		g_object_ref_sink(pixbuf);
-		g_object_unref((gpointer)pixbuf);
+		gtk_container_foreach(GTK_CONTAINER(bb->widget), (GtkCallback)DestroyImage, (gpointer)NULL);
+
+		image = AddImageToButton(bb, pixbuf);
 
 		if (image) {
 			gtk_widget_show(image);
@@ -354,6 +368,7 @@ wControl_p wButtonCreate(
 	                 G_CALLBACK(buttonClick), b);
 
 	wlibAddHelpString(b->widget, helpStr);
+	wlibAddTooltip(b->widget, parent->name, helpStr);
 	return b;
 }
 
@@ -420,9 +435,7 @@ wControl_p wButtonCreateForToolbar(
 	GtkStyleContext* styleContext;
 	GtkAspectFrame* aspectFrame;
 
-	/**
-	 * \todo make sure that parent is appmainwindow.
-	 */
+	g_assert(parent->type == W_MAIN);
 
 	buttonControl = wlibControlNew(B_BUTTON, parent, helpStr, context);
 	buttonAttributes = CONTROL_GET_ATTRIBUTES_PTR(buttonControl,button);
