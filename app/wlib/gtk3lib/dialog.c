@@ -203,17 +203,10 @@ wDialogButtonsConfigure(wControl_p dialog, const char* okLabel,
  * 
  * ### Usage in dialogs
  *
- * - Generated: used to load the basic dialog 
- * - Builder: yes
+ * - runtime: used to load the basic dialog 
+ * - builder: yes
  *
  * ### Options
- * DO_FILESYSTEM
- * : nameStr is the full path for a XML ui file with "ui" extension
- * BO_USEBUILDER
- * : nameStr is a builder file in the resources that will be used to 
- * create the complete dialog
- * default
- * : the dialog frame including a grid is created from a default ui definition
  *  
  * \param parent    IN  parent window for new dialog
  * \param helpStr   IN  help topic 
@@ -268,9 +261,6 @@ wWinDialogCreate(wControl_p parent,
     if (option & F_CENTER) {
         gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER_ON_PARENT);
     }
-
-    g_signal_connect(G_OBJECT(dialog), "response",
-        G_CALLBACK(response_signal), winDialog);
 
     gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parentWindow));
     gtk_window_set_title(GTK_WINDOW(dialog), titleStr);

@@ -946,26 +946,26 @@ EXPORT void CreateMenus(void)
 	/*
 	 * FILE MENU
 	 */
-	MiscMenuItemCreate(fileM, NULL, "menuFile-clear", _("&New ..."), ACCL_NEW,
+	MiscMenuItemCreate(fileM, NULL, "clear", _("&New ..."), ACCL_NEW,
 	                   DoClear, 0, NULL);
-	wMenuPushCreate(fileM, "menuFile-load", _("&Open ..."), ACCL_OPEN,
+	wMenuPushCreate(fileM, "load", _("&Open ..."), ACCL_OPEN,
 	                ChkLoad, NULL);
 	wMenuSeparatorCreate(fileM);
 
-	wMenuPushCreate(fileM, "menuFile-save", _("&Save"), ACCL_SAVE,
+	wMenuPushCreate(fileM, "save", _("&Save"), ACCL_SAVE,
 	                DoSave, NULL);
-	wMenuPushCreate(fileM, "menuFile-saveAs", _("Save &As ..."), ACCL_SAVEAS,
+	wMenuPushCreate(fileM, "saveAs", _("Save &As ..."), ACCL_SAVEAS,
 	                DoSaveAs, NULL);
-	wMenuPushCreate(fileM, "menuFile-revert", _("Revert"), ACCL_REVERT,
+	wMenuPushCreate(fileM, "revert", _("Revert"), ACCL_REVERT,
 	                ChkRevert, NULL);
 	wMenuSeparatorCreate(fileM);
 
 	cmdGroup = BG_FILE;
-	AddToolbarButton("menuFile-clear", wIconCreatePixMap(doc_new_xpm3[iconSize]),
+	AddToolbarButton("clear", wIconCreatePixMap(doc_new_xpm3[iconSize]),
 	                 IC_MODETRAIN_TOO, DoClear, NULL);
-	AddToolbarButton("menuFile-load", wIconCreatePixMap(doc_open_xpm3[iconSize]),
+	AddToolbarButton("load", wIconCreatePixMap(doc_open_xpm3[iconSize]),
 	                 IC_MODETRAIN_TOO, ChkLoad, NULL);
-	AddToolbarButton("menuFile-save", wIconCreatePixMap(doc_save_xpm3[iconSize]),
+	AddToolbarButton("save", wIconCreatePixMap(doc_save_xpm3[iconSize]),
 	                 IC_MODETRAIN_TOO, DoSave, NULL);
 
 	cmdGroup = BG_PRINT;

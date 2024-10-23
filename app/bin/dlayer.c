@@ -2342,7 +2342,7 @@ void InitLayers(int cmdGroup)
 			layer_btns[i] = AddToolbarButton(message, show_layer_bmps[i], IC_MODETRAIN_TOO,
 			                                 FlipLayer, I2VP(i) );
 			/* set state of button */
-			//wButtonSetBusy(layer_btns[i], 1);
+			wButtonSetBusy(layer_btns[i], TRUE);
 		}
 
 		layerName = FormatLayerName(i);
