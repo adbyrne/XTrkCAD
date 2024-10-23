@@ -1147,12 +1147,12 @@ void wDrawGetSize(
  */
 
 double wDrawGetDPI(
-        wDraw_p d )
+        wControl_p d )
 {
 	//if (d == &psPrint_d)
 	//return 1440.0;
 	//else
-	return d->dpi;
+	return d->attributes.draw.dpi;
 }
 
 
