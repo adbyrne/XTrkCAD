@@ -244,7 +244,8 @@ void CreateControls(paramGroup_p group)
 		LOG(log_dialogs, 2, ("%2d: %s\n", inx, pd->nameStr));
 
 		DynStringPrintf(&helpString, "%s-%s", group->nameStr, pd->nameStr);
-		CreateControl(pd, DynStringToCStr(&helpString) );
+		//CreateControl(pd, DynStringToCStr(&helpString) );
+		CreateControl(pd, pd->nameStr);
 		DynStringClear(&helpString);
 
 	}

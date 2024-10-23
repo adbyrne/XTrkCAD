@@ -42,7 +42,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="tip-mess1">
+              <object class="GtkLabel" id="mess1">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="halign">start</property>
@@ -70,7 +70,7 @@
             <property name="halign">fill</property>
             <property name="vexpand">True</property>
             <child>
-              <object class="GtkButton" id="tip-prev">
+              <object class="GtkButton" id="prev">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
@@ -102,7 +102,7 @@
                 <property name="min-content-width">200</property>
                 <property name="min-content-height">150</property>
                 <child>
-                  <object class="GtkTextView" id="tip-text">
+                  <object class="GtkTextView" id="text">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="editable">False</property>
@@ -120,7 +120,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="tip-next">
+              <object class="GtkButton" id="next">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
@@ -151,7 +151,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkBox" id="tip-showatstart">
+          <object class="GtkBox" id="showatstart">
             <property name="orientation">vertical</property>
             <property name="visible">True</property>
             <child>
