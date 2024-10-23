@@ -589,7 +589,7 @@ typedef enum {	wCursorNormal,
                 wCursorCross,
                 wCursorQuestion
              } wCursor_t;
-void wSetCursor( wDraw_p, wCursor_t );
+void wSetCursor( wControl_p window, wCursor_t cursor);
 #define defaultCursor wCursorCross
 
 const char * wMemStats( void );
@@ -924,7 +924,7 @@ void wDrawClip(wControl_p drawingArea,
     wDrawPix_t h);
 
 /* Geometry */
-double wDrawGetDPI(		wDraw_p );
+double wDrawGetDPI(	wControl_p drawingArea );
 double wDrawGetMaxRadius( wControl_p drawingArea);
 void wDrawSetSize(
     wControl_p drawingArea,

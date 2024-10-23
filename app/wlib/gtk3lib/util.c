@@ -91,10 +91,10 @@ static bool audioOn;
  *
  * \param ip the XBM data
  * \returns the pixbuf
+ * \todo Compare to similar function in pixbuf.c
  */
 
-GdkPixbuf* wlibPixbufFromXBM(
-                             wIcon_p ip)
+GdkPixbuf* wlibPixbufFromXBM( wIcon_p ip)
 {
     GdkPixbuf * pixbuf;
 
@@ -109,7 +109,8 @@ GdkPixbuf* wlibPixbufFromXBM(
     wb = (ip->w + 7) / 8;
     pixmapData = (char**) malloc((3 + ip->h) * sizeof *pixmapData);
     pixmapData[0] = line0;
-    rgb = wDrawGetRGB(ip->color);
+    rgb = ip->color;
+
     sprintf(line0, " %ld %ld 2 1", ip->w, ip->h);
     sprintf(line2, "# c #%2.2lx%2.2lx%2.2lx", (rgb >> 16)&0xFF, (rgb >> 8)&0xFF,
             rgb & 0xFF);
@@ -151,8 +152,6 @@ GdkPixbuf* wlibPixbufFromXBM(
 
 void wlibAddLabel(wControl_p b, wWinPix_t x, wWinPix_t y, const char * labelStr)
 {
-    GtkRequisition requisition, reqwidget;
-
     if (labelStr != NULL) {
         b->label = gtk_label_new(wlibConvertInput(labelStr));
         gtk_widget_set_halign(b->label, GTK_ALIGN_END);
@@ -406,7 +405,7 @@ extern long dontHideCursor;
  * \param cursor IN
  */
 
-void wSetCursor(wDraw_p bd, wCursor_t cursor)
+void wSetCursor(wControl_p bd, wCursor_t cursor)
 {
 	static GdkCursor * gdkcursors[wCursorQuestion+1];
 	GdkCursor * gdkcursor;
@@ -527,7 +526,7 @@ char * wlibConvertInput(const char * inString)
         }
     }
 
-    inCharCnt = cp - inString;
+    inCharCnt = (int)(cp - inString);
 
     if (extCharCnt == '\0') {
         return (char*) inString;
@@ -568,7 +567,7 @@ char * wlibConvertOutput(const char * inString)
         }
     }
 
-    inCharCnt = cp - inString;
+    inCharCnt = (int)(cp - inString);
 
     if (extCharCnt == '\0') {
         return (char*) inString;
@@ -745,7 +744,7 @@ void wControlLinkedActive(wControl_p b, int active)
     wControl_p savePtr = b;
 
     if (savePtr->type == B_MENUITEM) {
-        wMenuPushEnable((wMenuPush_p) savePtr, active);
+        wMenuPushEnable( savePtr, active);
     }
     else {
         wControlActive(savePtr, active);
@@ -756,7 +755,7 @@ void wControlLinkedActive(wControl_p b, int active)
     while (savePtr && savePtr != b) {
 
         if (savePtr->type == B_MENUITEM) {
-            wMenuPushEnable((wMenuPush_p) savePtr, active);
+            wMenuPushEnable(savePtr, active);
         }
         else {
             wControlActive(savePtr, active);
