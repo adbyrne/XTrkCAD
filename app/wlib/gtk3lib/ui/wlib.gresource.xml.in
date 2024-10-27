@@ -6,6 +6,7 @@
     <file preprocess="xml-stripblanks">demo.ui</file>
     <file preprocess="xml-stripblanks">map.ui</file>
     <file preprocess="xml-stripblanks">note.ui</file>
+    <file preprocess="xml-stripblanks">rgbcolor.ui</file>
     <file preprocess="xml-stripblanks">tip.ui</file>
     <file preprocess="xml-stripblanks">toolwindow.ui</file>
     <file>xtrackcad.css</file>  

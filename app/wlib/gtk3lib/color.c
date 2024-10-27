@@ -185,7 +185,7 @@ wDrawColor wColorSelectButtonGetColor(
  * 
  * ### Usage in dialogs
  *
- * - Generated: yes
+ * - runtime: yes
  *
  * ### Options
  * BB_DEFAULT
@@ -226,9 +226,7 @@ wControl_p wColorSelectButtonCreate(
 	ccontrol = CONTROL_GET_ATTRIBUTES_PTR(b, colorbutton);
 
 	if (HASDIALOGBUILDER(parent)) {
-		/** 
-
-		*/
+		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
 	} else {
 		b->widget = gtk_color_button_new();
 		if (!b->widget) { exit(1); }

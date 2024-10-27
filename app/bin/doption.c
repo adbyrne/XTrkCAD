@@ -562,7 +562,7 @@ static paramData_t colorPLs[] = {
 	{ PD_COLORLIST, &bridgeColor, "bridge", PDO_NOPSHUPD, NULL, N_("Bridge Base"), 0, I2VP(CHANGE_MAIN) },
 	{ PD_COLORLIST, &roadbedColor, "roadbed", PDO_NOPSHUPD, NULL, N_("Track Roadbed"), 0, I2VP(CHANGE_MAIN) }
 };
-static paramGroup_t colorPG = { "rgbcolor", PGO_RECORD|PGO_PREFGROUP, colorPLs, COUNT( colorPLs ) };
+static paramGroup_t colorPG = { "rgbcolor", PGO_RECORD|PGO_PREFGROUP|BO_DIALOGFROMBUILDER, colorPLs, COUNT( colorPLs ) };
 
 
 

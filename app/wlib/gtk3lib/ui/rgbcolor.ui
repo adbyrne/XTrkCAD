@@ -281,7 +281,7 @@
                                     </packing>
                                 </child>
                                 <child>
-                                    <object class="GtkColorButton"id="crossmajor">
+                                    <object class="GtkColorButton" id="crossmajor">
                                         <property name="visible">True</property>
                                     </object>
                                     <packing>
