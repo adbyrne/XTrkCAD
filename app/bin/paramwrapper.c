@@ -1,8 +1,6 @@
 /**
  * \file   paramwrapper.c
  * \brief  Wrapper around old Param*() functions to facilitate simple switch to new variants
- *
- * \author Martin Fischer
  */
 
  /*  XTrackCad - Model Railroad CAD
@@ -26,7 +24,7 @@
 #include <wlib.h>
 
 #include <param.h>
-#include <dialogs.h>
+#include <form.h>
 
 void ParamLoadControlsOrig(paramGroup_p);
 void ParamLoadControlOrig(paramGroup_p, int);
@@ -69,7 +67,7 @@ EXPORT void ParamLoadControls(
     paramGroup_p pg)
 {
     if (USESBUILDER(pg)) {
-        //DialogLoadControls(pg);
+        FormLoadControls(pg);
     }
     else {
         ParamLoadControlsOrig(pg);
@@ -81,7 +79,7 @@ EXPORT void ParamLoadControl(
     int inx)
 {
     if (USESBUILDER(pg)) {
-        //DialogLoadControl(pg, inx);
+        FormLoadSingleControl(pg, inx);
     }
     else {
         ParamLoadControlOrig(pg, inx);
@@ -120,8 +118,8 @@ void ParamLoadData(
 EXPORT void ParamRegister(paramGroup_p pg)
 {
     if (USESBUILDER(pg)) {
-        DialogsRegister(pg);
-        DialogsSetDefaultValues(pg);
+        FormRegister(pg);
+        FormSetDefaultValues(pg);
     }
     else {
         ParamRegisterOrig(pg);
@@ -219,7 +217,7 @@ wControl_p ParamCreateDialog(
     wControl_p dialog;
     if (group->options & BO_DIALOGFROMBUILDER) {
         char* cancelLabel = (winOption & PD_F_ALT_CANCELLABEL ? _("Close") : _("Cancel"));
-        dialog = DialogsCreateDialog(group, title, 
+        dialog = FormCreateDialog(group, title, 
             okLabel, okProc, 
             cancelLabel, cancelProc, 
             needHelpButton,

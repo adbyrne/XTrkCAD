@@ -238,7 +238,7 @@ target_sources(xtrkcad-lib
     include/utlist.h
 )
 
-add_subdirectory(dialogs)
+add_subdirectory(form)
 add_subdirectory(appmainwindow)
 
 # add UTF-8 conversion utilities on Windows

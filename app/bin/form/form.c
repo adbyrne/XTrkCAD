@@ -26,8 +26,8 @@
 #include <wlib.h>
 #include <param.h>
 #include <dynarray.h>
-#include <dialogs.h>
-#include "dialogsprivate.h"
+#include <form.h>
+#include "formprivate.h"
 
 int log_dialogs = 0;
 static dynArr_t dialogGroups_da;
@@ -41,17 +41,17 @@ static AddGroupPtrToItem(paramGroup_p pg)
 	}
 }
 
-void DialogsRegister(paramGroup_p pg)
+void FormRegister(paramGroup_p pg)
 {
 	DYNARR_APPEND(paramGroup_p, dialogGroups_da, 10);
 	dialogGroups(dialogGroups_da.cnt - 1) = pg;
 
 	AddGroupPtrToItem(pg);
 
-	DialogsSetDefaultValues(pg);
+	FormSetDefaultValues(pg);
 }
 
-static void DialogsButtonOk(paramGroup_p group)
+static void ButtonOk(paramGroup_p group)
 {
 	LOG(log_dialogs, 1, ("DialogsButtonOk: %s\n", group->nameStr));
 	if (!ParamCheckInputs(group, (wControl_p)group->okB)) {
@@ -72,7 +72,7 @@ static void DialogsButtonOk(paramGroup_p group)
 	LOG(log_dialogs, 1, ("DialogsButtonOk -> Ok\n"));
 }
 
-static void DialogsButtonCancel(paramGroup_p group)
+static void ButtonCancel(paramGroup_p group)
 {
 
 	//if (recordParamF && group->nameStr) {
@@ -85,7 +85,7 @@ static void DialogsButtonCancel(paramGroup_p group)
 }
 
 
-static void DialogsDlgProc(
+static void DialogProc(
 	wControl_p win,
 	winProcEvent e,
 	void* refresh,
@@ -127,7 +127,7 @@ static void DialogsDlgProc(
  * \param IN changeProc ???
  */
 
-wControl_p DialogsCreateDialog(
+wControl_p FormCreateDialog(
 	paramGroup_p group,
 	char* title,
 	char* okLabel,
@@ -156,16 +156,16 @@ wControl_p DialogsCreateDialog(
 	}
 
 	group->win = wWinDialogCreate(mainW, helpStr, title, group->nameStr, 
-		F_AUTOSIZE | winOption | BO_DIALOGFROMBUILDER, DialogsDlgProc, group);
+		F_AUTOSIZE | winOption | BO_DIALOGFROMBUILDER, DialogProc, group);
 
 	if (okLabel && okProc) {
 		sprintf(helpStr, "%s-ok", group->nameStr);
 		group->okB = wButtonCreate(group->win, 0, 0, "id_ok", okLabel, BB_DEFAULT, 0,
-			DialogsButtonOk, group);
+			ButtonOk, group);
 	}
 	if (group->cancelProc) {
 		group->cancelB = wButtonCreate(group->win, 0, 0, "id_cancel", cancelLabel, BB_CANCEL,
-			0, DialogsButtonCancel, group);
+			0, ButtonCancel, group);
 	}
 	if (needHelpButton) {
 		sprintf(helpStr, "cmd%s", group->nameStr);
@@ -194,7 +194,7 @@ wControl_p DialogsCreateDialog(
 }
 
 void
-DialogsInit(void)
+FormInit(void)
 {
 	log_dialogs= LogFindIndex("dialogs");
 	DYNARR_INIT(paramGroup_p, dialogGroups_da);

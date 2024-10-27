@@ -1,8 +1,6 @@
 /**
  * \file   createcontrols.c
  * \brief  
- *
- * \author Martin Fischer
  */
 
  /*  XTrackCad - Model Railroad CAD
@@ -25,12 +23,42 @@
 
 #include <wlib.h>
 #include <param.h>
-#include <dialogs.h>
-#include "dialogsprivate.h"
+#include <form.h>
+#include "formprivate.h"
 #include <dynstring.h>
 
 
-static void DialogsButtonPush(void* dp)
+static void ColorSelectPush(void* dp, wDrawColor dc)
+{
+	paramData_p p = (paramData_p)dp;
+	long rgb = wDrawGetRGB(dc);
+	while (dc == drawColorPreviewSelected || dc == drawColorPreviewUnselected) {
+		// The user picked a special color, tweak it
+		rgb -= 1; // Make it very close but different
+		if ((rgb & 0xFF) == 0)
+			// Ran out of room - bail
+		{
+			break;
+		}
+		dc = wDrawFindColor(rgb);
+	}
+	//if (recordParamF && (p->option & PDO_NORECORD) == 0 && p->group->nameStr
+	//	&& p->nameStr) {
+	//	fprintf(recordParamF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr,
+	//		wDrawGetRGB(dc));
+	//	fflush(recordParamF);
+	//}
+	if ((p->option & PDO_NOPSHUPD) == 0 && p->valueP) {
+		*(wDrawColor*)(p->valueP) = dc;
+	}
+	if ((p->option & PDO_NOPSHACT) == 0 && p->group->changeProc) {
+		p->group->changeProc(p->group, (int)(p - p->group->paramPtr), &dc);
+	}
+}
+
+
+
+static void ButtonPush(void* dp)
 {
 	paramData_p p = (paramData_p)dp;
 	//if (recordParamF && (p->option & PDO_NORECORD) == 0 && p->group->nameStr
@@ -49,7 +77,7 @@ static void DialogsButtonPush(void* dp)
 }
 
 
-static void DialogsChoicePush(long valL, void* dp)
+static void ChoicePush(long valL, void* dp)
 {
 	paramData_p p = (paramData_p)dp;
 
@@ -132,7 +160,7 @@ static void CreateControl(
 		break;
 	case PD_TOGGLE:
 		pd->control = (wControl_p)wToggleCreate(win, -1, -1, helpStr, _(pd->winLabel),
-			pd->winOption, pd->winData, NULL, DialogsChoicePush, pd);
+			pd->winOption, pd->winData, NULL, ChoicePush, pd);
 		break;
 	case PD_LIST:
 		listDataP = (paramListData_t*)pd->winData;
@@ -187,8 +215,8 @@ static void CreateControl(
 		listDataP->height = wControlGetHeight(pd->control);
 		break;
 	case PD_COLORLIST:
-		//pd->control = (wControl_p)wColorSelectButtonCreate(win, xx, yy, helpStr,
-		//	_(pd->winLabel), pd->winOption, 0, NULL, ParamColorSelectPush, pd);
+		pd->control = (wControl_p)wColorSelectButtonCreate(win, -1, -1, helpStr,
+			_(pd->winLabel), pd->winOption, 0, NULL, ColorSelectPush, pd);
 		break;
 	case PD_MESSAGE:
 		pd->control = (wControl_p)wMessageCreateEx(win, 0, 0, helpStr, 0,
@@ -196,7 +224,7 @@ static void CreateControl(
 		break;
 	case PD_BUTTON:
 		pd->control = (wControl_p)wButtonCreate(win, -1, -1, helpStr, _(pd->winLabel),
-			pd->winOption, 0, DialogsButtonPush, pd);
+			pd->winOption, 0, ButtonPush, pd);
 		break;
 	case PD_MENU:
 		menu = wMenuCreate(win, xx, yy, helpStr, _(pd->winLabel), pd->winOption);

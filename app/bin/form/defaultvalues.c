@@ -1,8 +1,6 @@
 /**
  * \file   defaultvalues.c
  * \brief  Save / Restore default values for dialog items
- *
- * \author Martin Fischer
  */
 
  /*  XTrackCad - Model Railroad CAD
@@ -25,8 +23,8 @@
 
 #include <wlib.h>
 #include <param.h>
-#include <dialogs.h>
-#include "dialogsprivate.h"
+#include <form.h>
+#include "formprivate.h"
 
 #define HASDEFAULT(p) (p->valueP && !(p->option&PDO_NOPREF))
 
@@ -59,7 +57,7 @@ DefaultFromListValue(const char* section, const char* namePrimary, const char* s
 }
 
 void
-DialogsSetDefaultValues(paramGroup_p pg)
+FormSetDefaultValues(paramGroup_p pg)
 {
 	for (int i = 0; i < (pg->paramCnt); i++) {
 		paramData_t* p = (pg->paramPtr)+i;
