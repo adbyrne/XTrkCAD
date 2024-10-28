@@ -49,7 +49,7 @@ endif()
 find_package(Pandoc)
 
 # For handling and creation of bitmaps the FreeImage library is required
-find_package(FreeImage REQUIRED)
+find_package(FreeImage)
 
 # check for GTK+ 2.0
 if(UNIX)
