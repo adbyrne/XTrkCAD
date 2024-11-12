@@ -2,16 +2,19 @@
 
 PROJECT(genbitmaps)
 
-# Find the conversion tool 
+if ( NOT DEFINED FLATPAK )
+	# Find the conversion tool 
+	find_package(Inkscape)
 
-find_package(Inkscape)
+	if( NOT Inkscape_FOUND )
+		message( STATUS "Inkscape not found." )
+	else()
+		message(STATUS "Inkscape is: ${Inkscape_EXECUTABLE}")
+		message(STATUS "Export option is: ${Inkscape_EXPORT}")
+	endif()
+endif()
 
-if( NOT Inkscape_FOUND )
-	message( STATUS "Inkscape not found." )
-else()
-	message(STATUS "Inkscape is: ${Inkscape_EXECUTABLE}")
-	message(STATUS "Export option is: ${Inkscape_EXPORT}")
-
+if ( Inkscape_FOUND OR NOT DEFINED FLATPAX)
 	set (XPMS
 		background benchwork bezier-line bezier-track block bottom box
 		bridge building car-inventory change-grid circle-center
@@ -34,39 +37,52 @@ else()
 		straight-line straight switch-motor table-edge text ties top
 		train trim tunnel turnout-design turnout turntable undo
 		zoom-choose zoom-extent zoom-in zoom-out
-	)
+		)
 	set( PIXS 16 24 32 )
 
 	foreach(xpm ${XPMS})
-		foreach(pix ${PIXS})
-			if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}${pix}.png" )
-				# MESSAGE( STATUS "Custom ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}${pix}.png" )
+		if ( DEFINED FLATPAK )
+			if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/${xpm}.xpm3" )
 				add_custom_command(
-					OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}${pix}.png
-					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}${pix}.png
-					COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/png/
-					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}${pix}.png ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}${pix}.png
+					OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm3
+					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/${xpm}.xpm3
+	#				COMMAND pngtoxpm ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm3	
+					COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/${xpm}.xpm3 ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm3
 				)
 			else()
-				# MESSAGE( STATUS "SVG ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg" )
-				add_custom_command(
-					OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}${pix}.png
-					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg
-					COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/png/
-					COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg -h ${pix} ${Inkscape_EXPORT}${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}${pix}.png
-				)
+				MESSAGE( STATUS "Missing ${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/${xpm}.xpm3" )
 			endif()
-			# build a list of all the depends
-			list(APPEND PNG_RESULTS ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}${pix}.png)
-		endforeach()
-		add_custom_command(
-			OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm3
-			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}16.png
-			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}24.png
-			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}32.png
-			COMMAND pngtoxpm ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm3	
-#			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm3 ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm3 
-		)
+		else()
+			foreach(pix ${PIXS})
+				if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}${pix}.png" )
+					# MESSAGE( STATUS "Custom ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}${pix}.png" )
+					add_custom_command(
+						OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}${pix}.png
+						DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}${pix}.png
+						COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/png/
+						COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}${pix}.png ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}${pix}.png
+					)
+				else()
+					# MESSAGE( STATUS "SVG ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg" )
+					add_custom_command(
+						OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}${pix}.png
+						DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg
+						COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/png/
+						COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg -h ${pix} ${Inkscape_EXPORT}${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}${pix}.png
+					)
+				endif()
+				# build a list of all the depends
+				list(APPEND PNG_RESULTS ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}${pix}.png)
+			endforeach()
+			add_custom_command(
+				OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm3
+				DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}16.png
+				DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}24.png
+				DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}32.png
+				COMMAND pngtoxpm ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm3	
+	#			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm3 ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm3 
+			)
+		endif()
 		# build a list of all the depends
 		list(APPEND XPM_RESULTS ${xpm}.xpm3)
 	endforeach()
@@ -76,7 +92,7 @@ else()
 		DEPENDS ${XPM_RESULTS}
 		DEPENDS ${PNG_RESULTS}
 	)
-	
+
 	if(WIN32)
 		# Temporarily the FreeImage dll is copied to the build directory
 		add_custom_command(
@@ -88,7 +104,6 @@ else()
 			TARGET genbitmaps POST_BUILD
 			COMMAND ${CMAKE_COMMAND} -E rm ${CMAKE_CURRENT_BINARY_DIR}/${filename}
 		)
-#
 
 	endif()
 endif()

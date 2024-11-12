@@ -7,4 +7,6 @@ if (WIN32)
 endif ()
 
 add_subdirectory(halibut)
+if ( NOT DEFINED FLATPAK )
 add_subdirectory(pngtoxpm)
+endif()
