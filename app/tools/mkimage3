@@ -1,0 +1,33 @@
+#!/usr/bin/bash
+if [ $# -ne 2 ] ; then
+	echo "$0 rootname outdir"
+	echo "For GTK systems"
+	echo "Converts "IMAGE{16,24,32}.png" image triples to a single include-able file IMAGE.image3"
+	exit 1
+fi
+
+INFILE=${1}
+OUTFILE=${2}/${1}.image3
+NAME=`echo ${1} | sed 's/-/_/'`
+
+if [ ! -f ${INFILE}16.png ] ; then
+	echo ${INFILE}16.png: not found
+	exit 1
+fi
+if [ ! -f ${INFILE}24.png ] ; then
+	echo ${INFILE}24.png: not found
+	exit 1
+fi
+if [ ! -f ${INFILE}24.png ] ; then
+	echo ${INFILE}24.png: not found
+	exit 1
+fi
+
+> ${OUTFILE}
+( 
+	gdk-pixbuf-csource --stream --name ${1}16 ${INFILE}16.png;  \
+	gdk-pixbuf-csource --stream --name ${1}24 ${INFILE}24.png;  \
+	gdk-pixbuf-csource --stream --name ${1}32 ${INFILE}32.png;  \
+	echo "static const char * ${NAME}_image3[3] = { ${NAME}16, ${NAME}24, ${NAME}32 };" ) \
+	| sed -e 's/guint8/char/g' -e 's/-/_/g' >> ${OUTFILE}
+

@@ -48,7 +48,7 @@ modules:
       - type: archive
         path: ./source.tar.gz
 #       if source changes, run ./make-source-archive and replace this checksum
-        sha256: 93b415d2eaa2511ffc4c8f658fd9a3a20319271b3fe990ec178c4c56c9bb10e1
+        sha256: c482d13257ed7bd401c2a15673941a23974e8754cc7604507c91fbb1532d2d2e 
     buildsystem: cmake
     config-opts:
       - -DCMAKE_BUILD_TYPE=DEBUG
