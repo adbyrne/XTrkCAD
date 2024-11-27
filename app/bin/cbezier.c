@@ -1283,9 +1283,6 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 }
 
 
-//#include "bitmaps/bezier-track.xpm"
-//#include "bitmaps/bezier-line.xpm"
-
 EXPORT void InitCmdBezier( wMenu_p menu )
 {
 

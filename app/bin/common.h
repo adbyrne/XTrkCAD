@@ -314,6 +314,5 @@ typedef struct {
 #include "command.h"
 #include "menu.h"
 
-#define wIconCreatePixMapImage( IMAGE ) wIconCreatePixMap( (char**)IMAGE )
 #endif
 

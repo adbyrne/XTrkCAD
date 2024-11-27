@@ -438,8 +438,8 @@ GetParamsPath()
 	return (params_path);
 }
 
-#include "bitmaps/funnel.xpm"
-#include "bitmaps/funnelclear.xpm"
+#include "bitmaps/funnel.image1"
+#include "bitmaps/funnelclear.image1"
 
 /**
  * Create and open the search dialog.
@@ -456,9 +456,9 @@ void DoSearchParams(void * junk)
 		trackLibrary = CreateLibrary(paramsDir);
 		free(paramsDir);
 
-		searchUiPLs[I_SEARCHBUTTON].winLabel = (char *)wIconCreatePixMap(funnel_xpm);
+		searchUiPLs[I_SEARCHBUTTON].winLabel = (char *)wIconCreatePixMap(funnel_image1);
 		searchUiPLs[I_CLEARBUTTON].winLabel = (char *)wIconCreatePixMap(
-		                funnelclear_xpm);
+		                funnelclear_image1);
 
 		searchFitMode = FIT_COMPATIBLE;  //Default to "Any" after startup
 

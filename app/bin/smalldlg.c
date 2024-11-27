@@ -182,7 +182,7 @@ void ShowTip( void * flagsVP )
 
 /*--------------------------------------------------------------------*/
 
-#include "bitmaps/xtc.xpm"
+#include "bitmaps/xtc.image1"
 
 static paramTextData_t aboutTextData = { 70, 10 };
 
@@ -207,7 +207,7 @@ void CreateAboutW(void *ptr)
 //	char *copyright = sAboutProd;
 
 	if (!aboutW) {
-		aboutPLs[I_ABOUTDRAW].winData = wIconCreatePixMap(xtc_xpm);
+		aboutPLs[I_ABOUTDRAW].winData = wIconCreatePixMap(xtc_image1);
 		ParamRegister(&aboutPG);
 		aboutW = ParamCreateDialog(&aboutPG, MakeWindowTitle(_("About")), NULL, NULL,
 		                           ParamCancel_Current, FALSE, NULL, F_TOP | F_CENTER| PD_F_ALT_CANCELLABEL, NULL);

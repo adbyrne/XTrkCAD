@@ -3161,32 +3161,36 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 	}
 }
 
-#include "bitmaps/straight-line.xpm3"
-#include "bitmaps/dimension.xpm3"
-#include "bitmaps/benchwork.xpm3"
-#include "bitmaps/table-edge.xpm3"
+#include "bitmaps/straight-line.image3"
+#include "bitmaps/dimension.image3"
+#include "bitmaps/benchwork.image3"
+#include "bitmaps/table-edge.image3"
 
-#include "bitmaps/curved-line-end.xpm3"
-#include "bitmaps/curved-line-tangent.xpm3"
-#include "bitmaps/curved-line-middle.xpm3"
-#include "bitmaps/curved-line-chord.xpm3"
+#include "bitmaps/curved-line-end.image3"
+#include "bitmaps/curved-line-tangent.image3"
+#include "bitmaps/curved-line-middle.image3"
+#include "bitmaps/curved-line-chord.image3"
 
-/*#include "bitmaps/dcircle1.xpm"*/
-#include "bitmaps/circle-line-center.xpm3"
-#include "bitmaps/circle-line-tangent.xpm3"
-/*#include "bitmaps/dflcrcl1.xpm"*/
-#include "bitmaps/circle-filled-center.xpm3"
-#include "bitmaps/circle-filled-tangent.xpm3"
+/*#include "bitmaps/dcircle1.image3"*/
+#include "bitmaps/circle-line-center.image3"
+#include "bitmaps/circle-line-tangent.image3"
+/*#include "bitmaps/dflcrcl1.image3"*/
+#include "bitmaps/circle-filled-center.image3"
+#include "bitmaps/circle-filled-tangent.image3"
 
-#include "bitmaps/box.xpm3"
-#include "bitmaps/filled-box.xpm3"
-#include "bitmaps/polygon.xpm3"
-#include "bitmaps/filled-polygon.xpm3"
-#include "bitmaps/bezier-line.xpm3"
-#include "bitmaps/polyline.xpm3"
+#include "bitmaps/box.image3"
+#include "bitmaps/filled-box.image3"
+#include "bitmaps/polygon.image3"
+#include "bitmaps/filled-polygon.image3"
+#include "bitmaps/bezier-line.image3"
+#include "bitmaps/polyline.image3"
 
 typedef struct {
-	char ***xpm;
+#ifdef WINDOWS
+	char ***image3;
+#else
+	char const **image3;
+#endif
 	int OP;
 	char * shortName;
 	char * cmdName;
@@ -3195,32 +3199,32 @@ typedef struct {
 } drawData_t;
 
 static drawData_t dlineCmds[] = {
-	{ straight_line_xpm3, OP_LINE, N_("Line"), N_("Draw Line"), "cmdDrawLine", ACCL_DRAWLINE },
-	{ dimension_xpm3, OP_DIMLINE, N_("Dimension Line"), N_("Draw Dimension Line"), "cmdDrawDimLine", ACCL_DRAWDIMLINE },
-	{ benchwork_xpm3, OP_BENCH, N_("Benchwork"), N_("Draw Benchwork"), "cmdDrawBench", ACCL_DRAWBENCH },
-	{ table_edge_xpm3, OP_TBLEDGE, N_("Table Edge"), N_("Draw Table Edge"), "cmdDrawTableEdge", ACCL_DRAWTBLEDGE }
+	{ straight_line_image3, OP_LINE, N_("Line"), N_("Draw Line"), "cmdDrawLine", ACCL_DRAWLINE },
+	{ dimension_image3, OP_DIMLINE, N_("Dimension Line"), N_("Draw Dimension Line"), "cmdDrawDimLine", ACCL_DRAWDIMLINE },
+	{ benchwork_image3, OP_BENCH, N_("Benchwork"), N_("Draw Benchwork"), "cmdDrawBench", ACCL_DRAWBENCH },
+	{ table_edge_image3, OP_TBLEDGE, N_("Table Edge"), N_("Draw Table Edge"), "cmdDrawTableEdge", ACCL_DRAWTBLEDGE }
 };
 static drawData_t dcurveCmds[] = {
-	{ curved_line_end_xpm3, OP_CURVE1, N_("Curve End"), N_("Draw Curve from End"), "cmdDrawCurveEndPt", ACCL_DRAWCURVE1 },
-	{ curved_line_tangent_xpm3, OP_CURVE2, N_("Curve Tangent"), N_("Draw Curve from Tangent"), "cmdDrawCurveTangent", ACCL_DRAWCURVE2 },
-	{ curved_line_middle_xpm3, OP_CURVE3, N_("Curve Center"), N_("Draw Curve from Center"), "cmdDrawCurveCenter", ACCL_DRAWCURVE3 },
-	{ curved_line_chord_xpm3, OP_CURVE4, N_("Curve Chord"), N_("Draw Curve from Chord"), "cmdDrawCurveChord", ACCL_DRAWCURVE4 },
-	{ bezier_line_xpm3, OP_BEZLIN, N_("Bezier Curve"), N_("Draw Bezier"), "cmdDrawBezierCurve", ACCL_DRAWBEZLINE }
+	{ curved_line_end_image3, OP_CURVE1, N_("Curve End"), N_("Draw Curve from End"), "cmdDrawCurveEndPt", ACCL_DRAWCURVE1 },
+	{ curved_line_tangent_image3, OP_CURVE2, N_("Curve Tangent"), N_("Draw Curve from Tangent"), "cmdDrawCurveTangent", ACCL_DRAWCURVE2 },
+	{ curved_line_middle_image3, OP_CURVE3, N_("Curve Center"), N_("Draw Curve from Center"), "cmdDrawCurveCenter", ACCL_DRAWCURVE3 },
+	{ curved_line_chord_image3, OP_CURVE4, N_("Curve Chord"), N_("Draw Curve from Chord"), "cmdDrawCurveChord", ACCL_DRAWCURVE4 },
+	{ bezier_line_image3, OP_BEZLIN, N_("Bezier Curve"), N_("Draw Bezier"), "cmdDrawBezierCurve", ACCL_DRAWBEZLINE }
 };
 static drawData_t dcircleCmds[] = {
-	/*{ dcircle1_xpm, OP_CIRCLE1, "Circle Fixed Radius", "Draw Fixed Radius Circle", "cmdDrawCircleFixedRadius", ACCL_DRAWCIRCLE1 },*/
-	{ circle_line_center_xpm3, OP_CIRCLE3, N_("Circle Center"), N_("Draw Circle from Center"), "cmdDrawCircleCenter", ACCL_DRAWCIRCLE2 },
-	{ circle_line_tangent_xpm3, OP_CIRCLE2, N_("Circle Tangent"), N_("Draw Circle from Tangent"), "cmdDrawCircleTangent", ACCL_DRAWCIRCLE3 },
-	/*{ dflcrcl1_xpm, OP_FILLCIRCLE1, "Circle Filled Fixed Radius", "Draw Fixed Radius Filled Circle", "cmdDrawFilledCircleFixedRadius", ACCL_DRAWFILLCIRCLE1 },*/
-	{ circle_filled_center_xpm3, OP_FILLCIRCLE3, N_("Circle Filled Center"), N_("Draw Filled Circle from Center"), "cmdDrawFilledCircleCenter", ACCL_DRAWFILLCIRCLE2 },
-	{ circle_filled_tangent_xpm3, OP_FILLCIRCLE2, N_("Circle Filled Tangent"), N_("Draw Filled Circle from Tangent"), "cmdDrawFilledCircleTangent", ACCL_DRAWFILLCIRCLE3 }
+	/*{ dcircle1_image3, OP_CIRCLE1, "Circle Fixed Radius", "Draw Fixed Radius Circle", "cmdDrawCircleFixedRadius", ACCL_DRAWCIRCLE1 },*/
+	{ circle_line_center_image3, OP_CIRCLE3, N_("Circle Center"), N_("Draw Circle from Center"), "cmdDrawCircleCenter", ACCL_DRAWCIRCLE2 },
+	{ circle_line_tangent_image3, OP_CIRCLE2, N_("Circle Tangent"), N_("Draw Circle from Tangent"), "cmdDrawCircleTangent", ACCL_DRAWCIRCLE3 },
+	/*{ dflcrcl1_image3, OP_FILLCIRCLE1, "Circle Filled Fixed Radius", "Draw Fixed Radius Filled Circle", "cmdDrawFilledCircleFixedRadius", ACCL_DRAWFILLCIRCLE1 },*/
+	{ circle_filled_center_image3, OP_FILLCIRCLE3, N_("Circle Filled Center"), N_("Draw Filled Circle from Center"), "cmdDrawFilledCircleCenter", ACCL_DRAWFILLCIRCLE2 },
+	{ circle_filled_tangent_image3, OP_FILLCIRCLE2, N_("Circle Filled Tangent"), N_("Draw Filled Circle from Tangent"), "cmdDrawFilledCircleTangent", ACCL_DRAWFILLCIRCLE3 }
 };
 static drawData_t dshapeCmds[] = {
-	{ box_xpm3, OP_BOX, N_("Box"), N_("Draw Box"), "cmdDrawBox", ACCL_DRAWBOX },
-	{ filled_box_xpm3, OP_FILLBOX, N_("Filled Box"), N_("Draw Filled Box"), "cmdDrawFilledBox", ACCL_DRAWFILLBOX },
-	{ polygon_xpm3, OP_POLY, N_("Polygon"), N_("Draw Polygon"), "cmdDrawPolygon", ACCL_DRAWPOLY },
-	{ filled_polygon_xpm3, OP_FILLPOLY, N_("Filled Polygon"), N_("Draw Filled Polygon"), "cmdDrawFilledPolygon", ACCL_DRAWFILLPOLYGON },
-	{ polyline_xpm3, OP_POLYLINE, N_("PolyLine"), N_("Draw PolyLine"), "cmdDrawPolyline", ACCL_DRAWPOLYLINE },
+	{ box_image3, OP_BOX, N_("Box"), N_("Draw Box"), "cmdDrawBox", ACCL_DRAWBOX },
+	{ filled_box_image3, OP_FILLBOX, N_("Filled Box"), N_("Draw Filled Box"), "cmdDrawFilledBox", ACCL_DRAWFILLBOX },
+	{ polygon_image3, OP_POLY, N_("Polygon"), N_("Draw Polygon"), "cmdDrawPolygon", ACCL_DRAWPOLY },
+	{ filled_polygon_image3, OP_FILLPOLY, N_("Filled Polygon"), N_("Draw Filled Polygon"), "cmdDrawFilledPolygon", ACCL_DRAWFILLPOLYGON },
+	{ polyline_image3, OP_POLYLINE, N_("PolyLine"), N_("Draw PolyLine"), "cmdDrawPolyline", ACCL_DRAWPOLYLINE },
 };
 
 typedef struct {
@@ -3333,7 +3337,7 @@ EXPORT void InitCmdDraw( wMenu_p menu )
 		ButtonGroupBegin( _(dsp->menuTitle), dsp->helpKey, _(dsp->stickyLabel) );
 		for ( inx2=0; inx2<dsp->cnt; inx2++ ) {
 			ddp = &dsp->data[inx2];
-			icon = wIconCreatePixMap( ddp->xpm[iconSize] );
+			icon = wIconCreatePixMap( ddp->image3[iconSize] );
 			AddMenuButton( menu, CmdDraw, ddp->helpKey, _(ddp->cmdName), icon, LEVEL0_50,
 			               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ddp->acclKey, I2VP(ddp->OP) );
 		}

@@ -27,6 +27,7 @@
 #include "gdk/gdk.h"
 #include "gtk/gtk.h"
 
+#include <assert.h>
 
 #ifdef WINDOWS
 #define strcasecmp _stricmp

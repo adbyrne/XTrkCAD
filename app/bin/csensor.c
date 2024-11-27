@@ -577,7 +577,7 @@ static int SensorMgmProc ( int cmd, void * data )
 	return FALSE;
 }
 
-#include "bitmaps/sensor.xpm3"
+#include "bitmaps/sensor.image3"
 
 EXPORT void SensorMgmLoad ( void )
 {
@@ -585,7 +585,7 @@ EXPORT void SensorMgmLoad ( void )
 	static wIcon_p sensorI = NULL;
 
 	if (sensorI == NULL) {
-		sensorI = wIconCreatePixMap( sensor_xpm3[iconSize] );
+		sensorI = wIconCreatePixMap( sensor_image3[iconSize] );
 	}
 
 	TRK_ITERATE(trk) {
@@ -599,7 +599,7 @@ EXPORT void SensorMgmLoad ( void )
 EXPORT void InitCmdSensor ( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdSensor, "cmdSensor", _("Sensor"),
-	               wIconCreatePixMap( sensor_xpm3[iconSize] ), LEVEL0_50, IC_STICKY|IC_POPUP2,
+	               wIconCreatePixMap( sensor_image3[iconSize] ), LEVEL0_50, IC_STICKY|IC_POPUP2,
 	               ACCL_SENSOR, NULL );
 }
 

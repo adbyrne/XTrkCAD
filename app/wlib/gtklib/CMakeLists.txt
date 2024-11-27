@@ -3,6 +3,7 @@
 target_include_directories(xtrkcad-wlib 
 	PRIVATE 
 	${xtrkcad-lib_SOURCE_DIR}
+	${xtrkcad-lib_BINARY_DIR}
 )
 
 target_sources(xtrkcad-wlib

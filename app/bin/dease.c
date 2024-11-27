@@ -274,15 +274,15 @@ EXPORT addButtonCallBack_t EasementInit( void )
 {
 	ParamRegister( &easementPG );
 
-	enone_bm = wIconCreatePixMapImage( ease_none_image3[iconSize] );
-	eltsharp_bm = wIconCreatePixMapImage( ease_lt_sharp_image3[iconSize] );
-	esharp_bm = wIconCreatePixMapImage( ease_sharp_image3[iconSize] );
-	egtsharp_bm = wIconCreatePixMapImage( ease_gt_sharp_image3[iconSize] );
-	enormal_bm = wIconCreatePixMapImage( ease_normal_image3[iconSize] );
-	eltbroad_bm = wIconCreatePixMapImage( ease_lt_broad_image3[iconSize] );
-	ebroad_bm = wIconCreatePixMapImage( (char **)(ease_broad_image3[iconSize]) );
-	egtbroad_bm = wIconCreatePixMapImage( ease_gt_broad_image3[iconSize] );
-	ecornu_bm = wIconCreatePixMapImage( ease_cornu_image3[iconSize] );
+	enone_bm = wIconCreatePixMap( ease_none_image3[iconSize] );
+	eltsharp_bm = wIconCreatePixMap( ease_lt_sharp_image3[iconSize] );
+	esharp_bm = wIconCreatePixMap( ease_sharp_image3[iconSize] );
+	egtsharp_bm = wIconCreatePixMap( ease_gt_sharp_image3[iconSize] );
+	enormal_bm = wIconCreatePixMap( ease_normal_image3[iconSize] );
+	eltbroad_bm = wIconCreatePixMap( ease_lt_broad_image3[iconSize] );
+	ebroad_bm = wIconCreatePixMap( ease_broad_image3[iconSize] );
+	egtbroad_bm = wIconCreatePixMap( ease_gt_broad_image3[iconSize] );
+	ecornu_bm = wIconCreatePixMap( ease_cornu_image3[iconSize] );
 	easementB = AddToolbarButton( "cmdEasement", enone_bm, 0, DoEasementRedir,
 	                              NULL );
 

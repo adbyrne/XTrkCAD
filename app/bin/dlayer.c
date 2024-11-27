@@ -2089,7 +2089,7 @@ static void DoLayer(void * unused)
 	layoutLayerChanged = FALSE;
 }
 
-#include "bitmaps/background.xpm3"
+#include "bitmaps/background.image3"
 
 #if NUM_BUTTONS < 100
 static int lbmap_width[3] = { 16, 24, 32 }; // For numbers < 100
@@ -2330,7 +2330,7 @@ void InitLayers(int cmdGroup)
 	ToolbarControlAdd((wControl_p)setLayerL, IC_MODETRAIN_TOO, cmdGroup );
 
 	backgroundB = AddToolbarButton("cmdBackgroundShow",
-	                               wIconCreatePixMap(background_xpm3[iconSize]), 0,
+	                               wIconCreatePixMap(background_image3[iconSize]), 0,
 	                               BackgroundToggleShow, NULL);
 	/* add the help text */
 	wControlSetBalloonText((wControl_p)backgroundB, _("Show/Hide Background"));

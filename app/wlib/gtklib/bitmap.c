@@ -67,8 +67,11 @@ wBitmapCreate( wWin_p parent, wWinPix_t x, wWinPix_t y, long options,
 		gtk_widget_realize( parent->widget );        /* force allocation, if pending */
 	}
 
-	/* create the bitmap from supplied xpm data */
-	pixbuf = gdk_pixbuf_new_from_xpm_data( (const char **)iconP->bits );
+	/* create the bitmap from supplied data */
+	assert ( *(int*)iconP->bits == 0x47646b50 ||
+	     *(int*)iconP->bits == 0x506b6447 );
+	pixbuf = gdk_pixbuf_new_from_inline( -1, iconP->bits, FALSE, NULL );
+	
 	g_object_ref_sink(pixbuf);
 	image = gtk_image_new_from_pixbuf( pixbuf );
 	gtk_widget_show( image );
@@ -117,7 +120,7 @@ wIcon_p wIconCreateBitMap( wWinPix_t w, wWinPix_t h, const char * bits,
  * \returns icon handle
  */
 
-wIcon_p wIconCreatePixMap( char *pm[] )
+wIcon_p wIconCreatePixMap( const char *pm )
 {
 	wIcon_p ip;
 	ip = (wIcon_p)malloc( sizeof *ip );
@@ -125,7 +128,7 @@ wIcon_p wIconCreatePixMap( char *pm[] )
 	ip->w = 0;
 	ip->h = 0;
 	ip->color = 0;
-	ip->bits = pm;
+	ip->bits = (char*) pm;
 	return ip;
 }
 

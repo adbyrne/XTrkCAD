@@ -2970,15 +2970,15 @@ static STATUS_T CmdCarDescAction(
 }
 #endif
 
-#include "bitmaps/train.xpm3"
-#include "bitmaps/exit.xpm3"
-#include "bitmaps/new-car.xpm3"
-#include "bitmaps/go.xpm3"
-#include "bitmaps/stop.xpm3"
+#include "bitmaps/train.image3"
+#include "bitmaps/exit.image3"
+#include "bitmaps/new-car.image3"
+#include "bitmaps/go.image3"
+#include "bitmaps/stop.image3"
 
-#include "bitmaps/zero.xpm"
-#include "bitmaps/greendot.xpm"
-#include "bitmaps/reddot.xpm"
+#include "bitmaps/zero.image1"
+#include "bitmaps/greendot.image1"
+#include "bitmaps/reddot.image1"
 
 
 static void CmdTrainStopGo(void * unused)
@@ -3198,23 +3198,23 @@ void InitCmdTrain(wMenu_p menu)
 {
 	log_trainMove = LogFindIndex("trainMove");
 	log_trainPlayback = LogFindIndex("trainPlayback");
-	trainPLs[I_ZERO].winLabel = (char*)wIconCreatePixMap(zero_xpm);
+	trainPLs[I_ZERO].winLabel = (char*)wIconCreatePixMap(zero_image1);
 	ParamRegister(&trainPG);
 	trainCmdInx = AddMenuButton(menu, CmdTrain, "cmdTrain", _("Run Trains"),
-	                            wIconCreatePixMap(train_xpm3[iconSize]), LEVEL0_50,
+	                            wIconCreatePixMap(train_image3[iconSize]), LEVEL0_50,
 	                            IC_POPUP3|IC_LCLICK|IC_RCLICK|IC_WANT_MOVE, 0,
 	                            NULL);
-	stopI = wIconCreatePixMap(reddot);
-	goI = wIconCreatePixMap(greendot);
-	stopB = wIconCreatePixMap(stop_xpm3[iconSize]);
-	goB = wIconCreatePixMap(go_xpm3[iconSize]);
+	stopI = wIconCreatePixMap(reddot_image1);
+	goI = wIconCreatePixMap(greendot_image1);
+	stopB = wIconCreatePixMap(stop_image3[iconSize]);
+	goB = wIconCreatePixMap(go_image3[iconSize]);
 	trainPauseB = AddToolbarButton("cmdTrainPause", stopB, IC_MODETRAIN_ONLY,
 	                               CmdTrainStopGo, NULL);
-	AddToolbarButton("cmdTrainExit", wIconCreatePixMap(exit_xpm3[iconSize]),
+	AddToolbarButton("cmdTrainExit", wIconCreatePixMap(exit_image3[iconSize]),
 	                 IC_MODETRAIN_ONLY,
 	                 CmdTrainExit, NULL);
 	newcarB = AddToolbarButton("cmdTrainNewCar",
-	                           wIconCreatePixMap(new_car_xpm3[iconSize]),
+	                           wIconCreatePixMap(new_car_image3[iconSize]),
 	                           IC_MODETRAIN_ONLY, CarItemLoadList, NULL);
 	T_CAR = InitObject(&carCmds);
 

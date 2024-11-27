@@ -691,12 +691,12 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 
 
 
-#include "bitmaps/describe.xpm3"
+#include "bitmaps/describe.image3"
 
 void InitCmdDescribe(wMenu_p menu)
 {
 	describeCmdInx = AddMenuButton(menu, CmdDescribe, "cmdDescribe",
-	                               _("Properties"), wIconCreatePixMap(describe_xpm3[iconSize]),
+	                               _("Properties"), wIconCreatePixMap(describe_image3[iconSize]),
 	                               LEVEL0, IC_CANCEL|IC_POPUP|IC_WANT_MOVE|IC_CMDMENU, ACCL_DESCRIBE, NULL);
 	RegisterChangeNotification(DescChange);
 	ParamRegister(&describePG);

@@ -1240,12 +1240,12 @@ static STATUS_T CmdStructureHotBar(
 	}
 }
 
-#include "bitmaps/building.xpm3"
+#include "bitmaps/building.image3"
 
 EXPORT void InitCmdStruct( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdStructure, "cmdStructure", _("Structure"),
-	               wIconCreatePixMap(building_xpm3[iconSize]), LEVEL0_50,
+	               wIconCreatePixMap(building_image3[iconSize]), LEVEL0_50,
 	               IC_WANT_MOVE|IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_STRUCTURE, NULL );
 	structureHotBarCmdInx = AddMenuButton( menu, CmdStructureHotBar,
 	                                       "cmdStructureHotBar", "", NULL, LEVEL0_50,
