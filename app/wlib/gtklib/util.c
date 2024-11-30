@@ -97,45 +97,38 @@ GdkPixbuf* wlibPixbufFromXBM(
         wIcon_p ip)
 {
 	GdkPixbuf * pixbuf;
+	const char * bits = ip->bits;
+	static unsigned char background[4] = { 0xFF, 0xFF, 0xFF, 0x0 };
+	long rgb = wDrawGetRGB(ip->color);
+	unsigned char foreground[4];
+	foreground[0] = ( rgb >> 16 ) & 0xFF;
+	foreground[1] = ( rgb >> 8 ) &0xFF;
+	foreground[2] = rgb & 0xFF;
+	foreground[3] = 0xFF;
+	int wb = (ip->w + 7) / 8;
+	size_t siz = ip->h * (wb * 8) * 4 * sizeof ( unsigned char );
+	unsigned char * pData = (unsigned char*)malloc( siz );
+	unsigned char * pCurr = pData;
+	int iStride = cairo_format_stride_for_width( CAIRO_FORMAT_RGB24, ip->w );
 
-	char line0[40];
-	char line2[40];
-
-	char ** pixmapData;
-	int row, col, wb;
-	long rgb;
-	const char * bits;
-
-	wb = (ip->w + 7) / 8;
-	pixmapData = (char**) malloc((3 + ip->h) * sizeof *pixmapData);
-	pixmapData[0] = line0;
-	rgb = wDrawGetRGB(ip->color);
-	sprintf(line0, " %ld %ld 2 1", ip->w, ip->h);
-	sprintf(line2, "# c #%2.2lx%2.2lx%2.2lx", (rgb >> 16)&0xFF, (rgb >> 8)&0xFF,
-	        rgb & 0xFF);
-	pixmapData[1] = ". c None s None";
-	pixmapData[2] = line2;
-	bits = ip->bits;
-
-	for (row = 0; row < ip->h; row++) {
-		pixmapData[row + 3] = (char*) malloc((ip->w + 1) * sizeof **pixmapData);
-
-		for (col = 0; col < ip->w; col++) {
-			if (bits[ row * wb + (col >> 3) ] & (1 << (col & 07))) {
-				pixmapData[row + 3][col] = '#';
-			} else {
-				pixmapData[row + 3][col] = '.';
+	for ( int y = 0; y < ip->h; y++ ) {
+		for ( int x = 0; x < ip->w; x++ ) {
+			int iIndex = y * wb + ( x >> 3 );
+			int iOffset = x & 0x7;
+			unsigned char iValue = bits[ iIndex ];
+			int iMask = 1<<iOffset;
+			wBool_t bOn = (iValue & iMask) ? TRUE : FALSE ; 
+			for ( int p = 0; p < 4; p++ ) {
+				*pCurr++ = ( bOn ? foreground[p] : background[p] );
 			}
+//			printf( bOn?"*":" " );
 		}
-		pixmapData[row + 3][ip->w] = 0;
+//		printf( "\n" );
 	}
+//	printf("\n");
 
-	pixbuf = gdk_pixbuf_new_from_xpm_data((const char **) pixmapData);
-
-	for (row = 0; row < ip->h; row++) {
-		free(pixmapData[row + 3]);
-	}
-	free(pixmapData);
+	pixbuf = gdk_pixbuf_new_from_data( pData, GDK_COLORSPACE_RGB, TRUE, 8,
+			ip->w, ip->h, iStride, NULL, NULL );
 	return pixbuf;
 }
 
