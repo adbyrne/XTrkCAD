@@ -48,8 +48,8 @@ endif()
 # Find document conversion tool
 find_package(Pandoc)
 
-# For handling and creation of bitmaps the FreeImage library is required
-if(NOT DEFINED FLATPAK)
+# For handling and creation of bitmaps the FreeImage library is required on Windows
+if(WIN32)
 find_package(FreeImage REQUIRED)
 endif()
 

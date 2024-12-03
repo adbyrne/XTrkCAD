@@ -79,6 +79,11 @@ find_package (GTK2)
 # configure for GTK's native Unix print
 find_package (GTKUnixPrint)
 
+# Needed for xtc.image1 include
+add_dependencies(xtrkcad-wlib
+	genbitmaps
+)
+
 target_include_directories(xtrkcad-wlib
 	PRIVATE
 	${GTK_INCLUDE_DIRS}

@@ -34,7 +34,7 @@ for XPMFILE in "$@" ; do
 	fi
 
 	NAME=`basename ${INBASE} | sed -e 's/-/_/g'`
-	OUTFILE=${OUTDIR}/${INBASE}.image3
+	OUTFILE="${OUTDIR}"/"`basename ${INBASE}`"".image3"
 	> ${OUTFILE}
 ( 
 	gdk-pixbuf-csource --stream --name ${NAME}16_image3 ${INBASE}16.png;  \

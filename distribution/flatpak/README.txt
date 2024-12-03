@@ -1,4 +1,4 @@
-oThis is a work-in-progress to build a flatpak package
+This is a work-in-progress to build a flatpak package
 
 BLDDIR is your build directory,
 SRCDIR is your source directory
@@ -20,21 +20,20 @@ Resolved issues so far:
   Not easy to include into flatpak, so we copy the .xpm3 from the regular build
   See make-soure-archive which creates a tar ball from xtrkcad source tree 
   appended with BLDDIR/app/bin/bitmaps
+  see make-source-archive and app/bin/bitmaps/CMakeLists.txt
+
+- Removed the runtime dependencies on .xpm files
 
 -libzip is included as a module
+
+- fix wlibPixbufFromXBM to directly generate Pixmap instead of .xpm intermediate 
 
 # Unresolved issues
 
 - org.xtrkcad.xtrkcad.yml needs cleanup actions
+- window background too dark
+- need to build a distribution package
 
-- Added cmake variable FLATPAC
-  CMake complains about this
-	"CMake Warning:
-	   Manually-specified variables were not used by the project:
-	     FLATPAK"
-  Controls CMakeLists.txt in SRCDIR, app/bin/bitmaps, app/tools
-
-- app builds bnd runs but buttons are empty
 $ flatpak-builder  --run workD org.xtrkcad.xtrkcad.yml xtrkcad
   see below
 
@@ -88,12 +87,7 @@ $ flatpak-builder --force-clean workD org.xtrkcad.xtrkcad.yml
 $ flatpak-builder --socket=fallback-x11 --run workD org.xtrkcad.xtrkcad.yml ln -s /apt/share ../share
 # ta-da
 $ flatpak-builder --socket=fallback-x11 --run workD org.xtrkcad.xtrkcad.yml xtrkcad
-# xtrkcad runs ok (minimal testing) but command buttons are empty
-GdkPixbuf-WARNING **: 09:45:31.759: Error loading XPM image loader: Image type “xpm” is not supported
-# and lots of errors
-# this was a recent change to GdkPixbuf :(
-https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/commit/e052a112075a19fb75f1f2ff3de4c82923de13f2
-
+# xtrkcad runs ok (minimal testing)
 
 # MISC:
 
