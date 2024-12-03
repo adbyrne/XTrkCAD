@@ -42,7 +42,7 @@
 // #define TEST_ARGV
 // #define TEST_SPLASH
 #define TEST_PULLDOWNMENU
-#define TEST_STATUSBAR
+// #define TEST_STATUSBAR
 #define TEST_TOOLBAR
 //#define TEST_DRAW
 
@@ -222,6 +222,8 @@ static char* yellowstar[] = {
 "                " };
 
 
+wBalloonHelp_t dummyTooltips = { NULL, NULL };
+
 //
 //------------------------- Pulldown Menu ------------------------------------
 //
@@ -268,7 +270,7 @@ doPause(void* unused)
  */
 
 void
-RecentUsedCallback(int unused, const char *label, void * attributes)
+RecentUsedCallback(int unused, const char *label, const void * attributes)
 {
 	printf("Recent used: %s - %s\n", label, (char *)attributes);
 }
@@ -388,6 +390,44 @@ BasicDialog(void* unused)
 		NULL);
 }
 
+/** ------------------------------- scale test ------------------------------- */
+wControl_p scale;
+wControl_p testDialog;
+double scaleValue;
+
+bool
+ScaleTestProc(double value, void *context )
+{
+	value = wScaleGetValue(scale);
+	printf("Scale was set to %f\n", value);
+	return(false);
+}
+
+void
+ScaleTestOk(void* attributes)
+{
+	printf("Scale is %f\n", scaleValue);
+	wControlShow(testDialog, false);
+}
+
+void
+ScaleTest(void* unused)
+{
+	testDialog = wWinDialogCreate(NULL,
+		"basicdialog-help",
+		"Scale Test",
+		"scaletest.ui",
+		DO_FILESYSTEM,
+		(wWinCallBack_p)ScaleTestProc,
+		NULL);
+
+	wDialogButtonsConfigure(testDialog, "Set", "Cancel", NULL);
+	wButtonCreate(testDialog, 0, 0, "id_ok", NULL, 0, 0, (wButtonCallBack_p)ScaleTestOk, (void*)1);
+
+	scale = wScaleCreate(testDialog, "scaleundertest", &scaleValue, ScaleTestProc, NULL);
+	wScaleSetValue(scale, 50.0);
+}
+
 wControl_p text;
 
 bool
@@ -426,12 +466,12 @@ NoteDialog(void* unused)
 		"note-text",
 		"Notes",
 		"note",
-		BO_USEBUILDER,
+		BO_DIALOGFROMBUILDER,
 		NoteDialogProc,
 		NULL);
 
 	text = wTextCreate(dialog, 0, 0, "note-text", "Enter notes here... ", 
-		BO_USEBUILDER, 0, 0);
+		BO_DIALOGFROMBUILDER, 0, 0);
 }
 
 bool
@@ -562,7 +602,7 @@ int LoadDesign(
 }
 
 void
-RecentUsedDesigns(int unused, const char* label, void * attributes)
+RecentUsedDesigns(int unused, const char* label, const void * attributes)
 {
 	wControl_p dialog;
 
@@ -592,7 +632,7 @@ wControl_p DialogViewer(char * builder)
 	wControl_p dialog;
 
 	dialog = wWinDialogCreate(mainW, "", NULL, (char *)builder, 
-		DO_FILESYSTEM | BO_USEBUILDER,
+		DO_FILESYSTEM | BO_DIALOGFROMBUILDER,
 		SimpleDynamicProc, NULL);
 
 	return(dialog);
@@ -667,6 +707,7 @@ void AddElevationTest(void* unused)
 	wDialogButtonsConfigure(dialog, "Change", "Cancel", NULL);
 
 	wEntryCreate(dialog, 0, 0, "value", NULL, 0L, 20, NULL, 0, NULL, NULL);
+
 	wControlShow(dialog, TRUE);
 }
 
@@ -703,7 +744,7 @@ void DemoTest(void* unused)
 		NULL,
 		"Demo", 
 		"demo",
-		BO_USEBUILDER,
+		BO_DIALOGFROMBUILDER,
 		DialogProc,
 		NULL);
 
@@ -739,7 +780,7 @@ ContextMenuAction(void* unused)
 }
 
 void
-CreateDraw()
+CreateDraw(void *unused)
 {
 	wControl_p maindrawing;
 
@@ -825,6 +866,14 @@ CreateMenuDialog(wControl_p mainW)
 
 	wMenuPushCreate(menu, "simpledyn", "Simply generated...", WCTL + 's',
 		SimpleDynamic, NULL);
+
+	wMenuPushCreate(menu, 				/* parent menu */
+		NULL, 				/* help topic */
+		"3 Button Notice", 				/* submenu title */
+		WCTL + '3', 					/* accelerator key */
+		Notice, 				/* callback funtion */
+		(void*)3 			/* pointer to user attributes */
+	);
 
 }
 
@@ -946,20 +995,6 @@ void TestMenu(wControl_p mainW)
 
 	CreateMenuDialog(mainW);
 
-	menu3 = wMenuBarAdd(mainW, 		/* parent window */
-		NULL, 			/* help topic */
-		"_Notice" 			/* submenu title */
-	);
-
-	wMenuPushCreate(menu3, 				/* parent menu */
-		NULL, 				/* help topic */
-		"3 Button Notice", 				/* submenu title */
-		WCTL + '3', 					/* accelerator key */
-		Notice, 				/* callback funtion */
-		(void*)3 			/* pointer to user attributes */
-	);
-
-	wSetBalloonHelp(balloonHelp);
 
 	menu = wMenuBarAdd(mainW, NULL, "_UI Designs");
 	wControl_p menuRecent;
@@ -973,6 +1008,13 @@ void TestMenu(wControl_p mainW)
 		0L,
 		Viewer,
 		menuDesigns);
+
+	wMenuPushCreate(menu,
+		NULL,
+		"Scale Test",
+		0L,
+		ScaleTest,
+		"controltest.ui");
 
 	wMenuPushCreate(menu,
 		NULL,
@@ -1075,19 +1117,45 @@ TestStatusbar(wControl_p mainWindow)
 }
 
 void
+LedOnOff(wControl_p button)
+{
+	wBool_t active = wControlGetActive(button);
+
+	wControlActive(button, !active);
+}
+
+wControl_p toolbarButtons[10];
+
+void 
+SetColor(void *buttonIndex)
+{
+
+	wFTLabelChangeColor(toolbarButtons[(unsigned long long)buttonIndex], 0xff0000);
+}
+
+void
 TestToolbar(wControl_p mainWindow)
 {
+	wIcon_p colorLabel;
+
+	wFTLabelLoadFontFromFile("xtrackcad-10.bdf");
+	colorLabel = wFTLabelCreate("69", 0xa0a0a0);
+
   	wControl_p button =	wButtonCreateForToolbar(mainWindow, 0, 0, "", 
-		wIconCreatePixMap((const char *)map_x16),
+		wIconCreatePixMap(map_x16),
+		BO_GAP, 0, NULL, NULL);
+
+	wControl_p ledbutton = wButtonCreateForToolbar(mainWindow, 0, 0, "", 
+		wIconCreatePixMap(ballgreen),
 		0, 0, NULL, NULL);
 
 	button = wButtonCreateForToolbar(mainWindow, 0, 0, "", 
-		wIconCreatePixMap((const char *)ballgreen),
-		BO_GAP, 0, NULL, NULL);
+		wIconCreatePixMap(yellowstar),
+		BO_ABUT, 0, LedOnOff, ledbutton);
 
-	button = wButtonCreateForToolbar(mainWindow, 0, 0, "", 
-		wIconCreatePixMap((const char *)yellowstar),
-		BO_ABUT, 0, NULL, NULL);
+	wButtonSetBusy(button, true);
+
+	toolbarButtons[0] = wButtonCreateForToolbar(mainWindow, 0, 0, "", colorLabel, 0, 0, SetColor, 0);
 }
 
 static
@@ -1136,6 +1204,7 @@ wControl_p wMain( int argc, char * argv[] )
 	wFlush();									/* make sure splash window is shown */
 #endif
 
+
 	/* create main window */	
     mainW = wWinMainCreate( APPNAME, 	/* application name  */
 	 								800, 			/* position x */
@@ -1143,12 +1212,14 @@ wControl_p wMain( int argc, char * argv[] )
 									"Help", 		/* help topic */
 									WINDOWTITLE, /* window title */
 									APPNAME, 	/* window name */	
-									BO_USEBUILDER | F_RESIZE|F_MENUBAR, /* options */
+									BO_DIALOGFROMBUILDER | F_RESIZE|F_MENUBAR, /* options */
 									mainCallBack, 		/* window callback function */
 									NULL 			/* pointer to user attributes */
 									);
 
 	// wWinShow( mainW, FALSE );
+
+	wSetBalloonHelp(balloonHelp);
 
 #ifdef TEST_PULLDOWNMENU
 	TestMenu(mainW);

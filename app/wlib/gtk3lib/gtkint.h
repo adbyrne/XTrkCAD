@@ -73,7 +73,7 @@ typedef enum {
 		B_MENUITEM, B_BOX,
 		B_BITMAP, B_STATUS,
 		B_COLORBUTTON, B_STACK, 
-		M_MENU, M_SUBMENU, M_PUSH, M_TOGGLE, M_RADIO, M_SEPARATOR, M_RECENTUSE
+		M_MENU, M_SUBMENU, M_PUSH, M_TOGGLE, M_RADIO, M_SEPARATOR, M_RECENTUSE, B_SCALE
 } wType_e;
 
 typedef void (*repaintProcCallback_p)( wControl_p );
@@ -96,6 +96,7 @@ struct bitmap {
 
 struct button {
 	wButtonCallBack_p action;
+	wIcon_p icon;
 	void* attributes;
 };
 
@@ -178,6 +179,11 @@ struct recentuse {
 	wControl_p parentMenu;
 };
 
+struct scale {
+	wScaleCallBack_p action;
+	double* valuePointer;
+};
+
 struct stack {
 	void* callback;
 };
@@ -223,6 +229,7 @@ struct control {
 		struct menuitem menuitem;
 		struct radio radio;
 		struct recentuse recentuse;
+		struct scale scale;
 		struct stack stack;
 		struct toggle toggle;
 		struct window window;
@@ -398,13 +405,15 @@ void wlibBasicDrawFillCircle(struct draw * drawingArea,
 /* bitmap.c */
 #define ICON_BITMAP (1)
 #define ICON_PIXMAP (2)
+#define ICON_PIXBUF (3)
 
 struct wIcon_t {
 	int gtkIconType;
 	wWinPix_t w;
 	wWinPix_t h;
 	wDrawColor color;
-	const void* bits;
+	const char* bits;
+	const char* text;
 };
 
 /* boxes.c */
@@ -635,7 +644,7 @@ struct wChoice_t {
 /* tooltip.c */
 #define HELPDATAKEY "HelpDataKey"
 void wlibAddHelpString(GtkWidget *widget, const char *helpStr);
-void wlibAddTooltip(GtkWidget* widget, char* dialog, char* field);
+void wlibAddTooltip(GtkWidget* widget, char* dialog, const char* field);
 void wlibHelpHideBalloon();
 
 /* treeview.c */

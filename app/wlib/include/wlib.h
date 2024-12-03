@@ -148,7 +148,7 @@ wIcon_p wIconCreateBitMap(wWinPix_t w,
                           wWinPix_t h, 
                           const char* bits,
                           wDrawColor color);
-wIcon_p wIconCreatePixMap(char* pm[]);
+wIcon_p wIconCreatePixMap(const char* pm[]);
 void wIconSetColor(wIcon_p ip, wDrawColor color);
 
 /*------------------------------------------------------------------------------
@@ -371,6 +371,15 @@ int wFilSelect(struct wFilSel_t* fs,
 
 /*------------------------------------------------------------------------------
  *
+ * Labels using Freetype
+ */
+
+void wFTLabelLoadFontFromFile(const char* filename);
+wIcon_p wFTLabelCreate(const char* text, wDrawColor color);
+void wFTLabelChangeColor(wControl_p button, wDrawColor newColor);
+
+/*------------------------------------------------------------------------------
+ *
  * Messages
  */
 
@@ -427,6 +436,18 @@ int wNoticeWithIcon(int type,
 
 /*----------------------------------------------------------------------------
  *
+ * Scale control
+ */
+
+
+typedef bool (*wScaleCallBack_p)(double value, void* context);
+wControl_p wScaleCreate(wControl_p parent, const char* id, double *valuePointer, wScaleCallBack_p action, void *context);
+double wScaleGetValue(wControl_p scale);
+void wScaleSetValue(wControl_p scale, double value);
+
+
+/*----------------------------------------------------------------------------
+ *
  * Splash window
  */
 
@@ -434,13 +455,14 @@ int wCreateSplash(char* appName, char* appVer);
 int wSetSplashInfo(char* msg);
 void wDestroySplash(void);
 
+
 /*---------------------------------------------------------------------------- 
  *
  * String entry
  */
 
  /* Creation CallBacks */
-typedef bool (*wEntryCallBack_p)(const char* enteredString, void* userData);
+typedef bool (*wEntryCallBack_p)(const char* enteredString, void * userData);
 
 wControl_p wEntryCreate(wControl_p parent, 
                         wWinPix_t x, 
@@ -603,7 +625,7 @@ void wGetDisplaySize(		wWinPix_t*, wWinPix_t* );
 
 wIcon_p wIconCreateBitMap(	wWinPix_t, wWinPix_t, const char * bits,
                                 wDrawColor );
-wIcon_p wIconCreatePixMap(	char *[] );
+wIcon_p wIconCreatePixMap(	const char *[] );
 void wIconSetColor(		wIcon_p, wDrawColor );
 void wIconDraw( wDraw_p d, wIcon_p bm, wWinPix_t x, wWinPix_t y );
 
@@ -623,7 +645,7 @@ wControl_p wMain(			int, char *[] );
 void wWinSetBigIcon(		wWin_p, wIcon_p );
 void wWinSetSmallIcon(		wWin_p, wIcon_p );
 void wWinShow( wControl_p control, wBool_t visibility);
-wBool_t wWinIsVisible(		wWin_p );
+wBool_t wWinIsVisible(		wControl_p window );
 wBool_t wWinIsMaximized( wWin_p win);
 void wWinGetSize (		wControl_p window, wWinPix_t * width, wWinPix_t *height );
 void wWinSetSize(		wControl_p, wWinPix_t, wWinPix_t );
@@ -681,7 +703,8 @@ wWinPix_t wControlGetPosX(		wControl_p );
 wWinPix_t wControlGetPosY(		wControl_p );
 void wControlSetPos(		wControl_p, wWinPix_t, wWinPix_t );
 void wControlSetFocus(		wControl_p );
-void wControlActive(		wControl_p, wBool_t );
+void wControlActive(		wControl_p control, wBool_t active);
+wBool_t wControlGetActive(wControl_p control);
 void wControlSetBalloon(	wControl_p, wWinPix_t, wWinPix_t, const char * );
 void wControlSetLabel(		wControl_p, const char * );
 void wControlSetBalloonText(	wControl_p, const char * );
@@ -749,7 +772,7 @@ wControl_p wComboBoxCreateForToolbar(wControl_p	parent, const char* helpStr, con
     long	option, wWinPix_t	width, long* valueP, wListCallBack_p action,
     void* context);
 
-void wComboBoxAddValue(wControl_p b, char* text, void * attributes);
+void wComboBoxAddValue(wControl_p b, const char* text, void * attributes);
 void wComboBoxSetIndex(wControl_p b, int row);
 wIndex_t wComboBoxGetCount(wControl_p b);
 void* wComboBoxGetItemContext(wControl_p b, wIndex_t inx);
