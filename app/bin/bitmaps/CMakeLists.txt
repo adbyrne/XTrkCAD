@@ -50,6 +50,7 @@ set( PIXS 16 24 32 )
 
 foreach(img3 ${IMG3S})
 	if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/" )
+		# FlatPak
 		# Copy .image3 from generated bitmaps/ 
 		if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/${img3}.image3" )
 			add_custom_command(
@@ -58,7 +59,7 @@ foreach(img3 ${IMG3S})
 				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/${img3}.image3 ${CMAKE_CURRENT_BINARY_DIR}/${img3}.image3
 			)
 		else()
-			MESSAGE( STATUS "Missing ${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/${img3}.xpm3" )
+			MESSAGE( STATUS "Missing ${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/${img3}.png3" )
 		endif()
 	else()
 		foreach(pix ${PIXS})
@@ -98,7 +99,7 @@ foreach(img3 ${IMG3S})
 				OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${img3}.image3
 				OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${img3}.xpm3
 				COMMAND pngtoxpm ${CMAKE_CURRENT_BINARY_DIR}/${img3}.xpm3
-				COMMAND -E echo "#include \"bitmaps\/${img1}.xpm" > ${CMAKE_CURRENT_BINARY_DIR}/${img1}.image1
+				COMMAND -E echo "#include \"bitmaps\/${img3}.xpm3" > ${CMAKE_CURRENT_BINARY_DIR}/${img3}.image3
 			)
 		endif()
 	endif()
@@ -133,6 +134,7 @@ set (IMG1S
 )
 foreach(img1 ${IMG1S})
 	if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/" )
+		# FlatPak
 		# Copy .image1 from generated bitmaps/ 
 		if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/${img1}.image1" )
 			add_custom_command(
@@ -141,35 +143,35 @@ foreach(img1 ${IMG1S})
 				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/${img1}.image1 ${CMAKE_CURRENT_BINARY_DIR}/${img1}.image1
 			)
 		else()
-			MESSAGE( STATUS "Missing ${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/${img1}.xpm1" )
+			MESSAGE( STATUS "Missing ${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/${img1}.image1" )
 		endif()
 	else()
-		if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${img1}.xpm" )
+		if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${img1}.png" )
 			if(UNIX)
 				add_custom_command(
 					OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${img1}.image1
-					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${img1}.xpm
+					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${img1}.png
 					COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/
-	#					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/png/${img1}${pix}.png ${CMAKE_CURRENT_BINARY_DIR}/png/${img1}${pix}.png
-					COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../../tools/mkimage1 ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/${img1}.xpm	
+					COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../../tools/mkimage1 ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/${img1}.png
 				)
 			else()
 				add_custom_command(
 					OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${img1}.image1
-					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${img1}.xpm
+					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${img1}.png
 					COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/
 					COMMAND -E echo "#include \"bitmaps\/${img1}.xpm" > ${CMAKE_CURRENT_BINARY_DIR}/${img1}.image1
 				)
 			endif()
 		else()
-			MESSAGE( STATUS "${CMAKE_CURRENT_SOURCE_DIR}/${img1}.xpm not found" )
+			MESSAGE( STATUS "${CMAKE_CURRENT_SOURCE_DIR}/${img1}.png not found" )
 		endif()
 #		# build a list of all the depends
 #		list(APPEND PNG_RESULTS ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png)
 	endif()
 	list(APPEND IMG_RESULTS ${img1}.image1)
+#	list(APPEND IMG_RESULTS ${img1}.png)
 	if(WIN32)
-		list(APPEND IMG_RESULTS ${img1}.xpm1)
+		list(APPEND IMG_RESULTS ${img1}.xpm)
 	endif()
 endforeach()
 

@@ -1,11 +1,11 @@
 #!/bin/bash
 if [ $# -lt 2 ] ; then
-	echo mkimage1 OUTDIR XPM ...
-	echo Converts .xpm files to .image1
+	echo mkimage1 OUTDIR PNG ...
+	echo Converts .pmg files to .image1
 	echo Run from SRCDIR/app/bitmaps
 	echo 
 	echo '$ cd $SRCDIR/app/bin/bitmaps'
-	echo '$ ../../tools/mkimage1 $BLDDIR/app/bin/bitamps *.xpm'
+	echo '$ ../../tools/mkimage1 $BLDDIR/app/bin/bitamps *.png'
 	exit 1
 fi
 
@@ -14,23 +14,11 @@ if [ ! -d ${OUTDIR} ] ; then
 	echo ${OUTDIR} - not a directory
 	exit 1
 fi
-TMPDIR=/tmp/mkimage.$$
-mkdir ${TMPDIR}
 
 shift
-for XPMFILE in "$@" ; do
-	echo $XPMFILE
-	F1=`basename "$XPMFILE" | sed 's/.xpm//'`;
-	cp ${XPMFILE} ${TMPDIR}/
-	mogrify -format "png" ${TMPDIR}/${F1}.xpm
-	if [ ! -f ${TMPDIR}/${F1}.png ] ; then
-		echo mogrify ${F1}.xpm failed
-		exit 1
-	fi
-	gdk-pixbuf-csource --stream --name "${F1}_image1" ${TMPDIR}/${F1}.png \
-		| sed -e 's/guint8/char/g' -e 's/-/_/g' \
-		> ${OUTDIR}/${F1}.image1
-	rm -f ${TMPDIR}/${F1}.xpm
-	rm -f ${TMPDIR}/${F1}.png
+for PNGFILE in "$@" ; do
+	NAME=`basename "$PNGFILE" | sed 's/.png//'`;
+	gdk-pixbuf-csource --stream --name "${NAME}_image1" ${PNGFILE} \
+		| sed -e 's/guint8/char/g' \
+		> ${OUTDIR}/${NAME}.image1
 done
-rmdir ${TMPDIR}
