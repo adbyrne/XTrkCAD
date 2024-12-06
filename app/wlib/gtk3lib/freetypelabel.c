@@ -120,10 +120,11 @@ CreatePixbufFromFTLabel(const char* text, wDrawColor color)
  * operating system.
  *
  * \param filename path to font
+ * \return font size or 0.0 on error
  *
  */
 
-void
+double
 wFTLabelLoadFontFromFile(const char* filename)
 {
 	if (!library) {
@@ -150,7 +151,7 @@ wFTLabelLoadFontFromFile(const char* filename)
 
 		fontSize = GetFaceHeight(ftFontFace);
 	}
-
+	return(fontSize);
 }
 
 /**

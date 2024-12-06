@@ -57,7 +57,7 @@ void RestoreLayers( void );
 void LoadLayerLists( void );
 addButtonCallBack_t InitLayersDialog( void );
 addButtonCallBack_t InitDrawOrderDialog( void );
-void FillLayerList(wList_p layerList);
+void FillLayerList(wControl_p layerList);
 
 void LayerAllDefaults();
 void LayerSetCounts();

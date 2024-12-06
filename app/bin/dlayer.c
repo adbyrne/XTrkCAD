@@ -1,3 +1,4 @@
+#include "custom.h"
 /** \file dlayer.c
  * Functions and dialogs for handling layers.
  */
@@ -39,8 +40,8 @@
  * LAYERS
  *
  */
-
-#define NUM_BUTTONS		(99)
+ /** \todo Move layer button handling to toolbar.c */
+#define NUM_BUTTONS (99)
 #define LAYERPREF_FROZEN  (1)
 #define LAYERPREF_ONMAP	  (2)
 #define LAYERPREF_VISIBLE (4)
@@ -72,7 +73,7 @@ EXPORT unsigned int maxLayer;
 
 unsigned int curLayer;
 long layerCount = 10;
-static long newLayerCount = 10;
+long newLayerCount = 10;
 static unsigned int layerSelected = 0;
 
 
@@ -496,7 +497,7 @@ static  long layerRawColorTab[] = {
 static  wDrawColor layerColorTab[COUNT(layerRawColorTab)];
 
 
-static wWin_p layerW;
+static wControl_p layerW;
 static char layerName[STR_SHORT_SIZE];
 static char layerLinkList[STR_LONG_SIZE];
 static char settingsName[STR_SHORT_SIZE];
@@ -534,7 +535,7 @@ static char *moduleLabels[] = { "", NULL };
 static char *noButtonLabels[] = { "", NULL };
 static char *defaultLabels[] = { "", NULL };
 static char *layerColorLabels[] = { "", NULL };
-static paramIntegerRange_t i0_20 = { 0, NUM_BUTTONS };
+
 //static paramListData_t layerUiListData = { 10, 370, 0 };
 
 static paramData_t layerPLs[] = {
@@ -580,12 +581,11 @@ static paramData_t layerPLs[] = {
 	{ PD_BUTTON, DoLayerOp, "delete", PDO_DLGHORZ, 0, N_("Delete Layer"), 0, I2VP(ENUMLAYER_DELETE) },
 #define I_DEFAULT (20)
 	{ PD_BUTTON, DoLayerOp, "default", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Default Values"), 0, I2VP(ENUMLAYER_DEFAULT) },
-	{ PD_LONG, &newLayerCount, "button-count", PDO_DLGBOXEND | PDO_DLGRESETMARGIN, &i0_20, N_("Number of Layer Buttons") },
-#define I_LINKLIST (22)
+#define I_LINKLIST (21)
 	{ PD_STRING, layerLinkList, "layerlist", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(250 - 54), N_("Linked Layers"), 0, 0, sizeof(layerLinkList) },
-#define I_SETTINGS (23)
+#define I_SETTINGS (22)
 	{ PD_COMBOLIST, NULL, "settings", PDO_LISTINDEX, I2VP(250), N_("Settings when Current") },
-#define I_COUNT (24)
+#define I_COUNT (23)
 	{ PD_LONG, &layerObjectCount, "objectCount", PDO_DLGBOXEND, &r_nocheck, N_("Object Count:"), 0, 0 },
 	{ PD_MESSAGE, N_("All Layer Preferences"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
 	{ PD_BUTTON, DoLayerOp, "load", PDO_DLGRESETMARGIN, 0, N_("Load"), 0, I2VP(ENUMLAYER_RELOAD) },
@@ -593,7 +593,7 @@ static paramData_t layerPLs[] = {
 	{ PD_BUTTON, DoLayerOp, "clear", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Defaults"), 0, I2VP(ENUMLAYER_CLEAR) },
 };
 
-#define settingsListL	((wList_p)layerPLs[I_SETTINGS].control)
+#define settingsListL	(layerPLs[I_SETTINGS].control)
 
 static paramGroup_t layerPG = { "layer", 0, layerPLs, COUNT( layerPLs ) };
 
@@ -639,13 +639,13 @@ static int LoadFileListLoad(Catalog *catalog, char * name)
 	return TRUE;
 }
 
-#define layerL	((wList_p)layerPLs[I_LIST].control)
+#define layerL	(layerPLs[I_LIST].control)
 
-#define layerS  ((wList_p)layerPLs[I_SETTINGS].control)
+#define layerS  (layerPLs[I_SETTINGS].control)
 
-#define scaleL	((wList_p)layerPLs[I_SCALE].control)
+#define scaleL	(layerPLs[I_SCALE].control)
 
-#define gaugeL	((wList_p)layerPLs[I_GAUGE].control)
+#define gaugeL	(layerPLs[I_GAUGE].control)
 
 /**
 * @brief Reload Layer parameters if changes
@@ -1016,14 +1016,14 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
  * \param listLayers the dropbox
  * \return
  */
-void FillLayerList( wList_p listLayers)
+void FillLayerList( wControl_p listLayers)
 {
 	wListClear(listLayers);  // Rebuild list on each invocation
 
 	for (int inx = 0; inx < NUM_LAYERS; inx++) {
 		char *layerFormattedName;
 		layerFormattedName = FormatLayerName(inx);
-		wListAddValue((wList_p)listLayers, layerFormattedName, NULL, I2VP(inx));
+		wListAddValue(listLayers, layerFormattedName, NULL, I2VP(inx));
 		free(layerFormattedName);
 	}
 
@@ -2041,9 +2041,9 @@ static void LayerDlgUpdate(
 		break;
 
 	case I_SCALE:
-		LoadGaugeList((wList_p)layerPLs[I_GAUGE].control, *((int *)valueP));
+		LoadGaugeList(layerPLs[I_GAUGE].control, *((int *)valueP));
 		// set the first entry as default, usually the standard gauge for a scale
-		wListSetIndex((wList_p)layerPLs[I_GAUGE].control, 0);
+		wListSetIndex(layerPLs[I_GAUGE].control, 0);
 		break;
 
 	case I_TIELEN:
@@ -2091,247 +2091,68 @@ static void DoLayer(void * unused)
 
 #include "bitmaps/background.xpm3"
 
-#if NUM_BUTTONS < 100
-static int lbmap_width[3] = { 16, 24, 32 }; // For numbers < 100
-#else
-static int lbmap_width[3] = { 20, 28, 36 }; // For numbers > 99
-#endif
-static int lbmap_height[3] = { 16, 24, 32 };
-
-static int lbit0_width[3] = { 6, 10, 14 };
-static int lbit1_width[3] = { 4, 5, 6 };
-
-//static int lbits_top[3] = { 3, 4, 6 };
-static int lbits_height[3] = { 10, 15, 20 };
-
-#include "bitmaps/layer_num.inc"
-
-static char** show_layer_digits[3][10] = {
-	{
-		n0_x16, n1_x16, n2_x16, n3_x16, n4_x16, n5_x16, n6_x16, n7_x16, n8_x16, n9_x16
-	},
-	{
-		n0_x24, n1_x24, n2_x24, n3_x24, n4_x24, n5_x24, n6_x24, n7_x24, n8_x24, n9_x24
-	},
-	{
-		n0_x32, n1_x32, n2_x32, n3_x32, n4_x32, n5_x32, n6_x32, n7_x32, n8_x32, n9_x32
-	}
+static char* customFonts[] = {
+	"xtrackcad-10.bdf",
+	"xtrackcad-15.bdf",
+	"xtrackcad-20.bdf"
 };
 
-/* Note: If the number of buttons is increased to > ~120, you should
- *       also increase COMMAND_MAX and BUTTON_MAX in command.c
- *       NUM_LAYERS is defined in common.h
- */
-#define ONE_PIXEL v *= 2; if (v > 128) { show_layer_bits[xx + yy] = b; xx += 1; v = 1; b = 0; }
-
-void InitLayers(int cmdGroup)
+static void
+InitializeCustomFont(int size)
 {
-	unsigned int i;
-	wPrefGetInteger(prefSect, "layer-button-count", &layerCount, layerCount);
+	char* pathToFontFile = NULL;
 
-	for (i = 0; i < COUNT(layerRawColorTab); i++) {
-		layerColorTab[i] = wDrawFindColor(layerRawColorTab[i]);
+	MakeFullpath(&pathToFontFile, wGetAppLibDir(), customFonts[size], NULL);
+	if (pathToFontFile) {
+
+		wFTLabelLoadFontFromFile(pathToFontFile);
+
+		free(pathToFontFile);
+	}
+}
+
+static
+void CreateLayerButtons()
+{
+	DynString buttonText;
+	DynStringMalloc(&buttonText, 5);
+
+	InitializeCustomFont(iconSize);
+
+	for (int i = 0; i < COUNT(layerRawColorTab); i++) {
+		layerColorTab[i] = layerRawColorTab[i];
 	}
 
-	/* build the adjust table for starting bit */
-	int dx_table[] = { 1, 2, 4, 8, 16, 32, 64, 128 };
-
-	/* create the bitmaps for the layer buttons */
-	/* all bitmaps have to have the same dimensions */
 	for (int i = 0; i < NUM_LAYERS; i++) {
-		int n = i + 1;
-		int bwid = lbmap_width[iconSize];
-		int wb = (bwid + 7) / 8; // width in bytes
-		int bhgt = lbmap_height[iconSize];
-		int h = lbits_height[iconSize];
+		DynStringPrintf(&buttonText, "%d", i );
 
-		// if (n > 30) n = n + 70; for testing > 100
-
-		show_layer_bits = MyMalloc(bhgt * wb);
-
-		if (n < 10) {
-			// width of char
-			int wc = 0;     // width of char
-			if (n == 1) {
-				wc = lbit1_width[iconSize];
-			} else {
-				wc = lbit0_width[iconSize];
-			}
-
-			// X-adjust
-			int dx = (bwid - wc) / 2;
-			int x0 = 0;
-			if (dx > 7) {
-				dx -= 8;
-				x0++;
-			}
-
-			char** cp = show_layer_digits[iconSize][n];
-
-			for (int y = 0; y < h; y++) {
-				int v = dx_table[dx]; // power of two
-				char b = 0; // bits
-
-				int yy = wb * (y + (bhgt - h) / 2);
-
-				int xx = x0; // starting byte
-				for (int x = 0; x < wc; x++) {
-					char z = *(*cp + x + y * wc);
-					if (z != ' ') {
-						b |= v;
-					}
-					ONE_PIXEL
-				}
-				if (v <= 128) {
-					show_layer_bits[xx + yy] = b;
-				}
-			}
-
-		} else if (n < 100) {
-			// width of chars
-			int wc1 = 0;
-			int wc0 = 0;
-			if ((n / 10) == 1) {
-				wc1 = lbit1_width[iconSize];
-			} else {
-				wc1 = lbit0_width[iconSize];
-			}
-			if ((n % 10) == 1) {
-				wc0 = lbit1_width[iconSize];
-			} else {
-				wc0 = lbit0_width[iconSize];
-			}
-
-			// X-adjust
-			int dx = (bwid - wc1 - wc0 - (iconSize >= 1 ? 2 : 1)) / 2;
-			int x0 = 0;
-			if (dx > 7) {
-				dx -= 8;
-				x0++;
-			}
-
-			char** cp1 = show_layer_digits[iconSize][n / 10];
-			char** cp0 = show_layer_digits[iconSize][n % 10];
-
-			for (int y = 0; y < h; y++) {
-				int v = dx_table[dx]; // powers of two
-				char b = 0; // bits
-
-				int yy = wb * (y + (bhgt - h) / 2);
-
-				int xx = x0; // starting byte
-				for (int x = 0; x < wc1; x++) {
-					char z = *(*cp1 + x + y * wc1);
-					if (z != ' ') {
-						b |= v;
-					}
-					ONE_PIXEL
-				}
-				ONE_PIXEL
-				if (iconSize >= 1) {
-					ONE_PIXEL
-				}
-				for (int x = 0; x < wc0; x++) {
-					char z = *(*cp0 + x + y * wc0);
-					if (z != ' ') {
-						b |= v;
-					}
-					ONE_PIXEL
-				}
-				if (v <= 128) {
-					show_layer_bits[xx + yy] = b;
-				}
-			}
-
-		} else { // n >= 100
-			// width of chars
-			int wc2 = 0;
-			int wc1 = 0;
-			int wc0 = 0;
-			if ((n / 100) == 1) {
-				wc2 = lbit1_width[iconSize];
-			} else {
-				wc2 = lbit0_width[iconSize];
-			}
-			if (((n / 10) % 10) == 1) {
-				wc1 = lbit1_width[iconSize];
-			} else {
-				wc1 = lbit0_width[iconSize];
-			}
-			if ((n % 10) == 1) {
-				wc0 = lbit1_width[iconSize];
-			} else {
-				wc0 = lbit0_width[iconSize];
-			}
-
-			// X-adjust and start
-			int dx = (bwid - wc2 - wc1 - wc0 - 2) / 2;
-			int x0 = 0;
-			if (dx > 7) {
-				dx -= 8;
-				x0++;
-			}
-
-			char** cp2 = show_layer_digits[iconSize][n / 100];
-			char** cp1 = show_layer_digits[iconSize][(n / 10) % 10];
-			char** cp0 = show_layer_digits[iconSize][n % 10];
-
-			for (int y = 0; y < h; y++) {
-				int v = dx_table[dx]; // powers of two
-				char b = 0; // bits
-
-				int yy = wb * (y + (bhgt - h) / 2);
-
-				int xx = x0; // byte
-				for (int x = 0; x < wc2; x++) {
-					char z = *(*cp2 + x + y * wc2);
-					if (z != ' ') {
-						b |= v;
-					}
-					ONE_PIXEL
-				}
-				ONE_PIXEL
-				for (int x = 0; x < wc1; x++) {
-					char z = *(*cp1 + x + y * wc1);
-					if (z != ' ') {
-						b |= v;
-					}
-					ONE_PIXEL
-				}
-				ONE_PIXEL
-				for (int x = 0; x < wc0; x++) {
-					char z = *(*cp0 + x + y * wc0);
-					if (z != ' ') {
-						b |= v;
-					}
-					ONE_PIXEL
-				}
-				if (v <= 128) {
-					show_layer_bits[xx + yy] = b;
-				}
-			}
-		}
-
-		show_layer_bmps[i] = wIconCreateBitMap(
-		                             bwid,
-		                             bhgt,
-		                             show_layer_bits,
-		                             layerColorTab[i % (COUNT(layerColorTab))]);
 		layers[i].color = layerColorTab[i % (COUNT(layerColorTab))];
+		show_layer_bmps[i] = wFTLabelCreate(DynStringToCStr(&buttonText),
+			layers[i].color);
+
 		layers[i].useColor = TRUE;
 	}
 
-	/* layer list for toolbar */
+	DynStringFree(&buttonText);
+}
 
+void InitLayers(int cmdGroup)
+{
+	wPrefGetInteger(prefSect, "layer-button-count", &layerCount, layerCount);
+
+	/* layer list for toolbar */
 	setLayerL = wComboBoxCreateForToolbar(mainW, "cmdLayerSet", NULL, 0, 100, NULL, SetCurrLayer, NULL);
 	wControlSetBalloonText((wControl_p)setLayerL, GetBalloonHelpStr("cmdLayerSet"));
 
+	/* background button */
 	backgroundB = AddToolbarButton("cmdBackgroundShow",
 	                               wIconCreatePixMap(background_xpm3[iconSize]), 0,
 	                               BackgroundToggleShow, NULL);
-	/* add the help text */
 	wControlSetBalloonText(backgroundB, _("Show/Hide Background"));
 	wControlActive(backgroundB, FALSE);
+
+	/* layer buttons */
+	CreateLayerButtons();
 
 	for (int i = 0; i < NUM_LAYERS; i++) {
 		char *layerName;
