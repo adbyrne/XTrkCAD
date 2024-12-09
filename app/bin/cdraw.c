@@ -3186,11 +3186,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 #include "bitmaps/polyline.image3"
 
 typedef struct {
-#ifdef WINDOWS
-	char ***image3;
-#else
-	char const **image3;
-#endif
+	wIconBitMap_t * image3;
 	int OP;
 	char * shortName;
 	char * cmdName;

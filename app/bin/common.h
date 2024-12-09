@@ -314,5 +314,10 @@ typedef struct {
 #include "command.h"
 #include "menu.h"
 
+#ifndef WINDOWS
+// base type of converted .png files
+typedef unsigned char guint8;
+#endif
+
 #endif
 

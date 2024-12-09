@@ -97,7 +97,7 @@ GdkPixbuf* wlibPixbufFromXBM(
         wIcon_p ip)
 {
 	GdkPixbuf * pixbuf;
-	const char * bits = ip->bits;
+	wIconBitMap_t bits = ip->bits;
 	static unsigned char background[4] = { 0xFF, 0xFF, 0xFF, 0x0 };
 	long rgb = wDrawGetRGB(ip->color);
 	unsigned char foreground[4];

@@ -54,7 +54,7 @@ static char *benchTypeS[] = { "", N_(" L-Girder"), N_(" T-Girder") };
 
 typedef struct {
 	char * name;
-	const char * image1;
+	wIconBitMap_t image1;
 	wIcon_p icon;
 } orientData_t;
 static orientData_t rectOrientD[] = {

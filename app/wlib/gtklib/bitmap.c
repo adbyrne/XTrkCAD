@@ -109,7 +109,7 @@ wIcon_p wIconCreateBitMap( wWinPix_t w, wWinPix_t h, const char * bits,
 	ip->color = color;
 	// Copy bits
 	int nBytes = ( ( w + 7 ) / 8 ) * h;
-	ip->bits = (char*)malloc( nBytes );
+	ip->bits = (wIconBitMap_t)malloc( nBytes );
 	memcpy( (void*)ip->bits, bits, nBytes );
 	return ip;
 }
@@ -120,7 +120,7 @@ wIcon_p wIconCreateBitMap( wWinPix_t w, wWinPix_t h, const char * bits,
  * \returns icon handle
  */
 
-wIcon_p wIconCreatePixMap( const char *pm )
+wIcon_p wIconCreatePixMap( wIconBitMap_t pm )
 {
 	wIcon_p ip;
 	ip = (wIcon_p)malloc( sizeof *ip );
@@ -128,7 +128,7 @@ wIcon_p wIconCreatePixMap( const char *pm )
 	ip->w = 0;
 	ip->h = 0;
 	ip->color = 0;
-	ip->bits = (char*) pm;
+	ip->bits = (wIconBitMap_t) pm;
 	return ip;
 }
 

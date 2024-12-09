@@ -36,7 +36,7 @@ EXPORT TRKTYP_T T_NOTE = -1;
 static wDrawBitMap_p note_bm, link_bm, document_bm;
 
 typedef struct {
-	const char **image3;
+	wIconBitMap_t * image3;
 	int OP;
 	char * shortName;
 	char * cmdName;

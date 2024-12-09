@@ -1,27 +1,23 @@
-# Generate bitmaps from SVG files
+# Generate bitmaps from SVG files and other places
+#
+# FLATPAK builds use pregenerated bitmap files.  See below;
+#
+# We generate different types of bitmap files depending of the platform
+# Both use the common suffix .image1 (this saves lots of ugly preprocesor code)
+# Unix - ascii-ized version of the .png files (using gdk_pixbuf_csource)
+# Window - .xpm files (using pngtoxpm)
+# 
+# Toolbar button icons come in 3 sizes.  Separate .image1 files are generated for each size
+# A small #include file (.image3) is generated for each icon, Which #include's the 3 .image1 files
+# and an array definition to select the bitmap for the size
+# Toolbar icons are defined as .svg file which are converated by Inkscape into .png files.
+# Some of the generated bitmap are ugly and handcrafted .png files are used instead
+# This live in ${CMAKE_CURRENT_SOURCE}/png
+#
+# Another group of icons are used as dialog decorations.
+# These .png files live in ${CMAKE_CURRENT_SOURCE_DIR}
 
 PROJECT(genbitmaps)
-
-# If ../../../bitmaps exists it is because we are building for FlatPak which can't
-# build bitmaps because we don't have inkscape and mogrifiy
-# Instead we copy the bitmaps from a regular build and include them at the top
-# level of the source tree in the tarball we create for the FlatPak build
-# See distribution/flatpak/make-source-archive
-# So if bitmaps/ exists then we are doing a FlatPak build
-
-if ( NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/" )
-	# NOT FLATPAK
-	# Find the conversion tool 
-	find_package(Inkscape)
-
-	if( NOT Inkscape_FOUND )
-		message( STATUS "Inkscape not found." )
-		return()
-	else()
-		message(STATUS "Inkscape is: ${Inkscape_EXECUTABLE}")
-		message(STATUS "Export option is: ${Inkscape_EXPORT}")
-	endif()
-endif()
 
 set (IMG3S
 	background benchwork bezier-line bezier-track block bottom box
@@ -48,68 +44,102 @@ set (IMG3S
 	)
 set( PIXS 16 24 32 )
 
+set (IMG1S
+	ballgreen ballred bluedot bo_edge bo_flat bo_lld bo_lli bo_llu bo_ll bo_lrd bo_lri
+	bo_lru bo_lr bo_ti bo_tl bo_tr bo_t carpart carproto funnelclear funnel greendot
+	greenstar greydot greystar loosen note partlist pause reddot redstar struct xtc
+	yellowdot yellowstar zero
+)
+
+# If ../../../bitmaps exists it is because we are building for FlatPak which can't
+# build bitmaps because we don't have inkscape
+# Instead we copy the bitmaps from bia regular build and include them at the top
+# level of the source tree in the tarball we create for the FlatPak build
+# See distribution/flatpak/make-source-archive
+# So if bitmaps/ exists then we are doing a FlatPak build
+if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/" )
+	# FLATPAK
+	MESSAGE( STATUS "FlatPak build" )
+	foreach( img1 ${IMG1S} )
+		list(APPEND IMG_RESULTS ${img1}.image1)
+	endforeach()
+	foreach( img3 ${IMG3S} )
+		foreach( pix 16 24 32 )
+			list(APPEND IMG_RESULTS ${img3}${pix}.image1)
+		endforeach()
+		list(APPEND IMG_RESULTS ${img3}.image3)
+	endforeach()
+
+	foreach ( img ${IMG_RESULTS} )
+		add_custom_command(
+			DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/${img}
+			OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${img}
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/${img} ${CMAKE_CURRENT_BINARY_DIR}/${img}
+		)
+	endforeach()
+	MESSAGE( STATUS ${IMG_RESULTS} )
+
+	add_custom_target (
+		genbitmaps 
+		DEPENDS ${IMG_RESULTS}
+	)
+	return()
+endif()
+
+# Find the conversion tool 
+find_package(Inkscape)
+
+if( NOT Inkscape_FOUND )
+	message( STATUS "Inkscape not found." )
+	return()
+else()
+	message(STATUS "Inkscape is: ${Inkscape_EXECUTABLE}")
+	message(STATUS "Export option is: ${Inkscape_EXPORT}")
+endif()
+
+
 foreach(img3 ${IMG3S})
-	if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/" )
-		# FlatPak
-		# Copy .image3 from generated bitmaps/ 
-		if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/${img3}.image3" )
+	STRING(MAKE_C_IDENTIFIER ${img3} NAME )
+	foreach(pix ${PIXS})
+		if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/png/${img3}${pix}.png" )
+			# MESSAGE( STATUS "Custom ${CMAKE_CURRENT_SOURCE_DIR}/png/${img3}${pix}.png" )
 			add_custom_command(
-				OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${img3}.image3
-				DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/${img3}.image3
-				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/${img3}.image3 ${CMAKE_CURRENT_BINARY_DIR}/${img3}.image3
+				OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png
+				DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/png/${img3}${pix}.png
+				COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/png/
+				COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/png/${img3}${pix}.png ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png
 			)
 		else()
-			MESSAGE( STATUS "Missing ${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/${img3}.png3" )
+			# MESSAGE( STATUS "SVG ${CMAKE_CURRENT_SOURCE_DIR}/svg/${img3}.svg" )
+			add_custom_command(
+				OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png
+				DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/svg/${img3}.svg
+				COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/png/
+				COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${img3}.svg -h ${pix} ${Inkscape_EXPORT}${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png
+			)
 		endif()
-	else()
-		foreach(pix ${PIXS})
-			if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/png/${img3}${pix}.png" )
-				# MESSAGE( STATUS "Custom ${CMAKE_CURRENT_SOURCE_DIR}/png/${img3}${pix}.png" )
-				add_custom_command(
-					OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png
-					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/png/${img3}${pix}.png
-					COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/png/
-					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/png/${img3}${pix}.png ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png
-				)
-			else()
-				# MESSAGE( STATUS "SVG ${CMAKE_CURRENT_SOURCE_DIR}/svg/${img3}.svg" )
-				add_custom_command(
-					OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png
-					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/svg/${img3}.svg
-					COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/png/
-					COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${img3}.svg -h ${pix} ${Inkscape_EXPORT}${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png
-				)
-			endif()
-			# build a list of all the depends
-			list(APPEND PNG_RESULTS ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png)
-		endforeach()
 		if(UNIX)
 			add_custom_command(
-				DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}16.png
-				DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}24.png
-				DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}32.png
-				OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${img3}.image3
-				COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../../tools/mkimage3  ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}16.png	
+				DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png
+				OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${img3}${pix}.image1
+				COMMAND gdk-pixbuf-csource --stream --name ${NAME}${pix}_image1 ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png >  ${CMAKE_CURRENT_BINARY_DIR}/${img3}${pix}.image1
 			)
 		else()
 			add_custom_command(
-				DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}16.png
-				DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}24.png
-				DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}32.png
-				OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${img3}.image3
-				OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${img3}.xpm3
-				COMMAND pngtoxpm ${CMAKE_CURRENT_BINARY_DIR}/${img3}.xpm3
-				COMMAND -E echo "#include \"bitmaps\/${img3}.xpm3" > ${CMAKE_CURRENT_BINARY_DIR}/${img3}.image3
+				DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png
+				OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${img3}${pix}.image1
+				COMMAND ../../tools/pngtoxpm/pngtoxpm ${img3}${pix}_image1 ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png ${CMAKE_CURRENT_BINARY_DIR}/${img3}${pix}.image1
 			)
 		endif()
-	endif()
-
-	# build a list of all the depends
-	if(UNIX)
-		list(APPEND IMG_RESULTS ${img3}.image3)
-	else()
-		list(APPEND IMG_RESULTS ${img3}.xpm3)
-	endif()
+	endforeach()
+	add_custom_command(
+		OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${img3}.image3
+		DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${img3}16.image1
+		DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${img3}24.image1
+		DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${img3}32.image1
+		COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/mkimage3.cmake ${img3}
+	)
+	list(APPEND IMG_RESULTS ${img3}.image3)
 endforeach()
 
 if(WIN32)
@@ -126,59 +156,29 @@ if(WIN32)
 
 endif()
 
-set (IMG1S
-	ballgreen ballred bluedot bo_edge bo_flat bo_lld bo_lli bo_llu bo_ll bo_lrd bo_lri
-	bo_lru bo_lr bo_ti bo_tl bo_tr bo_t carpart carproto funnelclear funnel greendot
-	greenstar greydot greystar loosen note partlist pause reddot redstar struct xtc
-	yellowdot yellowstar zero
-)
 foreach(img1 ${IMG1S})
-	if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/" )
-		# FlatPak
-		# Copy .image1 from generated bitmaps/ 
-		if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/${img1}.image1" )
-			add_custom_command(
-				OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${img1}.image1
-				DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/${img1}.image1
-				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/${img1}.image1 ${CMAKE_CURRENT_BINARY_DIR}/${img1}.image1
-			)
-		else()
-			MESSAGE( STATUS "Missing ${CMAKE_CURRENT_SOURCE_DIR}/../../../bitmaps/${img1}.image1" )
-		endif()
+	STRING(MAKE_C_IDENTIFIER ${img1} NAME )
+	if(UNIX)
+		add_custom_command(
+			OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${img1}.image1
+			DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${img1}.png
+			COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/
+			COMMAND gdk-pixbuf-csource --stream --name ${NAME}_image1 ${CMAKE_CURRENT_SOURCE_DIR}/${img1}.png >  ${CMAKE_CURRENT_BINARY_DIR}/${img1}.image1
+		)
 	else()
-		if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${img1}.png" )
-			if(UNIX)
-				add_custom_command(
-					OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${img1}.image1
-					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${img1}.png
-					COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/
-					COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../../tools/mkimage1 ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/${img1}.png
-				)
-			else()
-				add_custom_command(
-					OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${img1}.image1
-					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${img1}.png
-					COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/
-					COMMAND -E echo "#include \"bitmaps\/${img1}.xpm" > ${CMAKE_CURRENT_BINARY_DIR}/${img1}.image1
-				)
-			endif()
-		else()
-			MESSAGE( STATUS "${CMAKE_CURRENT_SOURCE_DIR}/${img1}.png not found" )
-		endif()
-#		# build a list of all the depends
-#		list(APPEND PNG_RESULTS ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png)
+		add_custom_command(
+			OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${img1}.image1
+			DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${img1}.png
+			COMMAND ../../tools/pngtoxpm/pngtoxpm ${img1}_image1 ${CMAKE_CURRENT_SOURCE_DIR}/${img1}.png ${CMAKE_CURRENT_BINARY_DIR}/${img1}.image1
+		)
 	endif()
 	list(APPEND IMG_RESULTS ${img1}.image1)
-#	list(APPEND IMG_RESULTS ${img1}.png)
-	if(WIN32)
-		list(APPEND IMG_RESULTS ${img1}.xpm)
-	endif()
+	list(APPEND IMG_RESULTS ${img1}.png)
 endforeach()
 
 add_custom_target (
 	genbitmaps 
 	DEPENDS ${IMG_RESULTS}
-#	DEPENDS ${PNG_RESULTS}
 )
 
 

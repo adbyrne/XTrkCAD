@@ -92,13 +92,13 @@ wControl_p wBitmapCreate(wWin_p parent, wWinPix_t x, wWinPix_t y, long options,
 wIcon_p wIconCreateBitMap(wWinPix_t w, wWinPix_t h, const char *bits,
                           wDrawColor color);
 #ifndef WINDOWS
-// png's is a string pointer:
-#define WICON_CREATE_ARG_TYPE char *
+// png's are a string pointer:
+typedef const unsigned char * wIconBitMap_t;
 #else
 // xpm's are an array of string pointers:
-#define WICON_CREATE_ARG_TYPE char *[]
+typedef const unsigned char *[] wIconBitMap_t;
 #endif
-wIcon_p wIconCreatePixMap(	const WICON_CREATE_ARG_TYPE );
+wIcon_p wIconCreatePixMap(	const wIconBitMap_t  );
 void wIconSetColor(		wIcon_p, wDrawColor );
 
 /*------------------------------------------------------------------------------

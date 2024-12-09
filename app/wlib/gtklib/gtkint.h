@@ -138,7 +138,7 @@ struct wIcon_t {
 	wWinPix_t w;
 	wWinPix_t h;
 	wDrawColor color;
-	const void * bits;
+	wIconBitMap_t bits;
 };
 
 extern char wConfigName[];
