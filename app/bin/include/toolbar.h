@@ -41,10 +41,10 @@ extern void ToolbarButtonEnable(wIndex_t button, wBool_t enable);
 extern void ToolbarButtonEnableIfSelect(bool selected);
 extern void ToolbarButtonCommandLink(wIndex_t button, int command);
 extern void ToolbarUpdateButton(wIndex_t button, wIndex_t command,
-    char* icon, const char* helpKey, void* context);
+    wIcon_p icon, const char* helpKey, void* context);
 extern void ToolbarButtonPlayback(wIndex_t buttonInx);
 extern void ToolbarLoadConfig(void);
-extern void ToolbarControlAdd(wControl_p parent, wControl_p control, long options, int cmdGroup);
+extern void ToolbarControlAdd(wControl_p control, long options, int cmdGroup);
 
 
 wIndex_t AddCommand(procCommand_t cmdProc, const char* helpKey,

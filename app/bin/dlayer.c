@@ -72,8 +72,7 @@ static paramFloatRange_t r0_90 = { 0.0, 90.0 };
 EXPORT unsigned int maxLayer;
 
 unsigned int curLayer;
-long layerCount = 10;
-long newLayerCount = 10;
+
 static unsigned int layerSelected = 0;
 
 
@@ -1996,19 +1995,7 @@ static void LayerOk(void * unused)
 {
 	LayerSelect(layerSelected);
 
-	if (newLayerCount != layerCount) {
-		layoutLayerChanged = TRUE;
 
-		if (newLayerCount > NUM_BUTTONS) {
-			newLayerCount = NUM_BUTTONS;
-		}
-
-		layerCount = newLayerCount;
-	}
-
-	if (layoutLayerChanged) {
-		MainProc(mainW, wResize_e, NULL, NULL);
-	}
 
 	wHide(layerW);
 }
@@ -2124,7 +2111,7 @@ void CreateLayerButtons()
 	}
 
 	for (int i = 0; i < NUM_LAYERS; i++) {
-		DynStringPrintf(&buttonText, "%d", i );
+		DynStringPrintf(&buttonText, "%d", i+1 );
 
 		layers[i].color = layerColorTab[i % (COUNT(layerColorTab))];
 		show_layer_bmps[i] = wFTLabelCreate(DynStringToCStr(&buttonText),
@@ -2138,11 +2125,12 @@ void CreateLayerButtons()
 
 void InitLayers(int cmdGroup)
 {
-	wPrefGetInteger(prefSect, "layer-button-count", &layerCount, layerCount);
+	wPrefGetInteger("toolbar", "button-count", &layerCount, layerCount);
 
 	/* layer list for toolbar */
 	setLayerL = wComboBoxCreateForToolbar(mainW, "cmdLayerSet", NULL, 0, 100, NULL, SetCurrLayer, NULL);
 	wControlSetBalloonText((wControl_p)setLayerL, GetBalloonHelpStr("cmdLayerSet"));
+	ToolbarControlAdd(setLayerL, 0, cmdGroup);
 
 	/* background button */
 	backgroundB = AddToolbarButton("cmdBackgroundShow",
