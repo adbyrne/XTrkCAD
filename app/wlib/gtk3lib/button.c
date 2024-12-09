@@ -318,26 +318,14 @@ static char* down16[] = {
 };
 
 static GtkWidget*
-AddDownArrowToButton(GtkWidget* button)
+SetAbutStyle(GtkWidget* button)
 {
-	GtkWidget* box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	GtkWidget* downArrowButton = gtk_button_new();
-	GdkPixbuf* pixbuf;
 	GtkStyleContext* styleContext;
 
-	pixbuf = gdk_pixbuf_new_from_xpm_data((const char**)down16);
-	if (pixbuf) {
-		AddPixbufToButton(downArrowButton, pixbuf);
-	}
-
-	styleContext = gtk_widget_get_style_context(GTK_WIDGET(downArrowButton));
+	styleContext = gtk_widget_get_style_context(GTK_WIDGET(button));
 	gtk_style_context_add_class(styleContext, "toolbar-button-arrow");
 
-	gtk_box_pack_start(GTK_BOX(box), button, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(box), downArrowButton, FALSE, FALSE, 0);
-	gtk_widget_set_halign(downArrowButton, GTK_ALIGN_START);
-
-	return(box);
+	return(button);
 }
 
 /**
@@ -387,25 +375,23 @@ wControl_p wButtonCreateForToolbar(
 	buttonAttributes = CONTROL_GET_ATTRIBUTES_PTR(buttonControl,button);
 	buttonAttributes->action = action;
 	buttonControl->widget = GTK_WIDGET(gtk_toggle_button_new());
-	toolbarWidget = buttonControl->widget;
-
+	
 	wButtonSetIcon(buttonControl, icon);
-
-	styleContext = gtk_widget_get_style_context(GTK_WIDGET(buttonControl->widget));
-	gtk_style_context_add_class(styleContext, "toolbar-button");
 
 	/** \todo BO_ABUT should be renamed to BO_OVERFLOW_MENU and be included with the button */
 	if (option & BO_ABUT) {
-		toolbarWidget = AddDownArrowToButton(buttonControl->widget);
+		SetAbutStyle(buttonControl->widget);
 	}
 
-	if (option & BO_GAP) {
-		gtk_style_context_add_class(styleContext, "toolbar-button-gap");
-	}
+	styleContext = gtk_widget_get_style_context(GTK_WIDGET(buttonControl->widget));
+	gtk_style_context_add_class(styleContext, "toolbar-button");
+	//if (option & BO_GAP) {
+	//	gtk_style_context_add_class(styleContext, "toolbar-button-gap");
+	//}
 
 	egg_wrap_box_insert_child(EGG_WRAP_BOX(parent->attributes.window.toolbar),
-	                          toolbarWidget, -1, 0);
-	gtk_widget_show_all(toolbarWidget);
+		buttonControl->widget, -1, 0);
+	gtk_widget_show_all(buttonControl->widget);
 
 	g_signal_connect(G_OBJECT(buttonControl->widget), "clicked",
 	                 G_CALLBACK(buttonClick), buttonControl);

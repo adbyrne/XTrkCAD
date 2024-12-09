@@ -1,4 +1,5 @@
 #ifndef HAVE_FORM_H
+#include "param.h"
 #define HAVE_FORM_H
 void FormInit(void);
 void FormRegister(paramGroup_p pg);

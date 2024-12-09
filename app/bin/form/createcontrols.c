@@ -95,6 +95,175 @@ static void ChoicePush(long valL, void* dp)
 	}
 }
 
+
+static void IntegerPush(const char* val, void* dp)
+{
+	paramData_p p = (paramData_p)dp;
+	long valL;
+	char* cp;
+	const char* value;
+
+	if (strlen(val) == 1 && val[strlen(val) - 1] == '\n') {
+		value = wEntryGetValue((wEntry_p)p->control);
+		p->enter_pressed = TRUE;
+	}
+	else {
+		value = val;
+		p->enter_pressed = FALSE;
+	}
+
+	valL = strtol(value, &cp, 10);
+	for (; isspace((unsigned char)*cp); cp++);
+	if (*cp != '\0') {
+		//wWinPix_t h = wControlGetHeight(p->control);
+		//wControlSetBalloon(p->control, 0, -h * 3 / 4, _("Invalid Number"));
+		p->bInvalid = TRUE;
+		// LOG(log_paraminput, 1, (" -> InvalidNumber\n"));
+		ParamHilite(p->group->win, p->control, p->bInvalid);
+		return;
+	}
+	if (!FormIntegerRangeCheck(p, valL)) {
+		return;
+	}
+	wControlSetBalloon(p->control, 0, 0, NULL);
+	p->bInvalid = FALSE;
+
+	//if (recordParamF && (p->option & PDO_NORECORD) == 0 && p->group->nameStr
+	//	&& p->nameStr) {
+	//	fprintf(recordParamF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr,
+	//		valL);
+	//	fflush(recordParamF);
+	//}
+	if ((p->option & PDO_NOPSHUPD) == 0 && p->valueP) {
+		*((long*)(p->valueP)) = valL;
+	}
+	if ((p->option & PDO_NOPSHACT) == 0 && p->group->changeProc) {
+		p->group->changeProc(p->group, (int)(p - p->group->paramPtr), &valL);
+	}
+	ParamHilite(p->group->win, p->control, p->bInvalid);
+
+}
+
+static void FloatPush(const char* val, void * dp)
+{
+	paramData_p p = (paramData_p)dp;
+	const char* value;
+	FLOAT_T valF;
+	BOOL_T valid;
+
+	if (strlen(val) == 1 && val[strlen(val) - 1] == '\n') {
+		value = wEntryGetValue(p->control);
+		p->enter_pressed = TRUE;
+	}
+	else {
+		value = val;
+		p->enter_pressed = FALSE;
+	}
+
+	if (p->option & PDO_DIM) {
+		valF = DecodeDistance((wEntry_p)p->control, &valid);
+	}
+	else {
+		valF = DecodeFloat((wEntry_p)p->control, &valid);
+		if (p->option & PDO_ANGLE) {
+			valF = NormalizeAngle((angleSystem == ANGLE_POLAR) ? valF : -valF);
+		}
+	}
+	if (!valid) {
+		//wWinPix_t h = wControlGetHeight(p->control);
+		//wControlSetBalloon(p->control, 0, -h * 3 / 4, decodeErrorStr);
+		p->bInvalid = TRUE;
+		wControlHilite(p->control, p->bInvalid);
+		return;
+	}
+	if (!FormFloatRangeCheck(p, valF)) {
+		return;
+	}
+	wControlSetBalloon(p->control, 0, 0, NULL);
+	p->bInvalid = FALSE;
+
+	//if (recordParamF && (p->option & PDO_NORECORD) == 0 && p->group->nameStr
+	//	&& p->nameStr) {
+	//	fprintf(recordParamF, "PARAMETER %s %s %0.6f\n", p->group->nameStr, p->nameStr,
+	//		valF);
+	//	fflush(recordParamF);
+	//}
+	if ((p->option & PDO_NOPSHUPD) == 0 && p->valueP) {
+		*((FLOAT_T*)(p->valueP)) = valF;
+	}
+	if ((p->option & PDO_NOPSHACT) == 0 && p->group->changeProc && strlen(value)) {
+		p->group->changeProc(p->group, (int)(p - p->group->paramPtr), &valF);
+	}
+	wControlHilite( p->control, p->bInvalid);
+}
+
+
+static void StringPush(const char* val, void* dp)
+{
+	paramData_p p = (paramData_p)dp;
+	const char* value;
+	//	wBool_t bInvalid = p->bInvalid;
+	//if (recordParamF && (p->option & PDO_NORECORD) == 0 && p->group->nameStr
+	//	&& p->nameStr) {
+	//	fprintf(recordParamF, "PARAMETER %s %s %s\n", p->group->nameStr, p->nameStr,
+	//		val);
+	//	fflush(recordParamF);
+	//}
+	if (strlen(val) == 1 && val[strlen(val) - 1] == '\n') {
+		value = wEntryGetValue((wEntry_p)p->control);
+		p->enter_pressed = TRUE;
+	}
+	else {
+		value = val;
+		p->enter_pressed = FALSE;
+	}
+	LOG(log_form, 1, ("ParamStringPush( %s: Enter:%d Val:%s )\n",
+		p->nameStr, p->enter_pressed, value));
+	//if (((!paramPlayback) && p->option & PDO_NOTBLANK) && value[0] == '\0') {
+	//	p->bInvalid = TRUE;
+	//	wControlSetBalloon(p->control, 0, 0, NULL);
+	//	wWinPix_t h = wControlGetHeight(p->control);
+	//	wControlSetBalloon(p->control, 0, -h * 3 / 4, _("String cannot be blank"));
+	//	ParamHilite(p->group->win, p->control, TRUE);
+	//	return;
+	//}
+	//wControlSetBalloon(p->control, 0, 0, NULL);
+	//p->bInvalid = FALSE;
+	//ParamHilite(p->group->win, p->control, FALSE);
+
+	//if ((p->option & PDO_NOPSHUPD) == 0 && p->valueP) {
+	//	strncpy((char*)p->valueP, value, p->max_string - 1);
+	//	((char*)p->valueP)[p->max_string - 1] = '\0';
+	//	if (strlen(value) > p->max_string - 1) {
+	//		p->bInvalid = TRUE;
+	//		wControlSetBalloon(p->control, 0, 0, NULL);
+	//		wWinPix_t h = wControlGetHeight(p->control);
+	//		sprintf(message, _("String is too long, Max length is %u"), p->max_string - 1);
+	//		wControlSetBalloon(p->control, 0, -h * 3 / 4, message);
+	//		ParamHilite(p->group->win, p->control, TRUE);
+	//	}
+	//}
+	if ((p->option & PDO_NOPSHACT) == 0 && p->group->changeProc)
+		// CAST_AWAY_CONST: param 3 should be const but its a big change
+	{
+		p->group->changeProc(p->group, (int)(p - p->group->paramPtr),
+			CAST_AWAY_CONST value);
+	}
+}
+
+static void ScalePush(FLOAT_T value, void* dp)
+{
+	paramData_p p = (paramData_p)dp;
+
+	if ((p->option & PDO_NOPSHUPD) == 0 && p->valueP) {
+		*((FLOAT_T *)(p->valueP)) = value;
+	}
+	if ((p->option & PDO_NOPSHACT) == 0 && p->group->changeProc) {
+		p->group->changeProc(p->group, (int)(p - p->group->paramPtr), &value);
+	}
+
+}
+
 void
 CreateControlText(paramData_p pd, wControl_p parent, char* helpStr)
 {
@@ -107,6 +276,8 @@ CreateControlText(paramData_p pd, wControl_p parent, char* helpStr)
 		wTextSetReadonly(pd->control, TRUE);
 	}
 }
+
+#define LISTDEFAULTWIDTH 100
 
 static void CreateControl(
 	paramData_p pd,
@@ -139,20 +310,20 @@ static void CreateControl(
 	case PD_FLOAT:
 		floatRangeP = pd->winData;
 		w = floatRangeP->width ? floatRangeP->width : 100;
-		//pd->control = (wControl_p)wEntryCreate(win, xx, yy, helpStr, _(pd->winLabel),
-		//	pd->winOption, w, NULL, 0, ParamFloatPush, pd);
+		pd->control = wEntryCreate(win, -1, -1, helpStr, _(pd->winLabel),
+			pd->winOption, w, NULL, 0, FloatPush, pd);
 		break;
 	case PD_LONG:
 		integerRangeP = pd->winData;
 		w = integerRangeP->width ? integerRangeP->width : 100;
-		//pd->control = (wControl_p)wEntryCreate(win, xx, yy, helpStr, _(pd->winLabel),
-		//	pd->winOption, w, NULL, 0, ParamIntegerPush, pd);
+		pd->control = wEntryCreate(win, -1, -1, helpStr, _(pd->winLabel),
+			pd->winOption, w, NULL, 0, IntegerPush, pd);
 		break;
 	case PD_STRING:
 		w = pd->winData ? (wWinPix_t)VP2L(pd->winData) : (wWinPix_t)250;
-		//pd->control = (wControl_p)wEntryCreate(win, xx, yy, helpStr, _(pd->winLabel),
-		//	pd->winOption, w, (pd->option & PDO_NOPSHUPD) ? NULL : pd->valueP, 0, ParamStringPush,
-		//	pd);
+		pd->control = wEntryCreate(win, -1, -1, helpStr, _(pd->winLabel),
+			pd->winOption, w, (pd->option & PDO_NOPSHUPD) ? NULL : pd->valueP, 0, StringPush,
+			pd);
 		break;
 	case PD_RADIO:
 		//pd->control = (wControl_p)wRadioCreate(win, xx, yy, helpStr, _(pd->winLabel),
@@ -203,16 +374,17 @@ static void CreateControl(
 		listDataP->height = wControlGetHeight(pd->control);
 		break;
 	case PD_DROPLIST:
-		w = pd->winData ? (wWinPix_t)VP2L(pd->winData) : (wWinPix_t)100;
+		w = pd->winData ? (wWinPix_t)VP2L(pd->winData) : (wWinPix_t)LISTDEFAULTWIDTH;
 		//pd->control = (wControl_p)wDropListCreate(win, xx, yy, helpStr,
 		//	_(pd->winLabel), pd->winOption, 10, w, NULL, ParamListPush, pd);
 		break;
 	case PD_COMBOLIST:
 		listDataP = (paramListData_t*)pd->winData;
-		//pd->control = (wControl_p)wComboListCreate(win, xx, yy, helpStr,
-		//	_(pd->winLabel), pd->winOption, listDataP->number, listDataP->width, NULL,
-		//	ParamListPush, pd);
-		listDataP->height = wControlGetHeight(pd->control);
+		w = pd->winData ? (wWinPix_t)VP2L(pd->winData) : (wWinPix_t)LISTDEFAULTWIDTH;
+		pd->control = (wControl_p)wComboBoxCreate(win, -1, -1, helpStr,
+			_(pd->winLabel), pd->winOption, 10, w, NULL,
+		/*ParamListPush*/NULL, pd);
+		//listDataP->height = wControlGetHeight(pd->control);
 		break;
 	case PD_COLORLIST:
 		pd->control = (wControl_p)wColorSelectButtonCreate(win, -1, -1, helpStr,
@@ -250,6 +422,9 @@ static void CreateControl(
 		iconP = pd->winData;
 		pd->control = (wControl_p)wBitmapCreate(win, xx, yy, pd->winOption, iconP);
 		break;
+	case PD_SCALE:
+		pd->control = wScaleCreate(win, helpStr, pd->valueP, ScalePush, pd);
+		break;
 	default:
 		CHECK(FALSE);
 	}
@@ -269,7 +444,7 @@ void CreateControls(paramGroup_p group)
 			continue;
 		}
 
-		LOG(log_dialogs, 2, ("%2d: %s\n", inx, pd->nameStr));
+		LOG(log_form, 2, ("%2d: %s\n", inx, pd->nameStr));
 
 		DynStringPrintf(&helpString, "%s-%s", group->nameStr, pd->nameStr);
 		//CreateControl(pd, DynStringToCStr(&helpString) );

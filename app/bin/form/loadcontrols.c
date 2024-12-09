@@ -26,6 +26,26 @@
 #include <form.h>
 #include "formprivate.h"
 
+static void 
+LoadFloatEntry(paramData_p entry, FLOAT_T value)
+{
+	char* formattedString;
+	if (entry->option & PDO_DIM) {
+		if (entry->option & PDO_SMALLDIM) {
+			formattedString = FormatSmallDistance(value);
+		}
+		else {
+			formattedString = FormatDistance(value);
+		}
+	}
+	else {
+		if (entry->option & PDO_ANGLE) {
+			value = NormalizeAngle((angleSystem == ANGLE_POLAR) ? value : -value);
+		}
+		formattedString = FormatFloat(value);
+	}
+	wEntrySetValue(entry->control, formattedString);
+}
 
 static void
 LoadColorButton( paramData_p colorButton, wDrawColor color)
@@ -39,8 +59,6 @@ void FormLoadSingleControl(
 	int inx)
 {
 	paramData_p p = &pg->paramPtr[inx];
-	FLOAT_T tmpR;
-	char* valS;
 
 	if ((p->option & PDO_DLGIGNORE) != 0) {
 		p->bInvalid = FALSE;
@@ -51,50 +69,34 @@ void FormLoadSingleControl(
 	}
 	switch (p->type) {
 	case PD_LONG:
-		wEntrySetValue((wEntry_p)p->control, FormatLong(*(long*)p->valueP));
+		wEntrySetValue(p->control, FormatLong(*(long*)p->valueP));
 		//if (!ParamIntegerRangeCheck(p, *(long*)p->valueP)) {
 		//	return;
 		//}
 		p->oldD.l = *(long*)p->valueP;
 		break;
 	case PD_RADIO:
-		wRadioSetValue((wChoice_p)p->control, *(long*)p->valueP);
+		wRadioSetValue(p->control, *(long*)p->valueP);
 		p->oldD.l = *(long*)p->valueP;
 		break;
 	case PD_TOGGLE:
-		wToggleSetValue((wChoice_p)p->control, *(long*)p->valueP);
+		wToggleSetValue(p->control, *(long*)p->valueP);
 		p->oldD.l = *(long*)p->valueP;
 		break;
 	case PD_LIST:
 	case PD_DROPLIST:
 	case PD_COMBOLIST:
-		wListSetIndex((wList_p)p->control, *(wIndex_t*)p->valueP);
+		wListSetIndex(p->control, *(wIndex_t*)p->valueP);
 		p->oldD.l = *(wIndex_t*)p->valueP;
 		break;
 	case PD_COLORLIST:
 		LoadColorButton(p, *(wDrawColor*)p->valueP);
 		break;
 	case PD_FLOAT:
-		tmpR = *(FLOAT_T*)p->valueP;
-		if (p->option & PDO_DIM) {
-			if (p->option & PDO_SMALLDIM) {
-				valS = FormatSmallDistance(tmpR);
-			}
-			else {
-				valS = FormatDistance(tmpR);
-			}
+		LoadFloatEntry(p, *(FLOAT_T*)p->valueP);
+		if (FormFloatRangeCheck(p, *(FLOAT_T*)p->valueP)) {
+			p->oldD.f = *(FLOAT_T*)p->valueP;
 		}
-		else {
-			if (p->option & PDO_ANGLE) {
-				tmpR = NormalizeAngle((angleSystem == ANGLE_POLAR) ? tmpR : -tmpR);
-			}
-			valS = FormatFloat(tmpR);
-		}
-		wEntrySetValue((wEntry_p)p->control, valS);
-		//if (!ParamFloatRangeCheck(p, tmpR)) {
-		//	break;
-		//}
-		p->oldD.f = tmpR;
 		break;
 	case PD_STRING:
 		if (p->oldD.s) {
@@ -105,14 +107,14 @@ void FormLoadSingleControl(
 			p->oldD.s = MyMalloc(p->max_string);
 			strncpy(p->oldD.s, (char*)p->valueP, p->max_string - 1);
 			*(p->oldD.s + (uint32_t)p->max_string - 1) = '\0';
-			wEntrySetValue((wEntry_p)p->control, (char*)p->oldD.s);
+			wEntrySetValue(p->control, (char*)p->oldD.s);
 		}
 		else {
 			p->oldD.s = MyStrdup((char*)p->valueP);
-			wEntrySetValue((wEntry_p)p->control, (char*)p->valueP);
+			wEntrySetValue(p->control, (char*)p->valueP);
 		}
 		if ((p->option & PDO_NOTBLANK) && strlen(p->oldD.s) == 0) {
-			ParamHilite(p->group->win, p->control, TRUE);
+			wControlHilite( p->control, TRUE);
 			p->bInvalid = TRUE;
 		}
 		else {
@@ -120,11 +122,14 @@ void FormLoadSingleControl(
 		}
 		break;
 	case PD_MESSAGE:
-		wMessageSetValue((wMessage_p)p->control, _((char*)p->valueP));
+		wMessageSetValue(p->control, _((char*)p->valueP));
 		break;
 	case PD_TEXT:
-		wTextClear((wText_p)p->control);
-		wTextAppend((wText_p)p->control, (char*)p->valueP);
+		wTextClear(p->control);
+		wTextAppend(p->control, (char*)p->valueP);
+		break;
+	case PD_SCALE:
+		wScaleSetValue(p->control, *(FLOAT_T *)p->valueP);
 		break;
 	case PD_BUTTON:
 	case PD_DRAW:
@@ -142,7 +147,7 @@ void FormLoadSingleControl(
 
 void FormLoadControls(paramGroup_p pg)
 {
-	LOG(log_dialogs, 1, ("FormLoadControls( %s )\n", pg->nameStr));
+	LOG(log_form, 1, ("FormLoadControls( %s )\n", pg->nameStr));
 
 	for (int inx = 0; inx < pg->paramCnt; inx++) {
 		FormLoadSingleControl(pg, inx);

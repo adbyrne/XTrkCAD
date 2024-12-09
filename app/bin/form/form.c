@@ -29,7 +29,7 @@
 #include <form.h>
 #include "formprivate.h"
 
-int log_dialogs = 0;
+int log_form = 0;
 static dynArr_t dialogGroups_da;
 #define dialogGroups(N) DYNARR_N( paramGroup_p, dialogGroups_da, N )
 
@@ -53,8 +53,8 @@ void FormRegister(paramGroup_p pg)
 
 static void ButtonOk(paramGroup_p group)
 {
-	LOG(log_dialogs, 1, ("DialogsButtonOk: %s\n", group->nameStr));
-	if (!ParamCheckInputs(group, (wControl_p)group->okB)) {
+	LOG(log_form, 1, ("DialogsButtonOk: %s\n", group->nameStr));
+	if (!FormCheckInputs(group, (wControl_p)group->okB)) {
 		return;
 	}
 	/** \todo Recording */
@@ -63,13 +63,15 @@ static void ButtonOk(paramGroup_p group)
 	//	fflush(recordParamF);
 	//}
 
+	FormSaveDefaultValues(group);
+
 	if (group->okProc) {
 		group->okProc(group);
 	}
 
-	wControlSetBalloon((wControl_p)group->okB, 0, 0, NULL);
+	LOG(log_form, 1, ("DialogsButtonOk -> Ok\n"));
 
-	LOG(log_dialogs, 1, ("DialogsButtonOk -> Ok\n"));
+	wHide(group->win);
 }
 
 static void ButtonCancel(paramGroup_p group)
@@ -103,7 +105,7 @@ static void DialogProc(
 		}
 		break;
 	//case wResize_e:
-	//	LOG(log_dialogs, 1, ("DialogsDlgProc %d/n", iResizeCnt++));
+	//	LOG(log_form, 1, ("DialogsDlgProc %d/n", iResizeCnt++));
 	//	LayoutControls(pg, ParamPositionControl, NULL, NULL);
 	//	break;
 	default:
@@ -158,7 +160,7 @@ wControl_p FormCreateDialog(
 	group->win = wWinDialogCreate(mainW, helpStr, title, group->nameStr, 
 		F_AUTOSIZE | winOption | BO_DIALOGFROMBUILDER, DialogProc, group);
 
-	if (okLabel && okProc) {
+	if (okLabel) {
 		sprintf(helpStr, "%s-ok", group->nameStr);
 		group->okB = wButtonCreate(group->win, 0, 0, "id_ok", okLabel, BB_DEFAULT, 0,
 			ButtonOk, group);
@@ -174,12 +176,12 @@ wControl_p FormCreateDialog(
 			(wButtonCallBack_p)wHelp, MyStrdup(helpStr));
 	}
 
-	LOG(log_dialogs, 1, ("DialogsCreateDialog/"));
+	LOG(log_form, 1, ("DialogsCreateDialog/"));
 	CreateControls(group);
 //	LayoutControls(group, ParamCreateControl, &group->origW, &group->origH);
 
 	wWinGetSize(group->win, &w0, &h0);
-	LOG(log_dialogs, 1, ("    winSize: %dx%d\n", w0, h0));
+	LOG(log_form, 1, ("    winSize: %dx%d\n", w0, h0));
 
 	/** \todo the following code sets the limits for the window size, needs work */
 	if ((winOption & F_RESIZE)) {
@@ -196,7 +198,7 @@ wControl_p FormCreateDialog(
 void
 FormInit(void)
 {
-	log_dialogs= LogFindIndex("dialogs");
+	log_form= LogFindIndex("dialogs");
 	DYNARR_INIT(paramGroup_p, dialogGroups_da);
 }
 

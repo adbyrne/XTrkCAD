@@ -31,6 +31,7 @@
 #include "fileio.h"
 #include "layout.h"
 #include "param.h"
+#include "paths.h"
 #include "include/problemrep.h"
 #include "smalldlg.h"
 #include "common-ui.h"
@@ -637,10 +638,15 @@ wControl_p AddToolbarButton(const char* helpStr, wIcon_p icon, long options,
 	long opt = 0L;
 	if (options & IC_ABUT)
 		opt = BO_ABUT;
-	if (cmdGroup & BG_BIGGAP)
-		opt = BO_GAP;
+
+	/** \TODO find a solution to create a gap after a button group is complete */
+//	if (cmdGroup & BG_BIGGAP)
+//		opt = BO_GAP;
 	bb = wButtonCreateForToolbar(mainW, 0, 0, helpStr, icon,
 		opt | BO_ICON, 0, action, context);
+
+	ToolbarControlAdd(bb, opt, cmdGroup);
+
 	return bb;
 }
 
@@ -785,6 +791,7 @@ static void MiscMenuItemCreate(wMenu_p m1, wMenu_p m2, const char * name,
 	menuPG.paramCnt++;
 	CHECK( menuPG.paramCnt < COUNT(menuPLs) );
 }
+
 
 
 #include "bitmaps/zoom-in.xpm3"
@@ -960,7 +967,7 @@ EXPORT void CreateMenus(void)
 	                ChkRevert, NULL);
 	wMenuSeparatorCreate(fileM);
 
-	cmdGroup = BG_FILE;
+	cmdGroup = BG_FILE | BG_BIGGAP;
 	AddToolbarButton("clear", wIconCreatePixMap(doc_new_xpm3[iconSize]),
 	                 IC_MODETRAIN_TOO, DoClear, NULL);
 	AddToolbarButton("load", wIconCreatePixMap(doc_open_xpm3[iconSize]),
@@ -1394,6 +1401,8 @@ EXPORT void CreateMenus(void)
 	ParamRegister(&rotatePG);
 	ParamRegister(&movePG);
 	ParamRegister(&indexPG);
+
+	ToolbarLayout(NULL);
 
 	// stickySet is initialized by AddMenuButton based on IC_STICKY flag
 	// Now check to see if there is saved value

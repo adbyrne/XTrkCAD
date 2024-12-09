@@ -932,8 +932,6 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	InitAppDefaults();
 
 	InitAudio();
-
-	ToolbarLoadConfig();
 	/*	newToolbarMax = (1 << BG_COUNT) - 1;
 		wPrefGetInteger("misc", "toolbarset", &toolbarSet, newToolbarMax);
 		wPrefGetInteger("misc", "max-toolbarset", &oldToolbarMax, 0);

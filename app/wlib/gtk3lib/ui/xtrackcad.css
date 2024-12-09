@@ -20,15 +20,15 @@
     padding: 2px;
     padding-left: 4px;
     padding-right: 4px;
-    background-image: none;
-    border-color: transparent;
     border-radius: 0;
-    background: transparent;
-    box-shadow: none;
     margin: 0px;
     outline: none;
 }
-  
+
+.toolbar-button-gap {
+    margin-right: 12px;
+}
+ 
 .toolbar-button:hover, 
 .toolbar-button-arrow:hover {
     background: lightblue;
@@ -68,9 +68,13 @@ box.framed {
 
 /* invalid value in entry */
 entry.error {
-    border: 1px solid red
+    border: 1px solid red;
 }
 
-combobox.toolbar {
+.hilite {
+    border: 1px solid orange;
+}
+
+combobox {
     -GtkComboBox-appears-as-list: 1; 
 }
