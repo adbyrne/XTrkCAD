@@ -300,7 +300,7 @@ wControl_p wButtonCreate(
 	                 G_CALLBACK(buttonClick), b);
 
 	wlibAddHelpString(b->widget, helpStr);
-	wlibAddTooltip(b->widget, parent->name, helpStr);
+	wlibAddTooltip(b->widget, helpStr);
 	return b;
 }
 
@@ -397,7 +397,7 @@ wControl_p wButtonCreateForToolbar(
 	                 G_CALLBACK(buttonClick), buttonControl);
 
 	wlibAddHelpString(buttonControl->widget, helpStr);
-	wlibAddTooltip(buttonControl->widget, parent->name, helpStr);
+	wlibAddTooltip(buttonControl->widget, helpStr);
 
 	return buttonControl;
 }

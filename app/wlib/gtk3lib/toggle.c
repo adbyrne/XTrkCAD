@@ -227,7 +227,7 @@ wControl_p wToggleCreate(
 			                 G_CALLBACK(toggled), b);
 
 			wlibAddHelpString(butt, helpStr);
-			wlibAddTooltip(butt, parent->name, helpStr);
+			wlibAddTooltip(butt, helpStr);
 		}
 
 		if (valueP) {

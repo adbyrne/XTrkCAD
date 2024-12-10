@@ -265,7 +265,7 @@ wControl_p wEntryCreate(
 	}
 	// link into help
 	wlibAddHelpString(b->widget, helpStr);
-  	wlibAddTooltip(b->widget, parent->name, helpStr);
+  	wlibAddTooltip(b->widget, helpStr);
 
 	g_signal_connect(G_OBJECT(b->widget), "focus-out-event",
 	                 G_CALLBACK(entryFocusOutEvent), b);

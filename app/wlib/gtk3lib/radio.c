@@ -210,7 +210,7 @@ wControl_p wRadioCreate(
 			g_signal_connect(G_OBJECT(butt), "clicked",
 			                 G_CALLBACK(radioChoice), b);
 			wlibAddHelpString(butt, helpStr);
-			wlibAddTooltip(butt, parent->name, helpStr);
+			wlibAddTooltip(butt, helpStr);
 		}
 
 		if (option & BB_DEFAULT) {

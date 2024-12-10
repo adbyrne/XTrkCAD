@@ -454,6 +454,7 @@ wIndex_t wListAddValue(
 	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(b, list);
 
 	g_assert(b != NULL);
+	g_assert(b->type == B_COMBOBOX);
 
 	id_p = (wListItem_p)g_malloc(sizeof *id_p);
 	memset(id_p, 0, sizeof *id_p);
@@ -608,7 +609,7 @@ wControl_p wListCreate(
 
 //	wlibAddButton((wControl_p)bl);
 	wlibAddHelpString(bl->widget, helpStr);
-	wlibAddTooltip(bl->widget, parent->name, helpStr);
+	wlibAddTooltip(bl->widget, helpStr);
 
 	return bl;
 }
