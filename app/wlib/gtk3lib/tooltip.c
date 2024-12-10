@@ -343,12 +343,15 @@ static const char *
 FindTooltip(gchar* field) {
 	int res;
 
+	if (!tooltipsCount)
+		return(NULL);
+
 	res = binarySearch(balloonHelpStrings, 0, 
 		tooltipsCount, 
 		field);
 
 	if (res==-1) {
-		return("No help found!");
+		return(NULL);
 	}
 	else {
 
@@ -390,20 +393,30 @@ queryTooltipEvent(GtkWidget* self,
  * result.
  * 
  * \param widget	IN	the widget
- * \param dialog	IN	name of parent dialog
+ * \param dialog	IN	name of parent control
  * \param field		IN	name of widget
  */
 
 void
-wlibAddTooltip(GtkWidget* widget, char* dialog, char* field)
+wlibAddTooltip(GtkWidget* widget, const char* field)
 {
-	gchar* fieldId = g_strdup_printf("%s-%s", dialog, field);
+	//gchar* fieldId;
+	//
+	//if (parent == NULL) {
+	//	fieldId = g_strdup(field);
+	//}
+	//else {
+	//	fieldId = g_strdup_printf("%s-%s", parent, field);
+	//}
 
-	if (fieldId) {
-		g_signal_connect(widget, "query-tooltip", 
-			G_CALLBACK(queryTooltipEvent), FindTooltip(fieldId));
-		gtk_widget_set_has_tooltip(widget, true);
-	}
+	//if (fieldId) {
+		const char* tooltip = FindTooltip(field);
+		if (tooltip) {
+			g_signal_connect(widget, "query-tooltip",
+				G_CALLBACK(queryTooltipEvent), tooltip);
+			gtk_widget_set_has_tooltip(widget, true);
+		}
+	//}
 
-	g_free(fieldId);
+	//g_free(fieldId);
 }

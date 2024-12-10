@@ -644,7 +644,7 @@ struct wChoice_t {
 /* tooltip.c */
 #define HELPDATAKEY "HelpDataKey"
 void wlibAddHelpString(GtkWidget *widget, const char *helpStr);
-void wlibAddTooltip(GtkWidget* widget, char* dialog, const char* field);
+void wlibAddTooltip(GtkWidget* widget, const char* field);
 void wlibHelpHideBalloon();
 
 /* treeview.c */

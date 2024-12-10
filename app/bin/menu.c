@@ -623,7 +623,6 @@ wControl_p AddToolbarButton(const char* helpStr, wIcon_p icon, long options,
 	wControl_p bb;
 	wIndex_t inx;
 
-	GetBalloonHelpStr(helpStr);
 	if (context == NULL) {
 		for (inx = 0; inx < menuPG.paramCnt; inx++) {
 			if (action != DoCommandB && menuPG.paramPtr[inx].valueP == I2VP(action)) {
@@ -768,6 +767,7 @@ EXPORT wIndex_t AddMenuButton(wMenu_p menu, procCommand_t command,
 	return cmdInx;
 }
 
+/**  these seem to be menu entries that will be  used by demo playback */
 
 static void MiscMenuItemCreate(wMenu_p m1, wMenu_p m2, const char * name,
                                const char * label, long acclKey, void * func, long option, void * context)
@@ -785,9 +785,6 @@ static void MiscMenuItemCreate(wMenu_p m1, wMenu_p m2, const char * name,
 	menuPLs[menuPG.paramCnt].option = option;
 	menuPLs[menuPG.paramCnt].context = context;
 
-	if (name) {
-		GetBalloonHelpStr(name);
-	}
 	menuPG.paramCnt++;
 	CHECK( menuPG.paramCnt < COUNT(menuPLs) );
 }
@@ -1013,7 +1010,7 @@ EXPORT void CreateMenus(void)
 	fileList_ml = wMenuListCreate(fileM, "menuFileList", NUM_FILELIST,
 	                              ChkFileList);
 	wMenuSeparatorCreate(fileM);
-	wMenuPushCreate(fileM, "menuFile-quit", _("E&xit"), 0,
+	wMenuPushCreate(fileM, "quit", _("E&xit"), 0,
 	                DoQuit, NULL);
 
 	InitCmdExport();
