@@ -154,6 +154,7 @@ target_sources(xtrkcad-lib
     dlayer.c
 	dlayer.h
     doption.c
+    dpreferences.c
     dpricels.c
     dprmfile.c
     draw.c

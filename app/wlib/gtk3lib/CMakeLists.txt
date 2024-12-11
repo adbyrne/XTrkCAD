@@ -20,6 +20,7 @@ target_sources(xtrkcad-wlib
 	drawcontrol.c
 	entry.c
  	fileselector.c
+	freetypelabel.c
 	keystate.c
  	lines.c
 	list.c
