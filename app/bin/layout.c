@@ -492,7 +492,7 @@ GetLayoutRoomSize(coOrd *roomSize)
 * Layout Dialog
 *
 */
-static wWin_p layoutW;
+static wControl_p layoutW;
 static void LayoutChange(long changes);
 
 /**
@@ -690,7 +690,7 @@ static paramData_t layoutPLs[] = {
 #define BACKGROUNDWIDTH (13)
 	{ PD_FLOAT, &thisLayout.props.backgroundSize, "backgroundWidth", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r0_9999999, N_("Background Size"), 0, I2VP(CHANGE_BACKGROUND) },
 #define BACKGROUNDSCREEN (14)
-	{ PD_LONG, &thisLayout.props.backgroundScreen, "backgroundScreen", PDO_NOPSHUPD | PDO_DRAW, &i0_100, N_("Background Screen %"), 0, I2VP(CHANGE_BACKGROUND) },
+	{ PD_SCALE, &thisLayout.props.backgroundScreen, "backgroundScreen", PDO_NOPSHUPD, &i0_100, N_("Background Screen %"), 0, I2VP(CHANGE_BACKGROUND) },
 #define BACKGROUNDANGLE (15)
 	{ PD_FLOAT, &thisLayout.props.backgroundAngle, "backgroundAngle", PDO_NOPSHUPD | PDO_DRAW | PDO_DLGBOXEND, &r360_360, N_("Background Angle"), 0, I2VP(CHANGE_BACKGROUND) },
 	{ PD_MESSAGE, N_("Named Settings File"), "settings", PDO_DLGRESETMARGIN, I2VP(180) },
@@ -698,7 +698,7 @@ static paramData_t layoutPLs[] = {
 	{ PD_BUTTON, SettingsRead, "read", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Read"), 0, I2VP(0) }
 };
 
-static paramGroup_t layoutPG = { "layout", PGO_RECORD | PGO_PREFMISC, layoutPLs, COUNT( layoutPLs ) };
+static paramGroup_t layoutPG = { "layout", PGO_RECORD | PGO_PREFMISC | BO_DIALOGFROMBUILDER, layoutPLs, COUNT( layoutPLs ) };
 
 /**
  * @brief Handle the Layout changes, setting the values of changed items from dialog.
@@ -832,12 +832,12 @@ void DoLayout(void * unused)
 		layoutW = ParamCreateDialog(&layoutPG, MakeWindowTitle(_("Layout Options")),
 		                            _("Ok"), LayoutOk, ParamCancel_Custom( LayoutCancel ),
 		                            TRUE, NULL, 0, LayoutDlgUpdate);
-		LoadScaleList((wList_p)layoutPLs[4].control);
+		LoadScaleList(layoutPLs[SCALEINX].control);
 	}
 
 	ParamControlActive(&layoutPG, BACKGROUNDFILEENTRY, FALSE);
 
-	LoadGaugeList((wList_p)layoutPLs[5].control,
+	LoadGaugeList(layoutPLs[GAUGEINX].control,
 	              thisLayout.props.curScaleDescInx); /* set correct gauge list here */
 	thisLayout.copyOfLayoutProps = malloc(sizeof(struct sLayoutProps));
 
@@ -893,13 +893,13 @@ LayoutDlgUpdate(
 		char prefString[130];
 		char scaleDesc[100];
 
-		LoadGaugeList((wList_p)layoutPLs[GAUGEINX].control, *((int *)valueP));
+		LoadGaugeList(layoutPLs[GAUGEINX].control, *((int *)valueP));
 		// set the first entry as default, usually the standard gauge for a scale
-		wListSetIndex((wList_p)layoutPLs[GAUGEINX].control, 0);
+		wListSetIndex(layoutPLs[GAUGEINX].control, 0);
 
 		// get the minimum radius
 		// get the selected scale first
-		wListGetValues((wList_p)layoutPLs[SCALEINX].control, scaleDesc, 99, NULL, NULL);
+		wListGetValues(layoutPLs[SCALEINX].control, scaleDesc, 99, NULL, NULL);
 		strtok(scaleDesc, " ");
 
 		// now get the minimum track radius
@@ -1046,7 +1046,7 @@ EXPORT int DoSettingsRead(
 	wPrefGetInteger("DialogItem","cmdopt-selectzero",&selectZero,selectZero);
 
 	//Get Toolbar showing
-	ToolbarLoadConfig();
+	//ToolbarLoadConfig();
 
 	LayoutBackGroundInit( FALSE );
 

@@ -426,9 +426,11 @@ void wWinBlockEnable(
  */
 
 wBool_t wWinIsVisible(
-    wWin_p win)
+    wControl_p win)
 {
-    return win->shown;
+    /**  \todo Check usage and remove if not necessary */
+    return(TRUE);
+//    return win->shown;
 }
 
 /**

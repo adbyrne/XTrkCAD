@@ -46,7 +46,7 @@
                                 <property name="shadow-type">in</property>
                                 <property name="max-content-width">80</property>
                                 <child>
-                                    <object class="GtkTextView" id="note-text">
+                                    <object class="GtkTextView" id="text">
                                         <property name="visible">True</property>
                                         <property name="can-focus">True</property>
                                         <property name="hexpand">True</property>

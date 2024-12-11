@@ -25,6 +25,7 @@
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
+#include <form.h>
 #include "misc.h"
 #include "paths.h"
 #include "param.h"
@@ -69,8 +70,8 @@ static void CreateTipW( void )
 	char *filename;
 	char * cp;
 
-	tipW = ParamCreateDialog( &tipPG, MakeWindowTitle(_("Tip of the Day")), NULL,
-	                          NULL, ParamCancel_Current, FALSE, NULL,
+	tipW = ParamCreateDialog(&tipPG, MakeWindowTitle(_("Tip of the Day")), "Done",
+	                          NULL, NULL, FALSE, NULL,
 	                          F_RESIZE|F_CENTER|PD_F_ALT_CANCELLABEL,
 	                          NULL );
 
@@ -157,7 +158,7 @@ void ShowTip( void * flagsVP )
 		ParamLoadControls( &tipPG );
 		wTextClear( tipT );
 		/*  initial value is -1 which gets incremented 0 below */
-		wPrefGetInteger( "misc", "tip-number", &tipNum, -1 );
+		wPrefGetInteger( "tip", "number", &tipNum, -1 );
 
 		if( flags & SHOWTIP_PREVTIP ) {
 			if(tipNum == 0 ) {
@@ -175,7 +176,7 @@ void ShowTip( void * flagsVP )
 
 		wTextAppend( tipT, _(tips(tipNum)) );
 
-		wPrefSetInteger( "misc", "tip-number", tipNum );
+		wPrefSetInteger( "tip", "number", tipNum );
 		wShow( tipW );
 	}
 }

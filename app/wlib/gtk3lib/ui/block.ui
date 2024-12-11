@@ -50,7 +50,7 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="max_length">80</property>
-                                <property name="width_chars">20</property>
+                                <property name="width_chars">2</property>
                                 <property name="halign">start</property>
                             </object>
                             <packing>
@@ -77,7 +77,7 @@
                                 <property name="halign">end</property>
                                 <property name="label" translatable="yes">_Script</property>
                                 <property name="use_underline">True</property>
-                                <property name="mnemonic_widget">block-script</property>
+                                <property name="mnemonic_widget">script</property>
                             </object>
                             <packing>
                                 <property name="left_attach">0</property>
@@ -91,7 +91,7 @@
                                 <property name="halign">end</property>
                                 <property name="label" translatable="yes">_Name</property>
                                 <property name="use_underline">True</property>
-                                <property name="mnemonic_widget">block-name</property>
+                                <property name="mnemonic_widget">name</property>
                             </object>
                             <packing>
                                 <property name="left_attach">0</property>

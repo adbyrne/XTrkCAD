@@ -50,7 +50,8 @@ typedef enum {
 	PD_TEXT,
 	PD_MENU,
 	PD_MENUITEM,
-	PD_BITMAP
+	PD_BITMAP,
+	PD_SCALE
 } parameterType;
 
 // PD_FLOAT modifiers
@@ -300,11 +301,11 @@ void ParamCancel_Current(wControl_p window);
 
 // As above and exits command regardless of Sticky
 // print, snap, *noteui
-void ParamCancel_Reset(wWin_p);
+void ParamCancel_Reset(wControl_p window);
 
 // Cancel restores values to previous state
 // Done/Ok propagates changed values. Cancel just closes dialog
-void ParamCancel_Restore(wWin_p);
+void ParamCancel_Restore(wControl_p window);
 
 // Pending
 // Dialogs which haven't been converted yet: work in progress

@@ -1467,7 +1467,7 @@ static void ParamChoicePush( long valL, void * dp )
 }
 
 
-static wBool_t ParamIntegerRangeCheck( paramData_p p, long valL )
+wBool_t ParamIntegerRangeCheck( paramData_p p, long valL )
 {
 	if ( paramPlayback ) {
 		return TRUE;
@@ -1891,7 +1891,7 @@ EXPORT void ParamCancel_Reset(
 /* Cancel button, exits commands restoring control values
  */
 EXPORT void ParamCancel_Restore(
-        wWin_p winP )
+        wControl_p winP )
 {
 	wHide( winP );
 }
@@ -1908,7 +1908,7 @@ static void ParamButtonCancel( void * groupVP )
 	}
 }
 
-EXPORT void ParamHiliteOrig(
+EXPORT void ParamHilite(
         wWin_p win,
         wControl_p control,
         BOOL_T hilite )

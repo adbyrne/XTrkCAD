@@ -132,7 +132,7 @@ wIcon_p wIconCreateBitMap( wWinPix_t w, wWinPix_t h, const char * bits, wDrawCol
  * \returns icon handle
  */
 
-wIcon_p wIconCreatePixMap( char *pm[] )
+wIcon_p wIconCreatePixMap( const char *pm[] )
 {
 	wIcon_p ip;
 	ip = (wIcon_p)malloc( sizeof *ip );

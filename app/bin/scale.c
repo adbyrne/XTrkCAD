@@ -809,7 +809,7 @@ EXPORT void ScaleLengthEnd( void )
 
 
 
-EXPORT void LoadScaleList( wList_p scaleList )
+EXPORT void LoadScaleList( wControl_p scaleList )
 {
 	wIndex_t inx;
 	for (inx=0; inx<scaleDesc_da.cnt-(extraButtons?0:1); inx++) {
@@ -817,7 +817,7 @@ EXPORT void LoadScaleList( wList_p scaleList )
 	}
 }
 
-EXPORT void LoadGaugeList( wList_p gaugeList, SCALEDESCINX_T scale )
+EXPORT void LoadGaugeList( wControl_p gaugeList, SCALEDESCINX_T scale )
 {
 	wListClear( gaugeList );			/* remove old list in case */
 	for ( wIndex_t inx=0; inx<scaleDesc(scale).gauges_da.cnt; inx++ ) {
@@ -989,7 +989,7 @@ static void RescaleDlgUpdate(
 			break;
 		}
 	case I_RESCALE_TO_SCALE:
-		LoadGaugeList( (wList_p)rescalePLs[I_RESCALE_TO_GAUGE].control,
+		LoadGaugeList(rescalePLs[I_RESCALE_TO_GAUGE].control,
 		               *((int *)valueP) );
 		rescaleToGaugeInx = 0;
 		ParamLoadControl( pg, I_RESCALE_TO_GAUGE );
@@ -1083,8 +1083,8 @@ EXPORT void DoRescale( void * unused )
 	if ( rescalePG.win == NULL ) {
 		ParamCreateDialog( &rescalePG, MakeWindowTitle(_("Rescale")), _("Ok"),
 		                   RescaleDlgOk, ParamCancel_Current, TRUE, NULL, F_BLOCK, RescaleDlgUpdate );
-		LoadScaleList( (wList_p)rescalePLs[I_RESCALE_TO_SCALE].control );
-		LoadGaugeList( (wList_p)rescalePLs[I_RESCALE_TO_GAUGE].control,
+		LoadScaleList(rescalePLs[I_RESCALE_TO_SCALE].control );
+		LoadGaugeList(rescalePLs[I_RESCALE_TO_GAUGE].control,
 		               GetLayoutCurScaleDesc() ); /* set correct gauge list here */
 		rescaleFromScaleInx = GetLayoutCurScale();
 		rescaleToScaleInx = rescaleFromScaleInx;

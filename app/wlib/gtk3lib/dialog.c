@@ -246,6 +246,7 @@ wWinDialogCreate(wControl_p parent,
             "OK",
             NULL);
         g_string_free(errorMessage, TRUE);
+        g_assert(NULL);
         return(NULL);
     }
 

@@ -42,7 +42,6 @@ void ParamSetInReadTracksOrig(bool state);
 void ParamSetInPlaybackOrig(bool state, long delay);
 void ParamTurnOffDelaysOrig(bool disable);
 void ParamMenuPushOrig(void*);
-void ParamHiliteOrig(wWin_p, wControl_p, BOOL_T);
 wBool_t ParamCheckInputsOrig(paramGroup_p pg, wControl_p b);
 void ParamInitOrig(void);
 void ParamResetInvalidOrig(wWin_p win);
@@ -161,14 +160,6 @@ EXPORT wBool_t ParamCheckInputs(
     wControl_p b)
 {
     return( ParamCheckInputsOrig(group, b));
-}
-
-EXPORT void ParamHilite(
-    wWin_p win,
-    wControl_p control,
-    BOOL_T hilite)
-{
-    ParamHiliteOrig(win, control, hilite);
 }
 
 

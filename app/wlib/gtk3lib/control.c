@@ -87,6 +87,20 @@ void wControlShow(
 }
 
 /**
+ * Return the active (GTK: sensitive) state of the widget.
+ * 
+ * \param control
+ * \return TRUE for active, FALSE is inactive
+ */
+wBool_t
+wControlGetActive(wControl_p control)
+{
+    GtkStateFlags state = gtk_widget_get_state_flags(control->widget);
+
+    return(!(state & GTK_STATE_FLAG_INSENSITIVE));
+}
+
+/**
  * Cause the control <b> to be marked active or inactive.
  * Inactive controls donot respond to actions.
  *
@@ -98,9 +112,7 @@ void wControlActive(
     wControl_p b,
     int active)
 {
-    if (b->widget == NULL) {
-        abort();
-    }
+    g_assert(b->widget != NULL);
 
     if (b->type == B_LIST ) {
 
@@ -322,28 +334,23 @@ wBool_t wControlExpose (
 }
 
 /**
- * Draw a rectangle around a control
+ * Highlight a control by giving it a colored frame.
  * \param b IN the control
- * \param hilite IN unused
+ * \param hilite IN TRUE for highlighting on, FALSE off
  * \returns
- *
- *
  */
+
+#define HILITECLASS "hilite"
+
 void wControlHilite(
-    wControl_p b,
+    wControl_p control,
     wBool_t hilite)
 {
-    printf("Not implemented wControlHilite %s %d\n", __FILE__, __LINE__);
-//    cairo_t *cr;
-//    int off = GTKCONTROLHILITEWIDTH/2+1;
-    //if ( debugWindow >= 1 )
-	   // printf( "wControlHIlite( %s, %d )\n", b->labelStr, hilite );
-
-    //if (b->widget == NULL) {
-    //    return;
-    //}
-    //b->outline = hilite;
-
-    //if (b->widget)
-    //	gtk_widget_queue_draw(b->widget);
+    GtkStyleContext* context = gtk_widget_get_style_context(GTK_WIDGET( control->widget));
+    if (hilite) {
+        gtk_style_context_add_class(context, HILITECLASS);       
+    }
+    else {
+        gtk_style_context_remove_class(context, HILITECLASS);
+    }
 }

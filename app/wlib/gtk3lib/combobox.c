@@ -437,6 +437,11 @@ wControl_p wComboBoxCreate(
 			wlibAddLabel((wControl_p)b, x-1, y, labelStr);
 		}
 
+		wlibComboBoxAddColumns(b->widget, COMBOBOX_TEXTCOLUMNS);
+
+		gtk_combo_box_set_entry_text_column(GTK_COMBO_BOX(b->widget),
+			LISTCOL_TEXT);
+
 		gtk_widget_show(b->widget);
 	}
 	wlibAddHelpString(b->widget, helpStr);
@@ -444,10 +449,6 @@ wControl_p wComboBoxCreate(
 	g_object_ref_sink(lcontrol->listStore);
 	g_object_unref(G_OBJECT(lcontrol->listStore));
 
-	wlibComboBoxAddColumns(b->widget, COMBOBOX_TEXTCOLUMNS);
-
-	gtk_combo_box_set_entry_text_column(GTK_COMBO_BOX(b->widget),
-	                                    LISTCOL_TEXT);
 
 	g_signal_connect(G_OBJECT(b->widget), "changed",
 	                 G_CALLBACK(ComboBoxChanged), b);
