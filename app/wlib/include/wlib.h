@@ -96,7 +96,7 @@ wIcon_p wIconCreateBitMap(wWinPix_t w, wWinPix_t h, const char *bits,
 typedef const unsigned char * wIconBitMap_t;
 #else
 // xpm's are an array of string pointers:
-typedef const unsigned char *[] wIconBitMap_t;
+typedef const unsigned char ** wIconBitMap_t;
 #endif
 wIcon_p wIconCreatePixMap(	const wIconBitMap_t  );
 void wIconSetColor(		wIcon_p, wDrawColor );
