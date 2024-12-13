@@ -258,12 +258,12 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 }
 
 
-#include "bitmaps/text.xpm3"
+#include "bitmaps/text.image3"
 
 void InitCmdText( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdText, "cmdText", _("Text"),
-	               wIconCreatePixMap(text_xpm3[iconSize]), LEVEL0_50,
+	               wIconCreatePixMap(text_image3[iconSize]), LEVEL0_50,
 	               IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_TEXT, NULL );
 	textPopupM = MenuRegister( "Text Font" );
 	wMenuPushCreate( textPopupM, "", _("Fonts..."), 0, SelectFont, NULL );

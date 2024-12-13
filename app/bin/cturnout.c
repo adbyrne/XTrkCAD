@@ -3179,13 +3179,13 @@ static STATUS_T CmdTurnoutHotBar(
 }
 
 #ifdef TURNOUTCMD
-#include "bitmaps/turnout.xpm3"
+#include "bitmaps/turnout.image3"
 
 
 EXPORT void InitCmdTurnout(wMenu_p menu)
 {
 	AddMenuButton(menu, CmdTurnout, "cmdNewFixedTrack", _("Fixed-Track"),
-	              wIconCreatePixMap(turnout_xpm3[iconSize]), LEVEL0_50,
+	              wIconCreatePixMap(turnout_image3[iconSize]), LEVEL0_50,
 	              IC_WANT_MOVE | IC_STICKY | IC_LCLICK | IC_CMDMENU | IC_POPUP2, ACCL_TURNOUT,
 	              NULL);
 	turnoutHotBarCmdInx = AddMenuButton(menu, CmdTurnoutHotBar, "cmdTurnoutHotBar",

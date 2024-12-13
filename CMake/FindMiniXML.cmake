@@ -25,6 +25,7 @@ else ()
 		/usr/local/include
 		/sw/include
 		/opt/local/include
+		/app/include
 	DOC "The directory where mxml.h resides")
 	if(UNIX AND NOT APPLE)
 		find_library( MINIXML_LIBRARY
@@ -36,6 +37,7 @@ else ()
 			/usr/local/lib
 			/sw/lib
 			/opt/local/lib
+			/app/lib
 		DOC "The Mini XML library")
 	else()
 		find_library( MINIXML_LIBRARY

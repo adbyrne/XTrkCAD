@@ -1563,7 +1563,7 @@ static STATUS_T CmdPrint(
 }
 
 
-#include "bitmaps/doc-print.xpm3"
+#include "bitmaps/doc-print.image3"
 
 EXPORT wIndex_t InitCmdPrint( wMenu_p menu )
 {
@@ -1575,7 +1575,7 @@ EXPORT wIndex_t InitCmdPrint( wMenu_p menu )
 	AddRotateMenu( printGridPopupM, PrintGridRotate );
 	ParamRegister( &customMarginPG );
 	return AddMenuButton( menu, CmdPrint, "cmdPrint", N_("Print..."),
-	                      wIconCreatePixMap(doc_print_xpm3[iconSize]), LEVEL0,
+	                      wIconCreatePixMap(doc_print_image3[iconSize]), LEVEL0,
 	                      IC_LCLICK|IC_POPUP3|IC_CMDMENU, ACCL_PRINT, NULL );
 }
 

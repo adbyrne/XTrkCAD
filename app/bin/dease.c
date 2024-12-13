@@ -260,30 +260,29 @@ static void EasementChange( long changes )
 }
 
 
-#include "bitmaps/ease-none.xpm3"
-#include "bitmaps/ease-sharp.xpm3"
-#include "bitmaps/ease-gt-sharp.xpm3"
-#include "bitmaps/ease-lt-sharp.xpm3"
-#include "bitmaps/ease-normal.xpm3"
-#include "bitmaps/ease-broad.xpm3"
-#include "bitmaps/ease-gt-broad.xpm3"
-#include "bitmaps/ease-lt-broad.xpm3"
-#include "bitmaps/ease-cornu.xpm3"
-
-
+#include "bitmaps/ease-none.image3"
+#include "bitmaps/ease-sharp.image3"
+#include "bitmaps/ease-gt-sharp.image3"
+#include "bitmaps/ease-lt-sharp.image3"
+#include "bitmaps/ease-normal.image3"
+#include "bitmaps/ease-broad.image3"
+#include "bitmaps/ease-gt-broad.image3"
+#include "bitmaps/ease-lt-broad.image3"
+#include "bitmaps/ease-cornu.image3"
+ 
 EXPORT addButtonCallBack_t EasementInit( void )
 {
 	ParamRegister( &easementPG );
 
-	enone_bm = wIconCreatePixMap( ease_none_xpm3[iconSize] );
-	eltsharp_bm = wIconCreatePixMap( ease_lt_sharp_xpm3[iconSize] );
-	esharp_bm = wIconCreatePixMap( ease_sharp_xpm3[iconSize] );
-	egtsharp_bm = wIconCreatePixMap( ease_gt_sharp_xpm3[iconSize] );
-	enormal_bm = wIconCreatePixMap( ease_normal_xpm3[iconSize] );
-	eltbroad_bm = wIconCreatePixMap( ease_lt_broad_xpm3[iconSize] );
-	ebroad_bm = wIconCreatePixMap( ease_broad_xpm3[iconSize] );
-	egtbroad_bm = wIconCreatePixMap( ease_gt_broad_xpm3[iconSize] );
-	ecornu_bm = wIconCreatePixMap( ease_cornu_xpm3[iconSize] );
+	enone_bm = wIconCreatePixMap( ease_none_image3[iconSize] );
+	eltsharp_bm = wIconCreatePixMap( ease_lt_sharp_image3[iconSize] );
+	esharp_bm = wIconCreatePixMap( ease_sharp_image3[iconSize] );
+	egtsharp_bm = wIconCreatePixMap( ease_gt_sharp_image3[iconSize] );
+	enormal_bm = wIconCreatePixMap( ease_normal_image3[iconSize] );
+	eltbroad_bm = wIconCreatePixMap( ease_lt_broad_image3[iconSize] );
+	ebroad_bm = wIconCreatePixMap( ease_broad_image3[iconSize] );
+	egtbroad_bm = wIconCreatePixMap( ease_gt_broad_image3[iconSize] );
+	ecornu_bm = wIconCreatePixMap( ease_cornu_image3[iconSize] );
 	easementB = AddToolbarButton( "cmdEasement", enone_bm, 0, DoEasementRedir,
 	                              NULL );
 

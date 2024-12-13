@@ -32,14 +32,14 @@
 static struct wFilSel_t * paramFile_fs;
 
 
-#include "bitmaps/greendot.xpm"
-#include "bitmaps/greydot.xpm"
-#include "bitmaps/yellowdot.xpm"
-#include "bitmaps/reddot.xpm"
-#include "bitmaps/greenstar.xpm"
-#include "bitmaps/greystar.xpm"
-#include "bitmaps/yellowstar.xpm"
-#include "bitmaps/redstar.xpm"
+#include "bitmaps/greendot.image1"
+#include "bitmaps/greydot.image1"
+#include "bitmaps/yellowdot.image1"
+#include "bitmaps/reddot.image1"
+#include "bitmaps/greenstar.image1"
+#include "bitmaps/greystar.image1"
+#include "bitmaps/yellowstar.image1"
+#include "bitmaps/redstar.image1"
 
 #define FAVORITE_PARAM 1
 #define STANDARD_PARAM 0
@@ -410,20 +410,20 @@ void DoParamFiles(void * junk)
 
 	if (paramFileW == NULL) {
 		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_UNLOADED ] = wIconCreatePixMap(
-		                        greydot);
+		                        greydot_image1);
 		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_NOTUSABLE ] = wIconCreatePixMap(
-		                        reddot);
+		                        reddot_image1);
 		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_COMPATIBLE ] = wIconCreatePixMap(
-		                        yellowdot);
-		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_FIT] = wIconCreatePixMap(greendot);
+		                        yellowdot_image1);
+		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_FIT] = wIconCreatePixMap(greendot_image1);
 		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_UNLOADED ] = wIconCreatePixMap(
-		                        greystar);
+		                        greystar_image1);
 		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_NOTUSABLE ] = wIconCreatePixMap(
-		                        redstar);
+		                        redstar_image1);
 		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_COMPATIBLE ] = wIconCreatePixMap(
-		                        yellowstar);
+		                        yellowstar_image1);
 		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_FIT ] = wIconCreatePixMap(
-		                        greenstar);
+		                        greenstar_image1);
 
 		ParamRegister(&paramFilePG);
 

@@ -91,8 +91,15 @@ wControl_p wBitmapCreate(wWin_p parent, wWinPix_t x, wWinPix_t y, long options,
                          const struct wIcon_t * iconP);
 wIcon_p wIconCreateBitMap(wWinPix_t w, wWinPix_t h, const char *bits,
                           wDrawColor color);
-wIcon_p wIconCreatePixMap(char *pm[]);
-void wIconSetColor(wIcon_p ip, wDrawColor color);
+#ifndef WINDOWS
+// png's are a string pointer:
+typedef const unsigned char * wIconBitMap_t;
+#else
+// xpm's are an array of string pointers:
+typedef const unsigned char ** wIconBitMap_t;
+#endif
+wIcon_p wIconCreatePixMap(	const wIconBitMap_t  );
+void wIconSetColor(		wIcon_p, wDrawColor );
 
 /*------------------------------------------------------------------------------
  *
@@ -228,8 +235,6 @@ void wGetDisplaySize(		wWinPix_t*, wWinPix_t* );
 
 wIcon_p wIconCreateBitMap(	wWinPix_t, wWinPix_t, const char * bits,
                                 wDrawColor );
-wIcon_p wIconCreatePixMap(	char *[] );
-void wIconSetColor(		wIcon_p, wDrawColor );
 void wIconDraw( wDraw_p d, wIcon_p bm, wWinPix_t x, wWinPix_t y );
 
 void wConvertToCharSet(		char *, int );

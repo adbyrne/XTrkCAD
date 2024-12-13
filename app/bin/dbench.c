@@ -37,45 +37,45 @@
 
 static char *benchTypeS[] = { "", N_(" L-Girder"), N_(" T-Girder") };
 
-#include "bitmaps/bo_edge.xpm"
-#include "bitmaps/bo_flat.xpm"
-#include "bitmaps/bo_ll.xpm"
-#include "bitmaps/bo_lr.xpm"
-#include "bitmaps/bo_lld.xpm"
-#include "bitmaps/bo_lrd.xpm"
-#include "bitmaps/bo_llu.xpm"
-#include "bitmaps/bo_lru.xpm"
-#include "bitmaps/bo_lli.xpm"
-#include "bitmaps/bo_lri.xpm"
-#include "bitmaps/bo_t.xpm"
-#include "bitmaps/bo_tr.xpm"
-#include "bitmaps/bo_tl.xpm"
-#include "bitmaps/bo_ti.xpm"
+#include "bitmaps/bo_edge.image1"
+#include "bitmaps/bo_flat.image1"
+#include "bitmaps/bo_ll.image1"
+#include "bitmaps/bo_lr.image1"
+#include "bitmaps/bo_lld.image1"
+#include "bitmaps/bo_lrd.image1"
+#include "bitmaps/bo_llu.image1"
+#include "bitmaps/bo_lru.image1"
+#include "bitmaps/bo_lli.image1"
+#include "bitmaps/bo_lri.image1"
+#include "bitmaps/bo_t.image1"
+#include "bitmaps/bo_tr.image1"
+#include "bitmaps/bo_tl.image1"
+#include "bitmaps/bo_ti.image1"
 
 typedef struct {
 	char * name;
-	char ** xpm;
+	wIconBitMap_t image1;
 	wIcon_p icon;
 } orientData_t;
 static orientData_t rectOrientD[] = {
-	{ N_("On Edge"), bo_edge_xpm },
-	{ N_("Flat"), bo_flat_xpm }
+	{ N_("On Edge"), bo_edge_image1 },
+	{ N_("Flat"), bo_flat_image1 }
 };
 static orientData_t lgirderOrientD[] = {
-	{ N_("Left"), bo_ll_xpm },
-	{ N_("Right"), bo_lr_xpm },
-	{ N_("Left-Down"), bo_lld_xpm },
-	{ N_("Right-Down"), bo_lrd_xpm },
-	{ N_("Left-Up"), bo_llu_xpm },
-	{ N_("Right-Up"), bo_lru_xpm },
-	{ N_("Left-Inverted"), bo_lli_xpm },
-	{ N_("Right-Inverted"), bo_lri_xpm }
+	{ N_("Left"), bo_ll_image1 },
+	{ N_("Right"), bo_lr_image1 },
+	{ N_("Left-Down"), bo_lld_image1 },
+	{ N_("Right-Down"), bo_lrd_image1 },
+	{ N_("Left-Up"), bo_llu_image1 },
+	{ N_("Right-Up"), bo_lru_image1 },
+	{ N_("Left-Inverted"), bo_lli_image1 },
+	{ N_("Right-Inverted"), bo_lri_image1 }
 };
 static orientData_t tgirderOrientD[] = {
-	{ N_("Normal"), bo_t_xpm },
-	{ N_("Right"), bo_tr_xpm },
-	{ N_("Left"), bo_tl_xpm },
-	{ N_("Inverted"), bo_ti_xpm }
+	{ N_("Normal"), bo_t_image1 },
+	{ N_("Right"), bo_tr_image1 },
+	{ N_("Left"), bo_tl_image1 },
+	{ N_("Inverted"), bo_ti_image1 }
 };
 
 static struct {
@@ -103,7 +103,7 @@ EXPORT void BenchUpdateOrientationList(
 	for (cnt=orientD[type].cnt-1; cnt>=0; cnt--,op++) {
 #ifdef WINDOWS
 		if (op->icon == NULL) {
-			op->icon = wIconCreatePixMap( op->xpm );
+			op->icon = wIconCreatePixMap( op->image1 );
 		}
 		wListAddValue( list, NULL, op->icon, op );
 #else

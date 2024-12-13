@@ -1,0 +1,24 @@
+#!/bin/bash
+if [ $# -lt 2 ] ; then
+	echo mkimage1 OUTDIR PNG ...
+	echo Converts .pmg files to .image1
+	echo Run from SRCDIR/app/bitmaps
+	echo 
+	echo '$ cd $SRCDIR/app/bin/bitmaps'
+	echo '$ ../../tools/mkimage1 $BLDDIR/app/bin/bitamps *.png'
+	exit 1
+fi
+
+OUTDIR=$1
+if [ ! -d ${OUTDIR} ] ; then
+	echo ${OUTDIR} - not a directory
+	exit 1
+fi
+
+shift
+for PNGFILE in "$@" ; do
+	NAME=`basename "$PNGFILE" | sed 's/.png//'`;
+	gdk-pixbuf-csource --stream --name "${NAME}_image1" ${PNGFILE} \
+		| sed -e 's/guint8/char/g' \
+		> ${OUTDIR}/${NAME}.image1
+done

@@ -291,17 +291,17 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 }
 
 
-#include "bitmaps/parallel.xpm3"
-#include "bitmaps/parallel-line.xpm3"
+#include "bitmaps/parallel.image3"
+#include "bitmaps/parallel-line.image3"
 
 EXPORT void InitCmdParallel( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Parallel"), "cmdParallelSetCmd", _("Parallel") );
 	AddMenuButton( menu, CmdParallel, "cmdParallelTrack", _("Parallel Track"),
-	               wIconCreatePixMap(parallel_xpm3[iconSize]), LEVEL0_50,
+	               wIconCreatePixMap(parallel_image3[iconSize]), LEVEL0_50,
 	               IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_PARALLEL, I2VP(0) );
 	AddMenuButton( menu, CmdParallel, "cmdParallelLine", _("Parallel Line"),
-	               wIconCreatePixMap(parallel_line_xpm3[iconSize]), LEVEL0_50,
+	               wIconCreatePixMap(parallel_line_image3[iconSize]), LEVEL0_50,
 	               IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_PARALLEL, I2VP(1) );
 	ButtonGroupEnd();
 	ParamRegister( &parSepPG );

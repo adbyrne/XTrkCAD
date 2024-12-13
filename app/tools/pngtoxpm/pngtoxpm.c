@@ -38,7 +38,7 @@ FIBITMAP* image;
 char palette[76] =
         "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~!@#$^&=+-<>/";
 
-char xpm3Buff[10000];
+char xpmBuff[10000];
 
 /**********************************************************************
 C Implementation of Wu's Color Quantizer (v. 2)
@@ -483,7 +483,7 @@ strscat(char* dest, const char* src, size_t count)
 	return -E2BIG;
 }
 
-int genXpm(int icon, char* name, int width, int height)
+int genXpm(char* name, int width, int height)
 {
 	char xpmName[100]; // XPM object name
 	char tmpBuff[100]; // sprintf
@@ -500,68 +500,55 @@ int genXpm(int icon, char* name, int width, int height)
 		}
 	}
 
-	strscat(xpm3Buff, "static char *", sizeof(xpm3Buff));
-	strscat(xpm3Buff, xpmName, sizeof(xpm3Buff));
-	strscat(xpm3Buff, "_x", sizeof(xpm3Buff));
-	sprintf(tmpBuff, "%d", height); strscat(xpm3Buff, tmpBuff, sizeof(xpm3Buff));
-	strscat(xpm3Buff, "[] = {"ENDLN, sizeof(xpm3Buff));
-	strscat(xpm3Buff, "\t\"", sizeof(xpm3Buff));
+	strscat(xpmBuff, "static char *", sizeof(xpmBuff));
+	strscat(xpmBuff, xpmName, sizeof(xpmBuff));
+
+	strscat(xpmBuff, "[] = {"ENDLN, sizeof(xpmBuff));
+	strscat(xpmBuff, "\t\"", sizeof(xpmBuff));
 	sprintf(tmpBuff, "%d %d %d %d", width, height, (K + 1), 1);
-	strscat(xpm3Buff, tmpBuff, sizeof(xpm3Buff));
-	strscat(xpm3Buff, "\","ENDLN"\t\" \tc\tNone\","ENDLN, sizeof(xpm3Buff));
+	strscat(xpmBuff, tmpBuff, sizeof(xpmBuff));
+	strscat(xpmBuff, "\","ENDLN"\t\" \tc\tNone\","ENDLN, sizeof(xpmBuff));
 	for (i = 0; i < K; i++) {
-		strscat(xpm3Buff, "\t\"", sizeof(xpm3Buff));
+		strscat(xpmBuff, "\t\"", sizeof(xpmBuff));
 		sprintf(tmpBuff, "%c\tc\t#%02x%02x%02x", pChar(i), lut_r[i], lut_g[i],
-		        lut_b[i]); strscat(xpm3Buff, tmpBuff, sizeof(xpm3Buff));
-		strscat(xpm3Buff, "\","ENDLN, sizeof(xpm3Buff));
+		        lut_b[i]); strscat(xpmBuff, tmpBuff, sizeof(xpmBuff));
+		strscat(xpmBuff, "\","ENDLN, sizeof(xpmBuff));
 	}
 
 	// Write the pixels
 	i = 0;
 	for (y = height - 1; y >= 0; y--) {
-		strscat(xpm3Buff, "\t\"", sizeof(xpm3Buff));
+		strscat(xpmBuff, "\t\"", sizeof(xpmBuff));
 		for (x = 0; x < width; x++) {
 			FreeImage_GetPixelColor(image, x, y, &color);
 			if (color.rgbReserved >= ALPHATHRESH) {
 				j = Qadd[i];
 				c[0] = pChar(j);
-				strscat(xpm3Buff, c, sizeof(xpm3Buff));
+				strscat(xpmBuff, c, sizeof(xpmBuff));
 				i++;
 			} else {
-				strscat(xpm3Buff, " ", sizeof(xpm3Buff));
+				strscat(xpmBuff, " ", sizeof(xpmBuff));
 			}
 		}
 
 		if (y > 0) {
-			strscat(xpm3Buff, "\","ENDLN, sizeof(xpm3Buff));
+			strscat(xpmBuff, "\","ENDLN, sizeof(xpmBuff));
 		} else {
-			strscat(xpm3Buff, "\"};"ENDLN, sizeof(xpm3Buff));
+			strscat(xpmBuff, "\"};"ENDLN, sizeof(xpmBuff));
 		}
 	}
 
-	if (icon == 32) {
-		strscat(xpm3Buff, ENDLN"static char **", sizeof(xpm3Buff));
-		strscat(xpm3Buff, xpmName, sizeof(xpm3Buff));
-		strscat(xpm3Buff, "_xpm3[3] = { ", sizeof(xpm3Buff));
-		strscat(xpm3Buff, xpmName, sizeof(xpm3Buff));
-		strscat(xpm3Buff, "_x16, ", sizeof(xpm3Buff));
-		strscat(xpm3Buff, xpmName, sizeof(xpm3Buff));
-		strscat(xpm3Buff, "_x24, ", sizeof(xpm3Buff));
-		strscat(xpm3Buff, xpmName, sizeof(xpm3Buff));
-		strscat(xpm3Buff, "_x32 };"ENDLN, sizeof(xpm3Buff));
-	}
 	return 0;
 }
 
-int process(char* path, char* name, int icon)
+int process(char* sPngFileName, char* sName )
 {
 	int i;
 	int w, h;
 	int x, y;
 	short a;
 	float frac;
-	short bg;
-	char filename[1000];
+	short bg; //char filename[1000];
 	RGBQUAD color;
 
 
@@ -574,7 +561,7 @@ int process(char* path, char* name, int icon)
 	/* printf( "FreeImage version %s\n\n",FreeImage_GetVersion( ) ); */
 
 	// Try override first
-	sprintf(filename, "%spng/%s%d.png", path, name, icon);
+	//sprintf(filename, "%spng/%s%d.png", path, name, icon);
 	//#if defined(WIN32) || defined(_WIN32)
 	//	if ( _access(filename, 04) != 0) {
 	//#else
@@ -583,12 +570,12 @@ int process(char* path, char* name, int icon)
 	//		sprintf( filename,"%s/png/%s%d.png",path,name,icon );
 	//	}
 #ifdef DEBUGPRINT
-	fprintf(stdout, "PNG: %s\n", filename);
+	fprintf(stdout, "PNG: %s\n", sPngFileName);
 #endif
 
-	image = FreeImage_Load(FIF_PNG, filename, PNG_DEFAULT);
+	image = FreeImage_Load(FIF_PNG, sPngFileName, PNG_DEFAULT);
 	if (image == NULL) {
-		fprintf(stderr, "%s not found.\n", filename);
+		fprintf(stderr, "%s not found.\n", sPngFileName);
 		exit(1);
 	}
 
@@ -637,7 +624,7 @@ int process(char* path, char* name, int icon)
 
 	free(Ig); free(Ib); free(Ir); /* */
 
-	genXpm(icon, name, w, h);
+	genXpm(sName, w, h);
 
 	// Delete
 	FreeImage_Unload(image);
@@ -647,74 +634,29 @@ int process(char* path, char* name, int icon)
 
 int main(int argc, char* argv[])
 {
-	char buffer[1000];
-	char path[1000];
-	char name[1000];
-	char* temp;
-	char* ext;
-//	int i = 0, j = 0;
-	int icon;
 
 #ifdef DEBUGPRINT
 	fprintf(stderr, "Begin pngtoxpm\n");
 #endif
 
-	if (argc < 2) {
-		printf("PngToXpm ver 0.2\nUsage: pngtoxpm filename\nfilename is the path to the resultant XPM3\n");
+	if (argc < 4) {
+		printf("PngToXpm ver 0.2\nUsage: pngtoxpm name pngfile xpmfile\nConverts the PNG file to a XPM file\n");
 		return 0;
 	}
 
-	// Get the file base name from path/name.ext
-	strncpy(buffer, argv[1], sizeof(buffer) - 1);
+	char * sName = argv[1];
+	char * sPngFileName = argv[2];
+	char * sXpmFileName = argv[3];
 
-	strncpy(path, argv[1], sizeof(path) - 1);
-#ifdef DEBUGPRINT
-	fprintf(stderr, "Filename: %s\n", path);
-#endif
+	process( sPngFileName, sName );
 
-	temp = strrchr(path, '/');
-	if (temp != NULL) {
-		temp++;
-		*temp = '\0';
-	} else {
-		path[0] = '\0';
-	}
-
-#ifdef DEBUGPRINT
-	fprintf(stderr, "Path: %s\n", path);
-#endif
-
-	(temp = strrchr(buffer, '/')) ? ++temp : (temp = buffer);
-
-	ext = strrchr(temp, '.');
-	if (ext != NULL) {
-		*ext = '\0';
-	}
-	strncpy(name, temp, sizeof(name) - 1);
-
-#ifdef DEBUGPRINT
-	fprintf(stdout, "In: %s %s\n", path, name);
-#endif
-
-
-	for (icon = 16; icon <= 32; icon += 8) {
-		process(path, name, icon);
-	}
-
-	// Write the xpm file
-	strncpy(buffer, argv[1], sizeof(buffer) - 1);
-#ifdef DEBUGPRINT
-	fprintf(stdout, "XPM: %s\n", buffer);
-#endif
-
-	FILE* ptr;
-	ptr = fopen(buffer, "w");
-	if (ptr == NULL) {
-		fprintf(stderr, "XPM3 file could not be created.\n");
+	FILE* fXpmFile = fopen( sXpmFileName, "w");
+	if (fXpmFile == NULL) {
+		fprintf(stderr, "Output file %s could not be created.\n", sXpmFileName );
 		exit(1);
 	}
-	fprintf(ptr, "%s", xpm3Buff);
-	fclose(ptr);
+	fprintf( fXpmFile, "%s", xpmBuff);
+	fclose( fXpmFile);
 
 	return 0;
 }

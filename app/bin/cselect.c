@@ -3743,16 +3743,16 @@ static STATUS_T CmdSelect(
 }
 
 
-#include "bitmaps/select.xpm3"
-#include "bitmaps/delete.xpm3"
-#include "bitmaps/tunnel.xpm3"
-#include "bitmaps/ties.xpm3"
-#include "bitmaps/bridge.xpm3"
-#include "bitmaps/roadbed.xpm3"
-#include "bitmaps/move.xpm3"
-#include "bitmaps/rotate.xpm3"
-#include "bitmaps/reflect.xpm3"
-#include "bitmaps/description.xpm3"
+#include "bitmaps/select.image3"
+#include "bitmaps/delete.image3"
+#include "bitmaps/tunnel.image3"
+#include "bitmaps/ties.image3"
+#include "bitmaps/bridge.image3"
+#include "bitmaps/roadbed.image3"
+#include "bitmaps/move.image3"
+#include "bitmaps/rotate.image3"
+#include "bitmaps/reflect.image3"
+#include "bitmaps/description.image3"
 
 
 static void SetMoveMode( char * line )
@@ -3783,7 +3783,7 @@ static void moveDescription( void * unused )
 EXPORT void InitCmdSelect( wMenu_p menu )
 {
 	selectCmdInx = AddMenuButton( menu, CmdSelect, "cmdSelect", _("Select"),
-	                              wIconCreatePixMap(select_xpm3[iconSize]),
+	                              wIconCreatePixMap(select_image3[iconSize]),
 	                              LEVEL0, IC_CANCEL|IC_POPUP|IC_LCLICK|IC_CMDMENU|IC_WANT_MOVE|IC_WANT_MODKEYS,
 	                              ACCL_SELECT, NULL );
 }
@@ -3914,7 +3914,7 @@ EXPORT void InitCmdSelect2( wMenu_p menu )
 EXPORT void InitCmdDelete( void )
 {
 	wIcon_p icon;
-	icon = wIconCreatePixMap( delete_xpm3[iconSize] );
+	icon = wIconCreatePixMap( delete_image3[iconSize] );
 	AddToolbarButton( "cmdDelete", icon, IC_SELECTED,
 	                  (wButtonCallBack_p)SelectDelete, 0 );
 }
@@ -3922,28 +3922,28 @@ EXPORT void InitCmdDelete( void )
 EXPORT void InitCmdTies( void )
 {
 	wIcon_p icon;
-	icon = wIconCreatePixMap( ties_xpm3[iconSize] );
+	icon = wIconCreatePixMap( ties_image3[iconSize] );
 	AddToolbarButton( "cmdTies", icon, IC_SELECTED|IC_POPUP, SelectTies, NULL );
 }
 
 EXPORT void InitCmdTunnel( void )
 {
 	wIcon_p icon;
-	icon = wIconCreatePixMap( tunnel_xpm3[iconSize] );
+	icon = wIconCreatePixMap( tunnel_image3[iconSize] );
 	AddToolbarButton( "cmdTunnel", icon, IC_SELECTED|IC_POPUP, SelectTunnel, NULL );
 }
 
 EXPORT void InitCmdBridge( void)
 {
 	wIcon_p icon;
-	icon = wIconCreatePixMap( bridge_xpm3[iconSize] );
+	icon = wIconCreatePixMap( bridge_image3[iconSize] );
 	AddToolbarButton( "cmdBridge", icon, IC_SELECTED|IC_POPUP, SelectBridge, NULL );
 }
 
 EXPORT void InitCmdRoadbed( void)
 {
 	wIcon_p icon;
-	icon = wIconCreatePixMap( roadbed_xpm3[iconSize] );
+	icon = wIconCreatePixMap( roadbed_image3[iconSize] );
 	AddToolbarButton( "cmdRoadbed", icon, IC_SELECTED|IC_POPUP, SelectRoadbed,
 	                  NULL );
 }
@@ -3952,7 +3952,7 @@ EXPORT void InitCmdRoadbed( void)
 EXPORT void InitCmdMoveDescription( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdMoveDescription, "cmdMoveLabel", _("Move Description"),
-	               wIconCreatePixMap(description_xpm3[iconSize]),
+	               wIconCreatePixMap(description_image3[iconSize]),
 	               LEVEL0, IC_STICKY|IC_POPUP3|IC_CMDMENU|IC_WANT_MOVE, ACCL_MOVEDESC, I2VP( 0 ));
 }
 
@@ -3960,12 +3960,12 @@ EXPORT void InitCmdMoveDescription( wMenu_p menu )
 EXPORT void InitCmdMove( wMenu_p menu )
 {
 	moveCmdInx = AddMenuButton( menu, CmdMove, "cmdMove", _("Move"),
-	                            wIconCreatePixMap(move_xpm3[iconSize]),
+	                            wIconCreatePixMap(move_image3[iconSize]),
 	                            LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU|IC_WANT_MOVE, ACCL_MOVE, NULL );
 	rotateCmdInx = AddMenuButton( menu, CmdRotate, "cmdRotate", _("Rotate"),
-	                              wIconCreatePixMap(rotate_xpm3[iconSize]),
+	                              wIconCreatePixMap(rotate_image3[iconSize]),
 	                              LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU|IC_WANT_MOVE, ACCL_ROTATE, NULL );
 	flipCmdInx = AddMenuButton( menu, CmdFlip, "cmdFlip", _("Flip"),
-	                            wIconCreatePixMap(reflect_xpm3[iconSize]),
+	                            wIconCreatePixMap(reflect_image3[iconSize]),
 	                            LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU, ACCL_FLIP, NULL );
 }

@@ -458,8 +458,8 @@ static int CompoundCustMgmProc(
 }
 
 
-#include "bitmaps/turnout.xpm3"
-#include "bitmaps/building.xpm3"
+#include "bitmaps/turnout.image3"
+#include "bitmaps/building.image3"
 
 EXPORT void CompoundCustMgmLoad( void )
 {
@@ -469,10 +469,10 @@ EXPORT void CompoundCustMgmLoad( void )
 	static wIcon_p structI = NULL;
 
 	if ( turnoutI == NULL ) {
-		turnoutI = wIconCreatePixMap( turnout_xpm3[0] );
+		turnoutI = wIconCreatePixMap( turnout_image3[0] );
 	}
 	if ( structI == NULL ) {
-		structI = wIconCreatePixMap( building_xpm3[0] );
+		structI = wIconCreatePixMap( building_image3[0] );
 	}
 
 	for ( inx=0; inx<turnoutInfo_da.cnt; inx++ ) {

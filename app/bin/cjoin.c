@@ -1567,17 +1567,17 @@ errorReturn:
  *
  */
 
-#include "bitmaps/join.xpm3"
-#include "bitmaps/join-line.xpm3"
+#include "bitmaps/join.image3"
+#include "bitmaps/join-line.image3"
 
 void InitCmdJoin( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Join"), "cmdJoinSetCmd", _("Join") );
 	AddMenuButton( menu, CmdJoin, "cmdJoinTrack", _("Join Track"),
-	               wIconCreatePixMap(join_xpm3[iconSize]), LEVEL0_50,
+	               wIconCreatePixMap(join_image3[iconSize]), LEVEL0_50,
 	               IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
 	AddMenuButton( menu, CmdJoinLine, "cmdJoinLine", _("Join Lines"),
-	               wIconCreatePixMap(join_line_xpm3[iconSize]), LEVEL0_50,
+	               wIconCreatePixMap(join_line_image3[iconSize]), LEVEL0_50,
 	               IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
 	ButtonGroupEnd();
 	/** @logcmd @showrefby join=n cjoin.c Log Join Lines and Tracks command */

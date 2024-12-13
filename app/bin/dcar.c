@@ -5845,8 +5845,8 @@ static int CarProtoCustMgmProc(
 }
 
 
-#include "bitmaps/carpart.xpm"
-#include "bitmaps/carproto.xpm"
+#include "bitmaps/carpart.image1"
+#include "bitmaps/carproto.image1"
 
 EXPORT void CarCustMgmLoad( void )
 {
@@ -5858,10 +5858,10 @@ EXPORT void CarCustMgmLoad( void )
 	static wIcon_p carprotoI = NULL;
 
 	if ( carpartI == NULL ) {
-		carpartI = wIconCreatePixMap( carpart_xpm );
+		carpartI = wIconCreatePixMap( carpart_image1 );
 	}
 	if ( carprotoI == NULL ) {
-		carprotoI = wIconCreatePixMap( carproto_xpm );
+		carprotoI = wIconCreatePixMap( carproto_image1 );
 	}
 
 	for ( parentX=0; parentX<carPartParent_da.cnt; parentX++ ) {

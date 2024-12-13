@@ -36,7 +36,7 @@ EXPORT TRKTYP_T T_NOTE = -1;
 static wDrawBitMap_p note_bm, link_bm, document_bm;
 
 typedef struct {
-	char ***xpm;
+	wIconBitMap_t * image3;
 	int OP;
 	char * shortName;
 	char * cmdName;
@@ -44,14 +44,14 @@ typedef struct {
 	long acclKey;
 } trknoteData_t;
 
-#include "bitmaps/sticky-note.xpm3"
-#include "bitmaps/sticky-link.xpm3"
-#include "bitmaps/sticky-doc.xpm3"
+#include "bitmaps/sticky-note.image3"
+#include "bitmaps/sticky-link.image3"
+#include "bitmaps/sticky-doc.image3"
 
 static trknoteData_t noteTypes[] = {
-	{ sticky_note_xpm3, OP_NOTETEXT, N_("Note"), N_("Text Note"), "cmdTextNote", ACCL_NOTE },
-	{ sticky_link_xpm3, OP_NOTELINK, N_("Link"), N_("Weblink"), "cmdLinkNote", 0L },
-	{ sticky_doc_xpm3, OP_NOTEFILE, N_("Document"), N_("Document"), "cmdFileNote", 0L },
+	{ sticky_note_image3, OP_NOTETEXT, N_("Note"), N_("Text Note"), "cmdTextNote", ACCL_NOTE },
+	{ sticky_link_image3, OP_NOTELINK, N_("Link"), N_("Weblink"), "cmdLinkNote", 0L },
+	{ sticky_doc_image3, OP_NOTEFILE, N_("Document"), N_("Document"), "cmdFileNote", 0L },
 };
 
 static long curNoteType;
@@ -578,7 +578,6 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 #include "bitmaps/note.xbm"
 #include "bitmaps/link.xbm"
 #include "bitmaps/clip.xbm"
-// RWS not used #include "bitmaps/note.xpm"
 
 void InitTrkNote(wMenu_p menu)
 {
@@ -593,7 +592,7 @@ void InitTrkNote(wMenu_p menu)
 		wIcon_p icon;
 
 		nt = noteTypes + i;
-		icon = wIconCreatePixMap(nt->xpm[iconSize]);
+		icon = wIconCreatePixMap(nt->image3[iconSize]);
 		AddMenuButton(menu, CmdNote, nt->helpKey, _(nt->cmdName), icon, LEVEL0_50,
 		              IC_STICKY | IC_POPUP2, nt->acclKey, I2VP(nt->OP));
 	}

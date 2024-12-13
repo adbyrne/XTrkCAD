@@ -535,13 +535,13 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 
 
 
-#include "bitmaps/elevation.xpm3"
+#include "bitmaps/elevation.image3"
 
 EXPORT void InitCmdElevation( wMenu_p menu )
 {
 	ParamRegister( &elevationPG );
 	AddMenuButton( menu, CmdElevation, "cmdElevation", _("Elevation"),
-	               wIconCreatePixMap(elevation_xpm3[iconSize]), LEVEL0_50,
+	               wIconCreatePixMap(elevation_image3[iconSize]), LEVEL0_50,
 	               IC_POPUP|IC_LCLICK|IC_RCLICK|IC_WANT_MOVE, ACCL_ELEVATION, NULL );
 }
 

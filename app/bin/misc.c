@@ -960,13 +960,6 @@ static void SetAccelKeys()
 }
 
 
-//EXPORT void InitCmdEnumerate(void) {
-//	AddToolbarButton("cmdEnumerate", wIconCreatePixMap(partlist_xpm),
-//			IC_SELECTED | IC_ACCLKEY, EnumerateTracks,
-//			NULL);
-//}
-
-
 
 /****************************************************************************
  *

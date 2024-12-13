@@ -618,6 +618,10 @@ static void getSavedSizeAndPos(
                 h = 10;
             }
 
+			// Make sure we can see the dialog
+			xadj += 100;
+			yadj += 100;
+
             if (w > screenWidth - xadj) {
                 w = screenWidth - xadj;
             }

@@ -197,11 +197,11 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 }
 
 
-#include "bitmaps/straight.xpm3"
+#include "bitmaps/straight.image3"
 
 void InitCmdStraight( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdStraight, "cmdStraight", _("Straight Track"),
-	               wIconCreatePixMap(straight_xpm3[iconSize]), LEVEL0_50,
+	               wIconCreatePixMap(straight_image3[iconSize]), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_STRAIGHT, NULL );
 }
