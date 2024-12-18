@@ -596,7 +596,7 @@ wTextCreate(wControl_p parent,
 	bt = wlibControlNew(B_TEXT, parent, helpStr, NULL);
 	tcontrol = CONTROL_GET_ATTRIBUTES_PTR(bt, text);
 
-	if (HASDIALOGBUILDER(parent)) {
+	if (ISDEFINEDINBUILDER(parent)) {
 		bt->widget = wlibWidgetFromIdWarn(parent, "scrollwindow");
 		tcontrol->text = wlibWidgetFromIdWarn(parent, helpStr);
 
@@ -660,7 +660,7 @@ wTextCreate(wControl_p parent,
 	}
 	// wlibAddTooltip(tcontrol->text, parent->name, helpStr);
 
-	if (!(option & BO_DIALOGFROMBUILDER)) {
+	if (!(option & F_DEFINEDINBUILDER)) {
 		/* place the widget in a fixed position of the parent */
 		//gtk_fixed_put(GTK_FIXED(parent->widget), bt->widget, bt->realX, bt->realY);
 		//wlibControlGetSize((wControl_p)bt);

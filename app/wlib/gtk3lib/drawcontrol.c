@@ -681,7 +681,7 @@ wControl_p wDrawCreate(
 	drawAttributes->option = option;
 	drawAttributes->dpi = gdk_screen_get_resolution(gdk_screen_get_default());
 
-	if (HASDIALOGBUILDER(parent)) {
+	if (ISDEFINEDINBUILDER(parent)) {
 		drawControl->widget = wlibWidgetFromIdWarn(parent, helpStr);
 	} else {
 		/**

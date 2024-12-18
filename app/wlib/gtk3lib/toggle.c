@@ -186,7 +186,7 @@ wControl_p wToggleCreate(
 	tcontrol->action = action;
 	tcontrol->valueP = valueP;
 
-	if (HASDIALOGBUILDER(parent)) {
+	if (ISDEFINEDINBUILDER(parent)) {
 		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
 		GList* child, * children;
 

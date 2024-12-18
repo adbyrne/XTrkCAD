@@ -157,8 +157,12 @@ wControl_p FormCreateDialog(
 		winOption |= F_RECALLSIZE;
 	}
 
+	if (group->options & PGO_FULLDIALOGFROMBUILDER) {
+		winOption |= F_DEFINEDINBUILDER;
+	}
+
 	group->win = wWinDialogCreate(mainW, helpStr, title, group->nameStr, 
-		F_AUTOSIZE | winOption | BO_DIALOGFROMBUILDER, DialogProc, group);
+		F_AUTOSIZE | winOption , DialogProc, group);
 
 	if (okLabel) {
 		sprintf(helpStr, "%s-ok", group->nameStr);

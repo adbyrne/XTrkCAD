@@ -908,7 +908,7 @@ wControl_p wWindowCreate(
     wControl_p newWindow = wlibControlNew(W_POPUP, parent, nameStr, context);
     struct window* windowPrivate = CONTROL_GET_ATTRIBUTES_PTR(newWindow, window);
 
-    newWindow->widget = wlibCreateWindowFromBuilder(newWindow, nameStr, BO_DIALOGFROMBUILDER | option);
+    newWindow->widget = wlibCreateWindowFromBuilder(newWindow, nameStr, F_DEFINEDINBUILDER | option);
     windowPrivate->winProc = winProc;
     windowPrivate->option = option;
 

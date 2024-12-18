@@ -402,7 +402,7 @@ wControl_p wComboBoxCreate(
 	lcontrol->action = action;
 	lcontrol->last = -1;
 
-	if(HASDIALOGBUILDER(parent)) {
+	if(ISDEFINEDINBUILDER(parent)) {
 		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
 		lcontrol->listStore = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(b->widget)));
 		if (!lcontrol->listStore) {
@@ -493,7 +493,7 @@ wControl_p wComboBoxCreateForToolbar(
 	lcontrol->action = action;
 	lcontrol->last = -1;
 
-	if (HASDIALOGBUILDER(parent)) {
+	if (ISDEFINEDINBUILDER(parent)) {
 		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
 		lcontrol->listStore = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(b->widget)));
 		if (!lcontrol->listStore) {

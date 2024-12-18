@@ -60,7 +60,7 @@ void ParamLayoutDialogOrig(paramGroup_p pg);
 void ParamDialogOkActiveOrig(paramGroup_p pg, int active);
 void ParamCreateControlsOrig(paramGroup_p pg, paramChangeProc changeProc);
 
-#define USESBUILDER(pg) ((pg->options)&BO_DIALOGFROMBUILDER)
+#define USESBUILDER(pg) ((pg->options)&PGO_FULLDIALOGFROMBUILDER)
 
 EXPORT void ParamLoadControls(
     paramGroup_p pg)
@@ -206,7 +206,7 @@ wControl_p ParamCreateDialog(
     paramChangeProc changeProc)
 {
     wControl_p dialog;
-    if (group->options & BO_DIALOGFROMBUILDER) {
+    if (group->options & PGO_FULLDIALOGFROMBUILDER) {
         char* cancelLabel = (winOption & PD_F_ALT_CANCELLABEL ? _("Close") : _("Cancel"));
         dialog = FormCreateDialog(group, title, 
             okLabel, okProc, 

@@ -56,7 +56,7 @@ static paramData_t tipPLs[] = {
 	{   PD_TOGGLE, &showTipAtStart, "showatstart", PDO_DLGCMDBUTTON, tipLabels, NULL, BC_NOBORDER }
 };
 
-static paramGroup_t tipPG = { "tip", BO_DIALOGFROMBUILDER, tipPLs, COUNT( tipPLs ) };
+static paramGroup_t tipPG = { "tip", PGO_FULLDIALOGFROMBUILDER, tipPLs, COUNT( tipPLs ) };
 
 /**
  * Create and initialize the tip of the day window. The dialog box is created and the list of tips is loaded
@@ -197,7 +197,7 @@ static paramData_t aboutPLs[] = {
 #define COPYRIGHT_T			(aboutPLs[I_COPYRIGHT].control)
 	{   PD_TEXT, NULL, "text", PDO_DLGRESIZE, &aboutTextData, NULL, BO_READONLY|BT_TOP|BT_CHARUNITS }
 };
-static paramGroup_t aboutPG = { "about", BO_DIALOGFROMBUILDER, aboutPLs, COUNT( aboutPLs ) };
+static paramGroup_t aboutPG = { "about", PGO_FULLDIALOGFROMBUILDER, aboutPLs, COUNT( aboutPLs ) };
 
 /**
  *	Create and show the About window.

@@ -251,7 +251,41 @@ static void StringPush(const char* val, void* dp)
 	}
 }
 
-static void ScalePush(FLOAT_T value, void* dp)
+
+static void 
+FormListPush(wIndex_t inx, const char* val, wIndex_t op,
+	void* dp, void* itemContext)
+{
+	paramData_p p = (paramData_p)dp;
+	long valL;
+
+	switch (p->type) {
+	case PD_LIST:
+	case PD_DROPLIST:
+	case PD_COMBOLIST:
+		//if (recordParamF && (p->option & PDO_NORECORD) == 0 && p->group->nameStr
+		//	&& p->nameStr) {
+		//	fprintf(recordParamF, "PARAMETER %s %s %d %s\n", p->group->nameStr, p->nameStr,
+		//		inx,
+		//		val);
+		//	fflush(recordParamF);
+		//}
+		if ((p->option & PDO_NOPSHUPD) == 0 && p->valueP) {
+			*(wIndex_t*)(p->valueP) = inx;
+		}
+		if ((p->option & PDO_NOPSHACT) == 0 && p->group->changeProc) {
+			valL = inx;
+			p->group->changeProc(p->group, (int)(p - p->group->paramPtr), &valL);
+		}
+		break;
+
+	default:
+		;
+	}
+}
+
+static void 
+ScalePush(FLOAT_T value, void* dp)
 {
 	paramData_p p = (paramData_p)dp;
 
@@ -277,11 +311,13 @@ CreateControlText(paramData_p pd, wControl_p parent, char* helpStr)
 	}
 }
 
-#define LISTDEFAULTWIDTH 100
+#define LISTDEFAULTWIDTH 10
 
 static void CreateControl(
 	paramData_p pd,
-	char* helpStr )
+	char* helpStr,
+	unsigned x,
+	unsigned y)
 {
 	const paramFloatRange_t* floatRangeP;
 	const paramIntegerRange_t* integerRangeP;
@@ -292,7 +328,6 @@ static void CreateControl(
 	wControl_p win;
 	wWinPix_t w;
 	wWinPix_t colWidth;
-	wWinPix_t xx, yy;
 	static wWinPix_t* colWidths;
 	static wBool_t* colRightJust;
 	static wBool_t maxColCnt = 0;
@@ -309,28 +344,28 @@ static void CreateControl(
 	switch (pd->type) {
 	case PD_FLOAT:
 		floatRangeP = pd->winData;
-		w = floatRangeP->width ? floatRangeP->width : 100;
-		pd->control = wEntryCreate(win, -1, -1, helpStr, _(pd->winLabel),
+		w = floatRangeP->width ? floatRangeP->width : 10;
+		pd->control = wEntryCreate(win, x, y, helpStr, _(pd->winLabel),
 			pd->winOption, w, NULL, 0, FloatPush, pd);
 		break;
 	case PD_LONG:
 		integerRangeP = pd->winData;
-		w = integerRangeP->width ? integerRangeP->width : 100;
-		pd->control = wEntryCreate(win, -1, -1, helpStr, _(pd->winLabel),
+		w = integerRangeP->width ? integerRangeP->width : 10;
+		pd->control = wEntryCreate(win, x, y, helpStr, _(pd->winLabel),
 			pd->winOption, w, NULL, 0, IntegerPush, pd);
 		break;
 	case PD_STRING:
 		w = pd->winData ? (wWinPix_t)VP2L(pd->winData) : (wWinPix_t)250;
-		pd->control = wEntryCreate(win, -1, -1, helpStr, _(pd->winLabel),
+		pd->control = wEntryCreate(win, x, y, helpStr, _(pd->winLabel),
 			pd->winOption, w, (pd->option & PDO_NOPSHUPD) ? NULL : pd->valueP, 0, StringPush,
 			pd);
 		break;
 	case PD_RADIO:
-		//pd->control = (wControl_p)wRadioCreate(win, xx, yy, helpStr, _(pd->winLabel),
-		//	pd->winOption, pd->winData, NULL, ParamChoicePush, pd);
+		pd->control = (wControl_p)wRadioCreate(win, x, y, helpStr, _(pd->winLabel),
+			pd->winOption, pd->winData, NULL, ChoicePush, pd);
 		break;
 	case PD_TOGGLE:
-		pd->control = (wControl_p)wToggleCreate(win, -1, -1, helpStr, _(pd->winLabel),
+		pd->control = (wControl_p)wToggleCreate(win, x, y, helpStr, _(pd->winLabel),
 			pd->winOption, pd->winData, NULL, ChoicePush, pd);
 		break;
 	case PD_LIST:
@@ -381,9 +416,9 @@ static void CreateControl(
 	case PD_COMBOLIST:
 		listDataP = (paramListData_t*)pd->winData;
 		w = pd->winData ? (wWinPix_t)VP2L(pd->winData) : (wWinPix_t)LISTDEFAULTWIDTH;
-		pd->control = (wControl_p)wComboBoxCreate(win, -1, -1, helpStr,
+		pd->control = (wControl_p)wComboBoxCreate(win, x, y, helpStr,
 			_(pd->winLabel), pd->winOption, 10, w, NULL,
-		/*ParamListPush*/NULL, pd);
+			FormListPush, pd);
 		//listDataP->height = wControlGetHeight(pd->control);
 		break;
 	case PD_COLORLIST:
@@ -395,11 +430,11 @@ static void CreateControl(
 			pd->valueP ? _(pd->valueP) : " ", pd->winOption);
 		break;
 	case PD_BUTTON:
-		pd->control = (wControl_p)wButtonCreate(win, -1, -1, helpStr, _(pd->winLabel),
+		pd->control = (wControl_p)wButtonCreate(win, x, y, helpStr, _(pd->winLabel),
 			pd->winOption, 0, ButtonPush, pd);
 		break;
 	case PD_MENU:
-		menu = wMenuCreate(win, xx, yy, helpStr, _(pd->winLabel), pd->winOption);
+		menu = wMenuCreate(win, x, y, helpStr, _(pd->winLabel), pd->winOption);
 		pd->control = (wControl_p)menu;
 		break;
 	case PD_MENUITEM:
@@ -420,7 +455,7 @@ static void CreateControl(
 		break;
 	case PD_BITMAP:
 		iconP = pd->winData;
-		pd->control = (wControl_p)wBitmapCreate(win, xx, yy, pd->winOption, iconP);
+		pd->control = (wControl_p)wBitmapCreate(win, x, y, pd->winOption, iconP);
 		break;
 	case PD_SCALE:
 		pd->control = wScaleCreate(win, helpStr, pd->valueP, ScalePush, pd);
@@ -435,6 +470,9 @@ static void CreateControl(
 void CreateControls(paramGroup_p group)
 {
 	DynString helpString;
+	unsigned xPos = 0;
+	unsigned yPos = 1;
+
 	DynStringMalloc(&helpString, 80);
 
 	for (int inx = 0; inx < (group->paramCnt); inx++) {
@@ -447,8 +485,16 @@ void CreateControls(paramGroup_p group)
 		LOG(log_form, 2, ("%2d: %s\n", inx, pd->nameStr));
 
 		DynStringPrintf(&helpString, "%s-%s", group->nameStr, pd->nameStr);
-		//CreateControl(pd, DynStringToCStr(&helpString) );
-		CreateControl(pd, pd->nameStr);
+
+		if (group->options & PGO_FULLDIALOGFROMBUILDER) {
+			CreateControl(pd, pd->nameStr, -1, -1);
+		}
+		else
+		{
+			CreateControl(pd, pd->nameStr, xPos, yPos);
+			yPos++;
+		}
+
 		DynStringClear(&helpString);
 
 	}

@@ -207,7 +207,7 @@ wControl_p wMessageCreateEx(
 	b = wlibControlNew(B_MESSAGE, parent, NULL, NULL);
 	
 
-	if (HASDIALOGBUILDER(parent)) {
+	if (ISDEFINEDINBUILDER(parent)) {
 		b->widget = wlibWidgetFromIdWarn(parent, labelStr);
 	} else {
 		b->widget = gtk_label_new(message);

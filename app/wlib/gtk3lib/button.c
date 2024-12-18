@@ -220,6 +220,8 @@ static wBool_t drawButton(
 	return wControlExpose(widget, cr, (wControl_p)g);
 }
 
+
+#define ISDIALOGACTION(options) ((options&BB_HELP)||(options&BB_CANCEL)||(option&&BB_DEFAULT))
 /**
  * Create a button
  *
@@ -268,7 +270,7 @@ wControl_p wButtonCreate(
 	button = CONTROL_GET_ATTRIBUTES_PTR(b, button);
 	button->action = action;
 
-	if (HASDIALOGBUILDER(parent)) {
+	if (ISDEFINEDINBUILDER(parent)||ISDIALOGACTION(option)) {
 		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
 	} else {
 		b->widget = GTK_WIDGET(gtk_toggle_button_new());
@@ -285,7 +287,7 @@ wControl_p wButtonCreate(
 			}
 		}
 
-		wlibBasicGridAttach(parent, b->widget, x, y, width, 1);
+		wlibBasicGridAttach(parent, b->widget, x, y, 1, 1);
 
 		if (option & BB_DEFAULT) {
 			gtk_widget_set_can_default(b->widget, TRUE);

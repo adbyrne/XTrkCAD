@@ -122,6 +122,7 @@ typedef bool (*wWinCallBack_p)(wControl_p control,
 #define F_MAXIMIZE  (1L<<14)
 #define F_RESTRICT  (1L<<15)
 #define F_NOTTRANSIENT (1L<<16)
+#define F_DEFINEDINBUILDER (1L<<17)
 
 wControl_p wWinMainCreate(
     const char* name,	        /* Application name */
@@ -464,7 +465,8 @@ void wDestroySplash(void);
  /* Creation CallBacks */
 typedef bool (*wEntryCallBack_p)(const char* enteredString, void * userData);
 
-wControl_p wEntryCreate(wControl_p parent, 
+
+wControl_p wEntryCreate(wControl_p parent,
                         wWinPix_t x, 
                         wWinPix_t y,
                         const char* helpStr, 
@@ -691,7 +693,7 @@ wBool_t wWinIsTemplated(wWin_p win);
 #define BO_ENTER    0
 #define BO_REPEAT   (1L<<11)
 #define BO_IGNFOCUS	(1L<<12)
-#define BO_DIALOGFROMBUILDER (1L<<13)
+#define PGO_FULLDIALOGFROMBUILDER (1L<<13)
 
 wWinPix_t wLabelWidth(		const char * );
 const char * wControlGetHelp(		wControl_p );

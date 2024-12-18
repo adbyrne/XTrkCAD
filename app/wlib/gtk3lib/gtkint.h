@@ -237,7 +237,7 @@ struct control {
 };
 
 #define CONTROL_GET_ATTRIBUTES_PTR(base, field) (&(base->attributes.field))
-#define HASDIALOGBUILDER(parent) ((parent)->attributes.window.option & BO_DIALOGFROMBUILDER)
+#define ISDEFINEDINBUILDER(parent) ((parent)->attributes.window.option & F_DEFINEDINBUILDER)
 
 struct wObjCommon {
 	wType_e type;			/**< type of control */
@@ -501,6 +501,9 @@ void wDropListAddValue(wControl_p b, char *text, wListItem_p attributes);
 void wDropListSetIndex(wList_p b, int val);
 wBool_t wDropListSetValues(wControl_p b, wIndex_t row, const char *labelStr, wIcon_p bm, void *itemData);
 wList_p wDropListCreate(wWin_p parent, wWinPix_t x, wWinPix_t y, const char *helpStr, const char *labelStr, long option, long number, wWinPix_t width, long *valueP, wListCallBack_p action, void *attributes);
+
+/* entry.c */
+
 
 /* filesel.c */
 

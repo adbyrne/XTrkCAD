@@ -190,6 +190,30 @@ static int entryFocusOutEvent(
 	return FALSE;
 }
 
+static void
+wlibCreateEntryAtRuntime(wControl_p parent, wControl_p b, const char* labelStr, 
+	long x, long y, wIndex_t fieldLength, long width)
+{
+	b->widget = (GtkWidget*)gtk_entry_new();
+	if (b->widget == NULL) { abort(); }
+
+	if (fieldLength) {
+		gtk_entry_set_max_length(GTK_ENTRY(b->widget), fieldLength);
+	}
+
+	// set minimum size for widget
+	if (width) {
+		gtk_entry_set_width_chars(GTK_ENTRY(b->widget), width);
+	}
+	// if desired, place a label in front of the created widget
+	if (labelStr)
+		wlibAddLabel((wControl_p)b, x - 1, y, labelStr);
+
+	wlibBasicGridAttach(parent, b->widget, x, y, 1, 1);
+	// show
+	gtk_widget_show(b->widget);
+}
+
 /**
  * Create a single line entry field for a string value
  *
@@ -217,6 +241,8 @@ static int entryFocusOutEvent(
  * \return  the created widget
  */
 
+
+
 wControl_p wEntryCreate(
         wControl_p	parent,
         wWinPix_t	x,
@@ -240,28 +266,11 @@ wControl_p wEntryCreate(
 	entry->action = action;
 	entry->valueL = fieldLength;
 
-	if (HASDIALOGBUILDER(parent)) {
+	if (ISDEFINEDINBUILDER(parent)) {
 		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
  	} else {
 		// create the gtk entry field and set maximum length if desired
-		b->widget = (GtkWidget*)gtk_entry_new();
-		if (b->widget == NULL) { abort(); }
-
-		if (fieldLength) {
-			gtk_entry_set_max_length(GTK_ENTRY(b->widget), fieldLength);
-		}
-
-		// set minimum size for widget
-		if (width) {
-			gtk_entry_set_width_chars(GTK_ENTRY(b->widget), width);
-		}
-		// if desired, place a label in front of the created widget
-		if (labelStr)
-			wlibAddLabel((wControl_p)b, x-1, y, labelStr);
-
-		wlibBasicGridAttach(parent, b->widget, x, y, 1, 1);
-		// show
-		gtk_widget_show(b->widget);
+		wlibCreateEntryAtRuntime(parent, b, labelStr, x, y, fieldLength, width);
 	}
 	// link into help
 	wlibAddHelpString(b->widget, helpStr);

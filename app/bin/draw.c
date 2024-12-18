@@ -2951,7 +2951,7 @@ static paramDrawData_t mapDrawData = { 50, 50, MapRedraw, DoMapPan, &mapD };
 static paramData_t mapPLs[] = {
 	{	PD_DRAW, NULL, "canvas", PDO_DLGRESIZE, &mapDrawData }
 };
-static paramGroup_t mapPG = { "map", PGO_NODEFAULTPROC | BO_DIALOGFROMBUILDER, mapPLs, COUNT( mapPLs ) };
+static paramGroup_t mapPG = { "map", PGO_NODEFAULTPROC | PGO_FULLDIALOGFROMBUILDER, mapPLs, COUNT( mapPLs ) };
 
 
 static void DrawChange( long changes )

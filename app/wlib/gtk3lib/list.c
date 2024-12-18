@@ -560,7 +560,7 @@ wControl_p wListCreate(
 	lcontrol->valueP = valueP;
 	lcontrol->action = action;
 
-	if (HASDIALOGBUILDER(parent)) {
+	if (ISDEFINEDINBUILDER(parent)) {
 		/** \todo Implement builder support */
 	} else {
 		GtkTreeSelection* sel;

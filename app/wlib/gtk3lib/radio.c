@@ -1,9 +1,6 @@
 /**
  * \file   radio.c
  * \brief  Radio button
- *
- * \author mf
- * \date   May 2024
  */
 
 /*  XTrackCad - Model Railroad CAD
@@ -35,13 +32,11 @@
 #include "gtkint.h"
 
 /**
- * Get the state of a group of buttons. If the group consists of
- * radio buttons, the return value is the index of the selected button
- * or -1 for none. If toggle buttons are checked, a bit is set for each
- * button that is active.
+ * Checks the state of a radio button. If the button is active, return value is the index of the
+ * button in its group.
  *
- * \param bc IN
- * \returns state of group
+ * \param button IN radio button
+ * \returns index of button within group if active, -1 otherwise
  */
 
 static long radioGetValue(
@@ -51,6 +46,7 @@ static long radioGetValue(
 
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button))) {
 		GSList* group = gtk_radio_button_get_group(GTK_RADIO_BUTTON(button));
+
 		inx = g_slist_length(group) - g_slist_index(group, button) - 1;
 	}
 
@@ -70,12 +66,15 @@ void wRadioSetValue(
 {
 	GList* children;
 	GList* child;
-	long inx;
+	long inx = 0;
 
 	children = gtk_container_get_children(GTK_CONTAINER(bc->widget));
-	for (child = children, inx = 0; child; child = child->next, inx++) {
-		if (inx == value) {
-			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(child->data), TRUE);
+	for (child = children; child; child = child->next) {
+		if (GTK_IS_RADIO_BUTTON(child->data)) {
+			if (inx == value) {
+				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(child->data), TRUE);
+			}
+			inx++;
 		}
 	}
 	if (children) {
@@ -93,15 +92,29 @@ void wRadioSetValue(
 long wRadioGetValue(
         wControl_p bc)		/* Radio box */
 {
-	return radioGetValue(GTK_RADIO_BUTTON(bc->widget));
+	GList* children;
+	GList* child;
+	long inx = 0;
+
+	children = gtk_container_get_children(GTK_CONTAINER(bc->widget));
+	for (child = children; child; child = child->next) {
+		GtkToggleButton *currentButton = child->data;
+
+		if (gtk_toggle_button_get_active(currentButton)) {
+			break;
+		}
+		inx++;
+	}
+	return inx;
 }
 
+
+#define ISACTIVEBUTTON(index)  (index != -1)
 /**
- * Signal handler for button selection in radio buttons and toggle
- * button group
+ * Signal handler for button selection in radio buttons
  *
  * \param widget IN the button group
- * \param b IN user context (button group????)
+ * \param b IN user context
  * \returns always 1
  */
 
@@ -110,18 +123,17 @@ static int radioChoice(
         gpointer b)
 {
 	wControl_p bc = (wControl_p)b;
-	long value = radioGetValue(GTK_RADIO_BUTTON(widget));
-	struct radio *rcontrol;
+	long activeIndex = radioGetValue(GTK_RADIO_BUTTON(widget));
 
-	rcontrol = CONTROL_GET_ATTRIBUTES_PTR(bc, radio);
+	if (ISACTIVEBUTTON(activeIndex)) {
+		struct radio* rcontrol = CONTROL_GET_ATTRIBUTES_PTR(bc, radio);
 
-	if (value != -1) {
 		if (rcontrol->valueP) {
-			*rcontrol->valueP = value;
+			*rcontrol->valueP = activeIndex;
 		}
 
 		if (rcontrol->action) {
-			rcontrol->action(value, bc->context);
+			rcontrol->action(activeIndex, bc->context);
 		}
 	}
 	return 1;
@@ -132,15 +144,15 @@ static int radioChoice(
  *
  *  * ### Usage in dialogs
  *
- * - Generated: yes
+ * - Runtime: yes
  *
  * ### Options
  * BC_HORIZONTAL
- * : align buttons in horizontal direction, 
- * 
+ * : align buttons in horizontal direction,
+ *
  * BC_NOBORDER
  * : do not draw a frame around buttons
- * 
+ *
  * \param parent IN parent window
  * \param x IN X-position
  * \param y IN Y-position
@@ -150,7 +162,7 @@ static int radioChoice(
  * \param labels IN Labels
  * \param valueP IN Selected value
  * \param action IN Callback
- * \param context IN User context 
+ * \param context IN User context
  * \returns radio button widget
  */
 
@@ -173,11 +185,11 @@ wControl_p wRadioCreate(
 	rcontrol->action = action;
 	rcontrol->valueP = valueP;
 
-	if (HASDIALOGBUILDER(parent)) {
+	if (ISDEFINEDINBUILDER(parent)) {
 		/** \todo use builder */
 
 	} else {
-		GtkRadioButton* butt0 = NULL;
+		GtkWidget* newRadioButton = NULL;
 		const char* const* label;
 
 		if (option & BC_HORIZONTAL) {
@@ -191,31 +203,23 @@ wControl_p wRadioCreate(
 		}
 
 		if (!(option & BC_NOBORDER)) {
-			GtkStyleContext* context = gtk_widget_get_style_context(GTK_WIDGET(
-			                                   b->widget));
-			gtk_style_context_add_class(context, "framed");
+			GtkStyleContext* styleContext = gtk_widget_get_style_context(GTK_WIDGET(
+			                                        b->widget));
+			gtk_style_context_add_class(styleContext, "framed");
 		}
 
 		gtk_box_set_homogeneous(GTK_BOX(b->widget), FALSE);
 
 		for (label = labels; *label; label++) {
-			GtkWidget *butt;
+			newRadioButton = gtk_radio_button_new_with_label_from_widget(
+			                         GTK_RADIO_BUTTON(newRadioButton), *label);
+			gtk_box_pack_start(GTK_BOX(b->widget), newRadioButton, TRUE, TRUE, 0);
 
-			butt = gtk_radio_button_new_with_label_from_widget(
-			               butt0, *label);
-			butt0 = GTK_RADIO_BUTTON(butt);
-
-			gtk_box_pack_start(GTK_BOX(b->widget), butt, TRUE, TRUE, 0);
-			gtk_widget_show(butt);
-			g_signal_connect(G_OBJECT(butt), "clicked",
+			g_signal_connect(G_OBJECT(newRadioButton), "toggled",
 			                 G_CALLBACK(radioChoice), b);
-			wlibAddHelpString(butt, helpStr);
-			wlibAddTooltip(butt, helpStr);
-		}
 
-		if (option & BB_DEFAULT) {
-			gtk_widget_set_can_default(b->widget, TRUE);
-			gtk_widget_grab_default(b->widget);
+			wlibAddHelpString(newRadioButton, helpStr);
+			wlibAddTooltip(newRadioButton, helpStr);
 		}
 
 		if (valueP) {
@@ -223,11 +227,10 @@ wControl_p wRadioCreate(
 		}
 
 		wlibBasicGridAttach(parent, b->widget, x, y, 1, 1);
-
 		gtk_widget_show_all(b->widget);
 
 		if (labelStr) {
-		    wlibAddLabel((wControl_p)b, x-1, y, labelStr);
+			wlibAddLabel((wControl_p)b, x-1, y, labelStr);
 		}
 	}
 	return b;

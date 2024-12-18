@@ -233,8 +233,14 @@ wWinDialogCreate(wControl_p parent,
 
     wControl_p winDialog = wlibControlNew(W_DIALOG, parent, helpStr, context);
     dcontrol = CONTROL_GET_ATTRIBUTES_PTR(winDialog, window);
+    dcontrol->option = option;
 
-    dialog = wlibCreateWindowFromBuilder(winDialog, nameStr, option);
+    if (option & F_DEFINEDINBUILDER) {
+        dialog = wlibCreateWindowFromBuilder(winDialog, nameStr, option);
+    }
+    else {
+        dialog = wlibCreateWindowFromBuilder(winDialog, "basicdialog", option);
+    }
     winDialog->widget = dialog;
 
     if (!dialog)
@@ -267,7 +273,6 @@ wWinDialogCreate(wControl_p parent,
     gtk_window_set_title(GTK_WINDOW(dialog), titleStr);
 
     gtk_widget_show(dialog);
-    dcontrol->option = option | BO_DIALOGFROMBUILDER;
     dcontrol->winProc = winProc;
 
     return(winDialog);

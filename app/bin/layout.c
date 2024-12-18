@@ -698,7 +698,7 @@ static paramData_t layoutPLs[] = {
 	{ PD_BUTTON, SettingsRead, "read", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Read"), 0, I2VP(0) }
 };
 
-static paramGroup_t layoutPG = { "layout", PGO_RECORD | PGO_PREFMISC | BO_DIALOGFROMBUILDER, layoutPLs, COUNT( layoutPLs ) };
+static paramGroup_t layoutPG = { "layout", PGO_RECORD | PGO_PREFMISC | PGO_FULLDIALOGFROMBUILDER, layoutPLs, COUNT( layoutPLs ) };
 
 /**
  * @brief Handle the Layout changes, setting the values of changed items from dialog.

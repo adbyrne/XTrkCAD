@@ -24,6 +24,7 @@
 #include <wlib.h>
 
 #include "custom.h"
+#include <form.h>
 #include "i18n.h"
 #include "messages.h"
 #include "param.h"
@@ -60,9 +61,9 @@ static paramData_t prefPLs[] = {
 #define I_UNITS			(2)
 	{ PD_RADIO, &units, "units", PDO_NOPSHUPD | PDO_NOUPDACT, unitsLabels, N_("Units"), BC_HORIZONTAL, I2VP(CHANGE_MAIN | CHANGE_UNITS) },
 #define I_DSTFMT		(3)
-	{ PD_COMBOLIST, &distanceFormatInx, "dstfmt", PDO_DIM | PDO_NOPSHUPD | PDO_LISTINDEX, I2VP(150), N_("Length Format"), 0, I2VP(CHANGE_MAIN | CHANGE_UNITS) },
+	{ PD_COMBOLIST, &distanceFormatInx, "dstfmt", PDO_DIM | PDO_NOPSHUPD | PDO_LISTINDEX, I2VP(15), N_("Length Format"), 0, I2VP(CHANGE_MAIN | CHANGE_UNITS) },
 	{ PD_FLOAT, &minLength, "minlength", PDO_DIM | PDO_SMALLDIM | PDO_NOPSHUPD, &r0o1_1, N_("Min Track Length") },
-	{ PD_FLOAT, &connectDistance, "connectdistance", PDO_DIM | PDO_SMALLDIM | PDO_NOPSHUPD, &r0o1_1, N_("Connection Distance"), },
+	{ PD_FLOAT, &connectDistance, "connectdistance", PDO_DIM | PDO_SMALLDIM | PDO_NOPSHUPD, &r0o1_1, N_("Connection Distance") },
 	{ PD_FLOAT, &connectAngle, "connectangle", PDO_NOPSHUPD, &r1_10, N_("Connection Angle") },
 	{ PD_FLOAT, &turntableAngle, "turntable-angle", PDO_NOPSHUPD, &r0_180, N_("Turntable Angle") },
 	{ PD_LONG, &maxCouplingSpeed, "coupling-speed-max", PDO_NOPSHUPD, &i10_100, N_("Max Coupling Speed"), 0 },
@@ -261,7 +262,6 @@ static void OptionDlgUpdate(
 	}
 }
 
-
 static void PrefOk(void* junk)
 {
 	wBool_t resetValuesLow = FALSE, resetValuesHigh = FALSE;
@@ -314,11 +314,13 @@ static void PrefOk(void* junk)
 static void DoPref(void* junk)
 {
 	if (prefW == NULL) {
-		prefW = ParamCreateDialog(&prefPG, MakeWindowTitle(_("Preferences")), _("Ok"),
-			PrefOk, ParamCancel_Restore, TRUE, NULL, 0, OptionDlgUpdate);
+		prefW = FormCreateDialog(&prefPG, MakeWindowTitle(_("Preferences")), 
+			_("Ok"),PrefOk, 
+			_("Cancel"), ParamCancel_Restore, 
+			TRUE, 0, OptionDlgUpdate);
 		LoadDstFmtList();
 	}
-	ParamLoadControls(&prefPG);
+	FormLoadControls(&prefPG);
 	displayUnits = units;
 	wShow(prefW);
 }
@@ -326,7 +328,7 @@ static void DoPref(void* junk)
 
 EXPORT addButtonCallBack_t PrefInit(void)
 {
-	ParamRegister(&prefPG);
+	FormRegister(&prefPG);
 	if (connectAngle < 1.0) {
 		connectAngle = 1.0;
 	}

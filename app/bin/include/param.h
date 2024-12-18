@@ -179,6 +179,7 @@ typedef void (*paramGroupProc_t) ( long, long );
 #define PGO_PREFMISCGROUP		(1<<8)
 #define PGO_PREFDRAWGROUP		(1<<9)
 #define PGO_PREFMISC			(1<<10)
+#define PGO_FULLDIALOGFROMBUILDER (1L<<13)	/**< complete dialog is defined in XML file*/
 
 typedef void (*paramLayoutProc)( paramData_t *, int, wWinPix_t, wWinPix_t *,
                                  wWinPix_t * );

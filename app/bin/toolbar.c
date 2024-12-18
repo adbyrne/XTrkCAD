@@ -134,7 +134,7 @@ static paramData_t toolbarPLs[] = {
 	{ PD_LONG, &layerCount, "button-count", 0L, &buttonRange, ""}
 };
 
-static paramGroup_t toolbarPG = { "toolbar", PGO_RECORD | BO_DIALOGFROMBUILDER, toolbarPLs,
+static paramGroup_t toolbarPG = { "toolbar", PGO_RECORD | PGO_FULLDIALOGFROMBUILDER, toolbarPLs,
                                   COUNT(toolbarPLs)
                                 };
 

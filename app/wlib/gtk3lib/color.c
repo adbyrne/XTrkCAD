@@ -225,7 +225,7 @@ wControl_p wColorSelectButtonCreate(
 	b = wlibControlNew(B_COLORBUTTON,parent, helpStr, context);
 	ccontrol = CONTROL_GET_ATTRIBUTES_PTR(b, colorbutton);
 
-	if (HASDIALOGBUILDER(parent)) {
+	if (ISDEFINEDINBUILDER(parent)) {
 		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
 	} else {
 		b->widget = gtk_color_button_new();

@@ -93,7 +93,7 @@ wScaleCreate(wControl_p parent,
 {
     struct scale* scaleAttributes;
 
-    g_assert(HASDIALOGBUILDER(parent));
+    g_assert(ISDEFINEDINBUILDER(parent));
 
     wControl_p scaleControl = wlibControlNew(B_SCALE, parent, NULL, NULL);
     scaleAttributes = CONTROL_GET_ATTRIBUTES_PTR(scaleControl, scale);
