@@ -1433,69 +1433,6 @@ EXPORT void SetMessage( char * msg )
  *
  */
 
-/*
- * Set mapW size to fit the rescaled map
- *
- * \param reset IN
- */
-static int mapBorderH = 24;
-static int mapBorderW = 24;
-static void ChangeMapScale()
-{
-	wWinPix_t w, h;
-	FLOAT_T fw, fh;
-
-	// Restrict map size to 1/2 of screen
-	FLOAT_T fScaleW = mapD.size.x / ( displayWidth * 0.5 / mapD.dpi );
-	FLOAT_T fScaleH = mapD.size.y / ( displayHeight * 0.5 / mapD.dpi );
-	FLOAT_T fScale = ceil( max( fScaleW, fScaleH ) );
-	if ( fScale > mapD.scale ) {
-		LOG( log_mapsize, 2, ( "  ChangeMapScale incr scale from %0.3f to %0.3f\n",
-		                       mapD.scale, fScale ) );
-		mapD.scale = fScale;
-	}
-
-	fw = (((mapD.size.x/mapD.scale)*mapD.dpi) + 0.5)+2;
-	fh = (((mapD.size.y/mapD.scale)*mapD.dpi) + 0.5)+2;
-
-	w = (wWinPix_t)fw;
-	h = (wWinPix_t)fh;
-	LOG( log_mapsize, 2, ( "  ChangeMapScale mapD.scale=%0.3f w=%ld h=%ld\n",
-	                       mapD.scale, w, h ) );
-	wWinSetSize( mapW, w+mapBorderW, h+mapBorderH );
-	// This should be done by wWinSetSize
-	wDrawSetSize( mapD.d, w, h, NULL );
-}
-
-
-EXPORT BOOL_T SetRoomSize( coOrd size )
-{
-	LOG( log_mapsize, 2, ( "SetRoomSize NEW:%0.3fx%0.3f OLD:%0.3fx%0.3f\n", size.x,
-	                       size.y, mapD.size.x, mapD.size.y ) );
-	SetLayoutRoomSize(size);
-	if (size.x < 1.0) {
-		size.x = 1.0;
-	}
-	if (size.y < 1.0) {
-		size.y = 1.0;
-	}
-	if ( mapD.size.x == size.x &&
-	     mapD.size.y == size.y ) {
-		return TRUE;
-	}
-	mapD.size = size;
-	SetLayoutRoomSize(size);
-	wPrefSetFloat( "draw", "roomsizeX", mapD.size.x );
-	wPrefSetFloat( "draw", "roomsizeY", mapD.size.y );
-	if ( mapW == NULL) {
-		return TRUE;
-	}
-	ChangeMapScale();
-	return TRUE;
-}
-
-
-
 /**
  * Redraw the Map window using the Scale derived from the Window size and Room size
  * \param bd [inout] Map canvas - not used
@@ -1569,6 +1506,70 @@ static void MapRedraw(
 	wDrawSetTempMode( mapD.d, bTemp );
 	wDrawDelayUpdate( mapD.d, FALSE );
 }
+
+
+/*
+ * Set mapW size to fit the rescaled map
+ *
+ * \param reset IN
+ */
+static int mapBorderH = 24;
+static int mapBorderW = 24;
+static void ChangeMapScale()
+{
+	wWinPix_t w, h;
+	FLOAT_T fw, fh;
+
+	// Restrict map size to 1/2 of screen
+	FLOAT_T fScaleW = mapD.size.x / ( displayWidth * 0.5 / mapD.dpi );
+	FLOAT_T fScaleH = mapD.size.y / ( displayHeight * 0.5 / mapD.dpi );
+	FLOAT_T fScale = ceil( max( fScaleW, fScaleH ) );
+	if ( fScale > mapD.scale ) {
+		LOG( log_mapsize, 2, ( "  ChangeMapScale incr scale from %0.3f to %0.3f\n",
+		                       mapD.scale, fScale ) );
+		mapD.scale = fScale;
+	}
+
+	fw = (((mapD.size.x/mapD.scale)*mapD.dpi) + 0.5)+2;
+	fh = (((mapD.size.y/mapD.scale)*mapD.dpi) + 0.5)+2;
+
+	w = (wWinPix_t)fw;
+	h = (wWinPix_t)fh;
+	LOG( log_mapsize, 2, ( "  ChangeMapScale mapD.scale=%0.3f w=%ld h=%ld\n",
+	                       mapD.scale, w, h ) );
+	wWinSetSize( mapW, w+mapBorderW, h+mapBorderH );
+	// This should be done by wWinSetSize
+	wDrawSetSize( mapD.d, w, h, NULL );
+	MapRedraw( mapD.d, NULL, 0, 0 );
+}
+
+
+EXPORT BOOL_T SetRoomSize( coOrd size )
+{
+	LOG( log_mapsize, 2, ( "SetRoomSize NEW:%0.3fx%0.3f OLD:%0.3fx%0.3f\n", size.x,
+	                       size.y, mapD.size.x, mapD.size.y ) );
+	SetLayoutRoomSize(size);
+	if (size.x < 1.0) {
+		size.x = 1.0;
+	}
+	if (size.y < 1.0) {
+		size.y = 1.0;
+	}
+	if ( mapD.size.x == size.x &&
+	     mapD.size.y == size.y ) {
+		return TRUE;
+	}
+	mapD.size = size;
+	SetLayoutRoomSize(size);
+	wPrefSetFloat( "draw", "roomsizeX", mapD.size.x );
+	wPrefSetFloat( "draw", "roomsizeY", mapD.size.y );
+	if ( mapW == NULL) {
+		return TRUE;
+	}
+	ChangeMapScale();
+	return TRUE;
+}
+
 
 
 EXPORT void SetMainSize( void )
@@ -1838,7 +1839,6 @@ EXPORT void DoRedraw( void )
 {
 	LOG( log_mapsize, 2, ( "DoRedraw\n" ) );
 	ChangeMapScale();
-	MapRedraw( mapD.d, NULL, 0, 0 );
 	MainRedraw(); // DoRedraw
 }
 

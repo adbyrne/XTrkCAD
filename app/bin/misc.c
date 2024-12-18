@@ -749,11 +749,11 @@ EXPORT void MapWindowShow(int state)
 	wPrefSetInteger("misc", "mapVisible", mapVisible);
 	wMenuToggleSet(mapShowMI, mapVisible);
 
+	wWinShow(mapW, mapVisible);
 	if (mapVisible) {
 		DoChangeNotification(CHANGE_MAP);
 	}
 
-	wWinShow(mapW, mapVisible);
 	wButtonSetBusy(mapShowB, (wBool_t) mapVisible);
 }
 
