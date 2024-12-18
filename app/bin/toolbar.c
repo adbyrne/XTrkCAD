@@ -415,7 +415,6 @@ EXPORT void ToolbarControlAdd(wControl_p control, long options, int cmdGroup)
 	buttonList[buttonCnt].y = 0;
 	buttonList[buttonCnt].control = control;
 	buttonList[buttonCnt].cmdInx = -1;
-	wControlShow(control, FALSE);
 	buttonCnt++;
 }
 
