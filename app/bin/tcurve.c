@@ -829,9 +829,15 @@ EXPORT void DrawCurvedTrack(
 	if (color == wDrawColorBlack) {
 		color = normalColor;
 	}
+	int iDrawCenter = centerDrawMode;
+	if ( options & DTS_NOCENTER ) {
+		iDrawCenter = FALSE;
+	}
+	if ( d == &mapD ) {
+		iDrawCenter = FALSE;
+	}
 	if ( ! DrawTwoRails( d, 1 ) ) {
-		DrawArc( d, p, r, a0, a1, (centerDrawMode
-		                           && !(options&DTS_NOCENTER)) ? 1 : 0, width, color );
+		DrawArc( d, p, r, a0, a1, iDrawCenter, width, color );
 	} else {
 		if ( hasTrackCenterline(d)) {
 			long options = d->options;
@@ -840,8 +846,7 @@ EXPORT void DrawCurvedTrack(
 			d->options = options;
 		}
 		DrawArc( d, p, r+trackGauge/2.0, a0, a1, 0, width, color );
-		DrawArc( d, p, r-trackGauge/2.0, a0, a1, (centerDrawMode
-		                && !(options&DTS_NOCENTER) ? 1: 0), width, color );
+		DrawArc( d, p, r-trackGauge/2.0, a0, a1, iDrawCenter, width, color );
 		if ( (d->options&DC_PRINT) && roadbedWidth > trackGauge
 		     && DrawTwoRails( d, 1 ) ) {
 			wDrawWidth rbw = (wDrawWidth)floor(roadbedLineWidth*(d->dpi/d->scale)+0.5);
