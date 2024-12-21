@@ -406,7 +406,7 @@ static void CreateControl(
 		//	(listDataP->colCnt > 1 ? colWidths : NULL),
 		//	(listDataP->colCnt > 1 ? colRightJust : NULL),
 		//	listDataP->colTitles, NULL, ParamListPush, pd);
-		listDataP->height = wControlGetHeight(pd->control);
+		//listDataP->height = wControlGetHeight(pd->control);
 		break;
 	case PD_DROPLIST:
 		w = pd->winData ? (wWinPix_t)VP2L(pd->winData) : (wWinPix_t)LISTDEFAULTWIDTH;

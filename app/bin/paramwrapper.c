@@ -118,7 +118,7 @@ EXPORT void ParamRegister(paramGroup_p pg)
 {
     if (USESBUILDER(pg)) {
         FormRegister(pg);
-        FormSetDefaultValues(pg);
+        FormLoadDefaultValues(pg);
     }
     else {
         ParamRegisterOrig(pg);

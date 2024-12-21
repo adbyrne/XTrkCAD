@@ -48,7 +48,7 @@ void FormRegister(paramGroup_p pg)
 
 	AddGroupPtrToItem(pg);
 
-	FormSetDefaultValues(pg);
+	FormLoadDefaultValues(pg);
 }
 
 static void ButtonOk(paramGroup_p group)

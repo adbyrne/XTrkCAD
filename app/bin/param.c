@@ -1124,26 +1124,19 @@ EXPORT void ParamRegisterOrig( paramGroup_p pg )
 		}
 		prefSect2 = prefSect;
 		prefName2 = prefName1;
-		if ( (p->option&PDO_MISC) ) {
-			prefSect2 = "misc";
-			prefName2 = p->nameStr;
-		} else if ( (p->option&PDO_DRAW) ) {
+
+		if ( (p->option&PDO_DRAW) ) {
 			prefSect2 = "draw";
 			prefName2 = p->nameStr;
 		} else if ( (p->option&PDO_FILE) ) {
 			prefSect2 = "file";
-			prefName2 = p->nameStr;
-		} else if ( (pg->options&PGO_PREFGROUP) ) {
-			prefSect2 = pg->nameStr;
 			prefName2 = p->nameStr;
 		} else if ( (pg->options&PGO_PREFMISC) ) {
 			prefSect2 = "misc";
 			prefName2 = p->nameStr;
 		} else if ( (pg->options&PGO_PREFMISCGROUP) ) {
 			prefSect2 = "misc";
-		} else if ( (pg->options&PGO_PREFDRAWGROUP) ) {
-			prefSect2 = "draw";
-		}
+		} 
 		cp = strchr( p->nameStr, '\t' );
 		if ( cp ) {
 			/* *cp++ = 0; */

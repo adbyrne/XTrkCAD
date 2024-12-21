@@ -233,6 +233,8 @@ wBool_t wComboBoxSetValues(
  * \param comboBox  IN the combobox
  * \param context      IN user context / pointer to the control
  * \return
+ * 
+ * \todo Refactor !!
  */
 
 static int ComboBoxChanged(
@@ -269,18 +271,20 @@ static int ComboBoxChanged(
 		lcontrol->editted = FALSE;
 
 	} else {
-		/* Nothing selected, user is entering text directly */
-		inx = -1;
-		GtkEntry * entry = GTK_ENTRY(gtk_bin_get_child(GTK_BIN(bl->widget)));
-		if ( entry == NULL ) {
-			return 0;
+		if (gtk_combo_box_get_has_entry(GTK_COMBO_BOX(bl->widget))) {
+			/* Nothing selected, user is entering text directly */
+			inx = -1;
+			GtkEntry* entry = GTK_ENTRY(gtk_bin_get_child(GTK_BIN(bl->widget)));
+			if (entry == NULL) {
+				return 0;
+			}
+			const char* string1 = gtk_entry_get_text(entry);
+			if (string1 == NULL) {
+				return 0;
+			}
+			string = g_strdup(string1);
+			lcontrol->editted = TRUE;
 		}
-		const char * string1 = gtk_entry_get_text(entry);
-		if ( string1 == NULL ) {
-			return 0;
-		}
-		string = g_strdup(string1);
-		lcontrol->editted = TRUE;
 	}
 
 	/* selection changed, store new selections and call back */
@@ -420,7 +424,7 @@ wControl_p wComboBoxCreate(
 
 		// create the droplist
 		b->widget = wlibNewComboBox(lcontrol->listStore,
-		                            option & BL_EDITABLE);
+		                            option & BL_EDITABLE );
 
 		if (b->widget == 0) {
 			abort();

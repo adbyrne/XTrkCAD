@@ -24,6 +24,7 @@
 #include <wlib.h>
 #include <param.h>
 #include <form.h>
+#include <dynstring.h>
 #include "formprivate.h"
 
 #define HASDEFAULT(p) (p->valueP && !(p->option&PDO_NOPREF))
@@ -56,46 +57,44 @@ DefaultFromListValue(const char* section, const char* namePrimary, const char* s
 	}
 }
 
+static
+CopyCStringtoDynString(DynString* destination, const char* cstring)
+{
+	DynStringClear(destination);
+	DynStringCatCStr(destination, cstring);
+}
+
 void
-FormSetDefaultValues(paramGroup_p pg)
+FormLoadDefaultValues(paramGroup_p pg)
 {
 	for (int i = 0; i < (pg->paramCnt); i++) {
+		DynString prefNameAlternative;
+		DynStringMalloc(&prefNameAlternative, STR_SHORT_SIZE);
+
 		paramData_t* p = (pg->paramPtr)+i;
 
-		if (HASDEFAULT(p)) {
-			char prefNamePrimary[STR_SHORT_SIZE];
-			const char* prefSectAlternative, * prefNameAlternative;
+		if (HASDEFAULT(p)) {			
+			const char* prefSectAlternative;
 			char* cp;
 
-			snprintf(prefNamePrimary, sizeof(prefNamePrimary), "%s-%s", pg->nameStr, p->nameStr);
-
+			DynStringPrintf(&prefNameAlternative, "%s-%s", pg->nameStr, p->nameStr);
 			prefSectAlternative = prefSect;
-			prefNameAlternative = prefNamePrimary;
-			if ((p->option & PDO_MISC)) { /** \todo PDO_MISC and PGO_PREFDRAWGROUP are unused */
-				prefSectAlternative = "misc";
-				prefNameAlternative = p->nameStr;
-			}
-			else if ((p->option & PDO_DRAW)) {
+
+			if ((p->option & PDO_DRAW)) {
 				prefSectAlternative = "draw";
-				prefNameAlternative = p->nameStr;
+				CopyCStringtoDynString(&prefNameAlternative, p->nameStr);
 			}
 			else if ((p->option & PDO_FILE)) {
 				prefSectAlternative = "file";
-				prefNameAlternative = p->nameStr;
+				CopyCStringtoDynString(&prefNameAlternative, p->nameStr);
 			}
-			else if ((pg->options & PGO_PREFGROUP)) {
-				prefSectAlternative = pg->nameStr;
-				prefNameAlternative = p->nameStr;
-			}
+
 			else if ((pg->options & PGO_PREFMISC)) {
 				prefSectAlternative = "misc";
-				prefNameAlternative = p->nameStr;
+				CopyCStringtoDynString(&prefNameAlternative, p->nameStr);
 			}
 			else if ((pg->options & PGO_PREFMISCGROUP)) {
 				prefSectAlternative = "misc";
-			}
-			else if ((pg->options & PGO_PREFDRAWGROUP)) {
-				prefSectAlternative = "draw";
 			}
 
 			cp = strchr(p->nameStr, '\t');
@@ -114,38 +113,44 @@ FormSetDefaultValues(paramGroup_p pg)
 			case PD_RADIO:
 			case PD_TOGGLE:
 				if (!wPrefGetInteger(pg->nameStr, p->nameStr, p->valueP, *(long*)p->valueP)) {
-					wPrefGetInteger(prefSectAlternative, prefNameAlternative, p->valueP, *(long*)p->valueP);
+					wPrefGetInteger(prefSectAlternative, DynStringToCStr(&prefNameAlternative), 
+						p->valueP, *(long*)p->valueP);
 				}
 				break;
 			case PD_LIST:
 			case PD_COMBOLIST:
 				if ((p->option & PDO_LISTINDEX)) {
-					DefaultFromListIndex(prefSect, prefNamePrimary, prefSectAlternative, prefNameAlternative, p);
+					DefaultFromListIndex(pg->nameStr, p->nameStr, prefSectAlternative, 
+						DynStringToCStr(&prefNameAlternative), p);
 				}
 				else {
-					DefaultFromListValue(prefSect, prefNamePrimary, prefSectAlternative, prefNameAlternative, p);
+					DefaultFromListValue(pg->nameStr, p->nameStr, prefSectAlternative, 
+						DynStringToCStr(&prefNameAlternative), p);
 				}
 				break;
 			case PD_COLORLIST:
-				if (!wPrefGetInteger(prefSect, prefNamePrimary, p->valueP, *(long*)p->valueP)) {
-					wPrefGetInteger(prefSectAlternative, prefNameAlternative, p->valueP, *(long*)p->valueP);
+				if (!wPrefGetInteger(pg->nameStr, p->nameStr, p->valueP, *(long*)p->valueP)) {
+					wPrefGetInteger(prefSectAlternative, DynStringToCStr(&prefNameAlternative),
+						p->valueP, *(long*)p->valueP);
 				}
 				break;
 			case PD_LONG:
 			case PD_SCALE:
-				if (!wPrefGetInteger(prefSect, prefNamePrimary, p->valueP, *(long*)p->valueP)) {
-					wPrefGetInteger(prefSectAlternative, prefNameAlternative, p->valueP, *(long*)p->valueP);
+				if (!wPrefGetInteger(pg->nameStr, p->nameStr, p->valueP, *(long*)p->valueP)) {
+					wPrefGetInteger(prefSectAlternative, DynStringToCStr(&prefNameAlternative),
+						p->valueP, *(long*)p->valueP);
 				}
 				break;
 			case PD_FLOAT:
-				if (!wPrefGetFloat(prefSect, prefNamePrimary, (FLOAT_T*)p->valueP, *(FLOAT_T*)p->valueP)) {
-					wPrefGetFloat(prefSectAlternative, prefNameAlternative, (FLOAT_T*)p->valueP, *(FLOAT_T*)p->valueP);
+				if (!wPrefGetFloat(pg->nameStr, p->nameStr, (FLOAT_T*)p->valueP, *(FLOAT_T*)p->valueP)) {
+					wPrefGetFloat(prefSectAlternative, DynStringToCStr(&prefNameAlternative),
+						(FLOAT_T*)p->valueP, *(FLOAT_T*)p->valueP);
 				}
 				break;
 			case PD_STRING:
-				cp = wPrefGetString(prefSect, prefNamePrimary);
+				cp = wPrefGetString(pg->nameStr, p->nameStr);
 				if (!cp) {
-					wPrefGetString(prefSectAlternative, prefNameAlternative);
+					wPrefGetString(prefSectAlternative, DynStringToCStr(&prefNameAlternative));
 				}
 				if (cp) {
 					strcpy(p->valueP, cp);
@@ -164,6 +169,7 @@ FormSetDefaultValues(paramGroup_p pg)
 				break;
 			}
 		}
+		DynStringFree(&prefNameAlternative);
 	}
 }
 

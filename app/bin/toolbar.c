@@ -150,7 +150,7 @@ static void
 InitializeToolbarDialog(void)
 {
 	FormRegister(&toolbarPG);
-	FormSetDefaultValues(&toolbarPG);
+	FormLoadDefaultValues(&toolbarPG);
 }
 
 static void ToolbarChange(long changes)

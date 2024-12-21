@@ -70,7 +70,6 @@ typedef enum {
 
 // Override paramGroup pref group
 #define PDO_NOPREF			(1L<<10)		/**< save entered value as default */
-#define PDO_MISC			(1L<<11)
 #define PDO_DRAW			(1L<<12)
 #define PDO_FILE			(1L<<13)
 //#define PDO_ENTER               	(1L<<14)
@@ -175,9 +174,7 @@ typedef void (*paramGroupProc_t) ( long, long );
 
 #define PGO_RECORD				(1<<1)
 #define PGO_NODEFAULTPROC		(1<<2)
-#define PGO_PREFGROUP			(1<<8)
 #define PGO_PREFMISCGROUP		(1<<8)
-#define PGO_PREFDRAWGROUP		(1<<9)
 #define PGO_PREFMISC			(1<<10)
 #define PGO_FULLDIALOGFROMBUILDER (1L<<13)	/**< complete dialog is defined in XML file*/
 

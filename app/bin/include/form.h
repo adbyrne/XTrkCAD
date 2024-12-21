@@ -3,7 +3,7 @@
 #define HAVE_FORM_H
 void FormInit(void);
 void FormRegister(paramGroup_p pg);
-void FormSetDefaultValues(paramGroup_p pg);
+void FormLoadDefaultValues(paramGroup_p pg);
 wControl_p FormCreateDialog(
 	paramGroup_p group,
 	char* title,

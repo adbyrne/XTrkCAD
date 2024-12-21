@@ -826,7 +826,7 @@ EXPORT void CreateMenus(void)
 
 	wControl_p zoomInM, zoomOutM, zoomExtentsM;
 
-	wPrefGetInteger("DialogItem", "pref-iconsize", (long *) &iconSize, 0);
+	wPrefGetInteger("pref", "iconsize", (long *) &iconSize, 0);
 
 	wSetBalloonHelp( balloonHelp );
 	fileM = wMenuBarAdd(mainW, "menuFile", _("_File"));

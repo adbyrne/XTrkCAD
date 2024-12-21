@@ -58,9 +58,9 @@ static char* startOptions[] = { N_("Load Last Layout"), N_("Start New Layout"), 
 static paramData_t prefPLs[] = {
 	{ PD_RADIO, &iconSize, "iconsize", PDO_NOPSHUPD, iconSizeLabels, N_("Icon Size"), BC_HORIZONTAL, I2VP(CHANGE_ICONSIZE) },
 	{ PD_RADIO, &angleSystem, "anglesystem", PDO_NOPSHUPD, angleSystemLabels, N_("Angles"), BC_HORIZONTAL },
-#define I_UNITS			(2)
+#define I_UNITS	(2)
 	{ PD_RADIO, &units, "units", PDO_NOPSHUPD | PDO_NOUPDACT, unitsLabels, N_("Units"), BC_HORIZONTAL, I2VP(CHANGE_MAIN | CHANGE_UNITS) },
-#define I_DSTFMT		(3)
+#define I_DISTANCEFORMAT (3)
 	{ PD_COMBOLIST, &distanceFormatInx, "dstfmt", PDO_DIM | PDO_NOPSHUPD | PDO_LISTINDEX, I2VP(15), N_("Length Format"), 0, I2VP(CHANGE_MAIN | CHANGE_UNITS) },
 	{ PD_FLOAT, &minLength, "minlength", PDO_DIM | PDO_SMALLDIM | PDO_NOPSHUPD, &r0o1_1, N_("Min Track Length") },
 	{ PD_FLOAT, &connectDistance, "connectdistance", PDO_DIM | PDO_SMALLDIM | PDO_NOPSHUPD, &r0o1_1, N_("Connection Distance") },
@@ -69,11 +69,12 @@ static paramData_t prefPLs[] = {
 	{ PD_LONG, &maxCouplingSpeed, "coupling-speed-max", PDO_NOPSHUPD, &i10_100, N_("Max Coupling Speed"), 0 },
 	{ PD_TOGGLE, &enableBalloonHelp, "balloonhelp", PDO_NOPSHUPD, enableBalloonHelpLabels, "", BC_HORIZONTAL },
 	{ PD_TOGGLE, &enableAudio, "setaudio", PDO_NOPSHUPD, enableAudioLabels, "", BC_HORIZONTAL },
+#define I_SHOWFLEXTRACK (11)
 	{ PD_TOGGLE, &showFlexTrack, "showflextrack", PDO_NOPSHUPD, enableFlexTrackLabels, "", BC_HORIZONTAL},
 	{ PD_LONG, &dragPixels, "dragpixels", PDO_NOPSHUPD | PDO_DRAW, &i1_1000, N_("Drag Distance") },
 	{ PD_LONG, &dragTimeout, "dragtimeout", PDO_NOPSHUPD | PDO_DRAW, &i1_1000, N_("Drag Timeout") },
 	{ PD_LONG, &minGridSpacing, "mingridspacing", PDO_NOPSHUPD | PDO_DRAW, &i1_100, N_("Min Grid Spacing"), 0, 0 },
-#define I_CHKPT		(15)
+#define I_CHECKPOINTFREQUENCY (15)
 	{ PD_LONG, &checkPtInterval, "checkpoint", PDO_NOPSHUPD | PDO_FILE, &i0_10000, N_("Check Point Frequency") },
 #define I_AUTOSAVE		(16)
 	{ PD_LONG, &autosaveChkPoints, "autosave", PDO_NOPSHUPD | PDO_FILE, &i0_99, N_("Autosave Checkpoint Frequency") },
@@ -134,27 +135,27 @@ void UpdateAutoSaveInterval(long value)
 {
 	autosaveChkPoints = value;
 	ParamLoadControl(&prefPG, I_AUTOSAVE);
-	ParamLoadControl(&prefPG, I_CHKPT);
+	ParamLoadControl(&prefPG, I_CHECKPOINTFREQUENCY);
 }
 
 void UpdateChkPtInterval(long value)
 {
 	checkPtInterval = value;
 	ParamLoadControl(&prefPG, I_AUTOSAVE);
-	ParamLoadControl(&prefPG, I_CHKPT);
+	ParamLoadControl(&prefPG, I_CHECKPOINTFREQUENCY);
 }
 
 /**
  * Load the selection list for number formats with the appropriate list of variants.
  */
 
-static void LoadDstFmtList(void)
+static void LoadDistanceFormatList(long selectedUnits)
 {
-	int inx;
-	wListClear(prefPLs[I_DSTFMT].control);
-	for (inx = 0; dstFmts[units][inx].name; inx++) {
-		wListAddValue(prefPLs[I_DSTFMT].control, _(dstFmts[units][inx].name),
-			NULL, I2VP(dstFmts[units][inx].fmt));
+	wListClear(prefPLs[I_DISTANCEFORMAT].control);
+
+	for (int inx = 0; dstFmts[selectedUnits][inx].name; inx++) {
+		wListAddValue(prefPLs[I_DISTANCEFORMAT].control, _(dstFmts[selectedUnits][inx].name),
+			NULL, I2VP(dstFmts[selectedUnits][inx].fmt));
 	}
 }
 
@@ -165,7 +166,7 @@ static void LoadDstFmtList(void)
 
 static void UpdatePrefD(void)
 {
-	long newUnits, oldUnits;
+	long newUnits;
 	int inx;
 
 	if (prefW == NULL || (!wWinIsVisible(prefW))
@@ -174,9 +175,7 @@ static void UpdatePrefD(void)
 	}
 	newUnits = wRadioGetValue(prefPLs[I_UNITS].control);
 	if (newUnits != displayUnits) {
-		oldUnits = units;
-		units = newUnits;
-		LoadDstFmtList();
+		LoadDistanceFormatList(newUnits);
 		distanceFormatInx = 0;
 
 		for (inx = 0; inx < COUNT(prefPLs); inx++) {
@@ -185,7 +184,6 @@ static void UpdatePrefD(void)
 			}
 		}
 
-		units = oldUnits;
 		displayUnits = newUnits;
 	}
 	return;
@@ -199,7 +197,7 @@ static void UpdateMeasureFmt()
 {
 	int inx;
 
-	distanceFormatInx = wListGetIndex(prefPLs[I_DSTFMT].control);
+	distanceFormatInx = wListGetIndex(prefPLs[I_DISTANCEFORMAT].control);
 	units = wRadioGetValue(prefPLs[I_UNITS].control);
 
 	for (inx = 0; inx < COUNT(prefPLs); inx++) {
@@ -215,50 +213,36 @@ static void OptionDlgUpdate(
 	void* valueP)
 {
 	if (inx < 0) { return; }
-	if (pg->paramPtr[inx].valueP == &enableBalloonHelp) {
-		wEnableBalloonHelp((wBool_t) * (long*)valueP);
-	}
-	else {
-		//if (pg->paramPtr[inx].valueP == &labelEnable) {
-		//	long new_labels = wRadioGetValue((wChoice_p)pg->paramPtr[inx].control);
-		//	labelEnable = new_labels;
-		//	//ParamLoadControl(&displayPG, labelSelect);
-		//}
-		if (pg->paramPtr[inx].valueP == &units) {
-			UpdatePrefD();
-		}
-		if (pg->paramPtr[inx].valueP == &distanceFormatInx) {
-			UpdateMeasureFmt();
-		}
-		if (pg->paramPtr[inx].valueP == &showFlexTrack) {
-			DoChangeNotification(CHANGE_PARAMS | CHANGE_TOOLBAR);
-		}
-		if (pg->paramPtr[inx].valueP == &checkPtInterval) {
-			checkPtInterval = *(long*)valueP;
-			if (checkPtInterval == 0) {
-				wWinPix_t h = wControlGetHeight(pg->paramPtr[inx].control);
-				wControlSetBalloon(pg->paramPtr[inx].control, 0, h * 3 / 4,
-					_("Turning off AutoSave"));
-				UpdateAutoSaveInterval(0);
-			}
-			else {
-				wControlSetBalloon(pg->paramPtr[inx].control, 0, 0, NULL);
-			}
-		}
-		if (pg->paramPtr[inx].valueP == &autosaveChkPoints) {
-			autosaveChkPoints = *(long*)valueP;
-			if (checkPtInterval == 0 && autosaveChkPoints > 0) {
-				wWinPix_t h = wControlGetHeight(pg->paramPtr[inx].control);
-				wControlSetBalloon(pg->paramPtr[inx].control, 0, -h * 3 / 4,
-					_("Turning on CheckPointing"));
-				UpdateChkPtInterval(10);
-			}
-			else {
-				wControlSetBalloon(pg->paramPtr[inx].control, 0, 0, NULL);
-			}
 
+	switch (inx) {
+	case I_UNITS:
+		UpdatePrefD();
+		break;
+	case I_DISTANCEFORMAT:
+		UpdateMeasureFmt();
+		break;
+	case I_SHOWFLEXTRACK:
+		DoChangeNotification(CHANGE_PARAMS | CHANGE_TOOLBAR);
+		break;
+	case I_CHECKPOINTFREQUENCY:
+		checkPtInterval = *(long*)valueP;
+		if (checkPtInterval == 0) {
+			/** \todo show status message to user */
+			//wWinPix_t h = wControlGetHeight(pg->paramPtr[inx].control);
+			//wControlSetBalloon(pg->paramPtr[inx].control, 0, h * 3 / 4,
+			//	_("Turning off AutoSave"));
+			UpdateAutoSaveInterval(0);
 		}
-
+		break;
+	case I_AUTOSAVE:
+		autosaveChkPoints = *(long*)valueP;
+		if (checkPtInterval == 0 && autosaveChkPoints > 0) {
+			//wWinPix_t h = wControlGetHeight(pg->paramPtr[inx].control);
+			//wControlSetBalloon(pg->paramPtr[inx].control, 0, -h * 3 / 4,
+			//	_("Turning on CheckPointing"));
+			UpdateChkPtInterval(10);
+		}
+		break;
 	}
 }
 
@@ -318,7 +302,7 @@ static void DoPref(void* junk)
 			_("Ok"),PrefOk, 
 			_("Cancel"), ParamCancel_Restore, 
 			TRUE, 0, OptionDlgUpdate);
-		LoadDstFmtList();
+		LoadDistanceFormatList(units);
 	}
 	FormLoadControls(&prefPG);
 	displayUnits = units;
