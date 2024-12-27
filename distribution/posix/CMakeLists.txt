@@ -37,12 +37,6 @@ if(NOT XTRKCAD_USE_BROWSER)
 #    message(AUTHOR_WARNING "Add dependency to webkitgtk for viewing help!")
 endif()
 
-#Add dependency to MiniXML (mxml) if configured
-if(XTRKCAD_CREATE_SVG)
-	set(CPACK_RPM_PACKAGE_REQUIRES
-		"${CPACK_RPM_PACKAGE_REQUIRES} mxml")
-endif()		
-
 # exclude these directories from the rpm
 set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
 	"/usr/local"
@@ -55,6 +49,12 @@ set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
 	"/usr/share/applications"
 	"/usr/share/pixmaps"
 )
+
+set(CPACK_RPM_DEFAULT_DIR_PERMISSIONS
+    OWNER_READ OWNER_WRITE OWNER_EXECUTE
+    GROUP_READ GROUP_EXECUTE
+    WORLD_READ WORLD_EXECUTE)
+
 
 set(CPACK_RPM_CHANGELOG_FILE "${CMAKE_CURRENT_SOURCE_DIR}////changelog.txt")
 
