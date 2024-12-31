@@ -1600,8 +1600,8 @@ EXPORT void TempRedraw( void )
 	} else {
 		wDrawDelayUpdate( tempD.d, TRUE );
 		wDrawSetTempMode( tempD.d, TRUE );
-		DoCurCommand( C_REDRAW, zero );
 		DrawMarkers();
+		DoCurCommand( C_REDRAW, zero );
 		RulerRedraw( FALSE );
 		RedrawPlaybackCursor();              //If in playback
 		wDrawSetTempMode( tempD.d, FALSE );
@@ -1696,8 +1696,8 @@ EXPORT void MainRedraw( void )
 	                              wGetTimer()-time0 ) );
 	// The remainder is from TempRedraw
 	wDrawSetTempMode( tempD.d, TRUE );
-	DoCurCommand( C_REDRAW, zero );
 	DrawMarkers();
+	DoCurCommand( C_REDRAW, zero );
 	RulerRedraw( FALSE );
 	RedrawPlaybackCursor();              //If in playback
 	wDrawSetTempMode( tempD.d, FALSE );
@@ -1870,19 +1870,16 @@ static void DrawRoomWalls( wBool_t drawBackground )
 }
 
 
-int markerWidth=3;
 static void DrawMarkers( void )
 {
 	coOrd p0, p1;
 	p0.x = p1.x = oldMarker.x;
 	p0.y = mainD.orig.y;
 	p1.y = mainD.orig.y-BBORDER*mainD.scale/mainD.dpi;
-	DrawLine( &tempD, p0, p1, markerWidth, wDrawColorWhite );
 	DrawLine( &tempD, p0, p1, 0, markerColor );
 	p0.y = p1.y = oldMarker.y;
 	p0.x = mainD.orig.x;
 	p1.x = mainD.orig.x-LBORDER*mainD.scale/mainD.dpi;
-	DrawLine( &tempD, p0, p1, markerWidth, wDrawColorWhite );
 	DrawLine( &tempD, p0, p1, 0, markerColor );
 }
 
@@ -1940,7 +1937,6 @@ EXPORT void DrawRuler(
 	}
 	end = FindDistance( orig, pos1 );
 
-	DrawLine( d, pos0, pos1, markerWidth, wDrawColorWhite );
 	DrawLine( d, pos0, pos1, 0, color );
 
 	if (units == UNITS_METRIC) {
@@ -1974,7 +1970,6 @@ EXPORT void DrawRuler(
 				if (power==1000 || mm%(power*10) != 0) {
 					Translate( &p0, orig, a, mm/25.4 );
 					Translate( &p1, p0, aa, len*d->scale/mainD.dpi );
-					DrawLine( d, p0, p1, markerWidth, wDrawColorWhite );
 					DrawLine( d, p0, p1, 0, color );
 					if (!number || (d->scale > 40 && mm % skip != 0.0)) {
 						continue;
@@ -2064,7 +2059,6 @@ EXPORT void DrawRuler(
 				if(!skip) {
 					Translate( &p0, orig, a, inch+fraction/16.0 );
 					Translate( &p1, p0, aa, lengths[fraction]*d->scale/mainD.dpi );
-					DrawLine( d, p0, p1, markerWidth, wDrawColorWhite );
 					DrawLine( d, p0, p1, 0, color );
 				}
 				if (fraction == 0) {

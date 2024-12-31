@@ -193,16 +193,13 @@ EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track,
 			}
 		}
 
-		if ( GetCurrentCommand() != modifyCmdInx ||
-		     FALSE == QueryTrack( trk, Q_IS_TEXT ) ) {
-			p = *fp;
-			distance = trackCmds( GetTrkType(trk) )->distance( trk, &p );
-			if (fabs(distance) <= fabs(
-				    closestDistance)) { //Make the last (highest) preferred
-				closestDistance = distance;
-				closestTrack = trk;
-				closestPos = p;
-			}
+		p = *fp;
+		distance = trackCmds( GetTrkType(trk) )->distance( trk, &p );
+		if (fabs(distance) <= fabs(
+		            closestDistance)) { //Make the last (highest) preferred
+			closestDistance = distance;
+			closestTrack = trk;
+			closestPos = p;
 		}
 	}
 	if (closestTrack && closestDistance <0 ) { closestDistance = 0.0; }  //Turntable was closest - inside well
