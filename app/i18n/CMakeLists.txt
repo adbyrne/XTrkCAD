@@ -134,10 +134,8 @@ function(updatepofile locale)
 			)
 	endif()
 
-	file(MAKE_DIRECTORY ${mofile_dir} )
-	file(CHMOD ${mofile_dir}  ${i18n_BINARY_DIR}/${locale}
-		PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-		)
+	file(MAKE_DIRECTORY ${mofile_dir})
+
 	# If translator program was given, add target to edit .po files with it
 	if(xtc_translator)
 		add_custom_target(msgtranslate-${locale}
