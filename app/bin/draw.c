@@ -786,7 +786,7 @@ EXPORT void DrawBoxedString(
         ANGLE_T a)
 {
 	coOrd size, p[4], p0 = pos, p1, p2;
-	static int bw = 2, bh = 2, br = 1, bb = 1;
+	static int br = 0, bl = 1, bt = 2, bb = -1;
 	static double arrowScale = 0.5;
 	POS_T descent, ascent;
 	if (fs < 2 * d->scale) {
@@ -805,21 +805,22 @@ EXPORT void DrawBoxedString(
 #endif
 		DrawTextSize2(&mainD, text, fp, fs, TRUE, &size, &descent, &ascent);
 
-	p0.x -= size.x / 2.0;
-	p0.y -= size.y / 2.0;
+	if ( (style & BOX_POS_BOTTOM_LEFT) == 0 ) {
+		// p0 was pos of center, shift to bottom left corner
+		p0.x -= size.x / 2.0;
+		p0.y -= size.y / 2.0;
+	}
+	style &= ~BOX_POS_BOTTOM_LEFT;
+
 	if (style == BOX_NONE || d == &mapD) {
 		DrawString(d, p0, 0.0, text, fp, fs, color);
 		return;
 	}
-	size.x += bw * d->scale / d->dpi;
-	size.y += bh * d->scale / d->dpi;
-	p[0] = p0;
-	p[0].x -= br * d->scale / d->dpi;          	//Top of box
-	p[0].y += (bb * d->scale / d->dpi + ascent);
-	p[1].y = p[0].y;
-	p[2].y = p[3].y = p[0].y - size.y - descent;  //Bottom of box
-	p[1].x = p[2].x = p[0].x + size.x;
-	p[3].x = p[0].x;
+	p[0].x = p[3].x = p0.x - bl*d->scale/d->dpi;
+	p[2].x = p[1].x = p0.x + br*d->scale/d->dpi + size.x;
+	p[0].y = p[1].y = p0.y + bt*d->scale/d->dpi + ascent;
+	p[3].y = p[2].y = p0.y - bb*d->scale/d->dpi - descent;
+
 	d->options &= ~DC_DASH;
 	switch (style) {
 	case BOX_ARROW:
