@@ -793,13 +793,16 @@ wIndex_t wListGetIndex(	wControl_p b );
 void* wListGetItemContext(wControl_p b, wIndex_t inx);
 wBool_t wListGetItemSelected( wControl_p b, wIndex_t inx);
 wIndex_t wListGetSelectedCount( wControl_p b);
+unsigned int wListGetColumnCount(wControl_p listControl);
 void wListSelectAll(wControl_p bl);
 wBool_t wListSetValues( wControl_p b, wIndex_t row, const char* labelStr,
     wIcon_p bm, void* itemData);
 void wListDelete(wControl_p b, wIndex_t inx);
-int wListGetColumnWidths(wControl_p bl, int colCnt, wWinPix_t* colWidths);
-wIndex_t wListAddValue(wControl_p b, const char* labelStr, wIcon_p bm,
-    void* itemData);
+int wListGetColumnWidths(wControl_p bl, unsigned int count, wWinPix_t* colWidths);
+
+wIndex_t wListAddValue(wControl_p b,  wIcon_p bm, void* itemData, const char* labelStr );
+wIndex_t wListAddValueVar(wControl_p b, wIcon_p bm, void* itemData, const char* labelStr, ...);
+
 void wListSetSize(wControl_p bl, wWinPix_t w, wWinPix_t h);
 wIndex_t wListGetValues(wControl_p bl, char* labelStr, int labelSize,
     void** listDataRet, void** itemDataRet);

@@ -95,6 +95,38 @@ static void ChoicePush(long valL, void* dp)
 	}
 }
 
+static void ListPush(wIndex_t inx, const char* val, wIndex_t op,
+	void* dp, void* itemContext)
+{
+	paramData_p p = (paramData_p)dp;
+	long valL;
+
+	switch (p->type) {
+	case PD_LIST:
+	case PD_DROPLIST:
+	case PD_COMBOLIST:
+		//if (recordParamF && (p->option & PDO_NORECORD) == 0 && p->group->nameStr
+		//	&& p->nameStr) {
+		//	fprintf(recordParamF, "PARAMETER %s %s %d %s\n", p->group->nameStr, p->nameStr,
+		//		inx,
+		//		val);
+		//	fflush(recordParamF);
+		//}
+		if ((p->option & PDO_NOPSHUPD) == 0 && p->valueP) {
+			*(wIndex_t*)(p->valueP) = inx;
+		}
+		if ((p->option & PDO_NOPSHACT) == 0 && p->group->changeProc) {
+			valL = inx;
+			p->group->changeProc(p->group, (int)(p - p->group->paramPtr), &valL);
+		}
+		break;
+
+	default:
+		;
+	}
+}
+
+
 
 static void IntegerPush(const char* val, void* dp)
 {
@@ -104,7 +136,7 @@ static void IntegerPush(const char* val, void* dp)
 	const char* value;
 
 	if (strlen(val) == 1 && val[strlen(val) - 1] == '\n') {
-		value = wEntryGetValue((wEntry_p)p->control);
+		value = wEntryGetValue(p->control);
 		p->enter_pressed = TRUE;
 	}
 	else {
@@ -210,7 +242,7 @@ static void StringPush(const char* val, void* dp)
 	//	fflush(recordParamF);
 	//}
 	if (strlen(val) == 1 && val[strlen(val) - 1] == '\n') {
-		value = wEntryGetValue((wEntry_p)p->control);
+		value = wEntryGetValue(p->control);
 		p->enter_pressed = TRUE;
 	}
 	else {
@@ -313,7 +345,82 @@ CreateControlText(paramData_p pd, wControl_p parent, char* helpStr)
 
 #define LISTDEFAULTWIDTH 10
 
-static void CreateControl(
+static int
+GetDefaultColumnFormat(paramListData_t *listData, wWinPix_t* widths, wBool_t* justification)
+{
+	for (int column = 0; column < listData->colCnt; column++) {
+		justification[column] = listData->colWidths[column] < 0;
+		widths[column] = labs(listData->colWidths[column]);
+	}
+	return(listData->colCnt);
+}
+
+static int 
+GetUserColumnWidths(paramData_p paramData, int columns, wWinPix_t* widths)
+{
+	wWinPix_t colWidth;
+	DynString preference;
+	char* cp;
+
+	DynStringMalloc(&preference, 20);
+	DynStringPrintf(&preference, "%s-%s-%s", paramData->group->nameStr, paramData->nameStr, "columnwidths");
+
+	cp = wPrefGetString(prefSect, DynStringToCStr(&preference));
+	if (cp != NULL) {
+		for (int column = 0; column < columns; column++) {
+			char* cq;
+			colWidth = (wWinPix_t)strtol(cp, &cq, 10);
+			if (cp == cq) {
+				break;
+			}
+			widths[column] = colWidth;
+			cp = cq;
+		}
+	}
+
+	DynStringFree(&preference);
+
+	return(columns);
+}
+
+static wControl_p
+CreateFormattedList(wControl_p parent, paramData_p paramDataList, const char *helpString, unsigned x, unsigned y)
+{
+	wWinPix_t *columnWidths = NULL;
+	wBool_t* columnJustification = NULL;
+
+//	static wBool_t maxColCnt = 0;
+
+	paramListData_t* listDataP = (paramListData_t*)paramDataList->winData;
+
+	if (listDataP->colCnt > 1) {
+		int columns = listDataP->colCnt;
+		columnWidths = (wWinPix_t*)MyMalloc(columns * sizeof(*columnWidths));
+		columnJustification = (wBool_t*)MyMalloc(columns * sizeof(*columnJustification));
+
+		GetDefaultColumnFormat(listDataP, columnWidths, columnJustification);
+		GetUserColumnWidths(paramDataList, columns, columnWidths );
+	}
+
+	paramDataList->control = (wControl_p)wListCreate(parent, x, y, helpString, 
+		_(paramDataList->winLabel),
+		paramDataList->winOption, 
+		listDataP->number, 
+		listDataP->width, 
+		listDataP->colCnt,
+		columnWidths,
+		columnJustification,
+		listDataP->colTitles, NULL, ListPush, paramDataList);
+
+	if (listDataP->colCnt > 1) {
+		MyFree(columnWidths);
+		MyFree(columnJustification);
+	}
+
+	return(paramDataList->control);
+}
+
+static int CreateControl(
 	paramData_p pd,
 	char* helpStr,
 	unsigned x,
@@ -323,17 +430,12 @@ static void CreateControl(
 	const paramIntegerRange_t* integerRangeP;
 	const paramDrawData_t* drawDataP;
 	paramListData_t* listDataP;
+
 	const struct wIcon_t* iconP;
 
 	wControl_p win;
 	wWinPix_t w;
-	wWinPix_t colWidth;
-	static wWinPix_t* colWidths;
-	static wBool_t* colRightJust;
-	static wBool_t maxColCnt = 0;
-	int col;
-	const char* cp;
-	char* cq;
+
 	static wMenu_p menu = NULL;
 
 	if ((win = pd->group->win) == NULL) {
@@ -361,52 +463,15 @@ static void CreateControl(
 			pd);
 		break;
 	case PD_RADIO:
-		pd->control = (wControl_p)wRadioCreate(win, x, y, helpStr, _(pd->winLabel),
+		pd->control = wRadioCreate(win, x, y, helpStr, _(pd->winLabel),
 			pd->winOption, pd->winData, NULL, ChoicePush, pd);
 		break;
 	case PD_TOGGLE:
-		pd->control = (wControl_p)wToggleCreate(win, x, y, helpStr, _(pd->winLabel),
+		pd->control = wToggleCreate(win, x, y, helpStr, _(pd->winLabel),
 			pd->winOption, pd->winData, NULL, ChoicePush, pd);
 		break;
 	case PD_LIST:
-		listDataP = (paramListData_t*)pd->winData;
-		if (listDataP->colCnt > 1) {
-			if (maxColCnt < listDataP->colCnt) {
-				if (maxColCnt == 0) {
-					colWidths = (wWinPix_t*)MyMalloc(listDataP->colCnt * sizeof * colWidths);
-					colRightJust = (wBool_t*)MyMalloc(listDataP->colCnt * sizeof * colRightJust);
-				}
-				else {
-					colWidths = (wWinPix_t*)MyRealloc(colWidths,
-						listDataP->colCnt * sizeof * colWidths);
-					colRightJust = (wBool_t*)MyRealloc(colRightJust,
-						listDataP->colCnt * sizeof * colRightJust);
-				}
-				maxColCnt = listDataP->colCnt;
-			}
-			for (col = 0; col < listDataP->colCnt; col++) {
-				colRightJust[col] = listDataP->colWidths[col] < 0;
-				colWidths[col] = labs(listDataP->colWidths[col]);
-			}
-			sprintf(message, "%s-%s-%s", pd->group->nameStr, pd->nameStr, "columnwidths");
-			cp = wPrefGetString(prefSect, message);
-			if (cp != NULL) {
-				for (col = 0; col < listDataP->colCnt; col++) {
-					colWidth = (wWinPix_t)strtol(cp, &cq, 10);
-					if (cp == cq) {
-						break;
-					}
-					colWidths[col] = colWidth;
-					cp = cq;
-				}
-			}
-		}
-		//pd->control = (wControl_p)wListCreate(win, xx, yy, helpStr, _(pd->winLabel),
-		//	pd->winOption, listDataP->number, listDataP->width, listDataP->colCnt,
-		//	(listDataP->colCnt > 1 ? colWidths : NULL),
-		//	(listDataP->colCnt > 1 ? colRightJust : NULL),
-		//	listDataP->colTitles, NULL, ParamListPush, pd);
-		//listDataP->height = wControlGetHeight(pd->control);
+		pd->control = CreateFormattedList(win, pd, helpStr, x, y);
 		break;
 	case PD_DROPLIST:
 		w = pd->winData ? (wWinPix_t)VP2L(pd->winData) : (wWinPix_t)LISTDEFAULTWIDTH;
@@ -435,10 +500,10 @@ static void CreateControl(
 		break;
 	case PD_MENU:
 		menu = wMenuCreate(win, x, y, helpStr, _(pd->winLabel), pd->winOption);
-		pd->control = (wControl_p)menu;
+		pd->control = menu;
 		break;
 	case PD_MENUITEM:
-		pd->control = (wControl_p)wMenuPushCreate(menu, helpStr, _(pd->winLabel), 0,
+		pd->control = wMenuPushCreate(menu, helpStr, _(pd->winLabel), 0,
 			ParamMenuPush, pd);
 		break;
 	case PD_DRAW:

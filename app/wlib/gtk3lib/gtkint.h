@@ -528,7 +528,10 @@ GtkListStore *wlibNewListStore(int colCnt);
 void wlibListStoreSetPixbuf(GtkListStore *ls, GtkTreeIter *iter, GdkPixbuf *pixbuf);
 int wlibListStoreAddData(GtkListStore *ls, GdkPixbuf *pixbuf, wListItem_p id);
 int wlibListStoreUpdateValues(GtkListStore *ls, int row, char *labels, wIcon_p bm);
-
+void wlibListStoreAddRow(GtkListStore* listStore, wIcon_p icon, wListItem_p userData, const char* label);
+void wlibListStoreAppendRow(GtkListStore* store, GtkTreeIter* iter, wListItem_p data);
+void wlibListStoreSetIcon(GtkListStore* store, GtkTreeIter* iter, wIcon_p icon);
+void wlibListStoreSetData(GtkListStore* store, GtkTreeIter* iter, int column, const char* label);
 /* main.c */
 char *wlibGetAppName(void);
 GtkApplication *wlibGetApp(void);
@@ -651,19 +654,21 @@ void wlibAddTooltip(GtkWidget* widget, const char* field);
 void wlibHelpHideBalloon();
 
 /* treeview.c */
+wListItem_p wlibAllocateListItem(wControl_p b, const char* labelStr, void* itemData);
 void wlibTreeViewSetSelected(wControl_p b, int index);
 GtkTreeView *wlibNewTreeView(GtkListStore *ls, int showTitles, int multiSelection);
 int wlibTreeViewAddColumns(GtkTreeView *tv, int count);
 int wlibAddColumnTitles(GtkTreeView *tv, const char **titles);
-int wlibTreeViewAddData(GtkTreeView *tv, char *label, GdkPixbuf *pixbuf, 
-	wListItem_p userData);
-void wlibTreeViewAddRow(wControl_p b, char *label, wIcon_p bm, 
-	wListItem_p id_p);
+int wlibTreeViewAddData(GtkTreeView* tv, wIcon_p bm, wListItem_p userData, const char* labelStr);
+void wlibTreeViewAddRow(wControl_p b, wIcon_p bm, wListItem_p id_p, const char* labelStr);
 gboolean changeSelection(GtkTreeSelection *selection, GtkTreeModel *model, GtkTreePath *path, gboolean path_currently_selected, gpointer attributes);
+void wlibTreeViewShowIcon(GtkTreeView* tv);
 
 int wTreeViewGetCount(wControl_p b);
 void wTreeViewClear(wList_p b);
 void *wTreeViewGetItemContext(wControl_p b, int row);
+
+void wlibTreeSelectionChanged(GtkTreeSelection* selection, void* context);
 
 /* window.c */
 void wlibDoModal(wWin_p win0, wBool_t modal);

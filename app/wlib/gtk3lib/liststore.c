@@ -196,22 +196,8 @@ wlibListStoreUpdateIter(GtkListStore *ls, GtkTreeIter *iter, char *labels)
 	return (current+1);
 }
 
-/**
- * Add a pixbuf to the list store. So pixbuf is unref'ed so it will be freed
- * with the list store.
- *
- * \param ls IN list store
- * \param iter IN position
- * \param pixbuf IN pixbuf to add
- */
 
-void
-wlibListStoreSetPixbuf(GtkListStore *ls, GtkTreeIter *iter, GdkPixbuf *pixbuf)
-{
-	gtk_list_store_set(ls, iter, LISTCOL_BITMAP, pixbuf, -1);
-	g_object_ref_sink(pixbuf);
-	g_object_unref(pixbuf);
-}
+
 /**
  * Add a row to the list store
  *
@@ -220,26 +206,51 @@ wlibListStoreSetPixbuf(GtkListStore *ls, GtkTreeIter *iter, GdkPixbuf *pixbuf)
  * \returns number columns added
  */
 
-int
-wlibListStoreAddData(GtkListStore *ls, GdkPixbuf *pixbuf, wListItem_p id)
+void
+wlibListStoreAppendRow(GtkListStore* store, GtkTreeIter *iter, wListItem_p data)
 {
-	GtkTreeIter iter;
-	int count;
-
-	gtk_list_store_append(ls, &iter);
-	gtk_list_store_set(ls, &iter, LISTCOL_DATA, id, -1);
-
-	if (pixbuf) {
-		gtk_list_store_set(ls, &iter, LISTCOL_BITMAP, pixbuf, -1);
-		g_object_ref_sink(pixbuf);
-		g_object_unref(pixbuf);
-
-	}
-
-	count = wlibListStoreUpdateIter(ls, &iter, (char *)id->label);
-
-	return (count);
+	gtk_list_store_append(store, iter);
+	gtk_list_store_set(store, iter, LISTCOL_DATA, data, -1);
 }
+
+/**
+ * Add a pixbuf to the list store. The pixbuf is unref'ed so it will be freed
+ * with the list store.
+ *
+ * \param ls IN list store
+ * \param iter IN position
+ * \param pixbuf IN pixbuf to add
+ */
+
+void
+wlibListStoreSetIcon(GtkListStore* store, GtkTreeIter* iter, wIcon_p icon)
+{
+	GdkPixbuf *pixbuf = wlibMakePixbuf(icon);
+
+	gtk_list_store_set(store, iter, LISTCOL_BITMAP, pixbuf, -1);
+
+	g_object_unref(pixbuf);
+}
+
+void
+wlibListStoreSetData(GtkListStore* store, GtkTreeIter* iter, int column, const char* label )
+{
+	gtk_list_store_set(store, iter, LISTCOL_TEXT+column, label, -1);
+}
+
+//void
+//wlibListStoreAddRow(GtkListStore* listStore, wIcon_p icon, wListItem_p userData, const char* label)
+//{
+//	GtkTreeIter iter;
+//
+//	ListStoreAppendRow(listStore, &iter, userData);
+//
+//	if (icon) {
+//		ListStoreSetIcon(listStore, &iter, icon);
+//	}
+//
+//	ListStoreSetData(listStore, &iter, label);
+//}
 
 /**
  * Change a row in the list store. The passed strings are placed
@@ -268,10 +279,10 @@ wlibListStoreUpdateValues(GtkListStore *ls, int row, char *labels,
 	count = wlibListStoreUpdateIter(ls, &iter, labels);
 
 	if (bm) {
-		GdkPixbuf *pixbuf;
+		//GdkPixbuf *pixbuf;
 
-		pixbuf = wlibMakePixbuf(bm);
-		wlibListStoreSetPixbuf(ls, &iter, pixbuf);
+		//pixbuf = wlibMakePixbuf(bm);
+		wlibListStoreSetIcon(ls, &iter, bm);
 	}
 
 	return (count);

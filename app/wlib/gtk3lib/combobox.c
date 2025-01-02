@@ -144,16 +144,19 @@ void *wComboBoxGetItemContext(wControl_p b, wIndex_t inx)
 void wComboBoxAddValue(
         wControl_p b,
         char *text,
-        wControl_p attributes)
+        void *attributes)
 {
 	GtkTreeIter iter;
 	struct list *list = CONTROL_GET_ATTRIBUTES_PTR(b, list);
+	wListItem_p id_p;
+
+	id_p = wlibAllocateListItem(b, text, attributes);
 
 	gtk_list_store_append(list->listStore, &iter);	// append new row to tree store
 
 	gtk_list_store_set(list->listStore, &iter,
 	                   LISTCOL_TEXT, text,
-	                   LISTCOL_DATA, (void *)attributes,
+	                   LISTCOL_DATA, (void *)id_p,
 	                   -1);
 }
 

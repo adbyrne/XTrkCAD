@@ -17,6 +17,8 @@
 
 .toolbar-button,
 .toolbar-button-arrow {
+    min-width: 24px;
+    min-height: 24px;
     padding: 2px;
     padding-left: 4px;
     padding-right: 4px;
@@ -39,6 +41,7 @@
 .toolbar-button-arrow {
     padding: 0px;
     margin:0px;
+    min-width: 12px;
 }
 
 .toolbar-separator {

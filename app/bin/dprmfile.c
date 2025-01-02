@@ -52,7 +52,7 @@ static struct wFilSel_t * paramFile_fs;
 
 static wIcon_p indicatorIcons[ 2 ][PARAMFILE_MAXSTATE];
 
-static wWin_p paramFileW;
+static wControl_p paramFileW;
 
 static long paramFileSel = 0;
 
@@ -62,30 +62,29 @@ static void ParamUnloadSelectedFiles(void * action);
 static void ParamFileBrowse(void * junk);
 static void ParamFileSelectAll(void * junk);
 
-static paramListData_t paramFileListData = { 15, 370 };
+static wWinPix_t paramFileWidths[] = {20, 40};
+static char* paramFileTitles[] = {N_("Content"), N_("Path")};
+
+static paramListData_t paramFileListData = { 15, 370, 2, paramFileWidths, paramFileTitles };
 static char * paramFileLabels[] = { N_("Show File Names"), NULL };
 static paramData_t paramFilePLs[] = {
 #define I_PRMFILLIST	(0)
-#define paramFileL				((wList_p)paramFilePLs[I_PRMFILLIST].control)
-	{	PD_LIST, NULL, "inx", PDO_NOPREF | PDO_DLGRESIZE, &paramFileListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
-#define I_PRMFILTOGGLE	(1)
-	{	PD_TOGGLE, &paramFileSel, "mode", 0, paramFileLabels, NULL, BC_HORIZONTAL|BC_NOBORDER },
-#define I_MESSAGE (2)
-	{ PD_MESSAGE, "", "message", 0, I2VP(370) },
-    	{ PD_BUTTON, ParamFileSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
-#define I_PRMFILEFAVORITE (4)
+#define paramFileL				(paramFilePLs[I_PRMFILLIST].control)
+	{	PD_LIST, NULL, "inx", PDO_DLGRESIZE, &paramFileListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
+#define I_MESSAGE (1)
+	{ PD_MESSAGE, "", "message", 0, I2VP(37) },
+    { PD_BUTTON, ParamFileSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
+#define I_PRMFILEFAVORITE (3)
 	{   PD_BUTTON, ParamFileFavorite, "favorite", PDO_DLGCMDBUTTON, I2VP(TRUE), N_("Favorite")},
 	{	PD_BUTTON, ParamUnloadSelectedFiles, "unload", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_UNLOAD), 0L, FALSE },
-	{   PD_BUTTON, ParamRefreshSelectedFiles, "refresh", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_REFRESH), 0L, FALSE },
+	{   PD_BUTTON, ParamRefreshSelectedFiles, "reload", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_REFRESH), 0L, FALSE },
 	{	PD_BUTTON, DoSearchParams, "find", 0, NULL, N_("Library...") },
 	{	PD_BUTTON, ParamFileBrowse, "browse", 0, NULL, N_("Browse...") },
-
-
 };
 
-static paramGroup_t paramFilePG = { "prmfile", 0, paramFilePLs, COUNT( paramFilePLs ) };
+static paramGroup_t paramFilePG = { "prmfile", PGO_FULLDIALOGFROMBUILDER, paramFilePLs, COUNT( paramFilePLs ) };
 
-#define MESSAGETEXT ((wMessage_p)paramFilePLs[I_MESSAGE].control)
+#define MESSAGETEXT (paramFilePLs[I_MESSAGE].control)
 
 static dynArr_t *sortFiles;
 
@@ -160,10 +159,13 @@ void ParamFileListLoad(int paramFileCnt,  dynArr_t *paramFiles)
 			                 paramFileInfo.contents :
 			                 paramFileInfo.name);
 
-			wListAddValue(paramFileL,
-			              DynStringToCStr(&description),
-			              indicatorIcons[ paramFileInfo.favorite ][paramFileInfo.trackState],
-			              I2VP(sortedIndex[i]));
+			wListAddValueVar(paramFileL,
+				indicatorIcons[paramFileInfo.favorite][paramFileInfo.trackState],
+				I2VP(sortedIndex[i]),
+				paramFileInfo.contents,
+				paramFileInfo.name,
+				NULL);
+;
 
 			LOG1(log_params, ("ParamFileListLoad: = %s: %d\n", paramFileInfo.contents,
 			                  paramFileInfo.trackState))
@@ -174,11 +176,16 @@ void ParamFileListLoad(int paramFileCnt,  dynArr_t *paramFiles)
 	MyFree(sortedIndex);
 }
 
+/**
+ * \todo remove workaround for initial path. Problem was possibly caused by a bug in the Windows
+ * glib implementation. Action: retest with a current (late 2024 version)
+ * See https://gitlab.gnome.org/GNOME/glib/-/issues/3279
+ */
 
 static void ParamFileBrowse(void * junk)
 {
 	wMessageSetValue(MESSAGETEXT, "");
-	wFilSelect(paramFile_fs, GetParamFileDir());
+	wFilSelect(paramFile_fs, /*GetParamFileDir()*/ ".");
 	return;
 }
 
@@ -208,7 +215,7 @@ static void UpdateParamFileButton(void)
 
 	// walk through the whole list box
 	for (inx=0; inx<cnt; inx++) {
-		if (wListGetItemSelected((wList_p)paramFileL, inx)) {
+		if (wListGetItemSelected(paramFileL, inx)) {
 			// if item is selected, get status
 			fileInx = (wIndex_t)VP2L(wListGetItemContext(paramFileL, inx));
 
@@ -239,7 +246,7 @@ UpdateParamFileProperties( bool newState)
 
 	// walk through the whole list box
 	for (inx = 0; inx < cnt; inx++) {
-		if (wListGetItemSelected((wList_p)paramFileL, inx)) {
+		if (wListGetItemSelected(paramFileL, inx)) {
 			fileInx = (wIndex_t)VP2L(wListGetItemContext(paramFileL, inx));
 			SetParamFileFavorite(fileInx, newState);
 		}
@@ -279,7 +286,7 @@ ParamChangeSelectedFiles(unsigned paramFileChange)
 	cnt = wListGetCount(paramFileL);
 
 	for (inx = 0; inx < cnt; inx++) {
-		if (wListGetItemSelected((wList_p)paramFileL, inx)) {
+		if (wListGetItemSelected(paramFileL, inx)) {
 			fileInx = (wIndex_t)VP2L(wListGetItemContext(paramFileL, inx));
 
 			switch (paramFileChange) {
@@ -380,9 +387,6 @@ static void ParamFileDlgUpdate(
 	switch (inx) {
 	case I_PRMFILLIST:
 		UpdateParamFileButton();
-		break;
-	case I_PRMFILTOGGLE:
-		DoChangeNotification(CHANGE_PARAMS);
 		break;
 	}
 }

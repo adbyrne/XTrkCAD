@@ -789,10 +789,10 @@ void LoadLayerLists(void)
 		layerLabel = FormatLayerName(inx);
 
 		if (layerL) {
-			wListAddValue(layerL, layerLabel, NULL, NULL);
+			wComboBoxAddValue(layerL, layerLabel, NULL);
 		}
 
-		wListAddValue(setLayerL, layerLabel, NULL, NULL);
+		wComboBoxAddValue(setLayerL, layerLabel, NULL);
 		free(layerLabel);
 	}
 
@@ -2155,7 +2155,7 @@ void InitLayers(int cmdGroup)
 		}
 
 		layerName = FormatLayerName(i);
-		wListAddValue(setLayerL, layerName, NULL, I2VP(i));
+		wComboBoxAddValue(setLayerL, layerName,I2VP(i));
 		free(layerName);
 	}
 

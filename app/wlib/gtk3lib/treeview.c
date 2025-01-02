@@ -36,6 +36,27 @@
 
 #include "gtkint.h"
 
+wListItem_p 
+wlibAllocateListItem(wControl_p b, const char *labelStr, void *itemData)
+{
+	wListItem_p id_p;
+
+	id_p = (wListItem_p)g_malloc0(sizeof * id_p);
+	
+	id_p->itemData = itemData;
+	id_p->active = TRUE;
+
+	if (labelStr == NULL) {
+		labelStr = "";
+	}
+
+	id_p->label = g_strdup(labelStr);
+	id_p->listP = b;
+
+	return(id_p);
+}
+
+
 /**
  * Get the count of columns in list
  *
@@ -46,7 +67,7 @@
 int
 wTreeViewGetCount(wControl_p b)
 {
-	return(gtk_tree_view_get_n_columns(b->attributes.list.treeView));
+	return (gtk_tree_model_iter_n_children(GTK_TREE_MODEL(b->attributes.list.listStore), NULL));
 }
 
 
@@ -248,6 +269,18 @@ wlibAddColumnTitles(GtkTreeView *tv, const char **titles)
 	return i;
 }
 
+#define TREEVIEWCOL_BITMAP 0
+
+void
+wlibTreeViewShowIcon(GtkTreeView *tv)
+{
+	GtkTreeViewColumn* column;
+
+	// first column in list store has pixbuf
+	column = gtk_tree_view_get_column(tv, TREEVIEWCOL_BITMAP);
+	gtk_tree_view_column_set_visible(column, TRUE);
+}
+
 /**
  * Add text to the text columns of the tree view and update the context
  * information
@@ -259,25 +292,25 @@ wlibAddColumnTitles(GtkTreeView *tv, const char **titles)
  * \returns
  */
 
-int
-wlibTreeViewAddData(GtkTreeView *tv, char *label, GdkPixbuf *pixbuf,
-                    wListItem_p userData)
-{
-	GtkListStore *listStore = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(
-	                                  tv)));
+//int
+//wlibTreeViewAddData(GtkTreeView *tv, wIcon_p bm, wListItem_p userData, const char* label)
+//{
+//	GtkListStore* listStore = GTK_LIST_STORE(gtk_tree_view_get_model(tv));
+//
+//	wlibListStoreAddRow(listStore, bm, userData, label);
+//
+//	if (bm) {
+//		GtkTreeViewColumn *column;
+//
+//		// first column in list store has pixbuf
+//		column = gtk_tree_view_get_column(GTK_TREE_VIEW(tv), TREEVIEWCOL_BITMAP );
+//		gtk_tree_view_column_set_visible(column, TRUE);
+//	}
+//
+//	return 0;
+//}
 
-	wlibListStoreAddData(listStore, pixbuf, userData);
 
-	if (pixbuf) {
-		GtkTreeViewColumn *column;
-
-		// first column in list store has pixbuf
-		column = gtk_tree_view_get_column(GTK_TREE_VIEW(tv), 0);
-		gtk_tree_view_column_set_visible(column,
-		                                 TRUE);
-	}
-	return 0;
-}
 
 /**
  * Add a row to the tree view. As necessary the adjustment is update in
@@ -290,30 +323,15 @@ wlibTreeViewAddData(GtkTreeView *tv, char *label, GdkPixbuf *pixbuf,
  * \param id_p IN user attributes
  */
 
+
 void
-wlibTreeViewAddRow(wControl_p b, char *label, wIcon_p bm, wListItem_p id_p)
+wlibTreeViewAddRow(wControl_p control, wIcon_p bm, wListItem_p id_p, const char* label)
 {
-	GtkAdjustment *adj;
-	GdkPixbuf *pixbuf = NULL;
+	//struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(control, list);
 
-	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(b, list);
+	//wlibTreeViewAddData(lcontrol->treeView, bm, id_p, (char*)label);
 
-	if (bm) {
-		pixbuf = wlibMakePixbuf(bm);
-	}
-
-	wlibTreeViewAddData(lcontrol->treeView, (char *)label, pixbuf, id_p);
-
-	adj = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(b->widget));
-	lcontrol->last = gtk_tree_model_iter_n_children(gtk_tree_view_get_model(GTK_TREE_VIEW(
-	                  lcontrol->treeView)), NULL);
-
-	if (gtk_adjustment_get_upper(adj) < gtk_adjustment_get_step_increment(adj) *
-	    lcontrol->last+1) {
-		gtk_adjustment_set_upper(adj,
-		                         gtk_adjustment_get_upper(adj) +
-		                         gtk_adjustment_get_step_increment(adj));
-	}
+	//ScrollToLastLine(control);
 }
 
 /**
@@ -370,3 +388,49 @@ changeSelection(GtkTreeSelection *selection,
 	return TRUE;
 }
 
+void
+wlibTreeSelectionChanged(GtkTreeSelection* selection, void* context)
+{
+	GList* selectedRows;
+	GtkTreeModel* model;
+	wControl_p control = context;
+	struct list* list = CONTROL_GET_ATTRIBUTES_PTR(control, list);
+
+	model = gtk_tree_view_get_model(list->treeView);
+
+	selectedRows = gtk_tree_selection_get_selected_rows(selection, NULL);
+
+	for (unsigned int i = 0; i < g_list_length(selectedRows); i++) {
+		GtkTreeIter iter;
+		GValue value = { 0 };
+		wListItem_p id_p = NULL;
+		char* text;
+		unsigned row;
+
+		gtk_tree_model_get_iter(model, &iter, g_list_nth_data(selectedRows, i));
+		gtk_tree_model_get_value(model, &iter, LISTCOL_DATA, &value);
+		id_p = g_value_get_pointer(&value);
+
+		text = gtk_tree_path_to_string(g_list_nth_data(selectedRows, i));
+		row = (long)g_ascii_strtoll(text, NULL, 10);
+		g_free(text);
+
+		id_p->selected = TRUE;
+
+		if (id_p->selected) {
+			list->last = row;
+
+			if (list->valueP) {
+				*list->valueP = row;
+			}
+
+			if (list->action) {
+				list->action(row, id_p->label, 1, control->context, id_p->itemData);
+			}
+		}
+
+	}
+
+
+	g_list_free_full(selectedRows, (GDestroyNotify)gtk_tree_path_free);
+}

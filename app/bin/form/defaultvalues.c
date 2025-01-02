@@ -57,6 +57,51 @@ DefaultFromListValue(const char* section, const char* namePrimary, const char* s
 	}
 }
 
+// see https://stackoverflow.com/questions/8257714/how-can-i-convert-an-int-to-a-string-in-c
+// for explanation of the following macro
+#define INT_DECIMAL_STRING_SIZE(int_type) ((CHAR_BIT*sizeof(int_type)-1)*10/33+3)
+
+static void
+FormatWidthsList(unsigned count, wWinPix_t* widths, DynString *output)
+{
+	DynString formattedWidths;
+
+	DynStringMalloc(&formattedWidths, 20);
+
+	for (unsigned int col = 0; col < count; col++) {
+		char buffer[INT_DECIMAL_STRING_SIZE(wWinPix_t) + sizeof(' ')];
+
+		sprintf(buffer, "%ld ", widths[col]);
+
+		DynStringCatCStr(output, buffer);
+	}
+	
+	return;
+}
+
+static void
+SaveListColumnWidths(char *section, paramData_p listData)
+{
+	paramListData_t *listDataP = (paramListData_t*)listData->winData;
+
+	if (listData->control) {
+		DynString columnWidthString;
+		wWinPix_t* colWidths = NULL;
+		unsigned int count = wListGetColumnCount(listData->control);
+
+		colWidths = (wWinPix_t*)MyMalloc(count * sizeof( wWinPix_t));
+		wListGetColumnWidths(listData->control, count, colWidths);
+
+		DynStringMalloc(&columnWidthString, 20);
+
+		FormatWidthsList(count, colWidths, &columnWidthString);
+		wPrefSetString(section, "columnwidths", DynStringToCStr(&columnWidthString));
+
+		DynStringFree(&columnWidthString);
+		MyFree(colWidths);
+	}
+}
+
 static
 CopyCStringtoDynString(DynString* destination, const char* cstring)
 {
@@ -118,6 +163,7 @@ FormLoadDefaultValues(paramGroup_p pg)
 				}
 				break;
 			case PD_LIST:
+				/** \todo Load column widths from preferences */
 			case PD_COMBOLIST:
 				if ((p->option & PDO_LISTINDEX)) {
 					DefaultFromListIndex(pg->nameStr, p->nameStr, prefSectAlternative, 
@@ -181,7 +227,7 @@ FormSaveDefaultValues(paramGroup_p pg)
 		paramData_p p = (pg->paramPtr) + i;
 		char prefNamePrimary[STR_SHORT_SIZE];
 
-		if (p->valueP == NULL || p->nameStr == NULL ) {
+		if (/*p->valueP == NULL || */p->nameStr == NULL) { /** \todo check for valueP == NULL */
 			continue;
 		}
 		if ((p->option & PDO_DLGIGNORE)|| (p->option & PDO_NOPREF)) {
@@ -197,30 +243,8 @@ FormSaveDefaultValues(paramGroup_p pg)
 			wPrefSetInteger(pg->nameStr, p->nameStr, *(long*)p->valueP);
 			break;
 		case PD_LIST:
-			//listDataP = (paramListData_t*)p->winData;
-			//if (p->control && listDataP->colCnt > 0) {
-			//	if (maxColCnt < listDataP->colCnt) {
-			//		if (maxColCnt == 0) {
-			//			colWidths = (wWinPix_t*)MyMalloc(listDataP->colCnt * sizeof * colWidths);
-			//		}
-			//		else {
-			//			colWidths = (wWinPix_t*)MyRealloc(colWidths,
-			//				listDataP->colCnt * sizeof * colWidths);
-			//		}
-			//		maxColCnt = listDataP->colCnt;
-			//	}
-			//	len = wListGetColumnWidths((wList_p)p->control, listDataP->colCnt, colWidths);
-			//	cp = message;
-			//	for (col = 0; col < len; col++) {
-			//		sprintf(cp, "%ld ", colWidths[col]);
-			//		cp += strlen(cp);
-			//	}
-			//	*cp = '\0';
-			//	len = strlen(prefNamePrimary);
-			//	strcpy(prefNamePrimary + len, "-columnwidths");
-			//	wPrefSetString(prefSect, prefNamePrimary, message);
-			//	prefNamePrimary[len] = '\0';
-			//}
+			SaveListColumnWidths(pg->nameStr, p);
+			//no break!
 		case PD_DROPLIST:
 		case PD_COMBOLIST:
 			//if ((p->option & PDO_LISTINDEX)) {
