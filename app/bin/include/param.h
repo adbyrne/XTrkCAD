@@ -182,7 +182,7 @@ typedef void (*paramLayoutProc)( paramData_t *, int, wWinPix_t, wWinPix_t *,
                                  wWinPix_t * );
 typedef void (*paramActionOkProc)( void * );
 typedef void (*paramActionCancelProc)( wControl_p );
-typedef void (*paramChangeProc)( paramGroup_p, int, void * );
+typedef wBool_t (*paramChangeProc)( paramGroup_p, int, void * );
 
 typedef struct paramGroup_t {
 	char * nameStr;

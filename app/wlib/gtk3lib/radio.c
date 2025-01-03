@@ -145,6 +145,7 @@ static int radioChoice(
  *  * ### Usage in dialogs
  *
  * - Runtime: yes
+ * - Builder: yes
  *
  * ### Options
  * BC_HORIZONTAL
@@ -187,6 +188,7 @@ wControl_p wRadioCreate(
 
 	if (ISDEFINEDINBUILDER(parent)) {
 		/** \todo use builder */
+		b->widget = wlibWidgetFromIdWarn(parent, "fit");
 
 	} else {
 		GtkWidget* newRadioButton = NULL;

@@ -52,9 +52,14 @@ static paramData_t tipPLs[] = {
 	{   PD_MESSAGE, N_("Did you know..."), "mess1", 0, NULL, NULL, BM_LARGE },
 	{   PD_TEXT, NULL, "text", PDO_DLGRESIZE, &tipTextData, NULL, BO_READONLY|BT_TOP|BT_CHARUNITS },
 	{   PD_BUTTON, ShowTip, "prev", PDO_DLGRESETMARGIN, NULL, N_("Previous Tip"), 0L, I2VP(SHOWTIP_FORCESHOW | SHOWTIP_PREVTIP) },
+#define I_TIPPREV (2)
 	{   PD_BUTTON, ShowTip, "next", PDO_DLGHORZ, NULL, N_("Next Tip"), 0L, I2VP(SHOWTIP_FORCESHOW | SHOWTIP_NEXTTIP) },
+#define I_TIPNEXT (3)
 	{   PD_TOGGLE, &showTipAtStart, "showatstart", PDO_DLGCMDBUTTON, tipLabels, NULL, BC_NOBORDER }
 };
+
+#define PREVIOUSBUTTON ((tipPLs[I_TIPPREV].control))
+#define NEXTBUTTON (tipPLs[I_TIPNEXT].control)
 
 static paramGroup_t tipPG = { "tip", PGO_FULLDIALOGFROMBUILDER, tipPLs, COUNT( tipPLs ) };
 
@@ -83,9 +88,9 @@ static void CreateTipW( void )
 	if (tipF == NULL) {
 		DYNARR_APPEND( char *, tips_da, 1 );
 		tips(0) = N_("No tips are available");
-		/*	TODO: enable buttons only if tips are available
-				wControlActive( prev, FALSE );
-				wControlActive( next, FALSE ); */
+
+		wControlActive( PREVIOUSBUTTON, FALSE );
+		wControlActive( NEXTBUTTON, FALSE ); 
 	} else {
 		/* read all the tips from the file */
 		while (fgets( buff, sizeof buff, tipF )) {

@@ -230,10 +230,12 @@ static void FloatPush(const char* val, void * dp)
 }
 
 
-static void StringPush(const char* val, void* dp)
+static bool StringPush(const char* val, void* dp)
 {
 	paramData_p p = (paramData_p)dp;
 	const char* value;
+	wBool_t result = FALSE;
+
 	//	wBool_t bInvalid = p->bInvalid;
 	//if (recordParamF && (p->option & PDO_NORECORD) == 0 && p->group->nameStr
 	//	&& p->nameStr) {
@@ -278,9 +280,11 @@ static void StringPush(const char* val, void* dp)
 	if ((p->option & PDO_NOPSHACT) == 0 && p->group->changeProc)
 		// CAST_AWAY_CONST: param 3 should be const but its a big change
 	{
-		p->group->changeProc(p->group, (int)(p - p->group->paramPtr),
+		result = p->group->changeProc(p->group, (int)(p - p->group->paramPtr),
 			CAST_AWAY_CONST value);
 	}
+
+	return(result);
 }
 
 
