@@ -1211,6 +1211,7 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	}
 	LOG1(log_init, ( "drawInit\n" ))
 	DrawInit(initialZoom);
+	//MainProc( mainW, wResize_e, NULL, NULL );
 
 	MacroInit();
 
