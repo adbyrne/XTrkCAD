@@ -16,16 +16,17 @@
 #define BG_TRKMOD		(5)
 #define BG_TRKGRP		(6)
 #define BG_MISCCRT		(7)
-#define BG_RULER		(18)
+#define BG_RULER		(8)
 #define BG_LAYER		(9)
 #define BG_HOTBAR		(10)
 #define BG_SNAP			(11)
 #define BG_TRAIN		(12)
-#define BG_COUNT		(13)
-#define BG_FILE			(14)
-#define BG_CONTROL		(15)
-#define BG_EXPORTIMPORT (16)
-#define BG_PRINT		(17)
+#define BG_FILE			(13)
+#define BG_CONTROL		(14)
+#define BG_EXPORTIMPORT		(15)
+#define BG_PRINT		(16)
+// This must be the last item:
+#define BG_LAST			(17)
 
 extern void InitToolbar(void);
 extern void ToolbarLayout(void* data);

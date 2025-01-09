@@ -115,7 +115,7 @@ static struct buttonGroups allToolbarGroups[] = {
 	{NULL, 0L}
 };
 
-#define COUNTTOOLBARGROUPS (COUNT(allToolbarGroups)-1)
+#define COUNTTOOLBARGROUPS (BG_LAST)
 
 // toolbar options dialog
 static wWin_p toolbarW;
