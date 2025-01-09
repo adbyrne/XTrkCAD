@@ -604,6 +604,7 @@ static void DoProfilePrint(void * junk)
 	wFont_p fp;
 	coOrd screenSize;
 	coOrd textsize;
+	double topMargin, rightMargin, bottomMargin, leftMargin;
 
 	if (!wPrintDocStart(_("Profile"), 1, &copies)) {
 		return;
@@ -614,6 +615,10 @@ static void DoProfilePrint(void * junk)
 	}
 	printProfileD.dpi = wDrawGetDPI(printProfileD.d);
 	wPrintGetPageSize(&w, &h);
+	wPrintGetMargins( &topMargin, &rightMargin,
+			  &bottomMargin, &leftMargin );
+	w -= (leftMargin+rightMargin);
+	h -= (topMargin+bottomMargin);
 	printProfileD.orig.x = -PBL(printProfileFontSize);
 	printProfileD.orig.y = -PBB(printProfileFontSize);
 	printProfileD.angle = 0.0;
@@ -871,7 +876,7 @@ DoProfileReset(void *junk)
 static void
 DoProfileChange(void *junk)
 {
-	DestroyCopyOfProfileElements();
+	CreateCopyProfileElements();
 	TempRedraw();
 }
 
