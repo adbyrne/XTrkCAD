@@ -164,7 +164,7 @@ void DoGroup( void * unused );
 
 /* dcmpnd.c */
 void DoRefreshCompound( void * unused );
-wIndex_t FindListItemByContext( wList_p, void *);
+wIndex_t FindListItemByContext( wControl_p control, void *context);
 
 
 /* cturnout.c */
@@ -196,7 +196,7 @@ turnoutInfo_t * CreateNewStructure( char *, char *, wIndex_t, trkSeg_p,
                                     BOOL_T );
 enum paramFileState	GetStructureCompatibility(int paramFileIndex,
                 SCALEINX_T scaleIndex);
-turnoutInfo_t * StructAdd( long, SCALEINX_T, wList_p, coOrd * );
+turnoutInfo_t * StructAdd( long, SCALEINX_T, wControl_p, coOrd * );
 STATUS_T CmdStructureAction( wAction_t, coOrd );
 BOOL_T StructLoadCarDescList( wList_p );
 void DeleteStructures(int fileIndex);

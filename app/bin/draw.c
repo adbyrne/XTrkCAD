@@ -2951,6 +2951,8 @@ static paramDrawData_t mapDrawData = { 50, 50, MapRedraw, DoMapPan, &mapD };
 static paramData_t mapPLs[] = {
 	{	PD_DRAW, NULL, "canvas", PDO_DLGRESIZE, &mapDrawData }
 };
+
+#define MAPCANVASCONTROL mapPLs[0].control
 static paramGroup_t mapPG = { "map", PGO_NODEFAULTPROC | PGO_FULLDIALOGFROMBUILDER, mapPLs, COUNT( mapPLs ) };
 
 
@@ -3075,7 +3077,7 @@ EXPORT void DrawInit( int initialZoom )
 	/**  \todo Create map */
 	mapW = ParamCreateDialog( &mapPG, MakeWindowTitle(_("Map")), NULL, NULL, ParamCancel_Null,
 	                          FALSE, NULL, F_RESIZE, NULL );
-	mapD.d = mapW;
+	mapD.d = MAPCANVASCONTROL;
 	//ChangeMapScale();
 
 	AddPlaybackProc( "MOUSE ", (playbackProc_p)PlaybackMain, NULL );

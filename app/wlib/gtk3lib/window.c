@@ -453,10 +453,11 @@ wBool_t wWinIsMaximized(wWin_p win)
  */
 
 void wWinSetTitle(
-    wWin_p win,		/* Window */
+    wControl_p win,		/* Window */
+
     const char * title)		/* New title */
 {
-    gtk_window_set_title(GTK_WINDOW(win->gtkwin), title);
+    gtk_window_set_title(win->widget, title);
 }
 
 /**

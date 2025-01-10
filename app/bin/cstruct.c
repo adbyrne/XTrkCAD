@@ -58,7 +58,7 @@ static drawCmd_t structureD = {
 static wIndex_t structureHotBarCmdInx;
 static wIndex_t structureInx;
 static long hideStructureWindow;
-static void RedrawStructure( wDraw_p d, void * context, wWinPix_t x,
+static void RedrawStructure( wControl_p d, void * context, wWinPix_t x,
                              wWinPix_t y );
 
 static wWinPix_t structureListWidths[] = { 80, 80, 220 };
@@ -68,31 +68,26 @@ static const char * hideLabels[] = { N_("Hide"), NULL };
 static paramDrawData_t structureDrawData = { 490, 200, RedrawStructure, NULL, &structureD };
 static paramData_t structurePLs[] = {
 #define I_LIST	(0)
-#define structureListL	((wList_p)structurePLs[I_LIST].control)
+#define structureListL	(structurePLs[I_LIST].control)
 	{	PD_LIST, &structureInx, "list", PDO_NOPREF|PDO_DLGRESIZEW, &listData, NULL, BL_DUP },
 #define I_DRAW	(1)
 	{	PD_DRAW, NULL, "canvas", PDO_NOPSHUPD|PDO_DLGUNDERCMDBUTT|PDO_DLGRESIZE, &structureDrawData, NULL, 0 },
 #define I_HIDE	(2)
 	{	PD_TOGGLE, &hideStructureWindow, "hide", PDO_DLGCMDBUTTON, hideLabels, NULL, BC_NOBORDER },
 #define I_MSGSCALE		(3)
-	{	PD_MESSAGE, NULL, NULL, 0, I2VP(80) },
+	{	PD_MESSAGE, NULL, "mess1", 0, I2VP(80)},
 #define I_MSGWIDTH		(4)
-	{	PD_MESSAGE, NULL, NULL, 0, I2VP(80) },
+	{	PD_MESSAGE, NULL, "mess2", 0, I2VP(80) },
 #define I_MSGHEIGHT		(5)
-	{	PD_MESSAGE, NULL, NULL, 0, I2VP(80) }
+	{	PD_MESSAGE, NULL, "mess3", 0, I2VP(80) }
 };
-static paramGroup_t structurePG = { "structure", 0, structurePLs, COUNT( structurePLs ) };
+static paramGroup_t structurePG = { "structure", PGO_FULLDIALOGFROMBUILDER, structurePLs, COUNT( structurePLs ) };
 
-
-
 /****************************************
  *
  * STRUCTURE LIST MANAGEMENT
  *
  */
-
-
-
 
 EXPORT turnoutInfo_t * CreateNewStructure(
         char * scale,
@@ -319,7 +314,7 @@ static BOOL_T ReadStructureParam(
 }
 
 
-EXPORT turnoutInfo_t * StructAdd( long mode, SCALEINX_T scale, wList_p list,
+EXPORT turnoutInfo_t * StructAdd( long mode, SCALEINX_T scale, wControl_p list,
                                   coOrd * maxDim )
 {
 	wIndex_t inx;
@@ -355,7 +350,7 @@ EXPORT turnoutInfo_t * StructAdd( long mode, SCALEINX_T scale, wList_p list,
 	return to1;
 }
 
-
+
 /****************************************
  *
  * GENERIC FUNCTIONS
@@ -505,7 +500,7 @@ static paramData_t pierPLs[] = {
 	{	PD_COMBOLIST, &pierListInx, "inx", 0, I2VP(50), N_("Pier Number") }
 };
 static paramGroup_t pierPG = { "structure-pier", 0, pierPLs, COUNT( pierPLs ) };
-#define pierL ((wList_p)pierPLs[0].control)
+#define pierL (pierPLs[0].control)
 
 static void ShowPierL( void )
 {
@@ -539,7 +534,6 @@ static void ShowPierL( void )
 	}
 }
 
-
 /*****************************************
  *
  *	 Structure Dialog
@@ -548,7 +542,7 @@ static void ShowPierL( void )
 
 static void NewStructure();
 static coOrd maxStructureDim;
-static wWin_p structureW;
+static wControl_p structureW;
 
 
 static void RescaleStructure( void )
@@ -609,7 +603,7 @@ static void structureChange( long changes )
 
 
 
-static void RedrawStructure( wDraw_p d, void * context, wWinPix_t x,
+static void RedrawStructure( wControl_p d, void * context, wWinPix_t x,
                              wWinPix_t y )
 {
 	RescaleStructure();
@@ -633,19 +627,21 @@ static void RedrawStructure( wDraw_p d, void * context, wWinPix_t x,
 }
 
 
-static void StructureDlgUpdate(
+static wBool_t StructureDlgUpdate(
         paramGroup_p pg,
         int inx,
         void * valueP )
 {
 	turnoutInfo_t * to;
-	if ( inx != I_LIST ) { return; }
-	to = (turnoutInfo_t*)wListGetItemContext( (wList_p)pg->paramPtr[inx].control,
+	if ( inx != I_LIST ) { return(0); }
+	to = (turnoutInfo_t*)wListGetItemContext( pg->paramPtr[inx].control,
 	                (wIndex_t)*(long*)valueP );
 	NewStructure();
 	curStructure = to;
 	ShowPierL();
 	RedrawStructure( structureD.d, NULL, 0, 0 );
+
+	return(0);
 }
 
 
@@ -655,8 +651,6 @@ static void DoStructOk( void )
 	Reset();
 }
 
-
-
 /****************************************
  *
  * GRAPHICS COMMANDS
@@ -1028,7 +1022,7 @@ static STATUS_T CmdStructure(
 		if (structureW == NULL) {
 			structureW = ParamCreateDialog( &structurePG, MakeWindowTitle(_("Structure")),
 			                                _("Close"), (paramActionOkProc)DoStructOk,
-			                                ParamCancel_Null, TRUE, NULL,
+			                                NULL, TRUE, NULL,
 			                                F_RESIZE,
 			                                StructureDlgUpdate );
 			RegisterChangeNotification( structureChange );

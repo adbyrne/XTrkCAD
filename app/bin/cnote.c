@@ -33,7 +33,7 @@ static wControl_p noteW;
 static paramTextData_t noteTextData = { 300, 150 };
 static paramData_t notePLs[] = {
 #define I_NOTETEXT		(0)
-#define noteT			((wText_p)notePLs[I_NOTETEXT].control)
+#define noteT			(notePLs[I_NOTETEXT].control)
 	{	PD_TEXT, NULL, "text", PDO_DLGRESIZE, &noteTextData }
 };
 static paramGroup_t notePG = { "note", PGO_FULLDIALOGFROMBUILDER, notePLs, COUNT( notePLs ) };

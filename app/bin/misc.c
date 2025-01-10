@@ -445,7 +445,7 @@ EXPORT bool Confirm(char * label2, doSaveCallBack_p after)
 	if (changed) {
 		rc = wNotice3(_("Save changes to the layout design before closing?\n\n"
 		                "If you don't save now, your unsaved changes will be discarded."),
-		              _("&Save"), _("&Cancel"), _("&Don't Save"));
+		              _("_Save"), _("_Cancel"), _("_Don't Save"));
 	}
 
 	switch (rc) {

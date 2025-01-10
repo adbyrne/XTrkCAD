@@ -950,15 +950,15 @@ EXPORT void CreateMenus(void)
 	/*
 	 * FILE MENU
 	 */
-	MiscMenuItemCreate(fileM, NULL, "clear", _("&New ..."), ACCL_NEW,
+	MiscMenuItemCreate(fileM, NULL, "clear", _("_New ..."), ACCL_NEW,
 	                   DoClear, 0, NULL);
-	wMenuPushCreate(fileM, "load", _("&Open ..."), ACCL_OPEN,
+	wMenuPushCreate(fileM, "load", _("_Open ..."), ACCL_OPEN,
 	                ChkLoad, NULL);
 	wMenuSeparatorCreate(fileM);
 
-	wMenuPushCreate(fileM, "save", _("&Save"), ACCL_SAVE,
+	wMenuPushCreate(fileM, "save", _("_Save"), ACCL_SAVE,
 	                DoSave, NULL);
-	wMenuPushCreate(fileM, "saveAs", _("Save &As ..."), ACCL_SAVEAS,
+	wMenuPushCreate(fileM, "saveAs", _("Save _As ..."), ACCL_SAVEAS,
 	                DoSaveAs, NULL);
 	wMenuPushCreate(fileM, "revert", _("Revert"), ACCL_REVERT,
 	                ChkRevert, NULL);

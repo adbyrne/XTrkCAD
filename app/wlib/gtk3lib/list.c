@@ -520,33 +520,46 @@ AddDataToRow(struct list* lcontrol, GtkTreeIter* iterPointer, const char* labelS
 	}
 }
 
-/**
- * Adds a entry to the list with label. This is a wrapper for wListAddValueVar in case only a 
- * single label is required.
- *
- * \param b		IN widget
- * \param bm	IN Entry bitmap
- * \param itemData IN User context
- * \param labelStr IN label
- * 
- * \returns number of rows
- */
-
-wIndex_t wListAddValue(
-        wControl_p b,
-		wIcon_p bm,
-		void* itemInfo,
-        const char * labelStr )
+static void
+AddDataArrayToRow(struct list* lcontrol, GtkTreeIter* iterPointer, char **data)
 {
-	wIndex_t rows = 0;
+	char* value = *data;
+	int column = 0;
 
-	rows = wListAddValueVar(b, bm, itemInfo, labelStr, NULL);
-
-	return(rows);
+	while (value) {
+		wlibListStoreSetData(lcontrol->listStore, iterPointer, column, value);
+		column++;
+		value = data[column];
+	}
 }
 
+wIndex_t
+wListAddValuesArr(wControl_p b,
+	wIcon_p bm,
+	void* itemInfo,
+	char** values)
+{
+	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(b, list);
+	GtkTreeIter iter;
+
+	g_assert(b != NULL);
+	g_assert(b->type == B_LIST);
+
+	iter = NewListRow(b, values[0], itemInfo);
+
+	AddIconToRow(lcontrol, &iter, bm);
+	AddDataArrayToRow(lcontrol, &iter, values);
+
+	ScrollToLastLine(b);
+
+	return(GetRowCount(lcontrol) - 1);
+}
+
+
+
+
 /**
- * Add a row to a list having several columns. Each string is added to a column. Columns are 
+ * Add a row to a list having several columns. Each string is added to a additionalValues. Columns are 
  * expected to be consecutive.
  * 
  * \param b		IN widget
@@ -564,26 +577,72 @@ wIndex_t wListAddValueVar(
 	const char* labelStr,
 	...)
 {
-	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(b, list);
-	GtkTreeIter iter;
 	va_list arguments;
-	int column = 0;
+	unsigned additionalValues = 0;
+	char** data = NULL;
+	wIndex_t rowCount = 0;
 
 	g_assert(b != NULL);
 	g_assert(b->type == B_LIST);
 
-	iter = NewListRow(b, labelStr, itemInfo);
-
-	AddIconToRow(lcontrol, &iter, bm);
-
 	va_start(arguments, labelStr);
-	AddDataToRow(lcontrol, &iter, labelStr, arguments);
+	while (va_arg(arguments, char *)) {
+		additionalValues++;
+	}
 	va_end(arguments);
 
-	ScrollToLastLine(b);
+	//add 2 as array will hold labelStrplus terminating NULL
+	data = g_malloc0((additionalValues+2) * sizeof(char*));
+	if (data) {
+		data[0] = (char *)labelStr;
+		va_start(arguments, labelStr);
+		for (unsigned i = 1; i <= additionalValues; i++) {
+			char* arg = va_arg(arguments, char*);
+			data[i] = arg;
+		}
+		va_end(arguments);
 
-	return(GetRowCount(lcontrol) - 1);
+		rowCount = wListAddValuesArr(b, bm, itemInfo, data);
+
+		g_free(data);
+	}
+
+	return(rowCount);
 }
+
+/**
+ * Adds a entry to the list with label. In case the labelStr holds tab-separated values these
+ * are split into an NULL terminated array
+ *
+ * \param b		IN widget
+ * \param bm	IN Entry bitmap
+ * \param itemData IN User context
+ * \param labelStr IN label
+ *
+ * \returns number of rows
+ */
+
+wIndex_t wListAddValue(
+	wControl_p b,
+	const char* labelStr,
+	wIcon_p bm,
+	void* itemInfo)
+{
+	wIndex_t rowCount;
+	gchar** data;
+
+	g_assert(b != NULL);
+	g_assert(b->type == B_LIST);
+
+	data = g_strsplit(labelStr, "\t", -1);
+
+	rowCount = wListAddValuesArr(b, bm, itemInfo, data);
+
+	g_strfreev(data);
+
+	return(rowCount);
+}
+
 
 /**
  * Set the size of the list

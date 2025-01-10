@@ -636,10 +636,13 @@ draw_realize(GtkWidget* widget,
 
 /**
  * Create a drawing area
+ * 
+ * Size and position information is ignored when creating the area from builder.
+ * This are set by the layout engine in GTK3
  *
  * ### Usage in dialogs
  *
- * - Generated: no
+ * - Runtime: no
  * - Builder: yes
  *
  * ### Options

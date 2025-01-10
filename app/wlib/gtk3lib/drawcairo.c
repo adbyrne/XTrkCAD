@@ -211,7 +211,7 @@ static cairo_t* gtkDrawCreateCairoContext(
 	}
 	cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
 	GdkRGBA gcolor;
-	//bd->lastColor = GtkDrawSetColor( cairo, color, &gcolor );
+	/*bd->lastColor = */GtkDrawSetColor(cairo, color, &gcolor);
 	cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
 
 	//if (bd->clip_set) {
@@ -869,8 +869,7 @@ void wDrawClearTemp(wControl_p drawingArea)
 	}
 }
 
-void wDrawClear(
-        wControl_p drawingArea )
+void wDrawClear( wControl_p drawingArea )
 {
 	if ( iDrawLog >= 1 ) {
 		printf( "%ld: wDrawClear\n", lDrawCnt++  );
@@ -879,17 +878,27 @@ void wDrawClear(
 	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
 	g_assert(drawingArea->type == B_DRAW);
 
-	GtkAllocation allocation;
-	gtk_widget_get_allocation(drawingArea->widget, &allocation);
+	cairo_t* cairo;
 
-	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid,
-	                 wDrawColorWhite, 0);
-	cairo_move_to(cairo, 0, 0);
-	cairo_rel_line_to(cairo, allocation.width, 0);
-	cairo_rel_line_to(cairo, 0, allocation.height);
-	cairo_rel_line_to(cairo, -allocation.width, 0);
-	cairo_fill(cairo);
-	gtkDrawDestroyCairoContext(cairo);
+	cairo = cairo_create(bd->surface);
+
+	/* Set surface to opaque color (r, g, b) */
+	cairo_set_source_rgb(cairo, 128,128,128);
+	cairo_paint(cairo);
+
+	cairo_destroy(cairo);
+
+	//GtkAllocation allocation;
+	//gtk_widget_get_allocation(drawingArea->widget, &allocation);
+
+	//cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid,
+	//                 wDrawColorWhite, 0);
+	//cairo_move_to(cairo, 0, 0);
+	//cairo_rel_line_to(cairo, allocation.width, 0);
+	//cairo_rel_line_to(cairo, 0, allocation.height);
+	//cairo_rel_line_to(cairo, -allocation.width, 0);
+	//cairo_fill(cairo);
+	//gtkDrawDestroyCairoContext(cairo);
 	gtk_widget_queue_draw(drawingArea->widget);
 	wDrawClearTemp(drawingArea);
 }

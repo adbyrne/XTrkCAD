@@ -800,7 +800,7 @@ wBool_t wListSetValues( wControl_p b, wIndex_t row, const char* labelStr,
 void wListDelete(wControl_p b, wIndex_t inx);
 int wListGetColumnWidths(wControl_p bl, unsigned int count, wWinPix_t* colWidths);
 
-wIndex_t wListAddValue(wControl_p b,  wIcon_p bm, void* itemData, const char* labelStr );
+wIndex_t wListAddValue(wControl_p b, const char* labelStr,  wIcon_p bm, void* itemData );
 wIndex_t wListAddValueVar(wControl_p b, wIcon_p bm, void* itemData, const char* labelStr, ...);
 
 void wListSetSize(wControl_p bl, wWinPix_t w, wWinPix_t h);

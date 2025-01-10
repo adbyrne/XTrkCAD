@@ -424,6 +424,48 @@ CreateFormattedList(wControl_p parent, paramData_p paramDataList, const char *he
 	return(paramDataList->control);
 }
 
+static void DrawRedraw(wControl_p d, void* dp, wWinPix_t w, wWinPix_t h)
+{
+	paramData_p p = (paramData_p)dp;
+	paramDrawData_t* ddp = (paramDrawData_t*)p->winData;
+	if (ddp->redraw) {
+		ddp->redraw(d, p->context, w, h);
+	}
+}
+
+
+static void DrawAction(wControl_p d, void* dp, wAction_t a, wDrawPix_t w,
+	wDrawPix_t h)
+{
+	paramData_p p = (paramData_p)dp;
+	paramDrawData_t* ddp = (paramDrawData_t*)p->winData;
+	coOrd pos;
+	ddp->d->Pix2CoOrd(ddp->d, w, h, &pos);
+	//if (recordParamF && (p->option & PDO_NORECORD) == 0 && p->group->nameStr
+	//	&& p->nameStr) {
+	//	fprintf(recordParamF, "PARAMETER %s %s %d %0.3f %0.3f\n", p->group->nameStr,
+	//		p->nameStr, a, pos.x, pos.y);
+	//	fflush(recordParamF);
+	//}
+	if ((p->option & PDO_NOPSHACT) == 0 && ddp->action) {
+		ddp->action(a, pos);
+	}
+}
+
+static 
+void CreateDrawingArea( wControl_p parent, char* helpStr, paramData_p pd )
+{
+	const paramDrawData_t* drawDataP = pd->winData;
+
+	pd->control = wDrawCreate(parent, 0, 0, helpStr, pd->winOption,
+		drawDataP->width, drawDataP->height, pd, DrawRedraw, DrawAction);
+
+	if (drawDataP->d) {
+		drawDataP->d->d = pd->control;
+		drawDataP->d->dpi = wDrawGetDPI(drawDataP->d->d);
+	}
+}
+
 static int CreateControl(
 	paramData_p pd,
 	char* helpStr,
@@ -432,7 +474,6 @@ static int CreateControl(
 {
 	const paramFloatRange_t* floatRangeP;
 	const paramIntegerRange_t* integerRangeP;
-	const paramDrawData_t* drawDataP;
 	paramListData_t* listDataP;
 
 	const struct wIcon_t* iconP;
@@ -511,13 +552,7 @@ static int CreateControl(
 			ParamMenuPush, pd);
 		break;
 	case PD_DRAW:
-		drawDataP = pd->winData;
-		//pd->control = (wControl_p)wDrawCreate(win, xx, yy, helpStr, pd->winOption,
-		//	drawDataP->width, drawDataP->height, pd, ParamDrawRedraw, ParamDrawAction);
-		//if (drawDataP->d) {
-		//	drawDataP->d->d = (wDraw_p)pd->control;
-		//	drawDataP->d->dpi = wDrawGetDPI(drawDataP->d->d);
-		//}
+		CreateDrawingArea(win, helpStr, pd );
 		break;
 	case PD_TEXT:
 		CreateControlText(pd, win, helpStr);

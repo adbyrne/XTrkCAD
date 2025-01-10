@@ -1867,9 +1867,9 @@ EXPORT void ParamCancel_Undo(
 /* Cancel button, exits commands leaving control values as current
  */
 EXPORT void ParamCancel_Current(
-        wControl_p winP )
+	paramGroup_p group )
 {
-	wHide( winP );
+	wHide( group->win );
 }
 
 /* As above, but always exit command

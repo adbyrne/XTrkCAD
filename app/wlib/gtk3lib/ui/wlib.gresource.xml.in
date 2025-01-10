@@ -10,6 +10,7 @@
     <file preprocess="xml-stripblanks">prmfile.ui</file>
     <file preprocess="xml-stripblanks">rgbcolor.ui</file>
     <file preprocess="xml-stripblanks">searchgui.ui</file>
+    <file preprocess="xml-stripblanks">structure.ui</file>
     <file preprocess="xml-stripblanks">tip.ui</file>
     <file preprocess="xml-stripblanks">toolbar.ui</file>
     <file preprocess="xml-stripblanks">toolwindow.ui</file>

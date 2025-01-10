@@ -154,8 +154,9 @@ static void LoadDistanceFormatList(long selectedUnits)
 	wListClear(prefPLs[I_DISTANCEFORMAT].control);
 
 	for (int inx = 0; dstFmts[selectedUnits][inx].name; inx++) {
-		wListAddValue(prefPLs[I_DISTANCEFORMAT].control, _(dstFmts[selectedUnits][inx].name),
-			NULL, I2VP(dstFmts[selectedUnits][inx].fmt));
+		wComboBoxAddValue(prefPLs[I_DISTANCEFORMAT].control, 
+						  _(dstFmts[selectedUnits][inx].name),
+						  I2VP(dstFmts[selectedUnits][inx].fmt));
 	}
 }
 
