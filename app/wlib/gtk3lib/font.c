@@ -109,19 +109,24 @@ static void fontSelectionDialogCallback(GtkFontChooserDialog
 
 static wBool_t fontInitted = FALSE;
 
-/** \todo Choose better default fonts for GTK3 */
+/**
+ * \todo F_TIMES and F_HELV are serif respective sans serif fonts. Change define to make names consistent 
+ * with meaning.
+ */
+
+#define DEFAULTFONTSANS "Sans 18"
 
 static wBool_t fontInit()
 {
     const char *fontNames[] = {
-        "times 18",
-        "times italic 18",
-        "times bold 18",
-        "times bold italic 18",
-        "helvetica 18",
-        "helvetica oblique 18",
-        "helvetica bold 18",
-        "helvetica bold oblique 18",
+        "Serif Normal 18",
+        "Serif Italic 18",
+        "Serif Bold 18",
+        "Serif Bold Italic 18",
+        "Sans 18",
+        "Sans Italic 18",
+        "Sans Bold 18",
+        "Sans Bold Italic 18",
     };
     int s = 0;
     int i, j, k;
@@ -145,10 +150,9 @@ static wBool_t fontInit()
             return FALSE;
         }
 
-//        const char *fontName = wPrefGetStringBasic("font", "name");
-        const char* fontName = NULL;
+        const char *fontName = wPrefGetStringBasic("font", "name");
         curFont->fontDescription = pango_font_description_from_string(
-                                       fontName ? fontName : "helvetica 18");
+                                       fontName ? fontName : DEFAULTFONTSANS);
         absoluteFontSize = (int) PANGO_PIXELS(pango_font_description_get_size(
                 curFont->fontDescription));
     }
