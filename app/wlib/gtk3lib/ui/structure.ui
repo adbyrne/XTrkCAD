@@ -169,11 +169,24 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox">
+                  <object class="GtkGrid">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="orientation">vertical</property>
-                    <property name="spacing">6</property>
+                    <property name="row-spacing">6</property>
+                    <property name="column-spacing">12</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label" translatable="yes">Scale:</property>
+
+                      </object>
+                      <packing>
+                          <property name="left-attach">0</property>
+                          <property name="top-attach">0</property>
+                      </packing>
+                    </child>
                     <child>
                       <object class="GtkLabel" id="mess1">
                         <property name="visible">True</property>
@@ -181,9 +194,21 @@
                         <property name="halign">start</property>
                       </object>
                       <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
+                          <property name="left-attach">1</property>
+                          <property name="top-attach">0</property>
+
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label" translatable="yes">Width:</property>
+                      </object>
+                      <packing>
+                          <property name="left-attach">0</property>
+                          <property name="top-attach">1</property>                      
                       </packing>
                     </child>
                     <child>
@@ -191,11 +216,24 @@
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="halign">start</property>
+
                       </object>
                       <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
+                          <property name="left-attach">1</property>
+                          <property name="top-attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label" translatable="yes">Height:</property>
+
+                      </object>
+                      <packing>
+                          <property name="left-attach">0</property>
+                          <property name="top-attach">2</property>
                       </packing>
                     </child>
                     <child>
@@ -203,11 +241,11 @@
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="halign">start</property>
+
                       </object>
                       <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">2</property>
+                          <property name="left-attach">1</property>
+                          <property name="top-attach">2</property>
                       </packing>
                     </child>
                   </object>

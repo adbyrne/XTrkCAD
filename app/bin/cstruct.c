@@ -24,6 +24,7 @@
 #include "cselect.h"
 #include "cundo.h"
 #include "custom.h"
+#include "dynstring.h"
 #include "fileio.h"
 #include "layout.h"
 #include "param.h"
@@ -606,6 +607,8 @@ static void structureChange( long changes )
 static void RedrawStructure( wControl_p d, void * context, wWinPix_t x,
                              wWinPix_t y )
 {
+	DynString output;
+
 	RescaleStructure();
 	LOG( log_structure, 2, ( "SelStructure(%s)\n",
 	                         (curStructure?curStructure->title:"<NULL>") ) )
@@ -613,17 +616,22 @@ static void RedrawStructure( wControl_p d, void * context, wWinPix_t x,
 	if (curStructure == NULL) {
 		return;
 	}
+
+
 	structureD.orig.x = -0.10*structureD.scale + curStructure->orig.x;
 	structureD.orig.y = (curStructure->size.y + curStructure->orig.y) -
 	                    structureD.size.y + trackGauge;
 	DrawSegs( &structureD, zero, 0.0, curStructure->segs, curStructure->segCnt,
 	          0.0, wDrawColorBlack );
-	sprintf( message, _("Scale %d:1"), (int)structureD.scale );
-	ParamLoadMessage( &structurePG, I_MSGSCALE, message );
-	sprintf( message, _("Width %s"), FormatDistance(curStructure->size.x) );
-	ParamLoadMessage( &structurePG, I_MSGWIDTH, message );
-	sprintf( message, _("Height %s"), FormatDistance(curStructure->size.y) );
-	ParamLoadMessage( &structurePG, I_MSGHEIGHT, message );
+
+	DynStringMalloc(&output, 16);
+	DynStringPrintf( &output, _("%d:1"), (int)structureD.scale );
+	ParamLoadMessage(&structurePG, I_MSGSCALE, DynStringToCStr(&output));
+	DynStringPrintf(&output, _("%s"), FormatDistance(curStructure->size.x) );
+	ParamLoadMessage( &structurePG, I_MSGWIDTH, DynStringToCStr(&output));
+	DynStringPrintf(&output, _("%s"), FormatDistance(curStructure->size.y) );
+	ParamLoadMessage( &structurePG, I_MSGHEIGHT, DynStringToCStr(&output));
+	DynStringFree(&output);
 }
 
 
