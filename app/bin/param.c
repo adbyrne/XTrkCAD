@@ -1875,18 +1875,18 @@ EXPORT void ParamCancel_Current(
 /* As above, but always exit command
  */
 EXPORT void ParamCancel_Reset(
-        wWin_p winP )
+	paramGroup_p group)
 {
 	ResetIfNotSticky();
-	wHide( winP );
+	ParamCancel_Current(group);
 }
 
 /* Cancel button, exits commands restoring control values
  */
 EXPORT void ParamCancel_Restore(
-        wControl_p winP )
+	paramGroup_p group )
 {
-	wHide( winP );
+	ParamCancel_Current(group);
 }
 
 static void ParamButtonCancel( void * groupVP )

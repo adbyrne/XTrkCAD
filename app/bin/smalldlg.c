@@ -190,19 +190,40 @@ void ShowTip( void * flagsVP )
 
 #include "bitmaps/xtc.xpm"
 
-static paramTextData_t aboutTextData = { 70, 10 };
+#define ABOUT_TEXT DESCRIPTION \
+		"\n\nXTrackCAD is Copyright 2003 by Sillub Technology and 2017" \
+		"by Bob Blackwell, Martin Fischer, Adam Richards and Russell Shilling.\n" \
+		"\nIcons by: Tango Desktop Project (http://tango.freedesktop.org)\n" \
+		"\nSome icons by Yusuke Kamiyamane." \
+		"Licensed under a Creative Commons Attribution 3.0 License.\n" \
+		"\nContributions by: Robert Heller, Mikko Nissinen," \
+		"Timothy M. Shead,  Daniel Luis Spagnol" \
+		"\nParameter Files by: Ralph Boyd, Dwayne Ward\n" \
+		"\nThe following software is distributed with XTrackCAD\n\n" \
+		"Cornu Algorithm and Implementation by: Raph Levien" \
+		"\n\nuthash, utlist Copyright notice:" \
+		"\nCopyright (c) 2005-2015, Troy D. Hanson http://troydhanson.github.com/uthash/" \
+		"\nAll rights reserved." \
+		"\n\ncJSON: Copyright (c) 2009-2017 Dave Gamble and cJSON contributors" \
+		"\n\nlibzip:  Copyright(C) 1999 - 2019 Dieter Baron and Thomas Klausner\n" \
+		"The authors can be contacted at libzip@nih.at" \
+		"\n\nMiniXML: Copyright (c) 2003-2019 by Michael R Sweet.\n" \
+		"The Mini - XML library is licensed under the Apache License Version 2.0 with an\n" \
+		"exception to allow linking against GPL2 / LGPL2 - only software." 
+
+static paramTextData_t aboutTextData = { 500, 100 };
 
 #define DESCRIPTION N_("XTrackCAD is a CAD (computer-aided design) program for designing model railroad layouts.")
 static paramData_t aboutPLs[] = {
 #define I_ABOUTDRAW				(0)
-	{   PD_BITMAP, NULL, "about", PDO_NOPSHUPD, NULL, NULL, 0 },
+	{   PD_BITMAP, NULL, "about", PDO_NOPSHUPD | PDO_SAMEROW, NULL, NULL, 0 },
 #define I_ABOUTVERSION			(1)
-	{   PD_MESSAGE, NULL, "mess1", PDO_DLGNEWCOLUMN, NULL, NULL, BM_LARGE },
+	{   PD_MESSAGE, NULL, "mess1", PDO_DLGNEWCOLUMN , NULL, NULL, BM_LARGE },
 #define I_COPYRIGHT				 (2)
 #define COPYRIGHT_T			(aboutPLs[I_COPYRIGHT].control)
-	{   PD_TEXT, NULL, "text", PDO_DLGRESIZE, &aboutTextData, NULL, BO_READONLY|BT_TOP|BT_CHARUNITS }
+	{   PD_TEXT, NULL, "text", PDO_DLGNEWCOLUMN, &aboutTextData, NULL, BO_READONLY | BT_TOP | BT_CHARUNITS}
 };
-static paramGroup_t aboutPG = { "about", PGO_FULLDIALOGFROMBUILDER, aboutPLs, COUNT( aboutPLs ) };
+static paramGroup_t aboutPG = { "about", 0l, aboutPLs, COUNT( aboutPLs ) };
 
 /**
  *	Create and show the About window.
@@ -212,44 +233,47 @@ void CreateAboutW(void *ptr)
 {
 	if (!aboutW) {
 		aboutPLs[I_ABOUTDRAW].winData = wIconCreatePixMap(xtc_xpm);
-		ParamRegister(&aboutPG);
-		aboutW = ParamCreateDialog(&aboutPG, MakeWindowTitle(_("About")), NULL, NULL,
-		                           ParamCancel_Current, FALSE, NULL, F_TOP | F_CENTER| PD_F_ALT_CANCELLABEL, NULL);
+		FormRegister(&aboutPG);
+		aboutW = FormCreateDialog(&aboutPG, MakeWindowTitle(_("About")), 
+								NULL, NULL, 
+								"Close", ParamCancel_Current,
+								FALSE, F_TOP | F_CENTER, NULL);
+
 		ParamLoadMessage(&aboutPG, I_ABOUTVERSION, sAboutProd);
-		wTextAppend(COPYRIGHT_T, DESCRIPTION);
-		wTextAppend(COPYRIGHT_T,
-		            "\n\nXTrackCAD is Copyright 2003 by Sillub Technology and 2017 by Bob Blackwell, Martin Fischer and  Adam Richards.\n");
-		wTextAppend(COPYRIGHT_T,
-		            "\nIcons by: Tango Desktop Project (http://tango.freedesktop.org)\n");
-		wTextAppend(COPYRIGHT_T,
-		            "\nSome icons by Yusuke Kamiyamane. Licensed under a Creative Commons Attribution 3.0 License.\n");
-		wTextAppend(COPYRIGHT_T,
-		            "\nContributions by: Robert Heller, Mikko Nissinen, Timothy M. Shead, Russell Shilling, Daniel Luis Spagnol");
-		wTextAppend(COPYRIGHT_T, "\nParameter Files by: Ralph Boyd, Dwayne Ward\n");
+		wTextAppend(COPYRIGHT_T, ABOUT_TEXT);
 
-		wTextAppend(COPYRIGHT_T,
-		            "\nThe following software is distributed with XTrackCAD\n\n");
-#ifdef WINDOWS
-		wTextAppend(COPYRIGHT_T, FreeImage_GetCopyrightMessage());
-		wTextAppend(COPYRIGHT_T, "\n\n");
-#endif
-		wTextAppend(COPYRIGHT_T, "Cornu Algorithm and Implementation by: Raph Levien");
-		wTextAppend(COPYRIGHT_T, "\n\nuthash, utlist Copyright notice:");
-		wTextAppend(COPYRIGHT_T,
-		            "\nCopyright (c) 2005-2015, Troy D. Hanson  http://troydhanson.github.com/uthash/");
-		wTextAppend(COPYRIGHT_T, "\nAll rights reserved.");
+		//wTextAppend(COPYRIGHT_T, DESCRIPTION);
+		//wTextAppend(COPYRIGHT_T,
+		//            "\n\nXTrackCAD is Copyright 2003 by Sillub Technology and 2017"
+		//			"by Bob Blackwell, Martin Fischer, Adam Richards and Russell Shilling.\n");
+		//wTextAppend(COPYRIGHT_T,
+		//            "\nIcons by: Tango Desktop Project (http://tango.freedesktop.org)\n");
+		//wTextAppend(COPYRIGHT_T, "\nSome icons by Yusuke Kamiyamane."
+		//			"Licensed under a Creative Commons Attribution 3.0 License.\n");
 
-		wTextAppend(COPYRIGHT_T,
-		            "\n\ncJSON: Copyright (c) 2009-2017 Dave Gamble and cJSON contributors");
-		wTextAppend(COPYRIGHT_T,
-		            "\n\nlibzip:  Copyright(C) 1999 - 2019 Dieter Baron and Thomas Klausner\n" \
-		            "The authors can be contacted at libzip@nih.at");
+		//wTextAppend(COPYRIGHT_T, "\nContributions by: Robert Heller, Mikko Nissinen,"
+		//			"Timothy M. Shead,  Daniel Luis Spagnol");
 
-		wTextAppend(COPYRIGHT_T,
-		            "\n\nMiniXML: Copyright (c) 2003-2019 by Michael R Sweet.\n" \
-		            "The Mini - XML library is licensed under the Apache License Version 2.0 with an\n"
-		            \
-		            "exception to allow linking against GPL2 / LGPL2 - only software.");
+		//wTextAppend(COPYRIGHT_T, "\nParameter Files by: Ralph Boyd, Dwayne Ward\n");
+
+		//wTextAppend(COPYRIGHT_T,
+		//            "\nThe following software is distributed with XTrackCAD\n\n");
+		//wTextAppend(COPYRIGHT_T, "Cornu Algorithm and Implementation by: Raph Levien");
+		//wTextAppend(COPYRIGHT_T, "\n\nuthash, utlist Copyright notice:");
+		//wTextAppend(COPYRIGHT_T, "\nCopyright (c) 2005-2015, Troy D. Hanson"
+		//			" http://troydhanson.github.com/uthash/");
+		//wTextAppend(COPYRIGHT_T, "\nAll rights reserved.");
+
+		//wTextAppend(COPYRIGHT_T,
+		//            "\n\ncJSON: Copyright (c) 2009-2017 Dave Gamble and cJSON contributors");
+		//wTextAppend(COPYRIGHT_T,
+		//            "\n\nlibzip:  Copyright(C) 1999 - 2019 Dieter Baron and Thomas Klausner\n" \
+		//            "The authors can be contacted at libzip@nih.at");
+
+		//wTextAppend(COPYRIGHT_T,
+		//            "\n\nMiniXML: Copyright (c) 2003-2019 by Michael R Sweet.\n" \
+		//            "The Mini - XML library is licensed under the Apache License Version 2.0 with an\n"
+		//            "exception to allow linking against GPL2 / LGPL2 - only software.");
 	}
 
 	wShow(aboutW);

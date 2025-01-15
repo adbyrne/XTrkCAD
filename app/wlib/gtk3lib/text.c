@@ -54,22 +54,6 @@
  *****************************************************************************
  */
 
-/**
- * set and formats the placeholder text for a empty text field.
- *
- * \param bt edit field
- */
-
-static void wlibSetPlaceholder(wControl_p bt)
-{
-	GtkTextIter startIter;
-	GtkTextIter endIter;
-	GtkTextBuffer* tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->attributes.text.text));
-
-	gtk_text_buffer_set_text(tb, bt->attributes.text.placeholder, -1);
-	gtk_text_buffer_get_bounds(tb, &startIter, &endIter);
-	gtk_text_buffer_apply_tag(tb, bt->attributes.text.placeholderTag, &startIter, &endIter);
-}
 
 /**
  * Reset a text entry by clearing text and resetting the readonly and the
@@ -87,9 +71,6 @@ void wTextClear(wControl_p bt)
 
 	if (bt->attributes.text.option & BO_READONLY) {
 		gtk_text_view_set_editable(GTK_TEXT_VIEW(bt->attributes.text.text), FALSE);
-	}
-	if (bt->attributes.text.placeholder) {
-		wlibSetPlaceholder(bt);
 	}
 	bt->attributes.text.changed = FALSE;
 }
@@ -157,9 +138,6 @@ static char* wlibGetText(wControl_p bt)
 	gtk_text_buffer_get_bounds(tb, &ti1, &ti2);
 	cp = gtk_text_buffer_get_text(tb, &ti1, &ti2, FALSE);
 
-	if (!g_strcmp0(bt->attributes.text.placeholder, cp)) {
-		*cp = '\0';
-	}
 	return cp;
 }
 
@@ -410,7 +388,7 @@ int wTextGetSize(wControl_p bt)
 }
 
 /**
- * Get the entered text. If the entered text is longer than the passed buffer, 
+ * Get the entered text. If the entered text is longer than the passed buffer,
  * it is truncated and zero terminated.
  *
  * \param bt IN the text widget
@@ -429,7 +407,7 @@ void wTextGetText(wControl_p bt, char* text, int len)
 }
 
 /**
- * Get the  read-only state of the text entry
+ * Set the  read-only state of the text entry
  *
  * \param bt IN the text widget
  * \param ro IN read only flag
@@ -523,31 +501,6 @@ static void textChanged(GtkWidget* widget, wControl_p bt)
 
 	bt->attributes.text.changed = TRUE;
 }
-/**
- * Signal handler for begin of user activity. Remove the placeholder text if
- * still present
- *
- * \param self
- * \param user_data	unused
- */
-
-/**
-\todo GTK3 shows warning when pressing delete and placeholder is shown
-*/
-
-static void userActivityStarts(GtkTextBuffer* self, wControl_p textField)
-{
-	GtkTextIter endIter;
-	GtkTextIter startIter;
-
-	gtk_text_buffer_get_bounds(self, &startIter, &endIter);
-
-	gchar* text = gtk_text_buffer_get_text(self, &startIter, &endIter, FALSE);
-	if (!g_strcmp0(text, textField->attributes.text.placeholder)) {
-		gtk_text_buffer_delete(self, &startIter, &endIter);
-		gtk_text_buffer_set_text(self, "", -1);
-	}
-}
 
 /**
  * Create a multiline text entry field
@@ -563,6 +516,7 @@ static void userActivityStarts(GtkTextBuffer* self, wControl_p textField)
  * ### Options
  * BO_READONLY
  * : set entry field to read only
+ * : use properties 'cursor-visible' and 'editable in builder definitions for same
  *
  * \param parent IN parent window
  * \param x IN x position
@@ -600,76 +554,46 @@ wTextCreate(wControl_p parent,
 		bt->widget = wlibWidgetFromIdWarn(parent, "scrollwindow");
 		tcontrol->text = wlibWidgetFromIdWarn(parent, helpStr);
 
-		/** \todo this could better be done in the XML definition */
+	} else {
+		// create a scroll window with scroll bars that are automatically created
+		bt->widget = gtk_scrolled_window_new(NULL, NULL);
+		gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(bt->widget),
+		                               GTK_POLICY_AUTOMATIC,
+		                               GTK_POLICY_AUTOMATIC);
+
+		gtk_scrolled_window_set_propagate_natural_width(GTK_SCROLLED_WINDOW(bt->widget),
+		        TRUE);
+		gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(bt->widget),
+		                                    GTK_SHADOW_IN);
+
+		// create a text view and place it inside the scroll widget
+		tcontrol->text = gtk_text_view_new();
+
+		if (!tcontrol->text) {
+			abort();
+		}
+
+		// configure read-only mode
 		if (option & BO_READONLY) {
 			gtk_text_view_set_editable(GTK_TEXT_VIEW(tcontrol->text), FALSE);
 			gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(tcontrol->text), FALSE);
-		} else {
-			gtk_text_view_set_editable(GTK_TEXT_VIEW(tcontrol->text), TRUE);
-			gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(tcontrol->text), TRUE);
 		}
-	} else {
-		//wlibComputePos((wControl_p)bt);
-		//// create a scroll window with scroll bars that are automatically created
-		//bt->widget = gtk_scrolled_window_new(NULL, NULL);
-		//gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(bt->widget),
-		//	GTK_POLICY_AUTOMATIC,
-		//	GTK_POLICY_AUTOMATIC);
+		wTextSetSize(bt, width, height);
 
-		//// create a text view and place it inside the scroll widget
-		//bt->text = gtk_text_view_new();
+		gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(tcontrol->text), GTK_WRAP_WORD);
+		gtk_container_add(GTK_CONTAINER(bt->widget), tcontrol->text);
 
-		//if (bt->text == 0) {
-		//	abort();
-		//}
-
-		//// configure read-only mode
-		//if (bt->option & BO_READONLY) {
-		//	gtk_text_view_set_editable(GTK_TEXT_VIEW(bt->text), FALSE);
-		//	gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(bt->text), FALSE);
-		//}
-
-		//// set the size???
-		//gtk_widget_set_size_request(GTK_WIDGET(bt->widget),
-		//	width + 15/*requisition.width*/, height);
-
-		//gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(bt->text), GTK_WRAP_WORD);
-		//gtk_container_add(GTK_CONTAINER(bt->widget), bt->text);
+		wlibBasicGridAttach(parent, bt->widget, x, y, 1, 1);
 	}
 
-	// this seems to assume some fixed size fonts, not really helpful
-	//if (option & BT_CHARUNITS) {
-	//	width *= 7;
-	//	height *= 14;
-	//}
-
-
-	// get the text buffer and add a bold tag to it
 	tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(tcontrol->text));
-	gtk_text_buffer_create_tag(tb, "bold", "weight", PANGO_WEIGHT_BOLD, NULL);
-	tcontrol->placeholderTag = gtk_text_buffer_create_tag(tb, "placeholder", "foreground",
-	                     "grey", NULL);
-
 	g_signal_connect(G_OBJECT(tb), "changed", G_CALLBACK(textChanged), bt);
-	g_signal_connect(G_OBJECT(tb), "begin-user-action",
-	                 G_CALLBACK(userActivityStarts), bt);
 
-	if (labelStr) {
-		tcontrol->placeholder = g_strdup(labelStr);
-		wlibSetPlaceholder(bt);
-	}
-	// wlibAddTooltip(tcontrol->text, parent->name, helpStr);
-
-	if (!(option & F_DEFINEDINBUILDER)) {
-		/* place the widget in a fixed position of the parent */
-		//gtk_fixed_put(GTK_FIXED(parent->widget), bt->widget, bt->realX, bt->realY);
-		//wlibControlGetSize((wControl_p)bt);
-		//wlibAddButton((wControl_p)bt);
-	}
 	// show the widgets
 	gtk_widget_show_all(tcontrol->text);
 	gtk_widget_show_all(bt->widget);
 
+	// wlibAddTooltip(tcontrol->text, parent->name, helpStr);
 	// wlibAddHelpString(bt->widget, helpStr);
 
 	tcontrol->option = option;

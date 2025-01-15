@@ -272,6 +272,9 @@ wControl_p wButtonCreate(
 
 	if (ISDEFINEDINBUILDER(parent)||ISDIALOGACTION(option)) {
 		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
+		if (labelStr) {
+			wButtonSetLabel(b, labelStr);
+		}
 	} else {
 		b->widget = GTK_WIDGET(gtk_toggle_button_new());
 
@@ -294,10 +297,8 @@ wControl_p wButtonCreate(
 			gtk_widget_grab_default(b->widget);
 			gtk_window_set_default(GTK_WINDOW(parent->widget), b->widget);
 		}
-
-		gtk_widget_show_all(b->widget);
 	}
-
+	gtk_widget_show_all(b->widget);
 	g_signal_connect(G_OBJECT(b->widget), "clicked",
 	                 G_CALLBACK(buttonClick), b);
 

@@ -95,8 +95,8 @@ wBitmapViewCreate( wControl_p parent, wWinPix_t x, wWinPix_t y, long options,
 	/* create the bitmap from supplied xpm attributes */
 	pixbuf = gdk_pixbuf_new_from_xpm_data( (const char **)iconP->bits );
 	g_object_ref_sink(pixbuf);
-	image = gtk_image_new_from_pixbuf( pixbuf );
-	gtk_widget_show( image );
+	bt->widget = gtk_image_new_from_pixbuf( pixbuf );
+	gtk_widget_show( bt->widget );
 	g_object_unref( (gpointer)pixbuf );
 		
 	wlibBasicGridAttach(parent, bt->widget, x, y, 1, 1);

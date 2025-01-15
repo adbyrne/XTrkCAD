@@ -89,6 +89,7 @@ typedef enum {
 #define PDO_DLGRESETMARGIN		(1L<<20)	 /**< position control on the left ?*/
 #define PDO_DLGIGNORELABELWIDTH 	(1L<<21)
 #define PDO_DLGHORZ			(1L<<22)  /**< arrange on same line as previous element */
+#define PDO_SAMEROW			(1L<<11)		/** place control on same line as previous */
 #define PDO_DLGNEWCOLUMN		(1L<<23)
 #define PDO_DLGNOLABELALIGN		(1L<<24)
 #define PDO_LISTINDEX			(1L<<25)

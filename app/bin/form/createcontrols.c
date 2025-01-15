@@ -335,13 +335,13 @@ ScalePush(FLOAT_T value, void* dp)
 }
 
 void
-CreateControlText(paramData_p pd, wControl_p parent, char* helpStr)
+CreateControlText(paramData_p pd, wControl_p parent, unsigned xPos, unsigned yPos, char* helpStr)
 {
 	const paramTextData_t* textDataP;
 
 	textDataP = pd->winData;
-	pd->control = (wControl_p)wTextCreate(parent, 0, 0, helpStr, NULL,
-		pd->winOption, 0, 0);
+	pd->control = (wControl_p)wTextCreate(parent, xPos, yPos, helpStr, NULL,
+		pd->winOption, textDataP->width, textDataP->height);
 	if (pd->winOption & BO_READONLY ) {
 		wTextSetReadonly(pd->control, TRUE);
 	}
@@ -536,7 +536,7 @@ static int CreateControl(
 			_(pd->winLabel), pd->winOption, 0, NULL, ColorSelectPush, pd);
 		break;
 	case PD_MESSAGE:
-		pd->control = (wControl_p)wMessageCreateEx(win, 0, 0, helpStr, 0,
+		pd->control = (wControl_p)wMessageCreateEx(win, x + ((pd->option & PDO_DLGNEWCOLUMN) != 0), y, helpStr, 1,
 			pd->valueP ? _(pd->valueP) : " ", pd->winOption);
 		break;
 	case PD_BUTTON:
@@ -555,11 +555,11 @@ static int CreateControl(
 		CreateDrawingArea(win, helpStr, pd );
 		break;
 	case PD_TEXT:
-		CreateControlText(pd, win, helpStr);
+		CreateControlText(pd, win, x + ((pd->option & PDO_DLGNEWCOLUMN) != 0), y, helpStr);
 		break;
 	case PD_BITMAP:
 		iconP = pd->winData;
-		pd->control = (wControl_p)wBitmapCreate(win, x, y, pd->winOption, iconP);
+		pd->control = wBitmapViewCreate(win, x, y, pd->winOption, iconP);
 		break;
 	case PD_SCALE:
 		pd->control = wScaleCreate(win, helpStr, pd->valueP, ScalePush, pd);
@@ -574,7 +574,7 @@ static int CreateControl(
 void CreateControls(paramGroup_p group)
 {
 	DynString helpString;
-	unsigned xPos = 0;
+	unsigned xPos = 1;
 	unsigned yPos = 1;
 
 	DynStringMalloc(&helpString, 80);
@@ -596,7 +596,9 @@ void CreateControls(paramGroup_p group)
 		else
 		{
 			CreateControl(pd, pd->nameStr, xPos, yPos);
-			yPos++;
+			if (!(pd->option & PDO_SAMEROW)) {
+				yPos++;
+			}
 		}
 
 		DynStringClear(&helpString);

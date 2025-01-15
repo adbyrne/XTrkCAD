@@ -189,8 +189,6 @@ struct stack {
 };
 
 struct text {
-	gchar* placeholder;
-	GtkTextTag* placeholderTag;
 	int changed;
 	long option;
 	GtkWidget* text;

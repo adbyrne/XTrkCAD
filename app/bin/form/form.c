@@ -82,7 +82,7 @@ static void ButtonCancel(paramGroup_p group)
 	//	fflush(recordParamF);
 	//}
 	if (group->cancelProc) {
-		group->cancelProc(group->win);
+		group->cancelProc(group);
 	}
 }
 
