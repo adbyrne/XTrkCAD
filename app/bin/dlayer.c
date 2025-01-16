@@ -1575,7 +1575,7 @@ void ResetLayers(void)
 
 
 		if (inx < NUM_BUTTONS) {
-			wButtonSetIcon(layer_btns[inx], (char*)show_layer_bmps[inx]);
+			wButtonSetIcon(layer_btns[inx], show_layer_bmps[inx]);
 		}
 	}
 

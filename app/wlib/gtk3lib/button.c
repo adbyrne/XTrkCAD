@@ -154,11 +154,16 @@ void wButtonSetIcon(wControl_p control, wIcon_p icon)
 		pixbuf = icon->bits;
 	}
 
+	
 	if (pixbuf) {
-		gtk_container_foreach(GTK_CONTAINER(control->widget), (GtkCallback)DestroyImage,
-		                      (gpointer)NULL);
+		g_object_ref(pixbuf);
 
+		gtk_container_foreach(GTK_CONTAINER(control->widget), (GtkCallback)DestroyImage,
+			(gpointer)NULL);
+	
 		AddPixbufToButton(control->widget, pixbuf);
+
+		g_object_unref(pixbuf);
 		control->attributes.button.icon = icon;
 	}
 }
@@ -380,6 +385,8 @@ wControl_p wButtonCreateForToolbar(
 	buttonControl->widget = GTK_WIDGET(gtk_toggle_button_new());
 	
 	wButtonSetIcon(buttonControl, icon);
+
+
 
 	/** \todo BO_ABUT should be renamed to BO_OVERFLOW_MENU and be included with the button */
 	if (option & BO_ABUT) {

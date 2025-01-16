@@ -16,7 +16,4 @@
     <file preprocess="xml-stripblanks">toolwindow.ui</file>
     <file>xtrackcad.css</file>  
   </gresource>
-  <gresource prefix ="">
-    <file>bitmaps/logo.png</file>
-  </gresource>
 </gresources>

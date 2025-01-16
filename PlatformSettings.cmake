@@ -6,6 +6,7 @@ if(UNIX)
     set(XTRKCAD_USE_GTK_DEFAULT ON)
 	# path to GTK resouces
 	set(XTRKCAD_RESOURCE_ROOT "/org/xtrackcad/wlib")
+	set(XTRKCAD_SYMBOLS_ROOT "/org/xtrackcad/symbols")
     # Configure help display and i18n
     if(APPLE)
         set(CMAKE_MACOSX_RPATH 0)

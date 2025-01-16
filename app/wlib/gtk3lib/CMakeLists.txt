@@ -2,6 +2,7 @@
 
 add_subdirectory(ui)
 add_subdirectory(wrapbox)
+add_subdirectory(symbols)
 
 target_include_directories(xtrkcad-wlib 
 	PRIVATE 
@@ -176,6 +177,6 @@ endif()
 #                     ${CMAKE_CURRENT_SOURCE_DIR}/glade
 #                     ${CMAKE_BINARY_DIR}/app/bin/ui
 # )
-add_dependencies(xtrkcad-wlib resource-target)
+add_dependencies(xtrkcad-wlib resource-target symbols-target)
 
 add_subdirectory(unittests)

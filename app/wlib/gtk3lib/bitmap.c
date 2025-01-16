@@ -30,6 +30,8 @@
 #include <gdk/gdk.h>
 #include "gtkint.h"
 
+#include "xtrkcad-config.h"
+
 #define PNGFORMAT "png"
 #define JPEGFORMAT "jpeg"
 
@@ -76,31 +78,26 @@ wBitmapViewCreate( wControl_p parent, wWinPix_t x, wWinPix_t y, long options,
 {
 	wControl_p bt;
 	struct bitmap* bm;
-	GdkPixbuf *pixbuf;
-	GtkWidget *image;
+	GdkPixbuf *pixbuf = NULL;
 	
 	bt = wlibControlNew(B_BITMAP, parent, NULL, NULL);
 	bm = CONTROL_GET_ATTRIBUTES_PTR(bt, bitmap);
+	
+	/* create the bitmap from supplied image attributes */
+	if (iconP->gtkIconType == ICON_PIXBUF) {
+		pixbuf = iconP->bits;
+	}
 
-	/*
-	 * Depending on the platform, parent->widget->window might still be null 
-	 * at this point. The window allocation should be forced before creating
-	 * the pixmap.
-	 * 
-	 * \todo Is this assumption really true? Temporarily assume no
-	 */
-	//if ( gtk_widget_get_window( parent->gtkWindow ) == NULL )
-	//	gtk_widget_realize( parent->gtkWindow ); /* force allocation, if pending */
-	
-	/* create the bitmap from supplied xpm attributes */
-	pixbuf = gdk_pixbuf_new_from_xpm_data( (const char **)iconP->bits );
-	g_object_ref_sink(pixbuf);
-	bt->widget = gtk_image_new_from_pixbuf( pixbuf );
-	gtk_widget_show( bt->widget );
-	g_object_unref( (gpointer)pixbuf );
-		
-	wlibBasicGridAttach(parent, bt->widget, x, y, 1, 1);
-	
+	if (iconP->gtkIconType == ICON_BITMAP) {
+		pixbuf = gdk_pixbuf_new_from_xpm_data((const char**)iconP->bits);
+	}
+
+	if (pixbuf) {
+		bt->widget = gtk_image_new_from_pixbuf(pixbuf);
+		gtk_widget_show(bt->widget);
+
+		wlibBasicGridAttach(parent, bt->widget, x, y, 1, 1);
+	}
 	return( (wControl_p)bt );
 }
 
@@ -141,6 +138,35 @@ wIcon_p wIconCreatePixMap( const char *pm[] )
 	ip->h = 0;
 	ip->color = 0;
 	ip->bits = pm;
+	return ip;
+}
+
+GdkPixbuf *
+CreatePixBufFromResource(char *filename)
+{
+	GdkPixbuf * pixbuf;
+	gchar* path;
+	GError* error = NULL;
+
+	path = g_strconcat(XTRKCAD_SYMBOLS_PATH,
+		filename, 
+		NULL);
+
+	pixbuf = gdk_pixbuf_new_from_resource(path, &error);
+
+
+	return(pixbuf);
+}
+
+wIcon_p wIconCreatePixBuFromResource(const char *filename)
+{
+	wIcon_p ip;
+	ip = (wIcon_p)malloc(sizeof * ip);
+	ip->gtkIconType = ICON_PIXBUF;
+	ip->w = 0;
+	ip->h = 0;
+	ip->color = 0;
+	ip->bits = (char *)CreatePixBufFromResource(filename);
 	return ip;
 }
 

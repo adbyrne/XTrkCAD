@@ -29,6 +29,8 @@
 
 #include "gtkint.h"
 
+#include "xtrkcad-config.h"
+
 #define LOGOFILENAME "logo.png"
 
 static GtkWidget *window;	/**< splash window handle */
@@ -72,7 +74,7 @@ wCreateSplash(char *appName, char *appVer)
 	gtk_container_add(GTK_CONTAINER(window), grid); 
 
 	/* add the logo image to the top of the splash window */
-	logoPath = g_strdup_printf("%s/%s", "/bitmaps", LOGOFILENAME);
+	logoPath = g_strdup_printf("%s%s", XTRKCAD_SYMBOLS_PATH, LOGOFILENAME);
 	image = gtk_image_new_from_resource(logoPath);
 	gtk_widget_show(image);
 	g_free(logoPath);

@@ -35,6 +35,7 @@
 #include "i18n.h"
 
 #include "resources.h"
+#include "symbols.h"
 
 static char *appName;		/**< application name */
 static GtkApplication *app;
@@ -91,8 +92,26 @@ static void
 startup(GtkApplication *app)
 {	
 	wControl_p window;
+	GError* error = NULL;
 
 	g_resources_register(wlib_get_resource());
+	g_resources_register(symbols_get_resource());
+
+	//char** children = g_resource_enumerate_children(wlib_get_resource(), "/", G_RESOURCE_LOOKUP_FLAGS_NONE, &error);
+
+	//for (int i = 0; children[i] != NULL; i++) {
+	//	printf("%s\n", children[i]);
+	//}
+
+	//g_strfreev(children);
+
+	// children = g_resource_enumerate_children(symbols_get_resource(), "/", G_RESOURCE_LOOKUP_FLAGS_NONE, &error);
+	//
+	//for (int i = 0; children[i] != NULL; i++) {
+	//	printf("%s\n", children[i]);
+	//}
+
+	//g_strfreev(children);
 
 	// load css
 	LoadStyles();
@@ -114,8 +133,12 @@ startup(GtkApplication *app)
 static void
 activate(GtkApplication* app, gpointer user_data)
 {
-    g_resources_register(wlib_get_resource());
+
+
+	//g_resources_register(wlib_get_resource());
+
 }
+	
 
 /**
  * Get the command line parameters and make them available to the main program.
