@@ -1804,7 +1804,7 @@ EXPORT void DrawSegsO(
 				DrawStraightTrack( d,
 				                   p0, p1,
 				                   FindAngle(p1, p0 ),
-				                   trk, color1, options );
+				                   trk, color, options );
 				break;
 			case SEG_STRLIN:;
 				wDrawWidth w;
@@ -1867,7 +1867,7 @@ EXPORT void DrawSegsO(
 				                 c,
 				                 fabs(segPtr->u.c.radius),
 				                 a0, segPtr->u.c.a1,
-				                 trk, color1, options );
+				                 trk, color, options );
 			} else {
 				wDrawWidth w;
 				if (segPtr->lineWidth < 0) {
@@ -1916,7 +1916,7 @@ EXPORT void DrawSegsO(
 						                 c,
 						                 fabs(tempPtr->u.c.radius),
 						                 a0, tempPtr->u.c.a1,
-						                 trk, color1, options );
+						                 trk, color, options );
 					} else if (tempPtr->type == SEG_CRVLIN) {
 						wDrawWidth w;
 						if (tempPtr->lineWidth < 0) {
@@ -1939,7 +1939,7 @@ EXPORT void DrawSegsO(
 					if ( tempPtr->color == wDrawColorWhite ) { break; }
 					DrawStraightTrack( d, p0, p1,
 					                   FindAngle(p1,p0),
-					                   trk,color1,options);
+					                   trk,color,options);
 					break;
 				case SEG_STRLIN:
 					REORIGIN(p0,tempPtr->u.l.pos[0], angle, orig);

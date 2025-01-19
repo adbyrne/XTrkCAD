@@ -748,9 +748,6 @@ static void DrawCurvedTies(
 		return;
 	}
 
-	if (color == wDrawColorBlack) {
-		color = tieColor;
-	}
 	len = 2*M_PI*r*a1/360.0;
 	cnt = (int)floor(len/td.spacing + 0.5);
 	if ( len - td.spacing*cnt - (td.width/2) > (td.spacing - td.width)/2 ) {

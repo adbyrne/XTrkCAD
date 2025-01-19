@@ -389,9 +389,6 @@ EXPORT void DrawStraightTies(
 		return;
 	}
 
-	if ( color == wDrawColorBlack ) {
-		color = tieColor;
-	}
 	len = FindDistance( p0, p1 );
 	len -= tieOff0+tieOff1;
 	angle = FindAngle( p0, p1 );
@@ -472,7 +469,7 @@ EXPORT void DrawStraightTrack(
 		td = GetTrkTieData( trk );
 		DrawStraightTies( d, td, p0, p1, color );
 	}
-	if (color == wDrawColorBlack) {
+	if ( color == wDrawColorBlack ) {
 		color = normalColor;
 	}
 	if ( ! DrawTwoRails( d, 1 ) ) {
