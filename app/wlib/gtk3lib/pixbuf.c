@@ -50,6 +50,10 @@ GdkPixbuf* wlibMakePixbuf(
 
     g_assert(ip != NULL);
 
+
+    if (ip->gtkIconType == ICON_PIXBUF)
+        return((GdkPixbuf*)ip->bits);
+
     if (ip->gtkIconType == ICON_PIXMAP) {
         pixbuf = gdk_pixbuf_new_from_xpm_data((const char**)ip->bits);
     } else {

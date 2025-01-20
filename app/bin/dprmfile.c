@@ -31,16 +31,6 @@
 
 static struct wFilSel_t * paramFile_fs;
 
-
-#include "bitmaps/greendot.xpm"
-#include "bitmaps/greydot.xpm"
-#include "bitmaps/yellowdot.xpm"
-#include "bitmaps/reddot.xpm"
-#include "bitmaps/greenstar.xpm"
-#include "bitmaps/greystar.xpm"
-#include "bitmaps/yellowstar.xpm"
-#include "bitmaps/redstar.xpm"
-
 #define FAVORITE_PARAM 1
 #define STANDARD_PARAM 0
 
@@ -413,21 +403,21 @@ void DoParamFiles(void * junk)
 	void * data;
 
 	if (paramFileW == NULL) {
-		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_UNLOADED ] = wIconCreatePixMap(
-		                        greydot);
-		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_NOTUSABLE ] = wIconCreatePixMap(
-		                        reddot);
-		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_COMPATIBLE ] = wIconCreatePixMap(
-		                        yellowdot);
-		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_FIT] = wIconCreatePixMap(greendot);
-		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_UNLOADED ] = wIconCreatePixMap(
-		                        greystar);
-		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_NOTUSABLE ] = wIconCreatePixMap(
-		                        redstar);
-		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_COMPATIBLE ] = wIconCreatePixMap(
-		                        yellowstar);
-		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_FIT ] = wIconCreatePixMap(
-		                        greenstar);
+		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_UNLOADED ] = wIconCreatePixBufFromResource(
+		                        "greydot.png");
+		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_NOTUSABLE ] = wIconCreatePixBufFromResource(
+		                        "reddot.png");
+		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_COMPATIBLE ] = wIconCreatePixBufFromResource(
+		                        "yellowdot.png");
+		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_FIT] = wIconCreatePixBufFromResource("greendot.png");
+		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_UNLOADED ] = wIconCreatePixBufFromResource(
+		                        "greystar.png");
+		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_NOTUSABLE ] = wIconCreatePixBufFromResource(
+		                        "redstar.png");
+		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_COMPATIBLE ] = wIconCreatePixBufFromResource(
+		                        "yellowstar.png");
+		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_FIT ] = wIconCreatePixBufFromResource(
+		                        "greenstar.png");
 
 		ParamRegister(&paramFilePG);
 

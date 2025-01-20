@@ -158,15 +158,17 @@ CreatePixBufFromResource(char *filename)
 	return(pixbuf);
 }
 
-wIcon_p wIconCreatePixBuFromResource(const char *filename)
+wIcon_p wIconCreatePixBufFromResource(const char *filename)
 {
 	wIcon_p ip;
 	ip = (wIcon_p)malloc(sizeof * ip);
-	ip->gtkIconType = ICON_PIXBUF;
-	ip->w = 0;
-	ip->h = 0;
-	ip->color = 0;
-	ip->bits = (char *)CreatePixBufFromResource(filename);
+	if (ip) {
+		ip->gtkIconType = ICON_PIXBUF;
+		ip->w = 0;
+		ip->h = 0;
+		ip->color = 0;
+		ip->bits = (char*)CreatePixBufFromResource(filename);
+	} 
 	return ip;
 }
 
