@@ -137,11 +137,6 @@ static switchmotorData_p GetswitchmotorData ( track_p trk )
 	return GET_EXTRA_DATA( trk, T_SWITCHMOTOR, switchmotorData_t );
 }
 
-#if 0
-#include "bitmaps/switchmotormark.xbm"
-static wDrawBitMap_p switchmotormark_bm = NULL;
-#endif
-
 static coOrd switchmotorPoly_Pix[] = {
 	{6,0}, {6,13}, {4,13}, {4,19}, {6,19}, {6,23}, {9,23}, {9,19}, {13,19},
 	{13,23}, {27,23}, {27,10}, {13,10}, {13,13}, {9,13}, {9,0}, {6,0}

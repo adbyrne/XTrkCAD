@@ -2,8 +2,9 @@
 /* background and text colors  for status bar */
 .statusbar {
     background-image: none;
-    background-color: rgb(192, 192, 192);
+    background-color: rgb(128, 128, 128);
     color: white;
+    min-height: 24px;
 }
 
 /* define font sizes for labels */

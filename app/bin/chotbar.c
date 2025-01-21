@@ -31,8 +31,6 @@ EXPORT DIST_T curBarScale = -1;
 EXPORT long hotBarLabels = 0;
 EXPORT wWinPix_t hotBarHeight = 32;
 
-#include "bitmaps/hotbarl.xbm"
-#include "bitmaps/hotbarr.xbm"
 
 #define HOTBAR_LEFT 2
 
@@ -580,10 +578,11 @@ EXPORT void LayoutHotBar( void * redraw )
 		if (winWidth < 50) {
 			return;
 		}
-		bm_p = wIconCreateBitMap( 16, 16, turnbarl_bits, wDrawColorBlack );
+		bm_p = wIconCreatePixBufFromResource("hotbarl.png");
 		hotBarLeftB = wButtonCreate( mainW, 0, 0, "hotBarLeft", (char*)bm_p,
 		                             BO_ICON|BO_REPEAT, 0, DoHotBarLeft, NULL );
-		bm_p = wIconCreateBitMap( 16, 16, turnbarr_bits, wDrawColorBlack );
+
+		bm_p = wIconCreatePixBufFromResource("hotbarr.png");
 		hotBarRightB = wButtonCreate( mainW, 0, 0, "hotBarRight", (char*)bm_p,
 		                              BO_ICON|BO_REPEAT, 0, DoHotBarRight, NULL );
 		hotBarD.d = wDrawCreate( mainW, 0, 0, NULL, 0, 100,
