@@ -38,35 +38,38 @@ else()
 	set( PIXS 16 24 32 )
 
 	foreach(xpm ${XPMS})
-		foreach(pix ${PIXS})
-			if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}${pix}.png" )
-				# MESSAGE( STATUS "Custom ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}${pix}.png" )
+		foreach(pixelsize ${PIXS})
+			set(DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/png${pixelsize}")
+			set(PNGFILENAME "${xpm}.png")
+
+			if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/png${pixelsize}/${PNGFILENAME}" )
+				MESSAGE( STATUS "Custom ${DESTINATION}/${PNGFILENAME}" )
 				add_custom_command(
-					OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}${pix}.png
-					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}${pix}.png
-					COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/png/
-					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}${pix}.png ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}${pix}.png
+					OUTPUT ${DESTINATION}/${PNGFILENAME}
+					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/png/${PNGFILENAME}
+					COMMAND ${CMAKE_COMMAND} -E make_directory ${DESTINATION}/
+					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/png${pixelsize}/${PNGFILENAME} ${DESTINATION}/${PNGFILENAME}
 				)
 			else()
-				# MESSAGE( STATUS "SVG ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg" )
+				MESSAGE( STATUS "SVG ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg ${Inkscape_EXPORT}${DESTINATION}/${PNGFILENAME}" )
 				add_custom_command(
-					OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}${pix}.png
-					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg
-					COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/png/
-					COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg -h ${pix} ${Inkscape_EXPORT}${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}${pix}.png
+				 	OUTPUT ${DESTINATION}/${PNGFILENAME}
+				 	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg
+				 	COMMAND ${CMAKE_COMMAND} -E make_directory ${DESTINATION}
+				 	COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg -h ${pixelsize} ${Inkscape_EXPORT}${DESTINATION}/${PNGFILENAME}
 				)
 			endif()
 			# build a list of all the depends
-			list(APPEND PNG_RESULTS ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}${pix}.png)
+			list(APPEND PNG_RESULTS ${DESTINATION}/${PNGFILENAME})
 		endforeach()
-		add_custom_command(
-			OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm3
-			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}16.png
-			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}24.png
-			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}32.png
-			COMMAND pngtoxpm ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm3	
-#			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm3 ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm3 
-		)
+# 		add_custom_command(
+# 			OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm3
+# 			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}16.png
+# 			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}24.png
+# 			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}32.png
+# 			COMMAND pngtoxpm ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm3	
+# #			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm3 ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm3 
+#		)
 		# build a list of all the depends
 		list(APPEND XPM_RESULTS ${xpm}.xpm3)
 	endforeach()
@@ -77,20 +80,20 @@ else()
 		DEPENDS ${PNG_RESULTS}
 	)
 	
-	if(WIN32)
-		# Temporarily the FreeImage dll is copied to the build directory
-		add_custom_command(
-			TARGET genbitmaps PRE_BUILD
-			COMMAND ${CMAKE_COMMAND} -E copy ${FREEIMAGE_SHAREDLIB} ${CMAKE_CURRENT_BINARY_DIR}
-		)
-		cmake_path(GET FREEIMAGE_SHAREDLIB FILENAME filename)
-		add_custom_command(
-			TARGET genbitmaps POST_BUILD
-			COMMAND ${CMAKE_COMMAND} -E rm ${CMAKE_CURRENT_BINARY_DIR}/${filename}
-		)
-#
+# 	if(WIN32)
+# 		# Temporarily the FreeImage dll is copied to the build directory
+# 		add_custom_command(
+# 			TARGET genbitmaps PRE_BUILD
+# 			COMMAND ${CMAKE_COMMAND} -E copy ${FREEIMAGE_SHAREDLIB} ${CMAKE_CURRENT_BINARY_DIR}
+# 		)
+# 		cmake_path(GET FREEIMAGE_SHAREDLIB FILENAME filename)
+# 		add_custom_command(
+# 			TARGET genbitmaps POST_BUILD
+# 			COMMAND ${CMAKE_COMMAND} -E rm ${CMAKE_CURRENT_BINARY_DIR}/${filename}
+# 		)
+# #
 
-	endif()
+# 	endif()
 endif()
 
 #MESSAGE (STATUS "SVG Converter: ${SVG_CONVERTER}")
