@@ -983,6 +983,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	 * MENUS
 	 */
 	wSetSplashInfo(_("Initializing menus"));
+	ToolbarLoadConfig();
 	LOG1(log_init, ( "createMenus\n" ))
 	CreateMenus();
 

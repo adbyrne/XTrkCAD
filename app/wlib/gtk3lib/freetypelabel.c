@@ -134,8 +134,6 @@ wFTLabelLoadFontFromFile(const char* filename)
 	if (FONTNOTCREATED(filename)) {
 		int error;
 
-		const char* directory = getcwd(NULL, 0);
-
 		error = FT_New_Face(library,
 		                    filename,
 		                    0,

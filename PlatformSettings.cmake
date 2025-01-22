@@ -1,12 +1,19 @@
 # Configure the platform specific settings
 #
 # Setup high-level build options ...
-if(UNIX)
-    include(FindPkgConfig)
-    set(XTRKCAD_USE_GTK_DEFAULT ON)
+
+if(XTRKCAD_USE_GTK3)
 	# path to GTK resouces
 	set(XTRKCAD_RESOURCE_ROOT "/org/xtrackcad/wlib")
 	set(XTRKCAD_SYMBOLS_ROOT "/org/xtrackcad/symbols")
+	set(XTRKCAD_ICONS_ROOT "/org/xtrackcad/icons")
+	message(STATUS "Plattform settings for GTK3")
+endif()
+
+if(UNIX)
+    include(FindPkgConfig)
+    set(XTRKCAD_USE_GTK_DEFAULT ON)
+
     # Configure help display and i18n
     if(APPLE)
         set(CMAKE_MACOSX_RPATH 0)

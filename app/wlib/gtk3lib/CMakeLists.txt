@@ -35,6 +35,7 @@ target_sources(xtrkcad-wlib
  	pulldnmenu.c
 	radio.c
 	recentuse.c
+	resource.c
 	scalectrl.c
 	stack.c
 	statusbar.c

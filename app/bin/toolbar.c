@@ -532,6 +532,24 @@ SaveToolbarConfig(void)
 
 }
 
+static char* resourceFiles[] = { "icons16.gresource", 
+								 "icons24.gresource", 
+								 "icons32.gresource" };
+
+void
+LoadIconResource(unsigned iconSize)
+{
+	char* pathToResourceFile = NULL;
+
+	MakeFullpath(&pathToResourceFile, wGetAppLibDir(), resourceFiles[iconSize], NULL);
+	if (pathToResourceFile) {
+
+		wLoadResourceFile(pathToResourceFile);
+
+		free(pathToResourceFile);
+	}
+}
+
 /**
  * Get the preferences for the toolbar from the configuration file.
  * Bits unused are cleared just to be sure;
@@ -562,7 +580,12 @@ ToolbarLoadConfig(void)
 		fprintf(recordF, "PARAMETER %s %s -> %ld", TOOLBAR_SECTION,
 			TOOLBAR_LAYER_BUTTONS, layerCount);
 
+	wPrefGetInteger("pref", "iconsize", (long*)&iconSize, 0);
+	if (recordF)
+		fprintf(recordF, "PARAMETER %s %s -> %ld", "pref",
+			"iconsize", iconSize);
 
+	LoadIconResource(iconSize);
 }
 
 /**

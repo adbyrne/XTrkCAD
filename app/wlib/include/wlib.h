@@ -1215,6 +1215,13 @@ void wPrefFormatLine(const char* section, const char* name,
 
 /*------------------------------------------------------------------------------
  *
+ * Resource
+ */
+
+wBool_t wLoadResourceFile(const char* filename);
+
+/*------------------------------------------------------------------------------
+ *
  * Statusbar
  */
 

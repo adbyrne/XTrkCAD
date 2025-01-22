@@ -19,7 +19,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-/* Generated file, do not edit! */
 
 #cmakedefine XTRKCAD_USE_GETTEXT
 #cmakedefine XTRKCAD_TESTING
@@ -28,7 +27,8 @@
 
 // root path used for GTK resources, used in GTK3 library only
 #define XTRKCAD_RESOURCE_PATH "@XTRKCAD_RESOURCE_ROOT@/"
-#define XTRKCAD_SYMBOLS_PATH "@XTRKCAD_SYMBOLS_PATH@/"
+#define XTRKCAD_SYMBOLS_PATH "@XTRKCAD_SYMBOLS_ROOT@/"
+#define XTRKCAD_ICONS_PATH "@XTRKCAD_ICONS_ROOT@/"
 
 #define XTRKCAD_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@"
 #define XTRKCAD_PACKAGE "@XTRKCAD_PACKAGE@"

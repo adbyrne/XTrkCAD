@@ -1,103 +1,88 @@
-# Generate XPM bitmaps from SVG files
+# create resource file to be compiled into the program
+cmake_minimum_required(VERSION 3.20)
 
-PROJECT(genbitmaps)
+set (RESOURCE_XML icons.gresource.xml)
+set (RESOURCE_XML_IN ${RESOURCE_XML}.in)
+set (ICONS_DEPENDENCIES CACHE INTERNAL "Icons dependencies")
 
-# Find the conversion tool 
+# find the resource compiler 
+find_program(RESOURCE_COMPILER NAMES glib-compile-resources REQUIRED)
 
-find_package(Inkscape)
+#create a list of icons
+if(NOT EXISTS ${RESOURCE_XML} OR (${RESOURCE_XML_IN} IS_NEWER_THAN ${RESOURCE_XML}))
+    #create the XML file
+    configure_file(${RESOURCE_XML}.in  ${RESOURCE_XML})
 
-if( NOT Inkscape_FOUND )
-	message( STATUS "Inkscape not found." )
-else()
-	message(STATUS "Inkscape is: ${Inkscape_EXECUTABLE}")
-	message(STATUS "Export option is: ${Inkscape_EXPORT}")
+    execute_process(
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMAND ${RESOURCE_COMPILER} --generate-dependencies ${RESOURCE_XML}
+        OUTPUT_VARIABLE RESOURCE_DEPENDENCIES 
+    )
 
-	set (XPMS
-		background benchwork bezier-line bezier-track block bottom box
-		bridge building car-inventory change-grid circle-center
-		circle-filled-center circle-filled-tangent circle-line-center
-		circle-line-tangent circle-line circle-tangent circle clone
-		connect control convert-from convert-to copy cornu curved-chord
-		curved-end curved-line-chord curved-line-end curved-line-middle
-		curved-line-tangent curved-middle curved-tangent cut delete
-		describe description dimension doc-export-bmap doc-export-dxf
-		doc-export-svg doc-export doc-import-mod doc-import doc-new doc-open 
-		doc-print doc-recent doc-revert doc-save-as doc-save doc-setup down 
-		ease-broad ease-cornu ease-gt-broad ease-gt-sharp ease-lt-broad 
-		ease-lt-sharp ease-none ease-normal ease-sharp
-		elevation exit extend filled-box filled-polygon go helix
-		info join-line join layers magnet manage map move
-		new-car ok pan-zoom parallel-line parallel parameter paste
-		polygon polyline profile protractor redo reflect roadbed
-		rotate ruler select sensor signal snap-curs snap-grid
-		split-draw split sticky-doc sticky-link sticky-note stop
-		straight-line straight switch-motor table-edge text ties top
-		train trim tunnel turnout-design turnout turntable undo
-		zoom-choose zoom-extent zoom-in zoom-out
-	)
-	set( PIXS 16 24 32 )
-
-	foreach(xpm ${XPMS})
-		foreach(pixelsize ${PIXS})
-			set(DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/png${pixelsize}")
-			set(PNGFILENAME "${xpm}.png")
-
-			if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/png${pixelsize}/${PNGFILENAME}" )
-				MESSAGE( STATUS "Custom ${DESTINATION}/${PNGFILENAME}" )
-				add_custom_command(
-					OUTPUT ${DESTINATION}/${PNGFILENAME}
-					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/png/${PNGFILENAME}
-					COMMAND ${CMAKE_COMMAND} -E make_directory ${DESTINATION}/
-					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/png${pixelsize}/${PNGFILENAME} ${DESTINATION}/${PNGFILENAME}
-				)
-			else()
-				MESSAGE( STATUS "SVG ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg ${Inkscape_EXPORT}${DESTINATION}/${PNGFILENAME}" )
-				add_custom_command(
-				 	OUTPUT ${DESTINATION}/${PNGFILENAME}
-				 	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg
-				 	COMMAND ${CMAKE_COMMAND} -E make_directory ${DESTINATION}
-				 	COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg -h ${pixelsize} ${Inkscape_EXPORT}${DESTINATION}/${PNGFILENAME}
-				)
-			endif()
-			# build a list of all the depends
-			list(APPEND PNG_RESULTS ${DESTINATION}/${PNGFILENAME})
-		endforeach()
-# 		add_custom_command(
-# 			OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm3
-# 			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}16.png
-# 			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}24.png
-# 			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}32.png
-# 			COMMAND pngtoxpm ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm3	
-# #			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm3 ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm3 
-#		)
-		# build a list of all the depends
-		list(APPEND XPM_RESULTS ${xpm}.xpm3)
-	endforeach()
-
-	add_custom_target (
-		genbitmaps 
-		DEPENDS ${XPM_RESULTS}
-		DEPENDS ${PNG_RESULTS}
-	)
-	
-# 	if(WIN32)
-# 		# Temporarily the FreeImage dll is copied to the build directory
-# 		add_custom_command(
-# 			TARGET genbitmaps PRE_BUILD
-# 			COMMAND ${CMAKE_COMMAND} -E copy ${FREEIMAGE_SHAREDLIB} ${CMAKE_CURRENT_BINARY_DIR}
-# 		)
-# 		cmake_path(GET FREEIMAGE_SHAREDLIB FILENAME filename)
-# 		add_custom_command(
-# 			TARGET genbitmaps POST_BUILD
-# 			COMMAND ${CMAKE_COMMAND} -E rm ${CMAKE_CURRENT_BINARY_DIR}/${filename}
-# 		)
-# #
-
-# 	endif()
+    # OUTPUT_VARIABLE is not a list but a single string value with newlines
+    # Convert it to a list and pop out the last newline character
+    string(REPLACE "\n" ";" RESOURCE_DEPENDENCIES ${RESOURCE_DEPENDENCIES})
+    list(POP_BACK RESOURCE_DEPENDENCIES)
 endif()
 
-#MESSAGE (STATUS "SVG Converter: ${SVG_CONVERTER}")
-#MESSAGE (STATUS "Source Dir: ${CMAKE_CURRENT_SOURCE_DIR}")
-#MESSAGE (STATUS "XPMs: ${XPMS}")
-#MESSAGE (STATUS "XPM_RESULTS: ${XPM_RESULTS}")
-#MESSAGE (STATUS "PNG_RESULTS: ${PNG_RESULTS}")
+set(ICONWIDTHS 16 24 32)
+
+#create the png files for all icons in three sizes
+foreach(iconfile ${RESOURCE_DEPENDENCIES})
+	foreach(pixelsize ${ICONWIDTHS})
+		set(DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/png${pixelsize}")
+		get_filename_component(iconfile ${iconfile} NAME_WE)
+		set(PNGFILENAME "${iconfile}.png")
+		set(SVGFILENAME "${iconfile}.svg")
+
+		if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/png${pixelsize}/${PNGFILENAME}" )
+			#message( STATUS "Custom ${DESTINATION}/${PNGFILENAME}" )
+			add_custom_command(
+				OUTPUT ${DESTINATION}/${PNGFILENAME}
+				DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/png${pixelsize}/${PNGFILENAME}
+				COMMAND ${CMAKE_COMMAND} -E make_directory ${DESTINATION}/
+				COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/png${pixelsize}/${PNGFILENAME} ${DESTINATION}/${PNGFILENAME}
+			)
+		else()
+			#message( STATUS "SVG ${CMAKE_CURRENT_SOURCE_DIR}/svg/${iconfile}.svg ${Inkscape_EXPORT}${DESTINATION}/${PNGFILENAME}" )
+			add_custom_command(
+				 OUTPUT ${DESTINATION}/${PNGFILENAME}
+			 	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/svg/${SVGFILENAME}
+			 	COMMAND ${CMAKE_COMMAND} -E make_directory ${DESTINATION}
+			 	COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${SVGFILENAME} -h ${pixelsize} ${Inkscape_EXPORT}${DESTINATION}/${PNGFILENAME}
+			)
+		endif()
+	endforeach()
+endforeach()
+
+#build one resource file per icon size
+foreach(WIDTH ${ICONWIDTHS})
+	list(TRANSFORM RESOURCE_DEPENDENCIES PREPEND ${CMAKE_CURRENT_BINARY_DIR}/png${WIDTH}/ OUTPUT_VARIABLE PNGDEPENDENCIES)
+	set(RESOURCE_FILE icons${WIDTH}.gresource)
+
+	#use the XML file to compile the resources into a source
+	add_custom_command(
+    	OUTPUT ${RESOURCE_FILE}
+    	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    	COMMAND ${RESOURCE_COMPILER}
+    	ARGS
+        	--target=${RESOURCE_FILE}
+        	--sourcedir=png${WIDTH} 
+        	${CMAKE_CURRENT_BINARY_DIR}/${RESOURCE_XML}
+    	VERBATIM
+    	MAIN_DEPENDENCY ${RESOURCE_XML}
+    	DEPENDS ${PNGDEPENDENCIES}
+	)
+
+	set(RESOURCE_FILES ${RESOURCE_FILES} ${RESOURCE_FILE})
+endforeach()
+
+# define target
+add_custom_target(
+  	genbitmaps
+    DEPENDS 
+        ${CMAKE_CURRENT_BINARY_DIR}/${RESOURCE_XML}
+		${RESOURCE_FILES}
+)
+
+ 
