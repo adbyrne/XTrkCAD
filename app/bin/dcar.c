@@ -2129,7 +2129,9 @@ EXPORT void CarItemDraw(
         int direction,
         BOOL_T locoIsMaster,
         vector_t *coupler,
+#ifdef CAR_CLEARANCE
         BOOL_T pencils,
+#endif
         track_p traverse)
 {
 	coOrd size, pos, pos2;
@@ -2169,9 +2171,11 @@ EXPORT void CarItemDraw(
 		DrawSegs( d, pos, item->angle-90.0, item->segPtr, item->segCnt, 0.0, color );
 	}
 
+#ifdef CAR_CLEARANCE
 	if (pencils) {
 // No code for pencils
 	}
+#endif
 
 	if ( drawCarTrucks ) {
 
