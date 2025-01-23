@@ -1001,7 +1001,7 @@ static void DrawDtoInit()
  *
  * \param d The drawing object
  * \param scaleInx The layout/track scale index
- * \param color The tie color. If black the color is read from the global tieColor.
+ * \param color The tie color. If black the color is read from the global tieColor in DrawTie().
  */
 static void DrawNormalTurnout(
         drawCmd_p d,
@@ -1018,9 +1018,6 @@ static void DrawNormalTurnout(
 //	int s0;
 	ANGLE_T a0;
 
-	if (color == wDrawColorBlack) {
-		color = tieColor;
-	}
 
 //	DIST_T trackGauge = GetTrkGauge(dtod.trk);
 
@@ -1246,7 +1243,7 @@ static void DrawNormalTurnout(
  *
  * \param d The drawing object
  * \param scaleInx The layout/track scale index
- * \param color The tie color. If black the color is read from the global tieColor.
+ * \param color The tie color. If black the color is read from the global tieColor in DrawTie().
  */
 static void DrawCurvedTurnout(
         drawCmd_p d,
@@ -1263,9 +1260,6 @@ static void DrawCurvedTurnout(
 	ANGLE_T a0, a1, a2;
 	struct extraDataCompound_t* xx = dtod.xx;
 
-	if (color == wDrawColorBlack) {
-		color = tieColor;
-	}
 
 	DrawDtoInit();
 
@@ -1505,7 +1499,7 @@ static void DrawCurvedTurnout(
   *
   * \param d The drawing object
   * \param scaleInx The layout/track scale index
-  * \param color The tie color. If black the color is read from the global tieColor.
+  * \param color The tie color. If black the color is read from the global tieColor in DrawTie().
   */
 static void DrawXingTurnout(
         drawCmd_p d,
@@ -1518,9 +1512,6 @@ static void DrawXingTurnout(
 	int cnt;
 	ANGLE_T cAngle;
 
-	if (color == wDrawColorBlack) {
-		color = tieColor;
-	}
 
 	coOrd c1, c2, s1, s2, p1, p2, q1;
 	int p0, q0;
@@ -1840,7 +1831,7 @@ static void DrawXingTurnout(
  *
  * \param d The drawing object
  * \param scaleInx The layout/track scale index
- * \param color The tie color. If black the color is read from the global tieColor.
+ * \param color The tie color. If black the color is read from the global tieColor in DrawTie().
  */
 static void DrawCrossTurnout(
         drawCmd_p d,
@@ -1853,9 +1844,6 @@ static void DrawCrossTurnout(
 	int cnt;
 	ANGLE_T angle;
 
-	if (color == wDrawColorBlack) {
-		color = tieColor;
-	}
 
 //	struct extraDataCompound_t* xx = dtod.xx;
 

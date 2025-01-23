@@ -924,9 +924,6 @@ EXPORT void DrawJointTrack(
 		return;
 	}
 	LOG( log_ease, 4, ( "DJT( (X%0.3f Y%0.3f A%0.3f) \n", pos.x, pos.y, angle ) )
-	if (color == wDrawColorBlack) {
-		color = normalColor;
-	}
 	if (!Scurve) {
 		/* print segments about 0.20" long */
 		len = (l0-l1)/(0.20*d->scale);
