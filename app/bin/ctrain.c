@@ -3246,7 +3246,7 @@ void InitCmdTrain(wMenu_p menu)
 #endif
 	trainPopupMI[DO_FLIPTRAIN]  = wMenuPushCreate(trainPopupM, "", _("Flip Train"),
 	                              0, TrainFunc, I2VP(DO_FLIPTRAIN));
-	trainPopupMI[DO_DESCRIBE] = wMenuPushCreate(trainPopupM, "", _("Describe"),
+	trainPopupMI[DO_DESCRIBE] = wMenuPushCreate(trainPopupM, "", _("Properties"),
 	                            0, TrainFunc, I2VP(DO_DESCRIBE));
 	trainPopupMI[DO_MUMASTER]   = wMenuPushCreate(trainPopupM, "", _("MU Master"),
 	                              0, TrainFunc, I2VP(DO_MUMASTER));

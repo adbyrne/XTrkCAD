@@ -12,7 +12,7 @@
 
 The \f{Change Menu} has all functions related to modifying objects that exist on the layout drawing.
 
-\dd \i{Properties} - sets \e{XTrackCAD} into \e{Describe} mode. Whenever an object is clicked on while in this mode, the \f{Properties} dialog is opened. This dialog allows direct manipulation of settings such as the objects length, position or orientation. (\K{cmdDescribe}).
+\dd \i{Properties} - sets \e{XTrackCAD} into \e{Property} mode. Whenever an object is clicked on while in this mode, the \f{Properties} dialog is opened. This dialog allows direct manipulation of settings such as the objects length, position or orientation. (\K{cmdDescribe}).
 
 \u000
 
@@ -1266,7 +1266,7 @@ The dialog can be closed with the 'X' button in the window's titlebar.
 
 \G{png.d/bdescrib.png}
 
-Clicking on the \f{Properties} (Describe Mode) button cancels all active commands, closes any open dialog windows and places focus on the main window.
+Clicking on the \f{Properties} (Property Mode) button cancels all active commands, closes any open dialog windows and places focus on the main window.
 
 Until an object is selected, the object under the cursor that will be selected with \e{Left-Click} is highlighted in blue.
 Objects in Frozen Layers will only be highlighted and selected if \f{Shift} is added.
@@ -1282,7 +1282,7 @@ The selected object is highlighted by a grey area.
 
 \G{png.d/dpropertieshighlight.png}
 
-\S2{drawDescribe} Draw Object Describe Fields
+\S2{drawDescribe} Draw Object Property Fields
 
 \S3{drawDescribeCommon} Common Draw Object Fields
 
@@ -1320,7 +1320,7 @@ If the Rotate Origin is set to \{0,0\}, the Object has an \e{Absolute} origin.
 
 \dt Rotate By
 
-\dd Some Draw objects (Polygon, Polyline, Lines, Curves, Circles, Text) can be rotated about their rotation origin in Describe.
+\dd Some Draw objects (Polygon, Polyline, Lines, Curves, Circles, Text) can be rotated about their rotation origin in Properties.
 In order to rotate them, the \f{Lock To Origin} must be enabled.
 After the rotation completes, the rotation angle will be set back to zero and all the points of the object will be adjusted to their absolute position in the layout.
 Negative values of rotation are counter-clockwise.
@@ -1334,7 +1334,7 @@ Note that for Text objects, the Rotation also changes the \f{Text Angle}.
 
 \dd The color of the line or the fill can be set
 
-\S3{drawDescribeStr} Straight Line Objects Describe Fields
+\S3{drawDescribeStr} Straight Line Objects Fields
 
 \dt End Pt 1
 
@@ -1358,7 +1358,7 @@ Note that for Text objects, the Rotation also changes the \f{Text Angle}.
 
 \dd The size of the arrows and text can be set to Tine, Small, Medium or Large.
 
-\S3{drawDescribeBench} BenchWork Objects Describe Fields
+\S3{drawDescribeBench} BenchWork Objects Fields
 
 \dt Lumber
 
@@ -1368,7 +1368,7 @@ Note that for Text objects, the Rotation also changes the \f{Text Angle}.
 
 \dd The timber can be orientated "On Edge" which will draw the smaller dimension or "Flat".
 
-\S3{drawDescribeCurve} Curved and Circle Objects Describe Fields
+\S3{drawDescribeCurve} Curved and Circle Objects Fields
 
 \dt Center
 
@@ -1382,7 +1382,7 @@ Note that for Text objects, the Rotation also changes the \f{Text Angle}.
 
 \dd For Curved Lines this is the length of the arc in degrees. If altered it will move the arc to respect the \f{Pivot} control setting.
 
-\S3{drawDescribePoly} Polygon Objects Describe Fields
+\S3{drawDescribePoly} Polygon Objects Fields
 
 \dt Fill
 
@@ -1404,7 +1404,7 @@ Note that for Text objects, the Rotation also changes the \f{Text Angle}.
 
 \dd Straight and Curved Lines, PolyLines, Polygons and Structures can be drawn with dotted, dashed, dash-dotted and dash-dot-dotted lines.
 
-\S3{drawDescribeText} Text Objects Describe Fields
+\S3{drawDescribeText} Text Objects Fields
 
 \dt Text Angle
 
@@ -1416,7 +1416,7 @@ This will be set by itself or by rotation of the starting position about the Rot
 
 \dd For Text objects, whether a line is drawn around the text.
 
-\S2{DescribeCompound} Structures, Sectional Track and Turnouts Describe Fields
+\S2{DescribeCompound} Structures, Sectional Track and Turnouts Object Fields
 
 \dt Pivot
 
@@ -1427,7 +1427,7 @@ These relative positions are calculated as though the object was rotated by zero
 
 \dd The Angle rotates the object about the Pivot point.
 
-\S2{DescribeTrack} Describe Track Fields
+\S2{DescribeTrack} Track Object Fields
 
 \S3{trackDescribeCommon} Common Track Object Fields
 
@@ -1458,7 +1458,7 @@ This can only be changed if the track is unconnected at that end. The elevation 
 \dd The Pivot control can be set to fix in place the start, or the middle or the end, and it applies to the Length, Track Angle and Angular Length controls.
 When these are changed the new dimensions are applied so as to keep the locked position in place.
 
-\S3{trackDescribeStr} Straight Track Describe Fields
+\S3{trackDescribeStr} Straight Track Fields
 
 
 \dt Track Angle
@@ -1466,7 +1466,7 @@ When these are changed the new dimensions are applied so as to keep the locked p
 \dd The angle of the Track object. This can be set if the track is not connected. It respects the value of the \f{Pivot} field
 
 
-\S3{trackDescribeCurve} Curved Track Describe Fields
+\S3{trackDescribeCurve} Curved Track Object Fields
 
 \dt Center
 
@@ -1489,7 +1489,7 @@ When these are changed the new dimensions are applied so as to keep the locked p
 \dd The ClockWise Angle (the angle from the center to the end position). Can only be modified if the second end of the curve is not connected.
 
 
-\S3{trackDescribeCornu} Cornu Track Describe Fields
+\S3{trackDescribeCornu} Cornu Track Object Fields
 
 \dt End Angle
 
@@ -1520,7 +1520,7 @@ It gives an idea of the "sharpness" of the curve.
 
 \dd The number of degrees that the curve executes - this number will rise if there are loops in the curve.
 
-\S3{trackDescribeBezier} Bezier Track Describe Fields
+\S3{trackDescribeBezier} Bezier Track Object Fields
 
 \dt Ctl Pt
 

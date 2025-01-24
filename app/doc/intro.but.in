@@ -356,7 +356,7 @@ Refer to \K{keyFeatures} and \K{addFeatures} for a listing of \e{XTrackCAD} feat
 
 \u000
 
-\b Describe objects
+\b Edit object properties
 
 \u000
 
@@ -738,7 +738,7 @@ You can use this menu to choose Metric units (\K{cmdPref}).
 
 The Tool Bar contains icons for each of the commands in the Menus. The icons shown can be customized using the \f{View->ToolBar} submenu.
 
-\b The main drawing Mode command is \f{Select} - which is shown with the red arrow icon. From this mode, selected objects can be \f{Modified} as well. A close second is the \f{Describe} mode which allows properties of Objects to be seen and Changed.
+\b The main drawing Mode command is \f{Select} - which is shown with the red arrow icon. From this mode, selected objects can be \f{Modified} as well. A close second is the \f{Property} mode which allows properties of Objects to be seen and Changed.
 
 \u000
 
