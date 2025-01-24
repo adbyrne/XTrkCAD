@@ -225,7 +225,7 @@ static paramGroup_t aboutPG = { "about", 0l, aboutPLs, COUNT( aboutPLs ) };
 void CreateAboutW(void *ptr)
 {
 	if (!aboutW) {
-		aboutPLs[I_ABOUTDRAW].winData = wIconCreatePixBufFromResource("xtc.png");
+		aboutPLs[I_ABOUTDRAW].winData = CreateSymbolFromResource("xtc.png");
 		FormRegister(&aboutPG);
 		aboutW = FormCreateDialog(&aboutPG, MakeWindowTitle(_("About")),
 		                          NULL, NULL,

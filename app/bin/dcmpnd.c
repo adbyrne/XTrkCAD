@@ -24,6 +24,7 @@
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
+#include "icons.h"
 #include "param.h"
 #include "include/paramfile.h"
 #include "shrtpath.h"
@@ -636,10 +637,7 @@ static int CompoundCustMgmProc(
 	return FALSE;
 }
 
-
-#include "bitmaps/turnout.xpm3"
-#include "bitmaps/building.xpm3"
-
+/**  \todo Check where the icons below are used and replace with fitting symbol */
 EXPORT void CompoundCustMgmLoad( void )
 {
 	int inx;
@@ -648,10 +646,10 @@ EXPORT void CompoundCustMgmLoad( void )
 	static wIcon_p structI = NULL;
 
 	if ( turnoutI == NULL ) {
-		turnoutI = wIconCreatePixMap( turnout_xpm3[0] );
+		turnoutI = CreateToolbarIconFromResource( "turnout.png");
 	}
 	if ( structI == NULL ) {
-		structI = wIconCreatePixMap( building_xpm3[0] );
+		structI = CreateToolbarIconFromResource( "building.png");
 	}
 
 	for ( inx=0; inx<turnoutInfo_da.cnt; inx++ ) {

@@ -35,6 +35,7 @@
 #include "cselect.h"
 #include "fileio.h"
 #include "common-ui.h"
+#include "icons.h"
 
 static BOOL_T debug = 0;
 /** @logcmd @showrefby join=n cjoin.c */
@@ -1560,24 +1561,21 @@ errorReturn:
 	return C_CONTINUE;
 
 }
-
+
 /*****************************************************************************
  *
  * INITIALIZATION
  *
  */
 
-#include "bitmaps/join.xpm3"
-#include "bitmaps/join-line.xpm3"
-
 void InitCmdJoin( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Join"), "cmdJoinSetCmd", _("Join") );
 	AddMenuButton( menu, CmdJoin, "cmdJoinTrack", _("Join Track"),
-	               wIconCreatePixMap(join_xpm3[iconSize]), LEVEL0_50,
+		CreateToolbarIconFromResource("join.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
 	AddMenuButton( menu, CmdJoinLine, "cmdJoinLine", _("Join Lines"),
-	               wIconCreatePixMap(join_line_xpm3[iconSize]), LEVEL0_50,
+		CreateToolbarIconFromResource("join-line.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
 	ButtonGroupEnd();
 	/** @logcmd @showrefby join=n cjoin.c Log Join Lines and Tracks command */

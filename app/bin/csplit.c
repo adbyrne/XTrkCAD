@@ -23,6 +23,7 @@
 #include "cundo.h"
 #include "compound.h"
 #include "cselect.h"
+#include "icons.h"
 #include "track.h"
 #include "draw.h"
 #include "fileio.h"
@@ -494,22 +495,17 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 	return C_CONTINUE;
 }
 
-
-#include "bitmaps/split.xpm3"
-#include "bitmaps/split-draw.xpm3"
-#include "bitmaps/trim.xpm3"
-
 void InitCmdSplit( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Split"), "cmdSplitSetCmd", _("Split") );
 	AddMenuButton( menu, CmdSplitTrack, "cmdSplitTrack", _("Split Track"),
-	               wIconCreatePixMap(split_xpm3[iconSize]), LEVEL0_50,
+		CreateToolbarIconFromResource("split.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP|IC_CMDMENU|IC_WANT_MOVE, ACCL_SPLIT,  NULL);
 	AddMenuButton( menu, CmdSplitDraw, "cmdSplitDraw", _("Split Draw"),
-	               wIconCreatePixMap(split_draw_xpm3[iconSize]), LEVEL0_50,
+		CreateToolbarIconFromResource("split-draw.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_SPLITDRAW, NULL);
 	AddMenuButton( menu, CmdTrimDraw, "cmdTrimDraw", _("Trim Draw"),
-	               wIconCreatePixMap(trim_xpm3[iconSize]), LEVEL0_50,
+		CreateToolbarIconFromResource("trim.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_TRIMDRAW, NULL);
 	ButtonGroupEnd();
 }

@@ -1021,7 +1021,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	if (!ParamFileListInit()) {
 		return NULL;
 	}
-
+	
 	/* initialize the layers */
 	LOG1(log_init, ("DefaultLayerProperties"));
 	DefaultLayerProperties();
@@ -1061,11 +1061,12 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 
 	wWinShow(mainW, TRUE);
 	wWinShow(mapW, mapVisible);
+	
 	wDestroySplash();
-
+	
 	/* this has to be called before ShowTip() */
 	InitSmallDlg();
-
+	
 	/* Compare the program version and display Beta warning if appropriate */
 	pref = wPrefGetString("misc", "version");
 	if((!pref) || (strcmp(pref,XTRKCAD_VERSION) != 0)) {

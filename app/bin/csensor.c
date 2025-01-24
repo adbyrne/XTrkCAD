@@ -51,6 +51,7 @@
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
+#include "icons.h"
 #include "layout.h"
 #include "param.h"
 #include "track.h"
@@ -577,15 +578,13 @@ static int SensorMgmProc ( int cmd, void * data )
 	return FALSE;
 }
 
-#include "bitmaps/sensor.xpm3"
-
 EXPORT void SensorMgmLoad ( void )
 {
 	track_p trk;
 	static wIcon_p sensorI = NULL;
 
 	if (sensorI == NULL) {
-		sensorI = wIconCreatePixMap( sensor_xpm3[iconSize] );
+		sensorI = CreateToolbarIconFromResource( "sensor.png");
 	}
 
 	TRK_ITERATE(trk) {
@@ -599,7 +598,7 @@ EXPORT void SensorMgmLoad ( void )
 EXPORT void InitCmdSensor ( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdSensor, "cmdSensor", _("Sensor"),
-	               wIconCreatePixMap( sensor_xpm3[iconSize] ), LEVEL0_50, IC_STICKY|IC_POPUP2,
+		CreateToolbarIconFromResource( "sensor.png"), LEVEL0_50, IC_STICKY | IC_POPUP2,
 	               ACCL_SENSOR, NULL );
 }
 

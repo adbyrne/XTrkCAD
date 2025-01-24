@@ -51,6 +51,7 @@
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
+#include "icons.h"
 #include "layout.h"
 #include "param.h"
 #include "track.h"
@@ -620,15 +621,13 @@ static int ControlMgmProc ( int cmd, void * data )
 	return FALSE;
 }
 
-#include "bitmaps/control.xpm3"
-
 EXPORT void ControlMgmLoad ( void )
 {
 	track_p trk;
 	static wIcon_p controlI = NULL;
 
 	if (controlI == NULL) {
-		controlI = wIconCreatePixMap( control_xpm3[iconSize] );
+		controlI = CreateToolbarIconFromResource( "control.png");
 	}
 
 	TRK_ITERATE(trk) {
@@ -642,7 +641,7 @@ EXPORT void ControlMgmLoad ( void )
 EXPORT void InitCmdControl ( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdControl, "cmdControl", _("Control"),
-	               wIconCreatePixMap( control_xpm3[iconSize] ), LEVEL0_50, IC_STICKY|IC_POPUP2,
+		CreateToolbarIconFromResource( "control.png"), LEVEL0_50, IC_STICKY | IC_POPUP2,
 	               ACCL_CONTROL, NULL );
 }
 

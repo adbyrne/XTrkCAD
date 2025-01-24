@@ -163,7 +163,7 @@ void wButtonSetIcon(wControl_p control, wIcon_p icon)
 	
 		AddPixbufToButton(control->widget, pixbuf);
 
-		g_object_unref(pixbuf);
+		//g_object_unref(pixbuf);
 		control->attributes.button.icon = icon;
 	}
 }
@@ -203,10 +203,10 @@ void wlibButtonDoAction(
  */
 
 static void buttonClick(
-        GtkWidget *widget,
-        gpointer value)
+	GtkWidget* widget,
+	gpointer value)
 {
-	struct button *b = CONTROL_GET_ATTRIBUTES_PTR(((wControl_p)value),button);
+	struct button* b = CONTROL_GET_ATTRIBUTES_PTR(((wControl_p)value), button);
 
 	if (b->action && DoCallbackOnClick()) {
 		b->action(((wControl_p)value)->context);
@@ -218,9 +218,9 @@ static void buttonClick(
  * Called after expose event default hander - allows the button to be outlined
  */
 static wBool_t drawButton(
-        GtkWidget *widget,
-        cairo_t *cr,
-        gpointer g)
+	GtkWidget* widget,
+	cairo_t* cr,
+	gpointer g)
 {
 	return wControlExpose(widget, cr, (wControl_p)g);
 }
@@ -258,29 +258,30 @@ static wBool_t drawButton(
  */
 
 wControl_p wButtonCreate(
-        wControl_p	parent,
-        wWinPix_t	x,
-        wWinPix_t	y,
-        const char 	* helpStr,
-        const char	* labelStr,
-        long 	option,
-        wWinPix_t 	width,
-        wButtonCallBack_p action,
-        void 	* context)
+	wControl_p	parent,
+	wWinPix_t	x,
+	wWinPix_t	y,
+	const char* helpStr,
+	const char* labelStr,
+	long 	option,
+	wWinPix_t 	width,
+	wButtonCallBack_p action,
+	void* context)
 {
 	wControl_p b;
 	struct button* button;
 
-	b = wlibControlNew( B_BUTTON, parent, helpStr, context );
+	b = wlibControlNew(B_BUTTON, parent, helpStr, context);
 	button = CONTROL_GET_ATTRIBUTES_PTR(b, button);
 	button->action = action;
 
-	if (ISDEFINEDINBUILDER(parent)||ISDIALOGACTION(option)) {
+	if (ISDEFINEDINBUILDER(parent) || ISDIALOGACTION(option)) {
 		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
 		if (labelStr) {
 			wButtonSetLabel(b, labelStr);
 		}
-	} else {
+	}
+	else {
 		b->widget = GTK_WIDGET(gtk_toggle_button_new());
 
 		if (width > 0) {
@@ -289,6 +290,10 @@ wControl_p wButtonCreate(
 
 		if (labelStr) {
 			if (option & BO_ICON) {
+				if (((wIcon_p)labelStr)->bits == NULL)
+				{
+					printf("Invalid icon for %s\n", helpStr);
+				}
 				wButtonSetIcon(b, (wIcon_p)labelStr);
 			} else {
 				wButtonSetLabel(b, labelStr);
@@ -309,6 +314,8 @@ wControl_p wButtonCreate(
 
 	wlibAddHelpString(b->widget, helpStr);
 	wlibAddTooltip(b->widget, helpStr);
+
+	wFlush();
 	return b;
 }
 
@@ -384,8 +391,12 @@ wControl_p wButtonCreateForToolbar(
 	buttonAttributes->action = action;
 	buttonControl->widget = GTK_WIDGET(gtk_toggle_button_new());
 	
-	wButtonSetIcon(buttonControl, icon);
-
+	if (icon->bits) {
+		wButtonSetIcon(buttonControl, icon);
+	}
+	else {
+		printf("Invalid icon for toolbar button %s\n", helpStr);
+	}
 
 
 	/** \todo BO_ABUT should be renamed to BO_OVERFLOW_MENU and be included with the button */
@@ -408,7 +419,7 @@ wControl_p wButtonCreateForToolbar(
 
 	wlibAddHelpString(buttonControl->widget, helpStr);
 	wlibAddTooltip(buttonControl->widget, helpStr);
-
+	wFlush();
 	return buttonControl;
 }
 

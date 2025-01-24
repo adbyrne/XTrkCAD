@@ -24,6 +24,7 @@
 #include "cundo.h"
 #include "param.h"
 #include "fileio.h"
+#include "icons.h"
 #include "cselect.h"
 #include "track.h"
 #include "common-ui.h"
@@ -688,14 +689,10 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 	return C_CONTINUE;
 }
 
-
-
-#include "bitmaps/describe.xpm3"
-
 void InitCmdDescribe(wMenu_p menu)
 {
 	describeCmdInx = AddMenuButton(menu, CmdDescribe, "cmdDescribe",
-	                               _("Properties"), wIconCreatePixMap(describe_xpm3[iconSize]),
+	                               _("Properties"), CreateToolbarIconFromResource("describe.png"),
 	                               LEVEL0, IC_CANCEL|IC_POPUP|IC_WANT_MOVE|IC_CMDMENU, ACCL_DESCRIBE, NULL);
 	RegisterChangeNotification(DescChange);
 	ParamRegister(&describePG);

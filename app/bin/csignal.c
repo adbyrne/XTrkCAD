@@ -52,6 +52,7 @@
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
+#include "icons.h"
 #include "layout.h"
 #include "param.h"
 #include "track.h"
@@ -911,15 +912,13 @@ static int SignalMgmProc ( int cmd, void * data )
 	return FALSE;
 }
 
-#include "bitmaps/signal.xpm3"
-
 EXPORT void SignalMgmLoad ( void )
 {
 	track_p trk;
 	static wIcon_p signalI = NULL;
 
 	if (signalI == NULL) {
-		signalI = wIconCreatePixMap( signal_xpm3[iconSize] );
+		signalI = CreateToolbarIconFromResource( "signal.png");
 	}
 
 	TRK_ITERATE(trk) {
@@ -933,7 +932,7 @@ EXPORT void SignalMgmLoad ( void )
 EXPORT void InitCmdSignal ( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdSignal, "cmdSignal", _("Signal"),
-	               wIconCreatePixMap( signal_xpm3[iconSize] ), LEVEL0_50, IC_STICKY|IC_POPUP2,
+		CreateToolbarIconFromResource( "signal.png"), LEVEL0_50, IC_STICKY | IC_POPUP2,
 	               ACCL_SIGNAL, NULL );
 }
 

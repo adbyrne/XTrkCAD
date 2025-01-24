@@ -22,6 +22,7 @@
 
 #include "cundo.h"
 #include "fileio.h"
+#include "icons.h"
 #include "param.h"
 #include "track.h"
 #include "draw.h"
@@ -257,13 +258,10 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 	return C_CONTINUE;
 }
 
-
-#include "bitmaps/text.xpm3"
-
 void InitCmdText( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdText, "cmdText", _("Text"),
-	               wIconCreatePixMap(text_xpm3[iconSize]), LEVEL0_50,
+		CreateToolbarIconFromResource("text.png"), LEVEL0_50,
 	               IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_TEXT, NULL );
 	textPopupM = MenuRegister( "Text Font" );
 	wMenuPushCreate( textPopupM, "", _("Fonts..."), 0, SelectFont, NULL );

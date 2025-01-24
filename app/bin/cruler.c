@@ -23,6 +23,7 @@
 #include "cundo.h"
 #include "cselect.h"
 #include "fileio.h"
+#include "icons.h"
 #include "param.h"
 #include "track.h"
 #include "misc.h"
@@ -381,18 +382,14 @@ STATUS_T ModifyRuler(
 	return C_CONTINUE;
 }
 
-
-#include "bitmaps/ruler.xpm3"
-#include "bitmaps/protractor.xpm3"
-
 void InitCmdRuler( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Measurement"), "cmdMeasureSetCmd", _("Measurement") );
 	AddMenuButton( menu, CmdRuler, "cmdRuler", _("Ruler"),
-	               wIconCreatePixMap(ruler_xpm3[iconSize]), LEVEL0,
+		CreateToolbarIconFromResource("ruler.png"), LEVEL0,
 	               IC_STICKY|IC_POPUP|IC_NORESTART, ACCL_RULER, NULL );
 	AddMenuButton( menu, CmdAngle, "cmdAngle", _("Protractor"),
-	               wIconCreatePixMap(protractor_xpm3[iconSize]), LEVEL0,
+		CreateToolbarIconFromResource("protractor.png"), LEVEL0,
 	               IC_STICKY|IC_POPUP|IC_NORESTART, ACCL_ANGLE, NULL );
 	ButtonGroupEnd();
 }

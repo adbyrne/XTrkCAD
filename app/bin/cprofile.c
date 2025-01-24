@@ -24,6 +24,7 @@
 #include "cselect.h"
 #include "cundo.h"
 #include "layout.h"
+#include "icons.h"
 #include "param.h"
 #include "shrtpath.h"
 #include "track.h"
@@ -1512,15 +1513,13 @@ static void ProfileChange(long changes)
 	}
 }
 
-#include "bitmaps/profile.xpm3"
-
 EXPORT void InitCmdProfile(wMenu_p menu)
 {
 	log_profile = LogFindIndex("profile");
 	ParamRegister(&profilePG);
 
 	AddMenuButton(menu, CmdProfile, "cmdProfile", _("Profile"),
-	              wIconCreatePixMap(profile_xpm3[iconSize]), LEVEL0_50,
+		CreateToolbarIconFromResource("profile.png"), LEVEL0_50,
 	              IC_LCLICK|IC_CMDMENU|IC_POPUP3,
 	              ACCL_PROFILE, NULL);
 	profilePopupM = MenuRegister("Profile Mode");

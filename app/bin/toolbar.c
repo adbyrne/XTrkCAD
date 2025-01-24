@@ -348,7 +348,7 @@ EXPORT void ToolbarLayout(void* data)
 	}
 
 	if (ISBITSET(toolbarSet, BG_HOTBAR)) {
-		LayoutHotBar(data);
+		//LayoutHotBar(data);
 	} else {
 		HideHotBar();
 	}

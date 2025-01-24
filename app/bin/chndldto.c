@@ -29,6 +29,7 @@
 #include "track.h"
 #include "draw.h"
 #include "common-ui.h"
+#include "icons.h"
 
 #define PTRACE(X)
 
@@ -373,11 +374,9 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 }
 
 
-#include "bitmaps/turnout-design.xpm3"
-
 EXPORT void InitCmdHandLaidTurnout( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdHandLaidTurnout, "cmdHandLaidTurnout",
-	               _("HandLaidTurnout"), wIconCreatePixMap(turnout_design_xpm3[iconSize]),
+	               _("HandLaidTurnout"), CreateToolbarIconFromResource("turnout-design.png"),
 	               LEVEL0_50, IC_STICKY|IC_INITNOTSTICKY|IC_POPUP2, ACCL_HNDLDTO, NULL );
 }

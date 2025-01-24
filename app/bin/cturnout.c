@@ -30,6 +30,7 @@
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
+#include "icons.h"
 #include "layout.h"
 #include "param.h"
 #include "cselect.h"
@@ -3179,13 +3180,11 @@ static STATUS_T CmdTurnoutHotBar(
 }
 
 #ifdef TURNOUTCMD
-#include "bitmaps/turnout.xpm3"
-
 
 EXPORT void InitCmdTurnout(wMenu_p menu)
 {
 	AddMenuButton(menu, CmdTurnout, "cmdNewFixedTrack", _("Fixed-Track"),
-	              wIconCreatePixMap(turnout_xpm3[iconSize]), LEVEL0_50,
+		CreateToolbarIconFromResource("turnout.png"), LEVEL0_50,
 	              IC_WANT_MOVE | IC_STICKY | IC_LCLICK | IC_CMDMENU | IC_POPUP2, ACCL_TURNOUT,
 	              NULL);
 	turnoutHotBarCmdInx = AddMenuButton(menu, CmdTurnoutHotBar, "cmdTurnoutHotBar",

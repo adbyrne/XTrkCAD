@@ -51,6 +51,7 @@
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
+#include "icons.h"
 #include "param.h"
 #include "track.h"
 #include "trkendpt.h"
@@ -1000,10 +1001,6 @@ static int BlockMgmProc ( int cmd, void * data )
 }
 
 
-//#include "bitmaps/blocknew.xpm"
-//#include "bitmaps/blockedit.xpm"
-//#include "bitmaps/blockdel.xpm"
-#include "bitmaps/block.xpm3"
 
 EXPORT void BlockMgmLoad( void )
 {
@@ -1011,7 +1008,7 @@ EXPORT void BlockMgmLoad( void )
 	static wIcon_p blockI = NULL;
 
 	if ( blockI == NULL) {
-		blockI = wIconCreatePixMap( block_xpm3[iconSize] );
+		blockI = CreateToolbarIconFromResource("block.png");
 	}
 
 	TRK_ITERATE(trk) {
@@ -1026,7 +1023,7 @@ EXPORT void InitCmdBlock( wMenu_p menu )
 	blockName[0] = '\0';
 	blockScript[0] = '\0';
 	AddMenuButton( menu, CmdBlockCreate, "cmdBlockCreate", _("Block"),
-	               wIconCreatePixMap( block_xpm3[iconSize] ), LEVEL0_50,
+		CreateToolbarIconFromResource( "block.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2, ACCL_BLOCK1, NULL );
 	ParamRegister( &blockPG );
 }

@@ -26,6 +26,7 @@
 #include "cstraigh.h"
 #include "custom.h"
 #include "fileio.h"
+#include "icons.h"
 #include "param.h"
 #include "track.h"
 
@@ -259,31 +260,19 @@ static void EasementChange( long changes )
 	}
 }
 
-
-#include "bitmaps/ease-none.xpm3"
-#include "bitmaps/ease-sharp.xpm3"
-#include "bitmaps/ease-gt-sharp.xpm3"
-#include "bitmaps/ease-lt-sharp.xpm3"
-#include "bitmaps/ease-normal.xpm3"
-#include "bitmaps/ease-broad.xpm3"
-#include "bitmaps/ease-gt-broad.xpm3"
-#include "bitmaps/ease-lt-broad.xpm3"
-#include "bitmaps/ease-cornu.xpm3"
-
-
 EXPORT addButtonCallBack_t EasementInit( void )
 {
 	ParamRegister( &easementPG );
 
-	enone_bm = wIconCreatePixMap( ease_none_xpm3[iconSize] );
-	eltsharp_bm = wIconCreatePixMap( ease_lt_sharp_xpm3[iconSize] );
-	esharp_bm = wIconCreatePixMap( ease_sharp_xpm3[iconSize] );
-	egtsharp_bm = wIconCreatePixMap( ease_gt_sharp_xpm3[iconSize] );
-	enormal_bm = wIconCreatePixMap( ease_normal_xpm3[iconSize] );
-	eltbroad_bm = wIconCreatePixMap( ease_lt_broad_xpm3[iconSize] );
-	ebroad_bm = wIconCreatePixMap( ease_broad_xpm3[iconSize] );
-	egtbroad_bm = wIconCreatePixMap( ease_gt_broad_xpm3[iconSize] );
-	ecornu_bm = wIconCreatePixMap( ease_cornu_xpm3[iconSize] );
+	enone_bm = CreateToolbarIconFromResource( "ease-none.png");
+	eltsharp_bm = CreateToolbarIconFromResource( "ease-lt-sharp.png");
+	esharp_bm = CreateToolbarIconFromResource( "ease-sharp.png");
+	egtsharp_bm = CreateToolbarIconFromResource( "ease-gt-sharp.png");
+	enormal_bm = CreateToolbarIconFromResource( "ease-normal.png");
+	eltbroad_bm = CreateToolbarIconFromResource( "ease-lt-broad.png");
+	ebroad_bm = CreateToolbarIconFromResource( "ease-broad.png");
+	egtbroad_bm = CreateToolbarIconFromResource( "ease-gt-broad.png");
+	ecornu_bm = CreateToolbarIconFromResource( "ease-cornu.png");
 	easementB = AddToolbarButton( "cmdEasement", enone_bm, 0, DoEasementRedir,
 	                              NULL );
 

@@ -403,20 +403,20 @@ void DoParamFiles(void * junk)
 	void * data;
 
 	if (paramFileW == NULL) {
-		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_UNLOADED ] = wIconCreatePixBufFromResource(
+		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_UNLOADED ] = CreateSymbolFromResource(
 		                        "greydot.png");
-		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_NOTUSABLE ] = wIconCreatePixBufFromResource(
+		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_NOTUSABLE ] = CreateSymbolFromResource(
 		                        "reddot.png");
-		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_COMPATIBLE ] = wIconCreatePixBufFromResource(
+		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_COMPATIBLE ] = CreateSymbolFromResource(
 		                        "yellowdot.png");
-		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_FIT] = wIconCreatePixBufFromResource("greendot.png");
-		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_UNLOADED ] = wIconCreatePixBufFromResource(
+		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_FIT] = CreateSymbolFromResource("greendot.png");
+		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_UNLOADED ] = CreateSymbolFromResource(
 		                        "greystar.png");
-		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_NOTUSABLE ] = wIconCreatePixBufFromResource(
+		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_NOTUSABLE ] = CreateSymbolFromResource(
 		                        "redstar.png");
-		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_COMPATIBLE ] = wIconCreatePixBufFromResource(
+		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_COMPATIBLE ] = CreateSymbolFromResource(
 		                        "yellowstar.png");
-		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_FIT ] = wIconCreatePixBufFromResource(
+		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_FIT ] = CreateSymbolFromResource(
 		                        "greenstar.png");
 
 		ParamRegister(&paramFilePG);

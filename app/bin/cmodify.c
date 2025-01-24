@@ -35,6 +35,7 @@
 #include "cselect.h"
 #include "common-ui.h"
 #include "draw.h"
+#include "icons.h"
 
 EXPORT wIndex_t modifyCmdInx;
 
@@ -868,19 +869,17 @@ extendTrackUp:
 	return C_CONTINUE;
 }
 
-
+
 /*****************************************************************************
  *
  * INITIALIZATION
  *
  */
 
-#include "bitmaps/extend.xpm3"
-
 void InitCmdModify( wMenu_p menu )
 {
 	modifyCmdInx = AddMenuButton( menu, CmdModify, "cmdModify", _("Modify"),
-	                              wIconCreatePixMap(extend_xpm3[iconSize]), LEVEL0_50,
+		CreateToolbarIconFromResource("extend.png"), LEVEL0_50,
 	                              IC_STICKY|IC_POPUP|IC_WANT_MOVE|IC_CMDMENU, ACCL_MODIFY, NULL );
 	/** @logcmd @showrefby modify=n cmodify.c Log Modify command */
 	log_modify = LogFindIndex( "modify" );

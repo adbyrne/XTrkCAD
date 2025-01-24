@@ -150,7 +150,7 @@ wIcon_p wIconCreateBitMap(wWinPix_t w,
                           const char* bits,
                           wDrawColor color);
 wIcon_p wIconCreatePixMap(const char* pm[]);
-wIcon_p wIconCreatePixBufFromResource(const char* filename);
+wIcon_p wIconCreatePixBufFromResource(const char *prefix, const char* filename);
 void wIconSetColor(wIcon_p ip, wDrawColor color);
 
 /*------------------------------------------------------------------------------

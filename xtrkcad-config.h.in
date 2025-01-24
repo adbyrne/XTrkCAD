@@ -26,7 +26,7 @@
 #cmakedefine XTRKCAD_GTK3_WLIB 
 
 // root path used for GTK resources, used in GTK3 library only
-#define XTRKCAD_RESOURCE_PATH "@XTRKCAD_RESOURCE_ROOT@/"
+#define XTRKCAD_RESOURCE_PATH "@XTRKCAD_BUILDER_ROOT@/"
 #define XTRKCAD_SYMBOLS_PATH "@XTRKCAD_SYMBOLS_ROOT@/"
 #define XTRKCAD_ICONS_PATH "@XTRKCAD_ICONS_ROOT@/"
 

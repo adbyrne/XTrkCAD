@@ -23,6 +23,7 @@
 #include "cstraigh.h"
 #include "cundo.h"
 #include "fileio.h"
+#include "icons.h"
 #include "param.h"
 #include "track.h"
 #include "cselect.h"
@@ -1081,14 +1082,10 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 	}
 }
 
-
-#include "bitmaps/turntable.xpm3"
-
-
 EXPORT void InitCmdTurntable( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdTurntable, "cmdTurntable", _("Custom Turntable"),
-	               wIconCreatePixMap(turntable_xpm3[iconSize]), LEVEL0_50,
+		CreateToolbarIconFromResource("turntable.png"), LEVEL0_50,
 	               IC_STICKY|IC_INITNOTSTICKY, ACCL_TURNTABLE, NULL );
 }
 

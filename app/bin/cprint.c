@@ -23,6 +23,7 @@
 #include "custom.h"
 #include "dynstring.h"
 #include "fileio.h"
+#include "icons.h"
 #include "layout.h"
 #include "param.h"
 #include "track.h"
@@ -1562,11 +1563,10 @@ static STATUS_T CmdPrint(
 	}
 }
 
-
-#include "bitmaps/doc-print.xpm3"
-
 EXPORT wIndex_t InitCmdPrint( wMenu_p menu )
 {
+	wIcon_p printIcon;
+
 	ParamRegister( &printPG );
 	currPrintGrid = newPrintGrid;
 	log_print = LogFindIndex( "print" );
@@ -1574,8 +1574,10 @@ EXPORT wIndex_t InitCmdPrint( wMenu_p menu )
 	printGridPopupM = MenuRegister( "Print Grid Rotate" );
 	AddRotateMenu( printGridPopupM, PrintGridRotate );
 	ParamRegister( &customMarginPG );
+
+	printIcon = CreateToolbarIconFromResource("doc-print.png");
 	return AddMenuButton( menu, CmdPrint, "cmdPrint", N_("Print..."),
-	                      wIconCreatePixMap(doc_print_xpm3[iconSize]), LEVEL0,
+		printIcon, LEVEL0,
 	                      IC_LCLICK|IC_POPUP3|IC_CMDMENU, ACCL_PRINT, NULL );
 }
 

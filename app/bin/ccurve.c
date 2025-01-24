@@ -28,7 +28,7 @@
 #include "custom.h"
 #include "fileio.h"
 #include "cselect.h"
-
+#include "icons.h"
 #include "param.h"
 #include "track.h"
 #include "cbezier.h"
@@ -1008,50 +1008,40 @@ static STATUS_T CmdHelix( wAction_t action, coOrd pos )
 {
 	return CmdCircleCommon( action, pos, TRUE );
 }
-
-#include "bitmaps/curved-end.xpm3"
-#include "bitmaps/curved-tangent.xpm3"
-#include "bitmaps/curved-middle.xpm3"
-#include "bitmaps/curved-chord.xpm3"
-#include "bitmaps/bezier-track.xpm3"
-#include "bitmaps/cornu.xpm3"
-#include "bitmaps/circle.xpm3"
-#include "bitmaps/circle-tangent.xpm3"
-#include "bitmaps/circle-center.xpm3"
-// #include "bitmaps/helix.xpm"
+
 
 EXPORT void InitCmdCurve( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Curve Track"), "cmdCurveSetCmd", _("Curve Tracks") );
 	AddMenuButton( menu, CmdCurve, "cmdCurveEndPt", _("Curve from End-Pt"),
-	               wIconCreatePixMap( curved_end_xpm3[iconSize] ), LEVEL0_50,
+		CreateToolbarIconFromResource( "curved-end.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE1, I2VP(0) );
 	AddMenuButton( menu, CmdCurve, "cmdCurveTangent", _("Curve from Tangent"),
-	               wIconCreatePixMap( curved_tangent_xpm3[iconSize] ), LEVEL0_50,
+		CreateToolbarIconFromResource( "curved-tangent.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE2, I2VP(1) );
 	AddMenuButton( menu, CmdCurve, "cmdCurveCenter", _("Curve from Center"),
-	               wIconCreatePixMap( curved_middle_xpm3[iconSize] ), LEVEL0_50,
+		CreateToolbarIconFromResource( "curved-middle.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE3, I2VP(2) );
 	AddMenuButton( menu, CmdCurve, "cmdCurveChord", _("Curve from Chord"),
-	               wIconCreatePixMap( curved_chord_xpm3[iconSize] ), LEVEL0_50,
+		CreateToolbarIconFromResource( "curved-chord.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE4, I2VP(3) );
 	AddMenuButton( menu, CmdBezCurve, "cmdBezier", _("Bezier Curve"),
-	               wIconCreatePixMap( bezier_track_xpm3[iconSize] ), LEVEL0_50,
+		CreateToolbarIconFromResource( "bezier-track.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_BEZIER, I2VP(bezCmdCreateTrack) );
 	AddMenuButton( menu, CmdCornu, "cmdCornu", _("Cornu Curve"),
-	               wIconCreatePixMap( cornu_xpm3[iconSize] ), LEVEL0_50,
+		CreateToolbarIconFromResource( "cornu.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CORNU, I2VP(cornuCmdCreateTrack));
 	ButtonGroupEnd();
 
 	ButtonGroupBegin( _("Circle Track"), "cmdCircleSetCmd", _("Circle Tracks") );
 	AddMenuButton( menu, CmdCircle, "cmdCircleFixedRadius",
-	               _("Fixed Radius Circle"), wIconCreatePixMap( circle_xpm3[iconSize] ), LEVEL0_50,
+	               _("Fixed Radius Circle"), CreateToolbarIconFromResource( "circle.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2, ACCL_CIRCLE1, I2VP(0) );
 	AddMenuButton( menu, CmdCircle, "cmdCircleTangent", _("Circle from Tangent"),
-	               wIconCreatePixMap( circle_tangent_xpm3[iconSize] ), LEVEL0_50,
+		CreateToolbarIconFromResource( "circle-tangent.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2, ACCL_CIRCLE2, I2VP(1) );
 	AddMenuButton( menu, CmdCircle, "cmdCircleCenter", _("Circle from Center"),
-	               wIconCreatePixMap( circle_center_xpm3[iconSize] ), LEVEL0_50,
+		CreateToolbarIconFromResource( "circle-center.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2, ACCL_CIRCLE3, I2VP(2) );
 	ButtonGroupEnd();
 

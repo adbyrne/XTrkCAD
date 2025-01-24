@@ -141,33 +141,26 @@ wIcon_p wIconCreatePixMap( const char *pm[] )
 	return ip;
 }
 
-GdkPixbuf *
-CreatePixBufFromResource(char *filename)
-{
-	GdkPixbuf * pixbuf;
-	gchar* path;
-	GError* error = NULL;
-
-	path = g_strconcat(XTRKCAD_SYMBOLS_PATH,
-		filename, 
-		NULL);
-
-	pixbuf = gdk_pixbuf_new_from_resource(path, &error);
-
-
-	return(pixbuf);
-}
-
-wIcon_p wIconCreatePixBufFromResource(const char *filename)
+wIcon_p wIconCreatePixBufFromResource(const char *prefix, const char *filename)
 {
 	wIcon_p ip;
-	ip = (wIcon_p)malloc(sizeof * ip);
+	GError* error = NULL;
+
+	ip = (wIcon_p)g_malloc0(sizeof * ip);
 	if (ip) {
+		gchar* path;
+		path = g_strconcat(prefix,
+			filename,
+			NULL);
+
 		ip->gtkIconType = ICON_PIXBUF;
-		ip->w = 0;
-		ip->h = 0;
-		ip->color = 0;
-		ip->bits = (char*)CreatePixBufFromResource(filename);
+		ip->bits = (char*)gdk_pixbuf_new_from_resource(path, &error);
+		if (error) {
+			fprintf(stderr, "Error reading icon: %s\n", error->message);
+			g_error_free(error);
+		}
+
+		g_free(path);
 	} 
 	return ip;
 }

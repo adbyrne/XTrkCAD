@@ -29,6 +29,7 @@
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
+#include "icons.h"
 #include "layout.h"
 #include "param.h"
 #include "paths.h"
@@ -1511,16 +1512,12 @@ EXPORT void SelectBelow( void * unused )
 	UndoEnd();
 }
 
-
-#include "bitmaps/top.xpm3"
-#include "bitmaps/bottom.xpm3"
-
 EXPORT void InitCmdAboveBelow( void )
 {
 	wIcon_p bm_p;
-	bm_p = wIconCreatePixMap( top_xpm3[iconSize] );
+	bm_p = CreateToolbarIconFromResource( "top.png");
 	AddToolbarButton( "cmdAbove", bm_p, IC_SELECTED|IC_POPUP, SelectAbove, NULL );
-	bm_p = wIconCreatePixMap( bottom_xpm3[iconSize] );
+	bm_p = CreateToolbarIconFromResource( "bottom.png");
 	AddToolbarButton( "cmdBelow", bm_p, IC_SELECTED|IC_POPUP, SelectBelow, NULL );
 }
 

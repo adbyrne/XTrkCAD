@@ -26,6 +26,7 @@
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
+#include "icons.h"
 #include "layout.h"
 #include "param.h"
 #include "track.h"
@@ -2970,17 +2971,6 @@ static STATUS_T CmdCarDescAction(
 }
 #endif
 
-#include "bitmaps/train.xpm3"
-#include "bitmaps/exit.xpm3"
-#include "bitmaps/new-car.xpm3"
-#include "bitmaps/go.xpm3"
-#include "bitmaps/stop.xpm3"
-
-#include "bitmaps/zero.xpm"
-#include "bitmaps/greendot.xpm"
-#include "bitmaps/reddot.xpm"
-
-
 static void CmdTrainStopGo(void * unused)
 {
 	wIcon_p icon;
@@ -3198,23 +3188,23 @@ void InitCmdTrain(wMenu_p menu)
 {
 	log_trainMove = LogFindIndex("trainMove");
 	log_trainPlayback = LogFindIndex("trainPlayback");
-	trainPLs[I_ZERO].winLabel = (char*)wIconCreatePixMap(zero_xpm);
+	trainPLs[I_ZERO].winLabel = (char*)CreateSymbolFromResource("zero.png");
 	ParamRegister(&trainPG);
 	trainCmdInx = AddMenuButton(menu, CmdTrain, "cmdTrain", _("Run Trains"),
-	                            wIconCreatePixMap(train_xpm3[iconSize]), LEVEL0_50,
+		CreateToolbarIconFromResource("train.png"), LEVEL0_50,
 	                            IC_POPUP3|IC_LCLICK|IC_RCLICK|IC_WANT_MOVE, 0,
 	                            NULL);
-	stopI = wIconCreatePixMap(reddot);
-	goI = wIconCreatePixMap(greendot);
-	stopB = wIconCreatePixMap(stop_xpm3[iconSize]);
-	goB = wIconCreatePixMap(go_xpm3[iconSize]);
+	stopI = CreateSymbolFromResource("reddot.png");
+	goI = CreateSymbolFromResource("greendot.png");
+	stopB = CreateSymbolFromResource("stop.png");
+	goB = CreateSymbolFromResource("go.png");
 	trainPauseB = AddToolbarButton("cmdTrainPause", stopB, IC_MODETRAIN_ONLY,
 	                               CmdTrainStopGo, NULL);
-	AddToolbarButton("cmdTrainExit", wIconCreatePixMap(exit_xpm3[iconSize]),
+	AddToolbarButton("cmdTrainExit", CreateToolbarIconFromResource("exit.png"),
 	                 IC_MODETRAIN_ONLY,
 	                 CmdTrainExit, NULL);
 	newcarB = AddToolbarButton("cmdTrainNewCar",
-	                           wIconCreatePixMap(new_car_xpm3[iconSize]),
+		CreateToolbarIconFromResource("new-car.png"),
 	                           IC_MODETRAIN_ONLY, CarItemLoadList, NULL);
 	T_CAR = InitObject(&carCmds);
 

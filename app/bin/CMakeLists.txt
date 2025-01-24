@@ -170,6 +170,7 @@ target_sources(xtrkcad-lib
     fileio.c
     fileio.h
     filenoteui.c
+    icons.c
     i18n.c
     layout.c
     layout.h

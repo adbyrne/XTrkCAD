@@ -54,6 +54,7 @@
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
+#include "icons.h"
 #include "param.h"
 #include "track.h"
 #include "common-ui.h"
@@ -858,20 +859,13 @@ static int SwitchmotorMgmProc ( int cmd, void * data )
 	return FALSE;
 }
 
-//#include "bitmaps/switchmotor.xpm"
-
-//#include "bitmaps/switchmnew.xpm"
-//#include "bitmaps/switchmedit.xpm"
-//#include "bitmaps/switchmdel.xpm"
-#include "bitmaps/switch-motor.xpm3"
-
 EXPORT void SwitchmotorMgmLoad( void )
 {
 	track_p trk;
 	static wIcon_p switchmI = NULL;
 
 	if ( switchmI == NULL) {
-		switchmI = wIconCreatePixMap( switch_motor_xpm3[iconSize] );
+		switchmI = CreateToolbarIconFromResource( "switch_motor.png");
 	}
 
 	TRK_ITERATE(trk) {
@@ -887,7 +881,7 @@ EXPORT void InitCmdSwitchMotor( wMenu_p menu )
 	switchmotorReverse[0] = '\0';
 	switchmotorPointSense[0] = '\0';
 	AddMenuButton( menu, CmdSwitchMotorCreate, "cmdSwitchMotorCreate",
-	               _("Switch Motor"), wIconCreatePixMap( switch_motor_xpm3[iconSize] ),
+	               _("Switch Motor"), CreateToolbarIconFromResource( "switch-motor.png"),
 	               LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_SWITCHMOTOR1,
 	               NULL );
 	ParamRegister( &switchmotorPG );

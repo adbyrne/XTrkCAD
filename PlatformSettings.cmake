@@ -4,9 +4,10 @@
 
 if(XTRKCAD_USE_GTK3)
 	# path to GTK resouces
-	set(XTRKCAD_RESOURCE_ROOT "/org/xtrackcad/wlib")
-	set(XTRKCAD_SYMBOLS_ROOT "/org/xtrackcad/symbols")
-	set(XTRKCAD_ICONS_ROOT "/org/xtrackcad/icons")
+	set(XTRKCAD_RESOURCE_ROOT "/org/xtrackcad")
+	set(XTRKCAD_BUILDER_ROOT "${XTRKCAD_RESOURCE_ROOT}/wlib")
+	set(XTRKCAD_SYMBOLS_ROOT "${XTRKCAD_RESOURCE_ROOT}/symbols")
+	set(XTRKCAD_ICONS_ROOT "${XTRKCAD_RESOURCE_ROOT}/icons")
 	message(STATUS "Plattform settings for GTK3")
 endif()
 

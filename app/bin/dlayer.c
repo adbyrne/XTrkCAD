@@ -27,6 +27,7 @@
 #include "paths.h"
 #include "dynstring.h"
 #include "fileio.h"
+#include "icons.h"
 #include "layout.h"
 #include "param.h"
 #include "track.h"
@@ -2076,8 +2077,6 @@ static void DoLayer(void * unused)
 	layoutLayerChanged = FALSE;
 }
 
-#include "bitmaps/background.xpm3"
-
 static char* customFonts[] = {
 	"xtrackcad-10.bdf",
 	"xtrackcad-15.bdf",
@@ -2134,7 +2133,7 @@ void InitLayers(int cmdGroup)
 
 	/* background button */
 	backgroundB = AddToolbarButton("cmdBackgroundShow",
-	                               wIconCreatePixMap(background_xpm3[iconSize]), 0,
+		CreateToolbarIconFromResource("background.png"), 0,
 	                               BackgroundToggleShow, NULL);
 	wControlSetBalloonText(backgroundB, _("Show/Hide Background"));
 	wControlActive(backgroundB, FALSE);

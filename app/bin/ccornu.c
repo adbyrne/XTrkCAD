@@ -1,7 +1,3 @@
-
-
-
-
 /** \file ccornu.c
  * Cornu Command. Draw or modify a Cornu Easement Track.
  */
@@ -80,6 +76,7 @@
 #include "drawgeom.h"
 #include "cjoin.h"
 #include "common.h"
+#include "icons.h"
 #include "param.h"
 #include "layout.h"
 #include "cundo.h"
@@ -3261,17 +3258,14 @@ static STATUS_T CmdConvertFrom(
 	}
 }
 
-#include "bitmaps/convert-to.xpm3"
-#include "bitmaps/convert-from.xpm3"
-
 EXPORT void InitCmdCornu( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Convert"), "cmdConvertSetCmd", _("Convert") );
 	AddMenuButton( menu, CmdConvertTo, "cmdConvertTo", _("Convert To Cornu"),
-	               wIconCreatePixMap(convert_to_xpm3[iconSize]), LEVEL0_50,
+		CreateToolbarIconFromResource("convert-to.png"), LEVEL0_50,
 	               IC_STICKY|IC_LCLICK|IC_POPUP3|IC_WANT_MOVE,ACCL_CONVERTTO, NULL );
 	AddMenuButton( menu, CmdConvertFrom, "cmdConvertFrom", _("Convert From Cornu"),
-	               wIconCreatePixMap(convert_from_xpm3[iconSize]), LEVEL0_50,
+		CreateToolbarIconFromResource("convert-from.png"), LEVEL0_50,
 	               IC_STICKY|IC_LCLICK|IC_POPUP3|IC_WANT_MOVE,ACCL_CONVERTFR, NULL );
 	cornuHotBarCmdInx = AddMenuButton(menu, cmdCornuCreate, "cmdCornuCreate", "",
 	                                  NULL, LEVEL0_50, IC_STICKY|IC_POPUP3|IC_WANT_MOVE, 0, NULL);
