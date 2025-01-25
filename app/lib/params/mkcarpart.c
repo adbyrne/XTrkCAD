@@ -184,7 +184,7 @@ void capitalize(
 }
 
 
-void canonicalize( char * name )
+void canonicalize_( char * name )
 {
 	char * cp, * cq;
 	for ( cp=cq=name; *cp; cp++ ) {
@@ -211,7 +211,7 @@ void lookupRoadname(
 	char * repmarkS )
 {
 	roadname_p r_p1, r_p2;
-	canonicalize( key );
+	canonicalize_( key );
 	if ( key == NULL || key[0] == '\0' || strnicmp( key, "undec", 5 ) == 0 ) {
 		roadnameS[0] = '\0';
 		repmarkS[0] = '\0';
