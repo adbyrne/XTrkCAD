@@ -1,7 +1,8 @@
 # Update Param Files
 # First non-comment line must be numeric date: YYYYMMDD
 # If this is less or equal to 'file.updatetime' in xtrkcad.rc/ini then this file is ignored
-20240119
+#20240119
+20250125
 # Files listed here are
 # - File Renames: Same CONTENTS, different files (old files should be deleted)
 # - Modified CONTENTS: multiple CONTENTS lines. 1st is active contents, subsequent lines are old
@@ -11,7 +12,7 @@ HO-Atlas Code 100 Track.xtp
 HO-fl-model.xtp
 HO-fl-profi.xtp
 HO-Peco-Code70USA.xtp
-HO-Walthers Cornerstone 1.xtp
+#HO-Walthers Cornerstone 1.xtp
 N-walthers-n.xtp
 # Updated files from V5.3.0B1
 1-mrkln.xtp
@@ -32,3 +33,5 @@ N-Bachmann EZ.xtp
 HO-TrixExpress Tracks.xtp
 HO-Kato.xtp
 N-MiniTrix Track.xtp
+#20250125
+HO-Walthers Cornerstone.xtp
