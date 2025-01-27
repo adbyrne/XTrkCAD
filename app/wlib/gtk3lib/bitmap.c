@@ -86,59 +86,12 @@ wBitmapViewCreate( wControl_p parent, wWinPix_t x, wWinPix_t y, long options,
 	/* create the bitmap from supplied image attributes */
 	if (iconP->gtkIconType == ICON_PIXBUF) {
 		pixbuf = iconP->bits;
-	}
-
-	if (iconP->gtkIconType == ICON_BITMAP) {
-		pixbuf = gdk_pixbuf_new_from_xpm_data((const char**)iconP->bits);
-	}
-
-	if (pixbuf) {
 		bt->widget = gtk_image_new_from_pixbuf(pixbuf);
 		gtk_widget_show(bt->widget);
 
 		wlibBasicGridAttach(parent, bt->widget, x, y, 1, 1);
 	}
 	return( (wControl_p)bt );
-}
-
-/**
- * Create a two-tone icon
- * 
- * \param w IN width of icon
- * \param h IN height of icon
- * \param bits IN bitmap
- * \param color IN color 
- * \returns icon handle
- */
-
-wIcon_p wIconCreateBitMap( wWinPix_t w, wWinPix_t h, const char * bits, wDrawColor color )
-{
-	wIcon_p ip;
-	ip = (wIcon_p)malloc( sizeof *ip );
-	ip->gtkIconType = ICON_BITMAP;
-	ip->w = w;
-	ip->h = h;
-	ip->color = color;
-	ip->bits = bits;
-	return ip;
-}
-
-/**
- * Create an icon from a pixmap
- * \param pm IN pixmap
- * \returns icon handle
- */
-
-wIcon_p wIconCreatePixMap( const char *pm[] )
-{
-	wIcon_p ip;
-	ip = (wIcon_p)malloc( sizeof *ip );
-	ip->gtkIconType = ICON_PIXMAP;
-	ip->w = 0;
-	ip->h = 0;
-	ip->color = 0;
-	ip->bits = pm;
-	return ip;
 }
 
 wIcon_p wIconCreatePixBufFromResource(const char *prefix, const char *filename)

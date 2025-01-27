@@ -27,6 +27,7 @@
 #include "custom.h"
 #include "dynstring.h"
 #include "fileio.h"
+#include "icons.h"
 #include "layout.h"
 #include "paths.h"
 #include "include/paramfile.h"

@@ -401,7 +401,7 @@ void wlibBasicDrawFillCircle(struct draw * drawingArea,
 	wDrawOpts opts);
 
 /* bitmap.c */
-#define ICON_BITMAP (1)
+
 #define ICON_PIXMAP (2)
 #define ICON_PIXBUF (3)
 

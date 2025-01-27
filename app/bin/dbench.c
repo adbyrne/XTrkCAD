@@ -37,20 +37,6 @@
 
 static char *benchTypeS[] = { "", N_(" L-Girder"), N_(" T-Girder") };
 
-#include "bitmaps/bo_edge.xpm"
-#include "bitmaps/bo_flat.xpm"
-#include "bitmaps/bo_ll.xpm"
-#include "bitmaps/bo_lr.xpm"
-#include "bitmaps/bo_lld.xpm"
-#include "bitmaps/bo_lrd.xpm"
-#include "bitmaps/bo_llu.xpm"
-#include "bitmaps/bo_lru.xpm"
-#include "bitmaps/bo_lli.xpm"
-#include "bitmaps/bo_lri.xpm"
-#include "bitmaps/bo_t.xpm"
-#include "bitmaps/bo_tr.xpm"
-#include "bitmaps/bo_tl.xpm"
-#include "bitmaps/bo_ti.xpm"
 
 typedef struct {
 	char * name;
@@ -58,24 +44,24 @@ typedef struct {
 	wIcon_p icon;
 } orientData_t;
 static orientData_t rectOrientD[] = {
-	{ N_("On Edge"), bo_edge_xpm },
-	{ N_("Flat"), bo_flat_xpm }
+	{ N_("On Edge"), "bo_edge.png" },
+	{ N_("Flat"), "bo_flat.png" }
 };
 static orientData_t lgirderOrientD[] = {
-	{ N_("Left"), bo_ll_xpm },
-	{ N_("Right"), bo_lr_xpm },
-	{ N_("Left-Down"), bo_lld_xpm },
-	{ N_("Right-Down"), bo_lrd_xpm },
-	{ N_("Left-Up"), bo_llu_xpm },
-	{ N_("Right-Up"), bo_lru_xpm },
-	{ N_("Left-Inverted"), bo_lli_xpm },
-	{ N_("Right-Inverted"), bo_lri_xpm }
+	{ N_("Left"), "bo_ll.png" },
+	{ N_("Right"), "bo_lr.png" },
+	{ N_("Left-Down"), "bo_lld.png" },
+	{ N_("Right-Down"), "bo_lrd.png" },
+	{ N_("Left-Up"), "bo_llu.png" },
+	{ N_("Right-Up"), "bo_lru.png" },
+	{ N_("Left-Inverted"), "bo_lli.png" },
+	{ N_("Right-Inverted"), "bo_lri.png" }
 };
 static orientData_t tgirderOrientD[] = {
-	{ N_("Normal"), bo_t_xpm },
-	{ N_("Right"), bo_tr_xpm },
-	{ N_("Left"), bo_tl_xpm },
-	{ N_("Inverted"), bo_ti_xpm }
+	{ N_("Normal"), "bo_t.png" },
+	{ N_("Right"), "bo_tr.png" },
+	{ N_("Left"), "bo_tl.png" },
+	{ N_("Inverted"), "bo_ti.png" }
 };
 
 static struct {
@@ -103,7 +89,7 @@ EXPORT void BenchUpdateOrientationList(
 	for (cnt=orientD[type].cnt-1; cnt>=0; cnt--,op++) {
 #ifdef WINDOWS
 		if (op->icon == NULL) {
-			op->icon = wIconCreatePixMap( op->xpm );
+			op->icon = wIconCreatePixBufFromResource( XTRKCAD_SYMBOLS_PATH, op->xpm);
 		}
 		wListAddValue( list, NULL, op->icon, op );
 #else

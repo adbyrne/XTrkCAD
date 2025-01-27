@@ -572,16 +572,11 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 	return C_CONTINUE;
 }
 
-#include "bitmaps/note.xbm"
-#include "bitmaps/link.xbm"
-#include "bitmaps/clip.xbm"
-
 void InitTrkNote(wMenu_p menu)
 {
-	note_bm = wDrawBitMapCreate(mainD.d, note_width, note_width, 8, 8, note_bits);
-	link_bm = wDrawBitMapCreate(mainD.d, note_width, note_width, 8, 8, link_bits);
-	document_bm = wDrawBitMapCreate(mainD.d, note_width, note_width, 8, 8,
-	                                clip_bits);
+	note_bm = wDrawBitMapCreate(mainD.d, 8, 8, XTRKCAD_SYMBOLS_PATH, "note.png");
+	link_bm = wDrawBitMapCreate(mainD.d, 8, 8, XTRKCAD_SYMBOLS_PATH, "link.png");
+	document_bm = wDrawBitMapCreate(mainD.d, 8, 8, XTRKCAD_SYMBOLS_PATH, "clip.png");
 
 	ButtonGroupBegin(_("Notes"), "cmdNoteCmd", _("Add notes"));
 	for (int i = 0; i < NOTETYPESCOUNT; i++) {

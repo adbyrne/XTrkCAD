@@ -40,7 +40,6 @@ EXPORT long minGridSpacing = 5;
 
 #define CROSSTICK
 #ifdef CROSSTICK
-#include "bitmaps/cross0.xbm"
 static wDrawBitMap_p cross0_bm;
 #endif
 
@@ -187,8 +186,7 @@ EXPORT void DrawGrid(
 
 #ifdef CROSSTICK
 	if (!cross0_bm) {
-		cross0_bm = wDrawBitMapCreate( mainD.d, cross0_width, cross0_height, 2, 2,
-		                               cross0_bits );
+		cross0_bm = wDrawBitMapCreate( mainD.d, 2, 2, XTRKCAD_SYMBOLS_PATH, "cross0.png");
 	}
 #endif
 	unsigned long drawOptions = D->options;

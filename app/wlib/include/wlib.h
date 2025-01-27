@@ -145,11 +145,7 @@ wControl_p wBitmapViewCreate(wControl_p parent,
                          wWinPix_t y, 
                          long options, 
                          const wIcon_p iconP);
-wIcon_p wIconCreateBitMap(wWinPix_t w, 
-                          wWinPix_t h, 
-                          const char* bits,
-                          wDrawColor color);
-wIcon_p wIconCreatePixMap(const char* pm[]);
+
 wIcon_p wIconCreatePixBufFromResource(const char *prefix, const char* filename);
 void wIconSetColor(wIcon_p ip, wDrawColor color);
 
@@ -964,11 +960,11 @@ void wDrawGetSize(
 /* Bitmaps */
 wDrawBitMap_p wDrawBitMapCreate(
     wControl_p drawingArea,
-    int w,
-    int h,
-    int x,
-    int y,
-    const unsigned char* fbits);
+    int xpos,
+    int ypos,
+    const char *prefix,
+    const char* filename);
+
 void wDrawBitMap(
     wControl_p bd,
     wDrawBitMap_p bm,

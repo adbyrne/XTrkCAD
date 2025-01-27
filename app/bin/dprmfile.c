@@ -23,6 +23,7 @@
 #include "custom.h"
 #include "dynstring.h"
 #include "fileio.h"
+#include "icons.h"
 #include "param.h"
 #include "include/paramfile.h"
 #include "include/paramfilelist.h"

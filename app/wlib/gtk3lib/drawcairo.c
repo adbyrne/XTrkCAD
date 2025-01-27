@@ -57,7 +57,7 @@ struct wDrawBitMap_t {
 	int h;
 	int x;
 	int y;
-	const unsigned char * bits;
+	GdkPixbuf * pixbuf;
 };
 
 struct draw * psPrint_d;
@@ -918,27 +918,40 @@ void * wDrawGetContext(
 
 wDrawBitMap_p wDrawBitMapCreate(
         wControl_p drawingArea,
-        int w,
-        int h,
         int x,
         int y,
-        const unsigned char * fbits )
+		const char *prefix,
+		const char *filename )
 {
-	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
-	g_assert(drawingArea->type == B_DRAW);
-
+	GError* error = NULL; 
 	wDrawBitMap_p bm;
+	
+	g_assert(drawingArea->type == B_DRAW);
+	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	
+	bm = (wDrawBitMap_p)g_malloc0( sizeof *bm );
+	if (bm) {
+		gchar* path;
+		path = g_strconcat(prefix,
+			filename,
+			NULL);
 
-	bm = (wDrawBitMap_p)malloc( sizeof *bm );
-	bm->w = w;
-	bm->h = h;
-	/*bm->pixmap = gtkMakeIcon( NULL, fbits, w, h, wDrawColorBlack, &bm->mask );*/
-	bm->bits = fbits;
-	bm->x = x;
-	bm->y = y;
+		bm->pixbuf = gdk_pixbuf_new_from_resource(path, &error);
+		if (error) {
+			fprintf(stderr, "Error reading icon: %s\n", error->message);
+			g_error_free(error);
+		}
+		bm->w = gdk_pixbuf_get_width(bm->pixbuf);
+		bm->h = gdk_pixbuf_get_height(bm->pixbuf);;
+		bm->x = x;
+		bm->y = y;
+
+		g_free(path);
+	}
 	return bm;
 }
 
+/**  \todo That doesn't throw any warnings at compile but needs refactoring and testing at runtime */
 
 void wDrawBitMap(
         wControl_p drawingArea,
@@ -947,89 +960,20 @@ void wDrawBitMap(
         wDrawColor color,
         wDrawOpts opts )
 {
-	GdkRectangle update_rect;
 	struct draw *bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
 	g_assert(drawingArea->type == B_DRAW);
 
-	int i, j, wb;
-	wDrawPix_t xx, yy;
-	wControl_p b = (wControl_p)bd;
-	GdkPixbuf * gdk_pixbuf, * cairo_pixbuf;
 	cairo_surface_t * surface = NULL;
 
 	x = INMAPX( bd, x-bm->x );
 	y = INMAPY( bd, y-bm->y )-bm->h;
-	wb = (bm->w+7)/8;
-
 
 	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color,
 	                 opts);
-	cairo_pixbuf = bd->pixbuf;
 
+	gdk_cairo_set_source_pixbuf(cairo, bm->pixbuf, x, y);
+	cairo_paint(cairo);
 
-	for ( i=0; i<bm->w; i++ )
-		for ( j=0; j<bm->h; j++ )
-			if ( bm->bits[ j*wb+(i>>3) ] & (1<<(i&07)) ) {
-				xx = x+i;
-				yy = y+j;
-#ifdef CURSOR_SURFACE
-				if ( 0 <= xx && xx < bd->w &&
-				     0 <= yy && yy < bd->h ) {
-					gdk_pixbuf = bd->pixbuf;
-					b = (wControl_p)bd;
-				} else if ( (opts&wDrawOptNoClip) != 0 ) {
-					xx += bd->realX;
-					yy += bd->realY;
-					b = wlibGetControlFromPos( bd->parent, xx, yy );
-					if ( b ) {
-						if ( b->type == B_DRAW ) {
-							gdk_pixbuf = ((wDraw_p)b)->pixbuf;
-						} else {
-							gdk_pixbuf = gdk_pixbuf_get_from_window(gtk_widget_get_window(bd->widget),xx,yy,
-							                                        bd->w, bd->h);
-						}
-						xx -= b->realX;
-						yy -= b->realY;
-					} else {
-						gdk_pixbuf = gdk_pixbuf_get_from_window(gtk_widget_get_window(bd->widget),xx,yy,
-						                                        bd->w, bd->h);
-					}
-				} else {
-					continue;
-				}
-
-				if (new_widget != widget) {
-					if (cairo) {
-						cairo_destroy(cairo);
-					}
-					cairo = NULL;
-					if (widget && (widget != bd->parent->widget)) {
-						gtk_widget_queue_draw(GTK_WIDGET(widget));
-					}
-					if ( (opts&wDrawOptCursor) || (opts&wDrawOptCursorRmv)
-					     || (opts&wDrawOptCursorQuit)) {
-						if (!b) { b = (wControl_p)(bd->parent->widget); }
-						cairo = CreateCursorSurface(b,&b->cursor_surface, b->w, b->h, color, opts);
-						widget = b->widget;
-						gc = NULL;
-						if ((opts&wDrawOptCursorRmv) || (opts&wDrawOptCursorQuit)) {
-							b->cursor_surface.show = FALSE;
-						} else {
-							b->cursor_surface.show = TRUE;
-						}
-					} else {
-						continue;
-					}
-					widget = new_widget;
-				}
-				if ((opts&wDrawOptCursorQuit) || (opts&wDrawOptCursorQuit) ) { continue; }
-#endif
-				cairo_rectangle(cairo, xx, yy, 1, 1);
-				cairo_fill(cairo);
-				if ( b && b->type == B_DRAW ) {
-					gtk_widget_queue_draw_area( drawingArea->widget, xx-1, yy-1, 3, 3 );
-				}
-			}
 	gtkDrawDestroyCairoContext(cairo);
 	gtk_widget_queue_draw(drawingArea->widget);
 }

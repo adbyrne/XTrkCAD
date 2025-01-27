@@ -294,18 +294,6 @@ static coOrd playbackPos;
 static wBool_t bDoFlash = FALSE;
 static wDrawColor flashColor;
 
-#include "bitmaps/arrow0.xbm"
-#include "bitmaps/arrow0_shift.xbm"
-#include "bitmaps/arrow0_ctl.xbm"
-#include "bitmaps/arrow3.xbm"
-#include "bitmaps/arrow3_shift.xbm"
-#include "bitmaps/arrow3_ctl.xbm"
-#include "bitmaps/arrows.xbm"
-#include "bitmaps/arrowr3.xbm"
-#include "bitmaps/arrowr3_shift.xbm"
-#include "bitmaps/arrowr3_ctl.xbm"
-#include "bitmaps/flash.xbm"
-
 static wDrawColor rightDragColor;
 static wDrawColor leftDragColor;
 static wDrawBitMap_p arrow0_bm;
@@ -1638,28 +1626,17 @@ EXPORT BOOL_T MacroInit( void )
 	rightDragColor = drawColorRed;
 	leftDragColor = drawColorBlue;
 
-	arrow0_bm = wDrawBitMapCreate( mainD.d, arrow0_width, arrow0_height, 12, 12,
-	                               arrow0_bits );
-	arrow0_shift_bm = wDrawBitMapCreate( mainD.d, arrow0_shift_width,
-	                                     arrow0_shift_height, 12, 12, arrow0_shift_bits );
-	arrow0_ctl_bm = wDrawBitMapCreate( mainD.d, arrow0_ctl_width, arrow0_ctl_height,
-	                                   12, 12, arrow0_ctl_bits );
-	arrow3_bm = wDrawBitMapCreate( mainD.d, arrow3_width, arrow3_height, 12, 12,
-	                               arrow3_bits );
-	arrow3_shift_bm = wDrawBitMapCreate( mainD.d, arrow3_shift_width,
-	                                     arrow3_shift_height, 12, 12, arrow3_shift_bits );
-	arrow3_ctl_bm = wDrawBitMapCreate( mainD.d, arrow3_ctl_width, arrow3_ctl_height,
-	                                   12, 12, arrow3_ctl_bits );
-	arrowr3_bm = wDrawBitMapCreate( mainD.d, arrowr3_width, arrowr3_height, 12, 12,
-	                                arrowr3_bits );
-	arrowr3_shift_bm = wDrawBitMapCreate( mainD.d, arrowr3_shift_width,
-	                                      arrowr3_shift_height, 12, 12, arrowr3_shift_bits );
-	arrowr3_ctl_bm = wDrawBitMapCreate( mainD.d, arrowr3_ctl_width,
-	                                    arrowr3_ctl_height, 12, 12, arrowr3_ctl_bits );
-	arrows_bm = wDrawBitMapCreate( mainD.d, arrows_width, arrows_height, 12, 12,
-	                               arrows_bits );
-	flash_bm = wDrawBitMapCreate( mainD.d, flash_width, flash_height, 12, 12,
-	                              flash_bits );
+	arrow0_bm = wDrawBitMapCreate( mainD.d, 12, 12, XTRKCAD_SYMBOLS_PATH,	"arrow0.png");
+	arrow0_shift_bm = wDrawBitMapCreate(mainD.d, 12, 12, XTRKCAD_SYMBOLS_PATH, "arrow0_shift.png");
+	arrow0_ctl_bm = wDrawBitMapCreate(mainD.d, 12, 12, XTRKCAD_SYMBOLS_PATH, "arrow0_ctl.png");
+	arrow3_bm = wDrawBitMapCreate( mainD.d, 12, 12, XTRKCAD_SYMBOLS_PATH,"arrow3.png");
+	arrow3_shift_bm = wDrawBitMapCreate(mainD.d, 12, 12, XTRKCAD_SYMBOLS_PATH, "arrow3_shift.png");
+	arrow3_ctl_bm = wDrawBitMapCreate(mainD.d, 12, 12, XTRKCAD_SYMBOLS_PATH, "arrow3_ctl.png");
+	arrowr3_bm = wDrawBitMapCreate( mainD.d, 12, 12, XTRKCAD_SYMBOLS_PATH, "arrowr3.png");
+	arrowr3_shift_bm = wDrawBitMapCreate(mainD.d, 12, 12, XTRKCAD_SYMBOLS_PATH, "arrowr3_shift.png");
+	arrowr3_ctl_bm = wDrawBitMapCreate(mainD.d, 12, 12, XTRKCAD_SYMBOLS_PATH, "arrowr3_ctl.png");
+	arrows_bm = wDrawBitMapCreate( mainD.d, 12, 12, XTRKCAD_SYMBOLS_PATH,"arrows.png");
+	flash_bm = wDrawBitMapCreate( mainD.d, 12, 12, XTRKCAD_SYMBOLS_PATH,"flash.png");
 
 	ParamRegister( &recordPG );
 	ParamRegister( &demoPG );

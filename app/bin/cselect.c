@@ -39,13 +39,6 @@
 #include "common-ui.h"
 #include "ctrain.h"
 
-
-#include "bitmaps/bmendpt.xbm"
-#include "bitmaps/bma0.xbm"
-#include "bitmaps/bma45.xbm"
-#include "bitmaps/bma90.xbm"
-#include "bitmaps/bma135.xbm"
-
 #define SETMOVEMODE "MOVEMODE"
 
 EXPORT wIndex_t selectCmdInx;
@@ -3779,16 +3772,11 @@ EXPORT void InitCmdSelect2( wMenu_p menu )
 {
 
 
-	endpt_bm = wDrawBitMapCreate( mainD.d, bmendpt_width, bmendpt_width, 7, 7,
-	                              bmendpt_bits );
-	angle_bm[0] = wDrawBitMapCreate( mainD.d, bma90_width, bma90_width, 7, 7,
-	                                 bma90_bits );
-	angle_bm[1] = wDrawBitMapCreate( mainD.d, bma135_width, bma135_width, 7, 7,
-	                                 bma135_bits );
-	angle_bm[2] = wDrawBitMapCreate( mainD.d, bma0_width, bma0_width, 7, 7,
-	                                 bma0_bits );
-	angle_bm[3] = wDrawBitMapCreate( mainD.d, bma45_width, bma45_width, 7, 7,
-	                                 bma45_bits );
+	endpt_bm = wDrawBitMapCreate( mainD.d,  7, 7, XTRKCAD_SYMBOLS_PATH, "bmendpt.png");
+	angle_bm[0] = wDrawBitMapCreate( mainD.d,  7, 7, XTRKCAD_SYMBOLS_PATH,"bma90.png");
+	angle_bm[1] = wDrawBitMapCreate( mainD.d, 7, 7, XTRKCAD_SYMBOLS_PATH, "bma135.png");
+	angle_bm[2] = wDrawBitMapCreate( mainD.d, 7, 7, XTRKCAD_SYMBOLS_PATH,"bma0.png");
+	angle_bm[3] = wDrawBitMapCreate( mainD.d, 7, 7, XTRKCAD_SYMBOLS_PATH, "bma45.png");
 	AddPlaybackProc( SETMOVEMODE, (playbackProc_p)SetMoveMode, NULL );
 	wPrefGetInteger( "draw", "movemode", &moveMode, MAXMOVEMODE );
 	if (moveMode > MAXMOVEMODE || moveMode < 0) {

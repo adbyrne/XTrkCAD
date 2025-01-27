@@ -62,51 +62,6 @@ void wButtonSetBusy(wControl_p bb, int value)
 	SetCallbackOnClick();
 }
 
-static
-GdkPixbuf *wlibNewPixbufFromXBM(wIcon_p ip)
-{
-	GdkPixbuf* pixbuf;
-	char line0[40];
-	char line2[40];
-
-	const char* bits;
-	long rgb;
-	int wb;
-	char** pixmapData;
-
-	wb = (ip->w + 7) / 8;
-	pixmapData = (char**)g_malloc((3 + ip->h) * sizeof * pixmapData);
-	pixmapData[0] = line0;
-	rgb = ip->color;
-	sprintf(line0, " %ld %ld 2 1", ip->w, ip->h);
-	sprintf(line2, "# c #%2.2lx%2.2lx%2.2lx", (rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF,
-	        rgb & 0xFF);
-	pixmapData[1] = ". c None s None";
-	pixmapData[2] = line2;
-	bits = ip->bits;
-
-	for (int row = 0; row < ip->h; row++) {
-		pixmapData[row + 3] = (char*)g_malloc((ip->w + 1) * sizeof * *pixmapData);
-
-		for (int col = 0; col < ip->w; col++) {
-			if (bits[row * wb + (col >> 3)] & (1 << (col & 07))) {
-				pixmapData[row + 3][col] = '#';
-			} else {
-				pixmapData[row + 3][col] = '.';
-			}
-		}
-
-		pixmapData[row + 3][ip->w] = 0;
-	}
-
-	pixbuf = gdk_pixbuf_new_from_xpm_data((const char**)pixmapData);
-
-	for (int row = 0; row < ip->h; row++) {
-		g_free(pixmapData[row + 3]);
-	}
-
-	return(pixbuf);
-}
 
 static GtkWidget *
 AddPixbufToButton(GtkWidget* button, GdkPixbuf* pixbuf)
@@ -142,19 +97,8 @@ void wButtonSetIcon(wControl_p control, wIcon_p icon)
 {
 	GdkPixbuf* pixbuf = NULL;
 
-	if (icon->gtkIconType == ICON_BITMAP) {
-		pixbuf = wlibNewPixbufFromXBM(icon);
-	}
+	pixbuf = icon->bits;
 
-	if (icon->gtkIconType == ICON_PIXMAP) {
-		pixbuf = gdk_pixbuf_new_from_xpm_data((const char**)icon->bits);
-	}
-
-	if (icon->gtkIconType == ICON_PIXBUF) {
-		pixbuf = icon->bits;
-	}
-
-	
 	if (pixbuf) {
 		g_object_ref(pixbuf);
 
