@@ -947,7 +947,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	FileInit();
 
 	wCreateSplash(sProdName, sVersion);
-	wFlush();
+	
 	if (!initialFile) {
 		WDOUBLE_T tmp;
 		LOG1(log_init, ( "set roomsize\n" ))

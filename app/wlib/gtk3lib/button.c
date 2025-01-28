@@ -259,7 +259,6 @@ wControl_p wButtonCreate(
 	wlibAddHelpString(b->widget, helpStr);
 	wlibAddTooltip(b->widget, helpStr);
 
-	wFlush();
 	return b;
 }
 
@@ -363,7 +362,7 @@ wControl_p wButtonCreateForToolbar(
 
 	wlibAddHelpString(buttonControl->widget, helpStr);
 	wlibAddTooltip(buttonControl->widget, helpStr);
-	wFlush();
+	
 	return buttonControl;
 }
 

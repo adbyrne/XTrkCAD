@@ -398,8 +398,7 @@ static wBool_t SearchUiDlgUpdate(
 		UpdateSearchUiButton();
 		break;
 	case I_FITRADIO:
-		strcpy( searchUiQuery, wEntryGetValue( 
-		                                       pg->paramPtr[I_QUERYSTRING].control) );
+		strcpy( searchUiQuery, wEntryGetValue( pg->paramPtr[I_QUERYSTRING].control) );
 		SearchUiDoSearch(NULL);
 		break;
 	case -1:

@@ -139,6 +139,34 @@ static int radioChoice(
 	return 1;
 }
 
+static void
+SetSignalsToRadioButton(GtkWidget* radioButton, gpointer data)
+{
+	g_signal_connect(G_OBJECT(radioButton), "toggled",
+		G_CALLBACK(radioChoice), data);
+}
+
+static void
+SetHelpToRadioButton(GtkWidget* radioButton, char* help)
+{
+	//wlibAddHelpString(newRadioButton, helpStr);
+	//wlibAddTooltip(newRadioButton, helpStr);
+}
+
+static void
+ConfigureButtons(GtkWidget *container, wControl_p control, const char *help )
+{
+
+	gtk_container_foreach(GTK_CONTAINER(container),
+		SetSignalsToRadioButton,
+		control);
+
+	gtk_container_foreach(GTK_CONTAINER(container),
+		SetHelpToRadioButton,
+		control);
+
+}
+
 /**
  * Create a group of radio buttons.
  *
@@ -190,13 +218,15 @@ wControl_p wRadioCreate(
 		/** \todo use builder */
 		b->widget = wlibWidgetFromIdWarn(parent, "fit");
 
-	} else {
+	}
+	else {
 		GtkWidget* newRadioButton = NULL;
 		const char* const* label;
 
 		if (option & BC_HORIZONTAL) {
 			b->widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
-		} else {
+		}
+		else {
 			b->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, 6);
 		}
 
@@ -206,7 +236,7 @@ wControl_p wRadioCreate(
 
 		if (!(option & BC_NOBORDER)) {
 			GtkStyleContext* styleContext = gtk_widget_get_style_context(GTK_WIDGET(
-			                                        b->widget));
+				b->widget));
 			gtk_style_context_add_class(styleContext, "framed");
 		}
 
@@ -214,27 +244,24 @@ wControl_p wRadioCreate(
 
 		for (label = labels; *label; label++) {
 			newRadioButton = gtk_radio_button_new_with_label_from_widget(
-			                         GTK_RADIO_BUTTON(newRadioButton), *label);
+				GTK_RADIO_BUTTON(newRadioButton), *label);
 			gtk_box_pack_start(GTK_BOX(b->widget), newRadioButton, TRUE, TRUE, 0);
-
-			g_signal_connect(G_OBJECT(newRadioButton), "toggled",
-			                 G_CALLBACK(radioChoice), b);
-
-			wlibAddHelpString(newRadioButton, helpStr);
-			wlibAddTooltip(newRadioButton, helpStr);
 		}
 
-		if (valueP) {
-			wRadioSetValue(b, *valueP);
+		if (labelStr) {
+			wlibAddLabel((wControl_p)b, x - 1, y, labelStr);
 		}
 
 		wlibBasicGridAttach(parent, b->widget, x, y, 1, 1);
 		gtk_widget_show_all(b->widget);
-
-		if (labelStr) {
-			wlibAddLabel((wControl_p)b, x-1, y, labelStr);
-		}
 	}
+
+	ConfigureButtons(b->widget, b, helpStr );
+
+	if (valueP) {
+		wRadioSetValue(b, *valueP);
+	}
+	
 	return b;
 }
 
