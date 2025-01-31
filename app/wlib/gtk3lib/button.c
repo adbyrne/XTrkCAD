@@ -83,31 +83,60 @@ DestroyImage(GtkWidget* image, gpointer unused)
 	gtk_widget_destroy(image);
 }
 
+
+static void
+RemovePixbuf(GtkWidget *button)
+{
+	if (GTK_IS_BIN(button)) {
+		GtkWidget* child = gtk_bin_get_child(GTK_BIN(button));
+		if (GTK_IS_IMAGE(child)) {
+			gtk_image_clear(GTK_IMAGE(child));
+		}
+	}
+}
+
+bool
+IsNewIcon(wIcon_p new, wIcon_p old)
+{
+
+	if (new->gtkIconType == ICON_PIXBUF_FROM_RESOURCE) {
+		if (g_strcmp0(new->filename, old->filename)) {
+			return(true);
+		}
+	}
+
+	if (new->gtkIconType == ICON_PIXBUF_FROM_TEXT) {
+		if ((new->color != old->color) || g_strcmp0(new->text, old->text)) {
+			return(true);
+		}
+	}
+
+	return(false);
+}
+
 /**
- * Change the icon of a button.
- * The icon has to be in XPM format.
+ * Replace the icon of a button.
  *
  * \param bb		IN button handle
  * \param iconData	IN icon data
- *
- * \todo icons in XBM format
  */
 
 void wButtonSetIcon(wControl_p control, wIcon_p icon)
 {
 	GdkPixbuf* pixbuf = NULL;
 
+	if (control->attributes.button.icon) {
+		if (!IsNewIcon(icon, control->attributes.button.icon)) {
+			return;
+		}
+		RemovePixbuf(control->widget);
+	}
+
 	pixbuf = icon->bits;
 
 	if (pixbuf) {
-		g_object_ref(pixbuf);
-
-		gtk_container_foreach(GTK_CONTAINER(control->widget), (GtkCallback)DestroyImage,
-			(gpointer)NULL);
-	
 		AddPixbufToButton(control->widget, pixbuf);
 
-		//g_object_unref(pixbuf);
 		control->attributes.button.icon = icon;
 	}
 }
@@ -147,8 +176,8 @@ void wlibButtonDoAction(
  */
 
 static void buttonClick(
-	GtkWidget* widget,
-	gpointer value)
+        GtkWidget* widget,
+        gpointer value)
 {
 	struct button* b = CONTROL_GET_ATTRIBUTES_PTR(((wControl_p)value), button);
 
@@ -162,9 +191,9 @@ static void buttonClick(
  * Called after expose event default hander - allows the button to be outlined
  */
 static wBool_t drawButton(
-	GtkWidget* widget,
-	cairo_t* cr,
-	gpointer g)
+        GtkWidget* widget,
+        cairo_t* cr,
+        gpointer g)
 {
 	return wControlExpose(widget, cr, (wControl_p)g);
 }
@@ -202,15 +231,15 @@ static wBool_t drawButton(
  */
 
 wControl_p wButtonCreate(
-	wControl_p	parent,
-	wWinPix_t	x,
-	wWinPix_t	y,
-	const char* helpStr,
-	const char* labelStr,
-	long 	option,
-	wWinPix_t 	width,
-	wButtonCallBack_p action,
-	void* context)
+        wControl_p	parent,
+        wWinPix_t	x,
+        wWinPix_t	y,
+        const char* helpStr,
+        const char* labelStr,
+        long 	option,
+        wWinPix_t 	width,
+        wButtonCallBack_p action,
+        void* context)
 {
 	wControl_p b;
 	struct button* button;
@@ -224,8 +253,7 @@ wControl_p wButtonCreate(
 		if (labelStr) {
 			wButtonSetLabel(b, labelStr);
 		}
-	}
-	else {
+	} else {
 		b->widget = GTK_WIDGET(gtk_toggle_button_new());
 
 		if (width > 0) {
@@ -234,8 +262,7 @@ wControl_p wButtonCreate(
 
 		if (labelStr) {
 			if (option & BO_ICON) {
-				if (((wIcon_p)labelStr)->bits == NULL)
-				{
+				if (((wIcon_p)labelStr)->bits == NULL) {
 					printf("Invalid icon for %s\n", helpStr);
 				}
 				wButtonSetIcon(b, (wIcon_p)labelStr);
@@ -325,7 +352,6 @@ wControl_p wButtonCreateForToolbar(
 	wControl_p buttonControl;
 	struct button* buttonAttributes;
 	GtkStyleContext* styleContext;
-	GtkWidget* toolbarWidget;
 
 	g_assert(parent->type == W_MAIN);
 
@@ -333,11 +359,10 @@ wControl_p wButtonCreateForToolbar(
 	buttonAttributes = CONTROL_GET_ATTRIBUTES_PTR(buttonControl,button);
 	buttonAttributes->action = action;
 	buttonControl->widget = GTK_WIDGET(gtk_toggle_button_new());
-	
+
 	if (icon->bits) {
 		wButtonSetIcon(buttonControl, icon);
-	}
-	else {
+	} else {
 		printf("Invalid icon for toolbar button %s\n", helpStr);
 	}
 
@@ -354,7 +379,7 @@ wControl_p wButtonCreateForToolbar(
 	//}
 
 	egg_wrap_box_insert_child(EGG_WRAP_BOX(parent->attributes.window.toolbar),
-		buttonControl->widget, -1, 0);
+	                          buttonControl->widget, -1, 0);
 	gtk_widget_show_all(buttonControl->widget);
 
 	g_signal_connect(G_OBJECT(buttonControl->widget), "clicked",
@@ -362,7 +387,7 @@ wControl_p wButtonCreateForToolbar(
 
 	wlibAddHelpString(buttonControl->widget, helpStr);
 	wlibAddTooltip(buttonControl->widget, helpStr);
-	
+
 	return buttonControl;
 }
 

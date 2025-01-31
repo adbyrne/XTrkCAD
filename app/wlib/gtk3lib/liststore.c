@@ -225,11 +225,7 @@ wlibListStoreAppendRow(GtkListStore* store, GtkTreeIter *iter, wListItem_p data)
 void
 wlibListStoreSetIcon(GtkListStore* store, GtkTreeIter* iter, wIcon_p icon)
 {
-	GdkPixbuf *pixbuf = wlibMakePixbuf(icon);
-
-	gtk_list_store_set(store, iter, LISTCOL_BITMAP, pixbuf, -1);
-
-	g_object_unref(pixbuf);
+	gtk_list_store_set(store, iter, LISTCOL_BITMAP, icon->bits, -1);
 }
 
 void

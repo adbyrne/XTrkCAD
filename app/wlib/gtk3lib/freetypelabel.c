@@ -27,7 +27,7 @@
 
 #include <wlib.h>
 #include "gtkint.h"
-
+#include <gdk-pixbuf/gdk-pixbuf.h>
 #include <cairo.h>
 #include <cairo-ft.h>
 
@@ -73,7 +73,7 @@ GetFaceHeight(FT_Face face)
 }
 
 
-static char*
+static GdkPixbuf*
 RenderToPixbuf(cairo_surface_t* surface, const char* text, wDrawColor color)
 {
 	cairo_t* cr = cairo_create(surface);
@@ -95,14 +95,14 @@ RenderToPixbuf(cairo_surface_t* surface, const char* text, wDrawColor color)
 	cairo_destroy(cr);
 	cairo_font_face_destroy(cairoFontFace);
 
-	return((char*)gdk_pixbuf_get_from_surface(surface, 0, 0, (int)extents.width,
+	return(gdk_pixbuf_get_from_surface(surface, 0, 0, (int)extents.width,
 	        (int)extents.height));
 }
 
-static char*
+static GdkPixbuf *
 CreatePixbufFromFTLabel(const char* text, wDrawColor color)
 {
-	char* bits;
+	GdkPixbuf* bits;
 
 	cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
 	                           ICON_DEFAULTSIZE,
@@ -168,33 +168,24 @@ wFTLabelCreate(const char* text, wDrawColor color)
 	if (icon) {
 		icon->bits = CreatePixbufFromFTLabel(text, color);
 		icon->color = color;
-		icon->text = text;
-		icon->gtkIconType = ICON_PIXBUF;
+		icon->text = g_strdup(text);
+		icon->gtkIconType = ICON_PIXBUF_FROM_TEXT;
 	}
 
 	return(icon);
 }
 
 /**
- * Change the color of a label used by a button. The newly colored label is shown in the
- * button
+ * Change the color of a label 
  *
- * \param button	the button which has the label
- * \param newColor	new color for the label
+ * \param icon		the icon
  */
 
 void
-wFTLabelChangeColor(wControl_p button, wDrawColor newColor)
+wlibFTLabelChangeColor(wIcon_p icon, wDrawColor color)
 {
-	const struct button* buttonAttributes = CONTROL_GET_ATTRIBUTES_PTR(button,
-	                                        button);
-	wIcon_p icon = buttonAttributes->icon;
-
-	if (newColor != icon->color) {
-		icon->bits = CreatePixbufFromFTLabel(icon->text, newColor);
-		icon->color = newColor;
-		wButtonSetIcon(button, icon);
-	}
+		icon->bits = CreatePixbufFromFTLabel(icon->text, color);
+		icon->color = color;
 }
 
 

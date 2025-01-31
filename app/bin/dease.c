@@ -161,7 +161,7 @@ static void SetEasement(
 	/*ParamChange( &easeValPD );*/
 
 	if (easementB) {
-		wButtonSetIcon( easementB, (char*)bm );
+		wButtonSetIcon( easementB, bm );
 	}
 }
 

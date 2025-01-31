@@ -401,17 +401,18 @@ void wlibBasicDrawFillCircle(struct draw * drawingArea,
 	wDrawOpts opts);
 
 /* bitmap.c */
-
-#define ICON_PIXMAP (2)
-#define ICON_PIXBUF (3)
+#define ICON_PIXBUF 2
+#define ICON_PIXBUF_FROM_TEXT 3
+#define ICON_PIXBUF_FROM_RESOURCE 4
 
 struct wIcon_t {
 	int gtkIconType;
+	GdkPixbuf* bits;
 	wWinPix_t w;
 	wWinPix_t h;
 	wDrawColor color;
-	const char* bits;
 	const char* text;
+	const char* filename;
 };
 
 /* boxes.c */
@@ -563,9 +564,6 @@ struct accelData_t *wlibFindAccelKey(GdkEventKey *event);
 wBool_t wlibHandleAccelKey(GdkEventKey *event);
 
 /* notice.c */
-
-/* pixbuf.c */
-GdkPixbuf *wlibMakePixbuf(wIcon_p ip);
 
 /* png.c */
 

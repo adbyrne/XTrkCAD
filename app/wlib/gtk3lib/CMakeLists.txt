@@ -29,7 +29,6 @@ target_sources(xtrkcad-wlib
  	main.c
  	message.c
  	notice.c
-	pixbuf.c
 	popupmenu.c
 	splash.c
  	pulldnmenu.c

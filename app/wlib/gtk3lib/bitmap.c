@@ -106,8 +106,10 @@ wIcon_p wIconCreatePixBufFromResource(const char *prefix, const char *filename)
 			filename,
 			NULL);
 
-		ip->gtkIconType = ICON_PIXBUF;
-		ip->bits = (char*)gdk_pixbuf_new_from_resource(path, &error);
+		ip->gtkIconType = ICON_PIXBUF_FROM_RESOURCE;
+		ip->bits = gdk_pixbuf_new_from_resource(path, &error);
+		ip->filename = g_strdup(path);
+
 		if (error) {
 			fprintf(stderr, "Error reading icon: %s\n", error->message);
 			g_error_free(error);
@@ -127,7 +129,7 @@ wIcon_p wIconCreatePixBufFromResource(const char *prefix, const char *filename)
 
 void wIconSetColor( wIcon_p ip, wDrawColor color )
 {
-	ip->color = color;
+	wlibFTLabelChangeColor(ip, color);
 }
 
 /**
