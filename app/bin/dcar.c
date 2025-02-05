@@ -3722,7 +3722,7 @@ void CarDlgError(
 	p->bInvalid = !ok;
 	ParamHilite( p->group->win, p->control, !ok );
 	wWinPix_t h = wControlGetHeight(p->control);
-	wControlSetBalloon( p->control, 0, -h*3/4, ok?NULL:msg );
+	wTooltipSet( p->control, 0, -h*3/4, ok?NULL:msg );
 }
 
 

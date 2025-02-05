@@ -45,7 +45,6 @@ static paramFloatRange_t r0_180 = { 0, 180 };
 
 static void UpdateMeasureFmt(void);
 
-EXPORT long enableBalloonHelp = 1;
 EXPORT long enableAudio = 1;
 
 EXPORT long showFlexTrack = 1;
@@ -69,21 +68,8 @@ static void OptionDlgUpdate(
 	void* valueP)
 {
 	if (inx < 0) { return; }
-	if (pg->paramPtr[inx].valueP == &enableBalloonHelp) {
-		wEnableBalloonHelp((wBool_t) * (long*)valueP);
-	}
-	else {
-		//if (pg->paramPtr[inx].valueP == &labelEnable) {
-		//	long new_labels = wRadioGetValue((wChoice_p)pg->paramPtr[inx].control);
-		//	labelEnable = new_labels;
-		//	//ParamLoadControl(&displayPG, labelSelect);
-		//}
 
 
-
-
-
-	}
 }
 
 /****************************************************************************
@@ -183,7 +169,6 @@ static void DoDisplay( void * junk )
 EXPORT addButtonCallBack_t DisplayInit( void )
 {
 	ParamRegister( &displayPG );
-	wEnableBalloonHelp( (int)enableBalloonHelp );
 #ifdef LATER
 	RegisterChangeNotification( DisplayChange );
 #endif

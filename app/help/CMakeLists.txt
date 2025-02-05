@@ -23,7 +23,7 @@ target_sources(genmessages PUBLIC
 )
 
 set_source_files_properties(
-	genhelp.json messages.in xtrkcad.tip 
+	tooltiptext.json messages.in xtrkcad.tip 
 	PROPERTIES HEADER_FILE_ONLY TRUE
 )
 
@@ -39,13 +39,13 @@ else()
 endif()
 
 add_custom_command(
-       OUTPUT bllnhlp.c
-       DEPENDS genhelp genhelp.json
-       COMMAND genhelp ${GENHELP_OPTS} ${CMAKE_CURRENT_SOURCE_DIR}/genhelp.json ${CMAKE_CURRENT_BINARY_DIR}/bllnhlp.c
+       OUTPUT tooltiptext.c
+       DEPENDS genhelp tooltiptext.json
+       COMMAND genhelp ${GENHELP_OPTS} ${CMAKE_CURRENT_SOURCE_DIR}/tooltiptext.json ${CMAKE_CURRENT_BINARY_DIR}/tooltiptext.c
 )
 
-add_custom_target(balloonhelp ALL
-	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/bllnhlp.c
+add_custom_target(tooltips ALL
+	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/tooltiptext.c
 )
 
 add_custom_command(
@@ -65,7 +65,7 @@ install(
 
 set_target_properties(
 	msgfiles
-	balloonhelp
+	tooltips
 	genmessages
 	genhelp
     PROPERTIES FOLDER HelpDocs

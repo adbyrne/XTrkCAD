@@ -258,7 +258,7 @@ wControl_p wEntryCreate(
 {
 	wControl_p b;
 	struct entry* entry;
-
+	
 	// create and initialize the widget
 	b = wlibControlNew(B_TEXT, parent, helpStr, context);
 	entry = CONTROL_GET_ATTRIBUTES_PTR(b, entry);
@@ -273,8 +273,8 @@ wControl_p wEntryCreate(
 		wlibCreateEntryAtRuntime(parent, b, labelStr, x, y, fieldLength, width);
 	}
 	// link into help
-	wlibAddHelpString(b->widget, helpStr);
-  	wlibAddTooltip(b->widget, helpStr);
+	wlibAddTooltip(b->widget, parent->name, helpStr);
+  	//wlibAddTooltip(b->widget, helpStr);
 
 	g_signal_connect(G_OBJECT(b->widget), "focus-out-event",
 	                 G_CALLBACK(entryFocusOutEvent), b);

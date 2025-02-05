@@ -282,7 +282,6 @@ wlibCreateWindowFromBuilder(wControl_p window, const char* nameStr, long option)
 	g_free(resourcePath);
 	resourcePath = NULL;
 
-	window->name = g_strdup(nameStr);
 	window->attributes.window.builder = builder;
 	window->widget = dialog;
 	g_free(tempStr);

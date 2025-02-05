@@ -79,10 +79,23 @@ typedef struct wColorButton_t* wColorButton_p;
 typedef int wDrawWidth;
 typedef unsigned long wDrawColor;
 
+
+/*----------------------------------------------------------------------------
+ * Tooltips
+ */
+
 typedef struct {
 	const char * name;
 	const char * value;
-} wBalloonHelp_t;
+} wTooltip_t;
+
+unsigned TooltipsGetCount(void);
+
+void wInitTooltip(wTooltip_t*, unsigned int count );
+void wEnableBalloonHelp(int);
+void wBalloonHelpUpdate(void);
+
+/*----------------------------------------------------------------------------
 
 extern long debugWindow;
 extern long wDebugFont;
@@ -582,9 +595,6 @@ void wHelp(const char*);
 unsigned wOpenFileExternal(char *filename);
 
 
-void wSetBalloonHelp ( wBalloonHelp_t * );
-void wEnableBalloonHelp ( int );
-void wBalloonHelpUpdate ( void );
 
 void wFlush(			void );
 
@@ -701,9 +711,10 @@ void wControlSetPos(		wControl_p, wWinPix_t, wWinPix_t );
 void wControlSetFocus(		wControl_p );
 void wControlActive(		wControl_p control, wBool_t active);
 wBool_t wControlGetActive(wControl_p control);
-void wControlSetBalloon(	wControl_p, wWinPix_t, wWinPix_t, const char * );
-void wControlSetLabel(		wControl_p, const char * );
-void wControlSetBalloonText(	wControl_p, const char * );
+void wControlSetLabel(wControl_p, const char*);
+
+void wTooltipSet(wControl_p control, const char* dialog, const char* dialogItem);
+void wTooltipSetText(	wControl_p control, const char * tooltipText);
 void wControlSetContext(	wControl_p, void * );
 void wControlHilite(		wControl_p, wBool_t );
 

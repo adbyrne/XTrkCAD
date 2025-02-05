@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include "wlib.h"
 
-wBalloonHelp_t balloonHelp[] = {
+wTooltip_t balloonHelp[] = {
 	{ "Close", N_("Closes the dialog") },
 	{ "Help", N_("Invokes online help for this dialog") },
 	{ "about", N_("No Help") },

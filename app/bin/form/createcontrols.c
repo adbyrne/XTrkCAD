@@ -157,7 +157,7 @@ static void IntegerPush(const char* val, void* dp)
 	if (!FormIntegerRangeCheck(p, valL)) {
 		return;
 	}
-	wControlSetBalloon(p->control, 0, 0, NULL);
+	//wControlSetBalloon(p->control, 0, 0, NULL);
 	p->bInvalid = FALSE;
 
 	//if (recordParamF && (p->option & PDO_NORECORD) == 0 && p->group->nameStr
@@ -211,7 +211,7 @@ static void FloatPush(const char* val, void * dp)
 	if (!FormFloatRangeCheck(p, valF)) {
 		return;
 	}
-	wControlSetBalloon(p->control, 0, 0, NULL);
+	//wControlSetBalloon(p->control, 0, 0, NULL);
 	p->bInvalid = FALSE;
 
 	//if (recordParamF && (p->option & PDO_NORECORD) == 0 && p->group->nameStr

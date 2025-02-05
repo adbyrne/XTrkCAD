@@ -104,7 +104,7 @@ LinkDlgUpdate(
 			paramData_p p = &linkNotePLs[I_URL];
 			p->bInvalid = TRUE;
 			wWinPix_t h = wControlGetHeight(p->control);
-			wControlSetBalloon( p->control, 0, -h*3/4, "URL is invalid" );
+			wTooltipSetText( p->control, "URL is invalid" );
 			ParamHilite( p->group->win, p->control, TRUE );
 		}
 		break;

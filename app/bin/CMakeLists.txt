@@ -322,11 +322,11 @@ endif()
 target_sources(${XTRKCAD_BIN}
 	PRIVATE
 		misc.c
-        ${messagefile_BINARY_DIR}/bllnhlp.c
+        ${messagefile_BINARY_DIR}/tooltiptext.c
 		xtrkcad.rc
 )
 add_dependencies(${XTRKCAD_BIN}
-    balloonhelp
+    tooltips
     msgfiles
     genbitmaps)
     

@@ -563,7 +563,7 @@ static void ShowMessageHelp(int index, const char * label, void * data)
  */
 
 // defined in ${BUILDIR}/app/bin/bllnhlp.c
-extern wBalloonHelp_t balloonHelp[];
+extern wTooltip_t tooltipTexts[];
 
 #ifdef DEBUG
 #define CHECK_BALLOONHELP
@@ -580,7 +580,7 @@ int * balloonHelpCnts;
 
 EXPORT const char * GetBalloonHelpStr(const char * helpKey)
 {
-	wBalloonHelp_t * bh;
+	wTooltip_t * bh;
 #ifdef CHECK_UNUSED_BALLOONHELP
 	if ( balloonHelpCnts == NULL ) {
 		for ( bh=balloonHelp; bh->name; bh++ );
@@ -588,7 +588,7 @@ EXPORT const char * GetBalloonHelpStr(const char * helpKey)
 		memset( balloonHelpCnts, 0, (sizeof *(int*)0) * (bh-balloonHelp) );
 	}
 #endif
-	for (bh = balloonHelp; bh->name; bh++) {
+	for (bh = tooltipTexts; bh->name; bh++) {
 		if (strcmp(bh->name, helpKey) == 0) {
 #ifdef CHECK_UNUSED_BALLOONHELP
 			balloonHelpCnts[(bh-balloonHelp)]++;
@@ -802,7 +802,7 @@ EXPORT void CreateMenus(void)
 
 	wControl_p zoomInM, zoomOutM, zoomExtentsM;
 
-	wSetBalloonHelp( balloonHelp );
+	wInitTooltip( tooltipTexts, TooltipsGetCount() );
 	fileM = wMenuBarAdd(mainW, "menuFile", _("_File"));
 	editM = wMenuBarAdd(mainW, "menuEdit", _("_Edit"));
 	viewM = wMenuBarAdd(mainW, "menuView", _("_View"));

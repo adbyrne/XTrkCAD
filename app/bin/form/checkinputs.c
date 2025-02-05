@@ -115,7 +115,7 @@ wBool_t FormCheckInputs(
 	if (bInvalid) {
 		// At least 1 invalid entry
 		LOG(log_form, 1, ("  Group %s Invalid\n", group->nameStr));
-		wControlSetBalloonText(button, _("Invalid input(s), please correct the hilighted field(s)"));
+		wTooltipSetText(button, _("Invalid input(s), please correct the hilighted field(s)"));
 		wFlush();
 		return FALSE;
 	}

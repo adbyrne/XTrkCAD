@@ -1481,7 +1481,7 @@ wBool_t ParamIntegerRangeCheck( paramData_p p, long valL )
 			         irangeP->high );
 		}
 		wWinPix_t h = wControlGetHeight(p->control);
-		wControlSetBalloon( p->control, 0, -h*3/4, message );
+		wTooltipSet( p->control, message );
 		p->bInvalid = TRUE;
 		LOG( log_paraminput, 1, ( " -> RangeError\n" ) );
 		ParamHilite( p->group->win, p->control, p->bInvalid );
@@ -1513,7 +1513,7 @@ static void ParamIntegerPush( const char * val, void * dp )
 	for ( ; isspace( (unsigned char)*cp); cp++ );
 	if ( *cp != '\0' ) {
 		wWinPix_t h = wControlGetHeight(p->control);
-		wControlSetBalloon( p->control, 0, -h*3/4, _("Invalid Number") );
+		wTooltipSet( p->control,  _("Invalid Number") );
 		p->bInvalid = TRUE;
 		LOG( log_paraminput, 1, ( " -> InvalidNumber\n" ) );
 		ParamHilite( p->group->win, p->control, p->bInvalid );
@@ -1522,7 +1522,7 @@ static void ParamIntegerPush( const char * val, void * dp )
 	if ( ! ParamIntegerRangeCheck( p, valL ) ) {
 		return;
 	}
-	wControlSetBalloon( p->control, 0, 0, NULL );
+	//wTooltipSet( p->control, 0, 0, NULL );
 	p->bInvalid = FALSE;
 
 	if (recordParamF && (p->option&PDO_NORECORD)==0 && p->group->nameStr
@@ -1565,7 +1565,7 @@ static wBool_t ParamFloatRangeCheck( paramData_p p, FLOAT_T valF )
 			         (p->option&PDO_DIM)?FormatDistance(frangeP->low):FormatFloat(frangeP->low),
 			         (p->option&PDO_DIM)?FormatDistance(frangeP->high):FormatFloat(frangeP->high) );
 		wWinPix_t h = wControlGetHeight(p->control);
-		wControlSetBalloon( p->control, 0, -h*3/4, message );
+		wTooltipSet( p->control, message );
 		p->bInvalid = TRUE;
 		ParamHilite( p->group->win, p->control, p->bInvalid );
 		return FALSE;
@@ -1611,7 +1611,7 @@ static void ParamFloatPush( const char * val, void * dp )
 	}
 	if ( !valid ) {
 		wWinPix_t h = wControlGetHeight(p->control);
-		wControlSetBalloon( p->control, 0, -h*3/4, decodeErrorStr );
+		wTooltipSet( p->control, 0, -h*3/4, decodeErrorStr );
 		p->bInvalid = TRUE;
 		ParamHilite( p->group->win, p->control, p->bInvalid );
 		return;
@@ -1619,7 +1619,7 @@ static void ParamFloatPush( const char * val, void * dp )
 	if ( !ParamFloatRangeCheck( p, valF ) ) {
 		return;
 	}
-	wControlSetBalloon( p->control, 0, 0, NULL );
+	wTooltipSet( p->control, 0, 0, NULL );
 	p->bInvalid = FALSE;
 
 	if (recordParamF && (p->option&PDO_NORECORD)==0 && p->group->nameStr
@@ -1660,13 +1660,13 @@ static void ParamStringPush( const char * val, void * dp )
 	                          p->nameStr, p->enter_pressed, value ) );
 	if ( ((!paramPlayback) && p->option & PDO_NOTBLANK) && value[0] == '\0' ) {
 		p->bInvalid = TRUE;
-		wControlSetBalloon( p->control, 0, 0, NULL );
+		wTooltipSet( p->control, 0, 0, NULL );
 		wWinPix_t h = wControlGetHeight(p->control);
-		wControlSetBalloon( p->control, 0, -h*3/4, _("String cannot be blank") );
+		wTooltipSet( p->control, 0, -h*3/4, _("String cannot be blank") );
 		ParamHilite( p->group->win, p->control, TRUE );
 		return;
 	}
-	wControlSetBalloon( p->control, 0, 0, NULL );
+	wTooltipSet( p->control, 0, 0, NULL );
 	p->bInvalid = FALSE;
 	ParamHilite( p->group->win, p->control, FALSE );
 
@@ -1675,10 +1675,10 @@ static void ParamStringPush( const char * val, void * dp )
 		((char *)p->valueP)[p->max_string - 1] = '\0';
 		if (strlen(value) > p->max_string-1) {
 			p->bInvalid = TRUE;
-			wControlSetBalloon( p->control, 0, 0, NULL );
+			wTooltipSet( p->control, 0, 0, NULL );
 			wWinPix_t h = wControlGetHeight(p->control);
 			sprintf( message, _("String is too long, Max length is %u"), p->max_string-1 );
-			wControlSetBalloon( p->control, 0, -h*3/4, message );
+			wTooltipSet( p->control, 0, -h*3/4, message );
 			ParamHilite( p->group->win, p->control, TRUE );
 		}
 	}
@@ -1816,7 +1816,7 @@ EXPORT wBool_t ParamCheckInputsOrig(
 	if ( bInvalid ) {
 		// At least 1 invalid entry
 		LOG( log_paraminput, 1, ( "  Group %s Invalid\n", group->nameStr ) );
-		wControlSetBalloon( b, 0, -29,
+		wTooltipSet( b, 0, -29,
 		                    _("Invalid input(s), please correct the hilighted field(s)") );
 		wFlush();
 		return FALSE;
@@ -1842,7 +1842,7 @@ static void ParamButtonOk( void * groupVP )
 		group->okProc( group );
 	}
 
-	wControlSetBalloon( (wControl_p)group->okB, 0, 0, NULL );
+	wTooltipSet( (wControl_p)group->okB, 0, 0, NULL );
 	wFlush();
 
 	LOG( log_paraminput, 1, ( "ParamButtonOk -> Ok\n" ) );
@@ -1931,7 +1931,7 @@ EXPORT void ParamResetInvalidOrig(
 					LOG( log_paraminput, 1, ( "  %s Invalid\n", p->nameStr ) );
 				}
 				ParamHilite( win, p->control, FALSE );
-				wControlSetBalloon( p->control, 0, 0, NULL );
+				wTooltipSet( p->control, 0, 0, NULL );
 				p->bInvalid = FALSE;
 			}
 			break;

@@ -452,8 +452,8 @@ EXPORT void ToolbarUpdateButton(wIndex_t button, wIndex_t command,
 {
 	if (buttonList[button].cmdInx != command) {
 		wButtonSetIcon(buttonList[button].control,icon);
-		wControlSetHelp(buttonList[button].control,
-		                GetBalloonHelpStr(helpKey));
+		wTooltipSet(buttonList[button].control, NULL, helpKey);
+		           
 		wControlSetContext(buttonList[button].control,
 		                   context);
 		buttonList[button].cmdInx = command;

@@ -1004,7 +1004,7 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
 	for (inx = 0; inx < NUM_BUTTONS; inx++) {
 		if (!layers[inx].button_off) {
 			wButtonSetBusy(layer_btns[inx], layers[inx].visible != 0);
-			wControlSetBalloonText((wControl_p)layer_btns[inx],
+			wTooltipSetText((wControl_p)layer_btns[inx],
 			                       (layers[inx].name[0] != '\0' ? layers[inx].name : _("Show/Hide Layer")));
 		}
 	}
@@ -1447,10 +1447,10 @@ static void LayerUpdate(void)
 
 	if (layerSelected < NUM_BUTTONS && !layers[(int)layerSelected].button_off) {
 		if (strlen(layers[(int)layerSelected].name) > 0) {
-			wControlSetBalloonText((wControl_p)layer_btns[(int)layerSelected],
+			wTooltipSetText((wControl_p)layer_btns[(int)layerSelected],
 			                       layers[(int)layerSelected].name);
 		} else {
-			wControlSetBalloonText((wControl_p)layer_btns[(int)layerSelected],
+			wTooltipSetText((wControl_p)layer_btns[(int)layerSelected],
 			                       _("Show/Hide Layer"));
 		}
 	}
@@ -1580,10 +1580,10 @@ void ResetLayers(void)
 		}
 	}
 
-	wControlSetBalloonText((wControl_p)layer_btns[0], _("Main"));
+	wTooltipSetText((wControl_p)layer_btns[0], _("Main"));
 
 	for (inx = 1; inx < NUM_BUTTONS; inx++) {
-		wControlSetBalloonText((wControl_p)layer_btns[inx], _("Show/Hide Layer"));
+		wTooltipSetText((wControl_p)layer_btns[inx], _("Show/Hide Layer"));
 	}
 
 	curLayer = -1;
@@ -1658,7 +1658,7 @@ void RestoreLayers(void)
 			label = layers[inx].name;
 		}
 
-		wControlSetBalloonText((wControl_p)layer_btns[inx], label);
+		wTooltipSetText((wControl_p)layer_btns[inx], label);
 	}
 
 	if (layerL) {
@@ -1885,7 +1885,7 @@ BOOL_T ReadLayers(char * line)
 
 	if (inx < NUM_BUTTONS && !layers[inx].button_off) {
 		if (strlen(name) > 0) {
-			wControlSetBalloonText((wControl_p)layer_btns[(int)inx], layers[inx].name);
+			wTooltipSet((wControl_p)layer_btns[(int)inx], NULL, layers[inx].name);
 		}
 		wButtonSetBusy(layer_btns[(int)inx], visible);
 	}
@@ -2128,14 +2128,14 @@ void InitLayers(int cmdGroup)
 
 	/* layer list for toolbar */
 	setLayerL = wComboBoxCreateForToolbar(mainW, "cmdLayerSet", NULL, 0, 100, NULL, SetCurrLayer, NULL);
-	wControlSetBalloonText((wControl_p)setLayerL, GetBalloonHelpStr("cmdLayerSet"));
+	wTooltipSet((wControl_p)setLayerL, NULL, "cmdLayerSet");
 	ToolbarControlAdd(setLayerL, 0, cmdGroup);
 
 	/* background button */
 	backgroundB = AddToolbarButton("cmdBackgroundShow",
 		CreateToolbarIconFromResource("background.png"), 0,
 	                               BackgroundToggleShow, NULL);
-	wControlSetBalloonText(backgroundB, _("Show/Hide Background"));
+	wTooltipSet(backgroundB, NULL, "cmdBackgroundShow");
 	wControlActive(backgroundB, FALSE);
 
 	/* layer buttons */

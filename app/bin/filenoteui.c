@@ -188,7 +188,7 @@ FileDlgUpdate(
 			paramData_p p = &fileNotePLs[I_PATH];
 			p->bInvalid = TRUE;
 			wWinPix_t h = wControlGetHeight(p->control);
-			wControlSetBalloon( p->control, 0, h, "Document path is invalid" );
+			wTooltipSet( p->control, 0, h, "Document path is invalid" );
 			ParamHilite( p->group->win, p->control, TRUE );
 		}
 		break;

@@ -241,7 +241,7 @@ wWinDialogCreate(wControl_p parent,
     else {
         dialog = wlibCreateWindowFromBuilder(winDialog, "basicdialog", option);
     }
-    winDialog->widget = dialog;
+
 
     if (!dialog)
     {
@@ -255,6 +255,9 @@ wWinDialogCreate(wControl_p parent,
         g_assert(NULL);
         return(NULL);
     }
+
+    winDialog->widget = dialog;
+    winDialog->name = g_strdup(nameStr);
 
     if (parent == NULL) {
         parentWindow = wlibAppWinGetMain();

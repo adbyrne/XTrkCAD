@@ -348,7 +348,8 @@ static void SelectHotBar( wDraw_p d, void * context, wAction_t action,
 	px += (wWinPix_t)(tbm->w*hotBarD.dpi/2);
 	titleP = tbm->proc( HB_LISTTITLE, tbm->context, NULL, NULL );
 	px -= wLabelWidth( titleP ) / 2;
-	wControlSetBalloon( (wControl_p)hotBarD.d, px, -20, titleP );
+	/**  \todo Tooltips in hotbar */
+	//wControlSetBalloon( (wControl_p)hotBarD.d, px, -20, titleP );
 	switch (action & 0xff) {
 	case wActionLDown:
 //		pos.x = mainD.size.x+mainD.orig.x;

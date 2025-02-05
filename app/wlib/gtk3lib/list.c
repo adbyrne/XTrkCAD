@@ -784,8 +784,8 @@ wControl_p wListCreate(
 
 	gtk_widget_show_all(bl->widget);
 
-	wlibAddHelpString(bl->widget, helpStr);
-	wlibAddTooltip(bl->widget, helpStr);
+	wlibAddTooltip(bl->widget, parent->name, helpStr);
+	//wlibAddTooltip(bl->widget, helpStr);
 
 	return bl;
 }

@@ -451,7 +451,7 @@ wControl_p wComboBoxCreate(
 
 		gtk_widget_show(b->widget);
 	}
-	wlibAddHelpString(b->widget, helpStr);
+	wlibAddTooltip(b->widget, parent->name, helpStr);
 
 	g_object_ref_sink(lcontrol->listStore);
 	g_object_unref(G_OBJECT(lcontrol->listStore));

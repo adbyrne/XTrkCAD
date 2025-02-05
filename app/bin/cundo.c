@@ -740,17 +740,17 @@ static void SetButtons( BOOL_T undoSetting, BOOL_T redoSetting )
 	}
 	if (undoSetting) {
 		sprintf( undoHelp, _("Undo: %s"), undoStack[undoHead].label );
-		wControlSetBalloonText( (wControl_p)undoB, undoHelp );
+		wTooltipSetText( (wControl_p)undoB, undoHelp );
 	} else {
-		wControlSetBalloonText( (wControl_p)undoB, _("Undo last command") );
+		wTooltipSet((wControl_p)undoB, NULL, "cmdUndo");
 	}
 	if (redoSetting) {
 		index = undoHead;
 		INC_UNDO_INX(index);
 		sprintf( redoHelp, _("Redo: %s"), undoStack[index].label );
-		wControlSetBalloonText( (wControl_p)redoB, redoHelp );
+		wTooltipSetText( (wControl_p)redoB, redoHelp );
 	} else {
-		wControlSetBalloonText( (wControl_p)redoB, _("Redo last undo") );
+		wTooltipSet((wControl_p)redoB, NULL, "cmdRedo");
 	}
 }
 
@@ -1190,7 +1190,7 @@ void UndoUndo( void * unused )
 	AuditTracks( "undoUndo" );
 	SelectRecount();
 	SetButtons( doCount>0, TRUE );
-	wBalloonHelpUpdate();
+
 	wDrawDelayUpdate( mainD.d, FALSE );
 	undoStatus = TRUE;
 	return;
@@ -1270,7 +1270,7 @@ void UndoRedo( void * unused )
 	AuditTracks( "undoRedo" );
 	SelectRecount();
 	SetButtons( TRUE, undoCount>0 );
-	wBalloonHelpUpdate();
+
 	wDrawDelayUpdate( mainD.d, FALSE );
 	undoStatus = TRUE;
 	return;

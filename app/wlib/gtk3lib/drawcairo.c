@@ -45,7 +45,7 @@ long lDrawCnt = 0;
 
 #include "gtkint.h"
 
-#define gtkAddHelpString( a, b ) wlibAddHelpString( a, b )
+#define gtkAddHelpString( a, b ) wlibAddTooltip( a, b )
 
 
 // Hack to do TempRedraw or MainRedraw
@@ -579,9 +579,9 @@ void wDrawGetTextSize(
 	//*d = textHeight-ascent;
 	*d = descent;
 
-	if (debugWindow >= 3) {
-		fprintf(stderr, "text metrics: w=%0.1f, h=%0.1f, d=%0.1f\n", *w, *h, *d);
-	}
+	//if (debugWindow >= 3) {
+	//	fprintf(stderr, "text metrics: w=%0.1f, h=%0.1f, d=%0.1f\n", *w, *h, *d);
+	//}
 
 	gtkDrawDestroyCairoContext(cairo);
 }

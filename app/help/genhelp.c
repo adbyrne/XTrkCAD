@@ -24,7 +24,7 @@
 
 #define I18NHEADERFILE "i18n.h"
 
-typedef enum { BALLOONHELP, BALLOONHELPI18N } mode_e;
+typedef enum { TOOLTIPS, TOOLTIPS_I18N } mode_e;
 
 struct messageData {
     char* line;
@@ -56,16 +56,15 @@ int process(mode_e mode, char * json, FILE * outFile)
         goto end;
     }
 
-    fputs("/*\n * DO NOT EDIT! This file has been automatically created by genhelp.\n * Changes to this file will be overwritten. Edit this: genhelp.json\n */\n",
+    fputs("/*\n * DO NOT EDIT! This file has been automatically created by genhelp.\n" 
+        " * Changes to this file will be overwritten. Edit this: genhelp.json\n */\n",
           outFile);
-    fprintf(outFile, "#include <stdio.h>\n");
+    ;
     fprintf(outFile, "#include \"wlib.h\"\n");
-    if (mode == BALLOONHELPI18N) {
+
+    if (mode == TOOLTIPS_I18N) {
         fprintf(outFile, "#include \"" I18NHEADERFILE "\"\n");
     }
-
-    fprintf(outFile, "wBalloonHelp_t balloonHelp[] = {\n");
-
 
     messages = cJSON_GetObjectItemCaseSensitive(message_json, "messages");
     cntMessages = cJSON_GetArraySize(messages);
@@ -74,6 +73,8 @@ int process(mode_e mode, char * json, FILE * outFile)
         fprintf(stderr, "Could not allocate storage for message list\n");
         return(1);
     }
+
+    fprintf(outFile, "wTooltip_t tooltipTexts[] = {\n");
 
     cJSON_ArrayForEach(messageLine, messages) {
         cJSON* line = cJSON_GetObjectItemCaseSensitive(messageLine, "line");
@@ -85,7 +86,12 @@ int process(mode_e mode, char * json, FILE * outFile)
         }
 
         messageList[i].line = line->valuestring;
-        messageList[i].message = contents->valuestring;
+        if (contents->valuestring[0]) {
+            messageList[i].message = contents->valuestring;
+        }
+        else {
+            messageList[i].message = NULL;
+        }
         i++;
     }
 
@@ -94,24 +100,24 @@ int process(mode_e mode, char * json, FILE * outFile)
     for(int i=0; i < cntMessages; i++ ) {
 
         if (messageList[i].message != NULL) {
-            if (mode == BALLOONHELP) {
+            if (mode == TOOLTIPS) {
                 fprintf(outFile, "\t{ \"%s\", \"%s\" },\n", messageList[i].line,
                     messageList[i].message);
             } else {
-                if (messageList[i].message[0]) {
                     fprintf(outFile, "\t{ \"%s\", N_(\"%s\") },\n", messageList[i].line,
                         messageList[i].message);
-                } else {
-                     fprintf(outFile, "\t{ \"%s\", \"\" },\n", messageList[i].line);
-                }
+
             }
         } else {
-            fprintf(outFile, "\t{ \"%s\", \"No help\" },\n", messageList[i].line);
+            fprintf(outFile, "\t{ \"%s\", NULL },\n", messageList[i].line);
             fprintf(stderr, "INFO: %s has an empty help text\n", messageList[i].line);
         }
     }
 
     fprintf(outFile, "\t{ NULL, NULL } };\n");
+
+    fprintf(outFile, "\n\nunsigned TooltipsGetCount(void)\n{\n\treturn(%d);\n}\n", cntMessages);
+
 end:
     cJSON_Delete(message_json);
     return status;
@@ -130,9 +136,9 @@ int main(int argc, char * argv[])
     }
 
     if (strcmp(argv[1], "-bh") == 0) {
-        mode = BALLOONHELP;
+        mode = TOOLTIPS;
     } else if (strcmp(argv[1], "-bhi") == 0) {
-        mode = BALLOONHELPI18N;
+        mode = TOOLTIPS_I18N;
     } else {
         fprintf(stderr, "Bad mode: %s\n", argv[1]);
         exit(1);

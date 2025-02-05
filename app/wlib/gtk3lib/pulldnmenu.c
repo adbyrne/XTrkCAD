@@ -238,8 +238,8 @@ static void CreateMenuItem(
     }
 
     if (helpStr != NULL) {
-//		wlibAddHelpString( MMENUITEM( mi ), helpStr );
-        wlibAddTooltip(mi->widget, helpStr);
+		wlibAddTooltip( mi->widget, NULL, helpStr );
+//        wlibAddTooltip(mi->widget, helpStr);
     }
 
     return;

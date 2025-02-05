@@ -283,8 +283,8 @@ wControl_p wButtonCreate(
 	g_signal_connect(G_OBJECT(b->widget), "clicked",
 	                 G_CALLBACK(buttonClick), b);
 
-	wlibAddHelpString(b->widget, helpStr);
-	wlibAddTooltip(b->widget, helpStr);
+	wlibAddTooltip(b->widget, parent->name, helpStr);
+//	wlibAddTooltip(b->widget, helpStr);
 
 	return b;
 }
@@ -385,8 +385,8 @@ wControl_p wButtonCreateForToolbar(
 	g_signal_connect(G_OBJECT(buttonControl->widget), "clicked",
 	                 G_CALLBACK(buttonClick), buttonControl);
 
-	wlibAddHelpString(buttonControl->widget, helpStr);
-	wlibAddTooltip(buttonControl->widget, helpStr);
+	wlibAddTooltip(buttonControl->widget,NULL, helpStr);
+	//wlibAddTooltip(buttonControl->widget, helpStr);
 
 	return buttonControl;
 }

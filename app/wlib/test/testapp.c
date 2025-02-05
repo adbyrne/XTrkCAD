@@ -43,7 +43,7 @@
 // #define TEST_SPLASH
 #define TEST_PULLDOWNMENU
 // #define TEST_STATUSBAR
-#define TEST_TOOLBAR
+//#define TEST_TOOLBAR
 //#define TEST_DRAW
 
 #define TRUE  (1)
@@ -222,7 +222,7 @@ static char* yellowstar[] = {
 "                " };
 
 
-wBalloonHelp_t dummyTooltips = { NULL, NULL };
+wTooltip_t dummyTooltips = { NULL, NULL };
 
 //
 //------------------------- Pulldown Menu ------------------------------------
@@ -466,12 +466,12 @@ NoteDialog(void* unused)
 		"note-text",
 		"Notes",
 		"note",
-		BO_DIALOGFROMBUILDER,
+		F_DEFINEDINBUILDER,
 		NoteDialogProc,
 		NULL);
 
 	text = wTextCreate(dialog, 0, 0, "note-text", "Enter notes here... ", 
-		BO_DIALOGFROMBUILDER, 0, 0);
+		F_DEFINEDINBUILDER, 0, 0);
 }
 
 bool
@@ -632,10 +632,17 @@ wControl_p DialogViewer(char * builder)
 	wControl_p dialog;
 
 	dialog = wWinDialogCreate(mainW, "", NULL, (char *)builder, 
-		DO_FILESYSTEM | BO_DIALOGFROMBUILDER,
+		DO_FILESYSTEM | F_DEFINEDINBUILDER,
 		SimpleDynamicProc, NULL);
 
 	return(dialog);
+}
+
+
+void
+ButtonCallback(void* choice)
+{
+	printf("Button clicked %d\n", (int)(uintptr_t)choice);
 }
 
 char entry1[80] = "Name";
@@ -650,6 +657,13 @@ TestLength(const char* value, void* attributes)
 		return(true);
 }
 
+bool
+HelpCallback(char* topic)
+{
+	wHelp(topic);
+}
+
+
 void TextFieldTest(void* builder)
 { 
 	wControl_p widget1;
@@ -659,6 +673,8 @@ void TextFieldTest(void* builder)
 	widget1 = wEntryCreate(dialog, 0, 0, "name", NULL, 0L, 0, entry1, sizeof(entry1) - 1, TestLength, NULL);
 
 	widget2 = wEntryCreate(dialog, 0, 0, "script", NULL, 0L, 0, entry2, sizeof(entry2) - 1, TestLength, NULL);
+
+	wButtonCreate(dialog, 0, 0, "id-help", NULL, 0, 0, HelpCallback, builder);
 }
 
 long choiceSelect;
@@ -669,11 +685,6 @@ ChoiceCallback(long value, void* unused)
 	printf("Choice callback: value=%ld\n", value);
 }
 
-void
-ButtonCallback(void* choice)
-{
-	printf("Button clicked %d\n", (int)(uintptr_t)choice);
-}
 
 void CheckboxTest(void* builderFile)
 {
@@ -691,6 +702,8 @@ void CheckboxTest(void* builderFile)
 
  	wButtonCreate(dialog, 0, 0, "tip-prev", NULL, 0, 0, ButtonCallback,(void *)-1);
 	wButtonCreate(dialog, 0, 0, "tip-next", NULL, 0, 0, ButtonCallback, (void *)1);
+
+
 }
 
 void AddElevationTest(void* unused)
@@ -744,7 +757,7 @@ void DemoTest(void* unused)
 		NULL,
 		"Demo", 
 		"demo",
-		BO_DIALOGFROMBUILDER,
+		F_DEFINEDINBUILDER,
 		DialogProc,
 		NULL);
 
@@ -1124,6 +1137,8 @@ LedOnOff(wControl_p button)
 	wControlActive(button, !active);
 }
 
+
+#ifdef TEST_TOOLBAR
 wControl_p toolbarButtons[10];
 
 void 
@@ -1157,6 +1172,7 @@ TestToolbar(wControl_p mainWindow)
 
 	toolbarButtons[0] = wButtonCreateForToolbar(mainWindow, 0, 0, "", colorLabel, 0, 0, SetColor, 0);
 }
+#endif
 
 static
 bool mainCallBack(wControl_p window, winProcEvent ev, void *data1, void *data2 )
@@ -1212,7 +1228,7 @@ wControl_p wMain( int argc, char * argv[] )
 									"Help", 		/* help topic */
 									WINDOWTITLE, /* window title */
 									APPNAME, 	/* window name */	
-									BO_DIALOGFROMBUILDER | F_RESIZE|F_MENUBAR, /* options */
+									F_DEFINEDINBUILDER | F_RESIZE|F_MENUBAR, /* options */
 									mainCallBack, 		/* window callback function */
 									NULL 			/* pointer to user attributes */
 									);

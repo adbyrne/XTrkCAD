@@ -735,7 +735,7 @@ wControl_p wDrawCreate(
 	gtk_widget_set_can_focus(drawControl->widget, !(option & BD_NOFOCUS));
 
 	gtk_widget_show(drawControl->widget);
-	wlibAddHelpString(drawControl->widget, helpStr);
+	wlibAddTooltip(drawControl->widget, parent->name, helpStr);
 
 	return drawControl;
 }

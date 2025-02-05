@@ -727,7 +727,6 @@ static void PlaybackQuit( void )
 	ParamRestoreAll();
 	magneticSnap = oldMagneticSnap;
 	RestoreLayers();
-	wEnableBalloonHelp( (int)enableBalloonHelp );
 	mainD.scale = oldMainScale;
 	mainD.size = oldMainSize;
 	mainD.orig = oldMainOrig;
