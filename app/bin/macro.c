@@ -209,6 +209,7 @@ static void DoRecordButton( void * context )
 		fprintf( recordF, "%s\nSTEP\n", END_MESSAGE );
 		fclose( recordF );
 		recordF = NULL;
+		ParamStartRecord( NULL );
 		wHide( recordW );
 		break;
 
