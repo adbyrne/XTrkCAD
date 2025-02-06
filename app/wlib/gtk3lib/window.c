@@ -52,8 +52,8 @@ static wControl_p firstWin = NULL, lastWin;
 
 static wBool_t gtkBlockEnabled = TRUE;
 static wBool_t maximize_at_next_show = FALSE;
-static dynArr_t toolbar_da;
-
+
+
 /*
  *****************************************************************************
  *
@@ -1066,29 +1066,6 @@ wControl_p wWindowCreate(
     return newWindow;
 }
 
-typedef struct {
-	wButton_p button;
-} toolbar_t;
-
-/**
- * \brief Add a button to the list of elements in toolbar
- * 
- * \param button the new button
- */
-
-void
-wlibAddButtonToolbar(wButton_p button)
-{
-	DYNARR_APPEND(toolbar_t,toolbar_da,20);
-	(((toolbar_t *)toolbar_da.ptr)[toolbar_da.cnt-1]).button = button;
-}
-
-/**
- * \brief Create a Toolbar object
- * 
- * \param container holding the newly created toolbar
- * \return GtkWidget* 
- */
 
 /**
  * Create a window.

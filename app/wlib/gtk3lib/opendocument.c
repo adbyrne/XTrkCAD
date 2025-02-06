@@ -1,5 +1,5 @@
 /** \file opendocument.c
- * open a document using the systems default application for that doc
+ * open a document using the file association
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -20,98 +20,75 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdlib.h>
-#include <assert.h>
-#include <string.h>
-
 #include "gtkint.h"
 #include "i18n.h"
 
-#include "dynstring.h"
+
 
 #if defined (_WIN32)
 
-#define DEFAULTOPENCOMMAND "start"
-
-#endif
-
-#if defined(__APPLE__) && defined(__MACH__)
-
-#define DEFAULTOPENCOMMAND "open"
+#include <windows.h>
+#include <shellapi.h>
 
 #else
 
+#include "dynstring.h"
+
+#if defined(__APPLE__) && defined(__MACH__)
+#define DEFAULTOPENCOMMAND "open"
+#else
 #define DEFAULTOPENCOMMAND "xdg-open"
+#endif
 
 #endif
 
-/**
- * Extend the PATH variable in the environment to include XTrackCAD's
- * script directory.
- *
- * \return pointer to old path
- */
-
-static char *
-ExtendPath(void)
-{
-    char *path = strdup(getenv("PATH"));
-    DynString newPath;
-    DynStringMalloc(&newPath, 16);
-
-    // append XTrackCAD's directory to the path as a fallback
-    DynStringCatCStrs(&newPath,
-                      path,
-                      ":",
-                      wGetAppLibDir(),
-                      NULL);
-
-    //setenv("PATH",
-    //       DynStringToCStr(&newPath),
-    //       TRUE);
-
-    DynStringFree(&newPath);
-
-    return (path);
-}
 
 /**
- * Invoke the system's default application to open a file. First the
- * system's standard xdg-open command is attempted. If that is not available, the
- * version included with the XTrackCAD installation is executed.
+ * Invoke the system's default application to open a file.
  *
  * \param topic IN URI of document
+ *
+ * \return 0 on success, error code on failure
  */
+
+/**  \todo Test UNIX case, change to glib string functions */
 
 unsigned wOpenFileExternal(char * filename)
 {
-    int rc;
-    DynString commandLine;
-    char *currentPath;
+	g_assert(filename != NULL);
+	g_assert(strlen(filename));
 
-    assert(filename != NULL);
-    assert(strlen(filename));
+#ifdef _WIN32
+	HINSTANCE handle;
+	unsigned int result;
 
-    currentPath = ExtendPath();
-    
-    DynStringMalloc(&commandLine, 16);
-    DynStringCatCStrs(&commandLine,
-                      DEFAULTOPENCOMMAND,
-                      " \"",
-                      filename,
-					  "\"",
-                      NULL);
+	handle = ShellExecute(NULL, "open", filename, NULL, NULL, SW_SHOWNORMAL);
 
-    // the command should be found via the PATH
-    rc = system(DynStringToCStr(&commandLine));
+	if (handle > (HINSTANCE)
+	    32) { /** magic Windows number, > 32 is a handle in case of success */
+		result = 0;
+	} else {
+		result = (unsigned)(long long)handle;
+	}
 
-    // restore the PATH
-    //setenv("PATH",
-    //       currentPath,
-    //       TRUE);
+#else
+	DynString commandLine;
+	unsigned int result;
 
-    free(currentPath);
-    DynStringFree(&commandLine);
-    
-    return(rc==0);
+	DynStringMalloc(&commandLine, 16);
+	DynStringCatCStrs(&commandLine,
+	                  DEFAULTOPENCOMMAND,
+	                  " \"",
+	                  filename,
+	                  "\"",
+	                  NULL);
+
+	// the command should be found via the PATH
+	result = system(DynStringToCStr(&commandLine));
+
+
+	DynStringFree(&commandLine);
+
+#endif
+	return result;
 }

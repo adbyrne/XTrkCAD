@@ -1481,7 +1481,7 @@ wBool_t ParamIntegerRangeCheck( paramData_p p, long valL )
 			         irangeP->high );
 		}
 		wWinPix_t h = wControlGetHeight(p->control);
-		wTooltipSet( p->control, message );
+		wTooltipSetText( p->control, message );
 		p->bInvalid = TRUE;
 		LOG( log_paraminput, 1, ( " -> RangeError\n" ) );
 		ParamHilite( p->group->win, p->control, p->bInvalid );
@@ -1513,7 +1513,7 @@ static void ParamIntegerPush( const char * val, void * dp )
 	for ( ; isspace( (unsigned char)*cp); cp++ );
 	if ( *cp != '\0' ) {
 		wWinPix_t h = wControlGetHeight(p->control);
-		wTooltipSet( p->control,  _("Invalid Number") );
+		wTooltipSetText( p->control,  _("Invalid Number") );
 		p->bInvalid = TRUE;
 		LOG( log_paraminput, 1, ( " -> InvalidNumber\n" ) );
 		ParamHilite( p->group->win, p->control, p->bInvalid );
@@ -1565,7 +1565,7 @@ static wBool_t ParamFloatRangeCheck( paramData_p p, FLOAT_T valF )
 			         (p->option&PDO_DIM)?FormatDistance(frangeP->low):FormatFloat(frangeP->low),
 			         (p->option&PDO_DIM)?FormatDistance(frangeP->high):FormatFloat(frangeP->high) );
 		wWinPix_t h = wControlGetHeight(p->control);
-		wTooltipSet( p->control, message );
+		wTooltipSetText( p->control, message );
 		p->bInvalid = TRUE;
 		ParamHilite( p->group->win, p->control, p->bInvalid );
 		return FALSE;

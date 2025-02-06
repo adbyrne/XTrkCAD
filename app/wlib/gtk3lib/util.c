@@ -35,6 +35,7 @@
 #include <gdk/gdkkeysyms.h>
 
 #include "gtkint.h"
+#include "dynarr.h"
 #include "i18n.h"
 
 extern wWin_p gtkMainW;

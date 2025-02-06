@@ -48,120 +48,70 @@ add_custom_target(clean-html
 	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/clean-html.cmake
 )
 
-# If we're using the GTK back-end, just generate "vanilla" HTML help files for use with gtkhtml
-if(XTRKCAD_USE_GTK)
-
-	if (APPLE)
-		target_sources(helpsystem
-			PRIVATE 
-			${CMAKE_CURRENT_SOURCE_DIR}/osxconf.but)
-	else()
+if (APPLE)
+	target_sources(helpsystem
+		PRIVATE 
+		${CMAKE_CURRENT_SOURCE_DIR}/osxconf.but)
+else()
+	if(WIN32)
 		target_sources(helpsystem 
-			PRIVATE
-			${CMAKE_CURRENT_SOURCE_DIR}/linconf.but)
-	endif()
+		PRIVATE
+		${CMAKE_CURRENT_SOURCE_DIR}/chmconf.but)
+	else()
+		target_sources(helpsystem P
+		PRIVATE
+		${CMAKE_CURRENT_SOURCE_DIR}/linconf.but)
+	endif()	
+endif()
 
-	get_target_property(halibut_sources helpsystem SOURCES)
+get_target_property(halibut_sources helpsystem SOURCES)
 
+add_custom_command(
+	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/html/index.html
+	DEPENDS halibut ${halibut_sources}
+	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
+	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/clean-html.cmake
+	COMMAND halibut ${halibut_sources}
+)
+
+add_custom_target(help-html ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/html/index.html msgfiles)
+
+install(
+	DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
+	DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
+)
+
+install(
+	DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/png.d
+	DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/html
+)
+
+install(
+	FILES xtrkcad_lin.css
+	DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/html
+)
+# Copy the help files to the Help bundle if Apple
+if (APPLE)
 	add_custom_command(
-		OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/html/index.html
-		DEPENDS halibut ${halibut_sources}
+		OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/html/XTrackCAD.helpindex
+		DEPENDS help-html ${halibut_sources}
 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
-		COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/clean-html.cmake
-		COMMAND halibut ${halibut_sources}
-		)
+		COMMAND hiutil -Cf XTrackCAD.helpindex -gva -e "IndexPage.html" -e "toc.html" ${CMAKE_CURRENT_BINARY_DIR}/html
+	)
 
-	add_custom_target(help-html ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/html/index.html msgfiles)
+	add_custom_target(help-index ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/html/XTrackCAD.helpindex)
 
 	install(
-		DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
-		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
-		)
-
+		DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html/
+		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/XTrackCAD.help/Contents/Resources/en.lproj
+	)
 	install(
 		DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/png.d
-		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/html
-		)
-
-	install(
-		FILES xtrkcad_lin.css
-		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/html
-        )
-# Copy the help files to the Help bundle if Apple
-	if (APPLE)
-        add_custom_command(
-        	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/html/XTrackCAD.helpindex
-        	DEPENDS help-html ${halibut_sources}
-        	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
-        	COMMAND hiutil -Cf XTrackCAD.helpindex -gva -e "IndexPage.html" -e "toc.html" ${CMAKE_CURRENT_BINARY_DIR}/html
-        )
-
-        add_custom_target(help-index ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/html/XTrackCAD.helpindex)
-
-        install(
-            DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html/
-            DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/XTrackCAD.help/Contents/Resources/en.lproj
-        )
-        install(
-            DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/png.d
-            DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/XTrackCAD.help/Contents/Resources/en.lproj
-        )
-	    install(
-	        FILES xtrkcad_osx.css
-		    DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/XTrackCAD.help/Contents/Resources/en.lproj/sty
+		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/XTrackCAD.help/Contents/Resources/en.lproj
 	)
-    endif()
-
-# Otherwise, we're using the Win32 back-end, so generate a compiled HTML help file
-else()
-    find_package(HTMLHelp)
-
-    if("${HTML_HELP_COMPILER}" STRGREATER "")
-        target_sources(helpsystem
-                    PRIVATE
-                    ${CMAKE_CURRENT_SOURCE_DIR}/chmconf.but
-        )
-    	file(GLOB IMAGE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/png.d/*)
-
-		#
-		# Use the Microsoft HTML Help Workshop to create a chm file
-		# 
-		# Clean the working directory
-		# Copy the image files and the CSS
-		# Create the sources for the Help Workshop using halibut
-		# Build the chm file
-		# Add the chm file to the installation 
-
-		add_custom_target(help-chm ALL DEPENDS ${halibut_sources})
-		set_target_properties(
-			help-chm
-			PROPERTIES FOLDER HelpDocs
-		)
-		get_target_property(halibut_sources helpsystem SOURCES)
-		
-		# hhc exits with non-zero code even on success
-		# workaround is to create an external cmake script that
-		# invokes hhc and handle its specific exit code
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/hhc.cmake.in"
-					   "${CMAKE_CURRENT_BINARY_DIR}/hhc.cmake"
-						@ONLY)	
-
-		add_custom_command(
-			TARGET help-chm
-			DEPENDS halibut helpsystem ${IMAGE_SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad_win.css
-			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
-			COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/clean-html.cmake
-			COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/png.d ${CMAKE_CURRENT_BINARY_DIR}/html/png.d
-			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad_win.css ${CMAKE_CURRENT_BINARY_DIR}/html
-			COMMAND halibut ${halibut_sources} 
-			COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/hhc.cmake
-		)
-
-		install(
-			FILES ${CMAKE_CURRENT_BINARY_DIR}/html/xtrkcad.chm
-			DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
-		)
-	else()
-		message(STATUS "HTML Help Workshop not found! CHM Help will not be created.")	
-	endif()
+	install(
+		FILES xtrkcad_osx.css
+		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/XTrackCAD.help/Contents/Resources/en.lproj/sty
+	)
+	
 endif()

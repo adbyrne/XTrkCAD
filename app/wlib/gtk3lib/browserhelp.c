@@ -23,14 +23,14 @@
 #include "gtkint.h"
 #include "i18n.h"
 
-#define DEFAULTBROWSERCOMMAND "xdg-open"
 
-#define  HELPERRORTEXT 			"Help Error - help information can not be found.\n" \
+#define  HELPERRORTEXT 			"Help Error - help information cannot be found.\n" \
 								"The help information you requested cannot be shown.\n" \
-								"Usually this is an installation problem, Make sure that a default browser" \
+								"Usually this is an installation problem. Make sure that a default browser" \
                                 " is configured and that XTrackCAD and the included " \
-								"HTML files are installed properly and can be found via the XTRKCADLIB environment " \
-								"variable.\n Also make sure that the user has sufficient access rights to read these" \
+								"HTML files are installed properly.\n" \
+                                "The expected location of the files is %s." \
+								"\nAlso make sure that the user has sufficient access rights to read these" \
  								"files."
 
 /**
@@ -43,15 +43,15 @@
 static void
 TopicToUrl(gchar** helpUrl, const char* topic)
 {
-    gchar* temp = g_strdup(topic);
+	gchar* temp = g_strdup(topic);
 
-    temp[0] = g_ascii_toupper(temp[0]);
+	//temp[0] = g_ascii_toupper(temp[0]);
 
-    *helpUrl = g_strdup_printf( "file://%s/html/cmd%s.html",
-                      wGetAppLibDir(),
-                      temp,
-                      NULL);
-    g_free(temp);
+	*helpUrl = g_strdup_printf( "file:///%s/html/%s.html",
+	                            wGetAppLibDir(),
+	                            temp,
+	                            NULL);
+	g_free(temp);
 }
 
 /**
@@ -64,19 +64,23 @@ TopicToUrl(gchar** helpUrl, const char* topic)
 
 void wHelp(const char * topic)
 {
-    int rc;
-    gchar *url;
+	int rc;
+	gchar *url;
 
-    g_assert(topic != NULL);
-    g_assert(strlen(topic));
+	g_assert(topic != NULL);
+	g_assert(strlen(topic));
 
-    TopicToUrl(&url, topic);
-
+	TopicToUrl(&url, topic);
 	rc = wOpenFileExternal(url);
 
-	if (!rc) {
-        wNotice(HELPERRORTEXT, _("Cancel"), NULL);
-    }
+	if (rc) {
+		GString* errorText = g_string_new("");
 
-    g_free(url);
+		g_string_printf(errorText, HELPERRORTEXT, url);
+		wNotice(errorText->str, _("Cancel"), NULL);
+
+		g_string_free(errorText, TRUE);
+	}
+
+	g_free(url);
 }

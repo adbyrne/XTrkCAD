@@ -25,16 +25,13 @@
 #define GTK_DISABLE_DEPRECATED
 #define GSEAL_ENABLE
 
-#include <gtk/gtk.h>
-#include <gdk/gdk.h>
-
-//#include "misc.h"
 extern const char * GetCurCommandName();
 
-#include "gtkint.h"
+#include "wlib.h"
 #include "i18n.h"
 
-
+#define SHOWHELPCONTENTS    1
+#define SHOWHELPFORCOMMAND  2
 /**
  * Handle the commands issued from the Help drop-down. Currently, we only have a table
  * of contents, but search etc. might be added in the future.
@@ -46,29 +43,30 @@ extern const char * GetCurCommandName();
 static void
 DoHelpMenu(void *data)
 {
-    int func = (intptr_t)data;
+	uintptr_t func = (intptr_t)data;
+	const char * topic;
 
-    const char * topic;
+	switch (func) {
+	case SHOWHELPCONTENTS:
+		wHelp("contents");
+		break;
 
-    switch (func) {
-    case 1:
-        wHelp("contents");
-        break;
+	case SHOWHELPFORCOMMAND:
+		topic = GetCurCommandName();
+		if (topic && topic[0]) {
+			wHelp(topic);
+		}
+		break;
 
-    case 3:
-    	topic = GetCurCommandName();
-    	if (topic && topic[0])
-    		wHelp(topic);
-    	break;
+	default:
+		break;
+	}
 
-    default:
-        break;
-    }
-
-    return;
+	return;
 }
 
-void wDoAccelHelp(wAccelKey_e key, void * context) {
+void wDoAccelHelp(wAccelKey_e key, void * context)
+{
 	DoHelpMenu(context);
 }
 
@@ -81,6 +79,8 @@ void wDoAccelHelp(wAccelKey_e key, void * context) {
 
 void wMenuAddHelp(wControl_p m)
 {
-    wMenuPushCreate(m, NULL, _("&Contents"), 0, DoHelpMenu, (void*)1);
-    wMenuPushCreate(m, NULL, _("Co&mmand Context help"), 0, DoHelpMenu, (void*)3);
+	wMenuPushCreate(m, NULL, _("&Contents"), 0, DoHelpMenu,
+	                (void*)SHOWHELPCONTENTS);
+	wMenuPushCreate(m, NULL, _("Co&mmand Context help"), 0, DoHelpMenu,
+	                (void*)SHOWHELPFORCOMMAND);
 }

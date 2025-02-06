@@ -813,7 +813,7 @@ EXPORT void LoadScaleList( wControl_p scaleList )
 {
 	wIndex_t inx;
 	for (inx=0; inx<scaleDesc_da.cnt-(extraButtons?0:1); inx++) {
-		wListAddValue( scaleList, scaleDesc(inx).scaleDescStr, NULL, I2VP(inx) );
+		wComboBoxAddValue( scaleList, scaleDesc(inx).scaleDescStr, I2VP(inx) );
 	}
 }
 
@@ -822,7 +822,7 @@ EXPORT void LoadGaugeList( wControl_p gaugeList, SCALEDESCINX_T scale )
 	wListClear( gaugeList );			/* remove old list in case */
 	for ( wIndex_t inx=0; inx<scaleDesc(scale).gauges_da.cnt; inx++ ) {
 		gaugeInfo_p g = &DYNARR_N( gaugeInfo_t, scaleDesc(scale).gauges_da, inx );
-		wListAddValue( gaugeList, g->gaugeStr, NULL, I2VP(g->scaleInx) );
+		wComboBoxAddValue( gaugeList, g->gaugeStr,  I2VP(g->scaleInx) );
 	}
 }
 
@@ -832,7 +832,7 @@ static void ScaleChange( long changes )
 		SetScale();
 	}
 }
-
+
 /*****************************************************************************
  *
  * Change Scale Dlg
