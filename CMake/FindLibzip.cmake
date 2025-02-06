@@ -38,7 +38,7 @@ else(WIN32)
 
   if(UNIX AND NOT APPLE)
     find_library(LIBZIP_LIBRARY
-      NAMES libzip.so libzip.a zip
+      NAMES libzip.a zip
       PATHS
 		/usr/lib64
 		/usr/lib
