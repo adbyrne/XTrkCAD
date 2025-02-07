@@ -159,9 +159,9 @@ void wControlSetBalloon( wControl_p b, wWinPix_t dx, wWinPix_t dy,
 		//GtkWidget *alignment;
 
 		GdkColor color;
-		color.red = 0x00C5 * 65536/255;
-		color.green = 0x006F * 65536/255;
-		color.blue = 0x0078 * 65536/255;
+		color.red = 0x00FE * 65536/255;
+		color.green = 0x007F * 65536/255;
+		color.blue = 0x007F * 65536/255;
 
 		balloonF = gtk_window_new( GTK_WINDOW_POPUP );
 		gtk_window_set_type_hint( GTK_WINDOW( balloonF), GDK_WINDOW_TYPE_HINT_TOOLTIP );
