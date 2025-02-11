@@ -229,8 +229,8 @@ extern long angleSystem;
 #define DISTFMT_FRACT_NUM		0x0000
 #define DISTFMT_FRACT_FRC		0x0400
 
-FLOAT_T DecodeFloat( wEntry_p entry, BOOL_T * valid);
-FLOAT_T DecodeDistance( wEntry_p entry, BOOL_T * valid);
+FLOAT_T DecodeFloat( wControl_p entry, BOOL_T * valid);
+FLOAT_T DecodeDistance( wControl_p entry, BOOL_T * valid);
 char * FormatLong( long );
 char * FormatFloat( FLOAT_T );
 char * FormatDistance( FLOAT_T );

@@ -128,37 +128,32 @@ static void ListPush(wIndex_t inx, const char* val, wIndex_t op,
 
 
 
-static void IntegerPush(const char* val, void* dp)
+static void IntegerPush(const char* value, void* dp)
 {
 	paramData_p p = (paramData_p)dp;
 	long valL;
-	char* cp;
-	const char* value;
 
-	if (strlen(val) == 1 && val[strlen(val) - 1] == '\n') {
-		value = wEntryGetValue(p->control);
-		p->enter_pressed = TRUE;
-	}
-	else {
-		value = val;
-		p->enter_pressed = FALSE;
-	}
+	// const char* value;
 
-	valL = strtol(value, &cp, 10);
-	for (; isspace((unsigned char)*cp); cp++);
-	if (*cp != '\0') {
-		//wWinPix_t h = wControlGetHeight(p->control);
-		//wControlSetBalloon(p->control, 0, -h * 3 / 4, _("Invalid Number"));
-		p->bInvalid = TRUE;
-		// LOG(log_paraminput, 1, (" -> InvalidNumber\n"));
-		ParamHilite(p->group->win, p->control, p->bInvalid);
+	// \todo Pressing Enter key is handled here, but when does that happen?
+	//if (strlen(val) == 1 && val[strlen(val) - 1] == '\n') {
+	//	value = wEntryGetValue(p->control);
+	//	p->enter_pressed = TRUE;
+	//}
+	//else {
+	//	value = val;
+	//	p->enter_pressed = FALSE;
+	//}
+
+	valL = FormIntegerGetValue(p, value);
+	if(p->bInvalid) {
+		// LOG(log_form, 1, (" -> InvalidNumber\n"));
 		return;
 	}
+
 	if (!FormIntegerRangeCheck(p, valL)) {
 		return;
 	}
-	//wControlSetBalloon(p->control, 0, 0, NULL);
-	p->bInvalid = FALSE;
 
 	//if (recordParamF && (p->option & PDO_NORECORD) == 0 && p->group->nameStr
 	//	&& p->nameStr) {
@@ -172,46 +167,31 @@ static void IntegerPush(const char* val, void* dp)
 	if ((p->option & PDO_NOPSHACT) == 0 && p->group->changeProc) {
 		p->group->changeProc(p->group, (int)(p - p->group->paramPtr), &valL);
 	}
-	ParamHilite(p->group->win, p->control, p->bInvalid);
-
 }
 
-static void FloatPush(const char* val, void * dp)
+static void FloatPush(const char* value, void * dp)
 {
 	paramData_p p = (paramData_p)dp;
-	const char* value;
 	FLOAT_T valF;
-	BOOL_T valid;
+46,5
+	//if (strlen(val) == 1 && val[strlen(val) - 1] == '\n') {
+	//	value = wEntryGetValue(p->control);
+	//	p->enter_pressed = TRUE;
+	//}
+	//else {
+	//	value = val;
+	//	p->enter_pressed = FALSE;
+	//}
 
-	if (strlen(val) == 1 && val[strlen(val) - 1] == '\n') {
-		value = wEntryGetValue(p->control);
-		p->enter_pressed = TRUE;
-	}
-	else {
-		value = val;
-		p->enter_pressed = FALSE;
-	}
-
-	if (p->option & PDO_DIM) {
-		valF = DecodeDistance((wEntry_p)p->control, &valid);
-	}
-	else {
-		valF = DecodeFloat((wEntry_p)p->control, &valid);
-		if (p->option & PDO_ANGLE) {
-			valF = NormalizeAngle((angleSystem == ANGLE_POLAR) ? valF : -valF);
-		}
-	}
-	if (!valid) {
-		//wWinPix_t h = wControlGetHeight(p->control);
-		//wControlSetBalloon(p->control, 0, -h * 3 / 4, decodeErrorStr);
-		p->bInvalid = TRUE;
-		wControlHilite(p->control, p->bInvalid);
+	valF = FormFloatGetValue(p, value);
+	if(p->bInvalid)
+	{
 		return;
 	}
+
 	if (!FormFloatRangeCheck(p, valF)) {
 		return;
 	}
-	//wControlSetBalloon(p->control, 0, 0, NULL);
 	p->bInvalid = FALSE;
 
 	//if (recordParamF && (p->option & PDO_NORECORD) == 0 && p->group->nameStr
@@ -536,7 +516,7 @@ static int CreateControl(
 			_(pd->winLabel), pd->winOption, 0, NULL, ColorSelectPush, pd);
 		break;
 	case PD_MESSAGE:
-		pd->control = (wControl_p)wMessageCreateEx(win, x + ((pd->option & PDO_DLGNEWCOLUMN) != 0), y, helpStr, 1,
+		pd->control = (wControl_p)wMessageCreateEx(win, ((pd->option & PDO_DLGNEWCOLUMN) != 0), y, helpStr, 1,
 			pd->valueP ? _(pd->valueP) : " ", pd->winOption);
 		break;
 	case PD_BUTTON:

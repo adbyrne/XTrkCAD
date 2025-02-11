@@ -163,10 +163,9 @@ EXPORT wBool_t ParamCheckInputs(
 }
 
 
-EXPORT void ParamResetInvalid(
-    wWin_p win)
+EXPORT void ParamResetInvalid(wControl_p win)
 {
-
+    //FormResetInvalid(win);
     ParamResetInvalidOrig(win);
 }
 

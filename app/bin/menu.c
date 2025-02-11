@@ -1304,7 +1304,7 @@ EXPORT void CreateMenus(void)
 	wMenuSeparatorCreate( helpM );
 	wMenuPushCreate( helpM, "cmdTip", _("Tip of the Day..."), 0, ShowTip,
 	                 I2VP(SHOWTIP_FORCESHOW | SHOWTIP_NEXTTIP));
-	demoM = wMenuMenuCreate( helpM, "cmdDemo", _("&Demos") );
+	demoM = wMenuMenuCreate( helpM, "cmdDemo", _("_Demos") );
 	wMenuPushCreate( helpM, "cmdExamples", _("Examples..."), 0, ChkExamples, NULL);
 
 	/* about window */

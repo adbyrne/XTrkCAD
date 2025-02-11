@@ -27,6 +27,7 @@
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
+#include "form.h"
 #include "cselect.h"
 #include "icons.h"
 #include "param.h"
@@ -843,8 +844,10 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 	case C_START:
 		if (helix) {
 			if (helixW == NULL) {
-				helixW = ParamCreateDialog(&helixPG, MakeWindowTitle(_("Helix")), NULL, NULL,
-				                           ParamCancel_Current, TRUE, NULL, 0, ComputeHelix);
+				helixW = FormCreateDialog(&helixPG, MakeWindowTitle(_("Helix")),
+					NULL, NULL,
+					_("Cancel"), ParamCancel_Current,
+					TRUE, 0, ComputeHelix);
 			}
 			ParamLoadControls(&helixPG);
 			ParamGroupRecord(&helixPG);

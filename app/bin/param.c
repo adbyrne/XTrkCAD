@@ -281,7 +281,7 @@ static BOOL_T GetDistance(char ** cpp, FLOAT_T * distP)
 }
 
 
-EXPORT FLOAT_T DecodeFloat(
+EXPORT FLOAT_T FloatGetValue(
         wEntry_p strCtrl,
         BOOL_T * validP )
 {
@@ -308,7 +308,7 @@ EXPORT FLOAT_T DecodeFloat(
 
 
 FLOAT_T DecodeDistance(
-        wEntry_p strCtrl,
+        wControl_p strCtrl,
         BOOL_T * validP)
 {
 	FLOAT_T valF = 0.0;
@@ -643,6 +643,7 @@ EXPORT void ParamLoadControlOrig(
 }
 
 
+
 /** Load all the controls in a parameter group.
 * \param IN pointer to parameter group to be loaded
 */
@@ -755,7 +756,7 @@ EXPORT long ParamUpdateOrig(
 			if (p->option & PDO_DIM) {
 				floatV = DecodeDistance( (wEntry_p)p->control, &valid );
 			} else {
-				floatV = DecodeFloat( (wEntry_p)p->control, &valid );
+				floatV = FloatGetValue( (wEntry_p)p->control, &valid );
 				if (valid && (p->option & PDO_ANGLE) ) {
 					floatV = NormalizeAngle( (angleSystem==ANGLE_POLAR)?floatV:-floatV );
 				}
@@ -878,7 +879,7 @@ void ParamLoadDataOrig(
 			if (p->option & PDO_DIM) {
 				floatV = DecodeDistance((wEntry_p)p->control, &valid);
 			} else {
-				floatV = DecodeFloat((wEntry_p)p->control, &valid);
+				floatV = FloatGetValue((wEntry_p)p->control, &valid);
 
 				if (valid && (p->option & PDO_ANGLE)) {
 					floatV = NormalizeAngle((angleSystem==ANGLE_POLAR)?floatV:-floatV);
@@ -1604,7 +1605,7 @@ static void ParamFloatPush( const char * val, void * dp )
 	if (p->option & PDO_DIM) {
 		valF = DecodeDistance( (wEntry_p)p->control, &valid );
 	} else {
-		valF = DecodeFloat( (wEntry_p)p->control, &valid );
+		valF = FloatGetValue( (wEntry_p)p->control, &valid );
 		if (p->option & PDO_ANGLE) {
 			valF = NormalizeAngle( (angleSystem==ANGLE_POLAR)?valF:-valF );
 		}

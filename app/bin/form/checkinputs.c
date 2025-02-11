@@ -23,78 +23,209 @@
 
 #include <wlib.h>
 #include <form.h>
+#include "dynstring.h"
+#include "xtctypes.h"
+
 
 #include "formprivate.h"
 
+#define CHECKUPPERLIMIT(rangeCheck) (!(rangeCheck & PDO_NORANGECHECK_HIGH ))
+#define CHECKLOWERLIMIT(rangeCheck) (!(rangeCheck & PDO_NORANGECHECK_LOW ))
+
+static void
+ShowErrorMessage(paramData_p p, const char *message)
+{
+	wTooltipSetText(p->control, message);
+	wControlHilite(p->control, TRUE);
+}
+
+static void
+ClearErrorMessage(paramData_p p)
+{
+	wTooltipSet(p->control, p->group->nameStr, p->nameStr);
+	wControlHilite(p->control, FALSE);
+}
+
+unsigned long 
+FormIntegerGetValue(paramData_p data, const char *enteredValue)
+{
+	char* cp;
+	unsigned long value;
+
+	value = strtol(enteredValue, &cp, 10);
+
+	while (isspace((unsigned char)*cp)) {
+		cp++;
+	}
+
+	if (*cp != '\0') {
+		data->bInvalid = TRUE;
+		ShowErrorMessage(data, _("Invalid number"));
+	}
+	else {
+		data->bInvalid = FALSE;
+		ClearErrorMessage(data);
+	}
+
+	return(value);
+}
 
 wBool_t FormIntegerRangeCheck(paramData_p p, long valL)
 {
+	paramIntegerRange_t* irangeP = (paramIntegerRange_t*)p->winData;
+	DynString errorMessage;
+	bool tooHigh = false;
+	bool tooLow = false;
+
 	//if (paramPlayback) {
 	//	return TRUE;
 	//}
-	paramIntegerRange_t* irangeP = (paramIntegerRange_t*)p->winData;
 
-	if (((irangeP->rangechecks & PDO_NORANGECHECK_HIGH) == 0
-		&& valL > irangeP->high) ||
-		((irangeP->rangechecks & PDO_NORANGECHECK_LOW) == 0 && valL < irangeP->low)) {
-		if ((irangeP->rangechecks & (PDO_NORANGECHECK_HIGH | PDO_NORANGECHECK_LOW)) ==
-			PDO_NORANGECHECK_HIGH) {
-			sprintf(message, _("Enter a value > %ld"), irangeP->low);
-		}
-		else if ((irangeP->rangechecks & (PDO_NORANGECHECK_HIGH | PDO_NORANGECHECK_LOW))
-			== PDO_NORANGECHECK_LOW) {
-			sprintf(message, _("Enter a value < %ld"), irangeP->high);
-		}
-		else {
-			sprintf(message, _("Enter a value between %ld and %ld"), irangeP->low,
-				irangeP->high);
-		}
-		//wWinPix_t h = wControlGetHeight(p->control);
-		//wControlSetBalloon(p->control, 0, -h * 3 / 4, message);
-		p->bInvalid = TRUE;
-		wControlHilite(p->control, p->bInvalid);
-		return FALSE;
-	}
+	DynStringMalloc(&errorMessage, 80);
+
 	p->bInvalid = FALSE;
-	return TRUE;
+
+	if (CHECKUPPERLIMIT(irangeP->rangechecks) && valL > irangeP->high) {
+		p->bInvalid = TRUE;
+		tooHigh = true;
+	}
+
+	if (CHECKLOWERLIMIT(irangeP->rangechecks) && valL < irangeP->low) {
+		p->bInvalid = TRUE;
+		tooLow = true;
+	}
+
+	if (tooHigh && tooLow) {
+		DynStringPrintf(&errorMessage, _("Enter a value between %ld and %ld"), 
+			irangeP->low,
+			irangeP->high);
+	}
+	else {
+		if (tooHigh) {
+			DynStringPrintf(&errorMessage, _("Enter a value < %ld"), irangeP->high);
+		}
+		if (tooLow) {
+			DynStringPrintf(&errorMessage, _("Enter a value > %ld"), irangeP->low);
+		}
+	}
+
+	if (p->bInvalid) {
+		ShowErrorMessage(p, DynStringToCStr(&errorMessage));
+	}
+	else {
+		ClearErrorMessage(p);
+	}
+
+	DynStringFree(&errorMessage);
+	return(!p->bInvalid);
 }
 
+static FLOAT_T FloatGetValue(const char *enteredValue,	BOOL_T* validP)
+{
+	FLOAT_T valF;
+	char* cp2;
+
+	while (isspace((unsigned char)*enteredValue)) { enteredValue++; }
+	if (*enteredValue) {
+		valF = strtod(enteredValue, &cp2);
+		if (*cp2 != 0) {
+			*validP = FALSE;
+			return 0.0;
+		}
+		*validP = TRUE;
+		return valF;
+	}
+	else {
+		*validP = TRUE;
+		return 0.0;
+	}
+}
+
+
+FLOAT_T FormFloatGetValue(paramData_p data, const char *enteredValue) 
+{
+	FLOAT_T value;
+	wBool_t valid;
+
+	if (data->option & PDO_DIM) {
+		value = FormDecodeDistance(enteredValue, &valid);
+		if (!valid) {
+			ShowErrorMessage(data, FormGetParseError());
+		}
+		/**
+		 * \todo The original version set the entry field to a properly formated value incl. scale conversion.
+		 * This was removed from DecodeDistance for clarity but could be put here if it makes sense
+		 */
+	} else {
+		value = FloatGetValue(enteredValue, &valid);
+		if (!valid) {
+			ShowErrorMessage(data, _("Invalid Number"));
+		}
+		else {
+			if (data->option & PDO_ANGLE) {
+				value = NormalizeAngle((angleSystem == ANGLE_POLAR) ? value : -value);
+			}
+		}
+	}
+
+
+	data->bInvalid = !valid;
+	return(value);
+}
 
 
 wBool_t FormFloatRangeCheck(paramData_p p, FLOAT_T valF)
 {
+	paramFloatRange_t* frangeP = (paramFloatRange_t*)p->winData;
+	DynString message;
+	bool tooHigh = false;
+	bool tooLow = false;
+
 	//if (paramPlayback) {
 	//	return TRUE;
 	//}
-	paramFloatRange_t* frangeP = (paramFloatRange_t*)p->winData;
-	//	wBool_t bInvalid = p->bInvalid;
-	if (((frangeP->rangechecks & PDO_NORANGECHECK_HIGH) == 0
-		&& valF > frangeP->high) ||
-		((frangeP->rangechecks & PDO_NORANGECHECK_LOW) == 0 && valF < frangeP->low)) {
-		if ((frangeP->rangechecks & (PDO_NORANGECHECK_HIGH | PDO_NORANGECHECK_LOW)) ==
-			PDO_NORANGECHECK_HIGH)
-			sprintf(message, _("Enter a value > %s"),
-				(p->option & PDO_DIM) ? FormatDistance(frangeP->low) : FormatFloat(frangeP->low));
-		else if ((frangeP->rangechecks & (PDO_NORANGECHECK_HIGH | PDO_NORANGECHECK_LOW)) ==
-			PDO_NORANGECHECK_LOW)
-			sprintf(message, _("Enter a value < %s"),
-				(p->option & PDO_DIM) ? FormatDistance(frangeP->high) : FormatFloat(frangeP->high));
-		else
-			sprintf(message, _("Enter a value between %s and %s"),
-				(p->option & PDO_DIM) ? FormatDistance(frangeP->low) : FormatFloat(frangeP->low),
-				(p->option & PDO_DIM) ? FormatDistance(frangeP->high) : FormatFloat(frangeP->high));
-		/** \todo Need to find a solution forshowing error messages in dialogs */
-		//wWinPix_t h = wControlGetHeight(p->control);
-		//wControlSetBalloon(p->control, 0, -h * 3 / 4, message);
-		p->bInvalid = TRUE;
-		wControlHilite( p->control, p->bInvalid);
-		return FALSE;
-	}
+
+	DynStringMalloc(&message, 80);
+
 	p->bInvalid = FALSE;
-	return TRUE;
+
+	if (CHECKUPPERLIMIT(frangeP->rangechecks) && valF > frangeP->high) {
+		p->bInvalid = TRUE;
+		tooHigh = true;
+	}
+
+	if (CHECKLOWERLIMIT(frangeP->rangechecks) && valF < frangeP->low) {
+		p->bInvalid = TRUE;
+		tooLow = true;
+	}
+
+	if (tooHigh && tooLow) {
+		DynStringPrintf(&message, _("Enter a value between %s and %s"),
+			(p->option & PDO_DIM) ? FormatDistance(frangeP->low) : FormatFloat(frangeP->low),
+			(p->option & PDO_DIM) ? FormatDistance(frangeP->high) : FormatFloat(frangeP->high));
+	}
+	else {
+		if (tooHigh) {
+			DynStringPrintf(&message, _("Enter a value < %s"), 
+				(p->option & PDO_DIM) ? FormatDistance(frangeP->high) : FormatFloat(frangeP->high));
+		}
+		if (tooLow) {
+			DynStringPrintf(&message, _("Enter a value > %s"), 
+				(p->option & PDO_DIM) ? FormatDistance(frangeP->low) : FormatFloat(frangeP->low));
+		}
+	}
+
+	if (p->bInvalid) {
+		wTooltipSetText(p->control, DynStringToCStr(&message));
+	}
+	else {
+		wTooltipSet(p->control, p->group->nameStr, p->nameStr);
+	}
+
+	wControlHilite(p->control, p->bInvalid);
+	DynStringFree(&message);
+	return(!p->bInvalid);
 }
-
-
 
 wBool_t FormCheckInputs(
 	paramGroup_p group,
