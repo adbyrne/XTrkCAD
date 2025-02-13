@@ -118,7 +118,8 @@ void CleanupCheckpointFiles( void );
 void CleanupTempArchive( void );
 int ExistsCheckpoint( void );
 int LoadCheckpoint( BOOL_T );
-void DoImport( void * typeVP );
+void DoImportObjects( void * typeVP );
+void DoImportModule( void * typeVP );
 void DoExport( void * unused );
 void DoExportDXF( void * unused );
 #if XTRKCAD_CREATE_SVG

@@ -971,10 +971,10 @@ EXPORT void CreateMenus(void)
 
 	wMenuSeparatorCreate(fileM);
 	MiscMenuItemCreate(fileM, NULL, "cmdImport", _("&Import"), ACCL_IMPORT,
-	                   DoImport, 0, I2VP(0));
+	                   DoImportObjects, 0, I2VP(0));
 	MiscMenuItemCreate(fileM, NULL, "cmdImportModule", _("Import &Module"),
 	                   ACCL_IMPORT_MOD,
-	                   DoImport, 0, I2VP(1));
+	                   DoImportModule, 0, I2VP(1));
 	MiscMenuItemCreate(fileM, NULL, "cmdOutputbitmap", _("Export to &Bitmap"),
 	                   ACCL_PRINTBM, OutputBitMapInit(), 0,
 	                   NULL);
@@ -1413,10 +1413,10 @@ static void InitCmdExport(void)
 #endif
 	AddToolbarButton("cmdImport", wIconCreatePixMap(doc_import_image3[iconSize]),
 	                 IC_ACCLKEY,
-	                 DoImport, I2VP(0));
+	                 DoImportObjects, I2VP(0));
 	AddToolbarButton("cmdImportModule",
 	                 wIconCreatePixMap(doc_import_mod_image3[iconSize]), IC_ACCLKEY,
-	                 DoImport, I2VP(1));
+	                 DoImportModule, I2VP(1));
 	ButtonGroupEnd();
 	ParamRegister( &menuPG );
 	AddPlaybackProc( "MENU", MenuPlayback, NULL );
