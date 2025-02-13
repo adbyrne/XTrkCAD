@@ -387,7 +387,6 @@ int wFilSelect(struct wFilSel_t* fs,
 
 double wFTLabelLoadFontFromFile(const char* filename);
 wIcon_p wFTLabelCreate(const char* text, wDrawColor color);
-void wFTLabelChangeColor(wControl_p button, wDrawColor newColor);
 
 /*------------------------------------------------------------------------------
  *

@@ -18,6 +18,10 @@ wControl_p FormCreateDialog(
 void FormLoadControls(paramGroup_p pg);
 void FormLoadSingleControl(paramGroup_p pg, int inx);
 
+void FormStartRecord(FILE* fileHandle);
+void FormMacroRecord(char* format, ...);
+
+
 #endif // HAVE_FORM_H
 
 

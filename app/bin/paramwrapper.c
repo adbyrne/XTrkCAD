@@ -137,8 +137,12 @@ EXPORT void ParamGroupRecord(paramGroup_p pg)
 
 EXPORT void ParamStartRecord(FILE* macroFile)
 {
+    FormStartRecord(macroFile);
+
     void ParamStartRecordOrig(macroFile);
 }
+
+
 
 EXPORT void ParamRestoreAll(void)
 {
@@ -166,7 +170,7 @@ EXPORT wBool_t ParamCheckInputs(
 EXPORT void ParamResetInvalid(wControl_p win)
 {
     //FormResetInvalid(win);
-    ParamResetInvalidOrig(win);
+    //ParamResetInvalidOrig(win);
 }
 
 EXPORT void ParamControlShow(paramGroup_p pg, wIndex_t inx, wBool_t bShow)

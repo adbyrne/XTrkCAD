@@ -57,11 +57,10 @@ static void ButtonOk(paramGroup_p group)
 	if (!FormCheckInputs(group, (wControl_p)group->okB)) {
 		return;
 	}
-	/** \todo Recording */
-	//if (recordParamF && group->nameStr) {
-	//	fprintf(recordParamF, "PARAMETER %s %s\n", group->nameStr, "ok");
-	//	fflush(recordParamF);
-	//}
+
+	if (group->nameStr) {
+		FormMacroRecord("PARAMETER %s %s\n", group->nameStr, "ok");
+	}
 
 	FormSaveDefaultValues(group);
 
@@ -76,11 +75,8 @@ static void ButtonOk(paramGroup_p group)
 
 static void ButtonCancel(paramGroup_p group)
 {
+	FormMacroRecord("PARAMETER %s %s\n", group->nameStr, "cancel");
 
-	//if (recordParamF && group->nameStr) {
-	//	fprintf(recordParamF, "PARAMETER %s %s\n", group->nameStr, "cancel");
-	//	fflush(recordParamF);
-	//}
 	if (group->cancelProc) {
 		group->cancelProc(group);
 	}

@@ -79,18 +79,20 @@ wBitmapViewCreate( wControl_p parent, wWinPix_t x, wWinPix_t y, long options,
 	wControl_p bt;
 	struct bitmap* bm;
 	GdkPixbuf *pixbuf = NULL;
+
+	g_assert(iconP->gtkIconType == ICON_PIXBUF_FROM_RESOURCE ||
+			iconP->gtkIconType == ICON_PIXBUF_FROM_TEXT);
 	
 	bt = wlibControlNew(B_BITMAP, parent, NULL, NULL);
 	bm = CONTROL_GET_ATTRIBUTES_PTR(bt, bitmap);
 	
 	/* create the bitmap from supplied image attributes */
-	if (iconP->gtkIconType == ICON_PIXBUF) {
 		pixbuf = iconP->bits;
 		bt->widget = gtk_image_new_from_pixbuf(pixbuf);
 		gtk_widget_show(bt->widget);
 
 		wlibBasicGridAttach(parent, bt->widget, x, y, 1, 1);
-	}
+
 	return( (wControl_p)bt );
 }
 

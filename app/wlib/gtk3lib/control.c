@@ -162,11 +162,11 @@ wWinPix_t wLabelWidth(
 wWinPix_t wControlGetWidth(
     wControl_p b)
 {
-    gint width;
-    gint height;
+    GtkAllocation allocation;
 
-    gtk_window_get_size(GTK_WINDOW(b->widget), &width, &height);
-    return width;
+    gtk_widget_get_allocation(b->widget, &allocation);
+    
+    return allocation.width;
 }
 
 /**
@@ -179,11 +179,11 @@ wWinPix_t wControlGetWidth(
 wWinPix_t wControlGetHeight(
     wControl_p b)
 {
-    gint width;
-    gint height;
+    GtkAllocation allocation;
 
-    gtk_window_get_size(GTK_WINDOW(b->widget), &width, &height);
-    return height;
+    gtk_widget_get_allocation(b->widget, &allocation);
+
+    return allocation.height;
 }
 
 /**

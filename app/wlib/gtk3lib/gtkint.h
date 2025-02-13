@@ -205,7 +205,7 @@ struct control {
 	wType_e type;
 	GtkWidget* widget;
 	void* context;
-	char* name;
+	const char* name;
 	wControl_p synonym;
 	wControl_p parent;
 	GtkWidget* label;
@@ -506,6 +506,9 @@ wList_p wDropListCreate(wWin_p parent, wWinPix_t x, wWinPix_t y, const char *hel
 PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget, void *cairo, wFont_p fp, wFontSize_t fs, const char *s, wDrawPix_t *width_p, wDrawPix_t *height_p, wDrawPix_t *ascent_p, wDrawPix_t *descent_p, wDrawPix_t *baseline_p);
 void wlibFontDestroyPangoLayout(PangoLayout *layout);
 const char *wlibFontTranslate(wFont_p fp);
+
+/* freetypelabel.c */
+void wlibFTLabelChangeColor(wIcon_p button, wDrawColor newColor);
 
 /* help.c */
 

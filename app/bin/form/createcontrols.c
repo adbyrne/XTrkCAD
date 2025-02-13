@@ -27,6 +27,7 @@
 #include "formprivate.h"
 #include <dynstring.h>
 
+#define DO_MACRO_RECORD(p) (((p)->option & PDO_NORECORD) == 0 && (p)->group->nameStr && (p)->nameStr)
 
 static void ColorSelectPush(void* dp, wDrawColor dc)
 {
@@ -42,12 +43,11 @@ static void ColorSelectPush(void* dp, wDrawColor dc)
 		}
 		dc = wDrawFindColor(rgb);
 	}
-	//if (recordParamF && (p->option & PDO_NORECORD) == 0 && p->group->nameStr
-	//	&& p->nameStr) {
-	//	fprintf(recordParamF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr,
-	//		wDrawGetRGB(dc));
-	//	fflush(recordParamF);
-	//}
+
+	if (DO_MACRO_RECORD(p)) {
+		FormMacroRecord( "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr, wDrawGetRGB(dc));
+	}
+
 	if ((p->option & PDO_NOPSHUPD) == 0 && p->valueP) {
 		*(wDrawColor*)(p->valueP) = dc;
 	}
@@ -61,11 +61,11 @@ static void ColorSelectPush(void* dp, wDrawColor dc)
 static void ButtonPush(void* dp)
 {
 	paramData_p p = (paramData_p)dp;
-	//if (recordParamF && (p->option & PDO_NORECORD) == 0 && p->group->nameStr
-	//	&& p->nameStr) {
-	//	fprintf(recordParamF, "PARAMETER %s %s\n", p->group->nameStr, p->nameStr);
-	//	fflush(recordParamF);
-	//}
+
+	if (DO_MACRO_RECORD(p)) {
+		FormMacroRecord("PARAMETER %s %s\n", p->group->nameStr, p->nameStr);
+	}
+
 	if ((p->option & PDO_NOPSHACT) == 0) {
 		if (p->valueP) {
 			((wButtonCallBack_p)(p->valueP))(p->context);
@@ -81,12 +81,11 @@ static void ChoicePush(long valL, void* dp)
 {
 	paramData_p p = (paramData_p)dp;
 
-	//if (recordParamF && (p->option & PDO_NORECORD) == 0 && p->group->nameStr
-	//	&& p->nameStr) {
-	//	fprintf(recordParamF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr,
-	//		valL);
-	//	fflush(recordParamF);
-	//}
+	if (DO_MACRO_RECORD(p)) {
+		FormMacroRecord("PARAMETER %s %s\n", "PARAMETER %s %s %ld\n", 
+			p->group->nameStr, p->nameStr, valL);
+	}
+
 	if ((p->option & PDO_NOPSHUPD) == 0 && p->valueP) {
 		*((long*)(p->valueP)) = valL;
 	}
@@ -105,13 +104,10 @@ static void ListPush(wIndex_t inx, const char* val, wIndex_t op,
 	case PD_LIST:
 	case PD_DROPLIST:
 	case PD_COMBOLIST:
-		//if (recordParamF && (p->option & PDO_NORECORD) == 0 && p->group->nameStr
-		//	&& p->nameStr) {
-		//	fprintf(recordParamF, "PARAMETER %s %s %d %s\n", p->group->nameStr, p->nameStr,
-		//		inx,
-		//		val);
-		//	fflush(recordParamF);
-		//}
+		if (DO_MACRO_RECORD(p)) {
+			FormMacroRecord("PARAMETER %s %s %d %s\n", p->group->nameStr, p->nameStr, inx, val);
+		}
+
 		if ((p->option & PDO_NOPSHUPD) == 0 && p->valueP) {
 			*(wIndex_t*)(p->valueP) = inx;
 		}
@@ -155,12 +151,10 @@ static void IntegerPush(const char* value, void* dp)
 		return;
 	}
 
-	//if (recordParamF && (p->option & PDO_NORECORD) == 0 && p->group->nameStr
-	//	&& p->nameStr) {
-	//	fprintf(recordParamF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr,
-	//		valL);
-	//	fflush(recordParamF);
-	//}
+	if (DO_MACRO_RECORD(p)) {
+		FormMacroRecord("PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr, valL);
+	}
+
 	if ((p->option & PDO_NOPSHUPD) == 0 && p->valueP) {
 		*((long*)(p->valueP)) = valL;
 	}
@@ -173,7 +167,7 @@ static void FloatPush(const char* value, void * dp)
 {
 	paramData_p p = (paramData_p)dp;
 	FLOAT_T valF;
-46,5
+
 	//if (strlen(val) == 1 && val[strlen(val) - 1] == '\n') {
 	//	value = wEntryGetValue(p->control);
 	//	p->enter_pressed = TRUE;
@@ -194,12 +188,10 @@ static void FloatPush(const char* value, void * dp)
 	}
 	p->bInvalid = FALSE;
 
-	//if (recordParamF && (p->option & PDO_NORECORD) == 0 && p->group->nameStr
-	//	&& p->nameStr) {
-	//	fprintf(recordParamF, "PARAMETER %s %s %0.6f\n", p->group->nameStr, p->nameStr,
-	//		valF);
-	//	fflush(recordParamF);
-	//}
+	if (DO_MACRO_RECORD(p)) {
+		FormMacroRecord("PARAMETER %s %s %f\n", p->group->nameStr, p->nameStr, valF);
+	}
+
 	if ((p->option & PDO_NOPSHUPD) == 0 && p->valueP) {
 		*((FLOAT_T*)(p->valueP)) = valF;
 	}
@@ -216,13 +208,11 @@ static bool StringPush(const char* val, void* dp)
 	const char* value;
 	wBool_t result = FALSE;
 
+	if (DO_MACRO_RECORD(p)) {
+		FormMacroRecord("PARAMETER %s %s %s\n", p->group->nameStr, p->nameStr, val);
+	}
 	//	wBool_t bInvalid = p->bInvalid;
-	//if (recordParamF && (p->option & PDO_NORECORD) == 0 && p->group->nameStr
-	//	&& p->nameStr) {
-	//	fprintf(recordParamF, "PARAMETER %s %s %s\n", p->group->nameStr, p->nameStr,
-	//		val);
-	//	fflush(recordParamF);
-	//}
+
 	if (strlen(val) == 1 && val[strlen(val) - 1] == '\n') {
 		value = wEntryGetValue(p->control);
 		p->enter_pressed = TRUE;
@@ -279,13 +269,10 @@ FormListPush(wIndex_t inx, const char* val, wIndex_t op,
 	case PD_LIST:
 	case PD_DROPLIST:
 	case PD_COMBOLIST:
-		//if (recordParamF && (p->option & PDO_NORECORD) == 0 && p->group->nameStr
-		//	&& p->nameStr) {
-		//	fprintf(recordParamF, "PARAMETER %s %s %d %s\n", p->group->nameStr, p->nameStr,
-		//		inx,
-		//		val);
-		//	fflush(recordParamF);
-		//}
+		if (DO_MACRO_RECORD(p)) {
+			FormMacroRecord("PARAMETER %s %s %d %s\n", p->group->nameStr, p->nameStr, inx, val);
+		}
+ 
 		if ((p->option & PDO_NOPSHUPD) == 0 && p->valueP) {
 			*(wIndex_t*)(p->valueP) = inx;
 		}
@@ -421,12 +408,10 @@ static void DrawAction(wControl_p d, void* dp, wAction_t a, wDrawPix_t w,
 	paramDrawData_t* ddp = (paramDrawData_t*)p->winData;
 	coOrd pos;
 	ddp->d->Pix2CoOrd(ddp->d, w, h, &pos);
-	//if (recordParamF && (p->option & PDO_NORECORD) == 0 && p->group->nameStr
-	//	&& p->nameStr) {
-	//	fprintf(recordParamF, "PARAMETER %s %s %d %0.3f %0.3f\n", p->group->nameStr,
-	//		p->nameStr, a, pos.x, pos.y);
-	//	fflush(recordParamF);
-	//}
+	if ((p->option & PDO_NORECORD) == 0 && p->group->nameStr&& p->nameStr) {
+		FormMacroRecord( "PARAMETER %s %s %d %0.3f %0.3f\n", p->group->nameStr,
+			p->nameStr, a, pos.x, pos.y);
+	}
 	if ((p->option & PDO_NOPSHACT) == 0 && ddp->action) {
 		ddp->action(a, pos);
 	}
@@ -446,11 +431,8 @@ void CreateDrawingArea( wControl_p parent, char* helpStr, paramData_p pd )
 	}
 }
 
-static int CreateControl(
-	paramData_p pd,
-	char* helpStr,
-	unsigned x,
-	unsigned y)
+static void
+CreateControl(paramData_p pd,char* helpStr,	unsigned x,	unsigned y)
 {
 	const paramFloatRange_t* floatRangeP;
 	const paramIntegerRange_t* integerRangeP;
@@ -516,7 +498,7 @@ static int CreateControl(
 			_(pd->winLabel), pd->winOption, 0, NULL, ColorSelectPush, pd);
 		break;
 	case PD_MESSAGE:
-		pd->control = (wControl_p)wMessageCreateEx(win, ((pd->option & PDO_DLGNEWCOLUMN) != 0), y, helpStr, 1,
+		pd->control = (wControl_p)wMessageCreateEx(win, x+((pd->option & PDO_DLGNEWCOLUMN) != 0), y, helpStr, 1,
 			pd->valueP ? _(pd->valueP) : " ", pd->winOption);
 		break;
 	case PD_BUTTON:

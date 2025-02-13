@@ -27,6 +27,7 @@
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
+#include "form.h"
 #include "misc.h"
 #include "param.h"
 #include "paths.h"
@@ -271,9 +272,8 @@ EXPORT void DoRecord( void * context )
 {
 	if (recordW == NULL) {
 		char * title = MakeWindowTitle(_("Record"));
-		recordW = ParamCreateDialog( &recordPG, title, NULL, NULL, ParamCancel_Null,
-		                             FALSE, NULL,
-		                             F_RESIZE, NULL );
+		recordW = FormCreateDialog( &recordPG, title, NULL, NULL, _("Cancel"), ParamCancel_Null,
+		                             FALSE, F_RESIZE, NULL );
 		recordFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, title, sRecordFilePattern,
 		                               StartRecord, NULL );
 	}

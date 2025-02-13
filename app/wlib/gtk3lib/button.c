@@ -199,7 +199,7 @@ static wBool_t drawButton(
 }
 
 
-#define ISDIALOGACTION(options) ((options&BB_HELP)||(options&BB_CANCEL)||(option&&BB_DEFAULT))
+#define ISDIALOGACTION(options) ((options&BB_HELP)||(options&BB_CANCEL)||(option&BB_DEFAULT))
 /**
  * Create a button
  *

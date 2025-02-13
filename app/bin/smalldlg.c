@@ -25,6 +25,7 @@
 #include "custom.h"
 #include "fileio.h"
 #include <form.h>
+#include "icons.h"
 #include "misc.h"
 #include "paths.h"
 #include "param.h"
@@ -231,12 +232,12 @@ void CreateAboutW(void *ptr)
 		                          NULL, NULL,
 		                          "Close", ParamCancel_Current,
 		                          FALSE, F_TOP | F_CENTER, NULL);
-
-		ParamLoadMessage(&aboutPG, I_ABOUTVERSION, sAboutProd);
+		wMessageSetValue(aboutPLs[I_ABOUTVERSION].control, sAboutProd);
 		wTextAppend(COPYRIGHT_T, ABOUT_TEXT);
 	}
 
 	wShow(aboutW);
+
 }
 
 /*--------------------------------------------------------------------*/
