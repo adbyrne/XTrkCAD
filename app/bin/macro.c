@@ -55,7 +55,7 @@ static int log_playbackCursor = 0;
  */
 
 EXPORT FILE * recordF;
-static wWin_p recordW;
+static wControl_p recordW;
 struct wFilSel_t * recordFile_fs;
 static BOOL_T recordMouseMoves = TRUE;
 
@@ -63,19 +63,19 @@ static void DoRecordButton( void * context );
 static paramTextData_t recordTextData = { 50, 16 };
 static paramData_t recordPLs[] = {
 #define I_RECSTOP		(0)
-#define recStopB		((wButton_p)recordPLs[I_RECSTOP].control)
+#define recStopB		(recordPLs[I_RECSTOP].control)
 	{   PD_BUTTON, DoRecordButton, "stop", PDO_NORECORD, NULL, N_("Stop"), 0, I2VP(0) },
 #define I_RECMESSAGE	(1)
-#define recMsgB ((wButton_p)recordPLs[I_RECMESSAGE].control)
+#define recMsgB (recordPLs[I_RECMESSAGE].control)
 	{   PD_BUTTON, DoRecordButton, "message", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("Message"), 0, I2VP(2) },
 #define I_RECEND		(2)
-#define recEndB ((wButton_p)recordPLs[I_RECEND].control)
-	{   PD_BUTTON, DoRecordButton, "end", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("End"), BO_DISABLED, I2VP(4) },
+#define recEndB (recordPLs[I_RECEND].control)
+	{   PD_BUTTON, DoRecordButton, "end", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("End"), 0, I2VP(4) },
 #define I_RECTEXT		(3)
-#define recordT			((wText_p)recordPLs[I_RECTEXT].control)
-	{   PD_TEXT, NULL, "text", PDO_NORECORD|PDO_DLGRESIZE, &recordTextData, NULL, BT_CHARUNITS|BO_READONLY}
+#define recordT			(recordPLs[I_RECTEXT].control)
+	{   PD_TEXT, NULL, "text", PDO_NORECORD|PDO_DLGRESIZE, &recordTextData, NULL, 0}
 };
-static paramGroup_t recordPG = { "record", 0, recordPLs, COUNT( recordPLs ) };
+static paramGroup_t recordPG = { "record", PGO_FULLDIALOGFROMBUILDER, recordPLs, COUNT( recordPLs ) };
 
 
 #ifndef WINDOWS
@@ -233,9 +233,9 @@ static void DoRecordButton( void * context )
 		}
 		wTextSetReadonly( recordT, TRUE );
 		fflush( recordF );
-		wControlActive( (wControl_p)recStopB, TRUE );
-		wControlActive( (wControl_p)recMsgB, TRUE );
-		wControlActive( (wControl_p)recEndB, FALSE );
+		wControlActive(recStopB, TRUE );
+		wControlActive(recMsgB, TRUE );
+		wControlActive(recEndB, FALSE );
 		wWinSetBusy( mainW, FALSE );
 		break;
 
@@ -244,9 +244,9 @@ static void DoRecordButton( void * context )
 		wTextSetReadonly( recordT, FALSE );
 		wTextClear( recordT );
 		recordingMessage = TRUE;
-		wControlActive( (wControl_p)recStopB, FALSE );
-		wControlActive( (wControl_p)recMsgB, FALSE );
-		wControlActive( (wControl_p)recEndB, TRUE );
+		wControlActive(recStopB, FALSE );
+		wControlActive(recMsgB, FALSE );
+		wControlActive(recEndB, TRUE );
 		wWinSetBusy( mainW, TRUE );
 		break;
 
@@ -635,7 +635,7 @@ EXPORT void MovePlaybackCursor(
 
 EXPORT wBool_t inPlayback;
 EXPORT wBool_t inPlaybackQuit;
-EXPORT wWin_p demoW;
+EXPORT wControl_p demoW;
 EXPORT int curDemo = -1;
 
 typedef struct {
@@ -676,22 +676,22 @@ static void DoDemoButton( void * context );
 static paramTextData_t demoTextData = { 50, 16 };
 static paramData_t demoPLs[] = {
 #define I_DEMOSTEP		(0)
-#define demoStep		((wButton_p)demoPLs[I_DEMOSTEP].control)
+#define demoStep		(demoPLs[I_DEMOSTEP].control)
 	{   PD_BUTTON, DoDemoButton, "step", PDO_NORECORD, NULL, N_("Step"), BB_DEFAULT, I2VP(0) },
 #define I_DEMONEXT		(1)
-#define demoNext		((wButton_p)demoPLs[I_DEMONEXT].control)
+#define demoNext		(demoPLs[I_DEMONEXT].control)
 	{   PD_BUTTON, DoDemoButton, "next", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("Next"), 0, I2VP(1) },
 #define I_DEMOQUIT		(2)
-#define demoQuit		((wButton_p)demoPLs[I_DEMOQUIT].control)
+#define demoQuit		(demoPLs[I_DEMOQUIT].control)
 	{   PD_BUTTON, DoDemoButton, "quit", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("Quit"), BB_CANCEL, I2VP(3) },
 #define I_DEMOSPEED		(3)
-#define demoSpeedL		((wList_p)demoPLs[I_DEMOSPEED].control)
+#define demoSpeedL		(demoPLs[I_DEMOSPEED].control)
 	{   PD_COMBOLIST, &playbackSpeed, "speed", PDO_NORECORD|PDO_LISTINDEX|PDO_DLGHORZ, I2VP(80), N_("Speed") },
 #define I_DEMOTEXT		(4)
-#define demoT			((wText_p)demoPLs[I_DEMOTEXT].control)
+#define demoT			(demoPLs[I_DEMOTEXT].control)
 	{   PD_TEXT, NULL, "text", PDO_NORECORD|PDO_DLGRESIZE, &demoTextData, NULL, BT_CHARUNITS|BO_READONLY}
 };
-static paramGroup_t demoPG = { "demo", 0, demoPLs, COUNT( demoPLs ) };
+static paramGroup_t demoPG = { "demo", PGO_FULLDIALOGFROMBUILDER, demoPLs, COUNT( demoPLs ) };
 
 EXPORT int MyGetKeyState( void )
 {
@@ -1414,13 +1414,13 @@ static void CreateDemoW( void )
 	                           NULL,
 	                           F_RESIZE, DemoDlgUpdate );
 
-	wListAddValue( demoSpeedL, _("Slowest"), NULL, I2VP(0) );
-	wListAddValue( demoSpeedL, _("Slow"), NULL, I2VP(1) );
-	wListAddValue( demoSpeedL, _("Normal"), NULL, I2VP(2) );
-	wListAddValue( demoSpeedL, _("Fast"), NULL, I2VP(3) );
-	wListAddValue( demoSpeedL, _("Faster"), NULL, I2VP(4) );
-	wListAddValue( demoSpeedL, _("Fastest"), NULL, I2VP(5) );
-	wListSetIndex( demoSpeedL, (wIndex_t)playbackSpeed );
+	wComboBoxAddValue( demoSpeedL, _("Slowest"),  I2VP(0) );
+	wComboBoxAddValue( demoSpeedL, _("Slow"),  I2VP(1) );
+	wComboBoxAddValue( demoSpeedL, _("Normal"),  I2VP(2) );
+	wComboBoxAddValue( demoSpeedL, _("Fast"),  I2VP(3) );
+	wComboBoxAddValue( demoSpeedL, _("Faster"),  I2VP(4) );
+	wComboBoxAddValue( demoSpeedL, _("Fastest"),  I2VP(5) );
+	wComboBoxSetIndex( demoSpeedL, (wIndex_t)playbackSpeed );
 	playbackFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, title, sRecordFilePattern,
 	                                 StartPlayback, NULL );
 }

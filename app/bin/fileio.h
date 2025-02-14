@@ -53,7 +53,7 @@ extern wBool_t executableOk;
 extern FILE * recordF;
 extern wBool_t inPlayback;
 extern wBool_t inPlaybackQuit;
-extern wWin_p demoW;
+extern wControl_p demoW;
 extern int curDemo;
 
 #define ZIPFILETYPEEXTENSION "xtce"

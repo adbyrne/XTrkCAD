@@ -394,7 +394,7 @@ void wFlush(
  * \returns
  */
 
-void wWinTop(wWin_p win)
+void wWinTop(wControl_p win)
 {
 }
 

@@ -6,5 +6,6 @@ target_sources(xtrkcad-lib
     defaultvalues.c
     form.c
     formdistance.c
+    formmacro.c
     loadcontrols.c
 )

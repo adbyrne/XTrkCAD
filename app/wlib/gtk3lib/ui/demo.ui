@@ -8,15 +8,15 @@
         <property name="use-header-bar">0</property>
         <property name="resizable">False</property>
         <child type="action">
-            <object class="GtkButton" id="id_cancel">
+            <object class="GtkButton" id="quit">
                 <property name="use-underline">True</property>
                 <property name="label">_Finish</property>
                 <property name="visible">True</property>
             </object>
         </child>
-        <action-widgets>
+        <!--         <action-widgets>
             <action-widget response="GTK_RESPONSE_CANCEL">id_cancel</action-widget>
-        </action-widgets>
+        </action-widgets> -->
         <child internal-child="vbox">
             <object class="GtkBox">
                 <property name="can-focus">False</property>
@@ -33,7 +33,7 @@
                         <property name="orientation">vertical</property>
                         <property name="spacing">12</property>
                         <child>
-                            <object class="GtkScrolledWindow" id="demo-text.scrollwindow">
+                            <object class="GtkScrolledWindow" id="scrollwindow">
                                 <property name="width-request">450</property>
                                 <property name="height-request">200</property>
                                 <property name="visible">True</property>
@@ -44,7 +44,7 @@
                                 <property name="min-content-width">200</property>
                                 <property name="min-content-height">150</property>
                                 <child>
-                                    <object class="GtkTextView" id="demo-text">
+                                    <object class="GtkTextView" id="text">
                                         <property name="visible">True</property>
                                         <property name="can-focus">True</property>
                                         <property name="editable">False</property>
@@ -93,7 +93,7 @@
                                                 <property name="can-focus">False</property>
                                                 <property name="label" translatable="yes">S_peed</property>
                                                 <property name="use-underline">True</property>
-                                                <property name="mnemonic-widget">demo-speed</property>
+                                                <property name="mnemonic-widget">speed</property>
                                             </object>
                                             <packing>
                                                 <property name="expand">False</property>
@@ -102,10 +102,19 @@
                                             </packing>
                                         </child>
                                         <child>
-                                            <object class="GtkComboBox" id="demo-speed">
+                                            <object class="GtkComboBox" id="speed">
                                                 <property name="visible">True</property>
                                                 <property name="can-focus">False</property>
                                                 <property name="model">speedoptions</property>
+                                                <child>
+                                                    <object class="GtkCellRendererText"
+                                                        id="textfield">
+                                                        <property name="width-chars">20</property>
+                                                    </object>
+                                                    <attributes>
+                                                        <attribute name="text">2</attribute>
+                                                    </attributes>
+                                                </child>
                                             </object>
                                             <packing>
                                                 <property name="expand">False</property>
@@ -121,8 +130,8 @@
                                     </packing>
                                 </child>
                                 <child>
-                                    <object class="GtkToggleButton" id="demo_next">
-                                        <property name="label">_Next Demo</property>
+                                    <object class="GtkToggleButton" id="step">
+                                        <property name="label">_Step</property>
                                         <property name="visible">True</property>
                                         <property name="can-focus">True</property>
                                         <property name="receives-default">True</property>
@@ -133,6 +142,21 @@
                                         <property name="expand">False</property>
                                         <property name="fill">False</property>
                                         <property name="position">2</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <object class="GtkToggleButton" id="next">
+                                        <property name="label">_Next Demo</property>
+                                        <property name="visible">True</property>
+                                        <property name="can-focus">True</property>
+                                        <property name="receives-default">True</property>
+                                        <property name="use-underline">True</property>
+                                        <property name="image-position">right</property>
+                                    </object>
+                                    <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">False</property>
+                                        <property name="position">3</property>
                                     </packing>
                                 </child>
                             </object>
@@ -154,16 +178,15 @@
     </object>
     <object class="GtkSizeGroup">
         <widgets>
-            <widget name="id_cancel" />
-            <widget name="id_ok" />
-            <widget name="demo_next" />
+            <widget name="step" />> <widget name="id_ok" />
+            <widget name="next" />
         </widgets>
     </object>
     <object class="GtkListStore" id="speedoptions">
         <columns>
             <column type="gpointer" />
-            <column type="GdkPixbuf" />  
-            <column type="gchararray" />         
+            <column type="GdkPixbuf" />
+            <column type="gchararray" />
         </columns>
     </object>
 </interface>
