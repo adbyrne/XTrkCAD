@@ -282,7 +282,6 @@ else()
     target_link_libraries(xtrkcad-lib 
         PRIVATE 
         Libzip::Libzip 
-        FreeImage::FreeImage 
         Zlib::Zlib)
 endif()
 
@@ -387,7 +386,6 @@ if(NOT WIN32)
 	endif()
 else()
 	# copy dlls into the build dir for easier debugging
-    COPYDLLTOBUILD(${FREEIMAGE_SHAREDLIB})
 #    COPYDLLTOBUILD(${LIBZIP_SHAREDLIB})
 #    COPYDLLTOBUILD(${ZLIB_SHAREDLIB})
     set(ENV{path} "${CMAKE_CURRENT_BINARY_DIR};$ENV{PATH}")

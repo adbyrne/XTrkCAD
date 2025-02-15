@@ -85,4 +85,9 @@ add_custom_target(
 		${RESOURCE_FILES}
 )
 
- 
+foreach( FILE ${RESOURCE_FILES})
+install(
+	FILES "${CMAKE_CURRENT_BINARY_DIR}/${FILE}"
+	DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
+)
+endforeach()

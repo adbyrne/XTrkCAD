@@ -3,6 +3,7 @@
 add_subdirectory(ui)
 add_subdirectory(wrapbox)
 add_subdirectory(symbols)
+add_subdirectory(fonts)
 
 target_include_directories(xtrkcad-wlib 
 	PRIVATE 

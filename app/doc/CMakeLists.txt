@@ -53,15 +53,9 @@ if (APPLE)
 		PRIVATE 
 		${CMAKE_CURRENT_SOURCE_DIR}/osxconf.but)
 else()
-	if(WIN32)
-		target_sources(helpsystem 
-		PRIVATE
-		${CMAKE_CURRENT_SOURCE_DIR}/chmconf.but)
-	else()
-		target_sources(helpsystem P
+	target_sources(helpsystem 
 		PRIVATE
 		${CMAKE_CURRENT_SOURCE_DIR}/linconf.but)
-	endif()	
 endif()
 
 get_target_property(halibut_sources helpsystem SOURCES)

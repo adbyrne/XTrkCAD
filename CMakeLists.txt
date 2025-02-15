@@ -24,6 +24,8 @@ enable_testing()
 # 
 # Additional libraries
 
+find_package(Inkscape)
+find_package(FreeImage)
 find_package(Libzip)
 find_package(Zlib)
 
@@ -48,43 +50,17 @@ endif()
 # Find document conversion tool
 find_package(Pandoc)
 
-# For handling and creation of bitmaps the FreeImage library is required
-find_package(FreeImage REQUIRED)
+# check for GTK+ 3.0
+pkg_check_modules(GTK3 QUIET "gtk+-3.0")
 
-if(XTRKCAD_GTK3_EXPERIMENT)
-	pkg_check_modules(GTK3 QUIET "gtk+-3.0")
+if(NOT GTK3_FOUND)
+	message(FATAL_ERROR "ERROR: GTK3 not found found!")
 endif()	
-
-# check for GTK+ 2.0
-if(UNIX)
-    pkg_check_modules(GTK QUIET "gtk+-2.0")
-	if(NOT GTK_FOUND AND NOT GTK3_FOUND)
-		message(FATAL_ERROR "ERROR: no GTK modules found!")
-	else()	
-		set(XTRKCAD_USE_GTK_DEFAULT ON)
-		if(GTK3_FOUND)
-			set(XTRKCAD_GTK3_WLIB ON)
-		endif()
-	endif()	
-endif()
-
-if(WIN32 AND NOT XTRKCAD_USE_GTK)
-	# use the Windows HTMLHelp tool
-	find_package(HTMLHelp REQUIRED)
-	if(XTRKCAD_GTK3_EXPERIMENT AND GTK3_FOUND)
-		message(STATUS "Building GTK3 Experimental")	
-		set(XTRKCAD_GTK3_WLIB ON)
-	else()
-		message(FATAL_ERROR "ERROR: no GTK modules for Win32 found!")	
-	endif()
-endif(WIN32 AND NOT XTRKCAD_USE_GTK)
 
 # 
 # Configure options
 #
 
-option(XTRKCAD_USE_GTK "Use GTK for the graphical user interface back-end" ${XTRKCAD_USE_GTK_DEFAULT})
-option(XTRKCAD_USE_GTK3 "Use GTK3 (experimental)" ${XTRKCAD_GTK3_EXPERIMENT})
 option(XTRKCAD_USE_GETTEXT "Use gettext for internationalization" ${XTRKCAD_USE_GETTEXT_DEFAULT})
 option(XTRKCAD_USE_DOXYGEN "Generate internals documentation using doxygen" OFF)
 
@@ -123,9 +99,9 @@ endif()
 
 #
 # configure installation directories
-if(WIN32)
-	set( CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX} ${XTRKCAD_VERSION}" )
-endif()
+
+#set( CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" )
+
 
 set(XTRKCAD_BIN_INSTALL_DIR "bin")
 set(XTRKCAD_LOCALE_INSTALL_DIR "share/locale")

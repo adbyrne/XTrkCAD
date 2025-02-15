@@ -31,6 +31,8 @@
 
 #include <wlib.h>
 
+#include <gtk/gtk.h>
+
 #define itoa(a,b,c) _itoa(a,b,c)
 #define getpid() _getpid()
 
@@ -134,4 +136,17 @@ const char* wGetUserHomeRootDir(void)
     else {
         return(buffer);
     }
+}
+
+const char *
+wGetPlatformVersion(void)
+{
+    gchar* version;
+    version = g_strdup_printf( "GTK %d.%d.%d", gtk_get_major_version(), gtk_get_minor_version(), gtk_get_micro_version());
+
+    g_strlcpy(buffer, version, MAX_PATH);
+
+    g_free(version);
+
+    return(buffer);
 }

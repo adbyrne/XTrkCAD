@@ -28,7 +28,6 @@
 
 #ifdef WINDOWS
 #include <Windows.h>
-#include <FreeImage.h>
 #define CONFIG_DELIMITER '='
 #else
 #define strnicmp strncasecmp
@@ -105,12 +104,9 @@ SaveSystemInfo(char* dir)
 
 		fprintf(fh, "XTrackCAD: %s\n", VERSION);
 		fprintf(fh, "OS: %s\n", wGetOSVersion());
-#ifdef WINDOWS
-		fprintf(fh, "FreeImage: %s\n", FreeImage_GetVersion());
-#else
+
 		// get gtk version
 		fprintf(fh, "GTK Version: %s", wGetPlatformVersion() );
-#endif // WINDOWS
 
 		fclose(fh);
 	}
