@@ -995,7 +995,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	/*
 	 * TIDY UP
 	 */
-	MainProc( mainW, wResize_e, NULL, NULL );
+	//MainProc( mainW, wResize_e, NULL, NULL );
 
 	/**  \todo Create hot bar */
 	//LayoutHotBar(NULL);
