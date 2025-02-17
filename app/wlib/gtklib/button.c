@@ -33,6 +33,7 @@
 
 #include "gtkint.h"
 #include "i18n.h"
+#include "assert.h"
 
 #define MIN_BUTTON_WIDTH (80)
 
@@ -97,7 +98,11 @@ void wlibSetLabel(
 			bm = (wIcon_p)labelStr;
 
 			if (bm->gtkIconType == gtkIcon_pixmap) {
-				pixbuf = gdk_pixbuf_new_from_xpm_data((const char**)bm->bits);
+				// check gdk_pixbuf header 
+				assert ( *(int*)bm->bits == 0x47646b50 ||
+				     *(int*)bm->bits == 0x506b6447 );
+				pixbuf = gdk_pixbuf_new_from_inline( -1, bm->bits, FALSE, NULL );
+				
 			} else {
 				pixbuf = wlibPixbufFromXBM( bm );
 			}

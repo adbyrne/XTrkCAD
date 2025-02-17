@@ -222,9 +222,6 @@ static void DrawTurntable( track_p t, drawCmd_p d, wDrawColor color )
 		p0 = GetTrkEndPos( t, xx->currEp );
 		Translate( &p1, xx->pos, GetTrkEndAngle(t,xx->currEp)+180.0, xx->radius );
 	}
-	if (color == wDrawColorBlack) {
-		color = normalColor;
-	}
 	DrawArc( d, xx->pos, xx->radius, 0.0, 360.0, 0,
 	         (color == wDrawColorPreviewSelected
 	          || color == wDrawColorPreviewUnselected)?3:0, color );

@@ -755,7 +755,7 @@ void psPrintString(
 	/** \todo use a getter function instead of double conversion */
 	desc = pango_font_description_from_string(wlibFontTranslate(fp));
 
-	pango_font_description_set_size(desc, fs * PANGO_SCALE * scale_text);
+	pango_font_description_set_absolute_size(desc, fs * PANGO_SCALE * scale_text);
 
 	// render the string to a Pango layout
 	pango_layout_set_font_description(layout, desc);
@@ -1063,13 +1063,13 @@ wBool_t wPrintDocStart(const char * title, int fTotalPageCount, int * copiesP)
 			psPrint_d.dpi = p_def;
 			scale_adjust = 72/p_def;
 		} else {
-			if (printTextScale > 0.0) {
-				scale_text = printTextScale;
-			}
 			if (printScale > 0.0) {
 				scale_adjust = printScale;
 			}
 			psPrint_d.dpi = 72;
+		}
+		if (printTextScale > 0.0) {
+			scale_text = printTextScale;
 		}
 
 		// in XTrackCAD 0,0 is top left, in cairo bottom left. This is

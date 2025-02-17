@@ -773,7 +773,7 @@ EXPORT void DrawBoxedString(
         ANGLE_T a)
 {
 	coOrd size, p[4], p0 = pos, p1, p2;
-	static int bw = 2, bh = 2, br = 1, bb = 1;
+	static int br = 0, bl = 1, bt = 2, bb = -1;
 	static double arrowScale = 0.5;
 	POS_T descent, ascent;
 	if (fs < 2 * d->scale) {
@@ -792,21 +792,22 @@ EXPORT void DrawBoxedString(
 #endif
 		DrawTextSize2(&mainD, text, fp, fs, TRUE, &size, &descent, &ascent);
 
-	p0.x -= size.x / 2.0;
-	p0.y -= size.y / 2.0;
+	if ( (style & BOX_POS_BOTTOM_LEFT) == 0 ) {
+		// p0 was pos of center, shift to bottom left corner
+		p0.x -= size.x / 2.0;
+		p0.y -= size.y / 2.0;
+	}
+	style &= ~BOX_POS_BOTTOM_LEFT;
+
 	if (style == BOX_NONE || d == &mapD) {
 		DrawString(d, p0, 0.0, text, fp, fs, color);
 		return;
 	}
-	size.x += bw * d->scale / d->dpi;
-	size.y += bh * d->scale / d->dpi;
-	p[0] = p0;
-	p[0].x -= br * d->scale / d->dpi;          	//Top of box
-	p[0].y += (bb * d->scale / d->dpi + ascent);
-	p[1].y = p[0].y;
-	p[2].y = p[3].y = p[0].y - size.y - descent;  //Bottom of box
-	p[1].x = p[2].x = p[0].x + size.x;
-	p[3].x = p[0].x;
+	p[0].x = p[3].x = p0.x - bl*d->scale/d->dpi;
+	p[2].x = p[1].x = p0.x + br*d->scale/d->dpi + size.x;
+	p[0].y = p[1].y = p0.y + bt*d->scale/d->dpi + ascent;
+	p[3].y = p[2].y = p0.y - bb*d->scale/d->dpi - descent;
+
 	d->options &= ~DC_DASH;
 	switch (style) {
 	case BOX_ARROW:
@@ -1188,69 +1189,6 @@ static wWinPix_t curInfoLabelWidth[NUM_INFOCTL];
  *
  */
 
-/*
- * Set mapW size to fit the rescaled map
- *
- * \param reset IN
- */
-static int mapBorderH = 24;
-static int mapBorderW = 24;
-static void ChangeMapScale()
-{
-	wWinPix_t w, h;
-	FLOAT_T fw, fh;
-
-	// Restrict map size to 1/2 of screen
-	FLOAT_T fScaleW = mapD.size.x / ( displayWidth * 0.5 / mapD.dpi );
-	FLOAT_T fScaleH = mapD.size.y / ( displayHeight * 0.5 / mapD.dpi );
-	FLOAT_T fScale = ceil( max( fScaleW, fScaleH ) );
-	if ( fScale > mapD.scale ) {
-		LOG( log_mapsize, 2, ( "  ChangeMapScale incr scale from %0.3f to %0.3f\n",
-		                       mapD.scale, fScale ) );
-		mapD.scale = fScale;
-	}
-
-	fw = (((mapD.size.x/mapD.scale)*mapD.dpi) + 0.5)+2;
-	fh = (((mapD.size.y/mapD.scale)*mapD.dpi) + 0.5)+2;
-
-	w = (wWinPix_t)fw;
-	h = (wWinPix_t)fh;
-	LOG( log_mapsize, 2, ( "  ChangeMapScale mapD.scale=%0.3f w=%ld h=%ld\n",
-	                       mapD.scale, w, h ) );
-	wWinSetSize( mapW, w+mapBorderW, h+mapBorderH );
-	// This should be done by wWinSetSize
-	wDrawSetSize( mapD.d, w, h, NULL );
-}
-
-
-EXPORT BOOL_T SetRoomSize( coOrd size )
-{
-	LOG( log_mapsize, 2, ( "SetRoomSize NEW:%0.3fx%0.3f OLD:%0.3fx%0.3f\n", size.x,
-	                       size.y, mapD.size.x, mapD.size.y ) );
-	SetLayoutRoomSize(size);
-	if (size.x < 1.0) {
-		size.x = 1.0;
-	}
-	if (size.y < 1.0) {
-		size.y = 1.0;
-	}
-	if ( mapD.size.x == size.x &&
-	     mapD.size.y == size.y ) {
-		return TRUE;
-	}
-	mapD.size = size;
-	SetLayoutRoomSize(size);
-	wPrefSetFloat( "draw", "roomsizeX", mapD.size.x );
-	wPrefSetFloat( "draw", "roomsizeY", mapD.size.y );
-	if ( mapW == NULL) {
-		return TRUE;
-	}
-	ChangeMapScale();
-	return TRUE;
-}
-
-
-
 /**
  * Redraw the Map window using the Scale derived from the Window size and Room size
  * \param bd [inout] Map canvas - not used
@@ -1326,6 +1264,70 @@ static void MapRedraw(
 }
 
 
+/*
+ * Set mapW size to fit the rescaled map
+ *
+ * \param reset IN
+ */
+static int mapBorderH = 24;
+static int mapBorderW = 24;
+static void ChangeMapScale()
+{
+	wWinPix_t w, h;
+	FLOAT_T fw, fh;
+
+	// Restrict map size to 1/2 of screen
+	FLOAT_T fScaleW = mapD.size.x / ( displayWidth * 0.5 / mapD.dpi );
+	FLOAT_T fScaleH = mapD.size.y / ( displayHeight * 0.5 / mapD.dpi );
+	FLOAT_T fScale = ceil( max( fScaleW, fScaleH ) );
+	if ( fScale > mapD.scale ) {
+		LOG( log_mapsize, 2, ( "  ChangeMapScale incr scale from %0.3f to %0.3f\n",
+		                       mapD.scale, fScale ) );
+		mapD.scale = fScale;
+	}
+
+	fw = (((mapD.size.x/mapD.scale)*mapD.dpi) + 0.5)+2;
+	fh = (((mapD.size.y/mapD.scale)*mapD.dpi) + 0.5)+2;
+
+	w = (wWinPix_t)fw;
+	h = (wWinPix_t)fh;
+	LOG( log_mapsize, 2, ( "  ChangeMapScale mapD.scale=%0.3f w=%ld h=%ld\n",
+	                       mapD.scale, w, h ) );
+	wWinSetSize( mapW, w+mapBorderW, h+mapBorderH );
+	// This should be done by wWinSetSize
+	wDrawSetSize( mapD.d, w, h, NULL );
+	MapRedraw( mapD.d, NULL, 0, 0 );
+}
+
+
+EXPORT BOOL_T SetRoomSize( coOrd size )
+{
+	LOG( log_mapsize, 2, ( "SetRoomSize NEW:%0.3fx%0.3f OLD:%0.3fx%0.3f\n", size.x,
+	                       size.y, mapD.size.x, mapD.size.y ) );
+	SetLayoutRoomSize(size);
+	if (size.x < 1.0) {
+		size.x = 1.0;
+	}
+	if (size.y < 1.0) {
+		size.y = 1.0;
+	}
+	if ( mapD.size.x == size.x &&
+	     mapD.size.y == size.y ) {
+		return TRUE;
+	}
+	mapD.size = size;
+	SetLayoutRoomSize(size);
+	wPrefSetFloat( "draw", "roomsizeX", mapD.size.x );
+	wPrefSetFloat( "draw", "roomsizeY", mapD.size.y );
+	if ( mapW == NULL) {
+		return TRUE;
+	}
+	ChangeMapScale();
+	return TRUE;
+}
+
+
+
 EXPORT void SetMainSize( void )
 {
 	wWinPix_t ww, hh;
@@ -1354,8 +1356,8 @@ EXPORT void TempRedraw( void )
 	} else {
 		wDrawDelayUpdate( tempD.d, TRUE );
 		wDrawSetTempMode( tempD.d, TRUE );
-		DrawMarkers();
 		DoCurCommand( C_REDRAW, zero );
+		DrawMarkers();
 		RulerRedraw( FALSE );
 		RedrawPlaybackCursor();              //If in playback
 		wDrawSetTempMode( tempD.d, FALSE );
@@ -1450,8 +1452,8 @@ EXPORT void MainRedraw( void )
 	                              wGetTimer()-time0 ) );
 	// The remainder is from TempRedraw
 	wDrawSetTempMode( tempD.d, TRUE );
-	DrawMarkers();
 	DoCurCommand( C_REDRAW, zero );
+	DrawMarkers();
 	RulerRedraw( FALSE );
 	RedrawPlaybackCursor();              //If in playback
 	wDrawSetTempMode( tempD.d, FALSE );
@@ -1593,7 +1595,6 @@ EXPORT void DoRedraw( void )
 {
 	LOG( log_mapsize, 2, ( "DoRedraw\n" ) );
 	ChangeMapScale();
-	MapRedraw( mapD.d, NULL, 0, 0 );
 	MainRedraw(); // DoRedraw
 }
 
@@ -1631,10 +1632,12 @@ static void DrawMarkers( void )
 	p0.x = p1.x = oldMarker.x;
 	p0.y = mainD.orig.y;
 	p1.y = mainD.orig.y-BBORDER*mainD.scale/mainD.dpi;
+	DrawLine( &tempD, p0, p1, 3, wDrawColorWhite );
 	DrawLine( &tempD, p0, p1, 0, markerColor );
 	p0.y = p1.y = oldMarker.y;
 	p0.x = mainD.orig.x;
 	p1.x = mainD.orig.x-LBORDER*mainD.scale/mainD.dpi;
+	DrawLine( &tempD, p0, p1, 3, wDrawColorWhite );
 	DrawLine( &tempD, p0, p1, 0, markerColor );
 }
 
@@ -1692,6 +1695,7 @@ EXPORT void DrawRuler(
 	}
 	end = FindDistance( orig, pos1 );
 
+	DrawLine( d, pos0, pos1, 3, wDrawColorWhite );
 	DrawLine( d, pos0, pos1, 0, color );
 
 	if (units == UNITS_METRIC) {
@@ -1725,6 +1729,7 @@ EXPORT void DrawRuler(
 				if (power==1000 || mm%(power*10) != 0) {
 					Translate( &p0, orig, a, mm/25.4 );
 					Translate( &p1, p0, aa, len*d->scale/mainD.dpi );
+					DrawLine( d, p0, p1, 3, wDrawColorWhite );
 					DrawLine( d, p0, p1, 0, color );
 					if (!number || (d->scale > 40 && mm % skip != 0.0)) {
 						continue;
@@ -1747,7 +1752,9 @@ EXPORT void DrawRuler(
 							//p0.x = p0.x+((-(LBORDER-2)/2)+((LBORDER-2)/2+2)*sin_aa)*d->scale/mainD.dpi;
 							//p0.y = p1.y+dyn*d->scale/mainD.dpi;
 						}
-						DrawString( d, p0, 0.0, message, rulerFp, fs*d->scale, color );
+						DrawBoxedString( BOX_BACKGROUND|BOX_POS_BOTTOM_LEFT,
+								 d, p0, message, rulerFp, fs*d->scale,
+								 color, 0 );
 					}
 				}
 			}
@@ -1814,6 +1821,7 @@ EXPORT void DrawRuler(
 				if(!skip) {
 					Translate( &p0, orig, a, inch+fraction/16.0 );
 					Translate( &p1, p0, aa, lengths[fraction]*d->scale/mainD.dpi );
+					DrawLine( d, p0, p1, 3, wDrawColorWhite );
 					DrawLine( d, p0, p1, 0, color );
 				}
 				if (fraction == 0) {
@@ -1834,7 +1842,9 @@ EXPORT void DrawRuler(
 							Translate( &p0, p0, aa, majorLength*d->scale/mainD.dpi );
 							Translate( &p0, p0, 225, fs*d->scale/mainD.dpi );
 							sprintf(message, "%d%c", digit, quote );
-							DrawString( d, p0, 0.0, message, rulerFp, fs*d->scale, color );
+							DrawBoxedString( BOX_BACKGROUND|BOX_POS_BOTTOM_LEFT,
+								 	d, p0, message, rulerFp, fs*d->scale,
+								 	color, 0 );
 						}
 					}
 				}

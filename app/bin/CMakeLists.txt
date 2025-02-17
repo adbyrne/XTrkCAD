@@ -285,6 +285,11 @@ else()
         Zlib::Zlib)
 endif()
 
+if(WIN32)
+    target_link_libraries(xtrkcad-lib 
+        PRIVATE 
+        FreeImage::FreeImage)
+endif()
 #
 # Start building the main program itself
 #

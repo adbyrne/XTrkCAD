@@ -20,12 +20,13 @@
 #define BG_HOTBAR		(10)
 #define BG_SNAP			(11)
 #define BG_TRAIN		(12)
-#define BG_COUNT		(13)
-#define BG_FILE			(14)
-#define BG_CONTROL		(15)
-#define BG_EXPORTIMPORT (16)
-#define BG_PRINT		(17)
-#define BG_RULER		(18)
+#define BG_FILE			(13)
+#define BG_CONTROL		(14)
+#define BG_EXPORTIMPORT		(15)
+#define BG_PRINT		(16)
+#define BG_RULER		(17)
+  // This must be the last item:
+#define BG_COUNT		(18)
 #define BG_BIGGAP       (1<<15)
 
 extern void InitToolbar(void);

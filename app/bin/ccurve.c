@@ -1013,6 +1013,7 @@ static STATUS_T CmdHelix( wAction_t action, coOrd pos )
 }
 
 
+
 EXPORT void InitCmdCurve( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Curve Track"), "cmdCurveSetCmd", _("Curve Tracks") );

@@ -896,7 +896,7 @@ If the click is on an area without objects and \f{SelectZero} is set, all object
 
 \dt \e{Double-Left-Click} 
 
-\dd Opens Modify for Cornu and Draw Objects other than Text, Activates Link and Document Notes, otherwise opens Describe.
+\dd Opens Modify for Cornu and Draw Objects other than Text, Activates Link and Document Notes, otherwise opens Properties.
 
 \dt \e{Left+Drag} 
 

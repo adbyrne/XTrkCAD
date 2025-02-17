@@ -18,7 +18,7 @@ The \f{Help Menu} displays information on various topics. The contents of the me
 
 \dd \e{Recent Messages}
 
-The \f{Recent Messages} command opens a cascading menu containing recent error messages and notices you have received. Selecting one of them displays additional information about the message (\K{messageList}).
+The \f{Recent Messages} command opens a cascading menu containing recent error messages and notices you have received. Selecting one of them displays additional information about the message.
 
 The \f{Collect Problem Info} command helps you to put together the information and files that might help the developers to analyze and fix possible bugs.
 

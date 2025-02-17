@@ -48,14 +48,20 @@ GdkPixbuf* wlibMakePixbuf(
         wIcon_p ip)
 {
 	GdkPixbuf * pixbuf;
+#ifdef LATER
 	char line0[40];
 	char line2[40];
+#endif
 
 	assert(ip != NULL);
 
-	if (ip->gtkIconType == gtkIcon_pixmap) {
-		pixbuf = gdk_pixbuf_new_from_xpm_data((const char**)ip->bits);
+	assert( ip->gtkIconType == gtkIcon_pixmap );
+	assert ( *(int*)ip->bits == 0x47646b50 ||
+	     *(int*)ip->bits == 0x506b6447 );
+	pixbuf = gdk_pixbuf_new_from_inline( -1, ip->bits, FALSE, NULL );
+#ifdef LATER		
 	} else {
+		assert( ip->gtkIconType != gtkIcon_pixmap );
 		const char * bits;
 		long rgb;
 		int row,col,wb;
@@ -92,6 +98,7 @@ GdkPixbuf* wlibMakePixbuf(
 			g_free(pixmapData[row+3]);
 		}
 	}
+#endif
 
 	return pixbuf;
 }

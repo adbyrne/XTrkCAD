@@ -332,7 +332,7 @@ wIcon_p wIconCreateBitMap( wWinPix_t w, wWinPix_t h, const char * bits,
  * \return    pointer to icon, call free() if not needed anymore.
  */
 
-wIcon_p wIconCreatePixMap( char *pm[])
+wIcon_p wIconCreatePixMap( wIconBitMap_t pm )
 {
 	wIcon_p ip;
 	int col, r, g, b;
@@ -356,7 +356,7 @@ wIcon_p wIconCreatePixMap( char *pm[])
 	ip->type = mswIcon_pixmap;
 
 	/* extract values */
-	cp = pm[0];
+	cp = (char*)(pm[0]);
 	width = (int)strtol(cp, &cq, 10 );			/* width of image */
 	height = (int)strtol(cq, &cq, 10 );			/* height of image */
 	col = (int)strtol(cq, &cq, 10 );			/* number of colors used */
@@ -431,7 +431,7 @@ wIcon_p wIconCreatePixMap( char *pm[])
 
 		cq = ip->pixels + lineLength * i;
 		/* get the next row */
-		cp = pm[ ip->h - i + ip->colorcnt ];
+		cp = (char*)(pm[ ip->h - i + ip->colorcnt ]);
 		/* for all pixels in row */
 		for( j = 0; j < ip->w; j++ ) {
 			/* get the pixel info */

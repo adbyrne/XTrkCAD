@@ -582,7 +582,7 @@ The Hot Bar becomes the \f{Shelf}.
 
 \dt \e{Change Reporting number of Car on Layout}
 
-\dd To change the reporting number, Right-Click over the Car and then select \e{Describe} and update the field. This value will be shown in the car if Labels are shown and in the \e{Train Control} Window.
+\dd To change the reporting number, Right-Click over the Car and then select \e{Properties} and update the field. This value will be shown in the car if Labels are shown and in the \e{Train Control} Window.
 
 \u000
 

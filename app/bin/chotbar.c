@@ -504,7 +504,7 @@ EXPORT void AddHotBarElement(
 }
 
 
-static void ChangeHotBar( long changes )
+EXPORT void ChangeHotBar( long changes )
 {
 #ifdef LATER
 	int curFileIndex = -3;

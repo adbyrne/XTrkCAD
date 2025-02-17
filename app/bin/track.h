@@ -601,6 +601,7 @@ void HotBarCancel( void );
 void AddHotBarTurnouts( void );
 void AddHotBarStructures( void );
 void AddHotBarCarDesc( void );
+void ChangeHotBar( long );
 
 /* cblock.c */
 void CheckDeleteBlock( track_p t );

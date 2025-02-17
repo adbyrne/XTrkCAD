@@ -53,7 +53,7 @@ static int keyState;
 static wBool_t gtkBlockEnabled = TRUE;
 static wBool_t maximize_at_next_show = FALSE;
 
-#include "../../bin/bitmaps/xtc.xpm"
+#include "bitmaps/xtc.image1"
 static GdkPixbuf *windowIconPixbuf = NULL;
 
 /*
@@ -1049,7 +1049,7 @@ static wWin_p wWinCommonCreate(
 	}
 
 	if ( windowIconPixbuf == NULL ) {
-		windowIconPixbuf = gdk_pixbuf_new_from_xpm_data((const char**)&xtc_xpm);
+		windowIconPixbuf = gdk_pixbuf_new_from_inline(-1, (unsigned char *)xtc_image1, FALSE, NULL);
 	}
 	gtk_window_set_icon( GTK_WINDOW(w->gtkwin), windowIconPixbuf );
 

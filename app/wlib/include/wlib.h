@@ -160,7 +160,8 @@ wControl_p wBitmapViewCreate(wControl_p parent,
                          const wIcon_p iconP);
 
 wIcon_p wIconCreatePixBufFromResource(const char *prefix, const char* filename);
-void wIconSetColor(wIcon_p ip, wDrawColor color);
+wIcon_p wIconCreatePixMap(	const wIconBitMap_t  );
+void wIconSetColor(		wIcon_p, wDrawColor );
 
 /*------------------------------------------------------------------------------
  *
@@ -631,7 +632,6 @@ int wGetKeyState(		void );
 
 void wGetDisplaySize(		wWinPix_t*, wWinPix_t* );
 
-void wIconSetColor(		wIcon_p, wDrawColor );
 void wIconDraw( wDraw_p d, wIcon_p bm, wWinPix_t x, wWinPix_t y );
 
 void wConvertToCharSet(		char *, int );

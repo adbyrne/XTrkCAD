@@ -157,7 +157,7 @@ static void ShowAddElevations(void * unused)
 	if (addElevW == NULL)
 		addElevW = ParamCreateDialog(&addElevPG,
 		                             MakeWindowTitle(_("Change Elevations")), _("Change"), DoAddElev,
-		                             ParamCancel_Undo, FALSE, NULL, 0, NULL);
+		                             ParamCancel_Current, FALSE, NULL, 0, NULL);
 	wShow(addElevW);
 }
 
@@ -203,7 +203,7 @@ static void StartRotateDialog(void * funcVP)
 	rotateDialogCallBack_t func = funcVP;
 	if (rotateW == NULL)
 		rotateW = ParamCreateDialog(&rotatePG, MakeWindowTitle(_("Rotate")),
-		                            _("Ok"), RotateEnterOk, ParamCancel_Undo, FALSE, NULL, 0, NULL);
+		                            _("Ok"), RotateEnterOk, ParamCancel_Current, FALSE, NULL, 0, NULL);
 	ParamLoadControls(&rotatePG);
 	rotateDialogCallBack = func;
 	wShow(rotateW);
@@ -226,7 +226,7 @@ static void StartMoveDialog(void * funcVP)
 	moveDialogCallBack_t func = funcVP;
 	if (moveW == NULL)
 		moveW = ParamCreateDialog(&movePG, MakeWindowTitle(_("Move")), _("Ok"),
-		                          MoveEnterOk, ParamCancel_Undo, FALSE, NULL, 0, NULL);
+		                          MoveEnterOk, ParamCancel_Current, FALSE, NULL, 0, NULL);
 	ParamLoadControls(&movePG);
 	moveDialogCallBack = func;
 	wShow(moveW);

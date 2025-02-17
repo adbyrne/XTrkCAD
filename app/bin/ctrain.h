@@ -62,7 +62,10 @@ void CarItemSetLocoMaster( carItem_p, BOOL_T );
 void CarItemSetTrack( carItem_p, track_p );
 void CarItemPlace( carItem_p, traverseTrack_p, DIST_T * );
 void CarItemDraw( drawCmd_p, carItem_p, wDrawColor, int, BOOL_T, vector_t *,
-                  BOOL_T, track_p );
+#ifdef CAR_CLEARANCE
+                  BOOL_T,
+#endif
+		  track_p );
 
 BOOL_T WriteCars( FILE * );
 void ClearCars( void );

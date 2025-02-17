@@ -7,4 +7,3 @@ if (WIN32)
 endif ()
 
 add_subdirectory(halibut)
-

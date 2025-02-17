@@ -3,6 +3,7 @@
 target_include_directories(xtrkcad-wlib 
 	PRIVATE 
 	${xtrkcad-lib_SOURCE_DIR}
+	${xtrkcad-lib_BINARY_DIR}
 )
 
 target_sources(xtrkcad-wlib
@@ -83,6 +84,11 @@ find_package (GTK2)
 # configure for GTK's native Unix print
 unset(GTK_UNIX_PRINT_FOUND CACHE)
 find_package (GTKUnixPrint)
+
+# Needed for xtc.image1 include
+add_dependencies(xtrkcad-wlib
+	genbitmaps
+)
 
 target_include_directories(xtrkcad-wlib
 	PRIVATE

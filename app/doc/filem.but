@@ -182,7 +182,7 @@ After importing the objects from the file, the imported objects are in selected 
 
 \S{cmdImportM} \i{Import as Module}
 
-\G{png.d/bimportxtc.png}
+\G{png.d/bimportmod.png}
 
 Importing displays a file selection dialog to specify the file to import as a module.
 

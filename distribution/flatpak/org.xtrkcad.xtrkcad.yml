@@ -1,0 +1,55 @@
+app-id: org.xtrkcad.xtrkcad
+runtime: org.gnome.Platform
+runtime-version: '47'
+sdk: org.gnome.Sdk
+command: xtrkcad
+env:
+  - XTRKCADLIB=/app/share/xtrkcad
+modules:
+  - shared-modules/gtk2/gtk2.json
+
+  - shared-modules/libcanberra/libcanberra.json
+
+  - name: mxml
+    buildsystem: simple
+    build-commands:
+      - ./configure --exec_prefix=/app --prefix=/app
+      - make
+      - make install
+    sources:
+      - type: archive
+# v4 changes names from mxml to mxml4 whch we haven't migrated yet
+        url: https://github.com/michaelrsweet/mxml/archive/refs/tags/v3.3.1.tar.gz
+        sha256: 59eba16ce43765f2e2a6cf4873a58d317be801f1e929647d85da9f171e41e9ac
+
+# from https://github.com/tinywrkb/flatpaks/commit/3e0a63a0f78deaec9f06cf61db0659d7773f0a49
+  - name: libzip
+    buildsystem: cmake
+    config-opts:
+      - -DBUILD_DOC=OFF
+      - -DBUILD_EXAMPLES=OFF
+      - -DBUILD_REGRESS=OFF
+      - -DBUILD_TOOLS=OFF
+    sources:
+      - type: archive
+        url: https://github.com/nih-at/libzip/releases/download/v1.8.0/libzip-1.8.0.tar.gz
+        sha256: 30ee55868c0a698d3c600492f2bea4eb62c53849bcf696d21af5eb65f3f3839e
+        x-checker-data:
+          type: anitya
+          project-id: 10649
+          stable-only: true
+          url-template: https://github.com/nih-at/libzip/releases/download/v$version/libzip-$version.tar.gz
+        cleanup:
+          - /lib/cmake
+#      - ../shared-modules/libzip/libzip.json
+
+  - name: xtrkcad
+    sources:
+      - type: archive
+        path: ./source.tar.gz
+#       if source changes, run ./make-source-archive and replace this checksum
+        sha256: 97a456c92ffc4d9c4ee2f62bfde74e7e93b493bbd047bf594fca1e4858fff266 
+    buildsystem: cmake
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=DEBUG
+      - -DCMAKE_INSTALL_PREFIX=/app

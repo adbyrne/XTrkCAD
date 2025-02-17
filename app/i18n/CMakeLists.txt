@@ -134,8 +134,7 @@ function(updatepofile locale)
 			)
 	endif()
 
-	file(MAKE_DIRECTORY ${mofile_dir})
-
+	file(MAKE_DIRECTORY ${mofile_dir} )
 	# If translator program was given, add target to edit .po files with it
 	if(xtc_translator)
 		add_custom_target(msgtranslate-${locale}

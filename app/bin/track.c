@@ -194,13 +194,16 @@ EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track,
 			}
 		}
 
-		p = *fp;
-		distance = trackCmds( GetTrkType(trk) )->distance( trk, &p );
-		if (fabs(distance) <= fabs(
-		            closestDistance)) { //Make the last (highest) preferred
-			closestDistance = distance;
-			closestTrack = trk;
-			closestPos = p;
+		if ( GetCurrentCommand() != modifyCmdInx ||
+		     FALSE == QueryTrack( trk, Q_IS_TEXT ) ) {
+			p = *fp;
+			distance = trackCmds( GetTrkType(trk) )->distance( trk, &p );
+			if (fabs(distance) <= fabs(
+				    closestDistance)) { //Make the last (highest) preferred
+				closestDistance = distance;
+				closestTrack = trk;
+				closestPos = p;
+			}
 		}
 	}
 	if (closestTrack && closestDistance <0 ) { closestDistance = 0.0; }  //Turntable was closest - inside well
@@ -2816,6 +2819,9 @@ EXPORT void DrawTie(
 			return;
 		}
 	}
+	if ( color == wDrawColorBlack ) {
+		color = tieColor;
+	}
 	if ( solid ) {
 		DrawPoly( d, 4, p, t, color, 0, DRAW_FILL );
 	} else {
@@ -2824,6 +2830,20 @@ EXPORT void DrawTie(
 }
 
 
+/**
+ * Return base color of a track
+ * Detect 
+ * - grade, radius exception
+ * - profile path
+ * - layer override
+ * - Cornu/Bezier too tight
+ * These are used for track and ties
+ * If not, return Black.  Which is converted to normalColor/tieColor before use
+ *
+ * \param		trk	track object
+ * \param		d	draw context
+ * \return	track color
+ */
 EXPORT wDrawColor GetTrkColor( track_p trk, drawCmd_p d )
 {
 	DIST_T len, elev0, elev1;

@@ -27,6 +27,7 @@
 #include "gdk/gdk.h"
 #include "gtk/gtk.h"
 
+#include <assert.h>
 
 #ifdef WINDOWS
 #define strcasecmp _stricmp
@@ -137,7 +138,7 @@ struct wIcon_t {
 	wWinPix_t w;
 	wWinPix_t h;
 	wDrawColor color;
-	const void * bits;
+	wIconBitMap_t bits;
 };
 
 extern char wConfigName[];

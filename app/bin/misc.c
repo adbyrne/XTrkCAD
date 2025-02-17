@@ -534,6 +534,7 @@ EXPORT void MapWindowShow(int state)
 	wPrefSetInteger("misc", "mapVisible", mapVisible);
 	wMenuToggleSet(mapShowMI, mapVisible);
 
+	wWinShow(mapW, mapVisible);
 	if (mapVisible) {
 		DoChangeNotification(CHANGE_MAP);
 	}
@@ -746,13 +747,6 @@ static void SetAccelKeys()
 		wAttachAccelKey(eKey, iMode, AccelKeyDispatch, I2VP(iAccelKey));
 	}
 }
-
-
-//EXPORT void InitCmdEnumerate(void) {
-//	AddToolbarButton("cmdEnumerate", wIconCreatePixMap(partlist_xpm),
-//			IC_SELECTED | IC_ACCLKEY, EnumerateTracks,
-//			NULL);
-//}
 
 
 
@@ -1001,6 +995,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	/*
 	 * TIDY UP
 	 */
+	MainProc( mainW, wResize_e, NULL, NULL );
 
 	/**  \todo Create hot bar */
 	//LayoutHotBar(NULL);
