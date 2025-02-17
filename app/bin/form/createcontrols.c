@@ -131,7 +131,8 @@ static void IntegerPush(const char* value, void* dp)
 
 	// const char* value;
 
-	// \todo Pressing Enter key is handled here, but when does that happen?
+	// \todo Pressing Enter key is handled here, but when does that happen?, see following 
+	// functions as well. Function currently gets called on focus loss
 	//if (strlen(val) == 1 && val[strlen(val) - 1] == '\n') {
 	//	value = wEntryGetValue(p->control);
 	//	p->enter_pressed = TRUE;
@@ -211,47 +212,31 @@ static bool StringPush(const char* val, void* dp)
 	if (DO_MACRO_RECORD(p)) {
 		FormMacroRecord("PARAMETER %s %s %s\n", p->group->nameStr, p->nameStr, val);
 	}
-	//	wBool_t bInvalid = p->bInvalid;
 
-	if (strlen(val) == 1 && val[strlen(val) - 1] == '\n') {
-		value = wEntryGetValue(p->control);
-		p->enter_pressed = TRUE;
-	}
-	else {
-		value = val;
-		p->enter_pressed = FALSE;
-	}
+	//if (strlen(val) == 1 && val[strlen(val) - 1] == '\n') {
+	//	value = wEntryGetValue(p->control);
+	//	p->enter_pressed = TRUE;
+	//}
+	//else {
+	//	value = val;
+	//	p->enter_pressed = FALSE;
+	//}
+
 	LOG(log_form, 1, ("ParamStringPush( %s: Enter:%d Val:%s )\n",
-		p->nameStr, p->enter_pressed, value));
-	//if (((!paramPlayback) && p->option & PDO_NOTBLANK) && value[0] == '\0') {
-	//	p->bInvalid = TRUE;
-	//	wControlSetBalloon(p->control, 0, 0, NULL);
-	//	wWinPix_t h = wControlGetHeight(p->control);
-	//	wControlSetBalloon(p->control, 0, -h * 3 / 4, _("String cannot be blank"));
-	//	ParamHilite(p->group->win, p->control, TRUE);
-	//	return;
-	//}
-	//wControlSetBalloon(p->control, 0, 0, NULL);
-	//p->bInvalid = FALSE;
-	//ParamHilite(p->group->win, p->control, FALSE);
+		p->nameStr, p->enter_pressed, val));
 
-	//if ((p->option & PDO_NOPSHUPD) == 0 && p->valueP) {
-	//	strncpy((char*)p->valueP, value, p->max_string - 1);
-	//	((char*)p->valueP)[p->max_string - 1] = '\0';
-	//	if (strlen(value) > p->max_string - 1) {
-	//		p->bInvalid = TRUE;
-	//		wControlSetBalloon(p->control, 0, 0, NULL);
-	//		wWinPix_t h = wControlGetHeight(p->control);
-	//		sprintf(message, _("String is too long, Max length is %u"), p->max_string - 1);
-	//		wControlSetBalloon(p->control, 0, -h * 3 / 4, message);
-	//		ParamHilite(p->group->win, p->control, TRUE);
-	//	}
-	//}
+	if(FormStringCheckValue(p, val))
+	{
+		return(FALSE);
+	}
+
+	FormStringGetValue(p, val);
+
 	if ((p->option & PDO_NOPSHACT) == 0 && p->group->changeProc)
 		// CAST_AWAY_CONST: param 3 should be const but its a big change
 	{
 		result = p->group->changeProc(p->group, (int)(p - p->group->paramPtr),
-			CAST_AWAY_CONST value);
+			CAST_AWAY_CONST val);
 	}
 
 	return(result);

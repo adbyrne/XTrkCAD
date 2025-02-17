@@ -227,6 +227,42 @@ wBool_t FormFloatRangeCheck(paramData_p p, FLOAT_T valF)
 	return(!p->bInvalid);
 }
 
+
+wBool_t FormStringCheckValue(paramData_p data, char * value)
+{
+	DynString message;
+	DynStringMalloc(&message, 80);
+
+	data->bInvalid = FALSE;
+
+	if ((data->option & PDO_NOTBLANK) && value[0] == '\0') {
+		ShowErrorMessage(data, _("String cannot be blank"));
+		data->bInvalid = TRUE;
+		return(data->bInvalid);
+	}
+
+	if ((data->option & PDO_NOPSHUPD) == 0 && data->valueP) {
+		if (strlen(value) > data->max_string - 1) {
+			DynStringPrintf(&message, "String is too long, Max length is % u", data->max_string - 1);
+			ShowErrorMessage(data, DynStringToCStr(&message));
+			data->bInvalid = TRUE;
+			return(data->bInvalid);
+		}
+	}
+
+	ClearErrorMessage(data);
+	DynStringFree(&message);
+
+	return(data->bInvalid);
+}
+
+void
+FormStringGetValue(paramData_p data, char* value)
+{
+	strncpy((char*)data->valueP, value, data->max_string - 1);
+	((char*)data->valueP)[data->max_string - 1] = '\0';
+}
+
 wBool_t FormCheckInputs(
 	paramGroup_p group,
 	wControl_p button)
@@ -252,4 +288,5 @@ wBool_t FormCheckInputs(
 	}
 	return TRUE;
 }
+
 

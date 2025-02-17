@@ -389,10 +389,10 @@ static wBool_t SearchUiDlgUpdate(
 {
 	switch (inx) {
 	case I_QUERYSTRING:
-		if (pg->paramPtr[inx].enter_pressed) {
+//		if (pg->paramPtr[inx].enter_pressed) {
 			strcpy( searchUiQuery, wEntryGetValue( pg->paramPtr[inx].control) );
 			SearchUiDoSearch(NULL);
-		}
+//		}
 		break;
 	case I_RESULTLIST:
 		UpdateSearchUiButton();
