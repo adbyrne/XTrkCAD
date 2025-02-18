@@ -514,12 +514,19 @@ EXPORT void DoClear(void * unused)
 }
 
 /**
- * Toggle visibility state of map window.
+ * Toggle visibility state of map window. Additional flag to avoid recursive calls while
+ * UI elements in toolbar and menu are sync'ed
  */
 
 EXPORT void MapWindowToggleShow(void * unused)
 {
-	MapWindowShow(!mapVisible);
+	static inTransition = FALSE;
+
+	if (!inTransition) {
+		inTransition = TRUE;
+		MapWindowShow(!mapVisible);
+		inTransition = FALSE;
+	}
 }
 
 /**

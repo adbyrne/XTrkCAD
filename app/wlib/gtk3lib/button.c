@@ -182,6 +182,7 @@ static void buttonClick(
 	struct button* b = CONTROL_GET_ATTRIBUTES_PTR(((wControl_p)value), button);
 
 	if (b->action && DoCallbackOnClick()) {
+		SetNoCallbackOnClick();
 		b->action(((wControl_p)value)->context);
 	}
 }

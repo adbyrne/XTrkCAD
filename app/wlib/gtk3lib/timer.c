@@ -21,7 +21,6 @@
  *
  */
 
-
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
 #define GTK_DISABLE_DEPRECATED
@@ -31,11 +30,11 @@
 #include <gdk/gdk.h>
 
 #include "gtkint.h"
-//#include "i18n.h"
 
 static wBool_t gtkPaused = FALSE;
 static int alarmTimer = 0;
-//static struct timeval startTime;
+
+static GDateTime* start;
 
 static wControl_p triggerControl = NULL;
 static setTriggerCallback_p triggerFunc = NULL;
@@ -137,11 +136,14 @@ void wPause(long duration)		/* milliseconds */
 
 unsigned long wGetTimer(void)
 {
-    printf("Not implemented wGetTimer: %s %d\n", __FILE__, __LINE__);
-    return(0L);
-    //struct timeval tv;
-    //struct timezone tz;
-    //
-    //gettimeofday(&tv, &tz);
-    //return (tv.tv_sec-startTime.tv_sec+1) * 1000 + tv.tv_usec /1000;
+    GDateTime *now = g_date_time_new_now_local();
+    GTimeSpan elapsed;
+    if (!start) {
+        start = g_date_time_new_now_local();
+    }
+    
+    elapsed = g_date_time_difference(now, start) / 1000L;
+    g_date_time_unref(now);
+
+    return((unsigned long)elapsed);
 }

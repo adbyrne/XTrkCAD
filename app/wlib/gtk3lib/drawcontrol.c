@@ -36,7 +36,7 @@
 #include "gtkint.h"
 
 // Trace low level drawing actions
-static int iDrawLog = 1;
+static int iDrawLog = 0;
 static long lDrawCnt = 0;
 
 /**

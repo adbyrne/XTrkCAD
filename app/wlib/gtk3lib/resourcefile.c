@@ -1,5 +1,5 @@
 /**
- * \file   resource.c
+ * \file   resourcefile.c
  * \brief  
  *
  * \author Martin Fischer

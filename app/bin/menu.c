@@ -361,11 +361,17 @@ EXPORT int MagneticSnap(int state)
 }
 
 /**
- * Toggle magnets on/off
+ * Toggle magnets on/off. Additional flag to avoid recursive calls while
+ * UI elements in toolbar and menu are sync'ed
  */
 static void MagneticSnapToggle(void * unused)
 {
-	MagneticSnap(!magneticSnap);
+	static inTransition = FALSE;
+	if (!inTransition) {
+		inTransition = TRUE;
+		MagneticSnap(!magneticSnap);
+		inTransition = FALSE;
+	}
 }
 
 
