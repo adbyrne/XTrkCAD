@@ -982,9 +982,9 @@ void wDrawBitMap(
     wDrawColor color,
     wDrawOpts opts);
 
-wDraw_p wBitmapCreate(		wWinPix_t, wWinPix_t, int );
-wBool_t wBitmapDelete(		wDraw_p );
-wBool_t wBitmapWriteFile(	wDraw_p, const char * );
+wControl_p wBitmapCreate(		wWinPix_t width, wWinPix_t height, int flags);
+wBool_t wBitmapDelete(		wControl_p );
+wBool_t wBitmapWriteFile(	wControl_p, const char * );
 
 /* Misc */
 void* wDrawGetContext(
@@ -992,7 +992,7 @@ void* wDrawGetContext(
 void wDrawSaveImage(		wDraw_p );
 void wDrawRestoreImage(		wDraw_p );
 int wDrawSetBackground(wControl_p bd, char* path, char** error);
-void wDrawCloneBackground(wDraw_p from, wDraw_p to);
+void wDrawCloneBackground(wControl_p from, wControl_p to);
 void wDrawShowBackground(wControl_p drawingArea, wWinPix_t pos_x, wWinPix_t pos_y,
     wWinPix_t size, wAngle_t angle, int screen);
 

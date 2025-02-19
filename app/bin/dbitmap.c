@@ -23,6 +23,7 @@
 #include "custom.h"
 #include "dynstring.h"
 #include "fileio.h"
+#include "form.h"
 #include "layout.h"
 #include "param.h"
 #include "paths.h"
@@ -151,7 +152,7 @@ static int SaveBitmapFile(
 
 	SetCurrentPath( BITMAPPATHKEY, fileName[ 0 ] );
 
-	bitmap_d.d = wBitmapCreate( bitmap_w, bitmap_h, 8 );
+	bitmap_d.d = wBitmapCreate( bitmap_w, bitmap_h, EXPORTBITMAP );
 
 	if( !bitmap_d.d ) {
 		NoticeMessage( MSG_WBITMAP_FAILED, _( "Ok" ), NULL );
@@ -172,8 +173,6 @@ static int SaveBitmapFile(
 			DrawRuler( &bitmap_d, p[0], p[3], 0.0, TRUE, TRUE, wDrawColorBlack );
 			DrawRuler( &bitmap_d, p[1], p[2], 0.0, FALSE, FALSE, wDrawColorBlack );
 			DrawRuler( &bitmap_d, p[3], p[2], 0.0, FALSE, TRUE, wDrawColorBlack );
-			//y0 = 0.37;
-			//y1 = 0.2;
 		}
 
 		if( outputBitMapTogglesV & BITMAPDRAWTITLE ) {
@@ -187,12 +186,6 @@ static int SaveBitmapFile(
 			DrawProductInfo( N_( "Drawn with " ), BITMAPEXPORTFONTSIZE, -LINEHEIGHT );
 		}
 	}
-
-	wDrawClip( bitmap_d.d,
-	           ( wWinPix_t )( -bitmap_d.orig.x/bitmap_d.scale*bitmap_d.dpi ),
-	           ( wWinPix_t )( -bitmap_d.orig.y/bitmap_d.scale*bitmap_d.dpi ),
-	           ( wWinPix_t )( mapD.size.x/bitmap_d.scale*bitmap_d.dpi ),
-	           ( wWinPix_t )( mapD.size.y/bitmap_d.scale*bitmap_d.dpi ) );
 
 	DrawSnapGrid( &bitmap_d, mapD.size, TRUE );
 
@@ -247,7 +240,7 @@ static int SaveBitmapFile(
  *
  */
 
-static wWin_p outputBitMapW;
+static wControl_p outputBitMapW;
 
 static char *bitmapTogglesLabels[] = { N_( "Layout Titles" ),
                                        N_( "Borders" ),
@@ -271,7 +264,7 @@ static paramData_t outputBitMapPLs[] = {
 	{ PD_MESSAGE, N_( "999.9Mb" ), "filesize", PDO_DLGHORZ | PDO_DLGUNDERCMDBUTT | PDO_DLGBOXEND, I2VP( 180 ) },
 };
 
-static paramGroup_t outputBitMapPG = { "outputbitmap", 0, outputBitMapPLs, COUNT( outputBitMapPLs ) };
+static paramGroup_t outputBitMapPG = { "outputbitmap", PGO_FULLDIALOGFROMBUILDER, outputBitMapPLs, COUNT( outputBitMapPLs ) };
 
 /**
  * The upper limit for the dpi setting is calculated. The limit is set
@@ -468,13 +461,13 @@ static void OutputBitMapChange( long changes )
 static void DoOutputBitMap( void* unused )
 {
 	if( outputBitMapW == NULL ) {
-		outputBitMapW = ParamCreateDialog( &outputBitMapPG,
+		outputBitMapW = FormCreateDialog( &outputBitMapPG,
 		                                   MakeWindowTitle( _( "Export to bitmap" ) ),
-		                                   _( "Ok" ),
+		                                   _( "_Ok" ),
 		                                   OutputBitMapOk,
+										   _("_Cancel"),
 		                                   ParamCancel_Current,
 		                                   TRUE,
-		                                   NULL,
 		                                   0,
 		                                   ( paramChangeProc )UpdateBitmapDialog );
 	}

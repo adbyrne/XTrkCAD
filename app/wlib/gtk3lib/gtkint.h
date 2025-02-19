@@ -126,6 +126,7 @@ struct draw {
 	GdkPixbuf* background;
 	cairo_t* cr;
 	double scale_adjust;		/** \todo Check necessity */
+	double scale_text;			/** \todo Check necessity */
 
 };
 
@@ -337,6 +338,7 @@ GtkWidget* wlibAppWinGetMain(void);
 /* basicdraw.c */
 
 void wlibBasicClear( struct draw * bd );
+
 void wlibBasicDrawLine(
 	struct draw * bd,
     wDrawPix_t x0, wDrawPix_t y0,

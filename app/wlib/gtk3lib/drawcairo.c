@@ -1176,12 +1176,14 @@ int wDrawSetBackground(    wControl_p drawingArea, char * path, char ** error)
  */
 
 void
-wDrawCloneBackground(wDraw_p from, wDraw_p to)
+wDrawCloneBackground(wControl_p from, wControl_p to)
 {
-	if (from->background) {
-		to->background = from->background;
+	struct draw* fromDraw = CONTROL_GET_ATTRIBUTES_PTR(from, draw);
+	struct draw* toDraw = CONTROL_GET_ATTRIBUTES_PTR(to, draw);
+	if (fromDraw->background) {
+		toDraw->background = fromDraw->background;
 	} else {
-		to->background = NULL;
+		toDraw->background = NULL;
 	}
 }
 

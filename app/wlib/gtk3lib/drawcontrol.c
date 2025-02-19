@@ -687,19 +687,16 @@ wControl_p wDrawCreate(
 	if (ISDEFINEDINBUILDER(parent)) {
 		drawControl->widget = wlibWidgetFromIdWarn(parent, helpStr);
 	} else {
-		/**
-		\todo generate drawing area from code if necessary
-				wlibComputePos( (wControl_p)drawControl );
-				drawControl->widget = gtk_drawing_area_new();
-				gtk_widget_set_size_request( GTK_WIDGET(drawControl->widget), width, height );
-
-				gtk_fixed_put( GTK_FIXED(parent->widget), drawControl->widget, drawControl->realX, drawControl->realY );
-				wlibControlGetSize( (wControl_p)drawControl );
-
-				drawControl->maxW = drawControl->w = width;
-				drawControl->maxH = drawControl->h = height;
-				*/
+		drawControl->widget = gtk_drawing_area_new();
+		gtk_widget_set_size_request( GTK_WIDGET(drawControl->widget), width, height );
 	}
+
+	wlibControlGetSize((wControl_p)drawControl);
+
+	//drawAttributes->maxW = width;
+	//drawAttributes->maxH = height;
+	drawAttributes->width = width;
+	drawAttributes->height = height;
 
 	g_signal_connect((drawControl->widget), "realize",
 	                 G_CALLBACK(draw_realize), drawControl);

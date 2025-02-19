@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk" version="3.22" />
-  <object class="GtkDialog" id="basicdialog">
+  <object class="GtkDialog" id="outputbitmap">
     <property name="can-focus">False</property>
     <property name="border-width">12</property>
     <property name="type-hint">dialog</property>
@@ -48,60 +48,66 @@
             <property name="row-spacing">6</property>
             <property name="column-spacing">6</property>
             <child>
-              <object class="GtkCheckButton">
-                <property name="label" translatable="yes">_Title of trackplan</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">False</property>
-                <property name="use-underline">True</property>
-                <property name="draw-indicator">True</property>
+              <object class="GtkBox" id="toggles">
+                <property name="orientation">vertical</property>
+                <property name="visible">true</property>
+                <child>
+                  <object class="GtkCheckButton">
+                    <property name="label" translatable="yes">_Title of trackplan</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">False</property>
+                    <property name="use-underline">True</property>
+                    <property name="draw-indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkCheckButton">
+                    <property name="label" translatable="yes">_Outline</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">False</property>
+                    <property name="use-underline">True</property>
+                    <property name="xalign">0</property>
+                    <property name="draw-indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkCheckButton">
+                    <property name="label" translatable="yes">_Center line of track</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">False</property>
+                    <property name="use-underline">True</property>
+                    <property name="draw-indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkCheckButton">
+                    <property name="label" translatable="yes">_Background image</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">False</property>
+                    <property name="use-underline">True</property>
+                    <property name="draw-indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="left-attach">1</property>
                 <property name="top-attach">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkCheckButton">
-                <property name="label" translatable="yes">_Outline</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">False</property>
-                <property name="use-underline">True</property>
-                <property name="xalign">0</property>
-                <property name="draw-indicator">True</property>
-              </object>
-              <packing>
-                <property name="left-attach">1</property>
-                <property name="top-attach">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkCheckButton">
-                <property name="label" translatable="yes">_Center line of track</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">False</property>
-                <property name="use-underline">True</property>
-                <property name="draw-indicator">True</property>
-              </object>
-              <packing>
-                <property name="left-attach">1</property>
-                <property name="top-attach">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkCheckButton">
-                <property name="label" translatable="yes">_Background image</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">False</property>
-                <property name="use-underline">True</property>
-                <property name="draw-indicator">True</property>
-              </object>
-              <packing>
-                <property name="left-attach">1</property>
-                <property name="top-attach">3</property>
               </packing>
             </child>
             <child>
@@ -124,7 +130,7 @@
                 <property name="can-focus">False</property>
                 <property name="label" translatable="yes">_Resolution</property>
                 <property name="use-underline">True</property>
-                <property name="mnemonic-widget">resolutionentry</property>
+                <property name="mnemonic-widget">density</property>
                 <property name="xalign">1</property>
               </object>
               <packing>
@@ -138,7 +144,7 @@
                 <property name="can-focus">False</property>
                 <property name="spacing">6</property>
                 <child>
-                  <object class="GtkEntry" id="resolutionentry">
+                  <object class="GtkEntry" id="density">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="margin-top">6</property>
@@ -150,7 +156,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel">
+                  <object class="GtkLabel" id="dpi">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label" translatable="yes">dpi</property>
@@ -168,7 +174,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkLabel" id="mess1">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="margin-top">6</property>
@@ -181,7 +187,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkLabel" id="mess2">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="label" translatable="yes">Approx. filesize</property>
@@ -193,7 +199,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkLabel" id="pixelsize">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="margin-top">6</property>
@@ -206,7 +212,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkLabel" id="filesize">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="label" translatable="yes">label</property>

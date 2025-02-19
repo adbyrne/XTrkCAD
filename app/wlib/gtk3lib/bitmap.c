@@ -134,21 +134,11 @@ void wIconSetColor( wIcon_p ip, wDrawColor color )
 	wlibFTLabelChangeColor(ip, color);
 }
 
-/**
-* Export as bitmap file.
-*
-* \param d IN the drawing area ?
-* \param fileName IN  fully qualified filename for the bitmap file.
-* \return    TRUE on success, FALSE on error
-*/
-
-wBool_t wBitmapWriteFile(wDraw_p drawingArea, const char* fileName)
+static const char *
+CheckFileFormat(const char* fileName)
 {
-	GdkPixbuf* pixbuf;
-	GError* error;
-	gboolean res;
 	const char* fileFormat = GetExtension(fileName);
-	char* writeFormat = NULL;
+	const char* writeFormat = NULL;
 
 	if (!strcasecmp(fileFormat, PNGFORMAT)) {
 		writeFormat = PNGFORMAT;
@@ -160,18 +150,35 @@ wBool_t wBitmapWriteFile(wDraw_p drawingArea, const char* fileName)
 
 	if (!writeFormat) {
 		wNoticeWithIcon(NT_ERROR, "WriteBitMap: invalid file format!", "Ok", NULL);
-		return FALSE;
 	}
 
-	//pixbuf = gdk_pixbuf_get_from_drawable(NULL, (GdkWindow*)d->pixmap, NULL, 0, 0,
-	//                                      0, 0, drawingArea->w, drawingArea->h);
+	return(writeFormat);
+}
+/**
+* Export as bitmap file.
+*
+* \param d IN the drawing area ?
+* \param fileName IN  fully qualified filename for the bitmap file.
+* \return    TRUE on success, FALSE on error
+*/
+
+wBool_t wBitmapWriteFile(wControl_p drawingControl, const char* fileName)
+{
+	GdkPixbuf* pixbuf;
+	GError* error = NULL;
+	gboolean res;
+	struct draw *drawArea = CONTROL_GET_ATTRIBUTES_PTR(drawingControl, draw);
+	const char* writeFormat;
+
+	writeFormat = CheckFileFormat(fileName);
+
+	pixbuf = gdk_pixbuf_get_from_surface(drawArea->surface, 0, 0, drawArea->width, drawArea->height);
 
 	if (!pixbuf) {
 		wNoticeWithIcon(NT_ERROR, "WriteBitMap: pixbuf_get failed", "Ok", NULL);
 		return FALSE;
 	}
 
-	error = NULL;
 	res = gdk_pixbuf_save(pixbuf, fileName, writeFormat, &error, NULL);
 
 	if (res == FALSE) {
@@ -179,81 +186,88 @@ wBool_t wBitmapWriteFile(wDraw_p drawingArea, const char* fileName)
 		return FALSE;
 	}
 
-	g_object_ref_sink(pixbuf);
 	g_object_unref(pixbuf);
 	return TRUE;
 }
 
-wDraw_p wBitmapCreate(wWinPix_t w, wWinPix_t h, int arg)
+wControl_p 
+wBitmapCreate(wWinPix_t w, wWinPix_t h, int arg)
 {
-	/*
-	wDraw_p bd;
+	
+	wControl_p bd;
+	struct draw* draw;
 
-	bd = (wDraw_p)wlibAlloc(gtkMainW, B_DRAW, 0, 0, NULL, sizeof * bd, NULL);
-
-	bd->lastColor = -1;
+	bd = (wControl_p)wlibControlNew(B_DRAW, NULL, NULL, NULL); 
+	draw = CONTROL_GET_ATTRIBUTES_PTR(bd, draw);
+	
+	//bd->lastColor = -1;
 
 	double dpi;
 
 	wPrefGetFloat(PREFSECTION, DPISET, &dpi, 96.0);
 
-	bd->dpi = dpi;
-	bd->maxW = bd->w = w;
-	bd->maxH = bd->h = h;
-	bd->clip_set = FALSE;
-	bd->scale_adjust = 1.0;
-	bd->scale_text = 1.0;
+	draw->dpi = dpi;
+	//draw->maxW = 
+	draw->width = w;
+	//draw->maxH = 
+	draw->height = h;
+	//draw->clip_set = FALSE;
+	draw->scale_adjust = 1.0;
+	draw->scale_text = 1.0;
 
 	if (arg & EXPORTBITMAP) {
-		bd->surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w, h);
-		if (bd->surface == NULL) {
+		draw->surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w, h);
+		if (draw->surface == NULL) {
 			wNoticeWithIcon(NT_ERROR, "image_ surface_create failed", "Ok", NULL);
 			return NULL;
 		}
-		bd->cr = cairo_create(bd->surface);
-		if (bd->cr == NULL) {
+		draw->cr = cairo_create(draw->surface);
+		if (draw->cr == NULL) {
 			wNoticeWithIcon(NT_ERROR, "image_ surface_create failed", "Ok", NULL);
 			return NULL;
 		}
-		bd->drawDestination = EXPORTBITMAP;
+		draw->drawDestination = EXPORTBITMAP;
 
 		// correct origin of coordinates top left -> bottom left
-		cairo_translate(bd->cr, 0, h);
-		cairo_scale(bd->cr, 1.0, -1.0);
+		cairo_translate(draw->cr, 0, h);
+		cairo_scale(draw->cr, 1.0, -1.0);
 
-		wlibBasicClear(bd);
+		wlibBasicClear(draw);
 	}
 	else {
-		bd->pixbuf = gdk_pixbuf_get_from_window(gtk_widget_get_window(GTK_WIDGET(
-			gtkMainW->gtkwin)), 0, 0, w, h);
-		if (bd->pixbuf == NULL) {
-			wNoticeWithIcon(NT_ERROR, "CreateBitMap: pixmap_new failed", "Ok", NULL);
-			return FALSE;
-		}
-		bd->drawDestination = 0;
-		wDrawClear(bd);
+		//bd->pixbuf = gdk_pixbuf_get_from_window(gtk_widget_get_window(GTK_WIDGET(
+		//	gtkMainW->gtkwin)), 0, 0, w, h);
+		//if (bd->pixbuf == NULL) {
+		//	wNoticeWithIcon(NT_ERROR, "CreateBitMap: pixmap_new failed", "Ok", NULL);
+		//	return FALSE;
+		//}
+		//bd->drawDestination = 0;
+		//wDrawClear(bd);
 
 	}
 	return bd;
-	*/
-	printf("Function wBitmapCreate is not implemented: %s %d\n", __FILE__, __LINE__);
-	return(NULL);
+	
 }
 
 
-wBool_t wBitmapDelete(wDraw_p d)
+wBool_t wBitmapDelete(wControl_p d)
 {
-	if (d->drawDestination == EXPORTBITMAP) {
-		cairo_destroy(d->cr);
-		d->cr = NULL;
-		cairo_surface_destroy(d->surface);
-		d->surface = NULL;
+	g_assert(d->type == B_DRAW);
+
+	struct draw* drawArea = CONTROL_GET_ATTRIBUTES_PTR(d, draw);
+
+	if (drawArea->drawDestination == EXPORTBITMAP) {
+		cairo_destroy(drawArea->cr);
+		drawArea->cr = NULL;
+		cairo_surface_destroy(drawArea->surface);
+		drawArea->surface = NULL;
 	}
 	else {
-		g_object_unref(d->pixbuf);
-		d->pixbuf = NULL;
+		g_object_unref(drawArea->pixbuf);
+		drawArea->pixbuf = NULL;
 	}
-	d->clip_set = FALSE;
+
+//	drawArea->clip_set = FALSE;
 	return TRUE;
 }
 

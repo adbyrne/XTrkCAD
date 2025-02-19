@@ -132,18 +132,14 @@ BasicDrawSetLineType (cairo_t *cr, double lineWidth, double minLineWidth,
  */
 
 void
-wlibBasicClear (wDraw_p bd)
+wlibBasicClear (struct draw * bd)
 {
 	if (iBasicLog >= 1) {
-		printf ("wlibBasicClear %ld+%ld\n", bd->w, bd->h);
+		printf ("wlibBasicClear %ld+%ld\n", bd->width, bd->height);
 	}
 
-	cairo_move_to (bd->cr, 0, 0);
-	cairo_rel_line_to (bd->cr, bd->w, 0);
-	cairo_rel_line_to (bd->cr, 0, bd->h);
-	cairo_rel_line_to (bd->cr, -bd->w, 0);
-	cairo_set_source_rgba (bd->cr, 1.0, 1.0, 1.0, 1.0);
-	cairo_fill (bd->cr);
+	cairo_set_source_rgb(bd->cr, 255, 255, 255);
+	cairo_paint(bd->cr);
 }
 
 /**
@@ -243,6 +239,33 @@ wlibBasicDrawArc (struct draw *bd, wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r,
 	cairo_stroke (bd->cr);
 }
 
+static PangoLayout *
+CreateLayoutForText(struct draw *bd, cairo_t *cr, char *text, wFont_p font, double size )
+{
+	PangoLayout* layout;
+	PangoFontDescription* desc;
+
+	layout = pango_cairo_create_layout(cr);
+
+	// set the correct font and size
+	// \todo use a getter function instead of double conversion
+	desc = pango_font_description_from_string(wlibFontTranslate(font));
+
+	pango_font_description_set_size(desc, (gint)lround(size * PANGO_SCALE * bd->scale_text));
+
+	// render the string to a Pango layout
+	pango_layout_set_font_description(layout, desc);
+
+	gchar* utf8 = wlibConvertInput(text);
+
+	pango_layout_set_text(layout, utf8, -1);
+	pango_layout_set_width(layout, -1);
+	pango_layout_set_alignment(layout, PANGO_ALIGN_LEFT);
+
+	g_free(desc);
+
+	return(layout);
+}
 /**
  * Print a string at the given position using specified font and text size.
  * The orientation of the y-axis in XTrackCAD is wrong for cairo. So for
@@ -250,10 +273,7 @@ wlibBasicDrawArc (struct draw *bd, wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r,
  * also affect the string orientation, printing a string has to be
  * treated differently. The starting point is transformed, then the
  * string is rotated and scaled as needed. Finally the string position
- * translated to the starting point calculated previously. The same
- * solution would have to be applied to a bitmap should printing
- * bitmaps ever be implemented.
- *
+ * translated to the starting point calculated previously. 
  * \param x IN x position in pixels
  * \param y IN y position in pixels
  * \param a IN angle of baseline in degrees. Positive is clockwise, 0 is direction of positive x axis
@@ -266,23 +286,21 @@ wlibBasicDrawArc (struct draw *bd, wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r,
  */
 
 void
-wlibBasicDrawString (wDraw_p bd, wDrawPix_t x, wDrawPix_t y, double a, char *s,
+wlibBasicDrawString (struct draw *bd, wDrawPix_t x, wDrawPix_t y, double a, char *s,
                      wFont_p fp, double fs, double width, double minWidth,
                      wDrawColor color, wDrawOpts opts)
 {
 	double x0 = (double) x, y0 = (double) y;
-	int text_height, text_width;
-	double ascent;
+	int baseline;
 
 	cairo_t *cr;
 	cairo_matrix_t matrix;
-
-	PangoLayout *layout;
-	PangoFontDescription *desc;
-	PangoFontMetrics *metrics;
-	PangoContext *pcontext;
+	PangoLayout* layout;
 
 	cr = bd->cr;
+
+	layout = CreateLayoutForText(bd, cr, s, fp, fs);
+	baseline = pango_layout_get_baseline(layout) / PANGO_SCALE;
 
 	// get the current transformation matrix and transform the starting
 	// point of the string
@@ -290,48 +308,13 @@ wlibBasicDrawString (wDraw_p bd, wDrawPix_t x, wDrawPix_t y, double a, char *s,
 	cairo_save (cr);
 
 	cairo_get_matrix (cr, &matrix);
-
 	cairo_matrix_transform_point (&matrix, &x0, &y0);
-
 	cairo_identity_matrix (cr);
-
-	layout = pango_cairo_create_layout (cr);
-
-	// set the correct font and size
-	// \todo use a getter function instead of double conversion
-	desc = pango_font_description_from_string (wlibFontTranslate (fp));
-
-	pango_font_description_set_size (desc, (gint)lround(fs * PANGO_SCALE * bd->scale_text));
-
-	// render the string to a Pango layout
-	pango_layout_set_font_description (layout, desc);
-
-	gchar *utf8 = wlibConvertInput (s);
-
-	pango_layout_set_text (layout, utf8, -1);
-	pango_layout_set_width (layout, -1);
-	pango_layout_set_alignment (layout, PANGO_ALIGN_LEFT);
-	pango_layout_get_size (layout, &text_width, &text_height);
-
-	text_width = text_width / PANGO_SCALE;
-	text_height = text_height / PANGO_SCALE;
-
-	// get the height of the string
-	pcontext = pango_cairo_create_context (cr);
-	metrics = pango_context_get_metrics (pcontext,
-	                                     desc,
-	                                     pango_context_get_language (pcontext));
-
-	ascent = pango_font_metrics_get_ascent (metrics) / PANGO_SCALE;
-
-	int baseline = pango_layout_get_baseline (layout) / PANGO_SCALE;
-
+	
 	cairo_translate (cr, x0, y0);
 	cairo_rotate (cr, -a * M_PI / 180.0);
-	cairo_translate (cr, 0, -baseline);
-
 	cairo_move_to (cr, 0, 0);
-
+	cairo_translate(cr, 0, -baseline);
 	pango_cairo_update_layout (cr, layout);
 
 	// set the color
@@ -340,7 +323,6 @@ wlibBasicDrawString (wDraw_p bd, wDrawPix_t x, wDrawPix_t y, double a, char *s,
 	// and show the string
 	if (!(opts & wDrawOutlineFont)) {
 		pango_cairo_show_layout (cr, layout);
-		cairo_stroke (cr);
 	} else {
 		PangoLayoutLine * line;
 		line = pango_layout_get_line_readonly (layout, 0);
@@ -351,11 +333,12 @@ wlibBasicDrawString (wDraw_p bd, wDrawPix_t x, wDrawPix_t y, double a, char *s,
 		                      0,
 		                      bd->scale_adjust);
 		pango_cairo_layout_line_path (cr, line);
-		cairo_stroke (cr);
 	}
+
+	cairo_stroke(cr);
+
 	// free unused objects
 	g_object_unref (layout);
-	g_object_unref (pcontext);
 
 	cairo_restore (cr);
 
@@ -373,7 +356,7 @@ wlibBasicDrawString (wDraw_p bd, wDrawPix_t x, wDrawPix_t y, double a, char *s,
  */
 
 void
-wlibBasicDrawFillRectangle (wDraw_p bd, wDrawPix_t x0, wDrawPix_t y0,
+wlibBasicDrawFillRectangle (struct draw * bd, wDrawPix_t x0, wDrawPix_t y0,
                             wDrawPix_t x1, wDrawPix_t y1, wDrawColor color,
                             wDrawOpts opts)
 {
@@ -401,12 +384,12 @@ wlibBasicDrawFillRectangle (wDraw_p bd, wDrawPix_t x0, wDrawPix_t y0,
  */
 
 void
-wlibBasicDrawFillPolygon (wControl_p drawingArea, wDrawPix_t p[][2], wPolyLine_e type[],
+wlibBasicDrawFillPolygon (struct draw* bd, wDrawPix_t p[][2], wPolyLine_e type[],
                           int cnt, wDrawColor color, wDrawOpts opts, int fill,
                           int open)
 {
-	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
-	g_assert(drawingArea->type == B_DRAW);
+	//struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	//g_assert(drawingArea->type == B_DRAW);
 
 	int inx;
 	cairo_t *cr = bd->cr;
@@ -521,11 +504,11 @@ wlibBasicDrawFillPolygon (wControl_p drawingArea, wDrawPix_t p[][2], wPolyLine_e
  */
 
 void
-wlibBasicDrawFillCircle (wControl_p drawingArea, wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r,
+wlibBasicDrawFillCircle (struct draw *bd, wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r,
                          wDrawColor color, wDrawOpts opts)
 {
-	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
-	g_assert(drawingArea->type == B_DRAW);
+	//struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	//g_assert(drawingArea->type == B_DRAW);
 
 	BasicDrawSetColor (bd->cr, color);
 
