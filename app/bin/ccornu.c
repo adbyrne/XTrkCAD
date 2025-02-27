@@ -1997,6 +1997,11 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos,
 			}
 			DYNARR_N(coOrd,Da.mid_points,0) = GetTrkEndPos(prior,1-ep0);
 			Da.trk[0] = GetTrkEndTrk( prior, ep0 );
+			if ( Da.trk[0] ==  trk ) {
+				// loop
+				ErrorMessage( "Cornu loop detected" );
+				return C_ERROR;
+			}
 			if (Da.trk[0]) { Da.ep[0] = GetEndPtConnectedToMe(Da.trk[0],prior); }
 			else { Da.ep[0] = -1; }
 		}
@@ -2023,6 +2028,11 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos,
 			DYNARR_APPEND(coOrd,Da.mid_points,1);
 			DYNARR_LAST(coOrd,Da.mid_points) = GetTrkEndPos(next,1-ep1);
 			Da.trk[1] = GetTrkEndTrk( next, ep1 );
+			if ( Da.trk[1] ==  trk ) {
+				// loop
+				ErrorMessage( "Cornu loop detected" );
+				return C_ERROR;
+			}
 			if (Da.trk[1]) { Da.ep[1] = GetEndPtConnectedToMe(Da.trk[1],next); }
 		}
 
