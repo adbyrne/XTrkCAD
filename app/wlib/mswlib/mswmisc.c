@@ -1210,6 +1210,7 @@ void wWinGetSize(wWin_p w, wWinPix_t * width, wWinPix_t * height)
 void wWinSetSize(wWin_p w, wWinPix_t width, wWinPix_t height)
 {
     RECT rect;
+    HWND hWnd = GetFocus();
     w->w = width;
     w->h = height;
     rect.left = 0;
@@ -1226,6 +1227,7 @@ void wWinSetSize(wWin_p w, wWinPix_t width, wWinPix_t height)
     }
 
     InvalidateRect(w->hWnd, NULL, TRUE);
+    SetFocus(hWnd);
 }
 
 
