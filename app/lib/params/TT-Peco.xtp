@@ -1,9 +1,4 @@
 CONTENTS Peco Code 55 TT Scale Track System
-#Med Radius Turnout 180mm for both Lenghts, Angle - 11.25d, Offset - based on Substitue Radius 922.6mm @ 11.25d
-#Sleepers measure 21mm x 2mm x 1.5mm with a 3.5mm spacing between each of them
-#Small Radius Turnout 135mm for both Lenghts, Angle - 11.25d Substitue Radius 466mm radius U1291RH U1292 LH
-#11.25d Crossing 180mm
-
 
 SUBCONTENTS Peco TT-Scale Track - Straight Track
 TURNOUT TT  "Peco Track	Flex Straight 914mm	SL-1200"
@@ -12,8 +7,44 @@ TURNOUT TT  "Peco Track	Flex Straight 914mm	SL-1200"
 	E 35.984252 0.000000 90.000000
 	S 0 0 0.000000 0.000000 35.984252 0.000000
 	END$SEGS
+TURNOUT TT  "Peco Set Track	Short Straight 59mm	ST-1270"
+	P "Normal" 1
+	E 0.000000 0.000000 270.000000
+	E 2.322835 0.000000 90.000000
+	S 0 0 0.000000 0.000000 2.322835 0.000000
+	END$SEGS
+TURNOUT TT  "Peco Set Track	Standard Straight 118mm	ST-1271"
+	P "Normal" 1
+	E 0.000000 0.000000 270.000000
+	E 4.645669 0.000000 90.000000
+	S 0 0 0.000000 0.000000 4.645669 0.000000
+	END$SEGS
+TURNOUT TT  "Peco Set Track	Double Straight 236mm	ST-1272"
+	P "Normal" 1
+	E 0.000000 0.000000 270.000000
+	E 9.291339 0.000000 90.000000
+	S 0 0 0.000000 0.000000 9.291339 0.000000
+	END$SEGS
 
 SUBCONTENTS Peco TT-Scale Track - Curve Tracks
+TURNOUT TT  "Peco Set Track	2nd Radius Half Curve R310mm 11.25d	ST-1250"
+	P "Normal" 1
+	E 0.000000 0.000000 270.000000
+	E 2.381024 -0.234510 101.250000
+	C 0 0 12.204724 0.000000 -12.204724 0.000000 11.250000
+	END$SEGS
+TURNOUT TT  "Peco Set Track	2nd Radius Standard Curve R310mm 22.5d	ST-1251"
+	P "Normal" 1
+	E 0.000000 0.000000 270.000000
+	E 4.670546 -0.929029 112.500000
+	C 0 0 12.204724 0.000000 -12.204724 0.000000 22.500000
+	END$SEGS
+TURNOUT TT  "Peco Set Track	2nd Radius Double Curve R310mm 45d	ST-1252"
+	P "Normal" 1
+	E 0.000000 0.000000 270.000000
+	E 8.630043 -3.574681 135.000000
+	C 0 0 12.204724 0.000000 -12.204724 0.000000 45.000000
+	END$SEGS
 
 SUBCONTENTS Peco TT-Scale Track - Turnouts
 TURNOUT TT "Peco Track	Medium Radius Right Turnout 180mm 11.25d	SL-U1295"
