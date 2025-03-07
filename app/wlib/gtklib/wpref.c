@@ -265,13 +265,15 @@ wlibSetProfileFilename(char *name)
 	if (name && name[0]) {
 		size_t length;
 		length = snprintf(profileFile, 0, "%s", name);
-		profileFile = malloc(length + sizeof(NULL));
+		length += sizeof("");
+		profileFile = malloc(length);
 		snprintf( profileFile, length, "%s", name );
 	} else {
 		size_t length; 
 		length = snprintf(profileFile, 0, "%s/%s.rc", workDir, wConfigName );
-		profileFile = malloc(length + sizeof(NULL));
-		length = snprintf(profileFile, length+sizeof(NULL), "%s/%s.rc", workDir, wConfigName );
+		length += sizeof("");
+		profileFile = malloc(length);
+		length = snprintf(profileFile, length, "%s/%s.rc", workDir, wConfigName );
 	}
 }
 
