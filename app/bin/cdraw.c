@@ -1639,7 +1639,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 			drawModCmdContext.open = (drawModCmdContext.subtype==POLYLINE)?TRUE:FALSE;
 			break;
 		case SEG_TEXT:
-			InfoMessage("Text can only be modified in Describe Mode");
+			InfoMessage("Text can only be modified with Property command");
 			wBeep();
 			return C_ERROR;
 		default:

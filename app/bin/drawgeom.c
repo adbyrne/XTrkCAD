@@ -2095,7 +2095,7 @@ STATUS_T DrawGeomModify(
 			}
 			break;
 		case SEG_TEXT:
-			InfoMessage("Text can only be modified with Describe");
+			InfoMessage("Text can only be modified with Property command");
 			wBeep();
 			return C_ERROR;
 		default:
