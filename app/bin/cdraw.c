@@ -3394,13 +3394,13 @@ EXPORT track_p NewText(
 	tempSeg.type = SEG_TEXT;
 	tempSeg.color = color;
 	tempSeg.lineWidth = 0;
-	tempSeg.u.t.pos = pos;
+	tempSeg.u.t.pos = zero;
 	tempSeg.u.t.angle = angle;
 	tempSeg.u.t.fontP = NULL;
 	tempSeg.u.t.fontSize = textSize;
 	tempSeg.u.t.string = MyStrdup( text );
 	tempSeg.u.t.boxed = boxed;
-	trk = MakeDrawFromSeg1( index, zero, 0.0, &tempSeg );
+	trk = MakeDrawFromSeg1( index, pos, 0.0, &tempSeg );
 	return trk;
 }
 
