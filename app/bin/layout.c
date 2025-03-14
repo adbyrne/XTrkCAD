@@ -91,6 +91,8 @@ static paramIntegerRange_t i0_100 = { 0, 100 };
 
 static void SettingsWrite( void  );
 static void SettingsRead( void  );
+static void ImageFileClear(void* unused);
+static void ImageFileBrowse(void* unused);
 
 static void LayoutDlgUpdate(paramGroup_p pg, int inx, void * valueP);
 
@@ -495,6 +497,39 @@ GetLayoutRoomSize(coOrd *roomSize)
 static wWin_p layoutW;
 static void LayoutChange(long changes);
 
+static paramData_t layoutPLs[] = {
+	{ PD_FLOAT, &thisLayout.props.roomSize.x, "roomsizeX", PDO_NOPREF | PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, N_("Room Width"), 0, I2VP(CHANGE_MAIN | CHANGE_MAP) },
+	{ PD_FLOAT, &thisLayout.props.roomSize.y, "roomsizeY", PDO_NOPREF | PDO_DIM | PDO_NOPSHUPD | PDO_DRAW | PDO_DLGHORZ, &r1_9999999, N_("    Height"), 0, I2VP(CHANGE_MAIN | CHANGE_MAP) },
+	{ PD_STRING, &thisLayout.props.title1, "title1", PDO_NOPSHUPD | PDO_STRINGLIMITLENGTH, NULL, N_("Layout Title"), 0, 0, sizeof(thisLayout.props.title1)},
+	{ PD_STRING, &thisLayout.props.title2, "title2", PDO_NOPSHUPD | PDO_STRINGLIMITLENGTH, NULL, N_("Subtitle"), 0, 0, sizeof(thisLayout.props.title2)},
+#define SCALEINX (4)
+	{ PD_DROPLIST, &thisLayout.props.curScaleDescInx, "scale", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT, I2VP(180), N_("Scale"), 0, I2VP(CHANGE_SCALE) },
+#define GAUGEINX (5)
+	{ PD_DROPLIST, &thisLayout.props.curGaugeInx, "gauge", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ, I2VP(180), N_("     Gauge"), 0, I2VP(CHANGE_SCALE) },
+#define MINRADIUSENTRY (6)
+	{ PD_FLOAT, &thisLayout.props.minTrackRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, N_("Min Track Radius"), 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
+	{ PD_FLOAT, &thisLayout.props.maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ, &r0_90, N_("  Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN) },
+#define BACKGROUNDFILEENTRY (8)
+	{ PD_STRING, &thisLayout.props.backgroundTextBox, "backgroundfile", PDO_NOPSHUPD | PDO_NOPREF | PDO_NORECORD | PDO_STRINGLIMITLENGTH,  NULL, N_("Background File Path"), 0, I2VP(CHANGE_BACKGROUND), TEXT_FIELD_LEN },
+	{ PD_BUTTON, ImageFileBrowse, "browse", PDO_DLGHORZ, NULL, N_("Browse ...") },
+	{ PD_BUTTON, ImageFileClear, "clear", PDO_DLGHORZ, NULL, N_("Clear") },
+#define BACKGROUNDPOSX (11)
+	{ PD_FLOAT, &thisLayout.props.backgroundPos.x, "backgroundposX", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &rN_9999999, N_("Background PosX,Y"), 0, I2VP(CHANGE_BACKGROUND) },
+#define BACKGROUNDPOSY (12)
+	{ PD_FLOAT, &thisLayout.props.backgroundPos.y, "backgroundposY", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW | PDO_DLGHORZ, &rN_9999999, NULL, 0, I2VP(CHANGE_BACKGROUND) },
+#define BACKGROUNDWIDTH (13)
+	{ PD_FLOAT, &thisLayout.props.backgroundSize, "backgroundWidth", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r0_9999999, N_("Background Size"), 0, I2VP(CHANGE_BACKGROUND) },
+#define BACKGROUNDSCREEN (14)
+	{ PD_LONG, &thisLayout.props.backgroundScreen, "backgroundScreen", PDO_NOPSHUPD | PDO_DRAW, &i0_100, N_("Background Screen %"), 0, I2VP(CHANGE_BACKGROUND) },
+#define BACKGROUNDANGLE (15)
+	{ PD_FLOAT, &thisLayout.props.backgroundAngle, "backgroundAngle", PDO_NOPSHUPD | PDO_DRAW | PDO_DLGBOXEND, &r360_360, N_("Background Angle"), 0, I2VP(CHANGE_BACKGROUND) },
+	{ PD_MESSAGE, N_("Named Settings File"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
+	{ PD_BUTTON, SettingsWrite, "write",  PDO_DLGHORZ, 0, N_("Write"), 0, I2VP(0) },
+	{ PD_BUTTON, SettingsRead, "read", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Read"), 0, I2VP(0) }
+};
+
+static paramGroup_t layoutPG = { "layout", PGO_RECORD | PGO_PREFMISC, layoutPLs, COUNT(layoutPLs) };
+
 /**
 * Show only the filename in the Dialog
 */
@@ -573,7 +608,7 @@ LoadBackGroundImage(void)
 	return TRUE;
 }
 
-#define BACKGROUNDFILEENTRY (8)
+
 
 /**
 * Callback from File Select for Background Image File
@@ -648,57 +683,46 @@ static void ImageFileBrowse( void * unused )
 	return;
 }
 
+
+static void ClearBackgroundData(void)
+{
+	SetLayoutBackGroundFullPath(NULL);
+	thisLayout.props.backgroundAngle = 0.0;
+	thisLayout.props.backgroundPos.x = 0.0;
+	thisLayout.props.backgroundPos.y = 0.0;
+	thisLayout.props.backgroundScreen = 0;
+	thisLayout.props.backgroundSize = 0.0;
+}
+
+static void UpdateBackgroundDialogControls()
+{
+	SetName();
+	ParamLoadControl(layout_pg_p, BACKGROUNDFILEENTRY);
+
+	ParamLoadControl(layout_pg_p, BACKGROUNDPOSX);
+	ParamLoadControl(layout_pg_p, BACKGROUNDPOSY);
+	ParamLoadControl(layout_pg_p, BACKGROUNDSCREEN);
+	ParamLoadControl(layout_pg_p, BACKGROUNDWIDTH);
+	ParamLoadControl(layout_pg_p, BACKGROUNDANGLE);
+}
 /**
  * Remove the background Image File
 */
 static void ImageFileClear( void * unused)
 {
-	char * noname = "";
-	SetLayoutBackGroundFullPath(noname);
+	ClearBackgroundData();
+	UpdateBackgroundDialogControls();
+
 	wDrawSetBackground(  mainD.d, NULL, NULL);
-	SetName();
 	wControlActive((wControl_p)backgroundB, FALSE);
+
 	file_changed = TRUE;
 	haveBackground = false;
-	ParamLoadControl(layout_pg_p, BACKGROUNDFILEENTRY);
-
-	LayoutChange( CHANGE_BACKGROUND );
 
 	MainRedraw();
 }
 
-static paramData_t layoutPLs[] = {
-	{ PD_FLOAT, &thisLayout.props.roomSize.x, "roomsizeX", PDO_NOPREF | PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, N_("Room Width"), 0, I2VP(CHANGE_MAIN | CHANGE_MAP) },
-	{ PD_FLOAT, &thisLayout.props.roomSize.y, "roomsizeY", PDO_NOPREF | PDO_DIM | PDO_NOPSHUPD | PDO_DRAW | PDO_DLGHORZ, &r1_9999999, N_("    Height"), 0, I2VP(CHANGE_MAIN | CHANGE_MAP) },
-	{ PD_STRING, &thisLayout.props.title1, "title1", PDO_NOPSHUPD | PDO_STRINGLIMITLENGTH, NULL, N_("Layout Title"), 0, 0, sizeof(thisLayout.props.title1)},
-	{ PD_STRING, &thisLayout.props.title2, "title2", PDO_NOPSHUPD | PDO_STRINGLIMITLENGTH, NULL, N_("Subtitle"), 0, 0, sizeof(thisLayout.props.title2)},
-#define SCALEINX (4)
-	{ PD_DROPLIST, &thisLayout.props.curScaleDescInx, "scale", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT, I2VP(180), N_("Scale"), 0, I2VP(CHANGE_SCALE) },
-#define GAUGEINX (5)
-	{ PD_DROPLIST, &thisLayout.props.curGaugeInx, "gauge", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ, I2VP(180), N_("     Gauge"), 0, I2VP(CHANGE_SCALE) },
-#define MINRADIUSENTRY (6)
-	{ PD_FLOAT, &thisLayout.props.minTrackRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, N_("Min Track Radius"), 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
-	{ PD_FLOAT, &thisLayout.props.maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ, &r0_90, N_("  Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN) },
-#define BACKGROUNDFILECHECK (8)  //Note this value used in the file section routines above - if it changes, they will need to change
-	{ PD_STRING, &thisLayout.props.backgroundTextBox, "backgroundfile", PDO_NOPSHUPD|PDO_NOPREF|PDO_NORECORD|PDO_STRINGLIMITLENGTH,  NULL, N_("Background File Path"), 0, I2VP(CHANGE_BACKGROUND), TEXT_FIELD_LEN },
-	{ PD_BUTTON, ImageFileBrowse, "browse", PDO_DLGHORZ, NULL, N_("Browse ...") },
-	{ PD_BUTTON, ImageFileClear, "clear", PDO_DLGHORZ, NULL, N_("Clear") },
-#define BACKGROUNDPOSX (11)
-	{ PD_FLOAT, &thisLayout.props.backgroundPos.x, "backgroundposX", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &rN_9999999, N_("Background PosX,Y"), 0, I2VP(CHANGE_BACKGROUND) },
-#define BACKGROUNDPOSY (12)
-	{ PD_FLOAT, &thisLayout.props.backgroundPos.y, "backgroundposY", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW | PDO_DLGHORZ, &rN_9999999, NULL, 0, I2VP(CHANGE_BACKGROUND) },
-#define BACKGROUNDWIDTH (13)
-	{ PD_FLOAT, &thisLayout.props.backgroundSize, "backgroundWidth", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r0_9999999, N_("Background Size"), 0, I2VP(CHANGE_BACKGROUND) },
-#define BACKGROUNDSCREEN (14)
-	{ PD_LONG, &thisLayout.props.backgroundScreen, "backgroundScreen", PDO_NOPSHUPD | PDO_DRAW, &i0_100, N_("Background Screen %"), 0, I2VP(CHANGE_BACKGROUND) },
-#define BACKGROUNDANGLE (15)
-	{ PD_FLOAT, &thisLayout.props.backgroundAngle, "backgroundAngle", PDO_NOPSHUPD | PDO_DRAW | PDO_DLGBOXEND, &r360_360, N_("Background Angle"), 0, I2VP(CHANGE_BACKGROUND) },
-	{ PD_MESSAGE, N_("Named Settings File"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
-	{ PD_BUTTON, SettingsWrite, "write",  PDO_DLGHORZ, 0, N_("Write"), 0, I2VP(0) },
-	{ PD_BUTTON, SettingsRead, "read", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Read"), 0, I2VP(0) }
-};
 
-static paramGroup_t layoutPG = { "layout", PGO_RECORD | PGO_PREFMISC, layoutPLs, COUNT( layoutPLs ) };
 
 /**
  * @brief Handle the Layout changes, setting the values of changed items from dialog.
@@ -824,7 +848,6 @@ static void LayoutChange(long changes)
 */
 void DoLayout(void * unused)
 {
-	CHECK(BACKGROUNDFILEENTRY == BACKGROUNDFILECHECK);
 
 	SetLayoutRoomSize(mapD.size);
 
