@@ -1288,7 +1288,7 @@ void wWinShow(
     wWin_p win1;
     win->busy = TRUE;
 
-    if (show) {
+    if (show & ~(DONTGRABFOCUS) ) {
         if (win->centerWin) {
             x = (screenWidth-win->w)/2;
             y = (screenHeight-win->h)/2;
@@ -1317,7 +1317,10 @@ void wWinShow(
         }
 
         if (mswHWnd == (HWND)0 || !IsIconic(mswHWnd)) {
-            ShowWindow(win->hWnd, SW_SHOW);
+            if (show & DONTGRABFOCUS)
+                ShowWindow(win->hWnd, SW_SHOWNOACTIVATE);
+            else 
+                ShowWindow(win->hWnd, SW_SHOW);
 
             if (win->focusChainFirst) {
                 SetFocus(win->focusChainFirst->hWnd);

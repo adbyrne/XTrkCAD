@@ -285,7 +285,8 @@ wWin_p wWinPopupCreate(		wWin_p, wWinPix_t, wWinPix_t, const char *,
 wWin_p wMain(			int, char *[] );
 void wWinSetBigIcon(		wWin_p, wIcon_p );
 void wWinSetSmallIcon(		wWin_p, wIcon_p );
-void wWinShow(			wWin_p, wBool_t );
+#define DONTGRABFOCUS 0x100
+void wWinShow(			wWin_p, unsigned show );
 wBool_t wWinIsVisible(		wWin_p );
 wBool_t wWinIsMaximized( wWin_p win);
 void wWinGetSize (		wWin_p, wWinPix_t *, wWinPix_t * );
