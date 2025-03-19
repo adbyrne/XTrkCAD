@@ -305,7 +305,7 @@ void wWinSetSize(
 
 void wWinShow(
         wWin_p win,		/* Window */
-        wBool_t show)		/* Command */
+        unsigned show)		/* Command */
 {
 	//GtkRequisition min_req, pref_req;
 
@@ -319,7 +319,7 @@ void wWinShow(
 
 	int width, height;
 
-	if (show) {
+	if (show & ~(DONTGRABFOCUS)) {
 		keyState = 0;
 		getPos(win);
 
@@ -358,6 +358,10 @@ void wWinShow(
 		}
 
 		gtk_window_present(GTK_WINDOW(win->gtkwin));
+
+		if(show & DONTGRABFOCUS) {
+			gtk_window_activate_focus(gtkMainW->gtkWin);
+		}
 
 
 		gdk_window_raise(gtk_widget_get_window(win->gtkwin));
