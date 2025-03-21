@@ -749,7 +749,7 @@ EXPORT void MapWindowShow(int state)
 	wPrefSetInteger("misc", "mapVisible", mapVisible);
 	wMenuToggleSet(mapShowMI, mapVisible);
 
-	wWinShow(mapW, mapVisible);
+	wWinShow(mapW, mapVisible | DONTGRABFOCUS);
 	if (mapVisible) {
 		DoChangeNotification(CHANGE_MAP);
 	}
@@ -1266,7 +1266,7 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	DoChangeNotification( CHANGE_MAIN | CHANGE_MAP);
 
 	wWinShow(mainW, TRUE);
-	wWinShow(mapW, mapVisible);
+	wWinShow(mapW, mapVisible | DONTGRABFOCUS);
 	wDestroySplash();
 
 	/* this has to be called before ShowTip() */
