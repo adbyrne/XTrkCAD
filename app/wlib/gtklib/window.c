@@ -318,8 +318,9 @@ void wWinShow(
 	}
 
 	int width, height;
-
-	if (show & ~(DONTGRABFOCUS)) {
+	show &= ~(DONTGRABFOCUS);	// flag is ignored on Linux
+	
+	if (show) {
 		keyState = 0;
 		getPos(win);
 
@@ -359,9 +360,6 @@ void wWinShow(
 
 		gtk_window_present(GTK_WINDOW(win->gtkwin));
 
-		if(show & DONTGRABFOCUS) {
-			gtk_window_activate_focus(gtkMainW->gtkWin);
-		}
 
 
 		gdk_window_raise(gtk_widget_get_window(win->gtkwin));
