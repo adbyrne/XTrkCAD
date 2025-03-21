@@ -526,29 +526,30 @@ static paramIntegerRange_t i0_1000		= { 0, 1000, 30 };
 static paramFloatRange_t r_1000_1000	= { -1000.0, 1000.0, 80 };
 static paramFloatRange_t r0_360			= { 0.0, 360.0, 80 };
 static char *gridLabels[]				= { "", NULL };
+
 static paramData_t gridPLs[] = {
 	{	PD_MESSAGE, N_("Horz"), NULL, 0, I2VP(60)  },
 #define I_HORZSPACING	(1)
-	{	PD_FLOAT, &grid.Horz.Spacing, "horzspacing", PDO_DIM, &r0_999999, N_("Spacing") },
+	{	PD_FLOAT, &grid.Horz.Spacing, "horzspacing", PDO_NOPSHUPD|PDO_DIM, &r0_999999, N_("Spacing") },
 #define I_HORZDIVISION	(2)
-	{	PD_LONG, &grid.Horz.Division, "horzdivision", 0, &i0_1000, N_("Divisions") },
+	{	PD_LONG, &grid.Horz.Division, "horzdivision", PDO_NOPSHUPD, &i0_1000, N_("Divisions") },
 #define I_HORZENABLE	(3)
 #define gridHorzEnableT ((wChoice_p)gridPLs[I_HORZENABLE].control)
 	{	PD_TOGGLE, &grid.Horz.Enable, "horzenable", 0, gridLabels, N_("Enable"), BC_HORZ|BC_NOBORDER },
 	{	PD_MESSAGE, N_("Vert"), NULL, PDO_DLGNEWCOLUMN|PDO_DLGWIDE, I2VP(60) },
 #define I_VERTSPACING	(5)
-	{	PD_FLOAT, &grid.Vert.Spacing, "vertspacing", PDO_DIM, &r0_999999, NULL },
+	{	PD_FLOAT, &grid.Vert.Spacing, "vertspacing", PDO_NOPSHUPD, &r0_999999, NULL },
 #define I_VERTDIVISION	(6)
-	{	PD_LONG, &grid.Vert.Division, "vertdivision", 0, &i0_1000, NULL },
+	{	PD_LONG, &grid.Vert.Division, "vertdivision", PDO_NOPSHUPD, &i0_1000, NULL },
 #define I_VERTENABLE	(7)
 #define gridVertEnableT ((wChoice_p)gridPLs[I_VERTENABLE].control)
 	{	PD_TOGGLE, &grid.Vert.Enable, "vertenable", 0, gridLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_VALUEX		(8)
-	{	PD_FLOAT, &grid.Orig.x, "origx", PDO_DIM|PDO_DLGNEWCOLUMN|PDO_DLGWIDE, &r_1000_1000, N_("X") },
+	{	PD_FLOAT, &grid.Orig.x, "origx", PDO_NOPSHUPD|PDO_DLGNEWCOLUMN|PDO_DLGWIDE, &r_1000_1000, N_("X") },
 #define I_VALUEY		(9)
-	{	PD_FLOAT, &grid.Orig.y, "origy", PDO_DIM, &r_1000_1000, N_("Y") },
+	{	PD_FLOAT, &grid.Orig.y, "origy", PDO_NOPSHUPD, &r_1000_1000, N_("Y") },
 #define I_VALUEA		(10)
-	{	PD_FLOAT, &grid.Angle, "origa", PDO_ANGLE, &r0_360, N_("A") },
+	{	PD_FLOAT, &grid.Angle, "origa", PDO_NOPSHUPD, &r0_360, N_("A") },
 #define I_SHOW			(11)
 #define gridShowT		((wChoice_p)gridPLs[I_SHOW].control)
 	{	PD_TOGGLE, &grid.Show, "show", PDO_DLGIGNORELABELWIDTH, gridLabels, N_("Show"), BC_HORZ|BC_NOBORDER }
@@ -667,7 +668,6 @@ static void GridButtonUpdate( long mode0 )
 	if ( mode0&CHK_SHOW ) {
 		RedrawGrid();
 	}
-	oldGrid = grid;
 }
 
 
@@ -699,10 +699,21 @@ static void GridDlgUpdate(
 	case I_SHOW:
 		GridButtonUpdate( CHK_SHOW );
 		break;
-	default:
+	case I_HORZSPACING:
+	case I_HORZDIVISION:
+	case I_VERTSPACING:
+	case I_VERTDIVISION:
+	case I_VALUEX:
+	case I_VALUEY:
+	case I_VALUEA:
 		ParamLoadData( &gridPG );
+		MainRedraw(); // GridDlgUpdate
+		break;
+	default:
+//		ParamLoadData( &gridPG );
 		GridButtonUpdate( 0 );
 		MainRedraw(); // GridDlgUpdate
+		break;
 	}
 }
 
@@ -713,7 +724,6 @@ static void SnapGridRotate( void * pangle )
 	wDrawDelayUpdate( tempD.d, TRUE );
 	grid.Orig = cmdMenuPos;
 	grid.Angle += angle/1000;
-	oldGrid = grid;
 	DrawASnapGrid( &grid, &tempD, mapD.size, TRUE );
 	wDrawDelayUpdate( tempD.d, FALSE );
 	ParamLoadControls( &gridPG );
@@ -731,7 +741,7 @@ EXPORT STATUS_T CmdGrid(
 	case C_START:
 		if (gridW == NULL) {
 			gridW = ParamCreateDialog( &gridPG, MakeWindowTitle(_("Snap Grid")), _("Ok"),
-			                           GridOk, ParamCancel_Reset, TRUE, NULL, 0, GridDlgUpdate );
+			                           GridOk, ParamCancel_Null, TRUE, NULL, 0, GridDlgUpdate );
 		}
 		oldGrid = grid;
 		ParamLoadControls( &gridPG );
@@ -744,6 +754,7 @@ EXPORT STATUS_T CmdGrid(
 
 	case C_CANCEL:
 		grid = oldGrid;
+//		ParamLoadControls( &gridPG );
 		wHide( gridW );
 		return C_TERMINATE;
 
@@ -761,7 +772,6 @@ EXPORT STATUS_T CmdGrid(
 
 	case C_DOWN:
 	case C_RDOWN:
-		oldGrid = grid;
 		rc = GridAction( action, pos, &grid.Orig, &grid.Angle );
 		return rc;
 	case C_MOVE:
@@ -774,7 +784,6 @@ EXPORT STATUS_T CmdGrid(
 		rc = GridAction( action, pos, &grid.Orig, &grid.Angle );
 		ParamLoadControls( &gridPG );
 		RedrawGrid();
-		oldGrid = grid;
 		return rc;
 
 	case C_CMDMENU:
