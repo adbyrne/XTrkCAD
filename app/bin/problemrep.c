@@ -48,6 +48,7 @@
 #include "include/paramfilelist.h"
 #include "paths.h"
 #include "version.h"
+#include "cundo.h"
 
 static void SaveSystemInfo(char* dir);
 static void ZipProblemData(const char* src);
@@ -532,6 +533,31 @@ PickupCustomFile(char* dest)
 }
 
 /**
+ * Get the undo log file.
+ *
+ * \param	dest	temporary directory
+ * \return	true on success
+ */
+
+static bool
+PickupUndoLog(char* dest)
+{
+	char* outFile;
+
+	MakeFullpath(&outFile, dest, "command.log", NULL);
+	FILE * fDump = fopen( outFile, "w" );
+	if ( fDump == NULL ) {
+		ProblemrepUpdateW(_("Get command log file FAILed: %s\n"), outFile);
+		free(outFile);
+		return false;
+	}
+	ProblemrepUpdateW(_("Get command log file %s\n"), outFile);
+	Rdump(fDump);
+	free(outFile);
+	return(true);
+}
+
+/**
  * Create a zip file from the collected information. The zip file is created
  * in the same directory as the layout design. A unique name is generated from
  * the current date and time.
@@ -618,6 +644,8 @@ ProblemDataCollect()
 	}
 	free(subdirectory);
 	subdirectory = NULL;
+
+	PickupUndoLog(tempDirectory);
 
 	if (ret) {
 		ZipProblemData(tempDirectory);
