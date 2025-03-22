@@ -616,7 +616,7 @@ static void DoProfilePrint(void * junk)
 	printProfileD.dpi = wDrawGetDPI(printProfileD.d);
 	wPrintGetPageSize(&w, &h);
 	wPrintGetMargins( &topMargin, &rightMargin,
-			  &bottomMargin, &leftMargin );
+	                  &bottomMargin, &leftMargin );
 	w -= (leftMargin+rightMargin);
 	h -= (topMargin+bottomMargin);
 	printProfileD.orig.x = -PBL(printProfileFontSize);

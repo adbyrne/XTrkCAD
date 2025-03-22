@@ -65,7 +65,7 @@ void CarItemDraw( drawCmd_p, carItem_p, wDrawColor, int, BOOL_T, vector_t *,
 #ifdef CAR_CLEARANCE
                   BOOL_T,
 #endif
-		  track_p );
+                  track_p );
 
 BOOL_T WriteCars( FILE * );
 void ClearCars( void );

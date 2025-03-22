@@ -198,7 +198,7 @@ EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track,
 			p = *fp;
 			distance = trackCmds( GetTrkType(trk) )->distance( trk, &p );
 			if (fabs(distance) <= fabs(
-				    closestDistance)) { //Make the last (highest) preferred
+			            closestDistance)) { //Make the last (highest) preferred
 				closestDistance = distance;
 				closestTrack = trk;
 				closestPos = p;
@@ -2835,7 +2835,7 @@ EXPORT void DrawTie(
 
 /**
  * Return base color of a track
- * Detect 
+ * Detect
  * - grade, radius exception
  * - profile path
  * - layer override

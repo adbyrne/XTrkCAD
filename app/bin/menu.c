@@ -966,7 +966,8 @@ EXPORT void CreateMenus(void)
 	                   ACCL_PRINTSETUP, (wMenuCallBack_p) wPrintSetup, 0,
 	                   I2VP(0));
 	InitCmdPrint(fileM);
-	AddToolbarButton("menuFile-setup", wIconCreatePixMap(doc_setup_image3[iconSize]),
+	AddToolbarButton("menuFile-setup",
+	                 wIconCreatePixMap(doc_setup_image3[iconSize]),
 	                 IC_MODETRAIN_TOO, (wMenuCallBack_p) wPrintSetup, I2VP(0));
 
 	wMenuSeparatorCreate(fileM);
@@ -1162,7 +1163,8 @@ EXPORT void CreateMenus(void)
 	wControlLinkedSet((wControl_p) magnetsMI, (wControl_p) magnetsB);
 	wButtonSetBusy(magnetsB, (wBool_t) magneticSnap);
 
-	mapShowB = AddToolbarButton("cmdMapShow", wIconCreatePixMap(map_image3[iconSize]),
+	mapShowB = AddToolbarButton("cmdMapShow",
+	                            wIconCreatePixMap(map_image3[iconSize]),
 	                            IC_MODETRAIN_TOO, MapWindowToggleShow, NULL);
 	wControlLinkedSet((wControl_p) mapShowMI, (wControl_p) mapShowB);
 	wButtonSetBusy(mapShowB, (wBool_t) mapVisible);

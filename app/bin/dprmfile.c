@@ -415,7 +415,8 @@ void DoParamFiles(void * junk)
 		                        reddot_image1);
 		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_COMPATIBLE ] = wIconCreatePixMap(
 		                        yellowdot_image1);
-		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_FIT] = wIconCreatePixMap(greendot_image1);
+		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_FIT] = wIconCreatePixMap(
+		                        greendot_image1);
 		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_UNLOADED ] = wIconCreatePixMap(
 		                        greystar_image1);
 		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_NOTUSABLE ] = wIconCreatePixMap(

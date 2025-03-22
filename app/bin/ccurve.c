@@ -702,7 +702,7 @@ struct helixData_s {
 	DIST_T radius;
 	DIST_T grade;
 	DIST_T vertSep;
-}; 
+};
 struct helixData_s helixDataCur = { 5, 0.0, 0.0, 18.0, 0.0, 0.0 };
 struct helixData_s helixDataOld = { 5, 0.0, 0.0, 18.0, 0.0, 0.0 };
 
@@ -764,7 +764,8 @@ static void ComputeHelix(
 	case H_ELEV:
 		if (h_orders[H_TURNS]<h_orders[H_VERTSEP] &&
 		    origVertSep > 0.0) {
-			helixDataCur.turns = (int)floor(helixDataCur.elev/origVertSep - helixDataCur.angSep/360.0);
+			helixDataCur.turns = (int)floor(helixDataCur.elev/origVertSep -
+			                                helixDataCur.angSep/360.0);
 			totTurns = helixDataCur.turns + helixDataCur.angSep/360.0;
 			updates |= (1<<H_TURNS);
 		}
@@ -781,7 +782,8 @@ static void ComputeHelix(
 	case H_VERTSEP:
 		if (helixDataCur.vertSep > 0.0) {
 			origVertSep = helixDataCur.vertSep;
-			helixDataCur.turns = (int)floor(helixDataCur.elev/origVertSep - helixDataCur.angSep/360.0);
+			helixDataCur.turns = (int)floor(helixDataCur.elev/origVertSep -
+			                                helixDataCur.angSep/360.0);
 			updates |= (1<<H_TURNS);
 			totTurns = helixDataCur.turns + helixDataCur.angSep/360.0;
 			if (totTurns > 0) {
@@ -798,12 +800,14 @@ static void ComputeHelix(
 		if ( h_orders[H_RADIUS]>=h_orders[H_GRADE] ||
 		     (helixDataCur.grade==0.0 && totTurns>0 && helixDataCur.radius>0) ) {
 			if ( helixDataCur.radius > 0.0 ) {
-				helixDataCur.grade = helixDataCur.elev/(totTurns*helixDataCur.radius*(2*M_PI))*100.0;
+				helixDataCur.grade = helixDataCur.elev/(totTurns*helixDataCur.radius*
+				                                        (2*M_PI))*100.0;
 				updates |= (1<<H_GRADE);
 			}
 		} else {
 			if( helixDataCur.grade > 0.0 ) {
-				helixDataCur.radius = helixDataCur.elev/(totTurns*(helixDataCur.grade/100.0)*2.0*M_PI);
+				helixDataCur.radius = helixDataCur.elev/(totTurns*(helixDataCur.grade/100.0)
+				                      *2.0*M_PI);
 				updates |= (1<<H_RADIUS);
 			}
 		}
@@ -956,7 +960,8 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 				return C_ERROR;
 			}
 			UndoStart(_("Create Helix Track"), "newHelix");
-			t = NewCurvedTrack(tempSegs(0).u.c.center, helixDataCur.radius, 0.0, 0.0, helixDataCur.turns);
+			t = NewCurvedTrack(tempSegs(0).u.c.center, helixDataCur.radius, 0.0, 0.0,
+			                   helixDataCur.turns);
 		} else {
 			if (circleRadius > mapD.size.x || circleRadius > mapD.size.y) {
 				ErrorMessage(MSG_RADIUS_TOO_BIG);
@@ -1051,7 +1056,8 @@ EXPORT void InitCmdCurve( wMenu_p menu )
 
 	ButtonGroupBegin( _("Circle Track"), "cmdCircleSetCmd", _("Circle Tracks") );
 	AddMenuButton( menu, CmdCircle, "cmdCircleFixedRadius",
-	               _("Fixed Radius Circle"), wIconCreatePixMap( circle_image3[iconSize] ), LEVEL0_50,
+	               _("Fixed Radius Circle"), wIconCreatePixMap( circle_image3[iconSize] ),
+	               LEVEL0_50,
 	               IC_STICKY|IC_POPUP2, ACCL_CIRCLE1, I2VP(0) );
 	AddMenuButton( menu, CmdCircle, "cmdCircleTangent", _("Circle from Tangent"),
 	               wIconCreatePixMap( circle_tangent_image3[iconSize] ), LEVEL0_50,

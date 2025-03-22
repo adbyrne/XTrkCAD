@@ -269,7 +269,7 @@ static void EasementChange( long changes )
 #include "bitmaps/ease-gt-broad.image3"
 #include "bitmaps/ease-lt-broad.image3"
 #include "bitmaps/ease-cornu.image3"
- 
+
 EXPORT addButtonCallBack_t EasementInit( void )
 {
 	ParamRegister( &easementPG );
