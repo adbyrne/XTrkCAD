@@ -72,7 +72,7 @@ PARAMETER describe F3 2.250
 REDRAW
 STEP
 #DESCRIBE OK
-PARAMETER describe ok
+PARAMETER describe cancel
 RESET
 PARAMETER misc cmdColor
 MESSAGE

@@ -157,7 +157,7 @@ STEP
 #DESCRIBE Size	1
 PARAMETER describe L1 1 Small
 #DESCRIBE OK
-PARAMETER describe ok
+PARAMETER describe cancel
 RESET
 MESSAGE
 =========================================

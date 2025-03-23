@@ -102,7 +102,7 @@ BIGPAUSE
 MOUSE 2 26.656 11.094
 MOUSE 4 26.656 11.094
 #DESCRIBE OK
-PARAMETER describe ok
+PARAMETER describe cancel
 RESET
 MESSAGE
 =========================================
