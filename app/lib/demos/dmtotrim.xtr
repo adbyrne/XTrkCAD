@@ -88,7 +88,7 @@ STEP
 MOUSE 2 5.453 1.875
 MOUSE 4 5.453 1.875
 #DESCRIBE OK
-PARAMETER describe ok
+PARAMETER describe cancel
 MESSAGE
 =========================================
 END

@@ -58,7 +58,7 @@ Change the Orientation to Right.
 END
 STEP
 PARAMETER describe L2 1 Right
-PARAMETER describe ok
+PARAMETER describe cancel
 RESET
 MESSAGE
 _________________________________________

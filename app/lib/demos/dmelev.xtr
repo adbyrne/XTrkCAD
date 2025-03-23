@@ -178,7 +178,7 @@ MOUSE 2 74.307 14.173
 #MOUSE 3 74.227 13.453
 KEYSTATE 4
 MOUSE 4 74.227 12.453
-#PARAMETER elev ok
+#PARAMETER elev done
 MESSAGE
 _________________________________________
 
@@ -204,7 +204,7 @@ KEYSTATE 4
 MOUSE 3 38.240 3.480
 KEYSTATE 4
 MOUSE 4 38.240 3.480
-#PARAMETER elev ok
+#PARAMETER elev close
 BIGPAUSE
 MESSAGE
 =========================================
@@ -298,7 +298,7 @@ MOUSE 3 25.320 10.000
 KEYSTATE 4
 MOUSE 4 25.320 10.000
 BIGPAUSE
-#PARAMETER elev ok
+#PARAMETER elev cancel
 MESSAGE
 _________________________________________
 
@@ -331,7 +331,7 @@ MOUSE 3 25.680 5.1
 KEYSTATE 4
 MOUSE 4 25.680 5.1
 BIGPAUSE
-#PARAMETER elev ok
+#PARAMETER elev cancel
 MESSAGE
 _________________________________________
 
@@ -372,7 +372,7 @@ MOUSE 2 55.120 5.480
 KEYSTATE 4
 MOUSE 4 54.960 6.520
 BIGPAUSE
-PARAMETER elev ok
+PARAMETER elev cancel
 MESSAGE
 =========================================
 END
