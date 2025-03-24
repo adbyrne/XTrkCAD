@@ -288,22 +288,12 @@ void wWinSetSize(
     wWinPix_t width,		/* Window width */
     wWinPix_t height)		/* Window height */
 {
-    printf("wWinSetSize is not implemented %s:%d\n", __FILE__, __LINE__);
-    /**  \todo Resize window */
-    //win->busy = TRUE;
-    //win->w = width;
-    //win->h = height + BORDERSIZE + ((win->option&F_MENUBAR)?MENUH:0);
-    //if (win->option&F_RESIZE) {
-    //   	gtk_window_resize(GTK_WINDOW(win->gtkwin), win->w, win->h);
-    //	//gtk_widget_set_size_request(win->widget, win->w-10, win->h-10);
-    //}
-    //else {
-    //	gtk_widget_set_size_request(win->gtkwin, win->w, win->h);
-    //	//gtk_widget_set_size_request(win->widget, win->w, win->h);
-    //}
-
-
-    //win->busy = FALSE;
+    if (win->attributes.window.option&F_RESIZE) {
+       	gtk_window_resize(GTK_WINDOW(win->widget), width, height);
+    }
+    else {
+    	gtk_widget_set_size_request(win->widget, width, height);
+    }
 }
 
 /**
