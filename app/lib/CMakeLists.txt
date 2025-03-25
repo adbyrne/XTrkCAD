@@ -10,7 +10,6 @@ add_subdirectory(params)
 
 install(FILES 
 	COPYING
-	logo.bmp
 	xtrkcad.xtq
 	xtrkcad.upd
 	DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
@@ -62,7 +61,7 @@ endif()
 	
 if(UNIX AND NOT APPLE)
     install(PROGRAMS
-        xdg-open xtrkcad-setup
+        xtrkcad-setup
         DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
         )
 	install(FILES
