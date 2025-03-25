@@ -297,10 +297,8 @@ void wWinSetSize(
 }
 
 /**
- * Shows or hides window <win>. If <win> is created with 'F_BLOCK' option then the applications other
- * windows are disabled and 'wWinShow' doesnot return until the window <win> is closed by calling
- * 'wWinShow(<win>,FALSE)'.
- *
+ * Shows or hides window <win>. 
+ * 
  * \param win IN window
  * \param show IN visibility state
  */
@@ -446,7 +444,7 @@ void wWinSetTitle(
     wControl_p win,		/* Window */
     const char * title)		/* New title */
 {
-    gtk_window_set_title(win->widget, title);
+    gtk_window_set_title(GTK_WINDOW(win->widget), title);
 }
 
 /**
@@ -540,9 +538,9 @@ void wlibDoModal(
  */
 
 const char * wWinGetTitle(
-    wWin_p win)			/* Window */
+    wControl_p win)			/* Window */
 {
-    return win->labelStr;
+    return gtk_window_get_title(GTK_WINDOW(win->widget));
 }
 
 

@@ -656,7 +656,7 @@ void wWinGetSize (		wControl_p window, wWinPix_t * width, wWinPix_t *height );
 void wWinSetSize(		wControl_p, wWinPix_t, wWinPix_t );
 void wWinSetTitle(		wControl_p window, const char * title);
 void wWinSetBusy(wControl_p win, wBool_t busy);
-const char * wWinGetTitle(		wWin_p );
+const char * wWinGetTitle(	wControl_p window );
 void wWinClear(			wWin_p, wWinPix_t, wWinPix_t, wWinPix_t, wWinPix_t );
 void wMessage(			wWin_p, const char *, wBool_t );
 void wWinTop(			wControl_p window );
@@ -784,6 +784,8 @@ wIndex_t wComboBoxGetCount(wControl_p b);
 void* wComboBoxGetItemContext(wControl_p b, wIndex_t inx);
 wBool_t wComboBoxSetValues( wControl_p b, wIndex_t row, const char* labelStr, wIcon_p bm,
     void* itemData); 
+void
+wComboBoxClear(wControl_p control);
 
 wControl_p wComboListCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
                          const char *helpStr, const char *labelStr, long option, long number,
@@ -815,6 +817,8 @@ wIndex_t wListGetValues(wControl_p bl, char* labelStr, int labelSize,
 void wListSetValue(wControl_p bl, const char* val);
 void wListSetActive(		wList_p, wIndex_t, wBool_t );
 void wListSetEditable(		wList_p, wBool_t );
+
+wListSetColumnEditable(wControl_p list, const char* renderer);
 
 /*------------------------------------------------------------------------------
  *

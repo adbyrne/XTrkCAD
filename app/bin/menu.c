@@ -1284,10 +1284,11 @@ EXPORT void CreateMenus(void)
 	/*
 	 * WINDOW MENU
 	 */
-	// wMenuPushCreate(windowM, "menuWindow", _("Main window"), 0,
-	//                (wMenuCallBack_p) wShow, mainW);
-	/** \todo Create list of windows  */
-	// winList_mi = wMenuListCreate(windowM, "menuWindow", -1, DoShowWindow);
+
+#define MAX_ENTRIES_IN_WINDOWLIST 25
+	
+	 winList_mi = wMenuListCreate(windowM, "menuWindow", MAX_ENTRIES_IN_WINDOWLIST, DoShowWindow);
+	 wMenuListAdd(winList_mi, 0, _("Main window"), mainW);
 
 	/*
 	 * HELP MENU
