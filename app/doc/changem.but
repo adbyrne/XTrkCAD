@@ -1801,7 +1801,11 @@ If \f{SelectZero} is selected in \K{cmdCmdopt} and an point that is not near to 
 
 \u000
 
-\G{png.d/mselectcmd.png} or \G{png.d/mselectcontext.png}
+\G{png.d/mselectcmd.png}
+
+or
+
+\G{png.d/mselectcontext.png}
 
 \u000
 
@@ -1872,21 +1876,6 @@ Upon release of the button, all the selected tracks will be moved and aligned an
 \dd \e{Double-Click} - on a eligible object such as a Link Object will Activate it, and on a Modifyable object will go into Modify Mode (\K{cmdModify}) within Select.
 
 \u000
-
-\dd \e{Right-Click} and \e{Shift-Right-Click} - either display a pop-up menu of commands or a set of context commands for the items selected depending on the setting of "Right-Click" in \K{cmdCmdopt}.
-The options effects depend on the type of object(s) selected and hovered over.
-
-\lcont{
-\u000
-
-\G{png.d/mselectcmd.png} or \G{png.d/mselectedcontext.png}
-
-\u000
-
-}
-
-Once Objects are
-
 
 Once objects are selected, the following commands operate on them:
 
