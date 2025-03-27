@@ -864,11 +864,9 @@ The check-point frequency is set by the \e{Check Point} field found in the \f{Pr
 
 \H{uninstall} \i{Removing \e{XTrackCAD}}
 
-Remove \e{XTrackCAD} by deleting the \e{XTrackCAD Install} directory, or application (on Mac OSX), deleting any \c{xtrkcad.*} files from the \e{Working} directory, and deleting any \e{*.xtc} and \e{*.xti} files.
+On Linux, please see \e{Removing XTrackCAD} on the \W{https://sourceforge.net/p/xtrkcad-fork/wiki/LinuxInstall}{Linux Install} wiki page.
 
-On Linux, if you installed \e{XTrackCAD} using your distribution's package manager, you can use that to remove \e{XTrackCAD}.
-
-On MS-Windows only, you can also use the \f{Uninstall} icon in the \e{XTrackCAD} program group.
+On MS-Windows you can also use the \f{Uninstall} icon in the \e{XTrackCAD} program group.
 
 \rule
 
