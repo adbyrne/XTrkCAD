@@ -49,7 +49,7 @@ static paramData_t turntablePLs[] = {
 #define turntableDiameterPD		(turntablePLs[0])
 	{	PD_FLOAT, &turntableDiameter, "diameter", PDO_DIM|PDO_NOPREF, &r1_100, N_("Diameter") }
 };
-static paramGroup_t turntablePG = { "turntable", 0, turntablePLs, COUNT( turntablePLs ) };
+static paramGroup_t turntablePG = { "turntable", PGO_FULLDIALOGFROMBUILDER, turntablePLs, COUNT( turntablePLs ) };
 
 
 static BOOL_T ValidateTurntablePosition(
@@ -1015,7 +1015,8 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 
 	case C_START:
 		if (turntableDiameterPD.control==NULL) {
-			ParamCreateControls( &turntablePG, NULL );
+			//ParamCreateControls( &turntablePG, NULL );
+			FormCreateControls(&turntablePG);
 		}
 		sprintf( message, "turntable-diameter-%s", curScaleName );
 		turntableDiameter = ceil(80.0*12.0/curScaleRatio);
@@ -1025,7 +1026,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		controls[0] = turntableDiameterPD.control;
 		controls[1] = NULL;
 		labels[0] = N_("Diameter");
-		InfoSubstituteControls( controls, labels );
+		InfoSubstituteControls(turntablePG.nameStr, controls, labels);
 		SetAllTrackSelect( FALSE );
 		/*InfoMessage( "Place Turntable");*/
 		state = 0;
@@ -1040,7 +1041,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		controls[0] = turntableDiameterPD.control;
 		controls[1] = NULL;
 		labels[0] = N_("Diameter");
-		InfoSubstituteControls( controls, labels );
+		InfoSubstituteControls(turntablePG.nameStr, controls, labels);
 		ParamLoadData( &turntablePG );
 		pos0 = pos;
 		state = 1;
@@ -1057,7 +1058,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		t = NewTurntable( pos, turntableDiameter/2.0 );
 		UndoEnd();
 		DrawNewTrack(t);
-		InfoSubstituteControls( NULL, NULL );
+		InfoDefaultControls();
 		sprintf( message, "turntable-diameter-%s", curScaleName );
 		wPrefSetFloat( "misc", message, turntableDiameter );
 		state = 0;
@@ -1071,7 +1072,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 
 	case C_CANCEL:
-		InfoSubstituteControls( NULL, NULL );
+		InfoDefaultControls();
 		return C_CONTINUE;
 
 	default:

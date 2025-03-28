@@ -1244,10 +1244,7 @@ wWinPix_t wStatusSetRequiredHeight(wControl_p label, long flags);
 void wStatusSetValue(wControl_p b, const char* arg);
 void wStatusSetWidth(wControl_p b, wWinPix_t width);
 
-void wStatusClearControls(wWin_p win);
-void wStatusAttachControl(wWin_p win, wControl_p b);
-void wStatusRevealControlSet(wWin_p win, char *id);
-
+void wStatusSetVisibleControlSet(wControl_p mainWindow, const char* controlsName);
 /*------------------------------------------------------------------------------
  *
  * Stack Container

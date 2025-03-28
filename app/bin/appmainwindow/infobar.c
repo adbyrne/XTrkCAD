@@ -162,60 +162,25 @@ void InfoPos(coOrd pos)
 	oldMarker = pos;
 }
 
-static wControl_p deferSubstituteControls[NUM_INFOCTL + 1];
-static char* deferSubstituteLabels[NUM_INFOCTL];
+//static wControl_p deferSubstituteControls[NUM_INFOCTL + 1];
+//static char* deferSubstituteLabels[NUM_INFOCTL];
 
 EXPORT void InfoSubstituteControls(
-	wControl_p* controls,
+	const char * name,
+	wControl_p* controls, 
 	char** labels)
 {
-	wWinPix_t x, y;
-	int inx;
-	for (inx = 0; inx < NUM_INFOCTL; inx++) {
-		if (curInfoControl[inx]) {
-			wControlShow(curInfoControl[inx], FALSE);
-			curInfoControl[inx] = NULL;
-		}
-		curInfoLabelWidth[inx] = 0;
-		curInfoControl[inx] = NULL;
-	}
-	if (inError && (controls != NULL && controls[0] != NULL)) {
-		memcpy(deferSubstituteControls, controls, sizeof deferSubstituteControls);
-		memcpy(deferSubstituteLabels, labels, sizeof deferSubstituteLabels);
-	}
-	if (inError || controls == NULL || controls[0] == NULL) {
-		wControlSetPos((wControl_p)infoD.info_m, messageOrControlX, messageOrControlY);
-		wControlShow((wControl_p)infoD.info_m, TRUE);
-		return;
-	}
-	//x = wControlGetPosX( (wControl_p)infoD.info_m );
-	x = messageOrControlX;
-	y = messageOrControlY;
-	wStatusSetValue(infoD.info_m, "");
-	wControlShow((wControl_p)infoD.info_m, FALSE);
-	for (inx = 0; controls[inx]; inx++) {
-		curInfoLabelWidth[inx] = wLabelWidth(_(labels[inx]));
-		x += curInfoLabelWidth[inx];
-#ifdef WINDOWS
-		wWinPix_t	y_this = y + (infoHeight / 2) - (textHeight / 2);
-#else
-		wWinPix_t	y_this = y + (infoHeight / 2) - (wControlGetHeight(
-			controls[inx]) / 2) - 2;
-#endif
-		wControlSetPos(controls[inx], x, y_this);
-		x += wControlGetWidth(controls[inx]);
-		wControlSetLabel(controls[inx], _(labels[inx]));
-		wControlShow(controls[inx], TRUE);
-		curInfoControl[inx] = controls[inx];
-		x += 3;
-	}
-	wControlSetPos((wControl_p)infoD.info_m, x, y);
-	curInfoControl[inx] = NULL;
-	deferSubstituteControls[0] = NULL;
+	wStatusSetVisibleControlSet(mainW, name);
+}
+
+void InfoDefaultControls(void)
+{
+	wStatusSetVisibleControlSet(mainW, "message" );
 }
 
 void SetMessage(char* msg)
 {
+	InfoDefaultControls();
 	wStatusSetValue(infoD.info_m, msg);
 }
 

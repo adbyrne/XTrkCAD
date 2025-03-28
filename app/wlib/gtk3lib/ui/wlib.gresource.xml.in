@@ -8,6 +8,8 @@
     <file preprocess="xml-stripblanks">map.ui</file>
     <file preprocess="xml-stripblanks">note.ui</file>
     <file preprocess="xml-stripblanks">outputbitmap.ui</file>
+    <file preprocess="xml-stripblanks">partcatalog.ui</file>
+    <file preprocess="xml-stripblanks">pricelist.ui</file>
     <file preprocess="xml-stripblanks">prmfile.ui</file>
     <file preprocess="xml-stripblanks">record.ui</file>
     <file preprocess="xml-stripblanks">rgbcolor.ui</file>

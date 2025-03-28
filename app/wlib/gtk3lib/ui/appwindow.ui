@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <requires lib="gtk+" version="3.20"/>
+  <requires lib="gtk+" version="3.20" />
   <object class="GtkWindow" id="main">
     <property name="can-focus">False</property>
     <child>
@@ -151,7 +151,7 @@
                 <property name="can-focus">False</property>
                 <property name="single-line-mode">True</property>
                 <style>
-                  <class name="statusbar"/>
+                  <class name="statusbar" />
                 </style>
               </object>
               <packing>
@@ -165,7 +165,7 @@
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <style>
-                  <class name="statusbar"/>
+                  <class name="statusbar" />
                 </style>
               </object>
               <packing>
@@ -179,7 +179,7 @@
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <style>
-                  <class name="statusbar"/>
+                  <class name="statusbar" />
                 </style>
               </object>
               <packing>
@@ -189,24 +189,101 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="infoBarStatus">
+              <!--start ofstack-->
+              <object class="GtkStack" id="stack">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="hexpand">True</property>
-                <property name="single-line-mode">True</property>
-                <property name="xalign">0</property>
-                <style>
-                  <class name="statusbar"/>
-                </style>
+                <property name="transition-type">GTK_STACK_TRANSITION_TYPE_CROSSFADE</property>
+                <!-- first child -->
+                <child>
+                  <object class="GtkLabel" id="infoBarStatus">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">Loaded successfully!</property>
+                    <property name="xalign">0</property>
+                  </object>
+                  <packing>
+                    <property name="name">message</property>
+                    <property name="title" translatable="yes">page0</property>
+                  </packing>
+                </child>
+                <!-- child turntable-->
+                <child>
+                  <object class="GtkBox" id="turntable">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">Diameter:</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="diameter">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="width-chars">6</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">turntable</property>
+
+                  </packing>
+                </child>
+                <!-- next child -->
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkLabel">
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="teeeee">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="width_chars">6</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">parametergroup</property>
+                    <property name="title" translatable="yes">page0</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
                 <property name="position">3</property>
               </packing>
+              <!-- end of stack -->
             </child>
             <style>
-              <class name="statusbar"/>
+              <class name="statusbar" />
             </style>
           </object>
           <packing>
@@ -222,7 +299,7 @@
     <property name="model">layerList</property>
     <property name="visible">True</property>
     <style>
-      <class name="toolbar"/>
+      <class name="toolbar" />
     </style>
     <child>
       <object class="GtkCellRendererText" id="textfield">

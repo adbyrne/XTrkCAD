@@ -165,3 +165,14 @@ void wStatusSetWidth(
  //   b->labelWidth = width;
  //   gtk_widget_set_size_request(b->labelWidget, width, -1);
 }
+
+void wStatusSetVisibleControlSet(wControl_p mainWindow, const char* controlsName)
+{
+	GtkStack* stack;
+
+	stack = GTK_STACK(wlibWidgetFromIdWarn(mainWindow, "stack"));
+
+	if (g_ascii_strcasecmp(controlsName, gtk_stack_get_visible_child_name(stack))) {
+		gtk_stack_set_visible_child_name(stack, controlsName);
+	}
+}
