@@ -177,7 +177,7 @@ wControl_p FormCreateDialog(
 	}
 
 	LOG(log_form, 1, ("DialogsCreateDialog/"));
-	CreateControls(group);
+	FormCreateControls(group);
 //	LayoutControls(group, ParamCreateControl, &group->origW, &group->origH);
 
 	wWinGetSize(group->win, &w0, &h0);

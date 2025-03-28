@@ -36,8 +36,8 @@
 static wWinPix_t infoHeight;
 static wWinPix_t textHeight;
 
-static wControl_p deferSubstituteControls[NUM_INFOCTL + 1];
-static char* deferSubstituteLabels[NUM_INFOCTL];
+//static wControl_p deferSubstituteControls[NUM_INFOCTL + 1];
+//static char* deferSubstituteLabels[NUM_INFOCTL];
 
 EXPORT wIndex_t panCmdInx;
 
@@ -2687,9 +2687,9 @@ static void DoMouse( wAction_t action, coOrd pos )
 	}
 
 	inError = FALSE;
-	if ( deferSubstituteControls[0] ) {
-		InfoSubstituteControls( deferSubstituteControls, deferSubstituteLabels );
-	}
+	//if ( deferSubstituteControls[0] ) {
+	//	InfoSubstituteControls(, deferSubstituteControls, deferSubstituteLabels);
+	//}
 
 //	panCenter.y = mainD.orig.y + mainD.size.y/2;
 //	panCenter.x = mainD.orig.x + mainD.size.x/2;

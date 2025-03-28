@@ -1656,14 +1656,14 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 	case C_DOWN:
 		rc = DrawGeomModify( C_DOWN, pos, &drawModCmdContext );
 		if ( infoSubst ) {
-			InfoSubstituteControls( NULL, NULL );
+			InfoDefaultControls();
 			infoSubst = FALSE;
 		}
 		break;
 	case C_LDOUBLE:
 		rc = DrawGeomModify( C_LDOUBLE, pos, &drawModCmdContext );
 		if ( infoSubst ) {
-			InfoSubstituteControls( NULL, NULL );
+			InfoDefaultControls();
 			infoSubst = FALSE;
 		}
 		break;
@@ -1697,7 +1697,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 						labels[0] = N_("Seg Lth");
 						labels[1] = N_("Rel Ang");
 						ParamLoadControls( &drawModPG );
-						InfoSubstituteControls( controls, labels );
+						InfoSubstituteControls(drawModPG.nameStr, controls, labels);
 						drawModLengthPD.option &= ~PDO_NORECORD;
 						drawModRelAnglePD.option &= ~PDO_NORECORD;
 						infoSubst = TRUE;
@@ -1711,7 +1711,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 					labels[0] = N_("Width");
 					labels[1] = N_("Height");
 					ParamLoadControls( &drawModPG );
-					InfoSubstituteControls( controls, labels );
+					InfoSubstituteControls(drawModPG.nameStr, controls, labels);
 					drawModWidthPD.option &= ~PDO_NORECORD;
 					drawModHeightPD.option &= ~PDO_NORECORD;
 					infoSubst = TRUE;
@@ -1729,7 +1729,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 				labels[0] = N_("Length");
 				labels[1] = N_("Angle");
 				ParamLoadControls( &drawModPG );
-				InfoSubstituteControls( controls, labels );
+				InfoSubstituteControls(drawModPG.nameStr, controls, labels);
 				drawModLengthPD.option &= ~PDO_NORECORD;
 				drawModAnglePD.option &= ~PDO_NORECORD;
 				infoSubst = TRUE;
@@ -1747,7 +1747,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 					labels[1] = N_("Arc Angle");
 				}
 				ParamLoadControls( &drawModPG );
-				InfoSubstituteControls( controls, labels );
+				InfoSubstituteControls(drawModPG.nameStr, controls, labels);
 				drawModArcAnglePD.option &= ~PDO_NORECORD;
 				if (drawModCmdContext.type == SEG_CRVLIN) {
 					drawModArcAnglePD.option &= ~PDO_NORECORD;
@@ -1755,12 +1755,12 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 				infoSubst = TRUE;
 				break;
 			default:
-				InfoSubstituteControls( NULL, NULL );
+				InfoDefaultControls();
 				infoSubst = FALSE;
 				break;
 			}
 		} else {
-			InfoSubstituteControls( NULL, NULL );
+			InfoDefaultControls();
 			infoSubst = FALSE;
 		}
 		break;
@@ -1813,7 +1813,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		ignoredDraw = trk ;
 		rc = DrawGeomModify( action, pos, &drawModCmdContext  );
 		if ( infoSubst ) {
-			InfoSubstituteControls( NULL, NULL );
+			InfoDefaultControls();
 			infoSubst = FALSE;
 		}
 		ignoredDraw = NULL;
@@ -1828,7 +1828,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		DrawNewTrack( trk );
 		ComputeDrawBoundingBox( trk );
 		if ( infoSubst ) {
-			InfoSubstituteControls( NULL, NULL );
+			InfoDefaultControls();
 			infoSubst = FALSE;
 		}
 		break;
@@ -1837,7 +1837,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		rc = DrawGeomModify( action, pos, &drawModCmdContext  );
 		ComputeDrawBoundingBox( trk );
 		if ( infoSubst ) {
-			InfoSubstituteControls( NULL, NULL );
+			InfoDefaultControls();
 			infoSubst = FALSE;
 		}
 		break;
@@ -1845,7 +1845,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		rc = DrawGeomModify( action, pos, &drawModCmdContext  );
 		drawModCmdContext.state = MOD_NONE;
 		if ( infoSubst ) {
-			InfoSubstituteControls( NULL, NULL );
+			InfoDefaultControls();
 			infoSubst = FALSE;
 		}
 		break;
@@ -2943,7 +2943,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 				wListAddValue( (wList_p)drawLineTypePD.control, _("Dash-Dot"), NULL, NULL );
 				wListAddValue( (wList_p)drawLineTypePD.control, _("Dash-Dot-Dot"), NULL, NULL );
 			}
-			InfoSubstituteControls( controls, labels );
+			InfoSubstituteControls(drawPG.nameStr, controls, labels);
 			drawLineWidthPD.option &= ~PDO_NORECORD;
 			drawColorPD.option &= ~PDO_NORECORD;
 			drawLineTypePD.option &= ~PDO_NORECORD;
@@ -2957,7 +2957,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			sprintf( labelName, _("%s Color"), _(objectName[drawCmdContext.Op]) );
 			labels[0] = labelName;
 			ParamLoadControls( &drawPG );
-			InfoSubstituteControls( controls, labels );
+			InfoSubstituteControls(drawPG.nameStr, controls, labels);
 			drawColorPD.option &= ~PDO_NORECORD;
 			break;
 		case OP_BENCH:
@@ -2977,7 +2977,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			BenchUpdateOrientationList( VP2L(wListGetItemContext( (wList_p)
 			                                 drawBenchChoicePD.control, benchChoice )), (wList_p)drawBenchOrientPD.control );
 			wListSetIndex( (wList_p)drawBenchOrientPD.control, benchOrient );
-			InfoSubstituteControls( controls, labels );
+			InfoSubstituteControls(drawPG.nameStr, controls, labels);
 			drawBenchColorPD.option &= ~PDO_NORECORD;
 			drawBenchChoicePD.option &= ~PDO_NORECORD;
 			drawBenchOrientPD.option &= ~PDO_NORECORD;
@@ -2994,14 +2994,14 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 				wListAddValue( (wList_p)drawDimArrowSizePD.control, _("Large"), NULL, NULL );
 			}
 			ParamLoadControls( &drawPG );
-			InfoSubstituteControls( controls, labels );
+			InfoSubstituteControls(drawPG.nameStr, controls, labels);
 			drawDimArrowSizePD.option &= ~PDO_NORECORD;
 			break;
 		case OP_TBLEDGE:
 			InfoMessage( _("Drag to create Table Edge") );
 			break;
 		default:
-			InfoSubstituteControls( NULL, NULL );
+			InfoDefaultControls();
 			infoSubst = FALSE;
 		}
 		ParamGroupRecord( &drawPG );
@@ -3029,7 +3029,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			lineColor = lineColor;
 		}
 		if ( infoSubst ) {
-			InfoSubstituteControls( NULL, NULL );
+			InfoDefaultControls();
 			infoSubst = FALSE;
 		}
 	/* no break */
@@ -3059,7 +3059,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 				controls[1] = NULL;
 				labels[0] = N_("Radius");
 				ParamLoadControls( &drawPG );
-				InfoSubstituteControls( controls, labels );
+				InfoSubstituteControls(drawPG.nameStr, controls, labels);
 				drawRadiusPD.option &= ~PDO_NORECORD;
 				infoSubst = TRUE;
 				break;
@@ -3081,7 +3081,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 					labels[1] = N_("Angle");
 				}
 				ParamLoadControls( &drawPG );
-				InfoSubstituteControls( controls, labels );
+				InfoSubstituteControls(drawPG.nameStr, controls, labels);
 				drawLengthPD.option &= ~PDO_NORECORD;
 				drawRadiusPD.option &= ~PDO_NORECORD;
 				drawAnglePD.option &= ~PDO_NORECORD;
@@ -3106,7 +3106,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 					labels[1] = N_("Angle");
 				}
 				ParamLoadControls( &drawPG );
-				InfoSubstituteControls( controls, labels );
+				InfoSubstituteControls(drawPG.nameStr, controls, labels);
 				drawLengthPD.option &= ~PDO_NORECORD;
 				drawAnglePD.option &= ~PDO_NORECORD;
 				infoSubst = TRUE;
@@ -3119,7 +3119,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 				labels[0] = N_("Length");
 				labels[1] = N_("Width");
 				ParamLoadControls( &drawPG );
-				InfoSubstituteControls( controls, labels );
+				InfoSubstituteControls(drawPG.nameStr, controls, labels);
 				drawLengthPD.option &= ~PDO_NORECORD;
 				drawWidthPD.option &= ~PDO_NORECORD;
 				infoSubst = TRUE;
@@ -3131,7 +3131,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		return rc;
 
 	case C_CANCEL:
-		InfoSubstituteControls( NULL, NULL );
+		InfoDefaultControls();
 		if (drawCmdContext.Op == OP_BEZLIN) { return CmdBezCurve(act2, pos); }
 		return DrawGeomMouse( action, pos, &drawCmdContext);
 	case C_TEXT:
@@ -3416,7 +3416,7 @@ void MenuMode(void * modeVP )
 {
 	int mode = (int)VP2L(modeVP);
 	if ( infoSubst ) {
-		InfoSubstituteControls( NULL, NULL );
+		InfoDefaultControls();
 		infoSubst = FALSE;
 	}
 	if (mode == 1) {

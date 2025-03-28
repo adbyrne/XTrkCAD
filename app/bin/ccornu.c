@@ -1218,7 +1218,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 		Da.selectEndHandle = -1;
 		Da.prevSelected = -1;
 		if (infoSubst) {
-			InfoSubstituteControls( NULL, NULL );
+			InfoDefaultControls();
 			infoSubst = FALSE;
 		}
 		for (int i=0; i<2; i++) {
@@ -1753,7 +1753,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 				labels[0] = N_("End Radius");
 				labels[1] = N_("End Angle");
 				ParamLoadControls( &cornuModPG );
-				InfoSubstituteControls( controls, labels );
+				InfoSubstituteControls(cornuModPG.nameStr, controls, labels);
 				cornuModEndRadiusPD.option &= ~PDO_NORECORD;
 				cornuModEndAnglePD.option &= ~PDO_NORECORD;
 				infoSubst = TRUE;
@@ -1774,7 +1774,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 			labels[0] = N_("End Radius");
 			labels[1] = N_("End Angle");
 			ParamLoadControls( &cornuModPG );
-			InfoSubstituteControls( controls, labels );
+			InfoSubstituteControls(cornuModPG.nameStr, controls, labels);
 			cornuModEndRadiusPD.option &= ~PDO_NORECORD;
 			cornuModEndAnglePD.option &= ~PDO_NORECORD;
 			infoSubst = TRUE;
@@ -1898,7 +1898,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 			}
 			UndoEnd();
 			if (infoSubst) {
-				InfoSubstituteControls( NULL, NULL );
+				InfoDefaultControls();
 				infoSubst = FALSE;
 			}
 			Da.state = NONE;
@@ -2075,7 +2075,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos,
 	/* no break */
 	case C_OK:
 		if (infoSubst) {
-			InfoSubstituteControls( NULL, NULL );
+			InfoDefaultControls();
 			infoSubst = FALSE;
 		}
 		if (Da.state != PICK_POINT) {										//Too early - abandon
@@ -2227,7 +2227,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos,
 		InfoMessage(_("Modify Cornu Cancelled"));
 		Da.state = NONE;
 		if (infoSubst) {
-			InfoSubstituteControls( NULL, NULL );
+			InfoDefaultControls();
 			infoSubst = FALSE;
 		}
 		//DYNARR_FREE(trkSeg_t,Da.crvSegs_da);
@@ -2768,7 +2768,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		SetAllTrackSelect( FALSE );
 		Da.state = NONE;
 		if (infoSubst) {
-			InfoSubstituteControls( NULL, NULL );
+			InfoDefaultControls();
 			infoSubst = FALSE;
 		}
 		return C_CONTINUE;

@@ -391,7 +391,7 @@ EXPORT void ErrorMessage(const char * format, ...)
 	format = ParseMessage(format);
 	vsnprintf(message2, 1020, format, ap);
 	va_end(ap);
-	InfoSubstituteControls( NULL, NULL);
+	InfoDefaultControls();
 	SetMessage(message2);
 	wBeep();
 	inError = TRUE;
@@ -587,9 +587,9 @@ EXPORT void wShow(wControl_p win)
 			demoWindows(inx) = win;
 		}
 	}
-	//if (win != mainW) {
-	//	wMenuListAdd(winList_mi, -1, wWinGetTitle(win), win);
-	//}
+	if (win != mainW) {
+		wMenuListAdd(winList_mi, -1, wWinGetTitle(win), win);
+	}
 	wWinShow(win, TRUE);
 }
 

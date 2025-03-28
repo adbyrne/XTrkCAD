@@ -137,7 +137,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		labels[0] = N_("Font Size");
 		labels[1] = N_("Color");
 		labels[2] = N_("Boxed");
-		InfoSubstituteControls( controls, labels );
+		InfoSubstituteControls(textPG.nameStr, controls, labels);
 		return C_CONTINUE;
 		break;
 	case C_DOWN:
@@ -190,7 +190,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 			UndoEnd();
 			DrawNewTrack(t);
 			Dt.state = POSITION_TEXT;
-			InfoSubstituteControls( NULL, NULL );
+			InfoDefaultControls();
 			return C_TERMINATE;
 		default:
 			if (Dt.len < sizeof Dt.text - 1 ) {
@@ -226,7 +226,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		if (Dt.state != POSITION_TEXT) {
 			Dt.state = POSITION_TEXT;
 		}
-		InfoSubstituteControls( NULL, NULL );
+		InfoDefaultControls();
 		return C_TERMINATE;
 	case C_OK:
 		if (Dt.state != POSITION_TEXT) {
@@ -239,7 +239,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 				DrawNewTrack(t);
 			}
 		}
-		InfoSubstituteControls( NULL, NULL );
+		InfoDefaultControls();
 		return C_TERMINATE;
 
 	case C_FINISH:

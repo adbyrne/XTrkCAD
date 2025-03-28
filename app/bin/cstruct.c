@@ -529,9 +529,9 @@ static void ShowPierL( void )
 		controls[0] = (wControl_p)pierL;
 		controls[1] = NULL;
 		labels[0] = N_("Pier Number");
-		InfoSubstituteControls( controls, labels );
+		InfoSubstituteControls(pierPG.nameStr, controls, labels);
 	} else {
-		InfoSubstituteControls( NULL, NULL );
+		InfoDefaultControls();
 	}
 }
 
@@ -985,7 +985,7 @@ EXPORT STATUS_T CmdStructureAction(
 	case C_CANCEL:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		Dst.state = 0;
-		InfoSubstituteControls( NULL, NULL );
+		InfoDefaultControls();
 		HotBarCancel();
 		/*wHide( newTurn.reg.win );*/
 		return C_TERMINATE;
@@ -998,7 +998,7 @@ EXPORT STATUS_T CmdStructureAction(
 	case C_OK:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		NewStructure();
-		InfoSubstituteControls( NULL, NULL );
+		InfoDefaultControls();
 		return C_TERMINATE;
 
 	case C_FINISH:
@@ -1100,7 +1100,7 @@ static STATUS_T CmdStructure(
 		return C_CONTINUE;
 
 	case C_CANCEL:
-		wHide( structureW );
+		//wHide( structureW );
 		return C_TERMINATE;
 
 	case C_REDRAW:

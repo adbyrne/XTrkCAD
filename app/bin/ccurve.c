@@ -480,7 +480,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		if (infoSubst) {
 			sprintf(message, "desired_radius-%s", curScaleName);
 			wPrefSetFloat("misc", message, desired_radius);
-			InfoSubstituteControls(NULL, NULL);
+			InfoDefaultControls();
 		}
 		infoSubst = FALSE;
 		//This is where the user could adjust - if we allow that?
@@ -614,7 +614,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			controls[0] = curveRadPD.control;
 			controls[1] = NULL;
 			labels[0] = N_("Desired Radius");
-			InfoSubstituteControls(controls, labels);
+			InfoSubstituteControls(curveRadPD.nameStr, controls, labels);
 			infoSubst = TRUE;
 			curveRadPD.option |= PDO_NORECORD;
 			ParamLoadControls(&curvePG);
@@ -863,14 +863,14 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 				controls[0] = circleRadiusPLs[0].control;
 				controls[1] = NULL;
 				labels[0] = N_("Circle Radius");
-				InfoSubstituteControls(controls, labels);
+				InfoSubstituteControls(circleRadiusPG.nameStr, controls, labels);
 				break;
 			case circleCmdFromTangent:
-				InfoSubstituteControls(NULL, NULL);
+				InfoDefaultControls();
 				InfoMessage(_("Click on Circle Edge"));
 				break;
 			case circleCmdFromCenter:
-				InfoSubstituteControls(NULL, NULL);
+				InfoDefaultControls();
 				InfoMessage(_("Click on Circle Center"));
 				break;
 			}
@@ -900,11 +900,11 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 				}
 				break;
 			case circleCmdFromTangent:
-				InfoSubstituteControls(NULL, NULL);
+				InfoDefaultControls();
 				InfoMessage(_("Drag to Center"));
 				break;
 			case circleCmdFromCenter:
-				InfoSubstituteControls(NULL, NULL);
+				InfoDefaultControls();
 				InfoMessage(_("Drag to Edge"));
 				break;
 			}
@@ -974,7 +974,7 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 		if (helix) {
 			wHide( helixW );
 		} else {
-			InfoSubstituteControls( NULL, NULL );
+			InfoDefaultControls();
 		}
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		return C_TERMINATE;
@@ -988,7 +988,7 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 		if (helix) {
 			wHide( helixW );
 		} else {
-			InfoSubstituteControls( NULL, NULL );
+			InfoDefaultControls();
 		}
 		return C_CONTINUE;
 

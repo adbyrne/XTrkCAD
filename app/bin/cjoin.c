@@ -1016,7 +1016,7 @@ static STATUS_T CmdJoin(
 			controls[0] = joinRadPD.control;
 			controls[1] = NULL;
 			labels[0] = N_("Desired Radius");
-			InfoSubstituteControls(controls, labels);
+			InfoSubstituteControls(joinPG.nameStr, controls, labels);
 			infoSubst = TRUE;
 			joinRadPD.option |= PDO_NORECORD;
 			ParamLoadControls(&joinPG);
@@ -1038,7 +1038,7 @@ static STATUS_T CmdJoin(
 				return C_CONTINUE;
 			}
 			if (infoSubst) {
-				InfoSubstituteControls(NULL, NULL);
+				InfoDefaultControls();
 			}
 			infoSubst = FALSE;
 
@@ -1516,7 +1516,7 @@ errorReturn:
 		DrawNewTrack( Dj.inp[1].trk );
 		DrawNewTrack( trk );
 		if (infoSubst) {
-			InfoSubstituteControls(NULL, NULL);
+			InfoDefaultControls();
 		}
 		infoSubst = FALSE;
 		return rc;
@@ -1524,7 +1524,7 @@ errorReturn:
 	case C_CANCEL:
 		SetAllTrackSelect( FALSE );
 		if (infoSubst) {
-			InfoSubstituteControls(NULL, NULL);
+			InfoDefaultControls();
 		}
 		infoSubst = FALSE;
 		break;
@@ -1551,7 +1551,7 @@ errorReturn:
 			return CmdCornu(action,pos);
 		}
 		if (infoSubst) {
-			InfoSubstituteControls(NULL, NULL);
+			InfoDefaultControls();
 		}
 		infoSubst = FALSE;
 

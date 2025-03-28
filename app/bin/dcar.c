@@ -1767,7 +1767,7 @@ EXPORT void CarItemLoadList( void * unused )
 	wListSetIndex( (wList_p)newCarPLs[0].control, 0 );
 	strcpy( newCarLabel1, _("Select") );
 	ParamLoadControl( &newCarPG, 0 );
-	InfoSubstituteControls( newCarControls, newCarLabels );
+	InfoSubstituteControls(newCarPG.nameStr, newCarControls, newCarLabels);
 	wWinGetSize( mainW, &w, &h );
 	w -= wControlGetPosX( newCarControls[0] ) + 4;
 	if ( w > 20 ) {
@@ -1820,7 +1820,7 @@ static char * CarItemHotbarProc(
 			ParamLoadControls( &newCarPG );
 			ParamGroupRecord( &newCarPG );
 
-			InfoSubstituteControls( newCarControls, newCarLabels );
+			InfoSubstituteControls(newCarPG.nameStr, newCarControls, newCarLabels);
 			wWinGetSize( mainW, &w, &h );
 			w -= wControlGetPosX( newCarControls[0] ) + 4;
 			if ( w > 20 ) {
@@ -1828,7 +1828,7 @@ static char * CarItemHotbarProc(
 				              wControlGetHeight( newCarControls[0] ) );
 			}
 		} else {
-			InfoSubstituteControls( NULL, NULL );
+			InfoDefaultControls();
 			cp = CarItemDescribe( item, 0, NULL );
 			InfoMessage( cp );
 		}
@@ -4863,7 +4863,7 @@ EXPORT void CarItemShelve(
 	}
 	CarItemUpdate(item);
 	HotBarCancel();
-	InfoSubstituteControls(NULL, NULL);
+	InfoDefaultControls();
 }
 
 
@@ -5817,7 +5817,7 @@ EXPORT void InitCarDlg( void )
 	AddParam( "CARPROTO ", CarProtoRead );
 	AddParam( "CARPART ", CarPartRead);
 	ParamRegister( &newCarPG );
-	ParamCreateControls( &newCarPG, CarItemHotbarUpdate );
+	//ParamCreateControls( &newCarPG, CarItemHotbarUpdate );
 	newCarControls[0] = newCarPLs[0].control;
 }
 

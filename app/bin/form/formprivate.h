@@ -3,7 +3,7 @@
 
 extern int log_form;
 
-void CreateControls(paramGroup_p group);
+
 void FormSaveDefaultValues(paramGroup_p group);
 
 /* checkinputs.c */

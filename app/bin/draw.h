@@ -281,7 +281,8 @@ void SetMessage(char *);
 
 extern wIndex_t panCmdInx;
 
-void InfoSubstituteControls(wControl_p *, char * *);
+void InfoSubstituteControls(const char * name, wControl_p *controls, char * *labels);
+void InfoDefaultControls(void);
 
 void MapGrid(coOrd, coOrd, ANGLE_T, coOrd, ANGLE_T, POS_T, POS_T, int *, int *,
              int *, int *);

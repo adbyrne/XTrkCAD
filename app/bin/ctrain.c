@@ -2795,7 +2795,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 			ControllerDialogSync(curTrainDlg);
 		}
 
-		InfoSubstituteControls(NULL, NULL);
+		InfoDefaultControls();
 		currCar = trk0 = NULL;
 		currCarItemPtr = NULL;
 		trainHighlighted = NULL;
@@ -2959,7 +2959,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 		currCar = NULL;
 		currCarItemPtr = NULL;
 		HotBarCancel();
-		InfoSubstituteControls(NULL, NULL);
+		InfoDefaultControls();
 		trk0 = NULL;
 		trainHighlighted = NULL;
 		return C_TERMINATE;
@@ -3020,7 +3020,7 @@ static BOOL_T TrainStopGoPlayback(char * line)
 static void CmdTrainExit(void * unused)
 {
 	Reset();
-	InfoSubstituteControls(NULL, NULL);
+	InfoDefaultControls();
 }
 
 
@@ -3139,7 +3139,7 @@ static void TrainFunc(
 		}
 
 		HotBarCancel();
-		InfoSubstituteControls(NULL, NULL);
+		InfoDefaultControls();
 		break;
 
 	case DO_MUMASTER:
