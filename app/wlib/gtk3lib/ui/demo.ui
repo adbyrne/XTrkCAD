@@ -112,7 +112,7 @@
                                                         <property name="width-chars">20</property>
                                                     </object>
                                                     <attributes>
-                                                        <attribute name="text">2</attribute>
+                                                        <attribute name="text">3</attribute>
                                                     </attributes>
                                                 </child>
                                             </object>
@@ -184,6 +184,7 @@
     </object>
     <object class="GtkListStore" id="speedoptions">
         <columns>
+            <column type="gboolean" />
             <column type="gpointer" />
             <column type="GdkPixbuf" />
             <column type="gchararray" />

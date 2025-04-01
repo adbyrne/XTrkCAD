@@ -210,12 +210,6 @@ void
 wlibListStoreAppendRow(GtkListStore* store, GtkTreeIter *iter, wListItem_p data)
 {
 	gtk_list_store_append(store, iter);
-	wlibListStoreSetContext(store, iter, LISTCOL_DATA, data);
-}
-
-void 
-wlibListStoreSetContext(GtkListStore* store, GtkTreeIter* iter, wListItem_p data)
-{
 	gtk_list_store_set(store, iter, LISTCOL_DATA, data, -1);
 }
 

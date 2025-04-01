@@ -184,6 +184,7 @@ static void buttonClick(
 	if (b->action && DoCallbackOnClick()) {
 		SetNoCallbackOnClick();
 		b->action(((wControl_p)value)->context);
+		SetCallbackOnClick();
 	}
 }
 

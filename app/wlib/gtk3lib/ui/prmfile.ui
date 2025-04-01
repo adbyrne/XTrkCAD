@@ -3,14 +3,16 @@
   <requires lib="gtk" version="3.22" />
   <object class="GtkListStore" id="liststore">
     <columns>
+      <!-- column-name set foreground -->
+      <column type="gboolean" />
       <!-- userdata -->
-      <column type="gpointer"/>
+      <column type="gpointer" />
       <!-- icon -->
-      <column type="GdkPixbuf"/>
+      <column type="GdkPixbuf" />
       <!-- parameterfile -->
-      <column type="gchararray"/>
+      <column type="gchararray" />
       <!-- full path-->
-      <column type="gchararray"/>
+      <column type="gchararray" />
     </columns>
   </object>
   <object class="GtkDialog" id="prmfile">
@@ -83,9 +85,9 @@
                 <child>
                   <object class="GtkTreeViewColumn" id="icon">
                     <child>
-                      <object class="GtkCellRendererPixbuf"/>
+                      <object class="GtkCellRendererPixbuf" />
                       <attributes>
-                        <attribute name="pixbuf">1</attribute>
+                        <attribute name="pixbuf">2</attribute>
                       </attributes>
                     </child>
                   </object>
@@ -95,9 +97,9 @@
                     <property name="resizable">True</property>
                     <property name="title" translatable="yes">Parameter</property>
                     <child>
-                      <object class="GtkCellRendererText"/>
+                      <object class="GtkCellRendererText" />
                       <attributes>
-                        <attribute name="text">2</attribute>
+                        <attribute name="text">3</attribute>
                       </attributes>
                     </child>
                   </object>
@@ -107,9 +109,9 @@
                     <property name="resizable">True</property>
                     <property name="title" translatable="yes">Full path</property>
                     <child>
-                      <object class="GtkCellRendererText"/>
+                      <object class="GtkCellRendererText" />
                       <attributes>
-                        <attribute name="text">3</attribute>
+                        <attribute name="text">4</attribute>
                       </attributes>
                     </child>
                   </object>
@@ -143,7 +145,7 @@
                 <property name="position">0</property>
               </packing>
             </child>
-           <child>
+            <child>
               <object class="GtkButton" id="reload">
                 <property name="label" translatable="yes">_Reload</property>
                 <property name="visible">True</property>
@@ -167,7 +169,7 @@
                 <property name="position">1</property>
               </packing>
             </child>
-             <child>
+            <child>
               <object class="GtkButton" id="favorite">
                 <property name="label" translatable="yes">Book_mark</property>
                 <property name="visible">True</property>
@@ -207,14 +209,14 @@
   <object class="GtkSizeGroup">
     <property name="mode">GTK_SIZE_GROUP_HORIZONTAL</property>
     <widgets>
-      <widget name="selectall"/>
-      <widget name="unload"/>
-      <widget name="reload"/>
-      <widget name="favorite"/>
-      <widget name="id_ok"/>
-      <widget name="id_help"/>
-      <widget name="find"/>
-      <widget name="browse"/>
+      <widget name="selectall" />
+      <widget name="unload" />
+      <widget name="reload" />
+      <widget name="favorite" />
+      <widget name="id_ok" />
+      <widget name="id_help" />
+      <widget name="find" />
+      <widget name="browse" />
     </widgets>
   </object>
 </interface>

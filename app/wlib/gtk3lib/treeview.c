@@ -410,26 +410,27 @@ wlibTreeSelectionChanged(GtkTreeSelection* selection, void* context)
 		gtk_tree_model_get_iter(model, &iter, g_list_nth_data(selectedRows, i));
 		gtk_tree_model_get_value(model, &iter, LISTCOL_DATA, &value);
 		id_p = g_value_get_pointer(&value);
-		if (id_p) {
-			text = gtk_tree_path_to_string(g_list_nth_data(selectedRows, i));
-			row = (long)g_ascii_strtoll(text, NULL, 10);
-			g_free(text);
 
-			id_p->selected = TRUE;
+		text = gtk_tree_path_to_string(g_list_nth_data(selectedRows, i));
+		row = (long)g_ascii_strtoll(text, NULL, 10);
+		g_free(text);
 
-			if (id_p->selected) {
-				list->last = row;
+		id_p->selected = TRUE;
 
-				if (list->valueP) {
-					*list->valueP = row;
-				}
+		if (id_p->selected) {
+			list->last = row;
 
-				if (list->action) {
-					list->action(row, id_p->label, 1, control->context, id_p->itemData);
-				}
+			if (list->valueP) {
+				*list->valueP = row;
+			}
+
+			if (list->action) {
+				list->action(row, id_p->label, 1, control->context, id_p->itemData);
 			}
 		}
+
 	}
+
 
 	g_list_free_full(selectedRows, (GDestroyNotify)gtk_tree_path_free);
 }

@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk" version="3.22" />
-    <object class="GtkListStore" id="liststore">
+  <object class="GtkListStore" id="liststore">
     <columns>
-      <!-- userdata -->
-      <column type="gpointer"/>
-      <!-- icon -->
-      <column type="GdkPixbuf"/>
-      <!-- column-name price -->
-      <column type="gchararray"/>
-      <!-- column-name description -->
-      <column type="gchararray"/>
       <!-- column-name set foreground -->
-      <column type="gboolean"/>
+      <column type="gboolean" />
+      <!-- userdata -->
+      <column type="gpointer" />
+      <!-- icon -->
+      <column type="GdkPixbuf" />
+      <!-- column-name price -->
+      <column type="gchararray" />
+      <!-- column-name description -->
+      <column type="gchararray" />
     </columns>
 
   </object>
@@ -46,7 +46,7 @@
         <property name="can-focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">12</property>
-        
+
         <child>
           <object class="GtkScrolledWindow" id="inx">
             <property name="visible">True</property>
@@ -69,16 +69,16 @@
                 <property name="show-expanders">False</property>
                 <property name="enable-grid-lines">vertical</property>
                 <child internal-child="selection">
-                  <object class="GtkTreeSelection"/>
+                  <object class="GtkTreeSelection" />
                 </child>
                 <child>
                   <object class="GtkTreeViewColumn" id="description">
                     <property name="resizable">True</property>
                     <property name="title" translatable="yes">Description</property>
                     <child>
-                      <object class="GtkCellRendererText"/>
+                      <object class="GtkCellRendererText" />
                       <attributes>
-                        <attribute name="text">3</attribute>
+                        <attribute name="text">4</attribute>
                       </attributes>
                     </child>
                   </object>
@@ -88,10 +88,10 @@
                     <property name="resizable">True</property>
                     <property name="title" translatable="yes">Price</property>
                     <child>
-                      <object class="GtkCellRendererText" id="pricerenderer"/>
+                      <object class="GtkCellRendererText" id="pricerenderer" />
                       <attributes>
-                        <attribute name="text">2</attribute>
-                <attribute name="foreground-set">4</attribute>                        
+                        <attribute name="text">3</attribute>
+                        <attribute name="foreground-set">0</attribute>
                       </attributes>
                     </child>
                   </object>

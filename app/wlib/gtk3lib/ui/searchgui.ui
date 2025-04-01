@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.40.0 -->
 <interface>
-  <requires lib="gtk+" version="3.22"/>
+  <requires lib="gtk+" version="3.22" />
   <object class="GtkListStore" id="liststore">
     <columns>
+      <!-- column-name set foreground -->
+      <column type="gboolean" />
       <!-- column-name userdata -->
-      <column type="gpointer"/>
+      <column type="gpointer" />
       <!-- column-name icon -->
-      <column type="GdkPixbuf"/>
+      <column type="GdkPixbuf" />
       <!-- column-name description -->
-      <column type="gchararray"/>
+      <column type="gchararray" />
       <!-- column-name filename -->
-      <column type="gchararray"/>
+      <column type="gchararray" />
     </columns>
   </object>
   <object class="GtkDialog" id="searchgui">
@@ -103,7 +105,7 @@
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
                     <child>
-                      <object class="GtkImage" >
+                      <object class="GtkImage">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="stock">gtk-clear</property>
@@ -239,9 +241,9 @@
                         <property name="resizable">True</property>
                         <property name="title" translatable="yes">Description</property>
                         <child>
-                          <object class="GtkCellRendererText"/>
+                          <object class="GtkCellRendererText" />
                           <attributes>
-                            <attribute name="text">2</attribute>
+                            <attribute name="text">3</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -251,9 +253,9 @@
                         <property name="resizable">True</property>
                         <property name="title" translatable="yes">Full Path</property>
                         <child>
-                          <object class="GtkCellRendererText"/>
+                          <object class="GtkCellRendererText" />
                           <attributes>
-                            <attribute name="text">3</attribute>
+                            <attribute name="text">4</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -322,8 +324,8 @@
   </object>
   <object class="GtkSizeGroup">
     <widgets>
-      <widget name="selectall"/>
-      <widget name="apply"/>
+      <widget name="selectall" />
+      <widget name="apply" />
     </widgets>
   </object>
 </interface>

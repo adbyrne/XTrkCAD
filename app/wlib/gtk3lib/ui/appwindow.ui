@@ -306,16 +306,16 @@
         <property name="width-chars">20</property>
       </object>
       <attributes>
-        <attribute name="text">2</attribute>
+        <attribute name="text">3</attribute>
       </attributes>
     </child>
   </object>
   <object class="GtkListStore" id="layerList">
     <columns>
+      <column type="gboolean" />
       <column type="gpointer" />
       <column type="gpointer" />
       <column type="gchararray" />
-
     </columns>
   </object>
 </interface>

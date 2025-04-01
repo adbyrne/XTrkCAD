@@ -455,12 +455,12 @@ wControl_p wlibControlNew(wType_e type, wControl_p parent, const char* name,
 void wlibBasicGridAttach(wControl_p parent, GtkWidget *widget, unsigned xPos,
 	unsigned yPos, unsigned colSpan, unsigned rowSpan);
 
-/* droplist.c */
+/* lists */
 enum columns {
+	LISTCOL_ERROR_COLOR,	/**< use error color for display if set */
 	LISTCOL_DATA,			/**< user attributes not for display */
 	LISTCOL_BITMAP,         /**< bitmap column */
 	LISTCOL_TEXT, 			/**< starting point for text columns */
-	LISTCOL_ERROR_COLOR,	/**< use error color for display if set */
 };
 
 /**
