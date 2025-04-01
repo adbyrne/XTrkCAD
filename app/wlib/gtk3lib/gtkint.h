@@ -321,7 +321,6 @@ struct wListItem_t {
 		wBool_t active;
 		void * itemData;
 		char * label;
-		GtkLabel * labelG;
 		wBool_t selected;
 		wControl_p listP;
 		};		
@@ -461,6 +460,7 @@ enum columns {
 	LISTCOL_DATA,			/**< user attributes not for display */
 	LISTCOL_BITMAP,         /**< bitmap column */
 	LISTCOL_TEXT, 			/**< starting point for text columns */
+	LISTCOL_ERROR_COLOR,	/**< use error color for display if set */
 };
 
 /**
@@ -529,6 +529,8 @@ void wlibListStoreSetPixbuf(GtkListStore *ls, GtkTreeIter *iter, GdkPixbuf *pixb
 int wlibListStoreAddData(GtkListStore *ls, GdkPixbuf *pixbuf, wListItem_p id);
 int wlibListStoreUpdateValues(GtkListStore *ls, int row, char *labels, wIcon_p bm);
 void wlibListStoreAddRow(GtkListStore* listStore, wIcon_p icon, wListItem_p userData, const char* label);
+
+void wlibListStoreSetContext(GtkListStore* store, GtkTreeIter* iter, wListItem_p data);
 void wlibListStoreAppendRow(GtkListStore* store, GtkTreeIter* iter, wListItem_p data);
 void wlibListStoreSetIcon(GtkListStore* store, GtkTreeIter* iter, wIcon_p icon);
 void wlibListStoreSetData(GtkListStore* store, GtkTreeIter* iter, int column, const char* label);

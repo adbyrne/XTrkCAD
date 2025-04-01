@@ -366,7 +366,7 @@ static void ParamFileOk(void * junk)
 	SearchUiOk(junk);
 
 	DoChangeNotification(CHANGE_PARAMS);
-	wHide(paramFileW);
+	//wHide(paramFileW);
 }
 
 

@@ -178,7 +178,8 @@ wIndex_t CheckPaths( wIndex_t, trkSeg_p, PATHPTR_T, char* );
 turnoutInfo_t * CreateNewTurnout( char *, char *, wIndex_t, trkSeg_p, PATHPTR_T,
                                   EPINX_T, trkEndPt_p, wBool_t, long );
 void DeleteTurnoutParams(int fileInx);
-turnoutInfo_t * TurnoutAdd( long, SCALEINX_T, wList_p, coOrd *, EPINX_T );
+turnoutInfo_t* TurnoutAdd(long mode, SCALEINX_T scale, wControl_p list, 
+	coOrd* maxDim, EPINX_T epCnt);
 STATUS_T CmdTurnoutAction( wAction_t, coOrd );
 BOOL_T ConnectAdjustableTracks( track_p trk1, EPINX_T ep1, track_p trk2,
                                 EPINX_T ep2 );
@@ -196,7 +197,8 @@ turnoutInfo_t * CreateNewStructure( char *, char *, wIndex_t, trkSeg_p,
                                     BOOL_T );
 enum paramFileState	GetStructureCompatibility(int paramFileIndex,
                 SCALEINX_T scaleIndex);
-turnoutInfo_t * StructAdd( long, SCALEINX_T, wControl_p, coOrd * );
+turnoutInfo_t* StructAdd(long mode, SCALEINX_T scale, wControl_p list,
+	coOrd* maxDim);
 STATUS_T CmdStructureAction( wAction_t, coOrd );
 BOOL_T StructLoadCarDescList( wList_p );
 void DeleteStructures(int fileIndex);

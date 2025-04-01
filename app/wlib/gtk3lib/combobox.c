@@ -99,9 +99,10 @@ wIndex_t wComboBoxGetCount(wControl_p b)
  */
 
 void
-wComboBoxClear(wList_p b)
+wComboBoxClear(wControl_p control)
 {
-	wlibListStoreClear(b->listStore);
+	
+	wlibListStoreClear(control->attributes.list.listStore);
 }
 
 /**
@@ -143,7 +144,7 @@ void *wComboBoxGetItemContext(wControl_p b, wIndex_t inx)
 
 void wComboBoxAddValue(
         wControl_p b,
-        char *text,
+        const char *text,
         void *attributes)
 {
 	GtkTreeIter iter;

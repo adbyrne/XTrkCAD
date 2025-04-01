@@ -818,7 +818,11 @@ void wListSetValue(wControl_p bl, const char* val);
 void wListSetActive(		wList_p, wIndex_t, wBool_t );
 void wListSetEditable(		wList_p, wBool_t );
 
-wListSetColumnEditable(wControl_p list, const char* renderer);
+struct rendererContext {
+    wControl_p list;
+    void* context;
+};
+wListSetColumnEditable(wControl_p list, const char* renderer, void *context);
 
 /*------------------------------------------------------------------------------
  *

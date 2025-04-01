@@ -127,8 +127,7 @@ BOOL_T Initialize( void )
 	InitTrkSignal();
 	InitTrkControl();
 	InitTrkSensor();
-	/**  \todo Enable car dialogs */
-	//InitCarDlg();
+	InitCarDlg();
 	InitCmdNote();
 
 	memset( message, 0, sizeof message );

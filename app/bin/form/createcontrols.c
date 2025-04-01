@@ -94,6 +94,8 @@ static void ChoicePush(long valL, void* dp)
 	}
 }
 
+/**  val is apparently unused */
+
 static void ListPush(wIndex_t inx, const char* val, wIndex_t op,
 	void* dp, void* itemContext)
 {
@@ -426,7 +428,7 @@ CreateControl(paramData_p pd,char* helpStr,	unsigned x,	unsigned y)
 	const struct wIcon_t* iconP;
 
 	wControl_p win;
-	wWinPix_t w;
+	wWinPix_t width;
 
 	static wMenu_p menu = NULL;
 
@@ -438,20 +440,20 @@ CreateControl(paramData_p pd,char* helpStr,	unsigned x,	unsigned y)
 	switch (pd->type) {
 	case PD_FLOAT:
 		floatRangeP = pd->winData;
-		w = floatRangeP->width ? floatRangeP->width : 10;
+		width = floatRangeP->width ? floatRangeP->width : 10;
 		pd->control = wEntryCreate(win, x, y, helpStr, _(pd->winLabel),
-			pd->winOption, w, NULL, 0, FloatPush, pd);
+			pd->winOption, width, NULL, 0, FloatPush, pd);
 		break;
 	case PD_LONG:
 		integerRangeP = pd->winData;
-		w = integerRangeP->width ? integerRangeP->width : 10;
+		width = integerRangeP->width ? integerRangeP->width : 10;
 		pd->control = wEntryCreate(win, x, y, helpStr, _(pd->winLabel),
-			pd->winOption, w, NULL, 0, IntegerPush, pd);
+			pd->winOption, width, NULL, 0, IntegerPush, pd);
 		break;
 	case PD_STRING:
-		w = pd->winData ? (wWinPix_t)VP2L(pd->winData) : (wWinPix_t)250;
+		width = pd->winData ? (wWinPix_t)VP2L(pd->winData) : (wWinPix_t)250;
 		pd->control = wEntryCreate(win, x, y, helpStr, _(pd->winLabel),
-			pd->winOption, w, (pd->option & PDO_NOPSHUPD) ? NULL : pd->valueP, 0, StringPush,
+			pd->winOption, width, (pd->option & PDO_NOPSHUPD) ? NULL : pd->valueP, 0, StringPush,
 			pd);
 		break;
 	case PD_RADIO:
@@ -466,21 +468,21 @@ CreateControl(paramData_p pd,char* helpStr,	unsigned x,	unsigned y)
 		pd->control = CreateFormattedList(win, pd, helpStr, x, y);
 		break;
 	case PD_DROPLIST:
-		w = pd->winData ? (wWinPix_t)VP2L(pd->winData) : (wWinPix_t)LISTDEFAULTWIDTH;
+		width = pd->winData ? (wWinPix_t)VP2L(pd->winData) : (wWinPix_t)LISTDEFAULTWIDTH;
 		//pd->control = (wControl_p)wDropListCreate(win, xx, yy, helpStr,
 		//	_(pd->winLabel), pd->winOption, 10, w, NULL, ParamListPush, pd);
 		break;
 	case PD_COMBOLIST:
 		listDataP = (paramListData_t*)pd->winData;
-		w = pd->winData ? (wWinPix_t)VP2L(pd->winData) : (wWinPix_t)LISTDEFAULTWIDTH;
+		width = pd->winData ? (wWinPix_t)VP2L(pd->winData) : (wWinPix_t)LISTDEFAULTWIDTH;
 		pd->control = (wControl_p)wComboBoxCreate(win, x, y, helpStr,
-			_(pd->winLabel), pd->winOption, 10, w, NULL,
+			_(pd->winLabel), pd->winOption, 10, width, NULL,
 			FormListPush, pd);
 		//listDataP->height = wControlGetHeight(pd->control);
 		break;
 	case PD_COLORLIST:
-		pd->control = (wControl_p)wColorSelectButtonCreate(win, -1, -1, helpStr,
-			_(pd->winLabel), pd->winOption, 0, NULL, ColorSelectPush, pd);
+		pd->control = (wControl_p)wColorSelectButtonCreate(win, x, y, helpStr,
+			_(pd->winLabel), pd->winOption, 1, NULL, ColorSelectPush, pd);
 		break;
 	case PD_MESSAGE:
 		pd->control = (wControl_p)wMessageCreateEx(win, x+((pd->option & PDO_DLGNEWCOLUMN) != 0), y, helpStr, 1,
@@ -518,7 +520,7 @@ CreateControl(paramData_p pd,char* helpStr,	unsigned x,	unsigned y)
 
 }
 
-void CreateControls(paramGroup_p group)
+void FormCreateControls(paramGroup_p group)
 {
 	DynString helpString;
 	unsigned xPos = 1;

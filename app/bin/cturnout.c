@@ -446,7 +446,7 @@ static BOOL_T ReadTurnoutParam(
 }
 
 
-EXPORT turnoutInfo_t* TurnoutAdd(long mode, SCALEINX_T scale, wList_p list,
+EXPORT turnoutInfo_t* TurnoutAdd(long mode, SCALEINX_T scale, wControl_p list,
                                  coOrd* maxDim, EPINX_T epCnt)
 {
 	wIndex_t inx;

@@ -338,7 +338,7 @@ wlibBasicDrawString (struct draw *bd, wDrawPix_t x, wDrawPix_t y, double a, char
 	cairo_stroke(cr);
 
 	// free unused objects
-	g_object_unref (layout);
+	wlibFontDestroyPangoLayout(layout);
 
 	cairo_restore (cr);
 

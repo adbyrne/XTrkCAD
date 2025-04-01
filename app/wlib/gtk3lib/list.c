@@ -82,8 +82,7 @@ GetRowCount(struct list* lcontrol)
  * \return
  */
 
-void wListClear(
-        wControl_p b)
+void wListClear(wControl_p b)
 {
 	g_assert(b!= NULL);
 
@@ -643,6 +642,53 @@ wIndex_t wListAddValue(
 	return(rowCount);
 }
 
+void
+cell_edited_callback(GtkCellRendererText* cell,
+	char* path_string,
+	char* new_text,
+	gpointer user_data) 
+{
+	struct rendererContext* context = (struct rendererContext*)user_data;
+	wControl_p list = context->list;
+	GtkTreeIter iter;
+	GtkTreeModel* listModel = gtk_tree_view_get_model(list->attributes.list.treeView);
+	gint64 line;
+
+	gtk_tree_model_get_iter_from_string(listModel, &iter, path_string);
+
+	gtk_list_store_set(GTK_LIST_STORE(listModel), &iter, LISTCOL_TEXT, new_text, -1);
+
+	line = g_ascii_strtoll(path_string, NULL, 10);
+
+	list->attributes.list.action((unsigned int)line, new_text, 0, context->context, NULL);
+
+	gtk_list_store_set(GTK_LIST_STORE(listModel), &iter, 4, FALSE, -1);
+
+	printf("Path: %s Text: %s\n", path_string, new_text);
+}
+
+#define ERROR_COLOR "#ff0000"
+
+wListSetColumnEditable(wControl_p list,const char* renderer, void *userData)
+{
+	g_assert(list->type == B_LIST);
+
+	
+	wControl_p parent = list->parent;
+	GObject *rendererObject = gtk_builder_get_object(parent->attributes.window.builder, renderer);
+
+	if (rendererObject) {
+		struct rendererContext* context = malloc(sizeof(struct rendererContext));
+
+		context->list = list;
+		context->context = userData;
+
+		g_object_set(rendererObject, "editable", TRUE, NULL);
+		g_object_set(rendererObject, "foreground", ERROR_COLOR, NULL);
+
+		g_signal_connect(rendererObject, "edited", G_CALLBACK(cell_edited_callback), context);
+	}
+}
 
 /**
  * Set the size of the list
@@ -732,11 +778,7 @@ wControl_p wListCreate(
 		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(lcontrol->treeView));
 		g_signal_connect(selection, "changed", (GCallback)wlibTreeSelectionChanged, bl);
 
-		//gtk_tree_selection_set_select_function(selection,
-		//	changeSelection,
-		//	bl,
-		//	NULL);
-
+		/**  \todo listStore could be gotten as needed, remove from struct */
 		lcontrol->listStore = GTK_LIST_STORE(gtk_tree_view_get_model(lcontrol->treeView));
 		
 		g_assert(lcontrol->listStore != NULL);
