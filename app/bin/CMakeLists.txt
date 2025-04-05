@@ -144,6 +144,7 @@ target_sources(xtrkcad-lib
     dbench.c
     dbitmap.c
     dcar.c
+    dcmdoptions.c
     dcmpnd.c
     dcustmgm.c
     dcontmgm.c

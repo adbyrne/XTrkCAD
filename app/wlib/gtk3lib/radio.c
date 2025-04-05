@@ -143,28 +143,70 @@ static void
 SetSignalsToRadioButton(GtkWidget* radioButton, gpointer data)
 {
 	g_signal_connect(G_OBJECT(radioButton), "toggled",
-		G_CALLBACK(radioChoice), data);
+	                 G_CALLBACK(radioChoice), data);
 }
 
 static void
-SetHelpToRadioButton(GtkWidget* radioButton, char* help)
+SetHelpToRadioButton(GtkWidget* radioButton, wControl_p control,
+                     const char* help)
 {
-	//wlibAddHelpString(newRadioButton, helpStr);
-	//wlibAddTooltip(newRadioButton, helpStr);
+	//wlibAddHelpString(radioButton, help);
+	wlibAddTooltip(radioButton, control->parent->name, help);
 }
 
 static void
 ConfigureButtons(GtkWidget *container, wControl_p control, const char *help )
 {
+	GList* children;
+	GList* current;
 
-	gtk_container_foreach(GTK_CONTAINER(container),
-		SetSignalsToRadioButton,
-		control);
+	children = gtk_container_get_children(GTK_CONTAINER(container));
+	for (current = children; current != NULL; current = g_list_next(current)) {
+		SetSignalsToRadioButton(GTK_WIDGET(current->data), control);
+		SetHelpToRadioButton(GTK_WIDGET(current->data), control, help);
+	}
 
-	gtk_container_foreach(GTK_CONTAINER(container),
-		SetHelpToRadioButton,
-		control);
+	g_list_free(children);
 
+}
+
+void RuntimeCreateRadiobuttons(long option, wControl_p b,
+                               const char* const* labels, const char* labelStr, wWinPix_t x, wWinPix_t y,
+                               wControl_p parent)
+{
+	GtkWidget* newRadioButton = NULL;
+	const char* const* label;
+
+	if (option & BC_HORIZONTAL) {
+		b->widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+	} else {
+		b->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, 6);
+	}
+
+	if (b->widget == 0) {
+		abort();
+	}
+
+	if (!(option & BC_NOBORDER)) {
+		GtkStyleContext* styleContext = gtk_widget_get_style_context(GTK_WIDGET(
+		                                        b->widget));
+		gtk_style_context_add_class(styleContext, "framed");
+	}
+
+	gtk_box_set_homogeneous(GTK_BOX(b->widget), FALSE);
+
+	for (label = labels; *label; label++) {
+		newRadioButton = gtk_radio_button_new_with_label_from_widget(
+		                         GTK_RADIO_BUTTON(newRadioButton), *label);
+		gtk_box_pack_start(GTK_BOX(b->widget), newRadioButton, TRUE, TRUE, 0);
+	}
+
+	if (labelStr) {
+		wlibAddLabel((wControl_p)b, x - 1, y, labelStr);
+	}
+
+	wlibBasicGridAttach(parent, b->widget, x, y, 1, 1);
+	gtk_widget_show_all(b->widget);
 }
 
 /**
@@ -215,45 +257,10 @@ wControl_p wRadioCreate(
 	rcontrol->valueP = valueP;
 
 	if (ISDEFINEDINBUILDER(parent)) {
-		/** \todo use builder */
-		b->widget = wlibWidgetFromIdWarn(parent, "fit");
+		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
 
-	}
-	else {
-		GtkWidget* newRadioButton = NULL;
-		const char* const* label;
-
-		if (option & BC_HORIZONTAL) {
-			b->widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
-		}
-		else {
-			b->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, 6);
-		}
-
-		if (b->widget == 0) {
-			abort();
-		}
-
-		if (!(option & BC_NOBORDER)) {
-			GtkStyleContext* styleContext = gtk_widget_get_style_context(GTK_WIDGET(
-				b->widget));
-			gtk_style_context_add_class(styleContext, "framed");
-		}
-
-		gtk_box_set_homogeneous(GTK_BOX(b->widget), FALSE);
-
-		for (label = labels; *label; label++) {
-			newRadioButton = gtk_radio_button_new_with_label_from_widget(
-				GTK_RADIO_BUTTON(newRadioButton), *label);
-			gtk_box_pack_start(GTK_BOX(b->widget), newRadioButton, TRUE, TRUE, 0);
-		}
-
-		if (labelStr) {
-			wlibAddLabel((wControl_p)b, x - 1, y, labelStr);
-		}
-
-		wlibBasicGridAttach(parent, b->widget, x, y, 1, 1);
-		gtk_widget_show_all(b->widget);
+	} else {
+		RuntimeCreateRadiobuttons(option, b, labels, labelStr, x, y, parent);
 	}
 
 	ConfigureButtons(b->widget, b, helpStr );
@@ -261,7 +268,7 @@ wControl_p wRadioCreate(
 	if (valueP) {
 		wRadioSetValue(b, *valueP);
 	}
-	
+
 	return b;
 }
 

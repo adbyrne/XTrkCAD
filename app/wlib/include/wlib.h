@@ -213,7 +213,8 @@ wControl_p wButtonCreateForToolbar(wControl_p  w,
 
 void wRadioSetValue(wControl_p bc, long value);
 long wRadioGetValue(wControl_p bc);
-wControl_p wRadioCreate(wControl_p parent, 
+void RuntimeCreateRadiobuttons(long option, wControl_p b, const char* const* labels, const char* labelStr, wWinPix_t x, wWinPix_t y, wControl_p parent);
+wControl_p wRadioCreate(wControl_p parent,
                         wWinPix_t x, 
                         wWinPix_t y,
                         const char* helpStr, 
