@@ -2133,7 +2133,7 @@ void InitLayers(int cmdGroup)
 
 	/* background button */
 	backgroundB = AddToolbarButton("cmdBackgroundShow",
-		CreateToolbarIconFromResource("background.png"), 0,
+		CreateToolbarIconFromResource("background.png"), IC_MODETRAIN_TOO | IC_TOGGLE,
 	                               BackgroundToggleShow, NULL);
 	wTooltipSet(backgroundB, NULL, "cmdBackgroundShow");
 	wControlActive(backgroundB, FALSE);
@@ -2147,7 +2147,7 @@ void InitLayers(int cmdGroup)
 		if (i < NUM_BUTTONS) {
 			/* create the layer button */
 			sprintf(message, "cmdLayerShow%u", i);
-			layer_btns[i] = AddToolbarButton(message, show_layer_bmps[i], IC_MODETRAIN_TOO,
+			layer_btns[i] = AddToolbarButton(message, show_layer_bmps[i], IC_MODETRAIN_TOO | IC_TOGGLE,
 			                                 FlipLayer, I2VP(i) );
 			/* set state of button */
 			wButtonSetBusy(layer_btns[i], TRUE);

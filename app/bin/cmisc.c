@@ -696,7 +696,7 @@ void InitCmdDescribe(wMenu_p menu)
 {
 	describeCmdInx = AddMenuButton(menu, CmdDescribe, "cmdDescribe",
 	                               _("Properties"), CreateToolbarIconFromResource("describe.png"),
-	                               LEVEL0, IC_CANCEL|IC_POPUP|IC_WANT_MOVE|IC_CMDMENU, ACCL_DESCRIBE, NULL);
+	                               LEVEL0, IC_CANCEL|IC_POPUP|IC_WANT_MOVE|IC_CMDMENU|IC_TOGGLE, ACCL_DESCRIBE, NULL);
 	RegisterChangeNotification(DescChange);
 	ParamRegister(&describePG);
 }

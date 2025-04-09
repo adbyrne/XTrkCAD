@@ -93,7 +93,6 @@ struct bitmap {
 struct button {
 	wButtonCallBack_p action;
 	wIcon_p icon;
-	void* attributes;
 };
 
 struct choice {
@@ -166,6 +165,7 @@ struct radio {
 struct toggle {
 	long* valueP;
 	wChoiceCallBack_p action;
+	unsigned long toggleHandler;
 };
 struct recentuse {
 	unsigned max;				// maximum members
@@ -412,6 +412,8 @@ struct wIcon_t {
 	const char* filename;
 };
 
+
+
 /* boxes.c */
 void wlibDrawBox(wWin_p win, wBoxType_e style, wWinPix_t x, wWinPix_t y, wWinPix_t w, wWinPix_t h);
 
@@ -429,6 +431,7 @@ bool wlibExistsTemplate(const char *name);
 /* button.c */
 void wlibSetLabel(GtkWidget *widget, long option, const char *labelStr, GtkLabel **labelG, GtkWidget **imageG);
 void wlibButtonDoAction(wControl_p bb);
+void wlibAddButtonToToolbar(wControl_p buttonControl, const char* helpStr);
 
 
 /* color.c */
@@ -645,6 +648,11 @@ struct wChoice_t {
 	char* labelStr;
 	void* attributes;
 };
+
+/* toolbarctrl.c */
+GtkWidget* wlibToolbarCreate(GtkWidget* container);
+void wlibSetAbutStyle(GtkWidget* button);
+void wlibAddButtonToToolbar(wControl_p buttonControl, const char* helpStr);
 
 /* tooltip.c */
 void wlibAddTooltip(GtkWidget *widget, const char *dialog, const char *dialogitem);

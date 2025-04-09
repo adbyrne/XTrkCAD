@@ -466,7 +466,9 @@ wBool_t wMenuToggleSet(
     if (mt==NULL) return 0;
 
     oldState = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM( mt->widget ));
-    gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(mt->widget ), set );
+
+    if(oldState != set )
+        gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(mt->widget ), set );
 
     return oldState;
 }

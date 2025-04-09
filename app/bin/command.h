@@ -44,6 +44,7 @@
 #define IC_PLAYBACK_PUSH        (1<<16)
 #define IC_WANT_MODKEYS         (1<<17)
 #define IC_POPUP3				(1<<18)
+#define IC_TOGGLE				(1<<19)
 
 
 /*

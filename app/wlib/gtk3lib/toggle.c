@@ -36,7 +36,6 @@
 #include "gtkint.h"
 #include "i18n.h"
 
-
 /**
  * Get the state of a group of buttons. If the group consists of
  * radio buttons, the return value is the index of the selected button
@@ -111,6 +110,7 @@ long wToggleGetValue(
 {
 	return toggleGetValue(b);
 }
+
 
 /**
  * Signal handler for button selection in radio buttons and toggle
@@ -243,4 +243,91 @@ wControl_p wToggleCreate(
 		gtk_widget_show_all(b->widget);
 	}
 	return b;
+}
+
+
+/**
+ * Set the status of the button
+ *
+ * \param bb    IN the button
+ * \param value IN TRUE for pressed in, FALSE for raised
+ */
+
+void wButtonSetBusy(wControl_p bb, int newState)
+{
+	gboolean currentState = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+	                                bb->widget));
+	if (currentState != newState) {
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bb->widget), newState);
+	}
+}
+
+static void toolbarClicked(GtkToggleButton* widget, gpointer value)
+{
+	struct button* b = CONTROL_GET_ATTRIBUTES_PTR(((wControl_p)value), button);
+
+	if (b->action ) {
+		b->action(((wControl_p)value)->context);
+	}
+}
+
+/**
+ * Create a toolbar toggle button
+ *
+ * ### Usage in dialogs
+ *
+ * - runtime: yes
+ * - builder: not required
+ *
+ * ### Options
+ * BO_GAP
+ * : leave some space after the button.
+ *
+ * \param parent IN		application main window
+ * \param x,y  IN		unused
+ * \param helpStr IN	help string
+ * \param icon IN		pointer to icon (XPM)
+ * \param option IN		options
+ * \param width IN		unused
+ * \param action IN		callback
+ * \param styleContext IN		user styleContext as styleContext
+ * \returns button control
+ *
+ */
+
+wControl_p wToggleCreateForToolbar(
+        wControl_p	parent,
+        wWinPix_t	x,
+        wWinPix_t	y,
+        const char* helpStr,
+        wIcon_p icon,
+        long 	option,
+        wWinPix_t 	width,
+        wButtonCallBack_p action,
+        void* context)
+{
+	wControl_p buttonControl;
+	struct button* buttonAttributes;
+
+	g_assert(parent->type == W_MAIN);
+	g_assert(icon->bits);
+
+	buttonControl = wlibControlNew(B_TOGGLE, parent, helpStr, context);
+	buttonAttributes = CONTROL_GET_ATTRIBUTES_PTR(buttonControl, button);
+	buttonAttributes->action = action;
+	buttonControl->widget = GTK_WIDGET(gtk_toggle_button_new());
+
+	wButtonSetIcon(buttonControl, icon);
+
+	/** \todo BO_ABUT should be renamed to BO_OVERFLOW_MENU and be included with the button */
+	if (option & BO_ABUT) {
+		wlibSetAbutStyle(buttonControl->widget);
+	}
+
+	wlibAddButtonToToolbar(buttonControl, helpStr);
+
+	g_signal_connect(G_OBJECT(buttonControl->widget), "clicked",
+	                 G_CALLBACK(toolbarClicked), buttonControl);
+
+	return buttonControl;
 }

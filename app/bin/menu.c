@@ -346,6 +346,15 @@ static void DoCommandBIndirect(void * cmdInxP)
 	DoCommandB(I2VP(cmdInx));
 }
 
+void ToggleSetInMenuToolbar(wControl_p menuItem, wControl_p toolbarButton, wBool_t newState)
+{
+	wMenuToggleSet(menuItem, newState);
+
+	if (toolbarButton) {
+		wButtonSetBusy(toolbarButton, newState);
+	}
+}
+
 /**
  * Set magnets state
  */
@@ -354,9 +363,9 @@ EXPORT int MagneticSnap(int state)
 	int oldState = magneticSnap;
 	magneticSnap = state;
 	wPrefSetInteger("misc", "magnets", magneticSnap);
-	wMenuToggleSet(magnetsMI, magneticSnap);
-	if(magnetsB)
-		wButtonSetBusy(magnetsB, (wBool_t) magneticSnap);
+
+	ToggleSetInMenuToolbar(magnetsMI, magnetsB, magneticSnap);
+
 	return oldState;
 }
 
@@ -635,6 +644,7 @@ wControl_p AddToolbarButton(const char* helpStr, wIcon_p icon, long options,
 	if (context == NULL) {
 		for (inx = 0; inx < menuPG.paramCnt; inx++) {
 			if (action != DoCommandB && menuPG.paramPtr[inx].valueP == I2VP(action)) {
+				// button is used to trigger a menu entry
 				context = &menuPG.paramPtr[inx];
 				action = ParamMenuPush;
 				menuPG.paramPtr[inx].context = I2VP(buttonCnt);
@@ -650,8 +660,15 @@ wControl_p AddToolbarButton(const char* helpStr, wIcon_p icon, long options,
 	/** \TODO find a solution to create a gap after a button group is complete */
 //	if (cmdGroup & BG_BIGGAP)
 //		opt = BO_GAP;
-	bb = wButtonCreateForToolbar(mainW, 0, 0, helpStr, icon,
-		opt | BO_ICON, 0, action, context);
+
+	if (options & IC_TOGGLE) {
+		bb = wToggleCreateForToolbar(mainW, 0, 0, helpStr, icon,
+			opt | BO_ICON, 0, action, context);
+	}
+	else {
+		bb = wButtonCreateForToolbar(mainW, 0, 0, helpStr, icon,
+			opt | BO_ICON, 0, action, context);
+	}
 
 	ToolbarControlAdd(bb, opt, cmdGroup);
 
@@ -1149,12 +1166,12 @@ EXPORT void CreateMenus(void)
 	InitSnapGridButtons();
 	magnetsB = AddToolbarButton("cmdMagneticSnap",
 		CreateToolbarIconFromResource("magnet.png"),
-	                            IC_MODETRAIN_TOO, MagneticSnapToggle, NULL);
+	                            IC_MODETRAIN_TOO | IC_TOGGLE, MagneticSnapToggle, NULL);
 	wControlLinkedSet((wControl_p) magnetsMI, (wControl_p) magnetsB);
 	wButtonSetBusy(magnetsB, (wBool_t) magneticSnap);
 
 	mapShowB = AddToolbarButton("cmdMapShow", CreateToolbarIconFromResource("map.png"),
-	                            IC_MODETRAIN_TOO, MapWindowToggleShow, NULL);
+	                            IC_MODETRAIN_TOO | IC_TOGGLE, MapWindowToggleShow, NULL);
 	wControlLinkedSet((wControl_p) mapShowMI, (wControl_p) mapShowB);
 	wButtonSetBusy(mapShowB, (wBool_t) mapVisible);
 

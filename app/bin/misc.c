@@ -1,3 +1,4 @@
+#include "misc.h"
 /* file misc.c
  * Main routine and initialization for the application
  */
@@ -535,20 +536,21 @@ EXPORT void MapWindowToggleShow(void * unused)
  * \param state IN TRUE if visible, FALSE if hidden
  */
 
-EXPORT void MapWindowShow(int state)
+EXPORT
+
+void MapWindowShow(int state)
 {
 	mapVisible = state;
 	wPrefSetInteger("misc", "mapVisible", mapVisible);
-	wMenuToggleSet(mapShowMI, mapVisible);
-
 	wWinShow(mapW, mapVisible);
+
 	if (mapVisible) {
 		DoChangeNotification(CHANGE_MAP);
 	}
-	if(mapW)
+	if (mapW) {
 		wWinShow(mapW, mapVisible);
-	if(mapShowB)
-		wButtonSetBusy(mapShowB, (wBool_t) mapVisible);
+	}
+	ToggleSetInMenuToolbar(mapShowMI, mapShowB, mapVisible);
 }
 
 

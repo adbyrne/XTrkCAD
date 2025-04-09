@@ -30,15 +30,16 @@
 
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
-#include "wrapbox/eggwrapbox.h"
 
 #include "gtkint.h"
-#include "i18n.h"
+
 
 static wBool_t blockCallback;
 #define SetNoCallbackOnClick() (blockCallback = TRUE)
 #define SetCallbackOnClick() (blockCallback = FALSE)
 #define DoCallbackOnClick() (blockCallback == FALSE)
+
+static void buttonClick(GtkWidget* widget, gpointer value);
 
 /*
  *****************************************************************************
@@ -47,20 +48,6 @@ static wBool_t blockCallback;
  *
  *****************************************************************************
  */
-
-/**
- * Set the status of the button
- *
- * \param bb    IN the button
- * \param value IN TRUE for pressed in, FALSE for raised
- */
-
-void wButtonSetBusy(wControl_p bb, int value)
-{
-	SetNoCallbackOnClick();
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bb->widget), value);
-	SetCallbackOnClick();
-}
 
 
 static GtkWidget *
@@ -304,16 +291,6 @@ static char* down16[] = {
 	"  +.+  "
 };
 
-static GtkWidget*
-SetAbutStyle(GtkWidget* button)
-{
-	GtkStyleContext* styleContext;
-
-	styleContext = gtk_widget_get_style_context(GTK_WIDGET(button));
-	gtk_style_context_add_class(styleContext, "toolbar-button-arrow");
-
-	return(button);
-}
 
 /**
  * Create a toolbar button
@@ -353,45 +330,30 @@ wControl_p wButtonCreateForToolbar(
 {
 	wControl_p buttonControl;
 	struct button* buttonAttributes;
-	GtkStyleContext* styleContext;
 
 	g_assert(parent->type == W_MAIN);
+	g_assert(icon->bits);
 
 	buttonControl = wlibControlNew(B_BUTTON, parent, helpStr, context);
 	buttonAttributes = CONTROL_GET_ATTRIBUTES_PTR(buttonControl,button);
 	buttonAttributes->action = action;
-	buttonControl->widget = GTK_WIDGET(gtk_toggle_button_new());
+	buttonControl->widget = GTK_WIDGET(gtk_button_new());
 
-	if (icon->bits) {
-		wButtonSetIcon(buttonControl, icon);
-	} else {
-		printf("Invalid icon for toolbar button %s\n", helpStr);
-	}
-
+	wButtonSetIcon(buttonControl, icon);
 
 	/** \todo BO_ABUT should be renamed to BO_OVERFLOW_MENU and be included with the button */
 	if (option & BO_ABUT) {
-		SetAbutStyle(buttonControl->widget);
+		wlibSetAbutStyle(buttonControl->widget);
 	}
 
-	styleContext = gtk_widget_get_style_context(GTK_WIDGET(buttonControl->widget));
-	gtk_style_context_add_class(styleContext, "toolbar-button");
-	//if (option & BO_GAP) {
-	//	gtk_style_context_add_class(styleContext, "toolbar-button-gap");
-	//}
-
-	egg_wrap_box_insert_child(EGG_WRAP_BOX(parent->attributes.window.toolbar),
-	                          buttonControl->widget, -1, 0);
-	gtk_widget_show_all(buttonControl->widget);
+	wlibAddButtonToToolbar(buttonControl, helpStr);
 
 	g_signal_connect(G_OBJECT(buttonControl->widget), "clicked",
 	                 G_CALLBACK(buttonClick), buttonControl);
 
-	wlibAddTooltip(buttonControl->widget,NULL, helpStr);
-	//wlibAddTooltip(buttonControl->widget, helpStr);
-
 	return buttonControl;
 }
+
 
 
 

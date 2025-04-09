@@ -209,6 +209,7 @@ wControl_p wButtonCreateForToolbar(wControl_p  w,
                                    wButtonCallBack_p action, 
                                    void* context);
 
+
 /** Radio buttons */
 
 void wRadioSetValue(wControl_p bc, long value);
@@ -239,7 +240,15 @@ wControl_p wToggleCreate(wControl_p parent,
                          long* valueP,
                          wChoiceCallBack_p action, 
                          void* context);
-
+wControl_p wToggleCreateForToolbar( wControl_p	parent,
+    wWinPix_t	x,
+    wWinPix_t	y,
+    const char* helpStr,
+    wIcon_p icon,
+    long 	option,
+    wWinPix_t 	width,
+    wButtonCallBack_p action,
+    void* context);
 /*------------------------------------------------------------------------------
  *
  * Color Selection

@@ -123,34 +123,6 @@ signalSizeAlloc(GtkWidget* self,
 }
 
 /**
- * Create the toolbar container of the main window and place inside the container passed as
- * parameter.
- *
- * \param toolbarScrolled IN the container
- * \return a WrapBox Container for the toolbar widgets
- */
-
-GtkWidget *
-CreateToolbar(GtkWidget *container)
-{
-	GtkWidget* toolbar;
-
-	toolbar = egg_wrap_box_new(EGG_WRAP_ALLOCATE_FREE,
-		EGG_WRAP_BOX_SPREAD_START,
-		EGG_WRAP_BOX_SPREAD_START,
-		0, 0);
-	egg_wrap_box_set_minimum_line_children(EGG_WRAP_BOX(toolbar), 15);
-	egg_wrap_box_set_natural_line_children(EGG_WRAP_BOX(toolbar), 60);
-	egg_wrap_box_set_horizontal_spacing(EGG_WRAP_BOX(toolbar), 0);
-	gtk_widget_set_name(toolbar, "toolbar");
-	gtk_widget_set_hexpand(toolbar, TRUE);
-	gtk_box_pack_start(GTK_BOX(container), toolbar, FALSE, FALSE, 6);
-	gtk_widget_show_all(toolbar);
-
-	return(GTK_WIDGET(toolbar));
-}
-
-/**
  * Initialize the application's main window. This function does the necessary
  * initialization of the application including creation of the main window.
  *
@@ -229,7 +201,7 @@ wControl_p wWinMainCreate(
 	GtkWidget* toolbarbox = GTK_WIDGET(gtk_builder_get_object(wcontrol->builder,
 									"toolbarWindow"));
 	if (toolbarbox) {
-		wcontrol->toolbar =  CreateToolbar(toolbarbox);
+		wcontrol->toolbar =  wlibToolbarCreate(toolbarbox);
 	}
 
 	GtkContainer *statusbar = GTK_CONTAINER(gtk_builder_get_object(

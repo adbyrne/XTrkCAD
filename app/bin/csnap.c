@@ -650,18 +650,16 @@ static void GridButtonUpdate( long mode0 )
 	     grid.Vert.Enable != (wToggleGetValue( gridVertEnableT ) != 0) ) {
 		ParamLoadControl( &gridPG, I_VERTENABLE );
 	}
-	if (snapGridEnable_b) {
-		wButtonSetBusy( snapGridEnable_b, grid.Horz.Enable||grid.Vert.Enable );
-	}
-	if (snapGridShow_b) {
-		wButtonSetBusy( snapGridShow_b, (wBool_t)grid.Show );
-	}
-	if (snapGridEnableMI) {
-		//wMenuToggleSet( snapGridEnableMI, ((grid.Horz.Enable||grid.Vert.Enable) != 0) );
-	}
-	if (snapGridShowMI) {
-		wMenuToggleSet( snapGridShowMI, (wBool_t)grid.Show );
-	}
+
+	ToggleSetInMenuToolbar(snapGridEnableMI, snapGridEnable_b, grid.Horz.Enable || grid.Vert.Enable);
+
+	ToggleSetInMenuToolbar(snapGridShowMI, snapGridShow_b, (wBool_t)grid.Show);
+//	if (snapGridShow_b) {
+////		wButtonSetBusy( snapGridShow_b, (wBool_t)grid.Show );
+//	}
+//	if (snapGridShowMI) {
+//		//wMenuToggleSet( snapGridShowMI, (wBool_t)grid.Show );
+//	}
 
 	if ( mode0&CHK_SHOW ) {
 		RedrawGrid();
@@ -818,22 +816,34 @@ EXPORT wIndex_t InitGrid( wMenu_p menu )
 
 EXPORT void SnapGridEnable( void * unused )
 {
-	grid.Vert.Enable = grid.Horz.Enable = !( grid.Vert.Enable || grid.Horz.Enable );
-	GridButtonUpdate( (CHK_HENABLE|CHK_VENABLE) );
+	static inTransition = FALSE;
+	if (!inTransition) {
+		inTransition = TRUE;
+
+		grid.Vert.Enable = grid.Horz.Enable = !(grid.Vert.Enable || grid.Horz.Enable);
+		GridButtonUpdate((CHK_HENABLE | CHK_VENABLE));
+		inTransition = FALSE;
+	}
 }
 
 
-EXPORT void SnapGridShow( void * unused )
+EXPORT void SnapGridShow(void* unused)
 {
-	grid.Show = !grid.Show;
-	GridButtonUpdate( CHK_SHOW );
+	static inTransition = FALSE;
+
+	if (!inTransition) {
+		inTransition = TRUE;
+		grid.Show = !grid.Show;
+		GridButtonUpdate(CHK_SHOW);
+		inTransition = FALSE;
+	}
 }
 
 EXPORT void InitSnapGridButtons( void )
 {
 	snapGridEnable_b = AddToolbarButton( "cmdGridEnable",
-		CreateToolbarIconFromResource("snap-curs.png"), 0, SnapGridEnable, NULL);
+		CreateToolbarIconFromResource("snap-curs.png"), IC_TOGGLE, SnapGridEnable, NULL);
 	snapGridShow_b = AddToolbarButton( "cmdGridShow",
-		CreateToolbarIconFromResource("snap-grid.png"), IC_MODETRAIN_TOO, SnapGridShow,
+		CreateToolbarIconFromResource("snap-grid.png"), IC_MODETRAIN_TOO | IC_TOGGLE, SnapGridShow,
 	                                   NULL );
 }
