@@ -22,6 +22,7 @@
 
 #include "custom.h"
 #include "fileio.h"
+#include "form.h"
 #include "icons.h"
 #include "param.h"
 #include "track.h"
@@ -105,7 +106,7 @@ void static DrawGridPoint(
         drawCmd_p D,
         wDrawColor Color,
         coOrd orig,
-        coOrd * size,
+        const coOrd * size,
         DIST_T dpi,
         coOrd p0,
         BOOL_T bigdot )
@@ -186,7 +187,8 @@ EXPORT void DrawGrid(
 
 #ifdef CROSSTICK
 	if (!cross0_bm) {
-		cross0_bm = wDrawBitMapCreate( mainD.d, 2, 2, XTRKCAD_SYMBOLS_PATH, "cross0.png");
+		cross0_bm = wDrawBitMapCreate( mainD.d, 2, 2, XTRKCAD_SYMBOLS_PATH,
+		                               "cross0.png");
 	}
 #endif
 	unsigned long drawOptions = D->options;
@@ -509,10 +511,10 @@ EXPORT BOOL_T GridIsVisible( void )
  *
  */
 
-static wWin_p gridW;
+static wControl_p gridW;
 static wMenu_p snapGridPopupM;
-static wButton_p snapGridEnable_b;
-static wButton_p snapGridShow_b;
+static wControl_p snapGridEnable_b;
+static wControl_p snapGridShow_b;
 
 static gridHVData oldGrid;
 
@@ -524,36 +526,34 @@ static paramFloatRange_t r0_999999		= { 0.0, 999999.0, 60 };
 static paramIntegerRange_t i0_1000		= { 0, 1000, 30 };
 static paramFloatRange_t r_1000_1000	= { -1000.0, 1000.0, 80 };
 static paramFloatRange_t r0_360			= { 0.0, 360.0, 80 };
-static char *gridLabels[]				= { "", NULL };
+
 static paramData_t gridPLs[] = {
-	{	PD_MESSAGE, N_("Horz"), "horz", 0, I2VP(60)  },
-#define I_HORZSPACING	(1)
-	{	PD_FLOAT, &grid.Horz.Spacing, "horzspacing", PDO_DIM, &r0_999999, N_("Spacing") },
-#define I_HORZDIVISION	(2)
-	{	PD_LONG, &grid.Horz.Division, "horzdivision", 0, &i0_1000, N_("Divisions") },
-#define I_HORZENABLE	(3)
-#define gridHorzEnableT ((wChoice_p)gridPLs[I_HORZENABLE].control)
-	{	PD_TOGGLE, &grid.Horz.Enable, "horzenable", 0, gridLabels, N_("Enable"), BC_HORIZONTAL|BC_NOBORDER },
-	{	PD_MESSAGE, N_("Vert"), "vert", PDO_DLGNEWCOLUMN|PDO_DLGWIDE, I2VP(60) },
-#define I_VERTSPACING	(5)
+#define I_HORZSPACING	(0)
+	{	PD_FLOAT, &grid.Horz.Spacing, "horzspacing", PDO_DIM, &r0_999999, NULL },
+#define I_HORZDIVISION	(1)
+	{	PD_LONG, &grid.Horz.Division, "horzdivision", 0, &i0_1000, NULL },
+#define I_HORZENABLE	(2)
+#define gridHorzEnableT ((wControl_p)gridPLs[I_HORZENABLE].control)
+	{	PD_TOGGLE, &grid.Horz.Enable, "horzenable", 0, NULL, NULL, BC_HORIZONTAL|BC_NOBORDER },
+#define I_VERTSPACING	(3)
 	{	PD_FLOAT, &grid.Vert.Spacing, "vertspacing", PDO_DIM, &r0_999999, NULL },
-#define I_VERTDIVISION	(6)
+#define I_VERTDIVISION	(4)
 	{	PD_LONG, &grid.Vert.Division, "vertdivision", 0, &i0_1000, NULL },
-#define I_VERTENABLE	(7)
-#define gridVertEnableT ((wChoice_p)gridPLs[I_VERTENABLE].control)
-	{	PD_TOGGLE, &grid.Vert.Enable, "vertenable", 0, gridLabels, NULL, BC_HORIZONTAL|BC_NOBORDER },
-#define I_VALUEX		(8)
+#define I_VERTENABLE	(5)
+#define gridVertEnableT ((wControl_p)gridPLs[I_VERTENABLE].control)
+	{	PD_TOGGLE, &grid.Vert.Enable, "vertenable", 0, NULL, NULL, BC_HORIZONTAL|BC_NOBORDER },
+#define I_VALUEX		(6)
 	{	PD_FLOAT, &grid.Orig.x, "origx", PDO_DIM|PDO_DLGNEWCOLUMN|PDO_DLGWIDE, &r_1000_1000, N_("X") },
-#define I_VALUEY		(9)
-	{	PD_FLOAT, &grid.Orig.y, "origy", PDO_DIM, &r_1000_1000, N_("Y") },
-#define I_VALUEA		(10)
-	{	PD_FLOAT, &grid.Angle, "origa", PDO_ANGLE, &r0_360, N_("A") },
-#define I_SHOW			(11)
-#define gridShowT		((wChoice_p)gridPLs[I_SHOW].control)
-	{	PD_TOGGLE, &grid.Show, "show", PDO_DLGIGNORELABELWIDTH, gridLabels, N_("Show"), BC_HORIZONTAL|BC_NOBORDER }
+#define I_VALUEY		(7)
+	{	PD_FLOAT, &grid.Orig.y, "origy", PDO_DIM, &r_1000_1000, NULL },
+#define I_VALUEA		(8)
+	{	PD_FLOAT, &grid.Angle, "origa", PDO_ANGLE, &r0_360, NULL },
+#define I_SHOW			(9)
+#define gridShowT		((wControl_p)gridPLs[I_SHOW].control)
+	{	PD_TOGGLE, &grid.Show, "show", PDO_DLGIGNORELABELWIDTH, NULL, NULL, BC_HORIZONTAL|BC_NOBORDER }
 };
 
-static paramGroup_t gridPG = { "grid", PGO_RECORD, gridPLs, COUNT( gridPLs ) };
+static paramGroup_t gridPG = { "grid", PGO_RECORD|PGO_FULLDIALOGFROMBUILDER, gridPLs, COUNT( gridPLs ) };
 
 
 static BOOL_T GridChanged( void )
@@ -565,8 +565,7 @@ static BOOL_T GridChanged( void )
 	        grid.Vert.Division != oldGrid.Vert.Division ||
 	        grid.Orig.x != oldGrid.Orig.x ||
 	        grid.Orig.y != oldGrid.Orig.y ||
-	        grid.Angle != oldGrid.Angle ||
-	        grid.Horz.Division != oldGrid.Horz.Division;
+	        grid.Angle != oldGrid.Angle;
 }
 
 static void RedrawGrid( void )
@@ -651,15 +650,10 @@ static void GridButtonUpdate( long mode0 )
 		ParamLoadControl( &gridPG, I_VERTENABLE );
 	}
 
-	ToggleSetInMenuToolbar(snapGridEnableMI, snapGridEnable_b, grid.Horz.Enable || grid.Vert.Enable);
+	ToggleSetInMenuToolbar(snapGridEnableMI, snapGridEnable_b, grid.Horz.Enable
+	                       || grid.Vert.Enable);
 
 	ToggleSetInMenuToolbar(snapGridShowMI, snapGridShow_b, (wBool_t)grid.Show);
-//	if (snapGridShow_b) {
-////		wButtonSetBusy( snapGridShow_b, (wBool_t)grid.Show );
-//	}
-//	if (snapGridShowMI) {
-//		//wMenuToggleSet( snapGridShowMI, (wBool_t)grid.Show );
-//	}
 
 	if ( mode0&CHK_SHOW ) {
 		RedrawGrid();
@@ -727,8 +721,9 @@ EXPORT STATUS_T CmdGrid(
 
 	case C_START:
 		if (gridW == NULL) {
-			gridW = ParamCreateDialog( &gridPG, MakeWindowTitle(_("Snap Grid")), _("Ok"),
-			                           GridOk, ParamCancel_Reset, TRUE, NULL, 0, GridDlgUpdate );
+			gridW = FormCreateDialog( &gridPG, MakeWindowTitle(_("Snap Grid")),
+			                          _("Ok"), GridOk,
+			                          _("Cancel"), ParamCancel_Reset, TRUE,  0, GridDlgUpdate);
 		}
 		oldGrid = grid;
 		ParamLoadControls( &gridPG );
@@ -842,8 +837,10 @@ EXPORT void SnapGridShow(void* unused)
 EXPORT void InitSnapGridButtons( void )
 {
 	snapGridEnable_b = AddToolbarButton( "cmdGridEnable",
-		CreateToolbarIconFromResource("snap-curs.png"), IC_TOGGLE, SnapGridEnable, NULL);
+	                                     CreateToolbarIconFromResource("snap-curs.png"), IC_TOGGLE, SnapGridEnable,
+	                                     NULL);
 	snapGridShow_b = AddToolbarButton( "cmdGridShow",
-		CreateToolbarIconFromResource("snap-grid.png"), IC_MODETRAIN_TOO | IC_TOGGLE, SnapGridShow,
+	                                   CreateToolbarIconFromResource("snap-grid.png"), IC_MODETRAIN_TOO | IC_TOGGLE,
+	                                   SnapGridShow,
 	                                   NULL );
 }

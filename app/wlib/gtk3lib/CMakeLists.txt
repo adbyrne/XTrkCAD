@@ -42,6 +42,7 @@ target_sources(xtrkcad-wlib
  	text.c
 	timer.c
 	toggle.c
+	toolbarctrl.c
 	treeview.c
  	wpref.c
 
