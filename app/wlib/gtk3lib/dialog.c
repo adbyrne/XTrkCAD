@@ -207,6 +207,8 @@ wDialogButtonsConfigure(wControl_p dialog, const char* okLabel,
  * - builder: yes
  *
  * ### Options
+ * F_CENTER center new window on parent window
+ * F_RESIZE user can resize the window
  *  
  * \param parent    IN  parent window for new dialog
  * \param helpStr   IN  help topic 
@@ -240,6 +242,10 @@ wWinDialogCreate(wControl_p parent,
     }
     else {
         dialog = wlibCreateWindowFromBuilder(winDialog, "basicdialog", option);
+
+        if (option & F_RESIZE) {
+            gtk_window_set_resizable(GTK_WINDOW(dialog), TRUE);
+        }
     }
 
 
@@ -273,7 +279,10 @@ wWinDialogCreate(wControl_p parent,
     }
 
     gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parentWindow));
-    gtk_window_set_title(GTK_WINDOW(dialog), titleStr);
+
+    if (titleStr) {
+        gtk_window_set_title(GTK_WINDOW(dialog), titleStr);
+    }
 
     gtk_widget_show(dialog);
     dcontrol->winProc = winProc;

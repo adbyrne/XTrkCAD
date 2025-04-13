@@ -160,9 +160,9 @@ EXPORT void Reset(void)
 	LOG(log_command, 2,
 	    ( "COMMAND CANCEL %s\n", commandList[curCommand].helpKey ))
 	commandList[curCommand].cmdProc( C_CANCEL, zero);
-	//if (commandList[curCommand].buttInx >= 0) {
-	//	ToolbarButtonBusy(commandList[curCommand].buttInx, FALSE);
-	//}
+	if (commandList[curCommand].buttInx >= 0) {
+		ToolbarButtonBusy(commandList[curCommand].buttInx, FALSE);
+	}
 	curCommand = (preSelect ? selectCmdInx : describeCmdInx);
 	wSetCursor(mainD.d, preSelect ? defaultCursor : wCursorQuestion);
 	commandContext = commandList[curCommand].context;

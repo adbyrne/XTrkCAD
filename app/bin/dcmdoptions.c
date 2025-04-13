@@ -55,7 +55,7 @@ static void CmdoptChange(long changes)
 static void DoCmdopt(void* junk)
 {
 	if (cmdoptW == NULL) {
-		cmdoptW = FormCreateDialog(&cmdoptPG, _("Command Options"),
+		cmdoptW = FormCreateDialog(&cmdoptPG, NULL,
 		                           _("Ok"), CmdoptOk,
 		                           _("Cancel"), ParamCancel_Restore, TRUE, 0L, NULL);
 	}
