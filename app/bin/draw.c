@@ -3293,7 +3293,7 @@ EXPORT void InitCmdPan( wMenu_p menu )
 {
 	panCmdInx = AddMenuButton( menu, CmdPan, "cmdPan", _("Pan/Zoom"),
 		CreateToolbarIconFromResource("pan-zoom.png"),
-	                           LEVEL0, IC_CANCEL|IC_POPUP|IC_LCLICK|IC_CMDMENU, ACCL_PAN, NULL );
+	                           LEVEL0, IC_TOGGLE | IC_CANCEL|IC_POPUP|IC_LCLICK|IC_CMDMENU, ACCL_PAN, NULL );
 }
 EXPORT void InitCmdPan2( wMenu_p menu )
 {

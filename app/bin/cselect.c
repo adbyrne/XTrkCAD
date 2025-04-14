@@ -3763,7 +3763,7 @@ EXPORT void InitCmdSelect( wMenu_p menu )
 {
 	selectCmdInx = AddMenuButton( menu, CmdSelect, "cmdSelect", _("Select"),
 		CreateToolbarIconFromResource("select.png"),
-	                              LEVEL0, IC_CANCEL|IC_POPUP|IC_LCLICK|IC_CMDMENU|IC_WANT_MOVE|IC_WANT_MODKEYS,
+	                              LEVEL0, IC_TOGGLE | IC_CANCEL|IC_POPUP|IC_LCLICK|IC_CMDMENU|IC_WANT_MOVE|IC_WANT_MODKEYS,
 	                              ACCL_SELECT, NULL );
 }
 

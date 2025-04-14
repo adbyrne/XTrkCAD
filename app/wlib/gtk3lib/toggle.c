@@ -35,6 +35,7 @@
 
 #include "gtkint.h"
 #include "i18n.h"
+#include <stdbool.h>
 
 /**
  * Get the state of a group of buttons. If the group consists of
@@ -199,15 +200,22 @@ wControl_p wToggleCreate(
 			g_list_free(children);
 		}
 	} else {
+
+		GtkWidget *scroll = gtk_scrolled_window_new(NULL, NULL);
+		gtk_scrolled_window_set_propagate_natural_height(GTK_SCROLLED_WINDOW(scroll), TRUE);
+		gtk_scrolled_window_set_propagate_natural_width(GTK_SCROLLED_WINDOW(scroll), TRUE);
+
 		if (option & BC_HORIZONTAL) {
-			b->widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+			b->widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 		} else {
-			b->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, 6);
+			b->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
 		}
 
 		if (b->widget == 0) {
 			abort();
 		}
+
+		gtk_container_add(GTK_CONTAINER(scroll), b->widget);
 
 		if (!(option & BC_NOBORDER)) {
 			GtkStyleContext* context = gtk_widget_get_style_context(GTK_WIDGET(
@@ -227,7 +235,6 @@ wControl_p wToggleCreate(
 			                 G_CALLBACK(toggled), b);
 
 			wlibAddTooltip(butt, parent->name, helpStr);
-			//wlibAddTooltip(butt, helpStr);
 		}
 
 		if (valueP) {
@@ -238,14 +245,14 @@ wControl_p wToggleCreate(
 			wlibAddLabel((wControl_p)b, x-1, y, labelStr);
 		}
 
-		wlibBasicGridAttach(parent, b->widget, x, y, 1, 1);
+		wlibBasicGridAttach(parent, scroll, x, y, 1, 1);
 
-		gtk_widget_show_all(b->widget);
+		gtk_widget_show_all(scroll);
 	}
 	return b;
 }
 
-
+static bool ignoreClick;
 /**
  * Set the status of the button
  *
@@ -258,7 +265,9 @@ void wButtonSetBusy(wControl_p bb, int newState)
 	gboolean currentState = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 	                                bb->widget));
 	if (currentState != newState) {
+		ignoreClick = true;
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bb->widget), newState);
+		ignoreClick = false;
 	}
 }
 
@@ -266,7 +275,7 @@ static void toolbarClicked(GtkToggleButton* widget, gpointer value)
 {
 	struct button* b = CONTROL_GET_ATTRIBUTES_PTR(((wControl_p)value), button);
 
-	if (b->action ) {
+	if (b->action && !ignoreClick) {
 		b->action(((wControl_p)value)->context);
 	}
 }

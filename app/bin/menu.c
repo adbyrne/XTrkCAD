@@ -29,6 +29,7 @@
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
+#include "form.h"
 #include "icons.h"
 #include "layout.h"
 #include "param.h"
@@ -389,11 +390,12 @@ EXPORT void SelectFont(void * unused)
 	wSelectFont(_("XTrackCAD Font"));
 }
 
+#define MAX_STICKY_GROUPS 32
 
 EXPORT long stickySet = 0;
 static long stickySet1 = 0;
 static wWin_p stickyW;
-static const char * stickyLabels[33];
+static const char * stickyLabels[MAX_STICKY_GROUPS + 1];
 static paramData_t stickyPLs[] = { {
 		PD_TOGGLE, &stickySet1, "set", 0,
 		stickyLabels
@@ -412,12 +414,14 @@ static void StickyOk(void * unused)
 
 EXPORT void DoSticky(void * unused)
 {
-	if (!stickyW)
-		stickyW = ParamCreateDialog(&stickyPG,
-		                            MakeWindowTitle(_("Sticky Commands")), _("Ok"), StickyOk, ParamCancel_Restore,
-		                            TRUE, NULL, 0, NULL);
+	if (!stickyW) {
+		stickyW = FormCreateDialog(&stickyPG, MakeWindowTitle(_("Sticky Commands")),
+			_("Ok"), StickyOk,
+			_("Cancel"), ParamCancel_Restore,
+			TRUE, F_RESIZE, NULL);
+	}
 	stickySet1 = stickySet;
-	ParamLoadControls(&stickyPG);
+	FormLoadControls(&stickyPG);
 	wShow(stickyW);
 }
 
@@ -661,7 +665,7 @@ wControl_p AddToolbarButton(const char* helpStr, wIcon_p icon, long options,
 //	if (cmdGroup & BG_BIGGAP)
 //		opt = BO_GAP;
 
-	if (options & IC_TOGGLE) {
+	if (options & IC_TOGGLE || options & IC_STICKY) {
 		bb = wToggleCreateForToolbar(mainW, 0, 0, helpStr, icon,
 			opt | BO_ICON, 0, action, context);
 	}
@@ -746,16 +750,21 @@ EXPORT wIndex_t AddMenuButton(wMenu_p menu, procCommand_t command,
 	wControl_p cmdMenus[NUM_CMDMENUS] = { NULL, NULL, NULL, NULL };
 	if (nameStr[0] != '\0') {
 		if (options & IC_STICKY) {
+
+			/* is button outside a group of buttons or is new group? */
 			if (buttonGroupPopupM == NULL || newButtonGroup) {
-				CHECK( stickyCnt <= 32 );
+				CHECK( stickyCnt <= MAX_STICKY_GROUPS );
 				stickyCnt++;
+				stickyLabels[stickyCnt] = NULL;
 			}
+			/* is button outside a group, use name of button, else use label of group */
 			if (buttonGroupPopupM == NULL) {
 				stickyLabels[stickyCnt - 1] = nameStr;
 			} else {
 				stickyLabels[stickyCnt - 1] = buttonGroupStickyLabel;
 			}
-			stickyLabels[stickyCnt] = NULL;
+
+			/* set initial flag for group */
 			stickyMask = 1L<<(stickyCnt-1);
 			if ( ( options & IC_INITNOTSTICKY ) == 0 ) {
 				stickySet |= stickyMask;
