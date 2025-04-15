@@ -70,6 +70,10 @@ button.color {
     padding: 0px;
 }
 
+scrolledwindow checkbutton {
+    padding: 0px;
+}
+
 framed box
 box.framed {
     border:1px solid rgb(192, 192, 192)

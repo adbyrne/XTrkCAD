@@ -1182,8 +1182,7 @@ void UndoUndo( void * unused )
 	oldCount = trackCount;
 	trackCount = us->trackCount;
 	us->trackCount = oldCount;
-	InfoCount( trackCount );
-
+	
 	doCount--;
 	undoCount++;
 	DEC_UNDO_INX( undoHead );
@@ -1262,7 +1261,6 @@ void UndoRedo( void * unused )
 	oldCount = trackCount;
 	trackCount = us->trackCount;
 	us->trackCount = oldCount;
-	InfoCount( trackCount );
 
 	undoCount--;
 	doCount++;

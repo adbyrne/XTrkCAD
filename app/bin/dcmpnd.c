@@ -114,7 +114,6 @@ static void UpdateTitleNext( void )
 		cnt = 0;
 		trk = NULL;
 		while (TrackIterate( &trk ) ) {
-			InfoCount(cnt++);
 			TRKTYP_T trkType = GetTrkType(trk);
 			if (trkType == T_TURNOUT || trkType == T_STRUCTURE) {
 				xx = GET_EXTRA_DATA(trk, trkType, extraDataCompound_t);
@@ -129,7 +128,6 @@ static void UpdateTitleNext( void )
 		}
 		DYNARR_RESET( updateTitleElement, updateTitles_da );
 		InfoMessage("");
-		InfoCount( trackCount );
 		SetFileChanged();
 		DoChangeNotification( CHANGE_MAIN );
 		return;

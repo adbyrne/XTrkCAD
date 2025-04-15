@@ -276,7 +276,6 @@ void PanMenuEnter(void * modeVP);
 void InitCmdZoom(wMenu_p, wMenu_p, wMenu_p, wMenu_p);
 
 void InfoPos(coOrd);
-void InfoCount(wIndex_t);
 void SetMessage(char *);
 
 extern wIndex_t panCmdInx;

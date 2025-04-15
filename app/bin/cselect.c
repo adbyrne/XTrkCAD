@@ -559,7 +559,6 @@ static void SelectConnectedTracks(
 	EPINX_T ep;
 	DYNARR_RESET( track_p, tlist_da );
 	TlistAppend( trk );
-	InfoCount( 0 );
 	if (!display_only) {
 		wDrawDelayUpdate( mainD.d, FALSE );
 	}
@@ -603,7 +602,6 @@ static void SelectConnectedTracks(
 				continue;
 			} else {
 				SelectOneTrack( trk, TRUE );
-				InfoCount( inx+1 );
 			}
 		}
 	}
@@ -611,7 +609,6 @@ static void SelectConnectedTracks(
 		RedrawSelectedTracksBoundary();
 		wDrawDelayUpdate( mainD.d, TRUE );
 		wFlush();
-		InfoCount( trackCount );
 	}
 }
 
@@ -1224,7 +1221,6 @@ static void AccumulateTracks( void )
 			movedCnt++;
 		}
 	}
-	InfoCount( movedCnt );
 	/*wDrawDelayUpdate( moveD.d, FALSE );*/
 }
 
@@ -1270,7 +1266,6 @@ static void GetMovedTracks( BOOL_T undraw )
 	DYNARR_RESET( trkSeg_p, tempSegs_da );
 	moveOrig = mainD.orig;
 	movedCnt = 0;
-	InfoCount(0);
 	wSetCursor( mainD.d, defaultCursor );
 	moveD_hi = moveD_lo = mainD.orig;
 	moveD_hi.x += mainD.size.x;
@@ -1512,8 +1507,6 @@ static void MoveTracks(
 				}
 			}
 		}
-
-		InfoCount( inx );
 	}
 	RemoveEndCornus();
 	ClrAllTrkBits(TB_UNDRAWN);
@@ -1522,7 +1515,7 @@ static void MoveTracks(
 	if (undo) {
 		UndoEnd();
 	}
-	InfoCount( trackCount );
+
 }
 
 void MoveToJoin(
@@ -2878,7 +2871,6 @@ static void FlipTracks(
 	}
 	wSetCursor( mainD.d, defaultCursor );
 	UndoEnd();
-	InfoCount( trackCount );
 }
 
 

@@ -1050,9 +1050,6 @@ static void Playback( void )
 		}
 		thisCmd = otherCmd;
 		paramLineNum++;
-		if (showParamLineNum) {
-			InfoCount( paramLineNum );
-		}
 		Stripcr( paramLine );
 		if (paramLine[0] == '#') {
 			/* comment */

@@ -1043,7 +1043,6 @@ EXPORT track_p NewTrack( TRKINX_T index, TRKTYP_T type, EPINX_T endCnt,
 	UndoNew( trk );
 	trackCount++;
 	IncrementLayerObjects(curLayer);
-	InfoCount( trackCount );
 	return trk;
 }
 
@@ -1078,7 +1077,6 @@ EXPORT void ClearTracks( void )
 	changed = checkPtMark = 0;
 	trackCount = 0;
 	ClearCars();
-	InfoCount( trackCount );
 }
 
 
@@ -1164,7 +1162,6 @@ EXPORT BOOL_T DeleteTrack( track_p trk, BOOL_T all )
 	trackCount--;
 	AuditTracks( "deleteTrack T%d", trk->index);
 	UndoDelete(trk);					/**< Attention: trk is invalidated during that call */
-	InfoCount( trackCount );
 	return TRUE;
 }
 
@@ -1181,7 +1178,6 @@ EXPORT void SaveTrackState( void )
 	changed = 0;
 	max_index = 0;
 	SaveCarState();
-	InfoCount( trackCount );
 }
 
 EXPORT void RestoreTrackState( void )
@@ -1192,7 +1188,6 @@ EXPORT void RestoreTrackState( void )
 	changed = savedTrackState.changed;
 	max_index = savedTrackState.max_index;
 	RestoreCarState();
-	InfoCount( trackCount );
 }
 
 
@@ -1705,7 +1700,6 @@ EXPORT void ImportEnd( coOrd offset, wBool_t import, wBool_t inPlace )
 	}
 	importTrack = NULL;
 	trackCount = trackCountOld;
-	InfoCount( trackCount );
 	// Pan screen if needed to center of new
 	if (offscreen) {
 		panCenter = middle_object;
@@ -1899,7 +1893,7 @@ nextEndPt:;
 			}
 		}
 	}
-	InfoCount( trackCount );
+
 	if (auditFile != NULL) {
 		if (auditStop) {
 			if (NoticeMessage( MSG_AUDIT_WRITE_FILE, _("Yes"), _("No"))) {
@@ -3190,7 +3184,6 @@ EXPORT void DrawTracks( drawCmd_p d, DIST_T scale, coOrd orig, coOrd size )
 	unsigned long time0 = wGetTimer();
 
 	inDrawTracks = TRUE;
-	InfoCount( 0 );
 
 	TRK_ITERATE( trk ) {
 		if ( (d->options&DC_PRINT) != 0 &&
@@ -3212,9 +3205,6 @@ EXPORT void DrawTracks( drawCmd_p d, DIST_T scale, coOrd orig, coOrd size )
 		}
 		DrawTrack( trk, d, wDrawColorBlack );
 		count++;
-		if (count%10 == 0) {
-			InfoCount( count );
-		}
 	}
 
 	if (d == &mainD) {
@@ -3225,7 +3215,7 @@ EXPORT void DrawTracks( drawCmd_p d, DIST_T scale, coOrd orig, coOrd size )
 		LOG( log_timedrawtracks, 1, ( "DrawTracks time = %lu mS\n",
 		                              wGetTimer()-time0 ) );
 	}
-	InfoCount( trackCount );
+
 	inDrawTracks = FALSE;
 	if ( doSelectRecount ) {
 		SelectRecount();
@@ -3239,18 +3229,14 @@ EXPORT void DrawSelectedTracks( drawCmd_p d, BOOL_T all )
 	wIndex_t count;
 
 	count = 0;
-	InfoCount( 0 );
 
 	TRK_ITERATE( trk ) {
 		if ( (all && GetLayerVisible(GetTrkLayer(trk))) || GetTrkSelected( trk ) ) {
 			DrawTrack( trk, d, wDrawColorBlack );
 			count++;
-			if (count%10 == 0) {
-				InfoCount( count );
-			}
 		}
 	}
-	InfoCount( trackCount );
+	
 	SelectRecount();
 }
 

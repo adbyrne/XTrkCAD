@@ -27,25 +27,11 @@
 
 #include <wlib.h>
 
-#include "draw.h"
-#include "misc.h"
-#include "param.h"
-
-
-static wWinPix_t infoHeight;
-static wWinPix_t textHeight;
+#include "form.h"
 
 #define XLABEL "X: "
 #define YLABEL "Y: "
 #define ZOOMLABEL "Zoom: "
-
-static wWinPix_t info_yb_offset = 2;
-static wWinPix_t info_xm_offset = 2;
-static wWinPix_t messageOrControlX = 0;
-static wWinPix_t messageOrControlY = 0;
-#define NUM_INFOCTL				(4)
-static wControl_p curInfoControl[NUM_INFOCTL];
-static wWinPix_t curInfoLabelWidth[NUM_INFOCTL];
 
 static struct {
 	wControl_p scale_m;
@@ -162,9 +148,6 @@ void InfoPos(coOrd pos)
 	oldMarker = pos;
 }
 
-//static wControl_p deferSubstituteControls[NUM_INFOCTL + 1];
-//static char* deferSubstituteLabels[NUM_INFOCTL];
-
 EXPORT void InfoSubstituteControls(
 	const char * name,
 	wControl_p* controls, 
@@ -184,10 +167,4 @@ void SetMessage(char* msg)
 	wStatusSetValue(infoD.info_m, msg);
 }
 
-
-void
-InfoCount(int count)
-{
-/** \todo Remove all references and then this dummy function */
-}
 
