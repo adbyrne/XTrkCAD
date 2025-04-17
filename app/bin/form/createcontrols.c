@@ -34,6 +34,7 @@ static void ColorSelectPush(void* dp, wDrawColor dc)
 	paramData_p p = (paramData_p)dp;
 	long rgb = wDrawGetRGB(dc);
 	while (dc == drawColorPreviewSelected || dc == drawColorPreviewUnselected) {
+		/**  \todo: probably unused code, check the two variable above for usage */
 		// The user picked a special color, tweak it
 		rgb -= 1; // Make it very close but different
 		if ((rgb & 0xFF) == 0)
@@ -520,7 +521,7 @@ CreateControl(paramData_p pd,char* helpStr,	unsigned x,	unsigned y)
 
 }
 
-void FormCreateControls(paramGroup_p group)
+void FormCreateControls(paramGroup_p group, paramChangeProc changeProc)
 {
 	DynString helpString;
 	unsigned xPos = 1;
@@ -553,7 +554,7 @@ void FormCreateControls(paramGroup_p group)
 		DynStringClear(&helpString);
 
 	}
-
+	group->changeProc = changeProc;
 	DynStringFree(&helpString);
 }
 

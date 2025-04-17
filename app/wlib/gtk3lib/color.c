@@ -224,6 +224,8 @@ wControl_p wColorSelectButtonCreate(
 
 	b = wlibControlNew(B_COLORBUTTON,parent, helpStr, context);
 	ccontrol = CONTROL_GET_ATTRIBUTES_PTR(b, colorbutton);
+	ccontrol->action = action;
+	ccontrol->valueP = valueP;
 
 	if (ISDEFINEDINBUILDER(parent)) {
 		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
@@ -231,8 +233,6 @@ wControl_p wColorSelectButtonCreate(
 		b->widget = gtk_color_button_new();
 		if (!b->widget) { exit(1); }
 
-		g_signal_connect(b->widget, "color-set",
-			G_CALLBACK(colorChange), b);
 
 		if (option & BB_DEFAULT) {
 			gtk_widget_set_can_default(b->widget, TRUE);
@@ -253,7 +253,8 @@ wControl_p wColorSelectButtonCreate(
 		gtk_widget_show(b->widget);
 	}
 
-	ccontrol->action = action;
+	g_signal_connect(b->widget, "color-set",
+		G_CALLBACK(colorChange), b);
 
 	wColorSelectButtonSetColor(b, (valueP?*valueP:0));
 

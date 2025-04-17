@@ -24,7 +24,7 @@
 #include "cundo.h"
 #include "fileio.h"
 #include "icons.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "cselect.h"
 #include "common-ui.h"
@@ -1002,34 +1002,27 @@ static trackCmd_t turntableCmds = {
 	CompareTurntable
 };
 
-
+
 static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 {
 	track_p t;
 	static coOrd pos0;
-	static int state = 0;
-	wControl_p controls[2];
-	char * labels[1];
+	static wBool_t drawOutline = FALSE;
 
 	switch (action) {
 
 	case C_START:
 		if (turntableDiameterPD.control==NULL) {
-			//ParamCreateControls( &turntablePG, NULL );
-			FormCreateControls(&turntablePG);
+			FormCreateControls(&turntablePG, NULL);
 		}
 		sprintf( message, "turntable-diameter-%s", curScaleName );
 		turntableDiameter = ceil(80.0*12.0/curScaleRatio);
 		wPrefGetFloat( "misc", message, &turntableDiameter, turntableDiameter );
 		ParamLoadControls( &turntablePG );
 		ParamGroupRecord( &turntablePG );
-		controls[0] = turntableDiameterPD.control;
-		controls[1] = NULL;
-		labels[0] = N_("Diameter");
-		InfoSubstituteControls(turntablePG.nameStr, controls, labels);
+		InfoSetControls(mainW, turntablePG.nameStr);
 		SetAllTrackSelect( FALSE );
-		/*InfoMessage( "Place Turntable");*/
-		state = 0;
+		drawOutline = TRUE;
 		return C_CONTINUE;
 
 	case C_DOWN:
@@ -1038,13 +1031,11 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 			ErrorMessage( MSG_TURNTABLE_DIAM_GTR_0 );
 			return C_ERROR;
 		}
-		controls[0] = turntableDiameterPD.control;
-		controls[1] = NULL;
-		labels[0] = N_("Diameter");
-		InfoSubstituteControls(turntablePG.nameStr, controls, labels);
+
+		InfoSetControls(mainW, turntablePG.nameStr);
 		ParamLoadData( &turntablePG );
 		pos0 = pos;
-		state = 1;
+		drawOutline = TRUE;
 		return C_CONTINUE;
 
 	case C_MOVE:
@@ -1061,11 +1052,11 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		InfoDefaultControls();
 		sprintf( message, "turntable-diameter-%s", curScaleName );
 		wPrefSetFloat( "misc", message, turntableDiameter );
-		state = 0;
+		drawOutline = FALSE;
 		return C_TERMINATE;
 
 	case C_REDRAW:
-		if ( state > 0 ) {
+		if ( drawOutline ) {
 			DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0,
 			         wDrawColorBlack );
 		}

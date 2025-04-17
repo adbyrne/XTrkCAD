@@ -119,9 +119,9 @@ void *wComboBoxGetItemContext(wControl_p b, wIndex_t inx)
 	GtkTreeIter iter;
 	wListItem_p attributes = NULL;
 
-	if (gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->attributes.list.treeView), &iter, NULL,
+	if (gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->attributes.list.listStore), &iter, NULL,
 	                                  inx)) {
-		gtk_tree_model_get(GTK_TREE_MODEL(b->attributes.list.treeView),
+		gtk_tree_model_get(GTK_TREE_MODEL(b->attributes.list.listStore),
 		                   &iter,
 		                   LISTCOL_DATA, (void *)&attributes,
 		                   -1);
@@ -139,10 +139,10 @@ void *wComboBoxGetItemContext(wControl_p b, wIndex_t inx)
  *
  * \param b		IN the combobox
  * \param text	IN string to add
- * \return    describe the return value
+ * \return    new number of rows
  */
 
-void wComboBoxAddValue(
+unsigned wComboBoxAddValue(
         wControl_p b,
         const char *text,
         void *attributes)
@@ -150,6 +150,7 @@ void wComboBoxAddValue(
 	GtkTreeIter iter;
 	struct list *list = CONTROL_GET_ATTRIBUTES_PTR(b, list);
 	wListItem_p id_p;
+	unsigned rows;
 
 	id_p = wlibAllocateListItem(b, text, attributes);
 
@@ -159,6 +160,11 @@ void wComboBoxAddValue(
 	                   LISTCOL_TEXT, text,
 	                   LISTCOL_DATA, (void *)id_p,
 	                   -1);
+
+	rows = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(list->listStore), NULL);
+
+	// index is zero based
+	return(rows - 1);
 }
 
 /**

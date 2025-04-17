@@ -65,7 +65,7 @@ static long fontSizeList[] = {
 };
 
 EXPORT void LoadFontSizeList(
-        wList_p list,
+        wControl_p list,
         long curFontSize)
 {
 	wIndex_t curInx = 0, inx1;
@@ -75,17 +75,17 @@ EXPORT void LoadFontSizeList(
 		if ((inx == 0 || curFontSize > fontSizeList[inx - 1]) &&
 		    (curFontSize < fontSizeList[inx])) {
 			sprintf(message, "%ld", curFontSize);
-			curInx = wListAddValue(list, message, NULL, I2VP(curFontSize));
+			curInx = wComboBoxAddValue(list, message, I2VP(curFontSize));
 		}
 		sprintf(message, "%ld", fontSizeList[inx]);
-		inx1 = wListAddValue(list, message, NULL, I2VP(fontSizeList[inx]));
+		inx1 = wComboBoxAddValue(list, message, I2VP(fontSizeList[inx]));
 		if (curFontSize == fontSizeList[inx]) {
 			curInx = inx1;
 		}
 	}
 	if (curFontSize > fontSizeList[ COUNT( fontSizeList ) - 1]) {
 		sprintf(message, "%ld", curFontSize);
-		curInx = wListAddValue(list, message, NULL, I2VP(curFontSize));
+		curInx = wComboBoxAddValue(list, message, I2VP(curFontSize));
 	}
 	wListSetIndex(list, curInx);
 	wFlush();
@@ -109,7 +109,7 @@ long GetFontSizeIndex(long size)
 
 EXPORT void UpdateFontSizeList(
         long * fontSizeR,
-        wList_p list,
+        wControl_p list,
         wIndex_t listInx )
 {
 	long fontSize;
@@ -2931,7 +2931,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			controls[0] = drawLineWidthPD.control;
 			controls[1] = drawColorPD.control;
 			controls[2] = drawLineTypePD.control;
-			controls[2] = NULL;
+			controls[3] = NULL;
 			sprintf( labelName, _("%s Line Width"), _(objectName[drawCmdContext.Op]) );
 			labels[0] = labelName;
 			labels[1] = N_("Color");

@@ -23,7 +23,7 @@
 #include "cundo.h"
 #include "fileio.h"
 #include "icons.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "draw.h"
 #include "misc.h"
@@ -52,14 +52,13 @@ static struct {
 	BOOL_T boxed;
 } Dt;
 
-static char * boxLabels[] = { "", NULL };
 static paramData_t textPLs[] = {
 #define textPD (textPLs[0])
-	{ PD_COMBOLIST, &Dt.fontSizeInx, "fontsize", 0, NULL, N_("Font Size"), BL_EDITABLE },
+	{ PD_COMBOLIST, &Dt.fontSizeInx, "fontsize", 0, NULL, NULL, BL_EDITABLE },
 #define colorPD (textPLs[1])
-	{ PD_COLORLIST, &Dt.color, "color", PDO_NORECORD, NULL, N_("Color") },
+	{ PD_COLORLIST, &Dt.color, "color", PDO_NORECORD, NULL, NULL },
 #define boxPD (textPLs[2])
-	{ PD_TOGGLE, &Dt.boxed, "boxed", 0, boxLabels, N_("Boxed"), 0 }
+	{ PD_TOGGLE, &Dt.boxed, "boxed", 0, NULL, NULL, 0 }
 };
 static paramGroup_t textPG = { "text", 0, textPLs, COUNT( textPLs ) };
 
@@ -102,8 +101,6 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 {
 	track_p t;
 	unsigned char c;
-	wControl_p controls[4];
-	char * labels[3];
 	coOrd size, lastline;
 
 	switch (action & 0xFF) {
@@ -116,10 +113,11 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		Dt.lastLineLen = 0;
 		Dt.lastLineOffset = 0;
 
-		if (textPD.control == NULL) {
-			ParamCreateControls(&textPG, TextDlgUpdate);
-			LoadFontSizeList((wList_p)textPD.control, Dt.size);
+ 		if (textPD.control == NULL) {
 			ParamRegister(&textPG);
+			FormCreateControls(&textPG, TextDlgUpdate);
+			LoadFontSizeList(textPD.control, Dt.size);
+
 			Dt.size = GetFontSize((long int)Dt.fontSizeInx);
 		}
 		Dt.size = (long)wSelectedFontSize();
@@ -129,15 +127,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 
 		DrawTextSize(&mainD, "Aquilp", NULL, Dt.size, TRUE, &size);
 		Dt.cursHeight = size.y;
-
-		controls[0] = textPD.control;
-		controls[1] = colorPD.control;
-		controls[2] = boxPD.control;
-		controls[3] = 0;
-		labels[0] = N_("Font Size");
-		labels[1] = N_("Color");
-		labels[2] = N_("Boxed");
-		InfoSubstituteControls(textPG.nameStr, controls, labels);
+		InfoSetControls(mainW, textPG.nameStr);
 		return C_CONTINUE;
 		break;
 	case C_DOWN:
@@ -146,6 +136,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		Dt.pos = pos;
 		Dt.cursPos0.y = Dt.cursPos1.y = pos.y + Dt.lastLineOffset;
 		Dt.cursPos0.x = Dt.cursPos1.x = pos.x + Dt.lastLineLen;
+
 		DrawTextSize(&mainD, "Aquilp", NULL, Dt.size, TRUE,
 		             &size);  //In case fontsize change
 		Dt.cursHeight = size.y;

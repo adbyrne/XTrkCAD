@@ -15,7 +15,7 @@ wControl_p FormCreateDialog(
 	long winOption,
 	paramChangeProc changeProc);
 
-void FormCreateControls(paramGroup_p group);
+void FormCreateControls(paramGroup_p group, paramChangeProc changeProc);
 void FormLoadControls(paramGroup_p pg);
 void FormLoadSingleControl(paramGroup_p pg, int inx);
 

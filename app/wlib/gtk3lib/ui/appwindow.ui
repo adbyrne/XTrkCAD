@@ -189,41 +189,32 @@
               </packing>
             </child>
             <child>
-              <!--start ofstack-->
+              <!--start
+              ofstack-->
               <object class="GtkStack" id="stack">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="transition-type">GTK_STACK_TRANSITION_TYPE_CROSSFADE</property>
-                <!-- first child -->
+                <!-- child status message -->
                 <child>
                   <object class="GtkLabel" id="infoBarStatus">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="label" translatable="yes">Loaded successfully!</property>
                     <property name="xalign">0</property>
                   </object>
                   <packing>
                     <property name="name">message</property>
-                    <property name="title" translatable="yes">page0</property>
                   </packing>
                 </child>
                 <!-- child turntable-->
                 <child>
-                  <object class="GtkBox" id="turntable">
+                  <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
                     <property name="spacing">6</property>
                     <child>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
-                        <property name="can-focus">False</property>
                         <property name="label" translatable="yes">Diameter:</property>
                       </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
                     </child>
                     <child>
                       <object class="GtkEntry" id="diameter">
@@ -231,47 +222,90 @@
                         <property name="can-focus">True</property>
                         <property name="width-chars">6</property>
                       </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
                     </child>
                   </object>
                   <packing>
                     <property name="name">turntable</property>
-
+                  </packing>
+                </child>
+                <!-- child text -->
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Font size:</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="fontsize">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="model">fontsizeList</property>
+                        <child>
+                          <object class="GtkCellRendererText">
+                            <property name="width-chars">5</property>
+                          </object>
+                          <attributes>
+                            <attribute name="text">3</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Text color:</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkColorButton" id="color">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Boxed:</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="boxed">
+                        <child>
+                          <object class="GtkCheckButton">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">text</property>
                   </packing>
                 </child>
                 <!-- next child -->
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
+                    <property name="spacing">6</property>
                     <child>
                       <object class="GtkLabel">
                       </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="teeeee">
+                      <object class="GtkEntry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="width_chars">6</property>
                       </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">1</property>
-                      </packing>
                     </child>
                   </object>
                   <packing>
                     <property name="name">parametergroup</property>
-                    <property name="title" translatable="yes">page0</property>
                   </packing>
                 </child>
               </object>
@@ -311,6 +345,14 @@
     </child>
   </object>
   <object class="GtkListStore" id="layerList">
+    <columns>
+      <column type="gboolean" />
+      <column type="gpointer" />
+      <column type="gpointer" />
+      <column type="gchararray" />
+    </columns>
+  </object>
+  <object class="GtkListStore" id="fontsizeList">
     <columns>
       <column type="gboolean" />
       <column type="gpointer" />

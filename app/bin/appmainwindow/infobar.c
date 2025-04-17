@@ -156,6 +156,11 @@ EXPORT void InfoSubstituteControls(
 	wStatusSetVisibleControlSet(mainW, name);
 }
 
+void InfoSetControls(wControl_p window, const char* name)
+{
+	wStatusSetVisibleControlSet(mainW, name);
+}
+
 void InfoDefaultControls(void)
 {
 	wStatusSetVisibleControlSet(mainW, "message" );

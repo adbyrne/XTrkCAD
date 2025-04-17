@@ -788,7 +788,7 @@ wControl_p wComboBoxCreateForToolbar(wControl_p	parent, const char* helpStr, con
     long	option, wWinPix_t	width, long* valueP, wListCallBack_p action,
     void* context);
 
-void wComboBoxAddValue(wControl_p b, const char* text, void * attributes);
+unsigned wComboBoxAddValue(wControl_p b, const char* text, void * attributes);
 void wComboBoxSetIndex(wControl_p b, int row);
 wIndex_t wComboBoxGetCount(wControl_p b);
 void* wComboBoxGetItemContext(wControl_p b, wIndex_t inx);

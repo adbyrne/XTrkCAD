@@ -48,7 +48,7 @@ void FormRegister(paramGroup_p pg)
 
 	AddGroupPtrToItem(pg);
 
-	FormLoadDefaultValues(pg);
+	//FormLoadDefaultValues(pg);
 }
 
 static void ButtonOk(paramGroup_p group)
@@ -177,7 +177,7 @@ wControl_p FormCreateDialog(
 	}
 
 	LOG(log_form, 1, ("DialogsCreateDialog/"));
-	FormCreateControls(group);
+	FormCreateControls(group, NULL);
 //	LayoutControls(group, ParamCreateControl, &group->origW, &group->origH);
 
 	wWinGetSize(group->win, &w0, &h0);
