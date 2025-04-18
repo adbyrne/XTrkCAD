@@ -61,7 +61,6 @@ set_target_properties(
 set(infiles
     "fallerho.struct"
     "revell.struct"
-    "pikestuf.struct"
 )
 
 # define build commands for all struct files

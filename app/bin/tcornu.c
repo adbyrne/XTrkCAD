@@ -1105,7 +1105,7 @@ BOOL_T GetBezierSegmentsFromCornu(track_p trk, dynArr_t * segs, BOOL_T track)
 			segPtr->type = track?SEG_STRTRK:SEG_STRLIN;
 			segPtr->color = wDrawColorBlack;
 			segPtr->lineWidth = 0;
-			for (int j=0; j<2; j++) { segPtr->u.l.pos[i] = p->u.l.pos[i]; }
+			for (int j=0; j<2; j++) { segPtr->u.l.pos[j] = p->u.l.pos[j]; }
 			segPtr->u.l.angle = p->u.l.angle;
 			segPtr->u.l.option = 0;
 		} else if (p->type == SEG_CRVTRK) {
