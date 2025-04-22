@@ -62,7 +62,7 @@ static void ButtonOk(paramGroup_p group)
 		FormMacroRecord("PARAMETER %s %s\n", group->nameStr, "ok");
 	}
 
-	FormSaveDefaultValues(group);
+ 	FormSaveDefaultValues(group);
 
 	if (group->okProc) {
 		group->okProc(group);

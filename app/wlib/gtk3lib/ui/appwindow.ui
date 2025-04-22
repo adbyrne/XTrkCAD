@@ -190,7 +190,7 @@
             </child>
             <child>
               <!--start
-              ofstack-->
+              of stack-->
               <object class="GtkStack" id="stack">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
@@ -285,6 +285,65 @@
                   </object>
                   <packing>
                     <property name="name">text</property>
+                  </packing>
+                </child>
+                <!-- child parallel track -->
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Separation:</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEntry"  id="separation">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="width_chars">6</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Radius factor:</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEntry"  id="factor">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="width_chars">6</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">parallel</property>
+                  </packing>
+                </child>
+                <!-- child parallel line -->
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Separation:</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEntry"  id="lineseparation">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="width_chars">6</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">parallelLine</property>
                   </packing>
                 </child>
                 <!-- next child -->

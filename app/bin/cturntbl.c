@@ -1015,10 +1015,10 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		if (turntableDiameterPD.control==NULL) {
 			FormCreateControls(&turntablePG, NULL);
 		}
-		sprintf( message, "turntable-diameter-%s", curScaleName );
+		sprintf( message, "diameter-%s", curScaleName );
 		turntableDiameter = ceil(80.0*12.0/curScaleRatio);
-		wPrefGetFloat( "misc", message, &turntableDiameter, turntableDiameter );
-		ParamLoadControls( &turntablePG );
+		wPrefGetFloat( "turntable", message, &turntableDiameter, turntableDiameter );
+		FormLoadControls( &turntablePG );
 		ParamGroupRecord( &turntablePG );
 		InfoSetControls(mainW, turntablePG.nameStr);
 		SetAllTrackSelect( FALSE );
@@ -1050,8 +1050,8 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		UndoEnd();
 		DrawNewTrack(t);
 		InfoDefaultControls();
-		sprintf( message, "turntable-diameter-%s", curScaleName );
-		wPrefSetFloat( "misc", message, turntableDiameter );
+		sprintf( message, "diameter-%s", curScaleName );
+		wPrefSetFloat( "turntable", message, turntableDiameter );
 		drawOutline = FALSE;
 		return C_TERMINATE;
 

@@ -24,7 +24,7 @@
 #include "cstraigh.h"
 #include "cselect.h"
 #include "cundo.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "layout.h"
 #include "common-ui.h"
@@ -44,20 +44,54 @@ enum PAR_TYPE_E { PAR_TRACK, PAR_LINE };
 
 static paramFloatRange_t r_0o1_100 = { 0.0, 100.0, 100 };
 static paramFloatRange_t r_0_10 = { 0.0, 10.0 };
-static paramData_t parSepPLs[] = {
-#define parSepPD (parSepPLs[0])
+
+static paramData_t parTrackPLs[] = {
+#define parSepPD (parTrackPLs[0])
 #define parSepI 0
-	{	PD_FLOAT, &parSeparation, "separation", PDO_DIM, &r_0o1_100, N_("Separation") },
-#define parFactorPD (parSepPLs[1])
+	{	PD_FLOAT, &parSeparation, "separation", PDO_DIM, &r_0o1_100, NULL },
+#define parFactorPD (parTrackPLs[1])
 #define parFactorI 1
-	{   PD_FLOAT, &parSepFactor, "factor", 0, &r_0_10, N_("Radius Factor") }
+	{   PD_FLOAT, &parSepFactor, "factor", 0, &r_0_10, NULL }
 };
-static paramGroup_t parSepPG = { "parallel", 0, parSepPLs, COUNT( parSepPLs ) };
+static paramGroup_t parTrackPG = { "parallel", PGO_FULLDIALOGFROMBUILDER, parTrackPLs, COUNT( parTrackPLs ) };
+
+static paramData_t parLinePLs[] = {
+//#define parSepPD (parSepPLs[0])
+#define parLineSepI 0
+	{	PD_FLOAT, &parSeparation, "separation", PDO_DIM, &r_0o1_100, NULL },
+};
+static paramGroup_t parLinePG = { "parallelLine", PGO_FULLDIALOGFROMBUILDER, parLinePLs, COUNT(parLinePLs) };
+
+static void
+ReadSeparation(long type)
+{
+	if (type == PAR_TRACK) {
+		sprintf(message, "separation-%s", curScaleName);
+		parSeparation = ceil(13.0 * 12.0 / curScaleRatio);
+	}
+	else {
+		sprintf(message, "line-separation-%s", curScaleName);
+		parSeparation = 5.0 * 12.0 / curScaleRatio;
+	}
+
+	wPrefGetFloat("parallel", message, &parSeparation, parSeparation);
+}
+
+static void
+SaveSeparation(long type)
+{
+	if (type == PAR_TRACK) {
+		sprintf(message, "separation-%s", curScaleName);
+	}
+	else {
+		sprintf(message, "line-separation-%s", curScaleName);
+	}
+	wPrefSetFloat("parallel", message, parSeparation);
+}
 
 
 static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 {
-
 	DIST_T d;
 	track_p t=NULL;
 	coOrd p;
@@ -65,42 +99,38 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 	ANGLE_T a;
 	track_p t0, t1;
 	EPINX_T ep0=-1, ep1=-1;
-	wControl_p controls[4];
-	char * labels[3];
+	paramGroup_p parGroup;
+	paramData_p parPLs;
+
 	static DIST_T parRFactor;
 
 	parType = VP2L(commandContext);
+	if (parType == PAR_TRACK) {
+		parGroup = &parTrackPG;
+	}
+	else {
+		parGroup = &parLinePG;
+	}
+	parPLs = parGroup->paramPtr;
 
 	switch (action&0xFF) {
 
 	case C_START:
-		if (parSepPLs[0].control==NULL) {
-			ParamCreateControls(&parSepPG, NULL);
+
+		if (parPLs[0].control==NULL) {
+			FormCreateControls(parGroup, NULL);
 		}
-		if (parType == PAR_TRACK) {
-			sprintf(message, "parallel-separation-%s", curScaleName);
-			parSeparation = ceil(13.0*12.0/curScaleRatio);
-		} else {
-			sprintf(message, "parallel-line-separation-%s", curScaleName);
-			parSeparation = 5.0*12.0/curScaleRatio;
-		}
-		wPrefGetFloat("misc", message, &parSeparation, parSeparation);
-		ParamLoadControls(&parSepPG);
-		ParamGroupRecord(&parSepPG);
-		parSepPD.option |= PDO_NORECORD;
-		parFactorPD.option |= PDO_NORECORD;
-		controls[0] = parSepPD.control;
-		if (parType == PAR_TRACK) {
-			controls[1] = parFactorPD.control;
-		} else {
-			controls[1] = NULL;
-		}
-		controls[2] = NULL;
-		labels[0] = N_("Separation");
-		labels[1] = N_("Radius Factor");
-		InfoSubstituteControls(parSepPG.nameStr, controls, labels);
-		parSepPD.option &= ~PDO_NORECORD;
-		parFactorPD.option &= ~PDO_NORECORD;
+	
+		ReadSeparation(parType);
+			
+		FormLoadControls(parGroup);
+		ParamGroupRecord(parGroup);
+		//parSepPD.option |= PDO_NORECORD;
+		//parFactorPD.option |= PDO_NORECORD;
+
+		InfoSetControls(mainW, parGroup->nameStr);
+		//parSepPD.option &= ~PDO_NORECORD;
+		//parFactorPD.option &= ~PDO_NORECORD;
 		Dpa.anchor_Trk = NULL;
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		SetAllTrackSelect( FALSE );
@@ -135,13 +165,8 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 			return C_ERROR;
 		}
 
-		controls[0] = parSepPD.control;
-		controls[1] = parFactorPD.control;
-		controls[2] = NULL;
-		labels[0] = N_("Separation");
-		labels[1] = N_("Radius factor");
-		InfoSubstituteControls(parSepPG.nameStr, controls, labels);
-		ParamLoadData(&parSepPG);
+		InfoSetControls(mainW, parGroup->nameStr);
+		ParamLoadData(parGroup);
 		Dpa.orig = pos;
 		if (parType == PAR_TRACK) {
 			Dpa.Trk = OnTrack(&pos, FALSE, TRUE);
@@ -238,7 +263,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 			if (GetTrkGauge(Dpa.Trk)> parSeparation) {
 				SetTrkNoTies(t, TRUE);
 			}
-			//CopyAttributes( Dpa.Trk, t );    Don't force scale or track width or Layer
+
 			SetTrkBits(t,(GetTrkBits(t)&TB_HIDEDESC) | (GetTrkBits(Dpa.Trk)&~TB_HIDEDESC));
 
 			if (t0) {
@@ -263,12 +288,8 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 		DrawNewTrack(t);
 		UndoEnd();
 		InfoDefaultControls();
-		if (parType == PAR_TRACK) {
-			sprintf(message, "parallel-separation-%s", curScaleName);
-		} else {
-			sprintf(message, "parallel-line-separation-%s", curScaleName);
-		}
-		wPrefSetFloat("misc", message, parSeparation);
+		SaveSeparation(parType);
+
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		return C_TERMINATE;
 
@@ -301,5 +322,6 @@ EXPORT void InitCmdParallel( wMenu_p menu )
 		CreateToolbarIconFromResource("parallel-line.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_PARALLEL, I2VP(1) );
 	ButtonGroupEnd();
-	ParamRegister( &parSepPG );
+	ParamRegister( &parTrackPG );
+	ParamRegister(&parLinePG);
 }

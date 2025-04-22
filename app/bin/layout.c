@@ -1039,11 +1039,11 @@ EXPORT int DoSettingsRead(
 		DoSetScale(buffer);
 	}
 	//Get command options
-	wPrefGetInteger("DialogItem","cmdopt-preselect",&preSelect,preSelect);
-	wPrefGetInteger("DialogItem","cmdopt-rightclickmode",&rightClickMode,
+	wPrefGetInteger("cmdopt","preselect",&preSelect,preSelect);
+	wPrefGetInteger("cmdopt","rightclickmode",&rightClickMode,
 	                rightClickMode);
-	wPrefGetInteger("DialogItem","cmdopt-selectmode",&selectMode,selectMode);
-	wPrefGetInteger("DialogItem","cmdopt-selectzero",&selectZero,selectZero);
+	wPrefGetInteger("cmdopt","selectmode",&selectMode,selectMode);
+	wPrefGetInteger("cmdopt","selectzero",&selectZero,selectZero);
 
 	//Get Toolbar showing
 	//ToolbarLoadConfig();

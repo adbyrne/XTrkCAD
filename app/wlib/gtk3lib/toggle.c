@@ -131,7 +131,7 @@ static int toggled(
 	long value = toggleGetValue(bc);
 
 	if (tcontrol->valueP) {
-		*tcontrol->valueP = value;
+		*(tcontrol->valueP) = value;
 	}
 
 	if (tcontrol->action) {

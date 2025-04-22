@@ -459,11 +459,11 @@ CreateControl(paramData_p pd,char* helpStr,	unsigned x,	unsigned y)
 		break;
 	case PD_RADIO:
 		pd->control = wRadioCreate(win, x, y, helpStr, _(pd->winLabel),
-			pd->winOption, pd->winData, NULL, ChoicePush, pd);
+			pd->winOption, pd->winData, pd->valueP, ChoicePush, pd);
 		break;
 	case PD_TOGGLE:
 		pd->control = wToggleCreate(win, x, y, helpStr, _(pd->winLabel),
-			pd->winOption, pd->winData, NULL, ChoicePush, pd);
+			pd->winOption, pd->winData, pd->valueP, ChoicePush, pd);
 		break;
 	case PD_LIST:
 		pd->control = CreateFormattedList(win, pd, helpStr, x, y);
