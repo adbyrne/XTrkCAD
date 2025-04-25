@@ -1510,7 +1510,7 @@ EXPORT void MainLayout(
 	DrawMapBoundingBox( TRUE );
 
 	if ( bRedraw ) {
-//		MainRedraw();
+		MainRedraw();
 	}
 
 	if ( bRedraw && wDrawDoTempDraw ) { // Temporary until mswlib supports TempDraw
