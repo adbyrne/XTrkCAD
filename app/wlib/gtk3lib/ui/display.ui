@@ -1,73 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.36.0 -->
 <interface>
-  <requires lib="gtk+" version="3.20"/>
+  <requires lib="gtk" version="3.22" />
   <object class="GtkDialog" id="display">
-    <property name="can_focus">False</property>
-    <property name="border_width">18</property>
-    <property name="type_hint">dialog</property>
+    <property name="can-focus">False</property>
+    <property name="border-width">12</property>
+    <property name="type-hint">dialog</property>
+    <property name="use-header-bar">0</property>
+    <property name="resizable">False</property>
+    <child type="action">
+      <object class="GtkButton" id="id_cancel">
+        <property name="use-underline">True</property>
+        <property name="label">_Cancel</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="id_help">
+        <property name="use-underline">True</property>
+        <property name="label">_Help</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="id_ok">
+        <property name="use-underline">True</property>
+        <property name="can-default">True</property>
+        <property name="label">_Done</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="GTK_RESPONSE_CANCEL">id_cancel</action-widget>
+      <action-widget response="GTK_RESPONSE_HELP">id_help</action-widget>
+      <action-widget response="GTK_RESPONSE_OK" default="true">id_ok</action-widget>
+    </action-widgets>
     <child internal-child="vbox">
       <object class="GtkBox">
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">18</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox">
-            <property name="can_focus">False</property>
-            <property name="homogeneous">True</property>
-            <property name="layout_style">end</property>
-            <child>
-              <object class="GtkToggleButton" id="id-cancel">
-                <property name="label" translatable="yes">_Cancel</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_underline">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToggleButton" id="id-help">
-                <property name="label" translatable="yes">_Help</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_underline">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToggleButton" id="id-ok">
-                <property name="label" translatable="yes">_Done</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_underline">True</property>
-                <style>
-                  <class name="suggested-action"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
         <child>
           <object class="GtkNotebook">
             <property name="visible">True</property>
@@ -94,13 +65,13 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="display-color-track.box">
+                  <object class="GtkBox" id="color-track">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="spacing">6</property>
                     <child>
-                      <object class="GtkCheckButton" id="display-color-trackObject">
-                        <property name="label" translatable="yes">Object</property>
+                      <object class="GtkRadioButton" id="trackcolor">
+                        <property name="label" translatable="yes">Track color</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -113,12 +84,13 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="display-color-trackLayer">
-                        <property name="label" translatable="yes">Layer</property>
+                      <object class="GtkRadioButton">
+                        <property name="label" translatable="yes">Layer color</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="draw_indicator">True</property>
+                        <property name="group">trackcolor</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -145,13 +117,13 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="display-color-draw.box">
+                  <object class="GtkBox" id="color-draw">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="spacing">6</property>
                     <child>
-                      <object class="GtkCheckButton" id="display-color-drawObject">
-                        <property name="label" translatable="yes">Object</property>
+                      <object class="GtkRadioButton" id="drawcolor">
+                        <property name="label" translatable="yes">Object color</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -164,12 +136,13 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="display-color-drawLayer">
-                        <property name="label" translatable="yes">Layer</property>
+                      <object class="GtkRadioButton">
+                        <property name="label" translatable="yes">Layer color</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="draw_indicator">True</property>
+                        <property name="group">drawcolor</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -196,7 +169,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="display-tunnels.box">
+                  <object class="GtkBox" id="tunnels">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="spacing">6</property>
@@ -216,7 +189,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkRadioButton" id="Dash">
+                      <object class="GtkRadioButton">
                         <property name="label" translatable="yes">Dash</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -232,7 +205,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkRadioButton" id="Normal">
+                      <object class="GtkRadioButton">
                         <property name="label" translatable="yes">Normal</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -266,7 +239,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="display-endpt.box">
+                  <object class="GtkBox" id="endpt">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="spacing">6</property>
@@ -286,7 +259,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkRadioButton" id="endpt-Turnouts">
+                      <object class="GtkRadioButton">
                         <property name="label" translatable="yes">Turnouts</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -302,7 +275,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkRadioButton" id="endpt-All">
+                      <object class="GtkRadioButton">
                         <property name="label" translatable="yes">All</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -336,7 +309,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="display-unconnected-endpt.box">
+                  <object class="GtkBox" id="unconnected-endpt">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="spacing">6</property>
@@ -356,7 +329,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkRadioButton" id="unconnected-endpt-Thick">
+                      <object class="GtkRadioButton">
                         <property name="label" translatable="yes">Thick</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -372,7 +345,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkRadioButton" id="unconnected-endpt-Exception">
+                      <object class="GtkRadioButton">
                         <property name="label" translatable="yes">Exception</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -406,7 +379,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="display-tiedraw.box">
+                  <object class="GtkBox" id="tiedraw">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="spacing">6</property>
@@ -426,7 +399,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkRadioButton" id="tiedraw-Outline">
+                      <object class="GtkRadioButton">
                         <property name="label" translatable="yes">Outline</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -442,7 +415,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkRadioButton" id="tiedraw-solid">
+                      <object class="GtkRadioButton">
                         <property name="label" translatable="yes">Solid</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -476,7 +449,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="display-centerdraw.box">
+                  <object class="GtkBox" id="centerdraw">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="spacing">6</property>
@@ -496,7 +469,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkRadioButton" id="centerdraw-on">
+                      <object class="GtkRadioButton">
                         <property name="label" translatable="yes">On</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -530,9 +503,11 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="display-tworailscale">
+                  <object class="GtkEntry" id="tworailscale">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="width-chars">3</property>
+                    <property name="halign">start</property>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -543,7 +518,7 @@
                   <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">	</property>
+                    <property name="label" translatable="yes"> </property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -551,13 +526,14 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="display-constrainmain.box">
+                  <object class="GtkBox" id="constrainmain">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkCheckButton" id="display-constrainmain">
-                        <property name="label" translatable="yes">Constrain drawing area to room boundaries</property>
+                        <property name="label" translatable="yes">Constrain drawing area to room
+                          boundaries</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -578,17 +554,16 @@
                   </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <placeholder />
                 </child>
                 <child>
-                  <placeholder/>
+                  <placeholder />
                 </child>
               </object>
             </child>
             <child type="tab">
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Drawing</property>
               </object>
               <packing>
@@ -598,7 +573,6 @@
             <child>
               <object class="GtkGrid">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="halign">start</property>
                 <property name="valign">start</property>
                 <property name="border_width">18</property>
@@ -607,7 +581,6 @@
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="halign">end</property>
                     <property name="valign">start</property>
                     <property name="label" translatable="yes">Label Enable</property>
@@ -619,13 +592,13 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="display-labelenable.box">
+                  <object class="GtkBox" id="labelenable">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
                     <property name="spacing">6</property>
                     <child>
-                      <object class="GtkCheckButton" id="labelenable-Track-Descriptions">
+                      <object class="GtkCheckButton">
                         <property name="label" translatable="yes">Track Descriptions</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -640,7 +613,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="labelenable-Lengths">
+                      <object class="GtkCheckButton">
                         <property name="label" translatable="yes">Lengths</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -655,7 +628,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="labelenable-EndPt-Elevations">
+                      <object class="GtkCheckButton">
                         <property name="label" translatable="yes">EndPt Elevations</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -670,7 +643,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="labelenable-Track-Elevations">
+                      <object class="GtkCheckButton">
                         <property name="label" translatable="yes">Track Elevations</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -685,7 +658,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="labelenable-Cars">
+                      <object class="GtkCheckButton">
                         <property name="label" translatable="yes">Cars</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -718,9 +691,11 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="display-labelscale">
+                  <object class="GtkEntry" id="labelscale">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="halign">start</property>
+                    <property name="width-chars">3</property>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -740,9 +715,11 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="display-description-fontsize">
+                  <object class="GtkEntry" id="description-fontsize">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="halign">start</property>
+                    <property name="width-chars">3</property>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -752,7 +729,6 @@
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="halign">end</property>
                     <property name="label" translatable="yes">Hot Bar Labels</property>
                   </object>
@@ -762,12 +738,11 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="display-hotbarlabels.box">
+                  <object class="GtkBox" id="hotbarlabels">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="spacing">6</property>
                     <child>
-                      <object class="GtkCheckButton" id="hotbarlabels-PartNo">
+                      <object class="GtkCheckButton">
                         <property name="label" translatable="yes">Part No</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -781,7 +756,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="hotbarlabels-Descr">
+                      <object class="GtkCheckButton">
                         <property name="label" translatable="yes">Descr</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -813,12 +788,12 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="display-layoutlabels.box">
+                  <object class="GtkBox" id="layoutlabels">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="spacing">6</property>
                     <child>
-                      <object class="GtkCheckButton" id="layoutlabels-Manuf">
+                      <object class="GtkCheckButton">
                         <property name="label" translatable="yes">Manuf</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -832,7 +807,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="layoutlabels-PartNo">
+                      <object class="GtkCheckButton">
                         <property name="label" translatable="yes">Part No</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -846,7 +821,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="layoutlabels-Descr">
+                      <object class="GtkCheckButton">
                         <property name="label" translatable="yes">Descr</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -868,7 +843,6 @@
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="halign">end</property>
                     <property name="label" translatable="yes">List Labels</property>
                   </object>
@@ -878,13 +852,12 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="display-listlabels.box">
+                  <object class="GtkBox" id="listlabels">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="halign">start</property>
                     <property name="spacing">6</property>
                     <child>
-                      <object class="GtkCheckButton" id="listlabels-Manuf">
+                      <object class="GtkCheckButton">
                         <property name="label" translatable="yes">Manuf</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -898,7 +871,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="listlabels-PartNo">
+                      <object class="GtkCheckButton">
                         <property name="label" translatable="yes">Part No</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -912,7 +885,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="listlabels-Descr">
+                      <object class="GtkCheckButton">
                         <property name="label" translatable="yes">Descr</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -934,7 +907,6 @@
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="halign">end</property>
                     <property name="label" translatable="yes">Car Labels</property>
                   </object>
@@ -944,9 +916,18 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkComboBox" id="display-carhotbarlabels">
+                  <object class="GtkComboBox" id="carhotbarlabels">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="model">carlabelsList</property>
+                    <child>
+                      <object class="GtkCellRendererText">
+
+                      </object>
+                      <attributes>
+                        <attribute name="text">3</attribute>
+                      </attributes>
+                    </child>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -954,13 +935,13 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="display-donthidecursor.box">
+                  <object class="GtkBox" id="donthidecursor">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkCheckButton" id="display-donthidecursor">
-                        <property name="label" translatable="yes">Dont hide system cursor when program cursor is active</property>
+                      <object class="GtkCheckButton">
+                        <property name="label" translatable="yes">Dont hide system cursor when
+                          program cursor is active</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -981,7 +962,7 @@
                   </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <placeholder />
                 </child>
               </object>
               <packing>
@@ -991,7 +972,6 @@
             <child type="tab">
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Labels</property>
               </object>
               <packing>
@@ -1002,19 +982,17 @@
             <child>
               <object class="GtkGrid">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="halign">baseline</property>
                 <property name="valign">start</property>
                 <property name="border_width">18</property>
                 <property name="row_spacing">6</property>
                 <property name="column_spacing">12</property>
                 <child>
-                  <object class="GtkBox" id="display-livemap.box">
+                  <object class="GtkBox" id="livemap">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkCheckButton" id="display-livemap">
+                      <object class="GtkCheckButton">
                         <property name="label" translatable="yes">Live Map</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -1035,12 +1013,11 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="display-autoPan.box">
+                  <object class="GtkBox" id="autoPan">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkCheckButton" id="display-autoPan">
+                      <object class="GtkCheckButton">
                         <property name="label" translatable="yes">Auto Pan</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -1063,7 +1040,6 @@
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="halign">end</property>
                     <property name="label" translatable="yes">Map Scale</property>
                   </object>
@@ -1073,9 +1049,11 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="display-mapscale">
+                  <object class="GtkEntry" id="mapscale">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="halign">start</property>
+                    <property name="width-chars">8</property>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -1083,10 +1061,10 @@
                   </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <placeholder />
                 </child>
                 <child>
-                  <placeholder/>
+                  <placeholder />
                 </child>
               </object>
               <packing>
@@ -1108,19 +1086,17 @@
             <child>
               <object class="GtkGrid">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="halign">baseline</property>
                 <property name="valign">start</property>
                 <property name="border_width">18</property>
                 <property name="row_spacing">6</property>
                 <property name="column_spacing">12</property>
                 <child>
-                  <object class="GtkBox" id="display-hideTrainsInTunnels.box">
+                  <object class="GtkBox" id="hideTrainsInTunnels">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkCheckButton" id="display-hideTrainsInTunnels">
+                      <object class="GtkCheckButton">
                         <property name="label" translatable="yes">Hide Trains On Hidden Track</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -1143,7 +1119,6 @@
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="halign">end</property>
                     <property name="label" translatable="yes">Train Update Delay</property>
                   </object>
@@ -1153,9 +1128,11 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="display-trainpause">
+                  <object class="GtkEntry" id="trainpause">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="halign">start</property>
+                    <property name="width-chars">4</property>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -1163,7 +1140,7 @@
                   </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <placeholder />
                 </child>
               </object>
               <packing>
@@ -1173,7 +1150,6 @@
             <child type="tab">
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Train Running</property>
               </object>
               <packing>
@@ -1190,8 +1166,13 @@
         </child>
       </object>
     </child>
-    <child type="titlebar">
-      <placeholder/>
-    </child>
+  </object>
+  <object class="GtkListStore" id="carlabelsList">
+    <columns>
+      <column type="gboolean" />
+      <column type="gpointer" />
+      <column type="gpointer" />
+      <column type="gchararray" />
+    </columns>
   </object>
 </interface>

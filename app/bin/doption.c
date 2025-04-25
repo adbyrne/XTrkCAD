@@ -21,33 +21,17 @@
  */
 
 #include "ccurve.h"
-#include "cselect.h"
 #include "custom.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
-#include "common-ui.h"
 #include "ctrain.h"
+#include "i18n.h"
 
-//static paramIntegerRange_t i1_64 = { 1, 64 };
-static paramIntegerRange_t i1_100 = { 1, 100 };
 static paramIntegerRange_t i0_256 = { 0, 256 };
 static paramIntegerRange_t i1_256 = { 1, 256 };
-static paramIntegerRange_t i0_10000 = { 0, 10000 };
-static paramIntegerRange_t i0_99 = { 0, 99};
 static paramIntegerRange_t i1_1000 = { 1, 1000 };
 static paramIntegerRange_t i10_1000 = { 10, 1000 };
-static paramIntegerRange_t i10_100 = { 10, 100 };
-static paramFloatRange_t r0o1_1 = { 0.1, 1 };
-static paramFloatRange_t r1_10 = { 1, 10 };
 static paramFloatRange_t r1_1000 = { 1, 1000 };
-static paramFloatRange_t r0_180 = { 0, 180 };
-
-
-static void UpdateMeasureFmt(void);
-
-EXPORT long enableAudio = 1;
-
-EXPORT long showFlexTrack = 1;
 
 long GetChanges( paramGroup_p pg )
 {
@@ -63,9 +47,9 @@ long GetChanges( paramGroup_p pg )
 }
 
 static void OptionDlgUpdate(
-	paramGroup_p pg,
-	int inx,
-	void* valueP)
+        paramGroup_p pg,
+        int inx,
+        void* valueP)
 {
 	if (inx < 0) { return; }
 
@@ -78,53 +62,41 @@ static void OptionDlgUpdate(
  *
  */
 
-static wWin_p displayW;
+static wControl_p displayW;
 
-static char * autoPanLabels[] = { N_("Auto Pan"), NULL };
-static char * drawTunnelLabels[] = { N_("Hide"), N_("Dash"), N_("Normal"), NULL };
-static char * drawEndPtLabels3[] = { N_("None"), N_("Turnouts"), N_("All"), NULL };
-static char * drawEndPtUnconnectedSize[] = { N_("Normal"), N_("Thick"), N_("Exception"), NULL };
-static char * tiedrawLabels[] = { N_("None"), N_("Outline"), N_("Solid"), NULL };
-static char * drawCenterCircle[] = { N_("Off"), N_("On"), NULL };
-static char * labelEnableLabels[] = { N_("Track Descriptions"), N_("Lengths"), N_("EndPt Elevations"), N_("Track Elevations"), N_("Cars"), NULL };
+
 static char * hotBarLabelsLabels[] = { N_("Part No"), N_("Descr"), NULL };
 static char * listLabelsLabels[] = { N_("Manuf"), N_("Part No"), N_("Descr"), NULL };
-static char * colorTrackLabels[] = { N_("Object"), N_("Layer"), NULL };
-static char * colorDrawLabels[] = { N_("Object"), N_("Layer"), NULL };
-static char * liveMapLabels[] = { N_("Live Map"), NULL };
-static char * hideTrainsInTunnelsLabels[] = { N_("Hide Trains On Hidden Track"), NULL };
-static char * constrainMainLabels[] = {N_("Constrain Drawing Area to Room boundaries"), NULL};
-static char * dontHideLabels[] = {N_("Don't Hide System Cursor when program cursor is active"), NULL};
 
 
 static paramData_t displayPLs[] = {
-	{ PD_RADIO, &colorTrack, "color-track", PDO_NOPSHUPD|PDO_DRAW, colorTrackLabels, N_("Color Track"), BC_HORIZONTAL, I2VP(CHANGE_MAIN) },
-	{ PD_RADIO, &colorDraw, "color-draw", PDO_NOPSHUPD|PDO_DRAW, colorDrawLabels, N_("Color Draw"), BC_HORIZONTAL, I2VP(CHANGE_MAIN) },
-	{ PD_RADIO, &drawTunnel, "tunnels", PDO_NOPSHUPD|PDO_DRAW, drawTunnelLabels, N_("Draw Tunnel"), BC_HORIZONTAL, I2VP(CHANGE_MAIN) },
-	{ PD_RADIO, &drawEndPtV, "endpt", PDO_NOPSHUPD|PDO_DRAW, drawEndPtLabels3, N_("Draw EndPts"), BC_HORIZONTAL, I2VP(CHANGE_MAIN) },
-	{ PD_RADIO, &drawUnconnectedEndPt, "unconnected-endpt", PDO_NOPSHUPD|PDO_DRAW, drawEndPtUnconnectedSize, N_("Draw Unconnected EndPts"), BC_HORIZONTAL, I2VP(CHANGE_MAIN) },
-	{ PD_RADIO, &tieDrawMode, "tiedraw", PDO_NOPSHUPD|PDO_DRAW, tiedrawLabels, N_("Draw Ties"), BC_HORIZONTAL, I2VP(CHANGE_MAIN) },
-	{ PD_RADIO, &centerDrawMode, "centerdraw", PDO_NOPSHUPD|PDO_DRAW, drawCenterCircle, N_("Draw Centers"), BC_HORIZONTAL, I2VP(CHANGE_MAIN | CHANGE_MAP) },
-	{ PD_LONG, &twoRailScale, "tworailscale", PDO_NOPSHUPD, &i1_256, N_("Two Rail Scale"), 0, I2VP(CHANGE_MAIN) },
-	{ PD_FLOAT, &mapD.scale, "mapscale", PDO_NOPSHUPD, &r1_1000, N_("Map Scale"), 0, I2VP(CHANGE_MAP) },
-	{ PD_TOGGLE, &dontHideCursor, "donthidecursor", PDO_NOPSHUPD, dontHideLabels, "", BC_HORIZONTAL },
-	{ PD_TOGGLE, &constrainMain, "constrainmain", PDO_NOPSHUPD, constrainMainLabels, "", BC_HORIZONTAL },
-	{ PD_TOGGLE, &liveMap, "livemap", PDO_NOPSHUPD, liveMapLabels, "", BC_HORIZONTAL },
-	{ PD_TOGGLE, &autoPan, "autoPan", PDO_NOPSHUPD, autoPanLabels, "", BC_HORIZONTAL },
+	{ PD_RADIO, &colorTrack, "color-track", PDO_NOPSHUPD|PDO_DRAW, NULL, NULL, BC_HORIZONTAL, I2VP(CHANGE_MAIN) },
+	{ PD_RADIO, &colorDraw, "color-draw", PDO_NOPSHUPD|PDO_DRAW, NULL, NULL, BC_HORIZONTAL, I2VP(CHANGE_MAIN) },
+	{ PD_RADIO, &drawTunnel, "tunnels", PDO_NOPSHUPD|PDO_DRAW, NULL, NULL, BC_HORIZONTAL, I2VP(CHANGE_MAIN) },
+	{ PD_RADIO, &drawEndPtV, "endpt", PDO_NOPSHUPD|PDO_DRAW, NULL, NULL, BC_HORIZONTAL, I2VP(CHANGE_MAIN) },
+	{ PD_RADIO, &drawUnconnectedEndPt, "unconnected-endpt", PDO_NOPSHUPD|PDO_DRAW, NULL, NULL, BC_HORIZONTAL, I2VP(CHANGE_MAIN) },
+	{ PD_RADIO, &tieDrawMode, "tiedraw", PDO_NOPSHUPD|PDO_DRAW, NULL, NULL, BC_HORIZONTAL, I2VP(CHANGE_MAIN) },
+	{ PD_RADIO, &centerDrawMode, "centerdraw", PDO_NOPSHUPD|PDO_DRAW, NULL, NULL, BC_HORIZONTAL, I2VP(CHANGE_MAIN | CHANGE_MAP) },
+	{ PD_LONG, &twoRailScale, "tworailscale", PDO_NOPSHUPD, &i1_256, NULL, 0, I2VP(CHANGE_MAIN) },
+	{ PD_FLOAT, &mapD.scale, "mapscale", PDO_NOPSHUPD, &r1_1000, NULL, 0, I2VP(CHANGE_MAP) },
+	{ PD_TOGGLE, &dontHideCursor, "donthidecursor", PDO_NOPSHUPD, NULL, "", BC_HORIZONTAL },
+	{ PD_TOGGLE, &constrainMain, "constrainmain", PDO_NOPSHUPD, NULL, "", BC_HORIZONTAL },
+	{ PD_TOGGLE, &liveMap, "livemap", PDO_NOPSHUPD, NULL, "", BC_HORIZONTAL },
+	{ PD_TOGGLE, &autoPan, "autoPan", PDO_NOPSHUPD, NULL, "", BC_HORIZONTAL },
 #define labelSelect (13)
-	{ PD_TOGGLE, &labelEnable, "labelenable", PDO_NOPSHUPD, labelEnableLabels, N_("Label Enable"), 0, I2VP(CHANGE_MAIN) },
-	{ PD_LONG, &labelScale, "labelscale", PDO_NOPSHUPD, &i0_256, N_("Label Scale"), 0, I2VP(CHANGE_MAIN) },
-	{ PD_LONG, &descriptionFontSize, "description-fontsize", PDO_NOPSHUPD, &i1_1000, N_("Label Font Size"), 0, I2VP(CHANGE_MAIN) },
-	{ PD_TOGGLE, &hotBarLabels, "hotbarlabels", PDO_NOPSHUPD, hotBarLabelsLabels, N_("Hot Bar Labels"), BC_HORIZONTAL, I2VP(CHANGE_TOOLBAR) },
-	{ PD_TOGGLE, &layoutLabels, "layoutlabels", PDO_NOPSHUPD, listLabelsLabels, N_("Layout Labels"), BC_HORIZONTAL, I2VP(CHANGE_MAIN) },
-	{ PD_TOGGLE, &listLabels, "listlabels", PDO_NOPSHUPD, listLabelsLabels, N_("List Labels"), BC_HORIZONTAL, I2VP(CHANGE_PARAMS) },
+	{ PD_TOGGLE, &labelEnable, "labelenable", PDO_NOPSHUPD, NULL, NULL, 0, I2VP(CHANGE_MAIN) },
+	{ PD_LONG, &labelScale, "labelscale", PDO_NOPSHUPD, &i0_256, NULL, 0, I2VP(CHANGE_MAIN) },
+	{ PD_LONG, &descriptionFontSize, "description-fontsize", PDO_NOPSHUPD, &i1_1000, NULL, 0, I2VP(CHANGE_MAIN) },
+	{ PD_TOGGLE, &hotBarLabels, "hotbarlabels", PDO_NOPSHUPD, NULL, NULL, BC_HORIZONTAL, I2VP(CHANGE_TOOLBAR) },
+	{ PD_TOGGLE, &layoutLabels, "layoutlabels", PDO_NOPSHUPD, NULL, NULL, BC_HORIZONTAL, I2VP(CHANGE_MAIN) },
+	{ PD_TOGGLE, &listLabels, "listlabels", PDO_NOPSHUPD, NULL, NULL, BC_HORIZONTAL, I2VP(CHANGE_PARAMS) },
 	/* ATTENTION: update the define below if you add entries above */
 #define I_HOTBARLABELS	(19)
 	{ PD_COMBOLIST, &carHotbarModeInx, "carhotbarlabels", PDO_NOPSHUPD|PDO_DLGUNDERCMDBUTT|PDO_LISTINDEX, I2VP(250), N_("Car Labels"), 0, I2VP(CHANGE_SCALE) },
-	{ PD_LONG, &trainPause, "trainpause", PDO_NOPSHUPD, &i10_1000, N_("Train Update Delay"), 0, 0 },
-	{ PD_TOGGLE, &hideTrainsInTunnels, "hideTrainsInTunnels", PDO_NOPSHUPD, hideTrainsInTunnelsLabels, "", BC_HORIZONTAL }
+	{ PD_LONG, &trainPause, "trainpause", PDO_NOPSHUPD, &i10_1000, NULL, 0, 0 },
+	{ PD_TOGGLE, &hideTrainsInTunnels, "hideTrainsInTunnels", PDO_NOPSHUPD, NULL, NULL, BC_HORIZONTAL }
 };
-static paramGroup_t displayPG = { "display", PGO_RECORD|PGO_PREFMISC, displayPLs, COUNT( displayPLs ) };
+static paramGroup_t displayPG = { "display", PGO_FULLDIALOGFROMBUILDER |PGO_RECORD, displayPLs, COUNT( displayPLs ) };
 
 
 static void DisplayOk( void * junk )
@@ -140,29 +112,28 @@ static void DisplayOk( void * junk )
 static void DoDisplay( void * junk )
 {
 	if (displayW == NULL) {
-		displayW = ParamCreateDialog( &displayPG, MakeWindowTitle(_("Display Options")),
-		                              _("Ok"), DisplayOk, ParamCancel_Restore, TRUE, NULL, 0, OptionDlgUpdate );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto"), NULL,
-		               I2VP(0x0002) );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto/Manuf"),
-		               NULL, I2VP(0x0012) );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control,
-		               _("Proto/Manuf/Part Number"), NULL, I2VP(0x0312) );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control,
-		               _("Proto/Manuf/Partno/Item"), NULL, I2VP(0x4312) );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Manuf/Proto"),
-		               NULL, I2VP(0x0021) );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control,
-		               _("Manuf/Proto/Part Number"), NULL, I2VP(0x0321) );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control,
-		               _("Manuf/Proto/Partno/Item"), NULL, I2VP(0x4321) );
+		displayW = FormCreateDialog( &displayPG, MakeWindowTitle(_("Display Options")),
+		                             _("Ok"), DisplayOk,
+		                             _("Cancel"), ParamCancel_Restore,
+		                             TRUE, 0, OptionDlgUpdate);
+		wComboBoxAddValue(displayPLs[I_HOTBARLABELS].control, _("Proto"),
+		                  I2VP(0x0002) );
+		wComboBoxAddValue(displayPLs[I_HOTBARLABELS].control, _("Proto/Manuf"),
+		                  I2VP(0x0012) );
+		wComboBoxAddValue(displayPLs[I_HOTBARLABELS].control,
+		                  _("Proto/Manuf/Part Number"), I2VP(0x0312) );
+		wComboBoxAddValue(displayPLs[I_HOTBARLABELS].control,
+		                  _("Proto/Manuf/Partno/Item"), I2VP(0x4312) );
+		wComboBoxAddValue(displayPLs[I_HOTBARLABELS].control, _("Manuf/Proto"),
+		                  I2VP(0x0021) );
+		wComboBoxAddValue(displayPLs[I_HOTBARLABELS].control,
+		                  _("Manuf/Proto/Part Number"), I2VP(0x0321) );
+		wComboBoxAddValue(displayPLs[I_HOTBARLABELS].control,
+		                  _("Manuf/Proto/Partno/Item"), I2VP(0x4321) );
 	}
 
-	ParamLoadControls( &displayPG );
+	FormLoadControls( &displayPG );
 	wShow( displayW );
-#ifdef LATER
-	DisplayChange( CHANGE_SCALE );
-#endif
 }
 
 
@@ -182,7 +153,7 @@ EXPORT addButtonCallBack_t DisplayInit( void )
  *
  */
 
-static wWin_p colorW;
+static wControl_p colorW;
 
 static paramData_t colorPLs[] = {
 	{ PD_COLORLIST, &snapGridColor, "snapgrid", PDO_NOPSHUPD, NULL, N_("Snap Grid"), 0, I2VP(CHANGE_GRID) },

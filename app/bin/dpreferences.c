@@ -3,23 +3,23 @@
  * \brief  Preferences dialog
  */
 
- /*  XTrackCad - Model Railroad CAD
-  *  Copyright (C) 2005, 2024 Dave Bullis
-  *
-  *  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
-  *  (at your option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
-  *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-  */
+/*  XTrackCad - Model Railroad CAD
+ *  Copyright (C) 2005, 2024 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #include <wlib.h>
 
@@ -33,6 +33,12 @@
 static wControl_p prefW;
 static long displayUnits;
 static wIndex_t distanceFormatInx;
+
+
+static void UpdateMeasureFmt(void);
+
+EXPORT long enableAudio = 1;
+EXPORT long showFlexTrack = 1;
 
 static paramIntegerRange_t i1_100 = { 1, 100 };
 static paramIntegerRange_t i0_99 = { 0, 99 };
@@ -152,9 +158,9 @@ static void LoadDistanceFormatList(long selectedUnits)
 	wListClear(prefPLs[I_DISTANCEFORMAT].control);
 
 	for (int inx = 0; dstFmts[selectedUnits][inx].name; inx++) {
-		wComboBoxAddValue(prefPLs[I_DISTANCEFORMAT].control, 
-						  _(dstFmts[selectedUnits][inx].name),
-						  I2VP(dstFmts[selectedUnits][inx].fmt));
+		wComboBoxAddValue(prefPLs[I_DISTANCEFORMAT].control,
+		                  _(dstFmts[selectedUnits][inx].name),
+		                  I2VP(dstFmts[selectedUnits][inx].fmt));
 	}
 }
 
@@ -166,10 +172,9 @@ static void LoadDistanceFormatList(long selectedUnits)
 static void UpdatePrefD(void)
 {
 	long newUnits;
-	int inx;
 
 	if (prefW == NULL || (!wWinIsVisible(prefW))
-		|| prefPLs[I_UNITS].control == NULL) {
+	    || prefPLs[I_UNITS].control == NULL) {
 		return;
 	}
 	newUnits = wRadioGetValue(prefPLs[I_UNITS].control);
@@ -177,7 +182,7 @@ static void UpdatePrefD(void)
 		LoadDistanceFormatList(newUnits);
 		distanceFormatInx = 0;
 
-		for (inx = 0; inx < COUNT(prefPLs); inx++) {
+		for (int inx = 0; inx < COUNT(prefPLs); inx++) {
 			if ((prefPLs[inx].option & PDO_DIM)) {
 				ParamLoadControl(&prefPG, inx);
 			}
@@ -207,9 +212,9 @@ static void UpdateMeasureFmt()
 }
 
 static void OptionDlgUpdate(
-	paramGroup_p pg,
-	int inx,
-	void* valueP)
+        paramGroup_p pg,
+        int inx,
+        void* valueP)
 {
 	if (inx < 0) { return; }
 
@@ -253,24 +258,21 @@ static void PrefOk(void* junk)
 	if (connectAngle < 1.0) {
 		connectAngle = 1.0;
 		resetValuesLow = TRUE;
-	}
-	else if (connectAngle > 10.0) {
+	} else if (connectAngle > 10.0) {
 		connectAngle = 10.0;
 		resetValuesHigh = TRUE;
 	}
 	if (connectDistance < 0.1) {
 		connectDistance = 0.1;
 		resetValuesLow = TRUE;
-	}
-	else if (connectDistance > 1.0) {
+	} else if (connectDistance > 1.0) {
 		connectDistance = 1.0;
 		resetValuesHigh = TRUE;
 	}
 	if (minLength < 0.1) {
 		minLength = 0.1;
 		resetValuesLow = TRUE;
-	}
-	else if (minLength > 1.0) {
+	} else if (minLength > 1.0) {
 		minLength = 1.0;
 		resetValuesHigh = TRUE;
 	}
@@ -297,10 +299,10 @@ static void PrefOk(void* junk)
 static void DoPref(void* junk)
 {
 	if (prefW == NULL) {
-		prefW = FormCreateDialog(&prefPG, MakeWindowTitle(_("Preferences")), 
-			_("Ok"),PrefOk, 
-			_("Cancel"), ParamCancel_Restore, 
-			TRUE, 0, OptionDlgUpdate);
+		prefW = FormCreateDialog(&prefPG, MakeWindowTitle(_("Preferences")),
+		                         _("Ok"),PrefOk,
+		                         _("Cancel"), ParamCancel_Restore,
+		                         TRUE, 0, OptionDlgUpdate);
 		LoadDistanceFormatList(units);
 	}
 	FormLoadControls(&prefPG);
