@@ -1105,7 +1105,7 @@ void wDoAccelHelp( wAccelKey_e key, void * );
 
 /* Creation CallBacks */
 typedef void (*wMenuCallBack_p)( void * );
-typedef void (*wMenuListCallBack_p)( int index, const char *label, const void * attributes);
+typedef void (*wMenuListCallBack_p)( int index, const char *label, void * attributes);
 typedef void (*wMenuCallBack_p)( void * );
 typedef void (*wAccelKeyCallBack_p)( wAccelKey_e, void * );
 typedef void (*wMenuTraceCallBack_p)( wMenu_p, const char *, void * );

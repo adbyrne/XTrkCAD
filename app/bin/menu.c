@@ -60,9 +60,9 @@ wControl_p zoomDownB;
 wControl_p zoomExtentsB;
 wControl_p mapShowB;
 static wControl_p magnetsB;
-EXPORT wMenuToggle_p mapShowMI;
+EXPORT wControl_p mapShowMI;
 static wMenuToggle_p magnetsMI;
-EXPORT wMenuList_p winList_mi;
+EXPORT wControl_p winList_mi;
 wControl_p fileList_ml;
 EXPORT wMenuToggle_p snapGridEnableMI;
 EXPORT wMenuToggle_p snapGridShowMI;
@@ -77,9 +77,8 @@ typedef struct {
 static dynArr_t menuTrace_da;
 #define menuTrace(N) DYNARR_N( menuTrace_t, menuTrace_da, N )
 
-static void DoMenuTrace(wMenu_p menu, const char * label, void * data)
+static void DoMenuTrace(wMenu_p menu, const char * label, const void * data)
 {
-	/*printf( "MENUTRACE: %s/%s\n", (char*)data, label );*/
 	if (recordF) {
 		fprintf(recordF, "MOUSE 1 %0.3f %0.3f\n", oldMarker.x, oldMarker.y);
 		fprintf(recordF, "MENU %0.3f %0.3f \"%s\" \"%s\"\n", oldMarker.x,
@@ -87,6 +86,7 @@ static void DoMenuTrace(wMenu_p menu, const char * label, void * data)
 	}
 }
 
+/**  \TODO: Cppcheck complains about usage of mt, might be a false positive */
 EXPORT wMenu_p MenuRegister(const char * label)
 {
 	wMenu_p m;
@@ -96,7 +96,7 @@ EXPORT wMenu_p MenuRegister(const char * label)
 	mt = &menuTrace(menuTrace_da.cnt - 1);
 	mt->label = strdup(label);
 	mt->menu = m;
-	wMenuSetTraceCallBack(m, DoMenuTrace, mt->label);
+	wMenuSetTraceCallBack(m, DoMenuTrace, strdup(label));
 	return m;
 }
 
@@ -129,7 +129,7 @@ static void MenuPlayback(char * line)
  */
 
 
-static wWin_p addElevW;
+static wControl_p addElevW;
 #define addElevF (wFloat_p)addElevPD.control
 static DIST_T addElevValueV;
 static void DoAddElev(void * unused);
@@ -137,7 +137,7 @@ static void DoAddElev(void * unused);
 static paramFloatRange_t rn1000_1000 = { -1000.0, 1000.0 };
 static paramData_t addElevPLs[] = { {
 		PD_FLOAT, &addElevValueV, "value",
-		PDO_NOPREF|PDO_DIM, &rn1000_1000, NULL, 0
+		PDO_NOPREF|PDO_DIM, &rn1000_1000, N_("Change height by:"), 0
 	}
 };
 static paramGroup_t addElevPG = { "addElev", 0, addElevPLs, COUNT( addElevPLs ) };
@@ -156,9 +156,10 @@ static void ShowAddElevations(void * unused)
 		return;
 	}
 	if (addElevW == NULL)
-		addElevW = ParamCreateDialog(&addElevPG,
-		                             MakeWindowTitle(_("Change Elevations")), _("Change"), DoAddElev,
-		                             ParamCancel_Current, FALSE, NULL, 0, NULL);
+		addElevW = FormCreateDialog(&addElevPG,
+		                            MakeWindowTitle(_("Change Elevations")),
+		                            _("Change"), DoAddElev,
+		                            _("Cancel"), ParamCancel_Current, FALSE, 0, NULL);
 	wShow(addElevW);
 }
 
@@ -169,9 +170,9 @@ static void ShowAddElevations(void * unused)
  */
 
 
-static wWin_p rotateW;
-static wWin_p indexW;
-static wWin_p moveW;
+static wControl_p rotateW;
+static wControl_p indexW;
+static wControl_p moveW;
 static double rotateValue;
 static char trackIndex[STR_LONG_SIZE];
 static coOrd moveValue;
@@ -181,17 +182,17 @@ static moveDialogCallBack_t moveDialogCallBack;
 
 static void RotateEnterOk(void * unused);
 
-static paramFloatRange_t rn360_360 = { -360.0, 360.0, 80 };
+static paramFloatRange_t rn360_360 = { -360.0, 360.0, 20 };
 static paramData_t rotatePLs[] = { { PD_FLOAT, &rotateValue, "rotate", PDO_NOPREF|PDO_ANGLE|PDO_NORECORD, &rn360_360, N_("Angle:") } };
 static paramGroup_t rotatePG = { "rotate", 0, rotatePLs, COUNT( rotatePLs ) };
 
 static void IndexEnterOk(void * unused);
 static paramData_t indexPLs[] = {
-	{ PD_STRING, &trackIndex, "select",	PDO_NOPREF|PDO_NORECORD|PDO_STRINGLIMITLENGTH, I2VP(STR_SIZE-1), N_("Indexes:"), 0, 0, sizeof(trackIndex) }
+	{ PD_STRING, &trackIndex, "select",	PDO_NOPREF|PDO_NORECORD|PDO_STRINGLIMITLENGTH, I2VP(20), N_("Indexes:"), 0, 0, sizeof(trackIndex) }
 };
 static paramGroup_t indexPG = { "index", 0, indexPLs, COUNT( indexPLs ) };
 
-static paramFloatRange_t r_1000_1000 = { -1000.0, 1000.0, 80 };
+static paramFloatRange_t r_1000_1000 = { -1000.0, 1000.0, 20 };
 static void MoveEnterOk(void * unused);
 static paramData_t movePLs[] = {
 	{ PD_FLOAT, &moveValue.x, "moveX", PDO_NOPREF|PDO_DIM|PDO_NORECORD, &r_1000_1000, N_("Move X:") },
@@ -203,8 +204,9 @@ static void StartRotateDialog(void * funcVP)
 {
 	rotateDialogCallBack_t func = funcVP;
 	if (rotateW == NULL)
-		rotateW = ParamCreateDialog(&rotatePG, MakeWindowTitle(_("Rotate")),
-		                            _("Ok"), RotateEnterOk, ParamCancel_Current, FALSE, NULL, 0, NULL);
+		rotateW = FormCreateDialog(&rotatePG, MakeWindowTitle(_("Rotate")),
+		                           _("Ok"), RotateEnterOk,
+		                           _("Cancel"), ParamCancel_Current, FALSE, 0, NULL);
 	ParamLoadControls(&rotatePG);
 	rotateDialogCallBack = func;
 	wShow(rotateW);
@@ -214,8 +216,9 @@ static void StartIndexDialog(void * funcVP)
 {
 	indexDialogCallBack_t func = funcVP;
 	if (indexW == NULL)
-		indexW = ParamCreateDialog(&indexPG, MakeWindowTitle(_("Select Index")),
-		                           _("Ok"), IndexEnterOk, ParamCancel_Current, FALSE, NULL, 0, NULL);
+		indexW = FormCreateDialog(&indexPG, MakeWindowTitle(_("Select Index")),
+		                          _("Ok"), IndexEnterOk,
+		                          _("Cancel"), ParamCancel_Current, FALSE, 0, NULL);
 	ParamLoadControls(&indexPG);
 	indexDialogCallBack = func;
 	trackIndex[0] = '\0';
@@ -226,8 +229,11 @@ static void StartMoveDialog(void * funcVP)
 {
 	moveDialogCallBack_t func = funcVP;
 	if (moveW == NULL)
-		moveW = ParamCreateDialog(&movePG, MakeWindowTitle(_("Move")), _("Ok"),
-		                          MoveEnterOk, ParamCancel_Current, FALSE, NULL, 0, NULL);
+		moveW = FormCreateDialog(&movePG, MakeWindowTitle(_("Move")),
+		                         _("Ok"), MoveEnterOk,
+		                         _("Cancel"), ParamCancel_Current,
+		                         FALSE, 0, NULL);
+
 	ParamLoadControls(&movePG);
 	moveDialogCallBack = func;
 	wShow(moveW);
@@ -312,13 +318,12 @@ static void ChkExamples( void * unused )
 
 static void ChkRevert(void * unused)
 {
-	int rc;
-
 	if (changed) {
+		int rc;
 		rc = wNoticeWithIcon(NT_WARNING,
-		               _("Do you want to return to the last saved state?\n\n"
-		                 "Revert will cause all changes done since last save to be lost."),
-		               _("&Revert"), _("&Cancel"));
+		                     _("Do you want to return to the last saved state?\n\n"
+		                       "Revert will cause all changes done since last save to be lost."),
+		                     _("&Revert"), _("&Cancel"));
 		if (rc) {
 			/* load the file */
 			char *filename = GetLayoutFullPath();
@@ -347,7 +352,8 @@ static void DoCommandBIndirect(void * cmdInxP)
 	DoCommandB(I2VP(cmdInx));
 }
 
-void ToggleSetInMenuToolbar(wControl_p menuItem, wControl_p toolbarButton, wBool_t newState)
+void ToggleSetInMenuToolbar(wControl_p menuItem, wControl_p toolbarButton,
+                            wBool_t newState)
 {
 	wMenuToggleSet(menuItem, newState);
 
@@ -394,7 +400,7 @@ EXPORT void SelectFont(void * unused)
 
 EXPORT long stickySet = 0;
 static long stickySet1 = 0;
-static wWin_p stickyW;
+static wControl_p stickyW;
 static const char * stickyLabels[MAX_STICKY_GROUPS + 1];
 static paramData_t stickyPLs[] = { {
 		PD_TOGGLE, &stickySet1, "set", 0,
@@ -416,9 +422,9 @@ EXPORT void DoSticky(void * unused)
 {
 	if (!stickyW) {
 		stickyW = FormCreateDialog(&stickyPG, MakeWindowTitle(_("Sticky Commands")),
-			_("Ok"), StickyOk,
-			_("Cancel"), ParamCancel_Restore,
-			TRUE, F_RESIZE, NULL);
+		                           _("Ok"), StickyOk,
+		                           _("Cancel"), ParamCancel_Restore,
+		                           TRUE, F_RESIZE, NULL);
 	}
 	stickySet1 = stickySet;
 	FormLoadControls(&stickyPG);
@@ -431,7 +437,7 @@ EXPORT void DoSticky(void * unused)
  *
  */
 
-static wWin_p debugW;
+static wControl_p debugW;
 
 static int debugCnt = 0;
 static paramIntegerRange_t r0_100 = { 0, 100, 80 };
@@ -457,8 +463,9 @@ static void CreateDebugW(void)
 {
 	debugPG.paramCnt = debugCnt+1;
 	ParamRegister(&debugPG);
-	debugW = ParamCreateDialog(&debugPG, MakeWindowTitle(_("Debug")), _("Ok"),
-	                           DebugOk, ParamCancel_Current, FALSE, NULL, 0, NULL);
+	debugW = FormCreateDialog(&debugPG, MakeWindowTitle(_("Debug")),
+	                          _("Ok"),DebugOk,
+	                          _("Cancel"), ParamCancel_Current, FALSE, 0, NULL);
 	wHide(debugW);
 }
 
@@ -640,7 +647,7 @@ static void ShowUnusedBalloonHelp( void )
 
 
 wControl_p AddToolbarButton(const char* helpStr, wIcon_p icon, long options,
-	wButtonCallBack_p action, void* context) 
+                            wButtonCallBack_p action, void* context)
 {
 	wControl_p bb;
 	wIndex_t inx;
@@ -658,8 +665,9 @@ wControl_p AddToolbarButton(const char* helpStr, wIcon_p icon, long options,
 		}
 	}
 	long opt = 0L;
-	if (options & IC_ABUT)
+	if (options & IC_ABUT) {
 		opt = BO_ABUT;
+	}
 
 	/** \TODO find a solution to create a gap after a button group is complete */
 //	if (cmdGroup & BG_BIGGAP)
@@ -667,11 +675,10 @@ wControl_p AddToolbarButton(const char* helpStr, wIcon_p icon, long options,
 
 	if (options & IC_TOGGLE || options & IC_STICKY) {
 		bb = wToggleCreateForToolbar(mainW, 0, 0, helpStr, icon,
-			opt | BO_ICON, 0, action, context);
-	}
-	else {
+		                             opt | BO_ICON, 0, action, context);
+	} else {
 		bb = wButtonCreateForToolbar(mainW, 0, 0, helpStr, icon,
-			opt | BO_ICON, 0, action, context);
+		                             opt | BO_ICON, 0, action, context);
 	}
 
 	ToolbarControlAdd(bb, opt, cmdGroup);
@@ -983,7 +990,8 @@ EXPORT void CreateMenus(void)
 	                   ACCL_PRINTSETUP, (wMenuCallBack_p) wPrintSetup, 0,
 	                   I2VP(0));
 	InitCmdPrint(fileM);
-	AddToolbarButton("menuFile-setup", CreateToolbarIconFromResource("doc-setup.png"),
+	AddToolbarButton("menuFile-setup",
+	                 CreateToolbarIconFromResource("doc-setup.png"),
 	                 IC_MODETRAIN_TOO, (wMenuCallBack_p) wPrintSetup, I2VP(0));
 
 	wMenuSeparatorCreate(fileM);
@@ -1022,28 +1030,30 @@ EXPORT void CreateMenus(void)
 	InitCmdExport();
 
 	AddToolbarButton("menuFile-parameter",
-		CreateToolbarIconFromResource("parameter.png"),
+	                 CreateToolbarIconFromResource("parameter.png"),
 	                 IC_MODETRAIN_TOO, paramFilesCallback, NULL);
 
 	cmdGroup = BG_ZOOM;
 	zoomUpB = AddToolbarButton("cmdZoomIn",
-		CreateToolbarIconFromResource("zoom-in.png"),
+	                           CreateToolbarIconFromResource("zoom-in.png"),
 	                           IC_MODETRAIN_TOO, DoZoomUp, NULL);
 	zoomM = wMenuPopupCreate(mainW, "");
 	AddToolbarButton("cmdZoom", CreateToolbarIconFromResource("zoom-choose.png"),
 	                 IC_MODETRAIN_TOO,
 	                 (wButtonCallBack_p) wMenuPopupShow, zoomM);
 	zoomDownB = AddToolbarButton("cmdZoomOut",
-		CreateToolbarIconFromResource("zoom-out.png"),
+	                             CreateToolbarIconFromResource("zoom-out.png"),
 	                             IC_MODETRAIN_TOO, DoZoomDown, NULL);
 	zoomExtentsB = AddToolbarButton("cmdZoomExtent",
-		CreateToolbarIconFromResource("zoom-extent.png"),
+	                                CreateToolbarIconFromResource("zoom-extent.png"),
 	                                IC_MODETRAIN_TOO, DoZoomExtents, NULL);
 
 	cmdGroup = BG_UNDO;
-	undoB = AddToolbarButton("cmdUndo", CreateToolbarIconFromResource("undo.png"), 0,
+	undoB = AddToolbarButton("cmdUndo", CreateToolbarIconFromResource("undo.png"),
+	                         0,
 	                         UndoUndo, NULL);
-	redoB = AddToolbarButton("cmdRedo", CreateToolbarIconFromResource("redo.png"), 0,
+	redoB = AddToolbarButton("cmdRedo", CreateToolbarIconFromResource("redo.png"),
+	                         0,
 	                         UndoRedo, NULL);
 
 	wControlActive((wControl_p) undoB, FALSE);
@@ -1174,14 +1184,15 @@ EXPORT void CreateMenus(void)
 	cmdGroup = BG_SNAP;
 	InitSnapGridButtons();
 	magnetsB = AddToolbarButton("cmdMagneticSnap",
-		CreateToolbarIconFromResource("magnet.png"),
+	                            CreateToolbarIconFromResource("magnet.png"),
 	                            IC_MODETRAIN_TOO | IC_TOGGLE, MagneticSnapToggle, NULL);
-	wControlLinkedSet((wControl_p) magnetsMI, (wControl_p) magnetsB);
+	wControlLinkedSet(magnetsMI,  magnetsB);
 	wButtonSetBusy(magnetsB, (wBool_t) magneticSnap);
 
-	mapShowB = AddToolbarButton("cmdMapShow", CreateToolbarIconFromResource("map.png"),
+	mapShowB = AddToolbarButton("cmdMapShow",
+	                            CreateToolbarIconFromResource("map.png"),
 	                            IC_MODETRAIN_TOO | IC_TOGGLE, MapWindowToggleShow, NULL);
-	wControlLinkedSet((wControl_p) mapShowMI, (wControl_p) mapShowB);
+	wControlLinkedSet( mapShowMI, mapShowB);
 	wButtonSetBusy(mapShowB, (wBool_t) mapVisible);
 
 	/*
@@ -1312,9 +1323,10 @@ EXPORT void CreateMenus(void)
 	 */
 
 #define MAX_ENTRIES_IN_WINDOWLIST 25
-	
-	 winList_mi = wMenuListCreate(windowM, "menuWindow", MAX_ENTRIES_IN_WINDOWLIST, DoShowWindow);
-	 wMenuListAdd(winList_mi, 0, _("Main window"), mainW);
+
+	winList_mi = wMenuListCreate(windowM, "menuWindow", MAX_ENTRIES_IN_WINDOWLIST,
+	                             DoShowWindow);
+	wMenuListAdd(winList_mi, 0, _("Main window"), mainW);
 
 	/*
 	 * HELP MENU
@@ -1401,16 +1413,16 @@ EXPORT void CreateMenus(void)
 	InitHotBar();
 
 	InitBenchDialog();
-	
+
 	ParamRegister(&rotatePG);
 	ParamRegister(&movePG);
 	ParamRegister(&indexPG);
 
 	ToolbarLayout(NULL);
-	
+
 	// stickySet is initialized by AddMenuButton based on IC_STICKY flag
 	// Now check to see if there is saved value
-	wPrefGetInteger( "DialogItem", "sticky-set", &stickySet, stickySet );
+	wPrefGetInteger( "sticky", "set", &stickySet, stickySet );
 	ParamRegister(&stickyPG);
 }
 
@@ -1423,21 +1435,21 @@ static void InitCmdExport(void)
 	AddToolbarButton("cmdExport", CreateToolbarIconFromResource("doc-export.png"),
 	                 IC_SELECTED | IC_ACCLKEY, DoExport, NULL);
 	AddToolbarButton("cmdExportDXF",
-		CreateToolbarIconFromResource("doc-export-dxf.png"),
+	                 CreateToolbarIconFromResource("doc-export-dxf.png"),
 	                 IC_SELECTED | IC_ACCLKEY, DoExportDXF, I2VP(1));
 	AddToolbarButton("cmdExportBmap",
-		CreateToolbarIconFromResource("doc-export-bmap.png"), IC_ACCLKEY,
+	                 CreateToolbarIconFromResource("doc-export-bmap.png"), IC_ACCLKEY,
 	                 OutputBitMapInit(), NULL);
 #if XTRKCAD_CREATE_SVG
 	AddToolbarButton("cmdExportSVG",
-		CreateToolbarIconFromResource("doc-export-svg.png"),
+	                 CreateToolbarIconFromResource("doc-export-svg.png"),
 	                 IC_ACCLKEY, DoExportSVG, NULL); // IC_SELECTED |
 #endif
 	AddToolbarButton("cmdImport", CreateToolbarIconFromResource("doc-import.png"),
 	                 IC_ACCLKEY,
 	                 DoImport, I2VP(0));
 	AddToolbarButton("cmdImportModule",
-		CreateToolbarIconFromResource("doc-import-mod.png"), IC_ACCLKEY,
+	                 CreateToolbarIconFromResource("doc-import-mod.png"), IC_ACCLKEY,
 	                 DoImport, I2VP(1));
 	ButtonGroupEnd();
 	ParamRegister( &menuPG );

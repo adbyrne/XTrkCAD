@@ -33,8 +33,8 @@ extern wControl_p zoomUpB;
 extern wControl_p zoomDownB;
 extern wControl_p zoomExtentsB;
 extern wControl_p mapShowB;
-extern wMenuToggle_p mapShowMI;
-extern wMenuList_p winList_mi;
+extern wControl_p mapShowMI;
+extern wControl_p winList_mi;
 extern wControl_p fileList_ml;
 extern wMenuToggle_p snapGridEnableMI;
 extern wMenuToggle_p snapGridShowMI;
@@ -56,8 +56,8 @@ extern void EnableMenus( void );
 extern void MessageListAppend( char *, const char * );
 extern const char * GetBalloonHelpStr(const char * helpKey);
 extern wControl_p AddToolbarButton(const char * helpStr, wIcon_p icon,
-                                  long options,
-                                  wButtonCallBack_p action, void * context);
+                                   long options,
+                                   wButtonCallBack_p action, void * context);
 extern void ButtonGroupBegin(const char * menuTitle, const char * helpKey,
                              const char * stickyLabel);
 extern void ButtonGroupEnd(void);
