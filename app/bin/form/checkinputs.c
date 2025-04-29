@@ -227,7 +227,13 @@ wBool_t FormFloatRangeCheck(paramData_p p, FLOAT_T valF)
 	return(!p->bInvalid);
 }
 
-
+/**
+ * Check for valid string: .
+ * 
+ * \param data	parameter definition
+ * \param value	entered string
+ * \return false if invalid, true if ok
+ */
 wBool_t FormStringCheckValue(paramData_p data, char * value)
 {
 	DynString message;
@@ -236,24 +242,29 @@ wBool_t FormStringCheckValue(paramData_p data, char * value)
 	data->bInvalid = FALSE;
 
 	if ((data->option & PDO_NOTBLANK) && value[0] == '\0') {
-		ShowErrorMessage(data, _("String cannot be blank"));
+		DynStringPrintf(&message, "%s", _("String cannot be blank"));
 		data->bInvalid = TRUE;
-		return(data->bInvalid);
 	}
-
-	if ((data->option & PDO_NOPSHUPD) == 0 && data->valueP) {
-		if (strlen(value) > data->max_string - 1) {
-			DynStringPrintf(&message, "String is too long, Max length is % u", data->max_string - 1);
-			ShowErrorMessage(data, DynStringToCStr(&message));
-			data->bInvalid = TRUE;
-			return(data->bInvalid);
+	else {
+		if ((data->option & PDO_NOPSHUPD) == 0 && data->valueP) {
+			if (strlen(value) > data->max_string - 1) {
+				DynStringPrintf(&message, "String is too long, Max length is % u", data->max_string - 1);
+				data->bInvalid = TRUE;
+			}
 		}
 	}
 
-	ClearErrorMessage(data);
-	DynStringFree(&message);
+	if (data->bInvalid) {
+		wTooltipSetText(data->control, DynStringToCStr(&message));
+	}
+	else {
+		wTooltipSet(data->control, data->group->nameStr, data->nameStr);
+	}
 
-	return(data->bInvalid);
+	wControlHilite(data->control, data->bInvalid);
+
+	DynStringFree(&message);
+	return(!data->bInvalid);
 }
 
 void

@@ -29,7 +29,7 @@
 #include "tbezier.h"
 #include "tcornu.h"
 #include "common.h"
-#include "param.h"
+#include "form.h"
 #include "shrtpath.h"
 #include "track.h"
 #include "trkendpt.h"
@@ -690,24 +690,22 @@ static long groupReplace;
 static long groupNoCombine;
 static double groupOriginX;
 static double groupOriginY;
-char * groupReplaceLabels[] = { N_("Replace with new group?"), NULL };
-char * groupNoCombineLabels[] = { N_("Turntable/TransferTable/DblSlipSwith?"), NULL };
 
-static wWin_p groupW;
+static wControl_p groupW;
 static paramIntegerRange_t r0_999999 = { 0, 999999 };
 static paramFloatRange_t r_1000_1000    = { -1000.0, 1000.0, 80 };
 static paramData_t groupPLs[] = {
-	/*0*/ { PD_STRING, groupManuf, "manuf", PDO_NOPREF | PDO_NOTBLANK, I2VP(350), N_("Manufacturer"), 0, 0, sizeof(groupManuf)},
-	/*1*/ { PD_STRING, groupDesc, "desc", PDO_NOPREF | PDO_NOTBLANK, I2VP(230), N_("Description"), 0, 0, sizeof(groupDesc)},
-	/*2*/ { PD_STRING, groupPartno, "partno", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGIGNORELABELWIDTH|PDO_NOTBLANK, I2VP(100), N_("#"), 0, 0, sizeof(groupPartno)},
+	/*0*/ { PD_STRING, groupManuf, "manuf", PDO_NOPREF | PDO_NOTBLANK, I2VP(350), NULL, 0, 0, sizeof(groupManuf)},
+	/*1*/ { PD_STRING, groupDesc, "desc", PDO_NOPREF | PDO_NOTBLANK, I2VP(230), NULL, 0, 0, sizeof(groupDesc)},
+	/*2*/ { PD_STRING, groupPartno, "partno", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGIGNORELABELWIDTH|PDO_NOTBLANK, I2VP(100), NULL, 0, 0, sizeof(groupPartno)},
 	/*3*/ { PD_LONG, &groupSegCnt, "segcnt", PDO_NOPREF, &r0_999999, N_("# Segments"), BO_READONLY },
 #define I_GROUP_ORIGIN_OFFSET 4  /* Need to change if add above */
-	/*4*/ { PD_FLOAT, &groupOriginX, "orig", PDO_DIM, &r_1000_1000, N_("Offset X,Y:")},
+	/*4*/ { PD_FLOAT, &groupOriginX, "origx", PDO_DIM, &r_1000_1000, N_("Offset X,Y:")},
 	/*5*/ { PD_FLOAT, &groupOriginY, "origy",PDO_DIM | PDO_DLGHORZ, &r_1000_1000, ""},
-	/*6*/ { PD_TOGGLE, &groupNoCombine, "noCombine", 0, groupNoCombineLabels, "", BC_HORIZONTAL|BC_NOBORDER },
-	/*7*/ { PD_TOGGLE, &groupReplace, "replace", 0, groupReplaceLabels, "", BC_HORIZONTAL|BC_NOBORDER }
+	/*6*/ { PD_TOGGLE, &groupNoCombine, "noCombine", 0, NULL, "", BC_HORIZONTAL | BC_NOBORDER},
+	/*7*/ { PD_TOGGLE, &groupReplace, "replace", 0, NULL, "", BC_HORIZONTAL | BC_NOBORDER}
 };
-static paramGroup_t groupPG = { "group", 0, groupPLs, COUNT( groupPLs ) };
+static paramGroup_t groupPG = { "group", PGO_FULLDIALOGFROMBUILDER, groupPLs, COUNT( groupPLs ) };
 
 
 typedef struct {
@@ -1863,8 +1861,10 @@ EXPORT void DoGroup( void * unused )
 	}
 	if ( !groupW ) {
 		ParamRegister( &groupPG );
-		groupW = ParamCreateDialog( &groupPG, MakeWindowTitle(_("Group Objects")),
-		                            _("Ok"), GroupOk, ParamCancel_Current, TRUE, NULL, F_BLOCK, NULL );
+		groupW = FormCreateDialog( &groupPG, MakeWindowTitle(_("Group Objects")),
+		                            _("Ok"), GroupOk, 
+									_("Cancel"), ParamCancel_Current, 
+									TRUE, F_BLOCK, NULL);
 		groupD.dpi = mainD.dpi;
 	}
 	if (isTurnout) {

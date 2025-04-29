@@ -49,7 +49,6 @@
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="halign">end</property>
                 <property name="label" translatable="yes">_Manufacturer</property>
                 <property name="use-underline">True</property>
@@ -63,14 +62,13 @@
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="halign">end</property>
                 <property name="margin-top">12</property>
                 <property name="label" translatable="yes">Number of segments</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">5</property>
+                <property name="top_attach">4</property>
               </packing>
             </child>
             <child>
@@ -78,7 +76,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="max_length">255</property>
-                <property name="width-request">350</property>
+                <property name="width-request">35</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -88,7 +86,6 @@
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="halign">end</property>
                 <property name="label" translatable="yes">_Description</property>
                 <property name="use-underline">True</property>
@@ -120,8 +117,8 @@
                     <property name="can_focus">False</property>
                     <property name="halign">end</property>
                     <property name="label" translatable="yes">Part _No.</property>
-                <property name="use-underline">True</property>
-                <property name="mnemonic-widget">partno</property>
+                    <property name="use-underline">True</property>
+                    <property name="mnemonic-widget">partno</property>
                   </object>
                   <packing>
                     <property name="position">2</property>
@@ -153,31 +150,41 @@
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">5</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkCheckButton" id="noCombine">
-                <property name="label" translatable="yes">_Turntable/TransferTable/DblSlipSwith?</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
-                <property name="use-underline">True</property>
-                <property name="draw_indicator">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
                 <property name="top_attach">4</property>
               </packing>
             </child>
             <child>
-              <object class="GtkCheckButton" id="replace">
-                <property name="label" translatable="yes">_Replace existing group</property>
+              <object class="GtkBox" id="noCombine">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
-                <property name="draw_indicator">True</property>
-                <property name="use-underline">True</property>
+                <child>
+                  <object class="GtkCheckButton">
+                    <property name="label" translatable="yes">_Turntable/TransferTable/DblSlipSwitch?</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="use-underline">True</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox" id="replace">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkCheckButton">
+                    <property name="label" translatable="yes">_Replace existing group</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="draw_indicator">True</property>
+                    <property name="use-underline">True</property>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -193,7 +200,7 @@
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">6</property>
+                <property name="top_attach">5</property>
               </packing>
             </child>
             <child>
@@ -226,7 +233,7 @@
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">6</property>
+                <property name="top_attach">5</property>
               </packing>
             </child>
           </object>

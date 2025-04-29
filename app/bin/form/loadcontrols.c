@@ -113,13 +113,13 @@ void FormLoadSingleControl(
 			p->oldD.s = MyStrdup((char*)p->valueP);
 			wEntrySetValue(p->control, (char*)p->valueP);
 		}
-		if ((p->option & PDO_NOTBLANK) && strlen(p->oldD.s) == 0) {
-			wControlHilite( p->control, TRUE);
-			p->bInvalid = TRUE;
-		}
-		else {
-			p->bInvalid = FALSE;
-		}
+		//if ((p->option & PDO_NOTBLANK) && strlen(p->oldD.s) == 0) {
+		//	wControlHilite( p->control, TRUE);
+		//	p->bInvalid = TRUE;
+		//}
+		//else {
+		//	p->bInvalid = FALSE;
+		//}
 		break;
 	case PD_MESSAGE:
 		wMessageSetValue(p->control, _((char*)p->valueP));

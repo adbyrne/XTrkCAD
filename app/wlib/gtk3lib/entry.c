@@ -171,21 +171,21 @@ wlibEntrySetValid(wControl_p entry, bool valid)
 
 static int entryFocusOutEvent(
         GtkEntry *widget,
-        GdkEvent * event,
+        GdkEventFocus event,
         wControl_p b)
 {
 	struct entry* entry = CONTROL_GET_ATTRIBUTES_PTR(b, entry);
-	bool isOK = TRUE;
+		bool isFalse = FALSE;
 
-	if (entry->action) {
-		const char *s;
-		s = gtk_entry_get_text(GTK_ENTRY(b->widget));
-
-		isOK = entry->action(s, b->context);
-		wlibEntrySetValid(b, isOK);
-	}
-	if (isOK && entry->valueP) {
-		g_strlcpy(entry->valueP, wEntryGetValue(b), entry->valueL);
+	if (event.in == FALSE) {
+		if (entry->action) {
+			const char* s;
+			s = gtk_entry_get_text(GTK_ENTRY(b->widget));
+			isFalse = entry->action(s, b->context);
+		}
+		if (!isFalse && entry->valueP) {
+			g_strlcpy(entry->valueP, wEntryGetValue(b), entry->valueL);
+		}
 	}
 	return FALSE;
 }
@@ -280,6 +280,7 @@ wControl_p wEntryCreate(
 	                 G_CALLBACK(entryFocusOutEvent), b);
 
 	gtk_widget_add_events(b->widget, GDK_FOCUS_CHANGE_MASK);
+
 
 	if (option & BO_READONLY) {
 		gtk_editable_set_editable(GTK_EDITABLE(b->widget), FALSE);

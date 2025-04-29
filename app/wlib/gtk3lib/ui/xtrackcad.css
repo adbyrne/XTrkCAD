@@ -80,13 +80,13 @@ box.framed {
 }
 
 /* invalid value in entry */
-entry.error {
-    border: 1px solid red;
-}
+/* entry.error {
+    border: 2px solid orchid;
+} */
 
 .hilite {
     border: 1px solid orange;
-}
+} 
 
 combobox {
     -GtkComboBox-appears-as-list: 1; 

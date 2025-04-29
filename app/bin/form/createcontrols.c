@@ -225,12 +225,12 @@ static bool StringPush(const char* val, void* dp)
 	//	p->enter_pressed = FALSE;
 	//}
 
-	LOG(log_form, 1, ("ParamStringPush( %s: Enter:%d Val:%s )\n",
+	LOG(log_form, 1, ("StringPush( %s: Enter:%d Val:%s )\n",
 		p->nameStr, p->enter_pressed, val));
 
-	if(FormStringCheckValue(p, val))
+	if(!FormStringCheckValue(p, val))
 	{
-		return(FALSE);
+		return(TRUE);
 	}
 
 	FormStringGetValue(p, val);
