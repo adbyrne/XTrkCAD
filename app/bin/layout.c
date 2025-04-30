@@ -24,7 +24,7 @@
 
 #include "custom.h"
 #include "layout.h"
-#include "param.h"
+#include "form.h"
 #include "paths.h"
 #include "track.h"
 #include "fileio.h"
@@ -92,7 +92,7 @@ static paramIntegerRange_t i0_100 = { 0, 100 };
 static void SettingsWrite( void  );
 static void SettingsRead( void  );
 
-static void LayoutDlgUpdate(paramGroup_p pg, int inx, void * valueP);
+static wBool_t LayoutDlgUpdate(paramGroup_p pg, int inx, void * valueP);
 
 /**
 * Update the full file name. Do not do anything if the new filename is identical to the old one.
@@ -158,7 +158,7 @@ LoadLayoutMaxGradePref(char* scaleName, double defaultValue)
  * @param src The source of the copy
 */
 static void
-CopyLayoutTitle(char* dest, char *src)
+CopyLayoutTitle(char* dest, const char *src)
 {
 	strncpy(dest, src, TITLEMAXLEN - 1);
 	*(dest + TITLEMAXLEN - 1) = '\0';
@@ -181,7 +181,7 @@ SetFileChanged(void)
  * @param title The Layout title
 */
 void
-SetLayoutTitle(char *title)
+SetLayoutTitle(const char *title)
 {
 	CopyLayoutTitle(thisLayout.props.title1, title);
 }
@@ -191,7 +191,7 @@ SetLayoutTitle(char *title)
  * @param title The Layout subtitle
 */
 void
-SetLayoutSubtitle(char *title)
+SetLayoutSubtitle(const char *title)
 {
 	CopyLayoutTitle(thisLayout.props.title2, title);
 }
@@ -502,7 +502,7 @@ void SetName()
 {
 	char *name = GetLayoutBackGroundFullPath();
 	if (name && name[0]) {									//Ignore ""
-		char *f = FindFilename(name);
+		const char *f = FindFilename(name);
 		if ( f ) {
 			strncpy( thisLayout.props.backgroundTextBox,f,TEXT_FIELD_LEN );
 		} else {
@@ -520,6 +520,7 @@ static wBool_t file_changed;
 bool haveBackground = false;
 BOOL_T backgroundVisible = TRUE;
 
+/**  \TODO: why use a global here that is never changed */
 char * noname = "";
 
 wControl_p backgroundB;
@@ -653,7 +654,6 @@ static void ImageFileBrowse( void * unused )
 */
 static void ImageFileClear( void * unused)
 {
-	char * noname = "";
 	SetLayoutBackGroundFullPath(noname);
 	wDrawSetBackground(  mainD.d, NULL, NULL);
 	SetName();
@@ -771,11 +771,11 @@ static void LayoutOk(void * unused)
 * \param unused IN unused
 */
 
-static void LayoutCancel(struct wWin_t *unused)
+static void LayoutCancel( wControl_p unused)
 {
 	// thisLayout.props = *(thisLayout.copyOfLayoutProps);
-	char* curr = DynStringToCStr(&thisLayout.backgroundFileName);
-	char* prev = DynStringToCStr(&thisLayout.copyBackgroundFileName);
+	const char* curr = DynStringToCStr(&thisLayout.backgroundFileName);
+	const char* prev = DynStringToCStr(&thisLayout.copyBackgroundFileName);
 	if ((curr == NULL && prev != NULL) || (curr != NULL && prev == NULL)
 	    || (strcmp(curr, prev) != 0) ) {
 		if (DynStringSize(&thisLayout.backgroundFileName)) {
@@ -829,9 +829,11 @@ void DoLayout(void * unused)
 	SetLayoutRoomSize(mapD.size);
 
 	if (layoutW == NULL) {
-		layoutW = ParamCreateDialog(&layoutPG, MakeWindowTitle(_("Layout Options")),
-		                            _("Ok"), LayoutOk, ParamCancel_Custom( LayoutCancel ),
-		                            TRUE, NULL, 0, LayoutDlgUpdate);
+		layoutW = FormCreateDialog(&layoutPG, MakeWindowTitle(_("Layout Options")),
+		                            _("Ok"), LayoutOk, 
+									_("Cancel"), ParamCancel_Custom(LayoutCancel),
+		                            TRUE, 0, 
+									LayoutDlgUpdate);
 		LoadScaleList(layoutPLs[SCALEINX].control);
 	}
 
@@ -882,7 +884,7 @@ EXPORT addButtonCallBack_t LayoutInit(void)
 * \param valueP IN new value
 */
 
-static void
+static wBool_t
 LayoutDlgUpdate(
         paramGroup_p pg,
         int inx,
@@ -944,7 +946,7 @@ LayoutDlgUpdate(
 		SetLayoutBackGroundAngle(angle);
 		MainRedraw();
 	}
-
+	return(TRUE);
 }
 /**
  * Load Background Options from Saved Parms section [layout]

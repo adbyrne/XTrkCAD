@@ -24,7 +24,7 @@
 #include "dynstring.h"
 #include "misc.h"
 #include "note.h"
-#include "param.h"
+#include "form.h"
 #include "shortentext.h"
 #include "track.h"
 #include "cundo.h"
@@ -48,10 +48,10 @@ static paramData_t textNotePLs[] = {
 	/*3*/ { PD_TEXT, NULL, "text", PDO_NOPREF, &noteTextData, N_("Note") }
 };
 
-static paramGroup_t textNotePG = { "textNote", 0, textNotePLs, COUNT( textNotePLs ) };
-static wWin_p textNoteW;
+static paramGroup_t textNotePG = { "textNote", PGO_FULLDIALOGFROMBUILDER, textNotePLs, COUNT( textNotePLs ) };
+static wControl_p textNoteW;
 
-#define textEntry	((wText_p)textNotePLs[I_TEXT].control)
+#define textEntry	(textNotePLs[I_TEXT].control)
 
 
 /**
@@ -61,11 +61,10 @@ static wWin_p textNoteW;
  * \param inx IN index into dialog template
  * \param valueP IN unused
  */
-static void
-TextDlgUpdate(
-        paramGroup_p pg,
-        int inx,
-        void * valueP)
+static wBool_t
+TextDlgUpdate(paramGroup_p pg,
+              int inx,
+              void * valueP)
 {
 	switch (inx) {
 	case I_ORIGX:
@@ -75,6 +74,8 @@ TextDlgUpdate(
 	default:
 		break;
 	}
+
+	return(TRUE);
 }
 
 
@@ -129,12 +130,11 @@ CreateEditTextNote(char *title, char * textData )
 	// create the dialog if necessary
 	if (!textNoteW) {
 		ParamRegister(&textNotePG);
-		textNoteW = ParamCreateDialog(&textNotePG,
-		                              "",
-		                              _("Done"), TextEditOK,
-		                              ParamCancel_Current, TRUE, NULL,
-		                              F_BLOCK,
-		                              TextDlgUpdate);
+		textNoteW = FormCreateDialog(&textNotePG, "",
+		                             _("Done"), TextEditOK,
+		                             _("Cancel"), ParamCancel_Current,
+		                             TRUE, F_BLOCK,
+		                             TextDlgUpdate);
 	}
 
 	wWinSetTitle(textNotePG.win, MakeWindowTitle(title));
@@ -142,7 +142,7 @@ CreateEditTextNote(char *title, char * textData )
 	wTextClear(textEntry);
 	wTextAppend(textEntry, textData );
 	wTextSetReadonly(textEntry, FALSE);
-	FillLayerList((wList_p)textNotePLs[I_LAYER].control);
+	FillLayerList(textNotePLs[I_LAYER].control);
 	ParamLoadControls(&textNotePG);
 	descTitle = title;
 

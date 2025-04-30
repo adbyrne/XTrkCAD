@@ -1023,7 +1023,7 @@ void FillLayerList( wControl_p listLayers)
 	for (int inx = 0; inx < NUM_LAYERS; inx++) {
 		char *layerFormattedName;
 		layerFormattedName = FormatLayerName(inx);
-		wListAddValue(listLayers, layerFormattedName, NULL, I2VP(inx));
+		wComboBoxAddValue(listLayers, layerFormattedName, I2VP(inx));
 		free(layerFormattedName);
 	}
 

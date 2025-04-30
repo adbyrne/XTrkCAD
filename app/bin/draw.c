@@ -1542,7 +1542,7 @@ EXPORT void MainLayout(
  * \param data additional data (unused)
  */
 
-void MainProc( wWin_p win, winProcEvent e, void * refresh, void * data )
+void MainProc( wControl_p win, winProcEvent e, void * refresh, void * data )
 {
 	static int cMP = 0;
 	wWinPix_t width, height;

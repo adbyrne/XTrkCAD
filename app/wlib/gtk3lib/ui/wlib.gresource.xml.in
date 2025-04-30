@@ -6,9 +6,11 @@
     <file preprocess="xml-stripblanks">cmdopt.ui</file>
     <file preprocess="xml-stripblanks">demo.ui</file>
     <file preprocess="xml-stripblanks">display.ui</file>
+    <file preprocess="xml-stripblanks">fileNote.ui</file>
     <file preprocess="xml-stripblanks">grid.ui</file>
     <file preprocess="xml-stripblanks">group.ui</file>
     <file preprocess="xml-stripblanks">layout.ui</file>
+    <file preprocess="xml-stripblanks">linkNote.ui</file>
     <file preprocess="xml-stripblanks">map.ui</file>
     <file preprocess="xml-stripblanks">note.ui</file>
     <file preprocess="xml-stripblanks">outputbitmap.ui</file>
@@ -19,6 +21,7 @@
     <file preprocess="xml-stripblanks">rgbcolor.ui</file>
     <file preprocess="xml-stripblanks">searchgui.ui</file>
     <file preprocess="xml-stripblanks">structure.ui</file>
+    <file preprocess="xml-stripblanks">textNote.ui</file>
     <file preprocess="xml-stripblanks">tip.ui</file>
     <file preprocess="xml-stripblanks">toolbar.ui</file>
     <file preprocess="xml-stripblanks">toolwindow.ui</file>

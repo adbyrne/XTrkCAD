@@ -22,10 +22,10 @@
 
 #include "custom.h"
 #include "dynstring.h"
-#include "file2uri.h"
+//#include "file2uri.h"
 #include "misc.h"
 #include "note.h"
-#include "param.h"
+#include "form.h"
 #include "paths.h"
 #include "include/stringxtc.h"
 #include "track.h"
@@ -48,7 +48,7 @@ static struct wFilSel_t * documentFile_fs;
 
 static void NoteFileOpenExternal(void * junk);
 static void NoteFileBrowse(void * junk);
-static void FileDlgUpdate(
+static wBool_t FileDlgUpdate(
         paramGroup_p pg,
         int inx,
         void * valueP);
@@ -76,12 +76,13 @@ static paramData_t fileNotePLs[] = {
 
 };
 
-static paramGroup_t fileNotePG = { "fileNote", 0, fileNotePLs, COUNT( fileNotePLs ) };
-static wWin_p fileNoteW;
+static paramGroup_t fileNotePG = { "fileNote", PGO_FULLDIALOGFROMBUILDER, fileNotePLs, COUNT( fileNotePLs ) };
+static wControl_p fileNoteW;
 
 BOOL_T IsFileNote(track_p trk)
 {
-	struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
+	const struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE,
+	                                    extraDataNote_t );
 
 	return(xx->op == OP_NOTEFILE );
 }
@@ -155,8 +156,9 @@ static void NoteFileOpen(char *fileName)
 	if (IsFileValid(fileName)) {
 		wOpenFileExternal(fileName);
 	} else {
-		wNoticeWithIcon(NT_ERROR, _("The file doesn't exist or cannot be read!"), _("Cancel"),
-		          NULL);
+		wNoticeWithIcon(NT_ERROR, _("The file doesn't exist or cannot be read!"),
+		                _("Cancel"),
+		                NULL);
 		if (fileNoteW) {
 			wControlActive(fileNotePLs[I_OPEN].control, FALSE);
 		}
@@ -171,7 +173,7 @@ NoteFileOpenExternal(void * junk)
 /**
  * Handle the dialog actions
  */
-static void
+static wBool_t
 FileDlgUpdate(
         paramGroup_p pg,
         int inx,
@@ -187,14 +189,15 @@ FileDlgUpdate(
 		if (!IsFileValid(fileNoteData.path)) {
 			paramData_p p = &fileNotePLs[I_PATH];
 			p->bInvalid = TRUE;
-			wWinPix_t h = wControlGetHeight(p->control);
-			wTooltipSet( p->control, 0, h, "Document path is invalid" );
-			ParamHilite( p->group->win, p->control, TRUE );
+			wTooltipSetText( p->control, "Document path is invalid" );
+			wControlHilite(  p->control, TRUE );
+			return(FALSE);
 		}
 		break;
 	default:
 		break;
 	}
+	return(TRUE);
 }
 
 
@@ -244,19 +247,18 @@ static void CreateEditFileDialog(char * windowTitle)
 {
 
 	if (!fileNoteW) {
-		ParamRegister(&fileNotePG);
-		fileNoteW = ParamCreateDialog(&fileNotePG,
-		                              "",
-		                              _("Done"), FileEditOK,
-		                              ParamCancel_Current, TRUE, NULL,
-		                              F_BLOCK,
-		                              FileDlgUpdate);
+		FormRegister(&fileNotePG);
+		fileNoteW = FormCreateDialog(&fileNotePG, NULL,
+		                             _("Done"), FileEditOK,
+		                             _("Cancel"), ParamCancel_Current,
+		                             TRUE, F_BLOCK,
+		                             FileDlgUpdate);
 	}
 
 	wWinSetTitle(fileNotePG.win, MakeWindowTitle(windowTitle));
 
-	FillLayerList((wList_p)fileNotePLs[I_LAYER].control);
-	ParamLoadControls(&fileNotePG);
+	FillLayerList(fileNotePLs[I_LAYER].control);
+	FormLoadControls(&fileNotePG);
 	wControlActive(fileNotePLs[I_OPEN].control,
 	               (IsFileValid(fileNoteData.path)?TRUE:FALSE));
 	descTitle = windowTitle;
@@ -325,7 +327,7 @@ void DescribeFileNote(track_p trk, char * str, CSIZE_T len)
 
 void NewFileNoteUI(coOrd pos)
 {
-	char *tmpPtrText = _("Describe the file");
+	const char *tmpPtrText = _("Describe the file");
 
 	fileNoteData.pos = pos;
 	fileNoteData.layer = curLayer;
