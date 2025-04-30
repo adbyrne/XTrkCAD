@@ -36,6 +36,8 @@
 #define itoa(a,b,c) _itoa(a,b,c)
 #define getpid() _getpid()
 
+extern char  wConfigName[];
+
 static char buffer[MAX_PATH + 1];
 
 /**
@@ -97,9 +99,14 @@ wGetOSVersion()
 char *
 wGetProfileFilename()
 {
-    /** \TODO Get the full path to the INI file for Windows */
-    char* mswProfileFile = NULL;
-    return(mswProfileFile);
+    gchar* profile;
+    
+    profile = g_strdup_printf("%s/%s.ini",  wGetAppWorkDir(), wConfigName);
+    g_strlcpy(buffer, profile, MAX_PATH);
+
+    g_free(profile);
+
+    return(buffer);
 }
 
 /**

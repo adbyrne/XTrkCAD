@@ -296,7 +296,7 @@ CreateControlText(paramData_p pd, wControl_p parent, unsigned xPos, unsigned yPo
 
 	textDataP = pd->winData;
 	pd->control = (wControl_p)wTextCreate(parent, xPos, yPos, helpStr, NULL,
-		pd->winOption, textDataP->width, textDataP->height);
+		pd->winOption, textDataP->width*10, textDataP->height*16);
 	if (pd->winOption & BO_READONLY ) {
 		wTextSetReadonly(pd->control, TRUE);
 	}

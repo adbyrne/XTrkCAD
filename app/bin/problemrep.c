@@ -94,12 +94,12 @@ CreateTempDirectory()
 void
 SaveSystemInfo(char* dir)
 {
-	FILE* fh;
 	char* fileName=NULL;
 
 	MakeFullpath(&fileName, dir, "versions.txt", NULL);
 
 	if (fileName) {
+		FILE* fh;
 		fh = fopen(fileName, "w");
 
 		fprintf(fh, "XTrackCAD: %s\n", VERSION);
@@ -252,7 +252,7 @@ PickupConfigFile(char *srcfile, char* destdir)
 			char* section;
 			char* name;
 			char* value;
-			size_t totalLength;
+
 
 			if(getline(&lineptr, &linelen, fhRead)==-1) {
 				continue;
@@ -260,12 +260,13 @@ PickupConfigFile(char *srcfile, char* destdir)
 
 			wPrefTokenize(lineptr, &section, &name, &value);
 			if (name && value) {
+				size_t totalLength;
 				FilterConfigLine(&configLine, name, value);
 
 				// calculate maximum possible length of resulting line
 				totalLength = (section ? strlen(section) : 0) +
-				              (name ? strlen(name) : 0) +
-				              (value ? strlen(value) : 0) + DELIMITER_COUNT;
+				              strlen(name) +
+				              strlen(value) + DELIMITER_COUNT;
 
 				// increase buffer size by 256  byte if too small
 				if (totalLength > linelen) {
@@ -564,7 +565,7 @@ ProblemDataCollect()
 	char* tempDirectory;
 	char* subdirectory = NULL;
 	bool ret;
-	char *filename = GetLayoutFullPath();
+	const char *filename = GetLayoutFullPath();
 
 	if(*filename == '\0') {
 		ProblemrepUpdateW(_("No layout design loaded! Operation is cancelled.\n"));

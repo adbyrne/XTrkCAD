@@ -25,10 +25,10 @@
 #include "custom.h"
 #include "fileio.h"
 #include "layout.h"
-#include "param.h"
+#include "form.h"
 #include "include/problemrep.h"
 
-static wWin_p problemrepW;
+static wControl_p problemrepW;
 
 #define DESCRIPTION N_("This function puts together information that can " \
 						"be helpful to analyze a problem. Private information " \
@@ -38,8 +38,8 @@ static paramTextData_t textData = { 60, 10 };
 
 static paramData_t problemrepPLs[] = {
 #define I_PROBLEMREPPROGRESS				 (0)
-#define PROBLEMREP_T			((wText_p)problemrepPLs[I_PROBLEMREPPROGRESS].control)
-	{   PD_TEXT, NULL, NULL, PDO_DLGRESIZE, &textData, NULL, BO_READONLY | BT_TOP | BT_CHARUNITS }
+#define PROBLEMREP_T			(problemrepPLs[I_PROBLEMREPPROGRESS].control)
+	{   PD_TEXT, NULL, NULL, PDO_DLGRESIZE, &textData, NULL, BO_READONLY }
 };
 static paramGroup_t problemrepPG = { "problemdata", 0, problemrepPLs, COUNT(problemrepPLs) };
 
@@ -52,10 +52,11 @@ void ProblemrepCreateW(void* ptr)
 	if (!problemrepW) {
 		ParamRegister(&problemrepPG);
 
-		problemrepW = ParamCreateDialog(&problemrepPG,
-		                                MakeWindowTitle(_("Data for Problem Report")),
-		                                NULL, NULL,	ParamCancel_Current, TRUE, NULL,
-		                                F_TOP | F_CENTER | PD_F_ALT_CANCELLABEL, NULL);
+		problemrepW = FormCreateDialog(&problemrepPG,
+		                               MakeWindowTitle(_("Data for Problem Report")),
+		                               NULL, NULL,
+		                               _("Close"), ParamCancel_Current, TRUE,
+		                               F_TOP | F_CENTER | PD_F_ALT_CANCELLABEL, NULL);
 	} else {
 		wTextClear(PROBLEMREP_T);
 	}
@@ -94,10 +95,10 @@ ProblemSaveLayout(void)
 	if (GetLayoutChanged()) {
 
 		rc = wNoticeWithIcon( NT_WARNING,
-		                _("Trackplan has to be saved first. " \
-		                  "Do you want to do so now ? "),
-		                N_("Save Now..."),
-		                N_("Cancel"));
+		                      _("Trackplan has to be saved first. " \
+		                        "Do you want to do so now ? "),
+		                      N_("Save Now..."),
+		                      N_("Cancel"));
 
 		if (rc) {
 			DoSave(NULL);
