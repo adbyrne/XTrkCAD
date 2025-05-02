@@ -1201,6 +1201,15 @@ void wAttachAccelKey( wAccelKey_e, int, wAccelKeyCallBack_p, void * );
 
 /*------------------------------------------------------------------------------
  *
+ * Notebook
+ */
+
+int wNoteBookGetActivePage(wControl_p notebook);
+wControl_p wNotebookCreate(wControl_p	parent, const char* labelStr, unsigned	activePage,
+    long flags);
+
+/*------------------------------------------------------------------------------
+ *
  * Preferences
  */
 

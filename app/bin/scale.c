@@ -28,7 +28,7 @@
 #include "draw.h"
 #include "fileio.h"
 #include "layout.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "cselect.h"
 #include "common-ui.h"
@@ -842,7 +842,6 @@ static void ScaleChange( long changes )
 static char rescaleFromScaleStr[20];
 static char rescaleFromGaugeStr[20];
 
-static char * rescaleToggleLabels[] = { N_("Scale"), N_("Ratio"), NULL };
 static long rescaleMode;
 static wIndex_t rescaleFromScaleInx;
 static wIndex_t rescaleFromGaugeInx;
@@ -851,26 +850,24 @@ static GAUGEINX_T rescaleToGaugeInx;
 static wIndex_t rescaleToInx;
 static long rescaleNoChangeDim = FALSE;
 static FLOAT_T rescalePercent;
-static char * rescaleChangeDimLabels[] = { N_("Do not resize track"), NULL };
 static paramFloatRange_t r0o001_10000 = { 0.001, 10000.0 };
 static paramData_t rescalePLs[] = {
-#define I_RESCALE_MODE		(0)
-	{ PD_RADIO, &rescaleMode, "toggle", PDO_NOPREF, &rescaleToggleLabels, N_("Rescale by:"), BC_HORIZONTAL|BC_NOBORDER },
-#define I_RESCALE_FROM_SCALE		(1)
-	{ PD_STRING, rescaleFromScaleStr, "fromS", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(100), N_("From:"),0, 0, sizeof(rescaleFromScaleStr)},
-#define I_RESCALE_FROM_GAUGE		(2)
-	{ PD_STRING, rescaleFromGaugeStr, "fromG", PDO_NOPREF|PDO_DLGHORZ | PDO_STRINGLIMITLENGTH, I2VP(100), " / ", 0, 0, sizeof(rescaleFromGaugeStr)},
-#define I_RESCALE_TO_SCALE		   (3)
-	{ PD_COMBOLIST, &rescaleToScaleInx, "toS", PDO_NOPREF|PDO_LISTINDEX, I2VP(100), N_("To: ") },
-#define I_RESCALE_TO_GAUGE		   (4)
-	{ PD_COMBOLIST, &rescaleToGaugeInx, "toG", PDO_NOPREF|PDO_LISTINDEX|PDO_DLGHORZ, NULL, " / " },
-#define I_RESCALE_CHANGE	(5)
-	{ PD_TOGGLE, &rescaleNoChangeDim, "change-dim", 0, &rescaleChangeDimLabels, "", BC_HORIZONTAL|BC_NOBORDER },
-#define I_RESCALE_PERCENT	(6)
-	{ PD_FLOAT, &rescalePercent, "ratio", 0, &r0o001_10000, N_("Ratio") },
-	{ PD_MESSAGE, "%", NULL, PDO_DLGHORZ }
+#define I_RESCALE_FROM_SCALE		(0)
+	{ PD_STRING, rescaleFromScaleStr, "fromS", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(100), NULL,0, 0, sizeof(rescaleFromScaleStr)},
+#define I_RESCALE_FROM_GAUGE		(1)
+	{ PD_STRING, rescaleFromGaugeStr, "fromG", PDO_NOPREF|PDO_DLGHORZ | PDO_STRINGLIMITLENGTH, I2VP(100), NULL, 0, 0, sizeof(rescaleFromGaugeStr)},
+#define I_RESCALE_TO_SCALE		   (2)
+	{ PD_COMBOLIST, &rescaleToScaleInx, "toS", PDO_NOPREF|PDO_LISTINDEX, I2VP(100), NULL},
+#define I_RESCALE_TO_GAUGE		   (3)
+	{ PD_COMBOLIST, &rescaleToGaugeInx, "toG", PDO_NOPREF|PDO_LISTINDEX|PDO_DLGHORZ, NULL, NULL },
+#define I_RESCALE_CHANGE	(4)
+	{ PD_TOGGLE, &rescaleNoChangeDim, "change-dim", 0, NULL, "", BC_HORIZONTAL | BC_NOBORDER},
+#define I_RESCALE_PERCENT	(5)
+	{ PD_FLOAT, &rescalePercent, "ratio", 0, &r0o001_10000, NULL},
+#define I_NOTEBOOK 6
+	{ PD_NOTEBOOK, NULL, "notebook"}
 };
-static paramGroup_t rescalePG = { "rescale", 0, rescalePLs, COUNT( rescalePLs ) };
+static paramGroup_t rescalePG = { "rescale", PGO_FULLDIALOGFROMBUILDER, rescalePLs, COUNT( rescalePLs ) };
 
 
 static coOrd rescaleShift;
@@ -909,6 +906,8 @@ static void RescaleDlgOk(
 	DIST_T d;
 	FLOAT_T ratio = rescalePercent/100.0;
 	coOrd getboundsLo, getboundsHi;
+
+	rescaleMode = wNoteBookGetActivePage(rescalePLs[I_NOTEBOOK].control);
 
 	UndoStart( _("Rescale Tracks"), "Rescale" );
 	GetSelectedBounds( &getboundsLo, &getboundsHi );
@@ -976,18 +975,7 @@ static void RescaleDlgUpdate(
         void * valueP )
 {
 	switch (inx) {
-	case I_RESCALE_MODE:
-		wControlShow( pg->paramPtr[I_RESCALE_FROM_SCALE].control, rescaleMode==0 );
-		wControlActive( pg->paramPtr[I_RESCALE_FROM_SCALE].control, FALSE );
-		wControlShow( pg->paramPtr[I_RESCALE_TO_SCALE].control, rescaleMode==0 );
-		wControlShow( pg->paramPtr[I_RESCALE_FROM_GAUGE].control, rescaleMode==0 );
-		wControlActive( pg->paramPtr[I_RESCALE_FROM_GAUGE].control, FALSE );
-		wControlShow( pg->paramPtr[I_RESCALE_TO_GAUGE].control, rescaleMode==0 );
-		wControlShow( pg->paramPtr[I_RESCALE_CHANGE].control, rescaleMode==0 );
-		wControlActive( pg->paramPtr[I_RESCALE_PERCENT].control, rescaleMode==1 );
-		if ( rescaleMode!=0 ) {
-			break;
-		}
+
 	case I_RESCALE_TO_SCALE:
 		LoadGaugeList(rescalePLs[I_RESCALE_TO_GAUGE].control,
 		               *((int *)valueP) );
@@ -1081,8 +1069,10 @@ static BOOL_T SelectedScaleGauge( track_p trk, BOOL_T unused )
 EXPORT void DoRescale( void * unused )
 {
 	if ( rescalePG.win == NULL ) {
-		ParamCreateDialog( &rescalePG, MakeWindowTitle(_("Rescale")), _("Ok"),
-		                   RescaleDlgOk, ParamCancel_Current, TRUE, NULL, F_BLOCK, RescaleDlgUpdate );
+		FormCreateDialog( &rescalePG, NULL,
+							_("Ok"), RescaleDlgOk, 
+							_("Cancel"), ParamCancel_Current, 
+							TRUE, F_BLOCK, RescaleDlgUpdate);
 		LoadScaleList(rescalePLs[I_RESCALE_TO_SCALE].control );
 		LoadGaugeList(rescalePLs[I_RESCALE_TO_GAUGE].control,
 		               GetLayoutCurScaleDesc() ); /* set correct gauge list here */
@@ -1121,7 +1111,6 @@ EXPORT void DoRescale( void * unused )
 	// get To scale and gauge (current)
 	GetScaleGauge( GetLayoutCurScale(), &rescaleToScaleInx, &rescaleToGaugeInx );
 
-	RescaleDlgUpdate( &rescalePG, I_RESCALE_MODE, &rescaleMode );
 	RescaleDlgUpdate( &rescalePG, I_RESCALE_CHANGE, &rescaleMode );
 
 	RescaleDlgUpdate( &rescalePG, I_RESCALE_FROM_SCALE, rescaleFromScaleStr );

@@ -514,6 +514,9 @@ CreateControl(paramData_p pd,char* helpStr,	unsigned x,	unsigned y)
 	case PD_SCALE:
 		pd->control = wScaleCreate(win, helpStr, pd->valueP, ScalePush, pd);
 		break;
+	case PD_NOTEBOOK:
+		pd->control = wNotebookCreate(win, helpStr, 0, 0L);
+		break;
 	default:
 		CHECK(FALSE);
 	}
@@ -521,7 +524,7 @@ CreateControl(paramData_p pd,char* helpStr,	unsigned x,	unsigned y)
 
 }
 
-void FormCreateControls(paramGroup_p group, paramChangeProc changeProc)
+void FormCreateControls(paramGroup_p group)
 {
 	DynString helpString;
 	unsigned xPos = 1;
@@ -554,7 +557,6 @@ void FormCreateControls(paramGroup_p group, paramChangeProc changeProc)
 		DynStringClear(&helpString);
 
 	}
-	group->changeProc = changeProc;
 	DynStringFree(&helpString);
 }
 

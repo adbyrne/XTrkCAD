@@ -51,7 +51,8 @@ typedef enum {
 	PD_MENU,
 	PD_MENUITEM,
 	PD_BITMAP,
-	PD_SCALE
+	PD_SCALE,
+	PD_NOTEBOOK
 } parameterType;
 
 // PD_FLOAT modifiers
