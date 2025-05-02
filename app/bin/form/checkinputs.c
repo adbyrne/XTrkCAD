@@ -21,6 +21,8 @@
   *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
   */
 
+#include <ctype.h>
+
 #include <wlib.h>
 #include <form.h>
 #include "dynstring.h"
@@ -227,6 +229,21 @@ wBool_t FormFloatRangeCheck(paramData_p p, FLOAT_T valF)
 	return(!p->bInvalid);
 }
 
+static void strip_whitespace(char* str) {
+	size_t len = strlen(str);
+	if (len == 0) return;
+
+	char* end = str + len - 1;
+
+	// Move backward while the character is whitespace
+	while (end >= str && isspace((unsigned char)*end)) {
+		end--;
+	}
+
+	// Write the null terminator just after the last non-whitespace character
+	*(end + 1) = '\0';
+}
+
 /**
  * Check for valid string: .
  * 
@@ -239,7 +256,9 @@ wBool_t FormStringCheckValue(paramData_p data, char * value)
 	DynString message;
 	DynStringMalloc(&message, 80);
 
-	data->bInvalid = FALSE;
+ 	data->bInvalid = FALSE;
+
+	strip_whitespace(value);
 
 	if ((data->option & PDO_NOTBLANK) && value[0] == '\0') {
 		DynStringPrintf(&message, "%s", _("String cannot be blank"));
