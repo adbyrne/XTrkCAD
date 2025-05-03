@@ -27,7 +27,7 @@
 #include "custom.h"
 #include "fileio.h"
 #include "icons.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 
 EXPORT DIST_T easementVal = 0.0;
@@ -58,7 +58,7 @@ static wIcon_p ecornu_bm;
  *
  */
 
-static wWin_p easementW;
+static wControl_p easementW;
 
 static void EasementSel( long );
 static void SetEasement( DIST_T, void * );
@@ -79,7 +79,7 @@ static paramData_t easementPLs[] = {
 #define I_EASESEL		(4)
 	{	PD_RADIO, &easeM, "radio", PDO_DIM|PDO_NORECORD|PDO_NOPREF|PDO_DLGRESETMARGIN, easementChoiceLabels, NULL, BC_HORIZONTAL }
 };
-static paramGroup_t easementPG = { "easement", PGO_RECORD, easementPLs, COUNT( easementPLs ) };
+static paramGroup_t easementPG = { "easement", PGO_RECORD|PGO_FULLDIALOGFROMBUILDER, easementPLs, COUNT( easementPLs ) };
 
 
 static void SetEasement(
@@ -239,9 +239,10 @@ static void LayoutEasementW(
 static void DoEasement( void * unused )
 {
 	if (easementW == NULL) {
-		easementW = ParamCreateDialog( &easementPG, MakeWindowTitle(_("Easement")),
-		                               _("Ok"), (paramActionOkProc)EasementOk, ParamCancel_Null,
-		                               TRUE, LayoutEasementW, 0, EasementDlgUpdate );
+		easementW = FormCreateDialog( &easementPG, MakeWindowTitle(N_("Easement")),
+		                              _("Ok"), (paramActionOkProc)EasementOk, 
+									  _("Cancel"), ParamCancel_Null,
+		                              TRUE, 0, EasementDlgUpdate );
 		SetEasement( easementVal, I2VP(TRUE) );
 	}
 	wShow( easementW );

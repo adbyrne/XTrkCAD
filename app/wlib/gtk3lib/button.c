@@ -50,10 +50,22 @@ static void buttonClick(GtkWidget* widget, gpointer value);
  */
 
 
+static void
+DestroyImage(GtkWidget* image, gpointer unused)
+{
+	gtk_widget_destroy(image);
+}
+
 static GtkWidget *
-AddPixbufToButton(GtkWidget* button, GdkPixbuf* pixbuf)
+SetPixbufToButton(GtkWidget* button, GdkPixbuf* pixbuf)
 {
 	GtkWidget* image;
+
+	if (gtk_container_child_type(GTK_CONTAINER(button)) == G_TYPE_NONE) {
+		GList *children = gtk_container_get_children(GTK_CONTAINER(button));
+		DestroyImage(g_list_nth_data(children, 0), NULL);
+		g_list_free(children);
+	}
 
 	image = gtk_image_new_from_pixbuf(pixbuf);
 	gtk_container_add(GTK_CONTAINER(button), image);
@@ -63,13 +75,6 @@ AddPixbufToButton(GtkWidget* button, GdkPixbuf* pixbuf)
 
 	return(image);
 }
-
-static void
-DestroyImage(GtkWidget* image, gpointer unused)
-{
-	gtk_widget_destroy(image);
-}
-
 
 static void
 RemovePixbuf(GtkWidget *button)
@@ -122,7 +127,7 @@ void wButtonSetIcon(wControl_p control, wIcon_p icon)
 	pixbuf = icon->bits;
 
 	if (pixbuf) {
-		AddPixbufToButton(control->widget, pixbuf);
+		SetPixbufToButton(control->widget, pixbuf);
 
 		control->attributes.button.icon = icon;
 	}
