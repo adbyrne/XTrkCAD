@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk" version="3.22" />
-  <object class="GtkTextBuffer" id="textbuffer1"/>
+  <object class="GtkTextBuffer" id="textbuffer1" />
   <object class="GtkDialog" id="enum">
     <property name="can-focus">False</property>
     <property name="border-width">12</property>
@@ -22,6 +22,7 @@
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
+        <property name="sensitive">False</property>
       </object>
     </child>
     <child type="action">
@@ -30,6 +31,7 @@
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
+        <property name="sensitive">False</property>
       </object>
     </child>
     <child type="action">
@@ -42,7 +44,7 @@
       </object>
     </child>
     <child type="action">
-      <object class="GtkButton" id="id_ok">
+      <object class="GtkButton" id="id_cancel">
         <property name="use-underline">True</property>
         <property name="can-default">True</property>
         <property name="has-default">True</property>
@@ -51,7 +53,7 @@
       </object>
     </child>
     <action-widgets>
-      <action-widget response="GTK_RESPONSE_CANCEL" default="true">id_ok</action-widget>
+      <action-widget response="GTK_RESPONSE_CANCEL" default="true">id_cancel</action-widget>
       <action-widget response="GTK_RESPONSE_HELP">id_help</action-widget>
       <action-widget response="1">print</action-widget>
       <action-widget response="2">printsetup</action-widget>
@@ -70,6 +72,8 @@
             <property name="hexpand">True</property>
             <property name="vexpand">True</property>
             <property name="shadow_type">in</property>
+            <property name="min-content-width">200</property>
+            <property name="min-content-height">150</property>
             <child>
               <object class="GtkTextView" id="text">
                 <property name="visible">True</property>
@@ -95,23 +99,33 @@
             <property name="orientation">horizontal</property>
             <property name="visible">True</property>
             <property name="spacing">12</property>
-        <property name="margin-bottom">12</property>
+            <property name="margin-bottom">12</property>
             <child>
-              <object class="GtkCheckButton">
-                <property name="label" translatable="yes">Show Prices</property>
+              <object class="GtkBox" id="list-prices">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
-                <property name="draw_indicator">True</property>
+                <child>
+                  <object class="GtkCheckButton">
+                    <property name="label" translatable="yes">Show Prices</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                </child>
               </object>
             </child>
             <child>
-              <object class="GtkCheckButton">
-                <property name="label" translatable="yes">Show Indexes</property>
+              <object class="GtkBox" id="list-indexes">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
-                <property name="draw_indicator">True</property>
+                <child>
+                  <object class="GtkCheckButton">
+                    <property name="label" translatable="yes">Show Indexes</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                </child>
               </object>
             </child>
           </object>

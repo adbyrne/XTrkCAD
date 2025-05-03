@@ -23,11 +23,11 @@
 #include "custom.h"
 #include "fileio.h"
 #include "layout.h"
-#include "param.h"
+#include "form.h"
 #include "paths.h"
 #include "track.h"
 
-static wWin_p enumW;
+static wControl_p enumW;
 
 #define ENUMOP_SAVE		(1)
 #define ENUMOP_PRINT	(5)
@@ -45,17 +45,17 @@ static char * priceLabels[] = { N_("Prices"), NULL };
 static char * indexLabels[] = { N_("Indexes"), NULL };
 static paramData_t enumPLs[] = {
 #define I_ENUMTEXT		(0)
-#define enumT			((wText_p)enumPLs[I_ENUMTEXT].control)
+#define enumT			(enumPLs[I_ENUMTEXT].control)
 	{   PD_TEXT, NULL, "text", PDO_DLGRESIZE, &enumTextData, NULL, BT_CHARUNITS|BT_FIXEDFONT },
-	{   PD_BUTTON, DoEnumOp, "save", PDO_DLGCMDBUTTON, NULL, N_("Save As ..."), 0, I2VP(ENUMOP_SAVE) },
-	{   PD_BUTTON, DoEnumOp, "print", 0, NULL, N_("Print"), 0, I2VP(ENUMOP_PRINT) },
-	{   PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, N_("Print Setup"), 0, NULL },
+	{   PD_BUTTON, DoEnumOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, I2VP(ENUMOP_SAVE) },
+	{   PD_BUTTON, DoEnumOp, "print", 0, NULL, NULL, 0, I2VP(ENUMOP_PRINT) },
+	{   PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
 #define I_ENUMLISTPRICE	(4)
-	{   PD_TOGGLE, &enableListPrices, "list-prices", PDO_DLGRESETMARGIN, priceLabels, NULL, BC_HORIZONTAL|BC_NOBORDER },
+	{   PD_TOGGLE, &enableListPrices, "list-prices", PDO_DLGRESETMARGIN, NULL, NULL, BC_HORIZONTAL|BC_NOBORDER },
 #define I_ENUMLISTINDEXES  (5)
-	{   PD_TOGGLE, &enableListIndexes, "list-indexes", PDO_DLGRESETMARGIN, indexLabels, NULL, BC_HORIZONTAL|BC_NOBORDER }
+	{   PD_TOGGLE, &enableListIndexes, "list-indexes", PDO_DLGRESETMARGIN, NULL, NULL, BC_HORIZONTAL|BC_NOBORDER }
 };
-static paramGroup_t enumPG = { "enum", 0, enumPLs, COUNT( enumPLs ) };
+static paramGroup_t enumPG = { "enum", PGO_FULLDIALOGFROMBUILDER, enumPLs, COUNT( enumPLs ) };
 
 static struct wFilSel_t * enumFile_fs;
 
@@ -149,8 +149,11 @@ void EnumerateStart(void)
 
 	if (enumW == NULL) {
 		ParamRegister( &enumPG );
-		enumW = ParamCreateDialog( &enumPG, MakeWindowTitle(_("Parts List")), NULL,
-		                           NULL, ParamCancel_Current, TRUE, NULL, F_RESIZE, EnumDlgUpdate );
+		enumW = FormCreateDialog( &enumPG, MakeWindowTitle(_("Parts List")), 
+									NULL, NULL, 
+									N_("Done"), ParamCancel_Current, 
+									TRUE, F_RESIZE, 
+									EnumDlgUpdate);
 		enumFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Parts List"),
 		                             sPartsListFilePattern, DoEnumSave, NULL );
 	}
