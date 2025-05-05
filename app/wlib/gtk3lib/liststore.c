@@ -148,7 +148,8 @@ wlibNewListStore(int colCnt)
 	GType *colTypes;
 
 	/* create the list store, using strings for all additional columns */
-	colTypes = g_malloc(sizeof(GType) * (colCnt + LISTCOL_TEXT));
+	colTypes = g_malloc(sizeof(GType) * (colCnt + LISTCOL_TEXT)); 
+	colTypes[LISTCOL_ERROR_COLOR] = G_TYPE_INT;
 	colTypes[ LISTCOL_BITMAP ] = GDK_TYPE_PIXBUF;
 	colTypes[ LISTCOL_DATA ] = G_TYPE_POINTER;
 

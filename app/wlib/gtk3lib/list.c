@@ -402,6 +402,51 @@ wBool_t wListSetValues(
 	return TRUE;
 }
 
+static void
+remove_row(GtkTreeRowReference* ref, GtkTreeModel* model)
+{
+	GtkTreeIter iter;
+	GtkTreePath* path;
+
+	path = gtk_tree_row_reference_get_path(ref);
+	gtk_tree_model_get_iter(model, &iter, path);
+
+	gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
+
+}
+
+/* delete all selected rows from a list store, thanks to Andrew Krause */
+
+void
+wListDeleteSelected(wControl_p list)
+{
+	GtkTreeSelection* selection;
+	GtkTreeModel* model;
+	GtkTreeRowReference* ref;
+	GList* rows, *ptr, *references = NULL;
+
+	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(list, list);
+
+	selection = gtk_tree_view_get_selection(lcontrol->treeView);
+	model = gtk_tree_view_get_model(lcontrol->treeView);
+	rows = gtk_tree_selection_get_selected_rows(selection, &model);
+
+	ptr = rows;
+	while (ptr != NULL) {
+		ref = gtk_tree_row_reference_new(model, (GtkTreePath*)ptr->data);
+		references = g_list_prepend(references, gtk_tree_row_reference_copy(ref));
+		gtk_tree_row_reference_free(ref);
+		ptr = ptr->next;
+	}
+
+	g_list_foreach(references, (GFunc)remove_row, model);
+
+	g_list_foreach(references, (GFunc)gtk_tree_row_reference_free, NULL);
+	g_list_foreach(rows, (GFunc)gtk_tree_path_free, NULL);
+	g_list_free(references);
+	g_list_free(rows);
+}
+
 /**
  * Remove a line from the list
  * \param b IN widget

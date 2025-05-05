@@ -814,6 +814,7 @@ void wListSelectAll(wControl_p bl);
 wBool_t wListSetValues( wControl_p b, wIndex_t row, const char* labelStr,
     wIcon_p bm, void* itemData);
 void wListDelete(wControl_p b, wIndex_t inx);
+void wListDeleteSelected(wControl_p list);
 int wListGetColumnWidths(wControl_p bl, unsigned int count, wWinPix_t* colWidths);
 
 wIndex_t wListAddValue(wControl_p b, const char* labelStr,  wIcon_p bm, void* itemData );
