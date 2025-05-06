@@ -22,9 +22,8 @@
 
 #include "custom.h"
 #include "fileio.h"
-#include "param.h"
+#include "form.h"
 #include "paths.h"
-#include "track.h"
 #include "include/paramfilelist.h"
 #include "common-ui.h"
 #include "ctrain.h"
@@ -48,20 +47,20 @@ static const char * customListTitles[] = { "", N_("Manufacturer"),
 static paramListData_t customListData = { 10, 400, 5, customListWidths, customListTitles };
 static paramData_t customPLs[] = {
 #define I_CUSTOMLIST	(0)
-#define customSelL		((wList_p)customPLs[I_CUSTOMLIST].control)
+#define customSelL		(customPLs[I_CUSTOMLIST].control)
 	{	PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN|PDO_DLGRESIZE|PDO_DLGBOXEND, &customListData, NULL, BL_MANY },
 #define I_CUSTOMNEWTYPE (1)
 	{   PD_COMBOLIST, &selectedType, "newtype", PDO_DLGRESETMARGIN | PDO_LISTINDEX, I2VP(150), N_("Create a new ") },
 #define I_CUSTOMNEW     (2)
 	{   PD_BUTTON, CustomNewCar, "newcar", PDO_DLGHORZ| PDO_DLGBOXEND, NULL, N_("Go") },
 #define I_CUSTOMEDIT	(3)
-	{	PD_BUTTON, CustomEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
+	{	PD_BUTTON, CustomEdit, "edit", PDO_DLGCMDBUTTON, NULL/*, N_("Edit")*/},
 #define I_CUSTOMDEL		(4)
-	{	PD_BUTTON, CustomDelete, "delete", 0, NULL, N_("Delete") },
+	{	PD_BUTTON, CustomDelete, "delete", 0, NULL/*, N_("Delete") */},
 #define I_CUSTOMCOPYTO	(5)
-	{	PD_BUTTON, CustomExport, "export", 0, NULL, N_("Move To") },
+	{	PD_BUTTON, CustomExport, "export", 0, NULL/*, N_("Move To")*/},
 } ;
-static paramGroup_t customPG = { "custmgm", 0, customPLs, COUNT( customPLs ) };
+static paramGroup_t customPG = { "custmgm", PGO_FULLDIALOGFROMBUILDER, customPLs, COUNT( customPLs ) };
 
 
 typedef struct {
@@ -71,55 +70,51 @@ typedef struct {
 } custMgmContext_t, *custMgmContext_p;
 
 
-static void CustomDlgUpdate(
+static wBool_t CustomDlgUpdate(
         paramGroup_p pg,
         int inx,
         void *valueP )
 {
 	custMgmContext_p context = NULL;
-	wIndex_t selcnt = wListGetSelectedCount( (wList_p)customPLs[0].control );
-	wIndex_t linx, lcnt;
+	wIndex_t selcnt = wListGetSelectedCount(customPLs[I_CUSTOMLIST].control );
+	
+	if ( inx != I_CUSTOMLIST ) { return(TRUE); }
 
-	if ( inx == I_CUSTOMNEW ) {
-		lcnt = wListGetCount( (wList_p)pg->paramPtr[I_CUSTOMNEWTYPE].control );
-	}
-
-	if ( inx != I_CUSTOMLIST ) { return; }
 	if ( selcnt == 1 ) {
-		lcnt = wListGetCount( (wList_p)pg->paramPtr[inx].control );
-		for ( linx=0;
-		      linx<lcnt && wListGetItemSelected( (wList_p)customPLs[0].control,
-		                      linx ) != TRUE;
-		      linx++ );
-		if ( linx < lcnt ) {
-			context = (custMgmContext_p)wListGetItemContext( (wList_p)
-			                pg->paramPtr[inx].control, linx );
-			wButtonSetLabel( (wButton_p)customPLs[I_CUSTOMEDIT].control,
-			                 context->proc( CUSTMGM_CAN_EDIT, context->data )?_("Edit"):_("Rename") );
-			ParamControlActive( &customPG, I_CUSTOMEDIT, TRUE );
-		} else {
-			ParamControlActive( &customPG, I_CUSTOMEDIT, FALSE );
+		wIndex_t lcnt = wListGetCount(pg->paramPtr[inx].control );
+
+		for (int linx = 0; linx < lcnt; linx++)
+		{
+			if (wListGetItemSelected(customPLs[I_CUSTOMLIST].control, linx)) {
+				context = (custMgmContext_p)wListGetItemContext(pg->paramPtr[I_CUSTOMLIST].control, linx);
+
+				wButtonSetLabel(customPLs[I_CUSTOMEDIT].control,
+					context->proc(CUSTMGM_CAN_EDIT, context->data) ? _("Edit") : _("Rename"));
+				ParamControlActive(&customPG, I_CUSTOMEDIT, TRUE);
+			}
 		}
 	} else {
 		ParamControlActive( &customPG, I_CUSTOMEDIT, FALSE );
 	}
 	ParamControlActive( &customPG, I_CUSTOMDEL, selcnt>0 );
 	ParamControlActive( &customPG, I_CUSTOMCOPYTO, selcnt>0 );
+
+	return(TRUE);
 }
 
 
 static void CustomEdit( void * action )
 {
 	custMgmContext_p context = NULL;
-	wIndex_t selcnt = wListGetSelectedCount( (wList_p)customPLs[0].control );
+	wIndex_t selcnt = wListGetSelectedCount(customPLs[0].control );
 	wIndex_t inx, cnt;
 
 	if ( selcnt != 1 ) {
 		return;
 	}
-	cnt = wListGetCount( (wList_p)customPLs[0].control );
+	cnt = wListGetCount(customPLs[0].control );
 	for ( inx=0;
-	      inx<cnt && wListGetItemSelected( (wList_p)customPLs[0].control, inx ) != TRUE;
+	      inx<cnt && wListGetItemSelected(customPLs[0].control, inx ) != TRUE;
 	      inx++ );
 	if ( inx >= cnt ) {
 		return;
@@ -152,7 +147,7 @@ static void CustomNewCar( void * action )
 
 static void CustomDelete( void * action )
 {
-	wIndex_t selcnt = wListGetSelectedCount( (wList_p)customPLs[0].control );
+	wIndex_t selcnt = wListGetSelectedCount(customPLs[I_CUSTOMLIST].control );
 	wIndex_t inx, cnt;
 	custMgmContext_p context = NULL;
 
@@ -163,18 +158,19 @@ static void CustomDelete( void * action )
 	                       selcnt ) ) ) {
 		return;
 	}
-	cnt = wListGetCount( (wList_p)customPLs[0].control );
+
+	cnt = wListGetCount(customPLs[I_CUSTOMLIST].control );
 	for ( inx=0; inx<cnt; inx++ ) {
-		if ( !wListGetItemSelected( (wList_p)customPLs[0].control, inx ) ) {
+		if ( !wListGetItemSelected(customPLs[I_CUSTOMLIST].control, inx ) ) {
 			continue;
 		}
 		context = (custMgmContext_p)wListGetItemContext( customSelL, inx );
 		context->proc( CUSTMGM_DO_DELETE, context->data );
 		MyFree( context );
-		wListDelete( customSelL, inx );
-		inx--;
-		cnt--;
 	}
+
+	wListDeleteSelected(customPLs[I_CUSTOMLIST].control);
+
 	DoChangeNotification( CHANGE_PARAMS );
 }
 
@@ -183,7 +179,7 @@ EXPORT FILE * customMgmF;
 static char custMgmContentsStr[STR_SIZE];
 static BOOL_T custMgmProceed;
 static paramData_t custMgmContentsPLs[] = {
-	{ PD_STRING, custMgmContentsStr, "label", PDO_NOTBLANK, I2VP(400), N_("Label"), 0, 0, sizeof(custMgmContentsStr)}
+	{ PD_STRING, custMgmContentsStr, "label", PDO_NOTBLANK, I2VP(40), N_("Label"), 0, 0, sizeof(custMgmContentsStr)}
 };
 static paramGroup_t custMgmContentsPG = { "contents", 0, custMgmContentsPLs, COUNT( custMgmContentsPLs ) };
 
@@ -208,7 +204,7 @@ static int CustomDoExport(
         void * data )
 {
 	int rc;
-	wIndex_t selcnt = wListGetSelectedCount( (wList_p)customPLs[0].control );
+	wIndex_t selcnt = wListGetSelectedCount(customPLs[0].control );
 	wIndex_t inx, cnt;
 	custMgmContext_p context = NULL;
 
@@ -230,8 +226,10 @@ static int CustomDoExport(
 		custMgmProceed = TRUE;
 	} else {
 		if ( custMgmContentsPG.win == NULL ) {
-			ParamCreateDialog( &custMgmContentsPG, MakeWindowTitle(_("Contents Label")),
-			                   _("Ok"), CustMgmContentsOk, ParamCancel_Current, TRUE, NULL, F_BLOCK, NULL );
+			FormCreateDialog( &custMgmContentsPG, MakeWindowTitle(_("Contents Label")),
+			                   _("Ok"), CustMgmContentsOk, 
+							   _("Cancel"), ParamCancel_Current, 
+								TRUE, F_BLOCK, NULL);
 		}
 		custMgmProceed = FALSE;
 		wShow( custMgmContentsPG.win );
@@ -258,9 +256,9 @@ static int CustomDoExport(
 #endif // UTFCONVERT
 	}
 
-	cnt = wListGetCount( (wList_p)customPLs[0].control );
+	cnt = wListGetCount(customPLs[0].control );
 	for ( inx=0; inx<cnt; inx++ ) {
-		if ( !wListGetItemSelected( (wList_p)customPLs[0].control, inx ) ) {
+		if ( !wListGetItemSelected(customPLs[0].control, inx ) ) {
 			continue;
 		}
 		context = (custMgmContext_p)wListGetItemContext( customSelL, inx );
@@ -332,23 +330,11 @@ static void LoadCustomMgmList( void )
 	wIndex_t curInx, cnt=0;
 	long tempL;
 	custMgmContext_p context;
-#ifdef LATER
-	custMgmContext_t curContext;
-#endif
 
 	curInx = wListGetIndex( customSelL );
-#ifdef LATER
-	curContext.proc = NULL;
-	curContext.data = NULL;
-	curContext.icon = NULL;
-#endif
+
 	if ( curInx >= 0 ) {
 		context = (custMgmContext_p)wListGetItemContext( customSelL, curInx );
-#ifdef LATER
-		if ( context != NULL ) {
-			curContext = *context;
-		}
-#endif
 	}
 	cnt = wListGetCount( customSelL );
 	for ( curInx=0; curInx<cnt; curInx++ ) {
@@ -364,26 +350,6 @@ static void LoadCustomMgmList( void )
 	CompoundCustMgmLoad();
 	CarCustMgmLoad();
 
-#ifdef LATER
-	curInx = 0;
-	cnt = wListGetCount( customSelL );
-	if ( curContext.proc != NULL ) {
-		for ( curInx=0; curInx<cnt; curInx++ ) {
-			context = (custMgmContext_p)wListGetItemContext( customSelL, curInx );
-			if ( context &&
-			     context->proc == curContext.proc &&
-			     context->data == curContext.data ) {
-				break;
-			}
-		}
-	}
-	if ( curInx >= cnt ) {
-		curInx = (cnt>0?0:-1);
-	}
-
-	wListSetIndex( customSelL, curInx );
-	tempL = curInx;
-#endif
 	tempL = -1;
 	CustomDlgUpdate( &customPG, I_CUSTOMLIST, &tempL );
 	wControlShow( (wControl_p)customSelL, TRUE );
@@ -392,6 +358,8 @@ static void LoadCustomMgmList( void )
 
 static void CustMgmChange( long changes )
 {
+	wIndex_t selcnt; 
+
 	if (changes) {
 		if (changed) {
 			changed = checkPtMark = 1;
@@ -402,6 +370,19 @@ static void CustMgmChange( long changes )
 		return;
 	}
 
+	selcnt = wListGetSelectedCount(customPLs[0].control);
+	if (selcnt) {
+		for (int i = 0; i < wListGetCount(customPG.paramPtr[I_CUSTOMLIST].control); i++)
+		{
+			if (wListGetItemSelected(customPLs[0].control, i)) {
+				custMgmContext_p context = (custMgmContext_p)wListGetItemContext(customSelL, i);
+				context->proc(CUSTMGM_GET_TITLE, context->data);
+				wListSetValues(customPG.paramPtr[I_CUSTOMLIST].control, i, message, NULL, NULL);
+				break;
+			}
+		}
+		return;
+	}
 	LoadCustomMgmList();
 }
 
@@ -411,16 +392,14 @@ static void DoCustomMgr( void * junk )
 	int i = 0;
 
 	if (customPG.win == NULL) {
-		ParamCreateDialog( &customPG,
-		                   MakeWindowTitle(_("Manage custom designed parts")), _("Done"), CustomDone,
-		                   ParamCancel_Null, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK,
+		FormCreateDialog( &customPG, MakeWindowTitle(_("Manage custom designed parts")), 
+							_("Done"), CustomDone,
+							_("Cancel"), ParamCancel_Null, 
+							TRUE, F_RESIZE|F_RECALLSIZE|F_BLOCK,
 		                   CustomDlgUpdate );
-		while(customTypes[ i ] != NULL) {
-			wListAddValue( ((wList_p)customPLs[I_CUSTOMNEWTYPE].control),
-			               customTypes[ i++ ], NULL, NULL );
-		}
+
 		selectedType = 0;
-		wListSetIndex( ((wList_p)customPLs[I_CUSTOMNEWTYPE].control), selectedType);
+		wComboBoxSetIndex( (customPLs[I_CUSTOMNEWTYPE].control), selectedType);
 
 	} else {
 		wListClear( customSelL );

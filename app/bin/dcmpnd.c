@@ -25,7 +25,7 @@
 #include "custom.h"
 #include "fileio.h"
 #include "icons.h"
-#include "param.h"
+#include "form.h"
 #include "include/paramfile.h"
 #include "shrtpath.h"
 #include "track.h"
@@ -502,9 +502,9 @@ static char renamePartno[STR_SIZE];
 static turnoutInfo_t * renameTo;
 
 static paramData_t renamePLs[] = {
-	/*0*/ { PD_STRING, renameManuf, "manuf", PDO_NOPREF | PDO_NOTBLANK, I2VP(350), N_("Manufacturer"), 0, 0, sizeof(renameManuf)},
-	/*1*/ { PD_STRING, renameDesc, "desc", PDO_NOPREF | PDO_NOTBLANK, I2VP(230), N_("Description"), 0, 0, sizeof(renameDesc)},
-	/*2*/ { PD_STRING, renamePartno, "partno", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGIGNORELABELWIDTH | PDO_NOTBLANK, I2VP(100), N_("#"), 0, 0, sizeof(renamePartno)}
+	/*0*/ { PD_STRING, renameManuf, "manuf", PDO_NOPREF | PDO_NOTBLANK, I2VP(40), N_("Manufacturer"), 0, 0, sizeof(renameManuf)},
+	/*1*/ { PD_STRING, renameDesc, "desc", PDO_NOPREF | PDO_NOTBLANK, I2VP(40), N_("Description"), 0, 0, sizeof(renameDesc)},
+	/*2*/ { PD_STRING, renamePartno, "partno", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGIGNORELABELWIDTH | PDO_NOTBLANK, I2VP(10), N_("#"), 0, 0, sizeof(renamePartno)}
 };
 static paramGroup_t renamePG = { "rename", 0, renamePLs, COUNT( renamePLs ) };
 
@@ -600,11 +600,13 @@ static int CompoundCustMgmProc(
 			strncpy( renameDesc, pP, pL ); renameDesc[pL] = 0;
 			strncpy( renamePartno, nP, nL ); renamePartno[nL] = 0;
 			if ( !renamePG.win ) {
-				ParamRegister( &renamePG );
-				ParamCreateDialog( &renamePG, MakeWindowTitle(_("Rename Object")), _("Ok"),
-				                   RenameOk, wHide, TRUE, NULL, F_BLOCK, NULL );
+				FormRegister( &renamePG );
+				FormCreateDialog( &renamePG, MakeWindowTitle(_("Rename Object")), 
+									_("Ok"), RenameOk, 
+									_("Cancel"), wHide, 
+									TRUE, F_BLOCK, NULL);
 			}
-			ParamLoadControls( &renamePG );
+			FormLoadControls( &renamePG );
 			wShow( renamePG.win );
 		} else {
 			for (inx=0; inx<turnoutInfo_da.cnt && to!=turnoutInfo(inx); inx++);
@@ -628,14 +630,13 @@ static int CompoundCustMgmProc(
 		return TRUE;
 	case CUSTMGM_GET_TITLE:
 		ParseCompoundTitle( to->title, &mP, &mL, &pP, &pL, &nP, &nL );
-		sprintf( message, "\t%.*s\t%s\t%.*s\t%.*s", mL, mP, GetScaleName(to->scaleInx),
+		sprintf( message, "%.*s\t%s\t%.*s\t%.*s", mL, mP, GetScaleName(to->scaleInx),
 		         nL, nP, pL, pP );
 		return TRUE;
 	}
 	return FALSE;
 }
 
-/**  \todo Check where the icons below are used and replace with fitting symbol */
 EXPORT void CompoundCustMgmLoad( void )
 {
 	int inx;
