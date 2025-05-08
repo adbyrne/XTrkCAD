@@ -71,8 +71,6 @@ SetPixbufToButton(GtkWidget* button, GdkPixbuf* pixbuf)
 	gtk_container_add(GTK_CONTAINER(button), image);
 	gtk_widget_show(image);
 
-	g_object_unref((gpointer)pixbuf);
-
 	return(image);
 }
 

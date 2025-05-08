@@ -35,6 +35,7 @@
 #include <string.h>
 #include <math.h>
 
+#include <cairo.h>
 #include <gtk/gtk.h>
 #include "gdk-pixbuf/gdk-pixbuf.h"
 
@@ -58,6 +59,7 @@ struct wDrawBitMap_t {
 	int x;
 	int y;
 	GdkPixbuf * pixbuf;
+	cairo_pattern_t* pattern;
 };
 
 struct draw * psPrint_d;
@@ -915,6 +917,23 @@ void * wDrawGetContext(
  *
 *******************************************************************************/
 
+#define SCALE_ONE_TO_ONE 1
+
+static cairo_pattern_t *
+CreatePatternFromPixbuf(GdkPixbuf* pixbuf)
+{
+	cairo_surface_t* surface;
+	cairo_pattern_t* pattern;
+
+	surface = gdk_cairo_surface_create_from_pixbuf(pixbuf, SCALE_ONE_TO_ONE, NULL);
+	pattern = cairo_pattern_create_for_surface(surface);
+
+	cairo_surface_destroy(surface);
+
+	return(pattern);
+}
+
+/**  \TODO: is pixbuf actually needed after conversion to pattern? */
 
 wDrawBitMap_p wDrawBitMapCreate(
         wControl_p drawingArea,
@@ -941,17 +960,19 @@ wDrawBitMap_p wDrawBitMapCreate(
 			fprintf(stderr, "Error reading icon: %s\n", error->message);
 			g_error_free(error);
 		}
-		bm->w = gdk_pixbuf_get_width(bm->pixbuf);
-		bm->h = gdk_pixbuf_get_height(bm->pixbuf);;
-		bm->x = x;
-		bm->y = y;
+		else {
+			bm->w = gdk_pixbuf_get_width(bm->pixbuf);
+			bm->h = gdk_pixbuf_get_height(bm->pixbuf);;
+			bm->x = x;
+			bm->y = y;
+
+			bm->pattern = CreatePatternFromPixbuf(bm->pixbuf);
+		}
 
 		g_free(path);
 	}
 	return bm;
 }
-
-/**  \todo That doesn't throw any warnings at compile but needs refactoring and testing at runtime */
 
 void wDrawBitMap(
         wControl_p drawingArea,
@@ -960,25 +981,25 @@ void wDrawBitMap(
         wDrawColor color,
         wDrawOpts opts )
 {
+	cairo_matrix_t matrix;
+
 	struct draw *bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
 	g_assert(drawingArea->type == B_DRAW);
-
-	cairo_surface_t * surface = NULL;
 
 	x = INMAPX( bd, x-bm->x );
 	y = INMAPY( bd, y-bm->y )-bm->h;
 
-	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color,
-	                 opts);
+	cairo_t *cr = cairo_create(bd->surface);
 
-	gdk_cairo_set_source_pixbuf(cairo, bm->pixbuf, x, y);
-	cairo_paint(cairo);
+	cairo_matrix_init_translate(&matrix, x, y);
+	cairo_set_matrix(cr, &matrix);
 
-	gtkDrawDestroyCairoContext(cairo);
-	gtk_widget_queue_draw(drawingArea->widget);
+	cairo_set_source(cr, bm->pattern);
+	cairo_paint(cr);
+
+	cairo_destroy(cr);
 }
 
-
 /*******************************************************************************
  *
  * Event Handlers
