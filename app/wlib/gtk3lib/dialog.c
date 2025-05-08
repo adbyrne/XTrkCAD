@@ -103,7 +103,7 @@ RestoreWindowSizePos(GtkWidget* window, const char* name)
 }
 
 static
-SaveWindowSizePos(GtkWidget* window, wControl_p control)
+SaveWindowSizePos(const GtkWidget* window, const char *name)
 {
     gint width;
     gint height;
@@ -114,14 +114,20 @@ SaveWindowSizePos(GtkWidget* window, wControl_p control)
     gtk_window_get_size(GTK_WINDOW(window), &width, &height);
 
     value = g_strdup_printf("%ld %ld", width, height);
-    wPrefSetString(control->name, "size", value);
+    wPrefSetString(name, "size", value);
     g_free(value);
 
     gtk_window_get_position(GTK_WINDOW(window), &x, &y);
     value = g_strdup_printf("%ld %ld", x, y);
-    wPrefSetString(control->name, "pos", value);
+    wPrefSetString(name, "pos", value);
     g_free(value);
 
+}
+
+void
+wDialogSaveSizePos(wControl_p dialog)
+{
+    SaveWindowSizePos(dialog->widget, dialog->name);
 }
 
 /**
@@ -139,7 +145,7 @@ response_signal(GtkDialog* self, gint response_id, wControl_p dialog)
 {
     winProcEvent event = 0;
 
-    SaveWindowSizePos(GTK_WIDGET(self), dialog); 
+    SaveWindowSizePos(GTK_WIDGET(self), dialog->name); 
     
     switch (response_id) {
     case GTK_RESPONSE_OK:

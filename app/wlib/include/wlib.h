@@ -302,6 +302,8 @@ void wDialogButtonsConfigure(wControl_p dialog,
                              const char* cancelLabel, 
                              const char* helpLabel);
 
+void wDialogSaveSizePos(wControl_p dialog);
+
 /*------------------------------------------------------------------------------
  *
  * Drawing area

@@ -70,6 +70,8 @@ static void ButtonOk(paramGroup_p group)
 
 	LOG(log_form, 1, ("DialogsButtonOk -> Ok\n"));
 
+	wDialogSaveSizePos(group->win);
+
 	wHide(group->win);
 }
 
