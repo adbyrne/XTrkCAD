@@ -80,7 +80,7 @@ static void ButtonCancel(paramGroup_p group)
 	FormMacroRecord("PARAMETER %s %s\n", group->nameStr, "cancel");
 
 	if (group->cancelProc) {
-		group->cancelProc(group->win);
+		group->cancelProc(group);
 	}
 }
 

@@ -230,7 +230,7 @@ void CreateAboutW(void *ptr)
 		FormRegister(&aboutPG);
 		aboutW = FormCreateDialog(&aboutPG, MakeWindowTitle(_("About")),
 		                          NULL, NULL,
-		                          "Close", ParamCancel_Current,
+		                          "Close", FormCancel_Current,
 		                          FALSE, F_TOP | F_CENTER, NULL);
 		wMessageSetValue(aboutPLs[I_ABOUTVERSION].control, sAboutProd);
 		wTextAppend(COPYRIGHT_T, ABOUT_TEXT);

@@ -114,7 +114,7 @@ static void DoDisplay( void * junk )
 	if (displayW == NULL) {
 		displayW = FormCreateDialog( &displayPG, MakeWindowTitle(_("Display Options")),
 		                             _("Ok"), DisplayOk,
-		                             _("Cancel"), ParamCancel_Restore,
+		                             _("Cancel"), FormCancel_Restore,
 		                             TRUE, 0, OptionDlgUpdate);
 		wComboBoxAddValue(displayPLs[I_HOTBARLABELS].control, _("Proto"),
 		                  I2VP(0x0002) );

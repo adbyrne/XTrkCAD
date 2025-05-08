@@ -831,7 +831,7 @@ void DoLayout(void * unused)
 	if (layoutW == NULL) {
 		layoutW = FormCreateDialog(&layoutPG, MakeWindowTitle(_("Layout Options")),
 		                            _("Ok"), LayoutOk, 
-									_("Cancel"), ParamCancel_Custom(LayoutCancel),
+									_("Cancel"), FormCancel_Custom(LayoutCancel),
 		                            TRUE, 0, 
 									LayoutDlgUpdate);
 		LoadScaleList(layoutPLs[SCALEINX].control);

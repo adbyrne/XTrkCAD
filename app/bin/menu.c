@@ -159,7 +159,7 @@ static void ShowAddElevations(void * unused)
 		addElevW = FormCreateDialog(&addElevPG,
 		                            MakeWindowTitle(_("Change Elevations")),
 		                            _("Change"), DoAddElev,
-		                            _("Cancel"), ParamCancel_Current, FALSE, 0, NULL);
+		                            _("Cancel"), FormCancel_Current, FALSE, 0, NULL);
 	wShow(addElevW);
 }
 
@@ -206,7 +206,7 @@ static void StartRotateDialog(void * funcVP)
 	if (rotateW == NULL)
 		rotateW = FormCreateDialog(&rotatePG, MakeWindowTitle(_("Rotate")),
 		                           _("Ok"), RotateEnterOk,
-		                           _("Cancel"), ParamCancel_Current, FALSE, 0, NULL);
+		                           _("Cancel"), FormCancel_Current, FALSE, 0, NULL);
 	ParamLoadControls(&rotatePG);
 	rotateDialogCallBack = func;
 	wShow(rotateW);
@@ -218,7 +218,7 @@ static void StartIndexDialog(void * funcVP)
 	if (indexW == NULL)
 		indexW = FormCreateDialog(&indexPG, MakeWindowTitle(_("Select Index")),
 		                          _("Ok"), IndexEnterOk,
-		                          _("Cancel"), ParamCancel_Current, FALSE, 0, NULL);
+		                          _("Cancel"), FormCancel_Current, FALSE, 0, NULL);
 	ParamLoadControls(&indexPG);
 	indexDialogCallBack = func;
 	trackIndex[0] = '\0';
@@ -231,7 +231,7 @@ static void StartMoveDialog(void * funcVP)
 	if (moveW == NULL)
 		moveW = FormCreateDialog(&movePG, MakeWindowTitle(_("Move")),
 		                         _("Ok"), MoveEnterOk,
-		                         _("Cancel"), ParamCancel_Current,
+		                         _("Cancel"), FormCancel_Current,
 		                         FALSE, 0, NULL);
 
 	ParamLoadControls(&movePG);
@@ -423,7 +423,7 @@ EXPORT void DoSticky(void * unused)
 	if (!stickyW) {
 		stickyW = FormCreateDialog(&stickyPG, MakeWindowTitle(_("Sticky Commands")),
 		                           _("Ok"), StickyOk,
-		                           _("Cancel"), ParamCancel_Restore,
+		                           _("Cancel"), FormCancel_Restore,
 		                           TRUE, F_RESIZE, NULL);
 	}
 	stickySet1 = stickySet;
@@ -465,7 +465,7 @@ static void CreateDebugW(void)
 	ParamRegister(&debugPG);
 	debugW = FormCreateDialog(&debugPG, MakeWindowTitle(_("Debug")),
 	                          _("Ok"),DebugOk,
-	                          _("Cancel"), ParamCancel_Current, FALSE, 0, NULL);
+	                          _("Cancel"), FormCancel_Current, FALSE, 0, NULL);
 	wHide(debugW);
 }
 

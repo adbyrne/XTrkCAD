@@ -1071,7 +1071,7 @@ EXPORT void DoRescale( void * unused )
 	if ( rescalePG.win == NULL ) {
 		FormCreateDialog( &rescalePG, NULL,
 							_("Ok"), RescaleDlgOk, 
-							_("Cancel"), ParamCancel_Current, 
+							_("Cancel"), FormCancel_Current, 
 							TRUE, F_BLOCK, RescaleDlgUpdate);
 		LoadScaleList(rescalePLs[I_RESCALE_TO_SCALE].control );
 		LoadGaugeList(rescalePLs[I_RESCALE_TO_GAUGE].control,

@@ -241,7 +241,7 @@ static void DoEasement( void * unused )
 	if (easementW == NULL) {
 		easementW = FormCreateDialog( &easementPG, MakeWindowTitle(N_("Easement")),
 		                              _("Ok"), (paramActionOkProc)EasementOk, 
-									  _("Cancel"), ParamCancel_Null,
+									  NULL, NULL,
 		                              TRUE, 0, EasementDlgUpdate );
 		SetEasement( easementVal, I2VP(TRUE) );
 	}

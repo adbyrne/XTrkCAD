@@ -55,7 +55,7 @@ void ProblemrepCreateW(void* ptr)
 		problemrepW = FormCreateDialog(&problemrepPG,
 		                               MakeWindowTitle(_("Data for Problem Report")),
 		                               NULL, NULL,
-		                               _("Close"), ParamCancel_Current, TRUE,
+		                               _("Close"), FormCancel_Current, TRUE,
 		                               F_TOP | F_CENTER | PD_F_ALT_CANCELLABEL, NULL);
 	} else {
 		wTextClear(PROBLEMREP_T);

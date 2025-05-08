@@ -273,7 +273,7 @@ EXPORT void DoRecord( void * context )
 {
 	if (recordW == NULL) {
 		char * title = MakeWindowTitle(_("Record"));
-		recordW = FormCreateDialog( &recordPG, title, NULL, NULL, _("Cancel"), ParamCancel_Null,
+		recordW = FormCreateDialog( &recordPG, title, NULL, NULL, _("Cancel"), FormCancel_Current,
 		                             FALSE, F_RESIZE, NULL );
 		recordFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, title, sRecordFilePattern,
 		                               StartRecord, NULL );

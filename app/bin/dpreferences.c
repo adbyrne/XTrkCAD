@@ -301,7 +301,7 @@ static void DoPref(void* junk)
 	if (prefW == NULL) {
 		prefW = FormCreateDialog(&prefPG, MakeWindowTitle(_("Preferences")),
 		                         _("Ok"),PrefOk,
-		                         _("Cancel"), ParamCancel_Restore,
+		                         _("Cancel"), FormCancel_Restore,
 		                         TRUE, 0, OptionDlgUpdate);
 		LoadDistanceFormatList(units);
 	}

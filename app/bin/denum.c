@@ -151,7 +151,7 @@ void EnumerateStart(void)
 		ParamRegister( &enumPG );
 		enumW = FormCreateDialog( &enumPG, MakeWindowTitle(_("Parts List")), 
 									NULL, NULL, 
-									N_("Done"), ParamCancel_Current, 
+									N_("Done"), FormCancel_Current, 
 									TRUE, F_RESIZE, 
 									EnumDlgUpdate);
 		enumFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Parts List"),

@@ -132,7 +132,7 @@ CreateEditTextNote(char *title, char * textData )
 		ParamRegister(&textNotePG);
 		textNoteW = FormCreateDialog(&textNotePG, "",
 		                             _("Done"), TextEditOK,
-		                             _("Cancel"), ParamCancel_Current,
+		                             _("Cancel"), FormCancel_Current,
 		                             TRUE, F_BLOCK,
 		                             TextDlgUpdate);
 	}

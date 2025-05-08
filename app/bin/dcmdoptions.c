@@ -57,7 +57,7 @@ static void DoCmdopt(void* junk)
 	if (cmdoptW == NULL) {
 		cmdoptW = FormCreateDialog(&cmdoptPG, NULL,
 		                           _("Ok"), CmdoptOk,
-		                           _("Cancel"), ParamCancel_Restore, TRUE, 0L, NULL);
+		                           _("Cancel"), FormCancel_Restore, TRUE, 0L, NULL);
 	}
 	ParamLoadControls(&cmdoptPG);
 	wShow(cmdoptW);

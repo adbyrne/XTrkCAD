@@ -846,7 +846,7 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 			if (helixW == NULL) {
 				helixW = FormCreateDialog(&helixPG, MakeWindowTitle(_("Helix")),
 					NULL, NULL,
-					_("Cancel"), ParamCancel_Current,
+					_("Cancel"), FormCancel_Current,
 					TRUE, 0, ComputeHelix);
 			}
 			ParamLoadControls(&helixPG);

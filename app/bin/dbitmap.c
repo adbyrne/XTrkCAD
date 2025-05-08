@@ -466,7 +466,7 @@ static void DoOutputBitMap( void* unused )
 		                                   _( "_Ok" ),
 		                                   OutputBitMapOk,
 										   _("_Cancel"),
-		                                   ParamCancel_Current,
+		                                   FormCancel_Current,
 		                                   TRUE,
 		                                   0,
 		                                   ( paramChangeProc )UpdateBitmapDialog );

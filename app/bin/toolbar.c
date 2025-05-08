@@ -224,7 +224,7 @@ EXPORT void DoToolbar(void* unused)
 		InitializeToolbarDialog();
 		toolbarW = FormCreateDialog(&toolbarPG, MakeWindowTitle(_("Toolbar Options")), 
 			_("OK"), ToolbarOk, 
-			_("Cancel"), ParamCancel_Restore, 
+			_("Cancel"), FormCancel_Restore, 
 			TRUE, 0, NULL);
 	}
 

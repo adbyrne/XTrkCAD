@@ -22,6 +22,14 @@ void FormLoadSingleControl(paramGroup_p pg, int inx);
 void FormStartRecord(FILE* fileHandle);
 void FormMacroRecord(char* format, ...);
 
+void FormCancel_Undo(wWin_p winP);
+void FormCancel_Current(paramGroup_p group);
+void FormCancel_Reset(paramGroup_p group);
+void FormCancel_Restore(paramGroup_p group);
+
+//EXPORT void* FormCancel_Null = NULL;
+
+#define FormCancel_Custom( PROC ) PROC
 
 #endif // HAVE_FORM_H
 
