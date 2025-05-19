@@ -1704,16 +1704,13 @@ static void ReadDxfFile(
 	BOOL_T complain)
 {
 	FILE* dxfFile;
-	// BOOL_T noSetCurDir;
+	time_t clock;
+
 	int count;
 
-	char *scale = "HO";
-	int scaleNum = 2;
-
-	// char* cp;
 	int ret = TRUE;
 
-	char output[100][100];
+	char output[500][100];
 	int outputCount = 0;
 
 	char dxfSection[50];
@@ -1753,6 +1750,7 @@ static void ReadDxfFile(
 	double y2 = 0.0;
 	int layerIdx = 0;
 	char* layer;
+	int visibility = 2;
 
 	double vrt_x[20];
 	double vrt_y[20];
@@ -1779,11 +1777,9 @@ static void ReadDxfFile(
 	paramFileName = strdup(fileName);
 
 	// Header
-	strcpy(output[outputCount], "#XTrackCAD Version: 5.3.2Dev, Date: Sun May 18 08:09:57 2025");
-	outputCount++;
-	strcpy(output[outputCount], "VERSION 12 5.2.0");
-	outputCount++;
-	// 
+	time(&clock);
+	sprintf(output[outputCount++], "#%s Version: %s, Date: %s", sProdName, sVersion, ctime(&clock));
+	sprintf(output[outputCount++], "VERSION %d %s\n", iParamVersion, PARAMVERSIONVERSION);
 
 	// InfoMessage("0", "0");
 	count = 0;
@@ -1833,8 +1829,8 @@ static void ReadDxfFile(
 					// Show Layer data
 					//ok = snprintf(tmp, 100, "\t%s %s %d %d", dxfSection, dxfGroup, color, lineType);
 
-					//strcpy(output[outputCount], tmp);
-					//outputCount++;
+					//strcpy(output[outputCount++], tmp);
+					//
 				}
 				// Write the Entity data into the list
 				else if (inEntities)
@@ -1874,40 +1870,38 @@ static void ReadDxfFile(
 							//	T4 2 21.000000 0.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
 							//	END$SEGS
 							ok = snprintf(tmp, 100, "%s %d %d %d 0 0 %s %d %f %f",
-								"STRAIGHT", entityCount, layerIdx, width, scale, 2, 0.0, 0.0);
-							strcpy(output[outputCount], tmp);
-							outputCount++;
+								"STRAIGHT", entityCount, layerIdx, width, curScaleName, visibility, 0.0, 0.0);
+							strcpy(output[outputCount++], tmp);
+							
 							// End points
 							double a1 = normalize(-toDegrees(atan2((y2 - y1), (x2 - x1))));
 							double a2 = normalize(180 + a1);
 							ok = snprintf(tmp, 100, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
 								"E4", x1, y1, a1);
-							strcpy(output[outputCount], tmp);
-							outputCount++;
+							strcpy(output[outputCount++], tmp);
+							
 							ok = snprintf(tmp, 100, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
 								"E4", x2, y2, a2);
-							strcpy(output[outputCount], tmp);
-							outputCount++;
+							strcpy(output[outputCount++], tmp);
+							
 							ok = snprintf(tmp, 100, "\t%s",
 								"END$SEGS");
-							strcpy(output[outputCount], tmp);
-							outputCount++;
+							strcpy(output[outputCount++], tmp);
 						}
 						else
 						{
 							// DRAW 1 0 0 0 0 -2.000000 -4.500000 0 0.000000
 							ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
 								"DRAW", entityCount, layerIdx, lineType, width, 0.0, 0.0, 0.0);
-							strcpy(output[outputCount], tmp);
-							outputCount++;
+							strcpy(output[outputCount++], tmp);
+							
 							ok = snprintf(tmp, 100, "\t%s %d %d %f %f 0 %f %f 0",
 								"L3", color, width, x1, y1, x2, y2);
-							strcpy(output[outputCount], tmp);
-							outputCount++;
+							strcpy(output[outputCount++], tmp);
+							
 							ok = snprintf(tmp, 100, "\t%s",
 								"END$SEGS");
-							strcpy(output[outputCount], tmp);
-							outputCount++;
+							strcpy(output[outputCount++], tmp);
 						}
 					}
 					else
@@ -1916,22 +1910,21 @@ static void ReadDxfFile(
 						// DRAW 1 0 0 0 0 -2.000000 -4.500000 0 0.000000
 						ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
 							"DRAW", entityCount, layerIdx, lineType, width, 0.0, 0.0, 0.0);
-						strcpy(output[outputCount], tmp);
-						outputCount++;
+						strcpy(output[outputCount++], tmp);
+						
 						ok = snprintf(tmp, 100, "\t%s %d %d %f %f %f 0",
 							"G3", color, width, radius, x1, y1);
-						strcpy(output[outputCount], tmp);
-						outputCount++;
+						strcpy(output[outputCount++], tmp);
+						
 						ok = snprintf(tmp, 100, "\t%s",
 							"END$SEGS");
-						strcpy(output[outputCount], tmp);
-						outputCount++;
+						strcpy(output[outputCount++], tmp);						
 					}
 					else 
 					if (strncmp(dxfSection, "ARC", 3) == 0)
 					{
 						// Save Entity data
-						if (isTrack) 
+						if (isTrack)
 						{
 							//CURVE index layer line-width 0 0 scale visibility&no_ties&bridge&roadbed center-X centerY 0 radius helix-turns desc-X desc-Y
 							//CURVE 2 1 0 0 0 OO 2 0.000000 12.000000 0 12.000000 0 0.000000 0.000000
@@ -1955,31 +1948,32 @@ static void ReadDxfFile(
 							double e3 = normalize(xStartAngle);
 							double e4 = normalize(xEndAngle - 180.0);
 							double xCurveAngle = normalize(endAngle - startAngle);
+
 							/* DEBUG
 							ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
 								"DRAW", entityCount, layerIdx, lineType, width, 0.0, 0.0, 0.0);
-							strcpy(output[outputCount], tmp);
-							outputCount++;
+							strcpy(output[outputCount++], tmp);
+							
 							ok = snprintf(tmp, 100, "\t%s %d %d %f %f %f 0",
 								"G3", 0xFF0000, width, 1.0, x1, y1); // red center
-							strcpy(output[outputCount], tmp);
-							outputCount++;
+							strcpy(output[outputCount++], tmp);
+							
 							ok = snprintf(tmp, 100, "\t%s %d %d %f %f %f 0",
 								"G3", 0x00FF00, width, 1.0, x3, y3); // green start
-							strcpy(output[outputCount], tmp);
-							outputCount++;
+							strcpy(output[outputCount++], tmp);
+							
 							ok = snprintf(tmp, 100, "\t%s %d %d %f %f %f 0",
 								"G3", 0x0000FF, width, 1.0, x4, y4); // blue end
-							strcpy(output[outputCount], tmp);
-							outputCount++;
+							strcpy(output[outputCount++], tmp);
+							
 							ok = snprintf(tmp, 100, "\t%s %d %d %f %f %f 0 %f %f",
 								"A3", 0, width, radius, x1, y1, xCurveStart, xCurveAngle);
-							strcpy(output[outputCount], tmp);
-							outputCount++;
+							strcpy(output[outputCount++], tmp);
+							
 							ok = snprintf(tmp, 100, "\t%s",
 								"END$SEGS");
-							strcpy(output[outputCount], tmp);
-							outputCount++;
+							strcpy(output[outputCount++], tmp);
+							
 							*/
 
 							// Not needed?
@@ -1999,37 +1993,52 @@ static void ReadDxfFile(
 							//}
 
 							ok = snprintf(tmp, 100, "%s %d %d %d 0 0 %s %d %f %f 0 %f 0 %f %f",
-								"CURVE", entityCount, layerIdx, width, scale, 2, x1, y1, radius, 0.0, 0.0);
-							strcpy(output[outputCount], tmp);
-							outputCount++;
+								"CURVE", entityCount, layerIdx, width, curScaleName, visibility, x1, y1, radius, 0.0, 0.0);
+							strcpy(output[outputCount++], tmp);
+							
 							ok = snprintf(tmp, 100, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
 								"E4", x3, y3, e3);
-							strcpy(output[outputCount], tmp);
-							outputCount++;
+							strcpy(output[outputCount++], tmp);
+							
 							ok = snprintf(tmp, 100, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
 								"E4", x4, y4, e4);
-							strcpy(output[outputCount], tmp);
-							outputCount++;
+							strcpy(output[outputCount++], tmp);
+							
 							ok = snprintf(tmp, 100, "\t%s",
 								"END$SEGS");
-							strcpy(output[outputCount], tmp);
-							outputCount++;							
+							strcpy(output[outputCount++], tmp);														
 						}
 						else
 						{
+							double xEndAngle = normalize(90.0 - startAngle);
+							double xStartAngle = normalize(90.0 - endAngle);
+							// double xCurveStart = normalize(90.0 - endAngle);
+
+							double x3 = x1 + radius * sin(toRadians(xStartAngle));
+							//double y3 = y1 - radius * cos(toRadians(xStartAngle));
+							double x4 = x1 + radius * sin(toRadians(xEndAngle));
+							//double y4 = y1 - radius * cos(toRadians(xEndAngle));
+							double dx = x3 - x4;
+
+							if (dx < 0)
+							{
+								double tmp;
+								tmp = xStartAngle;
+								xStartAngle = xEndAngle;
+								xEndAngle = tmp;
+							}
 							// DRAW 1 0 0 0 0 -2.000000 -4.500000 0 0.000000
 							ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
 								"DRAW", entityCount, layerIdx, lineType, width, 0.0, 0.0, 0.0);
-							strcpy(output[outputCount], tmp);
-							outputCount++;
+							strcpy(output[outputCount++], tmp);
+							
 							ok = snprintf(tmp, 100, "\t%s %d %d %f %f %f 0 %f %f",
-								"A3", color, width, radius, x1, y1, startAngle, endAngle);
-							strcpy(output[outputCount], tmp);
-							outputCount++;
+								"A3", color, width, radius, x1, y1, xStartAngle, xEndAngle);
+							strcpy(output[outputCount++], tmp);
+							
 							ok = snprintf(tmp, 100, "\t%s",
 								"END$SEGS");
-							strcpy(output[outputCount], tmp);
-							outputCount++;
+							strcpy(output[outputCount++], tmp);							
 						}
 					}
 					else
@@ -2039,33 +2048,43 @@ static void ReadDxfFile(
 						// Save Entity data
 						ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
 							"DRAW", entityCount, layerIdx, lineType, width, 0.0, 0.0, 0.0);
-						strcpy(output[outputCount], tmp);
-						outputCount++;
+						strcpy(output[outputCount++], tmp);
 
 						ok = snprintf(tmp, 100, "\t%s %d %d %d 0", 
 							"F4", color, width, vertices);
-						strcpy(output[outputCount], tmp);
-						outputCount++;
+						strcpy(output[outputCount++], tmp);
 
 						for (int v = 0; v < vertices; v++)
 						{
 							ok = snprintf(tmp, 100, "\t\t%f %f 0", vrt_x[v], vrt_y[v]);
 
-							strcpy(output[outputCount], tmp);
-							outputCount++;
+							strcpy(output[outputCount++], tmp);
+							
 						}
 
 						ok = snprintf(tmp, 100, "\t%s",
 							"END$SEGS");
-						strcpy(output[outputCount], tmp);
-						outputCount++;
+						strcpy(output[outputCount++], tmp);
+						
 
 						poly_flag = false;
+					}
+					else
+					if (strncmp(dxfSection, "MTEXT", 5) == 0)
+					{
+
+						// Save Entity data
+						//ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
+						//	"DRAW", entityCount, layerIdx, lineType, width, 0.0, 0.0, 0.0);
+						//strcpy(output[outputCount++], tmp);
+						//
+
 					}
 				}
 
 				dxfDirty = false;
 
+				// Make sure previous values are not used
 				vertices = 0;
 				color = 0;
 				colorRGB = 0;
@@ -2125,9 +2144,7 @@ static void ReadDxfFile(
 				strncpy(dxfGroup, dxfValue, sizeof dxfGroup);
 				inEntities = true;
 				inLayers = false;
-
-				//strcpy(output[outputCount], "ENTITIES:");
-				//outputCount++;
+				//strcpy(output[outputCount++], "ENTITIES:");
 			}
 		}
 
@@ -2227,8 +2244,8 @@ static void ReadDxfFile(
 	}
 
 	//ParamSetInReadTracks(FALSE);
-	strcpy(output[outputCount], "END$TRACKS");
-	outputCount++;
+	strcpy(output[outputCount++], "END$TRACKS");
+
 
 	if (dxfFile) {
 		fclose(dxfFile);
