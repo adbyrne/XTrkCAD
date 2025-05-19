@@ -620,7 +620,7 @@ static BOOL_T ReadTrackFile(
 	paramLineNum = 0;
 	paramFileName = strdup( fileName );
 
-	InfoMessage("0");
+	InfoMessage("0", "0");
 	count = 0;
 	int skipLines = 0;
 	BOOL_T skip = FALSE;
@@ -1329,7 +1329,7 @@ EXPORT void TryCheckPoint()
 			} else {
 				DoSave(NULL);
 			}
-			InfoMessage(_("File AutoSaved"));
+			InfoMessage(_("File AutoSaved"), "File AutoSaved");
 			autosave_count = 0;
 		}
 	}
@@ -1469,6 +1469,7 @@ EXPORT int LoadCheckpoint( BOOL_T sameName )
 
 static struct wFilSel_t * exportFile_fs;
 static struct wFilSel_t * importFile_fs;
+static struct wFilSel_t * importDxf_fs;
 
 static int importAsModule;
 
@@ -1545,6 +1546,721 @@ EXPORT void DoImportModule( void * unused )
 	importAsModule = TRUE;
 	DoImport( unused );
 }
+
+/*******************************************************************************
+ *
+ * Import DXF Dialog
+ *
+ */
+
+static int ImportDXF(
+	int cnt,
+	char** fileName,
+	void* data)
+{
+	char* nameOfFile;
+	long paramVersionOld = paramVersion;
+
+	CHECK(fileName != NULL);
+	CHECK(cnt == 1);
+
+	nameOfFile = FindFilename(fileName[0]);
+	paramVersion = -1;
+	wSetCursor(mainD.d, wCursorWait);
+	Reset();
+	SetAllTrackSelect(FALSE);
+	int saveLayer = curLayer;
+	int layer = 0;
+	if (importAsModule) {
+		layer = FindUnusedLayer(0);
+		if (layer == -1) { return FALSE; }
+		char LayerName[80];
+		LayerName[0] = '\0';
+		sprintf(LayerName, _("Module - %s"), nameOfFile);
+		if (layer >= 0) { SetCurrLayer(layer, NULL, 0, NULL, NULL); }
+		SetLayerName(layer, LayerName);
+	}
+	ImportStart();
+	UndoStart(_("Import DXF"), "importDXF");
+	useCurrentLayer = TRUE;
+	ReadDxfFile(fileName[0], nameOfFile, true);
+	ImportEnd(zero, TRUE, FALSE);
+	if (importAsModule) { SetLayerModule(layer, TRUE); }
+	useCurrentLayer = FALSE;
+	SetCurrLayer(saveLayer, NULL, 0, NULL, NULL);
+	/*DoRedraw();*/
+	EnableCommands();
+	wSetCursor(mainD.d, defaultCursor);
+	paramVersion = paramVersionOld;
+	DoCommandB(I2VP(selectCmdInx));
+	SelectRecount();
+	return TRUE;
+}
+
+EXPORT void DoImportDXF(void* unused)
+{
+	if (importDxf_fs == NULL)
+		importDxf_fs = wFilSelCreate(mainW, FS_LOAD, 0,
+			_("Import DXF"),
+			sDXFFilePattern, ImportDXF, NULL);
+
+	wFilSelect(importDxf_fs, GetCurrentPath(LAYOUTPATHKEY));
+}
+
+char dxfCode[50];
+char dxfValue[50];
+
+// Hex values (RGB) for all the 256 ACI Color indexes
+static long aci[256] = {
+	0x000000, 0xFF0000, 0xFFFF00, 0x00FF00, 0x00FFFF, 0x0000FF, 0xFF00FF, 0xFFFFFF, //007
+	0x414141, 0x808080, 0xFF0000, 0xFFAAAA, 0xBD0000, 0xBD7E7E, 0x810000, 0x815656, //015
+	0x680000, 0x684545, 0x4F0000, 0x4F3535, 0xFF3F00, 0xFFBFAA, 0xBD2E00, 0xBD8D7E, //023
+	0x811F00, 0x816056, 0x681900, 0x684E45, 0x4F1300, 0x4F3B35, 0xFF7F00, 0xFFD4AA, //031
+	0xBD5E00, 0xBD9D7E, 0x814000, 0x816B56, 0x683400, 0x685645, 0x4F2700, 0x4F4235, //039
+	0xFFBF00, 0xFFEAAA, 0xBD8D00, 0xBDAD7E, 0x816000, 0x817656, 0x684E00, 0x685F45, //047
+	0x4F3B00, 0x4F4935, 0xFFFF00, 0xFFFFAA, 0xBDBD00, 0xBDBD7E, 0x818100, 0x818156, //055
+	0x686800, 0x686845, 0x4F4F00, 0x4F4F35, 0xBFFF00, 0xEAFFAA, 0x8DBD00, 0xADBD7E, //063
+	0x608100, 0x768156, 0x4E6800, 0x5F6845, 0x3B4F00, 0x494F35, 0x7FFF00, 0xD4FFAA, //071
+	0x5EBD00, 0x9DBD7E, 0x408100, 0x6B8156, 0x346800, 0x566845, 0x274F00, 0x424F35, //079
+	0x3FFF00, 0xBFFFAA, 0x2EBD00, 0x8DBD7E, 0x1F8100, 0x608156, 0x196800, 0x4E6845, //087
+	0x134F00, 0x3B4F35, 0x00FF00, 0xAAFFAA, 0x00BD00, 0x7EBD7E, 0x008100, 0x568156, //095
+	0x006800, 0x456845, 0x004F00, 0x354F35, 0x00FF3F, 0xAAFFBF, 0x00BD2E, 0x7EBD8D, //103
+	0x00811F, 0x568160, 0x006819, 0x45684E, 0x004F13, 0x354F3B, 0x00FF7F, 0xAAFFD4, //111
+	0x00BD5E, 0x7EBD9D, 0x008140, 0x56816B, 0x006834, 0x456856, 0x004F27, 0x354F42, //119
+	0x00FFBF, 0xAAFFEA, 0x00BD8D, 0x7EBDAD, 0x008160, 0x568176, 0x00684E, 0x45685F, //127
+	0x004F3B, 0x354F49, 0x00FFFF, 0xAAFFFF, 0x00BDBD, 0x7EBDBD, 0x008181, 0x568181, //135
+	0x006868, 0x456868, 0x004F4F, 0x354F4F, 0x00BFFF, 0xAAEAFF, 0x008DBD, 0x7EADBD, //143
+	0x006081, 0x567681, 0x004E68, 0x455F68, 0x003B4F, 0x35494F, 0x007FFF, 0xAAD4FF, //151
+	0x005EBD, 0x7E9DBD, 0x004081, 0x566B81, 0x003468, 0x455668, 0x00274F, 0x35424F, //159
+	0x003FFF, 0xAABFFF, 0x002EBD, 0x7E8DBD, 0x001F81, 0x566081, 0x001968, 0x454E68, //167
+	0x00134F, 0x353B4F, 0x0000FF, 0xAAAAFF, 0x0000BD, 0x7E7EBD, 0x000081, 0x565681, //175
+	0x000068, 0x454568, 0x00004F, 0x35354F, 0x3F00FF, 0xBFAAFF, 0x2E00BD, 0x8D7EBD, //183
+	0x1F0081, 0x605681, 0x190068, 0x4E4568, 0x13004F, 0x3B354F, 0x7F00FF, 0xD4AAFF, //191
+	0x5E00BD, 0x9D7EBD, 0x400081, 0x6B5681, 0x340068, 0x564568, 0x27004F, 0x42354F, //199
+	0xBF00FF, 0xEAAAFF, 0x8D00BD, 0xAD7EBD, 0x600081, 0x765681, 0x4E0068, 0x5F4568, //207
+	0x3B004F, 0x49354F, 0xFF00FF, 0xFFAAFF, 0xBD00BD, 0xBD7EBD, 0x810081, 0x815681, //215
+	0x680068, 0x684568, 0x4F004F, 0x4F354F, 0xFF00BF, 0xFFAAEA, 0xBD008D, 0xBD7EAD, //223
+	0x810060, 0x815676, 0x68004E, 0x68455F, 0x4F003B, 0x4F3549, 0xFF007F, 0xFFAAD4, //231
+	0xBD005E, 0xBD7E9D, 0x810040, 0x81566B, 0x680034, 0x684556, 0x4F0027, 0x4F3542, //239
+	0xFF003F, 0xFFAABF, 0xBD002E, 0xBD7E8D, 0x81001F, 0x815660, 0x680019, 0x68454E, //247
+	0x4F0013, 0x4F353B, 0x333333, 0x505050, 0x696969, 0x828282, 0xBEBEBE, 0xFFFFFF  //255
+	};
+
+static bool ReadDxfPair(FILE* dxfFile) {
+	memset(dxfCode, 0, sizeof(dxfCode));
+	memset(dxfValue, 0, sizeof(dxfValue));
+
+	if (fgets(dxfCode, sizeof dxfCode, dxfFile) != NULL) {
+		if (fgets(dxfValue, sizeof dxfValue, dxfFile) != NULL) {
+			return true;
+		}
+	}
+	return false;
+}
+
+static wDrawLineType_e dxfLineType(char dxfValue[50])
+{
+	wDrawLineType_e lineType = wDrawLineSolid;
+
+	if (strncmp(dxfValue, "continuous", 10) == 0)
+		lineType = wDrawLineSolid;
+	else if (strncmp(dxfValue, "divide", 6) == 0)
+		lineType = wDrawLineDashDotDot;
+	else if (strncmp(dxfValue, "dashdot", 7) == 0)
+		lineType = wDrawLineDashDot;
+	else if (strncmp(dxfValue, "dot", 3) == 0)
+		lineType = wDrawLineDot;
+	else if (strncmp(dxfValue, "dashed", 6) == 0)
+		lineType = wDrawLineDash;
+	else if ((strncmp(dxfValue, "border", 6) == 0) ||
+		(strncmp(dxfValue, "center", 6) == 0))
+		lineType = wDrawLineCenter;
+
+	return lineType;
+}
+
+static double toDegrees(double a) 
+{
+	return 90.0 + a * 180.0 / M_PI;
+}
+
+static double normalize(double a)
+{
+	return a >= 360 ? a - 360 : (a < 0 ? a + 360 : a);
+}
+
+static double toRadians(double a)
+{
+	return (90.0 - a) * M_PI / 180.0;
+}
+
+
+#define MAX_DXF_LAYER 20
+#define MAX_DXF_ENTITY 200
+
+static void ReadDxfFile(
+	const char* pathName, 
+	const char* fileName, 
+	BOOL_T complain)
+{
+	FILE* dxfFile;
+	// BOOL_T noSetCurDir;
+	int count;
+
+	char *scale = "HO";
+	int scaleNum = 2;
+
+	// char* cp;
+	int ret = TRUE;
+
+	char output[100][100];
+	int outputCount = 0;
+
+	char dxfSection[50];
+	char dxfGroup[50];
+	
+	bool inEntities = false;
+	bool inLayers = false;
+
+	char layerZero[50];
+	int layerLine[MAX_DXF_LAYER];
+	char layerName[MAX_DXF_LAYER][50];
+	int layerColor[MAX_DXF_LAYER];
+	int layerLineType[MAX_DXF_LAYER];
+	int layerWidth[MAX_DXF_LAYER];
+
+	int entityLine[MAX_DXF_ENTITY];
+	char entityName[MAX_DXF_ENTITY][15];
+
+	int layerCount = 0;
+	int entityCount = 0;
+
+	// char dxfContext[20];
+
+	char dxfLayer[50];
+
+	long color; 
+	long colorRGB;
+	wDrawLineType_e lineType;
+	int width = 0;
+	double radius = 0.0;
+	double startAngle = 0.0;
+	double endAngle = 0.0;
+	int closed = 0;
+	double x1 = 0.0;
+	double y1 = 0.0;
+	double x2 = 0.0;
+	double y2 = 0.0;
+	int layerIdx = 0;
+	char* layer;
+
+	double vrt_x[20];
+	double vrt_y[20];
+	int vertices = 0;
+	bool poly_flag = false;
+
+	int dxfLayerCount = 0;
+	bool dxfDirty = false;
+	// char dxfOut[1000];
+
+	dxfFile = fopen(pathName, "r");
+	if (dxfFile == NULL) {
+		if (complain) {
+			NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, sProdName, pathName,
+				strerror(errno));
+		}
+		return FALSE;
+	}
+
+	ParamSetInReadTracks(TRUE);
+	SetCLocale();
+	checkPtFileNameBackup = NULL;
+	paramLineNum = 0;
+	paramFileName = strdup(fileName);
+
+	// Header
+	strcpy(output[outputCount], "#XTrackCAD Version: 5.3.2Dev, Date: Sun May 18 08:09:57 2025");
+	outputCount++;
+	strcpy(output[outputCount], "VERSION 12 5.2.0");
+	outputCount++;
+	// 
+
+	// InfoMessage("0", "0");
+	count = 0;
+	while (dxfFile 
+		&& ReadDxfPair(dxfFile)) 
+	{
+		count += 2;
+		// BOOL_T old_skip = skip;
+		// skip = FALSE;
+		if (count % 10 == 0) {
+			InfoMessage("%d", count);
+			wFlush();
+		}
+		paramLineNum++;
+		//if (strlen(paramLine) == (sizeof paramLine) - 1 &&
+		//	paramLine[(sizeof paramLine) - 1] != '\n') {
+		//	if (!(ret = InputError("Line too long", TRUE))) {
+		//		break;
+		//	}
+		//}
+		Stripcr(dxfCode);
+		Stripcr(dxfValue);
+
+		if (strncmp(dxfCode, "  0", 3) == 0) 
+		{
+			// Write previous entity
+			if (dxfDirty) {
+
+				int ok;
+				char tmp[100];
+
+				// Write the layer data into the list
+				if (inLayers)
+				{
+					if (layerCount < MAX_DXF_LAYER) {
+						layerLine[layerCount] = count;
+						strncpy(layerName[layerCount], dxfGroup, sizeof dxfGroup);
+						layerColor[layerCount] = color;
+						layerLineType[layerCount] = lineType;
+						layerWidth[layerCount] = width;
+					}
+					if (layerCount == 0) {
+						strncpy(layerZero, dxfGroup, sizeof dxfGroup);
+					}
+					layerCount++;
+
+					// Show Layer data
+					//ok = snprintf(tmp, 100, "\t%s %s %d %d", dxfSection, dxfGroup, color, lineType);
+
+					//strcpy(output[outputCount], tmp);
+					//outputCount++;
+				}
+				// Write the Entity data into the list
+				else if (inEntities)
+				{
+					if (entityCount < MAX_DXF_ENTITY) {
+						entityLine[entityCount] = count;
+						strncpy(entityName[entityCount], dxfSection, sizeof entityName[0]);
+					}
+					entityCount++;
+
+					BOOL_T isTrack = (strncmp(dxfLayer, layerZero, sizeof dxfLayer) == 0);
+
+					if (color < 0 || lineType < 0 || width < 0)
+					{
+						layerIdx = 0;
+						for (int i = 0; i < layerCount; i++)
+						{
+							if (strncmp(dxfLayer, layerName[i], sizeof dxfLayer) == 0)
+								layerIdx = i;
+							if ((color < 0) && (strncmp(dxfLayer, layerName[i], sizeof dxfLayer) == 0))
+								color = layerColor[i];
+							if ((lineType < 0) && (strncmp(dxfLayer, layerName[i], sizeof dxfLayer) == 0))
+								lineType = layerLineType[i];
+							if ((width < 0) && (strncmp(dxfLayer, layerName[i], sizeof dxfLayer) == 0))
+								width = layerWidth[i];
+						}
+					}
+
+					// Create the entity
+					if (strncmp(dxfSection, "LINE", 4) == 0)
+					{
+						// Save Entity data
+						if (isTrack) {
+							// STRAIGHT index layer line-width 0 0 scale descshow&visibility&no_ties&bridge&roadbed Desc-x Desc-y
+							//STRAIGHT 1 1 0 0 0 HO 2 0.000000 0.000000
+							//	E4 0.000000 0.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+							//	T4 2 21.000000 0.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+							//	END$SEGS
+							ok = snprintf(tmp, 100, "%s %d %d %d 0 0 %s %d %f %f",
+								"STRAIGHT", entityCount, layerIdx, width, scale, 2, 0.0, 0.0);
+							strcpy(output[outputCount], tmp);
+							outputCount++;
+							// End points
+							double a1 = normalize(-toDegrees(atan2((y2 - y1), (x2 - x1))));
+							double a2 = normalize(180 + a1);
+							ok = snprintf(tmp, 100, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
+								"E4", x1, y1, a1);
+							strcpy(output[outputCount], tmp);
+							outputCount++;
+							ok = snprintf(tmp, 100, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
+								"E4", x2, y2, a2);
+							strcpy(output[outputCount], tmp);
+							outputCount++;
+							ok = snprintf(tmp, 100, "\t%s",
+								"END$SEGS");
+							strcpy(output[outputCount], tmp);
+							outputCount++;
+						}
+						else
+						{
+							// DRAW 1 0 0 0 0 -2.000000 -4.500000 0 0.000000
+							ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
+								"DRAW", entityCount, layerIdx, lineType, width, 0.0, 0.0, 0.0);
+							strcpy(output[outputCount], tmp);
+							outputCount++;
+							ok = snprintf(tmp, 100, "\t%s %d %d %f %f 0 %f %f 0",
+								"L3", color, width, x1, y1, x2, y2);
+							strcpy(output[outputCount], tmp);
+							outputCount++;
+							ok = snprintf(tmp, 100, "\t%s",
+								"END$SEGS");
+							strcpy(output[outputCount], tmp);
+							outputCount++;
+						}
+					}
+					else
+					if (strncmp(dxfSection, "CIRCLE", 6) == 0)
+					{
+						// DRAW 1 0 0 0 0 -2.000000 -4.500000 0 0.000000
+						ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
+							"DRAW", entityCount, layerIdx, lineType, width, 0.0, 0.0, 0.0);
+						strcpy(output[outputCount], tmp);
+						outputCount++;
+						ok = snprintf(tmp, 100, "\t%s %d %d %f %f %f 0",
+							"G3", color, width, radius, x1, y1);
+						strcpy(output[outputCount], tmp);
+						outputCount++;
+						ok = snprintf(tmp, 100, "\t%s",
+							"END$SEGS");
+						strcpy(output[outputCount], tmp);
+						outputCount++;
+					}
+					else 
+					if (strncmp(dxfSection, "ARC", 3) == 0)
+					{
+						// Save Entity data
+						if (isTrack) 
+						{
+							//CURVE index layer line-width 0 0 scale visibility&no_ties&bridge&roadbed center-X centerY 0 radius helix-turns desc-X desc-Y
+							//CURVE 2 1 0 0 0 OO 2 0.000000 12.000000 0 12.000000 0 0.000000 0.000000
+							//	E4 0.000000 0.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+							//	T4 2 21.000000 0.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+							//	END$SEGS
+							// Save Entity data
+							// End points
+							// double end = normalize(startAngle + endAngle);
+
+							double xEndAngle = normalize(-startAngle);
+							double xStartAngle = normalize(-endAngle);
+							double xCurveStart = normalize(90.0 - endAngle);
+
+							double x3 = x1 + radius * sin(toRadians(xStartAngle));
+							double y3 = y1 - radius * cos(toRadians(xStartAngle));
+							double x4 = x1 + radius * sin(toRadians(xEndAngle));
+							double y4 = y1 - radius * cos(toRadians(xEndAngle));
+							double dx = x3 - x4;
+
+							double e3 = normalize(xStartAngle);
+							double e4 = normalize(xEndAngle - 180.0);
+							double xCurveAngle = normalize(endAngle - startAngle);
+							/* DEBUG
+							ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
+								"DRAW", entityCount, layerIdx, lineType, width, 0.0, 0.0, 0.0);
+							strcpy(output[outputCount], tmp);
+							outputCount++;
+							ok = snprintf(tmp, 100, "\t%s %d %d %f %f %f 0",
+								"G3", 0xFF0000, width, 1.0, x1, y1); // red center
+							strcpy(output[outputCount], tmp);
+							outputCount++;
+							ok = snprintf(tmp, 100, "\t%s %d %d %f %f %f 0",
+								"G3", 0x00FF00, width, 1.0, x3, y3); // green start
+							strcpy(output[outputCount], tmp);
+							outputCount++;
+							ok = snprintf(tmp, 100, "\t%s %d %d %f %f %f 0",
+								"G3", 0x0000FF, width, 1.0, x4, y4); // blue end
+							strcpy(output[outputCount], tmp);
+							outputCount++;
+							ok = snprintf(tmp, 100, "\t%s %d %d %f %f %f 0 %f %f",
+								"A3", 0, width, radius, x1, y1, xCurveStart, xCurveAngle);
+							strcpy(output[outputCount], tmp);
+							outputCount++;
+							ok = snprintf(tmp, 100, "\t%s",
+								"END$SEGS");
+							strcpy(output[outputCount], tmp);
+							outputCount++;
+							*/
+
+							// Not needed?
+							//if (dx > 0) 
+							//{
+							//	double tmp;
+							//	tmp = x3;
+							//	x3 = x4;
+							//	x4 = tmp;
+							//	tmp = y3;
+							//	y3 = y4;
+							//	y4 = tmp;
+
+							//	tmp = e3;
+							//	e3 = e4;
+							//	e4 = tmp;
+							//}
+
+							ok = snprintf(tmp, 100, "%s %d %d %d 0 0 %s %d %f %f 0 %f 0 %f %f",
+								"CURVE", entityCount, layerIdx, width, scale, 2, x1, y1, radius, 0.0, 0.0);
+							strcpy(output[outputCount], tmp);
+							outputCount++;
+							ok = snprintf(tmp, 100, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
+								"E4", x3, y3, e3);
+							strcpy(output[outputCount], tmp);
+							outputCount++;
+							ok = snprintf(tmp, 100, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
+								"E4", x4, y4, e4);
+							strcpy(output[outputCount], tmp);
+							outputCount++;
+							ok = snprintf(tmp, 100, "\t%s",
+								"END$SEGS");
+							strcpy(output[outputCount], tmp);
+							outputCount++;							
+						}
+						else
+						{
+							// DRAW 1 0 0 0 0 -2.000000 -4.500000 0 0.000000
+							ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
+								"DRAW", entityCount, layerIdx, lineType, width, 0.0, 0.0, 0.0);
+							strcpy(output[outputCount], tmp);
+							outputCount++;
+							ok = snprintf(tmp, 100, "\t%s %d %d %f %f %f 0 %f %f",
+								"A3", color, width, radius, x1, y1, startAngle, endAngle);
+							strcpy(output[outputCount], tmp);
+							outputCount++;
+							ok = snprintf(tmp, 100, "\t%s",
+								"END$SEGS");
+							strcpy(output[outputCount], tmp);
+							outputCount++;
+						}
+					}
+					else
+					if ((strncmp(dxfSection, "POLYLINE", 8) == 0) ||
+						(strncmp(dxfSection, "LWPOLYLINE", 10) == 0))
+					{
+						// Save Entity data
+						ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
+							"DRAW", entityCount, layerIdx, lineType, width, 0.0, 0.0, 0.0);
+						strcpy(output[outputCount], tmp);
+						outputCount++;
+
+						ok = snprintf(tmp, 100, "\t%s %d %d %d 0", 
+							"F4", color, width, vertices);
+						strcpy(output[outputCount], tmp);
+						outputCount++;
+
+						for (int v = 0; v < vertices; v++)
+						{
+							ok = snprintf(tmp, 100, "\t\t%f %f 0", vrt_x[v], vrt_y[v]);
+
+							strcpy(output[outputCount], tmp);
+							outputCount++;
+						}
+
+						ok = snprintf(tmp, 100, "\t%s",
+							"END$SEGS");
+						strcpy(output[outputCount], tmp);
+						outputCount++;
+
+						poly_flag = false;
+					}
+				}
+
+				dxfDirty = false;
+
+				vertices = 0;
+				color = 0;
+				colorRGB = 0;
+				lineType = 0;
+				width = 0;
+				radius = 0.0;
+				startAngle = 0.0;
+				endAngle = 0.0;
+				closed = 0;
+				x1 = 0.0;
+				y1 = 0.0;
+				x2 = 0.0;
+				y2 = 0.0;
+			}
+			
+			if (inEntities)
+			{
+				if ((strncmp(dxfValue, "ARC", 3) == 0) ||
+					(strncmp(dxfValue, "CIRCLE", 6) == 0) ||
+					(strncmp(dxfValue, "LINE", 4) == 0) ||
+					// (strncmp(dxfValue, "ELLIPSE", 7) == 0) ||
+					(strncmp(dxfValue, "POLYLINE", 8) == 0) ||
+					(strncmp(dxfValue, "LWPOLYLINE", 10) == 0))
+				{
+					strncpy(dxfSection, dxfValue, 50);
+					dxfDirty = true;
+				}
+			}
+			else
+			{
+				strncpy(dxfSection, dxfValue, sizeof dxfSection);
+				strncpy(dxfGroup, "X", 2);
+				//if (strncmp(dxfValue, "EOF", 3) == 0)
+				//	break;
+			}
+		}
+
+		if (strncmp(dxfCode, "  2", 3) == 0)
+		{
+			if ((inLayers) &&
+				(strncmp(dxfSection, "LAYER", 5) == 0))
+			{
+				strncpy(dxfGroup, dxfValue, sizeof dxfGroup);
+				dxfDirty = true;
+			}
+			
+			if ((strncmp(dxfSection, "TABLE", 5) == 0) &&
+				(strncmp(dxfValue, "LAYER", 5) == 0))
+			{
+				// strncpy(dxfGroup, dxfValue, 50);
+				inLayers = true;
+			}
+
+			if ((strncmp(dxfSection, "SECTION", 7) == 0) &&
+				(strncmp(dxfValue, "ENTITIES", 8) == 0))
+			{
+				strncpy(dxfGroup, dxfValue, sizeof dxfGroup);
+				inEntities = true;
+				inLayers = false;
+
+				//strcpy(output[outputCount], "ENTITIES:");
+				//outputCount++;
+			}
+		}
+
+		// Mundane data
+		width = 0;
+		if (strncmp(dxfCode, "  6", 3) == 0)
+		{
+			for (int i = 0; dxfValue[i]; i++) {
+				dxfValue[i] = tolower(dxfValue[i]);
+			}
+			if (strncmp(dxfValue, "bylayer", 7) == 0)
+				lineType = -1;
+			else
+				lineType = dxfLineType(dxfValue);
+		}
+		else if (strncmp(dxfCode, "  8", 3) == 0)
+		{
+			strncpy(dxfLayer, dxfValue, sizeof dxfLayer);
+		}
+		else if (strncmp(dxfCode, " 10", 3) == 0)
+		{
+			if ((strncmp(dxfSection, "POLYLINE", 8) == 0) ||
+				(strncmp(dxfSection, "LWPOLYLINE", 10) == 0))
+			{
+				vrt_x[vertices] = strtod(dxfValue, NULL);
+			}
+			else
+				x1 = strtod(dxfValue, NULL);
+		}
+		else if (strncmp(dxfCode, " 11", 3) == 0)
+		{
+			x2 = strtod(dxfValue, NULL);
+		}
+		else if (strncmp(dxfCode, " 20", 3) == 0)
+		{
+			if ((strncmp(dxfSection, "POLYLINE", 8) == 0) ||
+				(strncmp(dxfSection, "LWPOLYLINE", 10) == 0))
+			{
+				vrt_y[vertices] = strtod(dxfValue, NULL);
+				vertices++;
+			}
+			else
+				y1 = strtod(dxfValue, NULL);
+		}
+		else if (strncmp(dxfCode, " 21", 3) == 0)
+		{
+			y2 = strtod(dxfValue, NULL);
+		}
+		else if (strncmp(dxfCode, " 39", 3) == 0)
+		{
+			if (strncmp(dxfValue, "bylayer", 7) == 0)
+				width = -1;
+			else
+				width = strtol(dxfValue, NULL, 10);
+		}
+		else if (strncmp(dxfCode, " 40", 3) == 0)
+		{
+			radius = strtod(dxfValue, NULL);
+		}
+		else if (strncmp(dxfCode, " 50", 3) == 0)
+		{
+			startAngle = strtod(dxfValue, NULL);
+		}
+		else if (strncmp(dxfCode, " 51", 3) == 0)
+		{
+			endAngle = strtod(dxfValue, NULL);
+		}
+		else if (strncmp(dxfCode, " 62", 3) == 0)
+		{
+			long c = strtol(dxfValue, NULL, 10);
+			if ((c >= 0) && (c < 256))
+				color = aci[c];
+			else
+				color = -1;
+		}
+		else if (strncmp(dxfCode, " 70", 3) == 0)
+		{
+			closed = strtol(dxfValue, NULL, 10);
+		}
+		else if (strncmp(dxfCode, "370", 3) == 0)
+		{
+			width = strtol(dxfValue, NULL, 10);
+		}
+		else if (strncmp(dxfCode, "420", 3) == 0)
+		{
+			colorRGB = strtod(dxfValue, NULL);
+		}
+
+		//if (!old_skip) {
+		//	// SKIP until next main line we recognize 
+		//	skip = TRUE;
+		//	skipLines++;
+		//	continue;
+		//}
+
+		//skipLines++;
+	}
+
+	//ParamSetInReadTracks(FALSE);
+	strcpy(output[outputCount], "END$TRACKS");
+	outputCount++;
+
+	if (dxfFile) {
+		fclose(dxfFile);
+		dxfFile = NULL;
+	}
+
+	//if (skipLines > 0) {
+	//	NoticeMessage(MSG_LAYOUT_LINES_SKIPPED, _("Ok"), NULL, paramFileName,
+	//		skipLines);
+	//}
+
+	dxfFile = NULL;
+
+	char* p = strstr(pathName, ".dxf");
+	if (p != NULL) {
+		memcpy(p, ".xti", 4);
+	}
+
+	dxfFile = fopen(pathName, "w");
+	for (int i = 0; i < outputCount; i++) {
+		fprintf(dxfFile, "%s\n", output[i]);
+	}
+	if (dxfFile)
+		fclose(dxfFile);
+
+	SetUserLocale();
+	free(paramFileName);
+	paramFileName = NULL;
+	InfoMessage("%d", count);
+	return; // ret;
+}
+
 
 /**
  * Export the selected track pieces
