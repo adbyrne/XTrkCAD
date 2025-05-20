@@ -1697,6 +1697,19 @@ static double toRadians(double a)
 
 #define MAX_DXF_LAYER 20
 #define MAX_DXF_ENDPT 50
+#define MAX_DXF_ENTITY 100
+#define MAX_DXF_LINE 500
+
+static char* dxfAddOutput(char tmp[])
+{
+	int len = strlen(tmp) + 1;
+	char* outpt = malloc(len * sizeof(char));
+
+	strncpy(outpt, tmp, len);
+	outpt[len - 1] = 0;
+
+	return outpt;
+}
 
 static void ReadDxfFile(
 	const char* pathName, 
@@ -1709,12 +1722,13 @@ static void ReadDxfFile(
 	int count;
 
 	int ret = TRUE;
+	char tmp[100];
 
-	char output[500][100];
+	char *output[MAX_DXF_LINE];
 	int outputCount = 0;
 
-	int entity[500];
-	double endpt[500][2];
+	int entity[MAX_DXF_ENTITY];
+	double endpt[MAX_DXF_ENTITY][2];
 
 	char dxfSection[50];
 	char dxfGroup[50];
@@ -1732,7 +1746,7 @@ static void ReadDxfFile(
 	int endPtCount = 0;
 	int endPtEntity[MAX_DXF_ENDPT];
 	int endPtLine[MAX_DXF_ENDPT];
-	int endPtCoord[MAX_DXF_ENDPT][2];
+	double endPtCoord[MAX_DXF_ENDPT][2];
 
 	int layerCount = 0;
 	int entityCount = 0;
@@ -1783,8 +1797,12 @@ static void ReadDxfFile(
 
 	// Header
 	time(&clock);
-	sprintf(output[outputCount++], "#%s Version: %s, Date: %s", sProdName, sVersion, ctime(&clock));
-	sprintf(output[outputCount++], "VERSION %d %s\n", iParamVersion, PARAMVERSIONVERSION);
+	//sprintf(output[outputCount++], "#%s Version: %s, Date: %s", sProdName, sVersion, ctime(&clock));
+	//sprintf(output[outputCount++], "VERSION %d %s\n", iParamVersion, PARAMVERSIONVERSION);
+	sprintf(tmp, "#%s Version: %s, Date: %s", sProdName, sVersion, ctime(&clock));
+	output[outputCount++] = dxfAddOutput(tmp);
+	sprintf(tmp, "VERSION %d %s\n", iParamVersion, PARAMVERSIONVERSION);
+	output[outputCount++] = dxfAddOutput(tmp);
 
 	// InfoMessage("0", "0");
 	count = 0;
@@ -1870,7 +1888,7 @@ static void ReadDxfFile(
 							//	END$SEGS
 							ok = snprintf(tmp, 100, "%s %d %d %d 0 0 %s %d %f %f",
 								"STRAIGHT", entityCount, layerIdx, width, curScaleName, visibility, 0.0, 0.0);
-							strcpy(output[outputCount++], tmp);
+							output[outputCount++] = dxfAddOutput(tmp);
 							
 							// End points
 							double a1 = normalize(-toDegrees(atan2((y2 - y1), (x2 - x1))));
@@ -1884,7 +1902,7 @@ static void ReadDxfFile(
 								endPtCoord[endPtCount][0] = x1; endPtCoord[endPtCount][1] = y1;
 								endPtCount++;
 							}
-							strcpy(output[outputCount++], tmp);
+							output[outputCount++] = dxfAddOutput(tmp);
 							
 							ok = snprintf(tmp, 100, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
 								"E4", x2, y2, a2);
@@ -1894,26 +1912,26 @@ static void ReadDxfFile(
 								endPtCoord[endPtCount][0] = x2; endPtCoord[endPtCount][1] = y2;
 								endPtCount++;
 							}
-							strcpy(output[outputCount++], tmp);
+							output[outputCount++] = dxfAddOutput(tmp);
 							
 							ok = snprintf(tmp, 100, "\t%s",
 								"END$SEGS");
-							strcpy(output[outputCount++], tmp);
+							output[outputCount++] = dxfAddOutput(tmp);
 						}
 						else
 						{
 							// DRAW 1 0 0 0 0 -2.000000 -4.500000 0 0.000000
 							ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
 								"DRAW", entityCount, layerIdx, lineType, width, 0.0, 0.0, 0.0);
-							strcpy(output[outputCount++], tmp);
+							output[outputCount++] = dxfAddOutput(tmp);
 							
 							ok = snprintf(tmp, 100, "\t%s %d %d %f %f 0 %f %f 0",
 								"L3", color, width, x1, y1, x2, y2);
-							strcpy(output[outputCount++], tmp);
+							output[outputCount++] = dxfAddOutput(tmp);
 							
 							ok = snprintf(tmp, 100, "\t%s",
 								"END$SEGS");
-							strcpy(output[outputCount++], tmp);
+							output[outputCount++] = dxfAddOutput(tmp);
 						}
 					}
 					else
@@ -1922,15 +1940,15 @@ static void ReadDxfFile(
 						// DRAW 1 0 0 0 0 -2.000000 -4.500000 0 0.000000
 						ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
 							"DRAW", entityCount, layerIdx, lineType, width, 0.0, 0.0, 0.0);
-						strcpy(output[outputCount++], tmp);
+						output[outputCount++] = dxfAddOutput(tmp);
 						
 						ok = snprintf(tmp, 100, "\t%s %d %d %f %f %f 0",
 							"G3", color, width, radius, x1, y1);
-						strcpy(output[outputCount++], tmp);
+						output[outputCount++] = dxfAddOutput(tmp);
 						
 						ok = snprintf(tmp, 100, "\t%s",
 							"END$SEGS");
-						strcpy(output[outputCount++], tmp);						
+						output[outputCount++] = dxfAddOutput(tmp);
 					}
 					else 
 					if (strncmp(dxfSection, "ARC", 3) == 0)
@@ -1961,52 +1979,9 @@ static void ReadDxfFile(
 							double e4 = normalize(xEndAngle - 180.0);
 							double xCurveAngle = normalize(endAngle - startAngle);
 
-							/* DEBUG
-							ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
-								"DRAW", entityCount, layerIdx, lineType, width, 0.0, 0.0, 0.0);
-							strcpy(output[outputCount++], tmp);
-							
-							ok = snprintf(tmp, 100, "\t%s %d %d %f %f %f 0",
-								"G3", 0xFF0000, width, 1.0, x1, y1); // red center
-							strcpy(output[outputCount++], tmp);
-							
-							ok = snprintf(tmp, 100, "\t%s %d %d %f %f %f 0",
-								"G3", 0x00FF00, width, 1.0, x3, y3); // green start
-							strcpy(output[outputCount++], tmp);
-							
-							ok = snprintf(tmp, 100, "\t%s %d %d %f %f %f 0",
-								"G3", 0x0000FF, width, 1.0, x4, y4); // blue end
-							strcpy(output[outputCount++], tmp);
-							
-							ok = snprintf(tmp, 100, "\t%s %d %d %f %f %f 0 %f %f",
-								"A3", 0, width, radius, x1, y1, xCurveStart, xCurveAngle);
-							strcpy(output[outputCount++], tmp);
-							
-							ok = snprintf(tmp, 100, "\t%s",
-								"END$SEGS");
-							strcpy(output[outputCount++], tmp);
-							
-							*/
-
-							// Not needed?
-							//if (dx > 0) 
-							//{
-							//	double tmp;
-							//	tmp = x3;
-							//	x3 = x4;
-							//	x4 = tmp;
-							//	tmp = y3;
-							//	y3 = y4;
-							//	y4 = tmp;
-
-							//	tmp = e3;
-							//	e3 = e4;
-							//	e4 = tmp;
-							//}
-
 							ok = snprintf(tmp, 100, "%s %d %d %d 0 0 %s %d %f %f 0 %f 0 %f %f",
 								"CURVE", entityCount, layerIdx, width, curScaleName, visibility, x1, y1, radius, 0.0, 0.0);
-							strcpy(output[outputCount++], tmp);
+							output[outputCount++] = dxfAddOutput(tmp);
 							
 							ok = snprintf(tmp, 100, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
 								"E4", x3, y3, e3);
@@ -2016,7 +1991,7 @@ static void ReadDxfFile(
 								endPtCoord[endPtCount][0] = x3; endPtCoord[endPtCount][1] = y3;
 								endPtCount++;
 							}
-							strcpy(output[outputCount++], tmp);
+							output[outputCount++] = dxfAddOutput(tmp);
 							
 							ok = snprintf(tmp, 100, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
 								"E4", x4, y4, e4);
@@ -2026,11 +2001,11 @@ static void ReadDxfFile(
 								endPtCoord[endPtCount][0] = x4; endPtCoord[endPtCount][1] = y4;
 								endPtCount++;
 							}
-							strcpy(output[outputCount++], tmp);
+							output[outputCount++] = dxfAddOutput(tmp);
 							
 							ok = snprintf(tmp, 100, "\t%s",
 								"END$SEGS");
-							strcpy(output[outputCount++], tmp);														
+							output[outputCount++] = dxfAddOutput(tmp);
 						}
 						else
 						{
@@ -2054,15 +2029,15 @@ static void ReadDxfFile(
 							// DRAW 1 0 0 0 0 -2.000000 -4.500000 0 0.000000
 							ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
 								"DRAW", entityCount, layerIdx, lineType, width, 0.0, 0.0, 0.0);
-							strcpy(output[outputCount++], tmp);
+							output[outputCount++] = dxfAddOutput(tmp);
 							
 							ok = snprintf(tmp, 100, "\t%s %d %d %f %f %f 0 %f %f",
 								"A3", color, width, radius, x1, y1, xStartAngle, xEndAngle);
-							strcpy(output[outputCount++], tmp);
+							output[outputCount++] = dxfAddOutput(tmp);
 							
 							ok = snprintf(tmp, 100, "\t%s",
 								"END$SEGS");
-							strcpy(output[outputCount++], tmp);							
+							output[outputCount++] = dxfAddOutput(tmp);
 						}
 					}
 					else
@@ -2072,24 +2047,21 @@ static void ReadDxfFile(
 						// Save Entity data
 						ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
 							"DRAW", entityCount, layerIdx, lineType, width, 0.0, 0.0, 0.0);
-						strcpy(output[outputCount++], tmp);
+						output[outputCount++] = dxfAddOutput(tmp);
 
 						ok = snprintf(tmp, 100, "\t%s %d %d %d 0", 
 							"F4", color, width, vertices);
-						strcpy(output[outputCount++], tmp);
+						output[outputCount++] = dxfAddOutput(tmp);
 
 						for (int v = 0; v < vertices; v++)
 						{
 							ok = snprintf(tmp, 100, "\t\t%f %f 0", vrt_x[v], vrt_y[v]);
-
-							strcpy(output[outputCount++], tmp);
-							
+							output[outputCount++] = dxfAddOutput(tmp);
 						}
 
 						ok = snprintf(tmp, 100, "\t%s",
 							"END$SEGS");
-						strcpy(output[outputCount++], tmp);
-						
+						output[outputCount++] = dxfAddOutput(tmp);
 
 						poly_flag = false;
 					}
@@ -2268,7 +2240,8 @@ static void ReadDxfFile(
 	}
 
 	//ParamSetInReadTracks(FALSE);
-	strcpy(output[outputCount++], "END$TRACKS");
+	strcpy(tmp, "END$TRACKS");
+	output[outputCount++] = dxfAddOutput(tmp);
 
 	// Find and fix connected end points
 	int i;
@@ -2282,14 +2255,17 @@ static void ReadDxfFile(
 				double y1 = endPtCoord[i][1];
 				double x2 = endPtCoord[j][0];
 				double y2 = endPtCoord[j][1];
+
 				// Check if [i] should be connected to [j]
 				if ((abs(x1 - x2) < 0.05) &&
 					(abs(y1 - y2) < 0.05))
 				{
 					int li = endPtLine[i];
 					char substr[100];
-					strncpy(substr, output[li] + 4, sizeof(output[li]) - 4);
-					sprintf(output[li], "\tT4 %d %s", endPtEntity[j], substr);
+					strncpy(substr, output[li], 100);
+					sprintf(tmp, "\tT4 %d %s", endPtEntity[j], substr + 4);
+					free(output[li]);
+					output[li] = dxfAddOutput(tmp);
 				}
 			}
 		}
@@ -2319,7 +2295,12 @@ static void ReadDxfFile(
 		fclose(dxfFile);
 
 	SetUserLocale();
+
+	for (int i = 0; i < outputCount; i++) {
+		free(output[i]);
+	}
 	free(paramFileName);
+
 	paramFileName = NULL;
 	InfoMessage("%d", count);
 	return; // ret;
