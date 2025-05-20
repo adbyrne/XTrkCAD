@@ -1696,7 +1696,7 @@ static double toRadians(double a)
 
 
 #define MAX_DXF_LAYER 20
-#define MAX_DXF_ENTITY 200
+#define MAX_DXF_ENDPT 50
 
 static void ReadDxfFile(
 	const char* pathName, 
@@ -1713,6 +1713,9 @@ static void ReadDxfFile(
 	char output[500][100];
 	int outputCount = 0;
 
+	int entity[500];
+	double endpt[500][2];
+
 	char dxfSection[50];
 	char dxfGroup[50];
 	
@@ -1726,8 +1729,10 @@ static void ReadDxfFile(
 	int layerLineType[MAX_DXF_LAYER];
 	int layerWidth[MAX_DXF_LAYER];
 
-	int entityLine[MAX_DXF_ENTITY];
-	char entityName[MAX_DXF_ENTITY][15];
+	int endPtCount = 0;
+	int endPtEntity[MAX_DXF_ENDPT];
+	int endPtLine[MAX_DXF_ENDPT];
+	int endPtCoord[MAX_DXF_ENDPT][2];
 
 	int layerCount = 0;
 	int entityCount = 0;
@@ -1835,12 +1840,6 @@ static void ReadDxfFile(
 				// Write the Entity data into the list
 				else if (inEntities)
 				{
-					if (entityCount < MAX_DXF_ENTITY) {
-						entityLine[entityCount] = count;
-						strncpy(entityName[entityCount], dxfSection, sizeof entityName[0]);
-					}
-					entityCount++;
-
 					BOOL_T isTrack = (strncmp(dxfLayer, layerZero, sizeof dxfLayer) == 0);
 
 					if (color < 0 || lineType < 0 || width < 0)
@@ -1876,12 +1875,25 @@ static void ReadDxfFile(
 							// End points
 							double a1 = normalize(-toDegrees(atan2((y2 - y1), (x2 - x1))));
 							double a2 = normalize(180 + a1);
+
 							ok = snprintf(tmp, 100, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
 								"E4", x1, y1, a1);
+							if (endPtCount < MAX_DXF_ENDPT) {
+								endPtEntity[endPtCount] = entityCount;
+								endPtLine[endPtCount] = outputCount;
+								endPtCoord[endPtCount][0] = x1; endPtCoord[endPtCount][1] = y1;
+								endPtCount++;
+							}
 							strcpy(output[outputCount++], tmp);
 							
 							ok = snprintf(tmp, 100, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
 								"E4", x2, y2, a2);
+							if (endPtCount < MAX_DXF_ENDPT) {
+								endPtEntity[endPtCount] = entityCount;
+								endPtLine[endPtCount] = outputCount;
+								endPtCoord[endPtCount][0] = x2; endPtCoord[endPtCount][1] = y2;
+								endPtCount++;
+							}
 							strcpy(output[outputCount++], tmp);
 							
 							ok = snprintf(tmp, 100, "\t%s",
@@ -1998,10 +2010,22 @@ static void ReadDxfFile(
 							
 							ok = snprintf(tmp, 100, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
 								"E4", x3, y3, e3);
+							if (endPtCount < MAX_DXF_ENDPT) {
+								endPtEntity[endPtCount] = entityCount;
+								endPtLine[endPtCount] = outputCount;
+								endPtCoord[endPtCount][0] = x3; endPtCoord[endPtCount][1] = y3;
+								endPtCount++;
+							}
 							strcpy(output[outputCount++], tmp);
 							
 							ok = snprintf(tmp, 100, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
 								"E4", x4, y4, e4);
+							if (endPtCount < MAX_DXF_ENDPT) {
+								endPtEntity[endPtCount] = entityCount;
+								endPtLine[endPtCount] = outputCount;
+								endPtCoord[endPtCount][0] = x4; endPtCoord[endPtCount][1] = y4;
+								endPtCount++;
+							}
 							strcpy(output[outputCount++], tmp);
 							
 							ok = snprintf(tmp, 100, "\t%s",
@@ -2072,14 +2096,14 @@ static void ReadDxfFile(
 					else
 					if (strncmp(dxfSection, "MTEXT", 5) == 0)
 					{
-
 						// Save Entity data
 						//ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
 						//	"DRAW", entityCount, layerIdx, lineType, width, 0.0, 0.0, 0.0);
 						//strcpy(output[outputCount++], tmp);
 						//
-
 					}
+
+					entityCount++;
 				}
 
 				dxfDirty = false;
@@ -2246,6 +2270,29 @@ static void ReadDxfFile(
 	//ParamSetInReadTracks(FALSE);
 	strcpy(output[outputCount++], "END$TRACKS");
 
+	// Find and fix connected end points
+	int i;
+	int j;
+	for (i = 0; i < endPtCount; i++)
+		for (j = 0; j < endPtCount; j++)
+		{
+			if (i != j)
+			{
+				double x1 = endPtCoord[i][0];
+				double y1 = endPtCoord[i][1];
+				double x2 = endPtCoord[j][0];
+				double y2 = endPtCoord[j][1];
+				// Check if [i] should be connected to [j]
+				if ((abs(x1 - x2) < 0.05) &&
+					(abs(y1 - y2) < 0.05))
+				{
+					int li = endPtLine[i];
+					char substr[100];
+					strncpy(substr, output[li] + 4, sizeof(output[li]) - 4);
+					sprintf(output[li], "\tT4 %d %s", endPtEntity[j], substr);
+				}
+			}
+		}
 
 	if (dxfFile) {
 		fclose(dxfFile);
