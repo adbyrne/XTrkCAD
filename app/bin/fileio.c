@@ -1607,7 +1607,7 @@ EXPORT void DoImportDXF(void* unused)
 	wFilSelect(importDxf_fs, GetCurrentPath(LAYOUTPATHKEY));
 }
 
-char dxfCode[50];
+char dxfCode[20];
 char dxfValue[50];
 
 // Hex values (RGB) for all the 256 ACI Color indexes
@@ -1679,34 +1679,36 @@ static wDrawLineType_e dxfLineType(char dxfValue[50])
 	return lineType;
 }
 
-static double toDegrees(double a) 
+static double toDegrees(double a)
 {
+	double zz1; zz1 = R2D(0.4);
+
 	return 90.0 + a * 180.0 / M_PI;
 }
 
-static double normalize(double a)
-{
-	return a >= 360 ? a - 360 : (a < 0 ? a + 360 : a);
-}
+//static double normalize(double a)
+//{
+//	return a >= 360 ? a - 360 : (a < 0 ? a + 360 : a);
+//}
 
 static double toRadians(double a)
 {
+	double zz2; zz2 = D2R(40.0);
+
 	return (90.0 - a) * M_PI / 180.0;
 }
 
-
-#define MAX_DXF_LAYER 20
-#define MAX_DXF_ENDPT 50
-#define MAX_DXF_ENTITY 100
-#define MAX_DXF_LINE 500
+#define MAX_DXF_LAYER 20	// Layer list size
+#define MAX_DXF_ENDPT 50	// End point list
+#define MAX_DXF_LINES 500	// Output lines
 
 static char* dxfAddOutput(char tmp[])
 {
-	int len = strlen(tmp) + 1;
-	char* outpt = malloc(len * sizeof(char));
+	size_t len = strlen(tmp) + 1;
+	char* outpt = MyMalloc(len * sizeof(char));
 
 	strncpy(outpt, tmp, len);
-	outpt[len - 1] = 0;
+	//outpt[len - 1] = 0;
 
 	return outpt;
 }
@@ -1724,14 +1726,20 @@ static void ReadDxfFile(
 	int ret = TRUE;
 	char tmp[100];
 
-	char *output[MAX_DXF_LINE];
+	char *output[MAX_DXF_LINES];
 	int outputCount = 0;
 
-	int entity[MAX_DXF_ENTITY];
-	double endpt[MAX_DXF_ENTITY][2];
-
-	char dxfSection[50];
-	char dxfGroup[50];
+	char dxfSection[20];
+	char dxfGroup[20];
+	enum enumSection {
+		eNone,
+		eLine,
+		eArc,
+		eCircle,
+		ePoly,
+		eText
+	};
+	enum enumSection eSection;
 	
 	bool inEntities = false;
 	bool inLayers = false;
@@ -1746,12 +1754,11 @@ static void ReadDxfFile(
 	int endPtCount = 0;
 	int endPtEntity[MAX_DXF_ENDPT];
 	int endPtLine[MAX_DXF_ENDPT];
-	double endPtCoord[MAX_DXF_ENDPT][2];
+	coOrd endPtCoord[MAX_DXF_ENDPT];
+	double endPtAngle[MAX_DXF_ENDPT];
 
 	int layerCount = 0;
 	int entityCount = 0;
-
-	// char dxfContext[20];
 
 	char dxfLayer[50];
 
@@ -1768,7 +1775,6 @@ static void ReadDxfFile(
 	double x2 = 0.0;
 	double y2 = 0.0;
 	int layerIdx = 0;
-	char* layer;
 	int visibility = 2;
 
 	double vrt_x[20];
@@ -1778,7 +1784,8 @@ static void ReadDxfFile(
 
 	int dxfLayerCount = 0;
 	bool dxfDirty = false;
-	// char dxfOut[1000];
+
+	memset(dxfSection, 0, sizeof(dxfSection));
 
 	dxfFile = fopen(pathName, "r");
 	if (dxfFile == NULL) {
@@ -1786,14 +1793,14 @@ static void ReadDxfFile(
 			NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, sProdName, pathName,
 				strerror(errno));
 		}
-		return FALSE;
+		return;
 	}
 
 	ParamSetInReadTracks(TRUE);
 	SetCLocale();
 	checkPtFileNameBackup = NULL;
-	paramLineNum = 0;
-	paramFileName = strdup(fileName);
+	//paramLineNum = 0;
+	//paramFileName = strdup(fileName);
 
 	// Header
 	time(&clock);
@@ -1805,6 +1812,8 @@ static void ReadDxfFile(
 	output[outputCount++] = dxfAddOutput(tmp);
 
 	// InfoMessage("0", "0");
+	eSection = eNone;
+
 	count = 0;
 	while (dxfFile 
 		&& ReadDxfPair(dxfFile)) 
@@ -1816,7 +1825,7 @@ static void ReadDxfFile(
 			InfoMessage("%d", count);
 			wFlush();
 		}
-		paramLineNum++;
+		//paramLineNum++;
 		//if (strlen(paramLine) == (sizeof paramLine) - 1 &&
 		//	paramLine[(sizeof paramLine) - 1] != '\n') {
 		//	if (!(ret = InputError("Line too long", TRUE))) {
@@ -1834,7 +1843,7 @@ static void ReadDxfFile(
 				int ok;
 				char tmp[100];
 
-				// Write the layer data into the list
+				// Write the layer data into a list
 				if (inLayers)
 				{
 					if (layerCount < MAX_DXF_LAYER) {
@@ -1848,13 +1857,8 @@ static void ReadDxfFile(
 						strncpy(layerZero, dxfGroup, sizeof dxfGroup);
 					}
 					layerCount++;
-
-					// Show Layer data
-					//ok = snprintf(tmp, 100, "\t%s %s %d %d", dxfSection, dxfGroup, color, lineType);
-
-					//strcpy(output[outputCount++], tmp);
-					//
 				}
+
 				// Write the Entity data into the list
 				else if (inEntities)
 				{
@@ -1876,8 +1880,10 @@ static void ReadDxfFile(
 						}
 					}
 
-					// Create the entity
-					if (strncmp(dxfSection, "LINE", 4) == 0)
+					// Create the entity. Start numbering with 1
+					entityCount++;
+
+					if (eSection == eLine)
 					{
 						// Save Entity data
 						if (isTrack) {
@@ -1891,15 +1897,16 @@ static void ReadDxfFile(
 							output[outputCount++] = dxfAddOutput(tmp);
 							
 							// End points
-							double a1 = normalize(-toDegrees(atan2((y2 - y1), (x2 - x1))));
-							double a2 = normalize(180 + a1);
+							double a1 = NormalizeAngle(-toDegrees(atan2((y2 - y1), (x2 - x1))));
+							double a2 = NormalizeAngle(180 + a1);
 
 							ok = snprintf(tmp, 100, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
 								"E4", x1, y1, a1);
 							if (endPtCount < MAX_DXF_ENDPT) {
 								endPtEntity[endPtCount] = entityCount;
 								endPtLine[endPtCount] = outputCount;
-								endPtCoord[endPtCount][0] = x1; endPtCoord[endPtCount][1] = y1;
+								endPtCoord[endPtCount].x = x1; endPtCoord[endPtCount].y = y1;
+								endPtAngle[endPtCount] = a1;
 								endPtCount++;
 							}
 							output[outputCount++] = dxfAddOutput(tmp);
@@ -1909,7 +1916,8 @@ static void ReadDxfFile(
 							if (endPtCount < MAX_DXF_ENDPT) {
 								endPtEntity[endPtCount] = entityCount;
 								endPtLine[endPtCount] = outputCount;
-								endPtCoord[endPtCount][0] = x2; endPtCoord[endPtCount][1] = y2;
+								endPtCoord[endPtCount].x = x2; endPtCoord[endPtCount].y = y2;
+								endPtAngle[endPtCount] = a2;
 								endPtCount++;
 							}
 							output[outputCount++] = dxfAddOutput(tmp);
@@ -1935,7 +1943,8 @@ static void ReadDxfFile(
 						}
 					}
 					else
-					if (strncmp(dxfSection, "CIRCLE", 6) == 0)
+
+					if (eSection == eCircle)
 					{
 						// DRAW 1 0 0 0 0 -2.000000 -4.500000 0 0.000000
 						ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
@@ -1951,7 +1960,8 @@ static void ReadDxfFile(
 						output[outputCount++] = dxfAddOutput(tmp);
 					}
 					else 
-					if (strncmp(dxfSection, "ARC", 3) == 0)
+
+					if (eSection == eArc)
 					{
 						// Save Entity data
 						if (isTrack)
@@ -1961,23 +1971,24 @@ static void ReadDxfFile(
 							//	E4 0.000000 0.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
 							//	T4 2 21.000000 0.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
 							//	END$SEGS
+
 							// Save Entity data
 							// End points
-							// double end = normalize(startAngle + endAngle);
+							double end = NormalizeAngle(startAngle + endAngle);
 
-							double xEndAngle = normalize(-startAngle);
-							double xStartAngle = normalize(-endAngle);
-							double xCurveStart = normalize(90.0 - endAngle);
-
+							double xEndAngle = NormalizeAngle(-startAngle);
+							double xStartAngle = NormalizeAngle(-endAngle);
+							double xCurveStart = NormalizeAngle(90.0 - endAngle);
+							
 							double x3 = x1 + radius * sin(toRadians(xStartAngle));
 							double y3 = y1 - radius * cos(toRadians(xStartAngle));
 							double x4 = x1 + radius * sin(toRadians(xEndAngle));
 							double y4 = y1 - radius * cos(toRadians(xEndAngle));
 							double dx = x3 - x4;
 
-							double e3 = normalize(xStartAngle);
-							double e4 = normalize(xEndAngle - 180.0);
-							double xCurveAngle = normalize(endAngle - startAngle);
+							double e3 = NormalizeAngle(xStartAngle);
+							double e4 = NormalizeAngle(xEndAngle - 180.0);
+							double xCurveAngle = NormalizeAngle(endAngle - startAngle);
 
 							ok = snprintf(tmp, 100, "%s %d %d %d 0 0 %s %d %f %f 0 %f 0 %f %f",
 								"CURVE", entityCount, layerIdx, width, curScaleName, visibility, x1, y1, radius, 0.0, 0.0);
@@ -1988,7 +1999,8 @@ static void ReadDxfFile(
 							if (endPtCount < MAX_DXF_ENDPT) {
 								endPtEntity[endPtCount] = entityCount;
 								endPtLine[endPtCount] = outputCount;
-								endPtCoord[endPtCount][0] = x3; endPtCoord[endPtCount][1] = y3;
+								endPtCoord[endPtCount].x = x3; endPtCoord[endPtCount].y = y3;
+								endPtAngle[endPtCount] = e3;
 								endPtCount++;
 							}
 							output[outputCount++] = dxfAddOutput(tmp);
@@ -1998,7 +2010,8 @@ static void ReadDxfFile(
 							if (endPtCount < MAX_DXF_ENDPT) {
 								endPtEntity[endPtCount] = entityCount;
 								endPtLine[endPtCount] = outputCount;
-								endPtCoord[endPtCount][0] = x4; endPtCoord[endPtCount][1] = y4;
+								endPtCoord[endPtCount].x = x4; endPtCoord[endPtCount].y = y4;
+								endPtAngle[endPtCount] = e4;
 								endPtCount++;
 							}
 							output[outputCount++] = dxfAddOutput(tmp);
@@ -2009,14 +2022,13 @@ static void ReadDxfFile(
 						}
 						else
 						{
-							double xEndAngle = normalize(90.0 - startAngle);
-							double xStartAngle = normalize(90.0 - endAngle);
-							// double xCurveStart = normalize(90.0 - endAngle);
+							double xEndAngle = NormalizeAngle(90.0 - startAngle);
+							double xStartAngle = NormalizeAngle(90.0 - endAngle);
 
 							double x3 = x1 + radius * sin(toRadians(xStartAngle));
-							//double y3 = y1 - radius * cos(toRadians(xStartAngle));
+							double y3 = y1 - radius * cos(toRadians(xStartAngle));
 							double x4 = x1 + radius * sin(toRadians(xEndAngle));
-							//double y4 = y1 - radius * cos(toRadians(xEndAngle));
+							double y4 = y1 - radius * cos(toRadians(xEndAngle));
 							double dx = x3 - x4;
 
 							if (dx < 0)
@@ -2041,8 +2053,8 @@ static void ReadDxfFile(
 						}
 					}
 					else
-					if ((strncmp(dxfSection, "POLYLINE", 8) == 0) ||
-						(strncmp(dxfSection, "LWPOLYLINE", 10) == 0))
+
+					if (eSection == ePoly)
 					{
 						// Save Entity data
 						ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
@@ -2066,16 +2078,11 @@ static void ReadDxfFile(
 						poly_flag = false;
 					}
 					else
-					if (strncmp(dxfSection, "MTEXT", 5) == 0)
-					{
-						// Save Entity data
-						//ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
-						//	"DRAW", entityCount, layerIdx, lineType, width, 0.0, 0.0, 0.0);
-						//strcpy(output[outputCount++], tmp);
-						//
-					}
 
-					entityCount++;
+					if (eSection == eText)
+					{
+						// Process Text data
+					}
 				}
 
 				dxfDirty = false;
@@ -2098,14 +2105,23 @@ static void ReadDxfFile(
 			
 			if (inEntities)
 			{
-				if ((strncmp(dxfValue, "ARC", 3) == 0) ||
-					(strncmp(dxfValue, "CIRCLE", 6) == 0) ||
-					(strncmp(dxfValue, "LINE", 4) == 0) ||
-					// (strncmp(dxfValue, "ELLIPSE", 7) == 0) ||
-					(strncmp(dxfValue, "POLYLINE", 8) == 0) ||
+				if (strncmp(dxfValue, "ARC", 3) == 0)
+					eSection = eArc;
+				else if (strncmp(dxfValue, "CIRCLE", 6) == 0)
+					eSection = eCircle;
+				else if (strncmp(dxfValue, "LINE", 4) == 0)
+					eSection = eLine;
+				else if ((strncmp(dxfValue, "POLYLINE", 8) == 0) ||
 					(strncmp(dxfValue, "LWPOLYLINE", 10) == 0))
+					eSection = ePoly;
+				else if (strncmp(dxfValue, "MTEXT", 5) == 0)
+					eSection = eText;
+				else
+					eSection = eNone;
+
+				if (eSection != eNone)
 				{
-					strncpy(dxfSection, dxfValue, 50);
+					strncpy(dxfSection, dxfValue, 20);
 					dxfDirty = true;
 				}
 			}
@@ -2113,6 +2129,7 @@ static void ReadDxfFile(
 			{
 				strncpy(dxfSection, dxfValue, sizeof dxfSection);
 				strncpy(dxfGroup, "X", 2);
+
 				//if (strncmp(dxfValue, "EOF", 3) == 0)
 				//	break;
 			}
@@ -2126,21 +2143,21 @@ static void ReadDxfFile(
 				strncpy(dxfGroup, dxfValue, sizeof dxfGroup);
 				dxfDirty = true;
 			}
-			
+
+			// This signals the start of layer definitions
 			if ((strncmp(dxfSection, "TABLE", 5) == 0) &&
 				(strncmp(dxfValue, "LAYER", 5) == 0))
 			{
-				// strncpy(dxfGroup, dxfValue, 50);
 				inLayers = true;
 			}
 
+			// This signals the start of the entity definitions
 			if ((strncmp(dxfSection, "SECTION", 7) == 0) &&
 				(strncmp(dxfValue, "ENTITIES", 8) == 0))
 			{
 				strncpy(dxfGroup, dxfValue, sizeof dxfGroup);
 				inEntities = true;
 				inLayers = false;
-				//strcpy(output[outputCount++], "ENTITIES:");
 			}
 		}
 
@@ -2148,7 +2165,8 @@ static void ReadDxfFile(
 		width = 0;
 		if (strncmp(dxfCode, "  6", 3) == 0)
 		{
-			for (int i = 0; dxfValue[i]; i++) {
+			for (int i = 0; dxfValue[i]; i++) 
+			{
 				dxfValue[i] = tolower(dxfValue[i]);
 			}
 			if (strncmp(dxfValue, "bylayer", 7) == 0)
@@ -2162,8 +2180,7 @@ static void ReadDxfFile(
 		}
 		else if (strncmp(dxfCode, " 10", 3) == 0)
 		{
-			if ((strncmp(dxfSection, "POLYLINE", 8) == 0) ||
-				(strncmp(dxfSection, "LWPOLYLINE", 10) == 0))
+			if (eSection == ePoly)
 			{
 				vrt_x[vertices] = strtod(dxfValue, NULL);
 			}
@@ -2176,8 +2193,7 @@ static void ReadDxfFile(
 		}
 		else if (strncmp(dxfCode, " 20", 3) == 0)
 		{
-			if ((strncmp(dxfSection, "POLYLINE", 8) == 0) ||
-				(strncmp(dxfSection, "LWPOLYLINE", 10) == 0))
+			if (eSection == ePoly)
 			{
 				vrt_y[vertices] = strtod(dxfValue, NULL);
 				vertices++;
@@ -2226,7 +2242,7 @@ static void ReadDxfFile(
 		}
 		else if (strncmp(dxfCode, "420", 3) == 0)
 		{
-			colorRGB = strtod(dxfValue, NULL);
+			colorRGB = strtol(dxfValue, NULL, 10);
 		}
 
 		//if (!old_skip) {
@@ -2251,20 +2267,20 @@ static void ReadDxfFile(
 		{
 			if (i != j)
 			{
-				double x1 = endPtCoord[i][0];
-				double y1 = endPtCoord[i][1];
-				double x2 = endPtCoord[j][0];
-				double y2 = endPtCoord[j][1];
+				//double x1 = endPtCoord[i].x;
+				//double y1 = endPtCoord[i].y;
+				//double x2 = endPtCoord[j].x;
+				//double y2 = endPtCoord[j].y;
 
 				// Check if [i] should be connected to [j]
-				if ((abs(x1 - x2) < 0.05) &&
-					(abs(y1 - y2) < 0.05))
+				double d = FindDistance(endPtCoord[i], endPtCoord[j]);
+				if (d <= connectDistance)
 				{
 					int li = endPtLine[i];
 					char substr[100];
 					strncpy(substr, output[li], 100);
 					sprintf(tmp, "\tT4 %d %s", endPtEntity[j], substr + 4);
-					free(output[li]);
+					MyFree(output[li]);
 					output[li] = dxfAddOutput(tmp);
 				}
 			}
@@ -2297,13 +2313,13 @@ static void ReadDxfFile(
 	SetUserLocale();
 
 	for (int i = 0; i < outputCount; i++) {
-		free(output[i]);
+		MyFree(output[i]);
 	}
-	free(paramFileName);
+	//MyFree(paramFileName);
 
-	paramFileName = NULL;
+	//paramFileName = NULL;
 	InfoMessage("%d", count);
-	return; // ret;
+	return; 
 }
 
 
