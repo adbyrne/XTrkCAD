@@ -121,6 +121,7 @@ int LoadCheckpoint( BOOL_T );
 void DoImportObjects( void * typeVP );
 void DoImportModule( void * typeVP );
 void DoImportDXF( void* typeVP );
+void importDXF(void* typeVP);
 void ReadDxfFile( const char* pathName, const char* fileName, const BOOL_T complain );
 void DoExport( void * unused );
 void DoExportDXF( void * unused );

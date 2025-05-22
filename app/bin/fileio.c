@@ -1585,20 +1585,52 @@ static int ImportDXF(
 	useCurrentLayer = TRUE;
 	ReadDxfFile(fileName[0], nameOfFile, true);
 	ImportEnd(zero, TRUE, FALSE);
+
 	if (importAsModule) { SetLayerModule(layer, TRUE); }
 	useCurrentLayer = FALSE;
 	SetCurrLayer(saveLayer, NULL, 0, NULL, NULL);
+
 	/*DoRedraw();*/
 	EnableCommands();
 	wSetCursor(mainD.d, defaultCursor);
 	paramVersion = paramVersionOld;
 	DoCommandB(I2VP(selectCmdInx));
 	SelectRecount();
+
 	return TRUE;
 }
 
+static long importDxfTrack = 0;
+static long importDxfXti = 0;
+static char* xtiPathName;
+
+char* importDxfTrackLabels[] = { N_("Layer 0 Track"), NULL };
+char* importDxfXtiLabels[] = { N_("Import XTI"), NULL };
+
+static paramData_t importDxfPLs[] = {
+	/*0*/ { PD_TOGGLE, &importDxfTrack, "track", PDO_NOPREF, &importDxfTrackLabels, N_("Layer 0 Track"), 0, 0, 0}
+	/*1*/ // { PD_TOGGLE, &importDxfXti, "xti", PDO_NOPREF,&importDxfXtiLabels, N_("Import XTI"), 0, 0, 0}
+};
+static paramGroup_t importDxfPG = { "option", 0, importDxfPLs, COUNT(importDxfPLs) };
+static wWin_p importDxfW;
+
 EXPORT void DoImportDXF(void* unused)
 {
+	if (!importDxfW) {
+		ParamRegister(&importDxfPG);
+		importDxfW = ParamCreateDialog(&importDxfPG, MakeWindowTitle(_("Import DXF")),
+			_("Ok"), importDXF, ParamCancel_Current,
+			TRUE, NULL, NULL, NULL);
+		// blockD.dpi = mainD.dpi;
+	}
+	ParamLoadControls(&importDxfPG);
+	wShow(importDxfW);
+}
+
+EXPORT void importDXF(void* unused)
+{
+	wHide(importDxfW);
+
 	if (importDxf_fs == NULL)
 		importDxf_fs = wFilSelCreate(mainW, FS_LOAD, 0,
 		                             _("Import DXF"),
@@ -1681,22 +1713,15 @@ static wDrawLineType_e dxfLineType(char dxfValue[50])
 	return lineType;
 }
 
+// These differ from the XTC version as it changes 
+// the angle from DXF to XTC at the same time.
 static double toDegrees(double a)
 {
-	double zz1; zz1 = R2D(0.4);
-
 	return 90.0 + a * 180.0 / M_PI;
 }
 
-//static double normalize(double a)
-//{
-//	return a >= 360 ? a - 360 : (a < 0 ? a + 360 : a);
-//}
-
 static double toRadians(double a)
 {
-	double zz2; zz2 = D2R(40.0);
-
 	return (90.0 - a) * M_PI / 180.0;
 }
 
@@ -1721,6 +1746,8 @@ static void ReadDxfFile(
         BOOL_T complain)
 {
 	FILE* dxfFile;
+	FILE* xtiFile;
+
 	time_t clock;
 
 	int count;
@@ -1885,7 +1912,7 @@ static void ReadDxfFile(
 
 					if (eSection == eLine) {
 						// Save Entity data
-						if (isTrack) {
+						if (isTrack && importDxfTrack == 1) {
 							// STRAIGHT index layer line-width 0 0 scale descshow&visibility&no_ties&bridge&roadbed Desc-x Desc-y
 							//STRAIGHT 1 1 0 0 0 HO 2 0.000000 0.000000
 							//	E4 0.000000 0.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
@@ -1955,7 +1982,7 @@ static void ReadDxfFile(
 
 							if (eSection == eArc) {
 								// Save Entity data
-								if (isTrack) {
+								if (isTrack && importDxfTrack == 1) {
 									//CURVE index layer line-width 0 0 scale visibility&no_ties&bridge&roadbed center-X centerY 0 radius helix-turns desc-X desc-Y
 									//CURVE 2 1 0 0 0 OO 2 0.000000 12.000000 0 12.000000 0 0.000000 0.000000
 									//	E4 0.000000 0.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
@@ -2190,18 +2217,8 @@ static void ReadDxfFile(
 		} else if (strncmp(dxfCode, "420", 3) == 0) {
 			colorRGB = strtol(dxfValue, NULL, 10);
 		}
-
-		//if (!old_skip) {
-		//	// SKIP until next main line we recognize
-		//	skip = TRUE;
-		//	skipLines++;
-		//	continue;
-		//}
-
-		//skipLines++;
 	}
 
-	//ParamSetInReadTracks(FALSE);
 	strcpy(tmp, "END$TRACKS");
 	output[outputCount++] = dxfAddOutput(tmp);
 
@@ -2211,11 +2228,6 @@ static void ReadDxfFile(
 	for (i = 0; i < endPtCount; i++)
 		for (j = 0; j < endPtCount; j++) {
 			if (i != j) {
-				//double x1 = endPtCoord[i].x;
-				//double y1 = endPtCoord[i].y;
-				//double x2 = endPtCoord[j].x;
-				//double y2 = endPtCoord[j].y;
-
 				// Check if [i] should be connected to [j]
 				double d = FindDistance(endPtCoord[i], endPtCoord[j]);
 				if (d <= connectDistance) {
@@ -2225,8 +2237,6 @@ static void ReadDxfFile(
 					sprintf(tmp, "\tT4 %d %s", endPtEntity[j], substr + 4);
 					output[li] = MyRealloc(output[li], strlen(tmp));
 					strncpy(output[li], tmp, strlen(tmp));
-					// MyFree(output[li]);
-					// output[li] = dxfAddOutput(tmp);
 				}
 			}
 		}
@@ -2241,19 +2251,21 @@ static void ReadDxfFile(
 	//		skipLines);
 	//}
 
-	dxfFile = NULL;
-
 	char* p = strstr(pathName, ".dxf");
 	if (p != NULL) {
 		memcpy(p, ".xti", 4);
 	}
-
-	dxfFile = fopen(pathName, "w");
-	for (int i = 0; i < outputCount; i++) {
-		fprintf(dxfFile, "%s\n", output[i]);
+	else {
+		NoticeMessage(MSG_LAYOUT_LINES_SKIPPED, _("Ok"), NULL, paramFileName, 0);
+		return 0;
 	}
-	if (dxfFile) {
-		fclose(dxfFile);
+
+	xtiFile = fopen(pathName, "w");
+	for (int i = 0; i < outputCount; i++) {
+		fprintf(xtiFile, "%s\n", output[i]);
+	}
+	if (xtiFile) {
+		fclose(xtiFile);
 	}
 
 	SetUserLocale();
@@ -2262,6 +2274,16 @@ static void ReadDxfFile(
 		MyFree(output[i]);
 	}
 	//MyFree(paramFileName);
+
+	if (importDxfXti == 1) {
+		char* filename[1];
+		size_t len = strlen(pathName) + 1;
+		filename[0] = MyMalloc(len * sizeof(char));
+		strncpy(filename[0], pathName, strlen(pathName));
+
+		//importAsModule = FALSE;
+		//ImportTracks(1, filename, NULL);
+	}
 
 	//paramFileName = NULL;
 	InfoMessage("%d", count);
