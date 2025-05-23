@@ -1569,26 +1569,28 @@ static int ImportDXF(
 	wSetCursor(mainD.d, wCursorWait);
 	Reset();
 	SetAllTrackSelect(FALSE);
-	int saveLayer = curLayer;
-	int layer = 0;
-	if (importAsModule) {
-		layer = FindUnusedLayer(0);
-		if (layer == -1) { return FALSE; }
-		char LayerName[80];
-		LayerName[0] = '\0';
-		sprintf(LayerName, _("Module - %s"), nameOfFile);
-		if (layer >= 0) { SetCurrLayer(layer, NULL, 0, NULL, NULL); }
-		SetLayerName(layer, LayerName);
-	}
+	//int saveLayer = curLayer;
+	//int layer = 0;
+	//if (importAsModule) {
+	//	layer = FindUnusedLayer(0);
+	//	if (layer == -1) { return FALSE; }
+	//	char LayerName[80];
+	//	LayerName[0] = '\0';
+	//	sprintf(LayerName, _("Module - %s"), nameOfFile);
+	//	if (layer >= 0) { SetCurrLayer(layer, NULL, 0, NULL, NULL); }
+	//	SetLayerName(layer, LayerName);
+	//}
 	ImportStart();
 	UndoStart(_("Import DXF"), "importDXF");
 	useCurrentLayer = TRUE;
+
 	ReadDxfFile(fileName[0], nameOfFile, true);
+
 	ImportEnd(zero, TRUE, FALSE);
 
-	if (importAsModule) { SetLayerModule(layer, TRUE); }
-	useCurrentLayer = FALSE;
-	SetCurrLayer(saveLayer, NULL, 0, NULL, NULL);
+	//if (importAsModule) { SetLayerModule(layer, TRUE); }
+	//useCurrentLayer = FALSE;
+	//SetCurrLayer(saveLayer, NULL, 0, NULL, NULL);
 
 	/*DoRedraw();*/
 	EnableCommands();
@@ -1780,9 +1782,8 @@ static void ReadDxfFile(
 	bool inEntities = false;
 	bool inLayers = false;
 
-	char layerZero[50];
 	int layerLine[MAX_DXF_LAYER];
-	char layerName[MAX_DXF_LAYER][50];
+	char* layerName[MAX_DXF_LAYER];
 	int layerColor[MAX_DXF_LAYER];
 	int layerLineType[MAX_DXF_LAYER];
 	double layerThick[MAX_DXF_LAYER];
@@ -1871,20 +1872,19 @@ static void ReadDxfFile(
 				if (inLayers) {
 					if (layerCount < MAX_DXF_LAYER) {
 						layerLine[layerCount] = count;
-						strncpy(layerName[layerCount], dxfGroup, sizeof dxfGroup);
+						size_t len = strlen(dxfGroup);
+						layerName[layerCount] = MyMalloc((len + 1) * sizeof(char));
+						strncpy(layerName[layerCount], dxfGroup, len);
 						layerColor[layerCount] = color;
 						layerLineType[layerCount] = lineType;
 						layerThick[layerCount] = thick;
-					}
-					if (layerCount == 0) {
-						strncpy(layerZero, dxfGroup, sizeof dxfGroup);
 					}
 					layerCount++;
 				}
 
 				// Write the Entity data into the list
 				else if (inEntities) {
-					BOOL_T isTrack = (strncmp(dxfLayer, layerZero, sizeof dxfLayer) == 0);
+					BOOL_T isTrack = (strncmp(dxfLayer, layerName[0], sizeof dxfLayer) == 0);
 
 					if (color < 0 || lineType < 0 || thick < 0) {
 						layerIdx = 0;
@@ -2248,13 +2248,18 @@ static void ReadDxfFile(
 
 	// Change the extension to create the XTI file
 	char* p = strstr(pathName, ".dxf");
+	if (p == NULL)
+		p = strstr(pathName, ".DXF"); // stupid Windows
 	if (p != NULL) {
 		memcpy(p, ".xti", 4);
 	}
-	//else {
-	//	NoticeMessage(MSG_LAYOUT_LINES_SKIPPED, _("Ok"), NULL, paramFileName, 0);
-	//	return 0;
-	//}
+	else {
+		if (complain) {
+			NoticeMessage(MSG_OPEN_FAIL, _("Ok"), NULL, sProdName, pathName,
+				strerror(errno));
+		}
+		return;
+	}
 
 	xtiFile = fopen(pathName, "w");
 	for (int i = 0; i < outputCount; i++) {
@@ -2264,18 +2269,43 @@ static void ReadDxfFile(
 		fclose(xtiFile);
 	}
 
+
 	// Clean up
 	SetUserLocale();
 
 	for (int i = 0; i < outputCount; i++) {
 		MyFree(output[i]);
 	}
+	for (int i = 0; i < layerCount; i++) {
+		MyFree(layerName[i]);
+	}
+
 
 	// Import the XTI file
 	if (importDxfXti == 1) {
-		importAsModule = importDxfModule;
+
+		int saveLayer = curLayer;
+		int layer = 0;
+
+		if (importDxfModule) {
+			layer = FindUnusedLayer(0);
+			if (layer == -1) { 
+				NoticeMessage(MSG_NO_EMPTY_LAYER, _("Ok"), NULL, pathName, 0);
+				return;
+			}
+			char LayerName[80];
+			LayerName[0] = '\0';
+			sprintf(LayerName, _("Module - %s"), fileName);
+			if (layer >= 0) { SetCurrLayer(layer, NULL, 0, NULL, NULL); }
+			SetLayerName(layer, LayerName);
+		}
+
 		ParamSetInReadTracks(TRUE);
 		BOOL_T ret = ReadTrackFile(pathName, fileName, FALSE, TRUE, TRUE);
+
+		if (importDxfModule) { SetLayerModule(layer, TRUE); }
+		useCurrentLayer = FALSE;
+		SetCurrLayer(saveLayer, NULL, 0, NULL, NULL);
 	}
 
 	InfoMessage("%d", count);
