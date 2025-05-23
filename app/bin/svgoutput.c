@@ -331,7 +331,7 @@ static drawCmd_t svgD = {
 
 /**
  * Creates valid identifier from a string. Whitespaces are removed
- * and characters are prepended to make sure the i starts with
+ * and characters are prepended to make sure the id starts with
  * valid chars.
  * https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/id
  *
@@ -346,7 +346,7 @@ CreateValidId(char *base)
 	const char *idHead = "id";
 	char *out = MyMalloc(strlen(idHead) + strlen(base) + 1);
 	char *tmp;
-	int j;
+	size_t j;
 
 	strcpy(out, idHead);
 	j = strlen(out);
@@ -428,7 +428,6 @@ static int DoExportSVGTracks(
         char ** fileName,
         void * data)
 {
-	DynString command = NaS;
 	SVGDocument *svg;
 	SVGParent *svgData;
 	BOOL_T all = (selectedTrackCount == 0);
