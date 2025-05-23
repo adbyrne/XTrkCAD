@@ -1602,14 +1602,17 @@ static int ImportDXF(
 
 static long importDxfTrack = 0;
 static long importDxfXti = 0;
+static long importDxfModule = 0;
 static char* xtiPathName;
 
 char* importDxfTrackLabels[] = { N_("Layer 0 Track"), NULL };
 char* importDxfXtiLabels[] = { N_("Import XTI"), NULL };
+char* importDxfModLabels[] = { N_("Import as Module"), NULL };
 
 static paramData_t importDxfPLs[] = {
-	/*0*/ { PD_TOGGLE, &importDxfTrack, "track", PDO_NOPREF, &importDxfTrackLabels, N_("Layer 0 Track"), 0, 0, 0}
-	/*1*/ // { PD_TOGGLE, &importDxfXti, "xti", PDO_NOPREF,&importDxfXtiLabels, N_("Import XTI"), 0, 0, 0}
+	/*0*/ { PD_TOGGLE, &importDxfTrack, "track", PDO_NOPREF, &importDxfTrackLabels, N_("Layer 0 Track"), 0, 0, 0}, 
+	/*1*/ { PD_TOGGLE, &importDxfXti, "xti", PDO_NOPREF,&importDxfXtiLabels, N_("Import XTI"), 0, 0, 0},
+	/*2*/ { PD_TOGGLE, &importDxfModule, "mod", PDO_NOPREF,&importDxfModLabels, N_("Import as Module"), 0, 0, 0 }
 };
 static paramGroup_t importDxfPG = { "option", 0, importDxfPLs, COUNT(importDxfPLs) };
 static wWin_p importDxfW;
@@ -1678,6 +1681,7 @@ static long aci[256] = {
 	0x4F0013, 0x4F353B, 0x333333, 0x505050, 0x696969, 0x828282, 0xBEBEBE, 0xFFFFFF  //255
 };
 
+// Read the code/value pair that DXF uses
 static bool ReadDxfPair(FILE* dxfFile)
 {
 	memset(dxfCode, 0, sizeof(dxfCode));
@@ -1691,6 +1695,7 @@ static bool ReadDxfPair(FILE* dxfFile)
 	return false;
 }
 
+// Get the line type code from the DXF text
 static wDrawLineType_e dxfLineType(char dxfValue[50])
 {
 	wDrawLineType_e lineType = wDrawLineSolid;
@@ -1729,6 +1734,7 @@ static double toRadians(double a)
 #define MAX_DXF_ENDPT 50	// End point list
 #define MAX_DXF_LINES 500	// Output lines
 
+// Allocate memory for a line of output
 static char* dxfAddOutput(char tmp[])
 {
 	size_t len = strlen(tmp) + 1;
@@ -1740,6 +1746,7 @@ static char* dxfAddOutput(char tmp[])
 	return outpt;
 }
 
+// The main ReadDxfFile function
 static void ReadDxfFile(
         const char* pathName,
         const char* fileName,
@@ -1825,16 +1832,12 @@ static void ReadDxfFile(
 		return;
 	}
 
-	ParamSetInReadTracks(TRUE);
+	// ParamSetInReadTracks(TRUE);
 	SetCLocale();
 	checkPtFileNameBackup = NULL;
-	//paramLineNum = 0;
-	//paramFileName = strdup(fileName);
 
 	// Header
 	time(&clock);
-	//sprintf(output[outputCount++], "#%s Version: %s, Date: %s", sProdName, sVersion, ctime(&clock));
-	//sprintf(output[outputCount++], "VERSION %d %s\n", iParamVersion, PARAMVERSIONVERSION);
 	sprintf(tmp, "#%s Version: %s, Date: %s", sProdName, sVersion, ctime(&clock));
 	output[outputCount++] = dxfAddOutput(tmp);
 	sprintf(tmp, "VERSION %d %s\n", iParamVersion, PARAMVERSIONVERSION);
@@ -1853,13 +1856,7 @@ static void ReadDxfFile(
 			InfoMessage("%d", count);
 			wFlush();
 		}
-		//paramLineNum++;
-		//if (strlen(paramLine) == (sizeof paramLine) - 1 &&
-		//	paramLine[(sizeof paramLine) - 1] != '\n') {
-		//	if (!(ret = InputError("Line too long", TRUE))) {
-		//		break;
-		//	}
-		//}
+
 		Stripcr(dxfCode);
 		Stripcr(dxfValue);
 
@@ -2246,19 +2243,15 @@ static void ReadDxfFile(
 		dxfFile = NULL;
 	}
 
-	//if (skipLines > 0) {
-	//	NoticeMessage(MSG_LAYOUT_LINES_SKIPPED, _("Ok"), NULL, paramFileName,
-	//		skipLines);
-	//}
-
+	// Change the extension to create the XTI file
 	char* p = strstr(pathName, ".dxf");
 	if (p != NULL) {
 		memcpy(p, ".xti", 4);
 	}
-	else {
-		NoticeMessage(MSG_LAYOUT_LINES_SKIPPED, _("Ok"), NULL, paramFileName, 0);
-		return 0;
-	}
+	//else {
+	//	NoticeMessage(MSG_LAYOUT_LINES_SKIPPED, _("Ok"), NULL, paramFileName, 0);
+	//	return 0;
+	//}
 
 	xtiFile = fopen(pathName, "w");
 	for (int i = 0; i < outputCount; i++) {
@@ -2268,24 +2261,20 @@ static void ReadDxfFile(
 		fclose(xtiFile);
 	}
 
+	// Clean up
 	SetUserLocale();
 
 	for (int i = 0; i < outputCount; i++) {
 		MyFree(output[i]);
 	}
-	//MyFree(paramFileName);
 
+	// Import the XTI file
 	if (importDxfXti == 1) {
-		char* filename[1];
-		size_t len = strlen(pathName) + 1;
-		filename[0] = MyMalloc(len * sizeof(char));
-		strncpy(filename[0], pathName, strlen(pathName));
-
-		//importAsModule = FALSE;
-		//ImportTracks(1, filename, NULL);
+		importAsModule = importDxfModule;
+		ParamSetInReadTracks(TRUE);
+		BOOL_T ret = ReadTrackFile(pathName, fileName, FALSE, TRUE, TRUE);
 	}
 
-	//paramFileName = NULL;
 	InfoMessage("%d", count);
 	return;
 }
