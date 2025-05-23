@@ -2248,15 +2248,15 @@ static void ReadDxfFile(
 
 	// Change the extension to create the XTI file
 	char* p = strstr(pathName, ".dxf");
-	if (p == NULL)
-		p = strstr(pathName, ".DXF"); // stupid Windows
+	if (p == NULL) {
+		p = strstr(pathName, ".DXF");        // stupid Windows
+	}
 	if (p != NULL) {
 		memcpy(p, ".xti", 4);
-	}
-	else {
+	} else {
 		if (complain) {
 			NoticeMessage(MSG_OPEN_FAIL, _("Ok"), NULL, sProdName, pathName,
-				strerror(errno));
+			              strerror(errno));
 		}
 		return;
 	}
@@ -2289,7 +2289,7 @@ static void ReadDxfFile(
 
 		if (importDxfModule) {
 			layer = FindUnusedLayer(0);
-			if (layer == -1) { 
+			if (layer == -1) {
 				NoticeMessage(MSG_NO_EMPTY_LAYER, _("Ok"), NULL, pathName, 0);
 				return;
 			}
