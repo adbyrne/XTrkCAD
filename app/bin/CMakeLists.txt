@@ -13,7 +13,7 @@ include( CheckSymbolExists )
 # build GA or Beta executable
 set( XTRKCAD_BIN "xtrkcad${XTRKCAD_BETA}" )
 
-set( XTRKCAD_CORE_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/include")
+set( XTRKCAD_CORE_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 add_subdirectory(bitmaps)
 
