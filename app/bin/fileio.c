@@ -454,7 +454,7 @@ ReadMultilineText()
 #endif // UTFCONVERT
 
 	DynStringFree(&noteText);
-	return (string);
+	return(string);
 }
 
 
@@ -531,7 +531,7 @@ EXPORT char * PutTitle( char * cp )
 	*tp = '\0';
 
 #ifdef UTFCONVERT
-	if (RequiresConvToUTF8(title)) {
+	if(RequiresConvToUTF8(title)) {
 		char *out = MyMalloc(cnt);
 		wSystemToUTF8(title, out, (unsigned int)cnt);
 		strcpy(title, out);
@@ -636,7 +636,7 @@ static BOOL_T ReadTrackFile(
 		paramLineNum++;
 		if (strlen(paramLine) == (sizeof paramLine) -1 &&
 		    paramLine[(sizeof paramLine)-1] != '\n') {
-			if ( !(ret = InputError( "Line too long", TRUE ))) {
+			if( !(ret = InputError( "Line too long", TRUE ))) {
 				break;
 			}
 		}
@@ -672,7 +672,7 @@ static BOOL_T ReadTrackFile(
 				break;
 			}
 		} else if (!full) {
-			if ( !(ret = InputError( "unknown command", TRUE ))) {
+			if( !(ret = InputError( "unknown command", TRUE ))) {
 				break;
 			}
 		} else if (strncmp( paramLine, "TITLE1 ", 7 ) == 0) {
@@ -691,13 +691,13 @@ static BOOL_T ReadTrackFile(
 				/*wFloatSetValue( roomSizeXPD.control, PutDim(roomSize.x) );*/
 				/*wFloatSetValue( roomSizeYPD.control, PutDim(roomSize.y) );*/
 			} else {
-				if ( !(ret = InputError( "ROOMSIZE: bad value", TRUE ))) {
+				if( !(ret = InputError( "ROOMSIZE: bad value", TRUE ))) {
 					break;
 				}
 			}
 		} else if (strncmp( paramLine, "SCALE ", 6 ) == 0) {
 			if ( !DoSetScale( paramLine+6 ) ) {
-				if ( !(ret = InputError( "SCALE: bad value", TRUE ))) {
+				if( !(ret = InputError( "SCALE: bad value", TRUE ))) {
 					break;
 				}
 			}
@@ -730,7 +730,7 @@ static BOOL_T ReadTrackFile(
 		paramFile = NULL;
 	}
 
-	if ( ret ) {
+	if( ret ) {
 		if (!noSetCurDir) {
 			SetCurrentPath( LAYOUTPATHKEY, fileName );
 		}
@@ -1281,7 +1281,7 @@ static void DoCheckPoint( void )
 	rc = DoSaveTracks( checkPtFileName1 );
 
 	/* could the check point file be written ok? */
-	if ( rc ) {
+	if( rc ) {
 		/* yes, archive/delete the backup copy of the checkpoint file */
 		if (checkPtFileNameBackup) {
 			char * spot = strrchr(checkPtFileNameBackup,'.');
@@ -1329,7 +1329,7 @@ EXPORT void TryCheckPoint()
 			} else {
 				DoSave(NULL);
 			}
-			InfoMessage(_("File AutoSaved"), "File AutoSaved");
+			InfoMessage(_("File AutoSaved"));
 			autosave_count = 0;
 		}
 	}
@@ -1348,7 +1348,7 @@ EXPORT void TryCheckPoint()
 
 EXPORT void CleanupCheckpointFiles( void )
 {
-	if ( checkPtFileName1 ) {
+	if( checkPtFileName1 ) {
 		if (checkPtFileNameBackup) {
 			remove( checkPtFileNameBackup );
 			rename( checkPtFileName1, checkPtFileNameBackup );
@@ -1397,7 +1397,7 @@ EXPORT int ExistsCheckpoint( void )
 	MakeFullpath(&checkPtFileName1, workingDir, sCheckPointF, NULL);
 	MakeFullpath(&checkPtFileName2, workingDir, sCheckPoint1F, NULL);
 
-	if ( !stat( checkPtFileName1, &fileStat ) ) {
+	if( !stat( checkPtFileName1, &fileStat ) ) {
 		return TRUE;
 	} else {
 		return FALSE;
@@ -1569,17 +1569,7 @@ static int ImportDXF(
 	wSetCursor(mainD.d, wCursorWait);
 	Reset();
 	SetAllTrackSelect(FALSE);
-	//int saveLayer = curLayer;
-	//int layer = 0;
-	//if (importAsModule) {
-	//	layer = FindUnusedLayer(0);
-	//	if (layer == -1) { return FALSE; }
-	//	char LayerName[80];
-	//	LayerName[0] = '\0';
-	//	sprintf(LayerName, _("Module - %s"), nameOfFile);
-	//	if (layer >= 0) { SetCurrLayer(layer, NULL, 0, NULL, NULL); }
-	//	SetLayerName(layer, LayerName);
-	//}
+
 	ImportStart();
 	UndoStart(_("Import DXF"), "importDXF");
 	useCurrentLayer = TRUE;
@@ -1587,10 +1577,6 @@ static int ImportDXF(
 	ReadDxfFile(fileName[0], nameOfFile, true);
 
 	ImportEnd(zero, TRUE, FALSE);
-
-	//if (importAsModule) { SetLayerModule(layer, TRUE); }
-	//useCurrentLayer = FALSE;
-	//SetCurrLayer(saveLayer, NULL, 0, NULL, NULL);
 
 	/*DoRedraw();*/
 	EnableCommands();
@@ -2069,7 +2055,7 @@ static void ReadDxfFile(
 										ok = snprintf(tmp, 100, "\t%s %d %f %d 0",
 										              "F4", color, thick, vertices);
 									else
-										ok = snprintf(tmp, 100, "\t%s %d %f %d 0",
+										ok = snprintf(tmp, 100, "\t%s %d %f %d 2",
 										              "Y4", color, thick, vertices);
 									output[outputCount++] = dxfAddOutput(tmp);
 
@@ -2081,8 +2067,6 @@ static void ReadDxfFile(
 									ok = snprintf(tmp, 100, "\t%s", "END$SEGS");
 									output[outputCount++] = dxfAddOutput(tmp);
 
-									poly_flag = false;
-
 								} else
 
 									if (eSection == eText) {
@@ -2093,6 +2077,7 @@ static void ReadDxfFile(
 				dxfDirty = false;
 
 				// Make sure previous values are not used
+				poly_flag = false;
 				vertices = 0;
 				color = 0;
 				colorRGB = 0;
@@ -2248,15 +2233,15 @@ static void ReadDxfFile(
 
 	// Change the extension to create the XTI file
 	char* p = strstr(pathName, ".dxf");
-	if (p == NULL) {
-		p = strstr(pathName, ".DXF");        // stupid Windows
-	}
+	if (p == NULL)
+		p = strstr(pathName, ".DXF"); // stupid Windows
 	if (p != NULL) {
 		memcpy(p, ".xti", 4);
-	} else {
+	}
+	else {
 		if (complain) {
 			NoticeMessage(MSG_OPEN_FAIL, _("Ok"), NULL, sProdName, pathName,
-			              strerror(errno));
+				strerror(errno));
 		}
 		return;
 	}
@@ -2289,7 +2274,7 @@ static void ReadDxfFile(
 
 		if (importDxfModule) {
 			layer = FindUnusedLayer(0);
-			if (layer == -1) {
+			if (layer == -1) { 
 				NoticeMessage(MSG_NO_EMPTY_LAYER, _("Ok"), NULL, pathName, 0);
 				return;
 			}

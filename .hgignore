@@ -3,6 +3,8 @@
 .project
 .settings.json
 build/
+.vs/
+_CPack_Packages/
 syntax: glob
 *.mo
 .vscode/launch.json

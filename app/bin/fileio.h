@@ -120,9 +120,9 @@ int ExistsCheckpoint( void );
 int LoadCheckpoint( BOOL_T );
 void DoImportObjects( void * typeVP );
 void DoImportModule( void * typeVP );
-void DoImportDXF( void* typeVP );
-void importDXF(void* typeVP);
-void ReadDxfFile( const char* pathName, const char* fileName, const BOOL_T complain );
+void DoImportDXF( void * unused );
+void importDXF( void * unused );
+void ReadDxfFile(const char* pathName, const char* fileName, BOOL_T complain);
 void DoExport( void * unused );
 void DoExportDXF( void * unused );
 #if XTRKCAD_CREATE_SVG
