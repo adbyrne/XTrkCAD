@@ -433,6 +433,20 @@ The layout file that you loaded contained records that were not recognized. This
 Take full advantage of the latest features within \e{XTrackCAD} by visiting the \W{http://www.xtrkcad.org/}{\e{XTrackCAD} Fork Website} and downloading the latest release.
 END
 
+#fileio.c
+MESSAGE MSG_TOO_MANY_LAYERS
+While processing DXF file %s, too many layers were in the drawing. The maximum is %d.
+HELP
+The DXF file that you loaded contained more layers than the maximum.
+END
+
+#fileio.c
+MESSAGE MSG_TOO_MANY_ENDPTS
+While processing DXF file %s, too many track end points were in the drawing. The maximum is %d.
+HELP
+The DXF file that you loaded contained more end points than the maximum.
+END
+
 #paramfile.c
 MESSAGE MSG_PARAM_UPGRADE_VERSION1
 File version %ld is greater than supported

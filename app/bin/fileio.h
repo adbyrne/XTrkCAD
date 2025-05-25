@@ -142,9 +142,9 @@ void PlaybackMessage( char * );
 void DoPlayBack( void * );
 int MyGetKeyState( void );
 
-int RegLevel( void );
-void ReadKey( void );
-void PopupRegister( void * );
+// int RegLevel( void );
+// void ReadKey( void );
+// void PopupRegister( void * );
 
 void LoadFileList( void );
 void FileInit( void );

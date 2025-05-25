@@ -1598,11 +1598,11 @@ char* importDxfXtiLabels[] = { N_("Import XTI"), NULL };
 char* importDxfModLabels[] = { N_("Import as Module"), NULL };
 
 static paramData_t importDxfPLs[] = {
-	/*0*/ { PD_TOGGLE, &importDxfTrack, "track", PDO_NOPREF, &importDxfTrackLabels, N_("Layer 0 Track"), 0, 0, 0},
-	/*1*/ { PD_TOGGLE, &importDxfXti, "xti", PDO_NOPREF,&importDxfXtiLabels, N_("Import XTI"), 0, 0, 0},
-	/*2*/ { PD_TOGGLE, &importDxfModule, "mod", PDO_NOPREF,&importDxfModLabels, N_("Import as Module"), 0, 0, 0 }
+	/*0*/ { PD_TOGGLE,& importDxfTrack, "track", PDO_NOPREF, &importDxfTrackLabels, NULL, BC_NOBORDER },
+	/*1*/ { PD_TOGGLE, &importDxfXti, "xti", PDO_NOPREF, &importDxfXtiLabels, NULL, BC_NOBORDER },
+	/*2*/ { PD_TOGGLE, &importDxfModule, "mod", PDO_NOPREF, &importDxfModLabels, NULL, BC_NOBORDER } 
 };
-static paramGroup_t importDxfPG = { "option", 0, importDxfPLs, COUNT(importDxfPLs) };
+static paramGroup_t importDxfPG = { "dxf-import", 0, importDxfPLs, COUNT(importDxfPLs) };
 static wWin_p importDxfW;
 
 EXPORT void DoImportDXF(void* unused)
@@ -1611,7 +1611,7 @@ EXPORT void DoImportDXF(void* unused)
 		ParamRegister(&importDxfPG);
 		importDxfW = ParamCreateDialog(&importDxfPG, MakeWindowTitle(_("Import DXF")),
 		                               _("Ok"), importDXF, ParamCancel_Current,
-		                               TRUE, NULL, NULL, NULL);
+		                               TRUE, NULL, 0, NULL);
 		// blockD.dpi = mainD.dpi;
 	}
 	ParamLoadControls(&importDxfPG);
@@ -1720,18 +1720,34 @@ static double toRadians(double a)
 
 #define MAX_DXF_LAYER 20	// Layer list size
 #define MAX_DXF_ENDPT 50	// End point list
-#define MAX_DXF_LINES 500	// Output lines
+#define DXF_ALLOC_SIZE 64	// Amount to grow the output
 
-// Allocate memory for a line of output
-static char* dxfAddOutput(char tmp[])
+int DxfOutputAlloc;
+int DxfOutputCount;
+char** DxfOutput;			// Track Output lines
+
+// Allocate memory for a line of output and assign to output
+static BOOL_T dxfAddOutput(char tmp[])
 {
+	//if (DxfOutputCount >= MAX_DXF_LINES) {
+	//	NoticeMessage(MSG_OPEN_FAIL, _("Ok"), NULL, sProdName, "Output == MAX_DXF_LINES");
+	//	return FALSE;
+	//}
+
 	size_t len = strlen(tmp) + 1;
 	char* outpt = MyMalloc(len * sizeof(char));
 
 	strncpy(outpt, tmp, len);
 	//outpt[len - 1] = 0;
 
-	return outpt;
+	if (DxfOutputCount == DxfOutputAlloc) {
+		DxfOutputAlloc += DXF_ALLOC_SIZE;
+		int mSize = DxfOutputAlloc * sizeof(char*);
+		DxfOutput = MyRealloc(DxfOutput, mSize);
+	}
+	DxfOutput[DxfOutputCount++] = outpt;
+
+	return TRUE;
 }
 
 // The main ReadDxfFile function
@@ -1750,9 +1766,6 @@ static void ReadDxfFile(
 	int ret = TRUE;
 	char tmp[100];
 
-	char *output[MAX_DXF_LINES];
-	int outputCount = 0;
-
 	char dxfSection[20];
 	char dxfGroup[20];
 	enum enumSection {
@@ -1764,6 +1777,11 @@ static void ReadDxfFile(
 		eText
 	};
 	enum enumSection eSection;
+
+	DxfOutputAlloc = DXF_ALLOC_SIZE;
+	DxfOutputCount = 0;
+	int mSize = DxfOutputAlloc * sizeof(char*);
+	DxfOutput = MyMalloc(mSize);
 
 	bool inEntities = false;
 	bool inLayers = false;
@@ -1826,9 +1844,9 @@ static void ReadDxfFile(
 	// Header
 	time(&clock);
 	sprintf(tmp, "#%s Version: %s, Date: %s", sProdName, sVersion, ctime(&clock));
-	output[outputCount++] = dxfAddOutput(tmp);
+	dxfAddOutput(tmp);
 	sprintf(tmp, "VERSION %d %s\n", iParamVersion, PARAMVERSIONVERSION);
-	output[outputCount++] = dxfAddOutput(tmp);
+	dxfAddOutput(tmp);
 
 	// InfoMessage("0", "0");
 	eSection = eNone;
@@ -1861,31 +1879,37 @@ static void ReadDxfFile(
 						size_t len = strlen(dxfGroup);
 						layerName[layerCount] = MyMalloc((len + 1) * sizeof(char));
 						strncpy(layerName[layerCount], dxfGroup, len);
-						layerColor[layerCount] = color;
+						layerColor[layerCount] = (color == 7 ? 0 : (color > 0 && color < 256 ? color : 0));
 						layerLineType[layerCount] = lineType;
 						layerThick[layerCount] = thick;
+
+						layerCount++;
 					}
-					layerCount++;
+					else {
+						NoticeMessage(MSG_TOO_MANY_LAYERS, _("Ok"), NULL, fileName, MAX_DXF_LAYER);
+						return;
+					}
 				}
 
 				// Write the Entity data into the list
 				else if (inEntities) {
 					BOOL_T isTrack = (strncmp(dxfLayer, layerName[0], sizeof dxfLayer) == 0);
 
+					layerIdx = curLayer;
+
 					if (color < 0 || lineType < 0 || thick < 0) {
-						layerIdx = 0;
 						for (int i = 0; i < layerCount; i++) {
-							if (strncmp(dxfLayer, layerName[i], sizeof dxfLayer) == 0) {
-								layerIdx = i;
-							}
-							if ((color < 0) && (strncmp(dxfLayer, layerName[i], sizeof dxfLayer) == 0)) {
-								color = layerColor[i];
-							}
-							if ((lineType < 0) && (strncmp(dxfLayer, layerName[i], sizeof dxfLayer) == 0)) {
-								lineType = layerLineType[i];
-							}
-							if ((thick < 0) && (strncmp(dxfLayer, layerName[i], sizeof dxfLayer) == 0)) {
-								thick = layerThick[i];
+							if (strncmp(dxfLayer, layerName[i], sizeof dxfLayer) == 0)
+							{
+								if (color < 0) {
+									color = layerColor[i];
+								}
+								if (lineType < 0) {
+									lineType = layerLineType[i];
+								}
+								if (thick < 0) {
+									thick = layerThick[i];
+								}
 							}
 						}
 					}
@@ -1903,7 +1927,7 @@ static void ReadDxfFile(
 							//	END$SEGS
 							ok = snprintf(tmp, 100, "%s %d %d %d 0 0 %s %d %f %f",
 							              "STRAIGHT", entityCount, layerIdx, 0, curScaleName, visibility, 0.0, 0.0);
-							output[outputCount++] = dxfAddOutput(tmp);
+							dxfAddOutput(tmp);
 
 							// End points
 							double a1 = NormalizeAngle(-toDegrees(atan2((y2 - y1), (x2 - x1))));
@@ -1913,38 +1937,46 @@ static void ReadDxfFile(
 							              "E4", x1, y1, a1);
 							if (endPtCount < MAX_DXF_ENDPT) {
 								endPtEntity[endPtCount] = entityCount;
-								endPtLine[endPtCount] = outputCount;
+								endPtLine[endPtCount] = DxfOutputCount;
 								endPtCoord[endPtCount].x = x1; endPtCoord[endPtCount].y = y1;
 								endPtAngle[endPtCount] = a1;
 								endPtCount++;
 							}
-							output[outputCount++] = dxfAddOutput(tmp);
+							else {
+								NoticeMessage(MSG_TOO_MANY_ENDPTS, _("Ok"), NULL, fileName, MAX_DXF_ENDPT);
+								return;
+							}
+							dxfAddOutput(tmp);
 
 							ok = snprintf(tmp, 100, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
 							              "E4", x2, y2, a2);
 							if (endPtCount < MAX_DXF_ENDPT) {
 								endPtEntity[endPtCount] = entityCount;
-								endPtLine[endPtCount] = outputCount;
+								endPtLine[endPtCount] = DxfOutputCount;
 								endPtCoord[endPtCount].x = x2; endPtCoord[endPtCount].y = y2;
 								endPtAngle[endPtCount] = a2;
 								endPtCount++;
 							}
-							output[outputCount++] = dxfAddOutput(tmp);
+							else {
+								NoticeMessage(MSG_TOO_MANY_ENDPTS, _("Ok"), NULL, fileName, MAX_DXF_ENDPT);
+								return;
+							}
+							dxfAddOutput(tmp);
 
 							ok = snprintf(tmp, 100, "\t%s", "END$SEGS");
-							output[outputCount++] = dxfAddOutput(tmp);
+							dxfAddOutput(tmp);
 						} else {
 							// DRAW 1 0 0 0 0 -2.000000 -4.500000 0 0.000000
 							ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
 							              "DRAW", entityCount, layerIdx, lineType, 0, 0.0, 0.0, 0.0);
-							output[outputCount++] = dxfAddOutput(tmp);
+							dxfAddOutput(tmp);
 
 							ok = snprintf(tmp, 100, "\t%s %d %f %f %f 0 %f %f 0",
 							              "L3", color, thick, x1, y1, x2, y2);
-							output[outputCount++] = dxfAddOutput(tmp);
+							dxfAddOutput(tmp);
 
 							ok = snprintf(tmp, 100, "\t%s", "END$SEGS");
-							output[outputCount++] = dxfAddOutput(tmp);
+							dxfAddOutput(tmp);
 						}
 					} else
 
@@ -1952,14 +1984,14 @@ static void ReadDxfFile(
 							// DRAW 1 0 0 0 0 -2.000000 -4.500000 0 0.000000
 							ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
 							              "DRAW", entityCount, layerIdx, lineType, 0, 0.0, 0.0, 0.0);
-							output[outputCount++] = dxfAddOutput(tmp);
+							dxfAddOutput(tmp);
 
 							ok = snprintf(tmp, 100, "\t%s %d %f %f %f %f 0",
 							              "G3", color, thick, radius, x1, y1);
-							output[outputCount++] = dxfAddOutput(tmp);
+							dxfAddOutput(tmp);
 
 							ok = snprintf(tmp, 100, "\t%s", "END$SEGS");
-							output[outputCount++] = dxfAddOutput(tmp);
+							dxfAddOutput(tmp);
 
 						} else
 
@@ -1993,32 +2025,40 @@ static void ReadDxfFile(
 									ok = snprintf(tmp, 100, "%s %d %d %d 0 0 %s %d %f %f 0 %f 0 %f %f",
 									              "CURVE", entityCount, layerIdx, 0, curScaleName, visibility, x1, y1, radius,
 									              0.0, 0.0);
-									output[outputCount++] = dxfAddOutput(tmp);
+									dxfAddOutput(tmp);
 
 									ok = snprintf(tmp, 100, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
 									              "E4", x3, y3, e3);
 									if (endPtCount < MAX_DXF_ENDPT) {
 										endPtEntity[endPtCount] = entityCount;
-										endPtLine[endPtCount] = outputCount;
+										endPtLine[endPtCount] = DxfOutputCount;
 										endPtCoord[endPtCount].x = x3; endPtCoord[endPtCount].y = y3;
 										endPtAngle[endPtCount] = e3;
 										endPtCount++;
 									}
-									output[outputCount++] = dxfAddOutput(tmp);
+									else {
+										NoticeMessage(MSG_TOO_MANY_ENDPTS, _("Ok"), NULL, fileName, MAX_DXF_ENDPT);
+										return;
+									}
+									dxfAddOutput(tmp);
 
 									ok = snprintf(tmp, 100, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
 									              "E4", x4, y4, e4);
 									if (endPtCount < MAX_DXF_ENDPT) {
 										endPtEntity[endPtCount] = entityCount;
-										endPtLine[endPtCount] = outputCount;
+										endPtLine[endPtCount] = DxfOutputCount;
 										endPtCoord[endPtCount].x = x4; endPtCoord[endPtCount].y = y4;
 										endPtAngle[endPtCount] = e4;
 										endPtCount++;
 									}
-									output[outputCount++] = dxfAddOutput(tmp);
+									else {
+										NoticeMessage(MSG_TOO_MANY_ENDPTS, _("Ok"), NULL, fileName, MAX_DXF_ENDPT);
+										return;
+									}
+									dxfAddOutput(tmp);
 
 									ok = snprintf(tmp, 100, "\t%s", "END$SEGS");
-									output[outputCount++] = dxfAddOutput(tmp);
+									dxfAddOutput(tmp);
 
 								} else {
 									double xStartAngle = NormalizeAngle(90.0 - endAngle);
@@ -2027,14 +2067,14 @@ static void ReadDxfFile(
 									// DRAW 1 0 0 0 0 -2.000000 -4.500000 0 0.000000
 									ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
 									              "DRAW", entityCount, layerIdx, lineType, 0, 0.0, 0.0, 0.0);
-									output[outputCount++] = dxfAddOutput(tmp);
+									dxfAddOutput(tmp);
 
 									ok = snprintf(tmp, 100, "\t%s %d %f %f %f %f 0 %f %f",
 									              "A3", color, thick, radius, x1, y1, xStartAngle, xCurveAngle);
-									output[outputCount++] = dxfAddOutput(tmp);
+									dxfAddOutput(tmp);
 
 									ok = snprintf(tmp, 100, "\t%s", "END$SEGS");
-									output[outputCount++] = dxfAddOutput(tmp);
+									dxfAddOutput(tmp);
 								}
 							} else
 
@@ -2042,7 +2082,7 @@ static void ReadDxfFile(
 									// Save Entity data
 									ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
 									              "DRAW", entityCount, layerIdx, lineType, 0, 0.0, 0.0, 0.0);
-									output[outputCount++] = dxfAddOutput(tmp);
+									dxfAddOutput(tmp);
 
 									// Detect polylines that are actually cloesd
 									if (vertices > 1 && vrt_x[0] == vrt_x[vertices - 1]
@@ -2057,15 +2097,15 @@ static void ReadDxfFile(
 									else
 										ok = snprintf(tmp, 100, "\t%s %d %f %d 2",
 										              "Y4", color, thick, vertices);
-									output[outputCount++] = dxfAddOutput(tmp);
+									dxfAddOutput(tmp);
 
 									for (int v = 0; v < vertices; v++) {
 										ok = snprintf(tmp, 100, "\t\t%f %f 0", vrt_x[v], vrt_y[v]);
-										output[outputCount++] = dxfAddOutput(tmp);
+										dxfAddOutput(tmp);
 									}
 
 									ok = snprintf(tmp, 100, "\t%s", "END$SEGS");
-									output[outputCount++] = dxfAddOutput(tmp);
+									dxfAddOutput(tmp);
 
 								} else
 
@@ -2187,10 +2227,13 @@ static void ReadDxfFile(
 			endAngle = strtod(dxfValue, NULL);
 		} else if (strncmp(dxfCode, " 62", 3) == 0) {
 			long c = strtol(dxfValue, NULL, 10);
-			if ((c >= 0) && (c < 256)) {
-				color = aci[c];
+			if ((c > 0) && (c < 256)) {
+				if (c == 7)
+					color = 0; // Black
+				else
+					color = aci[c];
 			} else {
-				color = -1;
+				color = -1; // ByLayer
 			}
 		} else if (strncmp(dxfCode, " 70", 3) == 0) {
 			closed = strtol(dxfValue, NULL, 10);
@@ -2205,7 +2248,7 @@ static void ReadDxfFile(
 	}
 
 	strcpy(tmp, "END$TRACKS");
-	output[outputCount++] = dxfAddOutput(tmp);
+	dxfAddOutput(tmp);
 
 	// Find and fix connected end points
 	int i;
@@ -2218,10 +2261,10 @@ static void ReadDxfFile(
 				if (d <= connectDistance) {
 					int li = endPtLine[i];
 					char substr[100];
-					strncpy(substr, output[li], 100);
+					strncpy(substr, DxfOutput[li], 100);
 					sprintf(tmp, "\tT4 %d %s", endPtEntity[j], substr + 4);
-					output[li] = MyRealloc(output[li], strlen(tmp));
-					strncpy(output[li], tmp, strlen(tmp));
+					DxfOutput[li] = MyRealloc(DxfOutput[li], strlen(tmp));
+					strncpy(DxfOutput[li], tmp, strlen(tmp));
 				}
 			}
 		}
@@ -2238,17 +2281,17 @@ static void ReadDxfFile(
 	if (p != NULL) {
 		memcpy(p, ".xti", 4);
 	}
-	else {
+
+	xtiFile = fopen(pathName, "w");
+	if (xtiFile == NULL) {
 		if (complain) {
 			NoticeMessage(MSG_OPEN_FAIL, _("Ok"), NULL, sProdName, pathName,
 				strerror(errno));
 		}
 		return;
 	}
-
-	xtiFile = fopen(pathName, "w");
-	for (int i = 0; i < outputCount; i++) {
-		fprintf(xtiFile, "%s\n", output[i]);
+	for (int i = 0; i < DxfOutputCount; i++) {
+		fprintf(xtiFile, "%s\n", DxfOutput[i]);
 	}
 	if (xtiFile) {
 		fclose(xtiFile);
@@ -2258,9 +2301,11 @@ static void ReadDxfFile(
 	// Clean up
 	SetUserLocale();
 
-	for (int i = 0; i < outputCount; i++) {
-		MyFree(output[i]);
+	for (int i = 0; i < DxfOutputCount; i++) {
+		MyFree(DxfOutput[i]);
 	}
+	MyFree(DxfOutput);
+
 	for (int i = 0; i < layerCount; i++) {
 		MyFree(layerName[i]);
 	}
