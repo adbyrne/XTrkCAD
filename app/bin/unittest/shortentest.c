@@ -2,7 +2,7 @@
 * Unit tests for the dxfformat module
 */
 
-#include <malloc.h>
+#include <stdlib.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
