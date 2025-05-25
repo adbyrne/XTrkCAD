@@ -27,20 +27,6 @@ target_link_libraries(pathstest
 
 add_test(PathsTest pathstest)
 
-# handling of default settings
-
-#add_executable( defaultstest
-#				defaultstest.c
-#				)
-
-#target_link_libraries(defaultstest
-#                      xtrkcad-wlib
-#					  ${LIBS})
-
-#add_test(DefaultsTest defaultstest)
-
-#
-
 add_executable(shortentest
 			  shortentest.c
 			  ../shortentext.c
@@ -54,15 +40,16 @@ add_test(ShortenTest shortentest)
 set_target_properties(
 	dxfformattest 
 	shortentest
-#	defaultstest
 	pathstest
  	PROPERTIES FOLDER UnitTests
  )
 
- add_custom_command(
-	TARGET dxfformattest POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy
-            "${CMOCKA_ROOT_DIR}/lib/cmocka.dll"
-            ${CMAKE_CURRENT_BINARY_DIR}
- )
+ if(WIN32)
+	add_custom_command(
+		TARGET dxfformattest POST_BUILD
+				COMMAND ${CMAKE_COMMAND} -E copy
+				"${CMOCKA_ROOT_DIR}/lib/cmocka.dll"
+				${CMAKE_CURRENT_BINARY_DIR}
+	)
+ endif()
 
