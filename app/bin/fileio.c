@@ -1593,16 +1593,16 @@ static long importDxfXti = 0;
 static long importDxfModule = 0;
 static char* xtiPathName;
 
-char* importDxfTrackLabels[] = { N_("Layer 0 Track"), NULL };
-char* importDxfXtiLabels[] = { N_("Import XTI"), NULL };
-char* importDxfModLabels[] = { N_("Import as Module"), NULL };
+static char* importDxfTrackLabels[] = { N_("Layer 0 Track"), NULL };
+static char* importDxfXtiLabels[] = { N_("Import XTI"), NULL };
+static char* importDxfModLabels[] = { N_("Import as Module"), NULL };
 
 static paramData_t importDxfPLs[] = {
-	/*0*/ { PD_TOGGLE,& importDxfTrack, "track", PDO_NOPREF, &importDxfTrackLabels, NULL, BC_NOBORDER },
+	/*0*/ { PD_TOGGLE, &importDxfTrack, "track", PDO_NOPREF, &importDxfTrackLabels, NULL, BC_NOBORDER },
 	/*1*/ { PD_TOGGLE, &importDxfXti, "xti", PDO_NOPREF, &importDxfXtiLabels, NULL, BC_NOBORDER },
-	/*2*/ { PD_TOGGLE, &importDxfModule, "mod", PDO_NOPREF, &importDxfModLabels, NULL, BC_NOBORDER } 
+	/*2*/ { PD_TOGGLE, &importDxfModule, "mod", PDO_NOPREF, &importDxfModLabels, NULL, BC_NOBORDER }
 };
-static paramGroup_t importDxfPG = { "dxf-import", 0, importDxfPLs, COUNT(importDxfPLs) };
+static paramGroup_t importDxfPG = { "importDxf", 0, importDxfPLs, COUNT(importDxfPLs) };
 static wWin_p importDxfW;
 
 EXPORT void DoImportDXF(void* unused)

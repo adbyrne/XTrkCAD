@@ -337,15 +337,6 @@ The parameters \e{Minimum Track Length}, \e{Connection Angle} and \e{Connection 
 Refer to \k{cmdPref} for detail.
 END
 
-# fileio.c
-MESSAGE MSG_CANT_PASTE
-Copy/Paste buffer is empty. There is nothing to Paste.
-HELP
-An attempt was made to \f{Paste} an object onto the layout however the Copy/Paste buffer was empty. This error generally occurs when the \f{Paste} command is executed without first executing the \f{Copy} command.
-
-Refer to \k{editM} for detail.
-END
-
 # ctodesgn.c
 MESSAGE MSG_TODSGN_CROSSOVER_TOO_SHORT
 Crossover length is too short. Correct
@@ -398,6 +389,15 @@ HELP
 An \e{endpoint} that is already on the \f{Profile Path} has been selected. Select a different \e{endpoint}; one that is on a track that is not drawn in Purple.
 
 Refer to \k{cmdProfile} for detail.
+END
+
+# fileio.c
+MESSAGE MSG_CANT_PASTE
+Copy/Paste buffer is empty. There is nothing to Paste.
+HELP
+An attempt was made to \f{Paste} an object onto the layout however the Copy/Paste buffer was empty. This error generally occurs when the \f{Paste} command is executed without first executing the \f{Copy} command.
+
+Refer to \k{editM} for detail.
 END
 
 # fileio.c
