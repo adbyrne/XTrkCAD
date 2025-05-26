@@ -32,9 +32,9 @@ struct messageData {
 };
 
 int
-CompareMessages(const struct messageData *msg1, const struct messageData *msg2)
+CompareMessages(const void *msg1, const void *msg2)
 {
-    return(strcmp(msg1->line, msg2->line));
+    return(strcmp(((const struct messageData *)msg1)->line, ((const struct messageData *)msg2)->line));
 }
 
 int process(mode_e mode, char * json, FILE * outFile)
@@ -42,7 +42,7 @@ int process(mode_e mode, char * json, FILE * outFile)
     const cJSON *messages = NULL;
     const cJSON *messageLine = NULL;
     int cntMessages;
-    int i = 0;
+    int currentLine = 0;
     int status = 0;
     struct messageData *messageList = NULL;
 
@@ -85,14 +85,14 @@ int process(mode_e mode, char * json, FILE * outFile)
             goto end;
         }
 
-        messageList[i].line = line->valuestring;
+        messageList[currentLine].line = line->valuestring;
         if (contents->valuestring[0]) {
-            messageList[i].message = contents->valuestring;
+            messageList[currentLine].message = contents->valuestring;
         }
         else {
-            messageList[i].message = NULL;
+            messageList[currentLine].message = NULL;
         }
-        i++;
+        currentLine++;
     }
 
     qsort(messageList, cntMessages, sizeof(struct messageData),  CompareMessages);
