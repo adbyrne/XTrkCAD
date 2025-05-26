@@ -1602,7 +1602,7 @@ static paramData_t importDxfPLs[] = {
 	/*1*/ { PD_TOGGLE, &importDxfXti, "xti", PDO_NOPREF,&importDxfXtiLabels, N_("Import XTI"), 0, 0, 0},
 	/*2*/ { PD_TOGGLE, &importDxfModule, "mod", PDO_NOPREF,&importDxfModLabels, N_("Import as Module"), 0, 0, 0 }
 };
-static paramGroup_t importDxfPG = { "option", 0, importDxfPLs, COUNT(importDxfPLs) };
+static paramGroup_t importDxfPG = { "importDxf", 0, importDxfPLs, COUNT(importDxfPLs) };
 static wWin_p importDxfW;
 
 EXPORT void DoImportDXF(void* unused)

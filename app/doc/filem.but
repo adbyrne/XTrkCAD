@@ -53,7 +53,7 @@ or used for publishing on the web.
 \dd \G{png.d/bimportmod.png} \f{Import Module} - Displays the file selection dialog which allows selection of an existing \e{XTrackCAD} Import (\K{cmdExport} *.xti) file. The imported parts are put into a empty layer, sets the layer name to the imported filename and sets the layer to be a module - see (\K{cmdLayer}).
 \u000
 
-\dd \G{png.d/bimportdxf.png} \f{Import DXF} - Displays a dialog which allows selection of options for DXF import. DXF (\K{cmdImport} *.dxf) file. The imported parts are put into a empty layer, sets the layer name to the imported filename and sets the layer to be a module - see (\K{cmdLayer}).
+\dd \G{png.d/bimportdxf.png} \f{Import DXF} - Displays a dialog which allows selection of options for DXF import. DXF (\K{cmdImportDxf} *.dxf) file. The imported parts are put into a empty layer, sets the layer name to the imported filename and sets the layer to be a module - see (\K{cmdLayer}).
 -\u000
 
 \dd \G{png.d/bnew.png} \f{New} - Clears the current layout.  In case there are any unsaved changes on the current plan, a warning pop-up will be displayed and you'll have the option to cancel the operation. After that the Layout Options (\K{cmdLayout}) dialog will be opened.
@@ -182,6 +182,10 @@ Importing displays a file selection dialog to specify the file to import.
 After importing the objects from the file, the imported objects are in selected state and therefore are drawn in red. This allows you to easily move and rotate the imported objects to their final position.
 
 \rule
+
+\S{cmdImportDxf} \i{Import a DXF file}
+
+This does magic to dxf files.
 
 \S{cmdImportM} \i{Import as Module}
 
