@@ -185,6 +185,10 @@ After importing the objects from the file, the imported objects are in selected 
 
 \rule
 
+\S{cmdImportDxf} \i{Import a DXF file}
+
+This does magic to dxf files.
+
 \S{cmdImportM} \i{Import as Module}
 
 \G{png.d/bimportmod.png}
