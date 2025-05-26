@@ -1591,7 +1591,6 @@ static int ImportDXF(
 static long importDxfTrack = 0;
 static long importDxfXti = 0;
 static long importDxfModule = 0;
-static char* xtiPathName;
 
 static char* importDxfTrackLabels[] = { N_("Layer 0 Track"), NULL };
 static char* importDxfXtiLabels[] = { N_("Import XTI"), NULL };
@@ -1758,7 +1757,6 @@ static void ReadDxfFile(
 
 	int count;
 
-	int ret = TRUE;
 	char tmp[100];
 
 	char dxfSection[20];
@@ -1807,8 +1805,8 @@ static void ReadDxfFile(
 
 	char dxfLayer[50];
 
-	long color;
-	long colorRGB;
+	int color = 0;
+	int colorRGB = -1;
 	wDrawLineType_e lineType;
 	double thick = 0.0;
 	double radius = 0.0;
@@ -1825,7 +1823,6 @@ static void ReadDxfFile(
 	double vrt_x[20];
 	double vrt_y[20];
 	int vertices = 0;
-	bool poly_flag = false;
 
 	int dxfLayerCount = 0;
 	bool dxfDirty = false;
@@ -1882,7 +1879,7 @@ static void ReadDxfFile(
 						size_t len = strlen(dxfGroup);
 						layer[layerCount].name = MyMalloc((len + 1) * sizeof(char));
 						strncpy(layer[layerCount].name, dxfGroup, len);
-						layer[layerCount].color = (color == 7 ? 0 : (color > 0 && color < 256 ? color : 0));
+						layer[layerCount].color = (colorRGB >= 0 ? colorRGB : (color == 7 ? 0 : (color > 0 && color < 256 ? color : 0)));
 						layer[layerCount].lineType = lineType;
 						layer[layerCount].thick = thick;
 
@@ -1975,7 +1972,7 @@ static void ReadDxfFile(
 							dxfAddOutput(tmp);
 
 							ok = snprintf(tmp, 100, "\t%s %d %f %f %f 0 %f %f 0",
-							              "L3", color, thick, x1, y1, x2, y2);
+							              "L3", (colorRGB >= 0 ? colorRGB : color), thick, x1, y1, x2, y2);
 							dxfAddOutput(tmp);
 
 							ok = snprintf(tmp, 100, "\t%s", "END$SEGS");
@@ -1990,7 +1987,7 @@ static void ReadDxfFile(
 							dxfAddOutput(tmp);
 
 							ok = snprintf(tmp, 100, "\t%s %d %f %f %f %f 0",
-							              "G3", color, thick, radius, x1, y1);
+							              "G3", (colorRGB >= 0 ? colorRGB : color), thick, radius, x1, y1);
 							dxfAddOutput(tmp);
 
 							ok = snprintf(tmp, 100, "\t%s", "END$SEGS");
@@ -2073,7 +2070,7 @@ static void ReadDxfFile(
 									dxfAddOutput(tmp);
 
 									ok = snprintf(tmp, 100, "\t%s %d %f %f %f %f 0 %f %f",
-									              "A3", color, thick, radius, x1, y1, xStartAngle, xCurveAngle);
+									              "A3", (colorRGB >= 0 ? colorRGB : color), thick, radius, x1, y1, xStartAngle, xCurveAngle);
 									dxfAddOutput(tmp);
 
 									ok = snprintf(tmp, 100, "\t%s", "END$SEGS");
@@ -2096,10 +2093,10 @@ static void ReadDxfFile(
 
 									if (closed == 1)
 										ok = snprintf(tmp, 100, "\t%s %d %f %d 0",
-										              "F4", color, thick, vertices);
+										              "F4", (colorRGB >= 0 ? colorRGB : color), thick, vertices);
 									else
 										ok = snprintf(tmp, 100, "\t%s %d %f %d 2",
-										              "Y4", color, thick, vertices);
+										              "Y4", (colorRGB >= 0 ? colorRGB : color), thick, vertices);
 									dxfAddOutput(tmp);
 
 									for (int v = 0; v < vertices; v++) {
@@ -2120,10 +2117,9 @@ static void ReadDxfFile(
 				dxfDirty = false;
 
 				// Make sure previous values are not used
-				poly_flag = false;
 				vertices = 0;
 				color = 0;
-				colorRGB = 0;
+				colorRGB = -1;
 				lineType = 0;
 				thick = 0.0;
 				radius = 0.0;
@@ -2336,8 +2332,10 @@ static void ReadDxfFile(
 		ParamSetInReadTracks(TRUE);
 		BOOL_T ret = ReadTrackFile(pathName, fileName, FALSE, TRUE, TRUE);
 
-		if (importDxfModule) { SetLayerModule(layer, TRUE); }
-		useCurrentLayer = FALSE;
+		if (ret) {
+			if (importDxfModule) { SetLayerModule(layer, TRUE); }
+			useCurrentLayer = FALSE;
+		}
 		SetCurrLayer(saveLayer, NULL, 0, NULL, NULL);
 	}
 
