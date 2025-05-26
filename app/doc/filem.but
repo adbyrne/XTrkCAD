@@ -50,7 +50,7 @@ or used for publishing on the web.
 
 \u000
 
-\dd \G{png.d/bimportdxf.png} \f{Import DXF} - Displays a dialog which allows selection of options for (\K{cmdImportDxf} *.dxf) file. The DXF file is imported into the current layer, or if the Import as Module option is checked, into an empty layer as a module - see (\K{cmdLayer}). The Layer 0 as Track option will create track from lines (STRAIGHT) and arcs (CURVE). This command creates an XTI file in the same folder as the DXF file.
+\dd \G{png.d/bimportdxf.png} \f{Import DXF} - Displays a dialog which allows selection of options for (\K{cmdImportDxf} *.dxf) file. The DXF file is imported into the current layer, or if the Import as Module option is checked, into an empty layer as a module - see (\K{cmdLayer}). The "Layer 0 as Track" option will create track from lines (STRAIGHT) and arcs (CURVE). This command creates an XTI file in the same folder as the DXF file.
 
 \u000
 
@@ -183,12 +183,6 @@ Importing displays a file selection dialog to specify the file to import.
 
 After importing the objects from the file, the imported objects are in selected state and therefore are drawn in red. This allows you to easily move and rotate the imported objects to their final position.
 
-\rule
-
-\S{cmdImportDxf} \i{Import a DXF file}
-
-This does magic to dxf files.
-
 \S{cmdImportM} \i{Import as Module}
 
 \G{png.d/bimportmod.png}
@@ -201,7 +195,7 @@ After importing the objects from the file, the imported objects are in selected 
 
 \rule
 
-\S{cmdImportDxf} \i{Import Dxf}
+\S{cmdImportDxf} \i{Import Dxf File}
 
 \G{png.d/bimportdxf.png}
 
