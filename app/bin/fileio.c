@@ -1744,6 +1744,16 @@ static BOOL_T dxfAddOutput(char tmp[])
 	return TRUE;
 }
 
+#define TMP_SIZE 100		// tmp buffer size
+#define DXF_DEBUG TRUE
+
+static void dxfDebugMessage(int ok, const char *fileName) {
+	if (ok < 0) 
+		NoticeMessage(MSG_DXF_LINE_ERROR, _("Ok"), NULL, fileName);
+	else if (ok > TMP_SIZE) 
+		NoticeMessage(MSG_DXF_LINE_LEN, _("Ok"), NULL, fileName, ok, TMP_SIZE);
+}
+
 // The main ReadDxfFile function
 static void ReadDxfFile(
         const char* pathName,
@@ -1757,7 +1767,8 @@ static void ReadDxfFile(
 
 	int count;
 
-	char tmp[100];
+	char tmp[TMP_SIZE];
+	int ok;
 
 	char dxfSection[20];
 	char dxfGroup[20];
@@ -1824,7 +1835,6 @@ static void ReadDxfFile(
 	double vrt_y[20];
 	int vertices = 0;
 
-	int dxfLayerCount = 0;
 	bool dxfDirty = false;
 
 	memset(dxfSection, 0, sizeof(dxfSection));
@@ -1868,9 +1878,6 @@ static void ReadDxfFile(
 		if (strncmp(dxfCode, "  0", 3) == 0) {
 			// Write previous entity
 			if (dxfDirty) {
-
-				int ok;
-				char tmp[100];
 
 				// Write the layer data into a list
 				if (inLayers) {
@@ -1925,16 +1932,18 @@ static void ReadDxfFile(
 							//	E4 0.000000 0.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
 							//	T4 2 21.000000 0.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
 							//	END$SEGS
-							ok = snprintf(tmp, 100, "%s %d %d %d 0 0 %s %d %f %f",
+							ok = snprintf(tmp, TMP_SIZE, "%s %d %d %d 0 0 %s %d %f %f",
 							              "STRAIGHT", entityCount, layerIdx, 0, curScaleName, visibility, 0.0, 0.0);
 							dxfAddOutput(tmp);
+							dxfDebugMessage(ok, fileName);
 
 							// End points
 							double a1 = NormalizeAngle(-toDegrees(atan2((y2 - y1), (x2 - x1))));
 							double a2 = NormalizeAngle(180 + a1);
 
-							ok = snprintf(tmp, 100, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
+							ok = snprintf(tmp, TMP_SIZE, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
 							              "E4", x1, y1, a1);
+
 							if (endPtCount < MAX_DXF_ENDPT) {
 								endPt[endPtCount].entity = entityCount;
 								endPt[endPtCount].line = DxfOutputCount;
@@ -1947,9 +1956,11 @@ static void ReadDxfFile(
 								return;
 							}
 							dxfAddOutput(tmp);
+							dxfDebugMessage(ok, fileName);
 
-							ok = snprintf(tmp, 100, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
+							ok = snprintf(tmp, TMP_SIZE, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
 							              "E4", x2, y2, a2);
+
 							if (endPtCount < MAX_DXF_ENDPT) {
 								endPt[endPtCount].entity = entityCount;
 								endPt[endPtCount].line = DxfOutputCount;
@@ -1962,35 +1973,40 @@ static void ReadDxfFile(
 								return;
 							}
 							dxfAddOutput(tmp);
+							dxfDebugMessage(ok, fileName);
 
-							ok = snprintf(tmp, 100, "\t%s", "END$SEGS");
+							ok = snprintf(tmp, TMP_SIZE, "\t%s", "END$SEGS");
 							dxfAddOutput(tmp);
 						} else {
 							// DRAW 1 0 0 0 0 -2.000000 -4.500000 0 0.000000
-							ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
+							ok = snprintf(tmp, TMP_SIZE, "%s %d %d %d %d 0 %f %f 0 %f",
 							              "DRAW", entityCount, layerIdx, lineType, 0, 0.0, 0.0, 0.0);
 							dxfAddOutput(tmp);
+							dxfDebugMessage(ok, fileName);
 
-							ok = snprintf(tmp, 100, "\t%s %d %f %f %f 0 %f %f 0",
+							ok = snprintf(tmp, TMP_SIZE, "\t%s %d %f %f %f 0 %f %f 0",
 							              "L3", (colorRGB >= 0 ? colorRGB : color), thick, x1, y1, x2, y2);
 							dxfAddOutput(tmp);
+							dxfDebugMessage(ok, fileName);
 
-							ok = snprintf(tmp, 100, "\t%s", "END$SEGS");
+							ok = snprintf(tmp, TMP_SIZE, "\t%s", "END$SEGS");
 							dxfAddOutput(tmp);
 						}
 					} else
 
 						if (eSection == eCircle) {
 							// DRAW 1 0 0 0 0 -2.000000 -4.500000 0 0.000000
-							ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
+							ok = snprintf(tmp, TMP_SIZE, "%s %d %d %d %d 0 %f %f 0 %f",
 							              "DRAW", entityCount, layerIdx, lineType, 0, 0.0, 0.0, 0.0);
 							dxfAddOutput(tmp);
+							dxfDebugMessage(ok, fileName);
 
-							ok = snprintf(tmp, 100, "\t%s %d %f %f %f %f 0",
+							ok = snprintf(tmp, TMP_SIZE, "\t%s %d %f %f %f %f 0",
 							              "G3", (colorRGB >= 0 ? colorRGB : color), thick, radius, x1, y1);
 							dxfAddOutput(tmp);
+							dxfDebugMessage(ok, fileName);
 
-							ok = snprintf(tmp, 100, "\t%s", "END$SEGS");
+							ok = snprintf(tmp, TMP_SIZE, "\t%s", "END$SEGS");
 							dxfAddOutput(tmp);
 
 						} else
@@ -2006,7 +2022,7 @@ static void ReadDxfFile(
 
 									// Save Entity data
 									// End points
-									double end = NormalizeAngle(startAngle + endAngle);
+									//double end = NormalizeAngle(startAngle + endAngle);
 
 									double xEndAngle = NormalizeAngle(-startAngle);
 									double xStartAngle = NormalizeAngle(-endAngle);
@@ -2020,15 +2036,17 @@ static void ReadDxfFile(
 
 									double e3 = NormalizeAngle(xStartAngle);
 									double e4 = NormalizeAngle(xEndAngle - 180.0);
-									double xCurveAngle = NormalizeAngle(endAngle - startAngle);
+									//double xCurveAngle = NormalizeAngle(endAngle - startAngle);
 
-									ok = snprintf(tmp, 100, "%s %d %d %d 0 0 %s %d %f %f 0 %f 0 %f %f",
+									ok = snprintf(tmp, TMP_SIZE, "%s %d %d %d 0 0 %s %d %f %f 0 %f 0 %f %f",
 									              "CURVE", entityCount, layerIdx, 0, curScaleName, visibility, x1, y1, radius,
 									              0.0, 0.0);
 									dxfAddOutput(tmp);
+									dxfDebugMessage(ok, fileName);
 
-									ok = snprintf(tmp, 100, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
+									ok = snprintf(tmp, TMP_SIZE, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
 									              "E4", x3, y3, e3);
+
 									if (endPtCount < MAX_DXF_ENDPT) {
 										endPt[endPtCount].entity = entityCount;
 										endPt[endPtCount].line = DxfOutputCount;
@@ -2041,8 +2059,9 @@ static void ReadDxfFile(
 										return;
 									}
 									dxfAddOutput(tmp);
+									dxfDebugMessage(ok, fileName);
 
-									ok = snprintf(tmp, 100, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
+									ok = snprintf(tmp, TMP_SIZE, "\t%s %f %f %f 0 0.0 0.0 0.0 0.0 0 0 0 0.000000",
 									              "E4", x4, y4, e4);
 									if (endPtCount < MAX_DXF_ENDPT) {
 										endPt[endPtCount].entity = entityCount;
@@ -2056,8 +2075,9 @@ static void ReadDxfFile(
 										return;
 									}
 									dxfAddOutput(tmp);
+									dxfDebugMessage(ok, fileName);
 
-									ok = snprintf(tmp, 100, "\t%s", "END$SEGS");
+									ok = snprintf(tmp, TMP_SIZE, "\t%s", "END$SEGS");
 									dxfAddOutput(tmp);
 
 								} else {
@@ -2065,24 +2085,27 @@ static void ReadDxfFile(
 									double xCurveAngle = endAngle - startAngle;
 
 									// DRAW 1 0 0 0 0 -2.000000 -4.500000 0 0.000000
-									ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
+									ok = snprintf(tmp, TMP_SIZE, "%s %d %d %d %d 0 %f %f 0 %f",
 									              "DRAW", entityCount, layerIdx, lineType, 0, 0.0, 0.0, 0.0);
 									dxfAddOutput(tmp);
+									dxfDebugMessage(ok, fileName);
 
-									ok = snprintf(tmp, 100, "\t%s %d %f %f %f %f 0 %f %f",
+									ok = snprintf(tmp, TMP_SIZE, "\t%s %d %f %f %f %f 0 %f %f",
 									              "A3", (colorRGB >= 0 ? colorRGB : color), thick, radius, x1, y1, xStartAngle, xCurveAngle);
 									dxfAddOutput(tmp);
+									dxfDebugMessage(ok, fileName);
 
-									ok = snprintf(tmp, 100, "\t%s", "END$SEGS");
+									ok = snprintf(tmp, TMP_SIZE, "\t%s", "END$SEGS");
 									dxfAddOutput(tmp);
 								}
 							} else
 
 								if (eSection == ePoly) {
 									// Save Entity data
-									ok = snprintf(tmp, 100, "%s %d %d %d %d 0 %f %f 0 %f",
+									ok = snprintf(tmp, TMP_SIZE, "%s %d %d %d %d 0 %f %f 0 %f",
 									              "DRAW", entityCount, layerIdx, lineType, 0, 0.0, 0.0, 0.0);
 									dxfAddOutput(tmp);
+									dxfDebugMessage(ok, fileName);
 
 									// Detect polylines that are actually cloesd
 									if (vertices > 1 && vrt_x[0] == vrt_x[vertices - 1]
@@ -2092,20 +2115,22 @@ static void ReadDxfFile(
 									}
 
 									if (closed == 1)
-										ok = snprintf(tmp, 100, "\t%s %d %f %d 0",
+										ok = snprintf(tmp, TMP_SIZE, "\t%s %d %f %d 0",
 										              "F4", (colorRGB >= 0 ? colorRGB : color), thick, vertices);
 									else
-										ok = snprintf(tmp, 100, "\t%s %d %f %d 2",
+										ok = snprintf(tmp, TMP_SIZE, "\t%s %d %f %d 2",
 										              "Y4", (colorRGB >= 0 ? colorRGB : color), thick, vertices);
 									dxfAddOutput(tmp);
+									dxfDebugMessage(ok, fileName);
 
 									for (int v = 0; v < vertices; v++) {
-										ok = snprintf(tmp, 100, "\t\t%f %f 0", vrt_x[v], vrt_y[v]);
+										ok = snprintf(tmp, TMP_SIZE, "\t\t%f %f 0", vrt_x[v], vrt_y[v]);
 										dxfAddOutput(tmp);
 									}
 
-									ok = snprintf(tmp, 100, "\t%s", "END$SEGS");
+									ok = snprintf(tmp, TMP_SIZE, "\t%s", "END$SEGS");
 									dxfAddOutput(tmp);
+									dxfDebugMessage(ok, fileName);
 
 								} else
 
@@ -2246,7 +2271,7 @@ static void ReadDxfFile(
 		}
 	}
 
-	strcpy(tmp, "END$TRACKS");
+	ok = snprintf(tmp, TMP_SIZE, "\t%s", "END$TRACKS");
 	dxfAddOutput(tmp);
 
 	// Find and fix connected end points
@@ -2259,8 +2284,8 @@ static void ReadDxfFile(
 				double d = FindDistance(endPt[i].coord, endPt[j].coord);
 				if (d <= connectDistance) {
 					int li = endPt[i].line;
-					char substr[100];
-					strncpy(substr, DxfOutput[li], 100);
+					char substr[TMP_SIZE];
+					strncpy(substr, DxfOutput[li], TMP_SIZE);
 					sprintf(tmp, "\tT4 %d %s", endPt[j].entity, substr + 4);
 					DxfOutput[li] = MyRealloc(DxfOutput[li], strlen(tmp));
 					strncpy(DxfOutput[li], tmp, strlen(tmp));
