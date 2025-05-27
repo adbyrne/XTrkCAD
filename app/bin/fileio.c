@@ -1926,6 +1926,8 @@ static void ReadDxfFile(
 					// Create the entity. Start numbering with 1
 					entityCount++;
 
+					int useColor = (colorRGB >= 0 ? colorRGB : color);
+
 					if (eSection == eLine) {
 						// Save Entity data
 						if (isTrack && importDxfTrack == 1) {
@@ -1987,7 +1989,7 @@ static void ReadDxfFile(
 							dxfDebugMessage(ok, fileName);
 
 							ok = snprintf(tmp, TMP_SIZE, "\t%s %d %f %f %f 0 %f %f 0",
-							              "L3", (colorRGB >= 0 ? colorRGB : color), thick, x1, y1, x2, y2);
+							              "L3", useColor, thick, x1, y1, x2, y2);
 							dxfAddOutput(tmp);
 							dxfDebugMessage(ok, fileName);
 
@@ -1995,7 +1997,6 @@ static void ReadDxfFile(
 							dxfAddOutput(tmp);
 						}
 					} else
-
 						if (eSection == eCircle) {
 							// DRAW 1 0 0 0 0 -2.000000 -4.500000 0 0.000000
 							ok = snprintf(tmp, TMP_SIZE, "%s %d %d %d %d 0 %f %f 0 %f",
@@ -2004,7 +2005,7 @@ static void ReadDxfFile(
 							dxfDebugMessage(ok, fileName);
 
 							ok = snprintf(tmp, TMP_SIZE, "\t%s %d %f %f %f %f 0",
-							              "G3", (colorRGB >= 0 ? colorRGB : color), thick, radius, x1, y1);
+							              "G3", useColor, thick, radius, x1, y1);
 							dxfAddOutput(tmp);
 							dxfDebugMessage(ok, fileName);
 
@@ -2012,7 +2013,6 @@ static void ReadDxfFile(
 							dxfAddOutput(tmp);
 
 						} else
-
 							if (eSection == eArc) {
 								// Save Entity data
 								if (isTrack && importDxfTrack == 1) {
@@ -2093,7 +2093,7 @@ static void ReadDxfFile(
 									dxfDebugMessage(ok, fileName);
 
 									ok = snprintf(tmp, TMP_SIZE, "\t%s %d %f %f %f %f 0 %f %f",
-									              "A3", (colorRGB >= 0 ? colorRGB : color), thick, radius, x1, y1, xStartAngle, xCurveAngle);
+									              "A3", useColor, thick, radius, x1, y1, xStartAngle, xCurveAngle);
 									dxfAddOutput(tmp);
 									dxfDebugMessage(ok, fileName);
 
@@ -2118,10 +2118,10 @@ static void ReadDxfFile(
 
 									if (closed == 1)
 										ok = snprintf(tmp, TMP_SIZE, "\t%s %d %f %d 0",
-										              "F4", (colorRGB >= 0 ? colorRGB : color), thick, vertices);
+										              "F4", useColor, thick, vertices);
 									else
 										ok = snprintf(tmp, TMP_SIZE, "\t%s %d %f %d 2",
-										              "Y4", (colorRGB >= 0 ? colorRGB : color), thick, vertices);
+										              "Y4", useColor, thick, vertices);
 									dxfAddOutput(tmp);
 									dxfDebugMessage(ok, fileName);
 
