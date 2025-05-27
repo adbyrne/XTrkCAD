@@ -122,7 +122,6 @@ void DoImportObjects( void * typeVP );
 void DoImportModule( void * typeVP );
 void DoImportDXF( void * unused );
 void importDXF( void * unused );
-static void ReadDxfFile( const char*, const char*, BOOL_T );
 void DoExport( void * unused );
 void DoExportDXF( void * unused );
 #if XTRKCAD_CREATE_SVG
