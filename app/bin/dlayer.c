@@ -715,7 +715,7 @@ void LayerSystemDefault( unsigned int inx )
 	layers[inx].module = FALSE;
 	layers[inx].button_off = FALSE;
 	layers[inx].inherit = TRUE;
-	layers[inx].scaleInx = 0;
+	layers[inx].scaleInx = GetLayoutCurScale;
 	GetScaleGauge(layers[inx].scaleInx, &layers[inx].scaleDescInx,
 	              &layers[inx].gaugeInx);
 	layers[inx].minTrackRadius = GetLayoutMinTrackRadius();
