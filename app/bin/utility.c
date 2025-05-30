@@ -57,6 +57,27 @@ double min( double a, double b )
 }
 #endif
 
+/* Swap functions */
+void swapInt(int *a, int *b) {
+	// swap paths
+	int tmp = *a;
+	*a = *b;
+	*b = tmp;
+}
+
+void swapCoord(coOrd* a, coOrd* b) {
+	// swap paths
+	coOrd tmp = *a;
+	*a = *b;
+	*b = tmp;
+}
+
+void swapDouble(double* a, double* b) {
+	// swap paths
+	double tmp = *a;
+	*a = *b;
+	*b = tmp;
+}
 
 
 int CoOrdEqual(coOrd p0, coOrd p1)
