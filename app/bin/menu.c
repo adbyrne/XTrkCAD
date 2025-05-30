@@ -976,11 +976,17 @@ EXPORT void CreateMenus(void)
 	MiscMenuItemCreate(fileM, NULL, "cmdImportModule", _("Import &Module"),
 	                   ACCL_IMPORT_MOD,
 	                   DoImportModule, 0, I2VP(1));
-	MiscMenuItemCreate(fileM, NULL, "cmdOutputbitmap", _("Export to &Bitmap"),
-	                   ACCL_PRINTBM, OutputBitMapInit(), 0,
-	                   NULL);
+	MiscMenuItemCreate(fileM, NULL, "cmdImportDxf", _("Import &Dxf"),
+					   ACCL_IMPORT_DXF,
+					   DoImportDXF, 0, I2VP(1));
+
+	wMenuSeparatorCreate(fileM);
+
 	MiscMenuItemCreate(fileM, NULL, "cmdExport", _("E&xport"), ACCL_EXPORT,
 	                   DoExport, IC_SELECTED, NULL);
+	MiscMenuItemCreate(fileM, NULL, "cmdOutputbitmap", _("Export to &Bitmap"),
+					   ACCL_PRINTBM, OutputBitMapInit(), 0,
+					   NULL);
 	MiscMenuItemCreate(fileM, NULL, "cmdExportDXF", _("Export D&XF"),
 	                   ACCL_EXPORTDXF, DoExportDXF, IC_SELECTED,
 	                   NULL);

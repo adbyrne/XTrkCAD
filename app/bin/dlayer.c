@@ -285,6 +285,8 @@ void SetLayerDefault(unsigned int layer, BOOL_T inherit)
 {
 	if (IsLayerValid(layer)) {
 		layers[layer].inherit = inherit;
+		if (!inherit)
+			layers[layer].scaleInx = GetLayoutCurScale();
 	}
 }
 
@@ -715,7 +717,7 @@ void LayerSystemDefault( unsigned int inx )
 	layers[inx].module = FALSE;
 	layers[inx].button_off = FALSE;
 	layers[inx].inherit = TRUE;
-	layers[inx].scaleInx = GetLayoutCurScale;
+	layers[inx].scaleInx = layerScaleInx;
 	GetScaleGauge(layers[inx].scaleInx, &layers[inx].scaleDescInx,
 	              &layers[inx].gaugeInx);
 	layers[inx].minTrackRadius = GetLayoutMinTrackRadius();

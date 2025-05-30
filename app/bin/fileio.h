@@ -120,6 +120,8 @@ int ExistsCheckpoint( void );
 int LoadCheckpoint( BOOL_T );
 void DoImportObjects( void * typeVP );
 void DoImportModule( void * typeVP );
+void DoImportDXF( void * unused );
+void importDXF( void * unused );
 void DoExport( void * unused );
 void DoExportDXF( void * unused );
 #if XTRKCAD_CREATE_SVG
@@ -139,9 +141,9 @@ void PlaybackMessage( char * );
 void DoPlayBack( void * );
 int MyGetKeyState( void );
 
-int RegLevel( void );
-void ReadKey( void );
-void PopupRegister( void * );
+// int RegLevel( void );
+// void ReadKey( void );
+// void PopupRegister( void * );
 
 void LoadFileList( void );
 void FileInit( void );
