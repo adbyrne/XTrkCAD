@@ -86,6 +86,8 @@ struct DrawTo_t {
 	coOrd base[DTO_SEGS];
 	coOrd baseLast;
 	DIST_T dy[DTO_SEGS];
+	coOrd c[DTO_SEGS];
+	DIST_T r[DTO_SEGS];
 	ANGLE_T angle;
 	ANGLE_T crvAngle;
 	coOrd pts[DTO_SEGS];
@@ -244,7 +246,6 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx)
 		r = fabs(segPtr->u.c.radius);
 		a0 = segPtr->u.c.a0;
 		a1 = segPtr->u.c.a1;
-
 		if (segPtr->u.c.radius > 0) {
 			aa0 = a0;
 		} else {
@@ -287,6 +288,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx)
 						if (n >= DTO_SEGS - 1) { return -1; }
 
 						break;
+
 					case SEG_CRVTRK:
 						r = fabs(segPtr->u.c.radius);
 
@@ -313,6 +315,8 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx)
 						}
 						PointOnCircle(&p0, segPtr->u.c.center, r, aa0);
 						n = dto[pathCnt].n;
+						dto[pathCnt].c[n] = segPtr->u.c.center;
+						dto[pathCnt].r[n] = r;
 						dto[pathCnt].trkSeg[n] = segPtr;
 						dto[pathCnt].base[n] = p0;
 						n++;
@@ -323,6 +327,8 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx)
 							PointOnCircle(&p0, segPtr->u.c.center, r, aa0);
 
 							// n = dto[pathCnt].n;
+							dto[pathCnt].c[n] = segPtr->u.c.center;
+							dto[pathCnt].r[n] = r;
 							dto[pathCnt].trkSeg[n] = segPtr;
 							dto[pathCnt].base[n] = p0;
 							n++;
@@ -441,22 +447,23 @@ void GetTurnoutType()
 	dtod.rgtCnt = rgtCnt;
 
 	// Normal two- or three-way turnout, or a curved turnout
+	double crvMax = 25;
 	if (dtod.origCnt == 1) {
 		if (dtod.pathCnt == 2) {
-			// Check for overly curved legs and bail
-			if ((lftCnt == 1 || rgtCnt == 1) && (dto[1].crvAngle > 15)) {
-				dtod.toType = DTO_INVALID;
-			} else if (strCnt == 1 && crvCnt == 1) {
+			// Check for overly curved paths
+			BOOL_T chkCurve = dto[0].crvAngle <= crvMax && dto[1].crvAngle <= crvMax;
+			if (chkCurve && strCnt == 1 && crvCnt == 1) {
 				dtod.toType = DTO_NORMAL;
 			} else if ((strCnt == 0) && ((lftCnt == 2) || (rgtCnt == 2))) {
 				// Assumes outer curve is [0] and inner is [1]
-				if ((dto[0].crvAngle <= 15) && (dto[1].crvAngle - dto[0].crvAngle <= 15)) {
+				if ((dto[0].crvAngle <= crvMax) && (dto[1].crvAngle - dto[0].crvAngle <= crvMax)) {
 					dtod.toType = DTO_CURVED;
 				}
-			} else if (lftCnt == 1 && rgtCnt == 1) {
+			} else if (chkCurve && lftCnt == 1 && rgtCnt == 1) {
 				dtod.toType = DTO_WYE;
 			}
 		} else if ((dtod.pathCnt == 3) && (strCnt == 1)
+				   && (dto[0].crvAngle <= crvMax && dto[1].crvAngle <= 15 && dto[2].crvAngle <= crvMax)
 		           && (lftCnt == 1) && (rgtCnt == 1)) {
 			dtod.toType = DTO_THREE;
 		}
@@ -470,37 +477,27 @@ void GetTurnoutType()
 			a2 = FindAngle(dto[dtod.str2Path].base[0], dto[dtod.str2Path].base[1]);
 			// Swap the ends of the strPath if large angle
 			if ((a1 > 180.0) && (dto[dtod.strPath].n == 2)) {
-				coOrd tmp = dto[dtod.strPath].base[0];
-				dto[dtod.strPath].base[0] = dto[dtod.strPath].base[1];
-				dto[dtod.strPath].base[1] = tmp;
+				swapCoord(& dto[dtod.strPath].base[0], & dto[dtod.strPath].base[1]);
 
 				i = dto[dtod.strPath].n - 1;
-				tmp = dto[dtod.strPath].pts[0];
-				dto[dtod.strPath].pts[0] = dto[dtod.strPath].pts[i];
-				dto[dtod.strPath].pts[i] = tmp;
+				swapCoord(& dto[dtod.strPath].pts[0], & dto[dtod.strPath].pts[i]);
 
 				a1 = a1 - 180.0;
 				dto[dtod.strPath].angle = a1;
 			}
 			// Swap the ends of the str2Path if large angle
 			if ((a2 > 180.0) && (dto[dtod.str2Path].n == 2)) {
-				coOrd tmp = dto[dtod.str2Path].base[0];
-				dto[dtod.str2Path].base[0] = dto[dtod.str2Path].base[1];
-				dto[dtod.str2Path].base[1] = tmp;
+				swapCoord(& dto[dtod.str2Path].base[0], & dto[dtod.str2Path].base[1]);
 
 				i = dto[dtod.str2Path].n - 1;
-				tmp = dto[dtod.str2Path].pts[0];
-				dto[dtod.str2Path].pts[0] = dto[dtod.str2Path].pts[i];
-				dto[dtod.str2Path].pts[i] = tmp;
+				swapCoord(& dto[dtod.str2Path].pts[0], & dto[dtod.str2Path].pts[i]);
 
 				a2 = a2 - 180.0;
 				dto[dtod.str2Path].angle = a2;
 			}
 			a0 = DifferenceBetweenAngles(a1, a2);
 			if (a0 < 0) {
-				int tmp = dtod.strPath;
-				dtod.strPath = dtod.str2Path;
-				dtod.str2Path = tmp;
+				swapInt(& dtod.strPath, & dtod.str2Path);
 				a0 = NormalizeAngle(-a0);
 			}
 			if ((a0 > 90.0) || (a0 < 0.0)) {
@@ -627,7 +624,6 @@ static void DrawTurnoutFill(
 	if (dto[i1].base[dto[i1].n - 1].y < dto[i2].base[dto[i2].n - 1].y) {
 		i1 = path2;
 		i2 = path1;
-		// a = -a;
 	}
 
 	if (dtod.toType == DTO_THREE) {
@@ -1856,10 +1852,10 @@ static void DrawCrossTurnout(
 	int othPath = 2, secPath = 2;
 	if (dtod.pathCnt == 4) { secPath = 3; }
 
-	if (dto[str2Path].base[0].y < dto[strPath].base[0].y) {
-		// swap paths
-		//swapInt( &strPath, &str2Path );
-	}
+	//if (dto[str2Path].base[0].y < dto[strPath].base[0].y) {
+	//	// swap paths
+	//	swapInt( &strPath, &str2Path );
+	//}
 
 	dto[strPath].angle = FindAngle(dto[strPath].pts[0], dto[strPath].ptsLast);
 	dto[str2Path].angle = FindAngle(dto[str2Path].pts[0], dto[str2Path].ptsLast);
