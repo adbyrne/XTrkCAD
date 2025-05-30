@@ -372,8 +372,10 @@ void DrawCurvedTrack( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, track_cp,
 void DrawStraightTrack( drawCmd_p, coOrd, coOrd, ANGLE_T, track_cp, wDrawColor,
                         long );
 
+void DrawCurvedTies(drawCmd_p d, tieData_t td, coOrd p, DIST_T r,
+	ANGLE_T a0, ANGLE_T a1, wDrawColor color );
 void DrawStraightTies( drawCmd_p d, tieData_t td, coOrd p0, coOrd p1,
-                       wDrawColor color );
+             wDrawColor color );
 wBool_t DoDrawTies(drawCmd_p d, track_cp trk);
 void DrawTie(drawCmd_p d, coOrd pos, ANGLE_T angle, DIST_T length, DIST_T width,
              wDrawColor color, BOOL_T solid);

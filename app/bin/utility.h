@@ -43,6 +43,7 @@ extern DEBUGF_T debugIntersection;
 double max( double a, double b );
 double min( double a, double b );
 #endif
+void swapInt( int *a, int *b );
 double FindDistance( coOrd p0, coOrd p1 );
 int CoOrdEqual(coOrd p0, coOrd p1);
 double NormalizeAngle( double a );

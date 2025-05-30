@@ -51,7 +51,7 @@ enum dtoType {
 };
 
 // Define to plot control points (DTO_NORMAL, DTO_CURVED, DTO_XING, DTO_LCROSS)
-// #define DTO_DEBUG DTO_XING
+// #define DTO_DEBUG DTO_RCROSS
 
 #define DTO_DIM 4  // Maximum number of paths
 #define DTO_SEGS 24 // Maximum number of control points
@@ -443,16 +443,21 @@ void GetTurnoutType()
 	// Normal two- or three-way turnout, or a curved turnout
 	if (dtod.origCnt == 1) {
 		if (dtod.pathCnt == 2) {
-			if (strCnt == 1 && crvCnt == 1) {
-				dtod.toType = DTO_NORMAL;
-			} else if ((strCnt == 0) && ((lftCnt == 2) || (rgtCnt == 2))) {
+			// Check for overly curved legs and bail
+			if ((lftCnt == 1 || rgtCnt == 1) && (dto[1].crvAngle > 15)) {
+				dtod.toType = DTO_INVALID;
+			} 
+			else if (strCnt == 1 && crvCnt == 1) {
+					dtod.toType = DTO_NORMAL;
+			}
+			else if ((strCnt == 0) && ((lftCnt == 2) || (rgtCnt == 2))) {
 				// Assumes outer curve is [0] and inner is [1]
-				if ((dto[0].crvAngle <= 20) && (dto[1].crvAngle - dto[0].crvAngle <= 15)) {
+				if ((dto[0].crvAngle <= 15) && (dto[1].crvAngle - dto[0].crvAngle <= 15)) {
 					dtod.toType = DTO_CURVED;
 				}
 			} else if (lftCnt == 1 && rgtCnt == 1) {
 				dtod.toType = DTO_WYE;
-			}
+			}			
 		} else if ((dtod.pathCnt == 3) && (strCnt == 1)
 		           && (lftCnt == 1) && (rgtCnt == 1)) {
 			dtod.toType = DTO_THREE;
@@ -528,9 +533,9 @@ void GetTurnoutType()
 					dtod.toType = DTO_DCROSS;
 				} else if(dtod.pathCnt == 3) {
 					// Perverse test because the cross paths go Left then Right, for example
-					if(lftCnt == 1) {
+					if (lftCnt == 1) {
 						dtod.toType = DTO_RCROSS;
-					} else if(rgtCnt == 1) {
+					} else if (rgtCnt == 1) {
 						dtod.toType = DTO_LCROSS;
 					} else {
 						dtod.toType = DTO_INVALID;
@@ -540,7 +545,7 @@ void GetTurnoutType()
 		}
 }
 
-#if 0
+#if 1
 /**
  * Draw Layout lines and points
  *
@@ -554,13 +559,12 @@ static void DrawDtoLayout(
 {
 #ifdef DTO_DEBUG
 	// Draw the points and lines from dto
-	double r = dtod.td->width / 2;
-	// if (r < 1) r = 1;
+	double rdot = dtod.td.width / 2;
 
 	int i, j;
 	for (i = 0; i < DTO_DIM; i++) {
 		for (j = 0; j < dto[i].n; j++) {
-			DrawFillCircle(d, dto[i].pts[j], r, drawColorPurple);
+			DrawFillCircle(d, dto[i].pts[j], rdot, drawColorPurple);
 			if (j < dto[i].n - 1) {
 				DrawLine(d, dto[i].pts[j], dto[i].pts[j + 1], 0, drawColorPurple);
 			}
@@ -996,6 +1000,7 @@ static void DrawDtoInit()
 	}
 }
 
+
 /**
  * Draw Normal (Single Origin) Turnout Bridge and Ties. Uses the static dto and dtod structures.
  *
@@ -1161,12 +1166,6 @@ static void DrawNormalTurnout(
 			DIST_T lenr = (dto[othPath].baseLast.x - px + dlenx) / cos(D2R(90.0 - a0));
 			Translate(&p1, p2, angle, -lenr);
 			DrawStraightTies(d, dtod.td, p1, p2, color);
-		} else {
-			p1 = dto[othPath].pts[pn - 2];
-			a0 = FindAngle(p1, p2);
-			Translate(&pos, p2, a0, -dx / 2);
-			DrawTie(d, pos, a0, dtod.td.length, tdwid, color,
-			        tieDrawMode == TIEDRAWMODE_SOLID);
 		}
 		// Restore saved values
 		if(dtod.toType == DTO_THREE) {
@@ -1287,7 +1286,6 @@ static void DrawCurvedTurnout(
 	DIST_T tdlen = dtod.td.length, tdmax = tdlen * 2.5;
 	DIST_T tdspc = dtod.td.spacing, tdspc2 = tdspc / 2.0;
 	DIST_T tdwid = dtod.td.width;
-//	double rdot = tdwid / 2;
 
 	int pn = dto[othPath].n;
 	int qn = dto[secPath].n;
@@ -1457,6 +1455,7 @@ static void DrawCurvedTurnout(
 	}
 
 #ifdef DTO_DEBUG
+	double rdot = tdwid / 2;
 	if (DTO_DEBUG == DTO_CURVED) {
 		DrawFillCircle(d, othEnd, rdot, drawColorGreen);
 		DrawFillCircle(d, secEnd, rdot, drawColorGreen);
@@ -1582,11 +1581,11 @@ static void DrawXingTurnout(
 	dtod.midPt = pos;
 
 #ifdef DTO_DEBUG
-	if(DTO_DEBUG == DTO_XING) {
-		double r = td->width / 2;
-		DrawFillCircle(d,p1,r,drawColorPurple);
-		DrawFillCircle(d,q1,r,drawColorPurple);
-		DrawFillCircle(d,dtod.midPt,r,drawColorPurple);
+	double rdot = dtod.td.width / 2;
+	if (DTO_DEBUG == DTO_XING) {
+		DrawFillCircle(d,p1,rdot,drawColorPurple);
+		DrawFillCircle(d,q1,rdot,drawColorPurple);
+		DrawFillCircle(d,dtod.midPt,rdot,drawColorPurple);
 	}
 #endif
 
@@ -1851,13 +1850,18 @@ static void DrawCrossTurnout(
 
 	// draw the points
 #ifdef DTO_DEBUG
-	if (DTO_DEBUG == DTO_LCROSS) { DrawDtoLayout(d, scaleInx); }
+	if (DTO_DEBUG == DTO_RCROSS) { DrawDtoLayout(d, scaleInx); }
 #endif
 
 	int strPath = dtod.strPath, str2Path = dtod.str2Path;
 	// Bad assumption
 	int othPath = 2, secPath = 2;
 	if (dtod.pathCnt == 4) { secPath = 3; }
+
+	if (dto[str2Path].base[0].y < dto[strPath].base[0].y) {
+		// swap paths
+		//swapInt( &strPath, &str2Path );
+	}
 
 	dto[strPath].angle = FindAngle(dto[strPath].pts[0], dto[strPath].ptsLast);
 	dto[str2Path].angle = FindAngle(dto[str2Path].pts[0], dto[str2Path].ptsLast);
@@ -2056,7 +2060,7 @@ EXPORT void DrawTurnout(
 	long widthOptions = 0;
 	SCALEINX_T scaleInx = GetTrkScale(trk);
 	BOOL_T omitTies = !DoDrawTies(d, trk) || !DrawTwoRails(d,1)
-	                  || ((d->options & DC_SIMPLE) != 0); // || (scaleInx == 0);
+	                  || ((d->options & DC_SIMPLE) != 0); 
 
 	widthOptions = DTS_LEFT | DTS_RIGHT;
 

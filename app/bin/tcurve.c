@@ -732,7 +732,7 @@ static void DrawCurve( track_p t, drawCmd_p d, wDrawColor color )
 	DrawEndPt( d, t, 1, color );
 }
 
-static void DrawCurvedTies(
+EXPORT void DrawCurvedTies(
         drawCmd_p d,
         tieData_t td,
         coOrd p,

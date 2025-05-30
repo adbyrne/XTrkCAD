@@ -57,6 +57,12 @@ double min( double a, double b )
 }
 #endif
 
+void swapInt(int *a, int *b) {
+	// swap paths
+	int tmp = *a;
+	*a = *b;
+	*b = tmp;
+}
 
 
 int CoOrdEqual(coOrd p0, coOrd p1)
