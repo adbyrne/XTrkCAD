@@ -28,12 +28,12 @@ set (IMG3S
 	curved-end curved-line-chord curved-line-end curved-line-middle
 	curved-line-tangent curved-middle curved-tangent cut delete
 	describe description dimension doc-export-bmap doc-export-dxf
-	doc-export-svg doc-export doc-import-mod doc-import doc-new doc-open 
-	doc-print doc-recent doc-revert doc-save-as doc-save doc-setup down 
-	ease-broad ease-cornu ease-gt-broad ease-gt-sharp ease-lt-broad 
-	ease-lt-sharp ease-none ease-normal ease-sharp
-	elevation exit extend filled-box filled-polygon go helix
-	info join-line join layers magnet manage map move
+	doc-export-svg doc-export doc-import-dxf doc-import-mod doc-import 
+	doc-new doc-open doc-print doc-recent doc-revert doc-save-as 
+	doc-save doc-setup down ease-broad ease-cornu ease-gt-broad 
+	ease-gt-sharp ease-lt-broad ease-lt-sharp ease-none ease-normal 
+	ease-sharp elevation exit extend filled-box filled-polygon go 
+	helix info join-line join layers magnet manage map move
 	new-car ok pan-zoom parallel-line parallel parameter paste
 	polygon polyline profile protractor redo reflect roadbed
 	rotate ruler select sensor signal snap-curs snap-grid
