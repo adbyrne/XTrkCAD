@@ -199,11 +199,11 @@ After importing the objects from the file, the imported objects are in selected 
 
 \G{png.d/bimportdxf.png}
 
-Importing displays a file selection dialog to specify the file to import as a module.
+Importing displays a file selection dialog to specify the DXF file to import.
 
 \# \G{png.d/bimportdxf.png}
 
-After importing the objects from the file, the imported objects are in selected state and therefore are drawn in red. This allows you to easily move and rotate the imported objects to their final position.
+This menu item displays option for importing a DXF file. The command actually creates a XTI file that mirrors the contents of the DXF. It is in the same folderr and has the same filename as the DXF. The "Layer 0 Track" option outputs Lines and Arcs in DXF layer 0 as Straight and Curved tracks. The "Import XTI" option immediately imports the XTI file into the layout. "Import as Module" imports the XTI as a module. The Ok button opens a file selection dialog where a DXF file is selected. After importing the objects from the file, the imported objects are in selected state and therefore are drawn in red. This allows you to easily move and rotate the imported objects to their final position.
 
 \rule
 
