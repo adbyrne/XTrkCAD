@@ -978,7 +978,7 @@ EXPORT void CreateMenus(void)
 	                   DoImportModule, 0, I2VP(1));
 	MiscMenuItemCreate(fileM, NULL, "cmdImportDxf", _("Import &Dxf"),
 					   ACCL_IMPORT_DXF,
-					   DoImportDXF, 0, I2VP(1));
+					   DoImportDxf, 0, I2VP(1));
 
 	wMenuSeparatorCreate(fileM);
 
@@ -988,7 +988,7 @@ EXPORT void CreateMenus(void)
 					   ACCL_PRINTBM, OutputBitMapInit(), 0,
 					   NULL);
 	MiscMenuItemCreate(fileM, NULL, "cmdExportDXF", _("Export D&XF"),
-	                   ACCL_EXPORTDXF, DoExportDXF, IC_SELECTED,
+	                   ACCL_EXPORTDXF, DoExportDxf, IC_SELECTED,
 	                   NULL);
 #if XTRKCAD_CREATE_SVG
 	MiscMenuItemCreate( fileM, NULL, "cmdExportSVG", _("Export S&VG"),
@@ -1410,7 +1410,7 @@ static void InitCmdExport(void)
 	                 IC_SELECTED | IC_ACCLKEY, DoExport, NULL);
 	AddToolbarButton("cmdExportDXF",
 	                 wIconCreatePixMap(doc_export_dxf_image3[iconSize]),
-	                 IC_SELECTED | IC_ACCLKEY, DoExportDXF, I2VP(1));
+	                 IC_SELECTED | IC_ACCLKEY, DoExportDxf, I2VP(1));
 	AddToolbarButton("cmdExportBmap",
 	                 wIconCreatePixMap(doc_export_bmap_image3[iconSize]), IC_ACCLKEY,
 	                 OutputBitMapInit(), NULL);

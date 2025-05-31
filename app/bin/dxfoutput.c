@@ -232,7 +232,7 @@ static int DoExportDXFTracks(
 * Create and show the dialog for selected the DXF export filename
 */
 
-void DoExportDXF(void* unused )
+void DoExportDxf(void* unused )
 {
 	//if (selectedTrackCount <= 0) {
 	//    ErrorMessage(MSG_NO_SELECTED_TRK);
@@ -242,7 +242,7 @@ void DoExportDXF(void* unused )
 
 	if (exportDXFFile_fs == NULL)
 		exportDXFFile_fs = wFilSelCreate(mainW, FS_SAVE, 0, _("Export to DXF"),
-		                                 sDXFFilePattern, DoExportDXFTracks, NULL);
+		                                 sDxfFilePattern, DoExportDXFTracks, NULL);
 
 	wFilSelect(exportDXFFile_fs, GetCurrentPath(DXFPATHKEY));
 }

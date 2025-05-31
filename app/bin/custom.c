@@ -60,7 +60,7 @@ char * sSourceFilePattern = NULL;
 char * sSaveFilePattern = NULL;
 char * sImageFilePattern = NULL;
 char * sImportFilePattern = NULL;
-char * sDXFFilePattern = NULL;
+char * sDxfFilePattern = NULL;
 char * sSVGFilePattern = NULL;
 char * sRecordFilePattern = NULL;
 char * sNoteFilePattern = NULL;
@@ -178,8 +178,8 @@ void InitCustom( void )
 		sprintf(buf, _("%s Import Files (*.xti)|*.xti"), Product );
 		sImportFilePattern = strdup(buf);
 	}
-	if (sDXFFilePattern == NULL) {
-		sDXFFilePattern = strdup(_("Data Exchange Format Files (*.dxf)|*.dxf"));
+	if (sDxfFilePattern == NULL) {
+		sDxfFilePattern = strdup(_("Data Exchange Format Files (*.dxf)|*.dxf"));
 	}
 	if (sSVGFilePattern == NULL) {
 		sSVGFilePattern = strdup(
@@ -226,9 +226,9 @@ void CleanupCustom( void )
 		free(sImportFilePattern);
 		sImportFilePattern = NULL;
 	}
-	if (sDXFFilePattern) {
-		free(sDXFFilePattern);
-		sDXFFilePattern = NULL;
+	if (sDxfFilePattern) {
+		free(sDxfFilePattern);
+		sDxfFilePattern = NULL;
 	}
 	if (sSVGFilePattern) {
 		free(sSVGFilePattern);

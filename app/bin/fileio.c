@@ -1329,7 +1329,7 @@ EXPORT void TryCheckPoint()
 			} else {
 				DoSave(NULL);
 			}
-			InfoMessage(_("File AutoSaved"));
+			InfoMessage(_("File AutoSaved"), "");
 			autosave_count = 0;
 		}
 	}
@@ -1555,7 +1555,7 @@ EXPORT void DoImportModule( void * unused )
 
 static void ReadDxfFile(const char*, const char*, BOOL_T);
 
-static int ImportDXF(
+static int ImportDxf(
         int cnt,
         char** fileName,
         void* data)
@@ -1573,7 +1573,7 @@ static int ImportDXF(
 	SetAllTrackSelect(FALSE);
 
 	ImportStart();
-	UndoStart(_("Import DXF"), "importDXF");
+	UndoStart(_("Import Dxf"), "importDxf");
 	useCurrentLayer = TRUE;
 
 	ReadDxfFile(fileName[0], nameOfFile, true);
@@ -1592,26 +1592,23 @@ static int ImportDXF(
 
 static int importDxfTrack = 0;
 static int importDxfXti = 0;
-static int importDxfModule = 0;
 
 static char* importDxfTrackLabels[] = { N_("Layer 0 Track"), NULL };
-static char* importDxfXtiLabels[] = { N_("Import XTI"), NULL };
-static char* importDxfModLabels[] = { N_("Import as Module"), NULL };
+static char* importDxfXtiLabels[] = { N_("No Import"), N_("Import XTI"), N_("Import Module"), NULL };
 
 static paramData_t importDxfPLs[] = {
 	/*0*/ { PD_TOGGLE, &importDxfTrack, "track", PDO_NOPREF, &importDxfTrackLabels, NULL, BC_NOBORDER },
-	/*1*/ { PD_TOGGLE, &importDxfXti, "xti", PDO_NOPREF, &importDxfXtiLabels, NULL, BC_NOBORDER },
-	/*2*/ { PD_TOGGLE, &importDxfModule, "mod", PDO_NOPREF, &importDxfModLabels, NULL, BC_NOBORDER }
+	/*1*/ { PD_RADIO, &importDxfXti, "xti", PDO_NOPREF, &importDxfXtiLabels, NULL, BC_NOBORDER }
 };
 static paramGroup_t importDxfPG = { "importDxf", 0, importDxfPLs, COUNT(importDxfPLs) };
 static wWin_p importDxfW;
 
-EXPORT void DoImportDXF(void* unused)
+EXPORT void DoImportDxf(void* unused)
 {
 	if (!importDxfW) {
 		ParamRegister(&importDxfPG);
-		importDxfW = ParamCreateDialog(&importDxfPG, MakeWindowTitle(_("Import DXF")),
-		                               _("Ok"), importDXF, ParamCancel_Current,
+		importDxfW = ParamCreateDialog(&importDxfPG, MakeWindowTitle(_("Import Dxf")),
+		                               _("Ok"), importDxf, ParamCancel_Current,
 		                               TRUE, NULL, 0, NULL);
 		// blockD.dpi = mainD.dpi;
 	}
@@ -1619,14 +1616,14 @@ EXPORT void DoImportDXF(void* unused)
 	wShow(importDxfW);
 }
 
-EXPORT void importDXF(void* unused)
+EXPORT void importDxf(void* unused)
 {
 	wHide(importDxfW);
 
 	if (importDxf_fs == NULL)
 		importDxf_fs = wFilSelCreate(mainW, FS_LOAD, 0,
-		                             _("Import DXF"),
-		                             sDXFFilePattern, ImportDXF, NULL);
+		                             _("Import Dxf"),
+		                             sDxfFilePattern, ImportDxf, NULL);
 
 	wFilSelect(importDxf_fs, GetCurrentPath(LAYOUTPATHKEY));
 }
@@ -2335,21 +2332,21 @@ static void ReadDxfFile(
 
 
 	// Import the XTI file
-	if (importDxfXti == 1) {
+	if (importDxfXti >= 1) {
 
 		int saveLayer = curLayer;
 		int layer = 0;
 
-		if (importDxfModule) {
+		if (importDxfXti == 2) {
 			layer = FindUnusedLayer(0);
 			if (layer == -1) {
-				NoticeMessage(MSG_NO_EMPTY_LAYER, _("Ok"), NULL, pathName, 0);
+				NoticeMessage(MSG_NO_EMPTY_LAYER, _("Ok"), NULL, fileName, 0);
 				return;
 			}
 			char LayerName[80];
 			LayerName[0] = '\0';
 			sprintf(LayerName, _("Module - %s"), fileName);
-			if (layer >= 0) { SetCurrLayer(layer, NULL, 0, NULL, NULL); }
+			SetCurrLayer(layer, NULL, 0, NULL, NULL); 
 			SetLayerName(layer, LayerName);
 		}
 
@@ -2357,7 +2354,7 @@ static void ReadDxfFile(
 		BOOL_T ret = ReadTrackFile(pathName, fileName, FALSE, TRUE, TRUE);
 
 		if (ret) {
-			if (importDxfModule) { SetLayerModule(layer, TRUE); }
+			if ( importDxfXti == 2 ) { SetLayerModule(layer, TRUE); }
 			useCurrentLayer = FALSE;
 		}
 		SetCurrLayer(saveLayer, NULL, 0, NULL, NULL);
