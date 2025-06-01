@@ -1553,12 +1553,55 @@ EXPORT void DoImportModule( void * unused )
  *
  */
 
-static void ReadDxfFile(const char*, const char*, BOOL_T);
+static void ImportDxfFileSel( void* unused );
+static int ImportDxf( int cnt, char** fileName, void* data );
+static void ProcessDxfFile( const char* filePath, const char* fileName, BOOL_T complain );
 
+static int importDxfTrack = 0;
+static int importDxfXti = 0;
+
+static char* importDxfTrackLabels[] = { N_("Layer 0 Track"), NULL };
+static char* importDxfXtiLabels[] = { N_("No Import"), N_("Import XTI"), N_("Import Module"), NULL };
+
+static paramData_t importDxfPLs[] = {
+	/*0*/ { PD_TOGGLE, &importDxfTrack, "track", PDO_NOPREF, &importDxfTrackLabels, NULL, BC_NOBORDER },
+	/*1*/ { PD_RADIO, &importDxfXti, "xti", PDO_NOPREF, &importDxfXtiLabels, NULL, BC_NOBORDER }
+};
+static paramGroup_t importDxfPG = { "importDxf", 0, importDxfPLs, COUNT(importDxfPLs) };
+static wWin_p importDxfW;
+
+/* Called from File menu */
+EXPORT void DoImportDxf( void* unused )
+{
+	if (!importDxfW) {
+		ParamRegister(&importDxfPG);
+		importDxfW = ParamCreateDialog(&importDxfPG, MakeWindowTitle(_("Import Dxf")),
+		                               _("Ok"), ImportDxfFileSel, ParamCancel_Current,
+		                               TRUE, NULL, 0, NULL);
+		// blockD.dpi = mainD.dpi;
+	}
+	ParamLoadControls(&importDxfPG);
+	wShow(importDxfW);
+}
+
+/* Called from Param Dialog above */
+static void ImportDxfFileSel(void* unused)
+{
+	wHide(importDxfW);
+
+	if (importDxf_fs == NULL)
+		importDxf_fs = wFilSelCreate(mainW, FS_LOAD, 0,
+		                             _("Import Dxf"),
+		                             sDxfFilePattern, ImportDxf, NULL);
+
+	wFilSelect(importDxf_fs, GetCurrentPath(LAYOUTPATHKEY));
+}
+
+/* Called from File Select above */
 static int ImportDxf(
-        int cnt,
-        char** fileName,
-        void* data)
+	int cnt,
+	char** fileName,
+	void* data)
 {
 	char* nameOfFile;
 	long paramVersionOld = paramVersion;
@@ -1576,7 +1619,7 @@ static int ImportDxf(
 	UndoStart(_("Import Dxf"), "importDxf");
 	useCurrentLayer = TRUE;
 
-	ReadDxfFile(fileName[0], nameOfFile, true);
+	ProcessDxfFile(fileName[0], nameOfFile, true);
 
 	ImportEnd(zero, TRUE, FALSE);
 
@@ -1588,44 +1631,6 @@ static int ImportDxf(
 	SelectRecount();
 
 	return TRUE;
-}
-
-static int importDxfTrack = 0;
-static int importDxfXti = 0;
-
-static char* importDxfTrackLabels[] = { N_("Layer 0 Track"), NULL };
-static char* importDxfXtiLabels[] = { N_("No Import"), N_("Import XTI"), N_("Import Module"), NULL };
-
-static paramData_t importDxfPLs[] = {
-	/*0*/ { PD_TOGGLE, &importDxfTrack, "track", PDO_NOPREF, &importDxfTrackLabels, NULL, BC_NOBORDER },
-	/*1*/ { PD_RADIO, &importDxfXti, "xti", PDO_NOPREF, &importDxfXtiLabels, NULL, BC_NOBORDER }
-};
-static paramGroup_t importDxfPG = { "importDxf", 0, importDxfPLs, COUNT(importDxfPLs) };
-static wWin_p importDxfW;
-
-EXPORT void DoImportDxf(void* unused)
-{
-	if (!importDxfW) {
-		ParamRegister(&importDxfPG);
-		importDxfW = ParamCreateDialog(&importDxfPG, MakeWindowTitle(_("Import Dxf")),
-		                               _("Ok"), importDxf, ParamCancel_Current,
-		                               TRUE, NULL, 0, NULL);
-		// blockD.dpi = mainD.dpi;
-	}
-	ParamLoadControls(&importDxfPG);
-	wShow(importDxfW);
-}
-
-EXPORT void importDxf(void* unused)
-{
-	wHide(importDxfW);
-
-	if (importDxf_fs == NULL)
-		importDxf_fs = wFilSelCreate(mainW, FS_LOAD, 0,
-		                             _("Import Dxf"),
-		                             sDxfFilePattern, ImportDxf, NULL);
-
-	wFilSelect(importDxf_fs, GetCurrentPath(LAYOUTPATHKEY));
 }
 
 char dxfCode[20];
@@ -1756,7 +1761,7 @@ static void dxfDebugMessage(int ok, const char *fileName)
 }
 
 // The main ReadDxfFile function
-static void ReadDxfFile(
+static void ProcessDxfFile(
         const char* pathName,
         const char* fileName,
         BOOL_T complain)
@@ -2295,9 +2300,9 @@ static void ReadDxfFile(
 
 	// Change the extension to create the XTI file
 	char* p = strstr(pathName, ".dxf");
-	if (p == NULL) {
-		p = strstr(pathName, ".DXF");        // stupid Windows
-	}
+	//if (p == NULL) {
+	//	p = strstr(pathName, ".DXF");        // stupid Windows
+	//}
 	if (p != NULL) {
 		memcpy(p, ".xti", 4);
 	}

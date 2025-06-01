@@ -121,7 +121,6 @@ int LoadCheckpoint( BOOL_T );
 void DoImportObjects( void * typeVP );
 void DoImportModule( void * typeVP );
 void DoImportDxf( void * unused );
-void importDxf( void * unused );
 void DoExport( void * unused );
 void DoExportDxf( void * unused );
 #if XTRKCAD_CREATE_SVG
