@@ -1565,7 +1565,7 @@ static char* importDxfXtiLabels[] = { N_("No Import"), N_("Import XTI"), N_("Imp
 
 static paramData_t importDxfPLs[] = {
 	/*0*/ { PD_TOGGLE, &importDxfTrack, "track", PDO_NOPREF, &importDxfTrackLabels, NULL, BC_NOBORDER },
-	/*1*/ { PD_RADIO, &importDxfXti, "xti", PDO_NOPREF, &importDxfXtiLabels, NULL, BC_NOBORDER }
+	/*1*/ { PD_RADIO, &importDxfXti, "xti", PDO_NOPREF, &importDxfXtiLabels, NULL, BC_NONE }
 };
 static paramGroup_t importDxfPG = { "importDxf", 0, importDxfPLs, COUNT(importDxfPLs) };
 static wWin_p importDxfW;

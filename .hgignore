@@ -4,9 +4,6 @@
 .settings.json
 build/
 .vs/
-app/bin/bitmap/16pix/
-app/bin/bitmap/24pix/
-app/bin/bitmap/32pix/
 _CPack_Packages/
 syntax: glob
 *.mo
