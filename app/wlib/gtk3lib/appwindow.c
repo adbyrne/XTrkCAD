@@ -45,7 +45,11 @@ static wControl_p appMainWindow;
 GtkWidget *
 wlibAppWinGetMain()
 {
-	return(appMainWindow->widget);
+	if(appMainWindow) {
+		return(appMainWindow->widget);
+	} else {
+		return(NULL);
+	}
 }
 
 /**
@@ -162,14 +166,13 @@ wControl_p wWinMainCreate(
 		strcpy(wConfigName, name);
 	}
 
+	puts("Create Mainwindow");
 	wDrawColorWhite = wDrawFindColor(0xFFFFFF);
 	wDrawColorBlack = wDrawFindColor(0x000000);
 
-	appMainWindow = g_malloc0(sizeof(struct wWindow_t));
 	appMainWindow = wlibControlNew(W_MAIN, NULL, nameStr, context);
+	printf("MainWindow %ld\n", (long)appMainWindow);
 
-//	appMainWindow->helpTopic = g_strdup(helpStr);
-//	appMainWindow->name = g_strdup(nameStr);
 	wcontrol = CONTROL_GET_ATTRIBUTES_PTR(appMainWindow, window);
 	wcontrol->winProc = winProc;
 	wcontrol->option = option;
