@@ -117,7 +117,7 @@ GdkPixbuf* wlibPixbufFromXBM( wIcon_p ip)
             rgb & 0xFF);
     pixmapData[1] = ". c None s None";
     pixmapData[2] = line2;
-    bits = ip->bits;
+    bits = (const char *)ip->bits;
 
     for (row = 0; row < ip->h; row++) {
         pixmapData[row + 3] = (char*) malloc((ip->w + 1) * sizeof **pixmapData);

@@ -672,7 +672,7 @@ EXPORT void CompoundCustMgmLoad( void )
  */
 
 wIndex_t FindListItemByContext(
-        wList_p listP,
+        wControl_p listP,
         void * context )
 {
 	if ( listP == NULL ) {

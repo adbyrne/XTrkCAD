@@ -13,6 +13,7 @@
 #endif
 
 #include <stdbool.h>
+#include <stddef.h>
 
 #ifdef USE_SIMPLE_GETTEXT
 char *bindtextdomain( char *domainname, char *dirname );
@@ -99,7 +100,7 @@ void wBalloonHelpUpdate(void);
 
 extern long debugWindow;
 extern long wDebugFont;
-
+*/
 /*----------------------------------------------------------------------------
  * Application main window 
  */
@@ -160,7 +161,7 @@ wControl_p wBitmapViewCreate(wControl_p parent,
                          const wIcon_p iconP);
 
 wIcon_p wIconCreatePixBufFromResource(const char *prefix, const char* filename);
-wIcon_p wIconCreatePixMap(	const wIconBitMap_t  );
+//wIcon_p wIconCreatePixMap(	const wIconBitMap_t icon );
 void wIconSetColor(		wIcon_p, wDrawColor );
 
 /*------------------------------------------------------------------------------
@@ -226,7 +227,7 @@ wControl_p wRadioCreate(wControl_p parent,
                         wChoiceCallBack_p action, 
                         void* context);
 
-/** Toggle buttons */
+/** Toggle buttonlongs */
 
 void wToggleSetValue(wControl_p bc, long value);
 long wToggleGetValue(wControl_p b);
@@ -274,13 +275,9 @@ wDrawColor wDrawColorGray(int percent);
 // the following are placeholders for functions that are no longer needed
 // after color palettes were removed. 
 
-#define wDrawFindColor(rgb) \
-_Pragma("message (\"Obsolete function wDrawFindColor used!\")") \
-(rgb)
+#define wDrawFindColor(rgb) (rgb) 
 
-#define wDrawGetRGB( color ) \
-_Pragma("message (\"Obsolete function wDrawGetRGB used!\")") \
-(color) 
+#define wDrawGetRGB( color )  (color)
 
 /*------------------------------------------------------------------------------
  *
@@ -835,7 +832,7 @@ struct rendererContext {
     wControl_p list;
     void* context;
 };
-wListSetColumnEditable(wControl_p list, const char* renderer, void *context);
+int wListSetColumnEditable(wControl_p list, const char* renderer, void *context);
 
 /*------------------------------------------------------------------------------
  *

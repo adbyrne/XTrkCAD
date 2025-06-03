@@ -118,7 +118,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 	case C_START:
 
 		if (parPLs[0].control==NULL) {
-			FormCreateControls(parGroup, NULL);
+			FormCreateControls(parGroup);
 		}
 	
 		ReadSeparation(parType);

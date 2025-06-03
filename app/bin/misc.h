@@ -129,11 +129,11 @@ addButtonCallBack_t PriceListInit( void );
 addButtonCallBack_t ParamFilesInit( void );
 addButtonCallBack_t ControlMgrInit ( void );
 
-/* cdraw.h */
+/* cdraw.c */
 track_p NewText( wIndex_t index, coOrd p, ANGLE_T angle, char * text,
                  CSIZE_T textSize, wDrawColor color, BOOL_T boxed );
 void LoadFontSizeList( wControl_p control, long fontSize);
-void UpdateFontSizeList( long *, wList_p, wIndex_t );
+void UpdateFontSizeList( long *fontSizeR, wControl_p list,	wIndex_t listInx  );
 long GetFontSize(wIndex_t);
 long GetFontSizeIndex(long size);
 

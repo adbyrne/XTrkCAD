@@ -14,6 +14,8 @@ endif()
 if(UNIX)
     include(FindPkgConfig)
     set(XTRKCAD_USE_GTK_DEFAULT ON)
+	
+	add_compile_options(-Wno-incompatible-pointer-types)
 
     # Configure help display and i18n
     if(APPLE)

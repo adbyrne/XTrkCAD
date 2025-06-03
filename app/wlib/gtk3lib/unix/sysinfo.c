@@ -24,8 +24,7 @@
 #include <stdlib.h>
 
 #include <wlib.h>
-#include "gtkint.h"
-
+#include "../gtkint.h"
 
 static char *buffer;
 
@@ -91,6 +90,25 @@ wGetOSVersion()
 }
 
 
+/**
+ * Get the name of the configuration file.
+ *
+ * \return pointer to the filename.
+ *
+ */
+
+ char *
+ wGetProfileFilename()
+ {
+	 gchar* profile;
+	 
+	 profile = g_strdup_printf("%s/%s.rc",  wGetAppWorkDir(), wConfigName);
+	 buffer = g_strdup(profile);
+ 
+	 g_free(profile);
+ 
+	 return(buffer);
+ }
 
 /**
  * Get the name of the current user. The result is put into a buffer and is only

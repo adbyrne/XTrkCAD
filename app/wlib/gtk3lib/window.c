@@ -798,6 +798,7 @@ static gint window_char_event(
     //} else {
     //    return FALSE;
     //}
+    return FALSE;
 }
 
 void wSetGeometry(wControl_p win, wWinPix_t min_width, wWinPix_t max_width, wWinPix_t min_height, wWinPix_t max_height, wWinPix_t base_width, wWinPix_t base_height, double aspect_ratio ) {
@@ -1182,5 +1183,5 @@ void wExit(int rc)		/* Application return code */
     if (gtkMainW && gtkMainW->winProc != NULL) {
         // gtkMainW->winProc(gtkMainW, wQuit_e, NULL, gtkMainW->attributes.window);
     }
-    g_application_quit(wlibGetApp());
+    g_application_quit(G_APPLICATION(wlibGetApp()));
 }

@@ -811,7 +811,7 @@ EXPORT wIndex_t InitGrid( wMenu_p menu )
 
 EXPORT void SnapGridEnable( void * unused )
 {
-	static inTransition = FALSE;
+	static int inTransition = FALSE;
 	if (!inTransition) {
 		inTransition = TRUE;
 
@@ -824,7 +824,7 @@ EXPORT void SnapGridEnable( void * unused )
 
 EXPORT void SnapGridShow(void* unused)
 {
-	static inTransition = FALSE;
+	static int inTransition = FALSE;
 
 	if (!inTransition) {
 		inTransition = TRUE;

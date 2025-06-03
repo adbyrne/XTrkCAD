@@ -127,19 +127,19 @@ EXPORT void ParamRegister(paramGroup_p pg)
 
 EXPORT void ParamUpdatePrefs(void) 
 {
-    void ParamUpdatePrefsOrig(void);
+    ParamUpdatePrefsOrig();
 }
 
 EXPORT void ParamGroupRecord(paramGroup_p pg)
 {
-    void ParamGroupRecordOrig(pg);
+    ParamGroupRecordOrig(pg);
 }
 
 EXPORT void ParamStartRecord(FILE* macroFile)
 {
     FormStartRecord(macroFile);
 
-    void ParamStartRecordOrig(macroFile);
+    ParamStartRecordOrig(macroFile);
 }
 
 
@@ -167,7 +167,7 @@ EXPORT wBool_t ParamCheckInputs(
 }
 
 
-EXPORT void ParamResetInvalid(wControl_p win)
+EXPORT void ParamResetInvalid(wWin_p win)
 {
     //FormResetInvalid(win);
     //ParamResetInvalidOrig(win);

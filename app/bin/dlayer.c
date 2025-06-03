@@ -181,6 +181,8 @@ static void InitializeLayers(void LayerInitFunc(void), int newCurrLayer);
 static void LayerPrefSave(void);
 static void LayerPrefLoad(void);
 
+static void CreateLayerButtons();
+
 int IsLayerValid(unsigned int layer)
 {
 	return (layer <= NUM_LAYERS && layer != -1);
@@ -1117,7 +1119,7 @@ LayerPrefSave(void)
 			sprintf(buffer, LAYERPREF_NAME ".%0u", inx);
 			wPrefSetString(LAYERPREF_SECTION, buffer, layers[inx].name);
 
-			layerSetInteger(inx, LAYERPREF_COLOR, wDrawGetRGB(layers[inx].color));
+			layerSetInteger(inx, LAYERPREF_COLOR, layers[inx].color);
 
 			flags = 0;
 			if (layers[inx].frozen) {
@@ -1947,7 +1949,7 @@ BOOL_T WriteLayers(FILE * f)
 			        layers[inx].visible,
 			        layers[inx].frozen,
 			        layers[inx].onMap,
-			        wDrawGetRGB(layers[inx].color),
+			        layers[inx].color,
 			        layers[inx].module,
 			        layers[inx].useColor ? 0 : 1,
 			        ColorFlags,

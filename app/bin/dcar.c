@@ -1166,7 +1166,7 @@ static BOOL_T CarPartRead(
 	}
 	dim.truckCenterOffset = longCenterOffset/1000.0;
 	CarPartNew( NULL, curParamFileIndex, LookupScale(scale), title, options, type,
-	            &dim, wDrawFindColor(rgb) );
+	            &dim, rgb);
 	MyFree( title );
 	return TRUE;
 }
@@ -3732,7 +3732,7 @@ void CarDlgError(
 	p->bInvalid = !ok;
 	ParamHilite( p->group->win, p->control, !ok );
 	wWinPix_t h = wControlGetHeight(p->control);
-	wTooltipSet( p->control, 0, -h*3/4, ok?NULL:msg );
+	//wTooltipSet( p->control, 0, -h*3/4, ok?NULL:msg );
 }
 
 

@@ -22,6 +22,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include <stdint.h>
 #include <stdlib.h>
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
@@ -1237,7 +1238,7 @@ wControl_p wMain( int argc, char * argv[] )
 
 	// wWinShow( mainW, FALSE );
 
-	wSetBalloonHelp(balloonHelp);
+	wInitTooltip(balloonHelp, TooltipsGetCount());
 
 #ifdef TEST_PULLDOWNMENU
 	TestMenu(mainW);

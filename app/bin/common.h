@@ -37,8 +37,8 @@
 #include <sys/types.h>
 #include <time.h>
 
-#include "include\dynarray.h"
-#include "include\xtctypes.h"
+#include "dynarray.h"
+#include "xtctypes.h"
 #include "wlib.h"
 
 #ifndef WINDOWS

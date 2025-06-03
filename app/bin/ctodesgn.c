@@ -2945,7 +2945,7 @@ static void NewTurnOk( void * context )
 		cp += strlen(cp);
 	}
 	sprintf( cp, " %0.6f %0.6f %ld", newTurnRoadbedWidth,
-	         newTurnRoadbedLineWidth, wDrawGetRGB(newTurnRoadbedColor) );
+	         newTurnRoadbedLineWidth, newTurnRoadbedColor );
 	customInfoP = MyStrdup( tempCustom );
 	strcpy( tempCustom, message );
 
@@ -3661,13 +3661,13 @@ EXPORT char * PutTitle( char * cp )
 	return title;
 }
 
-
+/*
 long wDrawGetRGB(
         wDrawColor color )
 {
 	return newTurnRoadbedColorRGB;
 }
-
+*/
 EXPORT BOOL_T WriteSegs(
         FILE * f,
         wIndex_t segCnt,

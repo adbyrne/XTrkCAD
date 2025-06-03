@@ -33,7 +33,7 @@ int log_form = 0;
 static dynArr_t dialogGroups_da;
 #define dialogGroups(N) DYNARR_N( paramGroup_p, dialogGroups_da, N )
 
-static AddGroupPtrToItem(paramGroup_p pg)
+static void AddGroupPtrToItem(paramGroup_p pg)
 {
 	for (int i = 0; i < (pg->paramCnt); i++) {
 		paramData_t* p = (pg->paramPtr) + i;

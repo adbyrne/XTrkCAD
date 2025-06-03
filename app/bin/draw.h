@@ -275,8 +275,10 @@ void PanMenuEnter(void * modeVP);
 
 void InitCmdZoom(wMenu_p, wMenu_p, wMenu_p, wMenu_p);
 
-void InfoPos(coOrd);
-void SetMessage(char *);
+void InfoScale(void);
+void InfoPos(coOrd position);
+void SetMessage(char *infotext);
+void SetInfoBar(void);
 
 extern wIndex_t panCmdInx;
 

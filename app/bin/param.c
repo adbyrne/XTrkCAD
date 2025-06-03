@@ -638,6 +638,7 @@ EXPORT void ParamLoadControlOrig(
 	case PD_MENU:
 	case PD_MENUITEM:
 	case PD_BITMAP:
+	default:
 		break;
 	}
 }
@@ -812,6 +813,7 @@ EXPORT long ParamUpdateOrig(
 		case PD_MENU:
 		case PD_MENUITEM:
 		case PD_BITMAP:
+		default:
 			break;
 		}
 	}
@@ -911,6 +913,7 @@ void ParamLoadDataOrig(
 		case PD_MENU:
 		case PD_MENUITEM:
 		case PD_BITMAP:
+		default:
 			break;
 		}
 	}
@@ -1030,6 +1033,7 @@ static long ParamIntRestore(
 		case PD_MENU:
 		case PD_MENUITEM:
 		case PD_BITMAP:
+		default:
 			break;
 		}
 	}
@@ -1078,6 +1082,7 @@ static void ParamIntSave(
 			case PD_MENU:
 			case PD_MENUITEM:
 			case PD_BITMAP:
+			default:
 				break;
 			}
 		}
@@ -1212,6 +1217,7 @@ EXPORT void ParamRegisterOrig( paramGroup_p pg )
 		case PD_MENU:
 		case PD_MENUITEM:
 		case PD_BITMAP:
+		default:
 			break;
 		}
 	}
@@ -1303,6 +1309,7 @@ EXPORT void ParamUpdatePrefsOrig( void )
 			case PD_MENU:
 			case PD_MENUITEM:
 			case PD_BITMAP:
+			default:
 				break;
 			}
 		}
@@ -1364,6 +1371,7 @@ EXPORT void ParamGroupRecordOrig(
 		case PD_MENU:
 		case PD_MENUITEM:
 		case PD_BITMAP:
+		default:
 			break;
 		}
 	}
@@ -1611,8 +1619,7 @@ static void ParamFloatPush( const char * val, void * dp )
 		}
 	}
 	if ( !valid ) {
-		wWinPix_t h = wControlGetHeight(p->control);
-		wTooltipSet( p->control, 0, -h*3/4, decodeErrorStr );
+		wTooltipSetText( p->control, decodeErrorStr );
 		p->bInvalid = TRUE;
 		ParamHilite( p->group->win, p->control, p->bInvalid );
 		return;
@@ -1620,7 +1627,7 @@ static void ParamFloatPush( const char * val, void * dp )
 	if ( !ParamFloatRangeCheck( p, valF ) ) {
 		return;
 	}
-	wTooltipSet( p->control, 0, 0, NULL );
+	wTooltipSetText( p->control, NULL );
 	p->bInvalid = FALSE;
 
 	if (recordParamF && (p->option&PDO_NORECORD)==0 && p->group->nameStr
@@ -1661,13 +1668,12 @@ static void ParamStringPush( const char * val, void * dp )
 	                          p->nameStr, p->enter_pressed, value ) );
 	if ( ((!paramPlayback) && p->option & PDO_NOTBLANK) && value[0] == '\0' ) {
 		p->bInvalid = TRUE;
-		wTooltipSet( p->control, 0, 0, NULL );
-		wWinPix_t h = wControlGetHeight(p->control);
-		wTooltipSet( p->control, 0, -h*3/4, _("String cannot be blank") );
+		wTooltipSetText( p->control, NULL );
+		wTooltipSetText( p->control, _("String cannot be blank") );
 		ParamHilite( p->group->win, p->control, TRUE );
 		return;
 	}
-	wTooltipSet( p->control, 0, 0, NULL );
+	wTooltipSetText( p->control, NULL );
 	p->bInvalid = FALSE;
 	ParamHilite( p->group->win, p->control, FALSE );
 
@@ -1676,10 +1682,10 @@ static void ParamStringPush( const char * val, void * dp )
 		((char *)p->valueP)[p->max_string - 1] = '\0';
 		if (strlen(value) > p->max_string-1) {
 			p->bInvalid = TRUE;
-			wTooltipSet( p->control, 0, 0, NULL );
+			wTooltipSetText( p->control, NULL );
 			wWinPix_t h = wControlGetHeight(p->control);
 			sprintf( message, _("String is too long, Max length is %u"), p->max_string-1 );
-			wTooltipSet( p->control, 0, -h*3/4, message );
+			wTooltipSetText( p->control, message );
 			ParamHilite( p->group->win, p->control, TRUE );
 		}
 	}
@@ -1817,8 +1823,7 @@ EXPORT wBool_t ParamCheckInputsOrig(
 	if ( bInvalid ) {
 		// At least 1 invalid entry
 		LOG( log_paraminput, 1, ( "  Group %s Invalid\n", group->nameStr ) );
-		wTooltipSet( b, 0, -29,
-		                    _("Invalid input(s), please correct the hilighted field(s)") );
+		wTooltipSetText( b, _("Invalid input(s), please correct the hilighted field(s)") );
 		wFlush();
 		return FALSE;
 	}
@@ -1843,7 +1848,7 @@ static void ParamButtonOk( void * groupVP )
 		group->okProc( group );
 	}
 
-	wTooltipSet( (wControl_p)group->okB, 0, 0, NULL );
+	wTooltipSetText( (wControl_p)group->okB, NULL );
 	wFlush();
 
 	LOG( log_paraminput, 1, ( "ParamButtonOk -> Ok\n" ) );
@@ -1868,26 +1873,26 @@ EXPORT void ParamCancel_Undo(
 /* Cancel button, exits commands leaving control values as current
  */
 EXPORT void ParamCancel_Current(
-	paramGroup_p group )
+	wControl_p control )
 {
-	wHide( group->win );
+	wHide( control );
 }
 
 /* As above, but always exit command
  */
 EXPORT void ParamCancel_Reset(
-	paramGroup_p group)
+	wControl_p control)
 {
 	ResetIfNotSticky();
-	ParamCancel_Current(group);
+	ParamCancel_Current(control);
 }
 
 /* Cancel button, exits commands restoring control values
  */
 EXPORT void ParamCancel_Restore(
-	paramGroup_p group )
+	wControl_p control )
 {
-	ParamCancel_Current(group);
+	ParamCancel_Current(control);
 }
 
 static void ParamButtonCancel( void * groupVP )
@@ -1932,7 +1937,7 @@ EXPORT void ParamResetInvalidOrig(
 					LOG( log_paraminput, 1, ( "  %s Invalid\n", p->nameStr ) );
 				}
 				ParamHilite( win, p->control, FALSE );
-				wTooltipSet( p->control, 0, 0, NULL );
+				wTooltipSetText( p->control, NULL );
 				p->bInvalid = FALSE;
 			}
 			break;
@@ -2180,6 +2185,7 @@ static void ParamPlayback( char * line )
 			case PD_MESSAGE:
 			case PD_MENU:
 			case PD_BITMAP:
+			default:
 				break;
 			case PD_MENUITEM:
 				if (p->valueP) {
@@ -2189,6 +2195,7 @@ static void ParamPlayback( char * line )
 					((wButtonCallBack_p)(p->valueP))( p->context );
 				}
 				break;
+
 			}
 			if ( p->type != PD_DRAW && p->type != PD_MESSAGE && p->type != PD_MENU
 			     && p->type != PD_MENUITEM ) {
@@ -2339,6 +2346,7 @@ static void ParamCheck( char * line )
 			case PD_MENU:
 			case PD_MENUITEM:
 			case PD_BITMAP:
+			default:
 				break;
 			}
 			if ( hasError ) {
@@ -2522,7 +2530,7 @@ static void ParamCreateControl(
 		break;
 	case PD_BITMAP:
 		iconP = pd->winData;
-		pd->control = (wControl_p)wBitmapCreate( win, xx, yy, pd->winOption, iconP );
+		pd->control = (wControl_p)wBitmapCreate( xx, yy, pd->winOption );
 		break;
 	default:
 		CHECK(FALSE);

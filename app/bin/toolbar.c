@@ -25,6 +25,7 @@
 #include "custom.h"
 #include "fileio.h"
 #include <form.h>
+#include "paths.h"
 #include "track.h"
 #include "include/toolbar.h"
 
@@ -582,7 +583,7 @@ ToolbarLoadConfig(void)
 
 	wPrefGetInteger("pref", "iconsize", (long*)&iconSize, 0);
 	if (recordF)
-		fprintf(recordF, "PARAMETER %s %s -> %ld", "pref",
+		fprintf(recordF, "PARAMETER %s %s -> %d", "pref",
 			"iconsize", iconSize);
 
 	LoadIconResource(iconSize);

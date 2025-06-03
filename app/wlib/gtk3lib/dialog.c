@@ -102,7 +102,7 @@ RestoreWindowSizePos(GtkWidget* window, const char* name)
     }
 }
 
-static
+static void
 SaveWindowSizePos(const GtkWidget* window, const char *name)
 {
     gint width;
@@ -113,12 +113,12 @@ SaveWindowSizePos(const GtkWidget* window, const char *name)
 
     gtk_window_get_size(GTK_WINDOW(window), &width, &height);
 
-    value = g_strdup_printf("%ld %ld", width, height);
+    value = g_strdup_printf("%d %d", width, height);
     wPrefSetString(name, "size", value);
     g_free(value);
 
     gtk_window_get_position(GTK_WINDOW(window), &x, &y);
-    value = g_strdup_printf("%ld %ld", x, y);
+    value = g_strdup_printf("%d %d", x, y);
     wPrefSetString(name, "pos", value);
     g_free(value);
 

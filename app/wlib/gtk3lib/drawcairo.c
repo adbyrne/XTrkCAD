@@ -290,7 +290,7 @@ void wDrawDelayUpdate(
 	if ( (!delay) && bd->attributes.draw.delayUpdate ) {
 		update_rect.x = 0;
 		update_rect.y = 0;
-		wDrawGetSize(bd, &update_rect.width, &update_rect.height);
+		wDrawGetSize(bd, (wWinPix_t *)&update_rect.width, (wWinPix_t *)&update_rect.height);
 		cairo_region_t * cairo_region = cairo_region_create_rectangle(&update_rect);
 		gtk_widget_queue_draw_region(bd->widget, cairo_region);
 		cairo_region_destroy(cairo_region);
@@ -853,7 +853,7 @@ void wDrawClearTemp(wControl_p drawingArea)
 	gtk_widget_get_allocation(drawingArea->widget, &allocation);
 
 	if ( iDrawLog >= 1 ) {
-		printf( "%ld: wDrawClearTemp %ld+%ld\n", lDrawCnt++, allocation.width, allocation.height  );
+		printf( "%ld: wDrawClearTemp %d+%d\n", lDrawCnt++, allocation.width, allocation.height  );
 	}
 	cairo_t* cairo = cairo_create(bd->temp_surface);
 

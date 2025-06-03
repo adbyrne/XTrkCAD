@@ -1,6 +1,8 @@
 # create resource file to be compiled into the program
 cmake_minimum_required(VERSION 3.20)
 
+message( STATUS "Export option: >${Inkscape_EXPORT}<")
+
 set (RESOURCE_XML icons.gresource.xml)
 set (RESOURCE_XML_IN ${RESOURCE_XML}.in)
 set (ICONS_DEPENDENCIES CACHE INTERNAL "Icons dependencies")
@@ -46,10 +48,10 @@ foreach(iconfile ${RESOURCE_DEPENDENCIES})
 		else()
 			#message( STATUS "SVG ${CMAKE_CURRENT_SOURCE_DIR}/svg/${iconfile}.svg ${Inkscape_EXPORT}${DESTINATION}/${PNGFILENAME}" )
 			add_custom_command(
-				 OUTPUT ${DESTINATION}/${PNGFILENAME}
+				OUTPUT ${DESTINATION}/${PNGFILENAME}
 			 	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/svg/${SVGFILENAME}
-			 	COMMAND ${CMAKE_COMMAND} -E make_directory ${DESTINATION}
-			 	COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${SVGFILENAME} -h ${pixelsize} ${Inkscape_EXPORT}${DESTINATION}/${PNGFILENAME}
+			 	COMMAND ${CMAKE_COMMAND} -E make_directory ${DESTINATION};	export NO_AT_BRIDGE=1
+				COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${SVGFILENAME} -h ${pixelsize} ${Inkscape_EXPORT}${DESTINATION}/${PNGFILENAME}
 			)
 		endif()
 	endforeach()

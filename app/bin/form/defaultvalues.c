@@ -21,8 +21,9 @@
   *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
   */
 
+#include <limits.h>
 #include <wlib.h>
-#include <param.h>
+
 #include <form.h>
 #include <dynstring.h>
 #include "formprivate.h"
@@ -102,7 +103,7 @@ SaveListColumnWidths(char *section, paramData_p listData)
 	}
 }
 
-static
+static void
 CopyCStringtoDynString(DynString* destination, const char* cstring)
 {
 	DynStringClear(destination);

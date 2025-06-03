@@ -23,8 +23,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <direct.h>
-
 #include <wlib.h>
 #include "gtkint.h"
 #include <gdk-pixbuf/gdk-pixbuf.h>

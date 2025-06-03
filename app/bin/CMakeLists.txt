@@ -231,7 +231,6 @@ target_sources(xtrkcad-lib
     utility.h
     validator.c
     validator.h
-    include/dirent.h
     include/levenshtein.h
     include/paramfile.h
     include/paramfilelist.h
@@ -250,7 +249,8 @@ if(WIN32)
 	target_sources(xtrkcad-lib
 		PRIVATE
 			utf8convert.c
-			include/utf8convert.h			
+			include/win32/utf8convert.h
+            include/win32/dirent.h
 	)
 endif()
 
@@ -360,6 +360,9 @@ set_target_properties(mkturnout PROPERTIES FOLDER "Param Files" )
 target_include_directories(mkturnout
     PRIVATE
 	${messagefile_BINARY_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${XTRKCAD_CORE_INCLUDE_DIR}
 )
 
 target_link_libraries(mkturnout

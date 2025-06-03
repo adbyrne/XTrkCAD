@@ -128,6 +128,7 @@ target_link_libraries(xtrkcad-wlib
 	PRIVATE
 	dynstring
 	wrapbox
+	freetype
 	${GTK3_LIBRARIES}
 )
 
@@ -182,4 +183,6 @@ endif()
 # )
 add_dependencies(xtrkcad-wlib resource-target symbols-target)
 
-add_subdirectory(unittests)
+if(XTRKCAD_TESTING)
+	add_subdirectory(unittests)
+endif()

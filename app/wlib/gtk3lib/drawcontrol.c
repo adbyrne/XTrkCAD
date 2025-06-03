@@ -422,7 +422,7 @@ static gint
 draw_motion_event(GtkWidget* widget, GdkEventMotion* event,
                   wControl_p drawControl)
 {
-	long x, y;
+	gint x, y;
 	GdkModifierType state;
 	wAction_t action;
 	struct draw* drawAttributes = CONTROL_GET_ATTRIBUTES_PTR(drawControl, draw);

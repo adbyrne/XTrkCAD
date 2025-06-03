@@ -135,7 +135,7 @@ void
 wlibBasicClear (struct draw * bd)
 {
 	if (iBasicLog >= 1) {
-		printf ("wlibBasicClear %ld+%ld\n", bd->width, bd->height);
+		printf ("wlibBasicClear %d+%d\n", bd->width, bd->height);
 	}
 
 	cairo_set_source_rgb(bd->cr, 255, 255, 255);

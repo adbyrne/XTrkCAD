@@ -1013,7 +1013,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 
 	case C_START:
 		if (turntableDiameterPD.control==NULL) {
-			FormCreateControls(&turntablePG, NULL);
+			FormCreateControls(&turntablePG);
 		}
 		sprintf( message, "diameter-%s", curScaleName );
 		turntableDiameter = ceil(80.0*12.0/curScaleRatio);

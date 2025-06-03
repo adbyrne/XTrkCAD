@@ -29,6 +29,7 @@ extern const char * GetCurCommandName();
 
 #include "wlib.h"
 #include "i18n.h"
+#include <stdint.h>
 
 #define SHOWHELPCONTENTS    1
 #define SHOWHELPFORCOMMAND  2

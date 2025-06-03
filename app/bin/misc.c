@@ -521,7 +521,7 @@ EXPORT void DoClear(void * unused)
 
 EXPORT void MapWindowToggleShow(void * unused)
 {
-	static inTransition = FALSE;
+	static int inTransition = FALSE;
 
 	if (!inTransition) {
 		inTransition = TRUE;

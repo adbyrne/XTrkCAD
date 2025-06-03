@@ -382,7 +382,7 @@ EXPORT int MagneticSnap(int state)
  */
 static void MagneticSnapToggle(void * unused)
 {
-	static inTransition = FALSE;
+	static int inTransition = FALSE;
 	if (!inTransition) {
 		inTransition = TRUE;
 		MagneticSnap(!magneticSnap);

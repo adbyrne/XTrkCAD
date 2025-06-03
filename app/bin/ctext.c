@@ -115,7 +115,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 
  		if (textPD.control == NULL) {
 			ParamRegister(&textPG);
-			FormCreateControls(&textPG, TextDlgUpdate);
+			FormCreateControls(&textPG);
 			LoadFontSizeList(textPD.control, Dt.size);
 
 			Dt.size = GetFontSize((long int)Dt.fontSizeInx);

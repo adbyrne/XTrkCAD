@@ -43,6 +43,8 @@ static char *appLibDir;
 static char *appWorkDir;
 static char *userHomeDir;
 
+
+#define PATHOPTIONMAX 5
 /*
  *******************************************************************************
  *
@@ -154,7 +156,7 @@ const char * wGetAppLibDir( void )
 		              searchDirs[2],
 		              searchDirs[3],
 		              envvar);
-		wNoticeEx(NT_ERROR, msg, _("Ok"), NULL);
+		wNoticeWithIcon(NT_ERROR, msg, _("Ok"), NULL);
 		g_free(msg); // not necessary as program terminates anyway
 		wExit(1);
 	}
@@ -190,7 +192,7 @@ const char * wGetAppWorkDir(
 		if ( g_mkdir( appWorkDir, 0777 ) == -1 ) {
 			gchar *tmp;
 			tmp = g_strdup_printf(  _("Cannot create %s"), appWorkDir );
-			wNoticeEx( NT_ERROR, tmp, _("Exit"), NULL );
+			wNoticeWithIcon( NT_ERROR, tmp, _("Exit"), NULL );
 			g_free(tmp);
 			wExit(0);
 		} else {
@@ -232,7 +234,7 @@ const char *wGetUserHomeDir( void )
 
 	homeDir = g_get_home_dir();
  	if (homeDir == NULL) {
-		wNoticeEx( NT_ERROR, _("HOME is not set"), _("Exit"), NULL);
+		wNoticeWithIcon( NT_ERROR, _("HOME is not set"), _("Exit"), NULL);
 		wExit(0);
 	} else {
 		userHomeDir = g_strdup( homeDir );
