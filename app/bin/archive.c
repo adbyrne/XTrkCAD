@@ -29,7 +29,7 @@
 #include "dynstring.h"
 #include "misc.h"
 #include "paths.h"
-#include "include/utf8convert.h"
+#include "utf8convert.h"
 #include "common-ui.h"
 #include "fileio.h"
 

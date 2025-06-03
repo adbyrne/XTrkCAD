@@ -57,7 +57,7 @@
 #include "track.h"
 #include "common-ui.h"
 #ifdef UTFCONVERT
-#include "include/utf8convert.h"
+#include "utf8convert.h"
 #endif // UTFCONVERT
 
 EXPORT TRKTYP_T T_CONTROL = -1;
