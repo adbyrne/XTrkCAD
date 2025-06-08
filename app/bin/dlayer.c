@@ -709,7 +709,6 @@ void PutLayerListArray(int inx, char * list)
  */
 void LayerSystemDefault( unsigned int inx )
 {
-
 	strcpy(layers[inx].name, inx == 0 ? _("Main") : "");
 	layers[inx].visible = TRUE;
 	layers[inx].frozen = FALSE;
@@ -717,15 +716,12 @@ void LayerSystemDefault( unsigned int inx )
 	layers[inx].module = FALSE;
 	layers[inx].button_off = FALSE;
 	layers[inx].inherit = TRUE;
-	layers[inx].scaleInx = layerScaleInx;
+	layers[inx].scaleInx = GetLayoutCurScale();
 	GetScaleGauge(layers[inx].scaleInx, &layers[inx].scaleDescInx,
 	              &layers[inx].gaugeInx);
 	layers[inx].minTrackRadius = GetLayoutMinTrackRadius();
 	layers[inx].maxTrackGrade = GetLayoutMaxTrackGrade();
-	layers[inx].tieData.valid = FALSE;
-	layers[inx].tieData.length = 0.0;
-	layers[inx].tieData.width = 0.0;
-	layers[inx].tieData.spacing = 0.0;
+	layers[inx].tieData = GetScaleTieData(GetLayoutCurScale());
 	layers[inx].objCount = 0;
 	DYNARR_RESET(int, layers[inx].layerLinkList);
 	SetLayerColor(inx, layerColorTab[inx % COUNT(layerColorTab)]);
@@ -737,23 +733,23 @@ void LayerSystemDefault( unsigned int inx )
 BOOL_T IsLayerDefault( unsigned int inx )
 {
 	return (!layers[inx].name[0]) &&
-	       layers[inx].visible &&
-	       !layers[inx].frozen &&
-	       layers[inx].onMap &&
-	       !layers[inx].module &&
-	       !layers[inx].button_off &&
-	       layers[inx].inherit &&
-	       (!layers[inx].layerLinkList.cnt) &&
-	       (layers[inx].color == layerColorTab[inx % COUNT(layerColorTab)]) &&
-	       layers[inx].scaleInx == 0 &&
-	       //layers[inx].scaleDescInx != layerScaleDescInx ||
-	       //layers[inx].gaugeInx != layerGaugeInx ||
-	       layers[inx].minTrackRadius == GetLayoutMinTrackRadius() &&
-	       layers[inx].maxTrackGrade == GetLayoutMaxTrackGrade() &&
-	       layers[inx].tieData.valid == FALSE &&
-	       layers[inx].tieData.length == 0.0 &&
-	       layers[inx].tieData.width == 0.0 &&
-	       layers[inx].tieData.spacing == 0.0;
+		layers[inx].visible &&
+		!layers[inx].frozen &&
+		layers[inx].onMap &&
+		!layers[inx].module &&
+		!layers[inx].button_off &&
+		layers[inx].inherit &&
+		!layers[inx].layerLinkList.cnt;
+		//(layers[inx].color == layerColorTab[inx % COUNT(layerColorTab)]) &&
+		//layers[inx].scaleInx == GetLayoutCurScale()
+	    //layers[inx].scaleDescInx != layerScaleDescInx ||
+	    //layers[inx].gaugeInx != layerGaugeInx ||
+	    //layers[inx].minTrackRadius == GetLayoutMinTrackRadius() &&
+	    //layers[inx].maxTrackGrade == GetLayoutMaxTrackGrade() &&
+	    //layers[inx].tieData.valid == FALSE &&
+	    //layers[inx].tieData.length == 0.0 &&
+	    //layers[inx].tieData.width == 0.0 &&
+	    //layers[inx].tieData.spacing == 0.0
 }
 
 /**
@@ -1049,7 +1045,7 @@ void FillLayerList( wList_p listLayers)
 static void
 InitializeLayers(void LayerInitFunc(void), int newCurrLayer)
 {
-	/* reset the data structures to default valuses */
+	/* reset the data structures to default values */
 	LayerInitFunc();
 	/* count the objects on each layer */
 	LayerSetCounts();
@@ -1171,6 +1167,9 @@ LayerPrefSave(void)
 
 			sprintf(buffer, "%u", inx);
 			strcat(layersSaved, buffer);
+		}
+		else {
+			// Erase the entry
 		}
 	}
 
@@ -1565,6 +1564,12 @@ void ResetLayers(void)
 
 	for (inx = 0; inx < NUM_LAYERS; inx++) {
 		strcpy(layers[inx].name, inx == 0 ? _("Main") : "");
+		
+		layers[inx].scaleInx = GetLayoutCurScale();
+		layers[inx].minTrackRadius = GetLayoutMinTrackRadius();
+		layers[inx].maxTrackGrade = GetLayoutMaxTrackGrade();
+		layers[inx].tieData = GetScaleTieData(GetLayoutCurScale());
+
 		layers[inx].visible = TRUE;
 		layers[inx].frozen = FALSE;
 		layers[inx].onMap = TRUE;
