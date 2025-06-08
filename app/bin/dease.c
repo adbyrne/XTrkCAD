@@ -152,10 +152,10 @@ static void SetEasement(
 	easeR = (floor(easeR*100.0))/100.0;
 	easementVal = val;
 	if (easementW && wWinIsVisible(easementW)) {
-		ParamLoadControls( &easementPG );
+		FormLoadControls( &easementPG );
 		if (update) {
 			easeM = selVal;
-			ParamLoadControl( &easementPG, I_EASESEL );
+			FormLoadSingleControl( &easementPG, I_EASESEL );
 		}
 	}
 	/*ParamChange( &easeValPD );*/
@@ -168,7 +168,7 @@ static void SetEasement(
 
 static void EasementOk( void )
 {
-	ParamLoadData( &easementPG );
+	FormLoadControls( &easementPG );
 	SetEasement( easementVal, I2VP(FALSE) );
 	wHide( easementW );
 }
@@ -263,7 +263,7 @@ static void EasementChange( long changes )
 
 EXPORT addButtonCallBack_t EasementInit( void )
 {
-	ParamRegister( &easementPG );
+	FormRegister( &easementPG );
 
 	enone_bm = CreateToolbarIconFromResource( "ease-none.png");
 	eltsharp_bm = CreateToolbarIconFromResource( "ease-lt-sharp.png");

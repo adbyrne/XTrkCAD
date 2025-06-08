@@ -54,11 +54,11 @@ static paramData_t customPLs[] = {
 #define I_CUSTOMNEW     (2)
 	{   PD_BUTTON, CustomNewCar, "newcar", PDO_DLGHORZ| PDO_DLGBOXEND, NULL, N_("Go") },
 #define I_CUSTOMEDIT	(3)
-	{	PD_BUTTON, CustomEdit, "edit", PDO_DLGCMDBUTTON, NULL/*, N_("Edit")*/},
+	{	PD_BUTTON, CustomEdit, "edit", PDO_DLGCMDBUTTON, NULL},
 #define I_CUSTOMDEL		(4)
-	{	PD_BUTTON, CustomDelete, "delete", 0, NULL/*, N_("Delete") */},
+	{	PD_BUTTON, CustomDelete, "delete", 0, NULL},
 #define I_CUSTOMCOPYTO	(5)
-	{	PD_BUTTON, CustomExport, "export", 0, NULL/*, N_("Move To")*/},
+	{	PD_BUTTON, CustomExport, "export", 0, NULL},
 } ;
 static paramGroup_t customPG = { "custmgm", PGO_FULLDIALOGFROMBUILDER, customPLs, COUNT( customPLs ) };
 
@@ -90,14 +90,14 @@ static wBool_t CustomDlgUpdate(
 
 				wButtonSetLabel(customPLs[I_CUSTOMEDIT].control,
 					context->proc(CUSTMGM_CAN_EDIT, context->data) ? _("Edit") : _("Rename"));
-				ParamControlActive(&customPG, I_CUSTOMEDIT, TRUE);
+				FormControlActive(&customPG, I_CUSTOMEDIT, TRUE);
 			}
 		}
 	} else {
-		ParamControlActive( &customPG, I_CUSTOMEDIT, FALSE );
+		FormControlActive( &customPG, I_CUSTOMEDIT, FALSE );
 	}
-	ParamControlActive( &customPG, I_CUSTOMDEL, selcnt>0 );
-	ParamControlActive( &customPG, I_CUSTOMCOPYTO, selcnt>0 );
+	FormControlActive( &customPG, I_CUSTOMDEL, selcnt>0 );
+	FormControlActive( &customPG, I_CUSTOMCOPYTO, selcnt>0 );
 
 	return(TRUE);
 }

@@ -50,7 +50,7 @@ static paramGroup_t problemrepPG = { "problemdata", 0, problemrepPLs, COUNT(prob
 void ProblemrepCreateW(void* ptr)
 {
 	if (!problemrepW) {
-		ParamRegister(&problemrepPG);
+		FormRegister(&problemrepPG);
 
 		problemrepW = FormCreateDialog(&problemrepPG,
 		                               MakeWindowTitle(_("Data for Problem Report")),

@@ -209,7 +209,7 @@ typedef struct paramGroup_t {
 
 wIndex_t ColorTabLookup( wDrawColor );
 
-extern char * prefSect;
+
 // extern char decodeErrorStr[STR_SHORT_SIZE];
 
 
@@ -281,16 +281,16 @@ long GetChanges(paramGroup_p pg);
 // How dialogs handle Cancel:
 //
 // Remove Cancel button from dialogs that affect on-layout objects
-#define PARAMCANCEL_NEWUNDO
+//#define PARAMCANCEL_NEWUNDO
 
 // Cancel button not needed: map, demo, print margin,
-extern void* ParamCancel_Null;
+// extern void* ParamCancel_Null;
 
 // These affect objects on the layout
 // No Cancel button, use Undo to revert: describe, profile, move, rotate
 // undefine PARAMCANCEL_NEWUNDO to re-enable Cancel button
 #ifdef PARAMCANCEL_NEWUNDO
-extern void* ParamCancel_Undo;
+//extern void* ParamCancel_Undo;
 #else
 void ParamCancel_Undo(wWin_p);
 #endif
@@ -322,4 +322,6 @@ void ParamDialogOkActive( paramGroup_p, int );
 void ParamResetInvalid( wWin_p win );
 
 void ParamControlShow( paramGroup_t *, wIndex_t, wBool_t );
+
+EXPORT void ParamCancel_Null(void* dummy);
 #endif

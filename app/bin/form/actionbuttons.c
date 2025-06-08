@@ -50,6 +50,15 @@ void FormButtonOk(void* groupVP)
 	LOG(log_form, 1, ("ParamButtonOk -> Ok\n"));
 }
 
+void FormDialogOkActive(
+	paramGroup_p pg,
+	int active)
+{
+	if (pg->okB) {
+		wControlActive((wControl_p)pg->okB, active);
+	}
+}
+
 #define  FORMCANCEL_NEWUNDO
 #ifdef FORMCANCEL_NEWUNDO
 /* No Cancel button, Commnd can be undone

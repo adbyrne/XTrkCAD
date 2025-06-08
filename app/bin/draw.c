@@ -26,7 +26,7 @@
 #include "fileio.h"
 #include "icons.h"
 #include "misc.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "layout.h"
 #include "common-ui.h"
@@ -3085,9 +3085,11 @@ EXPORT void DrawInit( int initialZoom )
 	/*h = (wWinPix_t)((mapD.size.y/mapD.scale)*mainD.dpi + 0.5)+2;*/
 	ParamRegister( &mapPG );
 	LOG( log_mapsize, 2, ( "DrawInit/ParamCreateDialog(&mapPG\n" ) );
-	/**  \todo Create map */
-	mapW = ParamCreateDialog( &mapPG, MakeWindowTitle(_("Map")), NULL, NULL, ParamCancel_Null,
-	                          FALSE, NULL, F_RESIZE, NULL );
+
+	mapW = FormCreateDialog( &mapPG, MakeWindowTitle(_("Map")), 
+							NULL, NULL, 
+							NULL, NULL,
+	                         FALSE, F_RESIZE, NULL );
 	mapD.d = MAPCANVASCONTROL;
 	//ChangeMapScale();
 

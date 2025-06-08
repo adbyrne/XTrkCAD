@@ -141,6 +141,25 @@ void FormLoadSingleControl(
 }
 
 
+void FormLoadMessage(
+	paramGroup_p pg,
+	int inx,
+	char* message)
+{
+	paramData_p p = &pg->paramPtr[inx];
+	if (p->control) {
+		if (p->type == PD_MESSAGE) {
+			wMessageSetValue(p->control, message);
+		}
+		else if (p->type == PD_STRING) {
+			wEntrySetValue(p->control, message);
+		}
+		else {
+			CHECKMSG(FALSE, ("p->tytpe %d", (int)p->type));
+		}
+	}
+}
+
 /** Load all the controls in a parameter group.
  * \param IN pointer to parameter group to be loaded
  */

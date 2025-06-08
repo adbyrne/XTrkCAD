@@ -78,7 +78,7 @@ static void TextDlgUpdate(
 	case 0:
 	case 1:
 	case 2:
-		UpdateFontSizeList( &Dt.size, (wList_p)textPLs[0].control, Dt.fontSizeInx );
+		UpdateFontSizeList( &Dt.size, textPLs[0].control, Dt.fontSizeInx );
 		if ( Dt.state == SHOW_TEXT) {
 			DrawMultiLineTextSize( &mainD, Dt.text, NULL, Dt.size, TRUE, &size, &lastline);
 			Dt.textLen = size.x;
@@ -114,7 +114,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		Dt.lastLineOffset = 0;
 
  		if (textPD.control == NULL) {
-			ParamRegister(&textPG);
+			FormRegister(&textPG);
 			FormCreateControls(&textPG);
 			LoadFontSizeList(textPD.control, Dt.size);
 
@@ -122,8 +122,8 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		}
 		Dt.size = (long)wSelectedFontSize();
 		Dt.fontSizeInx = GetFontSizeIndex(Dt.size);
-		ParamLoadControls(&textPG);
-		ParamGroupRecord( &textPG );
+		FormLoadControls(&textPG);
+		FormGroupRecord( &textPG );
 
 		DrawTextSize(&mainD, "Aquilp", NULL, Dt.size, TRUE, &size);
 		Dt.cursHeight = size.y;

@@ -40,6 +40,8 @@ static void UpdateMeasureFmt(void);
 EXPORT long enableAudio = 1;
 EXPORT long showFlexTrack = 1;
 
+EXPORT long angleSystem = 0;
+
 static paramIntegerRange_t i1_100 = { 1, 100 };
 static paramIntegerRange_t i0_99 = { 0, 99 };
 static paramIntegerRange_t i0_10000 = { 0, 10000 };
@@ -138,15 +140,15 @@ static dstFmts_t* dstFmts[] = { englishDstFmts, metricDstFmts };
 void UpdateAutoSaveInterval(long value)
 {
 	autosaveChkPoints = value;
-	ParamLoadControl(&prefPG, I_AUTOSAVE);
-	ParamLoadControl(&prefPG, I_CHECKPOINTFREQUENCY);
+	FormLoadSingleControl(&prefPG, I_AUTOSAVE);
+	FormLoadSingleControl(&prefPG, I_CHECKPOINTFREQUENCY);
 }
 
 void UpdateChkPtInterval(long value)
 {
 	checkPtInterval = value;
-	ParamLoadControl(&prefPG, I_AUTOSAVE);
-	ParamLoadControl(&prefPG, I_CHECKPOINTFREQUENCY);
+	FormLoadSingleControl(&prefPG, I_AUTOSAVE);
+	FormLoadSingleControl(&prefPG, I_CHECKPOINTFREQUENCY);
 }
 
 /**
@@ -184,7 +186,7 @@ static void UpdatePrefD(void)
 
 		for (int inx = 0; inx < COUNT(prefPLs); inx++) {
 			if ((prefPLs[inx].option & PDO_DIM)) {
-				ParamLoadControl(&prefPG, inx);
+				FormLoadSingleControl(&prefPG, inx);
 			}
 		}
 
@@ -206,7 +208,7 @@ static void UpdateMeasureFmt()
 
 	for (inx = 0; inx < COUNT(prefPLs); inx++) {
 		if ((prefPLs[inx].option & PDO_DIM)) {
-			ParamLoadControl(&prefPG, inx);
+			FormLoadSingleControl(&prefPG, inx);
 		}
 	}
 }

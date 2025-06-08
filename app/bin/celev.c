@@ -40,6 +40,8 @@ static track_p elevTrk;
 static EPINX_T elevEp;
 static BOOL_T elevUndo = FALSE;
 
+#define DlgSepTop 12
+
 static char * elevModeLabels[] = { N_("None"), N_("Defined"), N_("Hidden"),
                                    N_("Computed"), N_("Grade"), N_("Station"), N_("Ignore"), NULL
                                  };

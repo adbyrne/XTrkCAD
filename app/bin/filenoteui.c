@@ -58,19 +58,19 @@ static paramFloatRange_t noRangeCheck = { 0.0, 0.0, 80, PDO_NORANGECHECK_HIGH | 
 // static char *toggleLabels[] = { N_("Copy to archive"), NULL };
 static paramData_t fileNotePLs[] = {
 #define I_ORIGX (0)
-	/*0*/ { PD_FLOAT, &fileNoteData.pos.x, "origx", PDO_DIM|PDO_NOPREF, &noRangeCheck, N_("Position X") },
+	/*0*/ { PD_FLOAT, &fileNoteData.pos.x, "origx", PDO_DIM|PDO_NOPREF, &noRangeCheck },
 #define I_ORIGY (1)
-	/*1*/ { PD_FLOAT, &fileNoteData.pos.y, "origy", PDO_DIM|PDO_NOPREF, &noRangeCheck, N_("Position Y") },
+	/*1*/ { PD_FLOAT, &fileNoteData.pos.y, "origy", PDO_DIM|PDO_NOPREF, &noRangeCheck },
 #define I_LAYER (2)
-	/*2*/ { PD_COMBOLIST, &fileNoteData.layer, "layer", PDO_NOPREF, I2VP(150), "Layer", 0 },
+	/*2*/ { PD_COMBOLIST, &fileNoteData.layer, "layer", PDO_NOPREF, I2VP(150), NULL, 0 },
 #define I_TITLE (3)
-	/*3*/ { PD_STRING, &fileNoteData.title, "title", PDO_NOPREF | PDO_NOTBLANK, I2VP(200), N_("Title"), 0, 0, sizeof fileNoteData.title },
+	/*3*/ { PD_STRING, &fileNoteData.title, "title", PDO_NOPREF | PDO_NOTBLANK, I2VP(200), NULL, 0, 0, sizeof fileNoteData.title },
 #define I_PATH (4)
-	{ PD_STRING, &fileNoteData.path, "filename", PDO_NOPREF | PDO_NOTBLANK,   I2VP(200), N_("Document"), BO_READONLY, I2VP(0L), sizeof fileNoteData.path },
+	{ PD_STRING, &fileNoteData.path, "filename", PDO_NOPREF | PDO_NOTBLANK,   I2VP(200), NULL, BO_READONLY, I2VP(0L), sizeof fileNoteData.path },
 #define I_BROWSE (5)
-	{ PD_BUTTON, NoteFileBrowse, "browse", 0L, NULL, N_("Select...") },
+	{ PD_BUTTON, NoteFileBrowse, "browse", 0L, NULL },
 #define I_OPEN (6)
-	{ PD_BUTTON, NoteFileOpenExternal, "openfile", PDO_DLGHORZ, NULL, N_("Open...") },
+	{ PD_BUTTON, NoteFileOpenExternal, "openfile", PDO_DLGHORZ, NULL },
 //#define I_ARCHIVE (7)
 //	{ PD_TOGGLE, &noteFileData.inArchive, "archive", 0, toggleLabels, NULL },
 
@@ -119,9 +119,9 @@ int LoadDocumentFile(
         void * data)
 {
 	wControlActive(fileNotePLs[I_OPEN].control, TRUE);
-	ParamDialogOkActive(&fileNotePG, TRUE);
+	FormDialogOkActive(&fileNotePG, TRUE);
 	strscpy(fileNoteData.path, *fileName, PATHMAXIMUMLENGTH );
-	ParamLoadControl(&fileNotePG, I_PATH);
+	FormLoadSingleControl(&fileNotePG, I_PATH);
 
 	return(0);
 }

@@ -30,6 +30,9 @@
 #include "formprivate.h"
 
 int log_form = 0;
+
+EXPORT char* prefSect = "DialogItem";
+
 static dynArr_t dialogGroups_da;
 #define dialogGroups(N) DYNARR_N( paramGroup_p, dialogGroups_da, N )
 

@@ -24,7 +24,7 @@
 #include "dynstring.h"
 #include "fileio.h"
 #include "misc.h"
-#include "param.h"
+#include "form.h"
 #include "include/utf8convert.h"
 
 static char * mainText = NULL;
@@ -64,9 +64,10 @@ static void NoteOk(void * unused)
 void DoNote(void * unused)
 {
 	if (noteW == NULL) {
-		noteW = ParamCreateDialog(&notePG, MakeWindowTitle(_("Note")), _("Ok"), NoteOk,
-		                          ParamCancel_Current, FALSE, NULL,
-		                          F_NOTTRANSIENT|F_RESIZE, NULL);
+		noteW = FormCreateDialog(&notePG, MakeWindowTitle(_("Note")), 
+								_("Ok"), NoteOk,
+								_("Cancel"), ParamCancel_Current, 
+								FALSE, F_NOTTRANSIENT|F_RESIZE, NULL);
 	}
 
 	wTextClear(noteT);

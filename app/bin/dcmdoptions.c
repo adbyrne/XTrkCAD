@@ -30,8 +30,8 @@ static wControl_p cmdoptW;
 
 static paramData_t cmdoptPLs[] = {
 	{ PD_RADIO, &preSelect, "preselect", PDO_NOPSHUPD, NULL, NULL, BC_HORIZONTAL },
-	{ PD_RADIO, &rightClickMode, "rightclickmode", PDO_NOPSHUPD, NULL, N_("Right Click"), 0},
-	{ PD_RADIO, &selectMode, "selectmode", PDO_NOPSHUPD, NULL, N_("Select Mode"), 0},
+	{ PD_RADIO, &rightClickMode, "rightclickmode", PDO_NOPSHUPD, NULL, NULL, 0},
+	{ PD_RADIO, &selectMode, "selectmode", PDO_NOPSHUPD, NULL, NULL, 0},
 	{ PD_TOGGLE, &selectZero, "selectzero", PDO_NOPSHUPD, NULL, "", 0 }
 };
 static paramGroup_t cmdoptPG = { "cmdopt", PGO_RECORD | PGO_PREFMISC | PGO_FULLDIALOGFROMBUILDER, cmdoptPLs, COUNT(cmdoptPLs) };
@@ -48,7 +48,7 @@ static void CmdoptChange(long changes)
 {
 	if (changes & CHANGE_CMDOPT)
 		if (cmdoptW != NULL && wWinIsVisible(cmdoptW)) {
-			ParamLoadControls(&cmdoptPG);
+			FormLoadControls(&cmdoptPG);
 		}
 }
 
@@ -59,13 +59,13 @@ static void DoCmdopt(void* junk)
 		                           _("Ok"), CmdoptOk,
 		                           _("Cancel"), FormCancel_Restore, TRUE, 0L, NULL);
 	}
-	ParamLoadControls(&cmdoptPG);
+	FormLoadControls(&cmdoptPG);
 	wShow(cmdoptW);
 }
 
 EXPORT addButtonCallBack_t CmdoptInit(void)
 {
-	ParamRegister(&cmdoptPG);
+	FormRegister(&cmdoptPG);
 	RegisterChangeNotification(CmdoptChange);
 	return &DoCmdopt;
 }

@@ -156,18 +156,18 @@ EXPORT addButtonCallBack_t DisplayInit( void )
 static wControl_p colorW;
 
 static paramData_t colorPLs[] = {
-	{ PD_COLORLIST, &snapGridColor, "snapgrid", PDO_NOPSHUPD, NULL, N_("Snap Grid"), 0, I2VP(CHANGE_GRID) },
-	{ PD_COLORLIST, &markerColor, "marker", PDO_NOPSHUPD, NULL, N_("Marker"), 0, I2VP(CHANGE_GRID) },
-	{ PD_COLORLIST, &borderColor, "border", PDO_NOPSHUPD, NULL, N_("Border"), 0, I2VP(CHANGE_MAIN) },
-	{ PD_COLORLIST, &crossMajorColor, "crossmajor", PDO_NOPSHUPD, NULL, N_("Primary Axis"), 0, 0 },
-	{ PD_COLORLIST, &crossMinorColor, "crossminor", PDO_NOPSHUPD, NULL, N_("Secondary Axis"), 0, 0 },
-	{ PD_COLORLIST, &normalColor, "normal", PDO_NOPSHUPD, NULL, N_("Normal Track"), 0, I2VP(CHANGE_MAIN|CHANGE_PARAMS|CHANGE_MAP) },
-	{ PD_COLORLIST, &selectedColor, "selected", PDO_NOPSHUPD, NULL, N_("Selected Track"), 0, I2VP(CHANGE_MAIN) },
-	{ PD_COLORLIST, &profilePathColor, "profile", PDO_NOPSHUPD, NULL, N_("Profile Path"), 0, I2VP(CHANGE_MAIN) },
-	{ PD_COLORLIST, &exceptionColor, "exception", PDO_NOPSHUPD, NULL, N_("Exception Track"), 0, I2VP(CHANGE_MAIN) },
-	{ PD_COLORLIST, &tieColor, "tie", PDO_NOPSHUPD, NULL, N_("Track Ties"), 0, I2VP(CHANGE_MAIN) },
-	{ PD_COLORLIST, &bridgeColor, "bridge", PDO_NOPSHUPD, NULL, N_("Bridge Base"), 0, I2VP(CHANGE_MAIN) },
-	{ PD_COLORLIST, &roadbedColor, "roadbed", PDO_NOPSHUPD, NULL, N_("Track Roadbed"), 0, I2VP(CHANGE_MAIN) }
+	{ PD_COLORLIST, &snapGridColor, "snapgrid", PDO_NOPSHUPD, NULL, NULL, 0, I2VP(CHANGE_GRID) },
+	{ PD_COLORLIST, &markerColor, "marker", PDO_NOPSHUPD, NULL, NULL, 0, I2VP(CHANGE_GRID) },
+	{ PD_COLORLIST, &borderColor, "border", PDO_NOPSHUPD, NULL, NULL, 0, I2VP(CHANGE_MAIN) },
+	{ PD_COLORLIST, &crossMajorColor, "crossmajor", PDO_NOPSHUPD, NULL, NULL, 0, 0 },
+	{ PD_COLORLIST, &crossMinorColor, "crossminor", PDO_NOPSHUPD, NULL, NULL, 0, 0 },
+	{ PD_COLORLIST, &normalColor, "normal", PDO_NOPSHUPD, NULL, NULL, 0, I2VP(CHANGE_MAIN|CHANGE_PARAMS|CHANGE_MAP) },
+	{ PD_COLORLIST, &selectedColor, "selected", PDO_NOPSHUPD, NULL, NULL, 0, I2VP(CHANGE_MAIN) },
+	{ PD_COLORLIST, &profilePathColor, "profile", PDO_NOPSHUPD, NULL, NULL, 0, I2VP(CHANGE_MAIN) },
+	{ PD_COLORLIST, &exceptionColor, "exception", PDO_NOPSHUPD, NULL, NULL, 0, I2VP(CHANGE_MAIN) },
+	{ PD_COLORLIST, &tieColor, "tie", PDO_NOPSHUPD, NULL, NULL, 0, I2VP(CHANGE_MAIN) },
+	{ PD_COLORLIST, &bridgeColor, "bridge", PDO_NOPSHUPD, NULL, NULL, 0, I2VP(CHANGE_MAIN) },
+	{ PD_COLORLIST, &roadbedColor, "roadbed", PDO_NOPSHUPD, NULL, NULL, 0, I2VP(CHANGE_MAIN) }
 };
 static paramGroup_t colorPG = { "rgbcolor", PGO_RECORD|PGO_FULLDIALOGFROMBUILDER, colorPLs, COUNT( colorPLs ) };
 
@@ -188,17 +188,19 @@ static void ColorOk( void * junk )
 static void DoColor( void * junk )
 {
 	if (colorW == NULL) {
-		colorW = ParamCreateDialog( &colorPG, MakeWindowTitle(_("Color")), _("Ok"),
-		                            ColorOk, ParamCancel_Restore, TRUE, NULL, 0, NULL );
+		colorW = FormCreateDialog( &colorPG, MakeWindowTitle(_("Color")), 
+								 _("Ok"), ColorOk, 
+								 _("Cancel"), ParamCancel_Restore, 
+								 TRUE, 0, NULL);
 	}
-	ParamLoadControls( &colorPG );
+	FormLoadControls( &colorPG );
 	wShow( colorW );
 }
 
 
 EXPORT addButtonCallBack_t ColorInit( void )
 {
-	ParamRegister( &colorPG );
+	FormRegister( &colorPG );
 	return &DoColor;
 }
 

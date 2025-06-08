@@ -322,6 +322,6 @@ EXPORT void InitCmdParallel( wMenu_p menu )
 		CreateToolbarIconFromResource("parallel-line.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_PARALLEL, I2VP(1) );
 	ButtonGroupEnd();
-	ParamRegister( &parTrackPG );
-	ParamRegister(&parLinePG);
+	FormRegister( &parTrackPG );
+	FormRegister(&parLinePG);
 }

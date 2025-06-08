@@ -188,7 +188,7 @@ target_sources(xtrkcad-lib
     misc.h
     mymalloc.c
     note.h
-    param.c
+#    param.c
     paramwrapper.c
     paramfile.c
     paramfilelist.c
@@ -249,7 +249,7 @@ if(WIN32)
 	target_sources(xtrkcad-lib
 		PRIVATE
 			utf8convert.c
-			include/win32/utf8convert.h
+			include/utf8convert.h
             include/win32/dirent.h
 	)
 endif()

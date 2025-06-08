@@ -24,7 +24,7 @@
 #include "fileio.h"
 #include "form.h"
 #include "icons.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "common-ui.h"
 
@@ -543,7 +543,7 @@ static paramData_t gridPLs[] = {
 #define gridVertEnableT ((wControl_p)gridPLs[I_VERTENABLE].control)
 	{	PD_TOGGLE, &grid.Vert.Enable, "vertenable", 0, NULL, NULL, BC_HORIZONTAL|BC_NOBORDER },
 #define I_VALUEX		(6)
-	{	PD_FLOAT, &grid.Orig.x, "origx", PDO_DIM|PDO_DLGNEWCOLUMN|PDO_DLGWIDE, &r_1000_1000, N_("X") },
+	{	PD_FLOAT, &grid.Orig.x, "origx", PDO_DIM|PDO_DLGNEWCOLUMN|PDO_DLGWIDE, &r_1000_1000,NULL },
 #define I_VALUEY		(7)
 	{	PD_FLOAT, &grid.Orig.y, "origy", PDO_DIM, &r_1000_1000, NULL },
 #define I_VALUEA		(8)
@@ -583,7 +583,7 @@ static void GridOk( void * unused )
 {
 	long changes;
 
-	ParamLoadData( &gridPG );
+	FormLoadControls( &gridPG );
 	if ( ( grid.Horz.Enable && grid.Horz.Spacing <= 0.0) ||
 	     ( grid.Vert.Enable && grid.Vert.Spacing <= 0.0) ) {
 		NoticeMessage( MSG_GRID_ENABLE_SPACE_GTR_0, _("Ok"), NULL );
@@ -639,15 +639,15 @@ static void GridButtonUpdate( long mode0 )
 	}
 	if ( gridShowT &&
 	     grid.Show != (wToggleGetValue( gridShowT ) != 0) ) {
-		ParamLoadControl( &gridPG, I_SHOW );
+		FormLoadSingleControl( &gridPG, I_SHOW );
 	}
 	if ( gridHorzEnableT &&
 	     grid.Horz.Enable != (wToggleGetValue( gridHorzEnableT ) != 0) ) {
-		ParamLoadControl( &gridPG, I_HORZENABLE );
+		FormLoadSingleControl( &gridPG, I_HORZENABLE );
 	}
 	if ( gridVertEnableT &&
 	     grid.Vert.Enable != (wToggleGetValue( gridVertEnableT ) != 0) ) {
-		ParamLoadControl( &gridPG, I_VERTENABLE );
+		FormLoadSingleControl( &gridPG, I_VERTENABLE );
 	}
 
 	ToggleSetInMenuToolbar(snapGridEnableMI, snapGridEnable_b, grid.Horz.Enable
@@ -671,7 +671,7 @@ static void GridChange( long changes )
 	if (gridW==NULL || !wWinIsVisible(gridW)) {
 		return;
 	}
-	ParamLoadControls( &gridPG );
+	FormLoadControls( &gridPG );
 }
 
 
@@ -691,7 +691,7 @@ static void GridDlgUpdate(
 		GridButtonUpdate( CHK_SHOW );
 		break;
 	default:
-		ParamLoadData( &gridPG );
+		FormLoadControls( &gridPG );
 		GridButtonUpdate( 0 );
 		MainRedraw(); // GridDlgUpdate
 	}
@@ -707,7 +707,7 @@ static void SnapGridRotate( void * pangle )
 	oldGrid = grid;
 	DrawASnapGrid( &grid, &tempD, mapD.size, TRUE );
 	wDrawDelayUpdate( tempD.d, FALSE );
-	ParamLoadControls( &gridPG );
+	FormLoadControls( &gridPG );
 }
 
 
@@ -726,7 +726,7 @@ EXPORT STATUS_T CmdGrid(
 			                          _("Cancel"), FormCancel_Reset, TRUE,  0, GridDlgUpdate);
 		}
 		oldGrid = grid;
-		ParamLoadControls( &gridPG );
+		FormLoadControls( &gridPG );
 		wShow( gridW );
 		return C_CONTINUE;
 
@@ -759,12 +759,12 @@ EXPORT STATUS_T CmdGrid(
 	case C_MOVE:
 	case C_RMOVE:
 		rc = GridAction( action, pos, &grid.Orig, &grid.Angle );
-		ParamLoadControls( &gridPG );
+		FormLoadControls( &gridPG );
 		return rc;
 	case C_UP:
 	case C_RUP:
 		rc = GridAction( action, pos, &grid.Orig, &grid.Angle );
-		ParamLoadControls( &gridPG );
+		FormLoadControls( &gridPG );
 		RedrawGrid();
 		oldGrid = grid;
 		return rc;
@@ -788,7 +788,7 @@ EXPORT STATUS_T CmdGrid(
 
 EXPORT wIndex_t InitGrid( wMenu_p menu )
 {
-	ParamRegister( &gridPG );
+	FormRegister( &gridPG );
 	RegisterChangeNotification( GridChange );
 	if ( grid.Horz.Enable && grid.Horz.Spacing <= 0.0 ) {
 		grid.Horz.Enable = FALSE;

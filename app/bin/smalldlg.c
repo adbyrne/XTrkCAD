@@ -39,7 +39,7 @@ static long showTipAtStart = 1;		/**< flag for visibility */
 static dynArr_t tips_da;			/**< dynamic array for all tips */
 #define tips(N) DYNARR_N( char *, tips_da, N )
 
-static char * tipLabels[] = { N_("Show tips at start"), NULL };
+//static char * tipLabels[] = { N_("Show tips at start"), NULL };
 static paramTextData_t tipTextData = { 1, 1 };
 
 static paramData_t tipPLs[] = {
@@ -51,7 +51,7 @@ static paramData_t tipPLs[] = {
 #define I_TIPPREV (2)
 	{   PD_BUTTON, ShowTip, "next", PDO_DLGHORZ, NULL, N_("Next Tip"), 0L, I2VP(SHOWTIP_FORCESHOW | SHOWTIP_NEXTTIP) },
 #define I_TIPNEXT (3)
-	{   PD_TOGGLE, &showTipAtStart, "showatstart", PDO_DLGCMDBUTTON, tipLabels, NULL, BC_NOBORDER }
+	{   PD_TOGGLE, &showTipAtStart, "showatstart", PDO_DLGCMDBUTTON, NULL, NULL, BC_NOBORDER }
 };
 
 #define PREVIOUSBUTTON ((tipPLs[I_TIPPREV].control))
@@ -205,7 +205,7 @@ void ShowTip( void * flagsVP )
 		"The Mini - XML library is licensed under the Apache License Version 2.0 with an\n" \
 		"exception to allow linking against GPL2 / LGPL2 - only software."
 
-static paramTextData_t aboutTextData = { 500, 100 };
+static paramTextData_t aboutTextData = { 50, 10 };
 
 #define DESCRIPTION N_("XTrackCAD is a CAD (computer-aided design) program for designing model railroad layouts.")
 static paramData_t aboutPLs[] = {

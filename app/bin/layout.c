@@ -668,34 +668,34 @@ static void ImageFileClear( void * unused)
 }
 
 static paramData_t layoutPLs[] = {
-	{ PD_FLOAT, &thisLayout.props.roomSize.x, "roomsizeX", PDO_NOPREF | PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, N_("Room Width"), 0, I2VP(CHANGE_MAIN | CHANGE_MAP) },
-	{ PD_FLOAT, &thisLayout.props.roomSize.y, "roomsizeY", PDO_NOPREF | PDO_DIM | PDO_NOPSHUPD | PDO_DRAW | PDO_DLGHORZ, &r1_9999999, N_("    Height"), 0, I2VP(CHANGE_MAIN | CHANGE_MAP) },
-	{ PD_STRING, &thisLayout.props.title1, "title1", PDO_NOPSHUPD | PDO_STRINGLIMITLENGTH, NULL, N_("Layout Title"), 0, 0, sizeof(thisLayout.props.title1)},
-	{ PD_STRING, &thisLayout.props.title2, "title2", PDO_NOPSHUPD | PDO_STRINGLIMITLENGTH, NULL, N_("Subtitle"), 0, 0, sizeof(thisLayout.props.title2)},
+	{ PD_FLOAT, &thisLayout.props.roomSize.x, "roomsizeX", PDO_NOPREF | PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, NULL, 0, I2VP(CHANGE_MAIN | CHANGE_MAP) },
+	{ PD_FLOAT, &thisLayout.props.roomSize.y, "roomsizeY", PDO_NOPREF | PDO_DIM | PDO_NOPSHUPD | PDO_DRAW | PDO_DLGHORZ, &r1_9999999, NULL, 0, I2VP(CHANGE_MAIN | CHANGE_MAP) },
+	{ PD_STRING, &thisLayout.props.title1, "title1", PDO_NOPSHUPD | PDO_STRINGLIMITLENGTH, NULL,NULL, 0, 0, sizeof(thisLayout.props.title1)},
+	{ PD_STRING, &thisLayout.props.title2, "title2", PDO_NOPSHUPD | PDO_STRINGLIMITLENGTH, NULL, NULL, 0, 0, sizeof(thisLayout.props.title2)},
 #define SCALEINX (4)
-	{ PD_COMBOLIST, &thisLayout.props.curScaleDescInx, "scale", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT, I2VP(180), N_("Scale"), 0, I2VP(CHANGE_SCALE) },
+	{ PD_COMBOLIST, &thisLayout.props.curScaleDescInx, "scale", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT, I2VP(180), NULL, 0, I2VP(CHANGE_SCALE) },
 #define GAUGEINX (5)
-	{ PD_COMBOLIST, &thisLayout.props.curGaugeInx, "gauge", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ, I2VP(180), N_("     Gauge"), 0, I2VP(CHANGE_SCALE) },
+	{ PD_COMBOLIST, &thisLayout.props.curGaugeInx, "gauge", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ, I2VP(180), NULL, 0, I2VP(CHANGE_SCALE) },
 #define MINRADIUSENTRY (6)
-	{ PD_FLOAT, &thisLayout.props.minTrackRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, N_("Min Track Radius"), 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
-	{ PD_FLOAT, &thisLayout.props.maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ, &r0_90, N_("  Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_FLOAT, &thisLayout.props.minTrackRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, NULL, 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
+	{ PD_FLOAT, &thisLayout.props.maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ, &r0_90, NULL, 0, I2VP(CHANGE_MAIN) },
 #define BACKGROUNDFILECHECK (8)  //Note this value used in the file section routines above - if it changes, they will need to change
-	{ PD_STRING, &thisLayout.props.backgroundTextBox, "backgroundfile", PDO_NOPSHUPD|PDO_NOPREF|PDO_NORECORD|PDO_STRINGLIMITLENGTH,  NULL, N_("Background File Path"), 0, I2VP(CHANGE_BACKGROUND), TEXT_FIELD_LEN },
-	{ PD_BUTTON, ImageFileBrowse, "browse", PDO_DLGHORZ, NULL, N_("Browse ...") },
-	{ PD_BUTTON, ImageFileClear, "clear", PDO_DLGHORZ, NULL, N_("Clear") },
+	{ PD_STRING, &thisLayout.props.backgroundTextBox, "backgroundfile", PDO_NOPSHUPD|PDO_NOPREF|PDO_NORECORD|PDO_STRINGLIMITLENGTH,  NULL, NULL, 0, I2VP(CHANGE_BACKGROUND), TEXT_FIELD_LEN },
+	{ PD_BUTTON, ImageFileBrowse, "browse", PDO_DLGHORZ, NULL },
+	{ PD_BUTTON, ImageFileClear, "clear", PDO_DLGHORZ, NULL },
 #define BACKGROUNDPOSX (11)
-	{ PD_FLOAT, &thisLayout.props.backgroundPos.x, "backgroundposX", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &rN_9999999, N_("Background PosX,Y"), 0, I2VP(CHANGE_BACKGROUND) },
+	{ PD_FLOAT, &thisLayout.props.backgroundPos.x, "backgroundposX", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &rN_9999999, NULL, 0, I2VP(CHANGE_BACKGROUND) },
 #define BACKGROUNDPOSY (12)
 	{ PD_FLOAT, &thisLayout.props.backgroundPos.y, "backgroundposY", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW | PDO_DLGHORZ, &rN_9999999, NULL, 0, I2VP(CHANGE_BACKGROUND) },
 #define BACKGROUNDWIDTH (13)
-	{ PD_FLOAT, &thisLayout.props.backgroundSize, "backgroundWidth", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r0_9999999, N_("Background Size"), 0, I2VP(CHANGE_BACKGROUND) },
+	{ PD_FLOAT, &thisLayout.props.backgroundSize, "backgroundWidth", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r0_9999999, NULL, 0, I2VP(CHANGE_BACKGROUND) },
 #define BACKGROUNDSCREEN (14)
-	{ PD_SCALE, &thisLayout.props.backgroundScreen, "backgroundScreen", PDO_NOPSHUPD, &i0_100, N_("Background Screen %"), 0, I2VP(CHANGE_BACKGROUND) },
+	{ PD_SCALE, &thisLayout.props.backgroundScreen, "backgroundScreen", PDO_NOPSHUPD, &i0_100, NULL, 0, I2VP(CHANGE_BACKGROUND) },
 #define BACKGROUNDANGLE (15)
-	{ PD_FLOAT, &thisLayout.props.backgroundAngle, "backgroundAngle", PDO_NOPSHUPD | PDO_DRAW | PDO_DLGBOXEND, &r360_360, N_("Background Angle"), 0, I2VP(CHANGE_BACKGROUND) },
+	{ PD_FLOAT, &thisLayout.props.backgroundAngle, "backgroundAngle", PDO_NOPSHUPD | PDO_DRAW | PDO_DLGBOXEND, &r360_360, NULL, 0, I2VP(CHANGE_BACKGROUND) },
 	{ PD_MESSAGE, N_("Named Settings File"), "settings", PDO_DLGRESETMARGIN, I2VP(180) },
-	{ PD_BUTTON, SettingsWrite, "write",  PDO_DLGHORZ, 0, N_("Write"), 0, I2VP(0) },
-	{ PD_BUTTON, SettingsRead, "read", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Read"), 0, I2VP(0) }
+	{ PD_BUTTON, SettingsWrite, "write",  PDO_DLGHORZ, 0, NULL, 0, I2VP(0) },
+	{ PD_BUTTON, SettingsRead, "read", PDO_DLGHORZ | PDO_DLGBOXEND, 0, NULL, 0, I2VP(0) }
 };
 
 static paramGroup_t layoutPG = { "layout", PGO_RECORD | PGO_PREFMISC | PGO_FULLDIALOGFROMBUILDER, layoutPLs, COUNT( layoutPLs ) };
@@ -796,7 +796,7 @@ static void LayoutCancel( wControl_p unused)
 		// ChangeLayout();
 	}
 
-	ParamLoadControls(&layoutPG);
+	FormLoadControls(&layoutPG);
 
 	free(thisLayout.copyOfLayoutProps);
 	DynStringFree(&thisLayout.copyBackgroundFileName);
@@ -814,7 +814,7 @@ static void LayoutChange(long changes)
 {
 	if (changes & (CHANGE_SCALE | CHANGE_UNITS | CHANGE_BACKGROUND))
 		if (layoutW != NULL && wWinIsVisible(layoutW)) {
-			ParamLoadControls(&layoutPG);
+			FormLoadControls(&layoutPG);
 		}
 }
 
@@ -837,7 +837,7 @@ void DoLayout(void * unused)
 		LoadScaleList(layoutPLs[SCALEINX].control);
 	}
 
-	ParamControlActive(&layoutPG, BACKGROUNDFILEENTRY, FALSE);
+	FormControlActive(&layoutPG, BACKGROUNDFILEENTRY, FALSE);
 
 	LoadGaugeList(layoutPLs[GAUGEINX].control,
 	              thisLayout.props.curScaleDescInx); /* set correct gauge list here */
@@ -856,7 +856,7 @@ void DoLayout(void * unused)
 		DynStringCatCStr(&thisLayout.copyBackgroundFileName, curr);
 	}
 
-	ParamLoadControls(&layoutPG);
+	FormLoadControls(&layoutPG);
 	wShow(layoutW);
 }
 
@@ -867,7 +867,7 @@ void DoLayout(void * unused)
 */
 EXPORT addButtonCallBack_t LayoutInit(void)
 {
-	ParamRegister(&layoutPG);
+	FormRegister(&layoutPG);
 	RegisterChangeNotification(LayoutChange);
 	layout_p = layoutPLs;
 	layout_pg_p = &layoutPG;

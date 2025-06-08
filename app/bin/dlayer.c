@@ -1,4 +1,4 @@
-#include "custom.h"
+
 /** \file dlayer.c
  * Functions and dialogs for handling layers.
  */
@@ -24,6 +24,7 @@
 #include "common.h"
 #include "cselect.h"
 #include "custom.h"
+#include <form.h>
 #include "paths.h"
 #include "dynstring.h"
 #include "fileio.h"
@@ -929,7 +930,7 @@ static void DoLayerOp(void * data)
 	}
 
 	// UpdateLayerDlg(curLayer);   //Reset to current Layer
-	ParamControlActive( &layerPG, I_DELETE, (layerSelected > 0) ? TRUE : FALSE);
+	FormControlActive( &layerPG, I_DELETE, (layerSelected > 0) ? TRUE : FALSE);
 
 	if (layoutLayerChanged) {
 		MainProc(mainW, wResize_e, NULL, NULL);
@@ -991,16 +992,15 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
 		}
 	}
 
-	ParamControlActive( &layerPG, I_DELETE, (layerSelected > 0) ? TRUE : FALSE);
-	ParamControlActive( &layerPG, I_COUNT, FALSE );
-
-	ParamControlActive( &layerPG, I_SCALE, !layerInherit);
-	ParamControlActive( &layerPG, I_GAUGE, !layerInherit);
-	ParamControlActive( &layerPG, I_MINRADIUSENTRY, !layerInherit);
-	ParamControlActive( &layerPG, I_MAXGRADEENTRY, !layerInherit);
-	ParamControlActive( &layerPG, I_TIELEN, !layerInherit);
-	ParamControlActive( &layerPG, I_TIEWID, !layerInherit);
-	ParamControlActive( &layerPG, I_TIESPC, !layerInherit);
+	FormControlActive( &layerPG, I_DELETE, (layerSelected > 0) ? TRUE : FALSE);
+	FormControlActive( &layerPG, I_COUNT, FALSE );
+	FormControlActive( &layerPG, I_SCALE, !layerInherit);
+	FormControlActive( &layerPG, I_GAUGE, !layerInherit);
+	FormControlActive( &layerPG, I_MINRADIUSENTRY, !layerInherit);
+	FormControlActive( &layerPG, I_MAXGRADEENTRY, !layerInherit);
+	FormControlActive( &layerPG, I_TIELEN, !layerInherit);
+	FormControlActive( &layerPG, I_TIEWID, !layerInherit);
+	FormControlActive( &layerPG, I_TIESPC, !layerInherit);
 
 	/* finally show the layer buttons with balloon text */
 	for (inx = 0; inx < NUM_BUTTONS; inx++) {
@@ -1032,11 +1032,11 @@ void FillLayerList( wControl_p listLayers)
 	/* set current layer to selected */
 	wListSetIndex(listLayers, curLayer);
 
-	ParamControlActive( &layerPG, I_DELETE, (curLayer > 0) ? TRUE : FALSE);
+	FormControlActive( &layerPG, I_DELETE, (curLayer > 0) ? TRUE : FALSE);
 	if ( layerInherit ) {
-		ParamControlActive( &layerPG, I_TIELEN, FALSE);
-		ParamControlActive( &layerPG, I_TIEWID, FALSE);
-		ParamControlActive( &layerPG, I_TIESPC, FALSE);
+		FormControlActive( &layerPG, I_TIELEN, FALSE);
+		FormControlActive( &layerPG, I_TIEWID, FALSE);
+		FormControlActive( &layerPG, I_TIESPC, FALSE);
 	}
 }
 
@@ -1540,15 +1540,15 @@ static void LayerSelect(
 	// ParamLoadMessage(&layerPG, I_COUNT, message);
 	ParamLoadControls(&layerPG);
 
-	ParamControlActive( &layerPG, I_DELETE, (layerSelected > 0) ? TRUE : FALSE);
+	FormControlActive( &layerPG, I_DELETE, (layerSelected > 0) ? TRUE : FALSE);
 
-	ParamControlActive( &layerPG, I_SCALE, !layerInherit);
-	ParamControlActive( &layerPG, I_GAUGE, !layerInherit);
-	ParamControlActive( &layerPG, I_MINRADIUSENTRY, !layerInherit);
-	ParamControlActive( &layerPG, I_MAXGRADEENTRY, !layerInherit);
-	ParamControlActive( &layerPG, I_TIELEN, !layerInherit);
-	ParamControlActive( &layerPG, I_TIEWID, !layerInherit);
-	ParamControlActive( &layerPG, I_TIESPC, !layerInherit);
+	FormControlActive( &layerPG, I_SCALE, !layerInherit);
+	FormControlActive( &layerPG, I_GAUGE, !layerInherit);
+	FormControlActive( &layerPG, I_MINRADIUSENTRY, !layerInherit);
+	FormControlActive( &layerPG, I_MAXGRADEENTRY, !layerInherit);
+	FormControlActive( &layerPG, I_TIELEN, !layerInherit);
+	FormControlActive( &layerPG, I_TIEWID, !layerInherit);
+	FormControlActive( &layerPG, I_TIESPC, !layerInherit);
 
 	if (layerS) {
 		if (!LoadFileListLoad(settingsCatalog, settingsName)) {

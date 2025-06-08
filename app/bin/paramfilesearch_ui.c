@@ -22,7 +22,7 @@
 
 #include "custom.h"
 #include "dynstring.h"
-#include "param.h"
+#include "form.h"
 #include "include/partcatalog.h"
 #include "paths.h"
 #include "include/paramfilelist.h"
@@ -47,9 +47,9 @@ static long searchFitMode = 0;
 static paramListData_t searchUiListData = { 10, 370, 0 };
 #define MAXQUERYLENGTH 250
 static char searchUiQuery[MAXQUERYLENGTH];
-static char * searchUiLabels[] = { N_("Show File Names"), NULL };
+//static char * searchUiLabels[] = { N_("Show File Names"), NULL };
 // Note these are defined in the same order as FIT_ANY, FIT_COMPATIBLE, FIT_EXACT
-static char * searchFitLabels[] = { N_("Fit Any"), N_("Fit Compatible"), N_("Fit Exact"), NULL};
+//static char * searchFitLabels[] = { N_("Fit Any"), N_("Fit Compatible"), N_("Fit Exact"), NULL};
 
 
 #define QUERYPROMPTSTRING "Enter at least one search word"
@@ -62,17 +62,17 @@ static paramData_t searchUiPLs[] = {
 #define I_CLEARBUTTON (2)
 	{ PD_BUTTON, SearchUiClearFilter, "clearfilter", PDO_DLGHORZ, 0, NULL,  BO_ICON, NULL },
 #define I_FITRADIO	(3)
-	{	PD_RADIO, &searchFitMode, "fit", PDO_NOPREF | PDO_DLGBOXEND, searchFitLabels, NULL, BC_HORIZONTAL|BC_NOBORDER },
+	{	PD_RADIO, &searchFitMode, "fit", PDO_NOPREF | PDO_DLGBOXEND, /*searchFitLabels*/NULL, NULL, BC_HORIZONTAL | BC_NOBORDER},
 #define I_MESSAGE (4)
     { PD_MESSAGE, N_(QUERYPROMPTSTRING), "messagetext", 0, (void *)370 },
 #define I_STATISTICS (5)
     { PD_MESSAGE, "", "searchstat", PDO_DLGBOXEND, I2VP(370) },
 #define I_RESULTLIST	(6)
-	{	PD_LIST, NULL, "inx", PDO_NOPREF | PDO_DLGRESIZE, &searchUiListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
+	{	PD_LIST, NULL, "inx", PDO_NOPREF | PDO_DLGRESIZE, &searchUiListData, NULL, BL_DUP | BL_SETSTAY | BL_MANY},
 #define I_APPLYBUTTON	(7)
-	{	PD_BUTTON, SearchUiApply, "apply", PDO_DLGCMDBUTTON, NULL, N_("Add") },
+	{	PD_BUTTON, SearchUiApply, "apply", PDO_DLGCMDBUTTON, NULL},
 #define I_SELECTALLBUTTON (8)
-	{	PD_BUTTON, SearchUiSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
+	{	PD_BUTTON, SearchUiSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL},
 };
 
 #define SEARCHBUTTON (searchUiPLs[I_SEARCHBUTTON].control)
@@ -122,7 +122,10 @@ int SearchFileListLoad(Catalog *catalog)
 	DynString description;
 	DynStringMalloc(&description, STR_SHORT_SIZE);
 
-	wControlShow((wControl_p)RESULTLIST, FALSE);
+	if (!RESULTLIST) {
+		return(0);
+	}
+	wControlShow(RESULTLIST, FALSE);
 	wListClear(RESULTLIST);
 
 	DL_FOREACH(head, catalogEntry) {
@@ -188,13 +191,14 @@ static void SearchUiDefault(void)
 	int matches = SearchFileListLoad(
 	                      trackLibrary->catalog);  //Start with system files
 	wEntrySetValue(QUERYSTRING, "");
-
-	wMessageSetValue(MESSAGETEXT, _(QUERYPROMPTSTRING));
-	DynStringMalloc(&dsSummary, 16);
-	DynStringPrintf(&dsSummary, _("%u parameter files in library. %d Fit Scale."),
-	                CountCatalogEntries(trackLibrary->catalog), matches);
-	wMessageSetValue(SEARCHSTAT, DynStringToCStr(&dsSummary));
-	DynStringFree(&dsSummary);
+	if (MESSAGETEXT && SEARCHSTAT) {
+		wMessageSetValue(MESSAGETEXT, _(QUERYPROMPTSTRING));
+		DynStringMalloc(&dsSummary, 16);
+		DynStringPrintf(&dsSummary, _("%u parameter files in library. %d Fit Scale."),
+			CountCatalogEntries(trackLibrary->catalog), matches);
+		wMessageSetValue(SEARCHSTAT, DynStringToCStr(&dsSummary));
+		DynStringFree(&dsSummary);
+	}
 
 	wControlActive((wControl_p)CLEARBUTTON, FALSE);
 }
@@ -450,13 +454,12 @@ void DoSearchParams(void * junk)
 
 		searchFitMode = FIT_COMPATIBLE;  //Default to "Any" after startup
 
-		ParamRegister(&searchUiPG);
+		FormRegister(&searchUiPG);
 
-		searchUiW = ParamCreateDialog(&searchUiPG, 
-									MakeWindowTitle(_("Choose parameter files")), 
+		searchUiW = FormCreateDialog(&searchUiPG,MakeWindowTitle(_("Choose parameter files")), 
 									_("Done"), ParamCancel_Current,
-									NULL,
-		                              TRUE, NULL, F_RESIZE | F_RECALLSIZE, SearchUiDlgUpdate);
+									NULL, NULL, 
+		                              TRUE, F_RESIZE | F_RECALLSIZE, SearchUiDlgUpdate);
 
 		wControlActive(APPLYBUTTON, FALSE);
 		wControlActive(SELECTALLBUTTON, FALSE);
@@ -464,8 +467,8 @@ void DoSearchParams(void * junk)
 
 	wControlActive(FITRADIO, TRUE);
 
-	ParamLoadControls(&searchUiPG);
-	ParamGroupRecord(&searchUiPG);
+	FormLoadControls(&searchUiPG);
+	FormGroupRecord(&searchUiPG);
 
 	if (!trackLibrary) {
 		wControlActive(SEARCHBUTTON, FALSE);

@@ -3,6 +3,8 @@
 
 extern int log_form;
 
+extern char* prefSect;
+
 
 void FormSaveDefaultValues(paramGroup_p group);
 

@@ -39,9 +39,9 @@ static paramTextData_t noteTextData = { 300, 150 };
 static paramFloatRange_t noRangeCheck = { 0.0, 0.0, 80, PDO_NORANGECHECK_HIGH | PDO_NORANGECHECK_LOW };
 static paramData_t textNotePLs[] = {
 #define I_ORIGX (0)
-	/*0*/ { PD_FLOAT, &textNoteData.pos.x, "origx", PDO_DIM|PDO_NOPREF, &noRangeCheck, N_("Position X") },
+	/*0*/ { PD_FLOAT, &textNoteData.pos.x, "origx", PDO_DIM|PDO_NOPREF, &noRangeCheck },
 #define I_ORIGY (1)
-	/*1*/ { PD_FLOAT, &textNoteData.pos.y, "origy", PDO_DIM|PDO_NOPREF, &noRangeCheck, N_("Position Y") },
+	/*1*/ { PD_FLOAT, &textNoteData.pos.y, "origy", PDO_DIM|PDO_NOPREF, &noRangeCheck},
 #define I_LAYER (2)
 	/*2*/ { PD_COMBOLIST, &textNoteData.layer, "layer", PDO_NOPREF, I2VP(150), "Layer", 0 },
 #define I_TEXT (3)
@@ -129,7 +129,7 @@ CreateEditTextNote(char *title, char * textData )
 {
 	// create the dialog if necessary
 	if (!textNoteW) {
-		ParamRegister(&textNotePG);
+		FormRegister(&textNotePG);
 		textNoteW = FormCreateDialog(&textNotePG, "",
 		                             _("Done"), TextEditOK,
 		                             _("Cancel"), FormCancel_Current,
@@ -143,7 +143,7 @@ CreateEditTextNote(char *title, char * textData )
 	wTextAppend(textEntry, textData );
 	wTextSetReadonly(textEntry, FALSE);
 	FillLayerList(textNotePLs[I_LAYER].control);
-	ParamLoadControls(&textNotePG);
+	FormLoadControls(&textNotePG);
 	descTitle = title;
 
 	// and show the dialog

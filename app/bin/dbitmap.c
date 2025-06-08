@@ -252,9 +252,9 @@ static paramFloatRange_t dpiRange = { 0.1, 100.0, 60 };
 
 static paramData_t outputBitMapPLs[] = {
 #define I_TOGGLES		(0)
-	{ PD_TOGGLE, &outputBitMapTogglesV, "toggles", PDO_NOPSHUPD, bitmapTogglesLabels, N_( "Include " ) },
+	{ PD_TOGGLE, &outputBitMapTogglesV, "toggles", PDO_NOPSHUPD, bitmapTogglesLabels, NULL },
 #define I_DENSITY		(1)
-	{ PD_FLOAT, &outputBitMapDensity, "density", PDO_NOPSHUPD, &dpiRange, N_( "Resolution " ) },
+	{ PD_FLOAT, &outputBitMapDensity, "density", PDO_NOPSHUPD, &dpiRange, NULL },
 	{ PD_MESSAGE, N_( "dpi" ), "dpi", PDO_DLGHORZ },
 	{ PD_MESSAGE, N_( "Bitmap Size " ), "mess1", PDO_NOPSHUPD | PDO_DLGRESETMARGIN, 0 },
 #define I_MSG1			(4)
@@ -305,10 +305,10 @@ OutputBitmapPixelSize( void )
 {
 	DynString message;
 	DynStringMalloc( &message, 16 );
-	ParamLoadData( &outputBitMapPG );
+	FormLoadControls( &outputBitMapPG );
 
 	DynStringPrintf( &message, _( "%ld by %ld pixels" ), bitmap_w, bitmap_h );
-	ParamLoadMessage( &outputBitMapPG, I_MSG1, DynStringToCStr( &message ) );
+	FormLoadMessage( &outputBitMapPG, I_MSG1, DynStringToCStr( &message ) );
 	DynStringFree( &message );
 }
 
@@ -323,7 +323,7 @@ OutputBitmapFileSize( void )
 {
 	DynString message;
 	DynStringMalloc( &message, 16 );
-	ParamLoadData( &outputBitMapPG );
+	FormLoadControls( &outputBitMapPG );
 	FLOAT_T size;
 
 	size = ( FLOAT_T )bitmap_w * bitmap_h;
@@ -338,7 +338,7 @@ OutputBitmapFileSize( void )
 		DynStringPrintf( &message, _( "%0.1fGb" ), ( size + 5e7 ) / 1e9 );
 	}
 
-	ParamLoadMessage( &outputBitMapPG, I_MSG2, DynStringToCStr( &message ) );
+	FormLoadMessage( &outputBitMapPG, I_MSG2, DynStringToCStr( &message ) );
 
 	DynStringFree( &message );
 
@@ -389,15 +389,15 @@ static void ComputeBitmapSize( void )
 void
 UpdateBitmapDialog( void )
 {
-	ParamLoadData( &outputBitMapPG );
+	FormLoadControls( &outputBitMapPG );
 
 	ComputeBitmapSize();
-	ParamLoadControl( &outputBitMapPG, I_DENSITY ); // trigger range check
+	FormLoadSingleControl( &outputBitMapPG, I_DENSITY ); // trigger range check
 
 	if( outputBitMapDensity > dpiRange.high ) {
-		ParamDialogOkActive( &outputBitMapPG, false );
+		FormDialogOkActive( &outputBitMapPG, false );
 	} else {
-		ParamDialogOkActive( &outputBitMapPG, true );
+		FormDialogOkActive( &outputBitMapPG, true );
 	}
 
 	OutputBitmapPixelSize();
@@ -445,7 +445,7 @@ static void OutputBitMapOk( void * unused )
 static void OutputBitMapChange( long changes )
 {
 	if( ( changes & CHANGE_MAP ) && outputBitMapW ) {
-		ParamLoadControls( &outputBitMapPG );
+		FormLoadControls( &outputBitMapPG );
 		ComputeBitmapSize();
 	}
 
@@ -472,14 +472,14 @@ static void DoOutputBitMap( void* unused )
 		                                   ( paramChangeProc )UpdateBitmapDialog );
 	}
 
-	ParamLoadControls( &outputBitMapPG );
-	ParamGroupRecord( &outputBitMapPG );
+	FormLoadControls( &outputBitMapPG );
+	FormGroupRecord( &outputBitMapPG );
 
 	UpdateBitmapDialog();
 
 	if( dpiRange.high < outputBitMapDensity ) {
 		outputBitMapDensity = dpiRange.high;
-		ParamLoadControl( &outputBitMapPG, I_DENSITY );
+		FormLoadSingleControl( &outputBitMapPG, I_DENSITY );
 	}
 
 	wShow( outputBitMapW );
@@ -493,7 +493,7 @@ static void DoOutputBitMap( void* unused )
 
 EXPORT addButtonCallBack_t OutputBitMapInit( void )
 {
-	ParamRegister( &outputBitMapPG );
+	FormRegister( &outputBitMapPG );
 	RegisterChangeNotification( OutputBitMapChange );
 	return &DoOutputBitMap;
 }

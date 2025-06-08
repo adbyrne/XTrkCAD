@@ -38,6 +38,72 @@ FormStartRecord(FILE* fileHandle)
 	macroFile = fileHandle;
 }
 
+void FormGroupRecord(
+	paramGroup_p pg)
+{
+	paramData_p p;
+	long rgb;
+
+	if (macroFile == NULL) {
+		return;
+	}
+	for (p = pg->paramPtr; p < &pg->paramPtr[pg->paramCnt]; p++) {
+		if ((p->option & PDO_NORECORD) != 0 || p->valueP == NULL
+			|| p->nameStr == NULL) {
+			continue;
+		}
+		if ((p->option & PDO_DLGIGNORE) != 0) {
+			continue;
+		}
+		switch (p->type) {
+		case PD_LONG:
+		case PD_RADIO:
+		case PD_TOGGLE:
+			fprintf(macroFile, "PARAMETER %s %s %ld\n", pg->nameStr, p->nameStr,
+				*(long*)p->valueP);
+			break;
+		case PD_LIST:
+		case PD_DROPLIST:
+		case PD_COMBOLIST:
+			if (p->control) {
+				wListGetValues(p->control, message, sizeof message, NULL, NULL);
+			}
+			else {
+				message[0] = '\0';
+			}
+			fprintf(macroFile, "PARAMETER %s %s %d %s\n", pg->nameStr, p->nameStr,
+				*(wIndex_t*)p->valueP, message);
+			break;
+		case PD_COLORLIST:
+			rgb = wDrawGetRGB(*(wDrawColor*)p->valueP);
+			fprintf(macroFile, "PARAMETER %s %s %ld\n",
+				pg->nameStr, p->nameStr, rgb);
+			break;
+		case PD_FLOAT:
+			fprintf(macroFile, "PARAMETER %s %s %0.3f\n", pg->nameStr, p->nameStr,
+				*(FLOAT_T*)p->valueP);
+			break;
+		case PD_STRING:
+			fprintf(macroFile, "PARAMETER %s %s %s\n", pg->nameStr, p->nameStr,
+				(char*)p->valueP);
+			break;
+		case PD_MESSAGE:
+		case PD_BUTTON:
+		case PD_DRAW:
+		case PD_TEXT:
+		case PD_MENU:
+		case PD_MENUITEM:
+		case PD_BITMAP:
+		default:
+			break;
+		}
+	}
+	if (pg->nameStr) {
+		fprintf(macroFile, "PARAMETER GROUP %s\n", pg->nameStr);
+	}
+	fflush(macroFile);
+}
+
 void
 FormMacroRecord(char* format, ...)
 {

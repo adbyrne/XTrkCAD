@@ -980,8 +980,8 @@ static void RescaleDlgUpdate(
 		LoadGaugeList(rescalePLs[I_RESCALE_TO_GAUGE].control,
 		               *((int *)valueP) );
 		rescaleToGaugeInx = 0;
-		ParamLoadControl( pg, I_RESCALE_TO_GAUGE );
-		ParamLoadControl( pg, I_RESCALE_TO_SCALE );
+		FormLoadSingleControl( pg, I_RESCALE_TO_GAUGE );
+		FormLoadSingleControl( pg, I_RESCALE_TO_SCALE );
 		if ( rescaleFromScaleInx >= 0 ) {
 			rescalePercent = GetScaleRatio(GetScaleInx(rescaleFromScaleInx,0))/
 			                 GetScaleRatio(GetScaleInx(rescaleToScaleInx,0))*100.0;
@@ -990,19 +990,19 @@ static void RescaleDlgUpdate(
 		}
 		wControlActive( pg->paramPtr[I_RESCALE_CHANGE].control,
 		                (rescaleFromScaleInx != rescaleToScaleInx) );
-		ParamLoadControl( pg, I_RESCALE_PERCENT );
+		FormLoadSingleControl( pg, I_RESCALE_PERCENT );
 		break;
 	case I_RESCALE_TO_GAUGE:
-		ParamLoadControl( pg, I_RESCALE_TO_GAUGE );
+		FormLoadSingleControl( pg, I_RESCALE_TO_GAUGE );
 		break;
 	case I_RESCALE_FROM_SCALE:
-		ParamLoadControl( pg, I_RESCALE_FROM_SCALE );
+		FormLoadSingleControl( pg, I_RESCALE_FROM_SCALE );
 		break;
 	case I_RESCALE_FROM_GAUGE:
-		ParamLoadControl( pg, I_RESCALE_FROM_GAUGE );
+		FormLoadSingleControl( pg, I_RESCALE_FROM_GAUGE );
 		break;
 	case I_RESCALE_CHANGE:
-		ParamLoadControl( pg, I_RESCALE_CHANGE );
+		FormLoadSingleControl( pg, I_RESCALE_CHANGE );
 		break;
 	case -1:
 		break;
@@ -1016,7 +1016,7 @@ static void RescaleDlgUpdate(
 		// Ratio
 		bOkActive = rescalePercent != 100.0;
 	}
-	ParamDialogOkActive( pg, bOkActive );
+	FormDialogOkActive( pg, bOkActive );
 }
 
 /**
@@ -1138,6 +1138,6 @@ EXPORT void ScaleInit( void )
 	RegisterChangeNotification( ScaleChange );
 	wPrefGetInteger( "misc", "include same gauge turnouts",
 	                 &includeSameGaugeTurnouts, 1 );
-	ParamRegister( &rescalePG );
+	FormRegister( &rescalePG );
 	log_scale = LogFindIndex( "scale" );
 }

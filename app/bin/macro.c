@@ -45,7 +45,7 @@ EXPORT long adjTimer;
 static void DemoInitValues( void );
 
 static int log_playbackCursor = 0;
-
+EXPORT BOOL_T paramTogglePlaybackHilite;
 
 
 /*****************************************************************************
@@ -273,8 +273,10 @@ EXPORT void DoRecord( void * context )
 {
 	if (recordW == NULL) {
 		char * title = MakeWindowTitle(_("Record"));
-		recordW = FormCreateDialog( &recordPG, title, NULL, NULL, _("Cancel"), FormCancel_Current,
-		                             FALSE, F_RESIZE, NULL );
+		recordW = FormCreateDialog( &recordPG, title, 
+									NULL, NULL, 
+									_("Cancel"), FormCancel_Current,
+		                            FALSE, F_RESIZE, NULL );
 		recordFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, title, sRecordFilePattern,
 		                               StartRecord, NULL );
 	}
@@ -678,16 +680,16 @@ static paramTextData_t demoTextData = { 50, 16 };
 static paramData_t demoPLs[] = {
 #define I_DEMOSTEP		(0)
 #define demoStep		(demoPLs[I_DEMOSTEP].control)
-	{   PD_BUTTON, DoDemoButton, "step", PDO_NORECORD, NULL, N_("Step"), BB_DEFAULT, I2VP(0) },
+	{   PD_BUTTON, DoDemoButton, "step", PDO_NORECORD, NULL, NULL, BB_DEFAULT, I2VP(0) },
 #define I_DEMONEXT		(1)
 #define demoNext		(demoPLs[I_DEMONEXT].control)
-	{   PD_BUTTON, DoDemoButton, "next", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("Next"), 0, I2VP(1) },
+	{   PD_BUTTON, DoDemoButton, "next", PDO_NORECORD|PDO_DLGHORZ, NULL, NULL, 0, I2VP(1) },
 #define I_DEMOQUIT		(2)
 #define demoQuit		(demoPLs[I_DEMOQUIT].control)
-	{   PD_BUTTON, DoDemoButton, "quit", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("Quit"), BB_CANCEL, I2VP(3) },
+	{   PD_BUTTON, DoDemoButton, "quit", PDO_NORECORD|PDO_DLGHORZ, NULL, NULL, BB_CANCEL, I2VP(3) },
 #define I_DEMOSPEED		(3)
 #define demoSpeedL		(demoPLs[I_DEMOSPEED].control)
-	{   PD_COMBOLIST, &playbackSpeed, "speed", PDO_NORECORD|PDO_LISTINDEX|PDO_DLGHORZ, I2VP(80), N_("Speed") },
+	{   PD_COMBOLIST, &playbackSpeed, "speed", PDO_NORECORD|PDO_LISTINDEX|PDO_DLGHORZ, I2VP(80), NULL },
 #define I_DEMOTEXT		(4)
 #define demoT			(demoPLs[I_DEMOTEXT].control)
 	{   PD_TEXT, NULL, "text", PDO_NORECORD|PDO_DLGRESIZE, &demoTextData, NULL, BT_CHARUNITS|BO_READONLY}
@@ -1408,9 +1410,10 @@ static void DemoDlgUpdate(
 static void CreateDemoW( void )
 {
 	char * title = MakeWindowTitle(_("Demo"));
-	demoW = ParamCreateDialog( &demoPG, title, NULL, NULL, ParamCancel_Null, FALSE,
-	                           NULL,
-	                           F_RESIZE, DemoDlgUpdate );
+	demoW = FormCreateDialog( &demoPG, title, 
+							  NULL, NULL, 
+							  N_("Cancel"), ParamCancel_Null,
+							  FALSE, F_RESIZE, DemoDlgUpdate );
 
 	wComboBoxAddValue( demoSpeedL, _("Slowest"),  I2VP(0) );
 	wComboBoxAddValue( demoSpeedL, _("Slow"),  I2VP(1) );
@@ -1635,8 +1638,8 @@ EXPORT BOOL_T MacroInit( void )
 	arrows_bm = wDrawBitMapCreate( mainD.d, 12, 12, XTRKCAD_SYMBOLS_PATH,"arrows.png");
 	flash_bm = wDrawBitMapCreate( mainD.d, 12, 12, XTRKCAD_SYMBOLS_PATH,"flash.png");
 
-	ParamRegister( &recordPG );
-	ParamRegister( &demoPG );
+	FormRegister( &recordPG );
+	FormRegister( &demoPG );
 
 	log_playbackCursor = LogFindIndex( "playbackcursor" );
 	log_regression = LogFindIndex( "regression" );

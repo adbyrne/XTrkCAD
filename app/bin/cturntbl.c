@@ -47,7 +47,7 @@ EXPORT ANGLE_T turntableAngle = 0.0;
 static paramFloatRange_t r1_100 = { 1.0, 100.0, 100 };
 static paramData_t turntablePLs[] = {
 #define turntableDiameterPD		(turntablePLs[0])
-	{	PD_FLOAT, &turntableDiameter, "diameter", PDO_DIM|PDO_NOPREF, &r1_100, N_("Diameter") }
+	{	PD_FLOAT, &turntableDiameter, "diameter", PDO_DIM|PDO_NOPREF, &r1_100, NULL }
 };
 static paramGroup_t turntablePG = { "turntable", PGO_FULLDIALOGFROMBUILDER, turntablePLs, COUNT( turntablePLs ) };
 
@@ -1019,7 +1019,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		turntableDiameter = ceil(80.0*12.0/curScaleRatio);
 		wPrefGetFloat( "turntable", message, &turntableDiameter, turntableDiameter );
 		FormLoadControls( &turntablePG );
-		ParamGroupRecord( &turntablePG );
+		FormGroupRecord( &turntablePG );
 		InfoSetControls(mainW, turntablePG.nameStr);
 		SetAllTrackSelect( FALSE );
 		drawOutline = TRUE;
@@ -1033,7 +1033,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		}
 
 		InfoSetControls(mainW, turntablePG.nameStr);
-		ParamLoadData( &turntablePG );
+		FormLoadControls( &turntablePG );
 		pos0 = pos;
 		drawOutline = TRUE;
 		return C_CONTINUE;
@@ -1083,5 +1083,5 @@ EXPORT void InitTrkTurntable( void )
 {
 	T_TURNTABLE = InitObject( &turntableCmds );
 
-	ParamRegister( &turntablePG );
+	FormRegister( &turntablePG );
 }

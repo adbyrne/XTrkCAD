@@ -24,7 +24,7 @@
 #include "dynstring.h"
 #include "fileio.h"
 #include "icons.h"
-#include "param.h"
+#include "form.h"
 #include "include/paramfile.h"
 #include "include/paramfilelist.h"
 #include "paths.h"
@@ -64,13 +64,13 @@ static paramData_t paramFilePLs[] = {
 	{	PD_LIST, NULL, "inx", PDO_DLGRESIZE, &paramFileListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
 #define I_MESSAGE (1)
 	{ PD_MESSAGE, "", "message", 0, I2VP(37) },
-    { PD_BUTTON, ParamFileSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
+    { PD_BUTTON, ParamFileSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL },
 #define I_PRMFILEFAVORITE (3)
-	{   PD_BUTTON, ParamFileFavorite, "favorite", PDO_DLGCMDBUTTON, I2VP(TRUE), N_("Favorite")},
+	{   PD_BUTTON, ParamFileFavorite, "favorite", PDO_DLGCMDBUTTON, I2VP(TRUE)},
 	{	PD_BUTTON, ParamUnloadSelectedFiles, "unload", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_UNLOAD), 0L, FALSE },
 	{   PD_BUTTON, ParamRefreshSelectedFiles, "reload", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_REFRESH), 0L, FALSE },
-	{	PD_BUTTON, DoSearchParams, "find", 0, NULL, N_("Library...") },
-	{	PD_BUTTON, ParamFileBrowse, "browse", 0, NULL, N_("Browse...") },
+	{	PD_BUTTON, DoSearchParams, "find", 0, NULL },
+	{	PD_BUTTON, ParamFileBrowse, "browse", 0, NULL },
 };
 
 static paramGroup_t paramFilePG = { "prmfile", PGO_FULLDIALOGFROMBUILDER, paramFilePLs, COUNT( paramFilePLs ) };
@@ -420,16 +420,17 @@ void DoParamFiles(void * junk)
 		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_FIT ] = CreateSymbolFromResource(
 		                        "greenstar.png");
 
-		ParamRegister(&paramFilePG);
+		FormRegister(&paramFilePG);
 
-		paramFileW = ParamCreateDialog(&paramFilePG,
-		                               MakeWindowTitle(_("Parameter Files")), _("Done"), ParamFileOk, ParamCancel_Null,
-		                               TRUE, NULL, F_RESIZE | F_RECALLSIZE, ParamFileDlgUpdate);
+		paramFileW = FormCreateDialog(&paramFilePG, MakeWindowTitle(_("Parameter Files")), 
+										_("Done"), ParamFileOk, 
+										NULL, NULL,
+		                               TRUE, F_RESIZE | F_RECALLSIZE, ParamFileDlgUpdate);
 		paramFile_fs = wFilSelCreate(mainW, FS_LOAD, FSO_MULTIPLEFILES,
 		                             _("Load Parameters"), _("Parameter files (*.xtp)|*.xtp"), LoadParamFile, NULL);
 	}
-	ParamLoadControls(&paramFilePG);
-	ParamGroupRecord(&paramFilePG);
+	FormLoadControls(&paramFilePG);
+	FormGroupRecord(&paramFilePG);
 	if ((wListGetValues(paramFileL, NULL, 0, NULL, &data))>=0) {
 		UpdateParamFileButton();
 	}

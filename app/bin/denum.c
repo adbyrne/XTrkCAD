@@ -41,8 +41,6 @@ static long enableListPrices;
 static long enableListIndexes;
 
 static paramTextData_t enumTextData = { 80, 24 };
-static char * priceLabels[] = { N_("Prices"), NULL };
-static char * indexLabels[] = { N_("Indexes"), NULL };
 static paramData_t enumPLs[] = {
 #define I_ENUMTEXT		(0)
 #define enumT			(enumPLs[I_ENUMTEXT].control)

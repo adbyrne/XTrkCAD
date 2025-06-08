@@ -46,17 +46,17 @@ static void NoteLinkOpen(char *url );
 static paramFloatRange_t noRangeCheck = { 0.0, 0.0, 80, PDO_NORANGECHECK_HIGH | PDO_NORANGECHECK_LOW };
 static paramData_t linkNotePLs[] = {
 #define I_ORIGX (0)
-	/*0*/ { PD_FLOAT, &linkNoteData.pos.x, "origx", PDO_DIM|PDO_NOPREF, &noRangeCheck, N_("Position X") },
+	/*0*/ { PD_FLOAT, &linkNoteData.pos.x, "origx", PDO_DIM|PDO_NOPREF, &noRangeCheck },
 #define I_ORIGY (1)
-	/*1*/ { PD_FLOAT, &linkNoteData.pos.y, "origy", PDO_DIM|PDO_NOPREF, &noRangeCheck, N_("Position Y") },
+	/*1*/ { PD_FLOAT, &linkNoteData.pos.y, "origy", PDO_DIM|PDO_NOPREF, &noRangeCheck },
 #define I_LAYER (2)
-	/*2*/ { PD_COMBOLIST, &linkNoteData.layer, "layer", PDO_NOPREF, I2VP(150), "Layer", 0 },
+	/*2*/ { PD_COMBOLIST, &linkNoteData.layer, "layer", PDO_NOPREF, I2VP(150), NULL, 0 },
 #define I_TITLE (3)
-	/*3*/ { PD_STRING, &linkNoteData.title, "title", PDO_NOPREF | PDO_NOTBLANK, I2VP(20), N_("Title"), 0, 0, sizeof(linkNoteData.title ) },
+	/*3*/ { PD_STRING, &linkNoteData.title, "title", PDO_NOPREF | PDO_NOTBLANK, I2VP(20), NULL, 0, 0, sizeof(linkNoteData.title ) },
 #define I_URL (4)
-	/*4*/ { PD_STRING, &linkNoteData.url, "name", PDO_NOPREF | PDO_NOTBLANK, I2VP(40), N_("URL"), 0, 0, sizeof(linkNoteData.url ) },
+	/*4*/ { PD_STRING, &linkNoteData.url, "name", PDO_NOPREF | PDO_NOTBLANK, I2VP(40), NULL, 0, 0, sizeof(linkNoteData.url ) },
 #define I_OPEN (5)
-	/*5*/{ PD_BUTTON, NoteLinkBrowse, "openlink", PDO_DLGHORZ, NULL, N_("Open...") },
+	/*5*/{ PD_BUTTON, NoteLinkBrowse, "openlink", PDO_DLGHORZ, NULL},
 };
 
 static paramGroup_t linkNotePG = { "linkNote", PGO_FULLDIALOGFROMBUILDER, linkNotePLs, COUNT( linkNotePLs ) };

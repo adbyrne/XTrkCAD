@@ -814,10 +814,10 @@ static void MiscMenuItemCreate(wMenu_p m1, wMenu_p m2, const char * name,
                                const char * label, long acclKey, void * func, long option, void * context)
 {
 	wControl_p mp;
-	mp = wMenuPushCreate(m1, name, label, acclKey, ParamMenuPush,
+	mp = wMenuPushCreate(m1, name, label, acclKey, FormMenuPush,
 	                     &menuPLs[menuPG.paramCnt]);
 	if (m2)
-		wMenuPushCreate(m2, name, label, acclKey, ParamMenuPush,
+		wMenuPushCreate(m2, name, label, acclKey, FormMenuPush,
 		                &menuPLs[menuPG.paramCnt]);
 	menuPLs[menuPG.paramCnt].control = (wControl_p) mp;
 	menuPLs[menuPG.paramCnt].type = PD_MENUITEM;
