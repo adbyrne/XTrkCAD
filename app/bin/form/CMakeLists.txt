@@ -5,9 +5,10 @@ target_sources(xtrkcad-lib
     checkinputs.c
     createcontrols.c
     defaultvalues.c
-    form.c
+    dialog.c
     formatval.c
-    formdistance.c
-    formmacro.c
+    formatdistance.c
     loadcontrols.c
+    macro.c
+    setcontrols.c
 )

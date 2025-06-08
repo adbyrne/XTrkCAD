@@ -21,11 +21,9 @@
   *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
   */
 
-#include <wlib.h>
 #include <form.h>
 #include "formprivate.h"
 
-#include "dynstring.h"
 
 static char* parseErrorMessage;
 

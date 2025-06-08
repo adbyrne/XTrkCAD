@@ -34,7 +34,7 @@ void FormButtonOk(void* groupVP)
 	paramGroup_p group = groupVP;
 	wFlush();
 	LOG(log_form, 1, ("ParamButtonOk: %s\n", group->nameStr));
-	if (!ParamCheckInputs(group, (wControl_p)group->okB)) {
+	if (!FormCheckInputs(group, (wControl_p)group->okB)) {
 		return;
 	}
 	if (group->nameStr) {

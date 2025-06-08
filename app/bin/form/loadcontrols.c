@@ -22,7 +22,6 @@
   */
 
 #include <wlib.h>
-#include <param.h>
 #include <form.h>
 #include "formprivate.h"
 
