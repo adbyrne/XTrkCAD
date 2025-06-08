@@ -1,25 +1,25 @@
 /**
  * \file   checkinputs.c
- * \brief  
+ * \brief
  */
 
- /*  XTrackCad - Model Railroad CAD
-  *  Copyright (C) 2005, 2024 Dave Bullis
-  *
-  *  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
-  *  (at your option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
-  *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-  */
+/*  XTrackCad - Model Railroad CAD
+ *  Copyright (C) 2005, 2024 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #include <ctype.h>
 
@@ -48,7 +48,7 @@ ClearErrorMessage(paramData_p p)
 	wControlHilite(p->control, FALSE);
 }
 
-unsigned long 
+unsigned long
 FormIntegerGetValue(paramData_p data, const char *enteredValue)
 {
 	char* cp;
@@ -63,8 +63,7 @@ FormIntegerGetValue(paramData_p data, const char *enteredValue)
 	if (*cp != '\0') {
 		data->bInvalid = TRUE;
 		ShowErrorMessage(data, _("Invalid number"));
-	}
-	else {
+	} else {
 		data->bInvalid = FALSE;
 		ClearErrorMessage(data);
 	}
@@ -98,11 +97,10 @@ wBool_t FormIntegerRangeCheck(paramData_p p, long valL)
 	}
 
 	if (tooHigh && tooLow) {
-		DynStringPrintf(&errorMessage, _("Enter a value between %ld and %ld"), 
-			irangeP->low,
-			irangeP->high);
-	}
-	else {
+		DynStringPrintf(&errorMessage, _("Enter a value between %ld and %ld"),
+		                irangeP->low,
+		                irangeP->high);
+	} else {
 		if (tooHigh) {
 			DynStringPrintf(&errorMessage, _("Enter a value < %ld"), irangeP->high);
 		}
@@ -113,8 +111,7 @@ wBool_t FormIntegerRangeCheck(paramData_p p, long valL)
 
 	if (p->bInvalid) {
 		ShowErrorMessage(p, DynStringToCStr(&errorMessage));
-	}
-	else {
+	} else {
 		ClearErrorMessage(p);
 	}
 
@@ -136,15 +133,14 @@ static FLOAT_T FloatGetValue(const char *enteredValue,	BOOL_T* validP)
 		}
 		*validP = TRUE;
 		return valF;
-	}
-	else {
+	} else {
 		*validP = TRUE;
 		return 0.0;
 	}
 }
 
 
-FLOAT_T FormFloatGetValue(paramData_p data, const char *enteredValue) 
+FLOAT_T FormFloatGetValue(paramData_p data, const char *enteredValue)
 {
 	FLOAT_T value;
 	wBool_t valid;
@@ -162,8 +158,7 @@ FLOAT_T FormFloatGetValue(paramData_p data, const char *enteredValue)
 		value = FloatGetValue(enteredValue, &valid);
 		if (!valid) {
 			ShowErrorMessage(data, _("Invalid Number"));
-		}
-		else {
+		} else {
 			if (data->option & PDO_ANGLE) {
 				value = NormalizeAngle((angleSystem == ANGLE_POLAR) ? value : -value);
 			}
@@ -203,24 +198,26 @@ wBool_t FormFloatRangeCheck(paramData_p p, FLOAT_T valF)
 
 	if (tooHigh && tooLow) {
 		DynStringPrintf(&message, _("Enter a value between %s and %s"),
-			(p->option & PDO_DIM) ? FormatDistance(frangeP->low) : FormatFloat(frangeP->low),
-			(p->option & PDO_DIM) ? FormatDistance(frangeP->high) : FormatFloat(frangeP->high));
-	}
-	else {
+		                (p->option & PDO_DIM) ? FormatDistance(frangeP->low) : FormatFloat(
+		                        frangeP->low),
+		                (p->option & PDO_DIM) ? FormatDistance(frangeP->high) : FormatFloat(
+		                        frangeP->high));
+	} else {
 		if (tooHigh) {
-			DynStringPrintf(&message, _("Enter a value < %s"), 
-				(p->option & PDO_DIM) ? FormatDistance(frangeP->high) : FormatFloat(frangeP->high));
+			DynStringPrintf(&message, _("Enter a value < %s"),
+			                (p->option & PDO_DIM) ? FormatDistance(frangeP->high) : FormatFloat(
+			                        frangeP->high));
 		}
 		if (tooLow) {
-			DynStringPrintf(&message, _("Enter a value > %s"), 
-				(p->option & PDO_DIM) ? FormatDistance(frangeP->low) : FormatFloat(frangeP->low));
+			DynStringPrintf(&message, _("Enter a value > %s"),
+			                (p->option & PDO_DIM) ? FormatDistance(frangeP->low) : FormatFloat(
+			                        frangeP->low));
 		}
 	}
 
 	if (p->bInvalid) {
 		wTooltipSetText(p->control, DynStringToCStr(&message));
-	}
-	else {
+	} else {
 		wTooltipSet(p->control, p->group->nameStr, p->nameStr);
 	}
 
@@ -229,9 +226,10 @@ wBool_t FormFloatRangeCheck(paramData_p p, FLOAT_T valF)
 	return(!p->bInvalid);
 }
 
-static void strip_whitespace(char* str) {
+static void strip_whitespace(char* str)
+{
 	size_t len = strlen(str);
-	if (len == 0) return;
+	if (len == 0) { return; }
 
 	char* end = str + len - 1;
 
@@ -246,7 +244,7 @@ static void strip_whitespace(char* str) {
 
 /**
  * Check for valid string: .
- * 
+ *
  * \param data	parameter definition
  * \param value	entered string
  * \return false if invalid, true if ok
@@ -256,18 +254,18 @@ wBool_t FormStringCheckValue(paramData_p data, char * value)
 	DynString message;
 	DynStringMalloc(&message, 80);
 
- 	data->bInvalid = FALSE;
+	data->bInvalid = FALSE;
 
 	strip_whitespace(value);
 
 	if ((data->option & PDO_NOTBLANK) && value[0] == '\0') {
 		DynStringPrintf(&message, "%s", _("String cannot be blank"));
 		data->bInvalid = TRUE;
-	}
-	else {
+	} else {
 		if ((data->option & PDO_NOPSHUPD) == 0 && data->valueP) {
 			if (strlen(value) > data->max_string - 1) {
-				DynStringPrintf(&message, "String is too long, Max length is % u", data->max_string - 1);
+				DynStringPrintf(&message, "String is too long, Max length is % u",
+				                data->max_string - 1);
 				data->bInvalid = TRUE;
 			}
 		}
@@ -275,8 +273,7 @@ wBool_t FormStringCheckValue(paramData_p data, char * value)
 
 	if (data->bInvalid) {
 		wTooltipSetText(data->control, DynStringToCStr(&message));
-	}
-	else {
+	} else {
 		wTooltipSet(data->control, data->group->nameStr, data->nameStr);
 	}
 
@@ -294,8 +291,8 @@ FormStringGetValue(paramData_p data, char* value)
 }
 
 wBool_t FormCheckInputs(
-	paramGroup_p group,
-	wControl_p button)
+        paramGroup_p group,
+        wControl_p button)
 {
 	wBool_t bInvalid = FALSE;
 	// Check for invalid entries
@@ -312,7 +309,8 @@ wBool_t FormCheckInputs(
 	if (bInvalid) {
 		// At least 1 invalid entry
 		LOG(log_form, 1, ("  Group %s Invalid\n", group->nameStr));
-		wTooltipSetText(button, _("Invalid input(s), please correct the hilighted field(s)"));
+		wTooltipSetText(button,
+		                _("Invalid input(s), please correct the hilighted field(s)"));
 		wFlush();
 		return FALSE;
 	}

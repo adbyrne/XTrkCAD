@@ -1,43 +1,41 @@
 /**
  * \file   loadcontrol.c
- * \brief  
+ * \brief
  */
 
- /*  XTrackCad - Model Railroad CAD
-  *  Copyright (C) 2005, 2024 Dave Bullis
-  *
-  *  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
-  *  (at your option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
-  *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-  */
+/*  XTrackCad - Model Railroad CAD
+ *  Copyright (C) 2005, 2024 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #include <wlib.h>
 #include <form.h>
 #include "formprivate.h"
 
-static void 
+static void
 LoadFloatEntry(paramData_p entry, FLOAT_T value)
 {
 	char* formattedString;
 	if (entry->option & PDO_DIM) {
 		if (entry->option & PDO_SMALLDIM) {
 			formattedString = FormatSmallDistance(value);
-		}
-		else {
+		} else {
 			formattedString = FormatDistance(value);
 		}
-	}
-	else {
+	} else {
 		if (entry->option & PDO_ANGLE) {
 			value = NormalizeAngle((angleSystem == ANGLE_POLAR) ? value : -value);
 		}
@@ -54,8 +52,8 @@ LoadColorButton( paramData_p colorButton, wDrawColor color)
 }
 
 void FormLoadSingleControl(
-	paramGroup_p pg,
-	int inx)
+        paramGroup_p pg,
+        int inx)
 {
 	paramData_p p = &pg->paramPtr[inx];
 
@@ -107,8 +105,7 @@ void FormLoadSingleControl(
 			strncpy(p->oldD.s, (char*)p->valueP, p->max_string - 1);
 			*(p->oldD.s + (uint32_t)p->max_string - 1) = '\0';
 			wEntrySetValue(p->control, (char*)p->oldD.s);
-		}
-		else {
+		} else {
 			p->oldD.s = MyStrdup((char*)p->valueP);
 			wEntrySetValue(p->control, (char*)p->valueP);
 		}
@@ -141,19 +138,17 @@ void FormLoadSingleControl(
 
 
 void FormLoadMessage(
-	paramGroup_p pg,
-	int inx,
-	char* message)
+        paramGroup_p pg,
+        int inx,
+        char* message)
 {
 	paramData_p p = &pg->paramPtr[inx];
 	if (p->control) {
 		if (p->type == PD_MESSAGE) {
 			wMessageSetValue(p->control, message);
-		}
-		else if (p->type == PD_STRING) {
+		} else if (p->type == PD_STRING) {
 			wEntrySetValue(p->control, message);
-		}
-		else {
+		} else {
 			CHECKMSG(FALSE, ("p->tytpe %d", (int)p->type));
 		}
 	}

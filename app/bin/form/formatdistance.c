@@ -3,23 +3,23 @@
  * \brief  Distance format functions, create and interpret
  */
 
- /*  XTrackCad - Model Railroad CAD
-  *  Copyright (C) 2005, 2025 Dave Bullis
-  *
-  *  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
-  *  (at your option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
-  *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-  */
+/*  XTrackCad - Model Railroad CAD
+ *  Copyright (C) 2005, 2025 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #include <form.h>
 #include "formprivate.h"
@@ -69,7 +69,7 @@ static int GetNumberStr(char** cpp, FLOAT_T* numP, BOOL_T* hasFract)
 	lc = localeconv();
 
 	if (**cpp != lc->decimal_point[0]
-		&& !GetDigitStr(cpp, &n0, NULL)) {
+	    && !GetDigitStr(cpp, &n0, NULL)) {
 		return FALSE;
 	}
 	if (**cpp == lc->decimal_point[0]) {
@@ -88,8 +88,7 @@ static int GetNumberStr(char** cpp, FLOAT_T* numP, BOOL_T* hasFract)
 	if (isdigit((unsigned char)**cpp)) {
 		cp = *cpp;
 		if (!GetDigitStr(cpp, &f1, NULL)) { return FALSE; }
-	}
-	else {
+	} else {
 		f1 = n0;
 		n0 = 0;
 	}
@@ -103,14 +102,12 @@ static int GetNumberStr(char** cpp, FLOAT_T* numP, BOOL_T* hasFract)
 		}
 		*numP = ((FLOAT_T)n0) + ((FLOAT_T)f1) / ((FLOAT_T)f2);
 		*hasFract = TRUE;
-	}
-	else {
+	} else {
 		if (cp != NULL) {
 			*cpp = cp;
 			parseErrorMessage = N_("Expected /");
 			return FALSE; /* 999 999 ?? */
-		}
-		else {
+		} else {
 			*hasFract = FALSE;
 			*numP = f1;
 		}
@@ -171,35 +168,28 @@ static BOOL_T GetDistance(char** cpp, FLOAT_T* distP)
 		n1 *= 12.0;
 		(*cpp) += 1;
 		expectInch = !hasFract;
-	}
-	else if (tolower((unsigned char)(*cpp)[0]) == 'f' &&
-		tolower((unsigned char)(*cpp)[1]) == 't') {
+	} else if (tolower((unsigned char)(*cpp)[0]) == 'f' &&
+	           tolower((unsigned char)(*cpp)[1]) == 't') {
 		n1 *= 12.0;
 		(*cpp) += 2;
 		expectInch = !hasFract;
-	}
-	else if (tolower((unsigned char)(*cpp)[0]) == 'c' &&
-		tolower((unsigned char)(*cpp)[1]) == 'm') {
+	} else if (tolower((unsigned char)(*cpp)[0]) == 'c' &&
+	           tolower((unsigned char)(*cpp)[1]) == 'm') {
 		n1 /= 2.54;
 		(*cpp) += 2;
-	}
-	else if (tolower((unsigned char)(*cpp)[0]) == 'm' &&
-		tolower((unsigned char)(*cpp)[1]) == 'm') {
+	} else if (tolower((unsigned char)(*cpp)[0]) == 'm' &&
+	           tolower((unsigned char)(*cpp)[1]) == 'm') {
 		n1 /= 25.4;
 		(*cpp) += 2;
-	}
-	else if (tolower((unsigned char)(*cpp)[0]) == 'm') {
+	} else if (tolower((unsigned char)(*cpp)[0]) == 'm') {
 		n1 *= 100.0 / 2.54;
 		(*cpp) += 1;
-	}
-	else if ((*cpp)[0] == '"') {
+	} else if ((*cpp)[0] == '"') {
 		(*cpp) += 1;
-	}
-	else if (tolower((unsigned char)(*cpp)[0]) == 'i' &&
-		tolower((unsigned char)(*cpp)[1]) == 'n') {
+	} else if (tolower((unsigned char)(*cpp)[0]) == 'i' &&
+	           tolower((unsigned char)(*cpp)[1]) == 'n') {
 		(*cpp) += 2;
-	}
-	else {
+	} else {
 		parseErrorMessage = N_("Invalid Units Indicator");
 		return FALSE;
 	}
@@ -217,9 +207,8 @@ static BOOL_T GetDistance(char** cpp, FLOAT_T* distP)
 
 		if ((*cpp)[0] == '"') {
 			(*cpp) += 1;
-		}
-		else if (tolower((unsigned char)(*cpp)[0]) == 'i' &&
-			tolower((unsigned char)(*cpp)[1]) == 'n') {
+		} else if (tolower((unsigned char)(*cpp)[0]) == 'i' &&
+		           tolower((unsigned char)(*cpp)[1]) == 'n') {
 			(*cpp) += 2;
 		}
 
@@ -241,7 +230,7 @@ static BOOL_T GetDistance(char** cpp, FLOAT_T* distP)
 	return TRUE;
 }
 
-FLOAT_T 
+FLOAT_T
 FormDecodeDistance(	const char *enteredValue, BOOL_T* validP)
 {
 	FLOAT_T valF = 0.0;
@@ -278,12 +267,10 @@ FormDecodeDistance(	const char *enteredValue, BOOL_T* validP)
 	if (*validP) {
 		if (c1 == 's' || c1 == 'S') {
 			valF *= curScaleRatio;
-		}
-		else if (c1 == 'p' || c1 == 'P') {
+		} else if (c1 == 'p' || c1 == 'P') {
 			valF /= curScaleRatio;
 		}
-	}
-	else {
+	} else {
 		//snprintf(decodeErrorStr, sizeof(decodeErrorStr), "%s @ %s", _(parseErrorMessage),
 		//	*cp1 ? cp1 : _("End Of String"));
 		valF = 0.0;

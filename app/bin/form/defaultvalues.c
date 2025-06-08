@@ -3,23 +3,23 @@
  * \brief  Save / Restore default values for dialog items
  */
 
- /*  XTrackCad - Model Railroad CAD
-  *  Copyright (C) 2005, 2024 Dave Bullis
-  *
-  *  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
-  *  (at your option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
-  *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-  */
+/*  XTrackCad - Model Railroad CAD
+ *  Copyright (C) 2005, 2024 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #include <limits.h>
 #include <wlib.h>
@@ -31,7 +31,8 @@
 #define HASDEFAULT(p) (p->nameStr && p->valueP && !(p->option&PDO_NOPREF))
 
 static void
-DefaultFromListIndex(const char *section, const char *namePrimary, const char *sectionAlt, const char *nameAlt,  paramData_t*p)
+DefaultFromListIndex(const char *section, const char *namePrimary,
+                     const char *sectionAlt, const char *nameAlt,  paramData_t*p)
 {
 	long value;
 
@@ -45,7 +46,8 @@ DefaultFromListIndex(const char *section, const char *namePrimary, const char *s
 }
 
 static void
-DefaultFromListValue(const char* section, const char* namePrimary, const char* sectionAlt, const char* nameAlt, paramData_t* p)
+DefaultFromListValue(const char* section, const char* namePrimary,
+                     const char* sectionAlt, const char* nameAlt, paramData_t* p)
 {
 	char* cp;
 
@@ -76,7 +78,7 @@ FormatWidthsList(unsigned count, wWinPix_t* widths, DynString *output)
 
 		DynStringCatCStr(output, buffer);
 	}
-	
+
 	return;
 }
 
@@ -119,7 +121,7 @@ FormLoadDefaultValues(paramGroup_p pg)
 
 		paramData_t* p = (pg->paramPtr)+i;
 
-		if (HASDEFAULT(p)) {			
+		if (HASDEFAULT(p)) {
 			const char* prefSectAlternative;
 			char* cp;
 
@@ -129,8 +131,7 @@ FormLoadDefaultValues(paramGroup_p pg)
 			if ((p->option & PDO_DRAW)) {
 				prefSectAlternative = "draw";
 				CopyCStringtoDynString(&prefNameAlternative, p->nameStr);
-			}
-			else if ((p->option & PDO_FILE)) {
+			} else if ((p->option & PDO_FILE)) {
 				prefSectAlternative = "file";
 				CopyCStringtoDynString(&prefNameAlternative, p->nameStr);
 			}
@@ -138,60 +139,59 @@ FormLoadDefaultValues(paramGroup_p pg)
 			else if ((pg->options & PGO_PREFMISC)) {
 				prefSectAlternative = "misc";
 				CopyCStringtoDynString(&prefNameAlternative, p->nameStr);
-			}
-			else if ((pg->options & PGO_PREFMISCGROUP)) {
+			} else if ((pg->options & PGO_PREFMISCGROUP)) {
 				prefSectAlternative = "misc";
 			}
 
 			cp = strchr(p->nameStr, '\t');
 			if (cp) {
 				LogPrintf("UNSUPPORTED: Parameter type has tab in name %s\n", p->nameStr);
-			//	/* *cp++ = 0; */
-			//	prefSectAlternative = cp;
-			//	cp = strchr(cp, '\t');
-			//	if (cp) {
-			//		/* *cp++ = 0; */
-			//		prefNameAlternative = cp;
-			//	}
+				//	/* *cp++ = 0; */
+				//	prefSectAlternative = cp;
+				//	cp = strchr(cp, '\t');
+				//	if (cp) {
+				//		/* *cp++ = 0; */
+				//		prefNameAlternative = cp;
+				//	}
 			}
 
 			switch (p->type) {
 			case PD_RADIO:
 			case PD_TOGGLE:
 				if (!wPrefGetInteger(pg->nameStr, p->nameStr, p->valueP, *(long*)p->valueP)) {
-					wPrefGetInteger(prefSectAlternative, DynStringToCStr(&prefNameAlternative), 
-						p->valueP, *(long*)p->valueP);
+					wPrefGetInteger(prefSectAlternative, DynStringToCStr(&prefNameAlternative),
+					                p->valueP, *(long*)p->valueP);
 				}
 				break;
 			case PD_LIST:
-				/** \todo Load column widths from preferences */
+			/** \todo Load column widths from preferences */
 			case PD_COMBOLIST:
 				if ((p->option & PDO_LISTINDEX)) {
-					DefaultFromListIndex(pg->nameStr, p->nameStr, prefSectAlternative, 
-						DynStringToCStr(&prefNameAlternative), p);
-				}
-				else {
-					DefaultFromListValue(pg->nameStr, p->nameStr, prefSectAlternative, 
-						DynStringToCStr(&prefNameAlternative), p);
+					DefaultFromListIndex(pg->nameStr, p->nameStr, prefSectAlternative,
+					                     DynStringToCStr(&prefNameAlternative), p);
+				} else {
+					DefaultFromListValue(pg->nameStr, p->nameStr, prefSectAlternative,
+					                     DynStringToCStr(&prefNameAlternative), p);
 				}
 				break;
 			case PD_COLORLIST:
 				if (!wPrefGetInteger(pg->nameStr, p->nameStr, p->valueP, *(long*)p->valueP)) {
 					wPrefGetInteger(prefSectAlternative, DynStringToCStr(&prefNameAlternative),
-						p->valueP, *(long*)p->valueP);
+					                p->valueP, *(long*)p->valueP);
 				}
 				break;
 			case PD_LONG:
 			case PD_SCALE:
 				if (!wPrefGetInteger(pg->nameStr, p->nameStr, p->valueP, *(long*)p->valueP)) {
 					wPrefGetInteger(prefSectAlternative, DynStringToCStr(&prefNameAlternative),
-						p->valueP, *(long*)p->valueP);
+					                p->valueP, *(long*)p->valueP);
 				}
 				break;
 			case PD_FLOAT:
-				if (!wPrefGetFloat(pg->nameStr, p->nameStr, (FLOAT_T*)p->valueP, *(FLOAT_T*)p->valueP)) {
+				if (!wPrefGetFloat(pg->nameStr, p->nameStr, (FLOAT_T*)p->valueP,
+				                   *(FLOAT_T*)p->valueP)) {
 					wPrefGetFloat(prefSectAlternative, DynStringToCStr(&prefNameAlternative),
-						(FLOAT_T*)p->valueP, *(FLOAT_T*)p->valueP);
+					              (FLOAT_T*)p->valueP, *(FLOAT_T*)p->valueP);
 				}
 				break;
 			case PD_STRING:
@@ -201,8 +201,7 @@ FormLoadDefaultValues(paramGroup_p pg)
 				}
 				if (cp) {
 					strcpy(p->valueP, cp);
-				}
-				else {
+				} else {
 					((char*)p->valueP)[0] = '\0';
 				}
 				break;
@@ -228,13 +227,15 @@ FormSaveDefaultValues(paramGroup_p pg)
 		paramData_p p = (pg->paramPtr) + i;
 		char prefNamePrimary[STR_SHORT_SIZE];
 
-		if (/*p->valueP == NULL || */p->nameStr == NULL) { /** \todo check for valueP == NULL */
+		if (/*p->valueP == NULL || */p->nameStr ==
+		                             NULL) { /** \todo check for valueP == NULL */
 			continue;
 		}
 		if ((p->option & PDO_DLGIGNORE)|| (p->option & PDO_NOPREF)) {
 			continue;
 		}
-		snprintf(prefNamePrimary, sizeof(prefNamePrimary), "%s-%s", pg->nameStr, p->nameStr);
+		snprintf(prefNamePrimary, sizeof(prefNamePrimary), "%s-%s", pg->nameStr,
+		         p->nameStr);
 
 		switch (p->type) {
 		case PD_LONG:
@@ -245,7 +246,7 @@ FormSaveDefaultValues(paramGroup_p pg)
 			break;
 		case PD_LIST:
 			SaveListColumnWidths(pg->nameStr, p);
-			//no break!
+		//no break!
 		case PD_DROPLIST:
 		case PD_COMBOLIST:
 			//if ((p->option & PDO_LISTINDEX)) {

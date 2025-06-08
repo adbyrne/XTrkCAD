@@ -5,23 +5,23 @@
  * \author Martin Fischer
  */
 
- /*  XTrackCad - Model Railroad CAD
-  *  Copyright (C) 2005, 2025 Dave Bullis
-  *
-  *  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
-  *  (at your option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
-  *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-  */
+/*  XTrackCad - Model Railroad CAD
+ *  Copyright (C) 2005, 2025 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -39,7 +39,7 @@ FormStartRecord(FILE* fileHandle)
 }
 
 void FormGroupRecord(
-	paramGroup_p pg)
+        paramGroup_p pg)
 {
 	paramData_p p;
 	long rgb;
@@ -49,7 +49,7 @@ void FormGroupRecord(
 	}
 	for (p = pg->paramPtr; p < &pg->paramPtr[pg->paramCnt]; p++) {
 		if ((p->option & PDO_NORECORD) != 0 || p->valueP == NULL
-			|| p->nameStr == NULL) {
+		    || p->nameStr == NULL) {
 			continue;
 		}
 		if ((p->option & PDO_DLGIGNORE) != 0) {
@@ -60,32 +60,31 @@ void FormGroupRecord(
 		case PD_RADIO:
 		case PD_TOGGLE:
 			fprintf(macroFile, "PARAMETER %s %s %ld\n", pg->nameStr, p->nameStr,
-				*(long*)p->valueP);
+			        *(long*)p->valueP);
 			break;
 		case PD_LIST:
 		case PD_DROPLIST:
 		case PD_COMBOLIST:
 			if (p->control) {
 				wListGetValues(p->control, message, sizeof message, NULL, NULL);
-			}
-			else {
+			} else {
 				message[0] = '\0';
 			}
 			fprintf(macroFile, "PARAMETER %s %s %d %s\n", pg->nameStr, p->nameStr,
-				*(wIndex_t*)p->valueP, message);
+			        *(wIndex_t*)p->valueP, message);
 			break;
 		case PD_COLORLIST:
 			rgb = wDrawGetRGB(*(wDrawColor*)p->valueP);
 			fprintf(macroFile, "PARAMETER %s %s %ld\n",
-				pg->nameStr, p->nameStr, rgb);
+			        pg->nameStr, p->nameStr, rgb);
 			break;
 		case PD_FLOAT:
 			fprintf(macroFile, "PARAMETER %s %s %0.3f\n", pg->nameStr, p->nameStr,
-				*(FLOAT_T*)p->valueP);
+			        *(FLOAT_T*)p->valueP);
 			break;
 		case PD_STRING:
 			fprintf(macroFile, "PARAMETER %s %s %s\n", pg->nameStr, p->nameStr,
-				(char*)p->valueP);
+			        (char*)p->valueP);
 			break;
 		case PD_MESSAGE:
 		case PD_BUTTON:

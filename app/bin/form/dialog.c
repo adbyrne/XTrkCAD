@@ -1,27 +1,27 @@
 /**
  * \file   dialogs.c
- * \brief  
+ * \brief
  *
  * \author Martin Fischer
  */
 
- /*  XTrackCad - Model Railroad CAD
-  *  Copyright (C) 2005, 2024 Dave Bullis
-  *
-  *  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
-  *  (at your option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
-  *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-  */
+/*  XTrackCad - Model Railroad CAD
+ *  Copyright (C) 2005, 2024 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #include <wlib.h>
 #include <param.h>
@@ -65,7 +65,7 @@ static void ButtonOk(paramGroup_p group)
 		FormMacroRecord("PARAMETER %s %s\n", group->nameStr, "ok");
 	}
 
- 	FormSaveDefaultValues(group);
+	FormSaveDefaultValues(group);
 
 	if (group->okProc) {
 		group->okProc(group);
@@ -89,10 +89,10 @@ static void ButtonCancel(paramGroup_p group)
 
 
 static void DialogProc(
-	wControl_p win,
-	winProcEvent e,
-	void* refresh,
-	void* data)
+        wControl_p win,
+        winProcEvent e,
+        void* refresh,
+        void* data)
 {
 	paramGroup_p pg = (paramGroup_p)data;
 //	static int iResizeCnt = 0;
@@ -131,19 +131,19 @@ static void DialogProc(
  */
 
 wControl_p FormCreateDialog(
-	paramGroup_p group,
-	char* title,
-	char* okLabel,
-	paramActionOkProc okProc,
-	char *cancelLabel, 
-	paramActionCancelProc cancelProc,
-	BOOL_T needHelpButton,
-	long winOption,
-	paramChangeProc changeProc)
+        paramGroup_p group,
+        char* title,
+        char* okLabel,
+        paramActionOkProc okProc,
+        char *cancelLabel,
+        paramActionCancelProc cancelProc,
+        BOOL_T needHelpButton,
+        long winOption,
+        paramChangeProc changeProc)
 {
 	char helpStr[STR_SHORT_SIZE] = "";
 	wWinPix_t w0, h0;
-	
+
 	winOption &= ~PD_F_ALT_CANCELLABEL;
 	group->okProc = okProc;
 	group->cancelProc = cancelProc;
@@ -162,23 +162,24 @@ wControl_p FormCreateDialog(
 		winOption |= F_DEFINEDINBUILDER;
 	}
 
-	group->win = wWinDialogCreate(mainW, helpStr, title, group->nameStr, 
-		F_AUTOSIZE | winOption , DialogProc, group);
+	group->win = wWinDialogCreate(mainW, helpStr, title, group->nameStr,
+	                              F_AUTOSIZE | winOption, DialogProc, group);
 
 	if (okLabel) {
 		sprintf(helpStr, "%s-ok", group->nameStr);
 		group->okB = wButtonCreate(group->win, 0, 0, "id_ok", okLabel, BB_DEFAULT, 0,
-			ButtonOk, group);
+		                           ButtonOk, group);
 	}
 	if (group->cancelProc) {
-		group->cancelB = wButtonCreate(group->win, 0, 0, "id_cancel", cancelLabel, BB_CANCEL,
-			0, ButtonCancel, group);
+		group->cancelB = wButtonCreate(group->win, 0, 0, "id_cancel", cancelLabel,
+		                               BB_CANCEL,
+		                               0, ButtonCancel, group);
 	}
 	if (needHelpButton) {
 		sprintf(helpStr, "cmd%s", group->nameStr);
 		helpStr[3] = toupper((unsigned char)helpStr[3]);
 		group->helpB = wButtonCreate(group->win, 0, 0, "id_help", _("Help"), BB_HELP, 0,
-			(wButtonCallBack_p)wHelp, MyStrdup(helpStr));
+		                             (wButtonCallBack_p)wHelp, MyStrdup(helpStr));
 	}
 
 	LOG(log_form, 1, ("DialogsCreateDialog/"));
@@ -194,7 +195,7 @@ wControl_p FormCreateDialog(
 		wWinPix_t scr_w, scr_h;
 		wGetDisplaySize(&scr_w, &scr_h);
 		wSetGeometry(group->win, 10, scr_w - 10, 10, scr_h, -1, -1,
-			-1);
+		             -1);
 	}
 
 	return group->win;
