@@ -380,18 +380,7 @@ if(NOT WIN32)
 else()
 	# copy dlls into the build dir for easier debugging
     COPYDLLTOBUILD(${FREEIMAGE_SHAREDLIB})
-#    COPYDLLTOBUILD(${LIBZIP_SHAREDLIB})
-#    COPYDLLTOBUILD(${ZLIB_SHAREDLIB})
     set(ENV{path} "${CMAKE_CURRENT_BINARY_DIR};$ENV{PATH}")
-	# add dll to install package
-#	install(
-#	    FILES ${LIBZIP_SHAREDLIB}
-#	    DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
-#	)
-#	install(
-#	FILES ${ZLIB_SHAREDLIB}
-#	    DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
-#	)
 
     # Copy program PDB file
     install(
