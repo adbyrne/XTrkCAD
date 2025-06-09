@@ -732,6 +732,12 @@ void LayerSystemDefault( unsigned int inx )
  */
 BOOL_T IsLayerDefault( unsigned int inx )
 {
+	int scaleDescInx;
+	int gaugeInx;
+	GetScaleGauge(GetLayoutCurScale(), &scaleDescInx, &gaugeInx);
+	tieData_t td;
+	td = GetScaleTieData(GetLayoutCurScale();
+
 	return (!layers[inx].name[0]) &&
 		layers[inx].visible &&
 		!layers[inx].frozen &&
@@ -740,16 +746,16 @@ BOOL_T IsLayerDefault( unsigned int inx )
 		!layers[inx].button_off &&
 		layers[inx].inherit &&
 		!layers[inx].layerLinkList.cnt;
-		//(layers[inx].color == layerColorTab[inx % COUNT(layerColorTab)]) &&
-		//layers[inx].scaleInx == GetLayoutCurScale()
-	    //layers[inx].scaleDescInx != layerScaleDescInx ||
-	    //layers[inx].gaugeInx != layerGaugeInx ||
-	    //layers[inx].minTrackRadius == GetLayoutMinTrackRadius() &&
-	    //layers[inx].maxTrackGrade == GetLayoutMaxTrackGrade() &&
-	    //layers[inx].tieData.valid == FALSE &&
-	    //layers[inx].tieData.length == 0.0 &&
-	    //layers[inx].tieData.width == 0.0 &&
-	    //layers[inx].tieData.spacing == 0.0
+		layers[inx].color == layerColorTab[inx % COUNT(layerColorTab)] &&
+		layers[inx].scaleInx == GetLayoutCurScale() &&
+	    layers[inx].scaleDescInx == layerScaleDescInx && // is this needed?
+	    layers[inx].gaugeInx == gaugeInx &&
+	    layers[inx].minTrackRadius == GetLayoutMinTrackRadius() &&
+	    layers[inx].maxTrackGrade == GetLayoutMaxTrackGrade() &&
+		layers[inx].tieData.valid == TRUE &&
+		layers[inx].tieData.length == td.length &&
+		layers[inx].tieData.width == td.width &&
+		layers[inx].tieData.spacing == td.spacing;
 }
 
 /**
@@ -1580,7 +1586,6 @@ void ResetLayers(void)
 		strcpy(layers[inx].settingsName, "");
 		DYNARR_RESET(int, layers[inx].layerLinkList);
 		SetLayerColor(inx, layerColorTab[inx % COUNT(layerColorTab)]);
-
 
 		if (inx < NUM_BUTTONS) {
 			wButtonSetLabel(layer_btns[inx], (char*)show_layer_bmps[inx]);
