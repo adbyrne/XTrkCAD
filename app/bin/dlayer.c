@@ -732,11 +732,11 @@ void LayerSystemDefault( unsigned int inx )
  */
 BOOL_T IsLayerDefault( unsigned int inx )
 {
-	int scaleDescInx;
-	int gaugeInx;
+	SCALEDESCINX_T scaleDescInx;
+	GAUGEINX_T gaugeInx;
 	GetScaleGauge(GetLayoutCurScale(), &scaleDescInx, &gaugeInx);
 	tieData_t td;
-	td = GetScaleTieData(GetLayoutCurScale();
+	td = GetScaleTieData(GetLayoutCurScale());
 
 	return (!layers[inx].name[0]) &&
 		layers[inx].visible &&
