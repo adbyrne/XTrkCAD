@@ -745,7 +745,7 @@ BOOL_T IsLayerDefault( unsigned int inx )
 		!layers[inx].module &&
 		!layers[inx].button_off &&
 		layers[inx].inherit &&
-		!layers[inx].layerLinkList.cnt;
+		!layers[inx].layerLinkList.cnt &&
 		layers[inx].color == layerColorTab[inx % COUNT(layerColorTab)] &&
 		layers[inx].scaleInx == GetLayoutCurScale() &&
 	    layers[inx].scaleDescInx == layerScaleDescInx && // is this needed?
