@@ -527,6 +527,13 @@ EXPORT BOOL_T DoSetScale(
 	LOG( log_scale, 1, ( "DoSetScale(%s) = %d\n", newScale, scaleInx ) );
 	CHECK( 0 <= scaleInx && scaleInx < scaleInfo_cnt );
 	SetLayoutCurScale( scaleInx );
+
+	SCALEDESCINX_T scaleDescInx;
+	GAUGEINX_T gaugeInx;
+	GetScaleGauge( scaleInx, &scaleDescInx, &gaugeInx);
+	SetLayoutCurScaleDesc(scaleDescInx);
+	SetLayoutCurGauge(gaugeInx);
+
 	DoChangeNotification( CHANGE_SCALE );
 	return TRUE;
 }

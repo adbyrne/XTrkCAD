@@ -717,7 +717,7 @@ void LayerSystemDefault( unsigned int inx )
 	layers[inx].button_off = FALSE;
 	layers[inx].inherit = TRUE;
 	layers[inx].scaleInx = GetLayoutCurScale();
-	GetScaleGauge(layers[inx].scaleInx, &layers[inx].scaleDescInx,
+	GetScaleGauge(layers[inx].scaleInx, &layers[inx].scaleDescInx, 
 	              &layers[inx].gaugeInx);
 	layers[inx].minTrackRadius = GetLayoutMinTrackRadius();
 	layers[inx].maxTrackGrade = GetLayoutMaxTrackGrade();
@@ -730,33 +730,33 @@ void LayerSystemDefault( unsigned int inx )
 /**
  * Is a layer the system default?
  */
-BOOL_T IsLayerDefault( unsigned int inx )
-{
-	SCALEDESCINX_T scaleDescInx;
-	GAUGEINX_T gaugeInx;
-	GetScaleGauge(GetLayoutCurScale(), &scaleDescInx, &gaugeInx);
-	tieData_t td;
-	td = GetScaleTieData(GetLayoutCurScale());
-
-	return (!layers[inx].name[0]) &&
-		layers[inx].visible &&
-		!layers[inx].frozen &&
-		layers[inx].onMap &&
-		!layers[inx].module &&
-		!layers[inx].button_off &&
-		layers[inx].inherit &&
-		!layers[inx].layerLinkList.cnt &&
-		layers[inx].color == layerColorTab[inx % COUNT(layerColorTab)] &&
-		layers[inx].scaleInx == GetLayoutCurScale() &&
-	    layers[inx].scaleDescInx == layerScaleDescInx && // is this needed?
-	    layers[inx].gaugeInx == gaugeInx &&
-	    layers[inx].minTrackRadius == GetLayoutMinTrackRadius() &&
-	    layers[inx].maxTrackGrade == GetLayoutMaxTrackGrade() &&
-		layers[inx].tieData.valid == TRUE &&
-		layers[inx].tieData.length == td.length &&
-		layers[inx].tieData.width == td.width &&
-		layers[inx].tieData.spacing == td.spacing;
-}
+//BOOL_T IsLayerDefault( unsigned int inx )
+//{
+//	SCALEDESCINX_T scaleDescInx;
+//	GAUGEINX_T gaugeInx;
+//	GetScaleGauge(GetLayoutCurScale(), &scaleDescInx, &gaugeInx);
+//	tieData_t td;
+//	td = GetScaleTieData(GetLayoutCurScale());
+//
+//	return (!layers[inx].name[0]) &&
+//		layers[inx].visible &&
+//		!layers[inx].frozen &&
+//		layers[inx].onMap &&
+//		!layers[inx].module &&
+//		!layers[inx].button_off &&
+//		layers[inx].inherit &&
+//		!layers[inx].layerLinkList.cnt &&
+//		layers[inx].color == layerColorTab[inx % COUNT(layerColorTab)] &&
+//		layers[inx].scaleInx == GetLayoutCurScale() &&
+//	    layers[inx].scaleDescInx == layerScaleDescInx && // is this needed?
+//	    layers[inx].gaugeInx == gaugeInx &&
+//	    layers[inx].minTrackRadius == GetLayoutMinTrackRadius() &&
+//	    layers[inx].maxTrackGrade == GetLayoutMaxTrackGrade() &&
+//		layers[inx].tieData.valid == TRUE &&
+//		layers[inx].tieData.length == td.length &&
+//		layers[inx].tieData.width == td.width &&
+//		layers[inx].tieData.spacing == td.spacing;
+//}
 
 /**
  * Load the layer settings to hard coded system defaults
@@ -871,22 +871,23 @@ static void LayerDelete( )
 */
 static void LayerDefault( )
 {
-	if ( layers[layerSelected].inherit ) {
-		layers[layerSelected].scaleInx = GetLayoutCurScale( );
+	if (layers[layerSelected].inherit) {
+		layers[layerSelected].scaleInx = GetLayoutCurScale();
 		GetScaleGauge(layers[layerSelected].scaleInx,
-		              &layers[layerSelected].scaleDescInx,
-		              &layers[layerSelected].gaugeInx);
+			&layers[layerSelected].scaleDescInx,
+			&layers[layerSelected].gaugeInx);
 		layers[layerSelected].minTrackRadius = GetLayoutMinTrackRadius();
 		layers[layerSelected].maxTrackGrade = GetLayoutMaxTrackGrade();
-	} else {
-		layers[layerSelected].scaleInx = GetLayerScale( layerSelected );
-		GetScaleGauge(layers[layerSelected].scaleInx,
-		              &layers[layerSelected].scaleDescInx,
-		              &layers[layerSelected].gaugeInx);
-		layers[layerSelected].minTrackRadius = GetLayoutMinTrackRadius();
-		layers[layerSelected].maxTrackGrade = GetLayoutMaxTrackGrade();
+		layers[layerSelected].tieData = GetScaleTieData(layers[layerSelected].scaleInx);
 	}
-	layers[layerSelected].tieData = GetScaleTieData(layers[layerSelected].scaleInx);
+	else {
+		GetScaleGauge(layers[layerSelected].scaleInx,
+		              &layers[layerSelected].scaleDescInx,
+		              &layers[layerSelected].gaugeInx);
+		layers[layerSelected].minTrackRadius = GetLayoutMinTrackRadius();
+		layers[layerSelected].maxTrackGrade = GetLayoutMaxTrackGrade();
+		layers[layerSelected].tieData = GetScaleTieData(layers[layerSelected].scaleInx);
+	}
 
 	UpdateLayerDlg( layerSelected );
 
@@ -978,8 +979,6 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
 		LoadGaugeList(gaugeL, layerScaleDescInx);
 		wListSetIndex(gaugeL, layerGaugeInx);
 	}
-	/* Sync Scale and lists */
-	GetScaleGauge(layerScaleInx, &layerScaleDescInx, &layerGaugeInx);
 
 	/* force update of the 'manage layers' dialogbox */
 	if (layerL) {
@@ -1117,11 +1116,9 @@ LayerPrefSave(void)
 	for (inx = 0; inx < NUM_LAYERS; inx++) {
 		/* if a name is set that is not the default value or a color different from the default has been set,
 		    information about the layer needs to be saved */
-		if (inx == 0 || !IsLayerDefault(inx)) {
+		if (inx == 0 || IsLayerConfigured(inx)) { 
 			sprintf(buffer, LAYERPREF_NAME ".%0u", inx);
 			wPrefSetString(LAYERPREF_SECTION, buffer, layers[inx].name);
-
-			layerSetInteger(inx, LAYERPREF_COLOR, wDrawGetRGB(layers[inx].color));
 
 			flags = 0;
 			if (layers[inx].frozen) {
@@ -1144,8 +1141,8 @@ LayerPrefSave(void)
 			}
 			layerSetInteger(inx, LAYERPREF_FLAGS, flags);
 
-			layers[inx].scaleInx = GetScaleInx( layers[inx].scaleDescInx,
-			                                    layers[inx].gaugeInx );
+			layerSetInteger(inx, LAYERPREF_COLOR, wDrawGetRGB(layers[inx].color));
+
 			layerSetInteger(inx, LAYERPREF_SCALEINX, layers[inx].scaleInx);
 			layerSetInteger(inx, LAYERPREF_SCLDESCINX, layers[inx].scaleDescInx);
 			layerSetInteger(inx, LAYERPREF_GAUGEINX, layers[inx].gaugeInx);
@@ -1173,9 +1170,6 @@ LayerPrefSave(void)
 
 			sprintf(buffer, "%u", inx);
 			strcat(layersSaved, buffer);
-		}
-		else {
-			// Erase the entry
 		}
 	}
 
@@ -1568,13 +1562,32 @@ void ResetLayers(void)
 {
 	int inx;
 
+	/* Move these out of the loop */
+	SCALEINX_T scaleInx;
+	SCALEDESCINX_T scaleDescInx;
+	GAUGEINX_T gaugeInx;
+
+	DIST_T minTrackRadius;
+	ANGLE_T maxTrackGrade;
+	tieData_t tieData;
+
+	scaleInx = GetLayoutCurScale();
+	GetScaleGauge(scaleInx, &scaleDescInx, &gaugeInx);
+
+	minTrackRadius = GetLayoutMinTrackRadius();
+	maxTrackGrade = GetLayoutMaxTrackGrade();
+	tieData = GetScaleTieData(scaleInx);
+
 	for (inx = 0; inx < NUM_LAYERS; inx++) {
 		strcpy(layers[inx].name, inx == 0 ? _("Main") : "");
-		
-		layers[inx].scaleInx = GetLayoutCurScale();
-		layers[inx].minTrackRadius = GetLayoutMinTrackRadius();
-		layers[inx].maxTrackGrade = GetLayoutMaxTrackGrade();
-		layers[inx].tieData = GetScaleTieData(GetLayoutCurScale());
+
+		layers[inx].scaleInx = scaleInx;
+		layers[inx].scaleDescInx = scaleDescInx;
+		layers[inx].gaugeInx = gaugeInx;
+
+		layers[inx].minTrackRadius = minTrackRadius;
+		layers[inx].maxTrackGrade = maxTrackGrade;
+		layers[inx].tieData = tieData;
 
 		layers[inx].visible = TRUE;
 		layers[inx].frozen = FALSE;
@@ -1882,6 +1895,7 @@ BOOL_T ReadLayers(char * line)
 	layers[inx].frozen = frozen;
 	layers[inx].onMap = onMap;
 	layers[inx].scaleInx = sclInx;
+	GetScaleGauge(sclInx, &layers[inx].scaleDescInx, &layers[inx].gaugeInx);
 	layers[inx].minTrackRadius = minRad;
 	layers[inx].maxTrackGrade = maxGrd;
 	layers[inx].tieData = td;
@@ -1890,7 +1904,6 @@ BOOL_T ReadLayers(char * line)
 	layers[inx].useColor = !dontUseColor;
 	layers[inx].button_off = button_off;
 	layers[inx].inherit = inherit;
-	GetScaleGauge(sclInx, &layers[inx].scaleDescInx, &layers[inx].gaugeInx);
 
 	colorTrack = ( ColorFlags & 1 ) ? 1 : 0; //Make sure globals are set
 	colorDraw = ( ColorFlags & 2 ) ? 1 : 0;
@@ -1928,8 +1941,8 @@ IsLayerConfigured(unsigned int layerNumber)
 	        !layers[layerNumber].onMap ||
 	        layers[layerNumber].module ||
 	        layers[layerNumber].button_off ||
-	        layers[layerNumber].color != layerColorTab[layerNumber % (COUNT(
-	                                layerColorTab))] ||
+	        !layers[layerNumber].inherit ||
+	        layers[layerNumber].color != layerColorTab[layerNumber % (COUNT(layerColorTab))] ||
 	        layers[layerNumber].layerLinkList.cnt > 0 ||
 	        layers[layerNumber].objCount);
 }
@@ -2084,7 +2097,7 @@ static void DoLayer(void * unused)
 	if (layerW == NULL) {
 		layerW = ParamCreateDialog(&layerPG, MakeWindowTitle(_("Layers")), _("Done"),
 		                           LayerOk, ParamCancel_Current, TRUE, NULL, 0, LayerDlgUpdate);
-		GetScaleGauge(layerScaleInx, &layerScaleDescInx, &layerGaugeInx);
+
 		LoadScaleList(scaleL);
 		LoadGaugeList(gaugeL, layerScaleDescInx);
 	}
