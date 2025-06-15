@@ -176,6 +176,7 @@ static int oldColorMap[][3] = {
 static void DoLayerOp(void * data);
 void UpdateLayerDlg(unsigned int);
 
+static BOOL_T IsLayerConfigured(unsigned int layerNumber);
 static void InitializeLayers(void LayerInitFunc(void), int newCurrLayer);
 static void LayerPrefSave(void);
 static void LayerPrefLoad(void);
@@ -1932,7 +1933,7 @@ BOOL_T ReadLayers(char * line)
  * \return TRUE if configured, FALSE if not
  */
 
-BOOL_T
+static BOOL_T
 IsLayerConfigured(unsigned int layerNumber)
 {
 	return (layers[layerNumber].name[0] ||
