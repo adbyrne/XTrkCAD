@@ -795,7 +795,7 @@ static void MiscMenuItemCreate(wMenu_p m1, wMenu_p m2, const char * name,
 #include "bitmaps/doc-export-svg.image3"
 #endif
 #include "bitmaps/doc-import.image3"
-#include "bitmaps/doc-import-dxf.image3"
+// #include "bitmaps/doc-import-dxf.image3"
 #include "bitmaps/doc-import-mod.image3"
 #include "bitmaps/doc-new.image3"
 #include "bitmaps/doc-save.image3"

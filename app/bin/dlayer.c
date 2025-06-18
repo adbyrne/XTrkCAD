@@ -2099,6 +2099,8 @@ static void DoLayer(void * unused)
 		layerW = ParamCreateDialog(&layerPG, MakeWindowTitle(_("Layers")), _("Done"),
 		                           LayerOk, ParamCancel_Current, TRUE, NULL, 0, LayerDlgUpdate);
 
+		GetScaleGauge(layerScaleInx, &layerScaleDescInx, &layerGaugeInx);
+
 		LoadScaleList(scaleL);
 		LoadGaugeList(gaugeL, layerScaleDescInx);
 	}
@@ -2106,7 +2108,6 @@ static void DoLayer(void * unused)
 	if (settingsCatalog) { CatalogDiscard(settingsCatalog); }
 	else { settingsCatalog = InitCatalog(); }
 	ScanSettingsDirectory(settingsCatalog, wGetAppWorkDir());
-
 
 	/* set the globals to the values for the current layer */
 	UpdateLayerDlg(curLayer);
