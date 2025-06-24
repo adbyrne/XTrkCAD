@@ -22,33 +22,35 @@
 
 #include <cJSON.h>
 
-#include "archive.h"
+// #include "archive.h"
 #include "common.h"
 #include "compound.h"
 #include "cselect.h"
-#include "cundo.h"
+// #include "cundo.h"
 #include "custom.h"
 #include "directory.h"
-#include "draw.h"
+// #include "draw.h"
 #include "fileio.h"
 #include "fcntl.h"
-#include "layout.h"
-#include "manifest.h"
+// #include "layout.h"
+// #include "manifest.h"
 #include "misc.h"
 #include "param.h"
-#include "include/paramfile.h"
-#include "include/paramfilelist.h"
+// #include "include/paramfile.h"
+// #include "include/paramfilelist.h"
 #include "paths.h"
-#include "include/stringxtc.h"
-#include "track.h"
+// #include "include/stringxtc.h"
+// #include "track.h"
 #include "version.h"
 #include "dynstring.h"
 #include "common-ui.h"
-#include "ctrain.h"
+// #include "ctrain.h"
 
 #ifdef UTFCONVERT
 #include "include/utf8convert.h"
 #endif // UTFCONVERT
+
+// int wFilSelect(struct wFilSel_t* fs, const char* dirName);
 
 /*******************************************************************************
  *
