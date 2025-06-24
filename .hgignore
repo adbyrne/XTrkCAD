@@ -3,6 +3,7 @@
 .project
 .settings.json
 build/
+build32/
 .vs/
 _CPack_Packages/
 syntax: glob

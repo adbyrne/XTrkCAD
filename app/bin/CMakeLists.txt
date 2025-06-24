@@ -154,9 +154,9 @@ target_sources(xtrkcad-lib
     draw.h
     drawgeom.c
     drawgeom.h
-    dxfimport.c
     dxfformat.c
     dxfformat.h
+    dxfimport.c
     dxfoutput.c
     elev.c
     file2uri.c
