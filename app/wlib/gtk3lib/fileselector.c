@@ -27,9 +27,10 @@
 #define GSEAL_ENABLE
 
 #include <gtk/gtk.h>
-#include <glib-object.h>
 #include "gtkint.h"
 #include "i18n.h"
+
+
 
 struct wFilSel_t {
 	wType_e type;                       /**< */

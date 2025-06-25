@@ -22,12 +22,11 @@
 
 #ifndef GTKINT_H
 #define GTKINT_H
-#include "wlib.h"
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <gtk/gtk.h>
 
-#include "gdk-pixbuf/gdk-pixbuf.h"
-#include "gdk/gdk.h"
-#include "gtk/gtk.h"
-
+#include <wlib.h>
 
 #ifdef WINDOWS
 #define strcasecmp _stricmp

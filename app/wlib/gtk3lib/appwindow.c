@@ -31,6 +31,7 @@
 // #include <gdk/gdkkeysyms.h>
 
 #include "gtkint.h"
+#include <wlib.h>
 
 #include "xtrkcad-config.h"
 
