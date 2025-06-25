@@ -26,7 +26,7 @@
 #include "common.h"
 #include "compound.h"
 #include "cselect.h"
-// #include "cundo.h"
+#include "cundo.h"
 #include "custom.h"
 #include "directory.h"
 // #include "draw.h"
