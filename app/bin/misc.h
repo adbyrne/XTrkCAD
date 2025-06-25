@@ -139,7 +139,8 @@ addButtonCallBack_t ControlMgrInit ( void );
 
 /* cdraw.h */
 track_p NewText( wIndex_t index, coOrd p, ANGLE_T angle, char * text,
-                 CSIZE_T textSize, wDrawColor color, BOOL_T boxed );
+                 CSIZE_T textSize, wDrawColor color, BOOL_T boxed,
+	             wDrawColor bg_color);
 void LoadFontSizeList( wList_p, long );
 void UpdateFontSizeList( long *, wList_p, wIndex_t );
 long GetFontSize(wIndex_t);

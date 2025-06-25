@@ -684,6 +684,7 @@ EXPORT void DrawMultiString(
         wFont_p fp,
         wFontSize_t fs,
         wDrawColor color,
+		wDrawColor bg_color,
         ANGLE_T a,
         coOrd * lo,
         coOrd * hi,
@@ -701,7 +702,32 @@ EXPORT void DrawMultiString(
 	}
 	line = malloc(strlen(text) + 1);
 
-	DrawTextSize2( &mainD, "Aqjlp", fp, fs, TRUE, &textsize, &descent, &ascent);
+	coOrd *lastline;
+	lastline = malloc(sizeof(coOrd));
+	DrawMultiLineTextSize(&mainD, text, fp, fs, FALSE, &size, lastline);
+
+	DrawTextSize2(&mainD, "Aqjlp", fp, fs, TRUE, &textsize, &descent, &ascent);
+
+	orig.x = pos.x;
+	orig.y = pos.y;
+	if (boxed && (d != &mapD)) {
+		int bw = 2, bh = 2, br = 1, bb = 1;
+		size.x += bw * d->scale / d->dpi;
+		size.y = fabs(orig.y - pos.y) + bh * d->scale / d->dpi;
+		size.y += descent + ascent;
+		coOrd p[4];
+		p[0] = orig; p[0].x -= (bw - br) * d->scale / d->dpi;
+		p[0].y += (bh - bb) * d->scale / d->dpi + ascent;
+		p[1] = p[0]; p[1].x += size.x;
+		p[2] = p[1]; p[2].y -= size.y;
+		p[3] = p[2]; p[3].x = p[0].x;
+		for (int i = 0; i < 4; i++) {
+			Rotate(&p[i], orig, a);
+		}
+		DrawPoly( d, 4, p, NULL, bg_color, 0, DRAW_FILL );
+		// DrawPoly(d, 4, p, NULL, color, 0, DRAW_CLOSED);
+	}
+
 	//POS_T ascent = textsize.y-descent;
 	lineH = (ascent+descent)*1.0;
 	size.x = 0.0;
@@ -754,6 +780,7 @@ EXPORT void DrawMultiString(
 		for (int i=0; i<4; i++) {
 			Rotate( &p[i], orig, a);
 		}
+		// DrawPoly( d, 4, p, NULL, bg_color, 0, DRAW_FILL );
 		DrawPoly( d, 4, p, NULL, color, 0, DRAW_CLOSED );
 	}
 

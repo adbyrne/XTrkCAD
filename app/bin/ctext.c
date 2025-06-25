@@ -49,6 +49,8 @@ static struct {
 	char text[STR_HUGE_SIZE];
 	wDrawColor color;
 	BOOL_T boxed;
+	// BOOL_T filled;
+	wDrawColor bg_color;
 } Dt;
 
 static char * boxLabels[] = { "", NULL };
@@ -58,7 +60,9 @@ static paramData_t textPLs[] = {
 #define colorPD (textPLs[1])
 	{ PD_COLORLIST, &Dt.color, "color", PDO_NORECORD, NULL, N_("Color") },
 #define boxPD (textPLs[2])
-	{ PD_TOGGLE, &Dt.boxed, "boxed", 0, boxLabels, N_("Boxed"), 0 }
+	{ PD_TOGGLE, &Dt.boxed, "boxed", 0, boxLabels, N_("Boxed"), 0 },
+#define backPD (textPLs[3])
+	{ PD_COLORLIST, &Dt.bg_color, "bg_color", PDO_NORECORD, NULL, N_("Bg Color") }
 };
 static paramGroup_t textPG = { "text", 0, textPLs, COUNT( textPLs ) };
 
@@ -101,8 +105,8 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 {
 	track_p t;
 	unsigned char c;
-	wControl_p controls[4];
-	char * labels[3];
+	wControl_p controls[5];
+	char * labels[4];
 	coOrd size, lastline;
 
 	switch (action & 0xFF) {
@@ -132,10 +136,12 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		controls[0] = textPD.control;
 		controls[1] = colorPD.control;
 		controls[2] = boxPD.control;
-		controls[3] = 0;
+		controls[3] = backPD.control;
+		controls[4] = 0;
 		labels[0] = N_("Font Size");
 		labels[1] = N_("Color");
 		labels[2] = N_("Boxed");
+		labels[3] = N_("Bg Color");
 		InfoSubstituteControls( controls, labels );
 		return C_CONTINUE;
 		break;
@@ -185,7 +191,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		case '\015':
 			UndoStart( _("Create Text"), "newText - CR" );
 			t = NewText( 0, Dt.pos, Dt.angle, Dt.text, (CSIZE_T)Dt.size, Dt.color,
-			             Dt.boxed );
+			             Dt.boxed, Dt.bg_color );
 			UndoEnd();
 			DrawNewTrack(t);
 			Dt.state = POSITION_TEXT;
@@ -219,7 +225,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 	case C_REDRAW:
 		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
 		DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color,
-		                0.0, NULL, NULL, Dt.boxed );
+		                Dt.bg_color, 0.0, NULL, NULL, Dt.boxed );
 		return C_CONTINUE;
 	case C_CANCEL:
 		if (Dt.state != POSITION_TEXT) {
@@ -233,7 +239,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 			if (Dt.len) {
 				UndoStart( _("Create Text"), "newText - OK" );
 				t = NewText( 0, Dt.pos, Dt.angle, Dt.text, (CSIZE_T)Dt.size, Dt.color,
-				             Dt.boxed );
+				             Dt.boxed, Dt.bg_color );
 				UndoEnd();
 				DrawNewTrack(t);
 			}

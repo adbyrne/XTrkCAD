@@ -3387,12 +3387,14 @@ EXPORT track_p NewText(
         char * text,
         CSIZE_T textSize,
         wDrawColor color,
-        BOOL_T boxed)
+        BOOL_T boxed,
+		wDrawColor bg_color)
 {
 	trkSeg_t tempSeg;
 	track_p trk;
 	tempSeg.type = SEG_TEXT;
 	tempSeg.color = color;
+	tempSeg.bg_color = bg_color;
 	tempSeg.lineWidth = 0;
 	tempSeg.u.t.pos = zero;
 	tempSeg.u.t.angle = angle;
@@ -3414,6 +3416,7 @@ EXPORT BOOL_T ReadText( char * line )
 	track_p trk;
 	ANGLE_T angle;
 	wDrawColor color = wDrawColorBlack;
+	wDrawColor bg_color = wDrawColorWhite;
 	if ( paramVersion<3 ) {
 		if (!GetArgs( line, "XXpYql", &index, &layer, &pos, &angle, &text,
 		              &textSize )) {
@@ -3431,7 +3434,7 @@ EXPORT BOOL_T ReadText( char * line )
 		}
 	}
 
-	trk = NewText( index, pos, angle, text, textSize, color, FALSE );
+	trk = NewText( index, pos, angle, text, textSize, color, FALSE, bg_color );
 	SetTrkLayer( trk, layer );
 	MyFree(text);
 	return TRUE;

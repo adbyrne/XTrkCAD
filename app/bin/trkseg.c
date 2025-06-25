@@ -1423,13 +1423,21 @@ EXPORT BOOL_T ReadSegs( void )
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = type;
 			s->u.t.fontP = NULL;
-			if ( !GetArgs( cp, "lpfdfq", &rgb, &s->u.t.pos, &s->u.t.angle, &s->u.t.boxed,
-			               &s->u.t.fontSize, &plain_text ) ) {
+			if ( !GetArgs( cp, "lpfdfqc", &rgb, &s->u.t.pos, &s->u.t.angle, &s->u.t.boxed,
+			               &s->u.t.fontSize, &plain_text, &cpp ) ) {
 				rc = FALSE;
 				/*??*/break;
 			}
 			s->u.t.string = MyStrdup(plain_text);
 			s->color = wDrawFindColor( rgb );
+			wDrawColor bg_color = wDrawColorWhite;
+			if (cpp) {
+				if (!GetArgs(cpp, "l", &rgb)) {
+					rc = FALSE;
+					break;
+				}
+				bg_color = wDrawFindColor(rgb);
+			}
 			break;
 		case SEG_UNCEP:
 		case SEG_CONEP:
@@ -1606,11 +1614,11 @@ EXPORT BOOL_T WriteSegsEnd(
 			trackText = segs[i].u.t.string;
 #endif // UTFCONVERT
 			escaped_text = ConvertToEscapedText(trackText);
-			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %d %0.6f \"%s\"\n",
+			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %d %0.6f \"%s\" %d\n",
 			               segs[i].type, wDrawGetRGB(segs[i].color),
 			               segs[i].u.t.pos.x, segs[i].u.t.pos.y, segs[i].u.t.angle,
-			               segs[i].u.t.boxed,
-			               segs[i].u.t.fontSize, escaped_text ) > 0;
+			               segs[i].u.t.boxed, segs[i].u.t.fontSize, 
+						   escaped_text, segs[i].bg_color) > 0;
 			MyFree(escaped_text);
 #ifdef UTFCONVERT
 			MyFree(out);
@@ -1965,8 +1973,9 @@ EXPORT void DrawSegsO(
 		case SEG_TEXT:
 			REORIGIN( p0, segPtr->u.t.pos, angle, orig )
 			DrawMultiString( d, p0, segPtr->u.t.string, segPtr->u.t.fontP,
-			                 segPtr->u.t.fontSize, color1, NormalizeAngle(angle + segPtr->u.t.angle), NULL,
-			                 NULL, segPtr->u.t.boxed );
+			                 segPtr->u.t.fontSize, color1, segPtr->bg_color, 
+				             NormalizeAngle(angle + segPtr->u.t.angle), 
+			                 NULL, NULL, segPtr->u.t.boxed );
 			break;
 		case SEG_FILPOLY:
 		case SEG_POLY:
