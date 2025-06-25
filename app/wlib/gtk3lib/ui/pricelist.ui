@@ -1,32 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <requires lib="gtk" version="3.22" />
-  <object class="GtkListStore" id="liststore">
-    <columns>
-      <!-- column-name set foreground -->
-      <column type="gboolean" />
-      <!-- userdata -->
-      <column type="gpointer" />
-      <!-- icon -->
-      <column type="GdkPixbuf" />
-      <!-- column-name price -->
-      <column type="gchararray" />
-      <!-- column-name description -->
-      <column type="gchararray" />
-    </columns>
-
-  </object>
+  <requires lib="gtk+" version="3.22" />
   <object class="GtkDialog" id="pricelist">
+    <property name="title" translatable="yes">Price List</property>
     <property name="can-focus">False</property>
     <property name="border-width">12</property>
     <property name="type-hint">dialog</property>
     <property name="use-header-bar">0</property>
     <property name="resizable">True</property>
     <child type="action">
+      <object class="GtkButton" id="id_cancel">
+        <property name="use-underline">True</property>
+        <property name="label">_Cancel</property>
+        <property name="visible">False</property>
+      </object>
+    </child>
+    <child type="action">
       <object class="GtkButton" id="id_help">
         <property name="use-underline">True</property>
         <property name="label">_Help</property>
-        <property name="visible">True</property>
+        <property name="visible">False</property>
       </object>
     </child>
     <child type="action">
@@ -34,10 +27,11 @@
         <property name="use-underline">True</property>
         <property name="can-default">True</property>
         <property name="label">_Done</property>
-        <property name="visible">True</property>
+        <property name="visible">False</property>
       </object>
     </child>
     <action-widgets>
+      <action-widget response="GTK_RESPONSE_CANCEL">id_cancel</action-widget>
       <action-widget response="GTK_RESPONSE_HELP">id_help</action-widget>
       <action-widget response="GTK_RESPONSE_OK" default="true">id_ok</action-widget>
     </action-widgets>
@@ -46,7 +40,6 @@
         <property name="can-focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">12</property>
-
         <child>
           <object class="GtkScrolledWindow" id="inx">
             <property name="visible">True</property>
@@ -56,20 +49,19 @@
             <property name="vexpand">True</property>
             <property name="shadow-type">in</property>
             <property name="min-content-height">320</property>
-            <property name="propagate-natural-width">False</property>
-            <property name="propagate-natural-height">False</property>
             <child>
               <object class="GtkTreeView" id="treeview">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="hexpand">True</property>
                 <property name="vexpand">True</property>
-                <property name="model">liststore</property>
                 <property name="enable-search">False</property>
                 <property name="show-expanders">False</property>
                 <property name="enable-grid-lines">vertical</property>
                 <child internal-child="selection">
-                  <object class="GtkTreeSelection" />
+                  <object class="GtkTreeSelection">
+                    
+                  </object>
                 </child>
                 <child>
                   <object class="GtkTreeViewColumn" id="description">
@@ -78,7 +70,31 @@
                     <child>
                       <object class="GtkCellRendererText" />
                       <attributes>
-                        <attribute name="text">4</attribute>
+                        <attribute name="text">0</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="manufacturer">
+                    <property name="resizable">True</property>
+                    <property name="title" translatable="yes">Manufacturer</property>
+                    <child>
+                      <object class="GtkCellRendererText" />
+                      <attributes>
+                        <attribute name="text">1</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="partno">
+                    <property name="resizable">True</property>
+                    <property name="title" translatable="yes">Part No</property>
+                    <child>
+                      <object class="GtkCellRendererText" />
+                      <attributes>
+                        <attribute name="text">2</attribute>
                       </attributes>
                     </child>
                   </object>
@@ -88,14 +104,19 @@
                     <property name="resizable">True</property>
                     <property name="title" translatable="yes">Price</property>
                     <child>
-                      <object class="GtkCellRendererText" id="pricerenderer" />
+                      <object class="GtkCellRendererText" id="pricerenderer">
+                        <property name="editable">True</property>
+                        <property name="xalign">1.0</property>
+                        <property name="foreground">red</property>
+                      </object>
                       <attributes>
                         <attribute name="text">3</attribute>
-                        <attribute name="foreground-set">0</attribute>
+                        <attribute name="foreground-set">4</attribute>
                       </attributes>
                     </child>
                   </object>
                 </child>
+
               </object>
             </child>
           </object>
@@ -110,6 +131,7 @@
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="spacing">6</property>
+            <property name="halign">start</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
@@ -166,11 +188,10 @@
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">True</property>
+            <property name="fill">False</property>
             <property name="position">2</property>
           </packing>
         </child>
-
       </object>
     </child>
   </object>

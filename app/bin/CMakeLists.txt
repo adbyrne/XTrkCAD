@@ -156,7 +156,6 @@ target_sources(xtrkcad-lib
 	dlayer.h
     doption.c
     dpreferences.c
-    dpricels.c
     dprmfile.c
     draw.c
     draw.h
@@ -242,6 +241,7 @@ target_sources(xtrkcad-lib
 
 add_subdirectory(form)
 add_subdirectory(appmainwindow)
+add_subdirectory(parts)
 
 # add UTF-8 conversion utilities on Windows
 
@@ -275,6 +275,7 @@ target_link_libraries(xtrkcad-lib
 	dynstring
 	xtrkcad-cornu
 	xtrkcad-wlib
+    parts
 )
 
 if(UNIX AND NOT APPLE)

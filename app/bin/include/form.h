@@ -24,6 +24,9 @@ void FormStartRecord(FILE* fileHandle);
 void FormMacroRecord(char* format, ...);
 void FormGroupRecord(paramGroup_p pg);
 
+wBool_t FormIntegerRangeCheck(paramData_p p, long valL);
+wBool_t FormFloatRangeCheck(paramData_p p, FLOAT_T valF);
+wBool_t FormStringCheckValue(paramData_p data, char* value);
 
 void FormDialogOkActive(paramGroup_p pg, int active);
 void FormCancel_Undo(wWin_p winP);

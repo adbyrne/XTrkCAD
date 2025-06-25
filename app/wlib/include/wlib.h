@@ -46,6 +46,7 @@ typedef int wBool_t;
 // index for lists etc
 typedef int wIndex_t;
 
+typedef struct _DataStore DataStore;
 /*
  * Opaque Pointers
  */
@@ -771,7 +772,7 @@ typedef void (*wListCallBack_p)( unsigned int , const char *, unsigned int, void
 #define BL_FIXFONT 	(1L<<22)
 #define BL_EDITABLE	(1L<<23)
 #define BL_ICON		(1L<<0)
-
+#define BL_NODATASTORE (1L<<24) /**< do no create a datastore from builder */
 
 /* lists, droplists and combo boxes */
 wControl_p wListCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
@@ -833,6 +834,8 @@ struct rendererContext {
     void* context;
 };
 int wListSetColumnEditable(wControl_p list, const char* renderer, void *context);
+wControl_p wListstoreCreate(wControl_p parent, const char* liststoreID);
+void wListSetStore(wControl_p list, DataStore * liststore);
 
 /*------------------------------------------------------------------------------
  *

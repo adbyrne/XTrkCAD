@@ -11,11 +11,10 @@ void FormSaveDefaultValues(paramGroup_p group);
 /* checkinputs.c */
 
 wBool_t FormCheckInputs(paramGroup_p group, wControl_p b);
-wBool_t FormIntegerRangeCheck(paramData_p p, long valL);
-wBool_t FormFloatRangeCheck(paramData_p p, FLOAT_T valF);
+
 unsigned long FormIntegerGetValue(paramData_p data, const char* enteredValue);
 FLOAT_T FormFloatGetValue(paramData_p data, const char* enteredValue);
-wBool_t FormStringCheckValue(paramData_p data, char* value);
+
 void FormStringGetValue(paramData_p data, char* value);
 
 /* formdistance.c */

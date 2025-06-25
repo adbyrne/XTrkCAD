@@ -102,7 +102,7 @@ typedef enum {
 #define PDO_DLGRESIZEH			(1L<<31)
 #define PDO_DLGRESIZE			(PDO_DLGRESIZEW|PDO_DLGRESIZEH)
 
-
+#define LIST_NODATASTORE			(1L<<4)		/**< do not automatically create a liststore */
 
 
 typedef struct paramGroup_t *paramGroup_p;

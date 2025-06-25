@@ -33,8 +33,9 @@ static void ColorSelectPush(void* dp, wDrawColor dc)
 {
 	paramData_p p = (paramData_p)dp;
 	long rgb = wDrawGetRGB(dc);
+
+	// make sure that the special colors for select/unselect aren't used elsewhere
 	while (dc == drawColorPreviewSelected || dc == drawColorPreviewUnselected) {
-		/**  \todo: probably unused code, check the two variable above for usage */
 		// The user picked a special color, tweak it
 		rgb -= 1; // Make it very close but different
 		if ((rgb & 0xFF) == 0)
@@ -345,6 +346,32 @@ GetUserColumnWidths(paramData_p paramData, int columns, wWinPix_t* widths)
 	return(columns);
 }
 
+
+/**
+ * If list box is created from builder file configuration is done in that file.
+ * 
+ * \param parent
+ * \param paramDataList
+ * \param helpString
+ * \param x
+ * \param y
+ * \return 
+ */
+
+static wControl_p
+GetFormattedList(wControl_p parent, paramData_p paramDataList,
+	const char* helpString, unsigned x, unsigned y)
+{
+	paramDataList->control = (wControl_p)wListCreate(parent, x, y, helpString,
+		NULL,
+		paramDataList->winOption,
+		0, 0, 0, NULL, NULL, NULL, NULL, 
+		ListPush, paramDataList);
+
+	return(paramDataList->control);
+}
+
+
 static wControl_p
 CreateFormattedList(wControl_p parent, paramData_p paramDataList,
                     const char *helpString, unsigned x, unsigned y)
@@ -353,19 +380,21 @@ CreateFormattedList(wControl_p parent, paramData_p paramDataList,
 	wBool_t* columnJustification = NULL;
 
 //	static wBool_t maxColCnt = 0;
+//	if (paramDataList->winOption && BL_NODATASTORE) {
+
 
 	paramListData_t* listDataP = (paramListData_t*)paramDataList->winData;
 
-	if (listDataP->colCnt > 1) {
-		int columns = listDataP->colCnt;
-		columnWidths = (wWinPix_t*)MyMalloc(columns * sizeof(*columnWidths));
-		columnJustification = (wBool_t*)MyMalloc(columns * sizeof(
-		                              *columnJustification));
+		if (listDataP->colCnt > 1) {
+			int columns = listDataP->colCnt;
+			columnWidths = (wWinPix_t*)MyMalloc(columns * sizeof(*columnWidths));
+			columnJustification = (wBool_t*)MyMalloc(columns * sizeof(
+				*columnJustification));
 
-		GetDefaultColumnFormat(listDataP, columnWidths, columnJustification);
-		GetUserColumnWidths(paramDataList, columns, columnWidths );
-	}
-
+			GetDefaultColumnFormat(listDataP, columnWidths, columnJustification);
+			GetUserColumnWidths(paramDataList, columns, columnWidths);
+		}
+	
 	paramDataList->control = (wControl_p)wListCreate(parent, x, y, helpString,
 	                         _(paramDataList->winLabel),
 	                         paramDataList->winOption,
@@ -472,7 +501,12 @@ CreateControl(paramData_p pd,char* helpStr,	unsigned x,	unsigned y)
 		                            pd->winOption, pd->winData, pd->valueP, ChoicePush, pd);
 		break;
 	case PD_LIST:
-		pd->control = CreateFormattedList(win, pd, helpStr, x, y);
+		if (pd->group->options & PGO_FULLDIALOGFROMBUILDER) {
+			pd->control = GetFormattedList(win, pd, helpStr, x, y);
+		}
+		else {
+			pd->control = CreateFormattedList(win, pd, helpStr, x, y);
+		}
 		break;
 	case PD_DROPLIST:
 		width = pd->winData ? (wWinPix_t)VP2L(pd->winData) : (wWinPix_t)

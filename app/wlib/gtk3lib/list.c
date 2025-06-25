@@ -27,7 +27,8 @@
 #include <glib-object.h>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
-#include "wlib.h"
+#include <wlib.h>
+#include <datastore.h>
 #include "gtkint.h"
 #include "i18n.h"
 
@@ -709,6 +710,47 @@ void wListSetSize(wControl_p bl, wWinPix_t w, wWinPix_t h)
 	//bl->h = h;
 }
 
+void
+wlibTreeViewEdited(GtkWidget* renderer, const char* path, const char* new_text, void (*cb)( int row, const char *text))
+{
+	// for a simple listbox the path is the current row  
+	(*cb)(atoi(path), new_text);
+}
+
+/**
+ * Connect the list to a existing liststore.
+ */
+
+void
+wListSetStore(wControl_p list, DataStore *store)
+{
+	g_assert(list);
+	g_assert(store);
+	g_assert(list->type==B_LIST);
+
+	GtkTreeView* treeview = list->attributes.list.treeView;
+
+	list->attributes.list.listStore = store->listStore;
+
+	gtk_tree_view_set_model(treeview, 
+							GTK_TREE_MODEL(store->listStore));
+
+	if (store->selectionChanged) {
+		GtkTreeSelection* selection;
+
+		selection = gtk_tree_view_get_selection(treeview);
+		g_signal_connect(selection, "changed", (GCallback)wlibTreeSelectionChanged, NULL);
+	}
+
+	if (store->edited) {
+
+		GtkWidget *renderer = wlibWidgetFromIdWarn(list->parent, store->editable);
+
+		g_signal_connect( renderer, "edited", (GCallback)wlibTreeViewEdited, store->edited);
+	}
+	
+}
+
 /**
  * Create a multi column list box.
  * if colCnt is set to zero, a single text column is created as default
@@ -760,7 +802,6 @@ wControl_p wListCreate(
 	struct list* lcontrol;
 	static wWinPix_t zeroPos = 0;
 
-	g_assert(width != 0);
 
 	bl = wlibControlNew(B_LIST, parent, helpStr, context);
 	lcontrol = CONTROL_GET_ATTRIBUTES_PTR(bl, list);
@@ -769,25 +810,27 @@ wControl_p wListCreate(
 	lcontrol->last = 0;
 	
 	if (ISDEFINEDINBUILDER(parent)) {
-		GtkTreeSelection* selection;
+
 		bl->widget = wlibWidgetFromIdWarn(parent, helpStr);
 		lcontrol->treeView = GTK_TREE_VIEW(wlibWidgetFromIdWarn(parent, "treeview"));
 		g_assert(lcontrol->treeView != NULL);
+
+		if (option & BL_NODATASTORE) {		
+			lcontrol->listStore = NULL;
+		}
+		else {
+			GtkTreeSelection* selection;
+
+			lcontrol->listStore = GTK_LIST_STORE(gtk_tree_view_get_model(lcontrol->treeView));
+
+			selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(lcontrol->treeView));
+			g_signal_connect(selection, "changed", (GCallback)wlibTreeSelectionChanged, bl);
+		}
 		
-		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(lcontrol->treeView));
-		g_signal_connect(selection, "changed", (GCallback)wlibTreeSelectionChanged, bl);
-
-		//gtk_tree_selection_set_select_function(selection,
-		//	changeSelection,
-		//	bl,
-		//	NULL);
-
-		lcontrol->listStore = GTK_LIST_STORE(gtk_tree_view_get_model(lcontrol->treeView));
-		
-		g_assert(lcontrol->listStore != NULL);
-
 	} else {
 		GtkTreeSelection* sel;
+
+		g_assert(width != 0);
 
 		if (colCnt <= 0) {
 			colCnt = 1;
