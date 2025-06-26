@@ -693,34 +693,31 @@ EXPORT void DrawMultiString(
 	char * cp;
 	char * cp1;
 	POS_T lineH, lineW;
-	coOrd size, textsize, posl, orig;
+	coOrd size, size2, textsize, posl, orig;
 	POS_T descent, ascent;
 	char *line;
+	coOrd p[4];
 
 	if (!text || !*text) {
 		return;  //No string or blank
 	}
 	line = malloc(strlen(text) + 1);
 
-	coOrd *lastline;
-	lastline = malloc(sizeof(coOrd));
-	DrawMultiLineTextSize(&mainD, text, fp, fs, FALSE, &size, lastline);
+	DrawMultiLineTextSize(&mainD, text, fp, fs, FALSE, &size, &posl);
 
-	DrawTextSize2(&mainD, "Aqjlp", fp, fs, TRUE, &textsize, &descent, &ascent);
+	DrawTextSize2(&mainD, "Aqjlp", fp, fs, TRUE, &size2, &descent, &ascent);
+
+	// set up the corners of the rectangle
+	p[0].x = p[3].x = pos.x;
+	p[1].x = p[2].x = pos.x + size.x;
+	// DrawTextSize2(&mainD, "A", NULL, fs, FALSE, &size2, &descent, &ascent);
+	p[0].y = p[1].y = pos.y + posl.y - descent;
+	p[2].y = p[3].y = pos.y + size2.y;
+
 
 	orig.x = pos.x;
 	orig.y = pos.y;
 	if (boxed && (d != &mapD)) {
-		int bw = 2, bh = 2, br = 1, bb = 1;
-		size.x += bw * d->scale / d->dpi;
-		size.y = fabs(orig.y - pos.y) + bh * d->scale / d->dpi;
-		size.y += descent + ascent;
-		coOrd p[4];
-		p[0] = orig; p[0].x -= (bw - br) * d->scale / d->dpi;
-		p[0].y += (bh - bb) * d->scale / d->dpi + ascent;
-		p[1] = p[0]; p[1].x += size.x;
-		p[2] = p[1]; p[2].y -= size.y;
-		p[3] = p[2]; p[3].x = p[0].x;
 		for (int i = 0; i < 4; i++) {
 			Rotate(&p[i], orig, a);
 		}
@@ -767,19 +764,6 @@ EXPORT void DrawMultiString(
 		hi->y = orig.y+ascent;
 	}
 	if (boxed && (d != &mapD)) {
-		int bw=2, bh=2, br=1, bb=1;
-		size.x += bw*d->scale/d->dpi;
-		size.y = fabs(orig.y-posl.y)+bh*d->scale/d->dpi;
-		size.y += descent+ascent;
-		coOrd p[4];
-		p[0] = orig; p[0].x -= (bw-br)*d->scale/d->dpi;
-		p[0].y += (bh-bb)*d->scale/d->dpi+ascent;
-		p[1] = p[0]; p[1].x += size.x;
-		p[2] = p[1]; p[2].y -= size.y;
-		p[3] = p[2]; p[3].x = p[0].x;
-		for (int i=0; i<4; i++) {
-			Rotate( &p[i], orig, a);
-		}
 		// DrawPoly( d, 4, p, NULL, bg_color, 0, DRAW_FILL );
 		DrawPoly( d, 4, p, NULL, color, 0, DRAW_CLOSED );
 	}
