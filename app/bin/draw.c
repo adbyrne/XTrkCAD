@@ -710,7 +710,6 @@ EXPORT void DrawMultiString(
 	// set up the corners of the rectangle
 	p[0].x = p[3].x = pos.x;
 	p[1].x = p[2].x = pos.x + size.x;
-	// DrawTextSize2(&mainD, "A", NULL, fs, FALSE, &size2, &descent, &ascent);
 	p[0].y = p[1].y = pos.y + posl.y - descent;
 	p[2].y = p[3].y = pos.y + size2.y;
 
@@ -722,15 +721,9 @@ EXPORT void DrawMultiString(
 			Rotate(&p[i], orig, a);
 		}
 		DrawPoly( d, 4, p, NULL, bg_color, 0, DRAW_FILL );
-		// DrawPoly(d, 4, p, NULL, color, 0, DRAW_CLOSED);
 	}
 
-	//POS_T ascent = textsize.y-descent;
 	lineH = (ascent+descent)*1.0;
-	//size.x = 0.0;
-	//size.y = 0.0;
-	orig.x = pos.x;
-	orig.y = pos.y;
 	cp = line;				// Build up message to hold all of the strings separated by nulls
 	while (*text) {
 		cp1 = cp;
@@ -738,33 +731,18 @@ EXPORT void DrawMultiString(
 			*cp++ = *text++;
 		}
 		*cp = '\0';
-		//DrawTextSize2( &mainD, cp1, fp, fs, TRUE, &textsize, &descent, &ascent);
-		//lineW = textsize.x;
-		//if (lineW>size.x) {
-		//	size.x = lineW;
-		//}
 		posl.x = pos.x;
 		posl.y = pos.y;
 		Rotate( &posl, orig, a);
 		DrawString( d, posl, a, cp1, fp, fs, color );
 		pos.y -= lineH;
-		//size.y += lineH;
 		if (*text == '\0') {
 			break;
 		}
 		text++;
 		cp++;
 	}
-	//if (lo) {
-	//	lo->x = posl.x;
-	//	lo->y = posl.y-descent;
-	//}
-	//if (hi) {
-	//	hi->x = posl.x+size.x;
-	//	hi->y = orig.y+ascent;
-	//}
 	if (boxed && (d != &mapD)) {
-		// DrawPoly( d, 4, p, NULL, bg_color, 0, DRAW_FILL );
 		DrawPoly( d, 4, p, NULL, color, 0, DRAW_CLOSED );
 	}
 
