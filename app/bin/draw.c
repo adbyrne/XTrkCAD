@@ -727,8 +727,8 @@ EXPORT void DrawMultiString(
 
 	//POS_T ascent = textsize.y-descent;
 	lineH = (ascent+descent)*1.0;
-	size.x = 0.0;
-	size.y = 0.0;
+	//size.x = 0.0;
+	//size.y = 0.0;
 	orig.x = pos.x;
 	orig.y = pos.y;
 	cp = line;				// Build up message to hold all of the strings separated by nulls
@@ -738,31 +738,31 @@ EXPORT void DrawMultiString(
 			*cp++ = *text++;
 		}
 		*cp = '\0';
-		DrawTextSize2( &mainD, cp1, fp, fs, TRUE, &textsize, &descent, &ascent);
-		lineW = textsize.x;
-		if (lineW>size.x) {
-			size.x = lineW;
-		}
+		//DrawTextSize2( &mainD, cp1, fp, fs, TRUE, &textsize, &descent, &ascent);
+		//lineW = textsize.x;
+		//if (lineW>size.x) {
+		//	size.x = lineW;
+		//}
 		posl.x = pos.x;
 		posl.y = pos.y;
 		Rotate( &posl, orig, a);
 		DrawString( d, posl, a, cp1, fp, fs, color );
 		pos.y -= lineH;
-		size.y += lineH;
+		//size.y += lineH;
 		if (*text == '\0') {
 			break;
 		}
 		text++;
 		cp++;
 	}
-	if (lo) {
-		lo->x = posl.x;
-		lo->y = posl.y-descent;
-	}
-	if (hi) {
-		hi->x = posl.x+size.x;
-		hi->y = orig.y+ascent;
-	}
+	//if (lo) {
+	//	lo->x = posl.x;
+	//	lo->y = posl.y-descent;
+	//}
+	//if (hi) {
+	//	hi->x = posl.x+size.x;
+	//	hi->y = orig.y+ascent;
+	//}
 	if (boxed && (d != &mapD)) {
 		// DrawPoly( d, 4, p, NULL, bg_color, 0, DRAW_FILL );
 		DrawPoly( d, 4, p, NULL, color, 0, DRAW_CLOSED );
