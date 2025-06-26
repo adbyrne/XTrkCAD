@@ -1436,7 +1436,7 @@ EXPORT BOOL_T ReadSegs( void )
 					rc = FALSE;
 					break;
 				}
-				bg_color = wDrawFindColor(rgb);
+				s->bg_color = wDrawFindColor(rgb);
 			}
 			break;
 		case SEG_UNCEP:
