@@ -72,6 +72,7 @@ typedef struct trkSeg_t {
 			wFont_p fontP;
 			FONTSIZE_T fontSize;
 			BOOL_T boxed;
+			BOOL_T filled;
 			char * string;
 		} t;
 		struct {

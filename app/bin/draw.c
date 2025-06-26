@@ -684,11 +684,12 @@ EXPORT void DrawMultiString(
         wFont_p fp,
         wFontSize_t fs,
         wDrawColor color,
+		BOOL_T boxed,
+		BOOL_T filled,
 		wDrawColor bg_color,
         ANGLE_T a,
         coOrd * lo,
-        coOrd * hi,
-        BOOL_T boxed)
+        coOrd * hi)
 {
 	char * cp;
 	char * cp1;
@@ -716,7 +717,7 @@ EXPORT void DrawMultiString(
 
 	orig.x = pos.x;
 	orig.y = pos.y;
-	if (boxed && (d != &mapD)) {
+	if (filled && (d != &mapD)) {
 		for (int i = 0; i < 4; i++) {
 			Rotate(&p[i], orig, a);
 		}
