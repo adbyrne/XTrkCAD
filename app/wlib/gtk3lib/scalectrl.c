@@ -105,4 +105,6 @@ wScaleCreate(wControl_p parent,
     scaleControl->widget =  wlibWidgetFromIdWarn(parent, id);
 
     g_signal_connect(scaleControl->widget, "value-changed", (GCallback)ScaleValueChanged, (gpointer)scaleControl);
+
+    return(scaleControl);
 }
