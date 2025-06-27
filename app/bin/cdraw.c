@@ -547,7 +547,7 @@ static struct {
 	unsigned int layer;
 	wIndex_t lineType;
 } drawData;
-typedef enum { E0, E1, PP, CE, AL, LA, A1, A2, RD, LN, HT, WT, PV, VC, LW, LT, CO, BG, FL, OP, BX, BE, OR, DS, TP, TA, TS, TX, LK, OI, RA, LY } drawDesc_e;
+typedef enum { E0, E1, PP, CE, AL, LA, A1, A2, RD, LN, HT, WT, PV, VC, LW, LT, CO, BG, BX, FL, OP, BE, OR, DS, TP, TA, TS, TX, LK, OI, RA, LY } drawDesc_e;
 static descData_t drawDesc[] = {
 	/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &drawData.endPt[0] },
 	/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &drawData.endPt[1] },
@@ -567,9 +567,9 @@ static descData_t drawDesc[] = {
 	/*LT*/  { DESC_LIST, N_("Line Type"), &drawData.lineType },
 	/*CO*/	{ DESC_COLOR, N_("Color"), &drawData.color },
 	/*BG*/	{ DESC_COLOR, N_("Bg Color"), &drawData.bg_color },
+	/*BX*/  { DESC_BOXED, N_("Boxed"), &drawData.boxed },
 	/*FL*/	{ DESC_BOXED, N_("Filled"), &drawData.filled },
 	/*OP*/  { DESC_BOXED, N_("Open End"), &drawData.open },
-	/*BX*/  { DESC_BOXED, N_("Boxed"), &drawData.boxed },
 	/*BE*/	{ DESC_LIST, N_("Lumber"), &drawData.benchChoice },
 	/*OR*/	{ DESC_LIST, N_("Orientation"), &drawData.benchOrient },
 	/*DS*/	{ DESC_LIST, N_("Size"), &drawData.dimenSize },
@@ -1321,8 +1321,8 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		                        drawDesc[TA].mode =
 		                                drawDesc[LK].mode =
 		                                        drawDesc[OI].mode =
-		                                              drawDesc[BX].mode = 
-			                                              drawDesc[FL].mode = 0;
+		                                                drawDesc[BX].mode = 
+			                                                    drawDesc[FL].mode = 0;
 		if (!drawData.lock_origin) { drawDesc[RA].mode = DESC_RO; }
 		else { drawDesc[RA].mode = 0; }
 		drawDesc[E0].mode = DESC_IGNORE;
