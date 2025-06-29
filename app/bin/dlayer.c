@@ -2117,6 +2117,10 @@ static void DoLayer(void * unused)
 }
 
 #include "bitmaps/background.image3"
+#include "bitmaps/layers.image3"
+
+wMenu_p layerM;
+wButton_p layerB;
 
 #if NUM_BUTTONS < 100
 static int lbmap_width[3] = { 16, 24, 32 }; // For numbers < 100
@@ -2356,12 +2360,23 @@ void InitLayers(int cmdGroup)
 	wControlSetBalloonText((wControl_p)setLayerL, GetBalloonHelpStr("cmdLayerSet"));
 	ToolbarControlAdd((wControl_p)setLayerL, IC_MODETRAIN_TOO, cmdGroup );
 
+	/* Buttons */
 	backgroundB = AddToolbarButton("cmdBackgroundShow",
 	                               wIconCreatePixMap(background_image3[iconSize]), 0,
 	                               BackgroundToggleShow, NULL);
 	/* add the help text */
 	wControlSetBalloonText((wControl_p)backgroundB, _("Show/Hide Background"));
 	wControlActive((wControl_p)backgroundB, FALSE);
+
+	// wMenuSeparatorCreate(layerM); Causes a fault
+
+	layerB = AddToolbarButton("cmdManageLayers",
+		wIconCreatePixMap(layers_image3[iconSize]), IC_MENU|IC_POPUP|IC_MODETRAIN_TOO,
+		DoLayer, layerB);
+	/* add the help text */
+	wControlSetBalloonText((wControl_p)layerB, _("Manage Layers"));
+	wControlActive((wControl_p)layerB, TRUE);
+
 
 	for (int i = 0; i < NUM_LAYERS; i++) {
 		char *layerName;

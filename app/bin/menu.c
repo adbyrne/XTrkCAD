@@ -1384,6 +1384,7 @@ EXPORT void CreateMenus(void)
 	InitCmdDescribe2(changeM);
 	InitCmdPan2(changeM);
 
+	// InitLayers2(changeM);
 	InitLayers(BG_LAYER);
 
 	cmdGroup = BG_HOTBAR;
