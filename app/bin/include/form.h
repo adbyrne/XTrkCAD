@@ -41,6 +41,8 @@ void FormCancel_Restore(paramGroup_p group);
 void FormControlActive(paramGroup_p pg, int inx, BOOL_T active);
 void FormMenuPush(void* dp);
 
+void FormFetchData(paramGroup_p pg);
+
 #endif // HAVE_FORM_H
 
 

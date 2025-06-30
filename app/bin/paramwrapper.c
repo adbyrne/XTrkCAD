@@ -116,7 +116,7 @@ EXPORT long ParamUpdate(
 void ParamLoadData(
     paramGroup_p pg)
 {
-    printf("%s:%d Old Param Function used by %s\n", __FILE__, __LINE__, pg->nameStr);
+    printf("%s:%d ParamLoadData used by %s\n", __FILE__, __LINE__, pg->nameStr);
     //ParamLoadDataOrig(pg);
 }
 

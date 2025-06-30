@@ -6,6 +6,7 @@ target_sources(xtrkcad-lib
     createcontrols.c
     defaultvalues.c
     dialog.c
+    fetchdata.c
     formatval.c
     formatdistance.c
     loadcontrols.c

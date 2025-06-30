@@ -1,6 +1,8 @@
 #ifndef HAVE_FORMPRIVATE_H
 #define HAVE_FORMPRIVATE_H
 
+#include <form.h>
+
 extern int log_form;
 
 extern char* prefSect;
