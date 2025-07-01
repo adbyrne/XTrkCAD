@@ -132,6 +132,7 @@ static int mResizeBorderW;
 static int mResizeBorderH;
 static int mMenuH;
 static int screenWidth = 0, screenHeight = 0;
+static RECT screenRect;
 
 static wWin_p mswWin = NULL;
 static wWin_p winFirst, winLast;
@@ -618,10 +619,7 @@ static void getSavedSizeAndPos(
                 h = 10;
             }
 
-			// Make sure we can see the dialog
-			//xadj += 10;
-			//yadj += 10;
-
+			// Make sure the dialog fits in the screen
             if (w > screenWidth - xadj) {
                 w = screenWidth - xadj;
             }
@@ -638,24 +636,21 @@ static void getSavedSizeAndPos(
                 (x = (wWinPix_t)(strtod(cp, &cq)), cp != cq) &&
                 (cp = cq, y = (wWinPix_t)(strtod(cp, &cq)), cp != cq)
            ) {
-            if (y < 0) {
-                y = 0;
+
+            if (y < screenRect.top) {
+                y = screenRect.top;
             }
 
-            if (x < 0) {
-                x = 0;
+            if (x < screenRect.left) {
+                x = screenRect.left;
             }
 
-            // Make sure we can see the dialog
-            //xadj += 100;
-            //yadj += 100;
-
-            if (y + h > screenHeight) {
-                y = screenHeight - h - yadj;
+            if (y + h > screenRect.bottom) {
+                y = screenRect.bottom - h - yadj;
             }
 
-            if (x + w > screenWidth) {
-                x = screenWidth - w - xadj;
+            if (x + w > screenRect.right) {
+                x = screenRect.right - w - xadj;
             }
 
             *rx = x;
@@ -3389,6 +3384,11 @@ int PASCAL WinMain(HINSTANCE hinstCurrent, HINSTANCE hinstPrevious,
         }
     }
 
+    // Area not obscured by desktop toolbars
+    SystemParametersInfo(SPI_GETWORKAREA, 0, &screenRect, 0);
+    screenWidth = screenRect.right - screenRect.left;
+    screenHeight = screenRect.bottom - screenRect.top;
+
     mswHInst = hinstCurrent;
     mTitleH = GetSystemMetrics(SM_CYCAPTION) - 1;
     mFixBorderW = GetSystemMetrics(SM_CXBORDER);
@@ -3396,8 +3396,8 @@ int PASCAL WinMain(HINSTANCE hinstCurrent, HINSTANCE hinstPrevious,
     mResizeBorderW = GetSystemMetrics(SM_CXFRAME);
     mResizeBorderH = GetSystemMetrics(SM_CYFRAME);
     mMenuH = GetSystemMetrics(SM_CYMENU) + 1;
-    screenWidth = GetSystemMetrics(SM_CXSCREEN);
-    screenHeight = GetSystemMetrics(SM_CYSCREEN);
+    // screenWidth = GetSystemMetrics(SM_CXSCREEN);
+    // screenHeight = GetSystemMetrics(SM_CYSCREEN);
     mswLabelFont = GetStockObject(DEFAULT_GUI_FONT);
     hDc = GetDC(0);
     mswScale = GetDeviceCaps(hDc, LOGPIXELSX) / 96.0;
