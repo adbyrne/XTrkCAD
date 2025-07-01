@@ -637,19 +637,20 @@ static void getSavedSizeAndPos(
                 (cp = cq, y = (wWinPix_t)(strtod(cp, &cq)), cp != cq)
            ) {
 
-            if (y < screenRect.top) {
-                y = screenRect.top;
+            // Position the dialog so its not off screen
+            if (y < screenRect.top + yadj) {
+                y = screenRect.top + yadj;
             }
 
-            if (x < screenRect.left) {
-                x = screenRect.left;
+            if (x < screenRect.left + xadj) {
+                x = screenRect.left + xadj;
             }
 
-            if (y + h > screenRect.bottom) {
+            if (y + h + yadj > screenRect.bottom) {
                 y = screenRect.bottom - h - yadj;
             }
 
-            if (x + w > screenRect.right) {
+            if (x + w + xadj > screenRect.right) {
                 x = screenRect.right - w - xadj;
             }
 
