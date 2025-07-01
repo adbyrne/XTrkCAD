@@ -601,9 +601,9 @@ static void getSavedSizeAndPos(
             xadj += mFixBorderW * 2;
             yadj += mFixBorderH * 2;
         }
-        //if (option & F_MENUBAR) {
-        //	yadj += mMenuH;
-        //}
+        if (option & F_MENUBAR) {
+        	yadj += mMenuH;
+        }
 
         if ((option & F_RESIZE) &&
                 (cp = wPrefGetStringBasic("msw window size", nameStr)) &&
