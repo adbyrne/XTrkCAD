@@ -592,8 +592,8 @@ static void getSavedSizeAndPos(
         int state;
 
         w = h = 0;
-        xadj = 2;
-        yadj = 2;
+        xadj = 0;
+        yadj = 0;
         if (option & F_RESIZE) {
             xadj += mResizeBorderW * 2;
             yadj += mResizeBorderH * 2;
@@ -612,7 +612,7 @@ static void getSavedSizeAndPos(
             (state = (int)strtol(cp, &cq, 10), cp != cq) &&  // state is not used
             (cp = cq, w = (wWinPix_t)(strtod(cp, &cq)), cp != cq) &&
             (cp = cq, h = (wWinPix_t)(strtod(cp, &cq)), cp != cq)
-         ) 
+        ) 
         {
             if (w < 10) {
                 w = 10;
