@@ -22,16 +22,15 @@
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
-        <property name="sensitive">False</property>
       </object>
     </child>
     <child type="action">
       <object class="GtkButton" id="printsetup">
-        <property name="label" translatable="yes">Print Setup...</property>
+        <property name="label" translatable="yes">Page Setup...</property>
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
-        <property name="sensitive">False</property>
+        <property name="sensitive">True</property>
       </object>
     </child>
     <child type="action">
@@ -78,7 +77,7 @@
               <object class="GtkTextView" id="text">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="halign">start</property>
+                <property name="halign">fill</property>
                 <property name="valign">start</property>
                 <property name="hexpand">True</property>
                 <property name="vexpand">True</property>

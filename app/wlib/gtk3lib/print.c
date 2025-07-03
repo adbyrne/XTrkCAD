@@ -22,19 +22,222 @@
 
 #include <stdio.h>
 
-#include "wlib.h"
+#define GTK_DISABLE_SINGLE_INCLUDES
+#define GDK_DISABLE_DEPRECATED
+#define GTK_DISABLE_DEPRECATED
+#define GSEAL_ENABLE
+
+#include <gtk/gtk.h>
+#include <gdk/gdk.h>
+
+#include "gtkint.h"
+
+static GtkPrintSettings* settings = NULL;			/**< current printer settings */
+static GtkPageSetup* page_setup;			/**< current paper settings */
+
+#define PAGESETTINGS "xtrkcad.page"			/**< filename for page settings */
+#define PRINTSETTINGS "xtrkcad.printer"		/**< filename for printer settings */
+
 #define TRUE 1
 #define FALSE 0
+
+static double paperWidth;		/**< physical paper width */
+static double paperHeight;		/**< physical paper height */
+static double tBorder;			/**< top margin */
+static double rBorder;			/**< right margin */
+static double lBorder;			/**< left margin */
+static double bBorder;			/**< bottom margin */
+
 /**
- * Page setup function. Previous settings are loaded and the setup
- * dialog is shown. The settings are saved after the dialog ends.
- *
- * \param callback IN unused
+ * Get the paper dimensions and margins and setup the internal variables
+ * \return
  */
+
+static void
+WlibGetPaperSize(void)
+{
+	double temp;
+
+	bBorder = gtk_page_setup_get_bottom_margin(page_setup, GTK_UNIT_INCH);
+	tBorder = gtk_page_setup_get_top_margin(page_setup, GTK_UNIT_INCH);
+	lBorder = gtk_page_setup_get_left_margin(page_setup, GTK_UNIT_INCH);
+	rBorder = gtk_page_setup_get_right_margin(page_setup, GTK_UNIT_INCH);
+	paperHeight = gtk_page_setup_get_paper_height(page_setup, GTK_UNIT_INCH);
+	paperWidth = gtk_page_setup_get_paper_width(page_setup, GTK_UNIT_INCH);
+
+	// XTrackCAD does page orientation itself. Basic assumption is that the
+	// paper is always oriented in portrait mode. Ignore settings by user
+	if (paperHeight < paperWidth) {
+		temp = paperHeight;
+		paperHeight = paperWidth;
+		paperWidth = temp;
+	}
+}
+
+/**
+ * Initialize printer und paper selection using the saved settings
+ *
+ * \param op IN print operation to initialize. If NULL only the global
+ * 				settings are loaded.
+ */
+
+void
+WlibApplySettings(GtkPrintOperation* op)
+{
+	gchar* filename;
+	GError* err = NULL;
+	GtkWidget* dialog;
+
+	filename = g_build_filename(wGetAppWorkDir(), PRINTSETTINGS, NULL);
+
+	if (!(settings = gtk_print_settings_new_from_file(filename, &err))) {
+		if (err->code != G_FILE_ERROR_NOENT) {
+			// ignore file not found error as defaults will be used
+			dialog = gtk_message_dialog_new(GTK_WINDOW(gtkMainW->gtkwin),
+				GTK_DIALOG_DESTROY_WITH_PARENT,
+				GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+				"%s", err->message);
+			gtk_dialog_run(GTK_DIALOG(dialog));
+			gtk_widget_destroy(dialog);
+		}
+		else {
+			// create  default print settings
+			settings = gtk_print_settings_new();
+		}
+		g_error_free(err);
+	}
+
+	g_free(filename);
+
+	if (settings && op) {
+		gtk_print_operation_set_print_settings(op, settings);
+	}
+
+	err = NULL;
+	filename = g_build_filename(wGetAppWorkDir(), PAGESETTINGS, NULL);
+
+	if (!(page_setup = gtk_page_setup_new_from_file(filename, &err))) {
+		// ignore file not found error as defaults will be used
+		if (err->code != G_FILE_ERROR_NOENT) {
+			dialog = gtk_message_dialog_new(GTK_WINDOW(gtkMainW->gtkwin),
+				GTK_DIALOG_DESTROY_WITH_PARENT,
+				GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+				"%s", err->message);
+			gtk_dialog_run(GTK_DIALOG(dialog));
+			gtk_widget_destroy(dialog);
+		}
+		else {
+			page_setup = gtk_page_setup_new();
+		}
+
+		g_error_free(err);
+	}
+	else {
+		// on success get the paper dimensions
+		WlibGetPaperSize();
+	}
+
+	g_free(filename);
+
+	if (page_setup && op) {
+		gtk_print_operation_set_default_page_setup(op, page_setup);
+	}
+
+}
+
+/**
+ * Save the printer settings. If op is not NULL the settings are retrieved
+ * from the print operation. Otherwise the state of the globals is saved.
+ *
+ * \param op IN printer operation. If NULL the glabal variables are used
+ */
+
+void
+WlibSaveSettings(GtkPrintOperation* op)
+{
+	GError* err = NULL;
+	gchar* filename;
+	GtkWidget* dialog;
+
+	if (op) {
+		if (settings != NULL) {
+			g_object_unref(settings);
+		}
+
+		settings = g_object_ref(gtk_print_operation_get_print_settings(op));
+	}
+
+	filename = g_build_filename(wGetAppWorkDir(), PRINTSETTINGS, NULL);
+
+	if (!gtk_print_settings_to_file(settings, filename, &err)) {
+		dialog = gtk_message_dialog_new(GTK_WINDOW(gtkMainW->gtkwin),
+			GTK_DIALOG_DESTROY_WITH_PARENT,
+			GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+			"%s", err->message);
+
+		g_error_free(err);
+		gtk_dialog_run(GTK_DIALOG(dialog));
+		gtk_widget_destroy(dialog);
+	}
+
+	g_free(filename);
+
+	if (op) {
+		if (page_setup != NULL) {
+			g_object_unref(page_setup);
+		}
+
+		page_setup = g_object_ref(gtk_print_operation_get_default_page_setup(op));
+	}
+
+	filename = g_build_filename(wGetAppWorkDir(), PAGESETTINGS, NULL);
+
+	if (!gtk_page_setup_to_file(page_setup, filename, &err)) {
+		dialog = gtk_message_dialog_new(GTK_WINDOW(gtkMainW->gtkwin),
+			GTK_DIALOG_DESTROY_WITH_PARENT,
+			GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+			"%s", err->message);
+
+		g_error_free(err);
+		gtk_dialog_run(GTK_DIALOG(dialog));
+		gtk_widget_destroy(dialog);
+	}
+
+	g_free(filename);
+
+}
+
+
+ /**
+  * Page setup function. Previous settings are loaded and the setup
+  * dialog is shown. The settings are saved after the dialog ends.
+  *
+  * \param callback IN unused
+  */
 
 void wPrintSetup(wPrintSetupCallBack_p callback)
 {
-    printf("Not yet implemented wPrintSetup() %s:%d\n", __FILE__, __LINE__);
+	GtkPageSetup* new_page_setup;
+	//    gchar *filename;
+	//    GError *err;
+	//    GtkWidget *dialog;
+
+	if (!settings) {
+		WlibApplySettings(NULL);
+	}
+
+	new_page_setup = gtk_print_run_page_setup_dialog(GTK_WINDOW(wlibAppWinGetMain()),
+		page_setup, settings);
+
+	if (page_setup
+		&& (page_setup != new_page_setup)) {      //Can be the same if no mods...
+		g_object_unref(page_setup);
+	}
+
+	page_setup = new_page_setup;
+
+	WlibGetPaperSize();
+	WlibSaveSettings(NULL);
 }
 
 /*****************************************************************************

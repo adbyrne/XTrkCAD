@@ -394,7 +394,7 @@ static void DoCustomMgr( void * junk )
 	if (customPG.win == NULL) {
 		FormCreateDialog( &customPG, MakeWindowTitle(_("Manage custom designed parts")), 
 							_("Done"), CustomDone,
-							_("Cancel"), ParamCancel_Null, 
+							NULL, NULL,
 							TRUE, F_RESIZE|F_RECALLSIZE|F_BLOCK,
 		                   CustomDlgUpdate );
 

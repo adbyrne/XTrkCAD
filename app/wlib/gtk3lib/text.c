@@ -25,6 +25,7 @@
  */
 
 #include <stdio.h>
+#include <math.h>
 
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
@@ -37,14 +38,17 @@
 #include "i18n.h"
 #include "gtkint.h"
 
-//struct PrintData {
-//	wText_p	tb;
-//	gint lines_per_page;
-//	gdouble font_size;
-//	gchar** lines;
-//	gint total_lines;
-//	gint total_pages;
-//};
+struct PrintData {
+	wControl_p	tb;
+	gint lines_per_page;
+	gdouble font_size;
+	gchar** lines;
+	gint total_lines;
+	gint total_pages;
+};
+
+#define HEADER_HEIGHT 20.0
+#define HEADER_GAP 8.5
 
 /*
  *****************************************************************************
@@ -167,6 +171,24 @@ wBool_t wTextSave(wControl_p bt, const char* fileName)
 	return TRUE;
 }
 
+gdouble
+CalcLineHeight(GtkPrintContext *context)
+{
+	// Create a temporary layout to measure text height
+	PangoLayout* layout = gtk_print_context_create_pango_layout(context);
+
+	pango_layout_set_font_description(layout, 
+		pango_font_description_from_string("Monospace 10"));
+
+	pango_layout_set_text(layout, "Sample", -1);
+
+	int text_height;
+	pango_layout_get_size(layout, NULL, &text_height);
+	gdouble line_height = (gdouble)text_height / PANGO_SCALE;
+
+	return(line_height);
+}
+
 /**
  * Begin the printing by retrieving the contents of the text box and
  * count the lines of text.
@@ -174,8 +196,6 @@ wBool_t wTextSave(wControl_p bt, const char* fileName)
  * \param operation IN the GTK print operation
  * \param context IN print context
  * \param pd IN attributes structure for user attributes
- *
- * \todo Redesign printing of textbox
  */
 
 static void
@@ -183,28 +203,31 @@ begin_print(GtkPrintOperation* operation,
             GtkPrintContext* context,
             struct PrintData* pd)
 {
-	//gchar* contents;
-	//gdouble height;
-	//contents = wlibGetText(pd->tb);
-	//pd->lines = g_strsplit(contents, "\n", 0);
-	///* Count the total number of lines in the file. */
-	///* ignore the header lines */
-	//pd->total_lines = 6;
+	gchar* contents;
+	gdouble height;
+	gdouble line_height;
 
-	//while (pd->lines[pd->total_lines] != NULL) {
-	//	pd->total_lines++;
-	//}
+	contents = wlibGetText(pd->tb);
+	pd->lines = g_strsplit(contents, "\n", 0);
+	/* Count the total number of lines in the file. */
+	/* ignore the header lines */
+	pd->total_lines = 6;
 
-	///* Based on the height of the page and font size, calculate how many lines can be
-	//* rendered on a single page. A padding of 3 is placed between lines as well.
-	//* Space for page header, table header and footer lines is subtracted from the total size
-	//*/
-	//height = gtk_print_context_get_height(context) - (pd->font_size + 3) - 2 *
-	//	(HEADER_HEIGHT + HEADER_GAP);
-	//pd->lines_per_page = floor(height / (pd->font_size + 3));
-	//pd->total_pages = (pd->total_lines - 1) / pd->lines_per_page + 1;
-	//gtk_print_operation_set_n_pages(operation, pd->total_pages);
-	//free(contents);
+	while (pd->lines[pd->total_lines] != NULL) {
+		pd->total_lines++;
+	}
+
+	/* Based on the height of the page and font size, calculate how many lines can be
+	* rendered on a single page. A padding of 3 is placed between lines as well.
+	* Space for page header, table header and footer lines is subtracted from the total size
+	*/
+	height = gtk_print_context_get_height(context);
+
+	line_height = CalcLineHeight(context);
+
+	pd->lines_per_page = (gint)floor(height / line_height);
+	pd->total_pages = (pd->total_lines - 1) / pd->lines_per_page + 1;
+	gtk_print_operation_set_n_pages(operation, pd->total_pages);
 }
 
 /**
@@ -225,76 +248,85 @@ draw_page(GtkPrintOperation* operation,
           gint page_nr,
           struct PrintData* pd)
 {
-	//cairo_t* cr;
-	//PangoLayout* layout;
-	//gdouble width, text_height, height;
-	//gint line, i, text_width, layout_height;
-	//PangoFontDescription* desc;
-	//gchar* page_str;
-	//cr = gtk_print_context_get_cairo_context(context);
-	//width = gtk_print_context_get_width(context);
-	//layout = gtk_print_context_create_pango_layout(context);
-	//desc = pango_font_description_from_string("Monospace");
-	//pango_font_description_set_size(desc, pd->font_size * PANGO_SCALE);
-	///*
-	// * render the header line with document type parts list on left and
-	// * first line of layout title on right
-	// */
-	//pango_layout_set_font_description(layout, desc);
-	//pango_layout_set_text(layout, pd->lines[0], -1); 	// document type
-	//pango_layout_set_width(layout, -1);
-	//pango_layout_set_alignment(layout, PANGO_ALIGN_LEFT);
-	//pango_layout_get_size(layout, NULL, &layout_height);
-	//text_height = (gdouble)layout_height / PANGO_SCALE;
-	//cairo_move_to(cr, 0, (HEADER_HEIGHT - text_height) / 2);
-	//pango_cairo_show_layout(cr, layout);
-	//pango_layout_set_text(layout, pd->lines[2], -1);		// layout title
-	//pango_layout_get_size(layout, &text_width, NULL);
-	//pango_layout_set_alignment(layout, PANGO_ALIGN_RIGHT);
-	//cairo_move_to(cr, width - (text_width / PANGO_SCALE),
-	//	(HEADER_HEIGHT - text_height) / 2);
-	//pango_cairo_show_layout(cr, layout);
-	///* Render the column header */
-	//cairo_move_to(cr, 0, HEADER_HEIGHT + HEADER_GAP + pd->font_size + 3);
-	//pango_layout_set_text(layout, pd->lines[6], -1);
-	//pango_cairo_show_layout(cr, layout);
-	//cairo_rel_move_to(cr, 0, pd->font_size + 3);
-	//pango_layout_set_text(layout, pd->lines[7], -1);
-	//pango_cairo_show_layout(cr, layout);
-	///* Render the page text with the specified font and size. */
-	//cairo_rel_move_to(cr, 0, pd->font_size + 3);
-	//line = page_nr * pd->lines_per_page + 8;
+	cairo_t* cr;
+	PangoLayout* layout;
+	gdouble width, text_height, height;
+	gint line, i, text_width, layout_height;
+	PangoFontDescription* desc;
+	gchar* page_str;
 
-	//for (i = 0; i < pd->lines_per_page && line < pd->total_lines; i++) {
-	//	pango_layout_set_text(layout, pd->lines[line], -1);
-	//	pango_cairo_show_layout(cr, layout);
-	//	cairo_rel_move_to(cr, 0, pd->font_size + 3);
-	//	line++;
-	//}
+	cr = gtk_print_context_get_cairo_context(context);
+	width = gtk_print_context_get_width(context);
 
-	///*
-	// * Render the footer line with date on the left and page number
-	// * on the right
-	// */
-	//pango_layout_set_text(layout, pd->lines[5], -1); 	// date
-	//pango_layout_set_width(layout, -1);
-	//pango_layout_set_alignment(layout, PANGO_ALIGN_LEFT);
-	//pango_layout_get_size(layout, NULL, &layout_height);
-	//text_height = (gdouble)layout_height / PANGO_SCALE;
-	//height = gtk_print_context_get_height(context);
-	//cairo_move_to(cr, 0, height - ((HEADER_HEIGHT - text_height) / 2));
-	//pango_cairo_show_layout(cr, layout);
-	//page_str = g_strdup_printf(_("%d of %d"), page_nr + 1,
-	//	pd->total_pages);  // page number
-	//pango_layout_set_text(layout, page_str, -1);
-	//pango_layout_get_size(layout, &text_width, NULL);
-	//pango_layout_set_alignment(layout, PANGO_ALIGN_RIGHT);
-	//cairo_move_to(cr, width - (text_width / PANGO_SCALE),
-	//	height - ((HEADER_HEIGHT - text_height) / 2));
-	//pango_cairo_show_layout(cr, layout);
-	//g_free(page_str);
-	//g_object_unref(layout);
-	//pango_font_description_free(desc);
+	layout = gtk_print_context_create_pango_layout(context);
+	desc = pango_font_description_from_string("Monospace 10");
+
+	/*
+	 * render the header line with document type parts list on left and
+	 * first line of layout title on right
+	 */
+	pango_layout_set_font_description(layout, desc);
+	pango_layout_set_width(layout, -1);
+	
+	pango_layout_set_text(layout, pd->lines[0], -1); 	
+	pango_layout_get_size(layout, NULL, &layout_height);
+	text_height = (gdouble)layout_height / PANGO_SCALE;
+
+	cairo_move_to(cr, 0, 0);								// headline
+	pango_layout_set_alignment(layout, PANGO_ALIGN_LEFT);
+	pango_cairo_show_layout(cr, layout);
+
+	pango_layout_set_text(layout, pd->lines[1], -1);		// layout title
+	cairo_rel_move_to(cr, 0, text_height*2);
+	pango_cairo_show_layout(cr, layout);
+
+	pango_layout_set_text(layout, pd->lines[2], -1);		// layout subtitle
+	cairo_rel_move_to(cr, 0, text_height);
+	pango_cairo_show_layout(cr, layout);
+
+	/* Render the column header */
+	cairo_rel_move_to(cr, 0, text_height*2);
+	pango_layout_set_text(layout, pd->lines[5], -1);
+	pango_cairo_show_layout(cr, layout);
+
+	cairo_rel_move_to(cr, 0, text_height);
+	pango_layout_set_text(layout, pd->lines[6], -1);
+	pango_cairo_show_layout(cr, layout);
+
+	/* Render the page text with the specified font and size. */
+	cairo_rel_move_to(cr, 0, text_height);
+	line = page_nr * pd->lines_per_page + 8;
+
+	for (i = 0; i < pd->lines_per_page && line < pd->total_lines; i++) {
+		pango_layout_set_text(layout, pd->lines[line], -1);
+		pango_cairo_show_layout(cr, layout);
+		cairo_rel_move_to(cr, 0, text_height);
+		line++;
+	}
+
+	/*
+	 * Render the footer line with date on the left and page number
+	 * on the right
+	 */
+	pango_layout_set_text(layout, pd->lines[3], -1); 	// date
+	pango_layout_set_width(layout, -1);
+	pango_layout_set_alignment(layout, PANGO_ALIGN_LEFT);
+	pango_layout_get_size(layout, NULL, &layout_height);
+	text_height = (gdouble)layout_height / PANGO_SCALE;
+	height = gtk_print_context_get_height(context);
+	cairo_move_to(cr, 0, height - ((HEADER_HEIGHT - text_height) / 2));
+	pango_cairo_show_layout(cr, layout);
+	page_str = g_strdup_printf(_("%d of %d"), page_nr + 1,
+		pd->total_pages);  // page number
+	pango_layout_set_text(layout, page_str, -1);
+	pango_layout_get_size(layout, &text_width, NULL);
+	pango_layout_set_alignment(layout, PANGO_ALIGN_RIGHT);
+	cairo_move_to(cr, width - (text_width / PANGO_SCALE),
+		height - ((HEADER_HEIGHT - text_height) / 2));
+	pango_cairo_show_layout(cr, layout);
+	g_free(page_str);
+	g_object_unref(layout);
+	pango_font_description_free(desc);
 }
 
 /**
@@ -311,8 +343,8 @@ end_print(GtkPrintOperation* operation,
           GtkPrintContext* context,
           struct PrintData* pd)
 {
-	//g_strfreev(pd->lines);
-	//free(pd);
+	g_strfreev(pd->lines);
+	g_free(pd);
 }
 
 /**
@@ -330,45 +362,60 @@ end_print(GtkPrintOperation* operation,
 wBool_t wTextPrint(
         wControl_p bt)
 {
-	//GtkPrintOperation* operation;
-	//GtkWidget* dialog;
-	//GError* error = NULL;
-	//gint res;
-	//struct PrintData* attributes;
-	///* Create a new print operation, applying saved print settings if they exist. */
-	//operation = gtk_print_operation_new();
-	//WlibApplySettings(operation);
-	//attributes = malloc(sizeof(struct PrintData));
-	//attributes->font_size = 10.0;
-	//attributes->tb = bt;
-	//g_signal_connect(G_OBJECT(operation), "begin_print",
-	//	G_CALLBACK(begin_print), (gpointer)attributes);
-	//g_signal_connect(G_OBJECT(operation), "draw_page",
-	//	G_CALLBACK(draw_page), (gpointer)attributes);
-	//g_signal_connect(G_OBJECT(operation), "end_print",
-	//	G_CALLBACK(end_print), (gpointer)attributes);
-	///* Run the default print operation that will print the selected file. */
-	//res = gtk_print_operation_run(operation,
-	//	GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
-	//	GTK_WINDOW(gtkMainW->gtkwin), &error);
+	GtkPrintOperation* operation;
+	GtkWidget* dialog;
+	GError* error = NULL;
+	gint res;
+	struct PrintData* attributes;
 
-	///* If the print operation was accepted, save the new print settings. */
-	//if (res == GTK_PRINT_OPERATION_RESULT_APPLY) {
-	//	WlibSaveSettings(operation);
-	//}
-	///* Otherwise, report that the print operation has failed. */
-	//else if (error) {
-	//	dialog = gtk_message_dialog_new(GTK_WINDOW(gtkMainW->gtkwin),
-	//		GTK_DIALOG_DESTROY_WITH_PARENT,
-	//		GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
-	//		"%s", error->message);
-	//	g_error_free(error);
-	//	gtk_dialog_run(GTK_DIALOG(dialog));
-	//	gtk_widget_destroy(dialog);
-	//}
-	//g_object_ref_sink(operation);
-	//g_object_unref(operation);
-	return TRUE;
+	/* Create a new print operation, applying saved print settings if they exist. */
+	operation = gtk_print_operation_new();
+	//wlibApplySettings(operation);
+	attributes = g_malloc0(sizeof(struct PrintData));
+	if (attributes) {
+		attributes->font_size = 10.0;
+		attributes->tb = bt;
+
+		g_signal_connect(G_OBJECT(operation), "begin_print",
+			G_CALLBACK(begin_print), (gpointer)attributes);
+		g_signal_connect(G_OBJECT(operation), "draw_page",
+			G_CALLBACK(draw_page), (gpointer)attributes);
+		g_signal_connect(G_OBJECT(operation), "end_print",
+			G_CALLBACK(end_print), (gpointer)attributes);
+
+		/* Run the default print operation that will print the selected file. */
+		res = gtk_print_operation_run(operation,
+			GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
+			GTK_WINDOW(wlibAppWinGetMain()), &error);
+
+		/* If the print operation was accepted, save the new print settings. */
+		if (res == GTK_PRINT_OPERATION_RESULT_APPLY) {
+			//WlibSaveSettings(operation);
+		}
+		/* Otherwise, report that the print operation has failed. */
+		else {
+			if (error) {
+				dialog = gtk_message_dialog_new(GTK_WINDOW(wlibAppWinGetMain()),
+					GTK_DIALOG_DESTROY_WITH_PARENT,
+					GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+					"%s", error->message);
+				g_error_free(error);
+				gtk_dialog_run(GTK_DIALOG(dialog));
+				gtk_widget_destroy(dialog);
+			}
+		}
+
+		//g_free(attributes);
+
+		//g_object_ref_sink(operation);
+		//g_object_unref(operation);
+
+		return TRUE;
+	}
+	else {
+		return(FALSE);
+	}
+	
 }
 
 
