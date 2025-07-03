@@ -684,30 +684,47 @@ EXPORT void DrawMultiString(
         wFont_p fp,
         wFontSize_t fs,
         wDrawColor color,
+		BOOL_T boxed,
+		BOOL_T filled,
+		wDrawColor bg_color,
         ANGLE_T a,
         coOrd * lo,
-        coOrd * hi,
-        BOOL_T boxed)
+        coOrd * hi)
 {
 	char * cp;
 	char * cp1;
 	POS_T lineH, lineW;
-	coOrd size, textsize, posl, orig;
+	coOrd size, size2, textsize, posl, orig;
 	POS_T descent, ascent;
 	char *line;
+	coOrd p[4];
 
 	if (!text || !*text) {
 		return;  //No string or blank
 	}
 	line = malloc(strlen(text) + 1);
 
-	DrawTextSize2( &mainD, "Aqjlp", fp, fs, TRUE, &textsize, &descent, &ascent);
-	//POS_T ascent = textsize.y-descent;
-	lineH = (ascent+descent)*1.0;
-	size.x = 0.0;
-	size.y = 0.0;
+	DrawMultiLineTextSize(&mainD, text, fp, fs, FALSE, &size, &posl);
+
+	DrawTextSize2(&mainD, "Aqjlp", fp, fs, TRUE, &size2, &descent, &ascent);
+
+	// set up the corners of the rectangle
+	p[0].x = p[3].x = pos.x;
+	p[1].x = p[2].x = pos.x + size.x;
+	p[0].y = p[1].y = pos.y + posl.y - descent;
+	p[2].y = p[3].y = pos.y + size2.y;
+
+
 	orig.x = pos.x;
 	orig.y = pos.y;
+	if (filled && (d != &mapD)) {
+		for (int i = 0; i < 4; i++) {
+			Rotate(&p[i], orig, a);
+		}
+		DrawPoly( d, 4, p, NULL, bg_color, 0, DRAW_FILL );
+	}
+
+	lineH = (ascent+descent)*1.0;
 	cp = line;				// Build up message to hold all of the strings separated by nulls
 	while (*text) {
 		cp1 = cp;
@@ -715,45 +732,18 @@ EXPORT void DrawMultiString(
 			*cp++ = *text++;
 		}
 		*cp = '\0';
-		DrawTextSize2( &mainD, cp1, fp, fs, TRUE, &textsize, &descent, &ascent);
-		lineW = textsize.x;
-		if (lineW>size.x) {
-			size.x = lineW;
-		}
 		posl.x = pos.x;
 		posl.y = pos.y;
 		Rotate( &posl, orig, a);
 		DrawString( d, posl, a, cp1, fp, fs, color );
 		pos.y -= lineH;
-		size.y += lineH;
 		if (*text == '\0') {
 			break;
 		}
 		text++;
 		cp++;
 	}
-	if (lo) {
-		lo->x = posl.x;
-		lo->y = posl.y-descent;
-	}
-	if (hi) {
-		hi->x = posl.x+size.x;
-		hi->y = orig.y+ascent;
-	}
 	if (boxed && (d != &mapD)) {
-		int bw=2, bh=2, br=1, bb=1;
-		size.x += bw*d->scale/d->dpi;
-		size.y = fabs(orig.y-posl.y)+bh*d->scale/d->dpi;
-		size.y += descent+ascent;
-		coOrd p[4];
-		p[0] = orig; p[0].x -= (bw-br)*d->scale/d->dpi;
-		p[0].y += (bh-bb)*d->scale/d->dpi+ascent;
-		p[1] = p[0]; p[1].x += size.x;
-		p[2] = p[1]; p[2].y -= size.y;
-		p[3] = p[2]; p[3].x = p[0].x;
-		for (int i=0; i<4; i++) {
-			Rotate( &p[i], orig, a);
-		}
 		DrawPoly( d, 4, p, NULL, color, 0, DRAW_CLOSED );
 	}
 
