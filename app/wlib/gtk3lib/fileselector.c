@@ -165,6 +165,7 @@ struct wFilSel_t * wFilSelCreate(
 
 int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 {
+	GError* err = NULL;
 
 	g_assert(fs->type == W_FILESELECT);
 
@@ -213,12 +214,17 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 		for (unsigned i=0; i < g_slist_length (fileNameList); i++ ) {
 			char* host;
 			char* file;
-			GError* err = NULL;
+			
+			gchar* converted;
+			gsize chars;
 
-			file = g_filename_from_uri( g_slist_nth_data( fileNameList, i ),
+			err = NULL;
+ 			file = g_filename_from_uri( g_slist_nth_data( fileNameList, i ),
 			                            &host, &err );
 
-			fileNames[ i ] = file;
+			converted = g_locale_from_utf8(file, -1, NULL, &chars, &err);
+			fileNames[ i ] = converted;
+			g_free(file);
 			g_free( g_slist_nth_data ( fileNameList, i));
 		}
 
