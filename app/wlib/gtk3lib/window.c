@@ -1183,5 +1183,11 @@ void wExit(int rc)		/* Application return code */
     if (gtkMainW && gtkMainW->winProc != NULL) {
         // gtkMainW->winProc(gtkMainW, wQuit_e, NULL, gtkMainW->attributes.window);
     }
-    g_application_quit(G_APPLICATION(wlibGetApp()));
+
+    // this should work but doesn't
+    //g_application_quit(G_APPLICATION(wlibGetApp()));
+
+    // use brute force instead
+    exit(rc);
+    
 }

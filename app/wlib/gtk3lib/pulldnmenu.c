@@ -195,9 +195,9 @@ static void CreateMenuItem(
     const char * labelStr,
     int acclKey )
 {
-//    MITEMTYPE( mi )= mtype;
-
-    g_strdelimit(labelStr, "&", '_');
+    // create a modifyable copy of the label
+    char *labelcopy = g_strdup(labelStr);
+    g_strdelimit(labelcopy, "&", '_');
 
     switch ( mtype ) {
     case M_SEPARATOR:
@@ -205,13 +205,13 @@ static void CreateMenuItem(
         break;
     case M_TOGGLE:
         mi->widget = gtk_check_menu_item_new_with_mnemonic(
-                              wlibConvertInput(labelStr));
+                              wlibConvertInput(labelcopy));
         g_signal_connect(mi->widget, "toggled", G_CALLBACK(pushMenuItem),
                          mi);
         break;
     case M_RADIO:
         mi->widget = gtk_radio_menu_item_new_with_mnemonic(m->attributes.menu.radioGroup,
-                          wlibConvertInput(labelStr));
+                          wlibConvertInput(labelcopy));
         m->attributes.menu.radioGroup = gtk_radio_menu_item_get_group (
                             GTK_RADIO_MENU_ITEM ( mi->widget ));
         g_signal_connect(mi->widget, "activate", G_CALLBACK(pushMenuItem),
@@ -219,7 +219,7 @@ static void CreateMenuItem(
         break;
     case M_PUSH:
         mi->widget = gtk_menu_item_new_with_mnemonic(
-                              wlibConvertInput(labelStr));
+                              wlibConvertInput(labelcopy));
         g_signal_connect(mi->widget, "activate",G_CALLBACK(pushMenuItem),
                          mi);
         break;
@@ -228,6 +228,8 @@ static void CreateMenuItem(
         g_abort();
         break;
     }
+
+    g_free(labelcopy);
 
     if (mi->widget) {
         if (acclKey) {
@@ -239,7 +241,6 @@ static void CreateMenuItem(
 
     if (helpStr != NULL) {
 		wlibAddTooltip( mi->widget, NULL, helpStr );
-//        wlibAddTooltip(mi->widget, helpStr);
     }
 
     return;

@@ -297,15 +297,15 @@ void ParamCancel_Undo(wWin_p);
 
 // Cancel leaves values in current state
 // Most dialogs
-void ParamCancel_Current(wControl_p window);
+void ParamCancel_Current(paramGroup_t *group);
 
 // As above and exits command regardless of Sticky
 // print, snap, *noteui
-void ParamCancel_Reset(wControl_p window);
+void ParamCancel_Reset(paramGroup_t *group);
 
 // Cancel restores values to previous state
 // Done/Ok propagates changed values. Cancel just closes dialog
-void ParamCancel_Restore(wControl_p window);
+void ParamCancel_Restore(paramGroup_t *group);
 
 // Pending
 // Dialogs which haven't been converted yet: work in progress
