@@ -233,7 +233,7 @@ modules:
           "
           rm -f \$LOGFILE
           touch \$LOGFILE
-          exec /app${XTRKCADBIN} -v -l \$LOGFILE \$LOG_ALLMODULES \"\$@\"
+          exec /app${XTRKCADBIN} -v -l \$LOGFILE \$LOG_ALLMODULES "\$@"
       - type: file
         path: ./$FP_DESKTOP
         dest-filename: $FP_DESKTOP
