@@ -82,10 +82,11 @@ FormFetchData(paramGroup_p pg)
 			break;
 
 		case PD_FLOAT:
+			stringV = wEntryGetValue(p->control);
 			if (p->option & PDO_DIM) {
-				floatV = DecodeDistance(p->control, &valid);
+				floatV = FormDecodeDistance(stringV, &valid);
 			} else {
-				floatV = DecodeFloat(p->control, &valid);
+				floatV = FormDecodeFloat(stringV, &valid);
 
 				if (valid && (p->option & PDO_ANGLE)) {
 					floatV = NormalizeAngle((angleSystem == ANGLE_POLAR) ? floatV : -floatV);

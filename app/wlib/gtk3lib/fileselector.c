@@ -200,8 +200,6 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 
 	}
 
-	gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER(fs->window), dirName );
-
 	int resp = gtk_native_dialog_run( GTK_NATIVE_DIALOG( fs->window ));
 
 	if( resp == GTK_RESPONSE_ACCEPT || resp == GTK_RESPONSE_APPLY) {
@@ -219,7 +217,7 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 			gsize chars;
 
 			err = NULL;
- 			file = g_filename_from_uri( g_slist_nth_data( fileNameList, i ),
+   			file = g_filename_from_uri( g_slist_nth_data( fileNameList, i ),
 			                            &host, &err );
 
 			converted = g_locale_from_utf8(file, -1, NULL, &chars, &err);

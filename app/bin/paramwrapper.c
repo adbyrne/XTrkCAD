@@ -69,7 +69,7 @@ EXPORT void ParamLoadControls(
         FormLoadControls(pg);
     }
     else {
-        printf("%s:%d Old Param Function used by %s\n", __FILE__, __LINE__, pg->nameStr);
+        printf("%s:%d Old Param Function %s used by %s\n", __FILE__, __LINE__, __func__, pg->nameStr);
         //ParamLoadControlsOrig(pg);
     }
 }
@@ -82,7 +82,7 @@ EXPORT void ParamLoadControl(
         FormLoadSingleControl(pg, inx);
     }
     else {
-        printf("%s:%d Old Param Function used by %s\n", __FILE__, __LINE__, pg->nameStr);
+        printf("%s:%d Old Param Function %s used by %s\n", __FILE__, __LINE__, __func__, pg->nameStr);
         //ParamLoadControlOrig(pg, inx);
     }
 }
@@ -92,7 +92,7 @@ EXPORT void ParamControlActive(
     int inx,
     BOOL_T active)
 {
-    printf("%s:%d Old Param function ParamControlActive()  used by %s\n", __FILE__, __LINE__, pg->nameStr);
+    printf("%s:%d Old Param Function %s used by %s\n", __FILE__, __LINE__, __func__, pg->nameStr);
     //ParamControlActiveOrig( pg, inx, active);
 }
 
@@ -101,14 +101,14 @@ EXPORT void ParamLoadMessage(
     int inx,
     char* message)
 {
-    printf("%s:%d Old Param Function used by %s\n", __FILE__, __LINE__, pg->nameStr);
+    printf("%s:%d Old Param Function %s used by %s\n", __FILE__, __LINE__, __func__, pg->nameStr);
     //ParamLoadMessageOrig(pg, inx, message);
 }
 
 EXPORT long ParamUpdate(
     paramGroup_p pg)
 {
-    printf("%s:%d Old Param Function used by %s\n", __FILE__, __LINE__, pg->nameStr);
+    printf("%s:%d Old Param Function %s used by %s\n", __FILE__, __LINE__, __func__, pg->nameStr);
     //return(ParamUpdateOrig(pg));
     return(0L);
 }
@@ -116,7 +116,7 @@ EXPORT long ParamUpdate(
 void ParamLoadData(
     paramGroup_p pg)
 {
-    printf("%s:%d ParamLoadData used by %s\n", __FILE__, __LINE__, pg->nameStr);
+    printf("%s:%d Old Param Function %s used by %s\n", __FILE__, __LINE__, __func__, pg->nameStr);
     //ParamLoadDataOrig(pg);
 }
 
@@ -127,27 +127,27 @@ EXPORT void ParamRegister(paramGroup_p pg)
         FormLoadDefaultValues(pg);
     }
     else {
-        printf("%s:%d Old Param Function used by %s\n", __FILE__, __LINE__, pg->nameStr);
+        printf("%s:%d Old Param Function %s used by %s\n", __FILE__, __LINE__, __func__, pg->nameStr);
         //ParamRegisterOrig(pg);
     }
 }
 
 EXPORT void ParamUpdatePrefs(void) 
 {
-    printf("%s:%d Old Param Function used\n", __FILE__, __LINE__);
+    printf("%s:%d Old Param function %s used\n", __FILE__, __LINE__, __func__);
     //ParamUpdatePrefsOrig();
 }
 
 EXPORT void ParamGroupRecord(paramGroup_p pg)
 {
-    printf("%s:%d Old Param Function used by %s\n", __FILE__, __LINE__, pg->nameStr);
+    printf("%s:%d Old Param Function %s used by %s\n", __FILE__, __LINE__, __func__, pg->nameStr);
     //ParamGroupRecordOrig(pg);
 }
 
 EXPORT void ParamStartRecord(FILE* macroFile)
 {
     FormStartRecord(macroFile);
-    printf("%s:%d Old Param Function used\n", __FILE__, __LINE__);
+    printf("%s:%d Old Param Function %s used\n", __FILE__, __LINE__, __func__);
     //ParamStartRecordOrig(macroFile);
 }
 
@@ -155,19 +155,19 @@ EXPORT void ParamStartRecord(FILE* macroFile)
 
 EXPORT void ParamRestoreAll(void)
 {
-    printf("%s:%d Old Param Function used\n", __FILE__, __LINE__);
+    printf("%s:%d Old Param Function %s used\n", __FILE__, __LINE__, __func__);
     //ParamRestoreAllOrig();
 }
 
 EXPORT void ParamSaveAll(void)
 {
-    printf("%s:%d Old Param Function used\n", __FILE__, __LINE__);
+    printf("%s:%d Old Param Function %s used\n", __FILE__, __LINE__, __func__);
     //ParamSaveAllOrig();
 }
 
 EXPORT void ParamMenuPush(void* dp)
 {
-    printf("%s:%d Old Param function ParamMenuPush() used\n", __FILE__, __LINE__);
+    printf("%s:%d Old Param function %s used\n", __FILE__, __LINE__, __func__);
     //ParamMenuPushOrig(dp);
 }
 
@@ -175,7 +175,7 @@ EXPORT wBool_t ParamCheckInputs(
     paramGroup_p group,
     wControl_p b)
 {
-    printf("%s:%d Old Param Function used by %s\n", __FILE__, __LINE__, group->nameStr);
+    printf("%s:%d Old Param Function %s used by %s\n", __FILE__, __LINE__, __func__, group->nameStr);
     //return( ParamCheckInputsOrig(group, b));
     return(FALSE);
 }
@@ -190,7 +190,7 @@ EXPORT void ParamResetInvalid(wWin_p win)
 
 EXPORT void ParamControlShow(paramGroup_p pg, wIndex_t inx, wBool_t bShow)
 {
-    printf("%s:%d Old Param Function used by %s\n", __FILE__, __LINE__, pg->nameStr);
+    printf("%s:%d Old Param Function %s used by %s\n", __FILE__, __LINE__, __func__, pg->nameStr);
     //ParamControlShowOrig(pg, inx, bShow);
 }
 
