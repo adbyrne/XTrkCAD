@@ -120,8 +120,8 @@ typedef enum {
 wBoxType_e;
 
 void wBoxSetSize(wBox_p b, wWinPix_t w, wWinPix_t h);
-void wlibDrawBox(wWin_p win, wBoxType_e style, wWinPix_t x, wWinPix_t y,
-                 wWinPix_t w, wWinPix_t h);
+//void wlibDrawBox(wWin_p win, wBoxType_e style, wWinPix_t x, wWinPix_t y,
+//                 wWinPix_t w, wWinPix_t h);
 wBox_p wBoxCreate(wWin_p parent, wWinPix_t bx, wWinPix_t by,
                   const char *labelStr, wBoxType_e boxTyp, wWinPix_t bw, wWinPix_t bh);
 
