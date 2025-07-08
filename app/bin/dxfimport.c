@@ -39,7 +39,7 @@
 // #include "include/paramfile.h"
 // #include "include/paramfilelist.h"
 #include "paths.h"
-// #include "include/stringxtc.h"
+#include "include/stringxtc.h"
 // #include "track.h"
 #include "version.h"
 #include "dynstring.h"
@@ -276,7 +276,7 @@ static BOOL_T dxfAddEndPt(struct sEndPt endPt)
 
 	if (DxfEndPtCount == DxfEndPtAlloc) {
 		DxfEndPtAlloc += DXF_ENDPT_ALLOC;
-		int eSize = DxfEndPtAlloc * len;
+		size_t eSize = DxfEndPtAlloc * len;
 		DxfEndPt = MyRealloc(DxfEndPt, eSize);
 	}
 	memcpy(&DxfEndPt[DxfEndPtCount], &endPt, len);
@@ -815,7 +815,7 @@ static void ProcessDxfFile(
 					// Connect i to j
 					int li = DxfEndPt[i].line;
 					char substr[TMP_SIZE];
-					int len = strlen(DxfOutput[li]);
+					size_t len = strlen(DxfOutput[li]);
 					strncpy(substr, DxfOutput[li], len);
 					substr[len] = '\0';
 					sprintf(tmp, "\tT4 %d %s", DxfEndPt[j].entity, substr + 4);
