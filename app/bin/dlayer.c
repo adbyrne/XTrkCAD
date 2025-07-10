@@ -2371,8 +2371,8 @@ void InitLayers(int cmdGroup)
 	// wMenuSeparatorCreate(layerM); Causes a fault
 
 	layerB = AddToolbarButton("cmdManageLayers",
-		wIconCreatePixMap(layers_image3[iconSize]), IC_MODETRAIN_TOO,
-		DoLayer, layerB);
+		                      wIconCreatePixMap(layers_image3[iconSize]), 0,
+		                      DoLayer, NULL); 
 	/* add the help text */
 	wControlSetBalloonText((wControl_p)layerB, _("Manage Layers"));
 	wControlActive((wControl_p)layerB, TRUE);
