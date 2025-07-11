@@ -40,6 +40,8 @@ target_sources(xtrkcad-wlib
 	scalectrl.c
 	stack.c
 	statusbar.c
+	sticky.c
+	stickytogglebutton.c
  	text.c
 	timer.c
 	toggle.c

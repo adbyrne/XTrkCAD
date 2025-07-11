@@ -346,8 +346,8 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos)
 		break;
 	}
 	if ((rc == C_TERMINATE )
-	    && (commandList[curCommand].options & IC_STICKY)
-	    && (commandList[curCommand].stickyMask & stickySet)) {
+		&& IsCurCommandSticky() )
+		 {
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		UpdateAllElevations();
 		if (commandList[curCommand].options & IC_NORESTART) {
@@ -627,9 +627,8 @@ EXPORT void PlaybackCommand(const char * line, wIndex_t lineNum)
 
 EXPORT BOOL_T IsCurCommandSticky(void)
 {
-	if ((commandList[curCommand].options & IC_STICKY) != 0
-	    && (commandList[curCommand].stickyMask & stickySet) != 0) {
-		return TRUE;
+	if ((commandList[curCommand].options & IC_STICKY) != 0) {
+		return ToolbarGetButtonSticky(commandList[curCommand].buttInx);
 	}
 	return FALSE;
 }

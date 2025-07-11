@@ -1282,6 +1282,18 @@ wControl_p wStackCreate(wControl_p	parent, wWinPix_t	x, wWinPix_t	y, const char*
 
 /*------------------------------------------------------------------------------
  *
+ * Sticky Toggle Button
+ */
+
+wControl_p wStickyCreateForToolbar(wControl_p parent, wWinPix_t x, wWinPix_t y,const char* helpStr,
+    wIcon_p icon, long option, wWinPix_t width, wButtonCallBack_p action,void* context);
+
+void wStickySetBusy(wControl_p bb, int newState);
+wBool_t wStickyGetSticky(wControl_p b);
+void wStickySetSticky(wControl_p b, wBool_t newSticky);
+
+/*------------------------------------------------------------------------------
+ *
  * System-Information
  */
 

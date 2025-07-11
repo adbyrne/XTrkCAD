@@ -29,10 +29,9 @@
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-#include "form.h"
+#include <form.h>
 #include "icons.h"
 #include "layout.h"
-#include "param.h"
 #include "paths.h"
 #include "include/problemrep.h"
 #include "smalldlg.h"
@@ -137,14 +136,14 @@ static void DoAddElev(void * unused);
 static paramFloatRange_t rn1000_1000 = { -1000.0, 1000.0 };
 static paramData_t addElevPLs[] = { {
 		PD_FLOAT, &addElevValueV, "value",
-		PDO_NOPREF|PDO_DIM, &rn1000_1000, N_("Change height by:"), 0
+		PDO_NOPREF|PDO_DIM, &rn1000_1000,
 	}
 };
 static paramGroup_t addElevPG = { "addElev", 0, addElevPLs, COUNT( addElevPLs ) };
 
 static void DoAddElev(void * unused)
 {
-	ParamLoadData(&addElevPG);
+	FormFetchData(&addElevPG);
 	AddElevations(addElevValueV);
 	wHide(addElevW);
 }
@@ -157,9 +156,9 @@ static void ShowAddElevations(void * unused)
 	}
 	if (addElevW == NULL)
 		addElevW = FormCreateDialog(&addElevPG,
-		                            MakeWindowTitle(_("Change Elevations")),
-		                            _("Change"), DoAddElev,
-		                            _("Cancel"), FormCancel_Current, FALSE, 0, NULL);
+		                            NULL,
+		                            NULL, DoAddElev,
+		                            NULL, FormCancel_Current, FALSE, 0, NULL);
 	wShow(addElevW);
 }
 
@@ -407,9 +406,7 @@ static paramData_t stickyPLs[] = { {
 		stickyLabels
 	}
 };
-static paramGroup_t stickyPG = { "sticky", PGO_RECORD, stickyPLs,
-                                 COUNT( stickyPLs )
-                               };
+static paramGroup_t stickyPG = { "sticky", PGO_RECORD, stickyPLs,COUNT( stickyPLs )};
 
 static void StickyOk(void * unused)
 {
@@ -421,6 +418,8 @@ static void StickyOk(void * unused)
 EXPORT void DoSticky(void * unused)
 {
 	if (!stickyW) {
+		FormRegister(&stickyPG);
+
 		stickyW = FormCreateDialog(&stickyPG, MakeWindowTitle(_("Sticky Commands")),
 		                           _("Ok"), StickyOk,
 		                           _("Cancel"), FormCancel_Restore,
@@ -673,12 +672,18 @@ wControl_p AddToolbarButton(const char* helpStr, wIcon_p icon, long options,
 //	if (cmdGroup & BG_BIGGAP)
 //		opt = BO_GAP;
 
-	if (options & IC_TOGGLE || options & IC_STICKY) {
+	if (options & IC_TOGGLE ) {
 		bb = wToggleCreateForToolbar(mainW, 0, 0, helpStr, icon,
 		                             opt | BO_ICON, 0, action, context);
 	} else {
-		bb = wButtonCreateForToolbar(mainW, 0, 0, helpStr, icon,
-		                             opt | BO_ICON, 0, action, context);
+		if (options & IC_STICKY) {
+			bb = wStickyCreateForToolbar(mainW, 0, 0, helpStr, icon,
+				opt | BO_ICON, 0, action, context);
+		}
+		else {
+			bb = wButtonCreateForToolbar(mainW, 0, 0, helpStr, icon,
+				opt | BO_ICON, 0, action, context);
+		}
 	}
 
 	ToolbarControlAdd(bb, opt, cmdGroup);

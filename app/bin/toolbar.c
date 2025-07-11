@@ -77,11 +77,12 @@ static wWinPix_t toolbarHeight = 0;
 static struct {
 	wControl_p control;
 	wBool_t enabled;
-	wWinPix_t x, y;
+	//wWinPix_t x, y;
 	long options;
 	int group;
 	wIndex_t cmdInx;
 } buttonList[BUTTON_MAX];
+
 EXPORT int buttonCnt = 0; // TODO-misc-refactor
 
 // control the order of the button groups inside the toolbar
@@ -355,8 +356,13 @@ EXPORT void ToolbarLayout(void* data)
 	}
 }
 
+EXPORT wBool_t ToolbarGetButtonSticky(wIndex_t button)
+{
+	return wStickyGetSticky(buttonList[button].control);
+}
+
 /**
- *  Set the 'pressed' state of a toolbar button.
+ *  Set the 'pressed' state of a toolbar button. Works for sticky button as well.
  *
  * \param button    index into button list
  * \param busy      desired button state
@@ -364,8 +370,7 @@ EXPORT void ToolbarLayout(void* data)
 
 EXPORT void ToolbarButtonBusy(wIndex_t button, wBool_t busy)
 {
-	wButtonSetBusy(buttonList[button].control,
-	               busy);
+	wStickySetBusy(buttonList[button].control, busy);
 }
 
 /**
@@ -412,8 +417,8 @@ EXPORT void ToolbarControlAdd(wControl_p control, long options, int cmdGroup)
 	buttonList[buttonCnt].enabled = TRUE;
 	buttonList[buttonCnt].options = options;
 	buttonList[buttonCnt].group = cmdGroup;
-	buttonList[buttonCnt].x = 0;
-	buttonList[buttonCnt].y = 0;
+	//buttonList[buttonCnt].x = 0;
+	//buttonList[buttonCnt].y = 0;
 	buttonList[buttonCnt].control = control;
 	buttonList[buttonCnt].cmdInx = -1;
 	buttonCnt++;
@@ -470,28 +475,30 @@ EXPORT void ToolbarUpdateButton(wIndex_t button, wIndex_t command,
  */
 EXPORT void PlaybackButtonMouse(wIndex_t buttInx)
 {
-	wWinPix_t cmdX, cmdY;
-	coOrd pos;
+	printf("Not implemented %s in %s:%d\n", __func__, __FILE__, __LINE__);
 
-	if (buttInx < 0 || buttInx >= buttonCnt) {
-		return;
-	}
-	if (buttonList[buttInx].control == NULL) {
-		return;
-	}
-	cmdX = buttonList[buttInx].x + 17;
-	cmdY = toolbarHeight - (buttonList[buttInx].y + 17)
-	       + (wWinPix_t)(mainD.size.y / mainD.scale * mainD.dpi) + 30;
+	//wWinPix_t cmdX, cmdY;
+	//coOrd pos;
 
-	mainD.Pix2CoOrd(&mainD, cmdX, cmdY, &pos);
-	MovePlaybackCursor(&mainD, pos, TRUE, buttonList[buttInx].control);
-	if (playbackTimer == 0) {
-		wButtonSetBusy(buttonList[buttInx].control, TRUE);
-		wFlush();
-		wPause(500);
-		wButtonSetBusy(buttonList[buttInx].control, FALSE);
-		wFlush();
-	}
+	//if (buttInx < 0 || buttInx >= buttonCnt) {
+	//	return;
+	//}
+	//if (buttonList[buttInx].control == NULL) {
+	//	return;
+	//}
+	//cmdX = buttonList[buttInx].x + 17;
+	//cmdY = toolbarHeight - (buttonList[buttInx].y + 17)
+	//       + (wWinPix_t)(mainD.size.y / mainD.scale * mainD.dpi) + 30;
+
+	//mainD.Pix2CoOrd(&mainD, cmdX, cmdY, &pos);
+	//MovePlaybackCursor(&mainD, pos, TRUE, buttonList[buttInx].control);
+	//if (playbackTimer == 0) {
+	//	wButtonSetBusy(buttonList[buttInx].control, TRUE);
+	//	wFlush();
+	//	wPause(500);
+	//	wButtonSetBusy(buttonList[buttInx].control, FALSE);
+	//	wFlush();
+	//}
 }
 
 /**
@@ -502,14 +509,15 @@ EXPORT void PlaybackButtonMouse(wIndex_t buttInx)
 
 EXPORT void ToolbarButtonPlayback(wIndex_t buttonInx)
 {
-	wWinPix_t cmdX, cmdY;
-	coOrd pos;
+	printf("Not implemented %s in %s:%d\n", __func__, __FILE__, __LINE__);
+	//wWinPix_t cmdX, cmdY;
+	//coOrd pos;
 
-	cmdX = buttonList[buttonInx].x + 17;
-	cmdY = toolbarHeight - (buttonList[buttonInx].y + 17)
-	       + (wWinPix_t)(mainD.size.y / mainD.scale * mainD.dpi) + 30;
-	mainD.Pix2CoOrd(&mainD, cmdX, cmdY, &pos);
-	MovePlaybackCursor(&mainD, pos, TRUE, buttonList[buttonInx].control);
+	//cmdX = buttonList[buttonInx].x + 17;
+	//cmdY = toolbarHeight - (buttonList[buttonInx].y + 17)
+	//       + (wWinPix_t)(mainD.size.y / mainD.scale * mainD.dpi) + 30;
+	//mainD.Pix2CoOrd(&mainD, cmdX, cmdY, &pos);
+	//MovePlaybackCursor(&mainD, pos, TRUE, buttonList[buttonInx].control);
 }
 
 /**
