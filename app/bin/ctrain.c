@@ -3205,7 +3205,7 @@ void InitCmdTrain(wMenu_p menu)
 	ParamRegister(&trainPG);
 	trainCmdInx = AddMenuButton(menu, CmdTrain, "cmdTrain", _("Run Trains"),
 		CreateToolbarIconFromResource("train.png"), LEVEL0_50,
-	                            IC_POPUP3|IC_LCLICK|IC_RCLICK|IC_WANT_MOVE, 0,
+	                            IC_TOGGLE | IC_POPUP3|IC_LCLICK|IC_RCLICK|IC_WANT_MOVE, 0,
 	                            NULL);
 	stopI = CreateSymbolFromResource("reddot.png");
 	goI = CreateSymbolFromResource("greendot.png");

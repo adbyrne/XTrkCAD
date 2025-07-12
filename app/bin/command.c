@@ -88,27 +88,20 @@ EXPORT const char* GetCurCommandName()
  * \return			true for enabled, false if disabled
  */
 
+
+
 EXPORT bool IsCommandEnabled(long mode, long options)
 {
-	/*
-	       	if (((mode == MODE_DESIGN) || (options & IC_MODETRAIN_ONLY) ||
-		     (options & IC_MODETRAIN_TOO)) &&
-		    ((mode == MODE_TRAIN) || !(options & IC_MODETRAIN_ONLY)) ||
-		    (options & IC_MODETRAIN_TOO)) {
-	*/
-	if (
-	        ((mode == MODE_DESIGN) ||
-	         (options & IC_MODETRAIN_ONLY) ||
-	         (options & IC_MODETRAIN_TOO))
-	        &&
-	        ((mode == MODE_TRAIN) ||
-	         !(options & IC_MODETRAIN_ONLY) ||
-	         (options & IC_MODETRAIN_TOO))
-	) {
+	
+	if (((mode == MODE_DESIGN) || (options & IC_MODETRAIN_ONLY) ||
+		(options & IC_MODETRAIN_TOO)) &&
+		((mode == MODE_TRAIN) || !(options & IC_MODETRAIN_ONLY)) ||
+		(options & IC_MODETRAIN_TOO)) {
 		return true;
 	}
-
-	return false;
+	else {
+		return false;
+	}
 }
 
 EXPORT void EnableCommands(void)

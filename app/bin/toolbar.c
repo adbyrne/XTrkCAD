@@ -130,9 +130,9 @@ static void InvertSelection(void* unused);
 static paramData_t toolbarPLs[] = {
 	{ PD_TOGGLE, &toggleSet, "toolbarset", 0, NULL},
 #define I_SELECTALL     (1)
-	{ PD_BUTTON, SelectAllGroups, "selectall", 0L, NULL, ""},
+	{ PD_BUTTON, SelectAllGroups, "selectall"},
 #define I_INVERT        (2)
-	{ PD_BUTTON, InvertSelection, "invert", 0L, NULL, ""},
+	{ PD_BUTTON, InvertSelection, "invert"},
 	{ PD_LONG, &layerCount, "button-count", 0L, &buttonRange, ""}
 };
 
@@ -225,8 +225,8 @@ EXPORT void DoToolbar(void* unused)
 	if (!toolbarW) {
 		InitializeToolbarDialog();
 		toolbarW = FormCreateDialog(&toolbarPG, MakeWindowTitle(_("Toolbar Options")), 
-			_("OK"), ToolbarOk, 
-			_("Cancel"), FormCancel_Restore, 
+			NULL, ToolbarOk, 
+			NULL, FormCancel_Restore, 
 			TRUE, 0, NULL);
 	}
 
@@ -307,7 +307,6 @@ IsButtonVisible(int group, long mode, long options, long layerButtons)
 static void ToolbarButtonPlace(struct sToolbarState *tbState, wIndex_t inx)
 {
 	int currentGroup = buttonList[inx].group;
-
 
 	if (buttonList[inx].control) {
 

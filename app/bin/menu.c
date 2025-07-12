@@ -686,7 +686,7 @@ wControl_p AddToolbarButton(const char* helpStr, wIcon_p icon, long options,
 		}
 	}
 
-	ToolbarControlAdd(bb, opt, cmdGroup);
+	ToolbarControlAdd(bb, options, cmdGroup);
 
 	return bb;
 }

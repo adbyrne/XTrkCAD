@@ -165,7 +165,7 @@ wControl_p FormCreateDialog(
 	group->win = wWinDialogCreate(mainW, helpStr, title, group->nameStr,
 	                              F_AUTOSIZE | winOption, DialogProc, group);
 
-	if (okLabel) {
+	if (group->okProc) {
 		sprintf(helpStr, "%s-ok", group->nameStr);
 		group->okB = wButtonCreate(group->win, 0, 0, "id_ok", okLabel, BB_DEFAULT, 0,
 		                           ButtonOk, group);
