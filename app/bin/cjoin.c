@@ -1,8 +1,5 @@
-/*
- * $Header: /home/dave/Source/xtrkcad_5_1_2a/app/bin/RCS/cjoin.c,v 1.3 2019/07/24 15:11:51 dave Exp $
- *
- * JOINS
- *
+/*****************************************************************//**
+ * \file   cjoin.c
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -23,14 +20,12 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-
-
 #include "track.h"
 #include "ccurve.h"
 #include "cstraigh.h"
 #include "cjoin.h"
 #include "ccornu.h"
-#include "param.h"
+#include <form.h>
 #include "cundo.h"
 #include "cselect.h"
 #include "fileio.h"
@@ -709,12 +704,13 @@ void AnchorPoint(coOrd center)
 static DIST_T desired_radius = 0.0;
 
 static paramFloatRange_t r_0_10000 = { 0.0, 100000.0 };
+
 static paramData_t joinPLs[] = {
 #define joinRadPD (joinPLs[0])
 #define joinRadI 0
 	{	PD_FLOAT, &desired_radius, "radius", PDO_DIM, &r_0_10000, N_("Desired Radius") }
 };
-static paramGroup_t joinPG = { "joinfixed", 0, joinPLs, COUNT( joinPLs ) };
+static paramGroup_t joinPG = { "joinfixed", PGO_FULLDIALOGFROMBUILDER, joinPLs, COUNT( joinPLs ) };
 
 
 
@@ -900,15 +896,14 @@ static STATUS_T CmdJoin(
 	ANGLE_T a, a1;
 	DIST_T eR[2];
 	BOOL_T ok;
-	wControl_p controls[2];
-	char * labels[1];
 	trkSeg_p p;
 
 	switch (action&0xFF) {
 
 	case C_START:
 		if (joinPLs[0].control==NULL) {
-			ParamCreateControls(&joinPG, NULL);
+			FormRegister(&joinPG);
+			FormCreateControls(&joinPG);
 		}
 		if (selectedTrackCount==0) {
 			InfoMessage( _("Left click - join with track") );
@@ -1009,18 +1004,14 @@ static STATUS_T CmdJoin(
 				}
 			}
 			Dj.inp[0].realType = GetTrkType(Dj.inp[0].trk);
-			InfoMessage( _("Select 2nd track") );
 			Dj.state = 1;
 			sprintf(message, "desired_radius-%s", curScaleName);
 			wPrefGetFloat("misc", message, &desired_radius, desired_radius);
-			controls[0] = joinRadPD.control;
-			controls[1] = NULL;
-			labels[0] = N_("Desired Radius");
-			InfoSubstituteControls(joinPG.nameStr, controls, labels);
+			InfoSetControls(mainW, joinPG.nameStr);
 			infoSubst = TRUE;
 			joinRadPD.option |= PDO_NORECORD;
-			ParamLoadControls(&joinPG);
-			ParamGroupRecord(&joinPG);
+			FormLoadControls(&joinPG);
+			FormGroupRecord(&joinPG);
 			return C_CONTINUE;
 		} else {
 			if ( (Dj.inp[1].trk = OnTrack( &pos, FALSE, TRUE )) == NULL) {
@@ -1467,7 +1458,7 @@ errorReturn:
 			}
 		}
 		if (Dj.state == 1) {
-			InfoMessage( _("Select 2nd track") );
+			//InfoMessage( _("Select 2nd track") );
 			return C_CONTINUE;
 		}
 		tempSegs(0).color = drawColorBlack;
