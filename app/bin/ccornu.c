@@ -77,7 +77,7 @@
 #include "cjoin.h"
 #include "common.h"
 #include "icons.h"
-#include "param.h"
+#include <form.h>
 #include "layout.h"
 #include "cundo.h"
 #include "cselect.h"
@@ -1078,10 +1078,10 @@ static paramData_t cornuModPLs[] = {
 
 #define cornuModEndAnglePD			(cornuModPLs[0])
 #define cornuModEndAngle 0
-	{ PD_FLOAT, &cornuModCmdContext.angle, "endangle", PDO_NORECORD|BO_ENTER, &r0_360, N_("End Angle") },
+	{ PD_FLOAT, &cornuModCmdContext.angle, "endangle", PDO_NORECORD|BO_ENTER, &r0_360 },
 #define cornuModEndRadiusPD			(cornuModPLs[1])
 #define cornuModEndRadius           1
-	{ PD_FLOAT, &cornuModCmdContext.radius, "endradius", PDO_DIM|PDO_NORECORD|BO_ENTER, &r10000_10000, N_("End Radius") },
+	{ PD_FLOAT, &cornuModCmdContext.radius, "endradius", PDO_DIM|PDO_NORECORD|BO_ENTER, &r10000_10000 },
 };
 static paramGroup_t cornuModPG = { "cornuMod", 0, cornuModPLs, COUNT( cornuModPLs ) };
 
@@ -1107,9 +1107,6 @@ EXPORT STATUS_T AdjustCornuCurve(
 	ANGLE_T a, a2;
 	EPINX_T ep;
 	cornuParm_t cp;
-
-	wControl_p controls[5];				//Always needs a NULL last entry
-	char * labels[4];
 
 	Da.cmdType = VP2L(commandContext);
 
@@ -1747,13 +1744,8 @@ EXPORT STATUS_T AdjustCornuCurve(
 				                                      Da.pos[Da.selectEndPoint]),Da.angle[Da.selectEndPoint])<0.0) {
 					cornuModCmdContext.radius = -cornuModCmdContext.radius;
 				}
-				controls[0] = cornuModEndRadiusPD.control;
-				controls[1] = cornuModEndAnglePD.control;
-				controls[2] = NULL;
-				labels[0] = N_("End Radius");
-				labels[1] = N_("End Angle");
-				ParamLoadControls( &cornuModPG );
-				InfoSubstituteControls(cornuModPG.nameStr, controls, labels);
+				FormLoadControls( &cornuModPG );
+				InfoSetControls(mainW, cornuModPG.nameStr);
 				cornuModEndRadiusPD.option &= ~PDO_NORECORD;
 				cornuModEndAnglePD.option &= ~PDO_NORECORD;
 				infoSubst = TRUE;
@@ -1768,13 +1760,13 @@ EXPORT STATUS_T AdjustCornuCurve(
 			                                      Da.pos[Da.prevSelected]),Da.angle[Da.prevSelected])<0.0) {
 				cornuModCmdContext.radius = -cornuModCmdContext.radius;
 			}
-			controls[0] = cornuModEndRadiusPD.control;
-			controls[1] = cornuModEndAnglePD.control;
-			controls[2] = NULL;
-			labels[0] = N_("End Radius");
-			labels[1] = N_("End Angle");
-			ParamLoadControls( &cornuModPG );
-			InfoSubstituteControls(cornuModPG.nameStr, controls, labels);
+			//controls[0] = cornuModEndRadiusPD.control;
+			//controls[1] = cornuModEndAnglePD.control;
+			//controls[2] = NULL;
+			//labels[0] = N_("End Radius");
+			//labels[1] = N_("End Angle");
+			FormLoadControls( &cornuModPG );
+			InfoSetControls(mainW, cornuModPG.nameStr);
 			cornuModEndRadiusPD.option &= ~PDO_NORECORD;
 			cornuModEndAnglePD.option &= ~PDO_NORECORD;
 			infoSubst = TRUE;
@@ -1787,8 +1779,8 @@ EXPORT STATUS_T AdjustCornuCurve(
 		if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
 		else { Da.crvSegs_da_cnt = 0; }
 		Da.minRadius = CornuMinRadius(Da.pos,Da.crvSegs_da);
-		InfoMessage(
-		        _("Pick on point to adjust it along track - Delete to remove, Enter to confirm, ESC to abort"));
+		//InfoMessage(
+		//        _("Pick on point to adjust it along track - Delete to remove, Enter to confirm, ESC to abort"));
 		Da.state = PICK_POINT;
 		return C_CONTINUE;
 
@@ -1931,8 +1923,8 @@ static void cornuModDlgUpdate(
         void * valueP )
 {
 	AdjustCornuCurve(C_UPDATE, zero, InfoMessage);
-	ParamLoadControl(&cornuModPG,cornuModEndRadius);			 	// Make sure Radius updated
-	ParamLoadControl(&cornuModPG,cornuModEndAngle);				//Relative Angle as well
+	FormLoadSingleControl(&cornuModPG,cornuModEndRadius);			 	// Make sure Radius updated
+	FormLoadSingleControl(&cornuModPG,cornuModEndAngle);				//Relative Angle as well
 	TempRedraw();
 
 }
@@ -3270,5 +3262,7 @@ EXPORT void InitCmdCornu( wMenu_p menu )
 	cornuHotBarCmdInx = AddMenuButton(menu, cmdCornuCreate, "cmdCornuCreate", "",
 	                                  NULL, LEVEL0_50, IC_STICKY|IC_POPUP3|IC_WANT_MOVE, 0, NULL);
 	ButtonGroupEnd();
-	//ParamCreateControls( &cornuModPG, cornuModDlgUpdate) ;
+
+	FormRegister(&cornuModPG);
+	FormCreateControls( &cornuModPG) ;
 }

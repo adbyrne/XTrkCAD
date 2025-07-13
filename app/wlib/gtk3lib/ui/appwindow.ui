@@ -374,6 +374,49 @@
                     <property name="name">joinfixed</property>
                   </packing>
                 </child>
+                <!-- cornu -->
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">End Angle:</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="endangle">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="width_chars">6</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">End Radius:</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="endradius">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="width_chars">6</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Pick on point to adjust it along track - Delete to remove, Enter to confirm, ESC to abort</property>
+                      </object>
+                    </child>
+
+                  </object>
+                  <packing>
+                    <property name="name">cornuMod</property>
+                  </packing>
+                </child>
                 <!-- next child -->
                 <child>
                   <object class="GtkBox">
