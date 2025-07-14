@@ -22,7 +22,7 @@
 
 #include "ccurve.h"
 
-#include "cjoin.h"
+//#include "cjoin.h"
 #include "cstraigh.h"
 #include "cundo.h"
 #include "custom.h"
@@ -431,9 +431,9 @@ static paramFloatRange_t r_0_10000 = { 0.0, 100000.0 };
 static paramData_t curvePLs[] = {
 #define curveRadPD (curvePLs[0])
 #define curveRadI 0
-	{	PD_FLOAT, &desired_radius, "radius", PDO_DIM, &r_0_10000, N_("Desired Radius") }
+	{	PD_FLOAT, &desired_radius, "fixedradius", PDO_DIM, &r_0_10000, N_("Desired Radius") }
 };
-static paramGroup_t curvePG = { "curvefixed", 0, curvePLs, COUNT( curvePLs ) };
+static paramGroup_t curvePG = { "curvefixed", PGO_FULLDIALOGFROMBUILDER, curvePLs, COUNT( curvePLs ) };
 
 static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 {
@@ -441,11 +441,8 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 	DIST_T d;
 	static int segCnt;
 	STATUS_T rc = C_CONTINUE;
-	wControl_p controls[2];
-	char * labels[1];
 	static BOOL_T lock;
 	static coOrd movePos;
-
 
 	switch (action) {
 
@@ -459,7 +456,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		STATUS_T rcode;
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (curvePLs[0].control==NULL) {
-			ParamCreateControls(&curvePG, NULL);
+			FormCreateControls(&curvePG);
 		}
 		SetAllTrackSelect(FALSE);
 		return CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode,
@@ -597,8 +594,6 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		if (Da.state<0) { return C_CONTINUE; }
 		if (Da.state == 0 && ((curveMode != crvCmdFromChord)
 		                      || (curveMode == crvCmdFromChord && !Da.trk))) {
-			//SnapPos( &pos );
-			//Da.pos1 = pos;
 			if ((d = FindDistance(Da.pos0,Da.pos1))<minLength) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
 				return C_TERMINATE;
@@ -611,16 +606,11 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 
 			sprintf(message, "desired_radius-%s", curScaleName);
 			wPrefGetFloat("misc", message, &desired_radius, desired_radius);
-			controls[0] = curveRadPD.control;
-			controls[1] = NULL;
-			labels[0] = N_("Desired Radius");
-			InfoSubstituteControls(curveRadPD.nameStr, controls, labels);
+			InfoSetControls(mainW, curvePG.nameStr);
 			infoSubst = TRUE;
 			curveRadPD.option |= PDO_NORECORD;
-			ParamLoadControls(&curvePG);
-			ParamGroupRecord(&curvePG);
-			//InfoMessage( _("Drag on Red arrows to adjust curve") );
-
+			FormLoadControls(&curvePG);
+			FormGroupRecord(&curvePG);
 			return C_CONTINUE;
 		} else if ((curveMode == crvCmdFromChord && Da.state == 0 && Da.trk)) {
 			pos = Da.middle;
@@ -703,7 +693,7 @@ static DIST_T helixRadius = 18.0;
 static DIST_T helixGrade = 0.0;
 static DIST_T helixVertSep = 0.0;
 static DIST_T origVertSep = 0.0;
-static wWin_p helixW;
+static wControl_p helixW;
 #define H_ELEV			(0)
 #define H_RADIUS		(1)
 #define H_TURNS			(2)
@@ -736,9 +726,9 @@ static paramData_t helixPLs[] = {
 static paramGroup_t helixPG = { "helix", PGO_PREFMISCGROUP, helixPLs, COUNT( helixPLs ) };
 
 static paramData_t circleRadiusPLs[] = {
-	{ PD_FLOAT, &circleRadius, "radius", PDO_DIM, &r1_10000 }
+	{ PD_FLOAT, &circleRadius, "circleradius", PDO_DIM, &r1_10000 }
 };
-static paramGroup_t circleRadiusPG = { "circle", 0, circleRadiusPLs, COUNT( circleRadiusPLs ) };
+static paramGroup_t circleRadiusPG = { "circle", PGO_FULLDIALOGFROMBUILDER, circleRadiusPLs, COUNT( circleRadiusPLs ) };
 
 
 static void ComputeHelix(
@@ -752,7 +742,7 @@ static void ComputeHelix(
 	if ( h_inx < 0 || h_inx >= COUNT( h_orders ) ) {
 		return;
 	}
-	ParamLoadData( &helixPG );
+	FormFetchData( &helixPG );
 	totTurns = helixTurns + helixAngSep/360.0;
 	length = totTurns * helixRadius * (2 * M_PI);
 	h_orders[h_inx] = ++h_clock;
@@ -807,7 +797,7 @@ static void ComputeHelix(
 	length = totTurns * helixRadius * (2 * M_PI);
 	for ( h_inx=0; updates; h_inx++,updates>>=1 ) {
 		if ( (updates&1) ) {
-			ParamLoadControl( &helixPG, h_inx );
+			FormLoadSingleControl( &helixPG, h_inx );
 		}
 	}
 	if (length > 0.0) {
@@ -815,7 +805,7 @@ static void ComputeHelix(
 	} else {
 		strcpy( message, "                           " );
 	}
-	ParamLoadMessage( &helixPG, I_HELIXMSG, message );
+	FormLoadMessage( &helixPG, I_HELIXMSG, message );
 }
 
 
@@ -824,7 +814,7 @@ static void ChangeHelixW( long changes )
 	if ( (changes & CHANGE_UNITS) &&
 	     helixW != NULL &&
 	     wWinIsVisible(helixW) ) {
-		ParamLoadControls( &helixPG );
+		FormLoadControls( &helixPG );
 		ComputeHelix( NULL, 6, NULL );
 	}
 }
@@ -836,8 +826,6 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 {
 	track_p t;
 	static coOrd pos0;
-	wControl_p controls[2];
-	char * labels[1];
 
 	switch (action) {
 
@@ -847,23 +835,20 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 				helixW = FormCreateDialog(&helixPG, MakeWindowTitle(_("Helix")),
 					NULL, NULL,
 					_("Cancel"), FormCancel_Current,
-					TRUE, 0, ComputeHelix);
+					TRUE, 0, (paramChangeProc)ComputeHelix);
 			}
-			ParamLoadControls(&helixPG);
-			ParamGroupRecord(&helixPG);
+			FormLoadControls(&helixPG);
+			FormGroupRecord(&helixPG);
 			ComputeHelix(NULL, 6, NULL);
 			wShow(helixW);
 			memset(h_orders, 0, sizeof h_orders);
 			h_clock = 0;
 		} else {
-			ParamLoadControls(&circleRadiusPG);
-			ParamGroupRecord(&circleRadiusPG);
+			FormLoadControls(&circleRadiusPG);
+			FormGroupRecord(&circleRadiusPG);
 			switch (circleMode) {
 			case circleCmdFixedRadius:
-				controls[0] = circleRadiusPLs[0].control;
-				controls[1] = NULL;
-				labels[0] = N_("Circle Radius");
-				InfoSubstituteControls(circleRadiusPG.nameStr, controls, labels);
+				InfoSetControls(mainW, circleRadiusPG.nameStr);
 				break;
 			case circleCmdFromTangent:
 				InfoDefaultControls();
@@ -889,9 +874,9 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 				ErrorMessage(MSG_HELIX_TURNS_GTR_0);
 				return C_ERROR;
 			}
-			ParamLoadData(&helixPG);
+			FormFetchData(&helixPG);
 		} else {
-			ParamLoadData(&circleRadiusPG);
+			FormFetchData(&circleRadiusPG);
 			switch (circleMode) {
 			case circleCmdFixedRadius:
 				if (circleRadius <= 0.0) {
@@ -1049,8 +1034,10 @@ EXPORT void InitCmdCurve( wMenu_p menu )
 	               IC_STICKY|IC_POPUP2, ACCL_CIRCLE3, I2VP(2) );
 	ButtonGroupEnd();
 
-	//ParamRegister( &circleRadiusPG );
-	//ParamCreateControls( &circleRadiusPG, NULL );
+	FormRegister( &circleRadiusPG );
+	FormCreateControls( &circleRadiusPG);
+
+	FormRegister(&curvePG);
 
 }
 
@@ -1066,6 +1053,6 @@ void InitCmdHelix(wMenu_p menu)
 {
 	AddMenuButton(menu, CmdHelix, "cmdHelix", _("Helix"), NULL, LEVEL0_50,
 	              IC_STICKY|IC_INITNOTSTICKY|IC_POPUP2, ACCL_HELIX, NULL);
-	ParamRegister(&helixPG);
+	FormRegister(&helixPG);
 	RegisterChangeNotification(ChangeHelixW);
 }

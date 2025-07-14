@@ -417,6 +417,52 @@
                     <property name="name">cornuMod</property>
                   </packing>
                 </child>
+                <!-- circle -->
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Circle Radius:</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="circleradius">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="width_chars">6</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">circle</property>
+                  </packing>
+                </child>
+                <!-- fixed radius curve -->
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Desired Radius:</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="fixedradius">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="width_chars">6</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">curvefixed</property>
+                  </packing>
+                </child>
                 <!-- next child -->
                 <child>
                   <object class="GtkBox">
