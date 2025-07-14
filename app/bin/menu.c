@@ -1425,10 +1425,8 @@ EXPORT void CreateMenus(void)
 
 	ToolbarLayout(NULL);
 
-	// stickySet is initialized by AddMenuButton based on IC_STICKY flag
-	// Now check to see if there is saved value
 	wPrefGetInteger( "sticky", "set", &stickySet, stickySet );
-	ParamRegister(&stickyPG);
+	FormRegister(&stickyPG);
 }
 
 

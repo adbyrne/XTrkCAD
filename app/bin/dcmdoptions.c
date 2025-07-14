@@ -22,7 +22,7 @@
  */
 
 #include <wlib.h>
-#include "form.h"
+#include <form.h>
 #include "i18n.h"
 #include "cselect.h"
 

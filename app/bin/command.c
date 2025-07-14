@@ -28,6 +28,7 @@
 #include "cundo.h"
 #include "draw.h"
 #include "fileio.h"
+#include <form.h>
 #include "track.h"
 #include "common-ui.h"
 #include "menu.h"
@@ -489,7 +490,7 @@ EXPORT void DoCommandB(void * data)
 
 	if (commandList[curCommand].buttInx >= 0) {
 		ToolbarUpdateButton(commandList[curCommand].buttInx,
-		                    curCommand, (char *)commandList[curCommand].icon,
+		                    curCommand,commandList[curCommand].icon,
 		                    commandList[curCommand].helpKey, I2VP(curCommand));
 		ToolbarButtonBusy(commandList[curCommand].buttInx, TRUE);
 	}
@@ -621,7 +622,9 @@ EXPORT void PlaybackCommand(const char * line, wIndex_t lineNum)
 EXPORT BOOL_T IsCurCommandSticky(void)
 {
 	if ((commandList[curCommand].options & IC_STICKY) != 0) {
-		return ToolbarGetButtonSticky(commandList[curCommand].buttInx);
+		BOOL_T stickyConfig = commandList[curCommand].stickyMask & stickySet;
+		BOOL_T stickyUser = ToolbarGetButtonSticky(commandList[curCommand].buttInx);
+		return stickyConfig | stickyUser;
 	}
 	return FALSE;
 }
@@ -641,5 +644,6 @@ EXPORT void CommandInit( void )
 	curCommand = describeCmdInx;
 	commandContext = commandList[curCommand].context;
 	log_command = LogFindIndex( "command" );
+
 }
 
