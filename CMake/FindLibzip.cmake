@@ -12,6 +12,7 @@
 # XTrackCAD specific directory tree is assumed
 #
 
+#set(CMAKE_FIND_DEBUG_MODE 1)
 if(WIN32)
   set(LIBZIPBASEDIR "$ENV{XTCEXTERNALROOT}/${XTRKCAD_ARCH_SUBDIR}/libzip" )
   find_path( LIBZIP_INCLUDE_DIR_ZIP zip.h
@@ -37,8 +38,9 @@ else(WIN32)
     HINTS ${PC_LIBZIP_INCLUDE_DIRS})
 
   if(UNIX AND NOT APPLE)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
     find_library(LIBZIP_LIBRARY
-      NAMES libzip.a zip
+      NAMES zip
       PATHS
 		/usr/lib64
 		/usr/lib
@@ -46,8 +48,10 @@ else(WIN32)
 		/usr/local/lib
 		/sw/lib
 		/opt/local/lib
+		/app/lib
 		${CMAKE_CURRENT_SOURCE_DIR}/app/tools/lib/linux
 	)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ".a" ".so")
   else()
     find_library(LIBZIP_LIBRARY
       NAMES zip)
@@ -84,3 +88,4 @@ if(Libzip_FOUND AND NOT TARGET Libzip::Libzip)
   endif ()
   set(LIBZIP_VERSION ${LIBZIP_VERSION} CACHE STRING "Version number of libzip")
 endif()
+#set(CMAKE_FIND_DEBUG_MODE 0)
