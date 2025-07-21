@@ -11,8 +11,11 @@ DEBUG=no
 #####################################################################
 usage() {
     cat <<EOF
+Usage: $ME [ destination-directory ]
+
 This script creates a flatpak from this source. The flatpak will end
-up in the root directory of this source tree.
+up in the root directory of this source tree or in the optional directory
+passed.
 
 The current directory should either be the root directory of the source
 or the source distribution/flatpak directory.
@@ -67,6 +70,11 @@ WORKING_FILE=xtrkcad-source.tar.gz
 FP_BUILD_DIR=workDir
 FP_STATE_DIR=$HOME/.flatpak-builder-xtrkcad
 FP_REPO=dummy_repo
+FP_DEST_DIR=${1:-$PWD}
+if [ ! -d "$FP_DEST_DIR" ]; then
+    echo "\"$FP_DEST_DIR\" is not a directory"
+    exit 1
+fi
 BETA_SUFFIX=""
 LOCAL_SUBDIR=""
 if [[ $XTRKCAD_VERSION = *[bB]eta[0-9]* ]]; then
@@ -134,6 +142,27 @@ start_fresh() {
 }
 
 #####################################################################
+#   F L U S H   C A C H E
+#
+#   Prevent cache from growing and growing during development
+#####################################################################
+flush_cache() {
+    # in meg
+    MAX_CACHE_SIZE=1000
+
+    if [ ! -d "$FP_STATE_DIR" ]; then
+        return
+    fi
+    CACHE_SIZE=$(du -sm $FP_STATE_DIR | cut -f1)
+    if [[ $CACHE_SIZE -ge $MAX_CACHE_SIZE ]]; then
+        echo "Removing build cache .."
+        echo "CACHE_SIZE=$CACHE_SIZE, MAX_CACHE_SIZE=$MAX_CACHE_SIZE"
+        rm -rf $FP_STATE_DIR
+        sleep 2
+    fi
+}
+
+#####################################################################
 #   M A K E   S O U R C E   T A R B A L L
 #####################################################################
 make_source_tar() {
@@ -191,33 +220,6 @@ runtime-version: '48'
 sdk: org.gnome.Sdk
 command: /app/bin/run-xtrkcad.sh
 modules:
-#  - name: libzip
-#    buildsystem: simple
-#    sources:
-#      - type: file
-#        url: "https://rpmfind.net/linux/fedora/linux/updates/42/Everything/x86_64/Packages/l/libzip-1.11.4-1.fc42.x86_64.rpm"
-#        sha256: a0594bec598a24977a11e44474091a7c6cad773f42ddf7df71b75ecb63769b67
-#        dest-filename: libzip.rpm
-#    build-commands:
-#      - bsdtar -xf libzip.rpm
-#      - mkdir -p /app/libzip
-#      #- cp -pr ./usr/* /app
-#      - cp -pr ./usr/* /app/libzip
-#      - rm -f libzip.rpm
-#  - name: libzip-dev
-#    buildsystem: simple
-#    sources:
-#      - type: file
-#        url: "https://rpmfind.net/linux/fedora/linux/updates/42/Everything/x86_64/Packages/l/libzip-devel-1.11.4-1.fc42.x86_64.rpm"
-#        sha256: 18c42584cc54404b063b08404519bb9352a97383ece470e44976aab32dd0afab
-#        dest-filename: libzip.rpm
-#    build-commands:
-#      - bsdtar -xf libzip.rpm
-#      - mkdir -p /app/libzip
-#      #- cp -pr ./usr/* /app
-#      - cp -pr ./usr/* /app/libzip
-#      - sed -i 's:prefix=/usr:prefix=/app/libzip:' /app/libzip/lib64/pkgconfig/libzip.pc
-#      - rm -f libzip.rpm
   - name: libzip
     buildsystem: cmake
     config-opts:
@@ -513,8 +515,9 @@ build_flatpak() {
     rm -f $FP_NAME
     flatpak build-bundle ${FP_REPO} $FP_NAME $FP_XTRKCAD_ORG
     if [ -f $FP_NAME ]; then
+        mv $FP_NAME $FP_DEST_DIR/$FP_NAME 2>/dev/null
         echo "========================================================================"
-        echo "$(pwd)/$FP_NAME created"
+        echo "$(ls $FP_DEST_DIR/$FP_NAME) created"
         echo
         flatpak info $FP_XTRKCAD_ORG
         echo "========================================================================"
@@ -533,6 +536,7 @@ echo "========================================================================"
 echo "Making xtrkcad-${XTRKCAD_VERSION}.flatpak"
 echo "========================================================================"
 sleep 3
+flush_cache
 make_source_tar
 get_extract_inkscape
 build_manifest
