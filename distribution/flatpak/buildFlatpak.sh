@@ -68,7 +68,7 @@ fi
 #####################################################################
 WORKING_FILE=xtrkcad-source.tar.gz
 FP_BUILD_DIR=workDir
-FP_STATE_DIR=$HOME/.flatpak-builder-xtrkcad
+FP_STATE_DIR=${FP_STATE_DIR:-$HOME/.flatpak-builder-xtrkcad}
 FP_REPO=dummy_repo
 FP_DEST_DIR=${1:-$PWD}
 if [ ! -d "$FP_DEST_DIR" ]; then
