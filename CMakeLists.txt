@@ -112,7 +112,7 @@ if(UNIX AND NOT APPLE)
 		set(XTRKCAD_BETA "-beta")
 	endif()
 endif()
-set(XTRKCAD_SHARE_INSTALL_DIR "share/xtrkcad${XTRKCAD_BETA}")
+set(XTRKCAD_SHARE_INSTALL_DIR "share/xtrkcad-gtk${XTRKCAD_BETA}")
 
 # Enable use of a configuration file ...
 add_definitions(-DXTRKCAD_CMAKE_BUILD)

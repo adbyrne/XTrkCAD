@@ -22,6 +22,7 @@
 
 #include <ctype.h>
 #include <dirent.h>
+#include <libgen.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -61,7 +62,8 @@ static char *userHomeDir;
 	int bytes = MIN(readlink("/proc/self/exe", pBuf, len), len - 1);
 	if(bytes >= 0)
     	pBuf[bytes] = '\0';
-	return bytes;
+	(void)dirname(pBuf);		
+	return strlen(pBuf);
  }
 
 /**
