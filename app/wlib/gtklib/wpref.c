@@ -107,12 +107,6 @@ const char * wGetAppLibDir( void )
 		return appLibDir;
 	}
 
-    strcpy(appLibDir, XTRKCAD_INSTALL_PREFIX "/share/");
-    strcat(appLibDir, wlibGetAppName());
-    if ((stat( appLibDir, &buf) == 0 ) && S_ISDIR(buf.st_mode)) {
-        return appLibDir;
-    }
-
 	char * dir1 = "/usr/share/";
 	char * dir2 = "/usr/local/share/";
 	char * beta = "";
