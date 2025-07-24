@@ -2834,7 +2834,9 @@ wDrawColor lineColor = 1;
 LWIDTH_T lineWidth = 0;
 wDrawColor benchColor;
 
-
+#define MAX_CONTROLS 5
+#define MAX_LABELS 4
+#define LABEL_NAME_SIZE 40
 
 static paramData_t drawPLs[] = {
 #define drawLineWidthPD				(drawPLs[0])
@@ -2895,126 +2897,40 @@ static char * objectName[] = {
 	NULL
 };
 
-static STATUS_T CmdDraw( wAction_t action, coOrd pos )
+static STATUS_T HandleStartCommand(BOOL_T* infoSubst, wControl_p* controls,
+	char** labels, char* labelName);
+static void SetupOperationControls(wControl_p* controls, char** labels, char* labelName);
+static void SetupLineControls(wControl_p* controls, char** labels, char* labelName);
+static void SetupFillControls(wControl_p* controls, char** labels, char* labelName);
+static void SetupBenchControls(wControl_p* controls, char** labels);
+static void SetupDimLineControls(wControl_p* controls, char** labels);
 
+static void PopulateLineTypeList(void);
+static void PopulateDimArrowSizeList(void);
+
+static void InitializeBenchLists(void);
+
+static void UpdateBenchOrientation(void);
+
+static void DisableControlRecording(void);
+static void EnableLineControlRecording(void);
+static void EnableBenchControlRecording(void);
+
+
+static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 {
 	static BOOL_T infoSubst = FALSE;
-	wControl_p controls[5];				//Always needs a NULL last entry
-	char * labels[4];
-	static char labelName[40];
+	wControl_p controls[MAX_CONTROLS];				//Always needs a NULL last entry
+	char * labels[MAX_LABELS];
+	static char labelName[LABEL_NAME_SIZE];
 
 	wAction_t act2 = (action&0xFF) | (bezCmdCreateLine<<8);
 
 	switch (action&0xFF) {
 
 	case C_START:
-		ParamLoadControls( &drawPG );
-		/*drawContext = &drawCmdContext;*/
-		drawLineWidthPD.option |= PDO_NORECORD;
-		drawColorPD.option |= PDO_NORECORD;
-		drawBenchColorPD.option |= PDO_NORECORD;
-		drawBenchChoicePD.option |= PDO_NORECORD;
-		drawBenchOrientPD.option |= PDO_NORECORD;
-		drawDimArrowSizePD.option |= PDO_NORECORD;
-		drawCmdContext.Op = (wIndex_t)VP2L(commandContext);
-		if ( drawCmdContext.Op < 0 || drawCmdContext.Op > OP_LAST ) {
-			NoticeMessage( "cmdDraw: Op %d", _("Ok"), NULL, drawCmdContext.Op );
-			drawCmdContext.Op = OP_LINE;
-		}
-		SetAllTrackSelect( FALSE );
-		/*DrawGeomOp( (drawCmdContext.Op>=0?drawCmdContext.Op:OP_LINE) );*/
-		infoSubst = TRUE;
-		switch( drawCmdContext.Op ) {
-		case OP_LINE:
-		case OP_CURVE1:
-		case OP_CURVE2:
-		case OP_CURVE3:
-		case OP_CURVE4:
-		case OP_CIRCLE2:
-		case OP_CIRCLE3:
-		case OP_BEZLIN:
-		case OP_BOX:
-		case OP_POLY:
-		case OP_POLYLINE:
-			controls[0] = drawLineWidthPD.control;
-			controls[1] = drawColorPD.control;
-			controls[2] = drawLineTypePD.control;
-			controls[2] = NULL;
-			sprintf( labelName, _("%s Line Width"), _(objectName[drawCmdContext.Op]) );
-			labels[0] = labelName;
-			labels[1] = N_("Color");
-			labels[2] = N_("Type");
-			if ( wListGetCount( (wList_p)drawLineTypePD.control ) == 0 ) {
-				wListAddValue( (wList_p)drawLineTypePD.control, _("Solid"), NULL, NULL );
-				wListAddValue( (wList_p)drawLineTypePD.control, _("Dot"), NULL, NULL );
-				wListAddValue( (wList_p)drawLineTypePD.control, _("Dash"), NULL, NULL );
-				wListAddValue( (wList_p)drawLineTypePD.control, _("Dash-Dot"), NULL, NULL );
-				wListAddValue( (wList_p)drawLineTypePD.control, _("Dash-Dot-Dot"), NULL, NULL );
-			}
-			InfoSubstituteControls( controls, labels );
-			drawLineWidthPD.option &= ~PDO_NORECORD;
-			drawColorPD.option &= ~PDO_NORECORD;
-			drawLineTypePD.option &= ~PDO_NORECORD;
-			break;
-		case OP_FILLCIRCLE2:
-		case OP_FILLCIRCLE3:
-		case OP_FILLBOX:
-		case OP_FILLPOLY:
-			controls[0] = drawColorPD.control;
-			controls[1] = NULL;
-			sprintf( labelName, _("%s Color"), _(objectName[drawCmdContext.Op]) );
-			labels[0] = labelName;
-			ParamLoadControls( &drawPG );
-			InfoSubstituteControls( controls, labels );
-			drawColorPD.option &= ~PDO_NORECORD;
-			break;
-		case OP_BENCH:
-			controls[0] = drawBenchChoicePD.control;
-			controls[1] = drawBenchOrientPD.control;
-			controls[2] = drawBenchColorPD.control;
-			controls[3] = NULL;
-			labels[0] = N_("Lumber Type");
-			labels[1] = "";
-			labels[2] = N_("Color");
-			if ( wListGetCount( (wList_p)drawBenchChoicePD.control ) == 0 ) {
-				BenchLoadLists( (wList_p)drawBenchChoicePD.control,
-				                (wList_p)drawBenchOrientPD.control );
-			}
+		return(HandleStartCommand(&infoSubst, controls, labels, labelName));
 
-			ParamLoadControls( &drawPG );
-			BenchUpdateOrientationList( VP2L(wListGetItemContext( (wList_p)
-			                                 drawBenchChoicePD.control, benchChoice )), (wList_p)drawBenchOrientPD.control );
-			wListSetIndex( (wList_p)drawBenchOrientPD.control, benchOrient );
-			InfoSubstituteControls( controls, labels );
-			drawBenchColorPD.option &= ~PDO_NORECORD;
-			drawBenchChoicePD.option &= ~PDO_NORECORD;
-			drawBenchOrientPD.option &= ~PDO_NORECORD;
-			drawLengthPD.option &= ~PDO_NORECORD;
-			break;
-		case OP_DIMLINE:
-			controls[0] = drawDimArrowSizePD.control;
-			controls[1] = NULL;
-			labels[0] = N_("Dimension Line Size");
-			if ( wListGetCount( (wList_p)drawDimArrowSizePD.control ) == 0 ) {
-				wListAddValue( (wList_p)drawDimArrowSizePD.control, _("Tiny"), NULL, NULL );
-				wListAddValue( (wList_p)drawDimArrowSizePD.control, _("Small"), NULL, NULL );
-				wListAddValue( (wList_p)drawDimArrowSizePD.control, _("Medium"), NULL, NULL );
-				wListAddValue( (wList_p)drawDimArrowSizePD.control, _("Large"), NULL, NULL );
-			}
-			ParamLoadControls( &drawPG );
-			InfoSubstituteControls( controls, labels );
-			drawDimArrowSizePD.option &= ~PDO_NORECORD;
-			break;
-		case OP_TBLEDGE:
-			InfoMessage( _("Drag to create Table Edge") );
-			break;
-		default:
-			InfoSubstituteControls( NULL, NULL );
-			infoSubst = FALSE;
-		}
-		ParamGroupRecord( &drawPG );
-		if (drawCmdContext.Op == OP_BEZLIN) { return CmdBezCurve(act2, pos); }
-		DrawGeomMouse( C_START, pos, &drawCmdContext);
 		return C_CONTINUE;
 
 	case wActionLDown:
@@ -3169,6 +3085,194 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 	}
 }
+
+static STATUS_T
+HandleStartCommand(BOOL_T* infoSubst, wControl_p* controls,
+	char** labels, char* labelName)
+{
+	wAction_t act2 = (bezCmdCreateLine << 8);
+
+	ParamLoadControls(&drawPG);
+	DisableControlRecording();
+
+	drawCmdContext.Op = (wIndex_t)VP2L(commandContext);
+	if (drawCmdContext.Op < 0 || drawCmdContext.Op > OP_LAST) {
+		NoticeMessage("cmdDraw: Op %d", _("Ok"), NULL, drawCmdContext.Op);
+		drawCmdContext.Op = OP_LINE;
+	}
+
+	SetAllTrackSelect(FALSE);
+	*infoSubst = TRUE;
+	
+	SetupOperationControls(controls, labels, labelName);
+	ParamGroupRecord(&drawPG);
+	if (drawCmdContext.Op == OP_BEZLIN) { 
+		return CmdBezCurve(act2, (coOrd) { 0, 0 });
+	}
+	DrawGeomMouse(C_START, (coOrd) { 0, 0 }, &drawCmdContext);
+	
+	return(C_CONTINUE);
+}
+
+static void SetupOperationControls(wControl_p* controls, char** labels, char* labelName)
+{
+	switch (drawCmdContext.Op) {
+	case OP_LINE:
+	case OP_CURVE1:
+	case OP_CURVE2:
+	case OP_CURVE3:
+	case OP_CURVE4:
+	case OP_CIRCLE2:
+	case OP_CIRCLE3:
+	case OP_BEZLIN:
+	case OP_BOX:
+	case OP_POLY:
+	case OP_POLYLINE:
+		SetupLineControls(controls, labels, labelName);
+		break;
+
+	case OP_FILLCIRCLE2:
+	case OP_FILLCIRCLE3:
+	case OP_FILLBOX:
+	case OP_FILLPOLY:
+		SetupFillControls(controls, labels, labelName);
+		break;
+
+	case OP_BENCH:
+		SetupBenchControls(controls, labels);
+		break;
+
+	case OP_DIMLINE:
+		SetupDimLineControls(controls, labels);
+		break;
+	case OP_TBLEDGE:
+		InfoMessage(_("Drag to create Table Edge"));
+		break;
+	default:
+		InfoSubstituteControls(NULL, NULL);
+		infoSubst = FALSE;
+	}
+
+	InfoSubstituteControls(controls, labels);
+}
+
+static void SetupLineControls(wControl_p* controls, char** labels, char* labelName)
+{
+	controls[0] = drawLineWidthPD.control;
+	controls[1] = drawColorPD.control;
+	controls[2] = drawLineTypePD.control;
+	controls[3] = NULL;
+
+	sprintf(labelName, _("%s Line Width"), _(objectName[drawCmdContext.Op]));
+	labels[0] = labelName;
+	labels[1] = N_("Color");
+	labels[2] = N_("Type");
+
+	PopulateLineTypeList();
+	EnableLineControlRecording();
+}
+
+static void SetupFillControls(wControl_p* controls, char** labels, char* labelName)
+{
+	controls[0] = drawColorPD.control;
+	controls[1] = NULL;
+
+	sprintf(labelName, _("%s Color"), _(objectName[drawCmdContext.Op]));
+	labels[0] = labelName;
+
+	ParamLoadControls(&drawPG);
+	drawColorPD.option &= ~PDO_NORECORD;
+}
+
+static void SetupBenchControls(wControl_p* controls, char** labels)
+{
+	controls[0] = drawBenchChoicePD.control;
+	controls[1] = drawBenchOrientPD.control;
+	controls[2] = drawBenchColorPD.control;
+	controls[3] = NULL;
+	labels[0] = N_("Lumber Type");
+	labels[1] = "";
+	labels[2] = N_("Color");
+
+	InitializeBenchLists();
+	ParamLoadControls(&drawPG);
+	UpdateBenchOrientation();
+	EnableBenchControlRecording();
+}
+
+static void SetupDimLineControls(wControl_p* controls, char** labels)
+{
+	controls[0] = drawDimArrowSizePD.control;
+	controls[1] = NULL;
+	labels[0] = N_("Dimension Line Size");
+
+	PopulateDimArrowSizeList();
+	ParamLoadControls(&drawPG);
+	drawDimArrowSizePD.option &= ~PDO_NORECORD;
+}
+
+static void PopulateLineTypeList(void)
+{
+	if (wListGetCount((wList_p)drawLineTypePD.control) == 0) {
+		wListAddValue((wList_p)drawLineTypePD.control, _("Solid"), NULL, NULL);
+		wListAddValue((wList_p)drawLineTypePD.control, _("Dot"), NULL, NULL);
+		wListAddValue((wList_p)drawLineTypePD.control, _("Dash"), NULL, NULL);
+		wListAddValue((wList_p)drawLineTypePD.control, _("Dash-Dot"), NULL, NULL);
+		wListAddValue((wList_p)drawLineTypePD.control, _("Dash-Dot-Dot"), NULL, NULL);
+	}
+}
+
+static void PopulateDimArrowSizeList(void)
+{
+	if (wListGetCount((wList_p)drawDimArrowSizePD.control) == 0) {
+		wListAddValue((wList_p)drawDimArrowSizePD.control, _("Tiny"), NULL, NULL);
+		wListAddValue((wList_p)drawDimArrowSizePD.control, _("Small"), NULL, NULL);
+		wListAddValue((wList_p)drawDimArrowSizePD.control, _("Medium"), NULL, NULL);
+		wListAddValue((wList_p)drawDimArrowSizePD.control, _("Large"), NULL, NULL);
+	}
+}
+
+static void InitializeBenchLists(void)
+{
+	if (wListGetCount((wList_p)drawBenchChoicePD.control) == 0) {
+		BenchLoadLists((wList_p)drawBenchChoicePD.control,
+			(wList_p)drawBenchOrientPD.control);
+	}
+}
+
+static void UpdateBenchOrientation(void)
+{
+	BenchUpdateOrientationList(VP2L(wListGetItemContext((wList_p)
+		drawBenchChoicePD.control, benchChoice)),
+		(wList_p)drawBenchOrientPD.control);
+	wListSetIndex((wList_p)drawBenchOrientPD.control, benchOrient);
+}
+
+static void DisableControlRecording(void)
+{
+	drawLineWidthPD.option |= PDO_NORECORD;
+	drawColorPD.option |= PDO_NORECORD;
+	drawBenchColorPD.option |= PDO_NORECORD;
+	drawBenchChoicePD.option |= PDO_NORECORD;
+	drawBenchOrientPD.option |= PDO_NORECORD;
+	drawDimArrowSizePD.option |= PDO_NORECORD;
+}
+
+static void EnableLineControlRecording(void)
+{
+	drawLineWidthPD.option &= ~PDO_NORECORD;
+	drawColorPD.option &= ~PDO_NORECORD;
+	drawLineTypePD.option &= ~PDO_NORECORD;
+}
+
+static void EnableBenchControlRecording(void)
+{
+	drawBenchColorPD.option &= ~PDO_NORECORD;
+	drawBenchChoicePD.option &= ~PDO_NORECORD;
+	drawBenchOrientPD.option &= ~PDO_NORECORD;
+	drawLengthPD.option &= ~PDO_NORECORD;
+}
+
 
 #include "bitmaps/straight-line.image3"
 #include "bitmaps/dimension.image3"
