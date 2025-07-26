@@ -26,6 +26,7 @@
 #include <wlib.h>
 #include <form.h>
 #include "dynstring.h"
+#include "messages.h"
 #include "xtctypes.h"
 
 
@@ -316,5 +317,170 @@ wBool_t FormCheckInputs(
 	}
 	return TRUE;
 }
+
+
+long FormUpdate(
+	paramGroup_p pg)
+{
+	long longV;
+	FLOAT_T floatV;
+	const char* stringV;
+	wDrawColor dc;
+	long change = 0;
+	int inx;
+	paramData_p p;
+	BOOL_T valid;
+
+	for (p = pg->paramPtr, inx = 0; p < &pg->paramPtr[pg->paramCnt]; p++, inx++) {
+		if ((p->option & PDO_DLGIGNORE) != 0) {
+			continue;
+		}
+		if (p->control == NULL) {
+			continue;
+		}
+		if (p->bInvalid == TRUE) {
+			break;
+		}
+		switch (p->type) {
+		case PD_LONG:
+			stringV = wEntryGetValue(p->control);
+			longV = atol(stringV);
+			if (!FormIntegerRangeCheck(p, longV)) {
+				break;
+			}
+			if (longV != p->oldD.l) {
+				p->oldD.l = longV;
+				if (p->valueP) {
+					*(long*)p->valueP = longV;
+				}
+				if ((p->option & PDO_NOUPDACT) == 0 && pg->changeProc) {
+					pg->changeProc(pg, inx, &longV);
+				}
+				change |= (1L << inx);
+			}
+			break;
+		case PD_RADIO:
+			longV = wRadioGetValue(p->control);
+			if (longV != p->oldD.l) {
+				p->oldD.l = longV;
+				if (p->valueP) {
+					*(long*)p->valueP = longV;
+				}
+				if ((p->option & PDO_NOUPDACT) == 0 && pg->changeProc) {
+					pg->changeProc(pg, inx, &longV);
+				}
+				change |= (1L << inx);
+			}
+			break;
+		case PD_TOGGLE:
+			longV = wToggleGetValue(p->control);
+			if (longV != p->oldD.l) {
+				p->oldD.l = longV;
+				if (p->valueP) {
+					*(long*)p->valueP = longV;
+				}
+				if ((p->option & PDO_NOUPDACT) == 0 && pg->changeProc) {
+					pg->changeProc(pg, inx, &longV);
+				}
+				change |= (1L << inx);
+			}
+			break;
+		case PD_LIST:
+		case PD_DROPLIST:
+		case PD_COMBOLIST:
+			longV = wListGetIndex(p->control);
+			if (longV != p->oldD.l) {
+				p->oldD.l = longV;
+				if (p->valueP) {
+					*(wIndex_t*)p->valueP = (wIndex_t)longV;
+				}
+				if ((p->option & PDO_NOUPDACT) == 0 && pg->changeProc) {
+					pg->changeProc(pg, inx, &longV);
+				}
+				change |= (1L << inx);
+			}
+			break;
+		case PD_COLORLIST:
+			dc = wColorSelectButtonGetColor(p->control);
+			if (dc != p->oldD.dc) {
+				p->oldD.dc = dc;
+				if (p->valueP) {
+					*(wDrawColor*)p->valueP = dc;
+				}
+				if ((p->option & PDO_NOUPDACT) == 0 && pg->changeProc) {
+					pg->changeProc(pg, inx, &longV); /* COLORNOP */
+				}
+				change |= (1L << inx);
+			}
+			break;
+		case PD_FLOAT:
+			stringV = wEntryGetValue(p->control);
+			if (p->option & PDO_DIM) {
+				floatV = FormDecodeDistance(stringV, &valid);
+			}
+			else {
+				floatV = FormDecodeFloat(stringV, &valid);
+				if (valid && (p->option & PDO_ANGLE)) {
+					floatV = NormalizeAngle((angleSystem == ANGLE_POLAR) ? floatV : -floatV);
+				}
+			}
+			if (!valid) {
+				break;
+			}
+			if (!FormFloatRangeCheck(p, floatV)) {
+				break;
+			}
+			if (floatV != p->oldD.f) {
+				p->oldD.f = floatV;
+				if (p->valueP) {
+					*(FLOAT_T*)p->valueP = floatV;
+				}
+				if ((p->option & PDO_NOUPDACT) == 0 && pg->changeProc) {
+					pg->changeProc(pg, inx, &floatV);
+				}
+				change |= (1L << inx);
+			}
+			break;
+		case PD_STRING:
+			stringV = wEntryGetValue(p->control);
+			if ((p->option & PDO_NOTBLANK) && stringV[0] == '\0') {
+				p->bInvalid = TRUE;
+				break;
+			}
+			if (strcmp(stringV, p->oldD.s) != 0) {
+				if (p->oldD.s) {
+					MyFree(p->oldD.s);
+				}
+				p->oldD.s = MyStrdup(stringV);
+				if (p->valueP) {
+					strncpy((char*)p->valueP, stringV, p->max_string - 1);
+					((char*)p->valueP)[p->max_string - 1] = '\0';
+					if (strlen(stringV) > p->max_string - 1) {
+						NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, p->max_string - 1);
+					}
+				}
+
+				if ((p->option & PDO_NOUPDACT) == 0 && pg->changeProc)
+					// CAST_AWAY_CONST: param 3 should be const but its a big change
+				{
+					pg->changeProc(pg, inx, CAST_AWAY_CONST stringV);
+				}
+				change |= (1L << inx);
+			}
+			break;
+		case PD_MESSAGE:
+		case PD_BUTTON:
+		case PD_DRAW:
+		case PD_TEXT:
+		case PD_MENU:
+		case PD_MENUITEM:
+		case PD_BITMAP:
+			break;
+		}
+	}
+
+	return change;
+}
+
 
 

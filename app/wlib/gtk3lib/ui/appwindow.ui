@@ -463,6 +463,262 @@
                     <property name="name">curvefixed</property>
                   </packing>
                 </child>
+                <!-- line style -->
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Line Width:</property>
+
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="linewidth">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="width_chars">3</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Line Color:</property>
+
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkColorButton" id="linecolor">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">linestyle</property>
+                  </packing>
+                </child>
+                <!-- dimension style -->
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkLabel">
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="arrowsize">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="model">arrowsizelist</property>
+                        <child>
+                          <object class="GtkCellRendererText">
+                            <property name="width-chars">10</property>
+                          </object>
+                          <attributes>
+                            <attribute name="text">3</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">dimensionstyle</property>
+                  </packing>
+                </child>
+                <!-- fill color -->
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Fill Color:</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkColorButton" id="fillcolor">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">filledobject</property>
+                  </packing>
+                </child>
+                <!-- bench style -->
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Color:</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkColorButton" id="benchcolor">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="benchlist">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="model">benchtype</property>
+                        <child>
+                          <object class="GtkCellRendererPixbuf">
+                          </object>
+                          <attributes>
+                            <attribute name="pixbuf">2</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="benchorient">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="model">benchorientlist</property>
+                        <child>
+                          <object class="GtkCellRendererPixbuf">
+                          </object>
+                          <attributes>
+                            <attribute name="pixbuf">2</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">benchstyle</property>
+                  </packing>
+                </child>
+                <!-- line data -->
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Length: </property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="linelength">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="width_chars">6</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Angle: </property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="lineangle">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="width_chars">6</property>
+                      </object>
+                    </child>                   
+                  </object>
+                  <packing>
+                    <property name="name">linedata</property>
+                  </packing>
+                </child>
+                <!-- curve data -->
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Angle:</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="curveangle"> 
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="width_chars">6</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">curvedata</property>
+                  </packing>
+                </child>
+                <!-- circle data -->
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Radius:</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="circledrawradius">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="width_chars">6</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">circledata</property>
+                  </packing>
+                </child>
+                <!-- polygon data-->
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Line Length:</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="polygonlength">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="width_chars">6</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Rel. Angle:</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="polygonangle">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="width_chars">6</property>
+                      </object>
+                    </child>                    
+                  </object>
+                  <packing>
+                    <property name="name">polygondata</property>
+                  </packing>
+                </child>
                 <!-- next child -->
                 <child>
                   <object class="GtkBox">
@@ -470,6 +726,8 @@
                     <property name="spacing">6</property>
                     <child>
                       <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">label text</property>
                       </object>
                     </child>
                     <child>
@@ -536,4 +794,29 @@
       <column type="gchararray" />
     </columns>
   </object>
+  <object class="GtkListStore" id="arrowsizelist">
+    <columns>
+      <column type="gboolean" />
+      <column type="gpointer" />
+      <column type="gpointer" />
+      <column type="gchararray" />
+    </columns>
+  </object>
+  <object class="GtkListStore" id="benchtype">
+    <columns>
+      <column type="gboolean" />
+      <column type="gpointer" />
+      <column type="gpointer" />
+      <column type="gchararray" />
+    </columns>
+  </object>
+  <object class="GtkListStore" id="benchorientlist">
+    <columns>
+      <column type="gboolean" />
+      <column type="gpointer" />
+      <column type="gpointer" />
+      <column type="gchararray" />
+    </columns>
+  </object>
+
 </interface>

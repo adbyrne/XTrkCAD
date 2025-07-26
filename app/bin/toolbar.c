@@ -299,7 +299,7 @@ IsButtonVisible(int group, long mode, long options, long layerButtons)
 }
 
 /**
- * Calculate the position and visibility of a button and display it.
+ * Get visibility of a button and display it.
  *
  * \param inx   index into button list
  */

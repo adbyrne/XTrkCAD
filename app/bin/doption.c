@@ -35,13 +35,14 @@ static paramFloatRange_t r1_1000 = { 1, 1000 };
 
 long GetChanges( paramGroup_p pg )
 {
-	long changes;
-	long changed;
-	int inx;
-	for ( changed=ParamUpdate(pg),inx=0,changes=0; changed; changed>>=1,inx++ ) {
+	long changes = 0;
+	long changed = FormUpdate(pg);
+	
+	for ( int inx=0; changed; inx++ ) {
 		if ( changed&1 ) {
 			changes |= VP2L(pg->paramPtr[inx].context);
 		}
+		changed >>= 1;
 	}
 	return changes;
 }

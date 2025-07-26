@@ -29,10 +29,10 @@
 static wControl_p cmdoptW;
 
 static paramData_t cmdoptPLs[] = {
-	{ PD_RADIO, &preSelect, "preselect", PDO_NOPSHUPD, NULL, NULL, BC_HORIZONTAL },
-	{ PD_RADIO, &rightClickMode, "rightclickmode", PDO_NOPSHUPD, NULL, NULL, 0},
-	{ PD_RADIO, &selectMode, "selectmode", PDO_NOPSHUPD, NULL, NULL, 0},
-	{ PD_TOGGLE, &selectZero, "selectzero", PDO_NOPSHUPD, NULL, "", 0 }
+	{ PD_RADIO, &preSelect, "preselect", PDO_NOPSHUPD, .context = (void *)CHANGE_CMDOPT },
+	{ PD_RADIO, &rightClickMode, "rightclickmode", PDO_NOPSHUPD, .context = (void*)CHANGE_CMDOPT},
+	{ PD_RADIO, &selectMode, "selectmode", PDO_NOPSHUPD, .context = (void*)CHANGE_CMDOPT},
+	{ PD_TOGGLE, &selectZero, "selectzero", PDO_NOPSHUPD, .context = (void*)CHANGE_CMDOPT}
 };
 static paramGroup_t cmdoptPG = { "cmdopt", PGO_RECORD | PGO_PREFMISC | PGO_FULLDIALOGFROMBUILDER, cmdoptPLs, COUNT(cmdoptPLs) };
 
@@ -41,6 +41,7 @@ static void CmdoptOk(void* junk)
 	long changes;
 	changes = GetChanges(&cmdoptPG);
 	wHide(cmdoptW);
+	FormSaveDefaultValues(&cmdoptPG);
 	DoChangeNotification(changes);
 }
 
@@ -56,8 +57,9 @@ static void DoCmdopt(void* junk)
 {
 	if (cmdoptW == NULL) {
 		cmdoptW = FormCreateDialog(&cmdoptPG, NULL,
-		                           _("Ok"), CmdoptOk,
-		                           _("Cancel"), FormCancel_Restore, TRUE, 0L, NULL);
+		                           NULL, CmdoptOk,
+		                           NULL, FormCancel_Restore, TRUE, 0L, NULL);
+		FormLoadDefaultValues(&cmdoptPG);
 	}
 	FormLoadControls(&cmdoptPG);
 	wShow(cmdoptW);

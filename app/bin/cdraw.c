@@ -2826,6 +2826,61 @@ wDrawColor lineColor = 1;
 LWIDTH_T lineWidth = 0;
 wDrawColor benchColor;
 
+// fields used before drawing starts (during C_START)
+static paramGroup_t linestylePG;
+static paramData_t linestylePLs[] = {
+	{ PD_FLOAT, &lineWidth, "linewidth", PDO_NORECORD, &r100_100, .group =&linestylePG},
+	{ PD_COLORLIST, &lineColor, "linecolor", PDO_NORECORD, NULL, .group = &linestylePG },
+};
+static paramGroup_t linestylepG = { "linestyle", PGO_FULLDIALOGFROMBUILDER, linestylePLs, COUNT(linestylePLs) };
+
+static paramGroup_t dimensionlinePG;
+static paramData_t dimensionlinePLs[] = {
+	{ PD_COMBOLIST, &dimArrowSize, "arrowsize", PDO_NORECORD | PDO_LISTINDEX, .group = &dimensionlinePG}
+};
+static paramGroup_t linestylePG = { "dimensionstyle", PGO_FULLDIALOGFROMBUILDER, dimensionlinePLs, COUNT(dimensionlinePLs) };
+
+static paramGroup_t filledobjectPG;
+static paramData_t filledobjectPLs[] = {
+	{ PD_COLORLIST, &lineColor, "fillcolor", PDO_NORECORD, NULL, .group = &filledobjectPG },
+};
+static paramGroup_t filledobjectPG = { "filledobject", PGO_FULLDIALOGFROMBUILDER, filledobjectPLs, COUNT(filledobjectPLs) };
+
+static paramGroup_t benchstylePG;
+static paramData_t	benchstylePLs[] = {
+	{ PD_COLORLIST, &benchColor, "benchcolor", PDO_NORECORD, NULL, .group = &benchstylePG },
+	{ PD_COMBOLIST, &benchChoice, "benchlist", PDO_NOPREF | PDO_NORECORD | PDO_LISTINDEX, .group = &benchstylePG },
+	{ PD_COMBOLIST, &benchOrient, "benchorient", PDO_NOPREF | PDO_NORECORD | PDO_LISTINDEX, .group = &benchstylePG },
+};
+static paramGroup_t benchstylePG = { "benchstyle", PGO_FULLDIALOGFROMBUILDER, benchstylePLs, COUNT(benchstylePLs) };
+
+// fields used when drawing is done
+static paramGroup_t linedataPG;
+static paramData_t linedataPLs[] = {
+	{ PD_FLOAT, &drawCmdContext.length, "linelength", PDO_DIM | PDO_NORECORD | BO_ENTER, &r0_10000, .group = &linedataPG },
+	{ PD_FLOAT, &drawCmdContext.angle, "lineangle", PDO_NORECORD | BO_ENTER, &r360_360, .group = &linedataPG },
+};
+static paramGroup_t linedataPG = { "linedata", PGO_FULLDIALOGFROMBUILDER, linedataPLs, COUNT(linedataPLs) };
+
+static paramGroup_t curvedataPG;
+static paramData_t curvedataPLs[] = {
+	{ PD_FLOAT, &drawCmdContext.angle, "curveangle", PDO_NORECORD | BO_ENTER, &r360_360, .group=&curvedataPG },
+	{ PD_FLOAT, &drawCmdContext.radius, "curveradius", PDO_DIM | PDO_NORECORD | BO_ENTER, &r0_10000, .group=&curvedataPG }
+};
+static paramGroup_t curvedataPG = { "curvedata", PGO_FULLDIALOGFROMBUILDER, curvedataPLs, COUNT(curvedataPLs) };
+
+static paramGroup_t circledataPG;
+static paramData_t circledataPLs[] = {
+	{ PD_FLOAT, &drawCmdContext.radius, "circledrawradius", PDO_DIM | PDO_NORECORD | BO_ENTER, &r0_10000, .group = &circledataPG }
+};
+static paramGroup_t circledataPG = { "circledata", PGO_FULLDIALOGFROMBUILDER, circledataPLs, COUNT(circledataPLs) };
+
+static paramGroup_t polygondataPG;
+static paramData_t polygondataPLs[] = {
+	{ PD_FLOAT, &drawCmdContext.length, "polygonlength", PDO_DIM | PDO_NORECORD | BO_ENTER, &r0_10000, .group = &polygondataPG },
+	{ PD_FLOAT, &drawCmdContext.angle, "polygonangle", PDO_NORECORD | BO_ENTER, &r360_360, .group = &polygondataPG },
+};
+static paramGroup_t polygondataPG = { "polygondata", PGO_FULLDIALOGFROMBUILDER, polygondataPLs, COUNT(polygondataPLs) };
 
 
 static paramData_t drawPLs[] = {
@@ -2862,6 +2917,7 @@ static paramData_t drawPLs[] = {
 	{ PD_COMBOLIST, &drawCmdContext.lineType, "type", PDO_DIM|PDO_NORECORD|BO_ENTER, I2VP(0), N_("Line Type") },
 };
 static paramGroup_t drawPG = { "draw", 0, drawPLs, COUNT( drawPLs ) };
+
 
 static char * objectName[] = {
 	N_("Straight"),
@@ -3232,7 +3288,7 @@ static void ChangeDraw( long changes )
 }
 
 
-
+/*
 static void DrawDlgUpdate(
         paramGroup_p pg,
         int inx,
@@ -3288,7 +3344,7 @@ static void DrawDlgUpdate(
 		                            (wList_p)drawBenchOrientPD.control );
 	}
 }
-
+*/
 EXPORT void InitCmdDraw( wMenu_p menu )
 {
 	int inx1, inx2;
