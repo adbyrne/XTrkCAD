@@ -2930,12 +2930,11 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		case OP_POLYLINE:
 			controls[0] = drawLineWidthPD.control;
 			controls[1] = drawColorPD.control;
-			controls[2] = drawLineTypePD.control;
-			controls[3] = NULL;
-			sprintf( labelName, _("%s Line Width"), _(objectName[drawCmdContext.Op]) );
-			labels[0] = labelName;
-			labels[1] = N_("Color");
-			labels[2] = N_("Type");
+	controls[2] = NULL;
+
+	sprintf(object, _("%s Line Width"), _(objectName[drawCmdContext.Op]));
+	labels[0] = object;
+	labels[1] = N_("Color");
 			if ( wListGetCount( (wList_p)drawLineTypePD.control ) == 0 ) {
 				wListAddValue( (wList_p)drawLineTypePD.control, _("Solid"), NULL, NULL );
 				wListAddValue( (wList_p)drawLineTypePD.control, _("Dot"), NULL, NULL );
