@@ -2836,7 +2836,7 @@ wDrawColor benchColor;
 
 #define MAX_CONTROLS 5
 #define MAX_LABELS 4
-#define LABEL_NAME_SIZE 40
+#define OBJECT_LABEL_SIZE 40
 
 static paramData_t drawPLs[] = {
 #define drawLineWidthPD				(drawPLs[0])
@@ -2897,11 +2897,9 @@ static char * objectName[] = {
 	NULL
 };
 
-static STATUS_T HandleStartCommand(BOOL_T* infoSubst, wControl_p* controls,
-	char** labels, char* labelName);
+static STATUS_T HandleStartCommand(wControl_p* controls, char** labels, wAction_t action, BOOL_T* infoSubst);
 static STATUS_T HandleMouseEvents(wAction_t action, coOrd pos);
-static STATUS_T HandleMouseUpEvents(wAction_t action, coOrd pos, BOOL_T* infoSubst,
-	wControl_p* controls, char** labels);
+static STATUS_T HandleMouseUpEvents(wControl_p* controls, char** labels, wAction_t action, coOrd pos, BOOL_T* infoSubst);
 static STATUS_T HandleSpecialCommands(wAction_t action, coOrd pos);
 
 static void SetupOperationControls(wControl_p* controls, char** labels, char* labelName);
@@ -2935,14 +2933,11 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 	static BOOL_T infoSubst = FALSE;
 	wControl_p controls[MAX_CONTROLS];				//Always needs a NULL last entry
 	char * labels[MAX_LABELS];
-	static char labelName[LABEL_NAME_SIZE];
-
-	wAction_t act2 = (action&0xFF) | (bezCmdCreateLine<<8);
 
 	switch (action&0xFF) {
 
 	case C_START:
-		return(HandleStartCommand(&infoSubst, controls, labels, labelName));
+		return(HandleStartCommand(controls, labels, action, &infoSubst));
 
 		return C_CONTINUE;
 
@@ -2963,7 +2958,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 
 	case wActionLUp:
 	case wActionRUp:
-		return HandleMouseUpEvents(action, pos, &infoSubst, controls, labels);
+		return HandleMouseUpEvents(controls, labels, action, pos, &infoSubst);
 		
 	case C_CANCEL:
 	case C_TEXT:
@@ -2979,10 +2974,9 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 }
 
 static STATUS_T
-HandleStartCommand(BOOL_T* infoSubst, wControl_p* controls,
-	char** labels, char* labelName)
+HandleStartCommand(wControl_p* controls, char** labels, wAction_t action, BOOL_T* infoSubst)
 {
-	wAction_t act2 = (bezCmdCreateLine << 8);
+	static char objectLabel[OBJECT_LABEL_SIZE];
 
 	ParamLoadControls(&drawPG);
 	DisableControlRecording();
@@ -2996,9 +2990,10 @@ HandleStartCommand(BOOL_T* infoSubst, wControl_p* controls,
 	SetAllTrackSelect(FALSE);
 	*infoSubst = TRUE;
 	
-	SetupOperationControls(controls, labels, labelName);
+	SetupOperationControls(controls, labels, objectLabel);
 	ParamGroupRecord(&drawPG);
 	if (drawCmdContext.Op == OP_BEZLIN) { 
+		wAction_t act2 = action | (bezCmdCreateLine << 8);
 		return CmdBezCurve(act2, (coOrd) { 0, 0 });
 	}
 	DrawGeomMouse(C_START, (coOrd) { 0, 0 }, &drawCmdContext);
@@ -3006,7 +3001,7 @@ HandleStartCommand(BOOL_T* infoSubst, wControl_p* controls,
 	return(C_CONTINUE);
 }
 
-static void SetupOperationControls(wControl_p* controls, char** labels, char* labelName)
+static void SetupOperationControls(wControl_p* controls, char** labels, char* object)
 {
 	switch (drawCmdContext.Op) {
 	case OP_LINE:
@@ -3020,14 +3015,14 @@ static void SetupOperationControls(wControl_p* controls, char** labels, char* la
 	case OP_BOX:
 	case OP_POLY:
 	case OP_POLYLINE:
-		SetupLineControls(controls, labels, labelName);
+		SetupLineControls(controls, labels, object);
 		break;
 
 	case OP_FILLCIRCLE2:
 	case OP_FILLCIRCLE3:
 	case OP_FILLBOX:
 	case OP_FILLPOLY:
-		SetupFillControls(controls, labels, labelName);
+		SetupFillControls(controls, labels, object);
 		break;
 
 	case OP_BENCH:
@@ -3048,15 +3043,15 @@ static void SetupOperationControls(wControl_p* controls, char** labels, char* la
 	InfoSubstituteControls(controls, labels);
 }
 
-static void SetupLineControls(wControl_p* controls, char** labels, char* labelName)
+static void SetupLineControls(wControl_p* controls, char** labels, char* object)
 {
 	controls[0] = drawLineWidthPD.control;
 	controls[1] = drawColorPD.control;
 	controls[2] = drawLineTypePD.control;
 	controls[3] = NULL;
 
-	sprintf(labelName, _("%s Line Width"), _(objectName[drawCmdContext.Op]));
-	labels[0] = labelName;
+	sprintf(object, _("%s Line Width"), _(objectName[drawCmdContext.Op]));
+	labels[0] = object;
 	labels[1] = N_("Color");
 	labels[2] = N_("Type");
 
@@ -3064,13 +3059,13 @@ static void SetupLineControls(wControl_p* controls, char** labels, char* labelNa
 	EnableLineControlRecording();
 }
 
-static void SetupFillControls(wControl_p* controls, char** labels, char* labelName)
+static void SetupFillControls(wControl_p* controls, char** labels, char* object)
 {
 	controls[0] = drawColorPD.control;
 	controls[1] = NULL;
 
-	sprintf(labelName, _("%s Color"), _(objectName[drawCmdContext.Op]));
-	labels[0] = labelName;
+	sprintf(object, _("%s Color"), _(objectName[drawCmdContext.Op]));
+	labels[0] = object;
 
 	ParamLoadControls(&drawPG);
 	drawColorPD.option &= ~PDO_NORECORD;
@@ -3202,8 +3197,8 @@ static STATUS_T HandleMouseEvents(wAction_t action, coOrd pos)
 	return DrawGeomMouse(action, pos, &drawCmdContext);
 }
 
-static STATUS_T HandleMouseUpEvents(wAction_t action, coOrd pos, BOOL_T* infoSubst,
-	wControl_p* controls, char** labels)
+static STATUS_T HandleMouseUpEvents(wControl_p* controls, char** labels, wAction_t action,
+	coOrd pos, BOOL_T* infoSubst)
 {
 	if (drawCmdContext.Op == OP_BEZLIN) {
 		wAction_t act2 = action | (bezCmdCreateLine << 8);
