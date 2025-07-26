@@ -3047,13 +3047,11 @@ static void SetupLineControls(wControl_p* controls, char** labels, char* object)
 {
 	controls[0] = drawLineWidthPD.control;
 	controls[1] = drawColorPD.control;
-	controls[2] = drawLineTypePD.control;
-	controls[3] = NULL;
+	controls[2] = NULL;
 
 	sprintf(object, _("%s Line Width"), _(objectName[drawCmdContext.Op]));
 	labels[0] = object;
 	labels[1] = N_("Color");
-	labels[2] = N_("Type");
 
 	PopulateLineTypeList();
 	EnableLineControlRecording();
