@@ -1321,8 +1321,8 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		                        drawDesc[TA].mode =
 		                                drawDesc[LK].mode =
 		                                        drawDesc[OI].mode =
-		                                                drawDesc[BX].mode = 
-			                                                    drawDesc[FL].mode = 0;
+		                                                        drawDesc[BX].mode =
+		                                                                        drawDesc[FL].mode = 0;
 		if (!drawData.lock_origin) { drawDesc[RA].mode = DESC_RO; }
 		else { drawDesc[RA].mode = 0; }
 		drawDesc[E0].mode = DESC_IGNORE;
@@ -1921,7 +1921,7 @@ static BOOL_T EnumerateDraw(
 			segPtr = &xx->segs[inx];
 			if ( segPtr->type == SEG_BENCH ) {
 				CountBench( segPtr->u.l.option, FindDistance( segPtr->u.l.pos[0],
-				                segPtr->u.l.pos[1] ) );
+				            segPtr->u.l.pos[1] ) );
 				content = TRUE;
 			}
 		}
@@ -2897,17 +2897,23 @@ static char * objectName[] = {
 	NULL
 };
 
-static STATUS_T HandleStartCommand(wControl_p* controls, char** labels, wAction_t action, BOOL_T* infoSubst);
+static STATUS_T HandleStartCommand(wControl_p* controls, char** labels,
+                                   wAction_t action, BOOL_T* infoSubst);
 static STATUS_T HandleMouseEvents(wAction_t action, coOrd pos);
-static STATUS_T HandleMouseUpEvents(wControl_p* controls, char** labels, wAction_t action, coOrd pos, BOOL_T* infoSubst);
+static STATUS_T HandleMouseUpEvents(wControl_p* controls, char** labels,
+                                    wAction_t action, coOrd pos, BOOL_T* infoSubst);
 static STATUS_T HandleSpecialCommands(wAction_t action, coOrd pos);
 
-static void SetupOperationControls(wControl_p* controls, char** labels, char* labelName);
-static void SetupLineControls(wControl_p* controls, char** labels, char* labelName);
-static void SetupFillControls(wControl_p* controls, char** labels, char* labelName);
+static void SetupOperationControls(wControl_p* controls, char** labels,
+                                   char* labelName);
+static void SetupLineControls(wControl_p* controls, char** labels,
+                              char* labelName);
+static void SetupFillControls(wControl_p* controls, char** labels,
+                              char* labelName);
 static void SetupBenchControls(wControl_p* controls, char** labels);
 static void SetupDimLineControls(wControl_p* controls, char** labels);
-static void SetupPostDrawControls(wControl_p* controls, char** labels, BOOL_T* infoSubst);
+static void SetupPostDrawControls(wControl_p* controls, char** labels,
+                                  BOOL_T* infoSubst);
 static void SetupCircleControls(wControl_p* controls, char** labels);
 static void SetupCurveControls(wControl_p* controls, char** labels);
 static void SetupLineAndPolyControls(wControl_p* controls, char** labels);
@@ -2959,7 +2965,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 	case wActionLUp:
 	case wActionRUp:
 		return HandleMouseUpEvents(controls, labels, action, pos, &infoSubst);
-		
+
 	case C_CANCEL:
 	case C_TEXT:
 	case C_OK:
@@ -2974,7 +2980,8 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 }
 
 static STATUS_T
-HandleStartCommand(wControl_p* controls, char** labels, wAction_t action, BOOL_T* infoSubst)
+HandleStartCommand(wControl_p* controls, char** labels, wAction_t action,
+                   BOOL_T* infoSubst)
 {
 	static char objectLabel[OBJECT_LABEL_SIZE];
 
@@ -2989,19 +2996,20 @@ HandleStartCommand(wControl_p* controls, char** labels, wAction_t action, BOOL_T
 
 	SetAllTrackSelect(FALSE);
 	*infoSubst = TRUE;
-	
+
 	SetupOperationControls(controls, labels, objectLabel);
 	ParamGroupRecord(&drawPG);
-	if (drawCmdContext.Op == OP_BEZLIN) { 
+	if (drawCmdContext.Op == OP_BEZLIN) {
 		wAction_t act2 = action | (bezCmdCreateLine << 8);
 		return CmdBezCurve(act2, (coOrd) { 0, 0 });
 	}
 	DrawGeomMouse(C_START, (coOrd) { 0, 0 }, &drawCmdContext);
-	
+
 	return(C_CONTINUE);
 }
 
-static void SetupOperationControls(wControl_p* controls, char** labels, char* object)
+static void SetupOperationControls(wControl_p* controls, char** labels,
+                                   char* object)
 {
 	switch (drawCmdContext.Op) {
 	case OP_LINE:
@@ -3121,15 +3129,15 @@ static void InitializeBenchLists(void)
 {
 	if (wListGetCount((wList_p)drawBenchChoicePD.control) == 0) {
 		BenchLoadLists((wList_p)drawBenchChoicePD.control,
-			(wList_p)drawBenchOrientPD.control);
+		               (wList_p)drawBenchOrientPD.control);
 	}
 }
 
 static void UpdateBenchOrientation(void)
 {
 	BenchUpdateOrientationList(VP2L(wListGetItemContext((wList_p)
-		drawBenchChoicePD.control, benchChoice)),
-		(wList_p)drawBenchOrientPD.control);
+	                                drawBenchChoicePD.control, benchChoice)),
+	                           (wList_p)drawBenchOrientPD.control);
 	wListSetIndex((wList_p)drawBenchOrientPD.control, benchOrient);
 }
 
@@ -3166,7 +3174,7 @@ static void ConfigureLineColor(void)
 	switch (drawCmdContext.Op) {
 	case OP_BENCH:
 		drawCmdContext.benchOption = GetBenchData(VP2L(wListGetItemContext(
-			(wList_p)drawBenchChoicePD.control, benchChoice)), benchOrient);
+		                                     (wList_p)drawBenchChoicePD.control, benchChoice)), benchOrient);
 		lineColor = benchColor;
 		break;
 
@@ -3195,8 +3203,9 @@ static STATUS_T HandleMouseEvents(wAction_t action, coOrd pos)
 	return DrawGeomMouse(action, pos, &drawCmdContext);
 }
 
-static STATUS_T HandleMouseUpEvents(wControl_p* controls, char** labels, wAction_t action,
-	coOrd pos, BOOL_T* infoSubst)
+static STATUS_T HandleMouseUpEvents(wControl_p* controls, char** labels,
+                                    wAction_t action,
+                                    coOrd pos, BOOL_T* infoSubst)
 {
 	if (drawCmdContext.Op == OP_BEZLIN) {
 		wAction_t act2 = action | (bezCmdCreateLine << 8);
@@ -3213,7 +3222,8 @@ static STATUS_T HandleMouseUpEvents(wControl_p* controls, char** labels, wAction
 	return rc;
 }
 
-static void SetupPostDrawControls(wControl_p* controls, char** labels, BOOL_T* infoSubst)
+static void SetupPostDrawControls(wControl_p* controls, char** labels,
+                                  BOOL_T* infoSubst)
 {
 	switch (drawCmdContext.Op) {
 	case OP_CIRCLE1:
@@ -3276,8 +3286,7 @@ static void SetupCurveControls(wControl_p* controls, char** labels)
 		labels[0] = N_("Radius");
 		labels[1] = N_("Arc Angle");
 		drawRadiusPD.option &= ~PDO_NORECORD;
-	}
-	else {
+	} else {
 		controls[0] = drawLengthPD.control;
 		controls[1] = drawAnglePD.control;
 		controls[2] = NULL;
@@ -3299,13 +3308,11 @@ static void SetupLineAndPolyControls(wControl_p* controls, char** labels)
 	labels[0] = N_("Seg Length");
 
 	if (drawCmdContext.Op == OP_LINE || drawCmdContext.Op == OP_BENCH ||
-		drawCmdContext.Op == OP_TBLEDGE) {
+	    drawCmdContext.Op == OP_TBLEDGE) {
 		labels[1] = N_("Angle");
-	}
-	else if (drawCmdContext.index > 0) {
+	} else if (drawCmdContext.index > 0) {
 		labels[1] = N_("Rel Angle");
-	}
-	else {
+	} else {
 		labels[1] = N_("Angle");
 	}
 
@@ -3590,8 +3597,8 @@ EXPORT track_p NewText(
         CSIZE_T textSize,
         wDrawColor color,
         BOOL_T boxed,
-		BOOL_T filled,
-		wDrawColor bg_color)
+        BOOL_T filled,
+        wDrawColor bg_color)
 {
 	trkSeg_t tempSeg;
 	track_p trk;
@@ -3638,7 +3645,8 @@ EXPORT BOOL_T ReadText( char * line )
 		}
 	}
 
-	trk = NewText( index, pos, angle, text, textSize, color, FALSE, FALSE, bg_color );
+	trk = NewText( index, pos, angle, text, textSize, color, FALSE, FALSE,
+	               bg_color );
 	SetTrkLayer( trk, layer );
 	MyFree(text);
 	return TRUE;
