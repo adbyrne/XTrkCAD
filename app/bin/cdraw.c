@@ -562,7 +562,7 @@ static descData_t drawDesc[] = {
 	/*WT*/ 	{ DESC_DIM, N_("Width"), &drawData.width },
 	/*PV*/	{ DESC_PIVOT, N_("Pivot"), &drawData.pivot },
 	/*VC*/	{ DESC_LONG, N_("Point Count"), &drawData.pointCount },
-	/*LW*/	{ DESC_FLOAT, N_("Line Width"), &drawData.lineWidth },
+	/*LW*/	{ DESC_DIM, N_("Line Width"), &drawData.lineWidth },
 	/*LT*/  { DESC_LIST, N_("Line Type"), &drawData.lineType },
 	/*CO*/	{ DESC_COLOR, N_("Color"), &drawData.color },
 	/*FL*/	{ DESC_BOXED, N_("Filled"), &drawData.filled },
@@ -2829,7 +2829,7 @@ wDrawColor benchColor;
 
 static paramData_t drawPLs[] = {
 #define drawLineWidthPD				(drawPLs[0])
-	{ PD_FLOAT, &lineWidth, "linewidth", PDO_NORECORD, &r100_100, N_("Line Width") },
+	{ PD_FLOAT, &lineWidth, "linewidth", PDO_DIM|PDO_NORECORD, &r100_100, N_("Line Width") },
 #define drawColorPD				(drawPLs[1])
 	{ PD_COLORLIST, &lineColor, "linecolor", PDO_NORECORD, NULL, N_("Color") },
 #define drawBenchColorPD		(drawPLs[2])
