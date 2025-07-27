@@ -538,7 +538,7 @@ static paramData_t gridPLs[] = {
 	{	PD_TOGGLE, &grid.Horz.Enable, "horzenable", 0, gridLabels, N_("Enable"), BC_HORZ|BC_NOBORDER },
 	{	PD_MESSAGE, N_("Vert"), NULL, PDO_DLGNEWCOLUMN|PDO_DLGWIDE, I2VP(60) },
 #define I_VERTSPACING	(5)
-	{	PD_FLOAT, &grid.Vert.Spacing, "vertspacing", PDO_NOPSHUPD, &r0_999999, NULL },
+	{	PD_FLOAT, &grid.Vert.Spacing, "vertspacing", PDO_NOPSHUPD|PDO_DIM, &r0_999999, NULL },
 #define I_VERTDIVISION	(6)
 	{	PD_LONG, &grid.Vert.Division, "vertdivision", PDO_NOPSHUPD, &i0_1000, NULL },
 #define I_VERTENABLE	(7)
