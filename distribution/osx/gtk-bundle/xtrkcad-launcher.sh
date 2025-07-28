@@ -8,12 +8,6 @@ if test "x$GTK_DEBUG_LAUNCHER" != x; then
     set -x
 fi
 
-if test "x$GTK_DEBUG_GDB" != x; then
-    EXEC="gdb --args"
-else
-    EXEC=exec
-fi
-
 name=`basename "$0"`
 tmp="$0"
 tmp=`dirname "$tmp"`
@@ -186,13 +180,13 @@ echo "XTrackCAD: XTRKCAD_BUNDLE: $XTRKCAD_BUNDLE"
 #sed -e 's|/opt/local/etc|'"$XTRKCAD_ETC|g" "$XTRKCAD_RESOURCES/etc/pango/pangorc" > "$XTRKCAD_ETC/pango/pangorc"
 #sed -e 's|/opt/local|\"'"$XTRKCAD_RESOURCES|g" -e "s/\.so/.so\"/g" "$XTRKCAD_RESOURCES/etc/pango/pango.modules" > "$XTRKCAD_ETC/pango/pango.modules"
 
-#export "DYLD_LIBRARY_PATH=$XTRKCAD_RESOURCES/lib"
-#export "FONTCONFIG_PATH=$XTRKCAD_RESOURCES/etc/fonts"
-#export "GDK_PIXBUF_MODULE_FILE=$XTRKCAD_GDK_PIXBUF_MODULE_FILE"
-#export "GTK_IM_MODULE_FILE=$XTRKCAD_GTK_IM_MODULE_FILE"
-export "PANGO_RC_FILE=$XTRKCAD_PANGO_RC_FILE"
-export "PATH=$XTRKCAD_RESOURCES/bin:$PATH"
-export "XTRKCADLIB=$XTRKCAD_RESOURCES/xtrkcad"
+#export DYLD_LIBRARY_PATH="$XTRKCAD_RESOURCES/lib"
+#export FONTCONFIG_PATH="$XTRKCAD_RESOURCES/etc/fonts"
+#export GDK_PIXBUF_MODULE_FILE="$XTRKCAD_GDK_PIXBUF_MODULE_FILE"
+#export GTK_IM_MODULE_FILE="$XTRKCAD_GTK_IM_MODULE_FILE"
+export PANGO_RC_FILE="$XTRKCAD_PANGO_RC_FILE"
+export PATH="$XTRKCAD_RESOURCES/bin:$PATH"
+export XTRKCADLIB="$XTRKCAD_RESOURCES/xtrkcad"
 
 #export
 #exec "$XTRKCAD_BUNDLE/Contents/MacOS/XtrkCAD-bin"
@@ -208,7 +202,15 @@ if /bin/expr "x$1" : '^x-psn_' > /dev/null; then
     shift 1
 fi
 
-$EXEC "$XTRKCAD_BUNDLE/Contents/MacOS/XtrkCAD-bin" "$@"
+if test "x$GTK_DEBUG_GDB" != x; then
+    gdb --args "$XTRKCAD_BUNDLE/Contents/MacOS/XtrkCAD-bin" "$@"
+else
+    if `tty -s`; then
+        $XTRKCAD_BUNDLE/Contents/MacOS/XtrkCAD-bin "$@"
+    else
+        nohup "$XTRKCAD_BUNDLE/Contents/MacOS/XtrkCAD-bin" "$@" >/dev/null &
+    fi
+fi
 
 echo "XTrackCAD: Finishing $0"
 
