@@ -300,11 +300,7 @@ STATUS_T DrawGeomMouse(
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		DYNARR_RESET( trkSeg_t, anchors_da );
 		locked = FALSE;
-		if (!magneticSnap) {
-			InfoMessage(_("+Alt for Magnetic Snap"));
-		} else {
-			InfoMessage(_("+Alt to inhibit Magnetic Snap"));
-		}
+
 		wSetCursor(mainD.d,defaultCursor);
 		movePos = zero;
 		context->UndoStarted = FALSE;

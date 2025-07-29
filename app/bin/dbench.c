@@ -77,7 +77,7 @@ static BOOL_T lgirderNarrow[]		= {	 1,	 1,	 0,	 0,	 0,	 0,	 1,	 1 };
 
 EXPORT void BenchUpdateOrientationList(
         long benchData,
-        wList_p list )
+        wControl_p list )
 {
 	long type;
 	orientData_t *op;
@@ -140,7 +140,7 @@ static void AddBenchTypes(
 }
 
 
-EXPORT void BenchLoadLists( wList_p choiceL, wList_p orientL )
+EXPORT void BenchLoadLists( wControl_p choiceL, wControl_p orientL )
 {
 	int inx;
 	long height;

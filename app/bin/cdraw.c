@@ -26,7 +26,7 @@
 #include "drawgeom.h"
 #include "fileio.h"
 #include "icons.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "tbezier.h"
 #include "misc.h"
@@ -36,26 +36,26 @@
 
 static wMenu_p drawModDelMI;
 static wMenu_p drawModLinMI;
-static wMenuPush_p drawModDel;
-static wMenuPush_p drawModSmooth;
-static wMenuPush_p drawModVertex;
-static wMenuPush_p drawModRound;
-static wMenuPush_p drawModriginMode;
-static wMenuPush_p drawModPointsMode;
-static wMenuPush_p drawModOrigin;
-static wMenuPush_p drawModLast;
-static wMenuPush_p drawModCenter;
-static wMenuPush_p drawModClose;
-static wMenuPush_p drawModOpen;
-static wMenuPush_p drawModFill;
-static wMenuPush_p drawModEmpty;
-static wMenuPush_p drawModSolid;
-static wMenuPush_p drawModDot;
-static wMenuPush_p drawModDash;
-static wMenuPush_p drawModDashDot;
-static wMenuPush_p drawModDashDotDot;
-static wMenuPush_p drawModCenterDot;
-static wMenuPush_p drawModPhantom;
+static wControl_p drawModDel;
+static wControl_p drawModSmooth;
+static wControl_p drawModVertex;
+static wControl_p drawModRound;
+static wControl_p drawModriginMode;
+static wControl_p drawModPointsMode;
+static wControl_p drawModOrigin;
+static wControl_p drawModLast;
+static wControl_p drawModCenter;
+static wControl_p drawModClose;
+static wControl_p drawModOpen;
+static wControl_p drawModFill;
+static wControl_p drawModEmpty;
+static wControl_p drawModSolid;
+static wControl_p drawModDot;
+static wControl_p drawModDash;
+static wControl_p drawModDashDot;
+static wControl_p drawModDashDotDot;
+static wControl_p drawModCenterDot;
+static wControl_p drawModPhantom;
 
 
 static long fontSizeList[] = {
@@ -950,19 +950,20 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		drawDesc[A1].mode |= DESC_CHANGE;
 		break;
 	case BE:
-		BenchUpdateOrientationList( VP2L( wListGetItemContext((wList_p)
-		                                  drawDesc[BE].control0, drawData.benchChoice)), (wList_p)drawDesc[OR].control0 );
-		if ( drawData.benchOrient < wListGetCount( (wList_p)drawDesc[OR].control0 ) ) {
-			wListSetIndex( (wList_p)drawDesc[OR].control0, drawData.benchOrient );
+		BenchUpdateOrientationList( VP2L( wListGetItemContext(drawDesc[BE].control0,
+		                                  drawData.benchChoice)),
+		                            drawDesc[OR].control0 );
+		if ( drawData.benchOrient < wListGetCount(drawDesc[OR].control0 ) ) {
+			wListSetIndex(drawDesc[OR].control0, drawData.benchOrient );
 		} else {
 			drawData.benchOrient = 0;
 		}
-		segPtr->u.l.option = GetBenchData( VP2L(wListGetItemContext((
-		                wList_p)drawDesc[BE].control0, drawData.benchChoice)), drawData.benchOrient );
+		segPtr->u.l.option = GetBenchData( VP2L(wListGetItemContext(
+		                drawDesc[BE].control0, drawData.benchChoice)), drawData.benchOrient );
 		break;
 	case OR:
-		segPtr->u.l.option = GetBenchData( VP2L(wListGetItemContext((
-		                wList_p)drawDesc[BE].control0, drawData.benchChoice)), drawData.benchOrient );
+		segPtr->u.l.option = GetBenchData( VP2L(wListGetItemContext(
+		                drawDesc[BE].control0, drawData.benchChoice)), drawData.benchOrient );
 		break;
 	case DS:
 		segPtr->u.l.option = drawData.dimenSize;
@@ -988,8 +989,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		break;
 	case TS:
 		fontSize = (long)segPtr->u.t.fontSize;
-		UpdateFontSizeList( &fontSize, (wList_p)drawDesc[TS].control0,
-		                    drawData.fontSizeInx );
+		UpdateFontSizeList( &fontSize, drawDesc[TS].control0, drawData.fontSizeInx );
 		segPtr->u.t.fontSize = fontSize;
 		break;
 	case FL:
@@ -1049,9 +1049,8 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		segPtr->u.t.boxed = drawData.boxed;
 		break;
 	case TX:
-		if ( wTextGetModified((wText_p)drawDesc[TX].control0 ) ||
-		     inPlayback ) {
-			int len = wTextGetSize((wText_p)drawDesc[TX].control0);
+		if ( wTextGetModified(drawDesc[TX].control0 ) ||   inPlayback ) {
+			int len = wTextGetSize(drawDesc[TX].control0);
 			UndoDeferFree( segPtr->u.t.string );
 			if ( !descUndoStarted ) {
 				UndoStart( _("Change Track"), "Change Text");
@@ -1063,7 +1062,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 				ErrorMessage( MSG_TEXT_TOO_LONG );
 			}
 			segPtr->u.t.string = (char *)MyMalloc(len+1);
-			wTextGetText((wText_p)drawDesc[TX].control0, segPtr->u.t.string, len+1);
+			wTextGetText(drawDesc[TX].control0, segPtr->u.t.string, len+1);
 			segPtr->u.t.string[len] = '\0';				//Make sure of null term
 		}
 
@@ -1342,35 +1341,35 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	DoDescribe( title, trk, drawDesc, UpdateDraw );
 	if ( segPtr->type==SEG_BENCH && drawDesc[BE].control0!=NULL
 	     && drawDesc[OR].control0!=NULL) {
-		BenchLoadLists( (wList_p)drawDesc[BE].control0,
-		                (wList_p)drawDesc[OR].control0 );
-		wListSetIndex( (wList_p)drawDesc[BE].control0, drawData.benchChoice );
-		BenchUpdateOrientationList( VP2L(wListGetItemContext((wList_p)
-		                                 drawDesc[BE].control0, drawData.benchChoice)), (wList_p)drawDesc[OR].control0 );
-		wListSetIndex( (wList_p)drawDesc[OR].control0, drawData.benchOrient );
+		BenchLoadLists( drawDesc[BE].control0,
+		                drawDesc[OR].control0 );
+		wListSetIndex( drawDesc[BE].control0, drawData.benchChoice );
+		BenchUpdateOrientationList( VP2L(wListGetItemContext(
+		                drawDesc[BE].control0, drawData.benchChoice)),drawDesc[OR].control0 );
+		wListSetIndex( drawDesc[OR].control0, drawData.benchOrient );
 	}
 	if ( (segPtr->type==SEG_STRLIN || segPtr->type==SEG_CRVLIN
 	      || segPtr->type==SEG_POLY) && drawDesc[LT].control0!=NULL) {
-		wListClear( (wList_p)drawDesc[LT].control0 );
-		wListAddValue( (wList_p)drawDesc[LT].control0, _("Solid"), NULL, I2VP(0 ));
-		wListAddValue( (wList_p)drawDesc[LT].control0, _("Dash"), NULL, I2VP(1 ));
-		wListAddValue( (wList_p)drawDesc[LT].control0, _("Dot"), NULL, I2VP(2 ));
-		wListAddValue( (wList_p)drawDesc[LT].control0, _("DashDot"), NULL, I2VP(3 ));
-		wListAddValue( (wList_p)drawDesc[LT].control0, _("DashDotDot"), NULL, I2VP(4 ));
-		wListAddValue( (wList_p)drawDesc[LT].control0, _("CenterDot"), NULL, I2VP(5 ));
-		wListAddValue( (wList_p)drawDesc[LT].control0, _("PhantomDot"), NULL, I2VP(6 ));
-		wListSetIndex( (wList_p)drawDesc[LT].control0, drawData.lineType );
+		wListClear( drawDesc[LT].control0 );
+		wListAddValue(drawDesc[LT].control0, _("Solid"), NULL, I2VP(0 ));
+		wListAddValue(drawDesc[LT].control0, _("Dash"), NULL, I2VP(1 ));
+		wListAddValue(drawDesc[LT].control0, _("Dot"), NULL, I2VP(2 ));
+		wListAddValue(drawDesc[LT].control0, _("DashDot"), NULL, I2VP(3 ));
+		wListAddValue(drawDesc[LT].control0, _("DashDotDot"), NULL, I2VP(4 ));
+		wListAddValue(drawDesc[LT].control0, _("CenterDot"), NULL, I2VP(5 ));
+		wListAddValue(drawDesc[LT].control0, _("PhantomDot"), NULL, I2VP(6 ));
+		wListSetIndex(drawDesc[LT].control0, drawData.lineType );
 	}
 	if ( segPtr->type==SEG_DIMLIN && drawDesc[DS].control0!=NULL ) {
-		wListClear( (wList_p)drawDesc[DS].control0 );
-		wListAddValue( (wList_p)drawDesc[DS].control0, _("Tiny"), NULL, I2VP(0 ));
-		wListAddValue( (wList_p)drawDesc[DS].control0, _("Small"), NULL, I2VP(1 ));
-		wListAddValue( (wList_p)drawDesc[DS].control0, _("Medium"), NULL, I2VP(2 ));
-		wListAddValue( (wList_p)drawDesc[DS].control0, _("Large"), NULL, I2VP(3 ));
-		wListSetIndex( (wList_p)drawDesc[DS].control0, drawData.dimenSize );
+		wListClear( drawDesc[DS].control0 );
+		wListAddValue(drawDesc[DS].control0, _("Tiny"), NULL, I2VP(0 ));
+		wListAddValue(drawDesc[DS].control0, _("Small"), NULL, I2VP(1 ));
+		wListAddValue(drawDesc[DS].control0, _("Medium"), NULL, I2VP(2 ));
+		wListAddValue(drawDesc[DS].control0, _("Large"), NULL, I2VP(3 ));
+		wListSetIndex(drawDesc[DS].control0, drawData.dimenSize );
 	}
 	if ( segPtr->type==SEG_TEXT && drawDesc[TS].control0!=NULL ) {
-		LoadFontSizeList( (wList_p)drawDesc[TS].control0, (long)segPtr->u.t.fontSize );
+		LoadFontSizeList(drawDesc[TS].control0, (long)segPtr->u.t.fontSize );
 	}
 }
 
@@ -1913,7 +1912,7 @@ static BOOL_T EnumerateDraw(
 			segPtr = &xx->segs[inx];
 			if ( segPtr->type == SEG_BENCH ) {
 				CountBench( segPtr->u.l.option, FindDistance( segPtr->u.l.pos[0],
-				                segPtr->u.l.pos[1] ) );
+				            segPtr->u.l.pos[1] ) );
 				content = TRUE;
 			}
 		}
@@ -2829,392 +2828,521 @@ wDrawColor benchColor;
 // fields used before drawing starts (during C_START)
 static paramGroup_t linestylePG;
 static paramData_t linestylePLs[] = {
-	{ PD_FLOAT, &lineWidth, "linewidth", PDO_NORECORD, &r100_100, .group =&linestylePG},
-	{ PD_COLORLIST, &lineColor, "linecolor", PDO_NORECORD, NULL, .group = &linestylePG },
+	{ PD_FLOAT, &lineWidth, "linewidth", PDO_DIM, &r100_100, .group =&linestylePG},
+	{ PD_COLORLIST, &lineColor, "linecolor", 0, NULL, .group = &linestylePG },
 };
-static paramGroup_t linestylepG = { "linestyle", PGO_FULLDIALOGFROMBUILDER, linestylePLs, COUNT(linestylePLs) };
+static paramGroup_t linestylePG = { "linestyle", PGO_FULLDIALOGFROMBUILDER, linestylePLs, COUNT(linestylePLs) };
 
 static paramGroup_t dimensionlinePG;
 static paramData_t dimensionlinePLs[] = {
-	{ PD_COMBOLIST, &dimArrowSize, "arrowsize", PDO_NORECORD | PDO_LISTINDEX, .group = &dimensionlinePG}
+	{ PD_COMBOLIST, &dimArrowSize, "arrowsize", PDO_LISTINDEX, .group = &dimensionlinePG}
 };
-static paramGroup_t linestylePG = { "dimensionstyle", PGO_FULLDIALOGFROMBUILDER, dimensionlinePLs, COUNT(dimensionlinePLs) };
+static paramGroup_t dimensionlinePG = { "dimensionstyle", PGO_FULLDIALOGFROMBUILDER, dimensionlinePLs, COUNT(dimensionlinePLs) };
+#define DIMENSION_ARROW  0
 
 static paramGroup_t filledobjectPG;
 static paramData_t filledobjectPLs[] = {
-	{ PD_COLORLIST, &lineColor, "fillcolor", PDO_NORECORD, NULL, .group = &filledobjectPG },
+	{ PD_COLORLIST, &lineColor, "fillcolor", 0, NULL, .group = &filledobjectPG },
 };
 static paramGroup_t filledobjectPG = { "filledobject", PGO_FULLDIALOGFROMBUILDER, filledobjectPLs, COUNT(filledobjectPLs) };
 
 static paramGroup_t benchstylePG;
 static paramData_t	benchstylePLs[] = {
-	{ PD_COLORLIST, &benchColor, "benchcolor", PDO_NORECORD, NULL, .group = &benchstylePG },
-	{ PD_COMBOLIST, &benchChoice, "benchlist", PDO_NOPREF | PDO_NORECORD | PDO_LISTINDEX, .group = &benchstylePG },
-	{ PD_COMBOLIST, &benchOrient, "benchorient", PDO_NOPREF | PDO_NORECORD | PDO_LISTINDEX, .group = &benchstylePG },
+	{ PD_COLORLIST, &benchColor, "benchcolor", 0, NULL, .group = &benchstylePG },
+	{ PD_COMBOLIST, &benchChoice, "benchlist", PDO_NOPREF | PDO_LISTINDEX, .group = &benchstylePG },
+	{ PD_COMBOLIST, &benchOrient, "benchorient", PDO_NOPREF | PDO_LISTINDEX, .group = &benchstylePG },
 };
 static paramGroup_t benchstylePG = { "benchstyle", PGO_FULLDIALOGFROMBUILDER, benchstylePLs, COUNT(benchstylePLs) };
+#define BENCH_COLOR 0
+#define BENCH_CHOICE 1
+#define BENCH_ORIENTATION 2
 
 // fields used when drawing is done
 static paramGroup_t linedataPG;
 static paramData_t linedataPLs[] = {
-	{ PD_FLOAT, &drawCmdContext.length, "linelength", PDO_DIM | PDO_NORECORD | BO_ENTER, &r0_10000, .group = &linedataPG },
-	{ PD_FLOAT, &drawCmdContext.angle, "lineangle", PDO_NORECORD | BO_ENTER, &r360_360, .group = &linedataPG },
+	{ PD_FLOAT, &drawCmdContext.length, "linelength", PDO_DIM | BO_ENTER, &r0_10000, .group = &linedataPG },
+	{ PD_FLOAT, &drawCmdContext.angle, "lineangle", BO_ENTER, &r360_360, .group = &linedataPG },
 };
 static paramGroup_t linedataPG = { "linedata", PGO_FULLDIALOGFROMBUILDER, linedataPLs, COUNT(linedataPLs) };
 
 static paramGroup_t curvedataPG;
 static paramData_t curvedataPLs[] = {
-	{ PD_FLOAT, &drawCmdContext.angle, "curveangle", PDO_NORECORD | BO_ENTER, &r360_360, .group=&curvedataPG },
-	{ PD_FLOAT, &drawCmdContext.radius, "curveradius", PDO_DIM | PDO_NORECORD | BO_ENTER, &r0_10000, .group=&curvedataPG }
+	{ PD_FLOAT, &drawCmdContext.angle, "curveangle",  BO_ENTER, &r360_360, .group=&curvedataPG },
+	{ PD_FLOAT, &drawCmdContext.radius, "curveradius", PDO_DIM | BO_ENTER, &r0_10000, .group=&curvedataPG }
 };
 static paramGroup_t curvedataPG = { "curvedata", PGO_FULLDIALOGFROMBUILDER, curvedataPLs, COUNT(curvedataPLs) };
 
 static paramGroup_t circledataPG;
 static paramData_t circledataPLs[] = {
-	{ PD_FLOAT, &drawCmdContext.radius, "circledrawradius", PDO_DIM | PDO_NORECORD | BO_ENTER, &r0_10000, .group = &circledataPG }
+	{ PD_FLOAT, &drawCmdContext.radius, "circledrawradius", PDO_DIM | BO_ENTER, &r0_10000, .group = &circledataPG }
 };
 static paramGroup_t circledataPG = { "circledata", PGO_FULLDIALOGFROMBUILDER, circledataPLs, COUNT(circledataPLs) };
 
 static paramGroup_t polygondataPG;
 static paramData_t polygondataPLs[] = {
-	{ PD_FLOAT, &drawCmdContext.length, "polygonlength", PDO_DIM | PDO_NORECORD | BO_ENTER, &r0_10000, .group = &polygondataPG },
-	{ PD_FLOAT, &drawCmdContext.angle, "polygonangle", PDO_NORECORD | BO_ENTER, &r360_360, .group = &polygondataPG },
+	{ PD_FLOAT, &drawCmdContext.length, "polygonlength", PDO_DIM | BO_ENTER, &r0_10000, .group = &polygondataPG },
+	{ PD_FLOAT, &drawCmdContext.angle, "polygonangle",  BO_ENTER, &r360_360, .group = &polygondataPG },
 };
 static paramGroup_t polygondataPG = { "polygondata", PGO_FULLDIALOGFROMBUILDER, polygondataPLs, COUNT(polygondataPLs) };
 
-
-static paramData_t drawPLs[] = {
-#define drawLineWidthPD				(drawPLs[0])
-	{ PD_FLOAT, &lineWidth, "linewidth", PDO_NORECORD, &r100_100, N_("Line Width") },
-#define drawColorPD				(drawPLs[1])
-	{ PD_COLORLIST, &lineColor, "linecolor", PDO_NORECORD, NULL, N_("Color") },
-#define drawBenchColorPD		(drawPLs[2])
-	{ PD_COLORLIST, &benchColor, "benchcolor", PDO_NORECORD, NULL, N_("Color") },
-#define drawBenchChoicePD		(drawPLs[3])
-#ifdef WINDOWS
-	{ PD_COMBOLIST, &benchChoice, "benchlist", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, I2VP(120), N_("Lumber Type") },
-#else
-	{ PD_COMBOLIST, &benchChoice, "benchlist", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, I2VP(145), N_("Lumber Type") },
-#endif
-#define drawBenchOrientPD		(drawPLs[4])
-#ifdef WINDOWS
-	{ PD_COMBOLIST, &benchOrient, "benchorient", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, I2VP(45), "", 0 },
-#else
-	{ PD_COMBOLIST, &benchOrient, "benchorient", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, I2VP(105), "", 0 },
-#endif
-#define drawDimArrowSizePD		(drawPLs[5])
-	{ PD_COMBOLIST, &dimArrowSize, "arrowsize", PDO_NORECORD|PDO_LISTINDEX, I2VP(80), N_("Size") },
-#define drawLengthPD			(drawPLs[6])
-	{ PD_FLOAT, &drawCmdContext.length, "length", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Length") },
-#define drawWidthPD				(drawPLs[7])
-	{ PD_FLOAT, &drawCmdContext.width, "width", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Width") },
-#define drawAnglePD				(drawPLs[8])
-#define drawAngleInx					8
-	{ PD_FLOAT, &drawCmdContext.angle, "angle", PDO_NORECORD|BO_ENTER, &r360_360, N_("Angle") },
-#define drawRadiusPD            (drawPLs[9])
-	{ PD_FLOAT, &drawCmdContext.radius, "radius", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Radius") },
-#define drawLineTypePD			(drawPLs[10])
-	{ PD_COMBOLIST, &drawCmdContext.lineType, "type", PDO_DIM|PDO_NORECORD|BO_ENTER, I2VP(0), N_("Line Type") },
+static paramGroup_t boxdataPG;
+static paramData_t boxdataPLs[] = {
+	{ PD_FLOAT, &drawCmdContext.length, "boxlength", PDO_DIM | BO_ENTER, &r0_10000, .group = &boxdataPG },
+	{ PD_FLOAT, &drawCmdContext.width, "boxwidth", PDO_DIM | BO_ENTER, &r0_10000, .group = &boxdataPG },
 };
-static paramGroup_t drawPG = { "draw", 0, drawPLs, COUNT( drawPLs ) };
+static paramGroup_t boxdataPG = { "boxdata",  PGO_FULLDIALOGFROMBUILDER, boxdataPLs, COUNT(boxdataPLs) };
+
+//static char * objectName[] = {
+//	N_("Straight"),
+//	N_("Dimension"),
+//	N_("Lumber"),
+//	N_("Table Edge"),
+//	N_("Curved"),
+//	N_("Curved"),
+//	N_("Curved"),
+//	N_("Curved"),
+//	N_("Circle"),
+//	N_("Circle"),
+//	N_("Circle"),
+//	N_("Box"),
+//	N_("Polygon"),
+//	N_("Filled Circle"),
+//	N_("Filled Circle"),
+//	N_("Filled Circle"),
+//	N_("Filled Box"),
+//	N_("Filled Polygon"),
+//	N_("Bezier Line"),
+//	N_("Polyline"),
+//	NULL
+//};
 
 
-static char * objectName[] = {
-	N_("Straight"),
-	N_("Dimension"),
-	N_("Lumber"),
-	N_("Table Edge"),
-	N_("Curved"),
-	N_("Curved"),
-	N_("Curved"),
-	N_("Curved"),
-	N_("Circle"),
-	N_("Circle"),
-	N_("Circle"),
-	N_("Box"),
-	N_("Polygon"),
-	N_("Filled Circle"),
-	N_("Filled Circle"),
-	N_("Filled Circle"),
-	N_("Filled Box"),
-	N_("Filled Polygon"),
-	N_("Bezier Line"),
-	N_("Polyline"),
-	NULL
-};
+#define MAX_CONTROLS 5
+#define MAX_LABELS 4
+#define OBJECT_LABEL_SIZE 40
+
+static STATUS_T HandleStartCommand(wAction_t action, BOOL_T* infoSubst);
+static STATUS_T HandleMouseEvents(wAction_t action, coOrd pos);
+static STATUS_T HandleMouseUpEvents(wControl_p* controls, char** labels,
+                                    wAction_t action, coOrd pos, BOOL_T* infoSubst);
+static STATUS_T HandleSpecialCommands(wAction_t action, coOrd pos);
+
+static void SetupOperationControls(void);
+static void SetupLineControls(void);
+static void SetupFillControls(void);
+static void SetupBenchControls(void);
+static void SetupDimLineControls(void);
+static void SetupPostDrawControls(BOOL_T* infoSubst);
+static void SetupCircleControls(void);
+static void SetupCurveControls(void);
+static void SetupLineAndPolyControls(void);
+static void SetupBoxControls(void);
+
+static void PopulateLineTypeList(void);
+static void PopulateDimArrowSizeList(void);
+
+static void InitializeBenchLists(void);
+
+static void UpdateBenchOrientation(void);
+
+static void ConfigureLineColor(void);
+
+static void CreateDrawControls(paramGroup_p pg);
+
 
 static STATUS_T CmdDraw( wAction_t action, coOrd pos )
-
 {
 	static BOOL_T infoSubst = FALSE;
-	wControl_p controls[5];				//Always needs a NULL last entry
-	char * labels[4];
-	static char labelName[40];
-
-	wAction_t act2 = (action&0xFF) | (bezCmdCreateLine<<8);
+	wControl_p controls[MAX_CONTROLS];				//Always needs a NULL last entry
+	char * labels[MAX_LABELS];
 
 	switch (action&0xFF) {
 
 	case C_START:
-		ParamLoadControls( &drawPG );
-		/*drawContext = &drawCmdContext;*/
-		drawLineWidthPD.option |= PDO_NORECORD;
-		drawColorPD.option |= PDO_NORECORD;
-		drawBenchColorPD.option |= PDO_NORECORD;
-		drawBenchChoicePD.option |= PDO_NORECORD;
-		drawBenchOrientPD.option |= PDO_NORECORD;
-		drawDimArrowSizePD.option |= PDO_NORECORD;
-		drawCmdContext.Op = (wIndex_t)VP2L(commandContext);
-		if ( drawCmdContext.Op < 0 || drawCmdContext.Op > OP_LAST ) {
-			NoticeMessage( "cmdDraw: Op %d", _("Ok"), NULL, drawCmdContext.Op );
-			drawCmdContext.Op = OP_LINE;
-		}
-		SetAllTrackSelect( FALSE );
-		/*DrawGeomOp( (drawCmdContext.Op>=0?drawCmdContext.Op:OP_LINE) );*/
-		infoSubst = TRUE;
-		switch( drawCmdContext.Op ) {
-		case OP_LINE:
-		case OP_CURVE1:
-		case OP_CURVE2:
-		case OP_CURVE3:
-		case OP_CURVE4:
-		case OP_CIRCLE2:
-		case OP_CIRCLE3:
-		case OP_BEZLIN:
-		case OP_BOX:
-		case OP_POLY:
-		case OP_POLYLINE:
-			controls[0] = drawLineWidthPD.control;
-			controls[1] = drawColorPD.control;
-	controls[2] = NULL;
+		return(HandleStartCommand(action, &infoSubst));
 
-	sprintf(object, _("%s Line Width"), _(objectName[drawCmdContext.Op]));
-	labels[0] = object;
-	labels[1] = N_("Color");
-			if ( wListGetCount( (wList_p)drawLineTypePD.control ) == 0 ) {
-				wListAddValue( (wList_p)drawLineTypePD.control, _("Solid"), NULL, NULL );
-				wListAddValue( (wList_p)drawLineTypePD.control, _("Dot"), NULL, NULL );
-				wListAddValue( (wList_p)drawLineTypePD.control, _("Dash"), NULL, NULL );
-				wListAddValue( (wList_p)drawLineTypePD.control, _("Dash-Dot"), NULL, NULL );
-				wListAddValue( (wList_p)drawLineTypePD.control, _("Dash-Dot-Dot"), NULL, NULL );
-			}
-			InfoSubstituteControls(drawPG.nameStr, controls, labels);
-			drawLineWidthPD.option &= ~PDO_NORECORD;
-			drawColorPD.option &= ~PDO_NORECORD;
-			drawLineTypePD.option &= ~PDO_NORECORD;
-			break;
-		case OP_FILLCIRCLE2:
-		case OP_FILLCIRCLE3:
-		case OP_FILLBOX:
-		case OP_FILLPOLY:
-			controls[0] = drawColorPD.control;
-			controls[1] = NULL;
-			sprintf( labelName, _("%s Color"), _(objectName[drawCmdContext.Op]) );
-			labels[0] = labelName;
-			ParamLoadControls( &drawPG );
-			InfoSubstituteControls(drawPG.nameStr, controls, labels);
-			drawColorPD.option &= ~PDO_NORECORD;
-			break;
-		case OP_BENCH:
-			controls[0] = drawBenchChoicePD.control;
-			controls[1] = drawBenchOrientPD.control;
-			controls[2] = drawBenchColorPD.control;
-			controls[3] = NULL;
-			labels[0] = N_("Lumber Type");
-			labels[1] = "";
-			labels[2] = N_("Color");
-			if ( wListGetCount( (wList_p)drawBenchChoicePD.control ) == 0 ) {
-				BenchLoadLists( (wList_p)drawBenchChoicePD.control,
-				                (wList_p)drawBenchOrientPD.control );
-			}
-
-			ParamLoadControls( &drawPG );
-			BenchUpdateOrientationList( VP2L(wListGetItemContext( (wList_p)
-			                                 drawBenchChoicePD.control, benchChoice )), (wList_p)drawBenchOrientPD.control );
-			wListSetIndex( (wList_p)drawBenchOrientPD.control, benchOrient );
-			InfoSubstituteControls(drawPG.nameStr, controls, labels);
-			drawBenchColorPD.option &= ~PDO_NORECORD;
-			drawBenchChoicePD.option &= ~PDO_NORECORD;
-			drawBenchOrientPD.option &= ~PDO_NORECORD;
-			drawLengthPD.option &= ~PDO_NORECORD;
-			break;
-		case OP_DIMLINE:
-			controls[0] = drawDimArrowSizePD.control;
-			controls[1] = NULL;
-			labels[0] = N_("Dimension Line Size");
-			if ( wListGetCount( (wList_p)drawDimArrowSizePD.control ) == 0 ) {
-				wListAddValue( (wList_p)drawDimArrowSizePD.control, _("Tiny"), NULL, NULL );
-				wListAddValue( (wList_p)drawDimArrowSizePD.control, _("Small"), NULL, NULL );
-				wListAddValue( (wList_p)drawDimArrowSizePD.control, _("Medium"), NULL, NULL );
-				wListAddValue( (wList_p)drawDimArrowSizePD.control, _("Large"), NULL, NULL );
-			}
-			ParamLoadControls( &drawPG );
-			InfoSubstituteControls(drawPG.nameStr, controls, labels);
-			drawDimArrowSizePD.option &= ~PDO_NORECORD;
-			break;
-		case OP_TBLEDGE:
-			InfoMessage( _("Drag to create Table Edge") );
-			break;
-		default:
-			InfoDefaultControls();
-			infoSubst = FALSE;
-		}
-		ParamGroupRecord( &drawPG );
-		if (drawCmdContext.Op == OP_BEZLIN) { return CmdBezCurve(act2, pos); }
-		DrawGeomMouse( C_START, pos, &drawCmdContext);
 		return C_CONTINUE;
 
 	case wActionLDown:
-		ParamLoadData( &drawPG );
-		if (drawCmdContext.Op == OP_BEZLIN) {
-			act2 = action | (bezCmdCreateLine<<8);
-			return CmdBezCurve(act2, pos);
-		}
-		if ( drawCmdContext.Op == OP_BENCH ) {
-			drawCmdContext.benchOption = GetBenchData( VP2L(wListGetItemContext((
-			                                     wList_p)drawBenchChoicePD.control, benchChoice )), benchOrient );
-			lineColor = benchColor;
-
-		} else if ( drawCmdContext.Op == OP_DIMLINE ) {
-			lineColor = wDrawColorBlack;
-			drawCmdContext.benchOption = dimArrowSize;
-		} else if ( drawCmdContext.Op == OP_TBLEDGE ) {
-			lineColor = wDrawColorBlack;
-		} else {
-			lineColor = lineColor;
-		}
+		ConfigureLineColor();
 		if ( infoSubst ) {
 			InfoDefaultControls();
 			infoSubst = FALSE;
 		}
 	/* no break */
 	case wActionLDrag:
-		ParamLoadData( &drawPG );
+		FormFetchData(&linestylePG);
 	/* no break */
 	case wActionMove:
 	case wActionRDown:
 	case wActionRDrag:
-		if (drawCmdContext.Op == OP_BEZLIN) { return CmdBezCurve(act2, pos); }
-		return DrawGeomMouse( action, pos, &drawCmdContext);
+		return(HandleMouseEvents(action, pos));
+
 	case wActionLUp:
 	case wActionRUp:
-		if (drawCmdContext.Op == OP_BEZLIN) { return CmdBezCurve(act2, pos); }
-		drawCmdContext.show = TRUE;
-		int rc = DrawGeomMouse( action, pos, &drawCmdContext);
-		// Put up text entry boxes ready for updates if the result was continue
-		if (rc == C_CONTINUE && drawCmdContext.show) {
-			switch( drawCmdContext.Op ) {
-			case OP_CIRCLE1:
-			case OP_CIRCLE2:
-			case OP_CIRCLE3:
-			case OP_FILLCIRCLE1:
-			case OP_FILLCIRCLE2:
-			case OP_FILLCIRCLE3:
-				controls[0] = drawRadiusPD.control;
-				controls[1] = NULL;
-				labels[0] = N_("Radius");
-				ParamLoadControls( &drawPG );
-				InfoSubstituteControls(drawPG.nameStr, controls, labels);
-				drawRadiusPD.option &= ~PDO_NORECORD;
-				infoSubst = TRUE;
-				break;
-			case OP_CURVE1:
-			case OP_CURVE2:
-			case OP_CURVE3:
-			case OP_CURVE4:
-				if (drawCmdContext.ArcData.type == curveTypeCurve) {
-					controls[0] = drawRadiusPD.control;
-					controls[1] = drawAnglePD.control;
-					controls[2] = NULL;
-					labels[0] = N_("Radius");
-					labels[1] = N_("Arc Angle");
-				} else {
-					controls[0] = drawLengthPD.control;
-					controls[1] = drawAnglePD.control;
-					controls[2] = NULL;
-					labels[0] = N_("Length");
-					labels[1] = N_("Angle");
-				}
-				ParamLoadControls( &drawPG );
-				InfoSubstituteControls(drawPG.nameStr, controls, labels);
-				drawLengthPD.option &= ~PDO_NORECORD;
-				drawRadiusPD.option &= ~PDO_NORECORD;
-				drawAnglePD.option &= ~PDO_NORECORD;
-				infoSubst = TRUE;
-				break;
-			case OP_LINE:
-			case OP_BENCH:
-			case OP_TBLEDGE:
-			case OP_POLY:
-			case OP_FILLPOLY:
-			case OP_POLYLINE:
-				controls[0] = drawLengthPD.control;
-				controls[1] = drawAnglePD.control;
-				controls[2] = NULL;
-				labels[0] = N_("Seg Length");
-				if (drawCmdContext.Op == OP_LINE || drawCmdContext.Op  == OP_BENCH
-				    || drawCmdContext.Op == OP_TBLEDGE) {
-					labels[1] = N_("Angle");
-				} else if (drawCmdContext.index > 0 ) {
-					labels[1] = N_("Rel Angle");
-				} else {
-					labels[1] = N_("Angle");
-				}
-				ParamLoadControls( &drawPG );
-				InfoSubstituteControls(drawPG.nameStr, controls, labels);
-				drawLengthPD.option &= ~PDO_NORECORD;
-				drawAnglePD.option &= ~PDO_NORECORD;
-				infoSubst = TRUE;
-				break;
-			case OP_BOX:
-			case OP_FILLBOX:
-				controls[0] = drawLengthPD.control;
-				controls[1] = drawWidthPD.control;
-				controls[2] = NULL;
-				labels[0] = N_("Length");
-				labels[1] = N_("Width");
-				ParamLoadControls( &drawPG );
-				InfoSubstituteControls(drawPG.nameStr, controls, labels);
-				drawLengthPD.option &= ~PDO_NORECORD;
-				drawWidthPD.option &= ~PDO_NORECORD;
-				infoSubst = TRUE;
-				break;
-			default:
-				break;
-			}
-		}
-		return rc;
+		return HandleMouseUpEvents(controls, labels, action, pos, &infoSubst);
 
 	case C_CANCEL:
-		InfoDefaultControls();
-		if (drawCmdContext.Op == OP_BEZLIN) { return CmdBezCurve(act2, pos); }
-		return DrawGeomMouse( action, pos, &drawCmdContext);
 	case C_TEXT:
-		if (drawCmdContext.Op == OP_BEZLIN) { return CmdBezCurve(action, pos); }
-		return DrawGeomMouse( action, pos, &drawCmdContext);
 	case C_OK:
-		if (drawCmdContext.Op == OP_BEZLIN) { return CmdBezCurve(act2, pos); }
-		return DrawGeomMouse( (0x0D<<8|wActionText), pos, &drawCmdContext);
 	case C_CONFIRM:
-		if (drawCmdContext.Op == OP_BEZLIN) { return CmdBezCurve(act2, pos); }
-		return DrawGeomMouse( (0x0D<<8|wActionText), pos, &drawCmdContext);
-
 	case C_FINISH:
-		if (drawCmdContext.Op == OP_BEZLIN) { return CmdBezCurve(act2, pos); }
-		return DrawGeomMouse( (0x0D<<8|wActionText), pos, &drawCmdContext);
-	/*DrawOk( NULL );*/
-
 	case C_REDRAW:
-		if (drawCmdContext.Op == OP_BEZLIN) { return CmdBezCurve(act2, pos); }
-		return DrawGeomMouse( action, pos, &drawCmdContext);
-
 	case C_CMDMENU:
-		if (drawCmdContext.Op == OP_BEZLIN) { return C_CONTINUE; }
-		return DrawGeomMouse( action, pos, &drawCmdContext);
-
+		return(HandleSpecialCommands(action, pos));
 	default:
 		return C_CONTINUE;
 	}
+}
+
+static STATUS_T
+HandleStartCommand(wAction_t action, BOOL_T* infoSubst)
+{
+	static char objectLabel[OBJECT_LABEL_SIZE];
+
+	// \todo needs work to be activated
+	//if (!magneticSnap) {
+	//	InfoMessage(_("+Alt for Magnetic Snap"));
+	//}
+	//else {
+	//	InfoMessage(_("+Alt to inhibit Magnetic Snap"));
+	//}
+
+	drawCmdContext.Op = (wIndex_t)VP2L(commandContext);
+	if (drawCmdContext.Op < 0 || drawCmdContext.Op > OP_LAST) {
+		NoticeMessage("cmdDraw: Op %d", _("Ok"), NULL, drawCmdContext.Op);
+		drawCmdContext.Op = OP_LINE;
+	}
+
+	SetAllTrackSelect(FALSE);
+	*infoSubst = TRUE;
+
+	SetupOperationControls();
+
+	if (drawCmdContext.Op == OP_BEZLIN) {
+		wAction_t act2 = action | (bezCmdCreateLine << 8);
+		return CmdBezCurve(act2, (coOrd) { 0, 0 });
+	}
+	DrawGeomMouse(C_START, (coOrd) { 0, 0 }, &drawCmdContext);
+
+	return(C_CONTINUE);
+}
+
+static void SetupOperationControls()
+{
+	switch (drawCmdContext.Op) {
+	case OP_LINE:
+	case OP_CURVE1:
+	case OP_CURVE2:
+	case OP_CURVE3:
+	case OP_CURVE4:
+	case OP_CIRCLE2:
+	case OP_CIRCLE3:
+	case OP_BEZLIN:
+	case OP_BOX:
+	case OP_POLY:
+	case OP_POLYLINE:
+		SetupLineControls();
+		break;
+
+	case OP_FILLCIRCLE2:
+	case OP_FILLCIRCLE3:
+	case OP_FILLBOX:
+	case OP_FILLPOLY:
+		SetupFillControls();
+		break;
+
+	case OP_BENCH:
+		SetupBenchControls();
+		break;
+
+	case OP_DIMLINE:
+		SetupDimLineControls();
+		break;
+	case OP_TBLEDGE:
+		InfoMessage(_("Drag to create Table Edge"));
+		return;
+	default:
+		InfoDefaultControls();
+		infoSubst = FALSE;
+	}
+}
+
+#define PAGE_PRE_LINE "linestyle"
+#define PAGE_PRE_FILLED "filledobject"
+#define PAGE_PRE_BENCH "benchstyle"
+#define PAGE_PRE_DIMENSION "dimensionstyle"
+
+
+static void SetupLineControls()
+{
+	CreateDrawControls(&linestylePG);
+
+	PopulateLineTypeList();
+
+	FormLoadControls(&linestylePG);
+	InfoSetControls(mainW, PAGE_PRE_LINE);
+}
+
+static void SetupFillControls()
+{
+	CreateDrawControls(&filledobjectPG);
+
+	FormLoadControls(&filledobjectPG);
+	InfoSetControls(mainW, PAGE_PRE_FILLED);
+
+	filledobjectPLs[0].option &= ~PDO_NORECORD;
+}
+
+static void SetupBenchControls()
+{
+	CreateDrawControls(&benchstylePG);
+
+	InitializeBenchLists();
+	FormLoadControls(&benchstylePG);
+	UpdateBenchOrientation();
+
+	InfoSetControls(mainW, PAGE_PRE_BENCH);
+}
+
+static void SetupDimLineControls()
+{
+	CreateDrawControls(&dimensionlinePG);
+
+	PopulateDimArrowSizeList();
+	FormLoadControls(&dimensionlinePG);
+	InfoSetControls(mainW, PAGE_PRE_DIMENSION);
+
+	dimensionlinePLs[0].option &= ~PDO_NORECORD;
+}
+
+static void CreateDrawControls(paramGroup_p pg)
+{
+	paramData_p paramPLs = pg->paramPtr;
+
+	if (paramPLs[0].control == NULL) {
+		FormCreateControls(pg);
+	}
+}
+
+static void PopulateLineTypeList(void)
+{
+	//will be populated with strings by builder
+	//
+	//if (wListGetCount(drawLineTypePD.control) == 0) {
+	//	wListAddValue(drawLineTypePD.control, _("Solid"), NULL, NULL);
+	//	wListAddValue(drawLineTypePD.control, _("Dot"), NULL, NULL);
+	//	wListAddValue(drawLineTypePD.control, _("Dash"), NULL, NULL);
+	//	wListAddValue(drawLineTypePD.control, _("Dash-Dot"), NULL, NULL);
+	//	wListAddValue(drawLineTypePD.control, _("Dash-Dot-Dot"), NULL, NULL);
+	//}
+}
+
+static void PopulateDimArrowSizeList(void)
+{
+	//will be populated with strings by builder
+	// wControl_p listControl = dimensionlinePLs[DIMENSION_ARROW].control;
+
+	//if (wComboBoxGetCount(listControl) == 0) {
+	//	wComboBoxAddValue(listControl, _("Tiny"), NULL);
+	//	wComboBoxAddValue(listControl, _("Small"), NULL);
+	//	wComboBoxAddValue(listControl, _("Medium"), NULL);
+	//	wComboBoxAddValue(listControl, _("Large"), NULL);
+	//}
+}
+
+static void InitializeBenchLists(void)
+{
+	//will be populated with strings by builder
+	wControl_p choiceControl = benchstylePLs[BENCH_CHOICE].control;
+	wControl_p orientControl = benchstylePLs[BENCH_ORIENTATION].control;
+
+	if (wListGetCount(choiceControl) == 0) {
+		BenchLoadLists(choiceControl, orientControl);
+	}
+}
+
+static void UpdateBenchOrientation(void)
+{
+	wControl_p choiceControl = benchstylePLs[BENCH_CHOICE].control;
+	wControl_p orientControl = benchstylePLs[BENCH_ORIENTATION].control;
+
+	//will be populated with strings by builder
+
+	BenchUpdateOrientationList(VP2L(wListGetItemContext(
+	                                        choiceControl, benchChoice)),
+	                           orientControl);
+	wListSetIndex(orientControl, benchOrient);
+}
+
+
+
+static void ConfigureLineColor(void)
+{
+	switch (drawCmdContext.Op) {
+	case OP_BENCH:
+		drawCmdContext.benchOption = GetBenchData(VP2L(wListGetItemContext(
+		                                     benchstylePLs[BENCH_ORIENTATION].control, benchChoice)), benchOrient);
+		lineColor = benchColor;
+		break;
+
+	case OP_DIMLINE:
+		lineColor = wDrawColorBlack;
+		drawCmdContext.benchOption = dimArrowSize;
+		break;
+
+	case OP_TBLEDGE:
+		lineColor = wDrawColorBlack;
+		break;
+
+	default:
+		// lineColor remains unchanged
+		break;
+	}
+}
+
+static STATUS_T HandleMouseEvents(wAction_t action, coOrd pos)
+{
+	if (drawCmdContext.Op == OP_BEZLIN) {
+		wAction_t act2 = action | (bezCmdCreateLine << 8);
+		return CmdBezCurve(act2, pos);
+	}
+
+	return DrawGeomMouse(action, pos, &drawCmdContext);
+}
+
+static STATUS_T HandleMouseUpEvents(wControl_p* controls, char** labels,
+                                    wAction_t action,
+                                    coOrd pos, BOOL_T* infoSubst)
+{
+	if (drawCmdContext.Op == OP_BEZLIN) {
+		wAction_t act2 = action | (bezCmdCreateLine << 8);
+		return CmdBezCurve(act2, pos);
+	}
+
+	drawCmdContext.show = TRUE;
+	int rc = DrawGeomMouse(action, pos, &drawCmdContext);
+
+	if (rc == C_CONTINUE && drawCmdContext.show) {
+		SetupPostDrawControls(infoSubst);
+	}
+
+	return rc;
+}
+
+#define PAGE_POST_CIRCLE "circledata"
+#define PAGE_POST_CURVE "curvedata"
+#define PAGE_POST_LINE "linedata"
+#define PAGE_POST_BOX "boxdata"
+#define PAGE_POST_POLYGON "polygondata"
+
+
+static void SetupPostDrawControls(BOOL_T* infoSubst)
+{
+	switch (drawCmdContext.Op) {
+	case OP_CIRCLE1:
+	case OP_CIRCLE2:
+	case OP_CIRCLE3:
+	case OP_FILLCIRCLE1:
+	case OP_FILLCIRCLE2:
+	case OP_FILLCIRCLE3:
+		SetupCircleControls();
+		*infoSubst = TRUE;
+		break;
+
+	case OP_CURVE1:
+	case OP_CURVE2:
+	case OP_CURVE3:
+	case OP_CURVE4:
+		SetupCurveControls();
+		*infoSubst = TRUE;
+		break;
+
+	case OP_LINE:
+	case OP_BENCH:
+	case OP_TBLEDGE:
+	case OP_POLY:
+	case OP_FILLPOLY:
+	case OP_POLYLINE:
+		SetupLineAndPolyControls();
+		*infoSubst = TRUE;
+		break;
+
+	case OP_BOX:
+	case OP_FILLBOX:
+		SetupBoxControls();
+		*infoSubst = TRUE;
+		break;
+
+	default:
+		break;
+	}
+}
+
+
+static void SetupCircleControls()
+{
+	CreateDrawControls(&circledataPG);
+
+	FormLoadControls(&circledataPG);
+	InfoSetControls(mainW, PAGE_POST_CIRCLE);
+}
+
+static void SetupCurveControls()
+{
+	CreateDrawControls(&curvedataPG);
+
+	FormLoadControls(&curvedataPG);
+	InfoSetControls( mainW, PAGE_POST_CURVE);
+
+}
+
+static void SetupLineAndPolyControls()
+{
+	CreateDrawControls(&polygondataPG);
+
+	FormLoadControls(&polygondataPG);
+	InfoSetControls( mainW, PAGE_POST_POLYGON);
+}
+
+static void SetupBoxControls()
+{
+	CreateDrawControls(&boxdataPG);
+
+	FormLoadControls(&boxdataPG);
+	InfoSetControls(mainW, PAGE_POST_BOX);
+
+}
+
+static STATUS_T HandleSpecialCommands(wAction_t action, coOrd pos)
+{
+	switch (action & 0xFF) {
+	case C_CANCEL:
+		InfoDefaultControls();
+		break;
+
+	case C_OK:
+	case C_CONFIRM:
+	case C_FINISH:
+		if (drawCmdContext.Op == OP_BEZLIN) {
+			wAction_t act2 = (action & 0xFF) | (bezCmdCreateLine << 8);
+			return CmdBezCurve(act2, pos);
+		}
+		return DrawGeomMouse((0x0D << 8 | wActionText), pos, &drawCmdContext);
+
+	case C_CMDMENU:
+		if (drawCmdContext.Op == OP_BEZLIN) {
+			return C_CONTINUE;
+		}
+		break;
+	}
+
+	if (drawCmdContext.Op == OP_BEZLIN) {
+		wAction_t act2 = (action & 0xFF) | (bezCmdCreateLine << 8);
+		return CmdBezCurve(act2, pos);
+	}
+
+	return DrawGeomMouse(action, pos, &drawCmdContext);
 }
 
 typedef struct {
@@ -3275,14 +3403,17 @@ static drawStuff_t drawStuff[4] = {
 static void ChangeDraw( long changes )
 {
 	wIndex_t choice, orient;
+
 	if ( changes & CHANGE_UNITS ) {
-		if ( drawBenchChoicePD.control && drawBenchOrientPD.control ) {
-			choice = wListGetIndex( (wList_p)drawBenchChoicePD.control );
-			orient = wListGetIndex( (wList_p)drawBenchOrientPD.control );
-			BenchLoadLists( (wList_p)drawBenchChoicePD.control,
-			                (wList_p)drawBenchOrientPD.control );
-			wListSetIndex( (wList_p)drawBenchChoicePD.control, choice );
-			wListSetIndex( (wList_p)drawBenchOrientPD.control, orient );
+		wControl_p choiceControl = benchstylePLs[BENCH_CHOICE].control;
+		wControl_p orientControl = benchstylePLs[BENCH_ORIENTATION].control;
+
+		if (choiceControl && orientControl) {
+			choice = wListGetIndex( choiceControl );
+			orient = wListGetIndex( orientControl );
+			BenchLoadLists( choiceControl, orientControl );
+			wListSetIndex(choiceControl, choice );
+			wListSetIndex(orientControl, orient );
 		}
 	}
 }
