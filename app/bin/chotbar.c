@@ -162,37 +162,67 @@ static wBool_t ScrollButtonStatus(void)
 
 	return TRUE;
 }
+static void
+DrawElement(hotBarMap_t* tbm, DIST_T baseX, DIST_T barWidth, DIST_T barHeight, DIST_T labelX)
+{
+	DIST_T hh = (double)(hotBarHeight + 1) / hotBarD.dpi;
+	DIST_T barScale = tbm->barScale;
+	DIST_T x = baseX;
+	coOrd orig;
+
+	// Calculate Y position (common to both functions)
+	orig.y = barScale / hotBarD.dpi + hh / 2.0 * barScale - tbm->size.y / 2.0 - tbm->orig.y;
+
+	// Handle labels if enabled
+	if (hotBarLabels) {
+		orig.y += hotBarTextHeight / hotBarD.dpi * barScale;
+		if (tbm->labelW > tbm->objectW) {
+			x += (tbm->labelW - tbm->objectW) / 2;
+		}
+	}
+
+	// Apply scaling and origin offset
+	x *= barScale;
+	x -= tbm->orig.x;
+	orig.x = x;
+
+	// Set up drawing context
+	hotBarD.scale = barScale;
+	hotBarD.size.x = barWidth * barScale;
+	hotBarD.size.y = barHeight * barScale;
+
+	// Draw the element
+	tbm->proc(HB_DRAW, tbm->context, &hotBarD, &orig);
+
+	// Add label
+	AddLabel(tbm, labelX);
+}
 
 static DIST_T
 DrawFixedElements(DIST_T barWidth, DIST_T barHeight)
 {
 	DIST_T fixed_x = 0.0;
-	DIST_T hh = (double)(hotBarHeight + 1) / hotBarD.dpi;
 
-	if ( hotBarMap_da.cnt > 0 && hotBarMap(0).isFixed && hotBarCurrStart > 0 )
-	{				
-		coOrd orig;
+	if (hotBarMap_da.cnt > 0 && hotBarMap(0).isFixed && hotBarCurrStart > 0) {
 		hotBarMap_t* tbm = &hotBarMap(0);
-		DIST_T barScale = tbm->barScale;
 		DIST_T x = 0.0;
-		orig.y = barScale / hotBarD.dpi + hh / 2.0 * barScale - tbm->size.y / 2.0 - tbm->orig.y;
+
+		// Calculate fixed width and x position
 		if (hotBarLabels) {
-			orig.y += hotBarTextHeight / hotBarD.dpi * barScale;
 			if (tbm->labelW > tbm->objectW) {
 				fixed_x = tbm->labelW;
 				x += (tbm->labelW - tbm->objectW) / 2;
 			}
-			else { fixed_x = tbm->objectW; }
+			else {
+				fixed_x = tbm->objectW;
+			}
 		}
-		else { fixed_x = tbm->objectW; }
-		x *= barScale;
-		orig.x = x;
-		hotBarD.scale = barScale;
-		hotBarD.size.x = barWidth * barScale;
-		hotBarD.size.y = barHeight * barScale;
-		tbm->proc(HB_DRAW, tbm->context, &hotBarD, &orig);
+		else {
+			fixed_x = tbm->objectW;
+		}
 
-		AddLabel(tbm, 0.0);
+		// Draw the fixed element
+		DrawElement(tbm, x, barWidth, barHeight, 0.0);
 	}
 
 	return fixed_x;
@@ -201,38 +231,98 @@ DrawFixedElements(DIST_T barWidth, DIST_T barHeight)
 static int
 DrawVariableElements(DIST_T xStart, DIST_T barWidth, DIST_T barHeight)
 {
-	DIST_T hh = (double)(hotBarHeight + 1) / hotBarD.dpi;
 	int inx;
 
 	for (inx = hotBarCurrStart; inx < hotBarMap_da.cnt; inx++) {
-		hotBarMap_t *tbm = &hotBarMap(inx);
-		DIST_T barScale = tbm->barScale;
-		DIST_T x = 0.0;
-		coOrd orig;
+		hotBarMap_t* tbm = &hotBarMap(inx);
 
-		x = tbm->x - hotBarMap(hotBarCurrStart).x + xStart;
+		// Calculate position relative to start
+		DIST_T x = tbm->x - hotBarMap(hotBarCurrStart).x + xStart;
+
+		// Check if element fits within bar width
 		if (x + tbm->w > barWidth) {
 			break;
 		}
-		orig.y = barScale / hotBarD.dpi + hh / 2.0 * barScale - tbm->size.y / 2.0 - tbm->orig.y;
-		if (hotBarLabels) {
-			orig.y += hotBarTextHeight / hotBarD.dpi * barScale;
-			if (tbm->labelW > tbm->objectW) {
-				x += (tbm->labelW - tbm->objectW) / 2;
-			}
-		}
-		x *= barScale;
-		x -= tbm->orig.x;
-		orig.x = x;
-		hotBarD.scale = barScale;
-		hotBarD.size.x = barWidth * barScale;
-		hotBarD.size.y = barHeight * barScale;
-		tbm->proc(HB_DRAW, tbm->context, &hotBarD, &orig);
 
-		AddLabel(tbm, tbm->x - hotBarMap(hotBarCurrStart).x + xStart);
+		// Calculate label position for AddLabel
+		DIST_T labelX = tbm->x - hotBarMap(hotBarCurrStart).x + xStart;
+
+		// Draw the variable element
+		DrawElement(tbm, x, barWidth, barHeight, labelX);
 	}
-	return(inx);
+
+	return inx;
 }
+//static DIST_T
+//DrawFixedElements(DIST_T barWidth, DIST_T barHeight)
+//{
+//	DIST_T fixed_x = 0.0;
+//	DIST_T hh = (double)(hotBarHeight + 1) / hotBarD.dpi;
+//
+//	if ( hotBarMap_da.cnt > 0 && hotBarMap(0).isFixed && hotBarCurrStart > 0 )
+//	{				
+//		coOrd orig;
+//		hotBarMap_t* tbm = &hotBarMap(0);
+//		DIST_T barScale = tbm->barScale;
+//		DIST_T x = 0.0;
+//		orig.y = barScale / hotBarD.dpi + hh / 2.0 * barScale - tbm->size.y / 2.0 - tbm->orig.y;
+//		if (hotBarLabels) {
+//			orig.y += hotBarTextHeight / hotBarD.dpi * barScale;
+//			if (tbm->labelW > tbm->objectW) {
+//				fixed_x = tbm->labelW;
+//				x += (tbm->labelW - tbm->objectW) / 2;
+//			}
+//			else { fixed_x = tbm->objectW; }
+//		}
+//		else { fixed_x = tbm->objectW; }
+//		x *= barScale;
+//		orig.x = x;
+//		hotBarD.scale = barScale;
+//		hotBarD.size.x = barWidth * barScale;
+//		hotBarD.size.y = barHeight * barScale;
+//		tbm->proc(HB_DRAW, tbm->context, &hotBarD, &orig);
+//
+//		AddLabel(tbm, 0.0);
+//	}
+//
+//	return fixed_x;
+//}
+//
+//static int
+//DrawVariableElements(DIST_T xStart, DIST_T barWidth, DIST_T barHeight)
+//{
+//	DIST_T hh = (double)(hotBarHeight + 1) / hotBarD.dpi;
+//	int inx;
+//
+//	for (inx = hotBarCurrStart; inx < hotBarMap_da.cnt; inx++) {
+//		hotBarMap_t *tbm = &hotBarMap(inx);
+//		DIST_T barScale = tbm->barScale;
+//		DIST_T x = 0.0;
+//		coOrd orig;
+//
+//		x = tbm->x - hotBarMap(hotBarCurrStart).x + xStart;
+//		if (x + tbm->w > barWidth) {
+//			break;
+//		}
+//		orig.y = barScale / hotBarD.dpi + hh / 2.0 * barScale - tbm->size.y / 2.0 - tbm->orig.y;
+//		if (hotBarLabels) {
+//			orig.y += hotBarTextHeight / hotBarD.dpi * barScale;
+//			if (tbm->labelW > tbm->objectW) {
+//				x += (tbm->labelW - tbm->objectW) / 2;
+//			}
+//		}
+//		x *= barScale;
+//		x -= tbm->orig.x;
+//		orig.x = x;
+//		hotBarD.scale = barScale;
+//		hotBarD.size.x = barWidth * barScale;
+//		hotBarD.size.y = barHeight * barScale;
+//		tbm->proc(HB_DRAW, tbm->context, &hotBarD, &orig);
+//
+//		AddLabel(tbm, tbm->x - hotBarMap(hotBarCurrStart).x + xStart);
+//	}
+//	return(inx);
+//}
 
 static void
 AddLabel(hotBarMap_t* tbm, POS_T xPos)
