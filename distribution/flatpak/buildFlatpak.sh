@@ -483,6 +483,8 @@ finish-args:
   - --socket=x11
   - --socket=wayland
   - --socket=session-bus
+  - --socket=cups
+  - --socket=pulseaudio
   - --share=ipc
   - --device=all
   - --filesystem=~/.xtrkcad${BETA_SUFFIX}:create
