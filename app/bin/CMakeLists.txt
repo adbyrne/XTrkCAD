@@ -105,7 +105,7 @@ target_sources(xtrkcad-lib
     celev.c
     cgroup.c
     chndldto.c
-    chotbar.c
+
     cjoin.c
     cjoin.h
     cmisc.c
