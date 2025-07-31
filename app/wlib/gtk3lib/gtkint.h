@@ -94,6 +94,9 @@ struct bitmap {
 struct button {
 	wButtonCallBack_p action;
 	wIcon_p icon;
+	wBool_t is_pressed;
+	guint timeout_id;
+	enum TIMER_STATE timer_state;
 };
 
 struct choice {
