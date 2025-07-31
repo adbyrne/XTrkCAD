@@ -32,9 +32,6 @@ EXPORT DIST_T curBarScale = -1;
 EXPORT long hotBarLabels = 0;
 EXPORT wWinPix_t hotBarHeight = 32;
 
-//#include "bitmaps/hotbarl.xbm"
-//#include "bitmaps/hotbarr.xbm"
-
 #define HOTBAR_LEFT 2
 
 static wControl_p hotBarLeftB = NULL;
@@ -155,12 +152,12 @@ static wBool_t ScrollButtonStatus(void)
 	if (hotBarCurrStart >0) {
 		wControlActive((wControl_p)hotBarLeftB, TRUE);
 	} else {
-		wButtonSetBusy(hotBarLeftB, FALSE);
+		//wButtonSetBusy(hotBarLeftB, FALSE);
 		wControlActive((wControl_p)hotBarLeftB, FALSE);
 	}
 
 	if (hotBarCurrStart < 0) {
-		wButtonSetBusy(hotBarRightB, FALSE);
+		//wButtonSetBusy(hotBarRightB, FALSE);
 		wControlActive((wControl_p)hotBarRightB, FALSE);
 		return FALSE;
 	}
@@ -519,7 +516,7 @@ EXPORT void AddHotBarElement(
 	if ( contentsLabel
 	     && strncmp(contentsLabel, curContentsLabel, sizeof curContentsLabel) != 0
 	     && !isFixed ) {
-		wMenuListAdd( hotBarML, hotBarMLcnt++, contentsLabel, I2VP(hotBarMap_da.cnt) );
+		//wMenuListAdd( hotBarML, hotBarMLcnt++, contentsLabel, I2VP(hotBarMap_da.cnt) );
 		strncpy( curContentsLabel, contentsLabel, sizeof(curContentsLabel)-1 );
 	}
 	if (barScale <= 0) {
@@ -606,11 +603,15 @@ EXPORT void InitHotBar( void )
 
 	AddParam( "BARSCALE", SetHotBarScale );
 	AddPlaybackProc( "HOTBARSELECT", (playbackProc_p)HotBarSelectPlayback, NULL );
+
 	RegisterChangeNotification( ChangeHotBar );
+	
 	wPrefGetInteger( "misc", "hotbar-start", &v, hotBarCurrStart );
 	hotBarCurrStart = (int)v;
-	hotbarPopupM = MenuRegister( "Hotbar Select" );
-	hotBarML = wMenuListCreate( hotbarPopupM, "", -1, HotbarJump );
+	
+	//hotbarPopupM = MenuRegister( "Hotbar Select" );
+	//hotBarML = wMenuListCreate( hotbarPopupM, "", -1, HotbarJump );
+
 	hotBarHeight = hotBarDrawHeight[iconSize];
 	hotBarFs = hotBarFontSize[iconSize];
 }
@@ -629,39 +630,50 @@ EXPORT void LayoutHotBar( void * redraw )
 		hbHeight += hotBarTextHeight;
 	}
 	if (hotBarLeftB == NULL) {
-		wIcon_p bm_p;
 		if (winWidth < 50) {
 			return;
 		}
-		bm_p = wIconCreateBitMap( 16, 16, turnbarl_bits, wDrawColorBlack );
-		hotBarLeftB = wButtonCreate( mainW, 0, 0, "hotBarLeft", (char*)bm_p,
-		                             BO_ICON|BO_REPEAT, 0, DoHotBarLeft, NULL );
-		bm_p = wIconCreateBitMap( 16, 16, turnbarr_bits, wDrawColorBlack );
-		hotBarRightB = wButtonCreate( mainW, 0, 0, "hotBarRight", (char*)bm_p,
-		                              BO_ICON|BO_REPEAT, 0, DoHotBarRight, NULL );
-		hotBarD.d = wDrawCreate( mainW, 0, 0, NULL, 0, 100,
+		
+		hotBarLeftB = wButtonCreate( mainW, 0, 0, "hotBarLeft", NULL,
+		                             BO_REPEAT, 0, DoHotBarLeft, NULL );
+
+		hotBarRightB = wButtonCreate( mainW, 0, 0, "hotBarRight", NULL,
+		                              BO_REPEAT, 0, DoHotBarRight, NULL );
+
+		hotBarD.d = wDrawCreate(mainW, 0, 0, "hotBarDraw", 0, 100,
 		                         hbHeight, NULL, RedrawHotBar, SelectHotBar );
+
 		hotBarD.dpi = wDrawGetDPI( hotBarD.d );
 		hotBarD.scale = 1.0;
+
 		wSetCursor(hotBarD.d,wCursorNormal);
 		initialize = TRUE;
 	}
-	buttonWidth = wControlGetWidth((wControl_p)hotBarLeftB);
-	buttonHeight = wControlGetHeight((wControl_p)hotBarLeftB);
-	wControlSetPos( (wControl_p)hotBarLeftB, HOTBAR_LEFT,
-	                ToolbarGetHeight() +(hbHeight-buttonHeight)/2 );
-	wControlSetPos( (wControl_p)hotBarRightB, winWidth-20-buttonWidth+HOTBAR_LEFT+1,
-	                ToolbarGetHeight() +(hbHeight-buttonHeight)/2 );
-	wControlSetPos( (wControl_p)hotBarD.d, buttonWidth+HOTBAR_LEFT+1,
-	                ToolbarGetHeight());
-	wDrawSetSize( hotBarD.d, winWidth-20-buttonWidth*2, hbHeight+2, redraw );
-	hotBarD.size.x = ((double)(winWidth-20
-	                           -buttonWidth*2))/hotBarD.dpi*hotBarD.scale;
-	hotBarD.size.y = (double)
-	                 hotBarHeight/hotBarD.dpi*hotBarD.scale;  //Exclude Label from calc
+	//buttonWidth = wControlGetWidth((wControl_p)hotBarLeftB);
+	//buttonHeight = wControlGetHeight((wControl_p)hotBarLeftB);
+	//wControlSetPos( (wControl_p)hotBarLeftB, HOTBAR_LEFT,
+	//                ToolbarGetHeight() +(hbHeight-buttonHeight)/2 );
+	//wControlSetPos( (wControl_p)hotBarRightB, winWidth-20-buttonWidth+HOTBAR_LEFT+1,
+	//                ToolbarGetHeight() +(hbHeight-buttonHeight)/2 );
+	//wControlSetPos( (wControl_p)hotBarD.d, buttonWidth+HOTBAR_LEFT+1,
+	//                ToolbarGetHeight());
+	//wDrawSetSize( hotBarD.d, winWidth-20-buttonWidth*2, hbHeight+2, redraw );
+
+	wWinPix_t width, height;
+	wDrawGetSize(hotBarD.d, &width, &height);
+
+	hotBarD.size.x = width;
+	hotBarD.size.y = height;
+
+	//hotBarD.size.x = ((double)(winWidth-20
+	//                           -buttonWidth*2))/hotBarD.dpi*hotBarD.scale;
+	//hotBarD.size.y = (double)
+	//                 hotBarHeight/hotBarD.dpi*hotBarD.scale;  //Exclude Label from calc
+
 	wControlShow( (wControl_p)hotBarLeftB, TRUE );
 	wControlShow( (wControl_p)hotBarRightB, TRUE );
 	wControlShow( (wControl_p)hotBarD.d, TRUE );
+
 	if (initialize) {
 		ChangeHotBar( CHANGE_PARAMS );
 	} else if (!redraw) {
