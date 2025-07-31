@@ -101,7 +101,6 @@
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
-                <property name="double-buffered">False</property>
                 <property name="use-underline">True</property>
                 <property name="always-show-image">True</property>
                 <child>
@@ -120,7 +119,6 @@
             </child>
             <child>
               <object class="GtkDrawingArea" id="hotBarDraw">
-                <property name="height-request">30</property>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="hexpand">True</property>
@@ -170,8 +168,6 @@
         </child>
         <child>
           <object class="GtkDrawingArea" id="maindraw">
-            <property name="width-request">500</property>
-            <property name="height-request">500</property>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="hexpand">True</property>

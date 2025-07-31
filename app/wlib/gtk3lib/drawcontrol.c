@@ -688,8 +688,11 @@ wControl_p wDrawCreate(
 		drawControl->widget = wlibWidgetFromIdWarn(parent, helpStr);
 	} else {
 		drawControl->widget = gtk_drawing_area_new();
-		gtk_widget_set_size_request( GTK_WIDGET(drawControl->widget), width, height );
+		
 	}
+	width = width ? width : -1;
+	height = height ? height : -1;
+	gtk_widget_set_size_request(GTK_WIDGET(drawControl->widget), width, height);
 
 	wlibControlGetSize((wControl_p)drawControl);
 

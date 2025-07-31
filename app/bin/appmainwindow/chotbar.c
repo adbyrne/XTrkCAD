@@ -83,6 +83,7 @@ static DIST_T DrawFixedElements(DIST_T barWidth, DIST_T barHeight);
 static int DrawVariableElements(DIST_T xStart, DIST_T barWidth,
                                 DIST_T barHeight);
 static void AddLabel(hotBarMap_t* tbm, POS_T xPos);
+static void ShowHotBar(wBool_t show);
 
 static void HotBarHighlight( int inx, DIST_T fixed_x )
 {
@@ -633,31 +634,23 @@ EXPORT void LayoutHotBar( void * redraw )
 		if (winWidth < 50) {
 			return;
 		}
-		
-		hotBarLeftB = wButtonCreate( mainW, 0, 0, "hotBarLeft", NULL,
-		                             BO_REPEAT, 0, DoHotBarLeft, NULL );
 
-		hotBarRightB = wButtonCreate( mainW, 0, 0, "hotBarRight", NULL,
-		                              BO_REPEAT, 0, DoHotBarRight, NULL );
+		hotBarLeftB = wButtonCreate(mainW, 0, 0, "hotBarLeft", NULL,
+			BO_REPEAT, 0, DoHotBarLeft, NULL);
 
-		hotBarD.d = wDrawCreate(mainW, 0, 0, "hotBarDraw", 0, 100,
-		                         hbHeight, NULL, RedrawHotBar, SelectHotBar );
+		hotBarRightB = wButtonCreate(mainW, 0, 0, "hotBarRight", NULL,
+			BO_REPEAT, 0, DoHotBarRight, NULL);
 
-		hotBarD.dpi = wDrawGetDPI( hotBarD.d );
+		hotBarD.d = wDrawCreate(mainW, 0, 0, "hotBarDraw", 0, -1,
+			hbHeight + 2, NULL, RedrawHotBar, SelectHotBar);
+
+		hotBarD.dpi = wDrawGetDPI(hotBarD.d);
 		hotBarD.scale = 1.0;
 
-		wSetCursor(hotBarD.d,wCursorNormal);
+		wSetCursor(hotBarD.d, wCursorNormal);
 		initialize = TRUE;
 	}
-	//buttonWidth = wControlGetWidth((wControl_p)hotBarLeftB);
-	//buttonHeight = wControlGetHeight((wControl_p)hotBarLeftB);
-	//wControlSetPos( (wControl_p)hotBarLeftB, HOTBAR_LEFT,
-	//                ToolbarGetHeight() +(hbHeight-buttonHeight)/2 );
-	//wControlSetPos( (wControl_p)hotBarRightB, winWidth-20-buttonWidth+HOTBAR_LEFT+1,
-	//                ToolbarGetHeight() +(hbHeight-buttonHeight)/2 );
-	//wControlSetPos( (wControl_p)hotBarD.d, buttonWidth+HOTBAR_LEFT+1,
-	//                ToolbarGetHeight());
-	//wDrawSetSize( hotBarD.d, winWidth-20-buttonWidth*2, hbHeight+2, redraw );
+	//wDrawSetSize( hotBarD.d, /*winWidth - 20 - buttonWidth * 2 */ -1, hbHeight + 2, redraw);
 
 	wWinPix_t width, height;
 	wDrawGetSize(hotBarD.d, &width, &height);
@@ -670,9 +663,7 @@ EXPORT void LayoutHotBar( void * redraw )
 	//hotBarD.size.y = (double)
 	//                 hotBarHeight/hotBarD.dpi*hotBarD.scale;  //Exclude Label from calc
 
-	wControlShow( (wControl_p)hotBarLeftB, TRUE );
-	wControlShow( (wControl_p)hotBarRightB, TRUE );
-	wControlShow( (wControl_p)hotBarD.d, TRUE );
+	ShowHotBar(TRUE);
 
 	if (initialize) {
 		ChangeHotBar( CHANGE_PARAMS );
@@ -682,11 +673,16 @@ EXPORT void LayoutHotBar( void * redraw )
 	ToolbarSetHeight( ToolbarGetHeight() + hbHeight+3 );
 }
 
-void HideHotBar( void )
+
+	void HideHotBar(void)
+	{
+		ShowHotBar(TRUE);
+	}
+static void ShowHotBar( wBool_t show )
 {
 	if (hotBarLeftB != NULL) {
-		wControlShow( (wControl_p)hotBarLeftB, FALSE );
-		wControlShow( (wControl_p)hotBarRightB, FALSE );
-		wControlShow( (wControl_p)hotBarD.d, FALSE );
+		wControlShow( (wControl_p)hotBarLeftB, show );
+		wControlShow( (wControl_p)hotBarRightB, show );
+		wControlShow( (wControl_p)hotBarD.d, show );
 	}
 }
