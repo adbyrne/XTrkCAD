@@ -36,9 +36,13 @@ EXPORT wWinPix_t hotBarHeight = 32;
 
 static wControl_p hotBarLeftB = NULL;
 static wControl_p hotBarRightB = NULL;
-static wMenu_p hotbarPopupM;
-static wControl_p hotBarML = NULL;
-static wIndex_t hotBarMLcnt = 0;
+
+static struct {
+	wMenu_p hotbarPopupM;
+	wControl_p hotBarML; 
+	wIndex_t hotBarMLcnt;
+	char curContentsLabel[STR_SHORT_SIZE];
+} hotbarContextMenu;
 
 static drawCmd_t hotBarD = {
 	NULL,
@@ -378,7 +382,7 @@ static void SelectHotBar( wControl_p d, void * context, wAction_t action,
 	}
 
 	if ( (action&0xFF) ==  wActionRUp ) {
-		wMenuPopupShow( hotbarPopupM );
+		wMenuPopupShow( hotbarContextMenu.hotbarPopupM );
 		return;
 	}
 	inx = -1;
@@ -499,9 +503,18 @@ static BOOL_T SetHotBarScale( char * line )
 	return TRUE;
 }
 
+void AddToContextMenu(char* contentsLabel, BOOL_T isFixed)
+{
+	if (contentsLabel
+		&& strncmp(contentsLabel, hotbarContextMenu.curContentsLabel, sizeof (hotbarContextMenu.curContentsLabel)) != 0
+		&& !isFixed) {
+		wMenuListAdd(hotbarContextMenu.hotBarML, hotbarContextMenu.hotBarMLcnt++, contentsLabel, I2VP(hotBarMap_da.cnt));
+		strncpy(hotbarContextMenu.curContentsLabel, contentsLabel, sizeof(hotbarContextMenu.curContentsLabel) - 1);
+	}
+}
 
-static char curContentsLabel[STR_SHORT_SIZE];
-EXPORT void AddHotBarElement(
+EXPORT
+void AddHotBarElement(
         char * contentsLabel,
         coOrd size,
         coOrd orig,
@@ -514,12 +527,7 @@ EXPORT void AddHotBarElement(
 	hotBarMap_t * tbm;
 	coOrd textsize;
 
-	if ( contentsLabel
-	     && strncmp(contentsLabel, curContentsLabel, sizeof curContentsLabel) != 0
-	     && !isFixed ) {
-		//wMenuListAdd( hotBarML, hotBarMLcnt++, contentsLabel, I2VP(hotBarMap_da.cnt) );
-		strncpy( curContentsLabel, contentsLabel, sizeof(curContentsLabel)-1 );
-	}
+	AddToContextMenu(contentsLabel, isFixed);
 	if (barScale <= 0) {
 		if (!isTrack) {
 			barScale = size.y/(((double)hotBarHeight-2.0)/hotBarD.dpi);
@@ -558,23 +566,27 @@ EXPORT void AddHotBarElement(
 	hotBarWidth += tbm->w + 2/hotBarD.dpi;
 }
 
+static void
+ClearContextMenu()
+{
+	hotbarContextMenu.hotBarMLcnt = 0;
+	wMenuListClear(hotbarContextMenu.hotBarML);
+
+}
 
 EXPORT void ChangeHotBar( long changes )
 {
-
-
 	if ( (changes&(CHANGE_SCALE|CHANGE_PARAMS|CHANGE_TOOLBAR)) == 0 ) {
 		return;
 	}
 
 	if (hotBarLeftB != NULL && curScaleName) {
 		static long programModeOld = 0;
+		ClearContextMenu();
 
 		hotBarWidth = 0.0;
-		hotBarMLcnt = 0;
-		wMenuListClear( hotBarML );
 		DYNARR_RESET( hotBarMap_t, hotBarMap_da );
-		curContentsLabel[0] = '\0';
+		hotbarContextMenu.curContentsLabel[0] = '\0';
 		if ( programMode == MODE_DESIGN ) {
 			if (showFlexTrack) {
 				AddHotBarCornu();
@@ -597,6 +609,12 @@ EXPORT void ChangeHotBar( long changes )
 	}
 }
 
+static void
+CreateContextMenu(void)
+{
+	hotbarContextMenu.hotbarPopupM = MenuRegister("Hotbar Select");
+	hotbarContextMenu.hotBarML = wMenuListCreate(hotbarContextMenu.hotbarPopupM, "", -1, HotbarJump);
+}
 
 EXPORT void InitHotBar( void )
 {
@@ -610,8 +628,7 @@ EXPORT void InitHotBar( void )
 	wPrefGetInteger( "misc", "hotbar-start", &v, hotBarCurrStart );
 	hotBarCurrStart = (int)v;
 	
-	//hotbarPopupM = MenuRegister( "Hotbar Select" );
-	//hotBarML = wMenuListCreate( hotbarPopupM, "", -1, HotbarJump );
+	CreateContextMenu();
 
 	hotBarHeight = hotBarDrawHeight[iconSize];
 	hotBarFs = hotBarFontSize[iconSize];
@@ -678,6 +695,7 @@ EXPORT void LayoutHotBar( void * redraw )
 	{
 		ShowHotBar(TRUE);
 	}
+
 static void ShowHotBar( wBool_t show )
 {
 	if (hotBarLeftB != NULL) {
