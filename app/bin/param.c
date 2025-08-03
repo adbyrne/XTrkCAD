@@ -273,40 +273,14 @@ static BOOL_T GetDistance(char ** cpp, FLOAT_T * distP)
 }
 
 
-EXPORT FLOAT_T DecodeFloat(
-        wString_p strCtrl,
-        BOOL_T * validP )
-{
-	FLOAT_T valF;
-	const char *cp1;
-	char *cp2;
-	cp1 = wStringGetValue( strCtrl );
-	while (isspace((unsigned char)*cp1)) { cp1++; }
-	if ( *cp1 ) {
-		valF = strtod( cp1, &cp2 );
-		if ( *cp2 != 0 ) {
-			/*wStringSetHilight( strCtrl, cp2-cp0, -1 );*/
-			snprintf( decodeErrorStr, sizeof(decodeErrorStr), _("Invalid Number") );
-			*validP = FALSE;
-			return 0.0;
-		}
-		*validP = TRUE;
-		return valF;
-	} else {
-		*validP = TRUE;
-		return 0.0;
-	}
-}
-
-
-FLOAT_T DecodeDistance(
-        wString_p strCtrl,
+static FLOAT_T DecodeDistance(
+	paramData_p pd,
         BOOL_T * validP)
 {
 	FLOAT_T valF = 0.0;
 	char *cp1, *cpN, c1;
 	// CAST_AWAY_CONST: we temporarily replace *cpN with a NULL and later restore
-	cp1 = cpN = CAST_AWAY_CONST wStringGetValue(strCtrl);
+	cp1 = cpN = CAST_AWAY_CONST wStringGetValue((wString_p)pd->control);
 	cpN += strlen(cpN)-1;
 
 	while (cpN > cp1 && isspace((unsigned char)*cpN)) {
@@ -342,7 +316,7 @@ FLOAT_T DecodeDistance(
 		}
 
 		if (cpN) {
-			wStringSetValue(strCtrl, FormatDistance(valF));
+			wStringSetValue((wString_p)pd->control, FormatDistance(valF));
 		}
 	} else {
 		snprintf(decodeErrorStr, sizeof(decodeErrorStr), "%s @ %s", _(getNumberError),
@@ -350,6 +324,46 @@ FLOAT_T DecodeDistance(
 		valF =	0.0;
 	}
 
+	return valF;
+}
+
+static FLOAT_T DecodeNumber(
+	paramData_p pd,
+	BOOL_T * validP )
+{
+	FLOAT_T valF;
+	const char *cp1;
+	char *cp2;
+	*validP = TRUE;
+	cp1 = wStringGetValue( (wString_p)pd->control );
+	while (isspace((unsigned char)*cp1)) { cp1++; }
+	if ( *cp1 == '\0' ) {
+		return 0.0;
+	}
+	BOOL_T bDistance = TRUE;
+	if ( ( pd->option & PDO_DIM ) == 0 ) {
+		bDistance = FALSE;
+	} else {
+		if ( pd->winLabel &&
+		     strcmp( pd->winLabel, N_("Line Width") ) == 0 &&
+		     *cp1 == '-' ) {
+			bDistance = FALSE;
+		}
+	}
+	if ( ! bDistance ) {
+		valF = strtod( cp1, &cp2 );
+		if ( *cp2 != 0 ) {
+			/*wStringSetHilight( strCtrl, cp2-cp0, -1 );*/
+			snprintf( decodeErrorStr, sizeof(decodeErrorStr), _("Invalid Number") );
+			*validP = FALSE;
+			return 0.0;
+		}
+		if ( pd->option & PDO_ANGLE) {
+			valF = NormalizeAngle( (angleSystem==ANGLE_POLAR)?valF:-valF );
+		}
+		return valF;
+	}
+	valF = DecodeDistance( pd, validP );
 	return valF;
 }
 
@@ -496,6 +510,36 @@ EXPORT char * FormatSmallDistance(
 	format |= 3;
 	return FormatDistanceEx( valF, format );
 }
+
+
+static char * FormatNumber( paramData_t* pd, FLOAT_T valF )
+{
+	BOOL_T bDistance = TRUE;
+	if ( ( pd->option & PDO_DIM ) == 0 ) {
+		bDistance = FALSE;
+	} else {
+		// Line Width: <=0 is zoom indep pixel, >0 zoom dep dist
+		if ( pd->winLabel &&
+		     strcmp( pd->winLabel, N_("Line Width") ) == 0 &&
+		     valF <= 0 ) {
+			bDistance = FALSE;
+		}
+	}
+	if ( bDistance ) {
+		if (pd->option&PDO_SMALLDIM) {
+			return FormatSmallDistance( valF );
+		} else {
+			return FormatDistance( valF );
+		}
+	} else {
+		if (pd->option&PDO_ANGLE) {
+			valF = NormalizeAngle( (angleSystem==ANGLE_POLAR)?valF:-valF );
+		}
+		return FormatFloat( valF );
+	}
+}
+
+
 
 /*****************************************************************************
  *
@@ -579,18 +623,7 @@ EXPORT void ParamLoadControl(
 		break;
 	case PD_FLOAT:
 		tmpR = *(FLOAT_T*)p->valueP;
-		if (p->option&PDO_DIM) {
-			if (p->option&PDO_SMALLDIM) {
-				valS = FormatSmallDistance( tmpR );
-			} else {
-				valS = FormatDistance( tmpR );
-			}
-		} else {
-			if (p->option&PDO_ANGLE) {
-				tmpR = NormalizeAngle( (angleSystem==ANGLE_POLAR)?tmpR:-tmpR );
-			}
-			valS = FormatFloat( tmpR );
-		}
+		valS = FormatNumber( p, tmpR );
 		wStringSetValue( (wString_p)p->control, valS );
 		if ( !ParamFloatRangeCheck( p, tmpR ) ) {
 			break;
@@ -744,14 +777,7 @@ EXPORT long ParamUpdate(
 			}
 			break;
 		case PD_FLOAT:
-			if (p->option & PDO_DIM) {
-				floatV = DecodeDistance( (wString_p)p->control, &valid );
-			} else {
-				floatV = DecodeFloat( (wString_p)p->control, &valid );
-				if (valid && (p->option & PDO_ANGLE) ) {
-					floatV = NormalizeAngle( (angleSystem==ANGLE_POLAR)?floatV:-floatV );
-				}
-			}
+			floatV = DecodeNumber( p, &valid );
 			if ( !valid ) {
 				break;
 			}
@@ -867,15 +893,7 @@ void ParamLoadData(
 			break;
 
 		case PD_FLOAT:
-			if (p->option & PDO_DIM) {
-				floatV = DecodeDistance((wString_p)p->control, &valid);
-			} else {
-				floatV = DecodeFloat((wString_p)p->control, &valid);
-
-				if (valid && (p->option & PDO_ANGLE)) {
-					floatV = NormalizeAngle((angleSystem==ANGLE_POLAR)?floatV:-floatV);
-				}
-			}
+			floatV = DecodeNumber( p, &valid );
 
 			if (p->winData) {
 				inRange = (floatV <= ((paramFloatRange_t *)p->winData)->high) &&
@@ -987,18 +1005,7 @@ static long ParamIntRestore(
 				*(FLOAT_T*)p->valueP = oldP->f;
 				if (p->control) {
 					valR = oldP->f;
-					if (p->option & PDO_DIM) {
-						if (p->option & PDO_SMALLDIM) {
-							valS = FormatSmallDistance( valR );
-						} else {
-							valS = FormatDistance( valR );
-						}
-					} else {
-						if (p->option & PDO_ANGLE) {
-							valR = NormalizeAngle( (angleSystem==ANGLE_POLAR)?valR:-valR );
-						}
-						valS = FormatFloat( valR );
-					}
+					valS = FormatNumber( p, valR );
 					wStringSetValue( (wString_p)p->control, valS );
 				}
 				change |= (1L<<inx);
@@ -1600,14 +1607,7 @@ static void ParamFloatPush( const char * val, void * dp )
 	LOG( log_paraminput, 1, ( "ParamFloatPush( %s: Enter:%d Val:%s )\n", p->nameStr,
 	                          p->enter_pressed, value ) );
 
-	if (p->option & PDO_DIM) {
-		valF = DecodeDistance( (wString_p)p->control, &valid );
-	} else {
-		valF = DecodeFloat( (wString_p)p->control, &valid );
-		if (p->option & PDO_ANGLE) {
-			valF = NormalizeAngle( (angleSystem==ANGLE_POLAR)?valF:-valF );
-		}
-	}
+	valF = DecodeNumber( p, &valid );
 	if ( !valid ) {
 		wWinPix_t h = wControlGetHeight(p->control);
 		wControlSetBalloon( p->control, 0, -h*3/4, decodeErrorStr );
@@ -2121,18 +2121,7 @@ static void ParamPlayback( char * line )
 				if (p->valueP) {
 					*(FLOAT_T*)p->valueP = valF;
 				}
-				if (p->option&PDO_DIM) {
-					if ( p->option&PDO_SMALLDIM ) {
-						valS = FormatSmallDistance( valF );
-					} else {
-						valS = FormatDistance( valF );
-					}
-				} else {
-					if (p->option&PDO_ANGLE) {
-						valF1 = NormalizeAngle( (angleSystem==ANGLE_POLAR)?valF1:-valF1 );
-					}
-					valS = FormatFloat( valF );
-				}
+				valS = FormatNumber( p, valF );
 				if (p->control) {
 					wStringSetValue( (wString_p)p->control, valS );
 					wFlush();
