@@ -57,6 +57,20 @@ typedef struct {
 } wCursorSurface_t, * wSurface_p;
 #endif
 
+typedef struct {
+	GQueue* elements;          // GLib Queue for MRU list
+	int max_capacity;          // mamimum number of entries, -1 for unlimited
+} MRUList;
+
+MRUList* MRUCreate(int max_capacity);
+void* MRUTouchEntry(MRUList* list, const char* label, void* entry);
+void* MRUGetRecent(MRUList* list);
+void* MRUGetNth(MRUList* list, int index);
+int MRUGetCount(MRUList* list);
+void* MRURemoveEntry(MRUList* list, const char* label);
+void MRUClear(MRUList* list);
+void MRUDestroy(MRUList* list);
+
 //typedef enum { M_MENU, M_SEPARATOR, M_PUSH, M_LIST, M_LISTITEM, M_TOGGLE, M_RADIO } mtype_e;
 
 typedef enum {
@@ -169,12 +183,10 @@ struct toggle {
 	unsigned long toggleHandler;
 };
 struct recentuse {
-	unsigned max;				// maximum members
-	unsigned current;			// current number of members
-	GSList* elements;			// list of elements
-	GtkWidget** widgets;		// display widgets
+	MRUList* mrulist;
 	wMenuListCallBack_p action;
 	wControl_p parentMenu;
+	GtkWidget* emptyList;
 };
 
 struct scale {
