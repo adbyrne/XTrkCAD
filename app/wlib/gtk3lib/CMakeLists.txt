@@ -29,6 +29,7 @@ target_sources(xtrkcad-wlib
 	liststore.c
  	main.c
  	message.c
+	mrulist.c
 	notebook.c
  	notice.c
 	popupmenu.c

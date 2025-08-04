@@ -1,5 +1,6 @@
 /** \file recentuse.c
  * Recently used list management
+ * \todo This is not only "recent use" but any type of menu list
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -36,21 +37,10 @@
 #define WLISTMENU	"wListMenu"		/**< id for reference to main list context */
 
 struct listentry {					/**< context of items in recently used list */
-	char* label;				// text label for menu
+	GtkWidget* menuentry;			// text label for menu
+	struct recentuse* recentuse;
 	const char* context;			// application context
 };
-
-/*-----------------------------------------------------------------*/
-
-static void
-ClearMenuList(struct recentuse* ru)
-{
-	for (unsigned i = 0; i < ru->current; i++) {
-		gtk_menu_item_set_label(GTK_MENU_ITEM(ru->widgets[i]), "");
-		gtk_widget_set_sensitive(ru->widgets[i], FALSE);
-		gtk_widget_hide(ru->widgets[i]);
-	}
-}
 
 /**
  * Update the MRU list.
@@ -59,21 +49,30 @@ ClearMenuList(struct recentuse* ru)
  */
 
 static void
-ShowMenuList(struct recentuse *ru)
+UpdateMenuList(struct recentuse *ru)
 {
-	if (ru->current == 0) {
-		gtk_menu_item_set_label(GTK_MENU_ITEM(ru->widgets[0]), _("Empty List"));
-		gtk_widget_set_sensitive(ru->widgets[0], FALSE);
-		gtk_widget_show(ru->widgets[0]);
+	int current = MRUGetCount(ru->mrulist);
+
+	if (current == 0) {
+		//gtk_menu_item_set_label(GTK_MENU_ITEM(ru->widgets[0]), _("Empty List"));
+		//gtk_widget_set_sensitive(ru->widgets[0], FALSE);
+		gtk_widget_show(ru->emptyList);
 	} else {
-		// iterate over ml: update labels
-		for (unsigned i = 0; i < ru->current; i++) {
-			struct listentry* entry = g_slist_nth_data(ru->elements, i);
-			gtk_menu_item_set_label(GTK_MENU_ITEM(ru->widgets[i]),
-			                        entry->label);
-			gtk_widget_set_sensitive(ru->widgets[i], TRUE);
-			gtk_widget_show(ru->widgets[i]);
-			g_object_set_data(G_OBJECT(ru->widgets[i]), WLISTITEM, entry);
+		gtk_widget_hide(ru->emptyList);
+
+
+		for (int i = 0; i < current; i++) {
+			struct listentry* entry = MRUGetNth(ru->mrulist, i);
+
+			// re-order the menu elements
+			g_object_ref(entry->menuentry);
+			gtk_container_remove(GTK_CONTAINER(ru->parentMenu->widget),  entry->menuentry);
+			gtk_menu_shell_append(GTK_MENU_SHELL(ru->parentMenu->widget), entry->menuentry);
+			g_object_unref(entry->menuentry);
+
+			gtk_widget_set_sensitive(entry->menuentry, TRUE);
+			gtk_widget_show(entry->menuentry);
+			//g_object_set_data(G_OBJECT(ru->widgets[i]), WLISTITEM, entry);
 		}
 
 	}
@@ -92,33 +91,32 @@ static void ActivateListMenuItem(
         GtkWidget* widget,
         gpointer value)
 {
-	// pointer to the list item
-	struct listentry *item = g_object_get_data(G_OBJECT(widget), WLISTITEM);
-	struct recentuse *list = g_object_get_data(G_OBJECT(widget), WLISTMENU);
+	struct listentry* userdata = (struct listentry*)value;
+	struct recentuse *ru = userdata->recentuse;
 
-	if (list->action) {
-		(*list->action)(0,
-		                gtk_menu_item_get_label(GTK_MENU_ITEM(widget)),
-		                item->context);
+	//// pointer to the list item
+	//struct listentry *item = g_object_get_data(G_OBJECT(widget), WLISTITEM);
+	//struct recentuse *list = g_object_get_data(G_OBJECT(widget), WLISTMENU);
+
+	if (ru->action) {
+		(*ru->action)(0,
+		                gtk_menu_item_get_label(GTK_MENU_ITEM(userdata->menuentry)),
+		                userdata->context);
 	}
 
-	// update order of elements in list
-	list->elements = g_slist_remove(list->elements, item );
-	list->elements = g_slist_prepend(list->elements, item );
-	ShowMenuList(list);
+	//// update order of elements in list
+	//list->elements = g_slist_remove(list->elements, item );
+	//list->elements = g_slist_prepend(list->elements, item );
+	//ShowMenuList(list);
 }
 
-/**
- * Create for the recently used menu entries. As this is
- * a GSList simple initialization is needed only.
- *
- * \param list	IN/OUT list pointer
- * \param max	IN maximum number of elements (unused)
- */
-static void
-CreateListElements(GSList *list, unsigned int max)
+GtkWidget*
+CreateEntry(const char* label, int state)
 {
-	list  = NULL;
+	GtkWidget* newItem = gtk_menu_item_new_with_label(label);
+	gtk_widget_set_sensitive(newItem, state);
+
+	return(newItem);
 }
 
 /**
@@ -128,28 +126,6 @@ CreateListElements(GSList *list, unsigned int max)
  * \param list	IN/OUT list pointer
  * \param max	IN maximum number of elements
  */
-
-static void
-CreateListEntries(struct recentuse* list, unsigned int  max)
-{
-	// pre-allocate the required menu entries
-	list->widgets = g_malloc0(sizeof(GtkWidget*) * max);
-	for (unsigned int i = 0; i < max; i++) {
-		list->widgets[ i ] = gtk_menu_item_new();
-		gtk_menu_shell_append(GTK_MENU_SHELL(list->parentMenu->widget),
-		                      list->widgets[i]);
-
-		g_signal_connect(G_OBJECT(list->widgets[i]), "activate",
-		                 G_CALLBACK(ActivateListMenuItem), NULL);
-
-		// initially hidden
-		gtk_widget_set_sensitive(list->widgets[i], FALSE);
-		gtk_widget_hide(list->widgets[i]);
-
-		// store pointer back to the list config element
-		g_object_set_data(G_OBJECT(list->widgets[i]), WLISTMENU, list);
-	}
-}
 
 /**
  * Create a list menu entry
@@ -162,8 +138,9 @@ CreateListEntries(struct recentuse* list, unsigned int  max)
  */
 
 wControl_p wMenuListCreate(
-        wControl_p m,
-        const char* helpStr,
+	wControl_p m,
+	const char* helpStr,
+	SORTORDER sorder,
         int max,
         wMenuListCallBack_p action)
 {
@@ -171,56 +148,15 @@ wControl_p wMenuListCreate(
 	wControl_p ml = wlibControlNew(M_RECENTUSE, m, helpStr, NULL);
 	ru = CONTROL_GET_ATTRIBUTES_PTR(ml, recentuse);
 	ru->action = action;
-	ru->elements = NULL;
-	ru->max = max;
 	ru->parentMenu = m;
+	ru->mrulist = MRUCreate(max);
+	ru->sortorder = sorder;
 
-	if (max != -1) {
-		CreateListElements(ru->elements, max);
-		CreateListEntries(ru, max);
-	}
-
-	ShowMenuList(ru);
+	// create placeholder for empty list
+	ru->emptyList = CreateEntry(_("Empty list"), FALSE );
+	gtk_menu_shell_append(GTK_MENU_SHELL(ru->parentMenu->widget),ru->emptyList);
 
 	return(ml);
-}
-
-/**
- * Remove an element from list without freeing the element's memory.
- */
-
-/** \todo address of list might be changed when element is removed, new  value is discarded here!! */
-
-static struct listentry *
-RemoveEntry(GSList* list, unsigned element)
-{
-	GSList* old = NULL;
-	struct listentry* entry;
-
-	old = g_slist_nth(list, element);
-	list = g_slist_remove_link(list, old);
-
-	entry = g_slist_nth_data(old, 0);
-
-	g_slist_free_1(old);
-
-	return(entry);
-}
-
-/**
- * Remove an element from the list and free the related memory.
- *
- * \param list		list of recently used items
- * \param element	index of the element to be removed
- */
-
-static void
-FreeEntry(GSList* list, unsigned element)
-{
-	struct listentry *entry = RemoveEntry(list, element);
-
-	g_free(entry->label);
-	g_free(entry);
 }
 
 /**
@@ -236,19 +172,28 @@ PushListEntry(wControl_p list, const char* label, const char* context)
 {
 	struct recentuse *ru = CONTROL_GET_ATTRIBUTES_PTR(list, recentuse);
 	struct listentry *newEntry;
-	newEntry = g_malloc0(sizeof( struct listentry));
+	char* name;
 
-	if (g_slist_length(ru->elements) == ru->max) {
-		//remove entry
-		FreeEntry(ru->elements, ru->max-1);
+	newEntry = g_malloc0(sizeof( struct listentry));
+	newEntry->context = context;
+	newEntry->menuentry = CreateEntry(label, TRUE);
+	newEntry->recentuse = ru;
+
+	gtk_menu_shell_append(GTK_MENU_SHELL(ru->parentMenu->widget),
+	                      newEntry->menuentry);
+
+	g_signal_connect(newEntry->menuentry, "activate", ActivateListMenuItem, newEntry);
+
+	name = g_strdup(wlibConvertInput(label));
+
+	if (ru->sortorder == NEWEST_TOP) {
+		MRUTouchEntry(ru->mrulist, name, newEntry);
+	}
+	else {
+		MRUAppendEntry(ru->mrulist, name, newEntry);
 	}
 
-	newEntry->label = g_strdup(wlibConvertInput(label));
-	newEntry->context = context;
-
-	ru->elements = g_slist_prepend(ru->elements, newEntry);
-
-	return(g_slist_length(ru->elements));
+	return(MRUGetCount(ru->mrulist));
 }
 
 /**
@@ -270,45 +215,28 @@ void wMenuListAdd(
         const void* context)
 {
 	struct recentuse *ru = CONTROL_GET_ATTRIBUTES_PTR(ml, recentuse);
-	ru->current = PushListEntry(ml, labelStr, context);
+	PushListEntry(ml, labelStr, context);
 
-	ShowMenuList(ru);
+	UpdateMenuList(ru);
 }
 
-
-gint CompareLabels(gconstpointer element, gconstpointer search)
-{
-	char* label = ((struct listentry*)element)->label;
-
-	return(g_ascii_strcasecmp(label, search));
-}
-/**
- * Remove the menu entry identified by a given label.
- *
- * \param ml IN menu list
- * \param labelStr IN label string of item
- */
 
 void wMenuListDelete(
         wControl_p ml,
         const char* labelStr)
 {
 	struct recentuse* ru = CONTROL_GET_ATTRIBUTES_PTR(ml, recentuse);
-	GSList *elements = ru->elements;
-	GSList* entry;
+	MRUList *elements = ru->mrulist;
+	struct listentry* entry;
 
-	entry = g_slist_find_custom(elements, labelStr, CompareLabels);
+	entry = MRURemoveEntry(elements, labelStr);
 
 	if (entry) {
-		ClearMenuList(ru);
-
-		ru->elements = g_slist_remove_link(elements, entry);
-		FreeEntry(entry, 0);
-
-		ru->current--;
+		gtk_widget_destroy(entry->menuentry);
+		g_free(entry);
 	}
 
-	ShowMenuList(ru);
+	UpdateMenuList(ru);
 }
 
 /**
@@ -325,15 +253,15 @@ void wMenuListDelete(
 const char*
 wMenuListGet(wControl_p ml, unsigned int index, void** attributes)
 {
-	struct recentuse* ru = CONTROL_GET_ATTRIBUTES_PTR(ml, recentuse);
+	//struct recentuse* ru = CONTROL_GET_ATTRIBUTES_PTR(ml, recentuse);
 
-	if (index < ru->current) {
-		gpointer data = g_slist_nth_data(ru->elements, index);
-		if (attributes) {
-			*attributes = (void *)((struct listentry*)data)->context;
-		}
-		return(((struct listentry*)data)->label);
-	}
+	//if (index < ru->current) {
+	//	gpointer data = g_slist_nth_data(ru->elements, index);
+	//	if (attributes) {
+	//		*attributes = (void *)((struct listentry*)data)->context;
+	//	}
+	//	return(((struct listentry*)data)->label);
+	//}
 	return(NULL);
 }
 

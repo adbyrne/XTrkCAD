@@ -28,7 +28,7 @@
 #include "icons.h"
 #include "misc.h"
 #include "paths.h"
-#include "param.h"
+#include "form.h"
 #include "smalldlg.h"
 
 EXPORT wControl_p aboutW;
@@ -46,7 +46,7 @@ static paramData_t tipPLs[] = {
 #define I_TIPTEXT		(1)
 #define tipT			(tipPLs[I_TIPTEXT].control)
 	{   PD_MESSAGE, N_("Did you know..."), "mess1", 0, NULL, NULL, BM_LARGE },
-	{   PD_TEXT, NULL, "text", PDO_DLGRESIZE, &tipTextData, NULL, BO_READONLY | BT_TOP | BT_CHARUNITS},
+	{   PD_TEXT, NULL, "text", PDO_DLGRESIZE, &tipTextData, NULL, BO_READONLY },
 	{   PD_BUTTON, ShowTip, "prev", PDO_DLGRESETMARGIN, NULL, N_("Previous Tip"), 0L, I2VP(SHOWTIP_FORCESHOW | SHOWTIP_PREVTIP) },
 #define I_TIPPREV (2)
 	{   PD_BUTTON, ShowTip, "next", PDO_DLGHORZ, NULL, N_("Next Tip"), 0L, I2VP(SHOWTIP_FORCESHOW | SHOWTIP_NEXTTIP) },
@@ -71,10 +71,11 @@ static void CreateTipW( void )
 	char *filename;
 	char * cp;
 
-	tipW = ParamCreateDialog(&tipPG, MakeWindowTitle(_("Tip of the Day")), "Done",
-	                         NULL, NULL, FALSE, NULL,
-	                         F_RESIZE|F_CENTER|PD_F_ALT_CANCELLABEL,
-	                         NULL );
+	tipW = FormCreateDialog(&tipPG, MakeWindowTitle(_("Tip of the Day")), 
+							NULL, FormCancel_Current, 
+							NULL, NULL,
+							FALSE, 
+							F_CENTER, NULL );
 
 	/* open the tip file */
 	MakeFullpath(&filename, libDir, sTipF, NULL);

@@ -613,7 +613,7 @@ static void
 CreateContextMenu(void)
 {
 	hotbarContextMenu.hotbarPopupM = MenuRegister("Hotbar Select");
-	hotbarContextMenu.hotBarML = wMenuListCreate(hotbarContextMenu.hotbarPopupM, "", -1, HotbarJump);
+	hotbarContextMenu.hotBarML = wMenuListCreate(hotbarContextMenu.hotbarPopupM, "",OLDEST_TOP, -1, HotbarJump);
 }
 
 EXPORT void InitHotBar( void )

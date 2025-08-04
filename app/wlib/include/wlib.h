@@ -1155,8 +1155,13 @@ void wMenuPushEnable(
     wControl_p mi,
     wBool_t enable);
 
-wControl_p wMenuListCreate(wControl_p m, const char* helpStr, int max,
-    wMenuListCallBack_p action);
+
+
+typedef enum {
+    NEWEST_TOP,
+    OLDEST_TOP
+} SORTORDER;
+wControl_p wMenuListCreate( wControl_p m, const char* helpStr, SORTORDER sorder, int max, wMenuListCallBack_p action);
 
 void wMenuListAdd(wControl_p ml, int index, const char* labelStr, const void* attributes);
 const char* wMenuListGet(wControl_p ml, unsigned int index, void** attributes);
