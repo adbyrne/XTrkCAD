@@ -34,6 +34,8 @@ EXPORT wWinPix_t hotBarHeight = 32;
 
 #define HOTBAR_LEFT 2
 
+#define KEY_ESC 0x1b
+
 static wControl_p hotBarLeftB = NULL;
 static wControl_p hotBarRightB = NULL;
 
@@ -357,100 +359,132 @@ static void DoHotBarJump( int inx )
 	}
 }
 
-
-static void SelectHotBar( wControl_p d, void * context, wAction_t action,
-                          wDrawPix_t w, wDrawPix_t h )
+static void HandleKeyboard(wAction_t action)
 {
-	int inx;
-	DIST_T x;
-	wWinPix_t px;
-	hotBarMap_t * tbm;
-	char * titleP;
+	int key = (int)(action >> 8);
+	if (key >= '0' && key <= '9') {
+		DoHotBarJump(key);
+	}
+	else if (key == KEY_ESC) {
+		ConfirmReset(FALSE);
+	}
+	return;
+}
 
-	if ( hotBarMap_da.cnt <= 0 ) {
-		return;
+static void HandleSelection(int inx, DIST_T fixed_x)
+{
+	hotBarMap_t* tbm = &hotBarMap(inx);
+
+	if (hotBarCurrSelect >= 0) {
+		hotBarCurrSelect = -1;
+		RedrawHotBar(hotBarD.d, NULL, 0, 0);
 	}
 
-	if ( ( action & 0xff ) == wActionText ) {
-		int key = (int)(action >> 8);
-		if ( key >= '0' && key <= '9') {
-			DoHotBarJump( key );
-		} else if ( key == 0x1B ) {
-			ConfirmReset( FALSE );
-		}
-		return;
+	tbm->proc(HB_SELECT, tbm->context, NULL, NULL);
+	hotBarCurrSelect = inx;
+	HotBarHighlight(hotBarCurrSelect, fixed_x);
+
+	if (recordF) {
+		fprintf(recordF, "HOTBARSELECT %s\n", tbm->proc(HB_FULLTITLE, tbm->context,
+			NULL, NULL));
 	}
 
-	if ( (action&0xFF) ==  wActionRUp ) {
-		wMenuPopupShow( hotbarContextMenu.hotbarPopupM );
-		return;
+	FakeDownMouseState();
+}
+
+static void HandleArrowKeys(wAction_t action)
+{
+	switch ((wAccelKey_e)(action >> 8)) {
+	case wAccelKey_Right:
+		DoHotBarRight(NULL);
+		break;
+	case wAccelKey_Left:
+		DoHotBarLeft(NULL);
+		break;
+	case wAccelKey_Up:
+		break;
+	case wAccelKey_Down:
+		break;
+	default:
+		break;
 	}
-	inx = -1;
-	x = hotBarMap(0).x;
+	return;
+}
+
+static int FindIndex(wDrawPix_t w, DIST_T* outfixedX)
+{
+	int inx = -1;
+	DIST_T x = hotBarMap(0).x;
 	DIST_T fixed_x = 0.0;
-	if (hotBarCurrStart>0 && hotBarMap_da.cnt>0 && hotBarMap(0).isFixed)  {
+
+	if (hotBarCurrStart > 0 && hotBarMap_da.cnt > 0 && hotBarMap(0).isFixed) {
 		fixed_x = hotBarMap(0).w;
-		x = w/hotBarD.dpi + hotBarMap(0).x;
-		if ( (x>= hotBarMap(0).x) &&
-		     (x <=hotBarMap(0).w )) { inx = 0; }   //Match on fixed
+		x = w / hotBarD.dpi + hotBarMap(0).x;
+		if ((x >= hotBarMap(0).x) && (x <= hotBarMap(0).w)) {
+			inx = 0; //Match on fixed item
+		}   
 	}
-	if (inx<0) {																//NoMatch
-		x = w/hotBarD.dpi + hotBarMap(hotBarCurrStart).x;
-		for ( inx=hotBarCurrStart; inx<hotBarCurrEnd; inx++ ) {
-			if ((x >= hotBarMap(inx).x + fixed_x) &&						//leave spaces between buttons
-			    (x <= hotBarMap(inx).x + hotBarMap(inx).w + fixed_x )) {
+	if (inx < 0) {																
+		x = w / hotBarD.dpi + hotBarMap(hotBarCurrStart).x;
+		for (inx = hotBarCurrStart; inx < hotBarCurrEnd; inx++) {
+			DIST_T itemStart = hotBarMap(inx).x + fixed_x;
+			DIST_T itemEnd = hotBarMap(inx).x + hotBarMap(inx).w + fixed_x;
+
+			if (x >= itemStart && x <= itemEnd) {
 				break;
 			}
 		}
 	}
 
-	if (inx >= hotBarCurrEnd) {
+	*outfixedX = fixed_x;
+
+	return((inx >= hotBarCurrEnd) ? -1 : inx);
+}
+
+static void SelectHotBar( wControl_p d, void * context, wAction_t action,
+                          wDrawPix_t w, wDrawPix_t h )
+{
+	if ( hotBarMap_da.cnt <= 0 ) {
 		return;
 	}
-	tbm = &hotBarMap(inx);
-	if (inx==0) {
-		px = (wWinPix_t)((tbm->x-hotBarMap(0).x)*hotBarD.dpi);
-	} else {
-		px = (wWinPix_t)(((tbm->x-hotBarMap(hotBarCurrStart).x)+fixed_x)*hotBarD.dpi);
-	}
-	px += (wWinPix_t)(tbm->w*hotBarD.dpi/2);
-	titleP = tbm->proc( HB_LISTTITLE, tbm->context, NULL, NULL );
-	px -= wLabelWidth( titleP ) / 2;
-	//wControlSetBalloon( (wControl_p)hotBarD.d, px, -20, titleP );
+
 	switch (action & 0xff) {
-	case wActionLDown:
-
-		if ( hotBarCurrSelect >= 0 ) {
-			hotBarCurrSelect = -1;
-			RedrawHotBar(hotBarD.d, NULL, 0, 0 );
-		}
-
-		tbm->proc( HB_SELECT, tbm->context, NULL, NULL );
-		hotBarCurrSelect = inx;
-		HotBarHighlight( hotBarCurrSelect, fixed_x );
-		if (recordF) {
-			fprintf( recordF, "HOTBARSELECT %s\n", tbm->proc( HB_FULLTITLE, tbm->context,
-			         NULL, NULL ) );
-		}
-		FakeDownMouseState();
+	case wActionText:
+		HandleKeyboard(action);
 		break;
+
+	case wActionRUp:
+		wMenuPopupShow( hotbarContextMenu.hotbarPopupM );
+		return;
+
 	case wActionExtKey:
-		switch ((wAccelKey_e)(action>>8)) {
-		case wAccelKey_Right:
-			DoHotBarRight(NULL);
-			break;
-		case wAccelKey_Left:
-			DoHotBarLeft(NULL);
-			break;
-		case wAccelKey_Up:
-			break;
-		case wAccelKey_Down:
-			break;
-		default:
-			break;
+		HandleArrowKeys(action);
+		return;
+
+	case wActionLDown: {
+		DIST_T fixed_x;
+		int inx = FindIndex(w, &fixed_x);
+		if (inx < 0) {
+			return; // No valid item found
 		}
-		break;
+
+		HandleSelection(inx, fixed_x);
 	}
+	default:
+		break;
+
+	}
+
+	//tbm = &hotBarMap(inx);
+	//if (inx==0) {
+	//	px = (wWinPix_t)((tbm->x-hotBarMap(0).x)*hotBarD.dpi);
+	//} else {
+	//	px = (wWinPix_t)(((tbm->x-hotBarMap(hotBarCurrStart).x)+fixed_x)*hotBarD.dpi);
+	//}
+	//px += (wWinPix_t)(tbm->w*hotBarD.dpi/2);
+	//titleP = tbm->proc( HB_LISTTITLE, tbm->context, NULL, NULL );
+	//px -= wLabelWidth( titleP ) / 2;
+	////wControlSetBalloon( (wControl_p)hotBarD.d, px, -20, titleP );
 }
 
 
