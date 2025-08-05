@@ -328,7 +328,8 @@ typedef int wAction_t;
 #define wActionMDown        (18)
 #define wActionMDrag        (19)
 #define wActionMUp          (20)
-#define wActionLast		    wActionMUp
+#define wActionGetTooltip   (21)
+#define wActionLast		    wActionGetTooltip
 
 /* Creation CallBacks */
 typedef void (*wDrawRedrawCallBack_p)(wControl_p control,

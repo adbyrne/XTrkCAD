@@ -22,6 +22,7 @@
 
 #include "fileio.h"
 #include "ccornu.h"
+#include "dynstring.h"
 #include "track.h"
 #include "draw.h"
 #include "include/toolbar.h"
@@ -32,18 +33,17 @@ EXPORT DIST_T curBarScale = -1;
 EXPORT long hotBarLabels = 0;
 EXPORT wWinPix_t hotBarHeight = 32;
 
-#define HOTBAR_LEFT 2
-
 #define KEY_ESC 0x1b
 
 static wControl_p hotBarLeftB = NULL;
 static wControl_p hotBarRightB = NULL;
 
-static struct {
+static struct hotbarContext{
 	wMenu_p hotbarPopupM;
 	wControl_p hotBarML; 
 	wIndex_t hotBarMLcnt;
 	char curContentsLabel[STR_SHORT_SIZE];
+	DynString tooltip;
 } hotbarContextMenu;
 
 static drawCmd_t hotBarD = {
@@ -81,6 +81,7 @@ static int hotBarCurrEnds[2] = { -1, -1 };
 #define hotBarCurrSelect (hotBarCurrSelects[programMode])
 #define hotBarCurrStart (hotBarCurrStarts[programMode])
 #define hotBarCurrEnd (hotBarCurrEnds[programMode])
+
 static DIST_T hotBarWidth = 0.0;
 
 static wBool_t ScrollButtonStatus();
@@ -411,6 +412,44 @@ static void HandleArrowKeys(wAction_t action)
 	return;
 }
 
+static void HandleTooltip(char **tooltip, int inx)
+{
+	hotBarMap_t* tbm = &hotBarMap(inx);
+	char * titleP = tbm->proc(HB_FULLTITLE, tbm->context, NULL, NULL);
+	char* copyOfTitle = MyStrdup(titleP);
+	char* manufacturer;
+	char* description;
+	char* partno;
+	char* nextToken;
+
+	if (*copyOfTitle == '\t') {
+		// no manufacturer
+		manufacturer = "";
+		nextToken = copyOfTitle;
+	}
+	else {
+		// manufacturer specified
+		manufacturer = strtok(copyOfTitle, "\t");
+		nextToken = NULL;
+	}
+	description = strtok(nextToken, "\t");
+	if (!description) description = "";
+	partno = strtok(NULL, "\t");
+	if (!partno) partno = "";
+
+	DynStringPrintf(&hotbarContextMenu.tooltip, 
+		"%s\r<span color=\"grey\" font_scale=\"small-caps\">Manufacturer</span>\r"
+		"%s\r<span color=\"grey\" font_scale=\"small-caps\">Description</span>\r"
+		"%s\r<span color=\"grey\" font_scale=\"small-caps\">Part #</span>", 
+		manufacturer, 
+		description, 
+		partno);
+
+	*tooltip = DynStringToCStr(&hotbarContextMenu.tooltip);
+	
+	MyFree(copyOfTitle);
+}
+
 static int FindIndex(wDrawPix_t w, DIST_T* outfixedX)
 {
 	int inx = -1;
@@ -469,6 +508,16 @@ static void SelectHotBar( wControl_p d, void * context, wAction_t action,
 		}
 
 		HandleSelection(inx, fixed_x);
+	}
+	case wActionGetTooltip: {
+		DIST_T fixed_x;
+		int inx = FindIndex(w, &fixed_x);
+		if (inx < 0) {
+			return; // No valid item found
+		}
+		HandleTooltip(context, inx);
+		
+		break;
 	}
 	default:
 		break;
@@ -648,6 +697,7 @@ CreateContextMenu(void)
 {
 	hotbarContextMenu.hotbarPopupM = MenuRegister("Hotbar Select");
 	hotbarContextMenu.hotBarML = wMenuListCreate(hotbarContextMenu.hotbarPopupM, "",OLDEST_TOP, -1, HotbarJump);
+	DynStringMalloc(&hotbarContextMenu.tooltip, 64);
 }
 
 EXPORT void InitHotBar( void )
@@ -659,7 +709,7 @@ EXPORT void InitHotBar( void )
 
 	RegisterChangeNotification( ChangeHotBar );
 	
-	wPrefGetInteger( "misc", "hotbar-start", &v, hotBarCurrStart );
+	wPrefGetInteger( "hotbar", "start", &v, hotBarCurrStart );
 	hotBarCurrStart = (int)v;
 	
 	CreateContextMenu();
@@ -693,7 +743,7 @@ EXPORT void LayoutHotBar( void * redraw )
 			BO_REPEAT, 0, DoHotBarRight, NULL);
 
 		hotBarD.d = wDrawCreate(mainW, 0, 0, "hotBarDraw", 0, -1,
-			hbHeight + 2, NULL, RedrawHotBar, SelectHotBar);
+			hbHeight + 2, &hotbarContextMenu, RedrawHotBar, SelectHotBar);
 
 		hotBarD.dpi = wDrawGetDPI(hotBarD.d);
 		hotBarD.scale = 1.0;

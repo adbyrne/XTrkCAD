@@ -628,6 +628,27 @@ draw_realize(GtkWidget* widget,
 	g_object_unref(cursor);
 }
 
+
+gboolean
+draw_tooltip(GtkWidget* widget, gint x, gint y, gboolean kbd, GtkTooltip* tooltip, gpointer context)
+{
+	wControl_p drawControl = (wControl_p)context;
+	struct draw* drawAttributes = CONTROL_GET_ATTRIBUTES_PTR(drawControl, draw);
+	char* tooltipTextPtr = NULL;
+
+	if (drawAttributes != NULL && drawAttributes->action == NULL) {
+		return(FALSE);
+	}
+
+	(drawAttributes->action)(drawControl, &tooltipTextPtr, wActionGetTooltip, x, y);
+
+	if (tooltipTextPtr) {
+		gtk_tooltip_set_markup(tooltip, tooltipTextPtr);
+	}
+
+	return(tooltipTextPtr != NULL);
+}
+
 /*******************************************************************************
  *
  * Create
@@ -701,6 +722,8 @@ wControl_p wDrawCreate(
 	drawAttributes->width = width;
 	drawAttributes->height = height;
 
+	g_signal_connect((drawControl->widget), "query-tooltip",
+					 G_CALLBACK(draw_tooltip), drawControl);
 	g_signal_connect((drawControl->widget), "realize",
 	                 G_CALLBACK(draw_realize), drawControl);
 	g_signal_connect((drawControl->widget), "draw",
