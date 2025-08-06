@@ -371,13 +371,11 @@ EXPORT void SelectFont(void * unused)
 
 
 EXPORT long stickySet = 0;
-static long stickySet1 = 0;
 static wWin_p stickyW;
 static const char * stickyLabels[33];
 static paramData_t stickyPLs[] = { {
-		PD_TOGGLE, &stickySet1, "set", 0,
-		stickyLabels
-	}
+		PD_TOGGLE, &stickySet, "set", PDO_NOPSHUPD,
+		stickyLabels, "", 0 }
 };
 static paramGroup_t stickyPG = { "sticky", PGO_RECORD, stickyPLs,
                                  COUNT( stickyPLs )
@@ -385,18 +383,32 @@ static paramGroup_t stickyPG = { "sticky", PGO_RECORD, stickyPLs,
 
 static void StickyOk(void * unused)
 {
-	stickySet = stickySet1;
+	long changes = GetChanges( &stickyPG );
 	wHide(stickyW);
+	DoChangeNotification(changes);
 }
 
 
+static void StickyChange( long chsnges )
+{
+}
+
+static void StickyDlgUpdate(
+        paramGroup_p pg,
+        int inx,
+        void * valueP )
+{
+}
+
 EXPORT void DoSticky(void * unused)
 {
-	if (!stickyW)
+	if (!stickyW) {
 		stickyW = ParamCreateDialog(&stickyPG,
-		                            MakeWindowTitle(_("Sticky Commands")), _("Ok"), StickyOk, ParamCancel_Restore,
-		                            TRUE, NULL, 0, NULL);
-	stickySet1 = stickySet;
+		                            MakeWindowTitle(_("Sticky Commands")),
+					    _("Ok"), StickyOk,
+					    ParamCancel_Restore,
+		                            TRUE, NULL, 0, StickyDlgUpdate );
+	}
 	ParamLoadControls(&stickyPG);
 	wShow(stickyW);
 }
@@ -1400,6 +1412,7 @@ EXPORT void CreateMenus(void)
 	// Now check to see if there is saved value
 	wPrefGetInteger( "DialogItem", "sticky-set", &stickySet, stickySet );
 	ParamRegister(&stickyPG);
+	RegisterChangeNotification( StickyChange );
 }
 
 

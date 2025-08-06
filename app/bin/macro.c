@@ -1527,7 +1527,7 @@ static char * demoInitParams[] = {
 	"misc toolbarset 65535",
 	"misc cur-turnout-ep 0",
 	"GROUP misc",
-	"sticky set 67108479", /* 0x3fffe7f - all but Helix and Turntable */
+	"sticky set 67108863", /* 0x3ffffff - all */
 	"GROUP sticky",
 	"newFixedTrack hide 0",
 	"layer button-count 10",
