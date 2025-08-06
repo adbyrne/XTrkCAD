@@ -527,6 +527,7 @@ static paramIntegerRange_t i0_1000		= { 0, 1000, 30 };
 static paramFloatRange_t r_1000_1000	= { -1000.0, 1000.0, 80 };
 static paramFloatRange_t r0_360			= { 0.0, 360.0, 80 };
 
+
 static paramData_t gridPLs[] = {
 #define I_HORZSPACING	(0)
 	{	PD_FLOAT, &grid.Horz.Spacing, "horzspacing", PDO_DIM, &r0_999999, NULL },
@@ -536,9 +537,9 @@ static paramData_t gridPLs[] = {
 #define gridHorzEnableT ((wControl_p)gridPLs[I_HORZENABLE].control)
 	{	PD_TOGGLE, &grid.Horz.Enable, "horzenable", 0, NULL, NULL, BC_HORIZONTAL|BC_NOBORDER },
 #define I_VERTSPACING	(3)
-	{	PD_FLOAT, &grid.Vert.Spacing, "vertspacing", PDO_DIM, &r0_999999, NULL },
+	{	PD_FLOAT, &grid.Vert.Spacing, "vertspacing", PDO_NOPSHUPD|PDO_DIM, &r0_999999, NULL },
 #define I_VERTDIVISION	(4)
-	{	PD_LONG, &grid.Vert.Division, "vertdivision", 0, &i0_1000, NULL },
+	{	PD_LONG, &grid.Vert.Division, "vertdivision", PDO_NOPSHUPD, &i0_1000, NULL },
 #define I_VERTENABLE	(5)
 #define gridVertEnableT ((wControl_p)gridPLs[I_VERTENABLE].control)
 	{	PD_TOGGLE, &grid.Vert.Enable, "vertenable", 0, NULL, NULL, BC_HORIZONTAL|BC_NOBORDER },
@@ -658,7 +659,6 @@ static void GridButtonUpdate( long mode0 )
 	if ( mode0&CHK_SHOW ) {
 		RedrawGrid();
 	}
-	oldGrid = grid;
 }
 
 
@@ -736,6 +736,7 @@ EXPORT STATUS_T CmdGrid(
 
 	case C_CANCEL:
 		grid = oldGrid;
+//		ParamLoadControls( &gridPG );
 		wHide( gridW );
 		return C_TERMINATE;
 

@@ -107,6 +107,11 @@ const char * wGetAppLibDir( void )
 		return appLibDir;
 	}
 
+	strcpy(appLibDir, XTRKCAD_INSTALL_PREFIX "/" XTRKCAD_SHARE_INSTALL_DIR);
+	if ((stat( appLibDir, &buf) == 0 ) && S_ISDIR(buf.st_mode)) {
+		return appLibDir;
+	}
+
 	char * dir1 = "/usr/share/";
 	char * dir2 = "/usr/local/share/";
 	char * beta = "";
@@ -265,13 +270,15 @@ wlibSetProfileFilename(char *name)
 	if (name && name[0]) {
 		size_t length;
 		length = snprintf(profileFile, 0, "%s", name);
-		profileFile = malloc(length + sizeof(NULL));
+		length += sizeof("");
+		profileFile = malloc(length);
 		snprintf( profileFile, length, "%s", name );
 	} else {
 		size_t length; 
 		length = snprintf(profileFile, 0, "%s/%s.rc", workDir, wConfigName );
-		profileFile = malloc(length + sizeof(NULL));
-		length = snprintf(profileFile, length+sizeof(NULL), "%s/%s.rc", workDir, wConfigName );
+		length += sizeof("");
+		profileFile = malloc(length);
+		length = snprintf(profileFile, length, "%s/%s.rc", workDir, wConfigName );
 	}
 }
 

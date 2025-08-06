@@ -986,7 +986,7 @@ EXPORT STATUS_T CmdStructureAction(
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		Dst.state = 0;
 		InfoDefaultControls();
-		HotBarCancel();
+		//HotBarCancel();
 		/*wHide( newTurn.reg.win );*/
 		return C_TERMINATE;
 

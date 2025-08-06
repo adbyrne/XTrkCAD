@@ -4,6 +4,51 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [5.3.1 Beta 1]
+ 
+## Added 
+
++ New and updated Parameter files^
++ Elevation changes can be Undone
++ Pressing Cancel does not save unwanted changes
++ Add option to control audio signals (beeps)
+
+## Build
+
++ Fedora insists on shared libraries when available.
++ Remove library dependency to Freeimage from Linux build
++ Save fedora xtrkcad.spec for 5.3.0
++ Generate manual in pdf format using pandoc (if present)
+
+## Bugfixes
+
++ Add log of commands to Problem Report for help in tracking down assertion errors
++ Fix #588 SnapGrid dialog cancel fails
++ #563 Track tip initially not shown 
++ Bug #586 layout options unexpected behavior 
++ Bug fixed #585 Object Properties for text cannot be changed
++ Fix #583 Cancel button does not revert back to previous state
++ Fix bug 581: Micro movements of an item does not seem to be working on Windows 10
++ #582 circle of cronu tracks causes infinite loop for modiy command
++ Bug 580 Import non-modules become modules
++ Fix Bug 579: Hot Bar does not refresh when inventory changed in Ops Mode
++ Replace 'Describe' with 'Property' for clarity
++ BUG #540 Track Colors Are Wrong When Color Track=Object
++ Toolbar is missing if you do File|New, OK, exit, restart
++ Fix Bug 566 HO-Atlas Code 100 Track.xtp Discrepancy
++ BUG FIX #575 Printing Text on Linux is too large
++ BUG FIX #556 Filled polygon in Modify mode obscures X-Y scale/ruler markers
++ BUG FIX 545 'Text can only be modified in Describe Mode' error stopping Modify/Extend working on track objects under a text bounding box
++ BUG #567 5.3.0GA RPM Install Error
++ BUG #562 Documentation missing images
++ Remove usage of xbm and xpm, use png instead 
++ FIX #571 Cross hair symbols on XTrackCAD layout, Don't draw curve centers on Map
++ Undo label for describe indicates indicates type of track being updated
++ BUG 555, 527 - Undo textNote object places garbage in restored object
++ Cleanup ParamDialog cancel handling by consistant CancelProc callbacks
++ Fix bug #558 Remember last path used for custom parameter file
++ Crash when downsizing layout dimensions 
+
 ## [5.3.0 GA]
 
 ## Bugs

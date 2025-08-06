@@ -1524,9 +1524,8 @@ static int ImportTracks(
 	return TRUE;
 }
 
-EXPORT void DoImport( void * type )
+static void DoImport( void * type )
 {
-	importAsModule = (int)VP2L(type);
 	if (importFile_fs == NULL)
 		importFile_fs = wFilSelCreate( mainW, FS_LOAD, 0,
 		                               type == 0 ? _("Import Tracks") : _("Import Module"),
@@ -1535,6 +1534,17 @@ EXPORT void DoImport( void * type )
 	wFilSelect( importFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 }
 
+EXPORT void DoImportObjects( void * unused )
+{
+	importAsModule = FALSE;
+	DoImport( unused );
+}
+
+EXPORT void DoImportModule( void * unused )
+{
+	importAsModule = TRUE;
+	DoImport( unused );
+}
 
 /**
  * Export the selected track pieces

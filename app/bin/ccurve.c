@@ -686,12 +686,17 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 
 
 static DIST_T circleRadius = 18.0;
-static long helixTurns = 5;
-static ANGLE_T helixAngSep = 0.0;
-static DIST_T helixElev = 0.0;
-static DIST_T helixRadius = 18.0;
-static DIST_T helixGrade = 0.0;
-static DIST_T helixVertSep = 0.0;
+struct helixData_s {
+	long turns;
+	ANGLE_T angSep;
+	DIST_T elev;
+	DIST_T radius;
+	DIST_T grade;
+	DIST_T vertSep;
+};
+struct helixData_s helixDataCur = { 5, 0.0, 0.0, 18.0, 0.0, 0.0 };
+struct helixData_s helixDataOld = { 5, 0.0, 0.0, 18.0, 0.0, 0.0 };
+
 static DIST_T origVertSep = 0.0;
 static wControl_p helixW;
 #define H_ELEV			(0)
@@ -714,12 +719,12 @@ static paramFloatRange_t r1_10000 = { 1, 10000 };
 static paramFloatRange_t r0_100= { 0, 100 };
 
 static paramData_t helixPLs[] = {
-	{ PD_FLOAT, &helixElev, "elev", PDO_DIM, &r0_1000000, N_("Elevation Difference") },
-	{ PD_FLOAT, &helixRadius, "radius", PDO_DIM, &r1_10000, N_("Radius") },
-	{ PD_LONG, &helixTurns, "turns", 0, &i1_1000000, N_("Turns") },
-	{ PD_FLOAT, &helixAngSep, "angSep", 0, &r0_360, N_("Angular Separation") },
-	{ PD_FLOAT, &helixGrade, "grade", 0, &r0_100, N_("Grade") },
-	{ PD_FLOAT, &helixVertSep, "vertSep", PDO_DIM, &r0_1000000, N_("Vertical Separation") },
+	{ PD_FLOAT, &helixDataCur.elev, "elev", PDO_DIM, &r0_1000000, N_("Elevation Difference") },
+	{ PD_FLOAT, &helixDataCur.radius, "radius", PDO_DIM, &r1_10000, N_("Radius") },
+	{ PD_LONG, &helixDataCur.turns, "turns", 0, &i1_1000000, N_("Turns") },
+	{ PD_FLOAT, &helixDataCur.angSep, "angSep", 0, &r0_360, N_("Angular Separation") },
+	{ PD_FLOAT, &helixDataCur.grade, "grade", 0, &r0_100, N_("Grade") },
+	{ PD_FLOAT, &helixDataCur.vertSep, "vertSep", PDO_DIM, &r0_1000000, N_("Vertical Separation") },
 #define I_HELIXMSG		(6)
 	{ PD_MESSAGE, N_("Total Length"), NULL, PDO_DLGRESETMARGIN, I2VP(200) }
 };
@@ -743,35 +748,37 @@ static void ComputeHelix(
 		return;
 	}
 	FormFetchData( &helixPG );
-	totTurns = helixTurns + helixAngSep/360.0;
-	length = totTurns * helixRadius * (2 * M_PI);
+	totTurns = helixDataCur.turns + helixDataCur.angSep/360.0;
+	length = totTurns * helixDataCur.radius * (2 * M_PI);
 	h_orders[h_inx] = ++h_clock;
 	switch ( h_inx ) {
 	case H_ELEV:
 		if (h_orders[H_TURNS]<h_orders[H_VERTSEP] &&
 		    origVertSep > 0.0) {
-			helixTurns = (int)floor(helixElev/origVertSep - helixAngSep/360.0);
-			totTurns = helixTurns + helixAngSep/360.0;
+			helixDataCur.turns = (int)floor(helixDataCur.elev/origVertSep -
+			                                helixDataCur.angSep/360.0);
+			totTurns = helixDataCur.turns + helixDataCur.angSep/360.0;
 			updates |= (1<<H_TURNS);
 		}
 		if (totTurns > 0) {
-			helixVertSep = helixElev/totTurns;
+			helixDataCur.vertSep = helixDataCur.elev/totTurns;
 			updates |= (1<<H_VERTSEP);
 		}
 		break;
 	case H_TURNS:
 	case H_ANGSEP:
-		helixVertSep = helixElev/totTurns;
+		helixDataCur.vertSep = helixDataCur.elev/totTurns;
 		updates |= (1<<H_VERTSEP);
 		break;
 	case H_VERTSEP:
-		if (helixVertSep > 0.0) {
-			origVertSep = helixVertSep;
-			helixTurns = (int)floor(helixElev/origVertSep - helixAngSep/360.0);
+		if (helixDataCur.vertSep > 0.0) {
+			origVertSep = helixDataCur.vertSep;
+			helixDataCur.turns = (int)floor(helixDataCur.elev/origVertSep -
+			                                helixDataCur.angSep/360.0);
 			updates |= (1<<H_TURNS);
-			totTurns = helixTurns + helixAngSep/360.0;
+			totTurns = helixDataCur.turns + helixDataCur.angSep/360.0;
 			if (totTurns > 0) {
-				helixVertSep = helixElev/totTurns;
+				helixDataCur.vertSep = helixDataCur.elev/totTurns;
 				updates |= (1<<H_VERTSEP);
 			}
 		}
@@ -782,19 +789,21 @@ static void ComputeHelix(
 	}
 	if ( totTurns > 0.0 ) {
 		if ( h_orders[H_RADIUS]>=h_orders[H_GRADE] ||
-		     (helixGrade==0.0 && totTurns>0 && helixRadius>0) ) {
-			if ( helixRadius > 0.0 ) {
-				helixGrade = helixElev/(totTurns*helixRadius*(2*M_PI))*100.0;
+		     (helixDataCur.grade==0.0 && totTurns>0 && helixDataCur.radius>0) ) {
+			if ( helixDataCur.radius > 0.0 ) {
+				helixDataCur.grade = helixDataCur.elev/(totTurns*helixDataCur.radius*
+				                                        (2*M_PI))*100.0;
 				updates |= (1<<H_GRADE);
 			}
 		} else {
-			if( helixGrade > 0.0 ) {
-				helixRadius = helixElev/(totTurns*(helixGrade/100.0)*2.0*M_PI);
+			if( helixDataCur.grade > 0.0 ) {
+				helixDataCur.radius = helixDataCur.elev/(totTurns*(helixDataCur.grade/100.0)
+				                      *2.0*M_PI);
 				updates |= (1<<H_RADIUS);
 			}
 		}
 	}
-	length = totTurns * helixRadius * (2 * M_PI);
+	length = totTurns * helixDataCur.radius * (2 * M_PI);
 	for ( h_inx=0; updates; h_inx++,updates>>=1 ) {
 		if ( (updates&1) ) {
 			FormLoadSingleControl( &helixPG, h_inx );
@@ -837,6 +846,7 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 					_("Cancel"), FormCancel_Current,
 					TRUE, 0, (paramChangeProc)ComputeHelix);
 			}
+			helixDataCur = helixDataOld;
 			FormLoadControls(&helixPG);
 			FormGroupRecord(&helixPG);
 			ComputeHelix(NULL, 6, NULL);
@@ -866,15 +876,16 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 
 	case C_DOWN:
 		if (helix) {
-			if (helixRadius <= 0.0) {
+			if (helixDataCur.radius <= 0.0) {
 				ErrorMessage(MSG_RADIUS_GTR_0);
 				return C_ERROR;
 			}
-			if (helixTurns <= 0) {
+			if (helixDataCur.turns <= 0) {
 				ErrorMessage(MSG_HELIX_TURNS_GTR_0);
 				return C_ERROR;
 			}
 			FormFetchData(&helixPG);
+			helixDataOld = helixDataCur;
 		} else {
 			FormFetchData(&circleRadiusPG);
 			switch (circleMode) {
@@ -921,23 +932,24 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 		}
 		tempSegs(0).color = wDrawColorBlack;
 		tempSegs(0).lineWidth = 0;
-		tempSegs(0).u.c.radius = helix ? helixRadius : circleRadius;
+		tempSegs(0).u.c.radius = helix ? helixDataCur.radius : circleRadius;
 		tempSegs(0).u.c.a0 = 0.0;
 		tempSegs(0).u.c.a1 = 360.0;
 		return C_CONTINUE;
 
 	case C_UP:
 		if (helix) {
-			if (helixRadius > mapD.size.x || helixRadius > mapD.size.y) {
+			if (helixDataCur.radius > mapD.size.x || helixDataCur.radius > mapD.size.y) {
 				ErrorMessage(MSG_RADIUS_TOO_BIG);
 				return C_ERROR;
 			}
-			if (helixRadius > 10000) {
+			if (helixDataCur.radius > 10000) {
 				ErrorMessage(MSG_RADIUS_GTR_10000);
 				return C_ERROR;
 			}
 			UndoStart(_("Create Helix Track"), "newHelix");
-			t = NewCurvedTrack(tempSegs(0).u.c.center, helixRadius, 0.0, 0.0, helixTurns);
+			t = NewCurvedTrack(tempSegs(0).u.c.center, helixDataCur.radius, 0.0, 0.0,
+			                   helixDataCur.turns);
 		} else {
 			if (circleRadius > mapD.size.x || circleRadius > mapD.size.y) {
 				ErrorMessage(MSG_RADIUS_TOO_BIG);
@@ -947,7 +959,7 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 				ErrorMessage(MSG_RADIUS_GTR_0);
 				return C_ERROR;
 			}
-			if ((circleRadius > 100000) || (helixRadius > 10000)) {
+			if ((circleRadius > 100000) || (helixDataCur.radius > 10000)) {
 				ErrorMessage(MSG_RADIUS_GTR_10000);
 				return C_ERROR;
 			}
@@ -1025,7 +1037,7 @@ EXPORT void InitCmdCurve( wMenu_p menu )
 	ButtonGroupBegin( _("Circle Track"), "cmdCircleSetCmd", _("Circle Tracks") );
 	AddMenuButton( menu, CmdCircle, "cmdCircleFixedRadius",
 	               _("Fixed Radius Circle"), CreateToolbarIconFromResource( "circle.png"), LEVEL0_50,
-	               IC_STICKY|IC_POPUP2, ACCL_CIRCLE1, I2VP(0) );
+               IC_STICKY|IC_POPUP2, ACCL_CIRCLE1, I2VP(0) );
 	AddMenuButton( menu, CmdCircle, "cmdCircleTangent", _("Circle from Tangent"),
 		CreateToolbarIconFromResource( "circle-tangent.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2, ACCL_CIRCLE2, I2VP(1) );

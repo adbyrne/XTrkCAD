@@ -659,6 +659,7 @@ FILE * wFileOpen(		const char *, const char * );
 wControl_p wMain(			int, char *[] );
 void wWinSetBigIcon(		wWin_p, wIcon_p );
 void wWinSetSmallIcon(		wWin_p, wIcon_p );
+#define DONTGRABFOCUS 0x100
 void wWinShow( wControl_p control, wBool_t visibility);
 wBool_t wWinIsVisible(		wControl_p window );
 wBool_t wWinIsMaximized( wWin_p win);

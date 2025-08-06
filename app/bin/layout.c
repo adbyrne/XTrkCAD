@@ -91,6 +91,8 @@ static paramIntegerRange_t i0_100 = { 0, 100 };
 
 static void SettingsWrite( void  );
 static void SettingsRead( void  );
+static void ImageFileClear(void* unused);
+static void ImageFileBrowse(void* unused);
 
 static wBool_t LayoutDlgUpdate(paramGroup_p pg, int inx, void * valueP);
 

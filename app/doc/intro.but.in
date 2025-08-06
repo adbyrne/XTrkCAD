@@ -560,7 +560,9 @@ Throughout this manual the following typographic conventions are used to make fi
 
 \H{installSoftware} Installation
 
-\e{XTrackCAD} is designed to operate under Linux, Apple MacOS or Microsoft Windows. Information within this section of the manual pertains to installation of the application in either of these environments.
+\e{XTrackCAD} is designed to operate under Linux, Apple MacOS or Microsoft Windows. Information within this section of the manual pertains to installation of the application in any of these environments.
+
+Please see \W{https://sourceforge.net/p/xtrkcad-fork/wiki/DownloadInstall/}{https://sourceforge.net/p/xtrkcad-fork/wiki/DownloadInstall/} for more detals.
 
 \rule
 
@@ -597,7 +599,7 @@ The application includes the program, documentation, parameter and example files
 
 \lcont{\u000}
 
-\n To run on Apple MacOS, the \e{XQuartz} package must first have been installed - see \W{http://www.xquartz.org}{http://www.xquartz.org}. XQuartz will need to be upgraded after each OS version upgrade.
+\n To run on Apple MacOS, the \e{XQhttps://sourceforge.net/projects/xtrkcad-fork/files/XTrackCad/Version%205.3.0/uartz} package must first have been installed - see \W{http://www.xquartz.org}{http://www.xquartz.org}. XQuartz will need to be upgraded after each OS version upgrade.
 
 \lcont{\u000}
 
@@ -611,21 +613,16 @@ This sequence may be necessary after each OS upgrade.
 
 \S{LinuxInstall} \i{Linux Installation}
 
-\e{XTrackCAD} for LINUX is shipped as a self-extracting archive (executable).
+\e{XTrackCAD} is available by a variety of methods:
+
+\n Installing from your distribution, such as Ubuntu or Fedora
+
+\n Installing the desired version from the XTrkCad release page; \W{https://sourceforge.net/projects/xtrkcad-fork/files/XTrackCad/}{https://sourceforge.net/projects/xtrkcad-fork/files/XTrackCad/}
 
 \n Installing from the self-extracting archive.
 
-\lcont{
 
-\dd After downloading open a command line then
-
-\dd \c{./\XTCStgzPack --prefix=/usr/local --exclude-subdir}
-
-\dd This will install the executable in /usr/local/bin. A directory named \c{xtrkcad} will be created in
-/usr/local/share and all files will be unpacked into it.
-
-}
-
+Normally \e{XTrkCAD} is installed in \c{/usr/...} or \c{/usr/local/...}.
 If you install \e{XTrackCAD} into another directory, set the \c{XTRKCADLIB} environment variable to point to that directory.
 
 \rule
@@ -799,7 +796,7 @@ On MS Windows, the \e{Install} directory is set when you install \e{XTrackCAD}. 
 demos, examples) can be found in the \c{share/xtrkcad} subdirectory underneath the \e{Install} directory.
 The \e{Working} directory is in your personal profile.
 
-On Linux, the \e{Install} directory is usually \c{/usr/local/lib/xtrkcad/}, but you can change this by defining the \c{XTRKCADLIB} environment variable before starting \e{XTrackCAD}. The working directory is \c{\{HOME\}/.xtrkcad/}.
+On Linux, the \e{Install} directory is usually \c{/usr/share/xtrkcad/}, but you can change this by defining the \c{XTRKCADLIB} environment variable before starting \e{XTrackCAD}. The working directory is \c{\{HOME\}/.xtrkcad/}.
 
 On Mac OSX, the \e{Install} directory is the application package, usually located in the \c{/Applications} directory.
 All the included parameters, demos and examples can be found inside the package under the  \c{/Applications/xtrkcad/Contents/Resources/xtrkcad} directory.
@@ -857,7 +854,7 @@ The check-point frequency is set by the \e{Check Point} field found in the \f{Pr
 
 }
 
-\b The \c{xtrkcad.cus} file contains parameter information.  This is mostly information created by the \f{Turnout Designer} dialogs (\K{cmdTurnoutNew}) and \f{Group} (\K{cmdGroup}) command.  You can use the \f{Edit>Custom Management} dialog to manipulate these parameters.
+\b The \c{xtrkcad.cus} file contains parameter information.  This is mostly information created by the \f{Turnout Designer} dialogs (\K{cmdTurnoutNew}) and \f{Group} (\K{cmdGroup}) command.  You can use the \f{Manage>Custom defined pats} dialog to manipulate these parameters.
 
 \u000
 
@@ -867,9 +864,9 @@ The check-point frequency is set by the \e{Check Point} field found in the \f{Pr
 
 \H{uninstall} \i{Removing \e{XTrackCAD}}
 
-Remove \e{XTrackCAD} by deleting the \e{XTrackCAD Install} directory, or application (on Mac OSX), deleting any \c{xtrkcad.*} files from the \e{Working} directory, and deleting any \e{*.xtc} and \e{*.xti} files.
+On Linux, please see \e{Removing XTrackCAD} on the \W{https://sourceforge.net/p/xtrkcad-fork/wiki/LinuxInstall}{Linux Install} wiki page.
 
-On MS-Windows only, you can also use the \f{Uninstall} icon in the \e{XTrackCAD} program group.
+On MS-Windows you can also use the \f{Uninstall} icon in the \e{XTrackCAD} program group.
 
 \rule
 
@@ -884,6 +881,7 @@ This section of the manual describes how and where to report a bug or seek an en
 \S{bugs} Reporting \i{Bugs}
 
 If you encounter an unreported bug please submit detail regarding such to the \f{Bug Tracker} located at the \W{https://sourceforge.net/p/xtrkcad-fork/bugs/}{\e{XTrackCAD} Fork Project Site}.
+Click \f{Create Ticket}.
 
 \f{Be sure to provide the three basic elements of a bug report:} What you were doing at the time the bug occurred,  what you expected to happen and what actually happened. This detail will help developers replicate the error, find and correct the offending code.
 
@@ -920,8 +918,11 @@ Remember the three basics: what you were doing, what you expected to happen, and
 If you can recreate the problem the \f{Macro>Record} command can be used to record what happened.  Try to isolate the problem by creating a minimal layout and recording as few commands as possible.
 
 \f{Don't report bugs about old versions.} Every time a new version of \e{XTrackCAD} is released, many enhancements are added and known bugs are fixed. If you're using a version of \e{XTrackCAD} that's more than two revisions older than the latest version, you should upgrade to the latest version to make sure the bug you are experiencing still exists. (It's not a bad idea to upgrade even if your version is only a version behind the most current one.)
-
 \f{Only report one problem in each bug report.} If you encounter two or more bugs that don't appear to be related create a separate bug report for each one. This makes the task of managing work assignments easier and may result in a quicker fix for the problem.
+
+Invoke \f{Help>Collect Problem Info},
+This will create a zip file with information about the state of the program including the layout file, information from the workng directory, recent actions etc.
+Please attach this zip file to your report.
 
 \rule
 
@@ -932,6 +933,7 @@ Suggestions for improvements are encouraged and welcome. Submit your suggestion 
 
 \S{support} \i{User Support}
 
-The developers maintain a forum \W{https://xtrackcad.groups.io/g/main}{\e{XtrackCAD} User Forum} a Wiki at \W{http://www.xtrkcad.org/Wikka/HomePage}{\e{XTrackCAD} Wiki}
+The developers maintain a forum at \W{https://xtrackcad.groups.io/g/main}{https://xtrackcad.groups.io/g/main}
+and a Wiki at \W{https://sourceforge.net/p/xtrkcad-fork/wiki/Home/}{https://sourceforge.net/p/xtrkcad-fork/wiki/Home/}
 
 \rule

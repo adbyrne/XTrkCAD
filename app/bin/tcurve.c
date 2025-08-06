@@ -441,12 +441,14 @@ static void UpdateCurve( track_p trk, int inx, descData_p descUpd,
 			crvData.radius = xx0.radius;
 			crvDesc[RA].mode |= DESC_CHANGE;
 		} else {
-			if ( crvData.pivot == DESC_PIVOT_FIRST || GetTrkEndTrk(trk,0) ) {
-				Translate( &xx0.pos, xx0.pos, a0, xx0.radius-crvData.radius );
-			} else if ( crvData.pivot == DESC_PIVOT_SECOND || GetTrkEndTrk(trk,1) ) {
-				Translate( &xx0.pos, xx0.pos, a0+a1, xx0.radius-crvData.radius );
-			} else {
-				Translate( &xx0.pos, xx0.pos, a0+a1/2.0, xx0.radius-crvData.radius );
+			if ( xx0.helixTurns==0 && xx0.circle==FALSE ) {
+				if ( crvData.pivot == DESC_PIVOT_FIRST || GetTrkEndTrk(trk,0) ) {
+					Translate( &xx0.pos, xx0.pos, a0, xx0.radius-crvData.radius );
+				} else if ( crvData.pivot == DESC_PIVOT_SECOND || GetTrkEndTrk(trk,1) ) {
+					Translate( &xx0.pos, xx0.pos, a0+a1, xx0.radius-crvData.radius );
+				} else {
+					Translate( &xx0.pos, xx0.pos, a0+a1/2.0, xx0.radius-crvData.radius );
+				}
 			}
 			crvDesc[CE].mode |= DESC_CHANGE;
 			xx0.radius = crvData.radius;

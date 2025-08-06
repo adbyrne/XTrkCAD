@@ -226,6 +226,8 @@ Otherwise, as much of the room as possible is displayed, and any \f{grey} area w
 Most Windows open with three standard dialog buttons:
 
 \dd \f{Cancel} - Cancels dialog. Layout reverts back to its previous state.
+\f{Cancel} may be absent if reverting the action is not applicable.
+If the action affected objects on the layout, they can by reverted with the \f{Undo} command.
 
 \u000
 

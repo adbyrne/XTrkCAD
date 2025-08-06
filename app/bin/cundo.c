@@ -96,12 +96,15 @@ static int rbuff_record = 0;
 
 EXPORT void Rdump( FILE * outf )
 {
-	fprintf( outf, "Record Buffer:\n" );
+	time_t clock;
+	time(&clock);
+	fprintf( outf, "Record Buffer %s:\n", ctime(&clock) );
 	rbuff[RBUFF_SIZE] = '\0';
 	fprintf( outf, "%s", rbuff+roff );
 	rbuff[roff] = '\0';
 	fprintf( outf, "%s", rbuff );
 	memset( rbuff, 0, sizeof rbuff );
+	fflush( outf );
 	roff = 0;
 }
 

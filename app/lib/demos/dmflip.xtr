@@ -182,7 +182,7 @@ STEP
 PARAMETER describe S2 Interstate Fuel - Loading Rack
 BIGPAUSE
 #DESCRIBE OK
-PARAMETER describe ok
+PARAMETER describe cancel
 REDRAW
 MESSAGE
 =========================================

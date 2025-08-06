@@ -1,4 +1,3 @@
-#include "misc.h"
 /* file misc.c
  * Main routine and initialization for the application
  */
@@ -536,13 +535,11 @@ EXPORT void MapWindowToggleShow(void * unused)
  * \param state IN TRUE if visible, FALSE if hidden
  */
 
-EXPORT
-
-void MapWindowShow(int state)
+EXPORT void MapWindowShow(int state)
 {
 	mapVisible = state;
 	wPrefSetInteger("misc", "mapVisible", mapVisible);
-	wWinShow(mapW, mapVisible);
+	wWinShow(mapW, mapVisible | DONTGRABFOCUS);
 
 	if (mapVisible) {
 		DoChangeNotification(CHANGE_MAP);
@@ -562,11 +559,11 @@ EXPORT void DoShowWindow(int index, const char * name, void * data)
 			return;
 		}
 	}
-	wWinShow((wWin_p) data, TRUE);
+	wWinShow((wControl_p) data, TRUE);
 }
 
 static dynArr_t demoWindows_da;
-#define demoWindows(N) DYNARR_N( wWin_p, demoWindows_da, N )
+#define demoWindows(N) DYNARR_N( wControl_p, demoWindows_da, N )
 
 EXPORT void wShow(wControl_p win)
 {
@@ -624,7 +621,7 @@ EXPORT void CloseDemoWindows(void)
 	DYNARR_RESET( wWin_p, demoWindows_da );
 }
 
-EXPORT void DefaultProc(wWin_p win, winProcEvent e, void * data)
+EXPORT void DefaultProc(wControl_p win, winProcEvent e, void * data)
 {
 	switch (e) {
 	case wClose_e:
@@ -1064,7 +1061,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	//DoChangeNotification( CHANGE_MAIN | CHANGE_MAP);
 
 	wWinShow(mainW, TRUE);
-	wWinShow(mapW, mapVisible);
+	wWinShow(mapW, mapVisible | DONTGRABFOCUS);
 	
 	wDestroySplash();
 	

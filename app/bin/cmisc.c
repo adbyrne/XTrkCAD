@@ -469,11 +469,11 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 	if (describePG.win == NULL) {
 		/* SDB 5.13.2005 */
 		ParamCreateDialog(&describePG, _("Description"),
-				  //_("Done"), DescribeDone,
-				  NULL, NULL,
+		                  //_("Done"), DescribeDone,
+		                  NULL, NULL,
 		                  ParamCancel_Reset,
 		                  TRUE, DescribeLayout,
-				  F_RECALLPOS|PD_F_ALT_CANCELLABEL,
+		                  F_RECALLPOS|PD_F_ALT_CANCELLABEL,
 		                  DescribeUpdate);
 		describeCmdButtonEnd = wControlBelow((wControl_p)describePG.helpB);
 	}
@@ -576,7 +576,7 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 
 	switch (action) {
 	case C_START:
-		InfoMessage(_("Select track to describe +Shift for Frozen"));
+		InfoMessage(_("Click on object for Properties +Shift for Frozen"));
 		wSetCursor(mainD.d,wCursorQuestion);
 		descUndoStarted = FALSE;
 		trk = NULL;
@@ -702,7 +702,7 @@ void InitCmdDescribe(wMenu_p menu)
 }
 void InitCmdDescribe2(wMenu_p menu)
 {
-	descPopupM = MenuRegister( "Describe Context Menu" );
+	descPopupM = MenuRegister( "Properties Context Menu" );
 	wMenuPushCreate(descPopupM, "cmdSelectMode", GetBalloonHelpStr("cmdSelectMode"),
 	                0, DoCommandB, I2VP(selectCmdInx));
 	wMenuPushCreate(descPopupM, "cmdModifyMode", GetBalloonHelpStr("cmdModifyMode"),

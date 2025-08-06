@@ -1194,7 +1194,8 @@ static BOOL_T CarPartWrite(
 	rc &= fprintf( f, "CARPART %s \"%s\"", GetScaleName(partP->parent->scale),
 	               PutTitle(message) )>0;
 	rc &= fprintf( f, " %ld %ld %0.3f %0.3f 0 %ld %0.3f %0.3f %ld\n",
-	               partP->options, partP->type, partP->dim.carLength, partP->dim.carWidth, longCenterOffset,
+	               partP->options, partP->type, partP->dim.carLength, partP->dim.carWidth,
+	               longCenterOffset,
 	               partP->dim.truckCenter, partP->dim.coupledLength, wDrawGetRGB(partP->color) )>0;
 
 	SetUserLocale();
@@ -1874,7 +1875,8 @@ EXPORT void AddHotBarCarDesc( void )
 	coOrd orig;
 	coOrd size;
 
-	LOG( log_carDlgDims, 1, ( "AddHotBarCarDesc/load carItemHB: carItemHB.cnt:%d\n", carItemInfo_da.cnt ) );
+	LOG( log_carDlgDims, 1, ( "AddHotBarCarDesc/load carItemHB: carItemHB.cnt:%d\n",
+	                          carItemInfo_da.cnt ) );
 	DYNARR_SET( carItem_t*, carItemHotbar_da, carItemInfo_da.cnt );
 	memcpy( &carItemHotbar(0), &carItemInfo(0),
 	        carItemInfo_da.cnt * sizeof carItemHotbar(0) );
@@ -3785,11 +3787,12 @@ static void CarDlgUpdate(
 		carDlgCarLengthClock = carDlgCoupledLengthClock = carDlgTruckCenterClock =
 		                               carDlgCouplerLengthClock = carDlgClock = 0;
 #ifdef TRUCK_OFFSET
-		LOG( log_carDlgDims, 1, ( "truckCenter(%d): trkCenter:%0.3f, .carLength:%0.3f = trackOffset: %0.3f %0.3f\n",
-			carDlgDim.truckCenter,
-			carDlgDim.carLength,
-		        carDlgTruckOffsetL,
-		        carDlgTruckOffsetR ) );
+		LOG( log_carDlgDims, 1,
+		     ( "truckCenter(%d): trkCenter:%0.3f, .carLength:%0.3f = trackOffset: %0.3f %0.3f\n",
+		       carDlgDim.truckCenter,
+		       carDlgDim.carLength,
+		       carDlgTruckOffsetL,
+		       carDlgTruckOffsetR ) );
 #endif
 		redraw = TRUE;
 		break;
@@ -4019,8 +4022,10 @@ static void CarDlgUpdate(
 			carDlgTruckOffsetR = carDlgTruckOffsetL;
 		} else if (carDlgDim.carLength - carDlgDim.truckCenter > 2*fabs(
 		                   carDlgDim.truckCenterOffset)) {
-			carDlgTruckOffsetL = (carDlgDim.carLength-carDlgDim.truckCenter)/2 - carDlgDim.truckCenterOffset;
-			carDlgTruckOffsetR = (carDlgDim.carLength-carDlgDim.truckCenter)/2 + carDlgDim.truckCenterOffset;
+			carDlgTruckOffsetL = (carDlgDim.carLength-carDlgDim.truckCenter)/2 -
+			                     carDlgDim.truckCenterOffset;
+			carDlgTruckOffsetR = (carDlgDim.carLength-carDlgDim.truckCenter)/2 +
+			                     carDlgDim.truckCenterOffset;
 		} else {
 			carDlgTruckOffsetL = 0;
 			carDlgTruckOffsetR = 0;
@@ -4034,12 +4039,13 @@ static void CarDlgUpdate(
 		}
 		redraw = TRUE;
 #ifdef TRUCK_OFFSET
-		LOG( log_carDlgDims, 1, ("I_CD_TRKOFFSET: len:%0.3f, center:%0.3f, cenoff:%0.3f = offset:%0.3f %0.3f\n",
-			carDlgDim.carLength,
-			carDlgDim.truckCenter,
-			carDlgDim.truckCenterOffset,
-			carDlgTruckOffsetL,
-			carDlgTruckOffsetR ) );
+		LOG( log_carDlgDims, 1,
+		     ("I_CD_TRKOFFSET: len:%0.3f, center:%0.3f, cenoff:%0.3f = offset:%0.3f %0.3f\n",
+		      carDlgDim.carLength,
+		      carDlgDim.truckCenter,
+		      carDlgDim.truckCenterOffset,
+		      carDlgTruckOffsetL,
+		      carDlgTruckOffsetR ) );
 #endif
 		break;
 
@@ -4057,18 +4063,21 @@ static void CarDlgUpdate(
 			return;
 		} else if ( carDlgDim.carLength - carDlgDim.truckCenter > 2*fabs(
 		                    carDlgDim.truckCenterOffset) ) {
-			carDlgTruckOffsetL = (carDlgDim.carLength-carDlgDim.truckCenter)/2 - carDlgDim.truckCenterOffset;
-			carDlgTruckOffsetR = (carDlgDim.carLength-carDlgDim.truckCenter)/2 + carDlgDim.truckCenterOffset;
+			carDlgTruckOffsetL = (carDlgDim.carLength-carDlgDim.truckCenter)/2 -
+			                     carDlgDim.truckCenterOffset;
+			carDlgTruckOffsetR = (carDlgDim.carLength-carDlgDim.truckCenter)/2 +
+			                     carDlgDim.truckCenterOffset;
 		} else {
 			carDlgTruckOffsetL = 0;
 			carDlgTruckOffsetR = 0;
 		}
-		LOG( log_carDlgDims, 1, ("I_CD_TRKCENTER: len:%0.3f, center:%0.3f, cenoff:%0.3f = offset:%0.3f %0.3f\n",
-			carDlgDim.carLength,
-			carDlgDim.truckCenter,
-			carDlgDim.truckCenterOffset,
-			carDlgTruckOffsetL,
-			carDlgTruckOffsetR ) );
+		LOG( log_carDlgDims, 1,
+		     ("I_CD_TRKCENTER: len:%0.3f, center:%0.3f, cenoff:%0.3f = offset:%0.3f %0.3f\n",
+		      carDlgDim.carLength,
+		      carDlgDim.truckCenter,
+		      carDlgDim.truckCenterOffset,
+		      carDlgTruckOffsetL,
+		      carDlgTruckOffsetR ) );
 #endif
 		redraw = TRUE;
 		break;
@@ -4213,12 +4222,12 @@ static void CarDlgUpdate(
 	if ( checkTruckCenter && carDlgDim.carLength > 0 ) {
 #ifdef TRUCK_OFFSET
 		DIST_T offL = (carDlgDim.carLength - carDlgDim.truckCenter)/2 -
-			                     carDlgDim.truckCenterOffset;
+		              carDlgDim.truckCenterOffset;
 		DIST_T offR = (carDlgDim.carLength - carDlgDim.truckCenter)/2 +
-			                     carDlgDim.truckCenterOffset;
+		              carDlgDim.truckCenterOffset;
 		LOG( log_carDlgDims, 1, ( "OFF %0.3f %0.3f %0.3f %0.3f\n",
-			carDlgTruckOffsetL, carDlgTruckOffsetR, offL, offR ) );
-		
+		                          carDlgTruckOffsetL, carDlgTruckOffsetR, offL, offR ) );
+
 		if ( carDlgTruckOffsetL > 0 || carDlgTruckOffsetR > 0 ) {
 			carDlgDim.truckCenter = carDlgDim.carLength - ( carDlgTruckOffsetL +
 			                        carDlgTruckOffsetR );
@@ -4227,9 +4236,10 @@ static void CarDlgUpdate(
 			carDlgDim.truckCenter = carDlgDim.carLength * 0.75;
 			carDlgDim.truckCenterOffset = 0;
 		}
-		LOG( log_carDlgDims, 1, ( "checkTruckCenter length:%0.3f, offset %0.3f, %0.3f = truckCenter:%0.3f, truckCenterOffset:%0.3f\n",
-		carDlgDim.carLength, carDlgTruckOffsetL, carDlgTruckOffsetR,
-		carDlgDim.truckCenter, carDlgDim.truckCenterOffset ) );
+		LOG( log_carDlgDims, 1,
+		     ( "checkTruckCenter length:%0.3f, offset %0.3f, %0.3f = truckCenter:%0.3f, truckCenterOffset:%0.3f\n",
+		       carDlgDim.carLength, carDlgTruckOffsetL, carDlgTruckOffsetR,
+		       carDlgDim.truckCenter, carDlgDim.truckCenterOffset ) );
 #endif
 		ParamLoadControl( &carDlgPG, I_CD_TRKCENTER );
 		ParamLoadControl( &carDlgPG, I_CD_TRKOFFSET );
@@ -4901,7 +4911,8 @@ static void CarInvDlgDeleteShelve( void )
 				}
 				bShowMsg = TRUE;
 			}
-			LOG( log_carDlgDims, 1, ( "CarInvDlgDeleteShelve( %d, %s\n", inx, item->title ) );
+			LOG( log_carDlgDims, 1, ( "CarInvDlgDeleteShelve( %d, %s\n", inx,
+			                          item->title ) );
 			wListDelete( (wList_p)carInvPLs[I_CI_LIST].control, inx );
 			if ( item->title ) { MyFree( item->title ); }
 			if ( item->data.number ) { MyFree( item->data.number ); }

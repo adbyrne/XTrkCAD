@@ -390,7 +390,7 @@ static void DrawCar(
 #ifdef CAR_CLEARANCE
 	            xx->pencils,
 #endif
-		    xx->trvTrk.trk);
+	            xx->trvTrk.trk);
 }
 
 

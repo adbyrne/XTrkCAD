@@ -1753,8 +1753,8 @@ EXPORT void DrawRuler(
 							//p0.y = p1.y+dyn*d->scale/mainD.dpi;
 						}
 						DrawBoxedString( BOX_BACKGROUND|BOX_POS_BOTTOM_LEFT,
-								 d, p0, message, rulerFp, fs*d->scale,
-								 color, 0 );
+						                 d, p0, message, rulerFp, fs*d->scale,
+						                 color, 0 );
 					}
 				}
 			}
@@ -1843,8 +1843,8 @@ EXPORT void DrawRuler(
 							Translate( &p0, p0, 225, fs*d->scale/mainD.dpi );
 							sprintf(message, "%d%c", digit, quote );
 							DrawBoxedString( BOX_BACKGROUND|BOX_POS_BOTTOM_LEFT,
-								 	d, p0, message, rulerFp, fs*d->scale,
-								 	color, 0 );
+							                 d, p0, message, rulerFp, fs*d->scale,
+							                 color, 0 );
 						}
 					}
 				}

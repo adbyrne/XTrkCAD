@@ -52,6 +52,9 @@ find_package(Pandoc)
 
 # check for GTK+ 3.0
 pkg_check_modules(GTK3 QUIET "gtk+-3.0")
+# Flatpak
+find_package(Flatpak)
+
 
 if(NOT GTK3_FOUND)
 	message(FATAL_ERROR "ERROR: GTK3 not found found!")

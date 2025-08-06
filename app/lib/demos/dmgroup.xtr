@@ -198,7 +198,7 @@ MOUSE 2 2.359 2.266
 MOUSE 4 2.359 2.266
 BIGPAUSE
 #DESCRIBE OK
-PARAMETER describe ok
+PARAMETER describe cancel
 RESET
 MESSAGE
 _________________________________________
@@ -441,7 +441,7 @@ STEP
 #DESCRIBE Length	7.500
 PARAMETER describe F7 7.500
 #DESCRIBE OK
-PARAMETER describe ok
+PARAMETER describe cancel
 RESET
 MESSAGE
 _________________________________________
@@ -477,7 +477,7 @@ STEP
 PARAMETER describe F11 17.5
 BIGPAUSE
 #DESCRIBE OK
-PARAMETER describe ok
+PARAMETER describe cancel
 MESSAGE
 _________________________________________
 

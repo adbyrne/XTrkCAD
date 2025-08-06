@@ -563,7 +563,7 @@ static descData_t drawDesc[] = {
 	/*WT*/ 	{ DESC_DIM, N_("Width"), &drawData.width },
 	/*PV*/	{ DESC_PIVOT, N_("Pivot"), &drawData.pivot },
 	/*VC*/	{ DESC_LONG, N_("Point Count"), &drawData.pointCount },
-	/*LW*/	{ DESC_FLOAT, N_("Line Width"), &drawData.lineWidth },
+	/*LW*/	{ DESC_DIM, N_("Line Width"), &drawData.lineWidth },
 	/*LT*/  { DESC_LIST, N_("Line Type"), &drawData.lineType },
 	/*CO*/	{ DESC_COLOR, N_("Color"), &drawData.color },
 	/*FL*/	{ DESC_BOXED, N_("Filled"), &drawData.filled },
@@ -1639,7 +1639,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 			drawModCmdContext.open = (drawModCmdContext.subtype==POLYLINE)?TRUE:FALSE;
 			break;
 		case SEG_TEXT:
-			InfoMessage("Text can only be modified in Describe Mode");
+			InfoMessage("Text can only be modified with Property command");
 			wBeep();
 			return C_ERROR;
 		default:
@@ -3555,13 +3555,13 @@ EXPORT track_p NewText(
 	tempSeg.type = SEG_TEXT;
 	tempSeg.color = color;
 	tempSeg.lineWidth = 0;
-	tempSeg.u.t.pos = pos;
+	tempSeg.u.t.pos = zero;
 	tempSeg.u.t.angle = angle;
 	tempSeg.u.t.fontP = NULL;
 	tempSeg.u.t.fontSize = textSize;
 	tempSeg.u.t.string = MyStrdup( text );
 	tempSeg.u.t.boxed = boxed;
-	trk = MakeDrawFromSeg1( index, zero, 0.0, &tempSeg );
+	trk = MakeDrawFromSeg1( index, pos, 0.0, &tempSeg );
 	return trk;
 }
 
