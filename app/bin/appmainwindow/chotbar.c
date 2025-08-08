@@ -147,7 +147,6 @@ static void ScrollButtonUpdate()
 	if (hotBarCurrEnd < hotBarMap_da.cnt) {
 		wControlActive((wControl_p)hotBarRightB, TRUE);
 	} else {
-		wButtonSetBusy(hotBarRightB, FALSE);
 		wControlActive((wControl_p)hotBarRightB, FALSE);
 	}
 }
@@ -158,12 +157,10 @@ static wBool_t ScrollButtonStatus(void)
 	if (hotBarCurrStart >0) {
 		wControlActive((wControl_p)hotBarLeftB, TRUE);
 	} else {
-		//wButtonSetBusy(hotBarLeftB, FALSE);
 		wControlActive((wControl_p)hotBarLeftB, FALSE);
 	}
 
 	if (hotBarCurrStart < 0) {
-		//wButtonSetBusy(hotBarRightB, FALSE);
 		wControlActive((wControl_p)hotBarRightB, FALSE);
 		return FALSE;
 	}
