@@ -1,6 +1,6 @@
 /**
  * \file   mrulist.c
- * \brief
+ * \brief	use a doubly linked list for most-recent-used lists
  *
  * \author Martin Fischer with thanks to claude.ai
  */
@@ -103,9 +103,8 @@ void* MRUAppendEntry(MRUList* list, const char* label, void* entry)
 {
 	if (!list || !label) { return(NULL); }
 
-
 	// check for existance of entry
-	GList* link = g_queue_find_custom(list->elements, label,
+	const GList* link = g_queue_find_custom(list->elements, label,
 		(GCompareFunc)labelcmp);
 
 	if (!link) {
@@ -113,6 +112,7 @@ void* MRUAppendEntry(MRUList* list, const char* label, void* entry)
 		MRUEntry* new_entry = g_malloc0(sizeof(MRUEntry));
 		new_entry->label = g_strdup(label);
 		new_entry->userdata = entry;
+
 		g_queue_push_tail(list->elements, new_entry);
 
 		// remove oldest if capacity is reached
@@ -206,12 +206,25 @@ void * MRURemoveEntry(MRUList* list, const char* label)
  * \param list  list handle
  */
 
+free_element(gpointer data)
+{
+	MRUEntry* queueelement = (MRUEntry*)data;
+
+	if (data) {
+		printf("label: %s\n", queueelement->label);
+		g_free(queueelement->label);
+	}
+}
+
+
 void MRUClear(MRUList* list)
 {
 	if (!list) { return; }
 
 	// free all elements
-	g_queue_foreach(list->elements, (GFunc)g_free, NULL);
+
+	printf("MRUClear: %d elements\n", MRUGetCount(list));
+	g_queue_foreach(list->elements, (GFunc)free_element, NULL);
 	g_queue_clear(list->elements);
 }
 

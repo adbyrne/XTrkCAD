@@ -656,7 +656,7 @@ EXPORT void ChangeHotBar( long changes )
 
 	if (hotBarLeftB != NULL && curScaleName) {
 		static long programModeOld = 0;
-		ClearContextMenu();
+ 		ClearContextMenu();
 
 		hotBarWidth = 0.0;
 		DYNARR_RESET( hotBarMap_t, hotBarMap_da );
