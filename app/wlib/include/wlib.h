@@ -328,7 +328,8 @@ typedef int wAction_t;
 #define wActionMDown        (18)
 #define wActionMDrag        (19)
 #define wActionMUp          (20)
-#define wActionLast		    wActionMUp
+#define wActionGetTooltip   (21)
+#define wActionLast		    wActionGetTooltip
 
 /* Creation CallBacks */
 typedef void (*wDrawRedrawCallBack_p)(wControl_p control,
@@ -1156,8 +1157,13 @@ void wMenuPushEnable(
     wControl_p mi,
     wBool_t enable);
 
-wControl_p wMenuListCreate(wControl_p m, const char* helpStr, int max,
-    wMenuListCallBack_p action);
+
+
+typedef enum {
+    NEWEST_TOP,
+    OLDEST_TOP
+} SORTORDER;
+wControl_p wMenuListCreate( wControl_p m, const char* helpStr, SORTORDER sorder, int max, wMenuListCallBack_p action);
 
 void wMenuListAdd(wControl_p ml, int index, const char* labelStr, const void* attributes);
 const char* wMenuListGet(wControl_p ml, unsigned int index, void** attributes);

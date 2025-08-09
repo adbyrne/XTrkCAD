@@ -1003,11 +1003,10 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	 */
 	//MainProc( mainW, wResize_e, NULL, NULL );
 
-	/**  \todo Create hot bar */
-	//LayoutHotBar(NULL);
-	//if (!ToolbarIsGroupVisible(BG_HOTBAR)) {
-	//	HideHotBar();           /* Then hide */
-	//}
+	LayoutHotBar(NULL);
+	if (!ToolbarIsGroupVisible(BG_HOTBAR)) {
+		HideHotBar();           /* Then hide */
+	}
 	MacroInit();
 
 	/*

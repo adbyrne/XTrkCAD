@@ -1026,7 +1026,7 @@ EXPORT void CreateMenus(void)
 	                   DoNote, 0, NULL);
 
 	wMenuSeparatorCreate(fileM);
-	fileList_ml = wMenuListCreate(fileM, "menuFileList", NUM_FILELIST,
+	fileList_ml = wMenuListCreate(fileM, "menuFileList", NEWEST_TOP, NUM_FILELIST,
 	                              ChkFileList);
 	wMenuSeparatorCreate(fileM);
 	wMenuPushCreate(fileM, "quit", _("E&xit"), 0,
@@ -1329,7 +1329,7 @@ EXPORT void CreateMenus(void)
 
 #define MAX_ENTRIES_IN_WINDOWLIST 25
 
-	winList_mi = wMenuListCreate(windowM, "menuWindow", MAX_ENTRIES_IN_WINDOWLIST,
+	winList_mi = wMenuListCreate(windowM, "menuWindow", NEWEST_TOP, MAX_ENTRIES_IN_WINDOWLIST,
 	                             DoShowWindow);
 	wMenuListAdd(winList_mi, 0, _("Main window"), mainW);
 
@@ -1344,7 +1344,7 @@ EXPORT void CreateMenus(void)
 	wMenuSeparatorCreate(helpM);
 	wMenu_p messageListM = wMenuMenuCreate(helpM, "menuHelpRecentMessages",
 	                                       _("Recent Messages"));
-	messageList_ml = wMenuListCreate(messageListM, "messageListM", 10,
+	messageList_ml = wMenuListCreate(messageListM, "messageListM", NEWEST_TOP, 10,
 	                                 ShowMessageHelp);
 	wMenuListAdd(messageList_ml, 0, _(MESSAGE_LIST_EMPTY), NULL);
 	wMenuPushCreate(helpM, "menuHelpProblemrep", _("Collect Problem Info"), 0,

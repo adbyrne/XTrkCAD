@@ -78,6 +78,6 @@ wControl_p wMenuPopupCreate(
 
 void wMenuPopupShow( wControl_p mp )
 {
-	gtk_menu_popup_at_pointer( GTK_MENU(mp->widget), NULL );
+ 	gtk_menu_popup_at_pointer( GTK_MENU(mp->widget), NULL );
 }
 

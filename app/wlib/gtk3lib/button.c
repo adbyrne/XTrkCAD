@@ -190,6 +190,97 @@ static wBool_t drawButton(
 	return wControlExpose(widget, cr, (wControl_p)g);
 }
 
+#define REPEAT_INITIAL_DELAY 500
+#define REPEAT_DELAY 150
+enum TIMER_STATE  {INITIAL_DELAY, REPEATED} ;
+
+
+static gboolean on_button_repeat(gpointer user_data) {
+	wControl_p button = (wControl_p)user_data;
+
+	if (!button->attributes.button.is_pressed) {
+		button->attributes.button.timeout_id = 0;
+		return G_SOURCE_REMOVE;
+	}
+
+	if (button->attributes.button.timer_state == INITIAL_DELAY)
+	{
+		g_source_remove(button->attributes.button.timeout_id);
+		button->attributes.button.timer_state = REPEATED;
+		button->attributes.button.timeout_id = g_timeout_add(REPEAT_DELAY, on_button_repeat, button);
+	}
+
+	g_signal_emit_by_name(button->widget, "clicked");
+
+	return G_SOURCE_CONTINUE;
+}
+
+// Callback for Button-Press-Event
+static gboolean 
+on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer user_data) {
+	wControl_p button = (wControl_p)user_data;
+
+	if (event->button == GDK_BUTTON_PRIMARY) {
+		//ar_button->is_pressed = TRUE;
+		button->attributes.button.is_pressed = TRUE;
+
+		// start first timeout after initial delay
+		button->attributes.button.timeout_id = g_timeout_add( REPEAT_INITIAL_DELAY, on_button_repeat, button);
+		button->attributes.button.timer_state = INITIAL_DELAY;
+	}
+
+	return FALSE; // forward event
+}
+
+// Callback for Button-Release-Event
+static gboolean on_button_release(GtkWidget* widget, GdkEventButton* event, gpointer user_data) {
+	wControl_p button = (wControl_p)user_data;
+
+	if (event->button == GDK_BUTTON_PRIMARY) {
+		button->attributes.button.is_pressed = FALSE;
+
+		if (button->attributes.button.timeout_id > 0) {
+			g_source_remove(button->attributes.button.timeout_id);
+			button->attributes.button.timeout_id = 0;
+		}
+
+		g_print("Button released - autorepeat stopped\n");
+	}
+
+	return FALSE; // Forward event
+}
+
+// Callback when mouse leaves the button
+static gboolean on_button_leave(GtkWidget* widget, GdkEventCrossing* event, gpointer user_data) {
+	wControl_p button = (wControl_p)user_data;
+
+	button->attributes.button.is_pressed = FALSE;
+
+	if (button->attributes.button.timeout_id > 0) {
+		g_source_remove(button->attributes.button.timeout_id);
+		button->attributes.button.timeout_id = 0;
+	}
+
+	return FALSE;
+}
+
+static void
+SetAutoRepeat(wControl_p button) {
+	// activate events
+	gtk_widget_add_events(button->widget,
+		GDK_BUTTON_PRESS_MASK |
+		GDK_BUTTON_RELEASE_MASK |
+		GDK_LEAVE_NOTIFY_MASK);
+
+	// connect event handlers
+	g_signal_connect(button->widget, "button-press-event",
+		G_CALLBACK(on_button_press), button);
+	g_signal_connect(button->widget, "button-release-event",
+		G_CALLBACK(on_button_release), button);
+	g_signal_connect(button->widget, "leave-notify-event",
+		G_CALLBACK(on_button_leave), button);
+}
+
 
 #define ISDIALOGACTION(options) ((options&BB_HELP)||(options&BB_CANCEL)||(option&BB_DEFAULT))
 /**
@@ -204,7 +295,9 @@ static wBool_t drawButton(
  * BB_DEFAULT
  * : set button as default for dialog
  * BO_ICON
- * : use an icon instead of label, label must point to a xpm in memory
+ * : use an icon instead of label, 
+ * BO_REPEAT
+ * : autorepeat function triggered by longer press
  *
  * \param parent IN parent window
  * \param x IN X-position
@@ -216,9 +309,6 @@ static wBool_t drawButton(
  * \param action IN Callback
  * \param styleContext IN User styleContext
  * \returns button control
- *
- * \todo replace XBM format (layer buttons) or add support in buttons.
- * layer buttons are created in dlayer.c
  *
  */
 
@@ -274,6 +364,10 @@ wControl_p wButtonCreate(
 	gtk_widget_show_all(b->widget);
 	g_signal_connect(G_OBJECT(b->widget), "clicked",
 	                 G_CALLBACK(buttonClick), b);
+
+	if (option & BO_REPEAT) {
+		SetAutoRepeat(b);
+	}
 
 	wlibAddTooltip(b->widget, parent->name, helpStr);
 //	wlibAddTooltip(b->widget, helpStr);

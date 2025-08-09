@@ -1,6 +1,6 @@
 /**
  * \file   mrulist.c
- * \brief
+ * \brief	use a doubly linked list for most-recent-used lists
  *
  * \author Martin Fischer with thanks to claude.ai
  */
@@ -67,6 +67,8 @@ labelcmp(const void* ptr1, const char* label)
  * \return pointer to data if element was removed, ie. when capacity was reached, NULL otherwise
  */
 
+#define IS_LIST_FULL(mrulist) (mrulist->max_capacity != -1 && (int)g_queue_get_length(mrulist->elements) > mrulist->max_capacity)
+
 void *MRUTouchEntry(MRUList* list, const char* label, void *entry)
 {
 	if (!list || !label) { return(NULL); }
@@ -87,8 +89,35 @@ void *MRUTouchEntry(MRUList* list, const char* label, void *entry)
 		g_queue_push_head(list->elements, new_entry);
 
 		// remove oldest if capacity is reached
-		if ((int)g_queue_get_length(list->elements) > list->max_capacity) {
+		if (IS_LIST_FULL(list)) {
 			MRUEntry *oldest = (MRUEntry *)g_queue_pop_tail(list->elements);
+			void* userdata = oldest->userdata;
+			g_free(oldest);
+			return(userdata);
+		}
+	}
+	return(NULL);
+}
+
+void* MRUAppendEntry(MRUList* list, const char* label, void* entry)
+{
+	if (!list || !label) { return(NULL); }
+
+	// check for existance of entry
+	const GList* link = g_queue_find_custom(list->elements, label,
+	                                        (GCompareFunc)labelcmp);
+
+	if (!link) {
+		// new entry, create and insert at end
+		MRUEntry* new_entry = g_malloc0(sizeof(MRUEntry));
+		new_entry->label = g_strdup(label);
+		new_entry->userdata = entry;
+
+		g_queue_push_tail(list->elements, new_entry);
+
+		// remove oldest if capacity is reached
+		if (IS_LIST_FULL(list)) {
+			MRUEntry* oldest = (MRUEntry*)g_queue_pop_head(list->elements);
 			void* userdata = oldest->userdata;
 			g_free(oldest);
 			return(userdata);
@@ -177,12 +206,25 @@ void * MRURemoveEntry(MRUList* list, const char* label)
  * \param list  list handle
  */
 
+free_element(gpointer data)
+{
+	MRUEntry* queueelement = (MRUEntry*)data;
+
+	if (data) {
+		// printf("label: %s\n", queueelement->label);
+		g_free(queueelement->label);
+	}
+}
+
+
 void MRUClear(MRUList* list)
 {
 	if (!list) { return; }
 
 	// free all elements
-	g_queue_foreach(list->elements, (GFunc)g_free, NULL);
+
+	//printf("MRUClear: %d elements\n", MRUGetCount(list));
+	g_queue_foreach(list->elements, (GFunc)free_element, NULL);
 	g_queue_clear(list->elements);
 }
 

@@ -101,15 +101,13 @@
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
-                <property name="double-buffered">False</property>
                 <property name="use-underline">True</property>
                 <property name="always-show-image">True</property>
                 <child>
                   <object class="GtkImage">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="double-buffered">False</property>
-                    <property name="stock">gtk-media-rewind</property>
+                    <property name="stock">gtk-go-back</property>
                   </object>
                 </child>
               </object>
@@ -121,10 +119,10 @@
             </child>
             <child>
               <object class="GtkDrawingArea" id="hotBarDraw">
-                <property name="height-request">30</property>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="hexpand">True</property>
+                <property name="has-tooltip">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -141,8 +139,7 @@
                   <object class="GtkImage">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="double-buffered">False</property>
-                    <property name="stock">gtk-media-forward</property>
+                    <property name="stock">gtk-go-forward</property>
                   </object>
                 </child>
               </object>
@@ -172,8 +169,6 @@
         </child>
         <child>
           <object class="GtkDrawingArea" id="maindraw">
-            <property name="width-request">500</property>
-            <property name="height-request">500</property>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="hexpand">True</property>

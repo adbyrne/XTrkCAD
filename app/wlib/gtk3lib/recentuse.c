@@ -38,6 +38,7 @@
 
 struct listentry {					/**< context of items in recently used list */
 	GtkWidget* menuentry;			// text label for menu
+	struct recentuse* recentuse;
 	const char* context;			// application context
 };
 
@@ -53,8 +54,8 @@ UpdateMenuList(struct recentuse *ru)
 	int current = MRUGetCount(ru->mrulist);
 
 	if (current == 0) {
-		//gtk_menu_item_set_label(GTK_MENU_ITEM(ru->widgets[0]), _("Empty List"));
-		//gtk_widget_set_sensitive(ru->widgets[0], FALSE);
+		gtk_menu_item_set_label(GTK_MENU_ITEM(ru->emptyList), _("Empty List"));
+		gtk_widget_set_sensitive(ru->emptyList, FALSE);
 		gtk_widget_show(ru->emptyList);
 	} else {
 		gtk_widget_hide(ru->emptyList);
@@ -90,15 +91,18 @@ static void ActivateListMenuItem(
         GtkWidget* widget,
         gpointer value)
 {
+	struct listentry* userdata = (struct listentry*)value;
+	struct recentuse *ru = userdata->recentuse;
+
 	//// pointer to the list item
 	//struct listentry *item = g_object_get_data(G_OBJECT(widget), WLISTITEM);
 	//struct recentuse *list = g_object_get_data(G_OBJECT(widget), WLISTMENU);
 
-	//if (list->action) {
-	//	(*list->action)(0,
-	//	                gtk_menu_item_get_label(GTK_MENU_ITEM(widget)),
-	//	                item->context);
-	//}
+	if (ru->action) {
+		(*ru->action)(0,
+		              gtk_menu_item_get_label(GTK_MENU_ITEM(userdata->menuentry)),
+		              userdata->context);
+	}
 
 	//// update order of elements in list
 	//list->elements = g_slist_remove(list->elements, item );
@@ -111,7 +115,6 @@ CreateEntry(const char* label, int state)
 {
 	GtkWidget* newItem = gtk_menu_item_new_with_label(label);
 	gtk_widget_set_sensitive(newItem, state);
-//	gtk_widget_show(newItem);
 
 	return(newItem);
 }
@@ -137,6 +140,7 @@ CreateEntry(const char* label, int state)
 wControl_p wMenuListCreate(
         wControl_p m,
         const char* helpStr,
+        SORTORDER sorder,
         int max,
         wMenuListCallBack_p action)
 {
@@ -146,6 +150,7 @@ wControl_p wMenuListCreate(
 	ru->action = action;
 	ru->parentMenu = m;
 	ru->mrulist = MRUCreate(max);
+	ru->sortorder = sorder;
 
 	// create placeholder for empty list
 	ru->emptyList = CreateEntry(_("Empty list"), FALSE );
@@ -172,11 +177,23 @@ PushListEntry(wControl_p list, const char* label, const char* context)
 	newEntry = g_malloc0(sizeof( struct listentry));
 	newEntry->context = context;
 	newEntry->menuentry = CreateEntry(label, TRUE);
+	//printf("CreateEntry newEntry: %p menuentry: %p\n", (void*)newEntry,
+	//       (void*)newEntry->menuentry);
+	newEntry->recentuse = ru;
+
 	gtk_menu_shell_append(GTK_MENU_SHELL(ru->parentMenu->widget),
 	                      newEntry->menuentry);
 
+	g_signal_connect(newEntry->menuentry, "activate", ActivateListMenuItem,
+	                 newEntry);
+
 	name = g_strdup(wlibConvertInput(label));
-	MRUTouchEntry(ru->mrulist, name, newEntry);
+
+	if (ru->sortorder == NEWEST_TOP) {
+		MRUTouchEntry(ru->mrulist, name, newEntry);
+	} else {
+		MRUAppendEntry(ru->mrulist, name, newEntry);
+	}
 
 	return(MRUGetCount(ru->mrulist));
 }
@@ -258,6 +275,22 @@ wMenuListGet(wControl_p ml, unsigned int index, void** attributes)
 void wMenuListClear(
         wControl_p ml)
 {
-	//struct recentuse* ru = CONTROL_GET_ATTRIBUTES_PTR(list, recentuse);
-	printf("%s:%d Not implemented!", __FILE__, __LINE__);
+	struct recentuse* ru = CONTROL_GET_ATTRIBUTES_PTR(ml, recentuse);
+
+	int count = MRUGetCount(ru->mrulist);
+
+	for (int i = 0; i < count; i++) {
+
+		void* user_data = MRUGetNth(ru->mrulist, i);
+		struct listentry * nextEntry = (struct listentry *)user_data;
+
+		if (nextEntry) {
+			//printf("DestroyEntry nextEntry: %p menuentry: %p\n", (void*)nextEntry,
+			//       (void*)nextEntry->menuentry);
+			gtk_widget_destroy(nextEntry->menuentry);
+			g_free(nextEntry);
+		}
+	}
+
+	MRUClear(ru->mrulist);
 }

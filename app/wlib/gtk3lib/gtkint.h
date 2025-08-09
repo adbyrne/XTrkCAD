@@ -64,6 +64,7 @@ typedef struct {
 
 MRUList* MRUCreate(int max_capacity);
 void* MRUTouchEntry(MRUList* list, const char* label, void* entry);
+void* MRUAppendEntry(MRUList* list, const char* label, void* entry);
 void* MRUGetRecent(MRUList* list);
 void* MRUGetNth(MRUList* list, int index);
 int MRUGetCount(MRUList* list);
@@ -92,6 +93,7 @@ typedef void (*doneProcCallback_p)( wControl_p b );
 typedef void (*setTriggerCallback_p)( wControl_p b );
 
 
+
 /*
  * Definition of attributes structs for the controls. Combining them into one
  * union as part of a struct avoids problems with compilers that optimize
@@ -108,6 +110,9 @@ struct bitmap {
 struct button {
 	wButtonCallBack_p action;
 	wIcon_p icon;
+	wBool_t is_pressed;
+	guint timeout_id;
+	enum TIMER_STATE timer_state;
 };
 
 struct choice {
@@ -187,6 +192,7 @@ struct recentuse {
 	wMenuListCallBack_p action;
 	wControl_p parentMenu;
 	GtkWidget* emptyList;
+	SORTORDER sortorder;
 };
 
 struct scale {
