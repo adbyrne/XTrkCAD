@@ -435,11 +435,11 @@ static void HandleTooltip(char **tooltip, int inx)
 	                "%s\r<span color=\"grey\" font_scale=\"small-caps\">%s</span>\r"
 	                "%s\r<span color=\"grey\" font_scale=\"small-caps\">%s</span>",
 	                manufacturer,
-					N_("Manufacturer"),
+	                N_("Manufacturer"),
 	                description,
-					N_("Description"),
+	                N_("Description"),
 	                partno,
-					N_("Part #"));
+	                N_("Part #"));
 
 	*tooltip = DynStringToCStr(&hotbarContextMenu.tooltip);
 
@@ -653,7 +653,7 @@ EXPORT void ChangeHotBar( long changes )
 
 	if (hotBarLeftB != NULL && curScaleName) {
 		static long programModeOld = 0;
- 		ClearContextMenu();
+		ClearContextMenu();
 
 		hotBarWidth = 0.0;
 		DYNARR_RESET( hotBarMap_t, hotBarMap_da );

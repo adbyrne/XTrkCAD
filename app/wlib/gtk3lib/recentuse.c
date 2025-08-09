@@ -100,8 +100,8 @@ static void ActivateListMenuItem(
 
 	if (ru->action) {
 		(*ru->action)(0,
-		                gtk_menu_item_get_label(GTK_MENU_ITEM(userdata->menuentry)),
-		                userdata->context);
+		              gtk_menu_item_get_label(GTK_MENU_ITEM(userdata->menuentry)),
+		              userdata->context);
 	}
 
 	//// update order of elements in list
@@ -138,9 +138,9 @@ CreateEntry(const char* label, int state)
  */
 
 wControl_p wMenuListCreate(
-	wControl_p m,
-	const char* helpStr,
-	SORTORDER sorder,
+        wControl_p m,
+        const char* helpStr,
+        SORTORDER sorder,
         int max,
         wMenuListCallBack_p action)
 {
@@ -177,20 +177,21 @@ PushListEntry(wControl_p list, const char* label, const char* context)
 	newEntry = g_malloc0(sizeof( struct listentry));
 	newEntry->context = context;
 	newEntry->menuentry = CreateEntry(label, TRUE);
-	printf("CreateEntry newEntry: %p menuentry: %p\n", (void*)newEntry, (void*)newEntry->menuentry);
+	//printf("CreateEntry newEntry: %p menuentry: %p\n", (void*)newEntry,
+	//       (void*)newEntry->menuentry);
 	newEntry->recentuse = ru;
 
 	gtk_menu_shell_append(GTK_MENU_SHELL(ru->parentMenu->widget),
 	                      newEntry->menuentry);
 
-	g_signal_connect(newEntry->menuentry, "activate", ActivateListMenuItem, newEntry);
+	g_signal_connect(newEntry->menuentry, "activate", ActivateListMenuItem,
+	                 newEntry);
 
 	name = g_strdup(wlibConvertInput(label));
 
 	if (ru->sortorder == NEWEST_TOP) {
 		MRUTouchEntry(ru->mrulist, name, newEntry);
-	}
-	else {
+	} else {
 		MRUAppendEntry(ru->mrulist, name, newEntry);
 	}
 
@@ -284,7 +285,8 @@ void wMenuListClear(
 		struct listentry * nextEntry = (struct listentry *)user_data;
 
 		if (nextEntry) {
-			printf("DestroyEntry nextEntry: %p menuentry: %p\n", (void*)nextEntry, (void*)nextEntry->menuentry);
+			//printf("DestroyEntry nextEntry: %p menuentry: %p\n", (void*)nextEntry,
+			//       (void*)nextEntry->menuentry);
 			gtk_widget_destroy(nextEntry->menuentry);
 			g_free(nextEntry);
 		}

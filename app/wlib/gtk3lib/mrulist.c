@@ -105,7 +105,7 @@ void* MRUAppendEntry(MRUList* list, const char* label, void* entry)
 
 	// check for existance of entry
 	const GList* link = g_queue_find_custom(list->elements, label,
-		(GCompareFunc)labelcmp);
+	                                        (GCompareFunc)labelcmp);
 
 	if (!link) {
 		// new entry, create and insert at end
@@ -211,7 +211,7 @@ free_element(gpointer data)
 	MRUEntry* queueelement = (MRUEntry*)data;
 
 	if (data) {
-		printf("label: %s\n", queueelement->label);
+		// printf("label: %s\n", queueelement->label);
 		g_free(queueelement->label);
 	}
 }
@@ -223,7 +223,7 @@ void MRUClear(MRUList* list)
 
 	// free all elements
 
-	printf("MRUClear: %d elements\n", MRUGetCount(list));
+	//printf("MRUClear: %d elements\n", MRUGetCount(list));
 	g_queue_foreach(list->elements, (GFunc)free_element, NULL);
 	g_queue_clear(list->elements);
 }
