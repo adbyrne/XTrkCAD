@@ -731,6 +731,7 @@ void wControlHilite(		wControl_p, wBool_t );
 
 void wControlLinkedSet( wControl_p b1, wControl_p b2 );
 void wControlLinkedActive( wControl_p b, int active );
+void wControlSetCustomTooltip(wControl_p control, char* tooltip);   // change tooltip at runtime
 
 
 /*------------------------------------------------------------------------------

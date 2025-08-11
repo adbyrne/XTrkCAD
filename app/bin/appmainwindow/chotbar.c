@@ -406,7 +406,7 @@ static void HandleArrowKeys(wAction_t action)
 	return;
 }
 
-static void HandleTooltip(char **tooltip, int inx)
+static void HandleTooltip(wControl_p control, int inx)
 {
 	hotBarMap_t* tbm = &hotBarMap(inx);
 	char * titleP = tbm->proc(HB_FULLTITLE, tbm->context, NULL, NULL);
@@ -441,7 +441,7 @@ static void HandleTooltip(char **tooltip, int inx)
 	                partno,
 	                N_("Part #"));
 
-	*tooltip = DynStringToCStr(&hotbarContextMenu.tooltip);
+	wControlSetCustomTooltip( control, DynStringToCStr(&hotbarContextMenu.tooltip));
 
 	MyFree(copyOfTitle);
 }
@@ -511,7 +511,7 @@ static void SelectHotBar( wControl_p d, void * context, wAction_t action,
 		if (inx < 0) {
 			return; // No valid item found
 		}
-		HandleTooltip(context, inx);
+		HandleTooltip(d, inx);
 
 		break;
 	}

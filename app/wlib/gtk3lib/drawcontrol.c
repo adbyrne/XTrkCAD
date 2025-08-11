@@ -634,19 +634,18 @@ draw_tooltip(GtkWidget* widget, gint x, gint y, gboolean kbd, GtkTooltip* toolti
 {
 	wControl_p drawControl = (wControl_p)context;
 	struct draw* drawAttributes = CONTROL_GET_ATTRIBUTES_PTR(drawControl, draw);
-	char* tooltipTextPtr = NULL;
 
 	if (drawAttributes != NULL && drawAttributes->action == NULL) {
 		return(FALSE);
 	}
 
-	(drawAttributes->action)(drawControl, &tooltipTextPtr, wActionGetTooltip, x, y);
+	(drawAttributes->action)(drawControl, drawControl->context, wActionGetTooltip, x, y);
 
-	if (tooltipTextPtr) {
-		gtk_tooltip_set_markup(tooltip, tooltipTextPtr);
+	if (drawControl->customTooltip) {
+		gtk_tooltip_set_markup(tooltip, drawControl->customTooltip);
 	}
 
-	return(tooltipTextPtr != NULL);
+	return(drawControl->customTooltip != NULL);
 }
 
 /*******************************************************************************

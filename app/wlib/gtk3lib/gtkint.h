@@ -229,6 +229,7 @@ struct control {
 	wControl_p synonym;
 	wControl_p parent;
 	GtkWidget* label;
+	const char* customTooltip;
 	union {
 		struct bitmap bitmap;
 		struct button button;

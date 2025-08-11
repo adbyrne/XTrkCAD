@@ -354,3 +354,10 @@ void wControlHilite(
         gtk_style_context_remove_class(context, HILITECLASS);
     }
 }
+
+void wControlSetCustomTooltip(wControl_p control, char* tooltip)
+{
+    g_assert(control);
+
+    control->customTooltip = tooltip;
+}
