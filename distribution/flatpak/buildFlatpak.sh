@@ -514,7 +514,8 @@ EOF
 build_flatpak() {
   flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
   flatpak-builder --state-dir=$FP_STATE_DIR --force-clean --user --install --repo=$FP_REPO --install-deps-from=flathub $FP_BUILD_DIR $FP_MANIFEST
-  FP_NAME=xtrkcad-${XTRKCAD_VERSION}.flatpak
+  ARCH=$(uname -m)
+  FP_NAME=xtrkcad-${XTRKCAD_VERSION}.${ARCH}.flatpak
   rm -f $FP_NAME
   flatpak build-bundle ${FP_REPO} $FP_NAME $FP_XTRKCAD_ORG
   if [ -f $FP_NAME ]; then
