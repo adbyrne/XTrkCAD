@@ -18,7 +18,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + 594: Toolbar icons don't load on GTK/Linux
 + 596: Screen Controls, 511: Lost properties window
 + 597: Snap grid bugs
-+ 599: Can't group a Cornu track
++ 598: Xtrkcad.rc file contains full paths to XTP files
 + ???: missing tool tips for toolbar
 
 
