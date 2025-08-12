@@ -32,7 +32,7 @@
 #include "fileio.h"
 #include "icons.h"
 #include "layout.h"
-#include "param.h"
+#include "form.h"
 #include "cselect.h"
 #include "include/paramfile.h"
 #include "track.h"
@@ -76,31 +76,35 @@ static drawCmd_t turnoutD = {
 static wIndex_t turnoutHotBarCmdInx;
 static wIndex_t turnoutInx;
 static long hideTurnoutWindow;
-static void RedrawTurnout( wDraw_p d, void * context, wWinPix_t x,
+static void RedrawTurnout( wControl_p d, void * context, wWinPix_t x,
                            wWinPix_t y );
 static void SelTurnoutEndPt(wIndex_t, coOrd);
 static void HilightEndPt(void);
 
 static wWinPix_t turnoutListWidths[] = { 80, 80, 220 };
-static const char* turnoutListTitles[] = { N_("Manufacturer"), N_("Part No"), N_("Description") };
-static paramListData_t listData = { 13, 400, 3, turnoutListWidths, turnoutListTitles };
-static const char* hideLabels[] = { N_("Hide"), NULL };
+static paramListData_t listData = { 13, 400, 3, turnoutListWidths, NULL };
 static paramDrawData_t turnoutDrawData = { 490, 200, RedrawTurnout, SelTurnoutEndPt, &turnoutD };
+
+/**
+ * \todo for turnoutNew PD_MENU was replaced by PD_BUTTON as a temporary fix. There should be a selector for
+ * which type of new track should be created newly.
+ */
+
 static paramData_t turnoutPLs[] = {
 #define I_LIST		(0)
-#define turnoutListL    ((wList_p)turnoutPLs[I_LIST].control)
+#define turnoutListL    (turnoutPLs[I_LIST].control)
 	{   PD_LIST, &turnoutInx, "list", PDO_NOPREF | PDO_DLGRESIZEW, &listData, NULL, BL_DUP },
 #define I_DRAW		(1)
-#define turnoutDrawD    ((wDraw_p)turnoutPLs[I_DRAW].control)
+#define turnoutDrawD    (turnoutPLs[I_DRAW].control)
 	{   PD_DRAW, NULL, "canvas", PDO_NOPSHUPD | PDO_DLGUNDERCMDBUTT | PDO_DLGRESIZE, &turnoutDrawData, NULL, 0 },
 #define I_NEW		(2)
-#define turnoutNewM     ((wMenu_p)turnoutPLs[I_NEW].control)
-	{   PD_MENU, NULL, "new", PDO_DLGCMDBUTTON, NULL, N_("New") },
+#define turnoutNewM     (turnoutPLs[I_NEW].control)
+	{   PD_BUTTON, NULL, "new", PDO_DLGCMDBUTTON, NULL, N_("New") },
 #define I_HIDE		(3)
-#define turnoutHideT    ((wChoice_p)turnoutPLs[I_HIDE].control)
-	{   PD_TOGGLE, &hideTurnoutWindow, "hide", PDO_DLGCMDBUTTON, hideLabels, NULL, BC_NOBORDER }
+#define turnoutHideT    (turnoutPLs[I_HIDE].control)
+	{   PD_TOGGLE, &hideTurnoutWindow, "hide", PDO_DLGCMDBUTTON, NULL, NULL, BC_NOBORDER }
 };
-static paramGroup_t turnoutPG = { "newFixedTrack", 0, turnoutPLs, COUNT( turnoutPLs ) };
+static paramGroup_t turnoutPG = { "turnout", PGO_FULLDIALOGFROMBUILDER, turnoutPLs, COUNT( turnoutPLs ) };
 #endif
 
 
@@ -2015,7 +2019,7 @@ static coOrd maxTurnoutDim;
 static void AddTurnout(void);
 
 
-static wWin_p turnoutW;
+static wControl_p turnoutW;
 
 
 static void RescaleTurnout(void)
@@ -2079,7 +2083,7 @@ static void TurnoutChange(long changes)
 	return;
 }
 
-static void RedrawTurnout( wDraw_p d, void * context, wWinPix_t x, wWinPix_t y )
+static void RedrawTurnout( wControl_p d, void * context, wWinPix_t x, wWinPix_t y )
 {
 	RescaleTurnout();
 	LOG(log_turnout, 2, ("SelTurnout(%s)\n",
@@ -2106,18 +2110,20 @@ static void TurnoutOk(void)
 }
 
 
-static void TurnoutDlgUpdate(
+static wBool_t TurnoutDlgUpdate(
         paramGroup_p pg,
         int inx,
         void* valueP)
 {
 	turnoutInfo_t* to;
-	if (inx != I_LIST) { return; }
-	to = (turnoutInfo_t*)wListGetItemContext((wList_p)pg->paramPtr[inx].control,
+	if (inx != I_LIST) { return(FALSE); }
+	to = (turnoutInfo_t*)wListGetItemContext(pg->paramPtr[inx].control,
 	                (wIndex_t) * (long*)valueP);
 	AddTurnout();
 	curTurnout = to;
 	RedrawTurnout( turnoutD.d, NULL, 0, 0 );
+
+	return(FALSE);
 }
 
 
@@ -2958,10 +2964,12 @@ static STATUS_T CmdTurnout(
 
 	case C_START:
 		if (turnoutW == NULL) {
-			turnoutW = ParamCreateDialog(&turnoutPG, MakeWindowTitle(_("Add Fixed-Track")),
-			                             _("Close"), (paramActionOkProc)TurnoutOk, ParamCancel_Null, TRUE, NULL,
+			turnoutW = FormCreateDialog(&turnoutPG, MakeWindowTitle(_("Add Fixed-Track")),
+			                             NULL, (paramActionOkProc)TurnoutOk, 
+										 NULL, NULL, 
+										 TRUE,
 			                             F_RESIZE | F_RECALLSIZE | PD_F_ALT_CANCELLABEL, TurnoutDlgUpdate);
-			InitNewTurn(turnoutNewM);
+			//InitNewTurn(turnoutNewM);
 		}
 		turnoutIndex = wListGetIndex(turnoutListL);
 		turnoutPtr = curTurnout;
@@ -2977,8 +2985,8 @@ static STATUS_T CmdTurnout(
 			RedrawTurnout( turnoutD.d, NULL, 0, 0 );
 		}
 		InfoMessage(_("Pick turnout and active End Point, then place on the layout"));
-		ParamLoadControls(&turnoutPG);
-		ParamGroupRecord(&turnoutPG);
+		FormLoadControls(&turnoutPG);
+		FormGroupRecord(&turnoutPG);
 		SetAllTrackSelect(FALSE);
 		return CmdTurnoutAction(action, pos);
 
@@ -2987,7 +2995,7 @@ static STATUS_T CmdTurnout(
 
 	case C_DOWN:
 	case C_RDOWN:
-		ParamDialogOkActive(&turnoutPG, TRUE);
+		FormDialogOkActive(&turnoutPG, TRUE);
 		if (hideTurnoutWindow) {
 			wHide(turnoutW);
 		}
@@ -3005,9 +3013,9 @@ static STATUS_T CmdTurnout(
 
 	case C_UP:
 	case C_RUP:
-		if (hideTurnoutWindow) {
-			wShow(turnoutW);
-		}
+		//if (hideTurnoutWindow) {
+		//	wShow(turnoutW);
+		//}
 
 		InfoMessage(
 		        _("Left-Drag to place, Ctrl+Left-Drag or Right-Drag to Rotate, Space or Enter to accept, Esc to Cancel"));
@@ -3025,12 +3033,17 @@ static STATUS_T CmdTurnout(
 		wHide(turnoutW);
 		return CmdTurnoutAction(action, pos);
 	case C_TEXT:
+		if (hideTurnoutWindow) {
+			wShow(turnoutW);
+		}
 		CmdTurnoutAction(action, pos);
 		return C_CONTINUE;
 	case C_OK:
 	case C_FINISH:
+
 	case C_CMDMENU:
 	case C_REDRAW:
+
 		return CmdTurnoutAction(action, pos);
 
 	default:
@@ -3127,8 +3140,8 @@ static STATUS_T CmdTurnoutHotBar(
 		if (listIndex >= 0) {
 			turnoutInx = listIndex;
 		}
-		ParamLoadControls(&turnoutPG);
-		ParamGroupRecord(&turnoutPG);
+		FormLoadControls(&turnoutPG);
+		FormGroupRecord(&turnoutPG);
 		return CmdTurnoutAction(action, pos);
 
 	case wActionMove:
@@ -3191,7 +3204,7 @@ EXPORT void InitCmdTurnout(wMenu_p menu)
 	                                    "", NULL, LEVEL0_50, IC_WANT_MOVE | IC_STICKY | IC_LCLICK | IC_CMDMENU |
 	                                    IC_POPUP2, 0, NULL);
 	RegisterChangeNotification(TurnoutChange);
-	ParamRegister(&turnoutPG);
+	FormRegister(&turnoutPG);
 	log_turnout = LogFindIndex("turnout");
 	log_traverseTurnout = LogFindIndex("traverseTurnout");
 	log_suppressCheckPaths = LogFindIndex("suppresscheckpaths");

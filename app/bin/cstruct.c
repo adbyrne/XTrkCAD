@@ -500,7 +500,7 @@ static trackCmd_t structureCmds = {
 static paramData_t pierPLs[] = {
 	{	PD_COMBOLIST, &pierListInx, "inx", 0, I2VP(50), N_("Pier Number") }
 };
-static paramGroup_t pierPG = { "structure-pier", 0, pierPLs, COUNT( pierPLs ) };
+static paramGroup_t pierPG = { "pier", 0, pierPLs, COUNT( pierPLs ) };
 #define pierL (pierPLs[0].control)
 
 static void ShowPierL( void )
@@ -512,7 +512,7 @@ static void ShowPierL( void )
 
 	if ( curStructure->special==TOpierInfo && curStructure->u.pierInfo.cnt > 1) {
 		if (pierL == NULL) {
-			ParamCreateControls( &pierPG, NULL );
+			FormCreateControls( &pierPG );
 		}
 		currInx = wListGetIndex( pierL );
 		wListClear( pierL );
@@ -626,11 +626,11 @@ static void RedrawStructure( wControl_p d, void * context, wWinPix_t x,
 
 	DynStringMalloc(&output, 16);
 	DynStringPrintf( &output, _("%d:1"), (int)structureD.scale );
-	ParamLoadMessage(&structurePG, I_MSGSCALE, DynStringToCStr(&output));
+	FormLoadMessage(&structurePG, I_MSGSCALE, DynStringToCStr(&output));
 	DynStringPrintf(&output, _("%s"), FormatDistance(curStructure->size.x) );
-	ParamLoadMessage( &structurePG, I_MSGWIDTH, DynStringToCStr(&output));
+	FormLoadMessage( &structurePG, I_MSGWIDTH, DynStringToCStr(&output));
 	DynStringPrintf(&output, _("%s"), FormatDistance(curStructure->size.y) );
-	ParamLoadMessage( &structurePG, I_MSGHEIGHT, DynStringToCStr(&output));
+	FormLoadMessage( &structurePG, I_MSGHEIGHT, DynStringToCStr(&output));
 	DynStringFree(&output);
 }
 
@@ -986,7 +986,7 @@ EXPORT STATUS_T CmdStructureAction(
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		Dst.state = 0;
 		InfoDefaultControls();
-		//HotBarCancel();
+		HotBarCancel();
 		/*wHide( newTurn.reg.win );*/
 		return C_TERMINATE;
 
@@ -1028,14 +1028,15 @@ static STATUS_T CmdStructure(
 
 	case C_START:
 		if (structureW == NULL) {
-			structureW = ParamCreateDialog( &structurePG, MakeWindowTitle(_("Structure")),
-			                                _("Close"), (paramActionOkProc)DoStructOk,
-			                                NULL, TRUE, NULL,
-			                                F_RESIZE,
+			structureW = FormCreateDialog( &structurePG, MakeWindowTitle(_("Structure")),
+			                                NULL, (paramActionOkProc)DoStructOk,
+			                                NULL, NULL,
+											TRUE,
+			                                0l,
 			                                StructureDlgUpdate );
 			RegisterChangeNotification( structureChange );
 		}
-		ParamDialogOkActive( &structurePG, TRUE );
+		FormDialogOkActive( &structurePG, TRUE );
 		structureIndex = wListGetIndex( structureListL );
 		structurePtr = curStructure;
 		wShow( structureW );
@@ -1050,8 +1051,8 @@ static STATUS_T CmdStructure(
 			RedrawStructure( structureD.d, NULL, 0, 0 );
 		}
 		InfoMessage( _("Select Structure and then drag to place"));
-		ParamLoadControls( &structurePG );
-		ParamGroupRecord( &structurePG );
+		FormLoadControls( &structurePG );
+		FormGroupRecord( &structurePG );
 		SetAllTrackSelect( FALSE );
 		return CmdStructureAction( action, pos );
 
@@ -1070,7 +1071,7 @@ static STATUS_T CmdStructure(
 		}
 	/* no break*/
 	case C_RDOWN:
-		ParamDialogOkActive( &structurePG, TRUE );
+		FormDialogOkActive( &structurePG, TRUE );
 		if (hideStructureWindow) {
 			wHide( structureW );
 		}
@@ -1189,8 +1190,8 @@ static STATUS_T CmdStructureHotBar(
 		if ( listIndex >= 0 ) {
 			structureInx = listIndex;
 		}
-		ParamLoadControls( &structurePG );
-		ParamGroupRecord( &structurePG );
+		FormLoadControls( &structurePG );
+		FormGroupRecord( &structurePG );
 		return CmdStructureAction( action, pos );
 
 	case wActionMove:
@@ -1250,7 +1251,7 @@ EXPORT void InitCmdStruct( wMenu_p menu )
 	structureHotBarCmdInx = AddMenuButton( menu, CmdStructureHotBar,
 	                                       "cmdStructureHotBar", "", NULL, LEVEL0_50,
 	                                       IC_WANT_MOVE|IC_STICKY|IC_CMDMENU|IC_POPUP2, 0, NULL );
-	ParamRegister( &structurePG );
+	FormRegister( &structurePG );
 	if ( structPopupM == NULL ) {
 		structPopupM = MenuRegister( "Structure Rotate" );
 		AddRotateMenu( structPopupM, StructRotate );
@@ -1263,5 +1264,5 @@ EXPORT void InitTrkStruct( void )
 
 	log_structure = LogFindIndex( "Structure" );
 	AddParam( "STRUCTURE ", ReadStructureParam);
-	ParamRegister( &pierPG );
+	FormRegister( &pierPG );
 }

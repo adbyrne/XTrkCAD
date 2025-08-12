@@ -286,7 +286,7 @@ EXPORT void ParamHilite(
 
 EXPORT void ParamInit(void)
 {
-    printf("%s:%d Old Param Function used\n", __FILE__, __LINE__);
+    printf("%s:%d Old Param Function %s used\n", __FILE__, __LINE__, __func__);
     //ParamInitOrig();
 }
 
