@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [5.3.1 Beta 2]
+
+## Added
++ param file updates
++ EXPERIMENTAL: flatpak support for Linux
+
+## Bug Fixes
++ 589: Can't group a Cornu track
++ 590: Inches used for line width
++ 591: Regression fails because sticky was not set
++ 593: Layer: Unchecking Inherit causes crash
++ 594: Toolbar icons don't load on GTK/Linux
++ 596: Screen Controls, 511: Lost properties window
++ 597: Snap grid bugs
++ 598: Xtrkcad.rc file contains full paths to XTP files
++ ???: missing tool tips for toolbar
+
+
 ## [5.3.1 Beta 1]
  
 ## Added 
