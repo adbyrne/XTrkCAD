@@ -2,8 +2,10 @@
 <!-- Generated with glade 3.36.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkListStore" id="contmgm-inx.liststore">
+  <object class="GtkListStore" id="liststore">
     <columns>
+                <!-- column-name set foreground -->
+      <column type="gboolean" />
       <!-- column-name userdata -->
       <column type="gpointer"/>
       <!-- column-name icon -->
@@ -18,67 +20,40 @@
     <property name="can_focus">False</property>
     <property name="border_width">18</property>
     <property name="type_hint">dialog</property>
+    <child type="action">
+      <object class="GtkButton" id="id_cancel">
+        <property name="use-underline">True</property>
+        <property name="label">_Cancel</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="id_help">
+        <property name="use-underline">True</property>
+        <property name="label">_Help</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="id_ok">
+        <property name="use-underline">True</property>
+        <property name="can-default">True</property>
+        <property name="label">_Done</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="GTK_RESPONSE_CANCEL">id_cancel</action-widget>
+      <action-widget response="GTK_RESPONSE_HELP">id_help</action-widget>
+      <action-widget response="GTK_RESPONSE_OK" default="true">id_ok</action-widget>
+    </action-widgets>
+
     <child internal-child="vbox">
       <object class="GtkBox">
-        <property name="can_focus">False</property>
         <property name="hexpand">True</property>
         <property name="vexpand">True</property>
         <property name="orientation">vertical</property>
         <property name="spacing">18</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox">
-            <property name="can_focus">False</property>
-            <property name="homogeneous">True</property>
-            <property name="layout_style">end</property>
-            <child>
-              <object class="GtkToggleButton" id="id-cancel">
-                <property name="label" translatable="yes">Cancel</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToggleButton" id="id-help">
-                <property name="label" translatable="yes">Help</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToggleButton" id="id-ok">
-                <property name="label" translatable="yes">Done</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <style>
-                  <class name="suggested-action"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
@@ -87,7 +62,7 @@
             <property name="vexpand">False</property>
             <property name="spacing">12</property>
             <child>
-              <object class="GtkScrolledWindow" id="contmgm-inx.scrollwindow">
+              <object class="GtkScrolledWindow" id="list">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="hexpand">True</property>
@@ -96,20 +71,19 @@
                 <property name="min_content_width">84</property>
                 <property name="min_content_height">120</property>
                 <child>
-                  <object class="GtkTreeView" id="contmgm-inx.treeview">
+                  <object class="GtkTreeView" id="treeview">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="hexpand">True</property>
                     <property name="vexpand">True</property>
-                    <property name="model">contmgm-inx.liststore</property>
+                    <property name="model">liststore</property>
                     <child internal-child="selection">
-                      <object class="GtkTreeSelection" id="contmgm-inx.selection"/>
+                      <object class="GtkTreeSelection" id="selection"/>
                     </child>
                     <child>
-                      <object class="GtkTreeViewColumn" id="contmgm-inx.col1">
+                      <object class="GtkTreeViewColumn" id="col1">
                         <property name="spacing">6</property>
                         <property name="sizing">autosize</property>
-                        <property name="fixed_width">18</property>
                         <child>
                           <object class="GtkCellRendererPixbuf"/>
                           <attributes>
@@ -119,7 +93,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkTreeViewColumn" id="contmgm-inx.col2">
+                      <object class="GtkTreeViewColumn" id="col2">
                         <property name="spacing">6</property>
                         <property name="sizing">autosize</property>
                         <property name="min_width">100</property>
@@ -133,7 +107,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkTreeViewColumn" id="contmgm-inx.col3">
+                      <object class="GtkTreeViewColumn" id="col3">
                         <property name="min_width">150</property>
                         <property name="title" translatable="yes">Tracks</property>
                         <child>
@@ -161,7 +135,7 @@
                 <property name="spacing">6</property>
                 <property name="layout_style">start</property>
                 <child>
-                  <object class="GtkToggleButton" id="contmgm-edit">
+                  <object class="GtkToggleButton" id="edit">
                     <property name="label" translatable="yes">Edit</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -174,7 +148,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="contmgm-delete">
+                  <object class="GtkToggleButton" id="delete">
                     <property name="label" translatable="yes">Delete</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -201,9 +175,6 @@
           </packing>
         </child>
       </object>
-    </child>
-    <child type="titlebar">
-      <placeholder/>
     </child>
   </object>
 </interface>

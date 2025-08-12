@@ -53,7 +53,7 @@
 #include "fileio.h"
 #include "icons.h"
 #include "layout.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "common-ui.h"
 #ifdef UTFCONVERT
@@ -429,13 +429,13 @@ static paramData_t controlEditPLs[] = {
 #define I_ORIGY (2)
 	/*2*/ { PD_FLOAT, &controlEditOrig.y, "origy", PDO_DIM, &r_1000_1000, N_("Origin Y") },
 #define I_CONTROLONSCRIPT (3)
-	/*3*/ { PD_STRING, controlEditOnScript, "script", PDO_NOPREF, I2VP(350), N_("On Script"), 0, 0, sizeof(controlEditOnScript)},
+	/*3*/ { PD_STRING, controlEditOnScript, "scripton", PDO_NOPREF, I2VP(350), N_("On Script"), 0, 0, sizeof(controlEditOnScript)},
 #define I_CONTROLOFFSCRIPT (4)
-	/*4*/ { PD_STRING, controlEditOffScript, "script", PDO_NOPREF, I2VP(350), N_("Off Script"), 0, 0, sizeof(controlEditOffScript)},
+	/*4*/ { PD_STRING, controlEditOffScript, "scriptoff", PDO_NOPREF, I2VP(350), N_("Off Script"), 0, 0, sizeof(controlEditOffScript)},
 };
 
-static paramGroup_t controlEditPG = { "controlEdit", 0, controlEditPLs, COUNT( controlEditPLs ) };
-static wWin_p controlEditW;
+static paramGroup_t controlEditPG = { "controledit", 0, controlEditPLs, COUNT( controlEditPLs ) };
+static wControl_p controlEditW;
 
 static void ControlEditOk ( void * junk )
 {
@@ -484,11 +484,12 @@ static void EditControlDialog()
 	controlData_p xx;
 
 	if ( !controlEditW ) {
-		ParamRegister( &controlEditPG );
-		controlEditW = ParamCreateDialog (&controlEditPG,
+		FormRegister( &controlEditPG );
+		controlEditW = FormCreateDialog (&controlEditPG,
 		                                  MakeWindowTitle(_("Edit control")),
-		                                  _("Ok"), ControlEditOk,
-		                                  ParamCancel_Current, TRUE, NULL,
+		                                  NULL, ControlEditOk,
+										  NULL, FormCancel_Current, 
+										  TRUE, 
 		                                  F_BLOCK,
 		                                  NULL );
 	}
@@ -503,7 +504,7 @@ static void EditControlDialog()
 		strncpy(controlEditOffScript,xx->offscript,STR_LONG_SIZE-1);
 		controlEditOrig = xx->orig;
 	}
-	ParamLoadControls( &controlEditPG );
+	FormLoadControls( &controlEditPG );
 	wShow( controlEditW );
 }
 

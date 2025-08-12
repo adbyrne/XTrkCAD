@@ -52,7 +52,7 @@
 #include "custom.h"
 #include "fileio.h"
 #include "icons.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "trkendpt.h"
 #include "common-ui.h"
@@ -111,8 +111,8 @@ static paramData_t blockPLs[] = {
 	/*0*/ { PD_STRING, blockName, "name", PDO_NOPREF | PDO_NOTBLANK, I2VP(200), N_("Name"), 0, 0, sizeof( blockName )},
 	/*1*/ { PD_STRING, blockScript, "script", PDO_NOPREF, I2VP(350), N_("Script"), 0, 0, sizeof( blockScript)}
 };
-static paramGroup_t blockPG = { "block", 0, blockPLs,  COUNT( blockPLs ) };
-static wWin_p blockW;
+static paramGroup_t blockPG = { "block", PGO_FULLDIALOGFROMBUILDER, blockPLs,  COUNT( blockPLs ) };
+static wControl_p blockW;
 
 static char blockEditName[STR_SHORT_SIZE];
 static char blockEditScript[STR_LONG_SIZE];
@@ -124,8 +124,8 @@ static paramData_t blockEditPLs[] = {
 	/*1*/ { PD_STRING, blockEditScript, "script", PDO_NOPREF, I2VP(350), N_("Script"), 0, 0, sizeof(blockEditScript)},
 	/*2*/ { PD_STRING, blockEditSegs, "segments", PDO_NOPREF, I2VP(350), N_("Segments"), BO_READONLY, 0, sizeof(blockEditSegs) },
 };
-static paramGroup_t blockEditPG = { "block", 0, blockEditPLs,  COUNT( blockEditPLs ) };
-static wWin_p blockEditW;
+static paramGroup_t blockEditPG = { "blockedit", PGO_FULLDIALOGFROMBUILDER, blockEditPLs,  COUNT( blockEditPLs ) };
+static wControl_p blockEditW;
 
 typedef struct btrackinfo_t {
 	track_p t;
@@ -588,7 +588,7 @@ static void BlockOk ( void * junk )
 	LOG( log_block, 1, ("*** BlockOk()\n"))
 	DYNARR_RESET( btrackinfo_p *, blockTrk_da );
 
-	ParamUpdate( &blockPG );
+	FormUpdate( &blockPG );
 	if ( blockName[0]==0 ) {
 		NoticeMessage( _("Block must have a name!"), _("Ok"), NULL);
 		return;
@@ -689,13 +689,15 @@ static void NewBlockDialog()
 	}
 	if ( log_block < 0 ) { log_block = LogFindIndex( "block" ); }
 	if ( !blockW ) {
-		ParamRegister( &blockPG );
-		blockW = ParamCreateDialog (&blockPG, MakeWindowTitle(_("Create Block")),
-		                            _("Ok"), BlockOk, ParamCancel_Current,
-		                            TRUE, NULL, F_BLOCK, NULL );
+		FormRegister( &blockPG );
+		blockW = FormCreateDialog (&blockPG, MakeWindowTitle(_("Create Block")),
+		                            NULL, BlockOk, 
+									NULL, FormCancel_Current,
+		                            TRUE, 
+									F_BLOCK, NULL );
 		blockD.dpi = mainD.dpi;
 	}
-	ParamLoadControls( &blockPG );
+	FormLoadControls( &blockPG );
 	wShow( blockW );
 }
 
@@ -823,7 +825,7 @@ static void BlockEditOk ( void * junk )
 	track_p trk;
 
 	LOG( log_block, 1, ("*** BlockEditOk()\n"))
-	ParamUpdate (&blockEditPG );
+	FormUpdate (&blockEditPG );
 	if ( blockEditName[0]==0 ) {
 		NoticeMessage( _("Block must have a name!"), _("Ok"), NULL);
 		return;

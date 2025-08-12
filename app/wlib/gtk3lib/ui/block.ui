@@ -3,26 +3,26 @@
     <requires lib="gtk+" version="3.20"/>
     <object class="GtkDialog" id="block">
         <property name="can_focus">False</property>
-        <property name="border_width">18</property>
+        <property name="border_width">12</property>
         <property name="title" translatable="yes">Create block</property>
         <property name="type_hint">dialog</property>
         <property name="resizable">False</property>
         <child type="action">
-            <object class="GtkButton" id="id-cancel">
+            <object class="GtkButton" id="id_cancel">
                 <property name="label" translatable="yes">_Cancel</property>
                 <property name="use-underline">True</property>
                 <property name="visible">True</property>
             </object>
         </child>
         <child type="action">
-            <object class="GtkButton" id="id-help">
+            <object class="GtkButton" id="id_help">
                 <property name="label" translatable="yes">_Help</property>
                 <property name="use-underline">True</property>
                 <property name="visible">True</property>
             </object>
         </child>
         <child type="action">
-            <object class="GtkButton" id="id-ok">
+            <object class="GtkButton" id="id_ok">
                 <property name="label" translatable="yes">C_reate</property>
                 <property name="use-underline">True</property>
                 <property name="visible">True</property>
@@ -30,9 +30,9 @@
             </object>
         </child>
         <action-widgets>
-            <action-widget response="GTK_RESPONSE_CANCEL">id-cancel</action-widget>
-            <action-widget response="GTK_RESPONSE_HELP">id-help</action-widget>
-            <action-widget response="GTK_RESPONSE_OK" default="true">id-ok</action-widget>
+            <action-widget response="GTK_RESPONSE_CANCEL">id_cancel</action-widget>
+            <action-widget response="GTK_RESPONSE_HELP">id_help</action-widget>
+            <action-widget response="GTK_RESPONSE_OK" default="true">id_ok</action-widget>
         </action-widgets>
         <child internal-child="vbox">
             <object class="GtkBox">
@@ -50,7 +50,7 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="max_length">80</property>
-                                <property name="width_chars">2</property>
+                                <property name="width_chars">20</property>
                                 <property name="halign">start</property>
                             </object>
                             <packing>
@@ -63,7 +63,7 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="max-length">1024</property>
-                                <property name="width-chars">40</property>
+                                <property name="width-chars">35</property>
                             </object>
                             <packing>
                                 <property name="left_attach">1</property>
