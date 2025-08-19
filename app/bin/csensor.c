@@ -519,6 +519,7 @@ static void DrawSensorTrackHilite( void )
 	if (ctlhiliteColor==0) {
 		ctlhiliteColor = wDrawColorGray(87);
 	}
+	wDrawSetTempMode(tempD.d, TRUE);
 	DrawRectangle( &tempD, ctlhiliteOrig, ctlhiliteSize, ctlhiliteColor,
 	               DRAW_TRANSPARENT );
 }

@@ -881,6 +881,7 @@ static void DrawBlockTrackHilite( void )
 		blkhiliteColor = wDrawColorGray(87);
 	}
 	// This is incomplete.  We should be in temp drawing mode and clearing temp draw on UN_HILIGHT
+	wDrawSetTempMode(tempD.d, TRUE);
 	DrawRectangle( &tempD, blkhiliteOrig, blkhiliteSize, blkhiliteColor,
 	               DRAW_TRANSPARENT );
 }

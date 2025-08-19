@@ -798,6 +798,7 @@ static void DrawSWMotorTrackHilite( void )
 	if (swmhiliteColor==0) {
 		swmhiliteColor = wDrawColorGray(87);
 	}
+	wDrawSetTempMode(tempD.d, TRUE);
 	DrawRectangle( &tempD, swmhiliteOrig, swmhiliteSize, swmhiliteColor,
 	               DRAW_TRANSPARENT );
 }
