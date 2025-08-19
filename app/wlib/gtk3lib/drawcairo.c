@@ -129,7 +129,7 @@ static cairo_t* gtkDrawCreateCairoContext(
 		if (opts & wDrawOptTemp) {
 			if ( ! bd->bTempMode ) {
 				printf( "Temp draw in Main Mode. Contact Developers. See %s:%d\n",
-				        "gtkdraw-cairo.c", __LINE__+1 );
+				        __FILE__, __LINE__+1 );
 			}
 			/* Temp Draw In Main Mode:
 				You are seeing this message because there is a wDraw*() call on tempD but you are not in the context of TempRedraw()

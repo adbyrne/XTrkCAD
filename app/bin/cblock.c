@@ -691,10 +691,10 @@ static void NewBlockDialog()
 	if ( !blockW ) {
 		FormRegister( &blockPG );
 		blockW = FormCreateDialog (&blockPG, MakeWindowTitle(_("Create Block")),
-		                            NULL, BlockOk, 
-									NULL, FormCancel_Current,
-		                            TRUE, 
-									F_BLOCK, NULL );
+		                           NULL, BlockOk,
+		                           NULL, FormCancel_Current,
+		                           TRUE,
+		                           F_BLOCK, NULL );
 		blockD.dpi = mainD.dpi;
 	}
 	FormLoadControls( &blockPG );
@@ -862,14 +862,15 @@ static void EditBlock (track_p trk)
 	}
 	blockEditTrack = trk;
 	if ( !blockEditW ) {
-		ParamRegister( &blockEditPG );
-		blockEditW = ParamCreateDialog (&blockEditPG,
-		                                MakeWindowTitle(_("Edit block")),
-		                                _("Ok"), BlockEditOk,
-		                                ParamCancel_Current, TRUE, NULL, F_BLOCK,
-		                                NULL );
+		FormRegister( &blockEditPG );
+		blockEditW = FormCreateDialog (&blockEditPG,
+		                               MakeWindowTitle(_("Edit block")),
+		                               NULL, BlockEditOk,
+		                               NULL, FormCancel_Current,
+		                               TRUE, F_BLOCK,
+		                               NULL );
 	}
-	ParamLoadControls( &blockEditPG );
+	FormLoadControls( &blockEditPG );
 	sprintf( message, _("Edit block %d"), GetTrkIndex(trk) );
 	wWinSetTitle( blockEditW, message );
 	wShow (blockEditW);
@@ -884,6 +885,7 @@ static void DrawBlockTrackHilite( void )
 		blkhiliteColor = wDrawColorGray(87);
 	}
 	// This is incomplete.  We should be in temp drawing mode and clearing temp draw on UN_HILIGHT
+	wDrawSetTempMode(tempD.d, TRUE);
 	DrawRectangle( &tempD, blkhiliteOrig, blkhiliteSize, blkhiliteColor,
 	               DRAW_TRANSPARENT );
 }
@@ -989,7 +991,7 @@ static int BlockMgmProc ( int cmd, void * data )
 		}
 		break;
 	case CONTMGM_GET_TITLE:
-		sprintf( message, "\t%s\t", xx->name);
+		sprintf( message, "%s\t", xx->name);
 		for (iTrack = 0; iTrack < xx->numTracks ; iTrack++) {
 			if ((&(xx->trackList))[iTrack].t == NULL) { continue; }
 			sprintf(temp,"%d",GetTrkIndex((&(xx->trackList))[iTrack].t));
@@ -1025,7 +1027,7 @@ EXPORT void InitCmdBlock( wMenu_p menu )
 	blockName[0] = '\0';
 	blockScript[0] = '\0';
 	AddMenuButton( menu, CmdBlockCreate, "cmdBlockCreate", _("Block"),
-		CreateToolbarIconFromResource( "block.png"), LEVEL0_50,
+	               CreateToolbarIconFromResource( "block.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2, ACCL_BLOCK1, NULL );
 	ParamRegister( &blockPG );
 }

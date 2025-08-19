@@ -54,7 +54,7 @@
 #include "fileio.h"
 #include "icons.h"
 #include "layout.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "common-ui.h"
 #ifdef UTFCONVERT
@@ -64,22 +64,6 @@
 EXPORT TRKTYP_T T_SIGNAL = -1;
 
 static int log_signal = 0;
-
-
-#if 0
-static drawCmd_t signalD = {
-	NULL,
-	&screenDrawFuncs,
-	0,
-	1.0,
-	0.0,
-	{0.0,0.0}, {0.0,0.0},
-	Pix2CoOrd, CoOrd2Pix
-};
-
-static char signalName[STR_SHORT_SIZE];
-static int  signalHeadCount;
-#endif
 
 typedef struct signalAspect_t {
 	char * aspectName;
@@ -151,6 +135,7 @@ static void DDrawSignal(drawCmd_p d, coOrd orig, ANGLE_T angle,
 static void DrawSignal (track_p t, drawCmd_p d, wDrawColor color )
 {
 	signalData_p xx = GetsignalData(t);
+
 	DDrawSignal(d,xx->orig, xx->angle, xx->numHeads, GetScaleRatio(GetTrkScale(t)),
 	            color);
 }
@@ -247,7 +232,7 @@ static void UpdateSignalProperties ( track_p trk, int inx, descData_p
 	signalData_p xx = GetsignalData( trk );
 	const char *thename;
 	char *newName;
-	BOOL_T changed, nChanged, pChanged, oChanged;
+	BOOL_T isChanged, nChanged, pChanged, oChanged;
 
 	switch (inx) {
 	case NM: break;
@@ -255,10 +240,10 @@ static void UpdateSignalProperties ( track_p trk, int inx, descData_p
 	case OR: break;
 	case HD: break;
 	case -1:
-		changed = nChanged = pChanged = oChanged = FALSE;
+		isChanged = nChanged = pChanged = oChanged = FALSE;
 		thename = wEntryGetValue( signalDesc[NM].control0 );
 		if (strcmp(thename,xx->name) != 0) {
-			nChanged = changed = TRUE;
+			nChanged = isChanged = TRUE;
 			unsigned int max_str = signalDesc[NM].max_string;
 			if (max_str && strlen(thename)>max_str) {
 				newName = MyMalloc(max_str);
@@ -270,10 +255,10 @@ static void UpdateSignalProperties ( track_p trk, int inx, descData_p
 
 		if (signalProperties.pos.x != xx->orig.x ||
 		    signalProperties.pos.y != xx->orig.y) {
-			pChanged = changed = TRUE;
+			pChanged = isChanged = TRUE;
 		}
 		if (signalProperties.orient != xx->angle) {
-			oChanged = changed = TRUE;
+			oChanged = isChanged = TRUE;
 		}
 		if (!changed) { break; }
 		if (needUndoStart) {
@@ -508,41 +493,44 @@ static paramFloatRange_t r_1000_1000    = { -1000.0, 1000.0, 80 };
 static paramFloatRange_t r0_360         = { 0.0, 360.0, 80 };
 static paramData_t signalEditPLs[] = {
 #define I_SIGNALNAME (0)
-	/*0*/ { PD_STRING, signalEditName, "name", PDO_NOPREF|PDO_NOTBLANK, I2VP(200), N_("Name"), 0, 0, sizeof(signalEditName)},
+	/*0*/ { PD_STRING, signalEditName, "name", PDO_NOPREF|PDO_NOTBLANK, I2VP(200), NULL, 0, 0, sizeof(signalEditName)},
 #define I_ORIGX (1)
-	/*1*/ { PD_FLOAT, &signalEditOrig.x, "origx", PDO_DIM, &r_1000_1000, N_("Origin X") },
+	/*1*/ { PD_FLOAT, &signalEditOrig.x, "origx", PDO_DIM, &r_1000_1000, NULL },
 #define I_ORIGY (2)
-	/*2*/ { PD_FLOAT, &signalEditOrig.y, "origy", PDO_DIM, &r_1000_1000, N_("Origin Y") },
+	/*2*/ { PD_FLOAT, &signalEditOrig.y, "origy", PDO_DIM, &r_1000_1000, NULL },
 #define I_ANGLE (3)
-	/*3*/ { PD_FLOAT, &signalEditAngle, "origa", PDO_ANGLE, &r0_360, N_("Angle") },
+	/*3*/ { PD_FLOAT, &signalEditAngle, "origa", PDO_ANGLE, &r0_360, NULL },
 #define I_SIGNALHEADCOUNT (4)
-	/*4*/ { PD_LONG,   &signalEditHeadCount, "headCount", PDO_NOPREF, &r1_3, N_("Number of Heads") },
+	/*4*/ { PD_LONG,   &signalEditHeadCount, "headCount", PDO_NOPREF, &r1_3, NULL },
 #define I_SIGNALASPECTLIST (5)
-#define aspectSelL ((wList_p)signalEditPLs[I_SIGNALASPECTLIST].control)
+#define aspectSelL (signalEditPLs[I_SIGNALASPECTLIST].control)
 	/*5*/ { PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN|PDO_DLGRESIZE, &aspectListData, NULL, BL_MANY },
 #define I_SIGNALASPECTEDIT (6)
-	/*6*/ { PD_BUTTON, AspectEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit Aspect") },
+	/*6*/ { PD_BUTTON, AspectEdit, "edit", PDO_DLGCMDBUTTON, NULL, NULL },
 #define I_SIGNALASPECTADD (7)
-	/*7*/ { PD_BUTTON, AspectAdd, "add", PDO_DLGCMDBUTTON, NULL, N_("Add Aspect") },
+	/*7*/ { PD_BUTTON, AspectAdd, "add", PDO_DLGCMDBUTTON, NULL, NULL },
 #define I_SIGNALASPECTDELETE (8)
-	/*8*/ { PD_BUTTON, AspectDelete, "delete", 0, NULL, N_("Delete Aspect") },
+	/*8*/ { PD_BUTTON, AspectDelete, "delete", 0, NULL, NULL },
 };
-static paramGroup_t signalEditPG = { "signalEdit", 0, signalEditPLs, COUNT( signalEditPLs ) };
-static wWin_p signalEditW;
+static paramGroup_t signalEditPG = { "signaledit", PGO_FULLDIALOGFROMBUILDER, signalEditPLs, COUNT( signalEditPLs ) };
+static wControl_p signalEditW;
 
 static paramIntegerRange_t rm1_999999 = { -1, 999999 };
 
 static paramData_t aspectEditPLs[] = {
 #define I_ASPECTNAME (0)
-	/*0*/ { PD_STRING, signalAspectEditName, "name", PDO_NOPREF|PDO_NOTBLANK, I2VP(200),  N_("Name"), 0, 0, sizeof(signalAspectEditName)},
+	/*0*/ { PD_STRING, signalAspectEditName, "name", PDO_NOPREF|PDO_NOTBLANK, I2VP(200),  NULL, 0, 0, sizeof(signalAspectEditName)},
 #define I_ASPECTSCRIPT (1)
-	/*1*/ { PD_STRING, signalAspectEditScript, "script", PDO_NOPREF, I2VP(350), N_("Script"), 0, 0, sizeof(signalAspectEditScript)},
+	/*1*/ { PD_STRING, signalAspectEditScript, "script", PDO_NOPREF, I2VP(350), NULL, 0, 0, sizeof(signalAspectEditScript)},
 #define I_ASPECTINDEX (2)
-	/*2*/ { PD_LONG,   &signalAspectEditIndex, "index", PDO_NOPREF, &rm1_999999, N_("Aspect Index"), BO_READONLY },
+	/*2*/ {
+		PD_LONG,   &signalAspectEditIndex, "index", PDO_NOPREF, &rm1_999999, NULL
+		, BO_READONLY
+	},
 };
 
-static paramGroup_t aspectEditPG = { "aspectEdit", 0, aspectEditPLs, COUNT( aspectEditPLs ) };
-static wWin_p aspectEditW;
+static paramGroup_t aspectEditPG = { "aspectedit", PGO_FULLDIALOGFROMBUILDER, aspectEditPLs, COUNT( aspectEditPLs ) };
+static wControl_p aspectEditW;
 
 
 static void SignalEditOk ( void * junk )
@@ -610,7 +598,7 @@ static void SignalEditOk ( void * junk )
 	wHide( signalEditW );
 }
 
-static void SignalEditCancel ( wWin_p junk )
+static void SignalEditCancel ( void * junk )
 {
 	wIndex_t ia;
 
@@ -622,14 +610,16 @@ static void SignalEditCancel ( wWin_p junk )
 	wHide( signalEditW );
 }
 
-static void SignalEditDlgUpdate (paramGroup_p pg, int inx, void *valueP )
+static wBool_t SignalEditDlgUpdate (paramGroup_p pg, int inx, void *valueP )
 {
 	wIndex_t selcnt = wListGetSelectedCount( aspectSelL );
 
-	if ( inx != I_SIGNALASPECTLIST ) { return; }
-	ParamControlActive( &signalEditPG, I_SIGNALASPECTEDIT, selcnt>0 );
-	ParamControlActive( &signalEditPG, I_SIGNALASPECTADD, TRUE );
-	ParamControlActive( &signalEditPG, I_SIGNALASPECTDELETE, selcnt>0 );
+	if ( inx != I_SIGNALASPECTLIST ) { return FALSE; }
+	FormControlActive( &signalEditPG, I_SIGNALASPECTEDIT, selcnt>0 );
+	FormControlActive( &signalEditPG, I_SIGNALASPECTADD, TRUE );
+	FormControlActive( &signalEditPG, I_SIGNALASPECTDELETE, selcnt>0 );
+
+	return TRUE;
 }
 
 static void aspectEditOK ( void * junk )
@@ -638,7 +628,7 @@ static void aspectEditOK ( void * junk )
 		DYNARR_APPEND( signalAspect_p *, signalAspect_da, 10 );
 		signalAspect(signalAspect_da.cnt-1).aspectName = MyStrdup(signalAspectEditName);
 		signalAspect(signalAspect_da.cnt-1).aspectScript = MyStrdup(
-		                        signalAspectEditScript);
+		                signalAspectEditScript);
 		snprintf(message,sizeof(message),"%s\t%s",signalAspectEditName,
 		         signalAspectEditScript);
 		wListAddValue( aspectSelL, message, NULL, NULL );
@@ -652,7 +642,7 @@ static void aspectEditOK ( void * junk )
 		              signalAspect(signalAspectEditIndex).aspectScript, STR_LONG_SIZE ) != 0 ) {
 			MyFree(signalAspect(signalAspectEditIndex).aspectScript);
 			signalAspect(signalAspectEditIndex).aspectScript = MyStrdup(
-			                        signalAspectEditScript);
+			                signalAspectEditScript);
 		}
 		snprintf(message,sizeof(message),"%s\t%s",
 		         signalAspect(signalAspectEditIndex).aspectName,
@@ -675,13 +665,15 @@ static void EditAspectDialog ( wIndex_t inx )
 	}
 	signalAspectEditIndex = inx;
 	if ( !aspectEditW ) {
-		ParamRegister( &aspectEditPG );
-		aspectEditW = ParamCreateDialog (&aspectEditPG,
-		                                 MakeWindowTitle(_("Edit aspect")),
-		                                 _("Ok"), aspectEditOK,
-		                                 ParamCancel_Current, TRUE, NULL,F_BLOCK,NULL);
+		FormRegister( &aspectEditPG );
+		aspectEditW = FormCreateDialog (&aspectEditPG,
+		                                MakeWindowTitle(_("Edit aspect")),
+		                                NULL, aspectEditOK,
+		                                NULL, FormCancel_Current,
+		                                TRUE,
+		                                F_BLOCK,NULL);
 	}
-	ParamLoadControls( &aspectEditPG );
+	FormLoadControls( &aspectEditPG );
 	wShow( aspectEditW );
 }
 
@@ -745,14 +737,14 @@ static void EditSignalDialog()
 	wIndex_t ia;
 
 	if ( !signalEditW ) {
-		ParamRegister( &signalEditPG );
-		signalEditW = ParamCreateDialog (&signalEditPG,
-		                                 MakeWindowTitle(_("Edit signal")),
-		                                 _("Ok"), SignalEditOk,
-		                                 ParamCancel_Custom( SignalEditCancel ),
-		                                 TRUE, NULL,
-		                                 F_RESIZE|F_RECALLSIZE|F_BLOCK,
-		                                 SignalEditDlgUpdate );
+		FormRegister( &signalEditPG );
+		signalEditW = FormCreateDialog (&signalEditPG,
+		                                MakeWindowTitle(_("Edit signal")),
+		                                NULL, SignalEditOk,
+		                                NULL, FormCancel_Custom( SignalEditCancel ),
+		                                TRUE,
+		                                F_RESIZE|F_RECALLSIZE|F_BLOCK,
+		                                SignalEditDlgUpdate );
 	}
 	if (signalCreate_P) {
 		signalEditName[0] = '\0';
@@ -774,15 +766,15 @@ static void EditSignalDialog()
 			wListAddValue( aspectSelL, message, NULL, NULL );
 			DYNARR_APPEND( signalAspect_p *, signalAspect_da, 10 );
 			signalAspect(signalAspect_da.cnt-1).aspectName = MyStrdup((&
-			                (xx->aspectList))[ia].aspectName);
+			        (xx->aspectList))[ia].aspectName);
 			signalAspect(signalAspect_da.cnt-1).aspectScript = MyStrdup((&
-			                (xx->aspectList))[ia].aspectScript);
+			        (xx->aspectList))[ia].aspectScript);
 		}
 	}
-	ParamLoadControls( &signalEditPG );
-	ParamControlActive( &signalEditPG, I_SIGNALASPECTEDIT, FALSE );
-	ParamControlActive( &signalEditPG, I_SIGNALASPECTADD, TRUE );
-	ParamControlActive( &signalEditPG, I_SIGNALASPECTDELETE, FALSE );
+	FormLoadControls( &signalEditPG );
+	FormControlActive( &signalEditPG, I_SIGNALASPECTEDIT, FALSE );
+	FormControlActive( &signalEditPG, I_SIGNALASPECTADD, TRUE );
+	FormControlActive( &signalEditPG, I_SIGNALASPECTDELETE, FALSE );
 	wShow( signalEditW );
 }
 
@@ -854,6 +846,8 @@ static void DrawSignalTrackHilite( void )
 	if (sighiliteColor==0) {
 		sighiliteColor = wDrawColorGray(87);
 	}
+
+	wDrawSetTempMode(tempD.d, TRUE);
 	DrawRectangle( &tempD, sighiliteOrig, sighiliteSize, sighiliteColor,
 	               DRAW_TRANSPARENT );
 }
@@ -906,7 +900,7 @@ static int SignalMgmProc ( int cmd, void * data )
 		}
 		break;
 	case CONTMGM_GET_TITLE:
-		sprintf(message,"\t%s\t",xx->name);
+		sprintf(message,"%s",xx->name);
 		break;
 	}
 	return FALSE;
@@ -932,7 +926,7 @@ EXPORT void SignalMgmLoad ( void )
 EXPORT void InitCmdSignal ( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdSignal, "cmdSignal", _("Signal"),
-		CreateToolbarIconFromResource( "signal.png"), LEVEL0_50, IC_STICKY | IC_POPUP2,
+	               CreateToolbarIconFromResource( "signal.png"), LEVEL0_50, IC_STICKY | IC_POPUP2,
 	               ACCL_SIGNAL, NULL );
 }
 

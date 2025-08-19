@@ -1,73 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.36.0 -->
 <interface>
-  <requires lib="gtk+" version="3.20"/>
-  <object class="GtkDialog" id="signalEdit">
-    <property name="can_focus">False</property>
-    <property name="border_width">18</property>
-    <property name="type_hint">dialog</property>
+  <requires lib="gtk" version="3.22" />
+    <object class="GtkListStore" id="liststore">
+    <columns>
+      <!-- column-name set foreground -->
+      <column type="gboolean" />
+      <!-- column-name userdata -->
+      <column type="gpointer"/>
+      <!-- column-name icon -->
+      <column type="GdkPixbuf"/>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name script -->
+      <column type="gchararray"/>      
+    </columns>
+  </object>
+  <object class="GtkDialog" id="signaledit">
+    <property name="border-width">12</property>
+    <property name="type-hint">dialog</property>
+    <property name="use-header-bar">0</property>
+    <property name="resizable">False</property>
+    <child type="action">
+      <object class="GtkButton" id="id_cancel">
+        <property name="use-underline">True</property>
+        <property name="label">_Cancel</property>
+        <property name="visible">False</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="id_help">
+        <property name="use-underline">True</property>
+        <property name="label">_Help</property>
+        <property name="visible">False</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="id_ok">
+        <property name="use-underline">True</property>
+        <property name="can-default">True</property>
+        <property name="label">_Done</property>
+        <property name="visible">False</property>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="GTK_RESPONSE_CANCEL">id_cancel</action-widget>
+      <action-widget response="GTK_RESPONSE_HELP">id_help</action-widget>
+      <action-widget response="GTK_RESPONSE_OK" default="true">id_ok</action-widget>
+    </action-widgets>
     <child internal-child="vbox">
       <object class="GtkBox">
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
         <property name="orientation">vertical</property>
-        <property name="spacing">18</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox">
-            <property name="can_focus">False</property>
-            <property name="homogeneous">True</property>
-            <property name="layout_style">end</property>
-            <child>
-              <object class="GtkToggleButton" id="id-cancel">
-                <property name="label" translatable="yes">_Cancel</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_underline">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToggleButton" id="id-help">
-                <property name="label" translatable="yes">_Help</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_underline">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToggleButton" id="id-ok">
-                <property name="label" translatable="yes">_Done</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_underline">True</property>
-                <style>
-                  <class name="suggested-action"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
+        <property name="spacing">12</property>
         <child>
           <object class="GtkGrid">
             <property name="visible">True</property>
@@ -87,7 +71,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="signalEdit-name">
+              <object class="GtkEntry" id="name">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="halign">start</property>
@@ -100,7 +84,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="signalEdit-origx">
+              <object class="GtkEntry" id="origx">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="valign">center</property>
@@ -127,7 +111,6 @@
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Angle</property>
                 <property name="xalign">1</property>
               </object>
@@ -137,7 +120,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="signalEdit-origy">
+              <object class="GtkEntry" id="origy">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -149,7 +132,6 @@
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Origin Y</property>
                 <property name="xalign">1</property>
               </object>
@@ -159,7 +141,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="signalEdit-origa">
+              <object class="GtkEntry" id="origa">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -171,7 +153,6 @@
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Number of Heads</property>
                 <property name="xalign">1</property>
               </object>
@@ -181,7 +162,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="signalEdit-headCount">
+              <object class="GtkEntry" id="headCount">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="halign">start</property>
@@ -194,12 +175,47 @@
               </packing>
             </child>
             <child>
-              <object class="GtkScrolledWindow" id="signalEdit-inx.scrollwindow">
+              <object class="GtkScrolledWindow" id="inx">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="shadow_type">in</property>
                 <child>
-                  <placeholder/>
+                  <object class="GtkTreeView" id="treeview">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="hexpand">True</property>
+                    <property name="vexpand">True</property>
+                    <property name="model">liststore</property>
+                    <child internal-child="selection">
+                      <object class="GtkTreeSelection" id="selection"/>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="col2">
+                        <property name="spacing">6</property>
+                        <property name="sizing">autosize</property>
+                        <property name="min_width">100</property>
+                        <property name="title" translatable="yes">Aspect</property>
+                        <child>
+                          <object class="GtkCellRendererText"/>
+                          <attributes>
+                            <attribute name="text">3</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="col3">
+                        <property name="min_width">150</property>
+                        <property name="title" translatable="yes">Script</property>
+                        <child>
+                          <object class="GtkCellRendererText"/>
+                          <attributes>
+                            <attribute name="text">4</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
                 </child>
               </object>
               <packing>
@@ -209,7 +225,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToggleButton" id="signalEdit-add">
+              <object class="GtkToggleButton" id="add">
                 <property name="label" translatable="yes">Add Aspect</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -221,7 +237,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToggleButton" id="signalEdit-edit">
+              <object class="GtkToggleButton" id="edit">
                 <property name="label" translatable="yes">Edit Aspect</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -233,7 +249,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToggleButton" id="signalEdit-delete">
+              <object class="GtkToggleButton" id="delete">
                 <property name="label" translatable="yes">Delete Aspect</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -244,15 +260,6 @@
                 <property name="top_attach">2</property>
               </packing>
             </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
           </object>
           <packing>
             <property name="expand">True</property>
@@ -261,9 +268,6 @@
           </packing>
         </child>
       </object>
-    </child>
-    <child type="titlebar">
-      <placeholder/>
     </child>
   </object>
 </interface>

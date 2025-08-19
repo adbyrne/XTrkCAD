@@ -62,7 +62,7 @@
             <property name="vexpand">False</property>
             <property name="spacing">12</property>
             <child>
-              <object class="GtkScrolledWindow" id="list">
+              <object class="GtkScrolledWindow" id="inx">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="hexpand">True</property>
@@ -87,7 +87,7 @@
                         <child>
                           <object class="GtkCellRendererPixbuf"/>
                           <attributes>
-                            <attribute name="pixbuf">1</attribute>
+                            <attribute name="pixbuf">2</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -101,7 +101,7 @@
                         <child>
                           <object class="GtkCellRendererText"/>
                           <attributes>
-                            <attribute name="text">2</attribute>
+                            <attribute name="text">3</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -113,7 +113,7 @@
                         <child>
                           <object class="GtkCellRendererText"/>
                           <attributes>
-                            <attribute name="text">3</attribute>
+                            <attribute name="text">4</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -135,7 +135,7 @@
                 <property name="spacing">6</property>
                 <property name="layout_style">start</property>
                 <child>
-                  <object class="GtkToggleButton" id="edit">
+                  <object class="GtkButton" id="edit">
                     <property name="label" translatable="yes">Edit</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -148,7 +148,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="delete">
+                  <object class="GtkButton" id="delete">
                     <property name="label" translatable="yes">Delete</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>

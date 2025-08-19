@@ -2,8 +2,10 @@
 <gresources>
   <gresource prefix="@XTRKCAD_BUILDER_ROOT@">
     <file preprocess="xml-stripblanks">appwindow.ui</file>
+    <file preprocess="xml-stripblanks">aspectedit.ui</file>
     <file preprocess="xml-stripblanks">basicdialog.ui</file>
     <file preprocess="xml-stripblanks">block.ui</file>
+    <file preprocess="xml-stripblanks">blockedit.ui</file>
     <file preprocess="xml-stripblanks">cmdopt.ui</file>
     <file preprocess="xml-stripblanks">controledit.ui</file>
     <file preprocess="xml-stripblanks">contmgm.ui</file>
@@ -27,7 +29,11 @@
     <file preprocess="xml-stripblanks">rescale.ui</file>
     <file preprocess="xml-stripblanks">rgbcolor.ui</file>
     <file preprocess="xml-stripblanks">searchgui.ui</file>
+    <file preprocess="xml-stripblanks">sensoredit.ui</file>
+    <file preprocess="xml-stripblanks">signaledit.ui</file>
     <file preprocess="xml-stripblanks">structure.ui</file>
+    <file preprocess="xml-stripblanks">switchmotor.ui</file>
+    <file preprocess="xml-stripblanks">switchmotoredit.ui</file>
     <file preprocess="xml-stripblanks">textNote.ui</file>
     <file preprocess="xml-stripblanks">tip.ui</file>
     <file preprocess="xml-stripblanks">toolbar.ui</file>

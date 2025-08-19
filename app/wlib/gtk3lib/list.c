@@ -427,7 +427,7 @@ wListDeleteSelected(wControl_p list)
 	GList* rows, *ptr, *references = NULL;
 
 	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(list, list);
-
+	
 	selection = gtk_tree_view_get_selection(lcontrol->treeView);
 	model = gtk_tree_view_get_model(lcontrol->treeView);
 	rows = gtk_tree_selection_get_selected_rows(selection, &model);
@@ -446,6 +446,8 @@ wListDeleteSelected(wControl_p list)
 	g_list_foreach(rows, (GFunc)gtk_tree_path_free, NULL);
 	g_list_free(references);
 	g_list_free(rows);
+
+	gtk_tree_selection_unselect_all(selection);
 }
 
 /**
@@ -470,6 +472,7 @@ void wListDelete(
 		                              &iter,
 		                              NULL,
 		                              inx);
+
 		gtk_list_store_remove(lcontrol->listStore, &iter);
 	}
 

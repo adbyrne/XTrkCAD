@@ -64,23 +64,6 @@ EXPORT TRKTYP_T T_CONTROL = -1;
 
 static int log_control = 0;
 
-
-#if 0
-static drawCmd_t controlD = {
-	NULL,
-	&screenDrawFuncs,
-	0,
-	1.0,
-	0.0,
-	{0.0,0.0}, {0.0,0.0},
-	Pix2CoOrd, CoOrd2Pix
-};
-
-static char controlName[STR_SHORT_SIZE];
-static char controlOnScript[STR_LONG_SIZE];
-static char controlOffScript[STR_LONG_SIZE];
-#endif
-
 typedef struct controlData_t {
 	extraDataBase_t base;
 	coOrd orig;
@@ -124,6 +107,7 @@ static void DDrawControl(drawCmd_p d, coOrd orig, DIST_T scaleRatio,
 static void DrawControl (track_p t, drawCmd_p d, wDrawColor color )
 {
 	controlData_p xx = GetcontrolData(t);
+
 	DDrawControl(d,xx->orig,GetScaleRatio(GetTrkScale(t)),color);
 }
 
@@ -180,7 +164,7 @@ static void UpdateControlProperties (  track_p trk, int inx, descData_p
 	const char *thename, *theonscript, *theoffscript;
 	unsigned int max_str;
 	char *newName, *newOnScript, *newOffScript=NULL;
-	BOOL_T changed, nChanged, pChanged, onChanged, offChanged;
+	BOOL_T isChanged, nChanged, pChanged, onChanged, offChanged;
 
 	switch (inx) {
 	case NM:
@@ -192,10 +176,10 @@ static void UpdateControlProperties (  track_p trk, int inx, descData_p
 	case OF:
 		break;
 	case -1:
-		changed = nChanged = pChanged = onChanged = offChanged = FALSE;
+		isChanged = nChanged = pChanged = onChanged = offChanged = FALSE;
 		thename = wEntryGetValue( controlDesc[NM].control0 );
 		if (strcmp(thename,xx->name) != 0) {
-			nChanged = changed = TRUE;
+			nChanged = isChanged = TRUE;
 			max_str = controlDesc[NM].max_string;
 			if (max_str && strlen(thename)>max_str-1) {
 				newName = MyMalloc(max_str);
@@ -208,7 +192,7 @@ static void UpdateControlProperties (  track_p trk, int inx, descData_p
 
 		theonscript = wEntryGetValue( controlDesc[ON].control0 );
 		if (strcmp(theonscript,xx->onscript) != 0) {
-			onChanged = changed = TRUE;
+			onChanged = isChanged = TRUE;
 			max_str = controlDesc[ON].max_string;
 			if (max_str && strlen(theonscript)>max_str-1) {
 				newOnScript = MyMalloc(max_str);
@@ -232,9 +216,9 @@ static void UpdateControlProperties (  track_p trk, int inx, descData_p
 
 		if (controlProperties.pos.x != xx->orig.x ||
 		    controlProperties.pos.y != xx->orig.y) {
-			pChanged = changed = TRUE;
+			pChanged = isChanged = TRUE;
 		}
-		if (!changed) { break; }
+		if (!isChanged) { break; }
 		if (needUndoStart) {
 			UndoStart( _("Change Control"), "Change Control" );
 		}
@@ -245,8 +229,6 @@ static void UpdateControlProperties (  track_p trk, int inx, descData_p
 		}
 		if (pChanged) {
 			UndrawNewTrack( trk );
-		}
-		if (pChanged) {
 			xx->orig = controlProperties.pos;
 		}
 		if (onChanged) {
@@ -434,7 +416,7 @@ static paramData_t controlEditPLs[] = {
 	/*4*/ { PD_STRING, controlEditOffScript, "scriptoff", PDO_NOPREF, I2VP(350), N_("Off Script"), 0, 0, sizeof(controlEditOffScript)},
 };
 
-static paramGroup_t controlEditPG = { "controledit", 0, controlEditPLs, COUNT( controlEditPLs ) };
+static paramGroup_t controlEditPG = { "controledit", PGO_FULLDIALOGFROMBUILDER, controlEditPLs, COUNT( controlEditPLs ) };
 static wControl_p controlEditW;
 
 static void ControlEditOk ( void * junk )
@@ -472,13 +454,6 @@ static void ControlEditOk ( void * junk )
 	wHide( controlEditW );
 }
 
-#if 0
-static void ControlEditCancel ( wWin_p junk )
-{
-	wHide( controlEditW );
-}
-#endif
-
 static void EditControlDialog()
 {
 	controlData_p xx;
@@ -486,12 +461,12 @@ static void EditControlDialog()
 	if ( !controlEditW ) {
 		FormRegister( &controlEditPG );
 		controlEditW = FormCreateDialog (&controlEditPG,
-		                                  MakeWindowTitle(_("Edit control")),
-		                                  NULL, ControlEditOk,
-										  NULL, FormCancel_Current, 
-										  TRUE, 
-		                                  F_BLOCK,
-		                                  NULL );
+		                                 MakeWindowTitle(_("Edit control")),
+		                                 NULL, ControlEditOk,
+		                                 NULL, FormCancel_Current,
+		                                 TRUE,
+		                                 F_BLOCK,
+		                                 NULL );
 	}
 	if (controlEditTrack == NULL) {
 		controlEditName[0] = '\0';
@@ -564,6 +539,9 @@ static void DrawControlTrackHilite( void )
 	if (ctlhiliteColor==0) {
 		ctlhiliteColor = wDrawColorGray(87);
 	}
+
+	wDrawSetTempMode(tempD.d, TRUE);
+
 	DrawRectangle( &tempD, ctlhiliteOrig, ctlhiliteSize, ctlhiliteColor,
 	               DRAW_TRANSPARENT );
 }
@@ -616,7 +594,7 @@ static int ControlMgmProc ( int cmd, void * data )
 		}
 		break;
 	case CONTMGM_GET_TITLE:
-		sprintf(message,"\t%s\t",xx->name);
+		sprintf(message,"%s",xx->name);
 		break;
 	}
 	return FALSE;
@@ -642,7 +620,7 @@ EXPORT void ControlMgmLoad ( void )
 EXPORT void InitCmdControl ( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdControl, "cmdControl", _("Control"),
-		CreateToolbarIconFromResource( "control.png"), LEVEL0_50, IC_STICKY | IC_POPUP2,
+	               CreateToolbarIconFromResource( "control.png"), LEVEL0_50, IC_STICKY | IC_POPUP2,
 	               ACCL_CONTROL, NULL );
 }
 

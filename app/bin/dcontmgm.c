@@ -62,9 +62,7 @@
 
 #include "cundo.h"
 #include "custom.h"
-#include "param.h"
-#include "track.h"
-
+#include "form.h"
 
 /*****************************************************************************
  *
@@ -75,21 +73,17 @@
 static void ControlEdit( void * action );
 static void ControlDelete( void * action );
 static void ControlDone( void * action );
-static wWinPix_t controlListWidths[] = { 18, 100, 150 };
-static const char * controlListTitles[] = { "", N_("Name"),
-                                            N_("Tracks")
-                                          };
-static paramListData_t controlListData = { 10, 400, 3, controlListWidths, controlListTitles };
+
 static paramData_t controlPLs[] = {
 #define I_CONTROLLIST	(0)
-#define controlSelL		((wList_p)controlPLs[I_CONTROLLIST].control)
-	{	PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN|PDO_DLGRESIZE, &controlListData, NULL, BL_MANY },
+#define controlSelL		(controlPLs[I_CONTROLLIST].control)
+	{	PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN|PDO_DLGRESIZE, NULL, NULL, BL_MANY},
 #define I_CONTROLEDIT	(1)
-	{	PD_BUTTON, ControlEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
+	{	PD_BUTTON, ControlEdit, "edit", PDO_DLGCMDBUTTON, NULL, NULL },
 #define I_CONTROLDEL		(2)
-	{	PD_BUTTON, ControlDelete, "delete", 0, NULL, N_("Delete") },
+	{	PD_BUTTON, ControlDelete, "delete", 0, NULL, NULL },
 } ;
-static paramGroup_t controlPG = { "contmgm", 0, controlPLs, COUNT( controlPLs ) };
+static paramGroup_t controlPG = { "contmgm", PGO_FULLDIALOGFROMBUILDER, controlPLs, COUNT( controlPLs ) };
 
 
 typedef struct {
@@ -100,46 +94,47 @@ typedef struct {
 
 static BOOL_T AnyHILIGHT = FALSE;
 
-static void ControlDlgUpdate(
+static wBool_t ControlDlgUpdate(
         paramGroup_p pg,
         int inx,
         void *valueP )
 {
 	contMgmContext_p context = NULL;
-	wIndex_t selcnt = wListGetSelectedCount( (wList_p)controlPLs[0].control );
+	wIndex_t selcnt = wListGetSelectedCount( controlPLs[0].control );
 	wIndex_t linx, lcnt;
 
-	if ( inx != I_CONTROLLIST ) { return; }
-	lcnt = wListGetCount( (wList_p)controlPLs[0].control );
+	if ( inx != I_CONTROLLIST ) { return FALSE; }
+
+	lcnt = wListGetCount( controlPLs[0].control );
 	AnyHILIGHT = FALSE;
-	for (linx=0;
-	     linx < lcnt;
-	     linx++ ) {
-		if (wListGetItemSelected( (wList_p)controlPLs[0].control, linx ) == TRUE) {
-			context = (contMgmContext_p)wListGetItemContext( controlSelL, linx );
+	for (linx=0; linx < lcnt; linx++ ) {
+		context = (contMgmContext_p)wListGetItemContext(controlSelL, linx);
+
+		if (wListGetItemSelected( controlPLs[0].control, linx ) == TRUE) {
 			context->proc( CONTMGM_DO_HILIGHT, context->data );
 			AnyHILIGHT = TRUE;
 		} else {
-			context = (contMgmContext_p)wListGetItemContext( controlSelL, linx );
 			context->proc( CONTMGM_UN_HILIGHT, context->data );
 		}
 	}
-	ParamControlActive( &controlPG, I_CONTROLEDIT, selcnt>0 );
-	ParamControlActive( &controlPG, I_CONTROLDEL, selcnt>0 );
+	FormControlActive( &controlPG, I_CONTROLEDIT, selcnt>0 );
+	FormControlActive( &controlPG, I_CONTROLDEL, selcnt>0 );
+
+	return FALSE;
 }
 
 static void ControlEdit( void * action )
 {
 	contMgmContext_p context = NULL;
-	wIndex_t selcnt = wListGetSelectedCount( (wList_p)controlPLs[0].control );
+	wIndex_t selcnt = wListGetSelectedCount(controlPLs[0].control );
 	wIndex_t inx, cnt;
 
 	if ( selcnt != 1 ) {
 		return;
 	}
-	cnt = wListGetCount( (wList_p)controlPLs[0].control );
+	cnt = wListGetCount(controlPLs[0].control );
 	for ( inx=0;
-	      inx<cnt && wListGetItemSelected( (wList_p)controlPLs[0].control, inx ) != TRUE;
+	      inx<cnt && wListGetItemSelected(controlPLs[0].control, inx ) != TRUE;
 	      inx++ );
 	if ( inx >= cnt ) {
 		return;
@@ -156,32 +151,39 @@ static void ControlEdit( void * action )
 
 static void ControlDelete( void * action )
 {
-	wIndex_t selcnt = wListGetSelectedCount( (wList_p)controlPLs[0].control );
+	wIndex_t selcnt = wListGetSelectedCount(controlPLs[0].control );
 	wIndex_t inx, cnt;
 	contMgmContext_p context = NULL;
+	int deleted = 0;
 
 	if ( selcnt <= 0 ) {
 		return;
 	}
+
 	if ( (!NoticeMessage2( 1,
 	                       _("Are you sure you want to delete the %d control element(s)"), _("Yes"),
 	                       _("No"), selcnt ) ) ) {
 		return;
 	}
-	cnt = wListGetCount( (wList_p)controlPLs[0].control );
+	cnt = wListGetCount(controlPLs[0].control );
 	UndoStart( _("Control Elements"), "delete" );
-	for ( inx=0; inx<cnt; inx++ ) {
-		if ( !wListGetItemSelected( (wList_p)controlPLs[0].control, inx ) ) {
-			continue;
+
+	inx = 0;
+	while( deleted < selcnt && inx < cnt) {
+		if ( wListGetItemSelected(controlPLs[0].control, inx ) ) {
+			context = (contMgmContext_p)wListGetItemContext(controlSelL, inx);
+			context->proc( CONTMGM_DO_DELETE, context->data );
+			MyFree(context);
+			deleted++;
 		}
-		context = (contMgmContext_p)wListGetItemContext( controlSelL, inx );
-		context->proc( CONTMGM_DO_DELETE, context->data );
-		MyFree( context );
-		wListDelete( controlSelL, inx );
-		inx--;
-		cnt--;
+
+		inx++;
 	}
+
+	wListDeleteSelected(controlSelL);
+
 	UndoEnd();
+
 	DoChangeNotification( CHANGE_PARAMS );
 }
 
@@ -191,7 +193,7 @@ static void ControlDone( void * action )
 	wIndex_t linx, lcnt;
 
 	if (AnyHILIGHT) {
-		lcnt = wListGetCount( (wList_p)controlPLs[0].control );
+		lcnt = wListGetCount(controlPLs[0].control );
 		for (linx=0;
 		     linx < lcnt;
 		     linx++ ) {
@@ -223,24 +225,9 @@ static void LoadControlMgmList( void )
 	wIndex_t curInx, cnt=0;
 	long tempL;
 	contMgmContext_p context;
-#ifdef LATER
-	contMgmContext_t curContext;
-#endif
 
 	curInx = wListGetIndex( controlSelL );
-#ifdef LATER
-	curContext.proc = NULL;
-	curContext.data = NULL;
-	curContext.icon = NULL;
-#endif
-	if ( curInx >= 0 ) {
-		context = (contMgmContext_p)wListGetItemContext( controlSelL, curInx );
-#ifdef LATER
-		if ( context != NULL ) {
-			curContext = *context;
-		}
-#endif
-	}
+
 	cnt = wListGetCount( controlSelL );
 	for ( curInx=0; curInx<cnt; curInx++ ) {
 		context = (contMgmContext_p)wListGetItemContext( controlSelL, curInx );
@@ -258,26 +245,6 @@ static void LoadControlMgmList( void )
 	ControlMgmLoad();
 	SensorMgmLoad();
 
-#ifdef LATER
-	curInx = 0;
-	cnt = wListGetCount( controlSelL );
-	if ( curContext.proc != NULL ) {
-		for ( curInx=0; curInx<cnt; curInx++ ) {
-			context = (contMgmContext_p)wListGetItemContext( controlSelL, curInx );
-			if ( context &&
-			     context->proc == curContext.proc &&
-			     context->data == curContext.data ) {
-				break;
-			}
-		}
-	}
-	if ( curInx >= cnt ) {
-		curInx = (cnt>0?0:-1);
-	}
-
-	wListSetIndex( controlSelL, curInx );
-	tempL = curInx;
-#endif
 	tempL = -1;
 	ControlDlgUpdate( &controlPG, I_CONTROLLIST, &tempL );
 	wControlShow( (wControl_p)controlSelL, TRUE );
@@ -295,8 +262,6 @@ static void ContMgmChange( long changes )
 	    controlPG.win == NULL || !wWinIsVisible(controlPG.win) ) {
 		return;
 	}
-
-	LoadControlMgmList();
 }
 
 
@@ -304,16 +269,18 @@ static void ContMgmChange( long changes )
 static void DoControlMgr( void * junk )
 {
 	if (controlPG.win == NULL) {
-		ParamCreateDialog( &controlPG,
-		                   MakeWindowTitle(_("Manage Layout Control Elements")),
-		                   _("Done"), ControlDone,
-		                   ParamCancel_Current, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK,
-		                   ControlDlgUpdate );
+		FormCreateDialog( &controlPG,
+		                  MakeWindowTitle(_("Manage Layout Control Elements")),
+		                  NULL, ControlDone,
+		                  NULL, ParamCancel_Current,
+		                  TRUE, F_RESIZE|F_RECALLSIZE|F_BLOCK,
+		                  ControlDlgUpdate );
 	} else {
 		wListClear( controlSelL );
 	}
-	/*ParamLoadControls( &controlPG );*/
-	/*ParamGroupRecord( &controlPG );*/
+	FormLoadControls( &controlPG );
+	FormGroupRecord( &controlPG );
+
 	LoadControlMgmList();
 	wShow( controlPG.win );
 }
@@ -321,8 +288,8 @@ static void DoControlMgr( void * junk )
 
 EXPORT addButtonCallBack_t ControlMgrInit( void )
 {
-	ParamRegister( &controlPG );
-	/*ParamRegister( &contMgmContentsPG );*/
+	FormRegister( &controlPG );
+
 	RegisterChangeNotification( ContMgmChange );
 	return &DoControlMgr;
 }

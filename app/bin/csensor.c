@@ -53,7 +53,7 @@
 #include "fileio.h"
 #include "icons.h"
 #include "layout.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "common-ui.h"
 #ifdef UTFCONVERT
@@ -63,22 +63,6 @@
 EXPORT TRKTYP_T T_SENSOR = -1;
 
 static int log_sensor = 0;
-
-
-#if 0
-static drawCmd_t sensorD = {
-	NULL,
-	&screenDrawFuncs,
-	0,
-	1.0,
-	0.0,
-	{0.0,0.0}, {0.0,0.0},
-	Pix2CoOrd, CoOrd2Pix
-};
-
-static char sensorName[STR_SHORT_SIZE];
-static char sensorScript[STR_LONG_SIZE];
-#endif
 
 typedef struct sensorData_t {
 	extraDataBase_t base;
@@ -171,7 +155,7 @@ static void UpdateSensorProperties (  track_p trk, int inx, descData_p
 	const char *thename, *thescript;
 	char *newName, *newScript = NULL;
 	unsigned int max_str;
-	BOOL_T changed, nChanged, pChanged, sChanged;
+	BOOL_T isChanged, nChanged, pChanged, sChanged;
 
 	switch (inx) {
 	case NM:
@@ -181,10 +165,10 @@ static void UpdateSensorProperties (  track_p trk, int inx, descData_p
 	case SC:
 		break;
 	case -1:
-		changed = nChanged = pChanged = sChanged = FALSE;
+		isChanged = nChanged = pChanged = sChanged = FALSE;
 		thename = wEntryGetValue(sensorDesc[NM].control0 );
 		if (strcmp(thename,xx->name) != 0) {
-			nChanged = changed = TRUE;
+			nChanged = isChanged = TRUE;
 			max_str = sensorDesc[NM].max_string;
 			if (max_str && strlen(thename)>max_str-1) {
 				newName = MyMalloc(max_str);
@@ -196,7 +180,7 @@ static void UpdateSensorProperties (  track_p trk, int inx, descData_p
 
 		thescript = wEntryGetValue(sensorDesc[SC].control0 );
 		if (strcmp(thescript,xx->script) != 0) {
-			sChanged = changed = TRUE;
+			sChanged = isChanged = TRUE;
 			max_str = sensorDesc[SC].max_string;
 			if (max_str && strlen(thename)>max_str-1) {
 				newScript = MyMalloc(max_str);
@@ -210,7 +194,7 @@ static void UpdateSensorProperties (  track_p trk, int inx, descData_p
 		    sensorProperties.pos.y != xx->orig.y) {
 			pChanged = changed = TRUE;
 		}
-		if (!changed) { break; }
+		if (!isChanged) { break; }
 		if (needUndoStart) {
 			UndoStart( _("Change Sensor"), "Change Sensor" );
 		}
@@ -221,18 +205,15 @@ static void UpdateSensorProperties (  track_p trk, int inx, descData_p
 		}
 		if (pChanged) {
 			UndrawNewTrack( trk );
-		}
-		if (pChanged) {
 			xx->orig = sensorProperties.pos;
+			ComputeSensorBoundingBox(trk);
+			DrawNewTrack(trk);
 		}
 		if (sChanged) {
 			MyFree(xx->script);
 			xx->script = newScript;
 		}
-		if (pChanged) {
-			ComputeSensorBoundingBox( trk );
-			DrawNewTrack( trk );
-		}
+
 		break;
 	}
 }
@@ -396,8 +377,8 @@ static paramData_t sensorEditPLs[] = {
 	/*3*/ { PD_STRING, sensorEditScript, "script", PDO_NOPREF, I2VP(350), N_("Script"), 0, 0, sizeof(sensorEditScript)},
 };
 
-static paramGroup_t sensorEditPG = { "sensorEdit", 0, sensorEditPLs, COUNT( sensorEditPLs ) };
-static wWin_p sensorEditW;
+static paramGroup_t sensorEditPG = { "sensoredit", PGO_FULLDIALOGFROMBUILDER, sensorEditPLs, COUNT( sensorEditPLs ) };
+static wControl_p sensorEditW;
 
 static void SensorEditOk ( void * junk )
 {
@@ -429,25 +410,19 @@ static void SensorEditOk ( void * junk )
 	wHide( sensorEditW );
 }
 
-#if 0
-static void SensorEditCancel ( wWin_p junk )
-{
-	wHide( sensorEditW );
-}
-#endif
-
 static void EditSensorDialog()
 {
 	sensorData_p xx;
 
 	if ( !sensorEditW ) {
-		ParamRegister( &sensorEditPG );
-		sensorEditW = ParamCreateDialog (&sensorEditPG,
-		                                 MakeWindowTitle(_("Edit sensor")),
-		                                 _("Ok"), SensorEditOk,
-		                                 ParamCancel_Current, TRUE, NULL,
-		                                 F_BLOCK,
-		                                 NULL );
+		FormRegister( &sensorEditPG );
+		sensorEditW = FormCreateDialog (&sensorEditPG,
+		                                MakeWindowTitle(_("Edit sensor")),
+		                                NULL, SensorEditOk,
+		                                NULL, FormCancel_Current,
+		                                TRUE,
+		                                F_BLOCK,
+		                                NULL );
 	}
 	if (sensorEditTrack == NULL) {
 		sensorEditName[0] = '\0';
@@ -460,7 +435,7 @@ static void EditSensorDialog()
 		sensorEditScript[STR_LONG_SIZE - 1] = '\0';
 		sensorEditOrig = xx->orig;
 	}
-	ParamLoadControls( &sensorEditPG );
+	FormLoadControls( &sensorEditPG );
 	wShow( sensorEditW );
 }
 
@@ -520,6 +495,8 @@ static void DrawSensorTrackHilite( void )
 	if (ctlhiliteColor==0) {
 		ctlhiliteColor = wDrawColorGray(87);
 	}
+	wDrawSetTempMode(tempD.d, TRUE);
+
 	DrawRectangle( &tempD, ctlhiliteOrig, ctlhiliteSize, ctlhiliteColor,
 	               DRAW_TRANSPARENT );
 }
@@ -572,7 +549,7 @@ static int SensorMgmProc ( int cmd, void * data )
 		}
 		break;
 	case CONTMGM_GET_TITLE:
-		sprintf(message,"\t%s\t",xx->name);
+		sprintf(message,"%s",xx->name);
 		break;
 	}
 	return FALSE;
@@ -598,7 +575,7 @@ EXPORT void SensorMgmLoad ( void )
 EXPORT void InitCmdSensor ( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdSensor, "cmdSensor", _("Sensor"),
-		CreateToolbarIconFromResource( "sensor.png"), LEVEL0_50, IC_STICKY | IC_POPUP2,
+	               CreateToolbarIconFromResource( "sensor.png"), LEVEL0_50, IC_STICKY | IC_POPUP2,
 	               ACCL_SENSOR, NULL );
 }
 
