@@ -20,6 +20,7 @@ void FormCreateControls(paramGroup_p group);
 void FormLoadControls(paramGroup_p pg);
 void FormLoadSingleControl(paramGroup_p pg, int inx);
 void FormLoadMessage(paramGroup_p pg, int inx, char* message);
+void FormMenuPush(void* dp);
 
 void FormStartRecord(FILE* fileHandle);
 void FormMacroRecord(char* format, ...);

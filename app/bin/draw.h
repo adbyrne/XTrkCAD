@@ -270,6 +270,8 @@ void DrawInit(int);
 void DoZoomUp(void * modeVP);
 void DoZoomDown(void * modeVP);
 void DoZoomExtents( void * modeVP);
+void DoNewScale(DIST_T scale);
+int DoPanKeyAction(wAction_t action);
 void PanHere(void * modeVP);
 void PanMenuEnter(void * modeVP);
 

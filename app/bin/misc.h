@@ -87,9 +87,9 @@ extern int NoticeMessage2( int, const char *, const char*, const char *, ... );
 extern bool Confirm( char *, doSaveCallBack_p );
 extern void DoQuit( void * unused );
 extern void DoClear( void * unused );
-extern void MapWindowToggleShow( void * unused );
+
 void ToggleSetInMenuToolbar(wControl_p menuItem, wControl_p toolbarButton, wBool_t newState);
-extern void MapWindowShow( int state );
+
 extern void DoShowWindow(int index, const char * name, void * data);
 
 extern void wShow( wControl_p window);

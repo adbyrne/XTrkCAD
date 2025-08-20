@@ -307,8 +307,11 @@ void wWinShow(
     wControl_p win,		/* Window */
     wBool_t show)		/* Command */
 {
-    if (show) {
+    wBool_t newState = show & ~DONTGRABFOCUS;
+    if (newState) {
+
         gtk_widget_show(win->widget);
+
     }
     else {
         gtk_widget_hide(win->widget);

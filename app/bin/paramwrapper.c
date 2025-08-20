@@ -169,6 +169,7 @@ EXPORT void ParamMenuPush(void* dp)
 {
     printf("%s:%d Old Param function %s used\n", __FILE__, __LINE__, __func__);
     //ParamMenuPushOrig(dp);
+    FormMenuPush(dp);
 }
 
 EXPORT wBool_t ParamCheckInputs(

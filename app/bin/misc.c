@@ -28,8 +28,9 @@
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
+#include "form.h"
 #include "layout.h"
-#include "param.h"
+#include "mapwindow.h"
 #include "include/paramfilelist.h"
 #include "paths.h"
 #include "smalldlg.h"
@@ -513,42 +514,8 @@ EXPORT void DoClear(void * unused)
 	Confirm(_("Clear"), DoClearAfter);
 }
 
-/**
- * Toggle visibility state of map window. Additional flag to avoid recursive calls while
- * UI elements in toolbar and menu are sync'ed
- */
 
-EXPORT void MapWindowToggleShow(void * unused)
-{
-	static int inTransition = FALSE;
 
-	if (!inTransition) {
-		inTransition = TRUE;
-		MapWindowShow(!mapVisible);
-		inTransition = FALSE;
-	}
-}
-
-/**
- * Set visibility state of map window.
- *
- * \param state IN TRUE if visible, FALSE if hidden
- */
-
-EXPORT void MapWindowShow(int state)
-{
-	mapVisible = state;
-	wPrefSetInteger("misc", "mapVisible", mapVisible);
-	wWinShow(mapW, mapVisible | DONTGRABFOCUS);
-
-	if (mapVisible) {
-		DoChangeNotification(CHANGE_MAP);
-	}
-	if (mapW) {
-		wWinShow(mapW, mapVisible);
-	}
-	ToggleSetInMenuToolbar(mapShowMI, mapShowB, mapVisible);
-}
 
 
 EXPORT void DoShowWindow(int index, const char * name, void * data)
@@ -925,9 +892,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 		return NULL;
 	}
 
-	wWinShow(mainW, TRUE);
-
-	wSetGeometry(mainW, displayWidth/2, displayWidth, displayHeight/2,
+ 	wSetGeometry(mainW, displayWidth/2, displayWidth, displayHeight/2,
 	             displayHeight, -1, -1, -1);
 	InitAppDefaults();
 
@@ -1030,7 +995,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 
 	CommandInit();
 	LOG1(log_init, ( "Reset\n" ))
-	//Reset();
+	Reset();
 
 	/*
 	 * SCALE
@@ -1057,11 +1022,8 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	EnableCommands();
 	LOG1(log_init, ( "Initialization complete\n" ))
 	wSetSplashInfo(_("Initialization complete"));
-	//DoChangeNotification( CHANGE_MAIN | CHANGE_MAP);
+	DoChangeNotification( CHANGE_MAIN | CHANGE_MAP);
 
-	wWinShow(mainW, TRUE);
-	wWinShow(mapW, mapVisible | DONTGRABFOCUS);
-	
 	wDestroySplash();
 	
 	/* this has to be called before ShowTip() */
@@ -1108,7 +1070,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	}
 	wFlush();
 	wWinShow(mainW, TRUE); 
-	//MainRedraw();
+	MainRedraw();
 	inMainW = FALSE;
 	if ( bRunTests ) {
 		int nFail = RegressionTestAll();

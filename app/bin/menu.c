@@ -32,6 +32,7 @@
 #include <form.h>
 #include "icons.h"
 #include "layout.h"
+#include "mapwindow.h"
 #include "paths.h"
 #include "include/problemrep.h"
 #include "smalldlg.h"
@@ -656,7 +657,7 @@ wControl_p AddToolbarButton(const char* helpStr, wIcon_p icon, long options,
 			if (action != DoCommandB && menuPG.paramPtr[inx].valueP == I2VP(action)) {
 				// button is used to trigger a menu entry
 				context = &menuPG.paramPtr[inx];
-				action = ParamMenuPush;
+				action = FormMenuPush;
 				menuPG.paramPtr[inx].context = I2VP(buttonCnt);
 				menuPG.paramPtr[inx].option |= IC_PLAYBACK_PUSH;
 				break;
@@ -1168,13 +1169,9 @@ EXPORT void CreateMenus(void)
 	                              0, magneticSnap,
 	                              MagneticSnapToggle, NULL);
 
-	// visibility toggle for map window
-	// get the start value
-	long mapVisible_long;
-	wPrefGetInteger("misc", "mapVisible", (long *) &mapVisible_long, 1);
-	mapVisible = mapVisible_long ? TRUE : FALSE;
+	
 	mapShowMI = wMenuToggleCreate(viewM, "cmdMapShow", _("Show/Hide Map"),
-	                              ACCL_MAPSHOW, mapVisible,
+	                              ACCL_MAPSHOW, MapGetVisiblePref(),
 	                              MapWindowToggleShow, NULL);
 
 	wMenuSeparatorCreate(viewM);
