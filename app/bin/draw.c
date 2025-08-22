@@ -20,16 +20,18 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include "common-ui.h"
 #include "cselect.h"
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
-#include "icons.h"
-#include "misc.h"
 #include "form.h"
-#include "track.h"
+#include "icons.h"
 #include "layout.h"
-#include "common-ui.h"
+#include "mapwindow.h"
+#include "misc.h"
+#include "track.h"
+
 #include "include/toolbar.h"
 
 #define NUM_INFOCTL (4)
@@ -53,7 +55,7 @@ static void DDrawPoly(
         wDrawColor color,
         wDrawWidth width,
         drawFill_e eFillOpt );
-static void DrawMapBoundingBox( BOOL_T set );
+
 static void DrawTicks( drawCmd_p d, coOrd size );
 static void DoZoom( void * pScaleVP );
 
@@ -61,8 +63,9 @@ EXPORT int log_pan = 0;
 static int log_zoom = 0;
 static int log_mouse = 0;
 static int log_redraw = 0;
+static int log_size = 0;
 static int log_timemainredraw = 0;
-static int log_mapsize = 0;
+
 
 static wFontSize_t drawMaxTextFontSize = 100;
 
@@ -123,8 +126,6 @@ EXPORT DIST_T pixelBins = 80;
  */
 
 
-EXPORT wControl_p mapW;
-EXPORT BOOL_T mapVisible;
 EXPORT BOOL_T magneticSnap;
 
 EXPORT wDrawColor markerColor;
@@ -1162,10 +1163,6 @@ EXPORT drawCmd_t tempD = {
 	NULL, &screenDrawFuncs, DC_TICKS|DC_TEMP, INIT_MAIN_SCALE, 0.0, {0.0,0.0}, {0.0,0.0}, MainPix2CoOrd, MainCoOrd2Pix, 96.0
 };
 
-EXPORT drawCmd_t mapD = {
-	NULL, &screenDrawFuncs, DC_SIMPLE, INIT_MAP_SCALE, 0.0, {0.0,0.0}, {96.0,48.0}, Pix2CoOrd, CoOrd2Pix, 96.0
-};
-
 
 /*****************************************************************************
  *
@@ -1184,125 +1181,10 @@ static wControl_p curInfoControl[NUM_INFOCTL];
 static wWinPix_t curInfoLabelWidth[NUM_INFOCTL];
 
 
-/**
- * Map Handling
- *
- */
-
-/**
- * Redraw the Map window using the Scale derived from the Window size and Room size
- * \param bd [inout] Map canvas - not used
- * \param pContext [inout] Param context - not used
- * \param px, py [in] canvas size
- */
-static void MapRedraw(
-        wDraw_p bd, void * pContex, wWinPix_t px, wWinPix_t py )
-{
-	if (inPlaybackQuit) {
-		return;
-	}
-	static int cMR = 0;
-	LOG( log_redraw, 2, ( "MapRedraw: %d\n", cMR++ ) );
-	if (!mapVisible) {
-		return;
-	}
-	if (delayUpdate) {
-		wDrawDelayUpdate( mapD.d, TRUE );
-	}
-	//wSetCursor( mapD.d, wCursorWait );
-	wBool_t bTemp = wDrawSetTempMode( mapD.d, FALSE );
-	if ( bTemp ) {
-		printf( "MapRedraw TempMode\n" );
-	}
-
-	if ( log_mapsize >= 2 ) {
-		lprintf( "    MapRedraw: parm=%ldx%ld", px, py );
-		wWinPix_t tx, ty;
-		if ( mapW ) {
-			wWinGetSize( mapW, &tx, &ty );
-			lprintf( " win=%ldx%ld", tx, ty );
-		}
-		if ( mapD.d ) {
-			wDrawGetSize( mapD.d, &tx, &ty );
-			lprintf( " draw=%ldx%ld", tx, ty );
-		}
-		lprintf( "\n" );
-	}
-
-	// Find new mapD.scale
-	if ( ( px <= 0 || py <= 0 ) && mapD.d ) {
-		wDrawGetSize( mapD.d, &px, &py );
-		px += 2;
-		py += 2;
-	}
-	if ( px > 0 && py > 0 ) {
-		FLOAT_T scaleX = mapD.size.x * mapD.dpi / px;
-		FLOAT_T scaleY = mapD.size.y * mapD.dpi / py;
-		FLOAT_T scale;
-
-		// Find largest scale
-		if (scaleX>scaleY) { scale = scaleX; }
-		else { scale = scaleY; }
-
-		if (scale > MAX_MAIN_SCALE) { scale = MAX_MAIN_SCALE; }
-		if (scale < MIN_MAIN_MACRO) { scale = MIN_MAIN_MACRO; }
-
-		scale = ceil( scale );	// Round up
-		LOG( log_mapsize, 2,
-		     ( "      %ldx%ld mapD.scale=%0.3f, scaleX=%0.3f scaleY=%0.3f scale=%0.3f\n",
-		       px, py, mapD.scale, scaleX, scaleY, scale ) );
-		mapD.scale = scale;
-	} else {
-		LOG( log_mapsize, 2, ( "  0x0 mapD.scale=%0.3f\n", mapD.scale ) );
-	}
-	wDrawClear( mapD.d );
-	DrawTracks( &mapD, mapD.scale, mapD.orig, mapD.size );
-	DrawMapBoundingBox( TRUE );
-	//wSetCursor( mapD.d, defaultCursor );
-	wDrawSetTempMode( mapD.d, bTemp );
-	wDrawDelayUpdate( mapD.d, FALSE );
-}
-
-
-/*
- * Set mapW size to fit the rescaled map
- *
- * \param reset IN
- */
-static int mapBorderH = 24;
-static int mapBorderW = 24;
-static void ChangeMapScale()
-{
-	wWinPix_t w, h;
-	FLOAT_T fw, fh;
-
-	// Restrict map size to 1/2 of screen
-	FLOAT_T fScaleW = mapD.size.x / ( displayWidth * 0.5 / mapD.dpi );
-	FLOAT_T fScaleH = mapD.size.y / ( displayHeight * 0.5 / mapD.dpi );
-	FLOAT_T fScale = ceil( max( fScaleW, fScaleH ) );
-	if ( fScale > mapD.scale ) {
-		LOG( log_mapsize, 2, ( "  ChangeMapScale incr scale from %0.3f to %0.3f\n",
-		                       mapD.scale, fScale ) );
-		mapD.scale = fScale;
-	}
-
-	fw = (((mapD.size.x/mapD.scale)*mapD.dpi) + 0.5)+2;
-	fh = (((mapD.size.y/mapD.scale)*mapD.dpi) + 0.5)+2;
-
-	w = (wWinPix_t)fw;
-	h = (wWinPix_t)fh;
-	LOG( log_mapsize, 2, ( "  ChangeMapScale mapD.scale=%0.3f w=%ld h=%ld\n",
-	                       mapD.scale, w, h ) );
-	wWinSetSize( mapW, w+mapBorderW, h+mapBorderH );
-	// This should be done by wWinSetSize
-	wDrawSetSize( mapD.d, w, h, NULL );
-	MapRedraw( mapD.d, NULL, 0, 0 );
-}
-
 
 EXPORT BOOL_T SetRoomSize( coOrd size )
 {
-	LOG( log_mapsize, 2, ( "SetRoomSize NEW:%0.3fx%0.3f OLD:%0.3fx%0.3f\n", size.x,
+	LOG( log_size, 2, ( "SetRoomSize NEW:%0.3fx%0.3f OLD:%0.3fx%0.3f\n", size.x,
 	                       size.y, mapD.size.x, mapD.size.y ) );
 	SetLayoutRoomSize(size);
 	if (size.x < 1.0) {
@@ -1322,7 +1204,7 @@ EXPORT BOOL_T SetRoomSize( coOrd size )
 	if ( mapW == NULL) {
 		return TRUE;
 	}
-	ChangeMapScale();
+	MapChangeScale();
 	return TRUE;
 }
 
@@ -1507,7 +1389,7 @@ EXPORT void MainLayout(
 	tempD.size = mainD.size;
 	mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 	mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
-	DrawMapBoundingBox( TRUE );
+	MapDrawBoundingBox( TRUE );
 
 	if ( bRedraw ) {
 		MainRedraw();
@@ -1573,7 +1455,7 @@ void MainProc( wControl_p win, winProcEvent e, void * refresh, void * data )
 			wPrefSetInteger( "draw", "mainwidth", (int)width );
 			wPrefSetInteger( "draw", "mainheight", (int)height );
 			wDrawSetTempMode( mainD.d, bTemp );
-		} else	{ DrawMapBoundingBox( TRUE ); }
+		} else	{ MapDrawBoundingBox( TRUE ); }
 		break;
 	case wState_e:
 		wPrefSetInteger( "draw", "maximized", wWinIsMaximized(win) );
@@ -1593,8 +1475,8 @@ void MainProc( wControl_p win, winProcEvent e, void * refresh, void * data )
 
 EXPORT void DoRedraw( void )
 {
-	LOG( log_mapsize, 2, ( "DoRedraw\n" ) );
-	ChangeMapScale();
+	LOG( log_size, 2, ( "DoRedraw\n" ) );
+	MapChangeScale();
 	MainRedraw(); // DoRedraw
 }
 
@@ -1909,17 +1791,6 @@ static void DrawTicks( drawCmd_p d, coOrd size )
 
 EXPORT coOrd mainCenter;
 
-static void DrawMapBoundingBox( BOOL_T set )
-{
-	CHECK( mainD.d );
-	CHECK( mapD.d );
-	if (!mapVisible) {
-		return;
-	}
-	DrawHilight( &mapD, mainD.orig, mainD.size, TRUE );
-}
-
-
 static void ConstraintOrig( coOrd * orig, coOrd size, wBool_t bNoBorder,
                             wBool_t bRound  )
 {
@@ -2094,7 +1965,7 @@ static int NearestScaleInx ( DIST_T scale, BOOL_T larger )
  * \param scale IN new scale
  */
 
-static void DoNewScale( DIST_T scale )
+void DoNewScale( DIST_T scale )
 {
 	char tmp[20];
 
@@ -2342,7 +2213,7 @@ EXPORT void PanHere(void * mode)
 }
 
 
-static int DoPanKeyAction( wAction_t action )
+int DoPanKeyAction( wAction_t action )
 {
 	switch ((wAccelKey_e)(action>>8)&0xFF) {
 	case wAccelKey_Del:
@@ -2411,121 +2282,6 @@ static int DoPanKeyAction( wAction_t action )
 		return 0;
 	}
 	return 0;
-}
-
-
-static void DoMapPan( wAction_t action, coOrd pos )
-{
-	static coOrd mapOrig;
-	static coOrd size;
-	static DIST_T xscale, yscale;
-	static enum { noPan, movePan, resizePan } mode = noPan;
-	wDrawPix_t x, y;
-
-	switch (action & 0xFF) {
-
-	case C_DOWN:
-		if ( mode == noPan ) {
-			mode = movePan;
-		} else {
-			break;
-		}
-	case C_MOVE:
-		if ( mode != movePan ) {
-			break;
-		}
-//		mainD.orig.x = pos.x - mainD.size.x/2.0;
-//		mainD.orig.y = pos.y - mainD.size.y/2.0;
-		panCenter = pos;
-		LOG( log_pan, 1, ( "%s = [ %0.3f, %0.3f ]\n", action == C_DOWN? "START":"MOVE",
-		                   mainD.orig.x, mainD.orig.y ) )
-		PanHere( I2VP(2));
-		break;
-	case C_UP:
-		if ( mode != movePan ) {
-			break;
-		}
-		panCenter = pos;
-		PanHere( I2VP(0));
-		LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", mainD.orig.x, mainD.orig.y ) )
-		mode = noPan;
-		break;
-
-	case C_RDOWN:
-		if ( mode == noPan ) {
-			mode = resizePan;
-		} else {
-			break;
-		}
-		mapOrig = pos;
-		size.x = mainD.size.x/mainD.scale;  //How big screen?
-		size.y = mainD.size.y/mainD.scale;
-		xscale = mainD.scale; //start at current
-		panCenter = pos;
-		LOG( log_pan, 1, ( "START %0.3fx%0.3f %0.3f+%0.3f\n", mapOrig.x, mapOrig.y,
-		                   size.x, size.y ) )
-		break;
-
-	case C_RMOVE:
-		if ( mode != resizePan ) {
-			break;
-		}
-		if (pos.x < 0) {
-			pos.x = 0;
-		}
-		if (pos.x > mapD.size.x) {
-			pos.x = mapD.size.x;
-		}
-		if (pos.y < 0) {
-			pos.y = 0;
-		}
-		if (pos.y > mapD.size.y) {
-			pos.y = mapD.size.y;
-		}
-
-		xscale = fabs((pos.x-mapOrig.x)*2.0/size.x);
-		yscale = fabs((pos.y-mapOrig.y)*2.0/size.y);
-		if (xscale < yscale) {
-			xscale = yscale;
-		}
-		xscale = ceil( xscale );
-
-		if (xscale < 0.01) {
-			xscale = 0.01;
-		}
-		if (xscale > 64) {
-			xscale = 64;
-		}
-
-		mainD.size.x = size.x * xscale;
-		mainD.size.y = size.y * xscale;
-		mainD.orig.x = mapOrig.x - mainD.size.x / 2.0;
-		mainD.orig.y = mapOrig.y - mainD.size.y / 2.0;
-		tempD.scale = mainD.scale = xscale;
-		PanHere( I2VP(2));
-		LOG( log_pan, 1, ( "MOVE SCL:%0.3f %0.3fx%0.3f %0.3f+%0.3f\n", xscale,
-		                   mainD.orig.x, mainD.orig.y, mainD.size.x, mainD.size.y ) )
-		InfoScale();
-		break;
-
-	case C_RUP:
-		if ( mode != resizePan ) {
-			break;
-		}
-		DoNewScale( xscale );
-		mode = noPan;
-		break;
-
-	case wActionExtKey:
-		mainD.CoOrd2Pix(&mainD,pos,&x,&y);
-		DoPanKeyAction( action );
-		mainD.Pix2CoOrd( &mainD, x, y, &pos );
-		InfoPos( pos );
-		return;
-
-	default:
-		return;
-	}
 }
 
 
@@ -2958,13 +2714,7 @@ static wBool_t PlaybackKey( char * line )
  *
  */
 
-static paramDrawData_t mapDrawData = { 50, 50, MapRedraw, DoMapPan, &mapD };
-static paramData_t mapPLs[] = {
-	{	PD_DRAW, NULL, "canvas", PDO_DLGRESIZE, &mapDrawData }
-};
 
-#define MAPCANVASCONTROL mapPLs[0].control
-static paramGroup_t mapPG = { "map", PGO_NODEFAULTPROC | PGO_FULLDIALOGFROMBUILDER, mapPLs, COUNT( mapPLs ) };
 
 
 static void DrawChange( long changes )
@@ -2976,8 +2726,8 @@ static void DrawChange( long changes )
 		SetInfoBar();
 	}
 	if (changes & CHANGE_MAP) {
-		LOG( log_mapsize, 2, ( "CHANGE_MAP: mapD.scale=%0.3f\n", mapD.scale ) );
-		ChangeMapScale();
+		LOG( log_size, 2, ( "CHANGE_MAP: mapD.scale=%0.3f\n", mapD.scale ) );
+		MapChangeScale();
 	}
 }
 
@@ -3044,7 +2794,7 @@ EXPORT void DrawInit( int initialZoom )
 	log_mouse = LogFindIndex( "mouse" );
 	log_redraw = LogFindIndex( "redraw" );
 	log_timemainredraw = LogFindIndex( "timemainredraw" );
-	log_mapsize = LogFindIndex( "mapsize" );
+	log_size = LogFindIndex( "mapsize" );
 
 //	InitColor();
 	wWinGetSize( mainW, &w, &h );
@@ -3081,25 +2831,16 @@ EXPORT void DrawInit( int initialZoom )
 	SetMainSize();
 	panCenter.x = mainD.size.x/2 +mainD.orig.x;
 	panCenter.y = mainD.size.y/2 +mainD.orig.y;
-	/*w = (wWinPix_t)((mapD.size.x/mapD.scale)*mainD.dpi + 0.5)+2;*/
-	/*h = (wWinPix_t)((mapD.size.y/mapD.scale)*mainD.dpi + 0.5)+2;*/
-	ParamRegister( &mapPG );
-	LOG( log_mapsize, 2, ( "DrawInit/ParamCreateDialog(&mapPG\n" ) );
 
-	mapW = FormCreateDialog( &mapPG, MakeWindowTitle(_("Map")), 
-							NULL, NULL, 
-							NULL, NULL,
-	                         FALSE, F_RESIZE, NULL );
-	mapD.d = MAPCANVASCONTROL;
-	//ChangeMapScale();
+	MapWindowCreate();
 
 	AddPlaybackProc( "MOUSE ", (playbackProc_p)PlaybackMain, NULL );
 	AddPlaybackProc( "KEY ", (playbackProc_p)PlaybackKey, NULL );
 
 	rulerFp = wStandardFont( F_HELV, FALSE, FALSE );
 
-	/** \todo deactivated temporarily, reenable at the end of main window creation */
-	//SetZoomRadio( mainD.scale );
+	// \todo Fix function
+	// SetZoomRadio( mainD.scale );
 	InfoScale();
 	SetInfoBar();
 	InfoPos( zero );

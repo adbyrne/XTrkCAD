@@ -22,12 +22,27 @@
  */
 
 #include <wlib.h>
-#include <param.h>
+//#include <param.h>
 #include <form.h>
 #include "formprivate.h"
 #include <dynstring.h>
 
 #define DO_MACRO_RECORD(p) (((p)->option & PDO_NORECORD) == 0 && (p)->group->nameStr && (p)->nameStr)
+
+void FormMenuPush(void* dp)
+{
+	paramData_p p = (paramData_p)dp;
+
+	CHECK(dp != NULL);
+
+	const char* groupNameStr = p->group ? p->group->nameStr : "menu";
+	if (((p)->option & PDO_NORECORD) == 0) {
+		FormMacroRecord("PARAMETER %s %s\n", groupNameStr, p->nameStr);
+	}
+	if ((p->option & PDO_NOPSHACT) == 0 && p->valueP) {
+		((wMenuCallBack_p)(p->valueP))(p->context);
+	}
+}
 
 static void ColorSelectPush(void* dp, wDrawColor dc)
 {

@@ -41,15 +41,15 @@ EXPORT void FormControlActive(
 }
 
 
-
-EXPORT void FormMenuPush(void* dp)
-{
-	paramData_p p = (paramData_p)dp;
-	const char* groupNameStr = p->group ? p->group->nameStr : "misc";
-	if ((p->option & PDO_NORECORD) == 0 && groupNameStr && p->nameStr) {
-		FormMacroRecord("PARAMETER %s %s\n", groupNameStr, p->nameStr);
-	}
-	if ((p->option & PDO_NOPSHACT) == 0 && p->valueP) {
-		((wMenuCallBack_p)(p->valueP))(p->context);
-	}
-}
+//
+//EXPORT void FormMenuPush(void* dp)
+//{
+//	paramData_p p = (paramData_p)dp;
+//	const char* groupNameStr = p->group ? p->group->nameStr : "misc";
+//	if ((p->option & PDO_NORECORD) == 0 && groupNameStr && p->nameStr) {
+//		FormMacroRecord("PARAMETER %s %s\n", groupNameStr, p->nameStr);
+//	}
+//	if ((p->option & PDO_NOPSHACT) == 0 && p->valueP) {
+//		((wMenuCallBack_p)(p->valueP))(p->context);
+//	}
+//}

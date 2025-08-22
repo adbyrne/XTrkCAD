@@ -105,7 +105,6 @@ target_sources(xtrkcad-lib
     celev.c
     cgroup.c
     chndldto.c
-
     cjoin.c
     cjoin.h
     cmisc.c
@@ -181,6 +180,8 @@ target_sources(xtrkcad-lib
     macro.c
     manifest.c
     manifest.h
+    mapwindow.c
+    mapwindow.h
 	menu.h
 	menu.c
     misc.c
