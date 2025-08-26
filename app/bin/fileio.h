@@ -107,6 +107,10 @@ void DoParamFiles(void * unused);
 
 int LoadTracks( int cnt, char **fileName, void *data );
 
+void AddToRecentFiles(char* displayFileName, char* fullFileName);
+
+void SaveRecentFileList();
+
 void SaveState( void );
 void DoSave( void * doAfterSaveVP );
 void DoSaveAs( void * doAfterSaveVP );

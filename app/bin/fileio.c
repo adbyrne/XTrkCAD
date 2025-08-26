@@ -104,6 +104,9 @@ EXPORT char * curSubContents;
 
 #define PARAM_DEMO (-1)
 
+#define RECENT_FILE_SECTION "recentfiles"
+#define RECENT_FILE_KEY "file"
+
 EXPORT dynArr_t paramProc_da;
 
 
@@ -884,19 +887,13 @@ int LoadTracks(
 	if (loadXTC
 	    && ReadTrackFile( full_path, FindFilename( fileName[0]), TRUE, TRUE, TRUE )) {
 
-		nameOfFile = NULL;
-		extOfFile = NULL;
+		//nameOfFile = NULL;
+		//extOfFile = NULL;
 		SetCurrentPath( LAYOUTPATHKEY, copyOfFileName );
 		SetLayoutFullPath(copyOfFileName);
 		SetWindowTitle();
 
-		if ( ! bExample && (nameOfFile != NULL) ) {
-			char * copyFile = strdup(fileName[0]);
-			char * listName = FindFilename(strdup(
-			                                       fileName[0]));  //Make sure the list name is new
-			wMenuListAdd( fileList_ml, 0, listName, copyFile );
-		}
-
+		AddToRecentFiles(nameOfFile, fileName[0]);
 
 		ResolveIndex();
 		LOG( log_timereadfile, 1, ( "Read time (%s) = %lu mS \n", fileName[0],
@@ -917,6 +914,37 @@ int LoadTracks(
 	Reset();
 	wSetCursor( mainD.d, defaultCursor );
 	return TRUE;
+}
+
+void AddToRecentFiles(char* displayFileName, char* fullFileName)
+{
+	if (!bExample && (displayFileName != NULL)) {
+		char* copyFile = MyStrdup(fullFileName);
+		char* listName = FindFilename(strdup(fullFileName));
+		wMenuListAdd(fileList_ml, 0, listName, copyFile);
+
+		SaveRecentFileList();
+	}
+}
+
+void
+SaveRecentFileList()
+{
+	int count = wMenuListGetCount(fileList_ml);		//index is zero based, 
+	DynString key;
+ 	DynStringMalloc(&key, 0);
+
+	if (count) {
+		for (int index = 0; index < count; index++) {
+			void* attributes;
+
+			if (wMenuListGet(fileList_ml, index, &attributes)) {
+				DynStringPrintf(&key, RECENT_FILE_KEY "%d", count - index -1 );
+				wPrefSetString(RECENT_FILE_SECTION, DynStringToCStr(&key), (char*)attributes);
+			}
+		}
+	}
+	DynStringFree(&key);
 }
 
 /**
@@ -1163,10 +1191,6 @@ static int SaveTracks(
 EXPORT void SaveState(void)
 {
 	wWinPix_t width, height;
-	const char * fileName;
-	void * pathName;
-	char file[6];
-	int inx;
 
 	wWinGetSize(mainW, &width, &height);
 	wPrefSetInteger("draw", "mainwidth", (int)width);
@@ -1177,19 +1201,7 @@ EXPORT void SaveState(void)
 	wPrefSetString( "misc", "lastlayout", GetLayoutFullPath());
 	wPrefSetInteger( "misc", "lastlayoutexample", bExample );
 
-	if (fileList_ml) {
-		strcpy(file, "file");
-		file[5] = 0;
-		for (inx = 0; inx < NUM_FILELIST; inx++) {
-			fileName = wMenuListGet(fileList_ml, inx, &pathName);
-			if (fileName) {
-				file[4] = '0' + inx;
-				sprintf(message, "%s", (char* )pathName);
-				wPrefSetString("filelist", file, message);
-			}
-		}
-	}
-	wPrefFlush("");
+ 	wPrefFlush("");
 }
 static void SetAutoSave()
 {
@@ -1711,14 +1723,16 @@ EXPORT void EditClone( void * unused )
 
 EXPORT void LoadFileList(void)
 {
-	char file[6];
-	int inx;
+	DynString key;
 	const char * cp;
 	const char *fileName, *pathName;
-	strcpy(file, "fileX");
-	for (inx = NUM_FILELIST - 1; inx >= 0; inx--) {
-		file[4] = '0' + inx;
-		cp = wPrefGetString("filelist", file);
+
+	DynStringMalloc(&key, 0);
+
+	for (int inx = 0; inx <NUM_FILELIST; inx++) {
+
+		DynStringPrintf(&key, RECENT_FILE_KEY "%d", inx);
+		cp = wPrefGetString(RECENT_FILE_SECTION, DynStringToCStr(&key));
 		if (!cp) {
 			continue;
 		}
@@ -1728,6 +1742,8 @@ EXPORT void LoadFileList(void)
 			wMenuListAdd(fileList_ml, 0, fileName, pathName);
 		}
 	}
+
+	DynStringFree(&key);
 }
 
 

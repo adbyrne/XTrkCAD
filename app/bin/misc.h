@@ -289,7 +289,7 @@ void LogPrintf( const char *, ... );
 #define LOG1( DBINX, DBMSG ) LOG( DBINX, 1, DBMSG )
 #define LOGNAME( DBNAME, DBMSG ) LOG( LogFindIndex( DBNAME ), DBMSG )
 
-#define NUM_FILELIST (5)
+#define NUM_FILELIST (10)
 #define lprintf LogPrintf
 
 /* track.c */

@@ -1027,8 +1027,13 @@ EXPORT void CreateMenus(void)
 	                   DoNote, 0, NULL);
 
 	wMenuSeparatorCreate(fileM);
-	fileList_ml = wMenuListCreate(fileM, "menuFileList", NEWEST_TOP, NUM_FILELIST,
-	                              ChkFileList);
+
+	wMenu_p recentuseMenu = wMenuMenuCreate(fileM, "menuRecentlyUsedFiles", _("Recent files"));
+	fileList_ml = wMenuListCreate(recentuseMenu, "fileListMenu", NEWEST_TOP, NUM_FILELIST,
+		ChkFileList);
+
+	//fileList_ml = wMenuListCreate(fileM, "menuFileList", NEWEST_TOP, NUM_FILELIST,
+	//                              ChkFileList);
 	wMenuSeparatorCreate(fileM);
 	wMenuPushCreate(fileM, "quit", _("E&xit"), 0,
 	                DoQuit, NULL);

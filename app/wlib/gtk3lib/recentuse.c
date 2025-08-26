@@ -250,20 +250,22 @@ void wMenuListDelete(
  * \return    item label
  */
 
-
-/**  \TODO: Test saving of recent file list to preferences */
 const char*
-wMenuListGet(wControl_p ml, unsigned int index, void** attributes)
+wMenuListGet(wControl_p ml, int index, void** attributes)
 {
-	//struct recentuse* ru = CONTROL_GET_ATTRIBUTES_PTR(ml, recentuse);
+	struct recentuse* ru = CONTROL_GET_ATTRIBUTES_PTR(ml, recentuse);
+	int count = MRUGetCount(ru->mrulist);
 
-	//if (index < ru->current) {
-	//	gpointer data = g_slist_nth_data(ru->elements, index);
-	//	if (attributes) {
-	//		*attributes = (void *)((struct listentry*)data)->context;
-	//	}
-	//	return(((struct listentry*)data)->label);
-	//}
+	if(index < count) {
+		void* entry;
+
+		entry = MRUGetNth(ru->mrulist, index);
+		if (entry) {
+			*attributes = (void*)((struct listentry*)entry)->context;
+		}
+
+		return(((struct listentry*)entry)->context);
+	}
 	return(NULL);
 }
 
@@ -293,4 +295,14 @@ void wMenuListClear(
 	}
 
 	MRUClear(ru->mrulist);
+}
+
+int
+wMenuListGetCount(wControl_p ml)
+{
+	g_assert(ml);
+
+	struct recentuse* ru = CONTROL_GET_ATTRIBUTES_PTR(ml, recentuse);
+
+	return(MRUGetCount(ru->mrulist));
 }

@@ -1171,7 +1171,7 @@ const char* wMenuListGet(wControl_p ml, unsigned int index, void** attributes);
 void wMenuListClear(wControl_p ml);
 void wMenuListDelete(wControl_p ml, const char* labelStr);
 const char* wMenuListGet(wControl_p ml, unsigned int index, void** attributes);
-
+int wMenuListGetCount(wControl_p ml);
 
 wControl_p wMenuToggleCreate(
     wControl_p m,
