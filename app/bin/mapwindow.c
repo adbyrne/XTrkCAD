@@ -368,6 +368,8 @@ MapWindowCreate()
 	                        FALSE, F_RESIZE, NULL);
 	mapD.d = MAPCANVASCONTROL;
 
+	MapWindowShow(FALSE);
+
 	/** \TODO Uncomment and enable ChangeMapScale() */
 	//ChangeMapScale();
 

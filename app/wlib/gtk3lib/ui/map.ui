@@ -4,6 +4,8 @@
   <object class="GtkWindow" id="map">
     <property name="can-focus">False</property>
     <property name="has-resize-grip">True</property>
+    <property name="visible">False</property>
+    <property name="deletable">False</property>
     <child>
       <object class="GtkDrawingArea" id="canvas">
         <property name="visible">True</property>

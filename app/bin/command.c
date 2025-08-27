@@ -157,7 +157,7 @@ EXPORT void Reset(void)
 	if (commandList[curCommand].buttInx >= 0) {
 		ToolbarButtonBusy(commandList[curCommand].buttInx, FALSE);
 	}
-	curCommand = (preSelect ? selectCmdInx : describeCmdInx);
+ 	curCommand = (preSelect ? selectCmdInx : describeCmdInx);
 	wSetCursor(mainD.d, preSelect ? defaultCursor : wCursorQuestion);
 	commandContext = commandList[curCommand].context;
 	if (commandList[curCommand].buttInx >= 0) {
@@ -642,6 +642,14 @@ EXPORT void ResetIfNotSticky(void)
 EXPORT void CommandInit( void )
 {
 	curCommand = describeCmdInx;
+	//Get command options
+
+	wPrefGetInteger("cmdopt", "preselect", &preSelect, preSelect);
+	wPrefGetInteger("cmdopt", "rightclickmode", &rightClickMode,
+		rightClickMode);
+	wPrefGetInteger("cmdopt", "selectmode", &selectMode, selectMode);
+	wPrefGetInteger("cmdopt", "selectzero", &selectZero, selectZero);
+
 	commandContext = commandList[curCommand].context;
 	log_command = LogFindIndex( "command" );
 
