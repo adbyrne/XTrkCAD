@@ -1,5 +1,5 @@
 /** \file dcar.c
- * TRAIN
+ * Car Management
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -31,6 +31,10 @@
 #include "include/paramfile.h"
 #include "common-ui.h"
 
+#include "listelem.h"
+#include "tabstring.h"
+#include "transform_pts.h"
+
 static int log_carList;
 static int log_carInvList;
 static int log_carDlgState;
@@ -48,13 +52,7 @@ static BOOL_T carProtoListChanged;
 static void CarInvListAdd( carItem_p item );
 static void CarInvListUpdate( carItem_p item );
 
-#define T_MANUF			(0)
-#define T_PROTO			(1)
-#define T_DESC			(2)
-#define T_PART			(3)
-#define T_ROADNAME		(4)
-#define T_REPMARK		(5)
-#define T_NUMBER		(6)
+
 
 typedef struct {
 	char * name;
@@ -111,199 +109,7 @@ struct carItem_t {
 };
 
 
-/*
- *  Utilities
- */
 
-
-
-typedef struct {
-	char * ptr;
-	int len;
-} tabString_t, *tabString_p;
-
-
-static void TabStringExtract(
-        char * string,
-        int count,
-        tabString_t * tabs )
-{
-	int inx;
-	char * next = string;
-
-	for ( inx=0; inx<count; inx++ ) {
-		tabs[inx].ptr = string;
-		if ( next ) {
-			next = strchr( string, '\t' );
-		}
-		if ( next ) {
-			tabs[inx].len = (int)(next-string);
-			string = next+1;
-		} else {
-			tabs[inx].len = (int)strlen( string );
-			string += tabs[inx].len;
-		}
-	}
-	if ( tabs[T_MANUF].len == 0 ) {
-		tabs[T_MANUF].len = 7;
-		tabs[T_MANUF].ptr = N_("Unknown");
-	}
-}
-
-
-static char * TabStringDup(
-        tabString_t * tab )
-{
-	char * ret;
-	ret = MyMalloc( tab->len+1 );
-	memcpy( ret, tab->ptr, tab->len );
-	ret[tab->len] = '\0';
-	return ret;
-}
-
-
-static char * TabStringCpy(
-        char * dst,
-        tabString_t * tab )
-{
-	memcpy( dst, tab->ptr, tab->len );
-	dst[tab->len] = '\0';
-	return dst+tab->len;
-}
-
-
-static int TabStringCmp(
-        char * src,
-        tabString_t * tab )
-{
-	size_t srclen = strlen(src);
-	size_t len = srclen;
-	int rc;
-	if ( len > tab->len ) {
-		len = tab->len;
-	}
-	rc = strncasecmp( src, tab->ptr, len );
-	if ( rc != 0 || srclen == tab->len ) {
-		return rc;
-	} else if ( srclen > tab->len ) {
-		return 1;
-	} else {
-		return -1;
-	}
-}
-
-
-static long TabGetLong(
-        tabString_t * tab )
-{
-	char old_c;
-	long val;
-	if ( tab->len <= 0 ) {
-		return 0;
-	}
-	old_c = tab->ptr[tab->len];
-	tab->ptr[tab->len] = '\0';
-	val = atol( tab->ptr );
-	tab->ptr[tab->len] = old_c;
-	return val;
-}
-
-
-static FLOAT_T TabGetFloat(
-        tabString_t * tab )
-{
-	char old_c;
-	FLOAT_T val;
-	if ( tab->len <= 0 ) {
-		return 0.0;
-	}
-	old_c = tab->ptr[tab->len];
-	tab->ptr[tab->len] = '\0';
-	val = atof( tab->ptr );
-	tab->ptr[tab->len] = old_c;
-	return val;
-}
-
-
-static void RotatePts(
-        int cnt,
-        coOrd * pts,
-        coOrd orig,
-        ANGLE_T angle )
-{
-	int inx;
-	for ( inx=0; inx<cnt; inx++ ) {
-		Rotate( &pts[inx], orig, angle );
-	}
-}
-
-
-static void RescalePts(
-        int cnt,
-        coOrd * pts,
-        FLOAT_T scale_x,
-        FLOAT_T scale_y )
-{
-	int inx;
-	for ( inx=0; inx<cnt; inx++ ) {
-		pts[inx].x *= scale_x;
-		pts[inx].y *= scale_y;
-	}
-}
-
-
-static int lookupListIndex;
-static void * LookupListElem(
-        dynArr_t * da,
-        void * key,
-        int (*cmpFunc)( void *, void * ),
-        int elem_size )
-{
-	int hi, lo, mid, rc;
-	lo = 0;
-	hi = da->cnt-1;
-	while (lo <= hi ) {
-		mid = (lo+hi)/2;
-		rc = cmpFunc( key, DYNARR_N(void*,*da,mid) );
-		if ( rc == 0 ) {
-			lookupListIndex = mid;
-			return DYNARR_N(void*,*da,mid);
-		}
-		if ( rc > 0 ) {
-			lo = mid+1;
-		} else {
-			hi = mid-1;
-		}
-	}
-	if ( elem_size == 0 ) {
-		lookupListIndex = -1;
-		return NULL;
-	}
-	DYNARR_APPEND( void*, *da, 10 );
-	for ( mid=da->cnt-1; mid>lo; mid-- ) {
-		DYNARR_N(void*,*da,mid) = DYNARR_N(void*,*da,mid-1);
-	}
-	DYNARR_N(void*,*da,lo) = MyMalloc(elem_size);
-	memset( DYNARR_N(void*,*da,lo), 0, elem_size );
-	lookupListIndex = lo;
-	return DYNARR_N(void*,*da,lo);
-}
-
-static void RemoveListElem(
-        dynArr_t * da,
-        void * elem )
-{
-	int inx;
-	for ( inx=0; inx<da->cnt; inx++ )
-		if ( DYNARR_N(void*,*da,inx) == elem ) {
-			break;
-		}
-	CHECK( inx<da->cnt );
-	for ( inx++; inx<da->cnt; inx++ ) {
-		DYNARR_N(void*,*da,inx-1) = DYNARR_N(void*,*da,inx);
-	}
-	da->cnt--;
-}
 
 /*
  *  Draw Car Parts
