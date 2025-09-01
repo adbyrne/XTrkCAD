@@ -105,34 +105,46 @@ int TabStringCmp(
 	}
 }
 
+/**
+ * \brief Converts a tabString to a long integer without modifying the source string.
+ * \param tab The tabString to convert.
+ * \return The converted long value, or 0 if the tab is empty or invalid.
+ */
 
 long TabGetLong(
-        tabString_t* tab)
+	const tabString_t* tab)
 {
-	char old_c;
-	long val;
-	if (tab->len == 0) {
-		return 0;
+	long val = 0;
+	// Buffer large enough for a 64-bit integer string plus sign.
+	char buf[21];
+
+	if (tab->len > 0 && tab->len < sizeof(buf)) {
+		memcpy(buf, tab->ptr, tab->len);
+		buf[tab->len] = '\0';
+		val = atol(buf);
 	}
-	old_c = tab->ptr[tab->len];
-	tab->ptr[tab->len] = '\0';
-	val = atol(tab->ptr);
-	tab->ptr[tab->len] = old_c;
 	return val;
 }
 
+/**
+ * Converts a tabString to a FLOAT_T without modifying the source string.
+ * \param tab The tabString to convert.
+ * \return The converted float value, or 0.0 if the tab is empty or invalid.
+ */
 
 FLOAT_T TabGetFloat(
-        tabString_t* tab)
+	const tabString_t* tab)
 {
-	char old_c;
-	FLOAT_T val;
-	if (tab->len == 0) {
+	if (!tab || tab->len == 0) {
 		return 0.0;
 	}
-	old_c = tab->ptr[tab->len];
-	tab->ptr[tab->len] = '\0';
-	val = atof(tab->ptr);
-	tab->ptr[tab->len] = old_c;
-	return val;
+	// A buffer for floating point numbers. 40 chars should be sufficient.
+	char buf[40];
+	if (tab->len >= sizeof(buf)) {
+		// String too long, handle as error.
+		return 0.0;
+	}
+	memcpy(buf, tab->ptr, tab->len);
+	buf[tab->len] = '\0';
+	return (FLOAT_T)atof(buf);
 }
