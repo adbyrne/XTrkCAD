@@ -1,5 +1,5 @@
 #!/bin/sh
-LOGF=/tmp/xtrkcad-setup.log
+LOGF=${HOME}/xtrkcad-setup.log
 if [ -f "${LOGF}" ] ; then
 	chmod 666 ${LOGF}
 	echo prerm: $* >> ${LOGF}
@@ -7,7 +7,9 @@ else
 	LOGF=/dev/null
 fi
 
-INSTALLDIR=/usr/share/xtrkcad
+# Note: when branching for Beta, change the next line to /usr/local/share/xtrkcad-beta
+#       when building for GA, change the next line back to /usr/share/xtrkcad
+INSTALLDIR=/usr/local/share/xtrkcad-beta
 
 ( su -c "sh ${INSTALLDIR}/xtrkcad-setup remove ${INSTALLDIR}" -l $SUDO_USER ) >> ${LOGF} 2>&1
 
