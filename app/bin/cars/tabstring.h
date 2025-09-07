@@ -3,10 +3,12 @@
 
 #include <common.h>
 
-typedef struct {
+typedef struct tabString_s{
 	char* ptr;
 	unsigned long len;
-} tabString_t, * tabString_p;
+} tabString_t;
+
+typedef struct tabString_s* tabString_p;
 
 #define T_MANUF			(0)
 #define T_PROTO			(1)

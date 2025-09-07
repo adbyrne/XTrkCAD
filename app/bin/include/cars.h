@@ -1,0 +1,21 @@
+#ifndef HAVE_CARS_H
+#define HAVE_CARS_H
+
+typedef struct carProto_s* carProto_p;
+
+struct carItem_s;
+
+typedef struct carItem_s* carItem_p;
+extern carItem_p currCarItemPtr;
+void CarProtoDelete(carProto_p protoP);
+void DeleteCarProto(int fileIndex);
+enum paramFileState	GetCarProtoCompatibility(int paramFileIndex, SCALEINX_T scaleIndex);
+
+typedef struct carDim_s* carDim_p;
+typedef struct carPart_s* carPart_p;
+carPart_p CarPartNew(carPart_p partP, int paramFileIndex, SCALEINX_T scaleInx, char* title, long options, long type, carDim_p dim, wDrawColor color);
+void DeleteCarPart(int fileIndex);
+
+void CarItemGetSegs(carItem_p item);
+
+#endif

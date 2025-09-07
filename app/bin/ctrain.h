@@ -25,20 +25,19 @@
 
 #include "common.h"
 #include "track.h" //- traverseTrack
+#include "include/cars.h"
+
 
 extern wIndex_t trainCmdInx;
 
 extern long trainPause;
 
-struct carItem_t;
-typedef struct carItem_t carItem_t;
-typedef carItem_t * carItem_p;
 typedef struct {
 	coOrd pos;
 	ANGLE_T angle;
 } vector_t;
 
-extern carItem_p currCarItemPtr;
+
 extern wControl_p newCarControls[2];
 void DoCarDlg( void * unused );
 BOOL_T CarItemRead( char * );
@@ -77,15 +76,14 @@ BOOL_T StoreCarItem (carItem_p item, void **data,long *len);
 BOOL_T ReplayCarItem(carItem_p item, void *data,long len);
 enum paramFileState	GetCarPartCompatibility(int paramFileIndex,
                 SCALEINX_T scaleIndex);
-enum paramFileState	GetCarProtoCompatibility(int paramFileIndex,
-                SCALEINX_T scaleIndex);
+
 int CarAvailableCount( void );
 BOOL_T TraverseTrack2( traverseTrack_p, DIST_T );
 void FlipTraverseTrack( traverseTrack_p );
 void CheckCarTraverse( track_p trk);
 
-void DeleteCarProto(int fileIndex);
-void DeleteCarPart(int fileIndex);
+
+
 void LocoListChangeEntry( track_p, track_p );
 
 #endif // !HAVE_CTRAIN_H

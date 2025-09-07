@@ -52,3 +52,16 @@ void RescalePts(
 		pts[inx].y *= scale_y;
 	}
 }
+
+
+void MovePts(
+	int cnt,
+	coOrd* pts,
+	coOrd orig)
+{
+	int inx;
+	for (inx = 0; inx < cnt; inx++) {
+		pts[inx].x += orig.x;
+		pts[inx].y += orig.y;
+	}
+}
