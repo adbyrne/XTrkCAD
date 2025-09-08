@@ -184,6 +184,36 @@ EXPORT wControl_p newCarControls[2];
 static char newCarLabel1[STR_SIZE];
 static char* newCarLabels[2] = { newCarLabel1, NULL };
 
+void CarUpdateHotbarList()
+{
+	wWinPix_t w, h;
+
+	/** \todo extract the following code to its own function and put into dcar.c */
+	wListClear((wList_p)newCarPLs[0].control);
+	for (int inx = 0; inx < carItemHotbar_da.cnt; inx++) {
+		carItem_p item;
+		char* cp;
+		item = carItemHotbar(inx);
+		if (item->car && !IsTrackDeleted(item->car)) {
+			continue;
+		}
+		cp = CarItemDescribe(item, 0, NULL);
+		wListAddValue((wList_p)newCarPLs[0].control, cp, NULL, I2VP(inx));
+	}
+	/*wListSetValue( (wList_p)newCarPLs[0].control, "Select a car" );*/
+	wListSetIndex((wList_p)newCarPLs[0].control, 0);
+	strcpy(newCarLabel1, _("Select"));
+	ParamLoadControl(&newCarPG, 0);
+	InfoSubstituteControls(newCarControls, newCarLabels);
+
+	wWinGetSize(mainW, &w, &h);
+	w -= wControlGetPosX(newCarControls[0]) + 4;
+	if (w > 20) {
+		wListSetSize((wList_p)newCarControls[0], w,
+			wControlGetHeight(newCarControls[0]));
+	}
+}
+
 
 static char* CarItemHotbarProc(
 	hotBarProc_e op,

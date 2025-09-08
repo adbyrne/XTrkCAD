@@ -77,28 +77,31 @@ typedef  struct nameLongMap_s nameLongMap_t;
 typedef nameLongMap_t* nameLongMap_p;
 extern nameLongMap_t typeListMap[];
 
-void CarProtoDlgCreateDummyOutline(int* segCntP, trkSeg_p* segPtrP, BOOL_T isLoco, DIST_T length, DIST_T width, wDrawColor color);
+void CarProtoDlgCreateDummyOutline(int* segCntP, trkSeg_p* segPtrP,
+                                   BOOL_T isLoco, DIST_T length, DIST_T width, wDrawColor color);
 carProto_p CarProtoFind(char* desc);
 int CarProtoFindTypeCode(long code);
-carProto_p CarProtoLookup(char* desc, BOOL_T createMissing, BOOL_T isLoco, DIST_T length, DIST_T width);
-carProto_p CarProtoNew(carProto_p proto, int paramFileIndex, char* desc, long options, long type, const carDim_t* dim, wIndex_t segCnt, trkSeg_p segPtr);
+carProto_p CarProtoLookup(char* desc, BOOL_T createMissing, BOOL_T isLoco,
+                          DIST_T length, DIST_T width);
+carProto_p CarProtoNew(carProto_p proto, int paramFileIndex, char* desc,
+                       long options, long type, const carDim_t* dim, wIndex_t segCnt, trkSeg_p segPtr);
 BOOL_T CarProtoRead(char* line);
 BOOL_T CarProtoWrite(FILE* f, const carProto_t* proto);
 BOOL_T CarProtoCustomSave(FILE* f);
 
 void CarProtoDrawTruck(
-	drawCmd_t* d,
-	DIST_T width,
-	FLOAT_T ratio,
-	coOrd pos,
-	ANGLE_T angle);
+        drawCmd_t* d,
+        DIST_T width,
+        FLOAT_T ratio,
+        coOrd pos,
+        ANGLE_T angle);
 
 void CarProtoDrawCoupler(
-	drawCmd_t* d,
-	DIST_T length,
-	FLOAT_T ratio,
-	coOrd pos,
-	ANGLE_T angle);
+        drawCmd_t* d,
+        DIST_T length,
+        FLOAT_T ratio,
+        coOrd pos,
+        ANGLE_T angle);
 
 
 // carpart
@@ -134,8 +137,10 @@ typedef struct carDim_s* carDim_p;
 int Cmp_part(void* key, void* elem);
 int Cmp_roadnameMap(void* key, void* elem);
 void CarPartDelete(carPart_p partP);
-carPart_p CarPartFind(char* manufP, int manufL, char* partnoP, int partnoL, SCALEINX_T scale);
-carPart_p CarPartNew(carPart_p partP, int paramFileIndex, SCALEINX_T scaleInx, char* title, long options, long type, const carDim_p dim, wDrawColor color);
+carPart_p CarPartFind(char* manufP, int manufL, char* partnoP, int partnoL,
+                      SCALEINX_T scale);
+carPart_p CarPartNew(carPart_p partP, int paramFileIndex, SCALEINX_T scaleInx,
+                     char* title, long options, long type, const carDim_p dim, wDrawColor color);
 BOOL_T CarDescCustomSave(FILE* f);
 BOOL_T CarPartWrite(FILE* f, carPart_p partP);
 BOOL_T CarPartRead(char* line);
@@ -193,25 +198,26 @@ typedef struct carItem_s *carItem_p;
 #define carItemHotbar(N)			DYNARR_N( carItem_p, carItemHotbar_da, N )
 
 carItem_p CarItemNew(
-	carItem_p item,
-	int paramFileIndex,
-	long itemIndex,
-	SCALEINX_T scale,
-	char* title,
-	long options,
-	long type,
-	carDim_t* dim,
-	wDrawColor color,
-	FLOAT_T purchPrice,
-	FLOAT_T currPrice,
-	long condition,
-	long purchDate,
-	long serviceDate);
+        carItem_p item,
+        int paramFileIndex,
+        long itemIndex,
+        SCALEINX_T scale,
+        char* title,
+        long options,
+        long type,
+        carDim_t* dim,
+        wDrawColor color,
+        FLOAT_T purchPrice,
+        FLOAT_T currPrice,
+        long condition,
+        long purchDate,
+        long serviceDate);
 
 #define N_CONDLISTMAP			(6)
 nameLongMap_t condListMap[];
 
 EXPORT long CarItemFindIndex(carItem_p item);
+void CarItemGetSegs(carItem_p item);
 
 #endif // !HAVE_CARSPRIVATE_H
 
