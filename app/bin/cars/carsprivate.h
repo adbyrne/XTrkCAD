@@ -3,8 +3,6 @@
 
 #include "common.h"
 #include "draw.h"
-
-
 #include "tabstring.h"
 
 // transform_pt.c
@@ -40,8 +38,6 @@ struct carProto_s {
 };
 typedef struct carProto_s carProto_t;
 typedef struct carProto_s* carProto_p;
-
-
 
 struct carPartParent_s {
 	char* manuf;
@@ -133,31 +129,16 @@ struct roadnameMap_s {
 };
 
 typedef struct roadnameMap_s roadnameMap_t;
+typedef struct carDim_s* carDim_p;
 
 int Cmp_part(void* key, void* elem);
-
-static int Cmp_partparent(void* key, void* elem);
-
 int Cmp_roadnameMap(void* key, void* elem);
-
-
-static carPartParent_p CarPartParentNew(char* manufP, int manufL, char* protoP, int protoL, SCALEINX_T scale);
-
-static void CarPartParentDelete(carPartParent_p parentP);
-
-static void CarPartUnlink(carPart_p partP);
-
 void CarPartDelete(carPart_p partP);
-
 carPart_p CarPartFind(char* manufP, int manufL, char* partnoP, int partnoL, SCALEINX_T scale);
-
-
-
+carPart_p CarPartNew(carPart_p partP, int paramFileIndex, SCALEINX_T scaleInx, char* title, long options, long type, const carDim_p dim, wDrawColor color);
 BOOL_T CarDescCustomSave(FILE* f);
-
 BOOL_T CarPartWrite(FILE* f, carPart_p partP);
 BOOL_T CarPartRead(char* line);
-
 BOOL_T CheckAvail(carPartParent_p parentP);
 
 #define carPartParent(N)	DYNARR_N(carPartParent_p, carPartParent_da, N)

@@ -1,8 +1,6 @@
 /**
  * \file   carpart.c
  * \brief  Manage purchasable car parts
- *
- * \author Martin Fischer
  */
 
  /*  XTrackCad - Model Railroad CAD
@@ -31,6 +29,12 @@
 #include "listelem.h"
 #include "tabstring.h"
 
+static int Cmp_partparent(void* key, void* elem);
+static carPartParent_p CarPartParentNew(char* manufP, int manufL, char* protoP, int protoL, SCALEINX_T scale);
+static void CarPartParentDelete(carPartParent_p parentP);
+static void CarPartUnlink(carPart_p partP);
+
+
 int log_carList;
 
 dynArr_t carPartParent_da;
@@ -38,7 +42,6 @@ dynArr_t carPartParent_da;
 dynArr_t roadnameMap_da;
 #define roadnameMap(N) DYNARR_N(roadnameMap_p, roadnameMap_da, N)
 BOOL_T roadnameMapChanged;
-
 
 typedef struct {
 	tabString_t manuf;
@@ -90,7 +93,6 @@ int Cmp_part(
 	}
 }
 
-
 static int Cmp_partparent(
 	void* key,
 	void* elem)
@@ -125,7 +127,6 @@ int Cmp_roadnameMap(void* key,void* elem)
 	return rc;
 }
 
-
 roadnameMap_p LoadRoadnameList(
 	tabString_p roadnameTab,
 	tabString_p repmarkTab)
@@ -134,7 +135,7 @@ roadnameMap_p LoadRoadnameList(
 	roadnameMap_p roadnameMapP;
 
 	lookupListIndex = -1;
-	if (roadnameTab->len <= 0) {
+	if (roadnameTab->len == 0) {
 		return NULL;
 	}
 	if (TabStringCmp("undecorated", roadnameTab) == 0) {
@@ -157,7 +158,6 @@ roadnameMap_p LoadRoadnameList(
 	}
 	return roadnameMapP;
 }
-
 
 static carPartParent_p CarPartParentNew(
 	char* manufP,
@@ -196,8 +196,6 @@ static void CarPartParentDelete(
 	MyFree(parentP);
 }
 
-
-
 static void CarPartUnlink(
 	carPart_p partP)
 {
@@ -208,8 +206,6 @@ static void CarPartUnlink(
 	}
 }
 
-
-
 carPart_p CarPartFind(
 	char* manufP,
 	int manufL,
@@ -217,15 +213,14 @@ carPart_p CarPartFind(
 	int partnoL,
 	SCALEINX_T scale)
 {
-	wIndex_t inx1, inx2;
-	carPart_p partP;
-	carPartParent_p parentP;
-	for (inx1 = 0; inx1 < carPartParent_da.cnt; inx1++) {
+	for (wIndex_t inx1 = 0; inx1 < carPartParent_da.cnt; inx1++) {
+		carPartParent_p parentP;
 		parentP = carPartParent(inx1);
 		if (manufL == (int)strlen(parentP->manuf) &&
 			strncasecmp(manufP, parentP->manuf, manufL) == 0 &&
 			scale == parentP->scale) {
-			for (inx2 = 0; inx2 < parentP->parts_da.cnt; inx2++) {
+			for (wIndex_t inx2 = 0; inx2 < parentP->parts_da.cnt; inx2++) {
+				carPart_p partP;
 				partP = carPart(parentP, inx2);
 				if (partnoL == partP->partnoL &&
 					strncasecmp(partnoP, partP->partnoP, partnoL) == 0) {
@@ -244,7 +239,7 @@ carPart_p CarPartNew(
 	char* title,
 	long options,
 	long type,
-	carDim_t* dim,
+	const carDim_p dim,
 	wDrawColor color)
 {
 	carPartParent_p parentP;
@@ -303,7 +298,6 @@ carPart_p CarPartNew(
 	return partP;
 }
 
-
 void CarPartDelete(carPart_p partP)
 {
 	if (partP == NULL) {
@@ -325,21 +319,27 @@ void CarPartDelete(carPart_p partP)
 * \param [IN] fileIndex parameter file
 */
 
-void
-DeleteCarPart(int fileIndex)
+void DeleteCarPart(int fileIndex)
 {
 	int inxParent = 0;
-	int inx;
 
 	while (inxParent < carPartParent_da.cnt) {
-		inx = 0;
-		while (inx < carPartParent(inxParent)->parts_da.cnt) {
-			carPart_p part = carPart(carPartParent(inxParent), inx++);
+		carPartParent_p parentP = carPartParent(inxParent);
+
+		// Iterate backwards to avoid index shifting when deleting
+		for (int inx = parentP->parts_da.cnt - 1; inx >= 0; inx--) {
+			carPart_p part = carPart(parentP, inx);
 			if (part->paramFileIndex == fileIndex) {
 				CarPartDelete(part);
 			}
 		}
-		inxParent++;
+
+		// Check if parent still exists (might have been deleted)
+		if (inxParent < carPartParent_da.cnt &&
+			carPartParent(inxParent) == parentP) {
+			inxParent++;
+		}
+		// If parent was deleted, don't increment (next parent shifted down)
 	}
 }
 
@@ -372,7 +372,7 @@ BOOL_T CarPartWrite(
 	carPart_p partP)
 {
 	BOOL_T rc = TRUE;
-	carPartParent_p parentP = partP->parent;
+	const carPartParent_p parentP = partP->parent;
 	tabString_t tabs[7];
 	long longCenterOffset = (long)(partP->dim.truckCenterOffset * 1000);
 
@@ -401,12 +401,12 @@ BOOL_T CarPartWrite(
 BOOL_T CarDescCustomSave(	FILE* f)
 {
 	int parentX;
-	carPartParent_p parentP;
 	int partX;
 	carPart_p partP;
 	BOOL_T rc = TRUE;
 
 	for (parentX = 0; parentX < carPartParent_da.cnt; parentX++) {
+		carPartParent_p parentP;
 		parentP = carPartParent(parentX);
 		for (partX = 0; partX < parentP->parts_da.cnt; partX++) {
 			partP = carPart(parentP, partX);
@@ -427,24 +427,22 @@ BOOL_T CarDescCustomSave(	FILE* f)
  * \return the compatibility state of the the
  */
 enum paramFileState
-	GetCarPartCompatibility(int paramFileIndex, SCALEINX_T scaleIndex) {
-	int i;
+GetCarPartCompatibility(int paramFileIndex, SCALEINX_T scaleIndex) 
+{
 	enum paramFileState ret = PARAMFILE_NOTUSABLE;
-	//	DIST_T ratio = GetScaleRatio(scaleIndex);
-	//	DIST_T gauge = GetScaleTrackGauge(scaleIndex);
 
 	if (!IsParamValid(paramFileIndex))
 	{
 		return(PARAMFILE_UNLOADED);
 	}
 
-	for (i = 0; i < carPartParent_da.cnt && ret != PARAMFILE_FIT; i++)
+	for (int i = 0; i < carPartParent_da.cnt && ret != PARAMFILE_FIT; i++)
 	{
 		carPartParent_t* carPartParent = carPartParent(i);
 		SCALE_FIT_T fit = CompatibleScale(FIT_CAR, carPartParent->scale, scaleIndex);
 		if (fit == FIT_EXACT) {
 			for (int j = 0; j < carPartParent->parts_da.cnt; j++) {
-				carPart_t* carPart = carPart(carPartParent, j);
+				const carPart_t* carPart = carPart(carPartParent, j);
 				if (carPart->paramFileIndex == paramFileIndex) {
 					ret = PARAMFILE_FIT;
 					break;
@@ -458,14 +456,11 @@ enum paramFileState
 	return(ret);
 }
 
-
-
 BOOL_T CheckAvail(
 	carPartParent_p parentP)
 {
-	wIndex_t inx;
-	carPart_p partP;
-	for (inx = 0; inx < parentP->parts_da.cnt; inx++) {
+	for (wIndex_t inx = 0; inx < parentP->parts_da.cnt; inx++) {
+		carPart_p partP;
 		partP = carPart(parentP, inx);
 		if (IsParamValid(partP->paramFileIndex)) {
 			return TRUE;

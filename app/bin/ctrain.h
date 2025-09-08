@@ -74,8 +74,7 @@ void AttachTrains( void );
 
 BOOL_T StoreCarItem (carItem_p item, void **data,long *len);
 BOOL_T ReplayCarItem(carItem_p item, void *data,long len);
-enum paramFileState	GetCarPartCompatibility(int paramFileIndex,
-                SCALEINX_T scaleIndex);
+
 
 int CarAvailableCount( void );
 BOOL_T TraverseTrack2( traverseTrack_p, DIST_T );

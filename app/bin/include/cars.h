@@ -11,10 +11,12 @@ void CarProtoDelete(carProto_p protoP);
 void DeleteCarProto(int fileIndex);
 enum paramFileState	GetCarProtoCompatibility(int paramFileIndex, SCALEINX_T scaleIndex);
 
-typedef struct carDim_s* carDim_p;
+
 typedef struct carPart_s* carPart_p;
-carPart_p CarPartNew(carPart_p partP, int paramFileIndex, SCALEINX_T scaleInx, char* title, long options, long type, carDim_p dim, wDrawColor color);
+
+
 void DeleteCarPart(int fileIndex);
+enum paramFileState	GetCarPartCompatibility(int paramFileIndex, SCALEINX_T scaleIndex);
 
 void CarItemGetSegs(carItem_p item);
 
