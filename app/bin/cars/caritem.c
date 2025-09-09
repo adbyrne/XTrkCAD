@@ -30,7 +30,7 @@
 #include "include/cars.h"
 
 dynArr_t carItemInfo_da;
-#define carItemInfo(N) DYNARR_N( carItem_t*, carItemInfo_da, N )
+
 
 #define N_CONDLISTMAP			(6)
 nameLongMap_t condListMap[N_CONDLISTMAP] = {

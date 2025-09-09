@@ -1,7 +1,8 @@
 #ifndef HAVE_CARS_H
 #define HAVE_CARS_H
 
-#include "ctrain.h"
+#include "track.h"
+
 
 typedef struct carProto_s* carProto_p;
 
@@ -39,4 +40,5 @@ BOOL_T CarItemIsLocoMaster(carItem_p);
 void CarItemSetLocoMaster(carItem_p, BOOL_T);
 
 
+#include "ctrain.h"
 #endif

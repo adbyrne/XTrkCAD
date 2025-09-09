@@ -140,6 +140,7 @@ target_sources(xtrkcad-lib
     cars/caritem.c
     cars/carpart.c
     cars/carproto.c
+    cars/carinvdlg.c
     cars/dcar.c
     cars/tabstring.c
     cars/transform_pts.c
