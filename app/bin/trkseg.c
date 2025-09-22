@@ -1619,8 +1619,8 @@ EXPORT BOOL_T WriteSegsEnd(
 			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %d %0.6f \"%s\" %d %ld\n",
 			               segs[i].type, wDrawGetRGB(segs[i].color),
 			               segs[i].u.t.pos.x, segs[i].u.t.pos.y, segs[i].u.t.angle,
-			               segs[i].u.t.boxed, segs[i].u.t.fontSize, 
-						   escaped_text, segs[i].u.t.filled, wDrawGetRGB(segs[i].bg_color) ) > 0;
+			               segs[i].u.t.boxed, segs[i].u.t.fontSize,
+			               escaped_text, segs[i].u.t.filled, wDrawGetRGB(segs[i].bg_color) ) > 0;
 			MyFree(escaped_text);
 #ifdef UTFCONVERT
 			MyFree(out);
@@ -1975,8 +1975,8 @@ EXPORT void DrawSegsO(
 		case SEG_TEXT:
 			REORIGIN( p0, segPtr->u.t.pos, angle, orig )
 			DrawMultiString( d, p0, segPtr->u.t.string, segPtr->u.t.fontP,
-			                 segPtr->u.t.fontSize, color1, segPtr->u.t.boxed, segPtr->u.t.filled, 
-				             segPtr->bg_color, NormalizeAngle(angle + segPtr->u.t.angle), 
+			                 segPtr->u.t.fontSize, color1, segPtr->u.t.boxed, segPtr->u.t.filled,
+			                 segPtr->bg_color, NormalizeAngle(angle + segPtr->u.t.angle),
 			                 NULL, NULL );
 			break;
 		case SEG_FILPOLY:

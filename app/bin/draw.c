@@ -684,9 +684,9 @@ EXPORT void DrawMultiString(
         wFont_p fp,
         wFontSize_t fs,
         wDrawColor color,
-		BOOL_T boxed,
-		BOOL_T filled,
-		wDrawColor bg_color,
+        BOOL_T boxed,
+        BOOL_T filled,
+        wDrawColor bg_color,
         ANGLE_T a,
         coOrd * lo,
         coOrd * hi)
@@ -745,7 +745,7 @@ EXPORT void DrawMultiString(
 	}
 	if (boxed && (d != &mapD)) {
 		DrawPoly( d, 4, p, NULL, color, 0, DRAW_CLOSED );
-		
+
 	}
 
 	free(line);

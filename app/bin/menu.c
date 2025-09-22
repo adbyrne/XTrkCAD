@@ -375,7 +375,8 @@ static wWin_p stickyW;
 static const char * stickyLabels[33];
 static paramData_t stickyPLs[] = { {
 		PD_TOGGLE, &stickySet, "set", PDO_NOPSHUPD,
-		stickyLabels, "", 0 }
+		stickyLabels, "", 0
+	}
 };
 static paramGroup_t stickyPG = { "sticky", PGO_RECORD, stickyPLs,
                                  COUNT( stickyPLs )
@@ -405,8 +406,8 @@ EXPORT void DoSticky(void * unused)
 	if (!stickyW) {
 		stickyW = ParamCreateDialog(&stickyPG,
 		                            MakeWindowTitle(_("Sticky Commands")),
-					    _("Ok"), StickyOk,
-					    ParamCancel_Restore,
+		                            _("Ok"), StickyOk,
+		                            ParamCancel_Restore,
 		                            TRUE, NULL, 0, StickyDlgUpdate );
 	}
 	ParamLoadControls(&stickyPG);
@@ -990,16 +991,16 @@ EXPORT void CreateMenus(void)
 	                   ACCL_IMPORT_MOD,
 	                   DoImportModule, 0, I2VP(1));
 	MiscMenuItemCreate(fileM, NULL, "cmdImportDxf", _("Import &Dxf"),
-					   ACCL_IMPORT_DXF,
-					   DoImportDxf, 0, I2VP(1));
+	                   ACCL_IMPORT_DXF,
+	                   DoImportDxf, 0, I2VP(1));
 
 	wMenuSeparatorCreate(fileM);
 
 	MiscMenuItemCreate(fileM, NULL, "cmdExport", _("E&xport"), ACCL_EXPORT,
 	                   DoExport, IC_SELECTED, NULL);
 	MiscMenuItemCreate(fileM, NULL, "cmdOutputbitmap", _("Export to &Bitmap"),
-					   ACCL_PRINTBM, OutputBitMapInit(), 0,
-					   NULL);
+	                   ACCL_PRINTBM, OutputBitMapInit(), 0,
+	                   NULL);
 	MiscMenuItemCreate(fileM, NULL, "cmdExportDXF", _("Export D&XF"),
 	                   ACCL_EXPORTDXF, DoExportDxf, IC_SELECTED,
 	                   NULL);

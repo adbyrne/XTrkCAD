@@ -456,14 +456,16 @@ void GetTurnoutType()
 				dtod.toType = DTO_NORMAL;
 			} else if ((strCnt == 0) && ((lftCnt == 2) || (rgtCnt == 2))) {
 				// Assumes outer curve is [0] and inner is [1]
-				if ((dto[0].crvAngle <= crvMax) && (dto[1].crvAngle - dto[0].crvAngle <= crvMax)) {
+				if ((dto[0].crvAngle <= crvMax)
+				    && (dto[1].crvAngle - dto[0].crvAngle <= crvMax)) {
 					dtod.toType = DTO_CURVED;
 				}
 			} else if (chkCurve && lftCnt == 1 && rgtCnt == 1) {
 				dtod.toType = DTO_WYE;
 			}
 		} else if ((dtod.pathCnt == 3) && (strCnt == 1)
-				   && (dto[0].crvAngle <= crvMax && dto[1].crvAngle <= 15 && dto[2].crvAngle <= crvMax)
+		           && (dto[0].crvAngle <= crvMax && dto[1].crvAngle <= 15
+		               && dto[2].crvAngle <= crvMax)
 		           && (lftCnt == 1) && (rgtCnt == 1)) {
 			dtod.toType = DTO_THREE;
 		}

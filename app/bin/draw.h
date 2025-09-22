@@ -251,7 +251,7 @@ void DrawTextSize2(drawCmd_p, char *, wFont_p, wFontSize_t, BOOL_T, coOrd *,
                    POS_T *, POS_T *);
 void DrawTextSize(drawCmd_p, char *, wFont_p, wFontSize_t, BOOL_T, coOrd *);
 void DrawMultiString(drawCmd_p d, coOrd pos, char * text, wFont_p fp,
-                     wFontSize_t fs, wDrawColor color, BOOL_T boxed, BOOL_T filled, 
+                     wFontSize_t fs, wDrawColor color, BOOL_T boxed, BOOL_T filled,
                      wDrawColor bg_color, ANGLE_T a, coOrd *lo, coOrd *hi);
 void TranslateBackground(drawCmd_p drawP, POS_T origX, POS_T origY,
                          wWinPix_t* posX,

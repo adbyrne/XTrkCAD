@@ -274,7 +274,7 @@ static BOOL_T GetDistance(char ** cpp, FLOAT_T * distP)
 
 
 static FLOAT_T DecodeDistance(
-	paramData_p pd,
+        paramData_p pd,
         BOOL_T * validP)
 {
 	FLOAT_T valF = 0.0;
@@ -328,8 +328,8 @@ static FLOAT_T DecodeDistance(
 }
 
 static FLOAT_T DecodeNumber(
-	paramData_p pd,
-	BOOL_T * validP )
+        paramData_p pd,
+        BOOL_T * validP )
 {
 	FLOAT_T valF;
 	const char *cp1;

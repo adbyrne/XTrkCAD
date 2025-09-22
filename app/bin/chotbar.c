@@ -426,7 +426,7 @@ static void SelectHotBar( wDraw_p d, void * context, wAction_t action,
 		HotBarHighlight( hotBarCurrSelect, fixed_x );
 		if (recordF) {
 			fprintf( recordF, "HOTBARSELECT %s\n", tbm->proc( HB_FULLTITLE, tbm->context,
-			         NULL, NULL ) );
+			                NULL, NULL ) );
 		}
 		FakeDownMouseState();
 		break;

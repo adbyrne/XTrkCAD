@@ -1925,7 +1925,7 @@ static BOOL_T EnumerateDraw(
 			segPtr = &xx->segs[inx];
 			if ( segPtr->type == SEG_BENCH ) {
 				CountBench( segPtr->u.l.option, FindDistance( segPtr->u.l.pos[0],
-				            segPtr->u.l.pos[1] ) );
+				                segPtr->u.l.pos[1] ) );
 				content = TRUE;
 			}
 		}

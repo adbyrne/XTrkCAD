@@ -286,8 +286,9 @@ void SetLayerDefault(unsigned int layer, BOOL_T inherit)
 {
 	if (IsLayerValid(layer)) {
 		layers[layer].inherit = inherit;
-		if (!inherit)
+		if (!inherit) {
 			layers[layer].scaleInx = GetLayoutCurScale();
+		}
 	}
 }
 
@@ -718,7 +719,7 @@ void LayerSystemDefault( unsigned int inx )
 	layers[inx].button_off = FALSE;
 	layers[inx].inherit = TRUE;
 	layers[inx].scaleInx = GetLayoutCurScale();
-	GetScaleGauge(layers[inx].scaleInx, &layers[inx].scaleDescInx, 
+	GetScaleGauge(layers[inx].scaleInx, &layers[inx].scaleDescInx,
 	              &layers[inx].gaugeInx);
 	layers[inx].minTrackRadius = GetLayoutMinTrackRadius();
 	layers[inx].maxTrackGrade = GetLayoutMaxTrackGrade();
@@ -875,13 +876,12 @@ static void LayerDefault( )
 	if (layers[layerSelected].inherit) {
 		layers[layerSelected].scaleInx = GetLayoutCurScale();
 		GetScaleGauge(layers[layerSelected].scaleInx,
-			&layers[layerSelected].scaleDescInx,
-			&layers[layerSelected].gaugeInx);
+		              &layers[layerSelected].scaleDescInx,
+		              &layers[layerSelected].gaugeInx);
 		layers[layerSelected].minTrackRadius = GetLayoutMinTrackRadius();
 		layers[layerSelected].maxTrackGrade = GetLayoutMaxTrackGrade();
 		layers[layerSelected].tieData = GetScaleTieData(layers[layerSelected].scaleInx);
-	}
-	else {
+	} else {
 		GetScaleGauge(layers[layerSelected].scaleInx,
 		              &layers[layerSelected].scaleDescInx,
 		              &layers[layerSelected].gaugeInx);
@@ -1117,7 +1117,7 @@ LayerPrefSave(void)
 	for (inx = 0; inx < NUM_LAYERS; inx++) {
 		/* if a name is set that is not the default value or a color different from the default has been set,
 		    information about the layer needs to be saved */
-		if (inx == 0 || IsLayerConfigured(inx)) { 
+		if (inx == 0 || IsLayerConfigured(inx)) {
 			sprintf(buffer, LAYERPREF_NAME ".%0u", inx);
 			wPrefSetString(LAYERPREF_SECTION, buffer, layers[inx].name);
 
@@ -1943,7 +1943,8 @@ IsLayerConfigured(unsigned int layerNumber)
 	        layers[layerNumber].module ||
 	        layers[layerNumber].button_off ||
 	        !layers[layerNumber].inherit ||
-	        layers[layerNumber].color != layerColorTab[layerNumber % (COUNT(layerColorTab))] ||
+	        layers[layerNumber].color != layerColorTab[layerNumber % (COUNT(
+	                                layerColorTab))] ||
 	        layers[layerNumber].layerLinkList.cnt > 0 ||
 	        layers[layerNumber].objCount);
 }
@@ -2371,8 +2372,8 @@ void InitLayers(int cmdGroup)
 	// wMenuSeparatorCreate(layerM); Causes a fault
 
 	layerB = AddToolbarButton("cmdManageLayers",
-		                      wIconCreatePixMap(layers_image3[iconSize]), 0,
-		                      DoLayer, NULL); 
+	                          wIconCreatePixMap(layers_image3[iconSize]), 0,
+	                          DoLayer, NULL);
 	/* add the help text */
 	wControlSetBalloonText((wControl_p)layerB, _("Manage Layers"));
 	wControlActive((wControl_p)layerB, TRUE);

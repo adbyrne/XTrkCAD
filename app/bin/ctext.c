@@ -229,7 +229,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 	case C_REDRAW:
 		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
 		DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color,
-			            Dt.boxed, Dt.filled, Dt.bg_color, 0.0, NULL, NULL );
+		                Dt.boxed, Dt.filled, Dt.bg_color, 0.0, NULL, NULL );
 		return C_CONTINUE;
 	case C_CANCEL:
 		if (Dt.state != POSITION_TEXT) {
