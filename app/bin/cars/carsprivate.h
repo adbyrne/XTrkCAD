@@ -271,8 +271,9 @@ typedef enum carDlgAction {
 	A_Last
 } carDlgAction_e;
 
-extern carDlgAction_e itemNewActions[];
-extern carDlgAction_e itemUpdActions[];
+void CarDlgAddItem(void);
+void CarDlgUpdItem(void);
+//extern carDlgAction_e itemUpdActions[];
 extern long carDlgItemIndex;
 extern int log_carDlgDims;
 

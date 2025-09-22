@@ -110,7 +110,9 @@ static void CarInvDlgAdd(void)
 		return;
 	}
 	carDlgUpdateItemPtr = NULL;
-	DoCarPartDlg(itemNewActions);
+
+	CarDlgAddItem();
+
 }
 
 
@@ -120,7 +122,7 @@ static void CarInvDlgEdit(void)
 	if (carDlgUpdateItemPtr == NULL) {
 		return;
 	}
-	DoCarPartDlg(itemUpdActions);
+	CarDlgUpdItem();
 }
 
 

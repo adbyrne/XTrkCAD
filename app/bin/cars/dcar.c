@@ -44,6 +44,245 @@ static int log_carDlgList;
 int log_carDlgDims;
 extern int log_carList;
 
+/**
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * 
+ * The state machine .
+ * 
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ */
+
+#define ACTION_COUNT(arr) (sizeof(arr) / sizeof(arr[0]))
+
+#define MAKE_ACTION_SEQUENCE(actions_array) \
+    { actions_array, ACTION_COUNT(actions_array) }
+
+#define EMPTY_ACTION_SEQUENCE \
+    { NULL, 0 }
+
+typedef enum {
+	T_ItemSel, T_ItemEnter, T_ProtoSel, T_ProtoEnter, T_PartnoSel, T_PartnoEnter,
+	T_InitProto, T_InitPart, T_InitItem, T_InitProtoUpd, T_InitPartUpd, T_InitItemUpd,
+	T_NewPart
+} carDlgTransistion_e;
+static char* carDlgTransistion_s[] = {
+	"ItemSel", "ItemEnter", "ProtoSel", "ProtoEnter", "PartnoSel", "PartnoEnter",
+	"InitProto", "InitPart", "InitItem", "InitProtoUpd", "InitPartUpd", "InitItemUpd",
+	"NewPart"
+};
+typedef enum {
+	S_Error,
+	S_ItemSel, S_ItemEnter, S_PartnoSel, S_PartnoEnter, S_ProtoSel, S_Waiting
+} carDlgState_e;
+static char* carDlgState_s[] = {
+	"Error",
+	"ItemSel", "ItemEnter", "PartnoSel", "PartnoEnter", "ProtoSel", "Waiting"
+};
+static char* carDlgAction_s[] = {
+	"Return",
+	"SError",
+	"Else",
+	"SItemSel",
+	"SItemEnter",
+	"SPartnoSel",
+	"SPartnoEnter",
+	"SProtoSel",
+	"IsCustom",
+	"IsNewPart",
+	"IsNewProto",
+	"LoadDataFromPartList",
+	"LoadDimsFromStack",
+	"LoadManufListForScale",
+	"LoadManufListAll",
+	"LoadProtoListForManuf",
+	"LoadProtoListAll",
+	"LoadPartnoList",
+	"LoadLists",
+	"LoadDimsFromProtoList",
+	"ConvertDimsToProto",
+	"Redraw",
+	"ClrManuf",
+	"ClrPartnoStr",
+	"ClrNumberStr",
+	"LoadProtoStrFromList",
+	"ShowPartnoList",
+	"HidePartnoList",
+	"PushDims",
+	"PopDims",
+	"PopTitleAndTypeinx",
+	"PopCouplerLength",
+	"ShowControls",
+	"LoadInfoFromUpdateItem",
+	"LoadDataFromUpdatePart",
+	"InitProto",
+	"RecallCouplerLength",
+	"Last"
+};
+
+// action sequence
+typedef struct {
+	carDlgAction_e* actions;
+	int action_count;
+} CarDlgActionSequence_t;
+
+// the transition table
+typedef struct {
+	carDlgState_e from_state;
+	carDlgTransistion_e transition;
+	carDlgState_e to_state;
+	CarDlgActionSequence_t action_sequence;
+} CarDlgStateTransition_t;
+
+void CarDlgStateMachine_Initialize(carDlgState_e initial_state);
+BOOL_T CarDlgStateMachine_ProcessTransition(carDlgTransistion_e transition);
+static void CarDlgStateMachineNew(carDlgTransistion_e transition);
+
+static carDlgAction_e item2partActions[] = {
+	A_PushDims, A_LoadManufListAll, A_LoadProtoListAll,
+	A_IsCustom, 0 + 1,
+	A_ClrManuf,
+	A_SPartnoSel,
+	A_ShowControls, A_Return
+};
+static carDlgAction_e part2itemActions[] = {
+	A_IsNewPart, 2 + 0,
+	A_Else, 1,
+	A_PopTitleAndTypeinx,
+	A_LoadLists,
+	A_IsCustom, 2 + 1,
+	A_LoadDimsFromProtoList,
+	A_Else, 1,
+	A_LoadDataFromPartList,
+#ifdef LATER
+	A_IsNewPart, 2 + 0,
+	A_Else, 1,
+	A_LoadDimsFromStack,
+#endif
+	A_ShowControls,
+	A_Return
+};
+
+static carDlgAction_e item2protoActions[] = { A_PushDims, A_ConvertDimsToProto, A_SProtoSel, A_ShowControls, A_Return };
+static carDlgAction_e proto2itemActions[] = {
+	A_IsCustom, 2 + 2 + 3,
+	A_IsNewProto, 2 + 3,
+	A_LoadProtoListAll,
+	A_PopCouplerLength,
+	A_LoadDimsFromProtoList,
+	A_Else, 2,
+	A_LoadDimsFromStack,
+	A_LoadProtoStrFromList,
+	A_ShowControls,
+	A_Return
+};
+
+static carDlgAction_e part2protoActions[] = { A_PushDims, A_ConvertDimsToProto, A_SProtoSel, A_ShowControls, A_Return };
+static carDlgAction_e proto2partActions[] = {
+	A_IsNewProto, 2 + 3,
+	A_LoadProtoListAll,
+	A_PopCouplerLength,
+	A_LoadDimsFromProtoList,
+	A_Else, 2,
+	A_LoadDimsFromStack,
+	A_LoadProtoStrFromList,
+	A_ShowControls,
+	A_Return
+};
+
+// Action sequences for dialog initialization
+carDlgAction_e itemNewActions[] = {
+	A_RecallCouplerLength,
+	A_LoadLists,
+	A_IsCustom, 2 + 3,
+	A_LoadDimsFromProtoList, A_ClrPartnoStr, A_ClrNumberStr,
+	A_Else, 1,
+	A_LoadDataFromPartList,
+	A_ShowControls, A_Return
+};
+
+carDlgAction_e itemUpdActions[] = { A_LoadInfoFromUpdateItem, A_ShowControls, A_Return };
+
+static carDlgAction_e partNewActions[] = { A_RecallCouplerLength, A_LoadManufListAll, A_LoadProtoListAll, A_ClrPartnoStr, A_ClrNumberStr, A_SPartnoSel, A_LoadDimsFromProtoList, A_ShowControls, A_Redraw, A_Return };
+static carDlgAction_e partUpdActions[] = { A_LoadDataFromUpdatePart, A_SPartnoSel, A_ShowControls, A_Return };
+
+static carDlgAction_e protoNewActions[] = { A_InitProto, A_SProtoSel, A_ShowControls, A_Return };
+static carDlgAction_e protoUpdActions[] = { A_InitProto, A_SProtoSel, A_ShowControls, A_Return };
+
+// Action sequences for item selection
+static carDlgAction_e itemSel_itemSel_actions[] = { A_LoadProtoListForManuf, A_LoadPartnoList, A_LoadDataFromPartList, A_Redraw, A_Return };
+static carDlgAction_e itemSel_itemEnter_actions[] = { A_SItemEnter, A_LoadProtoListAll, A_ClrPartnoStr, A_ClrNumberStr, A_LoadDimsFromProtoList, A_Redraw, A_HidePartnoList, A_Return };
+static carDlgAction_e itemSel_protoSel_actions[] = { A_LoadPartnoList, A_LoadDataFromPartList, A_Redraw };
+static carDlgAction_e itemSel_partnoSel_actions[] = { A_LoadDataFromPartList, A_Redraw, A_Return };
+static carDlgAction_e itemSel_partnoEnter_actions[] = { A_SItemEnter, A_LoadProtoListAll, A_HidePartnoList };
+
+static carDlgAction_e itemEnter_itemSel_actions[] = { A_SItemSel, A_LoadProtoListForManuf, A_LoadPartnoList, A_LoadDataFromPartList, A_Redraw, A_ShowPartnoList };
+static carDlgAction_e itemEnter_itemEnter_actions[] = { A_Return };
+static carDlgAction_e itemEnter_protoSel_actions[] = { A_LoadDimsFromProtoList, A_Redraw };
+static carDlgAction_e itemEnter_partnoEnter_actions[] = { A_Return };
+
+static carDlgAction_e partnoSel_itemSel_actions[] = { A_SPartnoSel };
+static carDlgAction_e partnoSel_itemEnter_actions[] = { A_SPartnoSel };
+static carDlgAction_e partnoSel_protoSel_actions[] = { A_SPartnoSel, A_LoadDimsFromProtoList, A_Redraw };
+static carDlgAction_e partnoSel_partnoEnter_actions[] = { A_Return };
+
+// Action sequences for part number
+static carDlgAction_e partnoEnter_itemSel_actions[] = { A_SPartnoSel };
+static carDlgAction_e partnoEnter_itemEnter_actions[] = { A_SPartnoEnter };
+static carDlgAction_e partnoEnter_protoSel_actions[] = { A_SPartnoEnter, A_LoadDimsFromProtoList, A_Redraw };
+static carDlgAction_e partnoEnter_partnoEnter_actions[] = { A_SPartnoEnter };
+
+// Action sequences for prototype
+static carDlgAction_e error_actions[] = { A_SError, A_Return };
+static carDlgAction_e protoSel_protoEnter_actions[] = { A_SProtoSel };
+
+// New state transition table (start small, grow as you migrate)
+static CarDlgStateTransition_t newStateTable[] = {
+
+	{S_Waiting, T_InitProto,	S_ProtoSel,		MAKE_ACTION_SEQUENCE(protoNewActions)},
+	{S_Waiting, T_InitPart,		S_PartnoSel,	MAKE_ACTION_SEQUENCE(partNewActions)},
+	{S_Waiting, T_InitItem,     S_ItemSel,		MAKE_ACTION_SEQUENCE(itemNewActions)},
+	{S_Waiting, T_InitProtoUpd, S_ProtoSel,		MAKE_ACTION_SEQUENCE(protoUpdActions)},
+	{S_Waiting, T_InitPartUpd,	S_PartnoSel,	MAKE_ACTION_SEQUENCE(partUpdActions)},
+	{S_Waiting, T_InitItemUpd,  S_ItemSel,		MAKE_ACTION_SEQUENCE(itemUpdActions)},
+
+	{S_ItemSel, T_ItemSel,		S_ItemSel,		MAKE_ACTION_SEQUENCE(itemSel_itemSel_actions)},
+	{S_ItemSel, T_ItemEnter,	S_ItemEnter,	MAKE_ACTION_SEQUENCE(itemSel_itemEnter_actions)},
+	{S_ItemSel, T_ProtoSel,		S_ItemSel,		MAKE_ACTION_SEQUENCE(itemSel_protoSel_actions)},
+	{S_ItemSel, T_ProtoEnter,	S_Error,		MAKE_ACTION_SEQUENCE(error_actions)},
+	{S_ItemSel, T_PartnoSel,	S_ItemSel,		MAKE_ACTION_SEQUENCE(itemSel_partnoSel_actions)},
+	{S_ItemSel, T_PartnoEnter,	S_ItemEnter,	MAKE_ACTION_SEQUENCE(itemSel_partnoEnter_actions)},
+	{S_ItemSel, T_NewPart,		S_PartnoSel,	MAKE_ACTION_SEQUENCE(item2partActions)},
+
+	{S_ItemEnter, T_ItemSel,		S_ItemSel,		MAKE_ACTION_SEQUENCE(itemEnter_itemSel_actions)},
+	{S_ItemEnter, T_ItemEnter,		S_ItemEnter,	MAKE_ACTION_SEQUENCE(itemEnter_itemEnter_actions)},
+	{S_ItemEnter, T_PartnoSel,		S_Error,		MAKE_ACTION_SEQUENCE(error_actions)},
+	{S_ItemEnter, T_PartnoEnter,	S_ItemEnter,	MAKE_ACTION_SEQUENCE(itemEnter_partnoEnter_actions)},
+	{S_ItemEnter, T_ProtoSel,		S_ItemEnter,	MAKE_ACTION_SEQUENCE(itemEnter_protoSel_actions)},
+	{S_ItemEnter, T_ProtoEnter,		S_Error,		MAKE_ACTION_SEQUENCE(error_actions)},
+
+	{S_PartnoSel, T_ItemSel,	S_PartnoSel,	MAKE_ACTION_SEQUENCE(partnoSel_itemSel_actions)},
+	{S_PartnoSel, T_ItemEnter,	S_PartnoSel,	MAKE_ACTION_SEQUENCE(partnoSel_itemEnter_actions)},
+	{S_PartnoSel, T_PartnoEnter, S_PartnoSel,	MAKE_ACTION_SEQUENCE(partnoSel_partnoEnter_actions)},
+	{S_PartnoSel, T_ProtoSel,	S_PartnoSel,	MAKE_ACTION_SEQUENCE(partnoSel_protoSel_actions)},
+	{S_PartnoSel, T_ProtoEnter, S_Error,		MAKE_ACTION_SEQUENCE(error_actions)},
+	{S_PartnoSel, T_PartnoSel,	S_Error,		MAKE_ACTION_SEQUENCE(error_actions)},
+
+	{S_PartnoEnter, T_ItemSel,		S_PartnoSel,	MAKE_ACTION_SEQUENCE(partnoEnter_itemSel_actions)},
+	{S_PartnoEnter, T_ItemEnter,	S_PartnoEnter,	MAKE_ACTION_SEQUENCE(partnoEnter_itemEnter_actions)},
+	{S_PartnoEnter, T_ProtoSel,		S_PartnoEnter,	MAKE_ACTION_SEQUENCE(partnoEnter_protoSel_actions)},
+	{S_PartnoEnter, T_ProtoEnter,	S_Error,		MAKE_ACTION_SEQUENCE(error_actions)},
+	{S_PartnoEnter, T_PartnoSel,	S_Error,		MAKE_ACTION_SEQUENCE(error_actions)},
+	{S_PartnoEnter, T_PartnoEnter,	S_PartnoEnter,	MAKE_ACTION_SEQUENCE(partnoEnter_partnoEnter_actions)},
+
+	{S_ProtoSel, T_ItemSel,    S_Error,     MAKE_ACTION_SEQUENCE(error_actions)},
+	{S_ProtoSel, T_ItemEnter,  S_Error,     MAKE_ACTION_SEQUENCE(error_actions)},
+	{S_ProtoSel, T_ProtoSel,   S_Error,     MAKE_ACTION_SEQUENCE(error_actions)},
+	{S_ProtoSel, T_ProtoEnter, S_ProtoSel,  MAKE_ACTION_SEQUENCE(protoSel_protoEnter_actions)},
+	{S_ProtoSel, T_PartnoSel,  S_Error,     MAKE_ACTION_SEQUENCE(error_actions)},
+	{S_ProtoSel, T_PartnoEnter,S_Error,     MAKE_ACTION_SEQUENCE(error_actions)},
+};
+
+
 
 //static paramFloatRange_t r0_99999 = { 0, 99999, 80 };
 static paramFloatRange_t r0d001_99999 = { 0.001, 99999, 80 };
@@ -557,62 +796,6 @@ static dynArr_t carDlgSegs_da;
 #define carDlgSegs(N) DYNARR_N( trkSeg_t, carDlgSegs_da, N )
 
 
-typedef enum {
-	T_ItemSel, T_ItemEnter, T_ProtoSel, T_ProtoEnter, T_PartnoSel, T_PartnoEnter,
-	T_InitProto
-} carDlgTransistion_e;
-static char *carDlgTransistion_s[] = {
-	"ItemSel", "ItemEnter", "ProtoSel", "ProtoEnter", "PartnoSel", "PartnoEnter",
-	"InitProto"
-};
-typedef enum {
-	S_Error,
-	S_ItemSel, S_ItemEnter, S_PartnoSel, S_PartnoEnter, S_ProtoSel, S_Waiting
-} carDlgState_e;
-static char *carDlgState_s[] = {
-	"Error",
-	"ItemSel", "ItemEnter", "PartnoSel", "PartnoEnter", "ProtoSel", "Waiting"
-};
-static char *carDlgAction_s[] = {
-	"Return",
-	"SError",
-	"Else",
-	"SItemSel",
-	"SItemEnter",
-	"SPartnoSel",
-	"SPartnoEnter",
-	"SProtoSel",
-	"IsCustom",
-	"IsNewPart",
-	"IsNewProto",
-	"LoadDataFromPartList",
-	"LoadDimsFromStack",
-	"LoadManufListForScale",
-	"LoadManufListAll",
-	"LoadProtoListForManuf",
-	"LoadProtoListAll",
-	"LoadPartnoList",
-	"LoadLists",
-	"LoadDimsFromProtoList",
-	"ConvertDimsToProto",
-	"Redraw",
-	"ClrManuf",
-	"ClrPartnoStr",
-	"ClrNumberStr",
-	"LoadProtoStrFromList",
-	"ShowPartnoList",
-	"HidePartnoList",
-	"PushDims",
-	"PopDims",
-	"PopTitleAndTypeinx",
-	"PopCouplerLength",
-	"ShowControls",
-	"LoadInfoFromUpdateItem",
-	"LoadDataFromUpdatePart",
-	"InitProto",
-	"RecallCouplerLength",
-	"Last"
-};
 static carDlgAction_e stateMachine[7][7][10] = {
 	/* A_SError */{   {A_SError}, {A_SError}, {A_SError}, {A_SError}, {A_SError}, {A_SError}, {A_SError} },
 
@@ -661,83 +844,7 @@ static carDlgAction_e stateMachine[7][7][10] = {
 	}
 };
 
-carDlgAction_e itemNewActions[] = {
-	A_RecallCouplerLength,
-	A_LoadLists,
-	A_IsCustom, 2+3,
-	A_LoadDimsFromProtoList, A_ClrPartnoStr, A_ClrNumberStr,
-	A_Else, 1,
-	A_LoadDataFromPartList,
-	A_ShowControls, A_Return
-};
-carDlgAction_e itemUpdActions[] = { A_LoadInfoFromUpdateItem, /*A_LoadManufListForScale,
-				A_IsCustom, 5,
-						A_LoadProtoListAll, A_HidePartnoList, A_SItemEnter,
-				A_Else, 5,
-						A_LoadProtoListForManuf, A_LoadPartnoList, A_LoadDataFromPartList, A_ShowPartnoList, A_SItemSel,*/
-                                           A_ShowControls, A_Return
-                                         };
 
-static carDlgAction_e partNewActions[] = { A_RecallCouplerLength, A_LoadManufListAll, A_LoadProtoListAll, A_ClrPartnoStr, A_ClrNumberStr, A_SPartnoSel, A_LoadDimsFromProtoList, A_ShowControls, A_Redraw, A_Return };
-static carDlgAction_e partUpdActions[] = { A_LoadDataFromUpdatePart, A_SPartnoSel, A_ShowControls, A_Return };
-
-static carDlgAction_e protoNewActions[] = { A_InitProto, A_SProtoSel, A_ShowControls, A_Return };
-static carDlgAction_e protoUpdActions[] = { A_InitProto, A_SProtoSel, A_ShowControls, A_Return };
-
-static carDlgAction_e item2partActions[] = {
-	A_PushDims, A_LoadManufListAll, A_LoadProtoListAll,
-	A_IsCustom, 0+1,
-	A_ClrManuf,
-	A_SPartnoSel,
-	A_ShowControls, A_Return
-};
-static carDlgAction_e part2itemActions[] = {
-	A_IsNewPart, 2+0,
-	A_Else, 1,
-	A_PopTitleAndTypeinx,
-	A_LoadLists,
-	A_IsCustom, 2+1,
-	A_LoadDimsFromProtoList,
-	A_Else, 1,
-	A_LoadDataFromPartList,
-#ifdef LATER
-	A_IsNewPart, 2+0,
-	A_Else, 1,
-	A_LoadDimsFromStack,
-#endif
-	A_ShowControls,
-	A_Return
-};
-
-static carDlgAction_e item2protoActions[] = { A_PushDims, A_ConvertDimsToProto, A_SProtoSel, A_ShowControls, A_Return };
-static carDlgAction_e proto2itemActions[] = {
-	A_IsCustom, 2+2+3,
-	A_IsNewProto, 2+3,
-	A_LoadProtoListAll,
-	A_PopCouplerLength,
-	A_LoadDimsFromProtoList,
-	A_Else, 2,
-	A_LoadDimsFromStack,
-	A_LoadProtoStrFromList,
-	A_ShowControls,
-	A_Return
-};
-
-static carDlgAction_e part2protoActions[] = { A_PushDims, A_ConvertDimsToProto, A_SProtoSel, A_ShowControls, A_Return };
-static carDlgAction_e proto2partActions[] = {
-	A_IsNewProto, 2+3,
-	A_LoadProtoListAll,
-	A_PopCouplerLength,
-	A_LoadDimsFromProtoList,
-	A_Else, 2,
-	A_LoadDimsFromStack,
-	A_LoadProtoStrFromList,
-	A_ShowControls,
-	A_Return
-};
-
-// new state machine is at bottom of file
-static void CarDlgStateMachineNew(carDlgTransistion_e transition);
 
 #define CARDLG_STK_SIZE (2)
 int carDlgStkPtr = 0;
@@ -2378,7 +2485,10 @@ static void CarDlgNewDesc( void )
 	carDlgUpdatePartPtr = NULL;
 	carDlgNumberStr[0] = '\0';
 	ParamLoadControl( &carDlgPG, I_CD_NUMBER );
-	CarDlgDoStateActions( item2partActions );
+
+	// CarDlgDoStateActions( item2partActions );
+	CarDlgStateMachine_ProcessTransition(T_NewPart);
+
 	carDlgChanged = 0;
 }
 
@@ -2825,9 +2935,31 @@ EXPORT void CarDlgAddProto( void )
 	carDlgUpdateProtoPtr = NULL;
 	currState = S_Waiting;
 	DoCarPartDlg(protoNewActions);
+
 	CarDlgStateMachine_ProcessTransition(T_InitProto);
 
 	wShow(carDlgPG.win);
+}
+
+void CarDlgUpdProto(void)
+{
+	DoCarPartDlg(protoUpdActions);
+	currState = S_Waiting;
+
+	CarDlgStateMachine_ProcessTransition(T_InitProtoUpd);
+
+	wShow(carDlgPG.win);
+}
+
+void CarDlgUpdPart(void)
+{
+	DoCarPartDlg(partUpdActions);
+	currState = S_Waiting;
+
+	CarDlgStateMachine_ProcessTransition(T_InitPartUpd);
+
+	wShow(carDlgPG.win);
+
 }
 
 EXPORT void CarDlgAddDesc( void )
@@ -2840,20 +2972,37 @@ EXPORT void CarDlgAddDesc( void )
 	carDlgUpdatePartPtr = NULL;
 	carDlgNumberStr[0] = '\0';
 	ParamLoadControl( &carDlgPG, I_CD_NUMBER );
+
+	currState = S_Waiting;
 	DoCarPartDlg( partNewActions );
+
+	CarDlgStateMachine_ProcessTransition(T_InitPart);
+
+	wShow(carDlgPG.win);
 }
-
+
+EXPORT void CarDlgAddItem(void)
+{
+	currState = S_Waiting;
+
+	DoCarPartDlg(itemNewActions);
+
+	CarDlgStateMachine_ProcessTransition(T_InitItem);
+
+	wShow(carDlgPG.win);
+}
 
 
+EXPORT void CarDlgUpdItem(void)
+{
+	currState = S_Waiting;
 
+	DoCarPartDlg(itemUpdActions);
 
+	CarDlgStateMachine_ProcessTransition(T_InitItemUpd);
 
-
-
-
-
-
-
+	wShow(carDlgPG.win);
+}
 
 
 static void CarDlgChange( long changes )
@@ -2944,7 +3093,7 @@ static int CarPartCustMgmProc(
 			return FALSE;
 		}
 		carDlgUpdatePartPtr = partP;
-		DoCarPartDlg( partUpdActions );
+		CarDlgUpdPart( );
 		return TRUE;
 	case CUSTMGM_CAN_DELETE:
 		return TRUE;
@@ -2986,7 +3135,7 @@ static int CarProtoCustMgmProc(
 			return FALSE;
 		}
 		carDlgUpdateProtoPtr = protoP;
-		DoCarPartDlg( protoUpdActions );
+		CarDlgUpdProto( );
 		return TRUE;
 	case CUSTMGM_CAN_DELETE:
 		return TRUE;
@@ -3072,98 +3221,6 @@ EXPORT void CarCustMgmLoad( void )
  This way you get benefits immediately without file management complexity!
  */
 
- // Essential macros - put these near the top of your file
-#define ACTION_COUNT(arr) (sizeof(arr) / sizeof(arr[0]))
-
-#define MAKE_ACTION_SEQUENCE(actions_array) \
-    { actions_array, ACTION_COUNT(actions_array) }
-
-#define EMPTY_ACTION_SEQUENCE \
-    { NULL, 0 }
-
-// action sequence
-typedef struct {
-	carDlgAction_e* actions;
-	int action_count;
-} CarDlgActionSequence_t;
-
-// the transition table
-typedef struct {
-	carDlgState_e from_state;
-	carDlgTransistion_e transition;
-	carDlgState_e to_state;
-	CarDlgActionSequence_t action_sequence;
-} CarDlgStateTransition_t;
-
-void CarDlgStateMachine_Initialize(carDlgState_e initial_state);
-BOOL_T CarDlgStateMachine_ProcessTransition(carDlgTransistion_e transition);
-
-
-// Action sequences for item selection
-static carDlgAction_e itemSel_itemSel_actions[] = { A_LoadProtoListForManuf, A_LoadPartnoList, A_LoadDataFromPartList, A_Redraw, A_Return };
-static carDlgAction_e itemSel_itemEnter_actions[] = { A_SItemEnter, A_LoadProtoListAll, A_ClrPartnoStr, A_ClrNumberStr, A_LoadDimsFromProtoList, A_Redraw, A_HidePartnoList, A_Return};
-static carDlgAction_e itemSel_protoSel_actions[] = { A_LoadPartnoList, A_LoadDataFromPartList, A_Redraw };
-static carDlgAction_e itemSel_partnoSel_actions[] = { A_LoadDataFromPartList, A_Redraw, A_Return };
-static carDlgAction_e itemSel_partnoEnter_actions[] = { A_SItemEnter, A_LoadProtoListAll, A_HidePartnoList };
-
-static carDlgAction_e itemEnter_itemSel_actions[] = { A_SItemSel, A_LoadProtoListForManuf, A_LoadPartnoList, A_LoadDataFromPartList, A_Redraw, A_ShowPartnoList };
-static carDlgAction_e itemEnter_itemEnter_actions[] = { A_Return };
-static carDlgAction_e itemEnter_protoSel_actions[] = { A_LoadDimsFromProtoList, A_Redraw };
-static carDlgAction_e itemEnter_partnoEnter_actions[] = { A_Return };
-
-static carDlgAction_e partnoSel_itemSel_actions[] = { A_SPartnoSel };
-static carDlgAction_e partnoSel_itemEnter_actions[] = { A_SPartnoSel };
-static carDlgAction_e partnoSel_protoSel_actions[] = { A_SPartnoSel, A_LoadDimsFromProtoList, A_Redraw };
-
-// Action sequences for part number
-static carDlgAction_e partnoEnter_itemSel_actions[] = { A_SPartnoSel };
-static carDlgAction_e partnoEnter_itemEnter_actions[] = { A_SPartnoEnter };
-static carDlgAction_e partnoEnter_protoSel_actions[] = { A_SPartnoEnter, A_LoadDimsFromProtoList, A_Redraw };
-static carDlgAction_e partnoEnter_partnoEnter_actions[] = { A_SPartnoEnter };
-
-// Action sequences for prototype
-static carDlgAction_e error_actions[] = { A_SError, A_Return };
-static carDlgAction_e protoSel_protoEnter_actions[] = { A_SProtoSel };
-
-// New state transition table (start small, grow as you migrate)
-static CarDlgStateTransition_t newStateTable[] = {
-
-	{S_Waiting, T_InitProto,	S_ProtoSel,		{protoNewActions, ACTION_COUNT(protoNewActions)}},
-	
-	{S_ItemSel, T_ItemSel,		S_ItemSel,		MAKE_ACTION_SEQUENCE(itemSel_itemSel_actions)}, 
-	{S_ItemSel, T_ItemEnter,	S_ItemEnter,	MAKE_ACTION_SEQUENCE(itemSel_itemEnter_actions)},
-	{S_ItemSel, T_ProtoSel,		S_ItemSel,		MAKE_ACTION_SEQUENCE(itemSel_protoSel_actions)},
-	{S_ItemSel, T_ProtoEnter,	S_Error,		MAKE_ACTION_SEQUENCE(error_actions)},
-	{S_ItemSel, T_PartnoSel,	S_ItemSel,		MAKE_ACTION_SEQUENCE(itemSel_partnoSel_actions)},
-	{S_ItemSel, T_PartnoEnter,	S_ItemEnter,	MAKE_ACTION_SEQUENCE(itemSel_partnoEnter_actions)},
-
-	{S_ItemEnter, T_ItemSel,		S_ItemSel,		MAKE_ACTION_SEQUENCE(itemEnter_itemSel_actions)},
-	{S_ItemEnter, T_ItemEnter,		S_ItemEnter,	MAKE_ACTION_SEQUENCE(itemEnter_itemEnter_actions)},
-	{S_ItemEnter, T_PartnoSel,		S_Error,		MAKE_ACTION_SEQUENCE(error_actions)},
-	{S_ItemEnter, T_PartnoEnter,	S_ItemEnter,	MAKE_ACTION_SEQUENCE(itemEnter_partnoEnter_actions)},
-	{S_ItemEnter, T_ProtoSel,		S_ItemEnter,	MAKE_ACTION_SEQUENCE(itemEnter_protoSel_actions)},
-	{S_ItemEnter, T_ProtoEnter,		S_Error,		MAKE_ACTION_SEQUENCE(error_actions)}, 
-
-	{S_PartnoSel, T_ItemSel,	S_PartnoSel,	MAKE_ACTION_SEQUENCE(partnoSel_itemSel_actions)},
-	{S_PartnoSel, T_ItemEnter,	S_PartnoSel,	MAKE_ACTION_SEQUENCE(partnoSel_itemEnter_actions)},
-	{S_PartnoSel, T_ProtoSel,	S_PartnoSel,	MAKE_ACTION_SEQUENCE(partnoSel_protoSel_actions)},
-	{S_PartnoSel, T_ProtoEnter, S_Error,		MAKE_ACTION_SEQUENCE(error_actions)},
-	{S_PartnoSel, T_PartnoSel,	S_Error,		MAKE_ACTION_SEQUENCE(error_actions)}, 
-
-	{S_PartnoEnter, T_ItemSel,		S_PartnoSel,	MAKE_ACTION_SEQUENCE(partnoEnter_itemSel_actions)},
-	{S_PartnoEnter, T_ItemEnter,	S_PartnoEnter,	MAKE_ACTION_SEQUENCE(partnoEnter_itemEnter_actions)},
-	{S_PartnoEnter, T_ProtoSel,		S_PartnoEnter,	MAKE_ACTION_SEQUENCE(partnoEnter_protoSel_actions)},
-	{S_PartnoEnter, T_ProtoEnter,	S_Error,		MAKE_ACTION_SEQUENCE(error_actions)},
-	{S_PartnoEnter, T_PartnoSel,	S_Error,		MAKE_ACTION_SEQUENCE(error_actions)},
-	{S_PartnoEnter, T_PartnoEnter,	S_PartnoEnter,	MAKE_ACTION_SEQUENCE(partnoEnter_partnoEnter_actions)},
-
-	{S_ProtoSel, T_ItemSel,    S_Error,     MAKE_ACTION_SEQUENCE(error_actions)},
-	{S_ProtoSel, T_ItemEnter,  S_Error,     MAKE_ACTION_SEQUENCE(error_actions)},
-	{S_ProtoSel, T_ProtoSel,   S_Error,     MAKE_ACTION_SEQUENCE(error_actions)},
-	{S_ProtoSel, T_ProtoEnter, S_ProtoSel,  MAKE_ACTION_SEQUENCE(protoSel_protoEnter_actions)},
-	{S_ProtoSel, T_PartnoSel,  S_Error,     MAKE_ACTION_SEQUENCE(error_actions)},
-	{S_ProtoSel, T_PartnoEnter,S_Error,     MAKE_ACTION_SEQUENCE(error_actions)},
-};
 
 // Context for safety
 static struct {
