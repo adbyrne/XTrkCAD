@@ -26,7 +26,6 @@
 #include "fileio.h"
 #include "layout.h"
 #include "param.h"
-#include "paths.h"
 #include "track.h"
 #include "include/paramfile.h"
 #include "common-ui.h"
@@ -34,7 +33,6 @@
 #include "include/cars.h"
 #include "listelem.h"
 #include "tabstring.h"
-//#include "transform_pts.h"
 #include "carsprivate.h"
 
 
@@ -63,17 +61,18 @@ extern int log_carList;
 typedef enum {
 	T_ItemSel, T_ItemEnter, T_ProtoSel, T_ProtoEnter, T_PartnoSel, T_PartnoEnter,
 	T_InitProto, T_InitPart, T_InitItem, T_InitProtoUpd, T_InitPartUpd, T_InitItemUpd,
-	T_NewPart
+	T_NewPart, T_NewPartDone, T_NewProto, T_NewProtoDone
 } carDlgTransistion_e;
 static char* carDlgTransistion_s[] = {
 	"ItemSel", "ItemEnter", "ProtoSel", "ProtoEnter", "PartnoSel", "PartnoEnter",
 	"InitProto", "InitPart", "InitItem", "InitProtoUpd", "InitPartUpd", "InitItemUpd",
-	"NewPart"
+	"NewPart", "NewPartDone", "NewProto", "NewProtoDone"
 };
 typedef enum {
 	S_Error,
 	S_ItemSel, S_ItemEnter, S_PartnoSel, S_PartnoEnter, S_ProtoSel, S_Waiting
 } carDlgState_e;
+
 static char* carDlgState_s[] = {
 	"Error",
 	"ItemSel", "ItemEnter", "PartnoSel", "PartnoEnter", "ProtoSel", "Waiting"
@@ -153,11 +152,6 @@ static carDlgAction_e part2itemActions[] = {
 	A_LoadDimsFromProtoList,
 	A_Else, 1,
 	A_LoadDataFromPartList,
-#ifdef LATER
-	A_IsNewPart, 2 + 0,
-	A_Else, 1,
-	A_LoadDimsFromStack,
-#endif
 	A_ShowControls,
 	A_Return
 };
@@ -252,6 +246,9 @@ static CarDlgStateTransition_t newStateTable[] = {
 	{S_ItemSel, T_PartnoSel,	S_ItemSel,		MAKE_ACTION_SEQUENCE(itemSel_partnoSel_actions)},
 	{S_ItemSel, T_PartnoEnter,	S_ItemEnter,	MAKE_ACTION_SEQUENCE(itemSel_partnoEnter_actions)},
 	{S_ItemSel, T_NewPart,		S_PartnoSel,	MAKE_ACTION_SEQUENCE(item2partActions)},
+	{S_ItemSel, T_NewProto,		S_ProtoSel,		MAKE_ACTION_SEQUENCE(item2protoActions)},
+	{S_ItemSel, T_NewProtoDone, S_ItemSel,      MAKE_ACTION_SEQUENCE(proto2itemActions)},
+	{S_ItemSel, T_NewPartDone,  S_ItemSel,		MAKE_ACTION_SEQUENCE(part2itemActions)},
 
 	{S_ItemEnter, T_ItemSel,		S_ItemSel,		MAKE_ACTION_SEQUENCE(itemEnter_itemSel_actions)},
 	{S_ItemEnter, T_ItemEnter,		S_ItemEnter,	MAKE_ACTION_SEQUENCE(itemEnter_itemEnter_actions)},
@@ -266,7 +263,10 @@ static CarDlgStateTransition_t newStateTable[] = {
 	{S_PartnoSel, T_ProtoSel,	S_PartnoSel,	MAKE_ACTION_SEQUENCE(partnoSel_protoSel_actions)},
 	{S_PartnoSel, T_ProtoEnter, S_Error,		MAKE_ACTION_SEQUENCE(error_actions)},
 	{S_PartnoSel, T_PartnoSel,	S_Error,		MAKE_ACTION_SEQUENCE(error_actions)},
-
+	{S_PartnoSel, T_NewPart,    S_ItemSel,		MAKE_ACTION_SEQUENCE(part2itemActions)},
+	{S_PartnoSel, T_NewProto, S_ProtoSel,		MAKE_ACTION_SEQUENCE(part2protoActions)},
+	{S_PartnoSel, T_NewProtoDone, S_PartnoSel, MAKE_ACTION_SEQUENCE(proto2partActions)},
+	
 	{S_PartnoEnter, T_ItemSel,		S_PartnoSel,	MAKE_ACTION_SEQUENCE(partnoEnter_itemSel_actions)},
 	{S_PartnoEnter, T_ItemEnter,	S_PartnoEnter,	MAKE_ACTION_SEQUENCE(partnoEnter_itemEnter_actions)},
 	{S_PartnoEnter, T_ProtoSel,		S_PartnoEnter,	MAKE_ACTION_SEQUENCE(partnoEnter_protoSel_actions)},
@@ -280,6 +280,7 @@ static CarDlgStateTransition_t newStateTable[] = {
 	{S_ProtoSel, T_ProtoEnter, S_ProtoSel,  MAKE_ACTION_SEQUENCE(protoSel_protoEnter_actions)},
 	{S_ProtoSel, T_PartnoSel,  S_Error,     MAKE_ACTION_SEQUENCE(error_actions)},
 	{S_ProtoSel, T_PartnoEnter,S_Error,     MAKE_ACTION_SEQUENCE(error_actions)},
+	{S_ProtoSel, T_NewProtoDone, S_PartnoSel, MAKE_ACTION_SEQUENCE(proto2partActions)}
 };
 
 
@@ -1580,7 +1581,7 @@ static void CarDlgDoActions(
 
 	memset( reload, 0, sizeof reload );
 	while ( 1 ) {
-		LOG( log_carDlgState, 2, ( "Action = %s\n", carDlgAction_s[*actions] ) )
+		LOG( log_carDlgState, 2, ( " Action = %s\n", carDlgAction_s[*actions] ) )
 		switch ( *actions++ ) {
 		case A_Return:
 			for ( inx=0; inx<COUNT( carDlgPLs ); inx++ )
@@ -1906,10 +1907,12 @@ static void CarDlgDoStateActions(
 static void CarDlgStateMachine(
         carDlgTransistion_e transistion )
 {
-	//LOG( log_carDlgState, 1, ( "S_%s[T_%s]\n", carDlgState_s[currState],
+	//LOG( log_carDlgState, 1, ( "S_%s[T_%s] ==>\n", carDlgState_s[currState],
 	//                           carDlgTransistion_s[transistion] ) )
-	//CarDlgDoStateActions( stateMachine[currState][transistion] );
+
 	CarDlgStateMachineNew(transistion);
+
+	LOG(log_carDlgState, 1, ("==> S_%s\n", carDlgState_s[currState]))
 }
 
 
@@ -2505,11 +2508,14 @@ static void CarDlgNewProto( void )
 	}
 	carDlgUpdateProtoPtr = NULL;
 	carDlgNewProtoPtr = NULL;
-	if ( S_ITEM ) {
-		CarDlgDoStateActions( item2protoActions );
-	} else {
-		CarDlgDoStateActions( part2protoActions );
-	}
+
+	CarDlgStateMachine_ProcessTransition(T_NewProto);
+
+	//if ( S_ITEM ) {
+	//	CarDlgDoStateActions( item2protoActions );
+	//} else {
+	//	CarDlgDoStateActions( part2protoActions );
+	//}
 	carDlgChanged = 0;
 }
 
@@ -2532,14 +2538,21 @@ static void CarDlgClose( wWin_p win )
 		oldState = currState;
 		currState = carDlgStk[carDlgStkPtr].state;
 		carDlgChanged = carDlgStk[carDlgStkPtr].changed;
-		if ( oldState == S_ProtoSel )
-			if ( S_PART ) {
-				CarDlgDoStateActions( proto2partActions );
-			} else {
-				CarDlgDoStateActions( proto2itemActions );
-			} else {
-			CarDlgDoStateActions( part2itemActions );
+		if (oldState == S_ProtoSel) {
+			CarDlgStateMachine_ProcessTransition(T_NewProtoDone);
 		}
+		else {
+			CarDlgStateMachine_ProcessTransition(T_NewPartDone);
+		}
+
+		//	if ( S_PART ) {
+		//		CarDlgDoStateActions( proto2partActions );
+		//	} else {
+		//		CarDlgDoStateActions( proto2itemActions );
+		//	} else {
+		//	CarDlgDoStateActions( part2itemActions );
+		//}
+		
 	} else {
 		wTextClear( (wText_p)carDlgPLs[I_CD_NOTES].control );
 		wHide( carDlgPG.win );
@@ -3239,7 +3252,7 @@ static const CarDlgStateTransition_t* FindNewTransition(carDlgState_e state, car
 
 // New state machine processor (hybrid - falls back to old system)
 static void CarDlgStateMachineNew(carDlgTransistion_e transition) {
-	LOG(log_carDlgState, 1, (" ==> S_%s[T_%s]\n", carDlgState_s[currState], carDlgTransistion_s[transition]));
+	LOG(log_carDlgState, 1, ("==> S_%s[T_%s]\n", carDlgState_s[currState], carDlgTransistion_s[transition]));
 
 	if (g_carDlgSMContext.in_transition) {
 		LOG(log_carDlgState, 1, ("State machine busy\n"));
@@ -3249,19 +3262,20 @@ static void CarDlgStateMachineNew(carDlgTransistion_e transition) {
 	// Try new table first
 	const CarDlgStateTransition_t* entry = FindNewTransition(currState, transition);
 	if (entry) {
-		//LOG(log_carDlgState, 2, ("Using NEW state machine\n"));
+		LOG(log_carDlgState, 2, (" Using NEW state machine\n"));
 		g_carDlgSMContext.in_transition = TRUE;
 
 		if (entry->action_sequence.actions) {
 			CarDlgDoActions(entry->action_sequence.actions); // Use existing function!
 		}
 		currState = entry->to_state;
+		LOG(log_carDlgState, 1, ("==> S_%s\n", carDlgState_s[currState]));
 
 		g_carDlgSMContext.in_transition = FALSE;
 	}
 	else {
 		// Fall back to old system
-		LOG(log_carDlgState, 2, ("Using OLD state machine\n"));
+		LOG(log_carDlgState, 2, (" Using OLD state machine\n"));
 		CarDlgDoStateActions(stateMachine[currState][transition]);
 	}
 }
@@ -3273,6 +3287,7 @@ void CarDlgStateMachine_Initialize(carDlgState_e initial_state) {
 }
 
 BOOL_T CarDlgStateMachine_ProcessTransition(carDlgTransistion_e transition) {
+
 	CarDlgStateMachineNew(transition);
 	return TRUE; // Simplified for now
 }
