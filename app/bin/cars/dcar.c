@@ -20,6 +20,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include <errno.h>
+
 #include "cselect.h"
 #include "ctrain.h"
 #include "custom.h"
@@ -44,9 +46,9 @@ extern int log_carList;
 
 /**
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * 
+ *
  * The state machine .
- * 
+ *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
 
@@ -77,6 +79,48 @@ static char* carDlgState_s[] = {
 	"Error",
 	"ItemSel", "ItemEnter", "PartnoSel", "PartnoEnter", "ProtoSel", "Waiting"
 };
+
+typedef enum carDlgAction {
+	A_Return,
+	A_SError,
+	A_Else,
+	A_SItemSel,
+	A_SItemEnter,
+	A_SPartnoSel,
+	A_SPartnoEnter,
+	A_SProtoSel,
+	A_IsCustom,
+	A_IsNewPart,
+	A_IsNewProto,
+	A_LoadDataFromPartList,
+	A_LoadDimsFromStack,
+	A_LoadManufListForScale,
+	A_LoadManufListAll,
+	A_LoadProtoListForManuf,
+	A_LoadProtoListAll,
+	A_LoadPartnoList,
+	A_LoadLists,
+	A_LoadDimsFromProtoList,
+	A_ConvertDimsToProto,
+	A_Redraw,
+	A_ClrManuf,
+	A_ClrPartnoStr,
+	A_ClrNumberStr,
+	A_LoadProtoStrFromList,
+	A_ShowPartnoList,
+	A_HidePartnoList,
+	A_PushDims,
+	A_PopDims,
+	A_PopTitleAndTypeinx,
+	A_PopCouplerLength,
+	A_ShowControls,
+	A_LoadInfoFromUpdateItem,
+	A_LoadDataFromUpdatePart,
+	A_InitProto,
+	A_RecallCouplerLength,
+	A_Last
+} carDlgAction_e;
+
 static char* carDlgAction_s[] = {
 	"Return",
 	"SError",
@@ -266,7 +310,7 @@ static CarDlgStateTransition_t newStateTable[] = {
 	{S_PartnoSel, T_NewPart,    S_ItemSel,		MAKE_ACTION_SEQUENCE(part2itemActions)},
 	{S_PartnoSel, T_NewProto, S_ProtoSel,		MAKE_ACTION_SEQUENCE(part2protoActions)},
 	{S_PartnoSel, T_NewProtoDone, S_PartnoSel, MAKE_ACTION_SEQUENCE(proto2partActions)},
-	
+
 	{S_PartnoEnter, T_ItemSel,		S_PartnoSel,	MAKE_ACTION_SEQUENCE(partnoEnter_itemSel_actions)},
 	{S_PartnoEnter, T_ItemEnter,	S_PartnoEnter,	MAKE_ACTION_SEQUENCE(partnoEnter_itemEnter_actions)},
 	{S_PartnoEnter, T_ProtoSel,		S_PartnoEnter,	MAKE_ACTION_SEQUENCE(partnoEnter_protoSel_actions)},
@@ -299,7 +343,8 @@ extern dynArr_t carItemInfo_da;
 #define carItemInfo(N) DYNARR_N( carItem_t*, carItemInfo_da, N )
 dynArr_t carItemHotbar_da;
 #define carItemHotbar(N)			DYNARR_N( carItem_p, carItemHotbar_da, N )
-static char* CarItemHotbarProc(hotBarProc_e op, void* data, drawCmd_p d, coOrd* origP);
+static char* CarItemHotbarProc(hotBarProc_e op, void* data, drawCmd_p d,
+                               coOrd* origP);
 
 
 static char* FormatCarTitle(carItem_p item, long mode);
@@ -335,8 +380,8 @@ static long carHotbarContents[] = { 0x0005, 0x0002, 0x0012, 0x0012, 0x0001, 0x00
 
 
 static int Cmp_carHotbar(
-	const void* ptr1,
-	const void* ptr2)
+        const void* ptr1,
+        const void* ptr2)
 {
 	carItem_p item1 = *(carItem_p*)ptr1;
 	carItem_p item2 = *(carItem_p*)ptr2;
@@ -346,29 +391,28 @@ static int Cmp_carHotbar(
 
 	TabStringExtract(item1->title, 7, tabs1);
 	TabStringExtract(item2->title, 7, tabs2);
-	for (mode = carHotbarModes[carHotbarModeInx], rc = 0; mode != 0 && rc == 0; mode >>= 4) {
+	for (mode = carHotbarModes[carHotbarModeInx], rc = 0; mode != 0
+	     && rc == 0; mode >>= 4) {
 		switch (mode & 0x000F) {
 		case 4:
 			rc = (int)(item1->index - item2->index);
 			break;
 		case 1:
 			rc = strncasecmp(tabs1[T_MANUF].ptr, tabs2[T_MANUF].ptr,
-				max(tabs1[T_MANUF].len, tabs2[T_MANUF].len));
+			                 max(tabs1[T_MANUF].len, tabs2[T_MANUF].len));
 			break;
 		case 3:
 			rc = strncasecmp(tabs1[T_PART].ptr, tabs2[T_PART].ptr, max(tabs1[T_PART].len,
-				tabs2[T_PART].len));
+			                 tabs2[T_PART].len));
 			break;
 		case 2:
 			if (item1->type < item2->type) {
 				rc = -1;
-			}
-			else if (item1->type > item2->type) {
+			} else if (item1->type > item2->type) {
 				rc = 1;
-			}
-			else {
+			} else {
 				rc = strncasecmp(tabs1[T_PROTO].ptr, tabs2[T_PROTO].ptr,
-					max(tabs1[T_PROTO].len, tabs2[T_PROTO].len));
+				                 max(tabs1[T_PROTO].len, tabs2[T_PROTO].len));
 			}
 			break;
 		}
@@ -383,22 +427,23 @@ EXPORT void AddHotBarCarDesc(void)
 	coOrd size;
 
 	LOG(log_carDlgDims, 1, ("AddHotBarCarDesc/load carItemHB: carItemHB.cnt:%d\n",
-		carItemInfo_da.cnt));
+	                        carItemInfo_da.cnt));
 	DYNARR_SET(carItem_t*, carItemHotbar_da, carItemInfo_da.cnt);
 	memcpy(&carItemHotbar(0), &carItemInfo(0),
-		carItemInfo_da.cnt * sizeof carItemHotbar(0));
+	       carItemInfo_da.cnt * sizeof carItemHotbar(0));
 	qsort(&carItemHotbar(0), carItemHotbar_da.cnt, sizeof carItemHotbar(0),
-		Cmp_carHotbar);
+	      Cmp_carHotbar);
 	for (inx = 0, item0 = NULL; inx < carItemHotbar_da.cnt; inx++) {
 		item1 = carItemHotbar(inx);
 		if (item1->car && !IsTrackDeleted(item1->car)) {
 			continue;
 		}
-		if (FIT_NONE == CompatibleScale(FIT_CAR, item1->scaleInx, GetLayoutCurScale())) {
+		if (FIT_NONE == CompatibleScale(FIT_CAR, item1->scaleInx,
+		                                GetLayoutCurScale())) {
 			continue;
 		}
 		if ((carHotbarModes[carHotbarModeInx] & 0xF000) != 0 || (item0 == NULL
-			|| Cmp_carHotbar(&item0, &item1) != 0)) {
+		        || Cmp_carHotbar(&item0, &item1) != 0)) {
 #ifdef DESCFIX
 			orig.x = -item->orig.x;
 			orig.y = -item->orig.y;
@@ -408,8 +453,8 @@ EXPORT void AddHotBarCarDesc(void)
 			size.y = item1->dim.carWidth;
 			LOG(log_carDlgDims, 1, ("AddHotBarElement( %d: %s\n", inx, item1->title));
 			AddHotBarElement(FormatCarTitle(item1, carHotbarContents[carHotbarModeInx]),
-				size, orig, FALSE, FALSE, (60.0 * 12.0 / curScaleRatio), I2VP(inx),
-				CarItemHotbarProc);
+			                 size, orig, FALSE, FALSE, (60.0 * 12.0 / curScaleRatio), I2VP(inx),
+			                 CarItemHotbarProc);
 		}
 		item0 = item1;
 	}
@@ -450,16 +495,16 @@ void CarUpdateHotbarList()
 	w -= wControlGetPosX(newCarControls[0]) + 4;
 	if (w > 20) {
 		wListSetSize((wList_p)newCarControls[0], w,
-			wControlGetHeight(newCarControls[0]));
+		             wControlGetHeight(newCarControls[0]));
 	}
 }
 
 
 static char* CarItemHotbarProc(
-	hotBarProc_e op,
-	void* data,
-	drawCmd_p d,
-	coOrd* origP)
+        hotBarProc_e op,
+        void* data,
+        drawCmd_p d,
+        coOrd* origP)
 {
 	wIndex_t carItemInx = (wIndex_t)VP2L(data);
 	carItem_p item;
@@ -480,9 +525,9 @@ static char* CarItemHotbarProc(
 		if ((mode & 0xF000) == 0) {
 			wListClear((wList_p)newCarPLs[0].control);
 			for (inx = carItemInx;
-				inx < carItemHotbar_da.cnt && (inx == carItemInx
-					|| Cmp_carHotbar(&carItemHotbar(carItemInx), &carItemHotbar(inx)) == 0);
-				inx++) {
+			     inx < carItemHotbar_da.cnt && (inx == carItemInx
+			                                    || Cmp_carHotbar(&carItemHotbar(carItemInx), &carItemHotbar(inx)) == 0);
+			     inx++) {
 				item = carItemHotbar(inx);
 				if (item->car && !IsTrackDeleted(item->car)) {
 					continue;
@@ -503,10 +548,9 @@ static char* CarItemHotbarProc(
 			w -= wControlGetPosX(newCarControls[0]) + 4;
 			if (w > 20) {
 				wListSetSize((wList_p)newCarControls[0], w,
-					wControlGetHeight(newCarControls[0]));
+				             wControlGetHeight(newCarControls[0]));
 			}
-		}
-		else {
+		} else {
 			InfoSubstituteControls(NULL, NULL);
 			cp = CarItemDescribe(item, 0, NULL);
 			InfoMessage(cp);
@@ -522,7 +566,7 @@ static char* CarItemHotbarProc(
 			CarItemGetSegs(item);
 		}
 		DrawSegs(d, *origP, 0.0, item->segPtr, item->segCnt, trackGauge,
-			wDrawColorBlack);
+		         wDrawColorBlack);
 		return NULL;
 	}
 	return NULL;
@@ -530,9 +574,9 @@ static char* CarItemHotbarProc(
 
 
 static void CarItemHotbarUpdate(
-	paramGroup_p pg,
-	int inx,
-	void* data)
+        paramGroup_p pg,
+        int inx,
+        void* data)
 {
 	wIndex_t carItemInx;
 	carItem_p item;
@@ -542,7 +586,7 @@ static void CarItemHotbarUpdate(
 			return;
 		}
 		carItemInx = (wIndex_t)VP2L(wListGetItemContext((wList_p)
-			pg->paramPtr[inx].control, carItemInx));
+		                            pg->paramPtr[inx].control, carItemInx));
 		CHECK(carItemInx < carItemHotbar_da.cnt);
 		item = carItemHotbar(carItemInx);
 		if (item != NULL) {
@@ -795,56 +839,6 @@ static paramGroup_t carDlgPG = { "carpart", 0, carDlgPLs, COUNT( carDlgPLs ) };
 
 static dynArr_t carDlgSegs_da;
 #define carDlgSegs(N) DYNARR_N( trkSeg_t, carDlgSegs_da, N )
-
-
-static carDlgAction_e stateMachine[7][7][10] = {
-	/* A_SError */{   {A_SError}, {A_SError}, {A_SError}, {A_SError}, {A_SError}, {A_SError}, {A_SError} },
-
-	/*A_SItemSel*/{
-		/*T_ItemSel*/    { A_LoadProtoListForManuf, A_LoadPartnoList, A_LoadDataFromPartList, A_Redraw },
-		/*T_ItemEnter*/  { A_SItemEnter, A_LoadProtoListAll, A_ClrPartnoStr, A_ClrNumberStr, A_LoadDimsFromProtoList, A_Redraw, A_HidePartnoList },
-		/*T_ProtoSel*/   { A_LoadPartnoList, A_LoadDataFromPartList, A_Redraw },
-		/*T_ProtoEnter*/ { A_SError },
-		/*T_PartnoSel*/  { A_LoadDataFromPartList, A_Redraw },
-		/*T_PartnoEnter*/{ A_SItemEnter, A_LoadProtoListAll, A_HidePartnoList }
-	},
-
-	/*A_SItemEnter*/{
-		/*T_ItemSel*/    { A_SItemSel, A_LoadProtoListForManuf, A_LoadPartnoList, A_LoadDataFromPartList, A_Redraw, A_ShowPartnoList },
-		/*T_ItemEnter*/  { A_Return },
-		/*T_ProtoSel*/   { A_LoadDimsFromProtoList, A_Redraw },
-		/*T_ProtoEnter*/ { A_SError },
-		/*T_PartnoSel*/  { A_SError },
-		/*T_PartnoEnter*/{ A_Return }
-	},
-
-	/*A_SPartnoSel*/{
-		/*T_ItemSel*/   { A_SPartnoSel },
-		/*T_ItemEnter*/ { A_SPartnoSel },
-		/*T_ProtoSel*/   { A_SPartnoSel, A_LoadDimsFromProtoList, A_Redraw },
-		/*T_ProtoEnter*/ { A_SError },
-		/*T_PartnoSel*/  { A_SError }
-	},
-
-	/*A_SPartnoEnter*/{
-		/*T_ItemSel*/   { A_SPartnoSel },
-		/*T_ItemEnter*/ { A_SPartnoEnter },
-		/*T_ProtoSel*/   { A_SPartnoEnter, A_LoadDimsFromProtoList, A_Redraw },
-		/*T_ProtoEnter*/ { A_SError },
-		/*T_PartnoSel*/  { A_SError },
-		/*T_PartnoEnter*/{ A_SPartnoEnter }
-	},
-
-	/*A_SProtoSel*/{
-		/*T_ItemSel*/   { A_SError },
-		/*T_ItemEnter*/ { A_SError },
-		/*T_ProtoSel*/   { A_SError },
-		/*T_ProtoEnter*/ { A_SProtoSel },
-		/*T_PartnoSel*/  { A_SError },
-		/*T_PartnoEnter*/{ A_SError }
-	}
-};
-
 
 
 #define CARDLG_STK_SIZE (2)
@@ -1396,12 +1390,12 @@ static BOOL_T CarDlgLoadLists(
 	}
 	if ( isItem ) {
 		parentP = (carPartParent_p)wListGetItemContext( (wList_p)
-		                carDlgPLs[I_CD_MANUF_LIST].control, carDlgManufInx );
+		          carDlgPLs[I_CD_MANUF_LIST].control, carDlgManufInx );
 		if ( parentP ) {
 			if ( tabs ) { TabStringCpy( carDlgProtoStr, &tabs[T_PROTO] ); }
 			if ( CarDlgLoadProtoList( carDlgManufStr, scale, TRUE ) || !tabs ) {
 				parentP = (carPartParent_p)wListGetItemContext( (wList_p)
-				                carDlgPLs[I_CD_PROTOTYPE_LIST].control, carDlgProtoInx );
+				          carDlgPLs[I_CD_PROTOTYPE_LIST].control, carDlgProtoInx );
 				if ( parentP ) {
 					if ( tabs ) { TabStringCpy( carDlgPartnoStr, &tabs[T_PART] ); }
 					if ( CarDlgLoadPartList( parentP ) || ( (!tabs) && carDlgPartnoInx>=0 ) ) {
@@ -1553,8 +1547,7 @@ static void CarDlgShowControls( void )
 
 
 
-static void CarDlgDoActions(
-        carDlgAction_e * actions )
+static void CarDlgDoActions( carDlgAction_e * actions, int action_count )
 {
 	carPart_p partP;
 	carPartParent_p parentP;
@@ -1580,7 +1573,8 @@ static void CarDlgDoActions(
 		reload[I_CD_PARTNO_LIST] = TRUE
 
 	memset( reload, 0, sizeof reload );
-	while ( 1 ) {
+
+	for(int i = 0; i < action_count; i++) {
 		LOG( log_carDlgState, 2, ( " Action = %s\n", carDlgAction_s[*actions] ) )
 		switch ( *actions++ ) {
 		case A_Return:
@@ -1662,7 +1656,7 @@ static void CarDlgDoActions(
 			break;
 		case A_LoadProtoListForManuf:
 			parentP = (carPartParent_p)wListGetItemContext( (wList_p)
-			                carDlgPLs[I_CD_MANUF_LIST].control, carDlgManufInx );
+			          carDlgPLs[I_CD_MANUF_LIST].control, carDlgManufInx );
 			CarDlgLoadProtoList( parentP->manuf, parentP->scale, TRUE );
 			reload[I_CD_PROTOKIND_LIST] = TRUE;
 			reload[I_CD_PROTOTYPE_LIST] = TRUE;
@@ -1674,7 +1668,7 @@ static void CarDlgDoActions(
 			break;
 		case A_LoadPartnoList:
 			parentP = (carPartParent_p)wListGetItemContext( (wList_p)
-			                carDlgPLs[I_CD_PROTOTYPE_LIST].control, carDlgProtoInx );
+			          carDlgPLs[I_CD_PROTOTYPE_LIST].control, carDlgProtoInx );
 			CarDlgLoadPartList( parentP );
 			reload[I_CD_PARTNO_LIST] = TRUE;
 			break;
@@ -1687,7 +1681,7 @@ static void CarDlgDoActions(
 			break;
 		case A_LoadDimsFromProtoList:
 			protoP = (carProto_p)wListGetItemContext( (wList_p)
-			                carDlgPLs[I_CD_PROTOTYPE_LIST].control, carDlgProtoInx );
+			         carDlgPLs[I_CD_PROTOTYPE_LIST].control, carDlgProtoInx );
 			if ( protoP ) {
 				CarDlgLoadDimsFromProto( protoP );
 				carDlgTypeInx = CarProtoFindTypeCode( protoP->type );
@@ -1737,7 +1731,7 @@ static void CarDlgDoActions(
 			                sizeof carDlgProtoStr, NULL, NULL );
 #ifdef LATER
 			protoP = (carProto_p)wListGetItemContext( (wList_p)
-			                carDlgPLs[I_CD_PROTOTYPE_LIST].control, carDlgProtoInx );
+			         carDlgPLs[I_CD_PROTOTYPE_LIST].control, carDlgProtoInx );
 			if ( protoP ) {
 				carDlgTypeInx = CarProtoFindTypeCode( protoP->type );
 				carDlgIsLoco = (protoP->options&CAR_DESC_IS_LOCO)!=0;
@@ -1894,23 +1888,21 @@ static void CarDlgDoActions(
 			break;
 		}
 	}
+
+	// Apply any remaining control updates
+	for (inx = 0; inx < COUNT(carDlgPLs); inx++) {
+		if (reload[inx]) {
+			ParamLoadControl(&carDlgPG, inx);
+		}
+	}
 }
 
-
-static void CarDlgDoStateActions(
-        carDlgAction_e * actions )
-{
-	CarDlgDoActions( actions );
-	LOG( log_carDlgState, 1, ( " ==> S_%s\n", carDlgState_s[currState] ) )
-}
-
-static void CarDlgStateMachine(
-        carDlgTransistion_e transistion )
+static void CarDlgStateMachine(        carDlgTransistion_e transition )
 {
 	//LOG( log_carDlgState, 1, ( "S_%s[T_%s] ==>\n", carDlgState_s[currState],
-	//                           carDlgTransistion_s[transistion] ) )
+	//                           carDlgTransistion_s[transition] ) )
 
-	CarDlgStateMachineNew(transistion);
+	CarDlgStateMachineNew(transition);
 
 	LOG(log_carDlgState, 1, ("==> S_%s\n", carDlgState_s[currState]))
 }
@@ -2041,7 +2033,7 @@ static void CarDlgUpdate(
 			parentP = NULL;
 			if ( carDlgProtoInx >= 0 ) {
 				parentP = (carPartParent_p)wListGetItemContext( (wList_p)
-				                pg->paramPtr[I_CD_PROTOTYPE_LIST].control, carDlgProtoInx );
+				          pg->paramPtr[I_CD_PROTOTYPE_LIST].control, carDlgProtoInx );
 			}
 			CarDlgLoadProtoList( carDlgManufStr, (parentP?parentP->scale:0), FALSE );
 		}
@@ -2095,7 +2087,7 @@ static void CarDlgUpdate(
 			carDlgRoadnameStr[0] = '\0';
 		} else if ( *(long*)valueP > 0 ) {
 			roadnameMapP = (roadnameMap_p)wListGetItemContext( (wList_p)
-			                pg->paramPtr[I_CD_ROADNAME_LIST].control, (wIndex_t)*(long*)valueP );
+			               pg->paramPtr[I_CD_ROADNAME_LIST].control, (wIndex_t)*(long*)valueP );
 			strcpy( carDlgRoadnameStr, roadnameMapP->roadname );
 		} else {
 			wListGetValues( (wList_p)pg->paramPtr[I_CD_ROADNAME_LIST].control,
@@ -2119,7 +2111,7 @@ static void CarDlgUpdate(
 		} else if ( carDlgDim.carLength < 100/ratio ) {
 			return;
 		} else if ( carDlgCouplerLength != 0 && ( carDlgDim.coupledLength == 0
-		                || carDlgCouplerLengthClock >= carDlgCoupledLengthClock ) ) {
+		            || carDlgCouplerLengthClock >= carDlgCoupledLengthClock ) ) {
 			len = carDlgDim.carLength+carDlgCouplerLength*2.0;
 			if ( len > 0 ) {
 				carDlgDim.coupledLength = len;
@@ -2127,7 +2119,7 @@ static void CarDlgUpdate(
 			}
 			carDlgCarLengthClock = ++carDlgClock;
 		} else if ( carDlgDim.coupledLength != 0 && ( carDlgCouplerLength == 0
-		                || carDlgCoupledLengthClock > carDlgCouplerLengthClock ) ) {
+		            || carDlgCoupledLengthClock > carDlgCouplerLengthClock ) ) {
 			len = (carDlgDim.coupledLength-carDlgDim.carLength)/2.0;
 			if ( len > 0 ) {
 				carDlgCouplerLength = len;
@@ -2151,7 +2143,7 @@ static void CarDlgUpdate(
 		} else if ( carDlgDim.coupledLength < 100/ratio ) {
 			return;
 		} else if ( carDlgDim.carLength != 0 && ( carDlgCouplerLength == 0
-		                || carDlgCarLengthClock > carDlgCouplerLengthClock ) ) {
+		            || carDlgCarLengthClock > carDlgCouplerLengthClock ) ) {
 			len = (carDlgDim.coupledLength-carDlgDim.carLength)/2.0;
 			if ( len > 0 ) {
 				carDlgCouplerLength = len;
@@ -2164,7 +2156,7 @@ static void CarDlgUpdate(
 			}
 			carDlgCoupledLengthClock = ++carDlgClock;
 		} else if ( carDlgCouplerLength != 0 && ( carDlgDim.carLength == 0
-		                || carDlgCouplerLengthClock >= carDlgCarLengthClock ) ) {
+		            || carDlgCouplerLengthClock >= carDlgCarLengthClock ) ) {
 			len = carDlgDim.coupledLength-carDlgCouplerLength*2.0;
 			if ( len > 0 ) {
 				carDlgDim.carLength = len;
@@ -2185,7 +2177,7 @@ static void CarDlgUpdate(
 		} else if ( carDlgCouplerLength < 1/ratio ) {
 			return;
 		} else if ( carDlgDim.carLength != 0 && ( carDlgDim.coupledLength == 0
-		                || carDlgCarLengthClock >= carDlgCoupledLengthClock ) ) {
+		            || carDlgCarLengthClock >= carDlgCoupledLengthClock ) ) {
 			len = carDlgDim.carLength+carDlgCouplerLength*2.0;
 			if ( len > 0 ) {
 				carDlgDim.coupledLength = len;
@@ -2193,7 +2185,7 @@ static void CarDlgUpdate(
 			}
 			carDlgCouplerLengthClock = ++carDlgClock;
 		} else if ( carDlgDim.coupledLength != 0 && ( carDlgDim.carLength == 0
-		                || carDlgCoupledLengthClock > carDlgCarLengthClock ) ) {
+		            || carDlgCoupledLengthClock > carDlgCarLengthClock ) ) {
 			len = carDlgDim.coupledLength-carDlgCouplerLength*2.0;
 			if ( len > 0 ) {
 				carDlgDim.carLength = len;
@@ -2303,7 +2295,7 @@ static void CarDlgUpdate(
 	case I_CD_CURPRC:
 		carDlgChanged++;
 		*(FLOAT_T*)(pg->paramPtr[inx].context) = strtod( (char*)
-		                pg->paramPtr[inx].valueP, &cp );
+		        pg->paramPtr[inx].valueP, &cp );
 		if ( cp==NULL || *cp!='\0' ) {
 			*(FLOAT_T*)(pg->paramPtr[inx].context) = -1;
 			ok = FALSE;
@@ -2489,7 +2481,6 @@ static void CarDlgNewDesc( void )
 	carDlgNumberStr[0] = '\0';
 	ParamLoadControl( &carDlgPG, I_CD_NUMBER );
 
-	// CarDlgDoStateActions( item2partActions );
 	CarDlgStateMachine_ProcessTransition(T_NewPart);
 
 	carDlgChanged = 0;
@@ -2511,11 +2502,6 @@ static void CarDlgNewProto( void )
 
 	CarDlgStateMachine_ProcessTransition(T_NewProto);
 
-	//if ( S_ITEM ) {
-	//	CarDlgDoStateActions( item2protoActions );
-	//} else {
-	//	CarDlgDoStateActions( part2protoActions );
-	//}
 	carDlgChanged = 0;
 }
 
@@ -2540,25 +2526,37 @@ static void CarDlgClose( wWin_p win )
 		carDlgChanged = carDlgStk[carDlgStkPtr].changed;
 		if (oldState == S_ProtoSel) {
 			CarDlgStateMachine_ProcessTransition(T_NewProtoDone);
-		}
-		else {
+		} else {
 			CarDlgStateMachine_ProcessTransition(T_NewPartDone);
 		}
-
-		//	if ( S_PART ) {
-		//		CarDlgDoStateActions( proto2partActions );
-		//	} else {
-		//		CarDlgDoStateActions( proto2itemActions );
-		//	} else {
-		//	CarDlgDoStateActions( part2itemActions );
-		//}
-		
 	} else {
 		wTextClear( (wText_p)carDlgPLs[I_CD_NOTES].control );
 		wHide( carDlgPG.win );
 	}
 }
 
+static void
+SetNextPartno(char* partnoStr)
+{
+	unsigned long number;
+	char* cp;
+	number = strtol(partnoStr, &cp, 10);
+
+	partnoStr[0] = '\0';
+
+	if (errno != ERANGE)
+	{
+		if (cp && *cp == 0 && number > 0) {
+			sprintf(partnoStr, "%lu", number + 1);
+		}
+	}
+}
+
+SetCarDlgFieldInvalid(int index, BOOL_T bInvalid)
+{
+	carDlgPLs[index].bInvalid = bInvalid;
+	ParamHilite(carDlgPG.win, carDlgPLs[index].control, FALSE);
+}
 
 static void CarDlgOk( void * unused )
 {
@@ -2608,11 +2606,21 @@ static void CarDlgOk( void * unused )
 	if ( S_ITEM && (carDlgPurchDate<0 || carDlgServiceDate<0 || carDlgPurchPrice <0
 	                || carDlgCurrPrice<0)) { return; }
 
-	if ( S_PROTO && carDlgProtoStr[0] == '\0' ) { return; }
+	if (S_PROTO && carDlgProtoStr[0] == '\0') { 
+		SetCarDlgFieldInvalid(I_CD_PROTOTYPE_STR, TRUE); 
+		return;
+	}
 
-	if ( S_PART && (carDlgManufStr[0] == '\0' || carDlgPartnoStr[0] == '\0')) { return; }
+	if ( S_PART && (carDlgManufStr[0] == '\0' || carDlgPartnoStr[0] == '\0')) { 
+		SetCarDlgFieldInvalid(I_CD_MANUF_LIST, carDlgManufStr[0] == '\0');
+		SetCarDlgFieldInvalid(I_CD_PARTNO_STR, carDlgPartnoStr[0] == '\0');
+		return; 
+	}
 
-	if ( S_ITEM && carDlgItemIndex <= 0 ) { return; }
+	if ( S_ITEM && carDlgItemIndex <= 0 ) { 
+		SetCarDlgFieldInvalid(I_CD_ITEMINDEX, TRUE);
+		return;
+	}
 
 	if ( (!S_PROTO) && carDlgCouplerMount != 0 ) {
 		options |= CAR_DESC_COUPLER_MODE_BODY;
@@ -2805,14 +2813,11 @@ static void CarDlgOk( void * unused )
 		}
 	} else if ( S_PART ) {
 		if ( carDlgUpdatePartPtr==NULL ) {
-			number = strtol( carDlgPartnoStr, &cp, 10 );
-			if ( cp && *cp == 0 && number > 0 ) {
-				sprintf( carDlgPartnoStr, "%ld", number+1 );
-			} else {
-				carDlgPartnoStr[0] = '\0';
-			}
-			carDlgNumberStr[0] = '\0';
+			SetNextPartno(carDlgPartnoStr);
 			ParamLoadControl( &carDlgPG, I_CD_PARTNO_STR );
+			SetCarDlgFieldInvalid(I_CD_PARTNO_STR, FALSE);
+
+			carDlgNumberStr[0] = '\0';
 			ParamLoadControl( &carDlgPG, I_CD_NUMBER );
 			return;
 		}
@@ -2820,6 +2825,7 @@ static void CarDlgOk( void * unused )
 		if ( carDlgUpdateProtoPtr==NULL ) {
 			carDlgProtoStr[0] = '\0';
 			ParamLoadControl( &carDlgPG, I_CD_PROTOTYPE_STR );
+			SetCarDlgFieldInvalid(I_CD_PROTOTYPE_STR, FALSE );
 			return;
 		}
 	}
@@ -3205,93 +3211,69 @@ EXPORT void CarCustMgmLoad( void )
 	}
 }
 
-
 /**
- * New state machine. With claude's help the state machine was refactored 
+ * New state machine. With claude's help the state machine was refactored
  * and hopefully made easier to understand.
- * 
+ *
  */
 
- /*
- MIGRATION PLAN:
-
- WEEK 1: Option 1 - Add new code to end of existing file
- - Add new state machine at end of carDlg.c
- - Replace CarDlgStateMachine() function
- - Test S_ProtoSel with new system
- - Fix the bug you mentioned
-
- WEEK 2: Migrate more states
- - Add S_PartnoEnter to new table
- - Add S_ItemSel to new table
- - Test each one
-
- WEEK 3: Clean up
- - Remove old stateMachine[7][7][10] array
- - Remove old CarDlgDoStateActions function
- - Optionally split into separate files
-
- This way you get benefits immediately without file management complexity!
- */
-
-
-// Context for safety
 static struct {
 	BOOL_T in_transition;
 } g_carDlgSMContext = { FALSE };
 
-// Find transition in new table
-static const CarDlgStateTransition_t* FindNewTransition(carDlgState_e state, carDlgTransistion_e trans) {
+
+static const CarDlgStateTransition_t* FindNewTransition(carDlgState_e state,
+        carDlgTransistion_e trans)
+{
 	for (int i = 0; i < ACTION_COUNT(newStateTable); i++) {
-		if (newStateTable[i].from_state == state && newStateTable[i].transition == trans) {
+		if (newStateTable[i].from_state == state
+		    && newStateTable[i].transition == trans) {
 			return &newStateTable[i];
 		}
 	}
 	return NULL;
 }
 
-// New state machine processor (hybrid - falls back to old system)
-static void CarDlgStateMachineNew(carDlgTransistion_e transition) {
-	LOG(log_carDlgState, 1, ("==> S_%s[T_%s]\n", carDlgState_s[currState], carDlgTransistion_s[transition]));
+static void CarDlgStateMachineNew(carDlgTransistion_e transition)
+{
+	LOG(log_carDlgState, 1, ("==> S_%s[T_%s]\n", carDlgState_s[currState],
+	                         carDlgTransistion_s[transition]));
 
 	if (g_carDlgSMContext.in_transition) {
 		LOG(log_carDlgState, 1, ("State machine busy\n"));
 		return;
 	}
 
-	// Try new table first
 	const CarDlgStateTransition_t* entry = FindNewTransition(currState, transition);
 	if (entry) {
-		LOG(log_carDlgState, 2, (" Using NEW state machine\n"));
 		g_carDlgSMContext.in_transition = TRUE;
 
 		if (entry->action_sequence.actions) {
-			CarDlgDoActions(entry->action_sequence.actions); // Use existing function!
+			CarDlgDoActions(entry->action_sequence.actions,
+			                entry->action_sequence.action_count); 
 		}
 		currState = entry->to_state;
 		LOG(log_carDlgState, 1, ("==> S_%s\n", carDlgState_s[currState]));
 
 		g_carDlgSMContext.in_transition = FALSE;
-	}
-	else {
-		// Fall back to old system
-		LOG(log_carDlgState, 2, (" Using OLD state machine\n"));
-		CarDlgDoStateActions(stateMachine[currState][transition]);
+	} else {
+		// Invalid transition
+		LOG(log_carDlgState, 2, (" Invalid transition!\n"));
 	}
 }
 
 // Public interface
-void CarDlgStateMachine_Initialize(carDlgState_e initial_state) {
+void CarDlgStateMachine_Initialize(carDlgState_e initial_state)
+{
 	currState = initial_state;
 	g_carDlgSMContext.in_transition = FALSE;
 }
 
-BOOL_T CarDlgStateMachine_ProcessTransition(carDlgTransistion_e transition) {
+BOOL_T CarDlgStateMachine_ProcessTransition(carDlgTransistion_e transition)
+{
 
 	CarDlgStateMachineNew(transition);
-	return TRUE; // Simplified for now
+	return TRUE;
 }
-
-
 
 

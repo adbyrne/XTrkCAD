@@ -230,55 +230,12 @@ extern paramGroup_t carInvPG;
 void CarInvListAdd(carItem_p item);
 void CarInvListUpdate(carItem_p item);
 
-typedef enum carDlgAction {
-	A_Return,
-	A_SError,
-	A_Else,
-	A_SItemSel,
-	A_SItemEnter,
-	A_SPartnoSel,
-	A_SPartnoEnter,
-	A_SProtoSel,
-	A_IsCustom,
-	A_IsNewPart,
-	A_IsNewProto,
-	A_LoadDataFromPartList,
-	A_LoadDimsFromStack,
-	A_LoadManufListForScale,
-	A_LoadManufListAll,
-	A_LoadProtoListForManuf,
-	A_LoadProtoListAll,
-	A_LoadPartnoList,
-	A_LoadLists,
-	A_LoadDimsFromProtoList,
-	A_ConvertDimsToProto,
-	A_Redraw,
-	A_ClrManuf,
-	A_ClrPartnoStr,
-	A_ClrNumberStr,
-	A_LoadProtoStrFromList,
-	A_ShowPartnoList,
-	A_HidePartnoList,
-	A_PushDims,
-	A_PopDims,
-	A_PopTitleAndTypeinx,
-	A_PopCouplerLength,
-	A_ShowControls,
-	A_LoadInfoFromUpdateItem,
-	A_LoadDataFromUpdatePart,
-	A_InitProto,
-	A_RecallCouplerLength,
-	A_Last
-} carDlgAction_e;
-
 void CarDlgAddItem(void);
 void CarDlgUpdItem(void);
-//extern carDlgAction_e itemUpdActions[];
 extern long carDlgItemIndex;
 extern int log_carDlgDims;
 
 BOOL_T CheckCarDlgItemIndex(long* index);
-void DoCarPartDlg(carDlgAction_e* actions);
 
 
 #endif // !HAVE_CARSPRIVATE_H

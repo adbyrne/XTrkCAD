@@ -279,6 +279,7 @@ static int Cmp_carInvItem(
 
 static void CarInvListLoad(void)
 {
+	wIndex_t selected; 
 
 	qsort(&carItemInfo(0), carItemInfo_da.cnt, sizeof carItemInfo(0),
 	      Cmp_carInvItem);
@@ -289,10 +290,12 @@ static void CarInvListLoad(void)
 		item = carItemInfo(inx);
 		CarInvLoadItem(item);
 	}
+
+	selected = wListGetIndex((wList_p)carInvPLs[I_CI_LIST].control);
 	ParamControlShow(&carInvPG, I_CI_LIST, TRUE);
-	ParamControlActive(&carInvPG, I_CI_EDIT, FALSE);
-	ParamControlActive(&carInvPG, I_CI_DELETE, FALSE);
-	wButtonSetLabel((wButton_p)(carInvPLs[I_CI_DELETE].control), "");
+	ParamControlActive(&carInvPG, I_CI_EDIT, selected >= 0 );
+	ParamControlActive(&carInvPG, I_CI_DELETE, selected >= 0);
+	//wButtonSetLabel((wButton_p)(carInvPLs[I_CI_DELETE].control), "");
 	ParamControlActive(&carInvPG, I_CI_EXPORT_CSV, carItemInfo_da.cnt > 0);
 	ParamDialogOkActive(&carInvPG, FALSE);
 }
