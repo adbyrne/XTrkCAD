@@ -17,7 +17,7 @@
 # Another group of icons are used as dialog decorations.
 # These .png files live in ${CMAKE_CURRENT_SOURCE_DIR}
 
-PROJECT(genbitmaps)
+PROJECT(genbitmaps C)
 
 set (IMG3S
 	background benchwork bezier-line bezier-track block bottom box

@@ -1,7 +1,7 @@
 #
 # handle translation using gettext
 #
-project(i18n)
+project(i18n C) 
 
 # List of the supported locales.
 set(xtrkcad_locale_ids
