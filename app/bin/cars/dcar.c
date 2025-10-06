@@ -44,6 +44,8 @@ static int log_carDlgList;
 int log_carDlgDims;
 extern int log_carList;
 
+void SetCarDlgFieldInvalid(int index, BOOL_T bInvalid);
+
 /**
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *
@@ -356,7 +358,7 @@ static char* FormatCarTitle(carItem_p item, long mode);
 extern trkSeg_p carProtoSegPtr;
 extern int carProtoSegCnt;
 
-extern BOOL roadnameMapChanged;
+extern BOOL_T roadnameMapChanged;
 
 EXPORT BOOL_T CarCustomSave(
         FILE * f )
@@ -2552,6 +2554,7 @@ SetNextPartno(char* partnoStr)
 	}
 }
 
+void
 SetCarDlgFieldInvalid(int index, BOOL_T bInvalid)
 {
 	carDlgPLs[index].bInvalid = bInvalid;

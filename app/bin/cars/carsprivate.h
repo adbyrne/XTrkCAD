@@ -1,5 +1,5 @@
 #ifndef HAVE_CARSPRIVATE_H
-#define HAVE_CARS_PRIVATE_H
+#define HAVE_CARSPRIVATE_H
 
 #include "common.h"
 #include "draw.h"
@@ -221,7 +221,7 @@ carItem_p CarItemNew(
         long serviceDate);
 
 #define N_CONDLISTMAP			(6)
-nameLongMap_t condListMap[];
+extern nameLongMap_t condListMap[];
 
 EXPORT long CarItemFindIndex(carItem_p item);
 void CarItemGetSegs(carItem_p item);

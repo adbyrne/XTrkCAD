@@ -5,7 +5,7 @@
 
 typedef struct tabString_s{
 	char* ptr;
-	unsigned long len;
+	int len;
 } tabString_t;
 
 typedef struct tabString_s* tabString_p;
@@ -26,8 +26,8 @@ char* TabStringCpy(char* dst, const tabString_t* tab);
 
 int TabStringCmp(char* src, tabString_t* tab);
 
-long TabGetLong(tabString_t* tab);
+long TabGetLong(const tabString_t* tab);
 
-FLOAT_T TabGetFloat(tabString_t* tab);
+FLOAT_T TabGetFloat(const tabString_t* tab);
 
 #endif
