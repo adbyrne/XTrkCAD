@@ -1,4 +1,4 @@
-project(doc)
+project(doc C)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/intro.but.in ${CMAKE_CURRENT_BINARY_DIR}/intro.but)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/hhc.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/hhc.cmake @ONLY)

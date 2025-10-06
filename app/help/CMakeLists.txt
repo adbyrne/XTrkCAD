@@ -1,4 +1,4 @@
-project(messagefile)
+project(messagefile C)
 
 #
 # genhelp is used in ..\bin to generate the tooltip texts

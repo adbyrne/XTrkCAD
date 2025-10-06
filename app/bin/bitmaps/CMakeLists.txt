@@ -1,7 +1,7 @@
 # create resource file to be compiled into the program
 cmake_minimum_required(VERSION 3.20)
 
-message( STATUS "Export option: >${Inkscape_EXPORT}<")
+PROJECT(genbitmaps C)
 
 set (RESOURCE_XML icons.gresource.xml)
 set (RESOURCE_XML_IN ${RESOURCE_XML}.in)
