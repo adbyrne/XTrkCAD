@@ -1,4 +1,4 @@
-project(cornu)
+project(cornu C)
 	
 add_library(xtrkcad-cornu "")
 

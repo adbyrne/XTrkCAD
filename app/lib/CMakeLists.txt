@@ -4,7 +4,7 @@
 # Generate and install a Readme.txt file from markdown if pandoc is available on the system
 # install desktop integration following freedesktop.org specification 
 #
-project(lib)
+project(lib C)
 
 add_subdirectory(params)
 

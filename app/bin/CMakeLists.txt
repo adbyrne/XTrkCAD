@@ -1,4 +1,4 @@
-project(xtrkcad-lib)
+project(xtrkcad-lib C)
 
 include( CheckSymbolExists )
 #

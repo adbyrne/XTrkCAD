@@ -1,4 +1,4 @@
-project(wlib)
+project(wlib C)
 
 add_library( xtrkcad-wlib
 			"")		
