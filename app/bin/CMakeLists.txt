@@ -229,7 +229,6 @@ target_sources(xtrkcad-lib
     utility.h
     validator.c
     validator.h
-    include/dirent.h
     include/levenshtein.h
     include/paramfile.h
     include/paramfilelist.h
@@ -245,7 +244,8 @@ if(WIN32)
 	target_sources(xtrkcad-lib
 		PRIVATE
 			utf8convert.c
-			include/utf8convert.h			
+			include/utf8convert.h
+            include/windows/dirent.h		
 	)
 endif()
 
@@ -261,6 +261,7 @@ target_include_directories(xtrkcad-lib
     PUBLIC
 	${messagefile_BINARY_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_LIST_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
