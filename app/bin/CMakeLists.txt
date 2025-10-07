@@ -267,6 +267,7 @@ target_include_directories(xtrkcad-lib
     PUBLIC
 	${messagefile_BINARY_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_LIST_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${XTRKCAD_CORE_INCLUDE_DIR}
 )
