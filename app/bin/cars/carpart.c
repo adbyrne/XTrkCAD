@@ -34,8 +34,7 @@ static carPartParent_p CarPartParentNew(char* manufP, int manufL, char* protoP, 
 static void CarPartParentDelete(carPartParent_p parentP);
 static void CarPartUnlink(carPart_p partP);
 
-
-int log_carList;
+static int log_carPart;
 
 dynArr_t carPartParent_da;
 
@@ -263,7 +262,7 @@ carPart_p CarPartNew(
 			paramFileIndex != PARAM_CUSTOM) {
 			return partP;
 		}
-		LOG(log_carList, 2, ("new car part: %s (%d) at %d\n", title, paramFileIndex,
+		LOG(log_carPart, 2, ("new car part: %s (%d) at %d\n", title, paramFileIndex,
 			lookupListIndex))
 	}
 	if (partP != NULL) {
@@ -271,7 +270,7 @@ carPart_p CarPartNew(
 		if (partP->title != NULL) {
 			MyFree(partP->title);
 		}
-		LOG(log_carList, 2, ("upd car part: %s (%d)\n", title, paramFileIndex))
+		LOG(log_carPart, 2, ("upd car part: %s (%d)\n", title, paramFileIndex))
 	}
 	LoadRoadnameList(&tabs[T_ROADNAME], &tabs[T_REPMARK]);
 	parentP = CarPartParentNew(tabs[T_MANUF].ptr, tabs[T_MANUF].len,
@@ -298,7 +297,7 @@ carPart_p CarPartNew(
 	return partP;
 }
 
-void CarPartDelete(carPart_p partP)
+static void CarPartDelete(carPart_p partP)
 {
 	if (partP == NULL) {
 		return;
@@ -344,7 +343,7 @@ void DeleteCarPart(int fileIndex)
 }
 
 
-BOOL_T CarPartRead(char* line)
+static BOOL_T CarPartRead(char* line)
 {
 	char scale[10];
 	long options;
@@ -467,4 +466,53 @@ BOOL_T CheckAvail(
 		}
 	}
 	return FALSE;
+}
+
+int CarPartCustMgmProc(int cmd, void * data )
+{
+	tabString_t tabs[7];
+	int rd_inx;
+
+	carPart_p partP = (carPart_p)data;
+	switch ( cmd ) {
+	case CUSTMGM_DO_COPYTO:
+		return CarPartWrite( customMgmF, partP );
+	case CUSTMGM_CAN_EDIT:
+		return TRUE;
+	case CUSTMGM_DO_EDIT:
+		if ( partP == NULL ) {
+			return FALSE;
+		}
+		carDlgUpdatePartPtr = partP;
+		CarDlgUpdPart( );
+		return TRUE;
+	case CUSTMGM_CAN_DELETE:
+		return TRUE;
+	case CUSTMGM_DO_DELETE:
+		CarPartDelete( partP );
+		return TRUE;
+	case CUSTMGM_GET_TITLE:
+		TabStringExtract( partP->title, 7, tabs );
+		rd_inx = T_REPMARK;
+		if ( tabs[T_REPMARK].len == 0 ) {
+			rd_inx = T_ROADNAME;
+		}
+		sprintf( message, "\t%s\t%s\t%.*s\t%s%s%.*s%s%.*s%s%.*s",
+		         partP->parent->manuf,
+		         GetScaleName(partP->parent->scale),
+		         tabs[T_PART].len, tabs[T_PART].ptr,
+		         partP->parent->proto,
+		         tabs[T_DESC].len?", ":"", tabs[T_DESC].len, tabs[T_DESC].ptr,
+		         tabs[rd_inx].len?", ":"", tabs[rd_inx].len, tabs[rd_inx].ptr,
+		         tabs[T_NUMBER].len?" ":"", tabs[T_NUMBER].len, tabs[T_NUMBER].ptr );
+		return TRUE;
+	}
+	return FALSE;
+}
+
+void
+InitCarPart(void)
+{
+		AddParam( "CARPART ", CarPartRead);
+		log_carPart = LogFindIndex("carPart");
 }

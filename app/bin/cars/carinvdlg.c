@@ -31,6 +31,8 @@
 #include "include/cars.h"
 #include "carsprivate.h"
 
+static int log_carInvDlg = 0;
+
 static wIndex_t carInvInx;
 
 static wIndex_t carInvSort[] = { 0, 1, 2, 3 };
@@ -160,7 +162,7 @@ static void CarInvDlgDeleteShelve(void)
 				}
 				bShowMsg = TRUE;
 			}
-			LOG(log_carDlgDims, 1, ("CarInvDlgDeleteShelve( %d, %s\n", inx,
+			LOG(log_carInvDlg, 1, ("CarInvDlgDeleteShelve( %d, %s\n", inx,
 			                        item->title));
 			wListDelete((wList_p)carInvPLs[I_CI_LIST].control, inx);
 			if (item->title) { MyFree(item->title); }
@@ -187,6 +189,7 @@ static void CarInvDlgDeleteShelve(void)
 	ParamControlActive(&carInvPG, I_CI_DELETE, FALSE);
 	wButtonSetLabel((wButton_p)(carInvPLs[I_CI_DELETE].control), "");
 	ParamControlActive(&carInvPG, I_CI_EXPORT_CSV, carItemInfo_da.cnt > 0);
+	ParamControlActive(&carInvPG, I_CI_PRINT, carItemInfo_da.cnt > 0);
 	ParamDialogOkActive(&carInvPG, FALSE);
 }
 
@@ -297,6 +300,7 @@ static void CarInvListLoad(void)
 	ParamControlActive(&carInvPG, I_CI_DELETE, selected >= 0);
 	//wButtonSetLabel((wButton_p)(carInvPLs[I_CI_DELETE].control), "");
 	ParamControlActive(&carInvPG, I_CI_EXPORT_CSV, carItemInfo_da.cnt > 0);
+	ParamControlActive(&carInvPG, I_CI_PRINT, carItemInfo_da.cnt > 0);
 	ParamDialogOkActive(&carInvPG, FALSE);
 }
 
@@ -1019,7 +1023,7 @@ static void CarInvDlgFind(void* unused)
 	CarGetPos(item->car, &pos, &angle);
 	CarSetVisible(item->car);
 	panCenter = pos;
-	LOG(log_pan, 2, ("PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x,
+	LOG(log_carInvDlg, 2, ("PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x,
 	                 panCenter.y));
 	PanHere(I2VP(0));		// CarInvDlgFind
 }
@@ -1041,4 +1045,11 @@ EXPORT void DoCarDlg(void* unused)
 	}
 	CarInvListLoad();
 	wShow(carInvPG.win);
+}
+
+
+void InitCarInvDlg(void) 
+{
+	ParamRegister( &carInvPG );
+	log_carInvDlg = LogFindIndex("carInvDlg");
 }

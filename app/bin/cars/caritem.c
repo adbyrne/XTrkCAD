@@ -27,7 +27,7 @@
 #include "trkseg.h"
 
 #include "carsprivate.h"
-#include "include/cars.h"
+#include "cars.h"
 
 dynArr_t carItemInfo_da;
 
@@ -256,18 +256,6 @@ EXPORT BOOL_T WriteCars(
 	return rc;
 }
 
-//EXPORT carItem_p CarItemFind(
-//	long itemInx)
-//{
-//	if (itemInx >= 0 && itemInx < carItemInfo_da.cnt) {
-//		return carItemInfo(itemInx);
-//	}
-//	else {
-//		return NULL;
-//	}
-//}
-
-
 EXPORT long CarItemFindIndex(
         carItem_p item)
 {
@@ -370,28 +358,6 @@ EXPORT void CarItemFindCouplerMountPoint(
 	Translate(&pos[0], trvTrk0.pos, angle[0], d[0]);
 	Translate(&pos[1], trvTrk1.pos, angle[1], d[1]);
 
-#ifdef LATER
-	if (trvTrk.trk == NULL || (item->options & CAR_DESC_COUPLER_MODE_BODY) != 0) {
-		couplerOffset = item->dim.coupledLength / 2.0;
-		Translate(&pos, trvTrk.pos, trvTrk.angle, couplerOffset);
-	} else {
-		if (dir) {
-			TraverseTrack2(&trvTrk,
-			               item->dim.truckCenter / 2.0 - item->dim.truckCenterOffset);
-		} else {
-			TraverseTrack2(&trvTrk,
-			               item->dim.truckCenter / 2.0 + item->dim.truckCenterOffset);
-		}
-		/*Translate( &pos1, trvTrk.pos, trvTrk.angle, item->dim.truckCenter/2.0 );*/
-		couplerOffset = (item->dim.coupledLength - item->dim.truckCenter) / 2.0;
-		if (dir) {
-			couplerOffset = couplerOffset + item->dim.truckCenterOffset;
-		} else {
-			couplerOffset = couplerOffset - item->dim.truckCenterOffset;
-		}
-		Translate(&pos, trvTrk.pos, trvTrk.angle, couplerOffset);
-	}
-#endif
 }
 
 EXPORT void CarItemPos(
@@ -646,12 +612,6 @@ EXPORT void CarItemDraw(
 		DrawSegs(d, pos, item->angle - 90.0, item->segPtr, item->segCnt, 0.0, color);
 	}
 
-#ifdef CAR_CLEARANCE
-	if (pencils) {
-		// No code for pencils
-	}
-#endif
-
 	if (drawCarTrucks) {
 
 		length = item->dim.truckCenter / 2.0;
@@ -700,4 +660,3 @@ EXPORT void CarItemDraw(
 		}
 	}
 }
-

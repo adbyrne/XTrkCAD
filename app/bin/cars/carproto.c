@@ -26,13 +26,15 @@
 #include "common.h"
 #include "draw.h"
 #include "fileio.h"
-#include "include/paramfile.h"
+#include "paramfile.h"
 #include "trkseg.h"
 
 #include "listelem.h"
 #include "carsprivate.h"
 
 static int CmpCarProto(void* key, void* elem);
+
+static int log_carPart;
 
 dynArr_t carProto_da;
 
@@ -46,8 +48,6 @@ nameLongMap_t typeListMap[N_TYPELISTMAP] = {
 	{ N_("Other"),  90100 }
 };
 
-trkSeg_p carProtoSegPtr;
-int carProtoSegCnt;
 static BOOL_T carProtoListChanged;
 
 static pts_t dummyOutlineSegPts[5];
@@ -245,7 +245,7 @@ void DeleteCarProto(int fileIndex)
 }
 
 
-BOOL_T CarProtoRead(char* line)
+static BOOL_T CarProtoRead(char* line)
 {
 	char* desc;
 	long options;
@@ -457,4 +457,41 @@ void CarProtoDrawCoupler(
 	RotatePts(COUNT(couplerOutline), p, zero, angle - 90.0);
 	MovePts(COUNT(couplerOutline), p, pos);
 	DrawPoly(d, COUNT(couplerOutline), p, NULL, color, 0, DRAW_FILL);
+}
+
+
+int CarProtoCustMgmProc( int cmd, void * data )
+{
+	carProto_p protoP = (carProto_p)data;
+	switch ( cmd ) {
+	case CUSTMGM_DO_COPYTO:
+		return CarProtoWrite( customMgmF, protoP );
+	case CUSTMGM_CAN_EDIT:
+		return TRUE;
+	case CUSTMGM_DO_EDIT:
+		if ( protoP == NULL ) {
+			return FALSE;
+		}
+		carDlgUpdateProtoPtr = protoP;
+		CarDlgUpdProto( );
+		return TRUE;
+	case CUSTMGM_CAN_DELETE:
+		return TRUE;
+	case CUSTMGM_DO_DELETE:
+		CarProtoDelete( protoP );
+		return TRUE;
+	case CUSTMGM_GET_TITLE:
+		sprintf( message, "\t%s\t\t%s\t%s", _("Prototype"),
+		         _(typeListMap[CarProtoFindTypeCode(protoP->type)].name), protoP->desc );
+		return TRUE;
+	}
+	return FALSE;
+}
+
+void
+InitCarProto(void)
+{
+	AddParam( "CARPROTO ", CarProtoRead );
+
+	log_carPart = LogFindIndex("carPart");
 }

@@ -55,9 +55,9 @@ void RescalePts(
 
 
 void MovePts(
-	int cnt,
-	coOrd* pts,
-	coOrd orig)
+        int cnt,
+        coOrd* pts,
+        coOrd orig)
 {
 	int inx;
 	for (inx = 0; inx < cnt; inx++) {
