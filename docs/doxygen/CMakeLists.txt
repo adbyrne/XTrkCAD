@@ -1,4 +1,4 @@
-project(sourcedoc)
+project(sourcedoc C)
 
 #
 # create source documentation using Doxygen 
