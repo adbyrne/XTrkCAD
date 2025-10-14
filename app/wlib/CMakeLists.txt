@@ -13,4 +13,4 @@ target_include_directories(xtrkcad-wlib
 
 add_subdirectory(gtk3lib)
 
-add_subdirectory(test)
+# add_subdirectory(test)

@@ -107,6 +107,8 @@ struct bitmap {
 	char unused;
 };
 
+enum TIMER_STATE  {INITIAL_DELAY, REPEATED} ;
+
 struct button {
 	wButtonCallBack_p action;
 	wIcon_p icon;

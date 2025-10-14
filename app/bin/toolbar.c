@@ -551,6 +551,7 @@ LoadIconResource(unsigned iconSize)
 
 	MakeFullpath(&pathToResourceFile, wGetAppLibDir(), resourceFiles[iconSize], NULL);
 	if (pathToResourceFile) {
+		printf("Loading icons from: %s\n", pathToResourceFile);
 
 		wLoadResourceFile(pathToResourceFile);
 

@@ -1167,10 +1167,10 @@ typedef enum {
 wControl_p wMenuListCreate( wControl_p m, const char* helpStr, SORTORDER sorder, int max, wMenuListCallBack_p action);
 
 void wMenuListAdd(wControl_p ml, int index, const char* labelStr, const void* attributes);
-const char* wMenuListGet(wControl_p ml, unsigned int index, void** attributes);
+
 void wMenuListClear(wControl_p ml);
 void wMenuListDelete(wControl_p ml, const char* labelStr);
-const char* wMenuListGet(wControl_p ml, unsigned int index, void** attributes);
+const char* wMenuListGet(wControl_p ml, int index, void** attributes);
 int wMenuListGetCount(wControl_p ml);
 
 wControl_p wMenuToggleCreate(

@@ -192,7 +192,6 @@ static wBool_t drawButton(
 
 #define REPEAT_INITIAL_DELAY 500
 #define REPEAT_DELAY 150
-enum TIMER_STATE  {INITIAL_DELAY, REPEATED} ;
 
 
 static gboolean on_button_repeat(gpointer user_data) {

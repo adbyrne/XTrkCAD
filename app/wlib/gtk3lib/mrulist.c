@@ -206,6 +206,7 @@ void * MRURemoveEntry(MRUList* list, const char* label)
  * \param list  list handle
  */
 
+void
 free_element(gpointer data)
 {
 	MRUEntry* queueelement = (MRUEntry*)data;

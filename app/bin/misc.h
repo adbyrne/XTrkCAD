@@ -95,7 +95,7 @@ extern void DoShowWindow(int index, const char * name, void * data);
 extern void wShow( wControl_p window);
 extern void wHide( wControl_p window );
 extern void CloseDemoWindows( void );
-extern void DefaultProc( wWin_p, winProcEvent, void * );
+extern void DefaultProc( wControl_p win, winProcEvent , void * data);
 typedef void (*changeNotificationCallBack_t)( long );
 #define CHANGE_SCALE	(1<<0)
 #define CHANGE_PARAMS	(1<<1)

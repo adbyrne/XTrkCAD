@@ -226,9 +226,11 @@ const char * wGetAppWorkDir(
 				                                 appEtcConfig,
 				                                 appWorkDir );
 				int rc = system( copyConfigCmd );
+
+				g_free(copyConfigCmd);
 			}
 			g_free(appEtcConfig);
-			g_free(copyConfigCmd);
+			
 		}
 	}
 	return appWorkDir;
