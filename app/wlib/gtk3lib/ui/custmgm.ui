@@ -183,63 +183,57 @@
                     </packing>
                 </child>
                 <child>
-                    <object class="GtkBox">
+                  <object class="GtkBox" id="split_button">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <child>
+                      <object class="GtkToggleButton" id="newcar">
+                        <property name="label" translatable="yes">New Car Prototype</property>
                         <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="spacing">6</property>
-                        <child>
-                            <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="margin-right">12</property>
-                                <property name="label" translatable="yes">_New</property>
-                                <property name="use-underline">True</property>
-                                <property name="mnemonic-widget">newtype</property>
-                            </object>
-                            <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                            </packing>
-                        </child>
-                        <child>
-                            <object class="GtkComboBox" id="newtype">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="model">newcartypes</property>
-                                <property name="id-column">0</property>
-                                <child>
-                                    <object class="GtkCellRendererText" />
-                                    <attributes>
-                                        <attribute name="text">3</attribute>
-                                    </attributes>
-                                </child>
-                            </object>
-                            <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                            </packing>
-                        </child>
-                        <child>
-                            <object class="GtkToggleButton" id="newcar">
-                                <property name="label" translatable="yes">Create</property>
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">True</property>
-                            </object>
-                            <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">2</property>
-                            </packing>
-                        </child>
-                    </object>
-                    <packing>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                      </object>
+                      <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">2</property>
-                    </packing>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkMenuButton">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="focus-on-click">False</property>
+                        <property name="receives-default">True</property>
+                        <property name="popup">select_new</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="icon-name">pan-down-symbolic</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <style>
+                      <class name="linked"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
                 </child>
+
             </object>
         </child>
     </object>
@@ -263,24 +257,24 @@
            <!-- <column type="gchararray" />-->
         </columns>
     </object>
-    <object class="GtkListStore" id="newcartypes">
-        <columns>
-            <!-- column-name error color -->
-            <column type="gboolean" />
-            <!-- column-name userdata -->
-            <column type="gpointer" />
-            <!-- column-name icon -->
-            <column type="GdkPixbuf" />
-            <!-- column-name type -->
-            <column type="gchararray" />
-        </columns>
-        <data>
-            <row>
-                <col id="3" translatable="yes">Car Part</col>
-            </row>
-            <row>
-                <col id="3" translatable="yes">Car Prototype</col>
-            </row>
-        </data>
+    <object class="GtkMenu" id="select_new">
+      <property name="visible">True</property>
+      <property name="can-focus">False</property>
+      <child>
+        <object class="GtkMenuItem" id="newproto">
+          <property name="visible">True</property>
+          <property name="can-focus">False</property>
+          <property name="label" translatable="yes">New Car Proto</property>
+          <property name="use-underline">True</property>
+        </object>
+      </child>
+      <child>
+        <object class="GtkMenuItem" id="newpart">
+          <property name="visible">True</property>
+          <property name="can-focus">False</property>
+          <property name="label" translatable="yes">New Car Part</property>
+          <property name="use-underline">True</property>
+        </object>
+      </child>
     </object>
 </interface>

@@ -305,6 +305,16 @@ ScalePush(FLOAT_T value, void* dp)
 
 }
 
+static void
+MenuPush(void *dp)
+{
+	paramData_p p = (paramData_p)dp;
+
+	if(p->valueP) {
+		((void (*)(void))p->valueP)();
+	}
+}
+
 void
 CreateControlText(paramData_p pd, wControl_p parent, unsigned xPos,
                   unsigned yPos, char* helpStr)
@@ -469,7 +479,7 @@ void CreateDrawingArea( wControl_p parent, char* helpStr, paramData_p pd )
 }
 
 static void
-CreateControl(paramData_p pd,char* helpStr,	unsigned x,	unsigned y)
+CreateControl(paramData_p pd, char* helpStr,	unsigned x,	unsigned y)
 {
 	const paramFloatRange_t* floatRangeP;
 	const paramIntegerRange_t* integerRangeP;
@@ -553,11 +563,11 @@ CreateControl(paramData_p pd,char* helpStr,	unsigned x,	unsigned y)
 		break;
 	case PD_MENU:
 		menu = wMenuCreate(win, x, y, helpStr, _(pd->winLabel), pd->winOption);
-		pd->control = menu;
+		//pd->control = menu;
 		break;
 	case PD_MENUITEM:
 		pd->control = wMenuPushCreate(menu, helpStr, _(pd->winLabel), 0,
-		                              ParamMenuPush, pd);
+		                              MenuPush, pd);
 		break;
 	case PD_DRAW:
 		CreateDrawingArea(win, helpStr, pd );

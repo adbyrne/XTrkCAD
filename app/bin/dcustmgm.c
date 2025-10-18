@@ -36,6 +36,8 @@ static void CustomDelete( void * action );
 static void CustomExport( void * action );
 static void CustomDone( void * action );
 static void CustomNewCar( void * action );
+static void CustomNewProto( void );
+static void CustomNewPart( void );
 
 static const char * customTypes[] = { "Car Part", "Car Prototype", NULL };
 static wIndex_t selectedType;
@@ -50,16 +52,21 @@ static paramData_t customPLs[] = {
 #define customSelL		(customPLs[I_CUSTOMLIST].control)
 	{	PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN|PDO_DLGRESIZE|PDO_DLGBOXEND, &customListData, NULL, BL_MANY },
 #define I_CUSTOMNEWTYPE (1)
-	{   PD_COMBOLIST, &selectedType, "newtype", PDO_DLGRESETMARGIN | PDO_LISTINDEX, I2VP(150), N_("Create a new ") },
+	{   PD_MENU, &selectedType, "select_new", 0L, I2VP(150), NULL },
 #define I_CUSTOMNEW     (2)
-	{   PD_BUTTON, CustomNewCar, "newcar", PDO_DLGHORZ| PDO_DLGBOXEND, NULL, N_("Go") },
+	{   PD_BUTTON, NULL, "newcar", PDO_DLGHORZ| PDO_DLGBOXEND, NULL },
 #define I_CUSTOMEDIT	(3)
 	{	PD_BUTTON, CustomEdit, "edit", PDO_DLGCMDBUTTON, NULL},
 #define I_CUSTOMDEL		(4)
 	{	PD_BUTTON, CustomDelete, "delete", 0, NULL},
 #define I_CUSTOMCOPYTO	(5)
 	{	PD_BUTTON, CustomExport, "export", 0, NULL},
+#define I_NEWPROTO	(6)
+	{	PD_MENUITEM, CustomNewProto, "newproto", 0, customPLs + I_CUSTOMNEWTYPE},
+#define I_NEWPART (7)
+	{	PD_MENUITEM, CustomNewPart, "newpart", 0, customPLs + I_CUSTOMNEWTYPE},
 } ;
+
 static paramGroup_t customPG = { "custmgm", PGO_FULLDIALOGFROMBUILDER, customPLs, COUNT( customPLs ) };
 
 
@@ -130,20 +137,44 @@ static void CustomEdit( void * action )
 #endif
 }
 
-static void CustomNewCar( void * action )
-{
+// static void CustomNewCar( void * action )
+// {
 
-	switch(selectedType) {
-	case 1:                 // car prototype
-		CarDlgAddProto();
-		break;
-	case 0:                 // car part
-		CarDlgAddDesc();
-		break;
-	default:
-		break;
-	}
+// 	switch(selectedType) {
+// 	case 1:                 // car prototype
+// 		CarDlgAddProto();
+// 		break;
+// 	case 0:                 // car part
+// 		CarDlgAddDesc();
+// 		break;
+// 	default:
+// 		break;
+// 	}
+// }
+
+static void
+SetSplitButton(paramData_p menuItem, void(* handler)(void))
+{
+	const char *label = wMenuGetLabel(menuItem->control);
+	wButtonSetLabel((customPLs+I_CUSTOMNEW)->control, label);
+
+	printf("%s\n", label);
+
+	customPLs[I_CUSTOMNEW].valueP = handler;
 }
+
+static void
+CustomNewProto(void)
+{
+	SetSplitButton(customPLs + I_NEWPROTO, CarDlgAddProto);
+}
+
+static void
+CustomNewPart(void)
+{
+	SetSplitButton(customPLs + I_NEWPART, CarDlgAddDesc);
+}
+
 
 static void CustomDelete( void * action )
 {
@@ -397,9 +428,9 @@ static void DoCustomMgr( void * junk )
 							NULL, NULL,
 							TRUE, F_RESIZE|F_RECALLSIZE|F_BLOCK,
 		                   CustomDlgUpdate );
-
-		selectedType = 0;
-		wComboBoxSetIndex( (customPLs[I_CUSTOMNEWTYPE].control), selectedType);
+		CustomNewPart();
+		//selectedType = 0;
+		// wComboBoxSetIndex( (customPLs[I_CUSTOMNEWTYPE].control), selectedType);
 
 	} else {
 		wListClear( customSelL );

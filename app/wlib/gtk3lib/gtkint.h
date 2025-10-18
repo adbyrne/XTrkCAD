@@ -170,6 +170,7 @@ struct menu {
 	GSList* radioGroup;			/* radio button group */
 	wMenuTraceCallBack_p traceFunc;
 	void* traceData;
+	long option;
 };
 
 struct menuitem {

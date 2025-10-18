@@ -196,8 +196,11 @@ static void CreateMenuItem(
     int acclKey )
 {
     // create a modifyable copy of the label
-    char *labelcopy = g_strdup(labelStr);
-    g_strdelimit(labelcopy, "&", '_');
+    char *labelcopy = NULL;
+    if(labelStr){
+        labelcopy = g_strdup(labelStr);
+        g_strdelimit(labelcopy, "&", '_');
+    }
 
     switch ( mtype ) {
     case M_SEPARATOR:
@@ -218,8 +221,13 @@ static void CreateMenuItem(
                          mi);
         break;
     case M_PUSH:
-        mi->widget = gtk_menu_item_new_with_mnemonic(
+        if(m->attributes.menu.option == F_DEFINEDINBUILDER)
+        {
+            mi->widget = wlibWidgetFromIdWarn(m->parent, helpStr);
+        } else {
+            mi->widget = gtk_menu_item_new_with_mnemonic(
                               wlibConvertInput(labelcopy));
+        }
         g_signal_connect(mi->widget, "activate",G_CALLBACK(pushMenuItem),
                          mi);
         break;
@@ -506,7 +514,29 @@ void wMenuSetLabel( wMenu_p m, const char * labelStr) {
 }
 
 /**
- * Create a button with a drop down menu
+ * Get the text for a menu entry
+ * 
+ * \param m IN menu entry
+ * \return  pointer to menu label         
+ */
+
+ const char *
+ wMenuGetLabel(wControl_p menuitem) 
+ {
+    g_assert( menuitem != NULL);
+
+    return gtk_menu_item_get_label(menuitem->widget);
+ }
+
+/**
+ * Create a pulldown menu
+ *
+ *  * ### Usage in dialogs
+ *
+ * - Runtime: no
+ * - Builder: yes
+ *
+ * ### Options
  *
  * \param parent 	IN parent window
  * \param x 		IN x position
@@ -518,27 +548,25 @@ void wMenuSetLabel( wMenu_p m, const char * labelStr) {
  */
 
 wMenu_p wMenuCreate(
-    wWin_p	parent,
+    wControl_p	parent,
     wWinPix_t	x,
     wWinPix_t	y,
     const char 	* helpStr,
     const char	* labelStr,
     long	option )
 {
-    wMenu_p m = NULL;
-    // m = wlibAlloc( parent, B_MENU, x, y, labelStr, sizeof( struct wMenu_t ), NULL );
-    // m->mmtype = MM_BUTT;
-    // m->option = option;
-    // m->traceFunc = NULL;
-    // m->traceData = NULL;
-    // wlibComputePos( (wControl_p)m );
+    struct menu *menu;
+    wMenu_p m = wlibControlNew(M_MENU, parent, helpStr, NULL);
+    menu = CONTROL_GET_ATTRIBUTES_PTR(m, menu);
 
-    // m->widget = gtk_button_new();
+    menu->radioGroup = NULL;
+    menu->traceFunc = NULL;
+    menu->traceData = NULL;
 
-    // g_signal_connect (m->widget, "clicked",
-    // 		G_CALLBACK(pushMenu), m );
-
-    // m->menu = gtk_menu_new();
+    if (ISDEFINEDINBUILDER(parent)) {
+		m->widget = wlibWidgetFromIdWarn(parent, helpStr);
+        m->attributes.menu.option = F_DEFINEDINBUILDER;
+	} 
 
     // 	wMenuSetLabel( m, labelStr );
     // 	gtk_fixed_put( GTK_FIXED(parent->widget), m->widget, m->realX, m->realY );
@@ -550,7 +578,9 @@ wMenu_p wMenuCreate(
     // gtk_widget_show( m->widget );
     // wlibAddButton( (wControl_p)m );
     // wlibAddHelpString( m->widget, helpStr );
-    printf("%s:%d Not implemented!", __FILE__, __LINE__);
+
+    wlibAddTooltip(m->widget, parent->name, helpStr);
+    
     return m;
 }
 

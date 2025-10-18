@@ -60,7 +60,7 @@ typedef struct wFloat_t     * wFloat_p;
 typedef struct wList_t      * wList_p;
 typedef struct wChoice_t    * wChoice_p;
 typedef struct wDraw_t      * wDraw_p;
-//typedef struct wMenu_t      * wMenu_p;
+typedef struct wMenu_t      * wMenu_p;
 #define wMenu_p wControl_p
 typedef struct wText_t      * wText_p;
 typedef struct wMessage_t   * wMessage_p;
@@ -1197,9 +1197,11 @@ void wMenuPopupShow(wControl_p mp);
 
 void wMenuAddHelp(		wMenu_p );
 
+const char * wMenuGetLabel(wControl_p menuitem);
 
-wMenu_p wMenuCreate(wWin_p, wWinPix_t, wWinPix_t, const char*, const char*,
-    long);
+wMenu_p wMenuCreate( wControl_p	parent, wWinPix_t	x, wWinPix_t	y, const char 	* helpStr,
+    const char	* labelStr, long	option );
+
 
 void wMenuSetTraceCallBack(
     wControl_p m,

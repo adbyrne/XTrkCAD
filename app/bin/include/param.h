@@ -151,7 +151,7 @@ typedef union {
 typedef struct {
 	parameterType type;
 	void * valueP;
-	const char * nameStr;
+	char * nameStr;
 	long option;
 	const void * winData;
 	const char * winLabel;
