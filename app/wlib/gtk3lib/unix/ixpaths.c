@@ -119,6 +119,14 @@ const char * wGetAppLibDir( void )
 
 	for (ep=envvar; *cp; cp++,ep++) {
 		*ep = toupper(*cp);
+		if ( * ep == '-' ) {
+			// Env Var cannot contain '-'
+			*ep = '_';
+		}
+	}
+	if ( strstr( XTRKCAD_VERSION, "Beta" ) != NULL ) {
+		strcpy( ep, "BETA" );
+		ep += 4;
 	}
 	strcpy( ep, "LIB" );
 	ep = getenv( envvar );
@@ -147,12 +155,10 @@ const char * wGetAppLibDir( void )
 	searchDirs[option] = NULL;
 
 	appLibDir = NULL;
-	for(unsigned int i = 1; i < option; i++) {
+	for(unsigned int i = 0; i < option; i++) {
 		if(IsExistingDirectory(searchDirs[ i ])) {
 			appLibDir = g_strdup(searchDirs[ i ]);
 			break;
-		} else {
-			i++;
 		}
 	}
 
@@ -202,7 +208,11 @@ const char * wGetAppWorkDir(
 
 	homeDir = wGetUserHomeDir();
 
-	appWorkDir = g_strdup_printf( "%s/.%s", homeDir, wlibGetAppName());
+	char * sBeta = "";
+	if ( strstr( XTRKCAD_VERSION, "Beta" ) != NULL ) {
+		sBeta = "-beta";
+	}
+	appWorkDir = g_strdup_printf( "%s/.%s%s", homeDir, wlibGetAppName(), sBeta );
 
 	if (!IsExistingDirectory(appWorkDir)) {
 		if ( g_mkdir( appWorkDir, 0777 ) == -1 ) {
