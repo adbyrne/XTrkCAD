@@ -1,12 +1,12 @@
-# XTrackCAD Version 5.3.0 GA Release Notes
+# XTrackCAD Version 5.3.1 General Availabilty Notes
 
-Welcome to the XtrackCAD V5.3.0 GA Release!
+Welcome to the XtrackCAD V5.3.1 General Availabuilty release!
 
-V5.3.0 GA contains many bug fixes, new and updated parameter files, new features and enhancements.
+V5.3.1 contains many bug fixes, new and updated parameter files, new features and enhancements.
 
 Enjoy!
 
-Dave, Martin and Adam, your volunteer developers.
+Adam, Dave, Dwayne, Heiko, Martin, Philip, Russell: your volunteer developers.
 
 PS The full change log is a file in the XtrkCAD download folder as CHANGELOG.md
 
@@ -18,7 +18,7 @@ To report bugs, please use the SourceForge bugs reporting page https://sourcefor
 
 To discuss the Release, please use the user forum https://xtrackcad.groups.io/g/main/topics
 
-# V5.3.0 GA Notes
+# V5.3.1 GA Notes
 
 This file contains installation instructions and up-to-date information regarding XTrackCad.
 
