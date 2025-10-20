@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.36.0 -->
+<!-- Generated with glade 3.40.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkListStore" id="carinv-list.liststore">
+  <object class="GtkListStore" id="liststore">
     <columns>
       <!-- column-name data -->
       <column type="gpointer"/>
@@ -40,28 +40,97 @@
       <column type="gchararray"/>
     </columns>
   </object>
+  <object class="GtkMenu" id="select_newobj">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <child>
+      <object class="GtkMenuItem" id="newproto">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="label" translatable="yes">New Car Prototype</property>
+        <property name="use-underline">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="newpart">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="label" translatable="yes">New Car Part</property>
+        <property name="use-underline">True</property>
+      </object>
+    </child>
+  </object>
+  <object class="GtkListStore" id="sortorder">
+    <columns>
+      <!-- column-name label -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Index</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Scale</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Manufacturer</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Part No</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Type</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Description</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Roadname</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Rep Marks</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Purc Price</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Curr Price</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Condition</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Purc Date</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Srvc Date</col>
+      </row>
+    </data>
+  </object>
   <object class="GtkDialog" id="carinv">
-    <property name="width_request">800</property>
-    <property name="can_focus">False</property>
-    <property name="border_width">18</property>
-    <property name="type_hint">dialog</property>
+    <property name="width-request">800</property>
+    <property name="can-focus">False</property>
+    <property name="border-width">18</property>
+    <property name="type-hint">dialog</property>
     <child internal-child="vbox">
       <object class="GtkBox">
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
           <object class="GtkButtonBox">
-            <property name="can_focus">False</property>
-            <property name="margin_top">18</property>
-            <property name="layout_style">end</property>
+            <property name="can-focus">False</property>
+            <property name="halign">start</property>
+            <property name="valign">start</property>
+            <property name="margin-top">18</property>
+            <property name="layout-style">end</property>
             <child>
               <object class="GtkToggleButton" id="id-help">
                 <property name="label" translatable="yes">_Help</property>
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_underline">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-underline">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -73,9 +142,9 @@
               <object class="GtkToggleButton" id="id-cancel">
                 <property name="label" translatable="yes">_Close</property>
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_underline">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-underline">True</property>
                 <style>
                   <class name="suggested-action"/>
                 </style>
@@ -90,26 +159,27 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
-            <property name="position">0</property>
+            <property name="position">1</property>
           </packing>
         </child>
         <child>
+          <!-- n-columns=2 n-rows=3 -->
           <object class="GtkGrid">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="row_spacing">12</property>
-            <property name="column_spacing">12</property>
+            <property name="can-focus">False</property>
+            <property name="row-spacing">12</property>
+            <property name="column-spacing">12</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="spacing">12</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">_Sort by</property>
-                    <property name="use_underline">True</property>
+                    <property name="use-underline">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -118,10 +188,18 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkComboBox" id="carinv-sort1">
-                    <property name="width_request">110</property>
+                  <object class="GtkComboBox" id="sort1">
+                    <property name="width-request">110</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
+                    <property name="model">sortorder</property>
+                    <property name="id-column">0</property>
+                    <child>
+                      <object class="GtkCellRendererText"/>
+                      <attributes>
+                        <attribute name="text">0</attribute>
+                      </attributes>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -130,10 +208,17 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkComboBox" id="carinv-sort2">
-                    <property name="width_request">110</property>
+                  <object class="GtkComboBox" id="sort2">
+                    <property name="width-request">110</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
+                    <property name="model">sortorder</property>
+                    <child>
+                      <object class="GtkCellRendererText"/>
+                      <attributes>
+                        <attribute name="text">0</attribute>
+                      </attributes>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -142,10 +227,17 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkComboBox" id="carinv-sort3">
-                    <property name="width_request">110</property>
+                  <object class="GtkComboBox" id="sort3">
+                    <property name="width-request">110</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
+                    <property name="model">sortorder</property>
+                    <child>
+                      <object class="GtkCellRendererText"/>
+                      <attributes>
+                        <attribute name="text">0</attribute>
+                      </attributes>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -154,10 +246,17 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkComboBox" id="carinv-sort4">
-                    <property name="width_request">110</property>
+                  <object class="GtkComboBox" id="sort4">
+                    <property name="width-request">110</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
+                    <property name="model">sortorder</property>
+                    <child>
+                      <object class="GtkCellRendererText"/>
+                      <attributes>
+                        <attribute name="text">0</attribute>
+                      </attributes>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -167,22 +266,22 @@
                 </child>
               </object>
               <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">0</property>
+                <property name="left-attach">0</property>
+                <property name="top-attach">0</property>
               </packing>
             </child>
             <child>
-              <object class="GtkScrolledWindow" id="carinv-list.scrollwindow">
+              <object class="GtkScrolledWindow" id="scrollwindow">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
+                <property name="can-focus">True</property>
                 <property name="hexpand">True</property>
                 <property name="vexpand">True</property>
-                <property name="shadow_type">in</property>
+                <property name="shadow-type">in</property>
                 <child>
-                  <object class="GtkTreeView" id="carinv-list.treeview">
+                  <object class="GtkTreeView" id="treeview">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="model">carinv-list.liststore</property>
+                    <property name="can-focus">True</property>
+                    <property name="model">liststore</property>
                     <child internal-child="selection">
                       <object class="GtkTreeSelection"/>
                     </child>
@@ -355,136 +454,26 @@
                 </child>
               </object>
               <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">1</property>
-                <property name="height">3</property>
+                <property name="left-attach">0</property>
+                <property name="top-attach">1</property>
               </packing>
             </child>
             <child>
               <object class="GtkButtonBox">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">end</property>
+                <property name="can-focus">False</property>
+                <property name="halign">start</property>
+                <property name="valign">center</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">6</property>
-                <property name="layout_style">start</property>
+                <property name="layout-style">start</property>
                 <child>
-                  <object class="GtkToggleButton" id="carinv-edit">
-                    <property name="label" translatable="yes">_Edit</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="use_underline">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkToggleButton" id="carinv-add">
-                    <property name="label" translatable="yes">_Add</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="use_underline">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkToggleButton" id="carinv-delete">
-                    <property name="label" translatable="yes">_Delete</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="use_underline">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButtonBox">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">end</property>
-                <property name="valign">start</property>
-                <property name="margin_top">12</property>
-                <property name="orientation">vertical</property>
-                <property name="spacing">6</property>
-                <property name="layout_style">start</property>
-                <child>
-                  <object class="GtkToggleButton" id="carinv-import">
-                    <property name="label" translatable="yes">Import...</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkToggleButton" id="carinv-export">
-                    <property name="label" translatable="yes">Export ...</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkToggleButton" id="carinv-savetext">
-                    <property name="label" translatable="yes">Save...</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButtonBox">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">end</property>
-                <property name="orientation">vertical</property>
-                <property name="layout_style">start</property>
-                <child>
-                  <object class="GtkToggleButton" id="id-ok">
+                  <object class="GtkToggleButton" id="find">
                     <property name="label" translatable="yes">_Find</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="use_underline">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                    <property name="use-underline">True</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -492,11 +481,144 @@
                     <property name="position">0</property>
                   </packing>
                 </child>
+                <child>
+                  <object class="GtkToggleButton" id="edit">
+                    <property name="label" translatable="yes">_Edit</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                    <property name="use-underline">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="delete">
+                    <property name="label" translatable="yes">_Delete</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                    <property name="use-underline">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
               </object>
               <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">1</property>
+                <property name="left-attach">1</property>
+                <property name="top-attach">1</property>
               </packing>
+            </child>
+            <child>
+              <object class="GtkButtonBox">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="halign">start</property>
+                <property name="valign">start</property>
+                <property name="spacing">6</property>
+                <property name="layout-style">start</property>
+                <child>
+                  <object class="GtkToggleButton" id="import">
+                    <property name="label" translatable="yes">Import...</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="export">
+                    <property name="label" translatable="yes">Export ...</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="savetext">
+                    <property name="label" translatable="yes">Save...</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <child>
+                      <object class="GtkToggleButton" id="add">
+                        <property name="label" translatable="yes">_New Car</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                        <property name="use-underline">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkMenuButton">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="focus-on-click">False</property>
+                        <property name="receives-default">True</property>
+                        <property name="popup">select_newobj</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="icon-name">pan-down-symbolic</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <style>
+                      <class name="linked"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
             </child>
             <child>
               <placeholder/>
@@ -510,21 +632,5 @@
         </child>
       </object>
     </child>
-    <child type="titlebar">
-      <placeholder/>
-    </child>
-  </object>
-  <object class="GtkSizeGroup" id="carinv-buttonsize">
-    <widgets>
-      <widget name="id-help"/>
-      <widget name="id-cancel"/>
-      <widget name="carinv-edit"/>
-      <widget name="carinv-add"/>
-      <widget name="carinv-delete"/>
-      <widget name="carinv-import"/>
-      <widget name="carinv-export"/>
-      <widget name="carinv-savetext"/>
-      <widget name="id-ok"/>
-    </widgets>
   </object>
 </interface>

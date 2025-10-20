@@ -6,6 +6,7 @@
     <file preprocess="xml-stripblanks">basicdialog.ui</file>
     <file preprocess="xml-stripblanks">block.ui</file>
     <file preprocess="xml-stripblanks">blockedit.ui</file>
+    <file preprocess="xml-stripblanks">carinv.ui</file>
     <file preprocess="xml-stripblanks">cmdopt.ui</file>
     <file preprocess="xml-stripblanks">controledit.ui</file>
     <file preprocess="xml-stripblanks">contmgm.ui</file>

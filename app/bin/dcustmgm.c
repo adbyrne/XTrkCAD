@@ -35,7 +35,6 @@ static void CustomEdit( void * action );
 static void CustomDelete( void * action );
 static void CustomExport( void * action );
 static void CustomDone( void * action );
-static void CustomNewCar( void * action );
 static void CustomNewProto( void );
 static void CustomNewPart( void );
 
@@ -136,21 +135,6 @@ static void CustomEdit( void * action )
 	wListSetValues( customSelL, inx, message, context->icon, context );
 #endif
 }
-
-// static void CustomNewCar( void * action )
-// {
-
-// 	switch(selectedType) {
-// 	case 1:                 // car prototype
-// 		CarDlgAddProto();
-// 		break;
-// 	case 0:                 // car part
-// 		CarDlgAddDesc();
-// 		break;
-// 	default:
-// 		break;
-// 	}
-// }
 
 static void
 SetSplitButton(paramData_p menuItem, void(* handler)(void))
