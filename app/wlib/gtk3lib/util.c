@@ -484,17 +484,16 @@ const char * wMemStats(void)
  * \param h IN pointer to height
  */
 
+
+ /** \todo gdk_screen_get_monitor_geometry is deprecated, use approach described in  */
 void wGetDisplaySize(wWinPix_t * w, wWinPix_t * h)
 {
-	GdkScreen *screen = gdk_screen_get_default();
-    GdkWindow * gdkwindow = gdk_get_default_root_window();
-	GdkDisplay * display = gdk_window_get_display(gdkwindow);
-
-	//guint monitor = gdk_screen_get_primary_monitor(screen);
-    GdkMonitor * monitor = gdk_display_get_primary_monitor (display);
+   	GdkScreen *screen = gdk_screen_get_default();
+	guint monitor = gdk_screen_get_primary_monitor(screen);
 	GdkRectangle screen_geometry = { 0, 0, 0, 0 };
-	
-	gdk_monitor_get_geometry(monitor, &screen_geometry);
+
+	gdk_screen_get_monitor_geometry( screen, monitor, &screen_geometry );
+
 	*w = screen_geometry.width;
 	*h = screen_geometry.height;
 }
