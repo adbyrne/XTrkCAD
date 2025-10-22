@@ -73,17 +73,24 @@ CreateFilters(struct wFilSel_t* fileSelect, const char* filterPattern)
 		g_ptr_array_add(fileSelect->filters, (gpointer)filter);
 	} else {
 		char* patternList = g_strdup(filterPattern);
-		char* name = strtok(patternList, "|");
+		char * saveptr1;
+		char * saveptr2;
+		char* name = strtok_r(patternList, "|", &saveptr1);
 
 		while (name) {
+			char* patterns;
 			char* pattern;
 			GtkFileFilter* filter = gtk_file_filter_new();
 
 			gtk_file_filter_set_name(filter, name);
-			pattern = strtok(NULL, "|");
-			gtk_file_filter_add_pattern(filter, pattern);
+			patterns = strtok_r(NULL, "|", &saveptr1);
+			pattern = strtok_r(patterns, ";", &saveptr2);
+			while (pattern) {
+				gtk_file_filter_add_pattern(filter, pattern);
+				pattern = strtok_r(NULL, ";", &saveptr2);
+			}
 			g_ptr_array_add(fileSelect->filters, (gpointer)filter);
-			name = strtok(NULL, "|");
+			name = strtok_r(NULL, "|", &saveptr1);
 		}
 		g_free(patternList);
 	}
@@ -185,6 +192,13 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 			gtk_file_chooser_set_do_overwrite_confirmation(
 			        GTK_FILE_CHOOSER(fs->window), true);
 		}
+
+		// NOTE: this is not the recommended way to set the folder
+		// See https://docs.gtk.org/gtk3/method.FileChooser.set_current_folder.html
+		// However this works for now
+		// TODO: revist how to set the current folder
+		gtk_file_chooser_set_current_folder(
+			GTK_FILE_CHOOSER(fs->window), dirName );
 
 		if (fs->opt & FSO_MULTIPLEFILES) {
 			gtk_file_chooser_set_select_multiple(
