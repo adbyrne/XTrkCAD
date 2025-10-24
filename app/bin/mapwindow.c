@@ -343,8 +343,6 @@ EXPORT void MapWindowShow(int state)
 {
 	mapVisible = state;
 
-	wPrefSetInteger("map", "visible", mapVisible);
-
 	if (mapW) {
 		wWinShow(mapW, mapVisible | DONTGRABFOCUS);
 	}
@@ -354,6 +352,8 @@ EXPORT void MapWindowShow(int state)
 	}
 
 	ToggleSetInMenuToolbar(mapShowMI, mapShowB, mapVisible);
+
+	wPrefSetInteger("map", "visible", mapVisible);
 }
 
 wControl_p
@@ -368,7 +368,7 @@ MapWindowCreate()
 	                        FALSE, F_RESIZE, NULL);
 	mapD.d = MAPCANVASCONTROL;
 
-	MapWindowShow(FALSE);
+	MapWindowShow(MapGetVisiblePref());
 
 	/** \TODO Uncomment and enable ChangeMapScale() */
 	//ChangeMapScale();

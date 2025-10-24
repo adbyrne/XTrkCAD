@@ -521,10 +521,11 @@ EXPORT void DoClear(void * unused)
 EXPORT void DoShowWindow(int index, const char * name, void * data)
 {
 	if (data == mapW) {
-		if (mapVisible == FALSE) {
-			MapWindowShow( TRUE);
-			return;
-		}
+		MapWindowShow(TRUE);
+		// if (mapVisible == FALSE) {
+		// 	MapWindowShow( TRUE);
+		// 	return;
+		// }
 	}
 	wWinShow((wControl_p) data, TRUE);
 }

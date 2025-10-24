@@ -973,6 +973,11 @@ EXPORT void CreateMenus(void)
 	                   DoClear, 0, NULL);
 	wMenuPushCreate(fileM, "load", _("_Open ..."), ACCL_OPEN,
 	                ChkLoad, NULL);
+
+	wMenu_p recentuseMenu = wMenuMenuCreate(fileM, "menuRecentlyUsedFiles", _("Recent files"));
+	fileList_ml = wMenuListCreate(recentuseMenu, "fileListMenu", NEWEST_TOP, NUM_FILELIST,
+		ChkFileList);	
+
 	wMenuSeparatorCreate(fileM);
 
 	wMenuPushCreate(fileM, "save", _("_Save"), ACCL_SAVE,
@@ -981,7 +986,6 @@ EXPORT void CreateMenus(void)
 	                DoSaveAs, NULL);
 	wMenuPushCreate(fileM, "revert", _("Revert"), ACCL_REVERT,
 	                ChkRevert, NULL);
-	wMenuSeparatorCreate(fileM);
 
 	cmdGroup = BG_FILE | BG_BIGGAP;
 	AddToolbarButton("clear", CreateToolbarIconFromResource("doc-new.png"),
@@ -990,6 +994,8 @@ EXPORT void CreateMenus(void)
 	                 IC_MODETRAIN_TOO, ChkLoad, NULL);
 	AddToolbarButton("save", CreateToolbarIconFromResource("doc-save.png"),
 	                 IC_MODETRAIN_TOO, DoSave, NULL);
+				 
+	wMenuSeparatorCreate(fileM);
 
 	cmdGroup = BG_PRINT;
 	MiscMenuItemCreate(fileM, NULL, "printSetup", _("P&rint Setup ..."),
@@ -1026,11 +1032,6 @@ EXPORT void CreateMenus(void)
 	MiscMenuItemCreate(fileM, NULL, "cmdFileNote", _("No&tes ..."), ACCL_NOTES,
 	                   DoNote, 0, NULL);
 
-	wMenuSeparatorCreate(fileM);
-
-	wMenu_p recentuseMenu = wMenuMenuCreate(fileM, "menuRecentlyUsedFiles", _("Recent files"));
-	fileList_ml = wMenuListCreate(recentuseMenu, "fileListMenu", NEWEST_TOP, NUM_FILELIST,
-		ChkFileList);
 
 	//fileList_ml = wMenuListCreate(fileM, "menuFileList", NEWEST_TOP, NUM_FILELIST,
 	//                              ChkFileList);

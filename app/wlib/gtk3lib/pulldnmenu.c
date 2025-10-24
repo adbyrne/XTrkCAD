@@ -57,7 +57,9 @@ static void pushMenuItem(
     switch( m->type ){
     case M_PUSH:
     case M_TOGGLE:
+        if(mi->action) {
         mi->action( m->context );
+        }
         break;
     //case M_TOGGLE:
     //    mt = (wMenuToggle_p)m;
@@ -437,11 +439,14 @@ wControl_p wMenuToggleCreate(
 
     wControl_p mt = wlibControlNew(M_TOGGLE, m, helpStr, context);
     menuitem = CONTROL_GET_ATTRIBUTES_PTR(mt, menuitem);
-    menuitem->action = action;
+    menuitem->action = NULL;
 
     CreateMenuItem(m, mt, M_TOGGLE, helpStr, labelStr, acclKey );
 
     wMenuToggleSet( mt, set );
+
+    menuitem->action = action;
+
 
     return mt;
 }
