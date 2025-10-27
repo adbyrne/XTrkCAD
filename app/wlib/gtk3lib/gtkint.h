@@ -221,7 +221,11 @@ struct window {
 	GtkBuilder* builder;
 	GtkAccelGroup* accelGroup;		/**< accelerator group if main window */
 	GtkContainer* statusbar;
-	bool maximize_initially;		
+	bool maximize_initially;
+	int resizeTimer;		       /** resizing **/
+	int w;
+	int h;
+	wBool_t size_changed;
 };
 
 struct control {

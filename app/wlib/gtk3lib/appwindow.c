@@ -37,6 +37,8 @@
 
 static wControl_p appMainWindow;
 
+#define REDRAW_TIMEOUT 100
+
 /**
  * Get the application's main window.
  *
@@ -78,6 +80,55 @@ wlibAppWinGetStatusbar()
 	return(appMainWindow->attributes.window.statusbar);
 }
 
+static int resizeTime(wControl_p win)
+{
+	struct window *wcontrol = CONTROL_GET_ATTRIBUTES_PTR(win, window);
+
+	g_assert(win->type == W_MAIN);
+
+	if (wcontrol->size_changed)
+	{
+		// do redraw
+		wcontrol->winProc(win, wResize_e, NULL, /*wcontrol->data*/ win);
+		g_print("r");
+		wcontrol->size_changed = FALSE;
+		return (TRUE);	// Continue timer in case more changes come
+	}
+
+	wcontrol->resizeTimer = 0;
+	g_print("o");
+	return FALSE; 
+}
+
+static void on_size_allocate(
+	GtkWidget *widget,
+	GdkRectangle *allocation,
+	wControl_p win)
+{
+	struct window *wcontrol;
+	if (win == NULL)
+	{
+		return;
+	}
+
+	g_assert(win->type == W_MAIN);
+
+	wcontrol = CONTROL_GET_ATTRIBUTES_PTR(win, window);
+	if (wcontrol->option & F_RESIZE)
+	{
+		if (wcontrol->w != allocation->width || wcontrol->h != allocation->height)
+		{
+			wcontrol->w = allocation->width;
+			wcontrol->h = allocation->height;
+			wcontrol->size_changed = TRUE;
+			g_print("+");
+			if (wcontrol->resizeTimer == 0)
+			{
+				wcontrol->resizeTimer = g_timeout_add(REDRAW_TIMEOUT, resizeTime, win);
+			}
+		}
+	}
+}
 
 /**
  * Handle the destroy event for the main window. Calls the windows callback
@@ -217,6 +268,8 @@ wControl_p wWinMainCreate(
 
 	g_signal_connect(G_OBJECT(appMainWindow->widget),
 	                 "delete-event", G_CALLBACK(on_widget_deleted), NULL);
+	g_signal_connect(G_OBJECT(appMainWindow->widget),
+					 "size-allocate", G_CALLBACK(on_size_allocate), appMainWindow);
 
 	gtk_widget_show_all(appMainWindow->widget);
 	return appMainWindow;

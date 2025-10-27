@@ -1436,17 +1436,13 @@ void MainProc( wControl_p win, winProcEvent e, void * refresh, void * data )
 		wWinGetSize( mainW, &width, &height );
 		LOG( log_redraw, 1, ( "MainProc/Resize: %d %s %ld %ld\n", cMP++,
 		                      refresh==NULL?"RDW":"---", width, height ) );
-		ToolbarLayout(refresh);
-		height -= (ToolbarGetHeight() +max(infoHeight,textHeight)+10);
 		if (height >= 0) {
 			wBool_t bTemp = wDrawSetTempMode(mainD.d, FALSE );
 			if ( bTemp ) {
 				printf( "MainProc TempMode\n" );
 			}
-			wDrawSetSize( mainD.d, width-20, height, refresh );
-			wControlSetPos( (wControl_p)mainD.d, 0, ToolbarGetHeight());
+
 			SetMainSize();
-			SetInfoBar();
 			panCenter.x = mainD.orig.x + mainD.size.x/2.0;
 			panCenter.y = mainD.orig.y + mainD.size.y/2.0;
 			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x,
