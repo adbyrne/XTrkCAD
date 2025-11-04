@@ -90,13 +90,11 @@ static int resizeTime(wControl_p win)
 	{
 		// do redraw
 		wcontrol->winProc(win, wResize_e, NULL, /*wcontrol->data*/ win);
-		g_print("r");
 		wcontrol->size_changed = FALSE;
 		return (TRUE);	// Continue timer in case more changes come
 	}
 
 	wcontrol->resizeTimer = 0;
-	g_print("o");
 	return FALSE; 
 }
 
@@ -121,7 +119,6 @@ static void on_size_allocate(
 			wcontrol->w = allocation->width;
 			wcontrol->h = allocation->height;
 			wcontrol->size_changed = TRUE;
-			g_print("+");
 			if (wcontrol->resizeTimer == 0)
 			{
 				wcontrol->resizeTimer = g_timeout_add(REDRAW_TIMEOUT, resizeTime, win);

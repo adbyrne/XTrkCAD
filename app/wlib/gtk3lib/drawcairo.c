@@ -946,8 +946,7 @@ wDrawBitMap_p wDrawBitMapCreate(
 	wDrawBitMap_p bm;
 	
 	g_assert(drawingArea->type == B_DRAW);
-	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
-	
+		
 	bm = (wDrawBitMap_p)g_malloc0( sizeof *bm );
 	if (bm) {
 		gchar* path;
@@ -1109,8 +1108,8 @@ void wDrawGetSize(
 	GtkAllocation allocation;
 
 	gtk_widget_get_allocation(drawingArea->widget, &allocation);
-	*w = allocation.width-2;
-	*h = allocation.height-2;
+	*w = allocation.width;
+	*h = allocation.height;
 }
 
 /**
@@ -1148,8 +1147,8 @@ void wDrawClip(wControl_p drawingArea,
         wDrawPix_t w,
         wDrawPix_t h )
 {
-	struct draw *d = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
-	g_assert(drawingArea->type == B_DRAW);
+	// struct draw *d = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	// g_assert(drawingArea->type == B_DRAW);
 
 	printf("Function wDrawClip is not implemented: %s %d\n", __FILE__, __LINE__);
 	//d->rect.width = w;
