@@ -967,7 +967,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	/*
 	 * TIDY UP
 	 */
-	//MainProc( mainW, wResize_e, NULL, NULL );
+	MainProc( mainW, wResize_e, NULL, NULL );
 
 	LayoutHotBar(NULL);
 	if (!ToolbarIsGroupVisible(BG_HOTBAR)) {
@@ -1071,6 +1071,8 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	}
 	wFlush();
 	wWinShow(mainW, TRUE); 
+	ChangeHotBar(CHANGE_PARAMS);
+	
 	MainRedraw();
 	inMainW = FALSE;
 	if ( bRunTests ) {

@@ -215,12 +215,10 @@ wControl_p wWinMainCreate(
 		strcpy(wConfigName, name);
 	}
 
-	puts("Create Mainwindow");
 	wDrawColorWhite = wDrawFindColor(0xFFFFFF);
 	wDrawColorBlack = wDrawFindColor(0x000000);
 
 	appMainWindow = wlibControlNew(W_MAIN, NULL, nameStr, context);
-	printf("MainWindow %ld\n", (long)appMainWindow);
 
 	wcontrol = CONTROL_GET_ATTRIBUTES_PTR(appMainWindow, window);
 	wcontrol->winProc = winProc;

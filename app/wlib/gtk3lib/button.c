@@ -242,8 +242,6 @@ static gboolean on_button_release(GtkWidget* widget, GdkEventButton* event, gpoi
 			g_source_remove(button->attributes.button.timeout_id);
 			button->attributes.button.timeout_id = 0;
 		}
-
-		g_print("Button released - autorepeat stopped\n");
 	}
 
 	return FALSE; // Forward event
