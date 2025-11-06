@@ -72,22 +72,13 @@ unsigned wOpenFileExternal(char * filename)
 	}
 
 #else
-	DynString commandLine;
-	unsigned int result;
+	unsigned int result = 0;
+	GError *error = NULL;
 
-	DynStringMalloc(&commandLine, 16);
-	DynStringCatCStrs(&commandLine,
-	                  DEFAULTOPENCOMMAND,
-	                  " \"",
-	                  filename,
-	                  "\"",
-	                  NULL);
-
-	// the command should be found via the PATH
-	result = system(DynStringToCStr(&commandLine));
-
-
-	DynStringFree(&commandLine);
+	gtk_show_uri_on_window(NULL, filename, GDK_CURRENT_TIME, &error);
+	if(error) {
+		result = error->code;
+	}
 
 #endif
 	return result;
