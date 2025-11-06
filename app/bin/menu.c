@@ -41,11 +41,12 @@
 
 #include "include/toolbar.h"
 
+static paramGroup_t menuPG;
 static paramData_t menuPLs[101] = {
-	{PD_LONG, NULL, "toolbarset", PDO_NOPREF},
-	{PD_LONG, &curTurnoutEp, "cur-turnout-ep"}
+	{PD_LONG, NULL, "toolbarset", PDO_NOPREF, .group = &menuPG },
+	{PD_LONG, &curTurnoutEp, "cur-turnout-ep", .group = &menuPG}
 };
-static paramGroup_t menuPG = { "misc", PGO_RECORD, menuPLs, 2 };
+static paramGroup_t menuPG = { "mainmenu", PGO_RECORD, menuPLs, 2 };
 
 static void InitCmdExport( void );
 
@@ -1459,6 +1460,6 @@ static void InitCmdExport(void)
 	                 CreateToolbarIconFromResource("doc-import-mod.png"), IC_ACCLKEY,
 	                 DoImportModule, I2VP(1));
 	ButtonGroupEnd();
-	ParamRegister( &menuPG );
+
 	AddPlaybackProc( "MENU", MenuPlayback, NULL );
 }

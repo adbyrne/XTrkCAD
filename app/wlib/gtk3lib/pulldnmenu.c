@@ -179,6 +179,18 @@ static void setAcclKey( GtkWidget* menu_item, int acclKey)
                                acclKey & 0xFF, mask, GTK_ACCEL_VISIBLE);
 }
 
+static char *
+ChangeToUnderscore(const char *label)
+{
+    char *labelcopy;
+    g_assert(label);
+
+    labelcopy = g_strdup(label);
+    g_strdelimit(labelcopy, "&", '_');
+
+    return(labelcopy);
+}
+
 /**
  * Create a new menu element, add to the parent menu and to help
  *
@@ -198,11 +210,7 @@ static void CreateMenuItem(
     int acclKey )
 {
     // create a modifyable copy of the label
-    char *labelcopy = NULL;
-    if(labelStr){
-        labelcopy = g_strdup(labelStr);
-        g_strdelimit(labelcopy, "&", '_');
-    }
+    char *labelcopy = ChangeToUnderscore(labelStr);
 
     switch ( mtype ) {
     case M_SEPARATOR:
@@ -375,12 +383,14 @@ wControl_p wMenuMenuCreate(
     struct menu *menu;
     GtkWidget* submenu;
     GtkWidget* menuitem;
+    char *label;
 
     mm = wlibControlNew(M_SUBMENU, m, helpStr, NULL);
     menu = CONTROL_GET_ATTRIBUTES_PTR(mm, menu);
     menu->radioGroup = NULL;
 
-    menuitem = gtk_menu_item_new_with_mnemonic(wlibConvertInput(labelStr));
+    label = ChangeToUnderscore( labelStr );
+    menuitem = gtk_menu_item_new_with_mnemonic(wlibConvertInput(label));
 
     submenu = gtk_menu_new();
     gtk_menu_item_set_submenu( GTK_MENU_ITEM( menuitem ), submenu );
@@ -389,6 +399,8 @@ wControl_p wMenuMenuCreate(
     gtk_widget_show(GTK_WIDGET(menuitem));
 
     mm->widget = submenu;
+
+    g_free(label);
     return mm;
 }
 
