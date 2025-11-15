@@ -50,15 +50,22 @@ static struct {
 	char text[STR_HUGE_SIZE];
 	wDrawColor color;
 	BOOL_T boxed;
+	BOOL_T filled;
+	wDrawColor bg_color;
 } Dt;
 
+static char * boxLabels[] = { "", NULL };
 static paramData_t textPLs[] = {
 #define textPD (textPLs[0])
 	{ PD_COMBOLIST, &Dt.fontSizeInx, "fontsize", 0, NULL, NULL, BL_EDITABLE },
 #define colorPD (textPLs[1])
 	{ PD_COLORLIST, &Dt.color, "color", PDO_NORECORD, NULL, NULL },
 #define boxPD (textPLs[2])
-	{ PD_TOGGLE, &Dt.boxed, "boxed", 0, NULL, NULL, 0 }
+	{ PD_TOGGLE, &Dt.boxed, "boxed", 0, boxLabels, N_("Boxed"), 0 },
+#define fillPD (textPLs[3])
+	{ PD_TOGGLE, &Dt.filled, "filled", 0, boxLabels, N_("Filled") },
+#define backPD (textPLs[4])
+	{ PD_COLORLIST,& Dt.bg_color, "bg_color", PDO_NORECORD, NULL, N_("Bg Color") }
 };
 static paramGroup_t textPG = { "text", 0, textPLs, COUNT( textPLs ) };
 
@@ -101,6 +108,8 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 {
 	track_p t;
 	unsigned char c;
+	wControl_p controls[6];
+	char * labels[5];
 	coOrd size, lastline;
 
 	switch (action & 0xFF) {
@@ -177,7 +186,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		case '\015':
 			UndoStart( _("Create Text"), "newText - CR" );
 			t = NewText( 0, Dt.pos, Dt.angle, Dt.text, (CSIZE_T)Dt.size, Dt.color,
-			             Dt.boxed );
+			             Dt.boxed, Dt.filled, Dt.bg_color );
 			UndoEnd();
 			DrawNewTrack(t);
 			Dt.state = POSITION_TEXT;
@@ -211,7 +220,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 	case C_REDRAW:
 		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
 		DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color,
-		                0.0, NULL, NULL, Dt.boxed );
+			            Dt.boxed, Dt.filled, Dt.bg_color, 0.0, NULL, NULL );
 		return C_CONTINUE;
 	case C_CANCEL:
 		if (Dt.state != POSITION_TEXT) {
@@ -225,7 +234,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 			if (Dt.len) {
 				UndoStart( _("Create Text"), "newText - OK" );
 				t = NewText( 0, Dt.pos, Dt.angle, Dt.text, (CSIZE_T)Dt.size, Dt.color,
-				             Dt.boxed );
+				             Dt.boxed, Dt.filled, Dt.bg_color );
 				UndoEnd();
 				DrawNewTrack(t);
 			}

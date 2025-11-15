@@ -538,6 +538,7 @@ static struct {
 	BOOL_T open;
 	BOOL_T lock_origin;
 	wDrawColor color;
+	wDrawColor bg_color;
 	wIndex_t benchChoice;
 	wIndex_t benchOrient;
 	wIndex_t dimenSize;
@@ -547,7 +548,7 @@ static struct {
 	unsigned int layer;
 	wIndex_t lineType;
 } drawData;
-typedef enum { E0, E1, PP, CE, AL, LA, A1, A2, RD, LN, HT, WT, PV, VC, LW, LT, CO, FL, OP, BX, BE, OR, DS, TP, TA, TS, TX, LK, OI, RA, LY } drawDesc_e;
+typedef enum { E0, E1, PP, CE, AL, LA, A1, A2, RD, LN, HT, WT, PV, VC, LW, LT, CO, BG, BX, FL, OP, BE, OR, DS, TP, TA, TS, TX, LK, OI, RA, LY } drawDesc_e;
 static descData_t drawDesc[] = {
 	/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &drawData.endPt[0] },
 	/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &drawData.endPt[1] },
@@ -566,9 +567,10 @@ static descData_t drawDesc[] = {
 	/*LW*/	{ DESC_DIM, N_("Line Width"), &drawData.lineWidth },
 	/*LT*/  { DESC_LIST, N_("Line Type"), &drawData.lineType },
 	/*CO*/	{ DESC_COLOR, N_("Color"), &drawData.color },
+	/*BG*/	{ DESC_COLOR, N_("Bg Color"), &drawData.bg_color },
+	/*BX*/  { DESC_BOXED, N_("Boxed"), &drawData.boxed },
 	/*FL*/	{ DESC_BOXED, N_("Filled"), &drawData.filled },
 	/*OP*/  { DESC_BOXED, N_("Open End"), &drawData.open },
-	/*BX*/  { DESC_BOXED, N_("Boxed"), &drawData.boxed },
 	/*BE*/	{ DESC_LIST, N_("Lumber"), &drawData.benchChoice },
 	/*OR*/	{ DESC_LIST, N_("Orientation"), &drawData.benchOrient },
 	/*DS*/	{ DESC_LIST, N_("Size"), &drawData.dimenSize },
@@ -636,6 +638,9 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		break;
 	case CO:
 		segPtr->color = drawData.color;
+		break;
+	case BG:
+		segPtr->bg_color = drawData.bg_color;
 		break;
 	case E0:
 	case E1:
@@ -1115,6 +1120,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		drawDesc[inx].control0 = NULL;
 	}
 	drawData.color = segPtr->color;
+	drawData.bg_color = segPtr->bg_color;
 	drawData.layer = GetTrkLayer(trk);
 	drawDesc[CO].mode = 0;
 	drawData.lineWidth = segPtr->lineWidth;
@@ -1308,17 +1314,20 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		strncpy( drawData.text, segPtr->u.t.string, sizeof drawData.text );
 		drawData.text[sizeof drawData.text-1] ='\0';
 		drawData.boxed = segPtr->u.t.boxed;
+		drawData.filled = segPtr->u.t.filled;
 		drawDesc[TP].mode =
 		        drawDesc[TS].mode =
 		                drawDesc[TX].mode =
 		                        drawDesc[TA].mode =
 		                                drawDesc[LK].mode =
 		                                        drawDesc[OI].mode =
-		                                                        drawDesc[BX].mode = 0;
+		                                                drawDesc[BX].mode = 
+			                                                    drawDesc[FL].mode = 0;
 		if (!drawData.lock_origin) { drawDesc[RA].mode = DESC_RO; }
 		else { drawDesc[RA].mode = 0; }
 		drawDesc[E0].mode = DESC_IGNORE;
 		drawDesc[CO].mode = 0;  /*Allow Text color setting*/
+		drawDesc[BG].mode = 0;  /*Allow BG color setting*/
 		drawDesc[LW].mode = DESC_IGNORE;
 		title = _("Text");
 		break;
@@ -3538,6 +3547,9 @@ BOOL_T ReadTableEdge( char * line )
  * \param text IN text itself
  * \param textSize IN font size in pts
  * \param color IN text color
+ * \param boxed IN outline the text
+ * \param filled IN background
+ * \param bg_color IN bg color
  * \return    the newly allocated trk structure
  */
 
@@ -3548,12 +3560,15 @@ EXPORT track_p NewText(
         char * text,
         CSIZE_T textSize,
         wDrawColor color,
-        BOOL_T boxed)
+        BOOL_T boxed,
+		BOOL_T filled,
+		wDrawColor bg_color)
 {
 	trkSeg_t tempSeg;
 	track_p trk;
 	tempSeg.type = SEG_TEXT;
 	tempSeg.color = color;
+	tempSeg.bg_color = bg_color;
 	tempSeg.lineWidth = 0;
 	tempSeg.u.t.pos = zero;
 	tempSeg.u.t.angle = angle;
@@ -3561,6 +3576,7 @@ EXPORT track_p NewText(
 	tempSeg.u.t.fontSize = textSize;
 	tempSeg.u.t.string = MyStrdup( text );
 	tempSeg.u.t.boxed = boxed;
+	tempSeg.u.t.filled = filled;
 	trk = MakeDrawFromSeg1( index, pos, 0.0, &tempSeg );
 	return trk;
 }
@@ -3575,6 +3591,7 @@ EXPORT BOOL_T ReadText( char * line )
 	track_p trk;
 	ANGLE_T angle;
 	wDrawColor color = wDrawColorBlack;
+	wDrawColor bg_color = wDrawColorWhite;
 	if ( paramVersion<3 ) {
 		if (!GetArgs( line, "XXpYql", &index, &layer, &pos, &angle, &text,
 		              &textSize )) {
@@ -3592,7 +3609,7 @@ EXPORT BOOL_T ReadText( char * line )
 		}
 	}
 
-	trk = NewText( index, pos, angle, text, textSize, color, FALSE );
+	trk = NewText( index, pos, angle, text, textSize, color, FALSE, FALSE, bg_color );
 	SetTrkLayer( trk, layer );
 	MyFree(text);
 	return TRUE;

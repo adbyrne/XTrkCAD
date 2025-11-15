@@ -131,7 +131,8 @@ addButtonCallBack_t ControlMgrInit ( void );
 
 /* cdraw.c */
 track_p NewText( wIndex_t index, coOrd p, ANGLE_T angle, char * text,
-                 CSIZE_T textSize, wDrawColor color, BOOL_T boxed );
+                 CSIZE_T textSize, wDrawColor color, BOOL_T boxed,
+	             BOOL_T filled, wDrawColor bg_color);
 void LoadFontSizeList( wControl_p control, long fontSize);
 void UpdateFontSizeList( long *fontSizeR, wControl_p list,	wIndex_t listInx  );
 long GetFontSize(wIndex_t);

@@ -34,6 +34,7 @@ typedef enum { FREEFORM, RECTANGLE, POLYLINE
 typedef struct trkSeg_t {
 	char type;
 	wDrawColor color;
+	wDrawColor bg_color;
 	LWIDTH_T lineWidth;
 	dynArr_t bezSegs;       //placed here to avoid overwrites
 	union {
@@ -71,6 +72,7 @@ typedef struct trkSeg_t {
 			wFont_p fontP;
 			FONTSIZE_T fontSize;
 			BOOL_T boxed;
+			BOOL_T filled;
 			char * string;
 		} t;
 		struct {
