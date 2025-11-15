@@ -2112,6 +2112,10 @@ static char* customFonts[] = {
 	"xtrackcad-15.bdf",
 	"xtrackcad-20.bdf"
 };
+// #include "bitmaps/layers.image3"
+
+wMenu_p layerM;
+wButton_p layerB;
 
 static void
 InitializeCustomFont(int size)
@@ -2170,6 +2174,16 @@ void InitLayers(int cmdGroup)
 
 	/* layer buttons */
 	CreateLayerButtons();
+
+	// wMenuSeparatorCreate(layerM); Causes a fault
+
+	layerB = AddToolbarButton("cmdManageLayers",
+		CreateToolbarIconFromResource("layers.png"), IC_MODETRAIN_TOO,
+		DoLayer, layerB);
+	/* add the help text */
+	wTooltipSetText(layerB, _("Manage Layers"));
+	wControlActive((wControl_p)layerB, TRUE);
+
 
 	for (int i = 0; i < NUM_LAYERS; i++) {
 		char *layerName;

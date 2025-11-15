@@ -59,6 +59,7 @@
  */
 
 static struct wFilSel_t* importDxf_fs;
+static char* nameOfFile;
 
 static void ImportDxfFileSel(void* unused);
 static int ImportDxf(int cnt, char** fileName, void* data);
@@ -111,7 +112,6 @@ static int ImportDxf(
         char** fileName,
         void* data)
 {
-	char* nameOfFile;
 	long paramVersionOld = paramVersion;
 
 	CHECK(fileName != NULL);
@@ -832,6 +832,8 @@ static void ProcessDxfFile(
 	}
 
 	// Change the extension to create the XTI file
+	MakeFullpath(&pathName, workingDir, nameOfFile, NULL);
+
 	char* p = strstr(pathName, ".dxf");
 	if (p != NULL) {
 		memcpy(p, ".xti", 4);
