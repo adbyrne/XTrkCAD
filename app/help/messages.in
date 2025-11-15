@@ -337,15 +337,6 @@ The parameters \e{Minimum Track Length}, \e{Connection Angle} and \e{Connection 
 Refer to \k{cmdPref} for detail.
 END
 
-# fileio.c
-MESSAGE MSG_CANT_PASTE
-Copy/Paste buffer is empty. There is nothing to Paste.
-HELP
-An attempt was made to \f{Paste} an object onto the layout however the Copy/Paste buffer was empty. This error generally occurs when the \f{Paste} command is executed without first executing the \f{Copy} command.
-
-Refer to \k{editM} for detail.
-END
-
 # ctodesgn.c
 MESSAGE MSG_TODSGN_CROSSOVER_TOO_SHORT
 Crossover length is too short. Correct
@@ -401,6 +392,15 @@ Refer to \k{cmdProfile} for detail.
 END
 
 # fileio.c
+MESSAGE MSG_CANT_PASTE
+Copy/Paste buffer is empty. There is nothing to Paste.
+HELP
+An attempt was made to \f{Paste} an object onto the layout however the Copy/Paste buffer was empty. This error generally occurs when the \f{Paste} command is executed without first executing the \f{Copy} command.
+
+Refer to \k{editM} for detail.
+END
+
+# fileio.c
 MESSAGE MSG_UPGRADE_VERSION1
 File version %ld is greater than supported
 version %d. You need to upgrade %s
@@ -432,6 +432,36 @@ The layout file that you loaded contained records that were not recognized. This
 
 Take full advantage of the latest features within \e{XTrackCAD} by visiting the \W{http://www.xtrkcad.org/}{\e{XTrackCAD} Fork Website} and downloading the latest release.
 END
+
+#fileio.c
+MESSAGE MSG_TOO_MANY_LAYERS
+While processing DXF file %s, too many layers were in the drawing. The maximum is %d.
+HELP
+The DXF file that you loaded contained more layers than the maximum.
+END
+
+#fileio.c
+MESSAGE MSG_TOO_MANY_ENDPTS
+While processing DXF file %s, too many track end points were in the drawing. The maximum is %d.
+HELP
+The DXF file that you loaded contained more track end points than the maximum.
+END
+
+#fileio.c
+MESSAGE MSG_DXF_LINE_ERROR
+While processing DXF file %s, an error occured. 
+HELP
+The DXF file that you loaded generated an error.
+END
+
+#fileio.c
+MESSAGE MSG_DXF_LINE_LEN
+While processing DXF file %s, a line that is too long was generated. 
+The line was %d, the maximum is %d.
+HELP
+The DXF file that you loaded generated a line longer than the maximum.
+END
+
 
 #paramfile.c
 MESSAGE MSG_PARAM_UPGRADE_VERSION1
@@ -1513,8 +1543,6 @@ You have changed values for this object.
 
 Are you sure you want to Close?
 END
-
-
 
 # fileio.c
 MESSAGE MSG_BAD_FILE_VERSION

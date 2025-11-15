@@ -622,8 +622,11 @@ static void getSavedSizeAndPos(
                 h = 10;
             }
 
-			// Make sure the dialog fits in the screen
-            if (w + xadj > screenWidth) {
+(??)			// Make sure we can see the dialog
+(??)			xadj += 100;
+(??)			yadj += 100;
+(??)
+(??)            if (w > screenWidth - xadj) {
                 w = screenWidth - xadj;
             }
 
@@ -649,8 +652,13 @@ static void getSavedSizeAndPos(
                 x = screenRect.left;
             }
 
-            if (y + h + yadj > screenRect.bottom) {
-                y = screenRect.bottom - h - yadj;
+(??)            // Make sure we can see the dialog
+(??)            xadj += 100;
+(??)            yadj += 100;
+(??)
+(??)
+(??)            if (y + h > screenHeight - yadj) {
+(??)                y = screenHeight - yadj - h;
             }
 
             if (x + w + xadj > screenRect.right) {
