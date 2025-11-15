@@ -132,7 +132,6 @@ static int mResizeBorderW;
 static int mResizeBorderH;
 static int mMenuH;
 static int screenWidth = 0, screenHeight = 0;
-static RECT screenRect;
 
 static wWin_p mswWin = NULL;
 static wWin_p winFirst, winLast;
@@ -592,8 +591,8 @@ static void getSavedSizeAndPos(
         int state;
 
         w = h = 0;
-        xadj = 0;
-        yadj = 0;
+        xadj = 1;
+        yadj = mTitleH + 1;
         if (option & F_RESIZE) {
             xadj += mResizeBorderW * 2;
             yadj += mResizeBorderH * 2;
@@ -601,19 +600,16 @@ static void getSavedSizeAndPos(
             xadj += mFixBorderW * 2;
             yadj += mFixBorderH * 2;
         }
-
-        yadj += mTitleH;
-        if (option & F_MENUBAR) {
-        	yadj += mMenuH;
-        }
+        //if (option & F_MENUBAR) {
+        //	yadj += mMenuH;
+        //}
 
         if ((option & F_RESIZE) &&
-            (cp = wPrefGetStringBasic("msw window size", nameStr)) &&
-            (state = (int)strtol(cp, &cq, 10), cp != cq) &&  // state is not used
-            (cp = cq, w = (wWinPix_t)(strtod(cp, &cq)), cp != cq) &&
-            (cp = cq, h = (wWinPix_t)(strtod(cp, &cq)), cp != cq)
-        ) 
-        {
+                (cp = wPrefGetStringBasic("msw window size", nameStr)) &&
+                (state = (int)strtol(cp, &cq, 10), cp != cq) &&  // state is not used
+                (cp = cq, w = (wWinPix_t)(strtod(cp, &cq)), cp != cq) &&
+                (cp = cq, h = (wWinPix_t)(strtod(cp, &cq)), cp != cq)
+           ) {
             if (w < 10) {
                 w = 10;
             }
@@ -622,15 +618,15 @@ static void getSavedSizeAndPos(
                 h = 10;
             }
 
-(??)			// Make sure we can see the dialog
-(??)			xadj += 100;
-(??)			yadj += 100;
-(??)
-(??)            if (w > screenWidth - xadj) {
+			// Make sure we can see the dialog
+			//xadj += 100;
+			//yadj += 100;
+
+            if (w > screenWidth - xadj) {
                 w = screenWidth - xadj;
             }
 
-            if (h + yadj > screenHeight) {
+            if (h > screenHeight - yadj) {
                 h = screenHeight - yadj;
             }
 
@@ -639,30 +635,28 @@ static void getSavedSizeAndPos(
         }
 
         if ((cp = wPrefGetStringBasic("msw window pos", nameStr)) &&
-            (x = (wWinPix_t)(strtod(cp, &cq)), cp != cq) &&
-            (cp = cq, y = (wWinPix_t)(strtod(cp, &cq)), cp != cq)
-        ) 
-        {
-            // Position the dialog so its not off screen
-            if (y < screenRect.top) {
-                y = screenRect.top;
+                (x = (wWinPix_t)(strtod(cp, &cq)), cp != cq) &&
+                (cp = cq, y = (wWinPix_t)(strtod(cp, &cq)), cp != cq)
+           ) {
+            if (y < 0) {
+                y = 0;
             }
 
-            if (x < screenRect.left) {
-                x = screenRect.left;
+            if (x < 0) {
+                x = 0;
             }
 
-(??)            // Make sure we can see the dialog
-(??)            xadj += 100;
-(??)            yadj += 100;
-(??)
-(??)
-(??)            if (y + h > screenHeight - yadj) {
-(??)                y = screenHeight - yadj - h;
+            // Make sure we can see the dialog
+            //xadj += 100;
+            //yadj += 100;
+
+
+            if (y + h > screenHeight - yadj) {
+                y = screenHeight - yadj - h;
             }
 
-            if (x + w + xadj > screenRect.right) {
-                x = screenRect.right - w - xadj;
+            if (x + w > screenWidth - xadj) {
+                x = screenWidth - xadj - w;
             }
 
             *rx = x;
@@ -1204,7 +1198,7 @@ void wGetDisplaySize(wWinPix_t * width, wWinPix_t * height)
 void wWinGetSize(wWin_p w, wWinPix_t * width, wWinPix_t * height)
 {
     RECT rect;
-    // GetWindowRect(w->hWnd, &rect);
+    GetWindowRect(w->hWnd, &rect);
     GetClientRect(w->hWnd, &rect);
     w->w = rect.right - rect.left;
     w->h = rect.bottom - rect.top;
@@ -1288,7 +1282,7 @@ static void savePos(wWin_p win)
 
 void wWinShow(
     wWin_p win,
-    unsigned show)
+    BOOL_T show)
 {
     wWinPix_t x, y;
     wWin_p win1;
@@ -2054,8 +2048,8 @@ int wNoticeEx(
     const char * no)
 {
     int res;
-    UINT flag = 0;
-    char *headline = "";
+    UINT flag;
+    char *headline;
 
     switch (type) {
     case NT_INFORMATION:
@@ -2428,7 +2422,7 @@ GetImageFileFormats(void)
     char *current = filter;
     char *message;
 
-    for (int i = 0; i < sizeof(filterImageFiles) / sizeof(filterImageFiles[0]) - 1;
+    for (int i = 0; i < sizeof(filterImageFiles) / sizeof(filterImageFiles[0]);
             i += 2) {
         message = gettext(filterImageFiles[i]);
         strcpy(current, message);
@@ -3396,21 +3390,15 @@ int PASCAL WinMain(HINSTANCE hinstCurrent, HINSTANCE hinstPrevious,
         }
     }
 
-    // Area not obscured by desktop toolbars
-    SystemParametersInfo(SPI_GETWORKAREA, 0, &screenRect, 0);
-    screenWidth = screenRect.right - screenRect.left;
-    screenHeight = screenRect.bottom - screenRect.top;
-
     mswHInst = hinstCurrent;
-    mTitleH = GetSystemMetrics(SM_CYCAPTION);
-    mMenuH = GetSystemMetrics(SM_CYMENU); // + GetSystemMetrics(SM_CYMENUSIZE);
-    mFixBorderW = GetSystemMetrics(SM_CXBORDER); // + GetSystemMetrics(SM_CXEDGE);
-    mFixBorderH = GetSystemMetrics(SM_CYBORDER); // + GetSystemMetrics(SM_CYEDGE);
-    mResizeBorderW = GetSystemMetrics(SM_CXSIZEFRAME); // + GetSystemMetrics(SM_CXEDGE);
-    mResizeBorderH = GetSystemMetrics(SM_CYSIZEFRAME); // + GetSystemMetrics(SM_CYEDGE);
-    // screenWidth = GetSystemMetrics(SM_CXSCREEN);
-    // screenHeight = GetSystemMetrics(SM_CYSCREEN);
-
+    mTitleH = GetSystemMetrics(SM_CYCAPTION) - 1;
+    mFixBorderW = GetSystemMetrics(SM_CXBORDER);
+    mFixBorderH = GetSystemMetrics(SM_CYBORDER);
+    mResizeBorderW = GetSystemMetrics(SM_CXFRAME);
+    mResizeBorderH = GetSystemMetrics(SM_CYFRAME);
+    mMenuH = GetSystemMetrics(SM_CYMENU) + 1;
+    screenWidth = GetSystemMetrics(SM_CXSCREEN);
+    screenHeight = GetSystemMetrics(SM_CYSCREEN);
     mswLabelFont = GetStockObject(DEFAULT_GUI_FONT);
     hDc = GetDC(0);
     mswScale = GetDeviceCaps(hDc, LOGPIXELSX) / 96.0;
