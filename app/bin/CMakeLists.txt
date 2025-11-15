@@ -160,6 +160,7 @@ target_sources(xtrkcad-lib
     draw.h
     drawgeom.c
     drawgeom.h
+    dxfimport.c
     dxfformat.c
     dxfformat.h
     dxfoutput.c
