@@ -424,6 +424,16 @@ GetLayoutCurScale()
 }
 
 /**
+* @brief Returns the gauge index of layout setting
+* @return The Gauge Index
+*/
+GAUGEINX_T
+GetLayoutCurGauge()
+{
+	return (thisLayout.props.curGaugeInx);
+}
+
+/**
  * @brief Returns the Layout Background full path
  * @return The Background full path
 */

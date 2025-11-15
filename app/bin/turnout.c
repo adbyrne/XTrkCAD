@@ -540,7 +540,7 @@ void GetTurnoutType()
 		}
 }
 
-#if 1
+#ifdef DTO_DEBUG
 /**
  * Draw Layout lines and points
  *
@@ -552,7 +552,6 @@ static void DrawDtoLayout(
         SCALEINX_T scaleInx
 )
 {
-#ifdef DTO_DEBUG
 	// Draw the points and lines from dto
 	double rdot = dtod.td.width / 2;
 
@@ -565,7 +564,6 @@ static void DrawDtoLayout(
 			}
 		}
 	}
-#endif
 }
 #endif
 
