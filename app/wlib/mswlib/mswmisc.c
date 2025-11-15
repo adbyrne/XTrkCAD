@@ -1280,7 +1280,7 @@ static void savePos(wWin_p win)
 
 void wWinShow(
     wWin_p win,
-    BOOL_T show)
+    unsigned show)
 {
     wWinPix_t x, y;
     wWin_p win1;
@@ -2046,8 +2046,8 @@ int wNoticeEx(
     const char * no)
 {
     int res;
-    UINT flag;
-    char *headline;
+    UINT flag = 0;
+    char *headline = "";
 
     switch (type) {
     case NT_INFORMATION:
@@ -2420,7 +2420,7 @@ GetImageFileFormats(void)
     char *current = filter;
     char *message;
 
-    for (int i = 0; i < sizeof(filterImageFiles) / sizeof(filterImageFiles[0]);
+    for (int i = 0; i < sizeof(filterImageFiles) / sizeof(filterImageFiles[0]) - 1;
             i += 2) {
         message = gettext(filterImageFiles[i]);
         strcpy(current, message);

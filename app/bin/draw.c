@@ -45,7 +45,7 @@ EXPORT wIndex_t panCmdInx;
 
 static void DrawRoomWalls( wBool_t );
 static void DrawMarkers( void );
-static void ConstraintOrig( coOrd *, coOrd, int, int );
+static void ConstraintOrig( coOrd *, coOrd, BOOL_T, BOOL_T );
 static void DoMouse( wAction_t action, coOrd pos );
 static void DDrawPoly(
         drawCmd_p d,
@@ -681,8 +681,8 @@ EXPORT void DrawMultiString(
 {
 	char * cp;
 	char * cp1;
-	POS_T lineH, lineW;
-	coOrd size, size2, textsize, posl, orig;
+	POS_T lineH;
+	coOrd size, size2, posl, orig;
 	POS_T descent, ascent;
 	char *line;
 	coOrd p[4];

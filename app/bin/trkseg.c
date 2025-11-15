@@ -29,6 +29,7 @@
 #include "cbezier.h"
 #include "tbezier.h"
 #include "cjoin.h"
+#include "include/utf8convert.h"
 
 
 /*****************************************************************************
@@ -1431,7 +1432,7 @@ EXPORT BOOL_T ReadSegs( void )
 			s->u.t.string = MyStrdup(plain_text);
 			s->color = wDrawFindColor( rgb );
 			s->u.t.filled = FALSE;
-			wDrawColor bg_color = wDrawColorWhite;
+			s->bg_color = wDrawColorWhite;
 			if (cpp) {
 				if (!GetArgs(cpp, "ll", &s->u.t.filled, &rgb)) {
 					rc = FALSE;
@@ -1615,7 +1616,7 @@ EXPORT BOOL_T WriteSegsEnd(
 			trackText = segs[i].u.t.string;
 #endif // UTFCONVERT
 			escaped_text = ConvertToEscapedText(trackText);
-			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %d %0.6f \"%s\" %d %d\n",
+			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %d %0.6f \"%s\" %d %ld\n",
 			               segs[i].type, wDrawGetRGB(segs[i].color),
 			               segs[i].u.t.pos.x, segs[i].u.t.pos.y, segs[i].u.t.angle,
 			               segs[i].u.t.boxed, segs[i].u.t.fontSize, 

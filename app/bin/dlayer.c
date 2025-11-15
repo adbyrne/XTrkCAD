@@ -2117,6 +2117,9 @@ static char* customFonts[] = {
 wMenu_p layerM;
 wButton_p layerB;
 
+wMenu_p layerM;
+wButton_p layerB;
+
 static void
 InitializeCustomFont(int size)
 {

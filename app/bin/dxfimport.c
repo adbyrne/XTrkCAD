@@ -63,7 +63,7 @@ static char* nameOfFile;
 
 static void ImportDxfFileSel(void* unused);
 static int ImportDxf(int cnt, char** fileName, void* data);
-static void ProcessDxfFile(const char* filePath, const char* fileName,
+static void ProcessDxfFile(char** filePath, char* fileName,
                            BOOL_T complain);
 
 static int importDxfTrack = 0;
@@ -127,7 +127,7 @@ static int ImportDxf(
 	UndoStart(_("Import Dxf"), "importDxf");
 	useCurrentLayer = TRUE;
 
-	ProcessDxfFile(fileName[0], nameOfFile, true);
+	ProcessDxfFile(fileName, nameOfFile, true);
 
 	ImportEnd(zero, TRUE, FALSE);
 
@@ -276,7 +276,7 @@ static BOOL_T dxfAddEndPt(struct sEndPt endPt)
 
 	if (DxfEndPtCount == DxfEndPtAlloc) {
 		DxfEndPtAlloc += DXF_ENDPT_ALLOC;
-		int eSize = DxfEndPtAlloc * len;
+		size_t eSize = DxfEndPtAlloc * len;
 		DxfEndPt = MyRealloc(DxfEndPt, eSize);
 	}
 	memcpy(&DxfEndPt[DxfEndPtCount], &endPt, len);
@@ -299,8 +299,8 @@ static void dxfDebugMessage(int ok, const char* fileName)
 
 // The main ReadDxfFile function
 static void ProcessDxfFile(
-        const char* pathName,
-        const char* fileName,
+        char** pathName,
+        char* fileName,
         BOOL_T complain)
 {
 	FILE* dxfFile;
@@ -379,7 +379,7 @@ static void ProcessDxfFile(
 
 	memset(dxfSection, 0, sizeof(dxfSection));
 
-	dxfFile = fopen(pathName, "r");
+	dxfFile = fopen(pathName[0], "r");
 	if (dxfFile == NULL) {
 		if (complain) {
 			NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, sProdName, pathName,
@@ -815,7 +815,7 @@ static void ProcessDxfFile(
 					// Connect i to j
 					int li = DxfEndPt[i].line;
 					char substr[TMP_SIZE];
-					int len = strlen(DxfOutput[li]);
+					size_t len = strlen(DxfOutput[li]);
 					strncpy(substr, DxfOutput[li], len);
 					substr[len] = '\0';
 					sprintf(tmp, "\tT4 %d %s", DxfEndPt[j].entity, substr + 4);
@@ -834,15 +834,17 @@ static void ProcessDxfFile(
 	// Change the extension to create the XTI file
 	MakeFullpath(&pathName, workingDir, nameOfFile, NULL);
 
-	char* p = strstr(pathName, ".dxf");
+	MakeFullpath(pathName, workingDir, nameOfFile, NULL);
+
+	char* p = strstr(pathName[0], ".dxf");
 	if (p != NULL) {
 		memcpy(p, ".xti", 4);
 	}
 
-	xtiFile = fopen(pathName, "w");
+	xtiFile = fopen(pathName[0], "w");
 	if (xtiFile == NULL) {
 		if (complain) {
-			NoticeMessage(MSG_OPEN_FAIL, _("Ok"), NULL, sProdName, pathName,
+			NoticeMessage(MSG_OPEN_FAIL, _("Ok"), NULL, sProdName, pathName[0],
 			              strerror(errno));
 		}
 		return;
@@ -888,7 +890,7 @@ static void ProcessDxfFile(
 		}
 
 		ParamSetInReadTracks(TRUE);
-		BOOL_T ret = ReadTrackFile(pathName, fileName, FALSE, TRUE, TRUE);
+		BOOL_T ret = ReadTrackFile(pathName[0], fileName, FALSE, TRUE, TRUE);
 
 		if (ret) {
 			if (importDxfXti == 2) { SetLayerModule(layer, TRUE); }

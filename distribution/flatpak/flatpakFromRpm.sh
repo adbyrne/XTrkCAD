@@ -147,7 +147,7 @@ modules:
           - "#export XTRKCADBETALIB=/app${XTRKCADLIB}"
           - export XTRKCADLIB=~/.local/${XTRKCADSHARE}
           - export XTRKCADBETALIB=~/.local/${XTRKCADSHARE}
-          - BOOKMARK="file://\$XTRKCADLIB xtrkcad${BETA_SUFFIX}"
+          - BOOKMARK="file://\$XTRKCADLIB xtrkcad-lib${BETA_SUFFIX}"
           - FILE="\$HOME/.gtk-bookmarks"
           - touch \$FILE
           - if ! grep -Fx "\$BOOKMARK" "\$FILE" >/dev/null; then
@@ -164,7 +164,7 @@ modules:
           #export XTRKCADBETALIB=/app${XTRKCADLIB}
           export XTRKCADLIB=~/.local/${XTRKCADSHARE}
           export XTRKCADBETALIB=~/.local/${XTRKCADSHARE}
-          BOOKMARK="file://\$XTRKCADLIB xtrkcad${BETA_SUFFIX}"
+          BOOKMARK="file://\$XTRKCADLIB xtrkcad-lib${BETA_SUFFIX}"
           FILE="\$HOME/.gtk-bookmarks"
           touch \$FILE
           if ! grep -Fx "\$BOOKMARK" "\$FILE" >/dev/null; then
@@ -233,7 +233,7 @@ modules:
           "
           rm -f \$LOGFILE
           touch \$LOGFILE
-          exec /app${XTRKCADBIN} -v -l \$LOGFILE \$LOG_ALLMODULES \"\$@\"
+          exec /app${XTRKCADBIN} -v -l \$LOGFILE \$LOG_ALLMODULES "\$@"
       - type: file
         path: ./$FP_DESKTOP
         dest-filename: $FP_DESKTOP
