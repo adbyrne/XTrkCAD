@@ -10,7 +10,7 @@ DEBUG=no
 #   U S A G E
 #####################################################################
 usage() {
-  cat <<EOF
+    cat <<EOF
 Usage: $ME [ destination-directory ]
 
 This script creates a flatpak from this source. The flatpak will end
@@ -28,10 +28,10 @@ Pre-requisities:
 Known issues:
   - still uses gtk2
 EOF
-  exit 1
+    exit 1
 }
 if [ "$1" = "-h" ]; then
-  usage
+    usage
 fi
 
 #####################################################################
@@ -39,17 +39,17 @@ fi
 #####################################################################
 PROGRAM_VERSION=ProgramVersion.cmake
 if [ ! -f $PROGRAM_VERSION ]; then
-  cd ../..
+    cd ../..
 fi
 if [ ! -f $PROGRAM_VERSION ]; then
-  echo
-  echo "ERROR: not in the correct directory"
-  echo
-  usage
-  exit 1
+    echo
+    echo "ERROR: not in the correct directory"
+    echo
+    usage
+    exit 1
 fi
 MOD_PROGRAM_VERSION=Modified${PROGRAM_VERSION}
-cat <<EOF >$MOD_PROGRAM_VERSION
+cat <<EOF > $MOD_PROGRAM_VERSION
 include($PROGRAM_VERSION)
 if (XTRKCAD_SHOW_VERSION)
     # used by distribution/flatpak/buildFlatpak.sh
@@ -59,8 +59,8 @@ EOF
 XTRKCAD_VERSION=$(cmake -DXTRKCAD_SHOW_VERSION=1 -P $MOD_PROGRAM_VERSION 2>&1)
 rm -f $MOD_PROGRAM_VERSION
 if [ -z "$XTRKCAD_VERSION" ]; then
-  echo "Unable to determine version; is the source correct?"
-  exit 1
+    echo "Unable to determine version; is the source correct?"
+    exit 1
 fi
 
 #####################################################################
@@ -72,17 +72,17 @@ FP_STATE_DIR=${FP_STATE_DIR:-$HOME/.flatpak-builder-xtrkcad}
 FP_REPO=dummy_repo
 FP_DEST_DIR=${1:-$PWD}
 if [ ! -d "$FP_DEST_DIR" ]; then
-  echo "\"$FP_DEST_DIR\" is not a directory"
-  exit 1
+    echo "\"$FP_DEST_DIR\" is not a directory"
+    exit 1
 fi
 BETA_SUFFIX=""
 LOCAL_SUBDIR=""
 if [[ $XTRKCAD_VERSION = *[bB]eta[0-9]* ]]; then
-  BETA_SUFFIX="-beta"
-  #LOCAL_SUBDIR="local/"
+    BETA_SUFFIX="-beta"
+    #LOCAL_SUBDIR="local/"
 fi
 if [ $DEBUG != "no" ]; then
-  XTRKCAD_VERSION=${XTRKCAD_VERSION}-debug
+    XTRKCAD_VERSION=${XTRKCAD_VERSION}-debug
 fi
 XTRKCADPREFIX=/app
 XTRKCADSHARE=share/xtrkcad${BETA_SUFFIX}
@@ -100,23 +100,23 @@ INKSCAPE_TAR="Inkscape.tar.gz"
 #   C L E A N U P
 #####################################################################
 cleanup() {
-  trap - 0 1 2 3 15 21 22
-  if [ "$DEBUG" = "no" ]; then
-    rm -f $WORKING_FILE
-    rm -rf $FP_BUILD_DIR
-    find $FP_STATE_DIR -name '*build-debug' | xargs -r rm
-    # removing the flatpak state dir forces fresh build
-    #rm -rf $FP_STATE_DIR
-    rm -rf $FP_REPO
-    # manifest dynamically built, but if you want to look comment out
-    rm -f $FP_MANIFEST
-    rm -f $FP_DESKTOP
-    rm -f $FP_META
-    rm -f $INKSCAPE_IMAGE
-    # removing existing inkscape tar file forces download of latest
-    #rm -f $XDG_DATA/$INKSCAPE_TAR
-    rm -f $MOD_PROGRAM_VERSION
-  fi
+    trap - 0 1 2 3 15 21 22
+    if [ "$DEBUG" = "no" ]; then
+        rm -f $WORKING_FILE
+        rm -rf $FP_BUILD_DIR
+        find $FP_STATE_DIR -name '*build-debug' | xargs -r rm
+        # removing the flatpak state dir forces fresh build
+        #rm -rf $FP_STATE_DIR
+        rm -rf $FP_REPO
+        # manifest dynamically built, but if you want to look comment out
+        rm -f $FP_MANIFEST
+        rm -f $FP_DESKTOP
+        rm -f $FP_META
+        rm -f $INKSCAPE_IMAGE
+        # removing existing inkscape tar file forces download of latest
+        #rm -f $XDG_DATA/$INKSCAPE_TAR
+        rm -f $MOD_PROGRAM_VERSION
+    fi
 }
 trap cleanup 0 1 2 3 15 21 22
 
@@ -126,19 +126,19 @@ trap cleanup 0 1 2 3 15 21 22
 #   Normally not run in order to take advantage of cached files
 #####################################################################
 start_fresh() {
-  rm -f $WORKING_FILE
-  rm -rf $FP_BUILD_DIR
-  # removing the flatpak state dir forces fresh build
-  rm -rf $FP_STATE_DIR
-  rm -rf $FP_REPO
-  # manifest dynamically built, but if you want to look comment out
-  rm -f $FP_MANIFEST
-  rm -f $FP_DESKTOP
-  rm -f $FP_META
-  rm -f $INKSCAPE_IMAGE
-  # removing existing inkscape tar file forces download of latest
-  rm -f $XDG_DATA/$INKSCAPE_TAR
-  flatpak uninstall -y --user org.inkscape.Inkscape
+    rm -f $WORKING_FILE
+    rm -rf $FP_BUILD_DIR
+    # removing the flatpak state dir forces fresh build
+    rm -rf $FP_STATE_DIR
+    rm -rf $FP_REPO
+    # manifest dynamically built, but if you want to look comment out
+    rm -f $FP_MANIFEST
+    rm -f $FP_DESKTOP
+    rm -f $FP_META
+    rm -f $INKSCAPE_IMAGE
+    # removing existing inkscape tar file forces download of latest
+    rm -f $XDG_DATA/$INKSCAPE_TAR
+    flatpak uninstall -y --user org.inkscape.Inkscape
 }
 
 #####################################################################
@@ -147,46 +147,46 @@ start_fresh() {
 #   Prevent cache from growing and growing during development
 #####################################################################
 flush_cache() {
-  # in meg
-  MAX_CACHE_SIZE=1000
+    # in meg
+    MAX_CACHE_SIZE=1000
 
-  if [ ! -d "$FP_STATE_DIR" ]; then
-    return
-  fi
-  CACHE_SIZE=$(du -sm $FP_STATE_DIR | cut -f1)
-  if [[ $CACHE_SIZE -ge $MAX_CACHE_SIZE ]]; then
-    echo "Removing build cache .."
-    echo "CACHE_SIZE=$CACHE_SIZE, MAX_CACHE_SIZE=$MAX_CACHE_SIZE"
-    rm -rf $FP_STATE_DIR
-    sleep 2
-  fi
+    if [ ! -d "$FP_STATE_DIR" ]; then
+        return
+    fi
+    CACHE_SIZE=$(du -sm $FP_STATE_DIR | cut -f1)
+    if [[ $CACHE_SIZE -ge $MAX_CACHE_SIZE ]]; then
+        echo "Removing build cache .."
+        echo "CACHE_SIZE=$CACHE_SIZE, MAX_CACHE_SIZE=$MAX_CACHE_SIZE"
+        rm -rf $FP_STATE_DIR
+        sleep 2
+    fi
 }
 
 #####################################################################
 #   M A K E   S O U R C E   T A R B A L L
 #####################################################################
 make_source_tar() {
-  tar -czf ../$WORKING_FILE --exclude=.hg .
-  mv ../$WORKING_FILE .
+    tar -czf ../$WORKING_FILE --exclude=.hg .
+    mv ../$WORKING_FILE .
 }
 
 #####################################################################
 #   G E T   A N D   E X T R A C T   I N K S C A P E
 #####################################################################
 get_extract_inkscape() {
-  flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
-  flatpak install -y --user flathub org.inkscape.Inkscape
-  if [ ! -f $XDG_DATA/$INKSCAPE_TAR ]; then
-    echo "creating tarball of inkscape ..."
-    flatpak run --user --command=tar org.inkscape.Inkscape -czf $XDG_DATA/$INKSCAPE_TAR --exclude='*/__pycache__*' /app 2>/dev/null
-  fi
+    flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
+    flatpak install -y --user flathub org.inkscape.Inkscape
+    if [ ! -f $XDG_DATA/$INKSCAPE_TAR ]; then
+        echo "creating tarball of inkscape ..."
+        flatpak run --user --command=tar org.inkscape.Inkscape -czf $XDG_DATA/$INKSCAPE_TAR --exclude='*/__pycache__*' /app 2>/dev/null
+    fi
 }
 
 #####################################################################
 #   B U I L D   M A N I F E S T
 #####################################################################
 build_manifest() {
-  cat <<EOF >$FP_DESKTOP
+    cat <<EOF > $FP_DESKTOP
 [Desktop Entry]
 Name=XTrackCAD${BETA_SUFFIX} (flatpak)
 Comment=Design model railroad layouts
@@ -196,8 +196,8 @@ Terminal=false
 Type=Application
 Categories=Graphics
 EOF
-  DT="$(date '+%Y-%m-%d')"
-  cat <<EOF >$FP_META
+    DT="$(date '+%Y-%m-%d')"
+    cat <<EOF > $FP_META
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
   <id>${FP_XTRKCAD_ORG}</id>
@@ -213,7 +213,7 @@ EOF
   <project_license>GPL-3.0</project_license>
 </component>
 EOF
-  cat <<EOF >$FP_MANIFEST
+    cat <<EOF > $FP_MANIFEST
 id: $FP_XTRKCAD_ORG
 runtime: org.gnome.Platform
 runtime-version: '48'
@@ -309,14 +309,16 @@ modules:
         dest-filename: run-xtrkcad.sh
         contents: |
           #!/bin/sh
-          export XTRKCADLIB=${XTRKCADLIB}
-          export XTRKCADBETALIB=${XTRKCADLIB}
-          # if no access due to sandboxing, copy
-          #mkdir -p ~/.local/${XTRKCADSHARE}
-          #rm -rf ~/.local/${XTRKCADSHARE}/*
-          #cp -pr ${XTRKCADLIB}/* ~/.local/${XTRKCADSHARE}
-          #export XTRKCADLIB=~/.local/${XTRKCADSHARE}
-          #export XTRKCADBETALIB=~/.local/${XTRKCADSHARE}
+          # flatpak sandboxing prevents browser from accessing the help so copy and adjust XTRKCADLIB
+          # (perhaps someday another env variable can be used for help html file access and thus not
+          #  have to copy all of XTRKCADLIB)
+          #export XTRKCADLIB=${XTRKCADLIB}
+          #export XTRKCADBETALIB=${XTRKCADLIB}
+          mkdir -p ~/.local/${XTRKCADSHARE}
+          rm -rf ~/.local/${XTRKCADSHARE}/*
+          cp -pr ${XTRKCADLIB}/* ~/.local/${XTRKCADSHARE}
+          export XTRKCADLIB=~/.local/${XTRKCADSHARE}
+          export XTRKCADBETALIB=~/.local/${XTRKCADSHARE}
           # there is no access to host gtk3 modules
           unset GTK3_MODULES
           unset GTK_MODULES
@@ -331,14 +333,16 @@ modules:
         dest-filename: run-xtrkcad-debug.sh
         contents: |
           #!/bin/sh
-          export XTRKCADLIB=${XTRKCADLIB}
-          export XTRKCADBETALIB=${XTRKCADLIB}
-          # if no access due to sandboxing, copy
-          #mkdir -p ~/.local/${XTRKCADSHARE}
-          #rm -rf ~/.local/${XTRKCADSHARE}/*
-          #cp -pr ${XTRKCADLIB}/* ~/.local/${XTRKCADSHARE}
-          #export XTRKCADLIB=~/.local/${XTRKCADSHARE}
-          #export XTRKCADBETALIB=~/.local/${XTRKCADSHARE}
+          # flatpak sandboxing prevents browser from accessing the help so copy and adjust XTRKCADLIB
+          # (perhaps someday another env variable can be used for help html file access and thus not
+          #  have to copy all of XTRKCADLIB)
+          #export XTRKCADLIB=${XTRKCADLIB}
+          #export XTRKCADBETALIB=${XTRKCADLIB}
+          mkdir -p ~/.local/${XTRKCADSHARE}
+          rm -rf ~/.local/${XTRKCADSHARE}/*
+          cp -pr ${XTRKCADLIB}/* ~/.local/${XTRKCADSHARE}
+          export XTRKCADLIB=~/.local/${XTRKCADSHARE}
+          export XTRKCADBETALIB=~/.local/${XTRKCADSHARE}
           # there is no access to host gtk3 modules
           unset GTK3_MODULES
           unset GTK_MODULES
@@ -479,8 +483,6 @@ finish-args:
   - --socket=x11
   - --socket=wayland
   - --socket=session-bus
-  - --socket=cups
-  - --socket=pulseaudio
   - --share=ipc
   - --device=all
   - --filesystem=~/.xtrkcad${BETA_SUFFIX}:create
@@ -489,18 +491,13 @@ finish-args:
   - --filesystem=~/.config:create
   - --filesystem=~/.gtk-bookmarks
   - --filesystem=~/.local/share:create
-  # if home directory access not allowed, define some common ones for plans
-  #- --filesystem=~/.local/${XTRKCADSHARE}:create
-  #- --filesystem=~/Documents:create
-  #- --filesystem=~/xtrkcad:create
-  #- --filesystem=~/XtrackCAD:create
-  - --filesystem=~/Downloads
+  - --filesystem=~/.local/${XTRKCADSHARE}:create
+  - --filesystem=~/Documents:create
+  - --filesystem=~/Downloads:create
+  - --filesystem=~/xtrkcad:create
+  - --filesystem=~/XtrackCAD:create
   - --filesystem=xdg-data/applications
   - --filesystem=xdg-data/icons
-  # home directory access
-  - --filesystem=home
-  # full system access
-  #- --filesystem=host
   - --talk-name=org.gnome.portal.*
   - --talk-name=org.gnome.*
   - --talk-name=org.gnome.portal.*
@@ -512,24 +509,23 @@ EOF
 #   B U I L D   F L A T P A K
 #####################################################################
 build_flatpak() {
-  flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
-  flatpak-builder --state-dir=$FP_STATE_DIR --force-clean --user --install --repo=$FP_REPO --install-deps-from=flathub $FP_BUILD_DIR $FP_MANIFEST
-  ARCH=$(uname -m)
-  FP_NAME=xtrkcad-${XTRKCAD_VERSION}.${ARCH}.flatpak
-  rm -f $FP_NAME
-  flatpak build-bundle ${FP_REPO} $FP_NAME $FP_XTRKCAD_ORG
-  if [ -f $FP_NAME ]; then
-    mv $FP_NAME $FP_DEST_DIR/$FP_NAME 2>/dev/null
-    echo "========================================================================"
-    echo "$(ls $FP_DEST_DIR/$FP_NAME) created"
-    echo
-    flatpak info $FP_XTRKCAD_ORG
-    echo "========================================================================"
-  else
-    echo "========================================================================"
-    echo "problem creating $FP_NAME "
-    echo "========================================================================"
-  fi
+    flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
+    flatpak-builder --state-dir=$FP_STATE_DIR --force-clean --user --install --repo=$FP_REPO --install-deps-from=flathub $FP_BUILD_DIR $FP_MANIFEST
+    FP_NAME=xtrkcad-${XTRKCAD_VERSION}.flatpak
+    rm -f $FP_NAME
+    flatpak build-bundle ${FP_REPO} $FP_NAME $FP_XTRKCAD_ORG
+    if [ -f $FP_NAME ]; then
+        mv $FP_NAME $FP_DEST_DIR/$FP_NAME 2>/dev/null
+        echo "========================================================================"
+        echo "$(ls $FP_DEST_DIR/$FP_NAME) created"
+        echo
+        flatpak info $FP_XTRKCAD_ORG
+        echo "========================================================================"
+    else
+        echo "========================================================================"
+        echo "problem creating $FP_NAME "
+        echo "========================================================================"
+    fi
 }
 
 #####################################################################

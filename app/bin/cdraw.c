@@ -998,6 +998,10 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		segPtr->u.t.fontSize = fontSize;
 		break;
 	case FL:
+		if (segPtr->type == SEG_TEXT) {
+			segPtr->u.t.filled = drawData.filled;
+			break;
+		}
 		if (segPtr->type == SEG_POLY && drawData.open) {
 			segPtr->u.p.polyType = POLYLINE;
 			drawData.filled = FALSE;

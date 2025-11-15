@@ -50,6 +50,9 @@ endif()
 # Find document conversion tool
 find_package(Pandoc)
 
+# Flatpak
+find_package(Flatpak)
+
 # check for GTK+ 3.0
 pkg_check_modules(GTK3 QUIET "gtk+-3.0")
 # Flatpak

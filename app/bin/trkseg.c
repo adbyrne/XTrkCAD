@@ -1434,7 +1434,7 @@ EXPORT BOOL_T ReadSegs( void )
 			s->u.t.filled = FALSE;
 			s->bg_color = wDrawColorWhite;
 			if (cpp) {
-				if (!GetArgs(cpp, "ll", &s->u.t.filled, &rgb)) {
+				if (!GetArgs(cpp, "dl", &s->u.t.filled, &rgb)) {
 					rc = FALSE;
 					break;
 				}

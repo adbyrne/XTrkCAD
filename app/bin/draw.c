@@ -705,10 +705,10 @@ EXPORT void DrawMultiString(
 
 	orig.x = pos.x;
 	orig.y = pos.y;
+	for (int i = 0; i < 4; i++) {
+		Rotate(&p[i], orig, a);
+	}
 	if (filled && (d != &mapD)) {
-		for (int i = 0; i < 4; i++) {
-			Rotate(&p[i], orig, a);
-		}
 		DrawPoly( d, 4, p, NULL, bg_color, 0, DRAW_FILL );
 	}
 
@@ -733,6 +733,7 @@ EXPORT void DrawMultiString(
 	}
 	if (boxed && (d != &mapD)) {
 		DrawPoly( d, 4, p, NULL, color, 0, DRAW_CLOSED );
+		
 	}
 
 	free(line);
