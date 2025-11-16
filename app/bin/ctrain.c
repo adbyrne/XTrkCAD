@@ -21,6 +21,7 @@
  */
 
 #include "compound.h"
+#include "include/cars.h"
 #include "cselect.h"
 #include "ctrain.h"
 #include "cundo.h"

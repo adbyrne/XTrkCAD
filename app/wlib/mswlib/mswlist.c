@@ -146,6 +146,10 @@ void wListSetIndex(
 wIndex_t wListGetIndex(
         wList_p b )
 {
+	b->last = SendMessage(b->hWnd, 
+						 (b->type == B_LIST ? LB_GETCURSEL: CB_GETCURSEL), 
+						 0, 0L);
+
 	return b->last;
 }
 
@@ -405,13 +409,13 @@ wIndex_t wListAddValue(
 	                 (UINT)b->type==B_LIST?LB_ADDSTRING:CB_ADDSTRING,
 	                 (WPARAM)0,
 	                 (LPARAM)value );
-	if (nindex == 0) {
-		SendMessage( b->hWnd,
-		             (UINT)b->type==B_LIST?LB_SETCURSEL:CB_SETCURSEL,
-		             (WPARAM)nindex,
-		             (LPARAM)0 );
-		b->last = 0;
-	}
+	//if (nindex == 0) {
+	//	SendMessage( b->hWnd,
+	//	             (UINT)b->type==B_LIST?LB_SETCURSEL:CB_SETCURSEL,
+	//	             (WPARAM)nindex,
+	//	             (LPARAM)0 );
+	//	b->last = 0;
+	//}
 	SendMessage( b->hWnd,
 	             (UINT)b->type==B_LIST?LB_SETITEMDATA:CB_SETITEMDATA,
 	             (WPARAM)nindex,
