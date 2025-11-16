@@ -846,7 +846,6 @@ static void DrawSignalTrackHilite( void )
 	if (sighiliteColor==0) {
 		sighiliteColor = wDrawColorGray(87);
 	}
-
 	wDrawSetTempMode(tempD.d, TRUE);
 	DrawRectangle( &tempD, sighiliteOrig, sighiliteSize, sighiliteColor,
 	               DRAW_TRANSPARENT );

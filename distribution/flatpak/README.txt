@@ -1,3 +1,17 @@
+A flatpak package is currently built using distribution/flatpak/buildFlatpak.sh which
+is called via target flatpak ("make flatpak", or "ninja flatpak" depending on
+cmake generator). A separate build target was necessary for flatpak since cmake as 
+of this writing has no support to build flatpak packages.
+
+This script dynamically creates the files needed to build the flatpak (desktop file, metainfo file, manifest, source tar file). Inkscape is installed from flatpak, tar'd 
+for later use within the builder, then removed. Libzip, minixml, and gtk2 are downloaded within the manifest. After the build, unneeded parts are deleted to keep the flatpak
+as small as possible.
+
+The following was kept for historical purposes.
+========================================================================================
+================================  Original README.txt  =================================
+========================================================================================
+
 This is a work-in-progress to build a flatpak package
 
 BLDDIR is your build directory,

@@ -405,22 +405,32 @@ EXPORT void SelectFont(void * unused)
 #define MAX_STICKY_GROUPS 32
 
 EXPORT long stickySet = 0;
-static long stickySet1 = 0;
 static wControl_p stickyW;
 static const char * stickyLabels[MAX_STICKY_GROUPS + 1];
 static paramData_t stickyPLs[] = { {
-		PD_TOGGLE, &stickySet1, "set", 0,
-		stickyLabels
-	}
+		PD_TOGGLE, &stickySet, "set", PDO_NOPSHUPD,
+		stickyLabels, "", 0 }
 };
 static paramGroup_t stickyPG = { "sticky", PGO_RECORD, stickyPLs,COUNT( stickyPLs )};
 
 static void StickyOk(void * unused)
 {
-	stickySet = stickySet1;
+	long changes = GetChanges( &stickyPG );
 	wHide(stickyW);
+	DoChangeNotification(changes);
 }
 
+
+static void StickyChange( long chsnges )
+{
+}
+
+static void StickyDlgUpdate(
+        paramGroup_p pg,
+        int inx,
+        void * valueP )
+{
+}
 
 EXPORT void DoSticky(void * unused)
 {
@@ -432,7 +442,6 @@ EXPORT void DoSticky(void * unused)
 		                           _("Cancel"), FormCancel_Restore,
 		                           TRUE, F_RESIZE, NULL);
 	}
-	stickySet1 = stickySet;
 	FormLoadControls(&stickyPG);
 	wShow(stickyW);
 }
@@ -1438,6 +1447,7 @@ EXPORT void CreateMenus(void)
 
 	wPrefGetInteger( "sticky", "set", &stickySet, stickySet );
 	FormRegister(&stickyPG);
+	RegisterChangeNotification( StickyChange );
 }
 
 
