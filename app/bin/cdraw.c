@@ -1325,8 +1325,8 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		                        drawDesc[TA].mode =
 		                                drawDesc[LK].mode =
 		                                        drawDesc[OI].mode =
-		                                                drawDesc[BX].mode = 
-			                                                    drawDesc[FL].mode = 0;
+		                                                        drawDesc[BX].mode =
+		                                                                        drawDesc[FL].mode = 0;
 		if (!drawData.lock_origin) { drawDesc[RA].mode = DESC_RO; }
 		else { drawDesc[RA].mode = 0; }
 		drawDesc[E0].mode = DESC_IGNORE;
@@ -2958,6 +2958,11 @@ static void InitializeBenchLists(void);
 
 static void UpdateBenchOrientation(void);
 
+/**  \todo added as part of the merge with 5.3.2, examine and enable
+static void DisableControlRecording(void);
+static void EnableLineControlRecording(void);
+static void EnableBenchControlRecording(void);
+*/
 static void ConfigureLineColor(void);
 
 static void CreateDrawControls(paramGroup_p pg);
@@ -3188,8 +3193,32 @@ static void UpdateBenchOrientation(void)
 	wListSetIndex(orientControl, benchOrient);
 }
 
+/**  \todo added as part of the merge with 5.3.2, examine and enable
+static void DisableControlRecording(void)
+{
+	drawLineWidthPD.option |= PDO_NORECORD;
+	drawColorPD.option |= PDO_NORECORD;
+	drawBenchColorPD.option |= PDO_NORECORD;
+	drawBenchChoicePD.option |= PDO_NORECORD;
+	drawBenchOrientPD.option |= PDO_NORECORD;
+	drawDimArrowSizePD.option |= PDO_NORECORD;
+}
 
+static void EnableLineControlRecording(void)
+{
+	drawLineWidthPD.option &= ~PDO_NORECORD;
+	drawColorPD.option &= ~PDO_NORECORD;
+	drawLineTypePD.option &= ~PDO_NORECORD;
+}
 
+static void EnableBenchControlRecording(void)
+{
+	drawBenchColorPD.option &= ~PDO_NORECORD;
+	drawBenchChoicePD.option &= ~PDO_NORECORD;
+	drawBenchOrientPD.option &= ~PDO_NORECORD;
+	drawLengthPD.option &= ~PDO_NORECORD;
+}
+*/
 static void ConfigureLineColor(void)
 {
 	switch (drawCmdContext.Op) {
@@ -3565,8 +3594,8 @@ EXPORT track_p NewText(
         CSIZE_T textSize,
         wDrawColor color,
         BOOL_T boxed,
-		BOOL_T filled,
-		wDrawColor bg_color)
+        BOOL_T filled,
+        wDrawColor bg_color)
 {
 	trkSeg_t tempSeg;
 	track_p trk;
@@ -3613,7 +3642,8 @@ EXPORT BOOL_T ReadText( char * line )
 		}
 	}
 
-	trk = NewText( index, pos, angle, text, textSize, color, FALSE, FALSE, bg_color );
+	trk = NewText( index, pos, angle, text, textSize, color, FALSE, FALSE,
+	               bg_color );
 	SetTrkLayer( trk, layer );
 	MyFree(text);
 	return TRUE;
