@@ -1475,6 +1475,12 @@ static void InitCmdExport(void)
 	AddToolbarButton("cmdImportModule",
 	                 CreateToolbarIconFromResource("doc-import-mod.png"), IC_ACCLKEY,
 	                 DoImportModule, I2VP(1));
+	AddToolbarButton("cmdImport", CreateToolbarIconFromResource("doc-import.png"),
+	                 IC_ACCLKEY,
+	                 DoImportObjects, I2VP(0));
+	AddToolbarButton("cmdImportDxf",
+	                 CreateToolbarIconFromResource("doc-import-dxf.png"), IC_ACCLKEY,
+	                 DoImportDxf, I2VP(1));					 
 	ButtonGroupEnd();
 
 	AddPlaybackProc( "MENU", MenuPlayback, NULL );

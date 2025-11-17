@@ -38,9 +38,8 @@ else(WIN32)
     HINTS ${PC_LIBZIP_INCLUDE_DIRS})
 
   if(UNIX AND NOT APPLE)
-    set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
     find_library(LIBZIP_LIBRARY
-      NAMES zip
+      NAMES libzip zip
       PATHS
 		/usr/lib64
 		/usr/lib
@@ -48,10 +47,8 @@ else(WIN32)
 		/usr/local/lib
 		/sw/lib
 		/opt/local/lib
-		/app/lib
 		${CMAKE_CURRENT_SOURCE_DIR}/app/tools/lib/linux
 	)
-    set(CMAKE_FIND_LIBRARY_SUFFIXES ".a" ".so")
   else()
     find_library(LIBZIP_LIBRARY
       NAMES zip)
