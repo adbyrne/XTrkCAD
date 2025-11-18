@@ -26,6 +26,21 @@
 #include <form.h>
 
 
+static BOOL_T ShouldParseAsDistance(int option, const char* label, const char* value)
+{
+    // No PDO_DIM Flag -> no distance
+    if ((option & PDO_DIM) == 0) {
+        return FALSE;
+    }
+    
+    // Special case: linewidth has negative value -> no distance
+    if (label && strcmp(label, N_("linewidth")) == 0 && value && value[0] == '-') {
+        return FALSE;
+    }
+    
+    return TRUE;
+}
+
 void
 FormFetchData(paramGroup_p pg)
 {
@@ -33,6 +48,7 @@ FormFetchData(paramGroup_p pg)
 	const char* stringV;
 	paramData_p p;
 	BOOL_T valid;
+	BOOL_T bDistance;
 	BOOL_T inRange;
 
 	for (p = pg->paramPtr; p < &pg->paramPtr[pg->paramCnt]; p++) {
@@ -83,14 +99,12 @@ FormFetchData(paramGroup_p pg)
 
 		case PD_FLOAT:
 			stringV = wEntryGetValue(p->control);
-			if (p->option & PDO_DIM) {
-				floatV = FormDecodeDistance(stringV, &valid);
-			} else {
-				floatV = FormDecodeFloat(stringV, &valid);
+			bDistance = ShouldParseAsDistance(p->option, p->nameStr, stringV );
 
-				if (valid && (p->option & PDO_ANGLE)) {
-					floatV = NormalizeAngle((angleSystem == ANGLE_POLAR) ? floatV : -floatV);
-				}
+			floatV = FormDecodeNumber(stringV, &valid, p->option, bDistance);
+		
+			if (valid && (p->option & PDO_ANGLE)) {
+				floatV = NormalizeAngle((angleSystem == ANGLE_POLAR) ? floatV : -floatV);
 			}
 
 			if (p->winData) {
@@ -103,7 +117,6 @@ FormFetchData(paramGroup_p pg)
 			if (valid && inRange) {
 				*(FLOAT_T*)p->valueP = floatV;
 			}
-
 			break;
 
 		case PD_STRING:

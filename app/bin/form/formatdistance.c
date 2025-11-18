@@ -304,6 +304,42 @@ FormDecodeDistance(	const char *enteredValue, BOOL_T* validP)
 	return valF;
 }
 
+
+FLOAT_T
+FormDecodeNumber(
+    const char* enteredValue,
+    BOOL_T* validP,
+    int option,              // equivalent to pd->option
+    BOOL_T bDistance)        // pre-determined distance vs number flag
+{
+    FLOAT_T valF;
+    const char* cp1;
+    
+    *validP = TRUE;
+    cp1 = enteredValue;
+    
+    // Skip leading whitespace
+    while (isspace((unsigned char)*cp1)) { cp1++; }
+    
+    // Handle empty string
+    if (*cp1 == '\0') {
+        return 0.0;
+    }
+    
+    // Route to appropriate parser
+    if (!bDistance) {
+        valF = FormDecodeFloat(cp1, validP);
+        if (*validP && (option & PDO_ANGLE)) {
+            valF = NormalizeAngle((angleSystem == ANGLE_POLAR) ? valF : -valF);
+        }
+        return valF;
+    }
+    
+    // Parse as distance with units
+    valF = FormDecodeDistance(cp1, validP);
+    return valF;
+}
+
 char *
 FormGetParseError()
 {

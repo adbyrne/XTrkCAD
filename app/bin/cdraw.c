@@ -2840,6 +2840,8 @@ wDrawColor benchColor;
 
 // fields used before drawing starts (during C_START)
 static paramGroup_t linestylePG;
+
+// if the name is linewidth, special parsing of the entered value is used: negative values stand for width in pixels
 static paramData_t linestylePLs[] = {
 	{ PD_FLOAT, &lineWidth, "linewidth", PDO_DIM, &r100_100, .group =&linestylePG},
 	{ PD_COLORLIST, &lineColor, "linecolor", 0, NULL, .group = &linestylePG },
@@ -3025,7 +3027,6 @@ HandleStartCommand(wAction_t action, BOOL_T* infoSubst)
 	//else {
 	//	InfoMessage(_("+Alt to inhibit Magnetic Snap"));
 	//}
-
 	drawCmdContext.Op = (wIndex_t)VP2L(commandContext);
 	if (drawCmdContext.Op < 0 || drawCmdContext.Op > OP_LAST) {
 		NoticeMessage("cmdDraw: Op %d", _("Ok"), NULL, drawCmdContext.Op);
@@ -3193,32 +3194,6 @@ static void UpdateBenchOrientation(void)
 	wListSetIndex(orientControl, benchOrient);
 }
 
-/**  \todo added as part of the merge with 5.3.2, examine and enable
-static void DisableControlRecording(void)
-{
-	drawLineWidthPD.option |= PDO_NORECORD;
-	drawColorPD.option |= PDO_NORECORD;
-	drawBenchColorPD.option |= PDO_NORECORD;
-	drawBenchChoicePD.option |= PDO_NORECORD;
-	drawBenchOrientPD.option |= PDO_NORECORD;
-	drawDimArrowSizePD.option |= PDO_NORECORD;
-}
-
-static void EnableLineControlRecording(void)
-{
-	drawLineWidthPD.option &= ~PDO_NORECORD;
-	drawColorPD.option &= ~PDO_NORECORD;
-	drawLineTypePD.option &= ~PDO_NORECORD;
-}
-
-static void EnableBenchControlRecording(void)
-{
-	drawBenchColorPD.option &= ~PDO_NORECORD;
-	drawBenchChoicePD.option &= ~PDO_NORECORD;
-	drawBenchOrientPD.option &= ~PDO_NORECORD;
-	drawLengthPD.option &= ~PDO_NORECORD;
-}
-*/
 static void ConfigureLineColor(void)
 {
 	switch (drawCmdContext.Op) {

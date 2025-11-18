@@ -20,7 +20,7 @@ FLOAT_T FormFloatGetValue(paramData_p data, const char* enteredValue);
 void FormStringGetValue(paramData_p data, char* value);
 
 /* formdistance.c */
-
+FLOAT_T FormDecodeNumber(const char* enteredValue, BOOL_T* validP, int option, BOOL_T bDistance);
 FLOAT_T FormDecodeDistance(const char *enteredValue, BOOL_T* validP);
 FLOAT_T FormDecodeFloat(const char* enteredValue, BOOL_T* validP);
 char* FormGetParseError();
