@@ -2397,7 +2397,7 @@ static toDesignSchema_t * LoadSegs(
 		int inx,subSeg;
 		wBool_t back, neg;
 		DIST_T radius = 0.0;
-		coOrd center;
+		coOrd center = {0,0};
 		pos.x = end_points[0].x+newTurnToeL-MIN_TRACK_LENGTH;
 		pos.y = end_points[0].y; 				/* This will be close to but not on the curve */
 		ANGLE_T angle = GetAngleSegs(tempSegs_da.cnt,&tempSegs(0),&pos,

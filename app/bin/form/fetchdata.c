@@ -131,6 +131,8 @@ FormFetchData(paramGroup_p pg)
 		case PD_MENU:
 		case PD_MENUITEM:
 		case PD_BITMAP:
+		case PD_SCALE:
+		case PD_NOTEBOOK:
 			break;
 		}
 	}
@@ -245,6 +247,8 @@ FormIntRestore(paramGroup_p pg,	int class)
 		case PD_MENU:
 		case PD_MENUITEM:
 		case PD_BITMAP:
+		case PD_SCALE:
+		case PD_NOTEBOOK:
 			break;
 		}
 	}
@@ -291,6 +295,8 @@ void FormIntSave(paramGroup_p pg, int class)
 			case PD_MENU:
 			case PD_MENUITEM:
 			case PD_BITMAP:
+			case PD_SCALE:
+			case PD_NOTEBOOK:
 				break;
 			}
 		}

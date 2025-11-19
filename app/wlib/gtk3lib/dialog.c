@@ -323,7 +323,7 @@ static wWin_p wWinPopupCreate(
     wWinCallBack_p winProc,
     void* attributes)
 {
-    wWin_p win;
+    wWin_p win = NULL;
 
     //if (parent == NULL) {
     //    if (gtkMainW == NULL) {

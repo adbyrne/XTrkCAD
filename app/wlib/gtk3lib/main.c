@@ -38,6 +38,8 @@
 #include "symbols.h"
 
 static char *appName;		/**< application name */
+char *wExecutableName;		/**< full path to executable, taken from argv[0] */
+
 static GtkApplication *app;
 static int argc;			/**< count of command line options */
 static char **argv;			/**< command line options */
@@ -157,6 +159,8 @@ command_line( GApplication* self, GApplicationCommandLine* cmdLine,
 	argv = g_application_command_line_get_arguments(
 	               cmdLine,
 	               &argc);
+
+	wExecutableName = argv[ 0 ];
 
 	return( 0 );
 }

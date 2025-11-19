@@ -34,7 +34,7 @@ typedef struct track_t {
 	unsigned int layer;
 	signed char scale;
 	BOOL_T modified:1;
-	BOOL_T deleted:1;
+	unsigned deleted:1;
 	BOOL_T new:1;
 	unsigned int width:2;
 	unsigned int elevMode:2;

@@ -81,8 +81,6 @@ EXPORT const char* GetCurCommandName()
  * Basically track modifications are not available in Train Mode, file
  * operations are always available and train control ops are available in
  * train mode only.
- * The specific logic was developed with the help of Wolfram Alpha:
- * CNF | ((NOT m) OR o OR t) AND(m OR (NOT o) OR t)
  *
  * \param mode		application mode
  * \param options	availability options
@@ -93,7 +91,21 @@ EXPORT const char* GetCurCommandName()
 
 EXPORT bool IsCommandEnabled(long mode, long options)
 {
-	
+	if (options & IC_MODETRAIN_TOO)
+	{
+		return true; // Fast path: always allow when IC_MODETRAIN_TOO is set
+	}
+
+	if (mode == MODE_DESIGN && !(options & IC_MODETRAIN_ONLY))
+	{
+		return true; // Design mode OK when ONLY flag is NOT set
+	}
+
+	if (mode == MODE_TRAIN && (options & IC_MODETRAIN_ONLY))
+	{
+		return true; // Train mode OK when ONLY flag IS set
+	}
+/*
 	if (((mode == MODE_DESIGN) || (options & IC_MODETRAIN_ONLY) ||
 		(options & IC_MODETRAIN_TOO)) &&
 		((mode == MODE_TRAIN) || !(options & IC_MODETRAIN_ONLY)) ||
@@ -103,6 +115,9 @@ EXPORT bool IsCommandEnabled(long mode, long options)
 	else {
 		return false;
 	}
+*/
+
+return false;
 }
 
 EXPORT void EnableCommands(void)

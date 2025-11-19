@@ -212,6 +212,8 @@ FormLoadDefaultValues(paramGroup_p pg)
 			case PD_MENU:
 			case PD_MENUITEM:
 			case PD_BITMAP:
+			case PD_NOTEBOOK:
+			case PD_DROPLIST:
 				break;
 			}
 		}
@@ -273,6 +275,7 @@ FormSaveDefaultValues(paramGroup_p pg)
 		case PD_MENU:
 		case PD_MENUITEM:
 		case PD_BITMAP:
+		case PD_NOTEBOOK:
 			break;
 		}
 	}

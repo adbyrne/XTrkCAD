@@ -790,7 +790,7 @@ EXPORT void TakeSnapshot( drawCmd_t * d )
 	ix = (wWinPix_t)(d->dpi*d->size.x/d->scale);
 	iy = (wWinPix_t)(d->dpi*d->size.y/d->scale);
 	d->d = wBitmapCreate( ix, iy, 8 );
-	if (d->d == (wDraw_p)0) {
+	if (d->d == NULL) {
 		return;
 	}
 	DrawTracks( d, d->scale, d->orig, d->size );
