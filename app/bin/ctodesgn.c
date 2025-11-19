@@ -2929,7 +2929,6 @@ static void NewTurnOk( void * context )
 		flt = *(FLOAT_T*)(turnDesignPLs[curDesign->floats[i].index].valueP);
 		switch( curDesign->floats[i].mode ) {
 		case Dim_e:
-			flt = ( flt );
 			break;
 		case Frog_e:
 			if (newTurnAngleMode == 0 && flt > 0.0) {
