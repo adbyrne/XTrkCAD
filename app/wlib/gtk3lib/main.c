@@ -72,13 +72,14 @@ wlibGetApp()
 /**
  * Load CSS definitions from resource. Name of the CSS-file is xtrackcad.css
  * 
+ * \todo Connect signal parsing-error and show / log errors
+ * 
  */
 
 static void
 LoadStyles(void)
 {	
    	GtkCssProvider* cssProvider = gtk_css_provider_new();
-	GError* error = NULL;
 	
 	gtk_css_provider_load_from_resource(cssProvider,
 		XTRKCAD_RESOURCE_PATH
@@ -93,12 +94,11 @@ LoadStyles(void)
 static void 
 startup(GtkApplication *app)
 {	
-	wControl_p window;
-	GError* error = NULL;
-
 	g_resources_register(wlib_get_resource());
 	g_resources_register(symbols_get_resource());
 
+	// debugging aid: show files in the resource
+	// GError *error = NULL;
 	//char** children = g_resource_enumerate_children(wlib_get_resource(), "/", G_RESOURCE_LOOKUP_FLAGS_NONE, &error);
 
 	//for (int i = 0; children[i] != NULL; i++) {
@@ -118,7 +118,8 @@ startup(GtkApplication *app)
 	// load css
 	LoadStyles();
 
-	window = wMain(argc, argv );
+	wMain(argc, argv );
+
 	wPrefFlush("");
 
 	g_strfreev(argv);
