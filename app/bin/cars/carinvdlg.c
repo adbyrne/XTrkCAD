@@ -1035,8 +1035,8 @@ EXPORT void DoCarDlg(void* unused)
 {
 	if (carInvPG.win == NULL) {
 		FormCreateDialog(&carInvPG, MakeWindowTitle(_("Car Inventory")), 
-						  _("Find"), CarInvDlgFind, 
-						  _("Done"), FormCancel_Current, TRUE, 
+						  _("Done"), FormButtonOk, 
+						  NULL, NULL, TRUE, 
 		                  0, 
 						  CarInvDlgUpdate);
 

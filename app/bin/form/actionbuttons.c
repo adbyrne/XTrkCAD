@@ -29,9 +29,8 @@
 #include "formprivate.h"
 
 
-void FormButtonOk(void* groupVP)
+void FormButtonOk(paramGroup_p group)
 {
-	paramGroup_p group = groupVP;
 	wFlush();
 	LOG(log_form, 1, ("ParamButtonOk: %s\n", group->nameStr));
 	if (!FormCheckInputs(group, (wControl_p)group->okB)) {
