@@ -50,7 +50,7 @@
 // Windows
 #include <io.h>
 #include <process.h>
-#include "include/dirent.h"
+#include "windows/dirent.h"
 #include "direct.h"
 #include "getopt.h"
 
