@@ -26,6 +26,12 @@ target_include_directories(cnvdsgn
 
 target_link_libraries(cnvdsgn xtrkcad-wlib)
 
+target_include_directories(cnvdsgn 
+    PUBLIC
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_LIST_DIR}/include
+)
+
 if(NOT WIN32)
 	target_link_libraries(cnvdsgn m)
 endif()
