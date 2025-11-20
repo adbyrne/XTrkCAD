@@ -717,7 +717,7 @@ static paramGroup_t joinPG = { "joinfixed", PGO_FULLDIALOGFROMBUILDER, joinPLs, 
 BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0,
                          ANGLE_T an1)
 {
-	coOrd point1,point2;
+	coOrd point1 = zero,point2 = zero;
 	switch ( Dj.inp[1].params.type ) {
 	case curveTypeCurve:
 		if (Dj.inp[0].params.type == curveTypeStraight) {
@@ -775,7 +775,7 @@ BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0,
 			                          Dj.inp[1].params.arcP,newR1)) {
 				return FALSE;
 			}
-		}
+		} 
 		if (debug) {
 			AnchorPoint(point1);
 			AnchorPoint(point2);

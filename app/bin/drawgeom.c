@@ -1550,15 +1550,16 @@ static STATUS_T DrawGeomPolyModify(
 				diff.y = pos_lock.y - points(first_inx).pt.y;
 				pos.x 	= points(polyInx).pt.x+diff.x;
 				pos.y 	= points(polyInx).pt.y+diff.y;
+				intersect = zero;
 				if (selected_count<2) {
 					if (FindIntersection(&intersect,last_point,last_angle+90.0,next_point,
 					                     last_angle+180.0)) {
 						show_intersect = TRUE;
 					}
-				}
-				d = FindDistance(intersect,pos_lock);
-				if (IsClose(d)) {
-					pos = intersect;
+					d = FindDistance(intersect,pos_lock);
+					if (IsClose(d)) {
+						pos = intersect;
+					}
 				}
 				InfoMessage( _("Length = %s, Last angle = %0.2f"),
 				             FormatDistance(FindDistance(pos_lock,last_point)),
@@ -1600,6 +1601,7 @@ static STATUS_T DrawGeomPolyModify(
 		DYNARR_RESET( trkSeg_t, anchors_da );
 		CreatePolyAnchors(polyInx);  //Show last selection
 		prev_inx = polyInx;
+		first_inx = -1;
 		for (int i=0; i<points_da.cnt; i++) {
 			if (point_selected(i)) {
 				first_inx = i;
@@ -1995,7 +1997,7 @@ STATUS_T DrawGeomModify(
         drawModContext_t * context)
 {
 	ANGLE_T a;
-	coOrd p0, p1, pc, pm;
+	coOrd p0 = zero, p1 = zero, pc, pm;
 	static coOrd start_pos;
 	static wIndex_t segInx;
 //	static EPINX_T segEp;
