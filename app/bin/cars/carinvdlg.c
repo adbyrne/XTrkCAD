@@ -25,11 +25,13 @@
 #include "custom.h"
 #include "fileio.h"
 #include "messages.h"
-#include "param.h"
+#include "form.h"
 #include "paths.h"
 
 #include "include/cars.h"
 #include "carsprivate.h"
+
+#define FormControlShow(a,b,c) 
 
 static int log_carInvDlg = 0;
 
@@ -56,6 +58,8 @@ static wWinPix_t carInvColumnWidths[] = {
 	-40, 30, 100, -50, 50, 130, 120, 100,
 	-50, -50, 60, 55, 55, 40, 200
 };
+
+/*
 static const char* carInvColumnTitles[] = {
 	N_("Index"), N_("Scale"), N_("Manufacturer"), N_("Part No"), N_("Type"),
 	N_("Description"), N_("Roadname"), N_("Rep Marks"), N_("Purc Price"),
@@ -66,7 +70,8 @@ static char* sortOrders[] = {
 	N_("Index"), N_("Scale"), N_("Manufacturer"), N_("Part No"), N_("Type"),
 	N_("Description"), N_("Roadname"), N_("RepMarks"), N_("Purch Price"),
 	N_("Curr Price"), N_("Condition"), N_("Purch Date"), N_("Service Date")
-};
+}; */
+
 #define S_INDEX			(0)
 #define S_SCALE			(1)
 #define S_MANUF			(2)
@@ -80,7 +85,7 @@ static char* sortOrders[] = {
 #define S_CONDITION		(10)
 #define S_PURCHDATE		(11)
 #define S_SRVDATE		(12)
-static paramListData_t carInvListData = { 30, 600, COUNT(carInvColumnTitles), carInvColumnWidths, carInvColumnTitles };
+static paramListData_t carInvListData = { 30, 600 };
 static paramData_t carInvPLs[] = {
 #define I_CI_SORT		(0)
 	{ PD_DROPLIST, &carInvSort[0], "sort1", PDO_LISTINDEX, I2VP(110), N_("Sort By") },
@@ -91,19 +96,19 @@ static paramData_t carInvPLs[] = {
 #define I_CI_LIST		(S+0)
 	{ PD_LIST, &carInvInx, "list", PDO_LISTINDEX | PDO_DLGRESIZE | PDO_DLGNOLABELALIGN | PDO_DLGRESETMARGIN, &carInvListData, NULL, BO_READONLY | BL_MANY },
 #define I_CI_EDIT		(S+1)
-	{ PD_BUTTON, CarInvDlgEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
+	{ PD_BUTTON, CarInvDlgEdit, "edit", PDO_DLGCMDBUTTON, NULL },
 #define I_CI_ADD		(S+2)
-	{ PD_BUTTON, CarInvDlgAdd, "add", 0, NULL, N_("Add"), 0, 0 },
+	{ PD_BUTTON, CarInvDlgAdd, "add", 0, NULL  },
 #define I_CI_DELETE		(S+3)
-	{ PD_BUTTON, CarInvDlgDeleteShelve, "delete", PDO_DLGWIDE, NULL, N_("Delete") },
+	{ PD_BUTTON, CarInvDlgDeleteShelve, "delete", PDO_DLGWIDE, NULL },
 #define I_CI_IMPORT_CSV	(S+4)
-	{ PD_BUTTON, CarInvDlgImportCsv, "import", PDO_DLGWIDE, NULL, N_("Import") },
+	{ PD_BUTTON, CarInvDlgImportCsv, "import", PDO_DLGWIDE, NULL},
 #define I_CI_EXPORT_CSV	(S+5)
-	{ PD_BUTTON, CarInvDlgExportCsv, "export", 0, NULL, N_("Export") },
+	{ PD_BUTTON, CarInvDlgExportCsv, "export", 0, NULL},
 #define I_CI_PRINT		(S+6)
-	{ PD_BUTTON, CarInvDlgSaveText, "savetext", 0, NULL, N_("List") }
+	{ PD_BUTTON, CarInvDlgSaveText, "savetext", 0, NULL}
 };
-paramGroup_t carInvPG = { "carinv", 0, carInvPLs, COUNT(carInvPLs) };
+paramGroup_t carInvPG = { "carinv", PGO_FULLDIALOGFROMBUILDER, carInvPLs, COUNT(carInvPLs) };
 
 static void CarInvDlgAdd(void)
 {
@@ -114,7 +119,6 @@ static void CarInvDlgAdd(void)
 	carDlgUpdateItemPtr = NULL;
 
 	CarDlgAddItem();
-
 }
 
 
@@ -135,16 +139,16 @@ static void CarInvDlgDeleteShelve(void)
 	wBool_t bShowMsg = FALSE;
 	wBool_t bNeedReload = FALSE;
 
-	selcnt = wListGetSelectedCount((wList_p)carInvPLs[I_CI_LIST].control);
+	selcnt = wListGetSelectedCount(carInvPLs[I_CI_LIST].control);
 	if (selcnt == 0) {
 		return;
 	}
-	cnt = wListGetCount((wList_p)carInvPLs[I_CI_LIST].control);
+	cnt = wListGetCount(carInvPLs[I_CI_LIST].control);
 	for (inx = 0; inx < cnt; inx++) {
-		if (!wListGetItemSelected((wList_p)carInvPLs[I_CI_LIST].control, inx)) {
+		if (!wListGetItemSelected(carInvPLs[I_CI_LIST].control, inx)) {
 			continue;
 		}
-		item = (carItem_p)wListGetItemContext((wList_p)carInvPLs[I_CI_LIST].control,
+		item = (carItem_p)wListGetItemContext(carInvPLs[I_CI_LIST].control,
 		                                      inx);
 		if (item == NULL) {
 			continue;
@@ -184,29 +188,28 @@ static void CarInvDlgDeleteShelve(void)
 	}
 	SetFileChanged();
 	carInvInx = -1;
-	ParamLoadControl(&carInvPG, I_CI_LIST);
-	ParamControlActive(&carInvPG, I_CI_EDIT, FALSE);
-	ParamControlActive(&carInvPG, I_CI_DELETE, FALSE);
+	FormLoadSingleControl(&carInvPG, I_CI_LIST);
+	FormControlActive(&carInvPG, I_CI_EDIT, FALSE);
+	FormControlActive(&carInvPG, I_CI_DELETE, FALSE);
 	wButtonSetLabel((wButton_p)(carInvPLs[I_CI_DELETE].control), "");
-	ParamControlActive(&carInvPG, I_CI_EXPORT_CSV, carItemInfo_da.cnt > 0);
-	ParamControlActive(&carInvPG, I_CI_PRINT, carItemInfo_da.cnt > 0);
-	ParamDialogOkActive(&carInvPG, FALSE);
+	FormControlActive(&carInvPG, I_CI_EXPORT_CSV, carItemInfo_da.cnt > 0);
+	FormControlActive(&carInvPG, I_CI_PRINT, carItemInfo_da.cnt > 0);
+	FormDialogOkActive(&carInvPG, FALSE);
 }
 
 static carItem_p CarInvDlgFindCurrentItem(void)
 {
-	wIndex_t selcnt = wListGetSelectedCount((wList_p)
-	                                        carInvPLs[I_CI_LIST].control);
+	wIndex_t selcnt = wListGetSelectedCount(carInvPLs[I_CI_LIST].control);
 	wIndex_t inx, cnt;
 
 	if (selcnt != 1) { return NULL; }
-	cnt = wListGetCount((wList_p)carInvPLs[I_CI_LIST].control);
+	cnt = wListGetCount(carInvPLs[I_CI_LIST].control);
 	for (inx = 0; inx < cnt; inx++)
-		if (wListGetItemSelected((wList_p)carInvPLs[I_CI_LIST].control, inx)) {
+		if (wListGetItemSelected(carInvPLs[I_CI_LIST].control, inx)) {
 			break;
 		}
 	if (inx >= cnt) { return NULL; }
-	return (carItem_p)wListGetItemContext((wList_p)carInvPLs[I_CI_LIST].control,
+	return (carItem_p)wListGetItemContext(carInvPLs[I_CI_LIST].control,
 	                                      inx);
 }
 
@@ -286,22 +289,22 @@ static void CarInvListLoad(void)
 
 	qsort(&carItemInfo(0), carItemInfo_da.cnt, sizeof carItemInfo(0),
 	      Cmp_carInvItem);
-	ParamControlShow(&carInvPG, I_CI_LIST, FALSE);
-	wListClear((wList_p)carInvPLs[I_CI_LIST].control);
+	FormControlShow(&carInvPG, I_CI_LIST, FALSE);
+	wListClear(carInvPLs[I_CI_LIST].control);
 	for (int inx = 0; inx < carItemInfo_da.cnt; inx++) {
 		carItem_p item;
 		item = carItemInfo(inx);
 		CarInvLoadItem(item);
 	}
 
-	selected = wListGetIndex((wList_p)carInvPLs[I_CI_LIST].control);
-	ParamControlShow(&carInvPG, I_CI_LIST, TRUE);
-	ParamControlActive(&carInvPG, I_CI_EDIT, selected >= 0 );
-	ParamControlActive(&carInvPG, I_CI_DELETE, selected >= 0);
+	selected = wListGetIndex(carInvPLs[I_CI_LIST].control);
+	FormControlShow(&carInvPG, I_CI_LIST, TRUE);
+	FormControlActive(&carInvPG, I_CI_EDIT, selected >= 0 );
+	FormControlActive(&carInvPG, I_CI_DELETE, selected >= 0);
 	//wButtonSetLabel((wButton_p)(carInvPLs[I_CI_DELETE].control), "");
-	ParamControlActive(&carInvPG, I_CI_EXPORT_CSV, carItemInfo_da.cnt > 0);
-	ParamControlActive(&carInvPG, I_CI_PRINT, carItemInfo_da.cnt > 0);
-	ParamDialogOkActive(&carInvPG, FALSE);
+	FormControlActive(&carInvPG, I_CI_EXPORT_CSV, carItemInfo_da.cnt > 0);
+	FormControlActive(&carInvPG, I_CI_PRINT, carItemInfo_da.cnt > 0);
+	FormDialogOkActive(&carInvPG, FALSE);
 }
 
 static void CarInvLoadItem(
@@ -362,7 +365,7 @@ static void CarInvLoadItem(
 	        item->data.serviceDate, _(location), notes);
 	if (manuf) { MyFree(manuf); }
 	if (road) { MyFree(road); }
-	wListAddValue((wList_p)carInvPLs[I_CI_LIST].control, message, NULL, item);
+	wListAddValue(carInvPLs[I_CI_LIST].control, message, NULL, item);
 }
 
 static void CarInvDlgUpdate(
@@ -379,17 +382,17 @@ static void CarInvDlgUpdate(
 		if (item) {
 			carInvInx = (wIndex_t)CarItemFindIndex(item);
 			if (carInvInx >= 0) {
-				ParamLoadControl(&carInvPG, I_CI_LIST);
+				FormLoadSingleControl(&carInvPG, I_CI_LIST);
 			}
 		}
 	} else if (inx == I_CI_LIST) {
-		cnt = wListGetCount((wList_p)carInvPLs[I_CI_LIST].control);
+		cnt = wListGetCount(carInvPLs[I_CI_LIST].control);
 		wIndex_t nOnShelf = 0;
 		wIndex_t nOnLayout = 0;
 		for (selinx = selcnt = 0; selinx < cnt; selinx++) {
-			if (wListGetItemSelected((wList_p)carInvPLs[I_CI_LIST].control, selinx)) {
+			if (wListGetItemSelected(carInvPLs[I_CI_LIST].control, selinx)) {
 				selcnt++;
-				item = (carItem_p)wListGetItemContext((wList_p)carInvPLs[I_CI_LIST].control,
+				item = (carItem_p)wListGetItemContext(carInvPLs[I_CI_LIST].control,
 				                                      selinx);
 				if (!item) { continue; }
 				if (item->car && !IsTrackDeleted(item->car)) {
@@ -400,16 +403,16 @@ static void CarInvDlgUpdate(
 			}
 		}
 		// Enable Find if 1 selected car is on Layout
-		ParamDialogOkActive(pg, nOnLayout == 1 && nOnShelf == 0);
+		FormDialogOkActive(pg, nOnLayout == 1 && nOnShelf == 0);
 		// Enable Edit if 1 selected car is on Shelf
-		ParamControlActive(&carInvPG, I_CI_EDIT, nOnLayout == 0 && nOnShelf == 1);
+		FormControlActive(&carInvPG, I_CI_EDIT, nOnLayout == 0 && nOnShelf == 1);
 		wBool_t bEnableDelete = nOnLayout + nOnShelf > 0 &&
 		                        (nOnLayout == 0 || nOnShelf == 0);
 		wButtonSetLabel((wButton_p)(carInvPLs[I_CI_DELETE].control),
 		                bEnableDelete == FALSE ? "" :
 		                nOnLayout > 0 ? _("Shelve") :
 		                _("Delete"));
-		ParamControlActive(&carInvPG, I_CI_DELETE, bEnableDelete);
+		FormControlActive(&carInvPG, I_CI_DELETE, bEnableDelete);
 	}
 }
 
@@ -1000,7 +1003,7 @@ void CarInvListAdd(	carItem_p item)
 	CarInvListLoad();
 	carInvInx = (wIndex_t)CarItemFindIndex(item);
 	if (carInvInx >= 0) {
-		ParamLoadControl(&carInvPG, I_CI_LIST);
+		FormLoadSingleControl(&carInvPG, I_CI_LIST);
 	}
 }
 
@@ -1010,7 +1013,7 @@ void CarInvListUpdate(carItem_p item)
 	CarInvListLoad();
 	carInvInx = (wIndex_t)CarItemFindIndex(item);
 	if (carInvInx >= 0) {
-		ParamLoadControl(&carInvPG, I_CI_LIST);
+		FormLoadSingleControl(&carInvPG, I_CI_LIST);
 	}
 }
 
@@ -1031,17 +1034,13 @@ static void CarInvDlgFind(void* unused)
 EXPORT void DoCarDlg(void* unused)
 {
 	if (carInvPG.win == NULL) {
-		ParamCreateDialog(&carInvPG, MakeWindowTitle(_("Car Inventory")), _("Find"),
-		                  CarInvDlgFind, ParamCancel_Current, TRUE, NULL,
-		                  F_BLOCK | F_RESIZE | F_RECALLSIZE | PD_F_ALT_CANCELLABEL, CarInvDlgUpdate);
-		for (int inx = I_CI_SORT; inx < I_CI_SORT + N_SORT; inx++) {
-			for (int inx2 = 0; inx2 < COUNT(sortOrders); inx2++) {
-				wListAddValue((wList_p)carInvPLs[inx].control, _(sortOrders[inx2]), NULL,
-				              NULL);
-				ParamLoadControl(&carInvPG, inx);
-			}
-		}
-		ParamDialogOkActive(&carInvPG, FALSE);
+		FormCreateDialog(&carInvPG, MakeWindowTitle(_("Car Inventory")), 
+						  _("Find"), CarInvDlgFind, 
+						  _("Done"), FormCancel_Current, TRUE, 
+		                  0, 
+						  CarInvDlgUpdate);
+
+		FormDialogOkActive(&carInvPG, FALSE);
 	}
 	CarInvListLoad();
 	wShow(carInvPG.win);
@@ -1050,6 +1049,6 @@ EXPORT void DoCarDlg(void* unused)
 
 void InitCarInvDlg(void) 
 {
-	ParamRegister( &carInvPG );
+	FormRegister( &carInvPG );
 	log_carInvDlg = LogFindIndex("carInvDlg");
 }
