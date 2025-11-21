@@ -40,6 +40,9 @@ static wIndex_t carInvInx;
 static wIndex_t carInvSort[] = { 0, 1, 2, 3 };
 #define N_SORT			(COUNT( carInvSort ))
 
+#define COMMA_SEP_EXT ".csv"
+#define LIST_EXP_EXT  ".txt"
+
 static void CsvFormatLong(FILE* f, long val, const char* sep);
 static void CsvFormatFloat(FILE* f, FLOAT_T val, int digits, const char* sep);
 static void CsvFormatString(FILE* f, char* str, int len, const char* sep);
@@ -95,17 +98,19 @@ static paramData_t carInvPLs[] = {
 #define S				(4)
 #define I_CI_LIST		(S+0)
 	{ PD_LIST, &carInvInx, "list", PDO_LISTINDEX | PDO_DLGRESIZE | PDO_DLGNOLABELALIGN | PDO_DLGRESETMARGIN, &carInvListData, NULL, BO_READONLY | BL_MANY },
-#define I_CI_EDIT		(S+1)
+#define I_CI_FIND		(S+1)
+	{ PD_BUTTON, CarInvDlgEdit, "find", 0, NULL },
+#define I_CI_EDIT		(S+2)
 	{ PD_BUTTON, CarInvDlgEdit, "edit", PDO_DLGCMDBUTTON, NULL },
-#define I_CI_ADD		(S+2)
+#define I_CI_ADD		(S+3)
 	{ PD_BUTTON, CarInvDlgAdd, "add", 0, NULL  },
-#define I_CI_DELETE		(S+3)
+#define I_CI_DELETE		(S+4)
 	{ PD_BUTTON, CarInvDlgDeleteShelve, "delete", PDO_DLGWIDE, NULL },
-#define I_CI_IMPORT_CSV	(S+4)
+#define I_CI_IMPORT_CSV	(S+5)
 	{ PD_BUTTON, CarInvDlgImportCsv, "import", PDO_DLGWIDE, NULL},
-#define I_CI_EXPORT_CSV	(S+5)
+#define I_CI_EXPORT_CSV	(S+6)
 	{ PD_BUTTON, CarInvDlgExportCsv, "export", 0, NULL},
-#define I_CI_PRINT		(S+6)
+#define I_CI_PRINT		(S+7)
 	{ PD_BUTTON, CarInvDlgSaveText, "savetext", 0, NULL}
 };
 paramGroup_t carInvPG = { "carinv", PGO_FULLDIALOGFROMBUILDER, carInvPLs, COUNT(carInvPLs) };
@@ -194,7 +199,6 @@ static void CarInvDlgDeleteShelve(void)
 	wButtonSetLabel((wButton_p)(carInvPLs[I_CI_DELETE].control), "");
 	FormControlActive(&carInvPG, I_CI_EXPORT_CSV, carItemInfo_da.cnt > 0);
 	FormControlActive(&carInvPG, I_CI_PRINT, carItemInfo_da.cnt > 0);
-	FormDialogOkActive(&carInvPG, FALSE);
 }
 
 static carItem_p CarInvDlgFindCurrentItem(void)
@@ -298,13 +302,12 @@ static void CarInvListLoad(void)
 	}
 
 	selected = wListGetIndex(carInvPLs[I_CI_LIST].control);
-	FormControlShow(&carInvPG, I_CI_LIST, TRUE);
+	FormControlActive(&carInvPG, I_CI_FIND, TRUE);
 	FormControlActive(&carInvPG, I_CI_EDIT, selected >= 0 );
 	FormControlActive(&carInvPG, I_CI_DELETE, selected >= 0);
 	//wButtonSetLabel((wButton_p)(carInvPLs[I_CI_DELETE].control), "");
 	FormControlActive(&carInvPG, I_CI_EXPORT_CSV, carItemInfo_da.cnt > 0);
 	FormControlActive(&carInvPG, I_CI_PRINT, carItemInfo_da.cnt > 0);
-	FormDialogOkActive(&carInvPG, FALSE);
 }
 
 static void CarInvLoadItem(
@@ -403,7 +406,7 @@ static void CarInvDlgUpdate(
 			}
 		}
 		// Enable Find if 1 selected car is on Layout
-		FormDialogOkActive(pg, nOnLayout == 1 && nOnShelf == 0);
+		FormControlActive(pg, I_CI_FIND, nOnLayout == 1 && nOnShelf == 0);
 		// Enable Edit if 1 selected car is on Shelf
 		FormControlActive(&carInvPG, I_CI_EDIT, nOnLayout == 0 && nOnShelf == 1);
 		wBool_t bEnableDelete = nOnLayout + nOnShelf > 0 &&
@@ -428,15 +431,22 @@ static int CarInvSaveText(
 	tabString_t tabs[7];
 	char* cp0, * cp1;
 	int len;
+	char *exportfile;
 
 	CHECK(fileName != NULL);
 	CHECK(files == 1);
 
+	exportfile = MyMalloc(strlen(fileName[0])+sizeof(LIST_EXP_EXT) + 1);
+	strcpy(exportfile, fileName[0]);
+	AddDefaultExtension(exportfile, LIST_EXP_EXT);
+
 	SetCurrentPath(CARSPATHKEY, fileName[0]);
-	f = fopen(fileName[0], "w");
+	f = fopen(exportfile, "w");
 	if (f == NULL) {
 		NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, _("Car Inventory"),
 		              fileName[0], strerror(errno));
+
+		MyFree(exportfile);
 		return FALSE;
 	}
 
@@ -559,6 +569,7 @@ static int CarInvSaveText(
 		}
 	}
 	fclose(f);
+	MyFree(exportfile);
 	return TRUE;
 }
 
@@ -847,15 +858,21 @@ static int CarInvExportCsv(
 {
 	FILE* f;
 	tabString_t tabs[7];
+	char *exportfile;
 
 	CHECK(fileName != NULL);
 	CHECK(files == 1);
 	SetCurrentPath(CARSPATHKEY, fileName[0]);
 
-	f = fopen(fileName[0], "w");
+	exportfile = MyMalloc(strlen(fileName[0])+sizeof(COMMA_SEP_EXT) + 1);
+	strcpy(exportfile, fileName[0]);
+	AddDefaultExtension(exportfile, COMMA_SEP_EXT);
+
+	f = fopen(exportfile, "w");
 	if (f == NULL) {
 		NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, _("Export Cars"),
 		              fileName[0], strerror(errno));
+					  MyFree(exportfile);
 		return FALSE;
 	}
 
@@ -903,9 +920,10 @@ static int CarInvExportCsv(
 	}
 	fclose(f);
 	SetUserLocale();
+
+	MyFree(exportfile);
 	return TRUE;
 }
-
 
 static struct wFilSel_t* carInvExportCsv_fs;
 static void CarInvDlgExportCsv(void)
@@ -1039,8 +1057,6 @@ EXPORT void DoCarDlg(void* unused)
 						  NULL, NULL, TRUE, 
 		                  0, 
 						  CarInvDlgUpdate);
-
-		FormDialogOkActive(&carInvPG, FALSE);
 	}
 	CarInvListLoad();
 	wShow(carInvPG.win);
