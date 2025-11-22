@@ -22,9 +22,9 @@ set(_XTRK_META_SRC_FILE "metainfo.xml")
 set(_XTRK_MANIFEST_SRC_FILE "manifest.yaml")
 
 # XTRKCAD_BASE_NAME should be of form xtrkcad, xtrkcad-beta, xtrkcad-gtk
-string(CONCAT _XTRK_DESKTOP_FILE ${XTRKCAD_BASE_NAME} "." ${_XTRK_DESKTOP_SRC_FILE})
-string(CONCAT _XTRK_META_FILE ${XTRKCAD_BASE_NAME} "." ${_XTRK_META_SRC_FILE})
-string(CONCAT _XTRK_MANIFEST_FILE ${XTRKCAD_BASE_NAME} "." ${_XTRK_MANIFEST_SRC_FILE})
+string(CONCAT _XTRK_DESKTOP_FILE org.xtrkcad.${XTRKCAD_BASE_NAME} "." ${_XTRK_DESKTOP_SRC_FILE})
+string(CONCAT _XTRK_META_FILE org.xtrkcad.${XTRKCAD_BASE_NAME} "." ${_XTRK_META_SRC_FILE})
+string(CONCAT _XTRK_MANIFEST_FILE org.xtrkcad.${XTRKCAD_BASE_NAME} ".yaml")
 
 # desktop.in
 string(CONCAT _XTRK_DESKTOP_IN_FILE
