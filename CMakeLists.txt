@@ -51,6 +51,9 @@ find_package(Pandoc)
 # Flatpak
 find_package(Flatpak)
 
+# Hg
+find_package(Hg)
+
 # For handling and creation of bitmaps the FreeImage library is required on Windows
 if(WIN32)
 	find_package(FreeImage REQUIRED)
