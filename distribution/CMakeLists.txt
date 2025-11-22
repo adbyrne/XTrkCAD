@@ -28,7 +28,7 @@ ENDIF(APPLE)
 
 IF(UNIX AND NOT APPLE)
 	ADD_SUBDIRECTORY(posix)
-    if(Flatpak_FOUND)
+    if(Flatpak_FOUND AND Hg_FOUND)
 	    ADD_SUBDIRECTORY(flatpak)
     endif()
 ENDIF(UNIX AND NOT APPLE)

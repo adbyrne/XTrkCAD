@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.xtrkcad.@XTRKCAD_BASE_NAME@</id>
+  <name>XTrackCAD@XTRKCAD_SUFFIX_NAME@ (flatpak)</name>
+  <summary>Design model railroad layouts</summary>
+  <description>
+    <p>XTrackCAD is a CAD (computer-aided design) program for designing model railroad layouts.</p>
+  </description>
+  <releases>
+    <release version="@XTRKCAD_VERSION@" date="@XTRKCAD_BUILD_DATE@"/>
+  </releases>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0</project_license>
+</component>
