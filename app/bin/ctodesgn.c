@@ -26,6 +26,7 @@
 #include "cstraigh.h"
 #include "custom.h"
 #include "fileio.h"
+#include "form.h"
 
 #include "param.h"
 #include "track.h"
@@ -95,11 +96,14 @@ typedef struct {
 typedef struct {
 	int type;
 	char * label;
+	const char * stackLabel;
 	int strCnt;
 	int lineCnt;
 	wLines_t * lines;
+#ifdef OLDGTK
 	int floatCnt;
 	toDesignFloat_t * floats;
+#endif
 	toDesignSchema_t * paths;
 	int angleModeCnt;
 	wLine_p lineC;
@@ -146,7 +150,7 @@ static wDrawColor newTurnRoadbedColor;
 static DIST_T newTurnTrackGauge;
 static char * newTurnScaleName;
 static paramFloatRange_t r0d001_10000 = { 0.001, 10000, 80 };
-static paramFloatRange_t r0d300_10000 = { 0.300, 10000, 80 };
+//static paramFloatRange_t r0d300_10000 = { 0.300, 10000, 80 };
 //static paramFloatRange_t r0_10000 = { 0, 10000, 80 };
 static paramFloatRange_t r_10000_10000 = { -1000, 10000, 80 };
 static paramFloatRange_t r0d001_90 = { 0.001, 90, 80 };
@@ -158,6 +162,13 @@ static paramFloatRange_t r_90_90 = { -90, 90, 80 };
 static void ShowTurnoutDesigner( void * context );
 #endif
 
+#define XXX
+#ifdef XXX
+static void NewTurnPrintX(
+        void * junk );
+#else
+#define NewTurnPrintX (NULL)
+#endif
 
 static coOrd points[20];
 #ifndef MKTURNOUT
@@ -173,7 +184,115 @@ static double angles[10];
 #define POSX(X) ((wWinPix_t)((X)*newTurnout_d.dpi))
 #define POSY(Y) ((wWinPix_t)((Y)*newTurnout_d.dpi))
 
+#define I_TOLENGTH (0)
+#define I_TOANGLE (1)
+#define I_TOOFFSET (2)
+#define I_TOTOELENGTH (3)
+#define I_TORAD (4)
+#define I_TO_FIRST_FLOAT (5)
+
 static paramData_t turnDesignPLs[] = {
+#define PL_REG_FIRST (0)
+	{ PD_FLOAT, &newTurnLen1, "td_reg_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Straight Length") },
+	{ PD_FLOAT, &newTurnLen2, "td_reg_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Diverging Length") },
+	{ PD_FLOAT, &newTurnOff2, "td_reg_off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+	{ PD_FLOAT, &newTurnAngle2, "td_reg_ang2", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+#define PL_REG_COUNT (4)
+
+#define PL_CRV_FIRST ( PL_REG_FIRST + PL_REG_COUNT )
+	{ PD_FLOAT, &newTurnLen1, "td_crv_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length 1") },
+	{ PD_FLOAT, &newTurnOff1, "td_crv_off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 1") },
+	{ PD_FLOAT, &newTurnAngle1, "td_crv_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 1") },
+	{ PD_FLOAT, &newTurnLen2, "td_crv_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 2") },
+	{ PD_FLOAT, &newTurnOff2, "td_crv_off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 2") },
+	{ PD_FLOAT, &newTurnAngle2, "td_crv_ang2", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 2") },
+#define PL_CRV_COUNT (6)
+
+#define PL_CORCRV_FIRST ( PL_CRV_FIRST + PL_CRV_COUNT )
+	{ PD_FLOAT, &newTurnLen1, "td_corcrv_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length 1") },
+	{ PD_FLOAT, &newTurnOff1, "td_corcrv_off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 1") },
+	{ PD_FLOAT, &newTurnAngle1, "td_corcrv_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 1") },
+	{ PD_FLOAT, &newTurnRad2, "td_corcrv_rad1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius ") },
+	{ PD_FLOAT, &newTurnLen2, "td_corcrv_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 2") },
+	{ PD_FLOAT, &newTurnOff2, "td_corcrv_off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 2") },
+	{ PD_FLOAT, &newTurnAngle2, "td_corcrv_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 2") },
+	{ PD_FLOAT, &newTurnRad2, "td_corcrv_rad2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius 2") },
+#define PL_CORCRV_COUNT (8)
+
+#define PL_WYE_FIRST ( PL_CORCRV_FIRST + PL_CORCRV_COUNT )
+	{ PD_FLOAT, &newTurnLen1, "td_wye_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length 1") },
+	{ PD_FLOAT, &newTurnOff1, "td_wye_off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 1") },
+	{ PD_FLOAT, &newTurnAngle1, "td_wye_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 1") },
+	{ PD_FLOAT, &newTurnLen2, "td_wye_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 2") },
+	{ PD_FLOAT, &newTurnOff2, "td_wye_off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 2") },
+	{ PD_FLOAT, &newTurnAngle2, "td_wye_ang2", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 2") },
+#define PL_WYE_COUNT (6)
+
+#define PL_3WAY_FIRST ( PL_WYE_FIRST + PL_WYE_COUNT )
+	{ PD_FLOAT, &newTurnLen1, "td_3way_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length 1") },
+	{ PD_FLOAT, &newTurnOff1, "td_3way_off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 1") },
+	{ PD_FLOAT, &newTurnAngle1, "td_3way_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 1") },
+	{ PD_FLOAT, &newTurnLen2, "td_3way_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 2") },
+	{ PD_FLOAT, &newTurnLen3, "td_3way_len3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 3") },
+	{ PD_FLOAT, &newTurnOff3, "td_3way_off3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 3") },
+	{ PD_FLOAT, &newTurnAngle3, "td_3way_ang3", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 3") },
+#define PL_3WAY_COUNT (6)
+
+#define PL_COR3WAY_FIRST ( PL_3WAY_FIRST + PL_3WAY_COUNT )
+	{ PD_FLOAT, &newTurnLen1, "td_cor3way_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length 1") },
+	{ PD_FLOAT, &newTurnOff1, "td_cor3way_off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 1") },
+	{ PD_FLOAT, &newTurnAngle1, "td_cor3way_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 1") },
+	{ PD_FLOAT, &newTurnLen2, "td_cor3way_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 2") },
+	{ PD_FLOAT, &newTurnLen3, "td_cor3way_len3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 3") },
+	{ PD_FLOAT, &newTurnOff3, "td_cor3way_off3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 3") },
+	{ PD_FLOAT, &newTurnAngle3, "td_cor3way_ang3", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 3") },
+#define PL_COR3WAY_COUNT (6)
+
+#define PL_CROSSING_FIRST ( PL_COR3WAY_FIRST + PL_COR3WAY_COUNT )
+	{ PD_FLOAT, &newTurnLen1, "td_crossing_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length 1") },
+	{ PD_FLOAT, &newTurnLen2, "td_crossing_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 2") },
+	{ PD_FLOAT, &newTurnAngle1, "td_crossing_ang", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+#define PL_CROSSING_COUNT (3)
+
+#define PL_SGLSLIP_FIRST ( PL_COR3WAY_FIRST + PL_COR3WAY_COUNT )
+	{ PD_FLOAT, &newTurnLen1, "td_sslip_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length 1") },
+	{ PD_FLOAT, &newTurnAngle1, "td_sslip_ang", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+	{ PD_FLOAT, &newTurnLen2, "td_sslip_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 2") },
+#define PL_SGLSLIP_COUNT (3)
+
+#define PL_DBLSLIP_FIRST ( PL_SGLSLIP_FIRST + PL_SGLSLIP_COUNT )
+	{ PD_FLOAT, &newTurnLen1, "td_dslip_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length 1") },
+	{ PD_FLOAT, &newTurnAngle1, "td_dslip_ang", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+	{ PD_FLOAT, &newTurnLen2, "td_dslip_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 2") },
+#define PL_DBLSLIP_COUNT (3)
+
+#define PL_RCROSSOVER_FIRST ( PL_DBLSLIP_FIRST + PL_DBLSLIP_COUNT )
+	{ PD_FLOAT, &newTurnLen1, "td_rcross_len", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length") },
+	{ PD_FLOAT, &newTurnOff0, "td_rcross_off", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+#define PL_RCROSSOVER_COUNT (2)
+
+#define PL_LCROSSOVER_FIRST ( PL_RCROSSOVER_FIRST + PL_RCROSSOVER_COUNT )
+	{ PD_FLOAT, &newTurnLen1, "td_lcross_len", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length") },
+	{ PD_FLOAT, &newTurnOff1, "td_lcross_off", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+#define PL_LCROSSOVER_COUNT (2)
+
+#define PL_DCROSSOVER_FIRST ( PL_LCROSSOVER_FIRST + PL_LCROSSOVER_COUNT )
+	{ PD_FLOAT, &newTurnLen1, "td_dcross_len", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length") },
+	{ PD_FLOAT, &newTurnOff1, "td_dcross_off", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+#define PL_DCROSSOVER_COUNT (2)
+
+#define PL_STRAIGHT_FIRST ( PL_DCROSSOVER_FIRST + PL_DCROSSOVER_COUNT )
+	{ PD_FLOAT, &newTurnLen1, "td_strsect_len", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length") },
+#define PL_STRAIGHT_COUNT (1)
+#define PL_CURVED_FIRST ( PL_STRAIGHT_FIRST + PL_STRAIGHT_COUNT )
+	{ PD_FLOAT, &newTurnRad1, "td_crvsect_rad", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius") },
+	{ PD_FLOAT, &newTurnAngle1, "td_crvsect_ang", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+#define PL_CURVED_COUNT (2)
+
+#define PL_TOTAL ( PL_CURVED_FIRST + PL_CURVED_COUNT )
+
+
+#ifdef OLDGTK
 #define I_TOLENGTH			(0)
 #define I_TO_FIRST_FLOAT	(0)
 	{ PD_FLOAT, &newTurnLen0, "len0", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length") },
@@ -199,27 +318,28 @@ static paramData_t turnDesignPLs[] = {
 	{ PD_FLOAT, &newTurnAngle2, "angle2", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
 #define I_TO_LAST_FLOAT		(17)
 	{ PD_FLOAT, &newTurnAngle3, "angle3", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
-#define I_TOMANUF			(18)
+#endif
+#define I_TOMANUF			(PL_TOTAL)
 	{ PD_STRING, &newTurnManufacturer, "manuf", PDO_NOTBLANK, NULL, N_("Manufacturer"), 0, 0, sizeof(newTurnManufacturer)},
-#define I_TOLDESC			(19)
+#define I_TOLDESC			( I_TOMANUF + 2 )
 	{ PD_STRING, &newTurnLeftDesc, "desc1", PDO_NOTBLANK, NULL, N_("Left Description"), 0, 0, sizeof(newTurnLeftDesc)},
 	{ PD_STRING, &newTurnLeftPartno, "partno1", PDO_DLGHORZ | PDO_NOTBLANK, NULL, N_(" #"), 0, 0, sizeof(newTurnLeftPartno)},
-#define I_TORDESC			(21)
+#define I_TORDESC			(I_TOLDESC + 2 )
 	{ PD_STRING, &newTurnRightDesc, "desc2", PDO_NOTBLANK, NULL, N_("Right Description"),0, 0, sizeof(newTurnRightDesc)},
 	{ PD_STRING, &newTurnRightPartno, "partno2", PDO_DLGHORZ | PDO_NOTBLANK, NULL, N_(" #"),0, 0, sizeof(newTurnRightPartno)},
 	{ PD_FLOAT, &newTurnRoadbedWidth, "roadbedWidth", PDO_DIM, &r0_100, N_("Roadbed Width") },
 	{ PD_LONG, &newTurnRoadbedLineWidth, "roadbedLineWidth", PDO_DLGHORZ, &i0_100, N_("Line Width") },
 	{ PD_COLORLIST, &newTurnRoadbedColor, "color", PDO_DLGHORZ|PDO_DLGBOXEND, NULL, N_("Color") },
-	{ PD_BUTTON, NewTurnOk, "done", PDO_DLGCMDBUTTON, NULL, N_("Ok") },
+//	{ PD_BUTTON, NewTurnPrintX, "print", PDO_DLGCMDBUTTON, NULL, N_("Ok") },
 	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, N_("Print Setup") },
-#define I_TOANGMODE			(28)
-	{ PD_RADIO, &newTurnAngleMode, "angleMode", 0, newTurnAngleModeLabels },
-#define I_TOSLIPMODE        (29)
-	{ PD_RADIO, &newTurnSlipMode, "slipMode", 0, newTurnSlipModeLabels }
+#define I_TOANGMODE			( I_TORDESC + 6 )
+	{ PD_RADIO, &newTurnAngleMode, "anglemode", 0, newTurnAngleModeLabels },
+#define I_TOSLIPMODE        ( I_TOANGMODE + 1 )
+	{ PD_RADIO, &newTurnSlipMode, "slippath", 0, newTurnSlipModeLabels }
 };
 #ifndef MKTURNOUT
 
-static paramGroup_t turnDesignPG = { "turnoutNew", 0, turnDesignPLs, COUNT( turnDesignPLs )  };
+static paramGroup_t turnDesignPG = { "turnout-designer", PGO_FULLDIALOGFROMBUILDER, turnDesignPLs, COUNT( turnDesignPLs )  };
 
 static turnoutInfo_t * customTurnout1, * customTurnout2;
 
@@ -242,12 +362,14 @@ static toDesignDesc_t * curDesign;
 static wLines_t RegLines[] = {
 #include "toreg.lin"
 };
+#ifdef OLDGTK
 static toDesignFloat_t RegFloats[] = {
 	{ { 175, 10 }, I_TOLENGTH+0, N_("Length"), N_("Diverging Length"), Dim_e },
 	{ { 400, 28 }, I_TOANGLE+0, N_("Angle"), N_("Diverging Angle"), Frog_e },
 	{ { 325, 68 }, I_TOOFFSET+0, N_("Offset"), N_("Diverging Offset"), Dim_e },
 	{ { 100, 120 }, I_TOLENGTH+1, N_("Length"), N_("Overall Length"), Dim_e },
 };
+#endif
 static signed char RegPaths[] = {
 	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 2, 0, 0,
 	'R', 'e', 'v', 'e', 'r', 's', 'e', 0, 1, 3, 4, 0, 0, 0
@@ -259,15 +381,19 @@ static toDesignSchema_t RegSchema = {
 static toDesignDesc_t RegDesc = {
 	NTO_REGULAR,
 	N_("Regular Turnout"),
+	"td_reg_stack",
 	2,
 	COUNT( RegLines ), RegLines,
+#ifdef OLDGTK
 	COUNT( RegFloats ), RegFloats,
+#endif
 	&RegSchema, 1
 };
 
 static wLines_t CrvLines[] = {
 #include "tocrv.lin"
 };
+#ifdef OLDGTK
 static toDesignFloat_t CrvFloats[] = {
 	{ { 175, 10 }, I_TOLENGTH+0, N_("Length"), N_("Inner Length"), Dim_e },
 	{ { 375, 12 }, I_TOANGLE+0, N_("Angle"), N_("Inner Angle"), Frog_e },
@@ -276,6 +402,7 @@ static toDesignFloat_t CrvFloats[] = {
 	{ { 400, 84 }, I_TOOFFSET+1, N_("Offset"), N_("Outer Offset"), Dim_e },
 	{ { 175, 120 }, I_TOLENGTH+1, N_("Length"), N_("Outer Length"), Dim_e }
 };
+#endif
 static signed char Crv1Paths[] = {
 	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 4, 5, 0, 0,
 	'R', 'e', 'v', 'e', 'r', 's', 'e', 0, 1, 2, 3, 0, 0, 0
@@ -304,9 +431,12 @@ static toDesignSchema_t Crv3Schema = {
 static toDesignDesc_t CrvDesc = {
 	NTO_CURVED,
 	N_("Curved Turnout"),
+	"td_crv_stack",
 	2,
 	COUNT( CrvLines ), CrvLines,
+#ifdef OLDGTK
 	COUNT( CrvFloats ), CrvFloats,
+#endif
 	&Crv1Schema, 1
 };
 
@@ -314,6 +444,7 @@ static toDesignDesc_t CrvDesc = {
 static wLines_t CornuLines[] = {
 #include "tocornu.lin"
 };
+#ifdef OLDGTK
 static toDesignFloat_t CornuFloats[] = {
 	{ { 175, 10 }, I_TOLENGTH+0, N_("Length"), N_("Inner Length"), Dim_e },
 	{ { 375, 0 }, I_TOANGLE+0, N_("Angle"), N_("Inner Angle"), Frog_e },
@@ -326,6 +457,7 @@ static toDesignFloat_t CornuFloats[] = {
 	{ { 50, 90 }, I_TORAD+2, N_("Radius"), N_("Toe Radius"), Dim_e },
 	{ { 50, 40 }, I_TOTOELENGTH+0, N_("Length"), N_("Toe Length"), Dim_e }
 };
+#endif
 static signed char CornuPaths[] = {
 	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 4, 0, 0, 0,
 	'R', 'e', 'v', 'e', 'r', 's', 'e', 0, 1, 2, 0, 0, 0, 0
@@ -338,9 +470,12 @@ static toDesignSchema_t CornuSchema = {
 static toDesignDesc_t CornuDesc = {
 	NTO_CORNU,
 	N_("Cornu Curved Turnout"),
+	"td_corcrv_stack",
 	2,
 	COUNT( CornuLines ), CornuLines,
+#ifdef OLDGTK
 	COUNT( CornuFloats ), CornuFloats,
+#endif
 	&CornuSchema, 1
 };
 #endif
@@ -348,6 +483,7 @@ static toDesignDesc_t CornuDesc = {
 static wLines_t WyeLines[] = {
 #include "towye.lin"
 };
+#ifdef OLDGTK
 static toDesignFloat_t WyeFloats[] = {
 	{ { 175, 10 }, I_TOLENGTH+0, N_("Length"), N_("Left Length"), Dim_e },
 	{ { 400, 28 }, I_TOANGLE+0, N_("Angle"), N_("Left Angle"), Frog_e },
@@ -356,6 +492,7 @@ static toDesignFloat_t WyeFloats[] = {
 	{ { 400, 153 }, I_TOANGLE+1, N_("Angle"), N_("Right Angle"), Frog_e },
 	{ { 175, 170 }, I_TOLENGTH+1, N_("Length"), N_("Right Length"), Dim_e },
 };
+#endif
 static signed char Wye1Paths[] = {
 	'L', 'e', 'f', 't', 0, 1, 2, 3, 0, 0,
 	'R', 'i', 'g', 'h', 't', 0, 1, 4, 5, 0, 0, 0
@@ -383,9 +520,12 @@ static toDesignSchema_t Wye3Schema = {
 static toDesignDesc_t WyeDesc = {
 	NTO_WYE,
 	N_("Wye Turnout"),
+	"td_wye_stack",
 	1,
 	COUNT( WyeLines ), WyeLines,
+#ifdef OLDGTK
 	COUNT( WyeFloats ), WyeFloats,
+#endif
 	NULL, 1
 };
 
@@ -393,6 +533,7 @@ static toDesignDesc_t WyeDesc = {
 static wLines_t CornuWyeLines[] = {
 #include "tocornuwye.lin"
 };
+#ifdef OLDGTK
 static toDesignFloat_t CornuWyeFloats[] = {
 	{ { 175, 10 }, I_TOLENGTH+0, N_("Length"), N_("Left Length"), Dim_e },
 	{ { 400, 28 }, I_TOANGLE+0, N_("Angle"), N_("Left Angle"), Frog_e },
@@ -405,6 +546,7 @@ static toDesignFloat_t CornuWyeFloats[] = {
 	{ { 80, 48 }, I_TOTOELENGTH+0, N_("Length"), N_("Toe Length"), Dim_e },
 	{ { 80, 28 }, I_TORAD+2, N_("Radius"), N_("Toe Radius"), Dim_e },
 };
+#endif
 static signed char CornuWyePaths[] = {
 	'L', 'e', 'f', 't', 0, 1, 2, 3, 0, 0,
 	'R', 'i', 'g', 'h', 't', 0, 1, 4, 5, 0, 0, 0
@@ -416,9 +558,12 @@ static toDesignSchema_t CornuWyeSchema = {
 static toDesignDesc_t CornuWyeDesc = {
 	NTO_CORNUWYE,
 	N_("Cornu Wye Turnout"),
+	"td_corwye_stack",
 	1,
 	COUNT( CornuWyeLines ), CornuWyeLines,
+#ifdef OLDGTK
 	COUNT( CornuWyeFloats ), CornuWyeFloats,
+#endif
 	NULL, 1
 };
 #endif
@@ -426,6 +571,7 @@ static toDesignDesc_t CornuWyeDesc = {
 static wLines_t ThreewayLines[] = {
 #include "to3way.lin"
 };
+#ifdef OLDGTK
 static toDesignFloat_t ThreewayFloats[] = {
 	{ { 175, 10 }, I_TOLENGTH+0, N_("Length"), N_("Left Length"), Dim_e },
 	{ { 400, 28 }, I_TOANGLE+0, N_("Angle"), N_("Left Angle"), Frog_e },
@@ -435,6 +581,7 @@ static toDesignFloat_t ThreewayFloats[] = {
 	{ { 400, 153 }, I_TOANGLE+1, N_("Angle"), N_("Right Angle"), Frog_e },
 	{ { 175, 170 }, I_TOLENGTH+1, N_("Length"), N_("Right Length"), Dim_e },
 };
+#endif
 static signed char Tri1Paths[] = {
 	'L', 'e', 'f', 't', 0, 1, 2, 3, 0, 0,
 	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 6, 0, 0,
@@ -465,9 +612,12 @@ static toDesignSchema_t Tri3Schema = {
 static toDesignDesc_t ThreewayDesc = {
 	NTO_3WAY,
 	N_("3-way Turnout"),
+	"td_3way_stack",
 	1,
 	COUNT( ThreewayLines ), ThreewayLines,
+#ifdef OLDGTK
 	COUNT( ThreewayFloats ), ThreewayFloats,
+#endif
 	NULL, 1
 };
 
@@ -475,6 +625,7 @@ static toDesignDesc_t ThreewayDesc = {
 static wLines_t CornuThreewayLines[] = {
 #include "tocornu3way.lin"
 };
+#ifdef OLDGTK
 static toDesignFloat_t CornuThreewayFloats[] = {
 	{ { 175, 10 }, I_TOLENGTH+0, N_("Length"), N_("Left Length"), Dim_e },
 	{ { 380, 10 }, I_TOANGLE+0, N_("Angle"), N_("Left Angle"), Frog_e },
@@ -492,6 +643,7 @@ static toDesignFloat_t CornuThreewayFloats[] = {
 	{ { 55, 140 }, I_TOTOELENGTH+1, N_("Length"), N_("Toe Length Right"), Dim_e },
 	{ { 40, 105 }, I_TORAD+2, N_("Radius"), N_("Toe Radius"), Dim_e },
 };
+#endif
 static signed char CornuTriPaths[] = {
 	'L', 'e', 'f', 't', 0, 1, 2, 3, 0, 0,
 	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 6, 0, 0,
@@ -504,9 +656,12 @@ static toDesignSchema_t CornuTriSchema = {
 static toDesignDesc_t CornuThreewayDesc = {
 	NTO_CORNU3WAY,
 	N_("Cornu 3-way Turnout"),
+	"td_cor3way_stack",
 	1,
 	COUNT( CornuThreewayLines ), CornuThreewayLines,
+#ifdef OLDGTK
 	COUNT( CornuThreewayFloats ), CornuThreewayFloats,
+#endif
 	NULL, 1
 };
 #endif
@@ -514,11 +669,13 @@ static toDesignDesc_t CornuThreewayDesc = {
 static wLines_t CrossingLines[] = {
 #include "toxing.lin"
 };
+#ifdef OLDGTK
 static toDesignFloat_t CrossingFloats[] = {
 	{ { 329, 30 }, I_TOLENGTH+0, N_("Length"), N_("Length"), Dim_e },
 	{ { 370, 90 }, I_TOANGLE+0, N_("Angle"), N_("Angle"), Frog_e },
 	{ { 329, 150 }, I_TOLENGTH+1, N_("Length"), N_("Length"), Dim_e }
 };
+#endif
 static signed char CrossingPaths[] = {
 	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 0, 2, 0, 0, 0
 };
@@ -529,20 +686,25 @@ static toDesignSchema_t CrossingSchema = {
 static toDesignDesc_t CrossingDesc = {
 	NTO_CROSSING,
 	N_("Crossing"),
+	"td_crossing_stack",
 	1,
 	COUNT( CrossingLines ), CrossingLines,
+#ifdef OLDGTK
 	COUNT( CrossingFloats ), CrossingFloats,
+#endif
 	&CrossingSchema, 1
 };
 
 static wLines_t SingleSlipLines[] = {
 #include "tosslip.lin"
 };
+#ifdef OLDGTK
 static toDesignFloat_t SingleSlipFloats[] = {
 	{ { 329, 30 }, I_TOLENGTH+0, N_("Length"), N_("Length"), Dim_e },
 	{ { 370, 90 }, I_TOANGLE+0, N_("Angle"), N_("Angle"), Frog_e },
 	{ { 329, 155 }, I_TOLENGTH+1, N_("Length"), N_("Length"), Dim_e }
 };
+#endif
 static signed char SingleSlipPaths[] = {
 	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 2, 0, 3, 4, 0, 0,
 	'R', 'e', 'v', 'e', 'r', 's', 'e', 0, 1, 5, 4, 0, 0, 0
@@ -554,20 +716,25 @@ static toDesignSchema_t SingleSlipSchema = {
 static toDesignDesc_t SingleSlipDesc = {
 	NTO_S_SLIP,
 	N_("Single Slipswitch"),
+	"td_sslip_stack",
 	1,
 	COUNT( SingleSlipLines ), SingleSlipLines,
+#ifdef OLDGTK
 	COUNT( SingleSlipFloats ), SingleSlipFloats,
+#endif
 	&SingleSlipSchema, 1
 };
 
 static wLines_t DoubleSlipLines[] = {
 #include "todslip.lin"
 };
+#ifdef OLDGTK
 static toDesignFloat_t DoubleSlipFloats[] = {
 	{ { 329, 30 }, I_TOLENGTH+0, N_("Length"), N_("Length"), Dim_e },
 	{ { 370, 90 }, I_TOANGLE+0, N_("Angle"), N_("Angle"), Frog_e },
 	{ { 329, 155 }, I_TOLENGTH+1, N_("Length"), N_("Length"), Dim_e }
 };
+#endif
 static signed char DoubleSlipPaths[] = {
 	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 2, 3, 0, 4, 5, 6, 0, 0,
 	'R', 'e', 'v', 'e', 'r', 's', 'e', 0, 1, 7, 6, 0, 4, 8, 3, 0, 0, 0
@@ -589,9 +756,12 @@ static toDesignSchema_t DoubleSlipSchema2 = {
 static toDesignDesc_t DoubleSlipDesc = {
 	NTO_D_SLIP,
 	N_("Double Slipswitch"),
+	"td_dslip_stack",
 	1,
 	COUNT( DoubleSlipLines ), DoubleSlipLines,
+#ifdef OLDGTK
 	COUNT( DoubleSlipFloats ), DoubleSlipFloats,
+#endif
 	&DoubleSlipSchema, 1
 };
 
@@ -599,10 +769,12 @@ static toDesignDesc_t DoubleSlipDesc = {
 static wLines_t RightCrossoverLines[] = {
 #include "torcross.lin"
 };
+#ifdef OLDGTK
 static toDesignFloat_t RightCrossoverFloats[] = {
 	{ { 200, 10 }, I_TOLENGTH+0, N_("Length"), N_("Length"), Dim_e },
 	{ { 90, 85 }, I_TOOFFSET+0, N_("Separation"), N_("Separation"), Dim_e }
 };
+#endif
 static signed char RightCrossoverPaths[] = {
 	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 2, 0, 3, 4, 0, 0,
 	'R', 'e', 'v', 'e', 'r', 's', 'e', 0, 3, 5, 6, 7, 2, 0, 0, 0
@@ -614,9 +786,12 @@ static toDesignSchema_t RightCrossoverSchema = {
 static toDesignDesc_t RightCrossoverDesc = {
 	NTO_R_CROSSOVER,
 	N_("Right Crossover"),
+	"td_rcross_stack",
 	1,
 	COUNT( RightCrossoverLines ), RightCrossoverLines,
+#ifdef OLDGTK
 	COUNT( RightCrossoverFloats ), RightCrossoverFloats,
+#endif
 	&RightCrossoverSchema, 0
 };
 #endif
@@ -625,10 +800,12 @@ static toDesignDesc_t RightCrossoverDesc = {
 static wLines_t LeftCrossoverLines[] = {
 #include "tolcross.lin"
 };
+#ifdef OLDGTK
 static toDesignFloat_t LeftCrossoverFloats[] = {
 	{ { 200, 10 }, I_TOLENGTH+0, N_("Length"), N_("Length"), Dim_e },
 	{ { 90, 85 }, I_TOOFFSET+0, N_("Separation"), N_("Separation"), Dim_e }
 };
+#endif
 static signed char LeftCrossoverPaths[] = {
 	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 2, 0, 3, 4, 0, 0,
 	'R', 'e', 'v', 'e', 'r', 's', 'e', 0, 1, 5, 6, 7, 4, 0, 0, 0
@@ -640,9 +817,12 @@ static toDesignSchema_t LeftCrossoverSchema = {
 static toDesignDesc_t LeftCrossoverDesc = {
 	NTO_L_CROSSOVER,
 	N_("Left Crossover"),
+	"td_lcross_stack",
 	1,
 	COUNT( LeftCrossoverLines ), LeftCrossoverLines,
+#ifdef OLDGTK
 	COUNT( LeftCrossoverFloats ), LeftCrossoverFloats,
+#endif
 	&LeftCrossoverSchema, 0
 };
 #endif
@@ -650,10 +830,12 @@ static toDesignDesc_t LeftCrossoverDesc = {
 static wLines_t DoubleCrossoverLines[] = {
 #include "todcross.lin"
 };
+#ifdef OLDGTK
 static toDesignFloat_t DoubleCrossoverFloats[] = {
 	{ { 200, 10 }, I_TOLENGTH+0, N_("Length"), N_("Length"), Dim_e },
 	{ { 90, 85 }, I_TOOFFSET+0, N_("Separation"), N_("Separation"), Dim_e }
 };
+#endif
 static signed char DoubleCrossoverPaths[] = {
 	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 2, 3, 0, 4, 5, 6, 0, 0,
 	'R', 'e', 'v', 'e', 'r', 's', 'e', 0, 1, 7, 8, 9, 6, 0, 4, 10, 11, 12, 3, 0, 0, 0
@@ -665,18 +847,23 @@ static toDesignSchema_t DoubleCrossoverSchema = {
 static toDesignDesc_t DoubleCrossoverDesc = {
 	NTO_D_CROSSOVER,
 	N_("Double Crossover"),
+	"td_dcross_stack",
 	1,
 	COUNT( DoubleCrossoverLines ), DoubleCrossoverLines,
+#ifdef OLDGTK
 	COUNT( DoubleCrossoverFloats ), DoubleCrossoverFloats,
+#endif
 	&DoubleCrossoverSchema, 0
 };
 
 static wLines_t StrSectionLines[] = {
 #include "tostrsct.lin"
 };
+#ifdef OLDGTK
 static toDesignFloat_t StrSectionFloats[] = {
 	{ { 200, 10 }, I_TOLENGTH+0, N_("Length"), N_("Length"), Dim_e }
 };
+#endif
 static signed char StrSectionPaths[] = {
 	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 0, 0, 0
 };
@@ -687,19 +874,24 @@ static toDesignSchema_t StrSectionSchema = {
 static toDesignDesc_t StrSectionDesc = {
 	NTO_STR_SECTION,
 	N_("Straight Section"),
+	"td_strsect_stack",
 	1,
 	COUNT( StrSectionLines ), StrSectionLines,
+#ifdef OLDGTK
 	COUNT( StrSectionFloats ), StrSectionFloats,
+#endif
 	&StrSectionSchema, 0
 };
 
 static wLines_t CrvSectionLines[] = {
 #include "tocrvsct.lin"
 };
+#ifdef OLDGTK
 static toDesignFloat_t CrvSectionFloats[] = {
 	{ { 225, 90 }, I_TOLENGTH+0, N_("Radius"), N_("Radius"), Dim_e },
 	{ { 225, 140}, I_TOANGLE+0, N_("Angle (Degrees)"), N_("Angle"), Angle_e }
 };
+#endif
 static signed char CrvSectionPaths[] = {
 	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 0, 0, 0
 };
@@ -710,9 +902,12 @@ static toDesignSchema_t CrvSectionSchema = {
 static toDesignDesc_t CrvSectionDesc = {
 	NTO_CRV_SECTION,
 	N_("Curved Section"),
+	"td_crvsect_stack",
 	1,
 	COUNT( CrvSectionLines ), CrvSectionLines,
+#ifdef OLDGTK
 	COUNT( CrvSectionFloats ), CrvSectionFloats,
+#endif
 	&CrvSectionSchema, 0
 };
 
@@ -2679,11 +2874,14 @@ static void CopyNonTracks( turnoutInfo_t * to )
 		}
 	}
 }
+#endif
 
 
-static void NewTurnPrint(
+#ifndef MKTURNOUT
+static void NewTurnPrintX(
         void * junk )
 {
+#ifdef XXX
 	coOrd pos, p0, p1;
 	WDOUBLE_T px, py;
 	int i, j, ii, jj, p;
@@ -2785,6 +2983,7 @@ static void NewTurnPrint(
 			strPos.y -= 0.5;
 			DrawString( &newTurnout_d, strPos, 0.0, message, fp, 20, wDrawColorBlack );
 			strPos.y -= 0.10;
+#ifdef OLDGTK
 			for ( p=0; p<curDesign->floatCnt; p++ ) {
 				tmpR = *(FLOAT_T*)(turnDesignPLs[curDesign->floats[p].index].valueP);
 				sprintf( message, "%s: %s",
@@ -2796,6 +2995,7 @@ static void NewTurnPrint(
 				strPos.y -= 0.25;
 				DrawString( &newTurnout_d, strPos, 0.0, message, fp, 16, wDrawColorBlack );
 			}
+#endif
 			if (newTurnLeftDesc[0] || newTurnLeftPartno[0]) {
 				sprintf( message, "%s %s %s", newTurnManufacturer, newTurnLeftPartno,
 				         newTurnLeftDesc );
@@ -2838,7 +3038,9 @@ static void NewTurnPrint(
 	}
 quitPrinting:
 	wPrintDocEnd();
+#endif
 }
+//#endif
 #endif
 
 
@@ -2925,6 +3127,7 @@ static void NewTurnOk( void * context )
 		cp += 1;
 	}
 	CHECK( cp-tempCustom <= sizeof tempCustom );
+#ifdef OLDGTK
 	for ( i=0; i<curDesign->floatCnt; i++ ) {
 		flt = *(FLOAT_T*)(turnDesignPLs[curDesign->floats[i].index].valueP);
 		switch( curDesign->floats[i].mode ) {
@@ -2943,6 +3146,7 @@ static void NewTurnOk( void * context )
 		sprintf( cp, " %0.6f", flt );
 		cp += strlen(cp);
 	}
+#endif
 	sprintf( cp, " %0.6f %0.6f %ld", newTurnRoadbedWidth,
 	         newTurnRoadbedLineWidth, newTurnRoadbedColor );
 	customInfoP = MyStrdup( tempCustom );
@@ -3102,6 +3306,7 @@ static void NewTurnOk( void * context )
 static wWinPix_t turnDesignWidth;
 static wWinPix_t turnDesignHeight;
 
+#ifdef OLDGTK
 static void TurnDesignLayout(
         paramData_t * pd,
         int index,
@@ -3126,6 +3331,7 @@ static void TurnDesignLayout(
 		*h = turnDesignHeight + 10;
 	}
 }
+#endif
 
 
 static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
@@ -3135,13 +3341,22 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 	wWinPix_t w, h, ctlH;
 
 	if ( newTurnW == NULL ) {
+#ifdef OLDGTK
 		partnoWidth = wLabelWidth( "999-99999-9999" );
 		turnDesignPLs[I_TOLDESC+1].winData =
 		        turnDesignPLs[I_TORDESC+1].winData =
 		                I2VP(partnoWidth);
 		partnoWidth += wLabelWidth( " # " );
-		newTurnW = ParamCreateDialog( &turnDesignPG, _("Turnout Designer"), _("Print"),
-		                              NewTurnPrint, ParamCancel_Current, TRUE, TurnDesignLayout, F_BLOCK, NULL );
+#endif
+		newTurnW = FormCreateDialog( &turnDesignPG,
+					     _("Turnout Designer"),
+					     _("Ok"),
+		                             NewTurnOk,
+					     _("Cancel"),
+					     FormCancel_Current,
+					     TRUE,
+					     F_BLOCK,
+					     NULL );
 		for ( inx=0; inx<COUNT( designDescs ); inx++ ) {
 			designDescs[inx]->lineC = wLineCreate( turnDesignPG.win, NULL,
 			                                       designDescs[inx]->lineCnt, designDescs[inx]->lines );
@@ -3153,8 +3368,10 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 			wControlShow( (wControl_p)curDesign->lineC, FALSE );
 		}
 		curDesign = newDesign;
+		wStatusSetVisibleControlSet(  newTurnW, curDesign->stackLabel );
 		sprintf( message, _("%s %s Designer"), sProdName, _(curDesign->label) );
-		wWinSetTitle( newTurnW, message );
+		wWinSetTitle( newTurnW, curDesign->stackLabel );
+#ifdef OLDGTK
 		for ( inx=I_TO_FIRST_FLOAT; inx<=I_TO_LAST_FLOAT; inx++ ) {
 			turnDesignPLs[inx].option |= PDO_DLGIGNORE;
 			wControlShow( turnDesignPLs[inx].control, FALSE );
@@ -3250,6 +3467,7 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 			                        turnDesignPLs[I_TOANGLE+3].winData = &r0d001_90;
 		}
 		ParamLayoutDialog( &turnDesignPG );
+#endif
 	}
 }
 
@@ -3279,8 +3497,8 @@ static void ShowTurnoutDesigner( void * context )
 		                                                                    newTurnOff3 = newTurnLen3 = newTurnAngle3 = newTurnRad3 =
 		                                                                                    newTurnToeL = newTurnToeR = 0.0;
 	}
-	ParamLoadControls( &turnDesignPG );
-	ParamGroupRecord( &turnDesignPG );
+	FormLoadControls( &turnDesignPG );
+	FormGroupRecord( &turnDesignPG );
 	customTurnout1 = NULL;
 	customTurnout2 = NULL;
 	wShow( newTurnW );
@@ -3333,6 +3551,7 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 	} else {
 		descR = partR = "";
 	}
+#ifdef OLDGTK
 	for ( i=0; i<dp->floatCnt; i++ ) {
 		if ( ! GetArgs( cp, "fc", turnDesignPLs[dp->floats[i].index].valueP, &cp ) ) {
 			return;
@@ -3355,6 +3574,7 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 			break;
 		}
 	}
+#endif
 	rgb = 0;
 	if ( cp && GetArgs( cp, "ffl", &newTurnRoadbedWidth, &lineWidth, &rgb ) ) {
 		newTurnRoadbedColor = wDrawFindColor(rgb);
@@ -3504,8 +3724,8 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 	}
 	/*if (recordF)
 		fprintf( recordF, TURNOUTDESIGNER " SHOW %s\n", dp->label );*/
-	ParamLoadControls( &turnDesignPG );
-	ParamGroupRecord( &turnDesignPG );
+	FormLoadControls( &turnDesignPG );
+	FormGroupRecord( &turnDesignPG );
 	wShow( newTurnW );
 }
 
@@ -3513,7 +3733,7 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 EXPORT void InitNewTurn( wMenu_p m )
 {
 	int i;
-	ParamRegister( &turnDesignPG );
+	FormRegister( &turnDesignPG );
 	for ( i=0; i<COUNT( designDescs ); i++ ) {
 		wMenuPushCreate( m, NULL, _(designDescs[i]->label), 0,
 		                 ShowTurnoutDesigner, designDescs[i] );

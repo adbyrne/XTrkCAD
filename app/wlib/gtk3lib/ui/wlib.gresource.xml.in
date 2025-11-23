@@ -40,6 +40,7 @@
     <file preprocess="xml-stripblanks">toolbar.ui</file>
     <file preprocess="xml-stripblanks">toolwindow.ui</file>
     <file preprocess="xml-stripblanks">turnout.ui</file>
+    <file preprocess="xml-stripblanks">turnout-designer.ui</file>
     <file>xtrackcad.css</file>
   </gresource>
 </gresources>
