@@ -56,12 +56,17 @@ static char *userHomeDir;
 
 
  static int
- GetProgramDir(char *pBuf, size_t len)
+ GetProgramDir(char *pBuf, ssize_t len)
  {
 
-	int bytes = MIN(readlink("/proc/self/exe", pBuf, len), len - 1);
-	if(bytes >= 0)
+	ssize_t result_len = readlink("/proc/self/exe", pBuf, len);
+
+	int bytes = MIN(result_len, len - 1);
+	if (bytes >= 0) {
     	pBuf[bytes] = '\0';
+	} else {
+		pBuf[0] = '\0';
+	}
 	(void)dirname(pBuf);		
 	return strlen(pBuf);
  }
@@ -104,7 +109,8 @@ const char * wGetAppLibDir( void )
 	char * cp, *ep;
 	char *envvar;
 	char pBuf[256];
-	size_t len = sizeof(pBuf); 
+	pBuf[0] = '\0'; //Initialize buffer
+	ssize_t len = sizeof(pBuf); 
 
 	char *searchDirs[PATHOPTIONMAX];
 	unsigned option = 0;
@@ -134,7 +140,12 @@ const char * wGetAppLibDir( void )
 
 	// option 2: relative path to share subdir
 	GetProgramDir(pBuf, len);
-	ep = g_canonicalize_filename ("../share/", pBuf);
+	if (pBuf[0] == '\0') {
+		// cannot determine program dir
+		ep = g_canonicalize_filename ("../share/", NULL);
+	} else {
+		ep = g_canonicalize_filename ("../share/", pBuf);
+	}	
 	searchDirs[ option++ ]= g_strdup_printf("%s/%s", ep, wlibGetAppName());
 	g_free(ep);
 
