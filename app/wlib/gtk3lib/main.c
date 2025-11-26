@@ -41,8 +41,8 @@ static char *appName;		/**< application name */
 char *wExecutableName;		/**< full path to executable, taken from argv[0] */
 
 static GtkApplication *app;
-static int argc;			/**< count of command line options */
-static char **argv;			/**< command line options */
+static int myargc;			/**< count of command line options */
+static char **myargv;			/**< command line options */
 
 /**
  * Initialize the application name for later use
@@ -118,11 +118,11 @@ startup(GtkApplication *app)
 	// load css
 	LoadStyles();
 
-	wMain(argc, argv );
+	wMain(myargc, myargv );
 
 	wPrefFlush("");
 
-	g_strfreev(argv);
+	g_strfreev(myargv);
 }
 
 /**
@@ -133,14 +133,12 @@ startup(GtkApplication *app)
  * \param user_data 	unused
  */
 
-static void
-activate(GtkApplication* app, gpointer user_data)
-{
+// static void
+// activate(GtkApplication* app, gpointer user_data)
+// {
 
 
-	//g_resources_register(wlib_get_resource());
-
-}
+// }
 	
 
 /**
@@ -153,18 +151,18 @@ activate(GtkApplication* app, gpointer user_data)
  * \return gint always 0 as parameters aren't checked
  */
 
-static gint
-command_line( GApplication* self, GApplicationCommandLine* cmdLine,
-               gpointer user_data )
-{
-	argv = g_application_command_line_get_arguments(
-	               cmdLine,
-	               &argc);
+// static gint
+// command_line( GApplication* self, GApplicationCommandLine* cmdLine,
+//                gpointer user_data )
+// {
+// 	myargv = g_application_command_line_get_arguments(
+// 	               cmdLine,
+// 	               &myargc);
 
-	wExecutableName = argv[ 0 ];
+// 	wExecutableName = myargv[ 0 ];
 
-	return( 0 );
-}
+// 	return( 0 );
+// }
 
 /*
  *******************************************************************************
@@ -184,9 +182,13 @@ int main( int argc, char *argv[] )
 
 	app = gtk_application_new("org.xtrackcad.wlib",
 	                           G_APPLICATION_HANDLES_COMMAND_LINE);
-	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
+
+	//g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
 	g_signal_connect(app, "startup", G_CALLBACK(startup), NULL);
-	g_signal_connect(app, "command-line", G_CALLBACK(command_line), NULL );
+	//g_signal_connect(app, "command-line", G_CALLBACK(command_line), NULL );
+
+	myargc = argc; myargv=argv;
+	wExecutableName = argv[0];
 
 	status = g_application_run(G_APPLICATION (app), argc, argv);
 
