@@ -311,7 +311,7 @@ MenuPush(void *dp)
 	paramData_p p = (paramData_p)dp;
 
 	if(p->valueP) {
-		((void (*)(void))p->valueP)();
+		((void (*)(void *))p->valueP)(p->context);
 	}
 }
 

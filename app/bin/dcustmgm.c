@@ -35,8 +35,7 @@ static void CustomEdit( void * action );
 static void CustomDelete( void * action );
 static void CustomExport( void * action );
 static void CustomDone( void * action );
-static void CustomNewProto( void );
-static void CustomNewPart( void );
+static void SelectNew(void *context );
 
 static const char * customTypes[] = { "Car Part", "Car Prototype", NULL };
 static wIndex_t selectedType;
@@ -61,9 +60,9 @@ static paramData_t customPLs[] = {
 #define I_CUSTOMCOPYTO	(5)
 	{	PD_BUTTON, CustomExport, "export", 0, NULL},
 #define I_NEWPROTO	(6)
-	{	PD_MENUITEM, CustomNewProto, "newproto", 0, customPLs + I_CUSTOMNEWTYPE},
+	{	PD_MENUITEM, SelectNew, "newproto", .context = I2VP(I_NEWPROTO)},
 #define I_NEWPART (7)
-	{	PD_MENUITEM, CustomNewPart, "newpart", 0, customPLs + I_CUSTOMNEWTYPE},
+	{	PD_MENUITEM, SelectNew, "newpart", .context = I2VP(I_NEWPART)},
 } ;
 
 static paramGroup_t customPG = { "custmgm", PGO_FULLDIALOGFROMBUILDER, customPLs, COUNT( customPLs ) };
@@ -137,28 +136,28 @@ static void CustomEdit( void * action )
 }
 
 static void
-SetSplitButton(paramData_p menuItem, void(* handler)(void))
+SelectNew(void *context)
 {
-	const char *label = wMenuGetLabel(menuItem->control);
+	unsigned index = (unsigned)context;
+	void(*handler)(void);
+	const char *label;
+	paramData_p menuItem = customPLs+index;;
+
+	// get selected function
+	switch(index) {
+		case I_NEWPART:
+		handler = CarDlgAddDesc;
+		break;
+		case I_NEWPROTO:
+		handler = CarDlgAddProto;
+		break;
+	}
+	label = wMenuGetLabel(menuItem->control);
+
+	// configure the button
 	wButtonSetLabel((customPLs+I_CUSTOMNEW)->control, label);
-
-	printf("%s\n", label);
-
-	customPLs[I_CUSTOMNEW].valueP = handler;
+	customPLs[I_CUSTOMNEW].valueP = handler;	
 }
-
-static void
-CustomNewProto(void)
-{
-	SetSplitButton(customPLs + I_NEWPROTO, CarDlgAddProto);
-}
-
-static void
-CustomNewPart(void)
-{
-	SetSplitButton(customPLs + I_NEWPART, CarDlgAddDesc);
-}
-
 
 static void CustomDelete( void * action )
 {
@@ -401,7 +400,6 @@ static void CustMgmChange( long changes )
 	LoadCustomMgmList();
 }
 
-
 static void DoCustomMgr( void * junk )
 {
 	int i = 0;
@@ -412,7 +410,7 @@ static void DoCustomMgr( void * junk )
 							NULL, NULL,
 							TRUE, F_RESIZE|F_RECALLSIZE|F_BLOCK,
 		                   CustomDlgUpdate );
-		CustomNewPart();
+		SelectNew(I2VP(I_NEWPART));
 		//selectedType = 0;
 		// wComboBoxSetIndex( (customPLs[I_CUSTOMNEWTYPE].control), selectedType);
 
