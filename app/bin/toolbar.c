@@ -55,8 +55,8 @@ static wWinPix_t toolbarHeight = 0;
 #define GROUP_DISTANCE (5)     // default distance between button groups
 #define GROUP_BIG_DISTANCE (GROUP_DISTANCE * 3) // big gap
 #define TOOLBAR_MARGIN (20)     // left and right margins of toolbar
-#define FIXEDLAYERCONTROLS (2)  // the layer groups has two controls that are
-// always visible (list and background)
+#define FIXEDLAYERCONTROLS (3)  // the layer groups has three controls 
+				// that are always visible (list, background and manage)
 
 /*
 * Bit handling macros
