@@ -122,7 +122,7 @@ startup(GtkApplication *app)
 
 	wPrefFlush("");
 
-	g_strfreev(myargv);
+// TODO-DB	g_strfreev(myargv);
 }
 
 /**

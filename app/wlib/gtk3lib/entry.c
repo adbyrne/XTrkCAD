@@ -170,14 +170,14 @@ wlibEntrySetValid(wControl_p entry, bool valid)
  */
 
 static int entryFocusOutEvent(
-        GtkEntry *widget,
-        GdkEventFocus event,
+        GtkWidget *widget,
+        GdkEventFocus *event,
         wControl_p b)
 {
 	struct entry* entry = CONTROL_GET_ATTRIBUTES_PTR(b, entry);
 		bool isFalse = FALSE;
 
-	if (event.in == FALSE) {
+	if (event->in == FALSE) {
 		if (entry->action) {
 			const char* s;
 			s = gtk_entry_get_text(GTK_ENTRY(b->widget));
@@ -187,7 +187,8 @@ static int entryFocusOutEvent(
 			g_strlcpy(entry->valueP, wEntryGetValue(b), entry->valueL);
 		}
 	}
-	return FALSE;
+	// Allow other handlers deal with this
+	return GDK_EVENT_PROPAGATE;
 }
 
 static void
@@ -276,11 +277,10 @@ wControl_p wEntryCreate(
 	wlibAddTooltip(b->widget, parent->name, helpStr);
   	//wlibAddTooltip(b->widget, helpStr);
 
+	gtk_widget_set_can_focus( G_OBJECT(b->widget), TRUE );
+	gtk_widget_add_events(b->widget, GDK_FOCUS_CHANGE_MASK);
 	g_signal_connect(G_OBJECT(b->widget), "focus-out-event",
 	                 G_CALLBACK(entryFocusOutEvent), b);
-
-	gtk_widget_add_events(b->widget, GDK_FOCUS_CHANGE_MASK);
-
 
 	if (option & BO_READONLY) {
 		gtk_editable_set_editable(GTK_EDITABLE(b->widget), FALSE);

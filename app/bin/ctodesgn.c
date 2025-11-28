@@ -3112,7 +3112,7 @@ static void NewTurnOk( void * context )
 	ANGLE_T angle;
 
 #ifndef MKTURNOUT
-	if ( ! ParamCheckInputs( &turnDesignPG, (wControl_p)turnDesignPG.okB ) ) {
+	if ( ! FormCheckInputs( &turnDesignPG, (wControl_p)turnDesignPG.okB ) ) {
 		return;
 	}
 #endif
