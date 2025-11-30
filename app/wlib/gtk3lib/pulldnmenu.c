@@ -182,12 +182,12 @@ static void setAcclKey( GtkWidget* menu_item, int acclKey)
 static char *
 ChangeToUnderscore(const char *label)
 {
-    char *labelcopy;
-    g_assert(label);
+    char *labelcopy = NULL;
 
+    if(label) {
     labelcopy = g_strdup(label);
     g_strdelimit(labelcopy, "&", '_');
-
+    }
     return(labelcopy);
 }
 

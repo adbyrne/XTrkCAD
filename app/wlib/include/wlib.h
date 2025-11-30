@@ -723,6 +723,7 @@ void wControlSetFocus(		wControl_p );
 void wControlActive(		wControl_p control, wBool_t active);
 wBool_t wControlGetActive(wControl_p control);
 void wControlSetLabel(wControl_p, const char*);
+void  wControlSetObjectInt(wControl_p control, const char *key, int value );
 
 void wTooltipSet(wControl_p control, const char* dialog, const char* dialogItem);
 void wTooltipSetText(	wControl_p control, const char * tooltipText);

@@ -38,6 +38,7 @@ static int log_carInvDlg = 0;
 static wIndex_t carInvInx;
 
 static wIndex_t carInvSort[] = { 0, 1, 2, 3 };
+
 #define N_SORT			(COUNT( carInvSort ))
 
 #define COMMA_SEP_EXT ".csv"
@@ -47,22 +48,23 @@ static void CsvFormatLong(FILE* f, long val, const char* sep);
 static void CsvFormatFloat(FILE* f, FLOAT_T val, int digits, const char* sep);
 static void CsvFormatString(FILE* f, char* str, int len, const char* sep);
 
-static void CarInvDlgAdd(void);
-static void CarInvDlgEdit(void);
-static void CarInvDlgDeleteShelve(void);
-static carItem_p CarInvDlgFindCurrentItem(void);
-static void CarInvDlgImportCsv(void);
-static void CarInvDlgExportCsv(void);
-static void CarInvDlgSaveText(void);
-static void CarInvListLoad(void);
-static void CarInvLoadItem(carItem_p item);
+static void AddNew(void *context);
+static void Edit(void);
+static void DeleteShelve(void);
+static carItem_p FindCurrentItem(void);
+static void ImportCsv(void);
+static void ExportCsv(void);
+static void SaveText(void);
+static void ListLoad(void);
+static void LoadItem(carItem_p item);
 
+/*
 static wWinPix_t carInvColumnWidths[] = {
 	-40, 30, 100, -50, 50, 130, 120, 100,
 	-50, -50, 60, 55, 55, 40, 200
 };
 
-/*
+
 static const char* carInvColumnTitles[] = {
 	N_("Index"), N_("Scale"), N_("Manufacturer"), N_("Part No"), N_("Type"),
 	N_("Description"), N_("Roadname"), N_("Rep Marks"), N_("Purc Price"),
@@ -74,6 +76,7 @@ static char* sortOrders[] = {
 	N_("Description"), N_("Roadname"), N_("RepMarks"), N_("Purch Price"),
 	N_("Curr Price"), N_("Condition"), N_("Purch Date"), N_("Service Date")
 }; */
+
 
 #define S_INDEX			(0)
 #define S_SCALE			(1)
@@ -89,47 +92,87 @@ static char* sortOrders[] = {
 #define S_PURCHDATE		(11)
 #define S_SRVDATE		(12)
 static paramListData_t carInvListData = { 30, 600 };
+
+enum {
+    I_CI_LIST,
+    I_CI_FIND,
+    I_CI_EDIT,
+    I_CI_ADD,
+    I_CI_DELETE,
+    I_CI_IMPORT_CSV,
+    I_CI_EXPORT_CSV,
+    I_CI_PRINT,
+    I_CI_SELECT_SORT,
+    I_CI_NEWPART,
+    I_CI_NEWPROTO,
+
+    I_CI_SORT,
+    // I_CI_SORT2,
+    // I_CI_SORT3,
+    // I_CI_SORT4,
+
+};
+
+
 static paramData_t carInvPLs[] = {
-#define I_CI_SORT		(0)
-	{ PD_DROPLIST, &carInvSort[0], "sort1", PDO_LISTINDEX, I2VP(110), N_("Sort By") },
-	{ PD_DROPLIST, &carInvSort[1], "sort2", PDO_LISTINDEX | PDO_DLGHORZ, I2VP(110), "" },
-	{ PD_DROPLIST, &carInvSort[2], "sort3", PDO_LISTINDEX | PDO_DLGHORZ, I2VP(110), "" },
-	{ PD_DROPLIST, &carInvSort[3], "sort4", PDO_LISTINDEX | PDO_DLGHORZ, I2VP(110), "" },
-#define S				(4)
-#define I_CI_LIST		(S+0)
-	{ PD_LIST, &carInvInx, "list", PDO_LISTINDEX | PDO_DLGRESIZE | PDO_DLGNOLABELALIGN | PDO_DLGRESETMARGIN, &carInvListData, NULL, BO_READONLY | BL_MANY },
-#define I_CI_FIND		(S+1)
-	{ PD_BUTTON, CarInvDlgEdit, "find", 0, NULL },
-#define I_CI_EDIT		(S+2)
-	{ PD_BUTTON, CarInvDlgEdit, "edit", PDO_DLGCMDBUTTON, NULL },
-#define I_CI_ADD		(S+3)
-	{ PD_BUTTON, CarInvDlgAdd, "add", 0, NULL  },
-#define I_CI_DELETE		(S+4)
-	{ PD_BUTTON, CarInvDlgDeleteShelve, "delete", PDO_DLGWIDE, NULL },
-#define I_CI_IMPORT_CSV	(S+5)
-	{ PD_BUTTON, CarInvDlgImportCsv, "import", PDO_DLGWIDE, NULL},
-#define I_CI_EXPORT_CSV	(S+6)
-	{ PD_BUTTON, CarInvDlgExportCsv, "export", 0, NULL},
-#define I_CI_PRINT		(S+7)
-	{ PD_BUTTON, CarInvDlgSaveText, "savetext", 0, NULL}
+    // [I_CI_SORT] = { PD_TAG, &carInvSort[0], "sort1", PDO_LISTINDEX, I2VP(110), N_("Sort By") },
+    // [I_CI_SORT2] = { PD_TAG, &carInvSort[1], "sort2", PDO_LISTINDEX | PDO_DLGHORZ, I2VP(110), "" },
+    // [I_CI_SORT3] = { PD_TAG, &carInvSort[2], "sort3", PDO_LISTINDEX | PDO_DLGHORZ, I2VP(110), "" },
+    // [I_CI_SORT4] = { PD_TAG, &carInvSort[3], "sort4", PDO_LISTINDEX | PDO_DLGHORZ, I2VP(110), "" },
+    [I_CI_LIST] = { PD_LIST, &carInvInx, "list", PDO_LISTINDEX | PDO_DLGRESIZE | PDO_DLGNOLABELALIGN | PDO_DLGRESETMARGIN, &carInvListData, NULL, BO_READONLY | BL_MANY },
+    [I_CI_FIND] = { PD_BUTTON, Edit, "find", 0, NULL },
+    [I_CI_EDIT] = { PD_BUTTON, Edit, "edit", PDO_DLGCMDBUTTON, NULL },
+    [I_CI_ADD] = { PD_BUTTON, NULL, "add", 0, NULL  },
+    [I_CI_DELETE] = { PD_BUTTON, DeleteShelve, "delete", PDO_DLGWIDE, NULL },
+    [I_CI_IMPORT_CSV] = { PD_BUTTON, ImportCsv, "import", PDO_DLGWIDE, NULL},
+    [I_CI_EXPORT_CSV] = { PD_BUTTON, ExportCsv, "export", 0, NULL},
+    [I_CI_PRINT] = { PD_BUTTON, SaveText, "savetext", 0, NULL},
+    { PD_MENU, NULL, "select_sort", 0, NULL },
+    [I_CI_NEWPART] = { PD_MENUITEM, AddNew, "newpart", .context = I2VP(I_CI_NEWPART) },
+    [I_CI_NEWPROTO] = { PD_MENUITEM, AddNew, "newproto", .context = I2VP(I_CI_NEWPROTO) },
 };
 paramGroup_t carInvPG = { "carinv", PGO_FULLDIALOGFROMBUILDER, carInvPLs, COUNT(carInvPLs) };
 
-static void CarInvDlgAdd(void)
-{
-	if (carProto_da.cnt <= 0) {
-		NoticeMessage(MSG_NO_CARPROTO, _("Ok"), NULL);
-		return;
-	}
-	carDlgUpdateItemPtr = NULL;
 
-	CarDlgAddItem();
+static void
+AddNew(void *context)
+{
+	unsigned index = (unsigned)context;
+	void(*handler)(void);
+	const char *label;
+	paramData_p menuItem = carInvPLs+index;
+
+	// get selected function
+	switch(index) {
+		case I_CI_NEWPART:
+		handler = CarDlgAddDesc;
+		break;
+		case I_CI_NEWPROTO:
+		handler = CarDlgAddProto;
+		break;
+	}
+	label = wMenuGetLabel(menuItem->control);
+
+	// configure the button
+	wButtonSetLabel((carInvPLs+I_CI_ADD)->control, label);
+	carInvPLs[I_CI_ADD].valueP = handler;	
 }
 
+// static void Add(void)
+// {
+// 	if (carProto_da.cnt <= 0) {
+// 		NoticeMessage(MSG_NO_CARPROTO, _("Ok"), NULL);
+// 		return;
+// 	}
+// 	carDlgUpdateItemPtr = NULL;
 
-static void CarInvDlgEdit(void)
+// 	CarDlgAddItem();
+// }
+
+
+static void Edit(void)
 {
-	carDlgUpdateItemPtr = CarInvDlgFindCurrentItem();
+	carDlgUpdateItemPtr = FindCurrentItem();
 	if (carDlgUpdateItemPtr == NULL) {
 		return;
 	}
@@ -137,7 +180,7 @@ static void CarInvDlgEdit(void)
 }
 
 
-static void CarInvDlgDeleteShelve(void)
+static void DeleteShelve(void)
 {
 	carItem_p item;
 	wIndex_t inx, inx1, cnt, selcnt;
@@ -187,7 +230,7 @@ static void CarInvDlgDeleteShelve(void)
 		}
 	}
 	if (bNeedReload) {
-		CarInvListLoad();
+		ListLoad();
 		ChangeHotBar(CHANGE_SCALE);
 		MainRedraw(); // Shelve Car from layout
 	}
@@ -201,7 +244,7 @@ static void CarInvDlgDeleteShelve(void)
 	FormControlActive(&carInvPG, I_CI_PRINT, carItemInfo_da.cnt > 0);
 }
 
-static carItem_p CarInvDlgFindCurrentItem(void)
+static carItem_p FindCurrentItem(void)
 {
 	wIndex_t selcnt = wListGetSelectedCount(carInvPLs[I_CI_LIST].control);
 	wIndex_t inx, cnt;
@@ -287,7 +330,7 @@ static int Cmp_carInvItem(
 	return rc;
 }
 
-static void CarInvListLoad(void)
+static void ListLoad(void)
 {
 	wIndex_t selected; 
 
@@ -298,7 +341,7 @@ static void CarInvListLoad(void)
 	for (int inx = 0; inx < carItemInfo_da.cnt; inx++) {
 		carItem_p item;
 		item = carItemInfo(inx);
-		CarInvLoadItem(item);
+		LoadItem(item);
 	}
 
 	selected = wListGetIndex(carInvPLs[I_CI_LIST].control);
@@ -310,7 +353,7 @@ static void CarInvListLoad(void)
 	FormControlActive(&carInvPG, I_CI_PRINT, carItemInfo_da.cnt > 0);
 }
 
-static void CarInvLoadItem(
+static void LoadItem(
         carItem_p item)
 {
 	/* "Index", "Scale", "Manufacturer", "Type", "Part No", "Description", "Roadname", "RepMarks",
@@ -380,8 +423,8 @@ static void CarInvDlgUpdate(
 	wIndex_t cnt, selinx, selcnt;
 
 	if (inx >= I_CI_SORT && inx < I_CI_SORT + N_SORT) {
-		item = CarInvDlgFindCurrentItem();
-		CarInvListLoad();
+		item = FindCurrentItem();
+		ListLoad();
 		if (item) {
 			carInvInx = (wIndex_t)CarItemFindIndex(item);
 			if (carInvInx >= 0) {
@@ -847,7 +890,7 @@ static int CarInvImportCsv(
 	}
 	fclose(f);
 	SetUserLocale();
-	CarInvListLoad();
+	ListLoad();
 	return TRUE;
 }
 
@@ -926,7 +969,7 @@ static int CarInvExportCsv(
 }
 
 static struct wFilSel_t* carInvExportCsv_fs;
-static void CarInvDlgExportCsv(void)
+static void ExportCsv(void)
 {
 	if (carItemInfo_da.cnt <= 0) {
 		return;
@@ -938,7 +981,7 @@ static void CarInvDlgExportCsv(void)
 }
 
 static struct wFilSel_t* carInvSaveText_fs;
-static void CarInvDlgSaveText(void)
+static void SaveText(void)
 {
 	if (carInvSaveText_fs == NULL)
 		carInvSaveText_fs = wFilSelCreate(mainW, FS_SAVE, 0, _("List Cars"),
@@ -950,7 +993,7 @@ static void CarInvDlgSaveText(void)
 
 
 static struct wFilSel_t* carInvImportCsv_fs;
-static void CarInvDlgImportCsv(void)
+static void ImportCsv(void)
 {
 	if (carInvImportCsv_fs == NULL)
 		carInvImportCsv_fs = wFilSelCreate(mainW, FS_LOAD, 0, _("Import Cars"),
@@ -1018,7 +1061,7 @@ static void CsvFormatFloat(
 
 void CarInvListAdd(	carItem_p item)
 {
-	CarInvListLoad();
+	ListLoad();
 	carInvInx = (wIndex_t)CarItemFindIndex(item);
 	if (carInvInx >= 0) {
 		FormLoadSingleControl(&carInvPG, I_CI_LIST);
@@ -1028,16 +1071,16 @@ void CarInvListAdd(	carItem_p item)
 
 void CarInvListUpdate(carItem_p item)
 {
-	CarInvListLoad();
+	ListLoad();
 	carInvInx = (wIndex_t)CarItemFindIndex(item);
 	if (carInvInx >= 0) {
 		FormLoadSingleControl(&carInvPG, I_CI_LIST);
 	}
 }
 
-static void CarInvDlgFind(void* unused)
+static void DlgFind(void* unused)
 {
-	carItem_p item = CarInvDlgFindCurrentItem();
+	carItem_p item = FindCurrentItem();
 	coOrd pos;
 	ANGLE_T angle;
 	if (item == NULL || item->car == NULL || IsTrackDeleted(item->car)) { return; }
@@ -1057,8 +1100,9 @@ EXPORT void DoCarDlg(void* unused)
 						  NULL, NULL, TRUE, 
 		                  0, 
 						  CarInvDlgUpdate);
+		AddNew(I2VP(I_CI_NEWPART));
 	}
-	CarInvListLoad();
+	ListLoad();
 	wShow(carInvPG.win);
 }
 
