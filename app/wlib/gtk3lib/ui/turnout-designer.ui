@@ -175,7 +175,7 @@
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">curved Turnout</property>
+                            <property name="label" translatable="yes">Curved Turnout</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -2256,7 +2256,7 @@
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <child>
-                      <object class="GtkLabel">
+                      <object class="GtkLabel" id="anglemode_label">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="label" translatable="yes">Angle Mode</property>
@@ -2332,7 +2332,7 @@
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <child>
-                      <object class="GtkLabel">
+                      <object class="GtkLabel" id="slippath_label">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="label" translatable="yes">Slip Path</property>
@@ -2435,8 +2435,8 @@
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <child>
-                  <object class="GtkToggleButton" id="id_cancel">
-                    <property name="label" translatable="yes">Cancel</property>
+                  <object class="GtkToggleButton" id="id_help">
+                    <property name="label" translatable="yes">Help</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
@@ -2462,8 +2462,8 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="id_help">
-                    <property name="label" translatable="yes">Help</property>
+                  <object class="GtkToggleButton" id="id_cancel">
+                    <property name="label" translatable="yes">Cancel</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>

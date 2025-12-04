@@ -107,10 +107,10 @@ typedef struct {
 	int type;
 	char * label;
 	const char * stackLabel;
-#ifndef MKTURNOUT
+//#ifndef MKTURNOUT
 	int iDescFirst;
 	int iDescCount;
-#endif
+//#endif
 	int strCnt;
 #ifdef _DRAWLINES
 	int lineCnt;
@@ -126,32 +126,32 @@ typedef struct {
 static wWin_p newTurnW;
 #endif
 
-static FLOAT_T newTurnAngle0;
-static FLOAT_T newTurnLen0;
+//static FLOAT_T newTurnAngle0;
+//static FLOAT_T newTurnLen0;
 static FLOAT_T newTurnOff0;
 
-static FLOAT_T newTurnAngle1;
-static FLOAT_T newTurnLen1;
-static FLOAT_T newTurnOff1;
+//static FLOAT_T newTurnAngle1;
+//static FLOAT_T newTurnLen1;
+//static FLOAT_T newTurnOff1;
 
-static FLOAT_T newTurnAngle2;
-static FLOAT_T newTurnLen2;
+//static FLOAT_T newTurnAngle2;
+//static FLOAT_T newTurnLen2;
 
-static FLOAT_T newTurnAngle3;
+//static FLOAT_T newTurnAngle3;
 
 //static FLOAT_T newTurnLen5;
 
 #ifndef MKTURNOUT
-static FLOAT_T newTurnRad0;
-static FLOAT_T newTurnRad1;
-static FLOAT_T newTurnRad2;
-static FLOAT_T newTurnOff2;
-static FLOAT_T newTurnRad3;
-static FLOAT_T newTurnOff3;
-static FLOAT_T newTurnLen3;
-static FLOAT_T newTurnLen4;
+//static FLOAT_T newTurnRad0;
+//static FLOAT_T newTurnRad1;
+//static FLOAT_T newTurnRad2;
+//static FLOAT_T newTurnOff2;
+//static FLOAT_T newTurnRad3;
+//static FLOAT_T newTurnOff3;
+//static FLOAT_T newTurnLen3;
+//static FLOAT_T newTurnLen4;
 static FLOAT_T newTurnToeL;
-static FLOAT_T newTurnToeR;
+//static FLOAT_T newTurnToeR;
 #endif
 
 static long newTurnAngleMode = 1;
@@ -162,14 +162,13 @@ static char newTurnManufacturer[STR_SIZE];
 #ifndef MKTURNOUT
 static char *newTurnAngleModeLabels[] = { N_("Frog #"), N_("Degrees"), NULL };
 static char *newTurnSlipModeLabels[] = { N_("Dual Path"), N_("Quad Path"), NULL };
+#endif
 static paramFloatRange_t r0d001_10000 = { 0.001, 10000, 80 };
 //static paramFloatRange_t r0d300_10000 = { 0.300, 10000, 80 };
 //static paramFloatRange_t r0_10000 = { 0, 10000, 80 };
 static paramFloatRange_t r_10000_10000 = { -1000, 10000, 80 };
 static paramFloatRange_t r0d001_90 = { 0.001, 90, 80 };
-static paramFloatRange_t r0_100 = { 0, 100, 80 };
-static paramIntegerRange_t i0_100 = { 0, 100, 40 };
-#endif
+
 static void NewTurnOk( void * context );
 static char * newTurnScaleName;
 static DIST_T newTurnTrackGauge;
@@ -178,6 +177,8 @@ static LWIDTH_T newTurnRoadbedLineWidth = 0;
 static wDrawColor newTurnRoadbedColor;
 #ifndef MKTURNOUT
 //static paramFloatRange_t r_90_90 = { -90, 90, 80 };
+static paramFloatRange_t r0_100 = { 0, 100, 80 };
+static paramIntegerRange_t i0_100 = { 0, 100, 40 };
 static void ShowTurnoutDesigner( void * context );
 static void NewTurnPrint(
         void * junk );
@@ -194,126 +195,128 @@ static DIST_T radii[10];
 static double angles[10];
 
 
-#define POSX(X) ((wWinPix_t)((X)*newTurnout_d.dpi))
-#define POSY(Y) ((wWinPix_t)((Y)*newTurnout_d.dpi))
 
-#ifndef MKTURNOUT
-static paramData_t turnDesignPLs[] = {
+static FLOAT_T tdVal[20];
+
+//#ifndef MKTURNOUT
+EXPORT // avoid unused var warning
+paramData_t turnDesignPLs[] = {
 #define I_REG_FIRST (0)
-	{ PD_FLOAT, &newTurnLen1, "td_reg_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Straight Length") },
-	{ PD_FLOAT, &newTurnLen2, "td_reg_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Diverging Length") },
-	{ PD_FLOAT, &newTurnOff2, "td_reg_off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
-	{ PD_FLOAT, &newTurnAngle2, "td_reg_ang2", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+	{ PD_FLOAT, tdVal+3, "td_reg_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Straight Length") },
+	{ PD_FLOAT, tdVal+0, "td_reg_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Diverging Length") },
+	{ PD_FLOAT, tdVal+2, "td_reg_off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+	{ PD_FLOAT, tdVal+1, "td_reg_ang2", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
 #define I_REG_COUNT (4)
 
 #define I_CRV_FIRST ( I_REG_FIRST + I_REG_COUNT )
-	{ PD_FLOAT, &newTurnLen1, "td_crv_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length 1") },
-	{ PD_FLOAT, &newTurnOff1, "td_crv_off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 1") },
-	{ PD_FLOAT, &newTurnAngle1, "td_crv_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 1") },
-	{ PD_FLOAT, &newTurnLen2, "td_crv_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 2") },
-	{ PD_FLOAT, &newTurnOff2, "td_crv_off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 2") },
-	{ PD_FLOAT, &newTurnAngle2, "td_crv_ang2", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 2") },
+	{ PD_FLOAT, tdVal+0, "td_crv_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length 1") },
+	{ PD_FLOAT, tdVal+2, "td_crv_off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 1") },
+	{ PD_FLOAT, tdVal+1, "td_crv_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 1") },
+	{ PD_FLOAT, tdVal+5, "td_crv_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 2") },
+	{ PD_FLOAT, tdVal+4, "td_crv_off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 2") },
+	{ PD_FLOAT, tdVal+3, "td_crv_ang2", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 2") },
 #define I_CRV_COUNT (6)
 
 #define I_CORCRV_FIRST ( I_CRV_FIRST + I_CRV_COUNT )
-	{ PD_FLOAT, &newTurnLen1, "td_corcrv_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length 1") },
-	{ PD_FLOAT, &newTurnOff1, "td_corcrv_off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 1") },
-	{ PD_FLOAT, &newTurnAngle1, "td_corcrv_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 1") },
-	{ PD_FLOAT, &newTurnRad2, "td_corcrv_rad1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius ") },
-	{ PD_FLOAT, &newTurnLen2, "td_corcrv_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 2") },
-	{ PD_FLOAT, &newTurnOff2, "td_corcrv_off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 2") },
-	{ PD_FLOAT, &newTurnAngle2, "td_corcrv_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 2") },
-	{ PD_FLOAT, &newTurnRad2, "td_corcrv_rad2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius 2") },
+	{ PD_FLOAT, tdVal+0, "td_corcrv_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length 1") },
+	{ PD_FLOAT, tdVal+2, "td_corcrv_off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 1") },
+	{ PD_FLOAT, tdVal+1, "td_corcrv_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 1") },
+	{ PD_FLOAT, tdVal+3, "td_corcrv_rad1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius ") },
+	{ PD_FLOAT, tdVal+7, "td_corcrv_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 2") },
+	{ PD_FLOAT, tdVal+5, "td_corcrv_off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 2") },
+	{ PD_FLOAT, tdVal+4, "td_corcrv_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 2") },
+	{ PD_FLOAT, tdVal+6, "td_corcrv_rad2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius 2") },
 #define I_CORCRV_COUNT (8)
 
 #define I_WYE_FIRST ( I_CORCRV_FIRST + I_CORCRV_COUNT )
-	{ PD_FLOAT, &newTurnLen1, "td_wye_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length 1") },
-	{ PD_FLOAT, &newTurnOff1, "td_wye_off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 1") },
-	{ PD_FLOAT, &newTurnAngle1, "td_wye_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 1") },
-	{ PD_FLOAT, &newTurnLen2, "td_wye_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 2") },
-	{ PD_FLOAT, &newTurnOff2, "td_wye_off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 2") },
-	{ PD_FLOAT, &newTurnAngle2, "td_wye_ang2", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 2") },
+	{ PD_FLOAT, tdVal+0, "td_wye_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length 1") },
+	{ PD_FLOAT, tdVal+2, "td_wye_off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 1") },
+	{ PD_FLOAT, tdVal+1, "td_wye_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 1") },
+	{ PD_FLOAT, tdVal+5, "td_wye_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 2") },
+	{ PD_FLOAT, tdVal+3, "td_wye_off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 2") },
+	{ PD_FLOAT, tdVal+4, "td_wye_ang2", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 2") },
 #define I_WYE_COUNT (6)
 
 #define I_CORWYE_FIRST ( I_WYE_FIRST + I_WYE_COUNT )
-	{ PD_FLOAT, &newTurnLen1, "td_corwye_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Left Length") },
-	{ PD_FLOAT, &newTurnOff1, "td_corwye_off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Left Offset") },
-	{ PD_FLOAT, &newTurnAngle1, "td_corwye_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Left Angle") },
-	{ PD_FLOAT, &newTurnOff1, "td_corwye_rad1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Left Radius") },
+	{ PD_FLOAT, tdVal+0, "td_corwye_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Left Length") },
+	{ PD_FLOAT, tdVal+2, "td_corwye_off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Left Offset") },
+	{ PD_FLOAT, tdVal+1, "td_corwye_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Left Angle") },
+	{ PD_FLOAT, tdVal+3, "td_corwye_rad1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Left Radius") },
 
-	{ PD_FLOAT, &newTurnLen2, "td_corwye_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Right Length") },
-	{ PD_FLOAT, &newTurnOff2, "td_corwye_off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Right Offset") },
-	{ PD_FLOAT, &newTurnAngle2, "td_corwye_ang2", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Right Angle") },
-	{ PD_FLOAT, &newTurnOff2, "td_corwye_rad2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Right Radius") },
+	{ PD_FLOAT, tdVal+7, "td_corwye_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Right Length") },
+	{ PD_FLOAT, tdVal+5, "td_corwye_off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Right Offset") },
+	{ PD_FLOAT, tdVal+6, "td_corwye_ang2", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Right Angle") },
+	{ PD_FLOAT, tdVal+4, "td_corwye_rad2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Right Radius") },
 
-	{ PD_FLOAT, &newTurnToeL, "td_corwye_toeL", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Toe Length") },
-	{ PD_FLOAT, &newTurnLen4, "td_corwye_rad3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Toe Radius") },
+	{ PD_FLOAT, tdVal+8, "td_corwye_toeL", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Toe Length") },
+	{ PD_FLOAT, tdVal+9, "td_corwye_rad3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Toe Radius") },
 #define I_CORWYE_COUNT (10)
 
 #define I_3WAY_FIRST ( I_CORWYE_FIRST + I_CORWYE_COUNT )
-	{ PD_FLOAT, &newTurnLen1, "td_3way_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length 1") },
-	{ PD_FLOAT, &newTurnOff1, "td_3way_off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 1") },
-	{ PD_FLOAT, &newTurnAngle1, "td_3way_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 1") },
-	{ PD_FLOAT, &newTurnLen2, "td_3way_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 2") },
-	{ PD_FLOAT, &newTurnLen3, "td_3way_len3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 3") },
-	{ PD_FLOAT, &newTurnOff3, "td_3way_off3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 3") },
-	{ PD_FLOAT, &newTurnAngle3, "td_3way_ang3", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 3") },
+	{ PD_FLOAT, tdVal+0, "td_3way_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length 1") },
+	{ PD_FLOAT, tdVal+2, "td_3way_off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 1") },
+	{ PD_FLOAT, tdVal+1, "td_3way_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 1") },
+	{ PD_FLOAT, tdVal+6, "td_3way_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 2") },
+	{ PD_FLOAT, tdVal+3, "td_3way_len3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 3") },
+	{ PD_FLOAT, tdVal+4, "td_3way_off3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 3") },
+	{ PD_FLOAT, tdVal+5, "td_3way_ang3", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 3") },
 #define I_3WAY_COUNT (7)
 
 #define I_COR3WAY_FIRST ( I_3WAY_FIRST + I_3WAY_COUNT )
-	{ PD_FLOAT, &newTurnLen1, "td_cor3way_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length 1") },
-	{ PD_FLOAT, &newTurnOff1, "td_cor3way_off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 1") },
-	{ PD_FLOAT, &newTurnAngle1, "td_cor3way_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 1") },
-	{ PD_FLOAT, &newTurnLen2, "td_cor3way_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 2") },
-	{ PD_FLOAT, &newTurnLen3, "td_cor3way_len3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 3") },
-	{ PD_FLOAT, &newTurnOff3, "td_cor3way_off3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 3") },
-	{ PD_FLOAT, &newTurnAngle3, "td_cor3way_ang3", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 3") },
+	{ PD_FLOAT, tdVal+0, "td_cor3way_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length 1") },
+	{ PD_FLOAT, tdVal+0, "td_cor3way_off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 1") },
+	{ PD_FLOAT, tdVal+0, "td_cor3way_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 1") },
+	{ PD_FLOAT, tdVal+0, "td_cor3way_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 2") },
+	{ PD_FLOAT, tdVal+0, "td_cor3way_len3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 3") },
+	{ PD_FLOAT, tdVal+0, "td_cor3way_off3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset 3") },
+	{ PD_FLOAT, tdVal+0, "td_cor3way_ang3", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle 3") },
 #define I_COR3WAY_COUNT (7)
 
 #define I_CROSSING_FIRST ( I_COR3WAY_FIRST + I_COR3WAY_COUNT )
-	{ PD_FLOAT, &newTurnLen1, "td_crossing_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length 1") },
-	{ PD_FLOAT, &newTurnLen2, "td_crossing_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 2") },
-	{ PD_FLOAT, &newTurnAngle1, "td_crossing_ang", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+	{ PD_FLOAT, tdVal+0, "td_crossing_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length 1") },
+	{ PD_FLOAT, tdVal+0, "td_crossing_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 2") },
+	{ PD_FLOAT, tdVal+0, "td_crossing_ang", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
 #define I_CROSSING_COUNT (3)
 
 #define I_SGLSLIP_FIRST ( I_CROSSING_FIRST + I_CROSSING_COUNT )
-	{ PD_FLOAT, &newTurnLen1, "td_sslip_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length 1") },
-	{ PD_FLOAT, &newTurnAngle1, "td_sslip_ang", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
-	{ PD_FLOAT, &newTurnLen2, "td_sslip_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 2") },
+	{ PD_FLOAT, tdVal+0, "td_sslip_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length 1") },
+	{ PD_FLOAT, tdVal+1, "td_sslip_ang", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+	{ PD_FLOAT, tdVal+2, "td_sslip_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 2") },
 #define I_SGLSLIP_COUNT (3)
 
 #define I_DBLSLIP_FIRST ( I_SGLSLIP_FIRST + I_SGLSLIP_COUNT )
-	{ PD_FLOAT, &newTurnLen1, "td_dslip_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length 1") },
-	{ PD_FLOAT, &newTurnAngle1, "td_dslip_ang", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
-	{ PD_FLOAT, &newTurnLen2, "td_dslip_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 2") },
+	{ PD_FLOAT, tdVal+0, "td_dslip_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length 1") },
+	{ PD_FLOAT, tdVal+1, "td_dslip_ang", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+	{ PD_FLOAT, tdVal+2, "td_dslip_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length 2") },
 #define I_DBLSLIP_COUNT (3)
 
 #define I_RCROSSOVER_FIRST ( I_DBLSLIP_FIRST + I_DBLSLIP_COUNT )
-	{ PD_FLOAT, &newTurnLen1, "td_rcross_len", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length") },
-	{ PD_FLOAT, &newTurnOff0, "td_rcross_off", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+	{ PD_FLOAT, tdVal+0, "td_rcross_len", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length") },
+	{ PD_FLOAT, tdVal+1, "td_rcross_off", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
 #define I_RCROSSOVER_COUNT (2)
 
 #define I_LCROSSOVER_FIRST ( I_RCROSSOVER_FIRST + I_RCROSSOVER_COUNT )
-	{ PD_FLOAT, &newTurnLen1, "td_lcross_len", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length") },
-	{ PD_FLOAT, &newTurnOff1, "td_lcross_off", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+	{ PD_FLOAT, tdVal+0, "td_lcross_len", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length") },
+	{ PD_FLOAT, tdVal+1, "td_lcross_off", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
 #define I_LCROSSOVER_COUNT (2)
 
 #define I_DCROSSOVER_FIRST ( I_LCROSSOVER_FIRST + I_LCROSSOVER_COUNT )
-	{ PD_FLOAT, &newTurnLen1, "td_dcross_len", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length") },
-	{ PD_FLOAT, &newTurnOff1, "td_dcross_off", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+	{ PD_FLOAT, tdVal+0, "td_dcross_len", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length") },
+	{ PD_FLOAT, tdVal+1, "td_dcross_off", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
 #define I_DCROSSOVER_COUNT (2)
 
 #define I_STRAIGHT_FIRST ( I_DCROSSOVER_FIRST + I_DCROSSOVER_COUNT )
-	{ PD_FLOAT, &newTurnLen1, "td_strsect_len", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length") },
+	{ PD_FLOAT, tdVal+0, "td_strsect_len", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length") },
 #define I_STRAIGHT_COUNT (1)
 #define I_CURVED_FIRST ( I_STRAIGHT_FIRST + I_STRAIGHT_COUNT )
-	{ PD_FLOAT, &newTurnRad1, "td_crvsect_rad", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius") },
-	{ PD_FLOAT, &newTurnAngle1, "td_crvsect_ang", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+	{ PD_FLOAT, tdVal+0, "td_crvsect_rad", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius") },
+	{ PD_FLOAT, tdVal+1, "td_crvsect_ang", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") }
 #define I_CURVED_COUNT (2)
 
+	,
 #define I_PLTOTAL ( I_CURVED_FIRST + I_CURVED_COUNT )
 
-
+#ifndef MKTURNOUT
 #define I_TOMANUF			(I_PLTOTAL)
 	{ PD_STRING, &newTurnManufacturer, "manuf", PDO_NOTBLANK, NULL, N_("Manufacturer"), 0, 0, sizeof(newTurnManufacturer)},
 #define I_TOLDESC			( I_TOMANUF + 1 )
@@ -327,14 +330,19 @@ static paramData_t turnDesignPLs[] = {
 	{ PD_LONG, &newTurnRoadbedLineWidth, "roadbedLineWidth", PDO_DLGHORZ, &i0_100, N_("Line Width") },
 	{ PD_COLORLIST, &newTurnRoadbedColor, "color", PDO_DLGHORZ|PDO_DLGBOXEND, NULL, N_("Color") },
 #define I_TOPRINT			(I_TOROADBED + 3 )
-	{ PD_BUTTON, NewTurnPrint, "print", PDO_DLGCMDBUTTON, NULL, N_("Ok") },
+	{ PD_BUTTON, NewTurnPrint, "print", PDO_DLGCMDBUTTON, NULL, N_("Print") },
 	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, N_("Print Setup") },
-#define I_TOANGMODE			( I_TOPRINT + 1 )
+#define I_TOANGMODE			( I_TOPRINT + 2 )
 	{ PD_RADIO, &newTurnAngleMode, "anglemode", 0, newTurnAngleModeLabels },
-#define I_TOSLIPMODE        ( I_TOANGMODE + 1 )
-	{ PD_RADIO, &newTurnSlipMode, "slippath", 0, newTurnSlipModeLabels }
+	{ PD_MESSAGE, NULL, "anglemode_label", 0, NULL },
+#define I_TOSLIPMODE        ( I_TOANGMODE + 2 )
+	{ PD_RADIO, &newTurnSlipMode, "slippath", 0, newTurnSlipModeLabels },
+	{ PD_MESSAGE, NULL, "slippath_label", 0, NULL },
+#endif
 };
+//#endif
 
+#ifndef MKTURNOUT
 static paramGroup_t turnDesignPG = { "turnout-designer", PGO_FULLDIALOGFROMBUILDER, turnDesignPLs, COUNT( turnDesignPLs )  };
 
 static turnoutInfo_t * customTurnout1, * customTurnout2;
@@ -355,7 +363,7 @@ static toDesignDesc_t * curDesign;
 #ifndef MKTURNOUT
 #define SLICE( FIRST, COUNT ) FIRST, COUNT,
 #else
-#define SLICE( FIRST, COUNT )
+#define SLICE( FIRST, COUNT ) FIRST, COUNT,
 #endif
 
 
@@ -1465,6 +1473,20 @@ BOOL_T CallCornuNoBez(coOrd pos[2], coOrd center[2], ANGLE_T angle[2],
 #endif
 
 
+static void FixFrog(
+		FLOAT_T * pAngle )
+{
+	if ( newTurnAngleMode == 1 ) {
+		return;
+	}
+	if ( *pAngle <= 0 ) {
+		return;
+	}
+	/* convert from Frog Num to degrees */
+	*pAngle = R2D(asin(1.0 / *pAngle));
+}
+
+
 static toDesignSchema_t * LoadSegs(
         toDesignDesc_t * dp,
         wBool_t loadPoints )
@@ -1476,7 +1498,7 @@ static toDesignSchema_t * LoadSegs(
 	char *segOrder;
 	coOrd pos;
 	wIndex_t segCnt = 0;
-	ANGLE_T angle0, angle1, angle2, angle3;
+	ANGLE_T angle0;//, angle1, angle3;
 	trkSeg_p segPtr;
 #ifndef MKTURNOUT
 	wIndex_t pathLen;
@@ -1489,27 +1511,6 @@ static toDesignSchema_t * LoadSegs(
 #endif
 
 	DYNARR_RESET( trkSeg_t, tempSegs_da );
-	angle0 = newTurnAngle0;
-	angle1 = newTurnAngle1;
-	angle2 = newTurnAngle2;
-	angle3 = newTurnAngle3;
-
-
-	if ( newTurnAngleMode == 0 && dp->type != NTO_CRV_SECTION ) {
-		/* convert from Frog Num to degrees */
-		if ( angle0 > 0 ) {
-			angle0 = R2D(asin(1.0 / angle0));
-		}
-		if ( angle1 > 0 ) {
-			angle1 = R2D(asin(1.0 / angle1));
-		}
-		if ( angle2 > 0 ) {
-			angle2 = R2D(asin(1.0 / angle2));
-		}
-		if ( angle3 > 0 ) {
-			angle3 = R2D(asin(1.0 / angle3));
-		}
-	}
 
 	pp = dp->paths;
 	if (loadPoints) {
@@ -1527,28 +1528,31 @@ static toDesignSchema_t * LoadSegs(
 		switch (dp->type) {
 		case NTO_REGULAR:
 			TempEndPtsSet( 3 );
+			FixFrog( tdVal+1 );
 			if ( !ComputeCurve( &points[3], &points[4], &radii[0],
-			                    (newTurnLen0), fabs(newTurnOff0), angle0 ) ) {
+			                    tdVal[0], fabs(tdVal[2]), tdVal[1] ) ) {
 				return NULL;
 			}
 			radii[0] = - radii[0];
 			points[0].x = points[0].y = points[1].y = 0.0;
-			points[1].x = (newTurnLen1);
-			points[2].y = fabs(newTurnOff0);
-			points[2].x = (newTurnLen0);
+			points[1].x = (tdVal[3]);
+			points[2].y = fabs(tdVal[2]);
+			points[2].x = (tdVal[0]);
 			SetEndPt( TempEndPt(0), points[0], 270.0 );
 			SetEndPt( TempEndPt(1), points[1], 90.0 );
-			SetEndPt( TempEndPt(2), points[2], 90.0-angle0 );
+			SetEndPt( TempEndPt(2), points[2], 90.0-tdVal[1] );
 			break;
 
 		case NTO_CURVED:
 			TempEndPtsSet( 3 );
+			FixFrog( tdVal+1 );
+			FixFrog( tdVal+4 );
 			if ( !ComputeCurve( &points[3], &points[4], &radii[0],
-			                    (newTurnLen0), fabs(newTurnOff0), angle0 ) ) {
+			                    tdVal[0], fabs(tdVal[2]), tdVal[1] ) ) {
 				return NULL;
 			}
 			if ( !ComputeCurve( &points[5], &points[6], &radii[1],
-			                    (newTurnLen1), fabs(newTurnOff1), angle1 ) ) {
+			                    tdVal[5], fabs(tdVal[4]), tdVal[3] ) ) {
 				return NULL;
 			}
 			d = points[3].x - points[5].x;
@@ -1562,25 +1566,27 @@ static toDesignSchema_t * LoadSegs(
 			radii[0] = - radii[0];
 			radii[1] = - radii[1];
 			points[0].x = points[0].y = 0.0;
-			points[1].y = fabs(newTurnOff0); points[1].x = (newTurnLen0);
-			points[2].y = fabs(newTurnOff1); points[2].x = (newTurnLen1);
+			points[1].y = fabs(tdVal[2]); points[1].x = tdVal[0];
+			points[2].y = fabs(tdVal[4]); points[2].x = (tdVal[5]);
 			SetEndPt( TempEndPt(0), points[0], 270.0 );
-			SetEndPt( TempEndPt(2), points[1], 90.0-angle0 );
-			SetEndPt( TempEndPt(1), points[2], 90.0-angle1 );
+			SetEndPt( TempEndPt(2), points[1], 90.0-tdVal[1] );
+			SetEndPt( TempEndPt(1), points[2], 90.0-tdVal[3] );
 			break;
 #ifndef MKTURNOUT
 		case NTO_CORNU:
 			TempEndPtsSet( 3 );
-			radii[0] =  fabs(newTurnRad2); /*Toe*/
-			radii[1] =  fabs(newTurnRad0); /*Inner*/
-			radii[2] =  fabs(newTurnRad1); /*Outer*/
+			FixFrog( tdVal+1 );
+			FixFrog( tdVal+4 );
+			radii[0] =  fabs(tdVal[8]); /*Toe*/
+			radii[1] =  fabs(tdVal[3]); /*Inner*/
+			radii[2] =  fabs(tdVal[6]); /*Outer*/
 			angles[0] = 0.0; 		  /*Base*/
-			angles[1] = angle0; /*Inner*/
-			angles[2] = angle1; /*Outer*/
+			angles[1] = tdVal[1]; /*Inner*/
+			angles[2] = tdVal[4]; /*Outer*/
 			pp = &CornuSchema;
 			points[0].x = points[0].y = 0.0;
-			points[1].y = (newTurnOff0); points[1].x = (newTurnLen0); /*Inner*/
-			points[2].y = (newTurnOff1); points[2].x = (newTurnLen1); /*Outer*/
+			points[1].y = tdVal[2]; points[1].x = tdVal[0]; /*Inner*/
+			points[2].y = tdVal[5]; points[2].x = tdVal[7]; /*Outer*/
 
 			SetEndPt( TempEndPt(0), points[0], 270.0 );
 			SetEndPt( TempEndPt(2), points[1], 90.0-angles[1] );
@@ -1590,24 +1596,26 @@ static toDesignSchema_t * LoadSegs(
 		case NTO_WYE:
 		case NTO_3WAY:
 			TempEndPtsSet( (dp->type==NTO_3WAY)?4:3 );
+			FixFrog( tdVal+1 );
+			FixFrog( tdVal+4 );
 			if ( !ComputeCurve( &points[3], &points[4], &radii[0],
-			                    (newTurnLen0), fabs(newTurnOff0), angle0 ) ) {
+			                    tdVal[0], fabs(tdVal[2]), tdVal[1] ) ) {
 				return NULL;
 			}
 			if ( !ComputeCurve( &points[5], &points[6], &radii[1],
-			                    (newTurnLen1), fabs(newTurnOff1), angle1 ) ) {
+			                    tdVal[5], fabs(tdVal[3]), tdVal[4] ) ) {
 				return NULL;
 			}
 			points[5].y = - points[5].y;
 			points[6].y = - points[6].y;
 			radii[0] = - radii[0];
 			points[0].x = points[0].y = 0.0;
-			points[1].y = fabs(newTurnOff0);
-			points[1].x = (newTurnLen0);
-			points[2].y = -fabs(newTurnOff1);
-			points[2].x = (newTurnLen1);
+			points[1].y = fabs(tdVal[2]);
+			points[1].x = tdVal[0];
+			points[2].y = -fabs(tdVal[3]);
+			points[2].x = tdVal[5];
 			points[7].y = 0;
-			points[7].x = (newTurnLen2);
+			points[7].x = tdVal[5];
 			d = points[3].x - points[5].x;
 			if ( d < -MIN_TRACK_LENGTH ) {
 				pp = (dp->type==NTO_3WAY ? &Tri3Schema : &Wye3Schema );
@@ -1617,8 +1625,8 @@ static toDesignSchema_t * LoadSegs(
 				pp = (dp->type==NTO_3WAY ? &Tri1Schema : &Wye1Schema );
 			}
 			SetEndPt( TempEndPt(0), points[0], 270.0 );
-			SetEndPt( TempEndPt(1), points[1], 90.0-angle0 );
-			SetEndPt( TempEndPt(2), points[2], 90.0+angle1 );
+			SetEndPt( TempEndPt(1), points[1], 90.0-tdVal[1] );
+			SetEndPt( TempEndPt(2), points[2], 90.0+tdVal[4] );
 			if (dp->type == NTO_3WAY) {
 				SetEndPt( TempEndPt(3), points[7], 90.0 );
 			}
@@ -1626,7 +1634,9 @@ static toDesignSchema_t * LoadSegs(
 #ifndef MKTURNOUT
 		case NTO_CORNUWYE:
 		case NTO_CORNU3WAY:
+#ifdef XXX
 			TempEndPtsSet( (dp->type==NTO_CORNU3WAY)?4:3 );
+			FixFrog( tdVal+1 );
 
 			/*
 			 * Construct Wye and 3 Way Turnouts with Cornu curves
@@ -1634,7 +1644,8 @@ static toDesignSchema_t * LoadSegs(
 			 * 2. Rebuild the segments into a single set using those points
 			 * 3. Build Path statements to suit the segments
 			 * ---------------------------------------------------------------------------------------------
-			 *                        7				CornuData. Cheat Sheet - segment array parts
+			 *                        7				CornuData. Cheat Sheet - segment array parts	 * ---------------------------------------------------------------------------------------------
+			
 			 *           =============+				Note - 6-7 is at Toe2 and 8-9 at Toe1 if RH comes before LH
 			 *         //    Toe 2                       - Toe2 and Toe1 are the same (no 2-3) if co-incident
 			 * 0      6+    3  4                  5		 - Toe2, 2-3 and 4-5 all only exist for 3WAY not WYE
@@ -2279,6 +2290,7 @@ static toDesignSchema_t * LoadSegs(
 			pp->paths = (signed char *)pathChar;
 			segCnt = tempSegs_da.cnt;
 
+#endif
 			break;
 #endif
 
@@ -2294,16 +2306,16 @@ static toDesignSchema_t * LoadSegs(
 			}
 			TempEndPtsSet( 4 );
 			points[0].x = points[0].y = points[1].y = 0.0;
-			points[1].x = (newTurnLen0);
-			pos.y = 0; pos.x = (newTurnLen0)/2.0;
+			points[1].x = tdVal[0];
+			pos.y = 0; pos.x = tdVal[0]/2.0;
 			coOrd cpos = pos;
-			Translate( &points[3], pos, 90.0+angle0, (newTurnLen1)/2.0 );
+			Translate( &points[3], pos, 90.0+tdVal[1], tdVal[2]/2.0 );
 			points[2].y = - points[3].y;
 			points[2].x = pos.x-(points[3].x-pos.x);
 			if (dp->type != NTO_CROSSING) {
-				Translate( &pos, points[3], 90.0+angle0, -newTurnTrackGauge );
+				Translate( &pos, points[3], 90.0+tdVal[1], -newTurnTrackGauge );
 				if (!ComputeCurve( &points[4], &points[5], &radii[0],
-				                   pos.x, fabs(pos.y), angle0 )) { /*???*/
+				                   pos.x, fabs(pos.y), tdVal[1] )) {
 					return NULL;
 				}
 				radii[1] = - radii[0];
@@ -2314,31 +2326,31 @@ static toDesignSchema_t * LoadSegs(
 			}
 			SetEndPt( TempEndPt(0), points[0], 270.0 );
 			SetEndPt( TempEndPt(1), points[1], 90.0 );
-			SetEndPt( TempEndPt(2), points[2], 270.0+angle0 );
-			SetEndPt( TempEndPt(3), points[3], 90.0+angle0 );
+			SetEndPt( TempEndPt(2), points[2], 270.0+tdVal[1] );
+			SetEndPt( TempEndPt(3), points[3], 90.0+tdVal[1] );
 			break;
 
 		case NTO_R_CROSSOVER:
 		case NTO_L_CROSSOVER:
 		case NTO_D_CROSSOVER:
 			TempEndPtsSet( 4 );
-			d = (newTurnLen0)/2.0 - newTurnTrackGauge;
+			d = tdVal[0]/2.0 - newTurnTrackGauge;
 			if (d < 0.0) {
 				NoticeMessage( MSG_TODSGN_CROSSOVER_TOO_SHORT, _("Ok"), NULL );
 				return NULL;
 			}
-			angle0 = R2D( atan2( fabs(newTurnOff0), d ) );
+			angle0 = R2D( atan2( fabs(tdVal[1]), d ) );
 			points[0].y = 0.0; points[0].x = 0.0;
-			points[1].y = 0.0; points[1].x = (newTurnLen0);
+			points[1].y = 0.0; points[1].x = tdVal[0];
 			points[2].y = fabs(newTurnOff0); points[2].x = 0.0;
-			points[3].y = fabs(newTurnOff0); points[3].x = (newTurnLen0);
+			points[3].y = fabs(newTurnOff0); points[3].x = tdVal[0];
 			if (!ComputeCurve( &points[4], &points[5], &radii[1],
-			                   (newTurnLen0)/2.0, fabs(newTurnOff0)/2.0, angle0 ) ) {
+			                   tdVal[0]/2.0, fabs(tdVal[1])/2.0, angle0 ) ) {
 				return NULL;
 			}
 			radii[0] = - radii[1];
-			points[6].y = 0.0; points[6].x = (newTurnLen0)-points[4].x;
-			points[7].y = points[5].y; points[7].x = (newTurnLen0)-points[5].x;
+			points[6].y = 0.0; points[6].x = tdVal[0]-points[4].x;
+			points[7].y = points[5].y; points[7].x = tdVal[0]-points[5].x;
 			points[8].y = fabs(newTurnOff0); points[8].x = points[4].x;
 			points[9].y = fabs(newTurnOff0)-points[5].y; points[9].x = points[5].x;
 			points[10].y = fabs(newTurnOff0); points[10].x = points[6].x;
@@ -2352,7 +2364,7 @@ static toDesignSchema_t * LoadSegs(
 		case NTO_STR_SECTION:
 			TempEndPtsSet( 2 );
 			points[0].y = points[0].x = 0;
-			points[1].y = 0/*(newTurnOff1)*/; points[1].x = (newTurnLen0);
+			points[1].y = 0; points[1].x = tdVal[0];
 			SetEndPt( TempEndPt(0), points[0], 270.0 );
 			SetEndPt( TempEndPt(1), points[1], 90.0 );
 			break;
@@ -2360,17 +2372,17 @@ static toDesignSchema_t * LoadSegs(
 		case NTO_CRV_SECTION:
 			TempEndPtsSet( 2 );
 			points[0].y = points[0].x = 0;
-			points[1].y = (newTurnLen0) * (1.0 - cos( D2R(angle0) ) );
-			points[1].x = (newTurnLen0) * sin( D2R(angle0) );
-			radii[0] = -(newTurnLen0);
+			points[1].y = tdVal[0] * (1.0 - cos( D2R(tdVal[1]) ) );
+			points[1].x = tdVal[0] * sin( D2R(tdVal[1]) );
+			radii[0] = -tdVal[0];
 			SetEndPt( TempEndPt(0), points[0], 270.0 );
-			SetEndPt( TempEndPt(1), points[1], 90.0-angle0 );
+			SetEndPt( TempEndPt(1), points[1], 90.0-tdVal[1] );
 			break;
 
 		case NTO_BUMPER:
 			TempEndPtsSet( 1 );
 			points[0].y = points[0].x = 0;
-			points[1].y = 0/*(newTurnOff1)*/; points[1].x = (newTurnLen0);
+			points[1].y = 0; points[1].x = tdVal[0];
 			SetEndPt( TempEndPt(0), points[0], 270.0 );
 			break;
 
@@ -2996,27 +3008,11 @@ static void NewTurnOk( void * context )
 		cp += 1;
 	}
 	CHECK( cp-tempCustom <= sizeof tempCustom );
-#ifdef OLDGTK
-	int i;
-	for ( i=0; i<curDesign->floatCnt; i++ ) {
-		FLOAT_T flt = *(FLOAT_T*)(turnDesignPLs[curDesign->floats[i].index].valueP);
-		switch( curDesign->floats[i].mode ) {
-		case Dim_e:
-			break;
-		case Frog_e:
-			if (newTurnAngleMode == 0 && flt > 0.0) {
-				flt = R2D(asin(1.0/flt));
-			}
-			break;
-		case Angle_e:
-			break;
-		case Rad_e:
-			break;
-		}
-		sprintf( cp, " %0.6f", flt );
+	for ( int inx=0; inx<curDesign->iDescCount; inx++ ) {
+		sprintf( cp, " %0.6f", tdVal[inx] );
 		cp += strlen(cp);
 	}
-#endif
+
 	sprintf( cp, " %0.6f %0.6f %ld", newTurnRoadbedWidth,
 	         newTurnRoadbedLineWidth, newTurnRoadbedColor );
 	customInfoP = MyStrdup( tempCustom );
@@ -3254,15 +3250,18 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 		}
 
 		wControlShow( turnDesignPLs[I_TOSLIPMODE].control, FALSE );
+		wControlShow( turnDesignPLs[I_TOSLIPMODE+1].control, FALSE );
 		turnDesignPLs[I_TOSLIPMODE].bShown = FALSE;
 		turnDesignPLs[I_TOSLIPMODE].option |= PDO_DLGIGNORE;
 		wControlShow( turnDesignPLs[I_TOANGMODE].control, FALSE );
+		wControlShow( turnDesignPLs[I_TOANGMODE+1].control, FALSE );
 		turnDesignPLs[I_TOANGMODE].bShown = FALSE;
 		turnDesignPLs[I_TOANGMODE].option |= PDO_DLGIGNORE;
 		switch ( curDesign->type ) {
 		case NTO_S_SLIP:
 		case NTO_D_SLIP:
 			wControlShow( turnDesignPLs[I_TOSLIPMODE].control, TRUE );
+			wControlShow( turnDesignPLs[I_TOSLIPMODE+1].control, TRUE );
 			turnDesignPLs[I_TOSLIPMODE].bShown = TRUE;
 			turnDesignPLs[I_TOSLIPMODE].option &= ~PDO_DLGIGNORE;
 			// fall thru
@@ -3275,6 +3274,7 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 		case NTO_CORNUWYE:
 		case NTO_CORNU3WAY:
 			wControlShow( turnDesignPLs[I_TOANGMODE].control, TRUE );
+			wControlShow( turnDesignPLs[I_TOANGMODE+1].control, TRUE );
 			turnDesignPLs[I_TOANGMODE].bShown = TRUE;
 			turnDesignPLs[I_TOANGMODE].option &= ~PDO_DLGIGNORE;
 			break;
@@ -3401,11 +3401,9 @@ static void ShowTurnoutDesigner( void * context )
 		newTurnRightPartno[0] = '\0';
 		newTurnLeftDesc[0] = '\0';
 		newTurnLeftPartno[0] = '\0';
-		newTurnOff0 = newTurnLen0 = newTurnAngle0 = newTurnRad0 =
-		                                    newTurnOff1 = newTurnLen1 = newTurnAngle1 = newTurnRad1 =
-		                                                    newTurnOff2 = newTurnLen2 = newTurnAngle2 = newTurnRad2 =
-		                                                                    newTurnOff3 = newTurnLen3 = newTurnAngle3 = newTurnRad3 =
-		                                                                                    newTurnToeL = newTurnToeR = 0.0;
+	}
+	for ( int inx=0; inx < COUNT(tdVal); inx++ ) {
+		tdVal[inx] = 0.0;
 	}
 	FormLoadControls( &turnDesignPG );
 	FormGroupRecord( &turnDesignPG );
@@ -3982,169 +3980,169 @@ int main ( int argc, char * argv[] )
 	strcpy( newTurnManufacturer, *argv++ );
 	specialLine[0] = '\0';
 	switch (tolower((unsigned char)(*argv++)[0])) {
-	case 'b':
+	case 'b':	// Bumper
 		if (argc != 7) { Usage(argc0,argv0); }
 		strcpy( newTurnLeftDesc, *argv++ );
 		strcpy( newTurnLeftPartno, *argv++ );
-		newTurnLen0 = GetDim(atof( *argv++ ));
+		tdVal[0] = GetDim(atof( *argv++ ));
 		curDesign = &StrSectionDesc;
 		NewTurnOk( &StrSectionDesc );
 		break;
-	case 's':
+	case 's':	// Straight Sectional
 		if (argc != 7) { Usage(argc0,argv0); }
 		strcpy( newTurnLeftDesc, *argv++ );
 		strcpy( newTurnLeftPartno, *argv++ );
-		newTurnLen0 = GetDim(atof( *argv++ ));
+		tdVal[0] = GetDim(atof( *argv++ ));
 		curDesign = &StrSectionDesc;
 		NewTurnOk( &StrSectionDesc );
 		break;
-	case 'j':
+	case 'j':	// Adjustable
 		if (argc != 8) { Usage(argc0,argv0); }
 		strcpy( newTurnLeftDesc, *argv++ );
 		strcpy( newTurnLeftPartno, *argv++ );
-		newTurnLen0 = GetDim(atof( *argv++ ));
-		newTurnLen1 = GetDim(atof( *argv++ ));
-		sprintf( specialLine, "\tX adjustable %0.6f %0.6f", newTurnLen0, newTurnLen1 );
+		tdVal[0] = GetDim(atof( *argv++ ));
+		tdVal[0] = GetDim(atof( *argv++ ));
+		sprintf( specialLine, "\tX adjustable %0.6f %0.6f", tdVal[0], tdVal[0] );
 		curDesign = &StrSectionDesc;
 		NewTurnOk( &StrSectionDesc );
 		break;
-	case 'c':
+	case 'c':	// Curve Sectional
 		if (argc != 8) { Usage(argc0,argv0); }
 		strcpy( newTurnLeftDesc, *argv++ );
 		strcpy( newTurnLeftPartno, *argv++ );
-		newTurnLen0 = GetDim(atof( *argv++ ));
-		newTurnAngle0 = atof( *argv++ );
+		tdVal[0] = GetDim(atof( *argv++ ));
+		tdVal[0] = atof( *argv++ );
 		curDesign = &CrvSectionDesc;
 		NewTurnOk( &CrvSectionDesc );
 		break;
-	case 'r':
+	case 'r':	// Regular Turnout
 		if (argc != 12) { Usage(argc0,argv0); }
 		strcpy( newTurnLeftDesc, *argv++ );
 		strcpy( newTurnLeftPartno, *argv++ );
 		strcpy( newTurnRightDesc, *argv++ );
 		strcpy( newTurnRightPartno, *argv++ );
-		newTurnLen0 = GetDim(atof( *argv++ ));
-		newTurnAngle0 = atof( *argv++ );
-		newTurnOff0 = GetDim(atof( *argv++ ));
-		newTurnLen1 = GetDim(atof( *argv++ ));
+		tdVal[0] = GetDim(atof( *argv++ ));
+		tdVal[0] = atof( *argv++ );
+		tdVal[0] = GetDim(atof( *argv++ ));
+		tdVal[0] = GetDim(atof( *argv++ ));
 		curDesign = &RegDesc;
 		NewTurnOk( &RegDesc );
 		break;
-	case 'q':
+	case 'q':	// Radial Turnout
 		if (argc != 11) { Usage(argc0,argv0); }
 		strcpy( newTurnLeftDesc, *argv++ );
 		strcpy( newTurnLeftPartno, *argv++ );
 		strcpy( newTurnRightDesc, *argv++ );
 		strcpy( newTurnRightPartno, *argv++ );
 		radius = GetDim(atof( *argv++ ));
-		newTurnAngle0 = atof( *argv++ );
-		newTurnLen0 = GetDim(atof( *argv++ ));
-		newTurnLen1 = radius * sin(D2R(newTurnAngle0));
-		newTurnOff1 = radius * (1-cos(D2R(newTurnAngle1)));
+		tdVal[0] = atof( *argv++ );
+		tdVal[0] = GetDim(atof( *argv++ ));
+		tdVal[0] = radius * sin(D2R(tdVal[0]));
+		tdVal[0] = radius * (1-cos(D2R(tdVal[0])));
 		curDesign = &RegDesc;
 		NewTurnOk( &RegDesc );
 		break;
-	case 'v':
+	case 'v':	// Curved Turnout
 		if (argc != 14) { Usage(argc0,argv0); }
 		strcpy( newTurnLeftDesc, *argv++ );
 		strcpy( newTurnLeftPartno, *argv++ );
 		strcpy( newTurnRightDesc, *argv++ );
 		strcpy( newTurnRightPartno, *argv++ );
-		newTurnLen1 = GetDim(atof( *argv++ ));
-		newTurnAngle1 = atof( *argv++ );
-		newTurnOff1 = GetDim(atof( *argv++ ));
-		newTurnLen0 = GetDim(atof( *argv++ ));
-		newTurnAngle0 = atof( *argv++ );
-		newTurnOff0 = GetDim(atof( *argv++ ));
+		tdVal[0] = GetDim(atof( *argv++ ));
+		tdVal[0] = atof( *argv++ );
+		tdVal[0] = GetDim(atof( *argv++ ));
+		tdVal[0] = GetDim(atof( *argv++ ));
+		tdVal[0] = atof( *argv++ );
+		tdVal[0] = GetDim(atof( *argv++ ));
 		curDesign = &CrvDesc;
 		NewTurnOk( &CrvDesc );
 		break;
-	case 'w':
+	case 'w':	// Curved Radial Turnout
 		if (argc != 12) { Usage(argc0,argv0); }
 		strcpy( newTurnLeftDesc, *argv++ );
 		strcpy( newTurnLeftPartno, *argv++ );
 		strcpy( newTurnRightDesc, *argv++ );
 		strcpy( newTurnRightPartno, *argv++ );
 		radius = GetDim(atof( *argv++ ));
-		newTurnAngle0 = atof( *argv++ );
-		newTurnLen0 = radius * sin(D2R(newTurnAngle0));
-		newTurnOff0 = radius * (1-cos(D2R(newTurnAngle0)));
+		tdVal[0] = atof( *argv++ );
+		tdVal[0] = radius * sin(D2R(tdVal[0]));
+		tdVal[0] = radius * (1-cos(D2R(tdVal[0])));
 		radius = GetDim(atof( *argv++ ));
-		newTurnAngle1 = atof( *argv++ );
-		newTurnLen1 = radius * sin(D2R(newTurnAngle1));
-		newTurnOff1 = radius * (1-cos(D2R(newTurnAngle1)));
+		tdVal[0] = atof( *argv++ );
+		tdVal[0] = radius * sin(D2R(tdVal[0]));
+		tdVal[0] = radius * (1-cos(D2R(tdVal[0])));
 		curDesign = &CrvDesc;
 		NewTurnOk( &CrvDesc );
 		break;
-	case 'y':
+	case 'y':	// Wye
 		if (argc != 14) { Usage(argc0,argv0); }
 		strcpy( newTurnLeftDesc, *argv++ );
 		strcpy( newTurnLeftPartno, *argv++ );
 		strcpy( newTurnRightDesc, *argv++ );
 		strcpy( newTurnRightPartno, *argv++ );
-		newTurnLen0 = GetDim(atof( *argv++ ));
-		newTurnAngle0 = atof( *argv++ );
-		newTurnOff0 = GetDim(atof( *argv++ ));
-		newTurnLen1 = GetDim(atof( *argv++ ));
-		newTurnAngle1 = atof( *argv++ );
-		newTurnOff1 = GetDim(atof( *argv++ ));
+		tdVal[0] = GetDim(atof( *argv++ ));
+		tdVal[0] = atof( *argv++ );
+		tdVal[0] = GetDim(atof( *argv++ ));
+		tdVal[0] = GetDim(atof( *argv++ ));
+		tdVal[0] = atof( *argv++ );
+		tdVal[0] = GetDim(atof( *argv++ ));
 		curDesign = &WyeDesc;
 		NewTurnOk( &WyeDesc );
 		break;
-	case '3':
+	case '3':	// 3 Way
 		if (argc != 13) { Usage(argc0,argv0); }
 		strcpy( newTurnLeftDesc, *argv++ );
 		strcpy( newTurnLeftPartno, *argv++ );
-		newTurnLen2 = GetDim(atof( *argv++ ));
-		newTurnLen0 = GetDim(atof( *argv++ ));
-		newTurnAngle0 = atof( *argv++ );
-		newTurnOff0 = GetDim(atof( *argv++ ));
-		newTurnLen1 = GetDim(atof( *argv++ ));
-		newTurnAngle1 = atof( *argv++ );
-		newTurnOff1 = GetDim(atof( *argv++ ));
+		tdVal[0] = GetDim(atof( *argv++ ));
+		tdVal[0] = GetDim(atof( *argv++ ));
+		tdVal[0] = atof( *argv++ );
+		tdVal[0] = GetDim(atof( *argv++ ));
+		tdVal[0] = GetDim(atof( *argv++ ));
+		tdVal[0] = atof( *argv++ );
+		tdVal[0] = GetDim(atof( *argv++ ));
 		curDesign = &ThreewayDesc;
 		NewTurnOk( &ThreewayDesc );
 		break;
-	case 'x':
+	case 'x':	// Crossing
 		if (argc<9) { Usage(argc0,argv0); }
 		strcpy( newTurnLeftDesc, *argv++ );
 		strcpy( newTurnLeftPartno, *argv++ );
-		newTurnLen0 = GetDim(atof( *argv++ ));
-		newTurnAngle0 = atof( *argv++ );
-		newTurnLen1 = GetDim(atof( *argv++ ));
+		tdVal[0] = GetDim(atof( *argv++ ));
+		tdVal[0] = atof( *argv++ );
+		tdVal[0] = GetDim(atof( *argv++ ));
 		curDesign = &CrossingDesc;
 		NewTurnOk( &CrossingDesc );
 		break;
-	case '1':
+	case '1':	// Single Slip
 		if (argc<9) { Usage(argc0,argv0); }
 		strcpy( newTurnLeftDesc, *argv++ );
 		strcpy( newTurnLeftPartno, *argv++ );
-		newTurnLen0 = GetDim(atof( *argv++ ));
-		newTurnAngle0 = atof( *argv++ );
-		newTurnLen1 = GetDim(atof( *argv++ ));
+		tdVal[0] = GetDim(atof( *argv++ ));
+		tdVal[0] = atof( *argv++ );
+		tdVal[0] = GetDim(atof( *argv++ ));
 		curDesign = &SingleSlipDesc;
 		NewTurnOk( &SingleSlipDesc );
 		break;
-	case '2':
+	case '2':	// Double Slip
 		strcpy( newTurnLeftDesc, *argv++ );
 		strcpy( newTurnLeftPartno, *argv++ );
 		if (argc<9) { Usage(argc0,argv0); }
-		newTurnLen0 = GetDim(atof( *argv++ ));
-		newTurnAngle0 = atof( *argv++ );
-		newTurnLen1 = GetDim(atof( *argv++ ));
+		tdVal[0] = GetDim(atof( *argv++ ));
+		tdVal[0] = atof( *argv++ );
+		tdVal[0] = GetDim(atof( *argv++ ));
 		curDesign = &DoubleSlipDesc;
 		NewTurnOk( &DoubleSlipDesc );
 		break;
-	case 'd':
+	case 'd':	// Double Crossover
 		strcpy( newTurnLeftDesc, *argv++ );
 		strcpy( newTurnLeftPartno, *argv++ );
 		if (argc<8) { Usage(argc0,argv0); }
-		newTurnLen0 = GetDim(atof( *argv++ ));
-		newTurnOff0 = GetDim(atof( *argv++ ));
+		tdVal[0] = GetDim(atof( *argv++ ));
+		tdVal[0] = GetDim(atof( *argv++ ));
 		curDesign = &DoubleCrossoverDesc;
 		NewTurnOk( &DoubleCrossoverDesc );
 		break;
-	case 't':
+	case 't':	// Turntable
 		strcpy( newTurnLeftDesc, *argv++ );
 		strcpy( newTurnLeftPartno, *argv++ );
 		if (argc<9) { Usage(argc0,argv0); }
