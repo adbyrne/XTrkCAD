@@ -1315,6 +1315,18 @@ char* wGetUserID(void);
 const char* wGetUserHomeRootDir(void);
 const char *wGetPlatformVersion(void);
 
+/*------------------------------------------------------------------------------
+ *
+ * Tag
+ */
+
+void wTagSetLabel( wControl_p tagControl, const char * text);
+const char *wTagGetLabel(wControl_p tagControl);
+wControl_p wTagCreate( wControl_p parent, const char* helpStr, const char* labelStr,
+    wButtonCallBack_p action, void* context);
+
+
+
 /*-------------------------------------------------------------------------------
  * User Preferences
  */

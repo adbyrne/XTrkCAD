@@ -299,11 +299,14 @@ wBool_t FormCheckInputs(
 	// Check for invalid entries
 	for (int i = 0; i < (group->paramCnt); i++) {
 		paramData_p p = (group->paramPtr) + i;
-		wControlHilite(p->control, p->bInvalid );
+		if(p->control) 
+		{
+			wControlHilite(p->control, p->bInvalid );
 
-		if (p->bInvalid && p->bShown) {
-			LOG(log_form, 1, ("   %s: Invalid\n", p->nameStr));
-			bInvalid = TRUE;
+			if (p->bInvalid && p->bShown) {
+				LOG(log_form, 1, ("   %s: Invalid\n", p->nameStr));
+				bInvalid = TRUE;
+			}
 		}
 	}
 

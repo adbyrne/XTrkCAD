@@ -31,22 +31,22 @@
 
 void FormButtonOk(paramGroup_p group)
 {
-	wFlush();
-	LOG(log_form, 1, ("ParamButtonOk: %s\n", group->nameStr));
-	if (!FormCheckInputs(group, (wControl_p)group->okB)) {
-		return;
-	}
-	if (group->nameStr) {
-		FormMacroRecord("PARAMETER %s %s\n", group->nameStr, "ok");
-	}
+	// wFlush();
+	// LOG(log_form, 1, ("FormButtonOk: %s\n", group->nameStr));
+	// if (!FormCheckInputs(group, (wControl_p)group->okB)) {
+	// 	return;
+	// }
+	// if (group->nameStr) {
+	// 	FormMacroRecord("PARAMETER %s %s\n", group->nameStr, "ok");
+	// }
 
-	if (group->okProc) {
-		group->okProc(group);
-	}
+	// // if (group->okProc) {
+	// // 	group->okProc(group);
+	// // }
 
-	wFlush();
+	// wFlush();
 
-	LOG(log_form, 1, ("ParamButtonOk -> Ok\n"));
+	// LOG(log_form, 1, ("FormButtonOk -> Ok\n"));
 }
 
 void FormDialogOkActive(

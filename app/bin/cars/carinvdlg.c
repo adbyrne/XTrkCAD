@@ -37,9 +37,12 @@ static int log_carInvDlg = 0;
 
 static wIndex_t carInvInx;
 
-static wIndex_t carInvSort[] = { 0, 1, 2, 3 };
 
-#define N_SORT			(COUNT( carInvSort ))
+//static wIndex_t carInvSort[] = { 0, 1, 2, 3 };
+
+//#define N_SORT			(COUNT( carInvSort ))
+
+unsigned selected;
 
 #define COMMA_SEP_EXT ".csv"
 #define LIST_EXP_EXT  ".txt"
@@ -48,6 +51,8 @@ static void CsvFormatLong(FILE* f, long val, const char* sep);
 static void CsvFormatFloat(FILE* f, FLOAT_T val, int digits, const char* sep);
 static void CsvFormatString(FILE* f, char* str, int len, const char* sep);
 
+static void SelectOrder(void *context);
+static void DeleteTag(void *context );
 static void AddNew(void *context);
 static void Edit(void);
 static void DeleteShelve(void);
@@ -78,19 +83,19 @@ static char* sortOrders[] = {
 }; */
 
 
-#define S_INDEX			(0)
-#define S_SCALE			(1)
-#define S_MANUF			(2)
-#define S_PARTNO		(3)
-#define S_TYPE			(4)
-#define S_DESC			(5)
-#define S_ROADNAME		(6)
-#define S_REPMARKS		(7)
-#define S_PURCHPRICE	(8)
-#define S_CURRPRICE		(9)
-#define S_CONDITION		(10)
-#define S_PURCHDATE		(11)
-#define S_SRVDATE		(12)
+// #define S_INDEX			(0)
+// #define S_SCALE			(1)
+// #define S_MANUF			(2)
+// #define S_PARTNO		(3)
+// #define S_TYPE			(4)
+// #define S_DESC			(5)
+// #define S_ROADNAME		(6)
+// #define S_REPMARKS		(7)
+// #define S_PURCHPRICE	(8)
+// #define S_CURRPRICE		(9)
+// #define S_CONDITION		(10)
+// #define S_PURCHDATE		(11)
+// #define S_SRVDATE		(12)
 static paramListData_t carInvListData = { 30, 600 };
 
 enum {
@@ -102,23 +107,36 @@ enum {
     I_CI_IMPORT_CSV,
     I_CI_EXPORT_CSV,
     I_CI_PRINT,
-    I_CI_SELECT_SORT,
+	I_CI_SELECT_NEW,
     I_CI_NEWPART,
     I_CI_NEWPROTO,
-
-    I_CI_SORT,
-    // I_CI_SORT2,
-    // I_CI_SORT3,
-    // I_CI_SORT4,
-
+    I_CI_SORT1,
+    I_CI_SORT2,
+    I_CI_SORT3,
+    I_CI_SORT4,
+	I_CI_SELECT_SORT_MENU,
+	I_CI_SELECT_SORT,
+	S_INDEX,		
+	S_SCALE,		
+	S_MANUF,		
+	S_PARTNO,	
+	S_TYPE,		
+	S_DESC,		
+	S_ROADNAME,	
+	S_REPMARKS,	
+	S_PURCHPRICE,
+	S_CURRPRICE,	
+	S_CONDITION,	
+	S_PURCHDATE,	
+	S_SRVDATE,	
 };
 
 
 static paramData_t carInvPLs[] = {
-    // [I_CI_SORT] = { PD_TAG, &carInvSort[0], "sort1", PDO_LISTINDEX, I2VP(110), N_("Sort By") },
-    // [I_CI_SORT2] = { PD_TAG, &carInvSort[1], "sort2", PDO_LISTINDEX | PDO_DLGHORZ, I2VP(110), "" },
-    // [I_CI_SORT3] = { PD_TAG, &carInvSort[2], "sort3", PDO_LISTINDEX | PDO_DLGHORZ, I2VP(110), "" },
-    // [I_CI_SORT4] = { PD_TAG, &carInvSort[3], "sort4", PDO_LISTINDEX | PDO_DLGHORZ, I2VP(110), "" },
+    [I_CI_SORT1] = { PD_TAG, DeleteTag, "sort1", .context = I2VP(0)},
+    [I_CI_SORT2] = { PD_TAG, DeleteTag, "sort2", .context = I2VP(1)},
+    [I_CI_SORT3] = { PD_TAG, DeleteTag, "sort3", .context = I2VP(2)},
+    [I_CI_SORT4] = { PD_TAG, DeleteTag, "sort4", .context = I2VP(3)},
     [I_CI_LIST] = { PD_LIST, &carInvInx, "list", PDO_LISTINDEX | PDO_DLGRESIZE | PDO_DLGNOLABELALIGN | PDO_DLGRESETMARGIN, &carInvListData, NULL, BO_READONLY | BL_MANY },
     [I_CI_FIND] = { PD_BUTTON, Edit, "find", 0, NULL },
     [I_CI_EDIT] = { PD_BUTTON, Edit, "edit", PDO_DLGCMDBUTTON, NULL },
@@ -127,17 +145,99 @@ static paramData_t carInvPLs[] = {
     [I_CI_IMPORT_CSV] = { PD_BUTTON, ImportCsv, "import", PDO_DLGWIDE, NULL},
     [I_CI_EXPORT_CSV] = { PD_BUTTON, ExportCsv, "export", 0, NULL},
     [I_CI_PRINT] = { PD_BUTTON, SaveText, "savetext", 0, NULL},
-    { PD_MENU, NULL, "select_sort", 0, NULL },
+	[I_CI_SELECT_NEW] = { PD_MENU, &selected, "select_newobj"},
     [I_CI_NEWPART] = { PD_MENUITEM, AddNew, "newpart", .context = I2VP(I_CI_NEWPART) },
     [I_CI_NEWPROTO] = { PD_MENUITEM, AddNew, "newproto", .context = I2VP(I_CI_NEWPROTO) },
+	[I_CI_SELECT_SORT_MENU] = { PD_MENU, &selected, "sort_order" },
+	[I_CI_SELECT_SORT] = { PD_BUTTON, NULL, "select_sort"},
+	[ S_INDEX ] = { PD_MENUITEM, SelectOrder, "s-index", .context = I2VP(S_INDEX) },		
+	[ S_SCALE ] = { PD_MENUITEM, SelectOrder, "s-scale", .context = I2VP(S_SCALE) },		
+	[ S_MANUF ] = { PD_MENUITEM, SelectOrder, "s-manuf", .context = I2VP(S_MANUF) },				
+	[ S_PARTNO ] = { PD_MENUITEM, SelectOrder, "s-partno" , .context = I2VP(S_PARTNO) },		
+	[ S_TYPE ] = { PD_MENUITEM, SelectOrder, "s-type", .context = I2VP(S_TYPE) },		 		
+	[ S_DESC ] = { PD_MENUITEM, SelectOrder, "s-desc", .context = I2VP(S_DESC) },				
+	[ S_ROADNAME ] = { PD_MENUITEM, SelectOrder, "s-roadname", .context = I2VP(S_ROADNAME) },		 	
+	[ S_REPMARKS ] = { PD_MENUITEM, SelectOrder, "s-repmarks", .context = I2VP(S_REPMARKS) },		 	
+	[ S_PURCHPRICE ] = { PD_MENUITEM, SelectOrder, "s-purchprice", .context = I2VP(S_PURCHPRICE) },		
+	[ S_CURRPRICE ] = { PD_MENUITEM, SelectOrder, "s-currprice", .context = I2VP(S_CURRPRICE) },			
+	[ S_CONDITION ] = { PD_MENUITEM, SelectOrder, "s-condition", .context = I2VP(S_CONDITION) },			
+	[ S_PURCHDATE ] = { PD_MENUITEM, SelectOrder, "s-purchdate", .context = I2VP(S_PURCHDATE) },			
+	[ S_SRVDATE	] = { PD_MENUITEM, SelectOrder, "s-srvdate", .context = I2VP(S_SRVDATE) },		
 };
 paramGroup_t carInvPG = { "carinv", PGO_FULLDIALOGFROMBUILDER, carInvPLs, COUNT(carInvPLs) };
 
+#define MAX_SORT_CRITERIA 4
+static struct {
+	unsigned criteria;
+	unsigned carInvSort[MAX_SORT_CRITERIA];
+} sortorder = {
+	.criteria = 0,
+};
+
+#define GET_TAG_FROM_COUNT(x) ((carInvPLs + I_CI_SORT1 + x)->control)
+
+/**
+ * Remove a tag from the list and update the ui. The tags to the right of the deleted tag are
+ * moved one slot to the left. 
+ * 
+ * \param	context	the position of the tag in the list 0...MAX_SORT_CRITERIA - 1
+ */
+
+static void
+DeleteTag(void *context )
+{
+	unsigned thisTag = (unsigned int )((long)context);
+	paramData_p menuItem = carInvPLs+sortorder.carInvSort[thisTag];
+
+	if(sortorder.criteria == 0 || thisTag >= sortorder.criteria) {
+		return;
+	}
+
+	for( int i = thisTag; i < sortorder.criteria - 1; i++ ){
+		const char *label = wTagGetLabel(GET_TAG_FROM_COUNT(i+1));
+		wTagSetLabel(GET_TAG_FROM_COUNT(i), label);
+		sortorder.carInvSort[i] = sortorder.carInvSort[i+1];
+	}
+	wControlActive(menuItem->control, TRUE);
+	wControlShow(GET_TAG_FROM_COUNT(sortorder.criteria-1), FALSE);
+	sortorder.criteria--;
+
+	ListLoad();
+
+	FormControlActive(&carInvPG, I_CI_SELECT_SORT, TRUE );
+
+}
+
+static void
+SelectOrder(void *context)
+{
+	unsigned sortby = (unsigned int )((long)context);
+
+	if(sortorder.criteria < MAX_SORT_CRITERIA){
+		const char *label;
+		paramData_p menuItem = carInvPLs+sortby; 
+		paramData_p currentTag = carInvPLs+I_CI_SORT1+sortorder.criteria;
+
+		sortorder.carInvSort[sortorder.criteria++] = sortby;
+
+		label = wMenuGetLabel(menuItem->control);
+		wControlActive(menuItem->control, FALSE);
+
+		wTagSetLabel(currentTag->control, label);
+		wControlShow(currentTag->control, TRUE);
+	} 
+
+	ListLoad();
+
+	if(sortorder.criteria == MAX_SORT_CRITERIA) {
+		FormControlActive(&carInvPG, I_CI_SELECT_SORT, FALSE );
+	}
+}
 
 static void
 AddNew(void *context)
 {
-	unsigned index = (unsigned)context;
+	unsigned index = (unsigned)((long)context);
 	void(*handler)(void);
 	const char *label;
 	paramData_p menuItem = carInvPLs+index;
@@ -272,8 +372,8 @@ static int Cmp_carInvItem(
 
 	TabStringExtract(item1->title, 7, tabs1);
 	TabStringExtract(item2->title, 7, tabs2);
-	for (inx = 0, rc = 0; inx < N_SORT && rc == 0; inx++) {
-		switch (carInvSort[inx]) {
+	for (inx = 0, rc = 0; inx <= sortorder.criteria && rc == 0; inx++) {
+		switch (sortorder.carInvSort[inx]) {
 		case S_INDEX:
 			rc = (int)(item1->index - item2->index);
 			break;
@@ -422,44 +522,44 @@ static void CarInvDlgUpdate(
 	carItem_p item = NULL;
 	wIndex_t cnt, selinx, selcnt;
 
-	if (inx >= I_CI_SORT && inx < I_CI_SORT + N_SORT) {
-		item = FindCurrentItem();
-		ListLoad();
-		if (item) {
-			carInvInx = (wIndex_t)CarItemFindIndex(item);
-			if (carInvInx >= 0) {
-				FormLoadSingleControl(&carInvPG, I_CI_LIST);
-			}
-		}
-	} else if (inx == I_CI_LIST) {
-		cnt = wListGetCount(carInvPLs[I_CI_LIST].control);
-		wIndex_t nOnShelf = 0;
-		wIndex_t nOnLayout = 0;
-		for (selinx = selcnt = 0; selinx < cnt; selinx++) {
-			if (wListGetItemSelected(carInvPLs[I_CI_LIST].control, selinx)) {
-				selcnt++;
-				item = (carItem_p)wListGetItemContext(carInvPLs[I_CI_LIST].control,
-				                                      selinx);
-				if (!item) { continue; }
-				if (item->car && !IsTrackDeleted(item->car)) {
-					nOnLayout++;
-				} else {
-					nOnShelf++;
-				}
-			}
-		}
-		// Enable Find if 1 selected car is on Layout
-		FormControlActive(pg, I_CI_FIND, nOnLayout == 1 && nOnShelf == 0);
-		// Enable Edit if 1 selected car is on Shelf
-		FormControlActive(&carInvPG, I_CI_EDIT, nOnLayout == 0 && nOnShelf == 1);
-		wBool_t bEnableDelete = nOnLayout + nOnShelf > 0 &&
-		                        (nOnLayout == 0 || nOnShelf == 0);
-		wButtonSetLabel((wButton_p)(carInvPLs[I_CI_DELETE].control),
-		                bEnableDelete == FALSE ? "" :
-		                nOnLayout > 0 ? _("Shelve") :
-		                _("Delete"));
-		FormControlActive(&carInvPG, I_CI_DELETE, bEnableDelete);
-	}
+	// if (inx >= I_CI_SORT && inx < I_CI_SORT + N_SORT) {
+	// 	item = FindCurrentItem();
+	// 	ListLoad();
+	// 	if (item) {
+	// 		carInvInx = (wIndex_t)CarItemFindIndex(item);
+	// 		if (carInvInx >= 0) {
+	// 			FormLoadSingleControl(&carInvPG, I_CI_LIST);
+	// 		}
+	// 	}
+	// } else if (inx == I_CI_LIST) {
+	// 	cnt = wListGetCount(carInvPLs[I_CI_LIST].control);
+	// 	wIndex_t nOnShelf = 0;
+	// 	wIndex_t nOnLayout = 0;
+	// 	for (selinx = selcnt = 0; selinx < cnt; selinx++) {
+	// 		if (wListGetItemSelected(carInvPLs[I_CI_LIST].control, selinx)) {
+	// 			selcnt++;
+	// 			item = (carItem_p)wListGetItemContext(carInvPLs[I_CI_LIST].control,
+	// 			                                      selinx);
+	// 			if (!item) { continue; }
+	// 			if (item->car && !IsTrackDeleted(item->car)) {
+	// 				nOnLayout++;
+	// 			} else {
+	// 				nOnShelf++;
+	// 			}
+	// 		}
+	// 	}
+	// 	// Enable Find if 1 selected car is on Layout
+	// 	FormControlActive(pg, I_CI_FIND, nOnLayout == 1 && nOnShelf == 0);
+	// 	// Enable Edit if 1 selected car is on Shelf
+	// 	FormControlActive(&carInvPG, I_CI_EDIT, nOnLayout == 0 && nOnShelf == 1);
+	// 	wBool_t bEnableDelete = nOnLayout + nOnShelf > 0 &&
+	// 	                        (nOnLayout == 0 || nOnShelf == 0);
+	// 	wButtonSetLabel((wButton_p)(carInvPLs[I_CI_DELETE].control),
+	// 	                bEnableDelete == FALSE ? "" :
+	// 	                nOnLayout > 0 ? _("Shelve") :
+	// 	                _("Delete"));
+	// 	FormControlActive(&carInvPG, I_CI_DELETE, bEnableDelete);
+	// }
 }
 
 static int CarInvSaveText(
@@ -1092,11 +1192,15 @@ static void DlgFind(void* unused)
 	PanHere(I2VP(0));		// CarInvDlgFind
 }
 
+static void ButtonOk(paramGroup_p group) {
+
+}
+
 EXPORT void DoCarDlg(void* unused)
 {
 	if (carInvPG.win == NULL) {
 		FormCreateDialog(&carInvPG, MakeWindowTitle(_("Car Inventory")), 
-						  _("Done"), FormButtonOk, 
+						  _("Done"), ButtonOk, 
 						  NULL, NULL, TRUE, 
 		                  0, 
 						  CarInvDlgUpdate);
