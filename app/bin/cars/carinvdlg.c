@@ -44,6 +44,7 @@ unsigned selected;
 
 #define MAX_SUBSTRING_COUNT 7
 #define SMALL_STRING_LEN 100
+#define LARGE_STRING_LEN 1024
 #define MAX_TEXT_COLUMNS 9
 
 static void CsvFormatLong(FILE* f, long val, const char* sep);
@@ -61,6 +62,15 @@ static void ExportCsv(void);
 static void SaveText(void);
 static void LoadSortedList(void);
 static void FormatDisplayItem(carItem_p item);
+
+typedef enum {
+	CONDITION_NA = 0,
+	CONDITION_POOR = 30,
+	CONDITION_FAIR = 50,
+	CONDITION_GOOD = 70,
+	CONDITION_EXCELLENT = 90,
+	CONDITION_MINT = 100
+} CarCondition;
 
 enum {
     I_CI_LIST,
@@ -430,6 +440,7 @@ static void FormatDisplayItem(carItem_p item)
 	char notes[SMALL_STRING_LEN];
 	char carLocation[MAX_SUBSTRING_COUNT];
 	tabString_t tabs[MAX_SUBSTRING_COUNT];
+	char line[LARGE_STRING_LEN];
 
 	TabStringExtract(item->title, MAX_SUBSTRING_COUNT, tabs);
 	if (item->data.notes) {
@@ -439,11 +450,11 @@ static void FormatDisplayItem(carItem_p item)
 		notes[0] = '\0';
 	}
 	condition =
-	        (item->data.condition < 10) ? N_("N/A") :
-	        (item->data.condition < 30) ? N_("Poor") :
-	        (item->data.condition < 50) ? N_("Fair") :
-	        (item->data.condition < 70) ? N_("Good") :
-	        (item->data.condition < 90) ? N_("Excellent") :
+	        (item->data.condition < CONDITION_NA) ? N_("N/A") :
+	        (item->data.condition < CONDITION_POOR) ? N_("Poor") :
+	        (item->data.condition < CONDITION_FAIR) ? N_("Fair") :
+	        (item->data.condition < CONDITION_GOOD) ? N_("Good") :
+	        (item->data.condition < CONDITION_EXCELLENT) ? N_("Excellent") :
 	        N_("Mint");
 
 
@@ -460,7 +471,7 @@ static void FormatDisplayItem(carItem_p item)
 
 	manuf = TabStringDup(&tabs[T_MANUF]);
 	road = TabStringDup(&tabs[T_ROADNAME]);
-	sprintf(message,
+	snprintf(line, LARGE_STRING_LEN,
 	        "%ld\t%s\t%s\t%.*s\t%s\t%.*s%s%.*s\t%s\t%.*s%s%.*s\t%0.2f\t%0.2f\t%s\t%ld\t%ld\t%s\t%s",
 	        item->index, GetScaleName(item->scaleInx),
 	        _(manuf),
@@ -477,7 +488,7 @@ static void FormatDisplayItem(carItem_p item)
 	        item->data.serviceDate, _(location), notes);
 	if (manuf) { MyFree(manuf); }
 	if (road) { MyFree(road); }
-	wListAddValue(carInvPLs[I_CI_LIST].control, message, NULL, item);
+	wListAddValue(carInvPLs[I_CI_LIST].control, line, NULL, item);
 }
 
 static void CarInvDlgUpdate(
@@ -1055,9 +1066,6 @@ static void SaveText(void)
 	wFilSelect(carInvSaveText_fs, GetCurrentPath(CARSPATHKEY));
 }
 
-
-
-
 static struct wFilSel_t* carInvImportCsv_fs;
 static void ImportCsv(void)
 {
@@ -1093,7 +1101,6 @@ static void CsvFormatString(
 	}
 	fprintf(f, "%s", sep);
 }
-
 
 static void CsvFormatLong(
         FILE* f,
