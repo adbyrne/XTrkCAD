@@ -42,10 +42,18 @@ unsigned selected;
 #define COMMA_SEP_EXT ".csv"
 #define LIST_EXP_EXT  ".txt"
 
-#define MAX_SUBSTRING_COUNT 7
+#define MAX_SUBSTRING_COUNT 10
 #define SMALL_STRING_LEN 100
 #define LARGE_STRING_LEN 1024
 #define MAX_TEXT_COLUMNS 9
+#define CONDITION_DEFAULT_LEN 5
+#define MAXIMUM_LENGTH_DATE	8		//yy/mm/dd
+
+#define UPDATE_MAX_WIDTH(index, current_width) \
+    if ((current_width) > widths[(index)]) { \
+        widths[(index)] = (current_width); \
+    }
+
 
 static void CsvFormatLong(FILE* f, long val, const char* sep);
 static void CsvFormatFloat(FILE* f, FLOAT_T val, int digits, const char* sep);
@@ -539,6 +547,244 @@ static void CarInvDlgUpdate(
 	}
 }
 
+
+typedef enum {
+	INDEX,
+	ITEMDESCRIPTION,
+	PROTOTYPE,
+	CARNUMBER,
+	PURCHASEDATE,
+	PURCHASEPRICE,
+	CONDITION,
+	CURRENTPRICE,
+	SERVICEDATE
+} ExportColumns;
+
+	char *columnHeaders[] = {
+		N_("#"),
+		N_("Part"),
+		N_("Description"),
+		N_("Rep Mark"),
+		N_("PurDate"),
+		N_("PurPrice"),
+		N_("Cond"),
+		N_("CurPrice"),
+		N_("SrvDate"),
+		NULL
+	};
+
+static void UpdateColumnWidths(unsigned int *widths, size_t count, char** columnHeaders)
+{
+	for(int inx = 0; inx < count; inx++)
+	{
+		if(widths[inx]) {
+			UPDATE_MAX_WIDTH(inx, strlen(columnHeaders[inx]));
+		}
+	}
+}
+
+static void CalculateColumnWidths(unsigned int *widths, size_t count )
+{
+	carItem_p item;
+	tabString_t tabs[MAX_SUBSTRING_COUNT];
+	
+	memset(widths, 0, sizeof(unsigned int ) * count);
+
+	for (int inx = 0; inx < carItemInfo_da.cnt; inx++) {
+		unsigned int width;
+		char buffer[SMALL_STRING_LEN];
+
+		item = carItemInfo(inx);
+		TabStringExtract(item->title, MAX_SUBSTRING_COUNT, tabs);
+
+		sprintf(buffer, "%ld", item->index);
+		UPDATE_MAX_WIDTH(INDEX, (int)strlen(buffer));
+
+		width = (int)strlen(GetScaleName(item->scaleInx)) + 1 + tabs[T_MANUF].len + 1 +
+		        tabs[T_PART].len;
+		UPDATE_MAX_WIDTH(ITEMDESCRIPTION, width);
+
+		UPDATE_MAX_WIDTH(PROTOTYPE, tabs[T_PROTO].len);
+
+		width = tabs[T_REPMARK].len + tabs[T_NUMBER].len;
+		if (tabs[T_REPMARK].len > 0 && tabs[T_NUMBER].len > 0) {
+			width += 1;
+		}
+		UPDATE_MAX_WIDTH(CARNUMBER, width);
+	
+		if (item->data.purchDate > 0) { widths[PURCHASEDATE] = MAXIMUM_LENGTH_DATE; }
+
+		if (item->data.purchPrice > 0) {
+			sprintf(buffer, "%0.2f", item->data.purchPrice);
+			UPDATE_MAX_WIDTH(PURCHASEPRICE, (int)strlen(buffer));
+		}
+
+		if (item->data.condition != 0) {
+			widths[CONDITION] = CONDITION_DEFAULT_LEN;
+		}
+
+		if (item->data.currPrice > 0) {
+			sprintf(buffer, "%0.2f", item->data.currPrice);
+			UPDATE_MAX_WIDTH(CURRENTPRICE, (int)strlen(buffer));
+		}
+
+		if (item->data.serviceDate > 0) { widths[SERVICEDATE] = MAXIMUM_LENGTH_DATE; }
+	}
+}
+
+static void 
+TextExportEOL(FILE *fh)
+{
+	fputc('\n', fh);
+}
+
+static void
+TextExportString(FILE *fh, int width, const char *string)
+{
+	fprintf(fh, "%-*.*s ", width, width, string);
+}
+
+/**
+ * \todo this is wrong, it prints a number instead of a date!
+ */
+
+static void
+TextExportDate(FILE *fh, int width, unsigned long dateValue)
+{
+	char buffer[SMALL_STRING_LEN];
+
+	if (dateValue > 0)
+	{
+		snprintf(buffer, SMALL_STRING_LEN, "%ld", dateValue);
+		fprintf(fh, "%*.*s ", width, width, buffer);
+	}
+	else
+	{
+		fprintf(fh, "%*s ", width, " ");
+	}
+}
+
+static void
+TextExportValue(FILE *fh, int width, double value)
+{
+	char buffer[SMALL_STRING_LEN];
+
+	if (value > 0)
+	{
+		snprintf(buffer, SMALL_STRING_LEN, "%0.2f", value);
+		fprintf(fh, "%*.*s ", width, width, buffer);
+	}
+	else
+	{
+		fprintf(fh, "%*s ", width, " ");
+	}
+}
+
+static void 
+WriteExportHeader( FILE* fh, unsigned int *widths, size_t count, char **label )
+{
+	for(int inx = 0; inx < count; inx++)
+	{
+		TextExportString(fh, widths[inx], label[inx]);
+	}
+	TextExportEOL(fh);
+}
+
+static void
+WriteExportItem(FILE *fh, unsigned int *widths, unsigned count, carItem_p item)
+{
+	tabString_t tabs[MAX_SUBSTRING_COUNT];
+	char buffer[SMALL_STRING_LEN];
+
+	TabStringExtract(item->title, MAX_TEXT_COLUMNS, tabs);
+
+	snprintf(buffer, SMALL_STRING_LEN, "%ld", item->index);
+	TextExportString(fh, widths[INDEX], buffer);
+
+	snprintf(buffer, SMALL_STRING_LEN, "%s %.*s %.*s", GetScaleName(item->scaleInx),
+			tabs[T_MANUF].len, tabs[T_MANUF].ptr, tabs[T_PART].len, tabs[T_PART].ptr);
+	TextExportString(fh, widths[ITEMDESCRIPTION], buffer);
+
+	TextExportString(fh,  widths[PROTOTYPE], tabs[T_PROTO].ptr);
+
+	snprintf(buffer, SMALL_STRING_LEN, "%.*s%s%.*s", tabs[T_REPMARK].len, tabs[T_REPMARK].ptr,
+			(tabs[T_REPMARK].len > 0 && tabs[T_NUMBER].len > 0) ? " " : "", tabs[T_NUMBER].len, tabs[T_NUMBER].ptr);
+	TextExportString(fh, widths[CARNUMBER], buffer);
+
+	if (widths[PURCHASEDATE] > 0)
+	{
+		TextExportDate(fh, widths[PURCHASEDATE], item->data.purchDate);
+	}
+
+	if (widths[PURCHASEPRICE] > 0)
+	{
+		TextExportValue(fh, widths[PURCHASEPRICE], item->data.purchPrice);
+	}
+
+	if (widths[CONDITION] > 0)
+	{
+		if (item->data.condition != 0)
+		{
+			TextExportString( fh, widths[CONDITION], condListMap[MapCondition(item->data.condition)].name);
+		}
+		else
+		{
+			TextExportString(fh, widths[CONDITION], " ");
+		}
+	}
+
+	if (widths[CURRENTPRICE] > 0)
+	{
+		TextExportValue(fh, widths[CURRENTPRICE], item->data.currPrice);
+	}
+
+	if (widths[SERVICEDATE] > 0)
+	{
+		TextExportDate(fh, widths[SERVICEDATE], item->data.serviceDate);
+	}
+
+	fprintf(fh, "\n");
+}
+
+/**
+ * \TODO This could probably better be solved with strtok()
+ */
+
+static void
+WriteExportNotes(FILE *fh, const char *notes, unsigned indent)
+{
+	const char *cp1;
+	const char *cp0;
+	int len;
+
+	if (notes)
+	{
+		cp0 = notes;
+		while (1)
+		{
+			cp1 = strchr(cp0, '\n');
+			if (cp1)
+			{
+				len = (int)(cp1 - cp0);
+			}
+			else
+			{
+				len = (int)strlen(cp0);
+				if (len == 0)
+				{
+					break;
+				}
+			}
+			fprintf(fh, "%*.*s %*.*s\n", indent, indent, " ", len, len, cp0);
+			if (cp1 == NULL)
+			{
+				break;
+			}
+			cp0 = cp1 + 1;
+		}
+	}
+}
+
 static int CarInvSaveText(
         int files,
         char** fileName,
@@ -546,11 +792,7 @@ static int CarInvSaveText(
 {
 	FILE* f;
 	carItem_p item;
-	int inx;
 	unsigned int widths[MAX_TEXT_COLUMNS];
-	tabString_t tabs[MAX_SUBSTRING_COUNT];
-	char* cp0, * cp1;
-	int len;
 	char *exportfile;
 
 	CHECK(fileName != NULL);
@@ -570,123 +812,18 @@ static int CarInvSaveText(
 		return FALSE;
 	}
 
-	memset(widths, 0, sizeof widths);
-	for (inx = 0; inx < carItemInfo_da.cnt; inx++) {
-		unsigned int width;
-		item = carItemInfo(inx);
-		TabStringExtract(item->title, MAX_SUBSTRING_COUNT, tabs);
-		sprintf(message, "%ld", item->index);
-		width = (int)strlen(message);
-		if (width > widths[0]) { widths[0] = width; }
-		width = (int)strlen(GetScaleName(item->scaleInx)) + 1 + tabs[T_MANUF].len + 1 +
-		        tabs[T_PART].len;
-		if (width > widths[1]) { widths[1] = width; }
-		if (tabs[T_PROTO].len > widths[2]) { widths[2] = tabs[T_PROTO].len; }
-		width = tabs[T_REPMARK].len + tabs[T_NUMBER].len;
-		if (tabs[T_REPMARK].len > 0 && tabs[T_NUMBER].len > 0) {
-			width += 1;
-		}
-		if (width > widths[3]) { widths[3] = width; }
-		if (item->data.purchDate > 0) { widths[4] = 8; }
-		if (item->data.purchPrice > 0) {
-			sprintf(message, "%0.2f", item->data.purchPrice);
-			width = (int)strlen(message);
-			if (width > widths[5]) { widths[5] = width; }
-		}
-		if (item->data.condition != 0) {
-			widths[6] = 5;
-		}
-		if (item->data.currPrice > 0) {
-			sprintf(message, "%0.2f", item->data.currPrice);
-			width = (int)strlen(message);
-			if (width > widths[7]) { widths[7] = width; }
-		}
-		if (item->data.serviceDate > 0) { widths[8] = 8; }
-	}
-	fprintf(f, "%-*.*s %-*.*s %-*.*s %-*.*s", widths[0], widths[0], "#", widths[1],
-	        widths[1], "Part", widths[2], widths[2], "Description", widths[3], widths[3],
-	        "Rep Mark");
-	if (widths[4]) { fprintf(f, " %-*.*s", widths[4], widths[4], "PurDate"); }
-	if (widths[5]) { fprintf(f, " %-*.*s", widths[5], widths[5], "PurPrice"); }
-	if (widths[6]) { fprintf(f, " %-*.*s", widths[6], widths[6], "Cond"); }
-	if (widths[7]) { fprintf(f, " %-*.*s", widths[7], widths[7], "CurPrice"); }
-	if (widths[8]) { fprintf(f, " %-*.*s", widths[8], widths[8], "SrvDate"); }
-	fprintf(f, "\n");
+	CalculateColumnWidths(widths, MAX_TEXT_COLUMNS);
 
-	for (inx = 0; inx < carItemInfo_da.cnt; inx++) {
-		item = carItemInfo(inx);
-		TabStringExtract(item->title, 7, tabs);
-		sprintf(message, "%ld", item->index);
-		fprintf(f, "%.*s", widths[0], message);
-		sprintf(message, "%s %.*s %.*s", GetScaleName(item->scaleInx),
-		        tabs[T_MANUF].len, tabs[T_MANUF].ptr, tabs[T_PART].len, tabs[T_PART].ptr);
-		fprintf(f, " %-*s", widths[1], message);
-		fprintf(f, " %-*.*s", widths[2], tabs[T_PROTO].len, tabs[T_PROTO].ptr);
+	UpdateColumnWidths(widths, MAX_TEXT_COLUMNS, columnHeaders);
+	WriteExportHeader(f, widths, MAX_TEXT_COLUMNS, columnHeaders);
 
-		sprintf(message, "%.*s%s%.*s", tabs[T_REPMARK].len, tabs[T_REPMARK].ptr,
-		        (tabs[T_REPMARK].len > 0
-		         && tabs[T_NUMBER].len > 0) ? " " : "", tabs[T_NUMBER].len, tabs[T_NUMBER].ptr);
-		fprintf(f, " %-*s", widths[3], message);
-		if (widths[4] > 0) {
-			if (item->data.purchDate > 0) {
-				sprintf(message, "%ld", item->data.purchDate);
-				fprintf(f, " %*.*s", widths[4], widths[4], message);
-			} else {
-				fprintf(f, " %*s", widths[4], " ");
-			}
-		}
-		if (widths[5] > 0) {
-			if (item->data.purchPrice > 0) {
-				sprintf(message, "%0.2f", item->data.purchPrice);
-				fprintf(f, " %*.*s", widths[5], widths[5], message);
-			} else {
-				fprintf(f, " %*s", widths[5], " ");
-			}
-		}
-		if (widths[6] > 0) {
-			if (item->data.condition != 0) {
-				fprintf(f, " %-*.*s", widths[6], widths[6],
-				        condListMap[MapCondition(item->data.condition)].name);
-			} else {
-				fprintf(f, " %*s", widths[6], " ");
-			}
-		}
-		if (widths[7] > 0) {
-			if (item->data.purchPrice > 0) {
-				sprintf(message, "%0.2f", item->data.purchPrice);
-				fprintf(f, " %*.*s", widths[7], widths[7], message);
-			} else {
-				fprintf(f, " %*s", widths[7], " ");
-			}
-		}
-		if (widths[8] > 0) {
-			if (item->data.serviceDate > 0) {
-				sprintf(message, "%ld", item->data.serviceDate);
-				fprintf(f, " %*.*s", widths[8], widths[8], message);
-			} else {
-				fprintf(f, " %*s", widths[8], " ");
-			}
-		}
-		fprintf(f, "\n");
-		if (item->data.notes) {
-			cp0 = item->data.notes;
-			while (1) {
-				cp1 = strchr(cp0, '\n');
-				if (cp1) {
-					len = (int)(cp1 - cp0);
-				} else {
-					len = (int)strlen(cp0);
-					if (len == 0) {
-						break;
-					}
-				}
-				fprintf(f, "%*.*s %*.*s\n", widths[0], widths[0], " ", len, len, cp0);
-				if (cp1 == NULL) {
-					break;
-				}
-				cp0 = cp1 + 1;
-			}
-		}
+	for (int inx = 0; inx < carItemInfo_da.cnt; inx++) {
+		item = carItemInfo(inx);
+
+		WriteExportItem(f, widths, MAX_TEXT_COLUMNS, item);
+
+		WriteExportNotes(f, item->data.notes, widths[INDEX]);
+
 	}
 	fclose(f);
 	MyFree(exportfile);
