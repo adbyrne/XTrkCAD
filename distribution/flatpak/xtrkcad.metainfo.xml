@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>@FLATPAK_DOMAIN@.@XTRKCAD_BASE_NAME@</id>
-  <name>XTrackCAD@XTRKCAD_SUFFIX_NAME@</name>
+  <id>io.sourceforge.xtrkcad_fork.xtrkcad</id>
+  <name>XTrackCAD</name>
   <summary>Design model railroad layouts</summary>
   <description>
     <p>XTrackCAD is a CAD (computer-aided design) program for designing model railroad layouts.</p>
     <p><em>Flatpak not officially supported, yet ;-) ; search for "flatpak" from the faq/home wiki</em></p>
   </description>
   <releases>
-    <release version="@XTRKCAD_VERSION@" date="1969-12-31"/>
+    <release version="5.3.2Dev" date="1969-12-31"/>
   </releases>
   <content_rating type="oars-1.1" />
-  <launchable type="desktop-id">@FLATPAK_DOMAIN@.@XTRKCAD_BASE_NAME@.desktop</launchable>
+  <launchable type="desktop-id">io.sourceforge.xtrkcad_fork.xtrkcad.desktop</launchable>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0</project_license>
   <url type="bugtracker">https://sourceforge.net/p/xtrkcad-fork/bugs/</url>
@@ -26,7 +26,7 @@
       <caption>Example port_dinllean.xtc</caption>
     </screenshot>
   </screenshots>
-  <developer id="@FLATPAK_DOMAIN@.@XTRKCAD_BASE_NAME@">
+  <developer id="io.sourceforge.xtrkcad_fork.xtrkcad">
     <name>xtrkcad developers</name>
   </developer>
 </component>
