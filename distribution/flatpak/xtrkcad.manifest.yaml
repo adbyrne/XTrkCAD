@@ -1,4 +1,7 @@
-id: @FLATPAK_DOMAIN@.@XTRKCAD_BASE_NAME@
+# this is a copy from the git repo for flathub builds
+# IT WILL FAIL IF USED WITH FLATPAK BUILDER,
+# use "make flatpak" or "ninja flatpak" instead.
+id: io.sourceforge.xtrkcad_fork.xtrkcad
 runtime: org.freedesktop.Platform
 runtime-version: '25.08'
 sdk: org.freedesktop.Sdk
@@ -56,28 +59,26 @@ modules:
   - name: xtrkcad
     buildsystem: cmake-ninja
     sources:
-      #- type: archive
-      #  url: https://download.sourceforge.net/project/xtrkcad-fork/XTrackCad/Version%205.3.1/xtrkcad-source-5.3.1GA.tar.gz
-      #  sha256: 5b02a0352c23f90b0011029c7e2c3f12a6f6779425c4c47c1f75d6b8a0db572c
-      #- type: patch
-      #  paths:
-      #    - patches/common_source.sh.patch
-      #    - patches/run-xtrkcad.sh.patch
-      #    - patches/xtrkcad.desktop.patch
-      #    - patches/xtrkcad.metainfo.xml.patch
-      #    - patches/xtrkcad_logo_128x128.svg.patch
-      - type: dir
-        path: @CMAKE_SOURCE_DIR@
+      - type: archive
+        url: https://download.sourceforge.net/project/xtrkcad-fork/XTrackCad/Version%205.3.1/xtrkcad-source-5.3.1GA.tar.gz
+        sha256: 5b02a0352c23f90b0011029c7e2c3f12a6f6779425c4c47c1f75d6b8a0db572c
+      - type: patch
+        paths:
+          - patches/common_source.sh.patch
+          - patches/run-xtrkcad.sh.patch
+          - patches/xtrkcad.desktop.patch
+          - patches/xtrkcad.metainfo.xml.patch
+          - patches/xtrkcad_logo_128x128.svg.patch
     builddir: true
     post-install:
       - |
-        set -e
-        install -Dm644 /app/share/xtrkcad/pixmaps/xtrkcad.png /app/share/icons/hicolor/64x64/apps/@FLATPAK_DOMAIN@.@XTRKCAD_BASE_NAME@.png
+        install -Dm644 /app/share/xtrkcad/pixmaps/xtrkcad.png /app/share/icons/hicolor/64x64/apps/io.sourceforge.xtrkcad_fork.xtrkcad.png
+        # makes presumption that builddir (when true) is subdirectory of source dir
         install -Dm755 ../distribution/flatpak/common_source.sh /app/bin/common_source.sh
         install -Dm755 ../distribution/flatpak/run-xtrkcad.sh /app/bin/run-xtrkcad.sh
-        install -Dm644 ../distribution/flatpak/xtrkcad.desktop /app/share/applications/@FLATPAK_DOMAIN@.@XTRKCAD_BASE_NAME@.desktop
-        install -Dm644 ../distribution/flatpak/xtrkcad.metainfo.xml /app/share/metainfo/@FLATPAK_DOMAIN@.@XTRKCAD_BASE_NAME@.metainfo.xml
+        install -Dm644 ../distribution/flatpak/xtrkcad.desktop /app/share/applications/io.sourceforge.xtrkcad_fork.xtrkcad.desktop
+        install -Dm644 ../distribution/flatpak/xtrkcad.metainfo.xml /app/share/metainfo/io.sourceforge.xtrkcad_fork.xtrkcad.metainfo.xml
         rsvg-convert -h 128 -o xtrkcad_logo_128x128.png ../distribution/flatpak/xtrkcad_logo_128x128.svg
-        install -Dm644 xtrkcad_logo_128x128.png /app/share/icons/hicolor/128x128/apps/@FLATPAK_DOMAIN@.@XTRKCAD_BASE_NAME@.png
+        install -Dm644 xtrkcad_logo_128x128.png /app/share/icons/hicolor/128x128/apps/io.sourceforge.xtrkcad_fork.xtrkcad.png
     cleanup:
       - xtrkcad_logo_128x128.png

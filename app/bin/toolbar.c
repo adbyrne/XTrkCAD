@@ -54,8 +54,8 @@ static wWinPix_t toolbarHeight = 0;
 #define TOOLBAR_VISIBLE "toolbarset"
 #define TOOLBAR_LAYER_BUTTONS "button-count"
 
-#define FIXEDLAYERCONTROLS (2)  // the layer groups has two controls that are
-// always visible (list and background)
+#define FIXEDLAYERCONTROLS (3)  // the layer groups has three controls 
+				// that are always visible (list, background and manage)
 
 /*
 * Bit handling macros

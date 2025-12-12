@@ -35,9 +35,9 @@ make flatpak    # or "ninja flatpak" with minimal progress output
     haven't changed.
 
 # RUN (pick one depending on what was built)
-flatpak run org.xtrkcad.xtrkcad
-flatpak run org.xtrkcad.xtrkcad-beta
-flatpak run org.xtrkcad.xtrkcad-gtk
+flatpak run io.sourceforge.xtrkcad_fork.xtrkcad
+flatpak run io.sourceforge.xtrkcad_fork.xtrkcad-beta
+flatpak run io.sourceforge.xtrkcad_fork.xtrkcad-gtk
 
 # Misc
 - paths in xtrkcad.rc need to change to flatpak xtrkcad lib location
@@ -47,3 +47,4 @@ flatpak run org.xtrkcad.xtrkcad-gtk
 - paths in xtrkcad.rc ought to be relative and code which references them
   should then prepend with the XTRKCAD*LIB environment; that way folks
   can keep their xtrkcad.rc file as is, but there will be pains in the transition
+- ./distribution/flatpak/buildFlatpak.sh will create build directory and build flatpak

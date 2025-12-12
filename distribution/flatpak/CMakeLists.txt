@@ -21,10 +21,15 @@ set(_XTRK_DESKTOP_SRC_FILE "desktop")
 set(_XTRK_META_SRC_FILE "metainfo.xml")
 set(_XTRK_MANIFEST_SRC_FILE "manifest.yaml")
 
-# XTRKCAD_BASE_NAME should be of form xtrkcad, xtrkcad-beta, xtrkcad-gtk
-string(CONCAT _XTRK_DESKTOP_FILE org.xtrkcad.${XTRKCAD_BASE_NAME} "." ${_XTRK_DESKTOP_SRC_FILE})
-string(CONCAT _XTRK_META_FILE org.xtrkcad.${XTRKCAD_BASE_NAME} "." ${_XTRK_META_SRC_FILE})
-string(CONCAT _XTRK_MANIFEST_FILE org.xtrkcad.${XTRKCAD_BASE_NAME} ".yaml")
+# flatpak domain build from flathub
+set(FLATPAK_DOMAIN "io.sourceforge.xtrkcad_fork")
+
+# flatpak domain local build
+#set(FLATPAK_DOMAIN "org.xtrkcad")
+
+set(_XTRK_DESKTOP_FILE "xtrkcad.desktop")
+set(_XTRK_META_FILE "xtrkcad.metainfo.xml")
+set(_XTRK_MANIFEST_FILE "xtrkcad.manifest.yaml")
 
 # desktop.in
 string(CONCAT _XTRK_DESKTOP_IN_FILE
@@ -33,7 +38,18 @@ string(CONCAT _XTRK_DESKTOP_IN_FILE
        ${_XTRK_DESKTOP_SRC_FILE}
        ".in"
       )
-configure_file(${_XTRK_DESKTOP_IN_FILE} ${_XTRK_DESKTOP_FILE})
+
+#######################################################################
+#   Note that some files in the source are modified based on the
+#   .in file in order that flathub builds require less patching
+#   since these files (the non .in ones) are used in the manifest.
+#
+#   When a cmake is performed and flatpak tools are available, these
+#   will be modified for your checking in pleasure.
+#######################################################################
+
+# updates source on purpose for flathub builds
+configure_file(${_XTRK_DESKTOP_IN_FILE} "${CMAKE_CURRENT_SOURCE_DIR}/${_XTRK_DESKTOP_FILE}")
 
 # metainfo.xml.in
 string(CONCAT _XTRK_META_IN_FILE
@@ -42,7 +58,9 @@ string(CONCAT _XTRK_META_IN_FILE
        ${_XTRK_META_SRC_FILE}
        ".in"
       )
-configure_file(${_XTRK_META_IN_FILE} ${_XTRK_META_FILE})
+
+# updates source on purpose for flathub builds
+configure_file(${_XTRK_META_IN_FILE} "${CMAKE_CURRENT_SOURCE_DIR}/${_XTRK_META_FILE}")
 
 # manifest.yaml.in
 string(CONCAT _XTRK_MANIFEST_IN_FILE
@@ -51,8 +69,20 @@ string(CONCAT _XTRK_MANIFEST_IN_FILE
        ${_XTRK_MANIFEST_SRC_FILE}
        ".in"
       )
-configure_file(${_XTRK_MANIFEST_IN_FILE} ${_XTRK_MANIFEST_FILE} @ONLY)
 
+# build manifest file to use for building in sandbox
+# note that the manifest file is not modified in the source tree as it's
+# maintained in the git repo (to be documented later)
+configure_file(${_XTRK_MANIFEST_IN_FILE} "${_XTRK_MANIFEST_FILE}" @ONLY)
+
+# needed for gtk2
+file(COPY
+    ${CMAKE_CURRENT_SOURCE_DIR}/shared-modules
+    DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+# the flatpak commands to make a local flatpak (official flatpak builds
+# maintained by github repo to be documented later)
 add_custom_command(
     OUTPUT ${FLATPAK_FILE}
     COMMAND ${Flatpak_EXECUTABLE} 
@@ -67,7 +97,7 @@ add_custom_command(
     COMMAND ${Flatpak_EXECUTABLE} build-bundle
             ${FLATPAK_REPO}
             ${FLATPAK_FILE}
-            org.xtrkcad.${XTRKCAD_BASE_NAME}
+            ${FLATPAK_DOMAIN}.${XTRKCAD_BASE_NAME}
     COMMAND rm -rf ${FLATPAK_REPO}
     COMMENT "Re-compiling xtrkcad within flatpak Sdk; this could take a while ..."
     DEPENDS ${_XTRK_MANIFEST_FILE} ${_XTRK_DESKTOP_FILE} ${_XTRK_META_FILE}
