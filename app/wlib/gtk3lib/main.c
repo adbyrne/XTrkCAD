@@ -122,7 +122,6 @@ startup(GtkApplication *app)
 
 	wPrefFlush("");
 
-	g_strfreev(myargv);
 }
 
 /**
