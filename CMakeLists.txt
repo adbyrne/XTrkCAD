@@ -59,6 +59,9 @@ find_package(Flatpak)
 # Hg
 find_package(Hg)
 
+# Hg
+find_package(Hg)
+
 if(NOT GTK3_FOUND)
 	message(FATAL_ERROR "ERROR: GTK3 not found found!")
 endif()	
