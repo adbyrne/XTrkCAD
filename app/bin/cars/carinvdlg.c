@@ -25,102 +25,238 @@
 #include "custom.h"
 #include "fileio.h"
 #include "messages.h"
-#include "param.h"
+#include "form.h"
 #include "paths.h"
 
 #include "include/cars.h"
 #include "carsprivate.h"
 
+#define FormControlShow(a,b,c)
+
 static int log_carInvDlg = 0;
 
 static wIndex_t carInvInx;
 
-static wIndex_t carInvSort[] = { 0, 1, 2, 3 };
-#define N_SORT			(COUNT( carInvSort ))
+unsigned selected;
+
+#define COMMA_SEP_EXT ".csv"
+#define LIST_EXP_EXT  ".txt"
+
+#define MAX_SUBSTRING_COUNT 10
+#define SMALL_STRING_LEN 100
+#define LARGE_STRING_LEN 1024
+#define MAX_TEXT_COLUMNS 9
+#define MAX_CSV_COLUMNS  40
+#define CONDITION_DEFAULT_LEN 5
+#define MAXIMUM_LENGTH_DATE	8		//yy/mm/dd
+
+#define UPDATE_MAX_WIDTH(index, current_width) \
+    if ((current_width) > widths[(index)]) { \
+        widths[(index)] = (current_width); \
+    }
+
 
 static void CsvFormatLong(FILE* f, long val, const char* sep);
 static void CsvFormatFloat(FILE* f, FLOAT_T val, int digits, const char* sep);
 static void CsvFormatString(FILE* f, char* str, int len, const char* sep);
 
-static void CarInvDlgAdd(void);
-static void CarInvDlgEdit(void);
-static void CarInvDlgDeleteShelve(void);
-static carItem_p CarInvDlgFindCurrentItem(void);
-static void CarInvDlgImportCsv(void);
-static void CarInvDlgExportCsv(void);
-static void CarInvDlgSaveText(void);
-static void CarInvListLoad(void);
-static void CarInvLoadItem(carItem_p item);
+static void SelectOrder(void *context);
+static void DeleteTag(void *context );
+static void AddNew(void *context);
+static void LaunchItemEditor(void);
+static void DeleteOrShelveSelected(void);
+static carItem_p FindCurrentItem(void);
+static void ImportCsv(void);
+static void ExportCsv(void);
+static void SaveText(void);
+static void LoadSortedList(void);
+static void FormatDisplayItem(carItem_p item);
 
-static wWinPix_t carInvColumnWidths[] = {
-	-40, 30, 100, -50, 50, 130, 120, 100,
-	-50, -50, 60, 55, 55, 40, 200
+typedef enum {
+	CONDITION_NA = 0,
+	CONDITION_POOR = 30,
+	CONDITION_FAIR = 50,
+	CONDITION_GOOD = 70,
+	CONDITION_EXCELLENT = 90,
+	CONDITION_MINT = 100
+} CarCondition;
+
+enum {
+	I_CI_LIST,
+	I_CI_FIND,
+	I_CI_EDIT,
+	I_CI_ADD,
+	I_CI_DELETE,
+	I_CI_IMPORT_CSV,
+	I_CI_EXPORT_CSV,
+	I_CI_PRINT,
+	I_CI_SELECT_NEW,
+	I_CI_NEWPART,
+	I_CI_NEWPROTO,
+	I_CI_SORT1,
+	I_CI_SORT2,
+	I_CI_SORT3,
+	I_CI_SORT4,
+	I_CI_SELECT_SORT_MENU,
+	I_CI_SELECT_SORT,
+	S_INDEX,
+	S_SCALE,
+	S_MANUF,
+	S_PARTNO,
+	S_TYPE,
+	S_DESC,
+	S_ROADNAME,
+	S_REPMARKS,
+	S_PURCHPRICE,
+	S_CURRPRICE,
+	S_CONDITION,
+	S_PURCHDATE,
+	S_SRVDATE,
 };
-static const char* carInvColumnTitles[] = {
-	N_("Index"), N_("Scale"), N_("Manufacturer"), N_("Part No"), N_("Type"),
-	N_("Description"), N_("Roadname"), N_("Rep Marks"), N_("Purc Price"),
-	N_("Curr Price"), N_("Condition"), N_("Purc Date"), N_("Srvc Date"),
-	N_("Locat'n"), N_("Notes")
-};
-static char* sortOrders[] = {
-	N_("Index"), N_("Scale"), N_("Manufacturer"), N_("Part No"), N_("Type"),
-	N_("Description"), N_("Roadname"), N_("RepMarks"), N_("Purch Price"),
-	N_("Curr Price"), N_("Condition"), N_("Purch Date"), N_("Service Date")
-};
-#define S_INDEX			(0)
-#define S_SCALE			(1)
-#define S_MANUF			(2)
-#define S_PARTNO		(3)
-#define S_TYPE			(4)
-#define S_DESC			(5)
-#define S_ROADNAME		(6)
-#define S_REPMARKS		(7)
-#define S_PURCHPRICE	(8)
-#define S_CURRPRICE		(9)
-#define S_CONDITION		(10)
-#define S_PURCHDATE		(11)
-#define S_SRVDATE		(12)
-static paramListData_t carInvListData = { 30, 600, COUNT(carInvColumnTitles), carInvColumnWidths, carInvColumnTitles };
+
+
 static paramData_t carInvPLs[] = {
-#define I_CI_SORT		(0)
-	{ PD_DROPLIST, &carInvSort[0], "sort1", PDO_LISTINDEX, I2VP(110), N_("Sort By") },
-	{ PD_DROPLIST, &carInvSort[1], "sort2", PDO_LISTINDEX | PDO_DLGHORZ, I2VP(110), "" },
-	{ PD_DROPLIST, &carInvSort[2], "sort3", PDO_LISTINDEX | PDO_DLGHORZ, I2VP(110), "" },
-	{ PD_DROPLIST, &carInvSort[3], "sort4", PDO_LISTINDEX | PDO_DLGHORZ, I2VP(110), "" },
-#define S				(4)
-#define I_CI_LIST		(S+0)
-	{ PD_LIST, &carInvInx, "list", PDO_LISTINDEX | PDO_DLGRESIZE | PDO_DLGNOLABELALIGN | PDO_DLGRESETMARGIN, &carInvListData, NULL, BO_READONLY | BL_MANY },
-#define I_CI_EDIT		(S+1)
-	{ PD_BUTTON, CarInvDlgEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
-#define I_CI_ADD		(S+2)
-	{ PD_BUTTON, CarInvDlgAdd, "add", 0, NULL, N_("Add"), 0, 0 },
-#define I_CI_DELETE		(S+3)
-	{ PD_BUTTON, CarInvDlgDeleteShelve, "delete", PDO_DLGWIDE, NULL, N_("Delete") },
-#define I_CI_IMPORT_CSV	(S+4)
-	{ PD_BUTTON, CarInvDlgImportCsv, "import", PDO_DLGWIDE, NULL, N_("Import") },
-#define I_CI_EXPORT_CSV	(S+5)
-	{ PD_BUTTON, CarInvDlgExportCsv, "export", 0, NULL, N_("Export") },
-#define I_CI_PRINT		(S+6)
-	{ PD_BUTTON, CarInvDlgSaveText, "savetext", 0, NULL, N_("List") }
+	[I_CI_SORT1] = { PD_TAG, DeleteTag, "sort1", .context = I2VP(0)},
+	[I_CI_SORT2] = { PD_TAG, DeleteTag, "sort2", .context = I2VP(1)},
+	[I_CI_SORT3] = { PD_TAG, DeleteTag, "sort3", .context = I2VP(2)},
+	[I_CI_SORT4] = { PD_TAG, DeleteTag, "sort4", .context = I2VP(3)},
+	[I_CI_LIST] = { PD_LIST, &carInvInx, "list", 0, NULL, NULL, 0 },
+	[I_CI_FIND] = { PD_BUTTON, FindCurrentItem, "find", 0, NULL },
+	[I_CI_EDIT] = { PD_BUTTON, LaunchItemEditor, "edit", 0, NULL },
+	[I_CI_ADD] = { PD_BUTTON, NULL, "add", 0, NULL  },
+	[I_CI_DELETE] = { PD_BUTTON, DeleteOrShelveSelected, "delete", 0, NULL },
+	[I_CI_IMPORT_CSV] = { PD_BUTTON, ImportCsv, "import", 0, NULL},
+	[I_CI_EXPORT_CSV] = { PD_BUTTON, ExportCsv, "export", 0, NULL},
+	[I_CI_PRINT] = { PD_BUTTON, SaveText, "savetext", 0, NULL},
+	[I_CI_SELECT_NEW] = { PD_MENU, &selected, "select_newobj"},
+	[I_CI_NEWPART] = { PD_MENUITEM, AddNew, "newpart", .context = I2VP(I_CI_NEWPART) },
+	[I_CI_NEWPROTO] = { PD_MENUITEM, AddNew, "newproto", .context = I2VP(I_CI_NEWPROTO) },
+	[I_CI_SELECT_SORT_MENU] = { PD_MENU, &selected, "sort_order" },
+	[I_CI_SELECT_SORT] = { PD_BUTTON, NULL, "select_sort"},
+	[ S_INDEX ] = { PD_MENUITEM, SelectOrder, "s-index", .context = I2VP(S_INDEX) },
+	[ S_SCALE ] = { PD_MENUITEM, SelectOrder, "s-scale", .context = I2VP(S_SCALE) },
+	[ S_MANUF ] = { PD_MENUITEM, SelectOrder, "s-manuf", .context = I2VP(S_MANUF) },
+	[ S_PARTNO ] = { PD_MENUITEM, SelectOrder, "s-partno", .context = I2VP(S_PARTNO) },
+	[ S_TYPE ] = { PD_MENUITEM, SelectOrder, "s-type", .context = I2VP(S_TYPE) },
+	[ S_DESC ] = { PD_MENUITEM, SelectOrder, "s-desc", .context = I2VP(S_DESC) },
+	[ S_ROADNAME ] = { PD_MENUITEM, SelectOrder, "s-roadname", .context = I2VP(S_ROADNAME) },
+	[ S_REPMARKS ] = { PD_MENUITEM, SelectOrder, "s-repmarks", .context = I2VP(S_REPMARKS) },
+	[ S_PURCHPRICE ] = { PD_MENUITEM, SelectOrder, "s-purchprice", .context = I2VP(S_PURCHPRICE) },
+	[ S_CURRPRICE ] = { PD_MENUITEM, SelectOrder, "s-currprice", .context = I2VP(S_CURRPRICE) },
+	[ S_CONDITION ] = { PD_MENUITEM, SelectOrder, "s-condition", .context = I2VP(S_CONDITION) },
+	[ S_PURCHDATE ] = { PD_MENUITEM, SelectOrder, "s-purchdate", .context = I2VP(S_PURCHDATE) },
+	[ S_SRVDATE	] = { PD_MENUITEM, SelectOrder, "s-srvdate", .context = I2VP(S_SRVDATE) },
 };
-paramGroup_t carInvPG = { "carinv", 0, carInvPLs, COUNT(carInvPLs) };
+paramGroup_t carInvPG = { "carinv", PGO_FULLDIALOGFROMBUILDER, carInvPLs, COUNT(carInvPLs) };
 
-static void CarInvDlgAdd(void)
+#define MAX_SORT_CRITERIA 4
+static struct {
+	unsigned criteria;
+	unsigned carInvSort[MAX_SORT_CRITERIA];
+} sortorder = {
+	.criteria = 0,
+};
+
+#define GET_TAG_FROM_COUNT(x) ((carInvPLs + I_CI_SORT1 + x)->control)
+
+/**
+ * Remove a tag from the list and update the ui. The tags to the right of the deleted tag are
+ * moved one slot to the left.
+ *
+ * \param	context	the position of the tag in the list 0...MAX_SORT_CRITERIA - 1
+ */
+
+static void
+DeleteTag(void *context )
 {
-	if (carProto_da.cnt <= 0) {
-		NoticeMessage(MSG_NO_CARPROTO, _("Ok"), NULL);
+	unsigned thisTag = (unsigned int )((long)context);
+	paramData_p menuItem = carInvPLs+sortorder.carInvSort[thisTag];
+
+	if(sortorder.criteria == 0 || thisTag >= sortorder.criteria) {
 		return;
 	}
-	carDlgUpdateItemPtr = NULL;
 
-	CarDlgAddItem();
+	for( int i = thisTag; i < sortorder.criteria - 1; i++ ) {
+		const char *label = wTagGetLabel(GET_TAG_FROM_COUNT(i+1));
+		wTagSetLabel(GET_TAG_FROM_COUNT(i), label);
+		sortorder.carInvSort[i] = sortorder.carInvSort[i+1];
+	}
+	wControlActive(menuItem->control, TRUE);
+	wControlShow(GET_TAG_FROM_COUNT(sortorder.criteria-1), FALSE);
+	sortorder.criteria--;
+
+	LoadSortedList();
+
+	FormControlActive(&carInvPG, I_CI_SELECT_SORT, TRUE );
 
 }
 
-
-static void CarInvDlgEdit(void)
+static void
+SelectOrder(void *context)
 {
-	carDlgUpdateItemPtr = CarInvDlgFindCurrentItem();
+	unsigned sortby = (unsigned int )((long)context);
+
+	if(sortorder.criteria < MAX_SORT_CRITERIA) {
+		const char *label;
+		paramData_p menuItem = carInvPLs+sortby;
+		paramData_p currentTag = carInvPLs+I_CI_SORT1+sortorder.criteria;
+
+		sortorder.carInvSort[sortorder.criteria++] = sortby;
+
+		label = wMenuGetLabel(menuItem->control);
+		wControlActive(menuItem->control, FALSE);
+
+		wTagSetLabel(currentTag->control, label);
+		wControlShow(currentTag->control, TRUE);
+	}
+
+	LoadSortedList();
+
+	if(sortorder.criteria == MAX_SORT_CRITERIA) {
+		FormControlActive(&carInvPG, I_CI_SELECT_SORT, FALSE );
+	}
+}
+
+static void
+AddNew(void *context)
+{
+	unsigned index = (unsigned)((long)context);
+	void(*handler)(void);
+	const char *label;
+	paramData_p menuItem = carInvPLs+index;
+
+	// get selected function
+	switch(index) {
+	case I_CI_NEWPART:
+		handler = CarDlgAddDesc;
+		break;
+	case I_CI_NEWPROTO:
+		handler = CarDlgAddProto;
+		break;
+	}
+	label = wMenuGetLabel(menuItem->control);
+
+	// configure the button
+	wButtonSetLabel((carInvPLs+I_CI_ADD)->control, label);
+	carInvPLs[I_CI_ADD].valueP = handler;
+}
+
+// static void Add(void)
+// {
+// 	if (carProto_da.cnt <= 0) {
+// 		NoticeMessage(MSG_NO_CARPROTO, _("Ok"), NULL);
+// 		return;
+// 	}
+// 	carDlgUpdateItemPtr = NULL;
+
+// 	CarDlgAddItem();
+// }
+
+
+static void
+LaunchItemEditor(void)
+{
+	carDlgUpdateItemPtr = FindCurrentItem();
 	if (carDlgUpdateItemPtr == NULL) {
 		return;
 	}
@@ -128,23 +264,24 @@ static void CarInvDlgEdit(void)
 }
 
 
-static void CarInvDlgDeleteShelve(void)
+static void
+DeleteOrShelveSelected(void)
 {
 	carItem_p item;
 	wIndex_t inx, inx1, cnt, selcnt;
 	wBool_t bShowMsg = FALSE;
 	wBool_t bNeedReload = FALSE;
 
-	selcnt = wListGetSelectedCount((wList_p)carInvPLs[I_CI_LIST].control);
+	selcnt = wListGetSelectedCount(carInvPLs[I_CI_LIST].control);
 	if (selcnt == 0) {
 		return;
 	}
-	cnt = wListGetCount((wList_p)carInvPLs[I_CI_LIST].control);
+	cnt = wListGetCount(carInvPLs[I_CI_LIST].control);
 	for (inx = 0; inx < cnt; inx++) {
-		if (!wListGetItemSelected((wList_p)carInvPLs[I_CI_LIST].control, inx)) {
+		if (!wListGetItemSelected(carInvPLs[I_CI_LIST].control, inx)) {
 			continue;
 		}
-		item = (carItem_p)wListGetItemContext((wList_p)carInvPLs[I_CI_LIST].control,
+		item = (carItem_p)wListGetItemContext(carInvPLs[I_CI_LIST].control,
 		                                      inx);
 		if (item == NULL) {
 			continue;
@@ -163,7 +300,7 @@ static void CarInvDlgDeleteShelve(void)
 				bShowMsg = TRUE;
 			}
 			LOG(log_carInvDlg, 1, ("CarInvDlgDeleteShelve( %d, %s\n", inx,
-			                        item->title));
+			                       item->title));
 			wListDelete((wList_p)carInvPLs[I_CI_LIST].control, inx);
 			if (item->title) { MyFree(item->title); }
 			if (item->data.number) { MyFree(item->data.number); }
@@ -178,35 +315,33 @@ static void CarInvDlgDeleteShelve(void)
 		}
 	}
 	if (bNeedReload) {
-		CarInvListLoad();
+		LoadSortedList();
 		ChangeHotBar(CHANGE_SCALE);
 		MainRedraw(); // Shelve Car from layout
 	}
 	SetFileChanged();
 	carInvInx = -1;
-	ParamLoadControl(&carInvPG, I_CI_LIST);
-	ParamControlActive(&carInvPG, I_CI_EDIT, FALSE);
-	ParamControlActive(&carInvPG, I_CI_DELETE, FALSE);
+	FormLoadSingleControl(&carInvPG, I_CI_LIST);
+	FormControlActive(&carInvPG, I_CI_EDIT, FALSE);
+	FormControlActive(&carInvPG, I_CI_DELETE, FALSE);
 	wButtonSetLabel((wButton_p)(carInvPLs[I_CI_DELETE].control), "");
-	ParamControlActive(&carInvPG, I_CI_EXPORT_CSV, carItemInfo_da.cnt > 0);
-	ParamControlActive(&carInvPG, I_CI_PRINT, carItemInfo_da.cnt > 0);
-	ParamDialogOkActive(&carInvPG, FALSE);
+	FormControlActive(&carInvPG, I_CI_EXPORT_CSV, carItemInfo_da.cnt > 0);
+	FormControlActive(&carInvPG, I_CI_PRINT, carItemInfo_da.cnt > 0);
 }
 
-static carItem_p CarInvDlgFindCurrentItem(void)
+static carItem_p FindCurrentItem(void)
 {
-	wIndex_t selcnt = wListGetSelectedCount((wList_p)
-	                                        carInvPLs[I_CI_LIST].control);
+	wIndex_t selcnt = wListGetSelectedCount(carInvPLs[I_CI_LIST].control);
 	wIndex_t inx, cnt;
 
 	if (selcnt != 1) { return NULL; }
-	cnt = wListGetCount((wList_p)carInvPLs[I_CI_LIST].control);
+	cnt = wListGetCount(carInvPLs[I_CI_LIST].control);
 	for (inx = 0; inx < cnt; inx++)
-		if (wListGetItemSelected((wList_p)carInvPLs[I_CI_LIST].control, inx)) {
+		if (wListGetItemSelected(carInvPLs[I_CI_LIST].control, inx)) {
 			break;
 		}
 	if (inx >= cnt) { return NULL; }
-	return (carItem_p)wListGetItemContext((wList_p)carInvPLs[I_CI_LIST].control,
+	return (carItem_p)wListGetItemContext(carInvPLs[I_CI_LIST].control,
 	                                      inx);
 }
 
@@ -216,14 +351,14 @@ static int Cmp_carInvItem(
 {
 	carItem_p item1 = *(carItem_p*)ptr1;
 	carItem_p item2 = *(carItem_p*)ptr2;
-	tabString_t tabs1[7], tabs2[7];
+	tabString_t tabs1[MAX_SUBSTRING_COUNT], tabs2[MAX_SUBSTRING_COUNT];
 	int inx;
 	int rc;
 
-	TabStringExtract(item1->title, 7, tabs1);
-	TabStringExtract(item2->title, 7, tabs2);
-	for (inx = 0, rc = 0; inx < N_SORT && rc == 0; inx++) {
-		switch (carInvSort[inx]) {
+	TabStringExtract(item1->title, MAX_SUBSTRING_COUNT, tabs1);
+	TabStringExtract(item2->title, MAX_SUBSTRING_COUNT, tabs2);
+	for (inx = 0, rc = 0; inx <= sortorder.criteria && rc == 0; inx++) {
+		switch (sortorder.carInvSort[inx]) {
 		case S_INDEX:
 			rc = (int)(item1->index - item2->index);
 			break;
@@ -280,32 +415,30 @@ static int Cmp_carInvItem(
 	return rc;
 }
 
-static void CarInvListLoad(void)
+static void LoadSortedList(void)
 {
-	wIndex_t selected; 
+	wIndex_t selected;
 
 	qsort(&carItemInfo(0), carItemInfo_da.cnt, sizeof carItemInfo(0),
 	      Cmp_carInvItem);
-	ParamControlShow(&carInvPG, I_CI_LIST, FALSE);
-	wListClear((wList_p)carInvPLs[I_CI_LIST].control);
+	FormControlShow(&carInvPG, I_CI_LIST, FALSE);
+	wListClear(carInvPLs[I_CI_LIST].control);
 	for (int inx = 0; inx < carItemInfo_da.cnt; inx++) {
 		carItem_p item;
 		item = carItemInfo(inx);
-		CarInvLoadItem(item);
+		FormatDisplayItem(item);
 	}
 
-	selected = wListGetIndex((wList_p)carInvPLs[I_CI_LIST].control);
-	ParamControlShow(&carInvPG, I_CI_LIST, TRUE);
-	ParamControlActive(&carInvPG, I_CI_EDIT, selected >= 0 );
-	ParamControlActive(&carInvPG, I_CI_DELETE, selected >= 0);
+	selected = wListGetIndex(carInvPLs[I_CI_LIST].control);
+	FormControlActive(&carInvPG, I_CI_FIND, TRUE);
+	FormControlActive(&carInvPG, I_CI_EDIT, selected >= 0 );
+	FormControlActive(&carInvPG, I_CI_DELETE, selected >= 0);
 	//wButtonSetLabel((wButton_p)(carInvPLs[I_CI_DELETE].control), "");
-	ParamControlActive(&carInvPG, I_CI_EXPORT_CSV, carItemInfo_da.cnt > 0);
-	ParamControlActive(&carInvPG, I_CI_PRINT, carItemInfo_da.cnt > 0);
-	ParamDialogOkActive(&carInvPG, FALSE);
+	FormControlActive(&carInvPG, I_CI_EXPORT_CSV, carItemInfo_da.cnt > 0);
+	FormControlActive(&carInvPG, I_CI_PRINT, carItemInfo_da.cnt > 0);
 }
 
-static void CarInvLoadItem(
-        carItem_p item)
+static void FormatDisplayItem(carItem_p item)
 {
 	/* "Index", "Scale", "Manufacturer", "Type", "Part No", "Description", "Roadname", "RepMarks",
 	   "Purch Price", "Curr Price", "Condition", "Purch Date", "Service Date", "Location", "Notes" */
@@ -313,10 +446,12 @@ static void CarInvLoadItem(
 	char* location;
 	char* manuf;
 	char* road;
-	char notes[100];
-	tabString_t tabs[7];
+	char notes[SMALL_STRING_LEN];
+	char carLocation[MAX_SUBSTRING_COUNT];
+	tabString_t tabs[MAX_SUBSTRING_COUNT];
+	char line[LARGE_STRING_LEN];
 
-	TabStringExtract(item->title, 7, tabs);
+	TabStringExtract(item->title, MAX_SUBSTRING_COUNT, tabs);
 	if (item->data.notes) {
 		strncpy(notes, item->data.notes, sizeof notes - 1);
 		notes[sizeof notes - 1] = '\0';
@@ -324,14 +459,14 @@ static void CarInvLoadItem(
 		notes[0] = '\0';
 	}
 	condition =
-	        (item->data.condition < 10) ? N_("N/A") :
-	        (item->data.condition < 30) ? N_("Poor") :
-	        (item->data.condition < 50) ? N_("Fair") :
-	        (item->data.condition < 70) ? N_("Good") :
-	        (item->data.condition < 90) ? N_("Excellent") :
+	        (item->data.condition < CONDITION_NA) ? N_("N/A") :
+	        (item->data.condition < CONDITION_POOR) ? N_("Poor") :
+	        (item->data.condition < CONDITION_FAIR) ? N_("Fair") :
+	        (item->data.condition < CONDITION_GOOD) ? N_("Good") :
+	        (item->data.condition < CONDITION_EXCELLENT) ? N_("Excellent") :
 	        N_("Mint");
 
-	char carLocation[30];
+
 	if (item->car && !IsTrackDeleted(item->car)) {
 		coOrd hi, lo;
 		GetBoundingBox(item->car, &hi, &lo);
@@ -345,24 +480,24 @@ static void CarInvLoadItem(
 
 	manuf = TabStringDup(&tabs[T_MANUF]);
 	road = TabStringDup(&tabs[T_ROADNAME]);
-	sprintf(message,
-	        "%ld\t%s\t%s\t%.*s\t%s\t%.*s%s%.*s\t%s\t%.*s%s%.*s\t%0.2f\t%0.2f\t%s\t%ld\t%ld\t%s\t%s",
-	        item->index, GetScaleName(item->scaleInx),
-	        _(manuf),
-	        tabs[T_PART].len, tabs[T_PART].ptr,
-	        _(typeListMap[CarProtoFindTypeCode(item->type)].name),
-	        tabs[T_PROTO].len, tabs[T_PROTO].ptr,
-	        (tabs[T_PROTO].len > 0 && tabs[T_DESC].len) ? "/" : "",
-	        tabs[T_DESC].len, tabs[T_DESC].ptr,
-	        _(road),
-	        tabs[T_REPMARK].len, tabs[T_REPMARK].ptr,
-	        (tabs[T_REPMARK].len > 0 && tabs[T_NUMBER].len > 0) ? " " : "",
-	        tabs[T_NUMBER].len, tabs[T_NUMBER].ptr,
-	        item->data.purchPrice, item->data.currPrice, _(condition), item->data.purchDate,
-	        item->data.serviceDate, _(location), notes);
+	snprintf(line, LARGE_STRING_LEN,
+	         "%ld\t%s\t%s\t%.*s\t%s\t%.*s%s%.*s\t%s\t%.*s%s%.*s\t%0.2f\t%0.2f\t%s\t%ld\t%ld\t%s\t%s",
+	         item->index, GetScaleName(item->scaleInx),
+	         _(manuf),
+	         tabs[T_PART].len, tabs[T_PART].ptr,
+	         _(typeListMap[CarProtoFindTypeCode(item->type)].name),
+	         tabs[T_PROTO].len, tabs[T_PROTO].ptr,
+	         (tabs[T_PROTO].len > 0 && tabs[T_DESC].len) ? "/" : "",
+	         tabs[T_DESC].len, tabs[T_DESC].ptr,
+	         _(road),
+	         tabs[T_REPMARK].len, tabs[T_REPMARK].ptr,
+	         (tabs[T_REPMARK].len > 0 && tabs[T_NUMBER].len > 0) ? " " : "",
+	         tabs[T_NUMBER].len, tabs[T_NUMBER].ptr,
+	         item->data.purchPrice, item->data.currPrice, _(condition), item->data.purchDate,
+	         item->data.serviceDate, _(location), notes);
 	if (manuf) { MyFree(manuf); }
 	if (road) { MyFree(road); }
-	wListAddValue((wList_p)carInvPLs[I_CI_LIST].control, message, NULL, item);
+	wListAddValue(carInvPLs[I_CI_LIST].control, line, NULL, item);
 }
 
 static void CarInvDlgUpdate(
@@ -373,23 +508,23 @@ static void CarInvDlgUpdate(
 	carItem_p item = NULL;
 	wIndex_t cnt, selinx, selcnt;
 
-	if (inx >= I_CI_SORT && inx < I_CI_SORT + N_SORT) {
-		item = CarInvDlgFindCurrentItem();
-		CarInvListLoad();
+	if (inx >= I_CI_SORT1 && inx <= I_CI_SORT4 ) {
+		item = FindCurrentItem();
+		LoadSortedList();
 		if (item) {
 			carInvInx = (wIndex_t)CarItemFindIndex(item);
 			if (carInvInx >= 0) {
-				ParamLoadControl(&carInvPG, I_CI_LIST);
+				FormLoadSingleControl(&carInvPG, I_CI_LIST);
 			}
 		}
 	} else if (inx == I_CI_LIST) {
-		cnt = wListGetCount((wList_p)carInvPLs[I_CI_LIST].control);
+		cnt = wListGetCount(carInvPLs[I_CI_LIST].control);
 		wIndex_t nOnShelf = 0;
 		wIndex_t nOnLayout = 0;
 		for (selinx = selcnt = 0; selinx < cnt; selinx++) {
-			if (wListGetItemSelected((wList_p)carInvPLs[I_CI_LIST].control, selinx)) {
+			if (wListGetItemSelected(carInvPLs[I_CI_LIST].control, selinx)) {
 				selcnt++;
-				item = (carItem_p)wListGetItemContext((wList_p)carInvPLs[I_CI_LIST].control,
+				item = (carItem_p)wListGetItemContext(carInvPLs[I_CI_LIST].control,
 				                                      selinx);
 				if (!item) { continue; }
 				if (item->car && !IsTrackDeleted(item->car)) {
@@ -400,16 +535,231 @@ static void CarInvDlgUpdate(
 			}
 		}
 		// Enable Find if 1 selected car is on Layout
-		ParamDialogOkActive(pg, nOnLayout == 1 && nOnShelf == 0);
+		FormControlActive(pg, I_CI_FIND, nOnLayout == 1 && nOnShelf == 0);
 		// Enable Edit if 1 selected car is on Shelf
-		ParamControlActive(&carInvPG, I_CI_EDIT, nOnLayout == 0 && nOnShelf == 1);
+		FormControlActive(&carInvPG, I_CI_EDIT, nOnLayout == 0 && nOnShelf == 1);
 		wBool_t bEnableDelete = nOnLayout + nOnShelf > 0 &&
 		                        (nOnLayout == 0 || nOnShelf == 0);
 		wButtonSetLabel((wButton_p)(carInvPLs[I_CI_DELETE].control),
 		                bEnableDelete == FALSE ? "" :
 		                nOnLayout > 0 ? _("Shelve") :
 		                _("Delete"));
-		ParamControlActive(&carInvPG, I_CI_DELETE, bEnableDelete);
+		FormControlActive(&carInvPG, I_CI_DELETE, bEnableDelete);
+	}
+}
+
+
+typedef enum {
+	INDEX,
+	ITEMDESCRIPTION,
+	PROTOTYPE,
+	CARNUMBER,
+	PURCHASEDATE,
+	PURCHASEPRICE,
+	CONDITION,
+	CURRENTPRICE,
+	SERVICEDATE
+} ExportColumns;
+
+char *columnHeaders[] = {
+	N_("#"),
+	N_("Part"),
+	N_("Description"),
+	N_("Rep Mark"),
+	N_("PurDate"),
+	N_("PurPrice"),
+	N_("Cond"),
+	N_("CurPrice"),
+	N_("SrvDate"),
+	NULL
+};
+
+static void UpdateColumnWidths(unsigned int *widths, size_t count,
+                               char** columnHeaders)
+{
+	for(int inx = 0; inx < count; inx++) {
+		if(widths[inx]) {
+			UPDATE_MAX_WIDTH(inx, strlen(columnHeaders[inx]));
+		}
+	}
+}
+
+static void CalculateColumnWidths(unsigned int *widths, size_t count )
+{
+	carItem_p item;
+	tabString_t tabs[MAX_SUBSTRING_COUNT];
+
+	memset(widths, 0, sizeof(unsigned int ) * count);
+
+	for (int inx = 0; inx < carItemInfo_da.cnt; inx++) {
+		unsigned int width;
+		char buffer[SMALL_STRING_LEN];
+
+		item = carItemInfo(inx);
+		TabStringExtract(item->title, MAX_SUBSTRING_COUNT, tabs);
+
+		sprintf(buffer, "%ld", item->index);
+		UPDATE_MAX_WIDTH(INDEX, (int)strlen(buffer));
+
+		width = (int)strlen(GetScaleName(item->scaleInx)) + 1 + tabs[T_MANUF].len + 1 +
+		        tabs[T_PART].len;
+		UPDATE_MAX_WIDTH(ITEMDESCRIPTION, width);
+
+		UPDATE_MAX_WIDTH(PROTOTYPE, tabs[T_PROTO].len);
+
+		width = tabs[T_REPMARK].len + tabs[T_NUMBER].len;
+		if (tabs[T_REPMARK].len > 0 && tabs[T_NUMBER].len > 0) {
+			width += 1;
+		}
+		UPDATE_MAX_WIDTH(CARNUMBER, width);
+
+		if (item->data.purchDate > 0) { widths[PURCHASEDATE] = MAXIMUM_LENGTH_DATE; }
+
+		if (item->data.purchPrice > 0) {
+			sprintf(buffer, "%0.2f", item->data.purchPrice);
+			UPDATE_MAX_WIDTH(PURCHASEPRICE, (int)strlen(buffer));
+		}
+
+		if (item->data.condition != 0) {
+			widths[CONDITION] = CONDITION_DEFAULT_LEN;
+		}
+
+		if (item->data.currPrice > 0) {
+			sprintf(buffer, "%0.2f", item->data.currPrice);
+			UPDATE_MAX_WIDTH(CURRENTPRICE, (int)strlen(buffer));
+		}
+
+		if (item->data.serviceDate > 0) { widths[SERVICEDATE] = MAXIMUM_LENGTH_DATE; }
+	}
+}
+
+static void
+TextExportEOL(FILE *fh)
+{
+	fputc('\n', fh);
+}
+
+static void
+TextExportString(FILE *fh, int width, const char *string)
+{
+	fprintf(fh, "%-*.*s ", width, width, string);
+}
+
+/**
+ * \todo this is wrong, it prints a number instead of a date!
+ */
+
+static void
+TextExportDate(FILE *fh, int width, unsigned long dateValue)
+{
+	char buffer[SMALL_STRING_LEN];
+
+	if (dateValue > 0) {
+		snprintf(buffer, SMALL_STRING_LEN, "%ld", dateValue);
+		fprintf(fh, "%*.*s ", width, width, buffer);
+	} else {
+		fprintf(fh, "%*s ", width, " ");
+	}
+}
+
+static void
+TextExportValue(FILE *fh, int width, double value)
+{
+	char buffer[SMALL_STRING_LEN];
+
+	if (value > 0) {
+		snprintf(buffer, SMALL_STRING_LEN, "%0.2f", value);
+		fprintf(fh, "%*.*s ", width, width, buffer);
+	} else {
+		fprintf(fh, "%*s ", width, " ");
+	}
+}
+
+static void
+WriteExportHeader( FILE* fh, unsigned int *widths, size_t count, char **label )
+{
+	for(int inx = 0; inx < count; inx++) {
+		TextExportString(fh, widths[inx], label[inx]);
+	}
+	TextExportEOL(fh);
+}
+
+static void
+WriteExportItem(FILE *fh, unsigned int *widths, unsigned count, carItem_p item)
+{
+	tabString_t tabs[MAX_SUBSTRING_COUNT];
+	char buffer[SMALL_STRING_LEN];
+
+	TabStringExtract(item->title, MAX_TEXT_COLUMNS, tabs);
+
+	snprintf(buffer, SMALL_STRING_LEN, "%ld", item->index);
+	TextExportString(fh, widths[INDEX], buffer);
+
+	snprintf(buffer, SMALL_STRING_LEN, "%s %.*s %.*s", GetScaleName(item->scaleInx),
+	         tabs[T_MANUF].len, tabs[T_MANUF].ptr, tabs[T_PART].len, tabs[T_PART].ptr);
+	TextExportString(fh, widths[ITEMDESCRIPTION], buffer);
+
+	TextExportString(fh,  widths[PROTOTYPE], tabs[T_PROTO].ptr);
+
+	snprintf(buffer, SMALL_STRING_LEN, "%.*s%s%.*s", tabs[T_REPMARK].len,
+	         tabs[T_REPMARK].ptr,
+	         (tabs[T_REPMARK].len > 0
+	          && tabs[T_NUMBER].len > 0) ? " " : "", tabs[T_NUMBER].len, tabs[T_NUMBER].ptr);
+	TextExportString(fh, widths[CARNUMBER], buffer);
+
+	if (widths[PURCHASEDATE] > 0) {
+		TextExportDate(fh, widths[PURCHASEDATE], item->data.purchDate);
+	}
+
+	if (widths[PURCHASEPRICE] > 0) {
+		TextExportValue(fh, widths[PURCHASEPRICE], item->data.purchPrice);
+	}
+
+	if (widths[CONDITION] > 0) {
+		if (item->data.condition != 0) {
+			TextExportString( fh, widths[CONDITION],
+			                  condListMap[MapCondition(item->data.condition)].name);
+		} else {
+			TextExportString(fh, widths[CONDITION], " ");
+		}
+	}
+
+	if (widths[CURRENTPRICE] > 0) {
+		TextExportValue(fh, widths[CURRENTPRICE], item->data.currPrice);
+	}
+
+	if (widths[SERVICEDATE] > 0) {
+		TextExportDate(fh, widths[SERVICEDATE], item->data.serviceDate);
+	}
+
+	fprintf(fh, "\n");
+}
+
+static void
+WriteExportNotes(FILE *fh, const char *notes, unsigned indent)
+{
+	const char *cp1;
+	const char *cp0;
+	int len;
+
+	if (notes) {
+		cp0 = notes;
+		while (1) {
+			cp1 = strchr(cp0, '\n');
+			if (cp1) {
+				len = (int)(cp1 - cp0);
+			} else {
+				len = (int)strlen(cp0);
+				if (len == 0) {
+					break;
+				}
+			}
+			fprintf(fh, "%*.*s %*.*s\n", indent, indent, " ", len, len, cp0);
+			if (cp1 == NULL) {
+				break;
+			}
+			cp0 = cp1 + 1;
+		}
 	}
 }
 
@@ -420,142 +770,41 @@ static int CarInvSaveText(
 {
 	FILE* f;
 	carItem_p item;
-	int inx;
-	unsigned int widths[9];
-	tabString_t tabs[7];
-	char* cp0, * cp1;
-	int len;
+	unsigned int widths[MAX_TEXT_COLUMNS];
+	char *exportfile;
 
 	CHECK(fileName != NULL);
 	CHECK(files == 1);
 
+	exportfile = MyMalloc(strlen(fileName[0])+sizeof(LIST_EXP_EXT) + 1);
+	strcpy(exportfile, fileName[0]);
+	AddDefaultExtension(exportfile, LIST_EXP_EXT);
+
 	SetCurrentPath(CARSPATHKEY, fileName[0]);
-	f = fopen(fileName[0], "w");
+	f = fopen(exportfile, "w");
 	if (f == NULL) {
 		NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, _("Car Inventory"),
 		              fileName[0], strerror(errno));
+
+		MyFree(exportfile);
 		return FALSE;
 	}
 
-	memset(widths, 0, sizeof widths);
-	for (inx = 0; inx < carItemInfo_da.cnt; inx++) {
-		unsigned int width;
-		item = carItemInfo(inx);
-		TabStringExtract(item->title, 7, tabs);
-		sprintf(message, "%ld", item->index);
-		width = (int)strlen(message);
-		if (width > widths[0]) { widths[0] = width; }
-		width = (int)strlen(GetScaleName(item->scaleInx)) + 1 + tabs[T_MANUF].len + 1 +
-		        tabs[T_PART].len;
-		if (width > widths[1]) { widths[1] = width; }
-		if (tabs[T_PROTO].len > widths[2]) { widths[2] = tabs[T_PROTO].len; }
-		width = tabs[T_REPMARK].len + tabs[T_NUMBER].len;
-		if (tabs[T_REPMARK].len > 0 && tabs[T_NUMBER].len > 0) {
-			width += 1;
-		}
-		if (width > widths[3]) { widths[3] = width; }
-		if (item->data.purchDate > 0) { widths[4] = 8; }
-		if (item->data.purchPrice > 0) {
-			sprintf(message, "%0.2f", item->data.purchPrice);
-			width = (int)strlen(message);
-			if (width > widths[5]) { widths[5] = width; }
-		}
-		if (item->data.condition != 0) {
-			widths[6] = 5;
-		}
-		if (item->data.currPrice > 0) {
-			sprintf(message, "%0.2f", item->data.currPrice);
-			width = (int)strlen(message);
-			if (width > widths[7]) { widths[7] = width; }
-		}
-		if (item->data.serviceDate > 0) { widths[8] = 8; }
-	}
-	fprintf(f, "%-*.*s %-*.*s %-*.*s %-*.*s", widths[0], widths[0], "#", widths[1],
-	        widths[1], "Part", widths[2], widths[2], "Description", widths[3], widths[3],
-	        "Rep Mark");
-	if (widths[4]) { fprintf(f, " %-*.*s", widths[4], widths[4], "PurDate"); }
-	if (widths[5]) { fprintf(f, " %-*.*s", widths[5], widths[5], "PurPrice"); }
-	if (widths[6]) { fprintf(f, " %-*.*s", widths[6], widths[6], "Cond"); }
-	if (widths[7]) { fprintf(f, " %-*.*s", widths[7], widths[7], "CurPrice"); }
-	if (widths[8]) { fprintf(f, " %-*.*s", widths[8], widths[8], "SrvDate"); }
-	fprintf(f, "\n");
+	CalculateColumnWidths(widths, MAX_TEXT_COLUMNS);
 
-	for (inx = 0; inx < carItemInfo_da.cnt; inx++) {
-		item = carItemInfo(inx);
-		TabStringExtract(item->title, 7, tabs);
-		sprintf(message, "%ld", item->index);
-		fprintf(f, "%.*s", widths[0], message);
-		sprintf(message, "%s %.*s %.*s", GetScaleName(item->scaleInx),
-		        tabs[T_MANUF].len, tabs[T_MANUF].ptr, tabs[T_PART].len, tabs[T_PART].ptr);
-		fprintf(f, " %-*s", widths[1], message);
-		fprintf(f, " %-*.*s", widths[2], tabs[T_PROTO].len, tabs[T_PROTO].ptr);
+	UpdateColumnWidths(widths, MAX_TEXT_COLUMNS, columnHeaders);
+	WriteExportHeader(f, widths, MAX_TEXT_COLUMNS, columnHeaders);
 
-		sprintf(message, "%.*s%s%.*s", tabs[T_REPMARK].len, tabs[T_REPMARK].ptr,
-		        (tabs[T_REPMARK].len > 0
-		         && tabs[T_NUMBER].len > 0) ? " " : "", tabs[T_NUMBER].len, tabs[T_NUMBER].ptr);
-		fprintf(f, " %-*s", widths[3], message);
-		if (widths[4] > 0) {
-			if (item->data.purchDate > 0) {
-				sprintf(message, "%ld", item->data.purchDate);
-				fprintf(f, " %*.*s", widths[4], widths[4], message);
-			} else {
-				fprintf(f, " %*s", widths[4], " ");
-			}
-		}
-		if (widths[5] > 0) {
-			if (item->data.purchPrice > 0) {
-				sprintf(message, "%0.2f", item->data.purchPrice);
-				fprintf(f, " %*.*s", widths[5], widths[5], message);
-			} else {
-				fprintf(f, " %*s", widths[5], " ");
-			}
-		}
-		if (widths[6] > 0) {
-			if (item->data.condition != 0) {
-				fprintf(f, " %-*.*s", widths[6], widths[6],
-				        condListMap[MapCondition(item->data.condition)].name);
-			} else {
-				fprintf(f, " %*s", widths[6], " ");
-			}
-		}
-		if (widths[7] > 0) {
-			if (item->data.purchPrice > 0) {
-				sprintf(message, "%0.2f", item->data.purchPrice);
-				fprintf(f, " %*.*s", widths[7], widths[7], message);
-			} else {
-				fprintf(f, " %*s", widths[7], " ");
-			}
-		}
-		if (widths[8] > 0) {
-			if (item->data.serviceDate > 0) {
-				sprintf(message, "%ld", item->data.serviceDate);
-				fprintf(f, " %*.*s", widths[8], widths[8], message);
-			} else {
-				fprintf(f, " %*s", widths[8], " ");
-			}
-		}
-		fprintf(f, "\n");
-		if (item->data.notes) {
-			cp0 = item->data.notes;
-			while (1) {
-				cp1 = strchr(cp0, '\n');
-				if (cp1) {
-					len = (int)(cp1 - cp0);
-				} else {
-					len = (int)strlen(cp0);
-					if (len == 0) {
-						break;
-					}
-				}
-				fprintf(f, "%*.*s %*.*s\n", widths[0], widths[0], " ", len, len, cp0);
-				if (cp1 == NULL) {
-					break;
-				}
-				cp0 = cp1 + 1;
-			}
-		}
+	for (int inx = 0; inx < carItemInfo_da.cnt; inx++) {
+		item = carItemInfo(inx);
+
+		WriteExportItem(f, widths, MAX_TEXT_COLUMNS, item);
+
+		WriteExportNotes(f, item->data.notes, widths[INDEX]);
+
 	}
 	fclose(f);
+	MyFree(exportfile);
 	return TRUE;
 }
 
@@ -647,27 +896,349 @@ static int ParseCsvLine(
 	return elem;
 }
 
-static int CarInvImportCsv(
+/* ============================================================================
+ * CSV IMPORT - Column Validation Helpers
+ * ============================================================================ */
+
+/* Define which columns are required for import */
+static const BOOL_T requiredColumnFlags[COUNT(carCsvColumnTitles)] = {
+	[M_SCALE]  = TRUE,
+	[M_MANUF]  = TRUE,
+	[M_PARTNO] = TRUE,
+	[M_PROTO]  = TRUE,
+};
+
+/**
+ * Find which known column title matches the CSV column
+ * Returns column index or -1 if not found
+ */
+static int FindColumnTitleMatch(const tabString_t* columnName)
+{
+	for (int j = 0; j < COUNT(carCsvColumnTitles); j++) {
+		if (TabStringCmp(carCsvColumnTitles[j], columnName) == 0) {
+			return j;
+		}
+	}
+	return -1;
+}
+
+/**
+ * Check if a column is required for import
+ */
+static BOOL_T IsRequiredColumn(int columnIndex)
+{
+	if (columnIndex < 0 || columnIndex >= COUNT(carCsvColumnTitles)) {
+		return FALSE;
+	}
+	return requiredColumnFlags[columnIndex];
+}
+
+/**
+ * Display warning for unrecognized column
+ */
+static void WarnUnrecognizedColumn(const tabString_t* columnName)
+{
+	char savedChar = columnName->ptr[columnName->len];
+	columnName->ptr[columnName->len] = '\0';
+	NoticeMessage(MSG_CARIMP_IGNORED_COLUMN, _("Continue"), NULL,
+	              columnName->ptr);
+	columnName->ptr[columnName->len] = savedChar;
+}
+
+/**
+ * Process a single CSV column header
+ * Returns TRUE if processing should continue, FALSE to abort
+ */
+static BOOL_T ProcessColumnHeader(int csvColumnIndex,
+                                  const tabString_t* columnName,
+                                  int* map,
+                                  BOOL_T* columnUsed,
+                                  int* requiredColCount)
+{
+	int columnIndex = FindColumnTitleMatch(columnName);
+
+	if (columnIndex < 0) {
+		WarnUnrecognizedColumn(columnName);
+		return TRUE;
+	}
+
+	if (columnUsed[columnIndex]) {
+		NoticeMessage(MSG_CARIMP_DUP_COLUMNS, _("Continue"), NULL,
+		              carCsvColumnTitles[columnIndex]);
+		return FALSE;
+	}
+
+	columnUsed[columnIndex] = TRUE;
+	map[csvColumnIndex] = columnIndex;
+
+	if (IsRequiredColumn(columnIndex)) {
+		(*requiredColCount)++;
+	}
+
+	return TRUE;
+}
+
+/**
+ * Validate CSV header row and build column mapping
+ */
+static BOOL_T
+ValidateImportHeaders(FILE *fh, char *csvLine, int *map, int mapSize)
+{
+	tabString_t tabs[MAX_CSV_COLUMNS];
+	BOOL_T columnUsed[COUNT(carCsvColumnTitles)] = {FALSE};
+	int numCol;
+	int requiredCols = 0;
+
+	/* Initialize map to identity */
+	for (int j = 0; j < mapSize; j++) {
+		map[j] = j;
+	}
+
+	/* Parse header line */
+	numCol = ParseCsvLine(csvLine, mapSize, tabs, map);
+	if (numCol <= 0) {
+		return FALSE;
+	}
+
+	if (numCol > mapSize) {
+		NoticeMessage(MSG_CARIMP_TOO_MANY_COLUMNS, _("Continue"), NULL);
+		return FALSE;
+	}
+
+	/* Reset map for column name matching */
+	for (int j = 0; j < mapSize; j++) {
+		map[j] = -1;
+	}
+
+	/* Process each CSV column */
+	for (int i = 0; i < numCol; i++) {
+		if (!ProcessColumnHeader(i, &tabs[i], map, columnUsed, &requiredCols)) {
+			return FALSE;
+		}
+	}
+
+	/* Verify all required columns present */
+	if (requiredCols != 4) {
+		NoticeMessage(MSG_CARIMP_MISSING_COLUMNS, _("Continue"), NULL);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+static void
+UseDefaultsFromPart(carPart_p part, tabString_p tabs, carDim_t *dim)
+{
+	tabString_t partTabs[MAX_CSV_COLUMNS];
+
+	TabStringExtract(part->title, MAX_SUBSTRING_COUNT, partTabs);
+	if (tabs[M_PROTO].len == 0 && partTabs[T_PROTO].len > 0) {
+		tabs[M_PROTO].ptr = partTabs[T_PROTO].ptr;
+		tabs[M_PROTO].len = partTabs[T_PROTO].len;
+	}
+	if (tabs[M_DESC].len == 0 && partTabs[T_DESC].len > 0) {
+		tabs[M_DESC].ptr = partTabs[T_DESC].ptr;
+		tabs[M_DESC].len = partTabs[T_DESC].len;
+	}
+	if (tabs[M_ROADNAME].len == 0 && partTabs[T_ROADNAME].len > 0) {
+		tabs[M_ROADNAME].ptr = partTabs[T_ROADNAME].ptr;
+		tabs[M_ROADNAME].len = partTabs[T_ROADNAME].len;
+	}
+	if (tabs[M_REPMARK].len == 0 && partTabs[T_REPMARK].len > 0) {
+		tabs[M_REPMARK].ptr = partTabs[T_REPMARK].ptr;
+		tabs[M_REPMARK].len = partTabs[T_REPMARK].len;
+	}
+	if (tabs[M_NUMBER].len == 0 && partTabs[T_NUMBER].len > 0) {
+		tabs[M_NUMBER].ptr = partTabs[T_NUMBER].ptr;
+		tabs[M_NUMBER].len = partTabs[T_NUMBER].len;
+	}
+	if (dim->carLength <= 0) {
+		dim->carLength = part->dim.carLength;
+	}
+	if (dim->carWidth <= 0) {
+		dim->carWidth = part->dim.carWidth;
+	}
+	if (dim->coupledLength <= 0) {
+		dim->coupledLength = part->dim.coupledLength;
+	}
+	if (dim->truckCenter <= 0) {
+		dim->truckCenter = part->dim.truckCenter;
+	}
+	if (dim->truckCenterOffset < 0) {
+		dim->truckCenterOffset = part->dim.truckCenterOffset;
+	}
+}
+
+static void
+BuildTitle(char *title, tabString_t *tabs)
+{
+	char *nextPos;
+
+	nextPos = TabStringCpy(title, &tabs[M_MANUF]);
+	*nextPos++ = '\t';
+	nextPos = TabStringCpy(nextPos, &tabs[M_PROTO]);
+	*nextPos++ = '\t';
+	nextPos = TabStringCpy(nextPos, &tabs[M_DESC]);
+	*nextPos++ = '\t';
+	nextPos = TabStringCpy(nextPos, &tabs[M_PARTNO]);
+	*nextPos++ = '\t';
+	nextPos = TabStringCpy(nextPos, &tabs[M_ROADNAME]);
+	*nextPos++ = '\t';
+	nextPos = TabStringCpy(nextPos, &tabs[M_REPMARK]);
+	*nextPos++ = '\t';
+	nextPos = TabStringCpy(nextPos, &tabs[M_NUMBER]);
+	*nextPos = '\0';
+}
+
+/**
+ * Convert notes from CSV format to internal format (allocates memory)
+ *
+ * Replaces <NL> markers with actual newlines.
+ * Returns allocated string that caller must free with MyFree().
+ *
+ * @param notesTab  Tab string containing CSV notes field
+ * @return          Allocated string with converted notes, or NULL if empty
+ */
+static char* ConvertNotesFromCsv(const tabString_t* notesTab)
+{
+	const char* src;
+	char* result;
+	char* dst;
+	int srcLen;
+
+	CHECK(notesTab != NULL);
+
+	/* Handle empty notes */
+	if (notesTab->len == 0 || notesTab->ptr == NULL) {
+		return NULL;
+	}
+
+	/*
+	 * Allocate buffer
+	 * Maximum size needed: original length + 1 for null terminator
+	 * (We're replacing 4-char "<NL>" with 1-char '\n', so we never need more)
+	 */
+	result = MyMalloc(notesTab->len + 1);
+	if (result == NULL) {
+		return NULL;
+	}
+
+	src = notesTab->ptr;
+	dst = result;
+	srcLen = notesTab->len;
+
+	/* Convert <NL> markers to newlines */
+	while (srcLen > 0 && *src) {                                    // +1
+		if (srcLen >= 4 && strncmp(src, "<NL>", 4) == 0) {          // +1
+			/* Found <NL> marker - convert to newline */
+			*dst++ = '\n';
+			src += 4;
+			srcLen -= 4;
+		} else {
+			/* Copy character as-is */
+			*dst++ = *src++;
+			srcLen--;
+		}
+	}
+
+	/* Null-terminate */
+	*dst = '\0';
+
+	return result;
+}
+
+static carItem_p
+CreateItemFromCsv(tabString_t *tabs, long *dlgIndex)
+{
+	SCALEINX_T scale;
+	long index;
+	unsigned duplicateIndexError = 0;
+	carDim_t dim;
+	carPart_p partP = NULL;
+	char *title[STR_LONG_SIZE];
+	carItem_p item;
+
+	FLOAT_T purchPrice, currPrice;
+	long type = 0;
+	long options, color, condition, purchDate, srvcDate;
+
+	tabs[M_SCALE].ptr[tabs[M_SCALE].len] = '\0';
+	scale = LookupScale(tabs[M_SCALE].ptr);
+	tabs[M_SCALE].ptr[tabs[M_SCALE].len] = ',';
+
+	index = TabGetLong(&tabs[M_INDEX]);
+	if (index == 0) {
+		CheckCarDlgItemIndex(&carDlgItemIndex);
+		index = carDlgItemIndex;
+	} else {
+		carDlgItemIndex = index;
+		if (!CheckCarDlgItemIndex(&index)) {
+			// report only once
+			if (!duplicateIndexError) {
+				NoticeMessage(MSG_CARIMP_DUP_INDEX, _("Ok"), NULL);
+				duplicateIndexError++;
+			}
+			carDlgItemIndex = index;
+		}
+	}
+
+	dim.carLength = TabGetFloat(&tabs[M_CARLENGTH]);
+	dim.carWidth = TabGetFloat(&tabs[M_CARWIDTH]);
+	dim.coupledLength = TabGetFloat(&tabs[M_CPLDLENGTH]);
+	dim.truckCenter = TabGetFloat(&tabs[M_TRKCENTER]);
+	dim.truckCenterOffset = TabGetFloat(&tabs[M_TRKOFFSET]);
+	if (dim.truckCenterOffset < 0) {
+		dim.truckCenterOffset = 0;
+	}
+
+	if (tabs[M_MANUF].len > 0 && tabs[M_PARTNO].len > 0) {
+		partP = CarPartFind(tabs[M_MANUF].ptr, tabs[M_MANUF].len, tabs[M_PARTNO].ptr,
+		                    tabs[M_PARTNO].len, scale);
+
+		if (partP) {
+			UseDefaultsFromPart(partP, tabs, &dim);
+		}
+	}
+
+	BuildTitle(title, tabs );
+
+	options = TabGetLong(&tabs[M_OPTIONS]);
+	type = TabGetLong(&tabs[M_TYPE]);
+	color = TabGetLong(&tabs[M_COLOR]);
+	purchPrice = TabGetFloat(&tabs[M_PURCHPRICE]);
+	currPrice = TabGetFloat(&tabs[M_CURRPRICE]);
+	condition = TabGetLong(&tabs[M_CONDITION]);
+	purchDate = TabGetLong(&tabs[M_PURCHDATE]);
+	srvcDate = TabGetLong(&tabs[M_SRVDATE]);
+	if (dim.carLength <= 0 || dim.carWidth <= 0 || dim.coupledLength <= 0
+	    || dim.truckCenter <= 0) {
+		int rc = NoticeMessage(MSG_CARIMP_MISSING_DIMS, _("Yes"), _("No"), message);
+		if (rc <= 0) {
+			return NULL;
+		}
+	}
+	item = CarItemNew(NULL, PARAM_CUSTOM, index, scale, title, options, type,
+	                  &dim, wDrawFindColor(color),
+	                  purchPrice, currPrice, condition, purchDate, srvcDate);
+
+	if (item&&tabs[M_NOTES].len > 0) {
+		item->data.notes = ConvertNotesFromCsv(&tabs[M_NOTES]);
+	}
+
+	return item;
+}
+
+static int
+CarInvImportCsv(
         int files,
         char** fileName,
         void* data)
 {
 	FILE* f;
-	carItem_p item;
-	tabString_t tabs[40], partTabs[7];
-	int map[40];
-	int i, j, numCol, len, rc;
-	char* cp, * cq;
-	long index;
+	char buffer[LARGE_STRING_LEN];
 
-	char title[STR_LONG_SIZE];
-
-	carDim_t dim;
-	FLOAT_T purchPrice, currPrice;
-	int duplicateIndexError = 0;
-	SCALEINX_T scale;
-	carPart_p partP;
-	int requiredCols;
+	tabString_t tabs[MAX_CSV_COLUMNS];
+	int map[MAX_CSV_COLUMNS];;
 
 	CHECK(fileName != NULL);
 	CHECK(files == 1);
@@ -682,158 +1253,44 @@ static int CarInvImportCsv(
 
 	SetCLocale();
 
-	if (fgets(message, sizeof message, f) == NULL) {
+	if (fgets(buffer, LARGE_STRING_LEN, f) == NULL) {
 		NoticeMessage(MSG_CARIMP_NO_DATA, _("Continue"), NULL);
 		fclose(f);
 		SetUserLocale();
 		return FALSE;
 	}
-	for (j = 0; j < 40; j++) { map[j] = j; }
-	numCol = ParseCsvLine(message, 40, tabs, map);
-	if (numCol <= 0) {
-		fclose(f);
-		SetUserLocale();
-		return FALSE;
-	}
-	for (j = 0; j < 40; j++) { map[j] = -1; }
-	requiredCols = 0;
-	for (i = 0; i < numCol; i++) {
-		for (j = 0; j < COUNT(carCsvColumnTitles); j++) {
-			if (TabStringCmp(carCsvColumnTitles[j], &tabs[i]) == 0) {
-				if (map[i] >= 0) {
-					NoticeMessage(MSG_CARIMP_DUP_COLUMNS, _("Continue"), NULL,
-					              carCsvColumnTitles[j]);
-					fclose(f);
-					SetUserLocale();
-					return FALSE;
-				}
-				map[i] = j;
-				/*j = COUNT( carCsvColumnTitles );*/
-				if (j == M_SCALE || j == M_PROTO || j == M_MANUF || j == M_PARTNO) {
-					requiredCols++;
-				}
-			}
-		}
-		if (map[i] == -1) {
-			tabs[i].ptr[tabs[i].len] = '\0';
-			NoticeMessage(MSG_CARIMP_IGNORED_COLUMN, _("Continue"), NULL, tabs[i].ptr);
-			tabs[i].ptr[tabs[i].len] = ',';
-		}
-	}
-	if (requiredCols != 4) {
-		NoticeMessage(MSG_CARIMP_MISSING_COLUMNS, _("Continue"), NULL);
-		fclose(f);
-		SetUserLocale();
-		return FALSE;
-	}
-	while (fgets(message, sizeof message, f) != NULL) {
-		int cnt;
-		long type = 0;
-		long options, color, condition, purchDate, srvcDate;
 
-		cnt = ParseCsvLine(message, 40, tabs, map);
+	if(!ValidateImportHeaders(f, buffer, map, MAX_CSV_COLUMNS)) {
+		fclose(f);
+		SetUserLocale();
+		return FALSE;
+	}
+
+	while (fgets(buffer, LARGE_STRING_LEN, f) != NULL) {
+		carItem_p item;
+
+		int cnt;
+
+		cnt = ParseCsvLine(buffer, MAX_CSV_COLUMNS, tabs, map);
 		if (cnt == -1) {
 			NoticeMessage(MSG_CARIMP_MISSING_COLUMNS, _("OK"), NULL);
 			fclose(f);
 			SetUserLocale();
 			return FALSE;
 		}
-		if (cnt > numCol) { cnt = numCol; }
-		tabs[M_SCALE].ptr[tabs[M_SCALE].len] = '\0';
-		scale = LookupScale(tabs[M_SCALE].ptr);
-		tabs[M_SCALE].ptr[tabs[M_SCALE].len] = ',';
-		index = TabGetLong(&tabs[M_INDEX]);
-		if (index == 0) {
-			CheckCarDlgItemIndex(&carDlgItemIndex);
-			index = carDlgItemIndex;
-		} else {
-			carDlgItemIndex = index;
-			if (!CheckCarDlgItemIndex(&index)) {
-				if (!duplicateIndexError) {
-					NoticeMessage(MSG_CARIMP_DUP_INDEX, _("Ok"), NULL);
-					duplicateIndexError++;
-				}
-				carDlgItemIndex = index;
-			}
+
+		item = CreateItemFromCsv(tabs, &carDlgItemIndex);
+		if(!item) {
+			fclose(f);
+			SetUserLocale();
+			return FALSE;
 		}
 
-		dim.carLength = TabGetFloat(&tabs[M_CARLENGTH]);
-		dim.carWidth = TabGetFloat(&tabs[M_CARWIDTH]);
-		dim.coupledLength = TabGetFloat(&tabs[M_CPLDLENGTH]);
-		dim.truckCenter = TabGetFloat(&tabs[M_TRKCENTER]);
-		dim.truckCenterOffset = TabGetFloat(&tabs[M_TRKOFFSET]);
-		partP = NULL;
-		if (tabs[M_MANUF].len > 0 && tabs[M_PARTNO].len > 0) {
-			partP = CarPartFind(tabs[M_MANUF].ptr, tabs[M_MANUF].len, tabs[M_PARTNO].ptr,
-			                    tabs[M_PARTNO].len, scale);
-		}
-		if (partP) {
-			TabStringExtract(partP->title, 7, partTabs);
-			if (tabs[M_PROTO].len == 0 && partTabs[T_PROTO].len > 0) { tabs[M_PROTO].ptr = partTabs[T_PROTO].ptr; tabs[M_PROTO].len = partTabs[T_PROTO].len; }
-			if (tabs[M_DESC].len == 0 && partTabs[T_DESC].len > 0) { tabs[M_DESC].ptr = partTabs[T_DESC].ptr; tabs[M_DESC].len = partTabs[T_DESC].len; }
-			if (tabs[M_ROADNAME].len == 0 && partTabs[T_ROADNAME].len > 0) { tabs[M_ROADNAME].ptr = partTabs[T_ROADNAME].ptr; tabs[M_ROADNAME].len = partTabs[T_ROADNAME].len; }
-			if (tabs[M_REPMARK].len == 0 && partTabs[T_REPMARK].len > 0) { tabs[M_REPMARK].ptr = partTabs[T_REPMARK].ptr; tabs[M_REPMARK].len = partTabs[T_REPMARK].len; }
-			if (tabs[M_NUMBER].len == 0 && partTabs[T_NUMBER].len > 0) { tabs[M_NUMBER].ptr = partTabs[T_NUMBER].ptr; tabs[M_NUMBER].len = partTabs[T_NUMBER].len; }
-			if (dim.carLength <= 0) { dim.carLength = partP->dim.carLength; }
-			if (dim.carWidth <= 0) { dim.carWidth = partP->dim.carWidth; }
-			if (dim.coupledLength <= 0) { dim.coupledLength = partP->dim.coupledLength; }
-			if (dim.truckCenter <= 0) { dim.truckCenter = partP->dim.truckCenter; }
-			if (dim.truckCenterOffset < 0) { dim.truckCenterOffset = partP->dim.truckCenterOffset; }
-		}
-		if (dim.truckCenterOffset < 0) { dim.truckCenterOffset = 0; }
-		cp = TabStringCpy(title, &tabs[M_MANUF]);
-		*cp++ = '\t';
-		cp = TabStringCpy(cp, &tabs[M_PROTO]);
-		*cp++ = '\t';
-		cp = TabStringCpy(cp, &tabs[M_DESC]);
-		*cp++ = '\t';
-		cp = TabStringCpy(cp, &tabs[M_PARTNO]);
-		*cp++ = '\t';
-		cp = TabStringCpy(cp, &tabs[M_ROADNAME]);
-		*cp++ = '\t';
-		cp = TabStringCpy(cp, &tabs[M_REPMARK]);
-		*cp++ = '\t';
-		cp = TabStringCpy(cp, &tabs[M_NUMBER]);
-		*cp = '\0';
-		options = TabGetLong(&tabs[M_OPTIONS]);
-		type = TabGetLong(&tabs[M_TYPE]);
-		color = TabGetLong(&tabs[M_COLOR]);
-		purchPrice = TabGetFloat(&tabs[M_PURCHPRICE]);
-		currPrice = TabGetFloat(&tabs[M_CURRPRICE]);
-		condition = TabGetLong(&tabs[M_CONDITION]);
-		purchDate = TabGetLong(&tabs[M_PURCHDATE]);
-		srvcDate = TabGetLong(&tabs[M_SRVDATE]);
-		if (dim.carLength <= 0 || dim.carWidth <= 0 || dim.coupledLength <= 0
-		    || dim.truckCenter <= 0) {
-			rc = NoticeMessage(MSG_CARIMP_MISSING_DIMS, _("Yes"), _("No"), message);
-			if (rc <= 0) {
-				fclose(f);
-				SetUserLocale();
-				return FALSE;
-			}
-			continue;
-		}
-		item = CarItemNew(NULL, PARAM_CUSTOM, index, scale, title, options, type,
-		                  &dim, wDrawFindColor(color),
-		                  purchPrice, currPrice, condition, purchDate, srvcDate);
-		if (tabs[M_NOTES].len > 0) {
-			item->data.notes = cp = MyMalloc((tabs[M_NOTES].len + 2));
-			for (cq = tabs[M_NOTES].ptr, len = tabs[M_NOTES].len; *cq && len; ) {
-				if (strncmp(cq, "<NL>", 4) == 0) {
-					*cp++ = '\n';
-					cq += 4;
-					len -= 4;
-				} else {
-					*cp++ = *cq++;
-					len -= 1;
-				}
-			}
-		}
 		SetFileChanged();
 	}
 	fclose(f);
 	SetUserLocale();
-	CarInvListLoad();
+	LoadSortedList();
 	return TRUE;
 }
 
@@ -843,16 +1300,22 @@ static int CarInvExportCsv(
         void* data)
 {
 	FILE* f;
-	tabString_t tabs[7];
+	tabString_t tabs[MAX_SUBSTRING_COUNT];
+	char *exportfile;
 
 	CHECK(fileName != NULL);
 	CHECK(files == 1);
 	SetCurrentPath(CARSPATHKEY, fileName[0]);
 
-	f = fopen(fileName[0], "w");
+	exportfile = MyMalloc(strlen(fileName[0])+sizeof(COMMA_SEP_EXT) + 1);
+	strcpy(exportfile, fileName[0]);
+	AddDefaultExtension(exportfile, COMMA_SEP_EXT);
+
+	f = fopen(exportfile, "w");
 	if (f == NULL) {
 		NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, _("Export Cars"),
 		              fileName[0], strerror(errno));
+		MyFree(exportfile);
 		return FALSE;
 	}
 
@@ -900,12 +1363,13 @@ static int CarInvExportCsv(
 	}
 	fclose(f);
 	SetUserLocale();
+
+	MyFree(exportfile);
 	return TRUE;
 }
 
-
 static struct wFilSel_t* carInvExportCsv_fs;
-static void CarInvDlgExportCsv(void)
+static void ExportCsv(void)
 {
 	if (carItemInfo_da.cnt <= 0) {
 		return;
@@ -917,7 +1381,7 @@ static void CarInvDlgExportCsv(void)
 }
 
 static struct wFilSel_t* carInvSaveText_fs;
-static void CarInvDlgSaveText(void)
+static void SaveText(void)
 {
 	if (carInvSaveText_fs == NULL)
 		carInvSaveText_fs = wFilSelCreate(mainW, FS_SAVE, 0, _("List Cars"),
@@ -925,11 +1389,8 @@ static void CarInvDlgSaveText(void)
 	wFilSelect(carInvSaveText_fs, GetCurrentPath(CARSPATHKEY));
 }
 
-
-
-
 static struct wFilSel_t* carInvImportCsv_fs;
-static void CarInvDlgImportCsv(void)
+static void ImportCsv(void)
 {
 	if (carInvImportCsv_fs == NULL)
 		carInvImportCsv_fs = wFilSelCreate(mainW, FS_LOAD, 0, _("Import Cars"),
@@ -964,7 +1425,6 @@ static void CsvFormatString(
 	fprintf(f, "%s", sep);
 }
 
-
 static void CsvFormatLong(
         FILE* f,
         long val,
@@ -997,26 +1457,26 @@ static void CsvFormatFloat(
 
 void CarInvListAdd(	carItem_p item)
 {
-	CarInvListLoad();
+	LoadSortedList();
 	carInvInx = (wIndex_t)CarItemFindIndex(item);
 	if (carInvInx >= 0) {
-		ParamLoadControl(&carInvPG, I_CI_LIST);
+		FormLoadSingleControl(&carInvPG, I_CI_LIST);
 	}
 }
 
 
 void CarInvListUpdate(carItem_p item)
 {
-	CarInvListLoad();
+	LoadSortedList();
 	carInvInx = (wIndex_t)CarItemFindIndex(item);
 	if (carInvInx >= 0) {
-		ParamLoadControl(&carInvPG, I_CI_LIST);
+		FormLoadSingleControl(&carInvPG, I_CI_LIST);
 	}
 }
 
-static void CarInvDlgFind(void* unused)
+static void DlgFind(void* unused)
 {
-	carItem_p item = CarInvDlgFindCurrentItem();
+	carItem_p item = FindCurrentItem();
 	coOrd pos;
 	ANGLE_T angle;
 	if (item == NULL || item->car == NULL || IsTrackDeleted(item->car)) { return; }
@@ -1024,32 +1484,32 @@ static void CarInvDlgFind(void* unused)
 	CarSetVisible(item->car);
 	panCenter = pos;
 	LOG(log_carInvDlg, 2, ("PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x,
-	                 panCenter.y));
+	                       panCenter.y));
 	PanHere(I2VP(0));		// CarInvDlgFind
+}
+
+static void ButtonOk(paramGroup_p group)
+{
+
 }
 
 EXPORT void DoCarDlg(void* unused)
 {
 	if (carInvPG.win == NULL) {
-		ParamCreateDialog(&carInvPG, MakeWindowTitle(_("Car Inventory")), _("Find"),
-		                  CarInvDlgFind, ParamCancel_Current, TRUE, NULL,
-		                  F_BLOCK | F_RESIZE | F_RECALLSIZE | PD_F_ALT_CANCELLABEL, CarInvDlgUpdate);
-		for (int inx = I_CI_SORT; inx < I_CI_SORT + N_SORT; inx++) {
-			for (int inx2 = 0; inx2 < COUNT(sortOrders); inx2++) {
-				wListAddValue((wList_p)carInvPLs[inx].control, _(sortOrders[inx2]), NULL,
-				              NULL);
-				ParamLoadControl(&carInvPG, inx);
-			}
-		}
-		ParamDialogOkActive(&carInvPG, FALSE);
+		FormCreateDialog(&carInvPG, MakeWindowTitle(_("Car Inventory")),
+		                 _("Done"), ButtonOk,
+		                 NULL, NULL, TRUE,
+		                 0,
+		                 CarInvDlgUpdate);
+		AddNew(I2VP(I_CI_NEWPART));
 	}
-	CarInvListLoad();
+	LoadSortedList();
 	wShow(carInvPG.win);
 }
 
 
-void InitCarInvDlg(void) 
+void InitCarInvDlg(void)
 {
-	ParamRegister( &carInvPG );
+	FormRegister( &carInvPG );
 	log_carInvDlg = LogFindIndex("carInvDlg");
 }

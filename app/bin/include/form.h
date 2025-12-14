@@ -32,6 +32,7 @@ wBool_t FormStringCheckValue(paramData_p data, char* value);
 long FormUpdate(paramGroup_p pg);
 
 void FormDialogOkActive(paramGroup_p pg, int active);
+void FormButtonOk( paramGroup_p group);
 void FormCancel_Undo(wWin_p winP);
 void FormCancel_Current(paramGroup_p group);
 void FormCancel_Reset(paramGroup_p group);

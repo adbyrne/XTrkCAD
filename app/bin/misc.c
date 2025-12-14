@@ -555,7 +555,10 @@ EXPORT void wShow(wControl_p win)
 		}
 	}
 	if (win != mainW) {
-		wMenuListAdd(winList_mi, -1, wWinGetTitle(win), win);
+		char *title = wWinGetTitle(win);
+		if(title && *title) {
+			wMenuListAdd(winList_mi, -1, title, win);
+		}
 	}
 	wWinShow(win, TRUE);
 }

@@ -251,6 +251,20 @@ void wControlSetPos(
     //}
 }
 
+
+/** 
+ * Set an integer as object data
+ */
+
+ void 
+ wControlSetObjectInt(wControl_p control, const char *key, int value )
+ {
+    g_assert(control != NULL);
+    g_assert(key != NULL && *key != '\0');
+
+    g_object_set_data(G_OBJECT(control->widget), key, GINT_TO_POINTER(value));
+ }
+ 
 /**
  * Set the label for a control
  *

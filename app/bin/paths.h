@@ -29,4 +29,5 @@ void ConvertPathForward(char *string);
 char *FindFilename(char *path);
 char *FindFileExtension(char *path);
 void MakeFullpath(char **str, ...);
+void AddDefaultExtension(char *filename, const char *default_ext);
 #endif

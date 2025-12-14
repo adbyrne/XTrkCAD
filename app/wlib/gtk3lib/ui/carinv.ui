@@ -1,9 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 0.96.1 -->
 <!-- Generated with glade 3.40.0 -->
 <interface>
+  <!-- interface-name carinv.ui -->
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkListStore" id="liststore">
     <columns>
+      <!-- column-name error -->
+      <column type="gboolean"/>
       <!-- column-name data -->
       <column type="gpointer"/>
       <!-- column-name icon -->
@@ -40,146 +44,148 @@
       <column type="gchararray"/>
     </columns>
   </object>
-  <object class="GtkMenu" id="select_newobj">
+  <object class="GtkMenu" id="sort_order">
     <property name="visible">True</property>
+    <child>
+      <object class="GtkMenuItem" id="s-index">
+        <property name="label" translatable="yes">Index</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="s-scale">
+        <property name="label" translatable="yes">Scale</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="s-manuf">
+        <property name="label" translatable="yes">Manufacturer</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="s-partno">
+        <property name="label" translatable="yes">Part No</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="s-type">
+        <property name="label" translatable="yes">Type</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="s-desc">
+        <property name="label" translatable="yes">Description</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="s-roadname">
+        <property name="label" translatable="yes">Roadname</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="s-repmarks">
+        <property name="label" translatable="yes">RepMarks</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="s-purchprice">
+        <property name="label" translatable="yes">Purch Price</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="s-currprice">
+        <property name="label" translatable="yes">Curr Price</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="s-condition">
+        <property name="label" translatable="yes">Condition</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="s-purchdate">
+        <property name="label" translatable="yes">Purch Date</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="s-srvdate">
+        <property name="label" translatable="yes">Service Date</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+  </object>
+  <object class="GtkMenu" id="select_newobj">
     <property name="can-focus">False</property>
+    <property name="visible">True</property>
     <child>
       <object class="GtkMenuItem" id="newproto">
-        <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="label" translatable="yes">New Car Prototype</property>
-        <property name="use-underline">True</property>
+        <property name="visible">True</property>
       </object>
     </child>
     <child>
       <object class="GtkMenuItem" id="newpart">
-        <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="label" translatable="yes">New Car Part</property>
-        <property name="use-underline">True</property>
+        <property name="visible">True</property>
       </object>
     </child>
   </object>
-  <object class="GtkListStore" id="sortorder">
-    <columns>
-      <!-- column-name label -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">Index</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Scale</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Manufacturer</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Part No</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Type</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Description</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Roadname</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Rep Marks</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Purc Price</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Curr Price</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Condition</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Purc Date</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Srvc Date</col>
-      </row>
-    </data>
-  </object>
   <object class="GtkDialog" id="carinv">
-    <property name="width-request">800</property>
-    <property name="can-focus">False</property>
     <property name="border-width">18</property>
+    <property name="can-focus">False</property>
+    <property name="height-request">400</property>
     <property name="type-hint">dialog</property>
+    <property name="width-request">800</property>
+    <child type="action">
+      <object class="GtkButton" id="id_help">
+        <property name="label">_Help</property>
+        <property name="use-underline">True</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="id_ok">
+        <property name="label">_Done</property>
+        <property name="use-underline">True</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
     <child internal-child="vbox">
       <object class="GtkBox">
         <property name="can-focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox">
-            <property name="can-focus">False</property>
-            <property name="halign">start</property>
-            <property name="valign">start</property>
-            <property name="margin-top">18</property>
-            <property name="layout-style">end</property>
-            <child>
-              <object class="GtkToggleButton" id="id-help">
-                <property name="label" translatable="yes">_Help</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-                <property name="use-underline">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToggleButton" id="id-cancel">
-                <property name="label" translatable="yes">_Close</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-                <property name="use-underline">True</property>
-                <style>
-                  <class name="suggested-action"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
         <child>
           <!-- n-columns=2 n-rows=3 -->
           <object class="GtkGrid">
-            <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="row-spacing">12</property>
             <property name="column-spacing">12</property>
+            <property name="margin-bottom">18</property>
+            <property name="row-spacing">12</property>
+            <property name="visible">True</property>
             <child>
               <object class="GtkBox">
-                <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="spacing">12</property>
+                <property name="visible">True</property>
                 <child>
                   <object class="GtkLabel">
-                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label" translatable="yes">_Sort by</property>
                     <property name="use-underline">True</property>
+                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -188,80 +194,127 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkComboBox" id="sort1">
-                    <property name="width-request">110</property>
+                  <object class="GtkFlowBox">
+                    <property name="column-spacing">6</property>
+                    <property name="orientation">vertical</property>
+                    <property name="selection-mode">none</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="model">sortorder</property>
-                    <property name="id-column">0</property>
                     <child>
-                      <object class="GtkCellRendererText"/>
-                      <attributes>
-                        <attribute name="text">0</attribute>
-                      </attributes>
+                      <object class="GtkBox" id="sort1">
+                        <property name="spacing">6</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton">
+                            <property name="relief">none</property>
+                            <property name="visible">True</property>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="icon-name">window-close</property>
+                                <property name="visible">True</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <style>
+                          <class name="tag"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="sort2">
+                        <property name="spacing">6</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton">
+                            <property name="relief">none</property>
+                            <property name="visible">True</property>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="icon-name">window-close</property>
+                                <property name="visible">True</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <style>
+                          <class name="tag"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="sort3">
+                        <property name="spacing">6</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton">
+                            <property name="relief">none</property>
+                            <property name="visible">True</property>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="icon-name">window-close</property>
+                                <property name="visible">True</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <style>
+                          <class name="tag"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="sort4">
+                        <property name="spacing">6</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton">
+                            <property name="relief">none</property>
+                            <property name="visible">True</property>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="icon-name">window-close</property>
+                                <property name="visible">True</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <style>
+                          <class name="tag"/>
+                        </style>
+                      </object>
                     </child>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
+                    <property name="expand">True</property>
                     <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkComboBox" id="sort2">
-                    <property name="width-request">110</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="model">sortorder</property>
-                    <child>
-                      <object class="GtkCellRendererText"/>
-                      <attributes>
-                        <attribute name="text">0</attribute>
-                      </attributes>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkComboBox" id="sort3">
-                    <property name="width-request">110</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="model">sortorder</property>
-                    <child>
-                      <object class="GtkCellRendererText"/>
-                      <attributes>
-                        <attribute name="text">0</attribute>
-                      </attributes>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">3</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkComboBox" id="sort4">
-                    <property name="width-request">110</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="model">sortorder</property>
-                    <child>
-                      <object class="GtkCellRendererText"/>
-                      <attributes>
-                        <attribute name="text">0</attribute>
-                      </attributes>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">4</property>
                   </packing>
                 </child>
               </object>
@@ -271,27 +324,30 @@
               </packing>
             </child>
             <child>
-              <object class="GtkScrolledWindow" id="scrollwindow">
-                <property name="visible">True</property>
+              <object class="GtkScrolledWindow" id="list">
                 <property name="can-focus">True</property>
                 <property name="hexpand">True</property>
-                <property name="vexpand">True</property>
                 <property name="shadow-type">in</property>
+                <property name="vexpand">True</property>
+                <property name="visible">True</property>
                 <child>
                   <object class="GtkTreeView" id="treeview">
-                    <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="model">liststore</property>
+                    <property name="visible">True</property>
                     <child internal-child="selection">
-                      <object class="GtkTreeSelection"/>
+                      <object class="GtkTreeSelection">
+                        <property name="mode">multiple</property>
+                      </object>
                     </child>
                     <child>
                       <object class="GtkTreeViewColumn">
                         <property name="title" translatable="yes">Index</property>
                         <child>
                           <object class="GtkCellRendererText"/>
+                          <!-- Custom child fragments -->
                           <attributes>
-                            <attribute name="text">2</attribute>
+                            <attribute name="text">3</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -301,8 +357,9 @@
                         <property name="title" translatable="yes">Scale</property>
                         <child>
                           <object class="GtkCellRendererText"/>
+                          <!-- Custom child fragments -->
                           <attributes>
-                            <attribute name="text">3</attribute>
+                            <attribute name="text">4</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -312,8 +369,9 @@
                         <property name="title" translatable="yes">Manufacturer</property>
                         <child>
                           <object class="GtkCellRendererText"/>
+                          <!-- Custom child fragments -->
                           <attributes>
-                            <attribute name="text">4</attribute>
+                            <attribute name="text">5</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -323,8 +381,9 @@
                         <property name="title" translatable="yes">Part No</property>
                         <child>
                           <object class="GtkCellRendererText"/>
+                          <!-- Custom child fragments -->
                           <attributes>
-                            <attribute name="text">5</attribute>
+                            <attribute name="text">6</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -334,8 +393,9 @@
                         <property name="title" translatable="yes">Type</property>
                         <child>
                           <object class="GtkCellRendererText"/>
+                          <!-- Custom child fragments -->
                           <attributes>
-                            <attribute name="text">6</attribute>
+                            <attribute name="text">7</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -345,8 +405,9 @@
                         <property name="title" translatable="yes">Description</property>
                         <child>
                           <object class="GtkCellRendererText"/>
+                          <!-- Custom child fragments -->
                           <attributes>
-                            <attribute name="text">7</attribute>
+                            <attribute name="text">8</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -356,8 +417,9 @@
                         <property name="title" translatable="yes">Roadname</property>
                         <child>
                           <object class="GtkCellRendererText"/>
+                          <!-- Custom child fragments -->
                           <attributes>
-                            <attribute name="text">8</attribute>
+                            <attribute name="text">9</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -367,8 +429,9 @@
                         <property name="title" translatable="yes">Rep Marks</property>
                         <child>
                           <object class="GtkCellRendererText"/>
+                          <!-- Custom child fragments -->
                           <attributes>
-                            <attribute name="text">9</attribute>
+                            <attribute name="text">10</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -378,8 +441,9 @@
                         <property name="title" translatable="yes">Purc Price</property>
                         <child>
                           <object class="GtkCellRendererText"/>
+                          <!-- Custom child fragments -->
                           <attributes>
-                            <attribute name="text">10</attribute>
+                            <attribute name="text">11</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -389,8 +453,9 @@
                         <property name="title" translatable="yes">Curr Price</property>
                         <child>
                           <object class="GtkCellRendererText"/>
+                          <!-- Custom child fragments -->
                           <attributes>
-                            <attribute name="text">11</attribute>
+                            <attribute name="text">12</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -400,8 +465,9 @@
                         <property name="title" translatable="yes">Condition</property>
                         <child>
                           <object class="GtkCellRendererText"/>
+                          <!-- Custom child fragments -->
                           <attributes>
-                            <attribute name="text">12</attribute>
+                            <attribute name="text">13</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -411,8 +477,9 @@
                         <property name="title" translatable="yes">Purc Date</property>
                         <child>
                           <object class="GtkCellRendererText"/>
+                          <!-- Custom child fragments -->
                           <attributes>
-                            <attribute name="text">13</attribute>
+                            <attribute name="text">14</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -422,8 +489,9 @@
                         <property name="title" translatable="yes">Srvc Date</property>
                         <child>
                           <object class="GtkCellRendererText"/>
+                          <!-- Custom child fragments -->
                           <attributes>
-                            <attribute name="text">14</attribute>
+                            <attribute name="text">15</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -433,8 +501,9 @@
                         <property name="title" translatable="yes">Locat'n</property>
                         <child>
                           <object class="GtkCellRendererText"/>
+                          <!-- Custom child fragments -->
                           <attributes>
-                            <attribute name="text">15</attribute>
+                            <attribute name="text">16</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -444,8 +513,9 @@
                         <property name="title" translatable="yes">Notes</property>
                         <child>
                           <object class="GtkCellRendererText"/>
+                          <!-- Custom child fragments -->
                           <attributes>
-                            <attribute name="text">16</attribute>
+                            <attribute name="text">17</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -460,20 +530,20 @@
             </child>
             <child>
               <object class="GtkButtonBox">
-                <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="halign">start</property>
-                <property name="valign">center</property>
+                <property name="layout-style">start</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">6</property>
-                <property name="layout-style">start</property>
+                <property name="valign">center</property>
+                <property name="visible">True</property>
                 <child>
                   <object class="GtkToggleButton" id="find">
-                    <property name="label" translatable="yes">_Find</property>
-                    <property name="visible">True</property>
                     <property name="can-focus">True</property>
+                    <property name="label" translatable="yes">_Find</property>
                     <property name="receives-default">True</property>
                     <property name="use-underline">True</property>
+                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -483,11 +553,11 @@
                 </child>
                 <child>
                   <object class="GtkToggleButton" id="edit">
-                    <property name="label" translatable="yes">_Edit</property>
-                    <property name="visible">True</property>
                     <property name="can-focus">True</property>
+                    <property name="label" translatable="yes">_Edit</property>
                     <property name="receives-default">True</property>
                     <property name="use-underline">True</property>
+                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -497,11 +567,11 @@
                 </child>
                 <child>
                   <object class="GtkToggleButton" id="delete">
-                    <property name="label" translatable="yes">_Delete</property>
-                    <property name="visible">True</property>
                     <property name="can-focus">True</property>
+                    <property name="label" translatable="yes">_Delete</property>
                     <property name="receives-default">True</property>
                     <property name="use-underline">True</property>
+                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -517,18 +587,18 @@
             </child>
             <child>
               <object class="GtkButtonBox">
-                <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="halign">start</property>
-                <property name="valign">start</property>
-                <property name="spacing">6</property>
                 <property name="layout-style">start</property>
+                <property name="spacing">6</property>
+                <property name="valign">start</property>
+                <property name="visible">True</property>
                 <child>
                   <object class="GtkToggleButton" id="import">
-                    <property name="label" translatable="yes">Import...</property>
-                    <property name="visible">True</property>
                     <property name="can-focus">True</property>
+                    <property name="label" translatable="yes">Import...</property>
                     <property name="receives-default">True</property>
+                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -538,10 +608,10 @@
                 </child>
                 <child>
                   <object class="GtkToggleButton" id="export">
-                    <property name="label" translatable="yes">Export ...</property>
-                    <property name="visible">True</property>
                     <property name="can-focus">True</property>
+                    <property name="label" translatable="yes">Export ...</property>
                     <property name="receives-default">True</property>
+                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -551,10 +621,10 @@
                 </child>
                 <child>
                   <object class="GtkToggleButton" id="savetext">
-                    <property name="label" translatable="yes">Save...</property>
-                    <property name="visible">True</property>
                     <property name="can-focus">True</property>
+                    <property name="label" translatable="yes">Save...</property>
                     <property name="receives-default">True</property>
+                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -564,15 +634,15 @@
                 </child>
                 <child>
                   <object class="GtkBox">
-                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
+                    <property name="visible">True</property>
                     <child>
                       <object class="GtkToggleButton" id="add">
-                        <property name="label" translatable="yes">_New Car</property>
-                        <property name="visible">True</property>
                         <property name="can-focus">True</property>
+                        <property name="label" translatable="yes">_New Car</property>
                         <property name="receives-default">True</property>
                         <property name="use-underline">True</property>
+                        <property name="visible">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -581,17 +651,17 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkMenuButton">
-                        <property name="visible">True</property>
+                      <object class="GtkMenuButton" id="select_new">
                         <property name="can-focus">True</property>
                         <property name="focus-on-click">False</property>
-                        <property name="receives-default">True</property>
                         <property name="popup">select_newobj</property>
+                        <property name="receives-default">True</property>
+                        <property name="visible">True</property>
                         <child>
                           <object class="GtkImage">
-                            <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="icon-name">pan-down-symbolic</property>
+                            <property name="visible">True</property>
                           </object>
                         </child>
                       </object>
@@ -618,10 +688,17 @@
               </packing>
             </child>
             <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
+              <object class="GtkMenuButton" id="select_sort">
+                <property name="label">+ Add</property>
+                <property name="popup">sort_order</property>
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="height">1</property>
+                <property name="left-attach">1</property>
+                <property name="top-attach">0</property>
+                <property name="width">1</property>
+              </packing>
             </child>
           </object>
           <packing>
@@ -632,5 +709,9 @@
         </child>
       </object>
     </child>
+    <action-widgets>
+      <action-widget response="GTK_RESPONSE_HELP">id_help</action-widget>
+      <action-widget response="GTK_RESPONSE_OK">id_ok</action-widget>
+    </action-widgets>
   </object>
 </interface>

@@ -311,7 +311,7 @@ MenuPush(void *dp)
 	paramData_p p = (paramData_p)dp;
 
 	if(p->valueP) {
-		((void (*)(void))p->valueP)();
+		((void (*)(void *))p->valueP)(p->context);
 	}
 }
 
@@ -585,6 +585,9 @@ CreateControl(paramData_p pd, char* helpStr,	unsigned x,	unsigned y)
 		break;
 	case PD_NOTEBOOK:
 		pd->control = wNotebookCreate(win, helpStr, 0, 0L);
+		break;
+	case PD_TAG:
+		pd->control = wTagCreate(win, helpStr, _(pd->winLabel), pd->valueP, pd->context);
 		break;
 	default:
 		CHECK(FALSE);

@@ -86,8 +86,8 @@ char* TabStringCpy(
 
 
 int TabStringCmp(
-        char* src,
-        tabString_t* tab)
+        const char* src,
+        const tabString_t* tab)
 {
 	size_t srclen = strlen(src);
 	size_t len = srclen;
