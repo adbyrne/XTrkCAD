@@ -609,10 +609,18 @@ No \f{Car Prototypes} are defined. Load a car prototype definition file (such as
 Refer to \k{cmdPrmfile} for detail regarding the \f{Parameter Files} or \k{carprototype} for detail regarding the \f{Car Prototype} dialog.
 END
 
-MESSAGE MSG_CARIMP_NO_DATA
-No data present in Car Import file.
+MESSAGE MSG_CARIMP_TOO_MANY_COLUMNS
+Too many columns in CSV import file.
 HELP
-The \f{Car Import} function reads car values from a Comma-Separated-Value (CSV) file. The import file must contain headers for at least the \e{Scale}, \e{Prototype}, \e{Manufacturer} and \e{Partno} columns. In addition, information relative to at least one car must be included in the file otherwise this error occurs.
+The \f{Car Import} function reads car values from a Comma-Separated-Value (CSV) file. The maximum number of columns is limited to 40.
+
+Refer to \k{cmdCarinv} for detail.
+END
+
+MESSAGE MSG_CARIMP_NO_DATA
+The CSV import file is empty or can't be read.
+HELP
+The \f{Car Import} function reads car values from a Comma-Separated-Value (CSV) file. The selected file is empty or can't be read by the XTrackCAD.
 
 Refer to \k{cmdCarinv} for detail.
 END

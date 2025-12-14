@@ -24,7 +24,7 @@ char* TabStringDup(const tabString_t* tab);
 
 char* TabStringCpy(char* dst, const tabString_t* tab);
 
-int TabStringCmp(char* src, tabString_t* tab);
+int TabStringCmp(const char* src, const tabString_t* tab);
 
 long TabGetLong(const tabString_t* tab);
 
