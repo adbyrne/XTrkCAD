@@ -448,8 +448,15 @@ long FormUpdate(
 			stringV = wEntryGetValue(p->control);
 			if ((p->option & PDO_NOTBLANK) && stringV[0] == '\0') {
 				p->bInvalid = TRUE;
+				wTooltipSetText(p->control, _("String cannot be blank"));
+        		wControlHilite(p->control, TRUE);
 				break;
 			}
+
+			p->bInvalid = FALSE;
+			wTooltipSet(p->control, p->group->nameStr, p->nameStr); 
+			wControlHilite(p->control, FALSE);
+			
 			if (strcmp(stringV, p->oldD.s) != 0) {
 				if (p->oldD.s) {
 					MyFree(p->oldD.s);
@@ -478,6 +485,9 @@ long FormUpdate(
 		case PD_MENU:
 		case PD_MENUITEM:
 		case PD_BITMAP:
+		case PD_TAG:
+		case PD_SCALE:
+		case PD_NOTEBOOK:
 			break;
 		}
 	}
