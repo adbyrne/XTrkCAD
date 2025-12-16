@@ -37,9 +37,7 @@
 #include "misc.h"
 #include "common-ui.h"
 
-#ifndef MKTURNOUT
 static int log_cornuturnoutdesigner;
-#endif
 
 dynArr_t tempSegs_da;
 char tempCustom[4096];
@@ -108,47 +106,16 @@ typedef struct {
 	wBool_t slipmode;
 } toDesignDesc_t;
 
-#ifndef MKTURNOUT
 static wWin_p newTurnW;
-#endif
 
-//static FLOAT_T newTurnAngle0;
-//static FLOAT_T newTurnLen0;
-//static FLOAT_T newTurnOff0;
-
-//static FLOAT_T newTurnAngle1;
-//static FLOAT_T newTurnLen1;
-//static FLOAT_T newTurnOff1;
-
-//static FLOAT_T newTurnAngle2;
-//static FLOAT_T newTurnLen2;
-
-//static FLOAT_T newTurnAngle3;
-
-//static FLOAT_T newTurnLen5;
-
-#ifndef MKTURNOUT
-//static FLOAT_T newTurnRad0;
-//static FLOAT_T newTurnRad1;
-//static FLOAT_T newTurnRad2;
-//static FLOAT_T newTurnOff2;
-//static FLOAT_T newTurnRad3;
-//static FLOAT_T newTurnOff3;
-//static FLOAT_T newTurnLen3;
-//static FLOAT_T newTurnLen4;
-//static FLOAT_T newTurnToeL;
-//static FLOAT_T newTurnToeR;
-#endif
 
 static long newTurnAngleMode = 0;
 static long newTurnSlipMode = 0;
 static char newTurnRightDesc[STR_SIZE], newTurnLeftDesc[STR_SIZE];
 static char newTurnRightPartno[STR_SIZE], newTurnLeftPartno[STR_SIZE];
 static char newTurnManufacturer[STR_SIZE];
-#ifndef MKTURNOUT
 static char *newTurnAngleModeLabels[] = { N_("Frog #"), N_("Degrees"), NULL };
 static char *newTurnSlipModeLabels[] = { N_("Dual Path"), N_("Quad Path"), NULL };
-#endif
 static paramFloatRange_t r0d001_10000 = { 0.001, 10000, 80 };
 //static paramFloatRange_t r0d300_10000 = { 0.300, 10000, 80 };
 static paramFloatRange_t r0_10000 = { 0, 10000, 80 };
@@ -162,21 +129,17 @@ static DIST_T newTurnRoadbedWidth;
 static LWIDTH_T newTurnRoadbedLineWidth = 0;
 static wDrawColor newTurnRoadbedColor;
 static paramFloatRange_t r_90_90 = { -90, 90, 80 };
-#ifndef MKTURNOUT
 static paramFloatRange_t r0_100 = { 0, 100, 80 };
 static paramIntegerRange_t i0_100 = { 0, 100, 40 };
 static void ShowTurnoutDesigner( void * context );
 static void NewTurnPrint(
         void * junk );
-#endif
 
 static coOrd points[20];
-#ifndef MKTURNOUT
 static coOrd end_points[20];
 static coOrd end_centers[20];
 static double end_arcs[20];
 static double end_angles[20];
-#endif
 static DIST_T radii[20];
 static double angles[20];
 
@@ -184,8 +147,6 @@ static double angles[20];
 
 static FLOAT_T tdVal[20];
 
-//#ifndef MKTURNOUT
-EXPORT // avoid unused var warning
 paramData_t turnDesignPLs[] = {
 #define I_REG_FIRST (0)
 	{ PD_FLOAT, tdVal+0, "td_reg_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Straight Length") },
@@ -313,7 +274,6 @@ paramData_t turnDesignPLs[] = {
 	,
 #define I_PLTOTAL ( I_CURVED_FIRST + I_CURVED_COUNT )
 
-#ifndef MKTURNOUT
 #define I_TOMANUF			(I_PLTOTAL)
 	{ PD_STRING, &newTurnManufacturer, "manuf", PDO_NOTBLANK, NULL, N_("Manufacturer"), 0, 0, sizeof(newTurnManufacturer)},
 #define I_TOLDESC			( I_TOMANUF + 1 )
@@ -339,32 +299,18 @@ paramData_t turnDesignPLs[] = {
 #define I_TOSLIPMODE        ( I_TOANGMODE + 2 )
 	{ PD_RADIO, &newTurnSlipMode, "slippath", 0, newTurnSlipModeLabels },
 	{ PD_MESSAGE, NULL, "slippath_label", 0, NULL },
-#endif
 };
-//#endif
 
-#ifndef MKTURNOUT
 static paramGroup_t turnDesignPG = { "turnout-designer", PGO_FULLDIALOGFROMBUILDER, turnDesignPLs, COUNT( turnDesignPLs )  };
 
 
 /* Copy non-track segs if there are any (Group & CustMgm/Edit) and user said yes. */
 static BOOL_T includeNontrackSegments = FALSE;
 
-#else
-int doCustomInfoLine = 1;
-int doRoadBed = 0;
-char specialLine[256];
-#endif
-
 static turnoutInfo_t * customTurnout1 = NULL, * customTurnout2 = NULL;
 static toDesignDesc_t * curDesign;
 
-#ifndef MKTURNOUT
 #define SLICE( FIRST, COUNT ) FIRST, COUNT,
-#else
-#define SLICE( FIRST, COUNT ) FIRST, COUNT,
-#endif
-
 
 
 /*********************************************************************
@@ -436,7 +382,6 @@ static toDesignDesc_t CrvDesc = {
 	&Crv1Schema, 1
 };
 
-#ifndef MKTURNOUT
 #ifdef _DRAWLINES
 static wLines_t CornuLines[] = {
 #include "tocornu.lin"
@@ -460,7 +405,6 @@ static toDesignDesc_t CornuDesc = {
 	DRAWLINES( CornuLines )
 	&CornuSchema, 1
 };
-#endif
 
 #ifdef _DRAWLINES
 static wLines_t WyeLines[] = {
@@ -501,7 +445,6 @@ static toDesignDesc_t WyeDesc = {
 	NULL, 1
 };
 
-#ifndef MKTURNOUT
 #ifdef _DRAWLINES
 static wLines_t CornuWyeLines[] = {
 #include "tocornuwye.lin"
@@ -524,7 +467,6 @@ static toDesignDesc_t CornuWyeDesc = {
 	DRAWLINES( CornuWyeLines )
 	NULL, 1
 };
-#endif
 
 #ifdef _DRAWLINES
 static wLines_t ThreewayLines[] = {
@@ -568,7 +510,6 @@ static toDesignDesc_t ThreewayDesc = {
 	NULL, 1
 };
 
-#ifndef MKTURNOUT
 #ifdef _DRAWLINES
 static wLines_t CornuThreewayLines[] = {
 #include "tocornu3way.lin"
@@ -592,7 +533,6 @@ static toDesignDesc_t CornuThreewayDesc = {
 	DRAWLINES( CornuThreewayLines )
 	NULL, 1
 };
-#endif
 
 #ifdef _DRAWLINES
 static wLines_t CrossingLines[] = {
@@ -672,7 +612,6 @@ static toDesignDesc_t DoubleSlipDesc = {
 	&DoubleSlipSchema, 1
 };
 
-#ifndef MKTURNOUT
 #ifdef _DRAWLINES
 static wLines_t RightCrossoverLines[] = {
 #include "torcross.lin"
@@ -695,9 +634,7 @@ static toDesignDesc_t RightCrossoverDesc = {
 	DRAWLINES( RightCrossoverLines )
 	&RightCrossoverSchema, 0
 };
-#endif
 
-#ifndef MKTURNOUT
 #ifdef _DRAWLINES
 static wLines_t LeftCrossoverLines[] = {
 #include "tolcross.lin"
@@ -720,7 +657,6 @@ static toDesignDesc_t LeftCrossoverDesc = {
 	DRAWLINES( LeftCrossoverLines )
 	&LeftCrossoverSchema, 0
 };
-#endif
 
 #ifdef _DRAWLINES
 static wLines_t DoubleCrossoverLines[] = {
@@ -907,7 +843,6 @@ static toDesignDesc_t TurntableDesc = {
 };
 #endif
 
-#ifndef MKTURNOUT
 static toDesignDesc_t * designDescs[] = {
 	&RegDesc,
 	&CrvDesc,
@@ -925,7 +860,6 @@ static toDesignDesc_t * designDescs[] = {
 	&StrSectionDesc,
 	&CrvSectionDesc
 };
-#endif
 
 /**************************************************************************
  *
@@ -1366,7 +1300,6 @@ static void AddRoadbed( void )
  *
  */
 
-#ifndef MKTURNOUT
 /* For Bezier Segs we need to duplicate the subSegs Array as well */
 void AppendSegs(dynArr_t * target, dynArr_t * source)
 {
@@ -1435,11 +1368,9 @@ BOOL_T CallCornuNoBez(coOrd pos[2], coOrd center[2], ANGLE_T angle[2],
 	return TRUE;
 }
 
-#endif
 
 
 
-#ifndef MKTURNOUT
 wIndex_t pathLen;
 struct {
 	coOrd pos[10];
@@ -2428,7 +2359,6 @@ static toDesignSchema_t * LoadWye3WayCornuSegs(
 	//segCnt = tempSegs_da.cnt;
 	return pp;
 }
-#endif
 
 
 /*********************************************************************
@@ -2564,7 +2494,6 @@ static toDesignSchema_t * LoadSegs(
 			SetEndPt( TempEndPt(2), points[1], 90.0-tdVal[2] );
 			SetEndPt( TempEndPt(1), points[2], 90.0-tdVal[5] );
 			break;
-#ifndef MKTURNOUT
 		case NTO_CORNU:
 			TempEndPtsSet( 3 );
 			FixFrog( tdVal+2 );
@@ -2585,7 +2514,6 @@ static toDesignSchema_t * LoadSegs(
 			SetEndPt( TempEndPt(1), points[2], 90.0-tdVal[6] );
 			pp = LoadCurvedCornuSegs( dp->type );
 			break;
-#endif
 		case NTO_WYE:
 		case NTO_3WAY:
 			TempEndPtsSet( (dp->type==NTO_3WAY)?4:3 );
@@ -2624,7 +2552,6 @@ static toDesignSchema_t * LoadSegs(
 				SetEndPt( TempEndPt(3), points[7], 90.0 );
 			}
 			break;
-#ifndef MKTURNOUT
 		case NTO_CORNUWYE:
 		case NTO_CORNU3WAY:
 			FixFrog( tdVal+2 );
@@ -2654,19 +2581,19 @@ static toDesignSchema_t * LoadSegs(
 			}
 			SetEndPt( TempEndPt(0), points[0], 270.0 );
 
-			if (tdVal[0] < 0.0){//newTurnRad0<0.0) {
+			if (tdVal[3] < 0.0){//newTurnRad0<0.0) {
 				SetEndPt( TempEndPt(1), points[1], 90.0+angles[1] );
 			} else {
 				SetEndPt( TempEndPt(1), points[1], 90.0-angles[1] );
 			}
-			if (tdVal[0] < 0.0){//newTurnRad1<0.0) {
+			if (tdVal[11] < 0.0){//newTurnRad1<0.0) {
 				SetEndPt( TempEndPt(2), points[2], 90.0-angles[2] );
 			} else {
 				SetEndPt( TempEndPt(2), points[2], 90.0+angles[2] );
 			}
 			if (dp->type == NTO_CORNU3WAY) {
 				// TODO 10?
-				if (tdVal[10] < 0.0) {//newTurnRad3<0.0) {
+				if (tdVal[7] < 0.0) {//newTurnRad3<0.0) {
 					SetEndPt( TempEndPt(3), points[3], 90.0+angles[3] );
 				} else {
 					SetEndPt( TempEndPt(3), points[3], 90.0-angles[3] );
@@ -2675,7 +2602,6 @@ static toDesignSchema_t * LoadSegs(
 			pp = LoadWye3WayCornuSegs( dp->type );
 			if ( ! pp ) { return NULL; }
 			break;
-#endif
 
 		case NTO_D_SLIP:
 		case NTO_S_SLIP:
@@ -2787,22 +2713,18 @@ static toDesignSchema_t * LoadSegs(
 			}
 			break;
 
-#ifndef MKTURNOUT
 		case NTO_CORNU:
 			pp = LoadCurvedCornuSegs( dp->type );
 			if ( ! pp ) { return NULL; }
-#endif
 		}
 //#endif
 	}
 
-#ifndef MKTURNOUT
 #ifdef XXX
 	if(dp->type == NTO_CORNU) {
 		TempEndPtsSet( 3 );
 		FixFrog( tdVal+1 );
 	}
-#endif
 #endif
 
 	switch ( dp->type ) {
@@ -2849,16 +2771,13 @@ static toDesignSchema_t * LoadSegs(
 
 	AddRoadbed();
 
-#ifndef MKTURNOUT
 	if ( CheckPaths( tempSegs_da.cnt, &tempSegs(0), pp->paths, dp->label ) < 0 ) {
 		return NULL;
 	}
-#endif
 	return pp;
 }
 
 
-#ifndef MKTURNOUT
 static void CopyNonTracks( turnoutInfo_t * to )
 {
 	trkSeg_p sp0;
@@ -2870,10 +2789,8 @@ static void CopyNonTracks( turnoutInfo_t * to )
 		}
 	}
 }
-#endif
 
 
-#ifndef MKTURNOUT
 static void NewTurnPrint(
         void * junk )
 {
@@ -3035,7 +2952,6 @@ quitPrinting:
 	wPrintDocEnd();
 }
 //#endif
-#endif
 
 
 static char * BuildTrimedTitle( char * cp, const char * sep, const char * mfg,
@@ -3066,10 +2982,8 @@ void OutputTurnoutDef(
        	turnoutInfo_t * customTurnout,
        	char * customInfoP	)
 {
-#ifndef MKTURNOUT
 	BOOL_T foundR=FALSE;
 	turnoutInfo_t *to;
-#endif
 
 	long options = 0;
 	if ( curDesign->type == NTO_D_SLIP && newTurnSlipMode == 1) {
@@ -3077,7 +2991,6 @@ void OutputTurnoutDef(
 	}
 
 //	BuildTrimedTitle( message, "\t", sManuf, sDesc, sPartno );
-#ifndef MKTURNOUT
 	if (includeNontrackSegments && customTurnout) {
 		CopyNonTracks( customTurnout );
 	}
@@ -3091,20 +3004,15 @@ void OutputTurnoutDef(
 			       TempEndPtsCount(), TempEndPt(0),
 			       FALSE, options );
 	to->customInfo = customInfoP;
-#endif
 	if (f) {
 		fprintf( f, "TURNOUT %s \"%s\" %ld\n", newTurnScaleName, PutTitle(tempCustom),
 		         options );
-#ifdef MKTURNOUT
-		if (doCustomInfoLine)
-#endif
-			fprintf( f, "\tU %s\n", customInfoP );
+		fprintf( f, "\tU %s\n", customInfoP );
 		WriteCompoundPathsEndPtsSegs( f, pp->paths,
 					      tempSegs_da.cnt, &tempSegs(0),
 		                              TempEndPtsCount(), TempEndPt(0) );
 	}
 
-#ifndef MKTURNOUT
 	if ( loadPoints &&
 	     customTurnout == NULL &&
 	     ( foundR || FindCompound( FIND_TURNOUT, newTurnScaleName, message ) ) ) {
@@ -3112,7 +3020,6 @@ void OutputTurnoutDef(
 			return;
 		}
 	}
-#endif
 }
 
 static void NewTurnOk( void * context )
@@ -3125,13 +3032,7 @@ static void NewTurnOk( void * context )
 	coOrd pos;
 	ANGLE_T angle;
 
-#ifndef MKTURNOUT
 	SetCLocale();
-//	if ( ! FormCheckInputs( &turnDesignPG, (wControl_p)turnDesignPG.okB ) ) {
-//		return;
-//	}
-#endif
-
 	//
 	// Generate segments and endPts
 	//
@@ -3210,7 +3111,6 @@ static void NewTurnOk( void * context )
 		SetEndPt( TempEndPt(2), pos, angle );
 		BuildTrimedTitle( tempCustom, "\t", newTurnManufacturer, newTurnRightDesc,
 		                  newTurnRightPartno );
-//#ifndef MKTURNOUT
 		OutputTurnoutDef( curDesign, pp, FALSE, f, customTurnout2, customInfoP );
 		break;
 	default:
@@ -3218,7 +3118,6 @@ static void NewTurnOk( void * context )
 	}
 	tempCustom[0] = '\0';
 
-#ifndef MKTURNOUT
 	if (f) {
 		fclose(f);
 	}
@@ -3226,13 +3125,9 @@ static void NewTurnOk( void * context )
 	includeNontrackSegments = FALSE;
 	wHide( newTurnW );
 	DoChangeNotification( CHANGE_PARAMS );
-
-#endif
-
 }
 
 
-#ifndef MKTURNOUT
 
 static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 {
@@ -3626,540 +3521,4 @@ EXPORT void InitNewTurn( wMenu_p m )
 	includeNontrackSegments = FALSE;
 	log_cornuturnoutdesigner = LogFindIndex( "cornuturnoutdesigner" );
 }
-#endif
 
-#ifdef MKTURNOUT
-
-
-char message[STR_HUGE_SIZE];
-char * curScaleName;
-double trackGauge;
-long units = 0;
-wDrawColor drawColorBlack;
-long newTurnRoadbedColorRGB = 0;
-
-EXPORT const char * AbortMessage(
-        const char * sFormat,
-        ... )
-{
-	static char sMessage[STR_SIZE];
-	if ( sFormat == NULL ) {
-		return "";
-	}
-	va_list ap;
-	va_start(ap, sFormat);
-	vsnprintf(sMessage, sizeof sMessage, sFormat, ap);
-	va_end(ap);
-	return sMessage;
-}
-
-EXPORT void AbortProg(
-        const char * sCond,
-        const char * sFileName,
-        int iLineNumber,
-        const char * sMsg )
-{
-	fprintf( stderr, "%s: %s:%d %s", sCond, sFileName, iLineNumber, sMsg );
-	abort();
-}
-
-void * MyRealloc( void * ptr, size_t size )
-{
-	return realloc( ptr, size );
-}
-
-EXPORT char * MyStrdup( const char * str )
-{
-	char * ret;
-	ret = (char*)malloc( strlen( str ) + 1 );
-	strcpy( ret, str );
-	return ret;
-}
-
-EXPORT void LogPrintf(
-        const char * format,
-        ... )
-{
-}
-
-int NoticeMessage( const char * msg, const char * yes, const char * no, ... )
-{
-	/*fprintf( stderr, "%s\n", msg );*/
-	return 0;
-}
-
-FILE * OpenCustom( char * mode)
-{
-	return stdout;
-}
-
-
-void wPrintSetup( wPrintSetupCallBack_p notused )
-{
-}
-
-EXPORT void ComputeCurvedSeg(
-        trkSeg_p s,
-        DIST_T radius,
-        coOrd p0,
-        coOrd p1 )
-{
-	DIST_T d;
-	ANGLE_T a, aa, aaa;
-	s->u.c.radius = radius;
-	d = FindDistance( p0, p1 )/2.0;
-	a = FindAngle( p0, p1 );
-	if (radius > 0) {
-		aa = R2D(asin( d/radius ));
-		aaa = a + (90.0 - aa);
-		Translate( &s->u.c.center, p0, aaa, radius );
-		s->u.c.a0 = NormalizeAngle( aaa + 180.0 );
-		s->u.c.a1 = aa*2.0;
-	} else {
-		aa = R2D(asin( d/(-radius) ));
-		aaa = a - (90.0 - aa);
-		Translate( &s->u.c.center, p0, aaa, -radius );
-		s->u.c.a0 = NormalizeAngle( aaa + 180.0 - aa *2.0 );
-		s->u.c.a1 = aa*2.0;
-	}
-}
-
-EXPORT char * Strcpytrimed( char * dst, const char * src, BOOL_T double_quotes )
-{
-	const char * cp;
-	while (*src && isspace((unsigned char)*src) ) { src++; }
-	if (!*src) {
-		return dst;
-	}
-	cp = src+strlen(src)-1;
-	while ( cp>src && isspace((unsigned char)*cp) ) { cp--; }
-	while ( src<=cp ) {
-		if (*src == '"' && double_quotes) {
-			*dst++ = '"';
-		}
-		*dst++ = *src++;
-	}
-	*dst = '\0';
-	return dst;
-}
-
-
-
-
-EXPORT char * PutTitle( char * cp )
-{
-	static char title[STR_SIZE];
-	char * tp = title;
-	while (*cp) {
-		if (*cp == '\"') {
-			*tp++ = '\"';
-			*tp++ = '\"';
-		} else {
-			*tp++ = *cp;
-		}
-		cp++;
-	}
-	*tp = '\0';
-	return title;
-}
-
-/*
-long wDrawGetRGB(
-        wDrawColor color )
-{
-	return newTurnRoadbedColorRGB;
-}
-*/
-EXPORT BOOL_T WriteSegs(
-        FILE * f,
-        wIndex_t segCnt,
-        trkSeg_p segs )
-{
-	int i, j;
-	BOOL_T rc = TRUE;
-	for ( i=0; i<segCnt; i++ ) {
-		switch ( segs[i].type ) {
-		case SEG_STRLIN:
-		case SEG_STRTRK:
-			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f %0.6f\n",
-			               segs[i].type, (segs[i].type==SEG_STRTRK?0:newTurnRoadbedColorRGB),
-			               segs[i].lineWidth,
-			               segs[i].u.l.pos[0].x, segs[i].u.l.pos[0].y,
-			               segs[i].u.l.pos[1].x, segs[i].u.l.pos[1].y )>0;
-			break;
-		case SEG_CRVTRK:
-		case SEG_CRVLIN:
-			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f\n",
-			               segs[i].type, (segs[i].type==SEG_CRVTRK?0:newTurnRoadbedColorRGB),
-			               segs[i].lineWidth,
-			               fabs(segs[i].u.c.radius),
-			               segs[i].u.c.center.x, segs[i].u.c.center.y,
-			               segs[i].u.c.a0, segs[i].u.c.a1 )>0;
-			break;
-		case SEG_FILCRCL:
-			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f\n",
-			               segs[i].type, newTurnRoadbedColorRGB, segs[i].lineWidth,
-			               fabs(segs[i].u.c.radius),
-			               segs[i].u.c.center.x, segs[i].u.c.center.y )>0;
-			break;
-		case SEG_POLY:
-		case SEG_FILPOLY:
-			rc &= fprintf( f, "\t%c %ld %0.6f %d\n",
-			               segs[i].type, newTurnRoadbedColorRGB, segs[i].lineWidth,
-			               segs[i].u.p.cnt )>0;
-			for ( j=0; j<segs[i].u.p.cnt; j++ )
-				rc &= fprintf( f, "\t\t%0.6f %0.6f\n",
-				               segs[i].u.p.pts[j].pt.x, segs[i].u.p.pts[j].pt.y )>0;
-			break;
-		}
-	}
-	rc &= fprintf( f, "\t%s\n", END_SEGS )>0;
-	return rc;
-}
-
-BOOL_T WriteCompoundPathsEndPtsSegs(
-        FILE * f,
-        PATHPTR_T paths,
-        wIndex_t segCnt,
-        trkSeg_p segs,
-        EPINX_T endPtCnt,
-        trkEndPt_p endPts )
-{
-	int i;
-	PATHPTR_T pp;
-	BOOL_T rc = TRUE;
-	for ( pp=paths; *pp; pp+=2 ) {
-		rc &= fprintf( f, "\tP \"%s\"", (char*)pp )>0;
-		for ( pp+=strlen((char*)pp)+1; pp[0]!=0||pp[1]!=0; pp++ ) {
-			rc &= fprintf( f, " %d", *pp )>0;
-		}
-		rc &= fprintf( f, "\n" )>0;
-	}
-	for ( i=0; i<endPtCnt; i++ )
-		rc &= fprintf( f, "\tE %0.6f %0.6f %0.6f\n",
-		               GetEndPtPos(EndPtIndex(endPts,i)).x,
-		               GetEndPtPos(EndPtIndex(endPts,i)).y,
-		               GetEndPtAngle(EndPtIndex(endPts,i)) )>0;
-#ifdef MKTURNOUT
-	if ( specialLine[0] ) {
-		rc &= fprintf( f, "%s\n", specialLine );
-	}
-#endif
-	rc &= WriteSegs( f, segCnt, segs );
-	return rc;
-}
-
-
-void Usage( int argc, char **argv )
-{
-	int inx;
-	for (inx=1; inx<argc; inx++) {
-		fprintf( stderr, "%s ", argv[inx] );
-	}
-	fprintf( stderr,
-	         "\nUsage: [-m] [-u] [-r#] [-c#] [-l#]\n"
-	         "  <SCL> <MNF> B <DSC> <PNO> <LEN> # Create bumper\n"
-	         "  <SCL> <MNF> S <DSC> <PNO> <LEN> # Create straight track\n"
-	         "  <SCL> <MNF> J <DSC> <PNO> <LEN1> <LEN2> # Create adjustable track\n"
-	         "  <SCL> <MNF> C <DSC> <PNO> <RAD> <ANG> # Create curved track\n"
-	         "  <SCL> <MNF> R <LDSC> <LPNO> <RDSC> <RPNO> <LEN2> <ANG> <OFF> <LEN1> # Create Regular Turnout\n"
-	         "  <SCL> <MNF> Q <LDSC> <LPNO> <RDSC> <RPNO> <RAD> <ANG> <LEN> # Create Radial Turnout\n"
-	         "  <SCL> <MNF> V <LDSC> <LPNO> <RDSC> <RPNO> <LEN1> <ANG1> <OFF1> <LEN2> <ANG2> <OFF2> # Create Curved Turnout\n"
-	         "  <SCL> <MNF> W <LDSC> <LPNO> <RDSC> <RPNO> <RAD1> <ANG2> <RAD2> <ANG2> # Create Radial Curved Turnout\n"
-	         "  <SCL> <MNF> Y <LDSC> <LPNO> <RDSC> <RPNO> <LENL> <ANGL> <OFFL> <LENR> <ANGR> <OFFR> # Create Wye Turnout\n"
-	         "  <SCL> <MNF> 3 <DSC> <PNO> <LEN0> <LENL> <ANGL> <OFFL> <LENR> <ANGR> <OFFR> # Create 3-Way Turnout\n"
-	         "  <SCL> <MNF> X <DSC> <PNO> <LEN1> <ANG> <LEN2> # Create Crossing\n"
-	         "  <SCL> <MNF> 1 <DSC> <PNO> <LEN1> <ANG> <LEN2> # Create Single Slipswitch\n"
-	         "  <SCL> <MNF> 2 <DSC> <PNO> <LEN1> <ANG> <LEN2> # Create Double Slipswitch\n"
-	         "  <SCL> <MNF> D <DSC> <PNO> <LEN> <OFF> # Create Double Crossover\n"
-	         "  <SCL> <MNF> T <DSC> <PNO> <CNT> <IN-DIAM> <OUT-DIAM> # Create TurnTable\n"
-	       );
-	exit(1);
-}
-
-struct {
-	char * scale;
-	double trackGauge;
-} scaleMap[] = {
-	{ "N", 0.3531 },
-	{ "HO", 0.6486 },
-	{ "O", 1.1770 },
-	{ "HOm", 0.472440 },
-	{ "G", 1.770 }
-};
-
-
-
-int main ( int argc, char * argv[] )
-{
-//	char * cmd;
-	double radius, radius2;
-	int inx, cnt;
-	double ang, x0, y0, x1, y1;
-	char **argv0;
-	int argc0;
-
-	argc0 = argc;
-	argv0 = argv;
-	doCustomInfoLine = FALSE;
-	argv++;
-
-	if (argc < 7) {
-		Usage(argc0,argv0);
-	}
-
-	while ( argv[0][0] == '-' ) {
-		switch (argv[0][1]) {
-		case 'm':
-			units = UNITS_METRIC;
-			break;
-		case 'u':
-			doCustomInfoLine = TRUE;
-			break;
-		case 'r':
-			doRoadBed = TRUE;
-			if (argv[0][2] == '\0') {
-				Usage(argc0,argv0);
-			}
-			newTurnRoadbedWidth = atof(&argv[0][2]);
-			newTurnRoadbedColorRGB = 0;
-			newTurnRoadbedColor = 0;
-			newTurnRoadbedLineWidth = 0;
-			break;
-		case 'c':
-			newTurnRoadbedColorRGB = atol(&argv[0][2]);
-			break;
-		case 'l':
-			newTurnRoadbedLineWidth = atol(&argv[0][2]);
-			break;
-		default:
-			fprintf( stderr, "Unknown option: %s\n", argv[0] );
-		}
-		argv++;
-		argc--;
-	}
-
-	newTurnScaleName = curScaleName = *argv++;
-	trackGauge = 0.0;
-	for ( inx=0; inx<COUNT( scaleMap ); inx++ ) {
-		if (strcmp( curScaleName, scaleMap[inx].scale ) == 0 ) {
-			newTurnTrackGauge = trackGauge = scaleMap[inx].trackGauge;
-			break;
-		}
-	}
-	if (trackGauge == 0.0) {
-		fprintf( stderr, "Unknown scale: %s\n", curScaleName );
-		exit(1);
-	}
-	strcpy( newTurnManufacturer, *argv++ );
-	specialLine[0] = '\0';
-	switch (tolower((unsigned char)(*argv++)[0])) {
-	case 'b':	// Bumper
-		if (argc != 7) { Usage(argc0,argv0); }
-		strcpy( newTurnLeftDesc, *argv++ );
-		strcpy( newTurnLeftPartno, *argv++ );
-		tdVal[0] = GetDim(atof( *argv++ ));
-		curDesign = &StrSectionDesc;
-		NewTurnOk( &StrSectionDesc );
-		break;
-	case 's':	// Straight Sectional
-		if (argc != 7) { Usage(argc0,argv0); }
-		strcpy( newTurnLeftDesc, *argv++ );
-		strcpy( newTurnLeftPartno, *argv++ );
-		tdVal[0] = GetDim(atof( *argv++ ));
-		curDesign = &StrSectionDesc;
-		NewTurnOk( &StrSectionDesc );
-		break;
-	case 'j':	// Adjustable
-		if (argc != 8) { Usage(argc0,argv0); }
-		strcpy( newTurnLeftDesc, *argv++ );
-		strcpy( newTurnLeftPartno, *argv++ );
-		tdVal[0] = GetDim(atof( *argv++ ));
-		tdVal[0] = GetDim(atof( *argv++ ));
-		sprintf( specialLine, "\tX adjustable %0.6f %0.6f", tdVal[0], tdVal[0] );
-		curDesign = &StrSectionDesc;
-		NewTurnOk( &StrSectionDesc );
-		break;
-	case 'c':	// Curve Sectional
-		if (argc != 8) { Usage(argc0,argv0); }
-		strcpy( newTurnLeftDesc, *argv++ );
-		strcpy( newTurnLeftPartno, *argv++ );
-		tdVal[0] = GetDim(atof( *argv++ ));
-		tdVal[0] = atof( *argv++ );
-		curDesign = &CrvSectionDesc;
-		NewTurnOk( &CrvSectionDesc );
-		break;
-	case 'r':	// Regular Turnout
-		if (argc != 12) { Usage(argc0,argv0); }
-		strcpy( newTurnLeftDesc, *argv++ );
-		strcpy( newTurnLeftPartno, *argv++ );
-		strcpy( newTurnRightDesc, *argv++ );
-		strcpy( newTurnRightPartno, *argv++ );
-		tdVal[0] = GetDim(atof( *argv++ ));
-		tdVal[0] = atof( *argv++ );
-		tdVal[0] = GetDim(atof( *argv++ ));
-		tdVal[0] = GetDim(atof( *argv++ ));
-		curDesign = &RegDesc;
-		NewTurnOk( &RegDesc );
-		break;
-	case 'q':	// Radial Turnout
-		if (argc != 11) { Usage(argc0,argv0); }
-		strcpy( newTurnLeftDesc, *argv++ );
-		strcpy( newTurnLeftPartno, *argv++ );
-		strcpy( newTurnRightDesc, *argv++ );
-		strcpy( newTurnRightPartno, *argv++ );
-		radius = GetDim(atof( *argv++ ));
-		tdVal[0] = atof( *argv++ );
-		tdVal[0] = GetDim(atof( *argv++ ));
-		tdVal[0] = radius * sin(D2R(tdVal[0]));
-		tdVal[0] = radius * (1-cos(D2R(tdVal[0])));
-		curDesign = &RegDesc;
-		NewTurnOk( &RegDesc );
-		break;
-	case 'v':	// Curved Turnout
-		if (argc != 14) { Usage(argc0,argv0); }
-		strcpy( newTurnLeftDesc, *argv++ );
-		strcpy( newTurnLeftPartno, *argv++ );
-		strcpy( newTurnRightDesc, *argv++ );
-		strcpy( newTurnRightPartno, *argv++ );
-		tdVal[0] = GetDim(atof( *argv++ ));
-		tdVal[0] = atof( *argv++ );
-		tdVal[0] = GetDim(atof( *argv++ ));
-		tdVal[0] = GetDim(atof( *argv++ ));
-		tdVal[0] = atof( *argv++ );
-		tdVal[0] = GetDim(atof( *argv++ ));
-		curDesign = &CrvDesc;
-		NewTurnOk( &CrvDesc );
-		break;
-	case 'w':	// Curved Radial Turnout
-		if (argc != 12) { Usage(argc0,argv0); }
-		strcpy( newTurnLeftDesc, *argv++ );
-		strcpy( newTurnLeftPartno, *argv++ );
-		strcpy( newTurnRightDesc, *argv++ );
-		strcpy( newTurnRightPartno, *argv++ );
-		radius = GetDim(atof( *argv++ ));
-		tdVal[0] = atof( *argv++ );
-		tdVal[0] = radius * sin(D2R(tdVal[0]));
-		tdVal[0] = radius * (1-cos(D2R(tdVal[0])));
-		radius = GetDim(atof( *argv++ ));
-		tdVal[0] = atof( *argv++ );
-		tdVal[0] = radius * sin(D2R(tdVal[0]));
-		tdVal[0] = radius * (1-cos(D2R(tdVal[0])));
-		curDesign = &CrvDesc;
-		NewTurnOk( &CrvDesc );
-		break;
-	case 'y':	// Wye
-		if (argc != 14) { Usage(argc0,argv0); }
-		strcpy( newTurnLeftDesc, *argv++ );
-		strcpy( newTurnLeftPartno, *argv++ );
-		strcpy( newTurnRightDesc, *argv++ );
-		strcpy( newTurnRightPartno, *argv++ );
-		tdVal[0] = GetDim(atof( *argv++ ));
-		tdVal[0] = atof( *argv++ );
-		tdVal[0] = GetDim(atof( *argv++ ));
-		tdVal[0] = GetDim(atof( *argv++ ));
-		tdVal[0] = atof( *argv++ );
-		tdVal[0] = GetDim(atof( *argv++ ));
-		curDesign = &WyeDesc;
-		NewTurnOk( &WyeDesc );
-		break;
-	case '3':	// 3 Way
-		if (argc != 13) { Usage(argc0,argv0); }
-		strcpy( newTurnLeftDesc, *argv++ );
-		strcpy( newTurnLeftPartno, *argv++ );
-		tdVal[0] = GetDim(atof( *argv++ ));
-		tdVal[0] = GetDim(atof( *argv++ ));
-		tdVal[0] = atof( *argv++ );
-		tdVal[0] = GetDim(atof( *argv++ ));
-		tdVal[0] = GetDim(atof( *argv++ ));
-		tdVal[0] = atof( *argv++ );
-		tdVal[0] = GetDim(atof( *argv++ ));
-		curDesign = &ThreewayDesc;
-		NewTurnOk( &ThreewayDesc );
-		break;
-	case 'x':	// Crossing
-		if (argc<9) { Usage(argc0,argv0); }
-		strcpy( newTurnLeftDesc, *argv++ );
-		strcpy( newTurnLeftPartno, *argv++ );
-		tdVal[0] = GetDim(atof( *argv++ ));
-		tdVal[0] = atof( *argv++ );
-		tdVal[0] = GetDim(atof( *argv++ ));
-		curDesign = &CrossingDesc;
-		NewTurnOk( &CrossingDesc );
-		break;
-	case '1':	// Single Slip
-		if (argc<9) { Usage(argc0,argv0); }
-		strcpy( newTurnLeftDesc, *argv++ );
-		strcpy( newTurnLeftPartno, *argv++ );
-		tdVal[0] = GetDim(atof( *argv++ ));
-		tdVal[0] = atof( *argv++ );
-		tdVal[0] = GetDim(atof( *argv++ ));
-		curDesign = &SingleSlipDesc;
-		NewTurnOk( &SingleSlipDesc );
-		break;
-	case '2':	// Double Slip
-		strcpy( newTurnLeftDesc, *argv++ );
-		strcpy( newTurnLeftPartno, *argv++ );
-		if (argc<9) { Usage(argc0,argv0); }
-		tdVal[0] = GetDim(atof( *argv++ ));
-		tdVal[0] = atof( *argv++ );
-		tdVal[0] = GetDim(atof( *argv++ ));
-		curDesign = &DoubleSlipDesc;
-		NewTurnOk( &DoubleSlipDesc );
-		break;
-	case 'd':	// Double Crossover
-		strcpy( newTurnLeftDesc, *argv++ );
-		strcpy( newTurnLeftPartno, *argv++ );
-		if (argc<8) { Usage(argc0,argv0); }
-		tdVal[0] = GetDim(atof( *argv++ ));
-		tdVal[0] = GetDim(atof( *argv++ ));
-		curDesign = &DoubleCrossoverDesc;
-		NewTurnOk( &DoubleCrossoverDesc );
-		break;
-	case 't':	// Turntable
-		strcpy( newTurnLeftDesc, *argv++ );
-		strcpy( newTurnLeftPartno, *argv++ );
-		if (argc<9) { Usage(argc0,argv0); }
-		cnt = atoi( *argv++ )/2;
-		radius = GetDim(atof( *argv++ ))/2.0;
-		radius2 = GetDim(atof( *argv++ ))/2.0;
-		BuildTrimedTitle( message, "\t", newTurnManufacturer, newTurnLeftDesc,
-		                  newTurnLeftPartno );
-		fprintf( stdout, "TURNOUT %s \"%s\"\n", curScaleName, PutTitle(message) );
-		for (inx=0; inx<cnt; inx++) {
-			fprintf( stdout, "\tP \"%d\" %d %d %d\n", inx+1, inx*3+1, inx*3+2, inx*3+3 );
-		}
-		for (inx=0; inx<cnt; inx++) {
-			fprintf( stdout, "\tP \"%d\" %d %d %d\n", inx+1+cnt, -(inx*3+3), -(inx*3+2),
-			         -(inx*3+1) );
-		}
-		for (inx=0; inx<cnt; inx++) {
-			ang = inx*180.0/cnt;
-			x0 = radius2 * sin(D2R(ang));
-			y0 = radius2 * cos(D2R(ang));
-			fprintf( stdout, "\tE %0.6f %0.6f %0.6f\n", x0, y0, ang );
-			fprintf( stdout, "\tE %0.6f %0.6f %0.6f\n", -x0, -y0, ang+180.0 );
-		}
-		for (inx=0; inx<cnt; inx++) {
-			ang = inx*180.0/cnt;
-			x0 = radius2 * sin(D2R(ang));
-			y0 = radius2 * cos(D2R(ang));
-			x1 = radius * sin(D2R(ang));
-			y1 = radius * cos(D2R(ang));
-			fprintf( stdout, "\tS 0 0 %0.6f %0.6f %0.6f %0.6f\n", x0, y0, x1, y1 );
-			fprintf( stdout, "\tS 0 0 %0.6f %0.6f %0.6f %0.6f\n", x1, y1, -x1, -y1 );
-			fprintf( stdout, "\tS 0 0 %0.6f %0.6f %0.6f %0.6f\n", -x1, -y1, -x0, -y0 );
-		}
-		fprintf( stdout, "\tA 16711680 0 %0.6f 0.000000 0.000000 0.000000 360.000000\n",
-		         radius2 );
-		fprintf( stdout, "\tA 16711680 0 %0.6f 0.000000 0.000000 0.000000 360.000000\n",
-		         radius );
-		fprintf( stdout, "\t%s\n", END_SEGS );
-		break;
-	default:
-		fprintf( stderr, "Invalid command: %s\n", argv[-1] );
-		exit(1);
-	}
-	exit(0);
-}
-#endif
