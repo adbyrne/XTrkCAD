@@ -76,23 +76,6 @@ dynArr_t tempSegs_da;
 #define NTO_CORNU3WAY   (17)
 
 
-typedef struct {
-	PATHPTR_T paths;
-	char * segOrder;
-} toDesignSchema_t;
-
-typedef struct {
-	int type;
-	char * label;
-	const char * stackLabel;
-	int iDescFirst;
-	int iDescCount;
-	int strCnt;
-	toDesignSchema_t * paths;
-	int angleModeCnt;
-	wBool_t slipmode;
-} toDesignDesc_t;
-
 static wWin_p newTurnW;
 
 static char * newTurnScaleName;
@@ -303,6 +286,24 @@ static turnoutInfo_t * customTurnout1 = NULL, * customTurnout2 = NULL;
  * Description Tables
  *
  */
+
+typedef struct {
+	PATHPTR_T paths;
+	char * segOrder;
+} toDesignSchema_t;
+
+typedef struct {
+	int type;
+	char * label;
+	const char * stackLabel;
+	int iDescFirst;
+	int iDescCount;
+	int strCnt;
+	toDesignSchema_t * paths;
+	int angleModeCnt;
+	wBool_t slipmode;
+} toDesignDesc_t;
+
 
 static signed char RegPaths[] = {
 	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 2, 0, 0,
@@ -2727,7 +2728,8 @@ static void NewTurnPrint(
 			strPos.y -= 0.10;
 #ifdef OLDGTK
 			FLOAT_T tmpR;
-			for ( int p=0; p<curDesign->floatCnt; p++ ) {
+			for ( int p=0; p<curDesign->iDescCount; p++ ) {
+				//tmpR = *(FLOAT_T*)(turnDesignPLs[curDesign->floats[p].index].valueP);
 				tmpR = *(FLOAT_T*)(turnDesignPLs[curDesign->floats[p].index].valueP);
 				sprintf( message, "%s: %s",
 				         (curDesign->floats[p].mode!=Frog_e
@@ -2737,6 +2739,12 @@ static void NewTurnPrint(
 				         FormatFloat(tmpR) );
 				strPos.y -= 0.25;
 				DrawString( &newTurnout_d, strPos, 0.0, message, fp, 16, wDrawColorBlack );
+			}
+#else
+			for ( int inx=0; inx<curDesign->iDescCount; inx++ ) {
+				sprintf( message, "%s: %s",
+					 turnDesignPLs[ curDesign->iDescFirst+inx ].winLabel,
+					 FormatFloat( tdVal[inx] ) );
 			}
 #endif
 			if (newTurnLeftDesc[0] || newTurnLeftPartno[0]) {
@@ -3143,30 +3151,20 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 	} else {
 		descR = partR = "";
 	}
-#ifdef OLDGTK
-	for ( i=0; i<dp->floatCnt; i++ ) {
-		if ( ! GetArgs( cp, "fc", turnDesignPLs[dp->floats[i].index].valueP, &cp ) ) {
+//#ifdef OLDGTK
+	newTurnAngleMode = 1;
+	for ( i=0; i<dp->iDescCount; i++ ) {
+		if ( ! GetArgs( cp, "fc", tdVal+i, &cp ) ) {
 			return;
 		}
-		switch (dp->floats[i].mode) {
-		case Dim_e:
-			/* *dp->floats[i].valueP = PutDim( *dp->floats[i].valueP ); */
-			break;
-		case Frog_e:
+#ifdef LATER
 			if (newTurnAngleMode == 0) {
 				if ( *(FLOAT_T*)(turnDesignPLs[dp->floats[i].index].valueP) > 0.0 ) {
 					*(FLOAT_T*)(turnDesignPLs[dp->floats[i].index].valueP) = 1.0/sin(D2R(*
 					                (FLOAT_T*)(turnDesignPLs[dp->floats[i].index].valueP)));
-				}
-			}
-			break;
-		case Angle_e:
-			break;
-		case Rad_e:
-			break;
-		}
-	}
 #endif
+	}
+//#endif
 	rgb = 0;
 	if ( cp && GetArgs( cp, "ffl", &newTurnRoadbedWidth, &lineWidth, &rgb ) ) {
 		newTurnRoadbedColor = wDrawFindColor(rgb);
