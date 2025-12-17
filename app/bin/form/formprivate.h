@@ -27,8 +27,6 @@ char* FormGetParseError();
 
 /* actionbuttons.c */
 
-void FormButtonOk(void* groupVP);
-
 void FormButtonCancel(void* groupVP);
 
 

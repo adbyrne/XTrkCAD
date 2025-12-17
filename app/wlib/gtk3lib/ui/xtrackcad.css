@@ -91,3 +91,9 @@ box.framed {
 combobox {
     -GtkComboBox-appears-as-list: 1; 
 }
+
+.tag {
+    background-color: #e0e0e0;
+    border-radius: 6px; 
+/*    margin: 2px; */
+}

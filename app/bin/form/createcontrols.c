@@ -99,7 +99,7 @@ static void ChoicePush(long valL, void* dp)
 	paramData_p p = (paramData_p)dp;
 
 	if (DO_MACRO_RECORD(p)) {
-		FormMacroRecord("PARAMETER %s %s\n", "PARAMETER %s %s %ld\n",
+		FormMacroRecord("PARAMETER %s %s\n",
 		                p->group->nameStr, p->nameStr, valL);
 	}
 
@@ -171,6 +171,9 @@ static void IntegerPush(const char* value, void* dp)
 	if (!FormIntegerRangeCheck(p, valL)) {
 		return;
 	}
+	
+	p->bInvalid = FALSE;
+	wControlHilite(p->control, p->bInvalid);
 
 	if (DO_MACRO_RECORD(p)) {
 		FormMacroRecord("PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr, valL);
@@ -225,7 +228,7 @@ static void FloatPush(const char* value, void * dp)
 static bool StringPush(const char* val, void* dp)
 {
 	paramData_p p = (paramData_p)dp;
-	const char* value;
+	// const char* value;
 	wBool_t result = FALSE;
 
 	if (DO_MACRO_RECORD(p)) {
@@ -244,11 +247,14 @@ static bool StringPush(const char* val, void* dp)
 	LOG(log_form, 1, ("StringPush( %s: Enter:%d Val:%s )\n",
 	                  p->nameStr, p->enter_pressed, val));
 
-	if(!FormStringCheckValue(p, val)) {
+	// Cast away const - validation functions modify the string (strip whitespace)
+	if(!FormStringCheckValue(p, (char*)val)) {
 		return(TRUE);
 	}
 
-	FormStringGetValue(p, val);
+	FormStringGetValue(p, (char*)val);
+	p->bInvalid = FALSE;
+	wControlHilite(p->control, p->bInvalid);
 
 	if ((p->option & PDO_NOPSHACT) == 0 && p->group->changeProc)
 		// CAST_AWAY_CONST: param 3 should be const but its a big change
@@ -258,37 +264,6 @@ static bool StringPush(const char* val, void* dp)
 	}
 
 	return(result);
-}
-
-
-static void
-FormListPush(wIndex_t inx, const char* val, wIndex_t op,
-             void* dp, void* itemContext)
-{
-	paramData_p p = (paramData_p)dp;
-	long valL;
-
-	switch (p->type) {
-	case PD_LIST:
-	case PD_DROPLIST:
-	case PD_COMBOLIST:
-		if (DO_MACRO_RECORD(p)) {
-			FormMacroRecord("PARAMETER %s %s %d %s\n", p->group->nameStr, p->nameStr, inx,
-			                val);
-		}
-
-		if ((p->option & PDO_NOPSHUPD) == 0 && p->valueP) {
-			*(wIndex_t*)(p->valueP) = inx;
-		}
-		if ((p->option & PDO_NOPSHACT) == 0 && p->group->changeProc) {
-			valL = inx;
-			p->group->changeProc(p->group, (int)(p - p->group->paramPtr), &valL);
-		}
-		break;
-
-	default:
-		;
-	}
 }
 
 static void
@@ -311,7 +286,7 @@ MenuPush(void *dp)
 	paramData_p p = (paramData_p)dp;
 
 	if(p->valueP) {
-		((void (*)(void))p->valueP)();
+		((void (*)(void *))p->valueP)(p->context);
 	}
 }
 
@@ -483,7 +458,6 @@ CreateControl(paramData_p pd, char* helpStr,	unsigned x,	unsigned y)
 {
 	const paramFloatRange_t* floatRangeP;
 	const paramIntegerRange_t* integerRangeP;
-	paramListData_t* listDataP;
 
 	const struct wIcon_t* iconP;
 
@@ -540,12 +514,11 @@ CreateControl(paramData_p pd, char* helpStr,	unsigned x,	unsigned y)
 		//	_(pd->winLabel), pd->winOption, 10, w, NULL, ParamListPush, pd);
 		break;
 	case PD_COMBOLIST:
-		listDataP = (paramListData_t*)pd->winData;
 		width = pd->winData ? (wWinPix_t)VP2L(pd->winData) : (wWinPix_t)
 		        LISTDEFAULTWIDTH;
 		pd->control = (wControl_p)wComboBoxCreate(win, x, y, helpStr,
 		              _(pd->winLabel), pd->winOption, 10, width, NULL,
-		              FormListPush, pd);
+		              ListPush, pd);
 		//listDataP->height = wControlGetHeight(pd->control);
 		break;
 	case PD_COLORLIST:
@@ -578,13 +551,16 @@ CreateControl(paramData_p pd, char* helpStr,	unsigned x,	unsigned y)
 		break;
 	case PD_BITMAP:
 		iconP = pd->winData;
-		pd->control = wBitmapViewCreate(win, x, y, pd->winOption, iconP);
+		pd->control = wBitmapViewCreate(win, x, y, pd->winOption, (wIcon_p)iconP);
 		break;
 	case PD_SCALE:
 		pd->control = wScaleCreate(win, helpStr, pd->valueP, ScalePush, pd);
 		break;
 	case PD_NOTEBOOK:
 		pd->control = wNotebookCreate(win, helpStr, 0, 0L);
+		break;
+	case PD_TAG:
+		pd->control = wTagCreate(win, helpStr, _(pd->winLabel), pd->valueP, pd->context);
 		break;
 	default:
 		CHECK(FALSE);

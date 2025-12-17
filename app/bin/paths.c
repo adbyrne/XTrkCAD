@@ -246,3 +246,26 @@ MakeFullpath(char **str, ...)
 	DynStringFree(&path);
 	va_end(valist);
 }
+
+/**
+ * Add the default extension to a filename if it doesn'thave an extension.
+ * 
+ * \param	filename the filename, the extension while be appended. Make sure that the buffer is large enough.
+ * \param	default_ext	the extension to add if none is present
+ * 
+ */
+void AddDefaultExtension(char *filename, const char *default_ext) {
+    char *dot = strrchr(filename, '.');
+    char *slash = strrchr(filename, '/');
+    char *backslash = strrchr(filename, '\\');
+    
+    // Find the last path separator (if any)
+    char *last_sep = (slash > backslash) ? slash : backslash;
+    
+    // Check if dot exists and comes after the last path separator
+    // (to avoid treating directories like "folder.name" as having extensions)
+    if (dot == NULL || (last_sep != NULL && dot < last_sep)) {
+        // No extension found, add the default
+        strcat(filename, default_ext);
+    }
+}

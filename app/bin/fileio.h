@@ -152,7 +152,7 @@ void LoadFileList( void );
 void FileInit( void );
 
 BOOL_T ReadTrackFile(const char* pathName, const char* fileName,
-	BOOL_T full, BOOL_T noSetCurDir, BOOL_T complain);
+                     BOOL_T full, BOOL_T noSetCurDir, BOOL_T complain);
 
 BOOL_T MacroInit( void );
 

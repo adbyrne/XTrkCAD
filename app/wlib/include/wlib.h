@@ -723,6 +723,7 @@ void wControlSetFocus(		wControl_p );
 void wControlActive(		wControl_p control, wBool_t active);
 wBool_t wControlGetActive(wControl_p control);
 void wControlSetLabel(wControl_p, const char*);
+void  wControlSetObjectInt(wControl_p control, const char *key, int value );
 
 void wTooltipSet(wControl_p control, const char* dialog, const char* dialogItem);
 void wTooltipSetText(	wControl_p control, const char * tooltipText);
@@ -1313,6 +1314,18 @@ char* wGetProfileFilename(void);
 char* wGetUserID(void);
 const char* wGetUserHomeRootDir(void);
 const char *wGetPlatformVersion(void);
+
+/*------------------------------------------------------------------------------
+ *
+ * Tag
+ */
+
+void wTagSetLabel( wControl_p tagControl, const char * text);
+const char *wTagGetLabel(wControl_p tagControl);
+wControl_p wTagCreate( wControl_p parent, const char* helpStr, const char* labelStr,
+    wButtonCallBack_p action, void* context);
+
+
 
 /*-------------------------------------------------------------------------------
  * User Preferences

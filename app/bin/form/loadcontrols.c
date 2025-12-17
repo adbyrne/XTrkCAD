@@ -64,6 +64,10 @@ void FormLoadSingleControl(
 	if (p->control == NULL || p->valueP == NULL) {
 		return;
 	}
+
+	p->bInvalid = FALSE;
+	wControlHilite(p->control, FALSE );
+
 	switch (p->type) {
 	case PD_LONG:
 		wEntrySetValue(p->control, FormatLong(*(long*)p->valueP));
@@ -133,6 +137,7 @@ void FormLoadSingleControl(
 	case PD_MENUITEM:
 	case PD_BITMAP:
 	case PD_NOTEBOOK:
+	case PD_TAG:
 		break;
 	}
 }

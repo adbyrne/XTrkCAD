@@ -25,7 +25,6 @@ enable_testing()
 # Additional libraries
 
 find_package(Inkscape)
-find_package(FreeImage)
 find_package(Libzip)
 find_package(Zlib)
 
@@ -52,6 +51,9 @@ find_package(Pandoc)
 
 # check for GTK+ 3.0
 pkg_check_modules(GTK3 QUIET "gtk+-3.0")
+if(NOT GTK3_FOUND)
+	message(FATAL_ERROR "ERROR: GTK3 not found found!")
+endif()
 
 # Flatpak
 find_package(Flatpak)
@@ -59,9 +61,6 @@ find_package(Flatpak)
 # Hg
 find_package(Hg)
 
-if(NOT GTK3_FOUND)
-	message(FATAL_ERROR "ERROR: GTK3 not found found!")
-endif()	
 
 # 
 # Configure options

@@ -3,7 +3,7 @@ if [ $# -ne 1 ] ; then
 	echo "$0 <BLDDIR>/distribution/flatpak"
 	echo "Create source tar ball, with .xpm3 files"
 	echo "Run from <SRCDIR>/distribution/flatpak"
-	echo "Computes sha256 checksum which must updated in org.xtrkcad.xtrkcad.yml"
+	echo "Computes sha256 checksum which must be updated in manifest file"
 	exit 0
 fi
 
@@ -12,12 +12,13 @@ BLDDIR=$1
 
 cd ../..
 tar cf ${BLDDIR}/source.tar .
-cd $BLDDIR/../../app/bin
-tar rf ${BLDDIR}/source.tar ./bitmaps
+# current flatpak builds everything, so these additions not necessary
+#cd $BLDDIR/../../app/bin
+#tar rf ${BLDDIR}/source.tar ./bitmaps
 
 cd $BLDDIR
 rm -f source.tar.gz
 # -n zeros the timestamp so repeated runs yield the same checksum
 gzip -n source.tar
-echo "Update org.xtrkcad.xtrkcad.yml with this checksum"
+echo "Update manifest.yaml with this checksum here and in git repo (tbd)"
 sha256sum source.tar.gz

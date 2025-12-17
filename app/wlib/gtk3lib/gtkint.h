@@ -85,7 +85,8 @@ typedef enum {
 		B_COLORBUTTON, 
 		B_STACK, B_NOTEBOOK,
 		M_MENU, M_SUBMENU, M_PUSH, M_TOGGLE, M_RADIO, M_SEPARATOR, M_RECENTUSE,
-		B_SCALE
+		B_SCALE,
+		B_TAG
 } wType_e;
 
 typedef void (*repaintProcCallback_p)( wControl_p );
@@ -207,6 +208,11 @@ struct stack {
 	void* callback;
 };
 
+struct tag {
+	wButtonCallBack_p callback;
+	GtkButton *button;
+	GtkLabel *label;
+};
 struct text {
 	int changed;
 	long option;
@@ -253,6 +259,7 @@ struct control {
 		struct recentuse recentuse;
 		struct scale scale;
 		struct stack stack;
+		struct tag tag;
 		struct toggle toggle;
 		struct window window;
 	} attributes;
