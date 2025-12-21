@@ -38,13 +38,11 @@
 #include "common-ui.h"
 
 static int log_cornuturnoutdesigner;
+static int log_turnoutdesigner;
 
 char tempCustom[4096];
 
 #define TURNOUTDESIGNER			"CTURNOUT DESIGNER"
-
-// TODO - this shouldn't be here
-dynArr_t tempSegs_da;
 
 // Minimum Track Segment length
 #define MIN_TRACK_LENGTH (0.20)
@@ -296,12 +294,15 @@ typedef struct {
 	int type;
 	char * label;
 	const char * stackLabel;
-	int iDescFirst;
-	int iDescCount;
+	int iDescFirstX;
+	int iDescCountX;
 	int strCnt;
 	toDesignSchema_t * paths;
 	int angleModeCnt;
-	wBool_t slipmode;
+	const char * sValueMode;
+	int iDescFirst;
+	int iDescCount;
+//	wBool_t slipmode;
 } toDesignDesc_t;
 
 
@@ -319,7 +320,8 @@ static toDesignDesc_t RegDesc = {
 	"td_reg_stack",
 	I_REG_FIRST, I_REG_COUNT,
 	2,
-	&RegSchema, 1
+	&RegSchema, 1,
+	"LLOF"
 };
 
 static signed char Crv1Paths[] = {
@@ -353,7 +355,8 @@ static toDesignDesc_t CrvDesc = {
 	"td_crv_stack",
 	I_CRV_FIRST , I_CRV_COUNT,
 	2,
-	&Crv1Schema, 1
+	&Crv1Schema, 1,
+	"LOFLOF"
 };
 
 static signed char CornuPaths[] = {
@@ -371,7 +374,8 @@ static toDesignDesc_t CornuDesc = {
 	"td_corcrv_stack",
 	I_CORCRV_FIRST, I_CORCRV_COUNT,
 	2,
-	&CornuSchema, 1
+	&CornuSchema, 1,
+	"LOFRLOFRLR"
 };
 
 static signed char Wye1Paths[] = {
@@ -404,7 +408,8 @@ static toDesignDesc_t WyeDesc = {
 	"td_wye_stack",
 	I_WYE_FIRST, I_WYE_COUNT,
 	1,
-	NULL, 1
+	NULL, 1,
+	"LOF-LOF"
 };
 
 static signed char CornuWyePaths[] = {
@@ -421,7 +426,8 @@ static toDesignDesc_t CornuWyeDesc = {
 	"td_corwye_stack",
 	I_CORWYE_FIRST, I_CORWYE_COUNT,
 	1,
-	NULL, 1
+	NULL, 1,
+	"LOFR----LOFRLR"
 };
 
 static signed char Tri1Paths[] = {
@@ -457,7 +463,8 @@ static toDesignDesc_t ThreewayDesc = {
 	"td_3way_stack",
 	I_3WAY_FIRST, I_3WAY_COUNT,
 	1,
-	NULL, 1
+	NULL, 1,
+	"LOFLLOF"
 };
 
 static signed char CornuTriPaths[] = {
@@ -475,7 +482,8 @@ static toDesignDesc_t CornuThreewayDesc = {
 	"td_cor3way_stack",
 	I_COR3WAY_FIRST, I_COR3WAY_COUNT,
 	1,
-	NULL, 1
+	NULL, 1,
+	"LOFRLOFRLOFRLR"
 };
 
 static signed char CrossingPaths[] = {
@@ -491,7 +499,8 @@ static toDesignDesc_t CrossingDesc = {
 	"td_crossing_stack",
 	I_CROSSING_FIRST, I_CROSSING_COUNT,
 	1,
-	&CrossingSchema, 1
+	&CrossingSchema, 1,
+	"LLF"
 };
 
 static signed char SingleSlipPaths[] = {
@@ -508,7 +517,8 @@ static toDesignDesc_t SingleSlipDesc = {
 	"td_sslip_stack",
 	I_SGLSLIP_FIRST, I_SGLSLIP_COUNT,
 	1,
-	&SingleSlipSchema, 1
+	&SingleSlipSchema, 1,
+	"LLF"
 };
 
 static signed char DoubleSlipPaths[] = {
@@ -535,7 +545,8 @@ static toDesignDesc_t DoubleSlipDesc = {
 	"td_dslip_stack",
 	I_DBLSLIP_FIRST, I_DBLSLIP_COUNT,
 	1,
-	&DoubleSlipSchema, 1
+	&DoubleSlipSchema, 1,
+	"LLF"
 };
 
 static signed char RightCrossoverPaths[] = {
@@ -552,7 +563,8 @@ static toDesignDesc_t RightCrossoverDesc = {
 	"td_rcross_stack",
 	I_RCROSSOVER_FIRST, I_RCROSSOVER_COUNT,
 	1,
-	&RightCrossoverSchema, 0
+	&RightCrossoverSchema, 0,
+	"LO"
 };
 
 static signed char LeftCrossoverPaths[] = {
@@ -569,7 +581,8 @@ static toDesignDesc_t LeftCrossoverDesc = {
 	"td_lcross_stack",
 	I_LCROSSOVER_FIRST, I_LCROSSOVER_COUNT,
 	1,
-	&LeftCrossoverSchema, 0
+	&LeftCrossoverSchema, 0,
+	"LO"
 };
 
 static signed char DoubleCrossoverPaths[] = {
@@ -586,7 +599,8 @@ static toDesignDesc_t DoubleCrossoverDesc = {
 	"td_dcross_stack",
 	I_DCROSSOVER_FIRST, I_DCROSSOVER_COUNT,
 	1,
-	&DoubleCrossoverSchema, 0
+	&DoubleCrossoverSchema, 0,
+	"LO"
 };
 
 static signed char StrSectionPaths[] = {
@@ -602,7 +616,8 @@ static toDesignDesc_t StrSectionDesc = {
 	"td_strsect_stack",
 	I_STRAIGHT_FIRST, I_STRAIGHT_COUNT,
 	1,
-	&StrSectionSchema, 0
+	&StrSectionSchema, 0,
+	"L"
 };
 
 static signed char CrvSectionPaths[] = {
@@ -618,7 +633,8 @@ static toDesignDesc_t CrvSectionDesc = {
 	"td_crvsect_stack",
 	I_CURVED_FIRST, I_CURVED_COUNT,
 	1,
-	&CrvSectionSchema, 0
+	&CrvSectionSchema, 0,
+	"LA"
 };
 
 #ifdef LATER
@@ -804,7 +820,7 @@ static searchTable_t searchTable[] = {
 #endif
 
 
-double LineSegDistance( coOrd p, coOrd p0, coOrd p1 )
+static double LineSegDistance( coOrd p, coOrd p0, coOrd p1 )
 {
 	double d, a;
 	coOrd pp, zero;
@@ -825,7 +841,7 @@ double LineSegDistance( coOrd p, coOrd p0, coOrd p1 )
 
 
 
-double CircleSegDistance( coOrd p, coOrd c, double r, double a0, double a1 )
+static double CircleSegDistance( coOrd p, coOrd c, double r, double a0, double a1 )
 {
 	double d, d0, d1;
 	double a,aa;
@@ -850,7 +866,7 @@ double CircleSegDistance( coOrd p, coOrd c, double r, double a0, double a1 )
 }
 
 
-BOOL_T HittestTurnoutRoadbed(
+static BOOL_T HittestTurnoutRoadbed(
         trkSeg_p segPtr,
         int segCnt,
         int segInx,
@@ -1187,7 +1203,7 @@ static void AddRoadbed( void )
  */
 
 /* For Bezier Segs we need to duplicate the subSegs Array as well */
-void AppendSegs(dynArr_t * target, dynArr_t * source)
+static void AppendSegs(dynArr_t * target, dynArr_t * source)
 {
 
 #define sourceSegs(N) DYNARR_N( trkSeg_t, *source, N )
@@ -1202,7 +1218,7 @@ void AppendSegs(dynArr_t * target, dynArr_t * source)
 }
 
 /* Bezier Segs will have subSegs Array - free it before resetting the array */
-void ClearSegs(dynArr_t * target)
+static void ClearSegs(dynArr_t * target)
 {
 	for (int i=0; i<(*target).cnt; i++) {
 		if (targetSegs(i).type == SEG_BEZTRK) {
@@ -1216,7 +1232,7 @@ void ClearSegs(dynArr_t * target)
 	DYNARR_RESET( trkSeg_t, *target );
 }
 
-BOOL_T CallCornuNoBez(coOrd pos[2], coOrd center[2], ANGLE_T angle[2],
+static BOOL_T CallCornuNoBez(coOrd pos[2], coOrd center[2], ANGLE_T angle[2],
                       DIST_T radius[2], dynArr_t * array_p)
 {
 
@@ -2271,10 +2287,13 @@ static toDesignSchema_t * LoadSegs(
 
 	if (bFirst) {
 		// Handle Left or only
-		for ( int inx = 0; inx < dp->iDescCount; inx ++ ) {
-			printf( "%0.3f ", tdVal[inx] );
+		if (logTable(log_turnoutdesigner).level >= 2) {
+			for ( const char *pVM = dp->sValueMode; *pVM; pVM++ ) {
+				if ( *pVM == '-' ) { continue; }
+				lprintf( "%0.3f ", tdVal[pVM - dp->sValueMode] );
+			}
+			lprintf( "\n" );
 		}
-		printf( "\n" );
 		TempEndPtsReset();
 		memset( points, 0, sizeof points );
 		memset( radii, 0, sizeof radii );
@@ -2726,27 +2745,26 @@ static void NewTurnPrint(
 			strPos.y -= 0.5;
 			DrawString( &newTurnout_d, strPos, 0.0, message, fp, 20, wDrawColorBlack );
 			strPos.y -= 0.10;
-#ifdef OLDGTK
-			FLOAT_T tmpR;
-			for ( int p=0; p<curDesign->iDescCount; p++ ) {
-				//tmpR = *(FLOAT_T*)(turnDesignPLs[curDesign->floats[p].index].valueP);
-				tmpR = *(FLOAT_T*)(turnDesignPLs[curDesign->floats[p].index].valueP);
-				sprintf( message, "%s: %s",
-				         (curDesign->floats[p].mode!=Frog_e
-				          ||newTurnAngleMode!=0)?_(curDesign->floats[p].printLabel):_("Frog Number"),
-				         curDesign->floats[p].mode==Dim_e?
-				         FormatDistance(tmpR):
-				         FormatFloat(tmpR) );
+			int inx = 0;
+			for ( const char *pVM = curDesign->sValueMode; *pVM; pVM++ ) {
+				if ( *pVM == '-' ) { continue; }
+				inx++;
+				const char * sLabel;
+				if ( *pVM != 'F' || newTurnAngleMode==0 ) {
+					sLabel = turnDesignPLs[ curDesign->iDescFirst+inx ].winLabel;
+				} else {
+					sLabel = _("Frog #");
+				}
+				const char * sValue;
+				if ( *pVM == 'L' || *pVM == 'O' ) {
+					sValue = FormatDistance( tdVal[inx] );
+				} else {
+					sValue = FormatFloat( tdVal[inx] );
+				}
+				sprintf( message, "%s: %s", sLabel, sValue );
 				strPos.y -= 0.25;
 				DrawString( &newTurnout_d, strPos, 0.0, message, fp, 16, wDrawColorBlack );
 			}
-#else
-			for ( int inx=0; inx<curDesign->iDescCount; inx++ ) {
-				sprintf( message, "%s: %s",
-					 turnDesignPLs[ curDesign->iDescFirst+inx ].winLabel,
-					 FormatFloat( tdVal[inx] ) );
-			}
-#endif
 			if (newTurnLeftDesc[0] || newTurnLeftPartno[0]) {
 				sprintf( message, "%s %s %s", newTurnManufacturer, newTurnLeftPartno,
 				         newTurnLeftDesc );
@@ -2790,7 +2808,6 @@ static void NewTurnPrint(
 quitPrinting:
 	wPrintDocEnd();
 }
-//#endif
 
 
 static char * BuildTrimedTitle( char * cp, const char * sep, const char * sMfg,
@@ -2810,7 +2827,7 @@ static char * BuildTrimedTitle( char * cp, const char * sep, const char * sMfg,
 //
 // Output definitons
 //
-void OutputTurnoutDef(
+static void OutputTurnoutDef(
         toDesignDesc_t * dp,
 	toDesignSchema_t * pp,
         wBool_t bFirst,
@@ -2846,7 +2863,7 @@ void OutputTurnoutDef(
 	if (f) {
 		fprintf( f, "TURNOUT %s \"%s\" %ld\n", newTurnScaleName, PutTitle(tempCustom),
 		         options );
-		fprintf( f, "\tU %s\n", customInfoP );
+		fprintf( f, "\tU5 %s\n", customInfoP );
 		WriteCompoundPathsEndPtsSegs( f, pp->paths,
 					      tempSegs_da.cnt, &tempSegs(0),
 		                              TempEndPtsCount(), TempEndPt(0) );
@@ -2882,6 +2899,7 @@ static void NewTurnOk( void * context )
 	//
 	// Build U line
 	//
+	memset( tempCustom, 0, sizeof tempCustom );
 	sprintf( tempCustom, "\"%s\" \"%s\" \"",
 	         curDesign->label, "" );
 	cp = tempCustom + strlen(tempCustom);
@@ -2906,8 +2924,10 @@ static void NewTurnOk( void * context )
 		cp += 1;
 	}
 	CHECK( cp-tempCustom <= sizeof tempCustom );
-	for ( int inx=0; inx<curDesign->iDescCount; inx++ ) {
-		sprintf( cp, " %0.6f", tdVal[inx] );
+
+	for ( const char * pVM = curDesign->sValueMode; *pVM; pVM++ ) {
+		if ( *pVM == '-' ) { continue; }
+		sprintf( cp, " %0.6f", tdVal[pVM-curDesign->sValueMode] );
 		cp += strlen(cp);
 	}
 
@@ -2916,7 +2936,6 @@ static void NewTurnOk( void * context )
 	customInfoP = MyStrdup( tempCustom );
 	strcpy( tempCustom, message );
 
-	//pp = LoadSegs( curDesign, TRUE );
 	OutputTurnoutDef(curDesign, pp, TRUE, f, customTurnout1, customInfoP );
 
 	//
@@ -2967,14 +2986,6 @@ static void NewTurnOk( void * context )
 static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 {
 	if ( newTurnW == NULL ) {
-#ifdef OLDGTK
-		static wWinPix_t partnoWidth;
-		partnoWidth = wLabelWidth( "999-99999-9999" );
-		turnDesignPLs[I_TOLDESC+1].winData =
-		        turnDesignPLs[I_TORDESC+1].winData =
-		                I2VP(partnoWidth);
-		partnoWidth += wLabelWidth( " # " );
-#endif
 		newTurnW = FormCreateDialog( &turnDesignPG,
 					     _("Turnout Designer"),
 					     _("Ok"),
@@ -2996,11 +3007,17 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 		wWinSetTitle( newTurnW, curDesign->stackLabel );
 
 		// Show or hide float controls
+		int iDescCount = 0;
+		for ( const char * pVM = curDesign->sValueMode; *pVM; pVM++ ) {
+			if ( *pVM == '-' ) { continue; }
+			iDescCount++;
+		}
+		CHECK( curDesign->iDescCount == iDescCount );
 		for ( int inx = 0; inx<I_PLTOTAL; inx++ ) {
 			paramData_p ptr = turnDesignPLs+inx;
 			ptr->bInvalid = FALSE;
 			if ( inx >= curDesign->iDescFirst &&
-			     inx < curDesign->iDescFirst + curDesign->iDescCount ) {
+			     inx < curDesign->iDescFirst + iDescCount ) {
 				ptr->bShown = TRUE;
 			} else {
 				ptr->bShown = FALSE;
@@ -3121,6 +3138,7 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 	BOOL_T segsDiff;
 	LWIDTH_T lineWidth;
 
+	memset( tdVal, 0, sizeof tdVal );
 	if ( ! GetArgs( to->customInfo, "qqqqqc", &type, &name, &mfg, &descL, &partL,
 	                &cp ) ) {
 		return;
@@ -3151,20 +3169,16 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 	} else {
 		descR = partR = "";
 	}
-//#ifdef OLDGTK
-	newTurnAngleMode = 1;
-	for ( i=0; i<dp->iDescCount; i++ ) {
-		if ( ! GetArgs( cp, "fc", tdVal+i, &cp ) ) {
-			return;
+
+	int inx = 0;
+	for ( const char * pVM = dp->sValueMode; *pVM; pVM++, inx++ ) {
+		if ( *pVM == '-' ) { continue; }
+		if ( ! GetArgs( cp, "fc", tdVal+inx, &cp ) ) { return; }
+		if ( *pVM == 'F' && newTurnAngleMode == 0 ) {
+			// Reset frog #
+			tdVal[inx] = round( 1024.0 / sin( D2R(tdVal[inx] ) ) ) / 1024;
 		}
-#ifdef LATER
-			if (newTurnAngleMode == 0) {
-				if ( *(FLOAT_T*)(turnDesignPLs[dp->floats[i].index].valueP) > 0.0 ) {
-					*(FLOAT_T*)(turnDesignPLs[dp->floats[i].index].valueP) = 1.0/sin(D2R(*
-					                (FLOAT_T*)(turnDesignPLs[dp->floats[i].index].valueP)));
-#endif
 	}
-//#endif
 	rgb = 0;
 	if ( cp && GetArgs( cp, "ffl", &newTurnRoadbedWidth, &lineWidth, &rgb ) ) {
 		newTurnRoadbedColor = wDrawFindColor(rgb);
@@ -3314,6 +3328,16 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 	}
 	/*if (recordF)
 		fprintf( recordF, TURNOUTDESIGNER " SHOW %s\n", dp->label );*/
+	if ( newTurnAngleMode == 0 ) {
+		// Reset frog #, again
+		int inx = 0;
+		for ( const char * pVM = dp->sValueMode; *pVM; pVM++, inx++ ) {
+			if ( *pVM == '-' ) { continue; }
+			if ( *pVM == 'F' ) {
+				tdVal[inx] = round( 1024.0 / sin( D2R(tdVal[inx] ) ) ) / 1024;
+			}
+		}
+	}
 	FormLoadControls( &turnDesignPG );
 	FormGroupRecord( &turnDesignPG );
 	wShow( newTurnW );
@@ -3324,14 +3348,31 @@ EXPORT void InitNewTurn( wMenu_p m )
 {
 	int i;
 	FormRegister( &turnDesignPG );
-	for ( i=0; i<COUNT( designDescs ); i++ ) {
-		wMenuPushCreate( m, NULL, _(designDescs[i]->label), 0,
-		                 ShowTurnoutDesigner, designDescs[i] );
-		sprintf( message, "%s SHOW %s", TURNOUTDESIGNER, designDescs[i]->label );
-		AddPlaybackProc( message, (playbackProc_p)ShowTurnoutDesigner, designDescs[i] );
-	}
+
+	log_cornuturnoutdesigner = LogFindIndex( "cornuturnoutdesigner" );
+	log_turnoutdesigner = LogFindIndex( "turnoutdesigner" );
+
 	newTurnRoadbedColor = wDrawColorBlack;
 	includeNontrackSegments = FALSE;
-	log_cornuturnoutdesigner = LogFindIndex( "cornuturnoutdesigner" );
+
+	int iDescFirst = 0;
+	for ( i=0; i<COUNT( designDescs ); i++ ) {
+		toDesignDesc_t * dp = designDescs[i];
+		wMenuPushCreate( m, NULL, _(dp->label), 0,
+		                 ShowTurnoutDesigner, dp );
+		sprintf( message, "%s SHOW %s", TURNOUTDESIGNER, dp->label );
+		AddPlaybackProc( message, (playbackProc_p)ShowTurnoutDesigner, dp );
+		dp->iDescCount = 0;
+		for ( const char * pVM = dp->sValueMode; *pVM; pVM++ ) {
+			if ( *pVM == '-' ) { continue; }
+			dp->iDescCount++;
+		}
+		dp->iDescFirst = iDescFirst;
+		iDescFirst += dp->iDescCount;
+		LOG( log_turnoutdesigner, 1, ("%d %d %s\n", dp->iDescFirst, dp->iDescCount, dp->label ) );
+		CHECK( dp->iDescFirst == dp->iDescFirstX );
+		CHECK( dp->iDescCount == dp->iDescCountX );
+
+	}
 }
 
