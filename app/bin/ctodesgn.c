@@ -299,9 +299,10 @@ typedef struct {
 	int strCnt;
 	toDesignSchema_t * paths;
 	int angleModeCnt;
-	const char * sValueMode;
+	// Frog, Angle, Len, Radius, Offset
+	const char * sParamType;
 	int iDescFirst;
-	int iDescCount;
+//	int iDescCount;
 //	wBool_t slipmode;
 } toDesignDesc_t;
 
@@ -2257,6 +2258,7 @@ static BOOL_T ComputeCurve(
 static void FixFrog(
 		FLOAT_T * pAngle )
 {
+	return;
 	if ( newTurnAngleMode == 1 ) {
 		return;
 	}
@@ -2287,13 +2289,19 @@ static toDesignSchema_t * LoadSegs(
 
 	if (bFirst) {
 		// Handle Left or only
-		if (logTable(log_turnoutdesigner).level >= 2) {
-			for ( const char *pVM = dp->sValueMode; *pVM; pVM++ ) {
-				if ( *pVM == '-' ) { continue; }
-				lprintf( "%0.3f ", tdVal[pVM - dp->sValueMode] );
+		int tdInx = 0;
+		for ( const char *pPT = dp->sParamType; *pPT; pPT++, tdInx++ ) {
+			if ( *pPT == '-' ) { continue; }
+			LOG( log_turnoutdesigner, 1, ( "%0.3f ", tdVal[tdInx] ) );
+			if ( *pPT == 'F' &&
+			     newTurnAngleMode == 0 &&
+			     tdVal[tdInx] > 0 ) {
+				/* convert from Frog Num to degrees */
+				tdVal[tdInx] = R2D(asin(1.0 / tdVal[tdInx]));
 			}
-			lprintf( "\n" );
 		}
+		LOG( log_turnoutdesigner, 1, ( "\n" ) );
+
 		TempEndPtsReset();
 		memset( points, 0, sizeof points );
 		memset( radii, 0, sizeof radii );
@@ -2745,25 +2753,26 @@ static void NewTurnPrint(
 			strPos.y -= 0.5;
 			DrawString( &newTurnout_d, strPos, 0.0, message, fp, 20, wDrawColorBlack );
 			strPos.y -= 0.10;
-			int inx = 0;
-			for ( const char *pVM = curDesign->sValueMode; *pVM; pVM++ ) {
-				if ( *pVM == '-' ) { continue; }
-				inx++;
+			int tdInx = 0;
+			int iDescInx = curDesign->iDescFirst;
+			for ( const char *pPT = curDesign->sParamType; *pPT; pPT++, tdInx++ ) {
+				if ( *pPT == '-' ) { continue; }
 				const char * sLabel;
-				if ( *pVM != 'F' || newTurnAngleMode==0 ) {
-					sLabel = turnDesignPLs[ curDesign->iDescFirst+inx ].winLabel;
-				} else {
+				if ( *pPT == 'F' && newTurnAngleMode==0 ) {
 					sLabel = _("Frog #");
+				} else {
+					sLabel = turnDesignPLs[ iDescInx ].winLabel;
 				}
 				const char * sValue;
-				if ( *pVM == 'L' || *pVM == 'O' ) {
-					sValue = FormatDistance( tdVal[inx] );
+				if ( *pPT == 'L' || *pPT == 'O' ) {
+					sValue = FormatDistance( tdVal[tdInx] );
 				} else {
-					sValue = FormatFloat( tdVal[inx] );
+					sValue = FormatFloat( tdVal[tdInx] );
 				}
 				sprintf( message, "%s: %s", sLabel, sValue );
 				strPos.y -= 0.25;
 				DrawString( &newTurnout_d, strPos, 0.0, message, fp, 16, wDrawColorBlack );
+				iDescInx++;
 			}
 			if (newTurnLeftDesc[0] || newTurnLeftPartno[0]) {
 				sprintf( message, "%s %s %s", newTurnManufacturer, newTurnLeftPartno,
@@ -2925,9 +2934,10 @@ static void NewTurnOk( void * context )
 	}
 	CHECK( cp-tempCustom <= sizeof tempCustom );
 
-	for ( const char * pVM = curDesign->sValueMode; *pVM; pVM++ ) {
-		if ( *pVM == '-' ) { continue; }
-		sprintf( cp, " %0.6f", tdVal[pVM-curDesign->sValueMode] );
+	int tdInx = 0;
+	for ( const char * pPT = curDesign->sParamType; *pPT; pPT++, tdInx++ ) {
+		if ( *pPT == '-' ) { continue; }
+		sprintf( cp, " %0.6f", tdVal[tdInx] );
 		cp += strlen(cp);
 	}
 
@@ -3007,17 +3017,17 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 		wWinSetTitle( newTurnW, curDesign->stackLabel );
 
 		// Show or hide float controls
-		int iDescCount = 0;
-		for ( const char * pVM = curDesign->sValueMode; *pVM; pVM++ ) {
-			if ( *pVM == '-' ) { continue; }
-			iDescCount++;
+		int iDescLast = curDesign->iDescFirst;
+		for ( const char * pPT = curDesign->sParamType; *pPT; pPT++ ) {
+			if ( *pPT == '-' ) { continue; }
+			iDescLast++;
 		}
-		CHECK( curDesign->iDescCount == iDescCount );
+//		CHECK( curDesign->iDescCount + curDesign->iDescFirst == iDescLast );
 		for ( int inx = 0; inx<I_PLTOTAL; inx++ ) {
 			paramData_p ptr = turnDesignPLs+inx;
 			ptr->bInvalid = FALSE;
 			if ( inx >= curDesign->iDescFirst &&
-			     inx < curDesign->iDescFirst + iDescCount ) {
+			     inx < iDescLast ) {
 				ptr->bShown = TRUE;
 			} else {
 				ptr->bShown = FALSE;
@@ -3170,13 +3180,13 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 		descR = partR = "";
 	}
 
-	int inx = 0;
-	for ( const char * pVM = dp->sValueMode; *pVM; pVM++, inx++ ) {
-		if ( *pVM == '-' ) { continue; }
-		if ( ! GetArgs( cp, "fc", tdVal+inx, &cp ) ) { return; }
-		if ( *pVM == 'F' && newTurnAngleMode == 0 ) {
+	int tdInx = 0;
+	for ( const char * pPT = dp->sParamType; *pPT; pPT++, tdInx++ ) {
+		if ( *pPT == '-' ) { continue; }
+		if ( ! GetArgs( cp, "fc", tdVal+tdInx, &cp ) ) { return; }
+		if ( *pPT == 'F' && newTurnAngleMode == 0 && tdVal[tdInx] != 0.0 ) {
 			// Reset frog #
-			tdVal[inx] = round( 1024.0 / sin( D2R(tdVal[inx] ) ) ) / 1024;
+			tdVal[tdInx] = round( 1024.0 / sin( D2R(tdVal[tdInx] ) ) ) / 1024;
 		}
 	}
 	rgb = 0;
@@ -3330,11 +3340,11 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 		fprintf( recordF, TURNOUTDESIGNER " SHOW %s\n", dp->label );*/
 	if ( newTurnAngleMode == 0 ) {
 		// Reset frog #, again
-		int inx = 0;
-		for ( const char * pVM = dp->sValueMode; *pVM; pVM++, inx++ ) {
-			if ( *pVM == '-' ) { continue; }
-			if ( *pVM == 'F' ) {
-				tdVal[inx] = round( 1024.0 / sin( D2R(tdVal[inx] ) ) ) / 1024;
+		int tdInx = 0;
+		for ( const char * pPT = dp->sParamType; *pPT; pPT++, tdInx++ ) {
+			if ( *pPT == '-' ) { continue; }
+			if ( *pPT == 'F' && tdVal[tdInx] != 0.0 ) {
+				tdVal[tdInx] = round( 1024.0 / sin( D2R(tdVal[tdInx] ) ) ) / 1024;
 			}
 		}
 	}
@@ -3362,16 +3372,16 @@ EXPORT void InitNewTurn( wMenu_p m )
 		                 ShowTurnoutDesigner, dp );
 		sprintf( message, "%s SHOW %s", TURNOUTDESIGNER, dp->label );
 		AddPlaybackProc( message, (playbackProc_p)ShowTurnoutDesigner, dp );
-		dp->iDescCount = 0;
-		for ( const char * pVM = dp->sValueMode; *pVM; pVM++ ) {
-			if ( *pVM == '-' ) { continue; }
-			dp->iDescCount++;
+		int iDescCount = 0;
+		for ( const char * pPT = dp->sParamType; *pPT; pPT++ ) {
+			if ( *pPT == '-' ) { continue; }
+			iDescCount++;
 		}
 		dp->iDescFirst = iDescFirst;
-		iDescFirst += dp->iDescCount;
-		LOG( log_turnoutdesigner, 1, ("%d %d %s\n", dp->iDescFirst, dp->iDescCount, dp->label ) );
+		iDescFirst += iDescCount;
+		LOG( log_turnoutdesigner, 1, ("%d %d %s\n", dp->iDescFirst, iDescCount, dp->label ) );
 		CHECK( dp->iDescFirst == dp->iDescFirstX );
-		CHECK( dp->iDescCount == dp->iDescCountX );
+		CHECK( iDescCount == dp->iDescCountX );
 
 	}
 }
