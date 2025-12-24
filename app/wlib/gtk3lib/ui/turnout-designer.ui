@@ -44,6 +44,7 @@
                   <object class="GtkStack" id="stack">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
+                    <property name="vhomogeneous">False</property>
                     <property name="interpolate-size">True</property>
                     <child>
                       <object class="GtkBox" id="td_reg_stack">
@@ -51,7 +52,7 @@
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <!-- n-columns=2 n-rows=4 -->
+                          <!-- n-columns=4 n-rows=4 -->
                           <object class="GtkGrid">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
@@ -59,11 +60,11 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Straight Length</property>
+                                <property name="label" translatable="yes">Length</property>
                               </object>
                               <packing>
                                 <property name="left-attach">0</property>
-                                <property name="top-attach">0</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
@@ -73,6 +74,20 @@
                               </object>
                               <packing>
                                 <property name="left-attach">1</property>
+                                <property name="top-attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Normal</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">0</property>
                                 <property name="top-attach">0</property>
                               </packing>
                             </child>
@@ -80,11 +95,47 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Diverging Length</property>
+                                <property name="label" translatable="yes">Reverse</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
                               </object>
                               <packing>
-                                <property name="left-attach">0</property>
+                                <property name="left-attach">2</property>
+                                <property name="top-attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Length</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">2</property>
                                 <property name="top-attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Offset</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">2</property>
+                                <property name="top-attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Angle</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">2</property>
+                                <property name="top-attach">3</property>
                               </packing>
                             </child>
                             <child>
@@ -93,10 +144,71 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
+                                <property name="left-attach">3</property>
                                 <property name="top-attach">1</property>
                               </packing>
                             </child>
+                            <child>
+                              <object class="GtkEntry" id="td_reg_off2">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">3</property>
+                                <property name="top-attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="td_reg_ang2">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">3</property>
+                                <property name="top-attach">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="name">td_reg_stack</property>
+                        <property name="title" translatable="yes">td_reg_stack</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="td_crv_stack">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="orientation">vertical</property>
+                        <child>
+                          <!-- n-columns=4 n-rows=4 -->
+                          <object class="GtkGrid">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
@@ -109,7 +221,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="td_reg_off2">
+                              <object class="GtkEntry" id="td_crv_off1">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                               </object>
@@ -130,7 +242,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="td_reg_ang2">
+                              <object class="GtkEntry" id="td_crv_ang1">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                               </object>
@@ -139,38 +251,15 @@
                                 <property name="top-attach">3</property>
                               </packing>
                             </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="name">td_reg_stack</property>
-                        <property name="title" translatable="yes">td_reg_stack</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkBox" id="td_crv_stack">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="orientation">vertical</property>
-                        <child>
-                          <!-- n-columns=2 n-rows=6 -->
-                          <object class="GtkGrid">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Length 1</property>
+                                <property name="label" translatable="yes">Length</property>
                               </object>
                               <packing>
                                 <property name="left-attach">0</property>
-                                <property name="top-attach">0</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
@@ -180,6 +269,20 @@
                               </object>
                               <packing>
                                 <property name="left-attach">1</property>
+                                <property name="top-attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Outer</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">0</property>
                                 <property name="top-attach">0</property>
                               </packing>
                             </child>
@@ -187,20 +290,24 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Offset 1</property>
+                                <property name="label" translatable="yes">Inner</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
                               </object>
                               <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">1</property>
+                                <property name="left-attach">2</property>
+                                <property name="top-attach">0</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="td_crv_off1">
+                              <object class="GtkLabel">
                                 <property name="visible">True</property>
-                                <property name="can-focus">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Length</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
+                                <property name="left-attach">2</property>
                                 <property name="top-attach">1</property>
                               </packing>
                             </child>
@@ -208,20 +315,10 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Angle 1</property>
+                                <property name="label" translatable="yes">Offset</property>
                               </object>
                               <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkEntry" id="td_crv_ang1">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">1</property>
+                                <property name="left-attach">2</property>
                                 <property name="top-attach">2</property>
                               </packing>
                             </child>
@@ -229,10 +326,10 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Length 2</property>
+                                <property name="label" translatable="yes">Angle</property>
                               </object>
                               <packing>
-                                <property name="left-attach">0</property>
+                                <property name="left-attach">2</property>
                                 <property name="top-attach">3</property>
                               </packing>
                             </child>
@@ -242,30 +339,8 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Offset 2</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">4</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Angle 2</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">5</property>
+                                <property name="left-attach">3</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
@@ -274,8 +349,8 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">4</property>
+                                <property name="left-attach">3</property>
+                                <property name="top-attach">2</property>
                               </packing>
                             </child>
                             <child>
@@ -284,14 +359,20 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">5</property>
+                                <property name="left-attach">3</property>
+                                <property name="top-attach">3</property>
                               </packing>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
                             </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="fill">True</property>
+                            <property name="fill">False</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
@@ -308,7 +389,7 @@
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <!-- n-columns=2 n-rows=10 -->
+                          <!-- n-columns=6 n-rows=5 -->
                           <object class="GtkGrid">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
@@ -316,11 +397,11 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Length 1</property>
+                                <property name="label" translatable="yes">Length</property>
                               </object>
                               <packing>
                                 <property name="left-attach">0</property>
-                                <property name="top-attach">0</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
@@ -330,18 +411,18 @@
                               </object>
                               <packing>
                                 <property name="left-attach">1</property>
-                                <property name="top-attach">0</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Offset 1</property>
+                                <property name="label" translatable="yes">Offset</property>
                               </object>
                               <packing>
                                 <property name="left-attach">0</property>
-                                <property name="top-attach">1</property>
+                                <property name="top-attach">2</property>
                               </packing>
                             </child>
                             <child>
@@ -351,18 +432,18 @@
                               </object>
                               <packing>
                                 <property name="left-attach">1</property>
-                                <property name="top-attach">1</property>
+                                <property name="top-attach">2</property>
                               </packing>
                             </child>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Angle 1</property>
+                                <property name="label" translatable="yes">Angle</property>
                               </object>
                               <packing>
                                 <property name="left-attach">0</property>
-                                <property name="top-attach">2</property>
+                                <property name="top-attach">3</property>
                               </packing>
                             </child>
                             <child>
@@ -372,133 +453,7 @@
                               </object>
                               <packing>
                                 <property name="left-attach">1</property>
-                                <property name="top-attach">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Radius 1</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
                                 <property name="top-attach">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkEntry" id="td_corcrv_rad1">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Length 2</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">4</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Offset 2</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">5</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Radius 2</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">7</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Angle 2</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">6</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkEntry" id="td_corcrv_len2">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">4</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkEntry" id="td_corcrv_off2">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">5</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkEntry" id="td_corcrv_ang2">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">6</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkEntry" id="td_corcrv_rad2">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">7</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Toe Length</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">8</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkEntry" id="td_corcrv_len3">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">8</property>
                               </packing>
                             </child>
                             <child>
@@ -509,7 +464,175 @@
                               </object>
                               <packing>
                                 <property name="left-attach">0</property>
-                                <property name="top-attach">9</property>
+                                <property name="top-attach">4</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="td_corcrv_rad1">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">1</property>
+                                <property name="top-attach">4</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Outer</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">0</property>
+                                <property name="top-attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Toe</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">2</property>
+                                <property name="top-attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Inner</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">4</property>
+                                <property name="top-attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Length</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">4</property>
+                                <property name="top-attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Offset</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">4</property>
+                                <property name="top-attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Angle</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">4</property>
+                                <property name="top-attach">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Radius</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">4</property>
+                                <property name="top-attach">4</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="td_corcrv_len2">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">5</property>
+                                <property name="top-attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="td_corcrv_off2">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">5</property>
+                                <property name="top-attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="td_corcrv_ang2">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">5</property>
+                                <property name="top-attach">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="td_corcrv_rad2">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">5</property>
+                                <property name="top-attach">4</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Length</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">2</property>
+                                <property name="top-attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Radius</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">2</property>
+                                <property name="top-attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="td_corcrv_len3">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">3</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
@@ -518,9 +641,30 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">9</property>
+                                <property name="left-attach">3</property>
+                                <property name="top-attach">2</property>
                               </packing>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
                             </child>
                           </object>
                           <packing>
@@ -542,10 +686,7 @@
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <!-- n-columns=2 n-rows=6 -->
+                          <!-- n-columns=4 n-rows=4 -->
                           <object class="GtkGrid">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
@@ -553,11 +694,11 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Left Length</property>
+                                <property name="label" translatable="yes">Length</property>
                               </object>
                               <packing>
                                 <property name="left-attach">0</property>
-                                <property name="top-attach">0</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
@@ -567,18 +708,18 @@
                               </object>
                               <packing>
                                 <property name="left-attach">1</property>
-                                <property name="top-attach">0</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Left Offset</property>
+                                <property name="label" translatable="yes">Offset</property>
                               </object>
                               <packing>
                                 <property name="left-attach">0</property>
-                                <property name="top-attach">1</property>
+                                <property name="top-attach">2</property>
                               </packing>
                             </child>
                             <child>
@@ -588,18 +729,18 @@
                               </object>
                               <packing>
                                 <property name="left-attach">1</property>
-                                <property name="top-attach">1</property>
+                                <property name="top-attach">2</property>
                               </packing>
                             </child>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Left Angle</property>
+                                <property name="label" translatable="yes">Angle</property>
                               </object>
                               <packing>
                                 <property name="left-attach">0</property>
-                                <property name="top-attach">2</property>
+                                <property name="top-attach">3</property>
                               </packing>
                             </child>
                             <child>
@@ -609,6 +750,56 @@
                               </object>
                               <packing>
                                 <property name="left-attach">1</property>
+                                <property name="top-attach">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Left</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">0</property>
+                                <property name="top-attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Right</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">2</property>
+                                <property name="top-attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Length</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">2</property>
+                                <property name="top-attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Offset</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">2</property>
                                 <property name="top-attach">2</property>
                               </packing>
                             </child>
@@ -616,10 +807,10 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Right Length</property>
+                                <property name="label" translatable="yes">Angle</property>
                               </object>
                               <packing>
-                                <property name="left-attach">0</property>
+                                <property name="left-attach">2</property>
                                 <property name="top-attach">3</property>
                               </packing>
                             </child>
@@ -629,19 +820,8 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Right Offset</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">4</property>
+                                <property name="left-attach">3</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
@@ -650,19 +830,8 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">4</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Right Angle</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">5</property>
+                                <property name="left-attach">3</property>
+                                <property name="top-attach">2</property>
                               </packing>
                             </child>
                             <child>
@@ -671,9 +840,15 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">5</property>
+                                <property name="left-attach">3</property>
+                                <property name="top-attach">3</property>
                               </packing>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
                             </child>
                           </object>
                           <packing>
@@ -695,10 +870,7 @@
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <!-- n-columns=2 n-rows=10 -->
+                          <!-- n-columns=6 n-rows=5 -->
                           <object class="GtkGrid">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
@@ -706,11 +878,11 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Left Length</property>
+                                <property name="label" translatable="yes">Length</property>
                               </object>
                               <packing>
                                 <property name="left-attach">0</property>
-                                <property name="top-attach">0</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
@@ -720,18 +892,18 @@
                               </object>
                               <packing>
                                 <property name="left-attach">1</property>
-                                <property name="top-attach">0</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Left Offset</property>
+                                <property name="label" translatable="yes">Offset</property>
                               </object>
                               <packing>
                                 <property name="left-attach">0</property>
-                                <property name="top-attach">1</property>
+                                <property name="top-attach">2</property>
                               </packing>
                             </child>
                             <child>
@@ -741,18 +913,18 @@
                               </object>
                               <packing>
                                 <property name="left-attach">1</property>
-                                <property name="top-attach">1</property>
+                                <property name="top-attach">2</property>
                               </packing>
                             </child>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Left Angle</property>
+                                <property name="label" translatable="yes">Angle</property>
                               </object>
                               <packing>
                                 <property name="left-attach">0</property>
-                                <property name="top-attach">2</property>
+                                <property name="top-attach">3</property>
                               </packing>
                             </child>
                             <child>
@@ -762,61 +934,19 @@
                               </object>
                               <packing>
                                 <property name="left-attach">1</property>
-                                <property name="top-attach">2</property>
+                                <property name="top-attach">3</property>
                               </packing>
                             </child>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Toe Radius</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">9</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Toe Length</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">8</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkEntry" id="td_corwye_rad3">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">9</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkEntry" id="td_corwye_toeL">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">8</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Left Radius
+                                <property name="label" translatable="yes">Radius
 </property>
                               </object>
                               <packing>
                                 <property name="left-attach">0</property>
-                                <property name="top-attach">3</property>
+                                <property name="top-attach">4</property>
                               </packing>
                             </child>
                             <child>
@@ -826,17 +956,6 @@
                               </object>
                               <packing>
                                 <property name="left-attach">1</property>
-                                <property name="top-attach">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Right Length</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
                                 <property name="top-attach">4</property>
                               </packing>
                             </child>
@@ -844,22 +963,86 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Right Offset</property>
+                                <property name="label" translatable="yes">Left</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
                               </object>
                               <packing>
                                 <property name="left-attach">0</property>
-                                <property name="top-attach">5</property>
+                                <property name="top-attach">0</property>
                               </packing>
                             </child>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Right Angle</property>
+                                <property name="label" translatable="yes">Toe</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
                               </object>
                               <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">6</property>
+                                <property name="left-attach">2</property>
+                                <property name="top-attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Right</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">4</property>
+                                <property name="top-attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Length</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">4</property>
+                                <property name="top-attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Offset</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">4</property>
+                                <property name="top-attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes"> Angle</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">4</property>
+                                <property name="top-attach">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Radius</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">4</property>
+                                <property name="top-attach">4</property>
                               </packing>
                             </child>
                             <child>
@@ -868,8 +1051,8 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">4</property>
+                                <property name="left-attach">5</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
@@ -878,8 +1061,8 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">5</property>
+                                <property name="left-attach">5</property>
+                                <property name="top-attach">2</property>
                               </packing>
                             </child>
                             <child>
@@ -888,19 +1071,8 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">6</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Right Radius</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">7</property>
+                                <property name="left-attach">5</property>
+                                <property name="top-attach">3</property>
                               </packing>
                             </child>
                             <child>
@@ -909,9 +1081,73 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">7</property>
+                                <property name="left-attach">5</property>
+                                <property name="top-attach">4</property>
                               </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Length</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">2</property>
+                                <property name="top-attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">
+Radius</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">2</property>
+                                <property name="top-attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="td_corwye_toeL">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">3</property>
+                                <property name="top-attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="td_corwye_rad3">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">3</property>
+                                <property name="top-attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
                             </child>
                           </object>
                           <packing>
@@ -933,10 +1169,7 @@
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <!-- n-columns=2 n-rows=7 -->
+                          <!-- n-columns=6 n-rows=4 -->
                           <object class="GtkGrid">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
@@ -944,11 +1177,11 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Left Length</property>
+                                <property name="label" translatable="yes">Length</property>
                               </object>
                               <packing>
                                 <property name="left-attach">0</property>
-                                <property name="top-attach">0</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
@@ -958,18 +1191,18 @@
                               </object>
                               <packing>
                                 <property name="left-attach">1</property>
-                                <property name="top-attach">0</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Left Offet</property>
+                                <property name="label" translatable="yes">Offet</property>
                               </object>
                               <packing>
                                 <property name="left-attach">0</property>
-                                <property name="top-attach">1</property>
+                                <property name="top-attach">2</property>
                               </packing>
                             </child>
                             <child>
@@ -979,18 +1212,18 @@
                               </object>
                               <packing>
                                 <property name="left-attach">1</property>
-                                <property name="top-attach">1</property>
+                                <property name="top-attach">2</property>
                               </packing>
                             </child>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Left Angle</property>
+                                <property name="label" translatable="yes">Angle</property>
                               </object>
                               <packing>
                                 <property name="left-attach">0</property>
-                                <property name="top-attach">2</property>
+                                <property name="top-attach">3</property>
                               </packing>
                             </child>
                             <child>
@@ -1000,6 +1233,81 @@
                               </object>
                               <packing>
                                 <property name="left-attach">1</property>
+                                <property name="top-attach">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Left</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">0</property>
+                                <property name="top-attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Center</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">2</property>
+                                <property name="top-attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Right</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">4</property>
+                                <property name="top-attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Length</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">2</property>
+                                <property name="top-attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Length</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">4</property>
+                                <property name="top-attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Offset</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">4</property>
                                 <property name="top-attach">2</property>
                               </packing>
                             </child>
@@ -1007,10 +1315,10 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Center Length</property>
+                                <property name="label" translatable="yes"> Angle</property>
                               </object>
                               <packing>
-                                <property name="left-attach">0</property>
+                                <property name="left-attach">4</property>
                                 <property name="top-attach">3</property>
                               </packing>
                             </child>
@@ -1020,19 +1328,8 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Right Length</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">4</property>
+                                <property name="left-attach">3</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
@@ -1041,19 +1338,8 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">4</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Right Offset</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">5</property>
+                                <property name="left-attach">5</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
@@ -1062,19 +1348,8 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">5</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Right Angle</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">6</property>
+                                <property name="left-attach">5</property>
+                                <property name="top-attach">2</property>
                               </packing>
                             </child>
                             <child>
@@ -1083,9 +1358,30 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">6</property>
+                                <property name="left-attach">5</property>
+                                <property name="top-attach">3</property>
                               </packing>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
                             </child>
                           </object>
                           <packing>
@@ -1107,23 +1403,21 @@
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <!-- n-columns=2 n-rows=14 -->
+                          <!-- n-columns=6 n-rows=8 -->
                           <object class="GtkGrid">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
+                            <property name="orientation">vertical</property>
                             <property name="row-spacing">1</property>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Left Length</property>
+                                <property name="label" translatable="yes">Length</property>
                               </object>
                               <packing>
                                 <property name="left-attach">0</property>
-                                <property name="top-attach">0</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
@@ -1133,18 +1427,18 @@
                               </object>
                               <packing>
                                 <property name="left-attach">1</property>
-                                <property name="top-attach">0</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Left Offset</property>
+                                <property name="label" translatable="yes">Offset</property>
                               </object>
                               <packing>
                                 <property name="left-attach">0</property>
-                                <property name="top-attach">1</property>
+                                <property name="top-attach">2</property>
                               </packing>
                             </child>
                             <child>
@@ -1154,18 +1448,18 @@
                               </object>
                               <packing>
                                 <property name="left-attach">1</property>
-                                <property name="top-attach">1</property>
+                                <property name="top-attach">2</property>
                               </packing>
                             </child>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Left Angle</property>
+                                <property name="label" translatable="yes">Angle</property>
                               </object>
                               <packing>
                                 <property name="left-attach">0</property>
-                                <property name="top-attach">2</property>
+                                <property name="top-attach">3</property>
                               </packing>
                             </child>
                             <child>
@@ -1175,7 +1469,7 @@
                               </object>
                               <packing>
                                 <property name="left-attach">1</property>
-                                <property name="top-attach">2</property>
+                                <property name="top-attach">3</property>
                               </packing>
                             </child>
                             <child>
@@ -1185,7 +1479,29 @@
                               </object>
                               <packing>
                                 <property name="left-attach">1</property>
-                                <property name="top-attach">3</property>
+                                <property name="top-attach">4</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Radius</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">0</property>
+                                <property name="top-attach">4</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Length</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">2</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
@@ -1194,27 +1510,126 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
+                                <property name="left-attach">3</property>
+                                <property name="top-attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Offset</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">2</property>
+                                <property name="top-attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Angle</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">2</property>
+                                <property name="top-attach">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Length</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">4</property>
+                                <property name="top-attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Offset</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">4</property>
+                                <property name="top-attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Angle</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">4</property>
+                                <property name="top-attach">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Radius</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">4</property>
                                 <property name="top-attach">4</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="td_cor3way_off2">
+                              <object class="GtkLabel">
                                 <property name="visible">True</property>
-                                <property name="can-focus">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Radius</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">5</property>
+                                <property name="left-attach">2</property>
+                                <property name="top-attach">4</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="td_cor3way_ang2">
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Length</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">2</property>
+                                <property name="top-attach">6</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Radius</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">2</property>
+                                <property name="top-attach">7</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="td_cor3way_rad4">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
+                                <property name="left-attach">3</property>
+                                <property name="top-attach">7</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="td_cor3way_len4">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">3</property>
                                 <property name="top-attach">6</property>
                               </packing>
                             </child>
@@ -1224,129 +1639,28 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">7</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Right Length</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">8</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Right Offset</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">9</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Right Angle</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">10</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Right Radius</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">11</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Center Radius</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">7</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Center Angle</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">6</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Center Offset</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">5</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Center Length</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
+                                <property name="left-attach">3</property>
                                 <property name="top-attach">4</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel">
+                              <object class="GtkEntry" id="td_cor3way_ang2">
                                 <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Left Radius</property>
+                                <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">0</property>
+                                <property name="left-attach">3</property>
                                 <property name="top-attach">3</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel">
+                              <object class="GtkEntry" id="td_cor3way_off2">
                                 <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Toe Length</property>
+                                <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">12</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Toe Radius</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">13</property>
+                                <property name="left-attach">3</property>
+                                <property name="top-attach">2</property>
                               </packing>
                             </child>
                             <child>
@@ -1355,8 +1669,8 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">8</property>
+                                <property name="left-attach">5</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
@@ -1365,8 +1679,8 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">9</property>
+                                <property name="left-attach">5</property>
+                                <property name="top-attach">2</property>
                               </packing>
                             </child>
                             <child>
@@ -1375,8 +1689,8 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">10</property>
+                                <property name="left-attach">5</property>
+                                <property name="top-attach">3</property>
                               </packing>
                             </child>
                             <child>
@@ -1385,29 +1699,113 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">11</property>
+                                <property name="left-attach">5</property>
+                                <property name="top-attach">4</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="td_cor3way_len4">
+                              <object class="GtkLabel">
                                 <property name="visible">True</property>
-                                <property name="can-focus">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Toe</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">12</property>
+                                <property name="left-attach">2</property>
+                                <property name="top-attach">5</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="td_cor3way_rad4">
+                              <object class="GtkLabel">
                                 <property name="visible">True</property>
-                                <property name="can-focus">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Left</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">13</property>
+                                <property name="left-attach">0</property>
+                                <property name="top-attach">0</property>
                               </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Center</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">2</property>
+                                <property name="top-attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Right</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">4</property>
+                                <property name="top-attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
                             </child>
                           </object>
                           <packing>
@@ -1429,10 +1827,7 @@
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <!-- n-columns=2 n-rows=3 -->
+                          <!-- n-columns=6 n-rows=2 -->
                           <object class="GtkGrid">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
@@ -1440,11 +1835,11 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Length 1</property>
+                                <property name="label" translatable="yes">Length</property>
                               </object>
                               <packing>
                                 <property name="left-attach">0</property>
-                                <property name="top-attach">0</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
@@ -1454,17 +1849,6 @@
                               </object>
                               <packing>
                                 <property name="left-attach">1</property>
-                                <property name="top-attach">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Length 2</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
                                 <property name="top-attach">1</property>
                               </packing>
                             </child>
@@ -1474,7 +1858,18 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
+                                <property name="left-attach">5</property>
+                                <property name="top-attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Length</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">4</property>
                                 <property name="top-attach">1</property>
                               </packing>
                             </child>
@@ -1485,8 +1880,8 @@
                                 <property name="label" translatable="yes">Angle</property>
                               </object>
                               <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">2</property>
+                                <property name="left-attach">2</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
@@ -1495,9 +1890,49 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">2</property>
+                                <property name="left-attach">3</property>
+                                <property name="top-attach">1</property>
                               </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Horizontal</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">0</property>
+                                <property name="top-attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Diagonal</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">4</property>
+                                <property name="top-attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
                             </child>
                           </object>
                           <packing>
@@ -1519,10 +1954,7 @@
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <!-- n-columns=2 n-rows=3 -->
+                          <!-- n-columns=6 n-rows=2 -->
                           <object class="GtkGrid">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
@@ -1530,11 +1962,11 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Length 1</property>
+                                <property name="label" translatable="yes">Length</property>
                               </object>
                               <packing>
                                 <property name="left-attach">0</property>
-                                <property name="top-attach">0</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
@@ -1545,6 +1977,20 @@
                               </object>
                               <packing>
                                 <property name="left-attach">1</property>
+                                <property name="top-attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Horizontal</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">0</property>
                                 <property name="top-attach">0</property>
                               </packing>
                             </child>
@@ -1552,20 +1998,24 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Length 2</property>
+                                <property name="label" translatable="yes">Diagonal</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
                               </object>
                               <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">1</property>
+                                <property name="left-attach">4</property>
+                                <property name="top-attach">0</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="td_sslip_len2">
+                              <object class="GtkLabel">
                                 <property name="visible">True</property>
-                                <property name="can-focus">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Length</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
+                                <property name="left-attach">4</property>
                                 <property name="top-attach">1</property>
                               </packing>
                             </child>
@@ -1576,8 +2026,18 @@
                                 <property name="label" translatable="yes">Angle</property>
                               </object>
                               <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">2</property>
+                                <property name="left-attach">2</property>
+                                <property name="top-attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="td_sslip_len2">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="left-attach">5</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
@@ -1586,9 +2046,21 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">2</property>
+                                <property name="left-attach">3</property>
+                                <property name="top-attach">1</property>
                               </packing>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
                             </child>
                           </object>
                           <packing>
@@ -1610,10 +2082,7 @@
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <!-- n-columns=2 n-rows=3 -->
+                          <!-- n-columns=6 n-rows=2 -->
                           <object class="GtkGrid">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
@@ -1621,11 +2090,11 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Length 1</property>
+                                <property name="label" translatable="yes">Length</property>
                               </object>
                               <packing>
                                 <property name="left-attach">0</property>
-                                <property name="top-attach">0</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
@@ -1636,6 +2105,20 @@
                               </object>
                               <packing>
                                 <property name="left-attach">1</property>
+                                <property name="top-attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Horizontal</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">0</property>
                                 <property name="top-attach">0</property>
                               </packing>
                             </child>
@@ -1643,11 +2126,25 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Length 2</property>
+                                <property name="label" translatable="yes">Length</property>
                               </object>
                               <packing>
-                                <property name="left-attach">0</property>
+                                <property name="left-attach">4</property>
                                 <property name="top-attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Diagonal</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">4</property>
+                                <property name="top-attach">0</property>
                               </packing>
                             </child>
                             <child>
@@ -1656,7 +2153,7 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
+                                <property name="left-attach">5</property>
                                 <property name="top-attach">1</property>
                               </packing>
                             </child>
@@ -1667,8 +2164,8 @@
                                 <property name="label" translatable="yes">Angle</property>
                               </object>
                               <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">2</property>
+                                <property name="left-attach">2</property>
+                                <property name="top-attach">1</property>
                               </packing>
                             </child>
                             <child>
@@ -1677,9 +2174,21 @@
                                 <property name="can-focus">True</property>
                               </object>
                               <packing>
-                                <property name="left-attach">1</property>
-                                <property name="top-attach">2</property>
+                                <property name="left-attach">3</property>
+                                <property name="top-attach">1</property>
                               </packing>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
                             </child>
                           </object>
                           <packing>
@@ -1700,9 +2209,6 @@
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
-                        <child>
-                          <placeholder/>
-                        </child>
                         <child>
                           <!-- n-columns=2 n-rows=2 -->
                           <object class="GtkGrid">
@@ -1771,9 +2277,6 @@
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <placeholder/>
-                        </child>
-                        <child>
                           <!-- n-columns=2 n-rows=2 -->
                           <object class="GtkGrid">
                             <property name="visible">True</property>
@@ -1840,9 +2343,6 @@
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
-                        <child>
-                          <placeholder/>
-                        </child>
                         <child>
                           <!-- n-columns=2 n-rows=2 -->
                           <object class="GtkGrid">
@@ -1911,9 +2411,6 @@
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <placeholder/>
-                        </child>
-                        <child>
                           <!-- n-columns=2 n-rows=1 -->
                           <object class="GtkGrid">
                             <property name="visible">True</property>
@@ -1959,9 +2456,6 @@
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
-                        <child>
-                          <placeholder/>
-                        </child>
                         <child>
                           <!-- n-columns=2 n-rows=2 -->
                           <object class="GtkGrid">
@@ -2024,9 +2518,6 @@
                         <property name="position">14</property>
                       </packing>
                     </child>
-                    <child>
-                      <placeholder/>
-                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2034,13 +2525,10 @@
                     <property name="position">0</property>
                   </packing>
                 </child>
-                <child>
-                  <placeholder/>
-                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="fill">True</property>
+                <property name="fill">False</property>
                 <property name="position">1</property>
               </packing>
             </child>
