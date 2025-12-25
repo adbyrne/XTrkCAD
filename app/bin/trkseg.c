@@ -31,6 +31,11 @@
 #include "cjoin.h"
 #include "include/utf8convert.h"
 
+// working segments
+dynArr_t tempSegs_da;
+
+// U5 - custom info line - reordedd values
+BOOL_T customLineReorder;
 
 /*****************************************************************************
  *
@@ -1235,8 +1240,11 @@ EXPORT BOOL_T ReadSegs( void )
 			if ( iVersion >= 4 ) {
 				improvedEnds = isPolyV2 = TRUE;
 			}
-			if ( iVersion > 4 ) {
-				InputError( "Invalid segment version number, maximum is %d", TRUE, 4 );
+			if ( iVersion >= 5 ) {
+				customLineReorder = TRUE;
+			}
+			if ( iVersion > 5 ) {
+				InputError( "Invalid segment version number, maximum is %d", TRUE, 5 );
 				break;
 			}
 		}

@@ -364,53 +364,13 @@ target_link_libraries(${XTRKCAD_BIN}
 		xtrkcad-lib
 )
 
-#
-# Create mkturnout utility
-#
-add_executable(mkturnout
-    ctodesgn.c
-	utility.c
-    trkendpt.c
-)
-set_target_properties(mkturnout PROPERTIES COMPILE_FLAGS -DMKTURNOUT)
-set_target_properties(mkturnout PROPERTIES FOLDER "Param Files" )
 
-target_include_directories(mkturnout
-    PRIVATE
-	${messagefile_BINARY_DIR}
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${XTRKCAD_CORE_INCLUDE_DIR}
-)
-
-target_link_libraries(mkturnout
-    PRIVATE
-    xtrkcad-wlib 
-)
-
-add_dependencies(mkturnout
-    msgfiles
-    lines
-)
 
 if(NOT WIN32)
-	target_link_libraries(mkturnout 
-        PRIVATE
-        m
-    )
 	target_link_libraries(${XTRKCAD_BIN}
         PRIVATE
         m
     )
-
-	# Link libintl for systems where it is a separate library
-	find_library( INTL_LIBRARY intl )
-	if(INTL_LIBRARY)
-		target_link_libraries( mkturnout
-            PRIVATE 
-            ${INTL_LIBRARY}
-        )
-	endif()
 else()
 	# copy dlls into the build dir for easier debugging
 #    COPYDLLTOBUILD(${LIBZIP_SHAREDLIB})
