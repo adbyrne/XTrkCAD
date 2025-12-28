@@ -1,8 +1,8 @@
 [Desktop Entry]
 Name=XTrackCAD
 Comment=Design model railroad layouts
-Exec=xtrkcad
-Icon=xtrkcad
+Exec=run-xtrkcad.sh
+Icon=io.sourceforge.xtrkcad_fork.xtrkcad
 Terminal=false
 Type=Application
 Categories=Graphics
