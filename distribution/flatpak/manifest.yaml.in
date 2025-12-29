@@ -47,7 +47,7 @@ modules:
         dest-filename: inkscape
         commands:
           - |
-            rsvg-convert $*
+            rsvg-convert "$@"
     build-commands:
       - install -Dm755 inkscape /app/bin/inkscape
     cleanup:
@@ -66,18 +66,11 @@ modules:
       #    - patches/xtrkcad.desktop.patch
       #    - patches/xtrkcad.metainfo.xml.patch
       #    - patches/xtrkcad_logo_128x128.svg.patch
+      #    - patches/lib.CMakeLists.txt.patch
+      #    - patches/bin.CMakeLists.txt.patch
+      #    - patches/bitmaps.CMakeLists.txt.patch
       - type: dir
         path: @CMAKE_SOURCE_DIR@
+    config-opts:
+      - -DXTRKCAD_BUILD_FLATPAK=1
     builddir: true
-    post-install:
-      - |
-        set -e
-        install -Dm644 /app/share/xtrkcad/pixmaps/xtrkcad.png /app/share/icons/hicolor/64x64/apps/@FLATPAK_DOMAIN@.@XTRKCAD_BASE_NAME@.png
-        install -Dm755 ../distribution/flatpak/common_source.sh /app/bin/common_source.sh
-        install -Dm755 ../distribution/flatpak/run-xtrkcad.sh /app/bin/run-xtrkcad.sh
-        install -Dm644 ../distribution/flatpak/xtrkcad.desktop /app/share/applications/@FLATPAK_DOMAIN@.@XTRKCAD_BASE_NAME@.desktop
-        install -Dm644 ../distribution/flatpak/xtrkcad.metainfo.xml /app/share/metainfo/@FLATPAK_DOMAIN@.@XTRKCAD_BASE_NAME@.metainfo.xml
-        rsvg-convert -h 128 -o xtrkcad_logo_128x128.png ../distribution/flatpak/xtrkcad_logo_128x128.svg
-        install -Dm644 xtrkcad_logo_128x128.png /app/share/icons/hicolor/128x128/apps/@FLATPAK_DOMAIN@.@XTRKCAD_BASE_NAME@.png
-    cleanup:
-      - xtrkcad_logo_128x128.png

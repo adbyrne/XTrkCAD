@@ -10,7 +10,7 @@ DEBUG=no
 #   U S A G E
 #####################################################################
 usage() {
-  cat <<EOF
+    cat <<EOF
 Usage: $ME
 
 This script creates a flatpak from this source. The flatpak will end
@@ -27,10 +27,10 @@ Pre-requisities:
 Known issues:
   - still uses gtk2
 EOF
-  exit 1
+    exit 1
 }
 if [ "$1" = "-h" ]; then
-  usage
+    usage
 fi
 
 #####################################################################
@@ -38,34 +38,40 @@ fi
 #####################################################################
 PROGRAM_VERSION=ProgramVersion.cmake
 if [ ! -f $PROGRAM_VERSION ]; then
-  cd ../..
+    cd ../..
 fi
 if [ ! -f $PROGRAM_VERSION ]; then
-  echo
-  echo "ERROR: not in the correct directory"
-  echo
-  usage
-  exit 1
+    echo
+    echo "ERROR: not in the correct directory"
+    echo
+    usage
+    exit 1
 fi
 #####################################################################
 #   C R E A T E   C H E C K   B U I L D   E N V
 #####################################################################
-HERE=`pwd`
+HERE=$(pwd)
 mkdir -p build
 cd build || exit 1
 rm -f *flatpak
-command -v flatpak >/dev/null 2>&1 || { echo "Missing flatpak tool"; exit 1; }
-command -v flatpak-builder >/dev/null 2>&1 || { echo "Missing flatpak-builder tool"; exit 1; }
+command -v flatpak >/dev/null 2>&1 || {
+    echo "Missing flatpak tool"
+    exit 1
+}
+command -v flatpak-builder >/dev/null 2>&1 || {
+    echo "Missing flatpak-builder tool"
+    exit 1
+}
 #####################################################################
 #   B U I L D
 #####################################################################
 NCPU=$(lscpu -rp=CPU | tail -1)
 NCPU=$((NCPU + 1))
 MAXLOAD=$((NCPU * 2))
-if command -v ninja >/dev/null 2>&1 && [ ! -s Makefile ] ; then
-    cmake -G Ninja -B . -S $HERE
-    ninja -j${NCPU} -l${MAXLOAD} flatpak
+if command -v ninja >/dev/null 2>&1 && [ ! -s Makefile ]; then
+    cmake -DXTRKCAD_BUILD_FLATPAK=1 -G Ninja -B . -S $HERE
+    ninja -j${NCPU} -l${MAXLOAD} flatpak || exit 1
 else
-    cmake -B . -S $HERE
-    make -j${NCPU} -l${MAXLOAD} flatpak
+    cmake -DXTRKCAD_BUILD_FLATPAK=1 -B . -S $HERE
+    make -j${NCPU} -l${MAXLOAD} flatpak || exit 1
 fi

@@ -15,12 +15,11 @@ cmake [-G Ninja] -DCMAKE_BUILD_TYPE=Debug $SRCDIR
 make            # or "ninja -j1"
 make package    # or "ninja package"
 
-# build and create flatpak 
+# build and create flatpak for testing (NOT for release, use github for flatpak release)
 make flatpak    # or "ninja flatpak" with minimal progress output
-    This will build the .flatpak file named by version and changeset ready to be 
-    uploaded to XTrackCAD's files on sourceforge. A directory holding state is
-    updated as builds progress, so that the next time, a build won't take
-    as long.
+    This will build the .flatpak file named by version and changeset ready to be
+    locally tested. A directory holding state is updated as builds progress, so that
+    the next time, a build won't take as long.
 
     If flatpak-builder errors out showing
 
@@ -33,6 +32,9 @@ make flatpak    # or "ninja flatpak" with minimal progress output
     where the path is on the same filesystem as BLDDIR. Similar to docker,
     not everything has to be rebuilt, so the state dir caches builds that
     haven't changed.
+
+    The manifest used is similar to the official build manifest except for
+    how the source is retrieved.
 
 # RUN (pick one depending on what was built)
 flatpak run io.sourceforge.xtrkcad_fork.xtrkcad

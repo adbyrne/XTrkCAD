@@ -2,7 +2,7 @@ project(xtrkcad-lib C)
 
 include( CheckSymbolExists )
 #
-# Create line symbols for turnouts from src definitions 
+# Create line symbols for turnouts from src definitions
 #
 #	1. Build converter cnvdsgn
 #   2. define target "lines" for all symols
@@ -19,7 +19,7 @@ add_executable(cnvdsgn cnvdsgn.c utility.c)
 
 target_link_libraries(cnvdsgn xtrkcad-wlib)
 
-target_include_directories(cnvdsgn 
+target_include_directories(cnvdsgn
     PUBLIC
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_CURRENT_LIST_DIR}/include
@@ -59,8 +59,8 @@ macro(GENERATE_LIN lin_name)
 		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${lin_name}.src
 		COMMAND cnvdsgn < ${CMAKE_CURRENT_SOURCE_DIR}/${lin_name}.src > ${CMAKE_CURRENT_BINARY_DIR}/${lin_name}.lin
 	)
-	
-	target_sources(lines 
+
+	target_sources(lines
 		PRIVATE
 			${CMAKE_CURRENT_BINARY_DIR}/${lin_name}.lin
 	)
@@ -252,19 +252,19 @@ if(WIN32)
 		PRIVATE
 			utf8convert.c
 			include/utf8convert.h
-            include/windows/dirent.h		
+            include/windows/dirent.h
 	)
 endif()
 
 # This ensures that messages.h has been generated before we build xtrkcad-lib
-add_dependencies(xtrkcad-lib 
+add_dependencies(xtrkcad-lib
     msgfiles
 	lines
     genbitmaps
 )
 
 
-target_include_directories(xtrkcad-lib 
+target_include_directories(xtrkcad-lib
     PUBLIC
 	${messagefile_BINARY_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
@@ -283,15 +283,15 @@ target_link_libraries(xtrkcad-lib
 if(UNIX AND NOT APPLE)
 	target_link_libraries(xtrkcad-lib PRIVATE ${LIBZIP_LIBRARY} ${LIBZIP_LIBRARIES} ${ZLIB_LIBRARY})
 else()
-    target_link_libraries(xtrkcad-lib 
-        PRIVATE 
-        Libzip::Libzip 
+    target_link_libraries(xtrkcad-lib
+        PRIVATE
+        Libzip::Libzip
         Zlib::Zlib)
 endif()
 
 if(WIN32)
-    target_link_libraries(xtrkcad-lib 
-        PRIVATE 
+    target_link_libraries(xtrkcad-lib
+        PRIVATE
         FreeImage::FreeImage)
 endif()
 #
@@ -309,17 +309,17 @@ if(XTRKCAD_CREATE_SVG)
 	)
 
 	if(WIN32)
-        target_link_libraries(xtrkcad-lib 
-            PRIVATE 
+        target_link_libraries(xtrkcad-lib
+            PRIVATE
             MiniXML::mxml
         )
 	endif()
 	if(UNIX)
 		if (APPLE OR NOT ${MINIXML_STATIC_LIBRARY})
-            target_link_libraries(xtrkcad-lib 
-                PRIVATE 
+            target_link_libraries(xtrkcad-lib
+                PRIVATE
                 MiniXML::mxml
-            )       
+            )
         else()
 			target_link_libraries(xtrkcad ${MINIXML_STATIC_LIBRARY})
 			target_link_libraries(xtrkcad "pthread")
@@ -337,10 +337,10 @@ add_dependencies(${XTRKCAD_BIN}
     balloonhelp
     msgfiles
     genbitmaps)
-    
+
 target_include_directories(${XTRKCAD_BIN}
     PRIVATE
-	${messagefile_BINARY_DIR}    
+	${messagefile_BINARY_DIR}
 )
 
 target_link_libraries(${XTRKCAD_BIN}
@@ -364,7 +364,7 @@ else()
     # Copy program PDB file
     install(
         FILES $<TARGET_PDB_FILE:xtrkcad>
-	    DESTINATION ${XTRKCAD_BIN_INSTALL_DIR} 
+	    DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
         OPTIONAL
 	)
 endif()
@@ -385,6 +385,19 @@ install(
 	TARGETS ${XTRKCAD_BIN}
 	RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
 )
+
+if (XTRKCAD_BUILD_FLATPAK)
+    install(
+        FILES ${CMAKE_SOURCE_DIR}/distribution/flatpak/common_source.sh
+        DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+    )
+
+    install(
+        FILES ${CMAKE_SOURCE_DIR}/distribution/flatpak/run-xtrkcad.sh
+        DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+        PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_EXECUTE WORLD_READ
+    )
+endif()
 
 if(XTRKCAD_TESTING AND CMOCKA_FOUND)
 	add_subdirectory( unittest )
