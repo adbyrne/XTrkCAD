@@ -92,8 +92,9 @@ combobox {
     -GtkComboBox-appears-as-list: 1; 
 }
 
+@define-color contrasted_bg mix(@theme_fg_color, @theme_bg_color, 0.7);
+
 .tag {
-    background-color: #e0e0e0;
+    background-color: @contrasted_bg;
     border-radius: 6px; 
-/*    margin: 2px; */
 }

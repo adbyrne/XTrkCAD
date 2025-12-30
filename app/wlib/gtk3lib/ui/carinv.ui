@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- Created with Cambalache 0.96.1 -->
+<!-- Created with Cambalache 0.96.3 -->
 <!-- Generated with glade 3.40.0 -->
 <interface>
   <!-- interface-name carinv.ui -->
@@ -196,7 +196,8 @@
                 <child>
                   <object class="GtkFlowBox">
                     <property name="column-spacing">6</property>
-                    <property name="orientation">vertical</property>
+                    <property name="homogeneous">True</property>
+                    <property name="max-children-per-line">4</property>
                     <property name="selection-mode">none</property>
                     <property name="visible">True</property>
                     <child>
@@ -204,6 +205,7 @@
                         <property name="spacing">6</property>
                         <child>
                           <object class="GtkLabel">
+                            <property name="margin-start">6</property>
                             <property name="visible">True</property>
                           </object>
                           <packing>
@@ -212,11 +214,13 @@
                         </child>
                         <child>
                           <object class="GtkButton">
+                            <property name="margin-end">6</property>
                             <property name="relief">none</property>
                             <property name="visible">True</property>
                             <child>
                               <object class="GtkImage">
                                 <property name="icon-name">window-close</property>
+                                <property name="margin-end">6</property>
                                 <property name="visible">True</property>
                               </object>
                             </child>
@@ -232,6 +236,7 @@
                         <property name="spacing">6</property>
                         <child>
                           <object class="GtkLabel">
+                            <property name="margin-start">6</property>
                             <property name="visible">True</property>
                           </object>
                           <packing>
@@ -245,6 +250,7 @@
                             <child>
                               <object class="GtkImage">
                                 <property name="icon-name">window-close</property>
+                                <property name="margin-end">6</property>
                                 <property name="visible">True</property>
                               </object>
                             </child>
@@ -260,6 +266,7 @@
                         <property name="spacing">6</property>
                         <child>
                           <object class="GtkLabel">
+                            <property name="margin-start">6</property>
                             <property name="visible">True</property>
                           </object>
                           <packing>
@@ -273,6 +280,7 @@
                             <child>
                               <object class="GtkImage">
                                 <property name="icon-name">window-close</property>
+                                <property name="margin-end">6</property>
                                 <property name="visible">True</property>
                               </object>
                             </child>
@@ -288,6 +296,7 @@
                         <property name="spacing">6</property>
                         <child>
                           <object class="GtkLabel">
+                            <property name="margin-start">6</property>
                             <property name="visible">True</property>
                           </object>
                           <packing>
@@ -301,6 +310,7 @@
                             <child>
                               <object class="GtkImage">
                                 <property name="icon-name">window-close</property>
+                                <property name="margin-end">6</property>
                                 <property name="visible">True</property>
                               </object>
                             </child>
