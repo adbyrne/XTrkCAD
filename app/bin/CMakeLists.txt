@@ -387,16 +387,16 @@ install(
 )
 
 if (XTRKCAD_BUILD_FLATPAK)
-    install(
-        FILES ${CMAKE_SOURCE_DIR}/distribution/flatpak/common_source.sh
-        DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
-    )
+	install(
+		FILES ${CMAKE_SOURCE_DIR}/distribution/flatpak/common_source.sh
+		DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+	)
 
-    install(
-        FILES ${CMAKE_SOURCE_DIR}/distribution/flatpak/run-xtrkcad.sh
-        DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
-        PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_EXECUTE WORLD_READ
-    )
+	install(
+		FILES ${CMAKE_SOURCE_DIR}/distribution/flatpak/run-xtrkcad.sh
+		DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+		PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_EXECUTE WORLD_READ
+	)
 endif()
 
 if(XTRKCAD_TESTING AND CMOCKA_FOUND)
