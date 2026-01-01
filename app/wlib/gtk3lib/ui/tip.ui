@@ -1,39 +1,39 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 0.96.3 -->
 <interface>
-  <requires lib="gtk" version="3.22" />
+  <!-- interface-name tip.ui -->
+  <requires lib="gtk" version="3.22"/>
+  <requires lib="gtk+" version="3.22"/>
   <object class="GtkDialog" id="tip">
-    <property name="can-focus">False</property>
     <property name="border-width">12</property>
+    <property name="can-focus">False</property>
     <property name="type-hint">dialog</property>
     <property name="use-header-bar">0</property>
     <child type="action">
       <object class="GtkButton" id="id_ok">
-        <property name="use-underline">True</property>
         <property name="can-default">True</property>
         <property name="label">_Done</property>
+        <property name="use-underline">True</property>
         <property name="visible">True</property>
       </object>
     </child>
-    <action-widgets>
-      <action-widget response="GTK_RESPONSE_OK" default="true">id_ok</action-widget>
-    </action-widgets>
     <child internal-child="vbox">
       <object class="GtkBox">
-        <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">6</property>
+        <property name="visible">True</property>
         <child>
           <object class="GtkBox">
-            <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="spacing">6</property>
+            <property name="visible">True</property>
             <child>
               <object class="GtkImage">
-                <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="icon-size">6</property>
                 <property name="stock">gtk-dialog-question</property>
-                <property name="icon_size">6</property>
+                <property name="visible">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -43,11 +43,14 @@
             </child>
             <child>
               <object class="GtkLabel" id="mess1">
-                <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="halign">start</property>
-                <property name="valign">baseline</property>
                 <property name="label" translatable="yes">Did you know...</property>
+                <property name="valign">baseline</property>
+                <property name="visible">True</property>
+                <style>
+                  <class name="largeLabel"/>
+                </style>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -64,25 +67,28 @@
         </child>
         <child>
           <object class="GtkBox">
-            <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="valign">fill</property>
             <property name="halign">fill</property>
+            <property name="valign">fill</property>
             <property name="vexpand">True</property>
+            <property name="visible">True</property>
+            <style>
+              <class name="linked"/>
+            </style>
             <child>
               <object class="GtkButton" id="prev">
-                <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
                 <property name="halign">end</property>
+                <property name="receives-default">True</property>
+                <property name="use-action-appearance">False</property>
                 <property name="vexpand">True</property>
-                <property name="relief">none</property>
+                <property name="visible">True</property>
                 <property name="xalign">1</property>
                 <child>
                   <object class="GtkImage">
-                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="icon-name">go-previous</property>
+                    <property name="visible">True</property>
                   </object>
                 </child>
               </object>
@@ -94,22 +100,21 @@
             </child>
             <child>
               <object class="GtkScrolledWindow" id="scrollwindow">
-                <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="hexpand">True</property>
-                <property name="vexpand">True</property>
-                <property name="shadow-type">in</property>
-                <property name="min-content-width">200</property>
                 <property name="min-content-height">150</property>
+                <property name="min-content-width">200</property>
+                <property name="shadow-type">in</property>
+                <property name="vexpand">True</property>
+                <property name="visible">True</property>
                 <child>
                   <object class="GtkTextView" id="text">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="editable">False</property>
-                    <property name="wrap-mode">word</property>
-                    <property name="cursor-visible">False</property>
                     <property name="accepts-tab">False</property>
-                    <property name="monospace">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="cursor-visible">False</property>
+                    <property name="editable">False</property>
+                    <property name="visible">True</property>
+                    <property name="wrap-mode">word</property>
                   </object>
                 </child>
               </object>
@@ -121,19 +126,19 @@
             </child>
             <child>
               <object class="GtkButton" id="next">
-                <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
                 <property name="halign">start</property>
+                <property name="receives-default">True</property>
+                <property name="use-action-appearance">False</property>
                 <property name="vexpand">True</property>
-                <property name="relief">none</property>
+                <property name="visible">True</property>
                 <property name="xalign">0</property>
                 <child>
                   <object class="GtkImage">
-                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">start</property>
                     <property name="icon-name">go-next</property>
+                    <property name="visible">True</property>
                   </object>
                 </child>
               </object>
@@ -156,13 +161,13 @@
             <property name="visible">True</property>
             <child>
               <object class="GtkCheckButton">
-                <property name="label" translatable="yes">_Show tip at startup</property>
-                <property name="visible">True</property>
                 <property name="can-focus">True</property>
+                <property name="draw-indicator">True</property>
+                <property name="label" translatable="yes">_Show tip at startup</property>
+                <property name="margin-bottom">12</property>
                 <property name="receives-default">False</property>
                 <property name="use-underline">True</property>
-                <property name="draw-indicator">True</property>
-                <property name="margin-bottom">12</property>
+                <property name="visible">True</property>
               </object>
             </child>
           </object>
@@ -172,8 +177,10 @@
             <property name="position">2</property>
           </packing>
         </child>
-
       </object>
     </child>
+    <action-widgets>
+      <action-widget response="GTK_RESPONSE_OK">id_ok</action-widget>
+    </action-widgets>
   </object>
 </interface>
