@@ -37,12 +37,15 @@
 #include "resources.h"
 #include "symbols.h"
 
+#define CSS_FILENAME "xtrackcad.css"
+#define XTRKCAD_APPL_ID "org.xtrackcad.wlib"
+
 static char *appName;		/**< application name */
 char *wExecutableName;		/**< full path to executable, taken from argv[0] */
 
 static GtkApplication *app;
 static int myargc;			/**< count of command line options */
-static char **myargv;			/**< command line options */
+static char **myargv;		/**< command line options */
 
 /**
  * Initialize the application name for later use
@@ -71,29 +74,29 @@ wlibGetApp()
 
 /**
  * Load CSS definitions from resource. Name of the CSS-file is xtrackcad.css
- * 
+ *
  * \todo Connect signal parsing-error and show / log errors
- * 
+ *
  */
 
 static void
 LoadStyles(void)
-{	
-   	GtkCssProvider* cssProvider = gtk_css_provider_new();
-	
-	gtk_css_provider_load_from_resource(cssProvider,
-		XTRKCAD_RESOURCE_PATH
-		"xtrackcad.css");
+{
+	GtkCssProvider* cssProvider = gtk_css_provider_new();
 
- 	gtk_style_context_add_provider_for_screen(gdk_screen_get_default(), 
-		GTK_STYLE_PROVIDER(cssProvider), 
-		GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+	gtk_css_provider_load_from_resource(cssProvider,
+	                                    XTRKCAD_RESOURCE_PATH
+	                                    CSS_FILENAME );
+
+	gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
+	                GTK_STYLE_PROVIDER(cssProvider),
+	                GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
 }
 
-static void 
+static void
 startup(GtkApplication *app)
-{	
+{
 	g_resources_register(wlib_get_resource());
 	g_resources_register(symbols_get_resource());
 
@@ -133,13 +136,13 @@ startup(GtkApplication *app)
  * \param user_data 	unused
  */
 
-// static void
-// activate(GtkApplication* app, gpointer user_data)
-// {
+static void
+activate(GtkApplication* app, gpointer user_data)
+{
 
 
-// }
-	
+}
+
 
 /**
  * Get the command line parameters and make them available to the main program.
@@ -180,12 +183,19 @@ int main( int argc, char *argv[] )
 		setlocale( LC_ALL, "en_US" );
 	}
 
-	app = gtk_application_new("org.xtrackcad.wlib",
-	                           G_APPLICATION_HANDLES_COMMAND_LINE);
+	/** \TODO Command line handling by GTK is disabled for now
+	 * still don't understand how this should work */
 
-	//g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
-	g_signal_connect(app, "startup", G_CALLBACK(startup), NULL);
+	app = gtk_application_new(XTRKCAD_APPL_ID, G_APPLICATION_FLAGS_NONE );
+
+
+	// app = gtk_application_new("org.xtrackcad.wlib",
+	//                            G_APPLICATION_HANDLES_COMMAND_LINE);
+
+
 	//g_signal_connect(app, "command-line", G_CALLBACK(command_line), NULL );
+	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);	
+	g_signal_connect(app, "startup", G_CALLBACK(startup), NULL);
 
 	myargc = argc; myargv=argv;
 	wExecutableName = argv[0];
