@@ -73,7 +73,7 @@ static void CreateTipW( void )
 	char * cp;
 
 	tipW = FormCreateDialog(&tipPG, MakeWindowTitle(_("Tip of the Day")),
-	                        NULL, FormCancel_Current,
+	                        NULL, FormButtonOk,
 	                        NULL, NULL,
 	                        FALSE,
 	                        F_CENTER, NULL );
