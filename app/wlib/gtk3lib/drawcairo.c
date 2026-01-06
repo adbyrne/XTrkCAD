@@ -968,6 +968,9 @@ wDrawBitMap_p wDrawBitMapCreate(
 			bm->pattern = CreatePatternFromPixbuf(bm->pixbuf);
 		}
 
+		if ( iDrawLog >= 1 ) {
+			printf( "%ld: wDrawBitMapCreate( %d+%d %s )\n", lDrawCnt++, bm->x, bm->y, path ) ;
+		}
 		g_free(path);
 	}
 	return bm;
@@ -988,7 +991,7 @@ void wDrawBitMap(
 	x = INMAPX( bd, x-bm->x );
 	y = INMAPY( bd, y-bm->y )-bm->h;
 
-	cairo_t *cr = cairo_create(bd->surface);
+	cairo_t* cr = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color, opts );
 
 	cairo_matrix_init_translate(&matrix, x, y);
 	cairo_set_matrix(cr, &matrix);
@@ -997,6 +1000,9 @@ void wDrawBitMap(
 	cairo_paint(cr);
 
 	cairo_destroy(cr);
+	if ( iDrawLog >= 1 ) {
+		printf( "%ld: wDrawBitMap( %d+%d ) %0.1f+%0.1f ) \n", lDrawCnt++, bm->x, bm->y, x, y ) ;
+	}
 }
 
 /*******************************************************************************

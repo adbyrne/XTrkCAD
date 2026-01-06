@@ -360,6 +360,7 @@ void wControlHilite(
     wControl_p control,
     wBool_t hilite)
 {
+    if ( control == NULL ) { return; }
     GtkStyleContext* context = gtk_widget_get_style_context(GTK_WIDGET( control->widget));
     if (hilite) {
         gtk_style_context_add_class(context, HILITECLASS);       
