@@ -5,8 +5,13 @@ void FormInit(void);
 void FormRegister(paramGroup_p pg);
 void FormLoadDefaultValues(paramGroup_p pg);
 void FormSaveDefaultValues(paramGroup_p pg);
+
+const paramGroup_p DialogGroupFind( const char * sName );
+const paramGroup_p * DialogGroupIter( const paramGroup_p * );
+
 wControl_p FormCreateDialog(
 	paramGroup_p group,
+
 	char* title,
 	char* okLabel,
 	paramActionOkProc okProc,

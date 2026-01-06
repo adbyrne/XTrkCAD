@@ -252,9 +252,9 @@ void ParamUpdatePrefs( void );
 void ParamStartRecord( FILE *recordF );
 void ParamRestoreAll( void );
 void ParamSaveAll( void );
-void ParamSetInReadTracks(bool state);
-void ParamSetInPlayback(bool state, long delay);
-void ParamTurnOffDelays(bool disable);
+void ParamSetInReadTracks(BOOL_T state);
+void ParamSetInPlayback(BOOL_T state, long delay);
+void ParamTurnOffDelays(BOOL_T disable);
 
 
 

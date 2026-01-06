@@ -153,13 +153,13 @@ EXPORT void ParamStartRecord(FILE* macroFile)
 
 
 
-EXPORT void ParamRestoreAll(void)
+EXPORT void XParamRestoreAll(void)
 {
     printf("%s:%d Old Param Function %s used\n", __FILE__, __LINE__, __func__);
     //ParamRestoreAllOrig();
 }
 
-EXPORT void ParamSaveAll(void)
+EXPORT void XParamSaveAll(void)
 {
     printf("%s:%d Old Param Function %s used\n", __FILE__, __LINE__, __func__);
     //ParamSaveAllOrig();
@@ -196,14 +196,14 @@ EXPORT void ParamControlShow(paramGroup_p pg, wIndex_t inx, wBool_t bShow)
 }
 
 void
-ParamSetInPlayback(bool state, long delay)
+XParamSetInPlayback(bool state, long delay)
 {
     printf("%s:%d Old Param Function used\n", __FILE__, __LINE__);
     //ParamSetInPlaybackOrig(state, delay);
 }
 
 EXPORT void
-ParamSetInReadTracks(bool state)
+XParamSetInReadTracks(bool state)
 {
     printf("%s:%d Old Param Function used\n", __FILE__, __LINE__);
 
@@ -211,7 +211,7 @@ ParamSetInReadTracks(bool state)
 }
 
 EXPORT void
-ParamTurnOffDelays(bool disable)
+XParamTurnOffDelays(bool disable)
 {
     printf("%s:%d Old Param Function used\n", __FILE__, __LINE__);
 

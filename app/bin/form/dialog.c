@@ -36,6 +36,32 @@ EXPORT char* prefSect = "DialogItem";
 static dynArr_t dialogGroups_da;
 #define dialogGroups(N) DYNARR_N( paramGroup_p, dialogGroups_da, N )
 
+EXPORT const paramGroup_p DialogGroupFind( const char* sName )
+{
+	for ( paramGroup_p * ppg = DialogGroupIter(NULL); ppg; ppg = DialogGroupIter( ppg ) ) {
+		if ( (*ppg)->nameStr == NULL ) { continue; }
+		size_t len = strlen( (*ppg)->nameStr );
+		if ( strncmp( (*ppg)->nameStr, sName, len ) == 0 &&
+		     sName[len] == ' ' ) {
+			return *ppg;
+		}
+	}
+	return NULL;
+}
+
+EXPORT const paramGroup_p * DialogGroupIter( const paramGroup_p * ppg )
+{
+	if ( ppg == NULL ) {
+		return &dialogGroups(0);
+	}
+	if ( ppg >= &DYNARR_LAST( paramGroup_p, dialogGroups_da ) ) {
+		return NULL;
+	} 
+	ppg++;
+	return ppg;
+}
+
+
 static void AddGroupPtrToItem(paramGroup_p pg)
 {
 	for (int i = 0; i < (pg->paramCnt); i++) {
@@ -51,7 +77,7 @@ void FormRegister(paramGroup_p pg)
 
 	AddGroupPtrToItem(pg);
 
-	//FormLoadDefaultValues(pg);
+	FormLoadDefaultValues(pg);
 }
 
 static void ButtonOk(paramGroup_p group)
@@ -146,6 +172,9 @@ wControl_p FormCreateDialog(
 
 	winOption &= ~PD_F_ALT_CANCELLABEL;
 	group->okProc = okProc;
+	if ( cancelProc == (paramActionCancelProc)ParamCancel_Null ) {
+		cancelProc = NULL;
+	}
 	group->cancelProc = cancelProc;
 	group->layoutProc = NULL;
 	group->changeProc = changeProc;
