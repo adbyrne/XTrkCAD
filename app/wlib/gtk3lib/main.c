@@ -71,29 +71,29 @@ wlibGetApp()
 
 /**
  * Load CSS definitions from resource. Name of the CSS-file is xtrackcad.css
- * 
+ *
  * \todo Connect signal parsing-error and show / log errors
- * 
+ *
  */
 
 static void
 LoadStyles(void)
-{	
+{
    	GtkCssProvider* cssProvider = gtk_css_provider_new();
-	
+
 	gtk_css_provider_load_from_resource(cssProvider,
 		XTRKCAD_RESOURCE_PATH
 		"xtrackcad.css");
 
- 	gtk_style_context_add_provider_for_screen(gdk_screen_get_default(), 
-		GTK_STYLE_PROVIDER(cssProvider), 
+ 	gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
+		GTK_STYLE_PROVIDER(cssProvider),
 		GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
 }
 
-static void 
+static void
 startup(GtkApplication *app)
-{	
+{
 	g_resources_register(wlib_get_resource());
 	g_resources_register(symbols_get_resource());
 
@@ -139,7 +139,7 @@ startup(GtkApplication *app)
 
 
 // }
-	
+
 
 /**
  * Get the command line parameters and make them available to the main program.
@@ -180,7 +180,12 @@ int main( int argc, char *argv[] )
 		setlocale( LC_ALL, "en_US" );
 	}
 
-	app = gtk_application_new("org.xtrackcad.wlib",
+	// XTRKCAD_APP_ID env var set when running via flatpak to avoid
+	// DBus.Error.ServiceUnknown
+	const char *app_id = getenv("XTRKCAD_APP_ID");
+	if (!app_id || !*app_id)
+		app_id = "org.xtrackcad.wlib";
+	app = gtk_application_new(app_id,
 	                           G_APPLICATION_HANDLES_COMMAND_LINE);
 
 	//g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
