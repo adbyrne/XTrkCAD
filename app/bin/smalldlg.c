@@ -28,7 +28,6 @@
 #include "icons.h"
 #include "misc.h"
 #include "paths.h"
-#include "form.h"
 #include "smalldlg.h"
 
 EXPORT wControl_p aboutW;
@@ -39,25 +38,27 @@ static long showTipAtStart = 1;		/**< flag for visibility */
 static dynArr_t tips_da;			/**< dynamic array for all tips */
 #define tips(N) DYNARR_N( char *, tips_da, N )
 
-//static char * tipLabels[] = { N_("Show tips at start"), NULL };
 static paramTextData_t tipTextData = { 1, 1 };
 
+static paramGroup_t tipPG;
 static paramData_t tipPLs[] = {
 #define I_TIPTEXT		(1)
 #define tipT			(tipPLs[I_TIPTEXT].control)
-	{   PD_MESSAGE, N_("Did you know..."), "mess1", 0, NULL, NULL, BM_LARGE },
-	{   PD_TEXT, NULL, "text", PDO_DLGRESIZE, &tipTextData, NULL, BO_READONLY },
-	{   PD_BUTTON, ShowTip, "prev", PDO_DLGRESETMARGIN, NULL, N_("Previous Tip"), 0L, I2VP(SHOWTIP_FORCESHOW | SHOWTIP_PREVTIP) },
+	{   PD_MESSAGE, NULL, "mess1", .group=&tipPG },
+	{   PD_TEXT, NULL, "text", PDO_DLGRESIZE, &tipTextData, .group=&tipPG },
+	{   PD_BUTTON, ShowTip, "prev", 0, NULL, NULL, 0L, I2VP(SHOWTIP_FORCESHOW | SHOWTIP_PREVTIP), .group=&tipPG },
 #define I_TIPPREV (2)
-	{   PD_BUTTON, ShowTip, "next", PDO_DLGHORZ, NULL, N_("Next Tip"), 0L, I2VP(SHOWTIP_FORCESHOW | SHOWTIP_NEXTTIP) },
+	{   PD_BUTTON, ShowTip, "next", 0, NULL, NULL, 0L, I2VP(SHOWTIP_FORCESHOW | SHOWTIP_NEXTTIP), .group=&tipPG },
 #define I_TIPNEXT (3)
-	{   PD_TOGGLE, &showTipAtStart, "showatstart", PDO_DLGCMDBUTTON, NULL, NULL, BC_NOBORDER }
+	{   PD_TOGGLE, &showTipAtStart, "showatstart", .group=&tipPG }
 };
+
+static paramGroup_t tipPG = { "tip", PGO_FULLDIALOGFROMBUILDER, tipPLs, COUNT( tipPLs ) };
 
 #define PREVIOUSBUTTON ((tipPLs[I_TIPPREV].control))
 #define NEXTBUTTON (tipPLs[I_TIPNEXT].control)
 
-static paramGroup_t tipPG = { "tip", PGO_FULLDIALOGFROMBUILDER, tipPLs, COUNT( tipPLs ) };
+#define MAX_TIP_LENGTH 4096
 
 /**
  * Create and initialize the tip of the day window. The dialog box is created and the list of tips is loaded
@@ -67,15 +68,15 @@ static paramGroup_t tipPG = { "tip", PGO_FULLDIALOGFROMBUILDER, tipPLs, COUNT( t
 static void CreateTipW( void )
 {
 	FILE * tipF;
-	char buff[4096];
+	char buff[MAX_TIP_LENGTH];
 	char *filename;
 	char * cp;
 
-	tipW = FormCreateDialog(&tipPG, MakeWindowTitle(_("Tip of the Day")), 
-							NULL, FormCancel_Current, 
-							NULL, NULL,
-							FALSE, 
-							F_CENTER, NULL );
+	tipW = FormCreateDialog(&tipPG, MakeWindowTitle(_("Tip of the Day")),
+	                        NULL, FormButtonOk,
+	                        NULL, NULL,
+	                        FALSE,
+	                        F_CENTER, NULL );
 
 	/* open the tip file */
 	MakeFullpath(&filename, libDir, sTipF, NULL);
@@ -116,7 +117,7 @@ static void CreateTipW( void )
 
 				/* read a line */
 				if (!fgets( cp, (int)((sizeof buff) - (cp-buff)), tipF )) {
-					return;
+					break;
 				}
 
 				/* lines starting with hash sign are ignored (comments) */
@@ -134,8 +135,13 @@ static void CreateTipW( void )
 			/* allocate memory for the tip and store pointer in dynamic array */
 			DYNARR_APPEND( char *, tips_da, 10 );
 			tips(tips_da.cnt-1) = strdup( buff );
+			if(tips(tips_da.cnt-1) == NULL ) {
+				tips(tips_da.cnt-1) = "";
+			}
 		}
 	}
+
+	fclose(tipF);
 	free(filename);
 }
 
@@ -187,7 +193,7 @@ void ShowTip( void * flagsVP )
 
 #define ABOUT_TEXT DESCRIPTION \
 		"\n\nXTrackCAD is Copyright 2003 by Sillub Technology and 2017" \
-		"by Bob Blackwell, Martin Fischer, Adam Richards and Russell Shilling.\n" \
+		" by Bob Blackwell, Martin Fischer, Adam Richards and Russell Shilling.\n" \
 		"\nIcons by: Tango Desktop Project (http://tango.freedesktop.org)\n" \
 		"\nSome icons by Yusuke Kamiyamane." \
 		"Licensed under a Creative Commons Attribution 3.0 License.\n" \
@@ -249,5 +255,4 @@ void CreateAboutW(void *ptr)
 
 void InitSmallDlg( void )
 {
-	ParamRegister( &tipPG );
 }

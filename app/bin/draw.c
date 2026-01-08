@@ -1415,14 +1415,14 @@ EXPORT void MainLayout(
  * \param data additional data (unused)
  */
 
-void MainProc( wControl_p win, winProcEvent e, void * refresh, void * data )
+wBool_t MainProc( wControl_p win, winProcEvent e, void * refresh, void * data )
 {
 	static int cMP = 0;
 	wWinPix_t width, height;
 	switch( e ) {
 	case wResize_e:
 		if (mainD.d == NULL) {
-			return;
+			return FALSE;
 		}
 		wWinGetSize( mainW, &width, &height );
 		LOG( log_redraw, 1, ( "MainProc/Resize: %d %s %ld %ld\n", cMP++,
@@ -1453,10 +1453,15 @@ void MainProc( wControl_p win, winProcEvent e, void * refresh, void * data )
 	case wClose_e:
 		/* shutdown the application via "close window"  button  */
 		DoQuit(NULL);
+		/* if DoQuit returns, the user decided to not terminate the application */
+		/* tell GTK to not proceed with the delete further, keeping the window 
+		open */
+		return(TRUE);
 		break;
 	default:
 		break;
 	}
+	return(FALSE);
 }
 
 

@@ -28,7 +28,6 @@
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include "wrapbox/eggwrapbox.h"
-// #include <gdk/gdkkeysyms.h>
 
 #include "gtkint.h"
 #include <wlib.h>
@@ -56,8 +55,8 @@ wlibAppWinGetMain()
 }
 
 /**
- * Get the key accelarator group for the application. It is created during
- * startup of the appl
+ * Get the key accelerator group for the application. It is created during
+ * startup of the application
  *
  * \return GTK handle of acc group
  */
@@ -80,7 +79,7 @@ wlibAppWinGetStatusbar()
 	return(appMainWindow->attributes.window.statusbar);
 }
 
-static int resizeTime(wControl_p win)
+static gboolean resizeTime(wControl_p win)
 {
 	struct window *wcontrol = CONTROL_GET_ATTRIBUTES_PTR(win, window);
 
@@ -89,7 +88,7 @@ static int resizeTime(wControl_p win)
 	if (wcontrol->size_changed)
 	{
 		// do redraw
-		wcontrol->winProc(win, wResize_e, NULL, /*wcontrol->data*/ win);
+		wcontrol->winProc(win, wResize_e, NULL, win);
 		wcontrol->size_changed = FALSE;
 		return (TRUE);	// Continue timer in case more changes come
 	}
@@ -128,8 +127,8 @@ static void on_size_allocate(
 }
 
 /**
- * Handle the destroy event for the main window. Calls the windows callback
- * function that allows the destroy operation to be cancelled
+ * Handle the delete event for the main window. Calls the windows callback
+ * function that allows the window close operation to be cancelled
  *
  * \param window see GTK3 docs
  * \param event
@@ -149,7 +148,7 @@ on_widget_deleted(GtkWidget* window, GdkEvent* event, gpointer userData)
 		return(rc);
 	}
 
-	wPrefFlush("");
+	wPrefFlush(NULL);
 	return FALSE;
 }
 
@@ -166,13 +165,8 @@ signalSizeAlloc(GtkWidget* self,
                 GtkAllocation* allocation,
                 gpointer user_data)
 {
-// 	allocation->height = 0x10;
-	
-	printf("sizeAlloc: %d\n", allocation->height);
  	gtk_scrolled_window_set_max_content_height(GTK_SCROLLED_WINDOW(user_data),
 	        allocation->height);
-
-	return;
 }
 
 /**
@@ -227,6 +221,10 @@ wControl_p wWinMainCreate(
 	wcontrol->builder = gtk_builder_new_from_resource(
 	                                 XTRKCAD_RESOURCE_PATH
 	                                 "appwindow.ui");
+	if(!wcontrol->builder) {
+		fprintf(stderr, "Builder %s could not be found. Terminating\n", "appwindow.ui");
+		exit(1);
+	}
 
 	appMainWindow->widget = GTK_WIDGET(gtk_builder_get_object(
 	                wcontrol->builder,
@@ -257,9 +255,8 @@ wControl_p wWinMainCreate(
 	GtkContainer *statusbar = GTK_CONTAINER(gtk_builder_get_object(
 	                wcontrol->builder,
 	                "statusbar"));
-	{
-		wcontrol->statusbar = statusbar;
-	}
+
+	wcontrol->statusbar = statusbar;
 
 	g_signal_connect(G_OBJECT(appMainWindow->widget),
 	                 "delete-event", G_CALLBACK(on_widget_deleted), NULL);

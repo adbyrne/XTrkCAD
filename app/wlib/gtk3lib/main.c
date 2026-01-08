@@ -28,8 +28,8 @@
 #define GTK_DISABLE_DEPRECATED
 #define GSEAL_ENABLE
 
-#include <gtk/gtk.h>
 #include <gdk/gdk.h>
+#include <gtk/gtk.h>
 
 #include "gtkint.h"
 #include "i18n.h"
@@ -37,12 +37,15 @@
 #include "resources.h"
 #include "symbols.h"
 
-static char *appName;		/**< application name */
-char *wExecutableName;		/**< full path to executable, taken from argv[0] */
+#define CSS_FILENAME "xtrackcad.css"
+#define XTRKCAD_APPL_ID "org.xtrackcad.wlib"
+
+static char *appName;  /**< application name */
+char *wExecutableName; /**< full path to executable, taken from argv[0] */
 
 static GtkApplication *app;
-static int myargc;			/**< count of command line options */
-static char **myargv;			/**< command line options */
+static int myargc;    /**< count of command line options */
+static char **myargv; /**< command line options */
 
 /**
  * Initialize the application name for later use
@@ -51,23 +54,11 @@ static char **myargv;			/**< command line options */
  * \return
  */
 
-void
-wInitAppName(char *_appName)
-{
-	appName = g_strdup( _appName );
-}
+void wInitAppName(char *_appName) { appName = g_strdup(_appName); }
 
-char *
-wlibGetAppName()
-{
-	return( appName );
-}
+char *wlibGetAppName() { return (appName); }
 
-GtkApplication *
-wlibGetApp()
-{
-	return(app);
-}
+GtkApplication *wlibGetApp() { return (app); }
 
 /**
  * Load CSS definitions from resource. Name of the CSS-file is xtrackcad.css
@@ -76,53 +67,51 @@ wlibGetApp()
  *
  */
 
-static void
-LoadStyles(void)
+static void LoadStyles(void)
 {
-   	GtkCssProvider* cssProvider = gtk_css_provider_new();
+	GtkCssProvider *cssProvider = gtk_css_provider_new();
 
 	gtk_css_provider_load_from_resource(cssProvider,
-		XTRKCAD_RESOURCE_PATH
-		"xtrackcad.css");
+	                                    XTRKCAD_RESOURCE_PATH CSS_FILENAME);
 
- 	gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
-		GTK_STYLE_PROVIDER(cssProvider),
-		GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-
+	gtk_style_context_add_provider_for_screen(
+	        gdk_screen_get_default(), GTK_STYLE_PROVIDER(cssProvider),
+	        GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 }
 
-static void
-startup(GtkApplication *app)
+static void startup(GtkApplication *app)
 {
 	g_resources_register(wlib_get_resource());
 	g_resources_register(symbols_get_resource());
 
 	// debugging aid: show files in the resource
 	// GError *error = NULL;
-	//char** children = g_resource_enumerate_children(wlib_get_resource(), "/", G_RESOURCE_LOOKUP_FLAGS_NONE, &error);
+	// char** children = g_resource_enumerate_children(wlib_get_resource(), "/",
+	// G_RESOURCE_LOOKUP_FLAGS_NONE, &error);
 
-	//for (int i = 0; children[i] != NULL; i++) {
+	// for (int i = 0; children[i] != NULL; i++) {
 	//	printf("%s\n", children[i]);
-	//}
+	// }
 
-	//g_strfreev(children);
+	// g_strfreev(children);
 
-	// children = g_resource_enumerate_children(symbols_get_resource(), "/", G_RESOURCE_LOOKUP_FLAGS_NONE, &error);
+	// children = g_resource_enumerate_children(symbols_get_resource(), "/",
+	// G_RESOURCE_LOOKUP_FLAGS_NONE, &error);
 	//
-	//for (int i = 0; children[i] != NULL; i++) {
+	// for (int i = 0; children[i] != NULL; i++) {
 	//	printf("%s\n", children[i]);
 	//}
 
-	//g_strfreev(children);
+	// g_strfreev(children);
 
 	// load css
 	LoadStyles();
 
-	wMain(myargc, myargv );
+	wMain(myargc, myargv);
 
 	wPrefFlush("");
 
-// TODO-DB	g_strfreev(myargv);
+	// TODO-DB	g_strfreev(myargv);
 }
 
 /**
@@ -133,13 +122,7 @@ startup(GtkApplication *app)
  * \param user_data 	unused
  */
 
-// static void
-// activate(GtkApplication* app, gpointer user_data)
-// {
-
-
-// }
-
+static void activate(GtkApplication *app, gpointer user_data) {}
 
 /**
  * Get the command line parameters and make them available to the main program.
@@ -172,32 +155,41 @@ startup(GtkApplication *app)
  *******************************************************************************
  */
 
-int main( int argc, char *argv[] )
+int main(int argc, char *argv[])
 {
 	int status;
 
-	if ( getenv( "GTKLIB_NOLOCALE" ) == 0 ) {
-		setlocale( LC_ALL, "en_US" );
+	if (getenv("GTKLIB_NOLOCALE") == 0) {
+		setlocale(LC_ALL, "en_US");
 	}
 
 	// XTRKCAD_APP_ID env var set when running via flatpak to avoid
 	// DBus.Error.ServiceUnknown
 	const char *app_id = getenv("XTRKCAD_APP_ID");
-	if (!app_id || !*app_id)
-		app_id = "org.xtrackcad.wlib";
-	app = gtk_application_new(app_id,
-	                           G_APPLICATION_HANDLES_COMMAND_LINE);
+	if (!app_id || !*app_id) {
+		app_id = XTRKCAD_APPL_ID;
+	}
 
-	//g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
+	/** \TODO Command line handling by GTK is disabled for now
+	 * still don't understand how this should work */
+
+	app = gtk_application_new(app_id, G_APPLICATION_HANDLES_COMMAND_LINE);
+
+	// app = gtk_application_new("org.xtrackcad.wlib",
+	//                            G_APPLICATION_HANDLES_COMMAND_LINE);
+
+	// g_signal_connect(app, "command-line", G_CALLBACK(command_line), NULL );
+	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
 	g_signal_connect(app, "startup", G_CALLBACK(startup), NULL);
-	//g_signal_connect(app, "command-line", G_CALLBACK(command_line), NULL );
 
-	myargc = argc; myargv=argv;
+	myargc = argc;
+	myargv = argv;
 	wExecutableName = argv[0];
 
-	status = g_application_run(G_APPLICATION (app), argc, argv);
+	status = g_application_run(G_APPLICATION(app), argc, argv);
 
-	g_object_unref (app);
+	g_object_unref(app);
 
 	return status;
 }
+
