@@ -15,12 +15,11 @@ cmake [-G Ninja] -DCMAKE_BUILD_TYPE=Debug $SRCDIR
 make            # or "ninja -j1"
 make package    # or "ninja package"
 
-# build and create flatpak 
+# build and create flatpak for testing (NOT for release, use github for flatpak release)
 make flatpak    # or "ninja flatpak" with minimal progress output
-    This will build the .flatpak file named by version and changeset ready to be 
-    uploaded to XTrackCAD's files on sourceforge. A directory holding state is
-    updated as builds progress, so that the next time, a build won't take
-    as long.
+    This will build the .flatpak file named by version and changeset ready to be
+    locally tested. A directory holding state is updated as builds progress, so that
+    the next time, a build won't take as long.
 
     If flatpak-builder errors out showing
 
@@ -33,6 +32,9 @@ make flatpak    # or "ninja flatpak" with minimal progress output
     where the path is on the same filesystem as BLDDIR. Similar to docker,
     not everything has to be rebuilt, so the state dir caches builds that
     haven't changed.
+
+    The manifest used is similar to the official build manifest except for
+    how the source is retrieved.
 
 # RUN (pick one depending on what was built)
 flatpak run io.sourceforge.xtrkcad_fork.xtrkcad
@@ -48,3 +50,10 @@ flatpak run io.sourceforge.xtrkcad_fork.xtrkcad-gtk
   should then prepend with the XTRKCAD*LIB environment; that way folks
   can keep their xtrkcad.rc file as is, but there will be pains in the transition
 - ./distribution/flatpak/buildFlatpak.sh will create build directory and build flatpak
+- special changes for gtk3
+  - desktop file uses icon ending in xtrkcad-gtk
+  - metainfo needs ids changed ending in xtrkcad-gtk (id, desktop-id, developer id)
+  - CMakeLists.txt install dir is share/xtrkcad-gtk
+  - app/lib/CMakeLists.txt uses xtrkcad-gtk
+  - common_source.sh copies from /app/share/xtrkcad-gtk
+  - manifest change to set XTRKCAD_APP_ID env var

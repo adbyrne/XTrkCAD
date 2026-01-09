@@ -59,8 +59,8 @@ string(CONCAT _XTRK_META_IN_FILE
        ".in"
       )
 
-# updates source on purpose for flathub builds
-configure_file(${_XTRK_META_IN_FILE} "${CMAKE_CURRENT_SOURCE_DIR}/${_XTRK_META_FILE}")
+# updates source on purpose for flathub builds; the date needs manual update before source archiving
+configure_file(${_XTRK_META_IN_FILE} "${CMAKE_SOURCE_DIR}/app/lib/${_XTRK_META_FILE}")
 
 # manifest.yaml.in
 string(CONCAT _XTRK_MANIFEST_IN_FILE
@@ -72,7 +72,7 @@ string(CONCAT _XTRK_MANIFEST_IN_FILE
 
 # build manifest file to use for building in sandbox
 # note that the manifest file is not modified in the source tree as it's
-# maintained in the git repo (to be documented later)
+# maintained in the git repo https://github.com/flathub/io.sourceforge.xtrkcad_fork.xtrkcad
 configure_file(${_XTRK_MANIFEST_IN_FILE} "${_XTRK_MANIFEST_FILE}" @ONLY)
 
 # needed for gtk2
@@ -82,17 +82,18 @@ file(COPY
 )
 
 # the flatpak commands to make a local flatpak (official flatpak builds
-# maintained by github repo to be documented later)
+# must be done via PR in its git repo)
 add_custom_command(
     OUTPUT ${FLATPAK_FILE}
-    COMMAND ${Flatpak_EXECUTABLE} 
-            remote-add --if-not-exists --user 
+    COMMAND ${Flatpak_EXECUTABLE}
+            remote-add --if-not-exists --user
             flathub https://flathub.org/repo/flathub.flatpakrepo
     COMMAND ${Flatpak_builder_EXECUTABLE}
             --state-dir=${FLATPAK_STATE_DIR}
             --force-clean --user --install --repo=${FLATPAK_REPO}
             --install-deps-from=flathub
             ${FLATPAK_WORK_DIR} ${_XTRK_MANIFEST_FILE}
+    #COMMAND sh -c "flatpak run --command=flatpak-builder-lint org.flatpak.Builder repo ${FLATPAK_REPO} || echo 'Flatpak lint ERROR: finish-args-home-filesystem-access and *screenshot* are ok, others need correcting'" VERBATIM
     COMMAND rm -rf ${FLATPAK_WORK_DIR}
     COMMAND ${Flatpak_EXECUTABLE} build-bundle
             ${FLATPAK_REPO}
@@ -100,7 +101,7 @@ add_custom_command(
             ${FLATPAK_DOMAIN}.${XTRKCAD_BASE_NAME}
     COMMAND rm -rf ${FLATPAK_REPO}
     COMMENT "Re-compiling xtrkcad within flatpak Sdk; this could take a while ..."
-    DEPENDS ${_XTRK_MANIFEST_FILE} ${_XTRK_DESKTOP_FILE} ${_XTRK_META_FILE}
+    DEPENDS ${_XTRK_MANIFEST_FILE} ${_XTRK_DESKTOP_FILE} ${CMAKE_SOURCE_DIR}/app/lib/${_XTRK_META_FILE}
 )
 
 # makes for an easy target: "make flatpak" or "ninja flatpak"
