@@ -125,24 +125,7 @@ startup(GtkApplication *app)
 
 	wPrefFlush("");
 
-// TODO-DB	g_strfreev(myargv);
 }
-
-/**
- * Activate the application by calling the main program after registering
- * the binary resources
- *
- * \param app 			see activate signal
- * \param user_data 	unused
- */
-
-static void
-activate(GtkApplication* app, gpointer user_data)
-{
-
-
-}
-
 
 /**
  * Get the command line parameters and make them available to the main program.
@@ -154,18 +137,12 @@ activate(GtkApplication* app, gpointer user_data)
  * \return gint always 0 as parameters aren't checked
  */
 
-// static gint
-// command_line( GApplication* self, GApplicationCommandLine* cmdLine,
-//                gpointer user_data )
-// {
-// 	myargv = g_application_command_line_get_arguments(
-// 	               cmdLine,
-// 	               &myargc);
-
-// 	wExecutableName = myargv[ 0 ];
-
-// 	return( 0 );
-// }
+static gint
+command_line( GApplication* self, GApplicationCommandLine* cmdLine,
+               gpointer user_data )
+{
+	return( 0 );
+}
 
 /*
  *******************************************************************************
@@ -183,18 +160,9 @@ int main( int argc, char *argv[] )
 		setlocale( LC_ALL, "en_US" );
 	}
 
-	/** \TODO Command line handling by GTK is disabled for now
-	 * still don't understand how this should work */
+	app = gtk_application_new(XTRKCAD_APPL_ID, G_APPLICATION_HANDLES_COMMAND_LINE);
 
-	app = gtk_application_new(XTRKCAD_APPL_ID, G_APPLICATION_FLAGS_NONE );
-
-
-	// app = gtk_application_new("org.xtrackcad.wlib",
-	//                            G_APPLICATION_HANDLES_COMMAND_LINE);
-
-
-	//g_signal_connect(app, "command-line", G_CALLBACK(command_line), NULL );
-	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);	
+	g_signal_connect(app, "command-line", G_CALLBACK(command_line), NULL);
 	g_signal_connect(app, "startup", G_CALLBACK(startup), NULL);
 
 	myargc = argc; myargv=argv;
