@@ -37,6 +37,8 @@
 #include "i18n.h"
 #include <stdbool.h>
 
+static void toolbarClicked(GtkToggleButton* widget, gpointer value);
+
 /**
  * Get the state of a group of buttons. If the group consists of
  * radio buttons, the return value is the index of the selected button
@@ -143,7 +145,8 @@ static int toggled(
 
 
 /**
- * Create a group of toggle buttons.
+ * Create a group of toggle buttons. The individual buttons are placed into
+ * a box. When using builder the help string has to be used as the id of the box.
  *
  * ### Usage in dialogs, created by
  *
@@ -218,9 +221,9 @@ wControl_p wToggleCreate(
 		gtk_container_add(GTK_CONTAINER(scroll), b->widget);
 
 		if (!(option & BC_NOBORDER)) {
-			GtkStyleContext* context = gtk_widget_get_style_context(GTK_WIDGET(
+			GtkStyleContext* styleContext = gtk_widget_get_style_context(GTK_WIDGET(
 			                                   b->widget));
-			gtk_style_context_add_class(context, "framed");
+			gtk_style_context_add_class(styleContext, "framed");
 		}
 		gtk_box_set_homogeneous(GTK_BOX(b->widget), FALSE);
 
@@ -271,12 +274,20 @@ void wButtonSetBusy(wControl_p bb, int newState)
 	}
 }
 
-static void toolbarClicked(GtkToggleButton* widget, gpointer value)
+/**
+ * Callback for toggle buttons on the toolbar. The user callback action is
+ * only executed when the new state of the button is active.
+ */
+static void toolbarClicked(GtkToggleButton *widget, gpointer value)
 {
-	struct button* b = CONTROL_GET_ATTRIBUTES_PTR(((wControl_p)value), button);
+	struct button *b = CONTROL_GET_ATTRIBUTES_PTR(((wControl_p)value), button);
 
-	if (b->action && !ignoreClick) {
-		b->action(((wControl_p)value)->context);
+	if (gtk_toggle_button_get_active(widget))
+	{
+		if (b->action && !ignoreClick)
+		{
+			b->action(((wControl_p)value)->context);
+		}
 	}
 }
 
