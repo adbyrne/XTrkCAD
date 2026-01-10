@@ -1300,7 +1300,7 @@ EXPORT void CreateMenus(void)
 	                   ClearElevations, IC_SELECTED, NULL);
 	MiscMenuItemCreate(changeM, NULL, "cmdElevation", _("Recompute Elevations"),
 	                   0, RecomputeElevations, 0, NULL);
-	ParamRegister(&addElevPG);
+	FormRegister(&addElevPG);
 
 	/*
 	 * DRAW MENU
