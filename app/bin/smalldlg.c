@@ -159,6 +159,8 @@ void ShowTip( void * flagsVP )
 	long flags = VP2L(flagsVP);
 	long tipNum;
 
+	wPrefGetInteger("tip", "showatstart", &showTipAtStart, 1);
+
 	if (showTipAtStart || (flags & SHOWTIP_FORCESHOW)) {
 		if (tipW == NULL) {
 			CreateTipW();

@@ -46,13 +46,22 @@ foreach(iconfile ${RESOURCE_DEPENDENCIES})
 				COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/png${pixelsize}/${PNGFILENAME} ${DESTINATION}/${PNGFILENAME}
 			)
 		else()
-			#message( STATUS "SVG ${CMAKE_CURRENT_SOURCE_DIR}/svg/${iconfile}.svg ${Inkscape_EXPORT}${DESTINATION}/${PNGFILENAME}" )
-			add_custom_command(
-				OUTPUT ${DESTINATION}/${PNGFILENAME}
-			 	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/svg/${SVGFILENAME}
-			 	COMMAND ${CMAKE_COMMAND} -E make_directory ${DESTINATION};	export NO_AT_BRIDGE=1
-				COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${SVGFILENAME} -h ${pixelsize} ${Inkscape_EXPORT}${DESTINATION}/${PNGFILENAME}
-			)
+			# MESSAGE( STATUS "SVG ${CMAKE_CURRENT_SOURCE_DIR}/svg/${img3}.svg" )
+			if (XTRKCAD_BUILD_FLATPAK)
+				add_custom_command(
+					OUTPUT ${DESTINATION}/${PNGFILENAME}
+					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/svg/${SVGFILENAME}
+					COMMAND ${CMAKE_COMMAND} -E make_directory ${DESTINATION};	export NO_AT_BRIDGE=1
+					COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${SVGFILENAME} -h ${pixelsize} -o ${DESTINATION}/${PNGFILENAME}
+				)
+			else()
+				add_custom_command(
+					OUTPUT ${DESTINATION}/${PNGFILENAME}
+					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/svg/${SVGFILENAME}
+					COMMAND ${CMAKE_COMMAND} -E make_directory ${DESTINATION};	export NO_AT_BRIDGE=1
+					COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${SVGFILENAME} -h ${pixelsize} ${Inkscape_EXPORT}${DESTINATION}/${PNGFILENAME}
+				)
+			endif()
 		endif()
 	endforeach()
 endforeach()

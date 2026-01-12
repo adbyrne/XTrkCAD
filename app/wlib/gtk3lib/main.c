@@ -28,8 +28,8 @@
 #define GTK_DISABLE_DEPRECATED
 #define GSEAL_ENABLE
 
-#include <gtk/gtk.h>
 #include <gdk/gdk.h>
+#include <gtk/gtk.h>
 
 #include "gtkint.h"
 #include "i18n.h"
@@ -40,12 +40,12 @@
 #define CSS_FILENAME "xtrackcad.css"
 #define XTRKCAD_APPL_ID "org.xtrackcad.wlib"
 
-static char *appName;		/**< application name */
-char *wExecutableName;		/**< full path to executable, taken from argv[0] */
+static char *appName;  /**< application name */
+char *wExecutableName; /**< full path to executable, taken from argv[0] */
 
 static GtkApplication *app;
-static int myargc;			/**< count of command line options */
-static char **myargv;		/**< command line options */
+static int myargc;    /**< count of command line options */
+static char **myargv; /**< command line options */
 
 /**
  * Initialize the application name for later use
@@ -85,13 +85,11 @@ LoadStyles(void)
 	GtkCssProvider* cssProvider = gtk_css_provider_new();
 
 	gtk_css_provider_load_from_resource(cssProvider,
-	                                    XTRKCAD_RESOURCE_PATH
-	                                    CSS_FILENAME );
+	                                    XTRKCAD_RESOURCE_PATH CSS_FILENAME);
 
-	gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
-	                GTK_STYLE_PROVIDER(cssProvider),
-	                GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-
+	gtk_style_context_add_provider_for_screen(
+	        gdk_screen_get_default(), GTK_STYLE_PROVIDER(cssProvider),
+	        GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 }
 
 static void
@@ -125,24 +123,7 @@ startup(GtkApplication *app)
 
 	wPrefFlush("");
 
-// TODO-DB	g_strfreev(myargv);
 }
-
-/**
- * Activate the application by calling the main program after registering
- * the binary resources
- *
- * \param app 			see activate signal
- * \param user_data 	unused
- */
-
-static void
-activate(GtkApplication* app, gpointer user_data)
-{
-
-
-}
-
 
 /**
  * Get the command line parameters and make them available to the main program.
@@ -154,18 +135,12 @@ activate(GtkApplication* app, gpointer user_data)
  * \return gint always 0 as parameters aren't checked
  */
 
-// static gint
-// command_line( GApplication* self, GApplicationCommandLine* cmdLine,
-//                gpointer user_data )
-// {
-// 	myargv = g_application_command_line_get_arguments(
-// 	               cmdLine,
-// 	               &myargc);
-
-// 	wExecutableName = myargv[ 0 ];
-
-// 	return( 0 );
-// }
+static gint
+command_line( GApplication* self, GApplicationCommandLine* cmdLine,
+               gpointer user_data )
+{
+	return( 0 );
+}
 
 /*
  *******************************************************************************
@@ -175,34 +150,33 @@ activate(GtkApplication* app, gpointer user_data)
  *******************************************************************************
  */
 
-int main( int argc, char *argv[] )
+int main(int argc, char *argv[])
 {
 	int status;
 
-	if ( getenv( "GTKLIB_NOLOCALE" ) == 0 ) {
-		setlocale( LC_ALL, "en_US" );
+	if (getenv("GTKLIB_NOLOCALE") == 0) {
+		setlocale(LC_ALL, "en_US");
 	}
 
-	/** \TODO Command line handling by GTK is disabled for now
-	 * still don't understand how this should work */
+	// XTRKCAD_APP_ID env var set when running via flatpak to avoid
+	// DBus.Error.ServiceUnknown
+	const char *app_id = getenv("XTRKCAD_APP_ID");
+	if (!app_id || !*app_id) {
+		app_id = XTRKCAD_APPL_ID;
+	}
+	app = gtk_application_new(app_id, G_APPLICATION_HANDLES_COMMAND_LINE);
 
-	app = gtk_application_new(XTRKCAD_APPL_ID, G_APPLICATION_FLAGS_NONE );
-
-
-	// app = gtk_application_new("org.xtrackcad.wlib",
-	//                            G_APPLICATION_HANDLES_COMMAND_LINE);
-
-
-	//g_signal_connect(app, "command-line", G_CALLBACK(command_line), NULL );
-	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);	
+	g_signal_connect(app, "command-line", G_CALLBACK(command_line), NULL );
 	g_signal_connect(app, "startup", G_CALLBACK(startup), NULL);
 
-	myargc = argc; myargv=argv;
+	myargc = argc;
+	myargv = argv;
 	wExecutableName = argv[0];
 
-	status = g_application_run(G_APPLICATION (app), argc, argv);
+	status = g_application_run(G_APPLICATION(app), argc, argv);
 
-	g_object_unref (app);
+	g_object_unref(app);
 
 	return status;
 }
+

@@ -37,6 +37,10 @@
 #include "i18n.h"
 #include <stdbool.h>
 
+#define MAX_SCROLL_AREA_SIZE 200
+
+static void toolbarClicked(GtkToggleButton* widget, gpointer value);
+
 /**
  * Get the state of a group of buttons. If the group consists of
  * radio buttons, the return value is the index of the selected button
@@ -141,9 +145,27 @@ static int toggled(
 	return TRUE;
 }
 
+static int ToggleHeight()
+{
+
+	GtkWidget *temp_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+
+	GtkWidget *dummy_toggle = gtk_toggle_button_new_with_label("EXAMPLE_TEXT");
+	gtk_container_add(GTK_CONTAINER(temp_window), dummy_toggle);
+
+	gtk_widget_show_all(temp_window);
+
+	GtkRequisition natural_size;
+	gtk_widget_get_preferred_size(dummy_toggle, NULL, &natural_size);
+
+	gtk_widget_destroy(temp_window);
+
+	return natural_size.height;
+}
 
 /**
- * Create a group of toggle buttons.
+ * Create a group of toggle buttons. The individual buttons are placed into
+ * a box. When using builder the help string has to be used as the id of the box.
  *
  * ### Usage in dialogs, created by
  *
@@ -200,10 +222,13 @@ wControl_p wToggleCreate(
 			g_list_free(children);
 		}
 	} else {
+		unsigned buttonCount = 0;
 
 		GtkWidget *scroll = gtk_scrolled_window_new(NULL, NULL);
-		gtk_scrolled_window_set_propagate_natural_height(GTK_SCROLLED_WINDOW(scroll), TRUE);
-		gtk_scrolled_window_set_propagate_natural_width(GTK_SCROLLED_WINDOW(scroll), TRUE);
+		gtk_scrolled_window_set_propagate_natural_height(GTK_SCROLLED_WINDOW(scroll),
+		                TRUE);
+		gtk_scrolled_window_set_propagate_natural_width(GTK_SCROLLED_WINDOW(scroll),
+		                TRUE);
 
 		if (option & BC_HORIZONTAL) {
 			b->widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
@@ -218,9 +243,9 @@ wControl_p wToggleCreate(
 		gtk_container_add(GTK_CONTAINER(scroll), b->widget);
 
 		if (!(option & BC_NOBORDER)) {
-			GtkStyleContext* context = gtk_widget_get_style_context(GTK_WIDGET(
-			                                   b->widget));
-			gtk_style_context_add_class(context, "framed");
+			GtkStyleContext* styleContext = gtk_widget_get_style_context(GTK_WIDGET(
+			                                        b->widget));
+			gtk_style_context_add_class(styleContext, "framed");
 		}
 		gtk_box_set_homogeneous(GTK_BOX(b->widget), FALSE);
 
@@ -228,6 +253,7 @@ wControl_p wToggleCreate(
 			GtkWidget* butt;
 
 			butt = gtk_check_button_new_with_label(_(*label));
+			buttonCount++;
 
 			gtk_box_pack_start(GTK_BOX(b->widget), butt, TRUE, TRUE, 0);
 
@@ -236,6 +262,9 @@ wControl_p wToggleCreate(
 
 			wlibAddTooltip(butt, parent->name, helpStr);
 		}
+
+		int scrollarea = MIN(buttonCount * ToggleHeight(), MAX_SCROLL_AREA_SIZE);
+		gtk_scrolled_window_set_min_content_height(scroll, scrollarea );
 
 		if (valueP) {
 			wToggleSetValue(b, *valueP);
@@ -271,12 +300,18 @@ void wButtonSetBusy(wControl_p bb, int newState)
 	}
 }
 
-static void toolbarClicked(GtkToggleButton* widget, gpointer value)
+/**
+ * Callback for toggle buttons on the toolbar. The user callback action is
+ * only executed when the new state of the button is active.
+ */
+static void toolbarClicked(GtkToggleButton *widget, gpointer value)
 {
-	struct button* b = CONTROL_GET_ATTRIBUTES_PTR(((wControl_p)value), button);
+	struct button *b = CONTROL_GET_ATTRIBUTES_PTR(((wControl_p)value), button);
 
-	if (b->action && !ignoreClick) {
-		b->action(((wControl_p)value)->context);
+	if (gtk_toggle_button_get_active(widget)) {
+		if (b->action && !ignoreClick) {
+			b->action(((wControl_p)value)->context);
+		}
 	}
 }
 
@@ -291,6 +326,8 @@ static void toolbarClicked(GtkToggleButton* widget, gpointer value)
  * ### Options
  * BO_GAP
  * : leave some space after the button.
+ * BO_ABUT
+ * : ????
  *
  * \param parent IN		application main window
  * \param x,y  IN		unused

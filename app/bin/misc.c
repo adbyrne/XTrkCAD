@@ -780,14 +780,13 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 {
 	int c;
 	int resumeWork;
+	int versionChanged;
 	char * logFileName = NULL;
 	int log_init = 0;
 	int initialZoom = 0;
 	char * initialFile = NULL;
 	const char * pref;
 	coOrd roomSize;
-	/*	long oldToolbarMax;
-		long newToolbarMax; */
 	char *cp;
 	char buffer[STR_SIZE];
 	unsigned int i;
@@ -1013,6 +1012,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	if ( pref == NULL || DoSetScale( pref ) == FALSE ) {
 		// if preferred scale was not set (eg. during initial run), initialize to a default value
 		DoSetScale( DEFAULT_SCALE );
+		ChangeHotBar(CHANGE_SCALE);
 	}
 
 	/* see whether last layout should be reopened on startup */
@@ -1035,12 +1035,19 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	
 	/* Compare the program version and display Beta warning if appropriate */
 	pref = wPrefGetString("misc", "version");
-	if((!pref) || (strcmp(pref,XTRKCAD_VERSION) != 0)) {
-		if(strstr(XTRKCAD_VERSION,"Beta") != NULL) {
-			NoticeMessage(MSG_BETA_NOTICE, _("Ok"),NULL, XTRKCAD_VERSION);
-		}
+	versionChanged = (!pref) || (strcmp(pref, XTRKCAD_VERSION) != 0);
+
+	if (versionChanged)
+	{
 		wPrefSetString("misc", "version", XTRKCAD_VERSION);
-	} else {
+	}
+
+	if (versionChanged && strstr(XTRKCAD_VERSION, "Beta") != NULL)
+	{
+		NoticeMessage(MSG_BETA_NOTICE, _("Ok"), NULL, XTRKCAD_VERSION);
+	}
+	else
+	{
 		ShowTip(SHOWTIP_NEXTTIP);
 	}
 
@@ -1072,11 +1079,11 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 		}
 
 	}
-	wFlush();
-	wWinShow(mainW, TRUE); 
-	ChangeHotBar(CHANGE_PARAMS);
-	
+
 	MainRedraw();
+	ChangeHotBar(CHANGE_SCALE|CHANGE_PARAMS);
+	wWinShow(mainW, TRUE); 
+
 	inMainW = FALSE;
 	if ( bRunTests ) {
 		int nFail = RegressionTestAll();
