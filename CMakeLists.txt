@@ -20,8 +20,10 @@ include(PlatformSettings.cmake)
 
 enable_testing()
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Find all dependencies
-# 
+#
 # Additional libraries
 
 find_package(Inkscape)
@@ -32,17 +34,17 @@ find_package(Zlib)
 find_package(MiniXML)
 if(MiniXML_FOUND)
     set(XTRKCAD_CREATE_SVG 1)
-	message( STATUS "MiniXML found: SVG export is enabled")
+    message( STATUS "MiniXML found: SVG export is enabled")
 else()
-	message( STATUS "MiniXML not found: no SVG export")
+    message( STATUS "MiniXML not found: no SVG export")
 endif()
 
 # Find unit testing framework
 find_package(CMocka)
 if(CMOCKA_FOUND)
-	include_directories(${CMOCKA_INCLUDE_DIR})
- 	set(LIBS ${LIBS} ${CMOCKA_LIBRARIES})
- 	option(XTRKCAD_TESTING "Build unittests" ON)
+    include_directories(${CMOCKA_INCLUDE_DIR})
+    set(LIBS ${LIBS} ${CMOCKA_LIBRARIES})
+    option(XTRKCAD_TESTING "Build unittests" ON)
 endif()
 
 # Tools
@@ -52,7 +54,7 @@ find_package(Pandoc)
 # check for GTK+ 3.0
 pkg_check_modules(GTK3 QUIET "gtk+-3.0")
 if(NOT GTK3_FOUND)
-	message(FATAL_ERROR "ERROR: GTK3 not found found!")
+    message(FATAL_ERROR "ERROR: GTK3 not found found!")
 endif()
 
 # Flatpak
@@ -62,7 +64,7 @@ find_package(Flatpak)
 find_package(Hg)
 
 
-# 
+#
 # Configure options
 #
 
@@ -74,9 +76,9 @@ if(UNIX AND NOT APPLE)
 endif()
 
 if(APPLE)
-	option(XTRKCAD_USE_APPLEHELP "Show help in Apple Help" ${XTRKCAD_USE_APPLEHELP_DEFAULT})
-	option(XTRKCAD_USE_BROWSER "Show help in default browser" ${XTRKCAD_USE_BROWSER_DEFAULT})
-	option(XTRKCAD_USE_PACKAGEMAKER "Generate an OSX PackageMaker package for distribution." OFF)
+    option(XTRKCAD_USE_APPLEHELP "Show help in Apple Help" ${XTRKCAD_USE_APPLEHELP_DEFAULT})
+    option(XTRKCAD_USE_BROWSER "Show help in default browser" ${XTRKCAD_USE_BROWSER_DEFAULT})
+    option(XTRKCAD_USE_PACKAGEMAKER "Generate an OSX PackageMaker package for distribution." OFF)
 endif()
 
 # Hide the advanced stuff ...
@@ -97,9 +99,9 @@ mark_as_advanced(LIBRARY_OUTPUT_PATH)
 #packaging related stuff
 
 if(XTRKCAD_USE_PACKAGEMAKER)
-	if(NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr")
-		message(SEND_ERROR "XTRKCAD_USE_PACKAGEMAKER requires CMAKE_INSTALL_PREFIX set to /usr.")
-	endif()
+    if(NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr")
+        message(SEND_ERROR "XTRKCAD_USE_PACKAGEMAKER requires CMAKE_INSTALL_PREFIX set to /usr.")
+    endif()
 endif()
 
 #
@@ -113,9 +115,9 @@ set(XTRKCAD_LOCALE_INSTALL_DIR "share/locale")
 set(XTRKCAD_PACKAGE "xtrkcad")
 set(XTRKCAD_BETA "")
 if(UNIX AND NOT APPLE)
-	if(XTRKCAD_VERSION_MODIFIER MATCHES "^Beta")
-		set(XTRKCAD_BETA "-beta")
-	endif()
+    if(XTRKCAD_VERSION_MODIFIER MATCHES "^Beta")
+        set(XTRKCAD_BETA "-beta")
+    endif()
 endif()
 set(XTRKCAD_SHARE_INSTALL_DIR "share/xtrkcad-gtk${XTRKCAD_BETA}")
 
@@ -125,37 +127,37 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad-config.h.in ${CMAKE_CURRENT_B
 
 # find the config.h include file
 include_directories(
-	${CMAKE_CURRENT_BINARY_DIR}
+ ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 #
 # I18N related dependencies
 
 if(XTRKCAD_USE_GETTEXT)
-	#
-	# Find the GnuWin32 installation directory, the gettext include should be located in subdir include
-	#
-	if(WIN32)
-		if(MSVC)
-			# use supplied gettext library for Visual Studio
-			message( STATUS "Use simple_gettext module included with XTrackCAD" )
-			add_definitions(-DUSE_SIMPLE_GETTEXT )
-		else()
-			# for mingw & co. find libintl.h and use it
-			find_path ( INTL_PATH libintl.h )
-			if(INTL_PATH)
-				message( STATUS "Use installed gettext module" )
-				include_directories(${INTL_PATH})
-			endif()
-		endif()
-	endif()
-	if(APPLE)
-		find_path ( INTL_PATH libintl.h )
-		if(INTL_PATH)
-			message( STATUS "Use installed gettext module" )
-			include_directories(${INTL_PATH})
-		endif()
-	endif()
+    #
+    # Find the GnuWin32 installation directory, the gettext include should be located in subdir include
+    #
+    if(WIN32)
+        if(MSVC)
+            # use supplied gettext library for Visual Studio
+            message( STATUS "Use simple_gettext module included with XTrackCAD" )
+            add_definitions(-DUSE_SIMPLE_GETTEXT )
+        else()
+            # for mingw & co. find libintl.h and use it
+            find_path ( INTL_PATH libintl.h )
+            if(INTL_PATH)
+                message( STATUS "Use installed gettext module" )
+                include_directories(${INTL_PATH})
+            endif()
+        endif()
+    endif()
+    if(APPLE)
+        find_path ( INTL_PATH libintl.h )
+        if(INTL_PATH)
+            message( STATUS "Use installed gettext module" )
+            include_directories(${INTL_PATH})
+        endif()
+    endif()
 endif()
 
 # Setup the rest of the build ...

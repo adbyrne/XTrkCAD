@@ -677,6 +677,7 @@ EXPORT void ChangeHotBar( long changes )
 			hotBarCurrStart = 0;
 		}
 		RedrawHotBar( NULL, NULL, 0, 0 );
+		wFlush();
 	}
 }
 
@@ -750,7 +751,7 @@ EXPORT void LayoutHotBar( const void * redraw )
 	ShowHotBar(TRUE);
 
 	if (initialize) {
-		ChangeHotBar( CHANGE_PARAMS );
+		ChangeHotBar( CHANGE_PARAMS | CHANGE_SCALE );
 	} else if (!redraw) {
 		RedrawHotBar( NULL, NULL, 0, 0 );
 	}
@@ -760,7 +761,7 @@ EXPORT void LayoutHotBar( const void * redraw )
 
 void HideHotBar(void)
 {
-	ShowHotBar(TRUE);
+	ShowHotBar(FALSE);
 }
 
 static void ShowHotBar( wBool_t show )
