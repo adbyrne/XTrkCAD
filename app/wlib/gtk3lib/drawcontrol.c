@@ -92,14 +92,30 @@ static gboolean draw_event(
 	struct draw* drawAttributes;
 
 	if (iDrawLog >= 4) {
-		printf("draw_event %ldx\n", lDrawCnt++);
+		printf("%ld: draw_event\n", lDrawCnt++);
 	}
 
 	drawAttributes = CONTROL_GET_ATTRIBUTES_PTR(drawControl, draw);
+#ifdef OLD_DRAW_EVENT
 	PaintOverSurface(cr, drawAttributes->surface);
 	PaintOverSurface(cr, drawAttributes->temp_surface);
-
 	ClearSurface(drawAttributes->temp_surface);
+#else
+//	cairo_t* cairo = gdk_cairo_create (widget->window);
+	cairo_set_source_surface(cr,drawAttributes->surface,0,0);
+	cairo_rectangle(cr, 0, 0,
+			drawAttributes->width, drawAttributes->height );
+	cairo_set_operator(cr,CAIRO_OPERATOR_SOURCE);
+	cairo_fill(cr);
+
+	cairo_set_source_surface(cr,drawAttributes->temp_surface,0,0);
+	cairo_rectangle(cr, 0, 0,
+			drawAttributes->width, drawAttributes->height );
+	cairo_set_operator(cr,CAIRO_OPERATOR_OVER);
+	cairo_fill(cr);
+
+//	cairo_destroy(cr);
+#endif
 
 	return TRUE;
 }
@@ -745,7 +761,8 @@ wControl_p wDrawCreate(
 	//                  G_CALLBACK( draw_leave_event), drawControl);
 
 	gtk_widget_add_events(drawControl->widget,
-	                      GDK_BUTTON_PRESS_MASK
+			      GDK_EXPOSURE_MASK
+	                      | GDK_BUTTON_PRESS_MASK
 	                      | GDK_BUTTON_RELEASE_MASK
 	                      //						   | GDK_LEAVE_NOTIFY_MASK
 	                      | GDK_SCROLL_MASK

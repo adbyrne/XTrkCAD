@@ -373,5 +373,6 @@ MapWindowCreate()
 	/** \TODO Uncomment and enable ChangeMapScale() */
 	//ChangeMapScale();
 
+	FormRegister( &mapPG );
 	return(mapW);
 }

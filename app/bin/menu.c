@@ -46,7 +46,7 @@ static paramData_t menuPLs[101] = {
 	{PD_LONG, NULL, "toolbarset", PDO_NOPREF, .group = &menuPG },
 	{PD_LONG, &curTurnoutEp, "cur-turnout-ep", .group = &menuPG}
 };
-static paramGroup_t menuPG = { "mainmenu", PGO_RECORD, menuPLs, 2 };
+static paramGroup_t menuPG = { "misc", PGO_RECORD, menuPLs, 2 };
 
 static void InitCmdExport( void );
 
@@ -1484,5 +1484,9 @@ static void InitCmdExport(void)
 	                 DoImportDxf, I2VP(1));					 
 	ButtonGroupEnd();
 
+	FormRegister( &menuPG );
 	AddPlaybackProc( "MENU", MenuPlayback, NULL );
+
+	ButtonGroupEnd();
+
 }

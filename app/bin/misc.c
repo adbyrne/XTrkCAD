@@ -941,8 +941,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 
 
 	wSetSplashInfo(_("Initializing commands"));
-	LOG1(log_init, ( "paramInit\n" ))
-	ParamInit();
+	LOG1(log_init, ( "FormInit\n" ))
 	FormInit();
 	LOG1(log_init, ( "initTrkTrack\n" ))
 	InitTrkTrack();
