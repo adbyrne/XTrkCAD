@@ -67,6 +67,7 @@ EXPORT wMenuToggle_p snapGridEnableMI;
 EXPORT wMenuToggle_p snapGridShowMI;
 
 static int cmdGroup;
+static void HandleCmdGroupChange(int currentGroup);
 
 /*--------------------------------------------------------------------*/
 typedef struct {
@@ -85,7 +86,6 @@ static void DoMenuTrace(wMenu_p menu, const char * label, const void * data)
 	}
 }
 
-/**  \TODO: Cppcheck complains about usage of mt, might be a false positive */
 EXPORT wMenu_p MenuRegister(const char * label)
 {
 	wMenu_p m;
@@ -671,9 +671,7 @@ wControl_p AddToolbarButton(const char* helpStr, wIcon_p icon, long options,
 		opt = BO_ABUT;
 	}
 
-	/** \TODO find a solution to create a gap after a button group is complete */
-//	if (cmdGroup & BG_BIGGAP)
-//		opt = BO_GAP;
+	HandleCmdGroupChange(cmdGroup);
 
 	if (options & IC_TOGGLE ) {
 		bb = wToggleCreateForToolbar(mainW, 0, 0, helpStr, icon,
@@ -727,6 +725,9 @@ static wIcon_p openbuttIcon = NULL;
 static wMenu_p commandsSubmenu = NULL;
 static wMenu_p popup1Submenu = NULL;
 static wMenu_p popup2Submenu = NULL;
+
+// Track previous cmdGroup to detect changes
+static int prevCmdGroup = -1;
 
 /*****************************************************************************
  *
@@ -923,6 +924,48 @@ static long SetupStickyBehavior(long options, wBool_t newButtonGroup,
     return stickyMask;
 }
 
+
+/**
+ * Add a gap after the previous command group using a separator.
+ * The gap size depends on whether BG_BIGGAP was set in the previous cmdGroup.
+ *
+ * \param prevGroup Previous command group flags
+ */
+static void AddGapAfterGroup(int prevGroup)
+{
+    if (prevGroup < 0) {
+        return;  // No previous group
+    }
+    
+    // Determine gap width based on previous group's flags
+    int width = (prevGroup & BG_BIGGAP) ? 16 : 8;
+    
+    // Create invisible separator
+    wControl_p separator = wSeparatorCreateForToolbar(mainW, width);
+    
+    if (separator) {
+        long option = (prevGroup & BG_BIGGAP) ? BO_BIGGAP : BO_GAP;
+        ToolbarControlAdd(separator, option, prevGroup);
+    }
+}
+
+/**
+ * Check if cmdGroup has changed and add gap if needed.
+ * Should be called at the start of AddMenuButton.
+ *
+ * \param currentGroup Current cmdGroup value
+ */
+static void HandleCmdGroupChange(int currentGroup)
+{
+    // Check if this is a new command group
+    if (prevCmdGroup >= 0 && prevCmdGroup != currentGroup) {
+        // cmdGroup changed - add gap after previous group
+        AddGapAfterGroup(prevCmdGroup);
+    }
+    
+    // Update tracked cmdGroup
+    prevCmdGroup = currentGroup;
+}
 /*****************************************************************************
  *
  * MAIN FUNCTION
@@ -967,6 +1010,13 @@ EXPORT wIndex_t AddMenuButton(wMenu_p menu, procCommand_t command,
         fprintf(stderr, "ERROR: AddMenuButton called with NULL nameStr\n");
         return -1;
     }
+
+	// ========================================================================
+    // PHASE 0: Handle Command Group Changes
+    // ========================================================================
+    
+    // Check if cmdGroup has changed and add gap if needed
+    HandleCmdGroupChange(cmdGroup);
 
     wIndex_t buttInx = -1;
     wBool_t newButtonGroup = FALSE;
@@ -1138,7 +1188,6 @@ EXPORT void ButtonGroupEnd(void)
     buttonGroupHelpKey = NULL;
     buttonGroupStickyLabel = NULL;
     buttonGroupPopupM = NULL;
-
 }
 
 /**  these seem to be menu entries that will be  used by demo playback */
@@ -1321,7 +1370,6 @@ EXPORT void CreateMenus(void)
 	                 IC_MODETRAIN_TOO, ChkLoad, NULL);
 	AddToolbarButton("save", CreateToolbarIconFromResource("doc-save.png"),
 	                 IC_MODETRAIN_TOO, DoSave, NULL);
-				 
 	wMenuSeparatorCreate(fileM);
 
 	cmdGroup = BG_PRINT;

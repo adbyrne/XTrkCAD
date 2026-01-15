@@ -700,6 +700,7 @@ wBool_t wWinIsTemplated(wWin_p win);
 #define BO_ICON		(1L<<0)
 #define BO_DISABLED	(1L<<1)
 #define BO_READONLY	(1L<<2)
+#define BO_BIGGAP   (1L<<3)
 #define BO_ABUT     (1L<<6)
 #define BO_GAP      (1L<<7)
 #define BO_NOTAB	(1L<<8)
@@ -1266,6 +1267,13 @@ void wPrefFormatLine(const char* section, const char* name,
  */
 
 wBool_t wLoadResourceFile(const char* filename);
+
+/*------------------------------------------------------------------------------
+ *
+ * Separator
+ */
+
+wControl_p wSeparatorCreateForToolbar(wControl_p parent, int width);
 
 /*------------------------------------------------------------------------------
  *

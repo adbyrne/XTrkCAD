@@ -39,6 +39,7 @@ target_sources(xtrkcad-wlib
 	recentuse.c
 	resourcefile.c
 	scalectrl.c
+	separator.c
 	stack.c
 	statusbar.c
 	sticky.c
