@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
 	if (!app_id || !*app_id) {
 		app_id = XTRKCAD_APPL_ID;
 	}
-	app = gtk_application_new(app_id, G_APPLICATION_HANDLES_COMMAND_LINE);
+	app = gtk_application_new(app_id, G_APPLICATION_HANDLES_COMMAND_LINE | G_APPLICATION_NON_UNIQUE);
 
 	g_signal_connect(app, "command-line", G_CALLBACK(command_line), NULL );
 	g_signal_connect(app, "startup", G_CALLBACK(startup), NULL);
