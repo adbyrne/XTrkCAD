@@ -1699,6 +1699,12 @@ static void ParamPlayback( char * line )
 	coOrd pos;
 	char * valS;
 
+#ifdef DESCRIBEHACK
+	// TODO Remove once describe is implemented
+	if ( strncmp( line, "describe cancel", 15 ) == 0 ) {
+		return;
+	}
+#endif
 	if ( strncmp( line, "GROUP ", 6 ) == 0 ) {
 #ifdef PGPROC
 		pg = DialogGroupFind( line+6 );
@@ -1923,7 +1929,7 @@ static void ParamPlayback( char * line )
 		//ParamHilite( pg->win, (wControl_p)pg->cancelB, TRUE );
 		if ( pg->cancelB ) wControlHilite( (wControl_p)pg->cancelB, TRUE );
 		if ( pg->cancelProc )
-			pg->cancelProc( pg->win );
+			pg->cancelProc( pg );
 		button = pg->cancelB;
 	}
 	SimulateButtonClick( button );

@@ -25,10 +25,10 @@ We'll start with a simple turnout and add a switch machine.
 END
 STEP
 COMMAND DrawLine
-PARAMETER draw linewidth 0
-PARAMETER draw linecolor 0
+PARAMETER linestyle linewidth 0
+PARAMETER linestyle linecolor 0
 PARAMETER GROUP draw
-PARAMETER draw linewidth 0.055555
+PARAMETER linestyle linewidth 0.055555
 MOUSE 1 2.500 3.000
 COMMAND DrawLine
 MOUSE 2 2.500 3.000
@@ -40,7 +40,7 @@ KEYSTATE A
 MOUSE 4 3.200 1.500
 STEP
 COMMAND DrawFilledBox
-PARAMETER draw linecolor 0
+PARAMETER linestyle linecolor 0
 PARAMETER GROUP draw
 KEYSTATE A
 MOUSE 1 2.600 3.000
@@ -256,7 +256,7 @@ MOUSE 4 11.156 4.281
 BIGPAUSE
 COMMAND TurnoutHotBar
 #PARAMETER turnout list 0 
-PARAMETER GROUP newFixedTrack
+PARAMETER GROUP turnout
 HOTBARSELECT Peco-55	Modified Medium Right	SL-E395F
 MOUSE 1 4.750 1.906
 MOUSE 2 4.750 1.906
@@ -310,9 +310,9 @@ END
 STEP
 ORIG 1.0 0.0 0.0
 COMMAND DrawFilledCircleCenter
-PARAMETER draw linecolor 0
+PARAMETER linestyle linecolor 0
 PARAMETER GROUP draw
-PARAMETER draw linecolor 65280
+PARAMETER linestyle linecolor 65280
 MOUSE 1 5.203 2.812
 MOUSE 2 5.203 2.812
 MOUSE 3 5.359 2.609

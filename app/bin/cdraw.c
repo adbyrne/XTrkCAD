@@ -3138,6 +3138,7 @@ static void SetupDimLineControls()
 static void CreateDrawControls(paramGroup_p pg)
 {
 	paramData_p paramPLs = pg->paramPtr;
+	FormRegister( pg );
 
 	if (paramPLs[0].control == NULL) {
 		FormCreateControls(pg);

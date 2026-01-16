@@ -933,15 +933,15 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	InitColor();
 	LOG1(log_init, ("initInfoBar\n"))
 	InitInfoBar();
-	wSetSplashInfo("Scale Init...");
-	LOG1(log_init, ( "ScaleInit\n" ))
-	ScaleInit();
 	wPrefGetInteger( "draw", "label-when", &labelWhen, labelWhen );
 
 
 	wSetSplashInfo(_("Initializing commands"));
 	LOG1(log_init, ( "FormInit\n" ))
 	FormInit();
+	wSetSplashInfo("Scale Init...");
+	LOG1(log_init, ( "ScaleInit\n" ))
+	ScaleInit();
 	LOG1(log_init, ( "initTrkTrack\n" ))
 	InitTrkTrack();
 	LOG1(log_init, ("drawInit\n"))

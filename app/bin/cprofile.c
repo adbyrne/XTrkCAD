@@ -29,6 +29,7 @@
 #include "shrtpath.h"
 #include "track.h"
 #include "common-ui.h"
+#include "include/form.h"
 
 
 /*
@@ -1445,8 +1446,8 @@ static STATUS_T CmdProfile(wAction_t action, coOrd pos)
 			             screenProfileFontSize, FALSE, &textsize);
 			labelH = textsize.y;
 			labelW = textsize.x;
-			profileW = ParamCreateDialog(&profilePG, MakeWindowTitle(_("Profile")), NULL,
-			                             NULL, ParamCancel_Undo, TRUE, NULL, F_RESIZE, CloseProfileWindow);
+			profileW = FormCreateDialog(&profilePG, MakeWindowTitle(_("Profile")), NULL, NULL,
+			                             NULL, ParamCancel_Undo, TRUE, F_RESIZE, CloseProfileWindow);
 		}
 		ParamLoadControls(&profilePG);
 		ParamGroupRecord(&profilePG);
@@ -1521,7 +1522,7 @@ static void ProfileChange(long changes)
 EXPORT void InitCmdProfile(wMenu_p menu)
 {
 	log_profile = LogFindIndex("profile");
-	ParamRegister(&profilePG);
+	FormRegister(&profilePG);
 
 	AddMenuButton(menu, CmdProfile, "cmdProfile", _("Profile"),
 		CreateToolbarIconFromResource("profile.png"), LEVEL0_50,

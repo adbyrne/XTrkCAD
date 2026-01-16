@@ -91,8 +91,8 @@ RESET
 MESSAGE
 We also draw Polylines and filled shapes.
 END
-PARAMETER draw linewidth 0.027777
-PARAMETER draw linecolor 11591910
+PARAMETER linestyle linewidth 0.027777
+PARAMETER linestyle linecolor 11591910
 COMMAND DrawPolyline
 STEP
 MESSAGE
@@ -101,9 +101,9 @@ _________________________________________
 A Polyline is drawn by dragging to place each of the point in the Polyline.
 END
 STEP
-PARAMETER draw linecolor 0
-PARAMETER draw linewidth 0.041667
-PARAMETER draw linecolor 32768
+PARAMETER linestyle linecolor 0
+PARAMETER linestyle linewidth 0.041667
+PARAMETER linestyle linecolor 32768
 MOUSE 2 0.64 6.07
 MOUSE 4 0.64 6.07
 MOUSE 2 1.17 7.25
