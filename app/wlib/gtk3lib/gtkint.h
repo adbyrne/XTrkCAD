@@ -85,8 +85,7 @@ typedef enum {
 		B_COLORBUTTON, 
 		B_STACK, B_NOTEBOOK,
 		M_MENU, M_SUBMENU, M_PUSH, M_TOGGLE, M_RADIO, M_SEPARATOR, M_RECENTUSE,
-		B_SCALE,
-		B_TAG
+		B_SCALE, B_TAG, B_SEPARATOR
 } wType_e;
 
 typedef void (*repaintProcCallback_p)( wControl_p );

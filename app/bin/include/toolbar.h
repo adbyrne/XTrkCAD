@@ -5,6 +5,7 @@
 
 #ifndef TOOLBAR_H
 #define TOOLBAR_H
+#include "command.h"
  /*
   * Command groups
   */

@@ -78,9 +78,6 @@ void wlibAddButtonToToolbar(wControl_p buttonControl, const char* helpStr)
 	wControl_p parent = buttonControl->parent;
 	GtkStyleContext* styleContext = gtk_widget_get_style_context(GTK_WIDGET(buttonControl->widget));
 	gtk_style_context_add_class(styleContext, "toolbar-button");
-	//if (option & BO_GAP) {
-	//	gtk_style_context_add_class(styleContext, "toolbar-button-gap");
-	//}
 
 	egg_wrap_box_insert_child(EGG_WRAP_BOX(parent->attributes.window.toolbar),
 		buttonControl->widget, -1, 0);
