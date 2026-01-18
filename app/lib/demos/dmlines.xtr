@@ -188,7 +188,7 @@ _________________________________________
 Boxes are useful for drawing rectangular shapes.
 END
 STEP
-PARAMETER draw linecolor 8355584
+PARAMETER linestyle linecolor 8355584
 COMMAND DrawBox
 MOUSE 2 11.413 4.960
 MOUSE 4 20.640 7.840
