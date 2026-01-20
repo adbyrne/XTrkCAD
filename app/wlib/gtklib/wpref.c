@@ -172,7 +172,7 @@ const char * wGetAppWorkDir(
 		wNoticeEx( NT_ERROR, _("HOME is not set"), _("Exit"), NULL);
 		wExit(0);
 	}
-#ifdef XTRKCAD_BUILD_FLATPAK
+#if XTRKCAD_BUILD_FLATPAK
 	sprintf( appWorkDir, "%s/.%s-fp", homeDir, wlibGetAppName() );
 #else
 	sprintf( appWorkDir, "%s/.%s", homeDir, wlibGetAppName() );
@@ -196,7 +196,7 @@ const char * wGetAppWorkDir(
 			 */
 			struct stat stFileInfo;
 			char appEtcConfig[BUFSIZ];
-#ifdef XTRKCAD_BUILD_FLATPAK
+#if XTRKCAD_BUILD_FLATPAK
 			sprintf( appEtcConfig, "/etc/%s-fp.rc", wlibGetAppName());
 #else
 			sprintf( appEtcConfig, "/etc/%s.rc", wlibGetAppName());
