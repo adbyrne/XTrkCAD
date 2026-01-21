@@ -18,7 +18,8 @@ find_program(
 )
 
 execute_process(COMMAND ${Inkscape_EXECUTABLE} "--version" OUTPUT_VARIABLE _Inkscape_VERSION ERROR_QUIET)
-STRING(REGEX MATCH "[1-9]\.[0-9\+\.[0-9]+" _Inkscape_VERSION ${_Inkscape_VERSION})
+STRING(REGEX MATCH "[ \t\r\n][1-9]+\.[0-9]+[ \t\r\n]|[ \t\r\n][1-9]+\.[0-9]+\.[0-9]+[ \t\r\n]" _Inkscape_VERSION ${_Inkscape_VERSION})
+STRING(STRIP "${_Inkscape_VERSION}" _Inkscape_VERSION)
 
 set(Inkscape_VERSION ${_Inkscape_VERSION} CACHE STRING "Inkscape Version")
 
