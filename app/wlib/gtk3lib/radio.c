@@ -122,18 +122,27 @@ static int radioChoice(
         GtkWidget* widget,
         gpointer b)
 {
+
 	wControl_p bc = (wControl_p)b;
+	if (bc->type == B_RADIO &&
+	    !(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))) {
+		return 1;
+	}
 	long activeIndex = radioGetValue(GTK_RADIO_BUTTON(widget));
 
 	if (ISACTIVEBUTTON(activeIndex)) {
 		struct radio* rcontrol = CONTROL_GET_ATTRIBUTES_PTR(bc, radio);
-
+		if ( rcontrol->recursion ) {
+			return 1;
+		}
 		if (rcontrol->valueP) {
 			*rcontrol->valueP = activeIndex;
 		}
 
 		if (rcontrol->action) {
+			rcontrol->recursion++;
 			rcontrol->action(activeIndex, bc->context);
+			rcontrol->recursion--;
 		}
 	}
 	return 1;
@@ -255,6 +264,7 @@ wControl_p wRadioCreate(
 	rcontrol = CONTROL_GET_ATTRIBUTES_PTR(b, radio);
 	rcontrol->action = action;
 	rcontrol->valueP = valueP;
+	rcontrol->recursion = 0;
 
 	if (ISDEFINEDINBUILDER(parent)) {
 		b->widget = wlibWidgetFromIdWarn(parent, helpStr);

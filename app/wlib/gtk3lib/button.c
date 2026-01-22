@@ -34,11 +34,6 @@
 #include "gtkint.h"
 
 
-static wBool_t blockCallback;
-#define SetNoCallbackOnClick() (blockCallback = TRUE)
-#define SetCallbackOnClick() (blockCallback = FALSE)
-#define DoCallbackOnClick() (blockCallback == FALSE)
-
 static void buttonClick(GtkWidget* widget, gpointer value);
 
 /*
@@ -154,8 +149,14 @@ void wButtonSetLabel(wControl_p bb, const char * labelStr)
 void wlibButtonDoAction(
         wControl_p bb)
 {
-	if (bb->attributes.button.action) {
+	if ( bb->attributes.button.recursion ) {
+		printf( "Recurse: wlibButtonDoAction\n" );
+		return;
+	}
+	if (bb->attributes.button.action) { 
+		bb->attributes.button.recursion++;
 		bb->attributes.button.action(bb->context);
+		bb->attributes.button.recursion--;
 	}
 }
 
@@ -170,11 +171,15 @@ static void buttonClick(
         gpointer value)
 {
 	struct button* b = CONTROL_GET_ATTRIBUTES_PTR(((wControl_p)value), button);
+	if ( b->recursion ) {
+		printf( "Recursion: buttonClick\n" );
+		return;
+	}
 
-	if (b->action && DoCallbackOnClick()) {
-		SetNoCallbackOnClick();
+	if (b->action ) {
+		b->recursion++;
 		b->action(((wControl_p)value)->context);
-		SetCallbackOnClick();
+		b->recursion--;
 	}
 }
 
@@ -326,6 +331,7 @@ wControl_p wButtonCreate(
 	b = wlibControlNew(B_BUTTON, parent, helpStr, context);
 	button = CONTROL_GET_ATTRIBUTES_PTR(b, button);
 	button->action = action;
+	button->recursion = 0;
 
 	if (ISDEFINEDINBUILDER(parent) || ISDIALOGACTION(option)) {
 		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
@@ -431,6 +437,7 @@ wControl_p wButtonCreateForToolbar(
 	buttonControl = wlibControlNew(B_BUTTON, parent, helpStr, context);
 	buttonAttributes = CONTROL_GET_ATTRIBUTES_PTR(buttonControl,button);
 	buttonAttributes->action = action;
+	buttonAttributes->recursion = 0;
 	buttonControl->widget = GTK_WIDGET(gtk_button_new());
 
 	wButtonSetIcon(buttonControl, icon);
@@ -441,6 +448,7 @@ wControl_p wButtonCreateForToolbar(
 	}
 
 	wlibAddButtonToToolbar(buttonControl, helpStr);
+
 
 	g_signal_connect(G_OBJECT(buttonControl->widget), "clicked",
 	                 G_CALLBACK(buttonClick), buttonControl);
