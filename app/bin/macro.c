@@ -687,7 +687,10 @@ static paramData_t demoPLs[] = {
 #define I_DEMOSPEED		(3)
 #define demoSpeedL		(demoPLs[I_DEMOSPEED].control)
 	{   PD_COMBOLIST, &playbackSpeed, "speed", PDO_NORECORD|PDO_LISTINDEX|PDO_DLGHORZ, I2VP(80), NULL },
-#define I_DEMOTEXT		(4)
+#define I_DEMOAUTOPLAY		(4)
+#define demoAutoPlay		(demoPLs[I_DEMOAUTOPLAY].control)
+	{   PD_BUTTON, DoDemoButton, "autoplay", PDO_NORECORD|PDO_DLGHORZ, NULL, NULL, 0, I2VP(4) },
+#define I_DEMOTEXT		(5)
 #define demoT			(demoPLs[I_DEMOTEXT].control)
 	{   PD_TEXT, NULL, "text", PDO_NORECORD|PDO_DLGRESIZE, &demoTextData, NULL, BT_CHARUNITS|BO_READONLY}
 };
@@ -1068,14 +1071,14 @@ static void Playback( void )
 			/* empty paramLine */
 			continue;
 		} else if (ReadTrack( paramLine ) ) {
-			LOG( log_playback, 2, ( "%3d: ReadTrack %s\n", paramLineNum, paramLine ) );
+			LOG( log_playback, 3, ( "%3d: ReadTrack %s\n", paramLineNum, paramLine ) );
 			if ( paramFile == NULL ) {
 				SetInPlayback(FALSE );
 				break;
 			}
 			continue;
 		}
-		LOG( log_playback, 2, ( "%3d: %s\n", paramLineNum, paramLine ) );
+		LOG( log_playback, 3, ( "%3d: %s\n", paramLineNum, paramLine ) );
 		if (strncmp( paramLine, "STEP", 5 ) == 0) {
 			paramTogglePlaybackHilite = TRUE;
 			wWinTop( demoW );
@@ -1372,7 +1375,8 @@ static void DoDemoButton( void * command )
 	switch( VP2L(command) ) {
 	case 0:
 		/* step */
-		playbackNonStop = (wGetKeyState() & WKEY_SHIFT) != 0;
+//		This doesn't work because meta keys are only caught for wDraw's
+//		playbackNonStop = (wGetKeyState() & WKEY_SHIFT) != 0;
 		Playback();
 		break;
 	case 1:
@@ -1413,6 +1417,11 @@ static void DoDemoButton( void * command )
 			// We're waiting for the user to press 'Step'
 			PlaybackQuit();
 		}
+		break;
+	case 4:
+		playbackNonStop = ! playbackNonStop;
+		wBool_t bActive = wControlGetActive( demoAutoPlay );
+		printf( "playbakNonStop = %d bActive = %d\n", playbackNonStop, bActive );
 		break;
 	default:
 		;
@@ -1593,7 +1602,8 @@ static void DoDemo( void * demoNumber )
 		return;
 	}
 	PlaybackSetup();
-	playbackNonStop = (wGetKeyState() & WKEY_SHIFT) != 0;
+//	This doesn't work because meta keys are only caught for wDraw's
+//	playbackNonStop = (wGetKeyState() & WKEY_SHIFT) != 0;
 	paramFile = NULL;
 	Playback();
 }

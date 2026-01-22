@@ -435,7 +435,7 @@ DEMO "Mouse Actions" dmmouse.xtr
 DEMO "Dialogs" dmdialog.xtr
 DEMO "Moving about" dmmovabt.xtr
 DEMOGROUP Describe and Select
-DEMO "Describe" dmcancel.xtr
+#DEMO "Describe" dmcancel.xtr
 DEMO "Select" dmselect.xtr
 DEMOGROUP Simple tracks
 DEMO "Straight tracks" dmstrtrk.xtr
@@ -458,9 +458,9 @@ DEMOGROUP Turnouts
 DEMO "Select and Placement" dmtosel.xtr
 DEMO "Building a yard throat." dmtoyard.xtr
 DEMO "Designing turnouts" dmtodes.xtr
-DEMO "Group and Ungroup" dmgroup.xtr
+#DEMO "Group and Ungroup" dmgroup.xtr
 DEMO "Triming Turnout Ends" dmtotrim.xtr
-DEMO "Handlaid Turnouts" dmhndld.xtr
+#DEMO "Handlaid Turnouts" dmhndld.xtr
 DEMOGROUP Elevations and Profile
 DEMO "Elevations" dmelev.xtr
 DEMO "Profile" dmprof.xtr
@@ -468,7 +468,7 @@ DEMOGROUP Misc track commands
 DEMO "Delete and Undo" dmdelund.xtr
 DEMO "Splitting and Tunnels" dmsplit.xtr
 DEMO "Parallel" dmparall.xtr
-DEMO "Helix tracks" dmhelix.xtr
+#DEMO "Helix tracks" dmhelix.xtr
 DEMO "Exception Tracks" dmexcept.xtr
 DEMO "Rescale" dmrescal.xtr
 DEMO "Connect and Tighten - a siding" dmconn1.xtr
@@ -476,15 +476,23 @@ DEMO "Connect and Tighten - figure-8" dmconn2.xtr
 DEMOGROUP Other commands
 DEMO "Ruler" dmruler.xtr
 DEMO "Table Edges" dmtbledg.xtr
-DEMO "Benchwork" dmbench.xtr
+#DEMO "Benchwork" dmbench.xtr
 DEMO "Dimension Lines" dmdimlin.xtr
-DEMO "Lines" dmlines.xtr
-DEMO "Poly-Shapes" dmlines2.xtr
+#DEMO "Lines" dmlines.xtr
+#DEMO "Poly-Shapes" dmlines2.xtr
 DEMO "Modifying Poly-Shapes" dmplymod.xtr
 DEMO "Rotate" dmrotate.xtr
 DEMO "Flip" dmflip.xtr
-DEMO "Control Panels" dmctlpnl.xtr
+#DEMO "Control Panels" dmctlpnl.xtr
 DEMO "Notes" dmnotes.xtr
 #DEMO "Text" dmtext.xtr
 #DEMOGROUP Example
 #DEMO "MR Layout Design" dmmrlay.xtr
+DEMO "Describe" dmcancel.xtr
+DEMO "Group and Ungroup" dmgroup.xtr
+DEMO "Handlaid Turnouts" dmhndld.xtr
+DEMO "Helix tracks" dmhelix.xtr
+DEMO "Benchwork" dmbench.xtr
+DEMO "Lines" dmlines.xtr
+DEMO "Poly-Shapes" dmlines2.xtr
+DEMO "Control Panels" dmctlpnl.xtr

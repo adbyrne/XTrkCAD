@@ -67,7 +67,7 @@
                                 <property name="can-focus">False</property>
                                 <property name="spacing">6</property>
                                 <child>
-                                    <object class="GtkToggleButton" id="id_ok">
+                                    <object class="GtkToggleButton" id="autoplay">
                                         <property name="label">_Auto Play</property>
                                         <property name="visible">True</property>
                                         <property name="can-focus">True</property>
@@ -178,7 +178,7 @@
     </object>
     <object class="GtkSizeGroup">
         <widgets>
-            <widget name="step" />> <widget name="id_ok" />
+            <widget name="step" />> <widget name="autoplay" />
             <widget name="next" />
         </widgets>
     </object>
