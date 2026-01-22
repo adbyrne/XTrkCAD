@@ -211,6 +211,12 @@ wControl_p wButtonCreateForToolbar(wControl_p  w,
                                    wButtonCallBack_p action, 
                                    void* context);
 
+wBool_t wButtonIsSplitButton(wControl_p button);
+void wButtonSetDropdownMenu(wControl_p button, wMenu_p menu);
+void wButtonSetContext(wControl_p button, void* context);
+void wButtonSetIcon(wControl_p button, wIcon_p icon);
+void wButtonSetDropdownMenu(wControl_p button, wMenu_p menu);
+void wButtonMakeSplit(wControl_p button, wMenu_p popupMenu);
 
 /** Radio buttons */
 
@@ -701,6 +707,7 @@ wBool_t wWinIsTemplated(wWin_p win);
 #define BO_DISABLED	(1L<<1)
 #define BO_READONLY	(1L<<2)
 #define BO_BIGGAP   (1L<<3)
+#define BO_SPLITBUTTON (1L<<4)
 #define BO_ABUT     (1L<<6)
 #define BO_GAP      (1L<<7)
 #define BO_NOTAB	(1L<<8)

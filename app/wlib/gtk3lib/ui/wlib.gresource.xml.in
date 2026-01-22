@@ -32,6 +32,7 @@
     <file preprocess="xml-stripblanks">searchgui.ui</file>
     <file preprocess="xml-stripblanks">sensoredit.ui</file>
     <file preprocess="xml-stripblanks">signaledit.ui</file>
+    <file preprocess="xml-stripblanks">splitbutton.ui</file>
     <file preprocess="xml-stripblanks">structure.ui</file>
     <file preprocess="xml-stripblanks">switchmotor.ui</file>
     <file preprocess="xml-stripblanks">switchmotoredit.ui</file>

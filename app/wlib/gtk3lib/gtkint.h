@@ -115,6 +115,7 @@ struct button {
 	wBool_t is_pressed;
 	guint timeout_id;
 	enum TIMER_STATE timer_state;
+	GtkWidget *dropdown;
 };
 
 struct choice {

@@ -30,16 +30,23 @@
 
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
+#include "i18n.h"
 
 #include "gtkint.h"
 
+#include "xtrkcad-config.h"
 
 static wBool_t blockCallback;
+
 #define SetNoCallbackOnClick() (blockCallback = TRUE)
 #define SetCallbackOnClick() (blockCallback = FALSE)
 #define DoCallbackOnClick() (blockCallback == FALSE)
 
-static void buttonClick(GtkWidget* widget, gpointer value);
+/* Forward declarations */
+static void splitButtonDropdownClick(GtkWidget* widget, gpointer data);
+static void ApplySplitButtonStyle(GtkWidget* splitButton);
+
+
 
 /*
  *****************************************************************************
@@ -111,25 +118,25 @@ IsNewIcon(wIcon_p new, wIcon_p old)
  * \param iconData	IN icon data
  */
 
-void wButtonSetIcon(wControl_p control, wIcon_p icon)
-{
-	GdkPixbuf* pixbuf = NULL;
+// void wButtonSetIcon(wControl_p control, wIcon_p icon)
+// {
+// 	GdkPixbuf* pixbuf = NULL;
 
-	if (control->attributes.button.icon) {
-		if (!IsNewIcon(icon, control->attributes.button.icon)) {
-			return;
-		}
-		RemovePixbuf(control->widget);
-	}
+// 	if (control->attributes.button.icon) {
+// 		if (!IsNewIcon(icon, control->attributes.button.icon)) {
+// 			return;
+// 		}
+// 		RemovePixbuf(control->widget);
+// 	}
 
-	pixbuf = icon->bits;
+// 	pixbuf = icon->bits;
 
-	if (pixbuf) {
-		SetPixbufToButton(control->widget, pixbuf);
+// 	if (pixbuf) {
+// 		SetPixbufToButton(control->widget, pixbuf);
 
-		control->attributes.button.icon = icon;
-	}
-}
+// 		control->attributes.button.icon = icon;
+// 	}
+// }
 
 /**
  * Change the label of a button. This can be used to set the text
@@ -194,7 +201,8 @@ static wBool_t drawButton(
 #define REPEAT_DELAY 150
 
 
-static gboolean on_button_repeat(gpointer user_data) {
+static gboolean on_button_repeat(gpointer user_data)
+{
 	wControl_p button = (wControl_p)user_data;
 
 	if (!button->attributes.button.is_pressed) {
@@ -202,11 +210,11 @@ static gboolean on_button_repeat(gpointer user_data) {
 		return G_SOURCE_REMOVE;
 	}
 
-	if (button->attributes.button.timer_state == INITIAL_DELAY)
-	{
+	if (button->attributes.button.timer_state == INITIAL_DELAY) {
 		g_source_remove(button->attributes.button.timeout_id);
 		button->attributes.button.timer_state = REPEATED;
-		button->attributes.button.timeout_id = g_timeout_add(REPEAT_DELAY, on_button_repeat, button);
+		button->attributes.button.timeout_id = g_timeout_add(REPEAT_DELAY,
+		                                       on_button_repeat, button);
 	}
 
 	g_signal_emit_by_name(button->widget, "clicked");
@@ -215,8 +223,9 @@ static gboolean on_button_repeat(gpointer user_data) {
 }
 
 // Callback for Button-Press-Event
-static gboolean 
-on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer user_data) {
+static gboolean
+on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer user_data)
+{
 	wControl_p button = (wControl_p)user_data;
 
 	if (event->button == GDK_BUTTON_PRIMARY) {
@@ -224,7 +233,8 @@ on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer user_data) {
 		button->attributes.button.is_pressed = TRUE;
 
 		// start first timeout after initial delay
-		button->attributes.button.timeout_id = g_timeout_add( REPEAT_INITIAL_DELAY, on_button_repeat, button);
+		button->attributes.button.timeout_id = g_timeout_add( REPEAT_INITIAL_DELAY,
+		                                       on_button_repeat, button);
 		button->attributes.button.timer_state = INITIAL_DELAY;
 	}
 
@@ -232,7 +242,9 @@ on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer user_data) {
 }
 
 // Callback for Button-Release-Event
-static gboolean on_button_release(GtkWidget* widget, GdkEventButton* event, gpointer user_data) {
+static gboolean on_button_release(GtkWidget* widget, GdkEventButton* event,
+                                  gpointer user_data)
+{
 	wControl_p button = (wControl_p)user_data;
 
 	if (event->button == GDK_BUTTON_PRIMARY) {
@@ -248,7 +260,9 @@ static gboolean on_button_release(GtkWidget* widget, GdkEventButton* event, gpoi
 }
 
 // Callback when mouse leaves the button
-static gboolean on_button_leave(GtkWidget* widget, GdkEventCrossing* event, gpointer user_data) {
+static gboolean on_button_leave(GtkWidget* widget, GdkEventCrossing* event,
+                                gpointer user_data)
+{
 	wControl_p button = (wControl_p)user_data;
 
 	button->attributes.button.is_pressed = FALSE;
@@ -262,24 +276,25 @@ static gboolean on_button_leave(GtkWidget* widget, GdkEventCrossing* event, gpoi
 }
 
 static void
-SetAutoRepeat(wControl_p button) {
+SetAutoRepeat(wControl_p button)
+{
 	// activate events
 	gtk_widget_add_events(button->widget,
-		GDK_BUTTON_PRESS_MASK |
-		GDK_BUTTON_RELEASE_MASK |
-		GDK_LEAVE_NOTIFY_MASK);
+	                      GDK_BUTTON_PRESS_MASK |
+	                      GDK_BUTTON_RELEASE_MASK |
+	                      GDK_LEAVE_NOTIFY_MASK);
 
 	// connect event handlers
 	g_signal_connect(button->widget, "button-press-event",
-		G_CALLBACK(on_button_press), button);
+	                 G_CALLBACK(on_button_press), button);
 	g_signal_connect(button->widget, "button-release-event",
-		G_CALLBACK(on_button_release), button);
+	                 G_CALLBACK(on_button_release), button);
 	g_signal_connect(button->widget, "leave-notify-event",
-		G_CALLBACK(on_button_leave), button);
+	                 G_CALLBACK(on_button_leave), button);
 }
 
 
-#define ISDIALOGACTION(options) ((options&BB_HELP)||(options&BB_CANCEL)||(option&BB_DEFAULT))
+#define ISDIALOGACTION(options) ((options&BB_HELP)||(options&BB_CANCEL)||(options&BB_DEFAULT))
 /**
  * Create a button
  *
@@ -292,7 +307,7 @@ SetAutoRepeat(wControl_p button) {
  * BB_DEFAULT
  * : set button as default for dialog
  * BO_ICON
- * : use an icon instead of label, 
+ * : use an icon instead of label,
  * BO_REPEAT
  * : autorepeat function triggered by longer press
  *
@@ -398,6 +413,8 @@ static char* down16[] = {
  * BO_GAP
  * : leave some space after the button. Technically this is an invisible
  * separator
+ * BO_SPLITBUTTON
+ * : create a button with an additional dropdown menu, context is the menu to open
  *
  * \param parent IN		application main window
  * \param x,y  IN		unused
@@ -406,19 +423,19 @@ static char* down16[] = {
  * \param option IN		options
  * \param width IN		unused
  * \param action IN		callback
- * \param styleContext IN		user styleContext as styleContext
+ * \param context IN	dopdown menu in case of BO_SPLITBUTTON
  * \returns button control
  *
  */
 
 wControl_p wButtonCreateForToolbar(
-        wControl_p	parent,
-        wWinPix_t	x,
-        wWinPix_t	y,
+        wControl_p parent,
+        wWinPix_t x,
+        wWinPix_t y,
         const char* helpStr,
         wIcon_p icon,
-        long 	option,
-        wWinPix_t 	width,
+        long option,
+        wWinPix_t width,
         wButtonCallBack_p action,
         void* context)
 {
@@ -426,32 +443,252 @@ wControl_p wButtonCreateForToolbar(
 	struct button* buttonAttributes;
 
 	g_assert(parent->type == W_MAIN);
-	g_assert(icon->bits);
 
 	buttonControl = wlibControlNew(B_BUTTON, parent, helpStr, context);
-	buttonAttributes = CONTROL_GET_ATTRIBUTES_PTR(buttonControl,button);
+	buttonAttributes = CONTROL_GET_ATTRIBUTES_PTR(buttonControl, button);
 	buttonAttributes->action = action;
-	buttonControl->widget = GTK_WIDGET(gtk_button_new());
 
-	wButtonSetIcon(buttonControl, icon);
+	// Create regular button
+	if (icon && icon->bits) {
+		buttonControl->widget = GTK_WIDGET(gtk_button_new());
 
-	/** \todo BO_ABUT should be renamed to BO_OVERFLOW_MENU and be included with the button */
-	if (option & BO_ABUT) {
-		wlibSetAbutStyle(buttonControl->widget);
+		if (!buttonControl->widget) {
+			fprintf(stderr, "ERROR: Failed to create button widget\n");
+			g_free(buttonControl);
+			return NULL;
+		}
+
+		wButtonSetIcon(buttonControl, icon);
+
+		// Connect click signal for regular button
+		g_signal_connect(G_OBJECT(buttonControl->widget), "clicked",
+		                 G_CALLBACK(buttonClick), buttonControl);
+	} else {
+		fprintf(stderr, "ERROR: No icon provided for regular button\n");
+		g_free(buttonControl);
+		return NULL;
 	}
 
-	wlibAddButtonToToolbar(buttonControl, helpStr);
 
-	g_signal_connect(G_OBJECT(buttonControl->widget), "clicked",
-	                 G_CALLBACK(buttonClick), buttonControl);
+	wlibAddButtonToToolbar(buttonControl, helpStr);
 
 	return buttonControl;
 }
 
 
+/**
+ * Wrap an existing button as a split button.
+ * Creates a container with the button and a dropdown arrow.
+ */
+void wButtonMakeSplit(wControl_p button, wMenu_p popupMenu)
+{
+	GtkWidget* splitContainer;
+	GtkWidget* dropdownButton;
+	GtkWidget* arrow;
+	GtkWidget* originalButton;
+
+	if (!button || !button->widget) {
+		fprintf(stderr, "ERROR: wButtonMakeSplit called with invalid button\n");
+		return;
+	}
+
+	originalButton = button->widget;
+
+	// Create horizontal box container
+	splitContainer = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_widget_set_name(splitContainer, "split-button-container");
+
+	// Create dropdown button with arrow
+	dropdownButton = gtk_button_new();
+	arrow = gtk_image_new_from_icon_name("pan-down-symbolic", GTK_ICON_SIZE_BUTTON);
+	gtk_button_set_image(GTK_BUTTON(dropdownButton), arrow);
+	gtk_button_set_relief(GTK_BUTTON(dropdownButton), GTK_RELIEF_NORMAL);
+	gtk_widget_set_can_focus(dropdownButton, FALSE);
+
+	// Add style class to dropdown for CSS targeting
+	GtkStyleContext* ctx = gtk_widget_get_style_context(dropdownButton);
+	gtk_style_context_add_class(ctx, "split-dropdown");
+
+	// Remove button from its current parent (if any)
+	GtkWidget* parent = gtk_widget_get_parent(originalButton);
+	if (parent) {
+		g_object_ref(originalButton);  // Keep reference while reparenting
+		gtk_container_remove(GTK_CONTAINER(parent), originalButton);
+	}
+
+	// Pack both buttons into container
+	gtk_box_pack_start(GTK_BOX(splitContainer), originalButton, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(splitContainer), dropdownButton, FALSE, FALSE, 0);
+
+	if (parent) {
+		g_object_unref(originalButton);  // Release temporary reference
+		gtk_container_add(GTK_CONTAINER(parent), splitContainer);
+	}
+
+	// Apply linked style to make them look like one button
+	ctx = gtk_widget_get_style_context(splitContainer);
+	gtk_style_context_add_class(ctx, "linked");
+
+	// Apply CSS for compact dropdown
+	ApplySplitButtonStyle(splitContainer);
+
+	// Store references and metadata
+	g_object_set_data(G_OBJECT(splitContainer), "action-button", originalButton);
+	g_object_set_data(G_OBJECT(splitContainer), "dropdown-button", dropdownButton);
+	g_object_set_data(G_OBJECT(splitContainer), "is-split-button",
+	                  GINT_TO_POINTER(1));
+	g_object_set_data(G_OBJECT(splitContainer), "popup-menu", popupMenu);
+
+	// Store back-reference so we can find container from button
+	g_object_set_data(G_OBJECT(originalButton), "split-container", splitContainer);
+
+	// Connect dropdown signal
+	g_signal_connect(G_OBJECT(dropdownButton), "clicked",
+	                 G_CALLBACK(splitButtonDropdownClick), splitContainer);
+
+	// Set tooltip on dropdown
+	gtk_widget_set_tooltip_text(dropdownButton, _("More options"));
+
+	gtk_widget_show_all(splitContainer);
+
+	// Update the button control to point to the container
+	button->widget = splitContainer;
+
+}
+
+/**
+ * Check if a button is a split button.
+ */
+wBool_t wButtonIsSplitButton(wControl_p button)
+{
+	if (!button || !button->widget) {
+		return FALSE;
+	}
+
+	gpointer flag = g_object_get_data(G_OBJECT(button->widget), "is-split-button");
+	return (flag != NULL);
+}
+
+/**
+ * Update the command context for a button's action.
+ * This updates what gets passed to the button's callback function.
+ * Works with both regular and split buttons.
+ *
+ * @param button Button control
+ * @param context New context (typically command index via I2VP)
+ */
+void wButtonSetContext(wControl_p button, void* context)
+{
+	if (!button) {
+		return;
+	}
+
+	// Update the control's data field
+	button->context = context;
+
+	// Also update the button attributes if they exist
+	// struct button* buttonAttributes = CONTROL_GET_ATTRIBUTES_PTR(button, button);
+	// if (buttonAttributes) {
+	//     buttonAttributes->context = context;
+	// }
+}
+
+/**
+ * Update icon on a button (handles both regular and split buttons).
+ */
+void wButtonSetIcon(wControl_p button, wIcon_p icon)
+{
+	if (!button || !button->widget || !icon) {
+		return;
+	}
+
+	GtkWidget* targetButton;
+
+	// Get the actual button widget
+	if (wButtonIsSplitButton(button)) {
+		targetButton = GTK_WIDGET(
+		                       g_object_get_data(G_OBJECT(button->widget), "action-button"));
+	} else {
+		targetButton = button->widget;
+	}
+
+	if (!targetButton) {
+		return;
+	}
+
+	// Set icon
+	if (icon->bits) {
+		GtkWidget* image = gtk_image_new_from_pixbuf(icon->bits);
+		gtk_button_set_image(GTK_BUTTON(targetButton), image);
+		gtk_button_set_always_show_image(GTK_BUTTON(targetButton), TRUE);
+	}
+}
+
+/**
+ * Set the popup menu for a split button's dropdown.
+ */
+void wButtonSetDropdownMenu(wControl_p button, wMenu_p menu)
+{
+	if (!button || !button->widget) {
+		return;
+	}
+
+	if (!wButtonIsSplitButton(button)) {
+		fprintf(stderr, "WARNING: Trying to set dropdown menu on non-split button\n");
+		return;
+	}
+
+	g_object_set_data(G_OBJECT(button->widget), "popup-menu", menu);
+}
 
 
+/**
+ * Handle dropdown button click - show popup menu.
+ */
+static void splitButtonDropdownClick(GtkWidget* widget, gpointer data)
+{
+	GtkWidget* splitContainer = GTK_WIDGET(data);
+
+	if (!splitContainer) {
+		return;
+	}
+
+	wMenu_p popupMenu = (wMenu_p)g_object_get_data(
+	                            G_OBJECT(splitContainer), "popup-menu");
+
+	if (popupMenu && popupMenu->widget) {
+		gtk_menu_popup_at_widget(GTK_MENU(popupMenu->widget),
+		                         widget,
+		                         GDK_GRAVITY_SOUTH_WEST,
+		                         GDK_GRAVITY_NORTH_WEST,
+		                         NULL);
+	}
+}
 
 
+static void ApplySplitButtonStyle(GtkWidget* splitButton)
+{
+	static GtkCssProvider* cssProvider = NULL;
+	static gboolean css_loaded = FALSE;
 
+	if (!css_loaded) {
+		cssProvider = gtk_css_provider_new();
 
+		// Try to load from embedded resource first (void function, no return value)
+		gtk_css_provider_load_from_resource(cssProvider,
+		                                    XTRKCAD_RESOURCE_PATH "xtrkcad.css");
+
+		// If resource loading failed, it will have triggered a warning
+		// but we can't check it directly. Try file fallback.
+		// Alternatively, just use the resource and assume it exists if properly compiled.
+
+		css_loaded = TRUE;
+	}
+
+	if (cssProvider) {
+		GtkStyleContext* context = gtk_widget_get_style_context(splitButton);
+		gtk_style_context_add_provider(context,
+		                               GTK_STYLE_PROVIDER(cssProvider),
+		                               GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+	}
+}
