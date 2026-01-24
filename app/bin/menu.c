@@ -68,7 +68,7 @@ EXPORT wMenuToggle_p snapGridShowMI;
 
 static int cmdGroup;
 static void HandleCmdGroupChange(int currentGroup);
-
+static wMenu_p buttonGroupPopupM = NULL;
 /*--------------------------------------------------------------------*/
 typedef struct {
 	char * label;
@@ -264,7 +264,7 @@ static void RotateEnterOk(void * unused)
 {
 	FormFetchData(&rotatePG);
 	if ( rotateValue != 0.0 ) {
-					rotateDialogCallBack(I2VP(rotateValue * 1000));
+		rotateDialogCallBack(I2VP(rotateValue * 1000));
 	}
 	wHide(rotateW);
 }
@@ -322,7 +322,7 @@ static void ChkRevert(void * unused)
 		int rc;
 		rc = wNoticeWithIcon(NT_WARNING,
 		                     _("Do you want to return to the last saved state?\n\n"
-		                       "Revert will cause all changes done since last save to be lost."),
+		  "Revert will cause all changes done since last save to be lost."),
 		                     _("&Revert"), _("&Cancel"));
 		if (rc) {
 			/* load the file */
@@ -449,8 +449,10 @@ static paramData_t debugPLs[30];
 static paramData_t p0[] = {
 	{ PD_BUTTON, TestMallocs, "test", PDO_DLGHORZ, NULL, N_("Test Mallocs") }
 };
-static long debug_values[30];
-static int debug_index[30];
+
+#define MAX_ACTIVE_LOGS	30
+static long debug_values[MAX_ACTIVE_LOGS];
+static int debug_index[MAX_ACTIVE_LOGS];
 
 static paramGroup_t debugPG = { "debug", 0, debugPLs, 0 };
 
@@ -492,8 +494,8 @@ static void DebugInit(void * unused)
 		BOOL_T default_line = FALSE;
 		debugCnt = 0;    //Reset to start building the dynamic dialog over again
 		int i = 0;
-		for ( int inx=0; inx<logTable_da.cnt; inx++ ) {
-			if (logTable(inx).name[0]) {
+		for ( int inx=0; inx<logTable_da.cnt && inx < MAX_ACTIVE_LOGS; inx++ ) {
+			if (logTable(inx).name[0] ) {
 				debug_values[i] = logTable(inx).level;
 				debug_index[i] = inx;
 				InitDebug(logTable(inx).name,&debug_values[i]);
@@ -576,7 +578,7 @@ static void ShowMessageHelp(int index, const char * label, void * data)
 	}
 	cp = strchr(msgSrc, '\t');
 	if (cp == NULL) {
-		sprintf(msgKey, _("No help for %s"), msgSrc);
+		snprintf(msgKey, STR_SIZE, _("No help for %s"), msgSrc);
 		wNoticeWithIcon( NT_INFORMATION, msgKey, _("Ok"), NULL);
 		return;
 	}
@@ -612,15 +614,15 @@ EXPORT const char * GetBalloonHelpStr(const char * helpKey)
 	wTooltip_t * bh;
 #ifdef CHECK_UNUSED_BALLOONHELP
 	if ( balloonHelpCnts == NULL ) {
-		for ( bh=balloonHelp; bh->name; bh++ );
-		balloonHelpCnts = (int*)malloc( (sizeof *(int*)0) * (bh-balloonHelp) );
-		memset( balloonHelpCnts, 0, (sizeof *(int*)0) * (bh-balloonHelp) );
+		for ( bh=tooltipTexts; bh->name; bh++ );
+		balloonHelpCnts = (int*)malloc( (sizeof *(int*)0) * (bh-tooltipTexts) );
+		memset( balloonHelpCnts, 0, (sizeof *(int*)0) * (bh-tooltipTexts) );
 	}
 #endif
 	for (bh = tooltipTexts; bh->name; bh++) {
 		if (strcmp(bh->name, helpKey) == 0) {
 #ifdef CHECK_UNUSED_BALLOONHELP
-			balloonHelpCnts[(bh-balloonHelp)]++;
+			balloonHelpCnts[(bh-tooltipTexts)]++;
 #endif
 			return _(bh->value);
 		}
@@ -635,9 +637,9 @@ EXPORT const char * GetBalloonHelpStr(const char * helpKey)
 static void ShowUnusedBalloonHelp( void )
 {
 	int cnt;
-	for ( cnt=0; balloonHelp[cnt].name; cnt++ )
+	for ( cnt=0; tooltipTexts[cnt].name; cnt++ )
 		if ( balloonHelpCnts[cnt] == 0 ) {
-			fprintf( stderr, "unused BH %s\n", balloonHelp[cnt].name );
+			fprintf( stderr, "unused BH %s\n", tooltipTexts[cnt].name );
 		}
 }
 #endif
@@ -673,18 +675,15 @@ wControl_p AddToolbarButton(const char* helpStr, wIcon_p icon, long options,
 
 	HandleCmdGroupChange(cmdGroup);
 
-	if (options & IC_TOGGLE ) {
+	if (options & IC_TOGGLE) {
 		bb = wToggleCreateForToolbar(mainW, 0, 0, helpStr, icon,
 		                             opt | BO_ICON, 0, action, context);
+	} else if (options & IC_STICKY) {
+		bb = wStickyCreateForToolbar(mainW, 0, 0, helpStr, icon,
+		                             opt | BO_ICON, 0, action, context);
 	} else {
-		if (options & IC_STICKY) {
-			bb = wStickyCreateForToolbar(mainW, 0, 0, helpStr, icon,
-				opt | BO_ICON, 0, action, context);
-		}
-		else {
-			bb = wButtonCreateForToolbar(mainW, 0, 0, helpStr, icon,
-				opt | BO_ICON, 0, action, context);
-		}
+		bb = wButtonCreateForToolbar(mainW, 0, 0, helpStr, icon,
+		                             opt | BO_ICON, 0, action, context);
 	}
 
 	ToolbarControlAdd(bb, options, cmdGroup);
@@ -715,19 +714,19 @@ wControl_p AddToolbarButton(const char* helpStr, wIcon_p icon, long options,
 static const char *buttonGroupMenuTitle = NULL;
 static const char *buttonGroupHelpKey = NULL;
 static const char *buttonGroupStickyLabel = NULL;
-static wMenu_p buttonGroupPopupM = NULL;
+
 
 // Sticky button tracking
 static int stickyCnt = 0;
 
 // Static menu state for button groups
-static wIcon_p openbuttIcon = NULL;
 static wMenu_p commandsSubmenu = NULL;
 static wMenu_p popup1Submenu = NULL;
 static wMenu_p popup2Submenu = NULL;
 
 // Track previous cmdGroup to detect changes
 static int prevCmdGroup = -1;
+static wControl_p currentSplitButton = NULL;  // Track active split button
 
 /*****************************************************************************
  *
@@ -744,36 +743,20 @@ static int prevCmdGroup = -1;
  */
 static void GetPopupMenus(long options, wMenu_p *p1m, wMenu_p *p2m)
 {
-    if (!p1m || !p2m) {
-        return;
-    }
+	if (!p1m || !p2m) {
+		return;
+	}
 
-    if (options & IC_POPUP2) {
-        *p1m = popup1aM;
-        *p2m = popup2aM;
-    } else if (options & IC_POPUP3) {
-        *p1m = popup1mM;
-        *p2m = popup2mM;
-    } else {
-        *p1m = popup1M;
-        *p2m = popup2M;
-    }
-}
-
-/**
- * Create the dropdown icon for button groups if needed.
- *
- * \return Icon pointer, or NULL on failure
- */
-static wIcon_p GetOrCreateDropdownIcon(void)
-{
-    if (openbuttIcon == NULL) {
-        openbuttIcon = CreateToolbarIconFromResource("down.png");
-        if (openbuttIcon == NULL) {
-            fprintf(stderr, "ERROR: Failed to create dropdown icon\n");
-        }
-    }
-    return openbuttIcon;
+	if (options & IC_POPUP2) {
+		*p1m = popup1aM;
+		*p2m = popup2aM;
+	} else if (options & IC_POPUP3) {
+		*p1m = popup1mM;
+		*p2m = popup2mM;
+	} else {
+		*p1m = popup1M;
+		*p2m = popup2M;
+	}
 }
 
 /**
@@ -785,82 +768,41 @@ static wIcon_p GetOrCreateDropdownIcon(void)
  */
 static wBool_t CreateButtonGroupSubmenus(wMenu_p menu, long options)
 {
-    if (!menu || !buttonGroupMenuTitle) {
-        return FALSE;
-    }
+	if (!menu || !buttonGroupMenuTitle) {
+		return FALSE;
+	}
 
-    // Create main commands submenu
-    commandsSubmenu = wMenuMenuCreate(menu, "", buttonGroupMenuTitle);
-    if (!commandsSubmenu) {
-        fprintf(stderr, "ERROR: Failed to create commands submenu\n");
-        return FALSE;
-    }
+	// Create main commands submenu
+	commandsSubmenu = wMenuMenuCreate(menu, "", buttonGroupMenuTitle);
+	if (!commandsSubmenu) {
+		fprintf(stderr, "ERROR: Failed to create commands submenu\n");
+		return FALSE;
+	}
 
-    // Determine which popup menus to use
-    wMenu_p popup1Parent, popup2Parent;
-    
-    if (options & IC_POPUP2) {
-        popup1Parent = popup1aM;
-        popup2Parent = popup2aM;
-    } else if (options & IC_POPUP3) {
-        popup1Parent = popup1mM;
-        popup2Parent = popup2mM;
-    } else {
-        popup1Parent = popup1M;
-        popup2Parent = popup2M;
-    }
+	// Determine which popup menus to use
+	wMenu_p popup1Parent, popup2Parent;
 
-    // Create popup submenus
-    popup1Submenu = wMenuMenuCreate(popup1Parent, "", buttonGroupMenuTitle);
-    popup2Submenu = wMenuMenuCreate(popup2Parent, "", buttonGroupMenuTitle);
+	if (options & IC_POPUP2) {
+		popup1Parent = popup1aM;
+		popup2Parent = popup2aM;
+	} else if (options & IC_POPUP3) {
+		popup1Parent = popup1mM;
+		popup2Parent = popup2mM;
+	} else {
+		popup1Parent = popup1M;
+		popup2Parent = popup2M;
+	}
 
-    if (!popup1Submenu || !popup2Submenu) {
-        fprintf(stderr, "ERROR: Failed to create popup submenus\n");
-        return FALSE;
-    }
+	// Create popup submenus
+	popup1Submenu = wMenuMenuCreate(popup1Parent, "", buttonGroupMenuTitle);
+	popup2Submenu = wMenuMenuCreate(popup2Parent, "", buttonGroupMenuTitle);
 
-    return TRUE;
-}
+	if (!popup1Submenu || !popup2Submenu) {
+		fprintf(stderr, "ERROR: Failed to create popup submenus\n");
+		return FALSE;
+	}
 
-/**
- * Initialize a new button group with popup menu and toolbar button.
- * This is called when we have a button group title but no popup menu yet.
- *
- * \param menu Main menu
- * \param options Option flags
- * \return TRUE if new button group was created, FALSE otherwise
- */
-static wBool_t InitializeButtonGroup(wMenu_p menu, long options)
-{
-    // Only initialize if we have a title but no popup yet
-    if (buttonGroupMenuTitle == NULL || buttonGroupPopupM != NULL) {
-        return FALSE;
-    }
-
-    // Get or create the dropdown icon
-    wIcon_p icon = GetOrCreateDropdownIcon();
-    if (!icon) {
-        return FALSE;
-    }
-
-    // Create the popup menu
-    buttonGroupPopupM = wMenuPopupCreate(mainW, buttonGroupMenuTitle);
-    if (!buttonGroupPopupM) {
-        fprintf(stderr, "ERROR: Failed to create button group popup menu\n");
-        return FALSE;
-    }
-
-    // Add dropdown toolbar button AFTER the icon button, using IC_ABUT
-    // This makes it appear adjacent to the icon button
-    AddToolbarButton(buttonGroupHelpKey, icon, IC_ABUT,
-                     (wButtonCallBack_p)wMenuPopupShow, buttonGroupPopupM);
-
-    // Create the submenus
-    if (!CreateButtonGroupSubmenus(menu, options)) {
-        return FALSE;
-    }
-
-    return TRUE;
+	return TRUE;
 }
 
 /**
@@ -875,55 +817,68 @@ static wBool_t InitializeButtonGroup(wMenu_p menu, long options)
 static long SetupStickyBehavior(long options, wBool_t newButtonGroup,
                                 const char *nameStr, int *stickyIndexOut)
 {
-    // Not a sticky button
-    if (!(options & IC_STICKY)) {
-        return 0;
-    }
+	// Not a sticky button
+	if (!(options & IC_STICKY)) {
+		return 0;
+	}
 
-    int stickyIndex;
+	int stickyIndex;
 
-    // Check if we need to start a new sticky group
-    if (buttonGroupPopupM == NULL || newButtonGroup) {
-        // Validate we haven't exceeded maximum groups
-        if (stickyCnt >= MAX_STICKY_GROUPS) {
-            fprintf(stderr, "ERROR: Exceeded maximum sticky groups (%d)\n",
-                    MAX_STICKY_GROUPS);
-            return 0;
-        }
+	// Check if we need to start a new sticky group
+	if (buttonGroupPopupM == NULL || newButtonGroup) {
+		// Validate we haven't exceeded maximum groups
+		if (stickyCnt >= MAX_STICKY_GROUPS) {
+			fprintf(stderr, "ERROR: Exceeded maximum sticky groups (%d)\n",
+			        MAX_STICKY_GROUPS);
+			return 0;
+		}
 
-        // Allocate new sticky group
-        stickyIndex = stickyCnt;
-        stickyCnt++;
-    } else {
-        // Use existing sticky group
-        stickyIndex = stickyCnt - 1;
-    }
+		// Allocate new sticky group
+		stickyIndex = stickyCnt;
+		stickyCnt++;
+	} else {
+		// Use existing sticky group
+		stickyIndex = stickyCnt - 1;
+	}
 
-    // Set the label for this sticky group
-    // Use group label if in a button group, otherwise use button name
-    if (buttonGroupPopupM != NULL && buttonGroupStickyLabel != NULL) {
-        stickyLabels[stickyIndex] = buttonGroupStickyLabel;
-    } else if (nameStr) {
-        stickyLabels[stickyIndex] = nameStr;
-    } else {
-        stickyLabels[stickyIndex] = "Unknown";
-    }
+	// Set the label for this sticky group
+	// Use group label if in a button group, otherwise use button name
+	if (buttonGroupPopupM != NULL && buttonGroupStickyLabel != NULL) {
+		stickyLabels[stickyIndex] = buttonGroupStickyLabel;
+	} else if (nameStr) {
+		stickyLabels[stickyIndex] = nameStr;
+	} else {
+		stickyLabels[stickyIndex] = "Unknown";
+	}
 
-    // Calculate sticky mask
-    long stickyMask = 1L << stickyIndex;
+	// Calculate sticky mask
+	long stickyMask = 1L << stickyIndex;
 
-    // Set initial sticky state (default is sticky unless IC_INITNOTSTICKY)
-    if ((options & IC_INITNOTSTICKY) == 0) {
-        stickySet |= stickyMask;
-    }
+	// Set initial sticky state (default is sticky unless IC_INITNOTSTICKY)
+	if ((options & IC_INITNOTSTICKY) == 0) {
+		stickySet |= stickyMask;
+	}
 
-    if (stickyIndexOut) {
-        *stickyIndexOut = stickyIndex;
-    }
+	if (stickyIndexOut) {
+		*stickyIndexOut = stickyIndex;
+	}
 
-    return stickyMask;
+	return stickyMask;
 }
 
+
+/**
+ * Check if a dropdown menu will be needed for this button.
+ * This is used to determine if a split button should be created.
+ *
+ * \return TRUE if this button will trigger creation of a dropdown menu
+ */
+
+static wBool_t WillNeedDropdown(void)
+{
+	// Dropdown is needed if we're about to start a new button group
+	return (buttonGroupMenuTitle != NULL && buttonGroupPopupM == NULL);
+}
 
 /**
  * Add a gap after the previous command group using a separator.
@@ -933,20 +888,20 @@ static long SetupStickyBehavior(long options, wBool_t newButtonGroup,
  */
 static void AddGapAfterGroup(int prevGroup)
 {
-    if (prevGroup < 0) {
-        return;  // No previous group
-    }
-    
-    // Determine gap width based on previous group's flags
-    int width = (prevGroup & BG_BIGGAP) ? 16 : 8;
-    
-    // Create invisible separator
-    wControl_p separator = wSeparatorCreateForToolbar(mainW, width);
-    
-    if (separator) {
-        long option = (prevGroup & BG_BIGGAP) ? BO_BIGGAP : BO_GAP;
-        ToolbarControlAdd(separator, option, prevGroup);
-    }
+	if (prevGroup < 0) {
+		return;  // No previous group
+	}
+
+	// Determine gap width based on previous group's flags
+	int width = (prevGroup & BG_BIGGAP) ? 16 : 8;
+
+	// Create invisible separator
+	wControl_p separator = wSeparatorCreateForToolbar(mainW, width);
+
+	if (separator) {
+		long option = (prevGroup & BG_BIGGAP) ? BO_BIGGAP : BO_GAP;
+		ToolbarControlAdd(separator, option, prevGroup);
+	}
 }
 
 /**
@@ -957,14 +912,14 @@ static void AddGapAfterGroup(int prevGroup)
  */
 static void HandleCmdGroupChange(int currentGroup)
 {
-    // Check if this is a new command group
-    if (prevCmdGroup >= 0 && prevCmdGroup != currentGroup) {
-        // cmdGroup changed - add gap after previous group
-        AddGapAfterGroup(prevCmdGroup);
-    }
-    
-    // Update tracked cmdGroup
-    prevCmdGroup = currentGroup;
+	// Check if this is a new command group
+	if (prevCmdGroup >= 0 && prevCmdGroup != currentGroup) {
+		// cmdGroup changed - add gap after previous group
+		AddGapAfterGroup(prevCmdGroup);
+	}
+
+	// Update tracked cmdGroup
+	prevCmdGroup = currentGroup;
 }
 /*****************************************************************************
  *
@@ -973,181 +928,136 @@ static void HandleCmdGroupChange(int currentGroup)
  */
 
 /**
- * Add a menu button with associated toolbar button and menu entries.
- *
- * This function creates:
- * - A toolbar button (if icon provided)
- * - Menu entries in main menu and popup menus
- * - Button group popup if needed
- * - Sticky button tracking if requested
- *
- * \param menu Main menu to add entry to
- * \param command Command procedure to execute
- * \param helpKey Help key/identifier for the button
- * \param nameStr Display name for menu entries
- * \param icon Icon for toolbar button (NULL for no toolbar button)
- * \param reqLevel Required level for command
- * \param options Option flags (IC_STICKY, IC_POPUP, etc.)
- * \param acclKey Accelerator key
- * \param context Context data for command
- * \return Command index, or -1 on error
+ * Add a menu button with toolbar button and menu entries.
  */
 EXPORT wIndex_t AddMenuButton(wMenu_p menu, procCommand_t command,
                               const char *helpKey, const char *nameStr,
                               wIcon_p icon, int reqLevel, long options,
                               long acclKey, void *context)
 {
-    // Input validation
-    if (!menu) {
-        fprintf(stderr, "ERROR: AddMenuButton called with NULL menu\n");
-        return -1;
-    }
-    if (!helpKey) {
-        fprintf(stderr, "ERROR: AddMenuButton called with NULL helpKey\n");
-        return -1;
-    }
-    if (!nameStr) {
-        fprintf(stderr, "ERROR: AddMenuButton called with NULL nameStr\n");
-        return -1;
-    }
+	if (!menu || !helpKey || !nameStr) {
+		return -1;
+	}
+
+	// Handle command group changes
+	HandleCmdGroupChange(cmdGroup);
+
+	wIndex_t buttInx = -1;
+	wBool_t newButtonGroup = FALSE;
+	wBool_t useSplitButton;
+	long stickyMask = 0;
+	wControl_p cmdMenus[NUM_CMDMENUS] = {NULL, NULL, NULL, NULL};
 
 	// ========================================================================
-    // PHASE 0: Handle Command Group Changes
-    // ========================================================================
-    
-    // Check if cmdGroup has changed and add gap if needed
-    HandleCmdGroupChange(cmdGroup);
+	// Toolbar Button Creation
+	// ========================================================================
 
-    wIndex_t buttInx = -1;
-    wBool_t newButtonGroup = FALSE;
-    long stickyMask = 0;
-    int stickyIndex = -1;
-    wControl_p cmdMenus[NUM_CMDMENUS] = {NULL, NULL, NULL, NULL};
+	if (icon != NULL) {
+		if (buttonGroupPopupM != NULL) {
+			// Already in button group
+			if (currentSplitButton != NULL) {
+				// Split button already exists - keep its current icon (the first one)
+				// Don't update icon or context during group building
+				buttInx = buttonCnt - 1;
+			} else {
+				// Regular button group
+				if (buttonCnt < 2) {
+					return -1;
+				}
+				buttInx = buttonCnt - 2;
+			}
+		} else {
+			// Not in button group yet
+			useSplitButton = WillNeedDropdown();
 
-    // ========================================================================
-    // PHASE 1: Toolbar Button Creation
-    // ========================================================================
-    
-if (icon != NULL) {
-    // Check if we're already in a button group
-    if (buttonGroupPopupM != NULL) {
-        // Already in button group - button was created earlier
-        // Validate buttonCnt is sufficient
-        if (buttonCnt < 2) {
-            fprintf(stderr, "ERROR: buttonCnt (%d) too small for button group\n",
-                    buttonCnt);
-            return -1;
-        }
-        buttInx = buttonCnt - 2;
-    } else {
-        // Not in a button group yet
-        // Create the icon button first
-        buttInx = buttonCnt;
-        AddToolbarButton(helpKey, icon, options, DoCommandB, I2VP(commandCnt));
-        
-        // Now check if we should start a button group
-        // This happens AFTER creating the icon button
-        if (buttonGroupMenuTitle != NULL) {
-            newButtonGroup = InitializeButtonGroup(menu, options);
-            // After creating button group, the dropdown arrow is now at buttonCnt
-            // and our icon button is at buttonCnt - 1, but buttInx is already
-            // set correctly to the old buttonCnt value
-        }
-    }
-}
+			if (useSplitButton) {
+				// Create popup menu first
+				buttonGroupPopupM = wMenuPopupCreate(mainW, buttonGroupMenuTitle);
+				if (!buttonGroupPopupM) {
+					return -1;
+				}
 
-    // ========================================================================
-    // PHASE 2: Sticky Button Setup
-    // ========================================================================
-    
-    if (nameStr[0] != '\0') {
-        stickyMask = SetupStickyBehavior(options, newButtonGroup, nameStr,
-                                        &stickyIndex);
-    }
+				// Create button using existing function
+				buttInx = buttonCnt;
+				wControl_p button = AddToolbarButton(helpKey, icon, options,
+				                                     DoCommandB, I2VP(commandCnt));
 
-    // ========================================================================
-    // PHASE 3: Menu Entry Creation
-    // ========================================================================
-    
-    if (nameStr[0] != '\0') {
-        wMenu_p targetMenu;
+				if (button) {
+					// Wrap it as a split button (modifies button in place)
+					wButtonMakeSplit(button, buttonGroupPopupM);
+					currentSplitButton = button;
+				}
 
-        // Determine target menu for main entry
-        if (buttonGroupPopupM != NULL && commandsSubmenu != NULL) {
-            targetMenu = commandsSubmenu;
-        } else {
-            targetMenu = menu;
-        }
+				newButtonGroup = TRUE;
+				CreateButtonGroupSubmenus(menu, options);
+			} else {
+				// Create regular button
+				buttInx = buttonCnt;
+				AddToolbarButton(helpKey, icon, options, DoCommandB, I2VP(commandCnt));
+			}
+		}
+	}
 
-        // Create main menu entry
-        cmdMenus[MENU_MAIN] = wMenuPushCreate(
-            targetMenu,
-            helpKey,
-            nameStr,
-            acclKey,
-            DoCommandB,
-            I2VP(commandCnt));
+	// ========================================================================
+	// Sticky Button Setup
+	// ========================================================================
 
-        // Create button group popup entry if applicable
-        if (buttonGroupPopupM != NULL) {
-            cmdMenus[MENU_BUTTONGROUP] = wMenuPushCreate(
-                buttonGroupPopupM,
-                helpKey,
-                GetBalloonHelpStr(helpKey),
-                0,
-                DoCommandB,
-                I2VP(commandCnt));
-        }
+	if (nameStr[0] != '\0') {
+		int stickyIndex;
+		stickyMask = SetupStickyBehavior(options, newButtonGroup, nameStr,
+		                                 &stickyIndex);
+	}
 
-        // Create popup menu entries if requested
-        if (options & (IC_POPUP | IC_POPUP2 | IC_POPUP3)) {
-            wMenu_p popup1Menu, popup2Menu;
+	// ========================================================================
+	// Menu Entry Creation
+	// ========================================================================
 
-            // Get appropriate popup menus
-            if (buttonGroupPopupM != NULL) {
-                popup1Menu = popup1Submenu;
-                popup2Menu = popup2Submenu;
-            } else {
-                GetPopupMenus(options, &popup1Menu, &popup2Menu);
-            }
+	if (nameStr[0] != '\0') {
+		wMenu_p targetMenu = (buttonGroupPopupM && commandsSubmenu) ?
+		                     commandsSubmenu : menu;
 
-            // Create first popup entry (unless IC_SELECTED flag is set)
-            if (!(options & IC_SELECTED) && popup1Menu != NULL) {
-                cmdMenus[MENU_POPUP1] = wMenuPushCreate(
-                    popup1Menu,
-                    helpKey,
-                    nameStr,
-                    0,
-                    DoCommandB,
-                    I2VP(commandCnt));
-            }
+		cmdMenus[MENU_MAIN] = wMenuPushCreate(targetMenu, helpKey, nameStr,
+		                                      acclKey, DoCommandB, I2VP(commandCnt));
 
-            // Create second popup entry
-            if (popup2Menu != NULL) {
-                cmdMenus[MENU_POPUP2] = wMenuPushCreate(
-                    popup2Menu,
-                    helpKey,
-                    nameStr,
-                    0,
-                    DoCommandB,
-                    I2VP(commandCnt));
-            }
-        }
-    }
+		if (buttonGroupPopupM) {
+			cmdMenus[MENU_BUTTONGROUP] = wMenuPushCreate(
+			                                     buttonGroupPopupM, helpKey, GetBalloonHelpStr(helpKey),
+			                                     0, DoCommandB, I2VP(commandCnt));
+		}
 
-    // ========================================================================
-    // PHASE 4: Command Registration
-    // ========================================================================
-    
-    wIndex_t cmdInx = AddCommand(command, helpKey, nameStr, icon, reqLevel,
-                                  options, acclKey, buttInx, stickyMask,
-                                  cmdMenus, context);
+		if (options & (IC_POPUP | IC_POPUP2 | IC_POPUP3)) {
+			wMenu_p popup1Menu, popup2Menu;
 
-    if (cmdInx < 0) {
-        fprintf(stderr, "ERROR: AddCommand failed for %s\n", helpKey);
-    }
+			if (buttonGroupPopupM) {
+				popup1Menu = popup1Submenu;
+				popup2Menu = popup2Submenu;
+			} else {
+				GetPopupMenus(options, &popup1Menu, &popup2Menu);
+			}
 
-    return cmdInx;
+			if (!(options & IC_SELECTED) && popup1Menu) {
+				cmdMenus[MENU_POPUP1] = wMenuPushCreate(popup1Menu, helpKey,
+				                                        nameStr, 0, DoCommandB,
+				                                        I2VP(commandCnt));
+			}
+
+			if (popup2Menu) {
+				cmdMenus[MENU_POPUP2] = wMenuPushCreate(popup2Menu, helpKey,
+				                                        nameStr, 0, DoCommandB,
+				                                        I2VP(commandCnt));
+			}
+		}
+	}
+
+	// ========================================================================
+	// Command Registration
+	// ========================================================================
+
+	wIndex_t cmdInx = AddCommand(command, helpKey, nameStr, icon, reqLevel,
+	                             options, acclKey, buttInx, stickyMask,
+	                             cmdMenus, context);
+
+	return cmdInx;
 }
 
 /*****************************************************************************
@@ -1160,22 +1070,23 @@ if (icon != NULL) {
  * Begin a new button group.
  * Subsequent AddMenuButton calls will be grouped under a dropdown menu.
  *
- * \param menuTitle Title for the button group menu
- * \param helpKey Help key for the group
- * \param stickyLabel Label for sticky button behavior
+ * @param menuTitle Title for the button group menu
+ * @param helpKey Help key for the group
+ * @param stickyLabel Label for sticky button behavior
  */
 EXPORT void ButtonGroupBegin(const char *menuTitle, const char *helpKey,
                              const char *stickyLabel)
 {
-    buttonGroupMenuTitle = menuTitle;
-    buttonGroupHelpKey = helpKey;
-    buttonGroupStickyLabel = stickyLabel;
-    buttonGroupPopupM = NULL;
-    
-    // Reset submenu pointers for new group
-    commandsSubmenu = NULL;
-    popup1Submenu = NULL;
-    popup2Submenu = NULL;
+	buttonGroupMenuTitle = menuTitle;
+	buttonGroupHelpKey = helpKey;
+	buttonGroupStickyLabel = stickyLabel;
+	buttonGroupPopupM = NULL;
+	currentSplitButton = NULL;
+
+	// Reset submenu pointers for new group
+	commandsSubmenu = NULL;
+	popup1Submenu = NULL;
+	popup2Submenu = NULL;
 }
 
 /**
@@ -1184,10 +1095,10 @@ EXPORT void ButtonGroupBegin(const char *menuTitle, const char *helpKey,
  */
 EXPORT void ButtonGroupEnd(void)
 {
-    buttonGroupMenuTitle = NULL;
-    buttonGroupHelpKey = NULL;
-    buttonGroupStickyLabel = NULL;
-    buttonGroupPopupM = NULL;
+	buttonGroupMenuTitle = NULL;
+	buttonGroupHelpKey = NULL;
+	buttonGroupStickyLabel = NULL;
+	buttonGroupPopupM = NULL;
 }
 
 /**  these seem to be menu entries that will be  used by demo playback */
@@ -1350,9 +1261,11 @@ EXPORT void CreateMenus(void)
 	wMenuPushCreate(fileM, "load", _("_Open ..."), ACCL_OPEN,
 	                ChkLoad, NULL);
 
-	wMenu_p recentuseMenu = wMenuMenuCreate(fileM, "menuRecentlyUsedFiles", _("Recent files"));
-	fileList_ml = wMenuListCreate(recentuseMenu, "fileListMenu", NEWEST_TOP, NUM_FILELIST,
-		ChkFileList);	
+	wMenu_p recentuseMenu = wMenuMenuCreate(fileM, "menuRecentlyUsedFiles",
+	                                        _("Recent files"));
+	fileList_ml = wMenuListCreate(recentuseMenu, "fileListMenu", NEWEST_TOP,
+	                              NUM_FILELIST,
+	                              ChkFileList);
 
 	wMenuSeparatorCreate(fileM);
 
@@ -1556,7 +1469,7 @@ EXPORT void CreateMenus(void)
 	                              0, magneticSnap,
 	                              MagneticSnapToggle, NULL);
 
-	
+
 	mapShowMI = wMenuToggleCreate(viewM, "cmdMapShow", _("Show/Hide Map"),
 	                              ACCL_MAPSHOW, MapGetVisiblePref(),
 	                              MapWindowToggleShow, NULL);
@@ -1713,7 +1626,8 @@ EXPORT void CreateMenus(void)
 
 #define MAX_ENTRIES_IN_WINDOWLIST 25
 
-	winList_mi = wMenuListCreate(windowM, "menuWindow", NEWEST_TOP, MAX_ENTRIES_IN_WINDOWLIST,
+	winList_mi = wMenuListCreate(windowM, "menuWindow", NEWEST_TOP,
+	                             MAX_ENTRIES_IN_WINDOWLIST,
 	                             DoShowWindow);
 	wMenuListAdd(winList_mi, 0, _("Main window"), mainW);
 
@@ -1837,7 +1751,7 @@ static void InitCmdExport(void)
 	                 DoImportModule, I2VP(1));
 	AddToolbarButton("cmdImportDxf",
 	                 CreateToolbarIconFromResource("doc-import-dxf.png"), IC_ACCLKEY,
-	                 DoImportDxf, I2VP(1));					 
+	                 DoImportDxf, I2VP(1));
 	ButtonGroupEnd();
 
 	FormRegister( &menuPG );

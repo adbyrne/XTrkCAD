@@ -21,29 +21,32 @@ entry.statusbar {
     font-size: 140% 
 }
 
-.toolbar-button,
-.toolbar-button-arrow {
-    min-width: 24px;
-    min-height: 24px;
+.toolbar-button {
     padding: 2px;
     padding-left: 4px;
     padding-right: 4px;
-    border-radius: 4px;
     margin: 0px;
     margin-top: 4px;
     margin-bottom: 4px;
 }
 
-.toolbar-button:hover, 
-.toolbar-button-arrow:hover {
+.toolbar-button:hover {
     background: lightblue;
     border-style:solid;
     border-color:blue;
 }
 
-.toolbar-button-arrow {
-    padding: 0px;
-    min-width: 4px;
+.split-dropdown {
+    min-width: 12px;
+    padding-left: 2px;
+    padding-right: 2px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.split-dropdown image {
+    min-width: 8px;
+    min-height: 8px;
 }
 
 .toolbar-separator {
