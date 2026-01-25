@@ -1421,7 +1421,7 @@ static void DoDemoButton( void * command )
 	case 4:
 		playbackNonStop = ! playbackNonStop;
 		wBool_t bActive = wControlGetActive( demoAutoPlay );
-		printf( "playbakNonStop = %d bActive = %d\n", playbackNonStop, bActive );
+		LOG( log_playback, 2, ( "playbakNonStop = %d bActive = %d\n", playbackNonStop, bActive ) );
 		break;
 	default:
 		;
@@ -1708,10 +1708,11 @@ static void ParamPlayback( char * line )
 	wAction_t a;
 	coOrd pos;
 	char * valS;
-
+#define DESCRIBEHACK
 #ifdef DESCRIBEHACK
 	// TODO Remove once describe is implemented
-	if ( strncmp( line, "describe cancel", 15 ) == 0 ) {
+	if ( strncmp( line, "describe ", 9 ) == 0 ) {
+		printf( "DESCRIBEHACK: %s\n", line );
 		return;
 	}
 #endif

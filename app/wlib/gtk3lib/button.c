@@ -42,6 +42,8 @@ static void buttonClick(GtkWidget* widget, gpointer value);
 static void splitButtonDropdownClick(GtkWidget* widget, gpointer data);
 static void ApplySplitButtonStyle(GtkWidget* splitButton);
 
+int wlibRecursionTrace = 0;
+
 /*
  *****************************************************************************
  *
@@ -156,7 +158,7 @@ void wlibButtonDoAction(
         wControl_p bb)
 {
 	if ( bb->attributes.button.recursion ) {
-		printf( "Recurse: wlibButtonDoAction\n" );
+		if ( wlibRecursionTrace ) printf( "Recurse: wlibButtonDoAction\n" );
 		return;
 	}
 	if (bb->attributes.button.action) {
@@ -178,7 +180,7 @@ static void buttonClick(
 {
 	struct button* b = CONTROL_GET_ATTRIBUTES_PTR(((wControl_p)value), button);
 	if ( b->recursion ) {
-		printf( "Recursion: buttonClick\n" );
+		if ( wlibRecursionTrace ) printf( "Recursion: buttonClick\n" );
 		return;
 	}
 

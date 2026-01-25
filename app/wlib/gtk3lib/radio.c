@@ -133,6 +133,7 @@ static int radioChoice(
 	if (ISACTIVEBUTTON(activeIndex)) {
 		struct radio* rcontrol = CONTROL_GET_ATTRIBUTES_PTR(bc, radio);
 		if ( rcontrol->recursion ) {
+			if ( wlibRecursionTrace ) printf( "Recurse: wlibButtonDoAction\n" );
 			return 1;
 		}
 		if (rcontrol->valueP) {

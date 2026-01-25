@@ -47,6 +47,7 @@
 
 extern wWin_p gtkMainW;
 
+extern int wlibRecursionTrace;
 
 #ifdef CURSOR_SURFACE
 typedef struct {
