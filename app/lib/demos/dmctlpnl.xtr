@@ -153,10 +153,10 @@ To create a 1/4" line, enter 0.250 in the "Straight Line Width" box at the botto
 END
 STEP
 COMMAND DrawLine
-PARAMETER draw linewidth 0
-PARAMETER draw linecolor 0
+PARAMETER linestyle linewidth 0
+PARAMETER linestyle linecolor 0
 PARAMETER GROUP draw
-PARAMETER draw linewidth 0.250
+PARAMETER linestyle linewidth 0.250
 STEP
 KEYSTATE 2
 MOUSE 2 1.000 6.000

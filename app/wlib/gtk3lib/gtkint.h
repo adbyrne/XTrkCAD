@@ -47,6 +47,7 @@
 
 extern wWin_p gtkMainW;
 
+extern int wlibRecursionTrace;
 
 #ifdef CURSOR_SURFACE
 typedef struct {
@@ -115,13 +116,14 @@ struct button {
 	wBool_t is_pressed;
 	guint timeout_id;
 	enum TIMER_STATE timer_state;
-	GtkWidget *dropdown;
+	int recursion;
 };
 
 struct choice {
 	long* valueP;
 	wChoiceCallBack_p action;
 	char* labelStr;
+	int recursion;
 };
 
 struct colorbutton {
@@ -165,6 +167,7 @@ struct list {
 	int editted;
 	int last;
 	wListCallBack_p action;
+	int recursion;
 };
 
 struct menu {
@@ -185,11 +188,13 @@ struct message {
 struct radio {
 	long* valueP;
 	wChoiceCallBack_p action;
+	int recursion;
 };
 struct toggle {
 	long* valueP;
 	wChoiceCallBack_p action;
 	unsigned long toggleHandler;
+	int recursion;
 };
 struct recentuse {
 	MRUList* mrulist;
@@ -524,6 +529,7 @@ struct wList_t {
 	int editted;
 	int last;
 	wListCallBack_p action;
+	int recursion;
 };
 
 GtkWidget *wlibNewDropList(GtkListStore *ls, int editable);

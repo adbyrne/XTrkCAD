@@ -269,6 +269,12 @@ void SetFileChanged(void);
 /* macro.c */
 extern long adjTimer;
 int RegressionTestAll();
+extern FILE * recordF;
+extern wBool_t inPlayback;
+extern wBool_t inPlaybackQuit;
+extern wControl_p demoW;
+extern int curDemo;
+
 
 /* lprintf.c */
 typedef struct {

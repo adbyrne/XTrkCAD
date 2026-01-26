@@ -121,11 +121,11 @@ Here we will create a Dimension Line to show the separation between two tracks.
 END
 STEP
 COMMAND DrawDimLine
-PARAMETER draw arrowsize 0 Tiny
+PARAMETER dimensionstyle arrowsize 0 Tiny
 PARAMETER GROUP draw
 MOUSE 2 13.953 7.766
 MOUSE 4 14.688 6.734
-#PARAMETER draw arrowsize 0 Tiny
+#PARAMETER dimensionstyle arrowsize 0 Tiny
 PARAMETER GROUP draw
 STEP
 ORIG 4.000 3.000 0.000
@@ -135,11 +135,11 @@ _________________________________________
 We might also want to measure the distance between two structures.  In this case we will use a larger dimension line.
 END
 STEP
-PARAMETER draw arrowsize 2 Small
+PARAMETER dimensionstyle arrowsize 2 Small
 MOUSE 2 15.000 9.688
 #MOUSE 4 6.375 4.000
 MOUSE 4 6.275 3.900
-#PARAMETER draw arrowsize 2 Medium
+#PARAMETER dimensionstyle arrowsize 2 Medium
 PARAMETER GROUP draw
 MESSAGE
 _________________________________________

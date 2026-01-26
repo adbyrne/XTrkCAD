@@ -164,6 +164,9 @@ static cairo_t* gtkDrawCreateCairoContext(
 	}
 
 	width = width ? abs(width) : 1;
+	if ( color == wDrawColorWhite ) {
+		width += 1;	// Remove ghosts
+	}
 	cairo_set_line_width(cairo, width);
 
 	cairo_set_line_cap(cairo, CAIRO_LINE_CAP_BUTT);
@@ -211,9 +214,11 @@ static cairo_t* gtkDrawCreateCairoContext(
 		break;
 	}
 	}
+
 	cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
-	GdkRGBA gcolor;
-	/*bd->lastColor = */GtkDrawSetColor(cairo, color, &gcolor);
+	GdkRGBA gcolor = wlibGetColor( color, TRUE );
+	/*bd->lastColor = */
+	GtkDrawSetColor(cairo, color, &gcolor);
 	cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
 
 	//if (bd->clip_set) {
@@ -288,6 +293,7 @@ void wDrawDelayUpdate(
 	cairo_rectangle_int_t update_rect;
 
 	if ( (!delay) && bd->attributes.draw.delayUpdate ) {
+		if ( iDrawLog >= 1 ) { printf( "wDrawDelayUpdate( %d -> %d ) - update\n", delay, bd->attributes.draw.delayUpdate ); }
 		update_rect.x = 0;
 		update_rect.y = 0;
 		wDrawGetSize(bd, (wWinPix_t *)&update_rect.width, (wWinPix_t *)&update_rect.height);
@@ -295,6 +301,8 @@ void wDrawDelayUpdate(
 		gtk_widget_queue_draw_region(bd->widget, cairo_region);
 		cairo_region_destroy(cairo_region);
 		gtk_widget_queue_draw(bd->widget);
+	} else {
+		if ( iDrawLog >= 2 ) { printf( "wDrawDelayUpdate( %d -> %d ) - update\n", delay, bd->attributes.draw.delayUpdate ); }
 	}
 	bd->attributes.draw.delayUpdate = delay;
 }
@@ -611,6 +619,10 @@ static void wlibDrawFilled(
 		cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
 		cairo_stroke_preserve(cairo);
 		cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
+		if ( iDrawLog >= 1 ) {
+			printf( "wlibDrawFilled( %0.3f %0.3f %0.3f %0.3f )\n", 
+				gcolor.red, gcolor.green, gcolor.blue, 0.3);
+		}
 		cairo_set_source_rgba(cairo, gcolor.red, gcolor.green, gcolor.blue, 0.3);
 	}
 	cairo_fill(cairo);
@@ -968,6 +980,9 @@ wDrawBitMap_p wDrawBitMapCreate(
 			bm->pattern = CreatePatternFromPixbuf(bm->pixbuf);
 		}
 
+		if ( iDrawLog >= 1 ) {
+			printf( "%ld: wDrawBitMapCreate( %d+%d %s )\n", lDrawCnt++, bm->x, bm->y, path ) ;
+		}
 		g_free(path);
 	}
 	return bm;
@@ -988,7 +1003,7 @@ void wDrawBitMap(
 	x = INMAPX( bd, x-bm->x );
 	y = INMAPY( bd, y-bm->y )-bm->h;
 
-	cairo_t *cr = cairo_create(bd->surface);
+	cairo_t* cr = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color, opts );
 
 	cairo_matrix_init_translate(&matrix, x, y);
 	cairo_set_matrix(cr, &matrix);
@@ -997,6 +1012,9 @@ void wDrawBitMap(
 	cairo_paint(cr);
 
 	cairo_destroy(cr);
+	if ( iDrawLog >= 1 ) {
+		printf( "%ld: wDrawBitMap( %d+%d ) %0.1f+%0.1f ) \n", lDrawCnt++, bm->x, bm->y, x, y ) ;
+	}
 }
 
 /*******************************************************************************

@@ -28,6 +28,7 @@
 #include "param.h"
 #include "track.h"
 #include "ccurve.h"
+#include "include/form.h"
 
 static wWin_p elevW;
 
@@ -384,10 +385,10 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 	switch (action) {
 	case C_START:
 		if ( elevW == NULL ) {
-			elevW = ParamCreateDialog( &elevationPG, MakeWindowTitle(_("Elevation")),
+			elevW = FormCreateDialog( &elevationPG, MakeWindowTitle(_("Elevation")),
 			                           NULL, NULL,
-			                           ParamCancel_Reset,
-			                           TRUE, LayoutElevW,
+			                           NULL, ParamCancel_Reset,
+			                           TRUE,
 			                           PD_F_ALT_CANCELLABEL,
 			                           DoElevUpdate );
 		}
@@ -541,7 +542,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 
 EXPORT void InitCmdElevation( wMenu_p menu )
 {
-	ParamRegister( &elevationPG );
+	FormRegister( &elevationPG );
 	AddMenuButton( menu, CmdElevation, "cmdElevation", _("Elevation"),
 		CreateToolbarIconFromResource("elevation.png"), LEVEL0_50,
 	               IC_POPUP|IC_LCLICK|IC_RCLICK|IC_WANT_MOVE, ACCL_ELEVATION, NULL );

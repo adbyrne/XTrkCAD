@@ -41,8 +41,8 @@ The Draw Commands are used to draw straight and curved lines on the layout.
 END
 STEP
 COMMAND DrawLine
-PARAMETER draw linewidth 0
-PARAMETER draw linecolor 0
+PARAMETER linestyle linewidth 0
+PARAMETER linestyle linecolor 0
 MESSAGE
 _________________________________________
 
@@ -93,8 +93,8 @@ _________________________________________
 
 You also draw in various colors and line widths.
 END
-PARAMETER draw linecolor 255
-PARAMETER draw linewidth 0.055555
+PARAMETER linestyle linecolor 255
+PARAMETER linestyle linewidth 0.055555
 STEP
 KEYSTATE A
 MOUSE 2 0.747 4.693
@@ -188,7 +188,7 @@ _________________________________________
 Boxes are useful for drawing rectangular shapes.
 END
 STEP
-PARAMETER draw linecolor 8355584
+PARAMETER linestyle linecolor 8355584
 COMMAND DrawBox
 MOUSE 2 11.413 4.960
 MOUSE 4 20.640 7.840

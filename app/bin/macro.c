@@ -46,6 +46,7 @@ static void DemoInitValues( void );
 
 static int log_playbackCursor = 0;
 EXPORT BOOL_T paramTogglePlaybackHilite;
+static int log_playback = 0;
 
 
 /*****************************************************************************
@@ -394,8 +395,6 @@ static void SetPlaybackSpeed(
 	case 5: playbackDelay = 0; break;
 	}
 	playbackSpeed = inx;
-
-	ParamSetInPlayback(inPlayback, playbackDelay);
 }
 
 
@@ -671,8 +670,6 @@ static wButton_p demoPause;
 #endif
 static BOOL_T playbackNonStop = FALSE;
 
-static BOOL_T showParamLineNum = FALSE;
-
 static int playbackKeyState;
 
 static void DoDemoButton( void * context );
@@ -690,7 +687,10 @@ static paramData_t demoPLs[] = {
 #define I_DEMOSPEED		(3)
 #define demoSpeedL		(demoPLs[I_DEMOSPEED].control)
 	{   PD_COMBOLIST, &playbackSpeed, "speed", PDO_NORECORD|PDO_LISTINDEX|PDO_DLGHORZ, I2VP(80), NULL },
-#define I_DEMOTEXT		(4)
+#define I_DEMOAUTOPLAY		(4)
+#define demoAutoPlay		(demoPLs[I_DEMOAUTOPLAY].control)
+	{   PD_BUTTON, DoDemoButton, "autoplay", PDO_NORECORD|PDO_DLGHORZ, NULL, NULL, 0, I2VP(4) },
+#define I_DEMOTEXT		(5)
 #define demoT			(demoPLs[I_DEMOTEXT].control)
 	{   PD_TEXT, NULL, "text", PDO_NORECORD|PDO_DLGRESIZE, &demoTextData, NULL, BT_CHARUNITS|BO_READONLY}
 };
@@ -718,6 +718,7 @@ EXPORT void AddPlaybackProc( char * label, playbackProc_p proc, void * data )
 static void PlaybackQuit( void )
 {
 	long playbackSpeed1 = playbackSpeed;
+	LOG( log_playback, 2, ( "Playback QUIT\n" ) );
 	if (paramFile) {
 		fclose( paramFile );
 	}
@@ -892,6 +893,7 @@ static BOOL_T DoRegression( char * sFileName )
 static void EnableButtons(
         BOOL_T enable )
 {
+	LOG( log_playback, 2, ( "EnableButtons( %d ), inPlayback:%d\n", enable, inPlayback ) );
 	wButtonSetBusy( demoStep, !enable );
 	wButtonSetBusy( demoNext, !enable );
 	wControlActive( (wControl_p)demoStep, enable );
@@ -954,11 +956,12 @@ static void PlaybackSetup( void )
 	nRegressionFail = 0;
 }
 
-void
+
+
+static void
 SetInPlayback(wBool_t state)
 {
 	inPlayback = state;
-	ParamSetInPlayback(state, playbackDelay);
 }
 
 static void Playback( void )
@@ -974,6 +977,10 @@ static void Playback( void )
 	char * cp, * cq;
 	char *demoFileName = NULL;
 
+	if ( inPlayback ) {
+		LOG( log_playback, 2, ( "Playback RECURSE\n" ) );
+		return;
+	}
 	useCurrentLayer = FALSE;
 	SetInPlayback( TRUE );
 	EnableButtons( FALSE );
@@ -985,6 +992,7 @@ static void Playback( void )
 		demoWinOnTop = FALSE;
 	}
 	SetCLocale();
+	LOG( log_playback, 2, ( "Playback START\n" ) ) ;
 	while (TRUE) {
 		if ( ! inPlayback )
 			// User pressed Quit
@@ -1009,11 +1017,13 @@ static void Playback( void )
 			}
 			demoFileName = strdup(demoList(curDemo).fileName );
 			paramFile = fopen( demoFileName, "r" );
+			LOG( log_playback, 2, ( "Playback Open %s\n", demoFileName ) );
 			if ( paramFile == NULL ) {
 				NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Demo"), demoFileName,
 				               strerror(errno) );
 				SetInPlayback( FALSE );
 				SetUserLocale();
+				LOG( log_playback, 2, ( "Playback OPENFAIL RETURN\n" ) );
 				return;
 			}
 
@@ -1034,6 +1044,7 @@ static void Playback( void )
 				fclose( paramFile );
 				paramFile = NULL;
 				SetInPlayback( FALSE );
+				LOG( log_playback, 2, ( "Playback READFAIL RETURN\n" ) );
 				SetUserLocale();
 				return;
 			}
@@ -1055,14 +1066,20 @@ static void Playback( void )
 		Stripcr( paramLine );
 		if (paramLine[0] == '#') {
 			/* comment */
+			continue;
 		} else if (paramLine[0] == 0) {
 			/* empty paramLine */
+			continue;
 		} else if (ReadTrack( paramLine ) ) {
+			LOG( log_playback, 3, ( "%3d: ReadTrack %s\n", paramLineNum, paramLine ) );
 			if ( paramFile == NULL ) {
 				SetInPlayback(FALSE );
 				break;
 			}
-		} else if (strncmp( paramLine, "STEP", 5 ) == 0) {
+			continue;
+		}
+		LOG( log_playback, 3, ( "%3d: %s\n", paramLineNum, paramLine ) );
+		if (strncmp( paramLine, "STEP", 5 ) == 0) {
 			paramTogglePlaybackHilite = TRUE;
 			wWinTop( demoW );
 			demoWinOnTop = TRUE;
@@ -1083,9 +1100,12 @@ static void Playback( void )
 			} else {
 				SetInPlayback(FALSE);
 				SetUserLocale();
+				LOG( log_playback, 2, ( "Playback STEP RETURN\n" ) );
 				return;
 			}
-		} else if (strncmp( paramLine, "CLEAR", 5 ) == 0) {
+			continue;
+		}
+		if (strncmp( paramLine, "CLEAR", 5 ) == 0) {
 			wTextClear( demoT );
 		} else if (strncmp( paramLine, "MESSAGE", 7 ) == 0) {
 			didPause = FALSE;
@@ -1105,6 +1125,7 @@ static void Playback( void )
 					EnableButtons( TRUE );
 					SetInPlayback(FALSE);
 					SetUserLocale();
+					LOG( log_playback, 2, ( "Playback  MESSAGE STEP RETURN\n" ) );
 					return;
 				}
 				PlaybackMessage( paramLine );
@@ -1303,6 +1324,7 @@ static void Playback( void )
 			pauseDemo = FALSE;
 			SetInPlayback(FALSE);
 			SetUserLocale();
+			LOG( log_playback, 2, ( "Playback RETURN PAUSE\n" ) );
 			return;
 		}
 	}
@@ -1317,6 +1339,7 @@ static void Playback( void )
 	SetInPlayback(FALSE);
 	PlaybackQuit();
 	SetUserLocale();
+	LOG( log_playback, 2, ( "Playback RETURN\n" ) );
 }
 
 
@@ -1352,13 +1375,19 @@ static void DoDemoButton( void * command )
 	switch( VP2L(command) ) {
 	case 0:
 		/* step */
-		playbackNonStop = (wGetKeyState() & WKEY_SHIFT) != 0;
+//		This doesn't work because meta keys are only caught for wDraw's
+//		playbackNonStop = (wGetKeyState() & WKEY_SHIFT) != 0;
 		Playback();
 		break;
 	case 1:
 		if (curDemo == -1) {
 			DoSaveAs( NULL );
 		} else {
+			if ( inPlayback ) {
+				// Shouldn't get here
+				LOG( log_playback, 2, ( "Playback RETURN NEXT\n" ) );
+				break;
+			}
 			/* next */
 			if (paramFile) {
 				fclose(paramFile);
@@ -1388,6 +1417,11 @@ static void DoDemoButton( void * command )
 			// We're waiting for the user to press 'Step'
 			PlaybackQuit();
 		}
+		break;
+	case 4:
+		playbackNonStop = ! playbackNonStop;
+		wBool_t bActive = wControlGetActive( demoAutoPlay );
+		LOG( log_playback, 2, ( "playbakNonStop = %d bActive = %d\n", playbackNonStop, bActive ) );
 		break;
 	default:
 		;
@@ -1457,7 +1491,7 @@ static char * demoInitParams[] = {
 	"display tworailscale 16",
 	"display tiedraw 0",
 	"pref mingridspacing 5",
-	"pref balloonhelp 1",
+//	"pref balloonhelp 1",
 	"display hotbarlabels 1",
 	"display mapscale 64",
 	"display livemap 0",
@@ -1511,16 +1545,16 @@ static char * demoInitParams[] = {
 	"grid origa 0.000",
 	"grid show 0",
 	"GROUP grid",
-	"misc toolbarset 65535",
-	"misc cur-turnout-ep 0",
+//	"misc toolbarset 65535",
+//	"misc cur-turnout-ep 0",
 	"GROUP misc",
 	"sticky set 67108863", /* 0x3ffffff - all */
 	"GROUP sticky",
-	"newFixedTrack hide 0",
-	"layer button-count 10",
+//	"newFixedTrack hide 0",
+//	"layer button-count 10",
 	"cmdopt selectmode 0",
 	"cmdopt selectzero 1",
-	"rescale change-dim 0",
+//	"rescale change-dim 0",
 	NULL
 };
 
@@ -1568,7 +1602,8 @@ static void DoDemo( void * demoNumber )
 		return;
 	}
 	PlaybackSetup();
-	playbackNonStop = (wGetKeyState() & WKEY_SHIFT) != 0;
+//	This doesn't work because meta keys are only caught for wDraw's
+//	playbackNonStop = (wGetKeyState() & WKEY_SHIFT) != 0;
 	paramFile = NULL;
 	Playback();
 }
@@ -1615,11 +1650,694 @@ error:
 }
 
 
+//static void ParamPlayback( char * );
+//static void ParamCheck( char * );
+/**
+ * Run all regression tests
+ *
+ * return	number of failed tests
+ */
+EXPORT int RegressionTestAll()
+{
+	playbackNonStop = TRUE;
+	playbackSpeed = 5;
+	CreateDemoW();
+	curDemo = 0;
+	PlaybackSetup();
+	Playback();
+	return nRegressionFail;
+}
+
+
+/****************************************************************************
+ *
+ *
+ *
+ */
+
+static BOOL_T paramCheckShowErrors = TRUE;
+static int paramCheckErrorCount = 0;
+
+static BOOL_T disablePlaybackDelays = FALSE;
+
+static void SimulateButtonClick(wButton_p control)
+{
+	if (!disablePlaybackDelays && control) {
+		wButtonSetBusy(control, TRUE);
+		wFlush();
+		wPause(500);
+		wButtonSetBusy(control, FALSE);
+		wFlush();
+	}
+}
+
+
+static void ParamPlayback( char * line )
+{
+	const paramGroup_t * pg;
+	paramData_p p;
+	long valL;
+	FLOAT_T valF, valF1;
+	size_t len, len1, len2;
+	wIndex_t inx;
+	void * listContext, * itemContext;
+	long rgb;
+	wDrawColor dc;
+	wButton_p button;
+	paramDrawData_t * ddp;
+	wAction_t a;
+	coOrd pos;
+	char * valS;
+#define DESCRIBEHACK
+#ifdef DESCRIBEHACK
+	// TODO Remove once describe is implemented
+	if ( strncmp( line, "describe ", 9 ) == 0 ) {
+		printf( "DESCRIBEHACK: %s\n", line );
+		return;
+	}
+#endif
+	if ( strncmp( line, "GROUP ", 6 ) == 0 ) {
+#ifdef PGPROC
+		pg = DialogGroupFind( line+6 );
+		if ( pg == NULL ) { return; }
+//		for ( inx=0; inx<paramGroups_da.cnt; inx++ ) {
+//			pg = paramGroups(inx);
+//			if ( pg->name && strncmp( line+6, pg->name, strlen( pg->name ) ) == 0 ) {
+				if ( pg->proc ) {
+					pg->proc( PGACT_PARAM, pg->action );
+				}
+				pg->action = 0;
+//			}
+//		}
+#endif
+		return;
+	}
+	pg = DialogGroupFind( line );
+	if ( pg != NULL ) {
+
+//	for ( inx=0; inx<paramGroups_da.cnt; inx++ ) {
+//	  pg = paramGroups(inx);
+//	  if ( pg->nameStr == NULL )
+//		  continue;
+//	  len1 = strlen( pg->nameStr );
+//	  if ( strncmp( pg->nameStr, line, len1 ) != 0 ||
+//		   line[len1] != ' ' )
+//		  continue;
+	  len1 = strlen( pg->nameStr );
+	  for ( p=pg->paramPtr,inx=0; inx<pg->paramCnt; p++,inx++ ) {
+		if ( p->nameStr == NULL )
+			continue;
+		len2 = strlen( p->nameStr );
+		if ( strncmp(p->nameStr, line+len1+1, len2) != 0 ||
+			 (line[len1+1+len2] != ' ' && line[len1+1+len2] != '\0') )
+			continue;
+		len = len1 + 1 + len2 + 1;
+		if ( p->type != PD_DRAW && p->type != PD_MESSAGE && p->type != PD_MENU && p->type != PD_MENUITEM )
+			//ParamHilite( p->group->win, p->control, TRUE );
+			if ( p->control ) wControlHilite( p->control, TRUE );
+		switch (p->type) {
+			case PD_BUTTON:
+				if (p->valueP)
+					 ((wButtonCallBack_p)(p->valueP))( p->context );
+				SimulateButtonClick( p->control );
+#ifdef LATER
+				if (playbackTimer == 0 && p->control) {
+					wButtonSetBusy( (wButton_p)p->control, TRUE );
+					wFlush();
+					wPause( 500 );
+					wButtonSetBusy( (wButton_p)p->control, FALSE );
+					wFlush();
+				}
+#endif
+				break;
+			case PD_LONG:
+				valL = atol( line+len );
+				if (p->valueP)
+					*(long*)p->valueP = valL;
+				if (p->control) {
+					wEntrySetValue( (wEntry_p)p->control, FormatLong( valL ) );
+					wFlush();
+				}
+				if (pg->changeProc)
+					pg->changeProc( pg, inx, &valL );
+				break;
+			case PD_RADIO:
+				valL = atol( line+len );
+				if (p->valueP)
+					*(long*)p->valueP = valL;
+				if (p->control) {
+					wRadioSetValue( (wChoice_p)p->control, valL );
+					wFlush();
+				}
+				if (pg->changeProc)
+					pg->changeProc( pg, inx, &valL );
+				break;
+			case PD_TOGGLE:
+				valL = atol( line+len );
+				if (p->valueP)
+					*(long*)p->valueP = valL;
+				if (p->control) {
+					wToggleSetValue( (wChoice_p)p->control, valL );
+					wFlush();
+				}
+				if (pg->changeProc)
+					pg->changeProc( pg, inx, &valL );
+				break;
+			case PD_LIST:
+			case PD_DROPLIST:
+			case PD_COMBOLIST:
+				line += len;
+				valL = strtol( line, &valS, 10 );
+				if ( valS )
+					valS++;
+				else
+					valS = "";
+				if ( p->control != NULL ) {
+					if ( (p->option&PDO_LISTINDEX) == 0 ) {
+						if ( valL < 0 ) {
+							wListSetValue( (wList_p)p->control, valS );
+						} else {
+							valL = wListFindValue( (wList_p)p->control, valS );
+							if (valL < 0) {
+								NoticeMessage( MSG_PLAYBACK_LISTENTRY, _("Ok"), NULL, line );
+								break;
+							}
+							wListSetIndex( (wList_p)p->control, (wIndex_t)valL );
+						}
+					} else {
+						wListSetIndex( (wList_p)p->control, (wIndex_t)valL );
+					}
+					wFlush();
+					wListGetValues( (wList_p)p->control, message, sizeof message, &listContext, &itemContext );
+				} else if ( (p->option&PDO_LISTINDEX) == 0 ) {
+					break;
+				}
+				if (p->valueP)
+					*(wIndex_t*)p->valueP = (wIndex_t)valL;
+				if (pg->changeProc) {
+					pg->changeProc( pg, inx, &valL );
+				}
+				break;
+			case PD_COLORLIST:
+				line += len;
+				rgb = atol( line );
+				dc = wDrawFindColor( rgb );
+				if ( p->control)
+					wColorSelectButtonSetColor( (wButton_p)p->control, dc );
+				if (p->valueP)
+					*(wDrawColor*)p->valueP = dc;
+				if (pg->changeProc) {
+					/* COLORNOP */
+					pg->changeProc( pg, inx, &valL );
+				}
+				break;
+			case PD_FLOAT:
+				SetCLocale();
+				valF = valF1 = atof( line+len );
+				SetUserLocale();
+				if (p->valueP)
+					*(FLOAT_T*)p->valueP = valF;
+				if (p->option&PDO_DIM) {
+					if ( p->option&PDO_SMALLDIM )
+						valS = FormatSmallDistance( valF );
+					else
+						valS = FormatDistance( valF );
+				} else {
+					if (p->option&PDO_ANGLE)
+						valF1 = NormalizeAngle( (angleSystem==ANGLE_POLAR)?valF1:-valF1 );
+					valS = FormatFloat( valF );
+				}
+				if (p->control) {
+					wEntrySetValue( (wEntry_p)p->control, valS );
+					wFlush();
+				}
+				if (pg->changeProc)
+					pg->changeProc( pg, inx, &valF );
+				break;
+			case PD_STRING:
+			case PD_TEXT:
+				line += len;
+				while ( *line == ' ' ) line++;
+				Stripcr( line );
+				if (p->valueP)
+					strcpy( (char*)p->valueP, line );
+				if (p->control) {
+					if (p->type == PD_STRING) {
+						wEntrySetValue((wEntry_p)p->control, line);
+						p->bInvalid =
+						     (p->option & PDO_NOTBLANK) &&
+						     strlen( line ) == 0;
+					} else {
+						wTextClear((wText_p)p->control);
+						wTextAppend((wText_p)p->control, line);
+					}
+					wFlush();
+				}
+				if (pg->changeProc)
+					pg->changeProc( pg, inx, line );
+				break;
+			case PD_DRAW:
+				ddp = (paramDrawData_t*)p->winData;
+				if ( ddp->action == NULL )
+					break;
+				a = (wAction_t)strtol( line+len, &line, 10 );
+				pos.x = strtod( line, &line );
+				pos.y = strtod( line, NULL );
+				PlaybackMouse( ddp->action, ddp->d, a, pos, drawColorBlack );
+				break;
+			case PD_MESSAGE:
+			case PD_MENU:
+			case PD_BITMAP:
+				break;
+			case PD_MENUITEM:
+				if (p->valueP) {
+					if ( (p->option&IC_PLAYBACK_PUSH) != 0 )
+						PlaybackButtonMouse( (wIndex_t)VP2L(p->context) );
+					((wButtonCallBack_p)(p->valueP))( p->context );
+				}
+				break;
+			case PD_SCALE:
+			case PD_NOTEBOOK:
+			case PD_TAG:
+				break;
+			}
+		if ( p->type != PD_DRAW && p->type != PD_MESSAGE && p->type != PD_MENU && p->type != PD_MENUITEM )
+			//ParamHilite( p->group->win, p->control, FALSE );
+			if ( p->control ) wControlHilite( p->control, FALSE );
+#ifdef HUH
+		pg->action |= p->change;
+#endif
+		return;
+	}
+	button = NULL;
+	if ( strcmp("ok", line+len1+1) == 0 ) {
+		//ParamHilite( pg->win, (wControl_p)pg->okB, TRUE );
+		if ( pg->okB ) wControlHilite( (wControl_p)pg->okB, TRUE );
+		if ( pg->okProc )
+			pg->okProc( pg );
+		button = pg->okB;
+	} else if ( strcmp("cancel", line+len1+1) == 0 ) {
+		//ParamHilite( pg->win, (wControl_p)pg->cancelB, TRUE );
+		if ( pg->cancelB ) wControlHilite( (wControl_p)pg->cancelB, TRUE );
+		if ( pg->cancelProc )
+			pg->cancelProc( pg );
+		button = pg->cancelB;
+	}
+	SimulateButtonClick( button );
+#ifdef LATER
+	if ( playbackTimer == 0 && button ) {
+		wButtonSetBusy( button, TRUE );
+		wFlush();
+		wPause( 500 );
+		wButtonSetBusy( button, FALSE );
+		wFlush();
+	}
+#endif
+	//ParamHilite( pg->win, (wControl_p)button, FALSE );
+	if ( button ) wControlHilite( (wControl_p)button, FALSE );
+	if ( !button )
+		NoticeMessage( "Unknown PARAM: %s", _("Ok"), NULL, line );
+	return;
+  }
+  NoticeMessage( "Unknown PARAM: %s", _("Ok"), NULL, line );
+}
+
+
+static void ParamCheck( char * line )
+{
+	const paramGroup_t * pg;
+	paramData_p p;
+	long valL;
+	FLOAT_T valF, diffF;
+	size_t len, len1, len2;
+	wIndex_t inx;
+	void * listContext, * itemContext;
+	char * valS;
+	char * expVal=NULL, * actVal=NULL;
+	char expNum[20], actNum[20];
+	BOOL_T hasError = FALSE;
+	FILE * f;
+
+	pg = DialogGroupFind( line );
+	if ( pg == NULL ) { return; }
+//	for ( inx=0; inx<paramGroups_da.cnt; inx++ ) {
+//	  pg = paramGroups(inx);
+//	  if ( pg->nameStr == NULL )
+//		  continue;
+	  len1 = strlen( pg->nameStr );
+//	  if ( strncmp( pg->nameStr, line, len1 ) != 0 ||
+//		   line[len1] != ' ' )
+//		  continue;
+	  for ( p=pg->paramPtr,inx=0; inx<pg->paramCnt; p++,inx++ ) {
+		if ( p->nameStr == NULL )
+			continue;
+		len2 = strlen( p->nameStr );
+		if ( strncmp(p->nameStr, line+len1+1, len2) != 0 ||
+			 (line[len1+1+len2] != ' ' && line[len1+1+len2] != '\0') )
+			continue;
+		if ( p->valueP == NULL )
+			return;
+		len = len1 + 1 + len2 + 1;
+		switch (p->type) {
+			case PD_BUTTON:
+				break;
+			case PD_LONG:
+			case PD_RADIO:
+			case PD_TOGGLE:
+				valL = atol( line+len );
+				if ( *(long*)p->valueP != valL ) {
+					sprintf( expNum, "%ld", valL );
+					sprintf( actNum, "%ld", *(long*)p->valueP );
+					expVal = expNum;
+					actVal = actNum;
+					hasError = TRUE;
+				}
+				break;
+			case PD_LIST:
+			case PD_DROPLIST:
+			case PD_COMBOLIST:
+				line += len;
+				if ( p->control == NULL )
+					break;
+				valL = strtol( line, &valS, 10 );
+				if ( valS ) {
+					if ( valS[0] == ' ' )
+						valS++;
+				} else {
+					valS = "";
+				}
+				if ( (p->option&PDO_LISTINDEX) != 0 ) {
+					if ( *(long*)p->valueP != valL ) {
+						sprintf( expNum, "%ld", valL );
+						sprintf( actNum, "%d", *(wIndex_t*)p->valueP );
+						expVal = expNum;
+						actVal = actNum;
+						hasError = TRUE;
+					}
+				} else {
+					wListGetValues( (wList_p)p->control, message, sizeof message, &listContext, &itemContext );
+					if ( strcasecmp( message, valS ) != 0 ) {
+						expVal = valS;
+						actVal = message;
+						hasError = TRUE;
+					}
+				}
+				break;
+			case PD_COLORLIST:
+				break;
+			case PD_FLOAT:
+				valF = atof( line+len );
+				diffF = fabs( *(FLOAT_T*)p->valueP - valF );
+				if ( diffF > 0.001 ) {
+					sprintf( expNum, "%0.3f", valF );
+					sprintf( actNum, "%0.3f", *(FLOAT_T*)p->valueP );
+					expVal = expNum;
+					actVal = actNum;
+					hasError = TRUE;
+				}
+				break;
+			case PD_STRING:
+				line += len;
+				while ( *line == ' ' ) line++;
+				wEntryGetValue( (wEntry_p)p->control );
+				if ( strcasecmp( line, (char*)p->valueP ) != 0 ) {
+					expVal = line;
+					actVal = (char*)p->valueP;
+					hasError = TRUE;
+				}
+				break;
+			case PD_DRAW:
+			case PD_MESSAGE:
+			case PD_TEXT:
+			case PD_MENU:
+			case PD_MENUITEM:
+			case PD_BITMAP:
+				break;
+			case PD_SCALE:
+			case PD_NOTEBOOK:
+			case PD_TAG:
+				break;
+		}
+		if ( hasError ) {
+			f = fopen( "error.log", "a" );
+			if ( f==NULL ) {
+				NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, "PARAMCHECK LOG", "error.log", strerror(errno) );
+			} else {
+				fprintf( f, "CHECK: %s:%d: %s-%s: exp: %s, act=%s\n",
+						paramFileName, paramLineNum, pg->nameStr, p->nameStr, expVal, actVal );
+				fclose( f );
+			}
+			if ( paramCheckShowErrors )
+				NoticeMessage( "CHECK: %d: %s-%s: exp: %s, act=%s", _("Ok"), NULL, paramLineNum, pg->nameStr, p->nameStr, expVal, actVal );
+			paramCheckErrorCount++;
+		}
+		return;
+//	 }
+  }
+  NoticeMessage( "Unknown PARAMCHECK: %s", _("Ok"), NULL, line );
+}
+
+
+static long ParamIntRestore(
+		paramGroup_p pg,
+		int class )
+{
+	long change = 0;
+	int inx;
+	paramData_p p;
+	FLOAT_T valR;
+	char * valS;
+	paramOldData_t * oldP;
+
+	for ( p=pg->paramPtr,inx=0; p<&pg->paramPtr[pg->paramCnt]; p++,inx++ ) {
+		oldP = (class==0)?&p->oldD:&p->demoD;
+		if ( (p->option&PDO_DLGIGNORE) != 0 )
+			continue;
+		if (p->valueP == NULL)
+			continue;
+		switch ( p->type ) {
+		case PD_LONG:
+			if ( *(long*)p->valueP != oldP->l ) {
+				/*if ((p->option&PDO_NORSTUPD)==0)*/
+					*(long*)p->valueP = oldP->l;
+				if (p->control) {
+					wEntrySetValue( (wEntry_p)p->control, FormatLong( oldP->l ) );
+				}
+				change |= (1L<<inx);
+			}
+			break;
+		case PD_RADIO:
+			if ( *(long*)p->valueP != oldP->l ) {
+				/*if ((p->option&PDO_NORSTUPD)==0)*/
+					*(long*)p->valueP = oldP->l;
+				if (p->control)
+					wRadioSetValue( (wChoice_p)p->control, oldP->l );
+				change |= (1L<<inx);
+			}
+			break;
+		case PD_TOGGLE:
+			if ( *(long*)p->valueP != oldP->l ) {
+				/*if ((p->option&PDO_NORSTUPD)==0)*/
+					*(long*)p->valueP = oldP->l;
+				if (p->control)
+					wToggleSetValue( (wChoice_p)p->control, oldP->l );
+				change |= (1L<<inx);
+			}
+			break;
+		case PD_LIST:
+		case PD_DROPLIST:
+		case PD_COMBOLIST:
+			if ( *(wIndex_t*)p->valueP != (wIndex_t)oldP->l ) {
+				/*if ((p->option&PDO_NORSTUPD)==0)*/
+					*(wIndex_t*)p->valueP = (wIndex_t)oldP->l;
+				if (p->control)
+					wListSetIndex( (wList_p)p->control, (wIndex_t)oldP->l );
+				change |= (1L<<inx);
+			}
+			break;
+		case PD_COLORLIST:
+			if ( *(wDrawColor*)p->valueP != oldP->dc ) {
+				/*if ((p->option&PDO_NORSTUPD)==0)*/
+					*(wDrawColor*)p->valueP = oldP->dc;
+				if (p->control)
+					wColorSelectButtonSetColor( (wButton_p)p->control, oldP->dc ); /* COLORNOP */
+				change |= (1L<<inx);
+			}
+			break;
+		case PD_FLOAT:
+			if ( *(FLOAT_T*)p->valueP != oldP->f ) {
+				/*if ((p->option&PDO_NORSTUPD)==0)*/
+					*(FLOAT_T*)p->valueP = oldP->f;
+				if (p->control) {
+					valR = oldP->f;
+					if (p->option & PDO_DIM) {
+						if (p->option & PDO_SMALLDIM)
+							valS = FormatSmallDistance( valR );
+						else
+							valS = FormatDistance( valR );
+					} else {
+						if (p->option & PDO_ANGLE)
+							valR = NormalizeAngle( (angleSystem==ANGLE_POLAR)?valR:-valR );
+						valS = FormatFloat( valR );
+					}
+					wEntrySetValue( (wEntry_p)p->control, valS );
+				}
+				change |= (1L<<inx);
+			}
+			break;
+		case PD_STRING:
+			if ( oldP->s && strcmp((char*)p->valueP,oldP->s) != 0 ) {
+				((char*)p->valueP)[0] = '\0';
+				strncat((char*)p->valueP,oldP->s,p->max_string-1);
+				if (p->control)
+					wEntrySetValue( (wEntry_p)p->control, (char*)p->valueP );
+				change |= (1L<<inx);
+			}
+			break;
+		case PD_MESSAGE:
+		case PD_BUTTON:
+		case PD_DRAW:
+		case PD_TEXT:
+		case PD_MENU:
+		case PD_MENUITEM:
+		case PD_BITMAP:
+			break;
+		default:
+			break;
+		}
+	}
+#ifdef PGPROC
+	if (pg->proc)
+		pg->proc( PGACT_RESTORE, change );
+#endif
+	return change;
+}
+
+
+static void ParamIntSave(
+		paramGroup_p pg,
+		int class )
+{
+	paramData_p p;
+	paramOldData_t * oldP;
+
+	for ( p=pg->paramPtr; p<&pg->paramPtr[pg->paramCnt]; p++ ) {
+		oldP = (class==0)?&p->oldD:&p->demoD;
+		if (p->valueP) {
+			switch (p->type) {
+			case PD_LONG:
+			case PD_RADIO:
+			case PD_TOGGLE:
+				oldP->l = *(long*)p->valueP;
+				break;
+			case PD_LIST:
+			case PD_DROPLIST:
+			case PD_COMBOLIST:
+				oldP->l = *(wIndex_t*)p->valueP;
+				break;
+			case PD_COLORLIST:
+				oldP->dc = *(wDrawColor*)p->valueP;
+				break;
+			case PD_FLOAT:
+				oldP->f = *(FLOAT_T*)p->valueP;
+				break;
+			case PD_STRING:
+				if (oldP->s)
+					MyFree(oldP->s);
+				oldP->s = MyStrdup( (char*)p->valueP );
+				break;
+			case PD_MESSAGE:
+			case PD_BUTTON:
+			case PD_DRAW:
+			case PD_TEXT:
+			case PD_MENU:
+			case PD_MENUITEM:
+			case PD_BITMAP:
+				break;
+			default:
+			}
+		}
+	}
+}
+
+
+EXPORT void ParamRestoreAll( void )
+{
+	for ( const paramGroup_p * ppg = DialogGroupIter( NULL ); ppg; ppg = DialogGroupIter( ppg ) ) {
+		ParamIntRestore( *ppg, 1 );
+	}
+	if ( paramCheckErrorCount > 0 ) {
+		NoticeMessage( "PARAMCHECK: %d errors", "Ok", NULL, paramCheckErrorCount );
+	}
+}
+
+
+EXPORT void ParamSaveAll( void )
+{
+	for ( const paramGroup_p *ppg = DialogGroupIter( NULL ); ppg; ppg = DialogGroupIter( ppg ) ) {
+		ParamIntSave( *ppg, 1 );
+		(*ppg)->action = 0;
+	}
+	paramCheckErrorCount = 0;
+}
+
+
+
+/**
+ * Inform about file operation in progress. While files are read, some
+ * operations in the params library must be disabled
+ *
+ * \param state	TRUE if file operation starts, FALSE when done
+ */
+
+static BOOL_T bInReadTracks = FALSE;
+
+EXPORT void
+ParamSetInReadTracks(BOOL_T state)
+{
+	bInReadTracks = state;
+}
+
+EXPORT void
+ParamTurnOffDelays(BOOL_T disable)
+{
+	disablePlaybackDelays = disable;
+}
+
+
+void ParamDlgProc(
+		wWin_p win,
+		winProcEvent e,
+		void * refresh,
+		void * data )
+{
+	paramGroup_p pg = (paramGroup_p)data;
+	switch (e) {
+	case wClose_e:
+		if ( pg->changeProc )
+			pg->changeProc( pg, -1, NULL );
+		if ( (pg->options&PGO_NODEFAULTPROC) == 0 )
+			DefaultProc( win, wClose_e, data );
+		break;
+	case wResize_e:
+		if ((wControl_p)win == mapW) {
+			if ( !bInReadTracks ) {
+				pg->changeProc(pg, wResize_e, NULL);
+			}
+		}
+		break;
+	default:
+		break;
+	}
+}
+
 
 EXPORT BOOL_T MacroInit( void )
 {
 	AddParam( "DEMOGROUP ", ReadDemo );
 	AddParam( "DEMO ", ReadDemo );
+	AddPlaybackProc( "PARAMETER", ParamPlayback, NULL );        
+	AddPlaybackProc( "PARAMCHECK", ParamCheck, NULL );
 
 	recordMouseMoves = ( getenv( "XTRKCADNORECORDMOUSEMOVES" ) == NULL );
 
@@ -1643,23 +2361,7 @@ EXPORT BOOL_T MacroInit( void )
 
 	log_playbackCursor = LogFindIndex( "playbackcursor" );
 	log_regression = LogFindIndex( "regression" );
+	log_playback = LogFindIndex( "playback" );
 
 	return TRUE;
-}
-
-
-/**
- * Run all regression tests
- *
- * return	number of failed tests
- */
-EXPORT int RegressionTestAll()
-{
-	playbackNonStop = TRUE;
-	playbackSpeed = 5;
-	CreateDemoW();
-	curDemo = 0;
-	PlaybackSetup();
-	Playback();
-	return nRegressionFail;
 }

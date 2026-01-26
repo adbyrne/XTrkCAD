@@ -133,13 +133,19 @@ static int toggled(
 	wControl_p bc = (wControl_p)b;
 	struct toggle* tcontrol = CONTROL_GET_ATTRIBUTES_PTR(bc, toggle);
 	long value = toggleGetValue(bc);
+	if ( tcontrol->recursion ) {
+		if ( wlibRecursionTrace ) printf( "Recursion: toggled\n" );
+		return TRUE;
+	}
 
 	if (tcontrol->valueP) {
 		*(tcontrol->valueP) = value;
 	}
 
 	if (tcontrol->action) {
+		tcontrol->recursion++;
 		tcontrol->action(value, bc->context);
+		tcontrol->recursion--;
 	}
 
 	return TRUE;
@@ -208,6 +214,7 @@ wControl_p wToggleCreate(
 	tcontrol = CONTROL_GET_ATTRIBUTES_PTR(b, toggle);
 	tcontrol->action = action;
 	tcontrol->valueP = valueP;
+	tcontrol->recursion = 0;
 
 	if (ISDEFINEDINBUILDER(parent)) {
 		b->widget = wlibWidgetFromIdWarn(parent, helpStr);

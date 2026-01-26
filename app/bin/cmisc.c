@@ -31,6 +31,8 @@
 #include "draw.h"
 #include "note.h"
 
+int bOldDescribe = FALSE;
+
 EXPORT wIndex_t describeCmdInx;
 EXPORT BOOL_T inDescribeCmd;
 
@@ -476,8 +478,10 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 		                  TRUE, DescribeLayout,
 		                  F_RECALLPOS|PD_F_ALT_CANCELLABEL,
 		                  DescribeUpdate);
+if ( bOldDescribe )
 		describeCmdButtonEnd = wControlBelow((wControl_p)describePG.helpB);
 	}
+if ( !bOldDescribe ) return;
 
 	for (inx=0; inx<COUNT( describePLs ); inx++) {
 		describePLs[inx].option = PDO_DLGIGNORE;
@@ -676,7 +680,9 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 		break;
 
 	case C_CANCEL:
+#ifdef DESCRIBEHACK
 		DescribeDone( NULL );
+#endif
 		wSetCursor(mainD.d,defaultCursor);
 		return C_CONTINUE;
 

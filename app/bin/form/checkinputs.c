@@ -29,7 +29,6 @@
 #include "messages.h"
 #include "xtctypes.h"
 
-
 #include "formprivate.h"
 
 #define CHECKUPPERLIMIT(rangeCheck) (!(rangeCheck & PDO_NORANGECHECK_HIGH ))
@@ -79,9 +78,9 @@ wBool_t FormIntegerRangeCheck(paramData_p p, long valL)
 	bool tooHigh = false;
 	bool tooLow = false;
 
-	//if (paramPlayback) {
-	//	return TRUE;
-	//}
+	if (inPlayback) {
+		return TRUE;
+	}
 
 	DynStringMalloc(&errorMessage, 80);
 
@@ -179,9 +178,10 @@ wBool_t FormFloatRangeCheck(paramData_p p, FLOAT_T valF)
 	bool tooHigh = false;
 	bool tooLow = false;
 
-	//if (paramPlayback) {
-	//	return TRUE;
-	//}
+	if (inPlayback) {
+		return TRUE;
+	}
+	
 
 	DynStringMalloc(&message, 80);
 
@@ -259,7 +259,8 @@ wBool_t FormStringCheckValue(paramData_p data, char * value)
 
 	strip_whitespace(value);
 
-	if ((data->option & PDO_NOTBLANK) && value[0] == '\0') {
+	
+	if ( (!inPlayback) && (data->option & PDO_NOTBLANK) && value[0] == '\0') {
 		DynStringPrintf(&message, "%s", _("String cannot be blank"));
 		data->bInvalid = TRUE;
 	} else {

@@ -36,17 +36,13 @@
 
 #include "xtrkcad-config.h"
 
-static wBool_t blockCallback;
 
-#define SetNoCallbackOnClick() (blockCallback = TRUE)
-#define SetCallbackOnClick() (blockCallback = FALSE)
-#define DoCallbackOnClick() (blockCallback == FALSE)
-
+static void buttonClick(GtkWidget* widget, gpointer value);
 /* Forward declarations */
 static void splitButtonDropdownClick(GtkWidget* widget, gpointer data);
 static void ApplySplitButtonStyle(GtkWidget* splitButton);
 
-
+int wlibRecursionTrace = 0;
 
 /*
  *****************************************************************************
@@ -161,8 +157,14 @@ void wButtonSetLabel(wControl_p bb, const char * labelStr)
 void wlibButtonDoAction(
         wControl_p bb)
 {
+	if ( bb->attributes.button.recursion ) {
+		if ( wlibRecursionTrace ) printf( "Recurse: wlibButtonDoAction\n" );
+		return;
+	}
 	if (bb->attributes.button.action) {
+		bb->attributes.button.recursion++;
 		bb->attributes.button.action(bb->context);
+		bb->attributes.button.recursion--;
 	}
 }
 
@@ -177,11 +179,15 @@ static void buttonClick(
         gpointer value)
 {
 	struct button* b = CONTROL_GET_ATTRIBUTES_PTR(((wControl_p)value), button);
+	if ( b->recursion ) {
+		if ( wlibRecursionTrace ) printf( "Recursion: buttonClick\n" );
+		return;
+	}
 
-	if (b->action && DoCallbackOnClick()) {
-		SetNoCallbackOnClick();
+	if (b->action ) {
+		b->recursion++;
 		b->action(((wControl_p)value)->context);
-		SetCallbackOnClick();
+		b->recursion--;
 	}
 }
 
@@ -223,7 +229,7 @@ static gboolean on_button_repeat(gpointer user_data)
 }
 
 // Callback for Button-Press-Event
-static gboolean
+static gboolean 
 on_button_press(GtkWidget* widget, GdkEventButton* event, gpointer user_data)
 {
 	wControl_p button = (wControl_p)user_data;
@@ -280,17 +286,17 @@ SetAutoRepeat(wControl_p button)
 {
 	// activate events
 	gtk_widget_add_events(button->widget,
-	                      GDK_BUTTON_PRESS_MASK |
-	                      GDK_BUTTON_RELEASE_MASK |
-	                      GDK_LEAVE_NOTIFY_MASK);
+		GDK_BUTTON_PRESS_MASK |
+		GDK_BUTTON_RELEASE_MASK |
+		GDK_LEAVE_NOTIFY_MASK);
 
 	// connect event handlers
 	g_signal_connect(button->widget, "button-press-event",
-	                 G_CALLBACK(on_button_press), button);
+		G_CALLBACK(on_button_press), button);
 	g_signal_connect(button->widget, "button-release-event",
-	                 G_CALLBACK(on_button_release), button);
+		G_CALLBACK(on_button_release), button);
 	g_signal_connect(button->widget, "leave-notify-event",
-	                 G_CALLBACK(on_button_leave), button);
+		G_CALLBACK(on_button_leave), button);
 }
 
 
@@ -307,7 +313,7 @@ SetAutoRepeat(wControl_p button)
  * BB_DEFAULT
  * : set button as default for dialog
  * BO_ICON
- * : use an icon instead of label,
+ * : use an icon instead of label, 
  * BO_REPEAT
  * : autorepeat function triggered by longer press
  *
@@ -429,13 +435,13 @@ static char* down16[] = {
  */
 
 wControl_p wButtonCreateForToolbar(
-        wControl_p parent,
-        wWinPix_t x,
-        wWinPix_t y,
+        wControl_p	parent,
+        wWinPix_t	x,
+        wWinPix_t	y,
         const char* helpStr,
         wIcon_p icon,
-        long option,
-        wWinPix_t width,
+        long 	option,
+        wWinPix_t 	width,
         wButtonCallBack_p action,
         void* context)
 {
@@ -445,12 +451,12 @@ wControl_p wButtonCreateForToolbar(
 	g_assert(parent->type == W_MAIN);
 
 	buttonControl = wlibControlNew(B_BUTTON, parent, helpStr, context);
-	buttonAttributes = CONTROL_GET_ATTRIBUTES_PTR(buttonControl, button);
+	buttonAttributes = CONTROL_GET_ATTRIBUTES_PTR(buttonControl,button);
 	buttonAttributes->action = action;
 
 	// Create regular button
 	if (icon && icon->bits) {
-		buttonControl->widget = GTK_WIDGET(gtk_button_new());
+	buttonControl->widget = GTK_WIDGET(gtk_button_new());
 
 		if (!buttonControl->widget) {
 			fprintf(stderr, "ERROR: Failed to create button widget\n");
@@ -458,11 +464,11 @@ wControl_p wButtonCreateForToolbar(
 			return NULL;
 		}
 
-		wButtonSetIcon(buttonControl, icon);
+	wButtonSetIcon(buttonControl, icon);
 
 		// Connect click signal for regular button
-		g_signal_connect(G_OBJECT(buttonControl->widget), "clicked",
-		                 G_CALLBACK(buttonClick), buttonControl);
+	g_signal_connect(G_OBJECT(buttonControl->widget), "clicked",
+	                 G_CALLBACK(buttonClick), buttonControl);
 	} else {
 		fprintf(stderr, "ERROR: No icon provided for regular button\n");
 		g_free(buttonControl);

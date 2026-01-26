@@ -177,7 +177,11 @@ const char * wGetAppWorkDir(
 		wNoticeEx( NT_ERROR, _("HOME is not set"), _("Exit"), NULL);
 		wExit(0);
 	}
+#if XTRKCAD_BUILD_FLATPAK
+	sprintf( appWorkDir, "%s/.%s-fp", homeDir, wlibGetAppName() );
+#else
 	sprintf( appWorkDir, "%s/.%s", homeDir, wlibGetAppName() );
+#endif
 #ifndef __APPLE__
 	if ( strstr( XTRKCAD_VERSION, "Beta" ) != NULL ) {
 		strcat( appWorkDir, "-beta" );
@@ -197,7 +201,11 @@ const char * wGetAppWorkDir(
 			 */
 			struct stat stFileInfo;
 			char appEtcConfig[BUFSIZ];
+#if XTRKCAD_BUILD_FLATPAK
+			sprintf( appEtcConfig, "/etc/%s-fp.rc", wlibGetAppName());
+#else
 			sprintf( appEtcConfig, "/etc/%s.rc", wlibGetAppName());
+#endif
 
 			if ( stat( appEtcConfig, &stFileInfo ) == 0 ) {
 				char copyConfigCmd[(BUFSIZ * 2) + 3];
@@ -255,10 +263,10 @@ dynArr_t prefs_da;
 wBool_t prefInitted = FALSE;
 
 /**
- * Define the name of the configuration file. Needed size is calculated, allocated and 
+ * Define the name of the configuration file. Needed size is calculated, allocated and
  * initialized with the filename
- * 
- * \param name overwrite default configuration 
+ *
+ * \param name overwrite default configuration
  */
 
 void static
@@ -274,7 +282,7 @@ wlibSetProfileFilename(char *name)
 		profileFile = malloc(length);
 		snprintf( profileFile, length, "%s", name );
 	} else {
-		size_t length; 
+		size_t length;
 		length = snprintf(profileFile, 0, "%s/%s.rc", workDir, wConfigName );
 		length += sizeof("");
 		profileFile = malloc(length);
@@ -595,16 +603,16 @@ void wPrefReset(
 /**
  * Split a line from the config file ie. rc ini-file into separate tokens. The
  * line is split into sections, name of value and value following. Pointers
- * to the respective token are returned. These are zero-terminated. 
- * If a token is not present, NULL is returned instead. 
+ * to the respective token are returned. These are zero-terminated.
+ * If a token is not present, NULL is returned instead.
  * The input line is modified.
- * 
+ *
  * \param line		input line, modified during excution of function
  * \param section	section if present
  * \param name		name of config value if present
  * \param value		name of value if present
  */
-void 
+void
 wPrefTokenize(char* line, char** section, char** name, char** value)
 {
 	*section = NULL;
@@ -620,18 +628,18 @@ wPrefTokenize(char* line, char** section, char** name, char** value)
 }
 
 /**
- * A valid line for a config file is created from the individual elements. 
- * Values not need for specific statement are ignored. Eg. when section is 
- * present, name and value are not used. 
+ * A valid line for a config file is created from the individual elements.
+ * Values not need for specific statement are ignored. Eg. when section is
+ * present, name and value are not used.
  * The caller has to make sure, that the return buffer is large enough.
- * 
+ *
  * \param section	section, first token, dellimited with '.'
  * \param name		name, left side of ':'
  * \param value		value, right side of ':'
- * \param result	pointer to buffer for formated line. 
+ * \param result	pointer to buffer for formated line.
  */
 
-void 
+void
 wPrefFormatLine(const char* section, const char* name, const char* value, char* result)
 {
 	if (!value || *value == '\0') {
