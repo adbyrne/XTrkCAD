@@ -40,6 +40,13 @@
 #include "../gtkint.h"
 #include "i18n.h"
 
+#include "xtrkcad-config.h"
+#if XTRKCAD_BUILD_FLATPAK
+#define FP_WORK_SUFFIX "-fp"
+#else
+#define FP_WORK_SUFFIX ""
+#endif
+
 static char *appLibDir;
 static char *appWorkDir;
 static char *userHomeDir;
@@ -67,7 +74,7 @@ static char *userHomeDir;
 	} else {
 		pBuf[0] = '\0';
 	}
-	(void)dirname(pBuf);		
+	(void)dirname(pBuf);
 	return strlen(pBuf);
  }
 
@@ -94,7 +101,7 @@ IsExistingDirectory( char *name)
  * Find the directory where configuration files, help, demos etc are installed.
  *
  * Windows: the directory is expected to be at ..\share\xtrkcad
- * 
+ *
  * Unix: The search order is:
  *  1. Directory specified by the XTRKCADLIB environment variable
  *  2. relative path ../xtrkcad from the installation directory
@@ -110,7 +117,7 @@ const char * wGetAppLibDir( void )
 	char *envvar;
 	char pBuf[256];
 	pBuf[0] = '\0'; //Initialize buffer
-	ssize_t len = sizeof(pBuf); 
+	ssize_t len = sizeof(pBuf);
 
 	char *searchDirs[PATHOPTIONMAX];
 	unsigned option = 0;
@@ -145,7 +152,7 @@ const char * wGetAppLibDir( void )
 		ep = g_canonicalize_filename ("../share/", NULL);
 	} else {
 		ep = g_canonicalize_filename ("../share/", pBuf);
-	}	
+	}
 	searchDirs[ option++ ]= g_strdup_printf("%s/%s", ep, wlibGetAppName());
 	g_free(ep);
 
@@ -223,7 +230,7 @@ const char * wGetAppWorkDir(
 	if ( strstr( XTRKCAD_VERSION, "Beta" ) != NULL ) {
 		sBeta = "-beta";
 	}
-	appWorkDir = g_strdup_printf( "%s/.%s%s", homeDir, wlibGetAppName(), sBeta );
+	appWorkDir = g_strdup_printf( "%s/.%s%s%s", homeDir, wlibGetAppName(), FP_WORK_SUFFIX, sBeta );
 
 	if (!IsExistingDirectory(appWorkDir)) {
 		if ( g_mkdir( appWorkDir, 0777 ) == -1 ) {
@@ -251,14 +258,14 @@ const char * wGetAppWorkDir(
 				g_free(copyConfigCmd);
 			}
 			g_free(appEtcConfig);
-			
+
 		}
 	}
 	return appWorkDir;
 }
 
 /**
- * Get the user's home directory. 
+ * Get the user's home directory.
  *
  * \return    pointer to the user's home directory
  */
