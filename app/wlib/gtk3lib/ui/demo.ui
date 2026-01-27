@@ -8,15 +8,16 @@
         <property name="use-header-bar">0</property>
         <property name="resizable">False</property>
         <child type="action">
-            <object class="GtkButton" id="quit">
+            <object class="GtkButton" id="id_ok">
                 <property name="use-underline">True</property>
+                <property name="can-default">True</property>
                 <property name="label">_Finish</property>
                 <property name="visible">True</property>
             </object>
         </child>
-        <!--         <action-widgets>
-            <action-widget response="GTK_RESPONSE_CANCEL">id_cancel</action-widget>
-        </action-widgets> -->
+        <action-widgets>
+            <action-widget response="GTK_RESPONSE_OK">id_ok</action-widget>
+        </action-widgets>
         <child internal-child="vbox">
             <object class="GtkBox">
                 <property name="can-focus">False</property>
@@ -67,13 +68,18 @@
                                 <property name="can-focus">False</property>
                                 <property name="spacing">6</property>
                                 <child>
-                                    <object class="GtkToggleButton" id="autoplay">
-                                        <property name="label">_Auto Play</property>
+                                    <object class="GtkBox" id="autoplay">
                                         <property name="visible">True</property>
-                                        <property name="can-focus">True</property>
-                                        <property name="receives-default">True</property>
-                                        <property name="use-underline">True</property>
-                                        <property name="image-position">right</property>
+                                        <child>
+                                            <object class="GtkToggleButton" >
+                                                <property name="label">_Auto Play</property>
+                                                <property name="visible">True</property>
+                                                <property name="can-focus">True</property>
+                                                <property name="receives-default">True</property>
+                                                <property name="use-underline">True</property>
+                                                <property name="image-position">right</property>
+                                            </object>
+                                        </child>
                                     </object>
                                     <packing>
                                         <property name="expand">False</property>
@@ -178,7 +184,8 @@
     </object>
     <object class="GtkSizeGroup">
         <widgets>
-            <widget name="step" />> <widget name="autoplay" />
+            <widget name="step" />
+            <widget name="autoplay" />
             <widget name="next" />
         </widgets>
     </object>

@@ -671,6 +671,8 @@ static wButton_p demoPause;
 static BOOL_T playbackNonStop = FALSE;
 
 static int playbackKeyState;
+static int autoplayState;
+
 
 static void DoDemoButton( void * context );
 static paramTextData_t demoTextData = { 50, 16 };
@@ -681,16 +683,13 @@ static paramData_t demoPLs[] = {
 #define I_DEMONEXT		(1)
 #define demoNext		(demoPLs[I_DEMONEXT].control)
 	{   PD_BUTTON, DoDemoButton, "next", PDO_NORECORD|PDO_DLGHORZ, NULL, NULL, 0, I2VP(1) },
-#define I_DEMOQUIT		(2)
-#define demoQuit		(demoPLs[I_DEMOQUIT].control)
-	{   PD_BUTTON, DoDemoButton, "quit", PDO_NORECORD|PDO_DLGHORZ, NULL, NULL, BB_CANCEL, I2VP(3) },
-#define I_DEMOSPEED		(3)
+#define I_DEMOSPEED		(2)
 #define demoSpeedL		(demoPLs[I_DEMOSPEED].control)
 	{   PD_COMBOLIST, &playbackSpeed, "speed", PDO_NORECORD|PDO_LISTINDEX|PDO_DLGHORZ, I2VP(80), NULL },
-#define I_DEMOAUTOPLAY		(4)
+#define I_DEMOAUTOPLAY		(3)
 #define demoAutoPlay		(demoPLs[I_DEMOAUTOPLAY].control)
-	{   PD_BUTTON, DoDemoButton, "autoplay", PDO_NORECORD|PDO_DLGHORZ, NULL, NULL, 0, I2VP(4) },
-#define I_DEMOTEXT		(5)
+	{   PD_TOGGLE, &autoplayState, "autoplay", PDO_NORECORD|PDO_DLGHORZ, NULL, NULL, 0, I2VP(3) },
+#define I_DEMOTEXT		(4)
 #define demoT			(demoPLs[I_DEMOTEXT].control)
 	{   PD_TEXT, NULL, "text", PDO_NORECORD|PDO_DLGRESIZE, &demoTextData, NULL, BT_CHARUNITS|BO_READONLY}
 };
@@ -1445,8 +1444,8 @@ static void CreateDemoW( void )
 {
 	char * title = MakeWindowTitle(_("Demo"));
 	demoW = FormCreateDialog( &demoPG, title, 
-							  NULL, NULL, 
-							  N_("Cancel"), ParamCancel_Null,
+							  N_("Finish"), FormButtonOk, 
+							  NULL, NULL,
 							  FALSE, F_RESIZE, DemoDlgUpdate );
 
 	wComboBoxAddValue( demoSpeedL, _("Slowest"),  I2VP(0) );
