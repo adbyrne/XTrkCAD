@@ -39,6 +39,7 @@ extern void ToolbarSetHeight(wWinPix_t newHeight);
 
 extern void InitToolbar(void);
 extern void ToolbarButtonBusy(wIndex_t button, wBool_t busy);
+extern wControl_p ToolbarButtonGetControl( wIndex_t );
 extern int ToolbarGetButtonSticky(wIndex_t button);
 extern void ToolbarButtonEnable(wIndex_t button, wBool_t enable);
 extern void ToolbarButtonEnableIfSelect(bool selected);

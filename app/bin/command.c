@@ -602,29 +602,17 @@ EXPORT void PlaybackCommand(const char * line, wIndex_t lineNum)
 		}
 		if (strcmp(line + 8, "Undo") == 0) {
 			if (buttInx > 0 && playbackTimer == 0) {
-				ToolbarButtonBusy(buttInx, TRUE);
-				wFlush();
-				wPause(500);
-				ToolbarButtonBusy(buttInx, FALSE);
-				wFlush();
+				SimulateButtonClick( ToolbarButtonGetControl(buttInx) );
 			}
 			UndoUndo(NULL);
 		} else if (strcmp(line + 8, "Redo") == 0) {
 			if (buttInx >= 0 && playbackTimer == 0) {
-				ToolbarButtonBusy(buttInx, TRUE);
-				wFlush();
-				wPause(500);
-				ToolbarButtonBusy(buttInx, FALSE);
-				wFlush();
+				SimulateButtonClick( ToolbarButtonGetControl(buttInx) );
 			}
 			UndoRedo(NULL);
 		} else {
 			if (buttInx >= 0 && playbackTimer == 0) {
-				ToolbarButtonBusy(buttInx, TRUE);
-				wFlush();
-				wPause(500);
-				ToolbarButtonBusy(buttInx, FALSE);
-				wFlush();
+				SimulateButtonClick( ToolbarButtonGetControl(buttInx) );
 			}
 			DoCommandB(I2VP(inx));
 		}

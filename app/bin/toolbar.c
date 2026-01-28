@@ -369,7 +369,19 @@ EXPORT wBool_t ToolbarGetButtonSticky(wIndex_t button)
 
 EXPORT void ToolbarButtonBusy(wIndex_t button, wBool_t busy)
 {
-	wStickySetBusy(buttonList[button].control, busy);
+	wButtonSetBusy(buttonList[button].control, busy);
+}
+
+/**
+ * Return the control for button
+ *
+ * \param button
+ * \return the control
+ */
+
+EXPORT wControl_p ToolbarButtonGetControl( wIndex_t button )
+{
+	return buttonList[button].control;
 }
 
 /**
