@@ -37,7 +37,6 @@
 #include "resources.h"
 #include "symbols.h"
 
-#define CSS_FILENAME "xtrackcad.css"
 #define XTRKCAD_APPL_ID "org.xtrackcad.wlib"
 
 static char *appName;  /**< application name */
@@ -93,6 +92,12 @@ LoadStyles(void)
 }
 
 static void
+activate(GtkApplication *app, gpointer user_data)
+{
+	// signal is not handled by xtrackcad, so a dummy is needed
+}
+
+static void
 startup(GtkApplication *app)
 {
 	g_resources_register(wlib_get_resource());
@@ -100,13 +105,13 @@ startup(GtkApplication *app)
 
 	// debugging aid: show files in the resource
 	// GError *error = NULL;
-	//char** children = g_resource_enumerate_children(wlib_get_resource(), "/", G_RESOURCE_LOOKUP_FLAGS_NONE, &error);
+	// char** children = g_resource_enumerate_children(wlib_get_resource(), "/", G_RESOURCE_LOOKUP_FLAGS_NONE, &error);
 
-	//for (int i = 0; children[i] != NULL; i++) {
-	//	printf("%s\n", children[i]);
-	//}
+	// for (int i = 0; children[i] != NULL; i++) {
+	// 	printf("%s\n", children[i]);
+	// }
 
-	//g_strfreev(children);
+	// g_strfreev(children);
 
 	// children = g_resource_enumerate_children(symbols_get_resource(), "/", G_RESOURCE_LOOKUP_FLAGS_NONE, &error);
 	//
@@ -164,16 +169,20 @@ int main(int argc, char *argv[])
 	if (!app_id || !*app_id) {
 		app_id = XTRKCAD_APPL_ID;
 	}
-	app = gtk_application_new(app_id, G_APPLICATION_HANDLES_COMMAND_LINE | G_APPLICATION_NON_UNIQUE);
+
+	gtk_init(&argc, &argv);
+
+	app = gtk_application_new(app_id, G_APPLICATION_NON_UNIQUE);
 
 	g_signal_connect(app, "command-line", G_CALLBACK(command_line), NULL );
 	g_signal_connect(app, "startup", G_CALLBACK(startup), NULL);
+	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
 
 	myargc = argc;
 	myargv = argv;
 	wExecutableName = argv[0];
 
-	status = g_application_run(G_APPLICATION(app), argc, argv);
+	status = g_application_run(G_APPLICATION(app), 0, NULL);
 
 	g_object_unref(app);
 

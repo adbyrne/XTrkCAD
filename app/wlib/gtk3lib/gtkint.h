@@ -47,6 +47,8 @@
 
 extern wWin_p gtkMainW;
 
+#define CSS_FILENAME "xtrackcad.css"
+
 extern int wlibRecursionTrace;
 
 #ifdef CURSOR_SURFACE
@@ -92,8 +94,6 @@ typedef enum {
 typedef void (*repaintProcCallback_p)( wControl_p );
 typedef void (*doneProcCallback_p)( wControl_p b );
 typedef void (*setTriggerCallback_p)( wControl_p b );
-
-
 
 /*
  * Definition of attributes structs for the controls. Combining them into one

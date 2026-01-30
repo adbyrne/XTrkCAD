@@ -1,4 +1,3 @@
-
 /* background and text colors  for status bar */
 .statusbar {
     background-image: none;
@@ -6,19 +5,19 @@
     color: white;
     min-height: 24px;
 }
-/* 
+/*
 entry.statusbar {
     background-color:rgb(192, 192, 192);
    outline:none;
 } */
 
 /* define font sizes for labels */
-.smallLabel { 
-    font-size: 70% 
+.smallLabel {
+    font-size: 70%;
 }
 
-.largeLabel { 
-    font-size: 140% 
+.largeLabel {
+    font-size: 140%;
 }
 
 .toolbar-button {
@@ -32,8 +31,8 @@ entry.statusbar {
 
 .toolbar-button:hover {
     background: lightblue;
-    border-style:solid;
-    border-color:blue;
+    border-style: solid;
+    border-color: blue;
 }
 
 .split-dropdown {
@@ -56,9 +55,9 @@ entry.statusbar {
 }
 
 .flat-button {
-    border: none; 
+    border: none;
     box-shadow: none;
-    margin: 0px; 
+    margin: 0px;
     padding: 0px;
 }
 
@@ -66,7 +65,7 @@ entry.statusbar {
 button.color {
     border: none;
     box-shadow: none;
-    margin: 0px; 
+    margin: 0px;
     padding: 0px;
 }
 
@@ -74,9 +73,8 @@ scrolledwindow checkbutton {
     padding: 0px;
 }
 
-framed box
-box.framed {
-    border:1px solid rgb(192, 192, 192)
+framed box box.framed {
+    border: 1px solid rgb(192, 192, 192);
 }
 
 /* invalid value in entry */
@@ -86,15 +84,15 @@ box.framed {
 
 .hilite {
     border: 1px solid orange;
-} 
+}
 
 combobox {
-    -GtkComboBox-appears-as-list: 1; 
+    -gtkcombobox-appears-as-list: 1;
 }
 
 @define-color contrasted_bg mix(@theme_fg_color, @theme_bg_color, 0.7);
 
 .tag {
     background-color: @contrasted_bg;
-    border-radius: 6px; 
+    border-radius: 6px;
 }

@@ -682,7 +682,7 @@ static void ApplySplitButtonStyle(GtkWidget* splitButton)
 
 		// Try to load from embedded resource first (void function, no return value)
 		gtk_css_provider_load_from_resource(cssProvider,
-		                                    XTRKCAD_RESOURCE_PATH "xtrkcad.css");
+		                                    XTRKCAD_RESOURCE_PATH CSS_FILENAME);
 
 		// If resource loading failed, it will have triggered a warning
 		// but we can't check it directly. Try file fallback.
