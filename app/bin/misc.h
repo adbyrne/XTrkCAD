@@ -274,6 +274,7 @@ extern wBool_t inPlayback;
 extern wBool_t inPlaybackQuit;
 extern wControl_p demoW;
 extern int curDemo;
+void SimulateButtonClick(wControl_p control);
 
 
 /* lprintf.c */

@@ -1679,13 +1679,13 @@ static int paramCheckErrorCount = 0;
 
 static BOOL_T disablePlaybackDelays = FALSE;
 
-static void SimulateButtonClick(wButton_p control)
+void SimulateButtonClick(wControl_p control)
 {
 	if (!disablePlaybackDelays && control) {
-		wButtonSetBusy(control, TRUE);
+		wControlHilite(control, TRUE);
 		wFlush();
 		wPause(500);
-		wButtonSetBusy(control, FALSE);
+		wControlHilite(control, FALSE);
 		wFlush();
 	}
 }
@@ -1752,22 +1752,14 @@ static void ParamPlayback( char * line )
 			continue;
 		len = len1 + 1 + len2 + 1;
 		if ( p->type != PD_DRAW && p->type != PD_MESSAGE && p->type != PD_MENU && p->type != PD_MENUITEM )
-			//ParamHilite( p->group->win, p->control, TRUE );
 			if ( p->control ) wControlHilite( p->control, TRUE );
 		switch (p->type) {
 			case PD_BUTTON:
 				if (p->valueP)
 					 ((wButtonCallBack_p)(p->valueP))( p->context );
-				SimulateButtonClick( p->control );
-#ifdef LATER
-				if (playbackTimer == 0 && p->control) {
-					wButtonSetBusy( (wButton_p)p->control, TRUE );
-					wFlush();
-					wPause( 500 );
-					wButtonSetBusy( (wButton_p)p->control, FALSE );
-					wFlush();
+				if ( playbackTimer == 0 ) {
+					SimulateButtonClick( p->control );
 				}
-#endif
 				break;
 			case PD_LONG:
 				valL = atol( line+len );
@@ -1921,7 +1913,6 @@ static void ParamPlayback( char * line )
 				break;
 			}
 		if ( p->type != PD_DRAW && p->type != PD_MESSAGE && p->type != PD_MENU && p->type != PD_MENUITEM )
-			//ParamHilite( p->group->win, p->control, FALSE );
 			if ( p->control ) wControlHilite( p->control, FALSE );
 #ifdef HUH
 		pg->action |= p->change;
@@ -1930,29 +1921,19 @@ static void ParamPlayback( char * line )
 	}
 	button = NULL;
 	if ( strcmp("ok", line+len1+1) == 0 ) {
-		//ParamHilite( pg->win, (wControl_p)pg->okB, TRUE );
 		if ( pg->okB ) wControlHilite( (wControl_p)pg->okB, TRUE );
 		if ( pg->okProc )
 			pg->okProc( pg );
 		button = pg->okB;
 	} else if ( strcmp("cancel", line+len1+1) == 0 ) {
-		//ParamHilite( pg->win, (wControl_p)pg->cancelB, TRUE );
 		if ( pg->cancelB ) wControlHilite( (wControl_p)pg->cancelB, TRUE );
 		if ( pg->cancelProc )
 			pg->cancelProc( pg );
 		button = pg->cancelB;
 	}
-	SimulateButtonClick( button );
-#ifdef LATER
-	if ( playbackTimer == 0 && button ) {
-		wButtonSetBusy( button, TRUE );
-		wFlush();
-		wPause( 500 );
-		wButtonSetBusy( button, FALSE );
-		wFlush();
+	if ( playbackTimer == 0 ) {
+		SimulateButtonClick( button );
 	}
-#endif
-	//ParamHilite( pg->win, (wControl_p)button, FALSE );
 	if ( button ) wControlHilite( (wControl_p)button, FALSE );
 	if ( !button )
 		NoticeMessage( "Unknown PARAM: %s", _("Ok"), NULL, line );
