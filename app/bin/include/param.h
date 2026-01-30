@@ -105,8 +105,9 @@ typedef enum {
 
 #define LIST_NODATASTORE			(1L<<4)		/**< do not automatically create a liststore */
 
-
-typedef struct paramGroup_t *paramGroup_p;
+typedef struct paramGroup_t paramGroup_t;
+typedef paramGroup_t * paramGroup_p;
+typedef paramGroup_t const * paramGroup_cp;
 
 #define PDO_NORANGECHECK_LOW			(1<<0)
 #define PDO_NORANGECHECK_HIGH	(1<<1)
@@ -183,9 +184,9 @@ typedef void (*paramGroupProc_t) ( long, long );
 
 typedef void (*paramLayoutProc)( paramData_t *, int, wWinPix_t, wWinPix_t *,
                                  wWinPix_t * );
-typedef void (*paramActionOkProc)( void * );
-typedef void (*paramActionCancelProc)( paramGroup_p group );
-typedef wBool_t (*paramChangeProc)( paramGroup_p group, int index, void * value);
+typedef void (*paramActionOkProc)( void const * );
+typedef void (*paramActionCancelProc)( paramGroup_cp group );
+typedef wBool_t (*paramChangeProc)( paramGroup_cp group, int index, void * value);
 
 typedef struct paramGroup_t {
 	char * nameStr;

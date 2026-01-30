@@ -555,7 +555,7 @@ EXPORT void wShow(wControl_p win)
 		}
 	}
 	if (win != mainW) {
-		char *title = wWinGetTitle(win);
+		char const *title = wWinGetTitle(win);
 		if(title && *title) {
 			wMenuListAdd(winList_mi, -1, title, win);
 		}
