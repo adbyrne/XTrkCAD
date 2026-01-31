@@ -253,7 +253,9 @@ const char * wGetAppWorkDir(
 				copyConfigCmd = g_strdup_printf( "cp %s %s",
 				                                 appEtcConfig,
 				                                 appWorkDir );
+#ifdef TODO_UNUSED
 				int rc = system( copyConfigCmd );
+#endif
 
 				g_free(copyConfigCmd);
 			}

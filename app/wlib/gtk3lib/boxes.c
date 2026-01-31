@@ -192,12 +192,14 @@ void wlibDrawBox(
  * \return
  */
 
+#ifdef TODO_NOTUSED
 static void boxRepaint(wControl_p b)
 {
     //wBox_p bb = (wBox_p)(b);
     //wWin_p win = bb->parent;
     //wlibDrawBox(win, bb->boxTyp, bb->realX, bb->realY, bb->w, bb->h);
 }
+#endif
 
 /**
  * Create new box

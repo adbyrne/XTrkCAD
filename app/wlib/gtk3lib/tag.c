@@ -58,7 +58,7 @@ wTagGetLabel(wControl_p tagControl)
         abort();
     }
     privateData = CONTROL_GET_ATTRIBUTES_PTR(tagControl, tag);
-    gtk_label_get_text(privateData->label);
+    return gtk_label_get_text(privateData->label);
 }
 
 static void 

@@ -101,6 +101,7 @@ const char *wEntryGetValue(
 	return gtk_entry_get_text(GTK_ENTRY(b->widget));
 }
 
+#ifdef TODO_UNUSED
 /**
  * Signal handler for 'activate' signal: enter pressed - callback with the
  * current value and then select the whole default value
@@ -141,7 +142,9 @@ static gboolean entryActivated(
 	gtk_editable_select_region( GTK_EDITABLE( widget ), 0, -1 );
 	return( TRUE );
 }
+#endif
 
+#ifdef TODO_UNUSED
 /**
  * Visually set the entry field to show whether the valus entered is valid.
  *
@@ -160,6 +163,7 @@ wlibEntrySetValid(wControl_p entry, bool valid)
 		gtk_style_context_add_class(context, "error");
 	}
 }
+#endif
 
 /**
  * Signal handler for changes in an entry field

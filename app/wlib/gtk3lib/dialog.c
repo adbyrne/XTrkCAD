@@ -311,7 +311,7 @@ wWinDialogCreate(wControl_p parent,
  * \param context      IN User context information
  * \return    handle for new window
  */
-
+#ifdef TODO_UNUSED
 static wWin_p wWinPopupCreate(
     wWindow_p parent,
     wWinPix_t x,
@@ -339,4 +339,4 @@ static wWin_p wWinPopupCreate(
     //    winProc, context);
     return win;
 }
-
+#endif

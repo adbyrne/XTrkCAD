@@ -558,6 +558,7 @@ AddIconToRow(struct list *lcontrol, GtkTreeIter *iterPointer, wIcon_p bm)
 	}
 }
 
+#ifdef TODO_UNUSED
 static void
 AddDataToRow(struct list* lcontrol, GtkTreeIter* iterPointer, const char* labelStr, va_list arguments)
 {
@@ -568,6 +569,7 @@ AddDataToRow(struct list* lcontrol, GtkTreeIter* iterPointer, const char* labelS
 		labelStr = va_arg(arguments, char*);
 	}
 }
+#endif
 
 static void
 AddDataArrayToRow(struct list* lcontrol, GtkTreeIter* iterPointer, char **data)

@@ -77,14 +77,18 @@ wBitmapViewCreate( wControl_p parent, wWinPix_t x, wWinPix_t y, long options,
 	const wIcon_p iconP )
 {
 	wControl_p bt;
+#ifdef TODO_UNUSED
 	struct bitmap* bm;
+#endif
 	GdkPixbuf *pixbuf = NULL;
 
 	g_assert(iconP->gtkIconType == ICON_PIXBUF_FROM_RESOURCE ||
 			iconP->gtkIconType == ICON_PIXBUF_FROM_TEXT);
 	
 	bt = wlibControlNew(B_BITMAP, parent, NULL, NULL);
+#ifdef TODO_UNUSED
 	bm = CONTROL_GET_ATTRIBUTES_PTR(bt, bitmap);
+#endif
 	
 	/* create the bitmap from supplied image attributes */
 		pixbuf = iconP->bits;
