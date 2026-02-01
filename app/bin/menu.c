@@ -480,7 +480,7 @@ static void InitDebug(const char * label, long * valueP)
 	memset(&debugPLs[debugCnt+1], 0, sizeof debugPLs[debugCnt]);
 	debugPLs[debugCnt+1].type = PD_LONG;
 	debugPLs[debugCnt+1].valueP = valueP;
-	debugPLs[debugCnt+1].nameStr = label;
+	debugPLs[debugCnt+1].nameStr = CAST_AWAY_CONST label;
 	debugPLs[debugCnt+1].winData = &r0_100;
 	debugPLs[debugCnt+1].winLabel = label;
 	debugCnt++;
@@ -1115,7 +1115,7 @@ static void MiscMenuItemCreate(wMenu_p m1, wMenu_p m2, const char * name,
 	menuPLs[menuPG.paramCnt].control = (wControl_p) mp;
 	menuPLs[menuPG.paramCnt].type = PD_MENUITEM;
 	menuPLs[menuPG.paramCnt].valueP = func;
-	menuPLs[menuPG.paramCnt].nameStr = name;
+	menuPLs[menuPG.paramCnt].nameStr = CAST_AWAY_CONST name;
 	menuPLs[menuPG.paramCnt].option = option;
 	menuPLs[menuPG.paramCnt].context = context;
 

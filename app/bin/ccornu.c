@@ -1917,6 +1917,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 
 }
 
+#ifdef TODO_UNUSED
 static void cornuModDlgUpdate(
         paramGroup_p pg,
         int inx,
@@ -1928,6 +1929,7 @@ static void cornuModDlgUpdate(
 	TempRedraw();
 
 }
+#endif
 
 /**
  * CmdCornuModify

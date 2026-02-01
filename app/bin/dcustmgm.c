@@ -37,7 +37,9 @@ static void CustomExport( void * action );
 static void CustomDone( void * action );
 static void SelectNew(void *context );
 
+#ifdef TODO_UNUSED
 static const char * customTypes[] = { "Car Part", "Car Prototype", NULL };
+#endif
 static wIndex_t selectedType;
 
 static wWinPix_t customListWidths[] = { 18, 100, 30, 80, 220 };
@@ -138,7 +140,7 @@ static void CustomEdit( void * action )
 static void
 SelectNew(void *context)
 {
-	unsigned index = (unsigned)context;
+	unsigned index = (unsigned)VP2L(context);
 	void(*handler)(void);
 	const char *label;
 	paramData_p menuItem = customPLs+index;;
@@ -402,7 +404,9 @@ static void CustMgmChange( long changes )
 
 static void DoCustomMgr( void * junk )
 {
+#ifdef TODO_UNUSED
 	int i = 0;
+#endif
 
 	if (customPG.win == NULL) {
 		FormCreateDialog( &customPG, MakeWindowTitle(_("Manage custom designed parts")), 

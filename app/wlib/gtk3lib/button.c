@@ -53,12 +53,16 @@ int wlibRecursionTrace = 0;
  */
 
 
+
+#ifdef TODO_UNUSED
 static void
 DestroyImage(GtkWidget* image, gpointer unused)
 {
 	gtk_widget_destroy(image);
 }
+#endif
 
+#ifdef TODO_UNUSED
 static GtkWidget *
 SetPixbufToButton(GtkWidget* button, GdkPixbuf* pixbuf)
 {
@@ -76,7 +80,9 @@ SetPixbufToButton(GtkWidget* button, GdkPixbuf* pixbuf)
 
 	return(image);
 }
+#endif
 
+#ifdef TODO_UNUSED
 static void
 RemovePixbuf(GtkWidget *button)
 {
@@ -87,6 +93,7 @@ RemovePixbuf(GtkWidget *button)
 		}
 	}
 }
+#endif
 
 bool
 IsNewIcon(wIcon_p new, wIcon_p old)
@@ -192,6 +199,7 @@ static void buttonClick(
 }
 
 
+#ifdef TODO_UNUSED
 /**
  * Called after expose event default hander - allows the button to be outlined
  */
@@ -202,6 +210,7 @@ static wBool_t drawButton(
 {
 	return wControlExpose(widget, cr, (wControl_p)g);
 }
+#endif
 
 #define REPEAT_INITIAL_DELAY 500
 #define REPEAT_DELAY 150
@@ -393,6 +402,7 @@ wControl_p wButtonCreate(
 	return b;
 }
 
+#ifdef TODO_UNUSED
 static char* down16[] = {
 	"7 4 5 1",
 	" 	c None",
@@ -405,7 +415,7 @@ static char* down16[] = {
 	" +.@#+ ",
 	"  +.+  "
 };
-
+#endif
 
 /**
  * Create a toolbar button

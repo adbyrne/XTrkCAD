@@ -340,6 +340,7 @@ wlibNewComboBox(GtkListStore *ls, int editable)
 	return (widget);
 }
 
+#ifdef TODO_UNUSED
 /**
  * Signal handler for the "changed"-signal in combobox's entry field.
  * Get the entered text and calls the 'action' for handling of entered
@@ -369,6 +370,7 @@ static void ComboBoxEntryEntered(
 		wBeep();
 	}
 }
+#endif
 
 /**
  * Create a combobox. The combobox is created having one text column.

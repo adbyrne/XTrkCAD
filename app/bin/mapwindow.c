@@ -275,8 +275,11 @@ static wBool_t MapRedraw( wControl_p bd, void* pContex, wWinPix_t px,
  *
  * \param reset IN
  */
+
+#ifdef TODO_UNUSED
 static int mapBorderH = 24;
 static int mapBorderW = 24;
+#endif
 
 void MapChangeScale()
 {

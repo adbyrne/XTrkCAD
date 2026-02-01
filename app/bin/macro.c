@@ -1431,7 +1431,7 @@ static void DoDemoButton( void * command )
 
 
 static void DemoDlgUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void * valueP )
 {
@@ -1699,7 +1699,7 @@ void SimulateButtonClick(wControl_p control)
 
 static void ParamPlayback( char * line )
 {
-	const paramGroup_t * pg;
+	paramGroup_cp pg;
 	paramData_p p;
 	long valL;
 	FLOAT_T valF, valF1;
@@ -1951,7 +1951,7 @@ static void ParamPlayback( char * line )
 
 static void ParamCheck( char * line )
 {
-	const paramGroup_t * pg;
+	paramGroup_cp pg;
 	paramData_p p;
 	long valL;
 	FLOAT_T valF, diffF;
@@ -2085,7 +2085,7 @@ static void ParamCheck( char * line )
 
 
 static long ParamIntRestore(
-		paramGroup_p pg,
+		paramGroup_cp pg,
 		int class )
 {
 	long change = 0;
@@ -2201,7 +2201,7 @@ static long ParamIntRestore(
 
 
 static void ParamIntSave(
-		paramGroup_p pg,
+		paramGroup_cp pg,
 		int class )
 {
 	paramData_p p;
@@ -2249,7 +2249,7 @@ static void ParamIntSave(
 
 EXPORT void ParamRestoreAll( void )
 {
-	for ( const paramGroup_p * ppg = DialogGroupIter( NULL ); ppg; ppg = DialogGroupIter( ppg ) ) {
+	for ( paramGroup_cp * ppg = DialogGroupIter( NULL ); ppg; ppg = DialogGroupIter( ppg ) ) {
 		ParamIntRestore( *ppg, 1 );
 	}
 	if ( paramCheckErrorCount > 0 ) {
@@ -2260,9 +2260,9 @@ EXPORT void ParamRestoreAll( void )
 
 EXPORT void ParamSaveAll( void )
 {
-	for ( const paramGroup_p *ppg = DialogGroupIter( NULL ); ppg; ppg = DialogGroupIter( ppg ) ) {
+	for ( paramGroup_cp *ppg = DialogGroupIter( NULL ); ppg; ppg = DialogGroupIter( ppg ) ) {
 		ParamIntSave( *ppg, 1 );
-		(*ppg)->action = 0;
+		((paramGroup_p)(*ppg))->action = 0; // CAST_AWAY_CONST - TODO why?
 	}
 	paramCheckErrorCount = 0;
 }
@@ -2297,7 +2297,7 @@ void ParamDlgProc(
 		void * refresh,
 		void * data )
 {
-	paramGroup_p pg = (paramGroup_p)data;
+	paramGroup_cp pg = (paramGroup_cp)data;
 	switch (e) {
 	case wClose_e:
 		if ( pg->changeProc )

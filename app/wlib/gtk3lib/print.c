@@ -38,8 +38,13 @@ static GtkPageSetup* page_setup;			/**< current paper settings */
 #define PAGESETTINGS "xtrkcad.page"			/**< filename for page settings */
 #define PRINTSETTINGS "xtrkcad.printer"		/**< filename for printer settings */
 
+// defined in /usr/lib/x86_64-linux-gnu/glib-2.0/include/glibconfig.h
+#ifndef TRUE
 #define TRUE 1
+#endif
+#ifndef FALSE
 #define FALSE 0
+#endif
 
 static double paperWidth;		/**< physical paper width */
 static double paperHeight;		/**< physical paper height */

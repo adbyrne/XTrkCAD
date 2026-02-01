@@ -49,8 +49,7 @@ TopicToUrl(gchar** helpUrl, const char* topic)
 
 	*helpUrl = g_strdup_printf( "file:///%s/html/%s.html",
 	                            wGetAppLibDir(),
-	                            temp,
-	                            NULL);
+	                            temp);
 	g_free(temp);
 }
 

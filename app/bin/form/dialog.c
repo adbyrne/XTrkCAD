@@ -36,9 +36,9 @@ EXPORT char* prefSect = "DialogItem";
 static dynArr_t dialogGroups_da;
 #define dialogGroups(N) DYNARR_N( paramGroup_p, dialogGroups_da, N )
 
-EXPORT const paramGroup_p DialogGroupFind( const char* sName )
+EXPORT paramGroup_cp DialogGroupFind( const char* sName )
 {
-	for ( paramGroup_p * ppg = DialogGroupIter(NULL); ppg; ppg = DialogGroupIter( ppg ) ) {
+	for ( paramGroup_cp * ppg = DialogGroupIter(NULL); ppg; ppg = DialogGroupIter( ppg ) ) {
 		if ( (*ppg)->nameStr == NULL ) { continue; }
 		size_t len = strlen( (*ppg)->nameStr );
 		if ( strncmp( (*ppg)->nameStr, sName, len ) == 0 &&
@@ -49,12 +49,12 @@ EXPORT const paramGroup_p DialogGroupFind( const char* sName )
 	return NULL;
 }
 
-EXPORT const paramGroup_p * DialogGroupIter( const paramGroup_p * ppg )
+EXPORT paramGroup_cp * DialogGroupIter( paramGroup_cp * ppg )
 {
 	if ( ppg == NULL ) {
 		return &dialogGroups(0);
 	}
-	if ( ppg >= &DYNARR_LAST( paramGroup_p, dialogGroups_da ) ) {
+	if ( ppg >= &DYNARR_LAST( paramGroup_cp, dialogGroups_da ) ) {
 		return NULL;
 	} 
 	ppg++;

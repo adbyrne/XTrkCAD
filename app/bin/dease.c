@@ -222,6 +222,7 @@ static void EasementDlgUpdate(
 }
 
 
+#ifdef TODO_UNUSED
 static void LayoutEasementW(
         paramData_t * pd,
         int inx,
@@ -234,6 +235,7 @@ static void LayoutEasementW(
 		                wControlGetPosY(easementPLs[0].control) );
 	}
 }
+#endif
 
 
 static void DoEasement( void * unused )

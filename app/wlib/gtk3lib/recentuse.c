@@ -101,7 +101,7 @@ static void ActivateListMenuItem(
 	if (ru->action) {
 		(*ru->action)(0,
 		              gtk_menu_item_get_label(GTK_MENU_ITEM(userdata->menuentry)),
-		              userdata->context);
+		              (char *)userdata->context); // CAST_AWAY_CONST
 	}
 
 	//// update order of elements in list

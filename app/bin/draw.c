@@ -1162,14 +1162,16 @@ EXPORT drawCmd_t tempD = {
  */
 
 
+#define NUM_INFOCTL				(4)
+#ifdef TODO_UNUSED
 static wWinPix_t info_yb_offset = 2;
 static wWinPix_t six = 2;
 static wWinPix_t info_xm_offset = 2;
 static wWinPix_t messageOrControlX = 0;
 static wWinPix_t messageOrControlY = 0;
-#define NUM_INFOCTL				(4)
 static wControl_p curInfoControl[NUM_INFOCTL];
 static wWinPix_t curInfoLabelWidth[NUM_INFOCTL];
+#endif
 
 
 

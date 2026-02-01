@@ -165,8 +165,9 @@ void wlibAddTooltip(
 
     if (dialogItem==NULL || *dialogItem==0)
         return;
-    if ( tooltipsTexts == NULL )
+    if ( tooltipsTexts == NULL ) {
         return;
+    }
 
 	if (dialog) {
 		g_string_printf(tooltip, "%s-%s", dialog, dialogItem);

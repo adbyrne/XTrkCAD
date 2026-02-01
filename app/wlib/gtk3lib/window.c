@@ -48,10 +48,15 @@ wWin_p gtkMainW;
 
 extern wBool_t listHelpStrings;
 
-static wControl_p firstWin = NULL, lastWin;
+static wControl_p firstWin = NULL;
+#ifdef TODO_UNUSED
+static wControl_p lastWin;
+#endif
 
 static wBool_t gtkBlockEnabled = TRUE;
+#ifdef TODO_UNUSED
 static wBool_t maximize_at_next_show = FALSE;
+#endif
 
 
 /*
@@ -68,12 +73,14 @@ static wBool_t maximize_at_next_show = FALSE;
  *
  */
 
+#ifdef TODO_UNUSED
 static GdkRectangle getMonitorDimensions(GtkWidget * widget) 
 {
     /** TODO: monitor dimensions are returned to caller, better call with reference ?*/
     	static GdkRectangle monitor_dimensions;
-
+#ifdef TODO_UNUSEDD
 	GdkScreen *screen = NULL;
+#endif
 
 	GdkMonitor *monitor;
 
@@ -102,6 +109,7 @@ static GdkRectangle getMonitorDimensions(GtkWidget * widget)
 
 	return monitor_dimensions;
 }
+#endif
 
 /**
  * Get the window size from the resource (.rc) file.  The size is saved under the key
@@ -111,6 +119,7 @@ static GdkRectangle getMonitorDimensions(GtkWidget * widget)
  * \param nameStr IN window name
  */
 
+#ifdef TODO_UNUSED
 static void getWinSize(wWin_p win, const char * nameStr)
 {
     int w=50, h=50;
@@ -155,6 +164,7 @@ static void getWinSize(wWin_p win, const char * nameStr)
 	win->h = win->origY = h;
 
 }
+#endif
 
 /**
  * Save the window size to the resource (.rc) file.  The size is saved under the key
@@ -168,7 +178,7 @@ static void saveSize(wWin_p win)
 
     if ((win->option&F_RECALLSIZE) &&
             gtk_widget_get_visible(GTK_WIDGET(win->gtkwin))) {
-        char pos_s[20];
+        char pos_s[40];
 
         sprintf(pos_s, "%ld %ld", win->w,
                 (win->h-(BORDERSIZE + ((win->option&F_MENUBAR)?MENUH:0))));
@@ -183,6 +193,7 @@ static void saveSize(wWin_p win)
  * \param win IN window
  */
 
+#ifdef TODO_UNUSED
 static void getPos(wWin_p win)
 {
     char *cp1, *cp2;
@@ -227,6 +238,7 @@ static void getPos(wWin_p win)
         }
     }
 }
+#endif
 
 /**
  * Save the window position to the resource (.rc) file.  The position is saved under the key
@@ -268,7 +280,9 @@ void wWinGetSize(
     wWinPix_t * height)	/* Returned window height */
 {
     GtkRequisition requisition;
+#ifdef TODO_UNUSEDD
     wWinPix_t w, h;
+#endif
     gtk_widget_get_preferred_size(win->widget, NULL, &requisition);
 
     *width = requisition.width;
@@ -563,7 +577,9 @@ void wWinClear(
 void wWinDoCancel(
     wWin_p win)
 {
+#ifdef TODO_UNUSEDD
     wControl_p b;
+#endif
 
     //for (b=win->first; b; b=b->next) {
     //    if ((b->type == B_BUTTON) && (b->option & BB_CANCEL)) {
@@ -581,7 +597,7 @@ void wWinDoCancel(
  *
  ******************************************************************************
  */
-
+#ifdef TODO_UNUSED
 static int window_redraw(
     wWin_p win,
     wBool_t doWinProc)
@@ -600,7 +616,9 @@ static int window_redraw(
 
     return FALSE;
 }
+#endif
 
+#ifdef TODO_UNUSED
 static gint window_delete_event(
     GtkWidget *widget,
     GdkEvent *event,
@@ -634,7 +652,9 @@ static gint window_delete_event(
 
     return (TRUE);
 }
+#endif
 
+#ifdef TODO_UNUSED
 static int fixed_draw_event(
     GtkWidget * widget,
     cairo_t *cr,
@@ -659,7 +679,9 @@ static int fixed_draw_event(
 #endif
     return rc;
 }
+#endif
 
+#ifdef TODO_UNUSED
 static int resizeTime(wControl_p win) 
 {
     struct window windowAttributes;
@@ -687,7 +709,9 @@ static int resizeTime(wControl_p win)
 	// }
 	return TRUE;							//Will redrive after another timer interval
 }
+#endif
 
+#ifdef TODO_UNUSED
 static int window_configure_event(
     GtkWidget * widget,
     GdkEventConfigure * event,
@@ -739,6 +763,7 @@ static int window_configure_event(
 
     return FALSE;
 }
+#endif
 
 /**
  * Event handler for window state changes (maximize)
@@ -773,6 +798,7 @@ gboolean window_state_event(
 
     return TRUE;
 }
+#ifdef TODO_UNUSED
 static gint window_char_event(
     GtkWidget * widget,
     GdkEventKey *event,
@@ -806,6 +832,7 @@ static gint window_char_event(
     //}
     return FALSE;
 }
+#endif
 
 void wSetGeometry(wControl_p win, wWinPix_t min_width, wWinPix_t max_width, wWinPix_t min_height, wWinPix_t max_height, wWinPix_t base_width, wWinPix_t base_height, double aspect_ratio ) {
 	GdkGeometry hints;
@@ -845,7 +872,10 @@ static char * xtcCustomStyle = " \
 void
 wlibCreateCustomStyle(void)
 {
+
+#ifdef TODO_UNUSED
 	GtkStyleContext *context;
+#endif
 	GError * error = NULL;
 
     GtkCssProvider *provider = gtk_css_provider_new();

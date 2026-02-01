@@ -486,7 +486,9 @@ FormatLayerName(unsigned int layerNumber)
 	return result;
 }
 
+#ifdef TODO_UNUSED
 static char *show_layer_bits;
+#endif
 
 static  long layerRawColorTab[] = {
 	wRGB(  0,   0, 192),    /* blue */

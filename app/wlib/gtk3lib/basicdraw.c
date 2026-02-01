@@ -69,8 +69,10 @@ BasicDrawSetLineType (cairo_t *cr, double lineWidth, double minLineWidth,
                       wDrawLineType_e lineType, wDrawOpts opts,
                       double scale_adjust)
 {
+#ifdef TODO_UNUSED
 	double dashes[] = { DASH_LENGTH, 3 };		//Reduce gap in between dashes
 	static int len_dashes = sizeof(dashes) / sizeof(dashes[0]);
+#endif
 
 	if (lineWidth < 0.0) {
 		lineWidth = P2I(-lineWidth) * 2.0 / scale_adjust;
