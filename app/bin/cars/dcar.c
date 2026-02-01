@@ -150,7 +150,9 @@ static paramData_t newCarPLs[] = {
 static paramGroup_t newCarPG = { "train-newcar", 0, newCarPLs, COUNT(newCarPLs) };
 EXPORT wControl_p newCarControls[2];
 static char newCarLabel1[STR_SIZE];
+#ifdef TODO_UNUSED
 static char* newCarLabels[2] = { newCarLabel1, NULL };
+#endif
 
 void CarUpdateHotbarList()
 {

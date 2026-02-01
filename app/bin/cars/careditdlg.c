@@ -1583,7 +1583,9 @@ void CarDlgError(
 {
 	p->bInvalid = !ok;
 	ParamHilite( p->group->win, p->control, !ok );
+#ifdef TODO_UNUSED
 	wWinPix_t h = wControlGetHeight(p->control);
+#endif
 	//wControlSetBalloon( p->control, 0, -h*3/4, ok?NULL:msg );
 }
 

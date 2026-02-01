@@ -57,7 +57,9 @@ static wWinPix_t paramFileWidths[] = {20, 40};
 static char* paramFileTitles[] = {N_("Content"), N_("Path")};
 
 static paramListData_t paramFileListData = { 15, 370, 2, paramFileWidths, paramFileTitles };
+#ifdef TODO_UNUSED
 static char * paramFileLabels[] = { N_("Show File Names"), NULL };
+#endif
 static paramData_t paramFilePLs[] = {
 #define I_PRMFILLIST	(0)
 #define paramFileL				(paramFilePLs[I_PRMFILLIST].control)

@@ -103,7 +103,9 @@ static void UpdateTitleChange( long changes )
 static void UpdateTitleNext( void )
 {
 	wIndex_t inx;
+#ifdef TODO_UNUSED
 	wIndex_t cnt;
+#endif
 	track_p trk;
 	struct extraDataCompound_t *xx;
 	updateTitleInx++;
@@ -111,7 +113,9 @@ static void UpdateTitleNext( void )
 		wHide( updateTitleW );
 		updateWVisible = FALSE;
 		InfoMessage( _("Updating definitions, please wait") );
+#ifdef TODO_UNUSED
 		cnt = 0;
+#endif
 		trk = NULL;
 		while (TrackIterate( &trk ) ) {
 			TRKTYP_T trkType = GetTrkType(trk);

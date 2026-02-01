@@ -1608,6 +1608,7 @@ static paramData_t drawModPLs[] = {
 };
 static paramGroup_t drawModPG = { "drawMod", 0, drawModPLs, COUNT( drawModPLs ) };
 
+#ifdef TODO_UNUSED
 static void DrawModDlgUpdate(
         paramGroup_p pg,
         int inx,
@@ -1621,6 +1622,7 @@ static void DrawModDlgUpdate(
 	MainRedraw();
 
 }
+#endif
 
 static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 {
@@ -3018,7 +3020,9 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 static STATUS_T
 HandleStartCommand(wAction_t action, BOOL_T* infoSubst)
 {
+#ifdef TODO_UNUSED
 	static char objectLabel[OBJECT_LABEL_SIZE];
+#endif
 
 	// \todo needs work to be activated
 	//if (!magneticSnap) {

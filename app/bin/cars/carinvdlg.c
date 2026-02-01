@@ -1474,6 +1474,7 @@ void CarInvListUpdate(carItem_p item)
 	}
 }
 
+#ifdef TODO_UNUSED
 static void DlgFind(void* unused)
 {
 	carItem_p item = FindCurrentItem();
@@ -1487,6 +1488,7 @@ static void DlgFind(void* unused)
 	                       panCenter.y));
 	PanHere(I2VP(0));		// CarInvDlgFind
 }
+#endif
 
 static void ButtonOk(paramGroup_p group)
 {

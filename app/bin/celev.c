@@ -136,6 +136,7 @@ void static CreateMoveAnchor(coOrd pos)
 }
 #endif
 
+#ifdef TODO_UNUSED
 static void LayoutElevW(
         paramData_t * pd,
         int inx,
@@ -160,6 +161,7 @@ static void LayoutElevW(
 		break;
 	}
 }
+#endif
 
 
 static int GetElevMode( void )

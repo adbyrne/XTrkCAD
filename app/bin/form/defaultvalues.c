@@ -85,7 +85,9 @@ FormatWidthsList(unsigned count, wWinPix_t* widths, DynString *output)
 static void
 SaveListColumnWidths(char *section, paramData_p listData)
 {
+#ifdef TODO_UNUSED
 	paramListData_t *listDataP = (paramListData_t*)listData->winData;
+#endif
 
 	if (listData->control) {
 		DynString columnWidthString;
@@ -214,6 +216,7 @@ FormLoadDefaultValues(paramGroup_p pg)
 			case PD_BITMAP:
 			case PD_NOTEBOOK:
 			case PD_DROPLIST:
+			case PD_TAG:
 				break;
 			}
 		}
@@ -276,6 +279,7 @@ FormSaveDefaultValues(paramGroup_p pg)
 		case PD_MENUITEM:
 		case PD_BITMAP:
 		case PD_NOTEBOOK:
+		case PD_TAG:
 			break;
 		}
 	}

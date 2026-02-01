@@ -133,6 +133,7 @@ FormFetchData(paramGroup_p pg)
 		case PD_BITMAP:
 		case PD_SCALE:
 		case PD_NOTEBOOK:
+		case PD_TAG:
 			break;
 		}
 	}
@@ -249,6 +250,7 @@ FormIntRestore(paramGroup_p pg,	int class)
 		case PD_BITMAP:
 		case PD_SCALE:
 		case PD_NOTEBOOK:
+		case PD_TAG:
 			break;
 		}
 	}
@@ -297,6 +299,7 @@ void FormIntSave(paramGroup_p pg, int class)
 			case PD_BITMAP:
 			case PD_SCALE:
 			case PD_NOTEBOOK:
+			case PD_TAG:
 				break;
 			}
 		}

@@ -45,7 +45,9 @@ static wDrawColor descColor = 0;
 EXPORT BOOL_T descUndoStarted;
 static BOOL_T descNeedDrawHilite;
 static wWinPix_t describeW_posy;
+#ifdef TODO_UNUSED
 static int describe_row;
+#endif
 static wWinPix_t describeCmdButtonEnd;
 EXPORT char * descTitle = "<>";
 
