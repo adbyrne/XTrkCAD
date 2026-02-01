@@ -46,7 +46,7 @@ void FormButtonOk(paramGroup_p group)
 
 	// wFlush();
 
-	// LOG(log_form, 1, ("FormButtonOk -> Ok\n"));
+	LOG(log_form, 1, ("FormButtonOk -> Ok\n"));
 }
 
 void FormDialogOkActive(

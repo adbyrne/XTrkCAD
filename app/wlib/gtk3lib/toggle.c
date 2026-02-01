@@ -298,11 +298,18 @@ static bool ignoreClick;
 
 void wButtonSetBusy(wControl_p bb, int newState)
 {
-	gboolean currentState = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-	                                bb->widget));
+	gboolean currentState;
+	GtkWidget *button;
+
+	if(wButtonIsSplitButton(bb)) {
+		button = GTK_WIDGET(g_object_get_data(G_OBJECT(bb->widget), "action-button"));
+	} else {
+		button = bb->widget;
+	}
+	currentState = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
 	if (currentState != newState) {
 		ignoreClick = true;
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bb->widget), newState);
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), newState);
 		ignoreClick = false;
 	}
 }

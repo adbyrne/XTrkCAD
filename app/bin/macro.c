@@ -275,8 +275,8 @@ EXPORT void DoRecord( void * context )
 	if (recordW == NULL) {
 		char * title = MakeWindowTitle(_("Record"));
 		recordW = FormCreateDialog( &recordPG, title, 
-									NULL, NULL, 
-									_("Cancel"), FormCancel_Current,
+									_("Finish"), FormButtonOk, 
+									NULL, NULL,
 		                            FALSE, F_RESIZE, NULL );
 		recordFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, title, sRecordFilePattern,
 		                               StartRecord, NULL );
@@ -1439,12 +1439,18 @@ static void DemoDlgUpdate(
 	SetPlaybackSpeed( (wIndex_t)*(long*)valueP );
 }
 
+static void DemoFinish(paramGroup_p demoPG)
+{
+	SetInPlayback(FALSE);
+	PlaybackQuit();
+	SetUserLocale();
+}
 
 static void CreateDemoW( void )
 {
 	char * title = MakeWindowTitle(_("Demo"));
 	demoW = FormCreateDialog( &demoPG, title, 
-							  N_("Finish"), FormButtonOk, 
+							  N_("Finish"), DemoFinish, 
 							  NULL, NULL,
 							  FALSE, F_RESIZE, DemoDlgUpdate );
 

@@ -250,6 +250,19 @@
 //}
 
 static bool ignoreClick;
+
+static GtkWidget *GetActionButton(wControl_p toolbarButton)
+{
+	GtkWidget *actionButton;
+
+	if (wButtonIsSplitButton(toolbarButton)) {
+		actionButton = GTK_WIDGET(g_object_get_data(G_OBJECT(toolbarButton->widget), "action-button"));
+	} else {
+		actionButton = toolbarButton->widget;
+	}
+
+	return(actionButton);
+}
 /**
  * Set the status of the button
  *
@@ -259,23 +272,30 @@ static bool ignoreClick;
 
 void wStickySetBusy(wControl_p bb, int newState)
 {
-	gboolean currentState = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-	                                bb->widget));
+	GtkWidget * targetButton = GetActionButton(bb);
+	gboolean currentState;
+
+
+	currentState = gtk_toggle_button_get_active(targetButton);
 	if (currentState != newState) {
 		ignoreClick = true;
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bb->widget), newState);
+		gtk_toggle_button_set_active(targetButton, newState);
 		ignoreClick = false;
 	}
 }
 
 wBool_t wStickyGetSticky(wControl_p b)
 {
-	return sticky_toggle_button_get_sticky(STICKY_TOGGLE_BUTTON(b->widget));
+	GtkWidget * targetButton = GetActionButton(b);
+
+	return sticky_toggle_button_get_sticky(STICKY_TOGGLE_BUTTON(targetButton));
 }
 
 void wStickySetSticky(wControl_p b, wBool_t newSticky)
 {
-	sticky_toggle_button_set_sticky(STICKY_TOGGLE_BUTTON(b->widget), newSticky);
+	GtkWidget * targetButton = GetActionButton(b);
+
+	sticky_toggle_button_set_sticky(STICKY_TOGGLE_BUTTON(targetButton), newSticky);
 }
 
 static void toolbarClicked(StickyToggleButton* widget, gpointer value)

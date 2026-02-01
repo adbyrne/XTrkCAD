@@ -137,9 +137,11 @@ static void sticky_toggle_button_dispose(GObject *object) {
 static gboolean sticky_toggle_button_button_press_event(GtkWidget *widget, GdkEventButton *event) {
     StickyToggleButton *self = STICKY_TOGGLE_BUTTON(widget);
     
-    if (event->button == GDK_BUTTON_PRIMARY && !self->sticky_mode) {
-        // Start long press timer (500ms)
-        self->long_press_timeout_id = g_timeout_add(500, long_press_timeout_callback, self);
+    if (event->button == GDK_BUTTON_PRIMARY) {
+        // In TEMP mode and not already sticky: start long press timer
+        if (!self->sticky_mode && !self->sticky_state) {
+            self->long_press_timeout_id = g_timeout_add(500, long_press_timeout_callback, self);
+        }
     }
     
     return GTK_WIDGET_CLASS(sticky_toggle_button_parent_class)->button_press_event(widget, event);
@@ -149,22 +151,29 @@ static gboolean sticky_toggle_button_button_release_event(GtkWidget *widget, Gdk
     StickyToggleButton *self = STICKY_TOGGLE_BUTTON(widget);
     
     if (event->button == GDK_BUTTON_PRIMARY) {
-        // Cancel long press timer
+        // Cancel long press timer if it's still running
         if (self->long_press_timeout_id) {
             g_source_remove(self->long_press_timeout_id);
             self->long_press_timeout_id = 0;
         }
         
         if (self->sticky_mode) {
-            // Toggle sticky on click (if not long press)
+            // FIXED mode: Toggle sticky on each click (unless it was a long press activation)
             if (!self->long_click) {
                 sticky_toggle_button_set_sticky(self, !self->sticky_state);
             }
             self->long_click = FALSE;
         } else {
-            self->sticky_state = FALSE;
+            // TEMP mode: If sticky is currently on, any click turns it off
+            // TEMP mode: If sticky is on AND this wasn't the long press that just activated it, turn it off
+            if (self->sticky_state && !self->long_click)
+            {
+                sticky_toggle_button_set_sticky(self, FALSE);
+            }
+            // If long_click flag is set, the long press timeout already activated sticky
+            // so we don't need to do anything else
+            self->long_click = FALSE;
         }
-        update_sticky_style(self);
     }
     
     return GTK_WIDGET_CLASS(sticky_toggle_button_parent_class)->button_release_event(widget, event);
@@ -243,4 +252,3 @@ gboolean sticky_toggle_button_get_mode(StickyToggleButton* self) {
 
     return self->sticky_mode;
 }
-
