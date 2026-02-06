@@ -431,8 +431,8 @@ static void DoCustomMgr( void * junk )
 
 EXPORT addButtonCallBack_t CustomMgrInit( void )
 {
-	ParamRegister( &customPG );
-	ParamRegister( &custMgmContentsPG );
+	FormRegister( &customPG );
+	FormRegister( &custMgmContentsPG );
 	RegisterChangeNotification( CustMgmChange );
 	return &DoCustomMgr;
 }

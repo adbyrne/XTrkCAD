@@ -7,6 +7,7 @@
     <file preprocess="xml-stripblanks">block.ui</file>
     <file preprocess="xml-stripblanks">blockedit.ui</file>
     <file preprocess="xml-stripblanks">carinv.ui</file>
+    <file preprocess="xml-stripblanks">carpart.ui</file>
     <file preprocess="xml-stripblanks">cmdopt.ui</file>
     <file preprocess="xml-stripblanks">controledit.ui</file>
     <file preprocess="xml-stripblanks">contmgm.ui</file>
@@ -18,6 +19,7 @@
     <file preprocess="xml-stripblanks">fileNote.ui</file>
     <file preprocess="xml-stripblanks">grid.ui</file>
     <file preprocess="xml-stripblanks">group.ui</file>
+    <file preprocess="xml-stripblanks">layer.ui</file>
     <file preprocess="xml-stripblanks">layout.ui</file>
     <file preprocess="xml-stripblanks">linkNote.ui</file>
     <file preprocess="xml-stripblanks">map.ui</file>
@@ -26,7 +28,9 @@
     <file preprocess="xml-stripblanks">partcatalog.ui</file>
     <file preprocess="xml-stripblanks">pricelist.ui</file>
     <file preprocess="xml-stripblanks">prmfile.ui</file>
+    <file preprocess="xml-stripblanks">print.ui</file>
     <file preprocess="xml-stripblanks">record.ui</file>
+    <file preprocess="xml-stripblanks">refreshSpecial.ui</file>
     <file preprocess="xml-stripblanks">rescale.ui</file>
     <file preprocess="xml-stripblanks">rgbcolor.ui</file>
     <file preprocess="xml-stripblanks">searchgui.ui</file>
@@ -39,8 +43,10 @@
     <file preprocess="xml-stripblanks">tip.ui</file>
     <file preprocess="xml-stripblanks">toolbar.ui</file>
     <file preprocess="xml-stripblanks">toolwindow.ui</file>
+    <file preprocess="xml-stripblanks">train.ui</file>
     <file preprocess="xml-stripblanks">turnout.ui</file>
     <file preprocess="xml-stripblanks">turnout-designer.ui</file>
+    <file preprocess="xml-stripblanks">updatetitle.ui</file>
     <file>xtrackcad.css</file>
   </gresource>
 </gresources>

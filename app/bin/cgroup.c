@@ -1860,11 +1860,11 @@ EXPORT void DoGroup( void * unused )
 		log_group = LogFindIndex( "group" );
 	}
 	if ( !groupW ) {
-		ParamRegister( &groupPG );
+		FormRegister( &groupPG );
 		groupW = FormCreateDialog( &groupPG, MakeWindowTitle(_("Group Objects")),
-		                            _("Ok"), GroupOk, 
-									_("Cancel"), FormCancel_Current, 
-									TRUE, F_BLOCK, NULL);
+		                           _("Ok"), GroupOk, 
+					   _("Cancel"), FormCancel_Current, 
+					   TRUE, F_BLOCK, NULL);
 		groupD.dpi = mainD.dpi;
 	}
 	if (isTurnout) {

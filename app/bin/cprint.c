@@ -28,6 +28,7 @@
 #include "param.h"
 #include "track.h"
 #include "common-ui.h"
+#include "include/form.h"
 
 #define PRINT_GAUDY		(0)
 #define PRINT_PLAIN		(1)
@@ -163,7 +164,7 @@ static paramData_t printPLs[] = {
 /*26*/ { PD_MESSAGE, N_("selected"), "mess2", 0, I2VP(80) }
 };
 
-static paramGroup_t printPG = { "print", PGO_PREFMISCGROUP, printPLs, COUNT( printPLs ) };
+static paramGroup_t printPG = { "print", PGO_PREFMISCGROUP|PGO_FULLDIALOGFROMBUILDER, printPLs, COUNT( printPLs ) };
 
 struct margins_s {
 	double top, right, bottom, left;
@@ -631,7 +632,7 @@ static paramData_t customMarginPLs[] = {
 #define I_PM_RESET (5)
 	{ PD_BUTTON, PrintMarginReset, "marginReset", PDO_DLGCMDBUTTON, NULL, N_("Reset") }
 };
-static paramGroup_t customMarginPG = { "printMargin", PGO_PREFMISCGROUP|PGO_NODEFAULTPROC, customMarginPLs, COUNT( customMarginPLs ) };
+static paramGroup_t customMarginPG = { "printMargin", PGO_PREFMISCGROUP|PGO_NODEFAULTPROC|PGO_FULLDIALOGFROMBUILDER, customMarginPLs, COUNT( customMarginPLs ) };
 
 static wLines_t aPmLines[] = {
 	{ 1,  25,  11,  94,  11 },
@@ -639,6 +640,7 @@ static wLines_t aPmLines[] = {
 	{ 1,  94, 111,  25, 111 },
 	{ 1,  25, 111,  25,  11 }
 };
+#ifdef TODO_UNUSED
 static int pmxoff=14;
 static int pmyoff=5;
 
@@ -665,6 +667,7 @@ static void PrintMarginLayout(
 	*w = x0;
 	*h = y0;
 }
+#endif
 
 
 static const char * sPrinterName = NULL;
@@ -743,11 +746,11 @@ static void DoPrintMargin( void )
 {
 	if ( customMarginWin == NULL ) {
 		int x=10, y=10;
-		customMarginWin = ParamCreateDialog( &customMarginPG,
+		customMarginWin = FormCreateDialog( &customMarginPG,
 		                                     MakeWindowTitle(_("Print Margins")),
 		                                     _("Ok"), DoPrintMarginOk,
-		                                     ParamCancel_Null, TRUE,
-		                                     PrintMarginLayout, F_BLOCK, PrintMarginDlgUpdate );
+		                                     NULL, ParamCancel_Null,
+						     TRUE, F_BLOCK, PrintMarginDlgUpdate );
 		if ( customMarginWin == NULL ) {
 			return;
 		}
@@ -1440,9 +1443,10 @@ static STATUS_T CmdPrint(
 				printScale = rminScale_999.low;
 			}
 			print_d.scale = printScale;
-			printWin = ParamCreateDialog( &printPG, MakeWindowTitle(_("Print")), _("Print"),
-			                              DoPrintPrint, ParamCancel_Reset,
-			                              TRUE, NULL, 0, PrintDlgUpdate );
+			printWin = FormCreateDialog( &printPG, MakeWindowTitle(_("Print")),
+						     _("Print"), DoPrintPrint,
+						     _("Cancel"), ParamCancel_Reset,
+			                             TRUE, 0, PrintDlgUpdate );
 		}
 		sPrinterName = wPrintGetName();
 		while ( *sPrinterName == '\0' ) {
@@ -1567,13 +1571,13 @@ EXPORT wIndex_t InitCmdPrint( wMenu_p menu )
 {
 	wIcon_p printIcon;
 
-	ParamRegister( &printPG );
+	FormRegister( &printPG );
 	currPrintGrid = newPrintGrid;
 	log_print = LogFindIndex( "print" );
 	RegisterChangeNotification( PrintChange );
 	printGridPopupM = MenuRegister( "Print Grid Rotate" );
 	AddRotateMenu( printGridPopupM, PrintGridRotate );
-	ParamRegister( &customMarginPG );
+	FormRegister( &customMarginPG );
 
 	printIcon = CreateToolbarIconFromResource("doc-print.png");
 	return AddMenuButton( menu, CmdPrint, "cmdPrint", N_("Print..."),

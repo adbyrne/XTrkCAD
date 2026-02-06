@@ -31,6 +31,7 @@
 #include "track.h"
 #include "paramfile.h"
 #include "common-ui.h"
+#include "form.h"
 
 #include "include/cars.h"
 #include "listelem.h"
@@ -401,7 +402,7 @@ EXPORT void InitCarDlg( void )
 	InitCarPart();
 	InitCarProto();
 
-	ParamRegister( &newCarPG );
+	FormRegister( &newCarPG );
 	ParamCreateControls( &newCarPG, CarItemHotbarUpdate );
 	newCarControls[0] = newCarPLs[0].control;
 

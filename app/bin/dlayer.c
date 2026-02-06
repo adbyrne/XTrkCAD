@@ -603,7 +603,7 @@ static paramData_t layerPLs[] = {
 
 #define settingsListL	(layerPLs[I_SETTINGS].control)
 
-static paramGroup_t layerPG = { "layer", 0, layerPLs, COUNT( layerPLs ) };
+static paramGroup_t layerPG = { "layer", PGO_FULLDIALOGFROMBUILDER, layerPLs, COUNT( layerPLs ) };
 
 /**
  * Reload the listbox showing the current catalog
@@ -2090,8 +2090,11 @@ static void LayerDlgUpdate(
 static void DoLayer(void * unused)
 {
 	if (layerW == NULL) {
-		layerW = ParamCreateDialog(&layerPG, MakeWindowTitle(_("Layers")), _("Done"),
-		                           LayerOk, ParamCancel_Current, TRUE, NULL, 0, LayerDlgUpdate);
+		layerW = FormCreateDialog( &layerPG,
+					   MakeWindowTitle(_("Layers")),
+					   _("Done"), LayerOk,
+					   NULL, ParamCancel_Current,
+					   TRUE, 0, LayerDlgUpdate);
 
 		GetScaleGauge(layerScaleInx, &layerScaleDescInx, &layerGaugeInx);
 
@@ -2214,7 +2217,7 @@ void InitLayers(int cmdGroup)
 
 addButtonCallBack_t InitLayersDialog(void)
 {
-	ParamRegister(&layerPG);
+	FormRegister(&layerPG);
 	RegisterChangeNotification(LayerChange);
 	return &DoLayer;
 }

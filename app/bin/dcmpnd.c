@@ -176,11 +176,12 @@ void DoUpdateTitles( void )
 		return;
 	}
 	if (updateTitleW == NULL) {
-		ParamRegister( &updateTitlePG );
+		FormRegister( &updateTitlePG );
 		updateTitlePLs[I_UPDATELOAD].valueP = ParamFilesInit();
-		updateTitleW = ParamCreateDialog( &updateTitlePG,
-		                                  MakeWindowTitle(_("Update Title")), _("Update"), UpdateTitleUpdate,
-		                                  UpdateTitleCancel, TRUE, NULL, 0, NULL );
+		updateTitleW = FormCreateDialog( &updateTitlePG, MakeWindowTitle(_("Update Title")),
+						  _("Update"), UpdateTitleUpdate,
+		                                  NULL, UpdateTitleCancel,
+						  TRUE, 0, NULL );
 		RegisterChangeNotification( UpdateTitleChange );
 	}
 	updateTitleInx = -1;
@@ -419,10 +420,12 @@ EXPORT BOOL_T RefreshCompound(
 		return TRUE;
 	}
 	if ( refreshSpecialPG.win == NULL ) {
-		ParamRegister( &refreshSpecialPG );
-		ParamCreateDialog( &refreshSpecialPG,
-		                   MakeWindowTitle(_("Refresh Turnout/Structure")), _("Ok"), RefreshSpecialOk,
-		                   RefreshSpecialCancel, TRUE, NULL, F_BLOCK|F_RESIZE|F_RECALLSIZE, NULL );
+		FormRegister( &refreshSpecialPG );
+		FormCreateDialog( &refreshSpecialPG,
+		                  MakeWindowTitle(_("Refresh Turnout/Structure")),
+				  _("Ok"), RefreshSpecialOk,
+		                  NULL, RefreshSpecialCancel,
+				  TRUE, F_BLOCK|F_RESIZE|F_RECALLSIZE, NULL );
 	}
 	ParamLoadMessage( &refreshSpecialPG, REFRESH_M1,
 	                  _("Choose a Turnout/Structure to replace:") );
@@ -605,10 +608,11 @@ static int CompoundCustMgmProc(
 			strncpy( renamePartno, nP, nL ); renamePartno[nL] = 0;
 			if ( !renamePG.win ) {
 				FormRegister( &renamePG );
-				FormCreateDialog( &renamePG, MakeWindowTitle(_("Rename Object")), 
-									_("Ok"), RenameOk, 
-									_("Cancel"), wHide, 
-									TRUE, F_BLOCK, NULL);
+				FormCreateDialog( &renamePG,
+						  MakeWindowTitle(_("Rename Object")), 
+						  _("Ok"), RenameOk, 
+						  N_("Cancel"), wHide, 
+						  TRUE, F_BLOCK, NULL);
 			}
 			FormLoadControls( &renamePG );
 			wShow( renamePG.win );

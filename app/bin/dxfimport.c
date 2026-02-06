@@ -45,6 +45,7 @@
 #include "dynstring.h"
 #include "common-ui.h"
 // #include "ctrain.h"
+#include "form.h"
 
 #ifdef UTFCONVERT
 #include "include/utf8convert.h"
@@ -83,10 +84,12 @@ static wWin_p importDxfW;
 EXPORT void DoImportDxf(void* unused)
 {
 	if (!importDxfW) {
-		ParamRegister(&importDxfPG);
-		importDxfW = ParamCreateDialog(&importDxfPG, MakeWindowTitle(_("Import Dxf")),
-		                               _("Ok"), ImportDxfFileSel, ParamCancel_Current,
-		                               TRUE, NULL, 0, NULL);
+		FormRegister(&importDxfPG);
+		importDxfW = FormCreateDialog( &importDxfPG,
+					       MakeWindowTitle(_("Import Dxf")),
+		                               _("Ok"), ImportDxfFileSel,
+					       NULL, ParamCancel_Current,
+		                               TRUE, 0, NULL);
 		// blockD.dpi = mainD.dpi;
 	}
 	ParamLoadControls(&importDxfPG);

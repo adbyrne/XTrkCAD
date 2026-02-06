@@ -800,7 +800,7 @@ EXPORT void InitCmdSwitchMotor( wMenu_p menu )
 	               _("Switch Motor"), CreateToolbarIconFromResource( "switch-motor.png"),
 	               LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_SWITCHMOTOR1,
 	               NULL );
-	//ParamRegister( &switchmotorPG );
+	//FormRegister( &switchmotorPG );
 }
 EXPORT void CheckDeleteSwitchmotor(track_p t)
 {

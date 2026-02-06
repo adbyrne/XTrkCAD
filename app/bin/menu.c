@@ -467,7 +467,7 @@ static void DebugOk(void * unused)
 static void CreateDebugW(void)
 {
 	debugPG.paramCnt = debugCnt+1;
-	ParamRegister(&debugPG);
+	FormRegister(&debugPG);
 	debugW = FormCreateDialog(&debugPG, MakeWindowTitle(_("Debug")),
 	                          _("Ok"),DebugOk,
 	                          _("Cancel"), FormCancel_Current, FALSE, 0, NULL);

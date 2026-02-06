@@ -30,6 +30,7 @@
 #include "common-ui.h"
 #include "draw.h"
 #include "note.h"
+#include "form.h"
 
 int bOldDescribe = FALSE;
 
@@ -407,6 +408,7 @@ static wControl_p AssignParamToDescribeDialog(descData_p ddp, void * valueP,
 }
 
 
+#ifdef TOTO_UNUSED
 static void DescribeLayout(
         paramData_t * pd,
         int inx,
@@ -439,6 +441,7 @@ static void DescribeLayout(
 
 	wControlShow(pd->control, TRUE);
 }
+#endif
 
 /**
  * Creation and modification of the Describe dialog box is handled here. As the number
@@ -473,11 +476,11 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 
 	if (describePG.win == NULL) {
 		/* SDB 5.13.2005 */
-		ParamCreateDialog(&describePG, _("Description"),
+		FormCreateDialog( &describePG, _("Description"),
 		                  //_("Done"), DescribeDone,
 		                  NULL, NULL,
-		                  ParamCancel_Reset,
-		                  TRUE, DescribeLayout,
+		                  NULL, ParamCancel_Reset,
+		                  TRUE,
 		                  F_RECALLPOS|PD_F_ALT_CANCELLABEL,
 		                  DescribeUpdate);
 if ( bOldDescribe )
@@ -707,7 +710,7 @@ void InitCmdDescribe(wMenu_p menu)
 	                               _("Properties"), CreateToolbarIconFromResource("describe.png"),
 	                               LEVEL0, IC_CANCEL|IC_POPUP|IC_WANT_MOVE|IC_CMDMENU|IC_TOGGLE, ACCL_DESCRIBE, NULL);
 	RegisterChangeNotification(DescChange);
-	ParamRegister(&describePG);
+	FormRegister(&describePG);
 }
 void InitCmdDescribe2(wMenu_p menu)
 {

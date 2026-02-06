@@ -1029,7 +1029,7 @@ EXPORT void InitCmdBlock( wMenu_p menu )
 	AddMenuButton( menu, CmdBlockCreate, "cmdBlockCreate", _("Block"),
 	               CreateToolbarIconFromResource( "block.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2, ACCL_BLOCK1, NULL );
-	ParamRegister( &blockPG );
+	FormRegister( &blockPG );
 }
 
 

@@ -120,11 +120,11 @@ void ParamLoadData(
     //ParamLoadDataOrig(pg);
 }
 
-EXPORT void ParamRegister(paramGroup_p pg)
+EXPORT void XParamRegister(paramGroup_p pg)
 {
     if (USESBUILDER(pg)) {
         FormRegister(pg);
-        FormLoadDefaultValues(pg);
+//        FormLoadDefaultValues(pg);
     }
     else {
         printf("%s:%d Old Param Function %s used by %s\n", __FILE__, __LINE__, __func__, pg->nameStr);
@@ -219,7 +219,7 @@ XParamTurnOffDelays(bool disable)
 }
 
 
-wControl_p ParamCreateDialog(
+wControl_p XParamCreateDialog(
     paramGroup_p group,
     char* title,
     char* okLabel,

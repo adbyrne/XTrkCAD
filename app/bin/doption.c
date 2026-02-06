@@ -142,7 +142,7 @@ static void DoDisplay( void * junk )
 
 EXPORT addButtonCallBack_t DisplayInit( void )
 {
-	ParamRegister( &displayPG );
+	FormRegister( &displayPG );
 #ifdef LATER
 	RegisterChangeNotification( DisplayChange );
 #endif

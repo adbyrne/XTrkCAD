@@ -32,6 +32,7 @@
 #include "param.h"
 #include "track.h"
 #include "common-ui.h"
+#include "form.h"
 
 #include "include/toolbar.h"
 
@@ -767,7 +768,7 @@ static paramData_t trainPLs[] = {
 	{ PD_MESSAGE, NULL, NULL, PDO_DLGIGNOREX, I2VP(120) }
 };
 
-static paramGroup_t trainPG = { "train", 0, trainPLs, COUNT( trainPLs ) };
+static paramGroup_t trainPG = { "train", PGO_FULLDIALOGFROMBUILDER, trainPLs, COUNT( trainPLs ) };
 
 
 typedef struct {
@@ -1384,8 +1385,10 @@ static trainControlDlg_p CreateTrainControlDlg(void)
 	title = MyStrdup(_("Train Control XXX"));
 	sprintf(title, _("Train Control %d"), ++numTrainDlg);
 	dlg->trainPGp = &trainPG;
-	dlg->win = ParamCreateDialog(dlg->trainPGp, _("Train Control"), NULL, NULL,
-	                             ParamCancel_Null, FALSE, NULL, 0, ControllerDialogUpdate);
+	dlg->win = FormCreateDialog(dlg->trainPGp, _("Train Control"),
+				    NULL, NULL,
+	                            NULL, ParamCancel_Null,
+				    FALSE, 0, ControllerDialogUpdate);
 	speedD.size.x = SLIDER_WIDTH/speedD.dpi;
 	speedD.size.y = SLIDER_HEIGHT/speedD.dpi;
 	return dlg;
@@ -3203,7 +3206,7 @@ void InitCmdTrain(wMenu_p menu)
 	log_trainMove = LogFindIndex("trainMove");
 	log_trainPlayback = LogFindIndex("trainPlayback");
 	trainPLs[I_ZERO].winLabel = (char*)CreateSymbolFromResource("zero.png");
-	ParamRegister(&trainPG);
+	FormRegister(&trainPG);
 	trainCmdInx = AddMenuButton(menu, CmdTrain, "cmdTrain", _("Run Trains"),
 		CreateToolbarIconFromResource("train.png"), LEVEL0_50,
 	                            IC_TOGGLE | IC_POPUP3|IC_LCLICK|IC_RCLICK|IC_WANT_MOVE, 0,

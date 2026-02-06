@@ -148,5 +148,5 @@ BOOL_T ReadMainNote(char *line)
 
 void InitCmdNote()
 {
-	ParamRegister(&notePG);
+	FormRegister(&notePG);
 }

@@ -31,6 +31,7 @@
 #include "track.h"
 #include "paramfile.h"
 #include "common-ui.h"
+#include "form.h"
 
 #include "include/cars.h"
 #include "listelem.h"
@@ -494,7 +495,7 @@ static paramData_t carDlgPLs[] = {
 	{ PD_BUTTON, CarDlgNewProto, "new", PDO_DLGCMDBUTTON, NULL, N_("New"), 0, I2VP(0) }
 };
 
-static paramGroup_t carDlgPG = { "carpart", 0, carDlgPLs, COUNT( carDlgPLs ) };
+static paramGroup_t carDlgPG = { "carpart", PGO_FULLDIALOGFROMBUILDER, carDlgPLs, COUNT( carDlgPLs ) };
 
 static dynArr_t carDlgSegs_da;
 #define carDlgSegs(N) DYNARR_N( trkSeg_t, carDlgSegs_da, N )
@@ -2381,6 +2382,7 @@ static void CarDlgOk( void * unused )
 
 
 
+#ifdef TODO_UNUSED
 static void CarDlgLayout(
         paramData_t * pd,
         int inx,
@@ -2431,6 +2433,7 @@ static void CarDlgLayout(
 		break;
 	}
 }
+#endif
 
 
 void DoCarPartDlg( carDlgAction_e *actions )
@@ -2439,10 +2442,13 @@ void DoCarPartDlg( carDlgAction_e *actions )
 	int inx;
 
 	if ( carDlgPG.win == NULL ) {
-		ParamCreateDialog( &carDlgPG, MakeWindowTitle(_("New Car Part")), _("Add"),
-		                   CarDlgOk, ParamCancel_Custom( CarDlgClose ),
-		                   TRUE, CarDlgLayout,
-		                   F_BLOCK|F_RESIZE|F_RECALLSIZE|PD_F_ALT_CANCELLABEL, CarDlgUpdate );
+		FormCreateDialog( &carDlgPG,
+				  MakeWindowTitle(_("New Car Part")),
+				  _("Add"), CarDlgOk,
+				  NULL, ParamCancel_Custom( CarDlgClose ),
+		                  TRUE,
+		                  F_BLOCK|F_RESIZE|F_RECALLSIZE|PD_F_ALT_CANCELLABEL,
+				  CarDlgUpdate );
 
 		if ( carDlgDim.carWidth==0 ) {
 			carDlgDim.carWidth = 12.0*10.0/curScaleRatio;
@@ -2642,7 +2648,7 @@ void
 InitCarEditDlg()
 {
 	carDlgBodyColor = wDrawFindColor( wRGB(255,128,0) );
-	ParamRegister( &carDlgPG );
+	FormRegister( &carDlgPG );
 
 	RegisterChangeNotification( CarDlgChange );
 

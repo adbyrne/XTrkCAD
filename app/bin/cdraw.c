@@ -3523,7 +3523,7 @@ EXPORT void InitCmdDraw( wMenu_p menu )
 		ButtonGroupEnd();
 	}
 
-	//ParamRegister( &drawPG );
+	//FormRegister( &drawPG );
 	RegisterChangeNotification( ChangeDraw );
 
 }
