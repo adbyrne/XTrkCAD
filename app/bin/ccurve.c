@@ -728,7 +728,7 @@ static paramData_t helixPLs[] = {
 #define I_HELIXMSG		(6)
 	{ PD_MESSAGE, N_("Total Length"), NULL, PDO_DLGRESETMARGIN, I2VP(200) }
 };
-static paramGroup_t helixPG = { "helix", PGO_PREFMISCGROUP, helixPLs, COUNT( helixPLs ) };
+static paramGroup_t helixPG = { "helix", PGO_PREFMISCGROUP|PGO_FULLDIALOGFROMBUILDER, helixPLs, COUNT( helixPLs ) };
 
 static paramData_t circleRadiusPLs[] = {
 	{ PD_FLOAT, &circleRadius, "circleradius", PDO_DIM, &r1_10000 }

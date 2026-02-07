@@ -58,7 +58,7 @@ static paramData_t elevationPLs[] = {
 #define I_GRADE			(3)
 	{ PD_MESSAGE, NULL, "grade", 0, I2VP(80) },
 #define I_STATION			(4)
-	{ PD_STRING, elevStationV, "station", PDO_DLGUNDERCMDBUTT|PDO_STRINGLIMITLENGTH, I2VP(200), NULL, 0, 0, sizeof(elevStationV)}
+	{ PD_STRING, elevStationV, "station", PDO_DLGUNDERCMDBUTT|PDO_STRINGLIMITLENGTH, I2VP(20), NULL, 0, 0, sizeof(elevStationV)}
 };
 static paramGroup_t elevationPG = { "elev", 0, elevationPLs, COUNT( elevationPLs ) };
 
@@ -207,7 +207,7 @@ static void DoElevUpdate( paramGroup_p pg, int inx, void * valueP )
 		}
 		elevModeV = mode;
 	}
-	ParamLoadData( &elevationPG );
+	FormFetchData( &elevationPG );
 	newMode = GetElevMode();
 	if (newMode == -1) {
 		return;
@@ -278,8 +278,8 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 	ParamControlActive( &elevationPG, I_MODE, TRUE );
 	ParamControlActive( &elevationPG, I_HEIGHT, FALSE );
 	ParamControlActive( &elevationPG, I_STATION, FALSE );
-	ParamLoadMessage( &elevationPG, I_COMPUTED, "" );
-	ParamLoadMessage( &elevationPG, I_GRADE, "" );
+	FormLoadMessage( &elevationPG, I_COMPUTED, "" );
+	FormLoadMessage( &elevationPG, I_GRADE, "" );
 	switch (mode & ELEV_MASK) {
 	case ELEV_NONE:
 		radio = 0;
@@ -318,7 +318,7 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 	gradeOk = ComputeElev( trk, ep, FALSE, &elevX, &grade, TRUE );
 	sprintf( message, "%0.2f%s", round(PutDim( elevX )*100.0)/100.0,
 	         (units==UNITS_METRIC?"cm":"\"") );
-	ParamLoadMessage( &elevationPG, I_COMPUTED, message );
+	FormLoadMessage( &elevationPG, I_COMPUTED, message );
 	if (gradeOk) {
 		sprintf( message, "%0.1f%%", fabs(round(grade*1000.0)/10.0) );
 	} else {
@@ -344,7 +344,7 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 			strcpy( message, _("Undefined") );
 		}
 	}
-	ParamLoadMessage( &elevationPG, I_GRADE, message );
+	FormLoadMessage( &elevationPG, I_GRADE, message );
 	if ( (mode&ELEV_MASK)!=ELEV_DEF ) {
 		elevHeightV = elevX;
 		ParamLoadControl( &elevationPG, I_HEIGHT );
@@ -398,13 +398,13 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		elevHeightV = 0.0;
 		elevStationV[0] = 0;
 		ParamLoadControls( &elevationPG );
-		ParamGroupRecord( &elevationPG );
+		FormGroupRecord( &elevationPG );
 		//wShow( elevW );
 		ParamControlActive( &elevationPG, I_MODE, FALSE );
 		ParamControlActive( &elevationPG, I_HEIGHT, FALSE );
 		ParamControlActive( &elevationPG, I_STATION, FALSE );
-		ParamLoadMessage( &elevationPG, I_COMPUTED, "" );
-		ParamLoadMessage( &elevationPG, I_GRADE, "" );
+		FormLoadMessage( &elevationPG, I_COMPUTED, "" );
+		FormLoadMessage( &elevationPG, I_GRADE, "" );
 		InfoMessage(
 		        _("Click on end, +Shift to split, +Ctrl to move description, +Alt to show elevation") );
 		elevTrk = NULL;

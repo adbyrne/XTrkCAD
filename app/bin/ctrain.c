@@ -751,7 +751,7 @@ static paramData_t trainPLs[] = {
 #define I_SLIDER			(3)
 	{ PD_DRAW, NULL, "speed", PDO_NOPSHUPD|PDO_DLGSETY, &speedParamData },
 #define I_DIST				(4)
-	{ PD_STRING, NULL, "distance", PDO_DLGNEWCOLUMN, I2VP(100-SLIDER_WIDTH), NULL, BO_READONLY },
+	{ PD_STRING, NULL, "distance", PDO_DLGNEWCOLUMN, I2VP(20-SLIDER_WIDTH), NULL, BO_READONLY },
 #define I_ZERO				(5)
 	{ PD_BUTTON, NULL, "zeroDistance", PDO_NOPSHUPD|PDO_NOPREF|PDO_DLGHORZ, NULL, NULL, BO_ICON },
 #define I_GOTO				(6)
@@ -848,7 +848,7 @@ static void SpeedRedraw(
 	sprintf(dlg->speedS, "%3d %s",
 	        (int)(units==UNITS_ENGLISH?xx->speed:xx->speed*1.6),
 	        (units==UNITS_ENGLISH?"mph":"km/h"));
-	ParamLoadMessage(dlg->trainPGp, I_SPEED, dlg->speedS);
+	FormLoadMessage(dlg->trainPGp, I_SPEED, dlg->speedS);
 	LOG(log_trainPlayback, 3, ("Speed = %d\n", (int)xx->speed));
 }
 
@@ -997,12 +997,12 @@ static void ControllerDialogSync(
 			}
 		}
 
-		ParamLoadMessage(dlg->trainPGp, I_STATUS, statusMsg);
+		FormLoadMessage(dlg->trainPGp, I_STATUS, statusMsg);
 	} else {
 		dir = 0;
 		followMe = FALSE;
 		autoReverse = FALSE;
-		ParamLoadMessage(dlg->trainPGp, I_STATUS, _("No trains"));
+		FormLoadMessage(dlg->trainPGp, I_STATUS, _("No trains"));
 	}
 
 	if (dlg->followMe != followMe) {
@@ -1032,33 +1032,33 @@ static void ControllerDialogSync(
 			sprintf(dlg->posS, "X:%s Y:%s",
 			        FormatDistanceEx(xx->trvTrk.pos.x, format),
 			        FormatDistanceEx(xx->trvTrk.pos.y, format));
-			ParamLoadMessage(dlg->trainPGp, I_POS, dlg->posS);
+			FormLoadMessage(dlg->trainPGp, I_POS, dlg->posS);
 		}
 
 		if (dlg->speed != xx->speed) {
 			dlg->speed = xx->speed;
 			sprintf(dlg->speedS, "%3d",
 			        (int)(units==UNITS_ENGLISH?xx->speed:xx->speed*1.6));
-			ParamLoadMessage(dlg->trainPGp, I_SPEED, dlg->speedS);
+			FormLoadMessage(dlg->trainPGp, I_SPEED, dlg->speedS);
 			SpeedRedraw((wDraw_p)dlg->trainPGp->paramPtr[I_SLIDER].control, dlg,
 			            SLIDER_WIDTH, SLIDER_HEIGHT);
 		}
 
-		ParamLoadMessage(dlg->trainPGp, I_DIST, FormatDistance(xx->distance));
+		FormLoadMessage(dlg->trainPGp, I_DIST, FormatDistance(xx->distance));
 	} else {
 		if (dlg->posS[0] != '\0') {
 			dlg->posS[0] = '\0';
-			ParamLoadMessage(dlg->trainPGp, I_POS, dlg->posS);
+			FormLoadMessage(dlg->trainPGp, I_POS, dlg->posS);
 		}
 
 		if (dlg->speed >= 0) {
 			dlg->speed = -1;
 			dlg->speedS[0] = '\0';
-			ParamLoadMessage(dlg->trainPGp, I_SPEED, dlg->speedS);
+			FormLoadMessage(dlg->trainPGp, I_SPEED, dlg->speedS);
 			wDrawClear((wDraw_p)dlg->trainPGp->paramPtr[I_SLIDER].control);
 		}
 
-		ParamLoadMessage(dlg->trainPGp, I_DIST, "");
+		FormLoadMessage(dlg->trainPGp, I_DIST, "");
 	}
 }
 
@@ -1271,7 +1271,7 @@ static void ControllerDialogUpdate(
 		TrainTimeEndPause();
 		xx = GET_EXTRA_DATA(dlg->train, T_CAR, extraDataCar_t);
 		xx->distance = 0.0;
-		ParamLoadMessage(dlg->trainPGp, I_DIST, FormatDistance(xx->distance));
+		FormLoadMessage(dlg->trainPGp, I_DIST, FormatDistance(xx->distance));
 		ParamLoadControl(curTrainDlg->trainPGp, I_DIST);
 		TrainTimeStartPause();
 		break;

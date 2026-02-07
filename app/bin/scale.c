@@ -860,9 +860,9 @@ static FLOAT_T rescalePercent;
 static paramFloatRange_t r0o001_10000 = { 0.001, 10000.0 };
 static paramData_t rescalePLs[] = {
 #define I_RESCALE_FROM_SCALE		(0)
-	{ PD_STRING, rescaleFromScaleStr, "fromS", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(100), NULL,0, 0, sizeof(rescaleFromScaleStr)},
+	{ PD_STRING, rescaleFromScaleStr, "fromS", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(10), NULL,0, 0, sizeof(rescaleFromScaleStr)},
 #define I_RESCALE_FROM_GAUGE		(1)
-	{ PD_STRING, rescaleFromGaugeStr, "fromG", PDO_NOPREF|PDO_DLGHORZ | PDO_STRINGLIMITLENGTH, I2VP(100), NULL, 0, 0, sizeof(rescaleFromGaugeStr)},
+	{ PD_STRING, rescaleFromGaugeStr, "fromG", PDO_NOPREF|PDO_DLGHORZ | PDO_STRINGLIMITLENGTH, I2VP(10), NULL, 0, 0, sizeof(rescaleFromGaugeStr)},
 #define I_RESCALE_TO_SCALE		   (2)
 	{ PD_COMBOLIST, &rescaleToScaleInx, "toS", PDO_NOPREF|PDO_LISTINDEX, I2VP(100), NULL},
 #define I_RESCALE_TO_GAUGE		   (3)

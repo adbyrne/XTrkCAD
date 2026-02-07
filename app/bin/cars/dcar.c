@@ -227,7 +227,7 @@ static char* CarItemHotbarProc(
 			strncpy(newCarLabel1, cp, sizeof(newCarLabel1) - 1);
 			newCarLabel1[sizeof(newCarLabel1) - 1] = 0;
 			ParamLoadControls(&newCarPG);
-			ParamGroupRecord(&newCarPG);
+			FormGroupRecord(&newCarPG);
 
 			// InfoSubstituteControls(newCarControls, newCarLabels);
 			wWinGetSize(mainW, &w, &h);

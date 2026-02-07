@@ -64,9 +64,9 @@ static paramData_t fileNotePLs[] = {
 #define I_LAYER (2)
 	/*2*/ { PD_COMBOLIST, &fileNoteData.layer, "layer", PDO_NOPREF, I2VP(150), NULL, 0 },
 #define I_TITLE (3)
-	/*3*/ { PD_STRING, &fileNoteData.title, "title", PDO_NOPREF | PDO_NOTBLANK, I2VP(200), NULL, 0, 0, sizeof fileNoteData.title },
+	/*3*/ { PD_STRING, &fileNoteData.title, "title", PDO_NOPREF | PDO_NOTBLANK, I2VP(20), NULL, 0, 0, sizeof fileNoteData.title },
 #define I_PATH (4)
-	{ PD_STRING, &fileNoteData.path, "filename", PDO_NOPREF | PDO_NOTBLANK,   I2VP(200), NULL, BO_READONLY, I2VP(0L), sizeof fileNoteData.path },
+	{ PD_STRING, &fileNoteData.path, "filename", PDO_NOPREF | PDO_NOTBLANK,   I2VP(20), NULL, BO_READONLY, I2VP(0L), sizeof fileNoteData.path },
 #define I_BROWSE (5)
 	{ PD_BUTTON, NoteFileBrowse, "browse", 0L, NULL },
 #define I_OPEN (6)

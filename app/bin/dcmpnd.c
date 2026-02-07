@@ -66,7 +66,7 @@ static paramData_t updateTitlePLs[] = {
 	{	PD_MESSAGE, "You can use the List Labels control on the Preferences dialog to" },
 	{	PD_MESSAGE, "control the format of the list entries" },
 #define I_UPDATESTR		(9)
-	{	PD_STRING, NULL, "old", PDO_NOPREF, I2VP(400), NULL, BO_READONLY },
+	{	PD_STRING, NULL, "old", PDO_NOPREF, I2VP(40), NULL, BO_READONLY },
 #define I_UPDATELIST	(10)
 #define updateTitleL	((wList_p)updateTitlePLs[I_UPDATELIST].control)
 	{	PD_COMBOLIST, NULL, "sel", PDO_NOPREF, I2VP(400) },
@@ -136,7 +136,7 @@ static void UpdateTitleNext( void )
 		DoChangeNotification( CHANGE_MAIN );
 		return;
 	}
-	ParamLoadMessage( &updateTitlePG, I_UPDATESTR,
+	FormLoadMessage( &updateTitlePG, I_UPDATESTR,
 	                  updateTitles(updateTitleInx).old );
 	if (updateWStale || updateTitles(updateTitleInx).type != updateListType) {
 		UpdateTitleChange( CHANGE_SCALE|CHANGE_PARAMS );
@@ -427,9 +427,9 @@ EXPORT BOOL_T RefreshCompound(
 		                  NULL, RefreshSpecialCancel,
 				  TRUE, F_BLOCK|F_RESIZE|F_RECALLSIZE, NULL );
 	}
-	ParamLoadMessage( &refreshSpecialPG, REFRESH_M1,
+	FormLoadMessage( &refreshSpecialPG, REFRESH_M1,
 	                  _("Choose a Turnout/Structure to replace:") );
-	ParamLoadMessage( &refreshSpecialPG, REFRESH_M2, "" );
+	FormLoadMessage( &refreshSpecialPG, REFRESH_M2, "" );
 	refreshSpecialInx = -1;
 	wListClear( (wList_p)refreshSpecialPLs[REFRESH_L].control );
 	if ( GetTrkEndPtCnt(trk) > 0 ) {
@@ -445,7 +445,7 @@ EXPORT BOOL_T RefreshCompound(
 		return FALSE;
 	}
 	FormatCompoundTitle( listLabels, xx->title );
-	ParamLoadMessage( &refreshSpecialPG, REFRESH_S, message );
+	FormLoadMessage( &refreshSpecialPG, REFRESH_S, message );
 	while (1) {
 		wListSetIndex( (wList_p)refreshSpecialPLs[REFRESH_L].control, -1 );
 		wShow( refreshSpecialPG.win );
@@ -470,8 +470,8 @@ EXPORT BOOL_T RefreshCompound(
 			}
 			return TRUE;
 		}
-		ParamLoadMessage( &refreshSpecialPG, REFRESH_M1, message );
-		ParamLoadMessage( &refreshSpecialPG, REFRESH_M2,
+		FormLoadMessage( &refreshSpecialPG, REFRESH_M1, message );
+		FormLoadMessage( &refreshSpecialPG, REFRESH_M2,
 		                  _("Choose another Turnout/Structure to replace:") );
 	}
 }

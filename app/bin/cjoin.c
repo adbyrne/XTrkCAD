@@ -915,7 +915,7 @@ static STATUS_T CmdJoin(
 		Dj.state = 0;
 		Dj.joinMoveState = 0;
 		Dj.cornuMode = FALSE;
-		/*ParamGroupRecord( &easementPG );*/
+		/*FormGroupRecord( &easementPG );*/
 		infoSubst = FALSE;
 		anchor_trk = NULL;
 		if (easementVal < 0.0) {

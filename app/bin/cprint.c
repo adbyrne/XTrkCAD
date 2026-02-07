@@ -190,7 +190,7 @@ UpdatePageCount()
 	DynStringMalloc(&msg, 0);
 
 	DynStringPrintf(&msg, (pageCount == 1?_("%d page"):_("%d pages")), pageCount);
-	ParamLoadMessage(&printPG, I_PAGECNT, DynStringToCStr(&msg));
+	FormLoadMessage(&printPG, I_PAGECNT, DynStringToCStr(&msg));
 	ParamDialogOkActive(&printPG, pageCount != 0);
 
 	DynStringFree(&msg);
@@ -519,7 +519,7 @@ static void PrintUpdate( int inx0 )
 {
 	int inx;
 
-	ParamLoadData( &printPG );
+	FormFetchData( &printPG );
 
 	if (newPrintGrid.size.x > maxPageSize.x) {
 		newPrintGrid.size.x = maxPageSize.x;
@@ -872,7 +872,7 @@ static void PrintSnapShot( void )
 	newPrintGrid = currPrintGrid;
 	iPrintScale = (long)printScale;
 	ParamLoadControls( &printPG );
-	ParamGroupRecord( &printPG );
+	FormGroupRecord( &printPG );
 	ChangeDim();
 	pageCount = 1;
 	BITMAP(bm,0,0) = TRUE;

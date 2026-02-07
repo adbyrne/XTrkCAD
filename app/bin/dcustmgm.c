@@ -423,7 +423,7 @@ static void DoCustomMgr( void * junk )
 	}
 
 	/*ParamLoadControls( &customPG );*/
-	/*ParamGroupRecord( &customPG );*/
+	/*FormGroupRecord( &customPG );*/
 	LoadCustomMgmList();
 	wShow( customPG.win );
 }

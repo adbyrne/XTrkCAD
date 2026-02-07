@@ -59,7 +59,7 @@ static void DoCmdopt(void* junk)
 		cmdoptW = FormCreateDialog(&cmdoptPG, NULL,
 		                           NULL, CmdoptOk,
 		                           NULL, FormCancel_Restore, TRUE, 0L, NULL);
-		FormLoadDefaultValues(&cmdoptPG);
+		FormLoadDefaultValues(&cmdoptPG); // TODO - remove?
 	}
 	FormLoadControls(&cmdoptPG);
 	wShow(cmdoptW);

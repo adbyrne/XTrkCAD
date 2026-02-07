@@ -108,8 +108,8 @@ static track_p first_block;
 static track_p last_block;
 
 static paramData_t blockPLs[] = {
-	/*0*/ { PD_STRING, blockName, "name", PDO_NOPREF | PDO_NOTBLANK, I2VP(200), N_("Name"), 0, 0, sizeof( blockName )},
-	/*1*/ { PD_STRING, blockScript, "script", PDO_NOPREF, I2VP(350), N_("Script"), 0, 0, sizeof( blockScript)}
+	/*0*/ { PD_STRING, blockName, "name", PDO_NOPREF | PDO_NOTBLANK, I2VP(20), N_("Name"), 0, 0, sizeof( blockName )},
+	/*1*/ { PD_STRING, blockScript, "script", PDO_NOPREF, I2VP(35), N_("Script"), 0, 0, sizeof( blockScript)}
 };
 static paramGroup_t blockPG = { "block", PGO_FULLDIALOGFROMBUILDER, blockPLs,  COUNT( blockPLs ) };
 static wControl_p blockW;
@@ -120,9 +120,9 @@ static char blockEditSegs[STR_LONG_SIZE];
 static track_p blockEditTrack;
 
 static paramData_t blockEditPLs[] = {
-	/*0*/ { PD_STRING, blockEditName, "name", PDO_NOPREF | PDO_NOTBLANK, I2VP(200), N_("Name"), 0, 0, sizeof(blockEditName)},
-	/*1*/ { PD_STRING, blockEditScript, "script", PDO_NOPREF, I2VP(350), N_("Script"), 0, 0, sizeof(blockEditScript)},
-	/*2*/ { PD_STRING, blockEditSegs, "segments", PDO_NOPREF, I2VP(350), N_("Segments"), BO_READONLY, 0, sizeof(blockEditSegs) },
+	/*0*/ { PD_STRING, blockEditName, "name", PDO_NOPREF | PDO_NOTBLANK, I2VP(20), N_("Name"), 0, 0, sizeof(blockEditName)},
+	/*1*/ { PD_STRING, blockEditScript, "script", PDO_NOPREF, I2VP(35), N_("Script"), 0, 0, sizeof(blockEditScript)},
+	/*2*/ { PD_STRING, blockEditSegs, "segments", PDO_NOPREF, I2VP(35), N_("Segments"), BO_READONLY, 0, sizeof(blockEditSegs) },
 };
 static paramGroup_t blockEditPG = { "blockedit", PGO_FULLDIALOGFROMBUILDER, blockEditPLs,  COUNT( blockEditPLs ) };
 static wControl_p blockEditW;

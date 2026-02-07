@@ -756,7 +756,7 @@ static void SelProfileW(
 			inx = profElem_da.cnt-1;
 		}
 		sprintf(message, _("Elev = %0.1f"), round(PutDim(elev)*10.0)/10.0);
-		ParamLoadMessage(&profilePG, I_PROFILEMSG, message);
+		FormLoadMessage(&profilePG, I_PROFILEMSG, message);
 		oldElev = elev;
 		RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
 		break;
@@ -784,7 +784,7 @@ static void SelProfileW(
 			        round(fabs((profElem(inx+1).elev-elev) / (profElem(inx+1).dist-profElem(
 			                                inx).dist)) * 1000.0)/10.0);
 		}
-		ParamLoadMessage(&profilePG, I_PROFILEMSG, message);
+		FormLoadMessage(&profilePG, I_PROFILEMSG, message);
 		oldElev = elev;
 		profElem(inx).elev = oldElev;
 		RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
@@ -801,7 +801,7 @@ static void SelProfileW(
 		}
 		profElem(inx).elev = oldElev;
 		RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
-		ParamLoadMessage(&profilePG, I_PROFILEMSG, _("Drag to change Elevation"));
+		FormLoadMessage(&profilePG, I_PROFILEMSG, _("Drag to change Elevation"));
 		inx = -1;
 		break;
 	default:
@@ -1450,9 +1450,9 @@ static STATUS_T CmdProfile(wAction_t action, coOrd pos)
 			                             NULL, ParamCancel_Undo, TRUE, F_RESIZE, CloseProfileWindow);
 		}
 		ParamLoadControls(&profilePG);
-		ParamGroupRecord(&profilePG);
+		FormGroupRecord(&profilePG);
 		wShow(profileW);
-		ParamLoadMessage(&profilePG, I_PROFILEMSG, _("Drag to change Elevation"));
+		FormLoadMessage(&profilePG, I_PROFILEMSG, _("Drag to change Elevation"));
 		DYNARR_RESET( profElem_t, profElem_da );
 		DYNARR_RESET( station_t, station_da );
 		RedrawProfileW( screenProfileD.d, NULL, 0, 0 );

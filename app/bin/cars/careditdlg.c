@@ -413,7 +413,7 @@ static paramData_t carDlgPLs[] = {
 #define I_CD_MANUF_LIST         (A+0)
 	{ PD_DROPLIST, &carDlgManufInx, "manuf", PDO_NOPREF, I2VP(350), N_("Manufacturer"), BL_EDITABLE },
 #define I_CD_PROTOTYPE_STR      (A+1)
-	{ PD_STRING, &carDlgProtoStr, "prototype", PDO_NOPREF|PDO_NOTBLANK, I2VP(350), N_("Prototype"), 0, 0, sizeof(carDlgProtoStr)},
+	{ PD_STRING, &carDlgProtoStr, "prototype", PDO_NOPREF|PDO_NOTBLANK, I2VP(35), N_("Prototype"), 0, 0, sizeof(carDlgProtoStr)},
 #define I_CD_PROTOKIND_LIST     (A+2)
 	{ PD_DROPLIST, &carDlgKindInx, "protokind-list", PDO_NOPREF, I2VP(125), N_("Prototype"), 0 },
 #define I_CD_PROTOTYPE_LIST     (A+3)
@@ -423,11 +423,11 @@ static paramData_t carDlgPLs[] = {
 #define I_CD_PARTNO_LIST        (A+5)
 	{ PD_DROPLIST, &carDlgPartnoInx, "partno-list", PDO_NOPREF, I2VP(350), N_("Part"), BL_EDITABLE },
 #define I_CD_PARTNO_STR         (A+6)
-	{ PD_STRING, &carDlgPartnoStr, "partno", PDO_NOPREF|PDO_NOTBLANK, I2VP(350), N_("Part Number"), 0, 0, sizeof(carDlgPartnoStr)},
+	{ PD_STRING, &carDlgPartnoStr, "partno", PDO_NOPREF|PDO_NOTBLANK, I2VP(35), N_("Part Number"), 0, 0, sizeof(carDlgPartnoStr)},
 #define I_CD_ISLOCO             (A+7)
 	{ PD_TOGGLE, &carDlgIsLoco, "isLoco", PDO_NOPREF|PDO_DLGWIDE, isLocoLabels, N_("Loco?"), BC_HORIZONTAL|BC_NOBORDER },
 #define I_CD_DESC_STR           (A+8)
-	{ PD_STRING, &carDlgDescStr, "desc", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(350), N_("Description"), 0, 0, sizeof(carDlgDescStr)},
+	{ PD_STRING, &carDlgDescStr, "desc", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(35), N_("Description"), 0, 0, sizeof(carDlgDescStr)},
 #define I_CD_IMPORT             (A+9)
 	{ PD_BUTTON, NULL, "import", 0, 0, N_("Import") },
 #define I_CD_RESET              (A+10)
@@ -442,9 +442,9 @@ static paramData_t carDlgPLs[] = {
 #define I_CD_ROADNAME_LIST      (B+0)
 	{ PD_DROPLIST, &carDlgRoadnameInx, "road", PDO_NOPREF|PDO_DLGWIDE, I2VP(350), N_("Road"), BL_EDITABLE },
 #define I_CD_REPMARK            (B+1)
-	{ PD_STRING, carDlgRepmarkStr, "repmark", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(60), N_("Reporting Mark"), 0, 0, sizeof(carDlgRepmarkStr)},
+	{ PD_STRING, carDlgRepmarkStr, "repmark", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(6), N_("Reporting Mark"), 0, 0, sizeof(carDlgRepmarkStr)},
 #define I_CD_NUMBER             (B+2)
-	{ PD_STRING, carDlgNumberStr, "number", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ|PDO_STRINGLIMITLENGTH, I2VP(80), N_("Number"), 0, 0, sizeof(carDlgNumberStr)},
+	{ PD_STRING, carDlgNumberStr, "number", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ|PDO_STRINGLIMITLENGTH, I2VP(12), N_("Number"), 0, 0, sizeof(carDlgNumberStr)},
 #define I_CD_BODYCOLOR          (B+3)
 	{ PD_COLORLIST, &carDlgBodyColor, "bodyColor", PDO_DLGWIDE|PDO_DLGHORZ, NULL, N_("Color") },
 #define I_CD_CARLENGTH          (B+4)
@@ -468,15 +468,15 @@ static paramData_t carDlgPLs[] = {
 #define I_CD_ITEMINDEX          (C+0)
 	{ PD_LONG, &carDlgItemIndex, "index", PDO_NOPREF|PDO_DLGWIDE, &i1_999999999, N_("Index"), 0 },
 #define I_CD_PURPRC             (C+1)
-	{ PD_STRING, &carDlgPurchPriceStr, "purchPrice", PDO_NOPREF|PDO_DLGWIDE|PDO_STRINGLIMITLENGTH, I2VP(50), N_("Purchase Price"), 0, &carDlgPurchPrice, sizeof(carDlgPurchPriceStr) },
+	{ PD_STRING, &carDlgPurchPriceStr, "purchPrice", PDO_NOPREF|PDO_DLGWIDE|PDO_STRINGLIMITLENGTH, I2VP(10), N_("Purchase Price"), 0, &carDlgPurchPrice, sizeof(carDlgPurchPriceStr) },
 #define I_CD_CURPRC             (C+2)
-	{ PD_STRING, &carDlgCurrPriceStr, "currPrice", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ|PDO_STRINGLIMITLENGTH, I2VP(50), N_("Current Price"), 0, &carDlgCurrPrice, sizeof(carDlgCurrPriceStr) },
+	{ PD_STRING, &carDlgCurrPriceStr, "currPrice", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ|PDO_STRINGLIMITLENGTH, I2VP(10), N_("Current Price"), 0, &carDlgCurrPrice, sizeof(carDlgCurrPriceStr) },
 #define I_CD_COND               (C+3)
 	{ PD_DROPLIST, &carDlgConditionInx, "condition", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ, I2VP(90), N_("Condition") },
 #define I_CD_PURDAT             (C+4)
-	{ PD_STRING, &carDlgPurchDateStr, "purchDate",  PDO_NOPREF|PDO_DLGWIDE|PDO_STRINGLIMITLENGTH, I2VP(80), N_("Purchase Date"), 0, &carDlgPurchDate, sizeof(carDlgPurchDateStr) },
+	{ PD_STRING, &carDlgPurchDateStr, "purchDate",  PDO_NOPREF|PDO_DLGWIDE|PDO_STRINGLIMITLENGTH, I2VP(10), N_("Purchase Date"), 0, &carDlgPurchDate, sizeof(carDlgPurchDateStr) },
 #define I_CD_SRVDAT             (C+5)
-	{ PD_STRING, &carDlgServiceDateStr, "serviceDate",  PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ|PDO_STRINGLIMITLENGTH, I2VP(80), N_("Service Date"), 0, &carDlgServiceDate, sizeof(carDlgServiceDateStr) },
+	{ PD_STRING, &carDlgServiceDateStr, "serviceDate",  PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ|PDO_STRINGLIMITLENGTH, I2VP(10), N_("Service Date"), 0, &carDlgServiceDate, sizeof(carDlgServiceDateStr) },
 #define I_CD_QTY                (C+6)
 	{ PD_LONG, &carDlgQuantity, "quantity", PDO_NOPREF|PDO_DLGWIDE, &i1_9999, N_("Quantity") },
 #define I_CD_MLTNUM             (C+7)
@@ -1158,7 +1158,7 @@ static void CarDlgShowControls( void )
 	ParamControlActive( &carDlgPG, I_CD_MLTNUM,				S_ITEM && carDlgQuantity>1 );
 	ParamControlActive( &carDlgPG, I_CD_IMPORT,				selectedTrackCount > 0 );
 
-	ParamLoadMessage( &carDlgPG, I_CD_MSG, "" );
+	FormLoadMessage( &carDlgPG, I_CD_MSG, "" );
 
 	if ( S_ITEM ) {
 		if ( carDlgUpdateItemPtr == NULL ) {
@@ -1999,16 +1999,16 @@ static void CarDlgUpdate(
 	}
 
 	if ( S_PART && carDlgManufStr[0] == '\0' ) {
-		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Select or Enter a Manufacturer") );
+		FormLoadMessage( &carDlgPG, I_CD_MSG, _("Select or Enter a Manufacturer") );
 	} else if ( S_ITEM && carDlgUpdateItemPtr==NULL &&
 	            ( valL = carDlgItemIndex, !CheckCarDlgItemIndex(&carDlgItemIndex) ) ) {
 		sprintf( message,
 		         _("Item Index %ld duplicated an existing item: updated to new value"), valL );
 		ParamLoadControl( &carDlgPG, I_CD_ITEMINDEX );
-		ParamLoadMessage( &carDlgPG, I_CD_MSG, message );
+		FormLoadMessage( &carDlgPG, I_CD_MSG, message );
 		ok = TRUE;
 	} else {
-		ParamLoadMessage( pg, I_CD_MSG, "" );
+		FormLoadMessage( pg, I_CD_MSG, "" );
 		ok = TRUE;
 	}
 
@@ -2331,7 +2331,7 @@ static void CarDlgOk( void * unused )
 		ParamLoadControl( &carDlgPG, I_CD_ROADNAME_LIST );
 	}
 
-	ParamLoadMessage( &carDlgPG, I_CD_MSG, message );
+	FormLoadMessage( &carDlgPG, I_CD_MSG, message );
 
 	DoChangeNotification( CHANGE_PARAMS );
 

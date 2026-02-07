@@ -124,7 +124,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 		ReadSeparation(parType);
 			
 		FormLoadControls(parGroup);
-		ParamGroupRecord(parGroup);
+		FormGroupRecord(parGroup);
 		//parSepPD.option |= PDO_NORECORD;
 		//parFactorPD.option |= PDO_NORECORD;
 
@@ -166,7 +166,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 		}
 
 		InfoSetControls(mainW, parGroup->nameStr);
-		ParamLoadData(parGroup);
+		FormFetchData(parGroup);
 		Dpa.orig = pos;
 		if (parType == PAR_TRACK) {
 			Dpa.Trk = OnTrack(&pos, FALSE, TRUE);

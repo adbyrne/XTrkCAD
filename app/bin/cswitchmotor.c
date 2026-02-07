@@ -87,10 +87,10 @@ static track_p last_motor;
 static track_p first_motor;
 
 static paramData_t switchmotorPLs[] = {
-	/*0*/ { PD_STRING, switchmotorName, "name", PDO_NOPREF|PDO_NOTBLANK, I2VP(200), NULL, 0, 0, sizeof(switchmotorName)},
-	/*1*/ { PD_STRING, switchmotorNormal, "normal", PDO_NOPREF, I2VP(350), NULL, 0, 0, sizeof(switchmotorNormal)},
-	/*2*/ { PD_STRING, switchmotorReverse, "reverse", PDO_NOPREF, I2VP(350), NULL, 0, 0, sizeof(switchmotorReverse)},
-	/*3*/ { PD_STRING, switchmotorPointSense, "pointSense", PDO_NOPREF, I2VP(350), NULL, 0, 0, sizeof(switchmotorPointSense)}
+	/*0*/ { PD_STRING, switchmotorName, "name", PDO_NOPREF|PDO_NOTBLANK, I2VP(20), NULL, 0, 0, sizeof(switchmotorName)},
+	/*1*/ { PD_STRING, switchmotorNormal, "normal", PDO_NOPREF, I2VP(35), NULL, 0, 0, sizeof(switchmotorNormal)},
+	/*2*/ { PD_STRING, switchmotorReverse, "reverse", PDO_NOPREF, I2VP(35), NULL, 0, 0, sizeof(switchmotorReverse)},
+	/*3*/ { PD_STRING, switchmotorPointSense, "pointSense", PDO_NOPREF, I2VP(35), NULL, 0, 0, sizeof(switchmotorPointSense)}
 };
 
 static paramGroup_t switchmotorPG = { "switchmotor", PGO_FULLDIALOGFROMBUILDER, switchmotorPLs, COUNT( switchmotorPLs ) };
@@ -106,10 +106,10 @@ static track_p switchmotorEditTrack;
 static paramIntegerRange_t r0_999999 = { 0, 999999 };
 
 static paramData_t switchmotorEditPLs[] = {
-	/*0*/ { PD_STRING, switchmotorEditName, "name", PDO_NOPREF | PDO_NOTBLANK, I2VP(200), NULL, 0, 0, sizeof(switchmotorEditName)},
-	/*1*/ { PD_STRING, switchmotorEditNormal, "normal", PDO_NOPREF, I2VP(350), NULL, 0, 0, sizeof(switchmotorEditNormal)},
-	/*2*/ { PD_STRING, switchmotorEditReverse, "reverse", PDO_NOPREF, I2VP(350), NULL, 0, 0, sizeof(switchmotorEditReverse)},
-	/*3*/ { PD_STRING, switchmotorEditPointSense, "pointSense", PDO_NOPREF, I2VP(350), NULL, 0, 0, sizeof(switchmotorEditPointSense)},
+	/*0*/ { PD_STRING, switchmotorEditName, "name", PDO_NOPREF | PDO_NOTBLANK, I2VP(20), NULL, 0, 0, sizeof(switchmotorEditName)},
+	/*1*/ { PD_STRING, switchmotorEditNormal, "normal", PDO_NOPREF, I2VP(35), NULL, 0, 0, sizeof(switchmotorEditNormal)},
+	/*2*/ { PD_STRING, switchmotorEditReverse, "reverse", PDO_NOPREF, I2VP(35), NULL, 0, 0, sizeof(switchmotorEditReverse)},
+	/*3*/ { PD_STRING, switchmotorEditPointSense, "pointSense", PDO_NOPREF, I2VP(35), NULL, 0, 0, sizeof(switchmotorEditPointSense)},
 	/*4*/ { PD_LONG,   &switchmotorEditTonum, "turnoutNumber", PDO_NOPREF, &r0_999999, NULL, BO_READONLY },
 };
 

@@ -695,9 +695,9 @@ static wControl_p groupW;
 static paramIntegerRange_t r0_999999 = { 0, 999999 };
 static paramFloatRange_t r_1000_1000    = { -1000.0, 1000.0, 80 };
 static paramData_t groupPLs[] = {
-	/*0*/ { PD_STRING, groupManuf, "manuf", PDO_NOPREF | PDO_NOTBLANK, I2VP(350), NULL, 0, 0, sizeof(groupManuf)},
-	/*1*/ { PD_STRING, groupDesc, "desc", PDO_NOPREF | PDO_NOTBLANK, I2VP(230), NULL, 0, 0, sizeof(groupDesc)},
-	/*2*/ { PD_STRING, groupPartno, "partno", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGIGNORELABELWIDTH|PDO_NOTBLANK, I2VP(100), NULL, 0, 0, sizeof(groupPartno)},
+	/*0*/ { PD_STRING, groupManuf, "manuf", PDO_NOPREF | PDO_NOTBLANK, I2VP(35), NULL, 0, 0, sizeof(groupManuf)},
+	/*1*/ { PD_STRING, groupDesc, "desc", PDO_NOPREF | PDO_NOTBLANK, I2VP(23), NULL, 0, 0, sizeof(groupDesc)},
+	/*2*/ { PD_STRING, groupPartno, "partno", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGIGNORELABELWIDTH|PDO_NOTBLANK, I2VP(10), NULL, 0, 0, sizeof(groupPartno)},
 	/*3*/ { PD_LONG, &groupSegCnt, "segcnt", PDO_NOPREF, &r0_999999, NULL, BO_READONLY },
 #define I_GROUP_ORIGIN_OFFSET 4  /* Need to change if add above */
 	/*4*/ { PD_FLOAT, &groupOriginX, "origx", PDO_DIM, &r_1000_1000, NULL},

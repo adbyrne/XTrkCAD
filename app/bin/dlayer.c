@@ -550,7 +550,7 @@ static paramData_t layerPLs[] = {
 #define I_LIST	(0)
 	{ PD_COMBOLIST, NULL, "layer", PDO_LISTINDEX, I2VP(250), N_("Select Layer:") },
 #define I_NAME	(1)
-	{ PD_STRING, layerName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH | PDO_DLGBOXEND, I2VP(250 - 54), N_("Name"), 0, 0, sizeof(layerName) },
+	{ PD_STRING, layerName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH | PDO_DLGBOXEND, I2VP(25 - 5), N_("Name"), 0, 0, sizeof(layerName) },
 #define I_COLOR	(2)
 	{ PD_COLORLIST, &layerColor, "color", PDO_NOPREF, NULL, N_("Color") },
 #define I_USE_COLOR (3)
@@ -590,7 +590,7 @@ static paramData_t layerPLs[] = {
 #define I_DEFAULT (20)
 	{ PD_BUTTON, DoLayerOp, "default", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Default Values"), 0, I2VP(ENUMLAYER_DEFAULT) },
 #define I_LINKLIST (21)
-	{ PD_STRING, layerLinkList, "layerlist", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(250 - 54), N_("Linked Layers"), 0, 0, sizeof(layerLinkList) },
+	{ PD_STRING, layerLinkList, "layerlist", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(25 - 5), N_("Linked Layers"), 0, 0, sizeof(layerLinkList) },
 #define I_SETTINGS (22)
 	{ PD_COMBOLIST, NULL, "settings", PDO_LISTINDEX, I2VP(250), N_("Settings when Current") },
 #define I_COUNT (23)
@@ -1391,7 +1391,7 @@ static void LayerUpdate(void)
 {
 	BOOL_T redraw;
 	char *layerFormattedName;
-	ParamLoadData(&layerPG);
+	FormFetchData(&layerPG);
 
 	if (!IsLayerValid(layerSelected)) {
 		return;
@@ -1542,7 +1542,7 @@ static void LayerSelect(
 
 	GetLayerLinkString(inx, layerLinkList);
 	// sprintf(message, "%ld", layers[inx].objCount);
-	// ParamLoadMessage(&layerPG, I_COUNT, message);
+	// FormLoadMessage(&layerPG, I_COUNT, message);
 	ParamLoadControls(&layerPG);
 
 	FormControlActive( &layerPG, I_DELETE, (layerSelected > 0) ? TRUE : FALSE);
@@ -1646,7 +1646,7 @@ void ResetLayers(void)
 
 	if (layerL) {
 		ParamLoadControls(&layerPG);
-		// ParamLoadMessage(&layerPG, I_COUNT, "0");
+		// FormLoadMessage(&layerPG, I_COUNT, "0");
 	}
 }
 
@@ -1694,7 +1694,7 @@ void RestoreLayers(void)
 
 	if (layerL) {
 		ParamLoadControls(&layerPG);
-		//ParamLoadMessage(&layerPG, I_COUNT, "0");
+		//FormLoadMessage(&layerPG, I_COUNT, "0");
 	}
 
 	LoadLayerLists();

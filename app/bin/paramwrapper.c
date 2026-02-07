@@ -96,7 +96,7 @@ EXPORT void ParamControlActive(
     //ParamControlActiveOrig( pg, inx, active);
 }
 
-EXPORT void ParamLoadMessage(
+EXPORT void XParamLoadMessage(
     paramGroup_p pg,
     int inx,
     char* message)
@@ -113,7 +113,7 @@ EXPORT long ParamUpdate(
     return(0L);
 }
 
-void ParamLoadData(
+void XParamLoadData(
     paramGroup_p pg)
 {
     printf("%s:%d Old Param Function %s used by %s\n", __FILE__, __LINE__, __func__, pg->nameStr);
@@ -138,10 +138,10 @@ EXPORT void ParamUpdatePrefs(void)
     //ParamUpdatePrefsOrig();
 }
 
-EXPORT void ParamGroupRecord(paramGroup_p pg)
+EXPORT void XParamGroupRecord(paramGroup_p pg)
 {
     printf("%s:%d Old Param Function %s used by %s\n", __FILE__, __LINE__, __func__, pg->nameStr);
-    //ParamGroupRecordOrig(pg);
+    //FormGroupRecordOrig(pg);
 }
 
 EXPORT void ParamStartRecord(FILE* macroFile)
