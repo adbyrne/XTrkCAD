@@ -422,7 +422,7 @@ static void DoCustomMgr( void * junk )
 		wListClear( customSelL );
 	}
 
-	/*ParamLoadControls( &customPG );*/
+	/*FormLoadControls( &customPG );*/
 	/*FormGroupRecord( &customPG );*/
 	LoadCustomMgmList();
 	wShow( customPG.win );

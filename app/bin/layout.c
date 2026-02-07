@@ -613,7 +613,7 @@ EXPORT int LoadImageFile(
 
 			file_changed = TRUE;
 			haveBackground = TRUE;
-			ParamLoadControl(layout_pg_p, BACKGROUNDFILEENTRY);
+			FormLoadSingleControl(layout_pg_p, BACKGROUNDFILEENTRY);
 
 			MainRedraw();
 		}
@@ -626,7 +626,7 @@ EXPORT int LoadImageFile(
 
 	SetName();
 	file_changed = TRUE;
-	ParamLoadControl(layout_pg_p, BACKGROUNDFILEENTRY);
+	FormLoadSingleControl(layout_pg_p, BACKGROUNDFILEENTRY);
 	LayoutChange( CHANGE_BACKGROUND );
 
 	return FALSE;
@@ -672,7 +672,7 @@ static void ImageFileClear( void * unused)
 	wControlActive((wControl_p)backgroundB, FALSE);
 	file_changed = TRUE;
 	haveBackground = false;
-	ParamLoadControl(layout_pg_p, BACKGROUNDFILEENTRY);
+	FormLoadSingleControl(layout_pg_p, BACKGROUNDFILEENTRY);
 
 	LayoutChange( CHANGE_BACKGROUND );
 

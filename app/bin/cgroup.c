@@ -1879,7 +1879,7 @@ EXPORT void DoGroup( void * unused )
 		wControlShow( groupPLs[5].control, TRUE );
 	}
 
-	ParamLoadControls( &groupPG );
+	FormLoadControls( &groupPG );
 	wShow( groupW );
 }
 

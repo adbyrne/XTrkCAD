@@ -62,7 +62,7 @@ void ParamCreateControlsOrig(paramGroup_p pg, paramChangeProc changeProc);
 
 #define USESBUILDER(pg) ((pg->options)&PGO_FULLDIALOGFROMBUILDER)
 
-EXPORT void ParamLoadControls(
+EXPORT void XParamLoadControls(
     paramGroup_p pg)
 {
     if (USESBUILDER(pg)) {
@@ -74,7 +74,7 @@ EXPORT void ParamLoadControls(
     }
 }
 
-EXPORT void ParamLoadControl(
+EXPORT void XParamLoadControl(
     paramGroup_p pg,
     int inx)
 {
@@ -87,7 +87,7 @@ EXPORT void ParamLoadControl(
     }
 }
 
-EXPORT void ParamControlActive(
+EXPORT void XParamControlActive(
     paramGroup_p pg,
     int inx,
     BOOL_T active)

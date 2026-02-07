@@ -189,20 +189,20 @@ static void DoElevUpdate( paramGroup_p pg, int inx, void * valueP )
 		if ( mode < 0 || mode >= 7 ) {
 			return;
 		}
-		ParamControlActive( &elevationPG, I_HEIGHT, FALSE );
-		ParamControlActive( &elevationPG, I_STATION, FALSE );
+		FormControlActive( &elevationPG, I_HEIGHT, FALSE );
+		FormControlActive( &elevationPG, I_STATION, FALSE );
 		switch ( mode ) {
 		case 0:
 			break;
 		case 1:
 		case 2:
-			ParamControlActive( &elevationPG, I_HEIGHT, TRUE );
+			FormControlActive( &elevationPG, I_HEIGHT, TRUE );
 			break;
 		case 3:
 		case 4:
 			break;
 		case 5:
-			ParamControlActive( &elevationPG, I_STATION, TRUE );
+			FormControlActive( &elevationPG, I_STATION, TRUE );
 			break;
 		}
 		elevModeV = mode;
@@ -274,10 +274,10 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 	elevTrk = trk;
 	elevEp = ep;
 	mode = GetTrkEndElevUnmaskedMode( trk, ep );
-	ParamLoadControls( &elevationPG );
-	ParamControlActive( &elevationPG, I_MODE, TRUE );
-	ParamControlActive( &elevationPG, I_HEIGHT, FALSE );
-	ParamControlActive( &elevationPG, I_STATION, FALSE );
+	FormLoadControls( &elevationPG );
+	FormControlActive( &elevationPG, I_MODE, TRUE );
+	FormControlActive( &elevationPG, I_HEIGHT, FALSE );
+	FormControlActive( &elevationPG, I_STATION, FALSE );
 	FormLoadMessage( &elevationPG, I_COMPUTED, "" );
 	FormLoadMessage( &elevationPG, I_GRADE, "" );
 	switch (mode & ELEV_MASK) {
@@ -292,8 +292,8 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 		}
 		elevHeightV = GetTrkEndElevHeight(trk,ep);
 		elevOldValue = elevHeightV;
-		ParamLoadControl( &elevationPG, I_HEIGHT );
-		ParamControlActive( &elevationPG, I_HEIGHT, TRUE );
+		FormLoadSingleControl( &elevationPG, I_HEIGHT );
+		FormControlActive( &elevationPG, I_HEIGHT, TRUE );
 		break;
 	case ELEV_COMP:
 		radio = 3;
@@ -304,8 +304,8 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 	case ELEV_STATION:
 		radio = 5;
 		strcpy( elevStationV, GetTrkEndElevStation(trk,ep) );
-		ParamLoadControl( &elevationPG, I_STATION );
-		ParamControlActive( &elevationPG, I_STATION, TRUE );
+		FormLoadSingleControl( &elevationPG, I_STATION );
+		FormControlActive( &elevationPG, I_STATION, TRUE );
 		break;
 	case ELEV_IGNORE:
 		radio = 6;
@@ -314,7 +314,7 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 		radio = 0;
 	}
 	elevModeV = radio;
-	ParamLoadControl( &elevationPG, I_MODE );
+	FormLoadSingleControl( &elevationPG, I_MODE );
 	gradeOk = ComputeElev( trk, ep, FALSE, &elevX, &grade, TRUE );
 	sprintf( message, "%0.2f%s", round(PutDim( elevX )*100.0)/100.0,
 	         (units==UNITS_METRIC?"cm":"\"") );
@@ -347,7 +347,7 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 	FormLoadMessage( &elevationPG, I_GRADE, message );
 	if ( (mode&ELEV_MASK)!=ELEV_DEF ) {
 		elevHeightV = elevX;
-		ParamLoadControl( &elevationPG, I_HEIGHT );
+		FormLoadSingleControl( &elevationPG, I_HEIGHT );
 	}
 	wShow(elevW);
 }
@@ -397,12 +397,12 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		elevModeV = 0;
 		elevHeightV = 0.0;
 		elevStationV[0] = 0;
-		ParamLoadControls( &elevationPG );
+		FormLoadControls( &elevationPG );
 		FormGroupRecord( &elevationPG );
 		//wShow( elevW );
-		ParamControlActive( &elevationPG, I_MODE, FALSE );
-		ParamControlActive( &elevationPG, I_HEIGHT, FALSE );
-		ParamControlActive( &elevationPG, I_STATION, FALSE );
+		FormControlActive( &elevationPG, I_MODE, FALSE );
+		FormControlActive( &elevationPG, I_HEIGHT, FALSE );
+		FormControlActive( &elevationPG, I_STATION, FALSE );
 		FormLoadMessage( &elevationPG, I_COMPUTED, "" );
 		FormLoadMessage( &elevationPG, I_GRADE, "" );
 		InfoMessage(

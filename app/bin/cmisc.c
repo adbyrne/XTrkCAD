@@ -301,7 +301,7 @@ static void DescribeUpdate(
 			}
 		}
 
-		ParamLoadControl(&describePG, inx);
+		FormLoadSingleControl(&describePG, inx);
 	}
 }
 
@@ -557,7 +557,7 @@ if ( !bOldDescribe ) return;
 	}
 
 	ParamLayoutDialog(&describePG);
-	ParamLoadControls(&describePG);
+	FormLoadControls(&describePG);
 	sprintf(message, "%s (T%d)", title, GetTrkIndex(trk));
 	wWinSetTitle(describePG.win, message);
 	wShow(describePG.win);
@@ -566,7 +566,7 @@ if ( !bOldDescribe ) return;
 static void DescChange(long changes)
 {
 	if ((changes&CHANGE_UNITS) && describePG.win && wWinIsVisible(describePG.win)) {
-		ParamLoadControls(&describePG);
+		FormLoadControls(&describePG);
 	}
 }
 

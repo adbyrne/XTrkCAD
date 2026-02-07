@@ -165,7 +165,7 @@ void ShowTip( void * flagsVP )
 		if (tipW == NULL) {
 			CreateTipW();
 		}
-		ParamLoadControls( &tipPG );
+		FormLoadControls( &tipPG );
 		wTextClear( tipT );
 		/*  initial value is -1 which gets incremented 0 below */
 		wPrefGetInteger( "tip", "number", &tipNum, -1 );

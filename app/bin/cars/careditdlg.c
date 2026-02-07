@@ -528,10 +528,10 @@ static void CarDlgLoadDimsFromPart( carPart_p partP )
 	wPrefSetFloat( carDlgPG.nameStr, message, carDlgCouplerLength );
 	carDlgIsLoco = (partP->options&CAR_DESC_IS_LOCO)?1:0;
 	carDlgBodyColor = partP->color;
-	ParamLoadControl( &carDlgPG, I_CD_CARLENGTH );
-	ParamLoadControl( &carDlgPG, I_CD_CARWIDTH );
-	ParamLoadControl( &carDlgPG, I_CD_TRKCENTER );
-	ParamLoadControl( &carDlgPG, I_CD_CPLDLEN );
+	FormLoadSingleControl( &carDlgPG, I_CD_CARLENGTH );
+	FormLoadSingleControl( &carDlgPG, I_CD_CARWIDTH );
+	FormLoadSingleControl( &carDlgPG, I_CD_TRKCENTER );
+	FormLoadSingleControl( &carDlgPG, I_CD_CPLDLEN );
 	wColorSelectButtonSetColor( (wButton_p)carDlgPLs[I_CD_BODYCOLOR].control,
 	                            *(wDrawColor*)carDlgPLs[I_CD_BODYCOLOR].valueP );
 	TabStringExtract( partP->title, 7, tabs );
@@ -547,10 +547,10 @@ static void CarDlgLoadDimsFromProto( carProto_p protoP )
 	carDlgDim.coupledLength = carDlgDim.carLength + carDlgCouplerLength*2;
 	/*carDlgCouplerLength = (carDlgDim.coupledLength-carDlgDim.carLength)/2.0;*/
 	carDlgIsLoco = (protoP->options&CAR_DESC_IS_LOCO)?1:0;
-	ParamLoadControl( &carDlgPG, I_CD_CARLENGTH );
-	ParamLoadControl( &carDlgPG, I_CD_CARWIDTH );
-	ParamLoadControl( &carDlgPG, I_CD_TRKCENTER );
-	ParamLoadControl( &carDlgPG, I_CD_CPLDLEN );
+	FormLoadSingleControl( &carDlgPG, I_CD_CARLENGTH );
+	FormLoadSingleControl( &carDlgPG, I_CD_CARWIDTH );
+	FormLoadSingleControl( &carDlgPG, I_CD_TRKCENTER );
+	FormLoadSingleControl( &carDlgPG, I_CD_CPLDLEN );
 }
 
 static void CarDlgRedraw(
@@ -1152,11 +1152,11 @@ static void CarDlgShowControls( void )
 	ParamControlShow( &carDlgPG, I_CD_PROTOTYPE_STR,		S_PROTO );
 	ParamControlShow( &carDlgPG, I_CD_MANUF_LIST,			!S_PROTO );
 
-	/*ParamControlActive( &carDlgPG, I_CD_PROTOTYPE_STR,	S_PROTO && carDlgUpdateProtoPtr==NULL );*/
-	ParamControlActive( &carDlgPG, I_CD_ITEMINDEX,			S_ITEM
+	/*FormControlActive( &carDlgPG, I_CD_PROTOTYPE_STR,	S_PROTO && carDlgUpdateProtoPtr==NULL );*/
+	FormControlActive( &carDlgPG, I_CD_ITEMINDEX,			S_ITEM
 	                    && carDlgUpdateItemPtr==NULL );
-	ParamControlActive( &carDlgPG, I_CD_MLTNUM,				S_ITEM && carDlgQuantity>1 );
-	ParamControlActive( &carDlgPG, I_CD_IMPORT,				selectedTrackCount > 0 );
+	FormControlActive( &carDlgPG, I_CD_MLTNUM,				S_ITEM && carDlgQuantity>1 );
+	FormControlActive( &carDlgPG, I_CD_IMPORT,				selectedTrackCount > 0 );
 
 	FormLoadMessage( &carDlgPG, I_CD_MSG, "" );
 
@@ -1189,7 +1189,7 @@ static void CarDlgShowControls( void )
 		}
 	}
 
-	ParamLoadControls( &carDlgPG );
+	FormLoadControls( &carDlgPG );
 
 	ParamDialogOkActive( &carDlgPG, S_ITEM );
 	CarDlgUpdate( &carDlgPG, -1, NULL );
@@ -1229,7 +1229,7 @@ static void CarDlgDoActions( carDlgAction_e * actions, int action_count )
 		case A_Return:
 			for ( inx=0; inx<COUNT( carDlgPLs ); inx++ )
 				if ( reload[inx] ) {
-					ParamLoadControl( &carDlgPG, inx );
+					FormLoadSingleControl( &carDlgPG, inx );
 				}
 			return;
 		case A_SError:
@@ -1541,7 +1541,7 @@ static void CarDlgDoActions( carDlgAction_e * actions, int action_count )
 	// Apply any remaining control updates
 	for (inx = 0; inx < COUNT(carDlgPLs); inx++) {
 		if (reload[inx]) {
-			ParamLoadControl(&carDlgPG, inx);
+			FormLoadSingleControl(&carDlgPG, inx);
 		}
 	}
 }
@@ -1680,7 +1680,7 @@ static void CarDlgUpdate(
 
 		if ( !ParamCheckInputs( &carDlgPG, carDlgPLs[I_CD_DISPMODE].control ) ) {
 			carDlgDispMode = 1-carDlgDispMode;
-			ParamLoadControl( &carDlgPG, I_CD_DISPMODE );
+			FormLoadSingleControl( &carDlgPG, I_CD_DISPMODE );
 			break;
 		}
 		for ( inx=B; inx<C; inx++ ) {
@@ -1718,7 +1718,7 @@ static void CarDlgUpdate(
 		} else {
 			carDlgRepmarkStr[0] = '\0';
 		}
-		ParamLoadControl( pg, I_CD_REPMARK );
+		FormLoadSingleControl( pg, I_CD_REPMARK );
 		break;
 
 	case I_CD_CARLENGTH:
@@ -1732,7 +1732,7 @@ static void CarDlgUpdate(
 			len = carDlgDim.carLength+carDlgCouplerLength*2.0;
 			if ( len > 0 ) {
 				carDlgDim.coupledLength = len;
-				ParamLoadControl( &carDlgPG, I_CD_CPLDLEN );
+				FormLoadSingleControl( &carDlgPG, I_CD_CPLDLEN );
 			}
 			carDlgCarLengthClock = ++carDlgClock;
 		} else if ( carDlgDim.coupledLength != 0 && ( carDlgCouplerLength == 0
@@ -1740,7 +1740,7 @@ static void CarDlgUpdate(
 			len = (carDlgDim.coupledLength-carDlgDim.carLength)/2.0;
 			if ( len > 0 ) {
 				carDlgCouplerLength = len;
-				ParamLoadControl( &carDlgPG, I_CD_CPLRLEN );
+				FormLoadSingleControl( &carDlgPG, I_CD_CPLRLEN );
 				if ( !S_PROTO ) {
 					sprintf( message, "%s-%s", carDlgPLs[I_CD_CPLRLEN].nameStr,
 					         GetScaleName(carDlgScaleInx) );
@@ -1764,7 +1764,7 @@ static void CarDlgUpdate(
 			len = (carDlgDim.coupledLength-carDlgDim.carLength)/2.0;
 			if ( len > 0 ) {
 				carDlgCouplerLength = len;
-				ParamLoadControl( &carDlgPG, I_CD_CPLRLEN );
+				FormLoadSingleControl( &carDlgPG, I_CD_CPLRLEN );
 				if ( !S_PROTO ) {
 					sprintf( message, "%s-%s", carDlgPLs[I_CD_CPLRLEN].nameStr,
 					         GetScaleName(carDlgScaleInx) );
@@ -1777,7 +1777,7 @@ static void CarDlgUpdate(
 			len = carDlgDim.coupledLength-carDlgCouplerLength*2.0;
 			if ( len > 0 ) {
 				carDlgDim.carLength = len;
-				ParamLoadControl( &carDlgPG, I_CD_CARLENGTH );
+				FormLoadSingleControl( &carDlgPG, I_CD_CARLENGTH );
 				checkTruckCenter = TRUE;
 			}
 			carDlgCoupledLengthClock = ++carDlgClock;
@@ -1798,7 +1798,7 @@ static void CarDlgUpdate(
 			len = carDlgDim.carLength+carDlgCouplerLength*2.0;
 			if ( len > 0 ) {
 				carDlgDim.coupledLength = len;
-				ParamLoadControl( &carDlgPG, I_CD_CPLDLEN );
+				FormLoadSingleControl( &carDlgPG, I_CD_CPLDLEN );
 			}
 			carDlgCouplerLengthClock = ++carDlgClock;
 		} else if ( carDlgDim.coupledLength != 0 && ( carDlgDim.carLength == 0
@@ -1806,7 +1806,7 @@ static void CarDlgUpdate(
 			len = carDlgDim.coupledLength-carDlgCouplerLength*2.0;
 			if ( len > 0 ) {
 				carDlgDim.carLength = len;
-				ParamLoadControl( &carDlgPG, I_CD_CARLENGTH );
+				FormLoadSingleControl( &carDlgPG, I_CD_CARLENGTH );
 				checkTruckCenter = TRUE;
 			}
 			carDlgCouplerLengthClock = ++carDlgClock;
@@ -1943,7 +1943,7 @@ static void CarDlgUpdate(
 	case I_CD_TYPE_LIST:
 		carDlgChanged++;
 		carDlgIsLoco = (typeListMap[carDlgTypeInx].value&1);
-		ParamLoadControl( &carDlgPG, I_CD_ISLOCO );
+		FormLoadSingleControl( &carDlgPG, I_CD_ISLOCO );
 		redraw = TRUE;
 		break;
 
@@ -1971,11 +1971,11 @@ static void CarDlgUpdate(
 		carDlgDim.carWidth = size2.y;
 		carDlgDim.coupledLength = carDlgDim.carLength + 32;
 		carDlgFlipToggle = FALSE;
-		ParamLoadControl( &carDlgPG, I_CD_CARLENGTH );
-		ParamLoadControl( &carDlgPG, I_CD_CARWIDTH );
-		ParamLoadControl( &carDlgPG, I_CD_CPLRLEN );
-		ParamLoadControl( &carDlgPG, I_CD_TRKCENTER );
-		ParamLoadControl( &carDlgPG, I_CD_TRKOFFSET );
+		FormLoadSingleControl( &carDlgPG, I_CD_CARLENGTH );
+		FormLoadSingleControl( &carDlgPG, I_CD_CARWIDTH );
+		FormLoadSingleControl( &carDlgPG, I_CD_CPLRLEN );
+		FormLoadSingleControl( &carDlgPG, I_CD_TRKCENTER );
+		FormLoadSingleControl( &carDlgPG, I_CD_TRKOFFSET );
 		redraw = TRUE;
 		break;
 
@@ -1994,8 +1994,8 @@ static void CarDlgUpdate(
 	}
 
 	if ( checkTruckCenter && carDlgDim.carLength > 0 ) {
-		ParamLoadControl( &carDlgPG, I_CD_TRKCENTER );
-		ParamLoadControl( &carDlgPG, I_CD_TRKOFFSET );
+		FormLoadSingleControl( &carDlgPG, I_CD_TRKCENTER );
+		FormLoadSingleControl( &carDlgPG, I_CD_TRKOFFSET );
 	}
 
 	if ( S_PART && carDlgManufStr[0] == '\0' ) {
@@ -2004,7 +2004,7 @@ static void CarDlgUpdate(
 	            ( valL = carDlgItemIndex, !CheckCarDlgItemIndex(&carDlgItemIndex) ) ) {
 		sprintf( message,
 		         _("Item Index %ld duplicated an existing item: updated to new value"), valL );
-		ParamLoadControl( &carDlgPG, I_CD_ITEMINDEX );
+		FormLoadSingleControl( &carDlgPG, I_CD_ITEMINDEX );
 		FormLoadMessage( &carDlgPG, I_CD_MSG, message );
 		ok = TRUE;
 	} else {
@@ -2027,7 +2027,7 @@ static void CarDlgNewDesc( void )
 	carDlgNewProtoPtr = NULL;
 	carDlgUpdatePartPtr = NULL;
 	carDlgNumberStr[0] = '\0';
-	ParamLoadControl( &carDlgPG, I_CD_NUMBER );
+	FormLoadSingleControl( &carDlgPG, I_CD_NUMBER );
 
 	CarDlgStateMachine_ProcessTransition(T_NewPart);
 
@@ -2147,7 +2147,7 @@ static void CarDlgOk( void * unused )
 	if ( S_ITEM && carDlgUpdateItemPtr==NULL
 	     && !CheckCarDlgItemIndex(&carDlgItemIndex) ) {
 		NoticeMessage( MSG_CARITEM_BAD_INDEX, _("Ok"), NULL );
-		ParamLoadControl( &carDlgPG, I_CD_ITEMINDEX );
+		FormLoadSingleControl( &carDlgPG, I_CD_ITEMINDEX );
 		return;
 	}
 
@@ -2215,7 +2215,7 @@ static void CarDlgOk( void * unused )
 				wPrefSetInteger( "misc", "last-car-item-index", carDlgItemIndex );
 				carDlgItemIndex++;
 				CheckCarDlgItemIndex(&carDlgItemIndex);
-				ParamLoadControl( &carDlgPG, I_CD_ITEMINDEX );
+				FormLoadSingleControl( &carDlgPG, I_CD_ITEMINDEX );
 				if ( carDlgQuantity>1 && carDlgMultiNum==0 ) {
 					number = strtol( carDlgNumberStr, &cp, 10 );
 					if ( cp && *cp == 0 && number > 0 ) {
@@ -2266,7 +2266,7 @@ static void CarDlgOk( void * unused )
 		         carDlgManufStr, carDlgPartnoStr, carDlgProtoStr, carDlgDescStr,
 		         (carDlgRepmarkStr[ 0 ]?carDlgRepmarkStr:carDlgRoadnameStr), carDlgNumberStr );
 		carDlgQuantity = 1;
-		ParamLoadControl( &carDlgPG, I_CD_QTY );
+		FormLoadSingleControl( &carDlgPG, I_CD_QTY );
 
 	} else if ( S_PART ) {
 		if ( strcasecmp( carDlgRoadnameStr, "undecorated" ) == 0 ) {
@@ -2328,7 +2328,7 @@ static void CarDlgOk( void * unused )
 		tabs[1].len = (int)strlen(carDlgRepmarkStr);
 		LoadRoadnameList( &tabs[0], &tabs[1] );
 		CarDlgLoadRoadnameList();
-		ParamLoadControl( &carDlgPG, I_CD_ROADNAME_LIST );
+		FormLoadSingleControl( &carDlgPG, I_CD_ROADNAME_LIST );
 	}
 
 	FormLoadMessage( &carDlgPG, I_CD_MSG, message );
@@ -2345,12 +2345,12 @@ static void CarDlgOk( void * unused )
 				} else {
 					currState = S_ItemEnter;
 				}
-				ParamLoadControl( &carDlgPG, I_CD_MANUF_LIST );
-				ParamLoadControl( &carDlgPG, I_CD_PROTOKIND_LIST );
-				ParamLoadControl( &carDlgPG, I_CD_PROTOTYPE_LIST );
-				ParamLoadControl( &carDlgPG, I_CD_PARTNO_LIST );
-				ParamLoadControl( &carDlgPG, I_CD_PARTNO_STR );
-				ParamLoadControl( &carDlgPG, I_CD_DESC_STR );
+				FormLoadSingleControl( &carDlgPG, I_CD_MANUF_LIST );
+				FormLoadSingleControl( &carDlgPG, I_CD_PROTOKIND_LIST );
+				FormLoadSingleControl( &carDlgPG, I_CD_PROTOTYPE_LIST );
+				FormLoadSingleControl( &carDlgPG, I_CD_PARTNO_LIST );
+				FormLoadSingleControl( &carDlgPG, I_CD_PARTNO_STR );
+				FormLoadSingleControl( &carDlgPG, I_CD_DESC_STR );
 				ParamControlShow( &carDlgPG, I_CD_PARTNO_LIST, carDlgPartnoInx>=0 );
 				ParamControlShow( &carDlgPG, I_CD_PARTNO_STR, carDlgPartnoInx<0 );
 				ParamControlShow( &carDlgPG, I_CD_DESC_STR, carDlgPartnoInx<0 );
@@ -2362,17 +2362,17 @@ static void CarDlgOk( void * unused )
 	} else if ( S_PART ) {
 		if ( carDlgUpdatePartPtr==NULL ) {
 			SetNextPartno(carDlgPartnoStr);
-			ParamLoadControl( &carDlgPG, I_CD_PARTNO_STR );
+			FormLoadSingleControl( &carDlgPG, I_CD_PARTNO_STR );
 			SetCarDlgFieldInvalid(I_CD_PARTNO_STR, FALSE);
 
 			carDlgNumberStr[0] = '\0';
-			ParamLoadControl( &carDlgPG, I_CD_NUMBER );
+			FormLoadSingleControl( &carDlgPG, I_CD_NUMBER );
 			return;
 		}
 	} else if ( S_PROTO ) {
 		if ( carDlgUpdateProtoPtr==NULL ) {
 			carDlgProtoStr[0] = '\0';
-			ParamLoadControl( &carDlgPG, I_CD_PROTOTYPE_STR );
+			FormLoadSingleControl( &carDlgPG, I_CD_PROTOTYPE_STR );
 			SetCarDlgFieldInvalid(I_CD_PROTOTYPE_STR, FALSE );
 			return;
 		}
@@ -2538,7 +2538,7 @@ EXPORT void CarDlgAddDesc( void )
 	carDlgIsLoco = FALSE;
 	carDlgUpdatePartPtr = NULL;
 	carDlgNumberStr[0] = '\0';
-	ParamLoadControl( &carDlgPG, I_CD_NUMBER );
+	FormLoadSingleControl( &carDlgPG, I_CD_NUMBER );
 
 	currState = S_Waiting;
 	DoCarPartDlg( partNewActions );

@@ -1615,10 +1615,10 @@ static void DrawModDlgUpdate(
         void * valueP )
 {
 	DrawGeomModify(C_UPDATE,zero,&drawModCmdContext);
-	ParamLoadControl(&drawModPG,
+	FormLoadSingleControl(&drawModPG,
 	                 drawModRotCenterInx-1);	  	//Make sure the angle is updated in case center moved
-	ParamLoadControl(&drawModPG,drawModRadius);			 	// Make sure Radius updated
-	ParamLoadControl(&drawModPG,drawModRelAngle);				//Relative Angle as well
+	FormLoadSingleControl(&drawModPG,drawModRadius);			 	// Make sure Radius updated
+	FormLoadSingleControl(&drawModPG,drawModRelAngle);				//Relative Angle as well
 	MainRedraw();
 
 }
@@ -1710,7 +1710,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 						controls[2] = NULL;
 						labels[0] = N_("Seg Lth");
 						labels[1] = N_("Rel Ang");
-						ParamLoadControls( &drawModPG );
+						FormLoadControls( &drawModPG );
 						InfoSubstituteControls(drawModPG.nameStr, controls, labels);
 						drawModLengthPD.option &= ~PDO_NORECORD;
 						drawModRelAnglePD.option &= ~PDO_NORECORD;
@@ -1724,7 +1724,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 					controls[2] = NULL;
 					labels[0] = N_("Width");
 					labels[1] = N_("Height");
-					ParamLoadControls( &drawModPG );
+					FormLoadControls( &drawModPG );
 					InfoSubstituteControls(drawModPG.nameStr, controls, labels);
 					drawModWidthPD.option &= ~PDO_NORECORD;
 					drawModHeightPD.option &= ~PDO_NORECORD;
@@ -1742,7 +1742,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 				controls[2] = NULL;
 				labels[0] = N_("Length");
 				labels[1] = N_("Angle");
-				ParamLoadControls( &drawModPG );
+				FormLoadControls( &drawModPG );
 				InfoSubstituteControls(drawModPG.nameStr, controls, labels);
 				drawModLengthPD.option &= ~PDO_NORECORD;
 				drawModAnglePD.option &= ~PDO_NORECORD;
@@ -1760,7 +1760,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 					controls[2] = NULL;
 					labels[1] = N_("Arc Angle");
 				}
-				ParamLoadControls( &drawModPG );
+				FormLoadControls( &drawModPG );
 				InfoSubstituteControls(drawModPG.nameStr, controls, labels);
 				drawModArcAnglePD.option &= ~PDO_NORECORD;
 				if (drawModCmdContext.type == SEG_CRVLIN) {
@@ -3483,7 +3483,7 @@ static void DrawDlgUpdate(
 			coOrd pos = zero;
 			DrawGeomMouse(C_UPDATE,pos,&drawCmdContext);
 		}
-		ParamLoadControl(&drawPG,drawAngleInx);				//Force Angle change out
+		FormLoadSingleControl(&drawPG,drawAngleInx);				//Force Angle change out
 		//if (pg->paramPtr[inx].enter_pressed) {
 		//	coOrd pos = zero;
 		//	DrawGeomMouse((0x0D<<8)|(C_TEXT&0xFF),pos,&drawCmdContext);

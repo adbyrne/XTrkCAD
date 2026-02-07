@@ -663,7 +663,7 @@ static void LayerChange(long changes)
 {
 	if (changes & (CHANGE_LAYER))
 		if (layerW != NULL && wWinIsVisible(layerW)) {
-			ParamLoadControls(&layerPG);
+			FormLoadControls(&layerPG);
 		}
 }
 
@@ -988,7 +988,7 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
 	/* force update of the 'manage layers' dialogbox */
 	if (layerL) {
 		wListSetIndex(layerL, layer);
-		ParamLoadControls(&layerPG);
+		FormLoadControls(&layerPG);
 	}
 
 	if (layerS) {
@@ -1400,19 +1400,19 @@ static void LayerUpdate(void)
 	if (layerSelected == curLayer && layerFrozen) {
 		NoticeMessage(MSG_LAYER_FREEZE, _("Ok"), NULL);
 		layerFrozen = FALSE;
-		ParamLoadControl(&layerPG, I_FRZ);
+		FormLoadSingleControl(&layerPG, I_FRZ);
 	}
 
 	if (layerSelected == curLayer && !layerVisible) {
 		NoticeMessage(MSG_LAYER_HIDE, _("Ok"), NULL);
 		layerVisible = TRUE;
-		ParamLoadControl(&layerPG, I_VIS);
+		FormLoadSingleControl(&layerPG, I_VIS);
 	}
 
 	if (layerSelected == curLayer && layerModule) {
 		NoticeMessage(MSG_LAYER_MODULE, _("Ok"), NULL);
 		layerModule = FALSE;
-		ParamLoadControl(&layerPG, I_MOD);
+		FormLoadSingleControl(&layerPG, I_MOD);
 	}
 	char oldLinkList[STR_LONG_SIZE];
 	GetLayerLinkString((int)layerSelected, oldLinkList);
@@ -1543,7 +1543,7 @@ static void LayerSelect(
 	GetLayerLinkString(inx, layerLinkList);
 	// sprintf(message, "%ld", layers[inx].objCount);
 	// FormLoadMessage(&layerPG, I_COUNT, message);
-	ParamLoadControls(&layerPG);
+	FormLoadControls(&layerPG);
 
 	FormControlActive( &layerPG, I_DELETE, (layerSelected > 0) ? TRUE : FALSE);
 
@@ -1645,7 +1645,7 @@ void ResetLayers(void)
 	LoadLayerLists();
 
 	if (layerL) {
-		ParamLoadControls(&layerPG);
+		FormLoadControls(&layerPG);
 		// FormLoadMessage(&layerPG, I_COUNT, "0");
 	}
 }
@@ -1693,7 +1693,7 @@ void RestoreLayers(void)
 	}
 
 	if (layerL) {
-		ParamLoadControls(&layerPG);
+		FormLoadControls(&layerPG);
 		//FormLoadMessage(&layerPG, I_COUNT, "0");
 	}
 

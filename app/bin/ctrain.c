@@ -1007,12 +1007,12 @@ static void ControllerDialogSync(
 
 	if (dlg->followMe != followMe) {
 		dlg->followMe = followMe;
-		ParamLoadControl(dlg->trainPGp, I_FOLLOW);
+		FormLoadSingleControl(dlg->trainPGp, I_FOLLOW);
 	}
 
 	if (dlg->autoReverse != autoReverse) {
 		dlg->autoReverse = autoReverse;
-		ParamLoadControl(dlg->trainPGp, I_AUTORVRS);
+		FormLoadSingleControl(dlg->trainPGp, I_AUTORVRS);
 	}
 
 	if (dlg->direction != dir) {
@@ -1272,7 +1272,7 @@ static void ControllerDialogUpdate(
 		xx = GET_EXTRA_DATA(dlg->train, T_CAR, extraDataCar_t);
 		xx->distance = 0.0;
 		FormLoadMessage(dlg->trainPGp, I_DIST, FormatDistance(xx->distance));
-		ParamLoadControl(curTrainDlg->trainPGp, I_DIST);
+		FormLoadSingleControl(curTrainDlg->trainPGp, I_DIST);
 		TrainTimeStartPause();
 		break;
 
@@ -1287,7 +1287,7 @@ static void ControllerDialogUpdate(
 		xx = GET_EXTRA_DATA(dlg->train, T_CAR, extraDataCar_t);
 		followTrain = NULL;
 		dlg->followMe = FALSE;
-		ParamLoadControl(curTrainDlg->trainPGp, I_FOLLOW);
+		FormLoadSingleControl(curTrainDlg->trainPGp, I_FOLLOW);
 		CarSetVisible(dlg->train);
 		MoveMainWindow(xx->trvTrk.pos, xx->trvTrk.angle);
 		trainHighlighted = dlg->train;
@@ -2185,7 +2185,7 @@ static BOOL_T MoveTrain(
 		    followCenter.y != mainCenter.y) {
 			if (curTrainDlg->train == followTrain) {
 				curTrainDlg->followMe = FALSE;
-				ParamLoadControl(curTrainDlg->trainPGp, I_FOLLOW);
+				FormLoadSingleControl(curTrainDlg->trainPGp, I_FOLLOW);
 			}
 
 			followTrain = NULL;

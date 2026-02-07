@@ -71,6 +71,7 @@ void FormLoadSingleControl(
 	switch (p->type) {
 	case PD_LONG:
 		wEntrySetValue(p->control, FormatLong(*(long*)p->valueP));
+		// TODO LoadSingleControl valid check
 		//if (!ParamIntegerRangeCheck(p, *(long*)p->valueP)) {
 		//	return;
 		//}
@@ -95,6 +96,7 @@ void FormLoadSingleControl(
 		break;
 	case PD_FLOAT:
 		LoadFloatEntry(p, *(FLOAT_T*)p->valueP);
+		// TODO LoadSingleControl valid check
 		if (FormFloatRangeCheck(p, *(FLOAT_T*)p->valueP)) {
 			p->oldD.f = *(FLOAT_T*)p->valueP;
 		}
@@ -113,6 +115,7 @@ void FormLoadSingleControl(
 			p->oldD.s = MyStrdup((char*)p->valueP);
 			wEntrySetValue(p->control, (char*)p->valueP);
 		}
+		// TODO LoadSingleControl valid check
 		//if ((p->option & PDO_NOTBLANK) && strlen(p->oldD.s) == 0) {
 		//	wControlHilite( p->control, TRUE);
 		//	p->bInvalid = TRUE;

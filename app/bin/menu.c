@@ -514,7 +514,7 @@ static void DebugInit(void * unused)
 		//ParamCreateControls( &debugPG, NULL );
 		CreateDebugW();
 	}
-	ParamLoadControls( &debugPG );
+	FormLoadControls( &debugPG );
 	wShow(debugW);
 }
 

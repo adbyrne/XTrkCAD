@@ -736,7 +736,7 @@ EXPORT STATUS_T CmdGrid(
 
 	case C_CANCEL:
 		grid = oldGrid;
-//		ParamLoadControls( &gridPG );
+//		FormLoadControls( &gridPG );
 		wHide( gridW );
 		return C_TERMINATE;
 

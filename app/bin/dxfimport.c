@@ -92,7 +92,7 @@ EXPORT void DoImportDxf(void* unused)
 		                               TRUE, 0, NULL);
 		// blockD.dpi = mainD.dpi;
 	}
-	ParamLoadControls(&importDxfPG);
+	FormLoadControls(&importDxfPG);
 	wShow(importDxfW);
 }
 

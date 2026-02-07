@@ -489,24 +489,24 @@ static void PrintPlainBox(
 static void PrintEnableControls( void )
 {
 	if (printScale <= 1) {
-		ParamLoadControl( &printPG, I_REGMARKS );
-		ParamControlActive( &printPG, I_REGMARKS, TRUE );
+		FormLoadSingleControl( &printPG, I_REGMARKS );
+		FormControlActive( &printPG, I_REGMARKS, TRUE );
 	} else {
-		ParamLoadControl( &printPG, I_REGMARKS );
+		FormLoadSingleControl( &printPG, I_REGMARKS );
 		printRegistrationMarks = 0;
-		ParamControlActive( &printPG, I_REGMARKS, FALSE );
+		FormControlActive( &printPG, I_REGMARKS, FALSE );
 	}
 	if ( DrawTwoRails( &print_d, 1 ) ) {
-		ParamLoadControl( &printPG, I_ROADBED );
-		ParamControlActive( &printPG, I_ROADBED, TRUE );
-		ParamControlActive( &printPG, I_ROADBEDWIDTH, TRUE );
-		ParamControlActive( &printPG, I_CENTERLINE, TRUE);
+		FormLoadSingleControl( &printPG, I_ROADBED );
+		FormControlActive( &printPG, I_ROADBED, TRUE );
+		FormControlActive( &printPG, I_ROADBEDWIDTH, TRUE );
+		FormControlActive( &printPG, I_CENTERLINE, TRUE);
 	} else {
 		printRoadbed = 0;
-		ParamLoadControl( &printPG, I_ROADBED );
-		ParamControlActive( &printPG, I_ROADBED, FALSE );
-		ParamControlActive( &printPG, I_ROADBEDWIDTH, FALSE );
-		ParamControlActive( &printPG, I_CENTERLINE, FALSE );
+		FormLoadSingleControl( &printPG, I_ROADBED );
+		FormControlActive( &printPG, I_ROADBED, FALSE );
+		FormControlActive( &printPG, I_ROADBEDWIDTH, FALSE );
+		FormControlActive( &printPG, I_CENTERLINE, FALSE );
 	}
 }
 
@@ -523,16 +523,16 @@ static void PrintUpdate( int inx0 )
 
 	if (newPrintGrid.size.x > maxPageSize.x) {
 		newPrintGrid.size.x = maxPageSize.x;
-		ParamLoadControl( &printPG, 1 );
+		FormLoadSingleControl( &printPG, 1 );
 	}
 	if (newPrintGrid.size.y > maxPageSize.y) {
 		newPrintGrid.size.y = maxPageSize.y;
-		ParamLoadControl( &printPG, 3 );
+		FormLoadSingleControl( &printPG, 3 );
 	}
 	currPrintGrid = newPrintGrid;
 	for ( inx = 0; inx < COUNT( printPLs ); inx++ ) {
 		if ( inx != inx0 && printPLs[inx].context == I2VP(2) ) {
-			ParamLoadControl( &printPG, inx );
+			FormLoadSingleControl( &printPG, inx );
 		}
 	}
 	ChangeDim();
@@ -596,7 +596,7 @@ static void PrintMaxPageSize( void )
 	SetMaxPageSize( TRUE );
 	currPrintGrid.size = maxPageSize;
 	newPrintGrid = currPrintGrid;
-	ParamLoadControls( &printPG );
+	FormLoadControls( &printPG );
 	ChangeDim();
 	TempRedraw(); // PrintMaxSize
 	wShow( printWin);
@@ -688,7 +688,7 @@ static void GetMargins()
 	wPrefGetFloat( "printer", message, &customMargin.bottom, printerMargin.bottom );
 	sprintf( message, "%s-marginL", sPrinterName );
 	wPrefGetFloat( "printer", message, &customMargin.left, printerMargin.left );
-	ParamLoadControls( &customMarginPG );
+	FormLoadControls( &customMarginPG );
 }
 
 
@@ -712,10 +712,10 @@ static void DoPrintMarginOk( void * context )
 	SetMaxPageSize( TRUE );
 	for ( int inx = 0; inx < COUNT( printPLs ); inx++ ) {
 		if ( printPLs[inx].context == I2VP(2) ) {
-			ParamLoadControl( &printPG, inx );
+			FormLoadSingleControl( &printPG, inx );
 		}
 	}
-	ParamLoadControls( &customMarginPG );
+	FormLoadControls( &customMarginPG );
 	DoPrintScale();
 }
 
@@ -735,7 +735,7 @@ static void PrintMarginDlgUpdate( paramGroup_p pg, int index, void * context )
 static void PrintMarginReset()
 {
 	customMargin = printerMargin;
-	ParamLoadControls( &customMarginPG );
+	FormLoadControls( &customMarginPG );
 	wControlActive( customMarginPLs[I_PM_RESET].control, FALSE );
 }
 
@@ -764,7 +764,7 @@ static void DoPrintMargin( void )
 	}
 	wMessageSetValue( (wMessage_p)customMarginPLs[I_PM_MESSAGE].control,
 	                  sPrinterName );
-	ParamLoadControls( &customMarginPG );
+	FormLoadControls( &customMarginPG );
 	wShow( customMarginWin );
 
 }
@@ -871,7 +871,7 @@ static void PrintSnapShot( void )
 	currPrintGrid.size = maxPageSize;
 	newPrintGrid = currPrintGrid;
 	iPrintScale = (long)printScale;
-	ParamLoadControls( &printPG );
+	FormLoadControls( &printPG );
 	FormGroupRecord( &printPG );
 	ChangeDim();
 	pageCount = 1;
@@ -1362,7 +1362,7 @@ static void DoResetGrid( void )
 	currPrintGrid.angle = 0.0;
 	ChangeDim();
 	newPrintGrid = currPrintGrid;
-	ParamLoadControls( &printPG );
+	FormLoadControls( &printPG );
 	TempRedraw(); // DoResetGrid
 }
 
@@ -1373,7 +1373,7 @@ static void PrintGridRotate( void * pangle )
 	currPrintGrid.orig = cmdMenuPos;
 	currPrintGrid.angle += angle/1000;
 	newPrintGrid = currPrintGrid;
-	ParamLoadControls( &printPG );
+	FormLoadControls( &printPG );
 	ChangeDim();
 	TempRedraw(); // PrintGridRotate
 }
@@ -1394,8 +1394,8 @@ static void PrintChange( long changes )
 	if (!GridIsVisible()) {
 		printGrid = 0;
 	}
-	ParamLoadControls( &printPG );
-	ParamControlActive( &printPG, I_GRID, GridIsVisible() );
+	FormLoadControls( &printPG );
+	FormControlActive( &printPG, I_GRID, GridIsVisible() );
 	PrintEnableControls();
 }
 
@@ -1411,7 +1411,7 @@ static void PrintDlgUpdate(
 	} else if ( pg->paramPtr[inx].context == I2VP(2) ) {
 		PrintUpdate( inx );
 	}
-	ParamControlActive( &printPG, I_RULER, currPrintGrid.angle == 0 );
+	FormControlActive( &printPG, I_RULER, currPrintGrid.angle == 0 );
 	TempRedraw(); // PrintDlgUpdate
 }
 
@@ -1470,7 +1470,7 @@ static STATUS_T CmdPrint(
 			currPrintGrid.size.y = maxPageSize.y;
 		}
 		newPrintGrid = currPrintGrid;
-		ParamLoadControls( &printPG );
+		FormLoadControls( &printPG );
 		pageCount = 0;
 		UpdatePageCount();
 		LOG( log_print, 2, ( "Page size = %0.3f %0.3f\n", currPrintGrid.size.x,
@@ -1479,7 +1479,7 @@ static STATUS_T CmdPrint(
 		ChangeDim();
 		InfoMessage( _("Select pages to print, or drag to move print grid") );
 		downShift = FALSE;
-		ParamControlActive( &printPG, I_RULER, currPrintGrid.angle == 0 );
+		FormControlActive( &printPG, I_RULER, currPrintGrid.angle == 0 );
 		TempRedraw(); // CmdPrint C_START
 		return C_CONTINUE;
 
@@ -1495,14 +1495,14 @@ static STATUS_T CmdPrint(
 	case C_MOVE:
 		if (downShift) {
 			rc = GridAction( action, pos, &newPrintGrid.orig, &newPrintGrid.angle );
-			ParamLoadControls( &printPG );
+			FormLoadControls( &printPG );
 		}
 		return C_CONTINUE;
 
 	case C_UP:
 		if (downShift) {
 			rc = GridAction( action, pos, &newPrintGrid.orig, &newPrintGrid.angle );
-			ParamLoadControls( &printPG );
+			FormLoadControls( &printPG );
 			currPrintGrid = newPrintGrid;
 			ChangeDim();
 			downShift = FALSE;
@@ -1525,18 +1525,18 @@ static STATUS_T CmdPrint(
 	case C_RMOVE:
 		if (downShift) {
 			rc = GridAction( action, pos, &newPrintGrid.orig, &newPrintGrid.angle );
-			ParamLoadControls( &printPG );
+			FormLoadControls( &printPG );
 		}
 		return rc;
 
 	case C_RUP:
 		if (downShift) {
 			rc = GridAction( action, pos, &newPrintGrid.orig, &newPrintGrid.angle );
-			ParamLoadControls( &printPG );
+			FormLoadControls( &printPG );
 			currPrintGrid = newPrintGrid;
 			ChangeDim();
 			downShift = FALSE;
-			ParamControlActive( &printPG, I_RULER, currPrintGrid.angle == 0 );
+			FormControlActive( &printPG, I_RULER, currPrintGrid.angle == 0 );
 		}
 		return rc;
 

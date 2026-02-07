@@ -174,7 +174,7 @@ void CarUpdateHotbarList()
 	/*wListSetValue( (wList_p)newCarPLs[0].control, "Select a car" );*/
 	wListSetIndex((wList_p)newCarPLs[0].control, 0);
 	strcpy(newCarLabel1, _("Select"));
-	ParamLoadControl(&newCarPG, 0);
+	FormLoadSingleControl(&newCarPG, 0);
 	// InfoSubstituteControls(newCarControls, newCarLabels);
 
 	wWinGetSize(mainW, &w, &h);
@@ -226,7 +226,7 @@ static char* CarItemHotbarProc(
 			cp = CarItemHotbarProc(HB_BARTITLE, I2VP(carItemInx), NULL, NULL);
 			strncpy(newCarLabel1, cp, sizeof(newCarLabel1) - 1);
 			newCarLabel1[sizeof(newCarLabel1) - 1] = 0;
-			ParamLoadControls(&newCarPG);
+			FormLoadControls(&newCarPG);
 			FormGroupRecord(&newCarPG);
 
 			// InfoSubstituteControls(newCarControls, newCarLabels);

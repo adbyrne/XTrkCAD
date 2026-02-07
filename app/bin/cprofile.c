@@ -1449,7 +1449,7 @@ static STATUS_T CmdProfile(wAction_t action, coOrd pos)
 			profileW = FormCreateDialog(&profilePG, MakeWindowTitle(_("Profile")), NULL, NULL,
 			                             NULL, ParamCancel_Undo, TRUE, F_RESIZE, CloseProfileWindow);
 		}
-		ParamLoadControls(&profilePG);
+		FormLoadControls(&profilePG);
 		FormGroupRecord(&profilePG);
 		wShow(profileW);
 		FormLoadMessage(&profilePG, I_PROFILEMSG, _("Drag to change Elevation"));
