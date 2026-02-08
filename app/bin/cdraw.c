@@ -3507,9 +3507,9 @@ EXPORT void InitCmdDraw( wMenu_p menu )
 
 	lineColor = wDrawColorBlack;
 	benchColor = wDrawFindColor( wRGB(255,192,0) );
-	//ParamCreateControls( &drawPG, DrawDlgUpdate );
+	//FormCreateControls( &drawPG, DrawDlgUpdate );
 
-	//ParamCreateControls( &drawModPG, DrawModDlgUpdate) ;
+	//FormCreateControls( &drawModPG, DrawModDlgUpdate) ;
 
 	for ( inx1=0; inx1<4; inx1++ ) {
 		dsp = &drawStuff[inx1];

@@ -148,7 +148,12 @@ static long newCarInx;
 static paramData_t newCarPLs[] = {
 	{ PD_DROPLIST, &newCarInx, "index", PDO_DLGWIDE, I2VP(400), N_("Item") }
 };
-static paramGroup_t newCarPG = { "train-newcar", 0, newCarPLs, COUNT(newCarPLs) };
+static void CarItemHotbarUpdate(
+        paramGroup_p pg,
+        int inx,
+        void* data);
+static paramGroup_t newCarPG = { "train-newcar", 0, newCarPLs, COUNT(newCarPLs),
+			NULL, NULL, NULL, 0L, CarItemHotbarUpdate };
 EXPORT wControl_p newCarControls[2];
 static char newCarLabel1[STR_SIZE];
 #ifdef TODO_UNUSED
@@ -403,7 +408,7 @@ EXPORT void InitCarDlg( void )
 	InitCarProto();
 
 	FormRegister( &newCarPG );
-	ParamCreateControls( &newCarPG, CarItemHotbarUpdate );
+	FormCreateControls( &newCarPG );
 	newCarControls[0] = newCarPLs[0].control;
 
 

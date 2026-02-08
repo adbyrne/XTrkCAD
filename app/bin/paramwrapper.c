@@ -253,7 +253,7 @@ wControl_p XParamCreateDialog(
     return(dialog);
 }
 
-EXPORT void ParamLayoutDialog(
+EXPORT void XParamLayoutDialog(
     paramGroup_p pg)
 {
     printf("%s:%d Old Param Function used for %s\n", __FILE__, __LINE__, pg->nameStr);
@@ -269,7 +269,7 @@ EXPORT void ParamDialogOkActive(
     //ParamDialogOkActiveOrig(pg, active);
 }
 
-EXPORT void ParamCreateControls(
+EXPORT void XParamCreateControls(
     paramGroup_p pg,
     paramChangeProc changeProc)
 {
