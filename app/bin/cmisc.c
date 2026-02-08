@@ -556,7 +556,7 @@ if ( !bOldDescribe ) return;
 		}
 	}
 
-	ParamLayoutDialog(&describePG);
+//	ParamLayoutDialog(&describePG); TODO Describe
 	FormLoadControls(&describePG);
 	sprintf(message, "%s (T%d)", title, GetTrkIndex(trk));
 	wWinSetTitle(describePG.win, message);
