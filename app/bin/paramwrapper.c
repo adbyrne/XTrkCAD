@@ -165,14 +165,14 @@ EXPORT void XParamSaveAll(void)
     //ParamSaveAllOrig();
 }
 
-EXPORT void ParamMenuPush(void* dp)
+EXPORT void XParamMenuPush(void* dp)
 {
     printf("%s:%d Old Param function %s used\n", __FILE__, __LINE__, __func__);
     //ParamMenuPushOrig(dp);
     FormMenuPush(dp);
 }
 
-EXPORT wBool_t ParamCheckInputs(
+EXPORT wBool_t XParamCheckInputs(
     paramGroup_p group,
     wControl_p b)
 {
@@ -189,7 +189,7 @@ EXPORT void ParamResetInvalid(wWin_p win)
     //ParamResetInvalidOrig(win);
 }
 
-EXPORT void ParamControlShow(paramGroup_p pg, wIndex_t inx, wBool_t bShow)
+EXPORT void XParamControlShow(paramGroup_p pg, wIndex_t inx, wBool_t bShow)
 {
     printf("%s:%d Old Param Function %s used by %s\n", __FILE__, __LINE__, __func__, pg->nameStr);
     //ParamControlShowOrig(pg, inx, bShow);

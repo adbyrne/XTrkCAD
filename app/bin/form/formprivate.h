@@ -12,8 +12,6 @@ void FormSaveDefaultValues(paramGroup_p group);
 
 /* checkinputs.c */
 
-wBool_t FormCheckInputs(paramGroup_p group, wControl_p b);
-
 unsigned long FormIntegerGetValue(paramData_p data, const char* enteredValue);
 FLOAT_T FormFloatGetValue(paramData_p data, const char* enteredValue);
 

@@ -1096,61 +1096,61 @@ static BOOL_T CarDlgLoadLists(
 
 static void CarDlgShowControls( void )
 {
-	ParamControlShow( &carDlgPG, I_CD_NEW,					S_ITEM );
-	ParamControlShow( &carDlgPG, I_CD_NEWPROTO,				S_PART );
+	FormControlShow( &carDlgPG, I_CD_NEW,					S_ITEM );
+	FormControlShow( &carDlgPG, I_CD_NEWPROTO,				S_PART );
 
-	ParamControlShow( &carDlgPG, I_CD_ITEMINDEX,			S_ITEM && carDlgDispMode==0 );
-	ParamControlShow( &carDlgPG, I_CD_PURPRC,				S_ITEM && carDlgDispMode==0 );
-	ParamControlShow( &carDlgPG, I_CD_CURPRC,				S_ITEM && carDlgDispMode==0 );
-	ParamControlShow( &carDlgPG, I_CD_COND,					S_ITEM && carDlgDispMode==0 );
-	ParamControlShow( &carDlgPG, I_CD_PURDAT,				S_ITEM && carDlgDispMode==0 );
-	ParamControlShow( &carDlgPG, I_CD_SRVDAT,				S_ITEM && carDlgDispMode==0 );
-	ParamControlShow( &carDlgPG, I_CD_NOTES,				S_ITEM && carDlgDispMode==0 );
-	ParamControlShow( &carDlgPG, I_CD_MLTNUM,				S_ITEM
+	FormControlShow( &carDlgPG, I_CD_ITEMINDEX,			S_ITEM && carDlgDispMode==0 );
+	FormControlShow( &carDlgPG, I_CD_PURPRC,				S_ITEM && carDlgDispMode==0 );
+	FormControlShow( &carDlgPG, I_CD_CURPRC,				S_ITEM && carDlgDispMode==0 );
+	FormControlShow( &carDlgPG, I_CD_COND,					S_ITEM && carDlgDispMode==0 );
+	FormControlShow( &carDlgPG, I_CD_PURDAT,				S_ITEM && carDlgDispMode==0 );
+	FormControlShow( &carDlgPG, I_CD_SRVDAT,				S_ITEM && carDlgDispMode==0 );
+	FormControlShow( &carDlgPG, I_CD_NOTES,				S_ITEM && carDlgDispMode==0 );
+	FormControlShow( &carDlgPG, I_CD_MLTNUM,				S_ITEM
 	                  && carDlgUpdateItemPtr==NULL && carDlgDispMode==0 );
-	ParamControlShow( &carDlgPG, I_CD_QTY,					S_ITEM && carDlgUpdateItemPtr==NULL
+	FormControlShow( &carDlgPG, I_CD_QTY,					S_ITEM && carDlgUpdateItemPtr==NULL
 	                  && carDlgDispMode==0 );
 
-	ParamControlShow( &carDlgPG, I_CD_ROADNAME_LIST,		S_PART || ( S_ITEM
+	FormControlShow( &carDlgPG, I_CD_ROADNAME_LIST,		S_PART || ( S_ITEM
 	                  && carDlgDispMode==1 ) );
-	ParamControlShow( &carDlgPG, I_CD_REPMARK,				S_PART || ( S_ITEM
+	FormControlShow( &carDlgPG, I_CD_REPMARK,				S_PART || ( S_ITEM
 	                  && carDlgDispMode==1 ) );
-	ParamControlShow( &carDlgPG, I_CD_NUMBER,				S_PART || ( S_ITEM
+	FormControlShow( &carDlgPG, I_CD_NUMBER,				S_PART || ( S_ITEM
 	                  && carDlgDispMode==1 ) );
-	ParamControlShow( &carDlgPG, I_CD_BODYCOLOR,			S_PART || ( S_ITEM
+	FormControlShow( &carDlgPG, I_CD_BODYCOLOR,			S_PART || ( S_ITEM
 	                  && carDlgDispMode==1 ) );
-	ParamControlShow( &carDlgPG, I_CD_CARLENGTH,			!( S_ITEM
+	FormControlShow( &carDlgPG, I_CD_CARLENGTH,			!( S_ITEM
 	                  && carDlgDispMode==0 ) );
-	ParamControlShow( &carDlgPG, I_CD_CARWIDTH,				!( S_ITEM
+	FormControlShow( &carDlgPG, I_CD_CARWIDTH,				!( S_ITEM
 	                  && carDlgDispMode==0 ) );
-	ParamControlShow( &carDlgPG, I_CD_TRKCENTER,			!( S_ITEM
+	FormControlShow( &carDlgPG, I_CD_TRKCENTER,			!( S_ITEM
 	                  && carDlgDispMode==0 ) );
-	ParamControlShow( &carDlgPG, I_CD_TRKOFFSET,            !( S_ITEM
+	FormControlShow( &carDlgPG, I_CD_TRKOFFSET,            !( S_ITEM
 	                  && carDlgDispMode==0 ) );
-	ParamControlShow( &carDlgPG, I_CD_CANVAS,				!( S_ITEM && carDlgDispMode==0 ) );
-	ParamControlShow( &carDlgPG, I_CD_CPLRLEN,				S_PART || ( S_ITEM
+	FormControlShow( &carDlgPG, I_CD_CANVAS,				!( S_ITEM && carDlgDispMode==0 ) );
+	FormControlShow( &carDlgPG, I_CD_CPLRLEN,				S_PART || ( S_ITEM
 	                  && carDlgDispMode==1 ) );
-	ParamControlShow( &carDlgPG, I_CD_CPLDLEN,				S_PART || ( S_ITEM
+	FormControlShow( &carDlgPG, I_CD_CPLDLEN,				S_PART || ( S_ITEM
 	                  && carDlgDispMode==1 ) );
-	ParamControlShow( &carDlgPG, I_CD_CPLRMNT,				S_PART || ( S_ITEM
+	FormControlShow( &carDlgPG, I_CD_CPLRMNT,				S_PART || ( S_ITEM
 	                  && carDlgDispMode==1 ) );
 
-	ParamControlShow( &carDlgPG, I_CD_DISPMODE,				S_ITEM );
+	FormControlShow( &carDlgPG, I_CD_DISPMODE,				S_ITEM );
 
-	ParamControlShow( &carDlgPG, I_CD_TYPE_LIST,			S_PROTO );
-	ParamControlShow( &carDlgPG, I_CD_FLIP,					S_PROTO );
-	ParamControlShow( &carDlgPG, I_CD_DESC_STR,				S_PART
+	FormControlShow( &carDlgPG, I_CD_TYPE_LIST,			S_PROTO );
+	FormControlShow( &carDlgPG, I_CD_FLIP,					S_PROTO );
+	FormControlShow( &carDlgPG, I_CD_DESC_STR,				S_PART
 	                  || (currState==S_ItemEnter) );
-	ParamControlShow( &carDlgPG, I_CD_IMPORT,				S_PROTO );
-	ParamControlShow( &carDlgPG, I_CD_RESET,				S_PROTO );
-	ParamControlShow( &carDlgPG, I_CD_PARTNO_STR,			S_PART
+	FormControlShow( &carDlgPG, I_CD_IMPORT,				S_PROTO );
+	FormControlShow( &carDlgPG, I_CD_RESET,				S_PROTO );
+	FormControlShow( &carDlgPG, I_CD_PARTNO_STR,			S_PART
 	                  || (currState==S_ItemEnter) );
-	ParamControlShow( &carDlgPG, I_CD_PARTNO_LIST,			(currState==S_ItemSel) );
-	ParamControlShow( &carDlgPG, I_CD_ISLOCO,				S_PROTO );
-	ParamControlShow( &carDlgPG, I_CD_PROTOKIND_LIST,		!S_PROTO );
-	ParamControlShow( &carDlgPG, I_CD_PROTOTYPE_LIST,		!S_PROTO );
-	ParamControlShow( &carDlgPG, I_CD_PROTOTYPE_STR,		S_PROTO );
-	ParamControlShow( &carDlgPG, I_CD_MANUF_LIST,			!S_PROTO );
+	FormControlShow( &carDlgPG, I_CD_PARTNO_LIST,			(currState==S_ItemSel) );
+	FormControlShow( &carDlgPG, I_CD_ISLOCO,				S_PROTO );
+	FormControlShow( &carDlgPG, I_CD_PROTOKIND_LIST,		!S_PROTO );
+	FormControlShow( &carDlgPG, I_CD_PROTOTYPE_LIST,		!S_PROTO );
+	FormControlShow( &carDlgPG, I_CD_PROTOTYPE_STR,		S_PROTO );
+	FormControlShow( &carDlgPG, I_CD_MANUF_LIST,			!S_PROTO );
 
 	/*FormControlActive( &carDlgPG, I_CD_PROTOTYPE_STR,	S_PROTO && carDlgUpdateProtoPtr==NULL );*/
 	FormControlActive( &carDlgPG, I_CD_ITEMINDEX,			S_ITEM
@@ -1389,15 +1389,15 @@ static void CarDlgDoActions( carDlgAction_e * actions, int action_count )
 			break;
 		case A_ShowPartnoList:
 			reload[I_CD_PARTNO_LIST] = TRUE;
-			ParamControlShow( &carDlgPG, I_CD_PARTNO_LIST, TRUE );
-			ParamControlShow( &carDlgPG, I_CD_DESC_STR, FALSE );
-			ParamControlShow( &carDlgPG, I_CD_PARTNO_STR, FALSE );
+			FormControlShow( &carDlgPG, I_CD_PARTNO_LIST, TRUE );
+			FormControlShow( &carDlgPG, I_CD_DESC_STR, FALSE );
+			FormControlShow( &carDlgPG, I_CD_PARTNO_STR, FALSE );
 			break;
 		case A_HidePartnoList:
 			reload[I_CD_PARTNO_STR] = reload[I_CD_DESC_STR] = TRUE;
-			ParamControlShow( &carDlgPG, I_CD_PARTNO_LIST, FALSE );
-			ParamControlShow( &carDlgPG, I_CD_DESC_STR, TRUE );
-			ParamControlShow( &carDlgPG, I_CD_PARTNO_STR, TRUE );
+			FormControlShow( &carDlgPG, I_CD_PARTNO_LIST, FALSE );
+			FormControlShow( &carDlgPG, I_CD_DESC_STR, TRUE );
+			FormControlShow( &carDlgPG, I_CD_PARTNO_STR, TRUE );
 			break;
 		case A_PushDims:
 			CHECK( carDlgStkPtr < CARDLG_STK_SIZE );
@@ -1637,7 +1637,7 @@ static void CarDlgUpdate(
 		else {
 			CarDlgStateMachine( T_ItemSel );
 		}
-		/*ParamControlShow( &carDlgPG, I_CD_MANUF_LIST, TRUE );*/
+		/*FormControlShow( &carDlgPG, I_CD_MANUF_LIST, TRUE );*/
 		break;
 
 	case I_CD_PROTOKIND_LIST:
@@ -1678,20 +1678,20 @@ static void CarDlgUpdate(
 
 	case I_CD_DISPMODE:
 
-		if ( !ParamCheckInputs( &carDlgPG, carDlgPLs[I_CD_DISPMODE].control ) ) {
+		if ( !FormCheckInputs( &carDlgPG, carDlgPLs[I_CD_DISPMODE].control ) ) {
 			carDlgDispMode = 1-carDlgDispMode;
 			FormLoadSingleControl( &carDlgPG, I_CD_DISPMODE );
 			break;
 		}
 		for ( inx=B; inx<C; inx++ ) {
-			ParamControlShow( &carDlgPG, inx, carDlgDispMode==1 );
+			FormControlShow( &carDlgPG, inx, carDlgDispMode==1 );
 		}
 		for ( inx=C; inx<D; inx++ ) {
-			ParamControlShow( &carDlgPG, inx, carDlgDispMode==0 );
+			FormControlShow( &carDlgPG, inx, carDlgDispMode==0 );
 		}
 		if ( carDlgDispMode == 0 && carDlgUpdateItemPtr != NULL ) {
-			ParamControlShow( &carDlgPG, I_CD_QTY, FALSE );
-			ParamControlShow( &carDlgPG, I_CD_MLTNUM, FALSE );
+			FormControlShow( &carDlgPG, I_CD_QTY, FALSE );
+			FormControlShow( &carDlgPG, I_CD_MLTNUM, FALSE );
 		}
 		redraw = carDlgDispMode==1;
 		break;
@@ -2351,9 +2351,9 @@ static void CarDlgOk( void * unused )
 				FormLoadSingleControl( &carDlgPG, I_CD_PARTNO_LIST );
 				FormLoadSingleControl( &carDlgPG, I_CD_PARTNO_STR );
 				FormLoadSingleControl( &carDlgPG, I_CD_DESC_STR );
-				ParamControlShow( &carDlgPG, I_CD_PARTNO_LIST, carDlgPartnoInx>=0 );
-				ParamControlShow( &carDlgPG, I_CD_PARTNO_STR, carDlgPartnoInx<0 );
-				ParamControlShow( &carDlgPG, I_CD_DESC_STR, carDlgPartnoInx<0 );
+				FormControlShow( &carDlgPG, I_CD_PARTNO_LIST, carDlgPartnoInx>=0 );
+				FormControlShow( &carDlgPG, I_CD_PARTNO_STR, carDlgPartnoInx<0 );
+				FormControlShow( &carDlgPG, I_CD_DESC_STR, carDlgPartnoInx<0 );
 			} else if ( carDlgManufInx == -1 ) {
 				carDlgManufStr[0] = '\0';
 			}

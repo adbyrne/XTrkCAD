@@ -33,6 +33,7 @@ void FormGroupRecord(paramGroup_p pg);
 wBool_t FormIntegerRangeCheck(paramData_p p, long valL);
 wBool_t FormFloatRangeCheck(paramData_p p, FLOAT_T valF);
 wBool_t FormStringCheckValue(paramData_p data, char* value);
+wBool_t FormCheckInputs(paramGroup_p group, wControl_p b);
 long FormUpdate(paramGroup_p pg);
 
 void FormDialogOkActive(paramGroup_p pg, int active);
@@ -47,6 +48,7 @@ void FormCancel_Restore(paramGroup_p group);
 #define FormCancel_Custom( PROC ) PROC
 
 void FormControlActive(paramGroup_p pg, int inx, BOOL_T active);
+void FormControlShow(paramGroup_p pg, int inx, BOOL_T bShow);
 void FormMenuPush(void* dp);
 
 void FormFetchData(paramGroup_p pg);

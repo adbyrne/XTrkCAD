@@ -53,3 +53,18 @@ EXPORT void FormControlActive(
 //		((wMenuCallBack_p)(p->valueP))(p->context);
 //	}
 //}
+
+
+EXPORT void FormControlShow (
+	paramGroup_p pg,
+	int inx,
+	wBool_t bShow )
+{
+	paramData_p pd = &pg->paramPtr[inx];
+	wControl_p pControl = pd->control;
+	if ( pControl == NULL ) { return; }
+	wControlShow( pControl, bShow );
+}
+
+
+
