@@ -5,6 +5,7 @@ void FormInit(void);
 void FormRegister(paramGroup_p pg);
 void FormLoadDefaultValues(paramGroup_p pg);
 void FormSaveDefaultValues(paramGroup_p pg);
+void FormUpdatePrefs(void);
 
 paramGroup_cp DialogGroupFind( const char * sName );
 paramGroup_cp * DialogGroupIter( paramGroup_cp * );
@@ -49,6 +50,9 @@ void FormCancel_Restore(paramGroup_p group);
 
 void FormControlActive(paramGroup_p pg, int inx, BOOL_T active);
 void FormControlShow(paramGroup_p pg, int inx, BOOL_T bShow);
+EXPORT void FormHilite( wWin_p win, wControl_p control, BOOL_T hilite );
+void FormResetInvalid( wControl_p win );
+
 void FormMenuPush(void* dp);
 
 void FormFetchData(paramGroup_p pg);

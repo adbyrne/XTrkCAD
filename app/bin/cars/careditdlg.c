@@ -1583,7 +1583,7 @@ void CarDlgError(
         char * msg )
 {
 	p->bInvalid = !ok;
-	ParamHilite( p->group->win, p->control, !ok );
+	FormHilite( p->group->win, p->control, !ok );
 #ifdef TODO_UNUSED
 	wWinPix_t h = wControlGetHeight(p->control);
 #endif
@@ -2103,7 +2103,7 @@ void
 SetCarDlgFieldInvalid(int index, BOOL_T bInvalid)
 {
 	carDlgPLs[index].bInvalid = bInvalid;
-	ParamHilite(carDlgPG.win, carDlgPLs[index].control, FALSE);
+	FormHilite(carDlgPG.win, carDlgPLs[index].control, FALSE);
 }
 
 static void CarDlgOk( void * unused )
@@ -2123,9 +2123,9 @@ static void CarDlgOk( void * unused )
 
 	LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 
-	ParamUpdate(&carDlgPG);
+	FormUpdate(&carDlgPG);
 
-	/*ParamUpdate( &carDlgPG );*/
+	/*FormUpdate( &carDlgPG );*/
 	if ( carDlgDim.carLength <= 0.0 ||
 	     carDlgDim.carWidth <= 0.0 ||
 	     carDlgDim.truckCenter <= 0.0 ||

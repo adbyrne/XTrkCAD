@@ -45,6 +45,7 @@
 #include "dynstring.h"
 #include "common-ui.h"
 #include "ctrain.h"
+#include "form.h"
 
 #ifdef UTFCONVERT
 #include "include/utf8convert.h"
@@ -1196,7 +1197,7 @@ EXPORT void SaveState(void)
 	wPrefSetInteger("draw", "mainwidth", (int)width);
 	wPrefSetInteger("draw", "mainheight", (int)height);
 	SaveParamFileList();
-	ParamUpdatePrefs();
+	FormUpdatePrefs();
 
 	wPrefSetString( "misc", "lastlayout", GetLayoutFullPath());
 	wPrefSetInteger( "misc", "lastlayoutexample", bExample );

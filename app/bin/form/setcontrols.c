@@ -68,3 +68,20 @@ EXPORT void FormControlShow (
 
 
 
+EXPORT void FormHilite(
+		wWin_p win,
+		wControl_p control,
+		BOOL_T hilite )
+{
+	if ( control == NULL ) return;
+	//LOG(log_paraminput, 2, ("ParamHilite %s\n", hilite?"Set":"Clr" ));
+	if ( hilite ) {
+		wControlHilite( control, TRUE );
+		wFlush();
+		if ( inPlayback ) {
+			wPause(playbackDelay*4+1);
+		}
+	} else {
+		wControlHilite( control, FALSE );
+	}
+}

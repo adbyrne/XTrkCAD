@@ -105,7 +105,7 @@ EXPORT void XParamLoadMessage(
     //ParamLoadMessageOrig(pg, inx, message);
 }
 
-EXPORT long ParamUpdate(
+EXPORT long XParamUpdate(
     paramGroup_p pg)
 {
     printf("%s:%d Old Param Function %s used by %s\n", __FILE__, __LINE__, __func__, pg->nameStr);
@@ -132,7 +132,7 @@ EXPORT void XParamRegister(paramGroup_p pg)
     }
 }
 
-EXPORT void ParamUpdatePrefs(void) 
+EXPORT void XParamUpdatePrefs(void) 
 {
     printf("%s:%d Old Param function %s used\n", __FILE__, __LINE__, __func__);
     //ParamUpdatePrefsOrig();
@@ -182,7 +182,7 @@ EXPORT wBool_t XParamCheckInputs(
 }
 
 
-EXPORT void ParamResetInvalid(wWin_p win)
+EXPORT void XParamResetInvalid(wWin_p win)
 {
 
     //FormResetInvalid(win);
@@ -277,7 +277,7 @@ EXPORT void XParamCreateControls(
     //ParamCreateControlsOrig(pg,  changeProc);
 }
 
-EXPORT void ParamHilite(
+EXPORT void XParamHilite(
     wWin_p win,
     wControl_p control,
     BOOL_T hilite)

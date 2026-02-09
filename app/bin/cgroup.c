@@ -1149,7 +1149,7 @@ static void GroupOk( void * unused )
 	TempEndPtsReset();
 	DYNARR_RESET( char, pathPtr_da );
 
-	ParamUpdate( &groupPG );
+	FormUpdate( &groupPG );
 	if ( groupManuf[0]==0 || groupDesc[0]==0 || groupPartno[0]==0 ) {
 		NoticeMessage2( 0, MSG_GROUP_NONBLANK, _("Ok"), NULL );
 		return;

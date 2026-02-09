@@ -97,7 +97,7 @@ static void DoEnumOp(
 		break;
 	case ENUMOP_CLOSE:
 		wHide( enumW );
-		ParamUpdate( &enumPG );
+		FormUpdate( &enumPG );
 	}
 }
 
