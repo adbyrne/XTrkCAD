@@ -29,7 +29,7 @@ void FormMenuPush(void* dp);
 
 void FormStartRecord(FILE* fileHandle);
 void FormMacroRecord(char* format, ...);
-void FormGroupRecord(paramGroup_p pg);
+void FormGroupRecord(paramGroup_cp pg);
 
 wBool_t FormIntegerRangeCheck(paramData_p p, long valL);
 wBool_t FormFloatRangeCheck(paramData_p p, FLOAT_T valF);

@@ -144,9 +144,9 @@ EXPORT void XParamGroupRecord(paramGroup_p pg)
     //FormGroupRecordOrig(pg);
 }
 
-EXPORT void ParamStartRecord(FILE* macroFile)
+EXPORT void XParamStartRecord(FILE* macroFile)
 {
-    FormStartRecord(macroFile);
+    //FormStartRecord(macroFile);
     printf("%s:%d Old Param Function %s used\n", __FILE__, __LINE__, __func__);
     //ParamStartRecordOrig(macroFile);
 }

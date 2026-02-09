@@ -157,7 +157,7 @@ EXPORT void RecordMouse( char * name, wAction_t action, POS_T px, POS_T py )
 }
 
 
-static int StartRecord( int cnt, char ** pathName, void * context )
+EXPORT int StartRecord( int cnt, char ** pathName, void * context )
 {
 	time_t clock;
 
@@ -185,7 +185,7 @@ static int StartRecord( int cnt, char ** pathName, void * context )
 	if ( logTable_da.cnt > 11 ) {
 		lprintf( "StartRecord( %s ) @ %s\n", pathName, ctime(&clock) );
 	}
-	ParamStartRecord(recordF);
+	FormStartRecord(recordF);
 	WriteTracks( recordF, TRUE );
 	WriteLayers( recordF );
 	fprintf( recordF, "REDRAW\n" );
@@ -211,7 +211,7 @@ static void DoRecordButton( void * context )
 		fprintf( recordF, "%s\nSTEP\n", END_MESSAGE );
 		fclose( recordF );
 		recordF = NULL;
-		ParamStartRecord( NULL );
+		FormStartRecord( NULL );
 		wHide( recordW );
 		break;
 
