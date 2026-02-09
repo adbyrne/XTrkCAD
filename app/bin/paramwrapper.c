@@ -261,7 +261,7 @@ EXPORT void XParamLayoutDialog(
     //ParamLayoutDialogOrig(pg);
 }
 
-EXPORT void ParamDialogOkActive(
+EXPORT void XParamDialogOkActive(
     paramGroup_p pg,
     int active)
 {

@@ -191,7 +191,7 @@ UpdatePageCount()
 
 	DynStringPrintf(&msg, (pageCount == 1?_("%d page"):_("%d pages")), pageCount);
 	FormLoadMessage(&printPG, I_PAGECNT, DynStringToCStr(&msg));
-	ParamDialogOkActive(&printPG, pageCount != 0);
+	FormDialogOkActive(&printPG, pageCount != 0);
 
 	DynStringFree(&msg);
 }

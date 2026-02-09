@@ -1191,7 +1191,7 @@ static void CarDlgShowControls( void )
 
 	FormLoadControls( &carDlgPG );
 
-	ParamDialogOkActive( &carDlgPG, S_ITEM );
+	FormDialogOkActive( &carDlgPG, S_ITEM );
 	CarDlgUpdate( &carDlgPG, -1, NULL );
 }
 
@@ -2016,7 +2016,7 @@ static void CarDlgUpdate(
 		CarDlgRedraw( carDlgD.d, NULL, 0, 0 );
 	}
 
-	ParamDialogOkActive( pg, ok );
+	FormDialogOkActive( pg, ok );
 }
 
 
