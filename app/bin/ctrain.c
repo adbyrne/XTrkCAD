@@ -745,9 +745,9 @@ static paramData_t trainPLs[] = {
 	/*0*/ { PD_LIST, NULL, "list", PDO_NOPREF|PDO_NOPSHUPD, &listData, NULL, 0 },
 #endif
 #define I_STATUS			(1)
-	{ PD_MESSAGE, NULL, NULL, 0, I2VP(120) },
+	{ PD_MESSAGE, NULL, mess0, 0, I2VP(120) },
 #define I_POS				(2)
-	{ PD_MESSAGE, NULL, NULL, 0, I2VP(120) },
+	{ PD_MESSAGE, NULL, mess1, 0, I2VP(120) },
 #define I_SLIDER			(3)
 	{ PD_DRAW, NULL, "speed", PDO_NOPSHUPD|PDO_DLGSETY, &speedParamData },
 #define I_DIST				(4)
@@ -765,7 +765,7 @@ static paramData_t trainPLs[] = {
 #define I_STOP				(10)
 	{ PD_BUTTON, NULL, "stop", PDO_DLGWIDE, NULL, N_("Stop") },
 #define I_SPEED				(11)
-	{ PD_MESSAGE, NULL, NULL, PDO_DLGIGNOREX, I2VP(120) }
+	{ PD_MESSAGE, NULL, mess2, PDO_DLGIGNOREX, I2VP(120) }
 };
 
 static paramGroup_t trainPG = { "train", PGO_FULLDIALOGFROMBUILDER, trainPLs, COUNT( trainPLs ) };
