@@ -291,30 +291,30 @@ EXPORT void XParamInit(void)
     //ParamInitOrig();
 }
 
-EXPORT void ParamCancel_Current(
+EXPORT void XParamCancel_Current(
     paramGroup_p group)
 {
     FormCancel_Current(group);
 }
 
-EXPORT void ParamCancel_Reset(
+EXPORT void XParamCancel_Reset(
     paramGroup_p group)
 {
     FormCancel_Reset(group);
 }
 
-EXPORT void ParamCancel_Restore(
+EXPORT void XParamCancel_Restore(
     paramGroup_p group)
 {
     FormCancel_Restore(group);
 }
 
-EXPORT void ParamCancel_Undo(
+EXPORT void XParamCancel_Undo(
     wWin_p winP)
 {
     printf("%s:%d Old Param Function used\n", __FILE__, __LINE__);
 }
-EXPORT void ParamCancel_Null(void* dummy)
+EXPORT void XParamCancel_Null(void* dummy)
     {
         printf("%s:%d Old Param Function used\n", __FILE__, __LINE__);
     }

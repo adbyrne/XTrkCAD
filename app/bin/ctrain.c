@@ -1387,7 +1387,7 @@ static trainControlDlg_p CreateTrainControlDlg(void)
 	dlg->trainPGp = &trainPG;
 	dlg->win = FormCreateDialog(dlg->trainPGp, _("Train Control"),
 				    NULL, NULL,
-	                            NULL, ParamCancel_Null,
+	                            NULL, FormCancel_Null,
 				    FALSE, 0, ControllerDialogUpdate);
 	speedD.size.x = SLIDER_WIDTH/speedD.dpi;
 	speedD.size.y = SLIDER_HEIGHT/speedD.dpi;

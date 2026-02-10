@@ -272,7 +272,7 @@ static void DoControlMgr( void * junk )
 		FormCreateDialog( &controlPG,
 		                  MakeWindowTitle(_("Manage Layout Control Elements")),
 		                  NULL, ControlDone,
-		                  NULL, ParamCancel_Current,
+		                  NULL, FormCancel_Current,
 		                  TRUE, F_RESIZE|F_RECALLSIZE|F_BLOCK,
 		                  ControlDlgUpdate );
 	} else {

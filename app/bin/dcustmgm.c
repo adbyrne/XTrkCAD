@@ -244,7 +244,7 @@ static int CustomDoExport(
 		if ( custMgmContentsPG.win == NULL ) {
 			FormCreateDialog( &custMgmContentsPG, MakeWindowTitle(_("Contents Label")),
 			                   _("Ok"), CustMgmContentsOk, 
-							   _("Cancel"), ParamCancel_Current, 
+							   _("Cancel"), FormCancel_Current, 
 								TRUE, F_BLOCK, NULL);
 		}
 		custMgmProceed = FALSE;

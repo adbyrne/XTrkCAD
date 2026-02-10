@@ -479,7 +479,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 		FormCreateDialog( &describePG, _("Description"),
 		                  //_("Done"), DescribeDone,
 		                  NULL, NULL,
-		                  NULL, ParamCancel_Reset,
+		                  NULL, FormCancel_Reset,
 		                  TRUE,
 		                  F_RECALLPOS|PD_F_ALT_CANCELLABEL,
 		                  DescribeUpdate);

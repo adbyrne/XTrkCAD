@@ -193,7 +193,7 @@ static void DoColor( void * junk )
 	if (colorW == NULL) {
 		colorW = FormCreateDialog( &colorPG, MakeWindowTitle(_("Color")), 
 								 _("Ok"), ColorOk, 
-								 _("Cancel"), ParamCancel_Restore, 
+								 _("Cancel"), FormCancel_Restore, 
 								 TRUE, 0, NULL);
 	}
 	FormLoadControls( &colorPG );

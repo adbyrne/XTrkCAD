@@ -88,7 +88,7 @@ EXPORT void DoImportDxf(void* unused)
 		importDxfW = FormCreateDialog( &importDxfPG,
 					       MakeWindowTitle(_("Import Dxf")),
 		                               _("Ok"), ImportDxfFileSel,
-					       NULL, ParamCancel_Current,
+					       NULL, FormCancel_Current,
 		                               TRUE, 0, NULL);
 		// blockD.dpi = mainD.dpi;
 	}

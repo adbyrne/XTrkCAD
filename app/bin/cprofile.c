@@ -716,7 +716,7 @@ static paramData_t profilePLs[] = {
 #define I_PRINTBUTTON 5
 	{	PD_BUTTON, DoProfilePrint, "print", 0, NULL, N_("Print") }
 };
-static paramGroup_t profilePG = { "profile", 0, profilePLs, COUNT( profilePLs ) };
+static paramGroup_t profilePG = { "profile", PGO_FULLDIALOGFROMBUILDER, profilePLs, COUNT( profilePLs ) };
 
 #define CHANGEBUTTON  ((wButton_p)profilePLs[I_CHANGEBUTTON].control)
 #define RESETBUTTON  ((wButton_p)profilePLs[I_RESETBUTTON].control)
@@ -1447,7 +1447,7 @@ static STATUS_T CmdProfile(wAction_t action, coOrd pos)
 			labelH = textsize.y;
 			labelW = textsize.x;
 			profileW = FormCreateDialog(&profilePG, MakeWindowTitle(_("Profile")), NULL, NULL,
-			                             NULL, ParamCancel_Undo, TRUE, F_RESIZE, CloseProfileWindow);
+			                             NULL, FormCancel_Undo, TRUE, F_RESIZE, CloseProfileWindow);
 		}
 		FormLoadControls(&profilePG);
 		FormGroupRecord(&profilePG);

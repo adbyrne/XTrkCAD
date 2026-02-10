@@ -2445,7 +2445,7 @@ void DoCarPartDlg( carDlgAction_e *actions )
 		FormCreateDialog( &carDlgPG,
 				  MakeWindowTitle(_("New Car Part")),
 				  _("Add"), CarDlgOk,
-				  NULL, ParamCancel_Custom( CarDlgClose ),
+				  NULL, FormCancel_Custom( CarDlgClose ),
 		                  TRUE,
 		                  F_BLOCK|F_RESIZE|F_RECALLSIZE|PD_F_ALT_CANCELLABEL,
 				  CarDlgUpdate );

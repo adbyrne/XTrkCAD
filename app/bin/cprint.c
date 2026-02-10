@@ -26,6 +26,7 @@
 #include "icons.h"
 #include "layout.h"
 #include "param.h"
+#include "form.h"
 #include "track.h"
 #include "common-ui.h"
 #include "include/form.h"
@@ -749,7 +750,7 @@ static void DoPrintMargin( void )
 		customMarginWin = FormCreateDialog( &customMarginPG,
 		                                     MakeWindowTitle(_("Print Margins")),
 		                                     _("Ok"), DoPrintMarginOk,
-		                                     NULL, ParamCancel_Null,
+		                                     NULL, FormCancel_Null,
 						     TRUE, F_BLOCK, PrintMarginDlgUpdate );
 		if ( customMarginWin == NULL ) {
 			return;
@@ -1445,7 +1446,7 @@ static STATUS_T CmdPrint(
 			print_d.scale = printScale;
 			printWin = FormCreateDialog( &printPG, MakeWindowTitle(_("Print")),
 						     _("Print"), DoPrintPrint,
-						     _("Cancel"), ParamCancel_Reset,
+						     _("Cancel"), FormCancel_Reset,
 			                             TRUE, 0, PrintDlgUpdate );
 		}
 		sPrinterName = wPrintGetName();

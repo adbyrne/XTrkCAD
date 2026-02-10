@@ -60,7 +60,7 @@ static paramData_t elevationPLs[] = {
 #define I_STATION			(4)
 	{ PD_STRING, elevStationV, "station", PDO_DLGUNDERCMDBUTT|PDO_STRINGLIMITLENGTH, I2VP(20), NULL, 0, 0, sizeof(elevStationV)}
 };
-static paramGroup_t elevationPG = { "elev", 0, elevationPLs, COUNT( elevationPLs ) };
+static paramGroup_t elevationPG = { "elev", PGO_FULLDIALOGFROMBUILDER, elevationPLs, COUNT( elevationPLs ) };
 
 static dynArr_t anchors_da;
 #define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
@@ -389,7 +389,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		if ( elevW == NULL ) {
 			elevW = FormCreateDialog( &elevationPG, MakeWindowTitle(_("Elevation")),
 			                           NULL, NULL,
-			                           NULL, ParamCancel_Reset,
+			                           NULL, FormCancel_Reset,
 			                           TRUE,
 			                           PD_F_ALT_CANCELLABEL,
 			                           DoElevUpdate );

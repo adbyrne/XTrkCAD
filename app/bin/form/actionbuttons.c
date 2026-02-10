@@ -62,7 +62,10 @@ void FormDialogOkActive(
 #ifdef FORMCANCEL_NEWUNDO
 /* No Cancel button, Commnd can be undone
  */
-//EXPORT void* FormCancel_Undo = NULL;
+EXPORT void FormCancel_Undo(
+        paramGroup_p group)
+{
+}
 #else
 EXPORT void FormCancel_Undo(
         wWin_p winP)
@@ -94,6 +97,13 @@ EXPORT void FormCancel_Restore(
         paramGroup_p group)
 {
 	FormCancel_Current(group);
+}
+
+/* Cancel button, no Cancel button
+ */
+EXPORT void FormCancel_Null(
+        paramGroup_p group)
+{
 }
 
 EXPORT void FormButtonCancel(void* groupVP)

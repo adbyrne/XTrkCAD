@@ -457,7 +457,7 @@ void DoSearchParams(void * junk)
 		FormRegister(&searchUiPG);
 
 		searchUiW = FormCreateDialog(&searchUiPG,MakeWindowTitle(_("Choose parameter files")), 
-									_("Done"), ParamCancel_Current,
+									_("Done"), FormCancel_Current,
 									NULL, NULL, 
 		                              TRUE, F_RESIZE | F_RECALLSIZE, SearchUiDlgUpdate);
 

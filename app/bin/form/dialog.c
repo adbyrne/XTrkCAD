@@ -172,7 +172,7 @@ wControl_p FormCreateDialog(
 
 	winOption &= ~PD_F_ALT_CANCELLABEL;
 	group->okProc = okProc;
-	if ( cancelProc == (paramActionCancelProc)ParamCancel_Null ) {
+	if ( cancelProc == (paramActionCancelProc)FormCancel_Null ) {
 		cancelProc = NULL;
 	}
 	group->cancelProc = cancelProc;

@@ -2093,7 +2093,7 @@ static void DoLayer(void * unused)
 		layerW = FormCreateDialog( &layerPG,
 					   MakeWindowTitle(_("Layers")),
 					   _("Done"), LayerOk,
-					   NULL, ParamCancel_Current,
+					   NULL, FormCancel_Current,
 					   TRUE, 0, LayerDlgUpdate);
 
 		GetScaleGauge(layerScaleInx, &layerScaleDescInx, &layerGaugeInx);

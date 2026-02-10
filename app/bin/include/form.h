@@ -39,12 +39,11 @@ long FormUpdate(paramGroup_p pg);
 
 void FormDialogOkActive(paramGroup_p pg, int active);
 void FormButtonOk( paramGroup_p group);
-void FormCancel_Undo(wWin_p winP);
+void FormCancel_Undo(paramGroup_p group );
 void FormCancel_Current(paramGroup_p group);
 void FormCancel_Reset(paramGroup_p group);
 void FormCancel_Restore(paramGroup_p group);
-
-//EXPORT void* FormCancel_Null = NULL;
+void FormCancel_Null(paramGroup_p group);
 
 #define FormCancel_Custom( PROC ) PROC
 
