@@ -29,7 +29,6 @@
     <file preprocess="xml-stripblanks">prmfile.ui</file>
     <file preprocess="xml-stripblanks">print.ui</file>
     <file preprocess="xml-stripblanks">profile.ui</file>
-    
     <file preprocess="xml-stripblanks">record.ui</file>
     <file preprocess="xml-stripblanks">rescale.ui</file>
     <file preprocess="xml-stripblanks">rgbcolor.ui</file>
@@ -41,8 +40,10 @@
     <file preprocess="xml-stripblanks">switchmotoredit.ui</file>
     <file preprocess="xml-stripblanks">textNote.ui</file>
     <file preprocess="xml-stripblanks">tip.ui</file>
+    <file preprocess="xml-stripblanks">train.ui</file>
     <file preprocess="xml-stripblanks">toolbar.ui</file>
     <file preprocess="xml-stripblanks">toolwindow.ui</file>
+    <file preprocess="xml-stripblanks">train.ui</file>
     <file preprocess="xml-stripblanks">turnout.ui</file>
     <file preprocess="xml-stripblanks">turnout-designer.ui</file>
     <file>xtrackcad.css</file>
