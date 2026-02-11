@@ -40,7 +40,6 @@
     <file preprocess="xml-stripblanks">switchmotoredit.ui</file>
     <file preprocess="xml-stripblanks">textNote.ui</file>
     <file preprocess="xml-stripblanks">tip.ui</file>
-    <file preprocess="xml-stripblanks">train.ui</file>
     <file preprocess="xml-stripblanks">toolbar.ui</file>
     <file preprocess="xml-stripblanks">toolwindow.ui</file>
     <file preprocess="xml-stripblanks">train.ui</file>
