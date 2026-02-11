@@ -1579,10 +1579,12 @@ EXPORT wIndex_t InitCmdPrint( wMenu_p menu )
 	AddRotateMenu( printGridPopupM, PrintGridRotate );
 	FormRegister( &customMarginPG );
 
+	long opts = (IC_LCLICK|IC_POPUP3|IC_CMDMENU|IC_TOGGLE);
+
 	printIcon = CreateToolbarIconFromResource("doc-print.png");
 	return AddMenuButton( menu, CmdPrint, "cmdPrint", N_("Print..."),
 		printIcon, LEVEL0,
-	                      IC_LCLICK|IC_POPUP3|IC_CMDMENU, ACCL_PRINT, NULL );
+	                      opts, ACCL_PRINT, NULL );
 }
 
 /*****************************************************************************
