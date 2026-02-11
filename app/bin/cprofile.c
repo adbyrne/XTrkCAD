@@ -1526,7 +1526,7 @@ EXPORT void InitCmdProfile(wMenu_p menu)
 
 	AddMenuButton(menu, CmdProfile, "cmdProfile", _("Profile"),
 		CreateToolbarIconFromResource("profile.png"), LEVEL0_50,
-	              IC_LCLICK|IC_CMDMENU|IC_POPUP3,
+	              IC_LCLICK|IC_CMDMENU|IC_POPUP3|IC_TOGGLE,
 	              ACCL_PROFILE, NULL);
 	profilePopupM = MenuRegister("Profile Mode");
 	profilePopupToggles[0] = wMenuToggleCreate(profilePopupM, "", _("Define"), 0,

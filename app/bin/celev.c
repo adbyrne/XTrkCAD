@@ -547,6 +547,7 @@ EXPORT void InitCmdElevation( wMenu_p menu )
 	FormRegister( &elevationPG );
 	AddMenuButton( menu, CmdElevation, "cmdElevation", _("Elevation"),
 		CreateToolbarIconFromResource("elevation.png"), LEVEL0_50,
-	               IC_POPUP|IC_LCLICK|IC_RCLICK|IC_WANT_MOVE, ACCL_ELEVATION, NULL );
+	               IC_POPUP|IC_LCLICK|IC_RCLICK|IC_WANT_MOVE|IC_TOGGLE,
+		       ACCL_ELEVATION, NULL );
 }
 
