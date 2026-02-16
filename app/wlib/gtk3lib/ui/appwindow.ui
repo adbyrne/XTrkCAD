@@ -892,9 +892,9 @@
                         <property name="can-focus">True</property>
                         <property name="model">benchtype</property>
                         <child>
-                          <object class="GtkCellRendererPixbuf" />
+                          <object class="GtkCellRendererText" />
                           <attributes>
-                            <attribute name="pixbuf">2</attribute>
+                            <attribute name="text">3</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -910,9 +910,9 @@
                         <property name="can-focus">True</property>
                         <property name="model">benchorientlist</property>
                         <child>
-                          <object class="GtkCellRendererPixbuf" />
+                          <object class="GtkCellRendererText" />
                           <attributes>
-                            <attribute name="pixbuf">2</attribute>
+                            <attribute name="text">3</attribute>
                           </attributes>
                         </child>
                       </object>

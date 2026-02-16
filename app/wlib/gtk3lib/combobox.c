@@ -88,7 +88,8 @@ wlibComboBoxAddColumns(GtkWidget *comboBox, int columns)
 
 wIndex_t wComboBoxGetCount(wControl_p b)
 {
-	return (gtk_tree_model_iter_n_children(GTK_TREE_MODEL(b->attributes.list.treeView), NULL));
+	return b->attributes.list.count;
+//	return (gtk_tree_model_iter_n_children(GTK_TREE_MODEL(b->attributes.list.treeView), NULL));
 }
 
 /**
@@ -103,6 +104,7 @@ wComboBoxClear(wControl_p control)
 {
 	
 	wlibListStoreClear(control->attributes.list.listStore);
+	control->attributes.list.count = 0;
 }
 
 /**
@@ -162,6 +164,8 @@ unsigned wComboBoxAddValue(
 	                   -1);
 
 	rows = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(list->listStore), NULL);
+
+	list->count++;
 
 	// index is zero based
 	return(rows - 1);
@@ -417,6 +421,7 @@ wControl_p wComboBoxCreate(
 	lcontrol->valueP = valueP;
 	lcontrol->action = action;
 	lcontrol->last = -1;
+	lcontrol->count = 0;
 
 	if(ISDEFINEDINBUILDER(parent)) {
 		b->widget = wlibWidgetFromIdWarn(parent, helpStr);

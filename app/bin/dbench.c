@@ -84,20 +84,20 @@ EXPORT void BenchUpdateOrientationList(
 	int cnt;
 
 	type = (benchData>>24)&0xff;
-	wListClear( list );
+	wComboBoxClear( list );
 	op = orientD[type].data;
 	for (cnt=orientD[type].cnt-1; cnt>=0; cnt--,op++) {
 #ifdef WINDOWS
 		if (op->icon == NULL) {
 			op->icon = wIconCreatePixBufFromResource( XTRKCAD_SYMBOLS_PATH, op->xpm);
 		}
-		wListAddValue( list, NULL, op->icon, op );
+		wComboBoxAddValue( list, op->icon, op );
 #else
 		/* gtk_combo_find is upset if we try to put anything other that a label on a list */
-		wListAddValue( list, _(op->name), NULL, op );
+		wComboBoxAddValue( list, _(op->name), op );
 #endif
 	}
-	wListSetIndex( list, 0 );
+	wComboBoxSetIndex( list, 0 );
 }
 
 typedef struct {
@@ -148,8 +148,8 @@ EXPORT void BenchLoadLists( wControl_p choiceL, wControl_p orientL )
 	benchType_p bt;
 	char * cp;
 
-	wListClear( choiceL );
-	wListClear( orientL );
+	wComboBoxClear( choiceL );
+	wComboBoxClear( orientL );
 	if ( benchType_da.cnt <= 0 ) {
 		Reset();
 		return;
@@ -166,11 +166,11 @@ EXPORT void BenchLoadLists( wControl_p choiceL, wControl_p orientL )
 			} else {
 				sprintf( cp, "%ldmm x %ldmm", height*25, bt->width*25 );
 			}
-			wListAddValue( choiceL, message, NULL, I2VP(benchData) );
+			wComboBoxAddValue( choiceL, message, I2VP(benchData) );
 		}
 	}
 	BenchUpdateOrientationList( benchType(0).type<<24, orientL );
-	wListSetIndex( choiceL, 0 );
+	wComboBoxSetIndex( choiceL, 0 );
 }
 
 
