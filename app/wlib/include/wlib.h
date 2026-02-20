@@ -1039,8 +1039,10 @@ wFontSize_t wSelectedFontSize(	void );
 void wSetSelectedFontSize(wFontSize_t size);
 #define F_TIMES	(1)
 #define F_HELV	(2)
+#define F_MONO  (3)
 wFont_p wStandardFont(		int, wBool_t, wBool_t );
-
+int wFontGetCharWidth(wControl_p control, wFont_p font, double size);
+int wFontGetCharHeight(wControl_p control, wFont_p font, double size);
 
 /*------------------------------------------------------------------------------
  *

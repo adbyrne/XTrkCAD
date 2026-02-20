@@ -720,20 +720,20 @@ wControl_p wDrawCreate(
 	drawAttributes->option = option;
 	drawAttributes->dpi = gdk_screen_get_resolution(gdk_screen_get_default());
 
-	if (ISDEFINEDINBUILDER(parent)) {
-		drawControl->widget = wlibWidgetFromIdWarn(parent, helpStr);
-	} else {
-		drawControl->widget = gtk_drawing_area_new();
-		
-	}
-	width = width ? width : -1;
-	height = height ? height : -1;
-	gtk_widget_set_size_request(GTK_WIDGET(drawControl->widget), width, height);
+        if (ISDEFINEDINBUILDER(parent)) {
+          drawControl->widget = wlibWidgetFromIdWarn(parent, helpStr);
+		  width = -1;
+		  height = -1;
+        } else {
+          drawControl->widget = gtk_drawing_area_new();
+          width = width ? width : -1;
+          height = height ? height : -1;
+          gtk_widget_set_size_request(GTK_WIDGET(drawControl->widget), width,
+                                      height);
+        }
 
-	wlibControlGetSize((wControl_p)drawControl);
+        wlibControlGetSize((wControl_p)drawControl);
 
-	//drawAttributes->maxW = width;
-	//drawAttributes->maxH = height;
 	drawAttributes->width = width;
 	drawAttributes->height = height;
 
