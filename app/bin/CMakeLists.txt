@@ -148,6 +148,7 @@ target_sources(xtrkcad-lib
     custom.h
     dbench.c
     dbitmap.c
+    ddrawprim.c
     cars/caritem.c
     cars/carpart.c
     cars/carproto.c
@@ -174,6 +175,8 @@ target_sources(xtrkcad-lib
     draw.h
     drawgeom.c
     drawgeom.h
+    drawruler.c
+    drawruler.h
     dxfformat.c
     dxfformat.h
     dxfimport.c
