@@ -897,7 +897,8 @@ void wDrawClear( wControl_p drawingArea )
 	cairo = cairo_create(bd->surface);
 
 	/* Set surface to opaque color (r, g, b) */
-	cairo_set_source_rgb(cairo, 128,128,128);
+	//cairo_set_source_rgb(cairo, 128,128,128);
+	cairo_set_source_rgb(cairo, 255,255,255);
 	cairo_paint(cairo);
 
 	cairo_destroy(cairo);
@@ -913,7 +914,9 @@ void wDrawClear( wControl_p drawingArea )
 	//cairo_rel_line_to(cairo, -allocation.width, 0);
 	//cairo_fill(cairo);
 	//gtkDrawDestroyCairoContext(cairo);
-	gtk_widget_queue_draw(drawingArea->widget);
+	if (drawingArea->widget && !bd->delayUpdate) {
+		gtk_widget_queue_draw(drawingArea->widget);
+	}
 	wDrawClearTemp(drawingArea);
 }
 
@@ -1084,33 +1087,36 @@ void wDrawSetSize(
 	if (w < 0 || h < 0) {
 		return;
 	}
+	gtk_widget_set_size_request(drawingArea->widget, w, h);
 
-	//repaint = (w != bd->w || h != bd->h);
-	//bd->w = w;
-	//bd->h = h;
-	repaint = TRUE;
-	gtk_widget_set_size_request( drawingArea->widget, w, h );
-	if (repaint) {
-		if (bd->surface) {
-			cairo_surface_destroy(bd->surface);
-		}
-		bd->surface = gdk_window_create_similar_surface(gtk_widget_get_window (
-		                        drawingArea->widget), CAIRO_CONTENT_COLOR_ALPHA, w, h);
+	// //repaint = (w != bd->w || h != bd->h);
+	// //bd->w = w;
+	// //bd->h = h;
+	// repaint = TRUE;
+	// gtk_widget_set_size_request( drawingArea->widget, w, h );
+	// if (repaint) {
+	// 	if (bd->surface) {
+	// 		cairo_surface_destroy(bd->surface);
+	// 	}
+	// 	bd->surface = gdk_window_create_similar_surface(gtk_widget_get_window (
+	// 	                        drawingArea->widget), CAIRO_CONTENT_COLOR_ALPHA, w, h);
 
-		if (bd->temp_surface) {
-			cairo_surface_destroy(bd->temp_surface);
-		}
-		bd->temp_surface = gdk_window_create_similar_surface(gtk_widget_get_window (
-		                           drawingArea->widget), CAIRO_CONTENT_COLOR_ALPHA, w, h);
+	// 	if (bd->temp_surface) {
+	// 		cairo_surface_destroy(bd->temp_surface);
+	// 	}
+	// 	bd->temp_surface = gdk_window_create_similar_surface(gtk_widget_get_window (
+	// 	                           drawingArea->widget), CAIRO_CONTENT_COLOR_ALPHA, w, h);
 
 
-		wDrawClear( drawingArea );
-		if (!redraw) {
-			bd->redraw( drawingArea, drawingArea->context, w, h );
-		}
-	}
-	/*wRedraw( drawControl );*/
-	gtk_widget_queue_draw(drawingArea->widget);
+	// 	wDrawClear( drawingArea );
+	// 	if (redraw) {
+	// 		((wDrawRedrawCallBack_p)redraw)( drawingArea, drawingArea->context, w, h );
+	// 	} else {
+	// 		bd->redraw( drawingArea, drawingArea->context, w, h );
+	// 	}
+	// }
+	// /*wRedraw( drawControl );*/
+	// gtk_widget_queue_draw(drawingArea->widget);
 }
 
 
