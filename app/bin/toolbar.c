@@ -356,6 +356,7 @@ EXPORT void ToolbarLayout(void* data)
 
 EXPORT wBool_t ToolbarGetButtonSticky(wIndex_t button)
 {
+	if ( button < 0 ) { return FALSE; }
 	return wStickyGetSticky(buttonList[button].control);
 }
 
