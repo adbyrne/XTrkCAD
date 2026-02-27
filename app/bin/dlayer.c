@@ -41,7 +41,7 @@
  * LAYERS
  *
  */
- /** \todo Move layer button handling to toolbar.c */
+ 
 #define NUM_BUTTONS (99)
 #define LAYERPREF_FROZEN  (1)
 #define LAYERPREF_ONMAP	  (2)
@@ -548,7 +548,7 @@ static char *layerColorLabels[] = { "", NULL };
 
 static paramData_t layerPLs[] = {
 #define I_LIST	(0)
-	{ PD_COMBOLIST, NULL, "layer", PDO_LISTINDEX, I2VP(250), N_("Select Layer:") },
+	{ PD_COMBOLIST, NULL, "layerlist", PDO_LISTINDEX, I2VP(250), N_("Select Layer:") },
 #define I_NAME	(1)
 	{ PD_STRING, layerName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH | PDO_DLGBOXEND, I2VP(25 - 5), N_("Name"), 0, 0, sizeof(layerName) },
 #define I_COLOR	(2)
@@ -582,7 +582,7 @@ static paramData_t layerPLs[] = {
 #define I_TIESPC (16)
 	{ PD_FLOAT, &layerTieData.spacing, "tiespacing", PDO_NOPREF | PDO_DLGHORZ | PDO_DLGBOXEND, &r_tieData, N_( "  Spacing" ), 0, I2VP( CHANGE_MAIN ) },
 
-	{ PD_MESSAGE, N_("Layer Actions"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
+	{ PD_MESSAGE, N_("Layer Actions"), "mess1", PDO_DLGRESETMARGIN, I2VP(180) },
 #define I_ADD (18)
 	{ PD_BUTTON, DoLayerOp, "add", PDO_DLGRESETMARGIN, 0, N_("Add Layer"), 0, I2VP(ENUMLAYER_ADD) },
 #define I_DELETE (19)
@@ -590,12 +590,12 @@ static paramData_t layerPLs[] = {
 #define I_DEFAULT (20)
 	{ PD_BUTTON, DoLayerOp, "default", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Default Values"), 0, I2VP(ENUMLAYER_DEFAULT) },
 #define I_LINKLIST (21)
-	{ PD_STRING, layerLinkList, "layerlist", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(25 - 5), N_("Linked Layers"), 0, 0, sizeof(layerLinkList) },
+	{ PD_STRING, layerLinkList, "linkedlayers", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(25 - 5), N_("Linked Layers"), 0, 0, sizeof(layerLinkList) },
 #define I_SETTINGS (22)
 	{ PD_COMBOLIST, NULL, "settings", PDO_LISTINDEX, I2VP(250), N_("Settings when Current") },
 #define I_COUNT (23)
 	{ PD_LONG, &layerObjectCount, "objectCount", PDO_DLGBOXEND, &r_nocheck, N_("Object Count:"), 0, 0 },
-	{ PD_MESSAGE, N_("All Layer Preferences"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
+	{ PD_MESSAGE, N_("All Layer Preferences"), "mess2", PDO_DLGRESETMARGIN, I2VP(180) },
 	{ PD_BUTTON, DoLayerOp, "load", PDO_DLGRESETMARGIN, 0, N_("Load"), 0, I2VP(ENUMLAYER_RELOAD) },
 	{ PD_BUTTON, DoLayerOp, "save", PDO_DLGHORZ, 0, N_("Save"), 0, I2VP(ENUMLAYER_SAVE) },
 	{ PD_BUTTON, DoLayerOp, "clear", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Defaults"), 0, I2VP(ENUMLAYER_CLEAR) },
@@ -621,16 +621,15 @@ static int LoadFileListLoad(Catalog *catalog, char * name)
 
 	int i = 0;
 
-	wListAddValue(settingsListL, " ", NULL, " ");
+	wComboBoxAddValue(settingsListL, " ", " ");
 
 	while (currentEntry) {
 		i++;
 		DynStringClear(&description);
 		DynStringCatCStr(&description,
 		                 currentEntry->contents) ;
-		wListAddValue(settingsListL,
+		wComboBoxAddValue(settingsListL,
 		              DynStringToCStr(&description),
-		              NULL,
 		              currentEntry->fullFileName[0]);
 		if (strcmp(currentEntry->fullFileName[0], name) == 0) { currset = i; }
 		currentEntry = currentEntry->next;

@@ -422,6 +422,7 @@ wControl_p wComboBoxCreate(
 		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
 		lcontrol->listStore = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(b->widget)));
 		if (!lcontrol->listStore) {
+			fprintf(stderr, "Critical error: Could not find liststore for %s\n", b->name);
 			abort();
 		}
 
