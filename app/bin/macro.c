@@ -1016,7 +1016,7 @@ static void Playback( void )
 			}
 			demoFileName = strdup(demoList(curDemo).fileName );
 			paramFile = fopen( demoFileName, "r" );
-			LOG( log_playback, 2, ( "Playback Open %s\n", demoFileName ) );
+			LOG( log_playback, 1, ( "Playback Open %s\n", demoFileName ) );
 			if ( paramFile == NULL ) {
 				NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Demo"), demoFileName,
 				               strerror(errno) );
