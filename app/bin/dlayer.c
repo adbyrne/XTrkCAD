@@ -165,7 +165,7 @@ static int oldColorMap[][3] = {
 	{64, 64, 64},    /* Gray */
 	{80, 80, 80},    /* Gray */
 	{96, 96, 96},    /* Gray */
-	{112, 112, 122}, /* Gray */
+	{112, 112, 112}, /* Gray */
 	{128, 128, 128}, /* Gray */
 	{144, 144, 144}, /* Gray */
 	{160, 160, 160}, /* Gray */
@@ -189,7 +189,7 @@ static void CreateLayerButtons();
 
 int IsLayerValid(unsigned int layer)
 {
-	return (layer < NUM_LAYERS && layer != -1);
+	return (layer < NUM_LAYERS && layer != (unsigned int)-1);
 }
 
 BOOL_T GetLayerVisible(unsigned int layer)
@@ -756,8 +756,8 @@ void GetLayerLinkString(int inx, char *list)
 {
 	char *cp = &list[0];
 	cp[0] = '\0';
-	int len = 0;
-	for (int i = 0; i < layers[inx].layerLinkList.cnt && len < STR_LONG_SIZE - 5;
+
+	for (int i = 0; i < layers[inx].layerLinkList.cnt && strlen(cp) < STR_LONG_SIZE - 5;
 	     i++) {
 		int l = DYNARR_N(int, layers[inx].layerLinkList, i);
 		if (i == 0) {
@@ -766,6 +766,7 @@ void GetLayerLinkString(int inx, char *list)
 			cp += sprintf(cp, ";%d", l);
 		}
 		cp[0] = '\0';
+
 	}
 }
 
@@ -1296,12 +1297,18 @@ static void LayerPrefLoad(void)
 			const char *layerValue;
 			char listValue[STR_LONG_SIZE];
 			int color;
+
 			inx = atoi(prefString);
+			if(inx < 0 || inx >=NUM_LAYERS) {
+				continue;
+			}
+
 			sprintf(layerOption, LAYERPREF_NAME ".%d", inx);
 			layerValue = wPrefGetString(LAYERPREF_SECTION, layerOption);
 
 			if (layerValue) {
-				strcpy(layers[inx].name, layerValue);
+				strncpy(layers[inx].name, layerValue, sizeof(layers[inx].name-1));
+				(layers[inx].name)[sizeof(layers[inx].name)-1] = '\0';
 			} else {
 				*(layers[inx].name) = '\0';
 			}
@@ -1324,9 +1331,8 @@ static void LayerPrefLoad(void)
 
 			layerGetInteger(inx, LAYERPREF_SCALEINX, &layers[inx].scaleInx,
 			                GetLayoutCurScale());
-			// layerGetInteger(inx, LAYERPREF_SCLDESCINX, &layers[inx].scaleDescInx,
-			//                 GetLayoutCurScaleDesc());
-			// layerGetInteger(inx, LAYERPREF_GAUGEINX, &layers[inx].gaugeInx, 0);
+			layerGetInteger(inx, LAYERPREF_USECOLOR, &layers[inx].useColor, TRUE);
+
 			layers[inx].scaleDescInx = 0;
 			layers[inx].gaugeInx = 0;
 
@@ -1835,11 +1841,11 @@ static CatalogEntry *ScanSettingsDirectory(Catalog *catalog,
 
 		while (GetNextSettingsFile(d, dirName, &fileName)) {
 			char *contents_start = strrchr(fileName, PATH_SEPARATOR[0]);
-			if (contents_start[0] == '/') {
+			if (contents_start && contents_start[0] == '/') {
 				contents_start++;
 			}
 			char *contents_end = strchr(contents_start, '.');
-			if (contents_end[0] == '.') {
+			if (contents_end && contents_end[0] == '.') {
 				contents_end[0] = '\0';
 			}
 			strcpy(contents, contents_start);
@@ -1971,6 +1977,7 @@ BOOL_T ReadLayers(char *line)
 	color = wDrawFindColor(rgb);
 	SetLayerColor(inx, color);
 	strncpy(layers[inx].name, name, sizeof layers[inx].name);
+	layers[inx].name[sizeof(layers[inx].name) - 1] = '\0';
 	layers[inx].visible = visible;
 	layers[inx].frozen = frozen;
 	layers[inx].onMap = onMap;
