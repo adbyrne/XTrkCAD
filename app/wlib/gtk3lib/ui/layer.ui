@@ -322,12 +322,10 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="objectCount">
-                        <property name="caps-lock-warning">False</property>
-                        <property name="editable">False</property>
-                        <property name="halign">start</property>
-                        <property name="has-frame">False</property>
-                        <property name="input-purpose">digits</property>
+                      <object class="GtkLabel" id="objectCount">
+                        <property name="label">0</property>
+                        <property name="visible">True</property>
+                        <property name="xalign">0.0</property>
                       </object>
                       <packing>
                         <property name="height">1</property>
@@ -684,6 +682,15 @@
                     <property name="hexpand">True</property>
                     <property name="model">layerListStore</property>
                     <property name="visible">True</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="textfield">
+                        <property name="width-chars">20</property>
+                      </object>
+                      <!-- Custom child fragments -->
+                      <attributes>
+                        <attribute name="text">3</attribute>
+                      </attributes>
+                    </child>
                   </object>
                   <packing>
                     <property name="position">1</property>

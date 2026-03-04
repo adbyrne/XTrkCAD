@@ -166,12 +166,12 @@ EXPORT SCALEINX_T GetScaleInx( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx )
 	gaugeInfo_p g;
 
 	if ( scaleInx < 0 || scaleInx >= scaleDesc_da.cnt ) {
-		lprintf( "GetScaleInx: bad scaleInx %ld (%d)\n", scaleInx, scaleDesc_da.cnt );
+		lprintf( "GetScaleInx: bad scaleInx %d (scaleDesc_da.cnt: %d)\n", scaleInx, scaleDesc_da.cnt );
 		return 0;
 	}
 	s = scaleDesc(scaleInx);
 	if ( gaugeInx < 0 || gaugeInx >= s.gauges_da.cnt ) {
-		lprintf( "GetScaleInx: bad gaugeInx %ld (%d)\n", gaugeInx, s.gauges_da.cnt );
+		lprintf( "GetScaleInx: bad gaugeInx %d (%d)\n", gaugeInx, s.gauges_da.cnt );
 		return 0;
 	}
 	g = &(DYNARR_N(gaugeInfo_t, s.gauges_da, gaugeInx));

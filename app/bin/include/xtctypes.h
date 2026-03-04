@@ -37,8 +37,8 @@ typedef signed char TRKTYP_T;
 typedef int TRKINX_T;
 typedef long DEBUGF_T;
 typedef int REGION_T;
-typedef long SCALEINX_T;
-typedef long GAUGEINX_T;
-typedef long SCALEDESCINX_T;
+typedef int SCALEINX_T;
+typedef int GAUGEINX_T;
+typedef int SCALEDESCINX_T;
 
 #endif
