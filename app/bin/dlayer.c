@@ -21,37 +21,38 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include "common-ui.h"
 #include "common.h"
 #include "cselect.h"
 #include "custom.h"
-#include <form.h>
-#include "paths.h"
 #include "dynstring.h"
 #include "fileio.h"
 #include "icons.h"
-#include "layout.h"
-#include "track.h"
 #include "include/partcatalog.h"
 #include "include/stringxtc.h"
 #include "include/toolbar.h"
-#include "common-ui.h"
+#include "layout.h"
+#include "paths.h"
+#include "track.h"
+#include <form.h>
 
 /*****************************************************************************
  *
  * LAYERS
  *
  */
- /** \todo Move layer button handling to toolbar.c */
+
 #define NUM_BUTTONS (99)
-#define LAYERPREF_FROZEN  (1)
-#define LAYERPREF_ONMAP	  (2)
+#define LAYERPREF_FROZEN (1)
+#define LAYERPREF_ONMAP (2)
 #define LAYERPREF_VISIBLE (4)
-#define LAYERPREF_MODULE  (8)
+#define LAYERPREF_MODULE (8)
 #define LAYERPREF_NOBUTTON (16)
 #define LAYERPREF_DEFAULT (32)
 #define LAYERPREF_SECTION ("Layers")
-#define LAYERPREF_NAME 	"name"
+#define LAYERPREF_NAME "name"
 #define LAYERPREF_COLOR "color"
+#define LAYERPREF_USECOLOR "useColor"
 #define LAYERPREF_FLAGS "flags"
 #define LAYERPREF_SCALEINX "scaleInx"
 #define LAYERPREF_SCLDESCINX "sclDescInx"
@@ -64,117 +65,119 @@
 #define LAYERPREF_LIST "list"
 #define LAYERPREF_SETTINGS "settings"
 
-static paramIntegerRange_t r_nocheck = { 0, 1, 100, PDO_NORANGECHECK_LOW | PDO_NORANGECHECK_HIGH };
-static paramFloatRange_t r_tieData = { 0.05, 100.0, 100, PDO_NORANGECHECK_LOW | PDO_NORANGECHECK_HIGH };
+static paramFloatRange_t r_tieData = {
+	0.05, 100.0, 100, PDO_NORANGECHECK_LOW | PDO_NORANGECHECK_HIGH
+};
 
-static paramFloatRange_t r0_10000 = { 0.0, 10000.0 };
-static paramFloatRange_t r0_90 = { 0.0, 90.0 };
+static paramFloatRange_t r0_10000 = {0.0, 10000.0};
+static paramFloatRange_t r0_90 = {0.0, 90.0};
 
 EXPORT unsigned int maxLayer;
 
 unsigned int curLayer;
 
 static unsigned int layerSelected = 0;
-
+static BOOL_T layerSelecting = FALSE;
 
 static BOOL_T layoutLayerChanged = FALSE;
 
 static wIcon_p show_layer_bmps[NUM_BUTTONS];
-static wControl_p layer_btns[NUM_BUTTONS];	/**< layer buttons on toolbar */
+static wControl_p layer_btns[NUM_BUTTONS]; /**< layer buttons on toolbar */
 
 /** Layer selector on toolbar */
 static wControl_p setLayerL;
 
 /** Describe the properties of a layer
-  * Defaults for layout track grade and min radius are in scale.c: SetScale
-  */
+ * Defaults for layout track grade and min radius are in scale.c: SetScale
+ */
 typedef struct {
-	char name[STR_SHORT_SIZE];			/**< Layer name */
-	wDrawColor color;					/**< layer color, is an index into a color table */
-	BOOL_T useColor;					/**< Use Layer color */
-	BOOL_T frozen;						/**< Frozen flag */
-	BOOL_T visible;						/**< visible flag */
-	BOOL_T onMap;						/**< is layer shown map */
-	BOOL_T module;						/**< is layer a module (all or nothing) */
-	BOOL_T button_off;					/**< hide button */
-	BOOL_T inherit;					    /**< inherit layout defaults */
-	SCALEINX_T scaleInx;                /**< scale override */
-	SCALEDESCINX_T scaleDescInx;        /**< the scale description */
-	GAUGEINX_T gaugeInx;                /**< the gauge desc index */
-	DIST_T minTrackRadius;              /**< minimum track radius */
-	ANGLE_T maxTrackGrade;              /**< maximum track grade */
-	tieData_t tieData;                  /**< tie data structure */
-	long objCount;						/**< number of objects on layer */
-	dynArr_t layerLinkList;				/**< other layers that show/hide with this one, 1-based index */
-	char settingsName[STR_SHORT_SIZE];  /**< name of settings file to load when this is current */
+	char name[STR_SHORT_SIZE]; /**< Layer name */
+	wDrawColor color;          /**< layer color, is an index into a color table */
+	BOOL_T useColor;           /**< Use Layer color */
+	BOOL_T frozen;             /**< Frozen flag */
+	BOOL_T visible;            /**< visible flag */
+	BOOL_T onMap;              /**< is layer shown map */
+	BOOL_T module;             /**< is layer a module (all or nothing) */
+	BOOL_T button_off;         /**< hide button */
+	BOOL_T inherit;            /**< inherit layout defaults */
+	SCALEINX_T scaleInx;       /**< scale override */
+	SCALEDESCINX_T scaleDescInx; /**< the scale description */
+	GAUGEINX_T gaugeInx;         /**< the gauge desc index */
+	DIST_T minTrackRadius;       /**< minimum track radius */
+	ANGLE_T maxTrackGrade;       /**< maximum track grade */
+	tieData_t tieData;           /**< tie data structure */
+	long objCount;               /**< number of objects on layer */
+	dynArr_t layerLinkList;      /**< other layers that show/hide with this one,
+                                  1-based index */
+	char settingsName[STR_SHORT_SIZE]; /**< name of settings file to load when
+                                        this is current */
 } layer_t;
 
 static layer_t layers[NUM_LAYERS];
 static layer_t *layers_save = NULL;
 
-static Catalog * settingsCatalog;
-
+static Catalog *settingsCatalog;
 
 static int oldColorMap[][3] = {
-	{ 255, 255, 255 },		/* White */
-	{   0,   0,   0 },      /* Black */
-	{ 255,   0,   0 },      /* Red */
-	{   0, 255,   0 },      /* Green */
-	{   0,   0, 255 },      /* Blue */
-	{ 255, 255,   0 },      /* Yellow */
-	{ 255,   0, 255 },      /* Purple */
-	{   0, 255, 255 },      /* Aqua */
-	{ 128,   0,   0 },      /* Dk. Red */
-	{   0, 128,   0 },      /* Dk. Green */
-	{   0,   0, 128 },      /* Dk. Blue */
-	{ 128, 128,   0 },      /* Dk. Yellow */
-	{ 128,   0, 128 },      /* Dk. Purple */
-	{   0, 128, 128 },      /* Dk. Aqua */
-	{  65, 105, 225 },      /* Royal Blue */
-	{   0, 191, 255 },      /* DeepSkyBlue */
-	{ 125, 206, 250 },      /* LightSkyBlue */
-	{  70, 130, 180 },      /* Steel Blue */
-	{ 176, 224, 230 },      /* Powder Blue */
-	{ 127, 255, 212 },      /* Aquamarine */
-	{  46, 139,  87 },      /* SeaGreen */
-	{ 152, 251, 152 },      /* PaleGreen */
-	{ 124, 252,   0 },      /* LawnGreen */
-	{  50, 205,  50 },      /* LimeGreen */
-	{  34, 139,  34 },      /* ForestGreen */
-	{ 255, 215,   0 },      /* Gold */
-	{ 188, 143, 143 },      /* RosyBrown */
-	{ 139, 69, 19 },        /* SaddleBrown */
-	{ 245, 245, 220 },      /* Beige */
-	{ 210, 180, 140 },      /* Tan */
-	{ 210, 105, 30 },       /* Chocolate */
-	{ 165, 42, 42 },        /* Brown */
-	{ 255, 165, 0 },        /* Orange */
-	{ 255, 127, 80 },       /* Coral */
-	{ 255, 99, 71 },        /* Tomato */
-	{ 255, 105, 180 },      /* HotPink */
-	{ 255, 192, 203 },      /* Pink */
-	{ 176, 48, 96 },        /* Maroon */
-	{ 238, 130, 238 },      /* Violet */
-	{ 160, 32, 240 },       /* Purple */
-	{  16,  16,  16 },      /* Gray */
-	{  32,  32,  32 },      /* Gray */
-	{  48,  48,  48 },      /* Gray */
-	{  64,  64,  64 },      /* Gray */
-	{  80,  80,  80 },      /* Gray */
-	{  96,  96,  96 },      /* Gray */
-	{ 112, 112, 122 },      /* Gray */
-	{ 128, 128, 128 },      /* Gray */
-	{ 144, 144, 144 },      /* Gray */
-	{ 160, 160, 160 },      /* Gray */
-	{ 176, 176, 176 },      /* Gray */
-	{ 192, 192, 192 },      /* Gray */
-	{ 208, 208, 208 },      /* Gray */
-	{ 224, 224, 224 },      /* Gray */
-	{ 240, 240, 240 },      /* Gray */
-	{   0,   0,   0 }       /* BlackPixel */
+	{255, 255, 255}, /* White */
+	{0, 0, 0},       /* Black */
+	{255, 0, 0},     /* Red */
+	{0, 255, 0},     /* Green */
+	{0, 0, 255},     /* Blue */
+	{255, 255, 0},   /* Yellow */
+	{255, 0, 255},   /* Purple */
+	{0, 255, 255},   /* Aqua */
+	{128, 0, 0},     /* Dk. Red */
+	{0, 128, 0},     /* Dk. Green */
+	{0, 0, 128},     /* Dk. Blue */
+	{128, 128, 0},   /* Dk. Yellow */
+	{128, 0, 128},   /* Dk. Purple */
+	{0, 128, 128},   /* Dk. Aqua */
+	{65, 105, 225},  /* Royal Blue */
+	{0, 191, 255},   /* DeepSkyBlue */
+	{125, 206, 250}, /* LightSkyBlue */
+	{70, 130, 180},  /* Steel Blue */
+	{176, 224, 230}, /* Powder Blue */
+	{127, 255, 212}, /* Aquamarine */
+	{46, 139, 87},   /* SeaGreen */
+	{152, 251, 152}, /* PaleGreen */
+	{124, 252, 0},   /* LawnGreen */
+	{50, 205, 50},   /* LimeGreen */
+	{34, 139, 34},   /* ForestGreen */
+	{255, 215, 0},   /* Gold */
+	{188, 143, 143}, /* RosyBrown */
+	{139, 69, 19},   /* SaddleBrown */
+	{245, 245, 220}, /* Beige */
+	{210, 180, 140}, /* Tan */
+	{210, 105, 30},  /* Chocolate */
+	{165, 42, 42},   /* Brown */
+	{255, 165, 0},   /* Orange */
+	{255, 127, 80},  /* Coral */
+	{255, 99, 71},   /* Tomato */
+	{255, 105, 180}, /* HotPink */
+	{255, 192, 203}, /* Pink */
+	{176, 48, 96},   /* Maroon */
+	{238, 130, 238}, /* Violet */
+	{160, 32, 240},  /* Purple */
+	{16, 16, 16},    /* Gray */
+	{32, 32, 32},    /* Gray */
+	{48, 48, 48},    /* Gray */
+	{64, 64, 64},    /* Gray */
+	{80, 80, 80},    /* Gray */
+	{96, 96, 96},    /* Gray */
+	{112, 112, 112}, /* Gray */
+	{128, 128, 128}, /* Gray */
+	{144, 144, 144}, /* Gray */
+	{160, 160, 160}, /* Gray */
+	{176, 176, 176}, /* Gray */
+	{192, 192, 192}, /* Gray */
+	{208, 208, 208}, /* Gray */
+	{224, 224, 224}, /* Gray */
+	{240, 240, 240}, /* Gray */
+	{0, 0, 0}        /* BlackPixel */
 };
 
-static void DoLayerOp(void * data);
+static void DoLayerOp(void *data);
 void UpdateLayerDlg(unsigned int);
 
 static BOOL_T IsLayerConfigured(unsigned int layerNumber);
@@ -186,7 +189,7 @@ static void CreateLayerButtons();
 
 int IsLayerValid(unsigned int layer)
 {
-	return (layer <= NUM_LAYERS && layer != -1);
+	return (layer < NUM_LAYERS && layer != (unsigned int)-1);
 }
 
 BOOL_T GetLayerVisible(unsigned int layer)
@@ -206,7 +209,6 @@ BOOL_T GetLayerHidden(unsigned int layer)
 		return layers[layer].button_off;
 	}
 }
-
 
 BOOL_T GetLayerFrozen(unsigned int layer)
 {
@@ -235,35 +237,34 @@ EXPORT BOOL_T GetLayerUseDefault(unsigned int layer)
 	}
 }
 
-
-EXPORT SCALEINX_T GetLayerScale( unsigned int layer )
+EXPORT SCALEINX_T GetLayerScale(unsigned int layer)
 {
-	if ( IsLayerValid(layer) && !GetLayerUseDefault(layer) ) {
+	if (IsLayerValid(layer) && !GetLayerUseDefault(layer)) {
 		return layers[layer].scaleInx;
 	}
 	return GetLayoutCurScale(); // layout scale
 }
 
-EXPORT DIST_T GetLayerMinTrackRadius( unsigned int layer )
+EXPORT DIST_T GetLayerMinTrackRadius(unsigned int layer)
 {
-	if ( IsLayerValid(layer) && !GetLayerUseDefault(layer) ) {
+	if (IsLayerValid(layer) && !GetLayerUseDefault(layer)) {
 		return layers[layer].minTrackRadius;
 	}
 	return GetLayoutMinTrackRadius();
 }
 
-EXPORT ANGLE_T GetLayerMaxTrackGrade( unsigned int layer )
+EXPORT ANGLE_T GetLayerMaxTrackGrade(unsigned int layer)
 {
-	if ( IsLayerValid(layer) && !GetLayerUseDefault(layer) ) {
+	if (IsLayerValid(layer) && !GetLayerUseDefault(layer)) {
 		return layers[layer].maxTrackGrade;
 	}
 	return GetLayoutMaxTrackGrade();
 }
 
-EXPORT tieData_t GetLayerTieData( unsigned int layer )
+EXPORT tieData_t GetLayerTieData(unsigned int layer)
 {
-	if ( IsLayerValid(layer) && !GetLayerUseDefault(layer)
-	     && layers[layer].tieData.valid ) {
+	if (IsLayerValid(layer) && !GetLayerUseDefault(layer) &&
+	    layers[layer].tieData.valid) {
 		return layers[layer].tieData;
 	}
 	return GetScaleTieData(GetLayoutCurScale()); // layout scale default tie data
@@ -291,12 +292,13 @@ void SetLayerDefault(unsigned int layer, BOOL_T inherit)
 		layers[layer].inherit = inherit;
 		if (!inherit) {
 			layers[layer].scaleInx = GetLayoutCurScale();
+			GetScaleGauge(layers[layer].scaleInx, &layers[layer].scaleDescInx,
+			              &layers[layer].gaugeInx);
 		}
 	}
 }
 
-
-char * GetLayerName(unsigned int layer)
+char *GetLayerName(unsigned int layer)
 {
 	if (!IsLayerValid(layer)) {
 		return NULL;
@@ -305,30 +307,35 @@ char * GetLayerName(unsigned int layer)
 	}
 }
 
-void SetLayerName(unsigned int layer, char* name)
+void SetLayerName(unsigned int layer, char *name)
 {
 	if (IsLayerValid(layer)) {
-		strcpy(layers[layer].name, name);
+		strncpy(layers[layer].name, name, sizeof(layers[layer].name) - 1);
+		layers[layer].name[sizeof(layers[layer].name) - 1] = '\0';
 	}
 }
 
 BOOL_T GetLayerUseColor(unsigned int layer)
 {
-	return layers[layer].useColor;
+	if (IsLayerValid(layer)) {
+		return layers[layer].useColor;
+	} else {
+		return (FALSE);
+	}
 }
 
 wDrawColor GetLayerColor(unsigned int layer)
 {
-	return layers[layer].color;
+	if (IsLayerValid(layer)) {
+		return layers[layer].color;
+	} else {
+		return 0L;
+	}
 }
 
-static void RedrawLayer( unsigned int l, BOOL_T draw )
-{
-	DoRedraw();
-}
+static void RedrawLayer(unsigned int l, BOOL_T draw) { DoRedraw(); }
 
-
-EXPORT void FlipLayer( void * layerVP )
+EXPORT void FlipLayer(void *layerVP)
 {
 	unsigned int layer = (unsigned int)VP2L(layerVP);
 	wBool_t visible;
@@ -349,13 +356,6 @@ EXPORT void FlipLayer( void * layerVP )
 	visible = !layers[layer].visible;
 	layers[layer].visible = visible;
 
-	//if (layer < NUM_BUTTONS) {
-	//	if (!layers[layer].button_off) {
-	//		wButtonSetBusy(layer_btns[layer], visible != 0);
-	//		wButtonSetIcon(layer_btns[layer], (char *)show_layer_bmps[layer]);
-	//	}
-	//}
-
 	/* Set visible on related layers other than current */
 	for (int i = 0; i < layers[layer].layerLinkList.cnt; i++) {
 		// .layerLinkList values are 1-based layer indices
@@ -367,13 +367,11 @@ EXPORT void FlipLayer( void * layerVP )
 			}
 		}
 	}
-
-	//RedrawLayer(layer, TRUE);
 }
 
 static char lastSettings[STR_SHORT_SIZE];
-void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
-                  void * listContext, void * arg)
+void SetCurrLayer(wIndex_t inx, const char *name, wIndex_t op,
+                  void *listContext, void *arg)
 {
 	unsigned int newLayer = (unsigned int)inx;
 
@@ -384,29 +382,29 @@ void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
 	}
 
 	char *array[1];
-	if (!layers[inx].settingsName[0]
-	    || strcmp(layers[inx].settingsName, " ") == 0) {
+	if (!layers[inx].settingsName[0] ||
+	    strcmp(layers[inx].settingsName, " ") == 0) {
 		if (lastSettings[0]) {
 			DoSettingsRead(1, NULL, NULL);
 		}
 		lastSettings[0] = '\0';
 	} else {
 		if (strcmp(layers[inx].settingsName, lastSettings) != 0) {
-			if (!lastSettings[0]) { wPrefFlush(""); }  // Save Last Settings for no settings file
+			if (!lastSettings[0]) {
+				wPrefFlush("");
+			} // Save Last Settings for no settings file
 			array[0] = layers[inx].settingsName;
 			DoSettingsRead(1, array, NULL);
 		}
 		strcpy(lastSettings, layers[inx].settingsName);
 	}
 
-
 	curLayer = newLayer;
 
 	if (!IsLayerValid(curLayer)) {
-		curLayer = 0;							//Too big or -1
-		layers[curLayer].frozen = FALSE;        //Make sure the layer is not frozen
+		curLayer = 0;                    // Too big or -1
+		layers[curLayer].frozen = FALSE; // Make sure the layer is not frozen
 	}
-
 
 	if (!layers[curLayer].visible) {
 		FlipLayer(I2VP(inx));
@@ -429,7 +427,7 @@ void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
 	}
 }
 
-static void PlaybackCurrLayer(char * line)
+static void PlaybackCurrLayer(char *line)
 {
 	wIndex_t layer;
 	layer = atoi(line);
@@ -449,7 +447,7 @@ static void SetLayerColor(unsigned int inx, wDrawColor color)
 	if (color != layers[inx].color) {
 		if (inx < NUM_BUTTONS) {
 			wIconSetColor(show_layer_bmps[inx], color);
-			wButtonSetIcon(layer_btns[inx], (char*)show_layer_bmps[inx]);
+			wButtonSetIcon(layer_btns[inx], (char *)show_layer_bmps[inx]);
 		}
 
 		layers[inx].color = color;
@@ -462,24 +460,25 @@ static void SetLayerHideButton(unsigned int inx, wBool_t hide)
 	if (hide != layers[inx].button_off) {
 		if (inx < NUM_BUTTONS) {
 			wControlShow((wControl_p)layer_btns[inx], !hide);
-			if (!hide) { wButtonSetBusy(layer_btns[inx], layers[inx].visible); }
+			if (!hide) {
+				wButtonSetBusy(layer_btns[inx], layers[inx].visible);
+			}
 		}
 		layers[inx].button_off = hide;
 		layoutLayerChanged = TRUE;
 	}
 }
 
-char *
-FormatLayerName(unsigned int layerNumber)
+char *FormatLayerName(unsigned int layerNumber)
 {
-	DynString string;// = NaS;
+	DynString string; // = NaS;
 	char *result;
 	DynStringMalloc(&string, 0);
-	DynStringPrintf(&string,
-	                "%2d %c %s",
-	                layerNumber + 1,
-	                (layers[layerNumber].frozen ? '*' : layers[layerNumber].module ? 'm' :
-	                 layers[layerNumber].objCount > 0 ? '+' : '-'),
+	DynStringPrintf(&string, "%2d %c %s", layerNumber + 1,
+	                (layers[layerNumber].frozen         ? '*'
+	                 : layers[layerNumber].module       ? 'm'
+	                 : layers[layerNumber].objCount > 0 ? '+'
+	                 : '-'),
 	                layers[layerNumber].name);
 	result = strdup(DynStringToCStr(&string));
 	DynStringFree(&string);
@@ -490,20 +489,19 @@ FormatLayerName(unsigned int layerNumber)
 static char *show_layer_bits;
 #endif
 
-static  long layerRawColorTab[] = {
-	wRGB(  0,   0, 192),    /* blue */
-	wRGB(  0, 192,   0),    /* green */
-	wRGB(192,   0,   0),    /* red */
-	wRGB(128, 128,   0),    /* yellow */
-	wRGB(  0, 128, 128),    /* cyan */
-	wRGB(  0,   0, 128),    /* dk blue */
-	wRGB(  0, 128,   0),    /* dk green */
-	wRGB(128,   0,   0),    /* dk red */
-	wRGB( 96,  96,   0),    /* green-brown */
-	wRGB(  0,  96,  96)     /* dk cyan */
+static long layerRawColorTab[] = {
+	wRGB(0, 0, 192),   /* blue */
+	wRGB(0, 192, 0),   /* green */
+	wRGB(192, 0, 0),   /* red */
+	wRGB(128, 128, 0), /* yellow */
+	wRGB(0, 128, 128), /* cyan */
+	wRGB(0, 0, 128),   /* dk blue */
+	wRGB(0, 128, 0),   /* dk green */
+	wRGB(128, 0, 0),   /* dk red */
+	wRGB(96, 96, 0),   /* green-brown */
+	wRGB(0, 96, 96)    /* dk cyan */
 };
-static  wDrawColor layerColorTab[COUNT(layerRawColorTab)];
-
+static wDrawColor layerColorTab[COUNT(layerRawColorTab)];
 
 static wControl_p layerW;
 static char layerName[STR_SHORT_SIZE];
@@ -519,96 +517,183 @@ static long layerNoButton = FALSE;
 static long layerInherit = FALSE;
 
 static SCALEINX_T layerScaleInx;
-static SCALEDESCINX_T layerScaleDescInx;
-static GAUGEINX_T layerGaugeInx;
+static wIndex_t layerScaleDescInx;
+static wIndex_t layerGaugeInx;
+
 static DIST_T layerMinRadius;
 static ANGLE_T layerMaxGrade;
 static tieData_t layerTieData;
 
 static long layerObjectCount;
-static void LayerOk(void * unused);
+static void LayerOk(void *unused);
 static BOOL_T layerRedrawMap = FALSE;
 
 #define ENUMLAYER_RELOAD (1)
-#define ENUMLAYER_SAVE	(2)
+#define ENUMLAYER_SAVE (2)
 #define ENUMLAYER_CLEAR (3)
 #define ENUMLAYER_ADD (4)
 #define ENUMLAYER_DELETE (5)
 #define ENUMLAYER_DEFAULT (6)
 
-static char *visibleLabels[] = { "", NULL };
-static char *frozenLabels[] = { "", NULL };
-static char *onMapLabels[] = { "", NULL };
-static char *moduleLabels[] = { "", NULL };
-static char *noButtonLabels[] = { "", NULL };
-static char *defaultLabels[] = { "", NULL };
-static char *layerColorLabels[] = { "", NULL };
-
-//static paramListData_t layerUiListData = { 10, 370, 0 };
+static char *visibleLabels[] = {"", NULL};
+static char *frozenLabels[] = {"", NULL};
+static char *onMapLabels[] = {"", NULL};
+static char *moduleLabels[] = {"", NULL};
+static char *noButtonLabels[] = {"", NULL};
+static char *defaultLabels[] = {"", NULL};
+static char *layerColorLabels[] = {"", NULL};
 
 static paramData_t layerPLs[] = {
-#define I_LIST	(0)
-	{ PD_COMBOLIST, NULL, "layer", PDO_LISTINDEX, I2VP(250), N_("Select Layer:") },
-#define I_NAME	(1)
-	{ PD_STRING, layerName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH | PDO_DLGBOXEND, I2VP(25 - 5), N_("Name"), 0, 0, sizeof(layerName) },
-#define I_COLOR	(2)
-	{ PD_COLORLIST, &layerColor, "color", PDO_NOPREF, NULL, N_("Color") },
+#define I_LIST (0)
+	{
+		PD_COMBOLIST, NULL, "layerlist", PDO_LISTINDEX, I2VP(250),
+		N_("Select Layer:")
+	},
+#define I_NAME (1)
+	{
+		PD_STRING, layerName, "name",
+		PDO_NOPREF | PDO_STRINGLIMITLENGTH | PDO_DLGBOXEND, I2VP(25 - 5),
+		N_("Name"), 0, 0, sizeof(layerName)
+	},
+#define I_COLOR (2)
+	{PD_COLORLIST, &layerColor, "color", PDO_NOPREF, NULL, N_("Color")},
 #define I_USE_COLOR (3)
-	{ PD_TOGGLE, &layerUseColor, "layercolor", PDO_NOPREF | PDO_DLGHORZ, layerColorLabels, N_("Use Color"), BC_HORIZONTAL | BC_NOBORDER },
-#define I_VIS	(4)
-	{ PD_TOGGLE, &layerVisible, "visible", PDO_NOPREF, visibleLabels, N_("Visible"), BC_HORIZONTAL | BC_NOBORDER },
-#define I_FRZ	(5)
-	{ PD_TOGGLE, &layerFrozen, "frozen", PDO_NOPREF | PDO_DLGHORZ, frozenLabels, N_("Frozen"), BC_HORIZONTAL | BC_NOBORDER },
-#define I_MAP	(6)
-	{ PD_TOGGLE, &layerOnMap, "onmap", PDO_NOPREF | PDO_DLGHORZ, onMapLabels, N_("On Map"), BC_HORIZONTAL | BC_NOBORDER },
-#define I_MOD 	(7)
-	{ PD_TOGGLE, &layerModule, "module", PDO_NOPREF | PDO_DLGHORZ, moduleLabels, N_("Module"), BC_HORIZONTAL | BC_NOBORDER },
-#define I_BUT   (8)
-	{ PD_TOGGLE, &layerNoButton, "button", PDO_NOPREF | PDO_DLGHORZ, noButtonLabels, N_("No Button"), BC_HORIZONTAL | BC_NOBORDER },
-#define I_DEF   (9)
-	{ PD_TOGGLE, &layerInherit, "inherit", PDO_NOPREF | PDO_DLGHORZ | PDO_DLGBOXEND, defaultLabels, N_("Inherit"), BC_HORIZONTAL | BC_NOBORDER },
+	{
+		PD_TOGGLE, &layerUseColor, "layercolor", PDO_NOPREF | PDO_DLGHORZ,
+		layerColorLabels, N_("Use Color"), BC_HORIZONTAL | BC_NOBORDER
+	},
+#define I_VIS (4)
+	{
+		PD_TOGGLE, &layerVisible, "visible", PDO_NOPREF, visibleLabels,
+		N_("Visible"), BC_HORIZONTAL | BC_NOBORDER
+	},
+#define I_FRZ (5)
+	{
+		PD_TOGGLE, &layerFrozen, "frozen", PDO_NOPREF | PDO_DLGHORZ, frozenLabels,
+		N_("Frozen"), BC_HORIZONTAL | BC_NOBORDER
+	},
+#define I_MAP (6)
+	{
+		PD_TOGGLE, &layerOnMap, "onmap", PDO_NOPREF | PDO_DLGHORZ, onMapLabels,
+		N_("On Map"), BC_HORIZONTAL | BC_NOBORDER
+	},
+#define I_MOD (7)
+	{
+		PD_TOGGLE, &layerModule, "module", PDO_NOPREF | PDO_DLGHORZ, moduleLabels,
+		N_("Module"), BC_HORIZONTAL | BC_NOBORDER
+	},
+#define I_BUT (8)
+	{
+		PD_TOGGLE, &layerNoButton, "button", PDO_NOPREF | PDO_DLGHORZ,
+		noButtonLabels, N_("No Button"), BC_HORIZONTAL | BC_NOBORDER
+	},
+#define I_DEF (9)
+	{
+		PD_TOGGLE, &layerInherit, "inherit",
+		PDO_NOPREF | PDO_DLGHORZ | PDO_DLGBOXEND, defaultLabels, N_("Inherit"),
+		BC_HORIZONTAL | BC_NOBORDER
+	},
 #define I_SCALE (10)
-	{ PD_COMBOLIST, &layerScaleDescInx, "scale", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT, I2VP(180), N_("Scale"), 0, I2VP(CHANGE_LAYER) },
+	{
+		PD_COMBOLIST, &layerScaleDescInx, "scale",
+		PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT, I2VP(180),
+		N_("Scale"), 0, I2VP(CHANGE_LAYER)
+	},
 #define I_GAUGE (11)
-	{ PD_COMBOLIST, &layerGaugeInx, "gauge", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ, I2VP(180), N_("     Gauge") },
+	{
+		PD_COMBOLIST, &layerGaugeInx, "gauge",
+		PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ,
+		I2VP(180), N_("     Gauge")
+	},
 #define I_MINRADIUSENTRY (12)
-	{ PD_FLOAT, &layerMinRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, N_("Min Track Radius"), 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
+	{
+		PD_FLOAT, &layerMinRadius, "mintrackradius",
+		PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, N_("Min Track Radius"), 0,
+		I2VP(CHANGE_MAIN | CHANGE_LIMITS)
+	},
 #define I_MAXGRADEENTRY (13)
-	{ PD_FLOAT, &layerMaxGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ | PDO_NOPREF, &r0_90, N_("  Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN) },
+	{
+		PD_FLOAT, &layerMaxGrade, "maxtrackgrade",
+		PDO_NOPSHUPD | PDO_DLGHORZ | PDO_NOPREF, &r0_90,
+		N_("  Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN)
+	},
 #define I_TIELEN (14)
-	{ PD_FLOAT, &layerTieData.length, "tielength", PDO_NOPREF, &r_tieData, N_( "Tie Length" ), 0, I2VP( CHANGE_MAIN ) },
+	{
+		PD_FLOAT, &layerTieData.length, "tielength", PDO_NOPREF, &r_tieData,
+		N_("Tie Length"), 0, I2VP(CHANGE_MAIN)
+	},
 #define I_TIEWID (15)
-	{ PD_FLOAT, &layerTieData.width, "tiewidth", PDO_NOPREF | PDO_DLGHORZ, &r_tieData, N_( "  Width" ), 0, I2VP( CHANGE_MAIN ) },
+	{
+		PD_FLOAT, &layerTieData.width, "tiewidth", PDO_NOPREF | PDO_DLGHORZ,
+		&r_tieData, N_("  Width"), 0, I2VP(CHANGE_MAIN)
+	},
 #define I_TIESPC (16)
-	{ PD_FLOAT, &layerTieData.spacing, "tiespacing", PDO_NOPREF | PDO_DLGHORZ | PDO_DLGBOXEND, &r_tieData, N_( "  Spacing" ), 0, I2VP( CHANGE_MAIN ) },
+	{
+		PD_FLOAT, &layerTieData.spacing, "tiespacing",
+		PDO_NOPREF | PDO_DLGHORZ | PDO_DLGBOXEND, &r_tieData, N_("  Spacing"), 0,
+		I2VP(CHANGE_MAIN)
+	},
 
-	{ PD_MESSAGE, N_("Layer Actions"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
+	{PD_MESSAGE, N_("Layer Actions"), "mess1", PDO_DLGRESETMARGIN, I2VP(180)},
 #define I_ADD (18)
-	{ PD_BUTTON, DoLayerOp, "add", PDO_DLGRESETMARGIN, 0, N_("Add Layer"), 0, I2VP(ENUMLAYER_ADD) },
+	{
+		PD_BUTTON, DoLayerOp, "add", PDO_DLGRESETMARGIN, 0, N_("Add Layer"), 0,
+		I2VP(ENUMLAYER_ADD)
+	},
 #define I_DELETE (19)
-	{ PD_BUTTON, DoLayerOp, "delete", PDO_DLGHORZ, 0, N_("Delete Layer"), 0, I2VP(ENUMLAYER_DELETE) },
+	{
+		PD_BUTTON, DoLayerOp, "delete", PDO_DLGHORZ, 0, N_("Delete Layer"), 0,
+		I2VP(ENUMLAYER_DELETE)
+	},
 #define I_DEFAULT (20)
-	{ PD_BUTTON, DoLayerOp, "default", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Default Values"), 0, I2VP(ENUMLAYER_DEFAULT) },
+	{
+		PD_BUTTON, DoLayerOp, "default", PDO_DLGHORZ | PDO_DLGBOXEND, 0,
+		N_("Default Values"), 0, I2VP(ENUMLAYER_DEFAULT)
+	},
 #define I_LINKLIST (21)
-	{ PD_STRING, layerLinkList, "layerlist", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(25 - 5), N_("Linked Layers"), 0, 0, sizeof(layerLinkList) },
+	{
+		PD_STRING, layerLinkList, "linkedlayers",
+		PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(25 - 5), N_("Linked Layers"), 0,
+		0, sizeof(layerLinkList)
+	},
 #define I_SETTINGS (22)
-	{ PD_COMBOLIST, NULL, "settings", PDO_LISTINDEX, I2VP(250), N_("Settings when Current") },
+	{
+		PD_COMBOLIST, NULL, "settings", PDO_LISTINDEX, I2VP(250),
+		N_("Settings when Current")
+	},
 #define I_COUNT (23)
-	{ PD_LONG, &layerObjectCount, "objectCount", PDO_DLGBOXEND, &r_nocheck, N_("Object Count:"), 0, 0 },
-	{ PD_MESSAGE, N_("All Layer Preferences"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
-	{ PD_BUTTON, DoLayerOp, "load", PDO_DLGRESETMARGIN, 0, N_("Load"), 0, I2VP(ENUMLAYER_RELOAD) },
-	{ PD_BUTTON, DoLayerOp, "save", PDO_DLGHORZ, 0, N_("Save"), 0, I2VP(ENUMLAYER_SAVE) },
-	{ PD_BUTTON, DoLayerOp, "clear", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Defaults"), 0, I2VP(ENUMLAYER_CLEAR) },
+	{
+		PD_MESSAGE, &layerObjectCount, "objectCount", PDO_DLGBOXEND, I2VP(20),
+		N_("Object Count:"), 0, 0
+	},
+	{
+		PD_MESSAGE, N_("All Layer Preferences"), "mess2", PDO_DLGRESETMARGIN,
+		I2VP(180)
+	},
+	{
+		PD_BUTTON, DoLayerOp, "load", PDO_DLGRESETMARGIN, 0, N_("Load"), 0,
+		I2VP(ENUMLAYER_RELOAD)
+	},
+	{
+		PD_BUTTON, DoLayerOp, "save", PDO_DLGHORZ, 0, N_("Save"), 0,
+		I2VP(ENUMLAYER_SAVE)
+	},
+	{
+		PD_BUTTON, DoLayerOp, "clear", PDO_DLGHORZ | PDO_DLGBOXEND, 0,
+		N_("Defaults"), 0, I2VP(ENUMLAYER_CLEAR)
+	},
 };
 
-#define settingsListL	(layerPLs[I_SETTINGS].control)
+#define settingsListL (layerPLs[I_SETTINGS].control)
 
-static paramGroup_t layerPG = { "layer", PGO_FULLDIALOGFROMBUILDER, layerPLs, COUNT( layerPLs ) };
+static paramGroup_t layerPG = {"layer", PGO_FULLDIALOGFROMBUILDER, layerPLs,
+                               COUNT(layerPLs)
+                              };
 
 /**
  * Reload the listbox showing the current catalog
  */
-static int LoadFileListLoad(Catalog *catalog, char * name)
+static int LoadFileListLoad(Catalog *catalog, char *name)
 {
 	CatalogEntry *currentEntry = catalog->head;
 	DynString description;
@@ -621,21 +706,19 @@ static int LoadFileListLoad(Catalog *catalog, char * name)
 
 	int i = 0;
 
-	wListAddValue(settingsListL, " ", NULL, " ");
+	wComboBoxAddValue(settingsListL, " ", " ");
 
 	while (currentEntry) {
 		i++;
 		DynStringClear(&description);
-		DynStringCatCStr(&description,
-		                 currentEntry->contents) ;
-		wListAddValue(settingsListL,
-		              DynStringToCStr(&description),
-		              NULL,
-		              currentEntry->fullFileName[0]);
-		if (strcmp(currentEntry->fullFileName[0], name) == 0) { currset = i; }
+		DynStringCatCStr(&description, currentEntry->contents);
+		wComboBoxAddValue(settingsListL, DynStringToCStr(&description),
+		                  currentEntry->fullFileName[0]);
+		if (strcmp(currentEntry->fullFileName[0], name) == 0) {
+			currset = i;
+		}
 		currentEntry = currentEntry->next;
 	}
-
 
 	wListSetIndex(settingsListL, currset);
 
@@ -643,22 +726,24 @@ static int LoadFileListLoad(Catalog *catalog, char * name)
 
 	DynStringFree(&description);
 
-	if (currset == 0 && strcmp(" ", name) != 0) { return FALSE; }
+	if (currset == 0 && strcmp(" ", name) != 0) {
+		return FALSE;
+	}
 	return TRUE;
 }
 
-#define layerL	(layerPLs[I_LIST].control)
+#define layerL (layerPLs[I_LIST].control)
 
-#define layerS  (layerPLs[I_SETTINGS].control)
+#define layerS (layerPLs[I_SETTINGS].control)
 
-#define scaleL	(layerPLs[I_SCALE].control)
+#define scaleL (layerPLs[I_SCALE].control)
 
-#define gaugeL	(layerPLs[I_GAUGE].control)
+#define gaugeL (layerPLs[I_GAUGE].control)
 
 /**
-* @brief Reload Layer parameters if changes
-* @param changes
-*/
+ * @brief Reload Layer parameters if changes
+ * @param changes
+ */
 static void LayerChange(long changes)
 {
 	if (changes & (CHANGE_LAYER))
@@ -667,13 +752,13 @@ static void LayerChange(long changes)
 		}
 }
 
-void GetLayerLinkString(int inx, char * list)
+void GetLayerLinkString(int inx, char *list)
 {
-	char * cp = &list[0];
+	char *cp = &list[0];
 	cp[0] = '\0';
-	int len = 0;
-	for (int i = 0; i < layers[inx].layerLinkList.cnt
-	     && len < STR_LONG_SIZE - 5; i++) {
+
+	for (int i = 0; i < layers[inx].layerLinkList.cnt && strlen(cp) < STR_LONG_SIZE - 5;
+	     i++) {
 		int l = DYNARR_N(int, layers[inx].layerLinkList, i);
 		if (i == 0) {
 			cp += sprintf(cp, "%d", l);
@@ -681,18 +766,19 @@ void GetLayerLinkString(int inx, char * list)
 			cp += sprintf(cp, ";%d", l);
 		}
 		cp[0] = '\0';
+
 	}
 }
 
-void PutLayerListArray(int inx, char * list)
+void PutLayerListArray(int inx, char *list)
 {
-	char * cp = &list[0];
+	char *cp = &list[0];
 	DYNARR_RESET(int, layers[inx].layerLinkList);
 	while (cp) {
 		cp = strpbrk(list, ",; ");
 		if (cp) {
 			cp[0] = '\0';
-			int i =  abs((int)strtol(list, &list, 0));
+			int i = abs((int)strtol(list, &list, 0));
 			if (i > 0 && i != inx + 1 && i < NUM_LAYERS) {
 				DYNARR_APPEND(int, layers[inx].layerLinkList, 1);
 				DYNARR_LAST(int, layers[inx].layerLinkList) = i;
@@ -700,7 +786,7 @@ void PutLayerListArray(int inx, char * list)
 			cp[0] = ';';
 			list = cp + 1;
 		} else {
-			int i =  abs((int)strtol(list, &list, 0));
+			int i = abs((int)strtol(list, &list, 0));
 			if (i > 0 && i != inx + 1 && i < NUM_LAYERS) {
 				DYNARR_APPEND(int, layers[inx].layerLinkList, 1);
 				DYNARR_LAST(int, layers[inx].layerLinkList) = i;
@@ -713,7 +799,7 @@ void PutLayerListArray(int inx, char * list)
 /**
  * Set a Layer to System Default
  */
-void LayerSystemDefault( unsigned int inx )
+void LayerSystemDefault(unsigned int inx)
 {
 	strcpy(layers[inx].name, inx == 0 ? _("Main") : "");
 	layers[inx].visible = TRUE;
@@ -734,37 +820,6 @@ void LayerSystemDefault( unsigned int inx )
 }
 
 /**
- * Is a layer the system default?
- */
-//BOOL_T IsLayerDefault( unsigned int inx )
-//{
-//	SCALEDESCINX_T scaleDescInx;
-//	GAUGEINX_T gaugeInx;
-//	GetScaleGauge(GetLayoutCurScale(), &scaleDescInx, &gaugeInx);
-//	tieData_t td;
-//	td = GetScaleTieData(GetLayoutCurScale());
-//
-//	return (!layers[inx].name[0]) &&
-//		layers[inx].visible &&
-//		!layers[inx].frozen &&
-//		layers[inx].onMap &&
-//		!layers[inx].module &&
-//		!layers[inx].button_off &&
-//		layers[inx].inherit &&
-//		!layers[inx].layerLinkList.cnt &&
-//		layers[inx].color == layerColorTab[inx % COUNT(layerColorTab)] &&
-//		layers[inx].scaleInx == GetLayoutCurScale() &&
-//	    layers[inx].scaleDescInx == layerScaleDescInx && // is this needed?
-//	    layers[inx].gaugeInx == gaugeInx &&
-//	    layers[inx].minTrackRadius == GetLayoutMinTrackRadius() &&
-//	    layers[inx].maxTrackGrade == GetLayoutMaxTrackGrade() &&
-//		layers[inx].tieData.valid == TRUE &&
-//		layers[inx].tieData.length == td.length &&
-//		layers[inx].tieData.width == td.width &&
-//		layers[inx].tieData.spacing == td.spacing;
-//}
-
-/**
  * Load the layer settings to hard coded system defaults
  */
 EXPORT void LayerAllDefaults(void)
@@ -777,7 +832,8 @@ EXPORT void LayerAllDefaults(void)
 }
 
 /**
- * Load the layer listboxes in Manage Layers and the Toolbar with up-to-date information.
+ * Load the layer listboxes in Manage Layers and the Toolbar with up-to-date
+ * information.
  */
 void LoadLayerLists(void)
 {
@@ -792,7 +848,6 @@ void LoadLayerLists(void)
 	if (layerS) {
 		wListClear(layerS);
 	}
-
 
 	/* add all layers to both lists */
 	for (inx = 0; inx < NUM_LAYERS; inx++) {
@@ -818,14 +873,18 @@ void LoadLayerLists(void)
 /**
  * Add a layer after selected layer
  */
-static void LayerAdd( )
+static void LayerAdd()
 {
 	unsigned int inx;
 	unsigned int newLayer = layerSelected + 1;
 
-	// UndoStart( _("Add Layer"), "addlayer" );
+	if (maxLayer >= NUM_LAYERS - 1) {
+		NoticeMessage(_("Maximum number of layers is reached\n"), "Cancel", NULL);
+		return;
+	}
+
 	maxLayer++;
-	for ( inx = maxLayer; inx > newLayer; inx-- ) {
+	for (inx = maxLayer; inx > newLayer; inx--) {
 		layers[inx] = layers[inx - 1];
 	}
 
@@ -835,7 +894,7 @@ static void LayerAdd( )
 	strcpy(layers[newLayer].name, "New Layer");
 	layers[newLayer].objCount = 0;
 
-	UpdateLayerDlg( newLayer );
+	UpdateLayerDlg(newLayer);
 
 	layerSelected = newLayer;
 	layoutLayerChanged = TRUE;
@@ -843,9 +902,9 @@ static void LayerAdd( )
 }
 
 /**
-* Delete the selected layer
-*/
-static void LayerDelete( )
+ * Delete the selected layer
+ */
+static void LayerDelete()
 {
 	unsigned int inx;
 
@@ -855,7 +914,7 @@ static void LayerDelete( )
 	}
 
 	if (layerSelected <= maxLayer) {
-		for ( inx = layerSelected; inx < maxLayer; inx++ ) {
+		for (inx = layerSelected; inx < maxLayer; inx++) {
 			layers[inx] = layers[inx + 1];
 		}
 		LayerSystemDefault(maxLayer);
@@ -865,17 +924,17 @@ static void LayerDelete( )
 		}
 	}
 
-	TrackDeleteLayer( layerSelected );
+	TrackDeleteLayer(layerSelected);
 
-	UpdateLayerDlg( layerSelected );
+	UpdateLayerDlg(layerSelected);
 
 	layoutLayerChanged = TRUE;
 }
 
 /**
-* Set the Min Radius, Max Grade and Tie values to Layout or Scale defaults
-*/
-static void LayerDefault( )
+ * Set the Min Radius, Max Grade and Tie values to Layout or Scale defaults
+ */
+static void LayerDefault()
 {
 	if (layers[layerSelected].inherit) {
 		layers[layerSelected].scaleInx = GetLayoutCurScale();
@@ -884,31 +943,33 @@ static void LayerDefault( )
 		              &layers[layerSelected].gaugeInx);
 		layers[layerSelected].minTrackRadius = GetLayoutMinTrackRadius();
 		layers[layerSelected].maxTrackGrade = GetLayoutMaxTrackGrade();
-		layers[layerSelected].tieData = GetScaleTieData(layers[layerSelected].scaleInx);
+		layers[layerSelected].tieData =
+		        GetScaleTieData(layers[layerSelected].scaleInx);
 	} else {
 		GetScaleGauge(layers[layerSelected].scaleInx,
 		              &layers[layerSelected].scaleDescInx,
 		              &layers[layerSelected].gaugeInx);
 		layers[layerSelected].minTrackRadius = GetLayoutMinTrackRadius();
 		layers[layerSelected].maxTrackGrade = GetLayoutMaxTrackGrade();
-		layers[layerSelected].tieData = GetScaleTieData(layers[layerSelected].scaleInx);
+		layers[layerSelected].tieData =
+		        GetScaleTieData(layers[layerSelected].scaleInx);
 	}
 
-	UpdateLayerDlg( layerSelected );
+	UpdateLayerDlg(layerSelected);
 
 	layoutLayerChanged = TRUE;
 }
 
 /**
- * Handle button presses for the layer dialog. For all button presses in the layer
- *	dialog, this function is called. The parameter identifies the button pressed and
- * the operation is performed.
+ * Handle button presses for the layer dialog. For all button presses in the
+ * layer dialog, this function is called. The parameter identifies the button
+ * pressed and the operation is performed.
  *
  * \param[IN] data identifier for the button pressed
  * \return
  */
 
-static void DoLayerOp(void * data)
+static void DoLayerOp(void *data)
 {
 	switch (VP2L(data)) {
 	case ENUMLAYER_CLEAR:
@@ -937,7 +998,7 @@ static void DoLayerOp(void * data)
 	}
 
 	// UpdateLayerDlg(curLayer);   //Reset to current Layer
-	FormControlActive( &layerPG, I_DELETE, (layerSelected > 0) ? TRUE : FALSE);
+	FormControlActive(&layerPG, I_DELETE, (layerSelected > 0) ? TRUE : FALSE);
 
 	if (layoutLayerChanged) {
 		MainProc(mainW, wResize_e, NULL, NULL);
@@ -947,13 +1008,15 @@ static void DoLayerOp(void * data)
 }
 
 /**
- * Update all dialogs and dialog elements after changing layers preferences. Once the global array containing
- * the settings for the labels has been changed, this function needs to be called to update all the user interface
+ * Update all dialogs and dialog elements after changing layers preferences.
+ * Once the global array containing the settings for the labels has been
+ * changed, this function needs to be called to update all the user interface
  * elements to the new settings.
  */
 EXPORT void UpdateLayerDlg(unsigned int layer)
 {
 	int inx;
+
 	/* update the globals for the layer dialog */
 	layerVisible = layers[layer].visible;
 	layerFrozen = layers[layer].frozen;
@@ -976,12 +1039,12 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
 
 	layerSelected = layer;
 
+	layerSelecting = TRUE;
 	/* now re-load the layer list boxes */
 	LoadLayerLists();
 
 	/* Sync Scale and lists */
 	if (gaugeL) {
-		LoadGaugeList(gaugeL, layerScaleDescInx);
 		wListSetIndex(gaugeL, layerGaugeInx);
 	}
 
@@ -990,6 +1053,7 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
 		wListSetIndex(layerL, layer);
 		FormLoadControls(&layerPG);
 	}
+	layerSelecting = FALSE;
 
 	if (layerS) {
 		if (!LoadFileListLoad(settingsCatalog, settingsName)) {
@@ -997,22 +1061,23 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
 		}
 	}
 
-	FormControlActive( &layerPG, I_DELETE, (layerSelected > 0) ? TRUE : FALSE);
-	FormControlActive( &layerPG, I_COUNT, FALSE );
-	FormControlActive( &layerPG, I_SCALE, !layerInherit);
-	FormControlActive( &layerPG, I_GAUGE, !layerInherit);
-	FormControlActive( &layerPG, I_MINRADIUSENTRY, !layerInherit);
-	FormControlActive( &layerPG, I_MAXGRADEENTRY, !layerInherit);
-	FormControlActive( &layerPG, I_TIELEN, !layerInherit);
-	FormControlActive( &layerPG, I_TIEWID, !layerInherit);
-	FormControlActive( &layerPG, I_TIESPC, !layerInherit);
+	FormControlActive(&layerPG, I_DELETE, (layerSelected > 0) ? TRUE : FALSE);
+	FormControlActive(&layerPG, I_COUNT, FALSE);
+	FormControlActive(&layerPG, I_SCALE, !layerInherit);
+	FormControlActive(&layerPG, I_GAUGE, !layerInherit);
+	FormControlActive(&layerPG, I_MINRADIUSENTRY, !layerInherit);
+	FormControlActive(&layerPG, I_MAXGRADEENTRY, !layerInherit);
+	FormControlActive(&layerPG, I_TIELEN, !layerInherit);
+	FormControlActive(&layerPG, I_TIEWID, !layerInherit);
+	FormControlActive(&layerPG, I_TIESPC, !layerInherit);
 
 	/* finally show the layer buttons with balloon text */
 	for (inx = 0; inx < NUM_BUTTONS; inx++) {
 		if (!layers[inx].button_off) {
 			wButtonSetBusy(layer_btns[inx], layers[inx].visible != 0);
 			wTooltipSetText((wControl_p)layer_btns[inx],
-			                       (layers[inx].name[0] != '\0' ? layers[inx].name : _("Show/Hide Layer")));
+			                (layers[inx].name[0] != '\0' ? layers[inx].name
+			                 : _("Show/Hide Layer")));
 		}
 	}
 }
@@ -1023,9 +1088,9 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
  * \param listLayers the dropbox
  * \return
  */
-void FillLayerList( wControl_p listLayers)
+void FillLayerList(wControl_p listLayers)
 {
-	wListClear(listLayers);  // Rebuild list on each invocation
+	wListClear(listLayers); // Rebuild list on each invocation
 
 	for (int inx = 0; inx < NUM_LAYERS; inx++) {
 		char *layerFormattedName;
@@ -1037,11 +1102,11 @@ void FillLayerList( wControl_p listLayers)
 	/* set current layer to selected */
 	wListSetIndex(listLayers, curLayer);
 
-	FormControlActive( &layerPG, I_DELETE, (curLayer > 0) ? TRUE : FALSE);
-	if ( layerInherit ) {
-		FormControlActive( &layerPG, I_TIELEN, FALSE);
-		FormControlActive( &layerPG, I_TIEWID, FALSE);
-		FormControlActive( &layerPG, I_TIESPC, FALSE);
+	FormControlActive(&layerPG, I_DELETE, (curLayer > 0) ? TRUE : FALSE);
+	if (layerInherit) {
+		FormControlActive(&layerPG, I_TIELEN, FALSE);
+		FormControlActive(&layerPG, I_TIEWID, FALSE);
+		FormControlActive(&layerPG, I_TIESPC, FALSE);
 	}
 }
 
@@ -1051,8 +1116,7 @@ void FillLayerList( wControl_p listLayers)
  * \param IN pointer to function that actually initialize tha data structures
  * \param IN current layer (0...NUM_LAYERS), (-1) for no change
  */
-static void
-InitializeLayers(void LayerInitFunc(void), int newCurrLayer)
+static void InitializeLayers(void LayerInitFunc(void), int newCurrLayer)
 {
 	/* reset the data structures to default values */
 	LayerInitFunc();
@@ -1069,7 +1133,7 @@ InitializeLayers(void LayerInitFunc(void), int newCurrLayer)
 			}
 		}
 		if (curLayer == -1) {
-			ErrorMessage( MSG_NO_EMPTY_LAYER );
+			ErrorMessage(MSG_NO_EMPTY_LAYER);
 			layers[0].frozen = FALSE;
 			curLayer = 0;
 		}
@@ -1079,47 +1143,46 @@ InitializeLayers(void LayerInitFunc(void), int newCurrLayer)
 /**
  * Save an integer to Prefs
  */
-static void
-layerSetInteger( unsigned int inx, char prefName[], int value )
+static void layerSetInteger(unsigned int inx, char prefName[], long value)
 {
 	char buffer[80];
 	char name[80];
 	strcpy(name, prefName);
 	strcat(name, ".%0u");
-	sprintf( buffer, name, inx );
-	wPrefSetInteger( LAYERPREF_SECTION, buffer, value );
+	sprintf(buffer, name, inx);
+	wPrefSetInteger(LAYERPREF_SECTION, buffer, value);
 }
 /**
-* Save a float to Prefs
-*/
-static void
-layerSetFloat( unsigned int inx, char prefName[], double value )
+ * Save a float to Prefs
+ */
+static void layerSetFloat(unsigned int inx, char prefName[], double value)
 {
 	char buffer[80];
-	char name[20];
+	char name[80];
 	strcpy(name, prefName);
 	strcat(name, ".%0u");
-	sprintf( buffer, name, inx );
-	wPrefSetFloat( LAYERPREF_SECTION, buffer, value );
+	sprintf(buffer, name, inx);
+	wPrefSetFloat(LAYERPREF_SECTION, buffer, value);
 }
 
 /**
  * Save the customized layer information to preferences.
  */
-static void
-LayerPrefSave(void)
+static void LayerPrefSave(void)
 {
 	unsigned int inx;
 	int flags;
-	char buffer[ 80 ];
+	char buffer[80];
 	char links[STR_LONG_SIZE];
-	char layersSaved[ 3 * NUM_LAYERS + 1 ];			/* 0..99 plus separator */
-	/* FIXME: values for layers that are configured to default now should be overwritten in the settings */
-	layersSaved[ 0 ] = '\0';
+	char layersSaved[3 * NUM_LAYERS + 1]; /* 0..99 plus separator */
+	/* FIXME: values for layers that are configured to default now should be
+	 * overwritten in the settings */
+	layersSaved[0] = '\0';
 
 	for (inx = 0; inx < NUM_LAYERS; inx++) {
-		/* if a name is set that is not the default value or a color different from the default has been set,
-		    information about the layer needs to be saved */
+		/* if a name is set that is not the default value or a color different from
+		   the default has been set, information about the layer needs to be saved
+		 */
 		if (inx == 0 || IsLayerConfigured(inx)) {
 			sprintf(buffer, LAYERPREF_NAME ".%0u", inx);
 			wPrefSetString(LAYERPREF_SECTION, buffer, layers[inx].name);
@@ -1147,7 +1210,7 @@ LayerPrefSave(void)
 			}
 			layerSetInteger(inx, LAYERPREF_FLAGS, flags);
 
-			layerSetInteger(inx, LAYERPREF_COLOR, wDrawGetRGB(layers[inx].color));
+			layerSetInteger(inx, LAYERPREF_USECOLOR, layers[inx].useColor);
 
 			layerSetInteger(inx, LAYERPREF_SCALEINX, layers[inx].scaleInx);
 			layerSetInteger(inx, LAYERPREF_SCLDESCINX, layers[inx].scaleDescInx);
@@ -1170,7 +1233,7 @@ LayerPrefSave(void)
 			}
 
 			/* extend the list of layers that are set up via the preferences */
-			if (layersSaved[ 0 ]) {
+			if (layersSaved[0]) {
 				strcat(layersSaved, ",");
 			}
 
@@ -1182,40 +1245,38 @@ LayerPrefSave(void)
 	wPrefSetString(LAYERPREF_SECTION, "layers", layersSaved);
 }
 
-
 /**
-* Load an integer from Prefs
-*/
-static void
-layerGetInteger( unsigned int inx, char prefName[], long *value, int deflt )
+ * Load an integer from Prefs
+ */
+static void layerGetInteger(unsigned int inx, char prefName[], long *value,
+                            int deflt)
 {
 	char buffer[80];
 	char name[80];
 	strcpy(name, prefName);
 	strcat(name, ".%0u");
-	sprintf( buffer, name, inx );
-	wPrefGetInteger( LAYERPREF_SECTION, buffer, value, deflt );
+	sprintf(buffer, name, inx);
+	wPrefGetInteger(LAYERPREF_SECTION, buffer, value, deflt);
 }
 /**
-* Load a float from Prefs
-*/
-static void
-layerGetFloat( unsigned int inx, char prefName[], double *value, double deflt )
+ * Load a float from Prefs
+ */
+static void layerGetFloat(unsigned int inx, char prefName[], double *value,
+                          double deflt)
 {
 	char buffer[80];
 	char name[20];
 	strcpy(name, prefName);
 	strcat(name, ".%0u");
-	sprintf( buffer, name, inx );
-	wPrefGetFloat( LAYERPREF_SECTION, buffer, value, deflt );
+	sprintf(buffer, name, inx);
+	wPrefGetFloat(LAYERPREF_SECTION, buffer, value, deflt);
 }
 
 /**
  * Load the settings for all layers from the preferences.
  */
 
-static void
-LayerPrefLoad(void)
+static void LayerPrefLoad(void)
 {
 	const char *prefString;
 	long rgb;
@@ -1224,10 +1285,10 @@ LayerPrefLoad(void)
 	LayerAllDefaults();
 	prefString = wPrefGetString(LAYERPREF_SECTION, "layers");
 
-	if (prefString && prefString[ 0 ]) {
+	if (prefString && prefString[0]) {
 		char layersSaved[3 * NUM_LAYERS];
-		strncpy(layersSaved, prefString, sizeof(layersSaved)-1);
-		layersSaved[sizeof(layersSaved)-1] = 0;
+		strncpy(layersSaved, prefString, sizeof(layersSaved) - 1);
+		layersSaved[sizeof(layersSaved) - 1] = 0;
 		prefString = strtok(layersSaved, ",");
 
 		while (prefString) {
@@ -1236,17 +1297,24 @@ LayerPrefLoad(void)
 			const char *layerValue;
 			char listValue[STR_LONG_SIZE];
 			int color;
+
 			inx = atoi(prefString);
+			if(inx < 0 || inx >=NUM_LAYERS) {
+				continue;
+			}
+
 			sprintf(layerOption, LAYERPREF_NAME ".%d", inx);
 			layerValue = wPrefGetString(LAYERPREF_SECTION, layerOption);
 
 			if (layerValue) {
-				strcpy(layers[inx].name, layerValue);
+				strncpy(layers[inx].name, layerValue, sizeof(layers[inx].name-1));
+				(layers[inx].name)[sizeof(layers[inx].name)-1] = '\0';
 			} else {
 				*(layers[inx].name) = '\0';
 			}
 
-			/* get and set the color, using the system default color in case color is not available from prefs */
+			/* get and set the color, using the system default color in case color is
+			 * not available from prefs */
 			layerGetInteger(inx, LAYERPREF_COLOR, &rgb,
 			                layerColorTab[inx % COUNT(layerColorTab)]);
 			color = wDrawFindColor(rgb);
@@ -1263,9 +1331,10 @@ LayerPrefLoad(void)
 
 			layerGetInteger(inx, LAYERPREF_SCALEINX, &layers[inx].scaleInx,
 			                GetLayoutCurScale());
-			layerGetInteger(inx, LAYERPREF_SCLDESCINX, &layers[inx].scaleDescInx,
-			                GetLayoutCurScaleDesc());
-			layerGetInteger(inx, LAYERPREF_GAUGEINX, &layers[inx].gaugeInx, 0);
+			layerGetInteger(inx, LAYERPREF_USECOLOR, &layers[inx].useColor, TRUE);
+
+			layers[inx].scaleDescInx = 0;
+			layers[inx].gaugeInx = 0;
 
 			layerGetFloat(inx, LAYERPREF_MINRADIUS, &layers[inx].minTrackRadius,
 			              GetLayoutMinTrackRadius());
@@ -1273,7 +1342,8 @@ LayerPrefLoad(void)
 			              GetLayoutMaxTrackGrade());
 			layerGetFloat(inx, LAYERPREF_TIELENGTH, &layers[inx].tieData.length, 0.0);
 			layerGetFloat(inx, LAYERPREF_TIEWIDTH, &layers[inx].tieData.width, 0.0);
-			layerGetFloat(inx, LAYERPREF_TIESPACING, &layers[inx].tieData.spacing, 0.0);
+			layerGetFloat(inx, LAYERPREF_TIESPACING, &layers[inx].tieData.spacing,
+			              0.0);
 
 			sprintf(layerOption, LAYERPREF_LIST ".%d", inx);
 			layerValue = wPrefGetString(LAYERPREF_SECTION, layerOption);
@@ -1295,15 +1365,15 @@ LayerPrefLoad(void)
 			prefString = strtok(NULL, ",");
 		}
 	}
-	//Make sure curLayer not frozen
+	// Make sure curLayer not frozen
 	for (int i = curLayer; i < NUM_LAYERS; i++) {
-		if (!layers[i].frozen)  {
+		if (!layers[i].frozen) {
 			curLayer = i;
 			break;
 		}
 	}
 	if (layers[curLayer].frozen) {
-		ErrorMessage( MSG_NO_EMPTY_LAYER );
+		ErrorMessage(MSG_NO_EMPTY_LAYER);
 		layers[0].frozen = FALSE;
 		curLayer = 0;
 	}
@@ -1317,24 +1387,25 @@ LayerPrefLoad(void)
 
 void IncrementLayerObjects(unsigned int layer)
 {
-	CHECK(layer <= NUM_LAYERS);
+	CHECK(layer < NUM_LAYERS);
 	layers[layer].objCount++;
 }
 
 /**
-* Decrement the count of objects on a given layer.
-*
-* \param index IN the layer to change
-*/
+ * Decrement the count of objects on a given layer.
+ *
+ * \param index IN the layer to change
+ */
 
 void DecrementLayerObjects(unsigned int layer)
 {
-	CHECK(layer <= NUM_LAYERS);
+	CHECK(layer < NUM_LAYERS);
 	layers[layer].objCount--;
 }
 
 /**
- *	Count the number of objects on each layer and store result in layers data structure.
+ *	Count the number of objects on each layer and store result in layers
+ * data structure.
  */
 
 void LayerSetCounts(void)
@@ -1359,9 +1430,11 @@ int FindUnusedLayer(unsigned int start)
 {
 	int inx;
 	for (inx = start; inx < NUM_LAYERS; inx++) {
-		if (layers[inx].objCount == 0 && !layers[inx].frozen) { return inx; }
+		if (layers[inx].objCount == 0 && !layers[inx].frozen) {
+			return inx;
+		}
 	}
-	ErrorMessage( MSG_NO_EMPTY_LAYER );
+	ErrorMessage(MSG_NO_EMPTY_LAYER);
 	return -1;
 }
 
@@ -1370,11 +1443,10 @@ int FindUnusedLayer(unsigned int start)
  * from the preferences file.
  */
 
-void
-DefaultLayerProperties(void)
+void DefaultLayerProperties(void)
 {
 	InitializeLayers(LayerPrefLoad, 0);
-	UpdateLayerDlg(curLayer);			//Use Current Layer
+	UpdateLayerDlg(curLayer); // Use Current Layer
 
 	if (layoutLayerChanged) {
 		MainProc(mainW, wResize_e, NULL, NULL);
@@ -1447,7 +1519,6 @@ static void LayerUpdate(void)
 		free(layerFormattedName);
 	}
 
-
 	layerFormattedName = FormatLayerName(layerSelected);
 	wListSetValues(setLayerL, layerSelected, layerFormattedName, NULL, NULL);
 	free(layerFormattedName);
@@ -1455,10 +1526,10 @@ static void LayerUpdate(void)
 	if (layerSelected < NUM_BUTTONS && !layers[(int)layerSelected].button_off) {
 		if (strlen(layers[(int)layerSelected].name) > 0) {
 			wTooltipSetText((wControl_p)layer_btns[(int)layerSelected],
-			                       layers[(int)layerSelected].name);
+			                layers[(int)layerSelected].name);
 		} else {
 			wTooltipSetText((wControl_p)layer_btns[(int)layerSelected],
-			                       _("Show/Hide Layer"));
+			                _("Show/Hide Layer"));
 		}
 	}
 
@@ -1469,8 +1540,8 @@ static void LayerUpdate(void)
 	SetLayerColor(layerSelected, layerColor);
 
 	if (layerSelected < NUM_BUTTONS &&
-	    layers[(int)layerSelected].visible != (BOOL_T)layerVisible
-	    && !layers[(int)layerSelected].button_off) {
+	    layers[(int)layerSelected].visible != (BOOL_T)layerVisible &&
+	    !layers[(int)layerSelected].button_off) {
 		wButtonSetBusy(layer_btns[(int)layerSelected], layerVisible);
 	}
 
@@ -1480,12 +1551,14 @@ static void LayerUpdate(void)
 	}
 	layers[(int)layerSelected].visible = (BOOL_T)layerVisible;
 	layers[(int)layerSelected].frozen = (BOOL_T)layerFrozen;
-	if (layers[(int)layerSelected].frozen) { DeselectLayer(layerSelected); }
+	if (layers[(int)layerSelected].frozen) {
+		DeselectLayer(layerSelected);
+	}
 	layers[(int)layerSelected].onMap = (BOOL_T)layerOnMap;
 	layers[(int)layerSelected].scaleDescInx = layerScaleDescInx;
 	layers[(int)layerSelected].gaugeInx = layerGaugeInx;
-	layers[(int)layerSelected].scaleInx = GetScaleInx( layerScaleDescInx,
-	                                      layerGaugeInx );
+	layers[(int)layerSelected].scaleInx =
+	        GetScaleInx(layerScaleDescInx, layerGaugeInx);
 	layers[(int)layerSelected].minTrackRadius = layerMinRadius;
 	layers[(int)layerSelected].maxTrackGrade = layerMaxGrade;
 	layers[(int)layerSelected].tieData = layerTieData;
@@ -1497,7 +1570,7 @@ static void LayerUpdate(void)
 
 	SetLayerHideButton(layerSelected, layerNoButton);
 
-	MainProc( mainW, wResize_e, NULL, NULL );
+	MainProc(mainW, wResize_e, NULL, NULL);
 
 	if (layerRedrawMap) {
 		DoRedraw();
@@ -1508,10 +1581,10 @@ static void LayerUpdate(void)
 	layerRedrawMap = FALSE;
 }
 
-
-static void LayerSelect(
-        wIndex_t inx)
+static void LayerSelect(wIndex_t inx)
 {
+	char objCountString[80];
+
 	LayerUpdate();
 
 	if (inx < 0 || inx >= NUM_LAYERS) {
@@ -1541,26 +1614,28 @@ static void LayerSelect(
 	layerObjectCount = layers[inx].objCount;
 
 	GetLayerLinkString(inx, layerLinkList);
-	// sprintf(message, "%ld", layers[inx].objCount);
-	// FormLoadMessage(&layerPG, I_COUNT, message);
+	snprintf(objCountString, sizeof(objCountString), "%ld", layers[inx].objCount);
+	FormLoadMessage(&layerPG, I_COUNT, objCountString);
+
+	layerSelecting = TRUE;
 	FormLoadControls(&layerPG);
+	layerSelecting = FALSE;
 
-	FormControlActive( &layerPG, I_DELETE, (layerSelected > 0) ? TRUE : FALSE);
+	FormControlActive(&layerPG, I_DELETE, (layerSelected > 0) ? TRUE : FALSE);
 
-	FormControlActive( &layerPG, I_SCALE, !layerInherit);
-	FormControlActive( &layerPG, I_GAUGE, !layerInherit);
-	FormControlActive( &layerPG, I_MINRADIUSENTRY, !layerInherit);
-	FormControlActive( &layerPG, I_MAXGRADEENTRY, !layerInherit);
-	FormControlActive( &layerPG, I_TIELEN, !layerInherit);
-	FormControlActive( &layerPG, I_TIEWID, !layerInherit);
-	FormControlActive( &layerPG, I_TIESPC, !layerInherit);
+	FormControlActive(&layerPG, I_SCALE, !layerInherit);
+	FormControlActive(&layerPG, I_GAUGE, !layerInherit);
+	FormControlActive(&layerPG, I_MINRADIUSENTRY, !layerInherit);
+	FormControlActive(&layerPG, I_MAXGRADEENTRY, !layerInherit);
+	FormControlActive(&layerPG, I_TIELEN, !layerInherit);
+	FormControlActive(&layerPG, I_TIEWID, !layerInherit);
+	FormControlActive(&layerPG, I_TIESPC, !layerInherit);
 
 	if (layerS) {
 		if (!LoadFileListLoad(settingsCatalog, settingsName)) {
 			settingsName[0] = '\0';
 			layers[inx].settingsName[0] = '\0';
 		}
-
 	}
 }
 
@@ -1627,7 +1702,7 @@ void ResetLayers(void)
 	}
 
 	if (curLayer == -1) {
-		ErrorMessage( MSG_NO_EMPTY_LAYER );
+		ErrorMessage(MSG_NO_EMPTY_LAYER);
 		layers[0].frozen = FALSE;
 		curLayer = 0;
 	}
@@ -1650,7 +1725,6 @@ void ResetLayers(void)
 	}
 }
 
-
 void SaveLayers(void)
 {
 	layers_save = malloc(NUM_LAYERS * sizeof(layers[0]));
@@ -1668,11 +1742,12 @@ void SaveLayers(void)
 void RestoreLayers(void)
 {
 	int inx;
-	char * label;
+	char *label;
 	wDrawColor color;
 	CHECK(layers_save != NULL);
 	memcpy(layers, layers_save, NUM_LAYERS * sizeof layers[0]);
 	free(layers_save);
+	layers_save = NULL;
 
 	for (inx = 0; inx < NUM_BUTTONS; inx++) {
 		color = layers[inx].color;
@@ -1694,12 +1769,11 @@ void RestoreLayers(void)
 
 	if (layerL) {
 		FormLoadControls(&layerPG);
-		//FormLoadMessage(&layerPG, I_COUNT, "0");
+		// FormLoadMessage(&layerPG, I_COUNT, "0");
 	}
 
 	LoadLayerLists();
 }
-
 
 /**
  * Scan opened directory for the next settings file
@@ -1711,15 +1785,15 @@ void RestoreLayers(void)
  * \return TRUE if file found, FALSE if not
  */
 
-static bool
-GetNextSettingsFile(DIR *dir, const char *dirName, char **fileName)
+static bool GetNextSettingsFile(DIR *dir, const char *dirName,
+                                char **fileName)
 {
 	bool done = false;
 	bool res = false;
 
 	/*
-	* get all files from the directory
-	*/
+	 * get all files from the directory
+	 */
 	while (!done) {
 		struct stat fileState;
 		struct dirent *ent;
@@ -1750,13 +1824,12 @@ GetNextSettingsFile(DIR *dir, const char *dirName, char **fileName)
 	return (res);
 }
 
-
 /*
  * Get all the settings files in the working directory
  */
 
-static CatalogEntry *
-ScanSettingsDirectory(Catalog *catalog, const char *dirName)
+static CatalogEntry *ScanSettingsDirectory(Catalog *catalog,
+                const char *dirName)
 {
 	DIR *d;
 	CatalogEntry *newEntry = catalog->head;
@@ -1768,9 +1841,13 @@ ScanSettingsDirectory(Catalog *catalog, const char *dirName)
 
 		while (GetNextSettingsFile(d, dirName, &fileName)) {
 			char *contents_start = strrchr(fileName, PATH_SEPARATOR[0]);
-			if (contents_start[0] == '/') { contents_start++; }
+			if (contents_start && contents_start[0] == '/') {
+				contents_start++;
+			}
 			char *contents_end = strchr(contents_start, '.');
-			if (contents_end[0] == '.') { contents_end[0] = '\0'; }
+			if (contents_end && contents_end[0] == '.') {
+				contents_end[0] = '\0';
+			}
 			strcpy(contents, contents_start);
 			contents_end[0] = '.';
 			newEntry = InsertInOrder(catalog, contents, NULL);
@@ -1784,21 +1861,20 @@ ScanSettingsDirectory(Catalog *catalog, const char *dirName)
 	return (newEntry);
 }
 
-
-
 /*****************************************************************************
-*
-* FILE READ/WRITE
-*
-*/
+ *
+ * FILE READ/WRITE
+ *
+ */
 
-BOOL_T ReadLayers(char * line)
+BOOL_T ReadLayers(char *line)
 {
-	char *name, *layerLinkList, *layerSettingsName, *extra;
-	int inx, visible, frozen, color, onMap, sclInx, module, dontUseColor,
-	    ColorFlags, button_off, inherit;
+	char *name, *linkedLayers, *layerSettingsName, *extra;
+	int inx, visible, frozen, color, onMap, module, dontUseColor, ColorFlags,
+	    button_off, inherit;
 	double minRad, maxGrd, tieLen, tieWid, tieSpc;
 	unsigned long rgb;
+	unsigned long sclInx;
 
 	/* older files didn't support layers */
 
@@ -1817,7 +1893,7 @@ BOOL_T ReadLayers(char * line)
 		}
 
 		if (layers[curLayer].frozen) {
-			ErrorMessage( MSG_NOT_UNFROZEN_LAYER );
+			ErrorMessage(MSG_NOT_UNFROZEN_LAYER);
 			layers[curLayer].frozen = FALSE;
 		}
 
@@ -1833,10 +1909,10 @@ BOOL_T ReadLayers(char * line)
 	}
 
 	if (strncmp(line, "LINK", 4) == 0) {
-		if (!GetArgs(line + 4, "dq", &inx, &layerLinkList)) {
+		if (!GetArgs(line + 4, "dq", &inx, &linkedLayers)) {
 			return FALSE;
 		}
-		PutLayerListArray(inx, layerLinkList);
+		PutLayerListArray(inx, linkedLayers);
 		return TRUE;
 	}
 
@@ -1844,21 +1920,25 @@ BOOL_T ReadLayers(char * line)
 		if (!GetArgs(line + 3, "dq", &inx, &layerSettingsName)) {
 			return FALSE;
 		}
-		strcpy(layers[inx].settingsName, layerSettingsName);
+		strncpy(layers[inx].settingsName, layerSettingsName,
+		        sizeof(layers[inx].settingsName) - 1);
+		layers[inx].settingsName[sizeof(layers[inx].settingsName) - 1] = '\0';
 		return TRUE;
 	}
 
-	/* get the properties for a layer from the file and update the layer accordingly */
+	/* get the properties for a layer from the file and update the layer
+	 * accordingly */
 	/* No Scale/tie data version */
 	if (!GetArgs(line, "dddduddddqc", &inx, &visible, &frozen, &onMap, &rgb,
-	             &module, &dontUseColor, &ColorFlags, &button_off, &name, &extra)) {
+	             &module, &dontUseColor, &ColorFlags, &button_off, &name,
+	             &extra)) {
 		return FALSE;
 	}
 	/* Check for old version: name here */
 	if (extra && strlen(extra) > 0) {
 		/* tie data version */
-		if (!GetArgs(extra, "dufffff", &inherit, &sclInx, &minRad, &maxGrd,
-		             &tieLen, &tieWid, &tieSpc)) {
+		if (!GetArgs(extra, "dufffff", &inherit, &sclInx, &minRad, &maxGrd, &tieLen,
+		             &tieWid, &tieSpc)) {
 			return FALSE;
 		}
 	} else {
@@ -1872,12 +1952,12 @@ BOOL_T ReadLayers(char * line)
 	}
 
 	// Provide defaults
-	if ( minRad < EPSILON ) {
+	if (minRad < EPSILON) {
 		minRad = GetScaleMinRadius(sclInx);
 	}
 
 	if (paramVersion < 9) {
-		if ((int)rgb < COUNT( oldColorMap ) ) {
+		if ((int)rgb < COUNT(oldColorMap)) {
 			rgb = wRGB(oldColorMap[(int)rgb][0], oldColorMap[(int)rgb][1],
 			           oldColorMap[(int)rgb][2]);
 		} else {
@@ -1891,12 +1971,13 @@ BOOL_T ReadLayers(char * line)
 
 	tieData_t td = {TRUE, tieLen, tieWid, tieSpc};
 	ValidateTieData(&td);
-	if ( !td.valid ) {
+	if (!td.valid) {
 		td = GetScaleTieData(sclInx);
 	}
 	color = wDrawFindColor(rgb);
 	SetLayerColor(inx, color);
 	strncpy(layers[inx].name, name, sizeof layers[inx].name);
+	layers[inx].name[sizeof(layers[inx].name) - 1] = '\0';
 	layers[inx].visible = visible;
 	layers[inx].frozen = frozen;
 	layers[inx].onMap = onMap;
@@ -1911,8 +1992,8 @@ BOOL_T ReadLayers(char * line)
 	layers[inx].button_off = button_off;
 	layers[inx].inherit = inherit;
 
-	colorTrack = ( ColorFlags & 1 ) ? 1 : 0; //Make sure globals are set
-	colorDraw = ( ColorFlags & 2 ) ? 1 : 0;
+	colorTrack = (ColorFlags & 1) ? 1 : 0; // Make sure globals are set
+	colorDraw = (ColorFlags & 2) ? 1 : 0;
 
 	if (inx < NUM_BUTTONS && !layers[inx].button_off) {
 		if (strlen(name) > 0) {
@@ -1938,22 +2019,17 @@ BOOL_T ReadLayers(char * line)
  * \return TRUE if configured, FALSE if not
  */
 
-static BOOL_T
-IsLayerConfigured(unsigned int layerNumber)
+static BOOL_T IsLayerConfigured(unsigned int layerNumber)
 {
-	return (layers[layerNumber].name[0] ||
-	        !layers[layerNumber].visible ||
-	        layers[layerNumber].frozen ||
-	        !layers[layerNumber].onMap ||
-	        layers[layerNumber].module ||
-	        layers[layerNumber].button_off ||
+	return (layers[layerNumber].name[0] || !layers[layerNumber].visible ||
+	        layers[layerNumber].frozen || !layers[layerNumber].onMap ||
+	        layers[layerNumber].module || layers[layerNumber].button_off ||
 	        !layers[layerNumber].inherit ||
-	        layers[layerNumber].color != layerColorTab[layerNumber % (COUNT(
-	                                layerColorTab))] ||
+	        layers[layerNumber].color !=
+	        layerColorTab[layerNumber % (COUNT(layerColorTab))] ||
 	        layers[layerNumber].layerLinkList.cnt > 0 ||
 	        layers[layerNumber].objCount);
 }
-
 
 /**
  * Save the layer information to the file.
@@ -1962,37 +2038,31 @@ IsLayerConfigured(unsigned int layerNumber)
  * \return always TRUE
  */
 
-BOOL_T WriteLayers(FILE * f)
+BOOL_T WriteLayers(FILE *f)
 {
 	unsigned int inx;
 
 	int ColorFlags = 0;
 
-	if (colorTrack) { ColorFlags |= 1; }
-	if (colorDraw) { ColorFlags |= 2; }
+	if (colorTrack) {
+		ColorFlags |= 1;
+	}
+	if (colorDraw) {
+		ColorFlags |= 2;
+	}
 
 	for (inx = 0; inx < NUM_LAYERS; inx++) {
 		if (IsLayerConfigured(inx)) {
 			fprintf(f,
-			        "LAYERS %u %d %d %d %ld %d %d %d %d \"%s\" %d %lu %.6f %.6f %.6f %.6f %.6f\n",
-			        inx,
-			        layers[inx].visible,
-			        layers[inx].frozen,
-			        layers[inx].onMap,
-			        layers[inx].color,
-			        layers[inx].module,
-			        layers[inx].useColor ? 0 : 1,
-			        ColorFlags,
-			        layers[inx].button_off,
-			        PutTitle(layers[inx].name),
-			        layers[inx].inherit,
-			        layers[inx].scaleInx,
-			        layers[inx].minTrackRadius,
-			        layers[inx].maxTrackGrade,
-			        layers[inx].tieData.length,
-			        layers[inx].tieData.width,
-			        layers[inx].tieData.spacing
-			       );
+			        "LAYERS %u %d %d %d %ld %d %d %d %d \"%s\" %d %d %.6f %.6f %.6f "
+			        "%.6f %.6f\n",
+			        inx, layers[inx].visible, layers[inx].frozen, layers[inx].onMap,
+			        layers[inx].color, layers[inx].module,
+			        layers[inx].useColor ? 0 : 1, ColorFlags, layers[inx].button_off,
+			        PutTitle(layers[inx].name), layers[inx].inherit,
+			        layers[inx].scaleInx, layers[inx].minTrackRadius,
+			        layers[inx].maxTrackGrade, layers[inx].tieData.length,
+			        layers[inx].tieData.width, layers[inx].tieData.spacing);
 		}
 	}
 
@@ -2012,36 +2082,34 @@ BOOL_T WriteLayers(FILE * f)
 }
 
 /*****************************************************************************
-*
-* DIALOG & MENU
-*
-*/
+ *
+ * DIALOG & MENU
+ *
+ */
 
 /**
-* This function is called when the Done button on the layer dialog is pressed. It hides the layer dialog and
-* updates the layer information.
-*
-* \param IN ignored
-*
-*/
-static void LayerOk(void * unused)
+ * This function is called when the Done button on the layer dialog is pressed.
+ * It hides the layer dialog and updates the layer information.
+ *
+ * \param IN ignored
+ *
+ */
+static void LayerOk(void *unused)
 {
 	LayerSelect(layerSelected);
-
-
 
 	wHide(layerW);
 }
 
-
-static void LayerDlgUpdate(
-        paramGroup_p pg,
-        int inx,
-        void * valueP)
+static void LayerDlgUpdate(paramGroup_p pg, int inx, void *valueP)
 {
+	if (layerSelecting) {           // we're in a programmatic reload — ignore
+		return;
+	}
+
 	switch (inx) {
 	case I_LIST:
-		LayerSelect((wIndex_t) * (long*)valueP);
+		LayerSelect((wIndex_t) * (long *)valueP);
 		break;
 
 	case I_NAME:
@@ -2070,31 +2138,29 @@ static void LayerDlgUpdate(
 	case I_TIEWID:
 	case I_TIESPC:
 		ValidateTieData(&layerTieData);
-		r_tieData.rangechecks = layerTieData.valid ? PDO_NORANGECHECK_LOW |
-		                        PDO_NORANGECHECK_HIGH : 0;
+		r_tieData.rangechecks =
+		        layerTieData.valid ? PDO_NORANGECHECK_LOW | PDO_NORANGECHECK_HIGH : 0;
 		break;
 
 	case I_SETTINGS:
-		if (strcmp((char*)wListGetItemContext(settingsListL,
-		                                      (wIndex_t) * (long*)valueP), " ") == 0) {
+		if (strcmp((char *)wListGetItemContext(settingsListL,
+		                                       (wIndex_t) * (long *)valueP),
+		           " ") == 0) {
 			settingsName[0] = '\0';
 		} else {
-			strcpy(settingsName, (char*)wListGetItemContext(settingsListL,
-			                (wIndex_t) * (long*)valueP));
+			strcpy(settingsName, (char *)wListGetItemContext(
+			               settingsListL, (wIndex_t) * (long *)valueP));
 		}
 		break;
 	}
 }
 
-
-static void DoLayer(void * unused)
+static void DoLayer(void *unused)
 {
 	if (layerW == NULL) {
-		layerW = FormCreateDialog( &layerPG,
-					   MakeWindowTitle(_("Layers")),
-					   _("Done"), LayerOk,
-					   NULL, FormCancel_Current,
-					   TRUE, 0, LayerDlgUpdate);
+		layerW = FormCreateDialog(&layerPG, MakeWindowTitle(_("Layers")), _("Done"),
+		                          LayerOk, NULL, FormCancel_Current, TRUE, 0,
+		                          LayerDlgUpdate);
 
 		GetScaleGauge(layerScaleInx, &layerScaleDescInx, &layerGaugeInx);
 
@@ -2102,8 +2168,11 @@ static void DoLayer(void * unused)
 		LoadGaugeList(gaugeL, layerScaleDescInx);
 	}
 
-	if (settingsCatalog) { CatalogDiscard(settingsCatalog); }
-	else { settingsCatalog = InitCatalog(); }
+	if (settingsCatalog) {
+		CatalogDiscard(settingsCatalog);
+	} else {
+		settingsCatalog = InitCatalog();
+	}
 	ScanSettingsDirectory(settingsCatalog, wGetAppWorkDir());
 
 	/* set the globals to the values for the current layer */
@@ -2113,23 +2182,16 @@ static void DoLayer(void * unused)
 	layoutLayerChanged = FALSE;
 }
 
-static char* customFonts[] = {
-	"xtrackcad-10.bdf",
-	"xtrackcad-15.bdf",
-	"xtrackcad-20.bdf"
-};
-// #include "bitmaps/layers.image3"
+static char *customFonts[] = {"xtrackcad-10.bdf", "xtrackcad-15.bdf",
+                              "xtrackcad-20.bdf"
+                             };
 
 wMenu_p layerM;
 wButton_p layerB;
 
-wMenu_p layerM;
-wButton_p layerB;
-
-static void
-InitializeCustomFont(int size)
+static void InitializeCustomFont(int size)
 {
-	char* pathToFontFile = NULL;
+	char *pathToFontFile = NULL;
 
 	MakeFullpath(&pathToFontFile, wGetAppLibDir(), customFonts[size], NULL);
 	if (pathToFontFile) {
@@ -2140,8 +2202,7 @@ InitializeCustomFont(int size)
 	}
 }
 
-static
-void CreateLayerButtons()
+static void CreateLayerButtons()
 {
 	DynString buttonText;
 	DynStringMalloc(&buttonText, 5);
@@ -2153,11 +2214,11 @@ void CreateLayerButtons()
 	}
 
 	for (int i = 0; i < NUM_LAYERS; i++) {
-		DynStringPrintf(&buttonText, "%d", i+1 );
+		DynStringPrintf(&buttonText, "%d", i + 1);
 
 		layers[i].color = layerColorTab[i % (COUNT(layerColorTab))];
-		show_layer_bmps[i] = wFTLabelCreate(DynStringToCStr(&buttonText),
-			layers[i].color);
+		show_layer_bmps[i] =
+		        wFTLabelCreate(DynStringToCStr(&buttonText), layers[i].color);
 
 		layers[i].useColor = TRUE;
 	}
@@ -2170,14 +2231,15 @@ void InitLayers(int cmdGroup)
 	wPrefGetInteger("toolbar", "button-count", &layerCount, layerCount);
 
 	/* layer list for toolbar */
-	setLayerL = wComboBoxCreateForToolbar(mainW, "cmdLayerSet", NULL, 0, 100, NULL, SetCurrLayer, NULL);
+	setLayerL = wComboBoxCreateForToolbar(mainW, "cmdLayerSet", NULL, 0, 100,
+	                                      NULL, SetCurrLayer, NULL);
 	wTooltipSet((wControl_p)setLayerL, NULL, "cmdLayerSet");
 	ToolbarControlAdd(setLayerL, 0, cmdGroup);
 
 	/* background button */
-	backgroundB = AddToolbarButton("cmdBackgroundShow",
-		CreateToolbarIconFromResource("background.png"), IC_MODETRAIN_TOO | IC_TOGGLE,
-	                               BackgroundToggleShow, NULL);
+	backgroundB = AddToolbarButton(
+	                      "cmdBackgroundShow", CreateToolbarIconFromResource("background.png"),
+	                      IC_MODETRAIN_TOO | IC_TOGGLE, BackgroundToggleShow, NULL);
 	wTooltipSet(backgroundB, NULL, "cmdBackgroundShow");
 	wControlActive(backgroundB, FALSE);
 
@@ -2187,28 +2249,28 @@ void InitLayers(int cmdGroup)
 	// wMenuSeparatorCreate(layerM); Causes a fault
 
 	layerB = AddToolbarButton("cmdManageLayers",
-		CreateToolbarIconFromResource("layers.png"), IC_MODETRAIN_TOO,
-		DoLayer, layerB);
+	                          CreateToolbarIconFromResource("layers.png"),
+	                          IC_MODETRAIN_TOO, DoLayer, layerB);
 	/* add the help text */
 	wTooltipSetText(layerB, _("Manage Layers"));
 	wControlActive((wControl_p)layerB, TRUE);
 
-
-	for (int i = 0; i < NUM_LAYERS; i++) {
-		char *layerName;
+	for (unsigned int i = 0; i < NUM_LAYERS; i++) {
+		char *layerNameString;
 
 		if (i < NUM_BUTTONS) {
 			/* create the layer button */
 			sprintf(message, "cmdLayerShow%u", i);
-			layer_btns[i] = AddToolbarButton(message, show_layer_bmps[i], IC_MODETRAIN_TOO | IC_TOGGLE,
-			                                 FlipLayer, I2VP(i) );
+			layer_btns[i] =
+			        AddToolbarButton(message, show_layer_bmps[i],
+			                         IC_MODETRAIN_TOO | IC_TOGGLE, FlipLayer, I2VP(i));
 			/* set state of button */
 			wButtonSetBusy(layer_btns[i], TRUE);
 		}
 
-		layerName = FormatLayerName(i);
-		wComboBoxAddValue(setLayerL, layerName,I2VP(i));
-		free(layerName);
+		layerNameString = FormatLayerName(i);
+		wComboBoxAddValue(setLayerL, layerNameString, I2VP(i));
+		free(layerNameString);
 	}
 
 	AddPlaybackProc("SETCURRLAYER", PlaybackCurrLayer, NULL);

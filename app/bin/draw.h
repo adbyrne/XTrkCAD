@@ -242,6 +242,9 @@ void DrawHilightPolygon(drawCmd_p, coOrd *, int);
 #define BOX_ARROW_BACKGROUND (6)    // box has a connector and background
 #define BOX_BOX_BACKGROUND (7)      // draw complete frame and background
 #define BOX_POS_BOTTOM_LEFT	(1<<8)	// Origin position
+#define BOX_POS_BOTTOM_RIGHT (1<<9)
+#define BOX_POS_TOP_CENTER (1<<10)
+#define BOX_POS_LEFT_CENTER (1<<11)
 
 void DrawBoxedString(int, drawCmd_p, coOrd, char *, wFont_p, wFontSize_t,
                      wDrawColor, ANGLE_T);

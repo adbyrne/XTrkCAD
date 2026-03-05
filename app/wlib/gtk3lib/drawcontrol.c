@@ -23,7 +23,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#define GTK_DISABLE_SINGLE_INCLUDES
+#define GTK_DISABLE_SINGLE_INCLUDES 
 #define GDK_DISABLE_DEPRECATED
 #define GTK_DISABLE_DEPRECATED
 #define GSEAL_ENABLE
@@ -89,36 +89,24 @@ static gboolean draw_event(
         cairo_t* cr,
         wControl_p drawControl)
 {
-	struct draw* drawAttributes;
 
-	if (iDrawLog >= 4) {
-		printf("%ld: draw_event\n", lDrawCnt++);
-	}
+    struct draw* drawAttributes = CONTROL_GET_ATTRIBUTES_PTR(drawControl, draw);
+    GtkAllocation alloc;
+    gtk_widget_get_allocation(widget, &alloc);
 
-	drawAttributes = CONTROL_GET_ATTRIBUTES_PTR(drawControl, draw);
-#ifdef OLD_DRAW_EVENT
-	PaintOverSurface(cr, drawAttributes->surface);
-	PaintOverSurface(cr, drawAttributes->temp_surface);
-	ClearSurface(drawAttributes->temp_surface);
-#else
-//	cairo_t* cairo = gdk_cairo_create (widget->window);
-	cairo_set_source_surface(cr,drawAttributes->surface,0,0);
-	cairo_rectangle(cr, 0, 0,
-			drawAttributes->width, drawAttributes->height );
-	cairo_set_operator(cr,CAIRO_OPERATOR_SOURCE);
-	cairo_fill(cr);
+    cairo_set_source_surface(cr, drawAttributes->surface, 0, 0);
+    cairo_rectangle(cr, 0, 0, alloc.width, alloc.height);
+    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+    cairo_fill(cr);
 
-	cairo_set_source_surface(cr,drawAttributes->temp_surface,0,0);
-	cairo_rectangle(cr, 0, 0,
-			drawAttributes->width, drawAttributes->height );
-	cairo_set_operator(cr,CAIRO_OPERATOR_OVER);
-	cairo_fill(cr);
+    cairo_set_source_surface(cr, drawAttributes->temp_surface, 0, 0);
+    cairo_rectangle(cr, 0, 0, alloc.width, alloc.height);
+    cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
+    cairo_fill(cr);
 
-//	cairo_destroy(cr);
-#endif
-
-	return TRUE;
+    return TRUE;
 }
+
 
 /**
  * Clear a surface by painting to all black.
@@ -196,6 +184,11 @@ draw_configure_event(
 		                          drawAttributes->surface);
 		drawAttributes->temp_surface = CreateNewSurface(widget,
 		                               drawAttributes->temp_surface);
+
+		if (drawAttributes->redraw) {
+        	drawAttributes->redraw(drawControl, drawControl->context,
+                               alloc.width, alloc.height);
+    	}									   
 	}
 
 	/* We've handled the configure event, no need for further processing. */
@@ -720,20 +713,20 @@ wControl_p wDrawCreate(
 	drawAttributes->option = option;
 	drawAttributes->dpi = gdk_screen_get_resolution(gdk_screen_get_default());
 
-	if (ISDEFINEDINBUILDER(parent)) {
-		drawControl->widget = wlibWidgetFromIdWarn(parent, helpStr);
-	} else {
-		drawControl->widget = gtk_drawing_area_new();
-		
-	}
-	width = width ? width : -1;
-	height = height ? height : -1;
-	gtk_widget_set_size_request(GTK_WIDGET(drawControl->widget), width, height);
+        if (ISDEFINEDINBUILDER(parent)) {
+          drawControl->widget = wlibWidgetFromIdWarn(parent, helpStr);
+		  width = 0;
+		  height = 0;
+        } else {
+          drawControl->widget = gtk_drawing_area_new();
+          width = width ? width : -1;
+          height = height ? height : -1;
+          gtk_widget_set_size_request(GTK_WIDGET(drawControl->widget), width,
+                                      height);
+        }
 
-	wlibControlGetSize((wControl_p)drawControl);
+        wlibControlGetSize((wControl_p)drawControl);
 
-	//drawAttributes->maxW = width;
-	//drawAttributes->maxH = height;
 	drawAttributes->width = width;
 	drawAttributes->height = height;
 

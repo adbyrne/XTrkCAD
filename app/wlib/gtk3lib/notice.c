@@ -183,6 +183,10 @@ int wNotice3(
 
 	noticeValue = gtk_dialog_run(dialog);
 
-	gtk_widget_destroy(GTK_WIDGET(dialog));
+	gtk_widget_hide(GTK_WIDGET(dialog));          /* hide immediately */
+	gtk_widget_destroy(GTK_WIDGET(dialog));       /* schedule destruction */
+	while (gtk_events_pending())                  		/* flush the event queue */
+    	gtk_main_iteration();
+
 	return noticeValue;
 }

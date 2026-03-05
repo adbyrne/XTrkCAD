@@ -161,6 +161,7 @@ target_sources(xtrkcad-lib
     dcmpnd.c
     dcustmgm.c
     dcontmgm.c
+    ddrawprim.c
     dease.c
     denum.c
     directory.c
@@ -174,6 +175,7 @@ target_sources(xtrkcad-lib
     draw.h
     drawgeom.c
     drawgeom.h
+    drawruler.c
     dxfformat.c
     dxfformat.h
     dxfimport.c

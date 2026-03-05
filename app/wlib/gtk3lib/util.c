@@ -255,8 +255,8 @@ void wlibControlGetSize(
 {
     GtkRequisition requisition;
     gtk_widget_get_preferred_size(b->widget, NULL, &requisition);
- //   b->w = requisition.width;
- //   b->h = requisition.height;
+//    b->w = requisition.width;
+//    b->h = requisition.height;
 }
 
 /**

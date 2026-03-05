@@ -158,7 +158,7 @@ void FormLoadMessage(
 		} else if (p->type == PD_STRING) {
 			wEntrySetValue(p->control, message);
 		} else {
-			CHECKMSG(FALSE, ("p->tytpe %d", (int)p->type));
+			CHECKMSG(FALSE, ("p->type %d", (int)p->type));
 		}
 	}
 }

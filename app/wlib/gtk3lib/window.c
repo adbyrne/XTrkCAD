@@ -311,6 +311,32 @@ void wWinSetSize(
 }
 
 /**
+ * Constrain the window's aspect ratio to match the layout dimensions.
+ */
+void wWinSetAspectRatio(wControl_p win, wWinPix_t x, wWinPix_t y)
+{
+    if (!win) {
+        return;
+    }
+
+    GdkGeometry geo;
+    geo.min_aspect = (gdouble)x / (gdouble)y;
+    geo.max_aspect = geo.min_aspect;
+
+    gtk_window_set_geometry_hints(
+        GTK_WINDOW(win->widget),
+        NULL,                          /* geometry_widget - not needed */
+        &geo,
+        GDK_HINT_ASPECT
+    );
+}
+
+void wWinSetDefaultSize(wControl_p win, wWinPix_t w, wWinPix_t h)
+{
+    gtk_window_set_default_size(win->widget, w, h);
+}
+
+/**
  * Shows or hides window <win>. 
  * 
  * \param win IN window

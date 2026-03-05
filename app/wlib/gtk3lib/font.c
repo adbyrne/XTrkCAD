@@ -20,6 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "pango/pango-font.h"
 #include <math.h>
 
 #define GTK_DISABLE_SINGLE_INCLUDES
@@ -67,7 +68,7 @@ struct wFont_t {
     PangoFontDescription *fontDescription;
 };
 
-static wFont_p standardFonts[F_HELV-F_TIMES+1][2][2];
+static wFont_p standardFonts[F_MONO-F_TIMES+1][2][2];
 static wFont_p curFont = NULL;
 
 /**
@@ -127,11 +128,15 @@ static wBool_t fontInit()
         "Sans Italic 18",
         "Sans Bold 18",
         "Sans Bold Italic 18",
+        "Monospace 18",
+        "Monospace Italic 18",
+        "Monospace Bold 18",
+        "Monospace Bold Italic 18",
     };
     int s = 0;
     int i, j, k;
 
-    for (i = F_TIMES; i <= F_HELV; ++i) {
+    for (i = F_TIMES; i <= F_MONO; ++i) {
         for (j = FW_MEDIUM; j <= FW_BOLD; ++j) {
             for (k = FS_REGULAR; k <= FS_ITALIC; ++k) {
                 PangoFontDescription *fontDescription = pango_font_description_from_string(
@@ -318,6 +323,57 @@ static wFont_p wlibSelectedFont(void)
 
     return curFont;
 }
+
+int
+wFontGetCharWidth(wControl_p control, wFont_p font, double size)
+{
+    PangoFontDescription *fontDescription = font->fontDescription;
+    PangoFontMetrics *metrics;
+    PangoContext *context;
+    int width;
+
+    context = gtk_widget_get_pango_context(control->widget);
+    /* set attributes */
+    pango_font_description_set_size(fontDescription,
+                                    FONTSIZE_TO_PANGOSIZE(size) * PANGO_SCALE);
+
+    metrics = pango_context_get_metrics(context, fontDescription,
+                                        NULL);
+
+    width = pango_font_metrics_get_approximate_digit_width(metrics) / PANGO_SCALE;                               
+
+    pango_font_metrics_unref(metrics);
+    //g_object_unref(context);    
+
+    return width;
+}
+
+
+int
+wFontGetCharHeight(wControl_p control, wFont_p font, double size)
+{
+    PangoFontDescription *fontDescription = font->fontDescription;
+    PangoFontMetrics *metrics;
+    PangoContext *context;
+    int height;
+
+    context = gtk_widget_get_pango_context(control->widget);
+    /* set attributes */
+    pango_font_description_set_size(fontDescription,
+                                    FONTSIZE_TO_PANGOSIZE(size) * PANGO_SCALE);
+
+    metrics = pango_context_get_metrics(context, fontDescription,
+                                        NULL);
+
+       height = (pango_font_metrics_get_ascent(metrics) +
+              pango_font_metrics_get_descent(metrics)) / PANGO_SCALE;                              
+
+    pango_font_metrics_unref(metrics);
+    //g_object_unref(context);    
+
+    return height;
+}
+
 
 /**
  * Get the default font size
