@@ -126,7 +126,7 @@ wlibColorButtonGetColor(GtkColorButton* widget)
 static void
 colorChange(GtkColorButton *widget, wControl_p user_data)
 {
-	long rgb;
+	unsigned long rgb;
 
 	rgb = wlibColorButtonGetColor(widget);
 

@@ -19,6 +19,7 @@
     <file preprocess="xml-stripblanks">fileNote.ui</file>
     <file preprocess="xml-stripblanks">grid.ui</file>
     <file preprocess="xml-stripblanks">group.ui</file>
+    <file preprocess="xml-stripblanks">layer.ui</file>
     <file preprocess="xml-stripblanks">layout.ui</file>
     <file preprocess="xml-stripblanks">linkNote.ui</file>
     <file preprocess="xml-stripblanks">map.ui</file>

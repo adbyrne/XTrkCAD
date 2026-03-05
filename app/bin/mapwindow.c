@@ -291,7 +291,7 @@ void MapChangeScale()
 	FLOAT_T fScaleH = mapD.size.y / (displayHeight * SCREEN_SIZE_FACTOR / mapD.dpi);
 	FLOAT_T fScale = ceil(max(fScaleW, fScaleH));
 	if (fScale > mapD.scale) {
-		LOG(log_mapsize, 2, ("  ChangeMapScale incr scale from %0.3f to %0.3f\n",
+		LOG(log_mapsize, 2, ("  MapChangeScale incr scale from %0.3f to %0.3f\n",
 		                     mapD.scale, fScale));
 		mapD.scale = fScale;
 	}
@@ -301,10 +301,11 @@ void MapChangeScale()
 
 	w = (wWinPix_t)fw;
 	h = (wWinPix_t)fh;
-	LOG(log_mapsize, 2, ("  ChangeMapScale mapD.scale=%0.3f w=%ld h=%ld\n",
+	LOG(log_mapsize, 2, ("  MapChangeScale mapD.scale=%0.3f w=%ld h=%ld\n",
 	                     mapD.scale, w, h));
+    
+    wWinSetAspectRatio(mapW, mapD.size.x, mapD.size.y );
 
-	wDrawSetSize(mapD.d, w, h, NULL);
 	MapRedraw(mapD.d, NULL, 0, 0);
 }
 
@@ -371,10 +372,8 @@ MapWindowCreate()
 	                        FALSE, F_RESIZE, NULL);
 	mapD.d = MAPCANVASCONTROL;
 
+	MapChangeScale();
 	MapWindowShow(MapGetVisiblePref());
-
-	/** \TODO Uncomment and enable ChangeMapScale() */
-	//ChangeMapScale();
 
 	FormRegister( &mapPG );
 	return(mapW);

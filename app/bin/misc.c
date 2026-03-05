@@ -991,8 +991,8 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	}
 	
 	/* initialize the layers */
-	LOG1(log_init, ("DefaultLayerProperties"));
-	DefaultLayerProperties();
+	// LOG1(log_init, ("DefaultLayerProperties"));
+	// DefaultLayerProperties();
 
 	// LOG1(log_init, ("!ParamFileListInit()\n"))
 
@@ -1014,6 +1014,10 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 		DoSetScale( DEFAULT_SCALE );
 		ChangeHotBar(CHANGE_SCALE);
 	}
+
+		/* initialize the layers */
+	LOG1(log_init, ("DefaultLayerProperties"));
+	DefaultLayerProperties();
 
 	/* see whether last layout should be reopened on startup */
 	wPrefGetInteger("DialogItem", "pref-onstartup", &onStartup, 0);
