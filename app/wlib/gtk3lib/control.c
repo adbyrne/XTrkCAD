@@ -218,6 +218,42 @@ wWinPix_t wControlGetPosY(
     return y;
 }
 
+
+/**
+ * Get y position of a control
+ *
+ * \param b IN Control
+ * \returns position
+ */
+
+// Adjust vertical size
+// Probably to account for some dialog components
+// TODO - compute this dynamically
+int wControlHeightAdjustment = 68;
+
+void wControlGetPos(
+    wControl_p b,		/* Control */
+    wWinPix_t *px,
+    wWinPix_t *py)
+{
+    *px = *py = 0;
+    if ( b->parent == NULL ) { return;}
+
+    // get position of parent and child
+    GtkAllocation allocationParent;
+    gtk_widget_get_allocation(b->parent->widget, &allocationParent);
+
+    GtkAllocation allocationChild;
+    gtk_widget_get_allocation(b->widget, &allocationChild);
+
+    // Flip vertical
+    allocationChild.y = allocationParent.height - allocationChild.y;
+
+    // find center of widget
+    *px = allocationChild.x + allocationChild.width/2;
+    *py = allocationChild.y + allocationChild.height/2 - wControlHeightAdjustment;;
+}
+
 /**
  * Set the fixed position of a control within its parent window
  *

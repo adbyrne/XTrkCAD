@@ -29,6 +29,8 @@
 #include "track.h"
 #include "include/toolbar.h"
 
+int log_playbackbuttonmouse = 0;
+
 //EXPORT void ToolbarLayout(void* unused);
 
 struct sToolbarState {
@@ -484,52 +486,30 @@ EXPORT void ToolbarUpdateButton(wIndex_t button, wIndex_t command,
  *
  * \param buttInx   selected button
  */
-EXPORT void PlaybackButtonMouse(wIndex_t buttInx)
+EXPORT void PlaybackButtonMouse(wIndex_t buttonInx)
 {
-	printf("Not implemented %s in %s:%d\n", __func__, __FILE__, __LINE__);
-
-	//wWinPix_t cmdX, cmdY;
-	//coOrd pos;
-
-	//if (buttInx < 0 || buttInx >= buttonCnt) {
-	//	return;
-	//}
-	//if (buttonList[buttInx].control == NULL) {
-	//	return;
-	//}
-	//cmdX = buttonList[buttInx].x + 17;
-	//cmdY = toolbarHeight - (buttonList[buttInx].y + 17)
-	//       + (wWinPix_t)(mainD.size.y / mainD.scale * mainD.dpi) + 30;
-
-	//mainD.Pix2CoOrd(&mainD, cmdX, cmdY, &pos);
-	//MovePlaybackCursor(&mainD, pos, TRUE, buttonList[buttInx].control);
-	//if (playbackTimer == 0) {
-	//	wButtonSetBusy(buttonList[buttInx].control, TRUE);
-	//	wFlush();
-	//	wPause(500);
-	//	wButtonSetBusy(buttonList[buttInx].control, FALSE);
-	//	wFlush();
-	//}
+	if (buttonInx < 0 || buttonInx >= buttonCnt) {
+		return;
+	}
+	if (buttonList[buttonInx].control == NULL) {
+		return;
+	}
+	wWinPix_t cmdX, cmdY;
+	int cmdInx = buttonList[buttonInx].cmdInx;
+	wControlGetPos( buttonList[buttonInx].control, &cmdX, &cmdY );
+	coOrd pos;
+	mainD.Pix2CoOrd(&mainD, cmdX, cmdY, &pos);
+	LOG( log_playbackbuttonmouse, 1,
+		( "PbBM: Butt:%d, Cmd:%d Zoom:%0.2f Orig:%0.3f x %0.3f Size:%0.3f x %0.3f @ %ld x %ld = pos: %0.3f x %0.3f\n",
+			buttonInx, cmdInx,
+			mainD.scale, mainD.orig.x, mainD.orig.y,
+			mainD.size.x, mainD.size.y,
+			cmdX, cmdY,
+	     		pos.x, pos.y ) );
+	// This hilites the control nd moves the cursor
+	MovePlaybackCursor(&mainD, pos, TRUE, buttonList[buttonInx].control);
 }
 
-/**
- * Handle cursor positioning for toolbar buttons during playback .
- *
- * \param buttonInx
- */
-
-EXPORT void ToolbarButtonPlayback(wIndex_t buttonInx)
-{
-	printf("Not implemented %s in %s:%d\n", __func__, __FILE__, __LINE__);
-	//wWinPix_t cmdX, cmdY;
-	//coOrd pos;
-
-	//cmdX = buttonList[buttonInx].x + 17;
-	//cmdY = toolbarHeight - (buttonList[buttonInx].y + 17)
-	//       + (wWinPix_t)(mainD.size.y / mainD.scale * mainD.dpi) + 30;
-	//mainD.Pix2CoOrd(&mainD, cmdX, cmdY, &pos);
-	//MovePlaybackCursor(&mainD, pos, TRUE, buttonList[buttonInx].control);
-}
 
 /**
  * Save the toolbar setting to the configuration file.
@@ -619,4 +599,6 @@ EXPORT void InitToolbar(void)
 	RegisterChangeNotification(ToolbarChange);
 
 	ToolbarLoadConfig();
+
+	log_playbackbuttonmouse = LogFindIndex( "playbackbuttonmouse" );
 }

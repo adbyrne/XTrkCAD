@@ -46,7 +46,6 @@ extern void ToolbarButtonEnableIfSelect(bool selected);
 extern void ToolbarButtonCommandLink(wIndex_t button, int command);
 extern void ToolbarUpdateButton(wIndex_t button, wIndex_t command,
     wIcon_p icon, const char* helpKey, void* context);
-extern void ToolbarButtonPlayback(wIndex_t buttonInx);
 extern void ToolbarLoadConfig(void);
 extern void ToolbarControlAdd(wControl_p control, long options, int cmdGroup);
 

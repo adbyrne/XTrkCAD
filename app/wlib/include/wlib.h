@@ -729,6 +729,7 @@ wWinPix_t wControlGetWidth(	wControl_p );
 wWinPix_t wControlGetHeight(	wControl_p );
 wWinPix_t wControlGetPosX(		wControl_p );
 wWinPix_t wControlGetPosY(		wControl_p );
+void wControlGetPos(		wControl_p, wWinPix_t *x, wWinPix_t *y );
 void wControlSetPos(		wControl_p, wWinPix_t, wWinPix_t );
 void wControlSetFocus(		wControl_p );
 void wControlActive(		wControl_p control, wBool_t active);

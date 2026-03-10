@@ -598,7 +598,7 @@ EXPORT void PlaybackCommand(const char * line, wIndex_t lineNum)
 	} else {
 		buttInx = commandList[inx].buttInx;
 		if ((commandList[inx].buttInx) >= 0) {
-			ToolbarButtonPlayback(commandList[inx].buttInx);
+			PlaybackButtonMouse(commandList[inx].buttInx);
 		}
 		if (strcmp(line + 8, "Undo") == 0) {
 			if (buttInx > 0 && playbackTimer == 0) {
