@@ -222,7 +222,6 @@ EXPORT BOOL_T SetRoomSize(coOrd size)
 	if (mapW == NULL) {
 		return TRUE;
 	}
-	MapChangeScale();
 	return TRUE;
 }
 
@@ -1419,10 +1418,6 @@ static void DrawChange(long changes)
 	}
 	if (changes & CHANGE_UNITS) {
 		SetInfoBar();
-	}
-	if (changes & CHANGE_MAP) {
-		LOG(log_size, 2, ("CHANGE_MAP: mapD.scale=%0.3f\n", mapD.scale));
-		MapChangeScale();
 	}
 }
 

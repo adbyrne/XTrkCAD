@@ -997,8 +997,6 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	// LOG1(log_init, ("!ParamFileListInit()\n"))
 
 	CommandInit();
-	LOG1(log_init, ( "Reset\n" ))
-	Reset();
 
 	/*
 	 * SCALE

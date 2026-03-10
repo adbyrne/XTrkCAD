@@ -781,7 +781,6 @@ int LoadTracks(
 	bReadOnly = bExample;
 	paramVersion = -1;
 	wSetCursor( mainD.d, wCursorWait );
-	Reset();
 	ClearTracks();
 	ResetLayers();
 	checkPtMark = changed = 0;
