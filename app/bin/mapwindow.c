@@ -83,6 +83,7 @@ static paramGroup_t mapPG = { "map", PGO_NODEFAULTPROC | PGO_FULLDIALOGFROMBUILD
 EXPORT wControl_p mapW;
 EXPORT BOOL_T mapVisible;
 
+#ifndef WIN32	
 #include <stdio.h>
 #include <execinfo.h>
 
@@ -108,6 +109,7 @@ log_calls(const char *fmt,...)
     va_end(args);
     free(symbols);	
 }
+#endif
 
 void MapDrawBoundingBox(BOOL_T set)
 {
@@ -245,10 +247,11 @@ static void DoMapPan(wAction_t action, coOrd pos)
 static wBool_t MapRedraw( wControl_p bd, void* pContex, wWinPix_t px,
                           wWinPix_t py)
 {
-	log_mapredraw =LogFindIndex("mapredraw");
+#ifndef WIN32
+	log_mapredraw = LogFindIndex("mapredraw");
 
 	log_calls("size: %ldx%ld", px, py);
-
+#endif
 	if (inPlaybackQuit) {
 		return FALSE;
 	}
@@ -337,8 +340,9 @@ void MapChangeScale()
 {
 	wWinPix_t w, h;
 	FLOAT_T fw, fh;
-
+#ifndef WIN32
 	log_calls("MapChangeScale()");
+#endif	
 
 	// Restrict map size to SCREEN_SIZE_FACTOR of screen
 	FLOAT_T fScaleW = mapD.size.x / (displayWidth * SCREEN_SIZE_FACTOR / mapD.dpi);

@@ -1419,6 +1419,9 @@ static void DrawChange(long changes)
 	if (changes & CHANGE_UNITS) {
 		SetInfoBar();
 	}
+	if(changes & CHANGE_MAP) {
+		MapChangeScale();
+	}
 }
 
 static void MainLayoutCB(wDraw_p bd, void *pContex, wWinPix_t px,
