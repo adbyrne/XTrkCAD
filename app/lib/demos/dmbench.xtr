@@ -16,12 +16,12 @@ You can also draw them in different orientations.
 END
 STEP
 COMMAND DrawBench
-PARAMETER draw benchcolor 16760832
-PARAMETER draw benchlist 0 1"x1"
-PARAMETER draw benchorient 0 On Edge
+PARAMETER benchstyle benchcolor 16760832
+PARAMETER benchstyle benchlist 0 1"x1"
+PARAMETER benchstyle benchorient 0 On Edge
 PARAMETER GROUP draw
-PARAMETER draw benchlist 12 L-2"x4"
-PARAMETER draw benchlist 16 L-3"x6"
+PARAMETER benchstyle benchlist 12 L-2"x4"
+PARAMETER benchstyle benchlist 16 L-3"x6"
 MESSAGE
 _________________________________________
 
@@ -30,15 +30,15 @@ END
 STEP
 MOUSE 2 0.000 2.000
 MOUSE 4 23.812 2.000
-PARAMETER draw benchcolor 16760832
-PARAMETER draw benchlist 16 L-3"x6"
-PARAMETER draw benchorient 0 Left
+PARAMETER benchstyle benchcolor 16760832
+PARAMETER benchstyle benchlist 16 L-3"x6"
+PARAMETER benchstyle benchorient 0 Left
 PARAMETER GROUP draw
 MOUSE 2 0.000 10.250
 MOUSE 4 23.750 10.250
-PARAMETER draw benchcolor 16760832
-PARAMETER draw benchlist 16 L-3"x6"
-PARAMETER draw benchorient 0 Left
+PARAMETER benchstyle benchcolor 16760832
+PARAMETER benchstyle benchlist 16 L-3"x6"
+PARAMETER benchstyle benchorient 0 Left
 PARAMETER GROUP draw
 MESSAGE
 _________________________________________

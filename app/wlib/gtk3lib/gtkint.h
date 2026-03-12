@@ -175,6 +175,7 @@ struct list {
 	int last;
 	wListCallBack_p action;
 	int recursion;
+	int count;
 };
 
 struct menu {

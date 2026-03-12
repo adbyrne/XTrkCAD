@@ -214,6 +214,11 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 
 	}
 
+	if (fs->opt & FSO_SETFOLDERALWAYS) {
+		gtk_file_chooser_set_current_folder(
+			GTK_FILE_CHOOSER(fs->window), dirName );
+	}
+
 	int resp = gtk_native_dialog_run( GTK_NATIVE_DIALOG( fs->window ));
 
 	if( resp == GTK_RESPONSE_ACCEPT || resp == GTK_RESPONSE_APPLY) {
@@ -226,7 +231,7 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 		for (unsigned i=0; i < g_slist_length (fileNameList); i++ ) {
 			char* host;
 			char* file;
-			
+
 			gchar* converted;
 			gsize chars;
 

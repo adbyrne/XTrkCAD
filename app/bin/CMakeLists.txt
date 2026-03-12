@@ -206,7 +206,6 @@ target_sources(xtrkcad-lib
     mymalloc.c
     note.h
 #    param.c
-    paramwrapper.c
     paramfile.c
     paramfilelist.c
     paramfilesearch_ui.c

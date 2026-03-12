@@ -930,7 +930,7 @@ void AddToRecentFiles(char* displayFileName, char* fullFileName)
 void
 SaveRecentFileList()
 {
-	int count = wMenuListGetCount(fileList_ml);		//index is zero based, 
+	int count = wMenuListGetCount(fileList_ml);		//index is zero based,
 	DynString key;
  	DynStringMalloc(&key, 0);
 
@@ -1264,7 +1264,7 @@ EXPORT void DoLoad( void )
 EXPORT void DoExamples( void )
 {
 	if (examplesFile_fs == NULL) {
-		examplesFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Example Tracks"),
+		examplesFile_fs = wFilSelCreate( mainW, FS_LOAD, FSO_SETFOLDERALWAYS, _("Example Tracks"),
 		                                 sSourceFilePattern, LoadTracks, NULL );
 	}
 	bExample = TRUE;

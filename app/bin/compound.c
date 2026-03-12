@@ -776,7 +776,10 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd,
 		if (mP == NULL) { mP = ""; }
 		if (nP == NULL) { nP = ""; }
 		if (pP == NULL) { pP = ""; }
-		manufS = wEntryGetValue( compoundDesc[MN].control0 );
+		manufS = "";
+		if ( compoundDesc[MN].control0 ) {
+			manufS = wEntryGetValue( compoundDesc[MN].control0 );
+		}
 		size_t max_manustr = 256, max_partstr = 256, max_namestr = 256;
 		if (compoundDesc[MN].max_string) {
 			max_manustr = compoundDesc[MN].max_string-1;
@@ -792,7 +795,10 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd,
 		flipped = xx->flipped;
 		ungrouped = xx->ungrouped;
 		split = xx->split;
-		nameS = wEntryGetValue(compoundDesc[NM].control0 );
+		nameS = "";
+		if ( compoundDesc[NM].control0 ) {
+			nameS = wEntryGetValue(compoundDesc[NM].control0 );
+		}
 		max_namestr = 256;
 		if (compoundDesc[NM].max_string) {
 			max_namestr = compoundDesc[NM].max_string;
@@ -826,7 +832,10 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd,
 		}
 		strcat( message, "\t" );
 		strncat( message, nameS, max_namestr-1 );
-		partnoS = wEntryGetValue(compoundDesc[PN].control0 );
+		partnoS = "";
+		if (compoundDesc[PN].control0 ) {
+			partnoS = wEntryGetValue(compoundDesc[PN].control0 );
+		}
 		max_partstr = 256;
 		if (compoundDesc[PN].max_string) {
 			max_partstr = compoundDesc[PN].max_string;

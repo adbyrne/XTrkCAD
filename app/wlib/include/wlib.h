@@ -103,7 +103,7 @@ extern long debugWindow;
 extern long wDebugFont;
 */
 /*----------------------------------------------------------------------------
- * Application main window 
+ * Application main window
  */
 
  /* Creation CallBacks */
@@ -117,9 +117,9 @@ typedef enum {
     wAccept_e
 } winProcEvent;
 
-typedef bool (*wWinCallBack_p)(wControl_p control, 
-                               winProcEvent event, 
-                               void* data1, 
+typedef bool (*wWinCallBack_p)(wControl_p control,
+                               winProcEvent event,
+                               void* data1,
                                void* data2);
 
 /* Creation Options */
@@ -155,10 +155,10 @@ wControl_p wWinMainCreate(
  * Bitmap Controls bitmap.c
  */
 
-wControl_p wBitmapViewCreate(wControl_p parent, 
-                         wWinPix_t x, 
-                         wWinPix_t y, 
-                         long options, 
+wControl_p wBitmapViewCreate(wControl_p parent,
+                         wWinPix_t x,
+                         wWinPix_t y,
+                         long options,
                          const wIcon_p iconP);
 
 wIcon_p wIconCreatePixBufFromResource(const char *prefix, const char* filename);
@@ -190,25 +190,25 @@ typedef void (*wButtonCallBack_p)(void* choice);
 void wButtonSetIcon(wControl_p bb, wIcon_p icon);
 void wButtonSetLabel(wControl_p bb, const char* labelStr);
 void wButtonSetBusy(wControl_p bb, int value);
-wControl_p wButtonCreate(wControl_p parent, 
-                        wWinPix_t x, 
+wControl_p wButtonCreate(wControl_p parent,
+                        wWinPix_t x,
                         wWinPix_t y,
-                        const char* helpStr, 
-                        const char* labelStr, 
+                        const char* helpStr,
+                        const char* labelStr,
                         long option,
-                        wWinPix_t width, 
-                        wButtonCallBack_p action, 
+                        wWinPix_t width,
+                        wButtonCallBack_p action,
                         void* context);
 
 
-wControl_p wButtonCreateForToolbar(wControl_p  w, 
-                                   wWinPix_t x, 
-                                   wWinPix_t y, 
-                                   const char* helpStr, 
-                                   wIcon_p icon, 
-                                   long option, 
-                                   wWinPix_t width, 
-                                   wButtonCallBack_p action, 
+wControl_p wButtonCreateForToolbar(wControl_p  w,
+                                   wWinPix_t x,
+                                   wWinPix_t y,
+                                   const char* helpStr,
+                                   wIcon_p icon,
+                                   long option,
+                                   wWinPix_t width,
+                                   wButtonCallBack_p action,
                                    void* context);
 
 wBool_t wButtonIsSplitButton(wControl_p button);
@@ -224,14 +224,14 @@ void wRadioSetValue(wControl_p bc, long value);
 long wRadioGetValue(wControl_p bc);
 void RuntimeCreateRadiobuttons(long option, wControl_p b, const char* const* labels, const char* labelStr, wWinPix_t x, wWinPix_t y, wControl_p parent);
 wControl_p wRadioCreate(wControl_p parent,
-                        wWinPix_t x, 
+                        wWinPix_t x,
                         wWinPix_t y,
-                        const char* helpStr, 
-                        const char* labelStr, 
+                        const char* helpStr,
+                        const char* labelStr,
                         long option,
-                        const char* const* labels, 
-                        long* valueP, 
-                        wChoiceCallBack_p action, 
+                        const char* const* labels,
+                        long* valueP,
+                        wChoiceCallBack_p action,
                         void* context);
 
 /** Toggle buttonlongs */
@@ -239,14 +239,14 @@ wControl_p wRadioCreate(wControl_p parent,
 void wToggleSetValue(wControl_p bc, long value);
 long wToggleGetValue(wControl_p b);
 wControl_p wToggleCreate(wControl_p parent,
-                         wWinPix_t x, 
+                         wWinPix_t x,
                          wWinPix_t y,
-                         const char* helpStr, 
-                         const char* labelStr, 
+                         const char* helpStr,
+                         const char* labelStr,
                          long option,
-                         const char* const* labels, 
+                         const char* const* labels,
                          long* valueP,
-                         wChoiceCallBack_p action, 
+                         wChoiceCallBack_p action,
                          void* context);
 wControl_p wToggleCreateForToolbar( wControl_p	parent,
     wWinPix_t	x,
@@ -280,9 +280,9 @@ wDrawColor wColorSelectButtonGetColor(wControl_p bb);
 wDrawColor wDrawColorGray(int percent);
 
 // the following are placeholders for functions that are no longer needed
-// after color palettes were removed. 
+// after color palettes were removed.
 
-#define wDrawFindColor(rgb) (rgb) 
+#define wDrawFindColor(rgb) (rgb)
 
 #define wDrawGetRGB( color )  (color)
 
@@ -293,17 +293,17 @@ wDrawColor wDrawColorGray(int percent);
 
 #define DO_FILESYSTEM 1
 
-wControl_p wWinDialogCreate(wControl_p parent, 
-                            const char* helpStr, 
+wControl_p wWinDialogCreate(wControl_p parent,
+                            const char* helpStr,
                             const char* titleStr,
-                            const char* nameStr, 
-                            long option, 
-                            wWinCallBack_p winProc, 
+                            const char* nameStr,
+                            long option,
+                            wWinCallBack_p winProc,
                             void* context);
 
-void wDialogButtonsConfigure(wControl_p dialog, 
+void wDialogButtonsConfigure(wControl_p dialog,
                              const char* okLabel,
-                             const char* cancelLabel, 
+                             const char* cancelLabel,
                              const char* helpLabel);
 
 void wDialogSaveSizePos(wControl_p dialog);
@@ -357,15 +357,15 @@ typedef void (*wDrawActionCallBack_p)(wControl_p control,
 #define BD_MODKEYS   (1L<<29)
 
 /* Create: */
-wControl_p wDrawCreate(wControl_p parent, 
-                       wWinPix_t x, 
+wControl_p wDrawCreate(wControl_p parent,
+                       wWinPix_t x,
                        wWinPix_t y,
-                       const char* helpStr, 
-                       long option, 
-                       wWinPix_t width, 
+                       const char* helpStr,
+                       long option,
+                       wWinPix_t width,
                        wWinPix_t height,
-                       void* context, 
-                       wDrawRedrawCallBack_p redraw, 
+                       void* context,
+                       wDrawRedrawCallBack_p redraw,
                        wDrawActionCallBack_p action);
 
 /*------------------------------------------------------------------------------
@@ -374,7 +374,8 @@ wControl_p wDrawCreate(wControl_p parent,
  */
 
 #define FSO_MULTIPLEFILES	1
-#define FSO_PICTURES        2
+#define FSO_PICTURES		2
+#define FSO_SETFOLDERALWAYS	8
 
 struct wFilSel_t;
 typedef enum {
@@ -422,12 +423,12 @@ wIcon_p wFTLabelCreate(const char* text, wDrawColor color);
 
 #define wMessageCreate( w, p1, p2, l, p3, m ) wMessageCreateEx( w, p1, p2, l, p3, m, 0 )
 
-wControl_p wMessageCreateEx(wControl_p parent, 
-                            wWinPix_t x, 
+wControl_p wMessageCreateEx(wControl_p parent,
+                            wWinPix_t x,
                             wWinPix_t y,
-                            const char* labelStr, 
-                            wWinPix_t width, 
-                            const char* message, 
+                            const char* labelStr,
+                            wWinPix_t width,
+                            const char* message,
                             long flags);
 
 void wMessageSetValue(wControl_p b, const char* arg);
@@ -484,7 +485,7 @@ int wSetSplashInfo(char* msg);
 void wDestroySplash(void);
 
 
-/*---------------------------------------------------------------------------- 
+/*----------------------------------------------------------------------------
  *
  * String entry
  */
@@ -494,19 +495,19 @@ typedef bool (*wEntryCallBack_p)(const char* enteredString, void * userData);
 
 
 wControl_p wEntryCreate(wControl_p parent,
-                        wWinPix_t x, 
+                        wWinPix_t x,
                         wWinPix_t y,
-                        const char* helpStr, 
-                        const char* labelStr, 
-                        long option, 
+                        const char* helpStr,
+                        const char* labelStr,
+                        long option,
                         wWinPix_t width,
-                        char* valueP, 
-                        wIndex_t valueL, 
-                        wEntryCallBack_p action, 
+                        char* valueP,
+                        wIndex_t valueL,
+                        wEntryCallBack_p action,
                         void* context);
-void wEntrySetValue(wControl_p control, 
+void wEntrySetValue(wControl_p control,
                     const char* value);
-void wEntrySetWidth(wControl_p control, 
+void wEntrySetWidth(wControl_p control,
                     wWinPix_t width);
 const char* wEntryGetValue(wControl_p control);
 
@@ -540,10 +541,10 @@ void wTextGetText(wControl_p bt, char* text, int len);
 void wTextSetReadonly(wControl_p bt, wBool_t ro);
 wBool_t wTextGetModified(wControl_p bt);
 void wTextSetSize(wControl_p bt, wWinPix_t w, wWinPix_t h);
-void wTextComputeSize(wControl_p bt, 
-                      wWinPix_t rows, 
+void wTextComputeSize(wControl_p bt,
+                      wWinPix_t rows,
                       wWinPix_t cols,
-                      wWinPix_t* width, 
+                      wWinPix_t* width,
                       wWinPix_t* height);
 void wTextSetPosition(wControl_p bt, int pos);
 
@@ -560,7 +561,7 @@ typedef struct {
 
 wLine_p wLineCreate(wWindow_p	parent, const char* labelStr, int	count,
     wLines_t* lines);
-  
+
 
 
 
@@ -728,6 +729,7 @@ wWinPix_t wControlGetWidth(	wControl_p );
 wWinPix_t wControlGetHeight(	wControl_p );
 wWinPix_t wControlGetPosX(		wControl_p );
 wWinPix_t wControlGetPosY(		wControl_p );
+void wControlGetPos(		wControl_p, wWinPix_t *x, wWinPix_t *y );
 void wControlSetPos(		wControl_p, wWinPix_t, wWinPix_t );
 void wControlSetFocus(		wControl_p );
 void wControlActive(		wControl_p control, wBool_t active);
@@ -807,7 +809,7 @@ void wComboBoxSetIndex(wControl_p b, int row);
 wIndex_t wComboBoxGetCount(wControl_p b);
 void* wComboBoxGetItemContext(wControl_p b, wIndex_t inx);
 wBool_t wComboBoxSetValues( wControl_p b, wIndex_t row, const char* labelStr, wIcon_p bm,
-    void* itemData); 
+    void* itemData);
 void
 wComboBoxClear(wControl_p control);
 
@@ -1121,7 +1123,7 @@ void wDoAccelHelp( wAccelKey_e key, void * );
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Menu creation
- * 
+ *
  */
 
 /* Creation CallBacks */
@@ -1221,7 +1223,7 @@ wMenu_p wMenuCreate( wControl_p	parent, wWinPix_t	x, wWinPix_t	y, const char 	* 
 void wMenuSetTraceCallBack(
     wControl_p m,
     wMenuTraceCallBack_p func,
-    void* attributes); 
+    void* attributes);
 
 wBool_t wMenuAction( wControl_p control, const char * label);
 

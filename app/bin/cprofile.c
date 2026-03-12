@@ -706,7 +706,7 @@ static paramDrawData_t profileDrawData = { 300, 150, RedrawProfileW, SelProfileW
 static paramData_t profilePLs[] = {
 	{	PD_DRAW, NULL, "canvas", PDO_DLGRESIZE, &profileDrawData },
 #define I_PROFILEMSG			(1)
-	{	PD_MESSAGE, NULL, NULL, PDO_DLGIGNOREX, I2VP(300) },
+	{	PD_MESSAGE, NULL, "message", PDO_DLGIGNOREX, I2VP(300) },
 #define I_CHANGEBUTTON 2
 	{	PD_BUTTON, DoProfileChange, "change", PDO_DLGCMDBUTTON, NULL, N_("Change") },
 #define I_RESETBUTTON 3
@@ -1526,7 +1526,7 @@ EXPORT void InitCmdProfile(wMenu_p menu)
 
 	AddMenuButton(menu, CmdProfile, "cmdProfile", _("Profile"),
 		CreateToolbarIconFromResource("profile.png"), LEVEL0_50,
-	              IC_LCLICK|IC_CMDMENU|IC_POPUP3,
+	              IC_LCLICK|IC_CMDMENU|IC_POPUP3|IC_TOGGLE,
 	              ACCL_PROFILE, NULL);
 	profilePopupM = MenuRegister("Profile Mode");
 	profilePopupToggles[0] = wMenuToggleCreate(profilePopupM, "", _("Define"), 0,

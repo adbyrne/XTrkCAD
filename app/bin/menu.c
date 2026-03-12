@@ -69,6 +69,8 @@ EXPORT wMenuToggle_p snapGridShowMI;
 static int cmdGroup;
 static void HandleCmdGroupChange(int currentGroup);
 static wMenu_p buttonGroupPopupM = NULL;
+
+static int log_menu;
 /*--------------------------------------------------------------------*/
 typedef struct {
 	char * label;
@@ -676,12 +678,15 @@ wControl_p AddToolbarButton(const char* helpStr, wIcon_p icon, long options,
 	HandleCmdGroupChange(cmdGroup);
 
 	if (options & IC_TOGGLE) {
+		LOG( log_menu, 2, ( "Toggle toolbar button: %s\n", helpStr ) );
 		bb = wToggleCreateForToolbar(mainW, 0, 0, helpStr, icon,
 		                             opt | BO_ICON, 0, action, context);
 	} else if (options & IC_STICKY) {
+		LOG( log_menu, 2, ( "Sticky toolbar button: %s\n", helpStr ) );
 		bb = wStickyCreateForToolbar(mainW, 0, 0, helpStr, icon,
 		                             opt | BO_ICON, 0, action, context);
 	} else {
+		LOG( log_menu, 2, ( "Normal toolbar button: %s\n", helpStr ) );
 		bb = wButtonCreateForToolbar(mainW, 0, 0, helpStr, icon,
 		                             opt | BO_ICON, 0, action, context);
 	}
@@ -1128,6 +1133,7 @@ static addButtonCallBack_t paramFilesCallback;
 
 EXPORT void CreateMenus(void)
 {
+	log_menu =  LogFindIndex( "menu" );
 	wMenu_p fileM, editM, viewM, optionM, windowM, macroM, helpM,
 	        manageM, addM, changeM, drawM;
 	wMenu_p zoomM, zoomSubM;
