@@ -45,6 +45,7 @@ int GetCharWidth(void){ return charWidth;  }
 
 /* Functions moved to drawruler.c */
 void DrawRoomWalls(wBool_t drawBackground);
+void DrawRulers(void);
 void DrawMarkers(void);
 
 /* Defined in ddrawprim.c — wires CoOrd2Pix/Pix2CoOrd into mainD/tempD */
@@ -292,6 +293,7 @@ void TranslateBackground(drawCmd_p drawP, POS_T origX, POS_T origY,
 EXPORT void MainRedraw(void)
 {
 	coOrd orig, size;
+	wWinPix_t totalW, totalH;
 
 	static int cMR = 0;
 	LOG(log_redraw, 1,
@@ -304,6 +306,10 @@ EXPORT void MainRedraw(void)
 	wDrawSetTempMode(mainD.d, FALSE);
 	wDrawClear(mainD.d);
 
+	/*
+	 * Phase 1: Background (unclipped)
+	 * Grey surround, white room area, background image, snap grid
+	 */
 	orig = mainD.orig;
 	size = mainD.size;
 	orig.x -= lborder / mainD.dpi * mainD.scale;
@@ -324,15 +330,34 @@ EXPORT void MainRedraw(void)
 	}
 	DrawSnapGrid(&mainD, mapD.size, TRUE);
 
+	/*
+	 * Phase 2: Drawing content (clipped to inner area)
+	 * Tracks and room border polygon must not overwrite the ruler margins.
+	 */
 	orig = mainD.orig;
 	size = mainD.size;
 	orig.x -= RBORDER / mainD.dpi * mainD.scale;
 	orig.y -= bborder / mainD.dpi * mainD.scale;
 	size.x += (RBORDER + lborder) / mainD.dpi * mainD.scale;
 	size.y += (bborder + TBORDER) / mainD.dpi * mainD.scale;
-	DrawTracks(&mainD, mainD.scale, orig, size);
 
-	DrawRoomWalls(FALSE); /* No background, just rulers */
+	wDrawGetSize(mainD.d, &totalW, &totalH);
+	wDrawClip(mainD.d,
+	          (wDrawPix_t)lborder,
+	          (wDrawPix_t)bborder,
+	          (wDrawPix_t)(totalW - lborder - RBORDER),
+	          (wDrawPix_t)(totalH - bborder - TBORDER));
+
+	DrawTracks(&mainD, mainD.scale, orig, size);
+	DrawRoomWalls(FALSE); /* Room border polygon only — clipped */
+
+	/*
+	 * Phase 3: Rulers and overlays (unclipped)
+	 * Reset clip to full canvas so rulers draw into the margins.
+	 */
+	wDrawClip(mainD.d, 0, 0, totalW, totalH);
+
+	DrawRulers();
 
 	currRedraw++;
 

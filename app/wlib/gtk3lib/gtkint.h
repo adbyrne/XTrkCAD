@@ -131,6 +131,13 @@ struct colorbutton {
 	wColorSelectButtonCallBack_p action;
 };
 
+struct rect {
+	wDrawPix_t x;
+	wDrawPix_t y;
+	wDrawPix_t w;
+	wDrawPix_t h;
+};
+
 struct draw {
 	wDrawActionCallBack_p action;
 	wDrawRedrawCallBack_p redraw;	//< handle redraw requests
@@ -151,7 +158,7 @@ struct draw {
 	cairo_t* cr;
 	double scale_adjust;		/** \todo Check necessity */
 	double scale_text;			/** \todo Check necessity */
-
+	struct rect *clipregion;
 };
 
 struct entry {

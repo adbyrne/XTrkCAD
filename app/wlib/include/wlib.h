@@ -990,6 +990,8 @@ void wDrawClip(wControl_p drawingArea,
     wDrawPix_t w,
     wDrawPix_t h);
 
+void wDrawClipClear(wControl_p drawingArea);    
+
 /* Geometry */
 double wDrawGetDPI(	wControl_p drawingArea );
 double wDrawGetMaxRadius( wControl_p drawingArea);

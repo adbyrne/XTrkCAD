@@ -20,6 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "glib.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -119,10 +120,7 @@ static cairo_t* gtkDrawCreateCairoContext(
 	//	        bd->clip_set,
 	//	        bd->realX, bd->realY, bd->w, bd->h );
 	cairo_t * cairo;
-	//struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
-
-	//g_assert(drawingArea->type == B_DRAW);
-
+	
 	if (surface) {
 		cairo = cairo_create(surface);
 	} else {
@@ -221,10 +219,10 @@ static cairo_t* gtkDrawCreateCairoContext(
 	GtkDrawSetColor(cairo, color, &gcolor);
 	cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
 
-	//if (bd->clip_set) {
-	//	cairo_rectangle(cairo,bd->rect.x,bd->rect.y,bd->rect.width,bd->rect.height);
-	//	cairo_clip(cairo);
-	//}
+	if (bd->clipregion) {
+		cairo_rectangle(cairo,bd->clipregion->x,bd->clipregion->y,bd->clipregion->w,bd->clipregion->h);
+		cairo_clip(cairo);
+	}
 
 	return cairo;
 }
@@ -1164,6 +1162,11 @@ double wDrawGetMaxRadius( wControl_p drawingArea )
 	return(32767.0);
 }
 
+/**
+ *	Define a clipping region. The passed coordinates are stored and will be applied
+ * 	when the cairo context for this drawing area is created
+ *
+ */
 
 void wDrawClip(wControl_p drawingArea,
         wDrawPix_t x,
@@ -1171,16 +1174,28 @@ void wDrawClip(wControl_p drawingArea,
         wDrawPix_t w,
         wDrawPix_t h )
 {
-	// struct draw *d = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
-	// g_assert(drawingArea->type == B_DRAW);
+	struct draw *d = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	g_assert(drawingArea->type == B_DRAW);
+	d->clipregion = g_malloc0(sizeof(struct rect));
 
-	printf("Function wDrawClip is not implemented: %s %d\n", __FILE__, __LINE__);
-	//d->rect.width = w;
-	//d->rect.height = h;
-	//d->rect.x = INMAPX( d, x );
-	//d->rect.y = INMAPY( d, y ) - d->rect.height;
-	//d->clip_set = TRUE;
+	d->clipregion->w = w;
+	d->clipregion->h = h;
+	d->clipregion->x = INMAPX( d, x );
+	d->clipregion->y = INMAPY( d, y ) - d->clipregion->h;
 
+}
+
+void wDrawClipClear(wControl_p drawingArea)
+{
+    wWinPix_t totalW, totalH;
+	struct draw *d = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	g_assert(drawingArea->type == B_DRAW);
+
+    wDrawGetSize(drawingArea, &totalW, &totalH);
+    wDrawClip(drawingArea, 0, 0, totalW, totalH);	
+
+	g_free(d->clipregion);
+	d->clipregion = NULL;
 }
 
 /*******************************************************************************
