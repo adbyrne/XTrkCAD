@@ -241,6 +241,34 @@ EXPORT void SetMainSize(void)
 	tempD.size = mainD.size;
 }
 
+/* Draw all temp-surface content: current command feedback (clipped to the
+ * inner drawing area) followed by markers, rulers and playback cursor
+ * (unclipped so they can extend into the border margins).
+ *
+ * The caller must already be in temp mode (wDrawSetTempMode TRUE).
+ */
+static void DrawTempContent(void)
+{
+	wWinPix_t totalW, totalH;
+
+	/* Clip command drawing to the inner area (exclude ruler margins). */
+	wDrawGetSize(tempD.d, &totalW, &totalH);
+	wDrawClip(tempD.d,
+	          (wDrawPix_t)lborder,
+	          (wDrawPix_t)bborder,
+	          (wDrawPix_t)(totalW - lborder - RBORDER),
+	          (wDrawPix_t)(totalH - bborder - TBORDER));
+
+	DoCurCommand(C_REDRAW, zero);
+
+	/* Reset clip so markers and rulers can draw into the margins. */
+	wDrawClipClear(tempD.d);
+
+	DrawMarkers();
+	RulerRedraw(FALSE);
+	RedrawPlaybackCursor(); /* If in playback */
+}
+
 /* Update temp_surface after executing a command
  */
 EXPORT void TempRedraw(void)
@@ -254,10 +282,7 @@ EXPORT void TempRedraw(void)
 	} else {
 		wDrawDelayUpdate(tempD.d, TRUE);
 		wDrawSetTempMode(tempD.d, TRUE);
-		DoCurCommand(C_REDRAW, zero);
-		DrawMarkers();
-		RulerRedraw(FALSE);
-		RedrawPlaybackCursor(); /* If in playback */
+		DrawTempContent();
 		wDrawSetTempMode(tempD.d, FALSE);
 		wDrawDelayUpdate(tempD.d, FALSE);
 	}
@@ -355,7 +380,7 @@ EXPORT void MainRedraw(void)
 	 * Phase 3: Rulers and overlays (unclipped)
 	 * Reset clip to full canvas so rulers draw into the margins.
 	 */
-	wDrawClip(mainD.d, 0, 0, totalW, totalH);
+	wDrawClipClear(mainD.d);
 
 	DrawRulers();
 
@@ -364,12 +389,9 @@ EXPORT void MainRedraw(void)
 	InfoScale();
 	LOG(log_timemainredraw, 1,
 	    ("MainRedraw time = %lu mS\n", wGetTimer() - time0));
-	/* The remainder is from TempRedraw */
+	/* Temp-surface content (command feedback, markers, rulers) */
 	wDrawSetTempMode(tempD.d, TRUE);
-	DoCurCommand(C_REDRAW, zero);
-	DrawMarkers();
-	RulerRedraw(FALSE);
-	RedrawPlaybackCursor(); /* If in playback */
+	DrawTempContent();
 	wDrawSetTempMode(tempD.d, FALSE);
 	wDrawDelayUpdate(mainD.d, FALSE);
 }
