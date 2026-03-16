@@ -107,24 +107,6 @@ static gboolean draw_event(
     return TRUE;
 }
 
-
-/**
- * Clear a surface by painting to all black.
- *
- * \param surface	surface to be cleared
- */
-
-//static void
-//clear_surface (cairo_surface_t * surface)
-//{
-//	cairo_t *cr;
-//
-//	cr = cairo_create (surface);
-//	cairo_set_source_rgb (cr, 0, 0, 0);
-//	cairo_paint (cr);
-//	cairo_destroy (cr);
-//}
-
 /**
  * Create and initialize a new surface for a window.
  *

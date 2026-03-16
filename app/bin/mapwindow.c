@@ -363,6 +363,10 @@ void MapChangeScale()
 	                     mapD.scale, w, h));
     
     wWinSetAspectRatio(mapW, mapD.size.x, mapD.size.y );
+	// Force the map to redraw with the new scale
+	if (mapD.d) {
+    	MapRedraw(mapD.d, NULL, 0, 0);
+	}
 }
 
 wBool_t MapGetVisiblePref(void)

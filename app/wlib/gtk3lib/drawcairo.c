@@ -854,26 +854,18 @@ void wDrawFilledCircle(
 void wDrawClearTemp(wControl_p drawingArea)
 {
 	//Wipe out temp space with 0 alpha (transparent)
-
-	/**  \todo Clearing the complete area can be simpler */
 	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
 	g_assert(drawingArea->type == B_DRAW);
 
-	GtkAllocation allocation;
-	gtk_widget_get_allocation(drawingArea->widget, &allocation);
-
 	if ( iDrawLog >= 1 ) {
-		printf( "%ld: wDrawClearTemp %d+%d\n", lDrawCnt++, allocation.width, allocation.height  );
+		printf( "%ld: wDrawClearTemp\n", lDrawCnt++  );
 	}
 	cairo_t* cairo = cairo_create(bd->temp_surface);
 
 	cairo_set_source_rgba(cairo, 0.0, 0.0, 0.0, 0.0);
 	cairo_set_operator (cairo, CAIRO_OPERATOR_SOURCE);
-	cairo_move_to(cairo, 0, 0);
-	cairo_rel_line_to(cairo, allocation.width, 0);
-	cairo_rel_line_to(cairo, 0, allocation.height);
-	cairo_rel_line_to(cairo, -allocation.width, 0);
-	cairo_fill(cairo);
+
+	cairo_paint(cairo);
 	cairo_destroy(cairo);
 
 	if (drawingArea->widget && !bd->delayUpdate) {
@@ -886,7 +878,7 @@ void wDrawClear( wControl_p drawingArea )
 	if ( iDrawLog >= 1 ) {
 		printf( "%ld: wDrawClear\n", lDrawCnt++  );
 	}
-	/**  \todo Clearing the complete area can be simpler */
+
 	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
 	g_assert(drawingArea->type == B_DRAW);
 
@@ -895,23 +887,11 @@ void wDrawClear( wControl_p drawingArea )
 	cairo = cairo_create(bd->surface);
 
 	/* Set surface to opaque color (r, g, b) */
-	//cairo_set_source_rgb(cairo, 128,128,128);
 	cairo_set_source_rgb(cairo, 255,255,255);
 	cairo_paint(cairo);
 
 	cairo_destroy(cairo);
 
-	//GtkAllocation allocation;
-	//gtk_widget_get_allocation(drawingArea->widget, &allocation);
-
-	//cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid,
-	//                 wDrawColorWhite, 0);
-	//cairo_move_to(cairo, 0, 0);
-	//cairo_rel_line_to(cairo, allocation.width, 0);
-	//cairo_rel_line_to(cairo, 0, allocation.height);
-	//cairo_rel_line_to(cairo, -allocation.width, 0);
-	//cairo_fill(cairo);
-	//gtkDrawDestroyCairoContext(cairo);
 	if (drawingArea->widget && !bd->delayUpdate) {
 		gtk_widget_queue_draw(drawingArea->widget);
 	}

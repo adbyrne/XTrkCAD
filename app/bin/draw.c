@@ -532,7 +532,7 @@ wBool_t MainProc(wControl_p win, winProcEvent e, void *refresh, void *data)
 EXPORT void DoRedraw(void)
 {
 	LOG(log_size, 2, ("DoRedraw\n"));
-	MapChangeScale();
+
 	MainRedraw(); /* DoRedraw */
 }
 
