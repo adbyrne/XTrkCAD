@@ -151,16 +151,12 @@ draw_configure_event(
         GdkEventConfigure* event,
         wControl_p drawControl)
 {
-	GtkAllocation alloc;
 	struct draw* drawAttributes = CONTROL_GET_ATTRIBUTES_PTR(drawControl, draw);
 
-	gtk_widget_get_allocation(widget, &alloc);
-	/**   \todo Use width and height from event if possible */
-
-	if ((drawAttributes->width != alloc.width) ||
-	    drawAttributes->height != alloc.height) {
-		drawAttributes->width = alloc.width;
-		drawAttributes->height = alloc.height;
+	if ((drawAttributes->width != event->width) ||
+	    drawAttributes->height != event->height) {
+		drawAttributes->width = event->width;
+		drawAttributes->height = event->height;
 
 		drawAttributes->surface = CreateNewSurface(widget,
 		                          drawAttributes->surface);
@@ -169,7 +165,7 @@ draw_configure_event(
 
 		if (drawAttributes->redraw) {
         	drawAttributes->redraw(drawControl, drawControl->context,
-                               alloc.width, alloc.height);
+                               event->width, event->height);
     	}									   
 	}
 
