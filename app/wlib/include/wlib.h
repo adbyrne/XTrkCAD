@@ -434,8 +434,6 @@ wControl_p wMessageCreateEx(wControl_p parent,
 void wMessageSetValue(wControl_p b, const char* arg);
 void wMessageSetWidth(wControl_p b, wWinPix_t width);
 void wMessageSetLength(wControl_p control, size_t length);
-
-wWinPix_t wMessageGetWidth(const char* testString);
 wWinPix_t wMessageGetHeight(long flags);
 
 /*------------------------------------------------------------------------------
