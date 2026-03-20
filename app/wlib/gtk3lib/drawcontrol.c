@@ -23,7 +23,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#define GTK_DISABLE_SINGLE_INCLUDES 
+#define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
 #define GTK_DISABLE_DEPRECATED
 #define GSEAL_ENABLE
@@ -90,21 +90,21 @@ static gboolean draw_event(
         wControl_p drawControl)
 {
 
-    struct draw* drawAttributes = CONTROL_GET_ATTRIBUTES_PTR(drawControl, draw);
-    GtkAllocation alloc;
-    gtk_widget_get_allocation(widget, &alloc);
+	struct draw* drawAttributes = CONTROL_GET_ATTRIBUTES_PTR(drawControl, draw);
+	GtkAllocation alloc;
+	gtk_widget_get_allocation(widget, &alloc);
 
-    cairo_set_source_surface(cr, drawAttributes->surface, 0, 0);
-    cairo_rectangle(cr, 0, 0, alloc.width, alloc.height);
-    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-    cairo_fill(cr);
+	cairo_set_source_surface(cr, drawAttributes->surface, 0, 0);
+	cairo_rectangle(cr, 0, 0, alloc.width, alloc.height);
+	cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+	cairo_fill(cr);
 
-    cairo_set_source_surface(cr, drawAttributes->temp_surface, 0, 0);
-    cairo_rectangle(cr, 0, 0, alloc.width, alloc.height);
-    cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
-    cairo_fill(cr);
+	cairo_set_source_surface(cr, drawAttributes->temp_surface, 0, 0);
+	cairo_rectangle(cr, 0, 0, alloc.width, alloc.height);
+	cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
+	cairo_fill(cr);
 
-    return TRUE;
+	return TRUE;
 }
 
 /**
@@ -154,7 +154,7 @@ draw_configure_event(
 	struct draw* drawAttributes = CONTROL_GET_ATTRIBUTES_PTR(drawControl, draw);
 
 	if ((drawAttributes->width != event->width) ||
-	    drawAttributes->height != event->height) {
+	    (drawAttributes->height != event->height)) {
 		drawAttributes->width = event->width;
 		drawAttributes->height = event->height;
 
@@ -164,9 +164,9 @@ draw_configure_event(
 		                               drawAttributes->temp_surface);
 
 		if (drawAttributes->redraw) {
-        	drawAttributes->redraw(drawControl, drawControl->context,
-                               event->width, event->height);
-    	}									   
+			drawAttributes->redraw(drawControl, drawControl->context,
+			                       event->width, event->height);
+		}
 	}
 
 	/* We've handled the configure event, no need for further processing. */
@@ -418,9 +418,6 @@ draw_motion_event(GtkWidget* widget, GdkEventMotion* event,
 		return TRUE;
 	}
 
-	/** \todo hint mask is deprecated and seems to be unnecessary here, test
-	* replacement or remove */
-
 	if (event->is_hint) {
 		gdk_window_get_device_position(event->window, event->device,
 		                               &x, &y, &state);
@@ -491,7 +488,6 @@ static gint draw_char_release_event(
 	} else {
 		return FALSE;
 	}
-	return FALSE;
 }
 
 /**
@@ -511,7 +507,7 @@ static gint draw_char_event(
         GdkEventKey* event,
         wControl_p drawControl)
 {
-	GdkModifierType modifiers = gtk_accelerator_get_default_mod_mask();;
+	GdkModifierType modifiers = gtk_accelerator_get_default_mod_mask();
 	struct draw* drawAttributes = CONTROL_GET_ATTRIBUTES_PTR(drawControl, draw);
 	guint key = event->keyval;
 	wAccelKey_e functionKey = wAccelKey_None;
@@ -617,16 +613,18 @@ draw_realize(GtkWidget* widget,
 
 
 gboolean
-draw_tooltip(GtkWidget* widget, gint x, gint y, gboolean kbd, GtkTooltip* tooltip, gpointer context)
+draw_tooltip(GtkWidget* widget, gint x, gint y, gboolean kbd,
+             GtkTooltip* tooltip, gpointer context)
 {
 	wControl_p drawControl = (wControl_p)context;
 	struct draw* drawAttributes = CONTROL_GET_ATTRIBUTES_PTR(drawControl, draw);
 
-	if (drawAttributes != NULL && drawAttributes->action == NULL) {
+	if (drawAttributes == NULL || drawAttributes->action == NULL) {
 		return(FALSE);
 	}
 
-	(drawAttributes->action)(drawControl, drawControl->context, wActionGetTooltip, x, y);
+	(drawAttributes->action)(drawControl, drawControl->context, wActionGetTooltip,
+	                         x, y);
 
 	if (drawControl->customTooltip) {
 		gtk_tooltip_set_markup(tooltip, drawControl->customTooltip);
@@ -643,7 +641,7 @@ draw_tooltip(GtkWidget* widget, gint x, gint y, gboolean kbd, GtkTooltip* toolti
 
 /**
  * Create a drawing area
- * 
+ *
  * Size and position information is ignored when creating the area from builder.
  * This are set by the layout engine in GTK3
  *
@@ -691,25 +689,25 @@ wControl_p wDrawCreate(
 	drawAttributes->option = option;
 	drawAttributes->dpi = gdk_screen_get_resolution(gdk_screen_get_default());
 
-        if (ISDEFINEDINBUILDER(parent)) {
-          drawControl->widget = wlibWidgetFromIdWarn(parent, helpStr);
-		  width = 0;
-		  height = 0;
-        } else {
-          drawControl->widget = gtk_drawing_area_new();
-          width = width ? width : -1;
-          height = height ? height : -1;
-          gtk_widget_set_size_request(GTK_WIDGET(drawControl->widget), width,
-                                      height);
-        }
+	if (ISDEFINEDINBUILDER(parent)) {
+		drawControl->widget = wlibWidgetFromIdWarn(parent, helpStr);
+		width = 0;
+		height = 0;
+	} else {
+		drawControl->widget = gtk_drawing_area_new();
+		width = width ? width : -1;
+		height = height ? height : -1;
+		gtk_widget_set_size_request(GTK_WIDGET(drawControl->widget), width,
+		                            height);
+	}
 
-        wlibControlGetSize((wControl_p)drawControl);
+	wlibControlGetSize((wControl_p)drawControl);
 
 	drawAttributes->width = width;
 	drawAttributes->height = height;
 
 	g_signal_connect((drawControl->widget), "query-tooltip",
-					 G_CALLBACK(draw_tooltip), drawControl);
+	                 G_CALLBACK(draw_tooltip), drawControl);
 	g_signal_connect((drawControl->widget), "realize",
 	                 G_CALLBACK(draw_realize), drawControl);
 	g_signal_connect((drawControl->widget), "draw",
@@ -732,7 +730,7 @@ wControl_p wDrawCreate(
 	//                  G_CALLBACK( draw_leave_event), drawControl);
 
 	gtk_widget_add_events(drawControl->widget,
-			      GDK_EXPOSURE_MASK
+	                      GDK_EXPOSURE_MASK
 	                      | GDK_BUTTON_PRESS_MASK
 	                      | GDK_BUTTON_RELEASE_MASK
 	                      //						   | GDK_LEAVE_NOTIFY_MASK
