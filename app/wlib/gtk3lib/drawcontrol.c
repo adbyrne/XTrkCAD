@@ -123,7 +123,7 @@ CreateNewSurface(GtkWidget* widget, cairo_surface_t* oldSurface)
 	if (oldSurface) {
 		cairo_surface_destroy(oldSurface);
 	}
-	/** \todo can the allocation be used instead of API call? */
+
 	newSurface = gdk_window_create_similar_surface(gtk_widget_get_window(widget),
 	             CAIRO_CONTENT_COLOR_ALPHA,
 	             gtk_widget_get_allocated_width(widget),
@@ -180,7 +180,7 @@ static const char* actionNames[] = { "None", "Move", "LDown", "LDrag", "LUp", "R
  */
 
 /**
- * \todo this code seems overly complicated. The action is only executed after
+ * this code seems overly complicated. The action is only executed after
  * several timeout cycles. So why is the timer not set to that larger timeout
  * at start?
  *
@@ -303,16 +303,6 @@ draw_scroll_event(GtkWidget* widget, GdkEventScroll* event,
 	return TRUE;
 }
 
-
-// \todo Check necessity
-//static gint draw_leave_event(
-//        GtkWidget *widget,
-//        GdkEvent * event )
-//{
-//	wlibHelpHideBalloon();
-//	return TRUE;
-//}
-
 /**
  * Translate screen to world coordinates. Screen has origin at top left, world
  * at bottom left of drawing area.
@@ -397,66 +387,44 @@ draw_button_event(GtkWidget* widget, GdkEventButton* event,
  * a drag operation is assumed. The is translated to an action and the
  * handler is called.
  *
- * \todo it might be better to use the drag_* virtual methods available in GTK
- *
  * \param widget		GTK drawing area
  * \param event			see GTK docs
  * \param drawControl	the control for the drawing area
  * \return
  */
-
 static gint
 draw_motion_event(GtkWidget* widget, GdkEventMotion* event,
                   wControl_p drawControl)
 {
-	gint x, y;
-	GdkModifierType state;
-	wAction_t action;
-	struct draw* drawAttributes = CONTROL_GET_ATTRIBUTES_PTR(drawControl, draw);
+    wAction_t action;
+    GdkModifierType state;
+    struct draw* drawAttributes = CONTROL_GET_ATTRIBUTES_PTR(drawControl, draw);
 
-	if (drawAttributes->action == NULL) {
-		return TRUE;
-	}
+    if (drawAttributes->action == NULL) {
+        return TRUE;
+    }
 
-	if (event->is_hint) {
-		gdk_window_get_device_position(event->window, event->device,
-		                               &x, &y, &state);
-	} else {
-		GdkModifierType modifiers;
-		modifiers = gtk_accelerator_get_default_mod_mask();
-		state = event->state & modifiers;
-		x = (long)event->x;
-		y = (long)event->y;
-	}
+    GdkModifierType modifiers = gtk_accelerator_get_default_mod_mask();
+    state = event->state & (modifiers | GDK_BUTTON1_MASK | GDK_BUTTON2_MASK | GDK_BUTTON3_MASK);
+    drawAttributes->lastX = (long)event->x;
+    drawAttributes->lastY = (long)event->y;
+    Screen2WorldCoord(drawAttributes);
 
-	drawAttributes->lastX = x;
-	drawAttributes->lastY = y;
-	Screen2WorldCoord(drawAttributes);
+    if (state & GDK_BUTTON1_MASK) {
+        action = wActionLDrag;
+    } else if (state & GDK_BUTTON2_MASK) {
+        action = wActionLDrag;
+    } else if (state & GDK_BUTTON3_MASK) {
+        action = wActionRDrag;
+    } else {
+        action = wActionMove;
+    }
 
-	if (state & GDK_BUTTON1_MASK) {
-		action = wActionLDrag;
-	} else if (state & GDK_BUTTON2_MASK) {
-		action = wActionLDrag;
-	} else if (state & GDK_BUTTON3_MASK) {
-		action = wActionRDrag;
-	} else {
-		action = wActionMove;
-	}
-
-	if (iDrawLog >= 3) {
-		printf("%lx: %s[%ldx%ld] %s\n", lDrawCnt++, actionNames[action],
-		       drawAttributes->lastX, drawAttributes->lastY,
-		       event->is_hint ? "<Hint>" : "<>");
-	}
-
-	drawAttributes->action(drawControl, drawControl->context, action,
-	                       drawAttributes->lastX,
-	                       drawAttributes->lastY);
-
-	CheckGrabFocus(drawControl);
-	return TRUE;
+    drawAttributes->action(drawControl, drawControl->context, action,
+                           drawAttributes->lastX, drawAttributes->lastY);
+    CheckGrabFocus(drawControl);
+    return TRUE;
 }
-
 
 static gint draw_char_release_event(
         GtkWidget* widget,
@@ -571,18 +539,7 @@ static gint draw_char_event(
 	} else {
 		return FALSE;
 	}
-	/**
-	 * \todo the following condition is always false as key is never set to
-	 * wAccelKey_Up wAccelKey_Left or any value in between. So this code has
-	 * been disabled for further examination
-	 */
 
-	//else if ((key >= wAccelKey_Up) && (key <= wAccelKey_Left) && drawAttributes->action) {
-	//	drawAttributes->action(drawControl, drawControl->context, wActionText + (key << 8), (wDrawPix_t)drawAttributes->lastX,
-	//		(wDrawPix_t)drawAttributes->lastY);
-	//	CheckGrabFocus(drawControl);
-	//	return TRUE;
-	//}
 	drawAttributes->action(drawControl,
 	                       drawControl->context,
 	                       keyboardAction,
@@ -726,17 +683,13 @@ wControl_p wDrawCreate(
 	                 G_CALLBACK(draw_char_event), drawControl);
 	g_signal_connect((drawControl->widget), "key_release_event",
 	                 G_CALLBACK(draw_char_release_event), drawControl);
-	//g_signal_connect ((drawControl->widget), "leave_notify_event",
-	//                  G_CALLBACK( draw_leave_event), drawControl);
 
 	gtk_widget_add_events(drawControl->widget,
 	                      GDK_EXPOSURE_MASK
 	                      | GDK_BUTTON_PRESS_MASK
 	                      | GDK_BUTTON_RELEASE_MASK
-	                      //						   | GDK_LEAVE_NOTIFY_MASK
 	                      | GDK_SCROLL_MASK
 	                      | GDK_POINTER_MOTION_MASK
-	                      | GDK_POINTER_MOTION_HINT_MASK
 	                      | GDK_KEY_PRESS_MASK
 	                      | GDK_KEY_RELEASE_MASK);
 
