@@ -21,7 +21,6 @@
  */
 
 #include "draw.h"
-#include "common-ui.h"
 #include "cselect.h"
 #include "custom.h"
 #include "fileio.h"
@@ -30,8 +29,6 @@
 #include "mapwindow.h"
 #include "misc.h"
 #include "track.h"
-
-#include "include/toolbar.h"
 
 #undef BBORDER
 #undef LBORDER
@@ -1235,12 +1232,98 @@ static void DoMouse(wAction_t action, coOrd pos)
 	case C_MUP:
 		InfoPos(pos);
 		break;
-	case C_WUP:
-		DoZoomUp(I2VP(1L));
+	case C_WUP: {
+		/* Zoom in toward mouse position.
+		 * Ignore if pointer is outside the drawing area (on rulers/border). */
+		wWinPix_t ww_z, hh_z;
+		wDrawGetSize(mainD.d, &ww_z, &hh_z);
+		if (mousePositionx < lborder || mousePositionx > ww_z - RBORDER ||
+		    mousePositiony < bborder || mousePositiony > hh_z - TBORDER) {
+			break;
+		}
+		{
+			coOrd anchor = pos;          /* model coord under cursor */
+			DIST_T oldScale = mainD.scale;
+			int idx = ScaleInx(oldScale);
+			if (idx < 0) { idx = NearestScaleInx(oldScale, FALSE); }
+
+			/* Same guard logic as DoZoomUp: stop at 1:1 unless CTRL held */
+			if (oldScale == 1.0 && !(MyGetKeyState() & WKEY_CTRL)) {
+				InfoMessage(_("Scale 1:1 - Use Ctrl+ to go to Macro Zoom Mode"));
+				break;
+			}
+			if (idx <= 0) {
+				InfoMessage("Minimum Macro Zoom");
+				break;
+			}
+
+			DIST_T newScale = zoomList[idx - 1].value;
+			if (newScale <= 1.0) {
+				InfoMessage(_("Macro Zoom Mode"));
+			} else {
+				InfoMessage("");
+			}
+
+			/* Fractional position of anchor within current viewport */
+			DIST_T fx = (anchor.x - mainD.orig.x) / mainD.size.x;
+			DIST_T fy = (anchor.y - mainD.orig.y) / mainD.size.y;
+
+			/* New model-space viewport size (proportional to scale) */
+			DIST_T ratio = newScale / oldScale;
+			DIST_T newSizeX = mainD.size.x * ratio;
+			DIST_T newSizeY = mainD.size.y * ratio;
+
+			/* Set panCenter so the anchor stays at (fx,fy) in the new viewport */
+			panCenter.x = anchor.x + newSizeX * (0.5 - fx);
+			panCenter.y = anchor.y + newSizeY * (0.5 - fy);
+			LOG(log_pan, 2,
+			    ("PanCenter:%d %0.3f %0.3f (zoom-to-mouse)\n",
+			     __LINE__, panCenter.x, panCenter.y));
+			DoNewScale(newScale);
+		}
 		break;
-	case C_WDOWN:
-		DoZoomDown(I2VP(1L));
+	}
+	case C_WDOWN: {
+		/* Zoom out away from mouse position.
+		 * Ignore if pointer is outside the drawing area (on rulers/border). */
+		wWinPix_t ww_z2, hh_z2;
+		wDrawGetSize(mainD.d, &ww_z2, &hh_z2);
+		if (mousePositionx < lborder || mousePositionx > ww_z2 - RBORDER ||
+		    mousePositiony < bborder || mousePositiony > hh_z2 - TBORDER) {
+			break;
+		}
+		{
+			coOrd anchor = pos;          /* model coord under cursor */
+			DIST_T oldScale = mainD.scale;
+			int idx = ScaleInx(oldScale);
+			if (idx < 0) { idx = NearestScaleInx(oldScale, TRUE); }
+			if (idx < 0 || idx >= (COUNT(zoomList) - 1)) {
+				InfoMessage(_("At Maximum Zoom Out"));
+				break;
+			}
+
+			DIST_T newScale = zoomList[idx + 1].value;
+			InfoMessage("");
+
+			/* Fractional position of anchor within current viewport */
+			DIST_T fx = (anchor.x - mainD.orig.x) / mainD.size.x;
+			DIST_T fy = (anchor.y - mainD.orig.y) / mainD.size.y;
+
+			/* New model-space viewport size (proportional to scale) */
+			DIST_T ratio = newScale / oldScale;
+			DIST_T newSizeX = mainD.size.x * ratio;
+			DIST_T newSizeY = mainD.size.y * ratio;
+
+			/* Set panCenter so the anchor stays at (fx,fy) in the new viewport */
+			panCenter.x = anchor.x + newSizeX * (0.5 - fx);
+			panCenter.y = anchor.y + newSizeY * (0.5 - fy);
+			LOG(log_pan, 2,
+			    ("PanCenter:%d %0.3f %0.3f (zoom-to-mouse)\n",
+			     __LINE__, panCenter.x, panCenter.y));
+			DoNewScale(newScale);
+		}
 		break;
+	}
 	case C_SCROLLUP:
 		panCenter.y = panCenter.y +
 		              ((mainD.size.y / 20 > min.y) ? mainD.size.y / 20 : min.y);
