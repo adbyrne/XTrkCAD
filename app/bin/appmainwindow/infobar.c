@@ -128,22 +128,27 @@ void SetInfoBar(void)
 
 void InfoScale(void)
 {
+	char zoomString[sizeof(ZOOMLABEL) + 10 ];
+
 	if (mainD.scale >= 1.0) {
-		sprintf(message, "%s%.4g:1", ZOOMLABEL, lround(mainD.scale * 4.0) / 4.0);
+		snprintf(zoomString, sizeof(zoomString),"%s%.4g:1", ZOOMLABEL, lround(mainD.scale * 4.0) / 4.0);
 	}
 	else {
-		sprintf(message, "%s1:%.4g", ZOOMLABEL, lround((1.0 / mainD.scale) * 4.0) / 4.0);
+		snprintf(zoomString, sizeof(zoomString), "%s1:%.4g", ZOOMLABEL, lround((1.0 / mainD.scale) * 4.0) / 4.0);
 	}
 
-	wStatusSetValue(infoD.scale_m, message);
+	wStatusSetValue(infoD.scale_m, zoomString);
 }
+
+#define POSSTRINGLEN 20
 
 void InfoPos(coOrd pos)
 {
-	sprintf(message, "%s%s", XLABEL, FormatDistance(pos.x));
-	wStatusSetValue(infoD.posX_m, message);
-	sprintf(message, "%s%s", YLABEL, FormatDistance(pos.y));
-	wStatusSetValue(infoD.posY_m, message);
+	char posString[POSSTRINGLEN];
+	snprintf(posString, POSSTRINGLEN, "%s%s", XLABEL, FormatDistance(pos.x));
+	wStatusSetValue(infoD.posX_m, posString);
+	snprintf(posString, POSSTRINGLEN, "%s%s", YLABEL, FormatDistance(pos.y));
+	wStatusSetValue(infoD.posY_m, posString);
 
 	oldMarker = pos;
 }

@@ -743,6 +743,10 @@ void wControlLinkedActive(wControl_p b, int active)
 {
     wControl_p savePtr = b;
 
+    if(!b) {
+        return;
+    }
+
     if (savePtr->type == B_MENUITEM) {
         wMenuPushEnable( savePtr, active);
     }
