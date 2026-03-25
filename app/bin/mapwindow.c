@@ -34,6 +34,23 @@
 
 #include "xtctypes.h"
 
+#include <time.h>
+
+/** Timing helpers — output goes through lprintf so it respects log levels */
+#define TIMER_START(var) \
+    struct timespec var##_ts0; \
+    clock_gettime(CLOCK_MONOTONIC, &var##_ts0); \
+	log_mapredraw=LogFindIndex("map"#var)
+
+#define TIMER_LOG(var, label) \
+    do { \
+        struct timespec var##_ts1; \
+        clock_gettime(CLOCK_MONOTONIC, &var##_ts1); \
+        long var##_ms = ((var##_ts1.tv_sec  - var##_ts0.tv_sec)  * 1000L) \
+                      + ((var##_ts1.tv_nsec - var##_ts0.tv_nsec) / 1000000L); \
+        LOG(log_mapredraw, 1, ("%s: %ld ms\n", (label), var##_ms)); \
+    } while (0)
+
 #define MIN_SCALE 0.01
 #define MAX_SCALE 64.0
 #define MAP_BORDER_PIXELS 2
@@ -41,6 +58,8 @@
 
 static int log_mapsize = 0;
 static int log_mapredraw = 0;
+
+
 
 static int delayUpdate = 1;
 
@@ -63,6 +82,34 @@ static paramGroup_t mapPG = { "map", PGO_NODEFAULTPROC | PGO_FULLDIALOGFROMBUILD
 
 EXPORT wControl_p mapW;
 EXPORT BOOL_T mapVisible;
+
+#ifndef WIN32	
+#include <stdio.h>
+#include <execinfo.h>
+
+static void
+log_calls(const char *fmt,...)
+{
+    void *callstack[3];
+    char **symbols;
+	char buffer[80];
+
+    // Capture the top 3 frames (0=this func, 1=caller, 2=caller's caller)
+    int frames = backtrace(callstack, 3);
+    symbols = backtrace_symbols(callstack, frames);
+
+    va_list args;
+    va_start(args, fmt );
+
+    // symbols[2] is the callee context, symbols[1] is the direct caller
+    LOG(log_mapredraw, 1, ("[%s] => [%s] | ", symbols[2], symbols[1]));
+    vsnprintf(buffer, sizeof(buffer), fmt, args);
+    LOG(log_mapredraw, 1, ("%s\n", buffer));
+
+    va_end(args);
+    free(symbols);	
+}
+#endif
 
 void MapDrawBoundingBox(BOOL_T set)
 {
@@ -200,6 +247,11 @@ static void DoMapPan(wAction_t action, coOrd pos)
 static wBool_t MapRedraw( wControl_p bd, void* pContex, wWinPix_t px,
                           wWinPix_t py)
 {
+#ifndef WIN32
+	log_mapredraw = LogFindIndex("mapredraw");
+
+	log_calls("size: %ldx%ld", px, py);
+#endif
 	if (inPlaybackQuit) {
 		return FALSE;
 	}
@@ -259,14 +311,17 @@ static wBool_t MapRedraw( wControl_p bd, void* pContex, wWinPix_t px,
 	} else {
 		LOG(log_mapsize, 2, ("  0x0 mapD.scale=%0.3f\n", mapD.scale));
 	}
-	wDrawClear(mapD.d);
-	DrawTracks(&mapD, mapD.scale, mapD.orig, mapD.size);
-	MapDrawBoundingBox(TRUE);
 
-	wDrawSetTempMode(mapD.d, bTemp);
-	wDrawDelayUpdate(mapD.d, FALSE);
+        TIMER_START(redraw);
+        wDrawClear(mapD.d);
+        DrawTracks(&mapD, mapD.scale, mapD.orig, mapD.size);
+        MapDrawBoundingBox(TRUE);
+		TIMER_LOG(redraw, "MapRedraw draw");
 
-	return TRUE;
+        wDrawSetTempMode(mapD.d, bTemp);
+        wDrawDelayUpdate(mapD.d, FALSE);
+
+        return TRUE;
 }
 
 
@@ -285,6 +340,9 @@ void MapChangeScale()
 {
 	wWinPix_t w, h;
 	FLOAT_T fw, fh;
+#ifndef WIN32
+	log_calls("MapChangeScale()");
+#endif	
 
 	// Restrict map size to SCREEN_SIZE_FACTOR of screen
 	FLOAT_T fScaleW = mapD.size.x / (displayWidth * SCREEN_SIZE_FACTOR / mapD.dpi);
@@ -305,8 +363,10 @@ void MapChangeScale()
 	                     mapD.scale, w, h));
     
     wWinSetAspectRatio(mapW, mapD.size.x, mapD.size.y );
-
-	MapRedraw(mapD.d, NULL, 0, 0);
+	// Force the map to redraw with the new scale
+	if (mapD.d) {
+    	MapRedraw(mapD.d, NULL, 0, 0);
+	}
 }
 
 wBool_t MapGetVisiblePref(void)
@@ -372,7 +432,6 @@ MapWindowCreate()
 	                        FALSE, F_RESIZE, NULL);
 	mapD.d = MAPCANVASCONTROL;
 
-	MapChangeScale();
 	MapWindowShow(MapGetVisiblePref());
 
 	FormRegister( &mapPG );

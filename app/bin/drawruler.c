@@ -68,12 +68,23 @@ void DrawRoomWalls(wBool_t drawBackground)
 		DrawRectangle(&mainD, zero, mapD.size, wDrawColorWhite, DRAW_FILL);
 	} else {
 		coOrd p[4];
-		DrawTicks(&mainD, mapD.size);
 		p[0].x = p[0].y = p[1].x = p[3].y = 0.0;
 		p[2].x = p[3].x = mapD.size.x;
 		p[1].y = p[2].y = mapD.size.y;
 		DrawPoly(&mainD, 4, p, NULL, borderColor, 3, DRAW_CLOSED);
 	}
+}
+
+/**
+ * Draw ruler tick marks and labels in the border areas.
+ * Must be called without clipping so rulers in the margins are visible.
+ */
+void DrawRulers(void)
+{
+	if (mainD.d == NULL) {
+		return;
+	}
+	DrawTicks(&mainD, mapD.size);
 }
 
 void DrawMarkers(void)

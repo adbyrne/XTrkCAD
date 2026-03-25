@@ -20,6 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "glib.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -119,10 +120,7 @@ static cairo_t* gtkDrawCreateCairoContext(
 	//	        bd->clip_set,
 	//	        bd->realX, bd->realY, bd->w, bd->h );
 	cairo_t * cairo;
-	//struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
-
-	//g_assert(drawingArea->type == B_DRAW);
-
+	
 	if (surface) {
 		cairo = cairo_create(surface);
 	} else {
@@ -221,10 +219,10 @@ static cairo_t* gtkDrawCreateCairoContext(
 	GtkDrawSetColor(cairo, color, &gcolor);
 	cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
 
-	//if (bd->clip_set) {
-	//	cairo_rectangle(cairo,bd->rect.x,bd->rect.y,bd->rect.width,bd->rect.height);
-	//	cairo_clip(cairo);
-	//}
+	if (bd->clipregion) {
+		cairo_rectangle(cairo,bd->clipregion->x,bd->clipregion->y,bd->clipregion->w,bd->clipregion->h);
+		cairo_clip(cairo);
+	}
 
 	return cairo;
 }
@@ -856,26 +854,18 @@ void wDrawFilledCircle(
 void wDrawClearTemp(wControl_p drawingArea)
 {
 	//Wipe out temp space with 0 alpha (transparent)
-
-	/**  \todo Clearing the complete area can be simpler */
 	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
 	g_assert(drawingArea->type == B_DRAW);
 
-	GtkAllocation allocation;
-	gtk_widget_get_allocation(drawingArea->widget, &allocation);
-
 	if ( iDrawLog >= 1 ) {
-		printf( "%ld: wDrawClearTemp %d+%d\n", lDrawCnt++, allocation.width, allocation.height  );
+		printf( "%ld: wDrawClearTemp\n", lDrawCnt++  );
 	}
 	cairo_t* cairo = cairo_create(bd->temp_surface);
 
 	cairo_set_source_rgba(cairo, 0.0, 0.0, 0.0, 0.0);
 	cairo_set_operator (cairo, CAIRO_OPERATOR_SOURCE);
-	cairo_move_to(cairo, 0, 0);
-	cairo_rel_line_to(cairo, allocation.width, 0);
-	cairo_rel_line_to(cairo, 0, allocation.height);
-	cairo_rel_line_to(cairo, -allocation.width, 0);
-	cairo_fill(cairo);
+
+	cairo_paint(cairo);
 	cairo_destroy(cairo);
 
 	if (drawingArea->widget && !bd->delayUpdate) {
@@ -888,7 +878,7 @@ void wDrawClear( wControl_p drawingArea )
 	if ( iDrawLog >= 1 ) {
 		printf( "%ld: wDrawClear\n", lDrawCnt++  );
 	}
-	/**  \todo Clearing the complete area can be simpler */
+
 	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
 	g_assert(drawingArea->type == B_DRAW);
 
@@ -897,23 +887,11 @@ void wDrawClear( wControl_p drawingArea )
 	cairo = cairo_create(bd->surface);
 
 	/* Set surface to opaque color (r, g, b) */
-	//cairo_set_source_rgb(cairo, 128,128,128);
 	cairo_set_source_rgb(cairo, 255,255,255);
 	cairo_paint(cairo);
 
 	cairo_destroy(cairo);
 
-	//GtkAllocation allocation;
-	//gtk_widget_get_allocation(drawingArea->widget, &allocation);
-
-	//cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid,
-	//                 wDrawColorWhite, 0);
-	//cairo_move_to(cairo, 0, 0);
-	//cairo_rel_line_to(cairo, allocation.width, 0);
-	//cairo_rel_line_to(cairo, 0, allocation.height);
-	//cairo_rel_line_to(cairo, -allocation.width, 0);
-	//cairo_fill(cairo);
-	//gtkDrawDestroyCairoContext(cairo);
 	if (drawingArea->widget && !bd->delayUpdate) {
 		gtk_widget_queue_draw(drawingArea->widget);
 	}
@@ -1164,6 +1142,11 @@ double wDrawGetMaxRadius( wControl_p drawingArea )
 	return(32767.0);
 }
 
+/**
+ *	Define a clipping region. The passed coordinates are stored and will be applied
+ * 	when the cairo context for this drawing area is created
+ *
+ */
 
 void wDrawClip(wControl_p drawingArea,
         wDrawPix_t x,
@@ -1171,16 +1154,28 @@ void wDrawClip(wControl_p drawingArea,
         wDrawPix_t w,
         wDrawPix_t h )
 {
-	// struct draw *d = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
-	// g_assert(drawingArea->type == B_DRAW);
+	struct draw *d = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	g_assert(drawingArea->type == B_DRAW);
+	d->clipregion = g_malloc0(sizeof(struct rect));
 
-	printf("Function wDrawClip is not implemented: %s %d\n", __FILE__, __LINE__);
-	//d->rect.width = w;
-	//d->rect.height = h;
-	//d->rect.x = INMAPX( d, x );
-	//d->rect.y = INMAPY( d, y ) - d->rect.height;
-	//d->clip_set = TRUE;
+	d->clipregion->w = w;
+	d->clipregion->h = h;
+	d->clipregion->x = INMAPX( d, x );
+	d->clipregion->y = INMAPY( d, y ) - d->clipregion->h;
 
+}
+
+void wDrawClipClear(wControl_p drawingArea)
+{
+    wWinPix_t totalW, totalH;
+	struct draw *d = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	g_assert(drawingArea->type == B_DRAW);
+
+    wDrawGetSize(drawingArea, &totalW, &totalH);
+    wDrawClip(drawingArea, 0, 0, totalW, totalH);	
+
+	g_free(d->clipregion);
+	d->clipregion = NULL;
 }
 
 /*******************************************************************************

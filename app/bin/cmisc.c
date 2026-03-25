@@ -308,6 +308,7 @@ static void DescribeUpdate(
 
 EXPORT void DescribeDone(void * junk)
 {
+#ifndef DESCRIBENOTIMPL
 	if (descTrk) {
 		CHECK(!IsTrackDeleted(descTrk));
 		// TODO_CANCEL last arg could be true
@@ -322,6 +323,7 @@ EXPORT void DescribeDone(void * junk)
 		layerValue = NULL;
 		descTrk = NULL;
 	}
+#endif
 	if (describePG.win && wWinIsVisible(describePG.win)) {
 		wHide(describePG.win);
 	}
@@ -455,6 +457,17 @@ static void DescribeLayout(
  *
  */
 
+#ifdef DESCRIBENOTIMPL
+void DescUpdateFuncNotImplemented(
+		track_p trkP,
+		int inx,
+		descData_p p,
+		BOOL_T bFlag )
+{
+	printf("%s:%d Not implemented! - DescUpdateFunc\n", __FILE__, __LINE__);
+}
+#endif
+
 //static wList_p setLayerL;
 void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 {
@@ -470,7 +483,11 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 	CreateEditableLayersList();
 	descTrk = trk;
 	descData = data;
+#ifdef DESCRIBENOTIMPL
+	descUpdateFunc = DescUpdateFuncNotImplemented;
+#else
 	descUpdateFunc = update;
+#endif
 	describeW_posy = 0;
 	descTitle = title;
 
@@ -685,9 +702,7 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 		break;
 
 	case C_CANCEL:
-#ifdef DESCRIBEHACK
 		DescribeDone( NULL );
-#endif
 		wSetCursor(mainD.d,defaultCursor);
 		return C_CONTINUE;
 

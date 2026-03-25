@@ -31,7 +31,6 @@
 #include "misc.h"
 #include "track.h"
 
-#include "include/toolbar.h"
 
 #undef BBORDER
 #undef LBORDER
@@ -41,10 +40,11 @@ static int charWidth;
 /* Accessor functions used by ddrawprim.c and drawruler.c */
 int GetLBorder(void)  { return lborder;   }
 int GetBBorder(void)  { return bborder;   }
-int GetCharWidth(void){ return charWidth;  }
+int GetCharWidth(void) { return charWidth;  }
 
 /* Functions moved to drawruler.c */
 void DrawRoomWalls(wBool_t drawBackground);
+void DrawRulers(void);
 void DrawMarkers(void);
 
 /* Defined in ddrawprim.c — wires CoOrd2Pix/Pix2CoOrd into mainD/tempD */
@@ -205,7 +205,6 @@ EXPORT BOOL_T SetRoomSize(coOrd size)
 	LOG(log_size, 2,
 	    ("SetRoomSize NEW:%0.3fx%0.3f OLD:%0.3fx%0.3f\n", size.x, size.y,
 	     mapD.size.x, mapD.size.y));
-	SetLayoutRoomSize(size);
 	if (size.x < 1.0) {
 		size.x = 1.0;
 	}
@@ -219,10 +218,6 @@ EXPORT BOOL_T SetRoomSize(coOrd size)
 	SetLayoutRoomSize(size);
 	wPrefSetFloat("draw", "roomsizeX", mapD.size.x);
 	wPrefSetFloat("draw", "roomsizeY", mapD.size.y);
-	if (mapW == NULL) {
-		return TRUE;
-	}
-	MapChangeScale();
 	return TRUE;
 }
 
@@ -241,6 +236,34 @@ EXPORT void SetMainSize(void)
 	tempD.size = mainD.size;
 }
 
+/* Draw all temp-surface content: current command feedback (clipped to the
+ * inner drawing area) followed by markers, rulers and playback cursor
+ * (unclipped so they can extend into the border margins).
+ *
+ * The caller must already be in temp mode (wDrawSetTempMode TRUE).
+ */
+static void DrawTempContent(void)
+{
+	wWinPix_t totalW, totalH;
+
+	/* Clip command drawing to the inner area (exclude ruler margins). */
+	wDrawGetSize(tempD.d, &totalW, &totalH);
+	wDrawClip(tempD.d,
+	          (wDrawPix_t)lborder,
+	          (wDrawPix_t)bborder,
+	          (wDrawPix_t)(totalW - lborder - RBORDER),
+	          (wDrawPix_t)(totalH - bborder - TBORDER));
+
+	DoCurCommand(C_REDRAW, zero);
+
+	/* Reset clip so markers and rulers can draw into the margins. */
+	wDrawClipClear(tempD.d);
+
+	DrawMarkers();
+	RulerRedraw(FALSE);
+	RedrawPlaybackCursor(); /* If in playback */
+}
+
 /* Update temp_surface after executing a command
  */
 EXPORT void TempRedraw(void)
@@ -254,10 +277,7 @@ EXPORT void TempRedraw(void)
 	} else {
 		wDrawDelayUpdate(tempD.d, TRUE);
 		wDrawSetTempMode(tempD.d, TRUE);
-		DoCurCommand(C_REDRAW, zero);
-		DrawMarkers();
-		RulerRedraw(FALSE);
-		RedrawPlaybackCursor(); /* If in playback */
+		DrawTempContent();
 		wDrawSetTempMode(tempD.d, FALSE);
 		wDrawDelayUpdate(tempD.d, FALSE);
 	}
@@ -293,6 +313,7 @@ void TranslateBackground(drawCmd_p drawP, POS_T origX, POS_T origY,
 EXPORT void MainRedraw(void)
 {
 	coOrd orig, size;
+	wWinPix_t totalW, totalH;
 
 	static int cMR = 0;
 	LOG(log_redraw, 1,
@@ -305,6 +326,10 @@ EXPORT void MainRedraw(void)
 	wDrawSetTempMode(mainD.d, FALSE);
 	wDrawClear(mainD.d);
 
+	/*
+	 * Phase 1: Background (unclipped)
+	 * Grey surround, white room area, background image, snap grid
+	 */
 	orig = mainD.orig;
 	size = mainD.size;
 	orig.x -= lborder / mainD.dpi * mainD.scale;
@@ -325,27 +350,43 @@ EXPORT void MainRedraw(void)
 	}
 	DrawSnapGrid(&mainD, mapD.size, TRUE);
 
+	/*
+	 * Phase 2: Drawing content (clipped to inner area)
+	 * Tracks and room border polygon must not overwrite the ruler margins.
+	 */
 	orig = mainD.orig;
 	size = mainD.size;
 	orig.x -= RBORDER / mainD.dpi * mainD.scale;
 	orig.y -= bborder / mainD.dpi * mainD.scale;
 	size.x += (RBORDER + lborder) / mainD.dpi * mainD.scale;
 	size.y += (bborder + TBORDER) / mainD.dpi * mainD.scale;
-	DrawTracks(&mainD, mainD.scale, orig, size);
 
-	DrawRoomWalls(FALSE); /* No background, just rulers */
+	wDrawGetSize(mainD.d, &totalW, &totalH);
+	wDrawClip(mainD.d,
+	          (wDrawPix_t)lborder,
+	          (wDrawPix_t)bborder,
+	          (wDrawPix_t)(totalW - lborder - RBORDER),
+	          (wDrawPix_t)(totalH - bborder - TBORDER));
+
+	DrawTracks(&mainD, mainD.scale, orig, size);
+	DrawRoomWalls(FALSE); /* Room border polygon only — clipped */
+
+	/*
+	 * Phase 3: Rulers and overlays (unclipped)
+	 * Reset clip to full canvas so rulers draw into the margins.
+	 */
+	wDrawClipClear(mainD.d);
+
+	DrawRulers();
 
 	currRedraw++;
 
 	InfoScale();
 	LOG(log_timemainredraw, 1,
 	    ("MainRedraw time = %lu mS\n", wGetTimer() - time0));
-	/* The remainder is from TempRedraw */
+	/* Temp-surface content (command feedback, markers, rulers) */
 	wDrawSetTempMode(tempD.d, TRUE);
-	DoCurCommand(C_REDRAW, zero);
-	DrawMarkers();
-	RulerRedraw(FALSE);
-	RedrawPlaybackCursor(); /* If in playback */
+	DrawTempContent();
 	wDrawSetTempMode(tempD.d, FALSE);
 	wDrawDelayUpdate(mainD.d, FALSE);
 }
@@ -437,6 +478,7 @@ wBool_t MainProc(wControl_p win, winProcEvent e, void *refresh, void *data)
 	static int cMP = 0;
 	wWinPix_t width, height;
 	switch (e) {
+
 	case wResize_e:
 		if (mainD.d == NULL) {
 			return FALSE;
@@ -451,12 +493,22 @@ wBool_t MainProc(wControl_p win, winProcEvent e, void *refresh, void *data)
 				printf("MainProc TempMode\n");
 			}
 
+			/* Remember the center of the current view BEFORE the size changes */
+			coOrd oldCenter;
+			oldCenter.x = mainD.orig.x + mainD.size.x / 2.0;
+			oldCenter.y = mainD.orig.y + mainD.size.y / 2.0;
+
 			SetMainSize();
-			panCenter.x = mainD.orig.x + mainD.size.x / 2.0;
-			panCenter.y = mainD.orig.y + mainD.size.y / 2.0;
+
+			/* Recompute origin so the viewport stays centered on the same point */
+			mainD.orig.x = oldCenter.x - mainD.size.x / 2.0;
+			mainD.orig.y = oldCenter.y - mainD.size.y / 2.0;
+
+			panCenter = oldCenter;
+
 			LOG(log_pan, 2,
 			    ("PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y));
-			MainLayout(!refresh, TRUE); /* MainProc: wResize_e event */
+			MainLayout(!refresh, constrainMain != 0); /* MainProc: wResize_e event */
 			wPrefSetInteger("draw", "mainwidth", (int)width);
 			wPrefSetInteger("draw", "mainheight", (int)height);
 			wDrawSetTempMode(mainD.d, bTemp);
@@ -486,7 +538,7 @@ wBool_t MainProc(wControl_p win, winProcEvent e, void *refresh, void *data)
 EXPORT void DoRedraw(void)
 {
 	LOG(log_size, 2, ("DoRedraw\n"));
-	MapChangeScale();
+
 	MainRedraw(); /* DoRedraw */
 }
 
@@ -700,7 +752,7 @@ void DoNewScale(DIST_T scale)
 	SetMainSize();
 	PanHere(I2VP(1));
 	LOG(log_zoom, 1, ("center = [%0.3f %0.3f]\n", mainCenter.x, mainCenter.y))
-	sprintf(tmp, "%0.3f", mainD.scale);
+	snprintf(tmp, sizeof(tmp), "%0.3f", mainD.scale);
 	wPrefSetString("draw", "zoom", tmp);
 	if (recordF) {
 		fprintf(recordF, "ORIG %0.3f %0.3f %0.3f\n", mainD.scale, mainD.orig.x,
@@ -818,7 +870,8 @@ EXPORT void DoZoomExtents(void *mode)
 	if (scale_x > MAX_MAIN_SCALE) {
 		scale_x = MAX_MAIN_SCALE;
 	}
-	if (1 != (intptr_t)1) {
+	//if (1 != (intptr_t)1) {
+	if (1 != VP2L(mode)) {
 		mainD.orig = zero;
 	}
 	DoNewScale(scale_x);
@@ -1189,12 +1242,106 @@ static void DoMouse(wAction_t action, coOrd pos)
 	case C_MUP:
 		InfoPos(pos);
 		break;
-	case C_WUP:
-		DoZoomUp(I2VP(1L));
+	case C_WUP: {
+		/* Zoom in toward mouse position.
+		 * Ignore if pointer is outside the drawing area (on rulers/border). */
+		wWinPix_t ww_z, hh_z;
+		wDrawGetSize(mainD.d, &ww_z, &hh_z);
+		if (mousePositionx < lborder || mousePositionx > ww_z - RBORDER ||
+		    mousePositiony < bborder || mousePositiony > hh_z - TBORDER) {
+			break;
+		}
+		coOrd anchor = pos;
+		if (anchor.x < 0.0 || anchor.x > mapD.size.x ||
+		    anchor.y < 0.0 || anchor.y > mapD.size.y) {
+			break;   /* pointer is over grey surround, not the layout */
+		}
+		{
+			DIST_T oldScale = mainD.scale;
+			int idx = ScaleInx(oldScale);
+			if (idx < 0) { idx = NearestScaleInx(oldScale, FALSE); }
+
+			/* Same guard logic as DoZoomUp: stop at 1:1 unless CTRL held */
+			if (oldScale == 1.0 && !(MyGetKeyState() & WKEY_CTRL)) {
+				InfoMessage(_("Scale 1:1 - Use Ctrl+ to go to Macro Zoom Mode"));
+				break;
+			}
+			if (idx <= 0) {
+				InfoMessage("Minimum Macro Zoom");
+				break;
+			}
+
+			DIST_T newScale = zoomList[idx - 1].value;
+			if (newScale <= 1.0) {
+				InfoMessage(_("Macro Zoom Mode"));
+			} else {
+				InfoMessage("");
+			}
+
+			/* Fractional position of anchor within current viewport */
+			DIST_T fx = (anchor.x - mainD.orig.x) / mainD.size.x;
+			DIST_T fy = (anchor.y - mainD.orig.y) / mainD.size.y;
+
+			/* New model-space viewport size (proportional to scale) */
+			DIST_T ratio = newScale / oldScale;
+			DIST_T newSizeX = mainD.size.x * ratio;
+			DIST_T newSizeY = mainD.size.y * ratio;
+
+			/* Set panCenter so the anchor stays at (fx,fy) in the new viewport */
+			panCenter.x = anchor.x + newSizeX * (0.5 - fx);
+			panCenter.y = anchor.y + newSizeY * (0.5 - fy);
+			LOG(log_pan, 2,
+			    ("PanCenter:%d %0.3f %0.3f (zoom-to-mouse)\n",
+			     __LINE__, panCenter.x, panCenter.y));
+			DoNewScale(newScale);
+		}
 		break;
-	case C_WDOWN:
-		DoZoomDown(I2VP(1L));
+	}
+	case C_WDOWN: {
+		/* Zoom out away from mouse position.
+		 * Ignore if pointer is outside the drawing area (on rulers/border). */
+		wWinPix_t ww_z2, hh_z2;
+		wDrawGetSize(mainD.d, &ww_z2, &hh_z2);
+		if (mousePositionx < lborder || mousePositionx > ww_z2 - RBORDER ||
+		    mousePositiony < bborder || mousePositiony > hh_z2 - TBORDER) {
+			break;
+		}
+		coOrd anchor = pos;
+		if (anchor.x < 0.0 || anchor.x > mapD.size.x ||
+		    anchor.y < 0.0 || anchor.y > mapD.size.y) {
+			break;   /* pointer is over grey surround, not the layout */
+		}
+		{
+			DIST_T oldScale = mainD.scale;
+			int idx = ScaleInx(oldScale);
+			if (idx < 0) { idx = NearestScaleInx(oldScale, TRUE); }
+			if (idx < 0 || idx >= (COUNT(zoomList) - 1)) {
+				InfoMessage(_("At Maximum Zoom Out"));
+				break;
+			}
+
+			DIST_T newScale = zoomList[idx + 1].value;
+			InfoMessage("");
+
+			/* Fractional position of anchor within current viewport */
+			DIST_T fx = (anchor.x - mainD.orig.x) / mainD.size.x;
+			DIST_T fy = (anchor.y - mainD.orig.y) / mainD.size.y;
+
+			/* New model-space viewport size (proportional to scale) */
+			DIST_T ratio = newScale / oldScale;
+			DIST_T newSizeX = mainD.size.x * ratio;
+			DIST_T newSizeY = mainD.size.y * ratio;
+
+			/* Set panCenter so the anchor stays at (fx,fy) in the new viewport */
+			panCenter.x = anchor.x + newSizeX * (0.5 - fx);
+			panCenter.y = anchor.y + newSizeY * (0.5 - fy);
+			LOG(log_pan, 2,
+			    ("PanCenter:%d %0.3f %0.3f (zoom-to-mouse)\n",
+			     __LINE__, panCenter.x, panCenter.y));
+			DoNewScale(newScale);
+		}
 		break;
+	}
 	case C_SCROLLUP:
 		panCenter.y = panCenter.y +
 		              ((mainD.size.y / 20 > min.y) ? mainD.size.y / 20 : min.y);
@@ -1400,7 +1547,7 @@ static wBool_t PlaybackKey(char *line)
 	if (rc != 3) {
 		SyntaxError("MOUSE", rc, 3);
 	} else {
-		action = action | c << 8;
+		action = action | (unsigned int)c << 8;
 		PlaybackMouse(DoMouse, &tempD, (wAction_t)action, pos, wDrawColorBlack);
 	}
 	return TRUE;
@@ -1420,8 +1567,7 @@ static void DrawChange(long changes)
 	if (changes & CHANGE_UNITS) {
 		SetInfoBar();
 	}
-	if (changes & CHANGE_MAP) {
-		LOG(log_size, 2, ("CHANGE_MAP: mapD.scale=%0.3f\n", mapD.scale));
+	if(changes & CHANGE_MAP) {
 		MapChangeScale();
 	}
 }
@@ -1533,8 +1679,7 @@ EXPORT void DrawInit(int initialZoom)
 	AddPlaybackProc("MOUSE ", (playbackProc_p)PlaybackMain, NULL);
 	AddPlaybackProc("KEY ", (playbackProc_p)PlaybackKey, NULL);
 
-	/* \todo Fix function */
-	/* SetZoomRadio( mainD.scale ); */
+	SetZoomRadio( mainD.scale );
 	InfoScale();
 	SetInfoBar();
 	InfoPos(zero);

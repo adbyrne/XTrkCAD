@@ -185,5 +185,7 @@ typedef struct {
 #include "command.h"
 #include "menu.h"
 
+// Remove once Describe/Proerties is implemnted
+#define DESCRIBENOTIMPL
 #endif
 

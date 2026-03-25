@@ -434,8 +434,6 @@ wControl_p wMessageCreateEx(wControl_p parent,
 void wMessageSetValue(wControl_p b, const char* arg);
 void wMessageSetWidth(wControl_p b, wWinPix_t width);
 void wMessageSetLength(wControl_p control, size_t length);
-
-wWinPix_t wMessageGetWidth(const char* testString);
 wWinPix_t wMessageGetHeight(long flags);
 
 /*------------------------------------------------------------------------------
@@ -729,6 +727,7 @@ wWinPix_t wControlGetWidth(	wControl_p );
 wWinPix_t wControlGetHeight(	wControl_p );
 wWinPix_t wControlGetPosX(		wControl_p );
 wWinPix_t wControlGetPosY(		wControl_p );
+void wControlGetPos(		wControl_p, wWinPix_t *x, wWinPix_t *y );
 void wControlSetPos(		wControl_p, wWinPix_t, wWinPix_t );
 void wControlSetFocus(		wControl_p );
 void wControlActive(		wControl_p control, wBool_t active);
@@ -990,6 +989,8 @@ void wDrawClip(wControl_p drawingArea,
     wDrawPix_t y,
     wDrawPix_t w,
     wDrawPix_t h);
+
+void wDrawClipClear(wControl_p drawingArea);    
 
 /* Geometry */
 double wDrawGetDPI(	wControl_p drawingArea );

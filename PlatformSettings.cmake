@@ -13,6 +13,7 @@ endif()
 
 if(UNIX)
     include(FindPkgConfig)
+    SET (CMAKE_ENABLE_EXPORTS TRUE)
     set(XTRKCAD_USE_GTK_DEFAULT ON)
 	
 	add_compile_options(-Wno-incompatible-pointer-types)

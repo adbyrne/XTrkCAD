@@ -588,6 +588,10 @@ EXPORT void PlaybackMouse(
 }
 
 
+//#define MOVECURSORTOCOMMANDBUTTON
+// Defining this shows the cursor move towards the active toolbar button
+// However it only is displayed over the main canvas, we can't draw over the toolbar
+
 EXPORT void MovePlaybackCursor(
         drawCmd_p d,
         coOrd pos,
@@ -1713,11 +1717,10 @@ static void ParamPlayback( char * line )
 	wAction_t a;
 	coOrd pos;
 	char * valS;
-#define DESCRIBEHACK
-#ifdef DESCRIBEHACK
+#ifdef DESCRIBENOTIMPL
 	// TODO Remove once describe is implemented
 	if ( strncmp( line, "describe ", 9 ) == 0 ) {
-		printf( "DESCRIBEHACK: %s\n", line );
+		printf( "DESCRIBENOTIMPL: %s\n", line );
 		return;
 	}
 #endif

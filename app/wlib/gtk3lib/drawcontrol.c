@@ -23,7 +23,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#define GTK_DISABLE_SINGLE_INCLUDES 
+#define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
 #define GTK_DISABLE_DEPRECATED
 #define GSEAL_ENABLE
@@ -90,40 +90,22 @@ static gboolean draw_event(
         wControl_p drawControl)
 {
 
-    struct draw* drawAttributes = CONTROL_GET_ATTRIBUTES_PTR(drawControl, draw);
-    GtkAllocation alloc;
-    gtk_widget_get_allocation(widget, &alloc);
+	struct draw* drawAttributes = CONTROL_GET_ATTRIBUTES_PTR(drawControl, draw);
+	GtkAllocation alloc;
+	gtk_widget_get_allocation(widget, &alloc);
 
-    cairo_set_source_surface(cr, drawAttributes->surface, 0, 0);
-    cairo_rectangle(cr, 0, 0, alloc.width, alloc.height);
-    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-    cairo_fill(cr);
+	cairo_set_source_surface(cr, drawAttributes->surface, 0, 0);
+	cairo_rectangle(cr, 0, 0, alloc.width, alloc.height);
+	cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+	cairo_fill(cr);
 
-    cairo_set_source_surface(cr, drawAttributes->temp_surface, 0, 0);
-    cairo_rectangle(cr, 0, 0, alloc.width, alloc.height);
-    cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
-    cairo_fill(cr);
+	cairo_set_source_surface(cr, drawAttributes->temp_surface, 0, 0);
+	cairo_rectangle(cr, 0, 0, alloc.width, alloc.height);
+	cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
+	cairo_fill(cr);
 
-    return TRUE;
+	return TRUE;
 }
-
-
-/**
- * Clear a surface by painting to all black.
- *
- * \param surface	surface to be cleared
- */
-
-//static void
-//clear_surface (cairo_surface_t * surface)
-//{
-//	cairo_t *cr;
-//
-//	cr = cairo_create (surface);
-//	cairo_set_source_rgb (cr, 0, 0, 0);
-//	cairo_paint (cr);
-//	cairo_destroy (cr);
-//}
 
 /**
  * Create and initialize a new surface for a window.
@@ -141,7 +123,7 @@ CreateNewSurface(GtkWidget* widget, cairo_surface_t* oldSurface)
 	if (oldSurface) {
 		cairo_surface_destroy(oldSurface);
 	}
-	/** \todo can the allocation be used instead of API call? */
+
 	newSurface = gdk_window_create_similar_surface(gtk_widget_get_window(widget),
 	             CAIRO_CONTENT_COLOR_ALPHA,
 	             gtk_widget_get_allocated_width(widget),
@@ -169,16 +151,12 @@ draw_configure_event(
         GdkEventConfigure* event,
         wControl_p drawControl)
 {
-	GtkAllocation alloc;
 	struct draw* drawAttributes = CONTROL_GET_ATTRIBUTES_PTR(drawControl, draw);
 
-	gtk_widget_get_allocation(widget, &alloc);
-	/**   \todo Use width and height from event if possible */
-
-	if ((drawAttributes->width != alloc.width) ||
-	    drawAttributes->height != alloc.height) {
-		drawAttributes->width = alloc.width;
-		drawAttributes->height = alloc.height;
+	if ((drawAttributes->width != event->width) ||
+	    (drawAttributes->height != event->height)) {
+		drawAttributes->width = event->width;
+		drawAttributes->height = event->height;
 
 		drawAttributes->surface = CreateNewSurface(widget,
 		                          drawAttributes->surface);
@@ -186,9 +164,9 @@ draw_configure_event(
 		                               drawAttributes->temp_surface);
 
 		if (drawAttributes->redraw) {
-        	drawAttributes->redraw(drawControl, drawControl->context,
-                               alloc.width, alloc.height);
-    	}									   
+			drawAttributes->redraw(drawControl, drawControl->context,
+			                       event->width, event->height);
+		}
 	}
 
 	/* We've handled the configure event, no need for further processing. */
@@ -202,7 +180,7 @@ static const char* actionNames[] = { "None", "Move", "LDown", "LDrag", "LUp", "R
  */
 
 /**
- * \todo this code seems overly complicated. The action is only executed after
+ * this code seems overly complicated. The action is only executed after
  * several timeout cycles. So why is the timer not set to that larger timeout
  * at start?
  *
@@ -325,16 +303,6 @@ draw_scroll_event(GtkWidget* widget, GdkEventScroll* event,
 	return TRUE;
 }
 
-
-// \todo Check necessity
-//static gint draw_leave_event(
-//        GtkWidget *widget,
-//        GdkEvent * event )
-//{
-//	wlibHelpHideBalloon();
-//	return TRUE;
-//}
-
 /**
  * Translate screen to world coordinates. Screen has origin at top left, world
  * at bottom left of drawing area.
@@ -419,69 +387,44 @@ draw_button_event(GtkWidget* widget, GdkEventButton* event,
  * a drag operation is assumed. The is translated to an action and the
  * handler is called.
  *
- * \todo it might be better to use the drag_* virtual methods available in GTK
- *
  * \param widget		GTK drawing area
  * \param event			see GTK docs
  * \param drawControl	the control for the drawing area
  * \return
  */
-
 static gint
 draw_motion_event(GtkWidget* widget, GdkEventMotion* event,
                   wControl_p drawControl)
 {
-	gint x, y;
-	GdkModifierType state;
-	wAction_t action;
-	struct draw* drawAttributes = CONTROL_GET_ATTRIBUTES_PTR(drawControl, draw);
+    wAction_t action;
+    GdkModifierType state;
+    struct draw* drawAttributes = CONTROL_GET_ATTRIBUTES_PTR(drawControl, draw);
 
-	if (drawAttributes->action == NULL) {
-		return TRUE;
-	}
+    if (drawAttributes->action == NULL) {
+        return TRUE;
+    }
 
-	/** \todo hint mask is deprecated and seems to be unnecessary here, test
-	* replacement or remove */
+    GdkModifierType modifiers = gtk_accelerator_get_default_mod_mask();
+    state = event->state & (modifiers | GDK_BUTTON1_MASK | GDK_BUTTON2_MASK | GDK_BUTTON3_MASK);
+    drawAttributes->lastX = (long)event->x;
+    drawAttributes->lastY = (long)event->y;
+    Screen2WorldCoord(drawAttributes);
 
-	if (event->is_hint) {
-		gdk_window_get_device_position(event->window, event->device,
-		                               &x, &y, &state);
-	} else {
-		GdkModifierType modifiers;
-		modifiers = gtk_accelerator_get_default_mod_mask();
-		state = event->state & modifiers;
-		x = (long)event->x;
-		y = (long)event->y;
-	}
+    if (state & GDK_BUTTON1_MASK) {
+        action = wActionLDrag;
+    } else if (state & GDK_BUTTON2_MASK) {
+        action = wActionLDrag;
+    } else if (state & GDK_BUTTON3_MASK) {
+        action = wActionRDrag;
+    } else {
+        action = wActionMove;
+    }
 
-	drawAttributes->lastX = x;
-	drawAttributes->lastY = y;
-	Screen2WorldCoord(drawAttributes);
-
-	if (state & GDK_BUTTON1_MASK) {
-		action = wActionLDrag;
-	} else if (state & GDK_BUTTON2_MASK) {
-		action = wActionLDrag;
-	} else if (state & GDK_BUTTON3_MASK) {
-		action = wActionRDrag;
-	} else {
-		action = wActionMove;
-	}
-
-	if (iDrawLog >= 3) {
-		printf("%lx: %s[%ldx%ld] %s\n", lDrawCnt++, actionNames[action],
-		       drawAttributes->lastX, drawAttributes->lastY,
-		       event->is_hint ? "<Hint>" : "<>");
-	}
-
-	drawAttributes->action(drawControl, drawControl->context, action,
-	                       drawAttributes->lastX,
-	                       drawAttributes->lastY);
-
-	CheckGrabFocus(drawControl);
-	return TRUE;
+    drawAttributes->action(drawControl, drawControl->context, action,
+                           drawAttributes->lastX, drawAttributes->lastY);
+    CheckGrabFocus(drawControl);
+    return TRUE;
 }
-
 
 static gint draw_char_release_event(
         GtkWidget* widget,
@@ -513,7 +456,6 @@ static gint draw_char_release_event(
 	} else {
 		return FALSE;
 	}
-	return FALSE;
 }
 
 /**
@@ -533,7 +475,7 @@ static gint draw_char_event(
         GdkEventKey* event,
         wControl_p drawControl)
 {
-	GdkModifierType modifiers = gtk_accelerator_get_default_mod_mask();;
+	GdkModifierType modifiers = gtk_accelerator_get_default_mod_mask();
 	struct draw* drawAttributes = CONTROL_GET_ATTRIBUTES_PTR(drawControl, draw);
 	guint key = event->keyval;
 	wAccelKey_e functionKey = wAccelKey_None;
@@ -597,18 +539,7 @@ static gint draw_char_event(
 	} else {
 		return FALSE;
 	}
-	/**
-	 * \todo the following condition is always false as key is never set to
-	 * wAccelKey_Up wAccelKey_Left or any value in between. So this code has
-	 * been disabled for further examination
-	 */
 
-	//else if ((key >= wAccelKey_Up) && (key <= wAccelKey_Left) && drawAttributes->action) {
-	//	drawAttributes->action(drawControl, drawControl->context, wActionText + (key << 8), (wDrawPix_t)drawAttributes->lastX,
-	//		(wDrawPix_t)drawAttributes->lastY);
-	//	CheckGrabFocus(drawControl);
-	//	return TRUE;
-	//}
 	drawAttributes->action(drawControl,
 	                       drawControl->context,
 	                       keyboardAction,
@@ -639,16 +570,18 @@ draw_realize(GtkWidget* widget,
 
 
 gboolean
-draw_tooltip(GtkWidget* widget, gint x, gint y, gboolean kbd, GtkTooltip* tooltip, gpointer context)
+draw_tooltip(GtkWidget* widget, gint x, gint y, gboolean kbd,
+             GtkTooltip* tooltip, gpointer context)
 {
 	wControl_p drawControl = (wControl_p)context;
 	struct draw* drawAttributes = CONTROL_GET_ATTRIBUTES_PTR(drawControl, draw);
 
-	if (drawAttributes != NULL && drawAttributes->action == NULL) {
+	if (drawAttributes == NULL || drawAttributes->action == NULL) {
 		return(FALSE);
 	}
 
-	(drawAttributes->action)(drawControl, drawControl->context, wActionGetTooltip, x, y);
+	(drawAttributes->action)(drawControl, drawControl->context, wActionGetTooltip,
+	                         x, y);
 
 	if (drawControl->customTooltip) {
 		gtk_tooltip_set_markup(tooltip, drawControl->customTooltip);
@@ -665,7 +598,7 @@ draw_tooltip(GtkWidget* widget, gint x, gint y, gboolean kbd, GtkTooltip* toolti
 
 /**
  * Create a drawing area
- * 
+ *
  * Size and position information is ignored when creating the area from builder.
  * This are set by the layout engine in GTK3
  *
@@ -713,25 +646,25 @@ wControl_p wDrawCreate(
 	drawAttributes->option = option;
 	drawAttributes->dpi = gdk_screen_get_resolution(gdk_screen_get_default());
 
-        if (ISDEFINEDINBUILDER(parent)) {
-          drawControl->widget = wlibWidgetFromIdWarn(parent, helpStr);
-		  width = 0;
-		  height = 0;
-        } else {
-          drawControl->widget = gtk_drawing_area_new();
-          width = width ? width : -1;
-          height = height ? height : -1;
-          gtk_widget_set_size_request(GTK_WIDGET(drawControl->widget), width,
-                                      height);
-        }
+	if (ISDEFINEDINBUILDER(parent)) {
+		drawControl->widget = wlibWidgetFromIdWarn(parent, helpStr);
+		width = 0;
+		height = 0;
+	} else {
+		drawControl->widget = gtk_drawing_area_new();
+		width = width ? width : -1;
+		height = height ? height : -1;
+		gtk_widget_set_size_request(GTK_WIDGET(drawControl->widget), width,
+		                            height);
+	}
 
-        wlibControlGetSize((wControl_p)drawControl);
+	wlibControlGetSize((wControl_p)drawControl);
 
 	drawAttributes->width = width;
 	drawAttributes->height = height;
 
 	g_signal_connect((drawControl->widget), "query-tooltip",
-					 G_CALLBACK(draw_tooltip), drawControl);
+	                 G_CALLBACK(draw_tooltip), drawControl);
 	g_signal_connect((drawControl->widget), "realize",
 	                 G_CALLBACK(draw_realize), drawControl);
 	g_signal_connect((drawControl->widget), "draw",
@@ -750,17 +683,13 @@ wControl_p wDrawCreate(
 	                 G_CALLBACK(draw_char_event), drawControl);
 	g_signal_connect((drawControl->widget), "key_release_event",
 	                 G_CALLBACK(draw_char_release_event), drawControl);
-	//g_signal_connect ((drawControl->widget), "leave_notify_event",
-	//                  G_CALLBACK( draw_leave_event), drawControl);
 
 	gtk_widget_add_events(drawControl->widget,
-			      GDK_EXPOSURE_MASK
+	                      GDK_EXPOSURE_MASK
 	                      | GDK_BUTTON_PRESS_MASK
 	                      | GDK_BUTTON_RELEASE_MASK
-	                      //						   | GDK_LEAVE_NOTIFY_MASK
 	                      | GDK_SCROLL_MASK
 	                      | GDK_POINTER_MOTION_MASK
-	                      | GDK_POINTER_MOTION_HINT_MASK
 	                      | GDK_KEY_PRESS_MASK
 	                      | GDK_KEY_RELEASE_MASK);
 

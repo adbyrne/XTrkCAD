@@ -41,10 +41,6 @@
  *****************************************************************************
  */
 
-//struct wMessage_t {
-//	GtkWidget * labelWidget;
-//};
-
 /**
  * Set the message text
  *
@@ -57,9 +53,7 @@ void wMessageSetValue(
         wControl_p b,
         const char * arg)
 {
-	if (b->widget == NULL) {
-		abort();
-	}
+	g_assert(b != NULL);
 
 	gtk_label_set_text(GTK_LABEL(b->widget), wlibConvertInput(arg));
 }
@@ -76,6 +70,7 @@ void wMessageSetWidth(
         wControl_p b,
         wWinPix_t width)
 {
+	g_assert(b != NULL);
 
 	gtk_widget_set_size_request(b->widget, width, -1);
 }
@@ -83,72 +78,71 @@ void wMessageSetWidth(
 
 void wMessageSetLength(wControl_p control, size_t length)
 {
+	g_assert(control != NULL);
+	
 	gtk_label_set_width_chars(GTK_LABEL(control->widget), (int)length);
 }
+
 /**
  * Get height of message text
  *
  * \param flags IN text properties (large or small size)
  * \return text height
  */
-static int fonts_set = 0;
 
-wWinPix_t wMessageGetHeight(
-        long flags)
+wWinPix_t wMessageGetHeight(long flags)
 {
+    GtkWidget *temp;
+	int text_width, text_height;
+	PangoLayout *layout;
 
-	GtkWidget * temp;
+    temp = gtk_label_new("Test");
 
-	if (!(flags&COMBOBOX)) {
-		temp = gtk_label_new("Test");	 //To get size of text itself
-	} else {
-		temp = gtk_combo_box_text_new();    //to get max size of an object in infoBar
-		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(temp),"Test");
-	}
+	/* the following code applies a different fontsize. It is not currently
+	 needed so it is not tested. Use with care ;-)	*/
+    if (wMessageSetFont(flags)) {
+        PangoFontDescription *fontDesc;
+        PangoContext *context;
+        int fontSize;
 
-	if (wMessageSetFont(flags))	{
-		if (!fonts_set) {
-			GtkStyleContext *context;
-			GtkCssProvider *smallProvider = gtk_css_provider_new();
-			GtkCssProvider *largeProvider = gtk_css_provider_new();
-			/* get the current font descriptor */
-			context = gtk_widget_get_style_context(temp);
-			static const char smallStyle[] = " .smallLabel { font-size: 70% } ";
+        /* get font info via Pango context */
+        context = gtk_widget_get_pango_context(temp);
+        fontDesc = pango_font_description_copy(
+            pango_context_get_font_description(context));
 
-			gtk_css_provider_load_from_data (smallProvider,
-			                                 smallStyle, -1, NULL);
-			gtk_style_context_add_provider(context,
-			                               GTK_STYLE_PROVIDER(smallProvider),
-			                               GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+        fontSize = pango_font_description_get_size(fontDesc);
 
-			static const char largeStyle[] = " .largeLabel{ font-size: 140% }  ";
+        if (flags & BM_LARGE) {
+            pango_font_description_set_size(fontDesc, (int)(fontSize * 1.4));
+        } else {
+            pango_font_description_set_size(fontDesc, (int)(fontSize * 0.7));
+        }
 
-			gtk_css_provider_load_from_data (largeProvider,
-			                                 largeStyle, -1, NULL);
-			gtk_style_context_add_provider(context,
-			                               GTK_STYLE_PROVIDER(largeProvider),
-			                               GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+        /* override font via CSS provider instead of deprecated modify_font */
+        char css[256];
+        char *font_str = pango_font_description_to_string(fontDesc);
+        snprintf(css, sizeof(css), "* { font: %s; }", font_str);
+        g_free(font_str);
 
+        GtkCssProvider *provider = gtk_css_provider_new();
+        gtk_css_provider_load_from_data(provider, css, -1, NULL);
+        gtk_style_context_add_provider(
+            gtk_widget_get_style_context(temp),
+            GTK_STYLE_PROVIDER(provider),
+            GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+        g_object_unref(provider);
 
-			fonts_set = 1;
+        pango_font_description_free(fontDesc);
+    }
 
-		}
+	layout = gtk_label_get_layout(GTK_LABEL(temp));
+	pango_layout_get_pixel_size(layout, &text_width, &text_height);
 
-		/* set the new font size */
-		GtkStyleContext * context = gtk_widget_get_style_context(GTK_WIDGET(temp));
-		if (flags & BM_LARGE) {
-			gtk_style_context_add_class(context, "largeLabel");
-		} else {
-			gtk_style_context_add_class(context, "smallLabel");
-		}
+    g_object_ref_sink(temp);
+    gtk_widget_destroy(temp);
+    g_object_unref(temp);
 
-	}
-
-	GtkRequisition min_requisition,natural_requisition;
-	gtk_widget_get_preferred_size (temp,&min_requisition,&natural_requisition);
-	g_object_ref_sink(temp);
-	gtk_widget_destroy(temp);
-	return natural_requisition.height;
+	return text_height;
 }
 
 /**
@@ -205,7 +199,6 @@ wControl_p wMessageCreateEx(
 	wControl_p b;
 
 	b = wlibControlNew(B_MESSAGE, parent, NULL, NULL);
-	
 
 	if (ISDEFINEDINBUILDER(parent)) {
 		b->widget = wlibWidgetFromIdWarn(parent, labelStr);
@@ -239,32 +232,4 @@ wControl_p wMessageCreateEx(
 	return b;
 }
 
-/**
- * Get the anticipated length of a message field
- *
- * \param testString IN string that should fit into the message box
- * \return expected width of message box
- */
-
-wWinPix_t
-wMessageGetWidth(const char *testString)
-{
-//	GtkWidget *entry;
-//	GtkRequisition requisition;
-
-	return( wLabelWidth(testString));
-//    entry = gtk_entry_new();
-//    g_object_ref_sink(entry);
-//
-//    gtk_entry_set_has_frame(GTK_ENTRY(entry), FALSE);
-//    gtk_entry_set_width_chars(GTK_ENTRY(entry), strlen(testString));
-//    gtk_entry_set_max_length(GTK_ENTRY(entry), strlen(testString));
-//
-//    gtk_widget_size_request(entry, &requisition);
-//
-//    gtk_widget_destroy(entry);
-//    g_object_unref(entry);
-//
-//    return (requisition.width+8);
-}
 
