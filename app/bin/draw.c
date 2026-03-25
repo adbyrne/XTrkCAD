@@ -205,7 +205,6 @@ EXPORT BOOL_T SetRoomSize(coOrd size)
 	LOG(log_size, 2,
 	    ("SetRoomSize NEW:%0.3fx%0.3f OLD:%0.3fx%0.3f\n", size.x, size.y,
 	     mapD.size.x, mapD.size.y));
-	SetLayoutRoomSize(size);
 	if (size.x < 1.0) {
 		size.x = 1.0;
 	}
@@ -219,9 +218,6 @@ EXPORT BOOL_T SetRoomSize(coOrd size)
 	SetLayoutRoomSize(size);
 	wPrefSetFloat("draw", "roomsizeX", mapD.size.x);
 	wPrefSetFloat("draw", "roomsizeY", mapD.size.y);
-	if (mapW == NULL) {
-		return TRUE;
-	}
 	return TRUE;
 }
 
@@ -756,7 +752,7 @@ void DoNewScale(DIST_T scale)
 	SetMainSize();
 	PanHere(I2VP(1));
 	LOG(log_zoom, 1, ("center = [%0.3f %0.3f]\n", mainCenter.x, mainCenter.y))
-	sprintf(tmp, "%0.3f", mainD.scale);
+	snprintf(tmp, sizeof(tmp), "%0.3f", mainD.scale);
 	wPrefSetString("draw", "zoom", tmp);
 	if (recordF) {
 		fprintf(recordF, "ORIG %0.3f %0.3f %0.3f\n", mainD.scale, mainD.orig.x,
@@ -874,7 +870,8 @@ EXPORT void DoZoomExtents(void *mode)
 	if (scale_x > MAX_MAIN_SCALE) {
 		scale_x = MAX_MAIN_SCALE;
 	}
-	if (1 != (intptr_t)1) {
+	//if (1 != (intptr_t)1) {
+	if (1 != VP2L(mode)) {
 		mainD.orig = zero;
 	}
 	DoNewScale(scale_x);
@@ -1550,7 +1547,7 @@ static wBool_t PlaybackKey(char *line)
 	if (rc != 3) {
 		SyntaxError("MOUSE", rc, 3);
 	} else {
-		action = action | c << 8;
+		action = action | (unsigned int)c << 8;
 		PlaybackMouse(DoMouse, &tempD, (wAction_t)action, pos, wDrawColorBlack);
 	}
 	return TRUE;
