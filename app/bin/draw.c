@@ -40,7 +40,7 @@ static int charWidth;
 /* Accessor functions used by ddrawprim.c and drawruler.c */
 int GetLBorder(void)  { return lborder;   }
 int GetBBorder(void)  { return bborder;   }
-int GetCharWidth(void){ return charWidth;  }
+int GetCharWidth(void) { return charWidth;  }
 
 /* Functions moved to drawruler.c */
 void DrawRoomWalls(wBool_t drawBackground);
@@ -479,43 +479,43 @@ wBool_t MainProc(wControl_p win, winProcEvent e, void *refresh, void *data)
 	wWinPix_t width, height;
 	switch (e) {
 
-case wResize_e:
-    if (mainD.d == NULL) {
-        return FALSE;
-    }
-    wWinGetSize(mainW, &width, &height);
-    LOG(log_redraw, 1,
-        ("MainProc/Resize: %d %s %ld %ld\n", cMP++,
-         refresh == NULL ? "RDW" : "---", width, height));
-    if (height >= 0) {
-        wBool_t bTemp = wDrawSetTempMode(mainD.d, FALSE);
-        if (bTemp) {
-            printf("MainProc TempMode\n");
-        }
+	case wResize_e:
+		if (mainD.d == NULL) {
+			return FALSE;
+		}
+		wWinGetSize(mainW, &width, &height);
+		LOG(log_redraw, 1,
+		    ("MainProc/Resize: %d %s %ld %ld\n", cMP++,
+		     refresh == NULL ? "RDW" : "---", width, height));
+		if (height >= 0) {
+			wBool_t bTemp = wDrawSetTempMode(mainD.d, FALSE);
+			if (bTemp) {
+				printf("MainProc TempMode\n");
+			}
 
-        /* Remember the center of the current view BEFORE the size changes */
-        coOrd oldCenter;
-        oldCenter.x = mainD.orig.x + mainD.size.x / 2.0;
-        oldCenter.y = mainD.orig.y + mainD.size.y / 2.0;
+			/* Remember the center of the current view BEFORE the size changes */
+			coOrd oldCenter;
+			oldCenter.x = mainD.orig.x + mainD.size.x / 2.0;
+			oldCenter.y = mainD.orig.y + mainD.size.y / 2.0;
 
-        SetMainSize();
+			SetMainSize();
 
-        /* Recompute origin so the viewport stays centered on the same point */
-        mainD.orig.x = oldCenter.x - mainD.size.x / 2.0;
-        mainD.orig.y = oldCenter.y - mainD.size.y / 2.0;
+			/* Recompute origin so the viewport stays centered on the same point */
+			mainD.orig.x = oldCenter.x - mainD.size.x / 2.0;
+			mainD.orig.y = oldCenter.y - mainD.size.y / 2.0;
 
-        panCenter = oldCenter;
+			panCenter = oldCenter;
 
-        LOG(log_pan, 2,
-            ("PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y));
-        MainLayout(!refresh, constrainMain != 0); /* MainProc: wResize_e event */
-        wPrefSetInteger("draw", "mainwidth", (int)width);
-        wPrefSetInteger("draw", "mainheight", (int)height);
-        wDrawSetTempMode(mainD.d, bTemp);
-    } else {
-        MapDrawBoundingBox(TRUE);
-    }
-    break;
+			LOG(log_pan, 2,
+			    ("PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y));
+			MainLayout(!refresh, constrainMain != 0); /* MainProc: wResize_e event */
+			wPrefSetInteger("draw", "mainwidth", (int)width);
+			wPrefSetInteger("draw", "mainheight", (int)height);
+			wDrawSetTempMode(mainD.d, bTemp);
+		} else {
+			MapDrawBoundingBox(TRUE);
+		}
+		break;
 	case wState_e:
 		wPrefSetInteger("draw", "maximized", wWinIsMaximized(win));
 		break;
@@ -1253,8 +1253,8 @@ static void DoMouse(wAction_t action, coOrd pos)
 		}
 		coOrd anchor = pos;
 		if (anchor.x < 0.0 || anchor.x > mapD.size.x ||
-    		anchor.y < 0.0 || anchor.y > mapD.size.y) {
-    		break;   /* pointer is over grey surround, not the layout */
+		    anchor.y < 0.0 || anchor.y > mapD.size.y) {
+			break;   /* pointer is over grey surround, not the layout */
 		}
 		{
 			DIST_T oldScale = mainD.scale;
@@ -1308,8 +1308,8 @@ static void DoMouse(wAction_t action, coOrd pos)
 		}
 		coOrd anchor = pos;
 		if (anchor.x < 0.0 || anchor.x > mapD.size.x ||
-    		anchor.y < 0.0 || anchor.y > mapD.size.y) {
-    	break;   /* pointer is over grey surround, not the layout */
+		    anchor.y < 0.0 || anchor.y > mapD.size.y) {
+			break;   /* pointer is over grey surround, not the layout */
 		}
 		{
 			DIST_T oldScale = mainD.scale;
@@ -1679,7 +1679,7 @@ EXPORT void DrawInit(int initialZoom)
 	AddPlaybackProc("MOUSE ", (playbackProc_p)PlaybackMain, NULL);
 	AddPlaybackProc("KEY ", (playbackProc_p)PlaybackKey, NULL);
 
-	SetZoomRadio( mainD.scale ); 
+	SetZoomRadio( mainD.scale );
 	InfoScale();
 	SetInfoBar();
 	InfoPos(zero);
