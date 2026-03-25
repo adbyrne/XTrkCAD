@@ -1254,8 +1254,12 @@ static void DoMouse(wAction_t action, coOrd pos)
 		    mousePositiony < bborder || mousePositiony > hh_z - TBORDER) {
 			break;
 		}
+		coOrd anchor = pos;
+		if (anchor.x < 0.0 || anchor.x > mapD.size.x ||
+    		anchor.y < 0.0 || anchor.y > mapD.size.y) {
+    		break;   /* pointer is over grey surround, not the layout */
+		}
 		{
-			coOrd anchor = pos;          /* model coord under cursor */
 			DIST_T oldScale = mainD.scale;
 			int idx = ScaleInx(oldScale);
 			if (idx < 0) { idx = NearestScaleInx(oldScale, FALSE); }
@@ -1305,8 +1309,12 @@ static void DoMouse(wAction_t action, coOrd pos)
 		    mousePositiony < bborder || mousePositiony > hh_z2 - TBORDER) {
 			break;
 		}
+		coOrd anchor = pos;
+		if (anchor.x < 0.0 || anchor.x > mapD.size.x ||
+    		anchor.y < 0.0 || anchor.y > mapD.size.y) {
+    	break;   /* pointer is over grey surround, not the layout */
+		}
 		{
-			coOrd anchor = pos;          /* model coord under cursor */
 			DIST_T oldScale = mainD.scale;
 			int idx = ScaleInx(oldScale);
 			if (idx < 0) { idx = NearestScaleInx(oldScale, TRUE); }
