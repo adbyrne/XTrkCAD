@@ -645,6 +645,7 @@ const char * wMemStats( void );
 #define WKEY_CTRL	(1<<2)
 #define WKEY_ALT	(1<<3)
 int wGetKeyState(		void );
+int wGetKeyStateFromButton(		void );
 
 void wGetDisplaySize(		wWinPix_t*, wWinPix_t* );
 
@@ -990,7 +991,7 @@ void wDrawClip(wControl_p drawingArea,
     wDrawPix_t w,
     wDrawPix_t h);
 
-void wDrawClipClear(wControl_p drawingArea);    
+void wDrawClipClear(wControl_p drawingArea);
 
 /* Geometry */
 double wDrawGetDPI(	wControl_p drawingArea );

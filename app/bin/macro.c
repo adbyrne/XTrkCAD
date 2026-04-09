@@ -274,8 +274,8 @@ EXPORT void DoRecord( void * context )
 {
 	if (recordW == NULL) {
 		char * title = MakeWindowTitle(_("Record"));
-		recordW = FormCreateDialog( &recordPG, title, 
-									_("Finish"), FormButtonOk, 
+		recordW = FormCreateDialog( &recordPG, title,
+									_("Finish"), FormButtonOk,
 									NULL, NULL,
 		                            FALSE, F_RESIZE, NULL );
 		recordFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, title, sRecordFilePattern,
@@ -1379,7 +1379,7 @@ static void DoDemoButton( void * command )
 	case 0:
 		/* step */
 //		This doesn't work because meta keys are only caught for wDraw's
-//		playbackNonStop = (wGetKeyState() & WKEY_SHIFT) != 0;
+		playbackNonStop = (wGetKeyStateFromButton() & WKEY_SHIFT) != 0;
 		Playback();
 		break;
 	case 1:
@@ -1397,7 +1397,7 @@ static void DoDemoButton( void * command )
 			}
 			paramFile = NULL;
 			wTextClear( demoT );
-			if ( (wGetKeyState()&WKEY_SHIFT)!=0 ) {
+			if ( (wGetKeyStateFromButton()&WKEY_SHIFT)!=0 ) {
 				if ( curDemo >= 2 ) {
 					curDemo -= 2;
 				} else {
@@ -1453,8 +1453,8 @@ static void DemoFinish(paramGroup_p demoPG)
 static void CreateDemoW( void )
 {
 	char * title = MakeWindowTitle(_("Demo"));
-	demoW = FormCreateDialog( &demoPG, title, 
-							  N_("Finish"), DemoFinish, 
+	demoW = FormCreateDialog( &demoPG, title,
+							  N_("Finish"), DemoFinish,
 							  NULL, NULL,
 							  FALSE, F_RESIZE, DemoDlgUpdate );
 
@@ -1612,7 +1612,7 @@ static void DoDemo( void * demoNumber )
 	}
 	PlaybackSetup();
 //	This doesn't work because meta keys are only caught for wDraw's
-//	playbackNonStop = (wGetKeyState() & WKEY_SHIFT) != 0;
+	playbackNonStop = (wGetKeyStateFromButton() & WKEY_SHIFT) != 0;
 	paramFile = NULL;
 	Playback();
 }
@@ -2325,7 +2325,7 @@ EXPORT BOOL_T MacroInit( void )
 {
 	AddParam( "DEMOGROUP ", ReadDemo );
 	AddParam( "DEMO ", ReadDemo );
-	AddPlaybackProc( "PARAMETER", ParamPlayback, NULL );        
+	AddPlaybackProc( "PARAMETER", ParamPlayback, NULL );
 	AddPlaybackProc( "PARAMCHECK", ParamCheck, NULL );
 
 	recordMouseMoves = ( getenv( "XTRKCADNORECORDMOUSEMOVES" ) == NULL );
