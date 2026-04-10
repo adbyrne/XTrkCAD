@@ -16,12 +16,12 @@
 #include <stddef.h>
 
 #ifdef USE_SIMPLE_GETTEXT
-char *bindtextdomain( char *domainname, char *dirname );
-char *bind_textdomain_codeset(char *domainname, char *codeset );
-char *textdomain( char *domainname );
-char *gettext( const char *msgid );
+char *bindtextdomain(char *domainname, char *dirname);
+char *bind_textdomain_codeset(char *domainname, char *codeset);
+char *textdomain(char *domainname);
+char *gettext(const char *msgid);
 
-//char *g_win32_getlocale (void);
+// char *g_win32_getlocale (void);
 #endif
 
 // conversion routines to and from UTF-8
@@ -29,7 +29,7 @@ bool wSystemToUTF8(const char *inString, char *outString,
                    unsigned outStringLength);
 bool wUTF8ToSystem(const char *inString, char *outString,
                    unsigned outStringLength);
-bool wIsUTF8(const char * string);
+bool wIsUTF8(const char *string);
 
 /*
  * Interface types
@@ -50,50 +50,49 @@ typedef struct _DataStore DataStore;
 /*
  * Opaque Pointers
  */
-typedef struct wWin_t       * wWin_p;
-typedef struct wWindow_t    * wWindow_p;
-typedef struct control      * wControl_p;
-typedef struct wButton_t    * wButton_p;
-typedef struct wEntry_t     * wEntry_p;
-typedef struct wInteger_t   * wInteger_p;
-typedef struct wFloat_t     * wFloat_p;
-typedef struct wList_t      * wList_p;
-typedef struct wChoice_t    * wChoice_p;
-typedef struct wDraw_t      * wDraw_p;
-typedef struct wMenu_t      * wMenu_p;
+typedef struct wWin_t *wWin_p;
+typedef struct wWindow_t *wWindow_p;
+typedef struct control *wControl_p;
+typedef struct wButton_t *wButton_p;
+typedef struct wEntry_t *wEntry_p;
+typedef struct wInteger_t *wInteger_p;
+typedef struct wFloat_t *wFloat_p;
+typedef struct wList_t *wList_p;
+typedef struct wChoice_t *wChoice_p;
+typedef struct wDraw_t *wDraw_p;
+typedef struct wMenu_t *wMenu_p;
 #define wMenu_p wControl_p
-typedef struct wText_t      * wText_p;
-typedef struct wMessage_t   * wMessage_p;
-typedef struct wLine_t      * wLine_p;
-typedef struct wMenuList_t  * wMenuList_p;
-typedef struct wMenuPush_t  * wMenuPush_p;
-typedef struct wMenuRadio_t * wMenuRadio_p;
-//typedef struct wMenuToggle_t* wMenuToggle_p;
+typedef struct wText_t *wText_p;
+typedef struct wMessage_t *wMessage_p;
+typedef struct wLine_t *wLine_p;
+typedef struct wMenuList_t *wMenuList_p;
+typedef struct wMenuPush_t *wMenuPush_p;
+typedef struct wMenuRadio_t *wMenuRadio_p;
+// typedef struct wMenuToggle_t* wMenuToggle_p;
 #define wMenuToggle_p wControl_p
-typedef struct wBox_t       * wBox_p;
-typedef struct wIcon_t      * wIcon_p;
-typedef struct wDrawBitMap_t * wDrawBitMap_p;
-typedef struct wFont_t      * wFont_p;
-typedef struct wBitmap_t	* wBitmap_p;
-typedef struct wStatus_t    * wStatus_p;
-typedef struct wColorButton_t* wColorButton_p;
+typedef struct wBox_t *wBox_p;
+typedef struct wIcon_t *wIcon_p;
+typedef struct wDrawBitMap_t *wDrawBitMap_p;
+typedef struct wFont_t *wFont_p;
+typedef struct wBitmap_t *wBitmap_p;
+typedef struct wStatus_t *wStatus_p;
+typedef struct wColorButton_t *wColorButton_p;
 
 typedef int wDrawWidth;
 typedef unsigned long wDrawColor;
-
 
 /*----------------------------------------------------------------------------
  * Tooltips
  */
 
 typedef struct {
-	const char * name;
-	const char * value;
+  const char *name;
+  const char *value;
 } wTooltip_t;
 
 unsigned TooltipsGetCount(void);
 
-void wInitTooltip(wTooltip_t*, unsigned int count );
+void wInitTooltip(wTooltip_t *, unsigned int count);
 void wEnableBalloonHelp(int);
 void wBalloonHelpUpdate(void);
 
@@ -106,64 +105,58 @@ extern long wDebugFont;
  * Application main window
  */
 
- /* Creation CallBacks */
+/* Creation CallBacks */
 typedef enum {
-    wClose_e,
-    wResize_e,
-    wState_e,
-    wQuit_e,
-    wRedraw_e,
-    wCancel_e,
-    wAccept_e
+  wClose_e,
+  wResize_e,
+  wState_e,
+  wQuit_e,
+  wRedraw_e,
+  wCancel_e,
+  wAccept_e
 } winProcEvent;
 
-typedef bool (*wWinCallBack_p)(wControl_p control,
-                               winProcEvent event,
-                               void* data1,
-                               void* data2);
+typedef bool (*wWinCallBack_p)(wControl_p control, winProcEvent event,
+                               void *data1, void *data2);
 
 /* Creation Options */
-#define F_AUTOSIZE	(1L<<1)
-#define F_HEADER 	(1L<<2)
-#define F_RESIZE 	(1L<<3)
-#define F_BLOCK  	(1L<<4)
-#define F_MENUBAR 	(1L<<5)
-#define F_NOTAB		(1L<<8)
-#define F_RECALLPOS	(1L<<9)
-#define F_RECALLSIZE	(1L<<10)
-#define F_TOP		(1L<<11)
-#define F_CENTER	(1L<<12)
-#define F_HIDE		(1L<<13)
-#define F_MAXIMIZE  (1L<<14)
-#define F_RESTRICT  (1L<<15)
-#define F_NOTTRANSIENT (1L<<16)
-#define F_DEFINEDINBUILDER (1L<<17)
+#define F_AUTOSIZE (1L << 1)
+#define F_HEADER (1L << 2)
+#define F_RESIZE (1L << 3)
+#define F_BLOCK (1L << 4)
+#define F_MENUBAR (1L << 5)
+#define F_NOTAB (1L << 8)
+#define F_RECALLPOS (1L << 9)
+#define F_RECALLSIZE (1L << 10)
+#define F_TOP (1L << 11)
+#define F_CENTER (1L << 12)
+#define F_HIDE (1L << 13)
+#define F_MAXIMIZE (1L << 14)
+#define F_RESTRICT (1L << 15)
+#define F_NOTTRANSIENT (1L << 16)
+#define F_DEFINEDINBUILDER (1L << 17)
 
-wControl_p wWinMainCreate(
-    const char* name,	        /* Application name */
-    wWinPix_t x,		        /* Initial window width */
-    wWinPix_t y,		        /* Initial window height */
-    const char* helpStr,	    /* Help topic string */
-    const char* labelStr,	    /* Window title */
-    const char* nameStr,	    /* Window name */
-    long option,		        /* Options */
-    wWinCallBack_p winProc,	    /* Call back function */
-    void* context );
+wControl_p wWinMainCreate(const char *name,       /* Application name */
+                          wWinPix_t x,            /* Initial window width */
+                          wWinPix_t y,            /* Initial window height */
+                          const char *helpStr,    /* Help topic string */
+                          const char *labelStr,   /* Window title */
+                          const char *nameStr,    /* Window name */
+                          long option,            /* Options */
+                          wWinCallBack_p winProc, /* Call back function */
+                          void *context);
 
 /*----------------------------------------------------------------------------
  *
  * Bitmap Controls bitmap.c
  */
 
-wControl_p wBitmapViewCreate(wControl_p parent,
-                         wWinPix_t x,
-                         wWinPix_t y,
-                         long options,
-                         const wIcon_p iconP);
+wControl_p wBitmapViewCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
+                             long options, const wIcon_p iconP);
 
-wIcon_p wIconCreatePixBufFromResource(const char *prefix, const char* filename);
-//wIcon_p wIconCreatePixMap(	const wIconBitMap_t icon );
-void wIconSetColor(		wIcon_p, wDrawColor );
+wIcon_p wIconCreatePixBufFromResource(const char *prefix, const char *filename);
+// wIcon_p wIconCreatePixMap(	const wIconBitMap_t icon );
+void wIconSetColor(wIcon_p, wDrawColor);
 
 /*------------------------------------------------------------------------------
  *
@@ -171,49 +164,38 @@ void wIconSetColor(		wIcon_p, wDrawColor );
  *
  */
 
- /* Creation Options */
-#define BB_DEFAULT	(1L<<5)
-#define BB_CANCEL   (1L<<6)
-#define BB_HELP (1L<<7)
-#define BC_ICON 	(1L<<0)
-#define BC_NOBORDER 	(1L<<15)
-#define BC_HORIZONTAL 	(1L<<22)
+/* Creation Options */
+#define BB_DEFAULT (1L << 5)
+#define BB_CANCEL (1L << 6)
+#define BB_HELP (1L << 7)
+#define BC_ICON (1L << 0)
+#define BC_NOBORDER (1L << 15)
+#define BC_HORIZONTAL (1L << 22)
 
 /* Creation CallBacks */
-typedef void (*wChoiceCallBack_p)(long, void*);
+typedef void (*wChoiceCallBack_p)(long, void *);
 
 /**  Buttons */
 
 /* Creation CallBacks */
-typedef void (*wButtonCallBack_p)(void* choice);
+typedef void (*wButtonCallBack_p)(void *choice);
 
 void wButtonSetIcon(wControl_p bb, wIcon_p icon);
-void wButtonSetLabel(wControl_p bb, const char* labelStr);
+void wButtonSetLabel(wControl_p bb, const char *labelStr);
 void wButtonSetBusy(wControl_p bb, int value);
-wControl_p wButtonCreate(wControl_p parent,
-                        wWinPix_t x,
-                        wWinPix_t y,
-                        const char* helpStr,
-                        const char* labelStr,
-                        long option,
-                        wWinPix_t width,
-                        wButtonCallBack_p action,
-                        void* context);
+wControl_p wButtonCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
+                         const char *helpStr, const char *labelStr, long option,
+                         wWinPix_t width, wButtonCallBack_p action,
+                         void *context);
 
-
-wControl_p wButtonCreateForToolbar(wControl_p  w,
-                                   wWinPix_t x,
-                                   wWinPix_t y,
-                                   const char* helpStr,
-                                   wIcon_p icon,
-                                   long option,
-                                   wWinPix_t width,
-                                   wButtonCallBack_p action,
-                                   void* context);
+wControl_p wButtonCreateForToolbar(wControl_p w, wWinPix_t x, wWinPix_t y,
+                                   const char *helpStr, wIcon_p icon,
+                                   long option, wWinPix_t width,
+                                   wButtonCallBack_p action, void *context);
 
 wBool_t wButtonIsSplitButton(wControl_p button);
 void wButtonSetDropdownMenu(wControl_p button, wMenu_p menu);
-void wButtonSetContext(wControl_p button, void* context);
+void wButtonSetContext(wControl_p button, void *context);
 void wButtonSetIcon(wControl_p button, wIcon_p icon);
 void wButtonSetDropdownMenu(wControl_p button, wMenu_p menu);
 void wButtonMakeSplit(wControl_p button, wMenu_p popupMenu);
@@ -222,59 +204,40 @@ void wButtonMakeSplit(wControl_p button, wMenu_p popupMenu);
 
 void wRadioSetValue(wControl_p bc, long value);
 long wRadioGetValue(wControl_p bc);
-void RuntimeCreateRadiobuttons(long option, wControl_p b, const char* const* labels, const char* labelStr, wWinPix_t x, wWinPix_t y, wControl_p parent);
-wControl_p wRadioCreate(wControl_p parent,
-                        wWinPix_t x,
-                        wWinPix_t y,
-                        const char* helpStr,
-                        const char* labelStr,
-                        long option,
-                        const char* const* labels,
-                        long* valueP,
-                        wChoiceCallBack_p action,
-                        void* context);
+void RuntimeCreateRadiobuttons(long option, wControl_p b,
+                               const char *const *labels, const char *labelStr,
+                               wWinPix_t x, wWinPix_t y, wControl_p parent);
+wControl_p wRadioCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
+                        const char *helpStr, const char *labelStr, long option,
+                        const char *const *labels, long *valueP,
+                        wChoiceCallBack_p action, void *context);
 
 /** Toggle buttonlongs */
 
 void wToggleSetValue(wControl_p bc, long value);
 long wToggleGetValue(wControl_p b);
-wControl_p wToggleCreate(wControl_p parent,
-                         wWinPix_t x,
-                         wWinPix_t y,
-                         const char* helpStr,
-                         const char* labelStr,
-                         long option,
-                         const char* const* labels,
-                         long* valueP,
-                         wChoiceCallBack_p action,
-                         void* context);
-wControl_p wToggleCreateForToolbar( wControl_p	parent,
-    wWinPix_t	x,
-    wWinPix_t	y,
-    const char* helpStr,
-    wIcon_p icon,
-    long 	option,
-    wWinPix_t 	width,
-    wButtonCallBack_p action,
-    void* context);
+wControl_p wToggleCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
+                         const char *helpStr, const char *labelStr, long option,
+                         const char *const *labels, long *valueP,
+                         wChoiceCallBack_p action, void *context);
+wControl_p wToggleCreateForToolbar(wControl_p parent, wWinPix_t x, wWinPix_t y,
+                                   const char *helpStr, wIcon_p icon,
+                                   long option, wWinPix_t width,
+                                   wButtonCallBack_p action, void *context);
 /*------------------------------------------------------------------------------
  *
  * Color Selection
  */
 
- /* Creation CallBacks */
-typedef void (*wColorSelectButtonCallBack_p)(void*, wDrawColor);
+/* Creation CallBacks */
+typedef void (*wColorSelectButtonCallBack_p)(void *, wDrawColor);
 
-wControl_p wColorSelectButtonCreate( wControl_p	parent,
-                                     wWinPix_t x,
-                                     wWinPix_t y,
-                                     const char* helpStr,
-                                     const char* labelStr,
-                                     long option,
-                                     wWinPix_t width,
-                                     wDrawColor* valueP,
-                                     wColorSelectButtonCallBack_p action,
-                                     void* context);
+wControl_p wColorSelectButtonCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
+                                    const char *helpStr, const char *labelStr,
+                                    long option, wWinPix_t width,
+                                    wDrawColor *valueP,
+                                    wColorSelectButtonCallBack_p action,
+                                    void *context);
 void wColorSelectButtonSetColor(wControl_p bb, wDrawColor color);
 wDrawColor wColorSelectButtonGetColor(wControl_p bb);
 wDrawColor wDrawColorGray(int percent);
@@ -284,7 +247,7 @@ wDrawColor wDrawColorGray(int percent);
 
 #define wDrawFindColor(rgb) (rgb)
 
-#define wDrawGetRGB( color )  (color)
+#define wDrawGetRGB(color) (color)
 
 /*------------------------------------------------------------------------------
  *
@@ -293,18 +256,12 @@ wDrawColor wDrawColorGray(int percent);
 
 #define DO_FILESYSTEM 1
 
-wControl_p wWinDialogCreate(wControl_p parent,
-                            const char* helpStr,
-                            const char* titleStr,
-                            const char* nameStr,
-                            long option,
-                            wWinCallBack_p winProc,
-                            void* context);
+wControl_p wWinDialogCreate(wControl_p parent, const char *helpStr,
+                            const char *titleStr, const char *nameStr,
+                            long option, wWinCallBack_p winProc, void *context);
 
-void wDialogButtonsConfigure(wControl_p dialog,
-                             const char* okLabel,
-                             const char* cancelLabel,
-                             const char* helpLabel);
+void wDialogButtonsConfigure(wControl_p dialog, const char *okLabel,
+                             const char *cancelLabel, const char *helpLabel);
 
 void wDialogSaveSizePos(wControl_p dialog);
 
@@ -314,57 +271,48 @@ void wDialogSaveSizePos(wControl_p dialog);
  */
 
 typedef int wAction_t;
-#define wActionMove		    (1)
-#define wActionLDown		(2)
-#define wActionLDrag		(3)
-#define wActionLUp		    (4)
-#define wActionRDown		(5)
-#define wActionRDrag		(6)
-#define wActionRUp		    (7)
-#define wActionText		    (8)
-#define wActionExtKey		(9)
-#define wActionWheelUp      (10)
-#define wActionWheelDown    (11)
-#define wActionLDownDouble  (12)
-#define wActionModKey       (13)
-#define wActionScrollUp     (14)
-#define wActionScrollDown   (15)
-#define wActionScrollLeft   (16)
-#define wActionScrollRight  (17)
-#define wActionMDown        (18)
-#define wActionMDrag        (19)
-#define wActionMUp          (20)
-#define wActionGetTooltip   (21)
-#define wActionLast		    wActionGetTooltip
+#define wActionMove (1)
+#define wActionLDown (2)
+#define wActionLDrag (3)
+#define wActionLUp (4)
+#define wActionRDown (5)
+#define wActionRDrag (6)
+#define wActionRUp (7)
+#define wActionText (8)
+#define wActionExtKey (9)
+#define wActionWheelUp (10)
+#define wActionWheelDown (11)
+#define wActionLDownDouble (12)
+#define wActionModKey (13)
+#define wActionScrollUp (14)
+#define wActionScrollDown (15)
+#define wActionScrollLeft (16)
+#define wActionScrollRight (17)
+#define wActionMDown (18)
+#define wActionMDrag (19)
+#define wActionMUp (20)
+#define wActionGetTooltip (21)
+#define wActionLast wActionGetTooltip
 
 /* Creation CallBacks */
-typedef void (*wDrawRedrawCallBack_p)(wControl_p control,
-    void* context,
-    wWinPix_t posX,
-    wWinPix_t posY);
+typedef void (*wDrawRedrawCallBack_p)(wControl_p control, void *context,
+                                      wWinPix_t posX, wWinPix_t posY);
 
-typedef void (*wDrawActionCallBack_p)(wControl_p control,
-    void* context,
-    wAction_t action,
-    wDrawPix_t posX,
-    wDrawPix_t posY);
+typedef void (*wDrawActionCallBack_p)(wControl_p control, void *context,
+                                      wAction_t action, wDrawPix_t posX,
+                                      wDrawPix_t posY);
 
 /* Creation Options */
-#define BD_TICKS	 (1L<<25)
-#define BD_DIRECT	 (1L<<26)
-#define BD_NOCAPTURE (1L<<27)
-#define BD_NOFOCUS   (1L<<28)
-#define BD_MODKEYS   (1L<<29)
+#define BD_TICKS (1L << 25)
+#define BD_DIRECT (1L << 26)
+#define BD_NOCAPTURE (1L << 27)
+#define BD_NOFOCUS (1L << 28)
+#define BD_MODKEYS (1L << 29)
 
 /* Create: */
-wControl_p wDrawCreate(wControl_p parent,
-                       wWinPix_t x,
-                       wWinPix_t y,
-                       const char* helpStr,
-                       long option,
-                       wWinPix_t width,
-                       wWinPix_t height,
-                       void* context,
+wControl_p wDrawCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
+                       const char *helpStr, long option, wWinPix_t width,
+                       wWinPix_t height, void *context,
                        wDrawRedrawCallBack_p redraw,
                        wDrawActionCallBack_p action);
 
@@ -373,65 +321,52 @@ wControl_p wDrawCreate(wControl_p parent,
  * File Selection
  */
 
-#define FSO_MULTIPLEFILES	1
-#define FSO_PICTURES		2
-#define FSO_SETFOLDERALWAYS	8
+#define FSO_MULTIPLEFILES 1
+#define FSO_PICTURES 2
+#define FSO_SETFOLDERALWAYS 8
 
 struct wFilSel_t;
-typedef enum {
-    FS_SAVE,
-    FS_LOAD,
-    FS_UPDATE
-} wFilSelMode_e;
+typedef enum { FS_SAVE, FS_LOAD, FS_UPDATE } wFilSelMode_e;
 
-typedef int (*wFilSelCallBack_p)(int files,
-    char** fileNames,
-    void* context);
+typedef int (*wFilSelCallBack_p)(int files, char **fileNames, void *context);
 
-struct wFilSel_t* wFilSelCreate(wControl_p parent,
-    wFilSelMode_e mode,
-    int options,
-    const char* title,
-    const char* patternList,
-    wFilSelCallBack_p action,
-    void* context);
+struct wFilSel_t *wFilSelCreate(wControl_p parent, wFilSelMode_e mode,
+                                int options, const char *title,
+                                const char *patternList,
+                                wFilSelCallBack_p action, void *context);
 
-int wFilSelect(struct wFilSel_t* fs,
-    const char* directoryName);
+int wFilSelect(struct wFilSel_t *fs, const char *directoryName);
 
 /*------------------------------------------------------------------------------
  *
  * Labels using Freetype
  */
 
-double wFTLabelLoadFontFromFile(const char* filename);
-wIcon_p wFTLabelCreate(const char* text, wDrawColor color);
+double wFTLabelLoadFontFromFile(const char *filename);
+wIcon_p wFTLabelCreate(const char *text, wDrawColor color);
 
 /*------------------------------------------------------------------------------
  *
  * Messages
  */
 
-#define BM_LARGE (1L<<24)
-#define BM_SMALL (1L<<25)
+#define BM_LARGE (1L << 24)
+#define BM_SMALL (1L << 25)
 #define BM_ALIGNCENTER (0)
-#define BM_ALIGNRIGHT (1L<<26)
-#define BM_ALIGNLEFT (1L<<27)
+#define BM_ALIGNRIGHT (1L << 26)
+#define BM_ALIGNLEFT (1L << 27)
 #define COMBOBOX (1L)
 
-#define wMessageSetFont( x ) ( x & (BM_LARGE | BM_SMALL ))
+#define wMessageSetFont(x) (x & (BM_LARGE | BM_SMALL))
 
-#define wMessageCreate( w, p1, p2, l, p3, m ) wMessageCreateEx( w, p1, p2, l, p3, m, 0 )
+#define wMessageCreate(w, p1, p2, l, p3, m)                                    \
+  wMessageCreateEx(w, p1, p2, l, p3, m, 0)
 
-wControl_p wMessageCreateEx(wControl_p parent,
-                            wWinPix_t x,
-                            wWinPix_t y,
-                            const char* labelStr,
-                            wWinPix_t width,
-                            const char* message,
-                            long flags);
+wControl_p wMessageCreateEx(wControl_p parent, wWinPix_t x, wWinPix_t y,
+                            const char *labelStr, wWinPix_t width,
+                            const char *message, long flags);
 
-void wMessageSetValue(wControl_p b, const char* arg);
+void wMessageSetValue(wControl_p b, const char *arg);
 void wMessageSetWidth(wControl_p b, wWinPix_t width);
 void wMessageSetLength(wControl_p control, size_t length);
 wWinPix_t wMessageGetHeight(long flags);
@@ -442,108 +377,78 @@ wWinPix_t wMessageGetHeight(long flags);
  */
 
 #define NT_INFORMATION 1
-#define NT_WARNING	   2
-#define NT_ERROR	   4
+#define NT_WARNING 2
+#define NT_ERROR 4
 
-int wNotice(
-    const char* msg,
-    const char* yes,
-    const char* no);
+int wNotice(const char *msg, const char *yes, const char *no);
 
-int wNotice3(
-    const char* msg,
-    const char* affirmative,
-    const char* cancel,
-    const char* alternate);
+int wNotice3(const char *msg, const char *affirmative, const char *cancel,
+             const char *alternate);
 
-int wNoticeWithIcon(int type,
-    const char* msg,
-    const char* yes,
-    const char* no);
+int wNoticeWithIcon(int type, const char *msg, const char *yes, const char *no);
 
 /*----------------------------------------------------------------------------
  *
  * Scale control
  */
 
-
-typedef bool (*wScaleCallBack_p)(double value, void* context);
-wControl_p wScaleCreate(wControl_p parent, const char* id, double *valuePointer, wScaleCallBack_p action, void *context);
+typedef bool (*wScaleCallBack_p)(double value, void *context);
+wControl_p wScaleCreate(wControl_p parent, const char *id, double *valuePointer,
+                        wScaleCallBack_p action, void *context);
 double wScaleGetValue(wControl_p scale);
 void wScaleSetValue(wControl_p scale, double value);
-
 
 /*----------------------------------------------------------------------------
  *
  * Splash window
  */
 
-int wCreateSplash(char* appName, char* appVer);
-int wSetSplashInfo(char* msg);
+int wCreateSplash(char *appName, char *appVer);
+int wSetSplashInfo(char *msg);
 void wDestroySplash(void);
-
 
 /*----------------------------------------------------------------------------
  *
  * String entry
  */
 
- /* Creation CallBacks */
-typedef bool (*wEntryCallBack_p)(const char* enteredString, void * userData);
+/* Creation CallBacks */
+typedef bool (*wEntryCallBack_p)(const char *enteredString, void *userData);
 
-
-wControl_p wEntryCreate(wControl_p parent,
-                        wWinPix_t x,
-                        wWinPix_t y,
-                        const char* helpStr,
-                        const char* labelStr,
-                        long option,
-                        wWinPix_t width,
-                        char* valueP,
-                        wIndex_t valueL,
-                        wEntryCallBack_p action,
-                        void* context);
-void wEntrySetValue(wControl_p control,
-                    const char* value);
-void wEntrySetWidth(wControl_p control,
-                    wWinPix_t width);
-const char* wEntryGetValue(wControl_p control);
+wControl_p wEntryCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
+                        const char *helpStr, const char *labelStr, long option,
+                        wWinPix_t width, char *valueP, wIndex_t valueL,
+                        wEntryCallBack_p action, void *context);
+void wEntrySetValue(wControl_p control, const char *value);
+void wEntrySetWidth(wControl_p control, wWinPix_t width);
+const char *wEntryGetValue(wControl_p control);
 
 /*------------------------------------------------------------------------------
  *
  * Text
  */
 
- /* Creation Options */
-#define BT_HSCROLL 	    (1L<<24)
-#define BT_CHARUNITS	(1L<<23)
-#define BT_FIXEDFONT	(1L<<22)
-#define BT_TOP		    (1L<<20)	/* Show the top of the text */
+/* Creation Options */
+#define BT_HSCROLL (1L << 24)
+#define BT_CHARUNITS (1L << 23)
+#define BT_FIXEDFONT (1L << 22)
+#define BT_TOP (1L << 20) /* Show the top of the text */
 
-wControl_p
-wTextCreate(wControl_p parent,
-    wWinPix_t	x,
-    wWinPix_t	y,
-    const char* helpStr,
-    const char* labelStr,
-    long	option,
-    wWinPix_t	width,
-    wWinPix_t	height);
+wControl_p wTextCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
+                       const char *helpStr, const char *labelStr, long option,
+                       wWinPix_t width, wWinPix_t height);
 
 void wTextClear(wControl_p bt);
-void wTextAppend(wControl_p bt, const char* text);
-wBool_t wTextSave(wControl_p bt, const char* fileName);
+void wTextAppend(wControl_p bt, const char *text);
+wBool_t wTextSave(wControl_p bt, const char *fileName);
 wBool_t wTextPrint(wControl_p bt);
 int wTextGetSize(wControl_p bt);
-void wTextGetText(wControl_p bt, char* text, int len);
+void wTextGetText(wControl_p bt, char *text, int len);
 void wTextSetReadonly(wControl_p bt, wBool_t ro);
 wBool_t wTextGetModified(wControl_p bt);
 void wTextSetSize(wControl_p bt, wWinPix_t w, wWinPix_t h);
-void wTextComputeSize(wControl_p bt,
-                      wWinPix_t rows,
-                      wWinPix_t cols,
-                      wWinPix_t* width,
-                      wWinPix_t* height);
+void wTextComputeSize(wControl_p bt, wWinPix_t rows, wWinPix_t cols,
+                      wWinPix_t *width, wWinPix_t *height);
 void wTextSetPosition(wControl_p bt, int pos);
 
 /*------------------------------------------------------------------------------
@@ -552,16 +457,13 @@ void wTextSetPosition(wControl_p bt, int pos);
  */
 
 typedef struct {
-    int width;
-    int x0, y0;
-    int x1, y1;
-} wLines_t, * wLines_p;
+  int width;
+  int x0, y0;
+  int x1, y1;
+} wLines_t, *wLines_p;
 
-wLine_p wLineCreate(wWindow_p	parent, const char* labelStr, int	count,
-    wLines_t* lines);
-
-
-
+wLine_p wLineCreate(wWindow_p parent, const char *labelStr, int count,
+                    wLines_t *lines);
 
 /* = *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= *= */
 
@@ -572,25 +474,22 @@ wLine_p wLineCreate(wWindow_p	parent, const char* labelStr, int	count,
  */
 
 typedef enum {
-	wBoxThinB,
-	wBoxThinW,
-	wBoxAbove,
-	wBoxBelow,
-	wBoxThickB,
-	wBoxThickW,
-	wBoxRidge,
-	wBoxTrough
-}
-wBoxType_e;
+  wBoxThinB,
+  wBoxThinW,
+  wBoxAbove,
+  wBoxBelow,
+  wBoxThickB,
+  wBoxThickW,
+  wBoxRidge,
+  wBoxTrough
+} wBoxType_e;
 
 void wBoxSetSize(wBox_p b, wWinPix_t w, wWinPix_t h);
-//void wlibDrawBox(wWin_p win, wBoxType_e style, wWinPix_t x, wWinPix_t y,
-//                 wWinPix_t w, wWinPix_t h);
+// void wlibDrawBox(wWin_p win, wBoxType_e style, wWinPix_t x, wWinPix_t y,
+//                  wWinPix_t w, wWinPix_t h);
 wBox_p wBoxCreate(wWin_p parent, wWinPix_t bx, wWinPix_t by,
-                  const char *labelStr, wBoxType_e boxTyp, wWinPix_t bw, wWinPix_t bh);
-
-
-
+                  const char *labelStr, wBoxType_e boxTyp, wWinPix_t bw,
+                  wWinPix_t bh);
 
 /*------------------------------------------------------------------------------
  *
@@ -599,62 +498,62 @@ wBox_p wBoxCreate(wWin_p parent, wWinPix_t bx, wWinPix_t by,
 
 void wInitAppName(char *appName);
 
-const char * wGetAppLibDir(			void );
-const char * wGetAppWorkDir(			void );
-const char * wGetUserHomeDir( void );
+const char *wGetAppLibDir(void);
+const char *wGetAppWorkDir(void);
+const char *wGetUserHomeDir(void);
 
 void wSetAudio(bool setting);
-void wBeep( void );
+void wBeep(void);
 
-void wHelp(const char*);
+void wHelp(const char *);
 
 unsigned wOpenFileExternal(char *filename);
 
+void wFlush(void);
 
+typedef void (*wAlarmCallBack_p)(void);
+void wAlarm(long, wAlarmCallBack_p);
+void wPause(long duration);
+unsigned long wGetTimer(void);
 
-void wFlush(			void );
+void wExit(int);
 
-typedef void (*wAlarmCallBack_p)( void );
-void wAlarm(			long, wAlarmCallBack_p );
-void wPause( long duration );
-unsigned long wGetTimer(	void );
-
-void wExit(			int );
-
-typedef enum {	wCursorNormal,
-                wCursorNone,
-                wCursorAppStart,
-                wCursorHand,
-                wCursorNo,
-                wCursorSizeAll,
-                wCursorSizeNESW,
-                wCursorSizeNS,
-                wCursorSizeNWSE,
-                wCursorSizeWE,
-                wCursorWait,
-                wCursorIBeam,
-                wCursorCross,
-                wCursorQuestion
-             } wCursor_t;
-void wSetCursor( wControl_p window, wCursor_t cursor);
+typedef enum {
+  wCursorNormal,
+  wCursorNone,
+  wCursorAppStart,
+  wCursorHand,
+  wCursorNo,
+  wCursorSizeAll,
+  wCursorSizeNESW,
+  wCursorSizeNS,
+  wCursorSizeNWSE,
+  wCursorSizeWE,
+  wCursorWait,
+  wCursorIBeam,
+  wCursorCross,
+  wCursorQuestion
+} wCursor_t;
+void wSetCursor(wControl_p window, wCursor_t cursor);
 #define defaultCursor wCursorCross
 
-const char * wMemStats( void );
+const char *wMemStats(void);
 
-#define WKEY_SHIFT	(1<<1)
-#define WKEY_CTRL	(1<<2)
-#define WKEY_ALT	(1<<3)
-int wGetKeyState(		void );
-int wGetKeyStateFromButton(		void );
+#define WKEY_SHIFT (1 << 1)
+#define WKEY_CTRL (1 << 2)
+#define WKEY_ALT (1 << 3)
+int wGetKeyState(void);
+int wGetKeyStateFromButton(void);
+void wResetKeyStateFromButton(void);
 
-void wGetDisplaySize(		wWinPix_t*, wWinPix_t* );
+void wGetDisplaySize(wWinPix_t *, wWinPix_t *);
 
-void wIconDraw( wDraw_p d, wIcon_p bm, wWinPix_t x, wWinPix_t y );
+void wIconDraw(wDraw_p d, wIcon_p bm, wWinPix_t x, wWinPix_t y);
 
-void wConvertToCharSet(		char *, int );
-void wConvertFromCharSet(	char *, int );
+void wConvertToCharSet(char *, int);
+void wConvertFromCharSet(char *, int);
 #ifdef WINDOWS
-FILE * wFileOpen(		const char *, const char * );
+FILE *wFileOpen(const char *, const char *);
 #endif
 
 /*------------------------------------------------------------------------------
@@ -662,40 +561,35 @@ FILE * wFileOpen(		const char *, const char * );
  * Main and Dialog Windows
  */
 
-
-wControl_p wMain(			int, char *[] );
-void wWinSetBigIcon(		wWin_p, wIcon_p );
-void wWinSetSmallIcon(		wWin_p, wIcon_p );
+wControl_p wMain(int, char *[]);
+void wWinSetBigIcon(wWin_p, wIcon_p);
+void wWinSetSmallIcon(wWin_p, wIcon_p);
 #define DONTGRABFOCUS 0x100
 void wWinSetAspectRatio(wControl_p win, wWinPix_t x, wWinPix_t y);
 void wWinSetDefaultSize(wControl_p win, wWinPix_t w, wWinPix_t h);
-void wWinShow( wControl_p control, wBool_t visibility);
-wBool_t wWinIsVisible(		wControl_p window );
-wBool_t wWinIsMaximized( wWin_p win);
-void wWinGetSize (		wControl_p window, wWinPix_t * width, wWinPix_t *height );
-void wWinSetSize(		wControl_p, wWinPix_t, wWinPix_t );
-void wWinSetTitle(		wControl_p window, const char * title);
+void wWinShow(wControl_p control, wBool_t visibility);
+wBool_t wWinIsVisible(wControl_p window);
+wBool_t wWinIsMaximized(wWin_p win);
+void wWinGetSize(wControl_p window, wWinPix_t *width, wWinPix_t *height);
+void wWinSetSize(wControl_p, wWinPix_t, wWinPix_t);
+void wWinSetTitle(wControl_p window, const char *title);
 void wWinSetBusy(wControl_p win, wBool_t busy);
-const char * wWinGetTitle(	wControl_p window );
-void wWinClear(			wWin_p, wWinPix_t, wWinPix_t, wWinPix_t, wWinPix_t );
-void wMessage(			wWin_p, const char *, wBool_t );
-void wWinTop(			wControl_p window );
-void wWinDoCancel(		wWin_p );
-void wWinBlockEnable(		wBool_t );
-void wSetGeometry(wControl_p win, wWinPix_t min_width, wWinPix_t max_width, wWinPix_t min_height, wWinPix_t max_height, wWinPix_t base_width, wWinPix_t base_height, double aspect_ratio);
+const char *wWinGetTitle(wControl_p window);
+void wWinClear(wWin_p, wWinPix_t, wWinPix_t, wWinPix_t, wWinPix_t);
+void wMessage(wWin_p, const char *, wBool_t);
+void wWinTop(wControl_p window);
+void wWinDoCancel(wWin_p);
+void wWinBlockEnable(wBool_t);
+void wSetGeometry(wControl_p win, wWinPix_t min_width, wWinPix_t max_width,
+                  wWinPix_t min_height, wWinPix_t max_height,
+                  wWinPix_t base_width, wWinPix_t base_height,
+                  double aspect_ratio);
 
 void wlibRedraw(wWin_p win);
 
-wControl_p wWindowCreate(
-    wControl_p parent,
-    int winType,
-    wWinPix_t x,
-    wWinPix_t y,
-    const char* labelStr,
-    const char* nameStr,
-    long option,
-    wWinCallBack_p winProc,
-    void* context);
+wControl_p wWindowCreate(wControl_p parent, int winType, wWinPix_t x,
+                         wWinPix_t y, const char *labelStr, const char *nameStr,
+                         long option, wWinCallBack_p winProc, void *context);
 
 wBool_t wWinIsTemplated(wWin_p win);
 
@@ -705,46 +599,47 @@ wBool_t wWinIsTemplated(wWin_p win);
  */
 
 /* Creation Options */
-#define BO_ICON		(1L<<0)
-#define BO_DISABLED	(1L<<1)
-#define BO_READONLY	(1L<<2)
-#define BO_BIGGAP   (1L<<3)
-#define BO_SPLITBUTTON (1L<<4)
-#define BO_ABUT     (1L<<6)
-#define BO_GAP      (1L<<7)
-#define BO_NOTAB	(1L<<8)
-#define BO_BORDER	(1L<<9)
-//#define BO_ENTER    (1L<<10)
-#define BO_ENTER    0
-#define BO_REPEAT   (1L<<11)
-#define BO_IGNFOCUS	(1L<<12)
-#define PGO_FULLDIALOGFROMBUILDER (1L<<13)
+#define BO_ICON (1L << 0)
+#define BO_DISABLED (1L << 1)
+#define BO_READONLY (1L << 2)
+#define BO_BIGGAP (1L << 3)
+#define BO_SPLITBUTTON (1L << 4)
+#define BO_ABUT (1L << 6)
+#define BO_GAP (1L << 7)
+#define BO_NOTAB (1L << 8)
+#define BO_BORDER (1L << 9)
+// #define BO_ENTER    (1L<<10)
+#define BO_ENTER 0
+#define BO_REPEAT (1L << 11)
+#define BO_IGNFOCUS (1L << 12)
+#define PGO_FULLDIALOGFROMBUILDER (1L << 13)
 
-wWinPix_t wLabelWidth(		const char * );
-const char * wControlGetHelp(		wControl_p );
-void wControlSetHelp(		wControl_p, const char * );
-void wControlShow(		wControl_p, wBool_t );
-wWinPix_t wControlGetWidth(	wControl_p );
-wWinPix_t wControlGetHeight(	wControl_p );
-wWinPix_t wControlGetPosX(		wControl_p );
-wWinPix_t wControlGetPosY(		wControl_p );
-void wControlGetPos(		wControl_p, wWinPix_t *x, wWinPix_t *y );
-void wControlSetPos(		wControl_p, wWinPix_t, wWinPix_t );
-void wControlSetFocus(		wControl_p );
-void wControlActive(		wControl_p control, wBool_t active);
+wWinPix_t wLabelWidth(const char *);
+const char *wControlGetHelp(wControl_p);
+void wControlSetHelp(wControl_p, const char *);
+void wControlShow(wControl_p, wBool_t);
+wWinPix_t wControlGetWidth(wControl_p);
+wWinPix_t wControlGetHeight(wControl_p);
+wWinPix_t wControlGetPosX(wControl_p);
+wWinPix_t wControlGetPosY(wControl_p);
+void wControlGetPos(wControl_p, wWinPix_t *x, wWinPix_t *y);
+void wControlSetPos(wControl_p, wWinPix_t, wWinPix_t);
+void wControlSetFocus(wControl_p);
+void wControlActive(wControl_p control, wBool_t active);
 wBool_t wControlGetActive(wControl_p control);
-void wControlSetLabel(wControl_p, const char*);
-void  wControlSetObjectInt(wControl_p control, const char *key, int value );
+void wControlSetLabel(wControl_p, const char *);
+void wControlSetObjectInt(wControl_p control, const char *key, int value);
 
-void wTooltipSet(wControl_p control, const char* dialog, const char* dialogItem);
-void wTooltipSetText(	wControl_p control, const char * tooltipText);
-void wControlSetContext(	wControl_p, void * );
-void wControlHilite(		wControl_p, wBool_t );
+void wTooltipSet(wControl_p control, const char *dialog,
+                 const char *dialogItem);
+void wTooltipSetText(wControl_p control, const char *tooltipText);
+void wControlSetContext(wControl_p, void *);
+void wControlHilite(wControl_p, wBool_t);
 
-void wControlLinkedSet( wControl_p b1, wControl_p b2 );
-void wControlLinkedActive( wControl_p b, int active );
-void wControlSetCustomTooltip(wControl_p control, char* tooltip);   // change tooltip at runtime
-
+void wControlLinkedSet(wControl_p b1, wControl_p b2);
+void wControlLinkedActive(wControl_p b, int active);
+void wControlSetCustomTooltip(wControl_p control,
+                              char *tooltip); // change tooltip at runtime
 
 /*------------------------------------------------------------------------------
  *
@@ -752,21 +647,18 @@ void wControlSetCustomTooltip(wControl_p control, char* tooltip);   // change to
  */
 
 /* Creation CallBacks */
-typedef void (*wIntegerCallBack_p)( long, void *, int);
-typedef void (*wFloatCallBack_p)( double, void *, int);
-wInteger_p wIntegerCreate(	wWin_p, wWinPix_t, wWinPix_t, const char *,
-                                const char *, long,
-                                wWinPix_t, wInteger_t, wInteger_t, wInteger_t *,
-                                wIntegerCallBack_p, void * );
-wFloat_p wFloatCreate(		wWin_p, wWinPix_t, wWinPix_t, const char *,
-                                const char *, long,
-                                wWinPix_t, double, double, double *,
-                                wFloatCallBack_p, void * );
-void wIntegerSetValue(		wInteger_p, wInteger_t );
-void wFloatSetValue(		wFloat_p, double );
-wInteger_t wIntegerGetValue(	wInteger_p );
-double wFloatGetValue(		wFloat_p );
-
+typedef void (*wIntegerCallBack_p)(long, void *, int);
+typedef void (*wFloatCallBack_p)(double, void *, int);
+wInteger_p wIntegerCreate(wWin_p, wWinPix_t, wWinPix_t, const char *,
+                          const char *, long, wWinPix_t, wInteger_t, wInteger_t,
+                          wInteger_t *, wIntegerCallBack_p, void *);
+wFloat_p wFloatCreate(wWin_p, wWinPix_t, wWinPix_t, const char *, const char *,
+                      long, wWinPix_t, double, double, double *,
+                      wFloatCallBack_p, void *);
+void wIntegerSetValue(wInteger_p, wInteger_t);
+void wFloatSetValue(wFloat_p, double);
+wInteger_t wIntegerGetValue(wInteger_p);
+double wFloatGetValue(wFloat_p);
 
 /*------------------------------------------------------------------------------
  *
@@ -774,278 +666,219 @@ double wFloatGetValue(		wFloat_p );
  */
 
 /* Creation CallBacks */
-typedef void (*wListCallBack_p)( unsigned int , const char *, unsigned int, void *,
-                                 void * );
+typedef void (*wListCallBack_p)(unsigned int, const char *, unsigned int,
+                                void *, void *);
 
 /* Creation Options */
-#define BL_DUP		(1L<<16)
-#define BL_SORT		(1L<<17)
-#define BL_MANY 	(1L<<18)
-#define BL_NONE 	(1L<<19)
-#define BL_SETSTAY 	(1L<<20)
-#define BL_DBLCLICK 	(1L<<21)
-#define BL_FIXFONT 	(1L<<22)
-#define BL_EDITABLE	(1L<<23)
-#define BL_ICON		(1L<<0)
-#define BL_NODATASTORE (1L<<24) /**< do no create a datastore from builder */
+#define BL_DUP (1L << 16)
+#define BL_SORT (1L << 17)
+#define BL_MANY (1L << 18)
+#define BL_NONE (1L << 19)
+#define BL_SETSTAY (1L << 20)
+#define BL_DBLCLICK (1L << 21)
+#define BL_FIXFONT (1L << 22)
+#define BL_EDITABLE (1L << 23)
+#define BL_ICON (1L << 0)
+#define BL_NODATASTORE                                                         \
+  (1L << 24) /**< do no create a datastore from builder                        \
+              */
 
 /* lists, droplists and combo boxes */
 wControl_p wListCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
-    const char* helpStr, const char* labelStr, long option, long number,
-    wWinPix_t width, int colCnt, wWinPix_t* colWidths, wBool_t* colRightJust,
-    const char** colTitles, long* valueP, wListCallBack_p action, void* attributes);
+                       const char *helpStr, const char *labelStr, long option,
+                       long number, wWinPix_t width, int colCnt,
+                       wWinPix_t *colWidths, wBool_t *colRightJust,
+                       const char **colTitles, long *valueP,
+                       wListCallBack_p action, void *attributes);
 
 wControl_p wComboBoxCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
-    const char* helpStr, const char* labelStr, long option, long	number,
-    wWinPix_t width, long* valueP, wListCallBack_p action, void* attributes);
+                           const char *helpStr, const char *labelStr,
+                           long option, long number, wWinPix_t width,
+                           long *valueP, wListCallBack_p action,
+                           void *attributes);
 
-wControl_p wComboBoxCreateForToolbar(wControl_p	parent, const char* helpStr, const char* labelStr,
-    long	option, wWinPix_t	width, long* valueP, wListCallBack_p action,
-    void* context);
+wControl_p wComboBoxCreateForToolbar(wControl_p parent, const char *helpStr,
+                                     const char *labelStr, long option,
+                                     wWinPix_t width, long *valueP,
+                                     wListCallBack_p action, void *context);
 
-unsigned wComboBoxAddValue(wControl_p b, const char* text, void * attributes);
+unsigned wComboBoxAddValue(wControl_p b, const char *text, void *attributes);
 void wComboBoxSetIndex(wControl_p b, int row);
 wIndex_t wComboBoxGetCount(wControl_p b);
-void* wComboBoxGetItemContext(wControl_p b, wIndex_t inx);
-wBool_t wComboBoxSetValues( wControl_p b, wIndex_t row, const char* labelStr, wIcon_p bm,
-    void* itemData);
-void
-wComboBoxClear(wControl_p control);
+void *wComboBoxGetItemContext(wControl_p b, wIndex_t inx);
+wBool_t wComboBoxSetValues(wControl_p b, wIndex_t row, const char *labelStr,
+                           wIcon_p bm, void *itemData);
+void wComboBoxClear(wControl_p control);
 
 wControl_p wComboListCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
-                         const char *helpStr, const char *labelStr, long option, long number,
-                         wWinPix_t width, long *valueP, wListCallBack_p action, void *attributes);
+                            const char *helpStr, const char *labelStr,
+                            long option, long number, wWinPix_t width,
+                            long *valueP, wListCallBack_p action,
+                            void *attributes);
 void wListClear(wControl_p b);
 void wListSetIndex(wControl_p b, int element);
-wIndex_t wListFindValue(wControl_p b, const char* val);
+wIndex_t wListFindValue(wControl_p b, const char *val);
 wIndex_t wListGetCount(wControl_p b);
 
-wIndex_t wListGetIndex(	wControl_p b );
-void* wListGetItemContext(wControl_p b, wIndex_t inx);
-wBool_t wListGetItemSelected( wControl_p b, wIndex_t inx);
-wIndex_t wListGetSelectedCount( wControl_p b);
+wIndex_t wListGetIndex(wControl_p b);
+void *wListGetItemContext(wControl_p b, wIndex_t inx);
+wBool_t wListGetItemSelected(wControl_p b, wIndex_t inx);
+wIndex_t wListGetSelectedCount(wControl_p b);
 unsigned int wListGetColumnCount(wControl_p listControl);
 void wListSelectAll(wControl_p bl);
-wBool_t wListSetValues( wControl_p b, wIndex_t row, const char* labelStr,
-    wIcon_p bm, void* itemData);
+wBool_t wListSetValues(wControl_p b, wIndex_t row, const char *labelStr,
+                       wIcon_p bm, void *itemData);
 void wListDelete(wControl_p b, wIndex_t inx);
 void wListDeleteSelected(wControl_p list);
-int wListGetColumnWidths(wControl_p bl, unsigned int count, wWinPix_t* colWidths);
+int wListGetColumnWidths(wControl_p bl, unsigned int count,
+                         wWinPix_t *colWidths);
 
-wIndex_t wListAddValue(wControl_p b, const char* labelStr,  wIcon_p bm, void* itemData );
-wIndex_t wListAddValueVar(wControl_p b, wIcon_p bm, void* itemData, const char* labelStr, ...);
+wIndex_t wListAddValue(wControl_p b, const char *labelStr, wIcon_p bm,
+                       void *itemData);
+wIndex_t wListAddValueVar(wControl_p b, wIcon_p bm, void *itemData,
+                          const char *labelStr, ...);
 
 void wListSetSize(wControl_p bl, wWinPix_t w, wWinPix_t h);
-wIndex_t wListGetValues(wControl_p bl, char* labelStr, int labelSize,
-    void** listDataRet, void** itemDataRet);
+wIndex_t wListGetValues(wControl_p bl, char *labelStr, int labelSize,
+                        void **listDataRet, void **itemDataRet);
 
-
-void wListSetValue(wControl_p bl, const char* val);
-void wListSetActive(		wList_p, wIndex_t, wBool_t );
-void wListSetEditable(		wList_p, wBool_t );
+void wListSetValue(wControl_p bl, const char *val);
+void wListSetActive(wList_p, wIndex_t, wBool_t);
+void wListSetEditable(wList_p, wBool_t);
 
 struct rendererContext {
-    wControl_p list;
-    void* context;
+  wControl_p list;
+  void *context;
 };
-int wListSetColumnEditable(wControl_p list, const char* renderer, void *context);
-wControl_p wListstoreCreate(wControl_p parent, const char* liststoreID);
-void wListSetStore(wControl_p list, DataStore * liststore);
+int wListSetColumnEditable(wControl_p list, const char *renderer,
+                           void *context);
+wControl_p wListstoreCreate(wControl_p parent, const char *liststoreID);
+void wListSetStore(wControl_p list, DataStore *liststore);
 
 /*------------------------------------------------------------------------------
  *
  * Draw
  */
 
-
 typedef int wDrawOpts;
-#define wDrawOptTemp	(1<<0)
-#define wDrawOptNoClip	(1<<1)
-#define wDrawOptTransparent  (1<<2)
-#define wDrawOutlineFont (1<<3)
+#define wDrawOptTemp (1 << 0)
+#define wDrawOptNoClip (1 << 1)
+#define wDrawOptTransparent (1 << 2)
+#define wDrawOutlineFont (1 << 3)
 #ifdef CURSOR_SURFACE
-#define wDrawOptCursor  (1<<4)
-#define wDrawOptCursorClr (1<<5)
-#define wDrawOptCursorClr (1<<6)
-#define wDrawOptCursorRmv (1<<7)
-#define wDrawOptCursorQuit (1<<8)
-#define wDrawOptOpaque   (1<<9)
+#define wDrawOptCursor (1 << 4)
+#define wDrawOptCursorClr (1 << 5)
+#define wDrawOptCursorClr (1 << 6)
+#define wDrawOptCursorRmv (1 << 7)
+#define wDrawOptCursorQuit (1 << 8)
+#define wDrawOptOpaque (1 << 9)
 #endif
 
 #define EXPORTBITMAP (1)
 
 typedef enum {
-	wDrawLineSolid,
-	wDrawLineDash,
-	wDrawLineDot,
-	wDrawLineDashDot,
-	wDrawLineDashDotDot,
-	wDrawLineCenter,
-	wDrawLinePhantom
-}
-wDrawLineType_e;
+  wDrawLineSolid,
+  wDrawLineDash,
+  wDrawLineDot,
+  wDrawLineDashDot,
+  wDrawLineDashDotDot,
+  wDrawLineCenter,
+  wDrawLinePhantom
+} wDrawLineType_e;
 
-typedef enum {
-	wPolyLineStraight,
-	wPolyLineSmooth,
-	wPolyLineRound
-}
-wPolyLine_e;
+typedef enum { wPolyLineStraight, wPolyLineSmooth, wPolyLineRound } wPolyLine_e;
 
-
-#define wRGB(R,G,B)\
-	(long)(((((long)(R)<<16))&0xFF0000L)|((((long)(G))<<8)&0x00FF00L)|(((long)(B))&0x0000FFL))
-
+#define wRGB(R, G, B)                                                          \
+  (long)(((((long)(R) << 16)) & 0xFF0000L) |                                   \
+         ((((long)(G)) << 8) & 0x00FF00L) | (((long)(B)) & 0x0000FFL))
 
 /* Draw: */
-void wDrawLine(
-    wControl_p drawingArea,
-    wDrawPix_t x0, wDrawPix_t y0,
-    wDrawPix_t x1, wDrawPix_t y1,
-    wDrawWidth width,
-    wDrawLineType_e lineType,
-    wDrawColor color,
-    wDrawOpts opts);
+void wDrawLine(wControl_p drawingArea, wDrawPix_t x0, wDrawPix_t y0,
+               wDrawPix_t x1, wDrawPix_t y1, wDrawWidth width,
+               wDrawLineType_e lineType, wDrawColor color, wDrawOpts opts);
 
-#define double2wAngle_t( A )	(A)
+#define double2wAngle_t(A) (A)
 typedef double wAngle_t;
-void wDrawArc(
-    wControl_p drawingArea,
-    wDrawPix_t x0, wDrawPix_t y0,
-    wDrawPix_t r,
-    wAngle_t angle0,
-    wAngle_t angle1,
-    int drawCenter,
-    wDrawWidth width,
-    wDrawLineType_e lineType,
-    wDrawColor color,
-    wDrawOpts opts);
+void wDrawArc(wControl_p drawingArea, wDrawPix_t x0, wDrawPix_t y0,
+              wDrawPix_t r, wAngle_t angle0, wAngle_t angle1, int drawCenter,
+              wDrawWidth width, wDrawLineType_e lineType, wDrawColor color,
+              wDrawOpts opts);
 
-void wDrawPoint(
-    wControl_p drawingArea,
-    wDrawPix_t x0, wDrawPix_t y0,
-    wDrawColor color,
-    wDrawOpts opts);
+void wDrawPoint(wControl_p drawingArea, wDrawPix_t x0, wDrawPix_t y0,
+                wDrawColor color, wDrawOpts opts);
 
-#define double2wFontSize_t( FS )	(FS)
+#define double2wFontSize_t(FS) (FS)
 typedef double wFontSize_t;
-void wDrawString(
-    wControl_p drawingArea,
-    wDrawPix_t x, wDrawPix_t y,
-    wAngle_t a,
-    const char* s,
-    wFont_p fp,
-    wFontSize_t fs,
-    wDrawColor color,
-    wDrawOpts opts);
+void wDrawString(wControl_p drawingArea, wDrawPix_t x, wDrawPix_t y, wAngle_t a,
+                 const char *s, wFont_p fp, wFontSize_t fs, wDrawColor color,
+                 wDrawOpts opts);
 
-void wDrawFilledRectangle(
-    wControl_p drawingArea,
-    wDrawPix_t x,
-    wDrawPix_t y,
-    wDrawPix_t w,
-    wDrawPix_t h,
-    wDrawColor color,
-    wDrawOpts opt);
+void wDrawFilledRectangle(wControl_p drawingArea, wDrawPix_t x, wDrawPix_t y,
+                          wDrawPix_t w, wDrawPix_t h, wDrawColor color,
+                          wDrawOpts opt);
 
-void wDrawPolygon(
-    wControl_p bd,
-    wDrawPix_t p[][2],
-    wPolyLine_e type[],
-    int cnt,
-    wDrawColor color,
-    wDrawWidth dw,
-    wDrawLineType_e lt,
-    wDrawOpts opt,
-    int fill,
-    int open);
+void wDrawPolygon(wControl_p bd, wDrawPix_t p[][2], wPolyLine_e type[], int cnt,
+                  wDrawColor color, wDrawWidth dw, wDrawLineType_e lt,
+                  wDrawOpts opt, int fill, int open);
 
-void wDrawFilledCircle(
-    wControl_p bd,
-    wDrawPix_t x0,
-    wDrawPix_t y0,
-    wDrawPix_t r,
-    wDrawColor color,
-    wDrawOpts opt);
+void wDrawFilledCircle(wControl_p bd, wDrawPix_t x0, wDrawPix_t y0,
+                       wDrawPix_t r, wDrawColor color, wDrawOpts opt);
 
-void wDrawGetTextSize(
-    wDrawPix_t* w,
-    wDrawPix_t* h,
-    wDrawPix_t* d,
-    wDrawPix_t* a,
-    wControl_p drawingArea,
-    const char* s,
-    wFont_p fp,
-    wFontSize_t fs);
+void wDrawGetTextSize(wDrawPix_t *w, wDrawPix_t *h, wDrawPix_t *d,
+                      wDrawPix_t *a, wControl_p drawingArea, const char *s,
+                      wFont_p fp, wFontSize_t fs);
 
-void wDrawClear(
-    wControl_p bd);
+void wDrawClear(wControl_p bd);
 
 void wDrawClearTemp(wControl_p drawingArea);
-wBool_t wDrawSetTempMode( wControl_p bd, wBool_t bTemp);
+wBool_t wDrawSetTempMode(wControl_p bd, wBool_t bTemp);
 
-void wDrawDelayUpdate(		wControl_p, wBool_t );
-void wDrawClip(wControl_p drawingArea,
-    wDrawPix_t x,
-    wDrawPix_t y,
-    wDrawPix_t w,
-    wDrawPix_t h);
+void wDrawDelayUpdate(wControl_p, wBool_t);
+void wDrawClip(wControl_p drawingArea, wDrawPix_t x, wDrawPix_t y, wDrawPix_t w,
+               wDrawPix_t h);
 
 void wDrawClipClear(wControl_p drawingArea);
 
 /* Geometry */
-double wDrawGetDPI(	wControl_p drawingArea );
-double wDrawGetMaxRadius( wControl_p drawingArea);
-void wDrawSetSize(
-    wControl_p drawingArea,
-    wWinPix_t w,
-    wWinPix_t h, void* redraw);
-void wDrawGetSize(
-    wControl_p drawingArea,
-    wWinPix_t* w,
-    wWinPix_t* h);
+double wDrawGetDPI(wControl_p drawingArea);
+double wDrawGetMaxRadius(wControl_p drawingArea);
+void wDrawSetSize(wControl_p drawingArea, wWinPix_t w, wWinPix_t h,
+                  void *redraw);
+void wDrawGetSize(wControl_p drawingArea, wWinPix_t *w, wWinPix_t *h);
 
 /* Bitmaps */
-wDrawBitMap_p wDrawBitMapCreate(
-    wControl_p drawingArea,
-    int xpos,
-    int ypos,
-    const char *prefix,
-    const char* filename);
+wDrawBitMap_p wDrawBitMapCreate(wControl_p drawingArea, int xpos, int ypos,
+                                const char *prefix, const char *filename);
 
-void wDrawBitMap(
-    wControl_p bd,
-    wDrawBitMap_p bm,
-    wDrawPix_t x, wDrawPix_t y,
-    wDrawColor color,
-    wDrawOpts opts);
+void wDrawBitMap(wControl_p bd, wDrawBitMap_p bm, wDrawPix_t x, wDrawPix_t y,
+                 wDrawColor color, wDrawOpts opts);
 
-wControl_p wBitmapCreate(		wWinPix_t width, wWinPix_t height, int flags);
-wBool_t wBitmapDelete(		wControl_p );
-wBool_t wBitmapWriteFile(	wControl_p, const char * );
+wControl_p wBitmapCreate(wWinPix_t width, wWinPix_t height, int flags);
+wBool_t wBitmapDelete(wControl_p);
+wBool_t wBitmapWriteFile(wControl_p, const char *);
 
 /* Misc */
-void* wDrawGetContext(
-    wControl_p drawingArea);
-void wDrawSaveImage(		wDraw_p );
-void wDrawRestoreImage(		wDraw_p );
-int wDrawSetBackground(wControl_p bd, char* path, char** error);
+void *wDrawGetContext(wControl_p drawingArea);
+void wDrawSaveImage(wDraw_p);
+void wDrawRestoreImage(wDraw_p);
+int wDrawSetBackground(wControl_p bd, char *path, char **error);
 void wDrawCloneBackground(wControl_p from, wControl_p to);
-void wDrawShowBackground(wControl_p drawingArea, wWinPix_t pos_x, wWinPix_t pos_y,
-    wWinPix_t size, wAngle_t angle, int screen);
+void wDrawShowBackground(wControl_p drawingArea, wWinPix_t pos_x,
+                         wWinPix_t pos_y, wWinPix_t size, wAngle_t angle,
+                         int screen);
 
 /*------------------------------------------------------------------------------
  *
  * Fonts
  */
 void wInitializeFonts();
-void wSelectFont(		const char * );
-wFontSize_t wSelectedFontSize(	void );
+void wSelectFont(const char *);
+wFontSize_t wSelectedFontSize(void);
 void wSetSelectedFontSize(wFontSize_t size);
-#define F_TIMES	(1)
-#define F_HELV	(2)
-#define F_MONO  (3)
-wFont_p wStandardFont(		int, wBool_t, wBool_t );
+#define F_TIMES (1)
+#define F_HELV (2)
+#define F_MONO (3)
+wFont_p wStandardFont(int, wBool_t, wBool_t);
 int wFontGetCharWidth(wControl_p control, wFont_p font, double size);
 int wFontGetCharHeight(wControl_p control, wFont_p font, double size);
 
@@ -1054,71 +887,68 @@ int wFontGetCharHeight(wControl_p control, wFont_p font, double size);
  * Printing
  */
 
-typedef void (*wPrintSetupCallBack_p)( wBool_t );
+typedef void (*wPrintSetupCallBack_p)(wBool_t);
 
-wBool_t wPrintInit(		void );
-void wPrintSetup(		wPrintSetupCallBack_p );
-void wPrintGetMargins(		double *, double *, double *, double * );
-void wPrintGetPageSize(		double *, double * );
-wBool_t wPrintDocStart(		const char *, int, int * );
-wDraw_p wPrintPageStart(	void );
-wBool_t wPrintPageEnd(		wDraw_p );
-void wPrintDocEnd(		void );
-wBool_t wPrintQuit(		void );
-void wPrintClip(		wDrawPix_t, wDrawPix_t, wDrawPix_t, wDrawPix_t );
-const char * wPrintGetName(	void );
-
+wBool_t wPrintInit(void);
+void wPrintSetup(wPrintSetupCallBack_p);
+void wPrintGetMargins(double *, double *, double *, double *);
+void wPrintGetPageSize(double *, double *);
+wBool_t wPrintDocStart(const char *, int, int *);
+wDraw_p wPrintPageStart(void);
+wBool_t wPrintPageEnd(wDraw_p);
+void wPrintDocEnd(void);
+wBool_t wPrintQuit(void);
+void wPrintClip(wDrawPix_t, wDrawPix_t, wDrawPix_t, wDrawPix_t);
+const char *wPrintGetName(void);
 
 /*------------------------------------------------------------------------------
  *
  * Menus
  */
-#define WACCL_BASE	(1000)
-#define WALT		(1<<10)
-#define WCTL		(1<<11)
-#define WMETA		(1<<12)
-#define WSHIFT		(1<<13)
+#define WACCL_BASE (1000)
+#define WALT (1 << 10)
+#define WCTL (1 << 11)
+#define WMETA (1 << 12)
+#define WSHIFT (1 << 13)
 
 typedef enum {
-	wAccelKey_None,
-	wAccelKey_Del,
-	wAccelKey_Ins,
-	wAccelKey_Home,
-	wAccelKey_End,
-	wAccelKey_Pgup,
-	wAccelKey_Pgdn,
-	wAccelKey_Up,
-	wAccelKey_Down,
-	wAccelKey_Right,
-	wAccelKey_Left,
-	wAccelKey_Back,
-	wAccelKey_F1,
-	wAccelKey_F2,
-	wAccelKey_F3,
-	wAccelKey_F4,
-	wAccelKey_F5,
-	wAccelKey_F6,
-	wAccelKey_F7,
-	wAccelKey_F8,
-	wAccelKey_F9,
-	wAccelKey_F10,
-	wAccelKey_F11,
-	wAccelKey_F12,
-	wAccelKey_Numpad_Add,
-	wAccelKey_Numpad_Subtract,
-	wAccelKey_LineFeed
-}
-wAccelKey_e;
+  wAccelKey_None,
+  wAccelKey_Del,
+  wAccelKey_Ins,
+  wAccelKey_Home,
+  wAccelKey_End,
+  wAccelKey_Pgup,
+  wAccelKey_Pgdn,
+  wAccelKey_Up,
+  wAccelKey_Down,
+  wAccelKey_Right,
+  wAccelKey_Left,
+  wAccelKey_Back,
+  wAccelKey_F1,
+  wAccelKey_F2,
+  wAccelKey_F3,
+  wAccelKey_F4,
+  wAccelKey_F5,
+  wAccelKey_F6,
+  wAccelKey_F7,
+  wAccelKey_F8,
+  wAccelKey_F9,
+  wAccelKey_F10,
+  wAccelKey_F11,
+  wAccelKey_F12,
+  wAccelKey_Numpad_Add,
+  wAccelKey_Numpad_Subtract,
+  wAccelKey_LineFeed
+} wAccelKey_e;
 
 typedef enum {
-	wModKey_None,
-	wModKey_Alt,
-	wModKey_Shift,
-	wModKey_Ctrl
-}
-wModKey_e;
+  wModKey_None,
+  wModKey_Alt,
+  wModKey_Shift,
+  wModKey_Ctrl
+} wModKey_e;
 
-void wDoAccelHelp( wAccelKey_e key, void * );
+void wDoAccelHelp(wAccelKey_e key, void *);
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Menu creation
@@ -1126,107 +956,74 @@ void wDoAccelHelp( wAccelKey_e key, void * );
  */
 
 /* Creation CallBacks */
-typedef void (*wMenuCallBack_p)( void * );
-typedef void (*wMenuListCallBack_p)( int index, const char *label, void * attributes);
-typedef void (*wMenuCallBack_p)( void * );
-typedef void (*wAccelKeyCallBack_p)( wAccelKey_e, void * );
-typedef void (*wMenuTraceCallBack_p)( wMenu_p, const char *, void * );
+typedef void (*wMenuCallBack_p)(void *);
+typedef void (*wMenuListCallBack_p)(int index, const char *label,
+                                    void *attributes);
+typedef void (*wMenuCallBack_p)(void *);
+typedef void (*wAccelKeyCallBack_p)(wAccelKey_e, void *);
+typedef void (*wMenuTraceCallBack_p)(wMenu_p, const char *, void *);
 
 /* Creation Options */
-#define BM_ICON		(1L<<0)
+#define BM_ICON (1L << 0)
 
-wControl_p wMenuBarAdd(
-    wControl_p w,
-    const char* helpStr,
-    const char* labelStr);
+wControl_p wMenuBarAdd(wControl_p w, const char *helpStr, const char *labelStr);
 
-wControl_p wMenuPushCreate(
-    wControl_p m,
-    const char* helpStr,
-    const char* labelStr,
-    long acclKey,
-    wMenuCallBack_p action,
-    void* attributes);
+wControl_p wMenuPushCreate(wControl_p m, const char *helpStr,
+                           const char *labelStr, long acclKey,
+                           wMenuCallBack_p action, void *attributes);
 
-wControl_p wMenuRadioCreate(
-    wControl_p m,
-    const char* helpStr,
-    const char* labelStr,
-    long acclKey,
-    wMenuCallBack_p action,
-    void* attributes);
+wControl_p wMenuRadioCreate(wControl_p m, const char *helpStr,
+                            const char *labelStr, long acclKey,
+                            wMenuCallBack_p action, void *attributes);
 
-wControl_p wMenuMenuCreate(
-    wControl_p m,
-    const char* helpStr,
-    const char* labelStr);
+wControl_p wMenuMenuCreate(wControl_p m, const char *helpStr,
+                           const char *labelStr);
 
-wControl_p wMenuPopupCreate(
-    wControl_p parent,
-    const char* labelStr);
+wControl_p wMenuPopupCreate(wControl_p parent, const char *labelStr);
 
-void wMenuSeparatorCreate(
-    wControl_p m);
+void wMenuSeparatorCreate(wControl_p m);
 
-void wMenuRadioSetActive( wControl_p mi);
+void wMenuRadioSetActive(wControl_p mi);
 
-void wMenuPushEnable(
-    wControl_p mi,
-    wBool_t enable);
+void wMenuPushEnable(wControl_p mi, wBool_t enable);
 
+typedef enum { NEWEST_TOP, OLDEST_TOP } SORTORDER;
+wControl_p wMenuListCreate(wControl_p m, const char *helpStr, SORTORDER sorder,
+                           int max, wMenuListCallBack_p action);
 
-
-typedef enum {
-    NEWEST_TOP,
-    OLDEST_TOP
-} SORTORDER;
-wControl_p wMenuListCreate( wControl_p m, const char* helpStr, SORTORDER sorder, int max, wMenuListCallBack_p action);
-
-void wMenuListAdd(wControl_p ml, int index, const char* labelStr, const void* attributes);
+void wMenuListAdd(wControl_p ml, int index, const char *labelStr,
+                  const void *attributes);
 
 void wMenuListClear(wControl_p ml);
-void wMenuListDelete(wControl_p ml, const char* labelStr);
-const char* wMenuListGet(wControl_p ml, int index, void** attributes);
+void wMenuListDelete(wControl_p ml, const char *labelStr);
+const char *wMenuListGet(wControl_p ml, int index, void **attributes);
 int wMenuListGetCount(wControl_p ml);
 
-wControl_p wMenuToggleCreate(
-    wControl_p m,
-    const char* helpStr,
-    const char* labelStr,
-    long acclKey,
-    wBool_t set,
-    wMenuCallBack_p action,
-    void* attributes);
+wControl_p wMenuToggleCreate(wControl_p m, const char *helpStr,
+                             const char *labelStr, long acclKey, wBool_t set,
+                             wMenuCallBack_p action, void *attributes);
 
-wBool_t wMenuToggleSet(
-    wControl_p mt,
-    wBool_t set);
+wBool_t wMenuToggleSet(wControl_p mt, wBool_t set);
 
-wBool_t wMenuToggleGet(
-    wControl_p mt);
+wBool_t wMenuToggleGet(wControl_p mt);
 
-void wMenuToggleEnable(
-    wControl_p mt,
-    wBool_t enable);
+void wMenuToggleEnable(wControl_p mt, wBool_t enable);
 
 void wMenuPopupShow(wControl_p mp);
 
-void wMenuAddHelp(		wMenu_p );
+void wMenuAddHelp(wMenu_p);
 
-const char * wMenuGetLabel(wControl_p menuitem);
+const char *wMenuGetLabel(wControl_p menuitem);
 
-wMenu_p wMenuCreate( wControl_p	parent, wWinPix_t	x, wWinPix_t	y, const char 	* helpStr,
-    const char	* labelStr, long	option );
+wMenu_p wMenuCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
+                    const char *helpStr, const char *labelStr, long option);
 
+void wMenuSetTraceCallBack(wControl_p m, wMenuTraceCallBack_p func,
+                           void *attributes);
 
-void wMenuSetTraceCallBack(
-    wControl_p m,
-    wMenuTraceCallBack_p func,
-    void* attributes);
+wBool_t wMenuAction(wControl_p control, const char *label);
 
-wBool_t wMenuAction( wControl_p control, const char * label);
-
-void wAttachAccelKey( wAccelKey_e, int, wAccelKeyCallBack_p, void * );
+void wAttachAccelKey(wAccelKey_e, int, wAccelKeyCallBack_p, void *);
 
 /*------------------------------------------------------------------------------
  *
@@ -1234,22 +1031,22 @@ void wAttachAccelKey( wAccelKey_e, int, wAccelKeyCallBack_p, void * );
  */
 
 int wNoteBookGetActivePage(wControl_p notebook);
-wControl_p wNotebookCreate(wControl_p	parent, const char* labelStr, unsigned	activePage,
-    long flags);
+wControl_p wNotebookCreate(wControl_p parent, const char *labelStr,
+                           unsigned activePage, long flags);
 
 /*------------------------------------------------------------------------------
  *
  * Preferences
  */
 
-void wPrefSetString(const char *, const char *, const char * );
-char * wPrefGetString(const char *section, const char *name);
-char * wPrefGetStringBasic( const char *section, const char *name );
-char * wPrefGetStringExt(const char *section, const char *name);
+void wPrefSetString(const char *, const char *, const char *);
+char *wPrefGetString(const char *section, const char *name);
+char *wPrefGetStringBasic(const char *section, const char *name);
+char *wPrefGetStringExt(const char *section, const char *name);
 
-void wPrefsLoad(char * name);
+void wPrefsLoad(char *name);
 
-void wPrefSetInteger(const char *, const char *, long );
+void wPrefSetInteger(const char *, const char *, long);
 wBool_t wPrefGetInteger(const char *section, const char *name, long *result,
                         long defaultValue);
 wBool_t wPrefGetIntegerBasic(const char *section, const char *name,
@@ -1257,7 +1054,7 @@ wBool_t wPrefGetIntegerBasic(const char *section, const char *name,
 wBool_t wPrefGetIntegerExt(const char *section, const char *name, long *result,
                            long defaultValue);
 
-void wPrefSetFloat(		const char *, const char *, double );
+void wPrefSetFloat(const char *, const char *, double);
 wBool_t wPrefGetFloat(const char *section, const char *name, double *result,
                       double defaultValue);
 wBool_t wPrefGetFloatBasic(const char *section, const char *name,
@@ -1265,22 +1062,22 @@ wBool_t wPrefGetFloatBasic(const char *section, const char *name,
 wBool_t wPrefGetFloatExt(const char *section, const char *name, double *result,
                          double defaultValue);
 
-//const char * wPrefGetSectionItem( const char * sectionName, wIndex_t * index,
-//                                  const char ** name );
-void wPrefFlush( char * name);
-void wPrefReset( void );
-void wPrefTokenize(char* line, char** section, char** name, char** value);
-void wPrefFormatLine(const char* section, const char* name,
-                    const char* value, char* result);
+// const char * wPrefGetSectionItem( const char * sectionName, wIndex_t * index,
+//                                   const char ** name );
+void wPrefFlush(char *name);
+void wPrefReset(void);
+void wPrefTokenize(char *line, char **section, char **name, char **value);
+void wPrefFormatLine(const char *section, const char *name, const char *value,
+                     char *result);
 
-//void CleanupCustom( void );
+// void CleanupCustom( void );
 
 /*------------------------------------------------------------------------------
  *
  * Resource
  */
 
-wBool_t wLoadResourceFile(const char* filename);
+wBool_t wLoadResourceFile(const char *filename);
 
 /*------------------------------------------------------------------------------
  *
@@ -1294,32 +1091,37 @@ wControl_p wSeparatorCreateForToolbar(wControl_p parent, int width);
  * Statusbar
  */
 
-wControl_p wStatusCreate(wControl_p	parent, const char* labelStr,
-    const char* message);
+wControl_p wStatusCreate(wControl_p parent, const char *labelStr,
+                         const char *message);
 
 wWinPix_t wStatusGetWidth(const char *testString);
 wWinPix_t wStatusSetRequiredHeight(wControl_p label, long flags);
 
-void wStatusSetValue(wControl_p b, const char* arg);
+void wStatusSetValue(wControl_p b, const char *arg);
 void wStatusSetWidth(wControl_p b, wWinPix_t width);
 
-void wStatusSetVisibleControlSet(wControl_p mainWindow, const char* controlsName);
+void wStatusSetVisibleControlSet(wControl_p mainWindow,
+                                 const char *controlsName);
 /*------------------------------------------------------------------------------
  *
  * Stack Container
  */
 
-void wStackPageShow(wControl_p stack, const char* pageName);
-wControl_p wStackCreate(wControl_p	parent, wWinPix_t	x, wWinPix_t	y, const char* helpStr,
-    const char* labelStr, long 	option, wWinPix_t 	width, wButtonCallBack_p action, void* context);
+void wStackPageShow(wControl_p stack, const char *pageName);
+wControl_p wStackCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
+                        const char *helpStr, const char *labelStr, long option,
+                        wWinPix_t width, wButtonCallBack_p action,
+                        void *context);
 
 /*------------------------------------------------------------------------------
  *
  * Sticky Toggle Button
  */
 
-wControl_p wStickyCreateForToolbar(wControl_p parent, wWinPix_t x, wWinPix_t y,const char* helpStr,
-    wIcon_p icon, long option, wWinPix_t width, wButtonCallBack_p action,void* context);
+wControl_p wStickyCreateForToolbar(wControl_p parent, wWinPix_t x, wWinPix_t y,
+                                   const char *helpStr, wIcon_p icon,
+                                   long option, wWinPix_t width,
+                                   wButtonCallBack_p action, void *context);
 
 void wStickySetBusy(wControl_p bb, int newState);
 wBool_t wStickyGetSticky(wControl_p b);
@@ -1330,11 +1132,11 @@ void wStickySetSticky(wControl_p b, wBool_t newSticky);
  * System-Information
  */
 
-char* wGetTempPath(void);
-char* wGetOSVersion(void);
-char* wGetProfileFilename(void);
-char* wGetUserID(void);
-const char* wGetUserHomeRootDir(void);
+char *wGetTempPath(void);
+char *wGetOSVersion(void);
+char *wGetProfileFilename(void);
+char *wGetUserID(void);
+const char *wGetUserHomeRootDir(void);
 const char *wGetPlatformVersion(void);
 
 /*------------------------------------------------------------------------------
@@ -1342,20 +1144,19 @@ const char *wGetPlatformVersion(void);
  * Tag
  */
 
-void wTagSetLabel( wControl_p tagControl, const char * text);
+void wTagSetLabel(wControl_p tagControl, const char *text);
 const char *wTagGetLabel(wControl_p tagControl);
-wControl_p wTagCreate( wControl_p parent, const char* helpStr, const char* labelStr,
-    wButtonCallBack_p action, void* context);
-
-
+wControl_p wTagCreate(wControl_p parent, const char *helpStr,
+                      const char *labelStr, wButtonCallBack_p action,
+                      void *context);
 
 /*-------------------------------------------------------------------------------
  * User Preferences
  */
 
 #define PREFSECTION "Preference"
-#define LARGEICON   "LargeIcons"
-#define DPISET      "ScreenDPI"
-#define PRINTSCALE    "PrintScale"
-#define PRINTTEXTSCALE  "PrintTextScale"
+#define LARGEICON "LargeIcons"
+#define DPISET "ScreenDPI"
+#define PRINTSCALE "PrintScale"
+#define PRINTTEXTSCALE "PrintTextScale"
 #endif

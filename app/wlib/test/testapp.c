@@ -5,7 +5,7 @@
  */
 
 /*  XTrkCad - Model Railroad CAD
- *  Copyright (C) 
+ *  Copyright (C)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 #include "wlib.h"
 #include <string.h>
 
-#define N_ 
+#define N_
 #include "tooltips.h"
 
 #define APPNAME "testapp"
@@ -232,7 +232,7 @@ wTooltip_t dummyTooltips = { NULL, NULL };
 //
 
 /**
- *	doFile: callback function for file submenu 
+ *	doFile: callback function for file submenu
  */
 
 void doFile( void * cmd )
@@ -249,7 +249,7 @@ void doFile( void * cmd )
 //			printf("Menu toggle changed!\n");
 			wStatusSetValue(statusMsg, "Menu toggle changed!");
 			break;				/* toggle test */
-		case 3: 
+		case 3:
 //			printf("Active radio button changed!\n");
 			wStatusSetValue(statusMsg, "Active radio button changed!");
 			break;				/* Radio test */
@@ -268,8 +268,8 @@ doPause(void* unused)
 
 /**
  * RecentusedCallback.
- * 
- * \param attributes	pointer to item attributes 
+ *
+ * \param attributes	pointer to item attributes
  */
 
 void
@@ -322,7 +322,7 @@ LoadFileSelector(wControl_p mainW, wControl_p parent)
 	wMenuPushCreate(parent, "menuFile-load", "Open ...", WCTL+'o',
 		OpenForLoad, NULL);
 
-	if (loadFile_fs == NULL) 
+	if (loadFile_fs == NULL)
 		loadFile_fs = wFilSelCreate(mainW, FS_LOAD, FSO_MULTIPLEFILES, "Open Tracks",
 			FILEPATTERN, LoadData, NULL);
 }
@@ -362,7 +362,7 @@ SelectFont(void* unused)
 
 bool
 DialogProc(wControl_p window, winProcEvent event, void *attributes, void *data2)
-{	
+{
 	char* cause;
 	switch (event) {
 	case wAccept_e:
@@ -473,7 +473,7 @@ NoteDialog(void* unused)
 		NoteDialogProc,
 		NULL);
 
-	text = wTextCreate(dialog, 0, 0, "note-text", "Enter notes here... ", 
+	text = wTextCreate(dialog, 0, 0, "note-text", "Enter notes here... ",
 		F_DEFINEDINBUILDER, 0, 0);
 }
 
@@ -498,7 +498,7 @@ EntryCallBack(const char* string, wEntry_p entry)
 	}
 }
 
-wControl_p button; 
+wControl_p button;
 
 void
 ButtonAction(void* attributes)
@@ -565,7 +565,7 @@ SimpleDynamic(void* unused)
 
 	wControl_p	combo = wComboBoxCreate(dialog, 1, 8, "combobox", NULL, 0L, 0, 1, NULL, ComboBoxAction, NULL);
 
-	for (int i = 0; i < COMBOLINES; i++) { 
+	for (int i = 0; i < COMBOLINES; i++) {
 		wComboBoxAddValue(combo, comboLines[i], NULL);
 	}
 
@@ -587,7 +587,7 @@ void Notice(void* unused)
 
 /*----------------------------------------------------------------------------
 * Load and show a UI file from disk
-*/ 
+*/
 
 int LoadDesign(
 	int cnt,
@@ -600,7 +600,7 @@ int LoadDesign(
 
 	dialog = wWinDialogCreate(mainW, "", "UI Viewer", fileName[0], DO_FILESYSTEM,
 		SimpleDynamicProc, NULL);
-	
+
 	return(0);
 }
 
@@ -634,7 +634,7 @@ wControl_p DialogViewer(char * builder)
 {
 	wControl_p dialog;
 
-	dialog = wWinDialogCreate(mainW, "", NULL, (char *)builder, 
+	dialog = wWinDialogCreate(mainW, "", NULL, (char *)builder,
 		DO_FILESYSTEM | F_DEFINEDINBUILDER,
 		SimpleDynamicProc, NULL);
 
@@ -668,7 +668,7 @@ HelpCallback(char* topic)
 
 
 void TextFieldTest(void* builder)
-{ 
+{
 	wControl_p widget1;
 	wControl_p widget2;
   	wControl_p dialog = DialogViewer((char*)builder);
@@ -695,7 +695,7 @@ void CheckboxTest(void* builderFile)
 	wControl_p text;
 
 	wControl_p dialog = DialogViewer((char*)builderFile);
-	
+
 	choice = wToggleCreate(dialog, 0, 0, "label", NULL, 0, NULL, &choiceSelect, ChoiceCallback, NULL);
 	wToggleSetValue(choice, 1L);
 
@@ -758,13 +758,13 @@ void DemoTest(void* unused)
 
 	dialog = wWinDialogCreate(NULL,
 		NULL,
-		"Demo", 
+		"Demo",
 		"demo",
 		F_DEFINEDINBUILDER,
 		DialogProc,
 		NULL);
 
-	wDialogButtonsConfigure(dialog, "AutoPlay", "Finish", NULL);
+	wDialogButtonsConfigure(dialog, "AutoPlay", "Quit", NULL);
 
 	combo = wComboBoxCreate(dialog, 0, 0, "demo-speed", NULL, 0L, 0L, 0, NULL, NULL, NULL);
 
@@ -1144,7 +1144,7 @@ LedOnOff(wControl_p button)
 #ifdef TEST_TOOLBAR
 wControl_p toolbarButtons[10];
 
-void 
+void
 SetColor(void *buttonIndex)
 {
 
@@ -1159,15 +1159,15 @@ TestToolbar(wControl_p mainWindow)
 	wFTLabelLoadFontFromFile("xtrackcad-10.bdf");
 	colorLabel = wFTLabelCreate("69", 0xa0a0a0);
 
-  	wControl_p button =	wButtonCreateForToolbar(mainWindow, 0, 0, "", 
+  	wControl_p button =	wButtonCreateForToolbar(mainWindow, 0, 0, "",
 		wIconCreatePixMap(map_x16),
 		BO_GAP, 0, NULL, NULL);
 
-	wControl_p ledbutton = wButtonCreateForToolbar(mainWindow, 0, 0, "", 
+	wControl_p ledbutton = wButtonCreateForToolbar(mainWindow, 0, 0, "",
 		wIconCreatePixMap(ballgreen),
 		0, 0, NULL, NULL);
 
-	button = wButtonCreateForToolbar(mainWindow, 0, 0, "", 
+	button = wButtonCreateForToolbar(mainWindow, 0, 0, "",
 		wIconCreatePixMap(yellowstar),
 		BO_ABUT, 0, LedOnOff, ledbutton);
 
@@ -1218,19 +1218,19 @@ wControl_p wMain( int argc, char * argv[] )
 	/* add a splash window */
 	wCreateSplash( WINDOWTITLE,			/* name of application to show */
 						"1.0"						/* application version information */
-					 );	
+					 );
 
 	wFlush();									/* make sure splash window is shown */
 #endif
 
 
-	/* create main window */	
+	/* create main window */
     mainW = wWinMainCreate( APPNAME, 	/* application name  */
 	 								800, 			/* position x */
 									600, 			/* position y */
 									"Help", 		/* help topic */
 									WINDOWTITLE, /* window title */
-									APPNAME, 	/* window name */	
+									APPNAME, 	/* window name */
 									F_DEFINEDINBUILDER | F_RESIZE|F_MENUBAR, /* options */
 									mainCallBack, 		/* window callback function */
 									NULL 			/* pointer to user attributes */
@@ -1251,8 +1251,8 @@ wControl_p wMain( int argc, char * argv[] )
 #ifdef TEST_TOOLBAR
 	TestToolbar(mainW);
 #endif
-	
-#ifdef TEST_SPLASH	
+
+#ifdef TEST_SPLASH
 	char buffer[ 80 ];
 
 	for( int i = 2; i > 0; i-- ) {
@@ -1260,9 +1260,9 @@ wControl_p wMain( int argc, char * argv[] )
 		wSetSplashInfo( buffer );
 		wPause( 1000L );
 	}
- 
+
 	wDestroySplash();							/* remove the splash window again */
-#endif	
+#endif
 
 	return mainW;
 }

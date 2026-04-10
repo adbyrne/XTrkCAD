@@ -47,6 +47,7 @@ static int keyStateFromButton;
 
 int wGetKeyState(void) { return keyState; }
 int wGetKeyStateFromButton(void) { return keyStateFromButton; }
+void wResetKeyStateFromButton(void) { keyStateFromButton = 0; }
 
 wBool_t UpdateModifierKeyState(GdkEventKey *event) {
   int state = 0;
