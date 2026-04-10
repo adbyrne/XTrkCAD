@@ -6,9 +6,9 @@
 #ifndef TOOLBAR_H
 #define TOOLBAR_H
 #include "command.h"
- /*
-  * Command groups
-  */
+/*
+ * Command groups
+ */
 #define BG_SELECT		(0)
 #define BG_ZOOM			(1)
 #define BG_UNDO			(2)
@@ -26,7 +26,7 @@
 #define BG_EXPORTIMPORT		(15)
 #define BG_PRINT		(16)
 #define BG_RULER		(17)
-  // This must be the last item:
+// This must be the last item:
 #define BG_COUNT		(18)
 #define BG_BIGGAP       (1<<15)
 
@@ -45,15 +45,15 @@ extern void ToolbarButtonEnable(wIndex_t button, wBool_t enable);
 extern void ToolbarButtonEnableIfSelect(bool selected);
 extern void ToolbarButtonCommandLink(wIndex_t button, int command);
 extern void ToolbarUpdateButton(wIndex_t button, wIndex_t command,
-    wIcon_p icon, const char* helpKey, void* context);
+                                wIcon_p icon, const char* helpKey, void* context);
 extern void ToolbarLoadConfig(void);
 extern void ToolbarControlAdd(wControl_p control, long options, int cmdGroup);
 
 
 wIndex_t AddCommand(procCommand_t cmdProc, const char* helpKey,
-    const char* nameStr, wIcon_p icon, int reqLevel, long options, long acclKey,
-    wIndex_t buttInx, long stickyMask, wControl_p cmdMenus[NUM_CMDMENUS],
-    void* context);
+                    const char* nameStr, wIcon_p icon, int reqLevel, long options, long acclKey,
+                    wIndex_t buttInx, long stickyMask, wControl_p cmdMenus[NUM_CMDMENUS],
+                    void* context);
 
 void PlaybackButtonMouse(wIndex_t);
 void PlaybackCommand(const char*, wIndex_t);

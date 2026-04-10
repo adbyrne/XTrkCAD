@@ -35,13 +35,13 @@
 #define PNGFORMAT "png"
 #define JPEGFORMAT "jpeg"
 
- /**
-  * Get the Extension part of a filename
-  *
-  * /param fname the filename
-  *
-  * /return char* point to the extension
-  */
+/**
+ * Get the Extension part of a filename
+ *
+ * /param fname the filename
+ *
+ * /return char* point to the extension
+ */
 
 static const char*
 GetExtension(const char* fname)
@@ -64,7 +64,7 @@ GetExtension(const char* fname)
  * - builder: no
  *
  * ### Options
- * 
+ *
  * \param parent IN parent window
  * \param x, y   IN position in parent window
  * \param option IN ignored for now
@@ -73,8 +73,8 @@ GetExtension(const char* fname)
  */
 
 wControl_p
-wBitmapViewCreate( wControl_p parent, wWinPix_t x, wWinPix_t y, long options, 
-	const wIcon_p iconP )
+wBitmapViewCreate( wControl_p parent, wWinPix_t x, wWinPix_t y, long options,
+                   const wIcon_p iconP )
 {
 	wControl_p bt;
 #ifdef TODO_UNUSED
@@ -83,19 +83,19 @@ wBitmapViewCreate( wControl_p parent, wWinPix_t x, wWinPix_t y, long options,
 	GdkPixbuf *pixbuf = NULL;
 
 	g_assert(iconP->gtkIconType == ICON_PIXBUF_FROM_RESOURCE ||
-			iconP->gtkIconType == ICON_PIXBUF_FROM_TEXT);
-	
+	         iconP->gtkIconType == ICON_PIXBUF_FROM_TEXT);
+
 	bt = wlibControlNew(B_BITMAP, parent, NULL, NULL);
 #ifdef TODO_UNUSED
 	bm = CONTROL_GET_ATTRIBUTES_PTR(bt, bitmap);
 #endif
-	
-	/* create the bitmap from supplied image attributes */
-		pixbuf = iconP->bits;
-		bt->widget = gtk_image_new_from_pixbuf(pixbuf);
-		gtk_widget_show(bt->widget);
 
-		wlibBasicGridAttach(parent, bt->widget, x, y, 1, 1);
+	/* create the bitmap from supplied image attributes */
+	pixbuf = iconP->bits;
+	bt->widget = gtk_image_new_from_pixbuf(pixbuf);
+	gtk_widget_show(bt->widget);
+
+	wlibBasicGridAttach(parent, bt->widget, x, y, 1, 1);
 
 	return( (wControl_p)bt );
 }
@@ -109,8 +109,8 @@ wIcon_p wIconCreatePixBufFromResource(const char *prefix, const char *filename)
 	if (ip) {
 		gchar* path;
 		path = g_strconcat(prefix,
-			filename,
-			NULL);
+		                   filename,
+		                   NULL);
 
 		ip->gtkIconType = ICON_PIXBUF_FROM_RESOURCE;
 		ip->bits = gdk_pixbuf_new_from_resource(path, &error);
@@ -122,7 +122,7 @@ wIcon_p wIconCreatePixBufFromResource(const char *prefix, const char *filename)
 		}
 
 		g_free(path);
-	} 
+	}
 	return ip;
 }
 
@@ -148,7 +148,7 @@ CheckFileFormat(const char* fileName)
 		writeFormat = PNGFORMAT;
 	}
 	if (!strcasecmp(fileFormat, "jpg") ||
-		!strcasecmp(fileFormat, "jpeg")) {
+	    !strcasecmp(fileFormat, "jpeg")) {
 		writeFormat = JPEGFORMAT;
 	}
 
@@ -176,7 +176,8 @@ wBool_t wBitmapWriteFile(wControl_p drawingControl, const char* fileName)
 
 	writeFormat = CheckFileFormat(fileName);
 
-	pixbuf = gdk_pixbuf_get_from_surface(drawArea->surface, 0, 0, drawArea->width, drawArea->height);
+	pixbuf = gdk_pixbuf_get_from_surface(drawArea->surface, 0, 0, drawArea->width,
+	                                     drawArea->height);
 
 	if (!pixbuf) {
 		wNoticeWithIcon(NT_ERROR, "WriteBitMap: pixbuf_get failed", "Ok", NULL);
@@ -194,16 +195,16 @@ wBool_t wBitmapWriteFile(wControl_p drawingControl, const char* fileName)
 	return TRUE;
 }
 
-wControl_p 
+wControl_p
 wBitmapCreate(wWinPix_t w, wWinPix_t h, int arg)
 {
-	
+
 	wControl_p bd;
 	struct draw* draw;
 
-	bd = (wControl_p)wlibControlNew(B_DRAW, NULL, NULL, NULL); 
+	bd = (wControl_p)wlibControlNew(B_DRAW, NULL, NULL, NULL);
 	draw = CONTROL_GET_ATTRIBUTES_PTR(bd, draw);
-	
+
 	//bd->lastColor = -1;
 
 	double dpi;
@@ -211,9 +212,9 @@ wBitmapCreate(wWinPix_t w, wWinPix_t h, int arg)
 	wPrefGetFloat(PREFSECTION, DPISET, &dpi, 96.0);
 
 	draw->dpi = dpi;
-	//draw->maxW = 
+	//draw->maxW =
 	draw->width = w;
-	//draw->maxH = 
+	//draw->maxH =
 	draw->height = h;
 	//draw->clip_set = FALSE;
 	draw->scale_adjust = 1.0;
@@ -237,8 +238,7 @@ wBitmapCreate(wWinPix_t w, wWinPix_t h, int arg)
 		cairo_scale(draw->cr, 1.0, -1.0);
 
 		wlibBasicClear(draw);
-	}
-	else {
+	} else {
 		//bd->pixbuf = gdk_pixbuf_get_from_window(gtk_widget_get_window(GTK_WIDGET(
 		//	gtkMainW->gtkwin)), 0, 0, w, h);
 		//if (bd->pixbuf == NULL) {
@@ -250,7 +250,7 @@ wBitmapCreate(wWinPix_t w, wWinPix_t h, int arg)
 
 	}
 	return bd;
-	
+
 }
 
 
@@ -265,8 +265,7 @@ wBool_t wBitmapDelete(wControl_p d)
 		drawArea->cr = NULL;
 		cairo_surface_destroy(drawArea->surface);
 		drawArea->surface = NULL;
-	}
-	else {
+	} else {
 		g_object_unref(drawArea->pixbuf);
 		drawArea->pixbuf = NULL;
 	}

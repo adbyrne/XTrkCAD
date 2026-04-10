@@ -268,7 +268,7 @@ static int DropListChanged(
 
 		/* get the selected row */
 		string = gtk_tree_model_get_string_from_iter(model,
-		                &iter);
+		         &iter);
 		inx = atoi(string);
 		g_free(string);
 		string = NULL;

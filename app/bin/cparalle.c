@@ -68,8 +68,7 @@ ReadSeparation(long type)
 	if (type == PAR_TRACK) {
 		sprintf(message, "separation-%s", curScaleName);
 		parSeparation = ceil(13.0 * 12.0 / curScaleRatio);
-	}
-	else {
+	} else {
 		sprintf(message, "line-separation-%s", curScaleName);
 		parSeparation = 5.0 * 12.0 / curScaleRatio;
 	}
@@ -82,8 +81,7 @@ SaveSeparation(long type)
 {
 	if (type == PAR_TRACK) {
 		sprintf(message, "separation-%s", curScaleName);
-	}
-	else {
+	} else {
 		sprintf(message, "line-separation-%s", curScaleName);
 	}
 	wPrefSetFloat("parallel", message, parSeparation);
@@ -107,8 +105,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 	parType = VP2L(commandContext);
 	if (parType == PAR_TRACK) {
 		parGroup = &parTrackPG;
-	}
-	else {
+	} else {
 		parGroup = &parLinePG;
 	}
 	parPLs = parGroup->paramPtr;
@@ -120,9 +117,9 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 		if (parPLs[0].control==NULL) {
 			FormCreateControls(parGroup);
 		}
-	
+
 		ReadSeparation(parType);
-			
+
 		FormLoadControls(parGroup);
 		FormGroupRecord(parGroup);
 		//parSepPD.option |= PDO_NORECORD;
@@ -316,10 +313,10 @@ EXPORT void InitCmdParallel( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Parallel"), "cmdParallelSetCmd", _("Parallel") );
 	AddMenuButton( menu, CmdParallel, "cmdParallelTrack", _("Parallel Track"),
-		CreateToolbarIconFromResource("parallel.png"), LEVEL0_50,
+	               CreateToolbarIconFromResource("parallel.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_PARALLEL, I2VP(0) );
 	AddMenuButton( menu, CmdParallel, "cmdParallelLine", _("Parallel Line"),
-		CreateToolbarIconFromResource("parallel-line.png"), LEVEL0_50,
+	               CreateToolbarIconFromResource("parallel-line.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_PARALLEL, I2VP(1) );
 	ButtonGroupEnd();
 	FormRegister( &parTrackPG );

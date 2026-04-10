@@ -35,7 +35,7 @@
 #include "gtkint.h"
 
 struct wStatus_t {
-    GtkWidget * labelWidget;
+	GtkWidget * labelWidget;
 };
 
 
@@ -48,14 +48,14 @@ struct wStatus_t {
  */
 
 void wStatusSetValue(
-    wControl_p b,
-    const char * arg)
+        wControl_p b,
+        const char * arg)
 {
-    if (!b || b->widget == 0) {
-        return;
-    }
+	if (!b || b->widget == 0) {
+		return;
+	}
 
-    gtk_label_set_text(GTK_LABEL(b->widget), wlibConvertInput(arg));
+	gtk_label_set_text(GTK_LABEL(b->widget), wlibConvertInput(arg));
 }
 
 /**
@@ -80,10 +80,10 @@ wControl_p wStatusCreate(
 
 	b = wlibControlNew(B_STATUS, parent, NULL, NULL);
 
-    b->widget = wlibWidgetFromIdWarn(parent, labelStr);
+	b->widget = wlibWidgetFromIdWarn(parent, labelStr);
 
 	gtk_label_set_text(GTK_LABEL(b->widget),
-		                   message?wlibConvertInput(message):"");
+	                   message?wlibConvertInput(message):"");
 
 	gtk_widget_show(b->widget);
 	return b;
@@ -99,44 +99,44 @@ wControl_p wStatusCreate(
 wWinPix_t
 wStatusGetWidth(const char *testString)
 {
-    printf("Function at line %d in %s is not implemented!\n", __LINE__, __FILE__);
-    return(0);
- //   GtkWidget *entry;
- //   GtkRequisition min_req, nat_req;
+	printf("Function at line %d in %s is not implemented!\n", __LINE__, __FILE__);
+	return(0);
+//   GtkWidget *entry;
+//   GtkRequisition min_req, nat_req;
 
- //   entry = gtk_entry_new();
- //   g_object_ref_sink(entry);
+//   entry = gtk_entry_new();
+//   g_object_ref_sink(entry);
 
- //   gtk_entry_set_has_frame(GTK_ENTRY(entry), FALSE);
- //   gtk_entry_set_width_chars(GTK_ENTRY(entry), strlen(testString));
- //   gtk_entry_set_max_length(GTK_ENTRY(entry), strlen(testString));
+//   gtk_entry_set_has_frame(GTK_ENTRY(entry), FALSE);
+//   gtk_entry_set_width_chars(GTK_ENTRY(entry), strlen(testString));
+//   gtk_entry_set_max_length(GTK_ENTRY(entry), strlen(testString));
 
- ////   gtk_widget_get_preferred_size(entry, NULL, &requisition);
- //   gtk_widget_get_preferred_size(entry, &min_req, &nat_req);
- //   gtk_widget_destroy(entry);
- //   g_object_unref(entry);
+////   gtk_widget_get_preferred_size(entry, NULL, &requisition);
+//   gtk_widget_get_preferred_size(entry, &min_req, &nat_req);
+//   gtk_widget_destroy(entry);
+//   g_object_unref(entry);
 
- //   return (nat_req.width);
+//   return (nat_req.width);
 }
 
 /**
  * Set height of message text
  *
  * \todo Are text properties actually used? remove if not
- * 
+ *
  * \param label IN text label
  * \param flags IN text properties (large or small size)
- * 
+ *
  * \return text height
  */
 
-wWinPix_t 
+wWinPix_t
 wStatusSetRequiredHeight(wControl_p label, long flags)
 {
 	PangoContext* pcontext = gtk_widget_get_pango_context(label->widget);
 	PangoFontMetrics* fontMetrics;
 	wWinPix_t height;
-	
+
 	fontMetrics = pango_context_get_metrics(pcontext, NULL, NULL);
 	height = (wWinPix_t)fontMetrics->height / PANGO_SCALE;
 
@@ -156,17 +156,18 @@ wStatusSetRequiredHeight(wControl_p label, long flags)
  */
 
 void wStatusSetWidth(
-    wControl_p b,
-    wWinPix_t width)
+        wControl_p b,
+        wWinPix_t width)
 {
 	printf("Function at line %d in %s is not implemented!\n", __LINE__, __FILE__);
 	return;
 
- //   b->labelWidth = width;
- //   gtk_widget_set_size_request(b->labelWidget, width, -1);
+//   b->labelWidth = width;
+//   gtk_widget_set_size_request(b->labelWidget, width, -1);
 }
 
-void wStatusSetVisibleControlSet(wControl_p mainWindow, const char* controlsName)
+void wStatusSetVisibleControlSet(wControl_p mainWindow,
+                                 const char* controlsName)
 {
 	GtkStack* stack;
 

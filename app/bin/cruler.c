@@ -386,10 +386,10 @@ void InitCmdRuler( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Measurement"), "cmdMeasureSetCmd", _("Measurement") );
 	AddMenuButton( menu, CmdRuler, "cmdRuler", _("Ruler"),
-		CreateToolbarIconFromResource("ruler.png"), LEVEL0,
+	               CreateToolbarIconFromResource("ruler.png"), LEVEL0,
 	               IC_STICKY|IC_POPUP|IC_NORESTART, ACCL_RULER, NULL );
 	AddMenuButton( menu, CmdAngle, "cmdAngle", _("Protractor"),
-		CreateToolbarIconFromResource("protractor.png"), LEVEL0,
+	               CreateToolbarIconFromResource("protractor.png"), LEVEL0,
 	               IC_STICKY|IC_POPUP|IC_NORESTART, ACCL_ANGLE, NULL );
 	ButtonGroupEnd();
 }

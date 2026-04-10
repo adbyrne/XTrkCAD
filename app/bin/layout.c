@@ -654,7 +654,8 @@ void LayoutBackGroundSave(void)
 */
 static void ImageFileBrowse( void * unused )
 {
-	imageFile_fs = wFilSelCreate( mainW, FS_LOAD, FSO_PICTURES, _("Load Background"),
+	imageFile_fs = wFilSelCreate( mainW, FS_LOAD, FSO_PICTURES,
+	                              _("Load Background"),
 	                              sImageFilePattern, LoadImageFile, NULL );
 
 	wFilSelect( imageFile_fs, GetCurrentPath( BACKGROUNDPATHKEY ) );
@@ -842,10 +843,10 @@ void DoLayout(void * unused)
 
 	if (layoutW == NULL) {
 		layoutW = FormCreateDialog(&layoutPG, MakeWindowTitle(_("Layout Options")),
-		                            _("Ok"), LayoutOk, 
-									_("Cancel"), FormCancel_Custom(LayoutCancel),
-		                            TRUE, 0, 
-									LayoutDlgUpdate);
+		                           _("Ok"), LayoutOk,
+		                           _("Cancel"), FormCancel_Custom(LayoutCancel),
+		                           TRUE, 0,
+		                           LayoutDlgUpdate);
 		LoadScaleList(layoutPLs[SCALEINX].control);
 	}
 

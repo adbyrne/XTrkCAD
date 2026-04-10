@@ -3754,8 +3754,9 @@ static void moveDescription( void * unused )
 EXPORT void InitCmdSelect( wMenu_p menu )
 {
 	selectCmdInx = AddMenuButton( menu, CmdSelect, "cmdSelect", _("Select"),
-		CreateToolbarIconFromResource("select.png"),
-	                              LEVEL0, IC_TOGGLE | IC_CANCEL|IC_POPUP|IC_LCLICK|IC_CMDMENU|IC_WANT_MOVE|IC_WANT_MODKEYS,
+	                              CreateToolbarIconFromResource("select.png"),
+	                              LEVEL0, IC_TOGGLE |
+	                              IC_CANCEL|IC_POPUP|IC_LCLICK|IC_CMDMENU|IC_WANT_MOVE|IC_WANT_MODKEYS,
 	                              ACCL_SELECT, NULL );
 }
 
@@ -3764,11 +3765,16 @@ EXPORT void InitCmdSelect2( wMenu_p menu )
 {
 
 
-	endpt_bm = wDrawBitMapCreate( mainD.d,  7, 7, XTRKCAD_SYMBOLS_PATH, "bmendpt.png");
-	angle_bm[0] = wDrawBitMapCreate( mainD.d,  7, 7, XTRKCAD_SYMBOLS_PATH,"bma90.png");
-	angle_bm[1] = wDrawBitMapCreate( mainD.d, 7, 7, XTRKCAD_SYMBOLS_PATH, "bma135.png");
-	angle_bm[2] = wDrawBitMapCreate( mainD.d, 7, 7, XTRKCAD_SYMBOLS_PATH,"bma0.png");
-	angle_bm[3] = wDrawBitMapCreate( mainD.d, 7, 7, XTRKCAD_SYMBOLS_PATH, "bma45.png");
+	endpt_bm = wDrawBitMapCreate( mainD.d,  7, 7, XTRKCAD_SYMBOLS_PATH,
+	                              "bmendpt.png");
+	angle_bm[0] = wDrawBitMapCreate( mainD.d,  7, 7, XTRKCAD_SYMBOLS_PATH,
+	                                 "bma90.png");
+	angle_bm[1] = wDrawBitMapCreate( mainD.d, 7, 7, XTRKCAD_SYMBOLS_PATH,
+	                                 "bma135.png");
+	angle_bm[2] = wDrawBitMapCreate( mainD.d, 7, 7, XTRKCAD_SYMBOLS_PATH,
+	                                 "bma0.png");
+	angle_bm[3] = wDrawBitMapCreate( mainD.d, 7, 7, XTRKCAD_SYMBOLS_PATH,
+	                                 "bma45.png");
 	AddPlaybackProc( SETMOVEMODE, (playbackProc_p)SetMoveMode, NULL );
 	wPrefGetInteger( "draw", "movemode", &moveMode, MAXMOVEMODE );
 	if (moveMode > MAXMOVEMODE || moveMode < 0) {
@@ -3918,7 +3924,7 @@ EXPORT void InitCmdRoadbed( void)
 EXPORT void InitCmdMoveDescription( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdMoveDescription, "cmdMoveLabel", _("Move Description"),
-		CreateToolbarIconFromResource("description.png"),
+	               CreateToolbarIconFromResource("description.png"),
 	               LEVEL0, IC_STICKY|IC_POPUP3|IC_CMDMENU|IC_WANT_MOVE, ACCL_MOVEDESC, I2VP( 0 ));
 }
 
@@ -3926,12 +3932,12 @@ EXPORT void InitCmdMoveDescription( wMenu_p menu )
 EXPORT void InitCmdMove( wMenu_p menu )
 {
 	moveCmdInx = AddMenuButton( menu, CmdMove, "cmdMove", _("Move"),
-		CreateToolbarIconFromResource("move.png"),
+	                            CreateToolbarIconFromResource("move.png"),
 	                            LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU|IC_WANT_MOVE, ACCL_MOVE, NULL );
 	rotateCmdInx = AddMenuButton( menu, CmdRotate, "cmdRotate", _("Rotate"),
-		CreateToolbarIconFromResource("rotate.png"),
+	                              CreateToolbarIconFromResource("rotate.png"),
 	                              LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU|IC_WANT_MOVE, ACCL_ROTATE, NULL );
 	flipCmdInx = AddMenuButton( menu, CmdFlip, "cmdFlip", _("Flip"),
-		CreateToolbarIconFromResource("reflect.png"),
+	                            CreateToolbarIconFromResource("reflect.png"),
 	                            LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU, ACCL_FLIP, NULL );
 }

@@ -8,18 +8,18 @@
 
 /*
  * Types of Deflate data stream.
- * 
+ *
  * DEFLATE_TYPE_BARE represents the basic Deflate data format, as
  * defined in RFC 1951. It has no checksum to detect errors and no
  * magic-number header for ease of recognition, but it does have
  * internal EOF indication.
- * 
+ *
  * DEFLATE_TYPE_ZLIB represents the zlib container format, as
  * defined in RFC 1950. It has a two-byte header, and a four-byte
  * Adler32 checksum at the end to verify correct decoding, but
  * apart from those six bytes it's exactly equivalent to
  * DEFLATE_TYPE_BARE.
- * 
+ *
  * DEFLATE_TYPE_GZIP represents the gzip compressed file format, as
  * defined in RFC 1952. This is a more full-featured format, with a
  * magic number, a CRC checksum of the compressed data, and various
@@ -30,9 +30,9 @@
  * concatenated gzip members (permitted by the RFC).
  */
 enum {
-    DEFLATE_TYPE_BARE,
-    DEFLATE_TYPE_ZLIB,
-    DEFLATE_TYPE_GZIP
+	DEFLATE_TYPE_BARE,
+	DEFLATE_TYPE_ZLIB,
+	DEFLATE_TYPE_GZIP
 };
 
 /* ----------------------------------------------------------------------
@@ -66,10 +66,10 @@ void deflate_compress_free(deflate_compress_ctx *ctx);
  * data is stored in `outlen'. It is common for no data to be
  * output, if the input data has merely been stored in internal
  * buffers.
- * 
+ *
  * `flushtype' indicates whether you want to force buffered data to
  * be output. It can be one of the following values:
- * 
+ *
  *  - DEFLATE_NO_FLUSH: nothing is output if the compressor would
  *    rather not. Use this when the best compression is desired
  *    (i.e. most of the time).
@@ -79,19 +79,19 @@ void deflate_compress_free(deflate_compress_ctx *ctx);
  *    compressing data. Use this in interactive protocols when a
  *    single compressed data stream is split across several network
  *    packets.
- * 
+ *
  *  - DEFLATE_END_OF_DATA: all the buffered data is output and the
  *    compressed data stream is cleaned up. Any checksums required
  *    at the end of the stream are also output.
  */
 void deflate_compress_data(deflate_compress_ctx *ctx,
-			   const void *inblock, int inlen, int flushtype,
-			   void **outblock, int *outlen);
+                           const void *inblock, int inlen, int flushtype,
+                           void **outblock, int *outlen);
 
 enum {
-    DEFLATE_NO_FLUSH,
-    DEFLATE_SYNC_FLUSH,
-    DEFLATE_END_OF_DATA
+	DEFLATE_NO_FLUSH,
+	DEFLATE_SYNC_FLUSH,
+	DEFLATE_END_OF_DATA
 };
 
 /* ----------------------------------------------------------------------
@@ -127,15 +127,15 @@ void deflate_decompress_free(deflate_decompress_ctx *ctx);
  * decoding error. In case of an error return, the data decoded
  * before the error is still returned as well. The possible errors
  * are listed below.
- * 
+ *
  * If you want to check that the compressed data stream was
  * correctly terminated, you can call this function with inlen==0
  * to signal input EOF and see if an error comes back. If you don't
  * care, don't bother.
  */
 int deflate_decompress_data(deflate_decompress_ctx *ctx,
-			    const void *inblock, int inlen,
-			    void **outblock, int *outlen);
+                            const void *inblock, int inlen,
+                            void **outblock, int *outlen);
 
 /*
  * Enumeration of error codes. The strange macro is so that I can

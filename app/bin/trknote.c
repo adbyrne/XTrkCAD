@@ -576,7 +576,8 @@ void InitTrkNote(wMenu_p menu)
 {
 	note_bm = wDrawBitMapCreate(mainD.d, 8, 8, XTRKCAD_SYMBOLS_PATH, "note.png");
 	link_bm = wDrawBitMapCreate(mainD.d, 8, 8, XTRKCAD_SYMBOLS_PATH, "link.png");
-	document_bm = wDrawBitMapCreate(mainD.d, 8, 8, XTRKCAD_SYMBOLS_PATH, "clip.png");
+	document_bm = wDrawBitMapCreate(mainD.d, 8, 8, XTRKCAD_SYMBOLS_PATH,
+	                                "clip.png");
 
 	ButtonGroupBegin(_("Notes"), "cmdNoteCmd", _("Add notes"));
 	for (int i = 0; i < NOTETYPESCOUNT; i++) {

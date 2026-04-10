@@ -22,7 +22,7 @@
 
 /*
  * Input file types:
- *  XTR = Marco file. Parse MESSAGE...END blocks. 
+ *  XTR = Marco file. Parse MESSAGE...END blocks.
  *  XTQ = Configuration file. Parse DEMOGROUP and DEMO lines.
  *  TIP = Tip of the day file.
  */
@@ -50,47 +50,43 @@ void process( mode_e mode, FILE * inFile, char *fileName )
 	int i;
 	unsigned lineNo = 0;
 
-	while ( fgets( line, sizeof(line), inFile ) != NULL )
-	{
+	while ( fgets( line, sizeof(line), inFile ) != NULL ) {
 		lineNo++;
 		offset = 0;
 
-		switch (mode)
-		{
+		switch (mode) {
 		case MODE_XTR:
-			if (strncmp( line, "MESSAGE", 7 ) == 0)
-			{
+			if (strncmp( line, "MESSAGE", 7 ) == 0) {
 				translatorcomment(fileName, lineNo);
 				while ( ( fgets( line, sizeof(line), inFile ) ) != NULL ) {
 					lineNo++;
 					if ( strncmp(line, "END", 3) == 0)
 						/* End of message block */
+					{
 						break;
-					else if (strncmp(line, "__________", 10) == 0
-							|| strncmp(line, "==========", 10) == 0)
+					} else if (strncmp(line, "__________", 10) == 0
+					           || strncmp(line, "==========", 10) == 0)
 						/* Skip */
+					{
 						continue;
+					}
 
 					len = (int)strlen( line );
-					if (len > 0 && line[len-1] == '\n' ) len--;
-					if (len > 0 && line[len-1] == '\r' ) len--;
+					if (len > 0 && line[len-1] == '\n' ) { len--; }
+					if (len > 0 && line[len-1] == '\r' ) { len--; }
 					line[len] = '\0';
-					if (len > 0)
-					{
-						if (strchr(line, '"'))
-						{
+					if (len > 0) {
+						if (strchr(line, '"')) {
 							printf("N_(\"");
-							for (i = 0; i < len; i++)
-							{
+							for (i = 0; i < len; i++) {
 								/* Escape double quotation marks */
-								if (line[i] == '"')
+								if (line[i] == '"') {
 									putchar('\\');
+								}
 								putchar(line[i]);
 							}
 							printf("\\n\");\n");
-						}
-						else
-						{
+						} else {
 							printf("N_(\"%s\\n\");\n", line);
 						}
 					}
@@ -99,32 +95,32 @@ void process( mode_e mode, FILE * inFile, char *fileName )
 			break; // case MODE_XTR:
 
 		case MODE_XTQ:
-			if ( strncmp( line, "DEMOGROUP ", 10 ) == 0 )
-			{
+			if ( strncmp( line, "DEMOGROUP ", 10 ) == 0 ) {
 				offset = 10;
-			}
-			else if ( strncmp( line, "DEMO ", 5 ) == 0 )
-			{
+			} else if ( strncmp( line, "DEMO ", 5 ) == 0 ) {
 				offset = 6;
-				if (line[5] != '"')
+				if (line[5] != '"') {
 					break;
+				}
 				cp = line+offset;
-				while (*cp && *cp != '"') cp++;
-				if ( !*cp )
+				while (*cp && *cp != '"') { cp++; }
+				if ( !*cp ) {
 					break;
+				}
 				*cp++ = '\0';
-				while (*cp && *cp == ' ') cp++;
-				if ( strlen(cp)==0 )
+				while (*cp && *cp == ' ') { cp++; }
+				if ( strlen(cp)==0 ) {
 					break;
+				}
 			}
-			if (offset > 0)
-			{
+			if (offset > 0) {
 				len = (int)strlen( line );
-				if (line[len-1] == '\n' ) len--;
-				if (line[len-1] == '\r' ) len--;
+				if (line[len-1] == '\n' ) { len--; }
+				if (line[len-1] == '\r' ) { len--; }
 				line[len] = '\0';
-				if (len == 0)
+				if (len == 0) {
 					break;
+				}
 				translatorcomment(fileName, lineNo);
 				printf("N_(\"%s\");\n", line+offset);
 			}
@@ -132,17 +128,19 @@ void process( mode_e mode, FILE * inFile, char *fileName )
 
 		case MODE_TIP:
 			/* lines starting with hash sign are ignored (comments) */
-			if (line[0] == '#')
+			if (line[0] == '#') {
 				continue;
+			}
 
-			/* remove CRs and LFs at end of line */				
+			/* remove CRs and LFs at end of line */
 			cp = line+strlen(line)-1;
-			if (*cp=='\n') cp--;
-			if (*cp=='\r') cp--;
+			if (*cp=='\n') { cp--; }
+			if (*cp=='\r') { cp--; }
 
 			/* get next line if the line was empty */
-			if (cp < line)
+			if (cp < line) {
 				continue;
+			}
 
 			cp[1] = '\0';
 
@@ -158,31 +156,29 @@ void process( mode_e mode, FILE * inFile, char *fileName )
 				}
 				lineNo++;
 				/* lines starting with hash sign are ignored (comments) */
-				if (*cp=='#')
+				if (*cp=='#') {
 					continue;
+				}
 
-				/* remove CRs and LFs at end of line */				
+				/* remove CRs and LFs at end of line */
 				cp += strlen(cp)-1;
-				if (*cp=='\n') cp--;
-				if (*cp=='\r') cp--;
+				if (*cp=='\n') { cp--; }
+				if (*cp=='\r') { cp--; }
 				cp[1] = '\0';
 			}
 
-			if (strchr(line, '"'))
-			{
+			if (strchr(line, '"')) {
 				printf("N_(\"");
 				len = (int)(strlen(line));
-				for (i = 0; i < len; i++)
-				{
+				for (i = 0; i < len; i++) {
 					/* Escape double quotation marks */
-					if (line[i] == '"')
+					if (line[i] == '"') {
 						putchar('\\');
+					}
 					putchar(line[i]);
 				}
 				printf("\");\n");
-			}
-			else
-			{
+			} else {
 				printf("N_(\"%s\");\n", line);
 			}
 			break; // case MODE_TIP:
@@ -205,45 +201,43 @@ int main ( int argc, char * argv[] )
 
 	if ( argc < 2 ) {
 		fprintf( stderr,
-				"Usage: %s files ...\n"
-				"       Where \'files\' is a list of files to be parsed. Program\n"
-				"       automatically detects the file type from the file extension.\n"
-				"       Supported file types are:\n"
-				"          .xtr, .xtq, .tip\n",
-				argv[0] );
+		         "Usage: %s files ...\n"
+		         "       Where \'files\' is a list of files to be parsed. Program\n"
+		         "       automatically detects the file type from the file extension.\n"
+		         "       Supported file types are:\n"
+		         "          .xtr, .xtq, .tip\n",
+		         argv[0] );
 		exit(1);
 	}
 
 	/* Print header info */
 	printf("/* ----------------------------------------------------------*\n"
-		   " * These strings are generated from the XTrkCad macro and\n"
-		   " * Tip of the day files by %s. The strings are\n"
-		   " * formatted so that the xgettext can extract them into\n"
-		   " * .pot file for translation.\n"
-		   " * ----------------------------------------------------------*/\n",
-		   argv[0]);
+	       " * These strings are generated from the XTrkCad macro and\n"
+	       " * Tip of the day files by %s. The strings are\n"
+	       " * formatted so that the xgettext can extract them into\n"
+	       " * .pot file for translation.\n"
+	       " * ----------------------------------------------------------*/\n",
+	       argv[0]);
 
-	for (i = 1; i < argc; i++)
-	{
+	for (i = 1; i < argc; i++) {
 		/* Set operating mode according to the file name extension */
 		ch = strrchr(argv[i], '.');
-		if (ch == NULL)
-		{
+		if (ch == NULL) {
 			errors++;
 			fprintf( stderr, "WARNING: No file name extension in file \"%s\"\n", argv[i]);
 			continue;
 		}
 		ch++;
-		if ( strcmp( ch, "xtq" ) == 0 )
+		if ( strcmp( ch, "xtq" ) == 0 ) {
 			mode = MODE_XTQ;
-		else if ( strcmp( ch, "xtr" ) == 0 )
+		} else if ( strcmp( ch, "xtr" ) == 0 ) {
 			mode = MODE_XTR;
-		else if ( strcmp( ch, "tip" ) == 0 )
+		} else if ( strcmp( ch, "tip" ) == 0 ) {
 			mode = MODE_TIP;
-		else
-		{
+		} else {
 			errors++;
-			fprintf( stderr, "WARNING: Unknown file name extension in file \"%s\"\n", argv[i]);
+			fprintf( stderr, "WARNING: Unknown file name extension in file \"%s\"\n",
+			         argv[i]);
 			continue;
 		}
 
@@ -260,8 +254,7 @@ int main ( int argc, char * argv[] )
 
 		/* Close  file */
 		files++;
-		switch (mode)
-		{
+		switch (mode) {
 		case MODE_XTQ:
 			xtqFiles++;
 			break;
@@ -278,13 +271,13 @@ int main ( int argc, char * argv[] )
 
 	/* Print out the results */
 	printf("/* ----------------------------------------------------------*\n"
-		   " * Input files:   %d\n"
-		   " * Files handled: %d (xtq: %d, xtr: %d, tip: %d)\n"
-		   " * Errors:        %d\n"
-		   " * ----------------------------------------------------------*/\n",
-		   argc-1,
-		   files, xtqFiles, xtrFiles, tipFiles,
-		   errors);
+	       " * Input files:   %d\n"
+	       " * Files handled: %d (xtq: %d, xtr: %d, tip: %d)\n"
+	       " * Errors:        %d\n"
+	       " * ----------------------------------------------------------*/\n",
+	       argc-1,
+	       files, xtqFiles, xtrFiles, tipFiles,
+	       errors);
 
 	exit(0);
 }

@@ -5,39 +5,39 @@
  * \author Martin Fischer
  */
 
- /*  XTrackCad - Model Railroad CAD
-  *  Copyright (C) 2005, 2024 Dave Bullis
-  *
-  *  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
-  *  (at your option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
-  *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-  */
+/*  XTrackCad - Model Railroad CAD
+ *  Copyright (C) 2005, 2024 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #include <wlib.h>
 
-  /*******************************************************************************
-   *
-   * BitMaps
-   *
-  *******************************************************************************/
+/*******************************************************************************
+ *
+ * BitMaps
+ *
+*******************************************************************************/
 
-  /**
-  * Export as bitmap file.
-  *
-  * \param d IN the drawing area ?
-  * \param fileName IN  fully qualified filename for the bitmap file.
-  * \return    TRUE on success, FALSE on error
-  */
+/**
+* Export as bitmap file.
+*
+* \param d IN the drawing area ?
+* \param fileName IN  fully qualified filename for the bitmap file.
+* \return    TRUE on success, FALSE on error
+*/
 
 wBool_t wBitMapWriteFile(wDraw_p d, const char* fileName)
 {
@@ -89,10 +89,9 @@ wDraw_p wBitMapCreate(wWinPix_t w, wWinPix_t h, int arg)
 		cairo_scale(bd->cr, 1.0, -1.0);
 
 		wlibBasicClear(bd);
-	}
-	else {
+	} else {
 		bd->pixbuf = gdk_pixbuf_get_from_window(gtk_widget_get_window(GTK_WIDGET(
-			gtkMainW->gtkwin)), 0, 0, w, h);
+		                gtkMainW->gtkwin)), 0, 0, w, h);
 		if (bd->pixbuf == NULL) {
 			wNoticeEx(NT_ERROR, "CreateBitMap: pixmap_new failed", "Ok", NULL);
 			return FALSE;
@@ -112,8 +111,7 @@ wBool_t wBitMapDelete(wDraw_p d)
 		d->cr = NULL;
 		cairo_surface_destroy(d->surface);
 		d->surface = NULL;
-	}
-	else {
+	} else {
 		g_object_unref(d->pixbuf);
 		d->pixbuf = NULL;
 	}

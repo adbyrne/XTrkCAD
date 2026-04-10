@@ -133,7 +133,7 @@ g_win32_getlocale (void)
 	}
 
 	loc = malloc( strlen( iso639 ) + strlen( iso3166 ) + (script ? strlen(
-	                        script ) : 0) + 2 );
+	                      script ) : 0) + 2 );
 	strcpy( loc, iso639 );
 	strcat( loc, "_" );
 	strcat( loc, iso3166 );

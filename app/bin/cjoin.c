@@ -548,20 +548,20 @@ static STATUS_T CmdJoinLine(
 			DYNARR_LAST(trkSeg_t,Dl.newLine).lineWidth = 0;
 			DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.polyType = POLYLINE;
 			DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts = MyMalloc(sizeof(
-			                        pts_t)*Dl.params.nodes.cnt);
+			                pts_t)*Dl.params.nodes.cnt);
 			DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.cnt = Dl.params.nodes.cnt;
 			if (Dl.params.ep) {
 				//Copy in reverse as we want this point to be last
 				for (int i=Dl.params.nodes.cnt-1,j=0; i>=0; i--,j++) {
 					DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[j].pt = DYNARR_N(coOrd,Dl.params.nodes,
-					                i);
+					        i);
 					DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[j].pt_type = wPolyLineStraight;
 				}
 			} else {
 				//Copy forwards to end up with this point last
 				for (int i=0; i<Dl.params.nodes.cnt; i++) {
 					DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[i].pt = DYNARR_N(coOrd,Dl.params.nodes,
-					                i);
+					        i);
 					DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[i].pt_type = wPolyLineStraight;
 				}
 			}
@@ -589,28 +589,28 @@ static STATUS_T CmdJoinLine(
 			BOOL_T join_near = FALSE;
 			if (Dl.inp[1].line == Dl.inp[0].line) {
 				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts = MyRealloc(DYNARR_LAST(trkSeg_t,
-				                Dl.newLine).u.p.pts,sizeof(pts_t)*(old_cnt+1));
+				        Dl.newLine).u.p.pts,sizeof(pts_t)*(old_cnt+1));
 				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[old_cnt] = DYNARR_LAST(trkSeg_t,
-				                Dl.newLine).u.p.pts[0];   // Joined up Polygon
+				        Dl.newLine).u.p.pts[0];   // Joined up Polygon
 				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.cnt += 1;
 			} else {
 				if (IsClose(FindDistance(Dl.inp[0].pos,Dl.inp[1].pos))) {
 					join_near = TRUE;
 				}
 				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts = MyRealloc(DYNARR_LAST(trkSeg_t,
-				                Dl.newLine).u.p.pts,sizeof(pts_t)*(old_cnt+Dl.params.nodes.cnt-join_near));
+				        Dl.newLine).u.p.pts,sizeof(pts_t)*(old_cnt+Dl.params.nodes.cnt-join_near));
 				if (Dl.params.ep) {
 					//Copy forwards as this point is first
 					for (int i=join_near,j=old_cnt; i<Dl.params.nodes.cnt; i++,j++) {
 						DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[j].pt = DYNARR_N(coOrd,Dl.params.nodes,
-						                i);
+						        i);
 						DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[j].pt_type = wPolyLineStraight;
 					}
 				} else {
 					//Copy backwards as this point is last
 					for (int i=Dl.params.nodes.cnt-join_near-1,j=old_cnt; i>=0; i--,j++) {
 						DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[j].pt = DYNARR_N(coOrd,Dl.params.nodes,
-						                i);
+						        i);
 						DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[j].pt_type = wPolyLineStraight;
 					}
 				}
@@ -725,7 +725,7 @@ BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0,
 			//Offset curve by desired_radius
 			DIST_T newR1;
 			newR1 = Dj.inp[1].params.arcR + desired_radius*((fabs(an1
-			                -Dj.inp[1].params.arcA0)<1.0)?1:-1);
+			        -Dj.inp[1].params.arcA0)<1.0)?1:-1);
 			if (newR1<=0.0) {
 				if (debug) { InfoMessage("Zero Radius C1"); }
 				return FALSE;
@@ -749,7 +749,7 @@ BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0,
 			//Offset curve by desired_radius
 			DIST_T newR0;
 			newR0 = Dj.inp[0].params.arcR + desired_radius*((fabs(an0
-			                -Dj.inp[0].params.arcA0)<1.0)?1:-1);
+			        -Dj.inp[0].params.arcA0)<1.0)?1:-1);
 			if (newR0<=0.0) {
 				if (debug) { InfoMessage("Zero Radius C0"); }
 				return FALSE;
@@ -761,7 +761,7 @@ BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0,
 			}
 			DIST_T newR1;
 			newR1 = Dj.inp[1].params.arcR + desired_radius*((fabs(an1
-			                -Dj.inp[1].params.arcA0)<1.0)?1:-1);
+			        -Dj.inp[1].params.arcA0)<1.0)?1:-1);
 			if (newR1<=0.0) {
 				if (debug) { InfoMessage("Zero Radius C1"); }
 				return FALSE;
@@ -775,7 +775,7 @@ BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0,
 			                          Dj.inp[1].params.arcP,newR1)) {
 				return FALSE;
 			}
-		} 
+		}
 		if (debug) {
 			AnchorPoint(point1);
 			AnchorPoint(point2);
@@ -806,7 +806,7 @@ BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0,
 			//Offset curve by desired_radius
 			DIST_T newR0;
 			newR0 = Dj.inp[0].params.arcR + desired_radius*((fabs(an0
-			                -Dj.inp[0].params.arcA0)<1.0)?1:-1);
+			        -Dj.inp[0].params.arcA0)<1.0)?1:-1);
 			if (newR0<=0.0) {
 				if (debug) { InfoMessage("Zero Radius C0"); }
 				return FALSE;
@@ -1563,10 +1563,10 @@ void InitCmdJoin( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Join"), "cmdJoinSetCmd", _("Join") );
 	AddMenuButton( menu, CmdJoin, "cmdJoinTrack", _("Join Track"),
-		CreateToolbarIconFromResource("join.png"), LEVEL0_50,
+	               CreateToolbarIconFromResource("join.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
 	AddMenuButton( menu, CmdJoinLine, "cmdJoinLine", _("Join Lines"),
-		CreateToolbarIconFromResource("join-line.png"), LEVEL0_50,
+	               CreateToolbarIconFromResource("join-line.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
 	ButtonGroupEnd();
 	/** @logcmd @showrefby join=n cjoin.c Log Join Lines and Tracks command */

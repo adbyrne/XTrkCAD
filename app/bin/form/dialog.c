@@ -38,7 +38,8 @@ static dynArr_t dialogGroups_da;
 
 EXPORT paramGroup_cp DialogGroupFind( const char* sName )
 {
-	for ( paramGroup_cp * ppg = DialogGroupIter(NULL); ppg; ppg = DialogGroupIter( ppg ) ) {
+	for ( paramGroup_cp * ppg = DialogGroupIter(NULL); ppg;
+	      ppg = DialogGroupIter( ppg ) ) {
 		if ( (*ppg)->nameStr == NULL ) { continue; }
 		size_t len = strlen( (*ppg)->nameStr );
 		if ( strncmp( (*ppg)->nameStr, sName, len ) == 0 &&
@@ -56,7 +57,7 @@ EXPORT paramGroup_cp * DialogGroupIter( paramGroup_cp * ppg )
 	}
 	if ( ppg >= &DYNARR_LAST( paramGroup_cp, dialogGroups_da ) ) {
 		return NULL;
-	} 
+	}
 	ppg++;
 	return ppg;
 }

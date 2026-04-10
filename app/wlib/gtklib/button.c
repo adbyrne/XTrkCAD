@@ -98,11 +98,11 @@ void wlibSetLabel(
 			bm = (wIcon_p)labelStr;
 
 			if (bm->gtkIconType == gtkIcon_pixmap) {
-				// check gdk_pixbuf header 
+				// check gdk_pixbuf header
 				assert ( *(int*)bm->bits == 0x47646b50 ||
-				     *(int*)bm->bits == 0x506b6447 );
+				         *(int*)bm->bits == 0x506b6447 );
 				pixbuf = gdk_pixbuf_new_from_inline( -1, bm->bits, FALSE, NULL );
-				
+
 			} else {
 				pixbuf = wlibPixbufFromXBM( bm );
 			}

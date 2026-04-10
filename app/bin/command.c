@@ -91,33 +91,30 @@ EXPORT const char* GetCurCommandName()
 
 EXPORT bool IsCommandEnabled(long mode, long options)
 {
-	if (options & IC_MODETRAIN_TOO)
-	{
+	if (options & IC_MODETRAIN_TOO) {
 		return true; // Fast path: always allow when IC_MODETRAIN_TOO is set
 	}
 
-	if (mode == MODE_DESIGN && !(options & IC_MODETRAIN_ONLY))
-	{
+	if (mode == MODE_DESIGN && !(options & IC_MODETRAIN_ONLY)) {
 		return true; // Design mode OK when ONLY flag is NOT set
 	}
 
-	if (mode == MODE_TRAIN && (options & IC_MODETRAIN_ONLY))
-	{
+	if (mode == MODE_TRAIN && (options & IC_MODETRAIN_ONLY)) {
 		return true; // Train mode OK when ONLY flag IS set
 	}
-/*
-	if (((mode == MODE_DESIGN) || (options & IC_MODETRAIN_ONLY) ||
-		(options & IC_MODETRAIN_TOO)) &&
-		((mode == MODE_TRAIN) || !(options & IC_MODETRAIN_ONLY)) ||
-		(options & IC_MODETRAIN_TOO)) {
-		return true;
-	}
-	else {
-		return false;
-	}
-*/
+	/*
+		if (((mode == MODE_DESIGN) || (options & IC_MODETRAIN_ONLY) ||
+			(options & IC_MODETRAIN_TOO)) &&
+			((mode == MODE_TRAIN) || !(options & IC_MODETRAIN_ONLY)) ||
+			(options & IC_MODETRAIN_TOO)) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	*/
 
-return false;
+	return false;
 }
 
 EXPORT void EnableCommands(void)
@@ -172,7 +169,7 @@ EXPORT void Reset(void)
 	if (commandList[curCommand].buttInx >= 0) {
 		ToolbarButtonBusy(commandList[curCommand].buttInx, FALSE);
 	}
- 	curCommand = (preSelect ? selectCmdInx : describeCmdInx);
+	curCommand = (preSelect ? selectCmdInx : describeCmdInx);
 	wSetCursor(mainD.d, preSelect ? defaultCursor : wCursorQuestion);
 	commandContext = commandList[curCommand].context;
 	if (commandList[curCommand].buttInx >= 0) {
@@ -355,8 +352,7 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos)
 		break;
 	}
 	if ((rc == C_TERMINATE )
-		&& IsCurCommandSticky() )
-		 {
+	    && IsCurCommandSticky() ) {
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		UpdateAllElevations();
 		if (commandList[curCommand].options & IC_NORESTART) {
@@ -409,10 +405,10 @@ EXPORT int ConfirmReset(BOOL_T retry)
 			else
 				rc =
 				        wNoticeWithIcon( NT_WARNING,
-				                   _(
-				                           "Cancelling the current command will undo the changes\n"
-				                           "you are currently making. Do you want to do the update instead?"),
-				                   _("Yes"), _("No"));
+				                         _(
+				                                 "Cancelling the current command will undo the changes\n"
+				                                 "you are currently making. Do you want to do the update instead?"),
+				                         _("Yes"), _("No"));
 			if (rc == 1) {
 				LOG(log_command, 3,
 				    ( "COMMAND OK %s\n", commandList[curCommand].helpKey ))
@@ -471,7 +467,7 @@ EXPORT void DoCommandB(void * data)
 		if (rc == C_ERROR) {
 			rc = wNotice3(
 			             _("Cancelling the current command will undo the changes\n"
-			               "you are currently making. Do you want to update?"),
+			  "you are currently making. Do you want to update?"),
 			             _("Yes"), _("No"), _("Cancel"));
 			if (rc == 1) {
 				commandList[curCommand].cmdProc( C_OK, zero);
@@ -649,7 +645,7 @@ EXPORT void CommandInit( void )
 
 	wPrefGetInteger("cmdopt", "preselect", &preSelect, preSelect);
 	wPrefGetInteger("cmdopt", "rightclickmode", &rightClickMode,
-		rightClickMode);
+	                rightClickMode);
 	wPrefGetInteger("cmdopt", "selectmode", &selectMode, selectMode);
 	wPrefGetInteger("cmdopt", "selectzero", &selectZero, selectZero);
 

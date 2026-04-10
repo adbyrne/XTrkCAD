@@ -643,7 +643,7 @@ static wBool_t StructureDlgUpdate(
 	turnoutInfo_t * to;
 	if ( inx != I_LIST ) { return(0); }
 	to = (turnoutInfo_t*)wListGetItemContext( pg->paramPtr[inx].control,
-	                (wIndex_t)*(long*)valueP );
+	        (wIndex_t)*(long*)valueP );
 	NewStructure();
 	curStructure = to;
 	ShowPierL();
@@ -1029,11 +1029,11 @@ static STATUS_T CmdStructure(
 	case C_START:
 		if (structureW == NULL) {
 			structureW = FormCreateDialog( &structurePG, MakeWindowTitle(_("Structure")),
-			                                NULL, (paramActionOkProc)DoStructOk,
-			                                NULL, NULL,
-											TRUE,
-			                                0l,
-			                                StructureDlgUpdate );
+			                               NULL, (paramActionOkProc)DoStructOk,
+			                               NULL, NULL,
+			                               TRUE,
+			                               0l,
+			                               StructureDlgUpdate );
 			RegisterChangeNotification( structureChange );
 		}
 		FormDialogOkActive( &structurePG, TRUE );
@@ -1246,7 +1246,7 @@ static STATUS_T CmdStructureHotBar(
 EXPORT void InitCmdStruct( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdStructure, "cmdStructure", _("Structure"),
-		CreateToolbarIconFromResource("building.png"), LEVEL0_50,
+	               CreateToolbarIconFromResource("building.png"), LEVEL0_50,
 	               IC_WANT_MOVE|IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_STRUCTURE, NULL );
 	structureHotBarCmdInx = AddMenuButton( menu, CmdStructureHotBar,
 	                                       "cmdStructureHotBar", "", NULL, LEVEL0_50,

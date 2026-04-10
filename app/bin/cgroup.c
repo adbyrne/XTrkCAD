@@ -570,7 +570,7 @@ EXPORT void UngroupCompound(
 			GetSegInxEP( cp[0], &segInx, &segEP );
 			stp = &segTrack(segInx);
 			ep = FindEP( epCnt, TempEndPt(0), GetSegEndPt( xx->segs+segInx, segEP, FALSE,
-			                NULL ) );
+			             NULL ) );
 			if ( ep >= 0 ) {
 				epp = TempEndPt(ep);
 				track_p trk1 = GetEndPtTrack(epp);
@@ -607,7 +607,7 @@ EXPORT void UngroupCompound(
 			}
 			/* joint EP to last segment */
 			ep = FindEP( epCnt, TempEndPt(0), GetSegEndPt( xx->segs+segInx, segEP1, FALSE,
-			                NULL ) );
+			             NULL ) );
 			if ( ep > 0 ) {
 				epp = TempEndPt(ep);
 				track_p trk1 = GetEndPtTrack( epp );
@@ -982,7 +982,7 @@ static int CmpEndPtAngle(
 
 	angle = NormalizeAngle(FindAngle(endPtOrig,
 	                                 GetEndPtPos(epp1))-endPtAngle) - NormalizeAngle(FindAngle(endPtOrig,
-	                                                 GetEndPtPos(epp2))-endPtAngle);
+	                                         GetEndPtPos(epp2))-endPtAngle);
 	return (int)angle;
 }
 
@@ -1862,9 +1862,9 @@ EXPORT void DoGroup( void * unused )
 	if ( !groupW ) {
 		FormRegister( &groupPG );
 		groupW = FormCreateDialog( &groupPG, MakeWindowTitle(_("Group Objects")),
-		                           _("Ok"), GroupOk, 
-					   _("Cancel"), FormCancel_Current, 
-					   TRUE, F_BLOCK, NULL);
+		                           _("Ok"), GroupOk,
+		                           _("Cancel"), FormCancel_Current,
+		                           TRUE, F_BLOCK, NULL);
 		groupD.dpi = mainD.dpi;
 	}
 	if (isTurnout) {

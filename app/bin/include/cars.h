@@ -8,12 +8,14 @@ typedef struct carProto_s* carProto_p;
 
 void CarProtoDelete(carProto_p protoP);
 void DeleteCarProto(int fileIndex);
-enum paramFileState	GetCarProtoCompatibility(int paramFileIndex, SCALEINX_T scaleIndex);
+enum paramFileState	GetCarProtoCompatibility(int paramFileIndex,
+                SCALEINX_T scaleIndex);
 
 typedef struct carPart_s* carPart_p;
 
 void DeleteCarPart(int fileIndex);
-enum paramFileState	GetCarPartCompatibility(int paramFileIndex, SCALEINX_T scaleIndex);
+enum paramFileState	GetCarPartCompatibility(int paramFileIndex,
+                SCALEINX_T scaleIndex);
 
 //struct carItem_s;
 typedef struct carItem_s* carItem_p;
@@ -23,7 +25,8 @@ extern carItem_p currCarItemPtr;
 
 DIST_T CarItemCoupledLength(carItem_p);
 char* CarItemDescribe(carItem_p, long, long*);
-void CarItemDraw(drawCmd_p, carItem_p, wDrawColor, int, BOOL_T, vector_p, track_p);
+void CarItemDraw(drawCmd_p, carItem_p, wDrawColor, int, BOOL_T, vector_p,
+                 track_p);
 void CarItemFindCouplerMountPoint(carItem_p, traverseTrack_t, coOrd[2]);
 BOOL_T CarItemIsLoco(carItem_p);
 void CarItemLoadList(void*);

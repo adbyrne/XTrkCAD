@@ -137,7 +137,7 @@ static void UpdateTitleNext( void )
 		return;
 	}
 	FormLoadMessage( &updateTitlePG, I_UPDATESTR,
-	                  updateTitles(updateTitleInx).old );
+	                 updateTitles(updateTitleInx).old );
 	if (updateWStale || updateTitles(updateTitleInx).type != updateListType) {
 		UpdateTitleChange( CHANGE_SCALE|CHANGE_PARAMS );
 	}
@@ -178,10 +178,11 @@ void DoUpdateTitles( void )
 	if (updateTitleW == NULL) {
 		FormRegister( &updateTitlePG );
 		updateTitlePLs[I_UPDATELOAD].valueP = ParamFilesInit();
-		updateTitleW = FormCreateDialog( &updateTitlePG, MakeWindowTitle(_("Update Title")),
-						  _("Update"), UpdateTitleUpdate,
-		                                  NULL, UpdateTitleCancel,
-						  TRUE, 0, NULL );
+		updateTitleW = FormCreateDialog( &updateTitlePG,
+		                                 MakeWindowTitle(_("Update Title")),
+		                                 _("Update"), UpdateTitleUpdate,
+		                                 NULL, UpdateTitleCancel,
+		                                 TRUE, 0, NULL );
 		RegisterChangeNotification( UpdateTitleChange );
 	}
 	updateTitleInx = -1;
@@ -423,12 +424,12 @@ EXPORT BOOL_T RefreshCompound(
 		FormRegister( &refreshSpecialPG );
 		FormCreateDialog( &refreshSpecialPG,
 		                  MakeWindowTitle(_("Refresh Turnout/Structure")),
-				  _("Ok"), RefreshSpecialOk,
+		                  _("Ok"), RefreshSpecialOk,
 		                  NULL, RefreshSpecialCancel,
-				  TRUE, F_BLOCK|F_RESIZE|F_RECALLSIZE, NULL );
+		                  TRUE, F_BLOCK|F_RESIZE|F_RECALLSIZE, NULL );
 	}
 	FormLoadMessage( &refreshSpecialPG, REFRESH_M1,
-	                  _("Choose a Turnout/Structure to replace:") );
+	                 _("Choose a Turnout/Structure to replace:") );
 	FormLoadMessage( &refreshSpecialPG, REFRESH_M2, "" );
 	refreshSpecialInx = -1;
 	wListClear( (wList_p)refreshSpecialPLs[REFRESH_L].control );
@@ -458,7 +459,7 @@ EXPORT BOOL_T RefreshCompound(
 			return refreshReturnVal;
 		}
 		to = (turnoutInfo_t*)wListGetItemContext( (wList_p)
-		                refreshSpecialPLs[REFRESH_L].control, refreshSpecialInx );
+		        refreshSpecialPLs[REFRESH_L].control, refreshSpecialInx );
 		if ( to != NULL &&
 		     RefreshCompound1( trk, to ) ) {
 			DYNARR_APPEND( refreshSpecial_t, refreshSpecial_da, 10 );
@@ -472,7 +473,7 @@ EXPORT BOOL_T RefreshCompound(
 		}
 		FormLoadMessage( &refreshSpecialPG, REFRESH_M1, message );
 		FormLoadMessage( &refreshSpecialPG, REFRESH_M2,
-		                  _("Choose another Turnout/Structure to replace:") );
+		                 _("Choose another Turnout/Structure to replace:") );
 	}
 }
 
@@ -489,8 +490,7 @@ EXPORT void DoRefreshCompound(void* unused)
 		RefreshCompound(NULL, FALSE);
 		UndoEnd();
 		MainRedraw(); // DoRefreshCompound
-	}
-	else {
+	} else {
 		ErrorMessage(MSG_NO_SELECTED_TRK);
 	}
 }
@@ -609,10 +609,10 @@ static int CompoundCustMgmProc(
 			if ( !renamePG.win ) {
 				FormRegister( &renamePG );
 				FormCreateDialog( &renamePG,
-						  MakeWindowTitle(_("Rename Object")), 
-						  _("Ok"), RenameOk, 
-						  N_("Cancel"), wHide, 
-						  TRUE, F_BLOCK, NULL);
+				                  MakeWindowTitle(_("Rename Object")),
+				                  _("Ok"), RenameOk,
+				                  N_("Cancel"), wHide,
+				                  TRUE, F_BLOCK, NULL);
 			}
 			FormLoadControls( &renamePG );
 			wShow( renamePG.win );

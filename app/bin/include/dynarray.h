@@ -2,28 +2,28 @@
  * Macros for dynamic arrays
  */
 
- /*  XTrkCad - Model Railroad CAD
-  *  Copyright (C) 2005 Dave Bullis
-  *
-  *  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
-  *  (at your option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
-  *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-  */
+/*  XTrkCad - Model Railroad CAD
+ *  Copyright (C) 2005 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #ifndef DYNARRAY_H
 #define DYNARRAY_H
 
-  // DYNARRAY
+// DYNARRAY
 
 typedef struct {
 	int cnt;
@@ -49,26 +49,26 @@ typedef struct {
 		} \
 		(DA).cnt++; }
 
- /**
-  * Return Last member of DA
-  */
+/**
+ * Return Last member of DA
+ */
 #define DYNARR_LAST(T,DA) \
 		(((T*)(DA).ptr)[(DA).cnt-1])
-  /**
-   * Return N't member of DA
-   */
+/**
+ * Return N't member of DA
+ */
 #define DYNARR_N(T,DA,N) \
 		(((T*)(DA).ptr)[N])
-   /**
-	* Logically empty the DA
-	* .max and .ptr are untouched
-	*/
+/**
+* Logically empty the DA
+* .max and .ptr are untouched
+*/
 #define DYNARR_RESET(T,DA) \
 		(DA).cnt=0
-	/**
-	 * Set number of members to N
-	 * If extending (.cnt > .max ), new values will be 0'd, otherwise not
-	 */
+/**
+ * Set number of members to N
+ * If extending (.cnt > .max ), new values will be 0'd, otherwise not
+ */
 #define DYNARR_SET(T,DA,N) \
 		{ if ((DA).max < (N)) { \
 			(DA).max = (N); \
@@ -78,18 +78,18 @@ typedef struct {
 				abort(); \
 		} \
 		(DA).cnt = (N); }
-	 /**
-	  * Initializes DA to empty when .ptr might be garbage (ie local vars)
-	  * All fields are cleared
-	  */
+/**
+ * Initializes DA to empty when .ptr might be garbage (ie local vars)
+ * All fields are cleared
+ */
 #define DYNARR_INIT(T,DA) \
 		{ (DA).ptr = NULL; \
 		(DA).max = 0; \
 		(DA).cnt = 0; \
 		}
-	  /**
-	   * Initializes DA to empty and frees .ptr
-	   */
+/**
+ * Initializes DA to empty and frees .ptr
+ */
 #define DYNARR_FREE(T,DA) \
 		{ if ((DA).ptr) { \
 			MyFree( (DA).ptr); \
@@ -97,10 +97,10 @@ typedef struct {
 		} \
 		(DA).max = 0; \
 		(DA).cnt = 0; }
-	   /**
-		* Removes N'th member from DA
-		* (Not used)
-		*/
+/**
+* Removes N'th member from DA
+* (Not used)
+*/
 #define DYNARR_REMOVE(T,DA,N) \
 		{ \
 		 { if ((DA).cnt-1 > (N)) { \

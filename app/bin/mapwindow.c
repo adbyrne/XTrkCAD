@@ -83,31 +83,31 @@ static paramGroup_t mapPG = { "map", PGO_NODEFAULTPROC | PGO_FULLDIALOGFROMBUILD
 EXPORT wControl_p mapW;
 EXPORT BOOL_T mapVisible;
 
-#ifndef WIN32	
+#ifndef WIN32
 #include <stdio.h>
 #include <execinfo.h>
 
 static void
 log_calls(const char *fmt,...)
 {
-    void *callstack[3];
-    char **symbols;
+	void *callstack[3];
+	char **symbols;
 	char buffer[80];
 
-    // Capture the top 3 frames (0=this func, 1=caller, 2=caller's caller)
-    int frames = backtrace(callstack, 3);
-    symbols = backtrace_symbols(callstack, frames);
+	// Capture the top 3 frames (0=this func, 1=caller, 2=caller's caller)
+	int frames = backtrace(callstack, 3);
+	symbols = backtrace_symbols(callstack, frames);
 
-    va_list args;
-    va_start(args, fmt );
+	va_list args;
+	va_start(args, fmt );
 
-    // symbols[2] is the callee context, symbols[1] is the direct caller
-    LOG(log_mapredraw, 1, ("[%s] => [%s] | ", symbols[2], symbols[1]));
-    vsnprintf(buffer, sizeof(buffer), fmt, args);
-    LOG(log_mapredraw, 1, ("%s\n", buffer));
+	// symbols[2] is the callee context, symbols[1] is the direct caller
+	LOG(log_mapredraw, 1, ("[%s] => [%s] | ", symbols[2], symbols[1]));
+	vsnprintf(buffer, sizeof(buffer), fmt, args);
+	LOG(log_mapredraw, 1, ("%s\n", buffer));
 
-    va_end(args);
-    free(symbols);	
+	va_end(args);
+	free(symbols);
 }
 #endif
 
@@ -312,16 +312,16 @@ static wBool_t MapRedraw( wControl_p bd, void* pContex, wWinPix_t px,
 		LOG(log_mapsize, 2, ("  0x0 mapD.scale=%0.3f\n", mapD.scale));
 	}
 
-        TIMER_START(redraw);
-        wDrawClear(mapD.d);
-        DrawTracks(&mapD, mapD.scale, mapD.orig, mapD.size);
-        MapDrawBoundingBox(TRUE);
-		TIMER_LOG(redraw, "MapRedraw draw");
+	TIMER_START(redraw);
+	wDrawClear(mapD.d);
+	DrawTracks(&mapD, mapD.scale, mapD.orig, mapD.size);
+	MapDrawBoundingBox(TRUE);
+	TIMER_LOG(redraw, "MapRedraw draw");
 
-        wDrawSetTempMode(mapD.d, bTemp);
-        wDrawDelayUpdate(mapD.d, FALSE);
+	wDrawSetTempMode(mapD.d, bTemp);
+	wDrawDelayUpdate(mapD.d, FALSE);
 
-        return TRUE;
+	return TRUE;
 }
 
 
@@ -342,7 +342,7 @@ void MapChangeScale()
 	FLOAT_T fw, fh;
 #ifndef WIN32
 	log_calls("MapChangeScale()");
-#endif	
+#endif
 
 	// Restrict map size to SCREEN_SIZE_FACTOR of screen
 	FLOAT_T fScaleW = mapD.size.x / (displayWidth * SCREEN_SIZE_FACTOR / mapD.dpi);
@@ -361,11 +361,11 @@ void MapChangeScale()
 	h = (wWinPix_t)fh;
 	LOG(log_mapsize, 2, ("  MapChangeScale mapD.scale=%0.3f w=%ld h=%ld\n",
 	                     mapD.scale, w, h));
-    
-    wWinSetAspectRatio(mapW, mapD.size.x, mapD.size.y );
+
+	wWinSetAspectRatio(mapW, mapD.size.x, mapD.size.y );
 	// Force the map to redraw with the new scale
 	if (mapD.d) {
-    	MapRedraw(mapD.d, NULL, 0, 0);
+		MapRedraw(mapD.d, NULL, 0, 0);
 	}
 }
 

@@ -85,8 +85,7 @@ static gboolean resizeTime(wControl_p win)
 
 	g_assert(win->type == W_MAIN);
 
-	if (wcontrol->size_changed)
-	{
+	if (wcontrol->size_changed) {
 		// do redraw
 		wcontrol->winProc(win, wResize_e, NULL, win);
 		wcontrol->size_changed = FALSE;
@@ -94,32 +93,28 @@ static gboolean resizeTime(wControl_p win)
 	}
 
 	wcontrol->resizeTimer = 0;
-	return FALSE; 
+	return FALSE;
 }
 
 static void on_size_allocate(
-	GtkWidget *widget,
-	GdkRectangle *allocation,
-	wControl_p win)
+        GtkWidget *widget,
+        GdkRectangle *allocation,
+        wControl_p win)
 {
 	struct window *wcontrol;
-	if (win == NULL)
-	{
+	if (win == NULL) {
 		return;
 	}
 
 	g_assert(win->type == W_MAIN);
 
 	wcontrol = CONTROL_GET_ATTRIBUTES_PTR(win, window);
-	if (wcontrol->option & F_RESIZE)
-	{
-		if (wcontrol->w != allocation->width || wcontrol->h != allocation->height)
-		{
+	if (wcontrol->option & F_RESIZE) {
+		if (wcontrol->w != allocation->width || wcontrol->h != allocation->height) {
 			wcontrol->w = allocation->width;
 			wcontrol->h = allocation->height;
 			wcontrol->size_changed = TRUE;
-			if (wcontrol->resizeTimer == 0)
-			{
+			if (wcontrol->resizeTimer == 0) {
 				wcontrol->resizeTimer = g_timeout_add(REDRAW_TIMEOUT, resizeTime, win);
 			}
 		}
@@ -140,8 +135,8 @@ static gboolean
 on_widget_deleted(GtkWidget* window, GdkEvent* event, gpointer userData)
 {
 	if (appMainWindow->attributes.window.winProc) {
-		bool rc = appMainWindow->attributes.window.winProc(appMainWindow, 
-			wClose_e, userData, NULL);
+		bool rc = appMainWindow->attributes.window.winProc(appMainWindow,
+		          wClose_e, userData, NULL);
 		if (!rc) {
 			wPrefFlush(NULL);
 		}
@@ -165,8 +160,8 @@ signalSizeAlloc(GtkWidget* self,
                 GtkAllocation* allocation,
                 gpointer user_data)
 {
- 	gtk_scrolled_window_set_max_content_height(GTK_SCROLLED_WINDOW(user_data),
-	        allocation->height);
+	gtk_scrolled_window_set_max_content_height(GTK_SCROLLED_WINDOW(user_data),
+	                allocation->height);
 }
 
 /**
@@ -219,8 +214,8 @@ wControl_p wWinMainCreate(
 	wcontrol->option = option;
 
 	wcontrol->builder = gtk_builder_new_from_resource(
-	                                 XTRKCAD_RESOURCE_PATH
-	                                 "appwindow.ui");
+	                            XTRKCAD_RESOURCE_PATH
+	                            "appwindow.ui");
 	if(!wcontrol->builder) {
 		fprintf(stderr, "Builder %s could not be found. Terminating\n", "appwindow.ui");
 		exit(1);
@@ -242,12 +237,12 @@ wControl_p wWinMainCreate(
 
 	if (option & F_MENUBAR) {
 		wcontrol->menubar = GTK_WIDGET(gtk_builder_get_object(
-		                wcontrol->builder,
-		                "menubar"));
+		                                       wcontrol->builder,
+		                                       "menubar"));
 	}
 
 	GtkWidget* toolbarbox = GTK_WIDGET(gtk_builder_get_object(wcontrol->builder,
-									"toolbarWindow"));
+	                                   "toolbarWindow"));
 	if (toolbarbox) {
 		wcontrol->toolbar =  wlibToolbarCreate(toolbarbox);
 	}
@@ -261,7 +256,7 @@ wControl_p wWinMainCreate(
 	g_signal_connect(G_OBJECT(appMainWindow->widget),
 	                 "delete-event", G_CALLBACK(on_widget_deleted), NULL);
 	g_signal_connect(G_OBJECT(appMainWindow->widget),
-					 "size-allocate", G_CALLBACK(on_size_allocate), appMainWindow);
+	                 "size-allocate", G_CALLBACK(on_size_allocate), appMainWindow);
 
 	gtk_widget_show_all(appMainWindow->widget);
 	return appMainWindow;

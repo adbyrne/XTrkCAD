@@ -991,21 +991,21 @@ wBool_t wPrintDocStart(const char * title, int fTotalPageCount, int * copiesP)
 
 	if (res == GTK_RESPONSE_OK) {
 		selPrinter = gtk_print_unix_dialog_get_selected_printer((
-		                        GtkPrintUnixDialog *)printDialog);
+		                     GtkPrintUnixDialog *)printDialog);
 
 		if (settings) {
 			g_object_unref(settings);
 		}
 
 		settings = gtk_print_unix_dialog_get_settings((GtkPrintUnixDialog *)
-		                printDialog);
+		           printDialog);
 
 		if (page_setup) {
 			g_object_unref(page_setup);
 		}
 
 		page_setup = gtk_print_unix_dialog_get_page_setup((GtkPrintUnixDialog *)
-		                printDialog);
+		             printDialog);
 
 		curPrintJob = gtk_print_job_new(title,
 		                                selPrinter,

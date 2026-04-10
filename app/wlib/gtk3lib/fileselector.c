@@ -198,7 +198,7 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 		// However this works for now
 		// TODO: revist how to set the current folder
 		gtk_file_chooser_set_current_folder(
-			GTK_FILE_CHOOSER(fs->window), dirName );
+		        GTK_FILE_CHOOSER(fs->window), dirName );
 
 		if (fs->opt & FSO_MULTIPLEFILES) {
 			gtk_file_chooser_set_select_multiple(
@@ -216,7 +216,7 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 
 	if (fs->opt & FSO_SETFOLDERALWAYS) {
 		gtk_file_chooser_set_current_folder(
-			GTK_FILE_CHOOSER(fs->window), dirName );
+		        GTK_FILE_CHOOSER(fs->window), dirName );
 	}
 
 	int resp = gtk_native_dialog_run( GTK_NATIVE_DIALOG( fs->window ));
@@ -236,7 +236,7 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 			gsize chars;
 
 			err = NULL;
-   			file = g_filename_from_uri( g_slist_nth_data( fileNameList, i ),
+			file = g_filename_from_uri( g_slist_nth_data( fileNameList, i ),
 			                            &host, &err );
 
 			converted = g_locale_from_utf8(file, -1, NULL, &chars, &err);

@@ -499,13 +499,13 @@ void InitCmdSplit( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Split"), "cmdSplitSetCmd", _("Split") );
 	AddMenuButton( menu, CmdSplitTrack, "cmdSplitTrack", _("Split Track"),
-		CreateToolbarIconFromResource("split.png"), LEVEL0_50,
+	               CreateToolbarIconFromResource("split.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP|IC_CMDMENU|IC_WANT_MOVE, ACCL_SPLIT,  NULL);
 	AddMenuButton( menu, CmdSplitDraw, "cmdSplitDraw", _("Split Draw"),
-		CreateToolbarIconFromResource("split-draw.png"), LEVEL0_50,
+	               CreateToolbarIconFromResource("split-draw.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_SPLITDRAW, NULL);
 	AddMenuButton( menu, CmdTrimDraw, "cmdTrimDraw", _("Trim Draw"),
-		CreateToolbarIconFromResource("trim.png"), LEVEL0_50,
+	               CreateToolbarIconFromResource("trim.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_TRIMDRAW, NULL);
 	ButtonGroupEnd();
 }

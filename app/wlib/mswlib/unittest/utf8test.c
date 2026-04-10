@@ -56,10 +56,10 @@ Umlauts(void **state)
 
 int main(void)
 {
-    const struct CMUnitTest tests[] = {
+	const struct CMUnitTest tests[] = {
 		cmocka_unit_test(ASCIIText),
 		cmocka_unit_test(Umlauts),
-    };
+	};
 
-    return cmocka_run_group_tests(tests, NULL, NULL);
+	return cmocka_run_group_tests(tests, NULL, NULL);
 }

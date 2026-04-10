@@ -49,18 +49,18 @@ static char buffer[MAX_PATH + 1];
 char *
 wGetTempPath()
 {
-    unsigned retChars;
+	unsigned retChars;
 
-    retChars = GetTempPath(MAX_PATH + 1, buffer);
+	retChars = GetTempPath(MAX_PATH + 1, buffer);
 
-    if (retChars <= MAX_PATH + 1) {
-        char str[20];
-        strcat(buffer, "xtc");
-        itoa(getpid(), str, 10);
-        strcat(buffer, str);
-    }
+	if (retChars <= MAX_PATH + 1) {
+		char str[20];
+		strcat(buffer, "xtc");
+		itoa(getpid(), str, 10);
+		strcat(buffer, str);
+	}
 
-    return(buffer);
+	return(buffer);
 }
 
 /**
@@ -75,17 +75,18 @@ wGetTempPath()
 char *
 wGetOSVersion()
 {
-    FILE* pPipe;
-    pPipe = _popen("ver", "r");
+	FILE* pPipe;
+	pPipe = _popen("ver", "r");
 
-    while (fgets(buffer, sizeof(buffer), pPipe))
-        ;
+	while (fgets(buffer, sizeof(buffer), pPipe))
+		;
 
-    if (buffer[strlen(buffer) -1]  == '\n')
-        buffer[strlen(buffer) -1 ] = '\0';
-    _pclose(pPipe);
+	if (buffer[strlen(buffer) -1]  == '\n') {
+		buffer[strlen(buffer) -1 ] = '\0';
+	}
+	_pclose(pPipe);
 
-    return(buffer);
+	return(buffer);
 }
 
 /**
@@ -98,7 +99,7 @@ wGetOSVersion()
 char *
 wGetProfileFilename()
 {
-    return(mswProfileFile);
+	return(mswProfileFile);
 }
 
 /**
@@ -112,11 +113,11 @@ wGetProfileFilename()
 char *
 wGetUserID()
 {
-    DWORD bufferSize = sizeof(buffer);
+	DWORD bufferSize = sizeof(buffer);
 
-    GetUserName(buffer, &bufferSize);
+	GetUserName(buffer, &bufferSize);
 
-    return(buffer);
+	return(buffer);
 }
 
 /** Get the user's profile directory. Other than on UNIX Windows differentiates
@@ -127,12 +128,11 @@ wGetUserID()
 
 const char* wGetUserHomeRootDir(void)
 {
-    if (SHGetSpecialFolderPath(NULL, mswTmpBuff, CSIDL_PROFILE, 0) == 0) {
-        wNoticeEx(NT_ERROR, "Cannot get user's profile directory", "Exit", NULL);
-        wExit(0);
-        return(NULL);
-    }
-    else {
-        return(mswTmpBuff);
-    }
+	if (SHGetSpecialFolderPath(NULL, mswTmpBuff, CSIDL_PROFILE, 0) == 0) {
+		wNoticeEx(NT_ERROR, "Cannot get user's profile directory", "Exit", NULL);
+		wExit(0);
+		return(NULL);
+	} else {
+		return(mswTmpBuff);
+	}
 }

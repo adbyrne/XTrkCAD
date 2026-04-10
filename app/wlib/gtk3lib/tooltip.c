@@ -1,6 +1,6 @@
 /** \file tooltip.c
  * Code for tooltip help functions
- * 
+ *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -47,7 +47,7 @@ static int tooltipsCount;
 
 void wInitTooltip( wTooltip_t * bh, unsigned int count )
 {
-    tooltipsTexts = bh;
+	tooltipsTexts = bh;
 	tooltipsCount = count;
 }
 
@@ -59,10 +59,10 @@ void wInitTooltip( wTooltip_t * bh, unsigned int count )
  */
 
 void wTooltipSetText(
-    wControl_p b,
-    const char * newTip )
+        wControl_p b,
+        const char * newTip )
 {
-    g_assert(b->widget != NULL);
+	g_assert(b->widget != NULL);
 
 	gtk_widget_set_tooltip_text( b->widget, newTip );
 }
@@ -118,21 +118,21 @@ static int binarySearch(wTooltip_t arr[], int l, int r, const char* key)
  */
 
 static const char*
-FindTooltip(const char* field) 
+FindTooltip(const char* field)
 {
 	int res;
 
-	if (!tooltipsCount)
+	if (!tooltipsCount) {
 		return(NULL);
+	}
 
 	res = binarySearch(tooltipsTexts, 0,
-		tooltipsCount,
-		field);
+	                   tooltipsCount,
+	                   field);
 
 	if (res == -1) {
 		return(NULL);
-	}
-	else {
+	} else {
 		return(tooltipsTexts[res].value);
 	}
 }
@@ -142,51 +142,52 @@ void wTooltipSet(wControl_p control, const char *dialog, const char* dialogItem)
 {
 	g_assert(control != NULL);
 	g_assert(dialogItem != NULL);
-	
+
 	wlibAddTooltip(control->widget, dialog, dialogItem);
 }
 
 /**
  * Add tooltip to a widget.
- * 
+ *
  * \param widget		IN widget
  * \param dialog		IN name of dialog
  * \param dialogitem	IN name of item within dialog
  */
 
 void wlibAddTooltip(
-    GtkWidget * widget,
-	const char *dialog,
-    const char * dialogItem )
+        GtkWidget * widget,
+        const char *dialog,
+        const char * dialogItem )
 {
-    const char *tooltipText;
+	const char *tooltipText;
 	const char* searchKey;
 	GString *tooltip = g_string_new(NULL);
 
-    if (dialogItem==NULL || *dialogItem==0)
-        return;
-    if ( tooltipsTexts == NULL ) {
-        return;
-    }
+	if (dialogItem==NULL || *dialogItem==0) {
+		return;
+	}
+	if ( tooltipsTexts == NULL ) {
+		return;
+	}
 
 	if (dialog) {
 		g_string_printf(tooltip, "%s-%s", dialog, dialogItem);
 		searchKey = tooltip->str;
-	}
-	else {
+	} else {
 		searchKey = dialogItem;
 	}
 
-    // search for the helpStr, tooltipText points to the entry when found
+	// search for the helpStr, tooltipText points to the entry when found
 	tooltipText = FindTooltip(searchKey);
 
-    if (listMissingHelpStrings && !tooltipText) {
-        printf( "Missing Help String: %s\n", searchKey );
+	if (listMissingHelpStrings && !tooltipText) {
+		printf( "Missing Help String: %s\n", searchKey );
 		g_string_free(tooltip, TRUE);
-        return;
-    }
-	if(tooltipText)
+		return;
+	}
+	if(tooltipText) {
 		gtk_widget_set_tooltip_text( widget, wlibConvertInput(_(tooltipText)) );
+	}
 
 	g_string_free(tooltip, TRUE);
 }

@@ -256,7 +256,8 @@ static GtkWidget *GetActionButton(wControl_p toolbarButton)
 	GtkWidget *actionButton;
 
 	if (wButtonIsSplitButton(toolbarButton)) {
-		actionButton = GTK_WIDGET(g_object_get_data(G_OBJECT(toolbarButton->widget), "action-button"));
+		actionButton = GTK_WIDGET(g_object_get_data(G_OBJECT(toolbarButton->widget),
+		                          "action-button"));
 	} else {
 		actionButton = toolbarButton->widget;
 	}

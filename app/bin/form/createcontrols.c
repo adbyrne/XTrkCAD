@@ -171,7 +171,7 @@ static void IntegerPush(const char* value, void* dp)
 	if (!FormIntegerRangeCheck(p, valL)) {
 		return;
 	}
-	
+
 	p->bInvalid = FALSE;
 	wControlHilite(p->control, p->bInvalid);
 
@@ -349,24 +349,24 @@ GetUserColumnWidths(paramData_p paramData, int columns, wWinPix_t* widths)
 
 /**
  * If list box is created from builder file configuration is done in that file.
- * 
+ *
  * \param parent
  * \param paramDataList
  * \param helpString
  * \param x
  * \param y
- * \return 
+ * \return
  */
 
 static wControl_p
 GetFormattedList(wControl_p parent, paramData_p paramDataList,
-	const char* helpString, unsigned x, unsigned y)
+                 const char* helpString, unsigned x, unsigned y)
 {
 	paramDataList->control = (wControl_p)wListCreate(parent, x, y, helpString,
-		NULL,
-		paramDataList->winOption,
-		0, 0, 0, NULL, NULL, NULL, NULL, 
-		ListPush, paramDataList);
+	                         NULL,
+	                         paramDataList->winOption,
+	                         0, 0, 0, NULL, NULL, NULL, NULL,
+	                         ListPush, paramDataList);
 
 	return(paramDataList->control);
 }
@@ -385,16 +385,16 @@ CreateFormattedList(wControl_p parent, paramData_p paramDataList,
 
 	paramListData_t* listDataP = (paramListData_t*)paramDataList->winData;
 
-		if (listDataP->colCnt > 1) {
-			int columns = listDataP->colCnt;
-			columnWidths = (wWinPix_t*)MyMalloc(columns * sizeof(*columnWidths));
-			columnJustification = (wBool_t*)MyMalloc(columns * sizeof(
-				*columnJustification));
+	if (listDataP->colCnt > 1) {
+		int columns = listDataP->colCnt;
+		columnWidths = (wWinPix_t*)MyMalloc(columns * sizeof(*columnWidths));
+		columnJustification = (wBool_t*)MyMalloc(columns * sizeof(
+		                              *columnJustification));
 
-			GetDefaultColumnFormat(listDataP, columnWidths, columnJustification);
-			GetUserColumnWidths(paramDataList, columns, columnWidths);
-		}
-	
+		GetDefaultColumnFormat(listDataP, columnWidths, columnJustification);
+		GetUserColumnWidths(paramDataList, columns, columnWidths);
+	}
+
 	paramDataList->control = (wControl_p)wListCreate(parent, x, y, helpString,
 	                         _(paramDataList->winLabel),
 	                         paramDataList->winOption,
@@ -502,8 +502,7 @@ CreateControl(paramData_p pd, char* helpStr,	unsigned x,	unsigned y)
 	case PD_LIST:
 		if (pd->group->options & PGO_FULLDIALOGFROMBUILDER) {
 			pd->control = GetFormattedList(win, pd, helpStr, x, y);
-		}
-		else {
+		} else {
 			pd->control = CreateFormattedList(win, pd, helpStr, x, y);
 		}
 		break;
@@ -560,7 +559,8 @@ CreateControl(paramData_p pd, char* helpStr,	unsigned x,	unsigned y)
 		pd->control = wNotebookCreate(win, helpStr, 0, 0L);
 		break;
 	case PD_TAG:
-		pd->control = wTagCreate(win, helpStr, _(pd->winLabel), pd->valueP, pd->context);
+		pd->control = wTagCreate(win, helpStr, _(pd->winLabel), pd->valueP,
+		                         pd->context);
 		break;
 	default:
 		CHECK(FALSE);

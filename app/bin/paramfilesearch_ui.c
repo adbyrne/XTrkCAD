@@ -64,9 +64,9 @@ static paramData_t searchUiPLs[] = {
 #define I_FITRADIO	(3)
 	{	PD_RADIO, &searchFitMode, "fit", PDO_NOPREF | PDO_DLGBOXEND, /*searchFitLabels*/NULL, NULL, BC_HORIZONTAL | BC_NOBORDER},
 #define I_MESSAGE (4)
-    { PD_MESSAGE, N_(QUERYPROMPTSTRING), "messagetext", 0, (void *)370 },
+	{ PD_MESSAGE, N_(QUERYPROMPTSTRING), "messagetext", 0, (void *)370 },
 #define I_STATISTICS (5)
-    { PD_MESSAGE, "", "searchstat", PDO_DLGBOXEND, I2VP(370) },
+	{ PD_MESSAGE, "", "searchstat", PDO_DLGBOXEND, I2VP(370) },
 #define I_RESULTLIST	(6)
 	{	PD_LIST, NULL, "inx", PDO_NOPREF | PDO_DLGRESIZE, &searchUiListData, NULL, BL_DUP | BL_SETSTAY | BL_MANY},
 #define I_APPLYBUTTON	(7)
@@ -162,13 +162,13 @@ int SearchFileListLoad(Catalog *catalog)
 			                 catalogEntry->fullFileName[i]);
 
 			wListAddValueVar(RESULTLIST,
-						  NULL,
-						  catalogEntry->fullFileName[i],
-			              catalogEntry->contents,
-			              catalogEntry->fullFileName[i],
-						  NULL);
+			                 NULL,
+			                 catalogEntry->fullFileName[i],
+			                 catalogEntry->contents,
+			                 catalogEntry->fullFileName[i],
+			                 NULL);
 
-			
+
 		}
 	}
 
@@ -195,7 +195,7 @@ static void SearchUiDefault(void)
 		wMessageSetValue(MESSAGETEXT, _(QUERYPROMPTSTRING));
 		DynStringMalloc(&dsSummary, 16);
 		DynStringPrintf(&dsSummary, _("%u parameter files in library. %d Fit Scale."),
-			CountCatalogEntries(trackLibrary->catalog), matches);
+		                CountCatalogEntries(trackLibrary->catalog), matches);
 		wMessageSetValue(SEARCHSTAT, DynStringToCStr(&dsSummary));
 		DynStringFree(&dsSummary);
 	}
@@ -291,7 +291,8 @@ static void SearchUiDoSearch(void * ptr)
 
 	ClearCurrentCatalog();
 
-	strcpy(searchUiQuery, wEntryGetValue(searchUiPG.paramPtr[I_QUERYSTRING].control));
+	strcpy(searchUiQuery, wEntryGetValue(
+	               searchUiPG.paramPtr[I_QUERYSTRING].control));
 	search = StringTrim(searchUiQuery);
 
 	if (search[0]) {
@@ -394,8 +395,8 @@ static wBool_t SearchUiDlgUpdate(
 	switch (inx) {
 	case I_QUERYSTRING:
 //		if (pg->paramPtr[inx].enter_pressed) {
-			strcpy( searchUiQuery, wEntryGetValue( pg->paramPtr[inx].control) );
-			SearchUiDoSearch(NULL);
+		strcpy( searchUiQuery, wEntryGetValue( pg->paramPtr[inx].control) );
+		SearchUiDoSearch(NULL);
 //		}
 		break;
 	case I_RESULTLIST:
@@ -456,10 +457,11 @@ void DoSearchParams(void * junk)
 
 		FormRegister(&searchUiPG);
 
-		searchUiW = FormCreateDialog(&searchUiPG,MakeWindowTitle(_("Choose parameter files")), 
-									_("Done"), FormCancel_Current,
-									NULL, NULL, 
-		                              TRUE, F_RESIZE | F_RECALLSIZE, SearchUiDlgUpdate);
+		searchUiW = FormCreateDialog(&searchUiPG,
+		                             MakeWindowTitle(_("Choose parameter files")),
+		                             _("Done"), FormCancel_Current,
+		                             NULL, NULL,
+		                             TRUE, F_RESIZE | F_RECALLSIZE, SearchUiDlgUpdate);
 
 		wControlActive(APPLYBUTTON, FALSE);
 		wControlActive(SELECTALLBUTTON, FALSE);

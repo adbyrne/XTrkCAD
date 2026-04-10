@@ -134,7 +134,7 @@ static int toggled(
 	struct toggle* tcontrol = CONTROL_GET_ATTRIBUTES_PTR(bc, toggle);
 	long value = toggleGetValue(bc);
 	if ( tcontrol->recursion ) {
-		if ( wlibRecursionTrace ) printf( "Recursion: toggled\n" );
+		if ( wlibRecursionTrace ) { printf( "Recursion: toggled\n" ); }
 		return TRUE;
 	}
 

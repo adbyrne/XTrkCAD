@@ -136,8 +136,8 @@ void wlibLineShow(
  * \param count IN number of lines
  * \param lines IN list of line coordinates
  * \return handle of new window
- * 
- * \todo At the moment the widget is not connected to any widget so can't be 
+ *
+ * \todo At the moment the widget is not connected to any widget so can't be
  * drawn on screen. Check implementation and necessity
  */
 

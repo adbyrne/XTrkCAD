@@ -932,7 +932,7 @@ SaveRecentFileList()
 {
 	int count = wMenuListGetCount(fileList_ml);		//index is zero based,
 	DynString key;
- 	DynStringMalloc(&key, 0);
+	DynStringMalloc(&key, 0);
 
 	if (count) {
 		for (int index = 0; index < count; index++) {
@@ -1201,7 +1201,7 @@ EXPORT void SaveState(void)
 	wPrefSetString( "misc", "lastlayout", GetLayoutFullPath());
 	wPrefSetInteger( "misc", "lastlayoutexample", bExample );
 
- 	wPrefFlush("");
+	wPrefFlush("");
 }
 static void SetAutoSave()
 {
@@ -1264,7 +1264,8 @@ EXPORT void DoLoad( void )
 EXPORT void DoExamples( void )
 {
 	if (examplesFile_fs == NULL) {
-		examplesFile_fs = wFilSelCreate( mainW, FS_LOAD, FSO_SETFOLDERALWAYS, _("Example Tracks"),
+		examplesFile_fs = wFilSelCreate( mainW, FS_LOAD, FSO_SETFOLDERALWAYS,
+		                                 _("Example Tracks"),
 		                                 sSourceFilePattern, LoadTracks, NULL );
 	}
 	bExample = TRUE;

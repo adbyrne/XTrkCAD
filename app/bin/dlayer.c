@@ -757,7 +757,8 @@ void GetLayerLinkString(int inx, char *list)
 	char *cp = &list[0];
 	cp[0] = '\0';
 
-	for (int i = 0; i < layers[inx].layerLinkList.cnt && strlen(cp) < STR_LONG_SIZE - 5;
+	for (int i = 0; i < layers[inx].layerLinkList.cnt
+	     && strlen(cp) < STR_LONG_SIZE - 5;
 	     i++) {
 		int l = DYNARR_N(int, layers[inx].layerLinkList, i);
 		if (i == 0) {

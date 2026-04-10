@@ -115,7 +115,7 @@ EXPORT void AddHotBarCarDesc(void)
 	coOrd size;
 
 	LOG(log_carList, 1, ("AddHotBarCarDesc/load carItemHB: carItemHB.cnt:%d\n",
-	                        carItemInfo_da.cnt));
+	                     carItemInfo_da.cnt));
 	DYNARR_SET(carItem_t*, carItemHotbar_da, carItemInfo_da.cnt);
 	memcpy(&carItemHotbar(0), &carItemInfo(0),
 	       carItemInfo_da.cnt * sizeof carItemHotbar(0));
@@ -153,7 +153,8 @@ static void CarItemHotbarUpdate(
         int inx,
         void* data);
 static paramGroup_t newCarPG = { "train-newcar", 0, newCarPLs, COUNT(newCarPLs),
-			NULL, NULL, NULL, 0L, CarItemHotbarUpdate };
+                                 NULL, NULL, NULL, 0L, CarItemHotbarUpdate
+                               };
 EXPORT wControl_p newCarControls[2];
 static char newCarLabel1[STR_SIZE];
 #ifdef TODO_UNUSED

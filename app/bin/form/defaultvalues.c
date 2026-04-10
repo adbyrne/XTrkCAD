@@ -300,87 +300,94 @@ EXPORT void FormUpdatePrefs( void )
 	static int maxColCnt = 0;
 	paramListData_t * listDataP;
 
-	for ( paramGroup_cp * ppg = DialogGroupIter(NULL); ppg; ppg = DialogGroupIter(ppg) ) {
-	  //pg = paramGroups(inx);
-	  if ((*ppg)->nameStr == NULL) continue;
-	  for ( p=(*ppg)->paramPtr; p<&(*ppg)->paramPtr[(*ppg)->paramCnt]; p++ ) {
-		if (p->valueP == NULL || p->nameStr == NULL || (p->option&PDO_NOPREF)!=0 )
-			continue;
-		if ( (p->option&PDO_DLGIGNORE) != 0 )
-			continue;
-		snprintf( prefName, sizeof(prefName), "%s-%s", (*ppg)->nameStr, p->nameStr );
-		switch ( p->type ) {
-		case PD_LONG:
-		case PD_RADIO:
-		case PD_TOGGLE:
-			wPrefSetInteger( PREFSECT, prefName, *(long*)p->valueP );
-			break;
-		case PD_LIST:
-			listDataP = (paramListData_t*)p->winData;
-			if ( p->control && listDataP->colCnt > 0 ) {
-				if ( maxColCnt < listDataP->colCnt ) {
-					if ( maxColCnt == 0 )
-						colWidths = (wWinPix_t*)MyMalloc( listDataP->colCnt * sizeof * colWidths );
-					else
-						colWidths = (wWinPix_t*)MyRealloc( colWidths, listDataP->colCnt * sizeof * colWidths );
-					maxColCnt = listDataP->colCnt;
-				}
-				len = wListGetColumnWidths( (wList_p)p->control, listDataP->colCnt, colWidths );
-				cp = message;
-				for ( col=0; col<len; col++ ) {
-					sprintf( cp, "%ld ", colWidths[col] );
-					cp += strlen(cp);
-				}
-				*cp = '\0';
-				len = strlen( prefName );
-				strcpy( prefName+len, "-columnwidths" );
-				wPrefSetString( PREFSECT, prefName, message );
-				prefName[len] = '\0';
+	for ( paramGroup_cp * ppg = DialogGroupIter(NULL); ppg;
+	      ppg = DialogGroupIter(ppg) ) {
+		//pg = paramGroups(inx);
+		if ((*ppg)->nameStr == NULL) { continue; }
+		for ( p=(*ppg)->paramPtr; p<&(*ppg)->paramPtr[(*ppg)->paramCnt]; p++ ) {
+			if (p->valueP == NULL || p->nameStr == NULL || (p->option&PDO_NOPREF)!=0 ) {
+				continue;
 			}
-		case PD_DROPLIST:
-		case PD_COMBOLIST:
-			if ( (p->option&PDO_LISTINDEX) ) {
-				wPrefSetInteger( PREFSECT, prefName, *(wIndex_t*)p->valueP );
-			} else {
-				if (p->control) {
-					wListGetValues( (wList_p)p->control, message, sizeof message, NULL, NULL );
+			if ( (p->option&PDO_DLGIGNORE) != 0 ) {
+				continue;
+			}
+			snprintf( prefName, sizeof(prefName), "%s-%s", (*ppg)->nameStr, p->nameStr );
+			switch ( p->type ) {
+			case PD_LONG:
+			case PD_RADIO:
+			case PD_TOGGLE:
+				wPrefSetInteger( PREFSECT, prefName, *(long*)p->valueP );
+				break;
+			case PD_LIST:
+				listDataP = (paramListData_t*)p->winData;
+				if ( p->control && listDataP->colCnt > 0 ) {
+					if ( maxColCnt < listDataP->colCnt ) {
+						if ( maxColCnt == 0 ) {
+							colWidths = (wWinPix_t*)MyMalloc( listDataP->colCnt * sizeof * colWidths );
+						} else {
+							colWidths = (wWinPix_t*)MyRealloc( colWidths,
+							                                   listDataP->colCnt * sizeof * colWidths );
+						}
+						maxColCnt = listDataP->colCnt;
+					}
+					len = wListGetColumnWidths( (wList_p)p->control, listDataP->colCnt, colWidths );
+					cp = message;
+					for ( col=0; col<len; col++ ) {
+						sprintf( cp, "%ld ", colWidths[col] );
+						cp += strlen(cp);
+					}
+					*cp = '\0';
+					len = strlen( prefName );
+					strcpy( prefName+len, "-columnwidths" );
 					wPrefSetString( PREFSECT, prefName, message );
+					prefName[len] = '\0';
 				}
+			case PD_DROPLIST:
+			case PD_COMBOLIST:
+				if ( (p->option&PDO_LISTINDEX) ) {
+					wPrefSetInteger( PREFSECT, prefName, *(wIndex_t*)p->valueP );
+				} else {
+					if (p->control) {
+						wListGetValues( (wList_p)p->control, message, sizeof message, NULL, NULL );
+						wPrefSetString( PREFSECT, prefName, message );
+					}
+				}
+				break;
+			case PD_COLORLIST:
+				rgb = wDrawGetRGB( *(wDrawColor*)p->valueP );
+				wPrefSetInteger( PREFSECT, prefName, rgb );
+				break;
+			case PD_FLOAT:
+				wPrefSetFloat( PREFSECT, prefName, *(FLOAT_T*)p->valueP );
+				break;
+			case PD_STRING:
+				wPrefSetString( PREFSECT, prefName, (char*)p->valueP );
+				break;
+			case PD_MESSAGE:
+			case PD_BUTTON:
+			case PD_DRAW:
+			case PD_TEXT:
+			case PD_MENU:
+			case PD_MENUITEM:
+			case PD_BITMAP:
+			case PD_SCALE:
+			case PD_TAG:
+			case PD_NOTEBOOK:
+				break;
 			}
-			break;
-		case PD_COLORLIST:
-			rgb = wDrawGetRGB( *(wDrawColor*)p->valueP );
-			wPrefSetInteger( PREFSECT, prefName, rgb );
-			break;
-		case PD_FLOAT:
-			wPrefSetFloat( PREFSECT, prefName, *(FLOAT_T*)p->valueP );
-			break;
-		case PD_STRING:
-			wPrefSetString( PREFSECT, prefName, (char*)p->valueP );
-			break;
-		case PD_MESSAGE:
-		case PD_BUTTON:
-		case PD_DRAW:
-		case PD_TEXT:
-		case PD_MENU:
-		case PD_MENUITEM:
-		case PD_BITMAP:
-		case PD_SCALE:
-		case PD_TAG:
-		case PD_NOTEBOOK:
-			break;
 		}
-	  }
 	}
 }
 
 EXPORT void FormResetInvalid(
-	wControl_p win )
+        wControl_p win )
 {
-	for ( paramGroup_cp * ppg = DialogGroupIter(NULL); ppg; ppg = DialogGroupIter(ppg) ) {
+	for ( paramGroup_cp * ppg = DialogGroupIter(NULL); ppg;
+	      ppg = DialogGroupIter(ppg) ) {
 		if ( (*ppg)->win == win ) {
 //			LOG( log_paraminput, 1, ( "Reset Invalid: %s\n", (*ppg)->nameStr ) );
-			for ( paramData_p p = &(*ppg)->paramPtr[0]; p < &(*ppg)->paramPtr[(*ppg)->paramCnt]; p++ ) {
+			for ( paramData_p p = &(*ppg)->paramPtr[0];
+			      p < &(*ppg)->paramPtr[(*ppg)->paramCnt]; p++ ) {
 //				if ( p->bInvalid )
 //					LOG( log_paraminput, 1, ( "  %s Invalid\n", p->nameStr ) );
 				FormHilite( win, p->control, FALSE );

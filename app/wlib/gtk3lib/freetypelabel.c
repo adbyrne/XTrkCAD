@@ -94,7 +94,7 @@ RenderToPixbuf(cairo_surface_t* surface, const char* text, wDrawColor color)
 	cairo_font_face_destroy(cairoFontFace);
 
 	return(gdk_pixbuf_get_from_surface(surface, 0, 0, (int)extents.width,
-	        (int)extents.height));
+	                                   (int)extents.height));
 }
 
 static GdkPixbuf *
@@ -174,7 +174,7 @@ wFTLabelCreate(const char* text, wDrawColor color)
 }
 
 /**
- * Change the color of a label 
+ * Change the color of a label
  *
  * \param icon		the icon
  */
@@ -182,8 +182,8 @@ wFTLabelCreate(const char* text, wDrawColor color)
 void
 wlibFTLabelChangeColor(wIcon_p icon, wDrawColor color)
 {
-		icon->bits = CreatePixbufFromFTLabel(icon->text, color);
-		icon->color = color;
+	icon->bits = CreatePixbufFromFTLabel(icon->text, color);
+	icon->color = color;
 }
 
 

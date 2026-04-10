@@ -15,8 +15,7 @@ void MovePts(int cnt, coOrd *pts, coOrd orig);
 #define N_TYPELISTMAP (7)
 
 // carproto
-struct carDim_s
-{
+struct carDim_s {
 	DIST_T carLength;
 	DIST_T carWidth;
 	DIST_T truckCenter;
@@ -25,8 +24,7 @@ struct carDim_s
 };
 typedef struct carDim_s carDim_t;
 
-struct carProto_s
-{
+struct carProto_s {
 	char *contentsLabel;
 	wIndex_t paramFileIndex;
 	char *desc;
@@ -41,8 +39,7 @@ struct carProto_s
 typedef struct carProto_s carProto_t;
 typedef struct carProto_s *carProto_p;
 
-struct carPartParent_s
-{
+struct carPartParent_s {
 	char *manuf;
 	char *proto;
 	SCALEINX_T scale;
@@ -52,14 +49,12 @@ struct carPartParent_s
 typedef struct carPartParent_s carPartParent_t;
 typedef struct carPartParent_s *carPartParent_p;
 
-typedef struct
-{
+typedef struct {
 	char *name;
 	int len;
 } cmp_key_t;
 
-struct nameLongMap_s
-{
+struct nameLongMap_s {
 	char *name;
 	long value;
 };
@@ -74,29 +69,29 @@ extern dynArr_t carProto_da;
 #define carProto(N) DYNARR_N(carProto_t *, carProto_da, N)
 
 void CarProtoDlgCreateDummyOutline(int *segCntP, trkSeg_p *segPtrP,
-								   BOOL_T isLoco, DIST_T length, DIST_T width, wDrawColor color);
+                                   BOOL_T isLoco, DIST_T length, DIST_T width, wDrawColor color);
 carProto_p CarProtoFind(char *desc);
 int CarProtoFindTypeCode(long code);
 carProto_p CarProtoLookup(char *desc, BOOL_T createMissing, BOOL_T isLoco,
-						  DIST_T length, DIST_T width);
+                          DIST_T length, DIST_T width);
 carProto_p CarProtoNew(carProto_p proto, int paramFileIndex, char *desc,
-					   long options, long type, const carDim_t *dim, wIndex_t segCnt, trkSeg_p segPtr);
+                       long options, long type, const carDim_t *dim, wIndex_t segCnt, trkSeg_p segPtr);
 BOOL_T CarProtoWrite(FILE *f, const carProto_t *proto);
 BOOL_T CarProtoCustomSave(FILE *f);
 
 void CarProtoDrawTruck(
-	drawCmd_t *d,
-	DIST_T width,
-	FLOAT_T ratio,
-	coOrd pos,
-	ANGLE_T angle);
+        drawCmd_t *d,
+        DIST_T width,
+        FLOAT_T ratio,
+        coOrd pos,
+        ANGLE_T angle);
 
 void CarProtoDrawCoupler(
-	drawCmd_t *d,
-	DIST_T length,
-	FLOAT_T ratio,
-	coOrd pos,
-	ANGLE_T angle);
+        drawCmd_t *d,
+        DIST_T length,
+        FLOAT_T ratio,
+        coOrd pos,
+        ANGLE_T angle);
 
 void InitCarProto(void);
 int CarProtoCustMgmProc(int cmd, void *data);
@@ -104,8 +99,7 @@ int CarProtoCustMgmProc(int cmd, void *data);
 // carpart
 extern BOOL_T roadnameMapChanged;
 
-struct roadnameMap_s
-{
+struct roadnameMap_s {
 	char *roadname;
 	char *repmark;
 };
@@ -114,8 +108,7 @@ typedef struct roadnameMap_s roadnameMap_t;
 
 roadnameMap_p LoadRoadnameList(tabString_p roadnameTab, tabString_p repmarkTab);
 
-struct carPart_s
-{
+struct carPart_s {
 	carPartParent_p parent;
 	wIndex_t paramFileIndex;
 	char *title;
@@ -136,9 +129,9 @@ int Cmp_part(void *key, void *elem);
 int Cmp_roadnameMap(void *key, void *elem);
 
 carPart_p CarPartFind(char *manufP, int manufL, char *partnoP, int partnoL,
-					  SCALEINX_T scale);
+                      SCALEINX_T scale);
 carPart_p CarPartNew(carPart_p partP, int paramFileIndex, SCALEINX_T scaleInx,
-					 char *title, long options, long type, const carDim_p dim, wDrawColor color);
+                     char *title, long options, long type, const carDim_p dim, wDrawColor color);
 BOOL_T CarDescCustomSave(FILE *f);
 BOOL_T CarPartWrite(FILE *f, carPart_p partP);
 
@@ -153,8 +146,7 @@ extern dynArr_t carPartParent_da;
 #define carPart(P, N) DYNARR_N(carPart_p, (P)->parts_da, N)
 
 // caritem
-typedef struct
-{
+typedef struct {
 	char *number;
 	FLOAT_T purchPrice;
 	FLOAT_T currPrice;
@@ -164,8 +156,7 @@ typedef struct
 	char *notes;
 } carData_t;
 
-struct carItem_s
-{
+struct carItem_s {
 	long index;
 	SCALEINX_T scaleInx;
 	char *contentsLabel;
@@ -203,20 +194,20 @@ extern carItem_p carDlgUpdateItemPtr;
 #define carItemHotbar(N) DYNARR_N(carItem_p, carItemHotbar_da, N)
 
 carItem_p CarItemNew(
-	carItem_p item,
-	int paramFileIndex,
-	long itemIndex,
-	SCALEINX_T scale,
-	char *title,
-	long options,
-	long type,
-	carDim_t *dim,
-	wDrawColor color,
-	FLOAT_T purchPrice,
-	FLOAT_T currPrice,
-	long condition,
-	long purchDate,
-	long serviceDate);
+        carItem_p item,
+        int paramFileIndex,
+        long itemIndex,
+        SCALEINX_T scale,
+        char *title,
+        long options,
+        long type,
+        carDim_t *dim,
+        wDrawColor color,
+        FLOAT_T purchPrice,
+        FLOAT_T currPrice,
+        long condition,
+        long purchDate,
+        long serviceDate);
 
 #define N_CONDLISTMAP (6)
 extern nameLongMap_t condListMap[];

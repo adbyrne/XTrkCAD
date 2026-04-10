@@ -3,7 +3,7 @@
 
 #include <common.h>
 
-typedef struct tabString_s{
+typedef struct tabString_s {
 	char* ptr;
 	int len;
 } tabString_t;

@@ -5,23 +5,23 @@
  * \author Martin Fischer
  */
 
- /*  XTrackCad - Model Railroad CAD
-  *  Copyright (C) 2005, 2024 Dave Bullis
-  *
-  *  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
-  *  (at your option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
-  *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-  */
+/*  XTrackCad - Model Railroad CAD
+ *  Copyright (C) 2005, 2024 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #include <string.h>
 
@@ -43,37 +43,31 @@ static struct {
 /**
  * Determine the width of a mouse pointer position string ( coordinate plus label ).
  *
- * \return length of position string 
+ * \return length of position string
  */
 static size_t GetInfoPosLength(const char *fixedLabel)
 {
 	DIST_T dist;
 	if (mapD.size.x > mapD.size.y) {
 		dist = mapD.size.x;
-	}
-	else {
+	} else {
 		dist = mapD.size.y;
 	}
 	if (units == UNITS_METRIC) {
 		dist *= 2.54;
 		if (dist >= 1000) {
 			dist = 9999.999 * 2.54;
-		}
-		else if (dist >= 100) {
+		} else if (dist >= 100) {
 			dist = 999.999 * 2.54;
-		}
-		else if (dist >= 10) {
+		} else if (dist >= 10) {
 			dist = 99.999 * 2.54;
 		}
-	}
-	else {
+	} else {
 		if (dist >= 100 * 12) {
 			dist = 999.0 * 12.0 + 11.0 + 3.0 / 4.0 - 1.0 / 64.0;
-		}
-		else if (dist >= 10 * 12) {
+		} else if (dist >= 10 * 12) {
 			dist = 99.0 * 12.0 + 11.0 + 3.0 / 4.0 - 1.0 / 64.0;
-		}
-		else if (dist >= 1 * 12) {
+		} else if (dist >= 1 * 12) {
 			dist = 9.0 * 12.0 + 11.0 + 3.0 / 4.0 - 1.0 / 64.0;
 		}
 	}
@@ -95,10 +89,10 @@ SetInfoMessageHeight(wControl_p label)
 	wStatusSetRequiredHeight(label, 0);
 
 }
-  /**
-   * Initialize the status line at the bottom of the window.
-   *
-   */
+/**
+ * Initialize the status line at the bottom of the window.
+ *
+ */
 
 void InitInfoBar(void)
 {
@@ -131,10 +125,11 @@ void InfoScale(void)
 	char zoomString[sizeof(ZOOMLABEL) + 10 ];
 
 	if (mainD.scale >= 1.0) {
-		snprintf(zoomString, sizeof(zoomString),"%s%.4g:1", ZOOMLABEL, lround(mainD.scale * 4.0) / 4.0);
-	}
-	else {
-		snprintf(zoomString, sizeof(zoomString), "%s1:%.4g", ZOOMLABEL, lround((1.0 / mainD.scale) * 4.0) / 4.0);
+		snprintf(zoomString, sizeof(zoomString),"%s%.4g:1", ZOOMLABEL,
+		         lround(mainD.scale * 4.0) / 4.0);
+	} else {
+		snprintf(zoomString, sizeof(zoomString), "%s1:%.4g", ZOOMLABEL,
+		         lround((1.0 / mainD.scale) * 4.0) / 4.0);
 	}
 
 	wStatusSetValue(infoD.scale_m, zoomString);
@@ -154,9 +149,9 @@ void InfoPos(coOrd pos)
 }
 
 EXPORT void InfoSubstituteControls(
-	const char * name,
-	wControl_p* controls, 
-	char** labels)
+        const char * name,
+        wControl_p* controls,
+        char** labels)
 {
 	wStatusSetVisibleControlSet(mainW, name);
 }

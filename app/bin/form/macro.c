@@ -36,10 +36,12 @@ void
 FormStartRecord(FILE* fileHandle)
 {
 	macroFile = fileHandle;
-	if (macroFile == NULL)
+	if (macroFile == NULL) {
 		return;
+	}
 
-	for ( paramGroup_cp * ppg = DialogGroupIter( NULL ); ppg; ppg = DialogGroupIter( ppg ) ) {
+	for ( paramGroup_cp * ppg = DialogGroupIter( NULL ); ppg;
+	      ppg = DialogGroupIter( ppg ) ) {
 
 		if ((*ppg)->options&PGO_RECORD) {
 			FormGroupRecord( (*ppg) );

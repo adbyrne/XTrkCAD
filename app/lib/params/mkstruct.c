@@ -1,11 +1,11 @@
 /** \file mkstruct.c
- * Build utility to create simple rectangular structure definitions from a data file. 
+ * Build utility to create simple rectangular structure definitions from a data file.
  *
  * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/lib/params/mkstruct.c,v 1.6 2008-06-10 20:27:21 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
- *  Copyright (C) 
+ *  Copyright (C)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,13 +29,13 @@
 #define BUFSIZE 1024
 
 #if _MSC_VER > 1300
-	#define stricmp _stricmp
-	#define strnicmp _strnicmp
+#define stricmp _stricmp
+#define strnicmp _strnicmp
 #endif
 
 #ifndef WIN32
-	#define stricmp strcasecmp
-	#define strnicmp strncasecmp
+#define stricmp strcasecmp
+#define strnicmp strncasecmp
 #endif // !WIN32
 
 int main ( int argc, char * argv [] )
@@ -52,19 +52,18 @@ int main ( int argc, char * argv [] )
 	char *ptr;
 	int err;
 
-	if( argc != 3 )
-	{
+	if( argc != 3 ) {
 		fprintf( stderr, "Usage: mkstruct definitions.data param file\n\n"
-						 "The data file is read line by line and structure defimitions\n"
-						 "are created in the param file.\n\n"
-						 "The file structure is:\n"
-						 "scale \"description of structure\" x y [cm] [color=#rrggbb]\n\n"
-						 "scale                    : scale of structure\n"
-						 "description of structure : name, enclosed in double quotes\n"
-						 "x                        : x dimension of structure\n"
-						 "y                        : y dimension of structure\n"
-						 "cm                       : dimensions are in centimeters (default: inch) (opt.)\n"
-						 "color=#rrggbb            : color to use for structure (default: #FF00FF) (opt.)\n" );
+		                 "The data file is read line by line and structure defimitions\n"
+		                 "are created in the param file.\n\n"
+		                 "The file structure is:\n"
+		                 "scale \"description of structure\" x y [cm] [color=#rrggbb]\n\n"
+		                 "scale                    : scale of structure\n"
+		                 "description of structure : name, enclosed in double quotes\n"
+		                 "x                        : x dimension of structure\n"
+		                 "y                        : y dimension of structure\n"
+		                 "cm                       : dimensions are in centimeters (default: inch) (opt.)\n"
+		                 "color=#rrggbb            : color to use for structure (default: #FF00FF) (opt.)\n" );
 		exit( 1 );
 	}
 
@@ -80,20 +79,19 @@ int main ( int argc, char * argv [] )
 		exit( 1 );
 	}
 
-	if( fgets( buffer, BUFSIZE, fIn ))
-	{
+	if( fgets( buffer, BUFSIZE, fIn )) {
 		fputs( buffer, fOut );
 		printf( "Creating %s\n", buffer + 9 );
 	}
-	
-	while(fgets(buffer, BUFSIZE, fIn ))
-	{
+
+	while(fgets(buffer, BUFSIZE, fIn )) {
 		err = 0;
 		scale = strtok( buffer, " \"" );
 		desc = strtok( NULL, "\"" );
 
-		if( scale == NULL && desc == NULL )
+		if( scale == NULL && desc == NULL ) {
 			err = 1;
+		}
 
 		/* get the size information */
 		x = atof( strtok( NULL, " " ));

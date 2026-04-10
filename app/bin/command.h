@@ -113,11 +113,11 @@ BOOL_T CommandEnabled( wIndex_t );
 
 // Menu indices for command menu array
 enum {
-    MENU_BUTTONGROUP = 0,  // Popup menu within button group
-    MENU_MAIN = 1,         // Main menu entry
-    MENU_POPUP1 = 2,       // First context popup
-    MENU_POPUP2 = 3,       // Second context popup
-    NUM_CMDMENUS
+	MENU_BUTTONGROUP = 0,  // Popup menu within button group
+	MENU_MAIN = 1,         // Main menu entry
+	MENU_POPUP1 = 2,       // First context popup
+	MENU_POPUP2 = 3,       // Second context popup
+	NUM_CMDMENUS
 };
 //#define NUM_CMDMENUS (4)
 BOOL_T IsCurCommandSticky(void);

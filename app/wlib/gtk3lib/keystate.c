@@ -49,59 +49,65 @@ int wGetKeyState(void) { return keyState; }
 int wGetKeyStateFromButton(void) { return keyStateFromButton; }
 void wResetKeyStateFromButton(void) { keyStateFromButton = 0; }
 
-wBool_t UpdateModifierKeyState(GdkEventKey *event) {
-  int state = 0;
-  switch (event->keyval) {
-  case GDK_KEY_Shift_L:
-  case GDK_KEY_Shift_R:
-    state |= WKEY_SHIFT;
-    break;
+wBool_t UpdateModifierKeyState(GdkEventKey *event)
+{
+	int state = 0;
+	switch (event->keyval) {
+	case GDK_KEY_Shift_L:
+	case GDK_KEY_Shift_R:
+		state |= WKEY_SHIFT;
+		break;
 
-  case GDK_KEY_Control_L:
-  case GDK_KEY_Control_R:
-    state |= WKEY_CTRL;
-    break;
+	case GDK_KEY_Control_L:
+	case GDK_KEY_Control_R:
+		state |= WKEY_CTRL;
+		break;
 
-  case GDK_KEY_Alt_L:
-  case GDK_KEY_Alt_R:
-    state |= WKEY_ALT;
-    break;
+	case GDK_KEY_Alt_L:
+	case GDK_KEY_Alt_R:
+		state |= WKEY_ALT;
+		break;
 
-  case GDK_KEY_Meta_L:
-  case GDK_KEY_Meta_R:
-    // Pressing SHIFT and then ALT generates a Meta key
-    state |= WKEY_ALT;
-    break;
-  }
+	case GDK_KEY_Meta_L:
+	case GDK_KEY_Meta_R:
+		// Pressing SHIFT and then ALT generates a Meta key
+		state |= WKEY_ALT;
+		break;
+	}
 
-  if (state != 0) {
-    if (event->type == GDK_KEY_PRESS) {
-      keyState |= state;
-    } else {
-      keyState &= ~state;
-    }
-    return TRUE;
-  }
-  return FALSE;
+	if (state != 0) {
+		if (event->type == GDK_KEY_PRESS) {
+			keyState |= state;
+		} else {
+			keyState &= ~state;
+		}
+		return TRUE;
+	}
+	return FALSE;
 }
 
-wBool_t UpdateModifierKeyStateFromButton(GdkEventButton *event) {
-  int state = 0;
+wBool_t UpdateModifierKeyStateFromButton(GdkEventButton *event)
+{
+	int state = 0;
 
-  if (event->state & GDK_SHIFT_MASK)
-    state |= WKEY_SHIFT;
+	if (event->state & GDK_SHIFT_MASK) {
+		state |= WKEY_SHIFT;
+	}
 
-  if (event->state & GDK_CONTROL_MASK)
-    state |= WKEY_CTRL;
+	if (event->state & GDK_CONTROL_MASK) {
+		state |= WKEY_CTRL;
+	}
 
-  if (event->state & GDK_MOD1_MASK)
-    state |= WKEY_ALT;
+	if (event->state & GDK_MOD1_MASK) {
+		state |= WKEY_ALT;
+	}
 
-  if (event->state & GDK_META_MASK)
-    state |= WKEY_ALT; /* or WKEY_META if you have it */
+	if (event->state & GDK_META_MASK) {
+		state |= WKEY_ALT;        /* or WKEY_META if you have it */
+	}
 
-  // may need to use different static variable and function to return it for
-  // buttons pressed with modifiers
-  keyStateFromButton = state;
-  return state != 0;
+	// may need to use different static variable and function to return it for
+	// buttons pressed with modifiers
+	keyStateFromButton = state;
+	return state != 0;
 }

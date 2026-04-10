@@ -1616,7 +1616,7 @@ static void DrawModDlgUpdate(
 {
 	DrawGeomModify(C_UPDATE,zero,&drawModCmdContext);
 	FormLoadSingleControl(&drawModPG,
-	                 drawModRotCenterInx-1);	  	//Make sure the angle is updated in case center moved
+	                      drawModRotCenterInx-1);	  	//Make sure the angle is updated in case center moved
 	FormLoadSingleControl(&drawModPG,drawModRadius);			 	// Make sure Radius updated
 	FormLoadSingleControl(&drawModPG,drawModRelAngle);				//Relative Angle as well
 	MainRedraw();

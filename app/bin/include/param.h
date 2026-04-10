@@ -165,7 +165,7 @@ typedef struct {
 	paramOldData_t oldD, demoD;
 	wBool_t enter_pressed;
 	wBool_t bInvalid;
-	unsigned posColumn, posRow; 	
+	unsigned posColumn, posRow;
 	wBool_t bShown;
 } paramData_t, *paramData_p;
 
@@ -186,7 +186,8 @@ typedef void (*paramLayoutProc)( paramData_t *, int, wWinPix_t, wWinPix_t *,
                                  wWinPix_t * );
 typedef void (*paramActionOkProc)( void const * );
 typedef void (*paramActionCancelProc)( paramGroup_cp group );
-typedef wBool_t (*paramChangeProc)( paramGroup_cp group, int index, void * value);
+typedef wBool_t (*paramChangeProc)( paramGroup_cp group, int index,
+                                    void * value);
 
 typedef struct paramGroup_t {
 	char * nameStr;
@@ -315,7 +316,7 @@ void ParamCancel_Restore(paramGroup_t *group);
 #define ParamCancel_Custom( PROC ) PROC
 
 wControl_p ParamCreateDialog( paramGroup_p, char *, char *, paramActionOkProc,
-                          paramActionCancelProc, BOOL_T, paramLayoutProc, long, paramChangeProc );
+                              paramActionCancelProc, BOOL_T, paramLayoutProc, long, paramChangeProc );
 void ParamCreateControls( paramGroup_p, paramChangeProc );
 void ParamLayoutDialog( paramGroup_p );
 

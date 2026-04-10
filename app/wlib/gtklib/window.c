@@ -319,7 +319,7 @@ void wWinShow(
 
 	int width, height;
 	show &= ~(DONTGRABFOCUS);	// flag is ignored on Linux
-	
+
 	if (show) {
 		keyState = 0;
 		getPos(win);
@@ -1051,7 +1051,8 @@ static wWin_p wWinCommonCreate(
 	}
 
 	if ( windowIconPixbuf == NULL ) {
-		windowIconPixbuf = gdk_pixbuf_new_from_inline(-1, (unsigned char *)xtc_image1, FALSE, NULL);
+		windowIconPixbuf = gdk_pixbuf_new_from_inline(-1, (unsigned char *)xtc_image1,
+		                   FALSE, NULL);
 	}
 	gtk_window_set_icon( GTK_WINDOW(w->gtkwin), windowIconPixbuf );
 

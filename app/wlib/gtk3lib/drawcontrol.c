@@ -396,34 +396,35 @@ static gint
 draw_motion_event(GtkWidget* widget, GdkEventMotion* event,
                   wControl_p drawControl)
 {
-    wAction_t action;
-    GdkModifierType state;
-    struct draw* drawAttributes = CONTROL_GET_ATTRIBUTES_PTR(drawControl, draw);
+	wAction_t action;
+	GdkModifierType state;
+	struct draw* drawAttributes = CONTROL_GET_ATTRIBUTES_PTR(drawControl, draw);
 
-    if (drawAttributes->action == NULL) {
-        return TRUE;
-    }
+	if (drawAttributes->action == NULL) {
+		return TRUE;
+	}
 
-    GdkModifierType modifiers = gtk_accelerator_get_default_mod_mask();
-    state = event->state & (modifiers | GDK_BUTTON1_MASK | GDK_BUTTON2_MASK | GDK_BUTTON3_MASK);
-    drawAttributes->lastX = (long)event->x;
-    drawAttributes->lastY = (long)event->y;
-    Screen2WorldCoord(drawAttributes);
+	GdkModifierType modifiers = gtk_accelerator_get_default_mod_mask();
+	state = event->state & (modifiers | GDK_BUTTON1_MASK | GDK_BUTTON2_MASK |
+	                        GDK_BUTTON3_MASK);
+	drawAttributes->lastX = (long)event->x;
+	drawAttributes->lastY = (long)event->y;
+	Screen2WorldCoord(drawAttributes);
 
-    if (state & GDK_BUTTON1_MASK) {
-        action = wActionLDrag;
-    } else if (state & GDK_BUTTON2_MASK) {
-        action = wActionLDrag;
-    } else if (state & GDK_BUTTON3_MASK) {
-        action = wActionRDrag;
-    } else {
-        action = wActionMove;
-    }
+	if (state & GDK_BUTTON1_MASK) {
+		action = wActionLDrag;
+	} else if (state & GDK_BUTTON2_MASK) {
+		action = wActionLDrag;
+	} else if (state & GDK_BUTTON3_MASK) {
+		action = wActionRDrag;
+	} else {
+		action = wActionMove;
+	}
 
-    drawAttributes->action(drawControl, drawControl->context, action,
-                           drawAttributes->lastX, drawAttributes->lastY);
-    CheckGrabFocus(drawControl);
-    return TRUE;
+	drawAttributes->action(drawControl, drawControl->context, action,
+	                       drawAttributes->lastX, drawAttributes->lastY);
+	CheckGrabFocus(drawControl);
+	return TRUE;
 }
 
 static gint draw_char_release_event(

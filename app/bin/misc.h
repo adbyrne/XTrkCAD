@@ -88,14 +88,15 @@ extern bool Confirm( char *, doSaveCallBack_p );
 extern void DoQuit( void * unused );
 extern void DoClear( void * unused );
 
-void ToggleSetInMenuToolbar(wControl_p menuItem, wControl_p toolbarButton, wBool_t newState);
+void ToggleSetInMenuToolbar(wControl_p menuItem, wControl_p toolbarButton,
+                            wBool_t newState);
 
 extern void DoShowWindow(int index, const char * name, void * data);
 
 extern void wShow( wControl_p window);
 extern void wHide( wControl_p window );
 extern void CloseDemoWindows( void );
-extern void DefaultProc( wControl_p win, winProcEvent , void * data);
+extern void DefaultProc( wControl_p win, winProcEvent, void * data);
 typedef void (*changeNotificationCallBack_t)( long );
 #define CHANGE_SCALE	(1<<0)
 #define CHANGE_PARAMS	(1<<1)

@@ -254,12 +254,12 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 
 	if (fs->window == NULL) {
 		fs->window = gtk_file_chooser_dialog_new( fs->title,
-		                GTK_WINDOW( fs->parent->gtkwin ),
-		                (fs->mode == FS_LOAD ? GTK_FILE_CHOOSER_ACTION_OPEN :
-		                 GTK_FILE_CHOOSER_ACTION_SAVE ),
-		                GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-		                (fs->mode == FS_LOAD ? GTK_STOCK_OPEN : GTK_STOCK_SAVE ), GTK_RESPONSE_ACCEPT,
-		                NULL );
+		             GTK_WINDOW( fs->parent->gtkwin ),
+		             (fs->mode == FS_LOAD ? GTK_FILE_CHOOSER_ACTION_OPEN :
+		              GTK_FILE_CHOOSER_ACTION_SAVE ),
+		             GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+		             (fs->mode == FS_LOAD ? GTK_STOCK_OPEN : GTK_STOCK_SAVE ), GTK_RESPONSE_ACCEPT,
+		             NULL );
 		if (fs->window==0) { abort(); }
 		if ( fs->mode == FS_SAVE ) {
 			// get confirmation before overwritting an existing file

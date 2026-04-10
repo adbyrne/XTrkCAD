@@ -913,7 +913,7 @@ void pullMenuEnter( void * keyVP )
 void InitCmdPull( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdPull, "cmdConnect", _("Connect Two Tracks"),
-		CreateToolbarIconFromResource("connect.png"), LEVEL0_50,
+	               CreateToolbarIconFromResource("connect.png"), LEVEL0_50,
 	               IC_STICKY|IC_INITNOTSTICKY|IC_LCLICK|IC_POPUP3|IC_CMDMENU|IC_WANT_MOVE,
 	               ACCL_CONNECT, NULL );
 	pullPopupM = MenuRegister( "Connect Options" );

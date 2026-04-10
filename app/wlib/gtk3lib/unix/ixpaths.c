@@ -62,21 +62,21 @@ static char *userHomeDir;
  */
 
 
- static int
- GetProgramDir(char *pBuf, ssize_t len)
- {
+static int
+GetProgramDir(char *pBuf, ssize_t len)
+{
 
 	ssize_t result_len = readlink("/proc/self/exe", pBuf, len);
 
 	int bytes = MIN(result_len, len - 1);
 	if (bytes >= 0) {
-    	pBuf[bytes] = '\0';
+		pBuf[bytes] = '\0';
 	} else {
 		pBuf[0] = '\0';
 	}
 	(void)dirname(pBuf);
 	return strlen(pBuf);
- }
+}
 
 /**
  * Check for existance of a directory
@@ -185,13 +185,13 @@ const char * wGetAppLibDir( void )
 
 		msg = g_strdup_printf(
 		              _("The required configuration files could not be located in the "
-		                "expected location.\n\nUsually this is an installation problem."
-		                "Make sure that these files are installed in either \n"
-		                "  %s or\n"
-		                "  %s or\n"
-		                "  %s\n"
-		                "If this is not possible, the environment variable %s must "
-		                "contain the name of the correct directory."),
+		  "expected location.\n\nUsually this is an installation problem."
+		  "Make sure that these files are installed in either \n"
+		  "  %s or\n"
+		  "  %s or\n"
+		  "  %s\n"
+		  "If this is not possible, the environment variable %s must "
+		  "contain the name of the correct directory."),
 		              searchDirs[1],
 		              searchDirs[2],
 		              searchDirs[3],
@@ -230,7 +230,8 @@ const char * wGetAppWorkDir(
 	if ( strstr( XTRKCAD_VERSION, "Beta" ) != NULL ) {
 		sBeta = "-beta";
 	}
-	appWorkDir = g_strdup_printf( "%s/.%s%s%s", homeDir, wlibGetAppName(), FP_WORK_SUFFIX, sBeta );
+	appWorkDir = g_strdup_printf( "%s/.%s%s%s", homeDir, wlibGetAppName(),
+	                              FP_WORK_SUFFIX, sBeta );
 
 	if (!IsExistingDirectory(appWorkDir)) {
 		if ( g_mkdir( appWorkDir, 0777 ) == -1 ) {
@@ -281,7 +282,7 @@ const char *wGetUserHomeDir( void )
 	}
 
 	homeDir = g_get_home_dir();
- 	if (homeDir == NULL) {
+	if (homeDir == NULL) {
 		wNoticeWithIcon( NT_ERROR, _("HOME is not set"), _("Exit"), NULL);
 		wExit(0);
 	} else {

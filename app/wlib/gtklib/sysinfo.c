@@ -32,7 +32,7 @@ static char *buffer;
 /**
  * Return the path to a temporary directory. The directory is not created.
  * The result is put into a buffer and is only valid immediately after the call.
- * 
+ *
  * \return pointer to fully qualified directory path
  */
 
@@ -57,12 +57,12 @@ wGetTempPath()
 }
 
 /**
- * Get the Windows version. This function uses the Windows ver command to 
+ * Get the Windows version. This function uses the Windows ver command to
  * retrieve the OS version. The result is put into a buffer and is only
  * valid immediately after the call.
- * 
+ *
  * \return buffer containing the zero terminated string
- * 
+ *
  */
 
 char *
@@ -83,8 +83,9 @@ wGetOSVersion()
 	while (fgets(buffer, bufferSize, pPipe))
 		;
 
-	if (buffer[strlen(buffer) -1]  == '\n')
+	if (buffer[strlen(buffer) -1]  == '\n') {
 		buffer[strlen(buffer) -1 ] = '\0';
+	}
 	pclose(pPipe);
 
 	return(buffer);
@@ -115,7 +116,7 @@ wGetUserID()
 }
 
 /** Get the user's profile directory. Other than on UNIX Windows differentiates
- * between the home directory and and the profile directory. 
+ * between the home directory and and the profile directory.
  *
  * \return    pointer to the user's profile directory
  */
@@ -131,7 +132,8 @@ const char* wGetPlatformVersion()
 		g_free(buffer);
 	}
 
-	buffer = g_strdup_printf("%d.%d.%d", gtk_major_version, gtk_minor_version, gtk_micro_version );
+	buffer = g_strdup_printf("%d.%d.%d", gtk_major_version, gtk_minor_version,
+	                         gtk_micro_version );
 	return(buffer);
 }
 

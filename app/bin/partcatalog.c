@@ -1021,7 +1021,7 @@ GetParameterFileScale(char *file)
 	fh = fopen(file, "rt");
 	if (fh) {
 		bool found = FALSE, found_Turnout = FALSE, found_Structure = FALSE,
-		     found_Car = FALSE;
+		                                           found_Car = FALSE;
 
 		while (!found) {
 			char buffer[512];

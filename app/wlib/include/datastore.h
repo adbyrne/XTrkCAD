@@ -5,10 +5,10 @@
 
 /* custom list store interface */
 struct _DataStore {
-    GtkListStore* listStore;
-    GCallback  selectionChanged;
-    const gchar* editable;
-    GCallback  edited;
-}; 
+	GtkListStore* listStore;
+	GCallback  selectionChanged;
+	const gchar* editable;
+	GCallback  edited;
+};
 
 #endif

@@ -266,7 +266,8 @@ void MainRedraw(void);
 void MainLayout(wBool_t, wBool_t);
 void TempRedraw(void);
 void DrawRuler(drawCmd_p, coOrd, coOrd, DIST_T, int, int, wDrawColor);
-wBool_t MainProc(wControl_p window, winProcEvent event, void *refresh, void *context);
+wBool_t MainProc(wControl_p window, winProcEvent event, void *refresh,
+                 void *context);
 void InitInfoBar(void);
 void InitColor(void);
 void DrawInit(int);
@@ -287,7 +288,8 @@ void SetInfoBar(void);
 
 extern wIndex_t panCmdInx;
 
-void InfoSubstituteControls(const char * name, wControl_p *controls, char * *labels);
+void InfoSubstituteControls(const char * name, wControl_p *controls,
+                            char * *labels);
 void InfoSetControls(wControl_p window, const char* name);
 void InfoDefaultControls(void);
 

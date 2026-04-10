@@ -166,7 +166,8 @@ EXPORT SCALEINX_T GetScaleInx( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx )
 	gaugeInfo_p g;
 
 	if ( scaleInx < 0 || scaleInx >= scaleDesc_da.cnt ) {
-		lprintf( "GetScaleInx: bad scaleInx %d (scaleDesc_da.cnt: %d)\n", scaleInx, scaleDesc_da.cnt );
+		lprintf( "GetScaleInx: bad scaleInx %d (scaleDesc_da.cnt: %d)\n", scaleInx,
+		         scaleDesc_da.cnt );
 		return 0;
 	}
 	s = scaleDesc(scaleInx);
@@ -985,7 +986,7 @@ static void RescaleDlgUpdate(
 
 	case I_RESCALE_TO_SCALE:
 		LoadGaugeList(rescalePLs[I_RESCALE_TO_GAUGE].control,
-		               *((int *)valueP) );
+		              *((int *)valueP) );
 		rescaleToGaugeInx = 0;
 		FormLoadSingleControl( pg, I_RESCALE_TO_GAUGE );
 		FormLoadSingleControl( pg, I_RESCALE_TO_SCALE );
@@ -1077,12 +1078,12 @@ EXPORT void DoRescale( void * unused )
 {
 	if ( rescalePG.win == NULL ) {
 		FormCreateDialog( &rescalePG, NULL,
-							_("Ok"), RescaleDlgOk, 
-							_("Cancel"), FormCancel_Current, 
-							TRUE, F_BLOCK, RescaleDlgUpdate);
+		                  _("Ok"), RescaleDlgOk,
+		                  _("Cancel"), FormCancel_Current,
+		                  TRUE, F_BLOCK, RescaleDlgUpdate);
 		LoadScaleList(rescalePLs[I_RESCALE_TO_SCALE].control );
 		LoadGaugeList(rescalePLs[I_RESCALE_TO_GAUGE].control,
-		               GetLayoutCurScaleDesc() ); /* set correct gauge list here */
+		              GetLayoutCurScaleDesc() ); /* set correct gauge list here */
 		rescaleFromScaleInx = GetLayoutCurScale();
 		rescaleToScaleInx = rescaleFromScaleInx;
 		rescalePercent = 100.0;

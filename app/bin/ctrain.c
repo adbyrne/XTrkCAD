@@ -1386,9 +1386,9 @@ static trainControlDlg_p CreateTrainControlDlg(void)
 	sprintf(title, _("Train Control %d"), ++numTrainDlg);
 	dlg->trainPGp = &trainPG;
 	dlg->win = FormCreateDialog(dlg->trainPGp, _("Train Control"),
-				    NULL, NULL,
+	                            NULL, NULL,
 	                            NULL, FormCancel_Null,
-				    FALSE, 0, ControllerDialogUpdate);
+	                            FALSE, 0, ControllerDialogUpdate);
 	speedD.size.x = SLIDER_WIDTH/speedD.dpi;
 	speedD.size.y = SLIDER_HEIGHT/speedD.dpi;
 	return dlg;
@@ -3208,7 +3208,7 @@ void InitCmdTrain(wMenu_p menu)
 	trainPLs[I_ZERO].winLabel = (char*)CreateSymbolFromResource("zero.png");
 	FormRegister(&trainPG);
 	trainCmdInx = AddMenuButton(menu, CmdTrain, "cmdTrain", _("Run Trains"),
-		CreateToolbarIconFromResource("train.png"), LEVEL0_50,
+	                            CreateToolbarIconFromResource("train.png"), LEVEL0_50,
 	                            IC_TOGGLE | IC_POPUP3|IC_LCLICK|IC_RCLICK|IC_WANT_MOVE, 0,
 	                            NULL);
 	stopI = CreateSymbolFromResource("reddot.png");
@@ -3221,7 +3221,7 @@ void InitCmdTrain(wMenu_p menu)
 	                 IC_MODETRAIN_ONLY,
 	                 CmdTrainExit, NULL);
 	newcarB = AddToolbarButton("cmdTrainNewCar",
-		CreateToolbarIconFromResource("new-car.png"),
+	                           CreateToolbarIconFromResource("new-car.png"),
 	                           IC_MODETRAIN_ONLY, CarItemLoadList, NULL);
 	T_CAR = InitObject(&carCmds);
 
@@ -3232,11 +3232,11 @@ void InitCmdTrain(wMenu_p menu)
 	                              TrainFunc, I2VP(DO_FLIPCAR));
 #ifdef CAR_CLEARANCE
 	trainPopupMI[DO_PENCILS_ON]	= wMenuPushCreate(trainPopupM, "",
-	                                  _("Clearance Lines On"), 0,
-	                                  TrainFunc, I2VP(DO_PENCILS_ON));
+	                               _("Clearance Lines On"), 0,
+	                               TrainFunc, I2VP(DO_PENCILS_ON));
 	trainPopupMI[DO_PENCILS_OFF]	= wMenuPushCreate(trainPopupM, "",
-	                                  _("Clearance Lines Off"), 0,
-	                                  TrainFunc, I2VP(DO_PENCILS_OFF));
+	                                _("Clearance Lines Off"), 0,
+	                                TrainFunc, I2VP(DO_PENCILS_OFF));
 #endif
 	trainPopupMI[DO_FLIPTRAIN]  = wMenuPushCreate(trainPopupM, "", _("Flip Train"),
 	                              0, TrainFunc, I2VP(DO_FLIPTRAIN));

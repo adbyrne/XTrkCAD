@@ -62,8 +62,8 @@ wDrawColor wDrawColorGray(
  * \param color IN index into palette
  * \param normal IN normal or inverted color
  * \return  the selected color definition
- * 
- * \todo Check usage 
+ *
+ * \todo Check usage
  */
 
 GdkRGBA wlibGetColor(
@@ -97,7 +97,7 @@ GdkRGBA wlibGetColor(
  */
 /**
  * Get the selected color from the color button.
- * 
+ *
  * \param widget	color button
  * \return			selected color
  */
@@ -110,9 +110,9 @@ wlibColorButtonGetColor(GtkColorButton* widget)
 
 	gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(widget), &rgba);
 
-	rgb = ((long)(rgba. red * 255.0) << 16) + 
-		((long)(rgba.green * 255.0) << 8) + 
-		((long)(rgba.blue * 255.0));
+	rgb = ((long)(rgba. red * 255.0) << 16) +
+	      ((long)(rgba.green * 255.0) << 8) +
+	      ((long)(rgba.blue * 255.0));
 
 	return(rgb);
 }
@@ -180,9 +180,9 @@ wDrawColor wColorSelectButtonGetColor(
 }
 
 /**
- * Create the button showing the current paint color and starting the color 
+ * Create the button showing the current paint color and starting the color
  * selection dialog.
- * 
+ *
  * ### Usage in dialogs
  *
  * - runtime: yes
@@ -192,7 +192,7 @@ wDrawColor wColorSelectButtonGetColor(
  * : set button as default for dialog
  *
  * \param IN parent parent window
- * \param IN x, y		x, y position in grid 
+ * \param IN x, y		x, y position in grid
  * \param IN helpStr	tooltip help string
  * \param IN labelStr	title for color selection dialog
  * \param IN option
@@ -200,11 +200,11 @@ wDrawColor wColorSelectButtonGetColor(
  * \param IN valueP		current color
  * \param IN action		button callback procedure
  * \param IN context		user context to pass to callback procedure
- * 
+ *
  * \return bb handle for created button
- * 
- * \todo Color button in builder definition 
- * 
+ *
+ * \todo Color button in builder definition
+ *
  */
 
 wControl_p wColorSelectButtonCreate(
@@ -254,7 +254,7 @@ wControl_p wColorSelectButtonCreate(
 	}
 
 	g_signal_connect(b->widget, "color-set",
-		G_CALLBACK(colorChange), b);
+	                 G_CALLBACK(colorChange), b);
 
 	wColorSelectButtonSetColor(b, (valueP?*valueP:0));
 

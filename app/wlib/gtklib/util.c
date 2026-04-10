@@ -117,7 +117,7 @@ GdkPixbuf* wlibPixbufFromXBM(
 			int iOffset = x & 0x7;
 			unsigned char iValue = bits[ iIndex ];
 			int iMask = 1<<iOffset;
-			wBool_t bOn = (iValue & iMask) ? TRUE : FALSE ; 
+			wBool_t bOn = (iValue & iMask) ? TRUE : FALSE ;
 			for ( int p = 0; p < 4; p++ ) {
 				*pCurr++ = ( bOn ? foreground[p] : background[p] );
 			}
@@ -128,7 +128,7 @@ GdkPixbuf* wlibPixbufFromXBM(
 //	printf("\n");
 
 	pixbuf = gdk_pixbuf_new_from_data( pData, GDK_COLORSPACE_RGB, TRUE, 8,
-			ip->w, ip->h, iStride, NULL, NULL );
+	                                   ip->w, ip->h, iStride, NULL, NULL );
 	return pixbuf;
 }
 
@@ -351,18 +351,18 @@ wControl_p wlibGetControlFromPos(
 
 /**
  * Change audio setting.
- * 
+ *
  * \param setting   true: beep is on
  */
 void
 wSetAudio(bool setting)
 {
-    audioOn = (setting > 0);
+	audioOn = (setting > 0);
 }
 
 /**
  * Sound speaker if audio is enabled.
- * 
+ *
  */
 void wBeep(void)
 {

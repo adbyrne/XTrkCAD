@@ -56,7 +56,7 @@ static char *userHomeDir;
  * Find the directory where configuration files, help, demos etc are installed.
  *
  * Windows: the directory is expected to be at ..\share\xtrkcad
- * 
+ *
  * Unix: The search order is:
  *  1. Directory specified by the XTRKCADLIB environment variable
  *  2. relative path ../xtrkcad from the installation directory
@@ -67,7 +67,7 @@ static char *userHomeDir;
  *  \return pointer to directory name
  */
 
-const char* 
+const char*
 wGetAppLibDir(void)
 {
 	gchar* moduleDir;
@@ -115,7 +115,7 @@ const char* wGetAppWorkDir(void)
 	tempIniFile = g_strdup_printf( "%s\\xtrkcad0.ini", wGetAppLibDir());
 
 	rc = GetPrivateProfileString("workdir", "path", "", tempDir,
-		MAX_PATH, tempIniFile);
+	                             MAX_PATH, tempIniFile);
 
 	g_free(tempIniFile);
 	tempIniFile = NULL;
@@ -123,8 +123,7 @@ const char* wGetAppWorkDir(void)
 	if (rc != 0) {
 		if (g_ascii_strncasecmp(tempDir, "installdir", strlen(tempDir)) == 0) {
 			g_strlcpy(tempDir, appLibDir, MAX_PATH);
-		}
-		else {
+		} else {
 			cp = &tempDir[strlen(tempDir) - 1];
 			while (cp > tempDir && *cp == '\\') { *cp-- = 0; }
 		}
@@ -132,17 +131,18 @@ const char* wGetAppWorkDir(void)
 		return appWorkDir;
 	}
 
-	if(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, tempDir) != S_OK) {
+	if(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT,
+	                   tempDir) != S_OK) {
 		wNoticeWithIcon(NT_ERROR, "Cannot get user's profile directory", "Exit", NULL);
 		wExit(0);
-	}
-	else {
+	} else {
 		g_snprintf(tempDir, MAX_PATH, "%s\\%s", tempDir,	wlibGetAppName());
 		appWorkDir = tempDir;
 
 		if (!g_file_test(appWorkDir, G_FILE_TEST_IS_DIR )) {
 			if (g_mkdir(appWorkDir, 0x666)) {
-				wNoticeWithIcon(NT_ERROR, "Cannot create user's profile directory", "Exit", NULL);
+				wNoticeWithIcon(NT_ERROR, "Cannot create user's profile directory", "Exit",
+				                NULL);
 				wExit(0);
 			}
 		}
@@ -152,7 +152,7 @@ const char* wGetAppWorkDir(void)
 }
 
 /**
- * Get the user's home directory. 
+ * Get the user's home directory.
  *
  * \return    pointer to the user's home directory
  */
@@ -166,7 +166,7 @@ const char *wGetUserHomeDir( void )
 	}
 
 	homeDir = g_get_home_dir();
- 	if (homeDir == NULL) {
+	if (homeDir == NULL) {
 		wNoticeWithIcon( NT_ERROR, _("HOME is not set"), _("Exit"), NULL);
 		wExit(0);
 	} else {

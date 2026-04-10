@@ -84,19 +84,19 @@ static wBool_t CustomDlgUpdate(
 {
 	custMgmContext_p context = NULL;
 	wIndex_t selcnt = wListGetSelectedCount(customPLs[I_CUSTOMLIST].control );
-	
+
 	if ( inx != I_CUSTOMLIST ) { return(TRUE); }
 
 	if ( selcnt == 1 ) {
 		wIndex_t lcnt = wListGetCount(pg->paramPtr[inx].control );
 
-		for (int linx = 0; linx < lcnt; linx++)
-		{
+		for (int linx = 0; linx < lcnt; linx++) {
 			if (wListGetItemSelected(customPLs[I_CUSTOMLIST].control, linx)) {
-				context = (custMgmContext_p)wListGetItemContext(pg->paramPtr[I_CUSTOMLIST].control, linx);
+				context = (custMgmContext_p)wListGetItemContext(
+				                  pg->paramPtr[I_CUSTOMLIST].control, linx);
 
 				wButtonSetLabel(customPLs[I_CUSTOMEDIT].control,
-					context->proc(CUSTMGM_CAN_EDIT, context->data) ? _("Edit") : _("Rename"));
+				                context->proc(CUSTMGM_CAN_EDIT, context->data) ? _("Edit") : _("Rename"));
 				FormControlActive(&customPG, I_CUSTOMEDIT, TRUE);
 			}
 		}
@@ -147,10 +147,10 @@ SelectNew(void *context)
 
 	// get selected function
 	switch(index) {
-		case I_NEWPART:
+	case I_NEWPART:
 		handler = CarDlgAddDesc;
 		break;
-		case I_NEWPROTO:
+	case I_NEWPROTO:
 		handler = CarDlgAddProto;
 		break;
 	}
@@ -158,7 +158,7 @@ SelectNew(void *context)
 
 	// configure the button
 	wButtonSetLabel((customPLs+I_CUSTOMNEW)->control, label);
-	customPLs[I_CUSTOMNEW].valueP = handler;	
+	customPLs[I_CUSTOMNEW].valueP = handler;
 }
 
 static void CustomDelete( void * action )
@@ -243,9 +243,9 @@ static int CustomDoExport(
 	} else {
 		if ( custMgmContentsPG.win == NULL ) {
 			FormCreateDialog( &custMgmContentsPG, MakeWindowTitle(_("Contents Label")),
-			                   _("Ok"), CustMgmContentsOk, 
-							   _("Cancel"), FormCancel_Current, 
-								TRUE, F_BLOCK, NULL);
+			                  _("Ok"), CustMgmContentsOk,
+			                  _("Cancel"), FormCancel_Current,
+			                  TRUE, F_BLOCK, NULL);
 		}
 		custMgmProceed = FALSE;
 		wShow( custMgmContentsPG.win );
@@ -374,7 +374,7 @@ static void LoadCustomMgmList( void )
 
 static void CustMgmChange( long changes )
 {
-	wIndex_t selcnt; 
+	wIndex_t selcnt;
 
 	if (changes) {
 		if (changed) {
@@ -388,8 +388,8 @@ static void CustMgmChange( long changes )
 
 	selcnt = wListGetSelectedCount(customPLs[0].control);
 	if (selcnt) {
-		for (int i = 0; i < wListGetCount(customPG.paramPtr[I_CUSTOMLIST].control); i++)
-		{
+		for (int i = 0; i < wListGetCount(customPG.paramPtr[I_CUSTOMLIST].control);
+		     i++) {
 			if (wListGetItemSelected(customPLs[0].control, i)) {
 				custMgmContext_p context = (custMgmContext_p)wListGetItemContext(customSelL, i);
 				context->proc(CUSTMGM_GET_TITLE, context->data);
@@ -409,11 +409,11 @@ static void DoCustomMgr( void * junk )
 #endif
 
 	if (customPG.win == NULL) {
-		FormCreateDialog( &customPG, MakeWindowTitle(_("Manage custom designed parts")), 
-							_("Done"), CustomDone,
-							NULL, NULL,
-							TRUE, F_RESIZE|F_RECALLSIZE|F_BLOCK,
-		                   CustomDlgUpdate );
+		FormCreateDialog( &customPG, MakeWindowTitle(_("Manage custom designed parts")),
+		                  _("Done"), CustomDone,
+		                  NULL, NULL,
+		                  TRUE, F_RESIZE|F_RECALLSIZE|F_BLOCK,
+		                  CustomDlgUpdate );
 		SelectNew(I2VP(I_NEWPART));
 		//selectedType = 0;
 		// wComboBoxSetIndex( (customPLs[I_CUSTOMNEWTYPE].control), selectedType);

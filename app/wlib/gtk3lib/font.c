@@ -65,7 +65,7 @@ static GtkWidget *fontSelectionDialog;
 int absoluteFontSize = 18;
 
 struct wFont_t {
-    PangoFontDescription *fontDescription;
+	PangoFontDescription *fontDescription;
 };
 
 static wFont_p standardFonts[F_MONO-F_TIMES+1][2][2];
@@ -83,35 +83,35 @@ static wFont_p curFont = NULL;
 static void fontSelectionDialogCallback(GtkFontChooserDialog
                                         *fontSelectionDialog, gint response, gpointer attributes)
 {
-    if (response == GTK_RESPONSE_APPLY || response == GTK_RESPONSE_OK) {
-        gchar *fontName;
+	if (response == GTK_RESPONSE_APPLY || response == GTK_RESPONSE_OK) {
+		gchar *fontName;
 
-        fontName = gtk_font_chooser_get_font(GTK_FONT_CHOOSER(fontSelectionDialog));
-        wPrefSetString("font", "name", fontName);
-        pango_font_description_free(curFont->fontDescription);
-        curFont->fontDescription = pango_font_description_from_string(fontName);
-        absoluteFontSize = (pango_font_description_get_size(
-                                curFont->fontDescription))/PANGO_SCALE;
+		fontName = gtk_font_chooser_get_font(GTK_FONT_CHOOSER(fontSelectionDialog));
+		wPrefSetString("font", "name", fontName);
+		pango_font_description_free(curFont->fontDescription);
+		curFont->fontDescription = pango_font_description_from_string(fontName);
+		absoluteFontSize = (pango_font_description_get_size(
+		                            curFont->fontDescription))/PANGO_SCALE;
 #if WLIB_FONT_DEBUG >= 2
-        fprintf(stderr, "new font selection:\n");
-        fprintf(stderr, "  font name \"%s\"\n", fontName);
-        fprintf(stderr, "  font size is %d\n",
-                pango_font_description_get_size(curFont->fontDescription)/PANGO_SCALE);
-        fprintf(stderr, "  font size is absolute %d\n",
-                pango_font_description_get_size_is_absolute(curFont->fontDescription));
+		fprintf(stderr, "new font selection:\n");
+		fprintf(stderr, "  font name \"%s\"\n", fontName);
+		fprintf(stderr, "  font size is %d\n",
+		        pango_font_description_get_size(curFont->fontDescription)/PANGO_SCALE);
+		fprintf(stderr, "  font size is absolute %d\n",
+		        pango_font_description_get_size_is_absolute(curFont->fontDescription));
 #endif
-        g_free(fontName);
-    }
+		g_free(fontName);
+	}
 
-    if (response == GTK_RESPONSE_OK || response == GTK_RESPONSE_CANCEL) {
-        gtk_widget_hide(GTK_WIDGET(fontSelectionDialog));
-    }
+	if (response == GTK_RESPONSE_OK || response == GTK_RESPONSE_CANCEL) {
+		gtk_widget_hide(GTK_WIDGET(fontSelectionDialog));
+	}
 }
 
 static wBool_t fontInitted = FALSE;
 
 /**
- * \todo F_TIMES and F_HELV are serif respective sans serif fonts. Change define to make names consistent 
+ * \todo F_TIMES and F_HELV are serif respective sans serif fonts. Change define to make names consistent
  * with meaning.
  */
 
@@ -119,51 +119,51 @@ static wBool_t fontInitted = FALSE;
 
 static wBool_t fontInit()
 {
-    const char *fontNames[] = {
-        "Serif Normal 18",
-        "Serif Italic 18",
-        "Serif Bold 18",
-        "Serif Bold Italic 18",
-        "Sans 18",
-        "Sans Italic 18",
-        "Sans Bold 18",
-        "Sans Bold Italic 18",
-        "Monospace 18",
-        "Monospace Italic 18",
-        "Monospace Bold 18",
-        "Monospace Bold Italic 18",
-    };
-    int s = 0;
-    int i, j, k;
+	const char *fontNames[] = {
+		"Serif Normal 18",
+		"Serif Italic 18",
+		"Serif Bold 18",
+		"Serif Bold Italic 18",
+		"Sans 18",
+		"Sans Italic 18",
+		"Sans Bold 18",
+		"Sans Bold Italic 18",
+		"Monospace 18",
+		"Monospace Italic 18",
+		"Monospace Bold 18",
+		"Monospace Bold Italic 18",
+	};
+	int s = 0;
+	int i, j, k;
 
-    for (i = F_TIMES; i <= F_MONO; ++i) {
-        for (j = FW_MEDIUM; j <= FW_BOLD; ++j) {
-            for (k = FS_REGULAR; k <= FS_ITALIC; ++k) {
-                PangoFontDescription *fontDescription = pango_font_description_from_string(
-                        fontNames[s++]);
-                wFont_p standardFont = (wFont_p) malloc(sizeof(struct wFont_t));
-                standardFont->fontDescription = fontDescription;
-                standardFonts[i-F_TIMES][j][k] = standardFont;
-            }
-        }
-    }
+	for (i = F_TIMES; i <= F_MONO; ++i) {
+		for (j = FW_MEDIUM; j <= FW_BOLD; ++j) {
+			for (k = FS_REGULAR; k <= FS_ITALIC; ++k) {
+				PangoFontDescription *fontDescription = pango_font_description_from_string(
+				                fontNames[s++]);
+				wFont_p standardFont = (wFont_p) malloc(sizeof(struct wFont_t));
+				standardFont->fontDescription = fontDescription;
+				standardFonts[i-F_TIMES][j][k] = standardFont;
+			}
+		}
+	}
 
-    if (curFont == NULL) {
-        curFont = (wFont_p) malloc(sizeof(struct wFont_t));
+	if (curFont == NULL) {
+		curFont = (wFont_p) malloc(sizeof(struct wFont_t));
 
-        if (curFont == NULL) {
-            return FALSE;
-        }
+		if (curFont == NULL) {
+			return FALSE;
+		}
 
-        const char *fontName = wPrefGetStringBasic("font", "name");
-        curFont->fontDescription = pango_font_description_from_string(
-                                       fontName ? fontName : DEFAULTFONTSANS);
-        absoluteFontSize = (int) PANGO_PIXELS(pango_font_description_get_size(
-                curFont->fontDescription));
-    }
+		const char *fontName = wPrefGetStringBasic("font", "name");
+		curFont->fontDescription = pango_font_description_from_string(
+		                                   fontName ? fontName : DEFAULTFONTSANS);
+		absoluteFontSize = (int) PANGO_PIXELS(pango_font_description_get_size(
+		                curFont->fontDescription));
+	}
 
-    fontInitted = TRUE;
-    return TRUE;
+	fontInitted = TRUE;
+	return TRUE;
 }
 
 
@@ -195,53 +195,53 @@ PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget,
                                        wDrawPix_t *height_p,
                                        wDrawPix_t *ascent_p,
                                        wDrawPix_t *descent_p,
-				       wDrawPix_t *baseline_p)
+                                       wDrawPix_t *baseline_p)
 {
 
-    g_assert(cairo!=NULL);
+	g_assert(cairo!=NULL);
 
-    if (!fontInitted) {
-        fontInit();
-    }
+	if (!fontInitted) {
+		fontInit();
+	}
 
-    PangoLayout *layout = NULL;
-    gchar *utf8 = wlibConvertInput(s);
+	PangoLayout *layout = NULL;
+	gchar *utf8 = wlibConvertInput(s);
 
-    layout = pango_cairo_create_layout((cairo_t *) cairo);
-    pango_layout_set_text(layout, utf8, -1);
+	layout = pango_cairo_create_layout((cairo_t *) cairo);
+	pango_layout_set_text(layout, utf8, -1);
 
-    PangoFontDescription *fontDescription = (fp ? fp : curFont)->fontDescription;
-    PangoContext *context;
-    PangoFontMetrics *metrics;
-    /* set attributes */
-    pango_font_description_set_size(fontDescription,
-                                    FONTSIZE_TO_PANGOSIZE(fs) * PANGO_SCALE);
-    pango_layout_set_font_description(layout, fontDescription);
-    /* get layout measures */
-    gint width_i, height_i;
-    pango_layout_get_size(layout, &width_i, &height_i);
-    *width_p = width_i / PANGO_SCALE;
-    *height_p = height_i / PANGO_SCALE;
-    context = gtk_widget_create_pango_context(widget);
-    metrics = pango_context_get_metrics(context, fontDescription,
-                                        pango_context_get_language(context));
-    *baseline_p = pango_layout_get_baseline(layout) / PANGO_SCALE;
-    *ascent_p  = pango_font_metrics_get_ascent(metrics) / PANGO_SCALE;
-    *descent_p = pango_font_metrics_get_descent(metrics) / PANGO_SCALE;
-    pango_font_metrics_unref(metrics);
-    g_object_unref(context);
+	PangoFontDescription *fontDescription = (fp ? fp : curFont)->fontDescription;
+	PangoContext *context;
+	PangoFontMetrics *metrics;
+	/* set attributes */
+	pango_font_description_set_size(fontDescription,
+	                                FONTSIZE_TO_PANGOSIZE(fs) * PANGO_SCALE);
+	pango_layout_set_font_description(layout, fontDescription);
+	/* get layout measures */
+	gint width_i, height_i;
+	pango_layout_get_size(layout, &width_i, &height_i);
+	*width_p = width_i / PANGO_SCALE;
+	*height_p = height_i / PANGO_SCALE;
+	context = gtk_widget_create_pango_context(widget);
+	metrics = pango_context_get_metrics(context, fontDescription,
+	                                    pango_context_get_language(context));
+	*baseline_p = pango_layout_get_baseline(layout) / PANGO_SCALE;
+	*ascent_p  = pango_font_metrics_get_ascent(metrics) / PANGO_SCALE;
+	*descent_p = pango_font_metrics_get_descent(metrics) / PANGO_SCALE;
+	pango_font_metrics_unref(metrics);
+	g_object_unref(context);
 #if WLIB_FONT_DEBUG >= 3
-    fprintf(stderr, "font layout created:\n");
-    fprintf(stderr, "  widget:         %p\n", widget);
-    //fprintf(stderr, "  font description:%p\n", fp);
-    fprintf(stderr, "  font size:      %f\n", fs);
-    fprintf(stderr, "  layout text:    \"%s\" (utf8)\n", utf8);
-    fprintf(stderr, "  layout width:   %d\n", *width_p);
-    fprintf(stderr, "  layout height:  %d\n", *height_p);
-    fprintf(stderr, "  layout ascent:  %d (pixels)\n", *ascent_p);
-    fprintf(stderr, "  layout descent: %d (pixels)\n", *descent_p);
+	fprintf(stderr, "font layout created:\n");
+	fprintf(stderr, "  widget:         %p\n", widget);
+	//fprintf(stderr, "  font description:%p\n", fp);
+	fprintf(stderr, "  font size:      %f\n", fs);
+	fprintf(stderr, "  layout text:    \"%s\" (utf8)\n", utf8);
+	fprintf(stderr, "  layout width:   %d\n", *width_p);
+	fprintf(stderr, "  layout height:  %d\n", *height_p);
+	fprintf(stderr, "  layout ascent:  %d (pixels)\n", *ascent_p);
+	fprintf(stderr, "  layout descent: %d (pixels)\n", *descent_p);
 #endif
-    return layout;
+	return layout;
 }
 
 /**
@@ -251,7 +251,7 @@ PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget,
 
 void wlibFontDestroyPangoLayout(PangoLayout *layout)
 {
-    g_object_ref_sink(layout);
+	g_object_ref_sink(layout);
 	g_object_unref(layout);
 }
 
@@ -262,9 +262,9 @@ void wlibFontDestroyPangoLayout(PangoLayout *layout)
 
 void wInitializeFonts()
 {
-    if (!fontInitted) {
-        fontInit();
-    }
+	if (!fontInitted) {
+		fontInit();
+	}
 }
 
 /**
@@ -275,38 +275,38 @@ void wInitializeFonts()
  */
 
 void wSelectFont(
-    const char * title)
+        const char * title)
 {
-    if (!fontInitted) {
-        fontInit();
-    }
+	if (!fontInitted) {
+		fontInit();
+	}
 
-    if (fontSelectionDialog == NULL) {
-        fontSelectionDialog = gtk_font_chooser_dialog_new( _("Font Select"), NULL);
-        gtk_window_set_position(GTK_WINDOW(fontSelectionDialog), GTK_WIN_POS_MOUSE);
-        gtk_window_set_modal(GTK_WINDOW(fontSelectionDialog), TRUE);
-        gtk_font_chooser_set_preview_text(GTK_FONT_CHOOSER(
-                    fontSelectionDialog), SAMPLETEXT);
-        g_signal_connect(G_OBJECT(fontSelectionDialog), "response",
-                         G_CALLBACK(fontSelectionDialogCallback), NULL);
-        g_signal_connect(G_OBJECT(fontSelectionDialog), "destroy",
-                         G_CALLBACK(gtk_widget_destroyed), &fontSelectionDialog);
-    }
+	if (fontSelectionDialog == NULL) {
+		fontSelectionDialog = gtk_font_chooser_dialog_new( _("Font Select"), NULL);
+		gtk_window_set_position(GTK_WINDOW(fontSelectionDialog), GTK_WIN_POS_MOUSE);
+		gtk_window_set_modal(GTK_WINDOW(fontSelectionDialog), TRUE);
+		gtk_font_chooser_set_preview_text(GTK_FONT_CHOOSER(
+		                fontSelectionDialog), SAMPLETEXT);
+		g_signal_connect(G_OBJECT(fontSelectionDialog), "response",
+		                 G_CALLBACK(fontSelectionDialogCallback), NULL);
+		g_signal_connect(G_OBJECT(fontSelectionDialog), "destroy",
+		                 G_CALLBACK(gtk_widget_destroyed), &fontSelectionDialog);
+	}
 
-    if (curFont != NULL) {
-        gchar *fontName;
+	if (curFont != NULL) {
+		gchar *fontName;
 
-        /* the curFont description contains the latest font info
-         * which is depended on the current scale
-         * overwrite it with the absoluteFontSize */
-        pango_font_description_set_size(curFont->fontDescription,
-                                        FONTSIZE_TO_PANGOSIZE(absoluteFontSize) * PANGO_SCALE);
-        fontName = pango_font_description_to_string(curFont->fontDescription);
-        gtk_font_chooser_set_font(GTK_FONT_CHOOSER(fontSelectionDialog), fontName);
-        g_free(fontName);
-    }
+		/* the curFont description contains the latest font info
+		 * which is depended on the current scale
+		 * overwrite it with the absoluteFontSize */
+		pango_font_description_set_size(curFont->fontDescription,
+		                                FONTSIZE_TO_PANGOSIZE(absoluteFontSize) * PANGO_SCALE);
+		fontName = pango_font_description_to_string(curFont->fontDescription);
+		gtk_font_chooser_set_font(GTK_FONT_CHOOSER(fontSelectionDialog), fontName);
+		g_free(fontName);
+	}
 
-    gtk_widget_show(fontSelectionDialog);
+	gtk_widget_show(fontSelectionDialog);
 }
 
 /**
@@ -317,61 +317,61 @@ void wSelectFont(
 
 static wFont_p wlibSelectedFont(void)
 {
-    if (!fontInitted) {
-        fontInit();
-    }
+	if (!fontInitted) {
+		fontInit();
+	}
 
-    return curFont;
+	return curFont;
 }
 
 int
 wFontGetCharWidth(wControl_p control, wFont_p font, double size)
 {
-    PangoFontDescription *fontDescription = font->fontDescription;
-    PangoFontMetrics *metrics;
-    PangoContext *context;
-    int width;
+	PangoFontDescription *fontDescription = font->fontDescription;
+	PangoFontMetrics *metrics;
+	PangoContext *context;
+	int width;
 
-    context = gtk_widget_get_pango_context(control->widget);
-    /* set attributes */
-    pango_font_description_set_size(fontDescription,
-                                    FONTSIZE_TO_PANGOSIZE(size) * PANGO_SCALE);
+	context = gtk_widget_get_pango_context(control->widget);
+	/* set attributes */
+	pango_font_description_set_size(fontDescription,
+	                                FONTSIZE_TO_PANGOSIZE(size) * PANGO_SCALE);
 
-    metrics = pango_context_get_metrics(context, fontDescription,
-                                        NULL);
+	metrics = pango_context_get_metrics(context, fontDescription,
+	                                    NULL);
 
-    width = pango_font_metrics_get_approximate_digit_width(metrics) / PANGO_SCALE;                               
+	width = pango_font_metrics_get_approximate_digit_width(metrics) / PANGO_SCALE;
 
-    pango_font_metrics_unref(metrics);
-    //g_object_unref(context);    
+	pango_font_metrics_unref(metrics);
+	//g_object_unref(context);
 
-    return width;
+	return width;
 }
 
 
 int
 wFontGetCharHeight(wControl_p control, wFont_p font, double size)
 {
-    PangoFontDescription *fontDescription = font->fontDescription;
-    PangoFontMetrics *metrics;
-    PangoContext *context;
-    int height;
+	PangoFontDescription *fontDescription = font->fontDescription;
+	PangoFontMetrics *metrics;
+	PangoContext *context;
+	int height;
 
-    context = gtk_widget_get_pango_context(control->widget);
-    /* set attributes */
-    pango_font_description_set_size(fontDescription,
-                                    FONTSIZE_TO_PANGOSIZE(size) * PANGO_SCALE);
+	context = gtk_widget_get_pango_context(control->widget);
+	/* set attributes */
+	pango_font_description_set_size(fontDescription,
+	                                FONTSIZE_TO_PANGOSIZE(size) * PANGO_SCALE);
 
-    metrics = pango_context_get_metrics(context, fontDescription,
-                                        NULL);
+	metrics = pango_context_get_metrics(context, fontDescription,
+	                                    NULL);
 
-       height = (pango_font_metrics_get_ascent(metrics) +
-              pango_font_metrics_get_descent(metrics)) / PANGO_SCALE;                              
+	height = (pango_font_metrics_get_ascent(metrics) +
+	          pango_font_metrics_get_descent(metrics)) / PANGO_SCALE;
 
-    pango_font_metrics_unref(metrics);
-    //g_object_unref(context);    
+	pango_font_metrics_unref(metrics);
+	//g_object_unref(context);
 
-    return height;
+	return height;
 }
 
 
@@ -383,16 +383,16 @@ wFontGetCharHeight(wControl_p control, wFont_p font, double size)
 
 wFontSize_t wSelectedFontSize(void)
 {
-    if (!fontInitted) {
-        fontInit();
-    }
+	if (!fontInitted) {
+		fontInit();
+	}
 
 #if WLIB_FONT_DEBUG >= 3
-    fprintf(stderr, "the font size of current font description is: %d\n",
-            pango_font_description_get_size(curFont->fontDescription)/PANGO_SCALE);
-    fprintf(stderr, "the font size of absoluteFontSize is: %d\n",absoluteFontSize);
+	fprintf(stderr, "the font size of current font description is: %d\n",
+	        pango_font_description_get_size(curFont->fontDescription)/PANGO_SCALE);
+	fprintf(stderr, "the font size of absoluteFontSize is: %d\n",absoluteFontSize);
 #endif
-    return absoluteFontSize;
+	return absoluteFontSize;
 }
 
 /**
@@ -404,7 +404,7 @@ wFontSize_t wSelectedFontSize(void)
 
 void wSetSelectedFontSize(wFontSize_t size)
 {
-    absoluteFontSize = lround(size);
+	absoluteFontSize = lround(size);
 }
 
 /**
@@ -419,30 +419,30 @@ void wSetSelectedFontSize(wFontSize_t size)
 
 const char *wlibFontTranslate(wFont_p fp)
 {
-    static gchar *fontName = NULL;
+	static gchar *fontName = NULL;
 
-    if (fontName != NULL) {
-        g_free(fontName);
-    }
+	if (fontName != NULL) {
+		g_free(fontName);
+	}
 
-    if (!fontInitted) {
-        fontInit();
-    }
+	if (!fontInitted) {
+		fontInit();
+	}
 
-    if (fp == NULL) {
-        fp = wlibSelectedFont();
-    }
+	if (fp == NULL) {
+		fp = wlibSelectedFont();
+	}
 
-    if (fp == NULL) {
-        fp = standardFonts[0][FW_MEDIUM][FS_REGULAR];
-    }
+	if (fp == NULL) {
+		fp = standardFonts[0][FW_MEDIUM][FS_REGULAR];
+	}
 
-    fontName = pango_font_description_to_string(fp->fontDescription);
+	fontName = pango_font_description_to_string(fp->fontDescription);
 #if WLIB_FONT_DEBUG >= 2
-    fprintf(stderr, "font translation: ");
-    fprintf(stderr, "  \"%s\"\n", fontName);
+	fprintf(stderr, "font translation: ");
+	fprintf(stderr, "  \"%s\"\n", fontName);
 #endif
-    return (const char *) fontName;
+	return (const char *) fontName;
 }
 
 /**
@@ -453,9 +453,9 @@ const char *wlibFontTranslate(wFont_p fp)
 
 wFont_p wStandardFont(int face, wBool_t bold, wBool_t italic)
 {
-    if (!fontInitted) {
-        fontInit();
-    }
+	if (!fontInitted) {
+		fontInit();
+	}
 
-    return standardFonts[face-F_TIMES][bold][italic];
+	return standardFonts[face-F_TIMES][bold][italic];
 }

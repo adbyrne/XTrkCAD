@@ -28,10 +28,10 @@
 #include <malloc.h>
 #endif
 #ifdef WIN32
-	#define _USE_MATH_DEFINES // for C
-	#include <Windows.h>
+#define _USE_MATH_DEFINES // for C
+#include <Windows.h>
 #else
-	#include <unistd.h>
+#include <unistd.h>
 #endif
 #include <string.h>
 #include <math.h>
@@ -120,7 +120,7 @@ static cairo_t* gtkDrawCreateCairoContext(
 	//	        bd->clip_set,
 	//	        bd->realX, bd->realY, bd->w, bd->h );
 	cairo_t * cairo;
-	
+
 	if (surface) {
 		cairo = cairo_create(surface);
 	} else {
@@ -220,7 +220,8 @@ static cairo_t* gtkDrawCreateCairoContext(
 	cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
 
 	if (bd->clipregion) {
-		cairo_rectangle(cairo,bd->clipregion->x,bd->clipregion->y,bd->clipregion->w,bd->clipregion->h);
+		cairo_rectangle(cairo,bd->clipregion->x,bd->clipregion->y,bd->clipregion->w,
+		                bd->clipregion->h);
 		cairo_clip(cairo);
 	}
 
@@ -294,7 +295,8 @@ void wDrawDelayUpdate(
 		if ( iDrawLog >= 1 ) { printf( "wDrawDelayUpdate( %d -> %d ) - update\n", delay, bd->attributes.draw.delayUpdate ); }
 		update_rect.x = 0;
 		update_rect.y = 0;
-		wDrawGetSize(bd, (wWinPix_t *)&update_rect.width, (wWinPix_t *)&update_rect.height);
+		wDrawGetSize(bd, (wWinPix_t *)&update_rect.width,
+		             (wWinPix_t *)&update_rect.height);
 		cairo_region_t * cairo_region = cairo_region_create_rectangle(&update_rect);
 		gtk_widget_queue_draw_region(bd->widget, cairo_region);
 		cairo_region_destroy(cairo_region);
@@ -342,7 +344,8 @@ void wDrawLine(
 	cairo_stroke(cairo);
 	gtkDrawDestroyCairoContext(cairo);
 	if (drawingArea->widget) {
-		gtk_widget_queue_draw_area(drawingArea->widget,x0>x1?x1:x0,y0>y1?y1:y0,fabs(x1-x0)+1,
+		gtk_widget_queue_draw_area(drawingArea->widget,x0>x1?x1:x0,y0>y1?y1:y0,
+		                           fabs(x1-x0)+1,
 		                           fabs(y1-y0)+1);
 	}
 
@@ -455,7 +458,8 @@ void wDrawPoint(
 	cairo_stroke(cairo);
 	gtkDrawDestroyCairoContext(cairo);
 	if (drawingArea->widget && !bd->delayUpdate) {
-		gtk_widget_queue_draw_area(drawingArea->widget,INMAPX(bd,x0-0.75),INMAPY(bd,y0+0.75),2,
+		gtk_widget_queue_draw_area(drawingArea->widget,INMAPX(bd,x0-0.75),INMAPY(bd,
+		                           y0+0.75),2,
 		                           2);
 	}
 
@@ -618,8 +622,8 @@ static void wlibDrawFilled(
 		cairo_stroke_preserve(cairo);
 		cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
 		if ( iDrawLog >= 1 ) {
-			printf( "wlibDrawFilled( %0.3f %0.3f %0.3f %0.3f )\n", 
-				gcolor.red, gcolor.green, gcolor.blue, 0.3);
+			printf( "wlibDrawFilled( %0.3f %0.3f %0.3f %0.3f )\n",
+			        gcolor.red, gcolor.green, gcolor.blue, 0.3);
 		}
 		cairo_set_source_rgba(cairo, gcolor.red, gcolor.green, gcolor.blue, 0.3);
 	}
@@ -665,7 +669,8 @@ void wDrawFilledRectangle(
 
 	gtkDrawDestroyCairoContext(cairo);
 	if (drawingArea->widget && !bd->delayUpdate) {
-		gtk_widget_queue_draw_area(GTK_WIDGET(drawingArea->widget),w>0?x:x+w,h>0?y:y+h,fabs(w)+1,
+		gtk_widget_queue_draw_area(GTK_WIDGET(drawingArea->widget),w>0?x:x+w,h>0?y:y+h,
+		                           fabs(w)+1,
 		                           fabs(h)+1);
 	}
 
@@ -806,7 +811,8 @@ void wDrawPolygon(
 	}
 	gtkDrawDestroyCairoContext(cairo);
 	if (drawingArea->widget && !bd->delayUpdate) {
-		gtk_widget_queue_draw_area(GTK_WIDGET(drawingArea->widget),min_x,min_y,max_x-min_x+1,
+		gtk_widget_queue_draw_area(GTK_WIDGET(drawingArea->widget),min_x,min_y,
+		                           max_x-min_x+1,
 		                           max_y-min_y+1);  //Ensure positive width
 	}
 
@@ -932,27 +938,26 @@ wDrawBitMap_p wDrawBitMapCreate(
         wControl_p drawingArea,
         int x,
         int y,
-		const char *prefix,
-		const char *filename )
+        const char *prefix,
+        const char *filename )
 {
-	GError* error = NULL; 
+	GError* error = NULL;
 	wDrawBitMap_p bm;
-	
+
 	g_assert(drawingArea->type == B_DRAW);
-		
+
 	bm = (wDrawBitMap_p)g_malloc0( sizeof *bm );
 	if (bm) {
 		gchar* path;
 		path = g_strconcat(prefix,
-			filename,
-			NULL);
+		                   filename,
+		                   NULL);
 
 		bm->pixbuf = gdk_pixbuf_new_from_resource(path, &error);
 		if (error) {
 			fprintf(stderr, "Error reading icon: %s\n", error->message);
 			g_error_free(error);
-		}
-		else {
+		} else {
 			bm->w = gdk_pixbuf_get_width(bm->pixbuf);
 			bm->h = gdk_pixbuf_get_height(bm->pixbuf);;
 			bm->x = x;
@@ -962,7 +967,8 @@ wDrawBitMap_p wDrawBitMapCreate(
 		}
 
 		if ( iDrawLog >= 1 ) {
-			printf( "%ld: wDrawBitMapCreate( %d+%d %s )\n", lDrawCnt++, bm->x, bm->y, path ) ;
+			printf( "%ld: wDrawBitMapCreate( %d+%d %s )\n", lDrawCnt++, bm->x, bm->y,
+			        path ) ;
 		}
 		g_free(path);
 	}
@@ -984,7 +990,8 @@ void wDrawBitMap(
 	x = INMAPX( bd, x-bm->x );
 	y = INMAPY( bd, y-bm->y )-bm->h;
 
-	cairo_t* cr = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color, opts );
+	cairo_t* cr = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color,
+	                                        opts );
 
 	cairo_matrix_init_translate(&matrix, x, y);
 	cairo_set_matrix(cr, &matrix);
@@ -994,7 +1001,8 @@ void wDrawBitMap(
 
 	cairo_destroy(cr);
 	if ( iDrawLog >= 1 ) {
-		printf( "%ld: wDrawBitMap( %d+%d ) %0.1f+%0.1f ) \n", lDrawCnt++, bm->x, bm->y, x, y ) ;
+		printf( "%ld: wDrawBitMap( %d+%d ) %0.1f+%0.1f ) \n", lDrawCnt++, bm->x, bm->y,
+		        x, y ) ;
 	}
 }
 
@@ -1149,10 +1157,10 @@ double wDrawGetMaxRadius( wControl_p drawingArea )
  */
 
 void wDrawClip(wControl_p drawingArea,
-        wDrawPix_t x,
-        wDrawPix_t y,
-        wDrawPix_t w,
-        wDrawPix_t h )
+               wDrawPix_t x,
+               wDrawPix_t y,
+               wDrawPix_t w,
+               wDrawPix_t h )
 {
 	struct draw *d = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
 	g_assert(drawingArea->type == B_DRAW);
@@ -1167,12 +1175,12 @@ void wDrawClip(wControl_p drawingArea,
 
 void wDrawClipClear(wControl_p drawingArea)
 {
-    wWinPix_t totalW, totalH;
+	wWinPix_t totalW, totalH;
 	struct draw *d = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
 	g_assert(drawingArea->type == B_DRAW);
 
-    wDrawGetSize(drawingArea, &totalW, &totalH);
-    wDrawClip(drawingArea, 0, 0, totalW, totalH);	
+	wDrawGetSize(drawingArea, &totalW, &totalH);
+	wDrawClip(drawingArea, 0, 0, totalW, totalH);
 
 	g_free(d->clipregion);
 	d->clipregion = NULL;
@@ -1226,7 +1234,8 @@ wDrawCloneBackground(wControl_p from, wControl_p to)
 	}
 }
 
-void wDrawShowBackground( wControl_p drawingArea, wWinPix_t pos_x, wWinPix_t pos_y,
+void wDrawShowBackground( wControl_p drawingArea, wWinPix_t pos_x,
+                          wWinPix_t pos_y,
                           wWinPix_t size, wAngle_t angle, int screen)
 {
 	struct draw* drawControl = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
@@ -1251,8 +1260,9 @@ void wDrawShowBackground( wControl_p drawingArea, wWinPix_t pos_x, wWinPix_t pos
 		}
 		cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
 		double rad = M_PI*(angle/180);
-		posy = (double)drawControl->height-((pixels_height*fabs(cos(rad))+pixels_width*fabs(sin(
-		                               rad)))*scale)-posy;
+		posy = (double)drawControl->height-((pixels_height*fabs(cos(
+		                rad))+pixels_width*fabs(sin(
+		                                rad)))*scale)-posy;
 		//width = (double)(pixels_width*scale);
 		//height = (double)(pixels_height*scale);
 		cairo_translate(cairo,posx,posy);

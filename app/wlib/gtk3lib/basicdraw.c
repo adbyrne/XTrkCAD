@@ -158,7 +158,8 @@ wlibBasicClear (struct draw * bd)
  */
 
 void
-wlibBasicDrawLine (struct draw * bd, wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t x1,
+wlibBasicDrawLine (struct draw * bd, wDrawPix_t x0, wDrawPix_t y0,
+                   wDrawPix_t x1,
                    wDrawPix_t y1, double width, double minWidth,
                    wDrawLineType_e lineType, wDrawColor color, wDrawOpts opts)
 {
@@ -242,7 +243,8 @@ wlibBasicDrawArc (struct draw *bd, wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r,
 }
 
 static PangoLayout *
-CreateLayoutForText(struct draw *bd, cairo_t *cr, char *text, wFont_p font, double size )
+CreateLayoutForText(struct draw *bd, cairo_t *cr, char *text, wFont_p font,
+                    double size )
 {
 	PangoLayout* layout;
 	PangoFontDescription* desc;
@@ -253,7 +255,8 @@ CreateLayoutForText(struct draw *bd, cairo_t *cr, char *text, wFont_p font, doub
 	// \todo use a getter function instead of double conversion
 	desc = pango_font_description_from_string(wlibFontTranslate(font));
 
-	pango_font_description_set_size(desc, (gint)lround(size * PANGO_SCALE * bd->scale_text));
+	pango_font_description_set_size(desc,
+	                                (gint)lround(size * PANGO_SCALE * bd->scale_text));
 
 	// render the string to a Pango layout
 	pango_layout_set_font_description(layout, desc);
@@ -275,7 +278,7 @@ CreateLayoutForText(struct draw *bd, cairo_t *cr, char *text, wFont_p font, doub
  * also affect the string orientation, printing a string has to be
  * treated differently. The starting point is transformed, then the
  * string is rotated and scaled as needed. Finally the string position
- * translated to the starting point calculated previously. 
+ * translated to the starting point calculated previously.
  * \param x IN x position in pixels
  * \param y IN y position in pixels
  * \param a IN angle of baseline in degrees. Positive is clockwise, 0 is direction of positive x axis
@@ -288,7 +291,8 @@ CreateLayoutForText(struct draw *bd, cairo_t *cr, char *text, wFont_p font, doub
  */
 
 void
-wlibBasicDrawString (struct draw *bd, wDrawPix_t x, wDrawPix_t y, double a, char *s,
+wlibBasicDrawString (struct draw *bd, wDrawPix_t x, wDrawPix_t y, double a,
+                     char *s,
                      wFont_p fp, double fs, double width, double minWidth,
                      wDrawColor color, wDrawOpts opts)
 {
@@ -312,7 +316,7 @@ wlibBasicDrawString (struct draw *bd, wDrawPix_t x, wDrawPix_t y, double a, char
 	cairo_get_matrix (cr, &matrix);
 	cairo_matrix_transform_point (&matrix, &x0, &y0);
 	cairo_identity_matrix (cr);
-	
+
 	cairo_translate (cr, x0, y0);
 	cairo_rotate (cr, -a * M_PI / 180.0);
 	cairo_move_to (cr, 0, 0);
@@ -386,7 +390,8 @@ wlibBasicDrawFillRectangle (struct draw * bd, wDrawPix_t x0, wDrawPix_t y0,
  */
 
 void
-wlibBasicDrawFillPolygon (struct draw* bd, wDrawPix_t p[][2], wPolyLine_e type[],
+wlibBasicDrawFillPolygon (struct draw* bd, wDrawPix_t p[][2],
+                          wPolyLine_e type[],
                           int cnt, wDrawColor color, wDrawOpts opts, int fill,
                           int open)
 {
@@ -506,7 +511,8 @@ wlibBasicDrawFillPolygon (struct draw* bd, wDrawPix_t p[][2], wPolyLine_e type[]
  */
 
 void
-wlibBasicDrawFillCircle (struct draw *bd, wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r,
+wlibBasicDrawFillCircle (struct draw *bd, wDrawPix_t x0, wDrawPix_t y0,
+                         wDrawPix_t r,
                          wDrawColor color, wDrawOpts opts)
 {
 	//struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);

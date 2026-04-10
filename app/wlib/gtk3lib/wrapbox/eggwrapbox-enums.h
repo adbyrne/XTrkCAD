@@ -23,16 +23,16 @@ GType egg_wrap_box_packing_get_type (void) G_GNUC_CONST;
 GType
 egg_wrap_box_packing_get_type (void)
 {
-  static GType etype = 0;
-  if (etype == 0) {
-    static const GFlagsValue values[] = {
-      { EGG_WRAP_BOX_H_EXPAND, "EGG_WRAP_BOX_H_EXPAND", "hexpand" },
-      { EGG_WRAP_BOX_V_EXPAND, "EGG_WRAP_BOX_V_EXPAND", "vexpand" },
-      { 0, NULL, NULL }
-    };
-    etype = g_flags_register_static ("GWrapBoxPacking", values);
-  }
-  return etype;
+	static GType etype = 0;
+	if (etype == 0) {
+		static const GFlagsValue values[] = {
+			{ EGG_WRAP_BOX_H_EXPAND, "EGG_WRAP_BOX_H_EXPAND", "hexpand" },
+			{ EGG_WRAP_BOX_V_EXPAND, "EGG_WRAP_BOX_V_EXPAND", "vexpand" },
+			{ 0, NULL, NULL }
+		};
+		etype = g_flags_register_static ("GWrapBoxPacking", values);
+	}
+	return etype;
 }
 
 G_END_DECLS

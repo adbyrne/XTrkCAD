@@ -775,4 +775,5 @@ wTooltip_t balloonHelp[] = {
 	{ "updatetitle-ok", N_("Update the Turnouts' title") },
 	{ "updatetitle-old", N_("Old Turnout title") },
 	{ "updatetitle-sel", N_("List of available titles") },
-	{ NULL, NULL } };
+	{ NULL, NULL }
+};

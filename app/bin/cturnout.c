@@ -2083,7 +2083,8 @@ static void TurnoutChange(long changes)
 	return;
 }
 
-static void RedrawTurnout( wControl_p d, void * context, wWinPix_t x, wWinPix_t y )
+static void RedrawTurnout( wControl_p d, void * context, wWinPix_t x,
+                           wWinPix_t y )
 {
 	RescaleTurnout();
 	LOG(log_turnout, 2, ("SelTurnout(%s)\n",
@@ -2118,7 +2119,7 @@ static wBool_t TurnoutDlgUpdate(
 	turnoutInfo_t* to;
 	if (inx != I_LIST) { return(FALSE); }
 	to = (turnoutInfo_t*)wListGetItemContext(pg->paramPtr[inx].control,
-	                (wIndex_t) * (long*)valueP);
+	        (wIndex_t) * (long*)valueP);
 	AddTurnout();
 	curTurnout = to;
 	RedrawTurnout( turnoutD.d, NULL, 0, 0 );
@@ -2965,10 +2966,10 @@ static STATUS_T CmdTurnout(
 	case C_START:
 		if (turnoutW == NULL) {
 			turnoutW = FormCreateDialog(&turnoutPG, MakeWindowTitle(_("Add Fixed-Track")),
-			                             NULL, (paramActionOkProc)TurnoutOk, 
-										 NULL, NULL, 
-										 TRUE,
-			                             F_RESIZE | F_RECALLSIZE | PD_F_ALT_CANCELLABEL, TurnoutDlgUpdate);
+			                            NULL, (paramActionOkProc)TurnoutOk,
+			                            NULL, NULL,
+			                            TRUE,
+			                            F_RESIZE | F_RECALLSIZE | PD_F_ALT_CANCELLABEL, TurnoutDlgUpdate);
 			//InitNewTurn(turnoutNewM);
 		}
 		turnoutIndex = wListGetIndex(turnoutListL);
@@ -3197,7 +3198,7 @@ static STATUS_T CmdTurnoutHotBar(
 EXPORT void InitCmdTurnout(wMenu_p menu)
 {
 	AddMenuButton(menu, CmdTurnout, "cmdNewFixedTrack", _("Fixed-Track"),
-		CreateToolbarIconFromResource("turnout.png"), LEVEL0_50,
+	              CreateToolbarIconFromResource("turnout.png"), LEVEL0_50,
 	              IC_WANT_MOVE | IC_STICKY | IC_LCLICK | IC_CMDMENU | IC_POPUP2, ACCL_TURNOUT,
 	              NULL);
 	turnoutHotBarCmdInx = AddMenuButton(menu, CmdTurnoutHotBar, "cmdTurnoutHotBar",

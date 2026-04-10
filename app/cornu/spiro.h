@@ -2,9 +2,9 @@
 #define _SPIRO_H
 #include "bezctx_intf.h"
 typedef struct {
-    double x;
-    double y;
-    char ty;
+	double x;
+	double y;
+	char ty;
 } spiro_cp;
 
 typedef struct spiro_seg_s spiro_seg;

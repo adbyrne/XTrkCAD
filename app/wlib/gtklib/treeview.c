@@ -144,7 +144,7 @@ wlibTreeViewSetSelected(wList_p b, int index)
 		gint childs;
 
 		childs = gtk_tree_model_iter_n_children (GTK_TREE_MODEL(b->listStore),
-		                NULL );
+		         NULL );
 
 		if(index < childs) {
 			gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->listStore),
@@ -366,8 +366,8 @@ wlibTreeViewAddRow(wList_p b, char *label, wIcon_p bm, wListItem_p id_p)
 	}
 
 	b->last = gtk_tree_model_iter_n_children(gtk_tree_view_get_model(GTK_TREE_VIEW(
-	                        b->treeView)),
-	                NULL);
+	                  b->treeView)),
+	          NULL);
 
 }
 

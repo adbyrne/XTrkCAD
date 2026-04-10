@@ -889,13 +889,14 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	wGetDisplaySize(&displayWidth, &displayHeight);
 	mainW = wWinMainCreate(buffer, (displayWidth * 2) / 3,
 	                       (displayHeight * 2) / 3, "xtrkcadW", message, "main",
-	                       F_DEFINEDINBUILDER | F_RESIZE | F_MENUBAR | F_NOTAB | F_RECALLPOS | F_RECALLSIZE | F_HIDE, MainProc,
+	                       F_DEFINEDINBUILDER | F_RESIZE | F_MENUBAR | F_NOTAB | F_RECALLPOS | F_RECALLSIZE
+	                       | F_HIDE, MainProc,
 	                       NULL);
 	if (mainW == NULL) {
 		return NULL;
 	}
 
- 	wSetGeometry(mainW, displayWidth/2, displayWidth, displayHeight/2,
+	wSetGeometry(mainW, displayWidth/2, displayWidth, displayHeight/2,
 	             displayHeight, -1, -1, -1);
 	InitAppDefaults();
 
@@ -915,7 +916,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	FileInit();
 
 	wCreateSplash(sProdName, sVersion);
-	
+
 	if (!initialFile) {
 		WDOUBLE_T tmp;
 		LOG1(log_init, ( "set roomsize\n" ))
@@ -989,7 +990,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	if (!ParamFileListInit()) {
 		return NULL;
 	}
-	
+
 	/* initialize the layers */
 	// LOG1(log_init, ("DefaultLayerProperties"));
 	// DefaultLayerProperties();
@@ -1013,7 +1014,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 		ChangeHotBar(CHANGE_SCALE);
 	}
 
-		/* initialize the layers */
+	/* initialize the layers */
 	LOG1(log_init, ("DefaultLayerProperties"));
 	DefaultLayerProperties();
 
@@ -1031,25 +1032,21 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	DoChangeNotification( CHANGE_MAIN | CHANGE_MAP);
 
 	wDestroySplash();
-	
+
 	/* this has to be called before ShowTip() */
 	InitSmallDlg();
-	
+
 	/* Compare the program version and display Beta warning if appropriate */
 	pref = wPrefGetString("misc", "version");
 	versionChanged = (!pref) || (strcmp(pref, XTRKCAD_VERSION) != 0);
 
-	if (versionChanged)
-	{
+	if (versionChanged) {
 		wPrefSetString("misc", "version", XTRKCAD_VERSION);
 	}
 
-	if (versionChanged && strstr(XTRKCAD_VERSION, "Beta") != NULL)
-	{
+	if (versionChanged && strstr(XTRKCAD_VERSION, "Beta") != NULL) {
 		NoticeMessage(MSG_BETA_NOTICE, _("Ok"), NULL, XTRKCAD_VERSION);
-	}
-	else
-	{
+	} else {
 		ShowTip(SHOWTIP_NEXTTIP);
 	}
 
@@ -1084,7 +1081,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 
 	MainRedraw();
 	ChangeHotBar(CHANGE_SCALE|CHANGE_PARAMS);
-	wWinShow(mainW, TRUE); 
+	wWinShow(mainW, TRUE);
 
 	inMainW = FALSE;
 	if ( bRunTests ) {

@@ -64,10 +64,10 @@ static void NoteOk(void * unused)
 void DoNote(void * unused)
 {
 	if (noteW == NULL) {
-		noteW = FormCreateDialog(&notePG, MakeWindowTitle(_("Note")), 
-								_("Ok"), NoteOk,
-								_("Cancel"), FormCancel_Current, 
-								FALSE, F_NOTTRANSIENT|F_RESIZE, NULL);
+		noteW = FormCreateDialog(&notePG, MakeWindowTitle(_("Note")),
+		                         _("Ok"), NoteOk,
+		                         _("Cancel"), FormCancel_Current,
+		                         FALSE, F_NOTTRANSIENT|F_RESIZE, NULL);
 	}
 
 	wTextClear(noteT);

@@ -57,7 +57,7 @@ static wWinPix_t toolbarHeight = 0;
 #define TOOLBAR_LAYER_BUTTONS "button-count"
 
 #define FIXEDLAYERCONTROLS (3)  // the layer groups has three controls 
-				// that are always visible (list, background and manage)
+// that are always visible (list, background and manage)
 
 /*
 * Bit handling macros
@@ -225,10 +225,10 @@ EXPORT void DoToolbar(void* unused)
 {
 	if (!toolbarW) {
 		InitializeToolbarDialog();
-		toolbarW = FormCreateDialog(&toolbarPG, MakeWindowTitle(_("Toolbar Options")), 
-			NULL, ToolbarOk, 
-			NULL, FormCancel_Restore, 
-			TRUE, 0, NULL);
+		toolbarW = FormCreateDialog(&toolbarPG, MakeWindowTitle(_("Toolbar Options")),
+		                            NULL, ToolbarOk,
+		                            NULL, FormCancel_Restore,
+		                            TRUE, 0, NULL);
 	}
 
 	toggleSet = 0;
@@ -472,7 +472,7 @@ EXPORT void ToolbarUpdateButton(wIndex_t button, wIndex_t command,
 	if (buttonList[button].cmdInx != command) {
 		wButtonSetIcon(buttonList[button].control,icon);
 		wTooltipSet(buttonList[button].control, NULL, helpKey);
-		           
+
 		wControlSetContext(buttonList[button].control,
 		                   context);
 		buttonList[button].cmdInx = command;
@@ -500,12 +500,12 @@ EXPORT void PlaybackButtonMouse(wIndex_t buttonInx)
 	coOrd pos;
 	mainD.Pix2CoOrd(&mainD, cmdX, cmdY, &pos);
 	LOG( log_playbackbuttonmouse, 1,
-		( "PbBM: Butt:%d, Cmd:%d Zoom:%0.2f Orig:%0.3f x %0.3f Size:%0.3f x %0.3f @ %ld x %ld = pos: %0.3f x %0.3f\n",
-			buttonInx, cmdInx,
-			mainD.scale, mainD.orig.x, mainD.orig.y,
-			mainD.size.x, mainD.size.y,
-			cmdX, cmdY,
-	     		pos.x, pos.y ) );
+	     ( "PbBM: Butt:%d, Cmd:%d Zoom:%0.2f Orig:%0.3f x %0.3f Size:%0.3f x %0.3f @ %ld x %ld = pos: %0.3f x %0.3f\n",
+	       buttonInx, cmdInx,
+	       mainD.scale, mainD.orig.x, mainD.orig.y,
+	       mainD.size.x, mainD.size.y,
+	       cmdX, cmdY,
+	       pos.x, pos.y ) );
 	// This hilites the control nd moves the cursor
 	MovePlaybackCursor(&mainD, pos, TRUE, buttonList[buttonInx].control);
 }
@@ -528,20 +528,22 @@ SaveToolbarConfig(void)
 
 	if (recordF)
 		fprintf(recordF, "PARAMETER %s %s %ld", TOOLBAR_SECTION,
-			TOOLBAR_LAYER_BUTTONS, layerCount);
+		        TOOLBAR_LAYER_BUTTONS, layerCount);
 
 }
 
-static char* resourceFiles[] = { "icons16.gresource", 
-								 "icons24.gresource", 
-								 "icons32.gresource" };
+static char* resourceFiles[] = { "icons16.gresource",
+                                 "icons24.gresource",
+                                 "icons32.gresource"
+                               };
 
 void
 LoadIconResource(unsigned iconSize)
 {
 	char* pathToResourceFile = NULL;
 
-	MakeFullpath(&pathToResourceFile, wGetAppLibDir(), resourceFiles[iconSize], NULL);
+	MakeFullpath(&pathToResourceFile, wGetAppLibDir(), resourceFiles[iconSize],
+	             NULL);
 	if (pathToResourceFile) {
 		printf("Loading icons from: %s\n", pathToResourceFile);
 
@@ -579,12 +581,12 @@ ToolbarLoadConfig(void)
 	wPrefGetInteger(TOOLBAR_SECTION, TOOLBAR_LAYER_BUTTONS, &layerCount, 10);
 	if (recordF)
 		fprintf(recordF, "PARAMETER %s %s -> %ld", TOOLBAR_SECTION,
-			TOOLBAR_LAYER_BUTTONS, layerCount);
+		        TOOLBAR_LAYER_BUTTONS, layerCount);
 
 	wPrefGetInteger("pref", "iconsize", (long*)&iconSize, 0);
 	if (recordF)
 		fprintf(recordF, "PARAMETER %s %s -> %d", "pref",
-			"iconsize", iconSize);
+		        "iconsize", iconSize);
 
 	LoadIconResource(iconSize);
 }

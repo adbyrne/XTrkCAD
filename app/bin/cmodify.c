@@ -650,9 +650,9 @@ extendTrackMove:
 			if ( QueryTrack( Dex.Trk, Q_IGNORE_EASEMENT_ON_EXTEND ) ) {
 				/* Ignore easements when extending turnouts or turntables */
 				Dex.jointD.x =
-				        Dex.jointD.r0 = Dex.jointD.r1 =
-				                                Dex.jointD.l0 = Dex.jointD.l1 =
-				                                                Dex.jointD.d0 = Dex.jointD.d1 = 0.0;
+				Dex.jointD.r0 = Dex.jointD.r1 =
+				Dex.jointD.l0 = Dex.jointD.l1 =
+				Dex.jointD.d0 = Dex.jointD.d1 = 0.0;
 				Dex.jointD.flip = Dex.jointD.negate = Dex.jointD.Scurve = FALSE;
 				d = Dex.curveData.curveRadius * Dex.curveData.a1 * 2.0*M_PI/360.0;
 			} else {					/* Easement code */
@@ -879,7 +879,7 @@ extendTrackUp:
 void InitCmdModify( wMenu_p menu )
 {
 	modifyCmdInx = AddMenuButton( menu, CmdModify, "cmdModify", _("Modify"),
-		CreateToolbarIconFromResource("extend.png"), LEVEL0_50,
+	                              CreateToolbarIconFromResource("extend.png"), LEVEL0_50,
 	                              IC_STICKY|IC_POPUP|IC_WANT_MOVE|IC_CMDMENU, ACCL_MODIFY, NULL );
 	/** @logcmd @showrefby modify=n cmodify.c Log Modify command */
 	log_modify = LogFindIndex( "modify" );

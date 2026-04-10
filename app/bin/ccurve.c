@@ -842,9 +842,9 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 		if (helix) {
 			if (helixW == NULL) {
 				helixW = FormCreateDialog(&helixPG, MakeWindowTitle(_("Helix")),
-					NULL, NULL,
-					_("Cancel"), FormCancel_Current,
-					TRUE, 0, (paramChangeProc)ComputeHelix);
+				                          NULL, NULL,
+				                          _("Cancel"), FormCancel_Current,
+				                          TRUE, 0, (paramChangeProc)ComputeHelix);
 			}
 			helixDataCur = helixDataOld;
 			FormLoadControls(&helixPG);
@@ -1015,34 +1015,35 @@ EXPORT void InitCmdCurve( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Curve Track"), "cmdCurveSetCmd", _("Curve Tracks") );
 	AddMenuButton( menu, CmdCurve, "cmdCurveEndPt", _("Curve from End-Pt"),
-		CreateToolbarIconFromResource( "curved-end.png"), LEVEL0_50,
+	               CreateToolbarIconFromResource( "curved-end.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE1, I2VP(0) );
 	AddMenuButton( menu, CmdCurve, "cmdCurveTangent", _("Curve from Tangent"),
-		CreateToolbarIconFromResource( "curved-tangent.png"), LEVEL0_50,
+	               CreateToolbarIconFromResource( "curved-tangent.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE2, I2VP(1) );
 	AddMenuButton( menu, CmdCurve, "cmdCurveCenter", _("Curve from Center"),
-		CreateToolbarIconFromResource( "curved-middle.png"), LEVEL0_50,
+	               CreateToolbarIconFromResource( "curved-middle.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE3, I2VP(2) );
 	AddMenuButton( menu, CmdCurve, "cmdCurveChord", _("Curve from Chord"),
-		CreateToolbarIconFromResource( "curved-chord.png"), LEVEL0_50,
+	               CreateToolbarIconFromResource( "curved-chord.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE4, I2VP(3) );
 	AddMenuButton( menu, CmdBezCurve, "cmdBezier", _("Bezier Curve"),
-		CreateToolbarIconFromResource( "bezier-track.png"), LEVEL0_50,
+	               CreateToolbarIconFromResource( "bezier-track.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_BEZIER, I2VP(bezCmdCreateTrack) );
 	AddMenuButton( menu, CmdCornu, "cmdCornu", _("Cornu Curve"),
-		CreateToolbarIconFromResource( "cornu.png"), LEVEL0_50,
+	               CreateToolbarIconFromResource( "cornu.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CORNU, I2VP(cornuCmdCreateTrack));
 	ButtonGroupEnd();
 
 	ButtonGroupBegin( _("Circle Track"), "cmdCircleSetCmd", _("Circle Tracks") );
 	AddMenuButton( menu, CmdCircle, "cmdCircleFixedRadius",
-	               _("Fixed Radius Circle"), CreateToolbarIconFromResource( "circle.png"), LEVEL0_50,
-               IC_STICKY|IC_POPUP2, ACCL_CIRCLE1, I2VP(0) );
+	               _("Fixed Radius Circle"), CreateToolbarIconFromResource( "circle.png"),
+	               LEVEL0_50,
+	               IC_STICKY|IC_POPUP2, ACCL_CIRCLE1, I2VP(0) );
 	AddMenuButton( menu, CmdCircle, "cmdCircleTangent", _("Circle from Tangent"),
-		CreateToolbarIconFromResource( "circle-tangent.png"), LEVEL0_50,
+	               CreateToolbarIconFromResource( "circle-tangent.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2, ACCL_CIRCLE2, I2VP(1) );
 	AddMenuButton( menu, CmdCircle, "cmdCircleCenter", _("Circle from Center"),
-		CreateToolbarIconFromResource( "circle-center.png"), LEVEL0_50,
+	               CreateToolbarIconFromResource( "circle-center.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2, ACCL_CIRCLE3, I2VP(2) );
 	ButtonGroupEnd();
 

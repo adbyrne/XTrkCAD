@@ -181,7 +181,7 @@ wBool_t FormFloatRangeCheck(paramData_p p, FLOAT_T valF)
 	if (inPlayback) {
 		return TRUE;
 	}
-	
+
 
 	DynStringMalloc(&message, 80);
 
@@ -259,7 +259,7 @@ wBool_t FormStringCheckValue(paramData_p data, char * value)
 
 	strip_whitespace(value);
 
-	
+
 	if ( (!inPlayback) && (data->option & PDO_NOTBLANK) && value[0] == '\0') {
 		DynStringPrintf(&message, "%s", _("String cannot be blank"));
 		data->bInvalid = TRUE;
@@ -300,8 +300,7 @@ wBool_t FormCheckInputs(
 	// Check for invalid entries
 	for (int i = 0; i < (group->paramCnt); i++) {
 		paramData_p p = (group->paramPtr) + i;
-		if(p->control) 
-		{
+		if(p->control) {
 			wControlHilite(p->control, p->bInvalid );
 
 			if (p->bInvalid && p->bShown) {
@@ -324,7 +323,7 @@ wBool_t FormCheckInputs(
 
 
 long FormUpdate(
-	paramGroup_p pg)
+        paramGroup_p pg)
 {
 	long longV;
 	FLOAT_T floatV;
@@ -421,8 +420,7 @@ long FormUpdate(
 			stringV = wEntryGetValue(p->control);
 			if (p->option & PDO_DIM) {
 				floatV = FormDecodeDistance(stringV, &valid);
-			}
-			else {
+			} else {
 				floatV = FormDecodeFloat(stringV, &valid);
 				if (valid && (p->option & PDO_ANGLE)) {
 					floatV = NormalizeAngle((angleSystem == ANGLE_POLAR) ? floatV : -floatV);
@@ -450,14 +448,14 @@ long FormUpdate(
 			if ((p->option & PDO_NOTBLANK) && stringV[0] == '\0') {
 				p->bInvalid = TRUE;
 				wTooltipSetText(p->control, _("String cannot be blank"));
-        		wControlHilite(p->control, TRUE);
+				wControlHilite(p->control, TRUE);
 				break;
 			}
 
 			p->bInvalid = FALSE;
-			wTooltipSet(p->control, p->group->nameStr, p->nameStr); 
+			wTooltipSet(p->control, p->group->nameStr, p->nameStr);
 			wControlHilite(p->control, FALSE);
-			
+
 			if (strcmp(stringV, p->oldD.s) != 0) {
 				if (p->oldD.s) {
 					MyFree(p->oldD.s);
@@ -467,7 +465,8 @@ long FormUpdate(
 					strncpy((char*)p->valueP, stringV, p->max_string - 1);
 					((char*)p->valueP)[p->max_string - 1] = '\0';
 					if (strlen(stringV) > p->max_string - 1) {
-						NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, p->max_string - 1);
+						NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL,
+						               p->max_string - 1);
 					}
 				}
 

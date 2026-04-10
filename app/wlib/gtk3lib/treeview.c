@@ -36,13 +36,13 @@
 
 #include "gtkint.h"
 
-wListItem_p 
+wListItem_p
 wlibAllocateListItem(wControl_p b, const char *labelStr, void *itemData)
 {
 	wListItem_p id_p;
 
 	id_p = (wListItem_p)g_malloc0(sizeof * id_p);
-	
+
 	id_p->itemData = itemData;
 	id_p->active = TRUE;
 
@@ -67,7 +67,8 @@ wlibAllocateListItem(wControl_p b, const char *labelStr, void *itemData)
 int
 wTreeViewGetCount(wControl_p b)
 {
-	return (gtk_tree_model_iter_n_children(GTK_TREE_MODEL(b->attributes.list.listStore), NULL));
+	return (gtk_tree_model_iter_n_children(GTK_TREE_MODEL(
+	                b->attributes.list.listStore), NULL));
 }
 
 
@@ -325,7 +326,8 @@ wlibTreeViewShowIcon(GtkTreeView *tv)
 
 
 void
-wlibTreeViewAddRow(wControl_p control, wIcon_p bm, wListItem_p id_p, const char* label)
+wlibTreeViewAddRow(wControl_p control, wIcon_p bm, wListItem_p id_p,
+                   const char* label)
 {
 	//struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(control, list);
 
@@ -361,7 +363,8 @@ changeSelection(GtkTreeSelection *selection,
 	wControl_p bl = (wControl_p)attributes;
 	long row;
 	char *text;
-	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(((wControl_p)attributes), list);
+	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(((wControl_p)attributes),
+	                        list);
 
 	text = gtk_tree_path_to_string(path);
 	row = (long)g_ascii_strtoll(text, NULL, 10);

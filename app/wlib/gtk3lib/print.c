@@ -99,13 +99,12 @@ WlibApplySettings(GtkPrintOperation* op)
 		if (err->code != G_FILE_ERROR_NOENT) {
 			// ignore file not found error as defaults will be used
 			dialog = gtk_message_dialog_new(GTK_WINDOW(gtkMainW->gtkwin),
-				GTK_DIALOG_DESTROY_WITH_PARENT,
-				GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
-				"%s", err->message);
+			                                GTK_DIALOG_DESTROY_WITH_PARENT,
+			                                GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+			                                "%s", err->message);
 			gtk_dialog_run(GTK_DIALOG(dialog));
 			gtk_widget_destroy(dialog);
-		}
-		else {
+		} else {
 			// create  default print settings
 			settings = gtk_print_settings_new();
 		}
@@ -125,19 +124,17 @@ WlibApplySettings(GtkPrintOperation* op)
 		// ignore file not found error as defaults will be used
 		if (err->code != G_FILE_ERROR_NOENT) {
 			dialog = gtk_message_dialog_new(GTK_WINDOW(gtkMainW->gtkwin),
-				GTK_DIALOG_DESTROY_WITH_PARENT,
-				GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
-				"%s", err->message);
+			                                GTK_DIALOG_DESTROY_WITH_PARENT,
+			                                GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+			                                "%s", err->message);
 			gtk_dialog_run(GTK_DIALOG(dialog));
 			gtk_widget_destroy(dialog);
-		}
-		else {
+		} else {
 			page_setup = gtk_page_setup_new();
 		}
 
 		g_error_free(err);
-	}
-	else {
+	} else {
 		// on success get the paper dimensions
 		WlibGetPaperSize();
 	}
@@ -176,9 +173,9 @@ WlibSaveSettings(GtkPrintOperation* op)
 
 	if (!gtk_print_settings_to_file(settings, filename, &err)) {
 		dialog = gtk_message_dialog_new(GTK_WINDOW(gtkMainW->gtkwin),
-			GTK_DIALOG_DESTROY_WITH_PARENT,
-			GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
-			"%s", err->message);
+		                                GTK_DIALOG_DESTROY_WITH_PARENT,
+		                                GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+		                                "%s", err->message);
 
 		g_error_free(err);
 		gtk_dialog_run(GTK_DIALOG(dialog));
@@ -199,9 +196,9 @@ WlibSaveSettings(GtkPrintOperation* op)
 
 	if (!gtk_page_setup_to_file(page_setup, filename, &err)) {
 		dialog = gtk_message_dialog_new(GTK_WINDOW(gtkMainW->gtkwin),
-			GTK_DIALOG_DESTROY_WITH_PARENT,
-			GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
-			"%s", err->message);
+		                                GTK_DIALOG_DESTROY_WITH_PARENT,
+		                                GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+		                                "%s", err->message);
 
 		g_error_free(err);
 		gtk_dialog_run(GTK_DIALOG(dialog));
@@ -213,12 +210,12 @@ WlibSaveSettings(GtkPrintOperation* op)
 }
 
 
- /**
-  * Page setup function. Previous settings are loaded and the setup
-  * dialog is shown. The settings are saved after the dialog ends.
-  *
-  * \param callback IN unused
-  */
+/**
+ * Page setup function. Previous settings are loaded and the setup
+ * dialog is shown. The settings are saved after the dialog ends.
+ *
+ * \param callback IN unused
+ */
 
 void wPrintSetup(wPrintSetupCallBack_p callback)
 {
@@ -231,11 +228,12 @@ void wPrintSetup(wPrintSetupCallBack_p callback)
 		WlibApplySettings(NULL);
 	}
 
-	new_page_setup = gtk_print_run_page_setup_dialog(GTK_WINDOW(wlibAppWinGetMain()),
-		page_setup, settings);
+	new_page_setup = gtk_print_run_page_setup_dialog(GTK_WINDOW(
+	                         wlibAppWinGetMain()),
+	                 page_setup, settings);
 
 	if (page_setup
-		&& (page_setup != new_page_setup)) {      //Can be the same if no mods...
+	    && (page_setup != new_page_setup)) {      //Can be the same if no mods...
 		g_object_unref(page_setup);
 	}
 
@@ -247,15 +245,15 @@ void wPrintSetup(wPrintSetupCallBack_p callback)
 
 /*****************************************************************************
  *
- * 
+ *
  *
  */
 
 
 const char * wPrintGetName()
 {
-    printf("Not yet implemented wPrintGetName() %s:%d\n", __FILE__, __LINE__);
-    return(NULL);
+	printf("Not yet implemented wPrintGetName() %s:%d\n", __FILE__, __LINE__);
+	return(NULL);
 }
 /*****************************************************************************
  *
@@ -274,7 +272,7 @@ const char * wPrintGetName()
 
 void wPrintClip(wDrawPix_t x, wDrawPix_t y, wDrawPix_t w, wDrawPix_t h)
 {
-    printf("Not yet implemented wPrintClip() %s:%d\n", __FILE__, __LINE__);
+	printf("Not yet implemented wPrintClip() %s:%d\n", __FILE__, __LINE__);
 }
 
 /*****************************************************************************
@@ -293,12 +291,12 @@ void wPrintClip(wDrawPix_t x, wDrawPix_t y, wDrawPix_t w, wDrawPix_t h)
 
 
 void wPrintGetMargins(
-	double * tMargin,
-	double * rMargin,
-	double * bMargin,
-	double * lMargin )
+        double * tMargin,
+        double * rMargin,
+        double * bMargin,
+        double * lMargin )
 {
-    printf("Not yet implemented wPrintGetMargins() %s:%d\n", __FILE__, __LINE__);
+	printf("Not yet implemented wPrintGetMargins() %s:%d\n", __FILE__, __LINE__);
 }
 
 /**
@@ -310,10 +308,10 @@ void wPrintGetMargins(
  */
 
 void wPrintGetPageSize(
-    double * w,
-    double * h)
+        double * w,
+        double * h)
 {
-    printf("Not yet implemented wPrintGetPageSize() %s:%d\n", __FILE__, __LINE__);
+	printf("Not yet implemented wPrintGetPageSize() %s:%d\n", __FILE__, __LINE__);
 }
 
 
@@ -328,8 +326,8 @@ void wPrintGetPageSize(
  */
 wDraw_p wPrintPageStart(void)
 {
-    printf("Not yet implemented wPrintPageStart() %s:%d\n", __FILE__, __LINE__);
-    return(NULL);
+	printf("Not yet implemented wPrintPageStart() %s:%d\n", __FILE__, __LINE__);
+	return(NULL);
 }
 
 /**
@@ -345,8 +343,8 @@ wDraw_p wPrintPageStart(void)
 
 wBool_t wPrintPageEnd(wDraw_p p)
 {
-        printf("Not yet implemented wPrintPageEnd() %s:%d\n", __FILE__, __LINE__);
-        return(FALSE);
+	printf("Not yet implemented wPrintPageEnd() %s:%d\n", __FILE__, __LINE__);
+	return(FALSE);
 }
 
 /*****************************************************************************
@@ -367,8 +365,8 @@ wBool_t wPrintPageEnd(wDraw_p p)
 
 wBool_t wPrintDocStart(const char * title, int fTotalPageCount, int * copiesP)
 {
-    printf("Not yet implemented wPrintDocStart() %s:%d\n", __FILE__, __LINE__);
-    return(FALSE);
+	printf("Not yet implemented wPrintDocStart() %s:%d\n", __FILE__, __LINE__);
+	return(FALSE);
 }
 
 /**
@@ -378,17 +376,17 @@ wBool_t wPrintDocStart(const char * title, int fTotalPageCount, int * copiesP)
 
 void wPrintDocEnd(void)
 {
-        printf("Not yet implemented wPrintDocEnd() %s:%d\n", __FILE__, __LINE__);
+	printf("Not yet implemented wPrintDocEnd() %s:%d\n", __FILE__, __LINE__);
 }
 
 
 wBool_t wPrintQuit(void)
 {
-    return FALSE;
+	return FALSE;
 }
 
 
 wBool_t wPrintInit(void)
 {
-    return TRUE;
+	return TRUE;
 }

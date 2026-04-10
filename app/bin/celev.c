@@ -148,7 +148,7 @@ static void LayoutElevW(
 	switch ( inx ) {
 	case I_HEIGHT:
 		h = wControlGetHeight( elevationPLs[I_MODE].control )/(COUNT(
-		                        elevModeLabels )-1);
+		                elevModeLabels )-1);
 #ifndef WINDOWS
 		h += 3;
 #endif
@@ -388,11 +388,11 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 	case C_START:
 		if ( elevW == NULL ) {
 			elevW = FormCreateDialog( &elevationPG, MakeWindowTitle(_("Elevation")),
-			                           NULL, NULL,
-			                           NULL, FormCancel_Reset,
-			                           TRUE,
-			                           PD_F_ALT_CANCELLABEL,
-			                           DoElevUpdate );
+			                          NULL, NULL,
+			                          NULL, FormCancel_Reset,
+			                          TRUE,
+			                          PD_F_ALT_CANCELLABEL,
+			                          DoElevUpdate );
 		}
 		elevModeV = 0;
 		elevHeightV = 0.0;
@@ -546,8 +546,8 @@ EXPORT void InitCmdElevation( wMenu_p menu )
 {
 	FormRegister( &elevationPG );
 	AddMenuButton( menu, CmdElevation, "cmdElevation", _("Elevation"),
-		CreateToolbarIconFromResource("elevation.png"), LEVEL0_50,
+	               CreateToolbarIconFromResource("elevation.png"), LEVEL0_50,
 	               IC_POPUP|IC_LCLICK|IC_RCLICK|IC_WANT_MOVE|IC_TOGGLE,
-		       ACCL_ELEVATION, NULL );
+	               ACCL_ELEVATION, NULL );
 }
 

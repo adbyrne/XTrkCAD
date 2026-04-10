@@ -142,7 +142,7 @@ startup(GtkApplication *app)
 
 static gint
 command_line( GApplication* self, GApplicationCommandLine* cmdLine,
-               gpointer user_data )
+              gpointer user_data )
 {
 	return( 0 );
 }

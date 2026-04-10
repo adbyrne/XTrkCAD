@@ -462,14 +462,14 @@ static void DoOutputBitMap( void* unused )
 {
 	if( outputBitMapW == NULL ) {
 		outputBitMapW = FormCreateDialog( &outputBitMapPG,
-		                                   MakeWindowTitle( _( "Export to bitmap" ) ),
-		                                   _( "_Ok" ),
-		                                   OutputBitMapOk,
-										   _("_Cancel"),
-		                                   FormCancel_Current,
-		                                   TRUE,
-		                                   0,
-		                                   ( paramChangeProc )UpdateBitmapDialog );
+		                                  MakeWindowTitle( _( "Export to bitmap" ) ),
+		                                  _( "_Ok" ),
+		                                  OutputBitMapOk,
+		                                  _("_Cancel"),
+		                                  FormCancel_Current,
+		                                  TRUE,
+		                                  0,
+		                                  ( paramChangeProc )UpdateBitmapDialog );
 	}
 
 	FormLoadControls( &outputBitMapPG );

@@ -52,7 +52,7 @@ static void LineCommand(void **state)
 	DxfLineCommand( &string, 0, 1.0, 2.0, 1.1, 2.2, 1, 1);
 	assert_string_equal(DynStringToCStr(&string),
 	                    DXF_INDENT "0\nLINE\n  8\nXTRKCAD0\n  10\n1.000000\n  20\n2.000000"
-	                    "\n  11\n1.100000\n  21\n2.200000\n  6\nDASHEDTINY\n  420\n1\n");
+	           "\n  11\n1.100000\n  21\n2.200000\n  6\nDASHEDTINY\n  420\n1\n");
 
 	DynStringFree(&string);
 }
@@ -68,7 +68,7 @@ static void CircleCommand(void **state)
 	DxfCircleCommand(&string, 0, 1.0, 2.0, 1.1, 1, 1);
 	assert_string_equal(DynStringToCStr(&string),
 	                    DXF_INDENT "0\nCIRCLE\n  10\n1.000000\n  20\n2.000000\n"
-	                    "  40\n1.100000\n  8\nXTRKCAD0\n  6\nDASHEDTINY\n  420\n1\n");
+	           "  40\n1.100000\n  8\nXTRKCAD0\n  6\nDASHEDTINY\n  420\n1\n");
 
 	DynStringFree(&string);
 }
@@ -84,7 +84,7 @@ static void ArcCommand(void **state)
 	DxfArcCommand(&string, 0, 1.0, 2.0, 1.1, 10.0, 180.0, 1, 1);
 	assert_string_equal(DynStringToCStr(&string),
 	                    DXF_INDENT "0\nARC\n  10\n1.000000\n  20\n2.000000\n  40\n1.100000\n"
-	                    "  50\n10.000000\n  51\n190.000000\n  8\nXTRKCAD0\n  6\nDASHEDTINY\n  420\n1\n");
+	           "  50\n10.000000\n  51\n190.000000\n  8\nXTRKCAD0\n  6\nDASHEDTINY\n  420\n1\n");
 
 	DynStringFree(&string);
 }
@@ -102,7 +102,7 @@ static void TextCommand(void **state)
 
 	assert_string_equal(DynStringToCStr(&string),
 	                    DXF_INDENT "0\nTEXT\n  1\n" TESTSTRING "\n  10\n10.000000\n  20\n12.000000\n"
-	                    "  40\n2.000000\n  8\nXTRKCAD0\n  420\n1\n");
+	           "  40\n2.000000\n  8\nXTRKCAD0\n  420\n1\n");
 
 	DynStringFree(&string);
 }

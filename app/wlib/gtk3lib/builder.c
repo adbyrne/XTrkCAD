@@ -2,23 +2,23 @@
  * Gtk.Builder functions
  */
 
- /*  XTrkCad - Model Railroad CAD
-  *  Copyright (C) 2005 Dave Bullis, 2018 Martin Fischer
-  *
-  *  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
-  *  (at your option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
-  *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-  */
+/*  XTrkCad - Model Railroad CAD
+ *  Copyright (C) 2005 Dave Bullis, 2018 Martin Fischer
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
 
 
 #define GTK_DISABLE_SINGLE_INCLUDES
@@ -64,7 +64,7 @@ wlibFileNameFromDialog( const char *dialog )
 
 /**
  * Check for the existance of a ui definition
- * 
+ *
  * \param name IN name of ui definition
  * \return true if exists, false otherwise
  */
@@ -85,11 +85,11 @@ wlibExistsTemplate(const char *name)
 }
 
 /*
- * Load the GTK builder object for this window. The filename is assumed to be 
+ * Load the GTK builder object for this window. The filename is assumed to be
  * the same as the nameStr and the window object id.
- * In the window object the builder field will be set with the loaded object 
+ * In the window object the builder field will be set with the loaded object
  * and the gtkwin field populated
- * 
+ *
  * \param IN winType passed through to wlibAlloc
  * \param IN labelStr the name that will be shown in the title of the window
  * \param IN nameStr the name to look up
@@ -120,20 +120,20 @@ wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr,
 		GString *errorMessage = g_string_new("Could not load ");
 		g_string_append( errorMessage, filename->str);
 		wNoticeWithIcon( NT_ERROR,
-		           errorMessage->str,
-		           "OK",
-		           NULL );
+		                 errorMessage->str,
+		                 "OK",
+		                 NULL );
 		exit(1);
 	}
 	w->widget = (GtkWidget *)gtk_builder_get_object(dcontrol->builder,
-	                nameStr);
+	            nameStr);
 	if (!w->widget) {
 		GString *errorMessage = g_string_new("Could not find window object ");
 		g_string_append( errorMessage, nameStr);
 		wNoticeWithIcon( NT_ERROR,
-		           errorMessage->str,
-		           "OK",
-		           NULL );
+		                 errorMessage->str,
+		                 "OK",
+		                 NULL );
 		exit(1);
 	}
 	g_string_free(filename, TRUE);
@@ -164,9 +164,9 @@ wlibGetWidgetFromName( wControl_p parent, const char *dialogname,
 			GString *errorMessage = g_string_new("Could not find widget ");
 			g_string_append( errorMessage, id->str);
 			wNoticeWithIcon( NT_ERROR,
-			           errorMessage->str,
-			           "OK",
-			           NULL );
+			                 errorMessage->str,
+			                 "OK",
+			                 NULL );
 			g_string_free(errorMessage, TRUE);
 			exit(1);
 		} else {
@@ -183,19 +183,16 @@ GtkWidget *
 wlibWidgetFromIdWarn(wControl_p win, const char *id)
 {
 	GtkWidget *wi = wlibWidgetFromId(win, id);
-	if (!wi)
-	{
+	if (!wi) {
 		GString *errorMessage = g_string_new("Could not find widget with id: ");
 		g_string_append_printf(errorMessage, "%s", id);
 		wNoticeWithIcon(NT_ERROR,
-				  errorMessage->str,
-				  "OK",
-				  NULL);
+		                errorMessage->str,
+		                "OK",
+		                NULL);
 		g_string_free(errorMessage, TRUE);
 		return NULL;
-	}
-	else
-	{
+	} else {
 		return wi;
 	}
 }
@@ -229,9 +226,9 @@ wlibAddContentFromTemplate( wWin_p win, const char *nameStr)
 			g_string_append(errorMessage,error->message);
 		}
 		wNoticeWithIcon( NT_ERROR,
-		           errorMessage->str,
-		           "OK",
-		           NULL );
+		                 errorMessage->str,
+		                 "OK",
+		                 NULL );
 		g_string_free(errorMessage, TRUE);
 		g_clear_error (&error);
 		exit(1);
@@ -259,7 +256,7 @@ wlibCreateWindowFromBuilder(wControl_p window, const char* nameStr, long option)
 	gchar* resourcePath;
 
 	if (option & DO_FILESYSTEM) {
-		// in case filename is given, load builder and create a name from 
+		// in case filename is given, load builder and create a name from
 		// the base filename without extension
 		resourcePath = g_strdup(nameStr);
 		builder = gtk_builder_new_from_file(resourcePath);
@@ -267,13 +264,12 @@ wlibCreateWindowFromBuilder(wControl_p window, const char* nameStr, long option)
 		tempStr[strlen(tempStr) - 3] = '\0';
 		nameStr = tempStr;
 		containerName = nameStr;
-	}
-	else {
+	} else {
 		containerName = (option & F_DEFINEDINBUILDER ? nameStr : BASICBUILDER_RESOURCE);
 		resourcePath = g_strconcat(XTRKCAD_RESOURCE_PATH,
-			containerName,
-			".ui",
-			NULL);
+		                           containerName,
+		                           ".ui",
+		                           NULL);
 		printf( "Loading resource %s\n", resourcePath );
 		builder = gtk_builder_new_from_resource(resourcePath);
 	}

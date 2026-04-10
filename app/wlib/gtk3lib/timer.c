@@ -48,14 +48,14 @@ static setTriggerCallback_p triggerFunc = NULL;
  */
 
 static gint doAlarm(
-    gpointer data)
+        gpointer data)
 {
-    wAlarmCallBack_p func = (wAlarmCallBack_p)data;
+	wAlarmCallBack_p func = (wAlarmCallBack_p)data;
 
-    func();
+	func();
 
-    alarmTimer = 0;
-    return FALSE;
+	alarmTimer = 0;
+	return FALSE;
 }
 
 /**
@@ -66,34 +66,34 @@ static gint doAlarm(
  */
 
 void wAlarm(
-    long count,
-    wAlarmCallBack_p func)		/* milliseconds */
+        long count,
+        wAlarmCallBack_p func)		/* milliseconds */
 {
-    gtkPaused = TRUE;
+	gtkPaused = TRUE;
 
-    if (alarmTimer) {
-        g_source_remove(alarmTimer);
-    }
+	if (alarmTimer) {
+		g_source_remove(alarmTimer);
+	}
 
-    alarmTimer = g_timeout_add(count, doAlarm, (void *)(GSourceFunc)func);
+	alarmTimer = g_timeout_add(count, doAlarm, (void *)(GSourceFunc)func);
 }
 
 static void doTrigger(void)
 {
-    if (triggerControl && triggerFunc) {
-        triggerFunc(triggerControl);
-        triggerFunc = NULL;
-        triggerControl = NULL;
-    }
+	if (triggerControl && triggerFunc) {
+		triggerFunc(triggerControl);
+		triggerFunc = NULL;
+		triggerControl = NULL;
+	}
 }
 
 void wlibSetTrigger(
-    wControl_p b,
-    setTriggerCallback_p trigger)
+        wControl_p b,
+        setTriggerCallback_p trigger)
 {
-    triggerControl = b;
-    triggerFunc = trigger;
-    wAlarm(500, doTrigger);
+	triggerControl = b;
+	triggerFunc = trigger;
+	wAlarm(500, doTrigger);
 }
 
 /**
@@ -105,26 +105,27 @@ void wlibSetTrigger(
 
 void wPause(long duration)		/* milliseconds */
 {
-	while (gtk_events_pending())
-	    gtk_main_iteration();			//Allow GTK to finish before pausing
+	while (gtk_events_pending()) {
+		gtk_main_iteration();        //Allow GTK to finish before pausing
+	}
 
-    gdk_display_sync(gdk_display_get_default());
+	gdk_display_sync(gdk_display_get_default());
 
-    GMutex mutex;
-    GCond cond;
-    gint64 end_time = g_get_monotonic_time() + duration * G_TIME_SPAN_MILLISECOND;
+	GMutex mutex;
+	GCond cond;
+	gint64 end_time = g_get_monotonic_time() + duration * G_TIME_SPAN_MILLISECOND;
 
-    g_cond_init(&cond);
-    g_mutex_init(&mutex);
+	g_cond_init(&cond);
+	g_mutex_init(&mutex);
 
-    g_mutex_lock(&mutex);
+	g_mutex_lock(&mutex);
 
-    g_cond_wait_until(&cond, &mutex, end_time);
+	g_cond_wait_until(&cond, &mutex, end_time);
 
-    g_mutex_unlock(&mutex);
+	g_mutex_unlock(&mutex);
 
-    g_mutex_clear(&mutex);
-    g_cond_clear(&cond);
+	g_mutex_clear(&mutex);
+	g_cond_clear(&cond);
 }
 
 /**
@@ -136,14 +137,14 @@ void wPause(long duration)		/* milliseconds */
 
 unsigned long wGetTimer(void)
 {
-    GDateTime *now = g_date_time_new_now_local();
-    GTimeSpan elapsed;
-    if (!start) {
-        start = g_date_time_new_now_local();
-    }
-    
-    elapsed = g_date_time_difference(now, start) / 1000L;
-    g_date_time_unref(now);
+	GDateTime *now = g_date_time_new_now_local();
+	GTimeSpan elapsed;
+	if (!start) {
+		start = g_date_time_new_now_local();
+	}
 
-    return((unsigned long)elapsed);
+	elapsed = g_date_time_difference(now, start) / 1000L;
+	g_date_time_unref(now);
+
+	return((unsigned long)elapsed);
 }

@@ -66,7 +66,7 @@ static paramData_t paramFilePLs[] = {
 	{	PD_LIST, NULL, "inx", PDO_DLGRESIZE, &paramFileListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
 #define I_MESSAGE (1)
 	{ PD_MESSAGE, "", "message", 0, I2VP(37) },
-    { PD_BUTTON, ParamFileSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL },
+	{ PD_BUTTON, ParamFileSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL },
 #define I_PRMFILEFAVORITE (3)
 	{   PD_BUTTON, ParamFileFavorite, "favorite", PDO_DLGCMDBUTTON, I2VP(TRUE)},
 	{	PD_BUTTON, ParamUnloadSelectedFiles, "unload", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_UNLOAD), 0L, FALSE },
@@ -153,12 +153,12 @@ void ParamFileListLoad(int paramFileCnt,  dynArr_t *paramFiles)
 			                 paramFileInfo.name);
 
 			wListAddValueVar(paramFileL,
-				indicatorIcons[paramFileInfo.favorite][paramFileInfo.trackState],
-				I2VP(sortedIndex[i]),
-				paramFileInfo.contents,
-				paramFileInfo.name,
-				NULL);
-;
+			                 indicatorIcons[paramFileInfo.favorite][paramFileInfo.trackState],
+			                 I2VP(sortedIndex[i]),
+			                 paramFileInfo.contents,
+			                 paramFileInfo.name,
+			                 NULL);
+			;
 
 			LOG1(log_params, ("ParamFileListLoad: = %s: %d\n", paramFileInfo.contents,
 			                  paramFileInfo.trackState))
@@ -406,28 +406,36 @@ void DoParamFiles(void * junk)
 	void * data;
 
 	if (paramFileW == NULL) {
-		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_UNLOADED ] = CreateSymbolFromResource(
-		                        "greydot.png");
-		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_NOTUSABLE ] = CreateSymbolFromResource(
-		                        "reddot.png");
-		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_COMPATIBLE ] = CreateSymbolFromResource(
-		                        "yellowdot.png");
-		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_FIT] = CreateSymbolFromResource("greendot.png");
-		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_UNLOADED ] = CreateSymbolFromResource(
-		                        "greystar.png");
-		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_NOTUSABLE ] = CreateSymbolFromResource(
-		                        "redstar.png");
-		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_COMPATIBLE ] = CreateSymbolFromResource(
-		                        "yellowstar.png");
+		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_UNLOADED ] =
+		        CreateSymbolFromResource(
+		                "greydot.png");
+		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_NOTUSABLE ] =
+		        CreateSymbolFromResource(
+		                "reddot.png");
+		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_COMPATIBLE ] =
+		        CreateSymbolFromResource(
+		                "yellowdot.png");
+		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_FIT] =
+		        CreateSymbolFromResource("greendot.png");
+		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_UNLOADED ] =
+		        CreateSymbolFromResource(
+		                "greystar.png");
+		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_NOTUSABLE ] =
+		        CreateSymbolFromResource(
+		                "redstar.png");
+		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_COMPATIBLE ] =
+		        CreateSymbolFromResource(
+		                "yellowstar.png");
 		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_FIT ] = CreateSymbolFromResource(
-		                        "greenstar.png");
+		                "greenstar.png");
 
 		FormRegister(&paramFilePG);
 
-		paramFileW = FormCreateDialog(&paramFilePG, MakeWindowTitle(_("Parameter Files")), 
-										_("Done"), ParamFileOk, 
-										NULL, NULL,
-		                               TRUE, F_RESIZE | F_RECALLSIZE, ParamFileDlgUpdate);
+		paramFileW = FormCreateDialog(&paramFilePG,
+		                              MakeWindowTitle(_("Parameter Files")),
+		                              _("Done"), ParamFileOk,
+		                              NULL, NULL,
+		                              TRUE, F_RESIZE | F_RECALLSIZE, ParamFileDlgUpdate);
 		paramFile_fs = wFilSelCreate(mainW, FS_LOAD, FSO_MULTIPLEFILES,
 		                             _("Load Parameters"), _("Parameter files (*.xtp)|*.xtp"), LoadParamFile, NULL);
 	}

@@ -146,9 +146,9 @@ void wListSetIndex(
 wIndex_t wListGetIndex(
         wList_p b )
 {
-	b->last = SendMessage(b->hWnd, 
-						 (b->type == B_LIST ? LB_GETCURSEL: CB_GETCURSEL), 
-						 0, 0L);
+	b->last = SendMessage(b->hWnd,
+	                      (b->type == B_LIST ? LB_GETCURSEL: CB_GETCURSEL),
+	                      0, 0L);
 
 	return b->last;
 }

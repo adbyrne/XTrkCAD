@@ -50,10 +50,11 @@ void TabStringExtract(
 			tabs[inx].len = (unsigned long)(next - string);
 			string = next + 1;
 		} else {
-			if (string)
+			if (string) {
 				tabs[inx].len = (unsigned long)strlen(string);
-			else
+			} else {
 				tabs[inx].len = 0;
+			}
 			string += tabs[inx].len;
 		}
 	}
@@ -112,7 +113,7 @@ int TabStringCmp(
  */
 
 long TabGetLong(
-	const tabString_t* tab)
+        const tabString_t* tab)
 {
 	long val = 0;
 	// Buffer large enough for a 64-bit integer string plus sign.
@@ -133,7 +134,7 @@ long TabGetLong(
  */
 
 FLOAT_T TabGetFloat(
-	const tabString_t* tab)
+        const tabString_t* tab)
 {
 	if (!tab || tab->len == 0) {
 		return 0.0;

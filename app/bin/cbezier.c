@@ -430,9 +430,9 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track,
 							if (arc.curveData.type != curveTypeStraight) {
 								coOrd d;
 								d.x = arc.curveData.curvePos.x + fabs(arc.curveData.curveRadius) * cos(D2R(
-								                        arc.curveData.a1));
+								                arc.curveData.a1));
 								d.y = arc.curveData.curvePos.y + fabs(arc.curveData.curveRadius) * sin(D2R(
-								                        arc.curveData.a1));
+								                arc.curveData.a1));
 
 								arc.curveData.a1 += FindAngle(d, getPoint(pos,1.0));
 								t_e = 1.0;

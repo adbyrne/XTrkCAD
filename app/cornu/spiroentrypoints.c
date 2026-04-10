@@ -25,36 +25,39 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 void
 SpiroCPsToBezier(spiro_cp *spiros,int n,int isclosed,bezctx *bc)
 {
-    spiro_seg *s;
+	spiro_seg *s;
 
-    if ( n<1 )
-return;
-    if ( !isclosed ) {
-	char oldty_start = spiros[0].ty;
-	char oldty_end   = spiros[n-1].ty;
-	spiros[0].ty = '{';
-	spiros[n-1].ty = '}';
-	s = run_spiro(spiros,n);
-	spiros[n-1].ty = oldty_end;
-	spiros[0].ty = oldty_start;
-    } else
-	s = run_spiro(spiros,n);
-    spiro_to_bpath(s,n,bc);
-    free_spiro(s);
+	if ( n<1 ) {
+		return;
+	}
+	if ( !isclosed ) {
+		char oldty_start = spiros[0].ty;
+		char oldty_end   = spiros[n-1].ty;
+		spiros[0].ty = '{';
+		spiros[n-1].ty = '}';
+		s = run_spiro(spiros,n);
+		spiros[n-1].ty = oldty_end;
+		spiros[0].ty = oldty_start;
+	} else {
+		s = run_spiro(spiros,n);
+	}
+	spiro_to_bpath(s,n,bc);
+	free_spiro(s);
 }
 
 void
 TaggedSpiroCPsToBezier(spiro_cp *spiros,bezctx *bc)
 {
-    spiro_seg *s;
-    int n;
+	spiro_seg *s;
+	int n;
 
-    for ( n=0; spiros[n].ty!='z' && spiros[n].ty!='}'; ++n );
-    if ( spiros[n].ty == '}' ) ++n;
+	for ( n=0; spiros[n].ty!='z' && spiros[n].ty!='}'; ++n );
+	if ( spiros[n].ty == '}' ) { ++n; }
 
-    if ( n<1 )
-return;
-    s = run_spiro(spiros,n);
-    spiro_to_bpath(s,n,bc);
-    free_spiro(s);
+	if ( n<1 ) {
+		return;
+	}
+	s = run_spiro(spiros,n);
+	spiro_to_bpath(s,n,bc);
+	free_spiro(s);
 }

@@ -652,7 +652,7 @@ static void DoProfilePrint(void * junk)
 	}
 	size.y -= titleH+(printVert?PBT*2:PBT)+PBB(printProfileFontSize);
 	size.x -= 4.0/mainD.dpi+PBL(printProfileFontSize)+(printVert?PBR(
-	                        printProfileFontSize)/4.0:PBR(printProfileFontSize));
+	                  printProfileFontSize)/4.0:PBR(printProfileFontSize));
 	printRatio = size.y/size.x;
 	if (printRatio < screenRatio) {
 		printProfileD.scale = screenSize.y/size.y;
@@ -1446,8 +1446,9 @@ static STATUS_T CmdProfile(wAction_t action, coOrd pos)
 			             screenProfileFontSize, FALSE, &textsize);
 			labelH = textsize.y;
 			labelW = textsize.x;
-			profileW = FormCreateDialog(&profilePG, MakeWindowTitle(_("Profile")), NULL, NULL,
-			                             NULL, FormCancel_Undo, TRUE, F_RESIZE, CloseProfileWindow);
+			profileW = FormCreateDialog(&profilePG, MakeWindowTitle(_("Profile")), NULL,
+			                            NULL,
+			                            NULL, FormCancel_Undo, TRUE, F_RESIZE, CloseProfileWindow);
 		}
 		FormLoadControls(&profilePG);
 		FormGroupRecord(&profilePG);
@@ -1525,7 +1526,7 @@ EXPORT void InitCmdProfile(wMenu_p menu)
 	FormRegister(&profilePG);
 
 	AddMenuButton(menu, CmdProfile, "cmdProfile", _("Profile"),
-		CreateToolbarIconFromResource("profile.png"), LEVEL0_50,
+	              CreateToolbarIconFromResource("profile.png"), LEVEL0_50,
 	              IC_LCLICK|IC_CMDMENU|IC_POPUP3|IC_TOGGLE,
 	              ACCL_PROFILE, NULL);
 	profilePopupM = MenuRegister("Profile Mode");

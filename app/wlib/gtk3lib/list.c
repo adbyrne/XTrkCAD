@@ -45,21 +45,23 @@ ScrollToLastLine(wControl_p control)
 	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(control, list);
 
 	adj = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(control->widget));
-	lcontrol->last = gtk_tree_model_iter_n_children(gtk_tree_view_get_model(GTK_TREE_VIEW(
-		lcontrol->treeView)), NULL);
+	lcontrol->last = gtk_tree_model_iter_n_children(gtk_tree_view_get_model(
+	                         GTK_TREE_VIEW(
+	                                 lcontrol->treeView)), NULL);
 
 	if (gtk_adjustment_get_upper(adj) < gtk_adjustment_get_step_increment(adj) *
-		lcontrol->last + 1) {
+	    lcontrol->last + 1) {
 		gtk_adjustment_set_upper(adj,
-			gtk_adjustment_get_upper(adj) +
-			gtk_adjustment_get_step_increment(adj));
+		                         gtk_adjustment_get_upper(adj) +
+		                         gtk_adjustment_get_step_increment(adj));
 	}
 }
 
 static int
 GetRowCount(struct list* lcontrol)
 {
-	int count = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(lcontrol->listStore), NULL);
+	int count = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(lcontrol->listStore),
+	            NULL);
 	if (count == 1) {
 		lcontrol->last = 0;
 	}
@@ -178,7 +180,8 @@ wIndex_t wListFindValue(
 	thisSearch.search = val;
 	thisSearch.row = 0;
 
-	gtk_tree_model_foreach(GTK_TREE_MODEL(b->attributes.list.listStore), CompareListData,
+	gtk_tree_model_foreach(GTK_TREE_MODEL(b->attributes.list.listStore),
+	                       CompareListData,
 	                       (void *)&thisSearch);
 
 	if (!thisSearch.result) {
@@ -246,7 +249,7 @@ wIndex_t wListGetValues(
         void * * itemDataRet)
 {
 	wListItem_p id_p;
-	wIndex_t inx; 
+	wIndex_t inx;
 	const char * entry_value = "";
 	void * item_data = NULL;
 	struct list* lcontrol;
@@ -319,12 +322,13 @@ wBool_t wListGetItemSelected(
 		return FALSE;
 	}
 
-	gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(list->listStore), &iter, NULL, inx);
+	gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(list->listStore), &iter, NULL,
+	                              inx);
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(list->treeView));
 	return(gtk_tree_selection_iter_is_selected(selection, &iter));
 
-	
+
 	//id_p = wlibListStoreGetContext(listControl->listStore, inx);
 
 	//if (id_p) {
@@ -350,7 +354,7 @@ wIndex_t wListGetSelectedCount(
 
 	g_assert(b != NULL);
 	g_assert(b->type == B_LIST);
-	
+
 	selection = gtk_tree_view_get_selection(lcontrol->treeView);
 	selcnt = gtk_tree_selection_count_selected_rows(selection);
 
@@ -370,7 +374,8 @@ void wListSelectAll(wControl_p bl)
 
 	g_assert(bl != NULL);
 	// mark all items selected
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(bl->attributes.list.treeView));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(
+	                bl->attributes.list.treeView));
 	gtk_tree_selection_select_all(selection);
 }
 
@@ -397,7 +402,8 @@ wBool_t wListSetValues(
 	if (b->type == B_COMBOBOX) {
 		wComboBoxSetValues(b, row, labelStr, bm, itemData);
 	} else {
-		wlibListStoreUpdateValues(b->attributes.list.listStore, row, (char *)labelStr, bm);
+		wlibListStoreUpdateValues(b->attributes.list.listStore, row, (char *)labelStr,
+		                          bm);
 	}
 
 	return TRUE;
@@ -427,7 +433,7 @@ wListDeleteSelected(wControl_p list)
 	GList* rows, *ptr, *references = NULL;
 
 	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(list, list);
-	
+
 	selection = gtk_tree_view_get_selection(lcontrol->treeView);
 	model = gtk_tree_view_get_model(lcontrol->treeView);
 	rows = gtk_tree_selection_get_selected_rows(selection, &model);
@@ -487,7 +493,7 @@ void wListDelete(
 
 #define FIXEDCOLUMNS 2
 
-unsigned int 
+unsigned int
 wListGetColumnCount(wControl_p listControl)
 {
 	GList* columns;
@@ -500,11 +506,11 @@ wListGetColumnCount(wControl_p listControl)
 	return(count+1);
 }
 
-static wWinPix_t 
+static wWinPix_t
 TreeViewGetColumnWidth(GtkTreeView *treeView, unsigned index)
 {
 	wWinPix_t width = 0;
-	
+
 	GtkTreeViewColumn* column = gtk_tree_view_get_column(treeView, index);
 	if (column) {
 		width = gtk_tree_view_column_get_width(column);
@@ -529,9 +535,10 @@ int wListGetColumnWidths(
 	g_assert(bl->type == B_LIST);
 
 	for (unsigned int i = 0; i < colCnt; i++) {
-		colWidths[i] = TreeViewGetColumnWidth(bl->attributes.list.treeView, i + FIXEDCOLUMNS-1);
+		colWidths[i] = TreeViewGetColumnWidth(bl->attributes.list.treeView,
+		                                      i + FIXEDCOLUMNS-1);
 	}
-	
+
 	return(0);
 }
 
@@ -542,7 +549,8 @@ NewListRow(wControl_p control, const char* labelStr, void* addInfo)
 	wListItem_p itemData;
 	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(control, list);
 
-	itemData = wlibAllocateListItem(control, labelStr, addInfo); /** \todo Check and rework usage of wListItem */
+	itemData = wlibAllocateListItem(control, labelStr,
+	                                addInfo); /** \todo Check and rework usage of wListItem */
 	wlibListStoreAppendRow(lcontrol->listStore, &iter, itemData);
 
 	return(iter);
@@ -560,7 +568,8 @@ AddIconToRow(struct list *lcontrol, GtkTreeIter *iterPointer, wIcon_p bm)
 
 #ifdef TODO_UNUSED
 static void
-AddDataToRow(struct list* lcontrol, GtkTreeIter* iterPointer, const char* labelStr, va_list arguments)
+AddDataToRow(struct list* lcontrol, GtkTreeIter* iterPointer,
+             const char* labelStr, va_list arguments)
 {
 	int column = 0;
 	while (labelStr) {
@@ -586,9 +595,9 @@ AddDataArrayToRow(struct list* lcontrol, GtkTreeIter* iterPointer, char **data)
 
 wIndex_t
 wListAddValuesArr(wControl_p b,
-	wIcon_p bm,
-	void* itemInfo,
-	char** values)
+                  wIcon_p bm,
+                  void* itemInfo,
+                  char** values)
 {
 	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(b, list);
 	GtkTreeIter iter;
@@ -610,23 +619,23 @@ wListAddValuesArr(wControl_p b,
 
 
 /**
- * Add a row to a list having several columns. Each string is added to a additionalValues. Columns are 
+ * Add a row to a list having several columns. Each string is added to a additionalValues. Columns are
  * expected to be consecutive.
- * 
+ *
  * \param b		IN widget
  * \param bm	IN Entry bitmap
  * \param itemData IN User context
  * \param labelStr IN label
  * \param		IN variable number of strings, terminated with NULL
- * 
+ *
  * \return		row count
  */
 wIndex_t wListAddValueVar(
-	wControl_p b,
-	wIcon_p bm,
-	void* itemInfo,
-	const char* labelStr,
-	...)
+        wControl_p b,
+        wIcon_p bm,
+        void* itemInfo,
+        const char* labelStr,
+        ...)
 {
 	va_list arguments;
 	unsigned additionalValues = 0;
@@ -674,10 +683,10 @@ wIndex_t wListAddValueVar(
  */
 
 wIndex_t wListAddValue(
-	wControl_p b,
-	const char* labelStr,
-	wIcon_p bm,
-	void* itemInfo)
+        wControl_p b,
+        const char* labelStr,
+        wIcon_p bm,
+        void* itemInfo)
 {
 	wIndex_t rowCount;
 	gchar** data;
@@ -716,9 +725,10 @@ void wListSetSize(wControl_p bl, wWinPix_t w, wWinPix_t h)
 }
 
 void
-wlibTreeViewEdited(GtkWidget* renderer, const char* path, const char* new_text, void (*cb)( int row, const char *text))
+wlibTreeViewEdited(GtkWidget* renderer, const char* path, const char* new_text,
+                   void (*cb)( int row, const char *text))
 {
-	// for a simple listbox the path is the current row  
+	// for a simple listbox the path is the current row
 	(*cb)(atoi(path), new_text);
 }
 
@@ -737,23 +747,25 @@ wListSetStore(wControl_p list, DataStore *store)
 
 	list->attributes.list.listStore = store->listStore;
 
-	gtk_tree_view_set_model(treeview, 
-							GTK_TREE_MODEL(store->listStore));
+	gtk_tree_view_set_model(treeview,
+	                        GTK_TREE_MODEL(store->listStore));
 
 	if (store->selectionChanged) {
 		GtkTreeSelection* selection;
 
 		selection = gtk_tree_view_get_selection(treeview);
-		g_signal_connect(selection, "changed", (GCallback)wlibTreeSelectionChanged, NULL);
+		g_signal_connect(selection, "changed", (GCallback)wlibTreeSelectionChanged,
+		                 NULL);
 	}
 
 	if (store->edited) {
 
 		GtkWidget *renderer = wlibWidgetFromIdWarn(list->parent, store->editable);
 
-		g_signal_connect( renderer, "edited", (GCallback)wlibTreeViewEdited, store->edited);
+		g_signal_connect( renderer, "edited", (GCallback)wlibTreeViewEdited,
+		                  store->edited);
 	}
-	
+
 }
 
 /**
@@ -813,25 +825,25 @@ wControl_p wListCreate(
 	lcontrol->valueP = valueP;
 	lcontrol->action = action;
 	lcontrol->last = 0;
-	
+
 	if (ISDEFINEDINBUILDER(parent)) {
 
 		bl->widget = wlibWidgetFromIdWarn(parent, helpStr);
 		lcontrol->treeView = GTK_TREE_VIEW(wlibWidgetFromIdWarn(parent, "treeview"));
 		g_assert(lcontrol->treeView != NULL);
 
-		if (option & BL_NODATASTORE) {		
+		if (option & BL_NODATASTORE) {
 			lcontrol->listStore = NULL;
-		}
-		else {
+		} else {
 			GtkTreeSelection* selection;
 
-			lcontrol->listStore = GTK_LIST_STORE(gtk_tree_view_get_model(lcontrol->treeView));
+			lcontrol->listStore = GTK_LIST_STORE(gtk_tree_view_get_model(
+			                lcontrol->treeView));
 
 			selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(lcontrol->treeView));
 			g_signal_connect(selection, "changed", (GCallback)wlibTreeSelectionChanged, bl);
 		}
-		
+
 	} else {
 		GtkTreeSelection* sel;
 
@@ -850,8 +862,8 @@ wControl_p wListCreate(
 		lcontrol->listStore = wlibNewListStore(colCnt);
 		/* create the widget for the list store */
 		lcontrol->treeView = wlibNewTreeView(lcontrol->listStore,
-		                               colTitles != NULL,
-		                               option & BL_MANY);
+		                                     colTitles != NULL,
+		                                     option & BL_MANY);
 
 		sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(lcontrol->treeView));
 

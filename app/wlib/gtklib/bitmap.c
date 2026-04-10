@@ -69,9 +69,9 @@ wBitmapCreate( wWin_p parent, wWinPix_t x, wWinPix_t y, long options,
 
 	/* create the bitmap from supplied data */
 	assert ( *(int*)iconP->bits == 0x47646b50 ||
-	     *(int*)iconP->bits == 0x506b6447 );
+	         *(int*)iconP->bits == 0x506b6447 );
 	pixbuf = gdk_pixbuf_new_from_inline( -1, iconP->bits, FALSE, NULL );
-	
+
 	g_object_ref_sink(pixbuf);
 	image = gtk_image_new_from_pixbuf( pixbuf );
 	gtk_widget_show( image );

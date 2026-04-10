@@ -37,7 +37,7 @@ long GetChanges( paramGroup_p pg )
 {
 	long changes = 0;
 	long changed = FormUpdate(pg);
-	
+
 	for ( int inx=0; changed; inx++ ) {
 		if ( changed&1 ) {
 			changes |= VP2L(pg->paramPtr[inx].context);
@@ -191,10 +191,10 @@ static void ColorOk( void * junk )
 static void DoColor( void * junk )
 {
 	if (colorW == NULL) {
-		colorW = FormCreateDialog( &colorPG, MakeWindowTitle(_("Color")), 
-								 _("Ok"), ColorOk, 
-								 _("Cancel"), FormCancel_Restore, 
-								 TRUE, 0, NULL);
+		colorW = FormCreateDialog( &colorPG, MakeWindowTitle(_("Color")),
+		                           _("Ok"), ColorOk,
+		                           _("Cancel"), FormCancel_Restore,
+		                           TRUE, 0, NULL);
 	}
 	FormLoadControls( &colorPG );
 	wShow( colorW );

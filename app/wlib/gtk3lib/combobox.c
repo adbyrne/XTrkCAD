@@ -102,7 +102,7 @@ wIndex_t wComboBoxGetCount(wControl_p b)
 void
 wComboBoxClear(wControl_p control)
 {
-	
+
 	wlibListStoreClear(control->attributes.list.listStore);
 	control->attributes.list.count = 0;
 }
@@ -121,7 +121,8 @@ void *wComboBoxGetItemContext(wControl_p b, wIndex_t inx)
 	GtkTreeIter iter;
 	wListItem_p attributes = NULL;
 
-	if (gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->attributes.list.listStore), &iter, NULL,
+	if (gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->attributes.list.listStore),
+	                                  &iter, NULL,
 	                                  inx)) {
 		gtk_tree_model_get(GTK_TREE_MODEL(b->attributes.list.listStore),
 		                   &iter,
@@ -247,7 +248,7 @@ wBool_t wComboBoxSetValues(
  * \param comboBox  IN the combobox
  * \param context      IN user context / pointer to the control
  * \return
- * 
+ *
  * \todo Refactor !!
  */
 
@@ -425,7 +426,8 @@ wControl_p wComboBoxCreate(
 
 	if(ISDEFINEDINBUILDER(parent)) {
 		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
-		lcontrol->listStore = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(b->widget)));
+		lcontrol->listStore = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(
+		                b->widget)));
 		if (!lcontrol->listStore) {
 			fprintf(stderr, "Critical error: Could not find liststore for %s\n", b->name);
 			abort();
@@ -462,7 +464,7 @@ wControl_p wComboBoxCreate(
 		wlibComboBoxAddColumns(b->widget, COMBOBOX_TEXTCOLUMNS);
 
 		gtk_combo_box_set_entry_text_column(GTK_COMBO_BOX(b->widget),
-			LISTCOL_TEXT);
+		                                    LISTCOL_TEXT);
 
 		gtk_widget_show(b->widget);
 	}
@@ -497,14 +499,14 @@ wControl_p wComboBoxCreate(
  */
 
 wControl_p wComboBoxCreateForToolbar(
-	wControl_p	parent,
-	const char* helpStr,
-	const char* labelStr,
-	long	option,
-	wWinPix_t	width,
-	long* valueP,
-	wListCallBack_p action,
-	void* context)
+        wControl_p	parent,
+        const char* helpStr,
+        const char* labelStr,
+        long	option,
+        wWinPix_t	width,
+        long* valueP,
+        wListCallBack_p action,
+        void* context)
 {
 	wControl_p b;
 	struct list* lcontrol;
@@ -517,14 +519,16 @@ wControl_p wComboBoxCreateForToolbar(
 
 	if (ISDEFINEDINBUILDER(parent)) {
 		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
-		lcontrol->listStore = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(b->widget)));
+		lcontrol->listStore = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(
+		                b->widget)));
 		if (!lcontrol->listStore) {
 			abort();
 		}
 
 	}
 
-	egg_wrap_box_insert_child(EGG_WRAP_BOX(parent->attributes.window.toolbar), GTK_WIDGET(b->widget), -1, 0);
+	egg_wrap_box_insert_child(EGG_WRAP_BOX(parent->attributes.window.toolbar),
+	                          GTK_WIDGET(b->widget), -1, 0);
 
 	return(b);
 }

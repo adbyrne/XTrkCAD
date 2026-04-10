@@ -1,5 +1,5 @@
 /** \file careditdlg.c.c
- * Car Edit Dialog 
+ * Car Edit Dialog
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1107,44 +1107,44 @@ static void CarDlgShowControls( void )
 	FormControlShow( &carDlgPG, I_CD_SRVDAT,				S_ITEM && carDlgDispMode==0 );
 	FormControlShow( &carDlgPG, I_CD_NOTES,				S_ITEM && carDlgDispMode==0 );
 	FormControlShow( &carDlgPG, I_CD_MLTNUM,				S_ITEM
-	                  && carDlgUpdateItemPtr==NULL && carDlgDispMode==0 );
+	                 && carDlgUpdateItemPtr==NULL && carDlgDispMode==0 );
 	FormControlShow( &carDlgPG, I_CD_QTY,					S_ITEM && carDlgUpdateItemPtr==NULL
-	                  && carDlgDispMode==0 );
+	                 && carDlgDispMode==0 );
 
 	FormControlShow( &carDlgPG, I_CD_ROADNAME_LIST,		S_PART || ( S_ITEM
-	                  && carDlgDispMode==1 ) );
+	                 && carDlgDispMode==1 ) );
 	FormControlShow( &carDlgPG, I_CD_REPMARK,				S_PART || ( S_ITEM
-	                  && carDlgDispMode==1 ) );
+	                 && carDlgDispMode==1 ) );
 	FormControlShow( &carDlgPG, I_CD_NUMBER,				S_PART || ( S_ITEM
-	                  && carDlgDispMode==1 ) );
+	                 && carDlgDispMode==1 ) );
 	FormControlShow( &carDlgPG, I_CD_BODYCOLOR,			S_PART || ( S_ITEM
-	                  && carDlgDispMode==1 ) );
+	                 && carDlgDispMode==1 ) );
 	FormControlShow( &carDlgPG, I_CD_CARLENGTH,			!( S_ITEM
-	                  && carDlgDispMode==0 ) );
+	                 && carDlgDispMode==0 ) );
 	FormControlShow( &carDlgPG, I_CD_CARWIDTH,				!( S_ITEM
-	                  && carDlgDispMode==0 ) );
+	                 && carDlgDispMode==0 ) );
 	FormControlShow( &carDlgPG, I_CD_TRKCENTER,			!( S_ITEM
-	                  && carDlgDispMode==0 ) );
+	                 && carDlgDispMode==0 ) );
 	FormControlShow( &carDlgPG, I_CD_TRKOFFSET,            !( S_ITEM
-	                  && carDlgDispMode==0 ) );
+	                 && carDlgDispMode==0 ) );
 	FormControlShow( &carDlgPG, I_CD_CANVAS,				!( S_ITEM && carDlgDispMode==0 ) );
 	FormControlShow( &carDlgPG, I_CD_CPLRLEN,				S_PART || ( S_ITEM
-	                  && carDlgDispMode==1 ) );
+	                 && carDlgDispMode==1 ) );
 	FormControlShow( &carDlgPG, I_CD_CPLDLEN,				S_PART || ( S_ITEM
-	                  && carDlgDispMode==1 ) );
+	                 && carDlgDispMode==1 ) );
 	FormControlShow( &carDlgPG, I_CD_CPLRMNT,				S_PART || ( S_ITEM
-	                  && carDlgDispMode==1 ) );
+	                 && carDlgDispMode==1 ) );
 
 	FormControlShow( &carDlgPG, I_CD_DISPMODE,				S_ITEM );
 
 	FormControlShow( &carDlgPG, I_CD_TYPE_LIST,			S_PROTO );
 	FormControlShow( &carDlgPG, I_CD_FLIP,					S_PROTO );
 	FormControlShow( &carDlgPG, I_CD_DESC_STR,				S_PART
-	                  || (currState==S_ItemEnter) );
+	                 || (currState==S_ItemEnter) );
 	FormControlShow( &carDlgPG, I_CD_IMPORT,				S_PROTO );
 	FormControlShow( &carDlgPG, I_CD_RESET,				S_PROTO );
 	FormControlShow( &carDlgPG, I_CD_PARTNO_STR,			S_PART
-	                  || (currState==S_ItemEnter) );
+	                 || (currState==S_ItemEnter) );
 	FormControlShow( &carDlgPG, I_CD_PARTNO_LIST,			(currState==S_ItemSel) );
 	FormControlShow( &carDlgPG, I_CD_ISLOCO,				S_PROTO );
 	FormControlShow( &carDlgPG, I_CD_PROTOKIND_LIST,		!S_PROTO );
@@ -1154,7 +1154,7 @@ static void CarDlgShowControls( void )
 
 	/*FormControlActive( &carDlgPG, I_CD_PROTOTYPE_STR,	S_PROTO && carDlgUpdateProtoPtr==NULL );*/
 	FormControlActive( &carDlgPG, I_CD_ITEMINDEX,			S_ITEM
-	                    && carDlgUpdateItemPtr==NULL );
+	                   && carDlgUpdateItemPtr==NULL );
 	FormControlActive( &carDlgPG, I_CD_MLTNUM,				S_ITEM && carDlgQuantity>1 );
 	FormControlActive( &carDlgPG, I_CD_IMPORT,				selectedTrackCount > 0 );
 
@@ -1633,8 +1633,7 @@ static void CarDlgUpdate(
 		     wListGetItemContext( (wList_p)pg->paramPtr[inx].control,
 		                          carDlgManufInx ) == NULL ) {
 			CarDlgStateMachine( T_ItemEnter );
-		}
-		else {
+		} else {
 			CarDlgStateMachine( T_ItemSel );
 		}
 		/*FormControlShow( &carDlgPG, I_CD_MANUF_LIST, TRUE );*/
@@ -2443,12 +2442,12 @@ void DoCarPartDlg( carDlgAction_e *actions )
 
 	if ( carDlgPG.win == NULL ) {
 		FormCreateDialog( &carDlgPG,
-				  MakeWindowTitle(_("New Car Part")),
-				  _("Add"), CarDlgOk,
-				  NULL, FormCancel_Custom( CarDlgClose ),
+		                  MakeWindowTitle(_("New Car Part")),
+		                  _("Add"), CarDlgOk,
+		                  NULL, FormCancel_Custom( CarDlgClose ),
 		                  TRUE,
 		                  F_BLOCK|F_RESIZE|F_RECALLSIZE|PD_F_ALT_CANCELLABEL,
-				  CarDlgUpdate );
+		                  CarDlgUpdate );
 
 		if ( carDlgDim.carWidth==0 ) {
 			carDlgDim.carWidth = 12.0*10.0/curScaleRatio;

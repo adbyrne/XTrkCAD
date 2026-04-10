@@ -1924,7 +1924,8 @@ static void cornuModDlgUpdate(
         void * valueP )
 {
 	AdjustCornuCurve(C_UPDATE, zero, InfoMessage);
-	FormLoadSingleControl(&cornuModPG,cornuModEndRadius);			 	// Make sure Radius updated
+	FormLoadSingleControl(&cornuModPG,
+	                      cornuModEndRadius);			 	// Make sure Radius updated
 	FormLoadSingleControl(&cornuModPG,cornuModEndAngle);				//Relative Angle as well
 	TempRedraw();
 
@@ -3266,10 +3267,10 @@ EXPORT void InitCmdCornu( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Convert"), "cmdConvertSetCmd", _("Convert") );
 	AddMenuButton( menu, CmdConvertTo, "cmdConvertTo", _("Convert To Cornu"),
-		CreateToolbarIconFromResource("convert-to.png"), LEVEL0_50,
+	               CreateToolbarIconFromResource("convert-to.png"), LEVEL0_50,
 	               IC_STICKY|IC_LCLICK|IC_POPUP3|IC_WANT_MOVE,ACCL_CONVERTTO, NULL );
 	AddMenuButton( menu, CmdConvertFrom, "cmdConvertFrom", _("Convert From Cornu"),
-		CreateToolbarIconFromResource("convert-from.png"), LEVEL0_50,
+	               CreateToolbarIconFromResource("convert-from.png"), LEVEL0_50,
 	               IC_STICKY|IC_LCLICK|IC_POPUP3|IC_WANT_MOVE,ACCL_CONVERTFR, NULL );
 	cornuHotBarCmdInx = AddMenuButton(menu, cmdCornuCreate, "cmdCornuCreate", "",
 	                                  NULL, LEVEL0_50, IC_STICKY|IC_POPUP3|IC_WANT_MOVE, 0, NULL);

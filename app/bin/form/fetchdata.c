@@ -26,19 +26,20 @@
 #include <form.h>
 
 
-static BOOL_T ShouldParseAsDistance(int option, const char* label, const char* value)
+static BOOL_T ShouldParseAsDistance(int option, const char* label,
+                                    const char* value)
 {
-    // No PDO_DIM Flag -> no distance
-    if ((option & PDO_DIM) == 0) {
-        return FALSE;
-    }
-    
-    // Special case: linewidth has negative value -> no distance
-    if (label && strcmp(label, N_("linewidth")) == 0 && value && value[0] == '-') {
-        return FALSE;
-    }
-    
-    return TRUE;
+	// No PDO_DIM Flag -> no distance
+	if ((option & PDO_DIM) == 0) {
+		return FALSE;
+	}
+
+	// Special case: linewidth has negative value -> no distance
+	if (label && strcmp(label, N_("linewidth")) == 0 && value && value[0] == '-') {
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 void
@@ -102,7 +103,7 @@ FormFetchData(paramGroup_p pg)
 			bDistance = ShouldParseAsDistance(p->option, p->nameStr, stringV );
 
 			floatV = FormDecodeNumber(stringV, &valid, p->option, bDistance);
-		
+
 			if (valid && (p->option & PDO_ANGLE)) {
 				floatV = NormalizeAngle((angleSystem == ANGLE_POLAR) ? floatV : -floatV);
 			}

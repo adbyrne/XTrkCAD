@@ -53,16 +53,16 @@ extern int wlibRecursionTrace;
 
 #ifdef CURSOR_SURFACE
 typedef struct {
-  cairo_surface_t *surface;
-  wWinPix_t width;
-  wWinPix_t height;
-  wBool_t show;
+	cairo_surface_t *surface;
+	wWinPix_t width;
+	wWinPix_t height;
+	wBool_t show;
 } wCursorSurface_t, *wSurface_p;
 #endif
 
 typedef struct {
-  GQueue *elements; // GLib Queue for MRU list
-  int max_capacity; // mamimum number of entries, -1 for unlimited
+	GQueue *elements; // GLib Queue for MRU list
+	int max_capacity; // mamimum number of entries, -1 for unlimited
 } MRUList;
 
 MRUList *MRUCreate(int max_capacity);
@@ -79,43 +79,43 @@ void MRUDestroy(MRUList *list);
 // M_RADIO } mtype_e;
 
 typedef enum {
-  W_MAIN,
-  W_POPUP,
-  W_FILESELECT,
-  W_DIALOG,
-  B_BUTTON,
-  B_RADIO,
-  B_TOGGLE,
-  B_STICKY,
-  B_CANCEL,
-  B_POPUP,
-  B_TEXT,
-  B_INTEGER,
-  B_FLOAT,
-  B_LIST,
-  B_COMBOBOX,
-  B_DRAW,
-  B_MENU,
-  B_MULTITEXT,
-  B_MESSAGE,
-  B_LINES,
-  B_MENUITEM,
-  B_BOX,
-  B_BITMAP,
-  B_STATUS,
-  B_COLORBUTTON,
-  B_STACK,
-  B_NOTEBOOK,
-  M_MENU,
-  M_SUBMENU,
-  M_PUSH,
-  M_TOGGLE,
-  M_RADIO,
-  M_SEPARATOR,
-  M_RECENTUSE,
-  B_SCALE,
-  B_TAG,
-  B_SEPARATOR
+	W_MAIN,
+	W_POPUP,
+	W_FILESELECT,
+	W_DIALOG,
+	B_BUTTON,
+	B_RADIO,
+	B_TOGGLE,
+	B_STICKY,
+	B_CANCEL,
+	B_POPUP,
+	B_TEXT,
+	B_INTEGER,
+	B_FLOAT,
+	B_LIST,
+	B_COMBOBOX,
+	B_DRAW,
+	B_MENU,
+	B_MULTITEXT,
+	B_MESSAGE,
+	B_LINES,
+	B_MENUITEM,
+	B_BOX,
+	B_BITMAP,
+	B_STATUS,
+	B_COLORBUTTON,
+	B_STACK,
+	B_NOTEBOOK,
+	M_MENU,
+	M_SUBMENU,
+	M_PUSH,
+	M_TOGGLE,
+	M_RADIO,
+	M_SEPARATOR,
+	M_RECENTUSE,
+	B_SCALE,
+	B_TAG,
+	B_SEPARATOR
 } wType_e;
 
 typedef void (*repaintProcCallback_p)(wControl_p);
@@ -133,177 +133,177 @@ typedef void (*setTriggerCallback_p)(wControl_p b);
  */
 
 struct bitmap {
-  char unused;
+	char unused;
 };
 
 enum TIMER_STATE { INITIAL_DELAY, REPEATED };
 
 struct button {
-  wButtonCallBack_p action;
-  wIcon_p icon;
-  wBool_t is_pressed;
-  guint timeout_id;
-  enum TIMER_STATE timer_state;
-  int recursion;
+	wButtonCallBack_p action;
+	wIcon_p icon;
+	wBool_t is_pressed;
+	guint timeout_id;
+	enum TIMER_STATE timer_state;
+	int recursion;
 };
 
 struct choice {
-  long *valueP;
-  wChoiceCallBack_p action;
-  char *labelStr;
-  int recursion;
+	long *valueP;
+	wChoiceCallBack_p action;
+	char *labelStr;
+	int recursion;
 };
 
 struct colorbutton {
-  wDrawColor *valueP;
-  wColorSelectButtonCallBack_p action;
+	wDrawColor *valueP;
+	wColorSelectButtonCallBack_p action;
 };
 
 struct rect {
-  wDrawPix_t x;
-  wDrawPix_t y;
-  wDrawPix_t w;
-  wDrawPix_t h;
+	wDrawPix_t x;
+	wDrawPix_t y;
+	wDrawPix_t w;
+	wDrawPix_t h;
 };
 
 struct draw {
-  wDrawActionCallBack_p action;
-  wDrawRedrawCallBack_p redraw; //< handle redraw requests
-  bool bTempMode;
-  gdouble dpi; //< resolution of screen
-  gint width;  //< size of drawing area and surface
-  gint height;
-  cairo_surface_t *surface; //< main drawing surface
-  cairo_surface_t *temp_surface;
-  wAction_t lastAction;
-  long lastX; //< position of last mouse click
-  long lastY;
-  long option; //< creation options
-  unsigned drawDestination;
-  unsigned delayUpdate;
-  GdkPixbuf *pixbuf; /** \todo Check necessity */
-  GdkPixbuf *background;
-  cairo_t *cr;
-  double scale_adjust; /** \todo Check necessity */
-  double scale_text;   /** \todo Check necessity */
-  struct rect *clipregion;
+	wDrawActionCallBack_p action;
+	wDrawRedrawCallBack_p redraw; //< handle redraw requests
+	bool bTempMode;
+	gdouble dpi; //< resolution of screen
+	gint width;  //< size of drawing area and surface
+	gint height;
+	cairo_surface_t *surface; //< main drawing surface
+	cairo_surface_t *temp_surface;
+	wAction_t lastAction;
+	long lastX; //< position of last mouse click
+	long lastY;
+	long option; //< creation options
+	unsigned drawDestination;
+	unsigned delayUpdate;
+	GdkPixbuf *pixbuf; /** \todo Check necessity */
+	GdkPixbuf *background;
+	cairo_t *cr;
+	double scale_adjust; /** \todo Check necessity */
+	double scale_text;   /** \todo Check necessity */
+	struct rect *clipregion;
 };
 
 struct entry {
-  char *valueP;            //< location of entered value
-  unsigned valueL;         //< maximum length of entered value
-  wEntryCallBack_p action; //< callback
+	char *valueP;            //< location of entered value
+	unsigned valueL;         //< maximum length of entered value
+	wEntryCallBack_p action; //< callback
 };
 
 struct list {
-  GtkListStore *listStore;
-  GtkTreeView *treeView;
-  long *valueP;
-  int editted;
-  int last;
-  wListCallBack_p action;
-  int recursion;
-  int count;
+	GtkListStore *listStore;
+	GtkTreeView *treeView;
+	long *valueP;
+	int editted;
+	int last;
+	wListCallBack_p action;
+	int recursion;
+	int count;
 };
 
 struct menu {
-  GSList *radioGroup; /* radio button group */
-  wMenuTraceCallBack_p traceFunc;
-  void *traceData;
-  long option;
+	GSList *radioGroup; /* radio button group */
+	wMenuTraceCallBack_p traceFunc;
+	void *traceData;
+	long option;
 };
 
 struct menuitem {
-  wControl_p parentMenu;
-  wMenuCallBack_p action;
+	wControl_p parentMenu;
+	wMenuCallBack_p action;
 };
 
 struct message {
-  char unused; //< msvc doesn't allow empty structs
+	char unused; //< msvc doesn't allow empty structs
 };
 struct radio {
-  long *valueP;
-  wChoiceCallBack_p action;
-  int recursion;
+	long *valueP;
+	wChoiceCallBack_p action;
+	int recursion;
 };
 struct toggle {
-  long *valueP;
-  wChoiceCallBack_p action;
-  unsigned long toggleHandler;
-  int recursion;
+	long *valueP;
+	wChoiceCallBack_p action;
+	unsigned long toggleHandler;
+	int recursion;
 };
 struct recentuse {
-  MRUList *mrulist;
-  wMenuListCallBack_p action;
-  wControl_p parentMenu;
-  GtkWidget *emptyList;
-  SORTORDER sortorder;
+	MRUList *mrulist;
+	wMenuListCallBack_p action;
+	wControl_p parentMenu;
+	GtkWidget *emptyList;
+	SORTORDER sortorder;
 };
 
 struct scale {
-  wScaleCallBack_p action;
-  double *valuePointer;
+	wScaleCallBack_p action;
+	double *valuePointer;
 };
 
 struct stack {
-  void *callback;
+	void *callback;
 };
 
 struct tag {
-  wButtonCallBack_p callback;
-  GtkButton *button;
-  GtkLabel *label;
+	wButtonCallBack_p callback;
+	GtkButton *button;
+	GtkLabel *label;
 };
 struct text {
-  int changed;
-  long option;
-  GtkWidget *text;
+	int changed;
+	long option;
+	GtkWidget *text;
 };
 
 struct window {
-  wWinCallBack_p winProc; /**< window procedure */
-  GtkWidget *menubar;     /**< menubar handle (if exists) */
-  GtkWidget *toolbar;     /**< toolbar handle (if exists) */
-  long option;            /**< creation options for window */
-  GtkBuilder *builder;
-  GtkAccelGroup *accelGroup; /**< accelerator group if main window */
-  GtkContainer *statusbar;
-  bool maximize_initially;
-  int resizeTimer; /** resizing **/
-  int w;
-  int h;
-  wBool_t size_changed;
+	wWinCallBack_p winProc; /**< window procedure */
+	GtkWidget *menubar;     /**< menubar handle (if exists) */
+	GtkWidget *toolbar;     /**< toolbar handle (if exists) */
+	long option;            /**< creation options for window */
+	GtkBuilder *builder;
+	GtkAccelGroup *accelGroup; /**< accelerator group if main window */
+	GtkContainer *statusbar;
+	bool maximize_initially;
+	int resizeTimer; /** resizing **/
+	int w;
+	int h;
+	wBool_t size_changed;
 };
 
 struct control {
-  wType_e type;
-  GtkWidget *widget;
-  void *context;
-  const char *name;
-  wControl_p synonym;
-  wControl_p parent;
-  GtkWidget *label;
-  const char *customTooltip;
-  union {
-    struct bitmap bitmap;
-    struct button button;
-    struct choice choice;
-    struct colorbutton colorbutton;
-    struct draw draw;
-    struct entry entry;
-    struct message message;
-    struct text text;
-    struct list list;
-    struct menu menu;
-    struct menuitem menuitem;
-    struct radio radio;
-    struct recentuse recentuse;
-    struct scale scale;
-    struct stack stack;
-    struct tag tag;
-    struct toggle toggle;
-    struct window window;
-  } attributes;
+	wType_e type;
+	GtkWidget *widget;
+	void *context;
+	const char *name;
+	wControl_p synonym;
+	wControl_p parent;
+	GtkWidget *label;
+	const char *customTooltip;
+	union {
+		struct bitmap bitmap;
+		struct button button;
+		struct choice choice;
+		struct colorbutton colorbutton;
+		struct draw draw;
+		struct entry entry;
+		struct message message;
+		struct text text;
+		struct list list;
+		struct menu menu;
+		struct menuitem menuitem;
+		struct radio radio;
+		struct recentuse recentuse;
+		struct scale scale;
+		struct stack stack;
+		struct tag tag;
+		struct toggle toggle;
+		struct window window;
+	} attributes;
 };
 
 #define CONTROL_GET_ATTRIBUTES_PTR(base, field) (&(base->attributes.field))
@@ -311,28 +311,28 @@ struct control {
   ((parent)->attributes.window.option & F_DEFINEDINBUILDER)
 
 struct wObjCommon {
-  wType_e type;      /**< type of control */
-  wWin_p parent;     /**< parent control */
-  long option;       /**< creation options*/
-  void *attributes;  /**< application additional attributes */
-  GtkWidget *widget; /**< GTK widget */
-  gchar *helpTopic;
-  gchar *name;
-  gchar *labelStr;
+	wType_e type;      /**< type of control */
+	wWin_p parent;     /**< parent control */
+	long option;       /**< creation options*/
+	void *attributes;  /**< application additional attributes */
+	GtkWidget *widget; /**< GTK widget */
+	gchar *helpTopic;
+	gchar *name;
+	gchar *labelStr;
 };
 
 struct wWindow_t {
-  wType_e type;
-  wWinCallBack_p winProc;      /**< window procedure */
-  GtkWidget *menubar;          /**< GTK menubar handle if present */
-  GtkWidget *toolbar;          /**< GTK toolbar handle if present */
-  GtkContainer *statusbar;     /**< GTK statusbar handle if present */
-  GtkAccelGroup *accelGroup;   /**< accelerator group connected to Window */
-  GtkDrawingArea *drawingArea; /**< the drawing area */
-  GtkWidget *gtkWindow;        /**< the GTK window */
-  GtkBuilder *builder;
-  const char *name; /**< unique name for window */
-  const char *helpTopic;
+	wType_e type;
+	wWinCallBack_p winProc;      /**< window procedure */
+	GtkWidget *menubar;          /**< GTK menubar handle if present */
+	GtkWidget *toolbar;          /**< GTK toolbar handle if present */
+	GtkContainer *statusbar;     /**< GTK statusbar handle if present */
+	GtkAccelGroup *accelGroup;   /**< accelerator group connected to Window */
+	GtkDrawingArea *drawingArea; /**< the drawing area */
+	GtkWidget *gtkWindow;        /**< the GTK window */
+	GtkBuilder *builder;
+	const char *name; /**< unique name for window */
+	const char *helpTopic;
 };
 
 /** /todo Check necessity of above fields */
@@ -364,24 +364,24 @@ struct wWindow_t {
   char *template_id;
 
 struct wWin_t {
-  WOBJ_COMMON
-  GtkWidget *gtkwin; /**< GTK window */
-  wWinPix_t lastX, lastY;
-  wControl_p first, last;
-  wWinCallBack_p winProc; /**< window procedure */
-  wBool_t shown;          /**< visibility state */
-  const char *nameStr;    /**< window name (not title) */
-  GtkWidget *menubar;     /**< menubar handle (if exists) */
-  GtkWidget *toolbar;
-  int menu_height;
-  int gc_linewidth; /**< ??? */
-  wBool_t busy;
-  int resizeTimer; /** resizing **/
-  int resizeW, resizeH;
-  int timer_idle_count;
-  int timer_busy_count;
-  int modalLevel;
-  GtkBuilder *builder;
+	WOBJ_COMMON
+	GtkWidget *gtkwin; /**< GTK window */
+	wWinPix_t lastX, lastY;
+	wControl_p first, last;
+	wWinCallBack_p winProc; /**< window procedure */
+	wBool_t shown;          /**< visibility state */
+	const char *nameStr;    /**< window name (not title) */
+	GtkWidget *menubar;     /**< menubar handle (if exists) */
+	GtkWidget *toolbar;
+	int menu_height;
+	int gc_linewidth; /**< ??? */
+	wBool_t busy;
+	int resizeTimer; /** resizing **/
+	int resizeW, resizeH;
+	int timer_idle_count;
+	int timer_busy_count;
+	int modalLevel;
+	GtkBuilder *builder;
 };
 
 // struct wControl_t {
@@ -391,11 +391,11 @@ struct wWin_t {
 typedef struct wListItem_t *wListItem_p;
 
 struct wListItem_t {
-  wBool_t active;
-  void *itemData;
-  char *label;
-  wBool_t selected;
-  wControl_p listP;
+	wBool_t active;
+	void *itemData;
+	char *label;
+	wBool_t selected;
+	wControl_p listP;
 };
 
 extern char wConfigName[];
@@ -443,13 +443,13 @@ void wlibBasicDrawFillCircle(struct draw *drawingArea, wDrawPix_t x0,
 #define ICON_PIXBUF_FROM_RESOURCE 4
 
 struct wIcon_t {
-  int gtkIconType;
-  GdkPixbuf *bits;
-  wWinPix_t w;
-  wWinPix_t h;
-  wDrawColor color;
-  const char *text;
-  const char *filename;
+	int gtkIconType;
+	GdkPixbuf *bits;
+	wWinPix_t w;
+	wWinPix_t h;
+	wDrawColor color;
+	const char *text;
+	const char *filename;
 };
 
 /* boxes.c */
@@ -479,13 +479,13 @@ void wlibAddButtonToToolbar(wControl_p buttonControl, const char *helpStr);
 /* color.c */
 
 typedef struct {
-  unsigned char red;
-  unsigned char green;
-  unsigned char blue;
-  GdkColor normalColor;
-  GdkColor invertColor;
-  long rgb;
-  int colorChar;
+	unsigned char red;
+	unsigned char green;
+	unsigned char blue;
+	GdkColor normalColor;
+	GdkColor invertColor;
+	long rgb;
+	int colorChar;
 } colorMap_t;
 
 GdkRGBA wlibGetColor(wDrawColor color, wBool_t normal);
@@ -501,10 +501,10 @@ void wlibBasicGridAttach(wControl_p parent, GtkWidget *widget, unsigned xPos,
 
 /* lists */
 enum columns {
-  LISTCOL_ERROR_COLOR, /**< use error color for display if set */
-  LISTCOL_DATA,        /**< user attributes not for display */
-  LISTCOL_BITMAP,      /**< bitmap column */
-  LISTCOL_TEXT,        /**< starting point for text columns */
+	LISTCOL_ERROR_COLOR, /**< use error color for display if set */
+	LISTCOL_DATA,        /**< user attributes not for display */
+	LISTCOL_BITMAP,      /**< bitmap column */
+	LISTCOL_TEXT,        /**< starting point for text columns */
 };
 
 /**
@@ -522,16 +522,16 @@ enum columns {
  */
 
 struct wList_t {
-  wType_e type;
-  GtkWidget *widget;
-  GtkListStore *listStore;
-  GtkTreeView *treeView;
-  long *valueP;
-  void *attributes;
-  int editted;
-  int last;
-  wListCallBack_p action;
-  int recursion;
+	wType_e type;
+	GtkWidget *widget;
+	GtkListStore *listStore;
+	GtkTreeView *treeView;
+	long *valueP;
+	void *attributes;
+	int editted;
+	int last;
+	wListCallBack_p action;
+	int recursion;
 };
 
 GtkWidget *wlibNewDropList(GtkListStore *ls, int editable);
@@ -603,10 +603,10 @@ int getMlistOrigin(wMenuList_p ml, GList **pChildren);
 
 /* misc.c */
 typedef struct accelData_t {
-  wAccelKey_e key;
-  int modifier;
-  wAccelKeyCallBack_p action;
-  void *data;
+	wAccelKey_e key;
+	int modifier;
+	wAccelKeyCallBack_p action;
+	void *data;
 } accelData_t;
 
 GdkPixbuf *wlibPixbufFromXBM(wIcon_p ip);
@@ -628,43 +628,43 @@ wBool_t wlibHandleAccelKey(GdkEventKey *event);
 
 /* print.c */
 struct wDraw_t {
-  WOBJ_COMMON
-  void *context;
-  wDrawActionCallBack_p action;
-  wDrawRedrawCallBack_p redraw;
+	WOBJ_COMMON
+	void *context;
+	wDrawActionCallBack_p action;
+	wDrawRedrawCallBack_p redraw;
 
-  cairo_surface_t *surface;
-  cairo_surface_t *temp_surface;
+	cairo_surface_t *surface;
+	cairo_surface_t *temp_surface;
 
-  cairo_t *printContext;
-  cairo_surface_t *curPrintSurface;
+	cairo_t *printContext;
+	cairo_surface_t *curPrintSurface;
 
-  wBool_t clip_set;
-  GdkRectangle rect;
+	wBool_t clip_set;
+	GdkRectangle rect;
 
-  GdkPixbuf *pixbuf;
-  GdkPixbuf *pixbufBackup;
+	GdkPixbuf *pixbuf;
+	GdkPixbuf *pixbufBackup;
 
-  double dpi;
-  double scale_adjust;
-  double scale_text;
+	double dpi;
+	double scale_adjust;
+	double scale_text;
 
-  wDrawWidth lineWidth;
-  wDrawOpts opts;
-  wWinPix_t maxW;
-  wWinPix_t maxH;
-  unsigned long lastColor;
-  wBool_t lastColorInverted;
-  const char *helpStr;
+	wDrawWidth lineWidth;
+	wDrawOpts opts;
+	wWinPix_t maxW;
+	wWinPix_t maxH;
+	unsigned long lastColor;
+	wBool_t lastColorInverted;
+	const char *helpStr;
 
-  wWinPix_t lastX;
-  wWinPix_t lastY;
+	wWinPix_t lastX;
+	wWinPix_t lastY;
 
-  wBool_t delayUpdate;
-  GdkPixbuf *background;
+	wBool_t delayUpdate;
+	GdkPixbuf *background;
 
-  wBool_t bTempMode;
-  unsigned drawDestination;
+	wBool_t bTempMode;
+	unsigned drawDestination;
 };
 
 void WlibApplySettings(GtkPrintOperation *op);
@@ -701,12 +701,12 @@ void wlibSetTrigger(wControl_p b, setTriggerCallback_p trigger);
  * \todo Check usage of labelStr
  */
 struct wChoice_t {
-  wType_e type;
-  GtkWidget *widget;
-  long *valueP;
-  wChoiceCallBack_p action;
-  char *labelStr;
-  void *attributes;
+	wType_e type;
+	GtkWidget *widget;
+	long *valueP;
+	wChoiceCallBack_p action;
+	char *labelStr;
+	void *attributes;
 };
 
 /* toolbarctrl.c */

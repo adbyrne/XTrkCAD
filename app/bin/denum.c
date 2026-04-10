@@ -53,7 +53,7 @@ static paramData_t enumPLs[] = {
 	{   PD_BUTTON, DoEnumOp, "print", 0, NULL, NULL, 0, I2VP(ENUMOP_PRINT) },
 	{   PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
 #define I_ENUMLISTPRICE	(4)
-	{   PD_TOGGLE, &enableListPrices, "list-prices" }, 
+	{   PD_TOGGLE, &enableListPrices, "list-prices" },
 #define I_ENUMLISTINDEXES  (5)
 	{   PD_TOGGLE, &enableListIndexes, "list-indexes" }
 };
@@ -181,8 +181,7 @@ CreateTableFooter(void)
 		strcat(cp, "-+-");
 		memset(line + strlen(line), '-', max(9, strlen(_("Extended"))));
 		*(line + strlen(line)) = '\n';
-	}
-	else {
+	} else {
 		*(cp + enumerateMaxDescLen + 2) = '\n';
 		*(cp + enumerateMaxDescLen + 3) = '\0';
 	}
@@ -198,7 +197,7 @@ CreateHeader(void)
 	DynStringMalloc(&headerLine, 256);
 
 	DynStringPrintf(&headerLine, _("%s Parts List\n"), sProdName);
-		
+
 	if (*GetLayoutTitle()) {
 		DynStringCatCStrs(&headerLine, GetLayoutTitle(), "\n", NULL);
 	}
@@ -227,13 +226,13 @@ CreateTableHeader(void)
 
 	if (enableListPrices) {
 		DynStringPrintf(&line, "%s | %-*s | %-*s | %-*s\n",
-			_("Count"), 
-			enumerateMaxDescLen, _("Description"),
-			(int)max(7,	count_utf8_chars(_("Each"))), _("Each"), 
-			(int)max(9,	count_utf8_chars(_("Extended"))), _("Extended"));
-	}
-	else {
-		DynStringPrintf(&line, "%s | %-*s\n", _("Count"), enumerateMaxDescLen, _("Description"));
+		                _("Count"),
+		                enumerateMaxDescLen, _("Description"),
+		                (int)max(7,	count_utf8_chars(_("Each"))), _("Each"),
+		                (int)max(9,	count_utf8_chars(_("Extended"))), _("Extended"));
+	} else {
+		DynStringPrintf(&line, "%s | %-*s\n", _("Count"), enumerateMaxDescLen,
+		                _("Description"));
 	}
 
 	wTextAppend(enumT, DynStringToCStr(&line));
@@ -248,11 +247,11 @@ void EnumerateStart(void)
 
 	if (enumW == NULL) {
 		FormRegister( &enumPG );
-		enumW = FormCreateDialog( &enumPG, MakeWindowTitle(_("Parts List")), 
-									NULL, NULL, 
-									NULL, FormCancel_Current, 
-									TRUE, F_RESIZE, 
-									EnumDlgUpdate);
+		enumW = FormCreateDialog( &enumPG, MakeWindowTitle(_("Parts List")),
+		                          NULL, NULL,
+		                          NULL, FormCancel_Current,
+		                          TRUE, F_RESIZE,
+		                          EnumDlgUpdate);
 		enumFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Parts List"),
 		                             sPartsListFilePattern, DoEnumSave, NULL );
 	}
@@ -281,7 +280,7 @@ void EnumerateEnd(void)
 	/**  \TODO Fix layout of summary line, why -3? */
 	if (enableListPrices) {
 		len = strlen( message ) - strlen( _("Total")) - max( 9,
-		                strlen(_("Extended"))) - 3 ;
+		        strlen(_("Extended"))) - 3 ;
 		memset ( message, ' ', len );
 		cp = message+len;
 		sprintf( cp, ("%s |%9.2f\n"), _("Total"), enumerateTotal );

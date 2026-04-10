@@ -11,15 +11,15 @@ paramGroup_cp DialogGroupFind( const char * sName );
 paramGroup_cp * DialogGroupIter( paramGroup_cp * );
 
 wControl_p FormCreateDialog(
-	paramGroup_p group,
-	char* title,
-	char* okLabel,
-	paramActionOkProc okProc,
-	char* cancelLabel,
-	paramActionCancelProc cancelProc,
-	BOOL_T needHelpButton,
-	long winOption,
-	paramChangeProc changeProc);
+        paramGroup_p group,
+        char* title,
+        char* okLabel,
+        paramActionOkProc okProc,
+        char* cancelLabel,
+        paramActionCancelProc cancelProc,
+        BOOL_T needHelpButton,
+        long winOption,
+        paramChangeProc changeProc);
 
 void FormCreateControls(paramGroup_p group);
 void FormLoadControls(paramGroup_p pg);

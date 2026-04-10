@@ -328,8 +328,7 @@ wPrefTokenize(char* line, char** section, char** name, char** value)
 
 	if (*line == '[') {
 		*section = strtok(line, "[]");
-	}
-	else {
+	} else {
 		*name = strtok(line, "=");
 		*value = strtok(NULL, "\n");
 	}
@@ -349,7 +348,7 @@ wPrefTokenize(char* line, char** section, char** name, char** value)
 
 void
 wPrefFormatLine(const char* section, const char* name,
-	const char* value, char* result)
+                const char* value, char* result)
 {
 	if (!value || *value == '\0') {
 		value = "";
@@ -357,8 +356,7 @@ wPrefFormatLine(const char* section, const char* name,
 
 	if (section) {
 		sprintf(result, "[%s]", section);
-	}
-	else {
+	} else {
 		sprintf(result, "%s=%s", name, value);
 	}
 }

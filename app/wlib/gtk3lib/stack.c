@@ -1,27 +1,27 @@
 /**
  * \file   stack.c
- * \brief  
+ * \brief
  *
  * \author Martin Fischer
  */
 
- /*  XTrackCad - Model Railroad CAD
-  *  Copyright (C) 2005, 2024 Dave Bullis
-  *
-  *  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
-  *  (at your option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
-  *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-  */
+/*  XTrackCad - Model Railroad CAD
+ *  Copyright (C) 2005, 2024 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 
 #define GTK_DISABLE_SINGLE_INCLUDES
@@ -39,7 +39,7 @@
 void
 wStackPageShow(wControl_p stack, const char* pageName)
 {
-    gtk_stack_set_visible_child_name(GTK_STACK(stack->widget), pageName);
+	gtk_stack_set_visible_child_name(GTK_STACK(stack->widget), pageName);
 }
 
 /**
@@ -67,24 +67,24 @@ wStackPageShow(wControl_p stack, const char* pageName)
  */
 
 wControl_p wStackCreate(
-    wControl_p	parent,
-    wWinPix_t	x,
-    wWinPix_t	y,
-    const char* helpStr,
-    const char* labelStr,
-    long 	option,
-    wWinPix_t 	width,
-    wButtonCallBack_p action,
-    void* context)
+        wControl_p	parent,
+        wWinPix_t	x,
+        wWinPix_t	y,
+        const char* helpStr,
+        const char* labelStr,
+        long 	option,
+        wWinPix_t 	width,
+        wButtonCallBack_p action,
+        void* context)
 
 {
-    wControl_p newStack = wlibControlNew(B_STACK, parent, helpStr, context);
-    struct stack* privateStack = CONTROL_GET_ATTRIBUTES_PTR(newStack, stack);
+	wControl_p newStack = wlibControlNew(B_STACK, parent, helpStr, context);
+	struct stack* privateStack = CONTROL_GET_ATTRIBUTES_PTR(newStack, stack);
 
-    newStack->widget = wlibWidgetFromIdWarn(parent, helpStr);
-    privateStack->callback = action;
+	newStack->widget = wlibWidgetFromIdWarn(parent, helpStr);
+	privateStack->callback = action;
 
-    return(newStack);
+	return(newStack);
 }
 
 

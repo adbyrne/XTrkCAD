@@ -179,7 +179,7 @@ static int entryFocusOutEvent(
         wControl_p b)
 {
 	struct entry* entry = CONTROL_GET_ATTRIBUTES_PTR(b, entry);
-		bool isFalse = FALSE;
+	bool isFalse = FALSE;
 
 	if (event->in == FALSE) {
 		if (entry->action) {
@@ -196,8 +196,8 @@ static int entryFocusOutEvent(
 }
 
 static void
-wlibCreateEntryAtRuntime(wControl_p parent, wControl_p b, const char* labelStr, 
-	long x, long y, wIndex_t fieldLength, long width)
+wlibCreateEntryAtRuntime(wControl_p parent, wControl_p b, const char* labelStr,
+                         long x, long y, wIndex_t fieldLength, long width)
 {
 	b->widget = (GtkWidget*)gtk_entry_new();
 	if (b->widget == NULL) { abort(); }
@@ -211,8 +211,9 @@ wlibCreateEntryAtRuntime(wControl_p parent, wControl_p b, const char* labelStr,
 		gtk_entry_set_width_chars(GTK_ENTRY(b->widget), width);
 	}
 	// if desired, place a label in front of the created widget
-	if (labelStr)
+	if (labelStr) {
 		wlibAddLabel((wControl_p)b, x - 1, y, labelStr);
+	}
 
 	wlibBasicGridAttach(parent, b->widget, x, y, 1, 1);
 	// show
@@ -242,7 +243,7 @@ wlibCreateEntryAtRuntime(wControl_p parent, wControl_p b, const char* labelStr,
  * \param	valueP	IN	initial value
  * \param	fieldLength	IN 	maximum length of entry in chars
  * \param	action	IN	application callback function
- * \param 	context	IN	application context 
+ * \param 	context	IN	application context
  * \return  the created widget
  */
 
@@ -263,7 +264,7 @@ wControl_p wEntryCreate(
 {
 	wControl_p b;
 	struct entry* entry;
-	
+
 	// create and initialize the widget
 	b = wlibControlNew(B_TEXT, parent, helpStr, context);
 	entry = CONTROL_GET_ATTRIBUTES_PTR(b, entry);
@@ -273,13 +274,13 @@ wControl_p wEntryCreate(
 
 	if (ISDEFINEDINBUILDER(parent)) {
 		b->widget = wlibWidgetFromIdWarn(parent, helpStr);
- 	} else {
+	} else {
 		// create the gtk entry field and set maximum length if desired
 		wlibCreateEntryAtRuntime(parent, b, labelStr, x, y, fieldLength, width);
 	}
 	// link into help
 	wlibAddTooltip(b->widget, parent->name, helpStr);
-  	//wlibAddTooltip(b->widget, helpStr);
+	//wlibAddTooltip(b->widget, helpStr);
 
 	gtk_widget_set_can_focus( G_OBJECT(b->widget), TRUE );
 	gtk_widget_add_events(b->widget, GDK_FOCUS_CHANGE_MASK);

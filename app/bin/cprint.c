@@ -161,8 +161,8 @@ static paramData_t printPLs[] = {
 	/*23*/ { PD_BUTTON, SelectAllPages, "selall", 0, NULL, N_("Select All") },
 	/*24*/ { PD_BUTTON, PrintClear, "clear", 0, NULL, N_("Clear") },
 #define I_PAGECNT		(25)
-/*25*/ { PD_MESSAGE, N_("0 pages"), "mess1", 0, I2VP(80) },
-/*26*/ { PD_MESSAGE, N_("selected"), "mess2", 0, I2VP(80) }
+	/*25*/ { PD_MESSAGE, N_("0 pages"), "mess1", 0, I2VP(80) },
+	/*26*/ { PD_MESSAGE, N_("selected"), "mess2", 0, I2VP(80) }
 };
 
 static paramGroup_t printPG = { "print", PGO_PREFMISCGROUP|PGO_FULLDIALOGFROMBUILDER, printPLs, COUNT( printPLs ) };
@@ -748,10 +748,10 @@ static void DoPrintMargin( void )
 	if ( customMarginWin == NULL ) {
 		int x=10, y=10;
 		customMarginWin = FormCreateDialog( &customMarginPG,
-		                                     MakeWindowTitle(_("Print Margins")),
-		                                     _("Ok"), DoPrintMarginOk,
-		                                     NULL, FormCancel_Null,
-						     TRUE, F_BLOCK, PrintMarginDlgUpdate );
+		                                    MakeWindowTitle(_("Print Margins")),
+		                                    _("Ok"), DoPrintMarginOk,
+		                                    NULL, FormCancel_Null,
+		                                    TRUE, F_BLOCK, PrintMarginDlgUpdate );
 		if ( customMarginWin == NULL ) {
 			return;
 		}
@@ -1203,7 +1203,7 @@ static BOOL_T PrintPage(
 		p[2].y = p[3].y = roomSize.y;
 
 		BOOL_T left_clear = FALSE, right_clear = FALSE, base_clear = FALSE,
-		       top_clear = FALSE;
+		                                                top_clear = FALSE;
 
 		if (currPrintGrid.orig.x <= -0.5*printScale) { left_clear = TRUE; }
 		if (currPrintGrid.orig.y <= -0.5*printScale) { base_clear = TRUE; }
@@ -1445,8 +1445,8 @@ static STATUS_T CmdPrint(
 			}
 			print_d.scale = printScale;
 			printWin = FormCreateDialog( &printPG, MakeWindowTitle(_("Print")),
-						     _("Print"), DoPrintPrint,
-						     _("Cancel"), FormCancel_Reset,
+			                             _("Print"), DoPrintPrint,
+			                             _("Cancel"), FormCancel_Reset,
 			                             TRUE, 0, PrintDlgUpdate );
 		}
 		sPrinterName = wPrintGetName();
@@ -1584,7 +1584,7 @@ EXPORT wIndex_t InitCmdPrint( wMenu_p menu )
 
 	printIcon = CreateToolbarIconFromResource("doc-print.png");
 	return AddMenuButton( menu, CmdPrint, "cmdPrint", N_("Print..."),
-		printIcon, LEVEL0,
+	                      printIcon, LEVEL0,
 	                      opts, ACCL_PRINT, NULL );
 }
 

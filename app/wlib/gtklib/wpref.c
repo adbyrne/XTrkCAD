@@ -140,12 +140,12 @@ const char * wGetAppLibDir( void )
 
 	sprintf( msg,
 	         _("The required configuration files could not be located in the expected location.\n\n"
-	           "Usually this is an installation problem. Make sure that these files are installed in either \n"
-	           "  ../share/xtrkcad or\n"
-	           "  /usr/share/%s or\n"
-	           "  /usr/local/share/%s\n"
-	           "If this is not possible, the environment variable %s must contain "
-	           "the name of the correct directory."),
+	  "Usually this is an installation problem. Make sure that these files are installed in either \n"
+	  "  ../share/xtrkcad or\n"
+	  "  /usr/share/%s or\n"
+	  "  /usr/local/share/%s\n"
+	  "If this is not possible, the environment variable %s must contain "
+	  "the name of the correct directory."),
 	         wlibGetAppName(), wlibGetAppName(), envvar );
 	wNoticeEx( NT_ERROR, msg, _("Ok"), NULL );
 	appLibDir[0] = '\0';
@@ -622,8 +622,9 @@ wPrefTokenize(char* line, char** section, char** name, char** value)
 	*section = strtok(line, ".");
 	*name = strtok(NULL, ":");
 	*value = strtok(NULL, "\n");
-	if(*value)
+	if(*value) {
 		g_strstrip(*value);
+	}
 
 }
 
@@ -640,7 +641,8 @@ wPrefTokenize(char* line, char** section, char** name, char** value)
  */
 
 void
-wPrefFormatLine(const char* section, const char* name, const char* value, char* result)
+wPrefFormatLine(const char* section, const char* name, const char* value,
+                char* result)
 {
 	if (!value || *value == '\0') {
 		value = "";

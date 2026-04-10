@@ -20,34 +20,34 @@ typedef struct charset_spec charset_spec;
 typedef struct sbcs_data sbcs_data;
 
 struct charset_spec {
-    int charset;		       /* numeric identifier */
+	int charset;		       /* numeric identifier */
 
-    /*
-     * A function to read the character set and output Unicode
-     * characters. The `emit' function expects to get Unicode chars
-     * passed to it; it should be sent ERROR for any encoding error
-     * on the input.
-     */
-    void (*read)(charset_spec const *charset, long int input_chr,
-		 charset_state *state,
-		 void (*emit)(void *ctx, long int output), void *emitctx);
-    /*
-     * A function to read Unicode characters and output in this
-     * character set. The `emit' function expects to get byte
-     * values passed to it.
-     * 
-     * A non-representable input character should cause a FALSE
-     * return, _before_ `emit' is called. Successful conversion
-     * causes a TRUE return.
-     * 
-     * If `input_chr' is -1, this function must revert the encoding
-     * state to any default required at the end of a piece of
-     * encoded text.
-     */
-    int (*write)(charset_spec const *charset, long int input_chr,
-		 charset_state *state,
-		 void (*emit)(void *ctx, long int output), void *emitctx);
-    void const *data;
+	/*
+	 * A function to read the character set and output Unicode
+	 * characters. The `emit' function expects to get Unicode chars
+	 * passed to it; it should be sent ERROR for any encoding error
+	 * on the input.
+	 */
+	void (*read)(charset_spec const *charset, long int input_chr,
+	             charset_state *state,
+	             void (*emit)(void *ctx, long int output), void *emitctx);
+	/*
+	 * A function to read Unicode characters and output in this
+	 * character set. The `emit' function expects to get byte
+	 * values passed to it.
+	 *
+	 * A non-representable input character should cause a FALSE
+	 * return, _before_ `emit' is called. Successful conversion
+	 * causes a TRUE return.
+	 *
+	 * If `input_chr' is -1, this function must revert the encoding
+	 * state to any default required at the end of a piece of
+	 * encoded text.
+	 */
+	int (*write)(charset_spec const *charset, long int input_chr,
+	             charset_state *state,
+	             void (*emit)(void *ctx, long int output), void *emitctx);
+	void const *data;
 };
 
 /*
@@ -55,30 +55,30 @@ struct charset_spec {
  * functions; so it's the format used in all SBCS definitions.
  */
 struct sbcs_data {
-    /*
-     * This is a simple mapping table converting each SBCS position
-     * to a Unicode code point. Some positions may contain ERROR,
-     * indicating that that byte value is not defined in the SBCS
-     * in question and its occurrence in input is an error.
-     */
-    unsigned long sbcs2ucs[256];
+	/*
+	 * This is a simple mapping table converting each SBCS position
+	 * to a Unicode code point. Some positions may contain ERROR,
+	 * indicating that that byte value is not defined in the SBCS
+	 * in question and its occurrence in input is an error.
+	 */
+	unsigned long sbcs2ucs[256];
 
-    /*
-     * This lookup table is used to convert Unicode back to the
-     * SBCS. It consists of the valid byte values in the SBCS,
-     * sorted in order of their Unicode translation. So given a
-     * Unicode value U, you can do a binary search on this table
-     * using the above table as a lookup: when testing the Xth
-     * position in this table, you branch according to whether
-     * sbcs2ucs[ucs2sbcs[X]] is less than, greater than, or equal
-     * to U.
-     * 
-     * Note that since there may be fewer than 256 valid byte
-     * values in a particular SBCS, we must supply the length of
-     * this table as well as the contents.
-     */
-    unsigned char ucs2sbcs[256];
-    int nvalid;
+	/*
+	 * This lookup table is used to convert Unicode back to the
+	 * SBCS. It consists of the valid byte values in the SBCS,
+	 * sorted in order of their Unicode translation. So given a
+	 * Unicode value U, you can do a binary search on this table
+	 * using the above table as a lookup: when testing the Xth
+	 * position in this table, you branch according to whether
+	 * sbcs2ucs[ucs2sbcs[X]] is less than, greater than, or equal
+	 * to U.
+	 *
+	 * Note that since there may be fewer than 256 valid byte
+	 * values in a particular SBCS, we must supply the length of
+	 * this table as well as the contents.
+	 */
+	unsigned char ucs2sbcs[256];
+	int nvalid;
 };
 
 /*
@@ -86,21 +86,21 @@ struct sbcs_data {
  */
 charset_spec const *charset_find_spec(int charset);
 void read_sbcs(charset_spec const *charset, long int input_chr,
-	       charset_state *state,
-	       void (*emit)(void *ctx, long int output), void *emitctx);
+               charset_state *state,
+               void (*emit)(void *ctx, long int output), void *emitctx);
 int write_sbcs(charset_spec const *charset, long int input_chr,
-	       charset_state *state,
-	       void (*emit)(void *ctx, long int output), void *emitctx);
+               charset_state *state,
+               void (*emit)(void *ctx, long int output), void *emitctx);
 long int sbcs_to_unicode(const struct sbcs_data *sd, long int input_chr);
 long int sbcs_from_unicode(const struct sbcs_data *sd, long int input_chr);
 
 void read_utf8(charset_spec const *charset, long int input_chr,
-	       charset_state *state,
-	       void (*emit)(void *ctx, long int output), void *emitctx);
+               charset_state *state,
+               void (*emit)(void *ctx, long int output), void *emitctx);
 int write_utf8(charset_spec const *charset, long int input_chr,
-	       charset_state *state,
-	       void (*emit)(void *ctx, long int output),
-	       void *emitctx);
+               charset_state *state,
+               void (*emit)(void *ctx, long int output),
+               void *emitctx);
 
 long int big5_to_unicode(int r, int c);
 int unicode_to_big5(long int unicode, int *r, int *c);

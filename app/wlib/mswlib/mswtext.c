@@ -39,17 +39,17 @@
 static LOGFONT fixedFont = {
 	/* Initial default values */
 	-18, 0, /* H, W */
-	        0,		/* A */
-	        0,
-	        FW_REGULAR,
-	        0, 0, 0,/* I, U, SO */
-	        ANSI_CHARSET,
-	        0,		/* OP */
-	        0,		/* CP */
-	        0,		/* Q */
-	        FIXED_PITCH|FF_MODERN,	/* P&F */
-	        "Courier"
-        };
+	0,		/* A */
+	0,
+	FW_REGULAR,
+	0, 0, 0,/* I, U, SO */
+	ANSI_CHARSET,
+	0,		/* OP */
+	0,		/* CP */
+	0,		/* Q */
+	FIXED_PITCH|FF_MODERN,	/* P&F */
+	"Courier"
+};
 static HFONT fixedTextFont, prevTextFont;
 
 struct wText_t {

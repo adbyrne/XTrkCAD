@@ -3236,7 +3236,7 @@ EXPORT void DrawSelectedTracks( drawCmd_p d, BOOL_T all )
 			count++;
 		}
 	}
-	
+
 	SelectRecount();
 }
 
@@ -3355,7 +3355,7 @@ EXPORT void AddTrkDetails(drawCmd_p d,track_p trk,coOrd pos, DIST_T length,
 	DYNARR_SET(pos_angle_t,pos_array,(int)division+1);
 	DYNARR_N(pos_angle_t,pos_array,0).pos = GetTrkEndPos(trk,0);
 	DYNARR_N(pos_angle_t,pos_array,0).angle = NormalizeAngle(GetTrkEndAngle(trk,
-	                0)+180.0);
+	        0)+180.0);
 	for (int i=1; i<pos_array.cnt; i++) {
 		tt.dist = dist;
 		dist1 = dist;
@@ -3376,7 +3376,7 @@ EXPORT void AddTrkDetails(drawCmd_p d,track_p trk,coOrd pos, DIST_T length,
 		if (i==pos_array.cnt-1) {
 			sprintf( &message[strlen(message)], _("[%0.2f,%0.2f] A%0.2f"),
 			         PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.x),PutDim(DYNARR_N(pos_angle_t,
-			                         pos_array,i).pos.y),DYNARR_N(pos_angle_t,pos_array,i).angle );
+			                 pos_array,i).pos.y),DYNARR_N(pos_angle_t,pos_array,i).angle );
 		} else {
 			sprintf( &message[strlen(message)], _("[%0.2f,%0.2f] A%0.2f\n"),
 			         PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.x),PutDim(DYNARR_N(pos_angle_t,

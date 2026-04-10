@@ -1,6 +1,6 @@
 /** \file boxes.c
  * Window for drawing a rectangle
- * 
+ *
  * \todo Boxes are used as frames in dialog layout. Occurences should either be
  * converted to CSS or removed making these functions obsolete
  */
@@ -63,13 +63,13 @@
  */
 
 void wBoxSetSize(
-    wBox_p b,	
-    wWinPix_t w,	
-    wWinPix_t h)	
+        wBox_p b,
+        wWinPix_t w,
+        wWinPix_t h)
 {
-    fprintf(stderr, "wBoxSetSize() ist not implemented!\n");
-    // b->w = w;
-    // b->h = h;
+	fprintf(stderr, "wBoxSetSize() ist not implemented!\n");
+	// b->w = w;
+	// b->h = h;
 }
 
 /**
@@ -86,14 +86,14 @@ void wBoxSetSize(
  */
 
 void wlibDrawBox(
-    wWin_p win,
-    wBoxType_e style,
-    wWinPix_t x,
-    wWinPix_t y,
-    wWinPix_t w,
-    wWinPix_t h)
+        wWin_p win,
+        wBoxType_e style,
+        wWinPix_t x,
+        wWinPix_t y,
+        wWinPix_t w,
+        wWinPix_t h)
 {
-    fprintf(stderr, "wlibDrawBox() ist not implemented!\n");
+	fprintf(stderr, "wlibDrawBox() ist not implemented!\n");
 //     wWinPix_t x0, y0, x1, y1;
 //     GdkWindow * window;
 //     GdkDrawingContext * context;
@@ -195,9 +195,9 @@ void wlibDrawBox(
 #ifdef TODO_NOTUSED
 static void boxRepaint(wControl_p b)
 {
-    //wBox_p bb = (wBox_p)(b);
-    //wWin_p win = bb->parent;
-    //wlibDrawBox(win, bb->boxTyp, bb->realX, bb->realY, bb->w, bb->h);
+	//wBox_p bb = (wBox_p)(b);
+	//wWin_p win = bb->parent;
+	//wlibDrawBox(win, bb->boxTyp, bb->realX, bb->realY, bb->w, bb->h);
 }
 #endif
 
@@ -215,24 +215,24 @@ static void boxRepaint(wControl_p b)
  */
 
 wBox_p wBoxCreate(
-    wWin_p	parent,
-    wWinPix_t	bx,
-    wWinPix_t	by,
-    const char	* labelStr,
-    wBoxType_e boxTyp,
-    wWinPix_t	bw,
-    wWinPix_t	bh)
+        wWin_p	parent,
+        wWinPix_t	bx,
+        wWinPix_t	by,
+        const char	* labelStr,
+        wBoxType_e boxTyp,
+        wWinPix_t	bw,
+        wWinPix_t	bh)
 {
-    fprintf(stderr, "wBoxCreate() is not implemented!\n");
-/*     wBox_p b;
-    b = (wBox_p)wlibAlloc(parent, B_BOX, bx, by, labelStr, sizeof *b, NULL);
-    wlibComputePos((wControl_p)b);
-    b->boxTyp = boxTyp;
-    b->w = bw;
-    b->h = bh;
-    b->repaintProc = boxRepaint;
-    wlibAddButton((wControl_p)b);
-    return b;
- */
-    return NULL;
+	fprintf(stderr, "wBoxCreate() is not implemented!\n");
+	/*     wBox_p b;
+	    b = (wBox_p)wlibAlloc(parent, B_BOX, bx, by, labelStr, sizeof *b, NULL);
+	    wlibComputePos((wControl_p)b);
+	    b->boxTyp = boxTyp;
+	    b->w = bw;
+	    b->h = bh;
+	    b->repaintProc = boxRepaint;
+	    wlibAddButton((wControl_p)b);
+	    return b;
+	 */
+	return NULL;
 }

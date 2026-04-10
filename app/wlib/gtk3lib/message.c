@@ -79,7 +79,7 @@ void wMessageSetWidth(
 void wMessageSetLength(wControl_p control, size_t length)
 {
 	g_assert(control != NULL);
-	
+
 	gtk_label_set_width_chars(GTK_LABEL(control->widget), (int)length);
 }
 
@@ -92,62 +92,62 @@ void wMessageSetLength(wControl_p control, size_t length)
 
 wWinPix_t wMessageGetHeight(long flags)
 {
-    GtkWidget *temp;
+	GtkWidget *temp;
 	int text_width, text_height;
 	PangoLayout *layout;
 
-    temp = gtk_label_new("Test");
+	temp = gtk_label_new("Test");
 
 	/* the following code applies a different fontsize. It is not currently
 	 needed so it is not tested. Use with care ;-)	*/
-    if (wMessageSetFont(flags)) {
-        PangoFontDescription *fontDesc;
-        PangoContext *context;
-        int fontSize;
+	if (wMessageSetFont(flags)) {
+		PangoFontDescription *fontDesc;
+		PangoContext *context;
+		int fontSize;
 
-        /* get font info via Pango context */
-        context = gtk_widget_get_pango_context(temp);
-        fontDesc = pango_font_description_copy(
-            pango_context_get_font_description(context));
+		/* get font info via Pango context */
+		context = gtk_widget_get_pango_context(temp);
+		fontDesc = pango_font_description_copy(
+		                   pango_context_get_font_description(context));
 
-        fontSize = pango_font_description_get_size(fontDesc);
+		fontSize = pango_font_description_get_size(fontDesc);
 
-        if (flags & BM_LARGE) {
-            pango_font_description_set_size(fontDesc, (int)(fontSize * 1.4));
-        } else {
-            pango_font_description_set_size(fontDesc, (int)(fontSize * 0.7));
-        }
+		if (flags & BM_LARGE) {
+			pango_font_description_set_size(fontDesc, (int)(fontSize * 1.4));
+		} else {
+			pango_font_description_set_size(fontDesc, (int)(fontSize * 0.7));
+		}
 
-        /* override font via CSS provider instead of deprecated modify_font */
-        char css[256];
-        char *font_str = pango_font_description_to_string(fontDesc);
-        snprintf(css, sizeof(css), "* { font: %s; }", font_str);
-        g_free(font_str);
+		/* override font via CSS provider instead of deprecated modify_font */
+		char css[256];
+		char *font_str = pango_font_description_to_string(fontDesc);
+		snprintf(css, sizeof(css), "* { font: %s; }", font_str);
+		g_free(font_str);
 
-        GtkCssProvider *provider = gtk_css_provider_new();
-        gtk_css_provider_load_from_data(provider, css, -1, NULL);
-        gtk_style_context_add_provider(
-            gtk_widget_get_style_context(temp),
-            GTK_STYLE_PROVIDER(provider),
-            GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-        g_object_unref(provider);
+		GtkCssProvider *provider = gtk_css_provider_new();
+		gtk_css_provider_load_from_data(provider, css, -1, NULL);
+		gtk_style_context_add_provider(
+		        gtk_widget_get_style_context(temp),
+		        GTK_STYLE_PROVIDER(provider),
+		        GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+		g_object_unref(provider);
 
-        pango_font_description_free(fontDesc);
-    }
+		pango_font_description_free(fontDesc);
+	}
 
 	layout = gtk_label_get_layout(GTK_LABEL(temp));
 	pango_layout_get_pixel_size(layout, &text_width, &text_height);
 
-    g_object_ref_sink(temp);
-    gtk_widget_destroy(temp);
-    g_object_unref(temp);
+	g_object_ref_sink(temp);
+	gtk_widget_destroy(temp);
+	g_object_unref(temp);
 
 	return text_height;
 }
 
 /**
  * Create a widget for a simple text.
- * 
+ *
  * ### Usage in dialogs
  *
  * - runtime supported
@@ -209,7 +209,7 @@ wControl_p wMessageCreateEx(
 		if (wMessageSetFont(flags)) {
 			/* set the new font size */
 			GtkStyleContext* context = gtk_widget_get_style_context(
-				GTK_WIDGET(b->widget));
+			                                   GTK_WIDGET(b->widget));
 			if (flags & BM_LARGE) {
 				gtk_style_context_add_class(context, "largeLabel");
 			} else {

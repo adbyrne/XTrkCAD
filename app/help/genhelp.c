@@ -27,147 +27,148 @@
 typedef enum { TOOLTIPS, TOOLTIPS_I18N } mode_e;
 
 struct messageData {
-    char* line;
-    char* message;
+	char* line;
+	char* message;
 };
 
 int
 CompareMessages(const void *msg1, const void *msg2)
 {
-    return(strcmp(((const struct messageData *)msg1)->line, ((const struct messageData *)msg2)->line));
+	return(strcmp(((const struct messageData *)msg1)->line,
+	              ((const struct messageData *)msg2)->line));
 }
 
 int process(mode_e mode, char * json, FILE * outFile)
 {
-    const cJSON *messages = NULL;
-    const cJSON *messageLine = NULL;
-    int cntMessages;
-    int currentLine = 0;
-    int status = 0;
-    struct messageData *messageList = NULL;
+	const cJSON *messages = NULL;
+	const cJSON *messageLine = NULL;
+	int cntMessages;
+	int currentLine = 0;
+	int status = 0;
+	struct messageData *messageList = NULL;
 
-    cJSON *message_json = cJSON_Parse(json);
-    if (message_json == NULL) {
-        const char *error_ptr = cJSON_GetErrorPtr();
-        if (error_ptr != NULL) {
-            fprintf(stderr, "Error before: %s\n", error_ptr);
-        }
-        status = 0;
-        goto end;
-    }
+	cJSON *message_json = cJSON_Parse(json);
+	if (message_json == NULL) {
+		const char *error_ptr = cJSON_GetErrorPtr();
+		if (error_ptr != NULL) {
+			fprintf(stderr, "Error before: %s\n", error_ptr);
+		}
+		status = 0;
+		goto end;
+	}
 
-    fputs("/*\n * DO NOT EDIT! This file has been automatically created by genhelp.\n" 
-        " * Changes to this file will be overwritten. Edit this: genhelp.json\n */\n",
-          outFile);
-    ;
-    fprintf(outFile, "#include \"wlib.h\"\n");
+	fputs("/*\n * DO NOT EDIT! This file has been automatically created by genhelp.\n"
+	      " * Changes to this file will be overwritten. Edit this: genhelp.json\n */\n",
+	      outFile);
+	;
+	fprintf(outFile, "#include \"wlib.h\"\n");
 
-    if (mode == TOOLTIPS_I18N) {
-        fprintf(outFile, "#include \"" I18NHEADERFILE "\"\n");
-    }
+	if (mode == TOOLTIPS_I18N) {
+		fprintf(outFile, "#include \"" I18NHEADERFILE "\"\n");
+	}
 
-    messages = cJSON_GetObjectItemCaseSensitive(message_json, "messages");
-    cntMessages = cJSON_GetArraySize(messages);
-    messageList = malloc(sizeof(struct messageData) * cntMessages);
-    if (!messageList) {
-        fprintf(stderr, "Could not allocate storage for message list\n");
-        return(1);
-    }
+	messages = cJSON_GetObjectItemCaseSensitive(message_json, "messages");
+	cntMessages = cJSON_GetArraySize(messages);
+	messageList = malloc(sizeof(struct messageData) * cntMessages);
+	if (!messageList) {
+		fprintf(stderr, "Could not allocate storage for message list\n");
+		return(1);
+	}
 
-    fprintf(outFile, "wTooltip_t tooltipTexts[] = {\n");
+	fprintf(outFile, "wTooltip_t tooltipTexts[] = {\n");
 
-    cJSON_ArrayForEach(messageLine, messages) {
-        cJSON* line = cJSON_GetObjectItemCaseSensitive(messageLine, "line");
-        cJSON* contents = cJSON_GetObjectItemCaseSensitive(messageLine, "contents");
+	cJSON_ArrayForEach(messageLine, messages) {
+		cJSON* line = cJSON_GetObjectItemCaseSensitive(messageLine, "line");
+		cJSON* contents = cJSON_GetObjectItemCaseSensitive(messageLine, "contents");
 
-        if (!cJSON_IsString(line) || !cJSON_IsString(contents)) {
-            status = 0;
-            goto end;
-        }
+		if (!cJSON_IsString(line) || !cJSON_IsString(contents)) {
+			status = 0;
+			goto end;
+		}
 
-        messageList[currentLine].line = line->valuestring;
-        if (contents->valuestring[0]) {
-            messageList[currentLine].message = contents->valuestring;
-        }
-        else {
-            messageList[currentLine].message = NULL;
-        }
-        currentLine++;
-    }
+		messageList[currentLine].line = line->valuestring;
+		if (contents->valuestring[0]) {
+			messageList[currentLine].message = contents->valuestring;
+		} else {
+			messageList[currentLine].message = NULL;
+		}
+		currentLine++;
+	}
 
-    qsort(messageList, cntMessages, sizeof(struct messageData),  CompareMessages);
+	qsort(messageList, cntMessages, sizeof(struct messageData),  CompareMessages);
 
-    for(int i=0; i < cntMessages; i++ ) {
+	for(int i=0; i < cntMessages; i++ ) {
 
-        if (messageList[i].message != NULL) {
-            if (mode == TOOLTIPS) {
-                fprintf(outFile, "\t{ \"%s\", \"%s\" },\n", messageList[i].line,
-                    messageList[i].message);
-            } else {
-                    fprintf(outFile, "\t{ \"%s\", N_(\"%s\") },\n", messageList[i].line,
-                        messageList[i].message);
+		if (messageList[i].message != NULL) {
+			if (mode == TOOLTIPS) {
+				fprintf(outFile, "\t{ \"%s\", \"%s\" },\n", messageList[i].line,
+				        messageList[i].message);
+			} else {
+				fprintf(outFile, "\t{ \"%s\", N_(\"%s\") },\n", messageList[i].line,
+				        messageList[i].message);
 
-            }
-        } else {
-            fprintf(outFile, "\t{ \"%s\", NULL },\n", messageList[i].line);
-            fprintf(stderr, "INFO: %s has an empty help text\n", messageList[i].line);
-        }
-    }
+			}
+		} else {
+			fprintf(outFile, "\t{ \"%s\", NULL },\n", messageList[i].line);
+			fprintf(stderr, "INFO: %s has an empty help text\n", messageList[i].line);
+		}
+	}
 
-    fprintf(outFile, "\t{ NULL, NULL } };\n");
+	fprintf(outFile, "\t{ NULL, NULL } };\n");
 
-    fprintf(outFile, "\n\nunsigned TooltipsGetCount(void)\n{\n\treturn(%d);\n}\n", cntMessages);
+	fprintf(outFile, "\n\nunsigned TooltipsGetCount(void)\n{\n\treturn(%d);\n}\n",
+	        cntMessages);
 
 end:
-    cJSON_Delete(message_json);
-    return status;
+	cJSON_Delete(message_json);
+	return status;
 }
 
 
 int main(int argc, char * argv[])
 {
-    FILE * inFile, * outFile;
-    char *jsonData;
+	FILE * inFile, * outFile;
+	char *jsonData;
 
-    mode_e mode;
-    if (argc != 4) {
-        fprintf(stderr, "Usage: %s (-bh|-bhi) JSONFILE OUTFILE\n", argv[0]);
-        exit(1);
-    }
+	mode_e mode;
+	if (argc != 4) {
+		fprintf(stderr, "Usage: %s (-bh|-bhi) JSONFILE OUTFILE\n", argv[0]);
+		exit(1);
+	}
 
-    if (strcmp(argv[1], "-bh") == 0) {
-        mode = TOOLTIPS;
-    } else if (strcmp(argv[1], "-bhi") == 0) {
-        mode = TOOLTIPS_I18N;
-    } else {
-        fprintf(stderr, "Bad mode: %s\n", argv[1]);
-        exit(1);
-    }
+	if (strcmp(argv[1], "-bh") == 0) {
+		mode = TOOLTIPS;
+	} else if (strcmp(argv[1], "-bhi") == 0) {
+		mode = TOOLTIPS_I18N;
+	} else {
+		fprintf(stderr, "Bad mode: %s\n", argv[1]);
+		exit(1);
+	}
 
-    inFile = fopen(argv[2], "r");
-    if (inFile == NULL) {
-        perror(argv[2]);
-        exit(1);
-    }
+	inFile = fopen(argv[2], "r");
+	if (inFile == NULL) {
+		perror(argv[2]);
+		exit(1);
+	}
 
-    if (inFile) {
-        unsigned int length;
-        fseek(inFile, 0, SEEK_END);
-        length = ftell(inFile);
-        fseek(inFile, 0, SEEK_SET);
-        jsonData = malloc(length + 1);
-        if (jsonData) {
-            jsonData[ fread(jsonData, 1, length, inFile) ] = '\0';
-        }
-        fclose(inFile);
-    }
+	if (inFile) {
+		unsigned int length;
+		fseek(inFile, 0, SEEK_END);
+		length = ftell(inFile);
+		fseek(inFile, 0, SEEK_SET);
+		jsonData = malloc(length + 1);
+		if (jsonData) {
+			jsonData[ fread(jsonData, 1, length, inFile) ] = '\0';
+		}
+		fclose(inFile);
+	}
 
-    outFile = fopen(argv[3], "w");
-    if (outFile == NULL) {
-        perror(argv[3]);
-        exit(1);
-    }
+	outFile = fopen(argv[3], "w");
+	if (outFile == NULL) {
+		perror(argv[3]);
+		exit(1);
+	}
 
-    int ret = process(mode, jsonData, outFile);
-    exit(ret);
+	int ret = process(mode, jsonData, outFile);
+	exit(ret);
 }

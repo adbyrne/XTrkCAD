@@ -86,8 +86,8 @@ typedef unsigned long wDrawColor;
  */
 
 typedef struct {
-  const char *name;
-  const char *value;
+	const char *name;
+	const char *value;
 } wTooltip_t;
 
 unsigned TooltipsGetCount(void);
@@ -107,13 +107,13 @@ extern long wDebugFont;
 
 /* Creation CallBacks */
 typedef enum {
-  wClose_e,
-  wResize_e,
-  wState_e,
-  wQuit_e,
-  wRedraw_e,
-  wCancel_e,
-  wAccept_e
+	wClose_e,
+	wResize_e,
+	wState_e,
+	wQuit_e,
+	wRedraw_e,
+	wCancel_e,
+	wAccept_e
 } winProcEvent;
 
 typedef bool (*wWinCallBack_p)(wControl_p control, winProcEvent event,
@@ -457,9 +457,9 @@ void wTextSetPosition(wControl_p bt, int pos);
  */
 
 typedef struct {
-  int width;
-  int x0, y0;
-  int x1, y1;
+	int width;
+	int x0, y0;
+	int x1, y1;
 } wLines_t, *wLines_p;
 
 wLine_p wLineCreate(wWindow_p parent, const char *labelStr, int count,
@@ -474,14 +474,14 @@ wLine_p wLineCreate(wWindow_p parent, const char *labelStr, int count,
  */
 
 typedef enum {
-  wBoxThinB,
-  wBoxThinW,
-  wBoxAbove,
-  wBoxBelow,
-  wBoxThickB,
-  wBoxThickW,
-  wBoxRidge,
-  wBoxTrough
+	wBoxThinB,
+	wBoxThinW,
+	wBoxAbove,
+	wBoxBelow,
+	wBoxThickB,
+	wBoxThickW,
+	wBoxRidge,
+	wBoxTrough
 } wBoxType_e;
 
 void wBoxSetSize(wBox_p b, wWinPix_t w, wWinPix_t h);
@@ -519,20 +519,20 @@ unsigned long wGetTimer(void);
 void wExit(int);
 
 typedef enum {
-  wCursorNormal,
-  wCursorNone,
-  wCursorAppStart,
-  wCursorHand,
-  wCursorNo,
-  wCursorSizeAll,
-  wCursorSizeNESW,
-  wCursorSizeNS,
-  wCursorSizeNWSE,
-  wCursorSizeWE,
-  wCursorWait,
-  wCursorIBeam,
-  wCursorCross,
-  wCursorQuestion
+	wCursorNormal,
+	wCursorNone,
+	wCursorAppStart,
+	wCursorHand,
+	wCursorNo,
+	wCursorSizeAll,
+	wCursorSizeNESW,
+	wCursorSizeNS,
+	wCursorSizeNWSE,
+	wCursorSizeWE,
+	wCursorWait,
+	wCursorIBeam,
+	wCursorCross,
+	wCursorQuestion
 } wCursor_t;
 void wSetCursor(wControl_p window, wCursor_t cursor);
 #define defaultCursor wCursorCross
@@ -747,8 +747,8 @@ void wListSetActive(wList_p, wIndex_t, wBool_t);
 void wListSetEditable(wList_p, wBool_t);
 
 struct rendererContext {
-  wControl_p list;
-  void *context;
+	wControl_p list;
+	void *context;
 };
 int wListSetColumnEditable(wControl_p list, const char *renderer,
                            void *context);
@@ -777,13 +777,13 @@ typedef int wDrawOpts;
 #define EXPORTBITMAP (1)
 
 typedef enum {
-  wDrawLineSolid,
-  wDrawLineDash,
-  wDrawLineDot,
-  wDrawLineDashDot,
-  wDrawLineDashDotDot,
-  wDrawLineCenter,
-  wDrawLinePhantom
+	wDrawLineSolid,
+	wDrawLineDash,
+	wDrawLineDot,
+	wDrawLineDashDot,
+	wDrawLineDashDotDot,
+	wDrawLineCenter,
+	wDrawLinePhantom
 } wDrawLineType_e;
 
 typedef enum { wPolyLineStraight, wPolyLineSmooth, wPolyLineRound } wPolyLine_e;
@@ -912,40 +912,40 @@ const char *wPrintGetName(void);
 #define WSHIFT (1 << 13)
 
 typedef enum {
-  wAccelKey_None,
-  wAccelKey_Del,
-  wAccelKey_Ins,
-  wAccelKey_Home,
-  wAccelKey_End,
-  wAccelKey_Pgup,
-  wAccelKey_Pgdn,
-  wAccelKey_Up,
-  wAccelKey_Down,
-  wAccelKey_Right,
-  wAccelKey_Left,
-  wAccelKey_Back,
-  wAccelKey_F1,
-  wAccelKey_F2,
-  wAccelKey_F3,
-  wAccelKey_F4,
-  wAccelKey_F5,
-  wAccelKey_F6,
-  wAccelKey_F7,
-  wAccelKey_F8,
-  wAccelKey_F9,
-  wAccelKey_F10,
-  wAccelKey_F11,
-  wAccelKey_F12,
-  wAccelKey_Numpad_Add,
-  wAccelKey_Numpad_Subtract,
-  wAccelKey_LineFeed
+	wAccelKey_None,
+	wAccelKey_Del,
+	wAccelKey_Ins,
+	wAccelKey_Home,
+	wAccelKey_End,
+	wAccelKey_Pgup,
+	wAccelKey_Pgdn,
+	wAccelKey_Up,
+	wAccelKey_Down,
+	wAccelKey_Right,
+	wAccelKey_Left,
+	wAccelKey_Back,
+	wAccelKey_F1,
+	wAccelKey_F2,
+	wAccelKey_F3,
+	wAccelKey_F4,
+	wAccelKey_F5,
+	wAccelKey_F6,
+	wAccelKey_F7,
+	wAccelKey_F8,
+	wAccelKey_F9,
+	wAccelKey_F10,
+	wAccelKey_F11,
+	wAccelKey_F12,
+	wAccelKey_Numpad_Add,
+	wAccelKey_Numpad_Subtract,
+	wAccelKey_LineFeed
 } wAccelKey_e;
 
 typedef enum {
-  wModKey_None,
-  wModKey_Alt,
-  wModKey_Shift,
-  wModKey_Ctrl
+	wModKey_None,
+	wModKey_Alt,
+	wModKey_Shift,
+	wModKey_Ctrl
 } wModKey_e;
 
 void wDoAccelHelp(wAccelKey_e key, void *);

@@ -459,10 +459,10 @@ static void DescribeLayout(
 
 #ifdef DESCRIBENOTIMPL
 void DescUpdateFuncNotImplemented(
-		track_p trkP,
-		int inx,
-		descData_p p,
-		BOOL_T bFlag )
+        track_p trkP,
+        int inx,
+        descData_p p,
+        BOOL_T bFlag )
 {
 	printf("%s:%d Not implemented! - DescUpdateFunc\n", __FILE__, __LINE__);
 }
@@ -500,10 +500,11 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 		                  TRUE,
 		                  F_RECALLPOS|PD_F_ALT_CANCELLABEL,
 		                  DescribeUpdate);
-if ( bOldDescribe )
-		describeCmdButtonEnd = wControlBelow((wControl_p)describePG.helpB);
+		if ( bOldDescribe ) {
+			describeCmdButtonEnd = wControlBelow((wControl_p)describePG.helpB);
+		}
 	}
-if ( !bOldDescribe ) return;
+	if ( !bOldDescribe ) { return; }
 
 	for (inx=0; inx<COUNT( describePLs ); inx++) {
 		describePLs[inx].option = PDO_DLGIGNORE;
@@ -723,7 +724,8 @@ void InitCmdDescribe(wMenu_p menu)
 {
 	describeCmdInx = AddMenuButton(menu, CmdDescribe, "cmdDescribe",
 	                               _("Properties"), CreateToolbarIconFromResource("describe.png"),
-	                               LEVEL0, IC_CANCEL|IC_POPUP|IC_WANT_MOVE|IC_CMDMENU|IC_TOGGLE, ACCL_DESCRIBE, NULL);
+	                               LEVEL0, IC_CANCEL|IC_POPUP|IC_WANT_MOVE|IC_CMDMENU|IC_TOGGLE, ACCL_DESCRIBE,
+	                               NULL);
 	RegisterChangeNotification(DescChange);
 	FormRegister(&describePG);
 }
