@@ -8,6 +8,8 @@ add_executable(dxfformattest
 				../dxfformat.c
 			  )
 
+target_include_directories(dxfformattest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
+
 target_link_libraries(dxfformattest
                       dynstring
 					 ${LIBS})
@@ -33,8 +35,12 @@ add_executable( defaultstest
 				defaultstest.c
 				)
 
+target_include_directories(defaultstest PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_SOURCE_DIR}/app/wlib/include
+)
+
 target_link_libraries(defaultstest
-                      xtrkcad-wlib
 					  ${LIBS})
 
 add_test(DefaultsTest defaultstest)
@@ -45,6 +51,8 @@ add_executable(shortentest
 			  shortentest.c
 			  ../shortentext.c
 			 )
+
+target_include_directories(shortentest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 target_link_libraries(shortentest
 					${LIBS})

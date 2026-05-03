@@ -29,11 +29,14 @@ find_path(CMOCKA_INCLUDE_DIR
         cmocka.h
     PATHS
         ${CMOCKA_ROOT_DIR}/include
+    PATH_SUFFIXES
+        cmocka
 )
 
 find_library(CMOCKA_LIBRARY
     NAMES
         cmocka-static
+        cmocka
     PATHS
         ${CMOCKA_ROOT_DIR}/lib
 )

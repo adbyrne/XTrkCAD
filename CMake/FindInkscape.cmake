@@ -1,19 +1,36 @@
 
-# Try to find the Inkscape command-line SVG rasterizer
+# Try to find an SVG rasterizer (rsvg-convert or Inkscape)
 # Once done this will define
 #
 # Inkscape_FOUND
-# Inkscape_EXECUTABLE   Where to find Inkscape
-# Inkscape_VERSION      The Inkscape version number
-# Inkscape_EXPORT       Option to specify the destination file
-# Inkscape_GUI          Option to disable the GUI if needed
+# Inkscape_EXECUTABLE   Where to find the rasterizer
+# Inkscape_VERSION      The rasterizer version number
+# Inkscape_EXPORT       Option to specify the destination file (Inkscape only)
+# Inkscape_GUI          Option to disable the GUI if needed (Inkscape only)
+# Inkscape_IS_RSVG      TRUE if rsvg-convert is being used instead of Inkscape
 #
-# Module is from https://github.com/arx/ArxLibertatis
+# Original module from https://github.com/arx/ArxLibertatis
+# Extended to prefer rsvg-convert (no D-Bus session required, works headless/CI)
+
+# Prefer rsvg-convert: lighter weight, no D-Bus session required, works in CI
+find_program(RsvgConvert_EXECUTABLE NAMES rsvg-convert DOC "rsvg-convert SVG rasterizer")
+
+if(RsvgConvert_EXECUTABLE)
+	set(Inkscape_EXECUTABLE ${RsvgConvert_EXECUTABLE} CACHE FILEPATH "SVG rasterizer (rsvg-convert)" FORCE)
+	set(Inkscape_IS_RSVG TRUE CACHE BOOL "SVG conversion uses rsvg-convert instead of Inkscape")
+	execute_process(COMMAND ${RsvgConvert_EXECUTABLE} "--version" OUTPUT_VARIABLE _RSVG_VERSION ERROR_QUIET)
+	STRING(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" _RSVG_VERSION "${_RSVG_VERSION}")
+	set(Inkscape_VERSION ${_RSVG_VERSION} CACHE STRING "SVG converter version")
+	message(STATUS "Found rsvg-convert: ${RsvgConvert_EXECUTABLE} (${Inkscape_VERSION}) — using instead of Inkscape")
+	include(FindPackageHandleStandardArgs)
+	find_package_handle_standard_args(Inkscape REQUIRED_VARS Inkscape_EXECUTABLE)
+	return()
+endif()
 
 find_program(
 	Inkscape_EXECUTABLE
 	NAMES inkscape
-    HINTS "C:/Program Files/Inkscape/bin" 
+    HINTS "C:/Program Files/Inkscape/bin"
 	DOC "Inkscape command-line SVG rasterizer"
 )
 
