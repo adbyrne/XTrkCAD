@@ -1,5 +1,6 @@
 """Tests for the XTrkCAD layout parser against bundled example files."""
 
+import os
 from pathlib import Path
 
 import pytest
@@ -7,10 +8,15 @@ import pytest
 from xtrkcad_mcp.parser import parse_file
 
 EXAMPLES_DIR = Path(__file__).parent.parent.parent / "app" / "lib" / "examples"
+USER_PLANS_DIR = Path(os.environ.get("XTRKCAD_PLANS_DIR", "")).expanduser()
 
 
 def examples_available() -> bool:
     return EXAMPLES_DIR.is_dir()
+
+
+def user_plans_available() -> bool:
+    return USER_PLANS_DIR.is_dir() and any(USER_PLANS_DIR.rglob("*.xtc"))
 
 
 @pytest.mark.skipif(not examples_available(), reason="example layouts not found")
@@ -66,3 +72,19 @@ def test_parse_multiple_layouts(filename):
     layout = parse_file(path)
     assert layout.scale != "" or layout.room_width > 0
     assert len(layout.tracks) >= 0  # at minimum parses without error
+
+
+@pytest.mark.skipif(not user_plans_available(), reason="XTRKCAD_PLANS_DIR not set or empty")
+def test_parse_all_user_plans():
+    """Parse every file in XTRKCAD_PLANS_DIR — no errors expected."""
+    files = sorted(USER_PLANS_DIR.rglob("*.xtc")) + sorted(USER_PLANS_DIR.rglob("*.xtce"))
+    assert len(files) > 0, "No layout files found"
+    for path in files:
+        layout = parse_file(path)
+        # Each file should have valid structure
+        assert isinstance(layout.scale, str)
+        assert layout.room_width >= 0
+        assert layout.room_height >= 0
+        for track in layout.tracks:
+            assert track.id > 0
+            assert isinstance(track.kind, str)
