@@ -1,0 +1,1 @@
+"""XTrkCAD MCP server."""

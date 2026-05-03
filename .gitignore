@@ -22,3 +22,10 @@ _CPack_Packages/
 # OS
 .DS_Store
 Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+*.egg-info/

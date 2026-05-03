@@ -1,0 +1,40 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "xtrkcad-mcp"
+version = "0.1.0"
+description = "MCP server for reading and creating XTrkCAD model railroad track plans"
+readme = "README.md"
+license = "GPL-2.0-or-later"
+requires-python = ">=3.11"
+authors = [
+    { name = "Allen Byrne", email = "allen.dean.byrne@gmail.com" }
+]
+keywords = ["xtrkcad", "mcp", "model-railroad", "cad", "claude"]
+dependencies = [
+    "mcp>=1.25.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.25.0",
+    "anyio>=4.0.0",
+]
+
+[project.scripts]
+xtrkcad-mcp = "xtrkcad_mcp.server:main"
+
+[project.urls]
+Homepage = "https://github.com/adbyrne/XTrkCAD"
+Repository = "https://github.com/adbyrne/XTrkCAD.git"
+
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/xtrkcad_mcp"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
