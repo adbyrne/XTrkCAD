@@ -2,16 +2,14 @@
 
 from pathlib import Path
 
-from xtrkcad_mcp.models import Endpoint, Layout, TrackObject
+from xtrkcad_mcp.models import Endpoint, LayerInfo, Layout, TrackObject
 
-# Top-level keywords that define track/non-track objects ending with END
 TRACK_KINDS = frozenset(
     {"STRAIGHT", "CURVE", "JOINT", "TURNOUT", "TURNTABLE", "CORNU", "BEZIER", "HANDLAID"}
 )
 
 
 def _parse_roomsize(value: str) -> tuple[float, float]:
-    """Parse 'W x H' string into (width, height)."""
     parts = value.split("x")
     if len(parts) == 2:
         try:
@@ -21,17 +19,31 @@ def _parse_roomsize(value: str) -> tuple[float, float]:
     return 0.0, 0.0
 
 
-def _parse_endpoint_line(parts: list[str]) -> Endpoint:
-    """Parse a T or E sub-line (already split, tag stripped)."""
-    # T: connected_id x y angle [extra...]
-    # E: x y angle [extra...]
+def _parse_layers_line(line: str, layout: Layout) -> None:
+    """Parse a LAYERS record and store in layout.layers."""
+    # LAYERS index visible flag visible_color ... "Name"
+    # LAYERS CURRENT index
+    parts = line.split(None, 3)
+    if len(parts) < 2:
+        return
+    if parts[1] == "CURRENT":
+        return
     try:
-        x = float(parts[0])
-        y = float(parts[1])
-        angle = float(parts[2])
-        return Endpoint(x=x, y=y, angle=angle, connected_to=None)
-    except (IndexError, ValueError):
-        return Endpoint(x=0.0, y=0.0, angle=0.0, connected_to=None)
+        idx = int(parts[1])
+    except ValueError:
+        return
+    # Extract quoted name at end of line
+    q = line.rfind('"')
+    qstart = line.rfind('"', 0, q)
+    name = line[qstart + 1:q] if q > 0 and qstart >= 0 else f"Layer {idx}"
+    # Visibility is the 3rd token (index 2)
+    visible = True
+    if len(parts) >= 3:
+        try:
+            visible = int(parts[2]) != 0
+        except ValueError:
+            pass
+    layout.layers[idx] = LayerInfo(index=idx, name=name, visible=visible)
 
 
 def parse_file(path: str | Path) -> Layout:
@@ -44,7 +56,6 @@ def parse_file(path: str | Path) -> Layout:
         for raw_line in fh:
             line = raw_line.rstrip("\n")
 
-            # Sub-line of a current track object
             if line.startswith("\t"):
                 if current_track is None:
                     continue
@@ -53,27 +64,28 @@ def parse_file(path: str | Path) -> Layout:
                     continue
                 tag = parts[0]
                 if tag == "T" and len(parts) >= 5:
-                    # T connected_id x y angle [extra...]
                     try:
                         connected_id = int(parts[1])
-                        ep = _parse_endpoint_line(parts[2:])
-                        ep.connected_to = connected_id
-                        current_track.endpoints.append(ep)
+                        x, y, angle = float(parts[2]), float(parts[3]), float(parts[4])
+                        current_track.endpoints.append(
+                            Endpoint(x=x, y=y, angle=angle, connected_to=connected_id)
+                        )
                     except (ValueError, IndexError):
                         pass
                 elif tag == "E" and len(parts) >= 4:
-                    # E x y angle — open endpoint
-                    ep = _parse_endpoint_line(parts[1:])
-                    current_track.endpoints.append(ep)
-                # D, P, C etc. are turnout internal data — skip
+                    try:
+                        x, y, angle = float(parts[1]), float(parts[2]), float(parts[3])
+                        current_track.endpoints.append(
+                            Endpoint(x=x, y=y, angle=angle, connected_to=None)
+                        )
+                    except (ValueError, IndexError):
+                        pass
                 continue
 
-            # End of a track object
             if line.strip() == "END":
                 current_track = None
                 continue
 
-            # Top-level keyword line
             parts = line.split()
             if not parts or line.startswith("#"):
                 continue
@@ -92,28 +104,31 @@ def parse_file(path: str | Path) -> Layout:
                 layout.room_width, layout.room_height = _parse_roomsize(
                     line[len("ROOMSIZE "):]
                 )
+            elif keyword == "LAYERS":
+                _parse_layers_line(line, layout)
             elif keyword in TRACK_KINDS and len(parts) >= 2:
                 try:
                     track_id = int(parts[1])
                 except ValueError:
                     continue
-                # Layer is the 6th field (index 5) when it exists
                 layer = 0
-                if len(parts) >= 6:
+                if len(parts) >= 3:
                     try:
-                        layer = int(parts[5])
+                        layer = int(parts[2])
                     except ValueError:
                         pass
                 extra: dict = {}
-                if keyword == "CURVE" and len(parts) >= 10:
-                    try:
-                        extra["cx"] = float(parts[8])
-                        extra["cy"] = float(parts[9])
-                        extra["radius"] = float(parts[11]) if len(parts) > 11 else 0.0
-                    except (ValueError, IndexError):
-                        pass
+                if keyword == "CURVE":
+                    # Format: CURVE id layer options 0 0 scale bits cx cy 0 radius ...
+                    # Indices:   0    1   2      3   4 5  6    7   8  9 10  11
+                    if len(parts) >= 12:
+                        try:
+                            extra["cx"] = float(parts[8])
+                            extra["cy"] = float(parts[9])
+                            extra["radius"] = float(parts[11])
+                        except (ValueError, IndexError):
+                            pass
                 elif keyword == "TURNOUT":
-                    # Name is in quotes at end of line
                     q = line.find('"')
                     if q >= 0:
                         extra["name"] = line[q:].strip('"')
