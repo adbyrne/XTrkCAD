@@ -4,26 +4,54 @@ import math
 from dataclasses import dataclass, field
 
 
-# Scale ratio lookup (model:prototype = 1:ratio)
-SCALE_RATIOS: dict[str, float] = {
-    "Z": 220.0,
-    "N": 160.0,
-    "TT": 120.0,
-    "HO": 87.1,
-    "S": 64.0,
-    "O": 48.0,
-    "G": 22.5,
-    "I": 32.0,
-    "Nn3": 160.0,
-    "HOn3": 87.1,
-    "On3": 48.0,
-    "Sn3": 64.0,
+# Fugate cars-per-real-foot factors (MRH Oct 2014).
+# Based on a ~44-ft car (40-ft body + couplers) at each scale.
+CARS_PER_FT: dict[str, float] = {
+    "O": 1.0,
+    "S": 1.5,
+    "HO": 2.0,
+    "N": 4.0,
+    "Z": 5.0,
+    # Narrow gauge — same body length as parent scale
+    "HOn3": 2.0,
+    "On3": 1.0,
+    "Sn3": 1.5,
+    "Nn3": 4.0,
+    # Other common scales (approximated)
+    "G": 0.5,
+    "TT": 3.0,
+    "I": 0.75,
 }
 
-# Car length in model inches for a standard 40-ft freight car, by scale
-def car_length_model_inches(scale: str) -> float:
-    ratio = SCALE_RATIOS.get(scale.upper(), SCALE_RATIOS.get(scale, 87.1))
-    return (40.0 * 12.0) / ratio  # 40 prototype ft → model inches
+# Scale prototype ratio (1:X) — used for radius conversions only
+SCALE_RATIOS: dict[str, float] = {
+    "Z": 220.0, "N": 160.0, "TT": 120.0, "HO": 87.1,
+    "S": 64.0, "O": 48.0, "G": 22.5, "I": 32.0,
+    "Nn3": 160.0, "HOn3": 87.1, "On3": 48.0, "Sn3": 64.0,
+}
+
+
+def cars_per_real_ft(scale: str) -> float:
+    """Return Fugate cars/ft factor for the given scale name."""
+    return CARS_PER_FT.get(scale.upper(), CARS_PER_FT.get(scale, 2.0))
+
+
+def ft_to_cars(feet: float, scale: str) -> int:
+    """Convert real feet of track to equivalent number of 40-ft cars (truncated)."""
+    return int(feet * cars_per_real_ft(scale))
+
+
+# Max-to-main interpretation bands
+def max_to_main_label(pct: float) -> str:
+    if pct < 50:
+        return "Mainline focus"
+    if pct <= 80:
+        return "Mainline emphasis"
+    if pct <= 120:
+        return "Balanced"
+    if pct <= 150:
+        return "Switching emphasis"
+    return "Switching focus"
 
 
 @dataclass
@@ -40,17 +68,16 @@ class Endpoint:
     x: float
     y: float
     angle: float
-    connected_to: int | None = None  # track object ID if T, None if E
+    connected_to: int | None = None
 
 
 def _normalize_angle(a: float) -> float:
-    """Bring angle to [0, 360)."""
     return ((a % 360.0) + 360.0) % 360.0
 
 
 @dataclass
 class TrackObject:
-    """A single track element (STRAIGHT, CURVE, TURNOUT, etc.)."""
+    """A single track element."""
     id: int
     kind: str
     layer: int
@@ -58,42 +85,29 @@ class TrackObject:
     extra: dict = field(default_factory=dict)
 
     def length_model_inches(self) -> float:
-        """Compute track length in model inches.
+        """Track length in model inches.
 
-        STRAIGHT / JOINT: Euclidean distance between endpoints 0 and 1.
-        CURVE: r × 2π × arc_angle / 360, where arc_angle uses the formula
-               from XTrkCAD's GetCurveAngles(): a1 = NormalizeAngle(ep1 - ep0 + 180).
-        TURNOUT: straight-line distance ep0 → ep1 (main path approximation).
-        Others: 0.0.
+        STRAIGHT / JOINT: Euclidean distance between ep[0] and ep[1].
+        CURVE: r × 2π × arc_angle / 360 using GetCurveAngles() from tcurve.c:
+               arc_angle = NormalizeAngle(ep[1].angle - ep[0].angle + 180).
+        TURNOUT: chord ep[0] → ep[1] (main-path approximation).
         """
         eps = self.endpoints
         if len(eps) < 2:
             return 0.0
-
         if self.kind in {"STRAIGHT", "JOINT"}:
-            dx = eps[1].x - eps[0].x
-            dy = eps[1].y - eps[0].y
-            return math.hypot(dx, dy)
-
+            return math.hypot(eps[1].x - eps[0].x, eps[1].y - eps[0].y)
         if self.kind == "CURVE":
-            radius = self.extra.get("radius", 0.0)
-            if radius <= 0.0:
-                # Fallback to chord length
-                dx = eps[1].x - eps[0].x
-                dy = eps[1].y - eps[0].y
-                return math.hypot(dx, dy)
-            arc_angle = _normalize_angle(eps[1].angle - eps[0].angle + 180.0)
-            return radius * 2.0 * math.pi * arc_angle / 360.0
-
+            r = self.extra.get("radius", 0.0)
+            if r <= 0.0:
+                return math.hypot(eps[1].x - eps[0].x, eps[1].y - eps[0].y)
+            arc_deg = _normalize_angle(eps[1].angle - eps[0].angle + 180.0)
+            return r * 2.0 * math.pi * arc_deg / 360.0
         if self.kind == "TURNOUT":
-            dx = eps[1].x - eps[0].x
-            dy = eps[1].y - eps[0].y
-            return math.hypot(dx, dy)
-
+            return math.hypot(eps[1].x - eps[0].x, eps[1].y - eps[0].y)
         return 0.0
 
     def length_real_feet(self) -> float:
-        """Length in real (layout room) feet: model_inches / 12."""
         return self.length_model_inches() / 12.0
 
 
@@ -116,19 +130,15 @@ class Layout:
         return counts
 
     def unconnected_endpoints(self) -> list[tuple[int, Endpoint]]:
-        """Return (track_id, endpoint) pairs where endpoint.connected_to is None."""
         return [
-            (t.id, ep)
-            for t in self.tracks
-            for ep in t.endpoints
-            if ep.connected_to is None
+            (t.id, ep) for t in self.tracks
+            for ep in t.endpoints if ep.connected_to is None
         ]
 
     def total_length_real_feet(self) -> float:
         return sum(t.length_real_feet() for t in self.tracks)
 
     def length_by_layer(self) -> dict[int, float]:
-        """Real feet of track per layer index."""
         result: dict[int, float] = {}
         for t in self.tracks:
             result[t.layer] = result.get(t.layer, 0.0) + t.length_real_feet()
@@ -142,9 +152,7 @@ class Layout:
         return result
 
     def curve_radii(self) -> list[float]:
-        """All CURVE radii in model inches."""
         return [
-            t.extra["radius"]
-            for t in self.tracks
+            t.extra["radius"] for t in self.tracks
             if t.kind == "CURVE" and t.extra.get("radius", 0.0) > 0.0
         ]
