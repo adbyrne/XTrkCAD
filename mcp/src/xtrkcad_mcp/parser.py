@@ -128,6 +128,15 @@ def parse_file(path: str | Path) -> Layout:
                             extra["radius"] = float(parts[11])
                         except (ValueError, IndexError):
                             pass
+                elif keyword == "TURNTABLE":
+                    # Same field layout as CURVE: cx=parts[8], cy=parts[9], radius=parts[11]
+                    if len(parts) >= 12:
+                        try:
+                            extra["cx"] = float(parts[8])
+                            extra["cy"] = float(parts[9])
+                            extra["radius"] = float(parts[11])
+                        except (ValueError, IndexError):
+                            pass
                 elif keyword == "TURNOUT":
                     q = line.find('"')
                     if q >= 0:

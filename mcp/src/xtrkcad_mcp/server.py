@@ -772,6 +772,9 @@ def write_gaps_report(path: str, output_path: str) -> str:
     Groups pairs of endpoints within 0.1 model inches of each other as
     near misses (should likely be connected).
 
+    Turntable stall endpoints are intentionally open and are reported
+    separately — they do not appear in the gap analysis.
+
     Args:
         path: Path to the source .xtc or .xtce file.
         output_path: Destination path for the .txt report.
@@ -780,10 +783,14 @@ def write_gaps_report(path: str, output_path: str) -> str:
         Confirmation message with the absolute path written.
     """
     layout = parse_file(_resolve_plan(path))
-    open_eps = [
+    all_open = [
         {"track_id": tid, "x": ep.x, "y": ep.y, "angle": ep.angle}
         for tid, ep in layout.unconnected_endpoints()
     ]
+
+    turntable_ids = {t.id for t in layout.tracks if t.kind == "TURNTABLE"}
+    open_eps = [ep for ep in all_open if ep["track_id"] not in turntable_ids]
+    tt_stalls = [ep for ep in all_open if ep["track_id"] in turntable_ids]
 
     pairs = _near_miss_pairs(open_eps)
     near_miss_indices: set[int] = set()
@@ -792,6 +799,11 @@ def write_gaps_report(path: str, output_path: str) -> str:
         near_miss_indices.add(j)
     isolated = [i for i in range(len(open_eps)) if i not in near_miss_indices]
 
+    tt_ids_str = (
+        ", ".join(str(i) for i in sorted({ep["track_id"] for ep in tt_stalls}))
+        if tt_stalls else "none"
+    )
+
     lines: list[str] = [
         "TRACK GAPS REPORT",
         f"  Layout : {layout.title1}",
@@ -799,9 +811,10 @@ def write_gaps_report(path: str, output_path: str) -> str:
         f"  Date   : {datetime.date.today()}",
         "",
         "SUMMARY",
-        f"  Total open endpoints : {len(open_eps)}",
-        f"  Near-miss pairs      : {len(pairs)}  (endpoints within 0.1\" of each other)",
-        f"  Isolated open ends   : {len(isolated)}",
+        f"  Turntable stalls (open by design) : {len(tt_stalls):4d}  (track IDs: {tt_ids_str})",
+        f"  Track gaps to check               : {len(open_eps):4d}",
+        f"  Near-miss pairs                   : {len(pairs):4d}  (endpoints within 0.1\" — should connect)",
+        f"  Isolated open ends                : {len(isolated):4d}",
     ]
 
     if pairs:
@@ -816,7 +829,7 @@ def write_gaps_report(path: str, output_path: str) -> str:
             )
 
     if open_eps:
-        lines += ["", "ALL OPEN ENDPOINTS"]
+        lines += ["", "ALL OPEN TRACK ENDPOINTS"]
         lines.append(
             f"  {'Track':>5s}  {'X':>10s}  {'Y':>10s}  {'Angle':>8s}  {'Note':5s}"
         )
@@ -833,6 +846,209 @@ def write_gaps_report(path: str, output_path: str) -> str:
     out = Path(output_path).expanduser()
     out.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return f"Report written to {out}"
+
+
+# ---------------------------------------------------------------------------
+# SVG radius map
+# ---------------------------------------------------------------------------
+
+
+def _arc_polyline(
+    cx: float, cy: float, r: float,
+    x1: float, y1: float, x2: float, y2: float,
+    arc_deg: float, n: int = 24,
+) -> list[tuple[float, float]]:
+    """Sample n+1 points on the circular arc from (x1,y1) to (x2,y2)."""
+    if arc_deg < 0.01 or r <= 0:
+        return [(x1, y1), (x2, y2)]
+    a_start = math.atan2(y1 - cy, x1 - cx)
+    arc_rad = math.radians(arc_deg)
+
+    def sample(direction: float) -> list[tuple[float, float]]:
+        return [
+            (cx + r * math.cos(a_start + direction * arc_rad * i / n),
+             cy + r * math.sin(a_start + direction * arc_rad * i / n))
+            for i in range(n + 1)
+        ]
+
+    pts_ccw = sample(1.0)
+    pts_cw = sample(-1.0)
+
+    def dist_end(pts: list) -> float:
+        ex, ey = pts[-1]
+        return math.hypot(ex - x2, ey - y2)
+
+    return pts_ccw if dist_end(pts_ccw) <= dist_end(pts_cw) else pts_cw
+
+
+@mcp.tool()
+def write_radius_map(
+    path: str,
+    output_path: str,
+    flag_radius: float | None = None,
+) -> str:
+    """Generate an SVG map of the layout with curves color-coded by radius.
+
+    Useful for visually identifying curves that may be too tight for
+    reliable equipment operation.
+
+    Color coding (model inches, scaled to layout's gauge):
+      Red    — below flag_radius (default 18\" HO-equivalent): likely problematic
+      Orange — flag_radius to 1.5×: tight but operable for most stock
+      Yellow — 1.5× to 2×flag_radius: marginal for long cars/steam
+      Gray   — above 2×flag_radius: normal
+
+    Problem curves (below 2×flag_radius) are labeled with track ID and radius.
+
+    Args:
+        path: Path to the source .xtc or .xtce file.
+        output_path: Destination path for the .svg file.
+        flag_radius: Model-inch threshold for red flagging. Defaults to
+            18\" HO scaled to the layout's scale.
+
+    Returns:
+        Confirmation message with the absolute path written.
+    """
+    layout = parse_file(_resolve_plan(path))
+    scale = layout.scale
+
+    ho_ratio = SCALE_RATIOS.get("HO", 87.1)
+    sr = SCALE_RATIOS.get(scale, 87.1)
+    if flag_radius is None:
+        flag_radius = 18.0 * ho_ratio / sr
+
+    thresh_orange = flag_radius * 1.5
+    thresh_yellow = flag_radius * 2.0
+
+    def curve_class(r: float) -> str:
+        if r < flag_radius:
+            return "curve-red"
+        if r < thresh_orange:
+            return "curve-orange"
+        if r < thresh_yellow:
+            return "curve-yellow"
+        return "curve-normal"
+
+    room_w = layout.room_width or 200.0
+    room_h = layout.room_height or 200.0
+    px_scale = 1200.0 / max(room_w, room_h)
+    svg_w = int(room_w * px_scale)
+    svg_h = int(room_h * px_scale)
+
+    def tx(x: float) -> str:
+        return f"{x * px_scale:.1f}"
+
+    def ty(y: float) -> str:
+        return f"{(room_h - y) * px_scale:.1f}"
+
+    def txf(x: float) -> float:
+        return x * px_scale
+
+    def tyf(y: float) -> float:
+        return (room_h - y) * px_scale
+
+    elements: list[str] = []
+
+    for t in layout.tracks:
+        eps = t.endpoints
+        if len(eps) < 2:
+            continue
+
+        if t.kind in {"STRAIGHT", "JOINT"}:
+            elements.append(
+                f'<line x1="{tx(eps[0].x)}" y1="{ty(eps[0].y)}"'
+                f' x2="{tx(eps[1].x)}" y2="{ty(eps[1].y)}" class="straight"/>'
+            )
+
+        elif t.kind == "CURVE":
+            cx_ = t.extra.get("cx")
+            cy_ = t.extra.get("cy")
+            r = t.extra.get("radius", 0.0)
+            if cx_ is None or r <= 0:
+                continue
+            arc_deg = ((eps[1].angle - eps[0].angle + 180.0) % 360.0 + 360.0) % 360.0
+            pts = _arc_polyline(cx_, cy_, r, eps[0].x, eps[0].y, eps[1].x, eps[1].y, arc_deg)
+            # Y-flip each sampled point
+            svg_pts = " ".join(f"{txf(px):.1f},{tyf(py):.1f}" for px, py in pts)
+            cls = curve_class(r)
+            elements.append(f'<polyline points="{svg_pts}" class="{cls}"/>')
+            if r < thresh_yellow:
+                mid = pts[len(pts) // 2]
+                elements.append(
+                    f'<text x="{txf(mid[0]):.1f}" y="{tyf(mid[1]):.1f}"'
+                    f' class="label">{t.id}: {r:.1f}"</text>'
+                )
+
+        elif t.kind == "TURNOUT":
+            x1s, y1s = tx(eps[0].x), ty(eps[0].y)
+            x2s, y2s = tx(eps[1].x), ty(eps[1].y)
+            elements.append(
+                f'<line x1="{x1s}" y1="{y1s}" x2="{x2s}" y2="{y2s}" class="turnout"/>'
+            )
+            if len(eps) >= 3:
+                elements.append(
+                    f'<line x1="{x1s}" y1="{y1s}"'
+                    f' x2="{tx(eps[2].x)}" y2="{ty(eps[2].y)}" class="turnout"/>'
+                )
+
+        elif t.kind == "TURNTABLE":
+            cx_ = t.extra.get("cx")
+            cy_ = t.extra.get("cy")
+            r = t.extra.get("radius", 0.0)
+            if cx_ is None or r <= 0:
+                continue
+            elements.append(
+                f'<circle cx="{tx(cx_)}" cy="{ty(cy_)}" r="{r * px_scale:.1f}"'
+                f' class="turntable"/>'
+            )
+
+        else:
+            # CORNU, BEZIER, etc. — draw as straight line between first two endpoints
+            elements.append(
+                f'<line x1="{tx(eps[0].x)}" y1="{ty(eps[0].y)}"'
+                f' x2="{tx(eps[1].x)}" y2="{ty(eps[1].y)}" class="straight"/>'
+            )
+
+    # Legend
+    leg_x, leg_y = 10, svg_h - 80
+    legend = [
+        f'<rect x="{leg_x}" y="{leg_y}" width="16" height="6" fill="#cc0000"/>',
+        f'<text x="{leg_x + 22}" y="{leg_y + 7}" class="legend">Radius &lt; {flag_radius:.1f}" (problem)</text>',
+        f'<rect x="{leg_x}" y="{leg_y + 14}" width="16" height="6" fill="#ff8800"/>',
+        f'<text x="{leg_x + 22}" y="{leg_y + 21}" class="legend">Radius {flag_radius:.1f}–{thresh_orange:.1f}" (tight)</text>',
+        f'<rect x="{leg_x}" y="{leg_y + 28}" width="16" height="6" fill="#ccaa00"/>',
+        f'<text x="{leg_x + 22}" y="{leg_y + 35}" class="legend">Radius {thresh_orange:.1f}–{thresh_yellow:.1f}" (marginal)</text>',
+        f'<rect x="{leg_x}" y="{leg_y + 42}" width="16" height="6" fill="#888"/>',
+        f'<text x="{leg_x + 22}" y="{leg_y + 49}" class="legend">Normal (≥ {thresh_yellow:.1f}")</text>',
+    ]
+
+    css = """\
+<style>
+  .straight     { stroke: #444; stroke-width: 2; fill: none; }
+  .curve-normal { stroke: #888; stroke-width: 2; fill: none; }
+  .curve-yellow { stroke: #ccaa00; stroke-width: 3; fill: none; }
+  .curve-orange { stroke: #ff8800; stroke-width: 3; fill: none; }
+  .curve-red    { stroke: #cc0000; stroke-width: 3; fill: none; }
+  .turnout      { stroke: #444; stroke-width: 2; fill: none; }
+  .turntable    { stroke: #666; stroke-width: 2; fill: #ddd; fill-opacity: 0.5; }
+  .label        { font-size: 10px; fill: #000; font-family: monospace; }
+  .legend       { font-size: 11px; fill: #333; font-family: sans-serif; }
+</style>"""
+
+    title = layout.title1 or "Layout"
+    svg_lines = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{svg_w}" height="{svg_h}"'
+        f' viewBox="0 0 {svg_w} {svg_h}">',
+        css,
+        f'<rect width="{svg_w}" height="{svg_h}" fill="white"/>',
+        f'<rect x="0" y="0" width="{svg_w}" height="{svg_h}" fill="none" stroke="#ccc" stroke-width="1"/>',
+        f'<text x="{svg_w // 2}" y="16" text-anchor="middle" font-size="14"'
+        f' font-family="sans-serif">{title} — Curve Radius Map</text>',
+    ] + elements + legend + ["</svg>"]
+
+    out = Path(output_path).expanduser()
+    out.write_text("\n".join(svg_lines) + "\n", encoding="utf-8")
+    return f"SVG radius map written to {out}"
 
 
 # ---------------------------------------------------------------------------
