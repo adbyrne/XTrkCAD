@@ -23,6 +23,9 @@ _CPack_Packages/
 .DS_Store
 Thumbs.db
 
+# Local layout files (personal/test data, not committed)
+nyelayout/
+
 # Python
 __pycache__/
 *.pyc
