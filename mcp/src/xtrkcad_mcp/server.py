@@ -1,6 +1,8 @@
 """XTrkCAD MCP server — Phase 1: read-only layout tools."""
 
+import datetime
 import logging
+import math
 import os
 from pathlib import Path
 
@@ -459,6 +461,374 @@ def write_operation_density_report(
         "",
         f"Note: {data['note']}",
     ]
+
+    out = Path(output_path).expanduser()
+    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return f"Report written to {out}"
+
+
+# ---------------------------------------------------------------------------
+# Report tools — write_layout_report, write_equipment_report,
+#                write_turnout_report, write_gaps_report
+# ---------------------------------------------------------------------------
+
+# Equipment minimum curve radii in HO model inches.
+# Scaled to other gauges via SCALE_RATIOS: threshold × (HO_ratio / scale_ratio).
+_EQUIPMENT_THRESHOLDS: list[tuple[str, float]] = [
+    ("Short freight car (< 40 ft)",              15.0),
+    ("Standard freight car (40–50 ft)",          18.0),
+    ("Long freight car (55–60 ft flatcar)",      22.0),
+    ("4-axle diesel (GP/RS-type)",               18.0),
+    ("6-axle diesel (SD40/ES44)",                22.0),
+    ("Small/medium steam (2-6-0, 2-8-0, 4-6-0)", 18.0),
+    ("Medium steam (4-6-2, 2-8-2, 4-6-4)",      22.0),
+    ("Large steam (4-8-4, 2-10-4, 4-8-2)",      24.0),
+    ("Articulated steam (2-8-8-2, 4-8-8-4)",    28.0),
+    ("Standard passenger car (85 ft)",           22.0),
+    ("Long passenger car (Superliner)",          28.0),
+]
+
+
+def _near_miss_pairs(
+    open_eps: list[dict], threshold: float = 0.1
+) -> list[tuple[int, int]]:
+    pairs = []
+    for i in range(len(open_eps)):
+        for j in range(i + 1, len(open_eps)):
+            a, b = open_eps[i], open_eps[j]
+            if math.hypot(b["x"] - a["x"], b["y"] - a["y"]) <= threshold:
+                pairs.append((i, j))
+    return pairs
+
+
+@mcp.tool()
+def write_layout_report(
+    path: str,
+    output_path: str,
+    layer_categories: dict | None = None,
+) -> str:
+    """Write a full layout summary report to a text file.
+
+    Covers layout header, track counts by type, track lengths per layer,
+    curve radius analysis, and (if layer_categories is given) Operation Density.
+
+    Args:
+        path: Path to the source .xtc or .xtce file.
+        output_path: Destination path for the .txt report.
+        layer_categories: Optional layer→category mapping (same as
+            get_operation_density). Required for the OD section.
+
+    Returns:
+        Confirmation message with the absolute path written.
+    """
+    layout = parse_file(_resolve_plan(path))
+    scale = layout.scale
+    cpf = cars_per_real_ft(scale)
+    total_ft = layout.total_length_real_feet()
+    room_w = layout.room_width / 12.0
+    room_h = layout.room_height / 12.0
+    radii = layout.curve_radii()
+    by_layer = layout.length_by_layer()
+    to_by_layer = layout.turnouts_by_layer()
+
+    lines: list[str] = [
+        "LAYOUT REPORT",
+        f"  Title  : {layout.title1}",
+    ]
+    if layout.title2:
+        lines.append(f"  Subtitle: {layout.title2}")
+    lines += [
+        f"  Scale  : {scale}",
+        f"  Room   : {room_w:.1f}' × {room_h:.1f}' = {room_w * room_h:.0f} sq ft",
+        f"  Date   : {datetime.date.today()}",
+        "",
+        "TRACK COUNTS BY TYPE",
+    ]
+    for kind, count in sorted(layout.track_counts().items()):
+        lines.append(f"  {kind:12s}: {count:4d}")
+    lines.append(f"  {'TOTAL':12s}: {len(layout.tracks):4d}")
+
+    lines += [
+        "",
+        "TRACK LENGTHS BY LAYER",
+        f"  {'Lyr':>3s}  {'Name':16s}  {'Feet':>8s}  {'Cars':>6s}  {'T/O':>5s}",
+        f"  {'---':>3s}  {'-'*16}  {'-'*8}  {'-'*6}  {'-'*5}",
+    ]
+    for idx, ft in sorted(by_layer.items()):
+        name = layout.layers[idx].name if idx in layout.layers else f"Layer {idx}"
+        cars = int(ft * cpf)
+        turnouts = to_by_layer.get(idx, 0)
+        lines.append(f"  {idx:>3d}  {name:16s}  {ft:8.1f}  {cars:6d}  {turnouts:5d}")
+    lines.append(
+        f"  {'':>3s}  {'TOTAL':16s}  {total_ft:8.1f}"
+        f"  {int(total_ft * cpf):6d}  {sum(to_by_layer.values()):5d}"
+    )
+
+    lines += ["", "CURVE ANALYSIS"]
+    if not radii:
+        lines.append("  No curves found.")
+    else:
+        min_r = min(radii)
+        max_r = max(radii)
+        mean_r = sum(radii) / len(radii)
+        lines += [
+            f"  Curves : {len(radii)}",
+            f"  Min    : {min_r:.1f}\" model",
+            f"  Max    : {max_r:.1f}\" model",
+            f"  Mean   : {mean_r:.1f}\" model",
+            "  Distribution:",
+        ]
+        for label, lo, hi in [
+            ("< 9\"",   0.0,  9.0),
+            ("9–18\"",  9.0, 18.0),
+            ("18–24\"", 18.0, 24.0),
+            ("24–36\"", 24.0, 36.0),
+            ("> 36\"",  36.0, 9999.0),
+        ]:
+            n = sum(1 for r in radii if lo <= r < hi)
+            if n:
+                lines.append(f"    {label:8s}: {n:4d}")
+        ho_ratio = SCALE_RATIOS.get("HO", 87.1)
+        sr = SCALE_RATIOS.get(scale, 87.1)
+        tight = 22.0 * ho_ratio / sr
+        if min_r < tight:
+            lines.append(
+                f"  NOTE: minimum {min_r:.1f}\" is below tight-running threshold"
+                f" {tight:.1f}\" ({scale}). Some equipment may not operate reliably."
+            )
+
+    if layer_categories is not None:
+        od = get_operation_density(path, layer_categories)
+        ops = od["operations"]
+        lines += ["", "OPERATION DENSITY (Joe Fugate, MRH Oct 2014)"]
+        cat_order = ["mainline", "passing", "storage", "staging", "connecting", "service"]
+        shown: set[str] = set()
+        for cat in cat_order:
+            if cat in od["by_category"]:
+                info = od["by_category"][cat]
+                lines.append(
+                    f"  {cat:12s}: {info['length_real_ft']:7.1f} ft"
+                    f"  {info['car_capacity']:4d} cars"
+                    f"  {info['turnouts']:3d} turnouts"
+                )
+                shown.add(cat)
+        for cat, info in sorted(od["by_category"].items()):
+            if cat not in shown:
+                lines.append(
+                    f"  {cat:12s}: {info['length_real_ft']:7.1f} ft"
+                    f"  {info['car_capacity']:4d} cars"
+                    f"  {info['turnouts']:3d} turnouts"
+                )
+        lines += [
+            f"  Max cars    : {ops['max_cars']}",
+            f"  Cars moved  : {ops['cars_moved_per_session']}",
+            f"  Max-to-main : {ops['max_to_main_pct']:.1f}%  → {ops['max_to_main_label']}",
+            f"  Est. trains : {ops['estimated_trains']} (@ {ops['assumed_train_length_cars']} cars)",
+        ]
+
+    out = Path(output_path).expanduser()
+    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return f"Report written to {out}"
+
+
+@mcp.tool()
+def write_equipment_report(path: str, output_path: str) -> str:
+    """Write an equipment suitability report based on the layout's minimum curve radius.
+
+    Compares the minimum curve radius against published minimums for common
+    equipment classes. Shows PASS / MARGINAL (within 2\" of minimum) / FAIL.
+
+    Args:
+        path: Path to the source .xtc or .xtce file.
+        output_path: Destination path for the .txt report.
+
+    Returns:
+        Confirmation message with the absolute path written.
+    """
+    layout = parse_file(_resolve_plan(path))
+    scale = layout.scale
+    radii = [r for r in layout.curve_radii() if r >= 9.0]  # skip decorative curves
+    min_r = min(radii) if radii else None
+
+    ho_ratio = SCALE_RATIOS.get("HO", 87.1)
+    sr = SCALE_RATIOS.get(scale, 87.1)
+    sf = ho_ratio / sr
+
+    lines: list[str] = [
+        "EQUIPMENT SUITABILITY REPORT",
+        f"  Layout : {layout.title1}",
+        f"  Scale  : {scale}",
+        f"  Date   : {datetime.date.today()}",
+    ]
+    if min_r is None:
+        lines.append("  No usable curves found — cannot assess equipment suitability.")
+    else:
+        lines += [
+            f"  Min curve radius: {min_r:.1f}\" model  "
+            f"(curves < 9\" excluded as likely decorative)",
+            "",
+            "EQUIPMENT COMPATIBILITY",
+            f"  {'Equipment Class':44s}  {'Min Radius':>10s}  {'Status':>10s}",
+            f"  {'-'*44}  {'-'*10}  {'-'*10}",
+        ]
+        for name, ho_thresh in _EQUIPMENT_THRESHOLDS:
+            thresh = ho_thresh * sf
+            if min_r >= thresh:
+                status = "PASS"
+            elif min_r >= thresh - 2.0 * sf:
+                status = "MARGINAL"
+            else:
+                status = "FAIL"
+            lines.append(
+                f"  {name:44s}  {thresh:>8.1f}\"  {status:>10s}"
+            )
+        lines += [
+            "",
+            f"Thresholds scaled from HO reference (factor {sf:.3f} for {scale}).",
+            "MARGINAL = within 2\" (scaled) of minimum; test with your specific models.",
+        ]
+
+    out = Path(output_path).expanduser()
+    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return f"Report written to {out}"
+
+
+@mcp.tool()
+def write_turnout_report(path: str, output_path: str) -> str:
+    """Write a turnout density report to a text file.
+
+    Reports total turnouts, density (turnouts per 100 ft of track), and a
+    per-layer breakdown. Flags layers with density > 10/100 ft as switching-heavy.
+    Also lists any turnout objects with fewer than 3 endpoints.
+
+    Args:
+        path: Path to the source .xtc or .xtce file.
+        output_path: Destination path for the .txt report.
+
+    Returns:
+        Confirmation message with the absolute path written.
+    """
+    layout = parse_file(_resolve_plan(path))
+    total_ft = layout.total_length_real_feet()
+    total_turnouts = sum(1 for t in layout.tracks if t.kind == "TURNOUT")
+    by_layer = layout.length_by_layer()
+    to_by_layer = layout.turnouts_by_layer()
+
+    global_density = (total_turnouts / total_ft * 100.0) if total_ft > 0 else 0.0
+
+    lines: list[str] = [
+        "TURNOUT DENSITY REPORT",
+        f"  Layout  : {layout.title1}",
+        f"  Scale   : {layout.scale}",
+        f"  Date    : {datetime.date.today()}",
+        "",
+        "OVERALL",
+        f"  Total turnouts: {total_turnouts}",
+        f"  Total track   : {total_ft:.1f} ft",
+        f"  Density       : {global_density:.1f} per 100 ft",
+        "",
+        "BY LAYER",
+        f"  {'Lyr':>3s}  {'Name':16s}  {'Feet':>8s}  {'T/O':>5s}  {'Density/100ft':>14s}  {'Flag':4s}",
+        f"  {'---':>3s}  {'-'*16}  {'-'*8}  {'-'*5}  {'-'*14}  {'-'*4}",
+    ]
+    for idx, ft in sorted(by_layer.items()):
+        name = layout.layers[idx].name if idx in layout.layers else f"Layer {idx}"
+        turnouts = to_by_layer.get(idx, 0)
+        density = (turnouts / ft * 100.0) if ft > 0 else 0.0
+        flag = "***" if density > 10.0 else ""
+        lines.append(
+            f"  {idx:>3d}  {name:16s}  {ft:8.1f}  {turnouts:5d}"
+            f"  {density:14.1f}  {flag}"
+        )
+
+    # Turnouts with < 3 endpoints
+    partial = [t for t in layout.tracks if t.kind == "TURNOUT" and len(t.endpoints) < 3]
+    lines += ["", "PARTIAL TURNOUTS (fewer than 3 endpoints — may be broken/incomplete)"]
+    if partial:
+        for t in partial:
+            lines.append(f"  ID {t.id}: {len(t.endpoints)} endpoint(s), layer {t.layer}")
+    else:
+        lines.append("  None found.")
+
+    if any(
+        (to_by_layer.get(idx, 0) / ft * 100.0) > 10.0
+        for idx, ft in by_layer.items() if ft > 0
+    ):
+        lines += [
+            "",
+            "*** Layers with density > 10/100 ft are switching-heavy (possible staging yard).",
+        ]
+
+    out = Path(output_path).expanduser()
+    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return f"Report written to {out}"
+
+
+@mcp.tool()
+def write_gaps_report(path: str, output_path: str) -> str:
+    """Write an open endpoints (track gaps) report to a text file.
+
+    Lists every unconnected endpoint with its track ID, position, and angle.
+    Groups pairs of endpoints within 0.1 model inches of each other as
+    near misses (should likely be connected).
+
+    Args:
+        path: Path to the source .xtc or .xtce file.
+        output_path: Destination path for the .txt report.
+
+    Returns:
+        Confirmation message with the absolute path written.
+    """
+    layout = parse_file(_resolve_plan(path))
+    open_eps = [
+        {"track_id": tid, "x": ep.x, "y": ep.y, "angle": ep.angle}
+        for tid, ep in layout.unconnected_endpoints()
+    ]
+
+    pairs = _near_miss_pairs(open_eps)
+    near_miss_indices: set[int] = set()
+    for i, j in pairs:
+        near_miss_indices.add(i)
+        near_miss_indices.add(j)
+    isolated = [i for i in range(len(open_eps)) if i not in near_miss_indices]
+
+    lines: list[str] = [
+        "TRACK GAPS REPORT",
+        f"  Layout : {layout.title1}",
+        f"  Scale  : {layout.scale}",
+        f"  Date   : {datetime.date.today()}",
+        "",
+        "SUMMARY",
+        f"  Total open endpoints : {len(open_eps)}",
+        f"  Near-miss pairs      : {len(pairs)}  (endpoints within 0.1\" of each other)",
+        f"  Isolated open ends   : {len(isolated)}",
+    ]
+
+    if pairs:
+        lines += ["", "NEAR-MISS PAIRS (should likely be connected)"]
+        for i, j in pairs:
+            a, b = open_eps[i], open_eps[j]
+            dist = math.hypot(b["x"] - a["x"], b["y"] - a["y"])
+            lines.append(
+                f"  Track {a['track_id']:4d}  ({a['x']:8.3f}, {a['y']:8.3f})"
+                f"  ↔  Track {b['track_id']:4d}  ({b['x']:8.3f}, {b['y']:8.3f})"
+                f"  gap={dist:.4f}\""
+            )
+
+    if open_eps:
+        lines += ["", "ALL OPEN ENDPOINTS"]
+        lines.append(
+            f"  {'Track':>5s}  {'X':>10s}  {'Y':>10s}  {'Angle':>8s}  {'Note':5s}"
+        )
+        lines.append(
+            f"  {'-----':>5s}  {'-'*10}  {'-'*10}  {'-'*8}  {'-'*10}"
+        )
+        for i, ep in enumerate(open_eps):
+            note = "near-miss" if i in near_miss_indices else ""
+            lines.append(
+                f"  {ep['track_id']:>5d}  {ep['x']:10.3f}  {ep['y']:10.3f}"
+                f"  {ep['angle']:8.2f}  {note}"
+            )
 
     out = Path(output_path).expanduser()
     out.write_text("\n".join(lines) + "\n", encoding="utf-8")
