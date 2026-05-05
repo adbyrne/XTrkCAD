@@ -7,7 +7,13 @@ import shutil
 import pytest
 
 from xtrkcad_mcp.parser import parse_file
-from xtrkcad_mcp.server import delete_track, write_gaps_report, write_radius_map
+from xtrkcad_mcp.server import (
+    delete_track,
+    find_dead_connections,
+    fix_dead_connections,
+    write_gaps_report,
+    write_radius_map,
+)
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 FIXTURE = FIXTURES_DIR / "test_layout.xtc"
@@ -166,3 +172,68 @@ def test_delete_track_file_still_parseable(tmp_path):
     delete_track(str(layout_copy), 3)
     layout = parse_file(layout_copy)
     assert len(layout.tracks) == 3
+
+
+# ---------------------------------------------------------------------------
+# find_dead_connections / fix_dead_connections
+# ---------------------------------------------------------------------------
+
+# Minimal layout: track 1 has T pointing to nonexistent track 999.
+_DEAD_T_LAYOUT = (
+    "VERSION 2 5.3.0Dev\n"
+    "TITLE1 Dead T Test\n"
+    "SCALE HO\n"
+    "ROOMSIZE 120 x 120\n"
+    "\n"
+    "STRAIGHT 1 0 0 0 0 HO 0\n"
+    "\tT 999 10.000000 10.000000 0.000000\n"
+    "\tE 30.000000 10.000000 180.000000\n"
+    "\n"
+    "STRAIGHT 2 0 0 0 0 HO 0\n"
+    "\tE 30.000000 20.000000 0.000000\n"
+    "\tE 50.000000 20.000000 180.000000\n"
+)
+
+
+def _write_dead_layout(path):
+    path.write_text(_DEAD_T_LAYOUT, encoding="utf-8")
+    return path
+
+
+def test_find_dead_connections_detects_dead_reference(tmp_path):
+    layout_file = _write_dead_layout(tmp_path / "layout.xtc")
+    dead = find_dead_connections(str(layout_file))
+    assert len(dead) == 1
+    assert dead[0]["track_id"] == 1
+    assert dead[0]["dead_reference"] == 999
+
+
+def test_find_dead_connections_no_false_positives(tmp_path):
+    # Fixture has only E records — no T records at all → zero dead connections.
+    layout_copy = tmp_path / "layout.xtc"
+    shutil.copy(FIXTURE, layout_copy)
+    assert find_dead_connections(str(layout_copy)) == []
+
+
+def test_fix_dead_connections_converts_T_to_E(tmp_path):
+    layout_file = _write_dead_layout(tmp_path / "layout.xtc")
+    fix_dead_connections(str(layout_file))
+    # After fix, track 1 should have 2 open E endpoints, no connected_to.
+    tracks = parse_file(layout_file).tracks
+    t1 = next(t for t in tracks if t.id == 1)
+    assert len(t1.endpoints) == 2
+    assert all(ep.connected_to is None for ep in t1.endpoints)
+
+
+def test_fix_dead_connections_returns_fix_count(tmp_path):
+    layout_file = _write_dead_layout(tmp_path / "layout.xtc")
+    result = fix_dead_connections(str(layout_file))
+    assert "1" in result
+    assert "999" in result
+
+
+def test_fix_dead_connections_no_op_when_clean(tmp_path):
+    layout_copy = tmp_path / "layout.xtc"
+    shutil.copy(FIXTURE, layout_copy)
+    result = fix_dead_connections(str(layout_copy))
+    assert "No dead connections" in result

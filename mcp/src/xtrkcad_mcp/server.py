@@ -1097,6 +1097,79 @@ def delete_track(path: str, track_id: int) -> str:
     return f"Track {track_id} deleted from {p}"
 
 
+@mcp.tool()
+def find_dead_connections(path: str) -> list[dict]:
+    """Find T (connected) endpoint records that reference a nonexistent track ID.
+
+    These arise when a track is deleted while other tracks still hold T records
+    pointing to it. Returns one entry per dangling endpoint.
+
+    Args:
+        path: Path to the .xtc layout file (absolute or relative to XTRKCAD_PLANS_DIR).
+    """
+    p = _resolve_plan(path)
+    layout = parse_file(p)
+    valid_ids = {t.id for t in layout.tracks}
+    dead = []
+    for track in layout.tracks:
+        for ep in track.endpoints:
+            if ep.connected_to is not None and ep.connected_to not in valid_ids:
+                dead.append({
+                    "track_id": track.id,
+                    "dead_reference": ep.connected_to,
+                    "x": ep.x,
+                    "y": ep.y,
+                    "angle": ep.angle,
+                })
+    return dead
+
+
+def _fix_dead_t_lines(lines: list[str], dead_ids: set[int]) -> tuple[list[str], int]:
+    """Replace T sub-records referencing dead_ids with E (open endpoint) records."""
+    result = []
+    count = 0
+    for line in lines:
+        if line.startswith("\t"):
+            parts = line.strip().split()
+            if parts and parts[0] == "T" and len(parts) >= 5:
+                try:
+                    if int(parts[1]) in dead_ids:
+                        result.append(f"\tE {parts[2]} {parts[3]} {parts[4]}")
+                        count += 1
+                        continue
+                except (ValueError, IndexError):
+                    pass
+        result.append(line)
+    return result, count
+
+
+@mcp.tool()
+def fix_dead_connections(path: str) -> str:
+    """Convert dangling T endpoint records to open E endpoints in place.
+
+    After deleting a track, any track that was connected to it retains a T
+    record pointing to the now-missing ID. This tool finds those records and
+    rewrites them as open E endpoints so the gaps show up correctly.
+
+    Args:
+        path: Path to the .xtc layout file (absolute or relative to XTRKCAD_PLANS_DIR).
+    """
+    p = _resolve_plan(path)
+    layout = parse_file(p)
+    valid_ids = {t.id for t in layout.tracks}
+    dead_ids: set[int] = set()
+    for track in layout.tracks:
+        for ep in track.endpoints:
+            if ep.connected_to is not None and ep.connected_to not in valid_ids:
+                dead_ids.add(ep.connected_to)
+    if not dead_ids:
+        return "No dead connections found"
+    lines = p.read_text(encoding="utf-8", errors="replace").splitlines()
+    updated, count = _fix_dead_t_lines(lines, dead_ids)
+    p.write_text("\n".join(updated) + "\n", encoding="utf-8")
+    return f"Fixed {count} dead endpoint(s) referencing deleted track ID(s): {sorted(dead_ids)}"
+
+
 # ---------------------------------------------------------------------------
 # Resources
 # ---------------------------------------------------------------------------
