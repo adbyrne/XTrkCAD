@@ -1,4 +1,4 @@
-"""XTrkCAD MCP server — Phase 1: read-only layout tools."""
+"""XTrkCAD MCP server — layout read and write tools."""
 
 import datetime
 import logging
@@ -9,7 +9,7 @@ from pathlib import Path
 from mcp.server.fastmcp import FastMCP
 
 from xtrkcad_mcp.models import SCALE_RATIOS, cars_per_real_ft, max_to_main_label
-from xtrkcad_mcp.parser import parse_file
+from xtrkcad_mcp.parser import TRACK_KINDS, parse_file
 
 logging.basicConfig(level=os.environ.get("XTRKCAD_LOG_LEVEL", "INFO"))
 logger = logging.getLogger(__name__)
@@ -1049,6 +1049,52 @@ def write_radius_map(
     out = Path(output_path).expanduser()
     out.write_text("\n".join(svg_lines) + "\n", encoding="utf-8")
     return f"SVG radius map written to {out}"
+
+
+# ---------------------------------------------------------------------------
+# Tools — write operations
+# ---------------------------------------------------------------------------
+
+
+def _delete_track_block(lines: list[str], track_id: int) -> list[str]:
+    """Return lines with the block for track_id removed.
+
+    Raises ValueError if track_id is not found.
+    """
+    start = None
+    for i, line in enumerate(lines):
+        parts = line.split()
+        if parts and parts[0] in TRACK_KINDS:
+            try:
+                if int(parts[1]) == track_id:
+                    start = i
+                    break
+            except (ValueError, IndexError):
+                pass
+    if start is None:
+        raise ValueError(f"Track ID {track_id} not found in layout")
+    end = start + 1
+    while end < len(lines) and lines[end].startswith("\t"):
+        end += 1
+    return lines[:start] + lines[end:]
+
+
+@mcp.tool()
+def delete_track(path: str, track_id: int) -> str:
+    """Delete a track object from a layout file by its numeric ID.
+
+    Rewrites the file in place. Use this to remove drawing errors or
+    phantom tracks that should not exist.
+
+    Args:
+        path: Path to the .xtc layout file (absolute or relative to XTRKCAD_PLANS_DIR).
+        track_id: Numeric track ID to remove (visible in XTrkCAD Properties dialog).
+    """
+    p = _resolve_plan(path)
+    lines = p.read_text(encoding="utf-8", errors="replace").splitlines()
+    updated = _delete_track_block(lines, track_id)
+    p.write_text("\n".join(updated) + "\n", encoding="utf-8")
+    return f"Track {track_id} deleted from {p}"
 
 
 # ---------------------------------------------------------------------------

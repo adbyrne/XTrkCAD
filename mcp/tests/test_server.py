@@ -2,10 +2,12 @@
 
 from pathlib import Path
 
+import shutil
+
 import pytest
 
 from xtrkcad_mcp.parser import parse_file
-from xtrkcad_mcp.server import write_gaps_report, write_radius_map
+from xtrkcad_mcp.server import delete_track, write_gaps_report, write_radius_map
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 FIXTURE = FIXTURES_DIR / "test_layout.xtc"
@@ -120,3 +122,47 @@ def test_radius_map_custom_flag_radius(tmp_path):
     svg = Path(out).read_text()
     # With flag_radius=35, 30 < 35 → red
     assert "curve-red" in svg
+
+
+# ---------------------------------------------------------------------------
+# delete_track — write round-trip
+# ---------------------------------------------------------------------------
+
+
+def test_delete_track_removes_straight(tmp_path):
+    layout_copy = tmp_path / "layout.xtc"
+    shutil.copy(FIXTURE, layout_copy)
+    delete_track(str(layout_copy), 1)
+    tracks = parse_file(layout_copy).tracks
+    assert not any(t.id == 1 for t in tracks)
+
+
+def test_delete_track_removes_curve(tmp_path):
+    layout_copy = tmp_path / "layout.xtc"
+    shutil.copy(FIXTURE, layout_copy)
+    delete_track(str(layout_copy), 2)
+    tracks = parse_file(layout_copy).tracks
+    assert not any(t.id == 2 for t in tracks)
+
+
+def test_delete_track_preserves_other_tracks(tmp_path):
+    layout_copy = tmp_path / "layout.xtc"
+    shutil.copy(FIXTURE, layout_copy)
+    delete_track(str(layout_copy), 1)
+    ids = {t.id for t in parse_file(layout_copy).tracks}
+    assert ids == {2, 3, 4}
+
+
+def test_delete_track_missing_id_raises(tmp_path):
+    layout_copy = tmp_path / "layout.xtc"
+    shutil.copy(FIXTURE, layout_copy)
+    with pytest.raises(ValueError, match="99"):
+        delete_track(str(layout_copy), 99)
+
+
+def test_delete_track_file_still_parseable(tmp_path):
+    layout_copy = tmp_path / "layout.xtc"
+    shutil.copy(FIXTURE, layout_copy)
+    delete_track(str(layout_copy), 3)
+    layout = parse_file(layout_copy)
+    assert len(layout.tracks) == 3
