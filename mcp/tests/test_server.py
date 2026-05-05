@@ -11,8 +11,11 @@ from xtrkcad_mcp.server import (
     delete_track,
     find_dead_connections,
     fix_dead_connections,
+    write_equipment_report,
     write_gaps_report,
+    write_layout_report,
     write_radius_map,
+    write_turnout_report,
 )
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
@@ -237,3 +240,93 @@ def test_fix_dead_connections_no_op_when_clean(tmp_path):
     shutil.copy(FIXTURE, layout_copy)
     result = fix_dead_connections(str(layout_copy))
     assert "No dead connections" in result
+
+
+# ---------------------------------------------------------------------------
+# Report format parameter — md / html / json
+# ---------------------------------------------------------------------------
+
+def test_gaps_report_md_has_markdown_table(tmp_path):
+    out = tmp_path / "gaps.md"
+    write_gaps_report(str(FIXTURE), str(out), format="md")
+    content = out.read_text()
+    assert "# Track Gaps Report" in content
+    assert "| Item |" in content
+
+
+def test_gaps_report_html_is_html(tmp_path):
+    out = tmp_path / "gaps.html"
+    write_gaps_report(str(FIXTURE), str(out), format="html")
+    content = out.read_text()
+    assert "<html" in content
+    assert "<table" in content
+
+
+def test_gaps_report_json_is_valid(tmp_path):
+    import json
+    out = tmp_path / "gaps.json"
+    write_gaps_report(str(FIXTURE), str(out), format="json")
+    data = json.loads(out.read_text())
+    assert "open_endpoints" in data
+    assert "near_miss_pairs" in data
+    assert isinstance(data["endpoints"], list)
+
+
+def test_equipment_report_json_has_equipment_list(tmp_path):
+    import json
+    out = tmp_path / "equip.json"
+    write_equipment_report(str(FIXTURE), str(out), format="json")
+    data = json.loads(out.read_text())
+    assert "equipment" in data
+    assert isinstance(data["equipment"], list)
+    assert all("status" in row for row in data["equipment"])
+
+
+def test_equipment_report_html_has_pass_class(tmp_path):
+    out = tmp_path / "equip.html"
+    write_equipment_report(str(FIXTURE), str(out), format="html")
+    content = out.read_text()
+    assert "pass" in content.lower()
+    assert "<table" in content
+
+
+def test_turnout_report_md_has_table(tmp_path):
+    out = tmp_path / "turnout.md"
+    write_turnout_report(str(FIXTURE), str(out), format="md")
+    content = out.read_text()
+    assert "# Turnout" in content
+    assert "|" in content
+
+
+def test_turnout_report_json_has_totals(tmp_path):
+    import json
+    out = tmp_path / "turnout.json"
+    write_turnout_report(str(FIXTURE), str(out), format="json")
+    data = json.loads(out.read_text())
+    assert "total_turnouts" in data
+    assert "global_density_per_100ft" in data
+
+
+def test_layout_report_md_has_headers(tmp_path):
+    out = tmp_path / "layout.md"
+    write_layout_report(str(FIXTURE), str(out), format="md")
+    content = out.read_text()
+    assert "# Layout Report" in content
+    assert "## Curve Analysis" in content
+
+
+def test_layout_report_json_has_track_counts(tmp_path):
+    import json
+    out = tmp_path / "layout.json"
+    write_layout_report(str(FIXTURE), str(out), format="json")
+    data = json.loads(out.read_text())
+    assert "total_tracks" in data
+    assert "curves" in data
+
+
+def test_layout_report_html_is_valid_html(tmp_path):
+    out = tmp_path / "layout.html"
+    write_layout_report(str(FIXTURE), str(out), format="html")
+    content = out.read_text()
+    assert "<html" in content
+    assert "Layout Report" in content

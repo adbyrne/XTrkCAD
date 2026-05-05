@@ -15,6 +15,7 @@ authors = [
 keywords = ["xtrkcad", "mcp", "model-railroad", "cad", "claude"]
 dependencies = [
     "mcp>=1.25.0",
+    "pyyaml>=6.0",
 ]
 
 [project.optional-dependencies]

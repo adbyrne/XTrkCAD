@@ -8,6 +8,7 @@ from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
 
+from xtrkcad_mcp.config import load_config
 from xtrkcad_mcp.models import SCALE_RATIOS, cars_per_real_ft, max_to_main_label
 from xtrkcad_mcp.parser import TRACK_KINDS, parse_file
 
@@ -54,6 +55,196 @@ def list_track_plans(directory: str = "") -> list[str]:
     return sorted(
         str(p) for p in base.rglob("*") if p.suffix.lower() in {".xtc", ".xtce"}
     )
+
+
+# ---------------------------------------------------------------------------
+# Tools — layout generation (config + questionnaire)
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool()
+def load_layout_config(config_path: str) -> dict:
+    """Parse and validate a layout YAML config file.
+
+    Returns a summary of the layout to be generated, or a list of missing
+    required fields with the questions to ask the user. Use this as the first
+    step before generating a layout.
+
+    Args:
+        config_path: Path to the YAML config file.
+
+    Returns:
+        Dict with:
+          ready    — True if all required fields are present
+          summary  — human-readable plan (populated when ready=True)
+          missing  — list of {field, question} for fields still needed
+          warnings — list of validation warnings
+          config   — parsed config values (name, scale, room, placements, ...)
+    """
+    result = load_config(config_path)
+    return {
+        "ready": result.ready,
+        "summary": result.summary,
+        "missing": [{"field": f, "question": q} for f, q in result.missing],
+        "warnings": result.warnings,
+        "config": {
+            "name": result.config.name,
+            "scale": result.config.scale,
+            "room_width_ft": result.config.room_width_ft,
+            "room_depth_ft": result.config.room_depth_ft,
+            "mainline": result.config.mainline,
+            "curve_radius_in": result.config.curve_radius_in,
+            "switch_size": result.config.switch_size,
+            "levels": result.config.levels,
+            "level_separation_in": result.config.level_separation_in,
+            "level_break_row": result.config.level_break_row,
+            "grid_size_ft": result.config.grid_size_ft,
+            "obstructions": result.config.obstructions,
+            "placements": [
+                {
+                    "range": pl.cell_range,
+                    "type": pl.element_type,
+                    "params": pl.params,
+                }
+                for pl in result.config.placements
+            ],
+        },
+    }
+
+
+@mcp.tool()
+def list_templates(category: str = "") -> list[dict]:
+    """List available layout element templates from the template library.
+
+    Args:
+        category: Filter by category (yard, staging, station, mainline, helix,
+                  siding). Empty returns all categories.
+
+    Returns:
+        List of template summaries with id, name, category, description,
+        mainline_connection, od_role, and stub flag.
+    """
+    from xtrkcad_mcp.templates import load_library
+    lib = load_library()
+    items = lib.by_category(category) if category else lib.templates
+    return [
+        {
+            "id": t.id,
+            "name": t.name,
+            "category": t.category,
+            "description": t.description,
+            "mainline_connection": t.mainline_connection,
+            "od_role": t.od_role,
+            "stub": t.stub,
+        }
+        for t in items
+    ]
+
+
+@mcp.tool()
+def get_template_info(template_id: str) -> dict:
+    """Get full details for a template including parameters and OD role.
+
+    Args:
+        template_id: Template identifier (e.g. 'yard/single-ended').
+
+    Returns:
+        Full template metadata with parameters and connection points,
+        or an error dict if not found.
+    """
+    from xtrkcad_mcp.templates import load_library
+    lib = load_library()
+    t = lib.by_id(template_id)
+    if t is None:
+        return {
+            "error": f"template {template_id!r} not found",
+            "available": [x.id for x in lib.templates],
+        }
+    return {
+        "id": t.id,
+        "name": t.name,
+        "category": t.category,
+        "description": t.description,
+        "file": t.file,
+        "mainline_connection": t.mainline_connection,
+        "od_role": t.od_role,
+        "scales": t.scales or ["all"],
+        "stub": t.stub,
+        "connection_points": t.connection_points,
+        "parameters": [
+            {
+                "name": p.name,
+                "type": p.type,
+                "required": p.required,
+                "description": p.description,
+                "default": p.default,
+                "unit": p.unit,
+                "min": p.min,
+                "max": p.max,
+            }
+            for p in t.parameters
+        ],
+    }
+
+
+@mcp.tool()
+def generate_layout(config_path: str, output_path: str = "") -> dict:
+    """Generate an initial .xtc layout file from a YAML config.
+
+    If the config is missing required fields (name, scale, room) the tool
+    returns a questionnaire — a list of fields to prompt the user for —
+    instead of generating. Fix the config and call again.
+
+    Any existing .xtc at output_path is versioned (copied to _v1.xtc, _v2.xtc,
+    etc.) before overwriting.
+
+    Args:
+        config_path: Path to the YAML layout config file.
+        output_path: Path for the .xtc output. Defaults to the config
+                     directory, named after the layout (e.g. my_layout.xtc).
+
+    Returns:
+        Dict with output_path, backup_path, placed list, skipped list,
+        warnings, and config summary — or missing/warnings if config incomplete.
+    """
+    from xtrkcad_mcp.config import load_config
+    from xtrkcad_mcp.generator import default_output_path, generate
+    from pathlib import Path
+
+    cfg_result = load_config(config_path)
+
+    if not cfg_result.ready:
+        return {
+            "ready": False,
+            "missing": [{"field": f, "question": q} for f, q in cfg_result.missing],
+            "warnings": cfg_result.warnings,
+            "summary": "Config incomplete — answer the missing fields and try again.",
+        }
+
+    config = cfg_result.config
+    cfg_path = Path(config_path).expanduser()
+    out = Path(output_path).expanduser() if output_path else default_output_path(config, cfg_path)
+
+    result = generate(config, out)
+
+    return {
+        "ready": True,
+        "output_path": str(result.output_path),
+        "backup_path": str(result.backup_path) if result.backup_path else None,
+        "placed": [
+            {
+                "template_id": p.template_id,
+                "grid_range": p.grid_range,
+                "origin_x_in": round(p.x, 2),
+                "origin_y_in": round(p.y, 2),
+                "track_ids": p.track_ids,
+            }
+            for p in result.placed
+        ],
+        "skipped": result.skipped,
+        "warnings": result.warnings,
+        "summary": cfg_result.summary,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -399,18 +590,20 @@ def write_operation_density_report(
     layer_categories: dict | None = None,
     car_length_model_in: float | None = None,
     train_length_cars: int = 6,
+    format: str = "txt",
 ) -> str:
-    """Write a Fugate Operation Density report to a text file.
+    """Write a Fugate Operation Density report.
 
     Runs get_operation_density and formats the result as a human-readable
-    text report in Fugate's summary style.
+    report in Fugate's summary style.
 
     Args:
         path: Path to the source .xtc or .xtce file.
-        output_path: Destination path for the .txt report.
+        output_path: Destination path for the report.
         layer_categories: Same as get_operation_density.
         car_length_model_in: Same as get_operation_density.
         train_length_cars: Same as get_operation_density.
+        format: Output format — "txt" (default), "md", or "html".
 
     Returns:
         Confirmation message with the absolute path written.
@@ -463,8 +656,126 @@ def write_operation_density_report(
     ]
 
     out = Path(output_path).expanduser()
-    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    if format == "txt":
+        out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    else:
+        # Rebuild as MD/HTML
+        cat_order = ["mainline", "passing", "storage", "staging", "connecting", "service"]
+        ordered_cats = [c for c in cat_order if c in data["by_category"]]
+        ordered_cats += [c for c in sorted(data["by_category"]) if c not in ordered_cats]
+        tbl_rows = [
+            [cat,
+             f"{data['by_category'][cat]['length_real_ft']:.1f}",
+             str(data['by_category'][cat]['car_capacity']),
+             str(data['by_category'][cat]['turnouts'])]
+            for cat in ordered_cats
+        ]
+        tbl_rows.append(["**TOTAL**",
+                         f"**{totals['length_real_ft']:.1f}**",
+                         f"**{totals['car_capacity']}**",
+                         f"**{totals['turnout_count']}**"])
+        tbl_hdrs = ["Category", "Track (ft)", "Cars", "Turnouts"]
+
+        title = f"Operation Density Report: {data['title']}"
+        if format == "md":
+            md: list[str] = [
+                f"# {title}", "",
+                f"**Scale:** {data['scale']}  |  "
+                f"**Room:** {room['width_ft']}′ × {room['height_ft']}′ = {room['area_sqft']:.0f} sq ft  |  "
+                f"**Date:** {datetime.date.today()}", "",
+                "## Track by Category", "",
+            ]
+            md += _md_table(tbl_hdrs, tbl_rows)
+            md += [
+                "", "## Operation Density (Joe Fugate, MRH Oct 2014)", "",
+                f"| Metric | Value |",
+                f"|---|---|",
+                f"| Max cars | **{ops['max_cars']}** |",
+                f"| Cars moved / session | **{ops['cars_moved_per_session']}** |",
+                f"| Max-to-main ratio | **{ops['max_to_main_pct']:.1f}%** → {ops['max_to_main_label']} |",
+                f"| Estimated trains | {ops['estimated_trains']} (@ {ops['assumed_train_length_cars']} cars) |",
+                "", f"> {data['note']}",
+            ]
+            out.write_text("\n".join(md) + "\n", encoding="utf-8")
+        else:  # html
+            html_tbl = _html_table(tbl_hdrs, tbl_rows)
+            metrics = _html_table(
+                ["Metric", "Value"],
+                [["Max cars", f"<strong>{ops['max_cars']}</strong>"],
+                 ["Cars moved / session", f"<strong>{ops['cars_moved_per_session']}</strong>"],
+                 ["Max-to-main ratio",
+                  f"<strong>{ops['max_to_main_pct']:.1f}%</strong> → {ops['max_to_main_label']}"],
+                 ["Estimated trains",
+                  f"{ops['estimated_trains']} (@ {ops['assumed_train_length_cars']} cars)"]],
+            )
+            body = (
+                f"<h1>{title}</h1>"
+                f"<p><strong>Scale:</strong> {data['scale']} &nbsp;|&nbsp; "
+                f"<strong>Room:</strong> {room['width_ft']}′ × {room['height_ft']}′ = "
+                f"{room['area_sqft']:.0f} sq ft &nbsp;|&nbsp; "
+                f"<strong>Date:</strong> {datetime.date.today()}</p>"
+                f"<h2>Track by Category</h2>{html_tbl}"
+                f"<h2>Operation Density (Joe Fugate, MRH Oct 2014)</h2>{metrics}"
+                f"<p><em>{data['note']}</em></p>"
+            )
+            out.write_text(_html_page(title, body), encoding="utf-8")
     return f"Report written to {out}"
+
+
+# ---------------------------------------------------------------------------
+# Report format helpers
+# ---------------------------------------------------------------------------
+
+def _md_table(headers: list[str], rows: list[list[str]]) -> list[str]:
+    """Build a GitHub-flavoured Markdown table, returning one line per row."""
+    widths = [
+        max(len(h), max((len(r[i]) for r in rows), default=0))
+        for i, h in enumerate(headers)
+    ]
+    def row_line(cells: list[str]) -> str:
+        return "| " + " | ".join(c.ljust(w) for c, w in zip(cells, widths)) + " |"
+    sep = ["-" * w for w in widths]
+    return [row_line(headers), row_line(sep)] + [row_line(r) for r in rows]
+
+
+def _html_table(headers: list[str], rows: list[list[str]],
+                row_class_fn=None) -> str:
+    """Build an HTML table string. row_class_fn(row) → optional CSS class for <tr>."""
+    ths = "".join(f"<th>{h}</th>" for h in headers)
+    body_rows = []
+    for r in rows:
+        cls = f' class="{row_class_fn(r)}"' if row_class_fn else ""
+        tds = "".join(f"<td>{c}</td>" for c in r)
+        body_rows.append(f"<tr{cls}>{tds}</tr>")
+    return f"<table><thead><tr>{ths}</tr></thead><tbody>{''.join(body_rows)}</tbody></table>"
+
+
+def _html_page(title: str, body: str) -> str:
+    """Wrap body HTML in a minimal styled standalone page."""
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{title}</title>
+<style>
+body{{font-family:sans-serif;max-width:960px;margin:2em auto;color:#222}}
+h1{{border-bottom:2px solid #555;padding-bottom:.3em}}
+h2{{border-bottom:1px solid #ccc;padding-bottom:.2em;margin-top:1.6em}}
+table{{border-collapse:collapse;width:100%;margin:.8em 0}}
+th,td{{border:1px solid #ccc;padding:5px 10px;text-align:left}}
+th{{background:#f4f4f4;font-weight:bold}}
+tr.pass td:last-child{{color:#267326;font-weight:bold}}
+tr.marginal td:last-child{{color:#7a5200;font-weight:bold}}
+tr.fail td:last-child{{color:#cc2200;font-weight:bold}}
+.summary{{background:#f9f9f9;border:1px solid #ddd;padding:.8em 1.2em;
+          border-radius:4px;margin:1em 0}}
+p{{margin:.4em 0}}
+</style>
+</head>
+<body>
+{body}
+</body>
+</html>"""
 
 
 # ---------------------------------------------------------------------------
@@ -506,17 +817,19 @@ def write_layout_report(
     path: str,
     output_path: str,
     layer_categories: dict | None = None,
+    format: str = "txt",
 ) -> str:
-    """Write a full layout summary report to a text file.
+    """Write a full layout summary report.
 
     Covers layout header, track counts by type, track lengths per layer,
     curve radius analysis, and (if layer_categories is given) Operation Density.
 
     Args:
         path: Path to the source .xtc or .xtce file.
-        output_path: Destination path for the .txt report.
+        output_path: Destination path for the report.
         layer_categories: Optional layer→category mapping (same as
             get_operation_density). Required for the OD section.
+        format: Output format — "txt" (default), "md", or "html".
 
     Returns:
         Confirmation message with the absolute path written.
@@ -627,12 +940,119 @@ def write_layout_report(
         ]
 
     out = Path(output_path).expanduser()
-    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    if format == "txt":
+        out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    else:
+        cpf = cars_per_real_ft(scale)
+        count_rows = [[k, str(v)] for k, v in sorted(layout.track_counts().items())]
+        count_rows.append(["**TOTAL**", f"**{len(layout.tracks)}**"])
+        layer_data = []
+        for idx, ft in sorted(by_layer.items()):
+            name = layout.layers[idx].name if idx in layout.layers else f"Layer {idx}"
+            layer_data.append({"layer": idx, "name": name, "feet": round(ft, 1),
+                                "cars": int(ft * cpf), "turnouts": to_by_layer.get(idx, 0)})
+        radii = layout.curve_radii()
+        curve_data = {"count": len(radii), "min": round(min(radii), 1) if radii else None,
+                      "max": round(max(radii), 1) if radii else None,
+                      "mean": round(sum(radii) / len(radii), 1) if radii else None}
+        od_data = (get_operation_density(path, layer_categories)["operations"]
+                   if layer_categories else None)
+        title = f"Layout Report: {layout.title1}"
+        if format == "json":
+            import json
+            out.write_text(json.dumps({
+                "title": layout.title1, "title2": layout.title2,
+                "scale": scale, "version": layout.version,
+                "room": {"width_ft": round(room_w, 1), "height_ft": round(room_h, 1),
+                         "area_sqft": round(room_w * room_h, 0)},
+                "date": str(datetime.date.today()),
+                "track_counts": layout.track_counts(),
+                "total_tracks": len(layout.tracks),
+                "layers": layer_data,
+                "total_ft": round(total_ft, 1),
+                "total_cars": int(total_ft * cpf),
+                "curves": curve_data,
+                "operation_density": od_data,
+            }, indent=2), encoding="utf-8")
+        elif format == "md":
+            layer_rows = [[str(d["layer"]), d["name"], f"{d['feet']:.1f}",
+                           str(d["cars"]), str(d["turnouts"])] for d in layer_data]
+            layer_rows.append(["—", "**TOTAL**", f"**{total_ft:.1f}**",
+                                f"**{int(total_ft * cpf)}**",
+                                f"**{sum(to_by_layer.values())}**"])
+            md = [f"# {title}", ""]
+            if layout.title2:
+                md += [f"*{layout.title2}*", ""]
+            md += [
+                f"| Field | Value |", f"|---|---|",
+                f"| Scale | {scale} |",
+                f"| Room | {room_w:.1f}′ × {room_h:.1f}′ = {room_w * room_h:.0f} sq ft |",
+                f"| Date | {datetime.date.today()} |",
+                "", "## Track Counts by Type", "",
+            ]
+            md += _md_table(["Type", "Count"], count_rows)
+            md += ["", "## Track Lengths by Layer", ""]
+            md += _md_table(["Layer", "Name", "Feet", "Cars", "Turnouts"], layer_rows)
+            md += ["", "## Curve Analysis", ""]
+            if not radii:
+                md.append("No curves found.")
+            else:
+                md += [f"- Curves: {curve_data['count']}",
+                       f"- Min radius: {curve_data['min']}\"",
+                       f"- Max radius: {curve_data['max']}\"",
+                       f"- Mean radius: {curve_data['mean']}\""]
+            if od_data:
+                md += ["", "## Operation Density (Joe Fugate, MRH Oct 2014)", "",
+                       f"| Metric | Value |", f"|---|---|",
+                       f"| Max cars | **{od_data['max_cars']}** |",
+                       f"| Cars moved / session | **{od_data['cars_moved_per_session']}** |",
+                       f"| Max-to-main | **{od_data['max_to_main_pct']:.1f}%** → "
+                       f"{od_data['max_to_main_label']} |"]
+            out.write_text("\n".join(md) + "\n", encoding="utf-8")
+        else:  # html
+            ct_tbl = _html_table(["Type", "Count"], [[k, str(v)]
+                                  for k, v in sorted(layout.track_counts().items())])
+            ly_tbl = _html_table(
+                ["Layer", "Name", "Feet", "Cars", "Turnouts"],
+                [[str(d["layer"]), d["name"], f"{d['feet']:.1f}",
+                  str(d["cars"]), str(d["turnouts"])] for d in layer_data],
+            )
+            curve_html = "<p>No curves found.</p>" if not radii else (
+                f"<p>Curves: {curve_data['count']} &nbsp;|&nbsp; "
+                f"Min: {curve_data['min']}\" &nbsp;|&nbsp; "
+                f"Max: {curve_data['max']}\" &nbsp;|&nbsp; "
+                f"Mean: {curve_data['mean']}\"</p>"
+            )
+            body = (
+                f"<h1>{title}</h1>"
+                + (f"<p><em>{layout.title2}</em></p>" if layout.title2 else "")
+                + f"<div class='summary'>"
+                f"<p><strong>Scale:</strong> {scale} &nbsp;|&nbsp; "
+                f"<strong>Room:</strong> {room_w:.1f}′ × {room_h:.1f}′ = "
+                f"{room_w * room_h:.0f} sq ft &nbsp;|&nbsp; "
+                f"<strong>Date:</strong> {datetime.date.today()}</p></div>"
+                f"<h2>Track Counts</h2>{ct_tbl}"
+                f"<h2>Track Lengths by Layer</h2>{ly_tbl}"
+                f"<h2>Curve Analysis</h2>{curve_html}"
+            )
+            if od_data:
+                od_tbl = _html_table(
+                    ["Metric", "Value"],
+                    [["Max cars", f"<strong>{od_data['max_cars']}</strong>"],
+                     ["Cars moved / session",
+                      f"<strong>{od_data['cars_moved_per_session']}</strong>"],
+                     ["Max-to-main",
+                      f"<strong>{od_data['max_to_main_pct']:.1f}%</strong> → "
+                      f"{od_data['max_to_main_label']}"]],
+                )
+                body += f"<h2>Operation Density</h2>{od_tbl}"
+            out.write_text(_html_page(title, body), encoding="utf-8")
     return f"Report written to {out}"
 
 
 @mcp.tool()
-def write_equipment_report(path: str, output_path: str) -> str:
+def write_equipment_report(path: str, output_path: str,
+                            format: str = "txt") -> str:
     """Write an equipment suitability report based on the layout's minimum curve radius.
 
     Compares the minimum curve radius against published minimums for common
@@ -640,7 +1060,8 @@ def write_equipment_report(path: str, output_path: str) -> str:
 
     Args:
         path: Path to the source .xtc or .xtce file.
-        output_path: Destination path for the .txt report.
+        output_path: Destination path for the report.
+        format: Output format — "txt" (default), "md", "html", or "json".
 
     Returns:
         Confirmation message with the absolute path written.
@@ -689,12 +1110,83 @@ def write_equipment_report(path: str, output_path: str) -> str:
         ]
 
     out = Path(output_path).expanduser()
-    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    if format == "txt":
+        out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    else:
+        # Build equipment rows for structured formats
+        if min_r is None:
+            eq_rows = []
+        else:
+            eq_rows = []
+            for name, ho_thresh in _EQUIPMENT_THRESHOLDS:
+                thresh = ho_thresh * sf
+                if min_r >= thresh:
+                    status = "PASS"
+                elif min_r >= thresh - 2.0 * sf:
+                    status = "MARGINAL"
+                else:
+                    status = "FAIL"
+                eq_rows.append({"name": name, "min_radius_in": round(thresh, 1),
+                                 "status": status})
+        title = f"Equipment Suitability Report: {layout.title1}"
+        if format == "json":
+            import json
+            out.write_text(json.dumps({
+                "title": layout.title1, "scale": scale,
+                "date": str(datetime.date.today()),
+                "min_curve_radius_in": min_r,
+                "equipment": eq_rows,
+                "note": f"Thresholds scaled from HO (factor {sf:.3f} for {scale}). "
+                        "MARGINAL = within 2\" scaled of minimum.",
+            }, indent=2), encoding="utf-8")
+        elif format == "md":
+            md = [f"# {title}", "",
+                  f"**Scale:** {scale}  |  **Date:** {datetime.date.today()}"]
+            if min_r is None:
+                md += ["", "No usable curves found."]
+            else:
+                md += ["", f"**Minimum curve radius:** {min_r:.1f}\"  "
+                           "(curves < 9\" excluded as decorative)", ""]
+                md += _md_table(
+                    ["Equipment Class", "Min Radius", "Status"],
+                    [[r["name"], f"{r['min_radius_in']:.1f}\"", r["status"]]
+                     for r in eq_rows],
+                )
+                md += ["", f"*Thresholds scaled from HO (factor {sf:.3f} for {scale}). "
+                           "MARGINAL = within 2\" scaled of minimum; test with your models.*"]
+            out.write_text("\n".join(md) + "\n", encoding="utf-8")
+        else:  # html
+            def _row_cls(row):
+                return row[2].lower()
+            if min_r is None:
+                tbl_html = "<p>No usable curves found.</p>"
+            else:
+                tbl_html = _html_table(
+                    ["Equipment Class", "Min Radius", "Status"],
+                    [[r["name"], f"{r['min_radius_in']:.1f}\"", r["status"]]
+                     for r in eq_rows],
+                    row_class_fn=lambda r: r[2].lower(),
+                )
+            body = (
+                f"<h1>{title}</h1>"
+                f"<p><strong>Scale:</strong> {scale} &nbsp;|&nbsp; "
+                f"<strong>Date:</strong> {datetime.date.today()}</p>"
+            )
+            if min_r is not None:
+                body += (
+                    f"<p><strong>Minimum curve radius:</strong> {min_r:.1f}\" "
+                    f"(curves &lt; 9\" excluded as decorative)</p>"
+                    f"<h2>Equipment Compatibility</h2>{tbl_html}"
+                    f"<p><em>Thresholds scaled from HO (factor {sf:.3f} for {scale}). "
+                    f"MARGINAL = within 2\" scaled of minimum; test with your specific models.</em></p>"
+                )
+            out.write_text(_html_page(title, body), encoding="utf-8")
     return f"Report written to {out}"
 
 
 @mcp.tool()
-def write_turnout_report(path: str, output_path: str) -> str:
+def write_turnout_report(path: str, output_path: str,
+                          format: str = "txt") -> str:
     """Write a turnout density report to a text file.
 
     Reports total turnouts, density (turnouts per 100 ft of track), and a
@@ -750,23 +1242,83 @@ def write_turnout_report(path: str, output_path: str) -> str:
     else:
         lines.append("  None found.")
 
-    if any(
+    has_heavy = any(
         (to_by_layer.get(idx, 0) / ft * 100.0) > 10.0
         for idx, ft in by_layer.items() if ft > 0
-    ):
-        lines += [
-            "",
-            "*** Layers with density > 10/100 ft are switching-heavy (possible staging yard).",
-        ]
+    )
+    if has_heavy:
+        lines += ["", "*** Layers with density > 10/100 ft are switching-heavy (possible staging yard)."]
 
     out = Path(output_path).expanduser()
-    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    if format == "txt":
+        out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    else:
+        layer_rows = []
+        for idx, ft in sorted(by_layer.items()):
+            name = layout.layers[idx].name if idx in layout.layers else f"Layer {idx}"
+            turnouts = to_by_layer.get(idx, 0)
+            density = (turnouts / ft * 100.0) if ft > 0 else 0.0
+            flag = "⚠" if density > 10.0 else ""
+            layer_rows.append([str(idx), name, f"{ft:.1f}", str(turnouts),
+                                f"{density:.1f}", flag])
+        partial_rows = [{"id": t.id, "endpoints": len(t.endpoints), "layer": t.layer}
+                        for t in layout.tracks if t.kind == "TURNOUT" and len(t.endpoints) < 3]
+        title = f"Turnout Report: {layout.title1}"
+        if format == "json":
+            import json
+            out.write_text(json.dumps({
+                "title": layout.title1, "scale": layout.scale,
+                "date": str(datetime.date.today()),
+                "total_turnouts": total_turnouts,
+                "total_track_ft": round(total_ft, 1),
+                "global_density_per_100ft": round(global_density, 1),
+                "by_layer": [{"layer": int(r[0]), "name": r[1], "feet": float(r[2]),
+                               "turnouts": int(r[3]), "density_per_100ft": float(r[4])}
+                              for r in layer_rows],
+                "partial_turnouts": partial_rows,
+            }, indent=2), encoding="utf-8")
+        elif format == "md":
+            md = [f"# {title}", "",
+                  f"**Scale:** {layout.scale}  |  **Date:** {datetime.date.today()}", "",
+                  "## Overall", "",
+                  f"- Total turnouts: **{total_turnouts}**",
+                  f"- Total track: **{total_ft:.1f} ft**",
+                  f"- Density: **{global_density:.1f}** per 100 ft", "",
+                  "## By Layer", ""]
+            md += _md_table(["Layer", "Name", "Feet", "Turnouts", "Density/100ft", ""],
+                             layer_rows)
+            md += ["", "## Partial Turnouts (fewer than 3 endpoints)", ""]
+            if partial_rows:
+                for p in partial_rows:
+                    md.append(f"- Track ID {p['id']}: {p['endpoints']} endpoint(s), layer {p['layer']}")
+            else:
+                md.append("None found.")
+            out.write_text("\n".join(md) + "\n", encoding="utf-8")
+        else:  # html
+            tbl = _html_table(["Layer", "Name", "Feet", "Turnouts", "Density/100ft", "Flag"],
+                               layer_rows)
+            body = (
+                f"<h1>{title}</h1>"
+                f"<p><strong>Scale:</strong> {layout.scale} &nbsp;|&nbsp; "
+                f"<strong>Date:</strong> {datetime.date.today()}</p>"
+                f"<div class='summary'>"
+                f"<p><strong>Total turnouts:</strong> {total_turnouts}</p>"
+                f"<p><strong>Total track:</strong> {total_ft:.1f} ft</p>"
+                f"<p><strong>Density:</strong> {global_density:.1f} per 100 ft</p></div>"
+                f"<h2>By Layer</h2>{tbl}"
+            )
+            if partial_rows:
+                items = "".join(f"<li>Track ID {p['id']}: {p['endpoints']} endpoint(s), "
+                                f"layer {p['layer']}</li>" for p in partial_rows)
+                body += f"<h2>Partial Turnouts</h2><ul>{items}</ul>"
+            out.write_text(_html_page(title, body), encoding="utf-8")
     return f"Report written to {out}"
 
 
 @mcp.tool()
-def write_gaps_report(path: str, output_path: str) -> str:
-    """Write an open endpoints (track gaps) report to a text file.
+def write_gaps_report(path: str, output_path: str,
+                       format: str = "txt") -> str:
+    """Write an open endpoints (track gaps) report.
 
     Lists every unconnected endpoint with its track ID, position, and angle.
     Groups pairs of endpoints within 0.1 model inches of each other as
@@ -777,7 +1329,8 @@ def write_gaps_report(path: str, output_path: str) -> str:
 
     Args:
         path: Path to the source .xtc or .xtce file.
-        output_path: Destination path for the .txt report.
+        output_path: Destination path for the report.
+        format: Output format — "txt" (default), "md", "html", or "json".
 
     Returns:
         Confirmation message with the absolute path written.
@@ -844,7 +1397,90 @@ def write_gaps_report(path: str, output_path: str) -> str:
             )
 
     out = Path(output_path).expanduser()
-    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    if format == "txt":
+        out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    else:
+        title = f"Track Gaps Report: {layout.title1}"
+        nm_list = [{"track_a": open_eps[i]["track_id"],
+                    "track_b": open_eps[j]["track_id"],
+                    "x_a": round(open_eps[i]["x"], 3),
+                    "y_a": round(open_eps[i]["y"], 3),
+                    "x_b": round(open_eps[j]["x"], 3),
+                    "y_b": round(open_eps[j]["y"], 3),
+                    "gap_in": round(math.hypot(open_eps[j]["x"] - open_eps[i]["x"],
+                                               open_eps[j]["y"] - open_eps[i]["y"]), 4)}
+                   for i, j in pairs]
+        ep_list = [{"track_id": ep["track_id"], "x": round(ep["x"], 3),
+                    "y": round(ep["y"], 3), "angle": round(ep["angle"], 2),
+                    "near_miss": i in near_miss_indices}
+                   for i, ep in enumerate(open_eps)]
+        if format == "json":
+            import json
+            out.write_text(json.dumps({
+                "title": layout.title1, "scale": layout.scale,
+                "date": str(datetime.date.today()),
+                "turntable_stalls": len(tt_stalls),
+                "open_endpoints": len(open_eps),
+                "near_miss_pairs": len(pairs),
+                "isolated_open_ends": len(isolated),
+                "near_misses": nm_list,
+                "endpoints": ep_list,
+            }, indent=2), encoding="utf-8")
+        elif format == "md":
+            md = [f"# {title}", "",
+                  f"**Scale:** {layout.scale}  |  **Date:** {datetime.date.today()}", "",
+                  "## Summary", "",
+                  f"| Item | Count |", f"|---|---|",
+                  f"| Turntable stalls (open by design) | {len(tt_stalls)} |",
+                  f"| Track gaps to check | **{len(open_eps)}** |",
+                  f"| Near-miss pairs (should connect) | {len(pairs)} |",
+                  f"| Isolated open ends | {len(isolated)} |"]
+            if nm_list:
+                md += ["", "## Near-Miss Pairs", ""]
+                md += _md_table(
+                    ["Track A", "Track B", "Gap (\")"],
+                    [[str(r["track_a"]), str(r["track_b"]), f"{r['gap_in']:.4f}"]
+                     for r in nm_list],
+                )
+            if ep_list:
+                md += ["", "## All Open Endpoints", ""]
+                md += _md_table(
+                    ["Track", "X", "Y", "Angle", "Note"],
+                    [[str(r["track_id"]), f"{r['x']:.3f}", f"{r['y']:.3f}",
+                      f"{r['angle']:.2f}", "near-miss" if r["near_miss"] else ""]
+                     for r in ep_list],
+                )
+            out.write_text("\n".join(md) + "\n", encoding="utf-8")
+        else:  # html
+            summary_tbl = _html_table(
+                ["Item", "Count"],
+                [["Turntable stalls (open by design)", str(len(tt_stalls))],
+                 ["Track gaps to check", f"<strong>{len(open_eps)}</strong>"],
+                 ["Near-miss pairs (should connect)", str(len(pairs))],
+                 ["Isolated open ends", str(len(isolated))]],
+            )
+            body = (
+                f"<h1>{title}</h1>"
+                f"<p><strong>Scale:</strong> {layout.scale} &nbsp;|&nbsp; "
+                f"<strong>Date:</strong> {datetime.date.today()}</p>"
+                f"<h2>Summary</h2>{summary_tbl}"
+            )
+            if nm_list:
+                nm_tbl = _html_table(
+                    ["Track A", "Track B", "Gap (\")"],
+                    [[str(r["track_a"]), str(r["track_b"]), f"{r['gap_in']:.4f}"]
+                     for r in nm_list],
+                )
+                body += f"<h2>Near-Miss Pairs</h2>{nm_tbl}"
+            if ep_list:
+                ep_tbl = _html_table(
+                    ["Track", "X", "Y", "Angle", "Note"],
+                    [[str(r["track_id"]), f"{r['x']:.3f}", f"{r['y']:.3f}",
+                      f"{r['angle']:.2f}", "near-miss" if r["near_miss"] else ""]
+                     for r in ep_list],
+                )
+                body += f"<h2>All Open Endpoints</h2>{ep_tbl}"
+            out.write_text(_html_page(title, body), encoding="utf-8")
     return f"Report written to {out}"
 
 
