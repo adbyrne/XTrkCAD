@@ -1,14 +1,21 @@
 name: CI
 on: [push]
+
 jobs:
   mcp-tests:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v7
-      - run: cd mcp && uv run --extra dev pytest -q
+      - name: Run MCP tests
+        working-directory: mcp
+        run: uv run --extra dev pytest -q
 
-  c-tests:
+  c-tests-linux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -21,4 +28,45 @@ jobs:
       - name: Build
         run: cmake --build build --parallel $(nproc)
       - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  c-tests-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install dependencies
+        run: brew install gtk+ cmocka libzip minixml librsvg
+      - name: Configure
+        # CMAKE_PREFIX_PATH points CMake at Homebrew's prefix (/opt/homebrew on arm64)
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DCMAKE_PREFIX_PATH="$(brew --prefix)"
+      - name: Build
+        run: cmake --build build --parallel $(sysctl -n hw.ncpu)
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  c-tests-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: false
+          install: >-
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-cmocka
+            mingw-w64-x86_64-zlib
+            mingw-w64-x86_64-libzip
+            mingw-w64-x86_64-mxml
+            mingw-w64-x86_64-librsvg
+      - name: Configure
+        # Windows build uses the mswlib (Win32) backend — no GTK needed
+        shell: msys2 {0}
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -G Ninja
+      - name: Build
+        shell: msys2 {0}
+        run: cmake --build build --parallel
+      - name: Test
+        shell: msys2 {0}
         run: ctest --test-dir build --output-on-failure
