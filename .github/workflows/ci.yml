@@ -58,7 +58,7 @@ jobs:
       - name: Install dependencies
         # Windows uses mswlib (Win32) backend — no GTK; mxml is optional (SVG export)
         # FreeImage is required by CMake; pre-installed on Ubuntu runners but not Windows
-        run: vcpkg install cmocka:x64-windows libzip:x64-windows freeimage:x64-windows
+        run: vcpkg install cmocka:x64-windows zlib:x64-windows libzip:x64-windows freeimage:x64-windows
       - name: Configure
         run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
       - name: Build
