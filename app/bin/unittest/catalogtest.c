@@ -2,7 +2,7 @@
 * Unit tests for part catalog management
 */
 
-#include <malloc.h>
+#include <stdlib.h>
 #include <stdarg.h>
 #include <stddef.h>
 #include <string.h>
