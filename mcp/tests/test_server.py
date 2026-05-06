@@ -14,6 +14,7 @@ from xtrkcad_mcp.server import (
     write_equipment_report,
     write_gaps_report,
     write_layout_report,
+    write_operation_density_report,
     write_radius_map,
     write_turnout_report,
 )
@@ -330,3 +331,76 @@ def test_layout_report_html_is_valid_html(tmp_path):
     content = out.read_text()
     assert "<html" in content
     assert "Layout Report" in content
+
+
+def test_equipment_report_md_has_table(tmp_path):
+    out = tmp_path / "equip.md"
+    write_equipment_report(str(FIXTURE), str(out), format="md")
+    content = out.read_text()
+    assert "# Equipment" in content
+    assert "|" in content
+
+
+def test_turnout_report_html_is_html(tmp_path):
+    out = tmp_path / "turnout.html"
+    write_turnout_report(str(FIXTURE), str(out), format="html")
+    content = out.read_text()
+    assert "<html" in content
+    assert "<table" in content
+
+
+def test_od_report_md_has_table(tmp_path):
+    out = tmp_path / "od.md"
+    layer_cats = {"0": "mainline", "1": "passing"}
+    write_operation_density_report(str(FIXTURE), str(out), layer_categories=layer_cats, format="md")
+    content = out.read_text()
+    assert "# Operation Density" in content
+    assert "|" in content
+
+
+def test_od_report_html_is_html(tmp_path):
+    out = tmp_path / "od.html"
+    layer_cats = {"0": "mainline", "1": "passing"}
+    write_operation_density_report(str(FIXTURE), str(out), layer_categories=layer_cats, format="html")
+    content = out.read_text()
+    assert "<html" in content
+    assert "<table" in content
+
+
+# ---------------------------------------------------------------------------
+# Format auto-detection from file extension
+# ---------------------------------------------------------------------------
+
+def test_layout_report_html_extension_autodetects(tmp_path):
+    out = tmp_path / "report.html"
+    write_layout_report(str(FIXTURE), str(out))  # no explicit format
+    content = out.read_text()
+    assert "<html" in content
+
+
+def test_layout_report_md_extension_autodetects(tmp_path):
+    out = tmp_path / "report.md"
+    write_layout_report(str(FIXTURE), str(out))  # no explicit format
+    content = out.read_text()
+    assert "# Layout Report" in content
+
+
+def test_gaps_report_html_extension_autodetects(tmp_path):
+    out = tmp_path / "gaps.html"
+    write_gaps_report(str(FIXTURE), str(out))  # no explicit format
+    content = out.read_text()
+    assert "<html" in content
+
+
+def test_equipment_report_md_extension_autodetects(tmp_path):
+    out = tmp_path / "equip.md"
+    write_equipment_report(str(FIXTURE), str(out))  # no explicit format
+    content = out.read_text()
+    assert "# Equipment" in content
+
+
+def test_turnout_report_html_extension_autodetects(tmp_path):
+    out = tmp_path / "turnout.html"
+    write_turnout_report(str(FIXTURE), str(out))  # no explicit format
+    content = out.read_text()
+    assert "<html" in content

@@ -656,6 +656,7 @@ def write_operation_density_report(
     ]
 
     out = Path(output_path).expanduser()
+    format = _resolve_format(output_path, format)
     if format == "txt":
         out.write_text("\n".join(lines) + "\n", encoding="utf-8")
     else:
@@ -725,6 +726,17 @@ def write_operation_density_report(
 # ---------------------------------------------------------------------------
 # Report format helpers
 # ---------------------------------------------------------------------------
+
+_EXT_FORMAT = {".html": "html", ".htm": "html", ".md": "md", ".json": "json"}
+
+
+def _resolve_format(output_path: str, explicit: str) -> str:
+    """Return explicit format if given (non-default), else infer from file extension."""
+    if explicit != "txt":
+        return explicit
+    suffix = Path(output_path).suffix.lower()
+    return _EXT_FORMAT.get(suffix, "txt")
+
 
 def _md_table(headers: list[str], rows: list[list[str]]) -> list[str]:
     """Build a GitHub-flavoured Markdown table, returning one line per row."""
@@ -940,6 +952,7 @@ def write_layout_report(
         ]
 
     out = Path(output_path).expanduser()
+    format = _resolve_format(output_path, format)
     if format == "txt":
         out.write_text("\n".join(lines) + "\n", encoding="utf-8")
     else:
@@ -1110,6 +1123,7 @@ def write_equipment_report(path: str, output_path: str,
         ]
 
     out = Path(output_path).expanduser()
+    format = _resolve_format(output_path, format)
     if format == "txt":
         out.write_text("\n".join(lines) + "\n", encoding="utf-8")
     else:
@@ -1250,6 +1264,7 @@ def write_turnout_report(path: str, output_path: str,
         lines += ["", "*** Layers with density > 10/100 ft are switching-heavy (possible staging yard)."]
 
     out = Path(output_path).expanduser()
+    format = _resolve_format(output_path, format)
     if format == "txt":
         out.write_text("\n".join(lines) + "\n", encoding="utf-8")
     else:
@@ -1397,6 +1412,7 @@ def write_gaps_report(path: str, output_path: str,
             )
 
     out = Path(output_path).expanduser()
+    format = _resolve_format(output_path, format)
     if format == "txt":
         out.write_text("\n".join(lines) + "\n", encoding="utf-8")
     else:
