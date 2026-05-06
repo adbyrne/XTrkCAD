@@ -5,21 +5,31 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Layout (`/home/abyrne/XTrkCAD/`)
 
 ```
-.claude/               Development working files — plans, notes (not committed to repos)
-docs/                  Project documentation not required in any repo
-xtrkcad-hg/            Authoritative Hg source (r6422+), remote = SourceForge
-xtrkcad-fork-xtrkcad/  Old Hg checkout — do not pull from (broken pull path), reference only
-build/                 Out-of-source CMake build (gitignored)
-CLAUDE.md              This file — committed into the git repo
+.claude/                   Development working files — plans, notes (not committed to repos)
+docs/                      Project documentation not required in any repo
+xtrkcad-hg/                Hg working copy — default branch (r6423+), remote = SourceForge
+xtrkcad-hg-gtk3v2main/     Hg working copy — GTK3V2MAIN branch (r5569+), cloned from xtrkcad-hg
+xtrkcad-fork-xtrkcad/      Old Hg checkout — do not pull from (broken pull path), reference only
+build/                     Out-of-source CMake build for default branch
+build-gtk3v2main/          Out-of-source CMake build for GTK3V2MAIN branch
+CLAUDE.md                  This file — committed into the git repo
 ```
 
 ## Build
 
-Requires CMake ≥ 3.20, GTK+ 2.0, and `rsvg-convert` (replaces Inkscape for SVG→PNG; no D-Bus needed). Out-of-source builds are mandatory.
+Requires CMake ≥ 3.20 and `rsvg-convert` (replaces Inkscape for SVG→PNG; no D-Bus needed). Out-of-source builds are mandatory.
+
+- **default branch** requires GTK+ 2.0 (`gtk2-devel`)
+- **GTK3V2MAIN branch** requires GTK+ 3.0 (`gtk3-devel`)
 
 ```sh
+# default branch (GTK2)
 cmake -B build -S xtrkcad-hg -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
 cmake --build build --parallel $(nproc)
+
+# GTK3V2MAIN branch (GTK3)
+cmake -B build-gtk3v2main -S xtrkcad-hg-gtk3v2main -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
+cmake --build build-gtk3v2main --parallel $(nproc)
 ```
 
 Useful CMake options:
@@ -29,15 +39,21 @@ Useful CMake options:
 
 ## Tests
 
-5 unit tests using [CMocka](https://cmocka.org/). All pass on the current codebase.
+Unit tests use [CMocka](https://cmocka.org/). Test sources: `app/bin/unittest/` and `app/dynstring/unittest/`.
+
+- **default branch**: 8 tests pass (`ctest --test-dir build`)
+- **GTK3V2MAIN branch**: 9 tests pass (adds `PreferenceTest` from GTK3 wlib)
 
 ```sh
-ctest --test-dir build                  # run all tests
+ctest --test-dir build                  # default branch
+ctest --test-dir build-gtk3v2main       # GTK3V2MAIN branch
 ctest --test-dir build -R pathstest     # run a single test by name
 ctest --test-dir build --output-on-failure
 ```
 
-Test sources: `app/bin/unittest/` and `app/dynstring/unittest/`.
+**GTK3V2MAIN-specific note**: `common.h` on that branch includes `dynarray.h` from
+`app/bin/include/` — any new test target that pulls in `common.h` must add
+`${CMAKE_CURRENT_SOURCE_DIR}/../include` to its `target_include_directories`.
 
 ## Doxygen
 
