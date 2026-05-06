@@ -75,6 +75,22 @@ target_link_libraries(utilitytest
 
 add_test(UtilityTest utilitytest)
 
+# Bezier pure-math functions
+
+add_executable(beziertest
+			  beziertest.c
+			  )
+
+target_include_directories(beziertest PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_SOURCE_DIR}/app/wlib/include
+)
+
+target_link_libraries(beziertest
+                      ${LIBS} m)
+
+add_test(BezierTest beziertest)
+
 # parts catalog
 # disabled because it pulls in too many dependencies
 
@@ -115,5 +131,6 @@ set_target_properties(
 	defaultstest
 	pathstest
 	utilitytest
+	beziertest
  	PROPERTIES FOLDER UnitTests
  )
