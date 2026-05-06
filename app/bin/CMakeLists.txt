@@ -260,8 +260,10 @@ endif()
 add_dependencies(xtrkcad-lib
     msgfiles
 	lines
-    genbitmaps
 )
+if(TARGET genbitmaps)
+    add_dependencies(xtrkcad-lib genbitmaps)
+endif()
 
 
 target_include_directories(xtrkcad-lib
@@ -335,8 +337,10 @@ target_sources(${XTRKCAD_BIN}
 )
 add_dependencies(${XTRKCAD_BIN}
     balloonhelp
-    msgfiles
-    genbitmaps)
+    msgfiles)
+if(TARGET genbitmaps)
+    add_dependencies(${XTRKCAD_BIN} genbitmaps)
+endif()
 
 target_include_directories(${XTRKCAD_BIN}
     PRIVATE
