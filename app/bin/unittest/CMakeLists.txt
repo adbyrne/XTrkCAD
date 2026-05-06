@@ -59,6 +59,22 @@ target_link_libraries(shortentest
 
 add_test(ShortenTest shortentest)
 
+# geometric utility functions
+
+add_executable(utilitytest
+			  utilitytest.c
+			  )
+
+target_include_directories(utilitytest PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_SOURCE_DIR}/app/wlib/include
+)
+
+target_link_libraries(utilitytest
+                      ${LIBS} m)
+
+add_test(UtilityTest utilitytest)
+
 # parts catalog
 # disabled because it pulls in too many dependencies
 
@@ -93,10 +109,11 @@ add_test(ShortenTest shortentest)
 
 
 set_target_properties(
-	dxfformattest 
+	dxfformattest
 #	catalogtest
 	shortentest
 	defaultstest
 	pathstest
+	utilitytest
  	PROPERTIES FOLDER UnitTests
  )
