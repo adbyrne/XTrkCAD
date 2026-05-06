@@ -57,7 +57,14 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
+      - name: Cache vcpkg packages
+        uses: actions/cache@v4
+        id: vcpkg-cache
+        with:
+          path: C:\vcpkg\installed
+          key: vcpkg-x64-windows-cmocka-zlib-libzip-freeimage-v1
       - name: Install dependencies
+        if: steps.vcpkg-cache.outputs.cache-hit != 'true'
         # Windows uses mswlib (Win32) backend — no GTK; mxml is optional (SVG export)
         # FreeImage is required by CMake; pre-installed on Ubuntu runners but not Windows
         run: vcpkg install cmocka:x64-windows zlib:x64-windows libzip:x64-windows freeimage:x64-windows
