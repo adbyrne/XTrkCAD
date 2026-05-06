@@ -69,9 +69,9 @@ jobs:
         # FreeImage is required by CMake; pre-installed on Ubuntu runners but not Windows
         run: vcpkg install cmocka:x64-windows zlib:x64-windows libzip:x64-windows freeimage:x64-windows
       - name: Configure
-        # ZLIB_ROOT hints FindZLIB at the vcpkg installed tree; without it the
-        # module-mode finder skips vcpkg paths and leaves Zlib::Zlib undefined.
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" "-DZLIB_ROOT=$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows"
+        # CMAKE_PREFIX_PATH points CMake at the vcpkg installed tree so all
+        # config-mode and module-mode finders (zlib, libzip, etc.) resolve.
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" "-DCMAKE_PREFIX_PATH=$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows"
       - name: Build
         run: cmake --build build --config Debug --parallel
       - name: Test
