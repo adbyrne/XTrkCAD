@@ -376,8 +376,8 @@ static callBacks_t buttonCallBacks = {
 	buttPush
 };
 
-wButton_p wButtonCreate(
-        wWin_p	parent,
+wControl_p wButtonCreate(
+        wControl_p	parent,
         wWinPix_t	x,
         wWinPix_t	y,
         const char	* helpStr,
@@ -387,6 +387,7 @@ wButton_p wButtonCreate(
         wButtonCallBack_p action,
         void	* data )
 {
+	wWin_p win = (wWin_p)parent;
 	wButton_p b;
 	RECT rect;
 	int h=20;
@@ -404,7 +405,7 @@ wButton_p wButtonCreate(
 		bm = (wIcon_p)labelStr;
 		labelStr = NULL;
 	}
-	b = (wButton_p)mswAlloc( parent, B_BUTTON, NULL, sizeof *b, data, &index );
+	b = (wButton_p)mswAlloc( win, B_BUTTON, NULL, sizeof *b, data, &index );
 	b->option = option;
 	b->busy = 0;
 	b->selected = 0;
@@ -418,7 +419,7 @@ wButton_p wButtonCreate(
 	}
 	style = ((b->option&BO_ICON)? BS_OWNERDRAW : BS_PUSHBUTTON) |
 	        WS_CHILD | WS_VISIBLE |
-	        mswGetBaseStyle(parent);
+	        mswGetBaseStyle(win);
 	if ((b->option&BB_DEFAULT) != 0) {
 		style |= BS_DEFPUSHBUTTON;
 	}
@@ -427,7 +428,7 @@ wButton_p wButtonCreate(
 	                        ((wControl_p)parent)->hWnd, (HMENU)(UINT_PTR)index, mswHInst, NULL );
 	if (b->hWnd == NULL) {
 		mswFail("CreateWindow(BUTTON)");
-		return b;
+		return (wControl_p)b;
 	}
 	/*SetWindowLong( b->hWnd, 0, (long)b );*/
 	GetWindowRect( b->hWnd, &rect );
@@ -451,5 +452,5 @@ wButton_p wButtonCreate(
 
 	InvalidateRect(b->hWnd, &rect, TRUE);
 
-	return b;
+	return (wControl_p)b;
 }

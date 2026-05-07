@@ -351,7 +351,7 @@ static wChoice_p choiceCreate(
 		}
 		SetBkMode( hDc, TRANSPARENT );
 		ReleaseDC( hButt, hDc );
-		if (b->option & BC_HORZ) {
+		if (b->option & BC_HORIZONTAL) {
 			pw += w;
 		} else {
 			ph += CHOICE_HEIGHT;
@@ -379,7 +379,7 @@ static wChoice_p choiceCreate(
 		wRadioSetValue( b, (b->valueP?*b->valueP:0L) );
 		break;
 	}
-	if (b->option & BC_HORZ) {
+	if (b->option & BC_HORIZONTAL) {
 		ph = CHOICE_HEIGHT;
 	} else {
 		pw = maxW;
@@ -401,8 +401,8 @@ static wChoice_p choiceCreate(
 }
 
 
-wChoice_p wRadioCreate(
-        wWin_p	parent,
+wControl_p wRadioCreate(
+        wControl_p	parent,
         wWinPix_t	x,
         wWinPix_t	y,
         const char	* helpStr,
@@ -413,12 +413,13 @@ wChoice_p wRadioCreate(
         wChoiceCallBack_p action,
         void	*data )
 {
-	return choiceCreate( B_RADIO, parent, x, y, helpStr, labelStr,
+	wWin_p win = (wWin_p)parent;
+	return (wControl_p)choiceCreate( B_RADIO, win, x, y, helpStr, labelStr,
 	                     option, labels, valueP, action, data );
 }
 
-wChoice_p wToggleCreate(
-        wWin_p	parent,
+wControl_p wToggleCreate(
+        wControl_p	parent,
         wWinPix_t	x,
         wWinPix_t	y,
         const char	* helpStr,
@@ -429,6 +430,7 @@ wChoice_p wToggleCreate(
         wChoiceCallBack_p action,
         void	*data )
 {
-	return choiceCreate( B_TOGGLE, parent, x, y, helpStr, labelStr,
+	wWin_p win = (wWin_p)parent;
+	return (wControl_p)choiceCreate( B_TOGGLE, win, x, y, helpStr, labelStr,
 	                     option, labels, valueP, action, data );
 }

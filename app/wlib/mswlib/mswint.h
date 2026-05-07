@@ -118,6 +118,8 @@ struct control {
 };
 
 typedef const unsigned char **wIconBitMap_t;
+typedef struct wString_t *wString_p;
+typedef void (*wStringCallBack_p)(const char *str, void *data);
 
 typedef struct {
 	unsigned key;

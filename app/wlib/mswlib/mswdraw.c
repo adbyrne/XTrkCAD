@@ -2064,8 +2064,8 @@ void mswRepaintAll( void )
 }
 
 
-wDraw_p wDrawCreate(
-        wWin_p parent,
+wControl_p wDrawCreate(
+        wControl_p parent,
         wWinPix_t x,
         wWinPix_t y,
         const char * helpStr,
@@ -2076,12 +2076,13 @@ wDraw_p wDrawCreate(
         wDrawRedrawCallBack_p redrawProc,
         wDrawActionCallBack_p action )
 {
+	wWin_p win = (wWin_p)parent;
 	wDraw_p d;
 	RECT rect;
 	int index;
 	HDC hDc;
 
-	d = mswAlloc( parent, B_DRAW, NULL, sizeof *d, data, &index );
+	d = mswAlloc( win, B_DRAW, NULL, sizeof *d, data, &index );
 	mswComputePos( (wControl_p)d, x, y );
 	d->w = w;
 	d->h = h;
@@ -2096,7 +2097,7 @@ wDraw_p wDrawCreate(
 
 	if (d->hWnd == (HWND)0) {
 		mswFail( "CreateWindow(DRAW)" );
-		return d;
+		return (wControl_p)d;
 	}
 
 	GetWindowRect( d->hWnd, &rect );
@@ -2118,7 +2119,7 @@ wDraw_p wDrawCreate(
 		ReleaseDC( d->hWnd, hDc );
 	}
 	d->bCopiedMain = FALSE;
-	return d;
+	return (wControl_p)d;
 }
 
 /*

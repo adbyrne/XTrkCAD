@@ -200,6 +200,7 @@ wDrawColor wDrawColorGray(
 	}
 }
 
+#undef wDrawFindColor
 wDrawColor wDrawFindColor(
         long rgb0 )
 {
@@ -218,6 +219,7 @@ wDrawColor wDrawFindColor(
 }
 
 
+#undef wDrawGetRGB
 long wDrawGetRGB(
         wDrawColor color )
 {
@@ -324,8 +326,8 @@ static void doColorButton(
 }
 
 
-wButton_p wColorSelectButtonCreate(
-        wWin_p win,
+wControl_p wColorSelectButtonCreate(
+        wControl_p parent,
         wWinPix_t x,
         wWinPix_t y,
         const char * helpStr,
@@ -336,7 +338,8 @@ wButton_p wColorSelectButtonCreate(
         wColorSelectButtonCallBack_p action,
         void * data )
 {
-	wButton_p bb;
+	wWin_p win = (wWin_p)parent;
+	wControl_p bb;
 	wIcon_p bm;
 	colorData_t * cd;
 	bm = wIconCreateBitMap( square10_width, square10_height, square10_bits,
@@ -348,13 +351,13 @@ wButton_p wColorSelectButtonCreate(
 	cd->labelStr = labelStr;
 	cd->color = (color?*color:0);
 	cd->bm = bm;
-	bb = wButtonCreate( win, x, y, helpStr, (char*)bm, option|BO_ICON, width,
+	bb = wButtonCreate( parent, x, y, helpStr, (char*)bm, option|BO_ICON, width,
 	                    doColorButton, cd );
-	cd->button = bb;
+	cd->button = (wButton_p)bb;
 	if ( labelStr ) {
-		wControlSetLabel( (wControl_p)bb, labelStr );
+		wControlSetLabel( bb, labelStr );
 	}
-	return bb;
+	return (wControl_p)bb;
 }
 
 
