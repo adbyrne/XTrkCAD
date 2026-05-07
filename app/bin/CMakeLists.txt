@@ -15,7 +15,9 @@ set( XTRKCAD_BIN "xtrkcad${XTRKCAD_BETA}" )
 
 set( XTRKCAD_CORE_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-add_subdirectory(bitmaps)
+if(NOT WIN32)
+    add_subdirectory(bitmaps)
+endif()
 
 add_executable(cnvdsgn cnvdsgn.c utility.c)
 
