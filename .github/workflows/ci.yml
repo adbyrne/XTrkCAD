@@ -87,7 +87,7 @@ jobs:
       - name: Configure
         # CMAKE_PREFIX_PATH points CMake at the vcpkg installed tree so all
         # config-mode and module-mode finders (zlib, libzip, etc.) resolve.
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" "-DCMAKE_PREFIX_PATH=$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows"
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_USE_GETTEXT=OFF "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" "-DCMAKE_PREFIX_PATH=$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows"
       - name: Build
         run: cmake --build build --config Debug --parallel
       - name: Test
