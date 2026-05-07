@@ -41,7 +41,7 @@ extern char *wExecutableName;
 
 /* Weak default so wlib links standalone (e.g. unit tests) without xtrkcad-lib.
    The real definition in app/bin/misc.c overrides this in the full app. */
-__attribute__((weak)) wBool_t CheckHelpTopicExists(const char * topic) { return wTrue; }
+__attribute__((weak)) wBool_t CheckHelpTopicExists(const char * topic) { return 1; }
 
 /**
  * Create the fully qualified filename for the help helper
