@@ -282,7 +282,7 @@ target_link_libraries(xtrkcad-lib
 	xtrkcad-wlib
 )
 
-if(UNIX AND NOT APPLE)
+if(UNIX)
 	target_link_libraries(xtrkcad-lib PRIVATE ${LIBZIP_LIBRARY} ${LIBZIP_LIBRARIES} ${ZLIB_LIBRARY})
 else()
     target_link_libraries(xtrkcad-lib
