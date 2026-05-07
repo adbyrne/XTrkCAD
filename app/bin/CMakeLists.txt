@@ -284,8 +284,9 @@ target_link_libraries(xtrkcad-lib
 
 target_link_libraries(xtrkcad-lib
     PRIVATE
-    Libzip::Libzip
-    ${ZLIB_LIBRARIES})
+    ${LIBZIP_LIBRARY}
+    ${LIBZIP_LIBRARIES}
+    ${ZLIB_LIBRARY})
 
 if(WIN32)
     target_link_libraries(xtrkcad-lib
