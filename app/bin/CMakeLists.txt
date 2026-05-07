@@ -288,7 +288,7 @@ else()
     target_link_libraries(xtrkcad-lib
         PRIVATE
         Libzip::Libzip
-        Zlib::Zlib)
+        ZLIB::ZLIB)
 endif()
 
 if(WIN32)
