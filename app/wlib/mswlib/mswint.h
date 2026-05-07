@@ -113,9 +113,11 @@ extern callBacks_t *mswCallBacks[CALLBACK_CNT];
 		wBool_t shown; \
 		wBool_t hilite;
 
-struct wControl_t {
+struct control {
 	WOBJ_COMMON
 };
+
+typedef const unsigned char **wIconBitMap_t;
 
 typedef struct {
 	unsigned key;
