@@ -51,10 +51,12 @@ endif()
 # Find document conversion tool
 find_package(Pandoc)
 
-# check for GTK+ 3.0
-pkg_check_modules(GTK3 QUIET "gtk+-3.0")
-if(NOT GTK3_FOUND)
-    message(FATAL_ERROR "ERROR: GTK3 not found found!")
+# check for GTK+ 3.0 (Linux/macOS only — Windows uses Win32/mswlib backend)
+if(NOT WIN32)
+    pkg_check_modules(GTK3 QUIET "gtk+-3.0")
+    if(NOT GTK3_FOUND)
+        message(FATAL_ERROR "ERROR: GTK3 not found found!")
+    endif()
 endif()
 
 # Flatpak
