@@ -14,7 +14,7 @@ if(WIN32)
       PATHS ${ZLIBBASEDIR} "${ZLIBBASEDIR}/include"
       DOC "The directory where zlib.h resides")
     find_library( ZLIB_LIBRARY
-      NAMES zlibstatic
+      NAMES zlibstatic zlib z
       PATHS ${ZLIBBASEDIR} "${ZLIBBASEDIR}/lib"
       DOC "The zlib library")
 else()
