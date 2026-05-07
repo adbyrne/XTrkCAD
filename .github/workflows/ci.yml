@@ -18,6 +18,19 @@ jobs:
         working-directory: mcp
         run: uv run --extra dev pytest -q
 
+  doxygen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake libgtk2.0-dev doxygen graphviz
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_USE_DOXYGEN=ON -DXTRKCAD_TESTING=OFF
+      - name: Build docs
+        run: cmake --build build --target docs-doxygen
+
   c-tests-linux:
     runs-on: ubuntu-latest
     steps:
