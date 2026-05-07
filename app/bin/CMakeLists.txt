@@ -296,14 +296,10 @@ target_link_libraries(xtrkcad-lib
     parts
 )
 
-if(UNIX AND NOT APPLE)
-	target_link_libraries(xtrkcad-lib PRIVATE ${LIBZIP_LIBRARY} ${LIBZIP_LIBRARIES} ${ZLIB_LIBRARY})
-else()
-    target_link_libraries(xtrkcad-lib
-        PRIVATE
-        Libzip::Libzip
-        Zlib::Zlib)
-endif()
+target_link_libraries(xtrkcad-lib
+    PRIVATE
+    Libzip::Libzip
+    ZLIB::ZLIB)
 
 if(WIN32)
     target_link_libraries(xtrkcad-lib

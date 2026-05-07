@@ -28,7 +28,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(Inkscape)
 find_package(Libzip)
-find_package(Zlib)
+find_package(ZLIB)
 
 # Optionally enable SVG export
 find_package(MiniXML)

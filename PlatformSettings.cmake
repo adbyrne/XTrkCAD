@@ -44,16 +44,10 @@ endif()
 
 # Set Win64 flag when a 64 bit build is selected
 if(WIN32)
-	include(FindPkgConfig)
-	pkg_check_modules(GTK3 REQUIRED "gtk+-3.0")
-
 	set(XTRKCAD_USE_GETTEXT_DEFAULT ON)
 	set(XTRKCAD_USE_GTK_DEFAULT OFF)
 	set(XTRKCAD_GTK3_EXPERIMENT OFF)
-
-	if(GTK3_FOUND)
-		set(XTRKCAD_USE_BROWSER ON)
-	endif()	
+	set(XTRKCAD_USE_BROWSER ON)
 
 	# determine processor target architecture
 	if (CMAKE_SIZEOF_VOID_P EQUAL 8)
