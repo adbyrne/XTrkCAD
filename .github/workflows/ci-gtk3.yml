@@ -52,22 +52,26 @@ jobs:
       - name: Test
         run: ctest --test-dir build --output-on-failure
 
-  c-tests-windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v5
-      - name: Cache vcpkg packages
-        uses: actions/cache@v4
-        id: vcpkg-cache
-        with:
-          path: C:\vcpkg\installed
-          key: vcpkg-x64-windows-cmocka-zlib-libzip-freeimage-v1
-      - name: Install dependencies
-        if: steps.vcpkg-cache.outputs.cache-hit != 'true'
-        run: vcpkg install cmocka:x64-windows zlib:x64-windows libzip:x64-windows freeimage:x64-windows
-      - name: Configure
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_USE_GETTEXT=OFF "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" "-DCMAKE_PREFIX_PATH=$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows"
-      - name: Build
-        run: cmake --build build --config Debug --parallel
-      - name: Test
-        run: ctest --test-dir build -C Debug --output-on-failure
+  # Windows skipped: mswlib does not compile with modern MSVC (bug #618).
+  # The Win32 backend needs signature audit and SDK compatibility fixes
+  # before Windows CI can be re-enabled.
+  # c-tests-windows:
+  #   runs-on: windows-latest
+  #   (job definition preserved below for reference when bug #618 is fixed)
+  #   steps:
+  #     - uses: actions/checkout@v5
+  #     - name: Cache vcpkg packages
+  #       uses: actions/cache@v4
+  #       id: vcpkg-cache
+  #       with:
+  #         path: C:\vcpkg\installed
+  #         key: vcpkg-x64-windows-cmocka-zlib-libzip-freeimage-v1
+  #     - name: Install dependencies
+  #       if: steps.vcpkg-cache.outputs.cache-hit != 'true'
+  #       run: vcpkg install cmocka:x64-windows zlib:x64-windows libzip:x64-windows freeimage:x64-windows
+  #     - name: Configure
+  #       run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_USE_GETTEXT=OFF "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" "-DCMAKE_PREFIX_PATH=$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows"
+  #     - name: Build
+  #       run: cmake --build build --config Debug --parallel
+  #     - name: Test
+  #       run: ctest --test-dir build -C Debug --output-on-failure
