@@ -282,14 +282,10 @@ target_link_libraries(xtrkcad-lib
 	xtrkcad-wlib
 )
 
-if(UNIX)
-	target_link_libraries(xtrkcad-lib PRIVATE ${LIBZIP_LIBRARY} ${LIBZIP_LIBRARIES} ${ZLIB_LIBRARY})
-else()
-    target_link_libraries(xtrkcad-lib
-        PRIVATE
-        Libzip::Libzip
-        ZLIB::ZLIB)
-endif()
+target_link_libraries(xtrkcad-lib
+    PRIVATE
+    Libzip::Libzip
+    ${ZLIB_LIBRARIES})
 
 if(WIN32)
     target_link_libraries(xtrkcad-lib
