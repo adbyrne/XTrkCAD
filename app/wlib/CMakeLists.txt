@@ -11,6 +11,10 @@ target_include_directories(xtrkcad-wlib
 	${xtrkcad-lib_SOURCE_DIR}
 )
 
-add_subdirectory(gtk3lib)
+if(NOT WIN32)
+    add_subdirectory(gtk3lib)
+else()
+    add_subdirectory(mswlib)
+endif()
 
 # add_subdirectory(test)
