@@ -22,6 +22,12 @@ add_executable( pathstest
 				pathstest.c
 				)
 
+target_include_directories(pathstest PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
+    ${CMAKE_SOURCE_DIR}/app/wlib/include
+)
+
 target_link_libraries(pathstest
                       dynstring
 					  xtrkcad-wlib
