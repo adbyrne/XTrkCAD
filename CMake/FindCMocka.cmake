@@ -38,6 +38,11 @@ find_library(CMOCKA_LIBRARY
         ${CMOCKA_ROOT_DIR}/lib
 )
 
+find_file(CMOCKA_DLL
+    NAMES cmocka.dll
+    PATHS ${CMOCKA_ROOT_DIR}
+    PATH_SUFFIXES bin lib
+)
 
 if (CMOCKA_LIBRARY)
   set(CMOCKA_LIBRARIES
@@ -50,4 +55,4 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(CMocka DEFAULT_MSG CMOCKA_LIBRARY CMOCKA_INCLUDE_DIR)
 
 # show the CMOCKA_INCLUDE_DIR and CMOCKA_LIBRARIES variables only in the advanced view
-mark_as_advanced(CMOCKA_INCLUDE_DIR CMOCKA_LIBRARY CMOCKA_LIBRARIES)
+mark_as_advanced(CMOCKA_INCLUDE_DIR CMOCKA_LIBRARY CMOCKA_LIBRARIES CMOCKA_DLL)

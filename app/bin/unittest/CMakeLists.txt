@@ -48,11 +48,11 @@ set_target_properties(
  	PROPERTIES FOLDER UnitTests
  )
 
- if(WIN32)
+ if(WIN32 AND CMOCKA_DLL)
 	add_custom_command(
 		TARGET dxfformattest POST_BUILD
 				COMMAND ${CMAKE_COMMAND} -E copy
-				"${CMOCKA_ROOT_DIR}/lib/cmocka.dll"
+				"${CMOCKA_DLL}"
 				${CMAKE_CURRENT_BINARY_DIR}
 	)
  endif()
