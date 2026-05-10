@@ -25,7 +25,6 @@ enable_testing()
 # Additional libraries
 
 find_package(Libzip)
-find_package(Zlib)
 
 # Optionally enable SVG export
 find_package(MiniXML)

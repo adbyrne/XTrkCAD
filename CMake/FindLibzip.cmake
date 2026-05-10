@@ -12,6 +12,11 @@
 # XTrackCAD specific directory tree is assumed
 #
 
+# libzip depends on zlib — declare that here so callers don't need a
+# separate find_package(ZLIB) call.
+set(_zlib_package_name "ZLIB")
+find_package(${_zlib_package_name} REQUIRED)
+
 #set(CMAKE_FIND_DEBUG_MODE 1)
 if(WIN32)
   set(LIBZIPBASEDIR "$ENV{XTCEXTERNALROOT}/${XTRKCAD_ARCH_SUBDIR}/libzip" )
