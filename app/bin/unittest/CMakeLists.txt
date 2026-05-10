@@ -78,8 +78,10 @@ target_include_directories(utilitytest PRIVATE
     ${CMAKE_SOURCE_DIR}/app/wlib/include
 )
 
-target_link_libraries(utilitytest
-                      ${LIBS} m)
+target_link_libraries(utilitytest ${LIBS})
+if(UNIX)
+    target_link_libraries(utilitytest m)
+endif()
 
 add_test(UtilityTest utilitytest)
 
@@ -95,8 +97,10 @@ target_include_directories(beziertest PRIVATE
     ${CMAKE_SOURCE_DIR}/app/wlib/include
 )
 
-target_link_libraries(beziertest
-                      ${LIBS} m)
+target_link_libraries(beziertest ${LIBS})
+if(UNIX)
+    target_link_libraries(beziertest m)
+endif()
 
 add_test(BezierTest beziertest)
 
