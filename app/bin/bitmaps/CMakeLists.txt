@@ -144,7 +144,12 @@ foreach(img3 ${IMG3S})
 			add_custom_command(
 				DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png pngtoxpm
 				OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${img3}${pix}.image1
-				COMMAND $<TARGET_FILE:pngtoxpm> ${img3}${pix}_image1 ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png ${CMAKE_CURRENT_BINARY_DIR}/${img3}${pix}.image1
+				COMMAND ${CMAKE_COMMAND}
+					-DEXE=$<TARGET_FILE:pngtoxpm>
+					-DNAME=${img3}${pix}_image1
+					"-DINPUT=${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png"
+					"-DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}/${img3}${pix}.image1"
+					-P ${CMAKE_CURRENT_SOURCE_DIR}/run_pngtoxpm.cmake
 			)
 		endif()
 	endforeach()
@@ -171,7 +176,12 @@ foreach(img1 ${IMG1S})
 		add_custom_command(
 			OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${img1}.image1
 			DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${img1}.png pngtoxpm
-			COMMAND $<TARGET_FILE:pngtoxpm> ${img1}_image1 ${CMAKE_CURRENT_SOURCE_DIR}/${img1}.png ${CMAKE_CURRENT_BINARY_DIR}/${img1}.image1
+			COMMAND ${CMAKE_COMMAND}
+				-DEXE=$<TARGET_FILE:pngtoxpm>
+				-DNAME=${img1}_image1
+				"-DINPUT=${CMAKE_CURRENT_SOURCE_DIR}/${img1}.png"
+				"-DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}/${img1}.image1"
+				-P ${CMAKE_CURRENT_SOURCE_DIR}/run_pngtoxpm.cmake
 		)
 	endif()
 	list(APPEND IMG_RESULTS ${img1}.image1)
