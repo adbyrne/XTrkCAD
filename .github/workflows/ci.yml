@@ -73,6 +73,10 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
+      - name: Install rsvg-convert
+        # rsvg-convert is needed to convert SVG toolbar icons to PNG during the build.
+        # librsvg provides the rsvg-convert.exe binary.
+        run: choco install librsvg -y --no-progress
       - name: Cache vcpkg packages
         uses: actions/cache@v4
         id: vcpkg-cache
