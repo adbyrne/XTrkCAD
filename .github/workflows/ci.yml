@@ -74,9 +74,12 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Install rsvg-convert
-        # rsvg-convert is needed to convert SVG toolbar icons to PNG during the build.
-        # librsvg provides the rsvg-convert.exe binary.
-        run: choco install librsvg -y --no-progress
+        # rsvg-convert converts SVG toolbar icons to PNG during the build.
+        # MSYS2 is pre-installed on Windows runners; mingw-w64-x86_64-librsvg
+        # provides rsvg-convert.exe in C:\msys64\mingw64\bin.
+        run: |
+          C:\msys64\usr\bin\pacman.exe -Sq --noconfirm mingw-w64-x86_64-librsvg
+          echo "C:\msys64\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: Cache vcpkg packages
         uses: actions/cache@v4
         id: vcpkg-cache
