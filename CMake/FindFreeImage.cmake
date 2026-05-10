@@ -22,8 +22,9 @@ if(WIN32)
 		PATHS ${FREEIMAGEBASEDIR}
 		DOC "The FreeImage library")
 	find_file( FREEIMAGE_SHAREDLIB
-		NAMES freeimage.DLL
+		NAMES FreeImage.dll freeimage.DLL FreeImage.DLL
 		PATHS ${FREEIMAGEBASEDIR}
+		PATH_SUFFIXES bin
 	)
 else()
 	find_path( FREEIMAGE_INCLUDE_PATH FreeImage.h
