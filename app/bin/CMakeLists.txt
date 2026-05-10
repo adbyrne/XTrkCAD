@@ -56,8 +56,8 @@ endif()
 macro(GENERATE_LIN lin_name)
 	add_custom_command(
 		OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${lin_name}.lin
-		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${lin_name}.src
-		COMMAND cnvdsgn < ${CMAKE_CURRENT_SOURCE_DIR}/${lin_name}.src > ${CMAKE_CURRENT_BINARY_DIR}/${lin_name}.lin
+		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${lin_name}.src cnvdsgn
+		COMMAND $<TARGET_FILE:cnvdsgn> < ${CMAKE_CURRENT_SOURCE_DIR}/${lin_name}.src > ${CMAKE_CURRENT_BINARY_DIR}/${lin_name}.lin
 	)
 
 	target_sources(lines

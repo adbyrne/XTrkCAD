@@ -142,9 +142,9 @@ foreach(img3 ${IMG3S})
 			)
 		else()
 			add_custom_command(
-				DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png
+				DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png pngtoxpm
 				OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${img3}${pix}.image1
-				COMMAND pngtoxpm ${img3}${pix}_image1 ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png ${CMAKE_CURRENT_BINARY_DIR}/${img3}${pix}.image1
+				COMMAND $<TARGET_FILE:pngtoxpm> ${img3}${pix}_image1 ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png ${CMAKE_CURRENT_BINARY_DIR}/${img3}${pix}.image1
 			)
 		endif()
 	endforeach()
@@ -170,8 +170,8 @@ foreach(img1 ${IMG1S})
 	else()
 		add_custom_command(
 			OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${img1}.image1
-			DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${img1}.png
-			COMMAND pngtoxpm ${img1}_image1 ${CMAKE_CURRENT_SOURCE_DIR}/${img1}.png ${CMAKE_CURRENT_BINARY_DIR}/${img1}.image1
+			DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${img1}.png pngtoxpm
+			COMMAND $<TARGET_FILE:pngtoxpm> ${img1}_image1 ${CMAKE_CURRENT_SOURCE_DIR}/${img1}.png ${CMAKE_CURRENT_BINARY_DIR}/${img1}.image1
 		)
 	endif()
 	list(APPEND IMG_RESULTS ${img1}.image1)
@@ -184,19 +184,6 @@ add_custom_target (
 )
 
 
-if(WIN32)
-	# Temporarily the FreeImage dll is copied to the build directory
-	add_custom_command(
-		TARGET genbitmaps PRE_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy ${FREEIMAGE_SHAREDLIB} ${CMAKE_CURRENT_BINARY_DIR}
-	)
-	cmake_path(GET FREEIMAGE_SHAREDLIB FILENAME filename)
-	add_custom_command(
-		TARGET genbitmaps POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E rm ${CMAKE_CURRENT_BINARY_DIR}/${filename}
-	)
-
-endif()
 
 #MESSAGE (STATUS "SVG Converter: ${SVG_CONVERTER}")
 #MESSAGE (STATUS "Source Dir: ${CMAKE_CURRENT_SOURCE_DIR}")

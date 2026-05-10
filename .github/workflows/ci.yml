@@ -99,6 +99,14 @@ jobs:
         # config-mode and module-mode finders (zlib, libzip, etc.) resolve.
         run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_USE_GETTEXT=OFF "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" "-DCMAKE_PREFIX_PATH=$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows"
       - name: Build
-        run: cmake --build build --config Debug --parallel
+        run: |
+          cmake --build build --config Debug 2>&1 | Tee-Object -FilePath build/build-log.txt
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build-log
+          path: build/build-log.txt
       - name: Test
         run: ctest --test-dir build -C Debug --output-on-failure
