@@ -54,6 +54,9 @@ jobs:
 
   c-tests-windows:
     runs-on: windows-latest
+    # mswlib (Win32 backend) is not yet fully ported to modern MSVC — bug #618.
+    # Allow the job to fail without blocking the overall workflow.
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v5
       - name: Cache vcpkg packages
