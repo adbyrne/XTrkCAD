@@ -17,7 +17,7 @@ find_program(RsvgConvert_EXECUTABLE NAMES rsvg-convert DOC "rsvg-convert SVG ras
 
 if(RsvgConvert_EXECUTABLE)
 	set(Inkscape_EXECUTABLE ${RsvgConvert_EXECUTABLE} CACHE FILEPATH "SVG rasterizer (rsvg-convert)" FORCE)
-	set(Inkscape_IS_RSVG TRUE CACHE BOOL "SVG conversion uses rsvg-convert instead of Inkscape")
+	set(Inkscape_IS_RSVG TRUE CACHE BOOL "SVG conversion uses rsvg-convert instead of Inkscape" FORCE)
 	execute_process(COMMAND ${RsvgConvert_EXECUTABLE} "--version" OUTPUT_VARIABLE _RSVG_VERSION ERROR_QUIET)
 	STRING(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" _RSVG_VERSION "${_RSVG_VERSION}")
 	set(Inkscape_VERSION ${_RSVG_VERSION} CACHE STRING "SVG converter version")
