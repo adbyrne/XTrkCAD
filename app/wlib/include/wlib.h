@@ -612,7 +612,6 @@ wBool_t wWinIsTemplated(wWin_p win);
 #define BO_ENTER 0
 #define BO_REPEAT (1L << 11)
 #define BO_IGNFOCUS (1L << 12)
-#define PGO_FULLDIALOGFROMBUILDER (1L << 13)
 
 wWinPix_t wLabelWidth(const char *);
 const char *wControlGetHelp(wControl_p);
