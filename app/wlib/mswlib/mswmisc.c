@@ -2422,7 +2422,7 @@ GetImageFileFormats(void)
 
     for (int i = 0; i < sizeof(filterImageFiles) / sizeof(filterImageFiles[0]) - 1;
             i += 2) {
-        message = gettext(filterImageFiles[i]);
+        message = _(filterImageFiles[i]);
         strcpy(current, message);
         current += strlen(message) + 1;
         strcpy(current, filterImageFiles[i + 1]);
