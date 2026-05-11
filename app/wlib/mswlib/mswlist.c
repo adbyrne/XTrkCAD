@@ -1166,7 +1166,7 @@ static wList_p listCreate(
 }
 
 
-wList_p wListCreate(
+wControl_p wListCreate(
         wWin_p	parent,
         wWinPix_t	x,
         wWinPix_t	y,
@@ -1233,7 +1233,7 @@ wList_p wListCreate(
 		GetWindowRect( bl->hScrollWnd, &rect );
 		bl->scrollH = rect.bottom - rect.top+2;
 	}
-	return bl;
+	return (wControl_p)bl;
 }
 
 
@@ -1265,7 +1265,7 @@ wList_p wDropListCreate(
 	                   labelStr, option, number, width, valueP, action, data, TRUE, NULL );
 }
 
-wList_p wComboListCreate(
+wControl_p wComboListCreate(
         wWin_p	parent,
         wWinPix_t	x,
         wWinPix_t	y,
@@ -1284,6 +1284,6 @@ wList_p wComboListCreate(
 	if (option & BL_SORT) {
 		bs |= CBS_SORT;
 	}
-	return listCreate( B_COMBOLIST, "COMBOBOX", bs, parent, x, y, helpStr,
-	                   labelStr, option, number, width, valueP, action, data, FALSE, NULL );
+	return (wControl_p)listCreate( B_COMBOLIST, "COMBOBOX", bs, parent, x, y, helpStr,
+	                               labelStr, option, number, width, valueP, action, data, FALSE, NULL );
 }

@@ -57,7 +57,7 @@ void wStatusSetValue(
  * \return handle for created window
  */
 
-wStatus_p wStatusCreate(
+wControl_p wStatusCreate(
         wWin_p	parent,
         wWinPix_t	x,
         wWinPix_t	y,
@@ -65,7 +65,7 @@ wStatus_p wStatusCreate(
         wWinPix_t	width,
         const char	*message)
 {
-	return (wStatus_p)wMessageCreateEx(parent, x, y, labelStr, width, message, 0);
+	return wMessageCreateEx(parent, x, y, labelStr, width, message, 0);
 }
 
 /**

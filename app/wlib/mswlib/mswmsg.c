@@ -148,7 +148,7 @@ static callBacks_t messageCallBacks = {
 	mswMessageSetBusy
 };
 
-wMessage_p wMessageCreateEx(
+wControl_p wMessageCreateEx(
         wWin_p	parent,
         wWinPix_t	x,
         wWinPix_t	y,
@@ -175,5 +175,5 @@ wMessage_p wMessageCreateEx(
 	mswAddButton( (wControl_p)b, FALSE, helpStr );
 	mswCallBacks[B_MESSAGE] = &messageCallBacks;
 
-	return b;
+	return (wControl_p)b;
 }

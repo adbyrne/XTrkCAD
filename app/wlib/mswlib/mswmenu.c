@@ -112,7 +112,12 @@ struct wMenuListItem_t {
 	wMenuListItem_p left, right;
 	wMenuListCallBack_p action;
 };
-
+
+/* Cast helpers: wMenu_p and wMenuToggle_p are erased to wControl_p in GTK3
+ * wlib.h — use these macros to access the private struct fields. */
+#define AS_MENU(p)    ((struct wMenu_t *)(p))
+#define AS_TOGGLE(p)  ((struct wMenuToggle_t *)(p))
+
 #define UNCHECK (0)
 #define CHECK	(1)
 #define RADIOCHECK (2)
@@ -173,8 +178,8 @@ static LRESULT menuPush(
 			set = wMenuToggleGet((wMenuToggle_p)m);
 			set = !set;
 			wMenuToggleSet((wMenuToggle_p)m,set);
-			if (((wMenuToggle_p)m)->action) {
-				((wMenuToggle_p)m)->action(((wMenuPush_p)m)->data);
+			if (AS_TOGGLE(m)->action) {
+				AS_TOGGLE(m)->action(((wMenuPush_p)m)->data);
 			}
 			break;
 		case M_LISTITEM:
@@ -190,9 +195,9 @@ static LRESULT menuPush(
 		}
 		return (LRESULT)0;
 	}
-	if ( (m->parentMenu)->traceFunc ) {
-		(m->parentMenu)->traceFunc( m->parentMenu, m->labelStr,
-		                            ((wMenu_p)m->parentMenu)->traceData );
+	if ( AS_MENU(m->parentMenu)->traceFunc ) {
+		AS_MENU(m->parentMenu)->traceFunc( m->parentMenu, m->labelStr,
+		                                   AS_MENU(m->parentMenu)->traceData );
 	}
 	return DefWindowProc( hWnd, message, wParam, lParam );
 }
@@ -202,9 +207,9 @@ static void menuDone( wControl_p b )
 	wMenuItem_p m = (wMenuItem_p)b;
 	switch ( m->mtype ) {
 	case M_MENU:
-		if ( ((wMenu_p)m)->mmtype == MM_BUTT ||
-		     ((wMenu_p)m)->mmtype == MM_POPUP ) {
-			DestroyMenu( ((wMenu_p)m)->menu );
+		if ( AS_MENU(m)->mmtype == MM_BUTT ||
+		     AS_MENU(m)->mmtype == MM_POPUP ) {
+			DestroyMenu( AS_MENU(m)->menu );
 		}
 		break;
 	}
@@ -218,7 +223,7 @@ static callBacks_t menuItemCallBacks = {
 
 
 static wMenuItem_p createMenuItem(
-        wMenu_p m,
+        struct wMenu_t *m,
         mtype_e mtype,
         const char * helpStr,
         const char * labelStr,
@@ -250,7 +255,7 @@ static wMenuItem_p createMenuItem(
 	mswCallBacks[B_MENUITEM] = &menuItemCallBacks;
 	return mi;
 }
-
+
 /*
  *****************************************************************************
  *
@@ -349,7 +354,7 @@ void wAttachAccelKey(
 	ad->data = data;
 	ad->mp = NULL;
 }
-
+
 /*
  *****************************************************************************
  *
@@ -495,7 +500,7 @@ void mswCreateCheckBitmaps()
 
 }
 
-wMenuRadio_p wMenuRadioCreate(
+wControl_p wMenuRadioCreate(
         wMenu_p m,
         const char * helpStr,
         const char * labelStr,
@@ -511,7 +516,7 @@ wMenuRadio_p wMenuRadioCreate(
 	UINT vk;
 	long modifier;
 
-	mi = (wMenuRadio_p)createMenuItem( m, M_RADIO, helpStr, labelStr, sizeof *mi );
+	mi = (wMenuRadio_p)createMenuItem( AS_MENU(m), M_RADIO, helpStr, labelStr, sizeof *mi );
 	mi->action = action;
 	mi->data = data;
 	mi->mparent = m;
@@ -551,37 +556,38 @@ wMenuRadio_p wMenuRadioCreate(
 		acclTable(acclTable_da.cnt-1).acclKey = (modifier<<8) | (vk&0x00FF);
 		acclTable(acclTable_da.cnt-1).mp = (wMenuPush_p)mi;
 	}
-	rc = AppendMenu( m->menu, MF_STRING, mi->index, label );
+	rc = AppendMenu( AS_MENU(m)->menu, MF_STRING, mi->index, label );
 
 	/* add the correct bitmaps for radio buttons */
 
-	rc = SetMenuItemBitmaps(m->menu, mi->index, FALSE, uncheckedRadio,
+	rc = SetMenuItemBitmaps(AS_MENU(m)->menu, mi->index, FALSE, uncheckedRadio,
 	                        checkedRadio );
 
-	if( m->radioGroup == NULL ) {
-		m->radioGroup = malloc( sizeof( struct radioButtonGroup ));
-		assert( m->radioGroup );
-		m->radioGroup->firstButton = mi->index;
+	if( AS_MENU(m)->radioGroup == NULL ) {
+		AS_MENU(m)->radioGroup = malloc( sizeof( struct radioButtonGroup ));
+		assert( AS_MENU(m)->radioGroup );
+		AS_MENU(m)->radioGroup->firstButton = mi->index;
 	} else {
-		m->radioGroup->lastButton = mi->index;
+		AS_MENU(m)->radioGroup->lastButton = mi->index;
 	}
 
-	return mi;
+	return (wControl_p)mi;
 }
 
-void wMenuRadioSetActive(wMenuRadio_p mi )
+void wMenuRadioSetActive(wControl_p mi )
 {
+	wMenuRadio_p mr = (wMenuRadio_p)mi;
 	BOOL rc;
 
-	rc = CheckMenuRadioItem( mi->mparent->menu,
-	                         mi->mparent->radioGroup->firstButton,
-	                         mi->mparent->radioGroup->lastButton,
-	                         mi->index,
+	rc = CheckMenuRadioItem( AS_MENU(mr->mparent)->menu,
+	                         AS_MENU(mr->mparent)->radioGroup->firstButton,
+	                         AS_MENU(mr->mparent)->radioGroup->lastButton,
+	                         mr->index,
 	                         MF_BYCOMMAND );
 }
 
 
-wMenuPush_p wMenuPushCreate(
+wControl_p wMenuPushCreate(
         wMenu_p m,
         const char * helpStr,
         const char * labelStr,
@@ -598,7 +604,7 @@ wMenuPush_p wMenuPushCreate(
 	UINT vk;
 	long modifier;
 
-	mi = (wMenuPush_p)createMenuItem( m, M_PUSH, helpStr, labelStr, sizeof *mi );
+	mi = (wMenuPush_p)createMenuItem( AS_MENU(m), M_PUSH, helpStr, labelStr, sizeof *mi );
 	mi->action = action;
 	mi->data = data;
 	mi->mparent = m;
@@ -638,19 +644,20 @@ wMenuPush_p wMenuPushCreate(
 		acclTable(acclTable_da.cnt-1).acclKey = (modifier<<8) | (vk&0x00FF);
 		acclTable(acclTable_da.cnt-1).mp = mi;
 	}
-	rc = AppendMenu( m->menu, MF_STRING, mi->index, label );
+	rc = AppendMenu( AS_MENU(m)->menu, MF_STRING, mi->index, label );
 	free(label);
-	return mi;
+	return (wControl_p)mi;
 }
 
 
 void wMenuPushEnable(
-        wMenuPush_p mi,
+        wControl_p mi,
         BOOL_T enable )
 {
-	EnableMenuItem( mi->mparent->menu, mi->index,
+	wMenuPush_p mp = (wMenuPush_p)mi;
+	EnableMenuItem( AS_MENU(mp->mparent)->menu, mp->index,
 	                MF_BYCOMMAND|(enable?MF_ENABLED:(MF_DISABLED|MF_GRAYED)) );
-	mi->enabled = enable;
+	mp->enabled = enable;
 }
 
 
@@ -659,29 +666,29 @@ wMenu_p wMenuMenuCreate(
         const char * helpStr,
         const char * labelStr )
 {
-	wMenu_p mm;
+	struct wMenu_t *mm;
 	int rc;
 
-	mm = (wMenu_p)createMenuItem( NULL, M_MENU, NULL, labelStr, sizeof *mm );
+	mm = (struct wMenu_t *)createMenuItem( NULL, M_MENU, NULL, labelStr, sizeof *mm );
 	mm->menu = CreatePopupMenu();
 	mm->mmtype = MM_MENU;
 	/*mm->parent = (wControl_p)m;*/
 	mm->first = mm->last = NULL;
 
-	rc = AppendMenu( m->menu, MF_STRING|MF_ENABLED|MF_POPUP, (UINT_PTR)(mm->menu),
+	rc = AppendMenu( AS_MENU(m)->menu, MF_STRING|MF_ENABLED|MF_POPUP, (UINT_PTR)(mm->menu),
 	                 mm->labelStr );
 
-	return mm;
+	return (wControl_p)mm;
 }
 
 void wMenuSeparatorCreate(
         wMenu_p m )
 {
 	int rc;
-	createMenuItem( m, M_SEPARATOR, NULL, NULL, sizeof *(wMenuItem_p)NULL );
-	rc = AppendMenu( m->menu, MF_SEPARATOR, (UINT)0, NULL );
+	createMenuItem( AS_MENU(m), M_SEPARATOR, NULL, NULL, sizeof *(wMenuItem_p)NULL );
+	rc = AppendMenu( AS_MENU(m)->menu, MF_SEPARATOR, (UINT)0, NULL );
 }
-
+
 /*
  *****************************************************************************
  *
@@ -711,24 +718,25 @@ static void removeItem(
 }
 
 
-wMenuList_p wMenuListCreate(
+wControl_p wMenuListCreate(
         wMenu_p m,
         const char * helpStr,
+        SORTORDER sorder,
         int max,
         wMenuListCallBack_p action )
 {
 	wMenuList_p mi;
-	mi = (wMenuList_p)createMenuItem( m, M_LIST, helpStr, NULL, sizeof *mi );
+	mi = (wMenuList_p)createMenuItem( AS_MENU(m), M_LIST, helpStr, NULL, sizeof *mi );
 	mi->count = 0;
 	mi->max = max;
 	mi->mlparent = m;
 	mi->action = action;
 	mi->right = mi->left = (wMenuListItem_p)mi;
-	return mi;
+	return (wControl_p)mi;
 }
 
 
-int getMlistOrigin( wMenu_p m, wMenuList_p ml )
+int getMlistOrigin( struct wMenu_t *m, wMenuList_p ml )
 {
 	wMenuItem_p mi;
 	int count;
@@ -755,37 +763,38 @@ int getMlistOrigin( wMenu_p m, wMenuList_p ml )
 
 
 void wMenuListAdd(
-        wMenuList_p ml,
+        wControl_p ml,
         int index,
         const char * labelStr,
-        void * data )
+        const void * data )
 {
+	wMenuList_p mlist = (wMenuList_p)ml;
 	int origin;
 	wMenuListItem_p wl_p;
 	wMenuListItem_p mi;
 	int count;
 	int rc;
 
-	origin = getMlistOrigin(ml->mlparent, ml);
-	for ( count=0,wl_p=ml->right; wl_p!=(wMenuListItem_p)ml;
+	origin = getMlistOrigin(AS_MENU(mlist->mlparent), mlist);
+	for ( count=0,wl_p=mlist->right; wl_p!=(wMenuListItem_p)mlist;
 	      count++,wl_p=wl_p->right ) {
 		if (wl_p->labelStr != NULL && strcmp( labelStr, wl_p->labelStr ) == 0) {
 			/* move item */
 			if (count != index) {
-				RemoveMenu( ml->mlparent->menu, origin+count, MF_BYPOSITION );
+				RemoveMenu( AS_MENU(mlist->mlparent)->menu, origin+count, MF_BYPOSITION );
 				removeItem( wl_p );
 				goto add;
 			}
-			((wMenuListItem_p)wl_p)->data = data;
+			((wMenuListItem_p)wl_p)->data = (void *)data;
 			return;
 		}
 	}
-	if (ml->max > 0 && ml->count >= ml->max) {
-		RemoveMenu( ml->mlparent->menu, origin+ml->count-1, MF_BYPOSITION );
-		wl_p = ml->left;
-		removeItem( ml->left );
+	if (mlist->max > 0 && mlist->count >= mlist->max) {
+		RemoveMenu( AS_MENU(mlist->mlparent)->menu, origin+mlist->count-1, MF_BYPOSITION );
+		wl_p = mlist->left;
+		removeItem( mlist->left );
 add:
-		ml->count--;
+		mlist->count--;
 		if (wl_p->labelStr ) {
 			free( CAST_AWAY_CONST wl_p->labelStr );
 		}
@@ -794,35 +803,36 @@ add:
 		wl_p = (wMenuListItem_p)createMenuItem( NULL, M_LISTITEM, NULL,
 		                                        labelStr, sizeof *wl_p );
 	}
-	((wMenuListItem_p)wl_p)->data = data;
-	((wMenuListItem_p)wl_p)->action = ml->action;
-	if (index < 0 || index > ml->count) {
-		index = ml->count;
+	((wMenuListItem_p)wl_p)->data = (void *)data;
+	((wMenuListItem_p)wl_p)->action = mlist->action;
+	if (index < 0 || index > mlist->count) {
+		index = mlist->count;
 	}
-	for ( mi=(wMenuListItem_p)ml,count=0; count<index; mi=mi->right,count++);
-	rc = InsertMenu( ml->mlparent->menu, origin+index,
+	for ( mi=(wMenuListItem_p)mlist,count=0; count<index; mi=mi->right,count++);
+	rc = InsertMenu( AS_MENU(mlist->mlparent)->menu, origin+index,
 	                 MF_BYPOSITION|MF_STRING, wl_p->index, wl_p->labelStr );
 	appendItem( mi, wl_p );
-	ml->count++;
+	mlist->count++;
 }
 
 
 void wMenuListDelete(
-        wMenuList_p ml,
+        wControl_p ml,
         const char * labelStr )
 {
+	wMenuList_p mlist = (wMenuList_p)ml;
 	int origin, count;
 	wMenuListItem_p wl_p;
 
-	origin = getMlistOrigin(ml->mlparent, ml);
-	for ( count=0,wl_p=ml->right; wl_p!=(wMenuListItem_p)ml;
+	origin = getMlistOrigin(AS_MENU(mlist->mlparent), mlist);
+	for ( count=0,wl_p=mlist->right; wl_p!=(wMenuListItem_p)mlist;
 	      count++,wl_p=wl_p->right ) {
 		if (wl_p->labelStr != NULL && strcmp( labelStr, wl_p->labelStr ) == 0) {
 			/* delete item */
 			mswUnregister( wl_p->index );
-			RemoveMenu( ml->mlparent->menu, origin+count, MF_BYPOSITION );
+			RemoveMenu( AS_MENU(mlist->mlparent)->menu, origin+count, MF_BYPOSITION );
 			removeItem( wl_p );
-			ml->count--;
+			mlist->count--;
 			free( wl_p );
 			return;
 		}
@@ -831,18 +841,19 @@ void wMenuListDelete(
 
 
 const char * wMenuListGet(
-        wMenuList_p ml,
+        wControl_p ml,
         int index,
         void ** data )
 {
+	wMenuList_p mlist = (wMenuList_p)ml;
 	int origin, count;
 	wMenuListItem_p wl_p;
 
-	if (index >= ml->count) {
+	if (index >= mlist->count) {
 		return NULL;
 	}
-	origin = getMlistOrigin(ml->mlparent, ml);
-	for ( count=0,wl_p=ml->right; wl_p&&count<index; count++,wl_p=wl_p->right );
+	origin = getMlistOrigin(AS_MENU(mlist->mlparent), mlist);
+	for ( count=0,wl_p=mlist->right; wl_p&&count<index; count++,wl_p=wl_p->right );
 	if (wl_p==NULL) {
 		return NULL;
 	}
@@ -852,28 +863,35 @@ const char * wMenuListGet(
 	return wl_p->labelStr;
 }
 
+int wMenuListGetCount(
+        wControl_p ml )
+{
+	wMenuList_p mlist = (wMenuList_p)ml;
+	return mlist->count;
+}
 
 void wMenuListClear(
-        wMenuList_p ml )
+        wControl_p ml )
 {
+	wMenuList_p mlist = (wMenuList_p)ml;
 	int origin, count;
 	wMenuListItem_p wl_p, wl_q;
 
-	origin = getMlistOrigin(ml->mlparent, ml);
-	for ( count=0,wl_p=ml->right; count<ml->count; count++,wl_p=wl_q ) {
+	origin = getMlistOrigin(AS_MENU(mlist->mlparent), mlist);
+	for ( count=0,wl_p=mlist->right; count<mlist->count; count++,wl_p=wl_q ) {
 		/* delete item */
 		mswUnregister( wl_p->index );
-		RemoveMenu( ml->mlparent->menu, origin, MF_BYPOSITION );
+		RemoveMenu( AS_MENU(mlist->mlparent)->menu, origin, MF_BYPOSITION );
 		wl_q = wl_p->right;
 		free( wl_p );
 	}
-	ml->count = 0;
-	ml->right = ml->left = (wMenuListItem_p)ml;
+	mlist->count = 0;
+	mlist->right = mlist->left = (wMenuListItem_p)mlist;
 }
 
 
 
-wMenuToggle_p wMenuToggleCreate(
+wControl_p wMenuToggleCreate(
         wMenu_p m,
         const char * helpStr,
         const char * labelStr,
@@ -882,7 +900,7 @@ wMenuToggle_p wMenuToggleCreate(
         wMenuCallBack_p action,
         void * data )
 {
-	wMenuToggle_p mt;
+	struct wMenuToggle_t *mt;
 	int rc;
 	char label[80];
 	char *cp;
@@ -890,8 +908,8 @@ wMenuToggle_p wMenuToggleCreate(
 	UINT vk;
 	long modifier;
 
-	mt = (wMenuToggle_p)createMenuItem( m, M_TOGGLE, helpStr, labelStr,
-	                                    sizeof *mt );
+	mt = (struct wMenuToggle_t *)createMenuItem( AS_MENU(m), M_TOGGLE, helpStr, labelStr,
+	                                             sizeof *mt );
 	/*setAcclKey( m->parent, m->menu, mt->menu_item, acclKey );*/
 	mt->action = action;
 	mt->data = data;
@@ -939,16 +957,16 @@ wMenuToggle_p wMenuToggleCreate(
 		acclTable(acclTable_da.cnt-1).mp = (wMenuPush_p)mt;
 	}
 
-	rc = AppendMenu( m->menu, MF_STRING, mt->index, label );
-	wMenuToggleSet( mt, set );
-	return mt;
+	rc = AppendMenu( AS_MENU(m)->menu, MF_STRING, mt->index, label );
+	wMenuToggleSet( (wMenuToggle_p)mt, set );
+	return (wControl_p)mt;
 }
 
 
 wBool_t wMenuToggleGet(
         wMenuToggle_p mt )
 {
-	return (GetMenuState( mt->mparent->menu, mt->index,
+	return (GetMenuState( AS_MENU(AS_TOGGLE(mt)->mparent)->menu, AS_TOGGLE(mt)->index,
 	                      MF_BYCOMMAND ) & MF_CHECKED) != 0;
 }
 
@@ -958,9 +976,9 @@ wBool_t wMenuToggleSet(
         wBool_t set )
 {
 	wBool_t rc;
-	CheckMenuItem( mt->mparent->menu, mt->index,
+	CheckMenuItem( AS_MENU(AS_TOGGLE(mt)->mparent)->menu, AS_TOGGLE(mt)->index,
 	               MF_BYCOMMAND|(set?MF_CHECKED:MF_UNCHECKED) );
-	rc = (GetMenuState( mt->mparent->menu, mt->index,
+	rc = (GetMenuState( AS_MENU(AS_TOGGLE(mt)->mparent)->menu, AS_TOGGLE(mt)->index,
 	                    MF_BYCOMMAND ) & MF_CHECKED) != 0;
 	return rc;
 }
@@ -969,11 +987,11 @@ void wMenuToggleEnable(
         wMenuToggle_p mt,
         wBool_t enable )
 {
-	EnableMenuItem( mt->mparent->menu, mt->index,
+	EnableMenuItem( AS_MENU(AS_TOGGLE(mt)->mparent)->menu, AS_TOGGLE(mt)->index,
 	                MF_BYCOMMAND|(enable?MF_ENABLED:(MF_DISABLED|MF_GRAYED)) );
-	mt->enabled = enable;
+	AS_TOGGLE(mt)->enabled = enable;
 }
-
+
 /*
  *****************************************************************************
  *
@@ -989,7 +1007,7 @@ void mswMenuMove(
         wWinPix_t y )
 {
 	wControl_p b;
-	b = (wControl_p)m->parent;
+	b = (wControl_p)((wControl_p)m)->parent;
 	if (b && b->hWnd)
 		if (!SetWindowPos( b->hWnd, HWND_TOP, x, y,
 		                   CW_USEDEFAULT, CW_USEDEFAULT,
@@ -1002,7 +1020,7 @@ void mswMenuMove(
 static void pushMenuButt(
         void * data )
 {
-	wMenu_p m = (wMenu_p)data;
+	struct wMenu_t *m = (struct wMenu_t *)data;
 	RECT rect;
 	mswAllowBalloonHelp = FALSE;
 	GetWindowRect( m->hWnd, &rect );
@@ -1019,7 +1037,7 @@ wMenu_p wMenuCreate(
         const char	* labelStr,
         long	option )
 {
-	wMenu_p m;
+	struct wMenu_t *m;
 	wControl_p b;
 	long buttOption = 0;
 	const char * label = labelStr;
@@ -1028,7 +1046,7 @@ wMenu_p wMenuCreate(
 		buttOption = BO_ICON;
 		label = "ICON";
 	}
-	m = (wMenu_p)createMenuItem( NULL, M_MENU, helpStr, label, sizeof *m );
+	m = (struct wMenu_t *)createMenuItem( NULL, M_MENU, helpStr, label, sizeof *m );
 	m->button = wButtonCreate( parent, x, y, helpStr, labelStr,
 	                           buttOption, 0, pushMenuButt, (void*)m );
 	b = (wControl_p)m->button;
@@ -1044,7 +1062,7 @@ wMenu_p wMenuCreate(
 	m->mmtype = MM_BUTT;
 	m->first = m->last = NULL;
 
-	return m;
+	return (wControl_p)m;
 }
 
 
@@ -1054,7 +1072,7 @@ wMenu_p wMenuBarAdd(
         const char * labelStr )
 {
 	HMENU menu;
-	wMenu_p m;
+	struct wMenu_t *m;
 	int rc;
 
 	menu = GetMenu( ((wControl_p)w)->hWnd );
@@ -1063,7 +1081,7 @@ wMenu_p wMenuBarAdd(
 		SetMenu( ((wControl_p)w)->hWnd, menu );
 	}
 
-	m = (wMenu_p)createMenuItem( NULL, M_MENU, helpStr, labelStr, sizeof *m );
+	m = (struct wMenu_t *)createMenuItem( NULL, M_MENU, helpStr, labelStr, sizeof *m );
 	m->menu = CreateMenu();
 	m->parent = w;
 	m->mmtype = MM_BAR;
@@ -1073,7 +1091,7 @@ wMenu_p wMenuBarAdd(
 	                 labelStr );
 
 	DrawMenuBar( ((wControl_p)w)->hWnd );
-	return m;
+	return (wControl_p)m;
 }
 
 
@@ -1082,11 +1100,10 @@ wMenu_p wMenuPopupCreate(
         wWin_p w,
         const char * labelStr )
 {
-	wMenu_p m;
-	long buttOption = 0;
+	struct wMenu_t *m;
 	const char * label = labelStr;
 
-	m = (wMenu_p)createMenuItem( NULL, M_MENU, NULL, label, sizeof *m );
+	m = (struct wMenu_t *)createMenuItem( NULL, M_MENU, NULL, label, sizeof *m );
 	m->button = NULL;
 	m->parent = w;
 	m->x = 0;
@@ -1100,7 +1117,7 @@ wMenu_p wMenuPopupCreate(
 	m->mmtype = MM_POPUP;
 	m->first = m->last = NULL;
 
-	return m;
+	return (wControl_p)m;
 }
 
 
@@ -1108,7 +1125,7 @@ void wMenuPopupShow( wMenu_p mp )
 {
 	POINT pt;
 	GetCursorPos( &pt );
-	TrackPopupMenu( mp->menu, TPM_LEFTALIGN, pt.x, pt.y, 0, mp->hWnd, NULL );
+	TrackPopupMenu( AS_MENU(mp)->menu, TPM_LEFTALIGN, pt.x, pt.y, 0, ((wControl_p)mp)->hWnd, NULL );
 }
 
 /*-----------------------------------------------------------------*/
@@ -1118,8 +1135,8 @@ void wMenuSetTraceCallBack(
         wMenuTraceCallBack_p func,
         void * data )
 {
-	m->traceFunc = func;
-	m->traceData = data;
+	AS_MENU(m)->traceFunc = func;
+	AS_MENU(m)->traceData = data;
 }
 
 wBool_t wMenuAction(
@@ -1127,9 +1144,9 @@ wBool_t wMenuAction(
         const char * label )
 {
 	wMenuItem_p mi;
-	wMenuToggle_p mt;
+	struct wMenuToggle_t *mt;
 	wBool_t set;
-	for ( mi = m->first; mi != NULL; mi = (wMenuItem_p)mi->mnext ) {
+	for ( mi = AS_MENU(m)->first; mi != NULL; mi = mi->mnext ) {
 		if ( mi->labelStr != NULL && strcmp( mi->labelStr, label ) == 0 ) {
 			switch( mi->mtype ) {
 			case M_SEPARATOR:
@@ -1142,12 +1159,12 @@ wBool_t wMenuAction(
 				}
 				break;
 			case M_TOGGLE:
-				mt = (wMenuToggle_p)mi;
+				mt = (struct wMenuToggle_t *)mi;
 				if ( mt->enabled == FALSE ) {
 					wBeep();
 				} else {
-					set = wMenuToggleGet( mt );
-					wMenuToggleSet( mt, !set );
+					set = wMenuToggleGet( (wMenuToggle_p)mt );
+					wMenuToggleSet( (wMenuToggle_p)mt, !set );
 					mt->action( mt->data );
 				}
 				break;

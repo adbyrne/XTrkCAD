@@ -171,6 +171,11 @@ static char * appName;
 static char * helpFile;
 char *mswProfileFile;
 
+/* wBalloonHelp_t and FS_ flags removed from GTK3 wlib.h; define locally. */
+typedef struct { const char *name; const char *value; } wBalloonHelp_t;
+#define FS_MULTIPLEFILES 1
+#define FS_PICTURES      2
+
 static wBalloonHelp_t * balloonHelpStrings;
 
 #ifdef HELPSTR
@@ -836,7 +841,7 @@ void wInitAppName(char *_appName)
  * \return    window handle or NULL on error
  */
 
-wWin_p wWinMainCreate(
+wControl_p wWinMainCreate(
         const char * name,
         wWinPix_t x,
         wWinPix_t y,
@@ -912,7 +917,7 @@ wWin_p wWinMainCreate(
 	ShowWindow(mswHWnd, showCmd);
 	UpdateWindow(mswHWnd);
 	w->busy = FALSE;
-	return w;
+	return (wControl_p)w;
 }
 
 wWin_p wWinPopupCreate(

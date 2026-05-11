@@ -379,7 +379,7 @@ static callBacks_t textCallBacks = {
 	NULL
 };
 
-wText_p wTextCreate(
+wControl_p wTextCreate(
         wWin_p	parent,
         wWinPix_t	x,
         wWinPix_t	y,
@@ -414,7 +414,7 @@ wText_p wTextCreate(
 
 	if (b->hWnd == NULL) {
 		mswFail("CreateWindow(TEXT)");
-		return b;
+		return (wControl_p)b;
 	}
 
 	if (option & BT_FIXEDFONT) {
@@ -444,5 +444,5 @@ wText_p wTextCreate(
 	b->h = rect.bottom - rect.top;
 	mswAddButton((wControl_p)b, FALSE, helpStr);
 	mswCallBacks[B_TEXT] = &textCallBacks;
-	return b;
+	return (wControl_p)b;
 }
