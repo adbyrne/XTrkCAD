@@ -37,6 +37,10 @@
 #include <time.h>
 
 /** Timing helpers — output goes through lprintf so it respects log levels */
+#ifdef _WIN32
+#define TIMER_START(var) ((void)0)
+#define TIMER_LOG(var, label) ((void)0)
+#else
 #define TIMER_START(var) \
     struct timespec var##_ts0; \
     clock_gettime(CLOCK_MONOTONIC, &var##_ts0); \
@@ -50,6 +54,7 @@
                       + ((var##_ts1.tv_nsec - var##_ts0.tv_nsec) / 1000000L); \
         LOG(log_mapredraw, 1, ("%s: %ld ms\n", (label), var##_ms)); \
     } while (0)
+#endif
 
 #define MIN_SCALE 0.01
 #define MAX_SCALE 64.0
