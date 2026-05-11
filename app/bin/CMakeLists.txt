@@ -272,6 +272,7 @@ if(WIN32)
 			utf8convert.c
 			include/utf8convert.h
             include/win32/dirent.h
+			winstubs.c
 	)
 endif()
 
@@ -318,7 +319,7 @@ endif()
 #
 # Start building the main program itself
 #
-add_executable(${XTRKCAD_BIN} "" )
+add_executable(${XTRKCAD_BIN} WIN32 "" )
 
 # if SVG export is built and source files and dependency on MiniXML
 

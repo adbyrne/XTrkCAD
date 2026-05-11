@@ -22,8 +22,17 @@
  */
 
 #include <windows.h>
+#include <stdarg.h>
 #include <stddef.h>
 #include "mswint.h"
+
+/* ── Font label (FreeType) ───────────────────────────────────────────────── */
+
+wIcon_p wFTLabelCreate(const char *text, wDrawColor color)
+{
+	mswFail("wFTLabelCreate: not implemented");
+	return NULL;
+}
 
 /* ── Bitmap ─────────────────────────────────────────────────────────────── */
 
@@ -68,6 +77,12 @@ void wButtonSetIcon(wControl_p button, wIcon_p icon)
 }
 
 /* ── ComboBox ────────────────────────────────────────────────────────────── */
+
+unsigned wComboBoxAddValue(wControl_p b, const char *text, void *attributes)
+{
+	mswFail("wComboBoxAddValue: not implemented");
+	return 0;
+}
 
 void wComboBoxClear(wControl_p control)
 {
@@ -155,6 +170,12 @@ void wEntrySetValue(wControl_p control, const char *value)
 	mswFail("wEntrySetValue: not implemented");
 }
 
+const char *wEntryGetValue(wControl_p control)
+{
+	mswFail("wEntryGetValue: not implemented");
+	return "";
+}
+
 /* ── Font ────────────────────────────────────────────────────────────────── */
 
 int wFontGetCharHeight(wControl_p control, wFont_p font, double size)
@@ -173,6 +194,14 @@ double wFTLabelLoadFontFromFile(const char *filename)
 {
 	mswFail("wFTLabelLoadFontFromFile: not implemented");
 	return 0.0;
+}
+
+/* ── Icon from resource ──────────────────────────────────────────────────── */
+
+wIcon_p wIconCreatePixBufFromResource(const char *prefix, const char *filename)
+{
+	mswFail("wIconCreatePixBufFromResource: not implemented");
+	return NULL;
 }
 
 /* ── Key state ───────────────────────────────────────────────────────────── */
@@ -194,6 +223,19 @@ void wInitTooltip(wTooltip_t *tooltips, unsigned int count)
 }
 
 /* ── List ────────────────────────────────────────────────────────────────── */
+
+unsigned int wListGetColumnCount(wControl_p listControl)
+{
+	mswFail("wListGetColumnCount: not implemented");
+	return 0;
+}
+
+wIndex_t wListAddValueVar(wControl_p b, wIcon_p bm, void *itemData,
+                           const char *labelStr, ...)
+{
+	mswFail("wListAddValueVar: not implemented");
+	return -1;
+}
 
 void wListDeleteSelected(wControl_p list)
 {
@@ -224,6 +266,14 @@ wBool_t wLoadResourceFile(const char *filename)
 void wMessageSetLength(wControl_p control, size_t length)
 {
 	mswFail("wMessageSetLength: not implemented");
+}
+
+/* ── Menu ────────────────────────────────────────────────────────────────── */
+
+const char *wMenuGetLabel(wControl_p menuitem)
+{
+	mswFail("wMenuGetLabel: not implemented");
+	return "";
 }
 
 /* ── Notice ──────────────────────────────────────────────────────────────── */
@@ -324,7 +374,20 @@ wBool_t wStickyGetSticky(wControl_p b)
 	return FALSE;
 }
 
+/* ── Platform version ────────────────────────────────────────────────────── */
+
+const char *wGetPlatformVersion(void)
+{
+	return "Windows";
+}
+
 /* ── Tag ─────────────────────────────────────────────────────────────────── */
+
+const char *wTagGetLabel(wControl_p tagControl)
+{
+	mswFail("wTagGetLabel: not implemented");
+	return "";
+}
 
 wControl_p wTagCreate(wControl_p parent, const char *helpStr,
                        const char *labelStr, wButtonCallBack_p action,
