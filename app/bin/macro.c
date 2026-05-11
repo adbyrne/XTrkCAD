@@ -2260,6 +2260,7 @@ static void ParamIntSave(paramGroup_cp pg, int class)
 			case PD_BITMAP:
 				break;
 			default:
+				break;
 			}
 		}
 	}
