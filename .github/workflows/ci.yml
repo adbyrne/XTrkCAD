@@ -62,6 +62,21 @@ jobs:
       - name: Test
         run: ctest --test-dir build --output-on-failure
 
+  c-tests-linux-clang:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake clang libgtk2.0-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DCMAKE_C_COMPILER=clang
+      - name: Build
+        run: cmake --build build --parallel $(nproc)
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
   c-tests-macos:
     runs-on: macos-latest
     steps:
@@ -78,6 +93,7 @@ jobs:
           export PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
           GTK_LDFLAGS=$(pkg-config --libs-only-L gtk+-2.0)
           cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
+            -DCMAKE_C_COMPILER=clang \
             -DCMAKE_PREFIX_PATH="$GTK_PREFIX;$(brew --prefix)" \
             -DCMAKE_EXE_LINKER_FLAGS="$GTK_LDFLAGS"
       - name: Build
