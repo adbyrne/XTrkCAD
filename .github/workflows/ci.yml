@@ -25,7 +25,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y cmake libgtk2.0-dev doxygen graphviz
+          sudo apt-get install -y cmake libgtk2.0-dev doxygen graphviz zlib1g-dev libzip-dev
       - name: Configure
         run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_USE_DOXYGEN=ON -DXTRKCAD_TESTING=OFF
       - name: Build docs
