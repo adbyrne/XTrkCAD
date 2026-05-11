@@ -31,6 +31,7 @@ target_sources(xtrkcad-wlib
 		mswsplash.c
 		mswstatus.c
 		mswtext.c
+		mswstubs.c
 		gwin32.c
 		simple-gettext.c
 		sysinfo.c
