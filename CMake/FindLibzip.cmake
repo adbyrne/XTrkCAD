@@ -46,7 +46,10 @@ else(WIN32)
     set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
     find_library(LIBZIP_LIBRARY
       NAMES zip
-      HINTS ${PC_LIBZIP_LIBRARY_DIRS}
+      HINTS
+        ${PC_LIBZIP_LIBRARY_DIRS}
+        /usr/lib/${CMAKE_LIBRARY_ARCHITECTURE}
+        /usr/local/lib/${CMAKE_LIBRARY_ARCHITECTURE}
       PATHS
 		/usr/lib64
 		/usr/lib
