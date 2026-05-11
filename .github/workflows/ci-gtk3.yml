@@ -25,7 +25,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y cmake libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin
+          sudo apt-get install -y cmake libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext
       - name: Configure
         run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
       - name: Build
