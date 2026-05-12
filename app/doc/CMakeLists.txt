@@ -149,6 +149,7 @@ else()
 		add_dependencies(help-chm halibut helpsystem)
 		add_custom_command(
 			TARGET help-chm
+			POST_BUILD
 			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
 			COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/clean-html.cmake
 			COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/png.d ${CMAKE_CURRENT_BINARY_DIR}/html/png.d
