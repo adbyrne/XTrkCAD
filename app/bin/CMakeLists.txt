@@ -17,7 +17,7 @@ add_subdirectory(bitmaps)
 
 add_executable(cnvdsgn cnvdsgn.c utility.c)
 
-target_link_libraries(cnvdsgn xtrkcad-wlib)
+target_link_libraries(cnvdsgn PRIVATE xtrkcad-wlib)
 
 target_include_directories(cnvdsgn
     PUBLIC
@@ -26,7 +26,7 @@ target_include_directories(cnvdsgn
 )
 
 if(NOT WIN32)
-	target_link_libraries(cnvdsgn m)
+	target_link_libraries(cnvdsgn PRIVATE m)
 endif()
 
 add_custom_target(lines
@@ -320,8 +320,8 @@ if(XTRKCAD_CREATE_SVG)
                 MiniXML::mxml
             )
         else()
-			target_link_libraries(xtrkcad ${MINIXML_STATIC_LIBRARY})
-			target_link_libraries(xtrkcad "pthread")
+			target_link_libraries(xtrkcad PRIVATE ${MINIXML_STATIC_LIBRARY})
+			target_link_libraries(xtrkcad PRIVATE "pthread")
 		endif()
 	endif()
 endif()
@@ -375,7 +375,7 @@ if(APPLE)
 	add_executable( helphelper helphelper.c )
 	find_library(COREFOUNDATION_LIBRARY CoreFoundation)
 	find_library(CARBON_LIBRARY Carbon)
-	target_link_libraries(helphelper ${COREFOUNDATION_LIBRARY} ${CARBON_LIBRARY})
+	target_link_libraries(helphelper PRIVATE ${COREFOUNDATION_LIBRARY} ${CARBON_LIBRARY})
 	install(
 		TARGETS helphelper
 		RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
