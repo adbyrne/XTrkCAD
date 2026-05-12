@@ -140,7 +140,7 @@ jobs:
         run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_USE_GETTEXT=OFF "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" "-DCMAKE_PREFIX_PATH=$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows"
       - name: Build
         run: |
-          cmake --build build --config Debug 2>&1 | Tee-Object -FilePath build/build-log.txt
+          cmake --build build --config Debug --parallel 2>&1 | Tee-Object -FilePath build/build-log.txt
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Upload build log
         if: always()
