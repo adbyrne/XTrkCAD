@@ -3,6 +3,9 @@ on:
   push:
     branches:
       - GTK3V2MAIN
+  pull_request:
+    branches:
+      - GTK3V2MAIN
 
 jobs:
   doxygen:
