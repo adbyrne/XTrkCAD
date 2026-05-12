@@ -1,6 +1,6 @@
 # XTrkCAD Development Plan
 
-_Last updated: 2026-05-12 (rev 3 — A1/A4 done; A2/A5-A6/A7 branches created; A3 N/A)_
+_Last updated: 2026-05-12 (rev 4 — A1/A2/A4 done; A3 N/A; A5-A6/A7 branches open)_
 
 ## Workflow
 
@@ -29,7 +29,7 @@ Goal: adopt current CMake best practices, unblock CMake 4.x, improve developer e
 | ID  | Size | Item                                                                                       | Branch                          | SF ticket | Status  |
 |-----|------|--------------------------------------------------------------------------------------------|---------------------------------|-----------|---------|
 | A1  | S    | `cmake_minimum_required(VERSION 3.20...4.0)` range syntax — silence policy warnings       | `fix/623-cmake-version-range`   | #623      | ✅ done  |
-| A2  | S    | Replace non-keyword `target_link_libraries` with `PRIVATE/PUBLIC/INTERFACE` (CMP0023)     | `feature/624-cmake-tll-keywords`| #624      | 🔧 open  |
+| A2  | S    | Replace non-keyword `target_link_libraries` with `PRIVATE/PUBLIC/INTERFACE` (CMP0023)     | `feature/624-cmake-tll-keywords`| #624      | ✅ done  |
 | A3  | S    | ~~Use `ZLIB::ZLIB` target name consistently~~ — already correct, no change needed         | —                               | —         | ✅ N/A   |
 | A4  | S    | Guard `add_dependencies` calls with `if(TARGET ...)` for conditional targets               | `fix/625-cmake-dep-guards`      | #625      | ✅ done  |
 | A5  | S    | cmake `-P` wrapper for rsvg-convert (bitmaps) — first priority of ~15–20 bare COMMAND calls| `bug619-fix`                   | #619      | 🔧 open  |
