@@ -146,14 +146,14 @@ else()
 					   "${CMAKE_CURRENT_BINARY_DIR}/hhc.cmake"
 						@ONLY)	
 
+		add_dependencies(help-chm halibut helpsystem)
 		add_custom_command(
 			TARGET help-chm
-			DEPENDS halibut helpsystem ${IMAGE_SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad_win.css
 			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
 			COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/clean-html.cmake
 			COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/png.d ${CMAKE_CURRENT_BINARY_DIR}/html/png.d
 			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad_win.css ${CMAKE_CURRENT_BINARY_DIR}/html
-			COMMAND halibut ${halibut_sources} 
+			COMMAND halibut ${halibut_sources}
 			COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/hhc.cmake
 		)
 

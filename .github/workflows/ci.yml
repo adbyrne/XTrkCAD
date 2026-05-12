@@ -1,8 +1,11 @@
 name: CI
 on:
   push:
-    branches-ignore:
-      - GTK3V2MAIN
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   mcp-tests:
