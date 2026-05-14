@@ -29,7 +29,7 @@ set_target_properties(
    halibut
    PROPERTIES FOLDER HelpDocs
 )
-target_link_libraries(halibut xtrkcad-charset)
+target_link_libraries(halibut PRIVATE xtrkcad-charset)
 
 add_subdirectory(charset)
 

@@ -86,9 +86,9 @@ unset(GTK_UNIX_PRINT_FOUND CACHE)
 find_package (GTKUnixPrint)
 
 # Needed for xtc.image1 include
-add_dependencies(xtrkcad-wlib
-	genbitmaps
-)
+if(TARGET genbitmaps)
+	add_dependencies(xtrkcad-wlib genbitmaps)
+endif()
 
 target_include_directories(xtrkcad-wlib
 	PRIVATE

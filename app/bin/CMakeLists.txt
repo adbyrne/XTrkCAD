@@ -26,7 +26,7 @@ target_include_directories(cnvdsgn
     ${XTRKCAD_CORE_INCLUDE_DIR}
 )
 
-target_link_libraries(cnvdsgn xtrkcad-wlib)
+target_link_libraries(cnvdsgn PRIVATE xtrkcad-wlib)
 
 target_include_directories(cnvdsgn
     PUBLIC
@@ -35,7 +35,7 @@ target_include_directories(cnvdsgn
 )
 
 if(NOT WIN32)
-	target_link_libraries(cnvdsgn m)
+	target_link_libraries(cnvdsgn PRIVATE m)
 endif()
 
 add_custom_target(lines
@@ -408,7 +408,7 @@ if(APPLE)
 	add_executable( helphelper helphelper.c )
 	find_library(COREFOUNDATION_LIBRARY CoreFoundation)
 	find_library(CARBON_LIBRARY Carbon)
-	target_link_libraries(helphelper ${COREFOUNDATION_LIBRARY} ${CARBON_LIBRARY})
+	target_link_libraries(helphelper PRIVATE ${COREFOUNDATION_LIBRARY} ${CARBON_LIBRARY})
 	install(
 		TARGETS helphelper
 		RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}

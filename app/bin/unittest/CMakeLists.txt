@@ -9,6 +9,7 @@ add_executable(dxfformattest
 			  )
 
 target_link_libraries(dxfformattest
+                      PRIVATE
                       dynstring
 					 ${LIBS})
 
@@ -25,6 +26,7 @@ target_include_directories( pathstest
                             ${CMAKE_CURRENT_SOURCE_DIR}/../include )
 
 target_link_libraries(pathstest
+                      PRIVATE
                       dynstring
 					  xtrkcad-wlib
 					  ${LIBS})
@@ -37,6 +39,7 @@ add_executable(shortentest
 			 )
 
 target_link_libraries(shortentest
+					PRIVATE
 					${LIBS})
 
 add_test(ShortenTest shortentest)

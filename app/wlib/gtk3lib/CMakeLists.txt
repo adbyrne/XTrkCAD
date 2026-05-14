@@ -186,7 +186,9 @@ endif()
 #                     ${CMAKE_CURRENT_SOURCE_DIR}/glade
 #                     ${CMAKE_BINARY_DIR}/app/bin/ui
 # )
-add_dependencies(xtrkcad-wlib resource-target symbols-target)
+if(TARGET resource-target AND TARGET symbols-target)
+	add_dependencies(xtrkcad-wlib resource-target symbols-target)
+endif()
 
 if(XTRKCAD_TESTING)
 	add_subdirectory(unittests)

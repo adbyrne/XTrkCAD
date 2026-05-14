@@ -1,5 +1,5 @@
 # create resource file to be compiled into the program
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.20...4.0)
 
 set (RESOURCE_XML wlib.gresource.xml)
 set (RESOURCE_XML_IN ${RESOURCE_XML}.in)

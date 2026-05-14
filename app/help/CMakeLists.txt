@@ -8,8 +8,8 @@ target_sources(genhelp
 	PRIVATE
 	genhelp.c)
 
-target_link_libraries(genhelp 
-	PUBLIC	
+target_link_libraries(genhelp
+	PRIVATE
 	cJSON
 )
 
