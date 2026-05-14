@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - GTK3V2MAIN
+      - test/upstream-gtk3*
   pull_request:
     branches:
       - GTK3V2MAIN
