@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - test/upstream-default-*
   pull_request:
     branches:
       - main
