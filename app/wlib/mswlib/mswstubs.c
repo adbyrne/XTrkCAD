@@ -154,6 +154,16 @@ void wDrawClipClear(wControl_p drawingArea)
 	mswFail("wDrawClipClear: not implemented");
 }
 
+void wDrawStart(wControl_p drawArea)
+{
+	(void)drawArea;
+}
+
+void wDrawFinish(wControl_p drawArea)
+{
+	(void)drawArea;
+}
+
 /* ── Entry ───────────────────────────────────────────────────────────────── */
 
 wControl_p wEntryCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
