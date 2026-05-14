@@ -3174,6 +3174,8 @@ EXPORT void DrawEndPt2(
 	}
 }
 
+static unsigned currTracks;
+
 EXPORT void DrawTracks( drawCmd_p d, DIST_T scale, coOrd orig, coOrd size )
 {
 	track_cp trk;
@@ -3184,6 +3186,8 @@ EXPORT void DrawTracks( drawCmd_p d, DIST_T scale, coOrd orig, coOrd size )
 	unsigned long time0 = wGetTimer();
 
 	inDrawTracks = TRUE;
+
+	currTracks = 0;
 
 	TRK_ITERATE( trk ) {
 		if ( (d->options&DC_PRINT) != 0 &&
@@ -3203,9 +3207,14 @@ EXPORT void DrawTracks( drawCmd_p d, DIST_T scale, coOrd orig, coOrd size )
 		     (d == &mapD && !GetLayerOnMap( GetTrkLayer(trk) ) ) ) {
 			continue;
 		}
+		currTracks++;
 		DrawTrack( trk, d, wDrawColorBlack );
 		count++;
 	}
+
+	LOG(log_timedrawtracks, 1, 
+		("Track elements drawn: %d\n", 
+		currTracks));
 
 	if (d == &mainD) {
 		for (inx=1; inx<trackCmds_da.cnt; inx++)

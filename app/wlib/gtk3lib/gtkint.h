@@ -187,6 +187,14 @@ struct draw {
 	double scale_adjust; /** \todo Check necessity */
 	double scale_text;   /** \todo Check necessity */
 	struct rect *clipregion;
+
+	// state of Cairo context
+	wDrawColor activeColor;
+	wDrawWidth activeWidth;
+	wDrawLineType_e activeStyle;
+	int pathOpen;
+	int fill;
+	int batchCount;
 };
 
 struct entry {

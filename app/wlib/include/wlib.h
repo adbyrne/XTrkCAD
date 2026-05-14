@@ -864,8 +864,12 @@ int wDrawSetBackground(wControl_p bd, char *path, char **error);
 void wDrawCloneBackground(wControl_p from, wControl_p to);
 void wDrawShowBackground(wControl_p drawingArea, wWinPix_t pos_x,
                          wWinPix_t pos_y, wWinPix_t size, wAngle_t angle,
-                         int screen);
-
+                         int screen,
+                         wDrawPix_t clip_x, wDrawPix_t clip_y,
+                         wDrawPix_t clip_w, wDrawPix_t clip_h);
+ void wDrawStart( wControl_p drawArea );
+ void wDrawFinish( wControl_p drawArea );
+ 
 /*------------------------------------------------------------------------------
  *
  * Fonts

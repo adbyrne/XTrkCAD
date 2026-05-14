@@ -309,7 +309,6 @@ EXPORT char * Strcpytrimed(char * dst, const char * src, BOOL_T double_quotes)
 	return dst;
 }
 
-// ??? Referenced from gtklib.browserhelp.c ???
 static char * directory;
 
 EXPORT wBool_t CheckHelpTopicExists(const char * topic)

@@ -20,6 +20,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include <time.h>
+
 #include "draw.h"
 #include "common-ui.h"
 #include "cselect.h"
@@ -30,7 +32,9 @@
 #include "mapwindow.h"
 #include "misc.h"
 #include "track.h"
+#include "wlib.h"
 
+// #define PERFORMANCE_TEST		/**< set to measure performance of redraw */
 
 #undef BBORDER
 #undef LBORDER
@@ -246,6 +250,7 @@ static void DrawTempContent(void)
 {
 	wWinPix_t totalW, totalH;
 
+	wDrawStart(tempD.d);
 	/* Clip command drawing to the inner area (exclude ruler margins). */
 	wDrawGetSize(tempD.d, &totalW, &totalH);
 	wDrawClip(tempD.d,
@@ -262,6 +267,7 @@ static void DrawTempContent(void)
 	DrawMarkers();
 	RulerRedraw(FALSE);
 	RedrawPlaybackCursor(); /* If in playback */
+	wDrawFinish(tempD.d);
 }
 
 /* Update temp_surface after executing a command
@@ -335,7 +341,16 @@ EXPORT void MainRedraw(void)
 	orig.x -= lborder / mainD.dpi * mainD.scale;
 	orig.y -= bborder / mainD.dpi * mainD.scale;
 
+	// measure redraw of main canvas
+#ifdef PERFORMANCE_TEST
+    struct timespec start, end;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+#endif
+
+	wDrawStart(mainD.d);	
+
 	DrawRoomWalls(TRUE);
+
 	if (GetLayoutBackGroundScreen() < 100.0 && GetLayoutBackGroundVisible()) {
 		wWinPix_t bitmapPosX;
 		wWinPix_t bitmapPosY;
@@ -344,31 +359,44 @@ EXPORT void MainRedraw(void)
 		TranslateBackground(&mainD, orig.x, orig.y, &bitmapPosX, &bitmapPosY,
 		                    &bitmapWidth);
 
-		wDrawShowBackground(mainD.d, bitmapPosX, bitmapPosY, bitmapWidth,
-		                    GetLayoutBackGroundAngle(),
-		                    GetLayoutBackGroundScreen());
+wDrawPix_t rx, ry, rw, rh;
+
+// 1. Calculate room area in screen pixels
+rx = lborder + (0.0 - mainD.orig.x) * mainD.dpi / mainD.scale;
+ry = (0.0 - mainD.orig.y) * mainD.dpi / mainD.scale;
+rw = mapD.size.x * mainD.dpi / mainD.scale;
+rh = mapD.size.y * mainD.dpi / mainD.scale;
+
+// 2. Call the background drawer with these pixel coordinates
+wDrawShowBackground(mainD.d, bitmapPosX, bitmapPosY, bitmapWidth,
+                    GetLayoutBackGroundAngle(),
+                    GetLayoutBackGroundScreen(),
+                    rx, ry, rw, rh);
 	}
+	
 	DrawSnapGrid(&mainD, mapD.size, TRUE);
 
 	/*
 	 * Phase 2: Drawing content (clipped to inner area)
 	 * Tracks and room border polygon must not overwrite the ruler margins.
 	 */
+
+		 
 	orig = mainD.orig;
 	size = mainD.size;
 	orig.x -= RBORDER / mainD.dpi * mainD.scale;
 	orig.y -= bborder / mainD.dpi * mainD.scale;
 	size.x += (RBORDER + lborder) / mainD.dpi * mainD.scale;
 	size.y += (bborder + TBORDER) / mainD.dpi * mainD.scale;
-
+ 
 	wDrawGetSize(mainD.d, &totalW, &totalH);
 	wDrawClip(mainD.d,
 	          (wDrawPix_t)lborder,
 	          (wDrawPix_t)bborder,
 	          (wDrawPix_t)(totalW - lborder - RBORDER),
 	          (wDrawPix_t)(totalH - bborder - TBORDER));
-
 	DrawTracks(&mainD, mainD.scale, orig, size);
+
 	DrawRoomWalls(FALSE); /* Room border polygon only — clipped */
 
 	/*
@@ -377,18 +405,36 @@ EXPORT void MainRedraw(void)
 	 */
 	wDrawClipClear(mainD.d);
 
-	DrawRulers();
+	/*
+	 * make sure that we have a fresh cairo context having default settings
+	 */
 
+	wDrawFinish(mainD.d);
+	wDrawStart((mainD.d));
+
+	DrawRulers();
+	
+	wDrawFinish(mainD.d);	
+
+#ifdef PERFORMANCE_TEST
+	// end measuring main canvas
+	clock_gettime(CLOCK_MONOTONIC, &end);
+    double time_spent = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
+	
+	LogPrintf("MainRedraw No. %d took %f sec\n", currRedraw, time_spent);
+#endif
 	currRedraw++;
 
 	InfoScale();
 	LOG(log_timemainredraw, 1,
 	    ("MainRedraw time = %lu mS\n", wGetTimer() - time0));
 	/* Temp-surface content (command feedback, markers, rulers) */
+	
 	wDrawSetTempMode(tempD.d, TRUE);
 	DrawTempContent();
 	wDrawSetTempMode(tempD.d, FALSE);
 	wDrawDelayUpdate(mainD.d, FALSE);
+	
 }
 
 /*

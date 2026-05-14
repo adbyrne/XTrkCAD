@@ -95,12 +95,12 @@ void DrawMarkers(void)
 	p0.x = p1.x = oldMarker.x;
 	p0.y = mainD.orig.y;
 	p1.y = mainD.orig.y - bborder * mainD.scale / mainD.dpi;
-	DrawLine(&tempD, p0, p1, 3, wDrawColorWhite);
+//	DrawLine(&tempD, p0, p1, 3, wDrawColorWhite);
 	DrawLine(&tempD, p0, p1, 0, markerColor);
 	p0.y = p1.y = oldMarker.y;
 	p0.x = mainD.orig.x;
 	p1.x = mainD.orig.x - lborder * mainD.scale / mainD.dpi;
-	DrawLine(&tempD, p0, p1, 3, wDrawColorWhite);
+//	DrawLine(&tempD, p0, p1, 3, wDrawColorWhite);
 	DrawLine(&tempD, p0, p1, 0, markerColor);
 }
 
@@ -110,8 +110,63 @@ void DrawMarkers(void)
  *
  */
 
-EXPORT void DrawRuler(drawCmd_p d, coOrd pos0, coOrd pos1, DIST_T offset,
-                      int number, int tickSide, wDrawColor color)
+/**
+ * @brief Draw a white filled rectangle behind the ruler to clear antialiasing
+ *        artifacts in one call, replacing per-tick white line erasure.
+ *
+ * @param d         Drawing command context
+ * @param pos0      Clipped spine start (layout coords)
+ * @param pos1      Clipped spine end   (layout coords)
+ * @param a         Ruler angle (0.0 = vertical, 90.0 = horizontal)
+ * @param tickSide  Which side the ticks extend to
+ * @param maxTickPx Maximum tick length in pixels
+ */
+static void DrawRulerBackground(drawCmd_p d, coOrd pos0, coOrd pos1,
+                                wAngle_t a, int tickSide, int maxTickPx,
+                                wDrawColor bgColor)
+{
+	wDrawPix_t px0, py0, px1, py1;
+
+	px0 = (wDrawPix_t)((pos0.x - d->orig.x) * d->dpi / d->scale);
+	py0 = (wDrawPix_t)((pos0.y - d->orig.y) * d->dpi / d->scale);
+	px1 = (wDrawPix_t)((pos1.x - d->orig.x) * d->dpi / d->scale);
+	py1 = (wDrawPix_t)((pos1.y - d->orig.y) * d->dpi / d->scale);
+
+	int lborder = GetLBorder();
+	int bborder = GetBBorder();
+
+	if (a == 90.0) {
+		/* Horizontal ruler */
+		wDrawPix_t x = (px0 < px1) ? px0 : px1;
+		wDrawPix_t w = abs(px1 - px0);
+		wDrawPix_t y, h;
+		h = maxTickPx;
+		if (tickSide == 0) {
+			y = (py0 < py1) ? py0 : py1;
+		} else {
+			y = ((py0 < py1) ? py0 : py1) + maxTickPx;
+		}
+		wDrawFilledRectangle(d->d, x + lborder, y + bborder - maxTickPx,
+		                     w, h, bgColor, 0);
+	} else if (a == 0.0) {
+		/* Vertical ruler */
+		wDrawPix_t y = (py0 < py1) ? py0 : py1;
+		wDrawPix_t h = abs(py1 - py0);
+		wDrawPix_t x, w;
+		w = maxTickPx;
+		if (tickSide == 0) {
+			x = (px0 < px1) ? px0 : px1;
+		} else {
+			x = ((px0 < px1) ? px0 : px1) - maxTickPx;
+		}
+		wDrawFilledRectangle(d->d, x + lborder, y + bborder,
+		                     w, h, bgColor, 0);
+	}
+}
+
+static void DrawRulerWithBackground(drawCmd_p d, coOrd pos0, coOrd pos1,
+                                    DIST_T offset, int number, int tickSide,
+                                    wDrawColor color, wDrawColor bgColor)
 {
 	coOrd orig = pos0;
 	wAngle_t a, aa;
@@ -160,7 +215,21 @@ EXPORT void DrawRuler(drawCmd_p d, coOrd pos0, coOrd pos1, DIST_T offset,
 	}
 	end = FindDistance(orig, pos1);
 
-	DrawLine(d, pos0, pos1, 3, wDrawColorWhite);
+	/*
+	 * Determine the maximum tick length in pixels so we can clear
+	 * the entire ruler area with a single white rectangle.
+	 */
+	int maxTickPx;
+	if (units == UNITS_METRIC) {
+		maxTickPx = 10;  /* longest metric tick is 10px (at power==1000) */
+	} else {
+		maxTickPx = 16;  /* longest imperial tick (majorLength) */
+	}
+
+	/* Draw white background rectangle to clear antialiasing artifacts */
+	DrawRulerBackground(d, pos0, pos1, a, tickSide, maxTickPx, bgColor);
+
+	/* Draw the ruler spine */
 	DrawLine(d, pos0, pos1, 0, color);
 
 	/**
@@ -224,7 +293,6 @@ EXPORT void DrawRuler(drawCmd_p d, coOrd pos0, coOrd pos1, DIST_T offset,
 				if (power == 1000 || mm % (power * 10) != 0) {
 					Translate(&p0, orig, a, mm / 25.4);
 					Translate(&p1, p0, aa, len * d->scale / mainD.dpi);
-					DrawLine(d, p0, p1, 3, wDrawColorWhite);
 					DrawLine(d, p0, p1, 0, color);
 					if (!number || (d->scale > 40 && mm % skip != 0.0)) {
 						continue;
@@ -315,7 +383,6 @@ EXPORT void DrawRuler(drawCmd_p d, coOrd pos0, coOrd pos1, DIST_T offset,
 				if (!skip) {
 					Translate(&p0, orig, a, inch + fraction / 16.0);
 					Translate(&p1, p0, aa, lengths[fraction] * d->scale / mainD.dpi);
-					DrawLine(d, p0, p1, 3, wDrawColorWhite);
 					DrawLine(d, p0, p1, 0, color);
 				}
 				if (fraction == 0) {
@@ -357,6 +424,18 @@ EXPORT void DrawRuler(drawCmd_p d, coOrd pos0, coOrd pos1, DIST_T offset,
 #undef LABEL_POS_HORIZONTAL
 }
 
+/**
+ * @brief Public wrapper – draws a ruler with a white background.
+ *
+ * Existing callers keep their current signature unchanged.
+ */
+EXPORT void DrawRuler(drawCmd_p d, coOrd pos0, coOrd pos1, DIST_T offset,
+                      int number, int tickSide, wDrawColor color)
+{
+	DrawRulerWithBackground(d, pos0, pos1, offset, number, tickSide, color,
+	                        wDrawColorWhite);
+}
+
 static void DrawTicks(drawCmd_p d, coOrd size)
 {
 	coOrd p0, p1;
@@ -370,13 +449,13 @@ static void DrawTicks(drawCmd_p d, coOrd size)
 		p0.y = 0.0;
 		p1.y = mapD.size.y;
 		p0.x = p1.x = 0.0;
-		DrawRuler(d, p0, p1, offset, FALSE, TRUE, borderColor);
+		DrawRulerWithBackground(d, p0, p1, offset, FALSE, TRUE, borderColor, wDrawColorGrey80);
 	}
 	if (d->orig.x + d->size.x > mapD.size.x + blank_zone) {
 		p0.y = 0.0;
 		p1.y = mapD.size.y;
 		p0.x = p1.x = mapD.size.x;
-		DrawRuler(d, p0, p1, offset, FALSE, FALSE, borderColor);
+		DrawRulerWithBackground(d, p0, p1, offset, FALSE, FALSE, borderColor, wDrawColorGrey80);
 	}
 	p0.x = 0.0;
 	p1.x = d->size.x;
@@ -392,13 +471,13 @@ static void DrawTicks(drawCmd_p d, coOrd size)
 		p0.x = 0.0;
 		p1.x = mapD.size.x;
 		p0.y = p1.y = 0.0;
-		DrawRuler(d, p0, p1, offset, FALSE, FALSE, borderColor);
+		DrawRulerWithBackground(d, p0, p1, offset, FALSE, FALSE, borderColor, wDrawColorGrey80);
 	}
 	if (d->orig.y + d->size.y > mapD.size.y + blank_zone) {
 		p0.x = 0.0;
 		p1.x = mapD.size.x;
 		p0.y = p1.y = mapD.size.y;
-		DrawRuler(d, p0, p1, offset, FALSE, TRUE, borderColor);
+		DrawRulerWithBackground(d, p0, p1, offset, FALSE, TRUE, borderColor, wDrawColorGrey80);
 	}
 	p0.y = 0.0;
 	p1.y = d->size.y;

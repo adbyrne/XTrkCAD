@@ -208,7 +208,8 @@ static int SaveBitmapFile(
 		                     bitmapPosY,
 		                     bitmapWidth,
 		                     GetLayoutBackGroundAngle(),
-		                     GetLayoutBackGroundScreen() );
+		                     GetLayoutBackGroundScreen(),
+		                     0, 0, 0, 0 );
 	}
 
 	if( outputBitMapTogglesV & BITMAPDRAWCENTERLINE ) {

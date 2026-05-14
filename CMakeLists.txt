@@ -50,7 +50,7 @@ endif()
 # Find document conversion tool
 find_package(Pandoc)
 
-# check for GTK+ 3.0 (Linux/macOS only — Windows uses Win32/mswlib backend)
+# check for GTK+ 3.0
 if(NOT WIN32)
     pkg_check_modules(GTK3 QUIET "gtk+-3.0")
     if(NOT GTK3_FOUND)

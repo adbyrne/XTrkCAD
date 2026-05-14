@@ -31,6 +31,7 @@
 #include "form.h"
 #include "include/stringxtc.h"
 #include "include/toolbar.h"
+#include "layout.h"
 #include "misc.h"
 #include "param.h"
 #include "paths.h"
@@ -659,6 +660,7 @@ EXPORT void MovePlaybackCursor(drawCmd_p d, coOrd pos, wBool_t direct,
 
 EXPORT wBool_t inPlayback;
 EXPORT wBool_t inPlaybackQuit;
+
 EXPORT wControl_p demoW;
 EXPORT int curDemo = -1;
 
@@ -684,6 +686,7 @@ static coOrd oldMainSize;
 static DIST_T oldMainScale;
 static char *oldScaleName;
 static int oldMagneticSnap;
+static wBool_t backgroundShown;
 
 static wBool_t pauseDemo = FALSE;
 static long bigPause = 2000;
@@ -759,6 +762,11 @@ static void PlaybackQuit(void)
 	ParamRestoreAll();
 	magneticSnap = oldMagneticSnap;
 	RestoreLayers();
+
+	if(backgroundShown) {
+		BackgroundToggleShow(NULL);
+	}
+
 	mainD.scale = oldMainScale;
 	mainD.size = oldMainSize;
 	mainD.orig = oldMainOrig;
@@ -955,6 +963,11 @@ static void PlaybackSetup(void)
 {
 	SaveTrackState();
 	EnableButtons(TRUE);
+
+	if((backgroundShown = GetLayoutBackGroundVisible())) {
+		BackgroundToggleShow(NULL);
+	}
+
 	SetPlaybackSpeed((wIndex_t)playbackSpeed);
 	wListSetIndex(demoSpeedL, (wIndex_t)playbackSpeed);
 	wTextClear(demoT);
