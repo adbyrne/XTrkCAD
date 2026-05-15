@@ -112,8 +112,21 @@ class TrackObject:
 
 
 @dataclass
+class NoteObject:
+    """A NOTE object from the layout — text, link, or file annotation."""
+    id: int
+    layer: int
+    x: float
+    y: float
+    op: int       # 0=text, 1=link, 2=file
+    text: str     # body text (text content, URL, or file path)
+    title: str = ""  # title string for link/file notes
+
+
+@dataclass
 class Layout:
     """Parsed XTrkCAD layout file."""
+    param_version: int = 0
     version: str = ""
     title1: str = ""
     title2: str = ""
@@ -122,6 +135,7 @@ class Layout:
     room_height: float = 0.0
     tracks: list[TrackObject] = field(default_factory=list)
     layers: dict[int, LayerInfo] = field(default_factory=dict)
+    notes: list[NoteObject] = field(default_factory=list)
 
     def track_counts(self) -> dict[str, int]:
         counts: dict[str, int] = {}

@@ -2,11 +2,14 @@
 
 from pathlib import Path
 
-from xtrkcad_mcp.models import Endpoint, LayerInfo, Layout, TrackObject
+from xtrkcad_mcp.models import Endpoint, LayerInfo, Layout, NoteObject, TrackObject
 
 TRACK_KINDS = frozenset(
     {"STRAIGHT", "CURVE", "JOINT", "TURNOUT", "TURNTABLE", "CORNU", "BEZIER", "HANDLAID"}
 )
+
+# paramVersion >= this value means NOTE content is inline (not multiline until END).
+_VERSION_INLINENOTE = 12
 
 
 def _parse_roomsize(value: str) -> tuple[float, float]:
@@ -46,15 +49,60 @@ def _parse_layers_line(line: str, layout: Layout) -> None:
     layout.layers[idx] = LayerInfo(index=idx, name=name, visible=visible)
 
 
+def _first_quoted(line: str) -> str:
+    """Return the content of the first double-quoted string in line, or ''."""
+    q1 = line.find('"')
+    if q1 < 0:
+        return ""
+    q2 = line.find('"', q1 + 1)
+    return line[q1 + 1:q2] if q2 > q1 else ""
+
+
+def _two_quoted(line: str) -> tuple[str, str]:
+    """Return the contents of the first two double-quoted strings in line."""
+    q1 = line.find('"')
+    if q1 < 0:
+        return "", ""
+    q2 = line.find('"', q1 + 1)
+    if q2 < 0:
+        return "", ""
+    first = line[q1 + 1:q2]
+    rest = line[q2 + 1:]
+    q3 = rest.find('"')
+    if q3 < 0:
+        return first, ""
+    q4 = rest.find('"', q3 + 1)
+    second = rest[q3 + 1:q4] if q4 > q3 else ""
+    return first, second
+
+
 def parse_file(path: str | Path) -> Layout:
     """Parse an XTrkCAD layout file and return a Layout object."""
     path = Path(path)
     layout = Layout()
     current_track: TrackObject | None = None
+    current_note: NoteObject | None = None
+    note_text_lines: list[str] = []
 
     with path.open(encoding="utf-8", errors="replace") as fh:
         for raw_line in fh:
             line = raw_line.rstrip("\n")
+
+            # END terminates both tracks and old-format (pre-v12) multiline notes.
+            if line.strip() == "END":
+                if current_note is not None:
+                    current_note.text = "\n".join(note_text_lines).strip()
+                    layout.notes.append(current_note)
+                    current_note = None
+                    note_text_lines = []
+                else:
+                    current_track = None
+                continue
+
+            # Accumulate old-format multiline note body (any line before END).
+            if current_note is not None:
+                note_text_lines.append(line)
+                continue
 
             if line.startswith("\t"):
                 if current_track is None:
@@ -82,18 +130,19 @@ def parse_file(path: str | Path) -> Layout:
                         pass
                 continue
 
-            if line.strip() == "END":
-                current_track = None
-                continue
-
             parts = line.split()
             if not parts or line.startswith("#"):
                 continue
 
             keyword = parts[0]
 
-            if keyword == "VERSION" and len(parts) >= 3:
-                layout.version = parts[2]
+            if keyword == "VERSION" and len(parts) >= 2:
+                try:
+                    layout.param_version = int(parts[1])
+                except ValueError:
+                    pass
+                if len(parts) >= 3:
+                    layout.version = parts[2]
             elif keyword == "TITLE1":
                 layout.title1 = line[len("TITLE1 "):]
             elif keyword == "TITLE2":
@@ -106,6 +155,37 @@ def parse_file(path: str | Path) -> Layout:
                 )
             elif keyword == "LAYERS":
                 _parse_layers_line(line, layout)
+            elif keyword == "NOTE" and not line.startswith("NOTE MAIN") and len(parts) >= 9:
+                # NOTE id layer 0 0 x y 0 op_or_len [content...]
+                try:
+                    note_id = int(parts[1])
+                    note_layer = int(parts[2])
+                    note_x = float(parts[5])
+                    note_y = float(parts[6])
+                    field8 = int(parts[8])
+                except (ValueError, IndexError):
+                    continue
+                if layout.param_version >= _VERSION_INLINENOTE:
+                    # Inline format: field8 = op; content is the first quoted string.
+                    op = field8
+                    if op == 0:
+                        text = _first_quoted(line)
+                        title = ""
+                    else:
+                        text, title = _two_quoted(line)
+                    layout.notes.append(NoteObject(
+                        id=note_id, layer=note_layer,
+                        x=note_x, y=note_y,
+                        op=op, text=text, title=title,
+                    ))
+                else:
+                    # Multiline format: field8 = byte count; text on following lines.
+                    current_note = NoteObject(
+                        id=note_id, layer=note_layer,
+                        x=note_x, y=note_y,
+                        op=0, text="",
+                    )
+                    note_text_lines = []
             elif keyword in TRACK_KINDS and len(parts) >= 2:
                 try:
                     track_id = int(parts[1])

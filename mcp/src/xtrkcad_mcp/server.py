@@ -11,6 +11,12 @@ from mcp.server.fastmcp import FastMCP
 from xtrkcad_mcp.config import load_config
 from xtrkcad_mcp.models import SCALE_RATIOS, cars_per_real_ft, max_to_main_label
 from xtrkcad_mcp.parser import TRACK_KINDS, parse_file
+from xtrkcad_mcp.stations import (
+    compute_capacities,
+    compute_distances,
+    extract_stations,
+    model_in_to_proto_ft,
+)
 
 logging.basicConfig(level=os.environ.get("XTRKCAD_LOG_LEVEL", "INFO"))
 logger = logging.getLogger(__name__)
@@ -1820,6 +1826,225 @@ def fix_dead_connections(path: str) -> str:
     updated, count = _fix_dead_t_lines(lines, dead_ids)
     p.write_text("\n".join(updated) + "\n", encoding="utf-8")
     return f"Fixed {count} dead endpoint(s) referencing deleted track ID(s): {sorted(dead_ids)}"
+
+
+# ---------------------------------------------------------------------------
+# Station distance tools
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool()
+def get_stations(path: str) -> list[dict]:
+    """List all stations identified by STATION: NOTE objects in the layout.
+
+    Stations are marked by placing a text NOTE in XTrkCAD whose text begins
+    with 'STATION:' (case-insensitive), e.g. 'STATION: Springfield'.
+    Each station is snapped to its nearest track endpoint for graph routing.
+
+    Args:
+        path: Path to the .xtc layout file (absolute or relative to XTRKCAD_PLANS_DIR).
+    """
+    p = _resolve_plan(path)
+    layout = parse_file(p)
+    stations = extract_stations(layout)
+    return [
+        {
+            "name": s.name,
+            "note_id": s.note_id,
+            "x": round(s.x, 4),
+            "y": round(s.y, 4),
+            "nearest_track_id": s.nearest_ep[0],
+            "nearest_ep_idx": s.nearest_ep[1],
+            "snap_distance_in": round(s.snap_dist, 4),
+        }
+        for s in stations
+    ]
+
+
+@mcp.tool()
+def get_station_distances(
+    path: str,
+    layer_categories: dict | None = None,
+    route_layer_names: list[str] | None = None,
+    exclude_turnouts: bool = False,
+) -> list[dict]:
+    """Compute track-graph distances between all STATION: notes in the layout.
+
+    Distances are the shortest path along connected track, weighted by track
+    length.  Results are returned in both model inches and prototypical feet.
+
+    Layer filtering (optional):
+      Provide layer_categories (e.g. {"0": "mainline", "1": "connecting"}) and
+      route_layer_names (e.g. ["mainline", "connecting"]) to restrict the path
+      to specific track categories.  Useful for mainline-only routing.
+
+    Turnout handling:
+      Set exclude_turnouts=True to treat TURNOUT lengths as zero — the switch
+      acts as a free connection rather than adding distance.  Use this when
+      measuring siding/storage capacity so the switch throat is not counted.
+
+    Args:
+        path: Path to the .xtc layout file.
+        layer_categories: Optional map of layer index → category name.
+        route_layer_names: Optional list of category names to restrict routing.
+        exclude_turnouts: If True, TURNOUT track lengths are excluded from totals.
+    """
+    p = _resolve_plan(path)
+    layout = parse_file(p)
+    results = compute_distances(
+        layout,
+        layer_categories=layer_categories,
+        route_layer_names=route_layer_names,
+        exclude_turnouts=exclude_turnouts,
+    )
+    return [
+        {
+            "from": r.from_station,
+            "to": r.to_station,
+            "distance_model_in": round(r.distance_model_in, 2),
+            "distance_proto_ft": round(r.distance_proto_ft, 1),
+            "reachable": r.reachable,
+        }
+        for r in results
+    ]
+
+
+@mcp.tool()
+def write_station_distance_report(
+    path: str,
+    output_path: str,
+    layer_categories: dict | None = None,
+    route_layer_names: list[str] | None = None,
+    exclude_turnouts: bool = False,
+    format: str = "md",
+) -> str:
+    """Write a station distance report to a file.
+
+    Reports the shortest track-graph distance between every pair of STATION:
+    notes in both model inches and prototypical feet.
+
+    Supports layer filtering and turnout exclusion — see get_station_distances
+    for parameter details.
+
+    Args:
+        path: Path to the .xtc layout file.
+        output_path: Where to write the report (.md or .json).
+        layer_categories: Optional map of layer index → category name.
+        route_layer_names: Optional list of category names to restrict routing.
+        exclude_turnouts: If True, TURNOUT lengths are excluded from totals.
+        format: Output format — "md" (default) or "json".
+    """
+    p = _resolve_plan(path)
+    layout = parse_file(p)
+    fmt = _resolve_format(output_path, format)
+    stations = extract_stations(layout)
+    results = compute_distances(
+        layout,
+        layer_categories=layer_categories,
+        route_layer_names=route_layer_names,
+        exclude_turnouts=exclude_turnouts,
+    )
+    out = Path(output_path)
+
+    scale = layout.scale or "?"
+    title = layout.title1 or p.stem
+    filter_note = ""
+    if route_layer_names:
+        filter_note = f" (layers: {', '.join(route_layer_names)})"
+    if exclude_turnouts:
+        filter_note += " (turnouts excluded)"
+
+    if fmt == "json":
+        import json
+        payload = {
+            "layout": title,
+            "scale": scale,
+            "route_filter": route_layer_names or "all",
+            "exclude_turnouts": exclude_turnouts,
+            "stations": [s.name for s in stations],
+            "distances": [
+                {
+                    "from": r.from_station,
+                    "to": r.to_station,
+                    "distance_model_in": round(r.distance_model_in, 2),
+                    "distance_proto_ft": round(r.distance_proto_ft, 1),
+                    "reachable": r.reachable,
+                }
+                for r in results
+            ],
+        }
+        out.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        return f"Wrote JSON station distance report to {out} ({len(results)} pairs)"
+
+    # Markdown
+    lines: list[str] = [
+        f"# Station Distance Report — {title} ({scale}){filter_note}",
+        "",
+    ]
+    if not stations:
+        lines.append(
+            "_No stations found. Add NOTE objects with text beginning 'STATION: <name>'._"
+        )
+    elif not results:
+        lines.append("_Only one station found — need at least two to compute distances._")
+    else:
+        headers = ["From", "To", "Model (in)", f"Proto (ft) [{scale}]", "Reachable"]
+        rows = [
+            [
+                r.from_station,
+                r.to_station,
+                f"{r.distance_model_in:.2f}" if r.reachable else "—",
+                f"{r.distance_proto_ft:.0f}" if r.reachable else "—",
+                "yes" if r.reachable else "no",
+            ]
+            for r in results
+        ]
+        lines.extend(_md_table(headers, rows))
+        lines.append("")
+        lines.append(
+            f"_Stations: {', '.join(s.name for s in stations)}_"
+        )
+
+    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return f"Wrote station distance report to {out} ({len(stations)} station(s), {len(results)} pair(s))"
+
+
+@mcp.tool()
+def get_siding_capacities(path: str) -> list[dict]:
+    """Report usable track length and car capacity for every SIDING:/STORAGE: note.
+
+    Capacity markers use NOTE objects whose text begins with 'SIDING:' or
+    'STORAGE:' (case-insensitive), e.g. 'SIDING: Springfield Freight House'.
+
+    The measurement walks connected non-TURNOUT tracks (STRAIGHT, CURVE, etc.)
+    from the nearest endpoint, so switch/turnout geometry is excluded.  The
+    Fugate cars-per-real-foot formula converts usable length to whole car count.
+
+    Args:
+        path: Path to the .xtc layout file (absolute or relative to XTRKCAD_PLANS_DIR).
+
+    Returns a list of dicts with keys:
+        name            — marker label (text after 'SIDING:' / 'STORAGE:')
+        kind            — "siding" or "storage"
+        nearest_track_id
+        length_model_in — usable length in model inches (turnouts excluded)
+        length_real_ft  — prototypical feet (scale-dependent)
+        max_cars        — whole cars that fit (Fugate formula, no partial)
+    """
+    p = _resolve_plan(path)
+    layout = parse_file(p)
+    results = compute_capacities(layout)
+    return [
+        {
+            "name": r.name,
+            "kind": r.kind,
+            "nearest_track_id": r.nearest_track_id,
+            "length_model_in": round(r.length_model_in, 2),
+            "length_real_ft": round(r.length_real_ft, 1),
+            "max_cars": r.max_cars,
+        }
+        for r in results
+    ]
 
 
 # ---------------------------------------------------------------------------
