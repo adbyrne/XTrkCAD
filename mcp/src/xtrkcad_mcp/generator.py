@@ -203,7 +203,6 @@ def _room_tableedges(room_w: float, room_h: float, track_id: int) -> tuple[list[
 
 
 _HARD_OBSTRUCTION_COLOR = 8421504   # gray (128,128,128) — physical hard limits
-_WALL_FOOTPRINT_COLOR  = 8421504    # same dark gray — interior walls treated equally
 
 
 def _filpoly_draw(
@@ -262,17 +261,9 @@ def _write_benchwork(
     track_id: int,
 ) -> int:
     """Append floor-plan fills (layer 0) and shelf outlines (layers 2+)."""
-    # Hard obstructions as filled polygons on layer 0
+    # Hard obstructions as filled polygons on layer 0 (physical no-go areas)
     for obs in bw.obstructions:
         new_lines, track_id = _obstruction_draw(obs, track_id)
-        lines += new_lines
-
-    # Benchwork wall footprints as filled rectangles on layer 0 (one per wall,
-    # regardless of level — the floor area is occupied at all levels).
-    for wall in bw.walls:
-        x0, y0, x1, y1 = _wall_rect(wall, room_w_in, room_h_in)
-        verts = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
-        new_lines, track_id = _filpoly_draw(verts, 0, _WALL_FOOTPRINT_COLOR, track_id)
         lines += new_lines
 
     # Shelf outlines on benchwork layers (2, 3, …) per level

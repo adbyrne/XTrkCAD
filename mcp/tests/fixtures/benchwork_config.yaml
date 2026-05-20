@@ -36,14 +36,14 @@ benchwork:
       levels: [2]       # upper level only
 
   obstructions:
-    - label: hall_rect
+    - label: interior_wall_marker
       type: rect
-      x: 163
-      y: 176
-      width: 50
-      height: 36
+      x: 131               # physical interior wall at X=131 (3in symbolic thickness)
+      y: 0
+      width: 3
+      height: 296
 
-    - label: triangle
+    - label: east_triangle  # east access corner — exercises triangle parsing
       type: triangle
       vertices:
         - [163, 176]

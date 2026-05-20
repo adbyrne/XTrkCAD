@@ -441,17 +441,17 @@ def test_room_tableedges_always_present(tmp_path):
     assert len(tableedges) == 4
 
 def test_floor_draws_on_layer0(benchwork_result):
-    # 2 hard obstructions + 4 wall footprints = 6 DRAW objects on layer 0
+    # 2 hard obstructions only — wall footprints are not on the floor layer
     layer0_draws = [
         ln for ln in benchwork_result.splitlines()
         if ln.startswith("DRAW") and ln.split()[2] == "0"
     ]
-    assert len(layer0_draws) == 6
+    assert len(layer0_draws) == 2
 
 def test_filpoly_segments_present(benchwork_result):
-    # Every floor DRAW emits one F4 (SEG_FILPOLY) segment — 6 total
+    # One F4 (SEG_FILPOLY) per hard obstruction — 2 total
     filpoly = [ln for ln in benchwork_result.splitlines() if ln.strip().startswith("F4")]
-    assert len(filpoly) == 6
+    assert len(filpoly) == 2
 
 def test_benchwork_west_shelf_draw_on_layer2(benchwork_result):
     # west wall on both levels → at least 1 DRAW on layer 2

@@ -349,16 +349,16 @@ def test_benchwork_obstruction_count():
 
 def test_benchwork_obstruction_rect_fields():
     result = load_config(BENCHWORK_CONFIG)
-    hall = next(o for o in result.config.benchwork.obstructions if o.label == "hall_rect")
-    assert hall.kind == "rect"
-    assert hall.x == pytest.approx(163.0)
-    assert hall.y == pytest.approx(176.0)
-    assert hall.width == pytest.approx(50.0)
-    assert hall.height == pytest.approx(36.0)
+    obs = next(o for o in result.config.benchwork.obstructions if o.label == "interior_wall_marker")
+    assert obs.kind == "rect"
+    assert obs.x == pytest.approx(131.0)
+    assert obs.y == pytest.approx(0.0)
+    assert obs.width == pytest.approx(3.0)
+    assert obs.height == pytest.approx(296.0)
 
 def test_benchwork_obstruction_triangle_vertices():
     result = load_config(BENCHWORK_CONFIG)
-    tri = next(o for o in result.config.benchwork.obstructions if o.label == "triangle")
+    tri = next(o for o in result.config.benchwork.obstructions if o.label == "east_triangle")
     assert tri.kind == "triangle"
     assert len(tri.vertices) == 3
     assert tri.vertices[0] == pytest.approx([163.0, 176.0])
