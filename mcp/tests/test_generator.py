@@ -20,6 +20,7 @@ from xtrkcad_mcp.templates import load_library
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 FULL_CONFIG = FIXTURES_DIR / "test_layout_config.yaml"
+BENCHWORK_CONFIG = FIXTURES_DIR / "benchwork_config.yaml"
 
 
 # ---------------------------------------------------------------------------
@@ -376,3 +377,78 @@ def test_generate_unknown_element_type_skipped(tmp_path):
     out = tmp_path / "t.xtc"
     gen = generate(result.config, out)
     assert gen.skipped == []   # single-ended yard should resolve fine
+
+
+# ---------------------------------------------------------------------------
+# generate — benchwork
+# ---------------------------------------------------------------------------
+
+@pytest.fixture
+def benchwork_result(tmp_path):
+    """Generate a layout from the benchwork fixture config."""
+    result = load_config(BENCHWORK_CONFIG)
+    out = tmp_path / "benchwork.xtc"
+    generate(result.config, out)
+    return out.read_text()
+
+
+def test_benchwork_layers_header_written(benchwork_result):
+    assert "LAYERS 0" in benchwork_result
+    assert "LAYERS 1" in benchwork_result
+    assert "LAYERS 2" in benchwork_result
+    assert "LAYERS CURRENT 0" in benchwork_result
+
+def test_benchwork_layer_names_present(benchwork_result):
+    assert '"Main"' in benchwork_result
+    assert '"L1-Benchwork"' in benchwork_result
+    assert '"L2-Benchwork"' in benchwork_result
+
+def test_benchwork_no_layers_without_benchwork(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text("name: T\nscale: HO\nroom: 12x16\ngrid: []\n")
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    content = out.read_text()
+    assert "LAYERS" not in content
+
+def test_benchwork_west_shelf_four_straights_on_layer1(benchwork_result):
+    # west wall is on both levels — should produce 4 STRAIGHT objects on layer 1
+    layer1_straights = [
+        ln for ln in benchwork_result.splitlines()
+        if ln.startswith("STRAIGHT") and ln.split()[2] == "1"
+    ]
+    assert len(layer1_straights) >= 4   # at least the west wall rectangle
+
+def test_benchwork_level2_wall_present_on_layer2(benchwork_result):
+    # north_ur has levels:[2] — must appear on layer 2
+    layer2_straights = [
+        ln for ln in benchwork_result.splitlines()
+        if ln.startswith("STRAIGHT") and ln.split()[2] == "2"
+    ]
+    assert len(layer2_straights) >= 4   # at least north_ur rectangle
+
+def test_benchwork_level2_only_wall_absent_from_layer1(benchwork_result):
+    # north_ur has levels:[2] — must NOT appear on layer 1
+    # west + south + north_ul are on both levels → 3 walls × 4 segments = 12 on layer 1
+    # north_ur on level 2 only → layer 1 has exactly 12 STRAIGHT objects
+    layer1_straights = [
+        ln for ln in benchwork_result.splitlines()
+        if ln.startswith("STRAIGHT") and ln.split()[2] == "1"
+    ]
+    # 3 walls on level 1 (west, south, north_ul) × 4 segments each = 12
+    assert len(layer1_straights) == 12
+
+def test_benchwork_level2_total_walls(benchwork_result):
+    # All 4 walls on level 2 (west, south, north_ul, north_ur) × 4 segments = 16
+    layer2_straights = [
+        ln for ln in benchwork_result.splitlines()
+        if ln.startswith("STRAIGHT") and ln.split()[2] == "2"
+    ]
+    assert len(layer2_straights) == 16
+
+def test_benchwork_generates_cleanly(tmp_path):
+    result = load_config(BENCHWORK_CONFIG)
+    out = tmp_path / "benchwork.xtc"
+    gen = generate(result.config, out)
+    assert out.exists()
+    assert gen.warnings == []

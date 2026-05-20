@@ -5,6 +5,9 @@ from pathlib import Path
 import pytest
 
 from xtrkcad_mcp.config import (
+    Benchwork,
+    BenchworkObstruction,
+    BenchworkWall,
     GridPlacement,
     _default_grid_cell_ft,
     _parse_cell_or_range,
@@ -16,6 +19,7 @@ from xtrkcad_mcp.config import (
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 FULL_CONFIG = FIXTURES_DIR / "test_layout_config.yaml"
+BENCHWORK_CONFIG = FIXTURES_DIR / "benchwork_config.yaml"
 
 
 # ---------------------------------------------------------------------------
@@ -279,3 +283,97 @@ def test_bad_grid_entry_warns(tmp_path):
     result = load_config(cfg)
     assert any("skipping grid entry" in w for w in result.warnings)
     assert result.config.placements == []
+
+
+# ---------------------------------------------------------------------------
+# benchwork — wall parsing
+# ---------------------------------------------------------------------------
+
+def test_benchwork_present_in_fixture():
+    result = load_config(BENCHWORK_CONFIG)
+    assert result.config.benchwork is not None
+
+def test_benchwork_wall_count():
+    result = load_config(BENCHWORK_CONFIG)
+    assert len(result.config.benchwork.walls) == 4
+
+def test_benchwork_west_wall_fields():
+    result = load_config(BENCHWORK_CONFIG)
+    west = next(w for w in result.config.benchwork.walls if w.label == "west")
+    assert west.side == "west"
+    assert west.from_in == pytest.approx(0.0)
+    assert west.to_in == pytest.approx(296.0)
+    assert west.depth_in == pytest.approx(24.0)
+
+def test_benchwork_wall_default_depth_applied():
+    # north_ul has no depth in the fixture — should inherit default_depth: 24
+    result = load_config(BENCHWORK_CONFIG)
+    north_ul = next(w for w in result.config.benchwork.walls if w.label == "north_ul")
+    assert north_ul.depth_in == pytest.approx(24.0)
+
+def test_benchwork_wall_levels_default_all():
+    # west wall has no levels key — should get all levels [1, 2]
+    result = load_config(BENCHWORK_CONFIG)
+    west = next(w for w in result.config.benchwork.walls if w.label == "west")
+    assert west.levels == [1, 2]
+
+def test_benchwork_wall_levels_explicit():
+    # north_ur has levels: [2]
+    result = load_config(BENCHWORK_CONFIG)
+    north_ur = next(w for w in result.config.benchwork.walls if w.label == "north_ur")
+    assert north_ur.levels == [2]
+
+def test_benchwork_south_wall_side():
+    result = load_config(BENCHWORK_CONFIG)
+    south = next(w for w in result.config.benchwork.walls if w.label == "south")
+    assert south.side == "south"
+    assert south.to_in == pytest.approx(214.0)
+
+def test_benchwork_default_depth_on_dataclass():
+    result = load_config(BENCHWORK_CONFIG)
+    assert result.config.benchwork.default_depth_in == pytest.approx(24.0)
+
+
+# ---------------------------------------------------------------------------
+# benchwork — obstruction parsing
+# ---------------------------------------------------------------------------
+
+def test_benchwork_obstruction_count():
+    result = load_config(BENCHWORK_CONFIG)
+    assert len(result.config.benchwork.obstructions) == 2
+
+def test_benchwork_obstruction_rect_fields():
+    result = load_config(BENCHWORK_CONFIG)
+    hall = next(o for o in result.config.benchwork.obstructions if o.label == "hall_rect")
+    assert hall.kind == "rect"
+    assert hall.x == pytest.approx(163.0)
+    assert hall.y == pytest.approx(176.0)
+    assert hall.width == pytest.approx(50.0)
+    assert hall.height == pytest.approx(36.0)
+
+def test_benchwork_obstruction_triangle_vertices():
+    result = load_config(BENCHWORK_CONFIG)
+    tri = next(o for o in result.config.benchwork.obstructions if o.label == "triangle")
+    assert tri.kind == "triangle"
+    assert len(tri.vertices) == 3
+    assert tri.vertices[0] == pytest.approx([163.0, 176.0])
+    assert tri.vertices[2] == pytest.approx([214.0, 100.0])
+
+
+# ---------------------------------------------------------------------------
+# benchwork — absent when not in config
+# ---------------------------------------------------------------------------
+
+def test_benchwork_absent_gives_none(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text("name: T\nscale: HO\nroom: 12x16\n")
+    result = load_config(cfg)
+    assert result.config.benchwork is None
+
+def test_benchwork_no_warnings_for_valid_config():
+    result = load_config(BENCHWORK_CONFIG)
+    assert result.warnings == []
+
+def test_benchwork_config_is_ready():
+    result = load_config(BENCHWORK_CONFIG)
+    assert result.ready is True

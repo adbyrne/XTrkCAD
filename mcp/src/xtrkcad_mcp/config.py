@@ -20,6 +20,8 @@ VALID_ELEMENT_TYPES = frozenset({
     "yard", "staging", "mainline", "station", "helix", "siding", "module",
 })
 
+VALID_SIDES = frozenset({"west", "south", "east", "north"})
+
 _CELL_RE = re.compile(r'^([A-Z]+)(\d+)$')
 _RANGE_RE = re.compile(r'^([A-Z]+)(\d+)-([A-Z]+)(\d+)$')
 
@@ -81,6 +83,34 @@ class GridPlacement:
 
 
 @dataclass
+class BenchworkWall:
+    label: str
+    side: str
+    from_in: float
+    to_in: float
+    depth_in: float
+    levels: list[int]
+
+
+@dataclass
+class BenchworkObstruction:
+    label: str
+    kind: str
+    x: float = 0.0
+    y: float = 0.0
+    width: float = 0.0
+    height: float = 0.0
+    vertices: list = field(default_factory=list)
+
+
+@dataclass
+class Benchwork:
+    default_depth_in: float
+    walls: list[BenchworkWall]
+    obstructions: list[BenchworkObstruction]
+
+
+@dataclass
 class LayoutConfig:
     # Required
     name: str = ""
@@ -99,6 +129,7 @@ class LayoutConfig:
 
     obstructions: list[str] = field(default_factory=list)
     placements: list[GridPlacement] = field(default_factory=list)
+    benchwork: "Benchwork | None" = None
 
 
 @dataclass
@@ -125,6 +156,93 @@ def _parse_grid_entry(s: str) -> GridPlacement:
         )
     col_s, row_s, col_e, row_e = _parse_cell_or_range(cell_part)
     return GridPlacement(col_s, row_s, col_e, row_e, element_type, params, raw=s)
+
+
+def _parse_benchwork(
+    raw_bw: dict,
+    total_levels: int,
+    warnings: list[str],
+) -> "Benchwork | None":
+    """Parse a benchwork: mapping into a Benchwork dataclass."""
+    if not isinstance(raw_bw, dict):
+        warnings.append("benchwork must be a YAML mapping; skipping")
+        return None
+
+    default_depth = float(raw_bw.get("default_depth", 24))
+    all_levels = list(range(1, total_levels + 1))
+
+    walls: list[BenchworkWall] = []
+    for entry in raw_bw.get("walls", []):
+        if not isinstance(entry, dict):
+            warnings.append(f"skipping non-dict wall entry: {entry!r}")
+            continue
+        label = str(entry.get("label", "")).strip()
+        side = str(entry.get("side", "")).strip().lower()
+        if side not in VALID_SIDES:
+            warnings.append(
+                f"skipping wall {label!r}: invalid side {side!r}; "
+                f"valid: {', '.join(sorted(VALID_SIDES))}"
+            )
+            continue
+        try:
+            from_in = float(entry.get("from", 0))
+            to_in = float(entry.get("to", 0))
+            depth_in = float(entry.get("depth", default_depth))
+        except (TypeError, ValueError) as exc:
+            warnings.append(f"skipping wall {label!r}: {exc}")
+            continue
+        raw_levels = entry.get("levels")
+        if raw_levels is None:
+            levels = list(all_levels)
+        else:
+            try:
+                levels = [int(lv) for lv in raw_levels]
+            except (TypeError, ValueError) as exc:
+                warnings.append(f"wall {label!r}: invalid levels {raw_levels!r}: {exc}")
+                levels = list(all_levels)
+        walls.append(BenchworkWall(
+            label=label, side=side,
+            from_in=from_in, to_in=to_in, depth_in=depth_in,
+            levels=levels,
+        ))
+
+    obstructions: list[BenchworkObstruction] = []
+    for entry in raw_bw.get("obstructions", []):
+        if not isinstance(entry, dict):
+            warnings.append(f"skipping non-dict obstruction entry: {entry!r}")
+            continue
+        label = str(entry.get("label", "")).strip()
+        kind = str(entry.get("type", "")).strip().lower()
+        if kind == "rect":
+            try:
+                obs = BenchworkObstruction(
+                    label=label, kind=kind,
+                    x=float(entry.get("x", 0)),
+                    y=float(entry.get("y", 0)),
+                    width=float(entry.get("width", 0)),
+                    height=float(entry.get("height", 0)),
+                )
+            except (TypeError, ValueError) as exc:
+                warnings.append(f"skipping obstruction {label!r}: {exc}")
+                continue
+        elif kind == "triangle":
+            raw_verts = entry.get("vertices", [])
+            try:
+                verts = [[float(v[0]), float(v[1])] for v in raw_verts]
+            except (TypeError, ValueError, IndexError) as exc:
+                warnings.append(f"skipping obstruction {label!r}: {exc}")
+                continue
+            obs = BenchworkObstruction(label=label, kind=kind, vertices=verts)
+        else:
+            warnings.append(f"skipping obstruction {label!r}: unknown type {kind!r}")
+            continue
+        obstructions.append(obs)
+
+    return Benchwork(
+        default_depth_in=default_depth,
+        walls=walls,
+        obstructions=obstructions,
+    )
 
 
 def load_config(path: str | Path) -> ConfigResult:
@@ -219,6 +337,10 @@ def load_config(path: str | Path) -> ConfigResult:
             config.grid_size_ft = _parse_length_in(str(raw["grid_size"]))
         except ValueError:
             warnings.append(f"invalid grid_size {raw['grid_size']!r}")
+
+    # --- Benchwork ---
+    if "benchwork" in raw:
+        config.benchwork = _parse_benchwork(raw["benchwork"], config.levels, warnings)
 
     # --- Obstructions ---
     for obs in raw.get("obstructions", []):

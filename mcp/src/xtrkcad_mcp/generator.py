@@ -5,7 +5,9 @@ import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from xtrkcad_mcp.config import GridPlacement, LayoutConfig
+import math
+
+from xtrkcad_mcp.config import Benchwork, BenchworkWall, GridPlacement, LayoutConfig
 from xtrkcad_mcp.models import SCALE_RATIOS
 from xtrkcad_mcp.parser import parse_file
 from xtrkcad_mcp.templates import TemplateInfo, TemplateLibrary, load_library
@@ -123,6 +125,91 @@ def _endpoint_line(x: float, y: float, angle: float) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Benchwork helpers
+# ---------------------------------------------------------------------------
+
+def _layers_header(num_levels: int) -> list[str]:
+    """Emit LAYERS lines for a multi-level layout with benchwork."""
+    result = [
+        'LAYERS 0 1 0 1 0 0 0 0 0 "Main" 1 7 18.0 5.0 0 0 0',
+    ]
+    for lv in range(1, num_levels + 1):
+        result.append(
+            f'LAYERS {lv} 1 0 1 0 0 0 0 0 "L{lv}-Benchwork" 0 7 18.0 5.0 0 0 0'
+        )
+    result.append("LAYERS CURRENT 0")
+    return result
+
+
+def _shelf_straights(
+    x0: float, y0: float, x1: float, y1: float,
+    layer: int, track_id: int, scale: str,
+) -> tuple[list[str], int]:
+    """Emit 4 STRAIGHT lines forming a closed rectangle (x0,y0)–(x1,y1).
+
+    Returns (lines, next_track_id).
+    """
+    corners = [
+        (x0, y0), (x1, y0), (x1, y1), (x0, y1),
+    ]
+    edges = [
+        (corners[0], corners[1]),
+        (corners[1], corners[2]),
+        (corners[2], corners[3]),
+        (corners[3], corners[0]),
+    ]
+    lines: list[str] = []
+    tid = track_id
+    for (ax, ay), (bx, by) in edges:
+        angle = math.degrees(math.atan2(by - ay, bx - ax))
+        lines.append(f"STRAIGHT {tid} {layer} 0 0 0 {scale} 0")
+        lines.append(f"\tE {ax:.6f} {ay:.6f} {angle + 180.0:.6f}")
+        lines.append(f"\tE {bx:.6f} {by:.6f} {angle:.6f}")
+        lines.append("")
+        tid += 1
+    return lines, tid
+
+
+def _wall_rect(
+    wall: BenchworkWall, room_w_in: float, room_h_in: float,
+) -> tuple[float, float, float, float]:
+    """Return (x0, y0, x1, y1) for the shelf rectangle of a wall."""
+    d = wall.depth_in
+    s = wall.side
+    if s == "west":
+        return 0.0, wall.from_in, d, wall.to_in
+    if s == "south":
+        return wall.from_in, 0.0, wall.to_in, d
+    if s == "east":
+        return room_w_in - d, wall.from_in, room_w_in, wall.to_in
+    # north
+    return wall.from_in, room_h_in - d, wall.to_in, room_h_in
+
+
+def _write_benchwork(
+    bw: Benchwork,
+    room_w_in: float, room_h_in: float,
+    num_levels: int,
+    scale: str,
+    lines: list[str],
+    track_id: int,
+) -> int:
+    """Append LAYERS header + shelf rectangles to lines; return next track_id."""
+    lines += _layers_header(num_levels)
+    lines.append("")
+
+    for lv in range(1, num_levels + 1):
+        for wall in bw.walls:
+            if lv not in wall.levels:
+                continue
+            x0, y0, x1, y1 = _wall_rect(wall, room_w_in, room_h_in)
+            new_lines, track_id = _shelf_straights(x0, y0, x1, y1, lv, track_id, scale)
+            lines += new_lines
+
+    return track_id
+
+
+# ---------------------------------------------------------------------------
 # Core generator
 # ---------------------------------------------------------------------------
 
@@ -158,6 +245,12 @@ def generate(config: LayoutConfig, output_path: Path) -> GenerationResult:
     ]
 
     track_id = 1
+
+    if config.benchwork is not None:
+        track_id = _write_benchwork(
+            config.benchwork, room_w_in, room_h_in,
+            config.levels, config.scale, lines, track_id,
+        )
 
     for pl in config.placements:
         template_id = _find_template_id(pl, lib)
