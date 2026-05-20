@@ -165,7 +165,7 @@ def _shelf_straights(
         lines.append(f"STRAIGHT {tid} {layer} 0 0 0 {scale} 0")
         lines.append(f"\tE {ax:.6f} {ay:.6f} {angle + 180.0:.6f}")
         lines.append(f"\tE {bx:.6f} {by:.6f} {angle:.6f}")
-        lines.append("")
+        lines.append("END")
         tid += 1
     return lines, tid
 
@@ -286,7 +286,7 @@ def generate(config: LayoutConfig, output_path: Path) -> GenerationResult:
             lines.append(_track_header(track.kind, track_id, track.layer, config.scale, track.extra))
             for ep in track.endpoints:
                 lines.append(_endpoint_line(ep.x * sf + x0, ep.y * sf + y0, ep.angle))
-            lines.append("")
+            lines.append("END")
             placed.track_ids.append(track_id)
             track_id += 1
 
