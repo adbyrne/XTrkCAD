@@ -128,52 +128,120 @@ def _endpoint_line(x: float, y: float, angle: float) -> str:
 # Benchwork helpers
 # ---------------------------------------------------------------------------
 
+# RGB colors per layer index (0=Floor, 1=Main, 2+=Benchwork levels).
+# Stored as XTrkCAD long integer (R*65536 + G*256 + B).
+_LAYER_COLORS = [
+    8421504,   # 0 Floor: gray  (128,128,128)
+    0,         # 1 Main: black
+    32768,     # 2 L1-Benchwork: dark green
+    255,       # 3 L2-Benchwork: blue
+]
+
+def _layer_line(lyr_id: int, name: str, current: bool) -> str:
+    color = _LAYER_COLORS[lyr_id] if lyr_id < len(_LAYER_COLORS) else 0
+    cur_flag = 1 if current else 0
+    return (
+        f'LAYERS {lyr_id} 1 0 1 {color} 0 0 0 0 "{name}" '
+        f'1 0 0.000000 0.000000 0.000000 0.000000 0.000000'
+    )
+
+
 def _layers_header(num_levels: int) -> list[str]:
-    """Emit LAYERS lines for a multi-level layout with benchwork."""
+    """Emit LAYERS lines: Floor (0), Main (1), then one benchwork layer per level."""
     result = [
-        'LAYERS 0 1 0 1 0 0 0 0 0 "Main" 1 7 18.0 5.0 0 0 0',
+        _layer_line(0, "Floor", False),
+        _layer_line(1, "Main", True),
     ]
     for lv in range(1, num_levels + 1):
-        result.append(
-            f'LAYERS {lv} 1 0 1 0 0 0 0 0 "L{lv}-Benchwork" 0 7 18.0 5.0 0 0 0'
-        )
-    result.append("LAYERS CURRENT 0")
+        result.append(_layer_line(lv + 1, f"L{lv}-Benchwork", False))
+    result.append("LAYERS CURRENT 1")
     return result
 
 
-def _shelf_straights(
+def _shelf_draw(
     x0: float, y0: float, x1: float, y1: float,
-    layer: int, track_id: int, scale: str,
+    layer: int, track_id: int,
 ) -> tuple[list[str], int]:
-    """Emit 4 STRAIGHT lines forming a closed rectangle (x0,y0)–(x1,y1).
+    """Emit one DRAW object with 4 SEG_STRLIN segments forming a shelf rectangle.
 
-    Returns (lines, next_track_id).
+    Returns (lines, next_track_id).  One ID consumed per shelf.
     """
-    corners = [
-        (x0, y0), (x1, y0), (x1, y1), (x0, y1),
-    ]
+    color = _LAYER_COLORS[layer] if layer < len(_LAYER_COLORS) else 0
+    corners = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
     edges = [
         (corners[0], corners[1]),
         (corners[1], corners[2]),
         (corners[2], corners[3]),
         (corners[3], corners[0]),
     ]
+    lines = [f"DRAW {track_id} {layer} 0 0 0 0.000000 0.000000 0.000000 0.000000"]
+    for (ax, ay), (bx, by) in edges:
+        lines.append(
+            f"\tL3 {color} 0.000000 {ax:.6f} {ay:.6f} 0 {bx:.6f} {by:.6f} 0"
+        )
+    lines.append("END")
+    return lines, track_id + 1
+
+
+def _room_tableedges(room_w: float, room_h: float, track_id: int) -> tuple[list[str], int]:
+    """Emit 4 TABLEEDGE lines forming the room perimeter on layer 0 (Floor)."""
+    edges = [
+        (0.0, 0.0, 0.0, room_h),        # west
+        (0.0, room_h, room_w, room_h),   # north
+        (room_w, room_h, room_w, 0.0),   # east
+        (room_w, 0.0, 0.0, 0.0),         # south
+    ]
     lines: list[str] = []
     tid = track_id
-    for (ax, ay), (bx, by) in edges:
-        angle = math.degrees(math.atan2(by - ay, bx - ax))
-        lines.append(f"STRAIGHT {tid} {layer} 0 0 0 {scale} 0")
-        lines.append(f"\tE {ax:.6f} {ay:.6f} {angle + 180.0:.6f}")
-        lines.append(f"\tE {bx:.6f} {by:.6f} {angle:.6f}")
-        lines.append("END")
+    for x0, y0, x1, y1 in edges:
+        # VERSION >= 9 format: dL000pfpf — each position needs an elevation float.
+        lines.append(
+            f"TABLEEDGE {tid} 0 0 0 0 {x0:.6f} {y0:.6f} 0.000000 {x1:.6f} {y1:.6f} 0.000000"
+        )
         tid += 1
     return lines, tid
+
+
+_HARD_OBSTRUCTION_COLOR = 8421504   # gray (128,128,128) — physical hard limits
+_WALL_FOOTPRINT_COLOR  = 8421504    # same dark gray — interior walls treated equally
+
+
+def _filpoly_draw(
+    vertices: list[tuple[float, float]],
+    layer: int, color: int, track_id: int,
+) -> tuple[list[str], int]:
+    """Emit one DRAW+SEG_FILPOLY for an arbitrary polygon.  One ID consumed."""
+    lines = [
+        f"DRAW {track_id} {layer} 0 0 0 0.000000 0.000000 0.000000 0.000000",
+        f"\tF4 {color} 0.000000 {len(vertices)} 0 ",
+    ]
+    for x, y in vertices:
+        lines.append(f"\t\t{x:.6f} {y:.6f} 0")
+    lines.append("END")
+    return lines, track_id + 1
+
+
+def _obstruction_draw(
+    obs: "BenchworkObstruction", track_id: int,
+) -> tuple[list[str], int]:
+    """Emit one DRAW+FILPOLY for a rect or triangle hard obstruction on layer 0."""
+    if obs.kind == "rect":
+        x0, y0 = obs.x, obs.y
+        x1, y1 = obs.x + obs.width, obs.y + obs.height
+        vertices = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+    elif obs.kind == "triangle":
+        vertices = [(v[0], v[1]) for v in obs.vertices]
+    else:
+        return [], track_id
+    return _filpoly_draw(vertices, 0, _HARD_OBSTRUCTION_COLOR, track_id)
 
 
 def _wall_rect(
     wall: BenchworkWall, room_w_in: float, room_h_in: float,
 ) -> tuple[float, float, float, float]:
     """Return (x0, y0, x1, y1) for the shelf rectangle of a wall."""
+    if wall.side == "interior":
+        return wall.x0, wall.y0, wall.x1, wall.y1
     d = wall.depth_in
     s = wall.side
     if s == "west":
@@ -190,20 +258,30 @@ def _write_benchwork(
     bw: Benchwork,
     room_w_in: float, room_h_in: float,
     num_levels: int,
-    scale: str,
     lines: list[str],
     track_id: int,
 ) -> int:
-    """Append LAYERS header + shelf rectangles to lines; return next track_id."""
-    lines += _layers_header(num_levels)
-    lines.append("")
+    """Append floor-plan fills (layer 0) and shelf outlines (layers 2+)."""
+    # Hard obstructions as filled polygons on layer 0
+    for obs in bw.obstructions:
+        new_lines, track_id = _obstruction_draw(obs, track_id)
+        lines += new_lines
 
+    # Benchwork wall footprints as filled rectangles on layer 0 (one per wall,
+    # regardless of level — the floor area is occupied at all levels).
+    for wall in bw.walls:
+        x0, y0, x1, y1 = _wall_rect(wall, room_w_in, room_h_in)
+        verts = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+        new_lines, track_id = _filpoly_draw(verts, 0, _WALL_FOOTPRINT_COLOR, track_id)
+        lines += new_lines
+
+    # Shelf outlines on benchwork layers (2, 3, …) per level
     for lv in range(1, num_levels + 1):
         for wall in bw.walls:
             if lv not in wall.levels:
                 continue
             x0, y0, x1, y1 = _wall_rect(wall, room_w_in, room_h_in)
-            new_lines, track_id = _shelf_straights(x0, y0, x1, y1, lv, track_id, scale)
+            new_lines, track_id = _shelf_draw(x0, y0, x1, y1, lv + 1, track_id)
             lines += new_lines
 
     return track_id
@@ -235,8 +313,10 @@ def generate(config: LayoutConfig, output_path: Path) -> GenerationResult:
     lines: list[str] = []
     timestamp = datetime.date.today().isoformat()
 
+    num_levels = config.levels if config.benchwork is not None else 0
+
     lines += [
-        f"VERSION 2 5.3.0Dev",
+        f"VERSION 10 3.0.0",
         f"TITLE1 {config.name}",
         f"TITLE2 Generated {timestamp} scale={config.scale} main={config.mainline}",
         f"SCALE {config.scale}",
@@ -244,12 +324,19 @@ def generate(config: LayoutConfig, output_path: Path) -> GenerationResult:
         "",
     ]
 
+    lines += _layers_header(num_levels)
+    lines.append("")
+
     track_id = 1
+
+    room_lines, track_id = _room_tableedges(room_w_in, room_h_in, track_id)
+    lines += room_lines
+    lines.append("")
 
     if config.benchwork is not None:
         track_id = _write_benchwork(
             config.benchwork, room_w_in, room_h_in,
-            config.levels, config.scale, lines, track_id,
+            config.levels, lines, track_id,
         )
 
     for pl in config.placements:
@@ -283,7 +370,7 @@ def generate(config: LayoutConfig, output_path: Path) -> GenerationResult:
         template_layout = parse_file(template_info.xtc_path)
 
         for track in template_layout.tracks:
-            lines.append(_track_header(track.kind, track_id, track.layer, config.scale, track.extra))
+            lines.append(_track_header(track.kind, track_id, 1, config.scale, track.extra))
             for ep in track.endpoints:
                 lines.append(_endpoint_line(ep.x * sf + x0, ep.y * sf + y0, ep.angle))
             lines.append("END")

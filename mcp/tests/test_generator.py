@@ -256,20 +256,23 @@ def test_generate_output_has_tracks(simple_config, tmp_path):
     assert len(layout.tracks) >= 2
 
 
-def test_generate_track_ids_start_at_1(simple_config, tmp_path):
+def test_generate_track_ids_are_positive(simple_config, tmp_path):
+    # TABLEEDGEs (room boundary) occupy IDs 1-4; placed template tracks start at 5+.
     result = load_config(simple_config)
     out = tmp_path / "test_layout.xtc"
     gen = generate(result.config, out)
     all_ids = [tid for p in gen.placed for tid in p.track_ids]
-    assert 1 in all_ids
+    assert all(tid > 0 for tid in all_ids)
 
 
 def test_generate_track_ids_sequential(simple_config, tmp_path):
+    # Placed template track IDs must be consecutive (no gaps), though they no
+    # longer start at 1 — room TABLEEDGE objects consume the first 4 IDs.
     result = load_config(simple_config)
     out = tmp_path / "test_layout.xtc"
     gen = generate(result.config, out)
     all_ids = sorted(tid for p in gen.placed for tid in p.track_ids)
-    assert all_ids == list(range(1, len(all_ids) + 1))
+    assert all_ids == list(range(all_ids[0], all_ids[0] + len(all_ids)))
 
 
 # ---------------------------------------------------------------------------
@@ -393,58 +396,94 @@ def benchwork_result(tmp_path):
 
 
 def test_benchwork_layers_header_written(benchwork_result):
-    assert "LAYERS 0" in benchwork_result
-    assert "LAYERS 1" in benchwork_result
-    assert "LAYERS 2" in benchwork_result
-    assert "LAYERS CURRENT 0" in benchwork_result
+    assert "LAYERS 0" in benchwork_result   # Floor
+    assert "LAYERS 1" in benchwork_result   # Main
+    assert "LAYERS 2" in benchwork_result   # L1-Benchwork
+    assert "LAYERS 3" in benchwork_result   # L2-Benchwork
+    assert "LAYERS CURRENT 1" in benchwork_result
 
 def test_benchwork_layer_names_present(benchwork_result):
+    assert '"Floor"' in benchwork_result
     assert '"Main"' in benchwork_result
     assert '"L1-Benchwork"' in benchwork_result
     assert '"L2-Benchwork"' in benchwork_result
 
-def test_benchwork_no_layers_without_benchwork(tmp_path):
+def test_floor_and_main_layers_always_present(tmp_path):
+    # Floor and Main layers are emitted even when there is no benchwork.
     cfg = tmp_path / "layout.yaml"
     cfg.write_text("name: T\nscale: HO\nroom: 12x16\ngrid: []\n")
     out = tmp_path / "t.xtc"
     generate(load_config(cfg).config, out)
     content = out.read_text()
-    assert "LAYERS" not in content
+    assert "LAYERS 0" in content
+    assert '"Floor"' in content
+    assert "LAYERS 1" in content
+    assert '"Main"' in content
+    assert "LAYERS 2" not in content        # no benchwork layers
+    assert "LAYERS CURRENT 1" in content
 
-def test_benchwork_west_shelf_four_straights_on_layer1(benchwork_result):
-    # west wall is on both levels — should produce 4 STRAIGHT objects on layer 1
-    layer1_straights = [
+def test_room_tableedges_present(benchwork_result):
+    tableedges = [
         ln for ln in benchwork_result.splitlines()
-        if ln.startswith("STRAIGHT") and ln.split()[2] == "1"
+        if ln.startswith("TABLEEDGE")
     ]
-    assert len(layer1_straights) >= 4   # at least the west wall rectangle
+    assert len(tableedges) == 4
 
-def test_benchwork_level2_wall_present_on_layer2(benchwork_result):
-    # north_ur has levels:[2] — must appear on layer 2
-    layer2_straights = [
-        ln for ln in benchwork_result.splitlines()
-        if ln.startswith("STRAIGHT") and ln.split()[2] == "2"
+def test_room_tableedges_always_present(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text("name: T\nscale: HO\nroom: 12x16\ngrid: []\n")
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    tableedges = [
+        ln for ln in out.read_text().splitlines()
+        if ln.startswith("TABLEEDGE")
     ]
-    assert len(layer2_straights) >= 4   # at least north_ur rectangle
+    assert len(tableedges) == 4
 
-def test_benchwork_level2_only_wall_absent_from_layer1(benchwork_result):
-    # north_ur has levels:[2] — must NOT appear on layer 1
-    # west + south + north_ul are on both levels → 3 walls × 4 segments = 12 on layer 1
-    # north_ur on level 2 only → layer 1 has exactly 12 STRAIGHT objects
-    layer1_straights = [
+def test_floor_draws_on_layer0(benchwork_result):
+    # 2 hard obstructions + 4 wall footprints = 6 DRAW objects on layer 0
+    layer0_draws = [
         ln for ln in benchwork_result.splitlines()
-        if ln.startswith("STRAIGHT") and ln.split()[2] == "1"
+        if ln.startswith("DRAW") and ln.split()[2] == "0"
     ]
-    # 3 walls on level 1 (west, south, north_ul) × 4 segments each = 12
-    assert len(layer1_straights) == 12
+    assert len(layer0_draws) == 6
+
+def test_filpoly_segments_present(benchwork_result):
+    # Every floor DRAW emits one F4 (SEG_FILPOLY) segment — 6 total
+    filpoly = [ln for ln in benchwork_result.splitlines() if ln.strip().startswith("F4")]
+    assert len(filpoly) == 6
+
+def test_benchwork_west_shelf_draw_on_layer2(benchwork_result):
+    # west wall on both levels → at least 1 DRAW on layer 2
+    layer2_draws = [
+        ln for ln in benchwork_result.splitlines()
+        if ln.startswith("DRAW") and ln.split()[2] == "2"
+    ]
+    assert len(layer2_draws) >= 1
+
+def test_benchwork_level2_wall_present_on_layer3(benchwork_result):
+    # wall_x131 levels:[2] only → at least 1 DRAW on layer 3
+    layer3_draws = [
+        ln for ln in benchwork_result.splitlines()
+        if ln.startswith("DRAW") and ln.split()[2] == "3"
+    ]
+    assert len(layer3_draws) >= 1
+
+def test_benchwork_level1_only_walls_on_layer2(benchwork_result):
+    # west + south + north_ul on level 1 → exactly 3 DRAW objects on layer 2
+    layer2_draws = [
+        ln for ln in benchwork_result.splitlines()
+        if ln.startswith("DRAW") and ln.split()[2] == "2"
+    ]
+    assert len(layer2_draws) == 3
 
 def test_benchwork_level2_total_walls(benchwork_result):
-    # All 4 walls on level 2 (west, south, north_ul, north_ur) × 4 segments = 16
-    layer2_straights = [
+    # west + south + north_ul + wall_x131 on level 2 → exactly 4 DRAW objects on layer 3
+    layer3_draws = [
         ln for ln in benchwork_result.splitlines()
-        if ln.startswith("STRAIGHT") and ln.split()[2] == "2"
+        if ln.startswith("DRAW") and ln.split()[2] == "3"
     ]
-    assert len(layer2_straights) == 16
+    assert len(layer3_draws) == 4
 
 def test_benchwork_generates_cleanly(tmp_path):
     result = load_config(BENCHWORK_CONFIG)

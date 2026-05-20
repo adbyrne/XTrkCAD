@@ -303,13 +303,13 @@ def test_benchwork_west_wall_fields():
     assert west.side == "west"
     assert west.from_in == pytest.approx(0.0)
     assert west.to_in == pytest.approx(296.0)
-    assert west.depth_in == pytest.approx(24.0)
+    assert west.depth_in == pytest.approx(26.0)
 
 def test_benchwork_wall_default_depth_applied():
-    # north_ul has no depth in the fixture — should inherit default_depth: 24
+    # north_ul has no depth in the fixture — should inherit default_depth: 26
     result = load_config(BENCHWORK_CONFIG)
     north_ul = next(w for w in result.config.benchwork.walls if w.label == "north_ul")
-    assert north_ul.depth_in == pytest.approx(24.0)
+    assert north_ul.depth_in == pytest.approx(26.0)
 
 def test_benchwork_wall_levels_default_all():
     # west wall has no levels key — should get all levels [1, 2]
@@ -317,11 +317,16 @@ def test_benchwork_wall_levels_default_all():
     west = next(w for w in result.config.benchwork.walls if w.label == "west")
     assert west.levels == [1, 2]
 
-def test_benchwork_wall_levels_explicit():
-    # north_ur has levels: [2]
+def test_benchwork_interior_wall_levels_explicit():
+    # wall_x131 is an interior wall on levels: [2] only
     result = load_config(BENCHWORK_CONFIG)
-    north_ur = next(w for w in result.config.benchwork.walls if w.label == "north_ur")
-    assert north_ur.levels == [2]
+    wall = next(w for w in result.config.benchwork.walls if w.label == "wall_x131")
+    assert wall.side == "interior"
+    assert wall.levels == [2]
+    assert wall.x0 == pytest.approx(131.0)
+    assert wall.x1 == pytest.approx(163.0)   # 131 + 32
+    assert wall.y0 == pytest.approx(0.0)
+    assert wall.y1 == pytest.approx(296.0)
 
 def test_benchwork_south_wall_side():
     result = load_config(BENCHWORK_CONFIG)
@@ -331,7 +336,7 @@ def test_benchwork_south_wall_side():
 
 def test_benchwork_default_depth_on_dataclass():
     result = load_config(BENCHWORK_CONFIG)
-    assert result.config.benchwork.default_depth_in == pytest.approx(24.0)
+    assert result.config.benchwork.default_depth_in == pytest.approx(26.0)
 
 
 # ---------------------------------------------------------------------------

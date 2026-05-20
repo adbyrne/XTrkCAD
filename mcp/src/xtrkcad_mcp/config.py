@@ -20,7 +20,7 @@ VALID_ELEMENT_TYPES = frozenset({
     "yard", "staging", "mainline", "station", "helix", "siding", "module",
 })
 
-VALID_SIDES = frozenset({"west", "south", "east", "north"})
+VALID_SIDES = frozenset({"west", "south", "east", "north", "interior"})
 
 _CELL_RE = re.compile(r'^([A-Z]+)(\d+)$')
 _RANGE_RE = re.compile(r'^([A-Z]+)(\d+)-([A-Z]+)(\d+)$')
@@ -90,6 +90,11 @@ class BenchworkWall:
     to_in: float
     depth_in: float
     levels: list[int]
+    # For side='interior': explicit bounding box in layout inches
+    x0: float = 0.0
+    y0: float = 0.0
+    x1: float = 0.0
+    y1: float = 0.0
 
 
 @dataclass
@@ -184,6 +189,35 @@ def _parse_benchwork(
                 f"valid: {', '.join(sorted(VALID_SIDES))}"
             )
             continue
+
+        # Interior walls use explicit bounding-box coords instead of
+        # from/to/depth relative to a room edge.
+        if side == "interior":
+            try:
+                x = float(entry.get("x", 0))
+                y = float(entry.get("y", 0))
+                width = float(entry.get("width", 0))
+                height = float(entry.get("height", 0))
+            except (TypeError, ValueError) as exc:
+                warnings.append(f"skipping wall {label!r}: {exc}")
+                continue
+            raw_levels = entry.get("levels")
+            if raw_levels is None:
+                levels = list(all_levels)
+            else:
+                try:
+                    levels = [int(lv) for lv in raw_levels]
+                except (TypeError, ValueError) as exc:
+                    warnings.append(f"wall {label!r}: invalid levels {raw_levels!r}: {exc}")
+                    levels = list(all_levels)
+            walls.append(BenchworkWall(
+                label=label, side=side,
+                from_in=0.0, to_in=0.0, depth_in=0.0,
+                levels=levels,
+                x0=x, y0=y, x1=x + width, y1=y + height,
+            ))
+            continue
+
         try:
             from_in = float(entry.get("from", 0))
             to_in = float(entry.get("to", 0))

@@ -6,32 +6,33 @@ levels: 2
 level_separation: 18in
 
 benchwork:
-  default_depth: 24
+  default_depth: 26   # lower-level typical; upper level is 12in (per-level depth TBD)
 
   walls:
     - label: west
       side: west
       from: 0
       to: 296
-      depth: 24
+      # no depth — inherits default_depth: 26
 
     - label: south
       side: south
       from: 0
       to: 214
-      depth: 24
+      # no depth — inherits default_depth: 26
 
     - label: north_ul
       side: north
       from: 0
       to: 125
-      # no depth — should inherit default_depth: 24
+      # no depth — inherits default_depth: 26
 
-    - label: north_ur
-      side: north
-      from: 131
-      to: 209
-      depth: 24
+    - label: wall_x131
+      side: interior
+      x: 131            # interior wall separating main room from UR section
+      y: 0
+      width: 32         # 32 inches east (X=131 to X=163)
+      height: 296       # full room height
       levels: [2]       # upper level only
 
   obstructions:
