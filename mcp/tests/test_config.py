@@ -25,7 +25,7 @@ from xtrkcad_mcp.config import (
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 FULL_CONFIG = FIXTURES_DIR / "test_layout_config.yaml"
 BENCHWORK_CONFIG = FIXTURES_DIR / "benchwork_config.yaml"
-FLOOR_PLAN_CONFIG = FIXTURES_DIR / "test_floor_plan_config.yaml"
+FLOOR_PLAN_CONFIG = FIXTURES_DIR / "hillside_division.yaml"
 
 
 # ---------------------------------------------------------------------------

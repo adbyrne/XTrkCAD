@@ -1,6 +1,6 @@
 # Hillside Division — Generic Tutorial Layout Config
 # Demonstrates floor_plan_file: loading.
-# Floor plan geometry is in test_floor_plan.yaml (same directory).
+# Floor plan geometry is in hillside_floor_plan.yaml (same directory).
 #
 # This file is the companion to the user guide: each key maps to a
 # documented concept so readers can follow along step by step.
@@ -8,7 +8,7 @@
 name: Hillside Division
 scale: HO
 
-floor_plan_file: test_floor_plan.yaml
+floor_plan_file: hillside_floor_plan.yaml
 
 mainline: single
 curve_radius: 22in

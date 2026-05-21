@@ -841,7 +841,7 @@ def _build_summary(config: LayoutConfig) -> str:
             )
         if fp.restricted:
             restr_strs = [
-                f"{r.label} {r.width/12:.1f}×{r.depth/12:.1f}ft"
+                f"{r.label} {'polygon' if r.vertices else f'{r.width/12:.1f}×{r.depth/12:.1f}ft'}"
                 + (f" [{r.reason}]" if r.reason else "")
                 for r in fp.restricted
             ]

@@ -21,7 +21,7 @@ from xtrkcad_mcp.templates import load_library
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 FULL_CONFIG = FIXTURES_DIR / "test_layout_config.yaml"
 BENCHWORK_CONFIG = FIXTURES_DIR / "benchwork_config.yaml"
-FLOOR_PLAN_CONFIG = FIXTURES_DIR / "test_floor_plan_config.yaml"
+FLOOR_PLAN_CONFIG = FIXTURES_DIR / "hillside_division.yaml"
 
 
 # ---------------------------------------------------------------------------
@@ -512,12 +512,12 @@ def _layer0_draws(content: str) -> list[str]:
 
 
 def test_floor_plan_layer0_draw_count(floor_plan_result):
-    # 1 restricted + 1 partition; door clearances are not rendered
-    assert len(_layer0_draws(floor_plan_result)) == 2
+    # 1 restricted + 1 partition + 1 inward door clearance
+    assert len(_layer0_draws(floor_plan_result)) == 3
 
 def test_floor_plan_filpoly_count(floor_plan_result):
     filpolys = [ln for ln in floor_plan_result.splitlines() if ln.strip().startswith("F4")]
-    assert len(filpolys) == 2
+    assert len(filpolys) == 3
 
 def test_floor_plan_restricted_vertex(floor_plan_result):
     # furnace_corner: x=96, y=0 → first vertex
@@ -526,6 +526,31 @@ def test_floor_plan_restricted_vertex(floor_plan_result):
 def test_floor_plan_partition_vertex(floor_plan_result):
     # alcove_wall: x0=48, y0=156, vertical → SW corner of polygon
     assert "48.000000 156.000000 0" in floor_plan_result
+
+def test_floor_plan_door_clearance_vertex(floor_plan_result):
+    # east door inward: wall_x=144, clearance=36 → x0=108, y0=36
+    assert "108.000000 36.000000 0" in floor_plan_result
+
+def test_floor_plan_door_clearance_light_color(floor_plan_result):
+    # door clearance uses RESTRICTION_COLOR (12632256), not PARTITION_COLOR
+    assert "F4 12632256" in floor_plan_result
+
+def test_floor_plan_swing_none_no_clearance(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text(
+        "name: T\nscale: HO\n"
+        "floor_plan:\n"
+        "  rooms:\n"
+        "    - name: main\n"
+        "      x: 0in\n      y: 0in\n      width: 144in\n      depth: 192in\n"
+        "  doors:\n"
+        "    - room: main\n      wall: east\n      from: 0in\n"
+        "      width: 36in\n      swing: none\n      clearance: 36in\n"
+        "grid: []\n"
+    )
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    assert len(_layer0_draws(out.read_text())) == 0
 
 def test_floor_plan_benchwork_walls_still_present(floor_plan_result):
     # west + south shelf outlines on layer 2

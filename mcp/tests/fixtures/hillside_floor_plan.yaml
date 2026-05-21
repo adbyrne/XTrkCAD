@@ -1,6 +1,6 @@
 # Hillside Division — Generic Tutorial Floor Plan
 # Simple 12×16 ft (144×192 in) single-room layout.
-# Used by test_floor_plan_config.yaml and the user-guide walkthrough.
+# Used by hillside_division.yaml and the user-guide walkthrough.
 #
 # Coordinate system: origin (0,0) at SW corner.
 # X increases east, Y increases north.  All dimensions in model inches.
