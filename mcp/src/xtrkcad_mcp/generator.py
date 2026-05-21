@@ -7,7 +7,10 @@ from pathlib import Path
 
 import math
 
-from xtrkcad_mcp.config import Benchwork, BenchworkWall, GridPlacement, LayoutConfig
+from xtrkcad_mcp.config import (
+    Benchwork, BenchworkWall, FloorDoor, FloorPartition, FloorPlan,
+    FloorRestricted, FloorRoom, GridPlacement, LayoutConfig,
+)
 from xtrkcad_mcp.models import SCALE_RATIOS
 from xtrkcad_mcp.parser import parse_file
 from xtrkcad_mcp.templates import TemplateInfo, TemplateLibrary, load_library
@@ -279,6 +282,112 @@ def _write_benchwork(
 
 
 # ---------------------------------------------------------------------------
+# Floor plan rendering helpers
+# ---------------------------------------------------------------------------
+
+def _floor_plan_restricted_draw(
+    restricted: FloorRestricted, track_id: int,
+) -> tuple[list[str], int]:
+    """Emit filled gray polygon for a restricted zone on layer 0."""
+    x0, y0 = restricted.x, restricted.y
+    x1, y1 = restricted.x + restricted.width, restricted.y + restricted.depth
+    vertices = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+    return _filpoly_draw(vertices, 0, _HARD_OBSTRUCTION_COLOR, track_id)
+
+
+def _floor_plan_partition_draw(
+    partition: FloorPartition, track_id: int,
+) -> tuple[list[str], int]:
+    """Emit filled gray polygon for an interior partition on layer 0.
+
+    Vertical partitions (x0 == x1) extend east by thickness.
+    Horizontal partitions (y0 == y1) extend north by thickness.
+    """
+    t = partition.thickness
+    if abs(partition.y1 - partition.y0) >= abs(partition.x1 - partition.x0):
+        # Vertical — thickness extends east
+        vertices = [
+            (partition.x0,     partition.y0),
+            (partition.x0 + t, partition.y0),
+            (partition.x1 + t, partition.y1),
+            (partition.x1,     partition.y1),
+        ]
+    else:
+        # Horizontal — thickness extends north
+        vertices = [
+            (partition.x0, partition.y0),
+            (partition.x1, partition.y0),
+            (partition.x1, partition.y1 + t),
+            (partition.x0, partition.y0 + t),
+        ]
+    return _filpoly_draw(vertices, 0, _HARD_OBSTRUCTION_COLOR, track_id)
+
+
+def _floor_plan_door_clearance_draw(
+    door: FloorDoor,
+    room: FloorRoom,
+    track_id: int,
+) -> tuple[list[str], int]:
+    """Emit filled gray polygon for door swing clearance on layer 0.
+
+    Only inward clearance is rendered; outward swings extend outside the room
+    and are skipped.
+    """
+    if door.swing in ("none", "outward"):
+        return [], track_id
+
+    c = door.clearance_in
+    if door.wall in ("east", "west"):
+        abs_y0 = room.y + door.from_in
+        abs_y1 = room.y + door.from_in + door.width_in
+        if door.wall == "east":
+            wall_x = room.x + room.width
+            x0, x1 = wall_x - c, wall_x
+        else:
+            wall_x = room.x
+            x0, x1 = wall_x, wall_x + c
+        vertices = [(x0, abs_y0), (x1, abs_y0), (x1, abs_y1), (x0, abs_y1)]
+    else:  # north / south
+        abs_x0 = room.x + door.from_in
+        abs_x1 = room.x + door.from_in + door.width_in
+        if door.wall == "north":
+            wall_y = room.y + room.depth
+            y0, y1 = wall_y - c, wall_y
+        else:
+            wall_y = room.y
+            y0, y1 = wall_y, wall_y + c
+        vertices = [(abs_x0, y0), (abs_x1, y0), (abs_x1, y1), (abs_x0, y1)]
+
+    return _filpoly_draw(vertices, 0, _HARD_OBSTRUCTION_COLOR, track_id)
+
+
+def _write_floor_plan(
+    fp: FloorPlan,
+    lines: list[str],
+    track_id: int,
+) -> int:
+    """Append floor plan features as layer 0 fills: restricted zones, partitions, door clearances."""
+    rooms_by_name = {r.name: r for r in fp.rooms}
+
+    for restricted in fp.restricted:
+        new_lines, track_id = _floor_plan_restricted_draw(restricted, track_id)
+        lines += new_lines
+
+    for partition in fp.partitions:
+        new_lines, track_id = _floor_plan_partition_draw(partition, track_id)
+        lines += new_lines
+
+    for door in fp.doors:
+        room = rooms_by_name.get(door.room)
+        if room is None:
+            continue
+        new_lines, track_id = _floor_plan_door_clearance_draw(door, room, track_id)
+        lines += new_lines
+
+    return track_id
+
+
+# ---------------------------------------------------------------------------
 # Core generator
 # ---------------------------------------------------------------------------
 
@@ -323,6 +432,9 @@ def generate(config: LayoutConfig, output_path: Path) -> GenerationResult:
     room_lines, track_id = _room_tableedges(room_w_in, room_h_in, track_id)
     lines += room_lines
     lines.append("")
+
+    if config.floor_plan is not None:
+        track_id = _write_floor_plan(config.floor_plan, lines, track_id)
 
     if config.benchwork is not None:
         track_id = _write_benchwork(
