@@ -9,10 +9,6 @@ levels: 2
 level_separation: 18in
 level_break: E
 
-obstructions:
-  - A1=door
-  - D3-D4=window
-
 grid:
   - A3-C5=yard=single-ended, 3 tracks, 60ft min
   - F6-F8=staging=double-ended, 4 tracks, 80ft min

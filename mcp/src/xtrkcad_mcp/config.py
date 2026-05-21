@@ -168,7 +168,6 @@ VALID_ELEMENT_TYPES = frozenset({
     "yard", "staging", "mainline", "station", "helix", "siding", "module",
 })
 
-VALID_SIDES = frozenset({"west", "south", "east", "north", "interior"})
 
 _CELL_RE = re.compile(r'^([A-Z]+)(\d+)$')
 _RANGE_RE = re.compile(r'^([A-Z]+)(\d+)-([A-Z]+)(\d+)$')
@@ -222,6 +221,7 @@ class GridPlacement:
     element_type: str
     params: str
     raw: str = ""
+    level: int = 1  # layout level this element lives on (1, 2, …)
 
     @property
     def cell_range(self) -> str:
@@ -231,36 +231,11 @@ class GridPlacement:
 
 
 @dataclass
-class BenchworkWall:
-    label: str
-    side: str
-    from_in: float
-    to_in: float
-    depth_in: float
-    levels: list[int]
-    # For side='interior': explicit bounding box in layout inches
-    x0: float = 0.0
-    y0: float = 0.0
-    x1: float = 0.0
-    y1: float = 0.0
-
-
-@dataclass
-class BenchworkObstruction:
-    label: str
-    kind: str
-    x: float = 0.0
-    y: float = 0.0
-    width: float = 0.0
-    height: float = 0.0
-    vertices: list = field(default_factory=list)
-
-
-@dataclass
 class Benchwork:
-    default_depth_in: float
-    walls: list[BenchworkWall]
-    obstructions: list[BenchworkObstruction]
+    """A physical benchwork section — free-floating polygon at a layout level."""
+    label: str
+    level: int                                    # 1, 2, 3… → XTrkCAD layer 2N
+    vertices: list = field(default_factory=list)  # [(x, y)…] model inches, always set
 
 
 @dataclass
@@ -337,9 +312,9 @@ class LayoutConfig:
     level_break_row: str = ""
     grid_size_ft: float = 0.0
 
-    obstructions: list[str] = field(default_factory=list)
     placements: list[GridPlacement] = field(default_factory=list)
-    benchwork: "Benchwork | None" = None
+    benchwork_sections: list[Benchwork] = field(default_factory=list)
+    benchwork_file: str = ""   # path to standalone benchwork YAML (relative to config)
     floor_plan: "FloorPlan | None" = None
     floor_plan_file: str = ""  # path to standalone floor plan YAML (relative to config)
 
@@ -366,124 +341,173 @@ def _parse_grid_entry(s: str) -> GridPlacement:
             f"unknown element type {element_type!r}; "
             f"valid: {', '.join(sorted(VALID_ELEMENT_TYPES))}"
         )
+    # Optional @N level tag on the range: "A1-B2@2" → level 2
+    level = 1
+    if "@" in cell_part:
+        cell_part, level_str = cell_part.split("@", 1)
+        try:
+            level = int(level_str)
+        except ValueError:
+            pass  # bad tag → default level 1
     col_s, row_s, col_e, row_e = _parse_cell_or_range(cell_part)
-    return GridPlacement(col_s, row_s, col_e, row_e, element_type, params, raw=s)
+    return GridPlacement(col_s, row_s, col_e, row_e, element_type, params, raw=s, level=level)
 
 
-def _parse_benchwork(
-    raw_bw: dict,
-    total_levels: int,
+def _rect_vertices(
+    x: float, y: float, width: float, length: float,
+) -> list[tuple[float, float]]:
+    return [(x, y), (x + width, y), (x + width, y + length), (x, y + length)]
+
+
+def _rotated_rect_vertices(
+    cx: float, cy: float, width: float, length: float, rotation_deg: float,
+) -> list[tuple[float, float]]:
+    angle = math.radians(rotation_deg)
+    hw, hl = width / 2.0, length / 2.0
+    corners = [(-hw, -hl), (hw, -hl), (hw, hl), (-hw, hl)]
+    return [
+        (
+            cx + dx * math.cos(angle) - dy * math.sin(angle),
+            cy + dx * math.sin(angle) + dy * math.cos(angle),
+        )
+        for dx, dy in corners
+    ]
+
+
+def _arc_vertices(
+    cx: float, cy: float, radius: float, width: float,
+    start_angle_deg: float, sweep_angle_deg: float,
+) -> list[tuple[float, float]]:
+    """Approximate a curved arc shelf as a closed polygon.
+
+    Generates points every 2° along the arc (minimum 4 steps).
+    Outer ring at radius+width/2, inner ring at radius-width/2, closed at ends.
+    """
+    n = max(4, int(abs(sweep_angle_deg) / 2.0))
+    r_outer = radius + width / 2.0
+    r_inner = radius - width / 2.0
+    start = math.radians(start_angle_deg)
+    sweep = math.radians(sweep_angle_deg)
+    outer = [
+        (cx + r_outer * math.cos(start + sweep * i / n),
+         cy + r_outer * math.sin(start + sweep * i / n))
+        for i in range(n + 1)
+    ]
+    inner = [
+        (cx + r_inner * math.cos(start + sweep * i / n),
+         cy + r_inner * math.sin(start + sweep * i / n))
+        for i in range(n + 1)
+    ]
+    return outer + list(reversed(inner))
+
+
+def _spline_offset_polygon(
+    points: list[tuple[float, float]], width: float,
+) -> list[tuple[float, float]]:
+    """Generate a closed offset polygon from a polyline centerline + width.
+
+    At each vertex, averages the normals of adjacent segments to produce a
+    smooth miter join.  Ends are capped flat perpendicular to the terminal
+    segment.
+    """
+    if len(points) < 2:
+        return []
+    half_w = width / 2.0
+
+    def seg_normal(a: tuple, b: tuple) -> tuple[float, float]:
+        dx, dy = b[0] - a[0], b[1] - a[1]
+        mag = math.hypot(dx, dy)
+        if mag < 1e-9:
+            return 0.0, 1.0
+        return -dy / mag, dx / mag
+
+    normals: list[tuple[float, float]] = []
+    for i in range(len(points)):
+        if i == 0:
+            nx, ny = seg_normal(points[0], points[1])
+        elif i == len(points) - 1:
+            nx, ny = seg_normal(points[-2], points[-1])
+        else:
+            n1 = seg_normal(points[i - 1], points[i])
+            n2 = seg_normal(points[i], points[i + 1])
+            nx, ny = (n1[0] + n2[0]) / 2.0, (n1[1] + n2[1]) / 2.0
+            mag = math.hypot(nx, ny)
+            if mag > 1e-9:
+                nx, ny = nx / mag, ny / mag
+        normals.append((nx, ny))
+
+    left = [(p[0] + half_w * n[0], p[1] + half_w * n[1])
+            for p, n in zip(points, normals)]
+    right = [(p[0] - half_w * n[0], p[1] - half_w * n[1])
+             for p, n in zip(points, normals)]
+    return left + list(reversed(right))
+
+
+def _parse_benchwork_sections(
+    raw_list: list,
     warnings: list[str],
-) -> "Benchwork | None":
-    """Parse a benchwork: mapping into a Benchwork dataclass."""
-    if not isinstance(raw_bw, dict):
-        warnings.append("benchwork must be a YAML mapping; skipping")
-        return None
+) -> list[Benchwork]:
+    """Parse a list of benchwork section entries into Benchwork dataclasses.
 
-    default_depth = float(raw_bw.get("default_depth", 24))
-    all_levels = list(range(1, total_levels + 1))
+    Each entry must be a dict with at least label, level, and shape fields.
+    Supported shapes:
+      rect        — x/y/width/length (axis-aligned rectangle)
+      rotated_rect — cx/cy/width/length/rotation (rotated rectangle)
+      polygon     — explicit vertices list
+      arc         — cx/cy/radius/width/start_angle/sweep_angle (curved shelf)
+      spline      — points polyline + width (narrow track-following strip)
+    """
+    if not isinstance(raw_list, list):
+        warnings.append("benchwork must be a YAML list of section entries; skipping")
+        return []
 
-    walls: list[BenchworkWall] = []
-    for entry in raw_bw.get("walls", []):
+    sections: list[Benchwork] = []
+    for entry in raw_list:
         if not isinstance(entry, dict):
-            warnings.append(f"skipping non-dict wall entry: {entry!r}")
+            warnings.append(f"skipping non-dict benchwork entry: {entry!r}")
             continue
         label = str(entry.get("label", "")).strip()
-        side = str(entry.get("side", "")).strip().lower()
-        if side not in VALID_SIDES:
-            warnings.append(
-                f"skipping wall {label!r}: invalid side {side!r}; "
-                f"valid: {', '.join(sorted(VALID_SIDES))}"
-            )
-            continue
-
-        # Interior walls use explicit bounding-box coords instead of
-        # from/to/depth relative to a room edge.
-        if side == "interior":
-            try:
-                x = float(entry.get("x", 0))
-                y = float(entry.get("y", 0))
-                width = float(entry.get("width", 0))
-                height = float(entry.get("height", 0))
-            except (TypeError, ValueError) as exc:
-                warnings.append(f"skipping wall {label!r}: {exc}")
-                continue
-            raw_levels = entry.get("levels")
-            if raw_levels is None:
-                levels = list(all_levels)
-            else:
-                try:
-                    levels = [int(lv) for lv in raw_levels]
-                except (TypeError, ValueError) as exc:
-                    warnings.append(f"wall {label!r}: invalid levels {raw_levels!r}: {exc}")
-                    levels = list(all_levels)
-            walls.append(BenchworkWall(
-                label=label, side=side,
-                from_in=0.0, to_in=0.0, depth_in=0.0,
-                levels=levels,
-                x0=x, y0=y, x1=x + width, y1=y + height,
-            ))
-            continue
+        level = int(entry.get("level", 1))
+        shape = str(entry.get("shape", "rect")).strip().lower()
 
         try:
-            from_in = float(entry.get("from", 0))
-            to_in = float(entry.get("to", 0))
-            depth_in = float(entry.get("depth", default_depth))
-        except (TypeError, ValueError) as exc:
-            warnings.append(f"skipping wall {label!r}: {exc}")
-            continue
-        raw_levels = entry.get("levels")
-        if raw_levels is None:
-            levels = list(all_levels)
-        else:
-            try:
-                levels = [int(lv) for lv in raw_levels]
-            except (TypeError, ValueError) as exc:
-                warnings.append(f"wall {label!r}: invalid levels {raw_levels!r}: {exc}")
-                levels = list(all_levels)
-        walls.append(BenchworkWall(
-            label=label, side=side,
-            from_in=from_in, to_in=to_in, depth_in=depth_in,
-            levels=levels,
-        ))
-
-    obstructions: list[BenchworkObstruction] = []
-    for entry in raw_bw.get("obstructions", []):
-        if not isinstance(entry, dict):
-            warnings.append(f"skipping non-dict obstruction entry: {entry!r}")
-            continue
-        label = str(entry.get("label", "")).strip()
-        kind = str(entry.get("type", "")).strip().lower()
-        if kind == "rect":
-            try:
-                obs = BenchworkObstruction(
-                    label=label, kind=kind,
-                    x=float(entry.get("x", 0)),
-                    y=float(entry.get("y", 0)),
-                    width=float(entry.get("width", 0)),
-                    height=float(entry.get("height", 0)),
+            if shape == "arc":
+                cx = _parse_length_in(str(entry["cx"]))
+                cy = _parse_length_in(str(entry["cy"]))
+                radius = _parse_length_in(str(entry["radius"]))
+                width = _parse_length_in(str(entry["width"]))
+                start_angle = float(entry.get("start_angle", 0))
+                sweep_angle = float(entry.get("sweep_angle", 90))
+                verts: list[tuple[float, float]] = _arc_vertices(
+                    cx, cy, radius, width, start_angle, sweep_angle,
                 )
-            except (TypeError, ValueError) as exc:
-                warnings.append(f"skipping obstruction {label!r}: {exc}")
-                continue
-        elif kind == "triangle":
-            raw_verts = entry.get("vertices", [])
-            try:
-                verts = [[float(v[0]), float(v[1])] for v in raw_verts]
-            except (TypeError, ValueError, IndexError) as exc:
-                warnings.append(f"skipping obstruction {label!r}: {exc}")
-                continue
-            obs = BenchworkObstruction(label=label, kind=kind, vertices=verts)
-        else:
-            warnings.append(f"skipping obstruction {label!r}: unknown type {kind!r}")
+            elif shape == "spline":
+                raw_pts = entry["points"]
+                pts = [(float(v[0]), float(v[1])) for v in raw_pts]
+                width = _parse_length_in(str(entry["width"]))
+                verts = _spline_offset_polygon(pts, width)
+            elif shape == "polygon" or "vertices" in entry:
+                raw_verts = entry["vertices"]
+                verts = [(float(v[0]), float(v[1])) for v in raw_verts]
+            elif shape == "rotated_rect" or "cx" in entry or "rotation" in entry:
+                cx = _parse_length_in(str(entry["cx"]))
+                cy = _parse_length_in(str(entry["cy"]))
+                width = _parse_length_in(str(entry["width"]))
+                length = _parse_length_in(str(entry["length"]))
+                rotation = float(entry.get("rotation", 0))
+                verts = _rotated_rect_vertices(cx, cy, width, length, rotation)
+            else:
+                x = _parse_length_in(str(entry.get("x", "0in")))
+                y = _parse_length_in(str(entry.get("y", "0in")))
+                width = _parse_length_in(str(entry["width"]))
+                length = _parse_length_in(str(entry["length"]))
+                verts = _rect_vertices(x, y, width, length)
+        except (KeyError, ValueError, TypeError, IndexError) as exc:
+            warnings.append(f"skipping benchwork {label!r}: {exc}")
             continue
-        obstructions.append(obs)
 
-    return Benchwork(
-        default_depth_in=default_depth,
-        walls=walls,
-        obstructions=obstructions,
-    )
+        sections.append(Benchwork(label=label, level=level, vertices=verts))
+    return sections
 
 
 _VALID_DOOR_WALLS = frozenset({"north", "south", "east", "west"})
@@ -727,9 +751,27 @@ def load_config(path: str | Path) -> ConfigResult:
         except ValueError:
             warnings.append(f"invalid grid_size {raw['grid_size']!r}")
 
-    # --- Benchwork ---
-    if "benchwork" in raw:
-        config.benchwork = _parse_benchwork(raw["benchwork"], config.levels, warnings)
+    # --- Benchwork (file reference takes precedence over inline) ---
+    if "benchwork_file" in raw:
+        bw_path = Path(str(raw["benchwork_file"]).strip()).expanduser()
+        if not bw_path.is_absolute():
+            bw_path = p.parent / bw_path
+        config.benchwork_file = str(bw_path)
+        if "benchwork" in raw:
+            warnings.append(
+                "both benchwork_file and benchwork are set; benchwork_file takes precedence"
+            )
+        try:
+            raw_bw_list = yaml.safe_load(bw_path.read_text()) or []
+        except FileNotFoundError:
+            warnings.append(f"benchwork_file not found: {bw_path}")
+            raw_bw_list = []
+        except yaml.YAMLError as _e:
+            warnings.append(f"benchwork_file YAML parse error: {_e}")
+            raw_bw_list = []
+        config.benchwork_sections = _parse_benchwork_sections(raw_bw_list, warnings)
+    elif "benchwork" in raw:
+        config.benchwork_sections = _parse_benchwork_sections(raw["benchwork"], warnings)
 
     # --- Floor plan (file reference takes precedence over inline) ---
     if "floor_plan_file" in raw:
@@ -763,9 +805,6 @@ def load_config(path: str | Path) -> ConfigResult:
         if config.room_depth_ft <= 0:
             config.room_depth_ft = config.floor_plan.total_depth_in / 12.0
 
-    # --- Obstructions ---
-    for obs in raw.get("obstructions", []):
-        config.obstructions.append(str(obs).strip())
 
     # --- Grid placements ---
     for entry in raw.get("grid", []):
@@ -846,8 +885,13 @@ def _build_summary(config: LayoutConfig) -> str:
                 for r in fp.restricted
             ]
             lines.append(f"  Restricted ({len(fp.restricted)}): {', '.join(restr_strs)}")
-    if config.obstructions:
-        lines.append(f"Obstructions: {', '.join(config.obstructions)}")
+    if config.benchwork_sections:
+        by_level: dict[int, list[str]] = {}
+        for bw in config.benchwork_sections:
+            by_level.setdefault(bw.level, []).append(bw.label)
+        for lv in sorted(by_level):
+            labels = ", ".join(by_level[lv])
+            lines.append(f"  Benchwork L{lv} ({len(by_level[lv])} sections): {labels}")
     if config.placements:
         lines.append(f"Elements ({len(config.placements)}):")
         for pl in config.placements:

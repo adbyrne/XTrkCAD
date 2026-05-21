@@ -15,18 +15,4 @@ curve_radius: 22in
 switch_size: "#6"
 levels: 1
 
-benchwork:
-  default_depth: 24
-  walls:
-    - label: west
-      side: west
-      from: 0
-      to: 192
-      depth: 24
-    - label: south
-      side: south
-      from: 0
-      to: 144
-      depth: 24
-
 grid: []

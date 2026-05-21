@@ -20,7 +20,6 @@ from xtrkcad_mcp.templates import load_library
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 FULL_CONFIG = FIXTURES_DIR / "test_layout_config.yaml"
-BENCHWORK_CONFIG = FIXTURES_DIR / "benchwork_config.yaml"
 FLOOR_PLAN_CONFIG = FIXTURES_DIR / "hillside_division.yaml"
 
 
@@ -384,33 +383,10 @@ def test_generate_unknown_element_type_skipped(tmp_path):
 
 
 # ---------------------------------------------------------------------------
-# generate — benchwork
+# generate — layer scheme
 # ---------------------------------------------------------------------------
 
-@pytest.fixture
-def benchwork_result(tmp_path):
-    """Generate a layout from the benchwork fixture config."""
-    result = load_config(BENCHWORK_CONFIG)
-    out = tmp_path / "benchwork.xtc"
-    generate(result.config, out)
-    return out.read_text()
-
-
-def test_benchwork_layers_header_written(benchwork_result):
-    assert "LAYERS 0" in benchwork_result   # Floor
-    assert "LAYERS 1" in benchwork_result   # Main
-    assert "LAYERS 2" in benchwork_result   # L1-Benchwork
-    assert "LAYERS 3" in benchwork_result   # L2-Benchwork
-    assert "LAYERS CURRENT 1" in benchwork_result
-
-def test_benchwork_layer_names_present(benchwork_result):
-    assert '"Floor"' in benchwork_result
-    assert '"Main"' in benchwork_result
-    assert '"L1-Benchwork"' in benchwork_result
-    assert '"L2-Benchwork"' in benchwork_result
-
-def test_floor_and_main_layers_always_present(tmp_path):
-    # Floor and Main layers are emitted even when there is no benchwork.
+def test_layer_scheme_floor_always_present(tmp_path):
     cfg = tmp_path / "layout.yaml"
     cfg.write_text("name: T\nscale: HO\nroom: 12x16\ngrid: []\n")
     out = tmp_path / "t.xtc"
@@ -418,17 +394,57 @@ def test_floor_and_main_layers_always_present(tmp_path):
     content = out.read_text()
     assert "LAYERS 0" in content
     assert '"Floor"' in content
-    assert "LAYERS 1" in content
-    assert '"Main"' in content
-    assert "LAYERS 2" not in content        # no benchwork layers
     assert "LAYERS CURRENT 1" in content
 
-def test_room_tableedges_present(benchwork_result):
-    tableedges = [
-        ln for ln in benchwork_result.splitlines()
-        if ln.startswith("TABLEEDGE")
-    ]
-    assert len(tableedges) == 4
+
+def test_layer_scheme_level1_always_emitted(tmp_path):
+    # L1-Track (layer 1) and L1-Benchwork (layer 2) always emitted for a 1-level config
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text("name: T\nscale: HO\nroom: 12x16\ngrid: []\n")
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    content = out.read_text()
+    assert "LAYERS 1" in content
+    assert '"L1-Track"' in content
+    assert "LAYERS 2" in content
+    assert '"L1-Benchwork"' in content
+
+
+def test_layer_scheme_two_levels(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text("name: T\nscale: HO\nroom: 12x16\nlevels: 2\ngrid: []\n")
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    content = out.read_text()
+    assert '"L1-Track"' in content
+    assert '"L1-Benchwork"' in content
+    assert '"L2-Track"' in content
+    assert '"L2-Benchwork"' in content
+    assert "LAYERS 3" in content
+    assert "LAYERS 4" in content
+
+
+def test_layer_scheme_track_colors(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text("name: T\nscale: HO\nroom: 12x16\nlevels: 2\ngrid: []\n")
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    content = out.read_text()
+    # L1-Track layer line should contain black (0), L2-Track dark-red (11534336)
+    assert "LAYERS 1 1 0 1 0 " in content
+    assert "LAYERS 3 1 0 1 11534336 " in content
+
+
+def test_layer_scheme_benchwork_colors(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text("name: T\nscale: HO\nroom: 12x16\nlevels: 2\ngrid: []\n")
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    content = out.read_text()
+    # L1-Benchwork = green (32768), L2-Benchwork = blue (255)
+    assert "LAYERS 2 1 0 1 32768 " in content
+    assert "LAYERS 4 1 0 1 255 " in content
+
 
 def test_room_tableedges_always_present(tmp_path):
     cfg = tmp_path / "layout.yaml"
@@ -441,57 +457,135 @@ def test_room_tableedges_always_present(tmp_path):
     ]
     assert len(tableedges) == 4
 
-def test_floor_draws_on_layer0(benchwork_result):
-    # 2 hard obstructions only — wall footprints are not on the floor layer
-    layer0_draws = [
-        ln for ln in benchwork_result.splitlines()
-        if ln.startswith("DRAW") and ln.split()[2] == "0"
-    ]
-    assert len(layer0_draws) == 2
 
-def test_filpoly_segments_present(benchwork_result):
-    # One F4 (SEG_FILPOLY) per hard obstruction — 2 total
-    filpoly = [ln for ln in benchwork_result.splitlines() if ln.strip().startswith("F4")]
-    assert len(filpoly) == 2
+# ---------------------------------------------------------------------------
+# generate — benchwork sections
+# ---------------------------------------------------------------------------
 
-def test_benchwork_west_shelf_draw_on_layer2(benchwork_result):
-    # west wall on both levels → at least 1 DRAW on layer 2
-    layer2_draws = [
-        ln for ln in benchwork_result.splitlines()
-        if ln.startswith("DRAW") and ln.split()[2] == "2"
-    ]
-    assert len(layer2_draws) >= 1
+def _bw_xtc(tmp_path, sections_yaml: str, levels: int = 1) -> str:
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text(
+        f"name: T\nscale: HO\nroom: 12x16\nlevels: {levels}\n"
+        f"benchwork:\n{sections_yaml}\ngrid: []\n"
+    )
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    return out.read_text()
 
-def test_benchwork_level2_wall_present_on_layer3(benchwork_result):
-    # wall_x131 levels:[2] only → at least 1 DRAW on layer 3
-    layer3_draws = [
-        ln for ln in benchwork_result.splitlines()
-        if ln.startswith("DRAW") and ln.split()[2] == "3"
-    ]
-    assert len(layer3_draws) >= 1
 
-def test_benchwork_level1_only_walls_on_layer2(benchwork_result):
-    # west + south + north_ul on level 1 → exactly 3 DRAW objects on layer 2
-    layer2_draws = [
-        ln for ln in benchwork_result.splitlines()
-        if ln.startswith("DRAW") and ln.split()[2] == "2"
-    ]
-    assert len(layer2_draws) == 3
+def test_benchwork_section_draws_on_benchwork_layer(tmp_path):
+    content = _bw_xtc(
+        tmp_path,
+        "  - label: west\n    level: 1\n    shape: rect\n"
+        "    x: 0in\n    y: 0in\n    width: 24in\n    length: 144in\n",
+    )
+    # L1-Benchwork = layer 2
+    layer2_draws = [ln for ln in content.splitlines()
+                    if ln.startswith("DRAW") and ln.split()[2] == "2"]
+    assert len(layer2_draws) == 1
 
-def test_benchwork_level2_total_walls(benchwork_result):
-    # west + south + north_ul + wall_x131 on level 2 → exactly 4 DRAW objects on layer 3
-    layer3_draws = [
-        ln for ln in benchwork_result.splitlines()
-        if ln.startswith("DRAW") and ln.split()[2] == "3"
-    ]
-    assert len(layer3_draws) == 4
 
-def test_benchwork_generates_cleanly(tmp_path):
-    result = load_config(BENCHWORK_CONFIG)
-    out = tmp_path / "benchwork.xtc"
-    gen = generate(result.config, out)
+def test_benchwork_section_level2_on_layer4(tmp_path):
+    content = _bw_xtc(
+        tmp_path,
+        "  - label: upper\n    level: 2\n    shape: rect\n"
+        "    x: 0in\n    y: 0in\n    width: 24in\n    length: 144in\n",
+        levels=2,
+    )
+    # L2-Benchwork = layer 4
+    layer4_draws = [ln for ln in content.splitlines()
+                    if ln.startswith("DRAW") and ln.split()[2] == "4"]
+    assert len(layer4_draws) == 1
+
+
+def test_benchwork_section_uses_benchwork_color(tmp_path):
+    content = _bw_xtc(
+        tmp_path,
+        "  - label: shelf\n    level: 1\n    shape: rect\n"
+        "    x: 0in\n    y: 0in\n    width: 24in\n    length: 144in\n",
+    )
+    # L1-Benchwork color = green (32768)
+    assert "F4 32768" in content
+
+
+def test_benchwork_section_filpoly_vertex_count(tmp_path):
+    content = _bw_xtc(
+        tmp_path,
+        "  - label: shelf\n    level: 1\n    shape: rect\n"
+        "    x: 0in\n    y: 0in\n    width: 24in\n    length: 144in\n",
+    )
+    # rect → 4 vertices
+    assert "F4 32768 0.000000 4 0" in content
+
+
+def test_benchwork_arc_section_generates(tmp_path):
+    content = _bw_xtc(
+        tmp_path,
+        "  - label: arc\n    level: 1\n    shape: arc\n"
+        "    cx: 144in\n    cy: 96in\n    radius: 48in\n    width: 24in\n"
+        "    start_angle: 0\n    sweep_angle: 90\n",
+    )
+    filpolys = [ln for ln in content.splitlines() if ln.strip().startswith("F4")]
+    assert len(filpolys) == 1
+    # 90°/2° = 45 steps → 46 points per ring → 92 total vertices
+    assert "F4 32768 0.000000 92 0" in content
+
+
+def test_benchwork_spline_section_generates(tmp_path):
+    content = _bw_xtc(
+        tmp_path,
+        "  - label: strip\n    level: 1\n    shape: spline\n    width: 6in\n"
+        "    points:\n      - [0, 48]\n      - [72, 48]\n      - [96, 72]\n",
+    )
+    filpolys = [ln for ln in content.splitlines() if ln.strip().startswith("F4")]
+    assert len(filpolys) == 1
+    # 3 points → 3+3 = 6 vertices
+    assert "F4 32768 0.000000 6 0" in content
+
+
+def test_benchwork_sections_no_layer0_draws(tmp_path):
+    content = _bw_xtc(
+        tmp_path,
+        "  - label: shelf\n    level: 1\n    shape: rect\n"
+        "    x: 0in\n    y: 0in\n    width: 24in\n    length: 144in\n",
+    )
+    layer0 = [ln for ln in content.splitlines()
+               if ln.startswith("DRAW") and ln.split()[2] == "0"]
+    assert len(layer0) == 0
+
+
+def test_benchwork_sections_generates_cleanly(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text(
+        "name: T\nscale: HO\nroom: 12x16\nlevels: 2\n"
+        "benchwork:\n"
+        "  - label: west\n    level: 1\n    shape: rect\n"
+        "    x: 0in\n    y: 0in\n    width: 24in\n    length: 144in\n"
+        "  - label: upper\n    level: 2\n    shape: rotated_rect\n"
+        "    cx: 72in\n    cy: 96in\n    width: 24in\n    length: 48in\n    rotation: 45\n"
+        "grid: []\n"
+    )
+    out = tmp_path / "t.xtc"
+    gen = generate(load_config(cfg).config, out)
     assert out.exists()
     assert gen.warnings == []
+
+
+def test_grid_level_tag_selects_track_layer(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text(
+        "name: T\nscale: HO\nroom: 12x16\nlevels: 2\n"
+        "grid:\n  - A1@2=yard=single-ended\n"
+    )
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    content = out.read_text()
+    # L2-Track = layer 3; template track headers should use layer 3
+    track_lines = [
+        ln for ln in content.splitlines()
+        if ln.startswith(("STRAIGHT", "CURVE", "JOINT")) and ln.split()[2] == "3"
+    ]
+    assert len(track_lines) >= 1
 
 
 # ---------------------------------------------------------------------------
@@ -551,12 +645,6 @@ def test_floor_plan_swing_none_no_clearance(tmp_path):
     out = tmp_path / "t.xtc"
     generate(load_config(cfg).config, out)
     assert len(_layer0_draws(out.read_text())) == 0
-
-def test_floor_plan_benchwork_walls_still_present(floor_plan_result):
-    # west + south shelf outlines on layer 2
-    layer2_draws = [ln for ln in floor_plan_result.splitlines()
-                    if ln.startswith("DRAW") and ln.split()[2] == "2"]
-    assert len(layer2_draws) == 2
 
 def test_floor_plan_no_extra_draws_without_floor_plan(tmp_path):
     cfg = tmp_path / "layout.yaml"
