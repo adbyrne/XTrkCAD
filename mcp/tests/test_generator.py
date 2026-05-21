@@ -546,3 +546,60 @@ def test_floor_plan_generates_cleanly(tmp_path):
     gen = generate(result.config, out)
     assert out.exists()
     assert gen.warnings == []
+
+def test_floor_plan_restricted_uses_light_color(floor_plan_result):
+    # Restricted zones should use RESTRICTION_COLOR (12632256 = light gray)
+    assert "F4 12632256" in floor_plan_result
+
+def test_floor_plan_partition_uses_medium_color(floor_plan_result):
+    # Partitions should use PARTITION_COLOR (8421504 = medium gray)
+    assert "F4 8421504" in floor_plan_result
+
+def test_floor_plan_polygon_restricted(tmp_path):
+    """Triangle restricted zone renders with correct vertex count."""
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text(
+        "name: T\nscale: HO\n"
+        "floor_plan:\n"
+        "  rooms:\n"
+        "    - name: main\n"
+        "      x: 0in\n      y: 0in\n      width: 144in\n      depth: 192in\n"
+        "  restricted:\n"
+        "    - label: triangle_zone\n"
+        "      vertices:\n"
+        "        - [163, 176]\n"
+        "        - [214, 176]\n"
+        "        - [214, 100]\n"
+        "      reason: access\n"
+        "grid: []\n"
+    )
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    content = out.read_text()
+    # Triangle has 3 vertices → F4 ... 3 0
+    assert "F4 12632256 0.000000 3 0" in content
+    assert "163.000000 176.000000 0" in content
+
+def test_floor_plan_partition_splits_around_door(tmp_path):
+    """Partition adjacent to a door opening splits into 2 DRAW segments."""
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text(
+        "name: T\nscale: HO\n"
+        "floor_plan:\n"
+        "  rooms:\n"
+        "    - name: left\n"
+        "      x: 0in\n      y: 0in\n      width: 48in\n      depth: 96in\n"
+        "  doors:\n"
+        "    - room: left\n      wall: east\n      from: 24in\n"
+        "      width: 32in\n      swing: none\n      clearance: 32in\n"
+        "  partitions:\n"
+        "    - label: center_wall\n"
+        "      x0: 48in\n      y0: 0in\n      x1: 48in\n      y1: 96in\n"
+        "      thickness: 6in\n"
+        "grid: []\n"
+    )
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    layer0 = _layer0_draws(out.read_text())
+    # One partition → split into 2 segments around the 32in door opening
+    assert len(layer0) == 2

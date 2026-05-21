@@ -297,13 +297,14 @@ class FloorPartition:
 
 @dataclass
 class FloorRestricted:
-    """A rectangular no-go zone within the layout space."""
+    """A no-go zone within the layout space — rectangle or arbitrary polygon."""
     label: str
-    x: float        # SW corner, model inches
+    x: float        # SW corner, model inches (ignored when vertices is set)
     y: float
-    width: float    # model inches east-west
-    depth: float    # model inches north-south
+    width: float    # model inches east-west (ignored when vertices is set)
+    depth: float    # model inches north-south (ignored when vertices is set)
     reason: str     # informational tag: HVAC, stairs, column, …
+    vertices: list = field(default_factory=list)  # [(x,y)…] for polygon shape
 
 
 @dataclass
@@ -591,18 +592,29 @@ def _parse_floor_plan(raw_fp: dict, warnings: list[str]) -> "FloorPlan | None":
             warnings.append(f"skipping non-dict restricted entry: {entry!r}")
             continue
         label = str(entry.get("label", "")).strip()
-        try:
-            x = _parse_length_in(str(entry.get("x", "0ft")))
-            y = _parse_length_in(str(entry.get("y", "0ft")))
-            width = _parse_length_in(str(entry["width"]))
-            depth = _parse_length_in(str(entry["depth"]))
-        except (KeyError, ValueError) as exc:
-            warnings.append(f"skipping restricted {label!r}: {exc}")
-            continue
         reason = str(entry.get("reason", "")).strip()
-        restricted.append(FloorRestricted(
-            label=label, x=x, y=y, width=width, depth=depth, reason=reason,
-        ))
+        raw_verts = entry.get("vertices", [])
+        if raw_verts:
+            try:
+                verts = [(float(v[0]), float(v[1])) for v in raw_verts]
+            except (TypeError, IndexError, ValueError) as exc:
+                warnings.append(f"skipping restricted {label!r}: bad vertices: {exc}")
+                continue
+            restricted.append(FloorRestricted(
+                label=label, x=0, y=0, width=0, depth=0, reason=reason, vertices=verts,
+            ))
+        else:
+            try:
+                x = _parse_length_in(str(entry.get("x", "0ft")))
+                y = _parse_length_in(str(entry.get("y", "0ft")))
+                width = _parse_length_in(str(entry["width"]))
+                depth = _parse_length_in(str(entry["depth"]))
+            except (KeyError, ValueError) as exc:
+                warnings.append(f"skipping restricted {label!r}: {exc}")
+                continue
+            restricted.append(FloorRestricted(
+                label=label, x=x, y=y, width=width, depth=depth, reason=reason,
+            ))
 
     # --- Bounding box from rooms ---
     if rooms:

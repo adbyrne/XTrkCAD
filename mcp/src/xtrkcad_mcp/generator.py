@@ -205,7 +205,8 @@ def _room_tableedges(room_w: float, room_h: float, track_id: int) -> tuple[list[
     return lines, tid
 
 
-_HARD_OBSTRUCTION_COLOR = 8421504   # gray (128,128,128) — physical hard limits
+_PARTITION_COLOR = 8421504     # medium gray (128,128,128) — walls and partitions
+_RESTRICTION_COLOR = 12632256  # light gray  (192,192,192) — access/clearance zones
 
 
 def _filpoly_draw(
@@ -235,7 +236,7 @@ def _obstruction_draw(
         vertices = [(v[0], v[1]) for v in obs.vertices]
     else:
         return [], track_id
-    return _filpoly_draw(vertices, 0, _HARD_OBSTRUCTION_COLOR, track_id)
+    return _filpoly_draw(vertices, 0, _PARTITION_COLOR, track_id)
 
 
 def _wall_rect(
@@ -288,39 +289,99 @@ def _write_benchwork(
 def _floor_plan_restricted_draw(
     restricted: FloorRestricted, track_id: int,
 ) -> tuple[list[str], int]:
-    """Emit filled gray polygon for a restricted zone on layer 0."""
-    x0, y0 = restricted.x, restricted.y
-    x1, y1 = restricted.x + restricted.width, restricted.y + restricted.depth
-    vertices = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
-    return _filpoly_draw(vertices, 0, _HARD_OBSTRUCTION_COLOR, track_id)
+    """Emit light-gray polygon for a restricted zone on layer 0."""
+    if restricted.vertices:
+        vertices = [(float(x), float(y)) for x, y in restricted.vertices]
+    else:
+        x0, y0 = restricted.x, restricted.y
+        x1, y1 = restricted.x + restricted.width, restricted.y + restricted.depth
+        vertices = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+    return _filpoly_draw(vertices, 0, _RESTRICTION_COLOR, track_id)
+
+
+def _partition_door_openings(
+    partition: FloorPartition,
+    doors: list,
+    rooms_by_name: dict,
+) -> list[tuple[float, float]]:
+    """Return sorted (start, end) gaps along the partition axis where doors cut through."""
+    is_vertical = abs(partition.y1 - partition.y0) >= abs(partition.x1 - partition.x0)
+    p_x = min(partition.x0, partition.x1)
+    p_y = min(partition.y0, partition.y1)
+    openings = []
+
+    for door in doors:
+        room = rooms_by_name.get(door.room)
+        if room is None:
+            continue
+        if is_vertical:
+            if door.wall not in ("east", "west"):
+                continue
+            wall_x = (room.x + room.width) if door.wall == "east" else room.x
+            if abs(wall_x - p_x) > partition.thickness:
+                continue
+            gap_start = room.y + door.from_in
+            gap_end = gap_start + door.width_in
+            p_start, p_end = min(partition.y0, partition.y1), max(partition.y0, partition.y1)
+        else:
+            if door.wall not in ("north", "south"):
+                continue
+            wall_y = (room.y + room.depth) if door.wall == "north" else room.y
+            if abs(wall_y - p_y) > partition.thickness:
+                continue
+            gap_start = room.x + door.from_in
+            gap_end = gap_start + door.width_in
+            p_start, p_end = min(partition.x0, partition.x1), max(partition.x0, partition.x1)
+
+        clipped = (max(gap_start, p_start), min(gap_end, p_end))
+        if clipped[0] < clipped[1]:
+            openings.append(clipped)
+
+    return sorted(openings)
 
 
 def _floor_plan_partition_draw(
-    partition: FloorPartition, track_id: int,
+    partition: FloorPartition,
+    openings: list[tuple[float, float]],
+    track_id: int,
 ) -> tuple[list[str], int]:
-    """Emit filled gray polygon for an interior partition on layer 0.
-
-    Vertical partitions (x0 == x1) extend east by thickness.
-    Horizontal partitions (y0 == y1) extend north by thickness.
-    """
+    """Emit filled medium-gray polygons for an interior partition, skipping door openings."""
     t = partition.thickness
-    if abs(partition.y1 - partition.y0) >= abs(partition.x1 - partition.x0):
-        # Vertical — thickness extends east
-        vertices = [
-            (partition.x0,     partition.y0),
-            (partition.x0 + t, partition.y0),
-            (partition.x1 + t, partition.y1),
-            (partition.x1,     partition.y1),
-        ]
+    is_vertical = abs(partition.y1 - partition.y0) >= abs(partition.x1 - partition.x0)
+    all_lines: list[str] = []
+
+    if is_vertical:
+        p_x = min(partition.x0, partition.x1)
+        p_start = min(partition.y0, partition.y1)
+        p_end = max(partition.y0, partition.y1)
+        cursor = p_start
+        for gap_start, gap_end in sorted(openings):
+            if cursor < gap_start:
+                verts = [(p_x, cursor), (p_x + t, cursor), (p_x + t, gap_start), (p_x, gap_start)]
+                new_lines, track_id = _filpoly_draw(verts, 0, _PARTITION_COLOR, track_id)
+                all_lines += new_lines
+            cursor = max(cursor, gap_end)
+        if cursor < p_end:
+            verts = [(p_x, cursor), (p_x + t, cursor), (p_x + t, p_end), (p_x, p_end)]
+            new_lines, track_id = _filpoly_draw(verts, 0, _PARTITION_COLOR, track_id)
+            all_lines += new_lines
     else:
-        # Horizontal — thickness extends north
-        vertices = [
-            (partition.x0, partition.y0),
-            (partition.x1, partition.y0),
-            (partition.x1, partition.y1 + t),
-            (partition.x0, partition.y0 + t),
-        ]
-    return _filpoly_draw(vertices, 0, _HARD_OBSTRUCTION_COLOR, track_id)
+        p_y = min(partition.y0, partition.y1)
+        p_start = min(partition.x0, partition.x1)
+        p_end = max(partition.x0, partition.x1)
+        cursor = p_start
+        for gap_start, gap_end in sorted(openings):
+            if cursor < gap_start:
+                verts = [(cursor, p_y), (gap_start, p_y), (gap_start, p_y + t), (cursor, p_y + t)]
+                new_lines, track_id = _filpoly_draw(verts, 0, _PARTITION_COLOR, track_id)
+                all_lines += new_lines
+            cursor = max(cursor, gap_end)
+        if cursor < p_end:
+            verts = [(cursor, p_y), (p_end, p_y), (p_end, p_y + t), (cursor, p_y + t)]
+            new_lines, track_id = _filpoly_draw(verts, 0, _PARTITION_COLOR, track_id)
+            all_lines += new_lines
+
+    return all_lines, track_id
 
 
 def _write_floor_plan(
@@ -329,12 +390,15 @@ def _write_floor_plan(
     track_id: int,
 ) -> int:
     """Append floor plan features as layer 0 fills: restricted zones and partitions."""
+    rooms_by_name = {r.name: r for r in fp.rooms}
+
     for restricted in fp.restricted:
         new_lines, track_id = _floor_plan_restricted_draw(restricted, track_id)
         lines += new_lines
 
     for partition in fp.partitions:
-        new_lines, track_id = _floor_plan_partition_draw(partition, track_id)
+        openings = _partition_door_openings(partition, fp.doors, rooms_by_name)
+        new_lines, track_id = _floor_plan_partition_draw(partition, openings, track_id)
         lines += new_lines
 
     return track_id
