@@ -8,8 +8,8 @@ from pathlib import Path
 import math
 
 from xtrkcad_mcp.config import (
-    Benchwork, BenchworkWall, FloorDoor, FloorPartition, FloorPlan,
-    FloorRestricted, FloorRoom, GridPlacement, LayoutConfig,
+    Benchwork, BenchworkWall, FloorPartition, FloorPlan,
+    FloorRestricted, GridPlacement, LayoutConfig,
 )
 from xtrkcad_mcp.models import SCALE_RATIOS
 from xtrkcad_mcp.parser import parse_file
@@ -323,65 +323,18 @@ def _floor_plan_partition_draw(
     return _filpoly_draw(vertices, 0, _HARD_OBSTRUCTION_COLOR, track_id)
 
 
-def _floor_plan_door_clearance_draw(
-    door: FloorDoor,
-    room: FloorRoom,
-    track_id: int,
-) -> tuple[list[str], int]:
-    """Emit filled gray polygon for door swing clearance on layer 0.
-
-    Only inward clearance is rendered; outward swings extend outside the room
-    and are skipped.
-    """
-    if door.swing in ("none", "outward"):
-        return [], track_id
-
-    c = door.clearance_in
-    if door.wall in ("east", "west"):
-        abs_y0 = room.y + door.from_in
-        abs_y1 = room.y + door.from_in + door.width_in
-        if door.wall == "east":
-            wall_x = room.x + room.width
-            x0, x1 = wall_x - c, wall_x
-        else:
-            wall_x = room.x
-            x0, x1 = wall_x, wall_x + c
-        vertices = [(x0, abs_y0), (x1, abs_y0), (x1, abs_y1), (x0, abs_y1)]
-    else:  # north / south
-        abs_x0 = room.x + door.from_in
-        abs_x1 = room.x + door.from_in + door.width_in
-        if door.wall == "north":
-            wall_y = room.y + room.depth
-            y0, y1 = wall_y - c, wall_y
-        else:
-            wall_y = room.y
-            y0, y1 = wall_y, wall_y + c
-        vertices = [(abs_x0, y0), (abs_x1, y0), (abs_x1, y1), (abs_x0, y1)]
-
-    return _filpoly_draw(vertices, 0, _HARD_OBSTRUCTION_COLOR, track_id)
-
-
 def _write_floor_plan(
     fp: FloorPlan,
     lines: list[str],
     track_id: int,
 ) -> int:
-    """Append floor plan features as layer 0 fills: restricted zones, partitions, door clearances."""
-    rooms_by_name = {r.name: r for r in fp.rooms}
-
+    """Append floor plan features as layer 0 fills: restricted zones and partitions."""
     for restricted in fp.restricted:
         new_lines, track_id = _floor_plan_restricted_draw(restricted, track_id)
         lines += new_lines
 
     for partition in fp.partitions:
         new_lines, track_id = _floor_plan_partition_draw(partition, track_id)
-        lines += new_lines
-
-    for door in fp.doors:
-        room = rooms_by_name.get(door.room)
-        if room is None:
-            continue
-        new_lines, track_id = _floor_plan_door_clearance_draw(door, room, track_id)
         lines += new_lines
 
     return track_id
