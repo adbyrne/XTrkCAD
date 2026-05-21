@@ -1,4 +1,152 @@
-"""Layout config parser — YAML config file → validated LayoutConfig."""
+"""Layout config parser — YAML config file → validated LayoutConfig.
+
+YAML CONFIG FORMAT
+==================
+
+Required keys
+-------------
+  name: "My Layout"
+  scale: HO           # Z N TT HO S O G I  Nn3 HOn3 On3 Sn3
+  room: 12x16         # WxD in feet — OR omit when floor_plan is present (see below)
+
+Optional keys
+-------------
+  mainline: single          # single (default) | dual
+  curve_radius: 22in        # model inches; 'ft' suffix also accepted
+  switch_size: "#6"         # default "#6"
+  levels: 1                 # multi-deck count
+  level_separation: 18in    # vertical spacing between decks
+  level_break: E            # grid row where upper deck begins
+  grid_size: 3ft            # grid cell size; derived from curve_radius if omitted
+
+floor_plan section
+------------------
+Describes the physical room in detail.  When present, the bounding box of all
+rooms is used as the room size (overriding a bare 'room:' key if both appear).
+All lengths accept a unit suffix: 16ft, 192in, 16 (bare numbers = inches).
+Use the 'ft' suffix for room-scale dimensions to avoid confusion.
+
+Two ways to supply the floor plan:
+
+  floor_plan_file: path/to/room.yaml   # standalone file — share one room
+                                       # across many layout configs
+  floor_plan:                          # inline — embed directly in the config
+
+Both are parsed identically.  floor_plan_file takes precedence if both appear.
+The standalone file contains just the floor_plan body (no wrapping key needed).
+
+  floor_plan:
+    wall_thickness: 4in     # default interior wall thickness (studs ~3.5in finished ~4-5in)
+
+    rooms:                  # one or more named rectangular sub-areas
+      - name: main
+        x: 0ft              # SW corner offset within the total space
+        y: 0ft
+        width: 16ft
+        depth: 10ft
+      - name: alcove
+        x: 0ft
+        y: 10ft
+        width: 10ft
+        depth: 4ft
+
+    doors:                  # wall openings with optional swing clearance
+      - room: main          # FloorRoom.name
+        wall: south         # north | south | east | west
+        from: 3ft           # offset from left/bottom end of that wall
+        width: 32in         # opening width
+        swing: inward       # inward | outward | both | none (default inward)
+        clearance: 32in     # swing arc depth; defaults to door width when omitted
+
+    partitions:             # partial walls, knee walls, freestanding columns
+      - label: half wall
+        x0: 8ft             # start point
+        y0: 4ft
+        x1: 11ft            # end point (axis-aligned or diagonal)
+        y1: 4ft
+        thickness: 4in      # defaults to floor_plan wall_thickness
+
+    restricted:             # rectangular no-go zones (HVAC, stairs, panels, columns)
+      - label: HVAC unit
+        x: 12ft             # SW corner of the rectangle
+        y: 0ft
+        width: 3ft
+        depth: 2ft
+        reason: HVAC        # informational tag (optional)
+
+benchwork section
+-----------------
+  benchwork:
+    default_depth: 24       # model inches
+    walls:
+      - label: west
+        side: west          # north | south | east | west | interior
+        from: 0             # model-inch offset along wall start
+        to: 192
+        depth: 24           # model inches into room; inherits default_depth if omitted
+        levels: [1, 2]      # which deck levels; all levels if omitted
+    obstructions:
+      - label: column
+        type: rect          # rect | triangle
+        x: 60
+        y: 48
+        width: 12
+        height: 12
+
+grid section
+------------
+Track element placements expressed as grid-cell ranges:
+
+  grid:
+    - A3-C5=yard=single-ended, 3 tracks, 60ft min
+    - F6-F8=staging=double-ended, 4 tracks
+    - B1-B8=mainline
+    - E4=station=passing siding, 100ft
+    - G2-G4=helix=22in radius, 2% grade, 18in rise
+
+  Valid element types: yard  staging  mainline  station  helix  siding  module
+
+SUGGESTED PROMPTS
+=================
+
+Starting from a blank layout:
+
+  "I need a layout YAML config. My room is [W×D] feet. Scale is [HO/N/O/…].
+   My theme is [era / prototype / operational goal]. What do you need to know?"
+
+Defining a multi-room or irregular space:
+
+  "My layout space has multiple connected areas. The main room is [W×D] feet.
+   There is also a [alcove / utility area / closet] that is [W×D] feet, located
+   off the [north/south/east/west] wall starting [N] feet from the [SW/NW/SE/NE]
+   corner. The wall between them is [~4 inches] thick.
+   Help me write the floor_plan section of my layout YAML config."
+
+Adding doors and swing clearances:
+
+  "There are [N] door(s) in the layout room:
+     Door 1: [wall] wall of [room name], [width]-inch opening, [N] feet from
+             the [corner], swinging [inward / outward].
+     Door 2: …
+   Add these to the floor_plan doors list."
+
+Adding restricted areas:
+
+  "Some areas of the room cannot be used for the layout:
+     - [Label]: roughly [W×D] feet, located [description of position].
+   Add these as restricted entries in the floor_plan."
+
+Reviewing and validating the floor plan:
+
+  "Load my config and summarise the floor plan: total bounding box, usable area
+   per room, door clearance zones, and restricted areas. Flag any overlaps or
+   anything that might conflict with track placement."
+
+Iterating on an existing plan:
+
+  "Here is my current floor_plan YAML section: [paste]. I need to add a partial
+   wall (knee wall) along the [description]. Update the partitions list."
+"""
 
 import math
 import re
@@ -116,6 +264,62 @@ class Benchwork:
 
 
 @dataclass
+class FloorRoom:
+    """A named rectangular sub-area within the total layout space."""
+    name: str
+    x: float        # model inches from SW corner of total space
+    y: float
+    width: float    # model inches east-west
+    depth: float    # model inches north-south
+
+
+@dataclass
+class FloorDoor:
+    """A door opening in a room wall, with optional swing clearance zone."""
+    room: str           # FloorRoom.name this door belongs to
+    wall: str           # north / south / east / west
+    from_in: float      # offset from the left/bottom end of that wall, model inches
+    width_in: float     # opening width, model inches
+    swing: str          # inward / outward / both / none
+    clearance_in: float  # swing arc depth, model inches (defaults to width_in)
+
+
+@dataclass
+class FloorPartition:
+    """A partial wall or column not aligned to a room perimeter edge."""
+    label: str
+    x0: float       # start point, model inches
+    y0: float
+    x1: float       # end point, model inches
+    y1: float
+    thickness: float  # wall thickness, model inches
+
+
+@dataclass
+class FloorRestricted:
+    """A rectangular no-go zone within the layout space."""
+    label: str
+    x: float        # SW corner, model inches
+    y: float
+    width: float    # model inches east-west
+    depth: float    # model inches north-south
+    reason: str     # informational tag: HVAC, stairs, column, …
+
+
+@dataclass
+class FloorPlan:
+    """Complete physical floor plan for the layout room."""
+    wall_thickness_in: float                  # default interior wall thickness
+    rooms: list[FloorRoom]
+    doors: list[FloorDoor]
+    partitions: list[FloorPartition]
+    restricted: list[FloorRestricted]
+    # Bounding box derived from the union of all rooms (set during parsing)
+    total_width_in: float = 0.0
+    total_depth_in: float = 0.0
+
+
+@dataclass
 class LayoutConfig:
     # Required
     name: str = ""
@@ -135,6 +339,8 @@ class LayoutConfig:
     obstructions: list[str] = field(default_factory=list)
     placements: list[GridPlacement] = field(default_factory=list)
     benchwork: "Benchwork | None" = None
+    floor_plan: "FloorPlan | None" = None
+    floor_plan_file: str = ""  # path to standalone floor plan YAML (relative to config)
 
 
 @dataclass
@@ -279,6 +485,143 @@ def _parse_benchwork(
     )
 
 
+_VALID_DOOR_WALLS = frozenset({"north", "south", "east", "west"})
+_VALID_SWINGS = frozenset({"inward", "outward", "both", "none"})
+
+
+def _parse_floor_plan(raw_fp: dict, warnings: list[str]) -> "FloorPlan | None":
+    """Parse a floor_plan: mapping into a FloorPlan dataclass."""
+    if not isinstance(raw_fp, dict):
+        warnings.append("floor_plan must be a YAML mapping; skipping")
+        return None
+
+    default_thickness = _parse_length_in(str(raw_fp.get("wall_thickness", "4in")))
+
+    # --- Rooms ---
+    rooms: list[FloorRoom] = []
+    for entry in raw_fp.get("rooms", []):
+        if not isinstance(entry, dict):
+            warnings.append(f"skipping non-dict room entry: {entry!r}")
+            continue
+        name = str(entry.get("name", "")).strip()
+        if not name:
+            warnings.append("skipping room with no name")
+            continue
+        try:
+            x = _parse_length_in(str(entry.get("x", "0ft")))
+            y = _parse_length_in(str(entry.get("y", "0ft")))
+            width = _parse_length_in(str(entry["width"]))
+            depth = _parse_length_in(str(entry["depth"]))
+        except (KeyError, ValueError) as exc:
+            warnings.append(f"skipping room {name!r}: {exc}")
+            continue
+        if width <= 0 or depth <= 0:
+            warnings.append(f"skipping room {name!r}: width and depth must be > 0")
+            continue
+        rooms.append(FloorRoom(name=name, x=x, y=y, width=width, depth=depth))
+
+    # --- Doors ---
+    doors: list[FloorDoor] = []
+    room_names = {r.name for r in rooms}
+    for entry in raw_fp.get("doors", []):
+        if not isinstance(entry, dict):
+            warnings.append(f"skipping non-dict door entry: {entry!r}")
+            continue
+        room = str(entry.get("room", "")).strip()
+        wall = str(entry.get("wall", "")).strip().lower()
+        if room not in room_names:
+            warnings.append(
+                f"skipping door: room {room!r} not found in rooms list"
+            )
+            continue
+        if wall not in _VALID_DOOR_WALLS:
+            warnings.append(
+                f"skipping door in {room!r}: invalid wall {wall!r}; "
+                f"valid: {', '.join(sorted(_VALID_DOOR_WALLS))}"
+            )
+            continue
+        try:
+            from_in = _parse_length_in(str(entry.get("from", "0ft")))
+            width_in = _parse_length_in(str(entry["width"]))
+        except (KeyError, ValueError) as exc:
+            warnings.append(f"skipping door in {room!r}/{wall}: {exc}")
+            continue
+        swing = str(entry.get("swing", "inward")).strip().lower()
+        if swing not in _VALID_SWINGS:
+            warnings.append(
+                f"door in {room!r}/{wall}: unknown swing {swing!r}; using 'inward'"
+            )
+            swing = "inward"
+        try:
+            clearance_in = _parse_length_in(str(entry["clearance"]))
+        except (KeyError, ValueError):
+            clearance_in = width_in
+        doors.append(FloorDoor(
+            room=room, wall=wall,
+            from_in=from_in, width_in=width_in,
+            swing=swing, clearance_in=clearance_in,
+        ))
+
+    # --- Partitions ---
+    partitions: list[FloorPartition] = []
+    for entry in raw_fp.get("partitions", []):
+        if not isinstance(entry, dict):
+            warnings.append(f"skipping non-dict partition entry: {entry!r}")
+            continue
+        label = str(entry.get("label", "")).strip()
+        try:
+            x0 = _parse_length_in(str(entry.get("x0", "0ft")))
+            y0 = _parse_length_in(str(entry.get("y0", "0ft")))
+            x1 = _parse_length_in(str(entry.get("x1", "0ft")))
+            y1 = _parse_length_in(str(entry.get("y1", "0ft")))
+            thickness = _parse_length_in(
+                str(entry.get("thickness", f"{default_thickness}in"))
+            )
+        except ValueError as exc:
+            warnings.append(f"skipping partition {label!r}: {exc}")
+            continue
+        partitions.append(FloorPartition(
+            label=label, x0=x0, y0=y0, x1=x1, y1=y1, thickness=thickness,
+        ))
+
+    # --- Restricted areas ---
+    restricted: list[FloorRestricted] = []
+    for entry in raw_fp.get("restricted", []):
+        if not isinstance(entry, dict):
+            warnings.append(f"skipping non-dict restricted entry: {entry!r}")
+            continue
+        label = str(entry.get("label", "")).strip()
+        try:
+            x = _parse_length_in(str(entry.get("x", "0ft")))
+            y = _parse_length_in(str(entry.get("y", "0ft")))
+            width = _parse_length_in(str(entry["width"]))
+            depth = _parse_length_in(str(entry["depth"]))
+        except (KeyError, ValueError) as exc:
+            warnings.append(f"skipping restricted {label!r}: {exc}")
+            continue
+        reason = str(entry.get("reason", "")).strip()
+        restricted.append(FloorRestricted(
+            label=label, x=x, y=y, width=width, depth=depth, reason=reason,
+        ))
+
+    # --- Bounding box from rooms ---
+    if rooms:
+        max_x = max(r.x + r.width for r in rooms)
+        max_y = max(r.y + r.depth for r in rooms)
+    else:
+        max_x = max_y = 0.0
+
+    return FloorPlan(
+        wall_thickness_in=default_thickness,
+        rooms=rooms,
+        doors=doors,
+        partitions=partitions,
+        restricted=restricted,
+        total_width_in=max_x,
+        total_depth_in=max_y,
+    )
+
+
 def load_config(path: str | Path) -> ConfigResult:
     """Parse a YAML layout config file. Always returns a ConfigResult."""
     p = Path(path).expanduser()
@@ -376,6 +719,38 @@ def load_config(path: str | Path) -> ConfigResult:
     if "benchwork" in raw:
         config.benchwork = _parse_benchwork(raw["benchwork"], config.levels, warnings)
 
+    # --- Floor plan (file reference takes precedence over inline) ---
+    if "floor_plan_file" in raw:
+        fp_path = Path(str(raw["floor_plan_file"]).strip()).expanduser()
+        if not fp_path.is_absolute():
+            fp_path = p.parent / fp_path
+        config.floor_plan_file = str(fp_path)
+        if "floor_plan" in raw:
+            warnings.append(
+                "both floor_plan_file and floor_plan are set; "
+                "floor_plan_file takes precedence"
+            )
+        try:
+            with open(fp_path) as _f:
+                fp_raw = yaml.safe_load(_f) or {}
+        except FileNotFoundError:
+            warnings.append(f"floor_plan_file not found: {fp_path}")
+            fp_raw = None
+        except yaml.YAMLError as _e:
+            warnings.append(f"floor_plan_file YAML parse error: {_e}")
+            fp_raw = None
+        if isinstance(fp_raw, dict):
+            config.floor_plan = _parse_floor_plan(fp_raw, warnings)
+    elif "floor_plan" in raw:
+        config.floor_plan = _parse_floor_plan(raw["floor_plan"], warnings)
+
+    if config.floor_plan and config.floor_plan.total_width_in > 0:
+        # Derive room dimensions from the bounding box when not set by 'room:'
+        if config.room_width_ft <= 0:
+            config.room_width_ft = config.floor_plan.total_width_in / 12.0
+        if config.room_depth_ft <= 0:
+            config.room_depth_ft = config.floor_plan.total_depth_in / 12.0
+
     # --- Obstructions ---
     for obs in raw.get("obstructions", []):
         config.obstructions.append(str(obs).strip())
@@ -409,8 +784,14 @@ def _required_missing(config: LayoutConfig) -> list[tuple[str, str]]:
         missing.append(("name", "Layout name?"))
     if not config.scale:
         missing.append(("scale", "Scale? (HO, N, O, S, Z, G, ...)"))
-    if config.room_width_ft <= 0 or config.room_depth_ft <= 0:
-        missing.append(("room", "Room size in feet? (e.g. 12x16)"))
+    has_room_dims = config.room_width_ft > 0 and config.room_depth_ft > 0
+    has_floor_plan = (
+        config.floor_plan is not None
+        and config.floor_plan.rooms
+        and config.floor_plan.total_width_in > 0
+    )
+    if not has_room_dims and not has_floor_plan:
+        missing.append(("room", "Room size in feet? (e.g. 12x16) or add a floor_plan section"))
     return missing
 
 
@@ -423,6 +804,36 @@ def _build_summary(config: LayoutConfig) -> str:
         f"Radius:  {config.curve_radius_in:.1f} in  |  Switch: {config.switch_size}"
         f"  |  Grid cell: {config.grid_size_ft:.0f} ft",
     ]
+    if config.floor_plan:
+        fp = config.floor_plan
+        lines.append(
+            f"Floor plan: {len(fp.rooms)} room(s), "
+            f"bounding box {fp.total_width_in/12:.1f}×{fp.total_depth_in/12:.1f} ft"
+            + (f", wall thickness {fp.wall_thickness_in:.1f} in" if fp.wall_thickness_in else "")
+        )
+        for r in fp.rooms:
+            area = (r.width / 12) * (r.depth / 12)
+            lines.append(
+                f"  Room '{r.name}': {r.width/12:.1f}×{r.depth/12:.1f} ft "
+                f"({area:.0f} sq ft) at ({r.x/12:.1f}′, {r.y/12:.1f}′)"
+            )
+        if fp.doors:
+            door_strs = [
+                f"{d.room}/{d.wall} {d.width_in:.0f}in ({d.swing})"
+                for d in fp.doors
+            ]
+            lines.append(f"  Doors ({len(fp.doors)}): {', '.join(door_strs)}")
+        if fp.partitions:
+            lines.append(
+                f"  Partitions: {', '.join(p.label for p in fp.partitions)}"
+            )
+        if fp.restricted:
+            restr_strs = [
+                f"{r.label} {r.width/12:.1f}×{r.depth/12:.1f}ft"
+                + (f" [{r.reason}]" if r.reason else "")
+                for r in fp.restricted
+            ]
+            lines.append(f"  Restricted ({len(fp.restricted)}): {', '.join(restr_strs)}")
     if config.obstructions:
         lines.append(f"Obstructions: {', '.join(config.obstructions)}")
     if config.placements:
