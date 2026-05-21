@@ -1,0 +1,41 @@
+# Hillside Division — Generic Tutorial Floor Plan
+# Simple 12×16 ft (144×192 in) single-room layout.
+# Used by test_floor_plan_config.yaml and the user-guide walkthrough.
+#
+# Coordinate system: origin (0,0) at SW corner.
+# X increases east, Y increases north.  All dimensions in model inches.
+# Bounding box: 144×192 in (12×16 ft).
+
+rooms:
+  - name: main
+    x: 0in
+    y: 0in
+    width: 144in   # 12 ft east-west
+    depth: 192in   # 16 ft north-south
+
+doors:
+  # 36" entry door in the east wall, offset 3 ft from the south end
+  - room: main
+    wall: east
+    from: 36in
+    width: 36in
+    swing: inward
+    clearance: 36in
+
+partitions:
+  # Short stub wall in the NW corner separating a utility alcove
+  - label: alcove_wall
+    x0: 48in
+    y0: 156in
+    x1: 48in
+    y1: 192in
+    thickness: 4in
+
+restricted:
+  # Furnace/HVAC unit occupies the SE corner — no benchwork here
+  - label: furnace_corner
+    x: 96in
+    y: 0in
+    width: 48in
+    depth: 36in
+    reason: HVAC unit

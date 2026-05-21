@@ -8,6 +8,11 @@ from xtrkcad_mcp.config import (
     Benchwork,
     BenchworkObstruction,
     BenchworkWall,
+    FloorDoor,
+    FloorPartition,
+    FloorPlan,
+    FloorRestricted,
+    FloorRoom,
     GridPlacement,
     _default_grid_cell_ft,
     _parse_cell_or_range,
@@ -20,6 +25,7 @@ from xtrkcad_mcp.config import (
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 FULL_CONFIG = FIXTURES_DIR / "test_layout_config.yaml"
 BENCHWORK_CONFIG = FIXTURES_DIR / "benchwork_config.yaml"
+FLOOR_PLAN_CONFIG = FIXTURES_DIR / "test_floor_plan_config.yaml"
 
 
 # ---------------------------------------------------------------------------
@@ -382,3 +388,95 @@ def test_benchwork_no_warnings_for_valid_config():
 def test_benchwork_config_is_ready():
     result = load_config(BENCHWORK_CONFIG)
     assert result.ready is True
+
+
+# ---------------------------------------------------------------------------
+# FloorPlan / floor_plan_file (Hillside Division generic tutorial fixture)
+# ---------------------------------------------------------------------------
+
+def test_floor_plan_loads():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    assert result.config.floor_plan is not None
+
+def test_floor_plan_no_warnings():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    assert result.warnings == []
+
+def test_floor_plan_config_ready():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    assert result.ready is True
+
+def test_floor_plan_derives_room_width():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    assert result.config.room_width_ft == pytest.approx(12.0)
+
+def test_floor_plan_derives_room_depth():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    assert result.config.room_depth_ft == pytest.approx(16.0)
+
+def test_floor_plan_bounding_box():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    fp = result.config.floor_plan
+    assert fp.total_width_in == pytest.approx(144.0)
+    assert fp.total_depth_in == pytest.approx(192.0)
+
+def test_floor_plan_room_count():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    assert len(result.config.floor_plan.rooms) == 1
+
+def test_floor_plan_room_fields():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    room = result.config.floor_plan.rooms[0]
+    assert room.name == "main"
+    assert room.x == pytest.approx(0.0)
+    assert room.y == pytest.approx(0.0)
+    assert room.width == pytest.approx(144.0)
+    assert room.depth == pytest.approx(192.0)
+
+def test_floor_plan_door_count():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    assert len(result.config.floor_plan.doors) == 1
+
+def test_floor_plan_door_fields():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    door = result.config.floor_plan.doors[0]
+    assert door.room == "main"
+    assert door.wall == "east"
+    assert door.from_in == pytest.approx(36.0)
+    assert door.width_in == pytest.approx(36.0)
+    assert door.swing == "inward"
+    assert door.clearance_in == pytest.approx(36.0)
+
+def test_floor_plan_partition_count():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    assert len(result.config.floor_plan.partitions) == 1
+
+def test_floor_plan_partition_fields():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    p = result.config.floor_plan.partitions[0]
+    assert p.label == "alcove_wall"
+    assert p.x0 == pytest.approx(48.0)
+    assert p.y0 == pytest.approx(156.0)
+    assert p.x1 == pytest.approx(48.0)
+    assert p.y1 == pytest.approx(192.0)
+    assert p.thickness == pytest.approx(4.0)
+
+def test_floor_plan_restricted_count():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    assert len(result.config.floor_plan.restricted) == 1
+
+def test_floor_plan_restricted_fields():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    r = result.config.floor_plan.restricted[0]
+    assert r.label == "furnace_corner"
+    assert r.x == pytest.approx(96.0)
+    assert r.y == pytest.approx(0.0)
+    assert r.width == pytest.approx(48.0)
+    assert r.depth == pytest.approx(36.0)
+    assert r.reason == "HVAC unit"
+
+def test_floor_plan_file_missing_warns(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text("name: T\nscale: HO\nfloor_plan_file: no_such_file.yaml\n")
+    result = load_config(cfg)
+    assert any("floor_plan_file not found" in w for w in result.warnings)

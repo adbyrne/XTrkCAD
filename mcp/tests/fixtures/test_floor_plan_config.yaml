@@ -1,0 +1,32 @@
+# Hillside Division — Generic Tutorial Layout Config
+# Demonstrates floor_plan_file: loading.
+# Floor plan geometry is in test_floor_plan.yaml (same directory).
+#
+# This file is the companion to the user guide: each key maps to a
+# documented concept so readers can follow along step by step.
+
+name: Hillside Division
+scale: HO
+
+floor_plan_file: test_floor_plan.yaml
+
+mainline: single
+curve_radius: 22in
+switch_size: "#6"
+levels: 1
+
+benchwork:
+  default_depth: 24
+  walls:
+    - label: west
+      side: west
+      from: 0
+      to: 192
+      depth: 24
+    - label: south
+      side: south
+      from: 0
+      to: 144
+      depth: 24
+
+grid: []
