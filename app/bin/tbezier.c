@@ -516,13 +516,13 @@ static void DescribeBezier( track_p trk, char * str, CSIZE_T len )
 		DoDescribe( _("Bezier Line"), trk, bezDesc, UpdateBezier );
 		if (bezDesc[LT].control0!=NULL) {
 			wListClear( (wList_p)bezDesc[LT].control0 );
-			wListAddValue( (wList_p)bezDesc[LT].control0, _("Solid"), NULL, I2VP(0));
-			wListAddValue( (wList_p)bezDesc[LT].control0, _("Dash"), NULL, I2VP(1));
-			wListAddValue( (wList_p)bezDesc[LT].control0, _("Dot"), NULL, I2VP(2));
-			wListAddValue( (wList_p)bezDesc[LT].control0, _("DashDot"), NULL, I2VP(3));
-			wListAddValue( (wList_p)bezDesc[LT].control0, _("DashDotDot"), NULL, I2VP(4));
-			wListAddValue( (wList_p)bezDesc[LT].control0, _("CenterDot"), NULL, I2VP(5));
-			wListAddValue( (wList_p)bezDesc[LT].control0, _("PhantomDot"), NULL, I2VP(6));
+			wComboBoxAddValue( (wList_p)bezDesc[LT].control0, _("Solid"), I2VP(0));
+			wComboBoxAddValue( (wList_p)bezDesc[LT].control0, _("Dash"), I2VP(1));
+			wComboBoxAddValue( (wList_p)bezDesc[LT].control0, _("Dot"), I2VP(2));
+			wComboBoxAddValue( (wList_p)bezDesc[LT].control0, _("DashDot"), I2VP(3));
+			wComboBoxAddValue( (wList_p)bezDesc[LT].control0, _("DashDotDot"), I2VP(4));
+			wComboBoxAddValue( (wList_p)bezDesc[LT].control0, _("CenterDot"), I2VP(5));
+			wComboBoxAddValue( (wList_p)bezDesc[LT].control0, _("PhantomDot"), I2VP(6));
 			wListSetIndex( (wList_p)bezDesc[LT].control0, bezData.lineType );
 		}
 	}

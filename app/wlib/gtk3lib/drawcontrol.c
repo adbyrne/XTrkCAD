@@ -129,9 +129,9 @@ CreateNewSurface(GtkWidget* widget, cairo_surface_t* oldSurface)
 	             gtk_widget_get_allocated_width(widget),
 	             gtk_widget_get_allocated_height(widget));
 
-	/* Initialize the surface */
-	ClearSurface(newSurface);
-
+	if(newSurface) { /* Initialize the surface */
+		ClearSurface(newSurface);
+	}		
 	return(newSurface);
 }
 
@@ -185,7 +185,7 @@ static const char* actionNames[] = { "None", "Move", "LDown", "LDrag", "LUp", "R
  * at start?
  *
  */
-static int scrollTimer;
+static guint scrollTimer;
 static int timer_busy_count;
 
 #define MIN_TIMER_INTERVALS 1
@@ -581,8 +581,11 @@ draw_tooltip(GtkWidget* widget, gint x, gint y, gboolean kbd,
 		return(FALSE);
 	}
 
+	drawAttributes->lastX = (long)x;
+	drawAttributes->lastY = (long)y;
+	Screen2WorldCoord(drawAttributes);
 	(drawAttributes->action)(drawControl, drawControl->context, wActionGetTooltip,
-	                         x, y);
+	                         drawAttributes->lastX, drawAttributes->lastY);
 
 	if (drawControl->customTooltip) {
 		gtk_tooltip_set_markup(tooltip, drawControl->customTooltip);
@@ -600,8 +603,12 @@ draw_tooltip(GtkWidget* widget, gint x, gint y, gboolean kbd,
 /**
  * Create a drawing area
  *
- * Size and position information is ignored when creating the area from builder.
- * This are set by the layout engine in GTK3
+ * Position information is ignored when creating the area from builder.
+ * This is set by the layout engine in GTK3.
+ *
+ * The size of the drawing area can be explicitely set by passing values
+ * large than 0. This is optional for builder defined controls but should
+ * be set for runtime created drawing areas.
  *
  * ### Usage in dialogs
  *
@@ -649,20 +656,18 @@ wControl_p wDrawCreate(
 
 	if (ISDEFINEDINBUILDER(parent)) {
 		drawControl->widget = wlibWidgetFromIdWarn(parent, helpStr);
-		width = 0;
-		height = 0;
 	} else {
 		drawControl->widget = gtk_drawing_area_new();
+	}
 		width = width ? width : -1;
 		height = height ? height : -1;
 		gtk_widget_set_size_request(GTK_WIDGET(drawControl->widget), width,
 		                            height);
-	}
-
+									
 	wlibControlGetSize((wControl_p)drawControl);
 
-	drawAttributes->width = width;
-	drawAttributes->height = height;
+	drawAttributes->width = width ? width: 0;
+	drawAttributes->height = height ? height: 0;
 
 	g_signal_connect((drawControl->widget), "query-tooltip",
 	                 G_CALLBACK(draw_tooltip), drawControl);

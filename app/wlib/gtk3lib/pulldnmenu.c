@@ -218,10 +218,14 @@ static void CreateMenuItem(
 		mi->widget = gtk_separator_menu_item_new();
 		break;
 	case M_TOGGLE:
+    {
+        unsigned long handler_id;
 		mi->widget = gtk_check_menu_item_new_with_mnemonic(
 		                     wlibConvertInput(labelcopy));
-		g_signal_connect(mi->widget, "toggled", G_CALLBACK(pushMenuItem),
+        handler_id = g_signal_connect(mi->widget, "toggled", G_CALLBACK(pushMenuItem),
 		                 mi);
+        g_object_set_data(G_OBJECT(mi->widget), "handler-id", GUINT_TO_POINTER(handler_id));                         
+        }
 		break;
 	case M_RADIO:
 		mi->widget = gtk_radio_menu_item_new_with_mnemonic(
@@ -259,6 +263,20 @@ static void CreateMenuItem(
 			gtk_menu_shell_append(GTK_MENU_SHELL(m->widget), mi->widget);
 		}
 		gtk_widget_show(GTK_WIDGET(mi->widget));
+	}
+	struct menuitem * menuitem = CONTROL_GET_ATTRIBUTES_PTR(mi, menuitem);
+	menuitem->label = (char*) labelStr;
+	menuitem->type = mtype;
+	// this is  a linked list of all menu items belonging to a specific menu
+	// is used for demo mode MENU command
+	if (m) {
+		struct menu * menu = CONTROL_GET_ATTRIBUTES_PTR(m, menu);
+		if (menu->first == NULL) {
+			menu->first = mi;
+		} else {
+			CONTROL_GET_ATTRIBUTES_PTR(menu->last, menuitem)->next = mi;
+		}
+		menu->last = mi;
 	}
 
 	if (helpStr != NULL) {
@@ -673,39 +691,41 @@ wBool_t wMenuAction(
         wControl_p m,
         const char * label )
 {
-	// wMenuItem_p mi;
-	// wMenuToggle_p mt;
-	// for ( mi = m->first; mi != NULL; mi = (wMenuItem_p)mi->next ) {
-	// 	if ( strcmp( mi->oc.parent, label ) == 0 ) {
-	// 		switch( MITEMTYPE( mi )) {
-	// 		case M_SEPARATOR:
-	// 			break;
-	// 		case M_PUSH:
-	// 			if ( ((wMenuPush_p)mi)->enabled == FALSE )
-	// 				wBeep();
-	// 			else
-	// 				((wMenuPush_p)mi)->action( ((wMenuPush_p)mi)->context );
-	// 			break;
-	// 		case M_TOGGLE:
-	// 			mt = (wMenuToggle_p)mi;
-	// 			if ( mt->enabled == FALSE ) {
-	// 				wBeep();
-	// 			} else {
-	// 				wMenuToggleSet( mt, !mt->set );
-	// 				mt->action( mt->context );
-	// 			}
-	// 			break;
-	// 		case M_MENU:
-	// 			break;
-	// 		case M_LIST:
-	// 			break;
-	// 		default:
-	// 			/*fprintf(stderr, "Oops: wMenuAction\n");*/
-	// 		break;
-	// 		}
-	// 		return TRUE;
-	// 	}
-	// }
-	printf("%s:%d Not implemented!", __FILE__, __LINE__);
+	struct menu* menu = CONTROL_GET_ATTRIBUTES_PTR(m, menu);
+	struct menuitem * menuitem;
+	for ( wControl_p mi = menu->first;
+	      mi != NULL;
+	      mi = menuitem->next ) {
+		menuitem = CONTROL_GET_ATTRIBUTES_PTR(mi, menuitem);
+		if ( strcmp( menuitem->label, label ) == 0 ) {
+			switch( menuitem->type ) {
+			case M_SEPARATOR:
+				break;
+			case M_PUSH:
+				if ( gtk_widget_get_sensitive( GTK_WIDGET( mi->widget ) ) ) {
+					menuitem->action( mi->context );
+				} else {
+					wBeep();
+				}
+				break;
+			case M_TOGGLE:
+				if ( gtk_widget_get_sensitive( GTK_WIDGET( mi->widget ) ) ) {
+					menuitem->set = !menuitem->set;
+					menuitem->action( mi->context );
+				} else {
+					wBeep();
+				}
+				break;
+			case M_MENU:
+				break;
+//			case M_LIST:
+//				break;
+			default:
+				/*fprintf(stderr, "Oops: wMenuAction\n");*/
+				break;
+			}
+			return TRUE;
+		}
+	}
 	return FALSE;
 }

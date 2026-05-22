@@ -198,7 +198,7 @@ MOUSE 2 2.359 2.266
 MOUSE 4 2.359 2.266
 BIGPAUSE
 #DESCRIBE OK
-PARAMETER describe cancel
+PARAMETER Describe Straight Track cancel
 RESET
 MESSAGE
 _________________________________________
@@ -431,7 +431,7 @@ If we change the Length, each End-Point will be moved to shorten the track.  We 
 END
 STEP
 #DESCRIBE Pivot	0
-PARAMETER describe P1 0
+PARAMETER Describe Straight Track 10 0
 MESSAGE
 _________________________________________
 
@@ -439,9 +439,9 @@ Now when change the Length only the Right End-Point will move.
 END
 STEP
 #DESCRIBE Length	7.500
-PARAMETER describe F7 7.500
+PARAMETER Describe Straight Track 7 7.500
 #DESCRIBE OK
-PARAMETER describe cancel
+PARAMETER Describe Straight Track cancel
 RESET
 MESSAGE
 _________________________________________
@@ -460,7 +460,7 @@ Here the Left End-Point (which we don't want to move) is the Second End-Point, s
 END
 STEP
 #DESCRIBE Pivot	2
-PARAMETER describe P1 2
+PARAMETER Describe Curved Track 17 2
 MESSAGE
 _________________________________________
 
@@ -469,15 +469,15 @@ First change the Radius...
 END
 STEP
 #DESCRIBE Radius	20.000
-PARAMETER describe F9 20.000000
+PARAMETER Describe Curved Track 9 20.000000
 MESSAGE
 and the the Angular Length.
 END
 STEP
-PARAMETER describe F11 17.5
+PARAMETER Describe Curved Track 13 17.5
 BIGPAUSE
 #DESCRIBE OK
-PARAMETER describe cancel
+PARAMETER Describe Curved Track cancel
 MESSAGE
 _________________________________________
 
@@ -568,11 +568,11 @@ _________________________________________
 Select the definitions you added and Delete them.
 END
 STEP
-PARAMETER custmgm inx 0 	Peco-55	DEMO	SL-E395F	Modified Medium Right
+PARAMETER custmgm inx 0 Peco-55	DEMO	SL-E395F	Modified Medium Right
 PARAMETER custmgm delete
-PARAMETER custmgm inx 0 	Custom	DEMO	99-L	Left
+PARAMETER custmgm inx 0 Custom	DEMO	99-L	Left
 PARAMETER custmgm delete
-PARAMETER custmgm inx 0 	Custom	DEMO	99-R	Right
+PARAMETER custmgm inx 0 Custom	DEMO	99-R	Right
 PARAMETER custmgm delete
 PARAMETER custmgm ok
 MESSAGE

@@ -26,6 +26,7 @@
 #include "cselect.h"
 #include "cundo.h"
 #include "custom.h"
+#include "draw.h"
 #include "fileio.h"
 #include "form.h"
 #include "icons.h"
@@ -38,6 +39,7 @@
 #include "ctrain.h"
 
 #include "toolbar.h"
+#include "wlib.h"
 
 static paramGroup_t menuPG;
 static paramData_t menuPLs[101] = {
@@ -384,12 +386,13 @@ EXPORT int MagneticSnap(int state)
  */
 static void MagneticSnapToggle(void * unused)
 {
-	static int inTransition = FALSE;
-	if (!inTransition) {
-		inTransition = TRUE;
-		MagneticSnap(!magneticSnap);
-		inTransition = FALSE;
-	}
+			MagneticSnap(!magneticSnap);
+	// static int inTransition = FALSE;
+	// if (!inTransition) {
+	// 	inTransition = TRUE;
+	// 	MagneticSnap(!magneticSnap);
+	// 	inTransition = FALSE;
+	// }
 }
 
 
@@ -1139,6 +1142,7 @@ EXPORT void CreateMenus(void)
 	wMenu_p zoomM, zoomSubM;
 
 	wControl_p zoomInM, zoomOutM, zoomExtentsM;
+	InitToolbar();
 
 	wInitTooltip( tooltipTexts, TooltipsGetCount() );
 	fileM = wMenuBarAdd(mainW, "menuFile", _("_File"));
@@ -1206,19 +1210,28 @@ EXPORT void CreateMenus(void)
 	                DoZoomExtents, I2VP(1));
 	wMenuPushCreate(popup2M, "cmdZoomExtents", _("Zoom Extents"), 0,
 	                DoZoomExtents, I2VP(1));
-	/* Display */
-	MiscMenuItemCreate(popup1M, popup2M, "cmdGridEnable", _("Enable SnapGrid"),
-	                   0, SnapGridEnable, 0, NULL);
-	MiscMenuItemCreate(popup1M, popup2M, "cmdGridShow", _("SnapGrid Show"), 0,
-	                   SnapGridShow, 0, NULL);
-	MiscMenuItemCreate(popup1M, popup2M, "cmdMagneticSnap",
-	                   _(" Enable Magnetic Snap"), 0,
-	                   MagneticSnapToggle, 0, NULL);
-	MiscMenuItemCreate(popup1M, popup2M, "cmdMapShow", _("Show/Hide Map"), 0,
-	                   MapWindowToggleShow, 0, NULL);
-	MiscMenuItemCreate(popup1M, popup2M, "cmdBackgroundShow",
-	                   _("Show/Hide Background"), 0,
-	                   BackgroundToggleShow, 0, NULL);
+	/* Display toggles — created here to preserve menu order, registered in
+	 * their ToggleGroups later once the view-menu masters are established. */
+	wMenuToggle_p p1GridEnable = wMenuToggleCreate(popup1M, "cmdGridEnable",
+	                             _("Enable SnapGrid"), 0, FALSE, SnapGridEnable, NULL);
+	wMenuToggle_p p2GridEnable = wMenuToggleCreate(popup2M, "cmdGridEnable",
+	                             _("Enable SnapGrid"), 0, FALSE, SnapGridEnable, NULL);
+	wMenuToggle_p p1GridShow = wMenuToggleCreate(popup1M, "cmdGridShow",
+	                           _("Show SnapGrid"), 0, FALSE, SnapGridShow, NULL);
+	wMenuToggle_p p2GridShow = wMenuToggleCreate(popup2M, "cmdGridShow",
+	                           _("Show SnapGrid"), 0, FALSE, SnapGridShow, NULL);
+	wMenuToggle_p p1MagSnap = wMenuToggleCreate(popup1M, "cmdMagneticSnap",
+	                          _("Enable Magnetic Snap"), 0, FALSE, MagneticSnapToggle, NULL);
+	wMenuToggle_p p2MagSnap = wMenuToggleCreate(popup2M, "cmdMagneticSnap",
+	                          _("Enable Magnetic Snap"), 0, FALSE, MagneticSnapToggle, NULL);
+	wMenuToggle_p p1MapShow = wMenuToggleCreate(popup1M, "cmdMapShow",
+	                          _("Show/Hide Map"), 0, FALSE, MapWindowToggleShow, NULL);
+	wMenuToggle_p p2MapShow = wMenuToggleCreate(popup2M, "cmdMapShow",
+	                          _("Show/Hide Map"), 0, FALSE, MapWindowToggleShow, NULL);
+	wMenuToggle_p p1BgShow = wMenuToggleCreate(popup1M, "cmdBackgroundShow",
+	                         _("Show/Hide Background"), 0, FALSE, BackgroundToggleShow, NULL);
+	wMenuToggle_p p2BgShow = wMenuToggleCreate(popup2M, "cmdBackgroundShow",
+	                         _("Show/Hide Background"), 0, FALSE, BackgroundToggleShow, NULL);
 	wMenuSeparatorCreate(popup1M);
 	wMenuSeparatorCreate(popup2M);
 	/* Copy/Paste */
@@ -1457,12 +1470,26 @@ EXPORT void CreateMenus(void)
 	                (wMenuCallBack_p) DoRedraw, NULL);
 	wMenuSeparatorCreate(viewM);
 
+	/* Read grid prefs before creating the toggles so that the ToggleGroup
+	 * masters start in the correct state.  If we used hardcoded FALSE here,
+	 * wToggleGroupSetActive() in InitSnapGridButtons() would change the master
+	 * from FALSE to the pref value, firing notify_active → SnapGridEnable /
+	 * SnapGridShow, which would immediately invert the state. */
+	long gridHorzEnable, gridVertEnable, gridShow;
+	wPrefGetInteger("grid", "horzenable", &gridHorzEnable, 1);
+	wPrefGetInteger("grid", "vertenable", &gridVertEnable, 1);
+	wPrefGetInteger("grid", "show",       &gridShow,       0);
+
 	snapGridEnableMI = wMenuToggleCreate(viewM, "cmdGridEnable",
-	                                     _("Enable SnapGrid"), ACCL_SNAPENABLE, 0,
+	                                     _("Enable SnapGrid"), ACCL_SNAPENABLE,
+	                                     (wBool_t)(gridHorzEnable || gridVertEnable),
 	                                     SnapGridEnable, NULL);
+	wToggleGroupRegister(snapGridEnableMI, TOGGLEGRP_GRID_ENABLE);
+
 	snapGridShowMI = wMenuToggleCreate(viewM, "cmdGridShow", _("Show SnapGrid"),
 	                                   ACCL_SNAPSHOW,
-	                                   FALSE, SnapGridShow, NULL);
+	                                   (wBool_t)gridShow, SnapGridShow, NULL);
+	wToggleGroupRegister(snapGridShowMI, TOGGLEGRP_GRID_VISIBLE);
 	InitGrid(viewM);
 
 	// visibility toggle for anchors
@@ -1474,15 +1501,15 @@ EXPORT void CreateMenus(void)
 	                              _("Enable Magnetic Snap"),
 	                              0, magneticSnap,
 	                              MagneticSnapToggle, NULL);
-
+	wToggleGroupRegister(magnetsMI, TOGGLEGRP_MAGNETS);									   
 
 	mapShowMI = wMenuToggleCreate(viewM, "cmdMapShow", _("Show/Hide Map"),
 	                              ACCL_MAPSHOW, MapGetVisiblePref(),
 	                              MapWindowToggleShow, NULL);
+	wToggleGroupRegister(mapShowMI, TOGGLEGRP_MAP_VISIBLE);
 
 	wMenuSeparatorCreate(viewM);
 
-	InitToolbar();
 	MiscMenuItemCreate(viewM, NULL, "cmdToolbarOpt", _("&Toolbar Options..."),
 	                   0L, DoToolbar, IC_MODETRAIN_TOO, NULL);
 
@@ -1494,14 +1521,31 @@ EXPORT void CreateMenus(void)
 	magnetsB = AddToolbarButton("cmdMagneticSnap",
 	                            CreateToolbarIconFromResource("magnet.png"),
 	                            IC_MODETRAIN_TOO | IC_TOGGLE, MagneticSnapToggle, NULL);
-	wControlLinkedSet(magnetsMI,  magnetsB);
-	wButtonSetBusy(magnetsB, (wBool_t) magneticSnap);
+	wToggleGroupRegister(magnetsB, TOGGLEGRP_MAGNETS);
+	wToggleGroupSetActive(TOGGLEGRP_MAGNETS, magneticSnap);
+
+	// wControlLinkedSet(magnetsMI,  magnetsB);
+	// wButtonSetBusy(magnetsB, (wBool_t) magneticSnap);
 
 	mapShowB = AddToolbarButton("cmdMapShow",
 	                            CreateToolbarIconFromResource("map.png"),
 	                            IC_MODETRAIN_TOO | IC_TOGGLE, MapWindowToggleShow, NULL);
-	wControlLinkedSet( mapShowMI, mapShowB);
-	wButtonSetBusy(mapShowB, (wBool_t) mapVisible);
+	wToggleGroupRegister(mapShowB, TOGGLEGRP_MAP_VISIBLE);
+	wToggleGroupSetActive(TOGGLEGRP_MAP_VISIBLE, mapVisible);
+
+	/* Register popup toggles as ToggleGroup members now that all masters
+	 * exist.  G_BINDING_SYNC_CREATE immediately syncs each item to the
+	 * master state, so the FALSE passed at creation time is irrelevant. */
+	wToggleGroupRegister(p1GridEnable, TOGGLEGRP_GRID_ENABLE);
+	wToggleGroupRegister(p2GridEnable, TOGGLEGRP_GRID_ENABLE);
+	wToggleGroupRegister(p1GridShow,   TOGGLEGRP_GRID_VISIBLE);
+	wToggleGroupRegister(p2GridShow,   TOGGLEGRP_GRID_VISIBLE);
+	wToggleGroupRegister(p1MagSnap,    TOGGLEGRP_MAGNETS);
+	wToggleGroupRegister(p2MagSnap,    TOGGLEGRP_MAGNETS);
+	wToggleGroupRegister(p1MapShow,    TOGGLEGRP_MAP_VISIBLE);
+	wToggleGroupRegister(p2MapShow,    TOGGLEGRP_MAP_VISIBLE);
+	wToggleGroupRegister(p1BgShow,     TOGGLEGRP_BG_VISIBLE);
+	wToggleGroupRegister(p2BgShow,     TOGGLEGRP_BG_VISIBLE);
 
 	/*
 	 * ADD MENU

@@ -31,6 +31,9 @@
 #include <datastore.h>
 #include "gtkint.h"
 #include "i18n.h"
+#include "dynstring.h"
+
+int iDebugList = 0;
 
 struct listSearch {
 	const char *search;
@@ -61,7 +64,7 @@ static int
 GetRowCount(struct list* lcontrol)
 {
 	int count = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(lcontrol->listStore),
-	            NULL);
+	                NULL);
 	if (count == 1) {
 		lcontrol->last = 0;
 	}
@@ -141,23 +144,35 @@ int
 CompareListData(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter,
                 gpointer attributes)
 {
-	wListItem_p id_p;
 	struct listSearch *search = (struct listSearch *)attributes;
+	DynString strKey;
+	DynStringMalloc( &strKey, 0 );
+	gint iColCnt = gtk_tree_model_get_n_columns (model);
 
-	gtk_tree_model_get(model,
-	                   iter,
-	                   LISTCOL_DATA,
-	                   &id_p,
-	                   -1);
-
-	if (id_p && id_p->label && !strcmp(id_p->label, search->search)) {
-		search->result = (char *)id_p->label;
-		return TRUE;
+	for ( int inx = LISTCOL_TEXT; inx < iColCnt; inx++ ) {
+		char * strP;
+		gtk_tree_model_get(model,
+		                   iter,
+		                   inx,
+		                   &strP,
+		                   -1 );
+		if ( inx != LISTCOL_TEXT ) {
+			DynStringCatCStr( &strKey, "\t" );
+		}
+		DynStringCatCStr( &strKey, strP );
+	}
+	if ( iDebugList >= 4 ) {
+		printf( "  CompareListData %s <> %s\n", DynStringToCStr(&strKey),
+		        search->search );
+	}
+	if ( !strcmp( DynStringToCStr(&strKey), search->search ) ) {
+		search->result = g_strdup(&strKey);
 	} else {
 		search->result = NULL;
 		search->row++;
-		return FALSE;
 	}
+	DynStringFree( &strKey );
+	return search->result != NULL;
 }
 
 /**
@@ -177,6 +192,11 @@ wIndex_t wListFindValue(
 	g_assert(b!=NULL);
 	g_assert(b->attributes.list.listStore!=NULL);
 
+
+	if ( iDebugList >= 3 ) {
+		printf( "wListFindValue \"%s\"?\"%s\"\n",
+			b->name,  val );
+	}
 	thisSearch.search = val;
 	thisSearch.row = 0;
 
@@ -261,8 +281,26 @@ wIndex_t wListGetValues(
 	inx = lcontrol->last;
 
 	if (bl->type == B_COMBOBOX && lcontrol->editted) {
-		entry_value = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(
-		                bl->widget))));
+
+		if (gtk_combo_box_get_has_entry(GTK_COMBO_BOX(bl->widget))) {
+			/* Nothing selected, user is entering text directly */
+//			inx = -1;
+			GtkEntry* entry = GTK_ENTRY(gtk_bin_get_child(GTK_BIN(bl->widget)));
+			if (entry == NULL) {
+				return 0;
+			}
+			const char* string1 = gtk_entry_get_text(entry);
+			if (string1 == NULL) {
+				return 0;
+			}
+		}
+
+
+		GtkBin *bin = GTK_BIN( bl->widget );
+		GtkCellView *cellView = gtk_bin_get_child( bin );
+		GtkEntry *entry = GTK_ENTRY( cellView );
+		entry_value = gtk_entry_get_text( entry );
+		//entry_value = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN( bl->widget))));
 		item_data = NULL;
 		inx = lcontrol->last = -1;
 	} else {
@@ -279,7 +317,9 @@ wIndex_t wListGetValues(
 			id_p = wlibListStoreGetContext(lcontrol->listStore, inx);
 
 			if (id_p==NULL) {
-				fprintf(stderr, "wListGetValues - id_p == NULL\n");
+				if ( iDebugList >= 1 ) {
+					fprintf(stderr, "wListGetValues - id_p == NULL\n");
+				}
 				lcontrol->last = -1;
 			} else {
 				entry_value = id_p->label;
@@ -653,6 +693,9 @@ wIndex_t wListAddValueVar(
 
 	//add 2 as array will hold labelStrplus terminating NULL
 	data = g_malloc0((additionalValues+2) * sizeof(char*));
+	if ( iDebugList >= 2 ) {
+		printf( "wListAddValueVar\n" );
+	}
 	if (data) {
 		data[0] = (char *)labelStr;
 		va_start(arguments, labelStr);
@@ -693,7 +736,9 @@ wIndex_t wListAddValue(
 
 	g_assert(b != NULL);
 	g_assert(b->type == B_LIST);
-
+	if ( iDebugList >= 2 ) {
+		printf( "wListAddValue \"%s\" =  \"%s\"\n", b->name, labelStr );
+	}
 	data = g_strsplit(labelStr, "\t", -1);
 
 	rowCount = wListAddValuesArr(b, bm, itemInfo, data);

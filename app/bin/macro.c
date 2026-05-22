@@ -754,6 +754,9 @@ static void PlaybackQuit(void)
 		fclose(paramFile);
 	}
 	paramFile = NULL;
+	if ( inPlaybackQuit ) {
+		return;
+	}
 	inPlaybackQuit = TRUE;
 	wPrefReset();
 	wHide(demoW);

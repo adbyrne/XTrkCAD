@@ -175,7 +175,7 @@ Note that the Title of the turnout did not change.
 END
 STEP
 #DESCRIBE OK
-PARAMETER describe cancel
+PARAMETER Describe Turnout cancel
 MESSAGE
 =========================================
 END

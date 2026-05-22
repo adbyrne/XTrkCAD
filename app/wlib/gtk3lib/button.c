@@ -481,7 +481,6 @@ wControl_p wButtonCreateForToolbar(wControl_p parent, wWinPix_t x, wWinPix_t y,
 
 	return buttonControl;
 }
-
 /**
  * Wrap an existing button as a split button.
  * Creates a container with the button and a dropdown arrow.

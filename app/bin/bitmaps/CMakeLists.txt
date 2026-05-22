@@ -58,8 +58,8 @@ foreach(iconfile ${RESOURCE_DEPENDENCIES})
 				add_custom_command(
 					OUTPUT ${DESTINATION}/${PNGFILENAME}
 					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/svg/${SVGFILENAME}
-					COMMAND ${CMAKE_COMMAND} -E make_directory ${DESTINATION}
-					COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${SVGFILENAME} -h ${pixelsize} -o ${DESTINATION}/${PNGFILENAME}
+					COMMAND ${CMAKE_COMMAND} -E make_directory ${DESTINATION};	export NO_AT_BRIDGE=1
+					COMMAND ${Inkscape_EXECUTABLE} -w ${pixelsize} -h ${pixelsize} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${SVGFILENAME} -o ${DESTINATION}/${PNGFILENAME}
 				)
 			else()
 				add_custom_command(

@@ -152,12 +152,14 @@ MOUSE 2 11.000 7.125
 MOUSE 4 11.000 7.125
 BIGPAUSE
 #DESCRIBE Size	3
-PARAMETER describe L1 3 Large
+#PARAMETER dimensiontyle arrowsize 3 Large
+PARAMETER Describe Dimension Line 8 3 Large
 STEP
 #DESCRIBE Size	1
-PARAMETER describe L1 1 Small
+#PARAMETER dimensionstyle arrowsize 1 Small
+PARAMETER Describe Dimension Line 8 1 Small
 #DESCRIBE OK
-PARAMETER describe cancel
+PARAMETER Describe Dimension Line cancel
 RESET
 MESSAGE
 =========================================

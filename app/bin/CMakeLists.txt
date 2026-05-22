@@ -15,9 +15,7 @@ set( XTRKCAD_BIN "xtrkcad${XTRKCAD_BETA}" )
 
 set( XTRKCAD_CORE_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-if(NOT WIN32)
-    add_subdirectory(bitmaps)
-endif()
+add_subdirectory(bitmaps)
 
 add_executable(cnvdsgn cnvdsgn.c utility.c)
 
@@ -39,7 +37,7 @@ if(NOT WIN32)
 endif()
 
 add_custom_target(lines
-	DEPENDS cnvdsgn
+ DEPENDS cnvdsgn
 )
 
 #
@@ -63,16 +61,16 @@ endif()
 #
 
 macro(GENERATE_LIN lin_name)
-	add_custom_command(
-		OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${lin_name}.lin
-		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${lin_name}.src
-		COMMAND cnvdsgn < ${CMAKE_CURRENT_SOURCE_DIR}/${lin_name}.src > ${CMAKE_CURRENT_BINARY_DIR}/${lin_name}.lin
-	)
+    add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${lin_name}.lin
+		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${lin_name}.src cnvdsgn
+		COMMAND $<TARGET_FILE:cnvdsgn> < ${CMAKE_CURRENT_SOURCE_DIR}/${lin_name}.src > ${CMAKE_CURRENT_BINARY_DIR}/${lin_name}.lin
+ )
 
-	target_sources(lines
-		PRIVATE
-			${CMAKE_CURRENT_BINARY_DIR}/${lin_name}.lin
-	)
+    target_sources(lines
+  PRIVATE
+   ${CMAKE_CURRENT_BINARY_DIR}/${lin_name}.lin
+ )
 endmacro(GENERATE_LIN)
 
 GENERATE_LIN(to3way)
@@ -97,7 +95,7 @@ set_target_properties(lines cnvdsgn PROPERTIES FOLDER LineSymbols)
 add_library(xtrkcad-lib "")
 
 target_sources(xtrkcad-lib
-	PRIVATE
+ PRIVATE
     appdefaults.c
     archive.c
     archive.h
@@ -109,17 +107,17 @@ target_sources(xtrkcad-lib
     ccurve.c
     ccurve.h
     ccontrol.c
+    cdescribe.c
     cdraw.c
     celev.c
     cgroup.c
     chndldto.c
     cjoin.c
     cjoin.h
-    cmisc.c
     cmodify.c
     cnote.c
-	command.c
-	command.h
+ command.c
+ command.h
     common-ui.h
     compound.c
     compound.h
@@ -169,7 +167,7 @@ target_sources(xtrkcad-lib
     directory.c
     directory.h
     dlayer.c
-	dlayer.h
+ dlayer.h
     doption.c
     dpreferences.c
     dprmfile.c
@@ -201,8 +199,8 @@ target_sources(xtrkcad-lib
     manifest.h
     mapwindow.c
     mapwindow.h
-	menu.h
-	menu.c
+ menu.h
+ menu.c
     misc.c
     misc.h
     mymalloc.c
@@ -216,8 +214,8 @@ target_sources(xtrkcad-lib
     paths.h
     problemrep.c
     problemrepui.c
-	scale.c
-	scale.h
+ scale.c
+ scale.h
     shortentext.c
     shortentext.h
     shrtpath.c
@@ -239,10 +237,9 @@ target_sources(xtrkcad-lib
     trkendpt.h
     trkendptx.h
     trknote.c
-	trkseg.h
+ trkseg.h
     trkseg.c
     tstraigh.c
-    toolbar.c
     turnout.c
     uthash.h
     utility.c
@@ -260,26 +257,24 @@ target_sources(xtrkcad-lib
 
 add_subdirectory(form)
 add_subdirectory(appmainwindow)
-if(NOT WIN32)
-    add_subdirectory(parts)
-endif()
+add_subdirectory(parts)
 
 # add UTF-8 conversion utilities on Windows
 
 if(WIN32)
-	target_sources(xtrkcad-lib
-		PRIVATE
-			utf8convert.c
-			include/utf8convert.h
+    target_sources(xtrkcad-lib
+  PRIVATE
+   utf8convert.c
+   include/utf8convert.h
             include/win32/dirent.h
 			winstubs.c
-	)
+ )
 endif()
 
 # This ensures that messages.h has been generated before we build xtrkcad-lib
 add_dependencies(xtrkcad-lib
     msgfiles
-	lines
+ lines
 )
 if(TARGET genbitmaps)
     add_dependencies(xtrkcad-lib genbitmaps)
@@ -287,7 +282,7 @@ endif()
 
 target_include_directories(xtrkcad-lib
     PUBLIC
-	${messagefile_BINARY_DIR}
+ ${messagefile_BINARY_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_CURRENT_LIST_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -297,14 +292,11 @@ target_include_directories(xtrkcad-lib
 target_link_libraries(xtrkcad-lib
     PRIVATE
     cJSON
-	dynstring
-	xtrkcad-cornu
-	xtrkcad-wlib
+ dynstring
+ xtrkcad-cornu
+ xtrkcad-wlib
+    parts
 )
-
-if(NOT WIN32)
-    target_link_libraries(xtrkcad-lib PRIVATE parts)
-endif()
 
 target_link_libraries(xtrkcad-lib
     PRIVATE
@@ -324,36 +316,35 @@ add_executable(${XTRKCAD_BIN} WIN32 "" )
 # if SVG export is built and source files and dependency on MiniXML
 
 if(XTRKCAD_CREATE_SVG)
-	target_sources(xtrkcad-lib
-		PRIVATE
-			svgformat.c
-			svgoutput.c
-	)
+    target_sources(xtrkcad-lib
+  PRIVATE
+   svgformat.c
+   svgoutput.c
+ )
 
-	if(WIN32)
+    if(WIN32)
         target_link_libraries(xtrkcad-lib
             PRIVATE
             MiniXML::mxml
         )
-	endif()
-	if(UNIX)
-		if (APPLE OR NOT ${MINIXML_STATIC_LIBRARY})
+    endif()
+    if(UNIX)
+        if (APPLE OR NOT ${MINIXML_STATIC_LIBRARY})
             target_link_libraries(xtrkcad-lib
                 PRIVATE
                 MiniXML::mxml
             )
         else()
-			target_link_libraries(xtrkcad ${MINIXML_STATIC_LIBRARY})
-			target_link_libraries(xtrkcad "pthread")
-		endif()
-	endif()
+			target_link_libraries(${XTRKCAD_BIN} PRIVATE ${MINIXML_STATIC_LIBRARY} pthread)
+        endif()
+    endif()
 endif()
 
 target_sources(${XTRKCAD_BIN}
-	PRIVATE
-		misc.c
+ PRIVATE
+  misc.c
         ${messagefile_BINARY_DIR}/tooltiptext.c
-		xtrkcad.rc
+  xtrkcad.rc
 )
 add_dependencies(${XTRKCAD_BIN}
     tooltips
@@ -364,60 +355,60 @@ endif()
 
 target_include_directories(${XTRKCAD_BIN}
     PRIVATE
-	${messagefile_BINARY_DIR}
+ ${messagefile_BINARY_DIR}
 )
 
 target_link_libraries(${XTRKCAD_BIN}
     PRIVATE
-		xtrkcad-wlib
-		xtrkcad-lib
+  xtrkcad-wlib
+  xtrkcad-lib
 )
 
 
 
 if(NOT WIN32)
-	target_link_libraries(${XTRKCAD_BIN}
+    target_link_libraries(${XTRKCAD_BIN}
         PRIVATE
         m
     )
 else()
-	# copy dlls into the build dir for easier debugging
-#    COPYDLLTOBUILD(${LIBZIP_SHAREDLIB})
-#    COPYDLLTOBUILD(${ZLIB_SHAREDLIB})
+    # copy dlls into the build dir for easier debugging
+    #    COPYDLLTOBUILD(${LIBZIP_SHAREDLIB})
+    #    COPYDLLTOBUILD(${ZLIB_SHAREDLIB})
     set(ENV{path} "${CMAKE_CURRENT_BINARY_DIR};$ENV{PATH}")
-	# add dll to install package
-	install(
-	    FILES ${LIBZIP_SHAREDLIB}
-	    DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
-	)
+    # add dll to install package
+    install(
+     FILES ${LIBZIP_SHAREDLIB}
+     DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+ )
     install(
         FILES ${ZLIB_SHAREDLIB}
-	    DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
-	)
+     DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+ )
 
     # Copy program PDB file
     install(
         FILES $<TARGET_PDB_FILE:xtrkcad>
-	    DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+     DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
         OPTIONAL
-	)
+ )
 endif()
 
 # for testing only, should be IF(APPLE) ...
 if(APPLE)
-	add_executable( helphelper helphelper.c )
-	find_library(COREFOUNDATION_LIBRARY CoreFoundation)
-	find_library(CARBON_LIBRARY Carbon)
+    add_executable( helphelper helphelper.c )
+    find_library(COREFOUNDATION_LIBRARY CoreFoundation)
+    find_library(CARBON_LIBRARY Carbon)
 	target_link_libraries(helphelper PRIVATE ${COREFOUNDATION_LIBRARY} ${CARBON_LIBRARY})
-	install(
-		TARGETS helphelper
-		RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
-		)
+    install(
+  TARGETS helphelper
+  RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+  )
 endif()
 
 install(
-	TARGETS ${XTRKCAD_BIN}
-	RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+ TARGETS ${XTRKCAD_BIN}
+ RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
 )
 
 if (XTRKCAD_BUILD_FLATPAK)
@@ -434,5 +425,5 @@ if (XTRKCAD_BUILD_FLATPAK)
 endif()
 
 if(XTRKCAD_TESTING AND CMOCKA_FOUND)
-	add_subdirectory( unittest )
+    add_subdirectory( unittest )
 endif()

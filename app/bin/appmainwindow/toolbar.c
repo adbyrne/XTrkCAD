@@ -25,6 +25,7 @@
 #include "custom.h"
 #include "fileio.h"
 #include <form.h>
+#include "misc.h"
 #include "paths.h"
 #include "track.h"
 #include "include/toolbar.h"
@@ -49,7 +50,6 @@ static void SaveToolbarConfig(void);
 
 // toolbar properties
 static long toolbarSet;
-static wWinPix_t toolbarHeight = 0;
 
 #define TOOLBARSET_INIT				(0xFFFF)
 #define TOOLBAR_SECTION "toolbar"
@@ -255,28 +255,6 @@ ToolbarIsGroupVisible(int group)
 	CHECK(group <= COUNTTOOLBARGROUPS);
 
 	return(ISGROUPVISIBLE(group));
-}
-
-/**
- * Get the current height of the toolbar.
- *
- * \return
- */
-
-EXPORT wWinPix_t
-ToolbarGetHeight(void)
-{
-	return(toolbarHeight);
-}
-
-/**
- * .
- */
-
-EXPORT void
-ToolbarSetHeight(wWinPix_t newHeight)
-{
-	toolbarHeight = newHeight;
 }
 
 /**
@@ -545,7 +523,7 @@ LoadIconResource(unsigned iconSize)
 	MakeFullpath(&pathToResourceFile, wGetAppLibDir(), resourceFiles[iconSize],
 	             NULL);
 	if (pathToResourceFile) {
-		printf("Loading icons from: %s\n", pathToResourceFile);
+		LogPrintf("Loading icons from: %s\n", pathToResourceFile);
 
 		wLoadResourceFile(pathToResourceFile);
 

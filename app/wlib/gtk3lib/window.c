@@ -307,6 +307,8 @@ void wWinSetSize(
 	if (win->attributes.window.option&F_RESIZE) {
 		gtk_window_resize(GTK_WINDOW(win->widget), width, height);
 	} else {
+        width = width ? width : -1;
+		height = height ? height : -1;
 		gtk_widget_set_size_request(win->widget, width, height);
 	}
 }
