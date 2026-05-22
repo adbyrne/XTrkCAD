@@ -63,6 +63,7 @@ target_include_directories(defaultstest PRIVATE
 )
 
 target_link_libraries(defaultstest
+					  xtrkcad-wlib
 					  ${LIBS})
 
 add_test(DefaultsTest defaultstest)
