@@ -1329,6 +1329,17 @@ wDrawCloneBackground(wControl_p from, wControl_p to)
 	}
 }
 
+void
+wDrawUnrefBackground(wControl_p drawControl)
+{
+	struct draw* drawing = CONTROL_GET_ATTRIBUTES_PTR(drawControl, draw);
+
+	if(drawing) {
+		g_object_unref(drawing->background);
+		drawing->background = NULL;
+	}
+}
+
 int GetLBorder(void);
 int GetBBorder(void);
 

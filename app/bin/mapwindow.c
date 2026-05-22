@@ -29,6 +29,7 @@
 #include "fileio.h"
 #include "form.h"
 #include "mapwindow.h"
+#include "menu.h"
 #include "misc.h"
 #include "track.h"
 
@@ -387,19 +388,13 @@ wBool_t MapGetVisiblePref(void)
 }
 
 /**
- * Toggle visibility state of map window. Additional flag to avoid recursive calls while
- * UI elements in toolbar and menu are sync'ed
+ * Toggle visibility state of map window. State of the widgets has to be
+ * synced by a togglegroup.
  */
 
 EXPORT void MapWindowToggleShow(void* unused)
 {
-	static int inTransition = FALSE;
-
-	if (!inTransition) {
-		inTransition = TRUE;
-		MapWindowShow(!mapVisible);
-		inTransition = FALSE;
-	}
+	MapWindowShow(!mapVisible);
 }
 
 /**
@@ -420,9 +415,17 @@ EXPORT void MapWindowShow(int state)
 		DoChangeNotification(CHANGE_MAP);
 	}
 
-	ToggleSetInMenuToolbar(mapShowMI, mapShowB, mapVisible);
+	wToggleGroupSetActive(TOGGLEGRP_MAP_VISIBLE, mapVisible);
 
 	wPrefSetInteger("map", "visible", mapVisible);
+}
+
+void
+MapWindowEventProc( int event, void *data)
+{
+	wToggleGroupSetActive(TOGGLEGRP_MAP_VISIBLE, FALSE);
+	mapVisible = FALSE;
+	return;
 }
 
 wControl_p
@@ -434,7 +437,7 @@ MapWindowCreate()
 	mapW = FormCreateDialog(&mapPG, _("Map"),
 	                        NULL, NULL,
 	                        NULL, NULL,
-	                        FALSE, F_RESIZE, NULL);
+	                        FALSE, F_RESIZE, MapWindowEventProc);
 	mapD.d = MAPCANVASCONTROL;
 
 	MapWindowShow(MapGetVisiblePref());

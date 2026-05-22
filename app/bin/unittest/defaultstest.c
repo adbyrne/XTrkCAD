@@ -67,9 +67,15 @@ char * wPrefGetStringBasic(const char *section, const char *name)
 	return(NULL);
 }
 
-/* dummy to make the linker happy */
+/* dummies to make the linker happy */
 void
 wPrefSetInteger(const char *section, const char *name,  long value)
+{
+	return;
+}
+
+void
+wPrefSetString(const char *section, const char *name, const char *value)
 {
 	return;
 }

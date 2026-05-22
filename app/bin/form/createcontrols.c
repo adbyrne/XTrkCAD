@@ -526,7 +526,7 @@ CreateControl(paramData_p pd, char* helpStr,	unsigned x,	unsigned y)
 		break;
 	case PD_MESSAGE:
 		pd->control = (wControl_p)wMessageCreateEx(win,
-		              x+((pd->option & PDO_DLGNEWCOLUMN) != 0), y, helpStr, 1,
+		                x, y, helpStr, 1,
 		              pd->valueP ? _(pd->valueP) : " ", pd->winOption);
 		break;
 	case PD_BUTTON:
@@ -545,8 +545,7 @@ CreateControl(paramData_p pd, char* helpStr,	unsigned x,	unsigned y)
 		CreateDrawingArea(win, helpStr, pd );
 		break;
 	case PD_TEXT:
-		CreateControlText(pd, win, x + ((pd->option & PDO_DLGNEWCOLUMN) != 0), y,
-		                  helpStr);
+		CreateControlText(pd, win, x, y, helpStr);
 		break;
 	case PD_BITMAP:
 		iconP = pd->winData;
@@ -572,8 +571,10 @@ CreateControl(paramData_p pd, char* helpStr,	unsigned x,	unsigned y)
 void FormCreateControls(paramGroup_p group)
 {
 	DynString helpString;
-	unsigned xPos = 1;
-	unsigned yPos = 1;
+	unsigned xPos = 1;	// x position of control
+	unsigned yPos = 1;	// y position of control
+	unsigned xCol = 0;	// index of current COLUMN
+	unsigned xRow = 0;	// index into SAMEROW
 
 	DynStringMalloc(&helpString, 80);
 
@@ -584,15 +585,44 @@ void FormCreateControls(paramGroup_p group)
 			continue;
 		}
 
-		LOG(log_form, 2, ("%2d: %s\n", inx, pd->nameStr));
-
 		DynStringPrintf(&helpString, "%s-%s", group->nameStr, pd->nameStr);
 
 		if (group->options & PGO_FULLDIALOGFROMBUILDER) {
+			LOG(log_form, 3, ("%2d: %s\n",
+			                  inx, pd->nameStr));
 			CreateControl(pd, pd->nameStr, -1, -1);
 		} else {
-			CreateControl(pd, pd->nameStr, xPos, yPos);
-			if (!(pd->option & PDO_SAMEROW)) {
+			if (pd->option & PDO_DLGNEWCOLUMN) {
+				// Adv X, Reset Y
+				xCol++;
+				yPos = 1;
+			}
+			if ( pd->option & PDO_SAMEROW) {
+				if ( xRow == 0 ) {
+					// start samerow
+					// This code leaves a gap btw col 1 and 2
+					// Proper fix: Create a horiz box to contain controls
+					// See wRadioCreate
+				}
+			} else {
+				if ( xRow > 0 ) {
+					// End of SAMEROW
+					// Reset X, adv Y
+					xRow=0;
+					yPos++;
+				}
+			}
+			LOG(log_form, 3, ("%d: %d %d %s\n",
+			                  inx, xPos+xCol+xRow, yPos,
+			                  pd->nameStr ));
+			CreateControl(pd, pd->nameStr,
+			              xPos+xCol+xRow, yPos);
+			if ( pd->option & PDO_SAMEROW) {
+				// Adv X
+				xRow++;
+				// add control to horiz box
+			} else {
+				// Adv Y
 				yPos++;
 			}
 		}

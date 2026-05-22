@@ -34,6 +34,8 @@
 
 static FT_Library library;
 static char* currentFontFile;
+static GBytes *fontBytes = NULL;
+
 static FT_Face ftFontFace;
 static double fontSize;
 
@@ -148,6 +150,57 @@ wFTLabelLoadFontFromFile(const char* filename)
 		fontSize = GetFaceHeight(ftFontFace);
 	}
 	return(fontSize);
+}
+
+/**
+ * Load a font from file using freetype. This allows to use fonts that are not installed by the
+ * operating system.
+ *
+ * \param filename path to font
+ * \return font size or 0.0 on error
+ *
+ */
+
+double
+wFTLabelLoadFontFromResource(const char* filename)
+{
+	int error;
+
+	if (!library) {
+		InitializeFreeType();
+	}
+
+	GError *gerror = NULL;
+
+	fontBytes =
+	        g_resources_lookup_data(filename, G_RESOURCE_LOOKUP_FLAGS_NONE, &gerror);
+
+	if (!fontBytes) {
+		printf("Could not load font from resource: %s\n", gerror->message);
+		g_abort();
+	}
+
+	gsize dataSize;
+	const guchar *data = g_bytes_get_data(fontBytes, &dataSize);
+
+	error = FT_New_Memory_Face(library,
+	                           (const FT_Byte *)data,
+	                           (FT_Long)dataSize,
+	                           0,
+	                           &ftFontFace);
+
+	if (error == FT_Err_Unknown_File_Format) {
+		printf("Font format is unsupported!\n");
+		g_abort();
+	} else if (error) {
+		printf("Font file could not be loaded from memory! [return "
+		       "code=%X]\n",
+		       error);
+		g_abort();
+	}
+
+	fontSize = GetFaceHeight(ftFontFace);
+	return (fontSize);
 }
 
 /**

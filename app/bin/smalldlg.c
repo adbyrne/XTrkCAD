@@ -219,12 +219,12 @@ static paramTextData_t aboutTextData = { 50, 10 };
 #define DESCRIPTION N_("XTrackCAD is a CAD (computer-aided design) program for designing model railroad layouts.")
 static paramData_t aboutPLs[] = {
 #define I_ABOUTDRAW				(0)
-	{   PD_BITMAP, NULL, "about", PDO_NOPSHUPD | PDO_SAMEROW, NULL, NULL, 0 },
+	{   PD_BITMAP, NULL, "about", PDO_NOPSHUPD, NULL, NULL, 0 },
 #define I_ABOUTVERSION			(1)
 	{   PD_MESSAGE, NULL, "mess1", PDO_DLGNEWCOLUMN, NULL, NULL, BM_LARGE },
 #define I_COPYRIGHT				 (2)
 #define COPYRIGHT_T			(aboutPLs[I_COPYRIGHT].control)
-	{   PD_TEXT, NULL, "text", PDO_DLGNEWCOLUMN, &aboutTextData, NULL, BO_READONLY | BT_TOP | BT_CHARUNITS}
+	{   PD_TEXT, NULL, "text", 0, &aboutTextData, NULL, BO_READONLY | BT_TOP | BT_CHARUNITS}
 };
 static paramGroup_t aboutPG = { "about", 0l, aboutPLs, COUNT( aboutPLs ) };
 

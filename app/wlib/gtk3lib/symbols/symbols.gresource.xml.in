@@ -57,5 +57,8 @@
     <file>yellowdot.png</file>
     <file>yellowstar.png</file>
     <file>zero.png</file>
+    <file>fonts/xtrackcad-10.bdf</file>
+    <file>fonts/xtrackcad-15.bdf</file>
+    <file>fonts/xtrackcad-20.bdf</file>
   </gresource>
 </gresources>

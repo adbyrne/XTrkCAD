@@ -142,7 +142,6 @@ static void DialogProc(
 }
 
 
-
 /**
  * Create a dialog box from data definition.
  *

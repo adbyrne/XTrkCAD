@@ -25,6 +25,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "glib-object.h"
+#include "glib.h"
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
 #define GTK_DISABLE_DEPRECATED
@@ -131,20 +133,9 @@ wDialogSaveSizePos(wControl_p dialog)
 }
 
 /**
- * React on response signal initiated when user presses one of the dialog
  * default buttons. Selecting Help causes the help function to be executed.
- * In all other cases the callback for the dialog is used.
  *
- * \param self          GTK dialog
- * \param response_id   GTK button response id
- * \param dialog        wlib dialog definition
- */
-
-void
-response_signal(GtkDialog* self, gint response_id, wControl_p dialog)
-{
 	winProcEvent event = 0;
-
 	SaveWindowSizePos(GTK_WIDGET(self), dialog->name);
 
 	switch (response_id) {
@@ -159,11 +150,8 @@ response_signal(GtkDialog* self, gint response_id, wControl_p dialog)
 		wHelp(dialog->name);
 		return;
 	}
-
 	dialog->attributes.window.winProc(dialog, event, NULL, NULL);
 }
-
-/**
  * Configure a button.
  *
  * \param dialog    the dialog holding the button
@@ -201,6 +189,20 @@ wDialogButtonsConfigure(wControl_p dialog, const char* okLabel,
 	ConfigureButton(&dialog->attributes.window, "id_ok", okLabel);
 	ConfigureButton(&dialog->attributes.window, "id_cancel", cancelLabel);
 	ConfigureButton(&dialog->attributes.window, "id_help", helpLabel);
+}
+
+static gboolean
+deleteHandler(GtkDialog *win, GdkEvent *event, gpointer userdata)
+{
+    wControl_p dialog = (wControl_p)userdata;
+    struct window *dcontrol = CONTROL_GET_ATTRIBUTES_PTR(dialog, window);
+
+    if(dcontrol->winProc) {
+        dcontrol->winProc(dialog, wClose_e, NULL,  dialog->context);
+        return gtk_widget_hide_on_delete(win);
+    }
+
+    return FALSE;
 }
 
 /**
@@ -286,27 +288,14 @@ wWinDialogCreate(wControl_p parent,
 		gtk_window_set_title(GTK_WINDOW(dialog), titleStr);
 	}
 
+    g_signal_connect(dialog, "delete-event", deleteHandler, winDialog);
+
 	gtk_widget_show(dialog);
 	dcontrol->winProc = winProc;
 
 	return(winDialog);
 }
 
-/**
- * Create a new popup window. Deaded as a shim for earlier implementation
- * \todo replace in main application
- *
- * \param parent    IN Parent window (may be NULL)
- * \param x         IN Initial window width
- * \param y         IN Initial window height
- * \param helpStr   IN Help topic string
- * \param labelStr  IN Window title
- * \param nameStr   IN Window name
- * \param option    IN Options
- * \param winProc   IN call back function
- * \param context      IN User context information
- * \return    handle for new window
- */
 #ifdef TODO_UNUSED
 static wWin_p wWinPopupCreate(
         wWindow_p parent,
@@ -320,17 +309,13 @@ static wWin_p wWinPopupCreate(
         void* attributes)
 {
 	wWin_p win = NULL;
-
 	//if (parent == NULL) {
 	//    if (gtkMainW == NULL) {
 	//        abort();
 	//    }
-
 	//    parent = gtkMainW;
 	//}
-
 	printf("%s:%d not implemented\n", __FILE__, __LINE__);
-
 	//win = wWinCommonCreate(parent, W_POPUP, x, y, labelStr, nameStr, option,
 	//    winProc, context);
 	return win;

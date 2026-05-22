@@ -61,7 +61,7 @@ Certain parameters of the object can be changed.  In this case we'll change the 
 END
 STEP
 #DESCRIBE Length	7.500
-PARAMETER describe F7 7.500
+PARAMETER Describe Straight Track 7 7.500
 MESSAGE
 _________________________________________
 
@@ -76,8 +76,8 @@ END
 STEP
 #DESCRIBE Name	Medium Left
 #DESCRIBE Part No	SL-E396F2
-PARAMETER describe S2 Medium Left
-PARAMETER describe S3 SL-E396F2
+PARAMETER Describe Turnout 35 Medium Left
+PARAMETER Describe Turnout 36 SL-E396F2
 STEP
 MOUSE 2 6.000 6.625
 MOUSE 4 6.000 6.625
@@ -88,14 +88,14 @@ You can change the contents of text...
 END
 STEP
 #DESCRIBE Text	Goodbye
-PARAMETER describe T1 Goodbye
+PARAMETER Describe Text 4 Goodbye
 BIGPAUSE
 MESSAGE
 and its size.
 END
 STEP
 #DESCRIBE Font Size	19
-PARAMETER describe LE1 -1 60
+PARAMETER Describe Text 3 -1 60
 STEP
 MESSAGE
 _________________________________________

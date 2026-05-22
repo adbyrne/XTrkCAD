@@ -57,8 +57,8 @@ _________________________________________
 Change the Orientation to Right.
 END
 STEP
-PARAMETER describe L2 1 Right
-PARAMETER describe cancel
+PARAMETER Describe Lumber 10 1 Right
+PARAMETER Describe Lumber cancel
 RESET
 MESSAGE
 _________________________________________

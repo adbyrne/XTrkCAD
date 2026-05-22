@@ -219,11 +219,18 @@ struct menu {
 	wMenuTraceCallBack_p traceFunc;
 	void *traceData;
 	long option;
+	wControl_p first;
+	wControl_p last;
 };
 
 struct menuitem {
 	wControl_p parentMenu;
 	wMenuCallBack_p action;
+	int type;
+	gulong toggleHandler;
+	char * label;
+	int set;
+	wControl_p next;
 };
 
 struct message {
@@ -705,6 +712,9 @@ void wlibSetTrigger(wControl_p b, setTriggerCallback_p trigger);
 
 /* toggle.c */
 
+/* togglegroup.c */
+void wlibToggleGroupsInit(void);
+void wlibToggleGroupConnect(const gchar *group_name, GCallback callback, wControl_p  user_data);
 /**
  * \todo Check usage of labelStr
  */

@@ -30,6 +30,7 @@
 #include "fileio.h"
 #include "cselect.h"
 #include "include/toolbar.h"
+#include "menu.h"
 
 #define MINTRACKRADIUSPREFS "minTrackRadius"
 #define MAXTRACKGRADEPREFS "maxTrackGrade"
@@ -544,8 +545,7 @@ wControl_p backgroundB;
 void
 BackgroundToggleShow( void * unused )
 {
-	backgroundVisible = !backgroundVisible;
-	wButtonSetBusy(backgroundB, backgroundVisible);
+	backgroundVisible = wToggleGroupGetActive(TOGGLEGRP_BG_VISIBLE);
 	MainRedraw();
 }
 
@@ -578,10 +578,11 @@ LoadBackGroundImage(void)
 	char * background = GetLayoutBackGroundFullPath();
 	if (wDrawSetBackground(  mainD.d, background, &error)==-1) {
 		NoticeMessage(_("Unable to load Image File - %s"),_("Ok"),NULL,error);
+		free(error);
 		return FALSE;
 	}
 	wControlActive((wControl_p)backgroundB, backgroundVisible);
-	wButtonSetBusy(backgroundB, backgroundVisible);
+	wToggleGroupSetActive(TOGGLEGRP_BG_VISIBLE, backgroundVisible);
 
 	return TRUE;
 }
@@ -622,7 +623,7 @@ EXPORT int LoadImageFile(
 		backgroundVisible = FALSE;
 	}
 	wControlActive((wControl_p)backgroundB, backgroundVisible);
-	wButtonSetBusy(backgroundB, backgroundVisible);
+	wToggleGroupSetActive(TOGGLEGRP_BG_VISIBLE, backgroundVisible);
 
 	SetName();
 	file_changed = TRUE;
@@ -1022,6 +1023,7 @@ LayoutBackGroundInit(BOOL_T clear)
 		char *error;
 		if (wDrawSetBackground(  mainD.d, str, &error) == -1) {
 			NoticeMessage(_("Unable to load Image File - %s"),_("Ok"),NULL,error);
+			free(error);
 			haveBackground = false;
 		}
 	} else {

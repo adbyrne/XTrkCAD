@@ -210,6 +210,8 @@ static int SaveBitmapFile(
 		                     GetLayoutBackGroundAngle(),
 		                     GetLayoutBackGroundScreen(),
 		                     0, 0, 0, 0 );
+		
+		wDrawUnrefBackground(bitmap_d.d);
 	}
 
 	if( outputBitMapTogglesV & BITMAPDRAWCENTERLINE ) {

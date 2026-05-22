@@ -3,180 +3,180 @@
 add_subdirectory(ui)
 add_subdirectory(wrapbox)
 add_subdirectory(symbols)
-add_subdirectory(fonts)
 
-target_include_directories(xtrkcad-wlib 
-	PRIVATE 
-	${xtrkcad-lib_SOURCE_DIR}
+target_include_directories(xtrkcad-wlib
+ PRIVATE
+ ${xtrkcad-lib_SOURCE_DIR}
 )
 
 target_sources(xtrkcad-wlib
-	PRIVATE 
-	appwindow.c
-	basicdraw.c
-	bitmap.c
-	boxes.c
-	button.c
-	color.c
-	combobox.c
-	drawcontrol.c
-	entry.c
- 	fileselector.c
-	freetypelabel.c
-	keystate.c
- 	lines.c
-	list.c
-	liststore.c
- 	main.c
- 	message.c
-	mrulist.c
-	notebook.c
- 	notice.c
-	popupmenu.c
-	splash.c
- 	pulldnmenu.c
-	radio.c
-	recentuse.c
-	resourcefile.c
-	scalectrl.c
-	separator.c
-	stack.c
-	statusbar.c
-	sticky.c
-	stickytogglebutton.c
-	tag.c
- 	text.c
-	timer.c
-	toggle.c
-	toolbarctrl.c
-	treeview.c
- 	wpref.c
+ PRIVATE
+ appwindow.c
+ basicdraw.c
+ bitmap.c
+ boxes.c
+ button.c
+ color.c
+ combobox.c
+ drawcontrol.c
+ entry.c
+  fileselector.c
+ freetypelabel.c
+ keystate.c
+  lines.c
+ list.c
+ liststore.c
+  main.c
+  message.c
+ mrulist.c
+ notebook.c
+  notice.c
+ popupmenu.c
+ splash.c
+  pulldnmenu.c
+ radio.c
+ recentuse.c
+ resourcefile.c
+ scalectrl.c
+ separator.c
+ stack.c
+ statusbar.c
+ sticky.c
+ stickytogglebutton.c
+ tag.c
+  text.c
+ timer.c
+ toggle.c
+ togglegroup.c
+ toolbarctrl.c
+ treeview.c
+  wpref.c
 
-	builder.c
+ builder.c
 
- 	control.c
-	dialog.c
-	drawcairo.c
+  control.c
+ dialog.c
+ drawcairo.c
 
- 	font.c
- 	help.c
+  font.c
+  help.c
 
- 	opendocument.c
+  opendocument.c
 
- 	tooltip.c	
- 	util.c
-	window.c
-	print.c
+  tooltip.c
+  util.c
+ window.c
+ print.c
 )
 
 if(WIN32)
-	target_sources(xtrkcad-wlib
-		PRIVATE
-		win32/getline.c
-		win32/getopt.c
-		win32/sysinfo.c
-		win32/w32paths.c
-		win32/utf8conv.c)
+    target_sources(xtrkcad-wlib
+  PRIVATE
+  win32/getline.c
+  win32/getopt.c
+  win32/sysinfo.c
+  win32/w32paths.c
+  win32/utf8conv.c)
 endif()
 
 if(UNIX)
-	target_sources(xtrkcad-wlib
-		PRIVATE
-			timer.c
-			print.c 
-			unix/ixpaths.c
-			unix/sysinfo.c)
+    target_sources(xtrkcad-wlib
+  PRIVATE
+   timer.c
+   print.c
+   unix/ixpaths.c
+   unix/sysinfo.c)
 endif()
 
 # help system is OS and build specific, add appropriate source files
 if(APPLE)
-   if (XTRKCAD_USE_APPLEHELP) 
-   		target_sources(xtrkcad-wlib
-			PRIVATE
-			osxhelp.c)	
-	else()
-		if(XTRKCAD_USE_BROWSER) 
-        	target_sources(xtrkcad-wlib
-				PRIVATE
-          	  	browserhelp.c)
-    	else()
-    		PKG_CHECK_MODULES(GTK_WEBKIT "webkit-1.0" REQUIRED)
-        	target_sources(xtrkcad-wlib
-				PRIVATE
-       	     	ixhelp.c)
-       	endif()
-    endif()    
-else()
-    if(XTRKCAD_USE_BROWSER) 
-		target_sources(xtrkcad-wlib
-			PRIVATE
-			browserhelp.c)
+    if (XTRKCAD_USE_APPLEHELP)
+        target_sources(xtrkcad-wlib
+   PRIVATE
+   osxhelp.c)
     else()
-    	PKG_CHECK_MODULES(GTK_WEBKIT "webkit-1.0" REQUIRED)
-			target_sources(xtrkcad-wlib
-				PRIVATE
-    	        ixhelp.c)
-    endif()    
+        if(XTRKCAD_USE_BROWSER)
+            target_sources(xtrkcad-wlib
+    PRIVATE
+              browserhelp.c)
+        else()
+            PKG_CHECK_MODULES(GTK_WEBKIT "webkit-1.0" REQUIRED)
+            target_sources(xtrkcad-wlib
+    PRIVATE
+              ixhelp.c)
+        endif()
+    endif()
+else()
+    if(XTRKCAD_USE_BROWSER)
+        target_sources(xtrkcad-wlib
+   PRIVATE
+   browserhelp.c)
+    else()
+        PKG_CHECK_MODULES(GTK_WEBKIT "webkit-1.0" REQUIRED)
+        target_sources(xtrkcad-wlib
+    PRIVATE
+             ixhelp.c)
+    endif()
 endif()
 
-# GTK 
+# GTK
 find_package (GTK3 REQUIRED)
 
 target_include_directories(xtrkcad-wlib
-	PRIVATE
-	${GTK3_INCLUDE_DIRS}
+ PRIVATE
+ ${GTK3_INCLUDE_DIRS}
 )
 
 message(STATUS "Include Dirs: ${GTK3_INCLUDE_DIRS}")
 
-target_link_libraries(xtrkcad-wlib 
-	PRIVATE
-	dynstring
-	wrapbox
-	freetype
-	${GTK3_LIBRARIES}
+target_link_libraries(xtrkcad-wlib
+ PRIVATE
+ dynstring
+ wrapbox
+ freetype
+ ${GTK3_LIBRARIES}
 )
 
 message(STATUS "Libraries: ${GTK3_LIBRARIES}")
 
 # configure for GTK's native Unix print
 if(UNIX)
-	find_package (GTKUnixPrint3 REQUIRED)
-	
-	target_include_directories(xtrkcad-wlib
-		PRIVATE
-		${GTK_UNIX_PRINT3_INCLUDE_DIRS}
-	)
+    find_package (GTKUnixPrint3 REQUIRED)
 
-	target_link_libraries(xtrkcad-wlib 
-		PRIVATE
-		${GTK_UNIX_PRINT3_LIBRARIES}
-	)
+    target_include_directories(xtrkcad-wlib
+  PRIVATE
+  ${GTK_UNIX_PRINT3_INCLUDE_DIRS}
+ )
+
+    target_link_libraries(xtrkcad-wlib
+  PRIVATE
+  ${GTK_UNIX_PRINT3_LIBRARIES}
+ )
 endif()
 
 # add dependency to webkit if configured
 if (APPLE)
-	if(NOT XTRKCAD_USE_APPLEHELP) 
-		if(NOT XTRKCAD_USE_BROWSER)
-			target_include_directories(xtrkcad-wlib
-				${GTK_WEBKIT_INCLUDE_DIRS}
-			)
-	 	   target_link_libraries(xtrkcad-wlib 
-				PRIVATE
-				${GTK_WEBKIT_LIBRARIES}
-			)
-		endif()
-	endif() 
+    if(NOT XTRKCAD_USE_APPLEHELP)
+        if(NOT XTRKCAD_USE_BROWSER)
+            target_include_directories(xtrkcad-wlib
+    ${GTK_WEBKIT_INCLUDE_DIRS}
+   )
+            target_link_libraries(xtrkcad-wlib
+    PRIVATE
+    ${GTK_WEBKIT_LIBRARIES}
+   )
+        endif()
+    endif()
 else ()
-	if(NOT XTRKCAD_USE_BROWSER)
- 	   target_include_directories(xtrkcad-wlib
-			${GTK_WEBKIT_INCLUDE_DIRS}
-		)
- 	   target_link_libraries(xtrkcad-wlib 
-			PRIVATE
-			${GTK_WEBKIT_LIBRARIES}
-		)
-	endif()
+    if(NOT XTRKCAD_USE_BROWSER)
+        target_include_directories(xtrkcad-wlib
+   ${GTK_WEBKIT_INCLUDE_DIRS}
+  )
+        target_link_libraries(xtrkcad-wlib
+   PRIVATE
+   ${GTK_WEBKIT_LIBRARIES}
+  )
+    endif()
 endif()
 
 # copy the glade ui definitions into the build tree
@@ -191,5 +191,5 @@ if(TARGET resource-target AND TARGET symbols-target)
 endif()
 
 if(XTRKCAD_TESTING)
-	add_subdirectory(unittests)
+    add_subdirectory(unittests)
 endif()

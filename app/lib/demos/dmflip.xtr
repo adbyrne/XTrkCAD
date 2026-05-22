@@ -179,10 +179,10 @@ MOUSE 2 20.125 4.812
 MOUSE 4 20.125 4.812
 STEP
 #DESCRIBE Name	Interstate Fuel - Loading Rack 
-PARAMETER describe S2 Interstate Fuel - Loading Rack
+PARAMETER Describe Structure 35 Interstate Fuel - Loading Rack
 BIGPAUSE
 #DESCRIBE OK
-PARAMETER describe cancel
+PARAMETER Describe Structure cancel
 REDRAW
 MESSAGE
 =========================================

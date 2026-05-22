@@ -36,6 +36,8 @@
 #include "gtkint.h"
 #include "i18n.h"
 
+extern int iDebugList;
+
 /* define the column count for the tree model */
 #define COMBOBOX_TEXTCOLUMNS 1
 
@@ -166,6 +168,9 @@ unsigned wComboBoxAddValue(
 
 	rows = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(list->listStore), NULL);
 
+	if ( iDebugList >= 2 ) {
+		printf( "wComboBoxAddValue \"%s\" = \"%s\"\n", b->name, text );
+	}
 	list->count++;
 
 	// index is zero based

@@ -21,10 +21,8 @@ entry.statusbar {
 }
 
 .toolbar-button {
-    padding: 2px;
-    padding-left: 4px;
-    padding-right: 4px;
-    margin: 0px;
+    padding-left: 6px;
+    padding-right: 6px;
     margin-top: 4px;
     margin-bottom: 4px;
 }
@@ -33,6 +31,13 @@ entry.statusbar {
     background: lightblue;
     border-style: solid;
     border-color: blue;
+}
+
+/* the following rule reduces the height of
+the layer selection combobox inside the toolbar */
+
+#toolbar > combobox {
+    padding: 4px;
 }
 
 .split-dropdown {

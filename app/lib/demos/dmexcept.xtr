@@ -56,7 +56,7 @@ MOUSE 2 4.500 5.188
 MOUSE 4 4.500 5.188
 BIGPAUSE
 #DESCRIBE Radius	8.000
-PARAMETER describe F9 8.000
+PARAMETER Describe Curved Track 9 8.000
 STEP
 MESSAGE
 _________________________________________
@@ -68,11 +68,11 @@ MOUSE 2 23.125 5.375
 MOUSE 4 23.125 5.375
 BIGPAUSE
 #DESCRIBE Z	2.250
-PARAMETER describe F3 2.250
+PARAMETER Describe Straight Track 6 2.250
 REDRAW
 STEP
 #DESCRIBE OK
-PARAMETER describe cancel
+PARAMETER Describe Straight Track cancel
 RESET
 PARAMETER misc cmdColor
 MESSAGE

@@ -224,6 +224,17 @@ wControl_p wToggleCreateForToolbar(wControl_p parent, wWinPix_t x, wWinPix_t y,
                                    const char *helpStr, wIcon_p icon,
                                    long option, wWinPix_t width,
                                    wButtonCallBack_p action, void *context);
+
+typedef enum {
+    TOGGLE_GROUP_ERROR = -1,
+    TOGGLE_GROUP_MEMBER,    /* 0 – registered as satellite */
+    TOGGLE_GROUP_MASTER     /* 1 – registered as master    */
+} ToggleGroupResult;    
+
+ToggleGroupResult wToggleGroupRegister( wControl_p toggle, const char *group_name );
+void wToggleGroupSetActive(const char *group_name, wBool_t     active);
+wBool_t wToggleGroupGetActive(const char *group_name);
+
 /*------------------------------------------------------------------------------
  *
  * Color Selection
@@ -343,6 +354,7 @@ int wFilSelect(struct wFilSel_t *fs, const char *directoryName);
  */
 
 double wFTLabelLoadFontFromFile(const char *filename);
+double wFTLabelLoadFontFromResource(const char* filename);
 wIcon_p wFTLabelCreate(const char *text, wDrawColor color);
 
 /*------------------------------------------------------------------------------
@@ -862,6 +874,7 @@ void wDrawSaveImage(wDraw_p);
 void wDrawRestoreImage(wDraw_p);
 int wDrawSetBackground(wControl_p bd, char *path, char **error);
 void wDrawCloneBackground(wControl_p from, wControl_p to);
+void wDrawUnrefBackground(wControl_p drawControl);
 void wDrawShowBackground(wControl_p drawingArea, wWinPix_t pos_x,
                          wWinPix_t pos_y, wWinPix_t size, wAngle_t angle,
                          int screen,

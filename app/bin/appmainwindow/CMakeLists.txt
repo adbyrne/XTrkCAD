@@ -1,6 +1,7 @@
 
 target_sources(xtrkcad-lib
-	PRIVATE
+ PRIVATE
     chotbar.c
     infobar.c
+    toolbar.c
 )

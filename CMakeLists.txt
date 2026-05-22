@@ -58,11 +58,6 @@ if(NOT WIN32)
     endif()
 endif()
 
-# For handling and creation of bitmaps the FreeImage library is required on Windows
-if(WIN32)
-    find_package(FreeImage REQUIRED)
-endif()
-
 # Flatpak
 find_package(Flatpak)
 

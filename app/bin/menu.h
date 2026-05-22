@@ -25,6 +25,13 @@
 
 #include "common.h"
 
+/* ToggleGroup name constants */
+#define TOGGLEGRP_GRID_ENABLE   "gridenable"
+#define TOGGLEGRP_GRID_VISIBLE  "gridvisible"
+#define TOGGLEGRP_MAGNETS       "magnetsenable"
+#define TOGGLEGRP_MAP_VISIBLE   "mapvisible"
+#define TOGGLEGRP_BG_VISIBLE    "backgroundvisible"
+
 extern wMenu_p demoM;
 extern wMenu_p popup1M, popup2M;
 extern wControl_p undoB;

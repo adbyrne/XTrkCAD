@@ -270,7 +270,7 @@ wlibCreateWindowFromBuilder(wControl_p window, const char* nameStr, long option)
 		                           containerName,
 		                           ".ui",
 		                           NULL);
-		printf( "Loading resource %s\n", resourcePath );
+		//printf( "Loading resource %s\n", resourcePath );
 		builder = gtk_builder_new_from_resource(resourcePath);
 	}
 

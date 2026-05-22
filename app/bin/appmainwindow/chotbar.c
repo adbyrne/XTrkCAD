@@ -26,6 +26,7 @@
 #include "track.h"
 #include "draw.h"
 #include "include/toolbar.h"
+#include "wlib.h"
 
 #define LARGE_SCROLL_STEP 8
 #define KEY_ESC 0x1b
@@ -108,7 +109,8 @@ static void HotBarHighlight( int inx, DIST_T fixed_x )
 	}
 	orig.y = 0;
 	size.x = hotBarMap(inx).w - 2.0/hotBarD.dpi;
-	size.y = ToolbarGetHeight();
+	size.y = (DIST_T)(wControlGetHeight( (wControl_p)hotBarD.d ) -
+	                            2)/hotBarD.dpi;
 
 	DrawRectangle( &hotBarD, orig, size, wDrawColorBlack, DRAW_TRANSPARENT );
 }
@@ -116,13 +118,14 @@ static void HotBarHighlight( int inx, DIST_T fixed_x )
 static void RedrawHotBar( wControl_p dd, void * data, wWinPix_t w,
                           wWinPix_t h  )
 {
+	wWinSetSize(hotBarD.d, w, h);
+	wDrawClear( hotBarD.d );
+
 	DIST_T barHeight = (DIST_T)(wControlGetHeight( (wControl_p)hotBarD.d ) -
 	                            2)/hotBarD.dpi;
 	DIST_T barWidth = (DIST_T)(wControlGetWidth( (wControl_p)hotBarD.d ) -
 	                           2)/hotBarD.dpi;
 	DIST_T fixed_x = 0.0;
-
-	wDrawClear( hotBarD.d );
 
 	if(!ScrollButtonStatus()) {
 		return;
@@ -645,6 +648,22 @@ ClearContextMenu()
 
 }
 
+static wWinPix_t
+GetHotbarHeight()
+{
+	wWinPix_t totalHeight = hotBarDrawHeight[iconSize];
+
+	if ( hotBarLabels) {
+	hotBarTextHeight = (wWinPix_t)round(wMessageGetHeight(0L) * (0.6 + 0.4 *
+	                                    (double)iconSize));
+
+	
+		totalHeight += hotBarTextHeight;
+	}
+
+	return(totalHeight + 2);
+}
+
 EXPORT void ChangeHotBar( long changes )
 {
 	if ( (changes&(CHANGE_SCALE|CHANGE_PARAMS|CHANGE_TOOLBAR)) == 0 ) {
@@ -653,6 +672,8 @@ EXPORT void ChangeHotBar( long changes )
 
 	if (hotBarLeftB != NULL && curScaleName) {
 		static long programModeOld = 0;
+		wWinPix_t hbHeight = GetHotbarHeight();
+
 		ClearContextMenu();
 
 		hotBarWidth = 0.0;
@@ -676,7 +697,8 @@ EXPORT void ChangeHotBar( long changes )
 		                             ||hotBarCurrStart < 0)) {
 			hotBarCurrStart = 0;
 		}
-		RedrawHotBar( NULL, NULL, 0, 0 );
+
+		RedrawHotBar( NULL, NULL, 0, hbHeight );
 		wFlush();
 	}
 }
@@ -711,16 +733,12 @@ EXPORT void InitHotBar( void )
 EXPORT void LayoutHotBar( const void * redraw )
 {
 	wWinPix_t winWidth, winHeight;
-	wWinPix_t hbHeight = hotBarHeight;
+	wWinPix_t hbHeight;
 	BOOL_T initialize = FALSE;
 
 	wWinGetSize( mainW, &winWidth, &winHeight );
-	hotBarTextHeight = (wWinPix_t)round(wMessageGetHeight(0L) * (0.6 + 0.4 *
-	                                    (double)iconSize));
+	hbHeight = GetHotbarHeight();
 
-	if ( hotBarLabels) {
-		hbHeight += hotBarTextHeight;
-	}
 	if (hotBarLeftB == NULL) {
 		if (winWidth < 50) {
 			return;
@@ -755,7 +773,6 @@ EXPORT void LayoutHotBar( const void * redraw )
 	} else if (!redraw) {
 		RedrawHotBar( NULL, NULL, 0, 0 );
 	}
-	ToolbarSetHeight( ToolbarGetHeight() + hbHeight+3 );
 }
 
 

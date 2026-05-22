@@ -32,8 +32,10 @@
 #include "include/stringxtc.h"
 #include "include/toolbar.h"
 #include "layout.h"
+#include "menu.h"
 #include "paths.h"
 #include "track.h"
+#include "xtrkcad-config.h"
 #include <form.h>
 
 /*****************************************************************************
@@ -1745,7 +1747,7 @@ void RestoreLayers(void)
 	int inx;
 	char *label;
 	wDrawColor color;
-	CHECK(layers_save != NULL);
+	if (layers_save == NULL) { return; }
 	memcpy(layers, layers_save, NUM_LAYERS * sizeof layers[0]);
 	free(layers_save);
 	layers_save = NULL;
@@ -2194,13 +2196,14 @@ static void InitializeCustomFont(int size)
 {
 	char *pathToFontFile = NULL;
 
-	MakeFullpath(&pathToFontFile, wGetAppLibDir(), customFonts[size], NULL);
+	MakeFullpath(&pathToFontFile, XTRKCAD_SYMBOLS_PATH, "fonts/", customFonts[size], NULL);
 	if (pathToFontFile) {
 
-		wFTLabelLoadFontFromFile(pathToFontFile);
+		wFTLabelLoadFontFromResource(pathToFontFile);
 
 		free(pathToFontFile);
 	}
+
 }
 
 static void CreateLayerButtons()
@@ -2242,6 +2245,7 @@ void InitLayers(int cmdGroup)
 	                      "cmdBackgroundShow", CreateToolbarIconFromResource("background.png"),
 	                      IC_MODETRAIN_TOO | IC_TOGGLE, BackgroundToggleShow, NULL);
 	wTooltipSet(backgroundB, NULL, "cmdBackgroundShow");
+	wToggleGroupRegister(backgroundB, TOGGLEGRP_BG_VISIBLE);
 	wControlActive(backgroundB, FALSE);
 
 	/* layer buttons */

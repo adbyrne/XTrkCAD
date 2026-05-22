@@ -222,8 +222,9 @@ wControl_p wToggleCreate(
 
 		children = gtk_container_get_children(GTK_CONTAINER(b->widget));
 		for (child = children; child; child = child->next) {
-			g_signal_connect(G_OBJECT(child->data), "toggled",
+			unsigned long handler_id = g_signal_connect(G_OBJECT(child->data), "toggled",
 			                 G_CALLBACK(toggled), b);
+			g_object_set_data(G_OBJECT(child->data), "handler-id", GUINT_TO_POINTER(handler_id));							 
 		}
 		if (children) {
 			g_list_free(children);
@@ -258,14 +259,16 @@ wControl_p wToggleCreate(
 
 		for (const char* const* label = labels; *label; label++) {
 			GtkWidget* butt;
+			unsigned long handler_id;
 
 			butt = gtk_check_button_new_with_label(_(*label));
 			buttonCount++;
-
+			
 			gtk_box_pack_start(GTK_BOX(b->widget), butt, TRUE, TRUE, 0);
 
-			g_signal_connect(G_OBJECT(butt), "toggled",
+			handler_id = g_signal_connect(G_OBJECT(butt), "toggled",
 			                 G_CALLBACK(toggled), b);
+			g_object_set_data(G_OBJECT(butt), "handler-id", GUINT_TO_POINTER(handler_id));
 
 			wlibAddTooltip(butt, parent->name, helpStr);
 		}
@@ -385,9 +388,14 @@ wControl_p wToggleCreateForToolbar(
 	}
 
 	wlibAddButtonToToolbar(buttonControl, helpStr);
+	unsigned long handler_id;
 
-	g_signal_connect(G_OBJECT(buttonControl->widget), "clicked",
-	                 G_CALLBACK(toolbarClicked), buttonControl);
+				handler_id = g_signal_connect(G_OBJECT(buttonControl->widget), "toggled",
+			                 G_CALLBACK(toolbarClicked), buttonControl);
+			g_object_set_data(G_OBJECT(buttonControl->widget), "handler-id", GUINT_TO_POINTER(handler_id));
+
+	// g_signal_connect(G_OBJECT(buttonControl->widget), "clicked",
+	//                  G_CALLBACK(toolbarClicked), buttonControl);
 
 	return buttonControl;
 }
