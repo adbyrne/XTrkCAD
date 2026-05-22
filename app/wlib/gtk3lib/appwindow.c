@@ -115,7 +115,7 @@ static void on_size_allocate(
 			wcontrol->h = allocation->height;
 			wcontrol->size_changed = TRUE;
 			if (wcontrol->resizeTimer == 0) {
-				wcontrol->resizeTimer = g_timeout_add(REDRAW_TIMEOUT, resizeTime, win);
+				wcontrol->resizeTimer = g_timeout_add(REDRAW_TIMEOUT, (GSourceFunc)resizeTime, win);
 			}
 		}
 	}
