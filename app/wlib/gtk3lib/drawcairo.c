@@ -1144,65 +1144,27 @@ void wDrawRestoreImage(
 	}
 }
 
-/** \todo Test and remove commented out secttions */
 void wDrawSetSize(
         wControl_p drawingArea,
         wWinPix_t w,
         wWinPix_t h, void * redraw)
 {
-	//wBool_t repaint;
 	if (drawingArea == NULL) {
 		fprintf(stderr,"resizeDraw: no client data\n");
 		return;
 	}
 
-	//struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
 	g_assert(drawingArea->type == B_DRAW);
 
 	if ( iDrawLog >= 1 ) {
 		printf( "%ld: wDrawSetSize %ld+%ld %s\n", lDrawCnt, w, h, redraw?"Redraw":"" );
 	}
-	// if (drawControl->fromTemplate && !(drawControl->option&BD_RESIZEABLE)) {
-	// 	GtkAllocation alloc;
-	// 	gtk_widget_get_allocation(drawControl->widget, &alloc);
-	// 	w = alloc.width;
-	// 	h = alloc.height;
-	// }
 
 	/* Negative values crashes the program */
 	if (w < 0 || h < 0) {
 		return;
 	}
 	gtk_widget_set_size_request(drawingArea->widget, w, h);
-
-	// //repaint = (w != bd->w || h != bd->h);
-	// //bd->w = w;
-	// //bd->h = h;
-	// repaint = TRUE;
-	// gtk_widget_set_size_request( drawingArea->widget, w, h );
-	// if (repaint) {
-	// 	if (bd->surface) {
-	// 		cairo_surface_destroy(bd->surface);
-	// 	}
-	// 	bd->surface = gdk_window_create_similar_surface(gtk_widget_get_window (
-	// 	                        drawingArea->widget), CAIRO_CONTENT_COLOR_ALPHA, w, h);
-
-	// 	if (bd->temp_surface) {
-	// 		cairo_surface_destroy(bd->temp_surface);
-	// 	}
-	// 	bd->temp_surface = gdk_window_create_similar_surface(gtk_widget_get_window (
-	// 	                           drawingArea->widget), CAIRO_CONTENT_COLOR_ALPHA, w, h);
-
-
-	// 	wDrawClear( drawingArea );
-	// 	if (redraw) {
-	// 		((wDrawRedrawCallBack_p)redraw)( drawingArea, drawingArea->context, w, h );
-	// 	} else {
-	// 		bd->redraw( drawingArea, drawingArea->context, w, h );
-	// 	}
-	// }
-	// /*wRedraw( drawControl );*/
-	// gtk_widget_queue_draw(drawingArea->widget);
 }
 
 

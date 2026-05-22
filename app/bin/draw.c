@@ -324,6 +324,12 @@ EXPORT void MainRedraw(void)
 	static int cMR = 0;
 	LOG(log_redraw, 1,
 	    ("MainRedraw: %d %0.1fx%0.1f\n", cMR++, mainD.size.x, mainD.size.y));
+
+	if(mainD.size.x == 0.0 && mainD.size.y == 0.0 ) {
+		LogPrintf("MainRedraw: return early as drawing area size is 0,0");
+		return;
+	}
+	
 	unsigned long time0 = wGetTimer();
 	if (delayUpdate) {
 		wDrawDelayUpdate(mainD.d, TRUE);
@@ -359,19 +365,16 @@ EXPORT void MainRedraw(void)
 		TranslateBackground(&mainD, orig.x, orig.y, &bitmapPosX, &bitmapPosY,
 		                    &bitmapWidth);
 
-wDrawPix_t rx, ry, rw, rh;
+		wDrawPix_t rx, ry, rw, rh;
+		rx = lborder + (0.0 - mainD.orig.x) * mainD.dpi / mainD.scale;
+		ry = (0.0 - mainD.orig.y) * mainD.dpi / mainD.scale;
+		rw = mapD.size.x * mainD.dpi / mainD.scale;
+		rh = mapD.size.y * mainD.dpi / mainD.scale;
 
-// 1. Calculate room area in screen pixels
-rx = lborder + (0.0 - mainD.orig.x) * mainD.dpi / mainD.scale;
-ry = (0.0 - mainD.orig.y) * mainD.dpi / mainD.scale;
-rw = mapD.size.x * mainD.dpi / mainD.scale;
-rh = mapD.size.y * mainD.dpi / mainD.scale;
-
-// 2. Call the background drawer with these pixel coordinates
-wDrawShowBackground(mainD.d, bitmapPosX, bitmapPosY, bitmapWidth,
-                    GetLayoutBackGroundAngle(),
-                    GetLayoutBackGroundScreen(),
-                    rx, ry, rw, rh);
+		wDrawShowBackground(mainD.d, bitmapPosX, bitmapPosY, bitmapWidth,
+		                    GetLayoutBackGroundAngle(),
+		                    GetLayoutBackGroundScreen(),
+		                    rx, ry, rw, rh);
 	}
 	
 	DrawSnapGrid(&mainD, mapD.size, TRUE);
@@ -1298,10 +1301,6 @@ static void DoMouse(wAction_t action, coOrd pos)
 			break;
 		}
 		coOrd anchor = pos;
-		if (anchor.x < 0.0 || anchor.x > mapD.size.x ||
-		    anchor.y < 0.0 || anchor.y > mapD.size.y) {
-			break;   /* pointer is over grey surround, not the layout */
-		}
 		{
 			DIST_T oldScale = mainD.scale;
 			int idx = ScaleInx(oldScale);
@@ -1353,10 +1352,6 @@ static void DoMouse(wAction_t action, coOrd pos)
 			break;
 		}
 		coOrd anchor = pos;
-		if (anchor.x < 0.0 || anchor.x > mapD.size.x ||
-		    anchor.y < 0.0 || anchor.y > mapD.size.y) {
-			break;   /* pointer is over grey surround, not the layout */
-		}
 		{
 			DIST_T oldScale = mainD.scale;
 			int idx = ScaleInx(oldScale);
@@ -1821,6 +1816,10 @@ static STATUS_T CmdPan(wAction_t action, coOrd pos)
 		break;
 	case C_UP:
 		if (panmode == ZOOM) {
+			if (size.x <= 0.0 || size.y <= 0.0) {
+				panmode = NONE;
+				break;
+			}
 			scale_x = size.x / mainD.size.x * mainD.scale;
 			scale_y = size.y / mainD.size.y * mainD.scale;
 
@@ -1858,7 +1857,7 @@ static STATUS_T CmdPan(wAction_t action, coOrd pos)
 		break;
 	case C_REDRAW:
 		if (panmode == ZOOM) {
-			if (base.x && base.y && size.x && size.y) {
+			if (size.x > 0.0 && size.y > 0.0) {
 				DrawHilight(&tempD, base, size, TRUE);
 			}
 		}

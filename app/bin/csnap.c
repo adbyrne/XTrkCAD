@@ -817,6 +817,7 @@ EXPORT void SnapGridEnable( void * unused )
 {
 	grid.Vert.Enable = grid.Horz.Enable = !(grid.Vert.Enable || grid.Horz.Enable);
 	GridButtonUpdate((CHK_HENABLE | CHK_VENABLE));
+	FormSaveDefaultValues(&gridPG);
 }
 
 
@@ -825,6 +826,7 @@ EXPORT void SnapGridShow(void* unused)
 	grid.Show = !grid.Show;
 
 	GridButtonUpdate(CHK_SHOW);
+	FormSaveDefaultValues(&gridPG);
 	// static int inTransition = FALSE;
 
 	// if (!inTransition) {
