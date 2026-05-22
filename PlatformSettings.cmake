@@ -71,6 +71,11 @@ if(WIN32)
 		add_compile_options("$<$<CONFIG:DEBUG>:/W3>")
 	else()
 		add_compile_options("$<$<CONFIG:DEBUG>:-Wall>")
+		# GCC 14 (MSYS2 MinGW) promotes this to a hard error; GTK3 type-system
+		# pointer casts throughout the codebase rely on the same suppression
+		# that the UNIX build already applies unconditionally.
+		add_compile_options(-Wno-incompatible-pointer-types)
+		add_compile_options(-Wno-deprecated-declarations)
 	endif()
 
 	add_compile_definitions(
