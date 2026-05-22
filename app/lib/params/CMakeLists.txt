@@ -4,7 +4,7 @@
 # Several xtp files are created from text definitions, the created xtp files are installed.
 #
 
-add_custom_target(xtpfiles ALL "")
+add_custom_target(xtpfiles ALL)
 set_target_properties(
    xtpfiles
    PROPERTIES FOLDER "Param Files"
