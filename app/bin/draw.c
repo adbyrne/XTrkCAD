@@ -44,7 +44,7 @@ static int charWidth;
 /* Accessor functions used by ddrawprim.c and drawruler.c */
 int GetLBorder(void)  { return lborder;   }
 int GetBBorder(void)  { return bborder;   }
-int GetCharWidth(void) { return charWidth;  }
+int DrawGetCharWidth(void) { return charWidth;  }
 
 /* Functions moved to drawruler.c */
 void DrawRoomWalls(wBool_t drawBackground);

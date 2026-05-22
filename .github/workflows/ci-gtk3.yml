@@ -4,6 +4,7 @@ on:
     branches:
       - GTK3V2MAIN
       - test/upstream-gtk3*
+      - test/windows-gtk3*
   pull_request:
     branches:
       - GTK3V2MAIN
@@ -88,6 +89,39 @@ jobs:
       - name: Test
         run: ctest --test-dir build --output-on-failure
 
-  # NOTE: Windows (mswlib/Win32) job removed — SF r6508 deleted the entire
-  # mswlib directory from GTK3V2MAIN. This branch is now GTK3-only.
-  # Windows would require GTK3 for Windows (MSYS2/MinGW), not tracked here.
+  c-tests-windows-msys2:
+    # GTK3 on Windows via MSYS2/MinGW64 — replaces the old mswlib/MSVC job.
+    # mswlib was removed from GTK3V2MAIN in SF r6508; Windows now builds
+    # against GTK3 directly using the official GTK Windows runtime (MSYS2).
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: false
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-pkg-config
+            mingw-w64-x86_64-gtk3
+            mingw-w64-x86_64-zlib
+            mingw-w64-x86_64-libzip
+            mingw-w64-x86_64-mxml
+            mingw-w64-x86_64-librsvg
+            mingw-w64-x86_64-gettext
+            mingw-w64-x86_64-cmocka
+      - name: Configure
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DXTRKCAD_TESTING=ON \
+            -DXTRKCAD_USE_GETTEXT=OFF
+      - name: Build
+        run: cmake --build build --parallel
+      - name: Test
+        run: ctest --test-dir build --output-on-failure

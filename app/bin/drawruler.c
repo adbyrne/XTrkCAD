@@ -29,7 +29,7 @@
 /* Accessor functions for border widths and character width, defined in draw.c */
 extern int GetLBorder(void);
 extern int GetBBorder(void);
-extern int GetCharWidth(void);
+extern int DrawGetCharWidth(void);
 
 static void DrawTicks(drawCmd_p d, coOrd size);
 
@@ -190,7 +190,7 @@ static void DrawRulerWithBackground(drawCmd_p d, coOrd pos0, coOrd pos1,
 	/* Fetch border metrics for label positioning */
 	int lborder   = GetLBorder();
 	int bborder   = GetBBorder();
-	int charWidth = GetCharWidth();
+	int charWidth = DrawGetCharWidth();
 
 	a = FindAngle(pos0, pos1);
 	Translate(&pos0, pos0, a, offset);

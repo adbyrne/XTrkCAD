@@ -1,4 +1,4 @@
-
+find_package(GTK3 REQUIRED)
 
 add_library(wrapbox)
 
