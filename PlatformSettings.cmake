@@ -67,9 +67,11 @@ if(WIN32)
         set( XTRKCAD_ARCH_SUBDIR "x86")
 	endif ()
 
-	add_compile_options(
-		"$<$<CONFIG:DEBUG>:/W3>"
-	)
+	if(MSVC)
+		add_compile_options("$<$<CONFIG:DEBUG>:/W3>")
+	else()
+		add_compile_options("$<$<CONFIG:DEBUG>:-Wall>")
+	endif()
 
 	add_compile_definitions(
 		"$<$<CONFIG:DEBUG>:_DEBUG>"
