@@ -9,6 +9,7 @@ name: Hillside Division
 scale: HO
 
 floor_plan_file: hillside_floor_plan.yaml
+benchwork_file: hillside_benchwork.yaml
 
 mainline: single
 curve_radius: 22in

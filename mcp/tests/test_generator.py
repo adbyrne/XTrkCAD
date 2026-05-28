@@ -609,9 +609,23 @@ def test_floor_plan_layer0_draw_count(floor_plan_result):
     # 1 restricted + 1 partition + 1 inward door clearance
     assert len(_layer0_draws(floor_plan_result)) == 3
 
+def _layer0_filpolys(content: str) -> list[str]:
+    """Return F4 lines that belong to layer-0 DRAW blocks (floor plan features)."""
+    result = []
+    in_layer0 = False
+    for ln in content.splitlines():
+        if ln.startswith("DRAW"):
+            in_layer0 = ln.split()[2] == "0"
+        elif ln.startswith("END"):
+            in_layer0 = False
+        elif in_layer0 and ln.strip().startswith("F4"):
+            result.append(ln)
+    return result
+
+
 def test_floor_plan_filpoly_count(floor_plan_result):
-    filpolys = [ln for ln in floor_plan_result.splitlines() if ln.strip().startswith("F4")]
-    assert len(filpolys) == 3
+    # 1 restricted + 1 partition + 1 inward door clearance = 3 layer-0 F4 polys
+    assert len(_layer0_filpolys(floor_plan_result)) == 3
 
 def test_floor_plan_restricted_vertex(floor_plan_result):
     # furnace_corner: x=96, y=0 → first vertex

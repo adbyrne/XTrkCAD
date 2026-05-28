@@ -76,22 +76,77 @@ The standalone file contains just the floor_plan body (no wrapping key needed).
 
 benchwork section
 -----------------
+A YAML list of physical benchwork sections.  Each entry must have label,
+level (deck number, 1-based), shape, and the shape's geometry keys.
+
+Two ways to supply the benchwork:
+
+  benchwork_file: path/to/benchwork.yaml   # standalone file — share across configs
+  benchwork:                               # inline list
+
+benchwork_file takes precedence when both are present.
+
+Supported shapes:
+
+  rect (axis-aligned rectangle):
+    shape: rect
+    x: 0          # SW corner, model inches
+    y: 0
+    width: 24
+    length: 156
+
+  rotated_rect (rectangle rotated around its centre):
+    shape: rotated_rect
+    cx: 60        # centre x, model inches
+    cy: 96        # centre y
+    width: 24
+    length: 72
+    rotation: 45  # degrees counter-clockwise
+
+  polygon (arbitrary convex/concave polygon):
+    shape: polygon
+    vertices:
+      - [0, 0]
+      - [24, 0]
+      - [24, 96]
+      - [0, 96]
+
+  arc (curved shelf — outer+inner ring approximated at 2°/step):
+    shape: arc
+    cx: 72        # arc centre, model inches
+    cy: 72
+    radius: 48    # centreline radius
+    width: 24     # shelf depth (radial)
+    start_angle: 0
+    sweep_angle: 90
+
+  spline (narrow strip following a track centreline path):
+    shape: spline
+    width: 12     # strip width, model inches
+    points:
+      - [0, 0]
+      - [48, 48]
+      - [96, 96]
+
+Example inline list:
+
   benchwork:
-    default_depth: 24       # model inches
-    walls:
-      - label: west
-        side: west          # north | south | east | west | interior
-        from: 0             # model-inch offset along wall start
-        to: 192
-        depth: 24           # model inches into room; inherits default_depth if omitted
-        levels: [1, 2]      # which deck levels; all levels if omitted
-    obstructions:
-      - label: column
-        type: rect          # rect | triangle
-        x: 60
-        y: 48
-        width: 12
-        height: 12
+    - label: west wall
+      shape: rect
+      level: 1
+      x: 0
+      y: 0
+      width: 24
+      length: 192
+    - label: curved corner
+      shape: arc
+      level: 1
+      cx: 144
+      cy: 0
+      radius: 24
+      width: 18
+      start_angle: 90
+      sweep_angle: 90
 
 grid section
 ------------

@@ -88,31 +88,50 @@ def load_layout_config(config_path: str) -> dict:
           config   — parsed config values (name, scale, room, placements, ...)
     """
     result = load_config(config_path)
+    cfg = result.config
+    fp = cfg.floor_plan
     return {
         "ready": result.ready,
         "summary": result.summary,
         "missing": [{"field": f, "question": q} for f, q in result.missing],
         "warnings": result.warnings,
         "config": {
-            "name": result.config.name,
-            "scale": result.config.scale,
-            "room_width_ft": result.config.room_width_ft,
-            "room_depth_ft": result.config.room_depth_ft,
-            "mainline": result.config.mainline,
-            "curve_radius_in": result.config.curve_radius_in,
-            "switch_size": result.config.switch_size,
-            "levels": result.config.levels,
-            "level_separation_in": result.config.level_separation_in,
-            "level_break_row": result.config.level_break_row,
-            "grid_size_ft": result.config.grid_size_ft,
-            "obstructions": result.config.obstructions,
+            "name": cfg.name,
+            "scale": cfg.scale,
+            "room_width_ft": cfg.room_width_ft,
+            "room_depth_ft": cfg.room_depth_ft,
+            "mainline": cfg.mainline,
+            "curve_radius_in": cfg.curve_radius_in,
+            "switch_size": cfg.switch_size,
+            "levels": cfg.levels,
+            "level_separation_in": cfg.level_separation_in,
+            "level_break_row": cfg.level_break_row,
+            "grid_size_ft": cfg.grid_size_ft,
+            "benchwork_file": cfg.benchwork_file,
+            "benchwork_sections": [
+                {
+                    "label": bw.label,
+                    "level": bw.level,
+                    "vertex_count": len(bw.vertices),
+                }
+                for bw in cfg.benchwork_sections
+            ],
+            "floor_plan_file": cfg.floor_plan_file,
+            "floor_plan": {
+                "width_in": fp.total_width_in,
+                "depth_in": fp.total_depth_in,
+                "rooms": len(fp.rooms),
+                "doors": len(fp.doors),
+                "partitions": len(fp.partitions),
+                "restricted": len(fp.restricted),
+            } if fp else None,
             "placements": [
                 {
                     "range": pl.cell_range,
                     "type": pl.element_type,
                     "params": pl.params,
                 }
-                for pl in result.config.placements
+                for pl in cfg.placements
             ],
         },
     }
@@ -251,6 +270,200 @@ def generate_layout(config_path: str, output_path: str = "") -> dict:
         "warnings": result.warnings,
         "summary": cfg_result.summary,
     }
+
+
+# ---------------------------------------------------------------------------
+# Tools — benchwork plan
+# ---------------------------------------------------------------------------
+
+
+def _poly_bbox(vertices: list) -> tuple[float, float, float, float]:
+    """Return (min_x, min_y, max_x, max_y) of a vertex list."""
+    xs = [v[0] for v in vertices]
+    ys = [v[1] for v in vertices]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+def _poly_area(vertices: list) -> float:
+    """Shoelace formula — signed area magnitude of a closed polygon."""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = sum(
+        vertices[i][0] * vertices[(i + 1) % n][1]
+        - vertices[(i + 1) % n][0] * vertices[i][1]
+        for i in range(n)
+    )
+    return abs(area) / 2.0
+
+
+@mcp.tool()
+def write_benchwork_report(
+    config_path: str,
+    output_path: str,
+    format: str = "txt",
+) -> str:
+    """Write a benchwork plan report from a layout YAML config.
+
+    Summarises every benchwork section by level: label, bounding box,
+    approximate area, and vertex count.  Useful for reviewing the physical
+    benchwork plan before generating a layout.
+
+    Args:
+        config_path: Path to the YAML layout config (or benchwork_file path).
+        output_path: Destination path for the report.
+        format: Output format — "txt" (default), "md", or "html".
+
+    Returns:
+        Confirmation message with the absolute path written.
+    """
+    cfg_result = load_config(config_path)
+    cfg = cfg_result.config
+    sections = cfg.benchwork_sections
+
+    # Group by level
+    by_level: dict[int, list] = {}
+    for bw in sections:
+        by_level.setdefault(bw.level, []).append(bw)
+
+    title = f"Benchwork Plan Report: {cfg.name}" if cfg.name else "Benchwork Plan Report"
+
+    # Build per-section rows: (label, level, bbox, area_sqin, area_sqft)
+    def _section_row(bw):
+        if bw.vertices:
+            x0, y0, x1, y1 = _poly_bbox(bw.vertices)
+            area_sqin = _poly_area(bw.vertices)
+        else:
+            x0 = y0 = x1 = y1 = 0.0
+            area_sqin = 0.0
+        area_sqft = area_sqin / 144.0
+        return {
+            "label": bw.label,
+            "level": bw.level,
+            "x0": x0, "y0": y0, "x1": x1, "y1": y1,
+            "area_sqin": area_sqin,
+            "area_sqft": area_sqft,
+        }
+
+    rows = [_section_row(bw) for bw in sections]
+
+    out = Path(output_path).expanduser()
+    fmt = _resolve_format(output_path, format)
+
+    if fmt == "txt":
+        lines = [
+            title,
+            f"  Config : {config_path}",
+            f"  Scale  : {cfg.scale or '—'}",
+            f"  Date   : {datetime.date.today()}",
+            f"  Levels : {', '.join(str(lv) for lv in sorted(by_level)) or 'none'}",
+            f"  Total sections: {len(sections)}",
+        ]
+        if cfg_result.warnings:
+            for w in cfg_result.warnings:
+                lines.append(f"  WARNING: {w}")
+        if not sections:
+            lines += ["", "  No benchwork sections defined."]
+        else:
+            for lv in sorted(by_level):
+                lv_rows = [r for r in rows if r["level"] == lv]
+                lv_area = sum(r["area_sqft"] for r in lv_rows)
+                lines += [
+                    "",
+                    f"LEVEL {lv}  ({len(lv_rows)} section{'s' if len(lv_rows) != 1 else ''},"
+                    f" ~{lv_area:.1f} sq ft total)",
+                    f"  {'Section':<24s}  {'Bbox (x0–x1) × (y0–y1) in':32s}  {'Sqin':>8s}  {'Sqft':>6s}",
+                    f"  {'-'*24}  {'-'*32}  {'-'*8}  {'-'*6}",
+                ]
+                for r in lv_rows:
+                    bbox = f"({r['x0']:.0f}–{r['x1']:.0f}) × ({r['y0']:.0f}–{r['y1']:.0f})"
+                    lines.append(
+                        f"  {r['label']:<24s}  {bbox:<32s}  {r['area_sqin']:8.1f}  {r['area_sqft']:6.1f}"
+                    )
+            total_area = sum(r["area_sqft"] for r in rows)
+            lines += [
+                "",
+                f"TOTAL BENCHWORK AREA: ~{total_area:.1f} sq ft",
+                "",
+                "Note: area is the polygon area of each section as defined; actual"
+                " built area may vary.",
+            ]
+        out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    elif fmt == "md":
+        md: list[str] = [
+            f"# {title}", "",
+            f"**Config:** {config_path}  |  **Scale:** {cfg.scale or '—'}"
+            f"  |  **Date:** {datetime.date.today()}",
+            f"**Levels:** {', '.join(str(lv) for lv in sorted(by_level)) or 'none'}"
+            f"  |  **Total sections:** {len(sections)}",
+        ]
+        if cfg_result.warnings:
+            md += ["", "> **Warnings:**"]
+            for w in cfg_result.warnings:
+                md.append(f"> - {w}")
+        if not sections:
+            md += ["", "_No benchwork sections defined._"]
+        else:
+            for lv in sorted(by_level):
+                lv_rows = [r for r in rows if r["level"] == lv]
+                lv_area = sum(r["area_sqft"] for r in lv_rows)
+                md += [
+                    "",
+                    f"## Level {lv}  (~{lv_area:.1f} sq ft)", "",
+                ]
+                tbl_rows = [
+                    [r["label"],
+                     f"({r['x0']:.0f}–{r['x1']:.0f}) × ({r['y0']:.0f}–{r['y1']:.0f})",
+                     f"{r['area_sqin']:.1f}",
+                     f"{r['area_sqft']:.1f}"]
+                    for r in lv_rows
+                ]
+                md += _md_table(["Section", "Bbox (in)", "Sq in", "Sq ft"], tbl_rows)
+            total_area = sum(r["area_sqft"] for r in rows)
+            md += [
+                "",
+                f"**Total benchwork area: ~{total_area:.1f} sq ft**",
+                "",
+                "_Area is the polygon area of each section as defined; actual built area may vary._",
+            ]
+        out.write_text("\n".join(md) + "\n", encoding="utf-8")
+
+    else:  # html
+        if not sections:
+            body = f"<h1>{title}</h1><p>No benchwork sections defined.</p>"
+        else:
+            body = (
+                f"<h1>{title}</h1>"
+                f"<div class='summary'>"
+                f"<p><strong>Config:</strong> {config_path} &nbsp;|&nbsp; "
+                f"<strong>Scale:</strong> {cfg.scale or '—'} &nbsp;|&nbsp; "
+                f"<strong>Date:</strong> {datetime.date.today()}</p>"
+                f"<p><strong>Levels:</strong> {', '.join(str(lv) for lv in sorted(by_level))} "
+                f"&nbsp;|&nbsp; <strong>Total sections:</strong> {len(sections)}</p>"
+                f"</div>"
+            )
+            for lv in sorted(by_level):
+                lv_rows = [r for r in rows if r["level"] == lv]
+                lv_area = sum(r["area_sqft"] for r in lv_rows)
+                tbl = _html_table(
+                    ["Section", "Bbox (in)", "Sq in", "Sq ft"],
+                    [[r["label"],
+                      f"({r['x0']:.0f}–{r['x1']:.0f}) × ({r['y0']:.0f}–{r['y1']:.0f})",
+                      f"{r['area_sqin']:.1f}",
+                      f"{r['area_sqft']:.1f}"]
+                     for r in lv_rows],
+                )
+                body += f"<h2>Level {lv} (~{lv_area:.1f} sq ft)</h2>{tbl}"
+            total_area = sum(r["area_sqft"] for r in rows)
+            body += (
+                f"<p><strong>Total benchwork area: ~{total_area:.1f} sq ft</strong></p>"
+                f"<p><em>Area is the polygon area of each section as defined; "
+                f"actual built area may vary.</em></p>"
+            )
+        out.write_text(_html_page(title, body), encoding="utf-8")
+
+    return f"Benchwork report written to {out}"
 
 
 # ---------------------------------------------------------------------------

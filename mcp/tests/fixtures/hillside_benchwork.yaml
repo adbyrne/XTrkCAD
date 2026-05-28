@@ -1,0 +1,37 @@
+# Hillside Division — Benchwork sections
+# Room: 12×16 ft (144×192 in).  All dimensions in model inches.
+# Coordinate system: origin (0,0) at SW corner, X increases east, Y increases north.
+#
+# Room constraints honored:
+#   - East wall entry door: y=36 to y=72  → east shelf starts at y=72
+#   - NW alcove wall: x=48, y=156 to y=192 → west shelf stops at y=156
+#   - SE corner HVAC restricted: x=96–144, y=0–36 → south end of east shelf clear
+#
+# Classic around-the-walls starter benchwork: three 24-inch deep wall shelves.
+
+# West wall shelf — full run from south wall to the alcove stub wall
+- label: west_wall
+  shape: rect
+  level: 1
+  x: 0
+  y: 0
+  width: 24        # 2 ft deep into room
+  length: 156      # runs from y=0 to y=156 (stops at alcove wall)
+
+# North wall shelf — full east-west width of the room
+- label: north_wall
+  shape: rect
+  level: 1
+  x: 0
+  y: 168           # 192 - 24 = 168 (24 in from north wall)
+  width: 144       # full 12 ft east-west
+  length: 24       # 2 ft deep
+
+# East wall shelf — above the entry door clearance zone
+- label: east_wall
+  shape: rect
+  level: 1
+  x: 120           # 144 - 24 = 120 (24 in from east wall)
+  y: 72            # starts above door clearance (door top = y 72)
+  width: 24        # 2 ft deep into room
+  length: 120      # runs from y=72 to y=192
