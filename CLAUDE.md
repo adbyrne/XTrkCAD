@@ -24,12 +24,12 @@ Requires CMake ≥ 3.20 and `rsvg-convert` (replaces Inkscape for SVG→PNG; no 
 
 ```sh
 # default branch (GTK2)
-cmake -B build -S xtrkcad-hg -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
-cmake --build build --parallel $(nproc)
+cmake -B build -S xtrkcad-hg -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
+cmake --build build
 
 # GTK3V2MAIN branch (GTK3)
-cmake -B build-gtk3v2main -S xtrkcad-hg-gtk3v2main -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
-cmake --build build-gtk3v2main --parallel $(nproc)
+cmake -B build-gtk3v2main -S xtrkcad-hg-gtk3v2main -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
+cmake --build build-gtk3v2main
 ```
 
 Useful CMake options:

@@ -29,9 +29,9 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y cmake libgtk2.0-dev doxygen graphviz zlib1g-dev libzip-dev
+          sudo apt-get install -y cmake ninja-build libgtk2.0-dev doxygen graphviz zlib1g-dev libzip-dev
       - name: Configure
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_USE_DOXYGEN=ON -DXTRKCAD_TESTING=OFF
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_USE_DOXYGEN=ON -DXTRKCAD_TESTING=OFF
       - name: Build docs
         run: cmake --build build --target docs-doxygen
 
@@ -42,11 +42,11 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y cmake libgtk2.0-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin
+          sudo apt-get install -y cmake ninja-build libgtk2.0-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin
       - name: Configure
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
       - name: Build
-        run: cmake --build build --parallel $(nproc)
+        run: cmake --build build
       - name: Test
         run: ctest --test-dir build --output-on-failure
 
@@ -58,11 +58,11 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y cmake libgtk2.0-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin
+          sudo apt-get install -y cmake ninja-build libgtk2.0-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin
       - name: Configure
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
       - name: Build
-        run: cmake --build build --parallel $(nproc)
+        run: cmake --build build
       - name: Test
         run: ctest --test-dir build --output-on-failure
 
@@ -73,11 +73,11 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y cmake clang libgtk2.0-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin
+          sudo apt-get install -y cmake ninja-build clang libgtk2.0-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin
       - name: Configure
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DCMAKE_C_COMPILER=clang
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DCMAKE_C_COMPILER=clang
       - name: Build
-        run: cmake --build build --parallel $(nproc)
+        run: cmake --build build
       - name: Test
         run: ctest --test-dir build --output-on-failure
 
@@ -87,7 +87,7 @@ jobs:
       - uses: actions/checkout@v5
       - name: Install dependencies
         # mxml (Mini-XML) is not in homebrew-core; it is optional (SVG export only)
-        run: brew install gtk+ cmocka libzip librsvg
+        run: brew install ninja gtk+ cmocka libzip librsvg
       - name: Configure
         # gtk+ and several of its deps (pango, atk, …) are keg-only in Homebrew
         # and are not symlinked into /opt/homebrew/lib.  Ask pkg-config for the
@@ -96,12 +96,12 @@ jobs:
           GTK_PREFIX=$(brew --prefix gtk+)
           export PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
           GTK_LDFLAGS=$(pkg-config --libs-only-L gtk+-2.0)
-          cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_PREFIX_PATH="$GTK_PREFIX;$(brew --prefix)" \
             -DCMAKE_EXE_LINKER_FLAGS="$GTK_LDFLAGS"
       - name: Build
-        run: cmake --build build --parallel $(sysctl -n hw.ncpu)
+        run: cmake --build build
       - name: Test
         run: ctest --test-dir build --output-on-failure
 
@@ -109,6 +109,9 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
       - name: Install rsvg-convert
         # rsvg-convert converts SVG toolbar icons to PNG during the build.
         # MSYS2 is pre-installed on Windows runners; mingw-w64-x86_64-librsvg
@@ -138,10 +141,11 @@ jobs:
       - name: Configure
         # CMAKE_PREFIX_PATH points CMake at the vcpkg installed tree so all
         # config-mode and module-mode finders (zlib, libzip, etc.) resolve.
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_USE_GETTEXT=OFF "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" "-DCMAKE_PREFIX_PATH=$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows"
+        # Ninja is a single-config generator — CMAKE_BUILD_TYPE set at configure time.
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_USE_GETTEXT=OFF "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" "-DCMAKE_PREFIX_PATH=$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows"
       - name: Build
         run: |
-          cmake --build build --config Debug --parallel 2>&1 | Tee-Object -FilePath build/build-log.txt
+          cmake --build build 2>&1 | Tee-Object -FilePath build/build-log.txt
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Upload build log
         if: always()
@@ -150,4 +154,4 @@ jobs:
           name: windows-build-log
           path: build/build-log.txt
       - name: Test
-        run: ctest --test-dir build -C Debug --output-on-failure
+        run: ctest --test-dir build --output-on-failure

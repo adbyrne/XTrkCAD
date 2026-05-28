@@ -25,9 +25,9 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y cmake libgtk-3-dev doxygen graphviz
+          sudo apt-get install -y cmake ninja-build libgtk-3-dev doxygen graphviz
       - name: Configure
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_USE_DOXYGEN=ON -DXTRKCAD_TESTING=OFF
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_USE_DOXYGEN=ON -DXTRKCAD_TESTING=OFF
       - name: Build docs
         run: cmake --build build --target docs-doxygen
 
@@ -38,11 +38,11 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y cmake libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin
+          sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin
       - name: Configure
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
       - name: Build
-        run: cmake --build build --parallel $(nproc)
+        run: cmake --build build
       - name: Test
         run: ctest --test-dir build --output-on-failure
 
@@ -51,17 +51,17 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Install dependencies
-        run: brew install gtk+3 cmocka libzip librsvg
+        run: brew install ninja gtk+3 cmocka libzip librsvg
       - name: Configure
         run: |
           GTK_PREFIX=$(brew --prefix gtk+3)
           export PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
           GTK_LDFLAGS=$(pkg-config --libs-only-L gtk+-3.0)
-          cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
             -DCMAKE_PREFIX_PATH="$GTK_PREFIX;$(brew --prefix)" \
             -DCMAKE_EXE_LINKER_FLAGS="$GTK_LDFLAGS"
       - name: Build
-        run: cmake --build build --parallel $(sysctl -n hw.ncpu)
+        run: cmake --build build
       - name: Test
         run: ctest --test-dir build --output-on-failure
 
@@ -69,6 +69,9 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
       - name: Cache vcpkg packages
         uses: actions/cache@v5
         id: vcpkg-cache
@@ -79,10 +82,10 @@ jobs:
         if: steps.vcpkg-cache.outputs.cache-hit != 'true'
         run: vcpkg install cmocka:x64-windows zlib:x64-windows libzip:x64-windows freeimage:x64-windows
       - name: Configure
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" "-DCMAKE_PREFIX_PATH=$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows"
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" "-DCMAKE_PREFIX_PATH=$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows"
       - name: Build
         run: |
-          cmake --build build --config Debug 2>&1 | Tee-Object -FilePath build/build-log.txt
+          cmake --build build 2>&1 | Tee-Object -FilePath build/build-log.txt
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Upload build log
         if: always()
@@ -91,4 +94,4 @@ jobs:
           name: windows-build-log
           path: build/build-log.txt
       - name: Test
-        run: ctest --test-dir build -C Debug --output-on-failure
+        run: ctest --test-dir build --output-on-failure
