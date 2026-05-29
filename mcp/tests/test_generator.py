@@ -20,6 +20,7 @@ from xtrkcad_mcp.templates import load_library
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 FULL_CONFIG = FIXTURES_DIR / "test_layout_config.yaml"
+FLOOR_PLAN_CONFIG = FIXTURES_DIR / "hillside_division.yaml"
 
 
 # ---------------------------------------------------------------------------
@@ -255,20 +256,23 @@ def test_generate_output_has_tracks(simple_config, tmp_path):
     assert len(layout.tracks) >= 2
 
 
-def test_generate_track_ids_start_at_1(simple_config, tmp_path):
+def test_generate_track_ids_are_positive(simple_config, tmp_path):
+    # TABLEEDGEs (room boundary) occupy IDs 1-4; placed template tracks start at 5+.
     result = load_config(simple_config)
     out = tmp_path / "test_layout.xtc"
     gen = generate(result.config, out)
     all_ids = [tid for p in gen.placed for tid in p.track_ids]
-    assert 1 in all_ids
+    assert all(tid > 0 for tid in all_ids)
 
 
 def test_generate_track_ids_sequential(simple_config, tmp_path):
+    # Placed template track IDs must be consecutive (no gaps), though they no
+    # longer start at 1 — room TABLEEDGE objects consume the first 4 IDs.
     result = load_config(simple_config)
     out = tmp_path / "test_layout.xtc"
     gen = generate(result.config, out)
     all_ids = sorted(tid for p in gen.placed for tid in p.track_ids)
-    assert all_ids == list(range(1, len(all_ids) + 1))
+    assert all_ids == list(range(all_ids[0], all_ids[0] + len(all_ids)))
 
 
 # ---------------------------------------------------------------------------
@@ -376,3 +380,353 @@ def test_generate_unknown_element_type_skipped(tmp_path):
     out = tmp_path / "t.xtc"
     gen = generate(result.config, out)
     assert gen.skipped == []   # single-ended yard should resolve fine
+
+
+# ---------------------------------------------------------------------------
+# generate — layer scheme
+# ---------------------------------------------------------------------------
+
+def test_layer_scheme_floor_always_present(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text("name: T\nscale: HO\nroom: 12x16\ngrid: []\n")
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    content = out.read_text()
+    assert "LAYERS 0" in content
+    assert '"Floor"' in content
+    assert "LAYERS CURRENT 1" in content
+
+
+def test_layer_scheme_level1_always_emitted(tmp_path):
+    # L1-Track (layer 1) and L1-Benchwork (layer 2) always emitted for a 1-level config
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text("name: T\nscale: HO\nroom: 12x16\ngrid: []\n")
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    content = out.read_text()
+    assert "LAYERS 1" in content
+    assert '"L1-Track"' in content
+    assert "LAYERS 2" in content
+    assert '"L1-Benchwork"' in content
+
+
+def test_layer_scheme_two_levels(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text("name: T\nscale: HO\nroom: 12x16\nlevels: 2\ngrid: []\n")
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    content = out.read_text()
+    assert '"L1-Track"' in content
+    assert '"L1-Benchwork"' in content
+    assert '"L2-Track"' in content
+    assert '"L2-Benchwork"' in content
+    assert "LAYERS 3" in content
+    assert "LAYERS 4" in content
+
+
+def test_layer_scheme_track_colors(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text("name: T\nscale: HO\nroom: 12x16\nlevels: 2\ngrid: []\n")
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    content = out.read_text()
+    # L1-Track layer line should contain black (0), L2-Track dark-red (11534336)
+    assert "LAYERS 1 1 0 1 0 " in content
+    assert "LAYERS 3 1 0 1 11534336 " in content
+
+
+def test_layer_scheme_benchwork_colors(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text("name: T\nscale: HO\nroom: 12x16\nlevels: 2\ngrid: []\n")
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    content = out.read_text()
+    # L1-Benchwork = green (32768), L2-Benchwork = blue (255)
+    assert "LAYERS 2 1 0 1 32768 " in content
+    assert "LAYERS 4 1 0 1 255 " in content
+
+
+def test_room_tableedges_always_present(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text("name: T\nscale: HO\nroom: 12x16\ngrid: []\n")
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    tableedges = [
+        ln for ln in out.read_text().splitlines()
+        if ln.startswith("TABLEEDGE")
+    ]
+    assert len(tableedges) == 4
+
+
+# ---------------------------------------------------------------------------
+# generate — benchwork sections
+# ---------------------------------------------------------------------------
+
+def _bw_xtc(tmp_path, sections_yaml: str, levels: int = 1) -> str:
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text(
+        f"name: T\nscale: HO\nroom: 12x16\nlevels: {levels}\n"
+        f"benchwork:\n{sections_yaml}\ngrid: []\n"
+    )
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    return out.read_text()
+
+
+def test_benchwork_section_draws_on_benchwork_layer(tmp_path):
+    content = _bw_xtc(
+        tmp_path,
+        "  - label: west\n    level: 1\n    shape: rect\n"
+        "    x: 0in\n    y: 0in\n    width: 24in\n    length: 144in\n",
+    )
+    # L1-Benchwork = layer 2
+    layer2_draws = [ln for ln in content.splitlines()
+                    if ln.startswith("DRAW") and ln.split()[2] == "2"]
+    assert len(layer2_draws) == 1
+
+
+def test_benchwork_section_level2_on_layer4(tmp_path):
+    content = _bw_xtc(
+        tmp_path,
+        "  - label: upper\n    level: 2\n    shape: rect\n"
+        "    x: 0in\n    y: 0in\n    width: 24in\n    length: 144in\n",
+        levels=2,
+    )
+    # L2-Benchwork = layer 4
+    layer4_draws = [ln for ln in content.splitlines()
+                    if ln.startswith("DRAW") and ln.split()[2] == "4"]
+    assert len(layer4_draws) == 1
+
+
+def test_benchwork_section_uses_benchwork_color(tmp_path):
+    content = _bw_xtc(
+        tmp_path,
+        "  - label: shelf\n    level: 1\n    shape: rect\n"
+        "    x: 0in\n    y: 0in\n    width: 24in\n    length: 144in\n",
+    )
+    # L1-Benchwork color = green (32768)
+    assert "F4 32768" in content
+
+
+def test_benchwork_section_filpoly_vertex_count(tmp_path):
+    content = _bw_xtc(
+        tmp_path,
+        "  - label: shelf\n    level: 1\n    shape: rect\n"
+        "    x: 0in\n    y: 0in\n    width: 24in\n    length: 144in\n",
+    )
+    # rect → 4 vertices
+    assert "F4 32768 0.000000 4 0" in content
+
+
+def test_benchwork_arc_section_generates(tmp_path):
+    content = _bw_xtc(
+        tmp_path,
+        "  - label: arc\n    level: 1\n    shape: arc\n"
+        "    cx: 144in\n    cy: 96in\n    radius: 48in\n    width: 24in\n"
+        "    start_angle: 0\n    sweep_angle: 90\n",
+    )
+    filpolys = [ln for ln in content.splitlines() if ln.strip().startswith("F4")]
+    assert len(filpolys) == 1
+    # 90°/2° = 45 steps → 46 points per ring → 92 total vertices
+    assert "F4 32768 0.000000 92 0" in content
+
+
+def test_benchwork_spline_section_generates(tmp_path):
+    content = _bw_xtc(
+        tmp_path,
+        "  - label: strip\n    level: 1\n    shape: spline\n    width: 6in\n"
+        "    points:\n      - [0, 48]\n      - [72, 48]\n      - [96, 72]\n",
+    )
+    filpolys = [ln for ln in content.splitlines() if ln.strip().startswith("F4")]
+    assert len(filpolys) == 1
+    # 3 points → 3+3 = 6 vertices
+    assert "F4 32768 0.000000 6 0" in content
+
+
+def test_benchwork_sections_no_layer0_draws(tmp_path):
+    content = _bw_xtc(
+        tmp_path,
+        "  - label: shelf\n    level: 1\n    shape: rect\n"
+        "    x: 0in\n    y: 0in\n    width: 24in\n    length: 144in\n",
+    )
+    layer0 = [ln for ln in content.splitlines()
+               if ln.startswith("DRAW") and ln.split()[2] == "0"]
+    assert len(layer0) == 0
+
+
+def test_benchwork_sections_generates_cleanly(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text(
+        "name: T\nscale: HO\nroom: 12x16\nlevels: 2\n"
+        "benchwork:\n"
+        "  - label: west\n    level: 1\n    shape: rect\n"
+        "    x: 0in\n    y: 0in\n    width: 24in\n    length: 144in\n"
+        "  - label: upper\n    level: 2\n    shape: rotated_rect\n"
+        "    cx: 72in\n    cy: 96in\n    width: 24in\n    length: 48in\n    rotation: 45\n"
+        "grid: []\n"
+    )
+    out = tmp_path / "t.xtc"
+    gen = generate(load_config(cfg).config, out)
+    assert out.exists()
+    assert gen.warnings == []
+
+
+def test_grid_level_tag_selects_track_layer(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text(
+        "name: T\nscale: HO\nroom: 12x16\nlevels: 2\n"
+        "grid:\n  - A1@2=yard=single-ended\n"
+    )
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    content = out.read_text()
+    # L2-Track = layer 3; template track headers should use layer 3
+    track_lines = [
+        ln for ln in content.splitlines()
+        if ln.startswith(("STRAIGHT", "CURVE", "JOINT")) and ln.split()[2] == "3"
+    ]
+    assert len(track_lines) >= 1
+
+
+# ---------------------------------------------------------------------------
+# generate — floor plan rendering (Hillside Division fixture)
+# ---------------------------------------------------------------------------
+
+@pytest.fixture
+def floor_plan_result(tmp_path):
+    """Generate from the Hillside Division floor-plan config."""
+    result = load_config(FLOOR_PLAN_CONFIG)
+    out = tmp_path / "hillside.xtc"
+    generate(result.config, out)
+    return out.read_text()
+
+
+def _layer0_draws(content: str) -> list[str]:
+    return [ln for ln in content.splitlines() if ln.startswith("DRAW") and ln.split()[2] == "0"]
+
+
+def test_floor_plan_layer0_draw_count(floor_plan_result):
+    # 1 restricted + 1 partition + 1 inward door clearance
+    assert len(_layer0_draws(floor_plan_result)) == 3
+
+def _layer0_filpolys(content: str) -> list[str]:
+    """Return F4 lines that belong to layer-0 DRAW blocks (floor plan features)."""
+    result = []
+    in_layer0 = False
+    for ln in content.splitlines():
+        if ln.startswith("DRAW"):
+            in_layer0 = ln.split()[2] == "0"
+        elif ln.startswith("END"):
+            in_layer0 = False
+        elif in_layer0 and ln.strip().startswith("F4"):
+            result.append(ln)
+    return result
+
+
+def test_floor_plan_filpoly_count(floor_plan_result):
+    # 1 restricted + 1 partition + 1 inward door clearance = 3 layer-0 F4 polys
+    assert len(_layer0_filpolys(floor_plan_result)) == 3
+
+def test_floor_plan_restricted_vertex(floor_plan_result):
+    # furnace_corner: x=96, y=0 → first vertex
+    assert "96.000000 0.000000 0" in floor_plan_result
+
+def test_floor_plan_partition_vertex(floor_plan_result):
+    # alcove_wall: x0=48, y0=156, vertical → SW corner of polygon
+    assert "48.000000 156.000000 0" in floor_plan_result
+
+def test_floor_plan_door_clearance_vertex(floor_plan_result):
+    # east door inward: wall_x=144, clearance=36 → x0=108, y0=36
+    assert "108.000000 36.000000 0" in floor_plan_result
+
+def test_floor_plan_door_clearance_light_color(floor_plan_result):
+    # door clearance uses RESTRICTION_COLOR (12632256), not PARTITION_COLOR
+    assert "F4 12632256" in floor_plan_result
+
+def test_floor_plan_swing_none_no_clearance(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text(
+        "name: T\nscale: HO\n"
+        "floor_plan:\n"
+        "  rooms:\n"
+        "    - name: main\n"
+        "      x: 0in\n      y: 0in\n      width: 144in\n      depth: 192in\n"
+        "  doors:\n"
+        "    - room: main\n      wall: east\n      from: 0in\n"
+        "      width: 36in\n      swing: none\n      clearance: 36in\n"
+        "grid: []\n"
+    )
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    assert len(_layer0_draws(out.read_text())) == 0
+
+def test_floor_plan_no_extra_draws_without_floor_plan(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text("name: T\nscale: HO\nroom: 12x16\ngrid: []\n")
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    assert len(_layer0_draws(out.read_text())) == 0
+
+def test_floor_plan_generates_cleanly(tmp_path):
+    result = load_config(FLOOR_PLAN_CONFIG)
+    out = tmp_path / "hillside.xtc"
+    gen = generate(result.config, out)
+    assert out.exists()
+    assert gen.warnings == []
+
+def test_floor_plan_restricted_uses_light_color(floor_plan_result):
+    # Restricted zones should use RESTRICTION_COLOR (12632256 = light gray)
+    assert "F4 12632256" in floor_plan_result
+
+def test_floor_plan_partition_uses_medium_color(floor_plan_result):
+    # Partitions should use PARTITION_COLOR (8421504 = medium gray)
+    assert "F4 8421504" in floor_plan_result
+
+def test_floor_plan_polygon_restricted(tmp_path):
+    """Triangle restricted zone renders with correct vertex count."""
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text(
+        "name: T\nscale: HO\n"
+        "floor_plan:\n"
+        "  rooms:\n"
+        "    - name: main\n"
+        "      x: 0in\n      y: 0in\n      width: 144in\n      depth: 192in\n"
+        "  restricted:\n"
+        "    - label: triangle_zone\n"
+        "      vertices:\n"
+        "        - [163, 176]\n"
+        "        - [214, 176]\n"
+        "        - [214, 100]\n"
+        "      reason: access\n"
+        "grid: []\n"
+    )
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    content = out.read_text()
+    # Triangle has 3 vertices → F4 ... 3 0
+    assert "F4 12632256 0.000000 3 0" in content
+    assert "163.000000 176.000000 0" in content
+
+def test_floor_plan_partition_splits_around_door(tmp_path):
+    """Partition adjacent to a door opening splits into 2 DRAW segments."""
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text(
+        "name: T\nscale: HO\n"
+        "floor_plan:\n"
+        "  rooms:\n"
+        "    - name: left\n"
+        "      x: 0in\n      y: 0in\n      width: 48in\n      depth: 96in\n"
+        "  doors:\n"
+        "    - room: left\n      wall: east\n      from: 24in\n"
+        "      width: 32in\n      swing: none\n      clearance: 32in\n"
+        "  partitions:\n"
+        "    - label: center_wall\n"
+        "      x0: 48in\n      y0: 0in\n      x1: 48in\n      y1: 96in\n"
+        "      thickness: 6in\n"
+        "grid: []\n"
+    )
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    layer0 = _layer0_draws(out.read_text())
+    # One partition → split into 2 segments around the 32in door opening
+    assert len(layer0) == 2

@@ -5,7 +5,12 @@ import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from xtrkcad_mcp.config import GridPlacement, LayoutConfig
+import math
+
+from xtrkcad_mcp.config import (
+    Benchwork, FloorDoor, FloorPartition, FloorPlan, FloorRestricted,
+    FloorRoom, GridPlacement, LayoutConfig,
+)
 from xtrkcad_mcp.models import SCALE_RATIOS
 from xtrkcad_mcp.parser import parse_file
 from xtrkcad_mcp.templates import TemplateInfo, TemplateLibrary, load_library
@@ -123,6 +128,279 @@ def _endpoint_line(x: float, y: float, angle: float) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Layer scheme: 0=Floor, then per-level pairs: 2N-1=Track, 2N=Benchwork
+# ---------------------------------------------------------------------------
+
+# Track colors per level (0-indexed): black, dark-red, orange
+_TRACK_COLORS = [0, 11534336, 16744448]
+# Benchwork colors per level (0-indexed): green, blue, purple
+_BENCHWORK_COLORS = [32768, 255, 8388736]
+
+
+def _track_layer(level: int) -> int:
+    return 2 * level - 1
+
+
+def _benchwork_layer(level: int) -> int:
+    return 2 * level
+
+
+def _track_color(level: int) -> int:
+    return _TRACK_COLORS[level - 1] if level <= len(_TRACK_COLORS) else 0
+
+
+def _benchwork_color(level: int) -> int:
+    idx = level - 1
+    return _BENCHWORK_COLORS[idx] if idx < len(_BENCHWORK_COLORS) else 32768
+
+
+def _layer_line(lyr_id: int, name: str, color: int) -> str:
+    return (
+        f'LAYERS {lyr_id} 1 0 1 {color} 0 0 0 0 "{name}" '
+        f'1 0 0.000000 0.000000 0.000000 0.000000 0.000000'
+    )
+
+
+def _layers_header(num_levels: int) -> list[str]:
+    """Emit LAYERS: Floor (0), then Track+Benchwork pair per level."""
+    result = [_layer_line(0, "Floor", 8421504)]
+    for lv in range(1, num_levels + 1):
+        result.append(_layer_line(_track_layer(lv), f"L{lv}-Track", _track_color(lv)))
+        result.append(_layer_line(_benchwork_layer(lv), f"L{lv}-Benchwork", _benchwork_color(lv)))
+    result.append("LAYERS CURRENT 1")
+    return result
+
+
+def _room_tableedges(room_w: float, room_h: float, track_id: int) -> tuple[list[str], int]:
+    """Emit 4 TABLEEDGE lines forming the room perimeter on layer 0 (Floor)."""
+    edges = [
+        (0.0, 0.0, 0.0, room_h),        # west
+        (0.0, room_h, room_w, room_h),   # north
+        (room_w, room_h, room_w, 0.0),   # east
+        (room_w, 0.0, 0.0, 0.0),         # south
+    ]
+    lines: list[str] = []
+    tid = track_id
+    for x0, y0, x1, y1 in edges:
+        # VERSION >= 9 format: dL000pfpf — each position needs an elevation float.
+        lines.append(
+            f"TABLEEDGE {tid} 0 0 0 0 {x0:.6f} {y0:.6f} 0.000000 {x1:.6f} {y1:.6f} 0.000000"
+        )
+        tid += 1
+    return lines, tid
+
+
+_PARTITION_COLOR = 8421504     # medium gray (128,128,128) — walls and partitions
+_RESTRICTION_COLOR = 12632256  # light gray  (192,192,192) — access/clearance zones
+
+
+def _filpoly_draw(
+    vertices: list[tuple[float, float]],
+    layer: int, color: int, track_id: int,
+    elevation_z: float = 0.0,
+) -> tuple[list[str], int]:
+    """Emit one DRAW+SEG_FILPOLY for an arbitrary polygon.  One ID consumed.
+
+    elevation_z goes in the DRAW header (field before angle); per-vertex Z is
+    always 0 — a non-zero per-vertex Z is read by XTrkCAD as pt_type and causes
+    arc rendering instead of straight-line polygon corners.
+    """
+    lines = [
+        f"DRAW {track_id} {layer} 0 0 0 0.000000 0.000000 {elevation_z:.6f} 0.000000",
+        f"\tF4 {color} 0.000000 {len(vertices)} 0 ",
+    ]
+    for x, y in vertices:
+        lines.append(f"\t\t{x:.6f} {y:.6f} 0")
+    lines.append("END")
+    return lines, track_id + 1
+
+
+def _benchwork_section_draw(
+    bw: Benchwork, track_id: int,
+) -> tuple[list[str], int]:
+    """Emit one filled polygon for a benchwork section on its benchwork layer."""
+    return _filpoly_draw(bw.vertices, _benchwork_layer(bw.level), _benchwork_color(bw.level), track_id, bw.elevation_in)
+
+
+def _write_benchwork_sections(
+    sections: list[Benchwork],
+    lines: list[str],
+    track_id: int,
+) -> int:
+    for bw in sections:
+        new_lines, track_id = _benchwork_section_draw(bw, track_id)
+        lines += new_lines
+    return track_id
+
+
+# ---------------------------------------------------------------------------
+# Floor plan rendering helpers
+# ---------------------------------------------------------------------------
+
+def _floor_plan_restricted_draw(
+    restricted: FloorRestricted, track_id: int,
+) -> tuple[list[str], int]:
+    """Emit light-gray polygon for a restricted zone on layer 0."""
+    if restricted.vertices:
+        vertices = [(float(x), float(y)) for x, y in restricted.vertices]
+    else:
+        x0, y0 = restricted.x, restricted.y
+        x1, y1 = restricted.x + restricted.width, restricted.y + restricted.depth
+        vertices = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+    return _filpoly_draw(vertices, 0, _RESTRICTION_COLOR, track_id)
+
+
+def _partition_door_openings(
+    partition: FloorPartition,
+    doors: list,
+    rooms_by_name: dict,
+) -> list[tuple[float, float]]:
+    """Return sorted (start, end) gaps along the partition axis where doors cut through."""
+    is_vertical = abs(partition.y1 - partition.y0) >= abs(partition.x1 - partition.x0)
+    p_x = min(partition.x0, partition.x1)
+    p_y = min(partition.y0, partition.y1)
+    openings = []
+
+    for door in doors:
+        room = rooms_by_name.get(door.room)
+        if room is None:
+            continue
+        if is_vertical:
+            if door.wall not in ("east", "west"):
+                continue
+            wall_x = (room.x + room.width) if door.wall == "east" else room.x
+            if abs(wall_x - p_x) > partition.thickness:
+                continue
+            gap_start = room.y + door.from_in
+            gap_end = gap_start + door.width_in
+            p_start, p_end = min(partition.y0, partition.y1), max(partition.y0, partition.y1)
+        else:
+            if door.wall not in ("north", "south"):
+                continue
+            wall_y = (room.y + room.depth) if door.wall == "north" else room.y
+            if abs(wall_y - p_y) > partition.thickness:
+                continue
+            gap_start = room.x + door.from_in
+            gap_end = gap_start + door.width_in
+            p_start, p_end = min(partition.x0, partition.x1), max(partition.x0, partition.x1)
+
+        clipped = (max(gap_start, p_start), min(gap_end, p_end))
+        if clipped[0] < clipped[1]:
+            openings.append(clipped)
+
+    return sorted(openings)
+
+
+def _floor_plan_partition_draw(
+    partition: FloorPartition,
+    openings: list[tuple[float, float]],
+    track_id: int,
+) -> tuple[list[str], int]:
+    """Emit filled medium-gray polygons for an interior partition, skipping door openings."""
+    t = partition.thickness
+    is_vertical = abs(partition.y1 - partition.y0) >= abs(partition.x1 - partition.x0)
+    all_lines: list[str] = []
+
+    if is_vertical:
+        p_x = min(partition.x0, partition.x1)
+        p_start = min(partition.y0, partition.y1)
+        p_end = max(partition.y0, partition.y1)
+        cursor = p_start
+        for gap_start, gap_end in sorted(openings):
+            if cursor < gap_start:
+                verts = [(p_x, cursor), (p_x + t, cursor), (p_x + t, gap_start), (p_x, gap_start)]
+                new_lines, track_id = _filpoly_draw(verts, 0, _PARTITION_COLOR, track_id)
+                all_lines += new_lines
+            cursor = max(cursor, gap_end)
+        if cursor < p_end:
+            verts = [(p_x, cursor), (p_x + t, cursor), (p_x + t, p_end), (p_x, p_end)]
+            new_lines, track_id = _filpoly_draw(verts, 0, _PARTITION_COLOR, track_id)
+            all_lines += new_lines
+    else:
+        p_y = min(partition.y0, partition.y1)
+        p_start = min(partition.x0, partition.x1)
+        p_end = max(partition.x0, partition.x1)
+        cursor = p_start
+        for gap_start, gap_end in sorted(openings):
+            if cursor < gap_start:
+                verts = [(cursor, p_y), (gap_start, p_y), (gap_start, p_y + t), (cursor, p_y + t)]
+                new_lines, track_id = _filpoly_draw(verts, 0, _PARTITION_COLOR, track_id)
+                all_lines += new_lines
+            cursor = max(cursor, gap_end)
+        if cursor < p_end:
+            verts = [(cursor, p_y), (p_end, p_y), (p_end, p_y + t), (cursor, p_y + t)]
+            new_lines, track_id = _filpoly_draw(verts, 0, _PARTITION_COLOR, track_id)
+            all_lines += new_lines
+
+    return all_lines, track_id
+
+
+def _floor_plan_door_clearance_draw(
+    door: FloorDoor,
+    room: FloorRoom,
+    track_id: int,
+) -> tuple[list[str], int]:
+    """Emit light-gray polygon for door swing clearance on layer 0.
+
+    Renders for inward/both/outward swings; skipped when swing='none'.
+    Outward clearance extends outside the room — rendered as-is.
+    """
+    if door.swing == "none":
+        return [], track_id
+
+    c = door.clearance_in
+    if door.wall in ("east", "west"):
+        abs_y0 = room.y + door.from_in
+        abs_y1 = room.y + door.from_in + door.width_in
+        if door.wall == "east":
+            wall_x = room.x + room.width
+            x0, x1 = wall_x - c, wall_x
+        else:
+            wall_x = room.x
+            x0, x1 = wall_x, wall_x + c
+        vertices = [(x0, abs_y0), (x1, abs_y0), (x1, abs_y1), (x0, abs_y1)]
+    else:  # north / south
+        abs_x0 = room.x + door.from_in
+        abs_x1 = room.x + door.from_in + door.width_in
+        if door.wall == "north":
+            wall_y = room.y + room.depth
+            y0, y1 = wall_y - c, wall_y
+        else:
+            wall_y = room.y
+            y0, y1 = wall_y, wall_y + c
+        vertices = [(abs_x0, y0), (abs_x1, y0), (abs_x1, y1), (abs_x0, y1)]
+
+    return _filpoly_draw(vertices, 0, _RESTRICTION_COLOR, track_id)
+
+
+def _write_floor_plan(
+    fp: FloorPlan,
+    lines: list[str],
+    track_id: int,
+) -> int:
+    """Append floor plan features as layer 0 fills: restricted zones, partitions, door clearances."""
+    rooms_by_name = {r.name: r for r in fp.rooms}
+
+    for restricted in fp.restricted:
+        new_lines, track_id = _floor_plan_restricted_draw(restricted, track_id)
+        lines += new_lines
+
+    for partition in fp.partitions:
+        openings = _partition_door_openings(partition, fp.doors, rooms_by_name)
+        new_lines, track_id = _floor_plan_partition_draw(partition, openings, track_id)
+        lines += new_lines
+
+    for door in fp.doors:
+        room = rooms_by_name.get(door.room)
+        if room is None:
+            continue
+        new_lines, track_id = _floor_plan_door_clearance_draw(door, room, track_id)
+        lines += new_lines
+
+    return track_id
+
+
+# ---------------------------------------------------------------------------
 # Core generator
 # ---------------------------------------------------------------------------
 
@@ -148,8 +426,10 @@ def generate(config: LayoutConfig, output_path: Path) -> GenerationResult:
     lines: list[str] = []
     timestamp = datetime.date.today().isoformat()
 
+    num_levels = config.levels
+
     lines += [
-        f"VERSION 2 5.3.0Dev",
+        f"VERSION 10 3.0.0",
         f"TITLE1 {config.name}",
         f"TITLE2 Generated {timestamp} scale={config.scale} main={config.mainline}",
         f"SCALE {config.scale}",
@@ -157,7 +437,20 @@ def generate(config: LayoutConfig, output_path: Path) -> GenerationResult:
         "",
     ]
 
+    lines += _layers_header(num_levels)
+    lines.append("")
+
     track_id = 1
+
+    room_lines, track_id = _room_tableedges(room_w_in, room_h_in, track_id)
+    lines += room_lines
+    lines.append("")
+
+    if config.floor_plan is not None:
+        track_id = _write_floor_plan(config.floor_plan, lines, track_id)
+
+    if config.benchwork_sections:
+        track_id = _write_benchwork_sections(config.benchwork_sections, lines, track_id)
 
     for pl in config.placements:
         template_id = _find_template_id(pl, lib)
@@ -190,10 +483,10 @@ def generate(config: LayoutConfig, output_path: Path) -> GenerationResult:
         template_layout = parse_file(template_info.xtc_path)
 
         for track in template_layout.tracks:
-            lines.append(_track_header(track.kind, track_id, track.layer, config.scale, track.extra))
+            lines.append(_track_header(track.kind, track_id, _track_layer(pl.level), config.scale, track.extra))
             for ep in track.endpoints:
                 lines.append(_endpoint_line(ep.x * sf + x0, ep.y * sf + y0, ep.angle))
-            lines.append("")
+            lines.append("END")
             placed.track_ids.append(track_id)
             track_id += 1
 

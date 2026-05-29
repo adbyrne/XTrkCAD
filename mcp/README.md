@@ -36,7 +36,7 @@ Configure in `~/.claude/settings.json` (Claude Code) or `claude_desktop_config.j
 ## Tests
 
 ```sh
-uv run pytest          # 154 tests
+uv run pytest          # 220 tests
 ```
 
 ## Tools
@@ -100,6 +100,53 @@ grid:
 Grid entries use the DSL `[col][row]=type[=params]`. Column letters (`A`, `B`, …) map
 left-to-right; row numbers map top-to-bottom. Ranges (`B3-C4`) span multiple cells.
 
+### Floor plan
+
+For rooms that aren't a simple rectangle, replace `room:` with a `floor_plan` description.
+The room bounding box is derived automatically from the union of all named rooms.
+
+```yaml
+floor_plan_file: my_room.yaml   # load from a standalone file (share across layouts)
+# — OR —
+floor_plan:                     # inline in the same config
+  wall_thickness: 4in
+  rooms:
+    - name: main
+      x: 0ft
+      y: 0ft
+      width: 16ft
+      depth: 10ft
+    - name: alcove
+      x: 0ft
+      y: 10ft
+      width: 10ft
+      depth: 4ft
+  doors:
+    - room: main
+      wall: south
+      from: 3ft
+      width: 32in
+      swing: inward
+  partitions:
+    - label: divider
+      x0: 0ft
+      y0: 10ft
+      x1: 10ft
+      y1: 10ft
+      thickness: 4in
+  restricted:
+    - label: HVAC
+      x: 12ft
+      y: 0ft
+      width: 3ft
+      depth: 2ft
+      reason: HVAC
+```
+
+`floor_plan_file` is resolved relative to the config file's directory.  Use it when
+multiple layout experiments share the same physical room — each layout config references
+the same floor plan file, varying only its `benchwork:` and `grid:` sections.
+
 ### Template categories
 
 `yard` · `staging` · `station` · `mainline` · `helix` · `siding`
@@ -121,6 +168,7 @@ src/xtrkcad_mcp/
   parser.py      — .xtc / .xtce file parser
   models.py      — Layout, Track, Endpoint dataclasses + scale ratios
   config.py      — YAML layout config loader + grid DSL parser
+                   FloorPlan / FloorRoom / FloorDoor / FloorPartition / FloorRestricted
   generator.py   — .xtc file generator from LayoutConfig
   templates.py   — Template library loader
   templates/     — 12 stub .xtc files + index.yaml catalog

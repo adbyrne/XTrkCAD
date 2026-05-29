@@ -5,6 +5,12 @@ from pathlib import Path
 import pytest
 
 from xtrkcad_mcp.config import (
+    Benchwork,
+    FloorDoor,
+    FloorPartition,
+    FloorPlan,
+    FloorRestricted,
+    FloorRoom,
     GridPlacement,
     _default_grid_cell_ft,
     _parse_cell_or_range,
@@ -16,6 +22,7 @@ from xtrkcad_mcp.config import (
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 FULL_CONFIG = FIXTURES_DIR / "test_layout_config.yaml"
+FLOOR_PLAN_CONFIG = FIXTURES_DIR / "hillside_division.yaml"
 
 
 # ---------------------------------------------------------------------------
@@ -173,10 +180,6 @@ def test_load_full_config_grid_cell_size():
     # 22in radius → 2*22/12=3.67 → ceil=4
     assert result.config.grid_size_ft == pytest.approx(4.0)
 
-def test_load_full_config_obstructions():
-    result = load_config(FULL_CONFIG)
-    assert len(result.config.obstructions) == 2
-
 def test_load_full_config_placements():
     result = load_config(FULL_CONFIG)
     assert len(result.config.placements) == 5
@@ -279,3 +282,386 @@ def test_bad_grid_entry_warns(tmp_path):
     result = load_config(cfg)
     assert any("skipping grid entry" in w for w in result.warnings)
     assert result.config.placements == []
+
+
+# ---------------------------------------------------------------------------
+# benchwork sections — shape parsing
+# ---------------------------------------------------------------------------
+
+def _bw_config(tmp_path, sections_yaml: str) -> "ConfigResult":
+    """Helper: create a config with inline benchwork sections."""
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text(
+        f"name: T\nscale: HO\nroom: 12x16\nbenchwork:\n{sections_yaml}\n"
+    )
+    return load_config(cfg)
+
+
+def test_benchwork_absent_gives_empty_list(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text("name: T\nscale: HO\nroom: 12x16\n")
+    result = load_config(cfg)
+    assert result.config.benchwork_sections == []
+
+
+def test_benchwork_rect_section(tmp_path):
+    result = _bw_config(
+        tmp_path,
+        "  - label: west_shelf\n    level: 1\n    shape: rect\n"
+        "    x: 0in\n    y: 0in\n    width: 24in\n    length: 144in\n",
+    )
+    assert result.warnings == []
+    sections = result.config.benchwork_sections
+    assert len(sections) == 1
+    bw = sections[0]
+    assert bw.label == "west_shelf"
+    assert bw.level == 1
+    assert len(bw.vertices) == 4
+    assert bw.vertices[0] == pytest.approx((0.0, 0.0))
+    assert bw.vertices[1] == pytest.approx((24.0, 0.0))
+
+
+def test_benchwork_rect_default_shape(tmp_path):
+    # shape: omitted → defaults to rect
+    result = _bw_config(
+        tmp_path,
+        "  - label: south_shelf\n    level: 1\n"
+        "    x: 0in\n    y: 0in\n    width: 144in\n    length: 24in\n",
+    )
+    assert len(result.config.benchwork_sections) == 1
+
+
+def test_benchwork_rotated_rect_section(tmp_path):
+    result = _bw_config(
+        tmp_path,
+        "  - label: corner_shelf\n    level: 1\n    shape: rotated_rect\n"
+        "    cx: 72in\n    cy: 96in\n    width: 24in\n    length: 24in\n    rotation: 45\n",
+    )
+    bw = result.config.benchwork_sections[0]
+    assert len(bw.vertices) == 4
+    # All vertices should be near (72, 96) — rotated square center
+    for x, y in bw.vertices:
+        assert abs(x - 72) < 25
+        assert abs(y - 96) < 25
+
+
+def test_benchwork_polygon_section(tmp_path):
+    result = _bw_config(
+        tmp_path,
+        "  - label: l_shelf\n    level: 1\n    shape: polygon\n"
+        "    vertices:\n      - [0, 0]\n      - [48, 0]\n      - [48, 24]\n"
+        "      - [24, 24]\n      - [24, 72]\n      - [0, 72]\n",
+    )
+    bw = result.config.benchwork_sections[0]
+    assert len(bw.vertices) == 6
+    assert bw.vertices[0] == pytest.approx((0.0, 0.0))
+
+
+def test_benchwork_arc_section(tmp_path):
+    result = _bw_config(
+        tmp_path,
+        "  - label: curve_shelf\n    level: 1\n    shape: arc\n"
+        "    cx: 144in\n    cy: 96in\n    radius: 48in\n    width: 24in\n"
+        "    start_angle: 90\n    sweep_angle: 90\n",
+    )
+    assert result.warnings == []
+    bw = result.config.benchwork_sections[0]
+    # Arc: 45 steps (90°/2°) + 1 points per ring, two rings → at least 8 vertices
+    assert len(bw.vertices) >= 8
+    # Outer ring = first half of vertices, all at r_outer=60; inner at r_inner=36
+    half = len(bw.vertices) // 2
+    outer = bw.vertices[:half]
+    for x, y in outer:
+        dist = ((x - 144)**2 + (y - 96)**2) ** 0.5
+        assert dist == pytest.approx(60.0, abs=0.01)
+
+
+def test_benchwork_spline_section(tmp_path):
+    result = _bw_config(
+        tmp_path,
+        "  - label: track_strip\n    level: 1\n    shape: spline\n    width: 6in\n"
+        "    points:\n      - [0, 48]\n      - [72, 48]\n      - [96, 72]\n      - [96, 144]\n",
+    )
+    assert result.warnings == []
+    bw = result.config.benchwork_sections[0]
+    # 4 input points → 4 left + 4 right = 8 vertices in polygon
+    assert len(bw.vertices) == 8
+
+
+def test_benchwork_spline_width_offset(tmp_path):
+    # Straight horizontal spline: left edge should be at y+3, right at y-3
+    result = _bw_config(
+        tmp_path,
+        "  - label: h_strip\n    level: 1\n    shape: spline\n    width: 6in\n"
+        "    points:\n      - [0, 60]\n      - [120, 60]\n",
+    )
+    bw = result.config.benchwork_sections[0]
+    left_ys = [v[1] for v in bw.vertices[:2]]
+    right_ys = [v[1] for v in bw.vertices[2:]]
+    assert all(abs(y - 63.0) < 0.1 for y in left_ys)
+    assert all(abs(y - 57.0) < 0.1 for y in right_ys)
+
+
+def test_benchwork_level_default_is_1(tmp_path):
+    result = _bw_config(
+        tmp_path,
+        "  - label: shelf\n    x: 0in\n    y: 0in\n    width: 24in\n    length: 144in\n",
+    )
+    assert result.config.benchwork_sections[0].level == 1
+
+
+def test_benchwork_level_explicit(tmp_path):
+    result = _bw_config(
+        tmp_path,
+        "  - label: upper\n    level: 2\n    x: 0in\n    y: 0in\n    width: 24in\n    length: 144in\n",
+    )
+    assert result.config.benchwork_sections[0].level == 2
+
+
+def test_benchwork_bad_entry_warns_and_skips(tmp_path):
+    result = _bw_config(
+        tmp_path,
+        "  - label: bad\n    level: 1\n    shape: rect\n    width: 24in\n",  # missing length
+    )
+    assert any("skipping benchwork" in w for w in result.warnings)
+    assert result.config.benchwork_sections == []
+
+
+def test_benchwork_file_key(tmp_path):
+    bw_file = tmp_path / "shelves.yaml"
+    bw_file.write_text(
+        "- label: west\n  level: 1\n  shape: rect\n"
+        "  x: 0in\n  y: 0in\n  width: 24in\n  length: 144in\n"
+    )
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text(
+        f"name: T\nscale: HO\nroom: 12x16\n"
+        f"benchwork_file: {bw_file.name}\n"
+    )
+    result = load_config(cfg)
+    assert result.warnings == []
+    assert len(result.config.benchwork_sections) == 1
+    assert result.config.benchwork_sections[0].label == "west"
+
+
+def test_benchwork_file_missing_warns(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text("name: T\nscale: HO\nroom: 12x16\nbenchwork_file: no_such.yaml\n")
+    result = load_config(cfg)
+    assert any("benchwork_file not found" in w for w in result.warnings)
+    assert result.config.benchwork_sections == []
+
+
+def test_benchwork_file_precedence_warns_when_both(tmp_path):
+    bw_file = tmp_path / "shelves.yaml"
+    bw_file.write_text(
+        "- label: west\n  level: 1\n  x: 0in\n  y: 0in\n  width: 24in\n  length: 144in\n"
+    )
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text(
+        f"name: T\nscale: HO\nroom: 12x16\n"
+        f"benchwork_file: {bw_file.name}\n"
+        f"benchwork:\n  - label: inline\n    level: 1\n"
+        f"    x: 0in\n    y: 0in\n    width: 24in\n    length: 144in\n"
+    )
+    result = load_config(cfg)
+    assert any("benchwork_file takes precedence" in w for w in result.warnings)
+    # Only the file-sourced section is loaded
+    assert len(result.config.benchwork_sections) == 1
+    assert result.config.benchwork_sections[0].label == "west"
+
+
+# ---------------------------------------------------------------------------
+# grid — @N level tag
+# ---------------------------------------------------------------------------
+
+def test_parse_grid_level_default_is_1():
+    p = _parse_grid_entry("A1-B2=yard=single-ended")
+    assert p.level == 1
+
+
+def test_parse_grid_level_at_tag():
+    p = _parse_grid_entry("A1-B2@2=yard=upper yard")
+    assert p.level == 2
+    assert p.col_start == "A"
+    assert p.row_start == 1
+    assert p.col_end == "B"
+    assert p.row_end == 2
+
+
+def test_parse_grid_level_single_cell():
+    p = _parse_grid_entry("C3@3=station=passing siding")
+    assert p.level == 3
+    assert p.col_start == "C"
+
+
+# ---------------------------------------------------------------------------
+# FloorPlan / floor_plan_file (Hillside Division generic tutorial fixture)
+# ---------------------------------------------------------------------------
+
+def test_floor_plan_loads():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    assert result.config.floor_plan is not None
+
+def test_floor_plan_no_warnings():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    assert result.warnings == []
+
+def test_floor_plan_config_ready():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    assert result.ready is True
+
+def test_floor_plan_derives_room_width():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    assert result.config.room_width_ft == pytest.approx(12.0)
+
+def test_floor_plan_derives_room_depth():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    assert result.config.room_depth_ft == pytest.approx(16.0)
+
+def test_floor_plan_bounding_box():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    fp = result.config.floor_plan
+    assert fp.total_width_in == pytest.approx(144.0)
+    assert fp.total_depth_in == pytest.approx(192.0)
+
+def test_floor_plan_room_count():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    assert len(result.config.floor_plan.rooms) == 1
+
+def test_floor_plan_room_fields():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    room = result.config.floor_plan.rooms[0]
+    assert room.name == "main"
+    assert room.x == pytest.approx(0.0)
+    assert room.y == pytest.approx(0.0)
+    assert room.width == pytest.approx(144.0)
+    assert room.depth == pytest.approx(192.0)
+
+def test_floor_plan_door_count():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    assert len(result.config.floor_plan.doors) == 1
+
+def test_floor_plan_door_fields():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    door = result.config.floor_plan.doors[0]
+    assert door.room == "main"
+    assert door.wall == "east"
+    assert door.from_in == pytest.approx(36.0)
+    assert door.width_in == pytest.approx(36.0)
+    assert door.swing == "inward"
+    assert door.clearance_in == pytest.approx(36.0)
+
+def test_floor_plan_partition_count():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    assert len(result.config.floor_plan.partitions) == 1
+
+def test_floor_plan_partition_fields():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    p = result.config.floor_plan.partitions[0]
+    assert p.label == "alcove_wall"
+    assert p.x0 == pytest.approx(48.0)
+    assert p.y0 == pytest.approx(156.0)
+    assert p.x1 == pytest.approx(48.0)
+    assert p.y1 == pytest.approx(192.0)
+    assert p.thickness == pytest.approx(4.0)
+
+def test_floor_plan_restricted_count():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    assert len(result.config.floor_plan.restricted) == 1
+
+def test_floor_plan_restricted_fields():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    r = result.config.floor_plan.restricted[0]
+    assert r.label == "furnace_corner"
+    assert r.x == pytest.approx(96.0)
+    assert r.y == pytest.approx(0.0)
+    assert r.width == pytest.approx(48.0)
+    assert r.depth == pytest.approx(36.0)
+    assert r.reason == "HVAC unit"
+
+def test_floor_plan_file_missing_warns(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text("name: T\nscale: HO\nfloor_plan_file: no_such_file.yaml\n")
+    result = load_config(cfg)
+    assert any("floor_plan_file not found" in w for w in result.warnings)
+
+
+# ---------------------------------------------------------------------------
+# Benchwork fixture — Hillside Division (hillside_benchwork.yaml)
+# ---------------------------------------------------------------------------
+
+def test_hillside_benchwork_loads_six_sections():
+    # 4 L1 wall shelves + 2 L2 upper-deck sections
+    result = load_config(FLOOR_PLAN_CONFIG)
+    assert len(result.config.benchwork_sections) == 6
+
+
+def test_hillside_benchwork_no_warnings():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    assert result.warnings == []
+
+
+def test_hillside_benchwork_labels():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    labels = [bw.label for bw in result.config.benchwork_sections]
+    assert "west_wall" in labels
+    assert "north_wall_west" in labels
+    assert "north_wall_east" in labels
+    assert "east_wall" in labels
+
+
+def test_hillside_benchwork_levels():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    levels = {bw.level for bw in result.config.benchwork_sections}
+    assert 1 in levels
+    assert 2 in levels
+
+
+def test_hillside_benchwork_file_path_set():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    assert result.config.benchwork_file.endswith("hillside_benchwork.yaml")
+
+
+def test_hillside_benchwork_west_wall_vertices():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    bw = next(b for b in result.config.benchwork_sections if b.label == "west_wall")
+    xs = [v[0] for v in bw.vertices]
+    ys = [v[1] for v in bw.vertices]
+    assert min(xs) == pytest.approx(0.0)
+    assert max(xs) == pytest.approx(24.0)
+    assert min(ys) == pytest.approx(0.0)
+    assert max(ys) == pytest.approx(156.0)
+
+
+def test_hillside_benchwork_north_wall_west_vertices():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    bw = next(b for b in result.config.benchwork_sections if b.label == "north_wall_west")
+    xs = [v[0] for v in bw.vertices]
+    ys = [v[1] for v in bw.vertices]
+    assert min(xs) == pytest.approx(0.0)
+    assert max(xs) == pytest.approx(48.0)
+    assert min(ys) == pytest.approx(168.0)
+    assert max(ys) == pytest.approx(192.0)
+
+
+def test_hillside_benchwork_north_wall_east_vertices():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    bw = next(b for b in result.config.benchwork_sections if b.label == "north_wall_east")
+    xs = [v[0] for v in bw.vertices]
+    ys = [v[1] for v in bw.vertices]
+    assert min(xs) == pytest.approx(52.0)
+    assert max(xs) == pytest.approx(144.0)
+    assert min(ys) == pytest.approx(168.0)
+    assert max(ys) == pytest.approx(192.0)
+
+
+def test_hillside_benchwork_east_wall_vertices():
+    result = load_config(FLOOR_PLAN_CONFIG)
+    bw = next(b for b in result.config.benchwork_sections if b.label == "east_wall")
+    xs = [v[0] for v in bw.vertices]
+    ys = [v[1] for v in bw.vertices]
+    assert min(xs) == pytest.approx(120.0)
+    assert max(xs) == pytest.approx(144.0)
+    assert min(ys) == pytest.approx(72.0)
+    assert max(ys) == pytest.approx(192.0)

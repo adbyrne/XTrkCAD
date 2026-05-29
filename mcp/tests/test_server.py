@@ -11,16 +11,21 @@ from xtrkcad_mcp.server import (
     delete_track,
     find_dead_connections,
     fix_dead_connections,
+    load_layout_config,
+    write_benchwork_report,
+    write_elevation_view,
     write_equipment_report,
     write_gaps_report,
     write_layout_report,
     write_operation_density_report,
+    write_plan_view,
     write_radius_map,
     write_turnout_report,
 )
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 FIXTURE = FIXTURES_DIR / "test_layout.xtc"
+HILLSIDE_CONFIG = FIXTURES_DIR / "hillside_division.yaml"
 
 
 # ---------------------------------------------------------------------------
@@ -132,6 +137,98 @@ def test_radius_map_custom_flag_radius(tmp_path):
     svg = Path(out).read_text()
     # With flag_radius=35, 30 < 35 → red
     assert "curve-red" in svg
+
+
+# ---------------------------------------------------------------------------
+# write_plan_view
+# ---------------------------------------------------------------------------
+
+
+def test_write_plan_view_creates_file(tmp_path):
+    out = str(tmp_path / "plan.svg")
+    result = write_plan_view(str(HILLSIDE_CONFIG), out)
+    assert Path(out).exists()
+    assert str(tmp_path) in result
+
+
+def test_write_plan_view_is_valid_svg(tmp_path):
+    out = str(tmp_path / "plan.svg")
+    write_plan_view(str(HILLSIDE_CONFIG), out)
+    svg = Path(out).read_text()
+    assert svg.startswith("<?xml")
+    assert "<svg" in svg
+    assert "</svg>" in svg
+
+
+def test_write_plan_view_level_filter_l1(tmp_path):
+    out = str(tmp_path / "plan_l1.svg")
+    write_plan_view(str(HILLSIDE_CONFIG), out, level=1)
+    svg = Path(out).read_text()
+    # L1 fill colour present; L2 fill colour absent
+    assert _LEVEL_FILL_L1 in svg
+    assert _LEVEL_FILL_L2 not in svg
+
+
+def test_write_plan_view_level_filter_l2(tmp_path):
+    out = str(tmp_path / "plan_l2.svg")
+    write_plan_view(str(HILLSIDE_CONFIG), out, level=2)
+    svg = Path(out).read_text()
+    assert _LEVEL_FILL_L2 in svg
+    assert _LEVEL_FILL_L1 not in svg
+
+
+def test_write_plan_view_all_levels_contains_both(tmp_path):
+    out = str(tmp_path / "plan_all.svg")
+    write_plan_view(str(HILLSIDE_CONFIG), out, level=0)
+    svg = Path(out).read_text()
+    assert _LEVEL_FILL_L1 in svg
+    assert _LEVEL_FILL_L2 in svg
+
+
+# Colour constants matched to svg_views._LEVEL_FILL
+_LEVEL_FILL_L1 = "#A5D6A7"
+_LEVEL_FILL_L2 = "#90CAF9"
+
+
+# ---------------------------------------------------------------------------
+# write_elevation_view
+# ---------------------------------------------------------------------------
+
+
+def test_write_elevation_view_creates_file(tmp_path):
+    out = str(tmp_path / "elev.svg")
+    result = write_elevation_view(str(HILLSIDE_CONFIG), out, wall="west")
+    assert Path(out).exists()
+    assert str(tmp_path) in result
+
+
+def test_write_elevation_view_is_valid_svg(tmp_path):
+    out = str(tmp_path / "elev.svg")
+    write_elevation_view(str(HILLSIDE_CONFIG), out, wall="west")
+    svg = Path(out).read_text()
+    assert svg.startswith("<?xml")
+    assert "<svg" in svg
+    assert "</svg>" in svg
+
+
+def test_write_elevation_view_south_wall(tmp_path):
+    out = str(tmp_path / "elev_south.svg")
+    write_elevation_view(str(HILLSIDE_CONFIG), out, wall="south")
+    assert Path(out).exists()
+
+
+def test_write_elevation_view_invalid_wall(tmp_path):
+    out = str(tmp_path / "elev.svg")
+    import pytest as _pytest
+    with _pytest.raises(ValueError, match="wall must be"):
+        write_elevation_view(str(HILLSIDE_CONFIG), out, wall="ceiling")
+
+
+def test_write_elevation_view_level_filter(tmp_path):
+    out = str(tmp_path / "elev_l1.svg")
+    write_elevation_view(str(HILLSIDE_CONFIG), out, wall="west", levels=[1])
+    svg = Path(out).read_text()
+    assert _LEVEL_FILL_L1 in svg
 
 
 # ---------------------------------------------------------------------------
@@ -404,3 +501,116 @@ def test_turnout_report_html_extension_autodetects(tmp_path):
     write_turnout_report(str(FIXTURE), str(out))  # no explicit format
     content = out.read_text()
     assert "<html" in content
+
+
+# ---------------------------------------------------------------------------
+# load_layout_config — benchwork and floor_plan fields in response
+# ---------------------------------------------------------------------------
+
+
+def test_load_layout_config_returns_benchwork_sections():
+    result = load_layout_config(str(HILLSIDE_CONFIG))
+    assert "benchwork_sections" in result["config"]
+    sections = result["config"]["benchwork_sections"]
+    assert len(sections) == 6  # 4 L1 + 2 L2 sections
+
+
+def test_load_layout_config_benchwork_section_fields():
+    result = load_layout_config(str(HILLSIDE_CONFIG))
+    section = result["config"]["benchwork_sections"][0]
+    assert "label" in section
+    assert "level" in section
+    assert "vertex_count" in section
+    assert section["vertex_count"] == 4  # rect = 4 vertices
+
+
+def test_load_layout_config_benchwork_file_field():
+    result = load_layout_config(str(HILLSIDE_CONFIG))
+    assert result["config"]["benchwork_file"].endswith("hillside_benchwork.yaml")
+
+
+def test_load_layout_config_floor_plan_field():
+    result = load_layout_config(str(HILLSIDE_CONFIG))
+    fp = result["config"]["floor_plan"]
+    assert fp is not None
+    assert fp["rooms"] == 1
+    assert fp["width_in"] == pytest.approx(144.0)
+    assert fp["depth_in"] == pytest.approx(192.0)
+
+
+def test_load_layout_config_no_obstructions_key():
+    result = load_layout_config(str(HILLSIDE_CONFIG))
+    assert "obstructions" not in result["config"]
+
+
+def test_load_layout_config_ready():
+    result = load_layout_config(str(HILLSIDE_CONFIG))
+    assert result["ready"] is True
+    assert result["warnings"] == []
+
+
+# ---------------------------------------------------------------------------
+# write_benchwork_report
+# ---------------------------------------------------------------------------
+
+
+def test_write_benchwork_report_creates_file(tmp_path):
+    out = tmp_path / "benchwork.txt"
+    msg = write_benchwork_report(str(HILLSIDE_CONFIG), str(out))
+    assert out.exists()
+    assert str(out) in msg
+
+
+def test_write_benchwork_report_txt_has_sections(tmp_path):
+    out = tmp_path / "benchwork.txt"
+    write_benchwork_report(str(HILLSIDE_CONFIG), str(out))
+    content = out.read_text()
+    assert "west_wall" in content
+    assert "north_wall" in content
+    assert "east_wall" in content
+
+
+def test_write_benchwork_report_txt_has_level(tmp_path):
+    out = tmp_path / "benchwork.txt"
+    write_benchwork_report(str(HILLSIDE_CONFIG), str(out))
+    content = out.read_text()
+    assert "LEVEL 1" in content
+
+
+def test_write_benchwork_report_txt_has_total_area(tmp_path):
+    out = tmp_path / "benchwork.txt"
+    write_benchwork_report(str(HILLSIDE_CONFIG), str(out))
+    content = out.read_text()
+    assert "TOTAL BENCHWORK AREA" in content
+
+
+def test_write_benchwork_report_md_format(tmp_path):
+    out = tmp_path / "benchwork.md"
+    write_benchwork_report(str(HILLSIDE_CONFIG), str(out), format="md")
+    content = out.read_text()
+    assert "# Benchwork Plan Report" in content
+    assert "west_wall" in content
+
+
+def test_write_benchwork_report_html_format(tmp_path):
+    out = tmp_path / "benchwork.html"
+    write_benchwork_report(str(HILLSIDE_CONFIG), str(out), format="html")
+    content = out.read_text()
+    assert "<html" in content
+    assert "west_wall" in content
+
+
+def test_write_benchwork_report_md_extension_autodetects(tmp_path):
+    out = tmp_path / "benchwork.md"
+    write_benchwork_report(str(HILLSIDE_CONFIG), str(out))  # no explicit format
+    content = out.read_text()
+    assert "# Benchwork Plan Report" in content
+
+
+def test_write_benchwork_report_empty_config(tmp_path):
+    cfg = tmp_path / "empty.yaml"
+    cfg.write_text("name: Empty\nscale: HO\nroom: 12x16\n")
+    out = tmp_path / "benchwork.txt"
+    write_benchwork_report(str(cfg), str(out))
+    content = out.read_text()
+    assert "No benchwork sections" in content
