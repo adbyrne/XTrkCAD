@@ -13,10 +13,12 @@ from xtrkcad_mcp.server import (
     fix_dead_connections,
     load_layout_config,
     write_benchwork_report,
+    write_elevation_view,
     write_equipment_report,
     write_gaps_report,
     write_layout_report,
     write_operation_density_report,
+    write_plan_view,
     write_radius_map,
     write_turnout_report,
 )
@@ -135,6 +137,98 @@ def test_radius_map_custom_flag_radius(tmp_path):
     svg = Path(out).read_text()
     # With flag_radius=35, 30 < 35 → red
     assert "curve-red" in svg
+
+
+# ---------------------------------------------------------------------------
+# write_plan_view
+# ---------------------------------------------------------------------------
+
+
+def test_write_plan_view_creates_file(tmp_path):
+    out = str(tmp_path / "plan.svg")
+    result = write_plan_view(str(HILLSIDE_CONFIG), out)
+    assert Path(out).exists()
+    assert str(tmp_path) in result
+
+
+def test_write_plan_view_is_valid_svg(tmp_path):
+    out = str(tmp_path / "plan.svg")
+    write_plan_view(str(HILLSIDE_CONFIG), out)
+    svg = Path(out).read_text()
+    assert svg.startswith("<?xml")
+    assert "<svg" in svg
+    assert "</svg>" in svg
+
+
+def test_write_plan_view_level_filter_l1(tmp_path):
+    out = str(tmp_path / "plan_l1.svg")
+    write_plan_view(str(HILLSIDE_CONFIG), out, level=1)
+    svg = Path(out).read_text()
+    # L1 fill colour present; L2 fill colour absent
+    assert _LEVEL_FILL_L1 in svg
+    assert _LEVEL_FILL_L2 not in svg
+
+
+def test_write_plan_view_level_filter_l2(tmp_path):
+    out = str(tmp_path / "plan_l2.svg")
+    write_plan_view(str(HILLSIDE_CONFIG), out, level=2)
+    svg = Path(out).read_text()
+    assert _LEVEL_FILL_L2 in svg
+    assert _LEVEL_FILL_L1 not in svg
+
+
+def test_write_plan_view_all_levels_contains_both(tmp_path):
+    out = str(tmp_path / "plan_all.svg")
+    write_plan_view(str(HILLSIDE_CONFIG), out, level=0)
+    svg = Path(out).read_text()
+    assert _LEVEL_FILL_L1 in svg
+    assert _LEVEL_FILL_L2 in svg
+
+
+# Colour constants matched to svg_views._LEVEL_FILL
+_LEVEL_FILL_L1 = "#A5D6A7"
+_LEVEL_FILL_L2 = "#90CAF9"
+
+
+# ---------------------------------------------------------------------------
+# write_elevation_view
+# ---------------------------------------------------------------------------
+
+
+def test_write_elevation_view_creates_file(tmp_path):
+    out = str(tmp_path / "elev.svg")
+    result = write_elevation_view(str(HILLSIDE_CONFIG), out, wall="west")
+    assert Path(out).exists()
+    assert str(tmp_path) in result
+
+
+def test_write_elevation_view_is_valid_svg(tmp_path):
+    out = str(tmp_path / "elev.svg")
+    write_elevation_view(str(HILLSIDE_CONFIG), out, wall="west")
+    svg = Path(out).read_text()
+    assert svg.startswith("<?xml")
+    assert "<svg" in svg
+    assert "</svg>" in svg
+
+
+def test_write_elevation_view_south_wall(tmp_path):
+    out = str(tmp_path / "elev_south.svg")
+    write_elevation_view(str(HILLSIDE_CONFIG), out, wall="south")
+    assert Path(out).exists()
+
+
+def test_write_elevation_view_invalid_wall(tmp_path):
+    out = str(tmp_path / "elev.svg")
+    import pytest as _pytest
+    with _pytest.raises(ValueError, match="wall must be"):
+        write_elevation_view(str(HILLSIDE_CONFIG), out, wall="ceiling")
+
+
+def test_write_elevation_view_level_filter(tmp_path):
+    out = str(tmp_path / "elev_l1.svg")
+    write_elevation_view(str(HILLSIDE_CONFIG), out, wall="west", levels=[1])
+    svg = Path(out).read_text()
+    assert _LEVEL_FILL_L1 in svg
 
 
 # ---------------------------------------------------------------------------
@@ -418,7 +512,7 @@ def test_load_layout_config_returns_benchwork_sections():
     result = load_layout_config(str(HILLSIDE_CONFIG))
     assert "benchwork_sections" in result["config"]
     sections = result["config"]["benchwork_sections"]
-    assert len(sections) == 3
+    assert len(sections) == 6  # 4 L1 + 2 L2 sections
 
 
 def test_load_layout_config_benchwork_section_fields():

@@ -340,7 +340,7 @@ def generate_plan_view(
 
     _scale_bar(svg, xf)
     _north_arrow(svg, xf)
-    _legend(svg, svg_width, padding, all_levels, fp is not None)
+    _legend(svg, svg_width, padding, draw_levels, fp is not None)
     svg.gclose()
 
     out = Path(output_path).expanduser()

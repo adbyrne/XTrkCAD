@@ -9,8 +9,8 @@ from pathlib import Path
 from mcp.server.fastmcp import FastMCP
 
 from xtrkcad_mcp.config import load_config
-from xtrkcad_mcp.models import SCALE_RATIOS
-from xtrkcad_mcp.svg_views import generate_elevation_view, generate_plan_view, cars_per_real_ft, max_to_main_label
+from xtrkcad_mcp.models import SCALE_RATIOS, cars_per_real_ft, max_to_main_label
+from xtrkcad_mcp.svg_views import generate_elevation_view, generate_plan_view
 from xtrkcad_mcp.parser import TRACK_KINDS, parse_file
 from xtrkcad_mcp.stations import (
     compute_capacities,

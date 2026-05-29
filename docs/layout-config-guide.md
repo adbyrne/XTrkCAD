@@ -357,30 +357,71 @@ y=0 because the SW corner module's toe sits at (0, 0).
 
 ---
 
-## 4. Generating the .xtc file
+## 4. Generating the .xtc file and views
 
-With the three YAML files in place, run the `generate_layout` MCP tool (or call
-the Python generator directly):
+### MCP server tools
+
+The layout config system is exposed as an MCP server with tools you can call
+from Claude or any MCP-compatible client:
+
+| Tool | What it does |
+|------|-------------|
+| `load_layout_config` | Validate a config and show a summary before generating |
+| `generate_layout` | Write the `.xtc` file from a validated config |
+| `write_plan_view` | Top-down SVG plan — one deck or all decks |
+| `write_elevation_view` | Wall-profile SVG showing benchwork heights |
+| `write_benchwork_report` | Text/HTML table of every section with area and bounding box |
+
+**Generate the layout:**
+```
+generate_layout("hillside_division.yaml", "hillside_division.xtc")
+```
+
+**Generate plan views** (one per deck):
+```
+write_plan_view("hillside_division.yaml", "hillside_plan_l1.svg", level=1)
+write_plan_view("hillside_division.yaml", "hillside_plan_l2.svg", level=2)
+```
+Pass `level=0` (the default) to draw all decks together on one view.
+
+**Generate elevation views** (one per wall):
+```
+write_elevation_view("hillside_division.yaml", "hillside_elev_west.svg",  wall="west")
+write_elevation_view("hillside_division.yaml", "hillside_elev_south.svg", wall="south")
+```
+The `levels` argument filters by deck: `levels=[1]` for Level 1 only,
+`levels=[1, 2]` for both.  Valid walls: `west`, `south`, `east`, `north`.
+
+Open the SVG files in any web browser to review the benchwork plan visually
+before committing to the `.xtc`.
+
+### Direct Python API
+
+The same operations work as a Python library:
 
 ```python
 from pathlib import Path
 from xtrkcad_mcp.config import load_config
 from xtrkcad_mcp.generator import generate, default_output_path
+from xtrkcad_mcp.svg_views import generate_plan_view, generate_elevation_view
 
 p = Path("hillside_division.yaml")
 result = load_config(p)
 out = default_output_path(result.config, p)   # hillside_division.xtc
 generate(result.config, out)
+
+generate_plan_view(str(p), "hillside_plan_l1.svg", level=1)
+generate_elevation_view(str(p), "hillside_elev_west.svg", wall="west")
 ```
 
 If a `.xtc` file already exists at `out` it is backed up automatically as
 `hillside_division_v1.xtc`, `_v2`, etc. before being overwritten.
 
-Open the resulting file in XTrkCAD.  The Floor layer (0) shows the room
-perimeter, door clearance zones, the alcove partition, and the HVAC restricted
-area.  The L1-Benchwork layer (2) shows the Level 1 shelf outlines.  The
-L2-Benchwork layer (4) shows the Level 2 shelves.  Use the Layers dialog to
-toggle each level independently.
+Open the `.xtc` in XTrkCAD.  The Floor layer (0) shows the room perimeter,
+door clearance zones, the alcove partition, and the HVAC restricted area.  The
+L1-Benchwork layer (2) shows Level 1 shelf outlines.  The L2-Benchwork layer
+(4) shows Level 2 shelves.  Use the Layers dialog to toggle each level
+independently.
 
 ---
 

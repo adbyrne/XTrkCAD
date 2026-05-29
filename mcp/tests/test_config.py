@@ -591,9 +591,10 @@ def test_floor_plan_file_missing_warns(tmp_path):
 # Benchwork fixture — Hillside Division (hillside_benchwork.yaml)
 # ---------------------------------------------------------------------------
 
-def test_hillside_benchwork_loads_four_sections():
+def test_hillside_benchwork_loads_six_sections():
+    # 4 L1 wall shelves + 2 L2 upper-deck sections
     result = load_config(FLOOR_PLAN_CONFIG)
-    assert len(result.config.benchwork_sections) == 4
+    assert len(result.config.benchwork_sections) == 6
 
 
 def test_hillside_benchwork_no_warnings():
@@ -610,9 +611,11 @@ def test_hillside_benchwork_labels():
     assert "east_wall" in labels
 
 
-def test_hillside_benchwork_all_level_1():
+def test_hillside_benchwork_levels():
     result = load_config(FLOOR_PLAN_CONFIG)
-    assert all(bw.level == 1 for bw in result.config.benchwork_sections)
+    levels = {bw.level for bw in result.config.benchwork_sections}
+    assert 1 in levels
+    assert 2 in levels
 
 
 def test_hillside_benchwork_file_path_set():
