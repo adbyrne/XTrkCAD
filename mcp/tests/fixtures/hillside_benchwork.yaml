@@ -7,7 +7,9 @@
 #   - NW alcove wall: x=48, y=156 to y=192 → west shelf stops at y=156
 #   - SE corner HVAC restricted: x=96–144, y=0–36 → south end of east shelf clear
 #
-# Classic around-the-walls starter benchwork: three 24-inch deep wall shelves.
+# Classic around-the-walls starter benchwork: four 24-inch deep wall shelves.
+# (north_wall split into west alcove section and east main-room section to clear
+# the alcove_wall partition at x=48, 4" thick.)
 
 # West wall shelf — full run from south wall to the alcove stub wall
 - label: west_wall
@@ -18,13 +20,22 @@
   width: 24        # 2 ft deep into room
   length: 156      # runs from y=0 to y=156 (stops at alcove wall)
 
-# North wall shelf — full east-west width of the room
-- label: north_wall
+# North wall shelf — alcove portion (west of alcove_wall partition at x=48)
+- label: north_wall_west
   shape: rect
   level: 1
   x: 0
   y: 168           # 192 - 24 = 168 (24 in from north wall)
-  width: 144       # full 12 ft east-west
+  width: 48        # x=0 to x=48 (stops at west face of alcove_wall)
+  length: 24       # 2 ft deep
+
+# North wall shelf — main-room portion (east of alcove_wall partition at x=48+4=52)
+- label: north_wall_east
+  shape: rect
+  level: 1
+  x: 52            # 4" clear of east face of alcove_wall (x=48+4)
+  y: 168
+  width: 92        # x=52 to x=144
   length: 24       # 2 ft deep
 
 # East wall shelf — above the entry door clearance zone
