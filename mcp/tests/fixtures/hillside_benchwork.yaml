@@ -7,14 +7,20 @@
 #   - NW alcove wall: x=48, y=156 to y=192 → west shelf stops at y=156
 #   - SE corner HVAC restricted: x=96–144, y=0–36 → south end of east shelf clear
 #
-# Classic around-the-walls starter benchwork: four 24-inch deep wall shelves.
-# (north_wall split into west alcove section and east main-room section to clear
-# the alcove_wall partition at x=48, 4" thick.)
+# elevation: top surface of benchwork above floor, real inches.
+# thickness: board depth below top surface (L1=3.5", L2=1.5").
+# Track elevation is always above benchwork elevation.
+#
+# Elevation zones:
+#   L1: 40" — all around-the-walls sections
+#   L2: 58" — upper deck sections (40" + 18" separation)
 
 # West wall shelf — full run from south wall to the alcove stub wall
 - label: west_wall
   shape: rect
   level: 1
+  elevation: 40in
+  thickness: 3.5in
   x: 0
   y: 0
   width: 24        # 2 ft deep into room
@@ -24,6 +30,8 @@
 - label: north_wall_west
   shape: rect
   level: 1
+  elevation: 40in
+  thickness: 3.5in
   x: 0
   y: 168           # 192 - 24 = 168 (24 in from north wall)
   width: 48        # x=0 to x=48 (stops at west face of alcove_wall)
@@ -33,6 +41,8 @@
 - label: north_wall_east
   shape: rect
   level: 1
+  elevation: 40in
+  thickness: 3.5in
   x: 52            # 4" clear of east face of alcove_wall (x=48+4)
   y: 168
   width: 92        # x=52 to x=144
@@ -42,7 +52,36 @@
 - label: east_wall
   shape: rect
   level: 1
+  elevation: 40in
+  thickness: 3.5in
   x: 120           # 144 - 24 = 120 (24 in from east wall)
   y: 72            # starts above door clearance (door top = y 72)
   width: 24        # 2 ft deep into room
   length: 120      # runs from y=72 to y=192
+
+# ---------------------------------------------------------------------------
+# Level 2 — upper deck (demonstrating elevation field with two deck heights)
+# 14" deep shelves; no corner modules — simplified for tutorial purposes.
+# ---------------------------------------------------------------------------
+
+# North wall upper deck
+- label: north_wall_l2
+  shape: rect
+  level: 2
+  elevation: 58in
+  thickness: 1.5in
+  x: 0
+  y: 178           # 192 - 14 = 178 (14 in from north wall)
+  width: 144       # full width
+  length: 14
+
+# East wall upper deck — above door clearance, same extents as L1 east_wall
+- label: east_wall_l2
+  shape: rect
+  level: 2
+  elevation: 58in
+  thickness: 1.5in
+  x: 130           # 144 - 14 = 130 (14 in from east wall)
+  y: 72
+  width: 14
+  length: 106      # y=72 to y=178 (meets north_wall_l2 corner)

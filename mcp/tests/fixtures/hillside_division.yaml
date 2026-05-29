@@ -14,6 +14,6 @@ benchwork_file: hillside_benchwork.yaml
 mainline: single
 curve_radius: 22in
 switch_size: "#6"
-levels: 1
+levels: 2
 
 grid: []

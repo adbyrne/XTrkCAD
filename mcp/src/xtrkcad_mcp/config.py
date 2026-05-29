@@ -128,6 +128,10 @@ Supported shapes:
       - [48, 48]
       - [96, 96]
 
+Optional fields (apply to all shapes):
+  elevation: 40in   # top surface height above floor, real inches (in/ft/bare number)
+  thickness: 3.5in  # board depth below top surface, real inches (default 0)
+
 Example inline list:
 
   benchwork:
@@ -291,6 +295,8 @@ class Benchwork:
     label: str
     level: int                                    # 1, 2, 3… → XTrkCAD layer 2N
     vertices: list = field(default_factory=list)  # [(x, y)…] model inches, always set
+    elevation_in: float = 0.0                     # top surface height above floor, real inches
+    thickness_in: float = 0.0                     # board depth below top surface, real inches
 
 
 @dataclass
@@ -561,7 +567,20 @@ def _parse_benchwork_sections(
             warnings.append(f"skipping benchwork {label!r}: {exc}")
             continue
 
-        sections.append(Benchwork(label=label, level=level, vertices=verts))
+        elevation_in = 0.0
+        if "elevation" in entry:
+            try:
+                elevation_in = _parse_length_in(str(entry["elevation"]))
+            except (ValueError, TypeError):
+                warnings.append(f"benchwork {label!r}: invalid elevation; using 0in")
+        thickness_in = 0.0
+        if "thickness" in entry:
+            try:
+                thickness_in = _parse_length_in(str(entry["thickness"]))
+            except (ValueError, TypeError):
+                warnings.append(f"benchwork {label!r}: invalid thickness; using 0in")
+        sections.append(Benchwork(label=label, level=level, vertices=verts,
+                                   elevation_in=elevation_in, thickness_in=thickness_in))
     return sections
 
 

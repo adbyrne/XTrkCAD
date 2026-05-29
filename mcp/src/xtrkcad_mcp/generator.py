@@ -197,10 +197,16 @@ _RESTRICTION_COLOR = 12632256  # light gray  (192,192,192) — access/clearance 
 def _filpoly_draw(
     vertices: list[tuple[float, float]],
     layer: int, color: int, track_id: int,
+    elevation_z: float = 0.0,
 ) -> tuple[list[str], int]:
-    """Emit one DRAW+SEG_FILPOLY for an arbitrary polygon.  One ID consumed."""
+    """Emit one DRAW+SEG_FILPOLY for an arbitrary polygon.  One ID consumed.
+
+    elevation_z goes in the DRAW header (field before angle); per-vertex Z is
+    always 0 — a non-zero per-vertex Z is read by XTrkCAD as pt_type and causes
+    arc rendering instead of straight-line polygon corners.
+    """
     lines = [
-        f"DRAW {track_id} {layer} 0 0 0 0.000000 0.000000 0.000000 0.000000",
+        f"DRAW {track_id} {layer} 0 0 0 0.000000 0.000000 {elevation_z:.6f} 0.000000",
         f"\tF4 {color} 0.000000 {len(vertices)} 0 ",
     ]
     for x, y in vertices:
@@ -213,7 +219,7 @@ def _benchwork_section_draw(
     bw: Benchwork, track_id: int,
 ) -> tuple[list[str], int]:
     """Emit one filled polygon for a benchwork section on its benchwork layer."""
-    return _filpoly_draw(bw.vertices, _benchwork_layer(bw.level), _benchwork_color(bw.level), track_id)
+    return _filpoly_draw(bw.vertices, _benchwork_layer(bw.level), _benchwork_color(bw.level), track_id, bw.elevation_in)
 
 
 def _write_benchwork_sections(
