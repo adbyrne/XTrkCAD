@@ -9,7 +9,8 @@ from pathlib import Path
 from mcp.server.fastmcp import FastMCP
 
 from xtrkcad_mcp.config import load_config
-from xtrkcad_mcp.models import SCALE_RATIOS, cars_per_real_ft, max_to_main_label
+from xtrkcad_mcp.models import SCALE_RATIOS
+from xtrkcad_mcp.svg_views import generate_elevation_view, generate_plan_view, cars_per_real_ft, max_to_main_label
 from xtrkcad_mcp.parser import TRACK_KINDS, parse_file
 from xtrkcad_mcp.stations import (
     compute_capacities,
@@ -2258,6 +2259,59 @@ def get_siding_capacities(path: str) -> list[dict]:
         }
         for r in results
     ]
+
+
+# ---------------------------------------------------------------------------
+# Tools — SVG visual views
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool()
+def write_plan_view(
+    config_path: str,
+    output_path: str,
+    level: int = 0,
+) -> str:
+    """Generate a top-down SVG plan view from a layout config.
+
+    Draws the room outline, floor plan features (restricted zones, door
+    clearances, partitions), and benchwork sections.  Each benchwork section
+    is labelled with its short name and elevation.
+
+    Args:
+        config_path: Path to the YAML layout config (or benchwork_file path).
+        output_path: Destination .svg path.
+        level: Deck level to show — 0 = all levels, 1 = Level 1 only, etc.
+
+    Returns:
+        Absolute path of the written SVG file.
+    """
+    return generate_plan_view(config_path, output_path, level=level)
+
+
+@mcp.tool()
+def write_elevation_view(
+    config_path: str,
+    output_path: str,
+    wall: str = "west",
+    levels: list[int] | None = None,
+) -> str:
+    """Generate a wall-profile elevation SVG from a layout config.
+
+    Shows benchwork cross-sections as seen from outside looking in:
+    the along-wall axis is horizontal, height above floor is vertical.
+    Bars are drawn at each section's elevation with its thickness shown.
+
+    Args:
+        config_path: Path to the YAML layout config.
+        output_path: Destination .svg path.
+        wall: Which wall to profile — "west", "south", "east", or "north".
+        levels: List of deck levels to include, e.g. [1, 2].  None = all.
+
+    Returns:
+        Absolute path of the written SVG file.
+    """
+    return generate_elevation_view(config_path, output_path, wall=wall, levels=levels)
 
 
 # ---------------------------------------------------------------------------
