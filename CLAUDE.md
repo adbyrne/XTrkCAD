@@ -9,10 +9,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 docs/                      Project documentation not required in any repo
 xtrkcad-hg/                Hg working copy — default branch (r6423+), remote = SourceForge
 xtrkcad-hg-gtk3v2main/     Hg working copy — GTK3V2MAIN branch (r5569+), cloned from xtrkcad-hg
-xtrkcad-fork-xtrkcad/      Old Hg checkout — do not pull from (broken pull path), reference only
+xtrkcad-git/               Git repo — main branch (GTK2), pushed to GitHub
+xtrkcad-git-gtk3/          Git worktree — GTK3V2MAIN branch (same .git as xtrkcad-git)
 build/                     Out-of-source CMake build for default branch
 build-gtk3v2main/          Out-of-source CMake build for GTK3V2MAIN branch
-CLAUDE.md                  This file — committed into the git repo
+CLAUDE.md                  This file — committed into xtrkcad-git (main) and xtrkcad-git-gtk3 (GTK3V2MAIN)
 ```
 
 ## Build
