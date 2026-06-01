@@ -4,17 +4,13 @@
 
 #include <stdlib.h>
 #include <stdarg.h>
-#include <stdbool.h>
 #include <stddef.h>
-#include <stdint.h>
-#include <setjmp.h>
-
-#include <cmocka.h>
-
 #include <string.h>
 #include <stdio.h>
+#include <setjmp.h>
+#include <cmocka.h>
 
-#include "../shortentext.h"
+#include <shortentext.h>
 
 #define RESULTSTRING "This is a test!"
 
@@ -29,6 +25,7 @@ static void NoRemoveBlanks(void **state)
 
 	RemoveFormatChars(" " RESULTSTRING, result);
 	assert_string_equal(result, " " RESULTSTRING);
+	free(result);
 }
 
 static void RemoveMultipleBlanks(void **state)
@@ -41,6 +38,7 @@ static void RemoveMultipleBlanks(void **state)
 
 	RemoveFormatChars("This   is a test!", result);
 	assert_string_equal(result, RESULTSTRING);
+	free(result);
 }
 
 
@@ -57,6 +55,7 @@ static void RemoveTabs(void **state)
 
 	RemoveFormatChars("\tThis is a test!", result);
 	assert_string_equal(result, " " RESULTSTRING);
+	free(result);
 }
 
 static void RemoveCRs(void **state)
@@ -72,6 +71,7 @@ static void RemoveCRs(void **state)
 
 	RemoveFormatChars("This is a test!\r", result);
 	assert_string_equal(result, RESULTSTRING);
+	free(result);
 }
 
 static void RemoveLFs(void **state)
@@ -90,6 +90,7 @@ static void RemoveLFs(void **state)
 
 	RemoveFormatChars("This is a test!\r\n", result);
 	assert_string_equal(result, RESULTSTRING);
+	free(result);
 }
 
 #define LONGSTRING "The strrchr() function in C/C++ locates the last occurrence of a character in a string. It returns a pointer to the last occurrence in the string. The terminating null character is considered part of the C string. ... str : specifies the pointer to the null terminated string to be searched for."
@@ -105,6 +106,7 @@ static void NoEllipsizeText(void **state)
 
 	EllipsizeString(RESULTSTRING, NULL, strlen(RESULTSTRING) + 10);
 	assert_string_equal(result, RESULTSTRING);
+	free(result);
 }
 
 static void EllipsizeText(void **state)
@@ -124,7 +126,7 @@ static void EllipsizeText(void **state)
 	strcpy(result, LONGSTRING);
 	EllipsizeString(result, NULL, 23);
 	assert_string_equal(result, "The strrchr()...");
-
+	free(result);
 }
 
 static void LongText(void **state)
@@ -138,6 +140,7 @@ static void LongText(void **state)
 
 	EllipsizeString("abcdefghijklmnopqrstuvwxyz", result, 10);
 	assert_string_equal(result, "abcdefg...");
+	free(result);
 }
 
 int main(void)

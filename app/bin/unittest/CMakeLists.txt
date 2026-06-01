@@ -152,6 +152,14 @@ set_target_properties(
  	PROPERTIES FOLDER UnitTests
  )
 
+if(XTRKCAD_SANITIZE AND UNIX)
+	set(SANITIZE_FLAGS -fsanitize=address,undefined -fno-omit-frame-pointer)
+	foreach(t dxfformattest shortentest defaultstest pathstest utilitytest beziertest cornutest undostreamtest)
+		target_compile_options(${t} PRIVATE ${SANITIZE_FLAGS})
+		target_link_options(${t} PRIVATE ${SANITIZE_FLAGS})
+	endforeach()
+endif()
+
  if(WIN32 AND CMOCKA_DLL)
 	add_custom_command(
 		TARGET dxfformattest POST_BUILD

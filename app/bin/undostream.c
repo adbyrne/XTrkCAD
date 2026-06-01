@@ -201,7 +201,7 @@ void ClearStream( stream_p stream )
 		blk = DYNARR_N( streamBlocks_p, stream->stream_da, inx );
 		MyFree( blk );
 	}
-	DYNARR_RESET( streamBlocks_p, stream->stream_da );
+	DYNARR_FREE( streamBlocks_p, stream->stream_da );
 	stream->startBInx = 0;
 	stream->end = stream->curr = 0;
 }

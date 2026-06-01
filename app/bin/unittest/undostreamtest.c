@@ -152,16 +152,18 @@ static void test_write_read_straddles_block_boundary(void **state)
 	(void)state;
 	stream_t s = make_stream();
 
-	/* Write a small pad so the interesting data straddles a block edge */
-	int pad = 0;
-	int pad_size = BSTREAM_SIZE - (int)sizeof(int);  /* land 4 bytes before end of block 0 */
-	assert_true(WriteStream(&s, &pad, pad_size));
+	/* Fill to 4 bytes before the end of block 0 so the next write straddles the boundary */
+	int pad_size = BSTREAM_SIZE - (int)sizeof(int);
+	char *pad_buf = calloc((size_t)pad_size, 1);
+	assert_non_null(pad_buf);
+	assert_true(WriteStream(&s, pad_buf, pad_size));
+	free(pad_buf);
 
-	/* This int will split across block 0 and block 1 */
+	/* This int is split across block 0 and block 1 */
 	int val = 0xDEADBEEF;
 	assert_true(WriteStream(&s, &val, sizeof val));
 
-	s.curr = pad_size;  /* skip past the padding */
+	s.curr = (uintptr_t)pad_size;
 	int got = 0;
 	assert_true(ReadStream(&s, &got, sizeof got));
 	assert_int_equal(val, (int)got);

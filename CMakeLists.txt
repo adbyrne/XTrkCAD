@@ -46,6 +46,8 @@ if(CMOCKA_FOUND)
     option(XTRKCAD_TESTING "Build unittests" ON)
 endif()
 
+option(XTRKCAD_SANITIZE "Build unit tests with AddressSanitizer + UBSan (Linux/GCC or Clang only)" OFF)
+
 # Tools
 # Find document conversion tool
 find_package(Pandoc)
