@@ -122,8 +122,13 @@ foreach(img3 ${IMG3S})
 		add_custom_command(
 			OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png
 			DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/svg/${img3}.svg
-			COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/png/
-			COMMAND ${Inkscape_EXECUTABLE} -w ${pix} -h ${pix} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${img3}.svg -o ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png
+			COMMAND ${CMAKE_COMMAND}
+				-DEXE=${Inkscape_EXECUTABLE}
+				-DWIDTH=${pix}
+				-DHEIGHT=${pix}
+				"-DINPUT=${CMAKE_CURRENT_SOURCE_DIR}/svg/${img3}.svg"
+				"-DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png"
+				-P ${CMAKE_CURRENT_SOURCE_DIR}/run_rsvg.cmake
 		)
 		else()
 		add_custom_command(
