@@ -43,6 +43,8 @@ static void CopyString(void **state)
     DynStringCatStr(&string, &string2);
     assert_int_equal(DynStringSize(&string), strlen(TEXT1) + strlen(TEXT2));
     assert_string_equal(DynStringToCStr(&string), TEXT1 TEXT2);
+    DynStringFree(&string);
+    DynStringFree(&string2);
 }
 
 static void VarStringCount(void **state)

@@ -1,6 +1,6 @@
 # Main CMake file for XTrackCAD
 
-cmake_minimum_required(VERSION 3.20...4.0)
+cmake_minimum_required(VERSION 3.20.0)
 project(XTrkCAD C)
 
 cmake_policy(SET CMP0076 NEW)
@@ -42,6 +42,8 @@ if(CMOCKA_FOUND)
  	set(LIBS ${LIBS} ${CMOCKA_LIBRARIES})
  	option(XTRKCAD_TESTING "Build unittests" ON)
 endif()
+
+option(XTRKCAD_SANITIZE "Build unit tests with AddressSanitizer + UBSan (Linux/GCC or Clang only)" OFF)
 
 # Tools
 # Find document conversion tool

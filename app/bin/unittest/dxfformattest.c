@@ -36,6 +36,7 @@ static void BasicFormatting(void **state)
 
 	DxfFormatPosition(&string, 20, 1.23456712);
 	assert_string_equal(DynStringToCStr(&string), DXF_INDENT "20\n1.234567\n");
+	DynStringFree(&string);
 }
 
 static void LineCommand(void **state)
@@ -136,7 +137,7 @@ static void Units(void **state)
 	DxfDimensionSize(&string, DXF_DIMTEXTSIZE);
 	assert_string_equal(DynStringToCStr(&string),
 	                    DXF_INDENT "9\n$DIMTXT\n  40\n25.0\n");
-
+	DynStringFree(&string);
 }
 int main(void)
 {
