@@ -144,6 +144,8 @@ target_sources(xtrkcad-lib
     cturntbl.c
     cundo.c
     cundo.h
+    undostream.c
+    undostream.h
     custom.c
     custom.h
     dbench.c

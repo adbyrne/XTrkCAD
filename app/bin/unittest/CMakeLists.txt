@@ -124,6 +124,22 @@ endif()
 
 add_test(CornuTest cornutest)
 
+# undo stream buffer operations
+
+add_executable(undostreamtest
+	undostreamtest.c
+)
+
+target_include_directories(undostreamtest PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
+    ${CMAKE_SOURCE_DIR}/app/wlib/include
+)
+
+target_link_libraries(undostreamtest ${LIBS})
+
+add_test(UndoStreamTest undostreamtest)
+
 set_target_properties(
 	dxfformattest
 	shortentest
@@ -132,6 +148,7 @@ set_target_properties(
 	utilitytest
 	beziertest
 	cornutest
+	undostreamtest
  	PROPERTIES FOLDER UnitTests
  )
 
