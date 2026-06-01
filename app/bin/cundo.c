@@ -75,61 +75,7 @@
 #include "common-ui.h"
 #include "ctrain.h"
 
-#include <inttypes.h>
-
-#include <stdint.h>
-
-#define SLOG_FMT "0x%.12" PRIxPTR
-
-
-/****************************************************************************
- *
- * RPRINTF
- *
- */
-
-
-#define RBUFF_SIZE (8192)
-static char rbuff[RBUFF_SIZE+1];
-static int roff;
-static int rbuff_record = 0;
-
-EXPORT void Rdump( FILE * outf )
-{
-	time_t clock;
-	time(&clock);
-	fprintf( outf, "Record Buffer %s:\n", ctime(&clock) );
-	rbuff[RBUFF_SIZE] = '\0';
-	fprintf( outf, "%s", rbuff+roff );
-	rbuff[roff] = '\0';
-	fprintf( outf, "%s", rbuff );
-	memset( rbuff, 0, sizeof rbuff );
-	fflush( outf );
-	roff = 0;
-}
-
-
-static void Rprintf(
-        char * format,
-        ... )
-{
-	static char buff[STR_SIZE];
-	char * cp;
-	va_list ap;
-	va_start( ap, format );
-	vsprintf( buff, format, ap );
-	va_end( ap );
-	if (rbuff_record >= 1) {
-		lprintf( buff );
-	}
-	for ( cp=buff; *cp; cp++ ) {
-		rbuff[roff] = *cp;
-		roff++;
-		if (roff>=RBUFF_SIZE) {
-			roff=0;
-		}
-	}
-}
+#include "undostream.h"
 
 /*****************************************************************************
  *
@@ -167,13 +113,6 @@ static int undoCount = 0;
 static char ModifyOp = 1;
 static char DeleteOp = 2;
 
-static BOOL_T recordUndo = 1;
-
-#define UASSERT( ARG, VAL ) \
-		if (!(ARG)) return UndoFail( #ARG, VAL, __FILE__, __LINE__ )
-#define UASSERT2( ARG, VAL ) \
-		if (!(ARG)) { UndoFail( #ARG, VAL, __FILE__, __LINE__ ); return; }
-
 #define INC_UNDO_INX( INX ) {\
 		if (++INX >= UNDO_STACK_SIZE) \
 			INX = 0; \
@@ -183,16 +122,6 @@ static BOOL_T recordUndo = 1;
 			INX = UNDO_STACK_SIZE-1; \
 		}
 
-#define BSTREAM_SIZE (4096)
-typedef char streamBlocks_t[BSTREAM_SIZE];
-typedef streamBlocks_t *streamBlocks_p;
-typedef struct {
-	dynArr_t stream_da;
-	long startBInx;
-	uintptr_t end;
-	uintptr_t curr;
-} stream_t;
-typedef stream_t *stream_p;
 static stream_t undoStream;
 static stream_t redoStream;
 
@@ -253,8 +182,8 @@ static void DumpStream( FILE * outf, stream_p stream, char * name )
 	}
 }
 
-static BOOL_T UndoFail( char * cause, uintptr_t val, char * fileName,
-                        int lineNumber )
+BOOL_T UndoFail( char * cause, uintptr_t val, char * fileName,
+                 int lineNumber )
 {
 	int inx, cnt;
 	undoStack_p us;
@@ -310,154 +239,6 @@ static BOOL_T UndoFail( char * cause, uintptr_t val, char * fileName,
 }
 
 
-BOOL_T ReadStream( stream_t * stream, void * ptr, int size )
-{
-	size_t binx, boff, brem;
-	streamBlocks_p blk;
-	if ( stream->curr+size > stream->end ) {
-		UndoFail( "Overrun on stream", (uintptr_t)(stream->curr+size), __FILE__,
-		          __LINE__ );
-		return FALSE;
-	}
-	LOG( log_undo, 5, ( "ReadStream( , "SLOG_FMT", %d ) %ld %ld %ld\n",
-	                    (uintptr_t)ptr, size, stream->startBInx, stream->curr, stream->end ) )
-	binx = stream->curr/BSTREAM_SIZE;
-	boff = stream->curr%BSTREAM_SIZE;
-	stream->curr += size;
-	binx -= stream->startBInx;
-	brem = BSTREAM_SIZE - boff;
-	while ( brem < size ) {
-		UASSERT( binx>=0 && binx < stream->stream_da.cnt, binx );
-		blk = DYNARR_N( streamBlocks_p, stream->stream_da, binx );
-		memcpy( ptr, &(*blk)[boff], (size_t)brem );
-		ptr = (char*)ptr + brem;
-		size -= (int)brem;
-		binx++;
-		boff = 0;
-		brem = BSTREAM_SIZE;
-	}
-	if (size) {
-		UASSERT( binx>=0 && binx < stream->stream_da.cnt, binx );
-		blk = DYNARR_N( streamBlocks_p, stream->stream_da, binx );
-		memcpy( ptr, &(*blk)[boff], size );
-	}
-	return TRUE;
-}
-
-BOOL_T WriteStream( stream_p stream, void * ptr, int size )
-{
-	size_t binx, boff, brem;
-	streamBlocks_p blk;
-	LOG( log_undo, 5,
-	     ( "WriteStream( , "SLOG_FMT", %d ) %ld "SLOG_FMT" "SLOG_FMT"\n", (uintptr_t)ptr,
-	       size, stream->startBInx, stream->curr, stream->end ) )
-	if (size == 0) {
-		return TRUE;
-	}
-	binx = stream->end/BSTREAM_SIZE;
-	boff = stream->end%BSTREAM_SIZE;
-	stream->end += size;
-	binx -= stream->startBInx;
-	brem = BSTREAM_SIZE - boff;
-	while ( size ) {
-		if (boff==0) {
-			UASSERT( binx == stream->stream_da.cnt, binx );
-			DYNARR_APPEND( streamBlocks_p, stream->stream_da, 10 );
-			blk = (streamBlocks_p)MyMalloc( sizeof *blk );
-			DYNARR_N( streamBlocks_p, stream->stream_da, binx ) = blk;
-		} else {
-			UASSERT( binx == stream->stream_da.cnt-1, binx );
-			blk = DYNARR_N( streamBlocks_p, stream->stream_da, binx );
-		}
-		if (size > brem) {
-			memcpy( &(*blk)[boff], ptr, (size_t)brem );
-			ptr = (char*)ptr + brem;
-			size -= (int)brem;
-			binx++;
-			boff = 0;
-			brem = BSTREAM_SIZE;
-		} else {
-			memcpy( &(*blk)[boff], ptr, size );
-			break;
-		}
-	}
-	return TRUE;
-}
-
-BOOL_T TrimStream( stream_p stream, uintptr_t off )
-{
-	size_t binx, cnt, inx;
-	streamBlocks_p blk;
-	LOG( log_undo, 3, ( "    TrimStream( , %ld )\n", off ) )
-	binx = off/BSTREAM_SIZE;
-	cnt = binx-stream->startBInx;
-	if (recordUndo) {
-		Rprintf("Trim("SLOG_FMT") %ld blocks (out of %d)\n", off, cnt,
-		        stream->stream_da.cnt);
-	}
-	UASSERT( cnt >= 0 && cnt <= stream->stream_da.cnt, cnt );
-	if (cnt == 0) {
-		return TRUE;
-	}
-	for (inx=0; inx<cnt; inx++) {
-		blk = DYNARR_N( streamBlocks_p, stream->stream_da, inx );
-		MyFree( blk );
-	}
-	for (inx=cnt; inx<stream->stream_da.cnt; inx++ ) {
-		DYNARR_N( streamBlocks_p, stream->stream_da,
-		          inx-cnt ) = DYNARR_N( streamBlocks_p, stream->stream_da, inx );
-	}
-	stream->startBInx =(long)binx;
-	stream->stream_da.cnt -= (wIndex_t)cnt;
-	UASSERT( stream->stream_da.cnt >= 0, stream->stream_da.cnt );
-	return TRUE;
-}
-
-
-void ClearStream( stream_p stream )
-{
-	long inx;
-	streamBlocks_p blk;
-	for (inx=0; inx<stream->stream_da.cnt; inx++) {
-		blk = DYNARR_N( streamBlocks_p, stream->stream_da, inx );
-		MyFree( blk );
-	}
-	DYNARR_RESET( streamBlocks_p, stream->stream_da );
-	stream->startBInx = 0;
-	stream->end = stream->curr = 0;
-}
-
-
-BOOL_T TruncateStream( stream_p stream, uintptr_t off )
-{
-	size_t binx, boff, cnt, inx;
-	streamBlocks_p blk;
-	LOG( log_undo, 3, ( "TruncateStream( , %ld )\n", off ) )
-	binx = off/BSTREAM_SIZE;
-	boff = off%BSTREAM_SIZE;
-	if (boff!=0) {
-		binx++;
-	}
-	binx -= stream->startBInx;
-	cnt = stream->stream_da.cnt-binx;
-	if (recordUndo) {
-		Rprintf("Truncate("SLOG_FMT") %ld blocks (out of %d)\n", off, cnt,
-		        stream->stream_da.cnt);
-	}
-	UASSERT( cnt >= 0 && cnt <= stream->stream_da.cnt, cnt );
-	if (cnt == 0) {
-		return TRUE;
-	}
-	for (inx=binx; inx<stream->stream_da.cnt; inx++) {
-		blk = DYNARR_N( streamBlocks_p, stream->stream_da, inx );
-		MyFree( blk );
-	}
-	DYNARR_SET( streamBlocks_p, stream->stream_da, (wIndex_t)binx );
-	stream->end = off;
-	UASSERT( stream->stream_da.cnt >= 0, stream->stream_da.cnt );
-	return TRUE;
-}
-
 
 BOOL_T WriteObject( stream_p stream, char op, track_p trk )
 {

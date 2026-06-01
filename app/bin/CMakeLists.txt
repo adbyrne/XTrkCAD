@@ -17,7 +17,7 @@ add_subdirectory(bitmaps)
 
 add_executable(cnvdsgn cnvdsgn.c utility.c)
 
-target_link_libraries(cnvdsgn PRIVATE xtrkcad-wlib)
+target_link_libraries(cnvdsgn xtrkcad-wlib)
 
 target_include_directories(cnvdsgn
     PUBLIC
@@ -26,7 +26,7 @@ target_include_directories(cnvdsgn
 )
 
 if(NOT WIN32)
-	target_link_libraries(cnvdsgn PRIVATE m)
+	target_link_libraries(cnvdsgn m)
 endif()
 
 add_custom_target(lines
@@ -139,6 +139,8 @@ target_sources(xtrkcad-lib
     cturntbl.c
     cundo.c
     cundo.h
+    undostream.c
+    undostream.h
     custom.c
     custom.h
     dbench.c
@@ -320,8 +322,7 @@ if(XTRKCAD_CREATE_SVG)
                 MiniXML::mxml
             )
         else()
-			target_link_libraries(xtrkcad PRIVATE ${MINIXML_STATIC_LIBRARY})
-			target_link_libraries(xtrkcad PRIVATE "pthread")
+			target_link_libraries(${XTRKCAD_BIN} PRIVATE ${MINIXML_STATIC_LIBRARY} pthread)
 		endif()
 	endif()
 endif()
@@ -375,7 +376,7 @@ if(APPLE)
 	add_executable( helphelper helphelper.c )
 	find_library(COREFOUNDATION_LIBRARY CoreFoundation)
 	find_library(CARBON_LIBRARY Carbon)
-	target_link_libraries(helphelper PRIVATE ${COREFOUNDATION_LIBRARY} ${CARBON_LIBRARY})
+	target_link_libraries(helphelper ${COREFOUNDATION_LIBRARY} ${CARBON_LIBRARY})
 	install(
 		TARGETS helphelper
 		RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
