@@ -134,6 +134,69 @@ jobs:
             -I app/bin -I app/bin/include -I app/wlib/include \
             app/bin/*.c app/dynstring/*.c
 
+  compiler-warnings:
+    # Report-only: captures -Wall -Wextra output as an artifact.
+    # Does NOT fail the build — legacy code has pre-existing warnings.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build libgtk2.0-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin
+      - name: Configure with -Wall -Wextra
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
+            -DCMAKE_C_FLAGS="-Wall -Wextra -Wno-unused-parameter"
+      - name: Build (warnings captured, non-fatal)
+        run: cmake --build build 2>&1 | tee build/warnings.txt || true
+      - name: Summarise warning count
+        run: |
+          COUNT=$(grep -c ': warning:' build/warnings.txt || echo 0)
+          echo "Total warnings: $COUNT"
+          grep ': warning:' build/warnings.txt | sed 's|.*/app/||' | sort | uniq -c | sort -rn | head -30
+      - name: Upload warning log
+        uses: actions/upload-artifact@v7
+        with:
+          name: compiler-warnings-gtk2
+          path: build/warnings.txt
+
+  coverage:
+    # Report-only: generates an lcov HTML report and uploads it as an artifact.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build libgtk2.0-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin lcov
+      - name: Configure with coverage flags
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
+            -DCMAKE_C_FLAGS="--coverage" -DCMAKE_EXE_LINKER_FLAGS="--coverage"
+      - name: Build
+        run: cmake --build build
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
+      - name: Collect coverage
+        run: |
+          lcov --capture --directory build \
+               --output-file build/coverage.info \
+               --ignore-errors mismatch
+          lcov --remove build/coverage.info \
+               '/usr/*' '*/build/*' '*/unittest/*' '*/tools/*' \
+               --output-file build/coverage-filtered.info \
+               --ignore-errors unused
+          genhtml build/coverage-filtered.info \
+                  --output-directory build/coverage-html \
+                  --title "XTrkCAD unit test coverage"
+          lcov --summary build/coverage-filtered.info
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-report-gtk2
+          path: build/coverage-html/
+
   c-tests-macos:
     runs-on: macos-latest
     steps:
