@@ -43,6 +43,7 @@ add_executable( defaultstest
 
 target_include_directories(defaultstest PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
     ${CMAKE_SOURCE_DIR}/app/wlib/include
 )
 

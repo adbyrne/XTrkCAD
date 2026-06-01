@@ -62,7 +62,9 @@ jobs:
         env:
           ASAN_OPTIONS: "abort_on_error=1:detect_leaks=1"
           UBSAN_OPTIONS: "abort_on_error=1:print_stacktrace=1"
-        run: ctest --test-dir build --output-on-failure
+        # PreferenceTest requires a GTK3 display and triggers GTK3 internal
+        # allocations that ASAN flags as leaks. It is covered by c-tests-linux.
+        run: ctest --test-dir build --output-on-failure -E PreferenceTest
 
   c-tests-valgrind:
     runs-on: ubuntu-latest
@@ -77,8 +79,11 @@ jobs:
       - name: Build
         run: cmake --build build
       - name: Test under Valgrind
+        # PreferenceTest requires a GTK3 display; GTK3 internals also trigger
+        # many Valgrind false-positives. It is covered by c-tests-linux.
         run: |
           ctest --test-dir build --output-on-failure \
+            -E PreferenceTest \
             -T memcheck \
             --overwrite MemoryCheckCommand=$(which valgrind) \
             --overwrite "MemoryCheckCommandOptions=--error-exitcode=1 --track-origins=yes --leak-check=full"
