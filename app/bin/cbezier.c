@@ -365,8 +365,7 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track,
 {
 	double t_s = 0.0, t_e = 1.0;
 	double errorThreshold = 0.05;
-	bCurveData_t prev_arc;
-	prev_arc.end = 0.0;
+	bCurveData_t prev_arc = {0}; /* sentinel: .end==0.0 means no arc found yet */
 	bCurveData_t arc;
 	DYNARR_RESET( trkSeg_t, *segs ); // wipe out
 	BOOL_T safety;

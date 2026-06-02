@@ -1106,7 +1106,7 @@ EXPORT long ComputeTurnoutRoadbedSide(
 		bitWidth = 2;
 	}
 	res = 0;
-	mask = (1<<bitWidth)-1;
+	mask = (1u<<bitWidth)-1;
 	hit0 = HittestTurnoutRoadbed( segPtr, segCnt, segInx, side, 0, roadbedWidth );
 	inx0 = 0;
 	inx1 = bitWidth;
@@ -1758,7 +1758,7 @@ static toDesignSchema_t * LoadSegs(
 
 			DYNARR_RESET( trkSeg_t, tempSegs_da );
 			DIST_T radius = 0.0;
-			coOrd center;
+			coOrd center = {0};
 			ANGLE_T angle;
 			int inx,subSeg;
 			wBool_t back, neg;
@@ -2397,7 +2397,7 @@ static toDesignSchema_t * LoadSegs(
 		int inx,subSeg;
 		wBool_t back, neg;
 		DIST_T radius = 0.0;
-		coOrd center;
+		coOrd center = {0};
 		pos.x = end_points[0].x+newTurnToeL-MIN_TRACK_LENGTH;
 		pos.y = end_points[0].y; 				/* This will be close to but not on the curve */
 		ANGLE_T angle = GetAngleSegs(tempSegs_da.cnt,&tempSegs(0),&pos,
@@ -3558,7 +3558,7 @@ EXPORT void AbortProg(
         int iLineNumber,
         const char * sMsg )
 {
-	fprintf( stderr, "%s: %s:%d %s", sCond, sFileName, iLineNumber, sMsg );
+	fprintf( stderr, "%s: %s:%d %s", sCond, sFileName, iLineNumber, sMsg ? sMsg : "" );
 	abort();
 }
 

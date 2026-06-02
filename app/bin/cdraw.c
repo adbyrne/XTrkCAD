@@ -2767,7 +2767,7 @@ EXPORT BOOL_T GetClosestEndPt( track_p trk, coOrd * pos)
 			return FALSE;
 		}
 		DIST_T dd0,dd1;
-		coOrd p00,p0,p1;
+		coOrd p00, p0 = {0}, p1 = {0};
 		p00 = *pos;
 		if (GetTrkType(trk) == T_DRAW) {
 			Rotate(&p00,xx->orig,-xx->angle);
