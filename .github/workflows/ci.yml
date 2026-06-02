@@ -144,7 +144,6 @@ jobs:
             --suppress=ctunullpointer:app/bin/track.c \
             --suppress=uninitvar:app/bin/levenshtein.c \
             --suppress=uninitvar:app/bin/problemrep.c \
-            --suppress=uninitvar:app/bin/paths.c \
             --suppress=nullPointer:app/bin/partcatalog.c \
             --suppress=missingReturn:app/bin/cturnout.c \
             --suppress=ctuPointerArith:app/bin/cturnout.c \
