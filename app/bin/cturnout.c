@@ -2702,7 +2702,7 @@ static void TurnoutRotate(void* pangle)
 static dynArr_t anchors_da;
 #define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
 
-void static CreateArrowAnchor(coOrd pos, ANGLE_T a, DIST_T len)
+static void CreateArrowAnchor(coOrd pos, ANGLE_T a, DIST_T len)
 {
 	DYNARR_APPEND(trkSeg_t, anchors_da, 1);
 	int i = anchors_da.cnt - 1;
@@ -2720,7 +2720,7 @@ void static CreateArrowAnchor(coOrd pos, ANGLE_T a, DIST_T len)
 	anchors(i).color = wDrawColorBlue;
 }
 
-void static CreateRotateAnchor(coOrd pos)
+static void CreateRotateAnchor(coOrd pos)
 {
 	DIST_T d = tempD.scale * 0.15;
 	DYNARR_APPEND(trkSeg_t, anchors_da, 1);
@@ -2739,7 +2739,7 @@ void static CreateRotateAnchor(coOrd pos)
 	}
 }
 
-void static CreateMoveAnchor(coOrd pos)
+static void CreateMoveAnchor(coOrd pos)
 {
 	DYNARR_SET(trkSeg_t, anchors_da, anchors_da.cnt + 5);
 	DrawArrowHeads(&DYNARR_N(trkSeg_t, anchors_da, anchors_da.cnt - 5), pos, 0,
@@ -2917,7 +2917,7 @@ EXPORT STATUS_T CmdTurnoutAction(
 		if ((action >> 8) != ' ') {
 			return C_CONTINUE;
 		}
-	/*no break*/
+	/* falls through */
 	case C_OK:
 		DYNARR_RESET(trkSeg_t, anchors_da);
 		AddTurnout();
@@ -2993,12 +2993,12 @@ static STATUS_T CmdTurnout(
 		if (((action & 0xFF) == C_DOWN) && (MyGetKeyState() & WKEY_CTRL)) {
 			return CmdTurnoutAction(C_RDOWN, pos);        //Convert CTRL into Right
 		}
-	/*no break*/
+	/* falls through */
 	case C_MOVE:
 		if (MyGetKeyState() & WKEY_CTRL) {
 			return CmdTurnoutAction(C_RMOVE, pos);
 		}
-	/*no break*/
+	/* falls through */
 	case C_RMOVE:
 		return CmdTurnoutAction(action, pos);
 
@@ -3137,7 +3137,7 @@ static STATUS_T CmdTurnoutHotBar(
 		if (MyGetKeyState() & WKEY_CTRL) {
 			return CmdTurnoutAction(C_RDOWN, pos);
 		}
-	/*no break*/
+	/* falls through */
 	case C_RDOWN:
 		return CmdTurnoutAction(action, pos);
 
@@ -3145,7 +3145,7 @@ static STATUS_T CmdTurnoutHotBar(
 		if (MyGetKeyState() & WKEY_CTRL) {
 			return CmdTurnoutAction(C_RMOVE, pos);
 		}
-	/*no break*/
+	/* falls through */
 	case C_RMOVE:
 		return CmdTurnoutAction(action, pos);
 
@@ -3153,7 +3153,7 @@ static STATUS_T CmdTurnoutHotBar(
 		if (MyGetKeyState() & WKEY_CTRL) {
 			return CmdTurnoutAction(C_RUP, pos);
 		}
-	/*no break*/
+	/* falls through */
 	case C_RUP:
 		InfoMessage(
 		        _("Left-Drag to place, Ctrl+Left-Drag or Right-Drag to Rotate, Space or Enter to accept, Esc to Cancel"));
@@ -3165,14 +3165,14 @@ static STATUS_T CmdTurnoutHotBar(
 		if ((action >> 8) != ' ') {
 			return C_CONTINUE;
 		}
-	/* no break*/
+	/* falls through */
 	case C_OK:
 		CmdTurnoutAction(action, pos);
 		return C_CONTINUE;
 
 	case C_CANCEL:
 		HotBarCancel();
-	/*no break*/
+	/* falls through */
 	default:
 		return CmdTurnoutAction(action, pos);
 	}

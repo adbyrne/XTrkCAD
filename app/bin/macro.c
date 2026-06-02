@@ -517,7 +517,7 @@ static void PlaybackCursor(
 		      ?arrow3_ctl_bm:arrow3_bm);
 		Flash( playbackColor=rightDragColor );
 		proc( action, pos );
-	/* no break */
+	/* falls through */
 
 	case C_MOVE:
 		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow3_shift_bm:(MyGetKeyState()&WKEY_CTRL)
@@ -544,7 +544,7 @@ static void PlaybackCursor(
 		      ?arrowr3_ctl_bm:arrowr3_bm);
 		Flash( playbackColor=leftDragColor );
 		proc( action, pos );
-	/* no break */
+	/* falls through */
 
 	case C_RMOVE:
 		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrowr3_shift_bm:(MyGetKeyState()&WKEY_CTRL)

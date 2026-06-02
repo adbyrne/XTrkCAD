@@ -2057,7 +2057,7 @@ static void LayerDlgUpdate(
 
 	case I_MAP:
 		layerRedrawMap = TRUE;
-	/* No Break */
+	/* falls through */
 	case I_VIS:
 	case I_FRZ:
 	case I_MOD:

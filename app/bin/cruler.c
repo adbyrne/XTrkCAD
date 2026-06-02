@@ -108,6 +108,7 @@ static STATUS_T CmdAngle( wAction_t action, coOrd pos )
 			break;
 		case AN_ON:
 			An.state = AN_OFF;
+		/* falls through */
 		case AN_FIRST:
 		case AN_SECOND:
 			An.state = AN_OFF;

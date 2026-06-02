@@ -264,7 +264,7 @@ wBool_t prefInitted = FALSE;
  * \param name overwrite default configuration
  */
 
-void static
+static void
 wlibSetProfileFilename(char *name)
 {
 	const char *workDir;

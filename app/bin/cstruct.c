@@ -678,7 +678,7 @@ static EPINX_T pierEp;
 static dynArr_t anchors_da;
 #define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
 
-void static CreateArrowAnchor(coOrd pos,ANGLE_T a,DIST_T len)
+static void CreateArrowAnchor(coOrd pos,ANGLE_T a,DIST_T len)
 {
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	int i = anchors_da.cnt-1;
@@ -696,7 +696,7 @@ void static CreateArrowAnchor(coOrd pos,ANGLE_T a,DIST_T len)
 	anchors(i).color = wDrawColorBlue;
 }
 
-void static CreateRotateAnchor(coOrd pos)
+static void CreateRotateAnchor(coOrd pos)
 {
 	DIST_T d = tempD.scale*0.15;
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
@@ -715,7 +715,7 @@ void static CreateRotateAnchor(coOrd pos)
 	}
 }
 
-void static CreateMoveAnchor(coOrd pos)
+static void CreateMoveAnchor(coOrd pos)
 {
 	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
 	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,0,TRUE,
@@ -992,7 +992,7 @@ EXPORT STATUS_T CmdStructureAction(
 		if ((action>>8) != ' ') {
 			return C_CONTINUE;
 		}
-	/*no break*/
+	/* falls through */
 	case C_OK:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		NewStructure();
@@ -1066,7 +1066,7 @@ static STATUS_T CmdStructure(
 		if (MyGetKeyState()&WKEY_CTRL) {
 			return CmdStructureAction( C_RDOWN, pos );
 		}
-	/* no break*/
+	/* falls through */
 	case C_RDOWN:
 		ParamDialogOkActive( &structurePG, TRUE );
 		if (hideStructureWindow) {
@@ -1077,7 +1077,7 @@ static STATUS_T CmdStructure(
 		if (MyGetKeyState()&WKEY_CTRL) {
 			return CmdStructureAction( C_RMOVE, pos );
 		}
-	/*no break*/
+	/* falls through */
 	case C_RMOVE:
 		return CmdStructureAction( action, pos );
 	case C_RUP:
@@ -1227,14 +1227,14 @@ static STATUS_T CmdStructureHotBar(
 		if ((action>>8) != ' ') {
 			return C_CONTINUE;
 		}
-	/*no break*/
+	/* falls through */
 	case C_OK:
 		CmdStructureAction( action, pos );
 		return C_CONTINUE;
 
 	case C_CANCEL:
 		HotBarCancel();
-	/* no break*/
+	/* falls through */
 	default:
 		return CmdStructureAction( action, pos );
 	}

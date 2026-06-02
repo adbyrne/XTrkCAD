@@ -831,7 +831,7 @@ EXPORT void DrawBoxedString(
 		DrawLine(d, p1, p2, 0, color);
 		Translate(&p1, p2, a - 150, size.y * 0.7 * arrowScale);
 		DrawLine(d, p1, p2, 0, color);
-	/* no break */
+	/* falls through */
 	case BOX_BOX:
 	case BOX_BOX_BACKGROUND:
 		if (style == BOX_ARROW_BACKGROUND || style == BOX_BOX_BACKGROUND) {
@@ -841,7 +841,7 @@ EXPORT void DrawBoxedString(
 		DrawLine(d, p[1], p[2], 0, color);
 		DrawLine(d, p[2], p[3], 0, color);
 		DrawLine(d, p[3], p[0], 0, color);
-	/* no break */
+	/* falls through */
 	case BOX_UNDERLINE:
 		DrawLine(d, p[0], p[1], 0, color);
 		DrawString(d, p0, 0.0, text, fp, fs, color);
@@ -2666,6 +2666,7 @@ static void DoMapPan( wAction_t action, coOrd pos )
 		} else {
 			break;
 		}
+	/* falls through */
 	case C_MOVE:
 		if ( mode != movePan ) {
 			break;
@@ -2970,7 +2971,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 			ConfirmReset( TRUE );
 			return;
 		}
-	/*no break */
+	/* falls through */
 	case C_MODKEY:
 	case C_MOVE:
 	case C_UP:

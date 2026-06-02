@@ -201,7 +201,7 @@ static STATUS_T ModifyDraw(wAction_t action, coOrd pos)
 		//Enter/Space/Tab does not
 		if ((action>>8 !=32) && (action>>8 != 13) && (action>>8 != 9)) { return C_CONTINUE; }
 		if (((action>>8) == 9 && (MyGetKeyState()&WKEY_SHIFT))) { return C_TERMINATE; }
-	/*no break*/
+	/* falls through */
 	case C_OK:
 		rc = ModifyTrack( Dex.Trk, C_OK, pos );
 		if (rc != C_CONTINUE) { modifyDrawMode = FALSE; }
@@ -574,7 +574,7 @@ CHANGE_TRACK:
 			InfoMessage ( _("No track selected"));
 			return C_ERROR;
 		}
-	/* no break */
+	/* falls through */
 	case C_RMOVE:
 extendTrackMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
@@ -855,7 +855,7 @@ extendTrackUp:
 		if (modifyCornuMode) {
 			return ModifyCornu(action, pos);
 		}
-	/*no break*/
+	/* falls through */
 	default:
 		if (modifyBezierMode) { return ModifyBezier(action, pos); }
 		if (modifyCornuMode) { return ModifyCornu(action, pos); }
