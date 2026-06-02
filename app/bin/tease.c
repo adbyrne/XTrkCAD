@@ -245,33 +245,6 @@ static DIST_T GetLfromD(
 }
 
 
-#ifdef LATER
-static void JoinDistance(
-        DIST_T r,
-        DIST_T R,
-        DIST_T X,
-        DIST_T L,
-        DIST_T *dr,
-        DIST_T *xr,
-        DIST_T *lr )
-{
-	DIST_T l, d, rr = 0.0;
-	coOrd p = {0}, pc = {0};
-	if (r == 0.0) {
-		*dr = 0.0;
-		*lr = *xr = 0.0;
-		return;
-	}
-	l = FindL( r, R, L );
-	d = JoinD( l, R, L );
-	ComputeJoinPos( l, R, L, NULL, NULL, &p, NULL );
-	LOG( log_ease, 2, ( "joinDistance r=%0.3f rr=%0.3f\n", r, rr ) )
-	*xr = pc.x - rr;
-	*dr = d;
-	*lr = pc.y;
-}
-#endif
-
 EXPORT STATUS_T ComputeJoint(
         DIST_T r0,
         DIST_T r1,
@@ -1888,7 +1861,6 @@ EXPORT void JointSegProc(
 
 
 
-#ifndef TEST
 BOOL_T JoinTracks(
         track_p trk0,
         EPINX_T ep0,
@@ -2001,7 +1973,6 @@ EXPORT void UndoJoint(
 	MoveEndPt( &trk, &ep, GetTrkEndPos(trk,ep), -d );
 	DrawNewTrack( trk );
 }
-#endif
 
 /*****************************************************************************
  *
@@ -2019,209 +1990,3 @@ void InitTrkEase( void )
 }
 
 
-/*****************************************************************************
- *
- * TEST
- *
- */
-
-#ifdef TEST
-
-
-void ErrorMessage( char * msg, ... )
-{
-	lprintf( "%s\n", msg );
-}
-
-void InfoMessage( char * msg, ... )
-{
-	lprintf( "%s\n", msg );
-}
-
-scaleInfo_p curScale;
-
-track_p NewTrack( TRKINX_T a, TRKTYP_T b, EPINX_T c, TRKTYP_T d )
-{
-	return NULL;
-}
-
-void DrawStraightTrack( drawCmd_p a, coOrd b, coOrd c, ANGLE_T d,
-                        track_p trk, wDrawColor color, int opts )
-{
-}
-
-void DrawNewTrack( track_p t )
-{
-}
-
-static DIST_T JoinDalt(
-        DIST_T x,
-        DIST_T R,
-        DIST_T L )
-/*
- * Alternative distance computation, integrate over the curve.
- */
-{
-#define DCNT (1000)
-	DIST_T d;
-	wIndex_t i;
-	coOrd p0, p1;
-	d = 0.0;
-	p0.x = p0.y = 0.0;
-	for ( i=1; i<=DCNT; i++) {
-		ComputeJoinPos( x*((DIST_T)i)/((DIST_T)DCNT), R, L, NULL, NULL, &p1, NULL );
-		d += FindDistance( p0, p1 );
-		p0 = p1;
-	}
-	return d;
-}
-
-
-test_plot( INT_T argc, char * argv[] )
-{
-	DIST_T l, X, L, rr, ra, d, d1, R;
-	coOrd p, pc, p1;
-	INT_T i, C;
-	if (argc != 4) {
-		lprintf("%s R L C\n", argv[0]);
-		Exit(1);
-	}
-	argv++;
-	R = atof( *argv++ );
-	L = atof( *argv++ );
-	C = atol( *argv++ );
-	X = L*L/(24*R);
-	lprintf("R=%0.3f X=%0.3f L=%0.3f\n", R, X, L );
-
-	for (i=0; i<=C; i++) {
-		l = L*((DIST_T)i)/((DIST_T)C);
-		d = JoinD( l, R, L );
-		d1 = JoinDalt( l, R, L );
-		ComputeJoinPos( l, R, L, &rr, &ra, &p, &pc );
-		lprintf("d: [%0.3f %0.3f] [%0.3f %03f] R=%0.3f A=%0.3f D=%0.3f D1=%0.3f X=%0.4f\n",
-		        i, p.x, p.y, pc.x, pc.y, rr, ra, d, d1, pc.x-rr );
-	}
-}
-
-test_psplot( INT_T argc, char * argv[] )
-{
-	DIST_T l, L, rr, ra, d, d1, R, S, X;
-	coOrd p = {0}, q, pc, p1;
-	INT_T i, C;
-	if (argc != 5) {
-		lprintf("%s R L C S\n", argv[0]);
-		Exit(1);
-	}
-	argv++;
-	easeR = R = atof( *argv++ );
-	easeL = L = atof( *argv++ );
-	C = atol( *argv++ );
-	S = atof( *argv++ );
-	X = L*L/(24*R);
-
-	lprintf("%%! kvjfv\nsave\n0 setlinewidth\n");
-	lprintf("/Times-BoldItalic findfont 16 scalefont setfont\n");
-	lprintf("36 36 moveto (R=%0.3f X=%0.3f L=%0.3f S=%0.3f) show\n", easeR, X, L,
-	        S );
-	/*lprintf("24 768 translate -90 rotate\n");*/
-	lprintf("gsave\n72 72 translate\n");
-	lprintf("%0.3f %0.3f scale\n", 72.0/S, 72.0/S );
-	lprintf("%0.3f %0.3f moveto %0.3f %0.3f lineto stroke\n", 0.0, 0.0, L, 0.0 );
-	lprintf("%0.3f %0.3f %0.3f 270.0 90.0 arc stroke\n", L/2.0, easeR+X, easeR );
-	lprintf("%0.3f %0.3f %0.3f 0.0 360.0 arc stroke\n", 0.0, 0.0, 0.25 );
-	q.x = q.y = 0.0;
-	for (i=0; i<=C; i++) {
-		l = L*((DIST_T)i)/((DIST_T)C);
-		ComputeJoinPos( l, R, L, &rr, &ra, &p, &pc );
-		lprintf("%0.3f %0.3f moveto %0.3f %0.3f lineto stroke\n", q.x, q.y, p.x, p.y );
-		q = p;
-	}
-	lprintf("%0.3f %0.3f %0.3f 0.0 360.0 arc stroke\n", p.x, p.y, 0.25 );
-	lprintf("grestore\nrestore\nshowpage\n%%Trailer\n%%Pages: 1\n");
-}
-
-void Test_compute( INT_T argc, char * argv[] )
-{
-	DIST_T r0, r1, x, l0, l1, R, X, d;
-	coOrd q0, q1, qc0, qc1;
-	easementData_t e;
-	if (argc != 5) {
-		lprintf("compute R0 R1 R L\n");
-		Exit(1);
-	}
-	/*debugEase = 5;*/
-	argv++;
-	r0 = atof( *argv++);
-	r1 = atof( *argv++);
-	easementVal = 1.0;
-	easeR = atof( *argv++);
-	easeL = atof( *argv++);
-	ComputeJoint( r0, r1, &e );
-	ComputeJoinPos( e.l0, easeR, easeL, NULL, NULL, &q0, &qc0 );
-	ComputeJoinPos( e.l1, easeR, easeL, NULL, NULL, &q1, &qc1 );
-	if (e.Scurve) {
-		q1.x = - q1.x; q1.y = - q1.y;
-		qc1.x = - qc1.x; qc1.y = - qc1.y;
-	}
-	d = FindDistance( q0, q1 );
-	lprintf("ENDPT  [%0.3f %0.3f] [%0.3f %0.3f]\n", q0.x, q0.y, q1.x, q1.y );
-	lprintf("CENTER [%0.3f %0.3f] [%0.3f %0.3f]\n", qc0.x, qc0.y, qc1.x, qc1.y );
-	lprintf("ComputeJoint( %0.3f %0.3f) { %0.3f %0.3f %0.3f } D0=%0.5f D1=%0.5f, D=%0.3f\n",
-	        r0, r1, easeR, easeL, e.x, e.d0, e.d1, d );
-}
-
-void Test_findL( INT_T argc, char * argv[] )
-{
-	DIST_T l, r, R, L;
-	if (argc != 5) {
-		lprintf("findL r R L\n");
-		Exit(1);
-	}
-	/*debugEase = 5;*/
-	argv++;
-	r = atof( *argv++ );
-	R = atof( *argv++ );
-	L = atof( *argv++ );
-	l = FindL( r, R, L );
-	lprintf("FindL( %0.3f %0.3f %0.3f ) = %0.3f\n", r, R, L, l );
-}
-
-
-main( INT_T argc, char * argv[] )
-{
-	INT_T flagX = 0;
-	INT_T flagV = 0;
-	if (argc<1) {
-		lprintf("plot|compute\n");
-		Exit(1);
-	}
-	argv++; argc--;
-	while (argv[0][0] == '-') {
-		switch (argv[0][1]) {
-		case 'x':
-			flagX++;
-			argc--; argv++;
-			break;
-		case 'v':
-			flagV++;
-			argc--; argv++;
-			break;
-		default:
-			lprintf("Huh: %s\n", *argv );
-			argc--; argv++;
-			break;
-		}
-	}
-	if (strcmp(argv[0],"plot")==0) {
-		Test_plot( argc, argv );
-	} else if (strcmp(argv[0],"psplot")==0) {
-		Test_psplot( argc, argv );
-	} else if (strcmp(argv[0],"compute")==0) {
-		Test_compute( argc, argv );
-	} else if (strcmp(argv[0],"findL")==0) {
-		Test_findL( argc, argv );
-	} else {
-		lprintf("unknown cmd %s\n", argv[0] );
-	}
-}
-#endif

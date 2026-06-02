@@ -1277,10 +1277,6 @@ static BOOL_T CheckTraverseTurnout(
 	struct extraDataCompound_t* xx = GET_EXTRA_DATA(trk, T_TURNOUT,
 	                                 extraDataCompound_t);
 	coOrd pos1;
-#ifdef LATER
-	int inx, foundInx = 0;
-	DIST_T d, foundD;
-#endif
 	DIST_T d;
 	PATHPTR_T pathCurr;
 	int segInx;
@@ -1293,30 +1289,6 @@ static BOOL_T CheckTraverseTurnout(
 	pos.y -= xx->orig.y;
 	LOG(log_traverseTurnout, 1, ("After rotation = [%0.3f %0.3f])\n", pos.x, pos.y))
 
-#ifdef LATER
-	for (inx = 0; inx < xx->segCnt; inx++) {
-		switch (xx->segs[inx].type) {
-		case SEG_STRTRK:
-		case SEG_CRVTRK:
-			pos1 = GetSegEndPt(&xx->segs[inx], 0, FALSE, NULL);
-			d = FindDistance(pos, pos1);
-			if (foundInx == 0 || d < foundD) {
-				foundInx = inx + 1;
-				foundD = d;
-			}
-			pos1 = GetSegEndPt(&xx->segs[inx], 1, FALSE, NULL);
-			d = FindDistance(pos, pos1);
-			if (foundInx == 0 || d < foundD) {
-				foundInx = -(inx + 1);
-				foundD = d;
-			}
-			break;
-		}
-	}
-	if (foundInx == 0) {
-		return FALSE;
-	}
-#endif
 	PATHPTR_T pathName = GetCurrPath(trk);
 	for (pathCurr = pathName + strlen((char*)pathName) + 1;
 	     pathCurr[0] || pathCurr[1]; pathCurr++) {
@@ -3212,73 +3184,3 @@ EXPORT void InitTrkTurnout(void)
 	AddParam("TURNOUT ", ReadTurnoutParam);
 }
 
-#ifdef TEST
-
-wDrawable_t turnoutD;
-
-void wListAddValue(wList_p bl, char* val, wIcon_p, void* listData,
-                   void* itemData)
-{
-}
-
-void wListClear(wList_p bl)
-{
-}
-
-void wDrawSetScale(wDrawable_p d)
-{
-	d->scale = 1.0;
-}
-
-void wDrawClear(wDrawable_p d)
-{
-}
-
-void GetTrkCurveCenter(track_p t, coOrd* pos, DIST_T* radius)
-{
-}
-
-#ifdef NOTRACK_C
-
-track_p NewTrack(wIndex_t index, TRKTYP_T type, EPINX_T endCnt,
-                 SIZE_T extraSize)
-{
-	return NULL;
-}
-
-track_p OnTrack(coOrd* pos)
-{
-	return NULL;
-}
-
-void ErrorMessage(char* msg, ...)
-{
-	lprintf("ERROR : %s\n", msg);
-}
-
-void DeleteTrack(track_p t)
-{
-}
-
-void ConnectTracks(track_p t0, EPINX_T ep0, track_p t1, EPINX_T ep1)
-{
-}
-#endif
-
-main(INT_T argc, char* argv[])
-{
-	FILE* f;
-	char line[STR_SIZE];
-	wIndex_t lineCnt = 0;
-
-	/*debugTurnout = 3;*/
-	if ((f = fopen("turnout.params", "r")) == NULL) {
-		Perror("turnout.params");
-		Exit(1);
-	}
-	while (fgets(line, sizeof line, f) != NULL) {
-		lineCnt++;
-		ReadTurnoutParam(&lineCnt);
-	}
-}
-#endif
