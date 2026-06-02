@@ -466,7 +466,7 @@ EXPORT track_p MakePolyLineFromSegs(
 static dynArr_t anchors_da;
 #define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
 
-void static CreateOriginAnchor(coOrd origin, wBool_t trans_selected)
+static void CreateOriginAnchor(coOrd origin, wBool_t trans_selected)
 {
 	double d = tempD.scale*0.15;
 	DYNARR_APPEND(trkSeg_t,anchors_da,2);
@@ -825,7 +825,7 @@ static void UpdateDraw( track_p trk, int drawDescInx, descUpdate_t * descUpd,
 				UNREORIGIN(segPtr->u.c.center,drawData.center,0.0,drawData.origin);
 				DrawDescSetMode(CE, DESC_CHANGE);
 				DrawDescSetMode(A1, DESC_CHANGE);
-			/*no break*/
+			/* falls through */
 			case SEG_FILCRCL:
 				REORIGIN(drawData.center, segPtr->u.c.center, angle,
 				         drawData.origin);  //Remove angle
@@ -1849,7 +1849,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		}
 		ignoredDraw = NULL;
 		if (rc == C_CONTINUE) { break; }
-	/* no break*/
+	/* falls through */
 	case C_FINISH:
 		ignoredDraw = trk;
 		rc = DrawGeomModify( C_FINISH, pos, &drawModCmdContext  );
@@ -3008,10 +3008,10 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			InfoDefaultControls();
 			infoSubst = FALSE;
 		}
-	/* no break */
+	/* falls through */
 	case wActionLDrag:
 		FormFetchData(&linestylePG);
-	/* no break */
+	/* falls through */
 	case wActionMove:
 	case wActionRDown:
 	case wActionRDrag:

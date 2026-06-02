@@ -2494,7 +2494,7 @@ EXPORT STATUS_T ExtendStraightFromOrig( track_p trk, wAction_t action,
 		tempSegs(0).lineWidth = 0;
 		tempSegs(0).u.l.pos[0] = GetTrkEndPos( trk, ep );
 		InfoMessage( _("Drag to change track length") );
-
+	/* falls through */
 	case C_MOVE:
 		d = FindDistance( tempSegs(0).u.l.pos[0], pos );
 		valid = TRUE;

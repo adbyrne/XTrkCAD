@@ -1101,7 +1101,7 @@ static STATUS_T CmdJoin(
 			Dj.state = 2;
 			Dj.jRes.flip = FALSE;
 		}
-		/* no break */
+		/* falls through */
 		
 	case C_MOVE:
 		DYNARR_RESET( trkSeg_t, tempSegs_da );

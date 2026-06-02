@@ -321,6 +321,7 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle,
 	case SEG_POLY:
 		/* TODO: be more precise about poly line width */
 		width.x = width.y = lwidth;
+	/* falls through */
 	case SEG_FILPOLY:
 		for (inx=0; inx<segPtr->u.p.cnt; inx++ ) {
 			REORIGIN( p0, segPtr->u.p.pts[inx].pt, angle, xlat )
@@ -565,6 +566,7 @@ EXPORT void FlipSegs(
 			break;
 		case SEG_CRVTRK:
 			s->u.c.radius = - s->u.c.radius;
+		/* falls through */
 		case SEG_CRVLIN:
 		case SEG_FILCRCL:
 			s->u.c.center.y = -s->u.c.center.y;

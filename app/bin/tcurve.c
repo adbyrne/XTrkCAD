@@ -1308,6 +1308,7 @@ static STATUS_T ModifyCurve( track_p trk, wAction_t action, coOrd pos )
 		tempSegs(0).u.c.a0 = arcA0;
 		tempSegs(0).u.c.a1 = arcA1;
 		InfoMessage( _("Drag to change angle or create tangent") );
+	/* falls through */
 	case C_MOVE:
 		if (xx->helixTurns>0) {
 			return C_CONTINUE;

@@ -871,7 +871,7 @@ static void SpeedAction(
 	switch (action) {
 	case C_DOWN:
 		InfoMessage("");
-
+	/* falls through */
 	case C_MOVE:
 	case C_UP:
 		TrainTimeEndPause();

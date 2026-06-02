@@ -2121,7 +2121,7 @@ static void LayerDlgUpdate(paramGroup_p pg, int inx, void *valueP)
 
 	case I_MAP:
 		layerRedrawMap = TRUE;
-	/* No Break */
+	/* falls through */
 	case I_VIS:
 	case I_FRZ:
 	case I_MOD:
