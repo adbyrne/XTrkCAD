@@ -255,8 +255,8 @@ static void JoinDistance(
         DIST_T *xr,
         DIST_T *lr )
 {
-	DIST_T l, d, rr;
-	coOrd p, pc;
+	DIST_T l, d, rr = 0.0;
+	coOrd p = {0}, pc = {0};
 	if (r == 0.0) {
 		*dr = 0.0;
 		*lr = *xr = 0.0;
@@ -2106,7 +2106,7 @@ test_plot( INT_T argc, char * argv[] )
 test_psplot( INT_T argc, char * argv[] )
 {
 	DIST_T l, L, rr, ra, d, d1, R, S, X;
-	coOrd p, q, pc, p1;
+	coOrd p = {0}, q, pc, p1;
 	INT_T i, C;
 	if (argc != 5) {
 		lprintf("%s R L C S\n", argv[0]);
