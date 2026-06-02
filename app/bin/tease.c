@@ -255,8 +255,8 @@ static void JoinDistance(
         DIST_T *xr,
         DIST_T *lr )
 {
-	DIST_T l, d, rr;
-	coOrd p, pc;
+	DIST_T l, d, rr = 0.0;
+	coOrd p = {0}, pc = {0};
 	if (r == 0.0) {
 		*dr = 0.0;
 		*lr = *xr = 0.0;
@@ -519,12 +519,10 @@ static struct {
 	descPivot_t pivot;
 	unsigned int layerNumber;
 } jointData;
-typedef enum { E0, Z0, E1, Z1, OR, AL, RR, LL, L0, L1, GR, PV, LY } jointDesc_e;
+typedef enum { E0, E1, OR, AL, RR, LL, L0, L1, GR, PV, LY } jointDesc_e;
 static descData_t jointDesc[] = {
-	/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &jointData.endPt[0] },
-	/*Z0*/	{ DESC_DIM, N_("Z"), &jointData.elev[0] },
-	/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &jointData.endPt[1] },
-	/*Z1*/	{ DESC_DIM, N_("Z"), &jointData.elev[1] },
+	/*E0*/	{ .type=DESC_POS3D, .label=N_("End Pt 1: X,Y,Z"), .valueP=&jointData.endPt[0], .valueP2=&jointData.elev[0] },
+	/*E1*/	{ .type=DESC_POS3D, .label=N_("End Pt 2: X,Y,Z"), .valueP=&jointData.endPt[1], .valueP2=&jointData.elev[1] },
 	/*OR*/	{ DESC_POS, N_("Origin: X,Y"), &jointData.orig },
 	/*AL*/	{ DESC_ANGLE, N_("Angle"), &jointData.angle },
 	/*RR*/	{ DESC_DIM, N_("R"), &jointData.r },
@@ -542,9 +540,9 @@ static void UpdateJoint( track_p trk, int inx, descData_p descUpd,
 {
 	EPINX_T ep;
 	switch (inx) {
-	case Z0:
-	case Z1:
-		ep = (inx==Z0?0:1);
+	case E0:
+	case E1:
+		ep = (inx==E0?0:1);
 		UpdateTrkEndElev( trk, ep, GetTrkEndElevUnmaskedMode(trk,ep),
 		                  jointData.elev[ep], NULL );
 		ComputeElev( trk, 1-ep, FALSE, &jointData.elev[1-ep], NULL, TRUE );
@@ -555,7 +553,7 @@ static void UpdateJoint( track_p trk, int inx, descData_p descUpd,
 			jointData.grade = 0.0;
 		}
 		jointDesc[GR].mode |= DESC_CHANGE;
-		jointDesc[inx==Z0?Z1:Z0].mode |= DESC_CHANGE;
+		jointDesc[inx==E0?E1:E0].mode |= DESC_CHANGE;
 		return;
 	case LY:
 		SetTrkLayer( trk, jointData.layerNumber );
@@ -607,17 +605,15 @@ static void DescribeJoint(
 		jointData.grade = 0.0;
 	}
 
-	jointDesc[E0].mode =
-	        jointDesc[E1].mode =
-	                jointDesc[OR].mode =
-	                        jointDesc[AL].mode =
-	                                jointDesc[RR].mode =
-	                                        jointDesc[LL].mode =
-	                                                        jointDesc[L0].mode =
-	                                                                        jointDesc[L1].mode =
-	                                                                                        DESC_RO;
-	jointDesc[Z0].mode = (EndPtIsDefinedElev(trk,0)?0:DESC_RO)|DESC_NOREDRAW;
-	jointDesc[Z1].mode = (EndPtIsDefinedElev(trk,1)?0:DESC_RO)|DESC_NOREDRAW;
+	jointDesc[OR].mode =
+	        jointDesc[AL].mode =
+	                jointDesc[RR].mode =
+	                        jointDesc[LL].mode =
+	                                jointDesc[L0].mode =
+	                                        jointDesc[L1].mode =
+	                                                DESC_RO;
+	jointDesc[E0].mode = DESC_RO|DESC_NOREDRAW|(EndPtIsDefinedElev(trk,0)?0:DESC_Z_RO);
+	jointDesc[E1].mode = DESC_RO|DESC_NOREDRAW|(EndPtIsDefinedElev(trk,1)?0:DESC_Z_RO);
 	jointDesc[GR].mode = DESC_RO;
 	jointDesc[PV].mode = (fix0|fix1)?DESC_IGNORE:0;
 	jointDesc[LY].mode = DESC_NOREDRAW;
@@ -2106,7 +2102,7 @@ test_plot( INT_T argc, char * argv[] )
 test_psplot( INT_T argc, char * argv[] )
 {
 	DIST_T l, L, rr, ra, d, d1, R, S, X;
-	coOrd p, q, pc, p1;
+	coOrd p = {0}, q, pc, p1;
 	INT_T i, C;
 	if (argc != 5) {
 		lprintf("%s R L C S\n", argv[0]);

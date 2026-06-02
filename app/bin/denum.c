@@ -155,8 +155,14 @@ AddDateString(DynString* output)
 	tm = localtime(&currentTime);
 
 	while (!strftime(formatted, length, "%x\n\n", tm)) {
+		char *tmp;
 		length *= 2;
-		formatted = realloc(formatted, length);
+		tmp = realloc(formatted, length);
+		if (!tmp) {
+			free(formatted);
+			return;
+		}
+		formatted = tmp;
 	}
 
 	DynStringCatCStr(output, formatted);

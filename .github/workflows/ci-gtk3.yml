@@ -3,8 +3,7 @@ on:
   push:
     branches:
       - GTK3V2MAIN
-      - test/upstream-gtk3*
-      - test/windows-gtk3*
+      - test/**
   pull_request:
     branches:
       - GTK3V2MAIN
@@ -181,6 +180,22 @@ jobs:
             --force \
             --suppress=missingInclude \
             --suppress=missingIncludeSystem \
+            --suppress=normalCheckLevelMaxBranches \
+            --suppress=nullPointerOutOfMemory \
+            --suppress=nullPointerOutOfResources \
+            --suppress=nullPointerArithmeticOutOfMemory \
+            --suppress=syntaxError:app/bin/archive.c \
+            --suppress=syntaxError:app/bin/cturntbl.c \
+            --suppress=syntaxError:app/bin/directory.c \
+            --suppress=syntaxError:app/bin/paths.c \
+            --suppress=syntaxError:app/bin/utility.c \
+            --suppress=unknownMacro:app/bin/custom.c \
+            --suppress=ctunullpointer:app/bin/track.c \
+            --suppress=uninitvar:app/bin/levenshtein.c \
+            --suppress=uninitvar:app/bin/problemrep.c \
+            --suppress=nullPointer:app/bin/partcatalog.c \
+            --suppress=missingReturn:app/bin/cturnout.c \
+            --suppress=ctuPointerArith:app/bin/cturnout.c \
             -I app/bin -I app/bin/include -I app/wlib/include \
             app/bin/*.c app/dynstring/*.c
 

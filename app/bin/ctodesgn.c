@@ -76,6 +76,30 @@ char tempCustom[4096];
 
 static wWin_p newTurnW;
 
+#define DESIGNER_CANVAS_W  260
+#define DESIGNER_CANVAS_H  180
+static const double designerScale = 260.0 / 450.0;
+static double designerXOff = 0.0;
+static double designerYOff = 0.0;
+
+static void RedrawDesigner(wControl_p, void *, wWinPix_t, wWinPix_t);
+static void ClickDesigner(wAction_t, coOrd);
+
+static drawCmd_t designerD = {
+	NULL,
+	&screenDrawFuncs,
+	0,
+	1.0,
+	0.0,
+	{0.0, 0.0}, {0.0, 0.0},
+	Pix2CoOrd, CoOrd2Pix,
+	1.0
+};
+static paramDrawData_t designerDrawData = {
+	DESIGNER_CANVAS_W, DESIGNER_CANVAS_H,
+	RedrawDesigner, ClickDesigner, &designerD
+};
+
 static char * newTurnScaleName;
 static DIST_T newTurnTrackGauge;
 
@@ -238,6 +262,8 @@ paramData_t turnDesignPLs[] = {
 #define I_TOSLIPMODE        ( I_TOANGMODE + 2 )
 	{ PD_RADIO, &newTurnSlipMode, "slippath", 0, newTurnSlipModeLabels },
 	{ PD_MESSAGE, NULL, "slippath_label", 0, NULL },
+#define I_TOCANVAS  (I_TOSLIPMODE + 2)
+	{ PD_DRAW, NULL, "designer-canvas", PDO_NOPSHUPD, &designerDrawData, NULL, 0 },
 };
 
 static paramGroup_t turnDesignPG = { "turnout-designer", PGO_FULLDIALOGFROMBUILDER, turnDesignPLs, COUNT( turnDesignPLs )  };
@@ -271,8 +297,56 @@ typedef struct {
 	// Frog, Angle, Len, Radius, Offset
 	const char * sParamType;
 	int iDescFirst; // computed in InitNewTurn, based on sParamType
+	int lineCnt;
+	wLines_t *lines;
 } toDesignDesc_t;
 
+
+static wLines_t RegLines[] = {
+#include "toreg.lin"
+};
+static wLines_t CrvLines[] = {
+#include "tocrv.lin"
+};
+static wLines_t CornuLines[] = {
+#include "tocornu.lin"
+};
+static wLines_t WyeLines[] = {
+#include "towye.lin"
+};
+static wLines_t CornuWyeLines[] = {
+#include "tocornuwye.lin"
+};
+static wLines_t ThreewayLines[] = {
+#include "to3way.lin"
+};
+static wLines_t CornuThreewayLines[] = {
+#include "tocornu3way.lin"
+};
+static wLines_t CrossingLines[] = {
+#include "toxing.lin"
+};
+static wLines_t SingleSlipLines[] = {
+#include "tosslip.lin"
+};
+static wLines_t DoubleSlipLines[] = {
+#include "todslip.lin"
+};
+static wLines_t RightCrossoverLines[] = {
+#include "torcross.lin"
+};
+static wLines_t LeftCrossoverLines[] = {
+#include "tolcross.lin"
+};
+static wLines_t DoubleCrossoverLines[] = {
+#include "todcross.lin"
+};
+static wLines_t StrSectionLines[] = {
+#include "tostrsct.lin"
+};
+static wLines_t CrvSectionLines[] = {
+#include "tocrvsct.lin"
+};
 
 static signed char RegPaths[] = {
 	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 2, 0, 0,
@@ -288,7 +362,8 @@ static toDesignDesc_t RegDesc = {
 	"td_reg_stack",
 	2,
 	&RegSchema, 1,
-	"LLOF"
+	"LLOF",
+	0, COUNT(RegLines), RegLines
 };
 
 static signed char Crv1Paths[] = {
@@ -322,7 +397,8 @@ static toDesignDesc_t CrvDesc = {
 	"td_crv_stack",
 	2,
 	&Crv1Schema, 1,
-	"LOFLOF"
+	"LOFLOF",
+	0, COUNT(CrvLines), CrvLines
 };
 
 static signed char CornuPaths[] = {
@@ -340,7 +416,8 @@ static toDesignDesc_t CornuDesc = {
 	"td_corcrv_stack",
 	2,
 	&CornuSchema, 1,
-	"LOFRLOFRLR"
+	"LOFRLOFRLR",
+	0, COUNT(CornuLines), CornuLines
 };
 
 static signed char Wye1Paths[] = {
@@ -373,7 +450,8 @@ static toDesignDesc_t WyeDesc = {
 	"td_wye_stack",
 	1,
 	NULL, 1,
-	"LOF-LOF"
+	"LOF-LOF",
+	0, COUNT(WyeLines), WyeLines
 };
 
 static signed char CornuWyePaths[] = {
@@ -390,7 +468,8 @@ static toDesignDesc_t CornuWyeDesc = {
 	"td_corwye_stack",
 	1,
 	NULL, 1,
-	"LOFR----LOFRLR"
+	"LOFR----LOFRLR",
+	0, COUNT(CornuWyeLines), CornuWyeLines
 };
 
 static signed char Tri1Paths[] = {
@@ -426,7 +505,8 @@ static toDesignDesc_t ThreewayDesc = {
 	"td_3way_stack",
 	1,
 	NULL, 1,
-	"LOFLLOF"
+	"LOFLLOF",
+	0, COUNT(ThreewayLines), ThreewayLines
 };
 
 static signed char CornuTriPaths[] = {
@@ -444,7 +524,8 @@ static toDesignDesc_t CornuThreewayDesc = {
 	"td_cor3way_stack",
 	1,
 	NULL, 1,
-	"LOFRLOFRLOFRLR"
+	"LOFRLOFRLOFRLR",
+	0, COUNT(CornuThreewayLines), CornuThreewayLines
 };
 
 static signed char CrossingPaths[] = {
@@ -460,7 +541,8 @@ static toDesignDesc_t CrossingDesc = {
 	"td_crossing_stack",
 	1,
 	&CrossingSchema, 1,
-	"LLF"
+	"LLF",
+	0, COUNT(CrossingLines), CrossingLines
 };
 
 static signed char SingleSlipPaths[] = {
@@ -477,7 +559,8 @@ static toDesignDesc_t SingleSlipDesc = {
 	"td_sslip_stack",
 	1,
 	&SingleSlipSchema, 1,
-	"LLF"
+	"LLF",
+	0, COUNT(SingleSlipLines), SingleSlipLines
 };
 
 static signed char DoubleSlipPaths[] = {
@@ -504,7 +587,8 @@ static toDesignDesc_t DoubleSlipDesc = {
 	"td_dslip_stack",
 	1,
 	&DoubleSlipSchema, 1,
-	"LLF"
+	"LLF",
+	0, COUNT(DoubleSlipLines), DoubleSlipLines
 };
 
 static signed char RightCrossoverPaths[] = {
@@ -521,7 +605,8 @@ static toDesignDesc_t RightCrossoverDesc = {
 	"td_rcross_stack",
 	1,
 	&RightCrossoverSchema, 0,
-	"LO"
+	"LO",
+	0, COUNT(RightCrossoverLines), RightCrossoverLines
 };
 
 static signed char LeftCrossoverPaths[] = {
@@ -538,7 +623,8 @@ static toDesignDesc_t LeftCrossoverDesc = {
 	"td_lcross_stack",
 	1,
 	&LeftCrossoverSchema, 0,
-	"LO"
+	"LO",
+	0, COUNT(LeftCrossoverLines), LeftCrossoverLines
 };
 
 static signed char DoubleCrossoverPaths[] = {
@@ -555,7 +641,8 @@ static toDesignDesc_t DoubleCrossoverDesc = {
 	"td_dcross_stack",
 	1,
 	&DoubleCrossoverSchema, 0,
-	"LO"
+	"LO",
+	0, COUNT(DoubleCrossoverLines), DoubleCrossoverLines
 };
 
 static signed char StrSectionPaths[] = {
@@ -571,7 +658,8 @@ static toDesignDesc_t StrSectionDesc = {
 	"td_strsect_stack",
 	1,
 	&StrSectionSchema, 0,
-	"L"
+	"L",
+	0, COUNT(StrSectionLines), StrSectionLines
 };
 
 static signed char CrvSectionPaths[] = {
@@ -587,7 +675,8 @@ static toDesignDesc_t CrvSectionDesc = {
 	"td_crvsect_stack",
 	1,
 	&CrvSectionSchema, 0,
-	"LA"
+	"LA",
+	0, COUNT(CrvSectionLines), CrvSectionLines
 };
 
 #ifdef LATER
@@ -965,7 +1054,7 @@ EXPORT long ComputeTurnoutRoadbedSide(
 		bitWidth = 2;
 	}
 	res = 0;
-	mask = (1<<bitWidth)-1;
+	mask = (1u<<bitWidth)-1;
 	hit0 = HittestTurnoutRoadbed( segPtr, segCnt, segInx, side, 0, roadbedWidth );
 	inx0 = 0;
 	inx1 = bitWidth;
@@ -1711,7 +1800,7 @@ static toDesignSchema_t * LoadWye3WayCornuSegs(
 
 	DYNARR_RESET( trkSeg_t, tempSegs_da );
 	DIST_T radius = 0.0;
-	coOrd center;
+	coOrd center = {0};
 	ANGLE_T angle;
 	int inx,subSeg;
 	wBool_t back, neg;
@@ -2912,6 +3001,99 @@ static void NewTurnOk( void * context )
 
 
 
+static void RedrawDesigner(
+        wControl_p d,
+        void *ctx,
+        wWinPix_t canvasW,
+        wWinPix_t canvasH)
+{
+	int i;
+	wDrawPix_t cx, cy;
+	const wDrawPix_t R = 10;
+	char buf[4];
+	double x_min = 1e9, x_max = -1e9, y_min = 1e9, y_max = -1e9;
+	wWinPix_t actualW, actualH;
+
+	if (!designerD.d) { return; }
+	wDrawClear(designerD.d);
+	if (!curDesign || curDesign->lineCnt == 0) { return; }
+
+	/* use actual canvas size so centering is correct even when the
+	 * canvas is stretched taller than DESIGNER_CANVAS_H by the layout */
+	wDrawGetSize(designerD.d, &actualW, &actualH);
+	if (actualW <= 0) { actualW = DESIGNER_CANVAS_W; }
+	if (actualH <= 0) { actualH = DESIGNER_CANVAS_H; }
+
+	/* compute bounding box to center the drawing */
+	for (i = 0; i < curDesign->lineCnt; i++) {
+		wLines_t *l = &curDesign->lines[i];
+		if (l->width == 2) { continue; }
+		double lx0 = l->x0 * designerScale, lx1 = l->x1 * designerScale;
+		double ly0 = l->y0 * designerScale, ly1 = l->y1 * designerScale;
+		if (lx0 < x_min) { x_min = lx0; } if (lx0 > x_max) { x_max = lx0; }
+		if (lx1 < x_min) { x_min = lx1; } if (lx1 > x_max) { x_max = lx1; }
+		if (ly0 < y_min) { y_min = ly0; } if (ly0 > y_max) { y_max = ly0; }
+		if (ly1 < y_min) { y_min = ly1; } if (ly1 > y_max) { y_max = ly1; }
+	}
+	/* INMAPY flips Y: screen_y = (H-1) - y_raw.
+	 * Center by shifting raw y so drawing midpoint maps to canvas midpoint. */
+	designerXOff = (actualW - (x_max + x_min)) / 2.0;
+	designerYOff = (actualH / 2.0 - 1.0) - (y_min + y_max) / 2.0;
+
+	for (i = 0; i < curDesign->lineCnt; i++) {
+		wLines_t *l = &curDesign->lines[i];
+		if (l->width == 2) { continue; }
+		wDrawLine(designerD.d,
+		          (wDrawPix_t)(l->x0 * designerScale + designerXOff),
+		          (wDrawPix_t)(l->y0 * designerScale + designerYOff),
+		          (wDrawPix_t)(l->x1 * designerScale + designerXOff),
+		          (wDrawPix_t)(l->y1 * designerScale + designerYOff),
+		          l->width == 3 ? 2 : 1,
+		          wDrawLineSolid, wDrawColorBlack, 0);
+	}
+
+	for (i = 0; i < curDesign->lineCnt; i++) {
+		wLines_t *l = &curDesign->lines[i];
+		if (l->width != 2) { continue; }
+		cx = (wDrawPix_t)(l->x0 * designerScale + designerXOff);
+		cy = (wDrawPix_t)(l->y0 * designerScale + designerYOff);
+		wDrawFilledCircle(designerD.d, cx, cy, R, wDrawColorBlue, 0);
+		sprintf(buf, "%d", l->x1 + 1);
+		{
+			wDrawPix_t tw, th, td, ta;
+			wDrawGetTextSize(&tw, &th, &td, &ta, designerD.d, buf, NULL, 9.0);
+			wDrawString(designerD.d, cx - tw/2, cy +td - th/2, 0.0,
+			            buf, NULL, 9.0, wDrawColorWhite, 0);
+		}
+	}
+}
+
+static void ClickDesigner(
+        wAction_t action,
+        coOrd pos)
+{
+	int i;
+	wDrawPix_t px, py, cx, cy, dx, dy;
+	const wDrawPix_t R = 10;
+
+	if (action != wActionLDown || !curDesign) { return; }
+	px = (wDrawPix_t)(pos.x * designerD.dpi / designerD.scale);
+	py = (wDrawPix_t)(pos.y * designerD.dpi / designerD.scale);
+	for (i = 0; i < curDesign->lineCnt; i++) {
+		wLines_t *l = &curDesign->lines[i];
+		if (l->width != 2) { continue; }
+		cx = (wDrawPix_t)(l->x0 * designerScale + designerXOff);
+		cy = (wDrawPix_t)(l->y0 * designerScale + designerYOff);
+		dx = px - cx;
+		dy = py - cy;
+		if (dx*dx + dy*dy <= R*R) {
+			wControlSetFocus(
+			        turnDesignPLs[curDesign->iDescFirst + l->x1].control);
+			return;
+		}
+	}
+}
+
 static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 {
 	if ( newTurnW == NULL ) {
@@ -2927,6 +3109,8 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 	}
 	if ( curDesign != newDesign ) {
 		curDesign = newDesign;
+
+		RedrawDesigner(NULL, NULL, 0, 0);
 
 		// Show new stack
 		wStatusSetVisibleControlSet(  newTurnW, curDesign->stackLabel );
