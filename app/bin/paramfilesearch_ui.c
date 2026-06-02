@@ -207,7 +207,7 @@ static void SearchUiDefault(void)
  * Load the selected items of search results
  */
 
-void static
+static void
 SearchUILoadResults(void)
 {
 	int files = wListGetSelectedCount(RESULTLIST);

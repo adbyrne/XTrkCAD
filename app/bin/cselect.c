@@ -126,7 +126,7 @@ void CreateArrowAnchor(coOrd pos,ANGLE_T a,DIST_T len)
 	wSetCursor(mainD.d,wCursorNone);
 }
 
-void static CreateRotateAnchor(coOrd pos)
+static void CreateRotateAnchor(coOrd pos)
 {
 	DIST_T d = tempD.scale*0.15;
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
@@ -155,7 +155,7 @@ void static CreateRotateAnchor(coOrd pos)
 	wSetCursor(mainD.d,wCursorNone);
 }
 
-void static CreateModifyAnchor(coOrd pos)
+static void CreateModifyAnchor(coOrd pos)
 {
 	DIST_T d = tempD.scale*0.15;
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
@@ -240,7 +240,7 @@ void CreateActivateAnchor(coOrd pos)
 	wSetCursor(mainD.d,wCursorNone);
 }
 
-void static CreateMoveAnchor(coOrd pos)
+static void CreateMoveAnchor(coOrd pos)
 {
 	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
 	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,0,TRUE,
@@ -2645,7 +2645,7 @@ STATUS_T CmdMoveDescription(
 			return C_ERROR;
 		}
 		SetAllTrackSelect( FALSE );
-	/* no break */
+	/* falls through */
 	case wActionMove:
 		if ( labelWhen < 2 || mainD.scale > labelScale ) {
 			return C_CONTINUE;
@@ -2725,7 +2725,7 @@ STATUS_T CmdMoveDescription(
 		if (ep == -1 ) {
 			DrawTrack( moveDescTrk, &mainD, wDrawColorWhite );
 		}
-	/* no break */
+	/* falls through */
 	case C_MOVE:
 		if (moveDescTrk == NULL ) {
 			return C_CONTINUE;
@@ -2734,7 +2734,7 @@ STATUS_T CmdMoveDescription(
 		UndoModify( moveDescTrk );
 		ClrTrkBits( moveDescTrk, TB_HIDEDESC );
 		hidden = FALSE;
-	/* no break */
+	/* falls through */
 	case C_UP:
 		if ( labelWhen < 2 || mainD.scale > labelScale ) {
 			return C_CONTINUE;
@@ -3408,7 +3408,7 @@ static STATUS_T CmdSelect(
 			SelectDelete();
 			break;
 		}
-	/* No Break */
+	/* falls through */
 	case C_RMOVE:
 	case C_MOVE:
 		if (doingDouble) {

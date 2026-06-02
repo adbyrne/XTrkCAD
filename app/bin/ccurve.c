@@ -589,7 +589,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			return CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode,
 			                    &anchors_da, InfoMessage );
 		}
-	/*no break*/
+	/* falls through */
 	case C_UP:
 		if (Da.state<0) { return C_CONTINUE; }
 		if (Da.state == 0 && ((curveMode != crvCmdFromChord)

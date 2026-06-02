@@ -666,7 +666,7 @@ static STATUS_T ModifyTurntable( track_p trk, wAction_t action, coOrd pos )
 		tempSegs(0).type = SEG_STRTRK;
 		tempSegs(0).lineWidth = 0;
 		InfoMessage( _("Drag to create stall track") );
-
+	/* falls through */
 	case C_MOVE:
 		valid = FALSE;
 		if ( (angle = ConstrainTurntableAngle( trk, pos )) < 0.0) {

@@ -2077,7 +2077,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos,
 		if ( (action>>8 != ' ') && (action>>8 != 13) ) {
 			return C_CONTINUE;
 		}
-	/* no break */
+	/* falls through */
 	case C_OK:
 		if (infoSubst) {
 			InfoDefaultControls();
@@ -2714,7 +2714,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		if (!(action>>8 == 32 )) { //Space is same as Enter.
 			return C_CONTINUE;
 		}
-	/* no break */
+	/* falls through */
 	case C_OK:
 		if (Da.state != PICK_POINT) { return C_CONTINUE; }
 		STATUS_T rc = AdjustCornuCurve( C_OK, pos, InfoMessage);
@@ -2886,7 +2886,7 @@ static STATUS_T cmdCornuCreate(
 		if ((action>>8) != ' ' && (action>>8) != 32) {
 			return CmdCornu(action,pos);
 		}
-	/*no break*/
+	/* falls through */
 	case C_OK:
 		CmdCornu(C_OK,pos);
 		MainRedraw();
@@ -2896,7 +2896,7 @@ static STATUS_T cmdCornuCreate(
 		CmdCornu(C_CANCEL, pos);
 		createState = 0;
 		rc = C_TERMINATE;
-	/* no break */
+	/* falls through */
 	case C_START:
 		createState = 0;
 		commandContext = I2VP(cornuCmdHotBar);
@@ -2945,7 +2945,7 @@ static STATUS_T CmdConvertTo(
 		}
 		trk = NULL;
 
-	/* no break */
+	/* falls through */
 	case C_START:
 		if (selectedTrackCount==0) {
 			InfoMessage( _("Select a Track To Convert") );
@@ -3169,7 +3169,7 @@ static STATUS_T CmdConvertFrom(
 			trk = NULL;
 			return C_CONTINUE;
 		}
-	/* no break */
+	/* falls through */
 	case C_START:
 		if (selectedTrackCount==0) {
 			InfoMessage( _("Select a Cornu or Bezier Track To Convert to Fixed") );

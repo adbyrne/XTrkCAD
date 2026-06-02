@@ -324,7 +324,7 @@ static void UpdateBezier( track_p trk, int inx, descData_p descUpd,
 		xx->a0 = bezData.angle[1] = FindAngle(xx->pos[1],xx->pos[0]);
 		bezDesc[A0].mode |= DESC_CHANGE;
 		bezDesc[P0].mode |= DESC_CHANGE;
-	/* no break */
+	/* falls through */
 	case P1:
 		updateEndPts = TRUE;
 		xx->pos[3]= bezData.pos[3];

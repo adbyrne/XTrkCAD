@@ -104,7 +104,7 @@ static coOrd GDorig;
 static wDrawPix_t lborder, bborder;
 int nDrawGridPoints = 0;
 
-void static DrawGridPoint(
+static void DrawGridPoint(
         drawCmd_p D,
         wDrawColor Color,
         coOrd orig,
