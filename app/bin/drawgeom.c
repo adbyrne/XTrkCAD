@@ -1560,9 +1560,11 @@ static STATUS_T DrawGeomPolyModify(
 						show_intersect = TRUE;
 					}
 				}
-				d = FindDistance(intersect,pos_lock);
-				if (IsClose(d)) {
-					pos = intersect;
+				if (show_intersect) {
+					d = FindDistance(intersect,pos_lock);
+					if (IsClose(d)) {
+						pos = intersect;
+					}
 				}
 				InfoMessage( _("Length = %s, Last angle = %0.2f"),
 				             FormatDistance(FindDistance(pos_lock,last_point)),
