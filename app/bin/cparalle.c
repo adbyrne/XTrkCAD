@@ -178,7 +178,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 		 */
 		//Dpa.Trk = OnTrack( &Dpa.orig, TRUE, TRUE );
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
-	/* no break */
+	/* falls through */
 
 	case C_MOVE:
 		if (Dpa.Trk == NULL) {

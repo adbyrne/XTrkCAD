@@ -995,6 +995,7 @@ static void RescaleDlgUpdate(
 		if ( rescaleMode!=0 ) {
 			break;
 		}
+	/* falls through */
 	case I_RESCALE_TO_SCALE:
 		LoadGaugeList( (wList_p)rescalePLs[I_RESCALE_TO_GAUGE].control,
 		               *((int *)valueP) );

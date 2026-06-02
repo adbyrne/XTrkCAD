@@ -932,7 +932,7 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG)
 		if ((action>>8) != 32) {
 			return C_CONTINUE;
 		}
-	/* no break */
+	/* falls through */
 	case C_OK:
 		if (Da.state != PICK_POINT) {										//Too early - abandon
 			InfoMessage(_("No changes made"));
@@ -1182,7 +1182,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			movePos = pos;
 		}
 		if (anchors_da.cnt)	{ return C_CONTINUE; }
-	/* no break */
+	/* falls through */
 	case C_MOVE:
 		if (Da.state == POS_1) {
 			InfoMessage( _("Place 1st endpoint of Bezier - snap to %s"),
@@ -1245,7 +1245,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		if (Da.state != PICK_POINT || (action>>8) != ' ') { //Space is same as Enter.
 			return C_CONTINUE;
 		}
-	/* no break */
+	/* falls through */
 	case C_OK:
 		if (Da.state != PICK_POINT) { return C_CONTINUE; }
 		return AdjustBezCurve( C_OK, pos, Da.track, lineColor, lineWidth, InfoMessage);

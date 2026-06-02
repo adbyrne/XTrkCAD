@@ -30,7 +30,7 @@ const char *libDir ="Parameter/directory/";
 void
 MakeFullpath( char **result, ...)
 {
-	*result = libDir;
+	*result = (char *)libDir;
 }
 
 #define TESTARRAYSIZE (sizeof(tests) / sizeof(tests[0]) )
@@ -102,7 +102,6 @@ static void BinarySearch(void **state)
 
 static void GetDefaults(void **state)
 {
-	double value = 0.0;
 	long intValue = 0;
 	(void)state;
 

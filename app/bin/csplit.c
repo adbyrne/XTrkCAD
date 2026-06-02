@@ -137,7 +137,7 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 		InfoMessage( _("Select track and position for split") );
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		SetAllTrackSelect( FALSE );
-	/* no break */
+	/* falls through */
 	case C_DOWN:
 	case C_MOVE:
 		return C_CONTINUE;
@@ -307,7 +307,7 @@ static STATUS_T CmdSplitDraw( wAction_t action, coOrd pos )
 		InfoMessage( _("Select draw to split") );
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		SetAllTrackSelect( FALSE );
-	/* no break */
+	/* falls through */
 	case C_DOWN:
 	case C_MOVE:
 		return C_CONTINUE;
@@ -374,7 +374,7 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 		trimLine = NULL;
 		trk = NULL;
 		SetAllTrackSelect( FALSE );
-	/* no break */
+	/* falls through */
 	case C_DOWN:
 	case C_MOVE:
 		return C_CONTINUE;

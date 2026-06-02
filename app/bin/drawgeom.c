@@ -489,7 +489,7 @@ STATUS_T DrawGeomMouse(
 			break;
 		case OP_FILLBOX:
 			lineWidth = 0;
-		/* no break */
+		/* falls through */
 		case OP_BOX:
 			DYNARR_SET( trkSeg_t, tempSegs_da, 4 );
 			for ( inx=0; inx<4; inx++ ) {
@@ -590,7 +590,7 @@ STATUS_T DrawGeomMouse(
 					pos1 = p;
 				}
 			}
-		/* no break */
+		/* falls through */
 		case OP_LINE:
 		case OP_DIMLINE:
 		case OP_BENCH:
@@ -1063,7 +1063,7 @@ static ANGLE_T rotate_angle;
 //static dynArr_t origin_da;
 
 
-void static CreateCircleAnchor(wBool_t selected,coOrd center, DIST_T rad,
+static void CreateCircleAnchor(wBool_t selected,coOrd center, DIST_T rad,
                                ANGLE_T angle)
 {
 	DYNARR_RESET(trkSeg_t,anchors_da);
@@ -1076,7 +1076,7 @@ void static CreateCircleAnchor(wBool_t selected,coOrd center, DIST_T rad,
 	PointOnCircle(&anchors(0).u.c.center,center,rad,angle);
 }
 
-void static CreateLineAnchors(int index, coOrd p0, coOrd p1)
+static void CreateLineAnchors(int index, coOrd p0, coOrd p1)
 {
 	DYNARR_RESET(trkSeg_t,anchors_da);
 	double d = tempD.scale*0.15;
@@ -1094,7 +1094,7 @@ void static CreateLineAnchors(int index, coOrd p0, coOrd p1)
 	anchors(1).u.c.center = p1;
 	if (index>=0) { wSetCursor(mainD.d,wCursorNone); }
 }
-void static CreateBoxAnchors(int index, pts_t pt[4])
+static void CreateBoxAnchors(int index, pts_t pt[4])
 {
 	DYNARR_RESET(trkSeg_t,anchors_da);
 //	double d = tempD.scale*0.15;
@@ -1119,7 +1119,7 @@ void static CreateBoxAnchors(int index, pts_t pt[4])
 	}
 }
 
-void static CreateOriginAnchor(coOrd origin, wBool_t trans_selected)
+static void CreateOriginAnchor(coOrd origin, wBool_t trans_selected)
 {
 	double d = tempD.scale*0.15;
 	DYNARR_APPEND(trkSeg_t,anchors_da,2);
@@ -1144,7 +1144,7 @@ void static CreateOriginAnchor(coOrd origin, wBool_t trans_selected)
 	if (trans_selected) { wSetCursor(mainD.d,wCursorNone); }
 }
 
-void static CreateCurveAnchors(int index, coOrd pm, coOrd pc, coOrd p0,
+static void CreateCurveAnchors(int index, coOrd pm, coOrd pc, coOrd p0,
                                coOrd p1)
 {
 	DYNARR_RESET(trkSeg_t,anchors_da);
@@ -1170,7 +1170,7 @@ void static CreateCurveAnchors(int index, coOrd pm, coOrd pc, coOrd p0,
 	else { wSetCursor(mainD.d,defaultCursor); }
 }
 
-void static CreatePolyAnchors(int index)
+static void CreatePolyAnchors(int index)
 {
 	DYNARR_RESET(trkSeg_t,anchors_da);
 	double d = tempD.scale*0.15;
@@ -1740,7 +1740,7 @@ static STATUS_T DrawGeomPolyModify(
 		}
 		if (action>>8 != 32 && action>>8 != 13 && action>>8 !=9) { return C_CONTINUE; }
 		if (action>>8 == 9 && (MyGetKeyState() & WKEY_SHIFT) != 0) { return C_TERMINATE; }
-	/* no break */
+	/* falls through */
 	case C_CONFIRM:
 	case C_OK:
 	case C_FINISH:
@@ -2349,7 +2349,7 @@ STATUS_T DrawGeomModify(
 					locked = TRUE;
 				}
 			}
-		/* No Break*/
+		/* falls through */
 		case SEG_STRLIN:
 		case SEG_DIMLIN:
 		case SEG_BENCH:
@@ -2763,10 +2763,10 @@ STATUS_T DrawGeomModify(
 		}
 
 		if (action>>8 != 32 && action>>8 != 13) { return C_CONTINUE; }
-	/* no break */
+	/* falls through */
 	case C_CONFIRM:
 		return C_CONTINUE;
-	/* no break*/
+	/* falls through */
 	case C_OK:
 	case C_FINISH:
 		UndoStart("Modify Draw", "OK");
