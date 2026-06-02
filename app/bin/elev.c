@@ -671,7 +671,7 @@ static void PropogateForkElev(
  */
 {
 	DIST_T d2;
-	DIST_T e1;
+	DIST_T e1 = 0.0;
 	EPINX_T ep2, epN, cnt2;
 	track_p trkN;
 	fork_t * n1;

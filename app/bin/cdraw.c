@@ -688,6 +688,8 @@ static void UpdateDraw( track_p trk, int drawDescInx, descUpdate_t * descUpd,
 		break;
 	case BG:
 		segPtr->bg_color = drawData.bg_color;
+		segPtr->u.t.filled = drawData.filled = TRUE;
+		DrawDescSetMode(FL, DESC_CHANGE);
 		break;
 	case E0:
 	case E1:
@@ -1270,8 +1272,8 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		drawData.filled = TRUE;
 		drawData.length = 0.0;
 		title = _("Filled Circle");
-		static descData_t filledCircleData[] = { xCE, xRD, xLN, xPV, xFL, xLK, xOI, xRA, xEND };
-		static drawDesc_e filledCircleMap[] = { CE, RD, LN, PV, FL, LK, OI, RA, END };
+		static descData_t filledCircleData[] = { xCE, xRD, xLN, xCO, xPV, xFL, xLK, xOI, xRA, xEND };
+		static drawDesc_e filledCircleMap[] = { CE, RD, LN, CO, PV, FL, LK, OI, RA, END };
 		curDescData = filledCircleData;
 		curDescMap = filledCircleMap;
 		curDescCnt = COUNT( filledCircleData );
@@ -2786,7 +2788,7 @@ EXPORT BOOL_T GetClosestEndPt( track_p trk, coOrd * pos)
 			return FALSE;
 		}
 		DIST_T dd0,dd1;
-		coOrd p00,p0,p1;
+		coOrd p00, p0 = {0}, p1 = {0};
 		p00 = *pos;
 		if (GetTrkType(trk) == T_DRAW) {
 			Rotate(&p00,xx->orig,-xx->angle);

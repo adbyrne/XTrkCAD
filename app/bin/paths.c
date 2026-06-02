@@ -52,6 +52,7 @@ static struct pathTable *
 FindPath(const char *type)
 {
 	struct pathTable *entry;
+	/* cppcheck-suppress uninitvar */ /* uthash macro initializes internal fields */
 	HASH_FIND_STR(paths, type, entry);
 	return (entry);
 }
@@ -78,6 +79,7 @@ AddPath(const char *type, char*path)
 #pragma warning( disable : 4267)
 #endif
 		// This generates warning C4267 on windows
+		/* cppcheck-suppress uninitvar */ /* uthash macro initializes internal fields */
 		HASH_ADD_STR(paths, type, tableEntry);
 	}
 

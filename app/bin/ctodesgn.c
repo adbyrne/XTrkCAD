@@ -965,7 +965,7 @@ EXPORT long ComputeTurnoutRoadbedSide(
 		bitWidth = 2;
 	}
 	res = 0;
-	mask = (1<<bitWidth)-1;
+	mask = (1u<<bitWidth)-1;
 	hit0 = HittestTurnoutRoadbed( segPtr, segCnt, segInx, side, 0, roadbedWidth );
 	inx0 = 0;
 	inx1 = bitWidth;
@@ -1711,7 +1711,7 @@ static toDesignSchema_t * LoadWye3WayCornuSegs(
 
 	DYNARR_RESET( trkSeg_t, tempSegs_da );
 	DIST_T radius = 0.0;
-	coOrd center;
+	coOrd center = {0};
 	ANGLE_T angle;
 	int inx,subSeg;
 	wBool_t back, neg;
