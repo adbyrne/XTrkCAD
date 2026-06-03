@@ -23,10 +23,11 @@ set(CPACK_PROJECT_CONFIG_FILE ${CMAKE_CURRENT_SOURCE_DIR}/package.txt)
 set(CPACK_PACKAGE_VENDOR "XTrackCAD Fork Project")
 
 # common dependencies for all Linux builds
-set(CPACK_RPM_PACKAGE_REQUIRES "glibc gtk2 zlib")
+set(CPACK_RPM_PACKAGE_REQUIRES "glibc gtk3 zlib libzip mxml librsvg2")
 
-set(CPACK_RPM_BUILDREQUIRES 
-    "gcc, cmake >= 2.4.7, pkgconfig, gtk2-devel" 
+set(CPACK_RPM_BUILDREQUIRES
+    "gcc, cmake >= 3.20, pkgconfig, gtk3-devel"
+    "libzip-devel, libmxml-devel, librsvg2-tools"
     "gettext, gettext-devel, glibc-devel"
 )
 
@@ -60,11 +61,21 @@ set(CPACK_RPM_CHANGELOG_FILE "${CMAKE_CURRENT_SOURCE_DIR}////changelog.txt")
 
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 
-set(CPACK_DEBIAN_PACKAGE_NAME "XTrkCad${XTRKCAD_BETA}")
+set(CPACK_DEBIAN_PACKAGE_NAME "xtrkcad${XTRKCAD_BETA}")
 
 set(CPACK_DEBIAN_PACKAGE_VERSION "1:${XTRKCAD_VERSION}")
 
-set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
+# Map CMake processor name to Debian architecture name
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
+    set(XTRKCAD_DEB_ARCH "arm64")
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "armv7|armhf")
+    set(XTRKCAD_DEB_ARCH "armhf")
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "i686|i386")
+    set(XTRKCAD_DEB_ARCH "i386")
+else()
+    set(XTRKCAD_DEB_ARCH "amd64")
+endif()
+set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "${XTRKCAD_DEB_ARCH}")
 
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "xdg-utils")
 
@@ -92,7 +103,7 @@ set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "xtrkcad.org")
 
-set(CPACK_PACKAGE_EXECUTABLES "xtrkcad;XTrkCad-5.2.1-Beta")
+set(CPACK_PACKAGE_EXECUTABLES "xtrkcad;XTrkCAD ${XTRKCAD_VERSION}")
 
 set(CPACK_CREATE_DESKTOP_LINKS "xtrkcad")
 

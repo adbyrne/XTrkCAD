@@ -41,7 +41,18 @@ modules:
     cleanup:
       - '*'
 
-  - shared-modules/gtk2/gtk2.json
+  - name: mxml
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DBUILD_SHARED_LIBS=OFF
+      - -DBUILD_TESTING=OFF
+      - -DBUILD_DOC=OFF
+    sources:
+      - type: archive
+        url: https://github.com/michaelrsweet/mxml/releases/download/v4.0.3/mxml-4.0.3.tar.gz
+        sha256: 7b894e870b43c44d36e72d2551dd73e9c498e03a6aabf64f85ea1aa1a44ec5c3
+    cleanup:
+      - '*'
 
   - name: fake-inkscape
     buildsystem: simple
@@ -58,18 +69,11 @@ modules:
 
   - name: xtrkcad
     buildsystem: cmake-ninja
+    # Update url and sha256 to match the release tag being packaged.
+    # App ID: io.sourceforge.xtrkcad_fork.xtrkcad — update to a proper
+    # reverse-DNS ID (e.g. org.xtrkcad.XTrkCAD) before Flathub submission.
     sources:
       - type: archive
-        url: https://download.sourceforge.net/project/xtrkcad-fork/XTrackCad/Version%205.3.1/xtrkcad-source-5.3.1GA.tar.gz
-        sha256: 5b02a0352c23f90b0011029c7e2c3f12a6f6779425c4c47c1f75d6b8a0db572c
-      - type: patch
-        paths:
-          - patches/common_source.sh.patch
-          - patches/run-xtrkcad.sh.patch
-          - patches/xtrkcad.desktop.patch
-          - patches/xtrkcad.metainfo.xml.patch
-          - patches/xtrkcad_logo_128x128.svg.patch
-          - patches/lib.CMakeLists.txt.patch
-          - patches/bin.CMakeLists.txt.patch
-          - patches/bitmaps.CMakeLists.txt.patch
+        url: https://github.com/adbyrne/XTrkCAD/archive/refs/tags/v5.4.0.tar.gz
+        sha256: # fill in sha256 of the release archive when tagging v5.4.0
     builddir: true
