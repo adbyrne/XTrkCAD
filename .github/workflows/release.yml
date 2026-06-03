@@ -70,8 +70,8 @@ jobs:
             build/xtrkcad-source-*
           retention-days: 14
 
-  # ── Linux ARM64 — DEB ──────────────────────────────────────────────────────
-  package-linux-arm64:
+  # ── Linux ARM64 — DEB (Ubuntu 24.04) ──────────────────────────────────────
+  package-linux-arm64-ubuntu:
     runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v5
@@ -103,7 +103,55 @@ jobs:
       - name: Upload package
         uses: actions/upload-artifact@v7
         with:
-          name: packages-linux-arm64
+          name: packages-linux-arm64-ubuntu
+          path: build/*.deb
+          retention-days: 14
+
+  # ── Linux ARM64 — DEB (Debian 12 / Raspberry Pi OS Bookworm) ──────────────
+  # Built inside a debian:bookworm container so the generated DEB declares
+  # Debian 12 dependency versions.  Ubuntu 24.04 renames packages with a
+  # "t64" suffix (libgtk-3-0t64, libzip4t64, …) that do not exist on Debian
+  # 12 / Raspberry Pi OS, causing "unmet dependencies" errors there.
+  package-linux-arm64-debian:
+    runs-on: ubuntu-24.04-arm
+    container: debian:bookworm
+    steps:
+      - name: Install git (required by actions/checkout)
+        run: apt-get update -q && apt-get install -y git
+
+      - uses: actions/checkout@v5
+
+      - name: Install dependencies
+        run: |
+          apt-get install -y \
+            cmake ninja-build \
+            libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev \
+            librsvg2-bin gettext xvfb \
+            dpkg-dev
+
+      - name: Configure (Release)
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DXTRKCAD_TESTING=ON
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        run: xvfb-run ctest --test-dir build --output-on-failure
+
+      - name: Package (DEB)
+        run: |
+          cd build && cpack -G DEB
+          for f in xtrkcad-setup-*aarch64.deb; do
+            mv "$f" "${f%.aarch64.deb}-debian12.deb"
+          done
+
+      - name: Upload package
+        uses: actions/upload-artifact@v7
+        with:
+          name: packages-linux-arm64-debian
           path: build/*.deb
           retention-days: 14
 
@@ -294,7 +342,7 @@ jobs:
 
   # ── GitHub Release — created only on version tags ──────────────────────────
   github-release:
-    needs: [package-linux, package-linux-arm64, package-macos, package-windows]
+    needs: [package-linux, package-linux-arm64-ubuntu, package-linux-arm64-debian, package-macos, package-windows]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
