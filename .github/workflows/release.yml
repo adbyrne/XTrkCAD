@@ -12,6 +12,15 @@ on:
     tags:
       - 'v*.*.*'
   workflow_dispatch:
+    inputs:
+      include_nsis:
+        description: 'Build NSIS installer (experimental — DLLs not yet bundled via CMake install)'
+        type: boolean
+        default: false
+      include_dmg:
+        description: 'Attempt self-contained DMG build (requires gtk-mac-bundler, may fail)'
+        type: boolean
+        default: false
 
 jobs:
   # ── Linux x86-64 — DEB + RPM + STGZ ───────────────────────────────────────
@@ -148,10 +157,11 @@ jobs:
           retention-days: 14
 
       - name: Build self-contained DMG
-        # Attempts to build a bundled DMG using the existing osx bundler script.
+        # Skipped on normal pushes — opt in via workflow_dispatch input.
         # The DMG is unsigned; a volunteer with an Apple Developer account can
-        # sign and notarize it using the artifact from this step.
-        # This step is allowed to fail — it does not block the archive upload.
+        # sign and notarize it. gtk-mac-bundler is not a standard Homebrew
+        # formula so this step may fail even when opted in.
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.include_dmg == true }}
         continue-on-error: true
         run: |
           brew install gtk-mac-bundler || true
@@ -162,7 +172,7 @@ jobs:
 
       - name: Upload DMG (if built)
         uses: actions/upload-artifact@v7
-        if: success()
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.include_dmg == true }}
         with:
           name: packages-macos-arm64-dmg
           path: "distribution/osx/gtk-bundle/xtrkcad-OSX-*.dmg"
@@ -265,9 +275,10 @@ jobs:
           retention-days: 14
 
       - name: Package NSIS installer
-        # Builds the NSIS installer using the staged directory (DLLs already
-        # collected above). The NSIS scripts in distribution/win32/nsis/ may
-        # need updates for MSYS2/GTK3 paths — this step is allowed to fail.
+        # Skipped on normal pushes — opt in via workflow_dispatch input.
+        # DLLs are not yet bundled via CMake install(); the ZIP (above) is
+        # the recommended Windows distributable until NSIS bundling is solved.
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.include_nsis == true }}
         continue-on-error: true
         run: |
           cd build
@@ -275,7 +286,7 @@ jobs:
 
       - name: Upload NSIS installer (if built)
         uses: actions/upload-artifact@v7
-        if: success()
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.include_nsis == true }}
         with:
           name: packages-windows-x64-nsis
           path: build/*.exe
