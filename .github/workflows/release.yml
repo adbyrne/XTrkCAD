@@ -1,0 +1,297 @@
+name: Release (GTK3V2MAIN)
+
+# Builds Release packages on every push to GTK3V2MAIN where the build and
+# tests pass. Packages are uploaded as GitHub Actions artifacts (14-day
+# retention) on every push. When a version tag (v*.*.*) is pushed, a
+# permanent GitHub Release is also created with all packages attached.
+
+on:
+  push:
+    branches:
+      - GTK3V2MAIN
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+jobs:
+  # ── Linux x86-64 — DEB + RPM + STGZ ───────────────────────────────────────
+  package-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y \
+            cmake ninja-build \
+            libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev \
+            librsvg2-bin gettext xvfb \
+            dpkg-dev rpm
+
+      - name: Configure (Release)
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DXTRKCAD_TESTING=ON
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        run: xvfb-run ctest --test-dir build --output-on-failure
+
+      - name: Package (DEB + RPM + STGZ)
+        run: |
+          cd build
+          cpack -G DEB
+          cpack -G RPM
+          cpack -G STGZ
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: packages-linux-x86_64
+          path: |
+            build/*.deb
+            build/*.rpm
+            build/*.sh
+          retention-days: 14
+
+  # ── Linux ARM64 — DEB ──────────────────────────────────────────────────────
+  package-linux-arm64:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y \
+            cmake ninja-build \
+            libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev \
+            librsvg2-bin gettext xvfb \
+            dpkg-dev
+
+      - name: Configure (Release)
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DXTRKCAD_TESTING=ON
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        run: xvfb-run ctest --test-dir build --output-on-failure
+
+      - name: Package (DEB)
+        run: cd build && cpack -G DEB
+
+      - name: Upload package
+        uses: actions/upload-artifact@v7
+        with:
+          name: packages-linux-arm64
+          path: build/*.deb
+          retention-days: 14
+
+  # ── macOS ARM64 — tar.gz (Homebrew-dependent) + DMG (self-contained) ───────
+  package-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install dependencies
+        run: brew install ninja gtk+3 cmocka libzip librsvg
+
+      - name: Configure (Release)
+        run: |
+          GTK_PREFIX=$(brew --prefix gtk+3)
+          export PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
+          GTK_LDFLAGS=$(pkg-config --libs-only-L gtk+-3.0)
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DXTRKCAD_TESTING=ON \
+            -DCMAKE_PREFIX_PATH="$GTK_PREFIX;$(brew --prefix)" \
+            -DCMAKE_EXE_LINKER_FLAGS="$GTK_LDFLAGS" \
+            -DXTRKCAD_USE_APPLEHELP=OFF -DXTRKCAD_USE_BROWSER=ON
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Create Homebrew-dependent archive
+        # Installs to a staging dir and tars it. Users must have the Homebrew
+        # prerequisites: brew install gtk+3 libzip librsvg
+        run: |
+          cmake --install build --prefix staging
+          VERSION=$(grep '^XTRKCAD_VERSION:' build/CMakeCache.txt | cut -d= -f2)
+          echo "XTRKCAD_VERSION=$VERSION" >> "$GITHUB_ENV"
+          tar -czf "xtrkcad-${VERSION}-macos-arm64.tar.gz" -C staging .
+
+      - name: Upload Homebrew archive
+        uses: actions/upload-artifact@v7
+        with:
+          name: packages-macos-arm64
+          path: xtrkcad-*-macos-arm64.tar.gz
+          retention-days: 14
+
+      - name: Build self-contained DMG
+        # Attempts to build a bundled DMG using the existing osx bundler script.
+        # The DMG is unsigned; a volunteer with an Apple Developer account can
+        # sign and notarize it using the artifact from this step.
+        # This step is allowed to fail — it does not block the archive upload.
+        continue-on-error: true
+        run: |
+          if [ -f distribution/osx/xtrkcad-bundler.sh ]; then
+            cmake --install build --prefix bundle-staging
+            bash distribution/osx/xtrkcad-bundler.sh bundle-staging \
+              xtrkcad-${XTRKCAD_VERSION}-macos-arm64.dmg
+          else
+            echo "Bundler script not found — skipping DMG build"
+            exit 1
+          fi
+
+      - name: Upload DMG (if built)
+        uses: actions/upload-artifact@v7
+        if: success()
+        with:
+          name: packages-macos-arm64-dmg
+          path: "*.dmg"
+          retention-days: 14
+
+  # ── Windows x86-64 — ZIP (DLLs bundled) + NSIS installer ──────────────────
+  package-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: false
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-pkg-config
+            mingw-w64-x86_64-gtk3
+            mingw-w64-x86_64-zlib
+            mingw-w64-x86_64-libzip
+            mingw-w64-x86_64-mxml
+            mingw-w64-x86_64-librsvg
+            mingw-w64-x86_64-gettext
+            mingw-w64-x86_64-cmocka
+            mingw-w64-x86_64-ntldd-git
+
+      - name: Configure (Release)
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DXTRKCAD_TESTING=ON \
+            -DXTRKCAD_USE_GETTEXT=OFF
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Install to staging directory
+        run: cmake --install build --prefix staging
+
+      - name: Collect GTK3 runtime DLLs
+        # Walk the binary's DLL dependencies and copy all MinGW64 DLLs.
+        # Also copy GTK3 runtime data (pixbuf loaders, GSettings schemas,
+        # icon theme) needed for a working installation.
+        run: |
+          BINARY=staging/bin/xtrkcad.exe
+          MINGW=/mingw64
+
+          # Collect DLL dependencies (filter to MinGW64 only)
+          ntldd -R "$BINARY" \
+            | grep -i mingw64 \
+            | awk '{print $3}' \
+            | xargs -I{} cp -n "{}" staging/bin/ || true
+
+          # GTK3 pixbuf loaders (needed for SVG icons and PNG images)
+          GDK_VER=$(ls $MINGW/lib/gdk-pixbuf-2.0/)
+          mkdir -p staging/lib/gdk-pixbuf-2.0/$GDK_VER/loaders
+          cp -r $MINGW/lib/gdk-pixbuf-2.0/$GDK_VER/loaders.cache \
+                staging/lib/gdk-pixbuf-2.0/$GDK_VER/ || true
+          cp $MINGW/lib/gdk-pixbuf-2.0/$GDK_VER/loaders/*.dll \
+             staging/lib/gdk-pixbuf-2.0/$GDK_VER/loaders/ 2>/dev/null || true
+
+          # GSettings compiled schemas (required by GTK3 on Windows)
+          mkdir -p staging/share/glib-2.0/schemas
+          cp $MINGW/share/glib-2.0/schemas/gschemas.compiled \
+             staging/share/glib-2.0/schemas/ || true
+
+          # Hicolor icon theme (GTK3 fallback icons)
+          mkdir -p staging/share/icons
+          cp -r $MINGW/share/icons/hicolor staging/share/icons/ || true
+
+      - name: Create ZIP archive
+        run: |
+          VERSION=$(grep '^XTRKCAD_VERSION:' build/CMakeCache.txt | cut -d= -f2)
+          cd staging
+          7z a "../xtrkcad-${VERSION}-windows-x64.zip" .
+
+      - name: Upload ZIP
+        uses: actions/upload-artifact@v7
+        with:
+          name: packages-windows-x64-zip
+          path: xtrkcad-*-windows-x64.zip
+          retention-days: 14
+
+      - name: Package NSIS installer
+        # Builds the NSIS installer using the staged directory (DLLs already
+        # collected above). The NSIS scripts in distribution/win32/nsis/ may
+        # need updates for MSYS2/GTK3 paths — this step is allowed to fail.
+        continue-on-error: true
+        run: |
+          cd build
+          cpack -G NSIS
+
+      - name: Upload NSIS installer (if built)
+        uses: actions/upload-artifact@v7
+        if: success()
+        with:
+          name: packages-windows-x64-nsis
+          path: build/*.exe
+          retention-days: 14
+
+  # ── GitHub Release — created only on version tags ──────────────────────────
+  github-release:
+    needs: [package-linux, package-linux-arm64, package-macos, package-windows]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Download all packages
+        uses: actions/download-artifact@v4
+        with:
+          path: release-packages
+          merge-multiple: true
+
+      - name: List packages
+        run: find release-packages -type f | sort
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          gh release create "$TAG" \
+            --title "XTrkCAD ${TAG}" \
+            --generate-notes \
+            --draft \
+            release-packages/*
