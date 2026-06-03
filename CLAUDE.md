@@ -130,8 +130,12 @@ Used only at build time:
 
 ## Version
 
-Current development version: **5.3.2Dev** (`ProgramVersion.cmake`). Binary named
-`xtrkcad-beta` when version modifier is set, `xtrkcad` otherwise.
+Current development version: **5.4.0** (`ProgramVersion.cmake`). GTK3V2MAIN branch
+is version 5.4.0 (GTK3 successor release); GTK2 default branch stays at 5.3.x.
+Binary named `xtrkcad-beta` when version modifier matches "^Beta", `xtrkcad` otherwise.
+
+To cut a release: `git tag v5.4.0 && git push origin v5.4.0` — GitHub Actions
+(`release.yml`) automatically builds packages and creates a draft GitHub Release.
 
 ## File Formats
 
