@@ -122,14 +122,20 @@ jobs:
       - name: Test
         run: ctest --test-dir build --output-on-failure
 
+      - name: Get version
+        run: |
+          MAJOR=$(awk -F'"' '/set\(XTRKCAD_MAJOR_VERSION/{print $2; exit}' ProgramVersion.cmake)
+          MINOR=$(awk -F'"' '/set\(XTRKCAD_MINOR_VERSION/{print $2; exit}' ProgramVersion.cmake)
+          PATCH=$(awk -F'"' '/set\(XTRKCAD_RELEASE_VERSION/{print $2; exit}' ProgramVersion.cmake)
+          MODIFIER=$(awk -F'"' '/set\(XTRKCAD_VERSION_MODIFIER/{print $2; exit}' ProgramVersion.cmake)
+          echo "XTRKCAD_VERSION=${MAJOR}.${MINOR}.${PATCH}${MODIFIER}" >> "$GITHUB_ENV"
+
       - name: Create Homebrew-dependent archive
         # Installs to a staging dir and tars it. Users must have the Homebrew
         # prerequisites: brew install gtk+3 libzip librsvg
         run: |
           cmake --install build --prefix staging
-          VERSION=$(grep '^XTRKCAD_VERSION:' build/CMakeCache.txt | cut -d= -f2)
-          echo "XTRKCAD_VERSION=$VERSION" >> "$GITHUB_ENV"
-          tar -czf "xtrkcad-${VERSION}-macos-arm64.tar.gz" -C staging .
+          tar -czf "xtrkcad-${XTRKCAD_VERSION}-macos-arm64.tar.gz" -C staging .
 
       - name: Upload Homebrew archive
         uses: actions/upload-artifact@v7
@@ -185,6 +191,14 @@ jobs:
             mingw-w64-x86_64-cmocka
             mingw-w64-x86_64-ntldd-git
 
+      - name: Get version
+        run: |
+          MAJOR=$(awk -F'"' '/set\(XTRKCAD_MAJOR_VERSION/{print $2; exit}' ProgramVersion.cmake)
+          MINOR=$(awk -F'"' '/set\(XTRKCAD_MINOR_VERSION/{print $2; exit}' ProgramVersion.cmake)
+          PATCH=$(awk -F'"' '/set\(XTRKCAD_RELEASE_VERSION/{print $2; exit}' ProgramVersion.cmake)
+          MODIFIER=$(awk -F'"' '/set\(XTRKCAD_VERSION_MODIFIER/{print $2; exit}' ProgramVersion.cmake)
+          echo "XTRKCAD_VERSION=${MAJOR}.${MINOR}.${PATCH}${MODIFIER}" >> "$GITHUB_ENV"
+
       - name: Configure (Release)
         run: |
           cmake -B build -G Ninja \
@@ -199,44 +213,45 @@ jobs:
         run: ctest --test-dir build --output-on-failure
 
       - name: Install to staging directory
-        run: cmake --install build --prefix staging
+        run: cmake --install build --prefix "$(pwd)/staging"
 
       - name: Collect GTK3 runtime DLLs
         # Walk the binary's DLL dependencies and copy all MinGW64 DLLs.
         # Also copy GTK3 runtime data (pixbuf loaders, GSettings schemas,
         # icon theme) needed for a working installation.
         run: |
-          BINARY=staging/bin/xtrkcad.exe
+          STAGING="$(pwd)/staging"
+          BINARY="$STAGING/bin/xtrkcad.exe"
           MINGW=/mingw64
 
           # Collect DLL dependencies (filter to MinGW64 only)
           ntldd -R "$BINARY" \
             | grep -i mingw64 \
             | awk '{print $3}' \
-            | xargs -I{} cp -n "{}" staging/bin/ || true
+            | xargs -I{} cp -n "{}" "$STAGING/bin/" || true
 
           # GTK3 pixbuf loaders (needed for SVG icons and PNG images)
           GDK_VER=$(ls $MINGW/lib/gdk-pixbuf-2.0/)
-          mkdir -p staging/lib/gdk-pixbuf-2.0/$GDK_VER/loaders
-          cp -r $MINGW/lib/gdk-pixbuf-2.0/$GDK_VER/loaders.cache \
-                staging/lib/gdk-pixbuf-2.0/$GDK_VER/ || true
-          cp $MINGW/lib/gdk-pixbuf-2.0/$GDK_VER/loaders/*.dll \
-             staging/lib/gdk-pixbuf-2.0/$GDK_VER/loaders/ 2>/dev/null || true
+          mkdir -p "$STAGING/lib/gdk-pixbuf-2.0/$GDK_VER/loaders"
+          cp -r "$MINGW/lib/gdk-pixbuf-2.0/$GDK_VER/loaders.cache" \
+                "$STAGING/lib/gdk-pixbuf-2.0/$GDK_VER/" || true
+          cp "$MINGW/lib/gdk-pixbuf-2.0/$GDK_VER/loaders/"*.dll \
+             "$STAGING/lib/gdk-pixbuf-2.0/$GDK_VER/loaders/" 2>/dev/null || true
 
           # GSettings compiled schemas (required by GTK3 on Windows)
-          mkdir -p staging/share/glib-2.0/schemas
-          cp $MINGW/share/glib-2.0/schemas/gschemas.compiled \
-             staging/share/glib-2.0/schemas/ || true
+          mkdir -p "$STAGING/share/glib-2.0/schemas"
+          cp "$MINGW/share/glib-2.0/schemas/gschemas.compiled" \
+             "$STAGING/share/glib-2.0/schemas/" || true
 
           # Hicolor icon theme (GTK3 fallback icons)
-          mkdir -p staging/share/icons
-          cp -r $MINGW/share/icons/hicolor staging/share/icons/ || true
+          mkdir -p "$STAGING/share/icons"
+          cp -r "$MINGW/share/icons/hicolor" "$STAGING/share/icons/" || true
 
       - name: Create ZIP archive
         run: |
-          VERSION=$(grep '^XTRKCAD_VERSION:' build/CMakeCache.txt | cut -d= -f2)
           cd staging
-          7z a "../xtrkcad-${VERSION}-windows-x64.zip" .
+          cmake -E tar cf "../xtrkcad-${XTRKCAD_VERSION}-windows-x64.zip" \
+            --format=zip .
 
       - name: Upload ZIP
         uses: actions/upload-artifact@v7
