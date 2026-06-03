@@ -102,7 +102,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Install dependencies
-        run: brew install ninja gtk+3 cmocka libzip librsvg gtk-mac-bundler
+        run: brew install ninja gtk+3 cmocka libzip librsvg
 
       - name: Configure (Release)
         run: |
@@ -151,6 +151,7 @@ jobs:
         # This step is allowed to fail — it does not block the archive upload.
         continue-on-error: true
         run: |
+          brew install gtk-mac-bundler || true
           cmake --install build --prefix bundle-staging
           cd distribution/osx/gtk-bundle
           bash xtrkcad-bundler.sh -i "${{ github.workspace }}/bundle-staging" \
