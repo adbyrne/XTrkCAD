@@ -376,23 +376,7 @@ if(NOT WIN32)
 else()
     set(ENV{path} "${CMAKE_CURRENT_BINARY_DIR};$ENV{PATH}")
 
-    if(MINGW)
-        # MinGW/MSYS2 build: collect all GTK3 runtime DLLs automatically.
-        # Requires CMake 3.21+ for RUNTIME_DEPENDENCY_SET support.
-        if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.21")
-            get_filename_component(MINGW_BIN_DIR "${CMAKE_C_COMPILER}" DIRECTORY)
-            install(RUNTIME_DEPENDENCY_SET xtrkcad_runtime
-                PRE_EXCLUDE_REGEXES
-                    [[api-ms-win-.*]]
-                    [[ext-ms-.*]]
-                POST_EXCLUDE_REGEXES
-                    [[.*[Ss]ystem32[/\\].*]]
-                    [[.*[Ww]in[Ss]x[Ss].*]]
-                DIRECTORIES
-                    "${MINGW_BIN_DIR}"
-            )
-        endif()
-    else()
+    if(NOT MINGW)
         # MSVC build: install explicit DLLs (libzip, zlib)
         install(FILES ${LIBZIP_SHAREDLIB} DESTINATION ${XTRKCAD_BIN_INSTALL_DIR})
         install(FILES ${ZLIB_SHAREDLIB} DESTINATION ${XTRKCAD_BIN_INSTALL_DIR})
@@ -404,6 +388,10 @@ else()
             )
         endif()
     endif()
+    # MinGW/MSYS2: GTK3 runtime DLLs are collected by the release workflow
+    # (ntldd-based script) before packaging. NSIS DLL bundling via CMake
+    # install(RUNTIME_DEPENDENCY_SET) is deferred — the keyword is not
+    # recognised by the MSYS2 CMake 4.x build.
 endif()
 
 # for testing only, should be IF(APPLE) ...
@@ -418,18 +406,10 @@ if(APPLE)
   )
 endif()
 
-if(WIN32 AND MINGW AND CMAKE_VERSION VERSION_GREATER_EQUAL "3.21")
-    install(
-        TARGETS ${XTRKCAD_BIN}
-        RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
-        RUNTIME_DEPENDENCY_SET xtrkcad_runtime
-    )
-else()
-    install(
-        TARGETS ${XTRKCAD_BIN}
-        RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
-    )
-endif()
+install(
+    TARGETS ${XTRKCAD_BIN}
+    RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+)
 
 if (XTRKCAD_BUILD_FLATPAK)
     install(
