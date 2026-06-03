@@ -374,27 +374,35 @@ if(NOT WIN32)
         m
     )
 else()
-    # copy dlls into the build dir for easier debugging
-    #    COPYDLLTOBUILD(${LIBZIP_SHAREDLIB})
-    #    COPYDLLTOBUILD(${ZLIB_SHAREDLIB})
     set(ENV{path} "${CMAKE_CURRENT_BINARY_DIR};$ENV{PATH}")
-    # add dll to install package
-    install(
-     FILES ${LIBZIP_SHAREDLIB}
-     DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
- )
-    install(
-        FILES ${ZLIB_SHAREDLIB}
-     DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
- )
 
-    if(MSVC)
-        # Copy program PDB file (MSVC debug info only)
-        install(
-            FILES $<TARGET_PDB_FILE:xtrkcad>
-         DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
-            OPTIONAL
-     )
+    if(MINGW)
+        # MinGW/MSYS2 build: collect all GTK3 runtime DLLs automatically.
+        # Requires CMake 3.21+ for RUNTIME_DEPENDENCY_SET support.
+        if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.21")
+            get_filename_component(MINGW_BIN_DIR "${CMAKE_C_COMPILER}" DIRECTORY)
+            install(RUNTIME_DEPENDENCY_SET xtrkcad_runtime
+                PRE_EXCLUDE_REGEXES
+                    [[api-ms-win-.*]]
+                    [[ext-ms-.*]]
+                POST_EXCLUDE_REGEXES
+                    [[.*[Ss]ystem32[/\\].*]]
+                    [[.*[Ww]in[Ss]x[Ss].*]]
+                DIRECTORIES
+                    "${MINGW_BIN_DIR}"
+            )
+        endif()
+    else()
+        # MSVC build: install explicit DLLs (libzip, zlib)
+        install(FILES ${LIBZIP_SHAREDLIB} DESTINATION ${XTRKCAD_BIN_INSTALL_DIR})
+        install(FILES ${ZLIB_SHAREDLIB} DESTINATION ${XTRKCAD_BIN_INSTALL_DIR})
+        if(MSVC)
+            install(
+                FILES $<TARGET_PDB_FILE:xtrkcad>
+                DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+                OPTIONAL
+            )
+        endif()
     endif()
 endif()
 
@@ -410,10 +418,18 @@ if(APPLE)
   )
 endif()
 
-install(
- TARGETS ${XTRKCAD_BIN}
- RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
-)
+if(WIN32 AND MINGW AND CMAKE_VERSION VERSION_GREATER_EQUAL "3.21")
+    install(
+        TARGETS ${XTRKCAD_BIN}
+        RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+        RUNTIME_DEPENDENCY_SET xtrkcad_runtime
+    )
+else()
+    install(
+        TARGETS ${XTRKCAD_BIN}
+        RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+    )
+endif()
 
 if (XTRKCAD_BUILD_FLATPAK)
     install(

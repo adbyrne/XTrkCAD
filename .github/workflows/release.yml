@@ -41,12 +41,14 @@ jobs:
       - name: Test
         run: xvfb-run ctest --test-dir build --output-on-failure
 
-      - name: Package (DEB + RPM + STGZ)
+      - name: Package (DEB + RPM + STGZ + source archives)
         run: |
           cd build
           cpack -G DEB
           cpack -G RPM
           cpack -G STGZ
+          cpack --config CPackSourceConfig.cmake -G TGZ
+          cpack --config CPackSourceConfig.cmake -G ZIP
 
       - name: Upload packages
         uses: actions/upload-artifact@v7
@@ -56,6 +58,7 @@ jobs:
             build/*.deb
             build/*.rpm
             build/*.sh
+            build/xtrkcad-source-*
           retention-days: 14
 
   # ── Linux ARM64 — DEB ──────────────────────────────────────────────────────

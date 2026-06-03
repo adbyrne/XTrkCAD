@@ -1,3 +1,6 @@
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/README-INSTALL.txt"
+    DESTINATION ".")
+
 # Automatically generate most of our external dependencies ...
 SET(XTRKCAD_LOCATION $<TARGET_FILE:xtrkcad>)
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/dependencies.cmake" @ONLY)
