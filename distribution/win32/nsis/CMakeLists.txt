@@ -9,8 +9,6 @@ set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\xtrkcad.exe")
 set(CPACK_NSIS_HELP_LINK "http://www.xtrkcad.org")
 set(CPACK_NSIS_MUI_FINISHPAGE_RUN "xtrkcad.exe")
 set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL "on")
-set(CMAKE_INSTALL_OPENMP_LIBRARIES TRUE)
-
 set(CPACK_NSIS_STARTMENU_FOLDER "XTrackCAD")
 
 set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS
@@ -20,7 +18,5 @@ set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS
 set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS
 	"; add part specific to XTrackCAD uninstall
 	!include \\\"${NATIVE_CURRENT_SOURCE_DIR}\\\\uninstall.nsh\\\"")
-
-include (InstallRequiredSystemLibraries)
 
 include(CPack)

@@ -38,7 +38,10 @@ cp -R "${installib}/share/" "share/"
 #copy in binary
 echo "copying binaries from build to bin directory"
 cp "${installib}/bin/xtrkcad" "bin"
-cp "${installib}/bin/helphelper" "bin"
+# helphelper is only present in GTK2 builds (Apple Help backend)
+if [ -f "${installib}/bin/helphelper" ]; then
+    cp "${installib}/bin/helphelper" "bin"
+fi
 
 echo "executing gtk-mac-bundler"
 gtk-mac-bundler xtrkcad.bundle

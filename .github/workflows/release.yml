@@ -102,7 +102,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Install dependencies
-        run: brew install ninja gtk+3 cmocka libzip librsvg
+        run: brew install ninja gtk+3 cmocka libzip librsvg gtk-mac-bundler
 
       - name: Configure (Release)
         run: |
@@ -145,21 +145,17 @@ jobs:
         # This step is allowed to fail — it does not block the archive upload.
         continue-on-error: true
         run: |
-          if [ -f distribution/osx/xtrkcad-bundler.sh ]; then
-            cmake --install build --prefix bundle-staging
-            bash distribution/osx/xtrkcad-bundler.sh bundle-staging \
-              xtrkcad-${XTRKCAD_VERSION}-macos-arm64.dmg
-          else
-            echo "Bundler script not found — skipping DMG build"
-            exit 1
-          fi
+          cmake --install build --prefix bundle-staging
+          cd distribution/osx/gtk-bundle
+          bash xtrkcad-bundler.sh -i "${{ github.workspace }}/bundle-staging" \
+            -v "${XTRKCAD_VERSION}"
 
       - name: Upload DMG (if built)
         uses: actions/upload-artifact@v7
         if: success()
         with:
           name: packages-macos-arm64-dmg
-          path: "*.dmg"
+          path: "distribution/osx/gtk-bundle/xtrkcad-OSX-*.dmg"
           retention-days: 14
 
   # ── Windows x86-64 — ZIP (DLLs bundled) + NSIS installer ──────────────────
