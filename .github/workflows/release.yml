@@ -127,7 +127,7 @@ jobs:
             cmake ninja-build \
             libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev \
             librsvg2-bin gettext xvfb \
-            dpkg-dev
+            dpkg-dev file
 
       - name: Configure (Release)
         run: |
