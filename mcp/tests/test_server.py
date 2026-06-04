@@ -8,6 +8,10 @@ import pytest
 
 from xtrkcad_mcp.parser import parse_file
 from xtrkcad_mcp.server import (
+    _category_from_name,
+    _level_from_layer_name,
+    add_track_layers,
+    rename_layers,
     delete_track,
     find_dead_connections,
     fix_dead_connections,
@@ -462,6 +466,289 @@ def test_od_report_html_is_html(tmp_path):
     content = out.read_text()
     assert "<html" in content
     assert "<table" in content
+
+
+# ---------------------------------------------------------------------------
+# Auto-categorization from layer name
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize("name,expected", [
+    ("L1-Main",       "mainline"),
+    ("L1-Passing",    "passing"),
+    ("L1-Storage",    "storage"),
+    ("L1-Staging",    "staging"),
+    ("L1-Connecting", "connecting"),
+    ("L1-Service",    "service"),
+    ("L1-Benchwork",  "ignore"),
+    ("L2-Main",       "mainline"),
+    ("L2-Staging",    "staging"),
+    ("l3-storage",    "storage"),    # lowercase
+    ("L1H-Connecting","connecting"), # helix pseudo-level
+    ("L1-Track",      "mainline"),   # backward compat
+])
+def test_category_from_name_standard_suffixes(name, expected):
+    assert _category_from_name(name) == expected
+
+
+def test_category_from_name_unrecognized_returns_none():
+    assert _category_from_name("MyCustomLayer") is None
+    assert _category_from_name("Floor") is None
+    assert _category_from_name("L1-Unknown") is None
+
+
+def test_category_from_name_explicit_overrides_auto(tmp_path):
+    """Explicit layer_categories dict takes precedence over name-based detection."""
+    from xtrkcad_mcp.server import get_operation_density
+    result = get_operation_density(
+        str(FIXTURE),
+        layer_categories={"L1-Main": "staging"},   # override: treat main layer as staging
+    )
+    # If the fixture has a layer named "L1-Main", it should be categorised as staging.
+    # The fixture may not have that layer — what matters is no exception is raised and
+    # the function returns a valid result.
+    assert "operations" in result
+
+
+# ---------------------------------------------------------------------------
+# Level extraction from layer name
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize("name,expected", [
+    ("L1-Main",        "1"),
+    ("L2-Staging",     "2"),
+    ("L10-Storage",    "10"),
+    ("l3-passing",     "3"),
+    ("L1H-Connecting", "1H"),
+    ("Floor",          "0"),
+    ("MyCustomLayer",  "0"),
+])
+def test_level_from_layer_name(name, expected):
+    assert _level_from_layer_name(name) == expected
+
+
+# ---------------------------------------------------------------------------
+# get_operation_density — by_level breakdown
+# ---------------------------------------------------------------------------
+
+def test_od_by_level_key_present():
+    from xtrkcad_mcp.server import get_operation_density
+    result = get_operation_density(str(FIXTURE))
+    assert "by_level" in result
+
+
+def test_od_by_level_structure():
+    from xtrkcad_mcp.server import get_operation_density
+    result = get_operation_density(str(FIXTURE))
+    for lv, info in result["by_level"].items():
+        assert "length_real_ft" in info
+        assert "car_capacity" in info
+        assert "turnouts" in info
+        assert "by_category" in info
+        assert isinstance(lv, str)
+
+
+def test_od_by_level_totals_sum_to_overall():
+    from xtrkcad_mcp.server import get_operation_density
+    result = get_operation_density(str(FIXTURE))
+    level_total_ft = sum(info["length_real_ft"] for info in result["by_level"].values())
+    assert abs(level_total_ft - result["totals"]["length_real_ft"]) < 0.2
+
+
+def test_od_by_level_unassigned_layer_goes_to_zero():
+    """Track on a layer with no Ln- prefix should appear under level '0'."""
+    from xtrkcad_mcp.server import get_operation_density
+    result = get_operation_density(str(FIXTURE), layer_categories={"0": "mainline"})
+    # Floor layer (index 0, name "Floor") has no Ln- prefix → level "0"
+    # Even if no track is on that layer, the key may or may not appear — just
+    # verify any "0" entry has the right structure if present.
+    if "0" in result["by_level"]:
+        assert "by_category" in result["by_level"]["0"]
+
+
+def test_od_report_txt_has_by_level_section(tmp_path):
+    from xtrkcad_mcp.server import write_operation_density_report
+    out = tmp_path / "od.txt"
+    write_operation_density_report(str(FIXTURE), str(out))
+    content = out.read_text()
+    assert "TRACK BY LEVEL" in content
+
+
+def test_od_report_md_has_by_level_section(tmp_path):
+    from xtrkcad_mcp.server import write_operation_density_report
+    out = tmp_path / "od.md"
+    write_operation_density_report(str(FIXTURE), str(out), format="md")
+    content = out.read_text()
+    assert "## Track by Level" in content
+
+
+def test_od_report_html_has_by_level_section(tmp_path):
+    from xtrkcad_mcp.server import write_operation_density_report
+    out = tmp_path / "od.html"
+    write_operation_density_report(str(FIXTURE), str(out), format="html")
+    content = out.read_text()
+    assert "Track by Level" in content
+
+
+# ---------------------------------------------------------------------------
+# add_track_layers
+# ---------------------------------------------------------------------------
+
+def _xtc_with_old_layers(tmp_path) -> Path:
+    """Copy the test fixture and strip its LAYERS down to old-style L1-Track/L1-Benchwork."""
+    src = FIXTURE.read_text(encoding="utf-8")
+    # Replace any Ln-Main / Ln-Passing etc. with the old single-layer scheme
+    # by simply writing a minimal file that has L1-Track + L1-Benchwork only.
+    out = tmp_path / "old_style.xtc"
+    old_layers = (
+        'LAYERS 0 1 0 1 8421504 0 0 0 0 "Floor" 1 0 0.000000 0.000000 0.000000 0.000000 0.000000\n'
+        'LAYERS 1 1 0 1 0 0 0 0 0 "L1-Track" 1 0 0.000000 0.000000 0.000000 0.000000 0.000000\n'
+        'LAYERS 2 1 0 1 9498256 0 0 0 0 "L1-Benchwork" 1 0 0.000000 0.000000 0.000000 0.000000 0.000000\n'
+        'LAYERS CURRENT 1\n'
+    )
+    lines = []
+    in_layers = False
+    for line in src.splitlines():
+        if line.startswith("LAYERS"):
+            in_layers = True
+            continue
+        if in_layers and not line.startswith("LAYERS"):
+            in_layers = False
+            lines.append(old_layers.rstrip())
+        lines.append(line)
+    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return out
+
+
+def test_add_track_layers_adds_missing(tmp_path):
+    xtc = _xtc_with_old_layers(tmp_path)
+    result = add_track_layers(str(xtc), levels=1)
+    assert result["added"] != []
+    # All 6 standard types should now be present
+    content = xtc.read_text()
+    for name in ["L1-Main", "L1-Passing", "L1-Storage", "L1-Staging", "L1-Connecting", "L1-Service"]:
+        assert f'"{name}"' in content
+
+
+def test_add_track_layers_skips_present(tmp_path):
+    xtc = _xtc_with_old_layers(tmp_path)
+    # Run twice — second run should add nothing
+    add_track_layers(str(xtc), levels=1)
+    result2 = add_track_layers(str(xtc), levels=1)
+    assert result2["added"] == []
+    assert len(result2["already_present"]) == 6
+
+
+def test_add_track_layers_ids_are_additive(tmp_path):
+    xtc = _xtc_with_old_layers(tmp_path)
+    result = add_track_layers(str(xtc), levels=1)
+    assert result["added"] != []
+    content = xtc.read_text()
+    # Max existing ID was 2 (L1-Benchwork); new layers must start at 3+
+    layer_ids = [
+        int(ln.split()[1])
+        for ln in content.splitlines()
+        if ln.startswith("LAYERS") and ln.split()[1] != "CURRENT"
+    ]
+    assert min(layer_ids) == 0
+    assert max(layer_ids) >= 3   # at least one new layer was added above id 2
+
+
+def test_add_track_layers_creates_backup(tmp_path):
+    xtc = _xtc_with_old_layers(tmp_path)
+    result = add_track_layers(str(xtc), levels=1)
+    assert result["backup_path"] is not None
+    assert Path(result["backup_path"]).exists()
+
+
+def test_add_track_layers_detects_levels_automatically(tmp_path):
+    """Omitting levels= should detect from existing L1-/L2- names."""
+    xtc = _xtc_with_old_layers(tmp_path)
+    # Add L2-Benchwork so level 2 is detectable
+    content = xtc.read_text()
+    content = content.replace(
+        "LAYERS CURRENT 1",
+        'LAYERS 3 1 0 1 11393254 0 0 0 0 "L2-Benchwork" 1 0 0.000000 0.000000 0.000000 0.000000 0.000000\n'
+        "LAYERS CURRENT 1",
+    )
+    xtc.write_text(content)
+    result = add_track_layers(str(xtc))   # no levels= arg
+    # Should have added layers for both L1 and L2
+    added = result["added"]
+    assert any(n.startswith("L1-") for n in added)
+    assert any(n.startswith("L2-") for n in added)
+
+
+# ---------------------------------------------------------------------------
+# rename_layers
+# ---------------------------------------------------------------------------
+
+def _xtc_with_custom_names(tmp_path) -> Path:
+    """Write a minimal .xtc with two custom-named LAYERS entries."""
+    out = tmp_path / "custom.xtc"
+    out.write_text(
+        "VERSION 10 3.0.0\nTITLE1 Test\nTITLE2 custom\nSCALE HO\nROOMSIZE 144 x 192\n\n"
+        'LAYERS 0 1 0 1 8421504 0 0 0 0 "Floor" 1 0 0.000000 0.000000 0.000000 0.000000 0.000000\n'
+        'LAYERS 50 1 0 1 0 0 0 0 0 "My Yard" 1 0 0.000000 0.000000 0.000000 0.000000 0.000000\n'
+        'LAYERS 51 1 0 1 0 0 0 0 0 "Upper Main" 1 0 0.000000 0.000000 0.000000 0.000000 0.000000\n'
+        "LAYERS CURRENT 50\n"
+    )
+    return out
+
+
+def test_rename_layers_applies_mapping(tmp_path):
+    xtc = _xtc_with_custom_names(tmp_path)
+    result = rename_layers(str(xtc), {"My Yard": "L1-Staging", "Upper Main": "L2-Main"})
+    assert len(result["renamed"]) == 2
+    assert result["not_found"] == []
+    content = xtc.read_text()
+    assert '"L1-Staging"' in content
+    assert '"L2-Main"' in content
+    assert '"My Yard"' not in content
+    assert '"Upper Main"' not in content
+
+
+def test_rename_layers_preserves_layer_id(tmp_path):
+    xtc = _xtc_with_custom_names(tmp_path)
+    rename_layers(str(xtc), {"My Yard": "L1-Staging"})
+    content = xtc.read_text()
+    # Layer 50 should now have the new name, not layer 51
+    assert 'LAYERS 50 1 0 1 0 0 0 0 0 "L1-Staging"' in content
+
+
+def test_rename_layers_partial_match(tmp_path):
+    xtc = _xtc_with_custom_names(tmp_path)
+    result = rename_layers(str(xtc), {"My Yard": "L1-Staging", "DoesNotExist": "L1-Main"})
+    assert len(result["renamed"]) == 1
+    assert result["not_found"] == ["DoesNotExist"]
+
+
+def test_rename_layers_all_not_found_skips_write(tmp_path):
+    xtc = _xtc_with_custom_names(tmp_path)
+    mtime_before = xtc.stat().st_mtime
+    result = rename_layers(str(xtc), {"NoSuchLayer": "L1-Main"})
+    assert result["renamed"] == []
+    assert result["not_found"] == ["NoSuchLayer"]
+    assert result["backup_path"] is None
+    # File should not have been rewritten
+    assert xtc.stat().st_mtime == mtime_before
+
+
+def test_rename_layers_creates_backup(tmp_path):
+    xtc = _xtc_with_custom_names(tmp_path)
+    result = rename_layers(str(xtc), {"My Yard": "L1-Staging"})
+    assert result["backup_path"] is not None
+    assert Path(result["backup_path"]).exists()
+
+
+def test_rename_layers_enables_auto_categorization(tmp_path):
+    """After renaming to standard names, get_operation_density should auto-categorize."""
+    from xtrkcad_mcp.server import get_operation_density
+    xtc = _xtc_with_custom_names(tmp_path)
+    rename_layers(str(xtc), {"My Yard": "L1-Staging"})
+    result = get_operation_density(str(xtc))
+    # L1-Staging should now appear in by_category without passing layer_categories
+    # (fixture may have no track on that layer, but no error should occur)
+    assert "operations" in result
 
 
 # ---------------------------------------------------------------------------

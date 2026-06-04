@@ -18,6 +18,14 @@ Optional keys
   level_separation: 18in    # vertical spacing between decks
   level_break: E            # grid row where upper deck begins
   grid_size: 3ft            # grid cell size; derived from curve_radius if omitted
+  track_types:              # which Fugate track-type layers to generate (default: all 6)
+    - Main
+    - Passing
+    - Storage
+    - Staging
+    - Connecting
+    - Service
+  distinct_track_colors: false   # true = each track type gets its own color
 
 floor_plan section
 ------------------
@@ -227,6 +235,11 @@ VALID_ELEMENT_TYPES = frozenset({
     "yard", "staging", "mainline", "station", "helix", "siding", "module",
 })
 
+# Standard Fugate track-type layer names (ordered; matches generator._TRACK_TYPES)
+VALID_TRACK_TYPES = frozenset({
+    "Main", "Passing", "Storage", "Staging", "Connecting", "Service",
+})
+
 
 _CELL_RE = re.compile(r'^([A-Z]+)(\d+)$')
 _RANGE_RE = re.compile(r'^([A-Z]+)(\d+)-([A-Z]+)(\d+)$')
@@ -378,6 +391,10 @@ class LayoutConfig:
     benchwork_file: str = ""   # path to standalone benchwork YAML (relative to config)
     floor_plan: "FloorPlan | None" = None
     floor_plan_file: str = ""  # path to standalone floor plan YAML (relative to config)
+
+    # Layer generation options
+    track_types: "list[str] | None" = None  # None = all 6 standard types
+    distinct_track_colors: bool = False     # True = each type gets its own color
 
 
 @dataclass
@@ -879,6 +896,25 @@ def load_config(path: str | Path) -> ConfigResult:
         if config.room_depth_ft <= 0:
             config.room_depth_ft = config.floor_plan.total_depth_in / 12.0
 
+
+    # --- Layer generation options ---
+    if "track_types" in raw:
+        raw_tt = raw["track_types"]
+        if isinstance(raw_tt, list):
+            valid, invalid = [], []
+            for t in raw_tt:
+                (valid if t in VALID_TRACK_TYPES else invalid).append(str(t))
+            if invalid:
+                warnings.append(
+                    f"unknown track_types: {', '.join(invalid)}; "
+                    f"valid: {', '.join(sorted(VALID_TRACK_TYPES))}"
+                )
+            config.track_types = valid if valid else None
+        else:
+            warnings.append(f"track_types must be a YAML list; got {raw_tt!r}, using all types")
+
+    if "distinct_track_colors" in raw:
+        config.distinct_track_colors = bool(raw["distinct_track_colors"])
 
     # --- Grid placements ---
     for entry in raw.get("grid", []):

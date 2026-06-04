@@ -661,6 +661,39 @@ def get_curve_stats(path: str) -> dict:
 # ---------------------------------------------------------------------------
 
 
+# Maps the suffix of a standard layer name (after stripping the leading
+# "L{n}-" or "L{n}H-" prefix) to a Fugate category.
+_SUFFIX_TO_CATEGORY: dict[str, str] = {
+    "main":       "mainline",
+    "passing":    "passing",
+    "storage":    "storage",
+    "staging":    "staging",
+    "connecting": "connecting",
+    "service":    "service",
+    "benchwork":  "ignore",
+    "track":      "mainline",   # backward compat with pre-spec generated files
+}
+
+
+def _category_from_name(name: str) -> str | None:
+    """Return Fugate category inferred from a standard layer name, or None."""
+    import re
+    # Strip optional leading "L{digits}[H]-" prefix (e.g. "L1-", "L1H-", "l2-")
+    suffix = re.sub(r"^l\d+h?-", "", name.lower())
+    return _SUFFIX_TO_CATEGORY.get(suffix)
+
+
+def _level_from_layer_name(name: str) -> str:
+    """Return the level key from a standard layer name, or '0' if unrecognised.
+
+    Examples: 'L1-Main' → '1', 'L2-Staging' → '2', 'L1H-Connecting' → '1H'.
+    Layers without an 'Ln-' prefix (Floor, custom names) → '0'.
+    """
+    import re
+    m = re.match(r"^[Ll](\d+[Hh]?)-", name)
+    return m.group(1) if m else "0"
+
+
 def _build_category_fn(
     layer_categories: dict | None,
     layout,
@@ -675,12 +708,18 @@ def _build_category_fn(
                 name_to_cat[key.lower()] = cat.lower()
 
     def _category(layer_idx: int) -> str:
+        # Explicit index override takes highest precedence
         if layer_idx in idx_to_cat:
             return idx_to_cat[layer_idx]
         if layer_idx in layout.layers:
-            name = layout.layers[layer_idx].name.lower()
-            if name in name_to_cat:
-                return name_to_cat[name]
+            name = layout.layers[layer_idx].name
+            # Explicit name override
+            if name.lower() in name_to_cat:
+                return name_to_cat[name.lower()]
+            # Auto-categorize from standard layer name suffix
+            inferred = _category_from_name(name)
+            if inferred is not None:
+                return inferred
         return "mainline"
 
     return _category
@@ -713,9 +752,12 @@ def get_operation_density(
             (default 6). Does not affect max_cars or cars_moved formulas.
 
     Returns:
-        Dict with room info, track by category, and operations sub-dict with
-        max_cars, cars_moved_per_session, max_to_main_pct, max_to_main_label,
-        and estimated_trains.
+        Dict with room info, track by category, by_level breakdown, and
+        operations sub-dict with max_cars, cars_moved_per_session,
+        max_to_main_pct, max_to_main_label, and estimated_trains.
+        by_level groups totals by physical level parsed from layer names
+        (e.g. "L1-Main" → level "1"); layers without a standard prefix
+        appear under level "0".
     """
     layout = parse_file(_resolve_plan(path))
     scale = layout.scale
@@ -730,13 +772,27 @@ def get_operation_density(
 
     cat_ft: dict[str, float] = {}
     cat_turnouts: dict[str, int] = {}
+    # level_data[level_str][cat] = {"ft": float, "turnouts": int}
+    level_data: dict[str, dict[str, dict]] = {}
+
     for t in layout.tracks:
         cat = _category(t.layer)
         if cat in {"ignore", "scenery"}:
             continue
-        cat_ft[cat] = cat_ft.get(cat, 0.0) + t.length_real_feet()
-        if t.kind == "TURNOUT":
+        ft = t.length_real_feet()
+        is_turnout = t.kind == "TURNOUT"
+
+        cat_ft[cat] = cat_ft.get(cat, 0.0) + ft
+        if is_turnout:
             cat_turnouts[cat] = cat_turnouts.get(cat, 0) + 1
+
+        layer_name = layout.layers[t.layer].name if t.layer in layout.layers else ""
+        lv = _level_from_layer_name(layer_name)
+        lv_cats = level_data.setdefault(lv, {})
+        lv_entry = lv_cats.setdefault(cat, {"ft": 0.0, "turnouts": 0})
+        lv_entry["ft"] += ft
+        if is_turnout:
+            lv_entry["turnouts"] += 1
 
     def _cars(category: str) -> float:
         return cat_ft.get(category, 0.0) * cpf
@@ -770,6 +826,34 @@ def get_operation_density(
             "turnouts": cat_turnouts.get(cat, 0),
         }
 
+    def _sort_level_key(lv: str) -> tuple:
+        """Sort level keys numerically: '1' < '1H' < '2' < '0' (unassigned last)."""
+        if lv == "0":
+            return (9999, "")
+        import re
+        m = re.match(r"(\d+)([Hh]?)", lv)
+        return (int(m.group(1)), m.group(2).upper()) if m else (9998, lv)
+
+    by_level_out: dict[str, dict] = {}
+    for lv in sorted(level_data, key=_sort_level_key):
+        lv_cats = level_data[lv]
+        lv_ft = sum(e["ft"] for e in lv_cats.values())
+        lv_turnouts = sum(e["turnouts"] for e in lv_cats.values())
+        lv_cats_out = {}
+        for cat in sorted(lv_cats):
+            e = lv_cats[cat]
+            lv_cats_out[cat] = {
+                "length_real_ft": round(e["ft"], 1),
+                "car_capacity": int(e["ft"] * cpf),
+                "turnouts": e["turnouts"],
+            }
+        by_level_out[lv] = {
+            "length_real_ft": round(lv_ft, 1),
+            "car_capacity": int(lv_ft * cpf),
+            "turnouts": lv_turnouts,
+            "by_category": lv_cats_out,
+        }
+
     return {
         "title": layout.title1,
         "scale": scale,
@@ -786,6 +870,7 @@ def get_operation_density(
             "turnout_count": total_turnouts,
         },
         "by_category": categories_out,
+        "by_level": by_level_out,
         "operations": {
             "max_cars": max_cars,
             "cars_moved_per_session": cars_moved,
@@ -866,6 +951,32 @@ def write_operation_density_report(
         f"  {totals['car_capacity']:4d} cars"
         f"  {totals['turnout_count']:3d} turnouts",
         "",
+        "TRACK BY LEVEL",
+    ]
+    for lv, lv_info in data["by_level"].items():
+        lv_label = f"Level {lv}" if lv != "0" else "Unassigned"
+        lines.append(
+            f"  {lv_label} — {lv_info['length_real_ft']:.1f} ft"
+            f"  {lv_info['car_capacity']} cars"
+            f"  {lv_info['turnouts']} turnouts"
+        )
+        for cat in cat_order:
+            if cat in lv_info["by_category"]:
+                ci = lv_info["by_category"][cat]
+                lines.append(
+                    f"    {cat:12s}: {ci['length_real_ft']:7.1f} ft"
+                    f"  {ci['car_capacity']:4d} cars"
+                    f"  {ci['turnouts']:3d} turnouts"
+                )
+        for cat, ci in sorted(lv_info["by_category"].items()):
+            if cat not in cat_order:
+                lines.append(
+                    f"    {cat:12s}: {ci['length_real_ft']:7.1f} ft"
+                    f"  {ci['car_capacity']:4d} cars"
+                    f"  {ci['turnouts']:3d} turnouts"
+                )
+    lines += [
+        "",
         "OPERATION DENSITY (Joe Fugate, MRH Oct 2014)",
         f"  Max cars (0.8×storage+staging+passing/2):  {ops['max_cars']}",
         f"  Cars moved/session (0.4×staging×2+pass+conn): {ops['cars_moved_per_session']}",
@@ -898,6 +1009,27 @@ def write_operation_density_report(
         tbl_hdrs = ["Category", "Track (ft)", "Cars", "Turnouts"]
 
         title = f"Operation Density Report: {data['title']}"
+        # Build per-level flat table rows: Level | Category | ft | Cars | Turnouts
+        lv_tbl_rows = []
+        for lv, lv_info in data["by_level"].items():
+            lv_label = f"Level {lv}" if lv != "0" else "Unassigned"
+            for cat in [c for c in cat_order if c in lv_info["by_category"]] + \
+                       [c for c in sorted(lv_info["by_category"]) if c not in cat_order]:
+                ci = lv_info["by_category"][cat]
+                lv_tbl_rows.append([
+                    lv_label, cat,
+                    f"{ci['length_real_ft']:.1f}",
+                    str(ci["car_capacity"]),
+                    str(ci["turnouts"]),
+                ])
+            lv_tbl_rows.append([
+                f"**{lv_label} Total**", "",
+                f"**{lv_info['length_real_ft']:.1f}**",
+                f"**{lv_info['car_capacity']}**",
+                f"**{lv_info['turnouts']}**",
+            ])
+        lv_tbl_hdrs = ["Level", "Category", "Track (ft)", "Cars", "Turnouts"]
+
         if format == "md":
             md: list[str] = [
                 f"# {title}", "",
@@ -907,6 +1039,8 @@ def write_operation_density_report(
                 "## Track by Category", "",
             ]
             md += _md_table(tbl_hdrs, tbl_rows)
+            md += ["", "## Track by Level", ""]
+            md += _md_table(lv_tbl_hdrs, lv_tbl_rows)
             md += [
                 "", "## Operation Density (Joe Fugate, MRH Oct 2014)", "",
                 f"| Metric | Value |",
@@ -929,6 +1063,7 @@ def write_operation_density_report(
                  ["Estimated trains",
                   f"{ops['estimated_trains']} (@ {ops['assumed_train_length_cars']} cars)"]],
             )
+            lv_html_tbl = _html_table(lv_tbl_hdrs, lv_tbl_rows)
             body = (
                 f"<h1>{title}</h1>"
                 f"<p><strong>Scale:</strong> {data['scale']} &nbsp;|&nbsp; "
@@ -936,11 +1071,188 @@ def write_operation_density_report(
                 f"{room['area_sqft']:.0f} sq ft &nbsp;|&nbsp; "
                 f"<strong>Date:</strong> {datetime.date.today()}</p>"
                 f"<h2>Track by Category</h2>{html_tbl}"
+                f"<h2>Track by Level</h2>{lv_html_tbl}"
                 f"<h2>Operation Density (Joe Fugate, MRH Oct 2014)</h2>{metrics}"
                 f"<p><em>{data['note']}</em></p>"
             )
             out.write_text(_html_page(title, body), encoding="utf-8")
     return f"Report written to {out}"
+
+
+# ---------------------------------------------------------------------------
+# Layer management tools
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool()
+def add_track_layers(path: str, levels: int | None = None) -> dict:
+    """Add standard Fugate track-type layers to an existing .xtc layout file.
+
+    Injects Ln-Main, Ln-Passing, Ln-Storage, Ln-Staging, Ln-Connecting, and
+    Ln-Service layers for each physical level. Safe to run at any stage of
+    track design — existing track objects and layer IDs are never modified.
+    Layers already present by name are skipped.
+
+    New layer IDs are assigned starting from max_existing_id + 1, so there
+    is no risk of collision with hand-built or previously edited files.
+
+    Args:
+        path: Path to the .xtc layout file (absolute or relative to
+              XTRKCAD_PLANS_DIR).
+        levels: Number of physical levels to add layers for. If omitted,
+                detected automatically from the highest Ln- prefix found
+                in existing layer names (minimum 1).
+
+    Returns:
+        Dict with output_path, backup_path, added (layer names inserted),
+        and already_present (layer names that were already there).
+    """
+    import re
+    from xtrkcad_mcp.generator import _TRACK_COLORS, _TRACK_TYPES, _version_backup
+
+    p = _resolve_plan(path)
+    layout = parse_file(p)
+
+    # Detect level count from existing Ln-* names if not provided
+    if levels is None:
+        max_lv = 0
+        for layer in layout.layers.values():
+            m = re.match(r"^[Ll](\d+)", layer.name)
+            if m:
+                max_lv = max(max_lv, int(m.group(1)))
+        levels = max(max_lv, 1)
+
+    existing_names = {layer.name for layer in layout.layers.values()}
+    max_id = max(layout.layers.keys()) if layout.layers else 0
+
+    # Classify each standard layer as missing or present
+    to_add: list[tuple[int, str]] = []   # (level, name)
+    already_present: list[str] = []
+    for lv in range(1, levels + 1):
+        for t_name in _TRACK_TYPES:
+            name = f"L{lv}-{t_name}"
+            if name in existing_names:
+                already_present.append(name)
+            else:
+                to_add.append((lv, name))
+
+    if not to_add:
+        return {
+            "output_path": str(p),
+            "backup_path": None,
+            "added": [],
+            "already_present": already_present,
+        }
+
+    # Build new LAYERS lines; IDs are strictly additive
+    def _lv_color(lv: int) -> int:
+        return _TRACK_COLORS[lv - 1] if lv <= len(_TRACK_COLORS) else 0
+
+    new_layer_lines: list[str] = []
+    added_names: list[str] = []
+    next_id = max_id + 1
+    for lv, name in to_add:
+        new_layer_lines.append(
+            f'LAYERS {next_id} 1 0 1 {_lv_color(lv)} 0 0 0 0 "{name}" '
+            f'1 0 0.000000 0.000000 0.000000 0.000000 0.000000'
+        )
+        added_names.append(name)
+        next_id += 1
+
+    # Insert new LAYERS lines just before LAYERS CURRENT
+    file_lines = p.read_text(encoding="utf-8", errors="replace").splitlines()
+    insert_at = next(
+        (i for i, ln in enumerate(file_lines) if ln.strip().startswith("LAYERS CURRENT")),
+        None,
+    )
+    if insert_at is None:
+        # Fallback: after the last existing LAYERS line
+        insert_at = next(
+            (i + 1 for i in range(len(file_lines) - 1, -1, -1)
+             if file_lines[i].startswith("LAYERS")),
+            len(file_lines),
+        )
+
+    updated = file_lines[:insert_at] + new_layer_lines + file_lines[insert_at:]
+    backup = _version_backup(p)
+    p.write_text("\n".join(updated) + "\n", encoding="utf-8")
+
+    return {
+        "output_path": str(p),
+        "backup_path": str(backup) if backup else None,
+        "added": added_names,
+        "already_present": already_present,
+    }
+
+
+@mcp.tool()
+def rename_layers(path: str, mapping: dict) -> dict:
+    """Rename layers in an existing .xtc layout file by name.
+
+    Renames the name string of matching LAYERS records in-place. Layer IDs
+    and all track object references are unchanged — only the display name is
+    updated. After renaming to standard Fugate names (e.g. 'L1-Staging'),
+    get_operation_density will auto-categorize them without needing an
+    explicit layer_categories argument.
+
+    Args:
+        path: Path to the .xtc layout file (absolute or relative to
+              XTRKCAD_PLANS_DIR).
+        mapping: Dict of {old_name: new_name} pairs.
+                 Example: {"My Yard": "L1-Staging", "Upper Main": "L2-Main"}
+
+    Returns:
+        Dict with output_path, backup_path, renamed (list of old→new pairs
+        that were applied), and not_found (old names not present in the file).
+    """
+    from xtrkcad_mcp.generator import _version_backup
+
+    p = _resolve_plan(path)
+    layout = parse_file(p)
+
+    # Build lookup: existing layer name → layer ID
+    name_to_id = {layer.name: layer.index for layer in layout.layers.values()}
+
+    renamed: list[dict] = []
+    not_found: list[str] = []
+    for old_name, new_name in mapping.items():
+        if old_name in name_to_id:
+            renamed.append({"from": old_name, "to": new_name, "id": name_to_id[old_name]})
+        else:
+            not_found.append(old_name)
+
+    if not renamed:
+        return {
+            "output_path": str(p),
+            "backup_path": None,
+            "renamed": [],
+            "not_found": not_found,
+        }
+
+    # Apply renames to raw file lines — replace quoted name on each LAYERS line
+    file_lines = p.read_text(encoding="utf-8", errors="replace").splitlines()
+    rename_map = {r["from"]: r["to"] for r in renamed}
+    updated_lines: list[str] = []
+    for line in file_lines:
+        if line.startswith("LAYERS") and not line.split()[1:2] == ["CURRENT"]:
+            # Extract quoted name
+            q2 = line.rfind('"')
+            q1 = line.rfind('"', 0, q2)
+            if q1 >= 0 and q2 > q1:
+                name_in_line = line[q1 + 1:q2]
+                if name_in_line in rename_map:
+                    line = line[:q1 + 1] + rename_map[name_in_line] + line[q2:]
+        updated_lines.append(line)
+
+    backup = _version_backup(p)
+    p.write_text("\n".join(updated_lines) + "\n", encoding="utf-8")
+
+    return {
+        "output_path": str(p),
+        "backup_path": str(backup) if backup else None,
+        "renamed": renamed,
+        "not_found": not_found,
+    }
 
 
 # ---------------------------------------------------------------------------

@@ -128,21 +128,39 @@ def _endpoint_line(x: float, y: float, angle: float) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Layer scheme: 0=Floor, then per-level pairs: 2N-1=Track, 2N=Benchwork
+# Layer scheme: 0=Floor, then per-level groups of 7 (6 track types + Benchwork)
+#   Level n: Main=(n-1)*7+1, Passing+2, Storage+3, Staging+4,
+#             Connecting+5, Service+6, Benchwork=n*7
 # ---------------------------------------------------------------------------
 
 # Track colors per level (0-indexed): black, dark-red, orange
 _TRACK_COLORS = [0, 11534336, 16744448]
-# Benchwork colors per level (0-indexed): green, blue, purple
-_BENCHWORK_COLORS = [32768, 255, 8388736]
+# Benchwork colors per level (0-indexed): light green, light blue, light plum
+_BENCHWORK_COLORS = [9498256, 11393254, 14381203]
+
+# Ordered track type names — suffix matches Fugate auto-categorization in server.py
+_TRACK_TYPES = ["Main", "Passing", "Storage", "Staging", "Connecting", "Service"]
+_LAYERS_PER_LEVEL = len(_TRACK_TYPES) + 1  # 6 track types + 1 benchwork = 7
+
+# Per-type colors for distinct_track_colors: true (same across all levels)
+# RGB packed as R*65536 + G*256 + B
+_DISTINCT_TRACK_COLORS: dict[str, int] = {
+    "Main":       0,        # black
+    "Passing":    32896,    # teal      (#008080)
+    "Storage":    11141120, # dark red  (#AA0000)
+    "Staging":    170,      # dark blue (#0000AA)
+    "Connecting": 8421376,  # olive     (#808000)
+    "Service":    5592405,  # dark gray (#555555)
+}
 
 
-def _track_layer(level: int) -> int:
-    return 2 * level - 1
+def _track_type_layer(level: int, type_idx: int = 0) -> int:
+    """Layer ID for a track type on a physical level (type_idx 0-indexed, 0=Main)."""
+    return (level - 1) * _LAYERS_PER_LEVEL + 1 + type_idx
 
 
 def _benchwork_layer(level: int) -> int:
-    return 2 * level
+    return level * _LAYERS_PER_LEVEL
 
 
 def _track_color(level: int) -> int:
@@ -151,7 +169,7 @@ def _track_color(level: int) -> int:
 
 def _benchwork_color(level: int) -> int:
     idx = level - 1
-    return _BENCHWORK_COLORS[idx] if idx < len(_BENCHWORK_COLORS) else 32768
+    return _BENCHWORK_COLORS[idx] if idx < len(_BENCHWORK_COLORS) else 9498256
 
 
 def _layer_line(lyr_id: int, name: str, color: int) -> str:
@@ -161,11 +179,32 @@ def _layer_line(lyr_id: int, name: str, color: int) -> str:
     )
 
 
-def _layers_header(num_levels: int) -> list[str]:
-    """Emit LAYERS: Floor (0), then Track+Benchwork pair per level."""
+def _layers_header(
+    num_levels: int,
+    track_types: "list[str] | None" = None,
+    distinct_track_colors: bool = False,
+) -> list[str]:
+    """Emit LAYERS: Floor (0), then active track types + Benchwork per level.
+
+    track_types filters which of the 6 standard types to emit (None = all).
+    Layer IDs still follow the standard formula — omitted types leave ID gaps,
+    which is harmless since no track is ever assigned to them by the generator.
+    distinct_track_colors assigns each type a unique color; default is one
+    color per physical level.
+    """
+    active = set(track_types) if track_types is not None else set(_TRACK_TYPES)
     result = [_layer_line(0, "Floor", 8421504)]
     for lv in range(1, num_levels + 1):
-        result.append(_layer_line(_track_layer(lv), f"L{lv}-Track", _track_color(lv)))
+        level_color = _track_color(lv)
+        for t_idx, t_name in enumerate(_TRACK_TYPES):
+            if t_name not in active:
+                continue
+            color = (
+                _DISTINCT_TRACK_COLORS.get(t_name, 0)
+                if distinct_track_colors
+                else level_color
+            )
+            result.append(_layer_line(_track_type_layer(lv, t_idx), f"L{lv}-{t_name}", color))
         result.append(_layer_line(_benchwork_layer(lv), f"L{lv}-Benchwork", _benchwork_color(lv)))
     result.append("LAYERS CURRENT 1")
     return result
@@ -437,7 +476,7 @@ def generate(config: LayoutConfig, output_path: Path) -> GenerationResult:
         "",
     ]
 
-    lines += _layers_header(num_levels)
+    lines += _layers_header(num_levels, config.track_types, config.distinct_track_colors)
     lines.append("")
 
     track_id = 1
@@ -483,7 +522,7 @@ def generate(config: LayoutConfig, output_path: Path) -> GenerationResult:
         template_layout = parse_file(template_info.xtc_path)
 
         for track in template_layout.tracks:
-            lines.append(_track_header(track.kind, track_id, _track_layer(pl.level), config.scale, track.extra))
+            lines.append(_track_header(track.kind, track_id, _track_type_layer(pl.level), config.scale, track.extra))
             for ep in track.endpoints:
                 lines.append(_endpoint_line(ep.x * sf + x0, ep.y * sf + y0, ep.angle))
             lines.append("END")

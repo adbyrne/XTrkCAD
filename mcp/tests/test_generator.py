@@ -398,16 +398,16 @@ def test_layer_scheme_floor_always_present(tmp_path):
 
 
 def test_layer_scheme_level1_always_emitted(tmp_path):
-    # L1-Track (layer 1) and L1-Benchwork (layer 2) always emitted for a 1-level config
+    # 6 track types (1-6) + L1-Benchwork (7) always emitted for a 1-level config
     cfg = tmp_path / "layout.yaml"
     cfg.write_text("name: T\nscale: HO\nroom: 12x16\ngrid: []\n")
     out = tmp_path / "t.xtc"
     generate(load_config(cfg).config, out)
     content = out.read_text()
-    assert "LAYERS 1" in content
-    assert '"L1-Track"' in content
-    assert "LAYERS 2" in content
+    for name in ["L1-Main", "L1-Passing", "L1-Storage", "L1-Staging", "L1-Connecting", "L1-Service"]:
+        assert f'"{name}"' in content
     assert '"L1-Benchwork"' in content
+    assert "LAYERS 7" in content   # L1-Benchwork
 
 
 def test_layer_scheme_two_levels(tmp_path):
@@ -416,12 +416,11 @@ def test_layer_scheme_two_levels(tmp_path):
     out = tmp_path / "t.xtc"
     generate(load_config(cfg).config, out)
     content = out.read_text()
-    assert '"L1-Track"' in content
-    assert '"L1-Benchwork"' in content
-    assert '"L2-Track"' in content
-    assert '"L2-Benchwork"' in content
-    assert "LAYERS 3" in content
-    assert "LAYERS 4" in content
+    for name in ["L1-Main", "L1-Benchwork", "L2-Main", "L2-Benchwork"]:
+        assert f'"{name}"' in content
+    assert "LAYERS 7" in content    # L1-Benchwork
+    assert "LAYERS 8" in content    # L2-Main
+    assert "LAYERS 14" in content   # L2-Benchwork
 
 
 def test_layer_scheme_track_colors(tmp_path):
@@ -430,9 +429,9 @@ def test_layer_scheme_track_colors(tmp_path):
     out = tmp_path / "t.xtc"
     generate(load_config(cfg).config, out)
     content = out.read_text()
-    # L1-Track layer line should contain black (0), L2-Track dark-red (11534336)
+    # L1-Main (layer 1) = black (0), L2-Main (layer 8) = dark-red (11534336)
     assert "LAYERS 1 1 0 1 0 " in content
-    assert "LAYERS 3 1 0 1 11534336 " in content
+    assert "LAYERS 8 1 0 1 11534336 " in content
 
 
 def test_layer_scheme_benchwork_colors(tmp_path):
@@ -441,9 +440,73 @@ def test_layer_scheme_benchwork_colors(tmp_path):
     out = tmp_path / "t.xtc"
     generate(load_config(cfg).config, out)
     content = out.read_text()
-    # L1-Benchwork = green (32768), L2-Benchwork = blue (255)
-    assert "LAYERS 2 1 0 1 32768 " in content
-    assert "LAYERS 4 1 0 1 255 " in content
+    # L1-Benchwork (layer 7) = light green (9498256), L2-Benchwork (layer 14) = light blue (11393254)
+    assert "LAYERS 7 1 0 1 9498256 " in content
+    assert "LAYERS 14 1 0 1 11393254 " in content
+
+
+def test_track_types_filters_layers(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text(
+        "name: T\nscale: HO\nroom: 12x16\ngrid: []\n"
+        "track_types: [Main, Storage]\n"
+    )
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    content = out.read_text()
+    assert '"L1-Main"' in content
+    assert '"L1-Storage"' in content
+    assert '"L1-Passing"' not in content
+    assert '"L1-Staging"' not in content
+    assert '"L1-Connecting"' not in content
+    assert '"L1-Service"' not in content
+    assert '"L1-Benchwork"' in content   # benchwork always emitted
+
+
+def test_track_types_default_emits_all_six(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text("name: T\nscale: HO\nroom: 12x16\ngrid: []\n")
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    content = out.read_text()
+    for name in ["L1-Main", "L1-Passing", "L1-Storage", "L1-Staging", "L1-Connecting", "L1-Service"]:
+        assert f'"{name}"' in content
+
+
+def test_distinct_track_colors_assigns_different_colors(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text(
+        "name: T\nscale: HO\nroom: 12x16\ngrid: []\n"
+        "distinct_track_colors: true\n"
+    )
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    content = out.read_text()
+    # L1-Main = black (0), L1-Passing = teal (32896) — must differ
+    assert "LAYERS 1 1 0 1 0 " in content        # Main: black
+    assert "LAYERS 2 1 0 1 32896 " in content    # Passing: teal
+
+
+def test_distinct_track_colors_default_false_uses_level_color(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text("name: T\nscale: HO\nroom: 12x16\ngrid: []\n")
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    content = out.read_text()
+    # All L1 track types should have the same color (black = 0)
+    for layer_id in range(1, 7):
+        assert f"LAYERS {layer_id} 1 0 1 0 " in content
+
+
+def test_track_types_invalid_entry_warns(tmp_path):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text(
+        "name: T\nscale: HO\nroom: 12x16\ngrid: []\n"
+        "track_types: [Main, NotAType]\n"
+    )
+    result = load_config(cfg)
+    assert any("unknown track_types" in w for w in result.warnings)
+    assert result.config.track_types == ["Main"]
 
 
 def test_room_tableedges_always_present(tmp_path):
@@ -479,23 +542,23 @@ def test_benchwork_section_draws_on_benchwork_layer(tmp_path):
         "  - label: west\n    level: 1\n    shape: rect\n"
         "    x: 0in\n    y: 0in\n    width: 24in\n    length: 144in\n",
     )
-    # L1-Benchwork = layer 2
-    layer2_draws = [ln for ln in content.splitlines()
-                    if ln.startswith("DRAW") and ln.split()[2] == "2"]
-    assert len(layer2_draws) == 1
+    # L1-Benchwork = layer 7
+    layer7_draws = [ln for ln in content.splitlines()
+                    if ln.startswith("DRAW") and ln.split()[2] == "7"]
+    assert len(layer7_draws) == 1
 
 
-def test_benchwork_section_level2_on_layer4(tmp_path):
+def test_benchwork_section_level2_on_layer14(tmp_path):
     content = _bw_xtc(
         tmp_path,
         "  - label: upper\n    level: 2\n    shape: rect\n"
         "    x: 0in\n    y: 0in\n    width: 24in\n    length: 144in\n",
         levels=2,
     )
-    # L2-Benchwork = layer 4
-    layer4_draws = [ln for ln in content.splitlines()
-                    if ln.startswith("DRAW") and ln.split()[2] == "4"]
-    assert len(layer4_draws) == 1
+    # L2-Benchwork = layer 14
+    layer14_draws = [ln for ln in content.splitlines()
+                     if ln.startswith("DRAW") and ln.split()[2] == "14"]
+    assert len(layer14_draws) == 1
 
 
 def test_benchwork_section_uses_benchwork_color(tmp_path):
@@ -504,8 +567,8 @@ def test_benchwork_section_uses_benchwork_color(tmp_path):
         "  - label: shelf\n    level: 1\n    shape: rect\n"
         "    x: 0in\n    y: 0in\n    width: 24in\n    length: 144in\n",
     )
-    # L1-Benchwork color = green (32768)
-    assert "F4 32768" in content
+    # L1-Benchwork color = light green (9498256)
+    assert "F4 9498256" in content
 
 
 def test_benchwork_section_filpoly_vertex_count(tmp_path):
@@ -514,8 +577,8 @@ def test_benchwork_section_filpoly_vertex_count(tmp_path):
         "  - label: shelf\n    level: 1\n    shape: rect\n"
         "    x: 0in\n    y: 0in\n    width: 24in\n    length: 144in\n",
     )
-    # rect → 4 vertices
-    assert "F4 32768 0.000000 4 0" in content
+    # rect → 4 vertices; L1-Benchwork color = light green (9498256)
+    assert "F4 9498256 0.000000 4 0" in content
 
 
 def test_benchwork_arc_section_generates(tmp_path):
@@ -528,7 +591,7 @@ def test_benchwork_arc_section_generates(tmp_path):
     filpolys = [ln for ln in content.splitlines() if ln.strip().startswith("F4")]
     assert len(filpolys) == 1
     # 90°/2° = 45 steps → 46 points per ring → 92 total vertices
-    assert "F4 32768 0.000000 92 0" in content
+    assert "F4 9498256 0.000000 92 0" in content
 
 
 def test_benchwork_spline_section_generates(tmp_path):
@@ -540,7 +603,7 @@ def test_benchwork_spline_section_generates(tmp_path):
     filpolys = [ln for ln in content.splitlines() if ln.strip().startswith("F4")]
     assert len(filpolys) == 1
     # 3 points → 3+3 = 6 vertices
-    assert "F4 32768 0.000000 6 0" in content
+    assert "F4 9498256 0.000000 6 0" in content
 
 
 def test_benchwork_sections_no_layer0_draws(tmp_path):
@@ -580,10 +643,10 @@ def test_grid_level_tag_selects_track_layer(tmp_path):
     out = tmp_path / "t.xtc"
     generate(load_config(cfg).config, out)
     content = out.read_text()
-    # L2-Track = layer 3; template track headers should use layer 3
+    # L2-Main = layer 8; template track headers should use layer 8
     track_lines = [
         ln for ln in content.splitlines()
-        if ln.startswith(("STRAIGHT", "CURVE", "JOINT")) and ln.split()[2] == "3"
+        if ln.startswith(("STRAIGHT", "CURVE", "JOINT")) and ln.split()[2] == "8"
     ]
     assert len(track_lines) >= 1
 

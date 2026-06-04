@@ -50,9 +50,52 @@ the same `hillside_floor_plan.yaml`).  You can also write the floor plan and
 benchwork inline using `floor_plan:` and `benchwork:` keys — useful for quick
 experiments — but separate files are easier to maintain.
 
-**`levels: 2`** tells the generator to create two track-layer / benchwork-layer
-pairs (L1-Track, L1-Benchwork, L2-Track, L2-Benchwork) plus the Floor layer.
-Set it to `1` for a single-deck layout.
+**`levels: 2`** tells the generator to create two sets of track layers plus the
+Floor layer.  Each physical level gets seven layers:
+
+| Layer name     | Purpose                            | Fugate category |
+|----------------|------------------------------------|-----------------|
+| `Ln-Main`      | Main line                          | mainline        |
+| `Ln-Passing`   | Passing sidings                    | passing         |
+| `Ln-Storage`   | Storage sidings / industry track   | storage         |
+| `Ln-Staging`   | Staging yard                       | staging         |
+| `Ln-Connecting`| Helix / ramp to adjacent level     | connecting      |
+| `Ln-Service`   | Loco service, turntable leads      | service         |
+| `Ln-Benchwork` | Benchwork outlines (filled polygons)| ignore         |
+
+For a 2-level layout the layers are: Floor (0), L1-Main (1) … L1-Benchwork (7),
+L2-Main (8) … L2-Benchwork (14).  The `get_operation_density` tool recognises
+these names automatically — no manual category mapping needed.  Set `levels: 1`
+for a single-deck layout.
+
+**Controlling which track-type layers are generated:**
+
+By default all six Fugate track-type layers are created for every deck.  To
+generate a subset, add `track_types:` to your config:
+
+```yaml
+track_types:
+  - Main
+  - Storage
+  - Staging
+```
+
+To give each track type a distinct color in the Layers dialog (instead of one
+color per deck), add:
+
+```yaml
+distinct_track_colors: true
+```
+
+The default per-type colors when `distinct_track_colors: true` are: Main=black,
+Passing=teal, Storage=dark red, Staging=dark blue, Connecting=olive,
+Service=dark gray.
+
+The operation density report includes a **Track by Level** breakdown in addition
+to the overall by-category totals.  This lets you see how each deck contributes
+to mainline footage, car capacity, and turnout count — useful when balancing
+operations across a multi-deck layout.  Helix or ramp track can be assigned to
+a special pseudo-level (e.g. `L1H-Connecting`) and will appear as its own row.
 
 **`mainline`, `curve_radius`, `switch_size`** are optional.  If you omit
 `curve_radius` the generator uses the scale minimum (18 in for HO).  These
@@ -371,6 +414,10 @@ from Claude or any MCP-compatible client:
 | `write_plan_view` | Top-down SVG plan — one deck or all decks |
 | `write_elevation_view` | Wall-profile SVG showing benchwork heights |
 | `write_benchwork_report` | Text/HTML table of every section with area and bounding box |
+| `add_track_layers` | Add standard Fugate track-type layers to any .xtc |
+| `rename_layers` | Rename layers by name so auto-categorization works |
+| `get_operation_density` | Compute Fugate op-density metrics; returns `by_level` breakdown |
+| `write_operation_density_report` | Write op-density report (txt / md / html) |
 
 **Generate the layout:**
 ```
@@ -419,9 +466,43 @@ If a `.xtc` file already exists at `out` it is backed up automatically as
 
 Open the `.xtc` in XTrkCAD.  The Floor layer (0) shows the room perimeter,
 door clearance zones, the alcove partition, and the HVAC restricted area.  The
-L1-Benchwork layer (2) shows Level 1 shelf outlines.  The L2-Benchwork layer
-(4) shows Level 2 shelves.  Use the Layers dialog to toggle each level
-independently.
+L1-Benchwork layer (7) shows Level 1 shelf outlines.  The L2-Benchwork layer
+(14) shows Level 2 shelves.  Layers 1–6 (L1-Main through L1-Service) and 8–13
+(L2-Main through L2-Service) are ready for track placement.  Use the Layers
+dialog to toggle each level or track type independently.
+
+**Adding track-type layers to an existing file:**
+
+If you started placing track before running `generate_layout` with the current
+config, or if you have a hand-built `.xtc`, use `add_track_layers` to inject
+the standard layers without disturbing any existing track:
+
+```
+add_track_layers("hillside_division.xtc")
+```
+
+The tool detects the number of levels from existing `Ln-*` layer names, adds
+any missing layers (skipping ones already present), and backs up the file
+before writing.  Pass `levels=N` to override the auto-detected count.
+
+**Renaming custom layer names to standard names:**
+
+If you placed track using your own layer names and want op-density
+auto-categorization to work without always passing a `layer_categories` dict,
+use `rename_layers` to update the names in-place:
+
+```
+rename_layers("hillside_division.xtc", {
+    "My Yard":    "L1-Staging",
+    "Upper Main": "L2-Main",
+})
+```
+
+Layer IDs and all track object references stay unchanged — only the display
+name in the LAYERS record is updated.  The tool returns `renamed` (applied
+pairs) and `not_found` (names that weren't in the file) so you can verify
+the result.  After renaming, `get_operation_density` will auto-categorize
+using the standard suffix rules with no extra arguments.
 
 ---
 
