@@ -167,15 +167,20 @@ jobs:
             -DCMAKE_C_FLAGS="-Wall -Wextra -Wno-unused-parameter"
       - name: Build (warnings captured, non-fatal)
         run: cmake --build build 2>&1 | tee build/warnings.txt || true
-      - name: Summarise warning count
+      - name: Summarise warnings
         run: |
           COUNT=$(grep -c ': warning:' build/warnings.txt || echo 0)
           echo "Total warnings: $COUNT"
-          grep ': warning:' build/warnings.txt | sed 's|.*/app/||' | sort | uniq -c | sort -rn | head -30
+          echo ""
+          echo "=== By warning flag ==="
+          grep ': warning:' build/warnings.txt | grep -oE '\[-W[^]]+\]' | sort | uniq -c | sort -rn || true
+          echo ""
+          echo "=== By file (top 20) ==="
+          grep ': warning:' build/warnings.txt | grep -oE '^[^:]+' | sed 's|.*/||' | sort | uniq -c | sort -rn | head -20 || true
       - name: Upload warning log
         uses: actions/upload-artifact@v7
         with:
-          name: compiler-warnings-gtk2
+          name: compiler-warnings-gtk2-linux
           path: build/warnings.txt
 
   coverage:
