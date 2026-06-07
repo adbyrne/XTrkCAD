@@ -290,7 +290,7 @@ target_link_libraries(xtrkcad-lib
     ${LIBZIP_LIBRARIES}
     ${ZLIB_LIBRARIES})
 
-if(WIN32)
+if(MSVC)
     target_link_libraries(xtrkcad-lib
         PRIVATE
         FreeImage::FreeImage)
@@ -363,12 +363,14 @@ else()
     COPYDLLTOBUILD(${FREEIMAGE_SHAREDLIB})
     set(ENV{path} "${CMAKE_CURRENT_BINARY_DIR};$ENV{PATH}")
 
-    # Copy program PDB file
-    install(
-        FILES $<TARGET_PDB_FILE:xtrkcad>
-	    DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
-        OPTIONAL
-	)
+    if(MSVC)
+        # Copy program PDB file (MSVC debug info only)
+        install(
+            FILES $<TARGET_PDB_FILE:xtrkcad>
+            DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+            OPTIONAL
+        )
+    endif()
 endif()
 
 # for testing only, should be IF(APPLE) ...
