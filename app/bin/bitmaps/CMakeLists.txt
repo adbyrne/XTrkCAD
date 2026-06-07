@@ -143,7 +143,11 @@ foreach(img3 ${IMG3S})
 			add_custom_command(
 				DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png
 				OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${img3}${pix}.image1
-				COMMAND gdk-pixbuf-csource --stream --name ${NAME}${pix}_image1 ${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png >  ${CMAKE_CURRENT_BINARY_DIR}/${img3}${pix}.image1
+				COMMAND ${CMAKE_COMMAND}
+					-DSYMBOL=${NAME}${pix}_image1
+					-DINPUT=${CMAKE_CURRENT_BINARY_DIR}/png/${img3}${pix}.png
+					-DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}/${img3}${pix}.image1
+					-P ${CMAKE_CURRENT_SOURCE_DIR}/run_gdk_pixbuf.cmake
 			)
 		else()
 			add_custom_command(
@@ -175,7 +179,11 @@ foreach(img1 ${IMG1S})
 			OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${img1}.image1
 			DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${img1}.png
 			COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/
-			COMMAND gdk-pixbuf-csource --stream --name ${NAME}_image1 ${CMAKE_CURRENT_SOURCE_DIR}/${img1}.png >  ${CMAKE_CURRENT_BINARY_DIR}/${img1}.image1
+			COMMAND ${CMAKE_COMMAND}
+				-DSYMBOL=${NAME}_image1
+				-DINPUT=${CMAKE_CURRENT_SOURCE_DIR}/${img1}.png
+				-DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}/${img1}.image1
+				-P ${CMAKE_CURRENT_SOURCE_DIR}/run_gdk_pixbuf.cmake
 		)
 	else()
 		add_custom_command(
