@@ -48,7 +48,11 @@ file(GLOB_RECURSE xtc_custom_msg_files
 # Extract translatable strings from custom message files to one temporary file
 add_custom_target(
 	custmsg
-	COMMAND stripmsg ${xtc_custom_msg_files} > ${CMAKE_CURRENT_BINARY_DIR}/custmsg.h
+	COMMAND ${CMAKE_COMMAND}
+		-DEXE=$<TARGET_FILE:stripmsg>
+		-DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}/custmsg.h
+		-P ${CMAKE_CURRENT_SOURCE_DIR}/run_stripmsg.cmake
+		${xtc_custom_msg_files}
 	DEPENDS stripmsg ${xtc_custom_msg_files}
 )
 

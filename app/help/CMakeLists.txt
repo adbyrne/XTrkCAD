@@ -41,7 +41,7 @@ endif()
 add_custom_command(
        OUTPUT tooltiptext.c
        DEPENDS genhelp tooltiptext.json
-       COMMAND genhelp ${GENHELP_OPTS} ${CMAKE_CURRENT_SOURCE_DIR}/tooltiptext.json ${CMAKE_CURRENT_BINARY_DIR}/tooltiptext.c
+       COMMAND $<TARGET_FILE:genhelp> ${GENHELP_OPTS} ${CMAKE_CURRENT_SOURCE_DIR}/tooltiptext.json ${CMAKE_CURRENT_BINARY_DIR}/tooltiptext.c
 )
 
 add_custom_target(tooltips ALL
@@ -51,7 +51,7 @@ add_custom_target(tooltips ALL
 add_custom_command(
  	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/messages.h ${CMAKE_CURRENT_BINARY_DIR}/messages.but
 	DEPENDS genmessages ${CMAKE_CURRENT_SOURCE_DIR}/messages.in
- 	COMMAND genmessages ${GENMESSAGES_OPTS} ${CMAKE_CURRENT_SOURCE_DIR}/messages.in ${CMAKE_CURRENT_BINARY_DIR}/messages.but
+ 	COMMAND $<TARGET_FILE:genmessages> ${GENMESSAGES_OPTS} ${CMAKE_CURRENT_SOURCE_DIR}/messages.in ${CMAKE_CURRENT_BINARY_DIR}/messages.but
 )
 
 add_custom_target(msgfiles ALL
