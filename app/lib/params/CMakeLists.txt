@@ -37,7 +37,7 @@ foreach(infile ${infiles})
     add_custom_command(
         OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${outfile}"
         DEPENDS "${infile}" mkcarpart 
-        COMMAND mkcarpart "${infile}" "${CMAKE_CURRENT_BINARY_DIR}/${outfile}"
+        COMMAND $<TARGET_FILE:mkcarpart> "${infile}" "${CMAKE_CURRENT_BINARY_DIR}/${outfile}"
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" 
     )
     target_sources(xtpfiles
@@ -77,7 +77,7 @@ foreach(infile ${infiles})
 
     add_custom_command(
         OUTPUT "${outfile}"
-        COMMAND mkstruct "${infile}" "${outfile}"
+        COMMAND $<TARGET_FILE:mkstruct> "${infile}" "${outfile}"
         DEPENDS "${infile}" mkstruct
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" 
     )
