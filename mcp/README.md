@@ -36,7 +36,7 @@ Configure in `~/.claude/settings.json` (Claude Code) or `claude_desktop_config.j
 ## Tests
 
 ```sh
-uv run pytest          # 220 tests
+uv run pytest          # 362 tests
 ```
 
 ## Tools
@@ -50,6 +50,7 @@ uv run pytest          # 220 tests
 | `list_templates` | List available track element templates, optionally filtered by category |
 | `get_template_info` | Detailed metadata for one template by id |
 | `generate_layout` | Generate an initial `.xtc` file from a YAML config |
+| `merge_benchwork` | Replace floor/benchwork layers in an existing `.xtc`, preserving all track objects and NOTEs |
 
 ### Read / analyse
 

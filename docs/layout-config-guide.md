@@ -411,6 +411,7 @@ from Claude or any MCP-compatible client:
 |------|-------------|
 | `load_layout_config` | Validate a config and show a summary before generating |
 | `generate_layout` | Write the `.xtc` file from a validated config |
+| `merge_benchwork` | Replace floor/benchwork layers in an existing layout (preserves tracks and NOTEs) |
 | `write_plan_view` | Top-down SVG plan — one deck or all decks |
 | `write_elevation_view` | Wall-profile SVG showing benchwork heights |
 | `write_benchwork_report` | Text/HTML table of every section with area and bounding box |
@@ -484,6 +485,31 @@ add_track_layers("hillside_division.xtc")
 The tool detects the number of levels from existing `Ln-*` layer names, adds
 any missing layers (skipping ones already present), and backs up the file
 before writing.  Pass `levels=N` to override the auto-detected count.
+
+**Fixing benchwork in a hand-drawn layout:**
+
+If you drew your own room walls and started placing track before generating
+benchwork, or if you later revised the benchwork YAML (e.g. extended a corner
+module), use `merge_benchwork` to replace only the floor/benchwork fill objects
+while leaving all track and NOTE objects intact:
+
+```
+merge_benchwork(
+    "my_layout.xtc",          # existing hand-drawn layout
+    "my_layout_config.yaml",  # updated benchwork config
+)
+```
+
+The existing file must already have `Floor` and `L{n}-Benchwork` layers — use
+`add_track_layers` first if they're missing.  The tool backs up the file
+(to `_v1.xtc`, `_v2.xtc`, etc.) then writes the merged output in-place.  Room
+wall DRAWs (Q3 type) are also preserved.
+
+Pass a third argument to write to a different path instead of replacing in-place:
+
+```
+merge_benchwork("my_layout.xtc", "my_layout_config.yaml", "my_layout_fixed.xtc")
+```
 
 **Renaming custom layer names to standard names:**
 
