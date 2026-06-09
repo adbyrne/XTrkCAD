@@ -1,0 +1,25 @@
+# hillside_stations.yaml — Hillside Division tutorial station reference
+# Companion to hillside_division.yaml; used in report/export tutorial examples.
+
+layout: hillside_division
+mp_scale: 1.0   # 1 MP = 1 prototype foot
+
+stations:
+  - id: SOUTH
+    name: South Junction
+    sequence: 0
+    types: [station]
+    switchback: false
+
+  - id: FREIGHT
+    name: Freight House
+    sequence: 1
+    types: [industry]
+    switchback: false
+    within_limits_of: SOUTH
+
+  - id: NORTH
+    name: North End
+    sequence: 2
+    types: [station]
+    switchback: false

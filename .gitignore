@@ -1,8 +1,31 @@
+# CMake out-of-source build
+build/
+build-*/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+_CPack_Packages/
+
+# Generated files
+*.image1
+*.image3
+*.mo
+*.xpm
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
 __pycache__/
 *.pyc
 *.pyo
-.pytest_cache/
-*.egg-info/
-dist/
-build/
 .venv/
+*.egg-info/
