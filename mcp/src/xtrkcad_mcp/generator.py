@@ -12,7 +12,7 @@ from xtrkcad_mcp.config import (
     FloorRoom, GridPlacement, LayoutConfig,
 )
 from xtrkcad_mcp.models import SCALE_RATIOS
-from xtrkcad_mcp.parser import parse_file
+from xtrkcad_mcp.parser import TRACK_KINDS, parse_file
 from xtrkcad_mcp.templates import TemplateInfo, TemplateLibrary, load_library
 
 HO_RATIO = SCALE_RATIOS["HO"]  # 87.1
@@ -237,37 +237,46 @@ def _filpoly_draw(
     vertices: list[tuple[float, float]],
     layer: int, color: int, track_id: int,
     elevation_z: float = 0.0,
+    param_version: int = 10,
 ) -> tuple[list[str], int]:
     """Emit one DRAW+SEG_FILPOLY for an arbitrary polygon.  One ID consumed.
 
-    elevation_z goes in the DRAW header (field before angle); per-vertex Z is
-    always 0 — a non-zero per-vertex Z is read by XTrkCAD as pt_type and causes
-    arc rendering instead of straight-line polygon corners.
+    elevation_z goes in the DRAW header (v10 only; v12 uses a literal 0).
+    Per-vertex Z is always 0 — a non-zero per-vertex Z is read by XTrkCAD as
+    pt_type and causes arc rendering instead of straight-line polygon corners.
+    param_version >= 12 uses the XTrkCAD 5.x file format (END$SEGS terminator).
     """
-    lines = [
-        f"DRAW {track_id} {layer} 0 0 0 0.000000 0.000000 {elevation_z:.6f} 0.000000",
-        f"\tF4 {color} 0.000000 {len(vertices)} 0 ",
-    ]
+    if param_version >= 12:
+        header = f"DRAW {track_id} {layer} 0 0 0 0.000000 0.000000 0 0.000000"
+        terminator = "\tEND$SEGS"
+    else:
+        header = f"DRAW {track_id} {layer} 0 0 0 0.000000 0.000000 {elevation_z:.6f} 0.000000"
+        terminator = "END"
+    lines = [header, f"\tF4 {color} 0.000000 {len(vertices)} 0 "]
     for x, y in vertices:
         lines.append(f"\t\t{x:.6f} {y:.6f} 0")
-    lines.append("END")
+    lines.append(terminator)
     return lines, track_id + 1
 
 
 def _benchwork_section_draw(
-    bw: Benchwork, track_id: int,
+    bw: Benchwork, track_id: int, param_version: int = 10,
 ) -> tuple[list[str], int]:
     """Emit one filled polygon for a benchwork section on its benchwork layer."""
-    return _filpoly_draw(bw.vertices, _benchwork_layer(bw.level), _benchwork_color(bw.level), track_id, bw.elevation_in)
+    return _filpoly_draw(
+        bw.vertices, _benchwork_layer(bw.level), _benchwork_color(bw.level),
+        track_id, bw.elevation_in, param_version,
+    )
 
 
 def _write_benchwork_sections(
     sections: list[Benchwork],
     lines: list[str],
     track_id: int,
+    param_version: int = 10,
 ) -> int:
     for bw in sections:
-        new_lines, track_id = _benchwork_section_draw(bw, track_id)
+        new_lines, track_id = _benchwork_section_draw(bw, track_id, param_version)
         lines += new_lines
     return track_id
 
@@ -277,7 +286,7 @@ def _write_benchwork_sections(
 # ---------------------------------------------------------------------------
 
 def _floor_plan_restricted_draw(
-    restricted: FloorRestricted, track_id: int,
+    restricted: FloorRestricted, track_id: int, param_version: int = 10,
 ) -> tuple[list[str], int]:
     """Emit light-gray polygon for a restricted zone on layer 0."""
     if restricted.vertices:
@@ -286,7 +295,7 @@ def _floor_plan_restricted_draw(
         x0, y0 = restricted.x, restricted.y
         x1, y1 = restricted.x + restricted.width, restricted.y + restricted.depth
         vertices = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
-    return _filpoly_draw(vertices, 0, _RESTRICTION_COLOR, track_id)
+    return _filpoly_draw(vertices, 0, _RESTRICTION_COLOR, track_id, param_version=param_version)
 
 
 def _partition_door_openings(
@@ -334,6 +343,7 @@ def _floor_plan_partition_draw(
     partition: FloorPartition,
     openings: list[tuple[float, float]],
     track_id: int,
+    param_version: int = 10,
 ) -> tuple[list[str], int]:
     """Emit filled medium-gray polygons for an interior partition, skipping door openings."""
     t = partition.thickness
@@ -348,12 +358,12 @@ def _floor_plan_partition_draw(
         for gap_start, gap_end in sorted(openings):
             if cursor < gap_start:
                 verts = [(p_x, cursor), (p_x + t, cursor), (p_x + t, gap_start), (p_x, gap_start)]
-                new_lines, track_id = _filpoly_draw(verts, 0, _PARTITION_COLOR, track_id)
+                new_lines, track_id = _filpoly_draw(verts, 0, _PARTITION_COLOR, track_id, param_version=param_version)
                 all_lines += new_lines
             cursor = max(cursor, gap_end)
         if cursor < p_end:
             verts = [(p_x, cursor), (p_x + t, cursor), (p_x + t, p_end), (p_x, p_end)]
-            new_lines, track_id = _filpoly_draw(verts, 0, _PARTITION_COLOR, track_id)
+            new_lines, track_id = _filpoly_draw(verts, 0, _PARTITION_COLOR, track_id, param_version=param_version)
             all_lines += new_lines
     else:
         p_y = min(partition.y0, partition.y1)
@@ -363,12 +373,12 @@ def _floor_plan_partition_draw(
         for gap_start, gap_end in sorted(openings):
             if cursor < gap_start:
                 verts = [(cursor, p_y), (gap_start, p_y), (gap_start, p_y + t), (cursor, p_y + t)]
-                new_lines, track_id = _filpoly_draw(verts, 0, _PARTITION_COLOR, track_id)
+                new_lines, track_id = _filpoly_draw(verts, 0, _PARTITION_COLOR, track_id, param_version=param_version)
                 all_lines += new_lines
             cursor = max(cursor, gap_end)
         if cursor < p_end:
             verts = [(cursor, p_y), (p_end, p_y), (p_end, p_y + t), (cursor, p_y + t)]
-            new_lines, track_id = _filpoly_draw(verts, 0, _PARTITION_COLOR, track_id)
+            new_lines, track_id = _filpoly_draw(verts, 0, _PARTITION_COLOR, track_id, param_version=param_version)
             all_lines += new_lines
 
     return all_lines, track_id
@@ -378,12 +388,9 @@ def _floor_plan_door_clearance_draw(
     door: FloorDoor,
     room: FloorRoom,
     track_id: int,
+    param_version: int = 10,
 ) -> tuple[list[str], int]:
-    """Emit light-gray polygon for door swing clearance on layer 0.
-
-    Renders for inward/both/outward swings; skipped when swing='none'.
-    Outward clearance extends outside the room — rendered as-is.
-    """
+    """Emit light-gray polygon for door swing clearance on layer 0."""
     if door.swing == "none":
         return [], track_id
 
@@ -409,31 +416,32 @@ def _floor_plan_door_clearance_draw(
             y0, y1 = wall_y, wall_y + c
         vertices = [(abs_x0, y0), (abs_x1, y0), (abs_x1, y1), (abs_x0, y1)]
 
-    return _filpoly_draw(vertices, 0, _RESTRICTION_COLOR, track_id)
+    return _filpoly_draw(vertices, 0, _RESTRICTION_COLOR, track_id, param_version=param_version)
 
 
 def _write_floor_plan(
     fp: FloorPlan,
     lines: list[str],
     track_id: int,
+    param_version: int = 10,
 ) -> int:
     """Append floor plan features as layer 0 fills: restricted zones, partitions, door clearances."""
     rooms_by_name = {r.name: r for r in fp.rooms}
 
     for restricted in fp.restricted:
-        new_lines, track_id = _floor_plan_restricted_draw(restricted, track_id)
+        new_lines, track_id = _floor_plan_restricted_draw(restricted, track_id, param_version)
         lines += new_lines
 
     for partition in fp.partitions:
         openings = _partition_door_openings(partition, fp.doors, rooms_by_name)
-        new_lines, track_id = _floor_plan_partition_draw(partition, openings, track_id)
+        new_lines, track_id = _floor_plan_partition_draw(partition, openings, track_id, param_version)
         lines += new_lines
 
     for door in fp.doors:
         room = rooms_by_name.get(door.room)
         if room is None:
             continue
-        new_lines, track_id = _floor_plan_door_clearance_draw(door, room, track_id)
+        new_lines, track_id = _floor_plan_door_clearance_draw(door, room, track_id, param_version)
         lines += new_lines
 
     return track_id
@@ -542,3 +550,274 @@ def default_output_path(config: LayoutConfig, config_path: Path) -> Path:
     """Derive a default output .xtc path from the config name and location."""
     stem = config.name.lower().replace(" ", "_")
     return config_path.parent / f"{stem}.xtc"
+
+
+# ---------------------------------------------------------------------------
+# Merge benchwork into an existing layout
+# ---------------------------------------------------------------------------
+
+# Block terminators for both v10 (END) and v12 (END$SEGS) formats.
+_BLOCK_END = frozenset({"END", "END$SEGS"})
+# Keywords that start multi-line or single-line object blocks.
+_BLOCK_KEYWORDS = TRACK_KINDS | {"DRAW", "TABLEEDGE", "NOTE"}
+# Keywords that appear in the file header (before any object blocks).
+_HEADER_KEYWORDS = frozenset({
+    "VERSION", "TITLE1", "TITLE2", "SCALE", "ROOMSIZE", "MAPSCALE",
+    "LAYERS", "NOTE MAIN",
+})
+import re as _re
+_BENCHWORK_LAYER_RE = _re.compile(r"^L\d+-Benchwork$")
+
+
+def _parse_merge_blocks(
+    path: Path,
+) -> tuple[list[str], list[tuple[str, int, list[str], str]], int, int]:
+    """Parse a .xtc file into header lines and object blocks for merging.
+
+    Returns:
+        header_lines   — VERSION, TITLE*, SCALE, ROOMSIZE, LAYERS, blanks, comment
+        blocks         — list of (keyword, layer, raw_lines, sub_type)
+                           raw_lines includes the header line, all sub-lines, and
+                           the END / END$SEGS terminator (single-line records have
+                           just the one line; END$TRACKS is not included)
+                           sub_type: 'F4' or 'Q3' for DRAW, '' otherwise
+        max_id         — highest integer object ID seen in the file
+        param_version  — integer from VERSION record (e.g. 10 or 12)
+    """
+    header_lines: list[str] = []
+    blocks: list[tuple[str, int, list[str], str]] = []
+    max_id = 0
+    param_version = 10
+    in_header = True
+
+    cur_lines: list[str] | None = None
+    cur_kw = ""
+    cur_layer = -1
+    cur_sub = ""
+
+    with path.open(encoding="utf-8", errors="replace") as fh:
+        for raw in fh:
+            line = raw.rstrip("\n")
+            stripped = line.strip()
+
+            # --- inside a multi-line block ---
+            if cur_lines is not None:
+                # Capture sub_type from first indented sub-line
+                if len(cur_lines) == 1 and line.startswith("\t"):
+                    tok = stripped.split(None, 1)
+                    cur_sub = tok[0] if tok else ""
+                cur_lines.append(line)
+                if stripped in _BLOCK_END:
+                    blocks.append((cur_kw, cur_layer, cur_lines, cur_sub))
+                    cur_lines = None
+                    cur_kw = ""
+                    cur_layer = -1
+                    cur_sub = ""
+                continue
+
+            # File-end marker (v12) — not a block
+            if stripped == "END$TRACKS":
+                continue
+
+            parts = stripped.split() if stripped else []
+
+            if not parts:
+                if in_header:
+                    header_lines.append(line)
+                continue
+
+            kw = parts[0]
+
+            # Header-only tokens (comment lines start with #)
+            if kw.startswith("#") or kw in _HEADER_KEYWORDS or line.startswith("NOTE MAIN"):
+                if in_header:
+                    header_lines.append(line)
+                    if kw == "VERSION" and len(parts) >= 2:
+                        try:
+                            param_version = int(parts[1])
+                        except ValueError:
+                            pass
+                continue
+
+            if kw not in _BLOCK_KEYWORDS:
+                if in_header:
+                    header_lines.append(line)
+                continue
+
+            in_header = False
+
+            # Parse obj_id and layer
+            obj_id = -1
+            layer = -1
+            if len(parts) >= 2:
+                try:
+                    obj_id = int(parts[1])
+                    max_id = max(max_id, obj_id)
+                except ValueError:
+                    pass
+            if kw != "NOTE" and len(parts) >= 3:
+                try:
+                    layer = int(parts[2])
+                except ValueError:
+                    pass
+
+            if kw == "TABLEEDGE":
+                blocks.append((kw, layer, [line], ""))
+            elif kw == "NOTE" and param_version >= 12:
+                # Inline note (v12) — single line, no END
+                blocks.append((kw, layer, [line], ""))
+            else:
+                # Multi-line block — collect until END / END$SEGS
+                cur_kw = kw
+                cur_layer = layer
+                cur_lines = [line]
+                cur_sub = ""
+
+    # Flush any block that ended at EOF without a terminator (incomplete inline)
+    if cur_lines is not None:
+        blocks.append((cur_kw, cur_layer, cur_lines, cur_sub))
+
+    return header_lines, blocks, max_id, param_version
+
+
+@dataclass
+class MergeResult:
+    output_path: Path
+    backup_path: Path | None
+    kept_tracks: int        # number of TRACK_KINDS blocks preserved
+    kept_notes: int         # number of NOTE blocks preserved
+    kept_walls: int         # number of Q3-type DRAW blocks preserved
+    replaced_draws: int     # number of F4 DRAW blocks replaced
+    new_draw_count: int     # number of new floor/benchwork DRAWs generated
+    warnings: list[str]
+
+
+def merge_benchwork_into(
+    existing_path: Path,
+    config: LayoutConfig,
+    output_path: Path,
+) -> MergeResult:
+    """Replace floor/benchwork DRAW objects in an existing .xtc with freshly
+    generated content from a LayoutConfig.
+
+    Rules:
+    - Track (STRAIGHT, CURVE, TURNOUT, …) and NOTE objects are always preserved.
+    - DRAW objects with Q3 sub-records (room-wall lines, v12 format) are preserved.
+    - DRAW objects with F4 sub-records in layer 0 ('Floor') or any 'L{n}-Benchwork'
+      layer are dropped and replaced with content generated from *config*.
+    - TABLEEDGE records (v10-format room walls) are always dropped; the v12 Q3 walls
+      already in the file take their place.
+    - The existing file's layer names must include 'Floor' or at least one
+      'L{n}-Benchwork' layer — raises ValueError otherwise.
+
+    param_version is detected from the existing file's VERSION record and is used
+    to write new DRAW blocks in the matching format (v10: END, v12: END$SEGS).
+    """
+    header_lines, blocks, max_id, param_version = _parse_merge_blocks(existing_path)
+
+    # --- Identify floor/benchwork layer IDs from existing LAYERS lines ---
+    layer_names: dict[int, str] = {}
+    for hl in header_lines:
+        s = hl.strip()
+        if s.startswith("LAYERS ") and "CURRENT" not in s:
+            parts = s.split()
+            try:
+                idx = int(parts[1])
+            except (IndexError, ValueError):
+                continue
+            q2 = s.rfind('"')
+            q1 = s.rfind('"', 0, q2)
+            if q2 > 0 and q1 >= 0:
+                layer_names[idx] = s[q1 + 1:q2]
+
+    floor_layer_ids: set[int] = {
+        idx for idx, name in layer_names.items()
+        if name == "Floor" or _BENCHWORK_LAYER_RE.match(name)
+    }
+
+    if not floor_layer_ids:
+        raise ValueError(
+            "Existing file has no 'Floor' or 'L{n}-Benchwork' layers. "
+            "merge_benchwork requires a file originally generated by this tool "
+            "(layers must follow the Floor / L{n}-Benchwork naming scheme)."
+        )
+
+    # --- Classify blocks ---
+    kept_tracks = kept_notes = kept_walls = replaced = 0
+    kept: list[tuple[str, int, list[str], str]] = []
+
+    for kw, layer, raw_lines, sub_type in blocks:
+        if kw in TRACK_KINDS:
+            kept.append((kw, layer, raw_lines, sub_type))
+            kept_tracks += 1
+        elif kw == "NOTE":
+            kept.append((kw, layer, raw_lines, sub_type))
+            kept_notes += 1
+        elif kw == "TABLEEDGE":
+            replaced += 1  # v10 walls always dropped
+        elif kw == "DRAW":
+            if sub_type == "Q3":
+                kept.append((kw, layer, raw_lines, sub_type))
+                kept_walls += 1
+            elif layer in floor_layer_ids:
+                replaced += 1
+            else:
+                kept.append((kw, layer, raw_lines, sub_type))
+        else:
+            kept.append((kw, layer, raw_lines, sub_type))
+
+    # --- Generate new floor/benchwork content ---
+    new_lines: list[str] = []
+    new_id = max_id + 1
+
+    if config.floor_plan is not None:
+        new_id = _write_floor_plan(config.floor_plan, new_lines, new_id, param_version)
+
+    if config.benchwork_sections:
+        new_id = _write_benchwork_sections(config.benchwork_sections, new_lines, new_id, param_version)
+
+    new_draw_count = new_id - max_id - 1
+
+    # --- Build LAYERS header from config (replaces existing LAYERS lines) ---
+    new_layers = _layers_header(config.levels, config.track_types, config.distinct_track_colors)
+    clean_header = [hl for hl in header_lines if not hl.strip().startswith("LAYERS")]
+
+    # --- Assemble output ---
+    # Order: existing header + new LAYERS + Q3 walls + new floor/benchwork + track/notes
+    output: list[str] = list(clean_header)
+    output.extend(new_layers)
+    output.append("")
+
+    # Q3 wall DRAWs come first (matching original file order)
+    for kw, layer, raw_lines, sub_type in kept:
+        if sub_type == "Q3":
+            output.extend(raw_lines)
+    output.append("")
+
+    # New floor plan fills and benchwork
+    output.extend(new_lines)
+    output.append("")
+
+    # Remaining kept blocks (track, notes, non-benchwork DRAWs)
+    for kw, layer, raw_lines, sub_type in kept:
+        if sub_type != "Q3":
+            output.extend(raw_lines)
+
+    if param_version >= 12:
+        output.append("END$TRACKS")
+
+    backup = _version_backup(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(output) + "\n")
+
+    return MergeResult(
+        output_path=output_path,
+        backup_path=backup,
+        kept_tracks=kept_tracks,
+        kept_notes=kept_notes,
+        kept_walls=kept_walls,
+        replaced_draws=replaced,
+        new_draw_count=new_draw_count,
+        warnings=[],
+    )

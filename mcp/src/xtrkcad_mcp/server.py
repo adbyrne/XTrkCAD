@@ -277,6 +277,63 @@ def generate_layout(config_path: str, output_path: str = "") -> dict:
     }
 
 
+@mcp.tool()
+def merge_benchwork(
+    layout_path: str,
+    config_path: str,
+    output_path: str = "",
+) -> dict:
+    """Replace floor/benchwork layers in an existing layout with fresh content
+    from a YAML config, preserving all track objects and NOTE annotations.
+
+    Use this to fix incorrectly-drawn benchwork in a hand-drawn layout without
+    losing any track work. The existing file must already have Floor and
+    L{n}-Benchwork layers matching the generator's naming scheme — the tool
+    raises an error if those layers are missing.
+
+    Any existing file at output_path is versioned (copied to _v1.xtc, etc.)
+    before overwriting. If output_path is omitted the existing file is
+    replaced in-place (also versioned).
+
+    Args:
+        layout_path: Path to the existing .xtc file with track objects.
+        config_path: Path to the YAML layout config file.
+        output_path: Destination path. Defaults to layout_path (in-place).
+
+    Returns:
+        Dict with output_path, backup_path, kept_tracks, kept_notes,
+        kept_walls, replaced_draws, new_draw_count, and warnings.
+    """
+    from xtrkcad_mcp.generator import MergeResult, merge_benchwork_into
+
+    cfg_result = load_config(config_path)
+    if not cfg_result.ready:
+        return {
+            "ready": False,
+            "missing": [{"field": f, "question": q} for f, q in cfg_result.missing],
+            "warnings": cfg_result.warnings,
+            "summary": "Config incomplete — answer the missing fields and try again.",
+        }
+
+    p = _resolve_plan(layout_path)
+    out = Path(output_path).expanduser() if output_path else p
+    try:
+        result = merge_benchwork_into(p, cfg_result.config, out)
+    except ValueError as e:
+        return {"error": str(e)}
+
+    return {
+        "output_path": str(result.output_path),
+        "backup_path": str(result.backup_path) if result.backup_path else None,
+        "kept_tracks": result.kept_tracks,
+        "kept_notes": result.kept_notes,
+        "kept_walls": result.kept_walls,
+        "replaced_draws": result.replaced_draws,
+        "new_draw_count": result.new_draw_count,
+        "warnings": result.warnings,
+    }
+
+
 # ---------------------------------------------------------------------------
 # Tools — benchwork plan
 # ---------------------------------------------------------------------------

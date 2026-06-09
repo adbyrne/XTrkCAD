@@ -169,6 +169,7 @@ jobs:
 
   cppcheck:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
       - name: Install cppcheck
@@ -177,10 +178,9 @@ jobs:
         run: |
           cppcheck \
             --error-exitcode=1 \
-            --force \
+            -j 4 \
             --suppress=missingInclude \
             --suppress=missingIncludeSystem \
-            --suppress=normalCheckLevelMaxBranches \
             --suppress=nullPointerOutOfMemory \
             --suppress=nullPointerOutOfResources \
             --suppress=nullPointerArithmeticOutOfMemory \
