@@ -13,10 +13,14 @@ from xtrkcad_mcp.models import SCALE_RATIOS, cars_per_real_ft, max_to_main_label
 from xtrkcad_mcp.svg_views import generate_elevation_view, generate_plan_view
 from xtrkcad_mcp.parser import TRACK_KINDS, parse_file
 from xtrkcad_mcp.stations import (
+    build_layout_export,
     compute_capacities,
     compute_distances,
     extract_stations,
+    list_annotated_segments,
+    load_stations_config,
     model_in_to_proto_ft,
+    validate_layout_annotations,
 )
 
 logging.basicConfig(level=os.environ.get("XTRKCAD_LOG_LEVEL", "INFO"))
@@ -2638,6 +2642,130 @@ def list_plans_resource() -> str:
     if not files:
         return f"No .xtc or .xtce files found in {_PLANS_DIR}"
     return "\n".join(files)
+
+
+# ---------------------------------------------------------------------------
+# Annotation and export tools
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool()
+def list_labeled_segments(path: str) -> list[dict]:
+    """List all annotated track segments found in the layout.
+
+    Scans every text NOTE for STATION:, SIDING:, STORAGE:, INDUSTRY:, and
+    REFERENCE: prefixes.  Each match is snapped to the nearest track endpoint
+    and returned with annotation type, source, layer info, and snap distance.
+
+    Use this to audit what is labelled before running validate_layout or
+    export_layout_data.
+
+    Args:
+        path: Path to the .xtc layout file.
+    """
+    p = _resolve_plan(path)
+    layout = parse_file(p)
+    segments = list_annotated_segments(layout)
+    return [
+        {
+            "annotation_id": s.annotation_id,
+            "annotation_type": s.annotation_type,
+            "annotation_source": s.annotation_source,
+            "note_id": s.note_id,
+            "note_text": s.note_text,
+            "nearest_track_id": s.nearest_track_id,
+            "layer": s.nearest_track_layer,
+            "layer_name": s.nearest_track_layer_name,
+            "snap_dist_in": round(s.snap_dist, 4),
+        }
+        for s in segments
+    ]
+
+
+@mcp.tool()
+def validate_layout(path: str, stations_yaml: str) -> dict:
+    """Check layout NOTE annotations against the stations config.
+
+    Reports errors and warnings for:
+      - Missing REFERENCE: MP_ZERO note
+      - Station entries without STATION: notes (milepost will be null)
+      - Station entries without SIDING: notes (siding capacity will be null)
+      - Industry entries without INDUSTRY: or SIDING: notes
+      - Notes placed far from any track endpoint
+
+    Args:
+        path: Path to the .xtc layout file.
+        stations_yaml: Path to the stations.yaml config file.
+    """
+    p = _resolve_plan(path)
+    sy = Path(stations_yaml)
+    layout = parse_file(p)
+    config = load_stations_config(sy)
+    issues = validate_layout_annotations(layout, config)
+    errors = [i for i in issues if i.severity == "error"]
+    warnings = [i for i in issues if i.severity == "warning"]
+    return {
+        "layout": str(p),
+        "stations_yaml": str(sy),
+        "error_count": len(errors),
+        "warning_count": len(warnings),
+        "issues": [
+            {
+                "severity": i.severity,
+                "code": i.code,
+                "location_id": i.location_id,
+                "message": i.message,
+            }
+            for i in issues
+        ],
+    }
+
+
+@mcp.tool()
+def export_layout_data(
+    path: str,
+    stations_yaml: str,
+    output_path: str = "",
+) -> dict:
+    """Export layout measurement data to layout_data.json for RR_server.
+
+    Produces a JSON file with station mileposts, siding lengths, industry spur
+    data, and inter-station segment lengths.  Fields that cannot be computed
+    (missing annotations, unreachable track) are null; reasons are in warnings[].
+
+    Milepost convention:
+      Distances are measured from the REFERENCE: MP_ZERO note along the track
+      graph.  With mp_scale=1.0 (default), 1 milepost unit = 1 prototype foot.
+
+    Args:
+        path: Path to the .xtc layout file.
+        stations_yaml: Path to the stations.yaml config file.
+        output_path: Where to write layout_data.json.  Defaults to
+                     layout_data.json alongside the .xtc file.
+    """
+    import json
+
+    p = _resolve_plan(path)
+    sy = Path(stations_yaml)
+    layout = parse_file(p)
+    config = load_stations_config(sy)
+    data = build_layout_export(layout, config)
+
+    if output_path:
+        out = Path(output_path)
+    else:
+        out = p.with_name("layout_data.json")
+
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+    return {
+        "output": str(out),
+        "stations": len(data["stations"]),
+        "industries": len(data["industries"]),
+        "segments": len(data["segments"]),
+        "warnings": data["warnings"],
+    }
 
 
 # ---------------------------------------------------------------------------
