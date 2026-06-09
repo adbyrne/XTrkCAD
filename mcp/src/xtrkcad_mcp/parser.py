@@ -111,7 +111,7 @@ def parse_file(path: str | Path) -> Layout:
                 if not parts:
                     continue
                 tag = parts[0]
-                if tag == "T" and len(parts) >= 5:
+                if tag in ("T", "T4") and len(parts) >= 5:
                     try:
                         connected_id = int(parts[1])
                         x, y, angle = float(parts[2]), float(parts[3]), float(parts[4])
@@ -120,7 +120,7 @@ def parse_file(path: str | Path) -> Layout:
                         )
                     except (ValueError, IndexError):
                         pass
-                elif tag == "E" and len(parts) >= 4:
+                elif tag in ("E", "E4") and len(parts) >= 4:
                     try:
                         x, y, angle = float(parts[1]), float(parts[2]), float(parts[3])
                         current_track.endpoints.append(
