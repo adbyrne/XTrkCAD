@@ -1048,11 +1048,15 @@ class ValidationIssue:
 
 def validate_layout_annotations(
     layout: Layout,
-    stations_config: StationsConfig,
+    stations_config: StationsConfig | None = None,
 ) -> list[ValidationIssue]:
-    """Check layout NOTE annotations against the stations config.
+    """Check layout NOTE annotations and track layer placement.
 
-    Checks:
+    Layer checks (always run, no stations_config needed):
+      - ISOLATED_MAIN_TRACK: main-layer track with no main-layer neighbours
+      - LAYER_BRIDGE_TRACK: main-layer track bridging to a siding/storage layer
+
+    Annotation checks (only run when stations_config is provided):
       - REFERENCE: MP_ZERO note is present
       - Every station entry has a STATION: note (for milepost)
       - Every station entry has a SIDING: note (for siding capacity)
@@ -1066,69 +1070,71 @@ def validate_layout_annotations(
     for seg in segments:
         by_type.setdefault(seg.annotation_type, set()).add(seg.annotation_id)
 
-    # REFERENCE: MP_ZERO must exist for milepost calculations
-    refs = by_type.get("reference", set())
-    if "MP_ZERO" not in refs:
-        issues.append(ValidationIssue(
-            severity="error",
-            code="MISSING_REFERENCE",
-            location_id=None,
-            message="No 'REFERENCE: MP_ZERO' note found — milepost calculations will be null",
-        ))
-
-    station_ids = by_type.get("station", set())
-    siding_ids = by_type.get("siding", set()) | by_type.get("industry", set())
-
-    for entry in stations_config.stations:
-        is_station = any(t in entry.types for t in ("station", "yard", "staging"))
-        is_industry = "industry" in entry.types
-
-        if is_station:
-            if entry.id not in station_ids:
-                issues.append(ValidationIssue(
-                    severity="warning",
-                    code="MISSING_STATION_NOTE",
-                    location_id=entry.id,
-                    message=(
-                        f"No 'STATION: {entry.id}' note — "
-                        f"milepost for '{entry.name}' will be null"
-                    ),
-                ))
-            if entry.id not in siding_ids:
-                issues.append(ValidationIssue(
-                    severity="warning",
-                    code="MISSING_SIDING_NOTE",
-                    location_id=entry.id,
-                    message=(
-                        f"No 'SIDING: {entry.id}' note — "
-                        f"siding capacity for '{entry.name}' will be null"
-                    ),
-                ))
-
-        if is_industry:
-            if entry.id not in siding_ids:
-                issues.append(ValidationIssue(
-                    severity="error",
-                    code="MISSING_INDUSTRY_NOTE",
-                    location_id=entry.id,
-                    message=(
-                        f"No 'INDUSTRY: {entry.id}' or 'SIDING: {entry.id}' note — "
-                        f"spur length for '{entry.name}' will be null"
-                    ),
-                ))
-
-    # Warn if any NOTE is far from its nearest track
-    for seg in segments:
-        if seg.snap_dist > _SNAP_WARN_THRESHOLD:
+    if stations_config is not None:
+        # REFERENCE: MP_ZERO must exist for milepost calculations
+        refs = by_type.get("reference", set())
+        if "MP_ZERO" not in refs:
             issues.append(ValidationIssue(
-                severity="warning",
-                code="FAR_SNAP",
-                location_id=seg.annotation_id,
-                message=(
-                    f"Note '{seg.note_text}' is {seg.snap_dist:.1f} model in from "
-                    f"nearest track (threshold {_SNAP_WARN_THRESHOLD} in)"
-                ),
+                severity="error",
+                code="MISSING_REFERENCE",
+                location_id=None,
+                message="No 'REFERENCE: MP_ZERO' note found — milepost calculations will be null",
             ))
+
+    if stations_config is not None:
+        station_ids = by_type.get("station", set())
+        siding_ids = by_type.get("siding", set()) | by_type.get("industry", set())
+
+        for entry in stations_config.stations:
+            is_station = any(t in entry.types for t in ("station", "yard", "staging"))
+            is_industry = "industry" in entry.types
+
+            if is_station:
+                if entry.id not in station_ids:
+                    issues.append(ValidationIssue(
+                        severity="warning",
+                        code="MISSING_STATION_NOTE",
+                        location_id=entry.id,
+                        message=(
+                            f"No 'STATION: {entry.id}' note — "
+                            f"milepost for '{entry.name}' will be null"
+                        ),
+                    ))
+                if entry.id not in siding_ids:
+                    issues.append(ValidationIssue(
+                        severity="warning",
+                        code="MISSING_SIDING_NOTE",
+                        location_id=entry.id,
+                        message=(
+                            f"No 'SIDING: {entry.id}' note — "
+                            f"siding capacity for '{entry.name}' will be null"
+                        ),
+                    ))
+
+            if is_industry:
+                if entry.id not in siding_ids:
+                    issues.append(ValidationIssue(
+                        severity="error",
+                        code="MISSING_INDUSTRY_NOTE",
+                        location_id=entry.id,
+                        message=(
+                            f"No 'INDUSTRY: {entry.id}' or 'SIDING: {entry.id}' note — "
+                            f"spur length for '{entry.name}' will be null"
+                        ),
+                    ))
+
+        # Warn if any NOTE is far from its nearest track
+        for seg in segments:
+            if seg.snap_dist > _SNAP_WARN_THRESHOLD:
+                issues.append(ValidationIssue(
+                    severity="warning",
+                    code="FAR_SNAP",
+                    location_id=seg.annotation_id,
+                    message=(
+                        f"Note '{seg.note_text}' is {seg.snap_dist:.1f} model in from "
+                        f"nearest track (threshold {_SNAP_WARN_THRESHOLD} in)"
+                    ),
+                ))
 
     track_by_id = {t.id: t for t in layout.tracks}
     main_layer_idxs: set[int] = set()

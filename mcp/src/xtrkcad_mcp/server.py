@@ -1422,24 +1422,31 @@ def write_layout_report(
     path: str,
     output_path: str,
     layer_categories: dict | None = None,
+    stations_yaml: str | None = None,
     format: str = "txt",
 ) -> str:
     """Write a full layout summary report.
 
     Covers layout header, track counts by type, track lengths per layer,
-    curve radius analysis, and (if layer_categories is given) Operation Density.
+    curve radius analysis, (if layer_categories given) Operation Density, and
+    a Validation Warnings section with ISOLATED_MAIN_TRACK / LAYER_BRIDGE_TRACK
+    issues plus (if stations_yaml given) annotation completeness checks.
 
     Args:
         path: Path to the source .xtc or .xtce file.
         output_path: Destination path for the report.
         layer_categories: Optional layer→category mapping (same as
             get_operation_density). Required for the OD section.
+        stations_yaml: Optional path to stations.yaml. When provided the
+            validation section also checks for missing STATION:/SIDING: notes.
         format: Output format — "txt" (default), "md", or "html".
 
     Returns:
         Confirmation message with the absolute path written.
     """
     layout = parse_file(_resolve_plan(path))
+    _val_config = load_stations_config(stations_yaml) if stations_yaml else None
+    validation_issues = validate_layout_annotations(layout, _val_config)
     scale = layout.scale
     cpf = cars_per_real_ft(scale)
     total_ft = layout.total_length_real_feet()
@@ -1544,6 +1551,22 @@ def write_layout_report(
             f"  Est. trains : {ops['estimated_trains']} (@ {ops['assumed_train_length_cars']} cars)",
         ]
 
+    # Validation warnings section (always appended)
+    lines += ["", "VALIDATION WARNINGS"]
+    if not validation_issues:
+        lines.append("  No issues found.")
+    else:
+        errors   = [i for i in validation_issues if i.severity == "error"]
+        warnings = [i for i in validation_issues if i.severity == "warning"]
+        if errors:
+            lines.append(f"  ERRORS ({len(errors)}):")
+            for issue in errors:
+                lines.append(f"    [{issue.code}] {issue.message}")
+        if warnings:
+            lines.append(f"  WARNINGS ({len(warnings)}):")
+            for issue in warnings:
+                lines.append(f"    [{issue.code}] {issue.message}")
+
     out = Path(output_path).expanduser()
     format = _resolve_format(output_path, format)
     if format == "txt":
@@ -1579,6 +1602,11 @@ def write_layout_report(
                 "total_cars": int(total_ft * cpf),
                 "curves": curve_data,
                 "operation_density": od_data,
+                "validation_issues": [
+                    {"severity": i.severity, "code": i.code,
+                     "location_id": i.location_id, "message": i.message}
+                    for i in validation_issues
+                ],
             }, indent=2), encoding="utf-8")
         elif format == "md":
             layer_rows = [[str(d["layer"]), d["name"], f"{d['feet']:.1f}",
@@ -1614,6 +1642,13 @@ def write_layout_report(
                        f"| Cars moved / session | **{od_data['cars_moved_per_session']}** |",
                        f"| Max-to-main | **{od_data['max_to_main_pct']:.1f}%** → "
                        f"{od_data['max_to_main_label']} |"]
+            md += ["", "## Validation Warnings", ""]
+            if not validation_issues:
+                md.append("No issues found.")
+            else:
+                for issue in validation_issues:
+                    icon = "🔴" if issue.severity == "error" else "⚠️"
+                    md.append(f"- {icon} **{issue.code}**: {issue.message}")
             out.write_text("\n".join(md) + "\n", encoding="utf-8")
         else:  # html
             ct_tbl = _html_table(["Type", "Count"], [[k, str(v)]
@@ -1652,6 +1687,20 @@ def write_layout_report(
                       f"{od_data['max_to_main_label']}"]],
                 )
                 body += f"<h2>Operation Density</h2>{od_tbl}"
+            if not validation_issues:
+                val_html = "<p>No issues found.</p>"
+            else:
+                rows = []
+                for issue in validation_issues:
+                    sev = "error" if issue.severity == "error" else "warning"
+                    rows.append(f"<tr class='{sev}'>"
+                                f"<td>{issue.severity}</td>"
+                                f"<td>{issue.code}</td>"
+                                f"<td>{issue.message}</td></tr>")
+                val_html = ("<table><thead><tr><th>Severity</th><th>Code</th>"
+                            "<th>Message</th></tr></thead><tbody>"
+                            + "".join(rows) + "</tbody></table>")
+            body += f"<h2>Validation Warnings</h2>{val_html}"
             out.write_text(_html_page(title, body), encoding="utf-8")
     return f"Report written to {out}"
 
