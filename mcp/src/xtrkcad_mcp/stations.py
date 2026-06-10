@@ -1130,36 +1130,79 @@ def validate_layout_annotations(
                 ),
             ))
 
-    # Flag main-layer non-TURNOUT tracks with no connections to any other
-    # main-layer track.  These are likely placed on the wrong layer
-    # (common when a track is drawn without switching the active layer).
     track_by_id = {t.id: t for t in layout.tracks}
     main_layer_idxs: set[int] = set()
+    siding_layer_idxs: set[int] = set()
     for layer_idx, layer_info in layout.layers.items():
         suffix = re.sub(r"^l\d+h?-", "", layer_info.name.lower())
         if suffix in _LAYER_MAIN_SUFFIXES:
             main_layer_idxs.add(layer_idx)
+        elif suffix in _LAYER_SIDING_SUFFIXES:
+            siding_layer_idxs.add(layer_idx)
+
+    def _track_coords(t: object) -> str:
+        """Return a short '(x,y)' coordinate string for the track's midpoint."""
+        eps = getattr(t, "endpoints", [])
+        if not eps:
+            return ""
+        if len(eps) >= 2:
+            cx = sum(ep.x for ep in eps) / len(eps)
+            cy = sum(ep.y for ep in eps) / len(eps)
+        else:
+            cx, cy = eps[0].x, eps[0].y
+        return f"({cx:.1f}, {cy:.1f})"
 
     if main_layer_idxs:
         for track in layout.tracks:
             if track.layer not in main_layer_idxs or track.kind == "TURNOUT":
                 continue
-            has_main_neighbor = any(
-                ep.connected_to is not None
-                and track_by_id.get(ep.connected_to) is not None
-                and track_by_id[ep.connected_to].layer in main_layer_idxs
+
+            layer_info_obj = layout.layers.get(track.layer, LayerInfo(track.layer, f"Layer {track.layer}"))
+            layer_name_str = layer_info_obj.name
+            coords = _track_coords(track)
+            length_str = f"{track.length_model_inches():.1f}in"
+
+            neighbors = [
+                track_by_id[ep.connected_to]
                 for ep in track.endpoints
-            )
+                if ep.connected_to is not None and ep.connected_to in track_by_id
+            ]
+
+            has_main_neighbor = any(nb.layer in main_layer_idxs for nb in neighbors)
+            siding_neighbors = [nb for nb in neighbors if nb.layer in siding_layer_idxs]
+
             if not has_main_neighbor:
-                layer_name = layout.layers.get(track.layer, LayerInfo(track.layer, f"Layer {track.layer}")).name
+                # Completely isolated from the main layer — likely wrong layer entirely.
+                if siding_neighbors:
+                    nb_layers = {layout.layers.get(nb.layer, LayerInfo(nb.layer, f"Layer {nb.layer}")).name
+                                 for nb in siding_neighbors}
+                    suggest = f"connects to {', '.join(sorted(nb_layers))} — should probably be on that layer"
+                else:
+                    suggest = "may be on the wrong layer"
                 issues.append(ValidationIssue(
                     severity="warning",
                     code="ISOLATED_MAIN_TRACK",
                     location_id=None,
                     message=(
-                        f"Track {track.id} ({track.kind}, {track.length_model_inches():.1f}in) "
-                        f"on {layer_name} has no connections to other main-layer tracks — "
-                        f"may be on the wrong layer"
+                        f"Track {track.id} ({track.kind}, {length_str}) "
+                        f"on {layer_name_str} at {coords}: "
+                        f"no connections to other main-layer tracks — {suggest}"
+                    ),
+                ))
+            elif siding_neighbors:
+                # Has both a main-layer neighbor AND a siding-layer neighbor:
+                # this is a bridge/throat connector that belongs on the siding layer.
+                nb_layers = {layout.layers.get(nb.layer, LayerInfo(nb.layer, f"Layer {nb.layer}")).name
+                             for nb in siding_neighbors}
+                issues.append(ValidationIssue(
+                    severity="warning",
+                    code="LAYER_BRIDGE_TRACK",
+                    location_id=None,
+                    message=(
+                        f"Track {track.id} ({track.kind}, {length_str}) "
+                        f"on {layer_name_str} at {coords}: "
+                        f"connects main-layer switch to {', '.join(sorted(nb_layers))} track — "
+                        f"should be on the siding layer (placed on wrong active layer)"
                     ),
                 ))
 
