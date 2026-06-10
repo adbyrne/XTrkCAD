@@ -22,6 +22,7 @@ so the count reflects only the usable straight/curve track.
 import datetime
 import heapq
 import math
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -332,7 +333,12 @@ def _snap_to_track(layout: Layout, x: float, y: float) -> int:
 
 
 def compute_capacities(layout: Layout) -> list[CapacityResult]:
-    """Compute usable track length and car capacity for every SIDING:/STORAGE: note.
+    """Compute usable track length and car capacity.
+
+    Priority:
+      1. Explicit SIDING:/STORAGE:/INDUSTRY: note  (note_id >= 0)
+      2. Layer-based fallback for STATION: notes whose nearest passing/storage
+         layer component has no explicit note (note_id == -1, inferred=True)
 
     The BFS walks connected non-TURNOUT tracks from the nearest track endpoint,
     so switch-throat length is excluded from the measurement.  The Fugate
@@ -368,6 +374,180 @@ def compute_capacities(layout: Layout) -> list[CapacityResult]:
             name=name,
             kind=kind,
             note_id=note.id,
+            nearest_track_id=nearest_id,
+            length_model_in=length_in,
+            length_real_ft=proto_ft,
+            max_cars=max_cars,
+        ))
+
+    existing_names = {r.name for r in results}
+    results.extend(_infer_layer_capacities(layout, existing_names))
+    return results
+
+
+# ---------------------------------------------------------------------------
+# Layer-based siding capacity inference
+# ---------------------------------------------------------------------------
+
+_LAYER_SIDING_SUFFIXES: frozenset[str] = frozenset({"passing", "storage", "staging"})
+
+
+def _layer_siding_category(layer_name: str) -> str | None:
+    """Return capacity category if layer name suffix indicates passing/storage, else None.
+
+    Recognises the standard 'L{n}-Suffix' and 'L{n}H-Suffix' naming scheme.
+    'L1-Passing' → 'passing', 'L2-Storage' → 'storage', 'Floor' → None.
+    """
+    suffix = re.sub(r"^l\d+h?-", "", layer_name.lower())
+    return suffix if suffix in _LAYER_SIDING_SUFFIXES else None
+
+
+@dataclass
+class _SidingComponent:
+    """A connected group of passing/storage-layer tracks bounded by turnouts."""
+    track_ids: set[int]
+    length_model_in: float
+    layer_idx: int
+    kind: str                          # "siding" (passing) or "storage" (storage/staging)
+    endpoints: list[tuple[float, float]]
+
+
+def _bfs_siding_component(
+    layout: Layout,
+    start_track_id: int,
+    layer_idx: int,
+) -> tuple[set[int], float]:
+    """BFS from start_track_id restricted to layer_idx, stopping at turnouts.
+
+    Returns (set of track IDs, total length in model inches).
+    """
+    track_by_id = {t.id: t for t in layout.tracks}
+    start = track_by_id.get(start_track_id)
+    if start is None or start.layer != layer_idx or start.kind == "TURNOUT":
+        return set(), 0.0
+
+    visited: set[int] = set()
+    queue: list[int] = [start_track_id]
+    total = 0.0
+
+    while queue:
+        tid = queue.pop()
+        if tid in visited:
+            continue
+        track = track_by_id.get(tid)
+        if track is None or track.layer != layer_idx or track.kind == "TURNOUT":
+            continue
+        visited.add(tid)
+        total += track.length_model_inches()
+        for ep in track.endpoints:
+            if ep.connected_to is not None and ep.connected_to not in visited:
+                queue.append(ep.connected_to)
+
+    return visited, total
+
+
+def _build_siding_components(layout: Layout) -> list[_SidingComponent]:
+    """Find all connected components of passing/storage/staging layer tracks."""
+    siding_layers: dict[int, str] = {}
+    for layer_idx, layer_info in layout.layers.items():
+        cat = _layer_siding_category(layer_info.name)
+        if cat is not None:
+            siding_layers[layer_idx] = cat
+
+    if not siding_layers:
+        return []
+
+    track_by_id = {t.id: t for t in layout.tracks}
+    seen: set[int] = set()
+    components: list[_SidingComponent] = []
+
+    for track in layout.tracks:
+        if track.id in seen:
+            continue
+        if track.layer not in siding_layers or track.kind == "TURNOUT":
+            seen.add(track.id)
+            continue
+
+        component_ids, length = _bfs_siding_component(layout, track.id, track.layer)
+        seen.update(component_ids if component_ids else {track.id})
+        if not component_ids:
+            continue
+
+        eps: list[tuple[float, float]] = []
+        for tid in component_ids:
+            t = track_by_id.get(tid)
+            if t:
+                for ep in t.endpoints:
+                    eps.append((ep.x, ep.y))
+
+        cat = siding_layers[track.layer]
+        kind = "storage" if cat in {"storage", "staging"} else "siding"
+        components.append(_SidingComponent(
+            track_ids=component_ids,
+            length_model_in=length,
+            layer_idx=track.layer,
+            kind=kind,
+            endpoints=eps,
+        ))
+
+    return components
+
+
+def _infer_layer_capacities(
+    layout: Layout,
+    existing_names: set[str],
+) -> list[CapacityResult]:
+    """Infer siding capacity for STATION: notes with no explicit SIDING: note.
+
+    For each uncovered station, finds the nearest *passing*-kind component first
+    (L{n}-Passing layers).  Only falls back to storage/staging if no passing
+    component exists anywhere in the layout.
+    """
+    stations = extract_stations(layout)
+    if not stations:
+        return []
+
+    components = _build_siding_components(layout)
+    if not components:
+        return []
+
+    passing_comps = [c for c in components if c.kind == "siding"]
+    fallback_comps = components  # storage + staging + passing, used when no passing exists
+
+    scale = layout.scale or "HO"
+    cpf = cars_per_real_ft(scale)
+    results: list[CapacityResult] = []
+
+    for station in stations:
+        if station.name in existing_names:
+            continue
+
+        # Prefer passing-layer components; fall back to all if layout has none
+        search = passing_comps if passing_comps else fallback_comps
+
+        best_comp: _SidingComponent | None = None
+        best_dist = _INF
+
+        for comp in search:
+            for ex, ey in comp.endpoints:
+                d = math.hypot(station.x - ex, station.y - ey)
+                if d < best_dist:
+                    best_dist = d
+                    best_comp = comp
+
+        if best_comp is None:
+            continue
+
+        length_in = best_comp.length_model_in
+        model_ft = length_in / 12.0
+        proto_ft = model_in_to_proto_ft(length_in, scale)
+        max_cars = int(model_ft * cpf)
+        nearest_id = next(iter(best_comp.track_ids))
+
+        results.append(CapacityResult(
+            name=station.name,
+            kind=best_comp.kind,
+            note_id=-1,
             nearest_track_id=nearest_id,
             length_model_in=length_in,
             length_real_ft=proto_ft,

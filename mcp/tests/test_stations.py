@@ -341,6 +341,61 @@ def test_get_siding_capacities_tool():
 
 
 # ---------------------------------------------------------------------------
+# compute_capacities — layer-based inference fallback
+# ---------------------------------------------------------------------------
+
+def test_layer_inference_finds_siding_without_note():
+    """Remove SIDING: XP note; XP siding should still be found via L1-Passing layer."""
+    layout = parse_file(EXPORT_FIXTURE)
+    layout.notes = [n for n in layout.notes if "SIDING: XP" not in n.text]
+    results = {r.name: r for r in compute_capacities(layout)}
+    assert "XP" in results
+    # Tracks 7+8 = 20in + 20in = 40in
+    assert results["XP"].length_model_in == pytest.approx(40.0, abs=0.1)
+
+
+def test_layer_inference_kind_is_siding_for_passing_layer():
+    layout = parse_file(EXPORT_FIXTURE)
+    layout.notes = [n for n in layout.notes if "SIDING: XP" not in n.text]
+    results = {r.name: r for r in compute_capacities(layout)}
+    assert results["XP"].kind == "siding"
+
+
+def test_layer_inference_note_id_is_minus_one():
+    """Inferred results carry note_id=-1 to distinguish them from explicit notes."""
+    layout = parse_file(EXPORT_FIXTURE)
+    layout.notes = [n for n in layout.notes if "SIDING: XP" not in n.text]
+    results = {r.name: r for r in compute_capacities(layout)}
+    assert results["XP"].note_id == -1
+
+
+def test_explicit_note_takes_priority_over_layer():
+    """When SIDING: XP note is present it must be used (note_id > 0, not inferred)."""
+    layout = parse_file(EXPORT_FIXTURE)
+    results = {r.name: r for r in compute_capacities(layout)}
+    xp = results.get("XP")
+    assert xp is not None
+    assert xp.note_id > 0
+
+
+def test_station_notes_not_in_capacities_no_passing_layers():
+    """station_layout.xtc has no standard passing-suffix layers → no inference fires."""
+    layout = parse_file(STATION_FIXTURE)
+    results = compute_capacities(layout)
+    names = {r.name for r in results}
+    assert "Alpha" not in names
+    assert "Beta" not in names
+
+
+def test_layer_inference_car_count():
+    """40 model in / 12 = 3.33 model ft × 2 cars/ft = 6 cars (HO)."""
+    layout = parse_file(EXPORT_FIXTURE)
+    layout.notes = [n for n in layout.notes if "SIDING: XP" not in n.text]
+    results = {r.name: r for r in compute_capacities(layout)}
+    assert results["XP"].max_cars == 6
+
+
+# ---------------------------------------------------------------------------
 # INDUSTRY: note — compute_capacities includes industry spurs
 # ---------------------------------------------------------------------------
 
