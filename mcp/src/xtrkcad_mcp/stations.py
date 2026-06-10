@@ -417,14 +417,26 @@ def _bfs_siding_component(
     layout: Layout,
     start_track_id: int,
     layer_idx: int,
+    traverse_turnouts: bool = True,
 ) -> tuple[set[int], float]:
-    """BFS from start_track_id restricted to layer_idx, stopping at turnouts.
+    """BFS from start_track_id restricted to layer_idx.
+
+    traverse_turnouts=True (default, used for passing/storage layers):
+        TURNOUT objects on the same layer are included — switch throat geometry
+        on a siding layer counts toward the siding length.  Stops only at
+        connections to a DIFFERENT layer.
+
+    traverse_turnouts=False (used for main-line layers):
+        TURNOUT objects act as opaque boundaries regardless of their layer.
+        This preserves station-section granularity (24 components vs 6).
 
     Returns (set of track IDs, total length in model inches).
     """
     track_by_id = {t.id: t for t in layout.tracks}
     start = track_by_id.get(start_track_id)
-    if start is None or start.layer != layer_idx or start.kind == "TURNOUT":
+    if start is None or start.layer != layer_idx:
+        return set(), 0.0
+    if not traverse_turnouts and start.kind == "TURNOUT":
         return set(), 0.0
 
     visited: set[int] = set()
@@ -436,7 +448,9 @@ def _bfs_siding_component(
         if tid in visited:
             continue
         track = track_by_id.get(tid)
-        if track is None or track.layer != layer_idx or track.kind == "TURNOUT":
+        if track is None or track.layer != layer_idx:
+            continue
+        if not traverse_turnouts and track.kind == "TURNOUT":
             continue
         visited.add(tid)
         total += track.length_model_inches()
@@ -474,6 +488,7 @@ def _build_siding_components(layout: Layout) -> list[_SidingComponent]:
         if not component_ids:
             continue
 
+        comp_layer = track.layer
         eps: list[tuple[float, float]] = []
         bounded = False
         for tid in component_ids:
@@ -483,7 +498,7 @@ def _build_siding_components(layout: Layout) -> list[_SidingComponent]:
                     eps.append((ep.x, ep.y))
                     if ep.connected_to is not None:
                         nb = track_by_id.get(ep.connected_to)
-                        if nb is not None and nb.kind == "TURNOUT":
+                        if nb is not None and nb.layer != comp_layer:
                             bounded = True
 
         cat = siding_layers[track.layer]
@@ -534,7 +549,11 @@ def _build_main_components(layout: Layout) -> list[_SidingComponent]:
             seen.add(track.id)
             continue
 
-        component_ids, length = _bfs_siding_component(layout, track.id, track.layer)
+        # traverse_turnouts=False: L2-Main TURNOUTs remain boundaries so each
+        # station section stays as a separate component.
+        component_ids, length = _bfs_siding_component(
+            layout, track.id, track.layer, traverse_turnouts=False
+        )
         seen.update(component_ids if component_ids else {track.id})
         if not component_ids:
             continue
@@ -620,14 +639,28 @@ def _infer_main_lengths(layout: Layout) -> list[CapacityResult]:
 
 
 def _infer_main_lengths_with_bounded(layout: Layout) -> tuple[list[CapacityResult], dict[str, bool]]:
-    """Like _infer_main_lengths but also returns a {station_name: bounded} dict."""
+    """Like _infer_main_lengths but also returns a {station_name: bounded} dict.
+
+    Uses the station's passing siding as the geographic anchor for selecting the
+    correct main component.  This avoids a common misfire where the station note
+    is slightly closer to a long through-main component than to the shorter
+    station-section component between its two siding switches.
+
+    Anchor selection: among passing sidings within 1.5× the nearest passing
+    distance from the station note, pick the longest one (most likely to be the
+    primary passing track, not a short stub at one switch).  Falls back to the
+    station note position when no passing sidings are found.
+    """
     stations = extract_stations(layout)
     if not stations:
         return [], {}
 
-    components = _build_main_components(layout)
-    if not components:
+    main_components = _build_main_components(layout)
+    if not main_components:
         return [], {}
+
+    siding_comps = _build_siding_components(layout)
+    passing_comps = [c for c in siding_comps if c.kind == "siding"]
 
     scale = layout.scale or "HO"
     cpf = cars_per_real_ft(scale)
@@ -635,15 +668,41 @@ def _infer_main_lengths_with_bounded(layout: Layout) -> tuple[list[CapacityResul
     bounded_map: dict[str, bool] = {}
 
     for station in stations:
+        # Step 1: find the best passing siding to use as the main anchor.
+        # Among all passing sidings, collect those within 1.5× the nearest distance.
+        # Prefer the longest (most likely the primary passing, not a short stub).
+        siding_candidates: list[tuple[float, _SidingComponent]] = []
+        for comp in passing_comps:
+            d = min(math.hypot(station.x - ex, station.y - ey) for ex, ey in comp.endpoints)
+            siding_candidates.append((d, comp))
+
+        anchor_eps: list[tuple[float, float]]
+        if siding_candidates:
+            min_d = min(d for d, _ in siding_candidates)
+            radius = max(min_d * 1.5, 20.0)
+            nearby_sidings = [(d, c) for d, c in siding_candidates if d <= radius]
+            # Pick the longest siding in the candidate set
+            anchor_siding = max(nearby_sidings, key=lambda x: x[1].length_model_in)[1]
+            anchor_eps = anchor_siding.endpoints
+        else:
+            anchor_eps = [(station.x, station.y)]
+
+        # Step 2: find the main component nearest to the siding anchor.
+        # Exclude tiny stubs (often tracks on the wrong layer) shorter than
+        # this threshold — real station sections are at least a few car lengths.
+        _MIN_MAIN_IN = 10.0   # model inches (~73ft prototype HO)
+
         best_comp: _SidingComponent | None = None
         best_dist = _INF
-
-        for comp in components:
+        for comp in main_components:
+            if comp.length_model_in < _MIN_MAIN_IN:
+                continue
             for ex, ey in comp.endpoints:
-                d = math.hypot(station.x - ex, station.y - ey)
-                if d < best_dist:
-                    best_dist = d
-                    best_comp = comp
+                for ax, ay in anchor_eps:
+                    d = math.hypot(ax - ex, ay - ey)
+                    if d < best_dist:
+                        best_dist = d
+                        best_comp = comp
 
         if best_comp is None:
             continue
@@ -700,18 +759,22 @@ def _infer_layer_capacities(
         # Prefer passing-layer components; fall back to all if layout has none
         search = passing_comps if passing_comps else fallback_comps
 
-        best_comp: _SidingComponent | None = None
-        best_dist = _INF
-
+        # Collect candidates with their distances
+        candidates: list[tuple[float, _SidingComponent]] = []
         for comp in search:
-            for ex, ey in comp.endpoints:
-                d = math.hypot(station.x - ex, station.y - ey)
-                if d < best_dist:
-                    best_dist = d
-                    best_comp = comp
+            d = min(math.hypot(station.x - ex, station.y - ey) for ex, ey in comp.endpoints)
+            candidates.append((d, comp))
 
-        if best_comp is None:
+        if not candidates:
             continue
+
+        # Among all passing components within 1.5× the nearest distance, prefer
+        # the longest one.  This prevents a short stub at one siding entry from
+        # winning over the primary siding track when both are nearly equidistant.
+        min_d = min(d for d, _ in candidates)
+        radius = max(min_d * 1.5, 20.0)
+        nearby = [(d, c) for d, c in candidates if d <= radius]
+        best_comp = max(nearby, key=lambda x: x[1].length_model_in)[1]
 
         length_in = best_comp.length_model_in
         model_ft = length_in / 12.0
@@ -1066,6 +1129,39 @@ def validate_layout_annotations(
                     f"nearest track (threshold {_SNAP_WARN_THRESHOLD} in)"
                 ),
             ))
+
+    # Flag main-layer non-TURNOUT tracks with no connections to any other
+    # main-layer track.  These are likely placed on the wrong layer
+    # (common when a track is drawn without switching the active layer).
+    track_by_id = {t.id: t for t in layout.tracks}
+    main_layer_idxs: set[int] = set()
+    for layer_idx, layer_info in layout.layers.items():
+        suffix = re.sub(r"^l\d+h?-", "", layer_info.name.lower())
+        if suffix in _LAYER_MAIN_SUFFIXES:
+            main_layer_idxs.add(layer_idx)
+
+    if main_layer_idxs:
+        for track in layout.tracks:
+            if track.layer not in main_layer_idxs or track.kind == "TURNOUT":
+                continue
+            has_main_neighbor = any(
+                ep.connected_to is not None
+                and track_by_id.get(ep.connected_to) is not None
+                and track_by_id[ep.connected_to].layer in main_layer_idxs
+                for ep in track.endpoints
+            )
+            if not has_main_neighbor:
+                layer_name = layout.layers.get(track.layer, LayerInfo(track.layer, f"Layer {track.layer}")).name
+                issues.append(ValidationIssue(
+                    severity="warning",
+                    code="ISOLATED_MAIN_TRACK",
+                    location_id=None,
+                    message=(
+                        f"Track {track.id} ({track.kind}, {track.length_model_inches():.1f}in) "
+                        f"on {layer_name} has no connections to other main-layer tracks — "
+                        f"may be on the wrong layer"
+                    ),
+                ))
 
     return issues
 
