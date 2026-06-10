@@ -27,6 +27,7 @@ dev = [
 
 [project.scripts]
 xtrkcad-mcp = "xtrkcad_mcp.server:main"
+xtrkcad-report = "xtrkcad_mcp.cli:report_main"
 
 [project.urls]
 Homepage = "https://github.com/adbyrne/XTrkCAD"
