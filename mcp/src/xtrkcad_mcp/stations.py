@@ -404,12 +404,13 @@ def _layer_siding_category(layer_name: str) -> str | None:
 
 @dataclass
 class _SidingComponent:
-    """A connected group of passing/storage-layer tracks bounded by turnouts."""
+    """A connected group of layer-restricted tracks bounded by turnouts."""
     track_ids: set[int]
     length_model_in: float
     layer_idx: int
-    kind: str                          # "siding" (passing) or "storage" (storage/staging)
+    kind: str                          # "siding", "storage", or "main"
     endpoints: list[tuple[float, float]]
+    bounded: bool = False              # True if at least one endpoint connects to a TURNOUT
 
 
 def _bfs_siding_component(
@@ -474,11 +475,16 @@ def _build_siding_components(layout: Layout) -> list[_SidingComponent]:
             continue
 
         eps: list[tuple[float, float]] = []
+        bounded = False
         for tid in component_ids:
             t = track_by_id.get(tid)
             if t:
                 for ep in t.endpoints:
                     eps.append((ep.x, ep.y))
+                    if ep.connected_to is not None:
+                        nb = track_by_id.get(ep.connected_to)
+                        if nb is not None and nb.kind == "TURNOUT":
+                            bounded = True
 
         cat = siding_layers[track.layer]
         kind = "storage" if cat in {"storage", "staging"} else "siding"
@@ -488,9 +494,178 @@ def _build_siding_components(layout: Layout) -> list[_SidingComponent]:
             layer_idx=track.layer,
             kind=kind,
             endpoints=eps,
+            bounded=bounded,
         ))
 
     return components
+
+
+# ---------------------------------------------------------------------------
+# Main-line component inference (station throat length)
+# ---------------------------------------------------------------------------
+
+_LAYER_MAIN_SUFFIXES: frozenset[str] = frozenset({"main", "track"})
+
+
+def _build_main_components(layout: Layout) -> list[_SidingComponent]:
+    """Find connected components of main-line layer tracks, bounded by turnouts.
+
+    Each component is one continuous run of main-line track between switches.
+    'bounded=True' means at least one end connects to a turnout, so the component
+    represents an actual station section rather than the whole unbounded main.
+    """
+    main_layers: dict[int, str] = {}
+    for layer_idx, layer_info in layout.layers.items():
+        suffix = re.sub(r"^l\d+h?-", "", layer_info.name.lower())
+        if suffix in _LAYER_MAIN_SUFFIXES:
+            main_layers[layer_idx] = suffix
+
+    if not main_layers:
+        return []
+
+    track_by_id = {t.id: t for t in layout.tracks}
+    seen: set[int] = set()
+    components: list[_SidingComponent] = []
+
+    for track in layout.tracks:
+        if track.id in seen:
+            continue
+        if track.layer not in main_layers or track.kind == "TURNOUT":
+            seen.add(track.id)
+            continue
+
+        component_ids, length = _bfs_siding_component(layout, track.id, track.layer)
+        seen.update(component_ids if component_ids else {track.id})
+        if not component_ids:
+            continue
+
+        eps: list[tuple[float, float]] = []
+        bounded = False
+        for tid in component_ids:
+            t = track_by_id.get(tid)
+            if t:
+                for ep in t.endpoints:
+                    eps.append((ep.x, ep.y))
+                    if ep.connected_to is not None:
+                        nb = track_by_id.get(ep.connected_to)
+                        if nb is not None and nb.kind == "TURNOUT":
+                            bounded = True
+
+        components.append(_SidingComponent(
+            track_ids=component_ids,
+            length_model_in=length,
+            layer_idx=track.layer,
+            kind="main",
+            endpoints=eps,
+            bounded=bounded,
+        ))
+
+    return components
+
+
+def _infer_main_lengths(layout: Layout) -> list[CapacityResult]:
+    """Infer main-line track length at each STATION: note.
+
+    For each station, finds the nearest main-layer component (bounded by turnouts).
+    Returns CapacityResult with kind='main' and note_id=-1.
+    The 'bounded' flag on the source component determines whether a mismatch
+    warning against the siding length is meaningful.
+    """
+    stations = extract_stations(layout)
+    if not stations:
+        return []
+
+    components = _build_main_components(layout)
+    if not components:
+        return []
+
+    scale = layout.scale or "HO"
+    cpf = cars_per_real_ft(scale)
+    results: list[CapacityResult] = []
+
+    for station in stations:
+        best_comp: _SidingComponent | None = None
+        best_dist = _INF
+
+        for comp in components:
+            for ex, ey in comp.endpoints:
+                d = math.hypot(station.x - ex, station.y - ey)
+                if d < best_dist:
+                    best_dist = d
+                    best_comp = comp
+
+        if best_comp is None:
+            continue
+
+        length_in = best_comp.length_model_in
+        model_ft = length_in / 12.0
+        proto_ft = model_in_to_proto_ft(length_in, scale)
+        max_cars = int(model_ft * cpf)
+        nearest_id = next(iter(best_comp.track_ids))
+
+        results.append(CapacityResult(
+            name=station.name,
+            kind="main",
+            note_id=-1,
+            nearest_track_id=nearest_id,
+            length_model_in=length_in,
+            length_real_ft=proto_ft,
+            max_cars=max_cars,
+            # Store bounded flag via nearest_track_id sign convention would be
+            # fragile — instead we post a per-station bounded lookup below.
+            # The bounded value is recorded in _main_bounded_by_station (caller).
+        ))
+
+    return results
+
+
+def _infer_main_lengths_with_bounded(layout: Layout) -> tuple[list[CapacityResult], dict[str, bool]]:
+    """Like _infer_main_lengths but also returns a {station_name: bounded} dict."""
+    stations = extract_stations(layout)
+    if not stations:
+        return [], {}
+
+    components = _build_main_components(layout)
+    if not components:
+        return [], {}
+
+    scale = layout.scale or "HO"
+    cpf = cars_per_real_ft(scale)
+    results: list[CapacityResult] = []
+    bounded_map: dict[str, bool] = {}
+
+    for station in stations:
+        best_comp: _SidingComponent | None = None
+        best_dist = _INF
+
+        for comp in components:
+            for ex, ey in comp.endpoints:
+                d = math.hypot(station.x - ex, station.y - ey)
+                if d < best_dist:
+                    best_dist = d
+                    best_comp = comp
+
+        if best_comp is None:
+            continue
+
+        length_in = best_comp.length_model_in
+        model_ft = length_in / 12.0
+        proto_ft = model_in_to_proto_ft(length_in, scale)
+        max_cars = int(model_ft * cpf)
+        nearest_id = next(iter(best_comp.track_ids))
+
+        results.append(CapacityResult(
+            name=station.name,
+            kind="main",
+            note_id=-1,
+            nearest_track_id=nearest_id,
+            length_model_in=length_in,
+            length_real_ft=proto_ft,
+            max_cars=max_cars,
+        ))
+        bounded_map[station.name] = best_comp.bounded
+
+    return results, bounded_map
 
 
 def _infer_layer_capacities(
@@ -946,6 +1121,12 @@ def build_layout_export(
     capacities = compute_capacities(layout)
     cap_by_name: dict[str, CapacityResult] = {c.name: c for c in capacities}
 
+    # Main-line track lengths at each station (bounded components only get warnings)
+    main_caps, main_bounded = _infer_main_lengths_with_bounded(layout)
+    main_by_id: dict[str, CapacityResult] = {r.name: r for r in main_caps}
+
+    _MAIN_SIDING_WARN_THRESHOLD = 0.25   # 25% difference triggers a warning
+
     # --- Stations ---
     station_entries = sorted(
         [e for e in stations_config.stations if any(t in e.types for t in ("station", "yard", "staging"))],
@@ -957,6 +1138,23 @@ def build_layout_export(
         cap = cap_by_name.get(entry.id)
         siding_ft = cap.length_real_ft if cap else None
         siding_cars = cap.max_cars if cap else None
+
+        main_cap = main_by_id.get(entry.id)
+        main_ft = main_cap.length_real_ft if main_cap else None
+        main_cars = main_cap.max_cars if main_cap else None
+
+        # Warn on significant mismatch only when main component is switch-bounded
+        # (unbounded = whole continuous main line, comparison is not meaningful)
+        if (siding_ft is not None and main_ft is not None
+                and main_bounded.get(entry.id, False)):
+            diff = abs(siding_ft - main_ft) / max(siding_ft, main_ft)
+            if diff > _MAIN_SIDING_WARN_THRESHOLD:
+                pct = int(diff * 100)
+                warnings.append(
+                    f"{entry.id}: main track ({main_ft:.0f}ft) and siding "
+                    f"({siding_ft:.0f}ft) differ by {pct}% — "
+                    f"verify switch placement at station limits"
+                )
 
         if not entry.switchback and mp_entry is not None and siding_ft is not None:
             mp_exit: float | None = mp_entry + siding_ft / stations_config.mp_scale
@@ -973,6 +1171,8 @@ def build_layout_export(
             "milepost_exit": round(mp_exit, 3) if mp_exit is not None else None,
             "siding_length_ft": round(siding_ft, 3) if siding_ft is not None else None,
             "siding_length_cars": siding_cars,
+            "main_length_ft": round(main_ft, 3) if main_ft is not None else None,
+            "main_length_cars": main_cars,
             "switchback": entry.switchback,
         })
 

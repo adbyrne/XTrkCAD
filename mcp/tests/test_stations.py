@@ -612,6 +612,40 @@ def test_build_layout_export_structure():
     assert "warnings" in data
 
 
+def test_build_layout_export_station_has_main_length_fields():
+    """Every station dict must contain main_length_ft and main_length_cars keys."""
+    layout = parse_file(EXPORT_FIXTURE)
+    config = load_stations_config(EXPORT_STATIONS)
+    data = build_layout_export(layout, config)
+    for s in data["stations"]:
+        assert "main_length_ft" in s, f"{s['station_id']} missing main_length_ft"
+        assert "main_length_cars" in s, f"{s['station_id']} missing main_length_cars"
+
+
+def test_build_layout_export_wp_main_length_not_null():
+    """WP has a STATION: note and the fixture has an L1-Main layer → main_length non-null."""
+    layout = parse_file(EXPORT_FIXTURE)
+    config = load_stations_config(EXPORT_STATIONS)
+    data = build_layout_export(layout, config)
+    wp = next(s for s in data["stations"] if s["station_id"] == "WP")
+    assert wp["main_length_ft"] is not None
+    assert wp["main_length_ft"] > 0
+
+
+def test_build_layout_export_no_main_siding_warning_when_unbounded():
+    """Export fixture main has no turnouts → component is unbounded → no mismatch warning.
+
+    This is the expected behaviour: when no switch bounds the main at a station
+    (e.g. a simple point-to-point with no intermediate turnouts on the main)
+    the comparison against siding length would be meaningless, so no warning fires.
+    """
+    layout = parse_file(EXPORT_FIXTURE)
+    config = load_stations_config(EXPORT_STATIONS)
+    data = build_layout_export(layout, config)
+    mismatch_warnings = [w for w in data["warnings"] if "differ by" in w]
+    assert mismatch_warnings == []
+
+
 def test_build_layout_export_station_ids():
     layout = parse_file(EXPORT_FIXTURE)
     config = load_stations_config(EXPORT_STATIONS)
