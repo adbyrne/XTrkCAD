@@ -62,6 +62,18 @@ uv run pytest          # 362 tests
 | `get_track_lengths` | Total track length by kind and layer |
 | `get_curve_stats` | Curve radius statistics (min/max/mean/distribution) |
 | `get_operation_density` | Fugate OD formula — max cars and cars moved per session |
+| `get_stations` | List all `STATION:` NOTE positions snapped to nearest track endpoint |
+| `get_siding_capacities` | BFS track length and car capacity for every `SIDING:`/`STORAGE:` note |
+| `get_station_distances` | Shortest track-graph distances between all station pairs |
+| `list_labeled_segments` | All annotation notes (`STATION:`, `SIDING:`, `INDUSTRY:`, `YARD_TRACK:`, `REFERENCE:`) snapped to tracks |
+
+### Annotation and validation
+
+| Tool | Description |
+|---|---|
+| `validate_layout` | Check NOTE annotations vs stations.yaml — missing notes, far snaps, ISOLATED_MAIN_TRACK, LAYER_BRIDGE_TRACK |
+| `write_validation_layer` | Write a copy of the layout with a red `Validation` layer marking every coordinate-bearing issue |
+| `export_layout_data` | Export `layout_data.json` for RR_server (mileposts, siding lengths, industry spots, yard tracks, segments) |
 
 ### Reports (txt / md / html / json)
 
@@ -71,15 +83,27 @@ All write-report tools accept a `format` parameter: `"txt"` (default), `"md"`, `
 |---|---|
 | `write_layout_report` | Full layout summary with layer lengths, curve stats, optional OD section |
 | `write_operation_density_report` | Operational density by layer category |
+| `write_station_distance_report` | Inter-station distances in both model and prototype units |
+| `write_benchwork_report` | Benchwork section list with elevations and areas |
 | `write_equipment_report` | Equipment suitability (PASS/MARGINAL/FAIL) vs. minimum curve radius |
 | `write_turnout_report` | Turnout count and density per 100 ft, by layer |
 | `write_gaps_report` | Open endpoints, near-miss pairs, turntable stall summary |
 | `write_radius_map` | SVG colour-coded curve radius map |
+| `write_plan_view` | SVG top-down track plan coloured by layer |
+| `write_elevation_view` | SVG side elevation showing level heights and benchwork |
+
+### Aisle and benchwork checks
+
+| Tool | Description |
+|---|---|
+| `check_aisle_clearance` | Minimum aisle width between all facing benchwork section pairs; flags below 30″ (error) or 36″ (warning) |
 
 ### Edit
 
 | Tool | Description |
 |---|---|
+| `add_track_layers` | Add standard `Ln-*` track-type layers to an existing layout |
+| `rename_layers` | Rename layers by index |
 | `delete_track` | Remove a single track object by ID |
 | `find_dead_connections` | Find T-endpoint references to non-existent tracks |
 | `fix_dead_connections` | Convert dead T-endpoints to open E-endpoints |
@@ -161,6 +185,62 @@ Each template carries an `od_role` used by `get_operation_density`:
 | `passing` | `max_cars += 0.8 × ft / 2`; `cars_moved += 0.4 × ft` |
 | `connecting` | `cars_moved += 0.4 × ft` |
 
+## Layout annotation conventions
+
+Operations-aware tools read text NOTE objects placed in XTrkCAD. Place the note close to
+the relevant track; the server snaps it to the nearest track endpoint.
+
+| Prefix | Format | Purpose |
+|---|---|---|
+| `STATION: <id> [@ref]` | `STATION: WP @MP_ZERO` | Mainline station; optional `@<ref>` co-locates it with a REFERENCE: note for routing |
+| `SIDING: <id> [description]` | `SIDING: WP Platform arrival track` | Measures BFS track capacity for a station's arrival/departure track or passing siding |
+| `STORAGE: <id> [description]` | `STORAGE: WP_YARD1 North ladder` | Measures capacity of a storage/yard track; label does not need to match a station ID |
+| `INDUSTRY: <id> [description]` | `INDUSTRY: TIMBER Logging spur` | Measures spur length; `id` matches a `types: [industry]` entry in stations.yaml |
+| `YARD_TRACK: <yard_id> <label>` | `YARD_TRACK: WP LEAD1` | Measures an individual yard track; works for yards and mine sidings |
+| `REFERENCE: MP_ZERO` | `REFERENCE: MP_ZERO` | Milepost origin; required for milepost calculations |
+| `REFERENCE: CO_MP_ZERO` | `REFERENCE: CO_MP_ZERO` | Milepost origin for a foreign railroad (e.g. C&O) |
+
+**ID vs. description:** The first whitespace-delimited token after the colon is the ID (matched
+against stations.yaml).  Any remaining text is a human-readable description that appears in
+reports and the JSON export — it does not affect matching.
+
+**`@ref` tag on STATION: notes:** If the station NOTE is placed on an isolated yard track that
+is not on the main graph (e.g. WP yard), add `@MP_ZERO` (or `@<any-REFERENCE-name>`) to the
+note text.  The server substitutes the reference point's graph endpoint, so distances and
+mileposts can be computed as if the station were at that position.
+Example: `STATION: WP @MP_ZERO` — WP is assigned milepost 0 and is reachable from all other
+stations via the main graph.
+
+**Foreign railroad layers:** Name layers `CO-Main`, `CO-Passing`, `CO-Storage`, `CO-Staging`
+(or any `<rr>-<type>` name not in the standard `Ln-*` scheme) to exclude them from NYE
+operation density calculations.  The suffix must match an entry in `_SUFFIX_TO_CATEGORY`
+or the layer will default to `"mainline"`.
+
+### stations.yaml reference
+
+```yaml
+layout: my_layout_name
+mp_scale: 1.0        # prototype feet per milepost unit
+
+stations:
+  - id: WP
+    name: Williamsport Station
+    sequence: 0
+    types: [station, yard]
+    switchback: false
+
+  - id: TIMBER
+    name: Timber Ltd
+    sequence: 8
+    types: [industry]
+    switchback: false
+    within_limits_of: JC   # parent station for branch milepost
+    spots: 2               # car spots (operational); null = derive from spur length
+```
+
+`spots` is the number of simultaneous car positions at the industry (waybill/forwarding
+use).  It is independent of `spur_length_cars` (physical track capacity).
+
 ## Module structure
 
 ```
@@ -170,7 +250,10 @@ src/xtrkcad_mcp/
   models.py      — Layout, Track, Endpoint dataclasses + scale ratios
   config.py      — YAML layout config loader + grid DSL parser
                    FloorPlan / FloorRoom / FloorDoor / FloorPartition / FloorRestricted
-  generator.py   — .xtc file generator from LayoutConfig
+  generator.py   — .xtc file generator from LayoutConfig; merge_benchwork; write_validation_layer helpers
+  stations.py    — Annotation parsing (STATION/SIDING/STORAGE/INDUSTRY/YARD_TRACK/REFERENCE),
+                   capacity BFS, station distances, validation checks, layout_data.json export
   templates.py   — Template library loader
+  svg_views.py   — Plan and elevation SVG renderers
   templates/     — 12 stub .xtc files + index.yaml catalog
 ```

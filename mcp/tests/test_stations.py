@@ -12,6 +12,7 @@ from xtrkcad_mcp.stations import (
     build_layout_export,
     compute_capacities,
     compute_distances,
+    compute_yard_tracks,
     extract_reference_points,
     extract_stations,
     list_annotated_segments,
@@ -248,11 +249,15 @@ def test_write_json_report(tmp_path):
     payload = json.loads(out.read_text())
     assert "distances" in payload
     assert "stations" in payload
-    assert "Alpha" in payload["stations"]
+    station_names = {s["name"] for s in payload["stations"]}
+    assert "Alpha" in station_names
     assert any(
         d["from"] in {"Alpha", "Beta"} and d["reachable"]
         for d in payload["distances"]
     )
+    # JSON distances include MP columns
+    assert "from_mp_ft" in payload["distances"][0]
+    assert "to_mp_ft" in payload["distances"][0]
 
 
 def test_get_stations_tool():
@@ -282,30 +287,37 @@ def test_capacity_finds_siding_and_storage():
     layout = parse_file(STATION_FIXTURE)
     results = compute_capacities(layout)
     names = {r.name for r in results}
-    assert "Freight House" in names
-    assert "Car Barn" in names
+    assert "FreightHouse" in names
+    assert "CarBarn" in names
 
 
 def test_capacity_kinds():
     layout = parse_file(STATION_FIXTURE)
     results = {r.name: r for r in compute_capacities(layout)}
-    assert results["Freight House"].kind == "siding"
-    assert results["Car Barn"].kind == "storage"
+    assert results["FreightHouse"].kind == "siding"
+    assert results["CarBarn"].kind == "storage"
 
 
 def test_freight_house_excludes_turnout():
     """Tracks 6+7 are 15in each = 30in. Track 8 is TURNOUT — excluded."""
     layout = parse_file(STATION_FIXTURE)
     results = {r.name: r for r in compute_capacities(layout)}
-    fh = results["Freight House"]
+    fh = results["FreightHouse"]
     assert fh.length_model_in == pytest.approx(30.0)
+
+
+def test_freight_house_description():
+    """FreightHouse note has description text after the ID token."""
+    layout = parse_file(STATION_FIXTURE)
+    results = {r.name: r for r in compute_capacities(layout)}
+    assert results["FreightHouse"].description == "Freight house siding"
 
 
 def test_car_barn_length():
     """Tracks 9+10 are 10in + 15in = 25in total (no TURNOUT boundary)."""
     layout = parse_file(STATION_FIXTURE)
     results = {r.name: r for r in compute_capacities(layout)}
-    cb = results["Car Barn"]
+    cb = results["CarBarn"]
     assert cb.length_model_in == pytest.approx(25.0)
 
 
@@ -313,7 +325,7 @@ def test_max_cars_uses_model_feet_not_proto_feet():
     """HO: 2 cars per model foot. 30 model in = 2.5 model ft → 5 cars."""
     layout = parse_file(STATION_FIXTURE)
     results = {r.name: r for r in compute_capacities(layout)}
-    fh = results["Freight House"]
+    fh = results["FreightHouse"]
     # 30 model in / 12 = 2.5 model ft × 2.0 cars/model-ft = 5
     assert fh.max_cars == 5
 
@@ -333,9 +345,9 @@ def test_get_siding_capacities_tool():
     from xtrkcad_mcp.server import get_siding_capacities
     result = get_siding_capacities(str(STATION_FIXTURE))
     names = {r["name"] for r in result}
-    assert "Freight House" in names
-    assert "Car Barn" in names
-    fh = next(r for r in result if r["name"] == "Freight House")
+    assert "FreightHouse" in names
+    assert "CarBarn" in names
+    fh = next(r for r in result if r["name"] == "FreightHouse")
     assert fh["max_cars"] == 5
     assert fh["length_model_in"] == pytest.approx(30.0, abs=0.01)
 
@@ -464,11 +476,11 @@ def test_compute_mileposts_unreachable():
 # ---------------------------------------------------------------------------
 
 def test_list_annotated_segments_count():
-    """Fixture has 5 annotations: REFERENCE:MP_ZERO, STATION:WP, STATION:XP,
-    SIDING:XP, INDUSTRY:KIEL."""
+    """Fixture has 6 annotations: REFERENCE:MP_ZERO, STATION:WP, STATION:XP,
+    SIDING:XP, INDUSTRY:KIEL, YARD_TRACK:WP LEAD."""
     layout = parse_file(EXPORT_FIXTURE)
     segs = list_annotated_segments(layout)
-    assert len(segs) == 5
+    assert len(segs) == 6
 
 
 def test_list_annotated_segments_types():
@@ -479,6 +491,7 @@ def test_list_annotated_segments_types():
     assert "siding" in types
     assert "industry" in types
     assert "reference" in types
+    assert "yard_track" in types
 
 
 def test_list_annotated_segments_ids():
@@ -488,6 +501,7 @@ def test_list_annotated_segments_ids():
     assert "XP" in segs
     assert "KIEL" in segs
     assert "MP_ZERO" in segs
+    assert "WP LEAD" in segs   # YARD_TRACK combined id
 
 
 def test_list_annotated_segments_source_is_note():
@@ -631,6 +645,7 @@ def test_list_labeled_segments_tool():
     assert "XP" in ids
     assert "KIEL" in ids
     assert "MP_ZERO" in ids
+    assert "WP LEAD" in ids
 
 
 def test_validate_layout_tool_clean():
@@ -655,3 +670,178 @@ def test_export_layout_data_tool(tmp_path):
     data = json.loads(out.read_text())
     assert data["layout"] == "export_test"
     assert data["scale"] == "HO"
+
+
+# ---------------------------------------------------------------------------
+# SIDING: optional description
+# ---------------------------------------------------------------------------
+
+def test_siding_description_parsed():
+    """SIDING: XP North arrival → id=XP, description='North arrival'."""
+    layout = parse_file(EXPORT_FIXTURE)
+    results = {r.name: r for r in compute_capacities(layout)}
+    assert "XP" in results
+    assert results["XP"].description == "North arrival"
+
+
+def test_siding_no_description_empty():
+    """FreightHouse note has description; CarBarn also. Verify via _note_prefix directly."""
+    from xtrkcad_mcp.stations import _note_prefix
+    result = _note_prefix("SIDING: BB")
+    assert result is not None
+    kind, name, desc = result
+    assert name == "BB"
+    assert desc == ""
+
+
+# ---------------------------------------------------------------------------
+# INDUSTRY: description and car_spots export
+# ---------------------------------------------------------------------------
+
+def test_industry_description_parsed():
+    """INDUSTRY: KIEL Coal dealer → description='Coal dealer'."""
+    layout = parse_file(EXPORT_FIXTURE)
+    results = {r.name: r for r in compute_capacities(layout)}
+    assert results["KIEL"].description == "Coal dealer"
+
+
+def test_industry_car_spots_in_export():
+    """KIEL has spots: 2 in stations.yaml → car_spots=2 in export JSON."""
+    layout = parse_file(EXPORT_FIXTURE)
+    config = load_stations_config(EXPORT_STATIONS)
+    data = build_layout_export(layout, config)
+    kiel = next(i for i in data["industries"] if i["industry_id"] == "KIEL")
+    assert kiel["car_spots"] == 2
+
+
+def test_industry_spur_description_in_export():
+    """KIEL spur description should appear in export industries list."""
+    layout = parse_file(EXPORT_FIXTURE)
+    config = load_stations_config(EXPORT_STATIONS)
+    data = build_layout_export(layout, config)
+    kiel = next(i for i in data["industries"] if i["industry_id"] == "KIEL")
+    assert kiel["spur_description"] == "Coal dealer"
+
+
+def test_stations_siding_description_in_export():
+    """XP siding description should appear in export stations list."""
+    layout = parse_file(EXPORT_FIXTURE)
+    config = load_stations_config(EXPORT_STATIONS)
+    data = build_layout_export(layout, config)
+    xp = next(s for s in data["stations"] if s["station_id"] == "XP")
+    assert xp["siding_description"] == "North arrival"
+
+
+# ---------------------------------------------------------------------------
+# compute_yard_tracks
+# ---------------------------------------------------------------------------
+
+def test_compute_yard_tracks_finds_wp_lead():
+    """YARD_TRACK: WP LEAD note in fixture → one result with yard_id=WP, label=LEAD."""
+    layout = parse_file(EXPORT_FIXTURE)
+    results = compute_yard_tracks(layout)
+    assert len(results) == 1
+    yt = results[0]
+    assert yt.yard_id == "WP"
+    assert yt.label == "LEAD"
+
+
+def test_compute_yard_tracks_length():
+    """YARD_TRACK note at x=10 snaps to track 1 (x=0..20); BFS covers main 1-6 = 120in."""
+    layout = parse_file(EXPORT_FIXTURE)
+    results = compute_yard_tracks(layout)
+    yt = results[0]
+    assert yt.length_model_in == pytest.approx(120.0, abs=0.5)
+
+
+def test_yard_tracks_in_export():
+    """yard_tracks array should appear in export JSON with WP/LEAD entry."""
+    layout = parse_file(EXPORT_FIXTURE)
+    config = load_stations_config(EXPORT_STATIONS)
+    data = build_layout_export(layout, config)
+    assert "yard_tracks" in data
+    yts = {(r["yard_id"], r["label"]) for r in data["yard_tracks"]}
+    assert ("WP", "LEAD") in yts
+
+
+def test_load_stations_config_spots():
+    """spots field from YAML should be loaded into StationEntry."""
+    config = load_stations_config(EXPORT_STATIONS)
+    kiel = next(s for s in config.stations if s.id == "KIEL")
+    assert kiel.spots == 2
+
+
+def test_load_stations_config_spots_none_for_station():
+    """Station entries without spots: should default to None."""
+    config = load_stations_config(EXPORT_STATIONS)
+    wp = next(s for s in config.stations if s.id == "WP")
+    assert wp.spots is None
+
+
+# ---------------------------------------------------------------------------
+# @MP_ZERO ref_tag — station adopts reference endpoint for routing
+# ---------------------------------------------------------------------------
+
+def test_extract_stations_parses_ref_tag():
+    """'STATION: WP @MP_ZERO' should produce name='WP' and ref_tag='MP_ZERO'."""
+    layout = parse_file(EXPORT_FIXTURE)
+    # Temporarily patch the WP note text to include @MP_ZERO
+    from xtrkcad_mcp.stations import extract_stations
+    for note in layout.notes:
+        if note.text == "STATION: WP":
+            note.text = "STATION: WP @MP_ZERO"
+    stations = {s.name: s for s in extract_stations(layout)}
+    assert "WP" in stations
+    assert stations["WP"].ref_tag == "MP_ZERO"
+
+
+def test_extract_stations_no_ref_tag_by_default():
+    """Plain 'STATION: WP' should have ref_tag=None."""
+    layout = parse_file(EXPORT_FIXTURE)
+    stations = {s.name: s for s in extract_stations(layout)}
+    assert stations["WP"].ref_tag is None
+
+
+def test_resolve_station_endpoints_uses_reference_ep():
+    """Station with @MP_ZERO should get the reference point's nearest_ep."""
+    from xtrkcad_mcp.stations import extract_stations, extract_reference_points, _resolve_station_endpoints
+    layout = parse_file(EXPORT_FIXTURE)
+    for note in layout.notes:
+        if note.text == "STATION: WP":
+            note.text = "STATION: WP @MP_ZERO"
+    stations = {s.name: s for s in _resolve_station_endpoints(extract_stations(layout), layout)}
+    refs = {r.name: r for r in extract_reference_points(layout)}
+    assert stations["WP"].nearest_ep == refs["MP_ZERO"].nearest_ep
+
+
+def test_distance_report_ordering_by_milepost(tmp_path):
+    """Stations in distance report should appear in milepost order (WP first)."""
+    import os
+    os.environ["XTRKCAD_PLANS_DIR"] = str(FIXTURES_DIR)
+    from xtrkcad_mcp.server import write_station_distance_report
+    # Patch WP note to @MP_ZERO
+    import copy
+    layout = parse_file(EXPORT_FIXTURE)
+    for note in layout.notes:
+        if note.text == "STATION: WP":
+            note.text = "STATION: WP @MP_ZERO"
+
+    out = tmp_path / "distances.md"
+    # Write using the original unmodified fixture — WP won't have @MP_ZERO but
+    # ordering should still put WP first since it's near MP_ZERO
+    write_station_distance_report(str(EXPORT_FIXTURE), str(out))
+    content = out.read_text()
+    # WP should appear in the first data row (nearest to MP_ZERO)
+    lines = [l for l in content.splitlines() if "|" in l and "From" not in l and "---" not in l]
+    assert lines[0].split("|")[1].strip() == "WP"
+
+
+def test_distance_report_mp_columns_present(tmp_path):
+    """Distance report markdown should include MP column headers."""
+    import os
+    os.environ["XTRKCAD_PLANS_DIR"] = str(FIXTURES_DIR)
+    from xtrkcad_mcp.server import write_station_distance_report
+    out = tmp_path / "distances.md"
+    write_station_distance_report(str(EXPORT_FIXTURE), str(out))
+    content = out.read_text()
+    assert "MP (ft)" in content

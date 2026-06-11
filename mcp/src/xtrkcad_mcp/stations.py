@@ -34,6 +34,7 @@ SIDING_PREFIX = "SIDING:"
 STORAGE_PREFIX = "STORAGE:"
 INDUSTRY_PREFIX = "INDUSTRY:"
 REFERENCE_PREFIX = "REFERENCE:"
+YARD_TRACK_PREFIX = "YARD_TRACK:"
 _INF = float("inf")
 
 _ALL_PREFIXES: list[tuple[str, str]] = [
@@ -42,6 +43,7 @@ _ALL_PREFIXES: list[tuple[str, str]] = [
     (STORAGE_PREFIX, "storage"),
     (INDUSTRY_PREFIX, "industry"),
     (REFERENCE_PREFIX, "reference"),
+    (YARD_TRACK_PREFIX, "yard_track"),
 ]
 
 _SNAP_WARN_THRESHOLD = 12.0  # model inches — warn if NOTE is more than 1 model foot from track
@@ -56,6 +58,7 @@ class Station:
     y: float           # NOTE position y (model inches)
     nearest_ep: tuple[int, int]   # (track_id, ep_idx)
     snap_dist: float              # distance from NOTE to nearest endpoint
+    ref_tag: str | None = None    # @<name> token — station is co-located with REFERENCE:<name>
 
 
 @dataclass
@@ -86,9 +89,12 @@ def extract_stations(layout: Layout) -> list[Station]:
         text = note.text.strip()
         if not text.upper().startswith(STATION_PREFIX):
             continue
-        name = text[len(STATION_PREFIX):].strip()
-        if not name:
+        body = text[len(STATION_PREFIX):].strip()
+        tokens = body.split()
+        if not tokens:
             continue
+        name = tokens[0]
+        ref_tag = next((t[1:] for t in tokens[1:] if t.startswith("@")), None)
 
         best_track_id = -1
         best_ep_idx = 0
@@ -109,9 +115,42 @@ def extract_stations(layout: Layout) -> list[Station]:
                 y=note.y,
                 nearest_ep=(best_track_id, best_ep_idx),
                 snap_dist=best_dist,
+                ref_tag=ref_tag,
             ))
 
     return stations
+
+
+def _resolve_station_endpoints(
+    stations: list[Station],
+    layout: Layout,
+) -> list[Station]:
+    """Return a copy of stations with ref-tagged stations' nearest_ep replaced.
+
+    A station annotated with '@MP_ZERO' (or any '@<ref>') adopts the graph
+    endpoint of the matching REFERENCE: note so that Dijkstra can route to it
+    even when the station NOTE is placed on an isolated yard track.
+    """
+    refs = {r.name: r for r in extract_reference_points(layout)}
+    if not refs:
+        return stations
+
+    resolved: list[Station] = []
+    for s in stations:
+        if s.ref_tag and s.ref_tag in refs:
+            ref = refs[s.ref_tag]
+            resolved.append(Station(
+                name=s.name,
+                note_id=s.note_id,
+                x=s.x,
+                y=s.y,
+                nearest_ep=ref.nearest_ep,
+                snap_dist=s.snap_dist,
+                ref_tag=s.ref_tag,
+            ))
+        else:
+            resolved.append(s)
+    return resolved
 
 
 def _build_ep_graph(
@@ -212,7 +251,7 @@ def compute_distances(
         exclude_turnouts: if True, TURNOUT track lengths are treated as 0
             (the turnout acts as a free connection, not adding to distance).
     """
-    stations = extract_stations(layout)
+    stations = _resolve_station_endpoints(extract_stations(layout), layout)
     if len(stations) < 2:
         return []
 
@@ -255,7 +294,8 @@ def compute_distances(
 @dataclass
 class CapacityResult:
     """Usable track length and car count for a named SIDING: or STORAGE: marker."""
-    name: str
+    name: str                    # station/siding ID (first token after prefix)
+    description: str             # optional human label (text after the ID token)
     kind: str                    # "siding" or "storage"
     note_id: int
     nearest_track_id: int
@@ -264,16 +304,53 @@ class CapacityResult:
     max_cars: int                # whole cars (Fugate formula: model feet × cars/model-ft)
 
 
-def _note_prefix(text: str) -> tuple[str, str] | None:
-    """Return (kind, name) if the NOTE text matches SIDING:, STORAGE:, or INDUSTRY:, else None."""
+@dataclass
+class YardTrackResult:
+    """Capacity measurement for a YARD_TRACK: marker."""
+    yard_id: str
+    label: str
+    note_id: int
+    nearest_track_id: int
+    length_model_in: float
+    length_real_ft: float
+    car_capacity: int
+
+
+def _note_prefix(text: str) -> tuple[str, str, str] | None:
+    """Return (kind, id, description) for any recognised annotation prefix.
+
+    The ID is the first whitespace-delimited token after the prefix.
+    Everything after the ID is the optional human-readable description.
+
+    Examples:
+      'SIDING: WP Platform arrival track' → ('siding', 'WP', 'Platform arrival track')
+      'YARD_TRACK: WP LEAD'              → ('yard_track', 'WP', 'LEAD')
+      'STATION: WP'                      → ('station', 'WP', '')
+      'REFERENCE: MP_ZERO'               → ('reference', 'MP_ZERO', '')
+    """
     upper = text.strip().upper()
-    if upper.startswith(SIDING_PREFIX):
-        return "siding", text.strip()[len(SIDING_PREFIX):].strip()
-    if upper.startswith(STORAGE_PREFIX):
-        return "storage", text.strip()[len(STORAGE_PREFIX):].strip()
-    if upper.startswith(INDUSTRY_PREFIX):
-        return "industry", text.strip()[len(INDUSTRY_PREFIX):].strip()
+    for prefix, kind in (
+        (STATION_PREFIX, "station"),
+        (SIDING_PREFIX, "siding"),
+        (STORAGE_PREFIX, "storage"),
+        (INDUSTRY_PREFIX, "industry"),
+        (REFERENCE_PREFIX, "reference"),
+        (YARD_TRACK_PREFIX, "yard_track"),
+    ):
+        if upper.startswith(prefix):
+            body = text.strip()[len(prefix):].strip()
+            parts = body.split(None, 1)
+            if not parts:
+                return None
+            return kind, parts[0], parts[1] if len(parts) > 1 else ""
     return None
+
+
+def _is_main_layer(name: str) -> bool:
+    """Return True if the layer name denotes a main track layer."""
+    lower = name.lower()
+    # Standard: "L1-Main", "L2-Main"; legacy: "L1-Track"
+    return lower.endswith("-main") or lower.endswith("-track")
 
 
 def _bfs_usable_length(
@@ -351,7 +428,9 @@ def compute_capacities(layout: Layout) -> list[CapacityResult]:
         parsed = _note_prefix(note.text)
         if parsed is None:
             continue
-        kind, name = parsed
+        kind, name, description = parsed
+        if kind not in ("siding", "storage", "industry"):
+            continue
         if not name:
             continue
 
@@ -366,12 +445,64 @@ def compute_capacities(layout: Layout) -> list[CapacityResult]:
 
         results.append(CapacityResult(
             name=name,
+            description=description,
             kind=kind,
             note_id=note.id,
             nearest_track_id=nearest_id,
             length_model_in=length_in,
             length_real_ft=proto_ft,
             max_cars=max_cars,
+        ))
+
+    return results
+
+
+def compute_yard_tracks(layout: Layout) -> list[YardTrackResult]:
+    """Compute usable length and car capacity for every YARD_TRACK: note.
+
+    Note format: YARD_TRACK: <yard_id> <label>
+    e.g.  YARD_TRACK: WP LEAD1
+          YARD_TRACK: QM1 LOADING
+
+    BFS walks connected non-TURNOUT tracks from the nearest endpoint, same
+    as compute_capacities.  Returns one YardTrackResult per note.
+    """
+    if not layout.tracks:
+        return []
+
+    scale = layout.scale or "HO"
+    cpf = cars_per_real_ft(scale)
+    results: list[YardTrackResult] = []
+
+    for note in layout.notes:
+        if note.op != 0:
+            continue
+        text = note.text.strip()
+        if not text.upper().startswith(YARD_TRACK_PREFIX):
+            continue
+        body = text[len(YARD_TRACK_PREFIX):].strip()
+        parts = body.split(None, 1)
+        if len(parts) < 2:
+            continue
+        yard_id, label = parts[0], parts[1]
+
+        nearest_id = _snap_to_track(layout, note.x, note.y)
+        if nearest_id < 0:
+            continue
+
+        length_in = _bfs_usable_length(layout, nearest_id)
+        model_ft = length_in / 12.0
+        proto_ft = model_in_to_proto_ft(length_in, scale)
+        capacity = int(model_ft * cpf)
+
+        results.append(YardTrackResult(
+            yard_id=yard_id,
+            label=label,
+            note_id=note.id,
+            nearest_track_id=nearest_id,
+            length_model_in=length_in,
+            length_real_ft=proto_ft,
+            car_capacity=capacity,
         ))
 
     return results
@@ -391,6 +522,7 @@ class StationEntry:
     types: list[str]              # "station", "industry", "yard", "staging"
     switchback: bool = False
     within_limits_of: str | None = None
+    spots: int | None = None      # industry car spots (operational); None = derive from length
 
 
 @dataclass
@@ -409,6 +541,7 @@ def load_stations_config(path: str | Path) -> StationsConfig:
 
     entries: list[StationEntry] = []
     for s in data.get("stations", []):
+        raw_spots = s.get("spots")
         entries.append(StationEntry(
             id=s["id"],
             name=s.get("name", s["id"]),
@@ -416,6 +549,7 @@ def load_stations_config(path: str | Path) -> StationsConfig:
             types=list(s.get("types", ["station"])),
             switchback=bool(s.get("switchback", False)),
             within_limits_of=s.get("within_limits_of"),
+            spots=int(raw_spots) if raw_spots is not None else None,
         ))
 
     return StationsConfig(
@@ -506,7 +640,7 @@ def compute_mileposts(
     Milepost = prototype_feet_from_ref / mp_scale.
     With the default mp_scale=1.0, 1 milepost unit == 1 prototype foot of track.
     """
-    stations = extract_stations(layout)
+    stations = _resolve_station_endpoints(extract_stations(layout), layout)
     if not stations:
         return []
 
@@ -515,6 +649,16 @@ def compute_mileposts(
 
     results: list[MilepostResult] = []
     for station in stations:
+        # Stations tagged @<ref_name> that match this reference are at MP 0
+        if station.ref_tag and station.ref_tag == ref.name:
+            results.append(MilepostResult(
+                station_id=station.name,
+                note_id=station.note_id,
+                milepost=0.0,
+                distance_model_in=0.0,
+                reachable=True,
+            ))
+            continue
         d = dist_from_ref.get(station.nearest_ep, _INF)
         reachable = d < _INF
         if reachable:
@@ -570,15 +714,16 @@ def list_annotated_segments(layout: Layout) -> list[AnnotatedSegment]:
         text = note.text.strip()
         upper = text.upper()
 
-        matched_type: str | None = None
-        matched_id: str | None = None
-        for prefix, atype in _ALL_PREFIXES:
-            if upper.startswith(prefix):
-                matched_type = atype
-                matched_id = text[len(prefix):].strip()
-                break
+        parsed = _note_prefix(text)
+        if not parsed:
+            continue
+        _kind, matched_id, _desc = parsed
+        matched_type = _kind
+        # YARD_TRACK annotation_id combines yard_id and label to stay unique
+        if _kind == "yard_track" and _desc:
+            matched_id = f"{matched_id} {_desc}"
 
-        if not matched_type or not matched_id:
+        if not matched_id:
             continue
 
         best_id = -1
@@ -626,6 +771,8 @@ class ValidationIssue:
     code: str                 # short machine-readable code
     location_id: str | None   # station/industry id, or None for global issues
     message: str
+    x: float | None = None    # layout coordinate for placement (model inches)
+    y: float | None = None
 
 
 def validate_layout_annotations(
@@ -702,6 +849,13 @@ def validate_layout_annotations(
     # Warn if any NOTE is far from its nearest track
     for seg in segments:
         if seg.snap_dist > _SNAP_WARN_THRESHOLD:
+            # Find the note position for placement
+            note_x: float | None = None
+            note_y: float | None = None
+            for n in layout.notes:
+                if n.id == seg.note_id:
+                    note_x, note_y = n.x, n.y
+                    break
             issues.append(ValidationIssue(
                 severity="warning",
                 code="FAR_SNAP",
@@ -710,7 +864,71 @@ def validate_layout_annotations(
                     f"Note '{seg.note_text}' is {seg.snap_dist:.1f} model in from "
                     f"nearest track (threshold {_SNAP_WARN_THRESHOLD} in)"
                 ),
+                x=note_x, y=note_y,
             ))
+
+    # Track-level structural checks
+    main_layer_ids: set[int] = {
+        idx for idx, li in layout.layers.items() if _is_main_layer(li.name)
+    }
+    if main_layer_ids:
+        track_by_id = {t.id: t for t in layout.tracks}
+        for track in layout.tracks:
+            if track.layer not in main_layer_ids or track.kind == "TURNOUT":
+                continue
+            cx = (sum(ep.x for ep in track.endpoints) / len(track.endpoints)
+                  if track.endpoints else 0.0)
+            cy = (sum(ep.y for ep in track.endpoints) / len(track.endpoints)
+                  if track.endpoints else 0.0)
+            length_in = track.length_model_inches()
+
+            has_main_neighbor = False
+            has_nonmain_neighbor = False
+            has_main_turnout_neighbor = False
+            target_layer_name: str | None = None
+
+            for ep in track.endpoints:
+                if ep.connected_to is None:
+                    continue
+                nb = track_by_id.get(ep.connected_to)
+                if nb is None:
+                    continue
+                if nb.layer in main_layer_ids:
+                    has_main_neighbor = True
+                    if nb.kind == "TURNOUT":
+                        has_main_turnout_neighbor = True
+                else:
+                    has_nonmain_neighbor = True
+                    if target_layer_name is None:
+                        nb_li = layout.layers.get(nb.layer)
+                        if nb_li:
+                            target_layer_name = nb_li.name
+
+            if not has_main_neighbor:
+                issues.append(ValidationIssue(
+                    severity="warning",
+                    code="ISOLATED_MAIN_TRACK",
+                    location_id=None,
+                    message=(
+                        f"T{track.id} ({length_in:.1f}in {track.kind}) at "
+                        f"({cx:.1f}, {cy:.1f}) is on a main layer but has no "
+                        f"main-layer connections — check layer assignment"
+                    ),
+                    x=cx, y=cy,
+                ))
+            elif has_main_turnout_neighbor and has_nonmain_neighbor:
+                suggest = target_layer_name or "non-main layer"
+                issues.append(ValidationIssue(
+                    severity="warning",
+                    code="LAYER_BRIDGE_TRACK",
+                    location_id=None,
+                    message=(
+                        f"T{track.id} ({length_in:.1f}in {track.kind}) at "
+                        f"({cx:.1f}, {cy:.1f}) bridges main layer and {suggest} — "
+                        f"suggest moving to {suggest}"
+                    ),
+                    x=cx, y=cy,
+                ))
 
     return issues
 
@@ -766,6 +984,9 @@ def build_layout_export(
     capacities = compute_capacities(layout)
     cap_by_name: dict[str, CapacityResult] = {c.name: c for c in capacities}
 
+    # Yard track capacities
+    yard_tracks = compute_yard_tracks(layout)
+
     # --- Stations ---
     station_entries = sorted(
         [e for e in stations_config.stations if any(t in e.types for t in ("station", "yard", "staging"))],
@@ -793,6 +1014,7 @@ def build_layout_export(
             "milepost_exit": round(mp_exit, 3) if mp_exit is not None else None,
             "siding_length_ft": round(siding_ft, 3) if siding_ft is not None else None,
             "siding_length_cars": siding_cars,
+            "siding_description": cap.description if cap else None,
             "switchback": entry.switchback,
         })
 
@@ -825,6 +1047,8 @@ def build_layout_export(
             "branch_milepost": round(branch_mp, 3) if branch_mp is not None else None,
             "spur_length_ft": round(spur_ft, 3) if spur_ft is not None else None,
             "spur_length_cars": spur_cars,
+            "spur_description": cap.description if cap else None,
+            "car_spots": entry.spots,
             "switchback": entry.switchback,
         })
 
@@ -844,6 +1068,18 @@ def build_layout_export(
             "length_ft": length,
         })
 
+    # --- Yard tracks ---
+    yard_tracks_out = [
+        {
+            "yard_id": yt.yard_id,
+            "label": yt.label,
+            "track_id": yt.nearest_track_id,
+            "length_ft": round(yt.length_real_ft, 3),
+            "car_capacity": yt.car_capacity,
+        }
+        for yt in sorted(yard_tracks, key=lambda r: (r.yard_id, r.label))
+    ]
+
     return {
         "generated": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "layout": stations_config.layout,
@@ -851,5 +1087,6 @@ def build_layout_export(
         "stations": stations_out,
         "industries": industries_out,
         "segments": segments_out,
+        "yard_tracks": yard_tracks_out,
         "warnings": warnings,
     }

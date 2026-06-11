@@ -16,11 +16,13 @@ from xtrkcad_mcp.stations import (
     build_layout_export,
     compute_capacities,
     compute_distances,
+    extract_reference_points,
     extract_stations,
     list_annotated_segments,
     load_stations_config,
     model_in_to_proto_ft,
     validate_layout_annotations,
+    _resolve_station_endpoints,
 )
 
 logging.basicConfig(level=os.environ.get("XTRKCAD_LOG_LEVEL", "INFO"))
@@ -733,6 +735,11 @@ _SUFFIX_TO_CATEGORY: dict[str, str] = {
     "service":    "service",
     "benchwork":  "ignore",
     "track":      "mainline",   # backward compat with pre-spec generated files
+    # Foreign railroad layers — excluded from all NYE operation density calculations
+    "co-main":    "ignore",
+    "co-passing": "ignore",
+    "co-storage": "ignore",
+    "co-staging": "ignore",
 }
 
 
@@ -2524,7 +2531,7 @@ def write_station_distance_report(
     p = _resolve_plan(path)
     layout = parse_file(p)
     fmt = _resolve_format(output_path, format)
-    stations = extract_stations(layout)
+    raw_stations = _resolve_station_endpoints(extract_stations(layout), layout)
     results = compute_distances(
         layout,
         layer_categories=layer_categories,
@@ -2541,6 +2548,62 @@ def write_station_distance_report(
     if exclude_turnouts:
         filter_note += " (turnouts excluded)"
 
+    # Sort stations by milepost from MP_ZERO (if reference exists).
+    # Stations with @MP_ZERO tag sort first at 0; unreachable sort after reachable.
+    from xtrkcad_mcp.stations import _build_ep_graph, _dijkstra, DistanceResult
+    _INF = float("inf")
+    refs = {r.name: r for r in extract_reference_points(layout)}
+    mp_zero = refs.get("MP_ZERO")
+
+    # Build station_mp dict: station_name → prototype-ft from MP_ZERO (None if unknown)
+    station_mp: dict[str, float | None] = {}
+    if mp_zero:
+        adj = _build_ep_graph(layout, None, False)
+        dist_from_ref = _dijkstra(adj, mp_zero.nearest_ep)
+        for s in raw_stations:
+            if s.ref_tag == "MP_ZERO":
+                station_mp[s.name] = 0.0
+            else:
+                d = dist_from_ref.get(s.nearest_ep, _INF)
+                if d < _INF:
+                    station_mp[s.name] = model_in_to_proto_ft(d, layout.scale or "HO")
+                else:
+                    station_mp[s.name] = None
+
+    def _sort_key(s) -> float:
+        v = station_mp.get(s.name)
+        return v if v is not None else _INF
+
+    stations = sorted(raw_stations, key=_sort_key) if mp_zero else raw_stations
+    station_order = {s.name: i for i, s in enumerate(stations)}
+
+    # Re-order distance pairs to match sorted stations; orient each pair low→high MP
+    def _pair_key(r):
+        a = station_order.get(r.from_station, 999)
+        b = station_order.get(r.to_station, 999)
+        return (min(a, b), max(a, b))
+
+    ordered_results = []
+    for r in sorted(results, key=_pair_key):
+        fa = station_order.get(r.from_station, 0)
+        fb = station_order.get(r.to_station, 0)
+        if fa <= fb:
+            ordered_results.append(r)
+        else:
+            ordered_results.append(DistanceResult(
+                from_station=r.to_station,
+                to_station=r.from_station,
+                distance_model_in=r.distance_model_in,
+                distance_proto_ft=r.distance_proto_ft,
+                reachable=r.reachable,
+            ))
+
+    def _mp_str(name: str) -> str:
+        v = station_mp.get(name)
+        if v is None:
+            return "—"
+        return f"{v:.0f}"
+
     if fmt == "json":
         import json
         payload = {
@@ -2548,20 +2611,25 @@ def write_station_distance_report(
             "scale": scale,
             "route_filter": route_layer_names or "all",
             "exclude_turnouts": exclude_turnouts,
-            "stations": [s.name for s in stations],
+            "stations": [
+                {"name": s.name, "milepost_ft": station_mp.get(s.name)}
+                for s in stations
+            ],
             "distances": [
                 {
                     "from": r.from_station,
+                    "from_mp_ft": station_mp.get(r.from_station),
                     "to": r.to_station,
+                    "to_mp_ft": station_mp.get(r.to_station),
                     "distance_model_in": round(r.distance_model_in, 2),
                     "distance_proto_ft": round(r.distance_proto_ft, 1),
                     "reachable": r.reachable,
                 }
-                for r in results
+                for r in ordered_results
             ],
         }
         out.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-        return f"Wrote JSON station distance report to {out} ({len(results)} pairs)"
+        return f"Wrote JSON station distance report to {out} ({len(ordered_results)} pairs)"
 
     # Markdown
     lines: list[str] = [
@@ -2572,19 +2640,22 @@ def write_station_distance_report(
         lines.append(
             "_No stations found. Add NOTE objects with text beginning 'STATION: <name>'._"
         )
-    elif not results:
+    elif not ordered_results:
         lines.append("_Only one station found — need at least two to compute distances._")
     else:
-        headers = ["From", "To", "Model (in)", f"Proto (ft) [{scale}]", "Reachable"]
+        mp_col = "MP (ft)" if mp_zero else "MP"
+        headers = ["From", mp_col, "To", mp_col, "Model (in)", f"Proto (ft) [{scale}]", "Reachable"]
         rows = [
             [
                 r.from_station,
+                _mp_str(r.from_station),
                 r.to_station,
+                _mp_str(r.to_station),
                 f"{r.distance_model_in:.2f}" if r.reachable else "—",
                 f"{r.distance_proto_ft:.0f}" if r.reachable else "—",
                 "yes" if r.reachable else "no",
             ]
-            for r in results
+            for r in ordered_results
         ]
         lines.extend(_md_table(headers, rows))
         lines.append("")
@@ -2593,7 +2664,7 @@ def write_station_distance_report(
         )
 
     out.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    return f"Wrote station distance report to {out} ({len(stations)} station(s), {len(results)} pair(s))"
+    return f"Wrote station distance report to {out} ({len(stations)} station(s), {len(ordered_results)} pair(s))"
 
 
 @mcp.tool()
@@ -2611,7 +2682,8 @@ def get_siding_capacities(path: str) -> list[dict]:
         path: Path to the .xtc layout file (absolute or relative to XTRKCAD_PLANS_DIR).
 
     Returns a list of dicts with keys:
-        name            — marker label (text after 'SIDING:' / 'STORAGE:')
+        name            — station/siding ID (first token after 'SIDING:' / 'STORAGE:')
+        description     — optional label from note text after the ID (may be "")
         kind            — "siding" or "storage"
         nearest_track_id
         length_model_in — usable length in model inches (turnouts excluded)
@@ -2624,6 +2696,7 @@ def get_siding_capacities(path: str) -> list[dict]:
     return [
         {
             "name": r.name,
+            "description": r.description,
             "kind": r.kind,
             "nearest_track_id": r.nearest_track_id,
             "length_model_in": round(r.length_model_in, 2),
@@ -2772,9 +2845,246 @@ def validate_layout(path: str, stations_yaml: str) -> dict:
                 "code": i.code,
                 "location_id": i.location_id,
                 "message": i.message,
+                "x": i.x,
+                "y": i.y,
             }
             for i in issues
         ],
+    }
+
+
+@mcp.tool()
+def write_validation_layer(
+    path: str,
+    stations_yaml: str,
+    output_path: str = "",
+) -> dict:
+    """Write a copy of the layout with a Validation layer marking each issue.
+
+    Runs all validate_layout checks (annotation gaps, ISOLATED_MAIN_TRACK,
+    LAYER_BRIDGE_TRACK, FAR_SNAP).  For every issue that has a layout
+    coordinate, a NOTE object is placed on a new 'Validation' layer (shown
+    in red) at the flagged position.  Issues without coordinates (e.g.
+    MISSING_REFERENCE) are listed in the return dict but get no marker.
+
+    Open the output file in XTrkCAD alongside the real layout, toggle the
+    Validation layer on/off to navigate to each flag.
+
+    Args:
+        path: Path to the source .xtc layout file.
+        stations_yaml: Path to the stations.yaml config file.
+        output_path: Destination path. Defaults to <stem>-validation.xtc
+                     alongside the source file.
+
+    Returns:
+        Dict with output path, placed count, total issues, and the full
+        issues list with coordinates.
+    """
+    from xtrkcad_mcp.generator import _parse_merge_blocks
+
+    p = _resolve_plan(path)
+    sy = Path(stations_yaml)
+    layout = parse_file(p)
+    config = load_stations_config(sy)
+    issues = validate_layout_annotations(layout, config)
+
+    if output_path:
+        out = Path(output_path)
+    else:
+        out = p.with_stem(p.stem + "-validation")
+
+    header_lines, blocks, max_id, param_version = _parse_merge_blocks(p)
+
+    # Determine next available layer index
+    max_layer = 0
+    for hl in header_lines:
+        s = hl.strip()
+        if s.startswith("LAYERS ") and "CURRENT" not in s:
+            parts = s.split()
+            try:
+                max_layer = max(max_layer, int(parts[1]))
+            except (IndexError, ValueError):
+                pass
+
+    val_layer_id = max_layer + 1
+    next_id = max_id + 1
+    note_lines: list[str] = []
+    placed_count = 0
+
+    for issue in issues:
+        if issue.x is None or issue.y is None:
+            continue
+        text = issue.message.replace('"', "'")
+        if param_version >= 12:
+            note_lines.append(
+                f'NOTE {next_id} {val_layer_id} 0 0 '
+                f'{issue.x:.6f} {issue.y:.6f} 0 0 "{text}"'
+            )
+        else:
+            byte_count = len(text.encode("utf-8"))
+            note_lines.append(
+                f'NOTE {next_id} {val_layer_id} 0 0 '
+                f'{issue.x:.6f} {issue.y:.6f} 0 {byte_count}'
+            )
+            note_lines.append(text)
+            note_lines.append("END")
+        next_id += 1
+        placed_count += 1
+
+    if not note_lines:
+        return {
+            "output": None,
+            "placed": 0,
+            "total_issues": len(issues),
+            "message": "No coordinate-bearing issues — validation layer not written.",
+            "issues": [
+                {"severity": i.severity, "code": i.code,
+                 "location_id": i.location_id, "message": i.message}
+                for i in issues
+            ],
+        }
+
+    # Insert Validation layer into header (after last LAYERS line)
+    _VAL_COLOR = 16711680  # bright red
+    val_layer_line = (
+        f'LAYERS {val_layer_id} 1 0 1 {_VAL_COLOR} 0 0 0 0 "Validation" '
+    )
+    new_header = list(header_lines)
+    last_layers_idx = -1
+    for i, hl in enumerate(new_header):
+        if hl.strip().startswith("LAYERS"):
+            last_layers_idx = i
+    if last_layers_idx >= 0:
+        new_header.insert(last_layers_idx + 1, val_layer_line)
+    else:
+        new_header.append(val_layer_line)
+
+    output: list[str] = list(new_header)
+    for _kw, _layer, raw_lines, _sub in blocks:
+        output.extend(raw_lines)
+    output.extend(note_lines)
+    if param_version >= 12:
+        output.append("END$TRACKS")
+
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text("\n".join(output) + "\n", encoding="utf-8")
+
+    return {
+        "output": str(out),
+        "placed": placed_count,
+        "total_issues": len(issues),
+        "issues": [
+            {
+                "severity": i.severity,
+                "code": i.code,
+                "location_id": i.location_id,
+                "message": i.message,
+                "x": i.x,
+                "y": i.y,
+            }
+            for i in issues
+        ],
+    }
+
+
+@mcp.tool()
+def check_aisle_clearance(
+    layout_config_yaml: str,
+    min_clearance_in: float = 30.0,
+    preferred_clearance_in: float = 36.0,
+) -> dict:
+    """Check minimum aisle width between facing benchwork sections.
+
+    Loads the benchwork sections from the layout config YAML, computes an
+    axis-aligned bounding box for each section, and reports section pairs
+    that face each other across an aisle with less than the required gap.
+
+    'Facing' means the sections' bounding boxes overlap when projected onto
+    one axis — i.e., they are truly across from each other, not on diagonal
+    corners.  Only the gap in the perpendicular axis is reported.
+
+    Args:
+        layout_config_yaml: Path to the layout config YAML (may reference a
+            benchwork_file: for the section list).
+        min_clearance_in: Minimum required aisle width in model inches
+            (default 30.0).  Gaps below this are errors.
+        preferred_clearance_in: Preferred aisle width (default 36.0).
+            Gaps between min and preferred are warnings.
+
+    Returns:
+        Dict with error_count, warning_count, and an issues list with
+        section labels, direction, and measured clearance.
+    """
+    from xtrkcad_mcp.config import load_config
+
+    cfg_path = Path(layout_config_yaml).expanduser().resolve()
+    cfg_result = load_config(str(cfg_path))
+    sections = cfg_result.config.benchwork_sections
+
+    def _bbox(bw) -> tuple[float, float, float, float]:
+        xs = [float(v[0]) for v in bw.vertices]
+        ys = [float(v[1]) for v in bw.vertices]
+        return min(xs), min(ys), max(xs), max(ys)
+
+    by_level: dict[int, list] = {}
+    for bw in sections:
+        by_level.setdefault(bw.level, []).append(bw)
+
+    issues: list[dict] = []
+
+    for level, lvl_sections in sorted(by_level.items()):
+        bboxes = [(bw, _bbox(bw)) for bw in lvl_sections]
+        for i, (bw_a, (ax0, ay0, ax1, ay1)) in enumerate(bboxes):
+            for bw_b, (bx0, by0, bx1, by1) in bboxes[i + 1:]:
+                x_overlap = ax0 < bx1 and bx0 < ax1
+                y_overlap = ay0 < by1 and by0 < ay1
+
+                if x_overlap and not y_overlap:
+                    gap = max(by0 - ay1, ay0 - by1)
+                    if gap < preferred_clearance_in:
+                        sev = "error" if gap < min_clearance_in else "warning"
+                        issues.append({
+                            "severity": sev,
+                            "level": level,
+                            "section_a": bw_a.label,
+                            "section_b": bw_b.label,
+                            "direction": "N-S",
+                            "clearance_in": round(gap, 1),
+                            "message": (
+                                f"L{level} '{bw_a.label}' ↔ '{bw_b.label}': "
+                                f"{gap:.1f}\" N-S clearance "
+                                f"({'< minimum' if gap < min_clearance_in else '< preferred'})"
+                            ),
+                        })
+                elif y_overlap and not x_overlap:
+                    gap = max(bx0 - ax1, ax0 - bx1)
+                    if gap < preferred_clearance_in:
+                        sev = "error" if gap < min_clearance_in else "warning"
+                        issues.append({
+                            "severity": sev,
+                            "level": level,
+                            "section_a": bw_a.label,
+                            "section_b": bw_b.label,
+                            "direction": "E-W",
+                            "clearance_in": round(gap, 1),
+                            "message": (
+                                f"L{level} '{bw_a.label}' ↔ '{bw_b.label}': "
+                                f"{gap:.1f}\" E-W clearance "
+                                f"({'< minimum' if gap < min_clearance_in else '< preferred'})"
+                            ),
+                        })
+
+    errors = [i for i in issues if i["severity"] == "error"]
+    warnings = [i for i in issues if i["severity"] == "warning"]
+
+    return {
+        "layout": cfg_result.config.name,
+        "min_clearance_in": min_clearance_in,
+        "preferred_clearance_in": preferred_clearance_in,
+        "section_count": len(sections),
+        "error_count": len(errors),
+        "warning_count": len(warnings),
+        "issues": issues,
     }
 
 
