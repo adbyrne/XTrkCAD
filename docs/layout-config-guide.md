@@ -530,6 +530,79 @@ pairs) and `not_found` (names that weren't in the file) so you can verify
 the result.  After renaming, `get_operation_density` will auto-categorize
 using the standard suffix rules with no extra arguments.
 
+### Annotating the layout for operations
+
+Once track is placed in XTrkCAD, add text **NOTE** objects to mark stations,
+industries, and reference points.  The annotation tools (`validate_layout`,
+`export_layout_data`, `get_siding_capacities`, `get_station_distances`) read
+these NOTEs to compute mileposts, siding lengths, and car capacities.
+
+#### NOTE prefixes
+
+| Prefix | Example | Purpose |
+|--------|---------|---------|
+| `STATION: <id>` | `STATION: WP` | Mainline station — milepost origin / destination |
+| `SIDING: <id>` | `SIDING: WP` | Siding track group — measures car capacity by BFS length |
+| `STORAGE: <id> <label>` | `STORAGE: WP_COAL Coal trestle` | Storage / yard track |
+| `INDUSTRY: <id>` | `INDUSTRY: KIEL` | Industry spur — spur length + branch milepost |
+| `REFERENCE: MP_ZERO` | `REFERENCE: MP_ZERO` | Milepost datum; required for milepost output |
+| `YARD_TRACK: <yard> <label>` | `YARD_TRACK: WP Caboose` | Individual yard track |
+
+Place each NOTE close to the track endpoint it labels.  The tool snaps the NOTE
+to the nearest endpoint; notes more than 12 model inches from any endpoint
+trigger a `FAR_SNAP` validation warning.
+
+#### Validating annotations
+
+```
+validate_layout("my_layout.xtc", "my_stations.yaml")
+```
+
+Reports missing notes, mis-placed notes, and cross-checks each annotation
+against the entries in `stations.yaml`.
+
+#### Car spots per industry
+
+Each `INDUSTRY:` spur's car capacity is derived automatically from the spur's
+BFS length using the Fugate formula (scale-dependent cars-per-foot).  To
+override the derived count, add `spots: N` to the industry entry in
+`stations.yaml`:
+
+```yaml
+stations:
+  - id: TIMBER
+    name: Timber Ltd
+    types: [industry]
+    within_limits_of: JC
+    spots: 3          # explicit override — 3 car spots regardless of spur length
+```
+
+#### Multiple industries on one spur
+
+When a single spur (team track or shared industrial lead) serves more than one
+customer, place one `INDUSTRY:` NOTE over each industry's section of the spur
+— directly over the track body, not necessarily at a track endpoint.
+
+The tool projects each NOTE perpendicularly onto the nearest track segment,
+groups notes that share the same spur (BFS component), and sorts them by
+distance from the dead-end (buffer-stop) endpoint.  Each industry is assigned
+one threshold-width slot (12 model inches ≈ one car length at HO).  The
+ordering in the output reflects which industry the switcher reaches first after
+clearing the turnout throat.
+
+```
+# Two industries on the same 60-inch spur:
+#   NOTE "INDUSTRY: COAL_A" placed over track at ~5 in from dead-end
+#   NOTE "INDUSTRY: COAL_B" placed over track at ~35 in from dead-end
+#
+# get_siding_capacities output:
+#   COAL_A  length=12 in  max_cars=2  (nearest dead-end → spotted first)
+#   COAL_B  length=12 in  max_cars=2
+```
+
+Set `spots:` in `stations.yaml` for either industry to override the slot-width
+car count with an explicit value.
+
 ---
 
 ## 5. Grid placements

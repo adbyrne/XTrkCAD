@@ -373,6 +373,86 @@ def test_industry_length():
 
 
 # ---------------------------------------------------------------------------
+# Multi-industry spur — shared spur slot-based capacity
+# ---------------------------------------------------------------------------
+
+def _make_shared_spur_layout():
+    """Three STRAIGHT tracks forming a 60-inch spur; TURNOUT at the throat end.
+
+    track 1:  E(0,0)  → T(20,0)   dead-end (buffer stop) at x=0
+    track 2: T(20,0)  → T(40,0)
+    track 3: T(40,0)  → T(60,0)   connects to TURNOUT (track 4)
+    track 4: TURNOUT  T(60,0) → E(80,0)  — throat, excluded from spur BFS
+
+    COAL_A at (5, 0)  — 5 model inches from dead-end
+    COAL_B at (35, 0) — 35 model inches from dead-end
+    """
+    from xtrkcad_mcp.models import Endpoint, Layout, NoteObject, TrackObject
+    t1 = TrackObject(id=1, kind="STRAIGHT", layer=0, endpoints=[
+        Endpoint(x=0,  y=0, angle=0,   connected_to=None),
+        Endpoint(x=20, y=0, angle=180, connected_to=2),
+    ])
+    t2 = TrackObject(id=2, kind="STRAIGHT", layer=0, endpoints=[
+        Endpoint(x=20, y=0, angle=0,   connected_to=1),
+        Endpoint(x=40, y=0, angle=180, connected_to=3),
+    ])
+    t3 = TrackObject(id=3, kind="STRAIGHT", layer=0, endpoints=[
+        Endpoint(x=40, y=0, angle=0,   connected_to=2),
+        Endpoint(x=60, y=0, angle=180, connected_to=4),
+    ])
+    t4 = TrackObject(id=4, kind="TURNOUT", layer=0, endpoints=[
+        Endpoint(x=60, y=0, angle=0,   connected_to=3),
+        Endpoint(x=80, y=0, angle=180, connected_to=None),
+    ])
+    note_a = NoteObject(id=1, layer=0, x=5,  y=0, op=0, text="INDUSTRY: COAL_A")
+    note_b = NoteObject(id=2, layer=0, x=35, y=0, op=0, text="INDUSTRY: COAL_B")
+    return Layout(scale="HO", tracks=[t1, t2, t3, t4], notes=[note_a, note_b])
+
+
+def test_multi_industry_both_present():
+    """Both industries on a shared spur appear in compute_capacities output."""
+    caps = {r.name: r for r in compute_capacities(_make_shared_spur_layout())}
+    assert "COAL_A" in caps
+    assert "COAL_B" in caps
+
+
+def test_multi_industry_slot_width():
+    """Multi-industry spur: each industry gets one threshold-slot (12 model inches)."""
+    caps = {r.name: r for r in compute_capacities(_make_shared_spur_layout())}
+    assert caps["COAL_A"].length_model_in == pytest.approx(12.0, abs=0.1)
+    assert caps["COAL_B"].length_model_in == pytest.approx(12.0, abs=0.1)
+
+
+def test_multi_industry_car_count():
+    """HO scale, 12-inch slot → 1 model foot → 2 cars (Fugate)."""
+    caps = {r.name: r for r in compute_capacities(_make_shared_spur_layout())}
+    assert caps["COAL_A"].max_cars == 2
+    assert caps["COAL_B"].max_cars == 2
+
+
+def test_multi_industry_kind():
+    """Kind remains 'industry' for all multi-spur entries."""
+    for r in compute_capacities(_make_shared_spur_layout()):
+        assert r.kind == "industry"
+
+
+def test_multi_industry_ordering():
+    """COAL_A (5 in from dead-end) is returned before COAL_B (35 in from dead-end)."""
+    industry = [r for r in compute_capacities(_make_shared_spur_layout())
+                if r.kind == "industry"]
+    names = [r.name for r in industry]
+    assert names.index("COAL_A") < names.index("COAL_B")
+
+
+def test_single_industry_unchanged_by_grouping():
+    """A spur with one industry still reports the full BFS length, not a slot."""
+    layout = parse_file(EXPORT_FIXTURE)
+    results = {r.name: r for r in compute_capacities(layout)}
+    # KIEL spur is 30 model inches; single industry so full length is returned.
+    assert results["KIEL"].length_model_in == pytest.approx(30.0, abs=0.1)
+
+
+# ---------------------------------------------------------------------------
 # load_stations_config
 # ---------------------------------------------------------------------------
 

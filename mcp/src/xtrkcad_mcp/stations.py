@@ -17,6 +17,18 @@ For routing distances, Dijkstra runs on the endpoint-level track graph.
 For capacity, a BFS walks connected non-TURNOUT tracks from the NOTE's nearest
 endpoint, summing their lengths.  TURNOUT (switch) track length is excluded
 so the count reflects only the usable straight/curve track.
+
+Multiple industries on one spur
+---------------------------------
+When two or more INDUSTRY: notes project onto the same BFS spur component, each
+note is snapped to the nearest track segment (perpendicular projection rather
+than nearest endpoint) and sorted by distance from the spur's dead-end (the
+unconnected / buffer-stop endpoint).  Each industry is then assigned one
+``_SNAP_WARN_THRESHOLD``-wide slot (default 12 model inches ≈ one car length).
+
+Place each NOTE over the section of track that serves the industry; the system
+derives the ordering automatically.  To override the car count for any industry,
+set ``spots: N`` in stations.yaml.
 """
 
 import datetime
@@ -408,12 +420,169 @@ def _snap_to_track(layout: Layout, x: float, y: float) -> int:
     return best_id
 
 
-def compute_capacities(layout: Layout) -> list[CapacityResult]:
-    """Compute usable track length and car capacity for every SIDING:/STORAGE: note.
+def _project_onto_segment(
+    px: float, py: float,
+    x0: float, y0: float, x1: float, y1: float,
+) -> tuple[float, float]:
+    """Project (px, py) onto segment [x0,y0]→[x1,y1].
 
-    The BFS walks connected non-TURNOUT tracks from the nearest track endpoint,
-    so switch-throat length is excluded from the measurement.  The Fugate
-    cars-per-real-foot formula (scale-dependent) converts length to car count.
+    Returns (t, perp_dist): t ∈ [0,1] is the clamped parameter (t=0 at ep[0],
+    t=1 at ep[1]) and perp_dist is the distance from (px,py) to the projection.
+    """
+    dx, dy = x1 - x0, y1 - y0
+    seg_len_sq = dx * dx + dy * dy
+    if seg_len_sq < 1e-12:
+        return 0.0, math.hypot(px - x0, py - y0)
+    t = ((px - x0) * dx + (py - y0) * dy) / seg_len_sq
+    t = max(0.0, min(1.0, t))
+    cx, cy = x0 + t * dx, y0 + t * dy
+    return t, math.hypot(px - cx, py - cy)
+
+
+def _snap_to_segment(layout: Layout, x: float, y: float) -> tuple[int, float, float]:
+    """Find the nearest point on any track segment to (x, y).
+
+    Returns (track_id, t, perp_dist): t ∈ [0,1] is the parameter along the
+    chord ep[0]→ep[1] and perp_dist is the perpendicular distance from (x,y)
+    to the projection point.  All track types are approximated via their chord
+    (accurate for straights; close enough for curves for ordering purposes).
+    """
+    best_id = -1
+    best_t = 0.0
+    best_dist = _INF
+    for track in layout.tracks:
+        eps = track.endpoints
+        if len(eps) < 2:
+            continue
+        t, d = _project_onto_segment(x, y, eps[0].x, eps[0].y, eps[1].x, eps[1].y)
+        if d < best_dist:
+            best_dist = d
+            best_id = track.id
+            best_t = t
+    return best_id, best_t, best_dist
+
+
+def _spur_bfs_component(layout: Layout, start_track_id: int) -> set[int]:
+    """Return the set of non-TURNOUT track IDs reachable from start_track_id.
+
+    Stops at TURNOUT boundaries (the switch throat), so the result contains
+    exactly the usable track IDs that _bfs_usable_length sums.
+    """
+    track_by_id = {t.id: t for t in layout.tracks}
+    start = track_by_id.get(start_track_id)
+    if start is None or start.kind == "TURNOUT":
+        return set()
+
+    visited: set[int] = set()
+    queue: list[int] = [start_track_id]
+    while queue:
+        tid = queue.pop()
+        if tid in visited:
+            continue
+        visited.add(tid)
+        track = track_by_id.get(tid)
+        if track is None:
+            continue
+        for ep in track.endpoints:
+            if ep.connected_to is not None and ep.connected_to not in visited:
+                nb = track_by_id.get(ep.connected_to)
+                if nb is not None and nb.kind != "TURNOUT":
+                    queue.append(ep.connected_to)
+    return visited
+
+
+def _find_dead_end_ep(layout: Layout, spur_ids: set[int]) -> tuple[int, int] | None:
+    """Return (track_id, ep_idx) of the first unconnected endpoint in the spur.
+
+    In a correctly-wired layout this is the buffer-stop end.  Iterates over
+    sorted track IDs for determinism.  Returns None for circular spurs.
+    """
+    track_by_id = {t.id: t for t in layout.tracks}
+    for tid in sorted(spur_ids):
+        track = track_by_id.get(tid)
+        if track is None or track.kind == "TURNOUT":
+            continue
+        for ep_idx, ep in enumerate(track.endpoints):
+            if ep.connected_to is None:
+                return (tid, ep_idx)
+    return None
+
+
+def _dist_from_dead_end(
+    layout: Layout,
+    spur_ids: set[int],
+    dead_end_ep: tuple[int, int],
+    target_track_id: int,
+    t_on_target: float,
+) -> float:
+    """Distance along the spur from dead_end_ep to the point at t_on_target on target_track.
+
+    Runs Dijkstra on the spur's own endpoint graph (restricted to spur_ids), then
+    adds the fractional remaining distance within the target segment.
+    """
+    track_by_id = {t.id: t for t in layout.tracks}
+
+    adj: dict[tuple[int, int], list[tuple[tuple[int, int], float]]] = {}
+    seen_inter: set[tuple] = set()
+
+    def _add(a: tuple[int, int], b: tuple[int, int], w: float) -> None:
+        adj.setdefault(a, []).append((b, w))
+        adj.setdefault(b, []).append((a, w))
+
+    for tid in spur_ids:
+        track = track_by_id.get(tid)
+        if track is None or track.kind == "TURNOUT":
+            continue
+        n_ep = len(track.endpoints)
+        length = track.length_model_inches()
+        for i in range(n_ep):
+            for j in range(i + 1, n_ep):
+                _add((tid, i), (tid, j), length)
+        for ep_idx, ep in enumerate(track.endpoints):
+            if ep.connected_to is None or ep.connected_to not in spur_ids:
+                continue
+            nb = track_by_id.get(ep.connected_to)
+            if nb is None or nb.kind == "TURNOUT":
+                continue
+            for n_ep_idx, n_ep_obj in enumerate(nb.endpoints):
+                if n_ep_obj.connected_to == tid:
+                    a, b = (tid, ep_idx), (nb.id, n_ep_idx)
+                    key = (min(a, b), max(a, b))
+                    if key not in seen_inter:
+                        seen_inter.add(key)
+                        _add(a, b, 0.0)
+
+    dist_from_dead = _dijkstra(adj, dead_end_ep)
+
+    target = track_by_id.get(target_track_id)
+    if target is None:
+        return _INF
+    seg_len = target.length_model_inches()
+    best = _INF
+    for ep_idx in range(len(target.endpoints)):
+        d_ep = dist_from_dead.get((target_track_id, ep_idx), _INF)
+        if d_ep >= _INF:
+            continue
+        # t_on_target is measured from ep[0]; distance from ep[ep_idx] to that point:
+        d_point = d_ep + (t_on_target if ep_idx == 0 else (1.0 - t_on_target)) * seg_len
+        best = min(best, d_point)
+    return best
+
+
+def compute_capacities(layout: Layout) -> list[CapacityResult]:
+    """Compute usable track length and car capacity for every SIDING:/STORAGE:/INDUSTRY: note.
+
+    SIDING / STORAGE notes: BFS walks connected non-TURNOUT tracks from the
+    nearest track endpoint; Fugate formula converts length to car count.
+
+    INDUSTRY notes — single industry on a spur: same as above (full BFS length).
+
+    INDUSTRY notes — multiple industries on the same spur: each note is projected
+    perpendicularly onto the track centreline and sorted by distance from the
+    spur's dead-end endpoint (the buffer-stop / unconnected end, i.e. the end
+    the switcher reaches last).  Each industry is assigned one threshold-width
+    slot (_SNAP_WARN_THRESHOLD model inches); set ``spots:`` in stations.yaml to
+    override the derived car count for any individual industry.
     """
     if not layout.tracks:
         return []
@@ -422,6 +591,7 @@ def compute_capacities(layout: Layout) -> list[CapacityResult]:
     cpf = cars_per_real_ft(scale)
     results: list[CapacityResult] = []
 
+    # --- SIDING / STORAGE: endpoint-snap, full BFS (unchanged behaviour) ---
     for note in layout.notes:
         if note.op != 0:
             continue
@@ -429,20 +599,14 @@ def compute_capacities(layout: Layout) -> list[CapacityResult]:
         if parsed is None:
             continue
         kind, name, description = parsed
-        if kind not in ("siding", "storage", "industry"):
+        if kind not in ("siding", "storage") or not name:
             continue
-        if not name:
-            continue
-
         nearest_id = _snap_to_track(layout, note.x, note.y)
         if nearest_id < 0:
             continue
-
         length_in = _bfs_usable_length(layout, nearest_id)
-        model_ft = length_in / 12.0        # layout/model feet — input to Fugate formula
-        proto_ft = model_in_to_proto_ft(length_in, scale)  # prototype feet for display
-        max_cars = int(model_ft * cpf)     # Fugate: cars per model foot, no partial cars
-
+        model_ft = length_in / 12.0
+        proto_ft = model_in_to_proto_ft(length_in, scale)
         results.append(CapacityResult(
             name=name,
             description=description,
@@ -451,8 +615,82 @@ def compute_capacities(layout: Layout) -> list[CapacityResult]:
             nearest_track_id=nearest_id,
             length_model_in=length_in,
             length_real_ft=proto_ft,
-            max_cars=max_cars,
+            max_cars=int(model_ft * cpf),
         ))
+
+    # --- INDUSTRY: segment-snap, grouped by spur component ---
+    # Each note is projected onto its nearest track segment to determine its
+    # position along the spur.  Notes that land on the same BFS component are
+    # treated as sharing that spur.
+    industry_items: list[tuple[NoteObject, str, str, int, float, frozenset]] = []
+    for note in layout.notes:
+        if note.op != 0:
+            continue
+        parsed = _note_prefix(note.text)
+        if parsed is None:
+            continue
+        kind, name, description = parsed
+        if kind != "industry" or not name:
+            continue
+        track_id, t, _perp = _snap_to_segment(layout, note.x, note.y)
+        if track_id < 0:
+            continue
+        spur_ids = frozenset(_spur_bfs_component(layout, track_id))
+        if not spur_ids:
+            continue  # note snapped to a TURNOUT — skip
+        industry_items.append((note, name, description, track_id, t, spur_ids))
+
+    # Group by spur component frozenset.
+    spur_groups: dict[frozenset, list] = {}
+    for item in industry_items:
+        spur_groups.setdefault(item[5], []).append(item)
+
+    for spur_ids, group in spur_groups.items():
+        any_track = next(iter(spur_ids))
+        total_in = _bfs_usable_length(layout, any_track)
+        total_ft = total_in / 12.0
+        total_proto = model_in_to_proto_ft(total_in, scale)
+
+        if len(group) == 1:
+            # Single industry on spur — full BFS length (existing behaviour).
+            note, name, description, track_id, _t, _ = group[0]
+            results.append(CapacityResult(
+                name=name,
+                description=description,
+                kind="industry",
+                note_id=note.id,
+                nearest_track_id=track_id,
+                length_model_in=total_in,
+                length_real_ft=total_proto,
+                max_cars=int(total_ft * cpf),
+            ))
+        else:
+            # Multiple industries share the spur.  Sort by distance from the
+            # dead-end so the result order reflects switcher reach sequence.
+            # Each industry gets one threshold-slot width of track.
+            dead_end_ep = _find_dead_end_ep(layout, set(spur_ids))
+            slot_in = _SNAP_WARN_THRESHOLD          # one slot = 12 model inches
+            slot_proto = model_in_to_proto_ft(slot_in, scale)
+            slot_cars = max(1, int(slot_in / 12.0 * cpf))
+
+            def _dead_end_dist(item: tuple) -> float:
+                _, _, _, tid, t, _ = item
+                if dead_end_ep is None:
+                    return _INF
+                return _dist_from_dead_end(layout, set(spur_ids), dead_end_ep, tid, t)
+
+            for item in sorted(group, key=_dead_end_dist):
+                note, name, description, track_id, _t, _ = item
+                results.append(CapacityResult(
+                    name=name,
+                    description=description,
+                    kind="industry",
+                    note_id=note.id,
+                    nearest_track_id=track_id,
+                    length_model_in=slot_in,
+                    length_real_ft=slot_proto,
+                    max_cars=slot_cars,
+                ))
 
     return results
 
