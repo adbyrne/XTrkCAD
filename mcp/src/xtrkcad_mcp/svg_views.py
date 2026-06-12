@@ -6,6 +6,8 @@ Two public functions:
 """
 
 import datetime
+import math
+import re
 import xml.sax.saxutils as _esc
 from pathlib import Path
 
@@ -13,6 +15,7 @@ from xtrkcad_mcp.config import (
     Benchwork, FloorDoor, FloorPartition, FloorRestricted, FloorRoom,
     load_config,
 )
+from xtrkcad_mcp.parser import parse_file
 
 
 # ---------------------------------------------------------------------------
@@ -21,6 +24,17 @@ from xtrkcad_mcp.config import (
 
 _LEVEL_FILL   = {1: "#A5D6A7", 2: "#90CAF9", 3: "#FFCC80"}
 _LEVEL_STROKE = {1: "#2E7D32", 2: "#1565C0", 3: "#E65100"}
+
+# Track colors by layer category (stroke, stroke-width)
+_TRACK_STYLE: dict[str, tuple[str, str]] = {
+    "main":       ("#0D47A1", "2.0"),
+    "passing":    ("#6A1B9A", "1.5"),
+    "storage":    ("#4E342E", "1.0"),
+    "staging":    ("#E65100", "1.5"),
+    "connecting": ("#1B5E20", "1.0"),
+    "service":    ("#37474F", "1.0"),
+}
+_TRACK_DEFAULT = ("#424242", "1.0")
 
 _ROOM_BG       = "#F5F5F5"
 _ROOM_BORDER   = "#212121"
@@ -219,6 +233,109 @@ def _legend(svg: _S, svg_w: int, pad: int, levels: list[int], has_fp: bool):
 
 
 # ---------------------------------------------------------------------------
+# Track-drawing helpers
+# ---------------------------------------------------------------------------
+
+def _layer_to_level(name: str) -> int | None:
+    """Return deck level from a layer name like 'L1-Main' → 1, or None."""
+    m = re.match(r'L(\d+)-', name)
+    return int(m.group(1)) if m else None
+
+
+def _track_style_for(layer_name: str) -> tuple[str, str]:
+    low = layer_name.lower()
+    for cat, style in _TRACK_STYLE.items():
+        if cat in low:
+            return style
+    return _TRACK_DEFAULT
+
+
+def _arc_pts(
+    cx: float, cy: float, r: float,
+    p0x: float, p0y: float,
+    p1x: float, p1y: float,
+    arc_deg: float, n: int = 32,
+) -> list[tuple[float, float]]:
+    """Polyline approximation of the arc from (p0x,p0y) to (p1x,p1y) on a circle."""
+    a1 = math.degrees(math.atan2(p0y - cy, p0x - cx))
+    # Try CCW then CW; pick direction whose end is closer to (p1x, p1y).
+    def endpoint(da: float) -> tuple[float, float]:
+        a = math.radians(a1 + da)
+        return cx + r * math.cos(a), cy + r * math.sin(a)
+
+    ex_ccw, ey_ccw = endpoint(arc_deg)
+    ex_cw,  ey_cw  = endpoint(-arc_deg)
+    d_ccw = math.hypot(ex_ccw - p1x, ey_ccw - p1y)
+    d_cw  = math.hypot(ex_cw  - p1x, ey_cw  - p1y)
+    sign = 1 if d_ccw <= d_cw else -1
+
+    return [
+        (cx + r * math.cos(math.radians(a1 + sign * arc_deg * i / n)),
+         cy + r * math.sin(math.radians(a1 + sign * arc_deg * i / n)))
+        for i in range(n + 1)
+    ]
+
+
+def _draw_tracks(svg: "_S", xf: "_XF", layout, layer_ids: set[int]) -> None:
+    """Draw track objects from layout whose layer is in layer_ids.
+
+    Two-pass render: white halo pass first, then colored lines on top, so
+    tracks are readable against any benchwork background color.
+    """
+    def _arc_coords(t, eps) -> str | None:
+        cx = t.extra.get("cx", 0.0)
+        cy = t.extra.get("cy", 0.0)
+        r  = t.extra.get("radius", 0.0)
+        if r <= 0:
+            return None
+        arc_deg = (((eps[1].angle - eps[0].angle + 180.0) % 360.0) + 360.0) % 360.0
+        pts = _arc_pts(cx, cy, r, eps[0].x, eps[0].y, eps[1].x, eps[1].y, arc_deg)
+        return " ".join(f"{xf.x(px):.1f},{xf.y(py):.1f}" for px, py in pts)
+
+    visible = [
+        t for t in layout.tracks if t.layer in layer_ids
+    ]
+
+    for pass_color, pass_extra_w in [("white", 2.0), (None, 0.0)]:
+        for t in visible:
+            layer_name = layout.layers.get(t.layer, None)
+            name = layer_name.name if layer_name else ""
+            color, lw = _track_style_for(name)
+            stroke = pass_color if pass_color else color
+            w = f"{float(lw) + pass_extra_w:.1f}" if pass_color else lw
+            eps = t.endpoints
+
+            if t.kind in ("STRAIGHT", "JOINT") and len(eps) >= 2:
+                svg.line(xf.x(eps[0].x), xf.y(eps[0].y),
+                         xf.x(eps[1].x), xf.y(eps[1].y),
+                         stroke=stroke, stroke_width=w)
+
+            elif t.kind == "CURVE" and len(eps) >= 2:
+                coords = _arc_coords(t, eps)
+                if coords:
+                    svg.add(f'<polyline points="{coords}" stroke="{stroke}" '
+                            f'stroke-width="{w}" fill="none"/>')
+
+            elif t.kind == "TURNOUT" and len(eps) >= 2:
+                svg.line(xf.x(eps[0].x), xf.y(eps[0].y),
+                         xf.x(eps[1].x), xf.y(eps[1].y),
+                         stroke=stroke, stroke_width=w)
+                if len(eps) >= 3:
+                    svg.line(xf.x(eps[0].x), xf.y(eps[0].y),
+                             xf.x(eps[2].x), xf.y(eps[2].y),
+                             stroke=stroke, stroke_width=w)
+
+            elif t.kind == "TURNTABLE":
+                cx = t.extra.get("cx", 0.0)
+                cy = t.extra.get("cy", 0.0)
+                r  = t.extra.get("radius", 0.0)
+                if r > 0:
+                    svg.add(f'<circle cx="{xf.x(cx):.1f}" cy="{xf.y(cy):.1f}" '
+                            f'r="{xf.ln(r):.1f}" stroke="{stroke}" '
+                            f'stroke-width="{w}" fill="none"/>')
+
+
+# ---------------------------------------------------------------------------
 # Plan view — public
 # ---------------------------------------------------------------------------
 
@@ -226,6 +343,7 @@ def generate_plan_view(
     config_path: str,
     output_path: str,
     level: int = 0,
+    xtc_path: str | None = None,
     svg_width: int = 840,
     padding: int = 55,
 ) -> str:
@@ -235,6 +353,11 @@ def generate_plan_view(
         config_path: YAML layout config path.
         output_path: Destination .svg path.
         level: 0 = all levels; 1, 2, … = that level only.
+        xtc_path: Optional path to a .xtc layout file.  When provided, track
+            objects are drawn over the benchwork for the selected level.
+            Layers are matched to the level by their name prefix (e.g.
+            'L1-Main' → level 1).  CO-* layers appear only in the all-levels
+            (level=0) view.
         svg_width: Canvas width in pixels.
         padding: Margin around the room in pixels.
 
@@ -304,6 +427,22 @@ def generate_plan_view(
                 continue
             svg.poly(xf.pts(bw.vertices),
                      fill=fill, stroke=stroke, stroke_width="1.5", opacity="0.72")
+
+    # Track overlay (drawn over benchwork, under room outline)
+    if xtc_path:
+        xtc_layout = parse_file(xtc_path)
+        if level == 0:
+            track_layers = {
+                idx for idx, info in xtc_layout.layers.items()
+                if _layer_to_level(info.name) is not None
+                or info.name.startswith("CO-")
+            }
+        else:
+            track_layers = {
+                idx for idx, info in xtc_layout.layers.items()
+                if _layer_to_level(info.name) == level
+            }
+        _draw_tracks(svg, xf, xtc_layout, track_layers)
 
     # Room outline on top
     svg.poly(xf.pts([(x_min, y_min), (x_max, y_min), (x_max, y_max), (x_min, y_max)]),

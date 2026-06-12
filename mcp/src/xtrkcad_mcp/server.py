@@ -2717,6 +2717,7 @@ def write_plan_view(
     config_path: str,
     output_path: str,
     level: int = 0,
+    xtc_path: str | None = None,
 ) -> str:
     """Generate a top-down SVG plan view from a layout config.
 
@@ -2724,15 +2725,21 @@ def write_plan_view(
     clearances, partitions), and benchwork sections.  Each benchwork section
     is labelled with its short name and elevation.
 
+    When xtc_path is provided, track objects from the .xtc file are drawn
+    over the benchwork.  Layers are assigned to levels by their name prefix
+    (e.g. 'L1-Main' → level 1); CO-* layers appear only in the all-levels
+    (level=0) view.
+
     Args:
         config_path: Path to the YAML layout config (or benchwork_file path).
         output_path: Destination .svg path.
         level: Deck level to show — 0 = all levels, 1 = Level 1 only, etc.
+        xtc_path: Optional path to a .xtc layout file to overlay track.
 
     Returns:
         Absolute path of the written SVG file.
     """
-    return generate_plan_view(config_path, output_path, level=level)
+    return generate_plan_view(config_path, output_path, level=level, xtc_path=xtc_path)
 
 
 @mcp.tool()
