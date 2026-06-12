@@ -366,10 +366,10 @@ def test_industry_note_in_capacities():
 
 
 def test_industry_length():
-    """KIEL spur: tracks 9+10 = 15in + 15in = 30in total."""
+    """KIEL: single INDUSTRY note — defaults to one threshold slot (12 model inches)."""
     layout = parse_file(EXPORT_FIXTURE)
     results = {r.name: r for r in compute_capacities(layout)}
-    assert results["KIEL"].length_model_in == pytest.approx(30.0, abs=0.1)
+    assert results["KIEL"].length_model_in == pytest.approx(12.0, abs=0.1)
 
 
 # ---------------------------------------------------------------------------
@@ -444,12 +444,13 @@ def test_multi_industry_ordering():
     assert names.index("COAL_A") < names.index("COAL_B")
 
 
-def test_single_industry_unchanged_by_grouping():
-    """A spur with one industry still reports the full BFS length, not a slot."""
+def test_single_industry_slot_not_full_bfs():
+    """Single industry on a 30-inch spur still gets the threshold slot, not 30 inches."""
     layout = parse_file(EXPORT_FIXTURE)
     results = {r.name: r for r in compute_capacities(layout)}
-    # KIEL spur is 30 model inches; single industry so full length is returned.
-    assert results["KIEL"].length_model_in == pytest.approx(30.0, abs=0.1)
+    # KIEL spur total = 30 model inches, but INDUSTRY: always gets one slot = 12 in.
+    assert results["KIEL"].length_model_in == pytest.approx(12.0, abs=0.1)
+    assert results["KIEL"].max_cars == 2  # HO: 1 model ft → 2 cars
 
 
 # ---------------------------------------------------------------------------

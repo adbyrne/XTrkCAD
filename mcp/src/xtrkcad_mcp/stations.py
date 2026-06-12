@@ -575,14 +575,15 @@ def compute_capacities(layout: Layout) -> list[CapacityResult]:
     SIDING / STORAGE notes: BFS walks connected non-TURNOUT tracks from the
     nearest track endpoint; Fugate formula converts length to car count.
 
-    INDUSTRY notes — single industry on a spur: same as above (full BFS length).
+    INDUSTRY notes: each note is projected perpendicularly onto the track
+    centreline (segment snap) and assigned one threshold-slot width
+    (_SNAP_WARN_THRESHOLD model inches, currently 12 in = 1 model foot).
+    This represents the spotting area at the industry, not the total spur length.
+    Use ``spots:`` in stations.yaml to override the derived car count.
 
-    INDUSTRY notes — multiple industries on the same spur: each note is projected
-    perpendicularly onto the track centreline and sorted by distance from the
-    spur's dead-end endpoint (the buffer-stop / unconnected end, i.e. the end
-    the switcher reaches last).  Each industry is assigned one threshold-width
-    slot (_SNAP_WARN_THRESHOLD model inches); set ``spots:`` in stations.yaml to
-    override the derived car count for any individual industry.
+    Multiple industries on the same spur: sorted by distance from the spur's
+    dead-end endpoint (the buffer-stop / unconnected end, i.e. the end the
+    switcher reaches last).
     """
     if not layout.tracks:
         return []
@@ -646,32 +647,15 @@ def compute_capacities(layout: Layout) -> list[CapacityResult]:
         spur_groups.setdefault(item[5], []).append(item)
 
     for spur_ids, group in spur_groups.items():
-        any_track = next(iter(spur_ids))
-        total_in = _bfs_usable_length(layout, any_track)
-        total_ft = total_in / 12.0
-        total_proto = model_in_to_proto_ft(total_in, scale)
+        # All INDUSTRY notes get one threshold slot regardless of how many share
+        # the spur.  INDUSTRY: marks the spotting area, not the full spur length.
+        slot_in = _SNAP_WARN_THRESHOLD          # one slot = 12 model inches
+        slot_proto = model_in_to_proto_ft(slot_in, scale)
+        slot_cars = max(1, int(slot_in / 12.0 * cpf))
 
-        if len(group) == 1:
-            # Single industry on spur — full BFS length (existing behaviour).
-            note, name, description, track_id, _t, _ = group[0]
-            results.append(CapacityResult(
-                name=name,
-                description=description,
-                kind="industry",
-                note_id=note.id,
-                nearest_track_id=track_id,
-                length_model_in=total_in,
-                length_real_ft=total_proto,
-                max_cars=int(total_ft * cpf),
-            ))
-        else:
-            # Multiple industries share the spur.  Sort by distance from the
-            # dead-end so the result order reflects switcher reach sequence.
-            # Each industry gets one threshold-slot width of track.
+        if len(group) > 1:
+            # Sort by distance from the dead-end so order reflects switcher reach.
             dead_end_ep = _find_dead_end_ep(layout, set(spur_ids))
-            slot_in = _SNAP_WARN_THRESHOLD          # one slot = 12 model inches
-            slot_proto = model_in_to_proto_ft(slot_in, scale)
-            slot_cars = max(1, int(slot_in / 12.0 * cpf))
 
             def _dead_end_dist(item: tuple) -> float:
                 _, _, _, tid, t, _ = item
@@ -679,18 +663,19 @@ def compute_capacities(layout: Layout) -> list[CapacityResult]:
                     return _INF
                 return _dist_from_dead_end(layout, set(spur_ids), dead_end_ep, tid, t)
 
-            for item in sorted(group, key=_dead_end_dist):
-                note, name, description, track_id, _t, _ = item
-                results.append(CapacityResult(
-                    name=name,
-                    description=description,
-                    kind="industry",
-                    note_id=note.id,
-                    nearest_track_id=track_id,
-                    length_model_in=slot_in,
-                    length_real_ft=slot_proto,
-                    max_cars=slot_cars,
-                ))
+            group = sorted(group, key=_dead_end_dist)
+
+        for note, name, description, track_id, _t, _ in group:
+            results.append(CapacityResult(
+                name=name,
+                description=description,
+                kind="industry",
+                note_id=note.id,
+                nearest_track_id=track_id,
+                length_model_in=slot_in,
+                length_real_ft=slot_proto,
+                max_cars=slot_cars,
+            ))
 
     return results
 

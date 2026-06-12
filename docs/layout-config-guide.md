@@ -544,13 +544,15 @@ these NOTEs to compute mileposts, siding lengths, and car capacities.
 | `STATION: <id>` | `STATION: WP` | Mainline station — milepost origin / destination |
 | `SIDING: <id>` | `SIDING: WP` | Siding track group — measures car capacity by BFS length |
 | `STORAGE: <id> <label>` | `STORAGE: WP_COAL Coal trestle` | Storage / yard track |
-| `INDUSTRY: <id>` | `INDUSTRY: KIEL` | Industry spur — spur length + branch milepost |
+| `INDUSTRY: <id>` | `INDUSTRY: KIEL` | Industry spotting area — one threshold slot (12 model in default) |
 | `REFERENCE: MP_ZERO` | `REFERENCE: MP_ZERO` | Milepost datum; required for milepost output |
 | `YARD_TRACK: <yard> <label>` | `YARD_TRACK: WP Caboose` | Individual yard track |
 
-Place each NOTE close to the track endpoint it labels.  The tool snaps the NOTE
-to the nearest endpoint; notes more than 12 model inches from any endpoint
-trigger a `FAR_SNAP` validation warning.
+Place each NOTE close to the track it labels.  `STATION:`, `SIDING:`, and
+`STORAGE:` notes snap to the nearest track **endpoint**; `INDUSTRY:` notes
+project perpendicularly onto the nearest track **body** (segment snap), so you
+can place them anywhere along a spur.  Notes more than 12 model inches from
+any snap target trigger a `FAR_SNAP` validation warning.
 
 #### Validating annotations
 
@@ -563,9 +565,12 @@ against the entries in `stations.yaml`.
 
 #### Car spots per industry
 
-Each `INDUSTRY:` spur's car capacity is derived automatically from the spur's
-BFS length using the Fugate formula (scale-dependent cars-per-foot).  To
-override the derived count, add `spots: N` to the industry entry in
+Each `INDUSTRY:` note defaults to **one threshold slot** of 12 model inches
+(≈ one car length at HO scale).  This represents the spotting area at the
+industry, not the total spur length — even if the spur is much longer, an
+industry typically occupies only the car spots directly at its loading point.
+
+To override the derived count, add `spots: N` to the industry entry in
 `stations.yaml`:
 
 ```yaml
@@ -574,8 +579,11 @@ stations:
     name: Timber Ltd
     types: [industry]
     within_limits_of: JC
-    spots: 3          # explicit override — 3 car spots regardless of spur length
+    spots: 3          # explicit override — 3 car spots regardless of default slot
 ```
+
+If you want to measure the full spur length for car capacity, use a `SIDING:`
+or `STORAGE:` note instead of (or in addition to) an `INDUSTRY:` note.
 
 #### Multiple industries on one spur
 
@@ -585,10 +593,9 @@ customer, place one `INDUSTRY:` NOTE over each industry's section of the spur
 
 The tool projects each NOTE perpendicularly onto the nearest track segment,
 groups notes that share the same spur (BFS component), and sorts them by
-distance from the dead-end (buffer-stop) endpoint.  Each industry is assigned
-one threshold-width slot (12 model inches ≈ one car length at HO).  The
-ordering in the output reflects which industry the switcher reaches first after
-clearing the turnout throat.
+distance from the dead-end (buffer-stop) endpoint.  Each industry gets the
+same default one-slot capacity.  The output order reflects which industry the
+switcher reaches first after clearing the turnout throat.
 
 ```
 # Two industries on the same 60-inch spur:
@@ -600,8 +607,8 @@ clearing the turnout throat.
 #   COAL_B  length=12 in  max_cars=2
 ```
 
-Set `spots:` in `stations.yaml` for either industry to override the slot-width
-car count with an explicit value.
+Set `spots:` in `stations.yaml` for any industry to override the default car
+count with an explicit value.
 
 ---
 
