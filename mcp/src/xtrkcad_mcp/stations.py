@@ -108,16 +108,9 @@ def extract_stations(layout: Layout) -> list[Station]:
         name = tokens[0]
         ref_tag = next((t[1:] for t in tokens[1:] if t.startswith("@")), None)
 
-        best_track_id = -1
-        best_ep_idx = 0
-        best_dist = _INF
-        for track in layout.tracks:
-            for ep_idx, ep in enumerate(track.endpoints):
-                d = math.hypot(ep.x - note.x, ep.y - note.y)
-                if d < best_dist:
-                    best_dist = d
-                    best_track_id = track.id
-                    best_ep_idx = ep_idx
+        best_track_id, best_ep_idx, best_dist = _snap_to_endpoint(
+            layout, note.x, note.y, note.layer,
+        )
 
         if best_track_id >= 0:
             stations.append(Station(
@@ -409,16 +402,44 @@ def _bfs_usable_length(
     return total
 
 
-def _snap_to_track(layout: Layout, x: float, y: float) -> int:
+_LAYER_PREF_THRESHOLD = 15.0  # model inches — use layer-filtered snap only if this close
+
+
+def _snap_to_endpoint(
+    layout: Layout, x: float, y: float, layer: int | None = None,
+) -> tuple[int, int, float]:
+    """Return (track_id, ep_idx, dist) of the nearest track endpoint to (x, y).
+
+    If layer is given, prefer tracks on that layer: use the layer-filtered result
+    when it is within _LAYER_PREF_THRESHOLD model inches; otherwise fall back to
+    the nearest endpoint on any layer.  This tolerates notes whose layer was not
+    saved correctly in XTrkCAD (old notes may be on layer 1 regardless of intent).
+    """
+    def _search(tracks: list) -> tuple[int, int, float]:
+        best_id, best_ep_idx, best_dist = -1, 0, _INF
+        for track in tracks:
+            for ep_idx, ep in enumerate(track.endpoints):
+                d = math.hypot(ep.x - x, ep.y - y)
+                if d < best_dist:
+                    best_dist = d
+                    best_id = track.id
+                    best_ep_idx = ep_idx
+        return best_id, best_ep_idx, best_dist
+
+    all_result = _search(layout.tracks)
+
+    if layer is not None:
+        same_layer = [t for t in layout.tracks if t.layer == layer]
+        filt_id, filt_ep_idx, filt_dist = _search(same_layer)
+        if filt_id >= 0 and filt_dist <= _LAYER_PREF_THRESHOLD:
+            return filt_id, filt_ep_idx, filt_dist
+
+    return all_result
+
+
+def _snap_to_track(layout: Layout, x: float, y: float, layer: int | None = None) -> int:
     """Return the track_id of the track whose nearest endpoint is closest to (x, y)."""
-    best_id = -1
-    best_dist = _INF
-    for track in layout.tracks:
-        for ep in track.endpoints:
-            d = math.hypot(ep.x - x, ep.y - y)
-            if d < best_dist:
-                best_dist = d
-                best_id = track.id
+    best_id, _, _ = _snap_to_endpoint(layout, x, y, layer)
     return best_id
 
 
@@ -441,27 +462,41 @@ def _project_onto_segment(
     return t, math.hypot(px - cx, py - cy)
 
 
-def _snap_to_segment(layout: Layout, x: float, y: float) -> tuple[int, float, float]:
+def _snap_to_segment(
+    layout: Layout, x: float, y: float, layer: int | None = None,
+) -> tuple[int, float, float]:
     """Find the nearest point on any track segment to (x, y).
 
     Returns (track_id, t, perp_dist): t ∈ [0,1] is the parameter along the
     chord ep[0]→ep[1] and perp_dist is the perpendicular distance from (x,y)
     to the projection point.  All track types are approximated via their chord
     (accurate for straights; close enough for curves for ordering purposes).
+
+    If layer is given, restrict search to tracks on that layer; falls back to
+    all tracks if nothing is found on that layer.
     """
-    best_id = -1
-    best_t = 0.0
-    best_dist = _INF
-    for track in layout.tracks:
-        eps = track.endpoints
-        if len(eps) < 2:
-            continue
-        t, d = _project_onto_segment(x, y, eps[0].x, eps[0].y, eps[1].x, eps[1].y)
-        if d < best_dist:
-            best_dist = d
-            best_id = track.id
-            best_t = t
-    return best_id, best_t, best_dist
+    def _search(tracks: list) -> tuple[int, float, float]:
+        best_id, best_t, best_dist = -1, 0.0, _INF
+        for track in tracks:
+            eps = track.endpoints
+            if len(eps) < 2:
+                continue
+            t, d = _project_onto_segment(x, y, eps[0].x, eps[0].y, eps[1].x, eps[1].y)
+            if d < best_dist:
+                best_dist = d
+                best_id = track.id
+                best_t = t
+        return best_id, best_t, best_dist
+
+    all_result = _search(layout.tracks)
+
+    if layer is not None:
+        same_layer = [t for t in layout.tracks if t.layer == layer]
+        filt_id, filt_t, filt_dist = _search(same_layer)
+        if filt_id >= 0 and filt_dist <= _LAYER_PREF_THRESHOLD:
+            return filt_id, filt_t, filt_dist
+
+    return all_result
 
 
 def _spur_bfs_component(layout: Layout, start_track_id: int) -> set[int]:
@@ -604,7 +639,7 @@ def compute_capacities(layout: Layout) -> list[CapacityResult]:
         kind, name, description = parsed
         if kind not in ("siding", "storage") or not name:
             continue
-        nearest_id = _snap_to_track(layout, note.x, note.y)
+        nearest_id = _snap_to_track(layout, note.x, note.y, note.layer)
         if nearest_id < 0:
             continue
         length_in = _bfs_usable_length(layout, nearest_id)
@@ -635,7 +670,7 @@ def compute_capacities(layout: Layout) -> list[CapacityResult]:
         kind, name, description = parsed
         if kind != "industry" or not name:
             continue
-        track_id, t, _perp = _snap_to_segment(layout, note.x, note.y)
+        track_id, t, _perp = _snap_to_segment(layout, note.x, note.y, note.layer)
         if track_id < 0:
             continue
         spur_ids = frozenset(_spur_bfs_component(layout, track_id))
@@ -711,7 +746,7 @@ def compute_yard_tracks(layout: Layout) -> list[YardTrackResult]:
             continue
         yard_id, label = parts[0], parts[1]
 
-        nearest_id = _snap_to_track(layout, note.x, note.y)
+        nearest_id, _t, _perp = _snap_to_segment(layout, note.x, note.y, note.layer)
         if nearest_id < 0:
             continue
 
@@ -816,16 +851,9 @@ def extract_reference_points(layout: Layout) -> list[ReferencePoint]:
         if not name:
             continue
 
-        best_id = -1
-        best_ep_idx = 0
-        best_dist = _INF
-        for track in layout.tracks:
-            for ep_idx, ep in enumerate(track.endpoints):
-                d = math.hypot(ep.x - note.x, ep.y - note.y)
-                if d < best_dist:
-                    best_dist = d
-                    best_id = track.id
-                    best_ep_idx = ep_idx
+        best_id, best_ep_idx, best_dist = _snap_to_endpoint(
+            layout, note.x, note.y, note.layer,
+        )
 
         if best_id >= 0:
             points.append(ReferencePoint(
@@ -915,6 +943,8 @@ class AnnotatedSegment:
     annotation_source: str     # "note" (only source implemented; "label"/"layer" are future)
     note_id: int
     note_text: str
+    note_layer: int
+    note_layer_name: str
     nearest_track_id: int
     nearest_track_layer: int
     nearest_track_layer_name: str
@@ -951,23 +981,17 @@ def list_annotated_segments(layout: Layout) -> list[AnnotatedSegment]:
         if not matched_id:
             continue
 
-        best_id = -1
-        best_ep_idx = 0
-        best_dist = _INF
-        for track in layout.tracks:
-            for ep_idx, ep in enumerate(track.endpoints):
-                d = math.hypot(ep.x - note.x, ep.y - note.y)
-                if d < best_dist:
-                    best_dist = d
-                    best_id = track.id
-                    best_ep_idx = ep_idx
+        best_id, _ep_idx, best_dist = _snap_to_endpoint(
+            layout, note.x, note.y, note.layer,
+        )
 
         if best_id < 0:
             continue
 
+        note_layer_info = layout.layers.get(note.layer, LayerInfo(note.layer, f"Layer {note.layer}"))
         track = track_by_id.get(best_id)
-        layer_idx = track.layer if track else 0
-        layer_info = layout.layers.get(layer_idx, LayerInfo(layer_idx, f"Layer {layer_idx}"))
+        track_layer_idx = track.layer if track else 0
+        track_layer_info = layout.layers.get(track_layer_idx, LayerInfo(track_layer_idx, f"Layer {track_layer_idx}"))
 
         results.append(AnnotatedSegment(
             annotation_id=matched_id,
@@ -975,9 +999,11 @@ def list_annotated_segments(layout: Layout) -> list[AnnotatedSegment]:
             annotation_source="note",
             note_id=note.id,
             note_text=text,
+            note_layer=note.layer,
+            note_layer_name=note_layer_info.name,
             nearest_track_id=best_id,
-            nearest_track_layer=layer_idx,
-            nearest_track_layer_name=layer_info.name,
+            nearest_track_layer=track_layer_idx,
+            nearest_track_layer_name=track_layer_info.name,
             snap_dist=best_dist,
         ))
 
@@ -1200,10 +1226,24 @@ def build_layout_export(
         return model_in_to_proto_ft(d, scale) / stations_config.mp_scale
 
     # Station mileposts keyed by station_id (from STATION: notes)
+    # exit_ref_by_id: stations whose @ref resolves the exit switch (not entry)
+    ref_points_by_name = {r.name: r for r in ref_points}
     station_objects = {s.name: s for s in extract_stations(layout)}
     mp_by_id: dict[str, float | None] = {}
+    exit_ref_by_id: dict[str, object] = {}
     for sid, sobj in station_objects.items():
-        mp_by_id[sid] = _ep_mp(sobj.nearest_ep)
+        mp_dijkstra = _ep_mp(sobj.nearest_ep)
+        if sobj.ref_tag is not None:
+            linked_ref = ref_points_by_name.get(sobj.ref_tag)
+            if mp_dijkstra is None:
+                # Dijkstra failed — @ref resolves entry (e.g. WP @MP_ZERO)
+                mp_by_id[sid] = _ep_mp(linked_ref.nearest_ep) if linked_ref else None
+            else:
+                # Dijkstra succeeded — @ref marks the exit switch (e.g. MC @MC_EXIT)
+                mp_by_id[sid] = mp_dijkstra
+                exit_ref_by_id[sid] = linked_ref
+        else:
+            mp_by_id[sid] = mp_dijkstra
 
     # Siding / industry capacities keyed by name
     capacities = compute_capacities(layout)
@@ -1211,6 +1251,10 @@ def build_layout_export(
 
     # Yard track capacities
     yard_tracks = compute_yard_tracks(layout)
+
+    # Main-line track lengths at each station
+    main_caps, main_bounded = _infer_main_lengths_with_bounded(layout)
+    main_by_id: dict[str, CapacityResult] = {r.name: r for r in main_caps}
 
     # --- Stations ---
     station_entries = sorted(
@@ -1223,14 +1267,21 @@ def build_layout_export(
         cap = cap_by_name.get(entry.id)
         siding_ft = cap.length_real_ft if cap else None
         siding_cars = cap.max_cars if cap else None
+        main_cap = main_by_id.get(entry.id)
+        main_ft = main_cap.length_real_ft if main_cap else None
 
-        if not entry.switchback and mp_entry is not None and siding_ft is not None:
-            mp_exit: float | None = mp_entry + siding_ft / stations_config.mp_scale
+        exit_ref = exit_ref_by_id.get(entry.id)
+        if exit_ref is not None:
+            mp_exit: float | None = _ep_mp(exit_ref.nearest_ep)
+        elif not entry.switchback and mp_entry is not None and siding_ft is not None:
+            mp_exit = mp_entry + siding_ft / stations_config.mp_scale
+        elif entry.switchback and mp_entry is not None and main_ft is not None:
+            mp_exit = mp_entry + main_ft / stations_config.mp_scale
         else:
             mp_exit = None
             if entry.switchback and mp_entry is not None:
                 warnings.append(
-                    f"{entry.id}: switchback — exit MP requires topology analysis, set to null"
+                    f"{entry.id}: switchback — exit MP could not be computed (no main length)"
                 )
 
         stations_out.append({
@@ -1251,8 +1302,6 @@ def build_layout_export(
     industries_out = []
     for entry in industry_entries:
         cap = cap_by_name.get(entry.id)
-        spur_ft = cap.length_real_ft if cap else None
-        spur_cars = cap.max_cars if cap else None
 
         # Branch milepost: nearest-endpoint MP of the industry's track
         branch_mp: float | None = None
@@ -1270,9 +1319,6 @@ def build_layout_export(
             "industry_id": entry.id,
             "connected_station": entry.within_limits_of,
             "branch_milepost": round(branch_mp, 3) if branch_mp is not None else None,
-            "spur_length_ft": round(spur_ft, 3) if spur_ft is not None else None,
-            "spur_length_cars": spur_cars,
-            "spur_description": cap.description if cap else None,
             "car_spots": entry.spots,
             "switchback": entry.switchback,
         })
