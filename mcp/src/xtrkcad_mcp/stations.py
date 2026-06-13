@@ -361,6 +361,8 @@ def _note_prefix(text: str) -> tuple[str, str, str] | None:
 def _is_main_layer(name: str) -> bool:
     """Return True if the layer name denotes a main track layer."""
     lower = name.lower()
+    if lower.startswith("co-"):
+        return False  # CO layers bridge operational areas by design
     # Standard: "L1-Main", "L2-Main"; legacy: "L1-Track"
     return lower.endswith("-main") or lower.endswith("-track")
 
