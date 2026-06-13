@@ -1438,7 +1438,7 @@ def write_layout_report(
         layer_categories: Optional layer→category mapping (same as
             get_operation_density). Required for the OD section.
         stations_yaml: Optional path to stations.yaml. When provided the
-            validation section also checks for missing STATION:/SIDING: notes.
+            validation section also checks for missing STATION:/INDUSTRY: notes.
         format: Output format — "txt" (default), "md", or "html".
 
     Returns:
@@ -2647,21 +2647,24 @@ def write_station_distance_report(
 
 @mcp.tool()
 def get_siding_capacities(path: str) -> list[dict]:
-    """Report usable track length and car capacity for every SIDING:/STORAGE: note.
+    """Report usable track length and car capacity for storage/passing tracks.
 
-    Capacity markers use NOTE objects whose text begins with 'SIDING:' or
-    'STORAGE:' (case-insensitive), e.g. 'SIDING: Springfield Freight House'.
+    Two sources of capacity data are combined:
+      - STORAGE: notes (house tracks, freight spurs) — explicitly placed NOTE objects
+      - INDUSTRY: notes — industry spurs with explicit NOTE objects
+      - L{n}-Passing layers — passing tracks measured automatically and matched to the
+        nearest STATION: note (no NOTE object required on the passing track itself)
 
-    The measurement walks connected non-TURNOUT tracks (STRAIGHT, CURVE, etc.)
-    from the nearest endpoint, so switch/turnout geometry is excluded.  The
-    Fugate cars-per-real-foot formula converts usable length to whole car count.
+    The measurement walks connected non-TURNOUT tracks from the nearest endpoint,
+    so switch/turnout geometry is excluded.  The Fugate cars-per-real-foot formula
+    converts usable length to whole car count.
 
     Args:
         path: Path to the .xtc layout file (absolute or relative to XTRKCAD_PLANS_DIR).
 
     Returns a list of dicts with keys:
-        name            — marker label (text after 'SIDING:' / 'STORAGE:')
-        kind            — "siding" or "storage"
+        name            — marker label (station id for passing, note label for storage)
+        kind            — "passing", "storage", or "industry"
         nearest_track_id
         length_model_in — usable length in model inches (turnouts excluded)
         length_real_ft  — prototypical feet (scale-dependent)
@@ -2759,7 +2762,7 @@ def list_plans_resource() -> str:
 def list_labeled_segments(path: str) -> list[dict]:
     """List all annotated track segments found in the layout.
 
-    Scans every text NOTE for STATION:, SIDING:, STORAGE:, INDUSTRY:, and
+    Scans every text NOTE for STATION:, STORAGE:, INDUSTRY:, and
     REFERENCE: prefixes.  Each match is snapped to the nearest track endpoint
     and returned with annotation type, source, layer info, and snap distance.
 
@@ -2797,9 +2800,11 @@ def validate_layout(path: str, stations_yaml: str) -> dict:
     Reports errors and warnings for:
       - Missing REFERENCE: MP_ZERO note
       - Station entries without STATION: notes (milepost will be null)
-      - Station entries without SIDING: notes (siding capacity will be null)
-      - Industry entries without INDUSTRY: or SIDING: notes
+      - Industry entries without INDUSTRY: notes
       - Notes placed far from any track endpoint
+
+    Passing track capacity is derived from L{n}-Passing layers automatically;
+    no SIDING: note is required or checked.
 
     Args:
         path: Path to the .xtc layout file.
@@ -2837,7 +2842,7 @@ def export_layout_data(
 ) -> dict:
     """Export layout measurement data to layout_data.json for RR_server.
 
-    Produces a JSON file with station mileposts, siding lengths, industry spur
+    Produces a JSON file with station mileposts, passing track lengths, industry spur
     data, and inter-station segment lengths.  Fields that cannot be computed
     (missing annotations, unreachable track) are null; reasons are in warnings[].
 

@@ -60,7 +60,7 @@ def test_parser_reads_station_notes():
     assert layout.param_version == 12
     note_ids = {n.id for n in layout.notes}
     # 10=STATION:Alpha, 11=STATION:Beta, 12=non-station, 13=STATION:Gamma
-    # 20=SIDING:FreightHouse, 21=STORAGE:CarBarn
+    # 20=STORAGE:FreightHouse, 21=STORAGE:CarBarn
     assert {10, 11, 12, 13, 20, 21}.issubset(note_ids)
 
 
@@ -289,7 +289,7 @@ def test_capacity_finds_siding_and_storage():
 def test_capacity_kinds():
     layout = parse_file(STATION_FIXTURE)
     results = {r.name: r for r in compute_capacities(layout)}
-    assert results["Freight House"].kind == "siding"
+    assert results["Freight House"].kind == "storage"
     assert results["Car Barn"].kind == "storage"
 
 
@@ -344,38 +344,26 @@ def test_get_siding_capacities_tool():
 # compute_capacities — layer-based inference fallback
 # ---------------------------------------------------------------------------
 
-def test_layer_inference_finds_siding_without_note():
-    """Remove SIDING: XP note; XP siding should still be found via L1-Passing layer."""
+def test_layer_inference_finds_passing_capacity():
+    """XP passing track capacity comes from the L1-Passing layer (no note needed)."""
     layout = parse_file(EXPORT_FIXTURE)
-    layout.notes = [n for n in layout.notes if "SIDING: XP" not in n.text]
     results = {r.name: r for r in compute_capacities(layout)}
     assert "XP" in results
     # Tracks 7+8 = 20in + 20in = 40in
     assert results["XP"].length_model_in == pytest.approx(40.0, abs=0.1)
 
 
-def test_layer_inference_kind_is_siding_for_passing_layer():
+def test_layer_inference_kind_is_passing_for_passing_layer():
     layout = parse_file(EXPORT_FIXTURE)
-    layout.notes = [n for n in layout.notes if "SIDING: XP" not in n.text]
     results = {r.name: r for r in compute_capacities(layout)}
-    assert results["XP"].kind == "siding"
+    assert results["XP"].kind == "passing"
 
 
 def test_layer_inference_note_id_is_minus_one():
-    """Inferred results carry note_id=-1 to distinguish them from explicit notes."""
+    """Layer-inferred results carry note_id=-1 to distinguish them from explicit notes."""
     layout = parse_file(EXPORT_FIXTURE)
-    layout.notes = [n for n in layout.notes if "SIDING: XP" not in n.text]
     results = {r.name: r for r in compute_capacities(layout)}
     assert results["XP"].note_id == -1
-
-
-def test_explicit_note_takes_priority_over_layer():
-    """When SIDING: XP note is present it must be used (note_id > 0, not inferred)."""
-    layout = parse_file(EXPORT_FIXTURE)
-    results = {r.name: r for r in compute_capacities(layout)}
-    xp = results.get("XP")
-    assert xp is not None
-    assert xp.note_id > 0
 
 
 def test_station_notes_not_in_capacities_no_passing_layers():
@@ -390,7 +378,6 @@ def test_station_notes_not_in_capacities_no_passing_layers():
 def test_layer_inference_car_count():
     """40 model in / 12 = 3.33 model ft × 2 cars/ft = 6 cars (HO)."""
     layout = parse_file(EXPORT_FIXTURE)
-    layout.notes = [n for n in layout.notes if "SIDING: XP" not in n.text]
     results = {r.name: r for r in compute_capacities(layout)}
     assert results["XP"].max_cars == 6
 
@@ -519,11 +506,11 @@ def test_compute_mileposts_unreachable():
 # ---------------------------------------------------------------------------
 
 def test_list_annotated_segments_count():
-    """Fixture has 5 annotations: REFERENCE:MP_ZERO, STATION:WP, STATION:XP,
-    SIDING:XP, INDUSTRY:KIEL."""
+    """Fixture has 4 annotations: REFERENCE:MP_ZERO, STATION:WP, STATION:XP,
+    INDUSTRY:KIEL.  Passing track capacity comes from L1-Passing layer, not a note."""
     layout = parse_file(EXPORT_FIXTURE)
     segs = list_annotated_segments(layout)
-    assert len(segs) == 5
+    assert len(segs) == 4
 
 
 def test_list_annotated_segments_types():
@@ -531,9 +518,9 @@ def test_list_annotated_segments_types():
     segs = list_annotated_segments(layout)
     types = {s.annotation_type for s in segs}
     assert "station" in types
-    assert "siding" in types
     assert "industry" in types
     assert "reference" in types
+    assert "siding" not in types
 
 
 def test_list_annotated_segments_ids():
@@ -555,7 +542,7 @@ def test_list_annotated_segments_layer_names():
     layout = parse_file(EXPORT_FIXTURE)
     segs = {s.annotation_id: s for s in list_annotated_segments(layout)}
     assert segs["WP"].nearest_track_layer_name == "L1-Main"
-    assert segs["XP"].nearest_track_layer_name == "L1-Passing"
+    assert segs["XP"].nearest_track_layer_name == "L1-Main"
 
 
 # ---------------------------------------------------------------------------
@@ -678,6 +665,28 @@ def test_build_layout_export_xp_milepost():
     xp = next(s for s in data["stations"] if s["station_id"] == "XP")
     expected = 120.0 * 87.1 / 12.0
     assert xp["milepost_entry"] == pytest.approx(expected, rel=1e-2)
+
+
+def test_terminus_station_exit_equals_entry():
+    """terminus: true → milepost_exit == milepost_entry (no distance added)."""
+    layout = parse_file(EXPORT_FIXTURE)
+    config = load_stations_config(EXPORT_STATIONS)
+    # Mark WP as terminus in-memory
+    wp_entry = next(e for e in config.stations if e.id == "WP")
+    wp_entry.terminus = True
+    data = build_layout_export(layout, config)
+    wp = next(s for s in data["stations"] if s["station_id"] == "WP")
+    assert wp["terminus"] is True
+    assert wp["milepost_exit"] == wp["milepost_entry"]
+
+
+def test_terminus_in_station_output():
+    """terminus field appears in every station dict."""
+    layout = parse_file(EXPORT_FIXTURE)
+    config = load_stations_config(EXPORT_STATIONS)
+    data = build_layout_export(layout, config)
+    for s in data["stations"]:
+        assert "terminus" in s
 
 
 def test_build_layout_export_xp_siding_length():

@@ -1,17 +1,20 @@
-"""Station distance and siding/storage capacity calculations for XTrkCAD layouts.
+"""Station distance and capacity calculations for XTrkCAD layouts.
 
 NOTE conventions
 ----------------
 STATION: <name>    — mainline station; used for inter-station routing/milepost.
-SIDING: <name>     — siding track group; used for car-capacity measurement.
-STORAGE: <name>    — storage/yard track group; used for car-capacity measurement.
+STORAGE: <name>    — storage track (house tracks, freight spurs); car-capacity measurement.
 INDUSTRY: <name>   — industry spur; used for spur-length and branch-MP measurement.
 REFERENCE: <name>  — reference point; REFERENCE: MP_ZERO marks milepost 0.
+
+Passing track capacity is NOT annotated with a note — it is derived from the layer
+name: layers named L{n}-Passing are automatically measured and matched to the
+nearest STATION: note.
 
 Resolution priority (first match wins):
   1. NOTE text with the prefix above
   2. (future) track label field
-  3. layer name inference (e.g. L1-Passing → siding)
+  3. layer name inference (e.g. L1-Passing → passing capacity for nearest station)
 
 For routing distances, Dijkstra runs on the endpoint-level track graph.
 For capacity, a BFS walks connected non-TURNOUT tracks from the NOTE's nearest
@@ -31,7 +34,6 @@ import yaml
 from xtrkcad_mcp.models import LayerInfo, Layout, NoteObject, SCALE_RATIOS, cars_per_real_ft
 
 STATION_PREFIX = "STATION:"
-SIDING_PREFIX = "SIDING:"
 STORAGE_PREFIX = "STORAGE:"
 INDUSTRY_PREFIX = "INDUSTRY:"
 REFERENCE_PREFIX = "REFERENCE:"
@@ -40,7 +42,6 @@ _INF = float("inf")
 
 _ALL_PREFIXES: list[tuple[str, str]] = [
     (STATION_PREFIX, "station"),
-    (SIDING_PREFIX, "siding"),
     (STORAGE_PREFIX, "storage"),
     (INDUSTRY_PREFIX, "industry"),
     (REFERENCE_PREFIX, "reference"),
@@ -265,9 +266,9 @@ def compute_distances(
 
 @dataclass
 class CapacityResult:
-    """Usable track length and car count for a named SIDING: or STORAGE: marker."""
+    """Usable track length and car count for a STORAGE:/INDUSTRY: note or L{n}-Passing layer."""
     name: str
-    kind: str                    # "siding" or "storage"
+    kind: str                    # "passing", "storage", or "industry"
     note_id: int
     nearest_track_id: int
     length_model_in: float       # total usable track length (model inches, turnouts excluded)
@@ -276,10 +277,8 @@ class CapacityResult:
 
 
 def _note_prefix(text: str) -> tuple[str, str] | None:
-    """Return (kind, name) if the NOTE text matches SIDING:, STORAGE:, or INDUSTRY:, else None."""
+    """Return (kind, name) if the NOTE text matches STORAGE: or INDUSTRY:, else None."""
     upper = text.strip().upper()
-    if upper.startswith(SIDING_PREFIX):
-        return "siding", text.strip()[len(SIDING_PREFIX):].strip()
     if upper.startswith(STORAGE_PREFIX):
         return "storage", text.strip()[len(STORAGE_PREFIX):].strip()
     if upper.startswith(INDUSTRY_PREFIX):
@@ -430,7 +429,7 @@ def compute_capacities(layout: Layout) -> list[CapacityResult]:
     """Compute usable track length and car capacity.
 
     Priority:
-      1. Explicit SIDING:/STORAGE:/INDUSTRY: note  (note_id >= 0)
+      1. Explicit STORAGE:/INDUSTRY: note  (note_id >= 0)
       2. Layer-based fallback for STATION: notes whose nearest passing/storage
          layer component has no explicit note (note_id == -1, inferred=True)
 
@@ -565,7 +564,7 @@ class _SidingComponent:
     track_ids: set[int]
     length_model_in: float
     layer_idx: int
-    kind: str                          # "siding", "storage", or "main"
+    kind: str                          # "passing", "storage", or "main"
     endpoints: list[tuple[float, float]]
     bounded: bool = False              # True if at least one endpoint connects to a TURNOUT
 
@@ -659,7 +658,7 @@ def _build_siding_components(layout: Layout) -> list[_SidingComponent]:
                             bounded = True
 
         cat = siding_layers[track.layer]
-        kind = "storage" if cat in {"storage", "staging"} else "siding"
+        kind = "storage" if cat in {"storage", "staging"} else "passing"
         components.append(_SidingComponent(
             track_ids=component_ids,
             length_model_in=length,
@@ -817,7 +816,7 @@ def _infer_main_lengths_with_bounded(layout: Layout) -> tuple[list[CapacityResul
         return [], {}
 
     siding_comps = _build_siding_components(layout)
-    passing_comps = [c for c in siding_comps if c.kind == "siding"]
+    passing_comps = [c for c in siding_comps if c.kind == "passing"]
 
     scale = layout.scale or "HO"
     cpf = cars_per_real_ft(scale)
@@ -888,10 +887,10 @@ def _infer_layer_capacities(
     layout: Layout,
     existing_names: set[str],
 ) -> list[CapacityResult]:
-    """Infer siding capacity for STATION: notes with no explicit SIDING: note.
+    """Infer passing track capacity for STATION: notes via layer-based measurement.
 
-    For each uncovered station, finds the nearest *passing*-kind component first
-    (L{n}-Passing layers).  Only falls back to storage/staging if no passing
+    For each station with no explicit capacity note, finds the nearest *passing*-kind
+    component (L{n}-Passing layers).  Only falls back to storage/staging if no passing
     component exists anywhere in the layout.
     """
     stations = extract_stations(layout)
@@ -902,7 +901,7 @@ def _infer_layer_capacities(
     if not components:
         return []
 
-    passing_comps = [c for c in components if c.kind == "siding"]
+    passing_comps = [c for c in components if c.kind == "passing"]
     fallback_comps = components  # storage + staging + passing, used when no passing exists
 
     scale = layout.scale or "HO"
@@ -965,6 +964,7 @@ class StationEntry:
     sequence: int
     types: list[str]              # "station", "industry", "yard", "staging"
     switchback: bool = False
+    terminus: bool = False        # True for line-end stations: mp_exit == mp_entry
     within_limits_of: str | None = None
     spots: int | None = None      # industry car spots (from YAML); None = not specified
 
@@ -992,6 +992,7 @@ def load_stations_config(path: str | Path) -> StationsConfig:
             sequence=int(s.get("sequence", 0)),
             types=list(s.get("types", ["station"])),
             switchback=bool(s.get("switchback", False)),
+            terminus=bool(s.get("terminus", False)),
             within_limits_of=s.get("within_limits_of"),
             spots=int(raw_spots) if raw_spots is not None else None,
         ))
@@ -1128,7 +1129,7 @@ class AnnotatedSegment:
 def list_annotated_segments(layout: Layout) -> list[AnnotatedSegment]:
     """Return one AnnotatedSegment for each NOTE with a known annotation prefix.
 
-    Scans all text NOTEs for STATION:, SIDING:, STORAGE:, INDUSTRY:, REFERENCE:
+    Scans all text NOTEs for STATION:, STORAGE:, INDUSTRY:, REFERENCE:
     prefixes and snaps each to the nearest track endpoint.
     """
     if not layout.tracks:
@@ -1210,9 +1211,11 @@ def validate_layout_annotations(
     Annotation checks (only run when stations_config is provided):
       - REFERENCE: MP_ZERO note is present
       - Every station entry has a STATION: note (for milepost)
-      - Every station entry has a SIDING: note (for siding capacity)
-      - Every industry entry has an INDUSTRY: or SIDING: note (for spur length)
+      - Every industry entry has an INDUSTRY: note (for spur length)
       - All found NOTEs snap close to a track (warn if far)
+
+    Note: passing track capacity is derived from L{n}-Passing layers, not from
+    notes — no MISSING_SIDING_NOTE warning is generated.
     """
     issues: list[ValidationIssue] = []
 
@@ -1234,7 +1237,7 @@ def validate_layout_annotations(
 
     if stations_config is not None:
         station_ids = by_type.get("station", set())
-        siding_ids = by_type.get("siding", set()) | by_type.get("industry", set())
+        industry_ids = by_type.get("industry", set())
 
         for entry in stations_config.stations:
             is_station = any(t in entry.types for t in ("station", "yard", "staging"))
@@ -1251,25 +1254,15 @@ def validate_layout_annotations(
                             f"milepost for '{entry.name}' will be null"
                         ),
                     ))
-                if entry.id not in siding_ids:
-                    issues.append(ValidationIssue(
-                        severity="warning",
-                        code="MISSING_SIDING_NOTE",
-                        location_id=entry.id,
-                        message=(
-                            f"No 'SIDING: {entry.id}' note — "
-                            f"siding capacity for '{entry.name}' will be null"
-                        ),
-                    ))
 
             if is_industry:
-                if entry.id not in siding_ids:
+                if entry.id not in industry_ids:
                     issues.append(ValidationIssue(
                         severity="error",
                         code="MISSING_INDUSTRY_NOTE",
                         location_id=entry.id,
                         message=(
-                            f"No 'INDUSTRY: {entry.id}' or 'SIDING: {entry.id}' note — "
+                            f"No 'INDUSTRY: {entry.id}' note — "
                             f"spur length for '{entry.name}' will be null"
                         ),
                     ))
@@ -1383,6 +1376,7 @@ def build_layout_export(
     Milepost and exit MP rules:
       - milepost_entry: MP of STATION: note via Dijkstra; or REFERENCE: point if
         Dijkstra fails and note carries @<ref> tag (e.g. WP @MP_ZERO)
+      - milepost_exit (terminus): milepost_entry  — trains enter and exit the same end
       - milepost_exit (non-switchback): milepost_entry + siding_length / mp_scale
       - milepost_exit (switchback, no @ref): milepost_entry + main_length / mp_scale
       - milepost_exit (switchback, @ref tag + Dijkstra succeeded): MP of the named
@@ -1470,9 +1464,12 @@ def build_layout_export(
                 )
 
         exit_ref = exit_ref_by_id.get(entry.id)
-        if exit_ref is not None:
+        if entry.terminus and mp_entry is not None:
+            # Terminus: trains enter and exit the same end — no distance added
+            mp_exit: float | None = mp_entry
+        elif exit_ref is not None:
             # Explicit exit switch via REFERENCE: note (e.g. MC @MC_EXIT)
-            mp_exit: float | None = _ep_mp(exit_ref.nearest_ep)
+            mp_exit = _ep_mp(exit_ref.nearest_ep)
         elif not entry.switchback and mp_entry is not None and siding_ft is not None:
             mp_exit = mp_entry + siding_ft / stations_config.mp_scale
         elif entry.switchback and mp_entry is not None and main_ft is not None:
@@ -1494,6 +1491,7 @@ def build_layout_export(
             "main_length_ft": round(main_ft, 3) if main_ft is not None else None,
             "main_length_cars": main_cars,
             "switchback": entry.switchback,
+            "terminus": entry.terminus,
         })
 
     # --- Industries ---
