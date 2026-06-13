@@ -10,7 +10,7 @@ turnouts, sectional track, and flex track.
 **Upstream project:** [XTrkCAD on SourceForge](https://sourceforge.net/projects/xtrkcad-fork/) —
 the authoritative Mercurial repository and issue tracker live there.
 This fork tracks that upstream and layers on toolchain modernization, CI/CD,
-and MCP support.
+GTK3 migration, and CI/CD.
 
 ---
 
@@ -18,9 +18,6 @@ and MCP support.
 
 - **GitHub Actions CI** — automated build and test on every push, using the
   same Ubuntu 22.04 / GTK 2.0 stack as the upstream release.
-- **MCP server** — a [Model Context Protocol](https://modelcontextprotocol.io/)
-  server (`mcp/`) so Claude and other AI assistants can read, create, and
-  validate XTrkCAD track plans programmatically.
 - **Modern toolchain support** — build fixes for GCC 15, `rsvg-convert`
   (replaces Inkscape for bitmap generation), CMocka shared library, and
   forward compatibility with CMake 4.x.
@@ -53,49 +50,6 @@ ctest --test-dir build --output-on-failure
 
 The debug build sets `-DCMAKE_BUILD_TYPE=Debug`. The binary is `xtrkcad`
 (or `xtrkcad-beta` for development builds with a version modifier).
-
----
-
-## MCP Server
-
-The `mcp/` directory contains an MCP server that exposes XTrkCAD layout files
-to Claude and other AI assistants. Phase 1 provides read-only tools; later
-phases will add layout creation and DXF/SVG export.
-
-### Tools
-
-| Tool | Description |
-|---|---|
-| `list_track_plans` | Find all `.xtc` / `.xtce` files in a directory |
-| `get_layout_summary` | Title, scale, room size, track type counts |
-| `get_track_objects` | All tracks with positions and endpoint connections |
-| `find_unconnected_endpoints` | Identify open (unconnected) track endpoints |
-
-### Quick start
-
-```sh
-# Run the server directly (requires uv)
-XTRKCAD_PLANS_DIR=/path/to/your/layouts \
-  uv run --project mcp xtrkcad-mcp
-```
-
-### Claude Code configuration
-
-Add a `.mcp.json` file in your project working directory:
-
-```json
-{
-  "mcpServers": {
-    "xtrkcad": {
-      "command": "uv",
-      "args": ["run", "--project", "/path/to/xtrkcad-git/mcp", "xtrkcad-mcp"],
-      "env": {
-        "XTRKCAD_PLANS_DIR": "/path/to/your/layouts"
-      }
-    }
-  }
-}
-```
 
 ---
 

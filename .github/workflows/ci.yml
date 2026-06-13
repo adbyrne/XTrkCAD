@@ -9,19 +9,6 @@ on:
       - main
 
 jobs:
-  mcp-tests:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-      fail-fast: false
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v5
-      - uses: astral-sh/setup-uv@v7
-      - name: Run MCP tests
-        working-directory: mcp
-        run: uv run --extra dev pytest -q
-
   doxygen:
     runs-on: ubuntu-latest
     steps:

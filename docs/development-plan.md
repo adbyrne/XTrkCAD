@@ -62,7 +62,7 @@ Goal: increase confidence in correctness; catch regressions earlier; add static 
 
 Goal: add write capability to the MCP server; operational density analysis; layout generation.
 
-Phase 1 complete: 16 tools, 27 tests. Source: `xtrkcad-git/mcp/`.
+Phase 1 complete. Source: `xtrkcad-git-gtk3/mcp/` (GTK3V2MAIN branch — MCP is not in the GTK2 main branch).
 
 | ID  | Size | Item                                                                                       | Suggested branch            | SF ticket |
 |-----|------|--------------------------------------------------------------------------------------------|-----------------------------|-----------|

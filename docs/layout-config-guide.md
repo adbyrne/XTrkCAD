@@ -6,7 +6,7 @@ using the **Hillside Division** — a simple two-deck HO layout in a 12×16 ft r
 describe the room geometry, the benchwork plan, and the track layout; and a tool
 that converts them into an XTrkCAD `.xtc` file.
 
-The complete Hillside Division files live in `mcp/tests/fixtures/`:
+The complete Hillside Division files live in `mcp/tests/fixtures/` on the GTK3V2MAIN branch (`xtrkcad-git-gtk3`):
 
 | File | Purpose |
 |------|---------|
@@ -542,17 +542,19 @@ these NOTEs to compute mileposts, siding lengths, and car capacities.
 | Prefix | Example | Purpose |
 |--------|---------|---------|
 | `STATION: <id>` | `STATION: WP` | Mainline station — milepost origin / destination |
-| `SIDING: <id>` | `SIDING: WP` | Siding track group — measures car capacity by BFS length |
-| `STORAGE: <id> <label>` | `STORAGE: WP_COAL Coal trestle` | Storage / yard track |
+| `STORAGE: <id> <label>` | `STORAGE: WP_COAL Coal trestle` | House track / freight spur — measures car capacity by BFS length |
 | `INDUSTRY: <id>` | `INDUSTRY: KIEL` | Industry spotting area — one threshold slot (12 model in default) |
 | `REFERENCE: MP_ZERO` | `REFERENCE: MP_ZERO` | Milepost datum; required for milepost output |
 | `YARD_TRACK: <yard> <label>` | `YARD_TRACK: WP Caboose` | Individual yard track |
 
-Place each NOTE close to the track it labels.  `STATION:`, `SIDING:`, and
-`STORAGE:` notes snap to the nearest track **endpoint**; `INDUSTRY:` notes
-project perpendicularly onto the nearest track **body** (segment snap), so you
-can place them anywhere along a spur.  Notes more than 12 model inches from
-any snap target trigger a `FAR_SNAP` validation warning.
+**Passing track capacity** is not annotated with a note — it is derived automatically
+from the layer name (`L{n}-Passing`).  No note is needed on the passing siding itself.
+
+Place each NOTE close to the track it labels.  `STATION:` and `STORAGE:` notes
+snap to the nearest track **endpoint**; `INDUSTRY:` notes project perpendicularly
+onto the nearest track **body** (segment snap), so you can place them anywhere
+along a spur.  Notes more than 12 model inches from any snap target trigger a
+`FAR_SNAP` validation warning.
 
 #### Validating annotations
 
@@ -582,8 +584,8 @@ stations:
     spots: 3          # explicit override — 3 car spots regardless of default slot
 ```
 
-If you want to measure the full spur length for car capacity, use a `SIDING:`
-or `STORAGE:` note instead of (or in addition to) an `INDUSTRY:` note.
+If you want to measure the full spur length for car capacity, use a `STORAGE:`
+note instead of (or in addition to) an `INDUSTRY:` note.
 
 #### Multiple industries on one spur
 
