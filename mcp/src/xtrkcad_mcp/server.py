@@ -2779,6 +2779,8 @@ def list_labeled_segments(path: str) -> list[dict]:
             "annotation_source": s.annotation_source,
             "note_id": s.note_id,
             "note_text": s.note_text,
+            "note_layer": s.note_layer,
+            "note_layer_name": s.note_layer_name,
             "nearest_track_id": s.nearest_track_id,
             "layer": s.nearest_track_layer,
             "layer_name": s.nearest_track_layer_name,
