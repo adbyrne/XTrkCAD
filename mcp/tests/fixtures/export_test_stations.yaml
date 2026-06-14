@@ -1,5 +1,5 @@
 layout: export_test
-mp_scale: 1.0   # 1 MP = 1 prototype foot of track
+mp_scale: 1.0   # 1 MP = 1 layout inch of track
 
 stations:
   - id: WP

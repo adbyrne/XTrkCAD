@@ -2553,11 +2553,19 @@ def write_station_distance_report(
     route_layer_names: list[str] | None = None,
     exclude_turnouts: bool = False,
     format: str = "md",
+    stations_yaml: str = "",
 ) -> str:
     """Write a station distance report to a file.
 
     Reports the shortest track-graph distance between every pair of STATION:
-    notes in both model inches and prototypical feet.
+    notes in model inches and mileposts.  Milepost scale is read from a
+    stations.yaml file (mp_scale field, layout inches per MP); defaults to
+    12 (1 MP = 12 layout inches) when no stations.yaml is provided.
+
+    Terminus stations whose STATION: note sits on an isolated yard stub are
+    automatically re-anchored via their @ref_tag to the corresponding
+    REFERENCE: note on the connected mainline (e.g. WP @MP_ZERO → REFERENCE:
+    MP_ZERO placed at the WP yard throat switch).
 
     Supports layer filtering and turnout exclusion — see get_station_distances
     for parameter details.
@@ -2569,6 +2577,9 @@ def write_station_distance_report(
         route_layer_names: Optional list of category names to restrict routing.
         exclude_turnouts: If True, TURNOUT lengths are excluded from totals.
         format: Output format — "md" (default) or "json".
+        stations_yaml: Optional path to stations.yaml for mp_scale.  When
+            omitted the directory of the .xtc file is searched for a
+            *_stations.yaml match; falls back to mp_scale=12.
     """
     p = _resolve_plan(path)
     layout = parse_file(p)
@@ -2581,6 +2592,26 @@ def write_station_distance_report(
         exclude_turnouts=exclude_turnouts,
     )
     out = Path(output_path)
+
+    # Load mp_scale: explicit arg > auto-discover > default 12
+    mp_scale = 12.0
+    sy_path: Path | None = None
+    if stations_yaml:
+        sy_path = Path(stations_yaml)
+    else:
+        # Auto-discover: look for *_stations.yaml or stations.yaml alongside the XTC
+        for candidate in p.parent.glob("*_stations.yaml"):
+            sy_path = candidate
+            break
+        if sy_path is None:
+            generic = p.parent / "stations.yaml"
+            if generic.exists():
+                sy_path = generic
+    if sy_path is not None and sy_path.exists():
+        try:
+            mp_scale = load_stations_config(sy_path).mp_scale
+        except Exception:
+            pass
 
     scale = layout.scale or "?"
     title = layout.title1 or p.stem
@@ -2595,6 +2626,7 @@ def write_station_distance_report(
         payload = {
             "layout": title,
             "scale": scale,
+            "mp_scale": mp_scale,
             "route_filter": route_layer_names or "all",
             "exclude_turnouts": exclude_turnouts,
             "stations": [s.name for s in stations],
@@ -2603,7 +2635,7 @@ def write_station_distance_report(
                     "from": r.from_station,
                     "to": r.to_station,
                     "distance_model_in": round(r.distance_model_in, 2),
-                    "distance_proto_ft": round(r.distance_proto_ft, 1),
+                    "milepost": round(r.distance_model_in / mp_scale, 1) if r.reachable else None,
                     "reachable": r.reachable,
                 }
                 for r in results
@@ -2613,6 +2645,7 @@ def write_station_distance_report(
         return f"Wrote JSON station distance report to {out} ({len(results)} pairs)"
 
     # Markdown
+    mp_label = f"MP ({int(mp_scale)}in=1MP)" if mp_scale == int(mp_scale) else f"MP ({mp_scale}in=1MP)"
     lines: list[str] = [
         f"# Station Distance Report — {title} ({scale}){filter_note}",
         "",
@@ -2624,13 +2657,13 @@ def write_station_distance_report(
     elif not results:
         lines.append("_Only one station found — need at least two to compute distances._")
     else:
-        headers = ["From", "To", "Model (in)", f"Proto (ft) [{scale}]", "Reachable"]
+        headers = ["From", "To", "Model (in)", mp_label, "Reachable"]
         rows = [
             [
                 r.from_station,
                 r.to_station,
                 f"{r.distance_model_in:.2f}" if r.reachable else "—",
-                f"{r.distance_proto_ft:.0f}" if r.reachable else "—",
+                f"{r.distance_model_in / mp_scale:.1f}" if r.reachable else "—",
                 "yes" if r.reachable else "no",
             ]
             for r in results

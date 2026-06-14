@@ -479,12 +479,12 @@ def test_compute_mileposts_wp_is_zero():
 
 
 def test_compute_mileposts_xp_distance():
-    """XP is 120 model inches from WP. Proto ft = 120 * 87.1 / 12."""
+    """XP is 120 model inches from WP. mp_scale=1.0 (layout in/MP) → 120 MPs."""
     layout = parse_file(EXPORT_FIXTURE)
     config = load_stations_config(EXPORT_STATIONS)
     refs = {r.name: r for r in extract_reference_points(layout)}
     results = {r.station_id: r for r in compute_mileposts(layout, config, refs["MP_ZERO"])}
-    expected_mp = 120.0 * 87.1 / 12.0   # mp_scale=1.0, so MP == proto_ft
+    expected_mp = 120.0 / 1.0   # d (layout in) / mp_scale (layout in/MP)
     assert results["XP"].milepost == pytest.approx(expected_mp, rel=1e-3)
 
 
@@ -663,7 +663,7 @@ def test_build_layout_export_xp_milepost():
     config = load_stations_config(EXPORT_STATIONS)
     data = build_layout_export(layout, config)
     xp = next(s for s in data["stations"] if s["station_id"] == "XP")
-    expected = 120.0 * 87.1 / 12.0
+    expected = 120.0 / 1.0   # d (layout in) / mp_scale (layout in/MP) = 120 MPs
     assert xp["milepost_entry"] == pytest.approx(expected, rel=1e-2)
 
 

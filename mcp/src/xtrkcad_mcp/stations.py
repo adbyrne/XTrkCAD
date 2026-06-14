@@ -209,6 +209,34 @@ def _dijkstra(
     return dist
 
 
+def _resolve_routing_ep(
+    station: "Station",
+    adj: dict,
+    ref_by_name: dict,
+) -> tuple[int, int]:
+    """Return the graph endpoint to use for routing this station.
+
+    If the station's nearest_ep has connections to other tracks in the
+    adjacency graph, use it directly.  Otherwise, if the station carries a
+    @ref_tag pointing to a known REFERENCE: note, fall back to that reference
+    point's nearest_ep.
+
+    This handles terminus stations (e.g. WP @MP_ZERO) whose STATION: note
+    may sit on an isolated yard stub while the mainline entry point is marked
+    by a separate REFERENCE: note placed on the connected throat switch.
+    """
+    ep = station.nearest_ep
+    track_id = ep[0]
+    # An isolated track only has intra-track edges (same track_id on both ends).
+    # If any neighbour is on a different track, the ep is connected.
+    has_inter = any(nb[0] != track_id for nb, _ in adj.get(ep, []))
+    if not has_inter and station.ref_tag:
+        ref = ref_by_name.get(station.ref_tag)
+        if ref is not None:
+            return ref.nearest_ep
+    return ep
+
+
 def compute_distances(
     layout: Layout,
     layer_categories: dict | None = None,
@@ -243,12 +271,20 @@ def compute_distances(
         }
 
     adj = _build_ep_graph(layout, allowed_layers, exclude_turnouts)
-    results: list[DistanceResult] = []
 
+    # Resolve each station's routing endpoint, applying the @ref_tag fallback
+    # for stations whose nearest track is isolated (e.g. WP @MP_ZERO).
+    ref_by_name = {r.name: r for r in extract_reference_points(layout)}
+    routing_eps = {
+        s.name: _resolve_routing_ep(s, adj, ref_by_name)
+        for s in stations
+    }
+
+    results: list[DistanceResult] = []
     for i, s1 in enumerate(stations):
-        dist_from_s1 = _dijkstra(adj, s1.nearest_ep)
+        dist_from_s1 = _dijkstra(adj, routing_eps[s1.name])
         for s2 in stations[i + 1:]:
-            d = dist_from_s1.get(s2.nearest_ep, _INF)
+            d = dist_from_s1.get(routing_eps[s2.name], _INF)
             reachable = d < _INF
             proto_ft = model_in_to_proto_ft(d, layout.scale) if reachable else 0.0
             results.append(DistanceResult(
@@ -998,7 +1034,7 @@ class StationEntry:
 class StationsConfig:
     """Parsed stations.yaml — the reference schema for export and validation."""
     layout: str
-    mp_scale: float               # prototype feet per milepost unit (default 1.0)
+    mp_scale: float               # layout inches per milepost unit (default 12 → 1 MP = 1 ft of layout)
     stations: list[StationEntry]
 
 
@@ -1100,8 +1136,8 @@ def compute_mileposts(
 ) -> list[MilepostResult]:
     """Compute milepost for every STATION: note, measured from ref.
 
-    Milepost = prototype_feet_from_ref / mp_scale.
-    With the default mp_scale=1.0, 1 milepost unit == 1 prototype foot of track.
+    Milepost = layout_inches_from_ref / mp_scale.
+    With mp_scale=12, 1 milepost unit == 12 layout inches of track.
     """
     stations = extract_stations(layout)
     if not stations:
@@ -1109,16 +1145,14 @@ def compute_mileposts(
 
     adj = _build_ep_graph(layout, None, False)
     dist_from_ref = _dijkstra(adj, ref.nearest_ep)
+    ref_by_name = {r.name: r for r in extract_reference_points(layout)}
 
     results: list[MilepostResult] = []
     for station in stations:
-        d = dist_from_ref.get(station.nearest_ep, _INF)
+        ep = _resolve_routing_ep(station, adj, ref_by_name)
+        d = dist_from_ref.get(ep, _INF)
         reachable = d < _INF
-        if reachable:
-            proto_ft = model_in_to_proto_ft(d, layout.scale)
-            mp: float | None = proto_ft / stations_config.mp_scale
-        else:
-            mp = None
+        mp: float | None = d / stations_config.mp_scale if reachable else None
         results.append(MilepostResult(
             station_id=station.name,
             note_id=station.note_id,
@@ -1466,7 +1500,7 @@ def build_layout_export(
         d = dist_from_ref.get(ep, _INF)
         if d >= _INF:
             return None
-        return model_in_to_proto_ft(d, scale) / stations_config.mp_scale
+        return d / stations_config.mp_scale   # d is layout inches; mp_scale is layout in/MP
 
     # Station mileposts keyed by station_id (from STATION: notes)
     # exit_ref_by_id: stations whose @ref resolves the exit switch (not entry)
@@ -1510,10 +1544,12 @@ def build_layout_export(
         mp_entry = mp_by_id.get(entry.id)
         cap = cap_by_name.get(entry.id)
         siding_ft = cap.length_real_ft if cap else None
+        siding_in = cap.length_model_in if cap else None
         siding_cars = cap.max_cars if cap else None
 
         main_cap = main_by_id.get(entry.id)
         main_ft = main_cap.length_real_ft if main_cap else None
+        main_in = main_cap.length_model_in if main_cap else None
         main_cars = main_cap.max_cars if main_cap else None
 
         # Warn on significant mismatch only when main component is switch-bounded
@@ -1536,11 +1572,11 @@ def build_layout_export(
         elif exit_ref is not None:
             # Explicit exit switch via REFERENCE: note (e.g. MC @MC_EXIT)
             mp_exit = _ep_mp(exit_ref.nearest_ep)
-        elif not entry.switchback and mp_entry is not None and siding_ft is not None:
-            mp_exit = mp_entry + siding_ft / stations_config.mp_scale
-        elif entry.switchback and mp_entry is not None and main_ft is not None:
+        elif not entry.switchback and mp_entry is not None and siding_in is not None:
+            mp_exit = mp_entry + siding_in / stations_config.mp_scale
+        elif entry.switchback and mp_entry is not None and main_in is not None:
             # Regular switchback: exit = entry + main section length between switches
-            mp_exit = mp_entry + main_ft / stations_config.mp_scale
+            mp_exit = mp_entry + main_in / stations_config.mp_scale
         else:
             mp_exit = None
             if entry.switchback and mp_entry is not None:
@@ -1601,7 +1637,8 @@ def build_layout_export(
         mp_b = mp_by_id.get(b.id)
         length: float | None = None
         if mp_a is not None and mp_b is not None:
-            length = round(abs(mp_b - mp_a) * stations_config.mp_scale, 3)
+            model_in_diff = abs(mp_b - mp_a) * stations_config.mp_scale
+            length = round(model_in_to_proto_ft(model_in_diff, scale), 3)
         segments_out.append({
             "from_station": a.id,
             "to_station": b.id,
