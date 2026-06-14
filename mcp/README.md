@@ -76,6 +76,31 @@ All write-report tools accept a `format` parameter: `"txt"` (default), `"md"`, `
 | `write_gaps_report` | Open endpoints, near-miss pairs, turntable stall summary |
 | `write_radius_map` | SVG colour-coded curve radius map |
 
+### Annotation and export
+
+These tools measure track capacity and compute station mileposts from NOTE annotations
+placed on the layout.  Annotations use the following `NOTE` text prefixes:
+
+| Prefix | Purpose |
+|---|---|
+| `STATION: <id>` | Station or yard identity; Dijkstra milepost origin |
+| `REFERENCE: <name>` | Named reference point (e.g. `REFERENCE: MP_ZERO`) |
+| `INDUSTRY: <id>` | Industry spur; length measured from nearest endpoint |
+| `STORAGE: <id>` | Standalone freight spur (not a station house track) |
+| `HOUSE_TRACK: <id>` | Station freight-house / team track; coexists with passing siding |
+| `YARD_TRACK: <id> <label>` | Individual yard track capacity |
+
+Passing siding capacity is inferred automatically from `L{n}-Passing` layers —
+no NOTE is required on the passing track itself.
+
+| Tool | Description |
+|---|---|
+| `get_siding_capacities` | Usable track length and car capacity for all annotated segments |
+| `get_station_distances` | Milepost and inter-station distances |
+| `list_labeled_segments` | Audit all annotated tracks before running validate/export |
+| `validate_layout` | Check NOTE annotations against stations.yaml config |
+| `export_layout_data` | Write `layout_data.json` (mileposts, sidings, house tracks, industries) |
+
 ### Edit
 
 | Tool | Description |

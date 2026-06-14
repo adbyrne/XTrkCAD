@@ -2649,9 +2649,11 @@ def write_station_distance_report(
 def get_siding_capacities(path: str) -> list[dict]:
     """Report usable track length and car capacity for storage/passing tracks.
 
-    Two sources of capacity data are combined:
-      - STORAGE: notes (house tracks, freight spurs) — explicitly placed NOTE objects
-      - INDUSTRY: notes — industry spurs with explicit NOTE objects
+    Three sources of capacity data are combined:
+      - STORAGE: <ID> notes — freight spurs / miscellaneous storage tracks
+      - INDUSTRY: <ID> notes — industry spurs
+      - HOUSE_TRACK: <ID> notes — station freight-house / team tracks (coexist with
+        passing siding capacity for the same station)
       - L{n}-Passing layers — passing tracks measured automatically and matched to the
         nearest STATION: note (no NOTE object required on the passing track itself)
 
@@ -2664,7 +2666,7 @@ def get_siding_capacities(path: str) -> list[dict]:
 
     Returns a list of dicts with keys:
         name            — marker label (station id for passing, note label for storage)
-        kind            — "passing", "storage", or "industry"
+        kind            — "passing", "storage", "industry", or "house_track"
         nearest_track_id
         length_model_in — usable length in model inches (turnouts excluded)
         length_real_ft  — prototypical feet (scale-dependent)
@@ -2762,7 +2764,7 @@ def list_plans_resource() -> str:
 def list_labeled_segments(path: str) -> list[dict]:
     """List all annotated track segments found in the layout.
 
-    Scans every text NOTE for STATION:, STORAGE:, INDUSTRY:, and
+    Scans every text NOTE for STATION:, STORAGE:, INDUSTRY:, HOUSE_TRACK:, and
     REFERENCE: prefixes.  Each match is snapped to the nearest track endpoint
     and returned with annotation type, source, layer info, and snap distance.
 
@@ -2842,9 +2844,10 @@ def export_layout_data(
 ) -> dict:
     """Export layout measurement data to layout_data.json for RR_server.
 
-    Produces a JSON file with station mileposts, passing track lengths, industry spur
-    data, and inter-station segment lengths.  Fields that cannot be computed
-    (missing annotations, unreachable track) are null; reasons are in warnings[].
+    Produces a JSON file with station mileposts, passing track lengths,
+    freight-house track lengths (house_track_ft), industry spur data, and
+    inter-station segment lengths.  Fields that cannot be computed (missing
+    annotations, unreachable track) are null; reasons are in warnings[].
 
     Milepost convention:
       Distances are measured from the REFERENCE: MP_ZERO note along the track
