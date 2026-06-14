@@ -38,6 +38,7 @@ STORAGE_PREFIX = "STORAGE:"
 INDUSTRY_PREFIX = "INDUSTRY:"
 REFERENCE_PREFIX = "REFERENCE:"
 YARD_TRACK_PREFIX = "YARD_TRACK:"
+HOUSE_TRACK_PREFIX = "HOUSE_TRACK:"
 _INF = float("inf")
 
 _ALL_PREFIXES: list[tuple[str, str]] = [
@@ -46,6 +47,7 @@ _ALL_PREFIXES: list[tuple[str, str]] = [
     (INDUSTRY_PREFIX, "industry"),
     (REFERENCE_PREFIX, "reference"),
     (YARD_TRACK_PREFIX, "yard_track"),
+    (HOUSE_TRACK_PREFIX, "house_track"),
 ]
 
 _SNAP_WARN_THRESHOLD = 12.0  # model inches — warn if NOTE is more than 1 model foot from track
@@ -277,12 +279,14 @@ class CapacityResult:
 
 
 def _note_prefix(text: str) -> tuple[str, str] | None:
-    """Return (kind, name) if the NOTE text matches STORAGE: or INDUSTRY:, else None."""
+    """Return (kind, name) if the NOTE text matches a known capacity prefix, else None."""
     upper = text.strip().upper()
     if upper.startswith(STORAGE_PREFIX):
         return "storage", text.strip()[len(STORAGE_PREFIX):].strip()
     if upper.startswith(INDUSTRY_PREFIX):
         return "industry", text.strip()[len(INDUSTRY_PREFIX):].strip()
+    if upper.startswith(HOUSE_TRACK_PREFIX):
+        return "house_track", text.strip()[len(HOUSE_TRACK_PREFIX):].strip()
     return None
 
 
@@ -473,7 +477,9 @@ def compute_capacities(layout: Layout) -> list[CapacityResult]:
             max_cars=max_cars,
         ))
 
-    existing_names = {r.name for r in results}
+    # Exclude house_track: a HOUSE_TRACK: note should not suppress layer inference
+    # for that station's passing siding — the two are independent.
+    existing_names = {r.name for r in results if r.kind != "house_track"}
     results.extend(_infer_layer_capacities(layout, existing_names))
     return results
 
@@ -1437,9 +1443,11 @@ def build_layout_export(
         else:
             mp_by_id[sid] = mp_dijkstra
 
-    # Siding / industry capacities keyed by name
+    # All capacities keyed by name; split house-track entries separately so they
+    # don't shadow passing/storage capacity for the same station ID.
     capacities = compute_capacities(layout)
-    cap_by_name: dict[str, CapacityResult] = {c.name: c for c in capacities}
+    cap_by_name: dict[str, CapacityResult] = {c.name: c for c in capacities if c.kind != "house_track"}
+    house_by_name: dict[str, CapacityResult] = {c.name: c for c in capacities if c.kind == "house_track"}
 
     # Main-line track lengths at each station (bounded components only get warnings)
     main_caps, main_bounded = _infer_main_lengths_with_bounded(layout)
@@ -1495,12 +1503,15 @@ def build_layout_export(
                     f"{entry.id}: switchback — exit MP could not be computed (no main length)"
                 )
 
+        house_cap = house_by_name.get(entry.id)
         stations_out.append({
             "station_id": entry.id,
             "milepost_entry": round(mp_entry, 3) if mp_entry is not None else None,
             "milepost_exit": round(mp_exit, 3) if mp_exit is not None else None,
             "siding_length_ft": round(siding_ft, 3) if siding_ft is not None else None,
             "siding_length_cars": siding_cars,
+            "house_track_ft": round(house_cap.length_real_ft, 3) if house_cap else None,
+            "house_track_cars": house_cap.max_cars if house_cap else None,
             "main_length_ft": round(main_ft, 3) if main_ft is not None else None,
             "main_length_cars": main_cars,
             "switchback": entry.switchback,
