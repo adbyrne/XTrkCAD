@@ -2787,6 +2787,7 @@ def list_labeled_segments(path: str) -> list[dict]:
             "note_layer": s.note_layer,
             "note_layer_name": s.note_layer_name,
             "nearest_track_id": s.nearest_track_id,
+            "nearest_track_kind": s.nearest_track_kind,
             "layer": s.nearest_track_layer,
             "layer_name": s.nearest_track_layer_name,
             "snap_dist_in": round(s.snap_dist, 4),

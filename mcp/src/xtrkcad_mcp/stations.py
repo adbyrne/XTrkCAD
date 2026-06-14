@@ -394,6 +394,7 @@ def _project_onto_segment(
 
 def _snap_to_segment(
     layout: Layout, x: float, y: float, layer: int | None = None,
+    exclude_turnouts: bool = False,
 ) -> tuple[int, float, float]:
     """Find the nearest point on any track segment to (x, y).
 
@@ -403,7 +404,9 @@ def _snap_to_segment(
     close enough for curves for ordering purposes).
 
     If layer is given, restrict search to tracks on that layer; falls back to
-    all tracks if nothing is found on that layer.
+    all tracks if nothing is found on that layer.  When exclude_turnouts is
+    True, TURNOUT tracks are skipped — useful for YARD_TRACK snapping where
+    snapping to a turnout boundary gives 0 usable length.
     """
     def _search(tracks: list) -> tuple[int, float, float]:
         best_id, best_t, best_dist = -1, 0.0, _INF
@@ -418,10 +421,11 @@ def _snap_to_segment(
                 best_t = t
         return best_id, best_t, best_dist
 
-    all_result = _search(layout.tracks)
+    candidates = [t for t in layout.tracks if not (exclude_turnouts and t.kind == "TURNOUT")]
+    all_result = _search(candidates)
 
     if layer is not None:
-        same_layer = [t for t in layout.tracks if t.layer == layer]
+        same_layer = [t for t in candidates if t.layer == layer]
         filt_id, filt_t, filt_dist = _search(same_layer)
         if filt_id >= 0 and filt_dist <= _LAYER_PREF_THRESHOLD:
             return filt_id, filt_t, filt_dist
@@ -525,7 +529,9 @@ def compute_yard_tracks(layout: Layout) -> list[YardTrackResult]:
             continue
         yard_id, label = parts[0], parts[1]
 
-        nearest_id, _t, _perp = _snap_to_segment(layout, note.x, note.y, note.layer)
+        nearest_id, _t, _perp = _snap_to_segment(
+            layout, note.x, note.y, note.layer, exclude_turnouts=True,
+        )
         if nearest_id < 0:
             continue
 
@@ -1133,13 +1139,14 @@ def compute_mileposts(
 class AnnotatedSegment:
     """One NOTE-based annotation resolved to its nearest track."""
     annotation_id: str
-    annotation_type: str       # "station" | "siding" | "storage" | "industry" | "reference"
+    annotation_type: str       # "station" | "siding" | "storage" | "industry" | "reference" | "yard_track" | "house_track"
     annotation_source: str     # "note" (only source implemented; "label"/"layer" are future)
     note_id: int
     note_text: str
     note_layer: int
     note_layer_name: str
     nearest_track_id: int
+    nearest_track_kind: str    # "STRAIGHT" | "CURVE" | "TURNOUT" | etc.
     nearest_track_layer: int
     nearest_track_layer_name: str
     snap_dist: float
@@ -1148,8 +1155,10 @@ class AnnotatedSegment:
 def list_annotated_segments(layout: Layout) -> list[AnnotatedSegment]:
     """Return one AnnotatedSegment for each NOTE with a known annotation prefix.
 
-    Scans all text NOTEs for STATION:, STORAGE:, INDUSTRY:, REFERENCE:
-    prefixes and snaps each to the nearest track endpoint.
+    Scans all text NOTEs for STATION:, STORAGE:, INDUSTRY:, HOUSE_TRACK:,
+    YARD_TRACK:, and REFERENCE: prefixes and snaps each to the nearest track.
+    YARD_TRACK: notes use segment-projection snap (excluding turnouts) to match
+    the measurement logic in compute_yard_tracks.  All others use endpoint snap.
     """
     if not layout.tracks:
         return []
@@ -1174,9 +1183,14 @@ def list_annotated_segments(layout: Layout) -> list[AnnotatedSegment]:
         if not matched_type or not matched_id:
             continue
 
-        best_id, _ep_idx, best_dist = _snap_to_endpoint(
-            layout, note.x, note.y, note.layer,
-        )
+        if matched_type == "yard_track":
+            best_id, _t, best_dist = _snap_to_segment(
+                layout, note.x, note.y, note.layer, exclude_turnouts=True,
+            )
+        else:
+            best_id, _ep_idx, best_dist = _snap_to_endpoint(
+                layout, note.x, note.y, note.layer,
+            )
 
         if best_id < 0:
             continue
@@ -1195,6 +1209,7 @@ def list_annotated_segments(layout: Layout) -> list[AnnotatedSegment]:
             note_layer=note.layer,
             note_layer_name=note_layer_info.name,
             nearest_track_id=best_id,
+            nearest_track_kind=track.kind if track else "UNKNOWN",
             nearest_track_layer=track_layer_idx,
             nearest_track_layer_name=track_layer_info.name,
             snap_dist=best_dist,
@@ -1296,6 +1311,32 @@ def validate_layout_annotations(
                     message=(
                         f"Note '{seg.note_text}' is {seg.snap_dist:.1f} model in from "
                         f"nearest track (threshold {_SNAP_WARN_THRESHOLD} in)"
+                    ),
+                ))
+
+        # Warn when a STATION: note snaps to a track on a different layer.
+        # Terminus stations (WP, HC) are excluded: their yards extend beyond the
+        # last milepost, so the nearest Main-layer track may be far away.
+        terminus_ids = {e.id for e in stations_config.stations if e.terminus}
+        station_segs = {seg.annotation_id: seg for seg in segments
+                        if seg.annotation_type == "station"}
+        for seg in station_segs.values():
+            sid = seg.annotation_id.split()[0]   # strip @ref tag if present
+            if sid in terminus_ids:
+                continue
+            if seg.note_layer != seg.nearest_track_layer:
+                note_lname = layout.layers.get(
+                    seg.note_layer, LayerInfo(seg.note_layer, f"Layer {seg.note_layer}")
+                ).name
+                track_lname = seg.nearest_track_layer_name
+                issues.append(ValidationIssue(
+                    severity="warning",
+                    code="STATION_NOTE_LAYER_MISMATCH",
+                    location_id=sid,
+                    message=(
+                        f"STATION: {seg.annotation_id} note is on layer '{note_lname}' "
+                        f"but snaps to T{seg.nearest_track_id} ({seg.nearest_track_kind}) "
+                        f"on layer '{track_lname}' — move note over a {note_lname} track"
                     ),
                 ))
 
