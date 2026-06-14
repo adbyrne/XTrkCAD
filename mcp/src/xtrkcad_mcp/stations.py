@@ -908,28 +908,40 @@ def _infer_layer_capacities(
     cpf = cars_per_real_ft(scale)
     results: list[CapacityResult] = []
 
-    for station in stations:
-        if station.name in existing_names:
-            continue
+    eligible = [s for s in stations if s.name not in existing_names]
+    if not eligible:
+        return []
 
-        # Prefer passing-layer components; fall back to all if layout has none
-        search = passing_comps if passing_comps else fallback_comps
+    # Prefer passing-layer components; fall back to all if layout has none
+    search = passing_comps if passing_comps else fallback_comps
 
-        # Collect candidates with their distances
-        candidates: list[tuple[float, _SidingComponent]] = []
-        for comp in search:
+    # Exclusive Voronoi assignment: each component goes to its single nearest
+    # station.  Without this, multiple stations can claim the same component
+    # (e.g. a terminal yard at one end of the line claiming a mid-line siding).
+    comps_for_station: dict[str, list[tuple[float, _SidingComponent]]] = {
+        s.name: [] for s in eligible
+    }
+    for comp in search:
+        best_name: str | None = None
+        best_dist = _INF
+        for station in eligible:
             d = min(math.hypot(station.x - ex, station.y - ey) for ex, ey in comp.endpoints)
-            candidates.append((d, comp))
+            if d < best_dist:
+                best_dist = d
+                best_name = station.name
+        if best_name is not None:
+            comps_for_station[best_name].append((best_dist, comp))
 
-        if not candidates:
+    for station in eligible:
+        owned = comps_for_station.get(station.name, [])
+        if not owned:
             continue
 
-        # Among all passing components within 1.5× the nearest distance, prefer
-        # the longest one.  This prevents a short stub at one siding entry from
-        # winning over the primary siding track when both are nearly equidistant.
-        min_d = min(d for d, _ in candidates)
+        # Among owned components within 1.5× the nearest distance, prefer the
+        # longest — avoids a short stub at one switch winning over the main siding.
+        min_d = min(d for d, _ in owned)
         radius = max(min_d * 1.5, 20.0)
-        nearby = [(d, c) for d, c in candidates if d <= radius]
+        nearby = [(d, c) for d, c in owned if d <= radius]
         best_comp = max(nearby, key=lambda x: x[1].length_model_in)[1]
 
         length_in = best_comp.length_model_in
@@ -964,7 +976,8 @@ class StationEntry:
     sequence: int
     types: list[str]              # "station", "industry", "yard", "staging"
     switchback: bool = False
-    terminus: bool = False        # True for line-end stations: mp_exit == mp_entry
+    terminus: bool = False        # True for line-end stations: mp_exit is null (no through exit)
+    passing_siding: bool | None = None  # False = suppress layer inference; None = auto-detect
     within_limits_of: str | None = None
     spots: int | None = None      # industry car spots (from YAML); None = not specified
 
@@ -1376,7 +1389,7 @@ def build_layout_export(
     Milepost and exit MP rules:
       - milepost_entry: MP of STATION: note via Dijkstra; or REFERENCE: point if
         Dijkstra fails and note carries @<ref> tag (e.g. WP @MP_ZERO)
-      - milepost_exit (terminus): milepost_entry  — trains enter and exit the same end
+      - milepost_exit (terminus): null — trains reverse out the same end, no through exit
       - milepost_exit (non-switchback): milepost_entry + siding_length / mp_scale
       - milepost_exit (switchback, no @ref): milepost_entry + main_length / mp_scale
       - milepost_exit (switchback, @ref tag + Dijkstra succeeded): MP of the named
@@ -1464,9 +1477,9 @@ def build_layout_export(
                 )
 
         exit_ref = exit_ref_by_id.get(entry.id)
-        if entry.terminus and mp_entry is not None:
-            # Terminus: trains enter and exit the same end — no distance added
-            mp_exit: float | None = mp_entry
+        if entry.terminus:
+            # Terminus: no through exit — trains reverse out the same end
+            mp_exit: float | None = None
         elif exit_ref is not None:
             # Explicit exit switch via REFERENCE: note (e.g. MC @MC_EXIT)
             mp_exit = _ep_mp(exit_ref.nearest_ep)

@@ -667,17 +667,16 @@ def test_build_layout_export_xp_milepost():
     assert xp["milepost_entry"] == pytest.approx(expected, rel=1e-2)
 
 
-def test_terminus_station_exit_equals_entry():
-    """terminus: true → milepost_exit == milepost_entry (no distance added)."""
+def test_terminus_station_exit_is_null():
+    """terminus: true → milepost_exit is null (no through exit)."""
     layout = parse_file(EXPORT_FIXTURE)
     config = load_stations_config(EXPORT_STATIONS)
-    # Mark WP as terminus in-memory
     wp_entry = next(e for e in config.stations if e.id == "WP")
     wp_entry.terminus = True
     data = build_layout_export(layout, config)
     wp = next(s for s in data["stations"] if s["station_id"] == "WP")
     assert wp["terminus"] is True
-    assert wp["milepost_exit"] == wp["milepost_entry"]
+    assert wp["milepost_exit"] is None
 
 
 def test_terminus_in_station_output():
