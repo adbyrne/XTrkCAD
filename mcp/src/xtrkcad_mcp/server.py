@@ -2830,13 +2830,12 @@ def list_labeled_segments(path: str) -> list[dict]:
 
 
 @mcp.tool()
-def validate_layout(path: str, stations_yaml: str) -> dict:
-    """Check layout NOTE annotations against the stations config.
+def validate_layout(path: str, stations_yaml: str = "") -> dict:
+    """Check layout NOTE annotations for completeness.
 
     Reports errors and warnings for:
       - Missing REFERENCE: MP_ZERO note
       - Station entries without STATION: notes (milepost will be null)
-      - Industry entries without INDUSTRY: notes
       - Notes placed far from any track endpoint
 
     Passing track capacity is derived from L{n}-Passing layers automatically;
@@ -2844,18 +2843,18 @@ def validate_layout(path: str, stations_yaml: str) -> dict:
 
     Args:
         path: Path to the .xtc layout file.
-        stations_yaml: Path to the stations.yaml config file.
+        stations_yaml: Optional path to stations.yaml.  When provided, checks
+                       that every station entry has a corresponding STATION: note.
     """
     p = _resolve_plan(path)
-    sy = Path(stations_yaml)
     layout = parse_file(p)
-    config = load_stations_config(sy)
+    config = load_stations_config(stations_yaml) if stations_yaml else None
     issues = validate_layout_annotations(layout, config)
     errors = [i for i in issues if i.severity == "error"]
     warnings = [i for i in issues if i.severity == "warning"]
     return {
         "layout": str(p),
-        "stations_yaml": str(sy),
+        "stations_yaml": stations_yaml,
         "error_count": len(errors),
         "warning_count": len(warnings),
         "issues": [
@@ -2873,7 +2872,7 @@ def validate_layout(path: str, stations_yaml: str) -> dict:
 @mcp.tool()
 def export_layout_data(
     path: str,
-    stations_yaml: str,
+    stations_yaml: str = "",
     output_path: str = "",
 ) -> dict:
     """Export layout measurement data to layout_data.json for RR_server.
@@ -2883,22 +2882,27 @@ def export_layout_data(
     inter-station segment lengths.  Fields that cannot be computed (missing
     annotations, unreachable track) are null; reasons are in warnings[].
 
+    Station metadata (terminus, switchback) is read from !TERM/!SWB flags in
+    STATION: notes; mp_scale from 'REFERENCE: MP_ZERO mp_scale=N'.  When
+    stations_yaml is provided it overrides note-derived values (legacy path).
+
     Milepost convention:
       Distances are measured from the REFERENCE: MP_ZERO note along the track
-      graph.  With mp_scale=1.0 (default), 1 milepost unit = 1 prototype foot.
+      graph.  mp_scale (layout inches per MP unit) defaults to 12.0 when not
+      specified in the REFERENCE: MP_ZERO note and no stations_yaml is given.
 
     Args:
         path: Path to the .xtc layout file.
-        stations_yaml: Path to the stations.yaml config file.
+        stations_yaml: Optional path to stations.yaml.  When omitted, all
+                       station metadata is derived from the .xtc notes.
         output_path: Where to write layout_data.json.  Defaults to
                      layout_data.json alongside the .xtc file.
     """
     import json
 
     p = _resolve_plan(path)
-    sy = Path(stations_yaml)
     layout = parse_file(p)
-    config = load_stations_config(sy)
+    config = load_stations_config(stations_yaml) if stations_yaml else None
     data = build_layout_export(layout, config)
 
     if output_path:

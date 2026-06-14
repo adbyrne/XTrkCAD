@@ -410,14 +410,13 @@ def test_load_stations_config_fields():
     config = load_stations_config(EXPORT_STATIONS)
     assert config.layout == "export_test"
     assert config.mp_scale == pytest.approx(1.0)
-    assert len(config.stations) == 3
+    assert len(config.stations) == 2
 
 
 def test_load_stations_config_ids():
     config = load_stations_config(EXPORT_STATIONS)
     ids = [s.id for s in config.stations]
     assert "WP" in ids
-    assert "KIEL" in ids
     assert "XP" in ids
 
 
@@ -425,16 +424,14 @@ def test_load_stations_config_types():
     config = load_stations_config(EXPORT_STATIONS)
     by_id = {s.id: s for s in config.stations}
     assert "station" in by_id["WP"].types
-    assert "industry" in by_id["KIEL"].types
-    assert by_id["KIEL"].switchback is False
+    assert "station" in by_id["XP"].types
 
 
 def test_load_stations_config_sequence():
     config = load_stations_config(EXPORT_STATIONS)
     seqs = {s.id: s.sequence for s in config.stations}
     assert seqs["WP"] == 0
-    assert seqs["KIEL"] == 1
-    assert seqs["XP"] == 2
+    assert seqs["XP"] == 1
 
 
 # ---------------------------------------------------------------------------
@@ -507,7 +504,7 @@ def test_compute_mileposts_unreachable():
 
 def test_list_annotated_segments_count():
     """Fixture has 4 annotations: REFERENCE:MP_ZERO, STATION:WP, STATION:XP,
-    INDUSTRY:KIEL.  Passing track capacity comes from L1-Passing layer, not a note."""
+    INDUSTRY:KIEL Kiel Co.  Passing track capacity comes from L1-Passing layer, not a note."""
     layout = parse_file(EXPORT_FIXTURE)
     segs = list_annotated_segments(layout)
     assert len(segs) == 4
@@ -575,13 +572,15 @@ def test_validate_missing_station_note_is_warning():
     assert "MISSING_STATION_NOTE" in codes
 
 
-def test_validate_missing_industry_note_is_error():
+def test_validate_industry_note_parsed_from_layout():
+    """Industries are note-driven: INDUSTRY: KIEL Kiel Co → annotation_id='KIEL'."""
     layout = parse_file(EXPORT_FIXTURE)
-    layout.notes = [n for n in layout.notes if "INDUSTRY: KIEL" not in n.text]
-    config = load_stations_config(EXPORT_STATIONS)
-    issues = validate_layout_annotations(layout, config)
-    codes = {i.code for i in issues if i.severity == "error"}
-    assert "MISSING_INDUSTRY_NOTE" in codes
+    segs = list_annotated_segments(layout)
+    ind = next((s for s in segs if s.annotation_type == "industry"), None)
+    assert ind is not None
+    assert ind.annotation_id == "KIEL"
+    assert ind.annotation_name == "Kiel Co"
+    assert ind.annotation_within is None
 
 
 # ---------------------------------------------------------------------------
@@ -702,7 +701,7 @@ def test_build_layout_export_segments():
     layout = parse_file(EXPORT_FIXTURE)
     config = load_stations_config(EXPORT_STATIONS)
     data = build_layout_export(layout, config)
-    # Station sequence: WP(0) → XP(2); KIEL is an industry, not in segments
+    # Station sequence: WP(0) → XP(1); KIEL is an industry, not in segments
     froms = {s["from_station"] for s in data["segments"]}
     assert "WP" in froms
 

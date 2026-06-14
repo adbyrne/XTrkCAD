@@ -11,15 +11,8 @@ stations:
     types: [station]
     switchback: false
 
-  - id: FREIGHT
-    name: Freight House
-    sequence: 1
-    types: [industry]
-    switchback: false
-    within_limits_of: SOUTH
-
   - id: NORTH
     name: North End
-    sequence: 2
+    sequence: 1
     types: [station]
     switchback: false

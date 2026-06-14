@@ -560,6 +560,101 @@ grade).
 
 ---
 
+---
+
+## 6. Track annotations and layout export
+
+Once you have placed track in XTrkCAD, add text NOTE objects to describe the
+operational geography.  The MCP server reads these notes to compute mileposts,
+siding lengths, and industry spur data, then writes them to `layout_data.json`
+for use by dispatcher and timetable tools.
+
+### Annotation note format
+
+All notes use XTrkCAD's built-in text NOTE objects (Insert → Note).  The
+server recognises four prefixes:
+
+| Note text | Meaning |
+|-----------|---------|
+| `REFERENCE: MP_ZERO mp_scale=N` | Milepost origin — place at the first decision point (first switch south of the originating yard). `mp_scale` is the number of layout inches per milepost unit; defaults to 12.0 if omitted. |
+| `STATION: <id> [!TERM] [!SWB] [@ref]` | Station stop. `!TERM` marks a terminus (no through exit; `milepost_exit` is null). `!SWB` marks a switchback (train enters, shoves to the far end, exits back out the same switch). `@ref` links to a named REFERENCE: point to resolve the exit milepost when the station's own NOTE can't reach the exit switch via Dijkstra (e.g. `STATION: MC !SWB @MC_EXIT`). |
+| `INDUSTRY: <id> <name> [@sta]` | Industry spur — place the note on or near the spur track. The first token is the short ID used in reports; the remaining tokens before any `@` are the display name. An optional `@STA` token names the station whose yard limits contain this industry (omit for on-line spurs directly off the mainline). |
+| `YARD_TRACK: <yard_id> <label>` | Individual yard track within a yard area. |
+
+**Examples for the Hillside Division:**
+
+```
+REFERENCE: MP_ZERO mp_scale=8
+STATION: SOUTH
+STATION: NORTH !TERM
+INDUSTRY: FREIGHT Freight House @SOUTH
+```
+
+Place each NOTE close to the track it describes — the server snaps each note
+to the nearest track endpoint (or segment for YARD_TRACK) to measure distances.
+
+### Export tools
+
+| Tool | What it does |
+|------|-------------|
+| `validate_layout(path)` | Check that every STATION: note snaps close to a track and that REFERENCE: MP_ZERO exists.  Returns error/warning counts and a list of issues. |
+| `export_layout_data(path, output_path="")` | Compute mileposts, siding lengths, and industry spur data; write `layout_data.json`. |
+
+Both tools derive all metadata from the `.xtc` notes — no separate YAML file
+is needed.  Pass an optional `stations_yaml` argument to override note-derived
+values (legacy path, for backwards compatibility).
+
+### layout_data.json structure
+
+```json
+{
+  "generated": "2026-06-14T12:00:00+00:00",
+  "layout": "Hillside Division",
+  "scale": "HO",
+  "mp_scale": 8.0,
+  "stations": [
+    {
+      "station_id": "SOUTH",
+      "milepost_entry": 0.0,
+      "milepost_exit": 8.0,
+      "siding_length_ft": null,
+      "siding_length_cars": null,
+      "house_track_ft": 174.2,
+      "house_track_cars": 3,
+      "main_length_ft": null,
+      "main_length_cars": null,
+      "switchback": false,
+      "terminus": false
+    }
+  ],
+  "industries": [
+    {
+      "industry_id": "FREIGHT",
+      "name": "Freight House",
+      "connected_station": "SOUTH",
+      "branch_milepost": 2.1,
+      "car_spots": 3
+    }
+  ],
+  "segments": [
+    { "from_station": "SOUTH", "to_station": "NORTH", "length_ft": 696.8 }
+  ],
+  "yard_tracks": [],
+  "warnings": []
+}
+```
+
+Key fields:
+- **`mp_scale`** — layout inches per milepost unit; use this to convert milepost
+  differences to prototype feet: `Δmp × mp_scale × (scale_ratio / 12)`.
+- **`milepost_exit`** — null for terminus stations and for stations where exit
+  geometry cannot be computed.
+- **`connected_station`** — null for on-line industries (directly off the
+  mainline); the parent station id for industries within a yard's limits.
+- **`car_spots`** — derived from spur track length measurement (Fugate formula).
+
+---
+
 ## Quick-start checklist
 
 1. Copy the three Hillside files to a new folder and rename them for your layout.

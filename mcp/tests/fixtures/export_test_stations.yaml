@@ -8,15 +8,8 @@ stations:
     types: [station, yard]
     switchback: false
 
-  - id: KIEL
-    name: Kiel Co
-    sequence: 1
-    types: [industry]
-    switchback: false
-    within_limits_of: null
-
   - id: XP
     name: Xina Pass
-    sequence: 2
+    sequence: 1
     types: [station]
     switchback: false

@@ -63,6 +63,8 @@ class Station:
     nearest_ep: tuple[int, int]   # (track_id, ep_idx)
     snap_dist: float              # distance from NOTE to nearest endpoint
     ref_tag: str | None = None    # @<name> token — station is co-located with REFERENCE:<name>
+    terminus: bool = False        # !TERM flag in note
+    switchback: bool = False      # !SWB flag in note
 
 
 @dataclass
@@ -91,24 +93,10 @@ def extract_stations(layout: Layout) -> list[Station]:
         if note.op != 0:
             continue
         text = note.text.strip()
-        if not text.upper().startswith(STATION_PREFIX):
+        parsed = _parse_station_note(text)
+        if parsed is None:
             continue
-        name_full = text[len(STATION_PREFIX):].strip()
-        if not name_full:
-            continue
-
-        # Parse optional @<ref> link (e.g. "WP @MP_ZERO")
-        ref_tag: str | None = None
-        name_parts = name_full.split()
-        name_tokens = []
-        for token in name_parts:
-            if token.startswith("@") and len(token) > 1:
-                ref_tag = token[1:]
-            else:
-                name_tokens.append(token)
-        name = " ".join(name_tokens)
-        if not name:
-            continue
+        station_id, terminus, switchback, ref_tag = parsed
 
         best_track_id, best_ep_idx, best_dist = _snap_to_endpoint(
             layout, note.x, note.y, note.layer,
@@ -116,13 +104,15 @@ def extract_stations(layout: Layout) -> list[Station]:
 
         if best_track_id >= 0:
             stations.append(Station(
-                name=name,
+                name=station_id,
                 note_id=note.id,
                 x=note.x,
                 y=note.y,
                 nearest_ep=(best_track_id, best_ep_idx),
                 snap_dist=best_dist,
                 ref_tag=ref_tag,
+                terminus=terminus,
+                switchback=switchback,
             ))
 
     return stations
@@ -314,16 +304,86 @@ class CapacityResult:
     max_cars: int                # whole cars (Fugate formula: model feet × cars/model-ft)
 
 
+def _parse_industry_note(text: str) -> tuple[str, str, str | None] | None:
+    """Parse 'INDUSTRY: <id> <name> [@station]' → (id, name, within_station) or None.
+
+    The id is the first token after INDUSTRY:.  An optional token starting with
+    '@' anywhere in the remainder is the connected-station reference.  All other
+    tokens form the display name; if no name tokens are present the id is reused.
+    """
+    if not text.strip().upper().startswith(INDUSTRY_PREFIX):
+        return None
+    rest = text.strip()[len(INDUSTRY_PREFIX):].strip()
+    if not rest:
+        return None
+    tokens = rest.split()
+    industry_id = tokens[0]
+    within: str | None = None
+    name_tokens: list[str] = []
+    for tok in tokens[1:]:
+        if tok.startswith('@'):
+            within = tok[1:]
+        else:
+            name_tokens.append(tok)
+    name = ' '.join(name_tokens) if name_tokens else industry_id
+    return industry_id, name, within
+
+
 def _note_prefix(text: str) -> tuple[str, str] | None:
-    """Return (kind, name) if the NOTE text matches a known capacity prefix, else None."""
+    """Return (kind, id) if the NOTE text matches a known capacity prefix, else None."""
     upper = text.strip().upper()
     if upper.startswith(STORAGE_PREFIX):
         return "storage", text.strip()[len(STORAGE_PREFIX):].strip()
     if upper.startswith(INDUSTRY_PREFIX):
-        return "industry", text.strip()[len(INDUSTRY_PREFIX):].strip()
+        parsed = _parse_industry_note(text)
+        return ("industry", parsed[0]) if parsed else None
     if upper.startswith(HOUSE_TRACK_PREFIX):
         return "house_track", text.strip()[len(HOUSE_TRACK_PREFIX):].strip()
     return None
+
+
+def _parse_station_note(
+    text: str,
+) -> tuple[str, bool, bool, str | None] | None:
+    """Parse 'STATION: <id> [!TERM] [!SWB] [@ref]' → (id, terminus, switchback, ref_tag) or None."""
+    if not text.strip().upper().startswith(STATION_PREFIX):
+        return None
+    rest = text.strip()[len(STATION_PREFIX):].strip()
+    if not rest:
+        return None
+    tokens = rest.split()
+    station_id = tokens[0]
+    terminus = False
+    switchback = False
+    ref_tag: str | None = None
+    for tok in tokens[1:]:
+        if tok == "!TERM":
+            terminus = True
+        elif tok == "!SWB":
+            switchback = True
+        elif tok.startswith('@') and len(tok) > 1:
+            ref_tag = tok[1:]
+    return station_id, terminus, switchback, ref_tag
+
+
+def _extract_mp_scale(layout: Layout) -> float:
+    """Return mp_scale from 'REFERENCE: MP_ZERO mp_scale=N', defaulting to 12.0."""
+    for note in layout.notes:
+        if note.op != 0:
+            continue
+        text = note.text.strip()
+        if not text.upper().startswith(REFERENCE_PREFIX):
+            continue
+        rest = text[len(REFERENCE_PREFIX):].strip().split()
+        if not rest or rest[0].upper() != "MP_ZERO":
+            continue
+        for tok in rest[1:]:
+            if tok.lower().startswith("mp_scale="):
+                try:
+                    return float(tok.split("=", 1)[1])
+                except ValueError:
+                    pass
+    return 12.0
 
 
 def _bfs_usable_length(
@@ -1026,8 +1086,6 @@ class StationEntry:
     switchback: bool = False
     terminus: bool = False        # True for line-end stations: mp_exit is null (no through exit)
     passing_siding: bool | None = None  # False = suppress layer inference; None = auto-detect
-    within_limits_of: str | None = None
-    spots: int | None = None      # industry car spots (from YAML); None = not specified
 
 
 @dataclass
@@ -1046,7 +1104,6 @@ def load_stations_config(path: str | Path) -> StationsConfig:
 
     entries: list[StationEntry] = []
     for s in data.get("stations", []):
-        raw_spots = s.get("spots")
         entries.append(StationEntry(
             id=s["id"],
             name=s.get("name", s["id"]),
@@ -1054,8 +1111,6 @@ def load_stations_config(path: str | Path) -> StationsConfig:
             types=list(s.get("types", ["station"])),
             switchback=bool(s.get("switchback", False)),
             terminus=bool(s.get("terminus", False)),
-            within_limits_of=s.get("within_limits_of"),
-            spots=int(raw_spots) if raw_spots is not None else None,
         ))
 
     return StationsConfig(
@@ -1093,7 +1148,9 @@ def extract_reference_points(layout: Layout) -> list[ReferencePoint]:
         text = note.text.strip()
         if not text.upper().startswith(REFERENCE_PREFIX):
             continue
-        name = text[len(REFERENCE_PREFIX):].strip()
+        # First token only — ignore trailing params (e.g. "mp_scale=12" in MP_ZERO note)
+        rest = text[len(REFERENCE_PREFIX):].strip().split()
+        name = rest[0] if rest else ""
         if not name:
             continue
 
@@ -1184,6 +1241,8 @@ class AnnotatedSegment:
     nearest_track_layer: int
     nearest_track_layer_name: str
     snap_dist: float
+    annotation_name: str | None = None      # industries: display name parsed from note
+    annotation_within: str | None = None    # industries: connected station (@STATION ref)
 
 
 def list_annotated_segments(layout: Layout) -> list[AnnotatedSegment]:
@@ -1208,10 +1267,26 @@ def list_annotated_segments(layout: Layout) -> list[AnnotatedSegment]:
 
         matched_type: str | None = None
         matched_id: str | None = None
+        annotation_name: str | None = None
+        annotation_within: str | None = None
         for prefix, atype in _ALL_PREFIXES:
             if upper.startswith(prefix):
                 matched_type = atype
-                matched_id = text[len(prefix):].strip()
+                if atype == "industry":
+                    parsed_ind = _parse_industry_note(text)
+                    if parsed_ind is None:
+                        break
+                    matched_id, annotation_name, annotation_within = parsed_ind
+                elif atype == "station":
+                    parsed_sta = _parse_station_note(text)
+                    if parsed_sta is None:
+                        break
+                    matched_id = parsed_sta[0]  # station ID only; flags handled by extract_stations
+                elif atype == "reference":
+                    rest = text[len(prefix):].strip().split()
+                    matched_id = rest[0] if rest else None
+                else:
+                    matched_id = text[len(prefix):].strip()
                 break
 
         if not matched_type or not matched_id:
@@ -1251,6 +1326,8 @@ def list_annotated_segments(layout: Layout) -> list[AnnotatedSegment]:
             nearest_track_layer=track_layer_idx,
             nearest_track_layer_name=track_layer_info.name,
             snap_dist=best_dist,
+            annotation_name=annotation_name,
+            annotation_within=annotation_within,
         ))
 
     return results
@@ -1309,11 +1386,9 @@ def validate_layout_annotations(
 
     if stations_config is not None:
         station_ids = by_type.get("station", set())
-        industry_ids = by_type.get("industry", set())
 
         for entry in stations_config.stations:
             is_station = any(t in entry.types for t in ("station", "yard", "staging"))
-            is_industry = "industry" in entry.types
 
             if is_station:
                 if entry.id not in station_ids:
@@ -1324,18 +1399,6 @@ def validate_layout_annotations(
                         message=(
                             f"No 'STATION: {entry.id}' note — "
                             f"milepost for '{entry.name}' will be null"
-                        ),
-                    ))
-
-            if is_industry:
-                if entry.id not in industry_ids:
-                    issues.append(ValidationIssue(
-                        severity="error",
-                        code="MISSING_INDUSTRY_NOTE",
-                        location_id=entry.id,
-                        message=(
-                            f"No 'INDUSTRY: {entry.id}' note — "
-                            f"spur length for '{entry.name}' will be null"
                         ),
                     ))
 
@@ -1462,9 +1525,64 @@ def validate_layout_annotations(
 # ---------------------------------------------------------------------------
 
 
+def _build_config_from_notes(layout: Layout) -> StationsConfig:
+    """Derive a StationsConfig entirely from the layout's STATION: notes.
+
+    Flags in the note drive station properties:
+      !TERM → terminus=True   !SWB → switchback=True
+    mp_scale is read from 'REFERENCE: MP_ZERO mp_scale=N' (default 12.0).
+    Station sequence is assigned in ascending milepost order.
+    """
+    mp_scale = _extract_mp_scale(layout)
+
+    station_list = extract_stations(layout)
+
+    # Quick Dijkstra pass to order stations by milepost
+    ref_points = extract_reference_points(layout)
+    ref = next((r for r in ref_points if r.name == "MP_ZERO"), None)
+    ref_by_name = {r.name: r for r in ref_points}
+    adj = _build_ep_graph(layout, None, False)
+    dist_from_ref: dict[tuple[int, int], float] = {}
+    if ref is not None:
+        dist_from_ref = _dijkstra(adj, ref.nearest_ep)
+
+    def _mp(s: Station) -> float:
+        d = dist_from_ref.get(s.nearest_ep, _INF)
+        if d < _INF:
+            return d / mp_scale
+        # Terminus / co-located stations use @ref for milepost (e.g. WP @MP_ZERO)
+        if s.ref_tag is not None:
+            linked = ref_by_name.get(s.ref_tag)
+            if linked is not None:
+                d_ref = dist_from_ref.get(linked.nearest_ep, _INF)
+                if d_ref < _INF:
+                    return d_ref / mp_scale
+        return _INF
+
+    station_list_sorted = sorted(station_list, key=_mp)
+
+    entries = [
+        StationEntry(
+            id=s.name,
+            name=s.name,
+            sequence=idx,
+            types=["station"],
+            switchback=s.switchback,
+            terminus=s.terminus,
+        )
+        for idx, s in enumerate(station_list_sorted)
+    ]
+
+    return StationsConfig(
+        layout=layout.title1 or "",
+        mp_scale=mp_scale,
+        stations=entries,
+    )
+
+
 def build_layout_export(
     layout: Layout,
-    stations_config: StationsConfig,
+    stations_config: StationsConfig | None = None,
 ) -> dict:
     """Build the layout_data.json export structure.
 
@@ -1480,6 +1598,9 @@ def build_layout_export(
       - milepost_exit (switchback, @ref tag + Dijkstra succeeded): MP of the named
         REFERENCE: point (e.g. STATION: MC @MC_EXIT resolves MC's exit switch)
     """
+    if stations_config is None:
+        stations_config = _build_config_from_notes(layout)
+
     warnings: list[str] = []
 
     # Find REFERENCE: MP_ZERO
@@ -1599,14 +1720,12 @@ def build_layout_export(
             "terminus": entry.terminus,
         })
 
-    # --- Industries ---
-    industry_entries = sorted(
-        [e for e in stations_config.stations if "industry" in e.types],
-        key=lambda e: e.sequence,
-    )
+    # --- Industries (derived from INDUSTRY: notes, not YAML) ---
+    all_segments = list_annotated_segments(layout)
+    industry_segs = [s for s in all_segments if s.annotation_type == "industry"]
     industries_out = []
-    for entry in industry_entries:
-        cap = cap_by_name.get(entry.id)
+    for seg in industry_segs:
+        cap = cap_by_name.get(seg.annotation_id)
 
         # Branch milepost: nearest-endpoint MP of the industry's track
         branch_mp: float | None = None
@@ -1621,12 +1740,16 @@ def build_layout_export(
                 branch_mp = best
 
         industries_out.append({
-            "industry_id": entry.id,
-            "connected_station": entry.within_limits_of,
+            "industry_id": seg.annotation_id,
+            "name": seg.annotation_name,
+            "connected_station": seg.annotation_within,
             "branch_milepost": round(branch_mp, 3) if branch_mp is not None else None,
-            "car_spots": entry.spots,
-            "switchback": entry.switchback,
+            "car_spots": cap.max_cars if cap is not None else None,
         })
+
+    industries_out.sort(
+        key=lambda i: i["branch_milepost"] if i["branch_milepost"] is not None else _INF
+    )
 
     # --- Mainline segments between consecutive stations ---
     segments_out = []
@@ -1662,6 +1785,7 @@ def build_layout_export(
         "generated": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "layout": stations_config.layout,
         "scale": scale,
+        "mp_scale": stations_config.mp_scale,
         "stations": stations_out,
         "industries": industries_out,
         "segments": segments_out,
