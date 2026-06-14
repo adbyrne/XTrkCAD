@@ -1183,9 +1183,13 @@ def list_annotated_segments(layout: Layout) -> list[AnnotatedSegment]:
         if not matched_type or not matched_id:
             continue
 
-        if matched_type == "yard_track":
+        if matched_type in ("station", "yard_track"):
+            # Use segment projection: notes are placed over the track body, not
+            # necessarily near an endpoint.  YARD_TRACK additionally excludes
+            # turnouts so a note adjacent to a switch measures the spur, not 0 ft.
             best_id, _t, best_dist = _snap_to_segment(
-                layout, note.x, note.y, note.layer, exclude_turnouts=True,
+                layout, note.x, note.y, note.layer,
+                exclude_turnouts=(matched_type == "yard_track"),
             )
         else:
             best_id, _ep_idx, best_dist = _snap_to_endpoint(
