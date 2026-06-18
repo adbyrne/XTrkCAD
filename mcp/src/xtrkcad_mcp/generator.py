@@ -9,7 +9,7 @@ import math
 
 from xtrkcad_mcp.config import (
     Benchwork, FloorDoor, FloorPartition, FloorPlan, FloorRestricted,
-    FloorRoom, GridPlacement, LayoutConfig,
+    FloorRoom, GridPlacement, LayoutConfig, partition_door_openings,
 )
 from xtrkcad_mcp.models import SCALE_RATIOS
 from xtrkcad_mcp.parser import TRACK_KINDS, parse_file
@@ -298,45 +298,7 @@ def _floor_plan_restricted_draw(
     return _filpoly_draw(vertices, 0, _RESTRICTION_COLOR, track_id, param_version=param_version)
 
 
-def _partition_door_openings(
-    partition: FloorPartition,
-    doors: list,
-    rooms_by_name: dict,
-) -> list[tuple[float, float]]:
-    """Return sorted (start, end) gaps along the partition axis where doors cut through."""
-    is_vertical = abs(partition.y1 - partition.y0) >= abs(partition.x1 - partition.x0)
-    p_x = min(partition.x0, partition.x1)
-    p_y = min(partition.y0, partition.y1)
-    openings = []
-
-    for door in doors:
-        room = rooms_by_name.get(door.room)
-        if room is None:
-            continue
-        if is_vertical:
-            if door.wall not in ("east", "west"):
-                continue
-            wall_x = (room.x + room.width) if door.wall == "east" else room.x
-            if abs(wall_x - p_x) > partition.thickness:
-                continue
-            gap_start = room.y + door.from_in
-            gap_end = gap_start + door.width_in
-            p_start, p_end = min(partition.y0, partition.y1), max(partition.y0, partition.y1)
-        else:
-            if door.wall not in ("north", "south"):
-                continue
-            wall_y = (room.y + room.depth) if door.wall == "north" else room.y
-            if abs(wall_y - p_y) > partition.thickness:
-                continue
-            gap_start = room.x + door.from_in
-            gap_end = gap_start + door.width_in
-            p_start, p_end = min(partition.x0, partition.x1), max(partition.x0, partition.x1)
-
-        clipped = (max(gap_start, p_start), min(gap_end, p_end))
-        if clipped[0] < clipped[1]:
-            openings.append(clipped)
-
-    return sorted(openings)
+_partition_door_openings = partition_door_openings
 
 
 def _floor_plan_partition_draw(
@@ -778,14 +740,48 @@ def merge_benchwork_into(
 
     new_draw_count = new_id - max_id - 1
 
-    # --- Build LAYERS header from config (replaces existing LAYERS lines) ---
+    # --- Build LAYERS header from config (replaces the *standard* existing
+    # LAYERS lines only). Any layer index outside the regenerated standard
+    # set (e.g. a custom layer the user added by hand in XTrkCAD) is kept
+    # as-is — tracks may still reference it, and dropping its LAYERS record
+    # would orphan them (no name, excluded from level/category detection).
     new_layers = _layers_header(config.levels, config.track_types, config.distinct_track_colors)
-    clean_header = [hl for hl in header_lines if not hl.strip().startswith("LAYERS")]
+    new_layer_ids: set[int] = set()
+    for nl in new_layers:
+        parts = nl.split()
+        if len(parts) >= 2 and parts[0] == "LAYERS" and parts[1] != "CURRENT":
+            try:
+                new_layer_ids.add(int(parts[1]))
+            except ValueError:
+                pass
+
+    clean_header: list[str] = []
+    extra_layers: list[str] = []
+    for hl in header_lines:
+        parts = hl.strip().split()
+        if not parts or parts[0] != "LAYERS":
+            clean_header.append(hl)
+            continue
+        if len(parts) >= 2 and parts[1] != "CURRENT":
+            try:
+                idx = int(parts[1])
+            except ValueError:
+                idx = None
+            if idx is not None and idx not in new_layer_ids:
+                extra_layers.append(hl)
+        # else: drop — either "LAYERS CURRENT" or a standard index being regenerated
 
     # --- Assemble output ---
-    # Order: existing header + new LAYERS + Q3 walls + new floor/benchwork + track/notes
+    # Order: existing header + new LAYERS + preserved extra LAYERS + Q3 walls
+    # + new floor/benchwork + track/notes. "LAYERS CURRENT" stays last among
+    # the LAYERS lines, matching XTrkCAD's own file convention.
+    new_layers_body = [nl for nl in new_layers if nl.split()[1:2] != ["CURRENT"]]
+    new_layers_current = [nl for nl in new_layers if nl.split()[1:2] == ["CURRENT"]]
+
     output: list[str] = list(clean_header)
-    output.extend(new_layers)
+    output.extend(new_layers_body)
+    output.extend(extra_layers)
+    output.extend(new_layers_current)
     output.append("")
 
     # Q3 wall DRAWs come first (matching original file order)

@@ -30,6 +30,7 @@ from xtrkcad_mcp.server import (
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 FIXTURE = FIXTURES_DIR / "test_layout.xtc"
 HILLSIDE_CONFIG = FIXTURES_DIR / "hillside_division.yaml"
+HILLSIDE_TRACK = FIXTURES_DIR / "hillside_track.xtc"
 
 
 # ---------------------------------------------------------------------------
@@ -187,6 +188,90 @@ def test_write_plan_view_all_levels_contains_both(tmp_path):
     svg = Path(out).read_text()
     assert _LEVEL_FILL_L1 in svg
     assert _LEVEL_FILL_L2 in svg
+
+
+# Track stroke colour matched to svg_views._TRACK_STROKE
+_TRACK_STROKE = "#0D0D0D"
+
+
+def test_write_plan_view_without_xtc_has_no_track_overlay(tmp_path):
+    out = str(tmp_path / "plan_no_track.svg")
+    write_plan_view(str(HILLSIDE_CONFIG), out, level=1)
+    svg = Path(out).read_text()
+    assert _TRACK_STROKE not in svg
+    assert "Track</text>" not in svg
+
+
+def test_write_plan_view_with_xtc_overlays_track(tmp_path):
+    out = str(tmp_path / "plan_track.svg")
+    write_plan_view(str(HILLSIDE_CONFIG), out, level=1, xtc_path=str(HILLSIDE_TRACK))
+    svg = Path(out).read_text()
+    assert _TRACK_STROKE in svg
+    assert "Track</text>" in svg
+
+
+def test_write_plan_view_xtc_track_count_matches_level(tmp_path):
+    """All 6 hillside_track.xtc STRAIGHTs are on L1-* layers, so 6 <line> overlays."""
+    out = str(tmp_path / "plan_track.svg")
+    write_plan_view(str(HILLSIDE_CONFIG), out, level=1, xtc_path=str(HILLSIDE_TRACK))
+    svg = Path(out).read_text()
+    track_lines = [
+        line for line in svg.splitlines()
+        if line.startswith("<line") and _TRACK_STROKE in line
+    ]
+    assert len(track_lines) == 6
+
+
+# Colour constant matched to svg_views._PART_BG
+_PART_BG = "#B0BEC5"
+
+
+def _door_partition_config(tmp_path, swing: str) -> Path:
+    """Inline config: one room, one partition, one door cut through it."""
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text(
+        "name: T\nscale: HO\n"
+        "floor_plan:\n"
+        "  rooms:\n"
+        "    - name: left\n"
+        "      x: 0in\n      y: 0in\n      width: 48in\n      depth: 96in\n"
+        "  doors:\n"
+        "    - room: left\n      wall: east\n      from: 24in\n"
+        f"      width: 32in\n      swing: {swing}\n      clearance: 32in\n"
+        "  partitions:\n"
+        "    - label: center_wall\n"
+        "      x0: 48in\n      y0: 0in\n      x1: 48in\n      y1: 96in\n"
+        "      thickness: 6in\n"
+        "benchwork: []\n"
+    )
+    return cfg
+
+
+def test_write_plan_view_partition_splits_around_door(tmp_path):
+    """A partition with a matching door opening renders as 2 segments, not 1 solid wall."""
+    cfg = _door_partition_config(tmp_path, swing="none")
+    out = str(tmp_path / "plan.svg")
+    write_plan_view(str(cfg), out, level=0)
+    svg = Path(out).read_text()
+    partition_polys = [
+        line for line in svg.splitlines()
+        if line.startswith("<polygon") and _PART_BG in line
+    ]
+    assert len(partition_polys) == 2
+
+
+def test_write_plan_view_partition_gap_independent_of_swing(tmp_path):
+    """The wall opening is cut regardless of swing — even 'none' (no door hardware)."""
+    for swing in ("none", "inward", "outward", "both"):
+        cfg = _door_partition_config(tmp_path, swing=swing)
+        out = str(tmp_path / f"plan_{swing}.svg")
+        write_plan_view(str(cfg), out, level=0)
+        svg = Path(out).read_text()
+        partition_polys = [
+            line for line in svg.splitlines()
+            if line.startswith("<polygon") and _PART_BG in line
+        ]
+        assert len(partition_polys) == 2, f"swing={swing} should still cut the wall gap"
 
 
 # Colour constants matched to svg_views._LEVEL_FILL
@@ -485,6 +570,9 @@ def test_od_report_html_is_html(tmp_path):
     ("l3-storage",    "storage"),    # lowercase
     ("L1H-Connecting","connecting"), # helix pseudo-level
     ("L1-Track",      "mainline"),   # backward compat
+    ("L1-CO-Main",    "mainline"),   # sub-division name — match trailing segment
+    ("L1-CO-Passing", "passing"),
+    ("L1-CO-Staging", "staging"),
 ])
 def test_category_from_name_standard_suffixes(name, expected):
     assert _category_from_name(name) == expected
@@ -738,6 +826,35 @@ def test_rename_layers_creates_backup(tmp_path):
     result = rename_layers(str(xtc), {"My Yard": "L1-Staging"})
     assert result["backup_path"] is not None
     assert Path(result["backup_path"]).exists()
+
+
+def _xtc_with_blank_named_layers(tmp_path) -> Path:
+    """Write a minimal .xtc with two distinct layers sharing a blank name."""
+    out = tmp_path / "blank.xtc"
+    out.write_text(
+        "VERSION 10 3.0.0\nTITLE1 Test\nTITLE2 blank\nSCALE HO\nROOMSIZE 144 x 192\n\n"
+        'LAYERS 0 1 0 1 8421504 0 0 0 0 "Floor" 1 0 0.000000 0.000000 0.000000 0.000000 0.000000\n'
+        'LAYERS 15 1 0 1 0 0 0 0 0 "" 1 0 0.000000 0.000000 0.000000 0.000000 0.000000\n'
+        'LAYERS 16 1 0 1 0 0 0 0 0 "" 1 0 0.000000 0.000000 0.000000 0.000000 0.000000\n'
+        "LAYERS CURRENT 15\n"
+    )
+    return out
+
+
+def test_rename_layers_by_index_disambiguates_blank_names(tmp_path):
+    xtc = _xtc_with_blank_named_layers(tmp_path)
+    result = rename_layers(str(xtc), {"15": "L1-CO-Main", "16": "L1-CO-Passing"})
+    assert len(result["renamed"]) == 2
+    content = xtc.read_text()
+    assert 'LAYERS 15 1 0 1 0 0 0 0 0 "L1-CO-Main"' in content
+    assert 'LAYERS 16 1 0 1 0 0 0 0 0 "L1-CO-Passing"' in content
+
+
+def test_rename_layers_index_not_found(tmp_path):
+    xtc = _xtc_with_blank_named_layers(tmp_path)
+    result = rename_layers(str(xtc), {"99": "L1-Main"})
+    assert result["renamed"] == []
+    assert result["not_found"] == ["99"]
 
 
 def test_rename_layers_enables_auto_categorization(tmp_path):

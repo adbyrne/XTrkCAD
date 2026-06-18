@@ -11,8 +11,10 @@ from pathlib import Path
 
 from xtrkcad_mcp.config import (
     Benchwork, FloorDoor, FloorPartition, FloorRestricted, FloorRoom,
-    load_config,
+    load_config, partition_door_openings,
 )
+from xtrkcad_mcp.models import arc_polyline, level_from_layer_name
+from xtrkcad_mcp.parser import parse_file
 
 
 # ---------------------------------------------------------------------------
@@ -33,6 +35,7 @@ _PART_STR      = "#37474F"
 _TEXT_DK       = "#212121"
 _TEXT_MD       = "#616161"
 _GRID          = "#E0E0E0"
+_TRACK_STROKE  = "#0D0D0D"
 
 
 # ---------------------------------------------------------------------------
@@ -71,6 +74,13 @@ class _S:
         self._b.append(
             f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" {self._kw(kw)}/>'
         )
+
+    def polyline(self, pts: list, **kw):
+        ps = " ".join(f"{x:.1f},{y:.1f}" for x, y in pts)
+        self._b.append(f'<polyline points="{ps}" fill="none" {self._kw(kw)}/>')
+
+    def circle(self, cx, cy, r, **kw):
+        self._b.append(f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{r:.1f}" {self._kw(kw)}/>')
 
     def text(self, x, y, s: str, **kw):
         self._b.append(f'<text x="{x:.1f}" y="{y:.1f}" {self._kw(kw)}>{_esc.escape(s)}</text>')
@@ -125,16 +135,39 @@ def _restr_verts(r: FloorRestricted):
     return _rect_v(r.x, r.y, r.width, r.depth)
 
 
-def _part_verts(p: FloorPartition):
+def _partition_rects(p: FloorPartition, doors: list[FloorDoor], rooms: list[FloorRoom]):
+    """Return one rectangle per partition segment, with door openings cut out.
+
+    Uses the same partition_door_openings() geometry as the .xtc generator
+    (generator.py) so a doorway never renders as a solid wall here while
+    showing correctly as an opening in XTrkCAD itself.
+    """
     t = p.thickness
-    if abs(p.y1 - p.y0) >= abs(p.x1 - p.x0):
-        x = min(p.x0, p.x1)
-        y0, y1 = min(p.y0, p.y1), max(p.y0, p.y1)
-        return [(x, y0), (x + t, y0), (x + t, y1), (x, y1)]
+    vertical = abs(p.y1 - p.y0) >= abs(p.x1 - p.x0)
+    if vertical:
+        line_pos = min(p.x0, p.x1)
+        span_lo, span_hi = min(p.y0, p.y1), max(p.y0, p.y1)
     else:
-        y = min(p.y0, p.y1)
-        x0, x1 = min(p.x0, p.x1), max(p.x0, p.x1)
-        return [(x0, y), (x1, y), (x1, y + t), (x0, y + t)]
+        line_pos = min(p.y0, p.y1)
+        span_lo, span_hi = min(p.x0, p.x1), max(p.x0, p.x1)
+
+    rooms_by_name = {r.name: r for r in rooms}
+    openings = partition_door_openings(p, doors, rooms_by_name)
+
+    def seg_rect(lo, hi):
+        if vertical:
+            return [(line_pos, lo), (line_pos + t, lo), (line_pos + t, hi), (line_pos, hi)]
+        return [(lo, line_pos), (hi, line_pos), (hi, line_pos + t), (lo, line_pos + t)]
+
+    rects = []
+    cursor = span_lo
+    for gap_start, gap_end in openings:
+        if cursor < gap_start:
+            rects.append(seg_rect(cursor, gap_start))
+        cursor = max(cursor, gap_end)
+    if cursor < span_hi:
+        rects.append(seg_rect(cursor, span_hi))
+    return rects
 
 
 def _door_verts(door: FloorDoor, rooms: list[FloorRoom]):
@@ -193,12 +226,15 @@ def _north_arrow(svg: _S, xf: _XF):
              font_weight="bold", text_anchor="middle", fill=_TEXT_DK)
 
 
-def _legend(svg: _S, svg_w: int, pad: int, levels: list[int], has_fp: bool):
+def _legend(svg: _S, svg_w: int, pad: int, levels: list[int], has_fp: bool,
+            has_tracks: bool = False):
     items: list[tuple[str, str, str]] = []
     for lv in levels:
         items.append((f"Level {lv} benchwork",
                       _LEVEL_FILL.get(lv, "#E0E0E0"),
                       _LEVEL_STROKE.get(lv, "#757575")))
+    if has_tracks:
+        items.append(("Track", _TRACK_STROKE, _TRACK_STROKE))
     if has_fp:
         items += [
             ("Restricted zone", _RESTR_BG, _RESTR_STR),
@@ -219,6 +255,62 @@ def _legend(svg: _S, svg_w: int, pad: int, levels: list[int], has_fp: bool):
 
 
 # ---------------------------------------------------------------------------
+# Track overlay (from a .xtc/.xtce file)
+# ---------------------------------------------------------------------------
+
+def _draw_tracks(svg: _S, xf: _XF, xtc_path: str, draw_levels: list[int]) -> None:
+    """Overlay real track geometry from an .xtc file on a plan view.
+
+    Tracks are filtered to the given levels via their layer name's
+    'Ln-' prefix (e.g. 'L1-Main' -> level 1), matching the convention used
+    by get_operation_density / write_operation_density_report.
+    """
+    layout = parse_file(xtc_path)
+    want = {str(lv) for lv in draw_levels}
+
+    def _level_of(layer_idx: int) -> str:
+        name = layout.layers[layer_idx].name if layer_idx in layout.layers else ""
+        return level_from_layer_name(name).rstrip("Hh")
+
+    kw = dict(stroke=_TRACK_STROKE, stroke_width="1.3", stroke_linecap="round")
+
+    for t in layout.tracks:
+        if _level_of(t.layer) not in want:
+            continue
+        eps = t.endpoints
+        if len(eps) < 2:
+            continue
+
+        if t.kind == "CURVE":
+            cx_, cy_ = t.extra.get("cx"), t.extra.get("cy")
+            r = t.extra.get("radius", 0.0)
+            if cx_ is None or r <= 0:
+                svg.line(xf.x(eps[0].x), xf.y(eps[0].y), xf.x(eps[1].x), xf.y(eps[1].y), **kw)
+                continue
+            arc_deg = ((eps[1].angle - eps[0].angle + 180.0) % 360.0 + 360.0) % 360.0
+            pts = arc_polyline(cx_, cy_, r, eps[0].x, eps[0].y, eps[1].x, eps[1].y, arc_deg)
+            svg.polyline([(xf.x(px), xf.y(py)) for px, py in pts], **kw)
+
+        elif t.kind == "TURNOUT":
+            x0, y0 = xf.x(eps[0].x), xf.y(eps[0].y)
+            for ep in eps[1:]:
+                svg.line(x0, y0, xf.x(ep.x), xf.y(ep.y), **kw)
+
+        elif t.kind == "TURNTABLE":
+            cx_, cy_ = t.extra.get("cx"), t.extra.get("cy")
+            r = t.extra.get("radius", 0.0)
+            if cx_ is not None and r > 0:
+                svg.circle(xf.x(cx_), xf.y(cy_), xf.ln(r), fill="none", **kw)
+            for ep in eps:
+                if cx_ is not None:
+                    svg.line(xf.x(cx_), xf.y(cy_), xf.x(ep.x), xf.y(ep.y), **kw)
+
+        else:
+            # STRAIGHT, JOINT, HANDLAID, CORNU, BEZIER — straight-line approximation
+            svg.line(xf.x(eps[0].x), xf.y(eps[0].y), xf.x(eps[-1].x), xf.y(eps[-1].y), **kw)
+
+
+# ---------------------------------------------------------------------------
 # Plan view — public
 # ---------------------------------------------------------------------------
 
@@ -226,6 +318,7 @@ def generate_plan_view(
     config_path: str,
     output_path: str,
     level: int = 0,
+    xtc_path: str | None = None,
     svg_width: int = 840,
     padding: int = 55,
 ) -> str:
@@ -235,6 +328,8 @@ def generate_plan_view(
         config_path: YAML layout config path.
         output_path: Destination .svg path.
         level: 0 = all levels; 1, 2, … = that level only.
+        xtc_path: Optional .xtc/.xtce file to overlay real track geometry on
+            top of the benchwork, filtered to the same level(s).
         svg_width: Canvas width in pixels.
         padding: Margin around the room in pixels.
 
@@ -289,8 +384,8 @@ def generate_plan_view(
                 svg.poly(xf.pts(v), fill=_DOOR_BG, stroke=_DOOR_STR,
                          stroke_width="1", opacity="0.85")
         for p in fp.partitions:
-            svg.poly(xf.pts(_part_verts(p)),
-                     fill=_PART_BG, stroke=_PART_STR, stroke_width="1.5")
+            for verts in _partition_rects(p, fp.doors, rooms):
+                svg.poly(xf.pts(verts), fill=_PART_BG, stroke=_PART_STR, stroke_width="1.5")
 
     # Benchwork
     all_levels = sorted({bw.level for bw in cfg.benchwork_sections})
@@ -308,6 +403,10 @@ def generate_plan_view(
     # Room outline on top
     svg.poly(xf.pts([(x_min, y_min), (x_max, y_min), (x_max, y_max), (x_min, y_max)]),
              fill="none", stroke=_ROOM_BORDER, stroke_width="2.5")
+
+    # Track overlay (drawn over benchwork, under labels)
+    if xtc_path:
+        _draw_tracks(svg, xf, xtc_path, draw_levels)
 
     # Labels
     label_px = max(7, min(11, int(xf.ln(5.5))))
@@ -340,7 +439,7 @@ def generate_plan_view(
 
     _scale_bar(svg, xf)
     _north_arrow(svg, xf)
-    _legend(svg, svg_width, padding, draw_levels, fp is not None)
+    _legend(svg, svg_width, padding, draw_levels, fp is not None, has_tracks=bool(xtc_path))
     svg.gclose()
 
     out = Path(output_path).expanduser()

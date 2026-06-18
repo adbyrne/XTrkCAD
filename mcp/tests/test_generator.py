@@ -14,6 +14,7 @@ from xtrkcad_mcp.generator import (
     _version_backup,
     default_output_path,
     generate,
+    merge_benchwork_into,
 )
 from xtrkcad_mcp.parser import parse_file
 from xtrkcad_mcp.templates import load_library
@@ -793,3 +794,43 @@ def test_floor_plan_partition_splits_around_door(tmp_path):
     layer0 = _layer0_draws(out.read_text())
     # One partition → split into 2 segments around the 32in door opening
     assert len(layer0) == 2
+
+
+# ---------------------------------------------------------------------------
+# merge_benchwork_into: custom layers outside the standard scheme
+# ---------------------------------------------------------------------------
+
+
+def test_merge_benchwork_preserves_extra_custom_layer(tmp_path):
+    """A layer index outside the regenerated standard set must survive a merge.
+
+    Regression test: merge_benchwork_into used to unconditionally drop every
+    existing LAYERS line and replace them with only the standard Floor/L{n}-*
+    set. A hand-added custom layer (e.g. one a user renamed in XTrkCAD, or
+    one left over from an earlier merge) would lose its LAYERS record even
+    though tracks still referenced it by index — orphaning those tracks with
+    no name at all (worse than blank: level/category detection sees nothing).
+    """
+    existing = tmp_path / "existing.xtc"
+    existing.write_text(
+        "VERSION 10 5.4.0\nTITLE1 T\nTITLE2 \nSCALE HO\nROOMSIZE 96 x 96\n\n"
+        'LAYERS 0 1 0 1 8421504 0 0 0 0 "Floor" 1 0 0.000000 0.000000 0.000000 0.000000 0.000000\n'
+        'LAYERS 99 1 0 1 0 0 0 0 0 "L1-CO-Main" 1 0 0.000000 0.000000 0.000000 0.000000 0.000000\n'
+        "LAYERS CURRENT 0\n\n"
+        "STRAIGHT 1 99 0 0 0 HO 0\n"
+        "\tT4 0 0.000000 0.000000 0.000000\n"
+        "\tT4 0 0.000000 48.000000 0.000000\n"
+        "END\n"
+    )
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text("name: T\nscale: HO\ngrid: []\n")
+    out = tmp_path / "merged.xtc"
+
+    merge_benchwork_into(existing, load_config(cfg).config, out)
+    content = out.read_text()
+
+    assert 'LAYERS 99 1 0 1 0 0 0 0 0 "L1-CO-Main"' in content
+    assert "STRAIGHT 1 99" in content
+    # Standard layers were still freshly regenerated as usual
+    assert '"L1-Main"' in content
+    assert content.count("LAYERS CURRENT") == 1

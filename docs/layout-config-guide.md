@@ -68,6 +68,13 @@ L2-Main (8) … L2-Benchwork (14).  The `get_operation_density` tool recognises
 these names automatically — no manual category mapping needed.  Set `levels: 1`
 for a single-deck layout.
 
+**Sub-divisions on the same deck** (e.g. a connecting railroad's own staging
+yard) can use an extra name segment: `L1-CO-Main`, `L1-CO-Passing`,
+`L1-CO-Staging`.  Both `write_plan_view`'s level grouping and
+`get_operation_density`'s category detection match on the leading `Ln-`
+prefix and the trailing category segment respectively, so the middle
+segment (`CO`) is free-form and doesn't need to be registered anywhere.
+
 **Controlling which track-type layers are generated:**
 
 By default all six Fugate track-type layers are created for every deck.  To
@@ -180,7 +187,11 @@ stub in the NW corner.  It splits the north wall benchwork into two sections
 (see `hillside_benchwork.yaml`).
 
 If a door opening falls along a partition the generator automatically cuts a gap
-in the rendered wall.
+in the rendered wall — both in the `.xtc` Floor layer and in `write_plan_view`'s
+SVG plan view, which share the same gap-cutting geometry
+(`partition_door_openings()` in `config.py`). The gap is cut regardless of
+`swing`: even a `swing: none` doorway (no door hardware, just an opening) is
+still a hole in the wall, not a solid one.
 
 ### Restricted areas
 
@@ -431,6 +442,17 @@ write_plan_view("hillside_division.yaml", "hillside_plan_l1.svg", level=1)
 write_plan_view("hillside_division.yaml", "hillside_plan_l2.svg", level=2)
 ```
 Pass `level=0` (the default) to draw all decks together on one view.
+
+Pass `xtc_path` to overlay real track geometry (straights, curves, turnouts,
+turntables) from a generated `.xtc`/`.xtce` file on top of the benchwork,
+filtered to the same deck via each track's layer name (`L1-*` → level 1,
+`L2-*` → level 2):
+```
+write_plan_view("hillside_division.yaml", "hillside_plan_l1.svg", level=1,
+                 xtc_path="hillside_division.xtc")
+```
+Without `xtc_path` the plan view shows benchwork only, which is normal when
+no `.xtc` has been generated yet.
 
 **Generate elevation views** (one per wall):
 ```

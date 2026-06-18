@@ -9,7 +9,13 @@ from pathlib import Path
 from mcp.server.fastmcp import FastMCP
 
 from xtrkcad_mcp.config import load_config
-from xtrkcad_mcp.models import SCALE_RATIOS, cars_per_real_ft, max_to_main_label
+from xtrkcad_mcp.models import (
+    SCALE_RATIOS,
+    arc_polyline,
+    cars_per_real_ft,
+    level_from_layer_name,
+    max_to_main_label,
+)
 from xtrkcad_mcp.svg_views import generate_elevation_view, generate_plan_view
 from xtrkcad_mcp.parser import TRACK_KINDS, parse_file
 from xtrkcad_mcp.stations import (
@@ -737,22 +743,21 @@ _SUFFIX_TO_CATEGORY: dict[str, str] = {
 
 
 def _category_from_name(name: str) -> str | None:
-    """Return Fugate category inferred from a standard layer name, or None."""
+    """Return Fugate category inferred from a standard layer name, or None.
+
+    Matches the trailing category segment so sub-division names work too,
+    e.g. "L1-CO-Staging" -> "staging" (last "-"-delimited token), not just
+    the plain "L1-Staging" form.
+    """
     import re
     # Strip optional leading "L{digits}[H]-" prefix (e.g. "L1-", "L1H-", "l2-")
     suffix = re.sub(r"^l\d+h?-", "", name.lower())
-    return _SUFFIX_TO_CATEGORY.get(suffix)
+    if suffix in _SUFFIX_TO_CATEGORY:
+        return _SUFFIX_TO_CATEGORY[suffix]
+    return _SUFFIX_TO_CATEGORY.get(suffix.rsplit("-", 1)[-1])
 
 
-def _level_from_layer_name(name: str) -> str:
-    """Return the level key from a standard layer name, or '0' if unrecognised.
-
-    Examples: 'L1-Main' → '1', 'L2-Staging' → '2', 'L1H-Connecting' → '1H'.
-    Layers without an 'Ln-' prefix (Floor, custom names) → '0'.
-    """
-    import re
-    m = re.match(r"^[Ll](\d+[Hh]?)-", name)
-    return m.group(1) if m else "0"
+_level_from_layer_name = level_from_layer_name
 
 
 def _build_category_fn(
@@ -1248,7 +1253,7 @@ def add_track_layers(path: str, levels: int | None = None) -> dict:
 
 @mcp.tool()
 def rename_layers(path: str, mapping: dict) -> dict:
-    """Rename layers in an existing .xtc layout file by name.
+    """Rename layers in an existing .xtc layout file by name or index.
 
     Renames the name string of matching LAYERS records in-place. Layer IDs
     and all track object references are unchanged — only the display name is
@@ -1259,28 +1264,43 @@ def rename_layers(path: str, mapping: dict) -> dict:
     Args:
         path: Path to the .xtc layout file (absolute or relative to
               XTRKCAD_PLANS_DIR).
-        mapping: Dict of {old_name: new_name} pairs.
-                 Example: {"My Yard": "L1-Staging", "Upper Main": "L2-Main"}
+        mapping: Dict of {old_name_or_index: new_name} pairs. A key is
+                 treated as a layer index when it parses as an int and that
+                 index exists; otherwise it is matched by current name.
+                 Index keys are required to disambiguate layers that share
+                 the same (e.g. blank) name.
+                 Example: {"My Yard": "L1-Staging", "15": "L1-CO-Main"}
 
     Returns:
         Dict with output_path, backup_path, renamed (list of old→new pairs
-        that were applied), and not_found (old names not present in the file).
+        that were applied), and not_found (keys not present in the file).
     """
     from xtrkcad_mcp.generator import _version_backup
 
     p = _resolve_plan(path)
     layout = parse_file(p)
 
-    # Build lookup: existing layer name → layer ID
+    # Build lookup: existing layer name → layer ID (last one wins on duplicates)
     name_to_id = {layer.name: layer.index for layer in layout.layers.values()}
 
     renamed: list[dict] = []
     not_found: list[str] = []
-    for old_name, new_name in mapping.items():
-        if old_name in name_to_id:
-            renamed.append({"from": old_name, "to": new_name, "id": name_to_id[old_name]})
-        else:
-            not_found.append(old_name)
+    id_to_newname: dict[int, str] = {}
+    for key, new_name in mapping.items():
+        layer_id: int | None = None
+        try:
+            candidate = int(key)
+            if candidate in layout.layers:
+                layer_id = candidate
+        except (TypeError, ValueError):
+            pass
+        if layer_id is None and key in name_to_id:
+            layer_id = name_to_id[key]
+        if layer_id is None:
+            not_found.append(key)
+            continue
+        id_to_newname[layer_id] = new_name
+        renamed.append({"from": layout.layers[layer_id].name, "to": new_name, "id": layer_id})
 
     if not renamed:
         return {
@@ -1290,19 +1310,22 @@ def rename_layers(path: str, mapping: dict) -> dict:
             "not_found": not_found,
         }
 
-    # Apply renames to raw file lines — replace quoted name on each LAYERS line
+    # Apply renames to raw file lines — replace quoted name on each LAYERS line,
+    # matched by the line's own index field (robust to duplicate/blank names).
     file_lines = p.read_text(encoding="utf-8", errors="replace").splitlines()
-    rename_map = {r["from"]: r["to"] for r in renamed}
     updated_lines: list[str] = []
     for line in file_lines:
-        if line.startswith("LAYERS") and not line.split()[1:2] == ["CURRENT"]:
-            # Extract quoted name
-            q2 = line.rfind('"')
-            q1 = line.rfind('"', 0, q2)
-            if q1 >= 0 and q2 > q1:
-                name_in_line = line[q1 + 1:q2]
-                if name_in_line in rename_map:
-                    line = line[:q1 + 1] + rename_map[name_in_line] + line[q2:]
+        parts = line.split(None, 2)
+        if line.startswith("LAYERS") and len(parts) >= 2 and parts[1] != "CURRENT":
+            try:
+                line_idx = int(parts[1])
+            except ValueError:
+                line_idx = None
+            if line_idx in id_to_newname:
+                q2 = line.rfind('"')
+                q1 = line.rfind('"', 0, q2)
+                if q1 >= 0 and q2 > q1:
+                    line = line[:q1 + 1] + id_to_newname[line_idx] + line[q2:]
         updated_lines.append(line)
 
     backup = _version_backup(p)
@@ -2147,32 +2170,7 @@ def write_gaps_report(path: str, output_path: str,
 # ---------------------------------------------------------------------------
 
 
-def _arc_polyline(
-    cx: float, cy: float, r: float,
-    x1: float, y1: float, x2: float, y2: float,
-    arc_deg: float, n: int = 24,
-) -> list[tuple[float, float]]:
-    """Sample n+1 points on the circular arc from (x1,y1) to (x2,y2)."""
-    if arc_deg < 0.01 or r <= 0:
-        return [(x1, y1), (x2, y2)]
-    a_start = math.atan2(y1 - cy, x1 - cx)
-    arc_rad = math.radians(arc_deg)
-
-    def sample(direction: float) -> list[tuple[float, float]]:
-        return [
-            (cx + r * math.cos(a_start + direction * arc_rad * i / n),
-             cy + r * math.sin(a_start + direction * arc_rad * i / n))
-            for i in range(n + 1)
-        ]
-
-    pts_ccw = sample(1.0)
-    pts_cw = sample(-1.0)
-
-    def dist_end(pts: list) -> float:
-        ex, ey = pts[-1]
-        return math.hypot(ex - x2, ey - y2)
-
-    return pts_ccw if dist_end(pts_ccw) <= dist_end(pts_cw) else pts_cw
+_arc_polyline = arc_polyline
 
 
 @mcp.tool()
@@ -2731,6 +2729,7 @@ def write_plan_view(
     config_path: str,
     output_path: str,
     level: int = 0,
+    xtc_path: str = "",
 ) -> str:
     """Generate a top-down SVG plan view from a layout config.
 
@@ -2742,11 +2741,16 @@ def write_plan_view(
         config_path: Path to the YAML layout config (or benchwork_file path).
         output_path: Destination .svg path.
         level: Deck level to show — 0 = all levels, 1 = Level 1 only, etc.
+        xtc_path: Optional path to a .xtc/.xtce file. When given, real track
+            geometry (straights, curves, turnouts, turntables) is overlaid on
+            top of the benchwork, filtered to the same level(s) via each
+            track's layer name (e.g. "L1-Main" -> level 1).
 
     Returns:
         Absolute path of the written SVG file.
     """
-    return generate_plan_view(config_path, output_path, level=level)
+    resolved_xtc = str(_resolve_plan(xtc_path)) if xtc_path else None
+    return generate_plan_view(config_path, output_path, level=level, xtc_path=resolved_xtc)
 
 
 @mcp.tool()

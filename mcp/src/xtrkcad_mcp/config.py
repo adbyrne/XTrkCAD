@@ -369,6 +369,55 @@ class FloorPlan:
     total_depth_in: float = 0.0
 
 
+def partition_door_openings(
+    partition: FloorPartition,
+    doors: list[FloorDoor],
+    rooms_by_name: dict[str, FloorRoom],
+) -> list[tuple[float, float]]:
+    """Return sorted (start, end) gaps along the partition axis where doors cut through.
+
+    Shared by both the .xtc generator (generator.py) and the SVG plan-view
+    renderer (svg_views.py) so a doorway never renders as a solid wall in
+    one and an opening in the other. A door cuts a gap regardless of its
+    `swing` setting — even a hardware-less "none" swing is still a hole in
+    the wall; `swing` only controls whether a separate clearance-zone
+    overlay is drawn.
+    """
+    is_vertical = abs(partition.y1 - partition.y0) >= abs(partition.x1 - partition.x0)
+    p_x = min(partition.x0, partition.x1)
+    p_y = min(partition.y0, partition.y1)
+    openings = []
+
+    for door in doors:
+        room = rooms_by_name.get(door.room)
+        if room is None:
+            continue
+        if is_vertical:
+            if door.wall not in ("east", "west"):
+                continue
+            wall_x = (room.x + room.width) if door.wall == "east" else room.x
+            if abs(wall_x - p_x) > partition.thickness:
+                continue
+            gap_start = room.y + door.from_in
+            gap_end = gap_start + door.width_in
+            p_start, p_end = min(partition.y0, partition.y1), max(partition.y0, partition.y1)
+        else:
+            if door.wall not in ("north", "south"):
+                continue
+            wall_y = (room.y + room.depth) if door.wall == "north" else room.y
+            if abs(wall_y - p_y) > partition.thickness:
+                continue
+            gap_start = room.x + door.from_in
+            gap_end = gap_start + door.width_in
+            p_start, p_end = min(partition.x0, partition.x1), max(partition.x0, partition.x1)
+
+        clipped = (max(gap_start, p_start), min(gap_end, p_end))
+        if clipped[0] < clipped[1]:
+            openings.append(clipped)
+
+    return sorted(openings)
+
+
 @dataclass
 class LayoutConfig:
     # Required

@@ -1,6 +1,7 @@
 """Data models for XTrkCAD layout objects."""
 
 import math
+import re
 from dataclasses import dataclass, field
 
 
@@ -170,3 +171,41 @@ class Layout:
             t.extra["radius"] for t in self.tracks
             if t.kind == "CURVE" and t.extra.get("radius", 0.0) > 0.0
         ]
+
+
+def level_from_layer_name(name: str) -> str:
+    """Return the level key from a standard layer name, or '0' if unrecognised.
+
+    Examples: 'L1-Main' → '1', 'L2-Staging' → '2', 'L1H-Connecting' → '1H'.
+    Layers without an 'Ln-' prefix (Floor, custom names) → '0'.
+    """
+    m = re.match(r"^[Ll](\d+[Hh]?)-", name)
+    return m.group(1) if m else "0"
+
+
+def arc_polyline(
+    cx: float, cy: float, r: float,
+    x1: float, y1: float, x2: float, y2: float,
+    arc_deg: float, n: int = 24,
+) -> list[tuple[float, float]]:
+    """Sample n+1 points on the circular arc from (x1,y1) to (x2,y2)."""
+    if arc_deg < 0.01 or r <= 0:
+        return [(x1, y1), (x2, y2)]
+    a_start = math.atan2(y1 - cy, x1 - cx)
+    arc_rad = math.radians(arc_deg)
+
+    def sample(direction: float) -> list[tuple[float, float]]:
+        return [
+            (cx + r * math.cos(a_start + direction * arc_rad * i / n),
+             cy + r * math.sin(a_start + direction * arc_rad * i / n))
+            for i in range(n + 1)
+        ]
+
+    pts_ccw = sample(1.0)
+    pts_cw = sample(-1.0)
+
+    def dist_end(pts: list) -> float:
+        ex, ey = pts[-1]
+        return math.hypot(ex - x2, ey - y2)
+
+    return pts_ccw if dist_end(pts_ccw) <= dist_end(pts_cw) else pts_cw
