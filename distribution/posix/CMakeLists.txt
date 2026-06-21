@@ -31,12 +31,11 @@ set(CPACK_RPM_BUILDREQUIRES
     "gettext, gettext-devel, glibc-devel"
 )
 
-# Add dependency to webkitgtk if configured
-if(NOT XTRKCAD_USE_BROWSER)
-    set(CPACK_RPM_PACKAGE_REQUIRES 
-        "${CPACK_RPM_PACKAGE_REQUIRES} webkitgtk")
-#    message(AUTHOR_WARNING "Add dependency to webkitgtk for viewing help!")
-endif()
+# NOTE: no webkitgtk packaging dependency here — the built-in WebKitGTK help
+# viewer requires "webkit-1.0", which has no GTK3 equivalent. GTK3 builds use
+# the system browser for help (XTRKCAD_USE_BROWSER=ON); see
+# app/wlib/gtk3lib/CMakeLists.txt, which now fails the cmake configure step
+# if XTRKCAD_USE_BROWSER is turned off on this branch.
 
 # exclude these directories from the rpm
 set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION

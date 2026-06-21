@@ -112,10 +112,11 @@ else()
    PRIVATE
    browserhelp.c)
     else()
-        PKG_CHECK_MODULES(GTK_WEBKIT "webkit-1.0" REQUIRED)
-        target_sources(xtrkcad-wlib
-    PRIVATE
-             ixhelp.c)
+        message(FATAL_ERROR
+            "XTRKCAD_USE_BROWSER=OFF requests the built-in WebKitGTK help viewer, "
+            "but WebKitGTK 1.0 (\"webkit-1.0\") has no GTK3 equivalent and is not "
+            "available on this branch. Re-run cmake with -DXTRKCAD_USE_BROWSER=ON "
+            "to show help in the system's default browser instead.")
     endif()
 endif()
 
@@ -166,16 +167,6 @@ if (APPLE)
     ${GTK_WEBKIT_LIBRARIES}
    )
         endif()
-    endif()
-else ()
-    if(NOT XTRKCAD_USE_BROWSER)
-        target_include_directories(xtrkcad-wlib
-   ${GTK_WEBKIT_INCLUDE_DIRS}
-  )
-        target_link_libraries(xtrkcad-wlib
-   PRIVATE
-   ${GTK_WEBKIT_LIBRARIES}
-  )
     endif()
 endif()
 
