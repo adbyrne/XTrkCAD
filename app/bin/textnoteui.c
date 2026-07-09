@@ -142,7 +142,9 @@ CreateEditTextNote(char *title, char * textData )
 	wTextClear(textEntry);
 	wTextAppend(textEntry, textData );
 	wTextSetReadonly(textEntry, FALSE);
+	int noteLayer = textNoteData.layer;
 	FillLayerList((wList_p)textNotePLs[I_LAYER].control);
+	textNoteData.layer = noteLayer;
 	ParamLoadControls(&textNotePG);
 	descTitle = title;
 

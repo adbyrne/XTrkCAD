@@ -171,7 +171,9 @@ CreateEditLinkDialog(char *title)
 
 	wWinSetTitle(linkNotePG.win, MakeWindowTitle(title));
 
+	int noteLayer = linkNoteData.layer;
 	FillLayerList((wList_p)linkNotePLs[I_LAYER].control);
+	linkNoteData.layer = noteLayer;
 	ParamLoadControls(&linkNotePG);
 	descTitle = title;
 
