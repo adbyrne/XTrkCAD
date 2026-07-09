@@ -255,7 +255,9 @@ static void CreateEditFileDialog(char * windowTitle)
 
 	wWinSetTitle(fileNotePG.win, MakeWindowTitle(windowTitle));
 
+	int noteLayer = fileNoteData.layer;
 	FillLayerList((wList_p)fileNotePLs[I_LAYER].control);
+	fileNoteData.layer = noteLayer;
 	ParamLoadControls(&fileNotePG);
 	wControlActive(fileNotePLs[I_OPEN].control,
 	               (IsFileValid(fileNoteData.path)?TRUE:FALSE));
