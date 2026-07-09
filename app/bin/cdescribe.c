@@ -134,7 +134,11 @@ static void DescribeUpdate(
 	ddp = (descData_p)pg->paramPtr[inx].context;
 
 	if ((ddp->mode&(DESC_RO|DESC_IGNORE)) != 0) {
-		return;
+		/* For POS3D: allow Z (control2) edit even when XY is RO */
+		if (ddp->type != DESC_POS3D || pg->paramPtr[inx].control != ddp->control2
+		    || (ddp->mode & DESC_Z_IGNORE)) {
+			return;
+		}
 	}
 
 	if (ddp->type == DESC_PIVOT) {
@@ -185,18 +189,21 @@ static void DescribeUpdate(
 			continue;
 		}
 
-		if ((ddp->mode&DESC_CHANGE) == 0) {
-			if ((ddp->mode&DESC_CHANGE2) == 0) {
-				continue;
-			}
+		if ((ddp->mode & (DESC_CHANGE|DESC_CHANGE2|DESC_CHANGE3)) == 0) {
+			continue;
 		}
 
 		wControlActive( ddp->control0,
 		                (ddp->mode&DESC_RO)?FALSE:TRUE);
 		ddp->mode &= ~DESC_CHANGE;
-		if (ddp->type == DESC_POS) {			//POS Has two fields
-			if (ddp->mode&DESC_CHANGE2) {
+		if (ddp->type == DESC_POS || ddp->type == DESC_POS3D) {
+			if (ddp->mode & DESC_CHANGE3) {
+				ddp->mode &= ~DESC_CHANGE3;		//Third time (POS3D only)
+			} else if (ddp->mode & DESC_CHANGE2) {
 				ddp->mode &= ~DESC_CHANGE2;		//Second time
+				if (ddp->type == DESC_POS3D) {
+					ddp->mode |= DESC_CHANGE3;        //Queue third
+				}
 			} else {
 				ddp->mode |= DESC_CHANGE2;		//First time
 			}
@@ -236,7 +243,6 @@ EXPORT void DescribeDone(void * junk)
 }
 
 
-
 static dynArr_t	descGroup_da;
 #define descGroup(N) DYNARR_N( paramGroup_p, descGroup_da, N)
 static dynArr_t pd_da;
@@ -250,8 +256,8 @@ static paramData_p CreateDescribeField(
 	paramData_p pd = &DYNARR_LAST( paramData_t, pd_da );
 	memset( pd, 0, sizeof *pd );
 	pd->type = type;
-	char * sIndex[10];
-	snprintf( sIndex, sizeof  sIndex, "%d", pd_da.cnt );
+	char sIndex[12];
+	snprintf( sIndex, sizeof sIndex, "%d", pd_da.cnt );
 	pd->nameStr = MyStrdup( sIndex );
 	pd->valueP = ddp->valueP;
 	pd->winLabel = ddp->label;
@@ -302,13 +308,27 @@ static paramGroup_p CreateDescribeDialog(
 		switch( ddp->type ) {
 		case DESC_POS:
 			pdp = CreateDescribeField( PD_FLOAT, pg, ddp );
-			pdp->option |= PDO_SAMEROW;
+			pdp->option |= PDO_SAMEROW | PDO_NEWSAMEROW;
 			pdp->context = (void*)ddp;
 			pdp = CreateDescribeField( PD_FLOAT, pg, ddp );
-			pdp->winLabel = "";
+			pdp->winLabel = NULL;
 			pdp->option |= PDO_SAMEROW;
 			// Point to 2nd double of a coOrd
 			pdp->valueP = pdp[-1].valueP + offsetof( coOrd, y );
+			break;
+		case DESC_POS3D:
+			pdp = CreateDescribeField( PD_FLOAT, pg, ddp );
+			pdp->option |= PDO_SAMEROW | PDO_NEWSAMEROW;
+			pdp->context = (void*)ddp;
+			pdp = CreateDescribeField( PD_FLOAT, pg, ddp );
+			pdp->winLabel = NULL;
+			pdp->option |= PDO_SAMEROW;
+			pdp->context = (void*)ddp;
+			pdp->valueP = pdp[-1].valueP + offsetof( coOrd, y );
+			pdp = CreateDescribeField( PD_FLOAT, pg, ddp );
+			pdp->winLabel = NULL;
+			pdp->option |=  PDO_SAMEROW | PDO_DIM;
+			pdp->valueP = ddp->valueP2;
 			break;
 		case DESC_FLOAT:
 		case DESC_DIM:
@@ -324,7 +344,7 @@ static paramGroup_p CreateDescribeDialog(
 			pdp = CreateDescribeField( PD_LONG, pg, ddp );
 			break;
 		case DESC_COLOR:
-			pdp = CreateDescribeField( PD_LONG, pg, ddp );
+			pdp = CreateDescribeField( PD_COLORLIST, pg, ddp );
 			break;
 		case DESC_PIVOT:
 			pdp = CreateDescribeField( PD_RADIO, pg, ddp );
@@ -371,7 +391,6 @@ static paramGroup_p CreateDescribeDialog(
 }
 
 
-//static wList_p setLayerL;
 void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 {
 
@@ -380,13 +399,12 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 	}
 
 	// Have we seen this type of object before?
-	strcpy( message, "Describe " );
-	strcat( message, title );
-	title = MyStrdup( message );
+	char sTitle[STR_SIZE];
+	snprintf( sTitle, sizeof sTitle, _("Describe %s"), title );
 	paramGroup_p pg = NULL;
 	for ( int inx = 0; inx < descGroup_da.cnt; inx++ ) {
 		pg = descGroup( inx );
-		if ( strcmp( title, pg->nameStr ) == 0 ) {
+		if ( strcmp( sTitle, pg->nameStr ) == 0 ) {
 			break;
 		}
 		pg = NULL;
@@ -394,6 +412,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 
 	if ( pg == NULL ) {
 		// No: Create a new dialog for it
+		title = MyStrdup( sTitle );
 		pg = CreateDescribeDialog( title, data, update);
 		FormCreateDialog( pg, title,
 		                  //_("Done"), DescribeDone,
@@ -413,14 +432,22 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 			ddp->control0 = pdp->control;
 			pdp++;
 			pdx++;
-			if ( ddp->type == DESC_POS ) {
+			if ( ddp->type == DESC_POS || ddp->type == DESC_POS3D ) {
 				LOG( log_describe, 3, ( " .1: %d<-%d %p\n", ddx, pdx, pdp->control ) );
 				ddp->control1 = pdp->control;
 				pdp++;
 				pdx++;
 			}
+			if ( ddp->type == DESC_POS3D ) {
+				LOG( log_describe, 3, ( " .2: %d<-%d %p\n", ddx, pdx, pdp->control ) );
+				ddp->control2 = pdp->control;
+				pdp++;
+				pdx++;
+			}
 		}
 		FormRegister(pg);
+	} else {
+		title = pg->nameStr;
 	}
 
 	if ( describePG ) {
@@ -454,10 +481,13 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 	for (ddp=data; ddp->type != DESC_NULL; ddp++) {
 		if (ddp->mode&DESC_IGNORE) {
 			wControlShow( ddp->control0, FALSE );
-			if ( ddp->type == DESC_POS ) {
+			if ( ddp->type == DESC_POS || ddp->type == DESC_POS3D ) {
 				wControlShow( ddp->control1, FALSE );
 			}
-			LOG( log_describe, 3, ( "Dodescribe-IGNORE-pd: %s.%s\n", title, ddp->label ) );;
+			if ( ddp->type == DESC_POS3D ) {
+				wControlShow( ddp->control2, FALSE );
+			}
+			LOG( log_describe, 3, ( "Dodescribe-IGNORE-pd: %s.%s\n", title, ddp->label ) );
 			continue;
 		}
 
@@ -472,6 +502,14 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 			wControlShow( ddp->control1, TRUE );
 			wControlActive(ddp->control1,
 			               (ddp->mode&DESC_RO)?FALSE:TRUE);
+			break;
+		case DESC_POS3D:
+			wControlShow( ddp->control1, TRUE );
+			wControlActive(ddp->control1,
+			               (ddp->mode&DESC_RO)?FALSE:TRUE);
+			wControlShow( ddp->control2, (ddp->mode&DESC_Z_IGNORE)?FALSE:TRUE );
+			wControlActive(ddp->control2,
+			               (ddp->mode&DESC_Z_RO)?FALSE:TRUE);
 			break;
 
 		case DESC_LAYER:

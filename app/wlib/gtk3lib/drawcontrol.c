@@ -94,6 +94,9 @@ static gboolean draw_event(
 	GtkAllocation alloc;
 	gtk_widget_get_allocation(widget, &alloc);
 
+	if (drawAttributes->surface == NULL || drawAttributes->temp_surface == NULL)
+		return FALSE;
+
 	cairo_set_source_surface(cr, drawAttributes->surface, 0, 0);
 	cairo_rectangle(cr, 0, 0, alloc.width, alloc.height);
 	cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
@@ -656,18 +659,19 @@ wControl_p wDrawCreate(
 
 	if (ISDEFINEDINBUILDER(parent)) {
 		drawControl->widget = wlibWidgetFromIdWarn(parent, helpStr);
+		/* start at 0 so configure_event always creates the surface */
+		drawAttributes->width = 0;
+		drawAttributes->height = 0;
 	} else {
 		drawControl->widget = gtk_drawing_area_new();
-	}
 		width = width ? width : -1;
 		height = height ? height : -1;
 		gtk_widget_set_size_request(GTK_WIDGET(drawControl->widget), width,
 		                            height);
-									
-	wlibControlGetSize((wControl_p)drawControl);
-
-	drawAttributes->width = width ? width: 0;
-	drawAttributes->height = height ? height: 0;
+		wlibControlGetSize((wControl_p)drawControl);
+		drawAttributes->width = width ? width: 0;
+		drawAttributes->height = height ? height: 0;
+	}
 
 	g_signal_connect((drawControl->widget), "query-tooltip",
 	                 G_CALLBACK(draw_tooltip), drawControl);

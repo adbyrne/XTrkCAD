@@ -129,6 +129,16 @@ static void buildDesignerLines( FILE * inf, FILE * outf )
 				a0 += a1;
 				p0 = p1;
 			}
+		} else if ( strncmp( line, "HOTSPOT", 7 ) == 0 ) {
+			int index;
+			if ( sscanf( line, "HOTSPOT, %lf, %lf, %d",
+			             &p0.x, &p0.y, &index ) != 3 ) {
+				fprintf( stderr, "SYNTAX: %s", line );
+				exit(1);
+			}
+			/* type=2, position in x0/y0, field index in x1, y1 unused */
+			fprintf( outf, "\t{ 2, %ld, %ld, %d, 0 },\n",
+			         (long)(p0.x+0.5), (long)(p0.y+0.5), index );
 		} else {
 			fprintf( stderr, "SYNTAX2: %s", line );
 		}

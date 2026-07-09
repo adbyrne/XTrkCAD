@@ -42,8 +42,7 @@
 #define CENTERMARK_LENGTH (60) /**< size of cross marking center of circles */
 #define DASH_LENGTH (8.0)
 
-#define MINLINEWIDTHBITMAP (1.0)
-#define MINLINEWIDTHPRINT (0.09)
+/* MINLINEWIDTHBITMAP and MINLINEWIDTHPRINT are defined in wlib.h */
 
 extern wWin_p gtkMainW;
 
@@ -421,36 +420,7 @@ extern wDrawColor wDrawColorBlack;
 GtkAccelGroup *wlibAppWinGetAccelGroup(void);
 GtkWidget *wlibAppWinGetMain(void);
 
-/* basicdraw.c */
-
-void wlibBasicClear(struct draw *bd);
-
-void wlibBasicDrawLine(struct draw *bd, wDrawPix_t x0, wDrawPix_t y0,
-                       wDrawPix_t x1, wDrawPix_t y1, double width,
-                       double minWidth, wDrawLineType_e lineType,
-                       wDrawColor color, wDrawOpts opts);
-
-void wlibBasicDrawArc(struct draw *bd, wDrawPix_t x0, wDrawPix_t y0,
-                      wDrawPix_t r, double angle0, double angle1,
-                      wBool_t drawCenter, double width, double minWidth,
-                      wDrawLineType_e lineType, wDrawColor color,
-                      wDrawOpts opts);
-
-void wlibBasicDrawString(struct draw *bd, wDrawPix_t x, wDrawPix_t y, double a,
-                         char *s, wFont_p fp, double fs, double width,
-                         double minWidth, wDrawColor color, wDrawOpts opts);
-
-void wlibBasicDrawFillPolygon(struct draw *bd, wDrawPix_t p[][2],
-                              wPolyLine_e type[], int cnt, wDrawColor color,
-                              wDrawOpts opts, int fill, int open);
-
-void wlibBasicDrawFillRectangle(struct draw *bd, wDrawPix_t x0, wDrawPix_t y0,
-                                wDrawPix_t x1, wDrawPix_t y1, wDrawColor color,
-                                wDrawOpts opts);
-
-void wlibBasicDrawFillCircle(struct draw *drawingArea, wDrawPix_t x0,
-                             wDrawPix_t y0, wDrawPix_t r, wDrawColor color,
-                             wDrawOpts opts);
+/* basicdraw.c — public API now in wlib.h as wBasicXxx */
 
 /* bitmap.c */
 #define ICON_PIXBUF 2

@@ -394,9 +394,9 @@ void wDrawLine(
 	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
 	g_assert(drawingArea->type == B_DRAW);
 
-	if(bd->drawDestination == EXPORTBITMAP) {
-		wlibBasicDrawLine( bd, x0, y0, x1, y1, width,
-		                   MINLINEWIDTHBITMAP, lineType, color, opts );
+	if (bd->drawDestination == DIRECTCAIRO) {
+		wBasicDrawLine(drawingArea, x0, y0, x1, y1, width,
+		              MINLINEWIDTHBITMAP, lineType, color, opts);
 		return;
 	}
 
@@ -460,9 +460,9 @@ void wDrawArc(
 
 	g_assert(drawingArea->type == B_DRAW);
 
-	if(bd->drawDestination == EXPORTBITMAP) {
-		wlibBasicDrawArc( bd, x0, y0, r, angle0, angle1, drawCenter, width,
-		                  MINLINEWIDTHBITMAP, lineType, color, opts );
+	if (bd->drawDestination == DIRECTCAIRO) {
+		wBasicDrawArc(drawingArea, x0, y0, r, angle0, angle1, drawCenter, width,
+		             MINLINEWIDTHBITMAP, lineType, color, opts);
 		return;
 	}
 
@@ -520,10 +520,10 @@ void wDrawPoint(
 	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
 	g_assert(drawingArea->type == B_DRAW);
 
-	if(bd->drawDestination == EXPORTBITMAP) {
-
+	if (bd->drawDestination == DIRECTCAIRO) {
 		return;
 	}
+
 	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color,
 	                 opts);
 	cairo_new_path(cairo);
@@ -566,10 +566,9 @@ void wDrawString(
 	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
 	g_assert(drawingArea->type == B_DRAW);
 
-	if(bd->drawDestination == EXPORTBITMAP) {
-		wlibBasicDrawString( bd, x, y, a, (char *) s, fp, fs,
-		                     MINLINEWIDTHBITMAP, MINLINEWIDTHBITMAP,
-		                     color, opts );
+	if (bd->drawDestination == DIRECTCAIRO) {
+		wBasicDrawString(drawingArea, x, y, a, (char *) s, fp, fs,
+		                MINLINEWIDTHBITMAP, MINLINEWIDTHBITMAP, color, opts);
 		return;
 	}
 
@@ -715,8 +714,8 @@ void wDrawFilledRectangle(
 	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
 	g_assert(drawingArea->type == B_DRAW);
 
-	if(bd->drawDestination == EXPORTBITMAP) {
-		wlibBasicDrawFillRectangle( bd, x, y, w, h, color, opt );
+	if (bd->drawDestination == DIRECTCAIRO) {
+		wBasicDrawFillRectangle(drawingArea, x, y, w, h, color, opt);
 		return;
 	}
 
@@ -775,10 +774,11 @@ void wDrawPolygon(
 	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
 	g_assert(drawingArea->type == B_DRAW);
 
-	if(bd->drawDestination == EXPORTBITMAP) {
-		wlibBasicDrawFillPolygon( bd, p, type, cnt, color, opt, fill, open );
+	if (bd->drawDestination == DIRECTCAIRO) {
+		wBasicDrawFillPolygon(drawingArea, p, type, cnt, color, opt, fill, open);
 		return;
 	}
+
 	if (cnt > maxCnt) {
 		if (points == NULL) {
 			points = (GdkPoint*)malloc( cnt*sizeof *points );
@@ -906,8 +906,8 @@ void wDrawFilledCircle(
 	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
 	g_assert(drawingArea->type == B_DRAW);
 
-	if(bd->drawDestination == EXPORTBITMAP) {
-		wlibBasicDrawFillCircle( bd, x0, y0, r, color, opt );
+	if (bd->drawDestination == DIRECTCAIRO) {
+		wBasicDrawFillCircle(drawingArea, x0, y0, r, color, opt);
 		return;
 	}
 

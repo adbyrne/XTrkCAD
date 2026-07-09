@@ -3224,7 +3224,7 @@ static void ConfigureLineColor(void)
 	switch (drawCmdContext.Op) {
 	case OP_BENCH:
 		drawCmdContext.benchOption = GetBenchData(VP2L(wListGetItemContext(
-		                                     benchstylePLs[BENCH_ORIENTATION].control, benchChoice)), benchOrient);
+		                                     benchstylePLs[BENCH_CHOICE].control, benchChoice)), benchOrient);
 		lineColor = benchColor;
 		break;
 

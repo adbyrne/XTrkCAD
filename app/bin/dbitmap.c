@@ -20,6 +20,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include "common.h"
 #include "custom.h"
 #include "dynstring.h"
 #include "fileio.h"
@@ -65,7 +66,7 @@ static struct wFilSel_t * bitmap_fs;
 static wWinPix_t bitmap_w, bitmap_h;
 static drawCmd_t bitmap_d = {
 	NULL,
-	&screenDrawFuncs,
+	&bitmapDrawFuncs,
 	0,
 	16.0,
 	0.0,
@@ -92,7 +93,7 @@ static void DrawTextCenterXPosY( char *string, wFont_p font,
 	DrawTextSize( &mainD, string, font, fontSize * bitmap_d.scale, FALSE,
 	              &textSize );
 	p.x = ( bitmap_d.size.x - textSize.x ) / 2.0 + bitmap_d.orig.x;
-	p.y = mapD.size.y + yPos*bitmap_d.scale;
+	p.y = mapD.size.y + yPos*bitmap_d.scale/* + textSize.y*/;
 	DrawString( &bitmap_d, p, 0.0, string, font, fontSize*bitmap_d.scale,
 	            wDrawColorBlack );
 }
@@ -119,7 +120,7 @@ DrawProductInfo( char *preFix, wFontSize_t fontSize, POS_T yPos )
 	              &textsize1 );
 	textPos.x = ( bitmap_d.size.x - ( textsize.x + textsize1.x ) ) /
 	            2.0 + bitmap_d.orig.x;
-	textPos.y = -LINEHEIGHT*bitmap_d.scale;
+	textPos.y =  - 2* LINEHEIGHT*bitmap_d.scale;
 	DrawString( &bitmap_d, textPos, 0.0, preFix, fp,
 	            fontSize * bitmap_d.scale, wDrawColorBlack );
 	textPos.x += textsize.x;
@@ -260,11 +261,8 @@ static paramData_t outputBitMapPLs[] = {
 	{ PD_FLOAT, &outputBitMapDensity, "density", PDO_NOPSHUPD, &dpiRange, NULL },
 	{ PD_MESSAGE, N_( "dpi" ), "dpi", PDO_DLGHORZ },
 	{ PD_MESSAGE, N_( "Bitmap Size " ), "mess1", PDO_NOPSHUPD | PDO_DLGRESETMARGIN, 0 },
-#define I_MSG1			(4)
+#define I_BITMAPSIZE			(4)
 	{ PD_MESSAGE, N_( "99999 by 99999 pixels" ), "pixelsize", PDO_DLGHORZ | PDO_DLGUNDERCMDBUTT, I2VP( 180 )},
-	{ PD_MESSAGE, N_( "Approximate File Size " ), "mess2", PDO_NOPSHUPD, 0 },
-#define I_MSG2			(6)
-	{ PD_MESSAGE, N_( "999.9Mb" ), "filesize", PDO_DLGHORZ | PDO_DLGUNDERCMDBUTT | PDO_DLGBOXEND, I2VP( 180 ) },
 };
 
 static paramGroup_t outputBitMapPG = { "outputbitmap", PGO_FULLDIALOGFROMBUILDER, outputBitMapPLs, COUNT( outputBitMapPLs ) };
@@ -306,46 +304,13 @@ static double CalculateMaxDPI( coOrd size, POS_T marginX, POS_T marginY )
 static void
 OutputBitmapPixelSize( void )
 {
-	DynString message;
-	DynStringMalloc( &message, 16 );
+	char message[STR_SIZE];
+	
 	FormLoadControls( &outputBitMapPG );
 
-	DynStringPrintf( &message, _( "%ld by %ld pixels" ), bitmap_w, bitmap_h );
-	FormLoadMessage( &outputBitMapPG, I_MSG1, DynStringToCStr( &message ) );
-	DynStringFree( &message );
-}
+	snprintf( &message, STR_SIZE,_( "%ld by %ld pixels" ), bitmap_w, bitmap_h );
 
-/**
-* Display and return the file size of the bitmap
-*
-* \returns the estimated file size
-*/
-
-static FLOAT_T
-OutputBitmapFileSize( void )
-{
-	DynString message;
-	DynStringMalloc( &message, 16 );
-	FormLoadControls( &outputBitMapPG );
-	FLOAT_T size;
-
-	size = ( FLOAT_T )bitmap_w * bitmap_h;
-
-	if( size < 1e4 ) {
-		DynStringPrintf( &message, _( "%0.0f" ), size );
-	} else if( size < 1e6 ) {
-		DynStringPrintf( &message, _( "%0.1fKb" ), ( size + 50.0 ) / 1e3 );
-	} else if( size < 1e9 ) {
-		DynStringPrintf( &message, _( "%0.1fMb" ), ( size + 5e4 ) / 1e6 );
-	} else {
-		DynStringPrintf( &message, _( "%0.1fGb" ), ( size + 5e7 ) / 1e9 );
-	}
-
-	FormLoadMessage( &outputBitMapPG, I_MSG2, DynStringToCStr( &message ) );
-
-	DynStringFree( &message );
-
-	return( size );
+	FormLoadMessage( &outputBitMapPG, I_BITMAPSIZE, message );
 }
 
 /**
@@ -392,7 +357,7 @@ static void ComputeBitmapSize( void )
 void
 UpdateBitmapDialog( void )
 {
-	FormLoadControls( &outputBitMapPG );
+	FormFetchData(&outputBitMapPG);
 
 	ComputeBitmapSize();
 	FormLoadSingleControl( &outputBitMapPG, I_DENSITY ); // trigger range check
@@ -404,7 +369,6 @@ UpdateBitmapDialog( void )
 	}
 
 	OutputBitmapPixelSize();
-	OutputBitmapFileSize();
 }
 
 /**
@@ -415,17 +379,6 @@ UpdateBitmapDialog( void )
 
 static void OutputBitMapOk( void * unused )
 {
-	FLOAT_T size;
-
-	size = OutputBitmapFileSize();
-
-	if( size > BITMAPSIZE ) {
-		if( NoticeMessage( MSG_BITMAP_SIZE_WARNING, _( "Continue" ),
-		                   _( "Cancel" ) )==0 ) {
-			return;
-		}
-	}
-
 	wHide( outputBitMapW );
 
 	if( !bitmap_fs ) {

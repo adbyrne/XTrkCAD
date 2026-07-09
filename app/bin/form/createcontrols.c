@@ -575,6 +575,7 @@ void FormCreateControls(paramGroup_p group)
 	unsigned yPos = 1;	// y position of control
 	unsigned xCol = 0;	// index of current COLUMN
 	unsigned xRow = 0;	// index into SAMEROW
+	void *sameRowBox = NULL;	// GtkHBox for current SAMEROW group
 
 	DynStringMalloc(&helpString, 80);
 
@@ -597,17 +598,26 @@ void FormCreateControls(paramGroup_p group)
 				xCol++;
 				yPos = 1;
 			}
+			if ( pd->option & PDO_NEWSAMEROW ) {
+				if ( xRow > 0 ) {
+					// End current SAMEROW group, start fresh on next row
+					sameRowBox = NULL;
+					xRow=0;
+					yPos++;
+				}
+			}
 			if ( pd->option & PDO_SAMEROW) {
 				if ( xRow == 0 ) {
-					// start samerow
-					// This code leaves a gap btw col 1 and 2
-					// Proper fix: Create a horiz box to contain controls
-					// See wRadioCreate
+					// Start a new SAMEROW group: pack into a HBox so
+					// that X-Y spacing is independent of other col-1
+					// widgets (e.g. the Pivot radio).
+					sameRowBox = wSameRowCreate(group->win,
+					                            xPos+xCol, yPos);
 				}
 			} else {
 				if ( xRow > 0 ) {
 					// End of SAMEROW
-					// Reset X, adv Y
+					sameRowBox = NULL;
 					xRow=0;
 					yPos++;
 				}
@@ -618,9 +628,10 @@ void FormCreateControls(paramGroup_p group)
 			CreateControl(pd, pd->nameStr,
 			              xPos+xCol+xRow, yPos);
 			if ( pd->option & PDO_SAMEROW) {
-				// Adv X
+				if (sameRowBox) {
+					wSameRowAdd(sameRowBox, pd->control);
+				}
 				xRow++;
-				// add control to horiz box
 			} else {
 				// Adv Y
 				yPos++;

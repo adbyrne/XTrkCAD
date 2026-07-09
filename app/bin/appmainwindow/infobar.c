@@ -122,7 +122,7 @@ void SetInfoBar(void)
 
 void InfoScale(void)
 {
-	char zoomString[sizeof(ZOOMLABEL) + 10 ];
+	char zoomString[sizeof(ZOOMLABEL) + 20 ];
 
 	if (mainD.scale >= 1.0) {
 		snprintf(zoomString, sizeof(zoomString),"%s%.4g:1", ZOOMLABEL,

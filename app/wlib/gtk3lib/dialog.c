@@ -60,6 +60,25 @@ wlibBasicGridAttach(wControl_p parent, GtkWidget *widget, unsigned xPos,
 	gtk_widget_set_halign(widget, GTK_ALIGN_START);
 }
 
+void *wSameRowCreate(wControl_p parent, unsigned x, unsigned y)
+{
+	GtkGrid *grid = GTK_GRID(wlibWidgetFromIdWarn(parent, "layoutgrid"));
+	GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+	gtk_grid_attach(grid, hbox, x, y, 1, 1);
+	gtk_widget_set_halign(hbox, GTK_ALIGN_START);
+	gtk_widget_show(hbox);
+	return hbox;
+}
+
+void wSameRowAdd(void *samerow, wControl_p ctl)
+{
+	GtkWidget *w = ctl->widget;
+	g_object_ref(w);
+	gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(w)), w);
+	gtk_box_pack_start(GTK_BOX(samerow), w, FALSE, FALSE, 0);
+	g_object_unref(w);
+}
+
 /**
  * Restore the window position from the INI file. Setting to 0 position or
  * size is not possible,

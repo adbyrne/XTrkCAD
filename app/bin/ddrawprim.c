@@ -844,6 +844,238 @@ static void NoDrawBitMap(drawCmd_p d, coOrd p, wDrawBitMap_p bm,
 
 /****************************************************************************
  *
+ * BITMAP DRAW FUNCTIONS
+ * Call wBasicXxx directly; used as the bitmapDrawFuncs vtable entries.
+ *
+ */
+
+/* Forward declaration (BDrawString calls BDrawPoly for white-text boxes) */
+static void BDrawPoly(drawCmd_p d, int cnt, coOrd *pts, int *types,
+                      wDrawColor color, wDrawWidth width, drawFill_e eFillOpt);
+
+static void BDrawLine(drawCmd_p d, coOrd p0, coOrd p1, wDrawWidth width,
+                      wDrawColor color)
+{
+	wDrawPix_t x0, y0, x1, y1;
+	BOOL_T in0 = FALSE, in1 = FALSE;
+	coOrd orig, size;
+	int lborder = GetLBorder();
+	int bborder = GetBBorder();
+	if (d == &mapD && !mapVisible) return;
+	if ((d->options & DC_NOCLIP) == 0) {
+		if (d->angle == 0.0) {
+			in0 = (p0.x >= d->orig.x && p0.x <= d->orig.x + d->size.x &&
+			       p0.y >= d->orig.y && p0.y <= d->orig.y + d->size.y);
+			in1 = (p1.x >= d->orig.x && p1.x <= d->orig.x + d->size.x &&
+			       p1.y >= d->orig.y && p1.y <= d->orig.y + d->size.y);
+		}
+		if ((!in0) || (!in1)) {
+			orig = d->orig;
+			size = d->size;
+			if (d->options & DC_TICKS) {
+				orig.x -= lborder / d->dpi * d->scale;
+				orig.y -= bborder / d->dpi * d->scale;
+				size.x += (lborder + RBORDER) / d->dpi * d->scale;
+				size.y += (bborder + TBORDER) / d->dpi * d->scale;
+			}
+			if (!ClipLine(&p0, &p1, orig, d->angle, size)) return;
+		}
+	}
+	d->CoOrd2Pix(d, p0, &x0, &y0);
+	d->CoOrd2Pix(d, p1, &x1, &y1);
+	drawCount++;
+	wDrawLineType_e lineOpt = wDrawLineSolid;
+	unsigned long opt = d->options & DC_NOTSOLIDLINE;
+	if (opt == DC_DASH)            lineOpt = wDrawLineDash;
+	else if (opt == DC_DOT)        lineOpt = wDrawLineDot;
+	else if (opt == DC_DASHDOT)    lineOpt = wDrawLineDashDot;
+	else if (opt == DC_DASHDOTDOT) lineOpt = wDrawLineDashDotDot;
+	else if (opt == DC_CENTER)     lineOpt = wDrawLineCenter;
+	else if (opt == DC_PHANTOM)    lineOpt = wDrawLinePhantom;
+	if (drawEnable)
+		wBasicDrawLine(d->d, x0, y0, x1, y1, width, MINLINEWIDTHBITMAP,
+		               lineOpt, color, DRAWOPTS(d));
+}
+
+static void BDrawArc(drawCmd_p d, coOrd p, DIST_T r, ANGLE_T angle0,
+                     ANGLE_T angle1, BOOL_T drawCenter, wDrawWidth width,
+                     wDrawColor color)
+{
+	wDrawPix_t x, y;
+	ANGLE_T da;
+	coOrd p0, p1;
+	DIST_T rr;
+	int i, cnt;
+
+	if (d == &mapD && !mapVisible) return;
+	rr = (r / d->scale) * d->dpi + 0.5;
+	if (rr > wDrawGetMaxRadius(d->d)) {
+		da = (maxArcSegStraightLen * 180) / (M_PI * rr);
+		cnt = (int)(angle1 / da) + 1;
+		da = angle1 / cnt;
+		coOrd min, max;
+		min = d->orig;
+		max.x = min.x + d->size.x;
+		max.y = min.y + d->size.y;
+		PointOnCircle(&p0, p, r, angle0);
+		for (i = 1; i <= cnt; i++) {
+			angle0 += da;
+			PointOnCircle(&p1, p, r, angle0);
+			if (d->angle == 0.0 &&
+			    ((p0.x >= min.x && p0.x <= max.x && p0.y >= min.y && p0.y <= max.y) ||
+			     (p1.x >= min.x && p1.x <= max.x && p1.y >= min.y && p1.y <= max.y))) {
+				DrawLine(d, p0, p1, width, color);
+			} else {
+				coOrd clip0 = p0, clip1 = p1;
+				if (ClipLine(&clip0, &clip1, d->orig, d->angle, d->size))
+					DrawLine(d, clip0, clip1, width, color);
+			}
+			p0 = p1;
+		}
+		return;
+	}
+	if (d->angle != 0.0 && angle1 < 360.0)
+		angle0 = NormalizeAngle(angle0 - d->angle);
+	d->CoOrd2Pix(d, p, &x, &y);
+	drawCount++;
+	wDrawLineType_e lineOpt = wDrawLineSolid;
+	unsigned long opt = d->options & DC_NOTSOLIDLINE;
+	if (opt == DC_DASH)            lineOpt = wDrawLineDash;
+	else if (opt == DC_DOT)        lineOpt = wDrawLineDot;
+	else if (opt == DC_DASHDOT)    lineOpt = wDrawLineDashDot;
+	else if (opt == DC_DASHDOTDOT) lineOpt = wDrawLineDashDotDot;
+	else if (opt == DC_CENTER)     lineOpt = wDrawLineCenter;
+	else if (opt == DC_PHANTOM)    lineOpt = wDrawLinePhantom;
+	if (drawEnable) {
+		int sizeCenter = (int)(drawCenter ?
+		        ((d->options & DC_PRINT) ? (d->dpi / BASE_DPI) : 1) : 0);
+		wBasicDrawArc(d->d, x, y, (wDrawPix_t)(rr), angle0, angle1,
+		              sizeCenter, width, MINLINEWIDTHBITMAP,
+		              lineOpt, color, DRAWOPTS(d));
+	}
+}
+
+static void BDrawString(drawCmd_p d, coOrd p, ANGLE_T a, char *s, wFont_p fp,
+                        FONTSIZE_T fontSize, wDrawColor color)
+{
+	wDrawPix_t x, y;
+	if (d == &mapD && !mapVisible) return;
+	d->CoOrd2Pix(d, p, &x, &y);
+	if (color == wDrawColorWhite) {
+		wDrawPix_t width, height, descent, ascent;
+		coOrd pos[4], size;
+		double scale = 1.0;
+		wDrawGetTextSize(&width, &height, &descent, &ascent, d->d, s, fp, fontSize);
+		pos[0] = p;
+		size.x = SCALEX(mainD, width) * scale;
+		size.y = SCALEY(mainD, height) * scale;
+		pos[1].x = p.x + size.x; pos[1].y = p.y;
+		pos[2].x = p.x + size.x; pos[2].y = p.y + size.y;
+		pos[3].x = p.x;          pos[3].y = p.y + size.y;
+		Rotate(&pos[1], pos[0], a);
+		Rotate(&pos[2], pos[0], a);
+		Rotate(&pos[3], pos[0], a);
+		BDrawPoly(d, 4, pos, NULL, color, 0, DRAW_FILL);
+	} else {
+		fontSize /= d->scale;
+		wBasicDrawString(d->d, x, y, d->angle - a, s, fp, fontSize,
+		                 MINLINEWIDTHBITMAP, MINLINEWIDTHBITMAP,
+		                 color, DRAWOPTS(d));
+	}
+}
+
+static void BDrawPoly(drawCmd_p d, int cnt, coOrd *pts, int *types,
+                      wDrawColor color, wDrawWidth width, drawFill_e eFillOpt)
+{
+	typedef wDrawPix_t bPos2[2];
+	static dynArr_t bwpts_da;
+	static dynArr_t bwpts_type_da;
+	int inx, fill = 0, open = 0;
+	wDrawPix_t x, y;
+	DYNARR_SET(bPos2, bwpts_da, cnt * 2);
+	DYNARR_SET(int, bwpts_type_da, cnt);
+#define bwpts(N) DYNARR_N(bPos2, bwpts_da, N)
+#define bwtype(N) DYNARR_N(wPolyLine_e, bwpts_type_da, N)
+	for (inx = 0; inx < cnt; inx++) {
+		d->CoOrd2Pix(d, pts[inx], &x, &y);
+		bwpts(inx)[0] = x;
+		bwpts(inx)[1] = y;
+		bwtype(inx) = types ? (wPolyLine_e)types[inx] : 0;
+	}
+	wDrawOpts drawOpts = DRAWOPTS(d);
+	switch (eFillOpt) {
+	case DRAW_OPEN:        open = 1; break;
+	case DRAW_CLOSED:      break;
+	case DRAW_FILL:        fill = 1; break;
+	case DRAW_TRANSPARENT: fill = 1; drawOpts |= wDrawOptTransparent; break;
+	default: CHECK(FALSE);
+	}
+	wBasicDrawFillPolygon(d->d, &bwpts(0), &bwtype(0), cnt, color, drawOpts,
+	                      fill, open);
+}
+
+static void BDrawFillCircle(drawCmd_p d, coOrd p, DIST_T r, wDrawColor color)
+{
+	wDrawPix_t x, y;
+	DIST_T rr;
+	int lborder = GetLBorder();
+	int bborder = GetBBorder();
+
+	if (d == &mapD && !mapVisible) return;
+	rr = (r / d->scale) * d->dpi + 0.5;
+	if (rr > wDrawGetMaxRadius(d->d)) return;
+	d->CoOrd2Pix(d, p, &x, &y);
+	wWinPix_t w, h;
+	wDrawGetSize(d->d, &w, &h);
+	if (d->options & DC_TICKS) {
+		if (x + rr < lborder || x - rr > w - RBORDER ||
+		    y + rr < bborder || y - rr > h - TBORDER) return;
+	} else {
+		if (x + rr < 0 || x - rr > w || y + rr < 0 || y - rr > h) return;
+	}
+	drawCount++;
+	if (drawEnable)
+		wBasicDrawFillCircle(d->d, x, y, (wDrawPix_t)(rr), color, DRAWOPTS(d));
+}
+
+static void BDrawRectangle(drawCmd_p d, coOrd orig, coOrd size,
+                            wDrawColor color, drawFill_e eFillOpt)
+{
+	wDrawPix_t x, y, w, h;
+
+	if (d == &mapD && !mapVisible) return;
+	d->CoOrd2Pix(d, orig, &x, &y);
+	w = (wDrawPix_t)((size.x / d->scale) * d->dpi + 0.5);
+	h = (wDrawPix_t)((size.y / d->scale) * d->dpi + 0.5);
+	drawCount++;
+	if (drawEnable) {
+		wDrawOpts opts = DRAWOPTS(d);
+		coOrd p1, p2;
+		switch (eFillOpt) {
+		case DRAW_CLOSED:
+			p1.x = orig.x; p1.y = orig.y + size.y;
+			DrawLine(d, orig, p1, 0, color);
+			p2.x = orig.x + size.x; p2.y = p1.y;
+			DrawLine(d, p1, p2, 0, color);
+			p1.x = p2.x; p1.y = orig.y;
+			DrawLine(d, p2, p1, 0, color);
+			DrawLine(d, p1, orig, 0, color);
+			break;
+		case DRAW_TRANSPARENT:
+			opts |= wDrawOptTransparent;
+		/* Fallthru */
+		case DRAW_FILL:
+			if (d->options & DC_ROUND) { x = round(x); y = round(y); }
+			wBasicDrawFillRectangle(d->d, x, y, w, h, color, opts);
+			break;
+		default:
+			CHECK(FALSE);
+		}
+	}
+}
+
+/****************************************************************************
+ *
  * DRAW FUNCTION TABLES AND COMMAND DESCRIPTORS
  *
  */
@@ -857,6 +1089,11 @@ EXPORT drawFuncs_t printDrawFuncs = {DDrawLine,     DDrawArc,  DDrawString,
                                      NoDrawBitMap,  DDrawPoly, DDrawFillCircle,
                                      DDrawRectangle
                                     };
+
+EXPORT drawFuncs_t bitmapDrawFuncs = {BDrawLine,     BDrawArc,  BDrawString,
+                                      NoDrawBitMap,  BDrawPoly, BDrawFillCircle,
+                                      BDrawRectangle
+                                     };
 
 EXPORT drawFuncs_t tempSegDrawFuncs = {
 	TempSegLine, TempSegArc,        TempSegString,   NoDrawBitMap,

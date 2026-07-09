@@ -32,9 +32,6 @@
 
 #include "gtkint.h"
 
-//static double scale_adjust = 1.0;
-//static double scale_text = 1.0;
-
 static int iBasicLog = 1;
 
 /**
@@ -134,14 +131,16 @@ BasicDrawSetLineType (cairo_t *cr, double lineWidth, double minLineWidth,
  */
 
 void
-wlibBasicClear (struct draw * bd)
+wBasicClear (wControl_p bd)
 {
+	struct draw *draw = CONTROL_GET_ATTRIBUTES_PTR(bd, draw);
+
 	if (iBasicLog >= 1) {
-		printf ("wlibBasicClear %d+%d\n", bd->width, bd->height);
+		printf ("wBasicClear %d+%d\n", draw->width, draw->height);
 	}
 
-	cairo_set_source_rgb(bd->cr, 255, 255, 255);
-	cairo_paint(bd->cr);
+	cairo_set_source_rgb(draw->cr, 255, 255, 255);
+	cairo_paint(draw->cr);
 }
 
 /**
@@ -152,28 +151,27 @@ wlibBasicClear (struct draw * bd)
  * \param x1
  * \param y1
  * \param width
+ * \param minWidth
  * \param lineType
  * \param color
  * \param opts
  */
 
 void
-wlibBasicDrawLine (struct draw * bd, wDrawPix_t x0, wDrawPix_t y0,
-                   wDrawPix_t x1,
-                   wDrawPix_t y1, double width, double minWidth,
-                   wDrawLineType_e lineType, wDrawColor color, wDrawOpts opts)
+wBasicDrawLine (wControl_p bd, wDrawPix_t x0, wDrawPix_t y0,
+                wDrawPix_t x1, wDrawPix_t y1,
+                double width, double minWidth,
+                wDrawLineType_e lineType, wDrawColor color, wDrawOpts opts)
 {
-	BasicDrawSetColor (bd->cr, color);
-	BasicDrawSetLineType (bd->cr,
-	                      width,
-	                      minWidth,
-	                      lineType,
-	                      opts,
-	                      bd->scale_adjust);
+	struct draw *draw = CONTROL_GET_ATTRIBUTES_PTR(bd, draw);
 
-	cairo_move_to (bd->cr, x0, y0);
-	cairo_line_to (bd->cr, x1, y1);
-	cairo_stroke (bd->cr);
+	BasicDrawSetColor (draw->cr, color);
+	BasicDrawSetLineType (draw->cr, width, minWidth, lineType, opts,
+	                      draw->scale_adjust);
+
+	cairo_move_to (draw->cr, x0, y0);
+	cairo_line_to (draw->cr, x1, y1);
+	cairo_stroke (draw->cr);
 }
 
 /**
@@ -191,18 +189,16 @@ wlibBasicDrawLine (struct draw * bd, wDrawPix_t x0, wDrawPix_t y0,
  */
 
 void
-wlibBasicDrawArc (struct draw *bd, wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r,
-                  double angle0, double angle1, wBool_t drawCenter,
-                  double width, double minWidth, wDrawLineType_e lineType,
-                  wDrawColor color, wDrawOpts opts)
+wBasicDrawArc (wControl_p bd, wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r,
+               double angle0, double angle1, wBool_t drawCenter,
+               double width, double minWidth, wDrawLineType_e lineType,
+               wDrawColor color, wDrawOpts opts)
 {
-	BasicDrawSetColor (bd->cr, color);
-	BasicDrawSetLineType (bd->cr,
-	                      width,
-	                      minWidth,
-	                      lineType,
-	                      opts,
-	                      bd->scale_adjust);
+	struct draw *draw = CONTROL_GET_ATTRIBUTES_PTR(bd, draw);
+
+	BasicDrawSetColor (draw->cr, color);
+	BasicDrawSetLineType (draw->cr, width, minWidth, lineType, opts,
+	                      draw->scale_adjust);
 
 	if (angle1 >= 360.0) {
 		angle1 = 359.999;
@@ -229,17 +225,18 @@ wlibBasicDrawArc (struct draw *bd, wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r,
 	}
 
 	// draw the curve
-	cairo_arc (bd->cr, x0, y0, r, angle1 * M_PI / 180.0, angle0 * M_PI / 180.0);
+	cairo_arc (draw->cr, x0, y0, r,
+	           angle1 * M_PI / 180.0, angle0 * M_PI / 180.0);
 
 	if (drawCenter) {
 		// draw crosshair for center of curve
-		cairo_move_to (bd->cr, x0 - CENTERMARK_LENGTH / 2, y0);
-		cairo_line_to (bd->cr, x0 + CENTERMARK_LENGTH / 2, y0);
-		cairo_move_to (bd->cr, x0, y0 - CENTERMARK_LENGTH / 2);
-		cairo_line_to (bd->cr, x0, y0 + CENTERMARK_LENGTH / 2);
+		cairo_move_to (draw->cr, x0 - CENTERMARK_LENGTH / 2, y0);
+		cairo_line_to (draw->cr, x0 + CENTERMARK_LENGTH / 2, y0);
+		cairo_move_to (draw->cr, x0, y0 - CENTERMARK_LENGTH / 2);
+		cairo_line_to (draw->cr, x0, y0 + CENTERMARK_LENGTH / 2);
 	}
 
-	cairo_stroke (bd->cr);
+	cairo_stroke (draw->cr);
 }
 
 static PangoLayout *
@@ -290,22 +287,22 @@ CreateLayoutForText(struct draw *bd, cairo_t *cr, char *text, wFont_p font,
  * \return
  */
 
-void
-wlibBasicDrawString (struct draw *bd, wDrawPix_t x, wDrawPix_t y, double a,
-                     char *s,
-                     wFont_p fp, double fs, double width, double minWidth,
-                     wDrawColor color, wDrawOpts opts)
+ void
+wBasicDrawString (wControl_p bd, wDrawPix_t x, wDrawPix_t y, double a,
+                  char *s,
+                  wFont_p fp, double fs, double width, double minWidth,
+                  wDrawColor color, wDrawOpts opts)
 {
+	struct draw *draw = CONTROL_GET_ATTRIBUTES_PTR(bd, draw);
 	double x0 = (double) x, y0 = (double) y;
 	int baseline;
 
 	cairo_t *cr;
 	cairo_matrix_t matrix;
 	PangoLayout* layout;
+	cr = draw->cr;
 
-	cr = bd->cr;
-
-	layout = CreateLayoutForText(bd, cr, s, fp, fs);
+	layout = CreateLayoutForText(draw, cr, s, fp, fs);
 	baseline = pango_layout_get_baseline(layout) / PANGO_SCALE;
 
 	// get the current transformation matrix and transform the starting
@@ -319,8 +316,12 @@ wlibBasicDrawString (struct draw *bd, wDrawPix_t x, wDrawPix_t y, double a,
 
 	cairo_translate (cr, x0, y0);
 	cairo_rotate (cr, -a * M_PI / 180.0);
+	/* Order matters: the offset translate must come BEFORE move_to(0,0), so the
+	 * layout's origin is set in the already-offset frame. Cairo bakes the CTM
+	 * into path points at the time they're recorded, so a translate issued
+	 * after move_to has no effect on that already-recorded point. */
+	cairo_translate (cr, 0, -baseline);
 	cairo_move_to (cr, 0, 0);
-	cairo_translate(cr, 0, -baseline);
 	pango_cairo_update_layout (cr, layout);
 
 	// set the color
@@ -332,12 +333,8 @@ wlibBasicDrawString (struct draw *bd, wDrawPix_t x, wDrawPix_t y, double a,
 	} else {
 		PangoLayoutLine * line;
 		line = pango_layout_get_line_readonly (layout, 0);
-		BasicDrawSetLineType (cr,
-		                      width,
-		                      minWidth,
-		                      wDrawLineSolid,
-		                      0,
-		                      bd->scale_adjust);
+		BasicDrawSetLineType (cr, width, minWidth, wDrawLineSolid, 0,
+		                      draw->scale_adjust);
 		pango_cairo_layout_line_path (cr, line);
 	}
 
@@ -362,11 +359,12 @@ wlibBasicDrawString (struct draw *bd, wDrawPix_t x, wDrawPix_t y, double a,
  */
 
 void
-wlibBasicDrawFillRectangle (struct draw * bd, wDrawPix_t x0, wDrawPix_t y0,
-                            wDrawPix_t x1, wDrawPix_t y1, wDrawColor color,
-                            wDrawOpts opts)
+wBasicDrawFillRectangle (wControl_p bd, wDrawPix_t x0, wDrawPix_t y0,
+                         wDrawPix_t x1, wDrawPix_t y1, wDrawColor color,
+                         wDrawOpts opts)
 {
-	cairo_t *cr = bd->cr;
+	struct draw *draw = CONTROL_GET_ATTRIBUTES_PTR(bd, draw);
+	cairo_t *cr = draw->cr;
 	double width = x0 - x1;
 	double height = y0 - y1;
 
@@ -390,16 +388,14 @@ wlibBasicDrawFillRectangle (struct draw * bd, wDrawPix_t x0, wDrawPix_t y0,
  */
 
 void
-wlibBasicDrawFillPolygon (struct draw* bd, wDrawPix_t p[][2],
-                          wPolyLine_e type[],
-                          int cnt, wDrawColor color, wDrawOpts opts, int fill,
-                          int open)
+wBasicDrawFillPolygon (wControl_p bd, wDrawPix_t p[][2],
+                       wPolyLine_e type[],
+                       int cnt, wDrawColor color, wDrawOpts opts, int fill,
+                       int open)
 {
-	//struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
-	//g_assert(drawingArea->type == B_DRAW);
-
+	struct draw *draw = CONTROL_GET_ATTRIBUTES_PTR(bd, draw);
 	int inx;
-	cairo_t *cr = bd->cr;
+	cairo_t *cr = draw->cr;
 
 	BasicDrawSetColor (cr, color);
 
@@ -511,17 +507,14 @@ wlibBasicDrawFillPolygon (struct draw* bd, wDrawPix_t p[][2],
  */
 
 void
-wlibBasicDrawFillCircle (struct draw *bd, wDrawPix_t x0, wDrawPix_t y0,
-                         wDrawPix_t r,
-                         wDrawColor color, wDrawOpts opts)
+wBasicDrawFillCircle (wControl_p bd, wDrawPix_t x0, wDrawPix_t y0,
+                      wDrawPix_t r, wDrawColor color, wDrawOpts opts)
 {
-	//struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
-	//g_assert(drawingArea->type == B_DRAW);
+	struct draw *draw = CONTROL_GET_ATTRIBUTES_PTR(bd, draw);
 
-	BasicDrawSetColor (bd->cr, color);
+	BasicDrawSetColor (draw->cr, color);
 
-	cairo_arc (bd->cr, x0, y0, r, 0.0, 2 * M_PI);
+	cairo_arc (draw->cr, x0, y0, r, 0.0, 2 * M_PI);
 
-	cairo_fill (bd->cr);
+	cairo_fill (draw->cr);
 }
-

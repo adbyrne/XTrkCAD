@@ -96,10 +96,7 @@ void FormLoadSingleControl(
 		break;
 	case PD_FLOAT:
 		LoadFloatEntry(p, *(FLOAT_T*)p->valueP);
-		// TODO LoadSingleControl valid check
-		if (FormFloatRangeCheck(p, *(FLOAT_T*)p->valueP)) {
-			p->oldD.f = *(FLOAT_T*)p->valueP;
-		}
+		p->oldD.f = *(FLOAT_T*)p->valueP;
 		break;
 	case PD_STRING:
 		if (p->oldD.s) {
