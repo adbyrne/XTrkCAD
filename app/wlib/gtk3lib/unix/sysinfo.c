@@ -103,7 +103,7 @@ wGetProfileFilename()
 {
 	gchar* profile;
 
-	profile = g_strdup_printf("%s/%s.rc",  wGetAppWorkDir(), wConfigName);
+	profile = g_strdup_printf("%s/%s.ini",  wGetAppWorkDir(), wConfigName);
 	buffer = g_strdup(profile);
 
 	g_free(profile);

@@ -635,7 +635,6 @@ wWinPix_t wControlGetHeight(wControl_p);
 wWinPix_t wControlGetPosX(wControl_p);
 wWinPix_t wControlGetPosY(wControl_p);
 void wControlGetPos(wControl_p, wWinPix_t *x, wWinPix_t *y);
-void wControlSetPos(wControl_p, wWinPix_t, wWinPix_t);
 void wControlSetFocus(wControl_p);
 void wControlActive(wControl_p control, wBool_t active);
 wBool_t wControlGetActive(wControl_p control);
@@ -801,6 +800,9 @@ typedef int wDrawOpts;
 #define DIRECTCAIRO  (1)
 #define EXPORTBITMAP DIRECTCAIRO
 
+#define MINLINEWIDTHBITMAP (1.0)
+#define MINLINEWIDTHPRINT  (0.09)
+
 typedef enum {
 	wDrawLineSolid,
 	wDrawLineDash,
@@ -852,6 +854,30 @@ void wDrawFilledCircle(wControl_p bd, wDrawPix_t x0, wDrawPix_t y0,
 void wDrawGetTextSize(wDrawPix_t *w, wDrawPix_t *h, wDrawPix_t *d,
                       wDrawPix_t *a, wControl_p drawingArea, const char *s,
                       wFont_p fp, wFontSize_t fs);
+
+/* Basic (non-screen) drawing — used by bitmap and print draw function tables */
+void wBasicClear(wControl_p bd);
+void wBasicDrawLine(wControl_p bd, wDrawPix_t x0, wDrawPix_t y0,
+                    wDrawPix_t x1, wDrawPix_t y1,
+                    double width, double minWidth,
+                    wDrawLineType_e lineType, wDrawColor color, wDrawOpts opts);
+void wBasicDrawArc(wControl_p bd, wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r,
+                   double angle0, double angle1, wBool_t drawCenter,
+                   double width, double minWidth,
+                   wDrawLineType_e lineType, wDrawColor color, wDrawOpts opts);
+void wBasicDrawString(wControl_p bd, wDrawPix_t x, wDrawPix_t y, double a,
+                      char *s, wFont_p fp, double fs,
+                      double width, double minWidth,
+                      wDrawColor color, wDrawOpts opts);
+void wBasicDrawFillRectangle(wControl_p bd, wDrawPix_t x0, wDrawPix_t y0,
+                              wDrawPix_t x1, wDrawPix_t y1,
+                              wDrawColor color, wDrawOpts opts);
+void wBasicDrawFillPolygon(wControl_p bd, wDrawPix_t p[][2],
+                            wPolyLine_e type[], int cnt,
+                            wDrawColor color, wDrawOpts opts, int fill,
+                            int open);
+void wBasicDrawFillCircle(wControl_p bd, wDrawPix_t x0, wDrawPix_t y0,
+                           wDrawPix_t r, wDrawColor color, wDrawOpts opts);
 
 void wDrawClear(wControl_p bd);
 
@@ -1183,6 +1209,12 @@ const char *wTagGetLabel(wControl_p tagControl);
 wControl_p wTagCreate(wControl_p parent, const char *helpStr,
                       const char *labelStr, wButtonCallBack_p action,
                       void *context);
+
+/* SAMEROW horizontal group: pack controls side-by-side inside a GtkHBox
+ * placed at (x,y) in parent's layout grid.  Returns an opaque handle.
+ * wSameRowAdd() moves ctl from wherever it was attached into the box. */
+void *wSameRowCreate(wControl_p parent, unsigned x, unsigned y);
+void  wSameRowAdd(void *samerow, wControl_p ctl);
 
 /*-------------------------------------------------------------------------------
  * User Preferences

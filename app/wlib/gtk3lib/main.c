@@ -110,7 +110,6 @@ startup(GtkApplication *app)
 	// for (int i = 0; children[i] != NULL; i++) {
 	// 	printf("%s\n", children[i]);
 	// }
-
 	// g_strfreev(children);
 
 	// children = g_resource_enumerate_children(symbols_get_resource(), "/", G_RESOURCE_LOOKUP_FLAGS_NONE, &error);
@@ -122,6 +121,11 @@ startup(GtkApplication *app)
 	//g_strfreev(children);
 
 	// load css
+
+	// system dialogs should not show buttons in titlebar for consistency with the custom dialogs
+	GtkSettings *settings = gtk_settings_get_default();
+	g_object_set(settings, "gtk-dialogs-use-header", FALSE, NULL);
+
 	LoadStyles();
 
 	wMain(myargc, myargv );

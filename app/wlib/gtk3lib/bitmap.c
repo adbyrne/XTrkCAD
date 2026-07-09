@@ -237,7 +237,7 @@ wBitmapCreate(wWinPix_t w, wWinPix_t h, int arg)
 		cairo_translate(draw->cr, 0, h);
 		cairo_scale(draw->cr, 1.0, -1.0);
 
-		wlibBasicClear(draw);
+		wBasicClear(bd);
 	} else {
 		//bd->pixbuf = gdk_pixbuf_get_from_window(gtk_widget_get_window(GTK_WIDGET(
 		//	gtkMainW->gtkwin)), 0, 0, w, h);
