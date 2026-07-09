@@ -1411,6 +1411,19 @@ static int StartPlayback(int cnt, char **pathName, void *context)
 	return TRUE;
 }
 
+
+static void DemoFinish(paramGroup_p demoPGp)
+{
+	if ( inPlayback ) {
+		SetInPlayback(FALSE);
+	} else {
+		// We're waiting for the user to press 'Step'
+		PlaybackQuit();
+	}
+	SetUserLocale();
+}
+
+
 static void DoDemoButton(void *command)
 {
 	switch (VP2L(command)) {
@@ -1444,20 +1457,17 @@ static void DoDemoButton(void *command)
 			Playback();
 		}
 		break;
+
 	case 2:
 		/* pause */
 		pauseDemo = TRUE;
 		break;
+
 	case 3:
 		/* quit */
-		if (inPlayback) {
-			// We will exit the loop in Playback() after the current command
-			SetInPlayback(FALSE);
-		} else {
-			// We're waiting for the user to press 'Step'
-			PlaybackQuit();
-		}
+		DemoFinish( &demoPG );
 		break;
+
 	default:;
 	}
 }
@@ -1468,13 +1478,6 @@ static void DemoDlgUpdate(paramGroup_cp pg, int inx, void *valueP)
 		return;
 	}
 	SetPlaybackSpeed((wIndex_t) * (long *)valueP);
-}
-
-static void DemoFinish(paramGroup_p demoPG)
-{
-	SetInPlayback(FALSE);
-	PlaybackQuit();
-	SetUserLocale();
 }
 
 static void CreateDemoW(void)
