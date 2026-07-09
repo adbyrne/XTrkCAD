@@ -554,6 +554,9 @@ EXPORT void DrawBoxedString(int style, drawCmd_p d, coOrd pos, char *text,
 	}
 	style &= ~BOX_POS_LEFT_CENTER;
 
+	if(style&BOX_POS_BOTTOM_LEFT )
+		p0.y += descent;
+
 	if ((style & BOX_POS_BOTTOM_LEFT) == 0) {
 		if ((style & BOX_POS_BOTTOM_RIGHT) != 0) {
 			p0.x -= size.x - 1;

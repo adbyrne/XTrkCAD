@@ -248,7 +248,7 @@ static void DrawRulerWithBackground(drawCmd_p d, coOrd pos0, coOrd pos1,
 	 */
 #define LABEL_POS_VERTICAL(p0, tickSide, boxStyle)                             \
   do {                                                                          \
-    Translate(&(p0), (p0), aa, (lborder - 24) * d->scale / mainD.dpi);         \
+    Translate(&(p0), (p0), aa, (lborder - 24) * mainD.scale / mainD.dpi);      \
     Translate(&(p0), (p0), a, rulerFontSize / 72.0 * d->scale);                \
     (boxStyle) |= ((tickSide) ? BOX_POS_LEFT_CENTER : BOX_POS_BOTTOM_LEFT);    \
   } while (0)
@@ -256,8 +256,8 @@ static void DrawRulerWithBackground(drawCmd_p d, coOrd pos0, coOrd pos1,
 #define LABEL_POS_HORIZONTAL(p0, tickLen, boxStyle)                            \
   do {                                                                          \
     Translate(&(p0), (p0), aa,                                                 \
-              ((bborder + (tickLen) - 6) / 2.0) * d->scale / mainD.dpi);       \
-    Translate(&(p0), (p0), a, ((double)charWidth * 1.5) * d->scale / mainD.dpi); \
+              ((bborder + (tickLen) - 6) / 2.0) * mainD.scale / mainD.dpi);    \
+    Translate(&(p0), (p0), a, ((double)charWidth * 1.5) * mainD.scale / mainD.dpi); \
     (boxStyle) |= BOX_POS_TOP_CENTER;                                          \
   } while (0)
 
@@ -292,7 +292,7 @@ static void DrawRulerWithBackground(drawCmd_p d, coOrd pos0, coOrd pos1,
 			     mm <= mm1; mm += power) {
 				if (power == 1000 || mm % (power * 10) != 0) {
 					Translate(&p0, orig, a, mm / 25.4);
-					Translate(&p1, p0, aa, len * d->scale / mainD.dpi);
+					Translate(&p1, p0, aa, len * mainD.scale / mainD.dpi);
 					DrawLine(d, p0, p1, 0, color);
 					if (!number || (d->scale > 40 && mm % skip != 0.0)) {
 						continue;
@@ -311,6 +311,8 @@ static void DrawRulerWithBackground(drawCmd_p d, coOrd pos0, coOrd pos1,
 						}
 						if (a == 0.0) {
 							LABEL_POS_VERTICAL(p0, tickSide, boxStyle);
+							if(boxStyle&BOX_POS_BOTTOM_LEFT)
+								p0.y -= 1.5*(rulerFontSize / 72.0 * d->scale);
 						} else {
 							LABEL_POS_HORIZONTAL(p0, len, boxStyle);
 						}
@@ -382,7 +384,7 @@ static void DrawRulerWithBackground(drawCmd_p d, coOrd pos0, coOrd pos1,
 				}
 				if (!skip) {
 					Translate(&p0, orig, a, inch + fraction / 16.0);
-					Translate(&p1, p0, aa, lengths[fraction] * d->scale / mainD.dpi);
+					Translate(&p1, p0, aa, lengths[fraction] * mainD.scale / mainD.dpi);
 					DrawLine(d, p0, p1, 0, color);
 				}
 				if (fraction == 0) {
@@ -406,6 +408,8 @@ static void DrawRulerWithBackground(drawCmd_p d, coOrd pos0, coOrd pos1,
 							Translate(&p0, orig, a, inch);
 							if (a == 0.0) {
 								LABEL_POS_VERTICAL(p0, tickSide, boxStyle);
+								if (boxStyle & BOX_POS_BOTTOM_LEFT)
+        							p0.y -= 1.5*(rulerFontSize / 72.0 * d->scale);
 							} else {
 								LABEL_POS_HORIZONTAL(p0, majorLength, boxStyle);
 							}

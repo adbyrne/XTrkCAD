@@ -337,34 +337,49 @@ wDrawColor GetLayerColor(unsigned int layer)
 
 static void RedrawLayer(unsigned int l, BOOL_T draw) { DoRedraw(); }
 
+EXPORT void ApplyLayerVisibilityChange(unsigned int layer)
+{
+	if (!IsLayerValid(layer)) {
+		return;
+	}
+
+	/* propagate visibility to linked layers (model only, no buttons) */
+	for (int i = 0; i < layers[layer].layerLinkList.cnt; i++) {
+		/* layerLinkList values are 1-based layer indices */
+		int l = DYNARR_N(int, layers[layer].layerLinkList, i) - 1;
+		if (l != (int)curLayer && l >= 0 && l < NUM_LAYERS) {
+			layers[l].visible = layers[layer].visible;
+		}
+	}
+
+	RedrawLayer(layer, FALSE);
+}
+
 EXPORT void FlipLayer(void *layerVP)
 {
 	unsigned int layer = (unsigned int)VP2L(layerVP);
-	wBool_t visible;
 
 	if (!IsLayerValid(layer)) {
 		return;
 	}
 
 	if (layer == curLayer && layers[layer].visible) {
-		if (!layers[layer].button_off) {
+		if (!layers[layer].button_off && layer < NUM_BUTTONS && layer_btns[layer]) {
 			wButtonSetBusy(layer_btns[layer], layers[layer].visible);
 		}
 		NoticeMessage(MSG_LAYER_HIDE, _("ok"), NULL);
 		return;
 	}
 
-	RedrawLayer(layer, FALSE);
-	visible = !layers[layer].visible;
-	layers[layer].visible = visible;
+	layers[layer].visible = !layers[layer].visible;
+	ApplyLayerVisibilityChange(layer);   /* propagates model + redraws */
 
-	/* Set visible on related layers other than current */
+	/* update buttons for linked layers */
 	for (int i = 0; i < layers[layer].layerLinkList.cnt; i++) {
-		// .layerLinkList values are 1-based layer indices
+		/* layerLinkList values are 1-based layer indices */
 		int l = DYNARR_N(int, layers[layer].layerLinkList, i) - 1;
-		if ((l != curLayer) && (l >= 0) && (l < NUM_LAYERS)) {
-			layers[l].visible = layers[layer].visible;
-			if (!layers[l].button_off) {
+		if (l != (int)curLayer && l >= 0 && l < NUM_LAYERS) {
+			if (!layers[l].button_off && l < NUM_BUTTONS && layer_btns[l]) {
 				wButtonSetBusy(layer_btns[l], layers[l].visible);
 			}
 		}
@@ -414,11 +429,11 @@ void SetCurrLayer(wIndex_t inx, const char *name, wIndex_t op,
 
 	/* Set visible on related layers other than current */
 	for (int i = 0; i < layers[curLayer].layerLinkList.cnt; i++) {
-		// .layerLinkList values are 1-based layer indices
+		/* layerLinkList values are 1-based layer indices */
 		int l = DYNARR_N(int, layers[curLayer].layerLinkList, i) - 1;
-		if (l != curLayer && l >= 0 && l < NUM_LAYERS) {
+		if (l != (int)curLayer && l >= 0 && l < NUM_LAYERS) {
 			layers[l].visible = layers[curLayer].visible;
-			if (!layers[l].button_off) {
+			if (!layers[l].button_off && l < NUM_BUTTONS && layer_btns[l]) {
 				wButtonSetBusy(layer_btns[l], layers[l].visible);
 			}
 		}
@@ -447,7 +462,7 @@ static void PlaybackCurrLayer(char *line)
 static void SetLayerColor(unsigned int inx, wDrawColor color)
 {
 	if (color != layers[inx].color) {
-		if (inx < NUM_BUTTONS) {
+		if (inx < NUM_BUTTONS && show_layer_bmps[inx] && layer_btns[inx]) {
 			wIconSetColor(show_layer_bmps[inx], color);
 			wButtonSetIcon(layer_btns[inx], (char *)show_layer_bmps[inx]);
 		}
@@ -460,7 +475,7 @@ static void SetLayerColor(unsigned int inx, wDrawColor color)
 static void SetLayerHideButton(unsigned int inx, wBool_t hide)
 {
 	if (hide != layers[inx].button_off) {
-		if (inx < NUM_BUTTONS) {
+		if (inx < NUM_BUTTONS && layer_btns[inx]) {
 			wControlShow((wControl_p)layer_btns[inx], !hide);
 			if (!hide) {
 				wButtonSetBusy(layer_btns[inx], layers[inx].visible);
@@ -1076,7 +1091,7 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
 
 	/* finally show the layer buttons with balloon text */
 	for (inx = 0; inx < NUM_BUTTONS; inx++) {
-		if (!layers[inx].button_off) {
+		if (!layers[inx].button_off && layer_btns[inx]) {
 			wButtonSetBusy(layer_btns[inx], layers[inx].visible != 0);
 			wTooltipSetText((wControl_p)layer_btns[inx],
 			                (layers[inx].name[0] != '\0' ? layers[inx].name
@@ -1526,7 +1541,8 @@ static void LayerUpdate(void)
 	wListSetValues(setLayerL, layerSelected, layerFormattedName, NULL, NULL);
 	free(layerFormattedName);
 
-	if (layerSelected < NUM_BUTTONS && !layers[(int)layerSelected].button_off) {
+	if (layerSelected < NUM_BUTTONS && !layers[(int)layerSelected].button_off
+	        && layer_btns[(int)layerSelected]) {
 		if (strlen(layers[(int)layerSelected].name) > 0) {
 			wTooltipSetText((wControl_p)layer_btns[(int)layerSelected],
 			                layers[(int)layerSelected].name);
@@ -1544,7 +1560,7 @@ static void LayerUpdate(void)
 
 	if (layerSelected < NUM_BUTTONS &&
 	    layers[(int)layerSelected].visible != (BOOL_T)layerVisible &&
-	    !layers[(int)layerSelected].button_off) {
+	    !layers[(int)layerSelected].button_off && layer_btns[(int)layerSelected]) {
 		wButtonSetBusy(layer_btns[(int)layerSelected], layerVisible);
 	}
 
@@ -1684,15 +1700,19 @@ void ResetLayers(void)
 		DYNARR_RESET(int, layers[inx].layerLinkList);
 		SetLayerColor(inx, layerColorTab[inx % COUNT(layerColorTab)]);
 
-		if (inx < NUM_BUTTONS) {
+		if (inx < NUM_BUTTONS && layer_btns[inx]) {
+			wControlShow((wControl_p)layer_btns[inx], inx < layerCount);
+			wButtonSetBusy(layer_btns[inx], TRUE);
 			wButtonSetIcon(layer_btns[inx], show_layer_bmps[inx]);
 		}
 	}
 
-	wTooltipSetText((wControl_p)layer_btns[0], _("Main"));
+	if (layer_btns[0])
+		wTooltipSetText((wControl_p)layer_btns[0], _("Main"));
 
 	for (inx = 1; inx < NUM_BUTTONS; inx++) {
-		wTooltipSetText((wControl_p)layer_btns[inx], _("Show/Hide Layer"));
+		if (layer_btns[inx])
+			wTooltipSetText((wControl_p)layer_btns[inx], _("Show/Hide Layer"));
 	}
 
 	curLayer = -1;
@@ -1767,7 +1787,8 @@ void RestoreLayers(void)
 			label = layers[inx].name;
 		}
 
-		wTooltipSetText((wControl_p)layer_btns[inx], label);
+		if (layer_btns[inx])
+			wTooltipSetText((wControl_p)layer_btns[inx], label);
 	}
 
 	if (layerL) {
@@ -1998,7 +2019,7 @@ BOOL_T ReadLayers(char *line)
 	colorTrack = (ColorFlags & 1) ? 1 : 0; // Make sure globals are set
 	colorDraw = (ColorFlags & 2) ? 1 : 0;
 
-	if (inx < NUM_BUTTONS && !layers[inx].button_off) {
+	if (inx < NUM_BUTTONS && !layers[inx].button_off && layer_btns[inx]) {
 		if (strlen(name) > 0) {
 			wTooltipSet((wControl_p)layer_btns[(int)inx], NULL, layers[inx].name);
 		}

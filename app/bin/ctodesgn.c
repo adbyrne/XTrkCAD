@@ -2569,27 +2569,137 @@ static void CopyNonTracks( turnoutInfo_t * to )
 }
 
 
+static drawCmd_t newTurnout_d = {
+	NULL,
+	&printDrawFuncs,
+	DC_PRINT,
+	1.0,
+	0.0,
+	{ 0.0, 0.0 },
+	{ 0.0, 0.0 },
+	Pix2CoOrd, CoOrd2Pix
+};
+
+static coOrd newTurnPrintOrig;
+static wFont_p newTurnPrintFont;
+static int newTurnPrintII, newTurnPrintJJ;
+
+#define NEWTURN_FONT_SCALE (0.6)			/**< all NewTurnPrint font sizes are 60% of their original value */
+#define NEWTURN_TITLE_FONTSIZE (40 * NEWTURN_FONT_SCALE)
+#define NEWTURN_SUBTITLE_FONTSIZE (20 * NEWTURN_FONT_SCALE)
+#define NEWTURN_DATA_FONTSIZE (16 * NEWTURN_FONT_SCALE)
+
+/**
+ * Per-page render callback invoked by the print backend (print.c) from the
+ * GtkPrintOperation "draw-page" signal, once the page cairo context and
+ * transform have already been established. Maps the linear page index back
+ * to its (i,j) grid cell and renders it.
+ *
+ * \param pageNr IN zero-based page index
+ * \param data IN unused
+ * \return TRUE to continue, FALSE to abort the job at the end of this page
+ */
+static wBool_t RenderNewTurnPage( int pageNr, void * data )
+{
+	coOrd pos, p0, p1;
+	EPINX_T ep;
+	coOrd strPos;
+	int i, j;
+
+	if ( pageNr < 0 || pageNr >= newTurnPrintII*newTurnPrintJJ ) {
+		return FALSE;
+	}
+	i = pageNr / newTurnPrintJJ;
+	j = pageNr % newTurnPrintJJ;
+
+	newTurnout_d.orig.x = newTurnPrintOrig.x + i*newTurnout_d.size.x;
+	newTurnout_d.orig.y = newTurnPrintOrig.y + j*newTurnout_d.size.y;
+
+	newTurnout_d.d = wPrintPageStart();
+	if ( newTurnout_d.d == NULL ) {
+		return FALSE;
+	}
+	newTurnout_d.dpi = wDrawGetDPI(newTurnout_d.d);
+	strPos.x = newTurnout_d.orig.x + 3.0;
+
+	sprintf( message, "%s", sProdName );
+	strPos.y = newTurnout_d.orig.y + 6.75;
+	DrawString( &newTurnout_d, strPos, 0.0, message, newTurnPrintFont, NEWTURN_TITLE_FONTSIZE, wDrawColorBlack );
+	sprintf( message, _("%s Designer"), _(curDesign->label) );
+	strPos.y -= 0.5;
+	DrawString( &newTurnout_d, strPos, 0.0, message, newTurnPrintFont, NEWTURN_SUBTITLE_FONTSIZE, wDrawColorBlack );
+	sprintf( message, _("%s %d x %d (of %d x %d)"), _("Page"), i+1, j+1, newTurnPrintII, newTurnPrintJJ );
+	strPos.y -= 0.5;
+	DrawString( &newTurnout_d, strPos, 0.0, message, newTurnPrintFont, NEWTURN_SUBTITLE_FONTSIZE, wDrawColorBlack );
+	strPos.y -= 0.10;
+	int tdInx = 0;
+	int iDescInx = curDesign->iDescFirst;
+	for ( const char *pPT = curDesign->sParamType; *pPT; pPT++, tdInx++ ) {
+		if ( *pPT == '-' ) { continue; }
+		const char * sLabel;
+		if ( *pPT == 'F' && newTurnAngleMode==0 ) {
+			sLabel = _("Frog #");
+		} else {
+			sLabel = turnDesignPLs[ iDescInx ].winLabel;
+		}
+		const char * sValue;
+		if ( *pPT == 'L' || *pPT == 'O' ) {
+			sValue = FormatDistance( tdVal[tdInx] );
+		} else {
+			sValue = FormatFloat( tdVal[tdInx] );
+		}
+		sprintf( message, "%s: %s", sLabel, sValue );
+		strPos.y -= 0.25;
+		DrawString( &newTurnout_d, strPos, 0.0, message, newTurnPrintFont, NEWTURN_DATA_FONTSIZE, wDrawColorBlack );
+		iDescInx++;
+	}
+	if (newTurnLeftDesc[0] || newTurnLeftPartno[0]) {
+		sprintf( message, "%s %s %s", newTurnManufacturer, newTurnLeftPartno,
+		         newTurnLeftDesc );
+		strPos.y -= 0.25;
+		DrawString( &newTurnout_d, strPos, 0.0, message, newTurnPrintFont, NEWTURN_DATA_FONTSIZE, wDrawColorBlack );
+	}
+	if (newTurnRightDesc[0] || newTurnRightPartno[0]) {
+		sprintf( message, "%s %s %s", newTurnManufacturer, newTurnRightPartno,
+		         newTurnRightDesc );
+		strPos.y -= 0.25;
+		DrawString( &newTurnout_d, strPos, 0.0, message, newTurnPrintFont, NEWTURN_DATA_FONTSIZE, wDrawColorBlack );
+	}
+
+	DrawRectangle( &newTurnout_d, newTurnout_d.orig, newTurnout_d.size,
+	               wDrawColorBlack, DRAW_CLOSED );
+
+	DrawSegsDA( &newTurnout_d, NULL, zero, 270.0, &tempSegs_da, newTurnTrackGauge,
+	            wDrawColorBlack, 0 );
+
+	for ( ep=0; ep<TempEndPtsCount(); ep++ ) {
+		pos.x = - GetEndPtPos( TempEndPt(ep) ).y;
+		pos.y = GetEndPtPos( TempEndPt(ep) ).x;
+		ANGLE_T angle = GetEndPtAngle( TempEndPt(ep) );
+		Translate( &p0, pos, angle+90+270.0,
+		           newTurnTrackGauge );
+		Translate( &p1, pos, angle+270+270.0,
+		           newTurnTrackGauge );
+		DrawLine( &newTurnout_d, p0, p1, 0, wDrawColorBlack );
+		Translate( &p0, pos, angle+270.0,
+		           newTurnout_d.size.y/2.0 );
+		DrawStraightTrack( &newTurnout_d, pos, p0,
+		                   angle+270.0,
+		                   NULL, wDrawColorBlack, 0 );
+	}
+
+	return wPrintPageEnd( newTurnout_d.d );
+}
+
 static void NewTurnPrint(
         void * junk )
 {
-	coOrd pos, p0, p1;
 	WDOUBLE_T px, py;
-	int i, j, ii, jj;
-	EPINX_T ep;
-	wFont_p fp;
+	double topMargin, rightMargin, bottomMargin, leftMargin;
+	int ii, jj;
 	coOrd orig, size;
 	toDesignSchema_t * pp;
 	POS_T tmp;
-	static drawCmd_t newTurnout_d = {
-		NULL,
-		&printDrawFuncs,
-		DC_PRINT,
-		1.0,
-		0.0,
-		{ 0.0, 0.0 },
-		{ 0.0, 0.0 },
-		Pix2CoOrd, CoOrd2Pix
-	};
 
 	if ((pp=LoadSegs( curDesign, TRUE )) == NULL) {
 		return;
@@ -2600,140 +2710,28 @@ static void NewTurnPrint(
 
 	GetSegBounds( zero, 0.0, tempSegs_da.cnt, &tempSegs(0), &orig, &size );
 	tmp = orig.x; orig.x = orig.y; orig.y = tmp;
-#ifdef LATER
-	size.x = 0.0; size.y = 0.0;
-	orig.x = 0.0; orig.y = 0.0;
-	for ( i=0; i<tempSegs_da.cnt; i++ ) {
-		segPtr = &tempSegs(i);
-		switch (segPtr->type) {
-		case SEG_STRLIN:
-		case SEG_STRTRK:
-			pos[0] = segPtr->u.l.pos[0];
-			pos[1] = segPtr->u.l.pos[1];
-			break;
-		case SEG_CRVTRK:
-		case SEG_CRVLIN:
-			PointOnCircle( &pos[0], segPtr->u.c.center, segPtr->u.c.radius,
-			               segPtr->u.c.a0 );
-			PointOnCircle( &pos[1], segPtr->u.c.center, segPtr->u.c.radius,
-			               segPtr->u.c.a0+segPtr->u.c.a1 );
-		}
-		for ( ep=0; ep<2; ep++ ) {
-			if (pos[ep].x < orig.x) {
-				orig.x = pos[ep].x;
-			}
-			if (pos[ep].x > size.x) {
-				size.x = pos[ep].x;
-			}
-			if (pos[ep].y < orig.y) {
-				orig.y = pos[ep].y;
-			}
-			if (pos[ep].y > size.y) {
-				size.y = pos[ep].y;
-			}
-		}
-	}
 
-	size.x -= orig.x;
-	size.y -= orig.y;
-#endif
-
-	fp = wStandardFont( F_TIMES, FALSE, FALSE );
+	newTurnPrintFont = wStandardFont( F_TIMES, FALSE, FALSE );
 	wPrintGetPageSize( &px, &py );
+	wPrintGetMargins( &topMargin, &rightMargin, &bottomMargin, &leftMargin );
+	px -= (leftMargin + rightMargin);
+	py -= (topMargin + bottomMargin);
 	newTurnout_d.size.x = px;
 	newTurnout_d.size.y = py;
 	ii = (int)(size.y/newTurnout_d.size.x)+1;
 	jj = (int)(size.x/newTurnout_d.size.y)+1;
+
+	orig.x = - ( size.y + orig.x + newTurnTrackGauge/2.0 + 0.5 );
+	orig.y -= (0.5);
+	newTurnPrintOrig = orig;
+	newTurnPrintII = ii;
+	newTurnPrintJJ = jj;
+
 	if ( !wPrintDocStart( sTurnoutDesignerW, ii*jj, NULL ) ) {
 		return;
 	}
-#ifdef LATER
-	orig.x -= (0.5);
-	orig.y -= (jj*newTurnout_d.size.y-size.y)/2.0;
-#endif
-	orig.x = - ( size.y + orig.x + newTurnTrackGauge/2.0 + 0.5 );
-	orig.y -= (0.5);
-	coOrd strPos;
-	for ( i=0, newTurnout_d.orig.x=orig.x; i<ii;
-	      i++, newTurnout_d.orig.x+=newTurnout_d.size.x ) {
-		for ( j=0, newTurnout_d.orig.y=orig.y; j<jj;
-		      j++, newTurnout_d.orig.y+=newTurnout_d.size.y ) {
-			newTurnout_d.d = wPrintPageStart();
-			newTurnout_d.dpi = wDrawGetDPI(newTurnout_d.d);
-			strPos.x = newTurnout_d.orig.x + 3.0;
-
-			sprintf( message, "%s", sProdName );
-			strPos.y = newTurnout_d.orig.y + 6.75;
-			DrawString( &newTurnout_d, strPos, 0.0, message, fp, 40, wDrawColorBlack );
-			sprintf( message, _("%s Designer"), _(curDesign->label) );
-			strPos.y -= 0.5;
-			DrawString( &newTurnout_d, strPos, 0.0, message, fp, 20, wDrawColorBlack );
-			sprintf( message, _("%s %d x %d (of %d x %d)"), _("Page"), i+1, j+1, ii, jj );
-			strPos.y -= 0.5;
-			DrawString( &newTurnout_d, strPos, 0.0, message, fp, 20, wDrawColorBlack );
-			strPos.y -= 0.10;
-			int tdInx = 0;
-			int iDescInx = curDesign->iDescFirst;
-			for ( const char *pPT = curDesign->sParamType; *pPT; pPT++, tdInx++ ) {
-				if ( *pPT == '-' ) { continue; }
-				const char * sLabel;
-				if ( *pPT == 'F' && newTurnAngleMode==0 ) {
-					sLabel = _("Frog #");
-				} else {
-					sLabel = turnDesignPLs[ iDescInx ].winLabel;
-				}
-				const char * sValue;
-				if ( *pPT == 'L' || *pPT == 'O' ) {
-					sValue = FormatDistance( tdVal[tdInx] );
-				} else {
-					sValue = FormatFloat( tdVal[tdInx] );
-				}
-				sprintf( message, "%s: %s", sLabel, sValue );
-				strPos.y -= 0.25;
-				DrawString( &newTurnout_d, strPos, 0.0, message, fp, 16, wDrawColorBlack );
-				iDescInx++;
-			}
-			if (newTurnLeftDesc[0] || newTurnLeftPartno[0]) {
-				sprintf( message, "%s %s %s", newTurnManufacturer, newTurnLeftPartno,
-				         newTurnLeftDesc );
-				strPos.y -= 0.25;
-				DrawString( &newTurnout_d, strPos, 0.0, message, fp, 16, wDrawColorBlack );
-			}
-			if (newTurnRightDesc[0] || newTurnRightPartno[0]) {
-				sprintf( message, "%s %s %s", newTurnManufacturer, newTurnRightPartno,
-				         newTurnRightDesc );
-				strPos.y -= 0.25;
-				DrawString( &newTurnout_d, strPos, 0.0, message, fp, 16, wDrawColorBlack );
-			}
-
-			DrawRectangle( &newTurnout_d, newTurnout_d.orig, newTurnout_d.size,
-			               wDrawColorBlack, DRAW_CLOSED );
-
-			DrawSegsDA( &newTurnout_d, NULL, zero, 270.0, &tempSegs_da, newTurnTrackGauge,
-			            wDrawColorBlack, 0 );
-
-			for ( ep=0; ep<TempEndPtsCount(); ep++ ) {
-				pos.x = - GetEndPtPos( TempEndPt(ep) ).y;
-				pos.y = GetEndPtPos( TempEndPt(ep) ).x;
-				ANGLE_T angle = GetEndPtAngle( TempEndPt(ep) );
-				Translate( &p0, pos, angle+90+270.0,
-				           newTurnTrackGauge );
-				Translate( &p1, pos, angle+270+270.0,
-				           newTurnTrackGauge );
-				DrawLine( &newTurnout_d, p0, p1, 0, wDrawColorBlack );
-				Translate( &p0, pos, angle+270.0,
-				           newTurnout_d.size.y/2.0 );
-				DrawStraightTrack( &newTurnout_d, pos, p0,
-				                   angle+270.0,
-				                   NULL, wDrawColorBlack, 0 );
-			}
-
-			if ( !wPrintPageEnd( newTurnout_d.d ) ) {
-				goto quitPrinting;
-			}
-		}
-	}
-quitPrinting:
+	wPrintDocSetPages( ii*jj, RenderNewTurnPage, NULL );
+	wPrintDocRun();
 	wPrintDocEnd();
 }
 

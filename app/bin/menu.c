@@ -1489,7 +1489,7 @@ EXPORT void CreateMenus(void)
 	snapGridShowMI = wMenuToggleCreate(viewM, "cmdGridShow", _("Show SnapGrid"),
 	                                   ACCL_SNAPSHOW,
 	                                   (wBool_t)gridShow, SnapGridShow, NULL);
-	wToggleGroupRegister(snapGridShowMI, TOGGLEGRP_GRID_VISIBLE);
+	wToggleGroupRegister(snapGridShowMI, TOGGLEGRP_GRID_SHOW);
 	InitGrid(viewM);
 
 	// visibility toggle for anchors
@@ -1538,8 +1538,8 @@ EXPORT void CreateMenus(void)
 	 * master state, so the FALSE passed at creation time is irrelevant. */
 	wToggleGroupRegister(p1GridEnable, TOGGLEGRP_GRID_ENABLE);
 	wToggleGroupRegister(p2GridEnable, TOGGLEGRP_GRID_ENABLE);
-	wToggleGroupRegister(p1GridShow,   TOGGLEGRP_GRID_VISIBLE);
-	wToggleGroupRegister(p2GridShow,   TOGGLEGRP_GRID_VISIBLE);
+	wToggleGroupRegister(p1GridShow,   TOGGLEGRP_GRID_SHOW);
+	wToggleGroupRegister(p2GridShow,   TOGGLEGRP_GRID_SHOW);
 	wToggleGroupRegister(p1MagSnap,    TOGGLEGRP_MAGNETS);
 	wToggleGroupRegister(p2MagSnap,    TOGGLEGRP_MAGNETS);
 	wToggleGroupRegister(p1MapShow,    TOGGLEGRP_MAP_VISIBLE);

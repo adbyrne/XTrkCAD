@@ -598,22 +598,22 @@ static drawCmd_t printProfileD = {
  * \return
  */
 
-static void DoProfilePrint(void * junk)
+static wBool_t RenderProfilePage(int pageNr, void * data)
 {
 	coOrd size, p[4];
-	int copies;
 	WDOUBLE_T w, h, screenRatio, printRatio, titleH;
 	wFont_p fp;
 	coOrd screenSize;
 	coOrd textsize;
 	double topMargin, rightMargin, bottomMargin, leftMargin;
 
-	if (!wPrintDocStart(_("Profile"), 1, &copies)) {
-		return;
+	if (pageNr != 0) {
+		return FALSE;
 	}
+
 	printProfileD.d = wPrintPageStart();
 	if (printProfileD.d == NULL) {
-		return;
+		return FALSE;
 	}
 	printProfileD.dpi = wDrawGetDPI(printProfileD.d);
 	wPrintGetPageSize(&w, &h);
@@ -680,7 +680,18 @@ static void DoProfilePrint(void * junk)
 	DrawPoly( &printProfileD, 4, p, NULL, drawColorBlack, 0, DRAW_CLOSED );
 
 	DrawProfile(&printProfileD, printProfileFontSize, printVert);
-	wPrintPageEnd(printProfileD.d);
+	return wPrintPageEnd(printProfileD.d);
+}
+
+static void DoProfilePrint(void * junk)
+{
+	int copies;
+
+	if (!wPrintDocStart(_("Profile"), 1, &copies)) {
+		return;
+	}
+	wPrintDocSetPages(1, RenderProfilePage, NULL);
+	wPrintDocRun();
 	wPrintDocEnd();
 }
 

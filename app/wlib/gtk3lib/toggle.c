@@ -318,17 +318,16 @@ void wButtonSetBusy(wControl_p bb, int newState)
 }
 
 /**
- * Callback for toggle buttons on the toolbar. The user callback action is
- * only executed when the new state of the button is active.
+ * Callback for toggle buttons on the toolbar. Fires on every user click
+ * (both activate and deactivate). Suppressed for programmatic state
+ * changes (wButtonSetBusy) via ignoreClick.
  */
 static void toolbarClicked(GtkToggleButton *widget, gpointer value)
 {
 	struct button *b = CONTROL_GET_ATTRIBUTES_PTR(((wControl_p)value), button);
 
-	if (gtk_toggle_button_get_active(widget)) {
-		if (b->action && !ignoreClick) {
-			b->action(((wControl_p)value)->context);
-		}
+	if (b->action && !ignoreClick) {
+		b->action(((wControl_p)value)->context);
 	}
 }
 
@@ -390,12 +389,10 @@ wControl_p wToggleCreateForToolbar(
 	wlibAddButtonToToolbar(buttonControl, helpStr);
 	unsigned long handler_id;
 
-				handler_id = g_signal_connect(G_OBJECT(buttonControl->widget), "toggled",
-			                 G_CALLBACK(toolbarClicked), buttonControl);
-			g_object_set_data(G_OBJECT(buttonControl->widget), "handler-id", GUINT_TO_POINTER(handler_id));
-
-	// g_signal_connect(G_OBJECT(buttonControl->widget), "clicked",
-	//                  G_CALLBACK(toolbarClicked), buttonControl);
+	handler_id = g_signal_connect(G_OBJECT(buttonControl->widget), "clicked",
+	                              G_CALLBACK(toolbarClicked), buttonControl);
+	g_object_set_data(G_OBJECT(buttonControl->widget), "handler-id",
+	                  GUINT_TO_POINTER(handler_id));
 
 	return buttonControl;
 }

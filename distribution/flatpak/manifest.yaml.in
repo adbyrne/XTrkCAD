@@ -40,15 +40,13 @@ modules:
       - '*'
 
   - name: mxml
-    buildsystem: cmake-ninja
+    buildsystem: autotools
     config-opts:
-      - -DBUILD_SHARED_LIBS=OFF
-      - -DBUILD_TESTING=OFF
-      - -DBUILD_DOC=OFF
+      - --prefix=/app
     sources:
       - type: archive
-        url: https://github.com/michaelrsweet/mxml/releases/download/v4.0.3/mxml-4.0.3.tar.gz
-        sha256: 7b894e870b43c44d36e72d2551dd73e9c498e03a6aabf64f85ea1aa1a44ec5c3
+        url: https://github.com/michaelrsweet/mxml/releases/download/v3.3.1/mxml-3.3.1.tar.gz
+        sha256: 0c663ed1fe393b5619f80101798202eea43534abd7c8aff389022fd8c1dacc32
     cleanup:
       - '*'
 

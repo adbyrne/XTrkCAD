@@ -222,7 +222,17 @@ PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget,
 	pango_layout_get_size(layout, &width_i, &height_i);
 	*width_p = width_i / PANGO_SCALE;
 	*height_p = height_i / PANGO_SCALE;
-	context = gtk_widget_create_pango_context(widget);
+	/* A print/export drawable has no backing widget. The width/height above come
+	 * from the layout and need no widget, but the ascent/descent metrics below
+	 * need a PangoContext. Derive it from the cairo target's font map when there
+	 * is no widget, otherwise gtk_widget_create_pango_context(NULL) fails and the
+	 * metrics (and callers such as wDrawGetTextSize / DrawRuler label alignment)
+	 * get bad values. */
+	if (widget) {
+		context = gtk_widget_create_pango_context(widget);
+	} else {
+		context = pango_cairo_create_context((cairo_t *) cairo);
+	}
 	metrics = pango_context_get_metrics(context, fontDescription,
 	                                    pango_context_get_language(context));
 	*baseline_p = pango_layout_get_baseline(layout) / PANGO_SCALE;

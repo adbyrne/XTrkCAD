@@ -532,6 +532,9 @@ wControl_p wComboBoxCreateForToolbar(
 
 	}
 
+	g_signal_connect(G_OBJECT(b->widget), "changed",
+	                 G_CALLBACK(ComboBoxChanged), b);
+
 	egg_wrap_box_insert_child(EGG_WRAP_BOX(parent->attributes.window.toolbar),
 	                          GTK_WIDGET(b->widget), -1, 0);
 

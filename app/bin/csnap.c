@@ -657,7 +657,7 @@ static void GridButtonUpdate( long mode0 )
 //	                       || grid.Vert.Enable);
 
 	//ToggleSetInMenuToolbar(snapGridShowMI, snapGridShow_b, (wBool_t)grid.Show);
-//	wToggleGroupSetActive(TOGGLEGRP_GRID_VISIBLE, grid.Show);
+//	wToggleGroupSetActive(TOGGLEGRP_GRID_SHOW, grid.Show);
 
 	if ( mode0&CHK_SHOW ) {
 		RedrawGrid();
@@ -850,7 +850,7 @@ EXPORT void InitSnapGridButtons( void )
 	                                   CreateToolbarIconFromResource("snap-grid.png"), IC_MODETRAIN_TOO | IC_TOGGLE,
 	                                   SnapGridShow,
 	                                   NULL );
-	wToggleGroupRegister(snapGridShow_b, TOGGLEGRP_GRID_VISIBLE);
-	wToggleGroupSetActive(TOGGLEGRP_GRID_VISIBLE, grid.Show);
+	wToggleGroupRegister(snapGridShow_b, TOGGLEGRP_GRID_SHOW);
+	wToggleGroupSetActive(TOGGLEGRP_GRID_SHOW, grid.Show);
 	GridButtonUpdate(0);
 }
