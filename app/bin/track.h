@@ -507,18 +507,17 @@ extern wIndex_t describeCmdInx;
 extern BOOL_T inDescribeCmd;
 extern BOOL_T descUndoStarted;
 extern char * descTitle;
-typedef enum { DESC_NULL, DESC_POS, DESC_FLOAT, DESC_ANGLE, DESC_LONG, DESC_COLOR, DESC_DIM, DESC_PIVOT, DESC_LAYER, DESC_STRING, DESC_TEXT, DESC_LIST, DESC_EDITABLELIST, DESC_BOXED } descType;
+typedef enum { DESC_NULL, DESC_POS, DESC_POS3D, DESC_FLOAT, DESC_ANGLE, DESC_LONG, DESC_COLOR, DESC_DIM, DESC_PIVOT, DESC_LAYER, DESC_STRING, DESC_TEXT, DESC_LIST, DESC_EDITABLELIST, DESC_BOXED } descType;
 #define DESC_RO			(1<<0)
 #define DESC_IGNORE		(1<<1)
 #define DESC_NOREDRAW	(1<<2)
+#define DESC_CHANGE3    (1<<3)
 #define DESC_CHANGE2    (1<<4)
+#define DESC_Z_RO       (1<<5)
+#define DESC_Z_IGNORE   (1<<6)
 #define DESC_CHANGE		(1<<8)
 typedef enum { DESC_PIVOT_FIRST, DESC_PIVOT_MID, DESC_PIVOT_SECOND, DESC_PIVOT_NONE } descPivot_t;
 #define DESC_PIVOT_1
-typedef struct {
-	coOrd pos;
-	POS_T ang;
-} descEndPt_t;
 typedef struct {
 	descType type;
 	char * label;
@@ -527,7 +526,8 @@ typedef struct {
 	int mode;
 	wControl_p control0;
 	wControl_p control1;
-	wWinPix_t posy;
+	wControl_p control2;
+	void * valueP2;
 } descData_t, * descData_p;
 typedef void (*descUpdate_t)( track_p, int, descData_p, BOOL_T );
 void DoDescribe( char *, track_p, descData_p, descUpdate_t );

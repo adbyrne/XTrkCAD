@@ -204,6 +204,7 @@ extern drawFuncs_t screenDrawFuncs;
 extern drawFuncs_t tempDrawFuncs;
 extern drawFuncs_t tempSegDrawFuncs;
 extern drawFuncs_t printDrawFuncs;
+extern drawFuncs_t bitmapDrawFuncs;
 
 #define DrawLine( D, P0, P1, W, C ) (D)->funcs->drawLine( D, P0, P1, W, C )
 #define DrawArc( D, P, R, A0, A1, F, W, C ) (D)->funcs->drawArc( D, P, R, A0, A1, F, W, C )
