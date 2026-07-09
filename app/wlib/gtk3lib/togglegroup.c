@@ -331,6 +331,23 @@ wToggleGroupRegister( wControl_p toggle,
 }
 
 /**
+ * \brief Report if the toggle group exists.
+ *
+ * Attempts to lookup the group name
+ *
+ * \param group_name  Name of a possibly existing toggle group.
+ * \return            \c FALSE if \p group_name is not found or the group has no master, otherwise TRUE.
+ */
+wBool_t
+wToggleGroupExists(const gchar *group_name)
+{
+	if (!groups)
+		return FALSE;
+	ToggleGroup *grp = g_hash_table_lookup(groups, group_name);
+	return (grp && grp->master);
+}
+
+/**
  * \brief Set the active state for all widgets in a toggle group.
  *
  * Sets the \c active property on the group's master widget. Because all member

@@ -8,7 +8,7 @@
     <p><em>Flatpak not officially supported, yet ;-) ; search for "flatpak" from the faq/home wiki</em></p>
   </description>
   <releases>
-    <release version="5.3.2DevGTK3" date="1969-12-31"/>
+    <release version="5.4.0" date="1969-12-31"/>
   </releases>
   <content_rating type="oars-1.1" />
   <launchable type="desktop-id">io.sourceforge.xtrkcad_fork.xtrkcad-gtk.desktop</launchable>

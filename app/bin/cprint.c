@@ -1304,6 +1304,104 @@ static BOOL_T PrintPage(
 }
 
 
+/*
+ * Ordered list of pages to print.
+ *
+ * With the portable GtkPrintOperation API, GTK owns the page loop (and copies
+ * and collation): it calls back per page index rather than letting us iterate.
+ * We therefore flatten the selected grid cells into an ordered array up front,
+ * honoring printOrder exactly as the former nested loops did, and the render
+ * callback simply indexes into it.
+ */
+typedef struct {
+	wIndex_t x;
+	wIndex_t y;
+} printPageCoord_t;
+
+static printPageCoord_t *printPageList = NULL;	/**< ordered pages for this job */
+static int printPageListCount = 0;				/**< number of entries in printPageList */
+
+/**
+ * Build the ordered list of selected pages, honoring printOrder.
+ *
+ * The traversal orders reproduce the former DoPrintPrint loops exactly, so the
+ * physical page sequence out of the printer is unchanged:
+ *   printOrder == 0 (Normal):  x ascending, y descending
+ *   printOrder != 0 (Reverse): y ascending, x ascending
+ *
+ * \return the number of pages placed in printPageList
+ */
+static int BuildPrintPageList( void )
+{
+	int n = 0;
+	wIndex_t x, y;
+
+	if (printPageList) {
+		MyFree( printPageList );
+		printPageList = NULL;
+	}
+	printPageListCount = 0;
+
+	if (pageCount <= 0) {
+		return 0;
+	}
+
+	printPageList = (printPageCoord_t *)MyMalloc( pageCount * sizeof(
+	                        printPageCoord_t) );
+
+	if ( printOrder == 0 ) {
+		for (x=bm.x0; x<bm.x1; x++)
+			for (y=bm.y1-1; y>=bm.y0; y--)
+				if (BITMAP(bm,x,y) && n < pageCount) {
+					printPageList[n].x = x;
+					printPageList[n].y = y;
+					n++;
+				}
+	} else {
+		for (y=bm.y0; y<bm.y1; y++)
+			for (x=bm.x0; x<bm.x1; x++)
+				if (BITMAP(bm,x,y) && n < pageCount) {
+					printPageList[n].x = x;
+					printPageList[n].y = y;
+					n++;
+				}
+	}
+
+	printPageListCount = n;
+	return n;
+}
+
+/**
+ * Release the ordered page list.
+ */
+static void FreePrintPageList( void )
+{
+	if (printPageList) {
+		MyFree( printPageList );
+		printPageList = NULL;
+	}
+	printPageListCount = 0;
+}
+
+/**
+ * Per-page render callback invoked by the print backend (print.c) from the
+ * GtkPrintOperation "draw-page" signal. The cairo context and coordinate
+ * transform have already been established by the backend before this is
+ * called. Maps the linear page index back to its grid cell and renders it.
+ *
+ * \param pageNr IN zero-based index into the ordered page list
+ * \param data IN unused
+ * \return TRUE to continue, FALSE to abort the job at the end of this page
+ */
+static wBool_t RenderOnePage( int pageNr, void * data )
+{
+	if (pageNr < 0 || pageNr >= printPageListCount) {
+		return FALSE;
+	}
+
+	return PrintPage( printPageList[pageNr].x, printPageList[pageNr].y );
+}
+
 static void DoPrintPrint( void * junk )
 /*
  * Called when print:print button is clicked.
@@ -1312,8 +1410,9 @@ static void DoPrintPrint( void * junk )
  */
 {
 	wIndex_t x, y;
-	int copy, copies;
+	int copies;
 	long noDecoration;
+	int nPages;
 
 	if (pageCount == 0) {
 		NoticeMessage( MSG_PRINT_NO_PAGES, _("Ok"), NULL );
@@ -1324,34 +1423,41 @@ static void DoPrintPrint( void * junk )
 
 	print_d.CoOrd2Pix = page_d.CoOrd2Pix = mainD.CoOrd2Pix;
 	wSetCursor( mainD.d, wCursorWait );
-	if (!wPrintDocStart(GetLayoutTitle(), pageCount, &copies )) {
+
+	// flatten the selected cells into the ordered page list GTK will drive
+	nPages = BuildPrintPageList();
+	if (nPages == 0) {
 		wSetCursor( mainD.d, defaultCursor );
 		return;
 	}
-	if (copies <= 0) {
-		copies = 1;
-	}
-	for ( copy=1; copy<=copies; copy++) {
-		if ( printOrder == 0 ) {
-			for (x=bm.x0; x<bm.x1; x++)
-				for (y=bm.y1-1; y>=bm.y0; y--)
-					if (!PrintPage( x, y )) { goto quitPrinting; }
-		} else {
-			for (y=bm.y0; y<bm.y1; y++)
-				for (x=bm.x0; x<bm.x1; x++)
-					if (!PrintPage( x, y )) { goto quitPrinting; }
-		}
-		for (y=bm.y0; y<bm.y1; y++)
-			for (x=bm.x0; x<bm.x1; x++)
-				if (BITMAP(bm,x,y)) {
-					if (copy >= copies) {
-						BITMAP(bm,x,y) = 0;
-					}
-				}
+
+	// GTK owns copies/collation, so copies comes back as 1 and we render each
+	// page exactly once
+	if (!wPrintDocStart(GetLayoutTitle(), nPages, &copies )) {
+		FreePrintPageList();
+		wSetCursor( mainD.d, defaultCursor );
+		return;
 	}
 
-quitPrinting:
+	// hand the ordered page list and per-page renderer to the backend
+	wPrintDocSetPages( nPages, RenderOnePage, NULL );
+
+	// runs the native print dialog and the begin/draw/end-print cycle; blocks
+	// until the job finishes or is cancelled
+	wPrintDocRun();
+
 	wPrintDocEnd();
+	FreePrintPageList();
+
+	// Match the former behaviour: after the job the selected pages are
+	// deselected. The old code always cleared the selection at the end of the
+	// (self-managed) copy loop; we preserve that unconditional clear here.
+	for (y=bm.y0; y<bm.y1; y++)
+		for (x=bm.x0; x<bm.x1; x++)
+			if (BITMAP(bm,x,y)) {
+				BITMAP(bm,x,y) = 0;
+			}
+
 	wSetCursor( mainD.d, defaultCursor );
 	Reset();		/* undraws grid, resets pagecount, etc */
 }
@@ -1450,7 +1556,7 @@ static STATUS_T CmdPrint(
 			                             TRUE, 0, PrintDlgUpdate );
 		}
 		sPrinterName = wPrintGetName();
-		while ( *sPrinterName == '\0' ) {
+		while ( !sPrinterName || *sPrinterName == '\0' ) {
 			int rc = NoticeMessage( MSG_NO_PRINTER_SELECTED, _("Ok"), _("Cancel") );
 			if ( rc <= 0 ) {
 				return C_TERMINATE;

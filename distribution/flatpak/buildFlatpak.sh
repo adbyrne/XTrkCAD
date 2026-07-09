@@ -6,6 +6,9 @@ ME=$(basename $0)
 #          tree which are not currently part of the .hgignore file
 DEBUG=no
 
+# uncomment to start fresh (presumes -DFLATPAK_STATE_DIR not passed)
+#rm -rf $HOME/.flatpak-builder-xtrkcad
+
 #####################################################################
 #   U S A G E
 #####################################################################

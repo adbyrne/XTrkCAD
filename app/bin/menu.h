@@ -26,8 +26,8 @@
 #include "common.h"
 
 /* ToggleGroup name constants */
-#define TOGGLEGRP_GRID_ENABLE   "gridenable"
-#define TOGGLEGRP_GRID_VISIBLE  "gridvisible"
+#define TOGGLEGRP_GRID_ENABLE   "misc cmdGridEnable"
+#define TOGGLEGRP_GRID_SHOW     "misc cmdGridShow"
 #define TOGGLEGRP_MAGNETS       "magnetsenable"
 #define TOGGLEGRP_MAP_VISIBLE   "mapvisible"
 #define TOGGLEGRP_BG_VISIBLE    "backgroundvisible"

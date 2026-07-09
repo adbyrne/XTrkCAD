@@ -232,6 +232,7 @@ typedef enum {
 } ToggleGroupResult;    
 
 ToggleGroupResult wToggleGroupRegister( wControl_p toggle, const char *group_name );
+wBool_t wToggleGroupExists(const char *group_name);
 void wToggleGroupSetActive(const char *group_name, wBool_t     active);
 wBool_t wToggleGroupGetActive(const char *group_name);
 
@@ -785,7 +786,20 @@ typedef int wDrawOpts;
 #define wDrawOptOpaque (1 << 9)
 #endif
 
-#define EXPORTBITMAP (1)
+/*
+ * Draw destinations for a drawable (struct draw / struct wDraw_t).
+ *
+ *   0            - interactive screen drawing area (default)
+ *   DIRECTCAIRO  - draw straight onto the drawable's own cairo context
+ *                  (bd->cr): no backing widget, no surface creation, no
+ *                  batching, no widget invalidation. Used for both bitmap
+ *                  export and printing, which share the wlibBasicDraw* path.
+ *
+ * EXPORTBITMAP is kept as a backward-compatible alias so existing bitmap
+ * export code continues to select the same path.
+ */
+#define DIRECTCAIRO  (1)
+#define EXPORTBITMAP DIRECTCAIRO
 
 typedef enum {
 	wDrawLineSolid,
@@ -916,6 +930,10 @@ void wPrintDocEnd(void);
 wBool_t wPrintQuit(void);
 void wPrintClip(wDrawPix_t, wDrawPix_t, wDrawPix_t, wDrawPix_t);
 const char *wPrintGetName(void);
+
+typedef wBool_t (*wPrintPageRenderProc)(int pageNr, void *data);
+void wPrintDocSetPages(int nPages, wPrintPageRenderProc proc, void *data);
+wBool_t wPrintDocRun(void);
 
 /*------------------------------------------------------------------------------
  *

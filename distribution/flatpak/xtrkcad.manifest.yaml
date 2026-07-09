@@ -50,7 +50,7 @@ modules:
     sources:
       - type: archive
         url: https://github.com/michaelrsweet/mxml/releases/download/v4.0.3/mxml-4.0.3.tar.gz
-        sha256: 7b894e870b43c44d36e72d2551dd73e9c498e03a6aabf64f85ea1aa1a44ec5c3
+        sha256: 3717da5b3829d6b37ef70db00ac1ec431bdb60faed8fde6538c11dc4aec13a7a
     cleanup:
       - '*'
 

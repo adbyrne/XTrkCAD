@@ -1719,6 +1719,14 @@ static void ParamPlayback(char *line)
 #endif
 		return;
 	}
+
+	if ( wToggleGroupExists( line ) ) {
+		wBool_t bActive = wToggleGroupGetActive( line );
+		bActive = ! bActive;
+		wToggleGroupSetActive( line, bActive );
+		return;
+	}
+
 	pg = DialogGroupFind(line);
 	if (pg != NULL) {
 
