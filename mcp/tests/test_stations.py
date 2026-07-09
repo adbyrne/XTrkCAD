@@ -59,18 +59,18 @@ def test_parser_reads_station_notes():
     layout = parse_file(STATION_FIXTURE)
     assert layout.param_version == 12
     note_ids = {n.id for n in layout.notes}
-    # 10=STATION:Alpha, 11=STATION:Beta, 12=non-station, 13=STATION:Gamma
+    # 30=STATION:Alpha, 11=STATION:Beta, 12=non-station, 13=STATION:Gamma
     # 20=STORAGE:FreightHouse, 21=STORAGE:CarBarn
-    assert {10, 11, 12, 13, 20, 21}.issubset(note_ids)
+    assert {30, 11, 12, 13, 20, 21}.issubset(note_ids)
 
 
 def test_parser_note_op_and_text():
     layout = parse_file(STATION_FIXTURE)
     notes = {n.id: n for n in layout.notes}
-    assert notes[10].op == 0
-    assert notes[10].text == "STATION: Alpha"
-    assert notes[10].x == pytest.approx(0.0)
-    assert notes[10].y == pytest.approx(0.0)
+    assert notes[30].op == 0
+    assert notes[30].text == "STATION: Alpha"
+    assert notes[30].x == pytest.approx(0.0)
+    assert notes[30].y == pytest.approx(0.0)
 
 
 def test_parser_non_station_note_preserved():
