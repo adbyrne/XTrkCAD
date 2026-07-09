@@ -97,6 +97,60 @@ static void SimpleInitialization(void **state)
     DynStringFree(&string);
 }
 
+static void ResetString(void **state)
+{
+    DynString string;
+    (void)state;
+    DynStringMalloc(&string, 0);
+    DynStringCatCStr(&string, TEXT1);
+    assert_int_equal(DynStringSize(&string), strlen(TEXT1));
+    DynStringReset(&string);
+    assert_int_equal(DynStringSize(&string), 0);
+    /* buffer still valid — can append again */
+    DynStringCatCStr(&string, TEXT2);
+    assert_int_equal(DynStringSize(&string), strlen(TEXT2));
+    assert_string_equal(DynStringToCStr(&string), TEXT2);
+    DynStringFree(&string);
+}
+
+static void CopyStr(void **state)
+{
+    DynString src, dest;
+    (void)state;
+    DynStringMalloc(&src, 0);
+    DynStringMalloc(&dest, 0);
+    DynStringCatCStr(&src, TEXT1);
+    DynStringCpyStr(&dest, &src);
+    assert_int_equal(DynStringSize(&dest), strlen(TEXT1));
+    assert_string_equal(DynStringToCStr(&dest), TEXT1);
+    /* overwrite dest with longer content */
+    DynStringCatCStr(&src, TEXT2);
+    DynStringCpyStr(&dest, &src);
+    assert_int_equal(DynStringSize(&dest), strlen(TEXT1) + strlen(TEXT2));
+    assert_string_equal(DynStringToCStr(&dest), TEXT1 TEXT2);
+    DynStringFree(&src);
+    DynStringFree(&dest);
+}
+
+static void CatStrsDyn(void **state)
+{
+    DynString s1, s2, s3;
+    (void)state;
+    DynStringMalloc(&s1, 0);
+    DynStringMalloc(&s2, 0);
+    DynStringMalloc(&s3, 0);
+    DynStringCatCStr(&s1, TEXT1);
+    DynStringCatCStr(&s2, TEXT2);
+    DynStringCatCStr(&s3, TEXT3);
+    DynStringCatStrs(&s1, &s2, &s3, NULL);
+    assert_int_equal(DynStringSize(&s1),
+                     strlen(TEXT1) + strlen(TEXT2) + strlen(TEXT3));
+    assert_string_equal(DynStringToCStr(&s1), TEXT1 TEXT2 TEXT3);
+    DynStringFree(&s1);
+    DynStringFree(&s2);
+    DynStringFree(&s3);
+}
+
 int main(void)
 {
     const struct CMUnitTest tests[] = {
@@ -105,7 +159,10 @@ int main(void)
         cmocka_unit_test(MultipleStrings),
         cmocka_unit_test(VarStringCount),
         cmocka_unit_test(CopyString),
-        cmocka_unit_test(PrintfString)
+        cmocka_unit_test(PrintfString),
+        cmocka_unit_test(ResetString),
+        cmocka_unit_test(CopyStr),
+        cmocka_unit_test(CatStrsDyn)
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }
