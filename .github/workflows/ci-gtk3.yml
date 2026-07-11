@@ -320,6 +320,33 @@ jobs:
           fi
           echo "All files conform to app/lib/astylerc."
 
+  fuzz-getargs:
+    # Gating, bounded-time regression check (not continuous fuzzing
+    # infrastructure) for GetArgs() (getargs.c), the format-string parser
+    # used throughout the .xtc/.xtr/.xtp file readers to pull typed fields
+    # out of untrusted file lines. Reuses the c-tests-sanitizers job's
+    # clang+ASan/UBSan toolchain, plus libFuzzer (-fsanitize=fuzzer).
+    #
+    # Deliberately covers only the format codes verified safe by an
+    # extended local fuzzing run (60M+ executions, 0 crashes) -- see
+    # fuzz_getargs.c's file comment for why one format code is excluded.
+    # Including it here would make this job permanently red on a known,
+    # already-tracked issue instead of being a useful gate against new
+    # regressions.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build clang libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext
+      - name: Configure and build fuzz_getargs
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=OFF -DXTRKCAD_FUZZ=ON -DCMAKE_C_COMPILER=clang
+          cmake --build build --target fuzz_getargs
+      - name: Run fuzz_getargs (bounded time budget)
+        run: ./build/app/bin/fuzz/fuzz_getargs -max_total_time=120
+
   compiler-warnings:
     # Report-only: captures -Wall -Wextra output as an artifact.
     # Does NOT fail the build — legacy code has pre-existing warnings.
