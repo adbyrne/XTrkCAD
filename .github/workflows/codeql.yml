@@ -1,0 +1,49 @@
+name: CodeQL (GTK3V2MAIN)
+
+on:
+  push:
+    branches:
+      - GTK3V2MAIN
+  pull_request:
+    branches:
+      - GTK3V2MAIN
+  schedule:
+    # Weekly, in addition to push/PR triggers -- catches issues from query-pack
+    # updates even when the branch itself is quiet.
+    - cron: '17 5 * * 1'
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'c-cpp' ]
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-extended
+
+      - name: Configure and build
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
+          cmake --build build
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
