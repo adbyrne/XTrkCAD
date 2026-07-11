@@ -175,6 +175,16 @@ static void IntegerPush(const char* value, void* dp)
 	p->bInvalid = FALSE;
 	wControlHilite(p->control, p->bInvalid);
 
+	// entry fields are pushed on focus-out even when the user didn't edit
+	// anything (e.g. focus moves away because a dialog tab was switched or
+	// the dialog itself is being hidden); skip side effects when the value
+	// didn't actually change so changeProc handlers with non-idempotent
+	// effects (e.g. cprint.c's DoPrintScale, which re-shows the dialog and
+	// resets the page grid) don't retrigger spuriously.
+	if (p->valueP && *((long*)(p->valueP)) == valL) {
+		return;
+	}
+
 	if (DO_MACRO_RECORD(p)) {
 		FormMacroRecord("PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr, valL);
 	}
