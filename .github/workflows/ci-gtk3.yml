@@ -200,6 +200,94 @@ jobs:
             -I app/bin -I app/bin/include -I app/wlib/include \
             app/bin/*.c app/dynstring/*.c
 
+  cppcheck-deep:
+    # Report-only: the gating `cppcheck` job above only runs cppcheck's default
+    # (error-only) severity class. This runs the warning/style/performance/
+    # portability classes too -- most of what cppcheck actually checks -- but
+    # does NOT fail the build: ~1150 findings surfaced the first time this was
+    # run (2026-07-11), almost entirely pre-existing and untriaged. Findings
+    # here are a triage backlog, not yet a quality gate.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install cppcheck
+        run: sudo apt-get update -q && sudo apt-get install -y cppcheck
+      - name: Run cppcheck (deep, non-fatal)
+        run: |
+          cppcheck \
+            --enable=warning,style,performance,portability \
+            -j 4 \
+            --suppress=missingInclude \
+            --suppress=missingIncludeSystem \
+            --suppress=nullPointerOutOfMemory \
+            --suppress=nullPointerOutOfResources \
+            --suppress=nullPointerArithmeticOutOfMemory \
+            --suppress=syntaxError:app/bin/archive.c \
+            --suppress=syntaxError:app/bin/cturntbl.c \
+            --suppress=syntaxError:app/bin/directory.c \
+            --suppress=syntaxError:app/bin/paths.c \
+            --suppress=syntaxError:app/bin/utility.c \
+            --suppress=unknownMacro:app/bin/custom.c \
+            --suppress=ctunullpointer:app/bin/track.c \
+            --suppress=uninitvar:app/bin/levenshtein.c \
+            --suppress=uninitvar:app/bin/problemrep.c \
+            --suppress=uninitvar:app/bin/paths.c \
+            --suppress=nullPointer:app/bin/partcatalog.c \
+            --suppress=missingReturn:app/bin/cturnout.c \
+            --suppress=ctuPointerArith:app/bin/cturnout.c \
+            -I app/bin -I app/bin/include -I app/wlib/include \
+            app/bin/*.c app/dynstring/*.c > cppcheck-deep.txt 2>&1 || true
+      - name: Summarise findings
+        run: |
+          COUNT=$(grep -cE '\[[a-zA-Z]+\]$' cppcheck-deep.txt || echo 0)
+          echo "Total findings: $COUNT"
+          echo ""
+          echo "=== By check ==="
+          grep -oE '\[[a-zA-Z]+\]$' cppcheck-deep.txt | sort | uniq -c | sort -rn || true
+      - name: Upload findings
+        uses: actions/upload-artifact@v7
+        with:
+          name: cppcheck-deep-gtk3
+          path: cppcheck-deep.txt
+
+  clang-tidy:
+    # Report-only: conservative check-set (bugprone-*/performance-*/portability-*)
+    # scoped to app/bin+app/dynstring+app/cornu. Excludes bdf2xtp.c and
+    # ppedit_gtk1.c (dead code, not referenced by any CMakeLists.txt target)
+    # and helphelper.c (macOS-only, if(APPLE) in app/bin/CMakeLists.txt) --
+    # none of the three are part of the Linux build's compile_commands.json,
+    # so clang-tidy can't get real compile flags for them and errors out.
+    # readability-*/modernize-* deliberately excluded for now -- expected to
+    # be high-volume style-only noise on this legacy C codebase.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build clang-tidy libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext
+      - name: Configure and build (need generated headers for clang-tidy to parse cleanly)
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          cmake --build build
+      - name: Run clang-tidy (non-fatal)
+        run: |
+          FILES=$(find app/bin app/dynstring app/cornu -name "*.c" | grep -v unittest | grep -vE 'bdf2xtp\.c|helphelper\.c|ppedit_gtk1\.c')
+          clang-tidy --checks='-*,bugprone-*,performance-*,portability-*' -p build $FILES > clang-tidy.txt 2>&1 || true
+      - name: Summarise findings
+        run: |
+          COUNT=$(grep -cE '\[[a-zA-Z.-]+\]$' clang-tidy.txt || echo 0)
+          echo "Total findings: $COUNT"
+          echo ""
+          echo "=== By check ==="
+          grep -oE '\[[a-zA-Z.-]+\]$' clang-tidy.txt | sort | uniq -c | sort -rn || true
+      - name: Upload findings
+        uses: actions/upload-artifact@v7
+        with:
+          name: clang-tidy-gtk3
+          path: clang-tidy.txt
+
   astyle-check:
     # Gating: fails if any tracked app/bin or app/wlib file (excluding vendored
     # eggwrapbox.c and unittest/) is not conformant with app/lib/astylerc.
