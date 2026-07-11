@@ -272,11 +272,17 @@ PickupConfigFile(char *srcfile, char* destdir)
 				// increase buffer size by 256  byte if too small
 				if (totalLength > linelen) {
 					size_t newLen = ((totalLength + 256) & (~0xff));
-					lineptr = realloc(lineptr, newLen);
-					if (!lineptr) {
+					char *newLineptr = realloc(lineptr, newLen);
+					if (!newLineptr) {
+						// AbortProg() can return (user may choose to save
+						// and continue) -- keep the original lineptr valid
+						// and skip this line rather than fall through to
+						// use a NULL/undersized buffer below.
 						AbortProg("!lineptr", __FILE__, __LINE__,
 						          "Can't realloc memory");
+						continue;
 					}
+					lineptr = newLineptr;
 					linelen = newLen;
 				}
 				value = DynStringToCStr(&configLine);
