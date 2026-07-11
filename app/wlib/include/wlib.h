@@ -226,12 +226,13 @@ wControl_p wToggleCreateForToolbar(wControl_p parent, wWinPix_t x, wWinPix_t y,
                                    wButtonCallBack_p action, void *context);
 
 typedef enum {
-    TOGGLE_GROUP_ERROR = -1,
-    TOGGLE_GROUP_MEMBER,    /* 0 – registered as satellite */
-    TOGGLE_GROUP_MASTER     /* 1 – registered as master    */
-} ToggleGroupResult;    
+	TOGGLE_GROUP_ERROR = -1,
+	TOGGLE_GROUP_MEMBER,    /* 0 – registered as satellite */
+	TOGGLE_GROUP_MASTER     /* 1 – registered as master    */
+} ToggleGroupResult;
 
-ToggleGroupResult wToggleGroupRegister( wControl_p toggle, const char *group_name );
+ToggleGroupResult wToggleGroupRegister( wControl_p toggle,
+                                        const char *group_name );
 wBool_t wToggleGroupExists(const char *group_name);
 void wToggleGroupSetActive(const char *group_name, wBool_t     active);
 wBool_t wToggleGroupGetActive(const char *group_name);
@@ -870,14 +871,14 @@ void wBasicDrawString(wControl_p bd, wDrawPix_t x, wDrawPix_t y, double a,
                       double width, double minWidth,
                       wDrawColor color, wDrawOpts opts);
 void wBasicDrawFillRectangle(wControl_p bd, wDrawPix_t x0, wDrawPix_t y0,
-                              wDrawPix_t x1, wDrawPix_t y1,
-                              wDrawColor color, wDrawOpts opts);
+                             wDrawPix_t x1, wDrawPix_t y1,
+                             wDrawColor color, wDrawOpts opts);
 void wBasicDrawFillPolygon(wControl_p bd, wDrawPix_t p[][2],
-                            wPolyLine_e type[], int cnt,
-                            wDrawColor color, wDrawOpts opts, int fill,
-                            int open);
+                           wPolyLine_e type[], int cnt,
+                           wDrawColor color, wDrawOpts opts, int fill,
+                           int open);
 void wBasicDrawFillCircle(wControl_p bd, wDrawPix_t x0, wDrawPix_t y0,
-                           wDrawPix_t r, wDrawColor color, wDrawOpts opts);
+                          wDrawPix_t r, wDrawColor color, wDrawOpts opts);
 
 void wDrawClear(wControl_p bd);
 
@@ -920,9 +921,9 @@ void wDrawShowBackground(wControl_p drawingArea, wWinPix_t pos_x,
                          int screen,
                          wDrawPix_t clip_x, wDrawPix_t clip_y,
                          wDrawPix_t clip_w, wDrawPix_t clip_h);
- void wDrawStart( wControl_p drawArea );
- void wDrawFinish( wControl_p drawArea );
- 
+void wDrawStart( wControl_p drawArea );
+void wDrawFinish( wControl_p drawArea );
+
 /*------------------------------------------------------------------------------
  *
  * Fonts

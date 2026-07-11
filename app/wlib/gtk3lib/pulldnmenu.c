@@ -217,16 +217,16 @@ static void CreateMenuItem(
 	case M_SEPARATOR:
 		mi->widget = gtk_separator_menu_item_new();
 		break;
-	case M_TOGGLE:
-    {
-        unsigned long handler_id;
+	case M_TOGGLE: {
+		unsigned long handler_id;
 		mi->widget = gtk_check_menu_item_new_with_mnemonic(
 		                     wlibConvertInput(labelcopy));
-        handler_id = g_signal_connect(mi->widget, "toggled", G_CALLBACK(pushMenuItem),
-		                 mi);
-        g_object_set_data(G_OBJECT(mi->widget), "handler-id", GUINT_TO_POINTER(handler_id));                         
-        }
-		break;
+		handler_id = g_signal_connect(mi->widget, "toggled", G_CALLBACK(pushMenuItem),
+		                              mi);
+		g_object_set_data(G_OBJECT(mi->widget), "handler-id",
+		                  GUINT_TO_POINTER(handler_id));
+	}
+	break;
 	case M_RADIO:
 		mi->widget = gtk_radio_menu_item_new_with_mnemonic(
 		                     m->attributes.menu.radioGroup,

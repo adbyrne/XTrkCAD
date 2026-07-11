@@ -427,7 +427,7 @@ void DoParamFiles(void * junk)
 		        CreateSymbolFromResource(
 		                "yellowstar.png");
 		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_FIT ] = CreateSymbolFromResource(
-		                "greenstar.png");
+		                        "greenstar.png");
 
 		FormRegister(&paramFilePG);
 

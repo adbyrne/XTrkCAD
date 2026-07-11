@@ -1542,7 +1542,7 @@ static void LayerUpdate(void)
 	free(layerFormattedName);
 
 	if (layerSelected < NUM_BUTTONS && !layers[(int)layerSelected].button_off
-	        && layer_btns[(int)layerSelected]) {
+	    && layer_btns[(int)layerSelected]) {
 		if (strlen(layers[(int)layerSelected].name) > 0) {
 			wTooltipSetText((wControl_p)layer_btns[(int)layerSelected],
 			                layers[(int)layerSelected].name);
@@ -1707,12 +1707,14 @@ void ResetLayers(void)
 		}
 	}
 
-	if (layer_btns[0])
+	if (layer_btns[0]) {
 		wTooltipSetText((wControl_p)layer_btns[0], _("Main"));
+	}
 
 	for (inx = 1; inx < NUM_BUTTONS; inx++) {
-		if (layer_btns[inx])
+		if (layer_btns[inx]) {
 			wTooltipSetText((wControl_p)layer_btns[inx], _("Show/Hide Layer"));
+		}
 	}
 
 	curLayer = -1;
@@ -1787,8 +1789,9 @@ void RestoreLayers(void)
 			label = layers[inx].name;
 		}
 
-		if (layer_btns[inx])
+		if (layer_btns[inx]) {
 			wTooltipSetText((wControl_p)layer_btns[inx], label);
+		}
 	}
 
 	if (layerL) {
@@ -2217,7 +2220,8 @@ static void InitializeCustomFont(int size)
 {
 	char *pathToFontFile = NULL;
 
-	MakeFullpath(&pathToFontFile, XTRKCAD_SYMBOLS_PATH, "fonts/", customFonts[size], NULL);
+	MakeFullpath(&pathToFontFile, XTRKCAD_SYMBOLS_PATH, "fonts/", customFonts[size],
+	             NULL);
 	if (pathToFontFile) {
 
 		wFTLabelLoadFontFromResource(pathToFontFile);

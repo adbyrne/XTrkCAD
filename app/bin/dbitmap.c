@@ -211,7 +211,7 @@ static int SaveBitmapFile(
 		                     GetLayoutBackGroundAngle(),
 		                     GetLayoutBackGroundScreen(),
 		                     0, 0, 0, 0 );
-		
+
 		wDrawUnrefBackground(bitmap_d.d);
 	}
 
@@ -305,7 +305,7 @@ static void
 OutputBitmapPixelSize( void )
 {
 	char message[STR_SIZE];
-	
+
 	FormLoadControls( &outputBitMapPG );
 
 	snprintf( &message, STR_SIZE,_( "%ld by %ld pixels" ), bitmap_w, bitmap_h );

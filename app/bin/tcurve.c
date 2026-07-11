@@ -1158,7 +1158,7 @@ static BOOL_T EnumerateCurve( track_p trk )
 		d = (xx->radius + (GetTrkGauge(trk)/2.0))* 2.0 * M_PI * a1 / 360.0;
 		if (xx->helixTurns > 0) {
 			d += (xx->helixTurns-(xx->circle?1:0)) * (xx->radius+(GetTrkGauge(
-			                trk)/2.0)) * 2.0 * M_PI;
+			                        trk)/2.0)) * 2.0 * M_PI;
 		}
 		ScaleLengthIncrement( GetTrkScale(trk), d );
 		return TRUE;

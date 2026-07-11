@@ -94,8 +94,9 @@ static gboolean draw_event(
 	GtkAllocation alloc;
 	gtk_widget_get_allocation(widget, &alloc);
 
-	if (drawAttributes->surface == NULL || drawAttributes->temp_surface == NULL)
+	if (drawAttributes->surface == NULL || drawAttributes->temp_surface == NULL) {
 		return FALSE;
+	}
 
 	cairo_set_source_surface(cr, drawAttributes->surface, 0, 0);
 	cairo_rectangle(cr, 0, 0, alloc.width, alloc.height);
@@ -128,13 +129,13 @@ CreateNewSurface(GtkWidget* widget, cairo_surface_t* oldSurface)
 	}
 
 	newSurface = gdk_window_create_similar_surface(gtk_widget_get_window(widget),
-	             CAIRO_CONTENT_COLOR_ALPHA,
-	             gtk_widget_get_allocated_width(widget),
-	             gtk_widget_get_allocated_height(widget));
+	                CAIRO_CONTENT_COLOR_ALPHA,
+	                gtk_widget_get_allocated_width(widget),
+	                gtk_widget_get_allocated_height(widget));
 
 	if(newSurface) { /* Initialize the surface */
 		ClearSurface(newSurface);
-	}		
+	}
 	return(newSurface);
 }
 

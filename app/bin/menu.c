@@ -326,7 +326,7 @@ static void ChkRevert(void * unused)
 		int rc;
 		rc = wNoticeWithIcon(NT_WARNING,
 		                     _("Do you want to return to the last saved state?\n\n"
-		  "Revert will cause all changes done since last save to be lost."),
+		                       "Revert will cause all changes done since last save to be lost."),
 		                     _("&Revert"), _("&Cancel"));
 		if (rc) {
 			/* load the file */
@@ -386,7 +386,7 @@ EXPORT int MagneticSnap(int state)
  */
 static void MagneticSnapToggle(void * unused)
 {
-			MagneticSnap(!magneticSnap);
+	MagneticSnap(!magneticSnap);
 	// static int inTransition = FALSE;
 	// if (!inTransition) {
 	// 	inTransition = TRUE;
@@ -1501,7 +1501,7 @@ EXPORT void CreateMenus(void)
 	                              _("Enable Magnetic Snap"),
 	                              0, magneticSnap,
 	                              MagneticSnapToggle, NULL);
-	wToggleGroupRegister(magnetsMI, TOGGLEGRP_MAGNETS);									   
+	wToggleGroupRegister(magnetsMI, TOGGLEGRP_MAGNETS);
 
 	mapShowMI = wMenuToggleCreate(viewM, "cmdMapShow", _("Show/Hide Map"),
 	                              ACCL_MAPSHOW, MapGetVisiblePref(),

@@ -1166,13 +1166,13 @@ void DescribeCompound(
 		wComboBoxAddValue( (wList_p)compoundDesc[LT].control0, _("Dash"), I2VP(1) );
 		wComboBoxAddValue( (wList_p)compoundDesc[LT].control0, _("Dot"), I2VP(2) );
 		wComboBoxAddValue( (wList_p)compoundDesc[LT].control0, _("DashDot"),
-		               I2VP(3) );
+		                   I2VP(3) );
 		wComboBoxAddValue( (wList_p)compoundDesc[LT].control0, _("DashDotDot"),
-		               I2VP(4) );
+		                   I2VP(4) );
 		wComboBoxAddValue( (wList_p)compoundDesc[LT].control0, _("CenterDot"),
-		               I2VP(5) );
+		                   I2VP(5) );
 		wComboBoxAddValue( (wList_p)compoundDesc[LT].control0, _("PhantomDot"),
-		               I2VP(6) );
+		                   I2VP(6) );
 		wListSetIndex( (wList_p)compoundDesc[LT].control0, compoundData.linetype );
 	}
 
@@ -1694,7 +1694,7 @@ BOOL_T EnumerateCompound( track_p trk )
 					               EnumCompound(inx).price,
 					               EnumCompound(inx).name,
 					               DynStringSize(&(EnumCompound(inx).indexes))?DynStringToCStr(&(EnumCompound(
-					                               inx).indexes)):NULL);
+					                                       inx).indexes)):NULL);
 				}
 				DynStringFree(&(EnumCompound(inx).indexes));
 			}

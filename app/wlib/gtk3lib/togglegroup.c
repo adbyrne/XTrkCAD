@@ -341,8 +341,9 @@ wToggleGroupRegister( wControl_p toggle,
 wBool_t
 wToggleGroupExists(const gchar *group_name)
 {
-	if (!groups)
+	if (!groups) {
 		return FALSE;
+	}
 	ToggleGroup *grp = g_hash_table_lookup(groups, group_name);
 	return (grp && grp->master);
 }
@@ -361,11 +362,13 @@ void
 wToggleGroupSetActive(const gchar *group_name,
                       wBool_t     active)
 {
-	if (!groups)
+	if (!groups) {
 		return;
+	}
 	ToggleGroup *grp = g_hash_table_lookup(groups, group_name);
-	if (!grp || !grp->master)
+	if (!grp || !grp->master) {
 		return;
+	}
 
 	g_object_set(grp->master, "active", active, NULL);
 }
@@ -383,11 +386,13 @@ wToggleGroupSetActive(const gchar *group_name,
 wBool_t
 wToggleGroupGetActive(const gchar *group_name)
 {
-	if (!groups)
+	if (!groups) {
 		return FALSE;
+	}
 	ToggleGroup *grp = g_hash_table_lookup(groups, group_name);
-	if (!grp || !grp->master)
+	if (!grp || !grp->master) {
 		return FALSE;
+	}
 
 	gboolean active;
 	g_object_get(grp->master, "active", &active, NULL);

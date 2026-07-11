@@ -467,7 +467,7 @@ EXPORT void DoCommandB(void * data)
 		if (rc == C_ERROR) {
 			rc = wNotice3(
 			             _("Cancelling the current command will undo the changes\n"
-			  "you are currently making. Do you want to update?"),
+			               "you are currently making. Do you want to update?"),
 			             _("Yes"), _("No"), _("Cancel"));
 			if (rc == 1) {
 				commandList[curCommand].cmdProc( C_OK, zero);

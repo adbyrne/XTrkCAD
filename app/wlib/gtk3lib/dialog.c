@@ -213,15 +213,15 @@ wDialogButtonsConfigure(wControl_p dialog, const char* okLabel,
 static gboolean
 deleteHandler(GtkDialog *win, GdkEvent *event, gpointer userdata)
 {
-    wControl_p dialog = (wControl_p)userdata;
-    struct window *dcontrol = CONTROL_GET_ATTRIBUTES_PTR(dialog, window);
+	wControl_p dialog = (wControl_p)userdata;
+	struct window *dcontrol = CONTROL_GET_ATTRIBUTES_PTR(dialog, window);
 
-    if(dcontrol->winProc) {
-        dcontrol->winProc(dialog, wClose_e, NULL,  dialog->context);
-        return gtk_widget_hide_on_delete(win);
-    }
+	if(dcontrol->winProc) {
+		dcontrol->winProc(dialog, wClose_e, NULL,  dialog->context);
+		return gtk_widget_hide_on_delete(win);
+	}
 
-    return FALSE;
+	return FALSE;
 }
 
 /**
@@ -307,7 +307,7 @@ wWinDialogCreate(wControl_p parent,
 		gtk_window_set_title(GTK_WINDOW(dialog), titleStr);
 	}
 
-    g_signal_connect(dialog, "delete-event", deleteHandler, winDialog);
+	g_signal_connect(dialog, "delete-event", deleteHandler, winDialog);
 
 	gtk_widget_show(dialog);
 	dcontrol->winProc = winProc;

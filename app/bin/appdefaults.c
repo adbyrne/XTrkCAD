@@ -351,7 +351,7 @@ wPrefGetIntegerExt(const char *section, const char *name, long *result,
 			defaultValue = thisDefault->defaultValue.intValue;
 		} else {
 			defaultValue = (thisDefault->defaultValue.intFunction)(thisDefault,
-			               thisDefault->additionalData);
+			                thisDefault->additionalData);
 		}
 	}
 
@@ -382,7 +382,7 @@ wPrefGetFloatExt(const char *section, const char *name, double *result,
 			defaultValue = thisDefault->defaultValue.floatValue;
 		} else {
 			defaultValue = (thisDefault->defaultValue.floatFunction)(thisDefault,
-			               thisDefault->additionalData);
+			                thisDefault->additionalData);
 		}
 	}
 
@@ -415,7 +415,7 @@ wPrefGetStringExt(const char *section, const char *name)
 		defaultValue = thisDefault->defaultValue.stringValue;
 	} else {
 		defaultValue = (thisDefault->defaultValue.stringFunction)(thisDefault,
-		               thisDefault->additionalData);
+		                thisDefault->additionalData);
 	}
 	// Next call will get value from Prefs
 	wPrefSetString( section, name, defaultValue );

@@ -83,7 +83,8 @@ extern wDrawColor wDrawColorBlack;
 static GtkPrintSettings *settings = NULL;	/**< current printer settings */
 static GtkPageSetup *page_setup = NULL;		/**< current paper settings */
 
-static GtkPrintOperation *printOp = NULL;	/**< the active portable print operation */
+static GtkPrintOperation *printOp =
+        NULL;	/**< the active portable print operation */
 
 /*
  * The print target is a real B_DRAW control (struct control) whose struct draw
@@ -96,7 +97,8 @@ static GtkPrintOperation *printOp = NULL;	/**< the active portable print operati
  * The control is allocated once (lazily) and its per-page cairo, scale and
  * transform are refreshed on each wPrintPageStart().
  */
-static wControl_p printControl = NULL;	/**< B_DRAW control used as the print target */
+static wControl_p printControl =
+        NULL;	/**< B_DRAW control used as the print target */
 
 static wBool_t printContinue;	/**< control print job, FALSE for cancelling */
 
@@ -120,7 +122,8 @@ static double scale_text = 1.0;
  * draw-page handler below invokes this procedure once per page, after the
  * cairo context and coordinate transform have been established.
  */
-static wPrintPageRenderProc gRenderProc = NULL;	/**< per-page callback into cprint.c */
+static wPrintPageRenderProc gRenderProc =
+        NULL;	/**< per-page callback into cprint.c */
 static void *gRenderData = NULL;				/**< opaque data passed back to cprint.c */
 static int gNumPages = 0;						/**< number of pages to print */
 
@@ -495,7 +498,8 @@ void wPrintGetPageSize(
  *
  */
 
-static double printDpi = 600.0;	/**< internal rendering resolution for the current job */
+static double printDpi =
+        600.0;	/**< internal rendering resolution for the current job */
 
 /**
  * Determine the internal rendering resolution and the resulting scale

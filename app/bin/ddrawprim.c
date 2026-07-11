@@ -554,8 +554,9 @@ EXPORT void DrawBoxedString(int style, drawCmd_p d, coOrd pos, char *text,
 	}
 	style &= ~BOX_POS_LEFT_CENTER;
 
-	if(style&BOX_POS_BOTTOM_LEFT )
+	if(style&BOX_POS_BOTTOM_LEFT ) {
 		p0.y += descent;
+	}
 
 	if ((style & BOX_POS_BOTTOM_LEFT) == 0) {
 		if ((style & BOX_POS_BOTTOM_RIGHT) != 0) {
@@ -861,7 +862,7 @@ static void BDrawLine(drawCmd_p d, coOrd p0, coOrd p1, wDrawWidth width,
 	coOrd orig, size;
 	int lborder = GetLBorder();
 	int bborder = GetBBorder();
-	if (d == &mapD && !mapVisible) return;
+	if (d == &mapD && !mapVisible) { return; }
 	if ((d->options & DC_NOCLIP) == 0) {
 		if (d->angle == 0.0) {
 			in0 = (p0.x >= d->orig.x && p0.x <= d->orig.x + d->size.x &&
@@ -878,7 +879,7 @@ static void BDrawLine(drawCmd_p d, coOrd p0, coOrd p1, wDrawWidth width,
 				size.x += (lborder + RBORDER) / d->dpi * d->scale;
 				size.y += (bborder + TBORDER) / d->dpi * d->scale;
 			}
-			if (!ClipLine(&p0, &p1, orig, d->angle, size)) return;
+			if (!ClipLine(&p0, &p1, orig, d->angle, size)) { return; }
 		}
 	}
 	d->CoOrd2Pix(d, p0, &x0, &y0);
@@ -886,12 +887,12 @@ static void BDrawLine(drawCmd_p d, coOrd p0, coOrd p1, wDrawWidth width,
 	drawCount++;
 	wDrawLineType_e lineOpt = wDrawLineSolid;
 	unsigned long opt = d->options & DC_NOTSOLIDLINE;
-	if (opt == DC_DASH)            lineOpt = wDrawLineDash;
-	else if (opt == DC_DOT)        lineOpt = wDrawLineDot;
-	else if (opt == DC_DASHDOT)    lineOpt = wDrawLineDashDot;
-	else if (opt == DC_DASHDOTDOT) lineOpt = wDrawLineDashDotDot;
-	else if (opt == DC_CENTER)     lineOpt = wDrawLineCenter;
-	else if (opt == DC_PHANTOM)    lineOpt = wDrawLinePhantom;
+	if (opt == DC_DASH) { lineOpt = wDrawLineDash; }
+	else if (opt == DC_DOT) { lineOpt = wDrawLineDot; }
+	else if (opt == DC_DASHDOT) { lineOpt = wDrawLineDashDot; }
+	else if (opt == DC_DASHDOTDOT) { lineOpt = wDrawLineDashDotDot; }
+	else if (opt == DC_CENTER) { lineOpt = wDrawLineCenter; }
+	else if (opt == DC_PHANTOM) { lineOpt = wDrawLinePhantom; }
 	if (drawEnable)
 		wBasicDrawLine(d->d, x0, y0, x1, y1, width, MINLINEWIDTHBITMAP,
 		               lineOpt, color, DRAWOPTS(d));
@@ -907,7 +908,7 @@ static void BDrawArc(drawCmd_p d, coOrd p, DIST_T r, ANGLE_T angle0,
 	DIST_T rr;
 	int i, cnt;
 
-	if (d == &mapD && !mapVisible) return;
+	if (d == &mapD && !mapVisible) { return; }
 	rr = (r / d->scale) * d->dpi + 0.5;
 	if (rr > wDrawGetMaxRadius(d->d)) {
 		da = (maxArcSegStraightLen * 180) / (M_PI * rr);
@@ -927,28 +928,30 @@ static void BDrawArc(drawCmd_p d, coOrd p, DIST_T r, ANGLE_T angle0,
 				DrawLine(d, p0, p1, width, color);
 			} else {
 				coOrd clip0 = p0, clip1 = p1;
-				if (ClipLine(&clip0, &clip1, d->orig, d->angle, d->size))
+				if (ClipLine(&clip0, &clip1, d->orig, d->angle, d->size)) {
 					DrawLine(d, clip0, clip1, width, color);
+				}
 			}
 			p0 = p1;
 		}
 		return;
 	}
-	if (d->angle != 0.0 && angle1 < 360.0)
+	if (d->angle != 0.0 && angle1 < 360.0) {
 		angle0 = NormalizeAngle(angle0 - d->angle);
+	}
 	d->CoOrd2Pix(d, p, &x, &y);
 	drawCount++;
 	wDrawLineType_e lineOpt = wDrawLineSolid;
 	unsigned long opt = d->options & DC_NOTSOLIDLINE;
-	if (opt == DC_DASH)            lineOpt = wDrawLineDash;
-	else if (opt == DC_DOT)        lineOpt = wDrawLineDot;
-	else if (opt == DC_DASHDOT)    lineOpt = wDrawLineDashDot;
-	else if (opt == DC_DASHDOTDOT) lineOpt = wDrawLineDashDotDot;
-	else if (opt == DC_CENTER)     lineOpt = wDrawLineCenter;
-	else if (opt == DC_PHANTOM)    lineOpt = wDrawLinePhantom;
+	if (opt == DC_DASH) { lineOpt = wDrawLineDash; }
+	else if (opt == DC_DOT) { lineOpt = wDrawLineDot; }
+	else if (opt == DC_DASHDOT) { lineOpt = wDrawLineDashDot; }
+	else if (opt == DC_DASHDOTDOT) { lineOpt = wDrawLineDashDotDot; }
+	else if (opt == DC_CENTER) { lineOpt = wDrawLineCenter; }
+	else if (opt == DC_PHANTOM) { lineOpt = wDrawLinePhantom; }
 	if (drawEnable) {
 		int sizeCenter = (int)(drawCenter ?
-		        ((d->options & DC_PRINT) ? (d->dpi / BASE_DPI) : 1) : 0);
+		                       ((d->options & DC_PRINT) ? (d->dpi / BASE_DPI) : 1) : 0);
 		wBasicDrawArc(d->d, x, y, (wDrawPix_t)(rr), angle0, angle1,
 		              sizeCenter, width, MINLINEWIDTHBITMAP,
 		              lineOpt, color, DRAWOPTS(d));
@@ -959,7 +962,7 @@ static void BDrawString(drawCmd_p d, coOrd p, ANGLE_T a, char *s, wFont_p fp,
                         FONTSIZE_T fontSize, wDrawColor color)
 {
 	wDrawPix_t x, y;
-	if (d == &mapD && !mapVisible) return;
+	if (d == &mapD && !mapVisible) { return; }
 	d->CoOrd2Pix(d, p, &x, &y);
 	if (color == wDrawColorWhite) {
 		wDrawPix_t width, height, descent, ascent;
@@ -1021,29 +1024,30 @@ static void BDrawFillCircle(drawCmd_p d, coOrd p, DIST_T r, wDrawColor color)
 	int lborder = GetLBorder();
 	int bborder = GetBBorder();
 
-	if (d == &mapD && !mapVisible) return;
+	if (d == &mapD && !mapVisible) { return; }
 	rr = (r / d->scale) * d->dpi + 0.5;
-	if (rr > wDrawGetMaxRadius(d->d)) return;
+	if (rr > wDrawGetMaxRadius(d->d)) { return; }
 	d->CoOrd2Pix(d, p, &x, &y);
 	wWinPix_t w, h;
 	wDrawGetSize(d->d, &w, &h);
 	if (d->options & DC_TICKS) {
 		if (x + rr < lborder || x - rr > w - RBORDER ||
-		    y + rr < bborder || y - rr > h - TBORDER) return;
+		    y + rr < bborder || y - rr > h - TBORDER) { return; }
 	} else {
-		if (x + rr < 0 || x - rr > w || y + rr < 0 || y - rr > h) return;
+		if (x + rr < 0 || x - rr > w || y + rr < 0 || y - rr > h) { return; }
 	}
 	drawCount++;
-	if (drawEnable)
+	if (drawEnable) {
 		wBasicDrawFillCircle(d->d, x, y, (wDrawPix_t)(rr), color, DRAWOPTS(d));
+	}
 }
 
 static void BDrawRectangle(drawCmd_p d, coOrd orig, coOrd size,
-                            wDrawColor color, drawFill_e eFillOpt)
+                           wDrawColor color, drawFill_e eFillOpt)
 {
 	wDrawPix_t x, y, w, h;
 
-	if (d == &mapD && !mapVisible) return;
+	if (d == &mapD && !mapVisible) { return; }
 	d->CoOrd2Pix(d, orig, &x, &y);
 	w = (wDrawPix_t)((size.x / d->scale) * d->dpi + 0.5);
 	h = (wDrawPix_t)((size.y / d->scale) * d->dpi + 0.5);

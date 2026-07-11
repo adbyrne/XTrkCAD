@@ -362,34 +362,35 @@ wPrefFormatLine(const char* section, const char* name,
 }
 
 GtkPrintSettings *
-wlibPrefGetPrintSettings(void) {
-  GError *err = NULL;
-  GtkPrintSettings *settings;
+wlibPrefGetPrintSettings(void)
+{
+	GError *err = NULL;
+	GtkPrintSettings *settings;
 
-  settings = gtk_print_settings_new_from_key_file(prefs, NULL, &err);
+	settings = gtk_print_settings_new_from_key_file(prefs, NULL, &err);
 
-  if (!settings) {
-    if (err->code != G_FILE_ERROR_NOENT) {
-      GtkWindow *dialog;
-      // G_FILE_ERROR_NOENT = section missing; gtk_print_settings_new_from_key_file
-      // returns this when the group is absent (gtk_page_setup_new_from_key_file
-      // returns G_FILE_ERROR_NAMETOOLONG for the same condition — GTK inconsistency)
-      dialog = gtk_message_dialog_new(
-          wlibAppWinGetMain(), GTK_DIALOG_DESTROY_WITH_PARENT,
-          GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "%s", err->message);
-      gtk_dialog_run(GTK_DIALOG(dialog));
-      gtk_widget_destroy(dialog);
-    } else {
-      // create  default print settings
-      settings = gtk_print_settings_new();
+	if (!settings) {
+		if (err->code != G_FILE_ERROR_NOENT) {
+			GtkWindow *dialog;
+			// G_FILE_ERROR_NOENT = section missing; gtk_print_settings_new_from_key_file
+			// returns this when the group is absent (gtk_page_setup_new_from_key_file
+			// returns G_FILE_ERROR_NAMETOOLONG for the same condition — GTK inconsistency)
+			dialog = gtk_message_dialog_new(
+			                 wlibAppWinGetMain(), GTK_DIALOG_DESTROY_WITH_PARENT,
+			                 GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "%s", err->message);
+			gtk_dialog_run(GTK_DIALOG(dialog));
+			gtk_widget_destroy(dialog);
+		} else {
+			// create  default print settings
+			settings = gtk_print_settings_new();
+		}
+		g_error_free(err);
 	}
-    g_error_free(err);
-  }
-  return (settings);
+	return (settings);
 }
 
-void 
-wlibPrefSetPrintSettings(GtkPrintSettings *settings) 
+void
+wlibPrefSetPrintSettings(GtkPrintSettings *settings)
 {
 	gtk_print_settings_to_key_file( settings, prefs, NULL);
 
