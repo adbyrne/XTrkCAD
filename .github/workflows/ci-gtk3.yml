@@ -207,6 +207,13 @@ jobs:
     # does NOT fail the build: ~1150 findings surfaced the first time this was
     # run (2026-07-11), almost entirely pre-existing and untriaged. Findings
     # here are a triage backlog, not yet a quality gate.
+    #
+    # selfAssignment is suppressed for cdraw.c/drawgeom.c specifically: both
+    # files use REORIGIN()/UNREORIGIN() macros as in-place coordinate
+    # transforms, always called as REORIGIN(x, x, ...) (dest == src by
+    # design). cppcheck's selfAssignment check can't see through the macro
+    # and flags every call as a no-op assignment; verified 2026-07-11 that
+    # all 29 instances across both files are this same pattern, not bugs.
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -236,6 +243,8 @@ jobs:
             --suppress=nullPointer:app/bin/partcatalog.c \
             --suppress=missingReturn:app/bin/cturnout.c \
             --suppress=ctuPointerArith:app/bin/cturnout.c \
+            --suppress=selfAssignment:app/bin/cdraw.c \
+            --suppress=selfAssignment:app/bin/drawgeom.c \
             -I app/bin -I app/bin/include -I app/wlib/include \
             app/bin/*.c app/dynstring/*.c > cppcheck-deep.txt 2>&1 || true
       - name: Summarise findings
