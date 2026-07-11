@@ -47,6 +47,7 @@ if(CMOCKA_FOUND)
 endif()
 
 option(XTRKCAD_SANITIZE "Build unit tests with AddressSanitizer + UBSan (Linux/GCC or Clang only)" OFF)
+option(XTRKCAD_FUZZ "Build libFuzzer harnesses (Clang only, requires -fsanitize=fuzzer support)" OFF)
 
 # Tools
 # Find document conversion tool

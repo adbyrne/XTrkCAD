@@ -192,6 +192,7 @@ target_sources(xtrkcad-lib
     fileio.c
     fileio.h
     filenoteui.c
+    getargs.c
     icons.c
     i18n.c
     layout.c
@@ -430,4 +431,8 @@ endif()
 
 if(XTRKCAD_TESTING AND CMOCKA_FOUND)
     add_subdirectory( unittest )
+endif()
+
+if(XTRKCAD_FUZZ)
+    add_subdirectory( fuzz )
 endif()
