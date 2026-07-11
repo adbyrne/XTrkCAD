@@ -100,7 +100,7 @@ static void linesRepaint(wControl_p b)
 	cairo_set_line_join(cr, CAIRO_LINE_JOIN_MITER);
 
 	for (i=0; i<bl->count; i++) {
-		if (bl->lines[i].width == 2) continue;
+		if (bl->lines[i].width == 2) { continue; }
 		cairo_set_line_width(cr, bl->lines[i].width);
 		cairo_move_to(cr, bl->lines[i].x0, bl->lines[i].y0);
 		cairo_line_to(cr, bl->lines[i].x1, bl->lines[i].y1);
@@ -162,7 +162,7 @@ wLine_p wLineCreate(
 	linesWindow->lines = lines;
 
 	for (int i=0; i<count; i++) {
-		if (lines[i].width == 2) continue;
+		if (lines[i].width == 2) { continue; }
 		if (lines[i].x0 > linesWindow->w) {
 			linesWindow->w = lines[i].x0;
 		}

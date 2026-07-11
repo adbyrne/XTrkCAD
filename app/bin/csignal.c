@@ -628,7 +628,7 @@ static void aspectEditOK ( void * junk )
 		DYNARR_APPEND( signalAspect_p *, signalAspect_da, 10 );
 		signalAspect(signalAspect_da.cnt-1).aspectName = MyStrdup(signalAspectEditName);
 		signalAspect(signalAspect_da.cnt-1).aspectScript = MyStrdup(
-		                signalAspectEditScript);
+		                        signalAspectEditScript);
 		snprintf(message,sizeof(message),"%s\t%s",signalAspectEditName,
 		         signalAspectEditScript);
 		wListAddValue( aspectSelL, message, NULL, NULL );
@@ -642,7 +642,7 @@ static void aspectEditOK ( void * junk )
 		              signalAspect(signalAspectEditIndex).aspectScript, STR_LONG_SIZE ) != 0 ) {
 			MyFree(signalAspect(signalAspectEditIndex).aspectScript);
 			signalAspect(signalAspectEditIndex).aspectScript = MyStrdup(
-			                signalAspectEditScript);
+			                        signalAspectEditScript);
 		}
 		snprintf(message,sizeof(message),"%s\t%s",
 		         signalAspect(signalAspectEditIndex).aspectName,
@@ -766,9 +766,9 @@ static void EditSignalDialog()
 			wListAddValue( aspectSelL, message, NULL, NULL );
 			DYNARR_APPEND( signalAspect_p *, signalAspect_da, 10 );
 			signalAspect(signalAspect_da.cnt-1).aspectName = MyStrdup((&
-			        (xx->aspectList))[ia].aspectName);
+			                (xx->aspectList))[ia].aspectName);
 			signalAspect(signalAspect_da.cnt-1).aspectScript = MyStrdup((&
-			        (xx->aspectList))[ia].aspectScript);
+			                (xx->aspectList))[ia].aspectScript);
 		}
 	}
 	FormLoadControls( &signalEditPG );

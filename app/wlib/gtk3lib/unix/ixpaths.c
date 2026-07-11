@@ -185,13 +185,13 @@ const char * wGetAppLibDir( void )
 
 		msg = g_strdup_printf(
 		              _("The required configuration files could not be located in the "
-		  "expected location.\n\nUsually this is an installation problem."
-		  "Make sure that these files are installed in either \n"
-		  "  %s or\n"
-		  "  %s or\n"
-		  "  %s\n"
-		  "If this is not possible, the environment variable %s must "
-		  "contain the name of the correct directory."),
+		                "expected location.\n\nUsually this is an installation problem."
+		                "Make sure that these files are installed in either \n"
+		                "  %s or\n"
+		                "  %s or\n"
+		                "  %s\n"
+		                "If this is not possible, the environment variable %s must "
+		                "contain the name of the correct directory."),
 		              searchDirs[1],
 		              searchDirs[2],
 		              searchDirs[3],

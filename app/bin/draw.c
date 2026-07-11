@@ -329,7 +329,7 @@ EXPORT void MainRedraw(void)
 		LogPrintf("MainRedraw: return early as drawing area size is 0,0");
 		return;
 	}
-	
+
 	unsigned long time0 = wGetTimer();
 	if (delayUpdate) {
 		wDrawDelayUpdate(mainD.d, TRUE);
@@ -349,11 +349,11 @@ EXPORT void MainRedraw(void)
 
 	// measure redraw of main canvas
 #ifdef PERFORMANCE_TEST
-    struct timespec start, end;
-    clock_gettime(CLOCK_MONOTONIC, &start);
+	struct timespec start, end;
+	clock_gettime(CLOCK_MONOTONIC, &start);
 #endif
 
-	wDrawStart(mainD.d);	
+	wDrawStart(mainD.d);
 
 	DrawRoomWalls(TRUE);
 
@@ -376,7 +376,7 @@ EXPORT void MainRedraw(void)
 		                    GetLayoutBackGroundScreen(),
 		                    rx, ry, rw, rh);
 	}
-	
+
 	DrawSnapGrid(&mainD, mapD.size, TRUE);
 
 	/*
@@ -384,14 +384,14 @@ EXPORT void MainRedraw(void)
 	 * Tracks and room border polygon must not overwrite the ruler margins.
 	 */
 
-		 
+
 	orig = mainD.orig;
 	size = mainD.size;
 	orig.x -= RBORDER / mainD.dpi * mainD.scale;
 	orig.y -= bborder / mainD.dpi * mainD.scale;
 	size.x += (RBORDER + lborder) / mainD.dpi * mainD.scale;
 	size.y += (bborder + TBORDER) / mainD.dpi * mainD.scale;
- 
+
 	wDrawGetSize(mainD.d, &totalW, &totalH);
 	wDrawClip(mainD.d,
 	          (wDrawPix_t)lborder,
@@ -416,14 +416,15 @@ EXPORT void MainRedraw(void)
 	wDrawStart((mainD.d));
 
 	DrawRulers();
-	
-	wDrawFinish(mainD.d);	
+
+	wDrawFinish(mainD.d);
 
 #ifdef PERFORMANCE_TEST
 	// end measuring main canvas
 	clock_gettime(CLOCK_MONOTONIC, &end);
-    double time_spent = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
-	
+	double time_spent = (end.tv_sec - start.tv_sec) + (end.tv_nsec -
+	                    start.tv_nsec) / 1e9;
+
 	LogPrintf("MainRedraw No. %d took %f sec\n", currRedraw, time_spent);
 #endif
 	currRedraw++;
@@ -432,12 +433,12 @@ EXPORT void MainRedraw(void)
 	LOG(log_timemainredraw, 1,
 	    ("MainRedraw time = %lu mS\n", wGetTimer() - time0));
 	/* Temp-surface content (command feedback, markers, rulers) */
-	
+
 	wDrawSetTempMode(tempD.d, TRUE);
 	DrawTempContent();
 	wDrawSetTempMode(tempD.d, FALSE);
 	wDrawDelayUpdate(mainD.d, FALSE);
-	
+
 }
 
 /*
@@ -604,7 +605,7 @@ static void ConstraintOrig(coOrd * orig, coOrd size, wBool_t bNoBorder,
 {
 	LOG(log_pan, 2,
 	    ("ConstraintOrig [ %0.6f, %0.6f ] RoomSize(%0.3f %0.3f), "
-	 "WxH=%0.3fx%0.3f",
+	     "WxH=%0.3fx%0.3f",
 	     orig->x, orig->y, mapD.size.x, mapD.size.y, size.x, size.y))
 
 	coOrd bound = zero;

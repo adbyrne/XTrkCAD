@@ -2624,13 +2624,17 @@ static wBool_t RenderNewTurnPage( int pageNr, void * data )
 
 	sprintf( message, "%s", sProdName );
 	strPos.y = newTurnout_d.orig.y + 6.75;
-	DrawString( &newTurnout_d, strPos, 0.0, message, newTurnPrintFont, NEWTURN_TITLE_FONTSIZE, wDrawColorBlack );
+	DrawString( &newTurnout_d, strPos, 0.0, message, newTurnPrintFont,
+	            NEWTURN_TITLE_FONTSIZE, wDrawColorBlack );
 	sprintf( message, _("%s Designer"), _(curDesign->label) );
 	strPos.y -= 0.5;
-	DrawString( &newTurnout_d, strPos, 0.0, message, newTurnPrintFont, NEWTURN_SUBTITLE_FONTSIZE, wDrawColorBlack );
-	sprintf( message, _("%s %d x %d (of %d x %d)"), _("Page"), i+1, j+1, newTurnPrintII, newTurnPrintJJ );
+	DrawString( &newTurnout_d, strPos, 0.0, message, newTurnPrintFont,
+	            NEWTURN_SUBTITLE_FONTSIZE, wDrawColorBlack );
+	sprintf( message, _("%s %d x %d (of %d x %d)"), _("Page"), i+1, j+1,
+	         newTurnPrintII, newTurnPrintJJ );
 	strPos.y -= 0.5;
-	DrawString( &newTurnout_d, strPos, 0.0, message, newTurnPrintFont, NEWTURN_SUBTITLE_FONTSIZE, wDrawColorBlack );
+	DrawString( &newTurnout_d, strPos, 0.0, message, newTurnPrintFont,
+	            NEWTURN_SUBTITLE_FONTSIZE, wDrawColorBlack );
 	strPos.y -= 0.10;
 	int tdInx = 0;
 	int iDescInx = curDesign->iDescFirst;
@@ -2650,20 +2654,23 @@ static wBool_t RenderNewTurnPage( int pageNr, void * data )
 		}
 		sprintf( message, "%s: %s", sLabel, sValue );
 		strPos.y -= 0.25;
-		DrawString( &newTurnout_d, strPos, 0.0, message, newTurnPrintFont, NEWTURN_DATA_FONTSIZE, wDrawColorBlack );
+		DrawString( &newTurnout_d, strPos, 0.0, message, newTurnPrintFont,
+		            NEWTURN_DATA_FONTSIZE, wDrawColorBlack );
 		iDescInx++;
 	}
 	if (newTurnLeftDesc[0] || newTurnLeftPartno[0]) {
 		sprintf( message, "%s %s %s", newTurnManufacturer, newTurnLeftPartno,
 		         newTurnLeftDesc );
 		strPos.y -= 0.25;
-		DrawString( &newTurnout_d, strPos, 0.0, message, newTurnPrintFont, NEWTURN_DATA_FONTSIZE, wDrawColorBlack );
+		DrawString( &newTurnout_d, strPos, 0.0, message, newTurnPrintFont,
+		            NEWTURN_DATA_FONTSIZE, wDrawColorBlack );
 	}
 	if (newTurnRightDesc[0] || newTurnRightPartno[0]) {
 		sprintf( message, "%s %s %s", newTurnManufacturer, newTurnRightPartno,
 		         newTurnRightDesc );
 		strPos.y -= 0.25;
-		DrawString( &newTurnout_d, strPos, 0.0, message, newTurnPrintFont, NEWTURN_DATA_FONTSIZE, wDrawColorBlack );
+		DrawString( &newTurnout_d, strPos, 0.0, message, newTurnPrintFont,
+		            NEWTURN_DATA_FONTSIZE, wDrawColorBlack );
 	}
 
 	DrawRectangle( &newTurnout_d, newTurnout_d.orig, newTurnout_d.size,

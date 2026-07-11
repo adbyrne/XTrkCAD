@@ -539,7 +539,7 @@ EXPORT void wShow(wControl_p win)
 	if(!win) {
 		return;
 	}
-	
+
 	if (inPlayback && win != demoW) {
 		wWinSetBusy(win, TRUE);
 		for (inx = 0; inx < demoWindows_da.cnt; inx++)

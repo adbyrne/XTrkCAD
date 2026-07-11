@@ -311,8 +311,9 @@ static void DrawRulerWithBackground(drawCmd_p d, coOrd pos0, coOrd pos1,
 						}
 						if (a == 0.0) {
 							LABEL_POS_VERTICAL(p0, tickSide, boxStyle);
-							if(boxStyle&BOX_POS_BOTTOM_LEFT)
+							if(boxStyle&BOX_POS_BOTTOM_LEFT) {
 								p0.y -= 1.5*(rulerFontSize / 72.0 * d->scale);
+							}
 						} else {
 							LABEL_POS_HORIZONTAL(p0, len, boxStyle);
 						}
@@ -408,8 +409,9 @@ static void DrawRulerWithBackground(drawCmd_p d, coOrd pos0, coOrd pos1,
 							Translate(&p0, orig, a, inch);
 							if (a == 0.0) {
 								LABEL_POS_VERTICAL(p0, tickSide, boxStyle);
-								if (boxStyle & BOX_POS_BOTTOM_LEFT)
-        							p0.y -= 1.5*(rulerFontSize / 72.0 * d->scale);
+								if (boxStyle & BOX_POS_BOTTOM_LEFT) {
+									p0.y -= 1.5*(rulerFontSize / 72.0 * d->scale);
+								}
 							} else {
 								LABEL_POS_HORIZONTAL(p0, majorLength, boxStyle);
 							}
@@ -453,13 +455,15 @@ static void DrawTicks(drawCmd_p d, coOrd size)
 		p0.y = 0.0;
 		p1.y = mapD.size.y;
 		p0.x = p1.x = 0.0;
-		DrawRulerWithBackground(d, p0, p1, offset, FALSE, TRUE, borderColor, wDrawColorGrey80);
+		DrawRulerWithBackground(d, p0, p1, offset, FALSE, TRUE, borderColor,
+		                        wDrawColorGrey80);
 	}
 	if (d->orig.x + d->size.x > mapD.size.x + blank_zone) {
 		p0.y = 0.0;
 		p1.y = mapD.size.y;
 		p0.x = p1.x = mapD.size.x;
-		DrawRulerWithBackground(d, p0, p1, offset, FALSE, FALSE, borderColor, wDrawColorGrey80);
+		DrawRulerWithBackground(d, p0, p1, offset, FALSE, FALSE, borderColor,
+		                        wDrawColorGrey80);
 	}
 	p0.x = 0.0;
 	p1.x = d->size.x;
@@ -475,13 +479,15 @@ static void DrawTicks(drawCmd_p d, coOrd size)
 		p0.x = 0.0;
 		p1.x = mapD.size.x;
 		p0.y = p1.y = 0.0;
-		DrawRulerWithBackground(d, p0, p1, offset, FALSE, FALSE, borderColor, wDrawColorGrey80);
+		DrawRulerWithBackground(d, p0, p1, offset, FALSE, FALSE, borderColor,
+		                        wDrawColorGrey80);
 	}
 	if (d->orig.y + d->size.y > mapD.size.y + blank_zone) {
 		p0.x = 0.0;
 		p1.x = mapD.size.x;
 		p0.y = p1.y = mapD.size.y;
-		DrawRulerWithBackground(d, p0, p1, offset, FALSE, TRUE, borderColor, wDrawColorGrey80);
+		DrawRulerWithBackground(d, p0, p1, offset, FALSE, TRUE, borderColor,
+		                        wDrawColorGrey80);
 	}
 	p0.y = 0.0;
 	p1.y = d->size.y;

@@ -287,7 +287,7 @@ CreateLayoutForText(struct draw *bd, cairo_t *cr, char *text, wFont_p font,
  * \return
  */
 
- void
+void
 wBasicDrawString (wControl_p bd, wDrawPix_t x, wDrawPix_t y, double a,
                   char *s,
                   wFont_p fp, double fs, double width, double minWidth,

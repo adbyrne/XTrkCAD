@@ -291,7 +291,7 @@ BOOL_T FindArcAndLineIntersections(coOrd *intersection1, coOrd *intersection2,
 	la = point1.y - point2.y;
 	lb = point2.x - point1.x;
 	lc = (point1.x-c.x)*(point2.y-c.y) - (point2.x-c.x)*(point1.y
-	        -c.y);  //Move by c(x,y)
+	                -c.y);  //Move by c(x,y)
 
 	double x0 = -la*lc/(la*la+lb*lb), y0 = -lb*lc/(la*la+lb*lb);
 

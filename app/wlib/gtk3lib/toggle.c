@@ -223,8 +223,9 @@ wControl_p wToggleCreate(
 		children = gtk_container_get_children(GTK_CONTAINER(b->widget));
 		for (child = children; child; child = child->next) {
 			unsigned long handler_id = g_signal_connect(G_OBJECT(child->data), "toggled",
-			                 G_CALLBACK(toggled), b);
-			g_object_set_data(G_OBJECT(child->data), "handler-id", GUINT_TO_POINTER(handler_id));							 
+			                           G_CALLBACK(toggled), b);
+			g_object_set_data(G_OBJECT(child->data), "handler-id",
+			                  GUINT_TO_POINTER(handler_id));
 		}
 		if (children) {
 			g_list_free(children);
@@ -263,11 +264,11 @@ wControl_p wToggleCreate(
 
 			butt = gtk_check_button_new_with_label(_(*label));
 			buttonCount++;
-			
+
 			gtk_box_pack_start(GTK_BOX(b->widget), butt, TRUE, TRUE, 0);
 
 			handler_id = g_signal_connect(G_OBJECT(butt), "toggled",
-			                 G_CALLBACK(toggled), b);
+			                              G_CALLBACK(toggled), b);
 			g_object_set_data(G_OBJECT(butt), "handler-id", GUINT_TO_POINTER(handler_id));
 
 			wlibAddTooltip(butt, parent->name, helpStr);

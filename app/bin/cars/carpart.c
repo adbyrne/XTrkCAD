@@ -172,7 +172,7 @@ static carPartParent_p CarPartParentNew(
 	cmp_key.proto.len = protoL;
 	cmp_key.scale = scale;
 	parentP = (carPartParent_p)LookupListElem(&carPartParent_da, &cmp_key,
-	          Cmp_partparent, sizeof * parentP);
+	                Cmp_partparent, sizeof * parentP);
 	if (parentP->manuf == NULL) {
 		parentP->manuf = (char*)MyMalloc(manufL + 1);
 		memcpy(parentP->manuf, manufP, manufL);

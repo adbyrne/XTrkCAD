@@ -69,7 +69,7 @@ ReadParamError(char *file)
 	DynStringMalloc(&error_msg, 100);
 	DynStringPrintf(&error_msg,
 	                _("The parameter file: %s could not be found and was probably deleted or moved. "
-	  "The file is removed from the active parameter file list."),
+	                  "The file is removed from the active parameter file list."),
 	                file);
 	wNoticeWithIcon(NT_ERROR, DynStringToCStr(&error_msg), "OK", NULL);
 	DynStringFree(&error_msg);

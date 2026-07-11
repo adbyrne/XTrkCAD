@@ -3185,7 +3185,7 @@ static void PopulateLineTypeList(void)
 static void PopulateDimArrowSizeList(void)
 {
 	//will be populated with strings by builder
-	 wControl_p listControl = dimensionlinePLs[DIMENSION_ARROW].control;
+	wControl_p listControl = dimensionlinePLs[DIMENSION_ARROW].control;
 
 	if (wComboBoxGetCount(listControl) == 0) {
 		wComboBoxAddValue(listControl, _("Tiny"), NULL);

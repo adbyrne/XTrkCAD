@@ -313,7 +313,7 @@ void wControlSetContext(
 void wControlSetFocus(
         wControl_p b)
 {
-	if (b == NULL || b->widget == NULL) return;
+	if (b == NULL || b->widget == NULL) { return; }
 	gtk_widget_grab_focus(b->widget);
 }
 

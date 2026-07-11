@@ -115,7 +115,8 @@ static void on_size_allocate(
 			wcontrol->h = allocation->height;
 			wcontrol->size_changed = TRUE;
 			if (wcontrol->resizeTimer == 0) {
-				wcontrol->resizeTimer = g_timeout_add(REDRAW_TIMEOUT, (GSourceFunc)resizeTime, win);
+				wcontrol->resizeTimer = g_timeout_add(REDRAW_TIMEOUT, (GSourceFunc)resizeTime,
+				                                      win);
 			}
 		}
 	}
@@ -136,7 +137,7 @@ on_widget_deleted(GtkWidget* window, GdkEvent* event, gpointer userData)
 {
 	if (appMainWindow->attributes.window.winProc) {
 		bool rc = appMainWindow->attributes.window.winProc(appMainWindow,
-		          wClose_e, userData, NULL);
+		                wClose_e, userData, NULL);
 		if (!rc) {
 			wPrefFlush(NULL);
 		}

@@ -195,7 +195,7 @@ wIndex_t wListFindValue(
 
 	if ( iDebugList >= 3 ) {
 		printf( "wListFindValue \"%s\"?\"%s\"\n",
-			b->name,  val );
+		        b->name,  val );
 	}
 	thisSearch.search = val;
 	thisSearch.row = 0;

@@ -1044,12 +1044,12 @@ static BOOL_T CarDlgLoadLists(
 	}
 	if ( isItem ) {
 		parentP = (carPartParent_p)wListGetItemContext( (wList_p)
-		          carDlgPLs[I_CD_MANUF_LIST].control, carDlgManufInx );
+		                carDlgPLs[I_CD_MANUF_LIST].control, carDlgManufInx );
 		if ( parentP ) {
 			if ( tabs ) { TabStringCpy( carDlgProtoStr, &tabs[T_PROTO] ); }
 			if ( CarDlgLoadProtoList( carDlgManufStr, scale, TRUE ) || !tabs ) {
 				parentP = (carPartParent_p)wListGetItemContext( (wList_p)
-				          carDlgPLs[I_CD_PROTOTYPE_LIST].control, carDlgProtoInx );
+				                carDlgPLs[I_CD_PROTOTYPE_LIST].control, carDlgProtoInx );
 				if ( parentP ) {
 					if ( tabs ) { TabStringCpy( carDlgPartnoStr, &tabs[T_PART] ); }
 					if ( CarDlgLoadPartList( parentP ) || ( (!tabs) && carDlgPartnoInx>=0 ) ) {
@@ -1305,7 +1305,7 @@ static void CarDlgDoActions( carDlgAction_e * actions, int action_count )
 			break;
 		case A_LoadProtoListForManuf:
 			parentP = (carPartParent_p)wListGetItemContext( (wList_p)
-			          carDlgPLs[I_CD_MANUF_LIST].control, carDlgManufInx );
+			                carDlgPLs[I_CD_MANUF_LIST].control, carDlgManufInx );
 			CarDlgLoadProtoList( parentP->manuf, parentP->scale, TRUE );
 			reload[I_CD_PROTOKIND_LIST] = TRUE;
 			reload[I_CD_PROTOTYPE_LIST] = TRUE;
@@ -1317,7 +1317,7 @@ static void CarDlgDoActions( carDlgAction_e * actions, int action_count )
 			break;
 		case A_LoadPartnoList:
 			parentP = (carPartParent_p)wListGetItemContext( (wList_p)
-			          carDlgPLs[I_CD_PROTOTYPE_LIST].control, carDlgProtoInx );
+			                carDlgPLs[I_CD_PROTOTYPE_LIST].control, carDlgProtoInx );
 			CarDlgLoadPartList( parentP );
 			reload[I_CD_PARTNO_LIST] = TRUE;
 			break;
@@ -1330,7 +1330,7 @@ static void CarDlgDoActions( carDlgAction_e * actions, int action_count )
 			break;
 		case A_LoadDimsFromProtoList:
 			protoP = (carProto_p)wListGetItemContext( (wList_p)
-			         carDlgPLs[I_CD_PROTOTYPE_LIST].control, carDlgProtoInx );
+			                carDlgPLs[I_CD_PROTOTYPE_LIST].control, carDlgProtoInx );
 			if ( protoP ) {
 				CarDlgLoadDimsFromProto( protoP );
 				carDlgTypeInx = CarProtoFindTypeCode( protoP->type );
@@ -1380,7 +1380,7 @@ static void CarDlgDoActions( carDlgAction_e * actions, int action_count )
 			                sizeof carDlgProtoStr, NULL, NULL );
 #ifdef LATER
 			protoP = (carProto_p)wListGetItemContext( (wList_p)
-			         carDlgPLs[I_CD_PROTOTYPE_LIST].control, carDlgProtoInx );
+			                carDlgPLs[I_CD_PROTOTYPE_LIST].control, carDlgProtoInx );
 			if ( protoP ) {
 				carDlgTypeInx = CarProtoFindTypeCode( protoP->type );
 				carDlgIsLoco = (protoP->options&CAR_DESC_IS_LOCO)!=0;
@@ -1621,7 +1621,7 @@ static void CarDlgUpdate(
 
 	case -1:
 		carDlgCarLengthClock = carDlgCoupledLengthClock = carDlgTruckCenterClock =
-		carDlgCouplerLengthClock = carDlgClock = 0;
+		                               carDlgCouplerLengthClock = carDlgClock = 0;
 		redraw = TRUE;
 		break;
 
@@ -1649,7 +1649,7 @@ static void CarDlgUpdate(
 			parentP = NULL;
 			if ( carDlgProtoInx >= 0 ) {
 				parentP = (carPartParent_p)wListGetItemContext( (wList_p)
-				          pg->paramPtr[I_CD_PROTOTYPE_LIST].control, carDlgProtoInx );
+				                pg->paramPtr[I_CD_PROTOTYPE_LIST].control, carDlgProtoInx );
 			}
 			CarDlgLoadProtoList( carDlgManufStr, (parentP?parentP->scale:0), FALSE );
 		}
@@ -1703,7 +1703,7 @@ static void CarDlgUpdate(
 			carDlgRoadnameStr[0] = '\0';
 		} else if ( *(long*)valueP > 0 ) {
 			roadnameMapP = (roadnameMap_p)wListGetItemContext( (wList_p)
-			               pg->paramPtr[I_CD_ROADNAME_LIST].control, (wIndex_t)*(long*)valueP );
+			                pg->paramPtr[I_CD_ROADNAME_LIST].control, (wIndex_t)*(long*)valueP );
 			strcpy( carDlgRoadnameStr, roadnameMapP->roadname );
 		} else {
 			wListGetValues( (wList_p)pg->paramPtr[I_CD_ROADNAME_LIST].control,
@@ -1874,7 +1874,7 @@ static void CarDlgUpdate(
 	case I_CD_CURPRC:
 		carDlgChanged++;
 		*(FLOAT_T*)(pg->paramPtr[inx].context) = strtod( (char*)
-		        pg->paramPtr[inx].valueP, &cp );
+		                pg->paramPtr[inx].valueP, &cp );
 		if ( cp==NULL || *cp!='\0' ) {
 			*(FLOAT_T*)(pg->paramPtr[inx].context) = -1;
 			ok = FALSE;

@@ -1203,7 +1203,7 @@ static BOOL_T PrintPage(
 		p[2].y = p[3].y = roomSize.y;
 
 		BOOL_T left_clear = FALSE, right_clear = FALSE, base_clear = FALSE,
-		                                                top_clear = FALSE;
+		       top_clear = FALSE;
 
 		if (currPrintGrid.orig.x <= -0.5*printScale) { left_clear = TRUE; }
 		if (currPrintGrid.orig.y <= -0.5*printScale) { base_clear = TRUE; }
@@ -1318,7 +1318,8 @@ typedef struct {
 	wIndex_t y;
 } printPageCoord_t;
 
-static printPageCoord_t *printPageList = NULL;	/**< ordered pages for this job */
+static printPageCoord_t *printPageList =
+        NULL;	/**< ordered pages for this job */
 static int printPageListCount = 0;				/**< number of entries in printPageList */
 
 /**

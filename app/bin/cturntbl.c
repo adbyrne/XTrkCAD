@@ -105,7 +105,7 @@ static track_p NewTurntable( coOrd p, DIST_T r )
 
 #ifdef LATER
 -static void PruneTurntable( track_p trk )
--
+        -
 {
 	-	 EPINX_T inx0;
 	-	 EPINX_T inx1;
@@ -113,20 +113,20 @@ static track_p NewTurntable( coOrd p, DIST_T r )
 		-		if (GetTrkEndTrk(trk,inx0) == NULL) {
 			-			continue;
 			-
-		} else {
+		        } else {
 			-			if (inx0 != inx1) {
 				-				trk->endPt[inx1] = GetTrkEndTrk(trk,inx0);
 				-
-			}
+			        }
 			-			inx1++;
 			-
-		}
+		        }
 		-
 	}
 	-	 trk->endPt = Realloc( trk->endPt, inx1*sizeof trk->endPt[0] );
 	-	 trk->endCnt = inx1;
 	-
-}
+        }
 #endif
 
 static ANGLE_T ConstrainTurntableAngle( track_p trk, coOrd pos )
@@ -547,7 +547,7 @@ static BOOL_T CheckTraverseTurntable(
 		return FALSE;
 	}
 	angle = FindAngle( xx->pos, pos ) - GetTrkEndAngle( trk,
-	        xx->currEp )+connectAngle/2.0;
+	                xx->currEp )+connectAngle/2.0;
 	if ( angle <= connectAngle	||
 	     ( angle >= 180.0 && angle <= 180+connectAngle ) ) {
 		return TRUE;

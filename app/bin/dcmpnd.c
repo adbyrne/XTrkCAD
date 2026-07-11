@@ -275,7 +275,7 @@ EXPORT BOOL_T RefreshCompound(
 			return refreshReturnVal;
 		}
 		to = (turnoutInfo_t*)wListGetItemContext( (wList_p)
-		        refreshSpecialPLs[REFRESH_L].control, refreshSpecialInx );
+		                refreshSpecialPLs[REFRESH_L].control, refreshSpecialInx );
 		if ( to != NULL &&
 		     RefreshCompound1( trk, to ) ) {
 			DYNARR_APPEND( refreshSpecial_t, refreshSpecial_da, 10 );
@@ -419,9 +419,9 @@ static int CompoundCustMgmProc(
 		if ( to->endCnt == 0 || to->customInfo==NULL )	{
 			renameTo = to;
 			ParseCompoundTitle( to->title, &mP, &mL, &pP, &pL, &nP, &nL );
-			if ( mL > (int)sizeof renameManuf - 1 ) mL = (int)sizeof renameManuf - 1;
-			if ( pL > (int)sizeof renameDesc - 1 )  pL = (int)sizeof renameDesc - 1;
-			if ( nL > (int)sizeof renamePartno - 1 ) nL = (int)sizeof renamePartno - 1;
+			if ( mL > (int)sizeof renameManuf - 1 ) { mL = (int)sizeof renameManuf - 1; }
+			if ( pL > (int)sizeof renameDesc - 1 ) { pL = (int)sizeof renameDesc - 1; }
+			if ( nL > (int)sizeof renamePartno - 1 ) { nL = (int)sizeof renamePartno - 1; }
 			strncpy( renameManuf, mP, mL ); renameManuf[mL] = 0;
 			strncpy( renameDesc, pP, pL ); renameDesc[pL] = 0;
 			strncpy( renamePartno, nP, nL ); renamePartno[nL] = 0;

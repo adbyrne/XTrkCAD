@@ -844,7 +844,8 @@ EXPORT void InitSnapGridButtons( void )
 	                                     NULL);
 
 	wToggleGroupRegister(snapGridEnable_b, TOGGLEGRP_GRID_ENABLE);
-	wToggleGroupSetActive(TOGGLEGRP_GRID_ENABLE, grid.Horz.Enable || grid.Vert.Enable);
+	wToggleGroupSetActive(TOGGLEGRP_GRID_ENABLE, grid.Horz.Enable
+	                      || grid.Vert.Enable);
 
 	snapGridShow_b = AddToolbarButton( "cmdGridShow",
 	                                   CreateToolbarIconFromResource("snap-grid.png"), IC_MODETRAIN_TOO | IC_TOGGLE,

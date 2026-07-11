@@ -396,7 +396,7 @@ void wDrawLine(
 
 	if (bd->drawDestination == DIRECTCAIRO) {
 		wBasicDrawLine(drawingArea, x0, y0, x1, y1, width,
-		              MINLINEWIDTHBITMAP, lineType, color, opts);
+		               MINLINEWIDTHBITMAP, lineType, color, opts);
 		return;
 	}
 
@@ -462,7 +462,7 @@ void wDrawArc(
 
 	if (bd->drawDestination == DIRECTCAIRO) {
 		wBasicDrawArc(drawingArea, x0, y0, r, angle0, angle1, drawCenter, width,
-		             MINLINEWIDTHBITMAP, lineType, color, opts);
+		              MINLINEWIDTHBITMAP, lineType, color, opts);
 		return;
 	}
 
@@ -568,7 +568,7 @@ void wDrawString(
 
 	if (bd->drawDestination == DIRECTCAIRO) {
 		wBasicDrawString(drawingArea, x, y, a, (char *) s, fp, fs,
-		                MINLINEWIDTHBITMAP, MINLINEWIDTHBITMAP, color, opts);
+		                 MINLINEWIDTHBITMAP, MINLINEWIDTHBITMAP, color, opts);
 		return;
 	}
 

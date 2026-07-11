@@ -578,7 +578,7 @@ SimpleDynamic(void* unused)
 	                       ButtonAction, NULL);
 
 	wControl_p	combo = wComboBoxCreate(dialog, 1, 8, "combobox", NULL, 0L, 0, 1,
-	                                    NULL, ComboBoxAction, NULL);
+	                                        NULL, ComboBoxAction, NULL);
 
 	for (int i = 0; i < COMBOLINES; i++) {
 		wComboBoxAddValue(combo, comboLines[i], NULL);

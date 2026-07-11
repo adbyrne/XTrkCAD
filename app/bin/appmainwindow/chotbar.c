@@ -110,7 +110,7 @@ static void HotBarHighlight( int inx, DIST_T fixed_x )
 	orig.y = 0;
 	size.x = hotBarMap(inx).w - 2.0/hotBarD.dpi;
 	size.y = (DIST_T)(wControlGetHeight( (wControl_p)hotBarD.d ) -
-	                            2)/hotBarD.dpi;
+	                  2)/hotBarD.dpi;
 
 	DrawRectangle( &hotBarD, orig, size, wDrawColorBlack, DRAW_TRANSPARENT );
 }
@@ -654,10 +654,10 @@ GetHotbarHeight()
 	wWinPix_t totalHeight = hotBarDrawHeight[iconSize];
 
 	if ( hotBarLabels) {
-	hotBarTextHeight = (wWinPix_t)round(wMessageGetHeight(0L) * (0.6 + 0.4 *
-	                                    (double)iconSize));
+		hotBarTextHeight = (wWinPix_t)round(wMessageGetHeight(0L) * (0.6 + 0.4 *
+		                                    (double)iconSize));
 
-	
+
 		totalHeight += hotBarTextHeight;
 	}
 

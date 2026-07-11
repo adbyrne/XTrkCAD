@@ -613,7 +613,7 @@ wBool_t wlibHandleAccelKey(GdkEventKey *event);
 
 /* wPref.c */
 GtkPrintSettings *wlibPrefGetPrintSettings(void);
-void wlibPrefSetPrintSettings(GtkPrintSettings *settings); 
+void wlibPrefSetPrintSettings(GtkPrintSettings *settings);
 GtkPageSetup *wlibPrefGetPageSetup(void);
 void wlibPrefSetPageSetup(GtkPageSetup *page_setup);
 
@@ -677,7 +677,8 @@ void wlibSetTrigger(wControl_p b, setTriggerCallback_p trigger);
 
 /* togglegroup.c */
 void wlibToggleGroupsInit(void);
-void wlibToggleGroupConnect(const gchar *group_name, GCallback callback, wControl_p  user_data);
+void wlibToggleGroupConnect(const gchar *group_name, GCallback callback,
+                            wControl_p  user_data);
 /**
  * \todo Check usage of labelStr
  */
