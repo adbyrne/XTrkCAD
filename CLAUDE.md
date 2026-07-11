@@ -2,18 +2,141 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Session startup — SSH agent check
+
+The SourceForge Hg remote (`hg.code.sf.net`) requires the passphrase-protected key
+`~/.ssh/id_ed25519`. Non-interactive SSH (the weekly sync timer, or any `hg pull`/`push` run by
+Claude) cannot supply the passphrase, so the key must already be loaded in the user's
+`ssh-agent`. Check at the start of every session:
+
+```sh
+ssh-add -l | grep -q id_ed25519 || echo "NOT LOADED"
+```
+
+If not loaded, ask the user to run (via `!` so it's interactive and can prompt for the
+passphrase): `ssh-add ~/.ssh/id_ed25519`. Don't attempt `hg pull`/`push` against the SF remote
+until this succeeds — it will otherwise fail with `Permission denied (publickey,keyboard-interactive)`,
+which looks like an SF-side credential problem but usually isn't (see incident 2026-07-11 below).
+
+## Session startup — upstream sync check
+
+**At the start of every session**, check for the pending upstream-sync notification:
+
+```sh
+cat /home/abyrne/XTrkCAD/.claude/sf-sync-pending   # non-empty = upstream changes waiting
+```
+
+If the file is non-empty, tell the user which branches have new SF changes (the file lists the
+git test-branch names) and ask: **"Upstream SF changes are pending — want me to compile and
+test them locally, then push to GitHub CI?"**
+
+If yes, run the following workflow:
+
+### 1 — Local compile (Linux GTK3)
+
+The Hg working copies are already updated by the weekly sync script. Just rebuild:
+
+```sh
+cmake --build build-gtk3v2main 2>&1 | tee /tmp/build-gtk3v2main.log
+ctest --test-dir build-gtk3v2main --output-on-failure
+```
+
+For default-branch changes (rare) use `build/` instead.
+
+### 2 — Fix any compile errors
+
+- Edit files in `xtrkcad-hg-gtk3v2main/` (the Hg source for GTK3V2MAIN).
+- Rebuild until clean and all tests pass.
+- Keep fixes minimal — only what's needed to compile against the upstream changes.
+
+### 3 — Carry fixes into the git test branch and push
+
+The sync script already pushed a `test/upstream-{branch}-YYYY-MM-DD` branch to GitHub with the
+raw upstream diff applied. If the local build needed fixes, apply them to that branch too:
+
+```sh
+# Get a diff of what was fixed in Hg
+hg -R xtrkcad-hg-gtk3v2main diff > /tmp/local-fixes.diff
+
+# Apply to the git test branch
+BRANCH=$(grep -oP "test/upstream-\S+" /home/abyrne/XTrkCAD/.claude/sf-sync-pending | head -1)
+git -C xtrkcad-git checkout "$BRANCH"
+git -C xtrkcad-git apply /tmp/local-fixes.diff
+git -C xtrkcad-git add -u
+git -C xtrkcad-git commit -m "fix: local compile fixes for upstream SF sync"
+git -C xtrkcad-git push
+```
+
+If the build was already clean (no fixes needed), skip step 3 — CI is already running on the
+branch that the sync script pushed.
+
+### 4 — Verify the git tree actually matches Hg before declaring the sync done
+
+**Never update `bug-tracker.md`'s "Hg Branches" table to `✅ rNNNN — synced` based on the diff
+having applied cleanly.** A clean `git apply` only proves *that patch's* hunks landed — it says
+nothing about files a *previous* sync silently failed to bring forward. That gap is exactly what
+caused the 2026-07-09 incident: git's GTK3V2MAIN quietly fell behind Hg in the gtk3lib
+control-struct/basic-draw family and several `app/bin` files for weeks while the tracker kept
+claiming full sync.
+
+Run the verification script instead:
+
+```sh
+xtrkcad-verify-sync xtrkcad-hg-gtk3v2main tip xtrkcad-git-gtk3 GTK3V2MAIN
+# for the default/GTK2 branch: xtrkcad-verify-sync xtrkcad-hg tip xtrkcad-git main
+```
+
+It archives both trees and diffs every file under `app/`, filtered against the maintained
+allowlist at `.claude/sync-exceptions.txt`. `PASS` means the git tree is byte-for-byte identical
+to Hg except for documented, deliberate exceptions — only then is it safe to write the `✅ rNNNN`
+line. On `FAIL`, either reconcile the listed files or, if the difference is genuinely intentional
+(e.g. a feature port that's blocked, or local test coverage never contributed upstream), add it
+to `sync-exceptions.txt` with a reason comment — don't silently ignore the failure.
+
+### 5 — Clear the pending file
+
+```sh
+rm /home/abyrne/XTrkCAD/.claude/sf-sync-pending
+```
+
+### Notes
+- The test branch is for integration testing only — do **not** merge it into `main`/`GTK3V2MAIN`
+  until CI is green and the changes are reviewed.
+- If the patch required manual conflict resolution (the sync script saved a `.diff` to
+  `.claude/patches/` instead of creating a branch), handle that first before compiling, and run
+  step 4's verification afterward — this is exactly the case that most often leaves files behind.
+
+---
+
 ## Project Layout (`/home/abyrne/XTrkCAD/`)
 
 ```
-.claude/                   Development working files — plans, notes (not committed to repos)
+.claude/                   Development working files — plans, notes, sf-sync-pending (not committed)
 docs/                      Project documentation not required in any repo
-xtrkcad-hg/                Hg working copy — default branch (r6423+), remote = SourceForge
-xtrkcad-hg-gtk3v2main/     Hg working copy — GTK3V2MAIN branch (r5569+), cloned from xtrkcad-hg
-xtrkcad-git/               Git repo — main branch (GTK2), pushed to GitHub
+xtrkcad-hg/                Hg working copy — default branch, remote = SourceForge
+xtrkcad-hg-gtk3v2main/     Hg working copy — GTK3V2MAIN branch, cloned from xtrkcad-hg
+xtrkcad-git/               Git repo — main branch (GTK2), pushed to github.com/adbyrne/XTrkCAD
 xtrkcad-git-gtk3/          Git worktree — GTK3V2MAIN branch (same .git as xtrkcad-git)
-build/                     Out-of-source CMake build for default branch
-build-gtk3v2main/          Out-of-source CMake build for GTK3V2MAIN branch
+build/                     Out-of-source CMake build for default branch (source: xtrkcad-hg)
+build-gtk3v2main/          Out-of-source CMake build for GTK3V2MAIN branch (source: xtrkcad-hg-gtk3v2main)
 CLAUDE.md                  This file — committed into xtrkcad-git (main) and xtrkcad-git-gtk3 (GTK3V2MAIN)
+```
+
+## SourceForge / Mercurial remote
+
+Both Hg repos push via SSH. The HTTP endpoint returns 400 errors and is not used.
+
+- **SourceForge username**: `adbyrne1905`
+- **SSH key**: `~/.ssh/id_ed25519` (registered at SF Account → SSH Settings)
+- `xtrkcad-hg` remote: `ssh://adbyrne1905@hg.code.sf.net/p/xtrkcad-fork/xtrkcad`
+- `xtrkcad-hg-gtk3v2main` remote: `xtrkcad-hg` (local) — push there first, then push `xtrkcad-hg` to SF
+
+Push sequence:
+```sh
+hg -R xtrkcad-hg-gtk3v2main push          # GTK3V2MAIN → local default repo
+hg -R xtrkcad-hg pull                     # pull any upstream SF changes
+hg -R xtrkcad-hg merge && hg -R xtrkcad-hg commit -m "merge: ..."   # if needed
+hg -R xtrkcad-hg push                     # default → SourceForge
 ```
 
 ## Build
@@ -74,12 +197,6 @@ astyle --options=xtrkcad-hg/app/lib/astylerc <file.c>
 
 The `.editorconfig` at repo root encodes the same rules for editor integration.
 
-## Known CMake Issues (track for CMake 4.x)
-
-`app/bin/CMakeLists.txt` mixes keyword and non-keyword `target_link_libraries` calls on
-`xtrkcad-lib` — line 284 uses `PRIVATE`, surrounding calls do not. CMake 4.0 makes
-CMP0023 a hard error. Fix by adding `PRIVATE` to all non-keyword calls on that target.
-
 ## Architecture
 
 XTrkCAD is a C application for designing model railroad layouts. Several libraries link into one executable:
@@ -130,12 +247,14 @@ Used only at build time:
 
 ## Version
 
-Current development version: **5.4.0** (`ProgramVersion.cmake`). GTK3V2MAIN branch
-is version 5.4.0 (GTK3 successor release); GTK2 default branch stays at 5.3.x.
-Binary named `xtrkcad-beta` when version modifier matches "^Beta", `xtrkcad` otherwise.
+Current development version: **5.3.2Dev** (`ProgramVersion.cmake`) on `default`/`main`
+(GTK2). Binary named `xtrkcad-beta` when `XTRKCAD_VERSION_MODIFIER` matches `^Beta`,
+`xtrkcad` otherwise.
 
-To cut a release: `git tag v5.4.0 && git push origin v5.4.0` — GitHub Actions
-(`release.yml`) automatically builds packages and creates a draft GitHub Release.
+**GTK3V2MAIN branch only:** version is **5.4.0** (GTK3 successor release; no modifier),
+tracked independently from the GTK2 default branch's 5.3.x line. To cut a release:
+`git tag v5.4.0 && git push origin v5.4.0` — GitHub Actions (`release.yml`) automatically
+builds packages and creates a draft GitHub Release.
 
 ## File Formats
 
