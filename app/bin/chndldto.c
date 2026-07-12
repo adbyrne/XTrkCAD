@@ -94,7 +94,7 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 //			pointC = pointP = pointP1 = reverseC = zero;
 			return C_CONTINUE;
 		}
-		/* fall through */
+	/* fall through */
 
 	case C_MOVE:
 	case C_UP:
@@ -354,7 +354,7 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 			Dhlt.state = 0;
 			return C_TERMINATE;
 		}
-		/* fall through */
+	/* fall through */
 
 	case C_REDRAW:
 		if (Dhlt.state >= 1) {

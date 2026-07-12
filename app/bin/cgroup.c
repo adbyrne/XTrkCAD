@@ -885,7 +885,7 @@ static int GroupShortestPathFunc(
 		CHECKMSG( FALSE,
 		          ( "GroupShortestPathFunc(SPTC_ADD_TRK, T%d) - track not in group",
 		            GetTrkIndex(trk) ) );
-		/* fall through */
+	/* fall through */
 
 	case SPTC_TERMINATE:
 		ppp = &pathElem(pathElemStart);

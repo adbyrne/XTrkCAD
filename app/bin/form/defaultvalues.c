@@ -342,7 +342,7 @@ EXPORT void FormUpdatePrefs( void )
 					wPrefSetString( PREFSECT, prefName, message );
 					prefName[len] = '\0';
 				}
-				/* fall through */
+			/* fall through */
 			case PD_DROPLIST:
 			case PD_COMBOLIST:
 				if ( (p->option&PDO_LISTINDEX) ) {
