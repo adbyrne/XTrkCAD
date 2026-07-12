@@ -407,7 +407,7 @@ BOOL_T UnpackArchiveFor(
 				}
 
 				sum = 0;
-				while (sum != sb.size) {
+				while (sum != (long long)sb.size) {
 					len = zip_fread(zf, buf, 100);
 					if (len < 0) {
 						NoticeMessage(MSG_ZIP_READ_FAIL, _("Continue"), NULL, dirName, &sb.name[0]);

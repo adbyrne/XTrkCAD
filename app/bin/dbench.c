@@ -377,7 +377,7 @@ EXPORT void CountBench(
 	bp->length = length;
 foundBenchEnum:
 	PrintBenchLine( message, bp );
-	size_t width = strlen(message);
+	int width = (int)strlen(message);
 	if ( width > enumerateMaxDescLen) {
 		enumerateMaxDescLen = (int)width;
 	}

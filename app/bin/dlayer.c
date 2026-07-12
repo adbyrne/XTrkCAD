@@ -1150,7 +1150,7 @@ static void InitializeLayers(void LayerInitFunc(void), int newCurrLayer)
 				break;
 			}
 		}
-		if (curLayer == -1) {
+		if ((int)curLayer == -1) {
 			ErrorMessage(MSG_NO_EMPTY_LAYER);
 			layers[0].frozen = FALSE;
 			curLayer = 0;
@@ -1726,7 +1726,7 @@ void ResetLayers(void)
 		}
 	}
 
-	if (curLayer == -1) {
+	if ((int)curLayer == -1) {
 		ErrorMessage(MSG_NO_EMPTY_LAYER);
 		layers[0].frozen = FALSE;
 		curLayer = 0;

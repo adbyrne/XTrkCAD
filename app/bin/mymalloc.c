@@ -195,7 +195,7 @@ EXPORT void* MyRealloc(void* old, size_t size)
 	LOG1(log_malloc, ("  Realloc (" SLOG_FMT ",%ld) was %d\n", (size_t)old, size,
 	                  oldSize))
 
-	if ((long)oldSize == size) {
+	if (oldSize == size) {
 		return old;
 	}
 	new = MyMalloc(size);

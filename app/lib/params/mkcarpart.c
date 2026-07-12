@@ -436,7 +436,7 @@ void processFile(
 				while ( cq[-1] == ' ' ) { cq--; }
 				*cq = '\0';
 			}
-			for ( ; inx<sizeof tab/sizeof tab[0]; inx++ ) {
+			for ( ; inx<(int)(sizeof tab/sizeof tab[0]); inx++ ) {
 				tab[inx] = blanks;
 			}
 			lookupRoadname( tab[roadX], roadnameS, repmarkS );

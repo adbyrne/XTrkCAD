@@ -51,7 +51,7 @@ unsigned selected;
 #define MAXIMUM_LENGTH_DATE	8		//yy/mm/dd
 
 #define UPDATE_MAX_WIDTH(index, current_width) \
-    if ((current_width) > widths[(index)]) { \
+    if ((unsigned int)(current_width) > widths[(index)]) { \
         widths[(index)] = (current_width); \
     }
 
@@ -151,7 +151,7 @@ paramGroup_t carInvPG = { "carinv", PGO_FULLDIALOGFROMBUILDER, carInvPLs, COUNT(
 
 #define MAX_SORT_CRITERIA 4
 static struct {
-	unsigned criteria;
+	int criteria;
 	unsigned carInvSort[MAX_SORT_CRITERIA];
 } sortorder = {
 	.criteria = 0,
@@ -169,7 +169,7 @@ static struct {
 static void
 DeleteTag(void *context )
 {
-	unsigned thisTag = (unsigned int )((long)context);
+	int thisTag = (int)((long)context);
 	paramData_p menuItem = carInvPLs+sortorder.carInvSort[thisTag];
 
 	if(sortorder.criteria == 0 || thisTag >= sortorder.criteria) {
@@ -577,7 +577,7 @@ char *columnHeaders[] = {
 static void UpdateColumnWidths(unsigned int *widths, size_t count,
                                char** columnHeaders)
 {
-	for(int inx = 0; inx < count; inx++) {
+	for(int inx = 0; inx < (int)count; inx++) {
 		if(widths[inx]) {
 			UPDATE_MAX_WIDTH(inx, strlen(columnHeaders[inx]));
 		}
@@ -678,7 +678,7 @@ TextExportValue(FILE *fh, int width, double value)
 static void
 WriteExportHeader( FILE* fh, unsigned int *widths, size_t count, char **label )
 {
-	for(int inx = 0; inx < count; inx++) {
+	for(int inx = 0; inx < (int)count; inx++) {
 		TextExportString(fh, widths[inx], label[inx]);
 	}
 	TextExportEOL(fh);

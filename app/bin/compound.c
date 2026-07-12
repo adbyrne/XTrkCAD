@@ -789,7 +789,7 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd,
 		}
 		message[0] = '\0';
 		strncat( message, manufS, max_manustr-1 );
-		if ( strncmp( manufS, mP, mL ) != 0 || mL != strlen(manufS) ) {
+		if ( strncmp( manufS, mP, mL ) != 0 || mL != (int)strlen(manufS) ) {
 			titleChanged = TRUE;
 		}
 		flipped = xx->flipped;
@@ -824,7 +824,7 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd,
 		} else {
 			split = FALSE;
 		}
-		if ( strncmp( nameS, nP, nL ) != 0 || nL != strlen(nameS) ||
+		if ( strncmp( nameS, nP, nL ) != 0 || nL != (int)strlen(nameS) ||
 		     xx->flipped != flipped ||
 		     xx->ungrouped != ungrouped ||
 		     xx->split != split ) {
@@ -846,7 +846,7 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd,
 		strcat( message, "\t");
 		strncat( message, partnoS, max_partstr-1 );
 		newTitle = MyStrdup( message );
-		if ( strncmp( partnoS, pP, pL ) != 0 || pL != strlen(partnoS) ) {
+		if ( strncmp( partnoS, pP, pL ) != 0 || pL != (int)strlen(partnoS) ) {
 			titleChanged = TRUE;
 		}
 		if ( ! titleChanged ) {

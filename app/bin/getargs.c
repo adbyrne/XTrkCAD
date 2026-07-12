@@ -270,7 +270,7 @@ EXPORT BOOL_T GetArgs(
 				ps = &message[0];
 				cp++;
 				while (*cp) {
-					CHECK( (ps-message)<sizeof message );
+					CHECK( (size_t)(ps-message)<sizeof message );
 					if (*cp == '\"') {
 						if (*++cp == '\"') {
 							*ps++ = '\"';

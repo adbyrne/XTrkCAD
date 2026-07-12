@@ -1835,7 +1835,7 @@ EXPORT void AuditTracks( char * event, ... )
 	*msgp++ = '\n';
 
 	trackCount = 0;
-	for (i=0; i<sizeof used; i++) {
+	for (i=0; i<(wIndex_t)sizeof used; i++) {
 		used[i] = 0;
 	}
 	if (*to_last) {
@@ -1858,7 +1858,7 @@ EXPORT void AuditTracks( char * event, ... )
 				AuditPrint( msg );
 			}
 		}
-		if (trk->index < 8*sizeof used) {
+		if (trk->index < (TRKINX_T)(8*sizeof used)) {
 			if (BIT_SET(used,trk->index)) {
 				sprintf( msgp, "T%d: index used again\n", trk->index );
 				AuditPrint( msg );

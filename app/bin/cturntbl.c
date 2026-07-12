@@ -623,7 +623,7 @@ static BOOL_T EnumerateTurntable( track_p trk )
 	struct extraDataTurntable_t *xx;
 	static dynArr_t turntables_da;
 #define turntables(N) DYNARR_N( FLOAT_T, turntables_da, N )
-	size_t inx;
+	int inx;
 	char tmp[40];
 	BOOL_T content = FALSE;
 	if ( trk != NULL ) {
