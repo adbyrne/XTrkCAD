@@ -138,7 +138,7 @@ static void DrawRulerBackground(drawCmd_p d, coOrd pos0, coOrd pos1,
 	if (a == 90.0) {
 		/* Horizontal ruler */
 		wDrawPix_t x = (px0 < px1) ? px0 : px1;
-		wDrawPix_t w = abs(px1 - px0);
+		wDrawPix_t w = fabs(px1 - px0);
 		wDrawPix_t y, h;
 		h = maxTickPx;
 		if (tickSide == 0) {
@@ -151,7 +151,7 @@ static void DrawRulerBackground(drawCmd_p d, coOrd pos0, coOrd pos1,
 	} else if (a == 0.0) {
 		/* Vertical ruler */
 		wDrawPix_t y = (py0 < py1) ? py0 : py1;
-		wDrawPix_t h = abs(py1 - py0);
+		wDrawPix_t h = fabs(py1 - py0);
 		wDrawPix_t x, w;
 		w = maxTickPx;
 		if (tickSide == 0) {

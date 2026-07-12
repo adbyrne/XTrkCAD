@@ -122,11 +122,11 @@ void EnumerateList(
         char * indexes )
 {
 	char * cp;
-	size_t len;
+	long len;
 	sprintf( message, "%*ld | %s\n", count_utf8_chars(_("Count")), count, desc );
 	if (enableListPrices) {
 		cp = message + strlen( message )-1;
-		len = enumerateMaxDescLen-strlen(desc);
+		len = (long)enumerateMaxDescLen-(long)strlen(desc);
 		if (len<0) { len = 0; }
 		memset( cp, ' ', len );
 		cp += len;
