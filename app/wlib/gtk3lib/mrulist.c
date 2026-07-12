@@ -207,7 +207,7 @@ void * MRURemoveEntry(MRUList* list, const char* label)
  */
 
 void
-free_element(gpointer data)
+free_element(gpointer data, gpointer user_data)
 {
 	MRUEntry* queueelement = (MRUEntry*)data;
 
@@ -225,7 +225,7 @@ void MRUClear(MRUList* list)
 	// free all elements
 
 	//printf("MRUClear: %d elements\n", MRUGetCount(list));
-	g_queue_foreach(list->elements, (GFunc)free_element, NULL);
+	g_queue_foreach(list->elements, free_element, NULL);
 	g_queue_clear(list->elements);
 }
 

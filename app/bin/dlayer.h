@@ -45,7 +45,7 @@ ANGLE_T GetLayerMaxTrackGrade( unsigned int layer );
 void SetLayerModule(unsigned int, BOOL_T);
 char * GetLayerName( unsigned int );
 void SetLayerName(unsigned int layer, char* name);
-BOOL_T ReadLayers( char * );
+void ReadLayers( char * );
 BOOL_T WriteLayers( FILE * );
 char * FormatLayerName(unsigned int layerNumber);
 // void UpdateLayerLists( void );

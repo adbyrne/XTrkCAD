@@ -1245,12 +1245,12 @@ EXPORT void CreateMenus(void)
 	                   EditClone, 0, NULL);
 	/*Select*/
 	MiscMenuItemCreate(popup1M, popup2M, "cmdSelectAll", _("Select All"), 0,
-	                   (wMenuCallBack_p) SetAllTrackSelect, 0, I2VP(1));
+	                   SetAllTrackSelectCB, 0, I2VP(1));
 	MiscMenuItemCreate(popup1M, popup2M, "cmdSelectCurrentLayer",
 	                   _("Select Current Layer"), 0,
 	                   SelectCurrentLayer, 0, NULL);
 	MiscMenuItemCreate(popup2M, NULL, "cmdDeselectAll", _("Deselect All"), 0,
-	                   (wMenuCallBack_p) SetAllTrackSelect, 0, I2VP(FALSE));
+	                   SetAllTrackSelectCB, 0, I2VP(FALSE));
 	wMenuPushCreate(popup1M, "cmdSelectIndex", _("Select Track Index..."), 0,
 	                StartIndexDialog, &SelectByIndex);
 	wMenuPushCreate(popup2M, "cmdSelectIndex", _("Select Track Index..."), 0,
@@ -1263,7 +1263,7 @@ EXPORT void CreateMenus(void)
 	wMenuSeparatorCreate(popup1M);
 	wMenuSeparatorCreate(popup2M);
 	MiscMenuItemCreate(popup2M, NULL, "cmdDelete", _("Delete"), 0,
-	                   (wMenuCallBack_p) SelectDelete, 0, NULL);
+	                   SelectDeleteCB, 0, NULL);
 	wMenuSeparatorCreate(popup2M);
 	popup1aM = wMenuMenuCreate(popup1M, "", _("Add..."));
 	popup2aM = wMenuMenuCreate(popup2M, "", _("Add..."));
@@ -1402,7 +1402,7 @@ EXPORT void CreateMenus(void)
 	MiscMenuItemCreate(editM, NULL, "cmdClone", _("C&lone"), ACCL_CLONE,
 	                   EditClone, 0, NULL);
 	MiscMenuItemCreate(editM, NULL, "cmdDelete", _("De&lete"), ACCL_DELETE,
-	                   (wMenuCallBack_p) SelectDelete, IC_SELECTED, NULL);
+	                   SelectDeleteCB, IC_SELECTED, NULL);
 	MiscMenuItemCreate(editM, NULL, "cmdMoveToCurrentLayer",
 	                   _("Move To Current Layer"), ACCL_MOVCURLAYER,
 	                   MoveSelectedTracksToCurrentLayer,
@@ -1410,13 +1410,13 @@ EXPORT void CreateMenus(void)
 	wMenuSeparatorCreate( editM );
 	menuPLs[menuPG.paramCnt].context = I2VP(1);
 	MiscMenuItemCreate( editM, NULL, "cmdSelectAll", _("Select &All"),
-	                    ACCL_SELECTALL, (wMenuCallBack_p)SetAllTrackSelect, 0, I2VP(TRUE) );
+	                    ACCL_SELECTALL, SetAllTrackSelectCB, 0, I2VP(TRUE) );
 	MiscMenuItemCreate( editM, NULL, "cmdSelectCurrentLayer",
 	                    _("Select Current Layer"), ACCL_SETCURLAYER, SelectCurrentLayer, 0, NULL);
 	MiscMenuItemCreate( editM, NULL, "cmdSelectByIndex", _("Select By Index"), 0L,
 	                    StartIndexDialog, 0, &SelectByIndex );
 	MiscMenuItemCreate( editM, NULL, "cmdDeselectAll", _("&Deselect All"),
-	                    ACCL_DESELECTALL, (wMenuCallBack_p)SetAllTrackSelect, 0, I2VP(FALSE) );
+	                    ACCL_DESELECTALL, SetAllTrackSelectCB, 0, I2VP(FALSE) );
 	MiscMenuItemCreate( editM, NULL,  "cmdSelectInvert", _("&Invert Selection"), 0L,
 	                    InvertTrackSelect, 0, NULL);
 	MiscMenuItemCreate( editM, NULL,  "cmdSelectOrphaned",

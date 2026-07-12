@@ -1894,7 +1894,7 @@ static CatalogEntry *ScanSettingsDirectory(Catalog *catalog,
  *
  */
 
-BOOL_T ReadLayers(char *line)
+void ReadLayers(char *line)
 {
 	char *name, *linkedLayers, *layerSettingsName, *extra;
 	int inx, visible, frozen, color, onMap, module, dontUseColor, ColorFlags,
@@ -1906,7 +1906,7 @@ BOOL_T ReadLayers(char *line)
 	/* older files didn't support layers */
 
 	if (paramVersion < 7) {
-		return TRUE;
+		return;
 	}
 
 	/* set the current layer */
@@ -1932,25 +1932,25 @@ BOOL_T ReadLayers(char *line)
 			wListSetIndex(setLayerL, curLayer);
 		}
 
-		return TRUE;
+		return;
 	}
 
 	if (strncmp(line, "LINK", 4) == 0) {
 		if (!GetArgs(line + 4, "dq", &inx, &linkedLayers)) {
-			return FALSE;
+			return;
 		}
 		PutLayerListArray(inx, linkedLayers);
-		return TRUE;
+		return;
 	}
 
 	if (strncmp(line, "SET", 3) == 0) {
 		if (!GetArgs(line + 3, "dq", &inx, &layerSettingsName)) {
-			return FALSE;
+			return;
 		}
 		strncpy(layers[inx].settingsName, layerSettingsName,
 		        sizeof(layers[inx].settingsName) - 1);
 		layers[inx].settingsName[sizeof(layers[inx].settingsName) - 1] = '\0';
-		return TRUE;
+		return;
 	}
 
 	/* get the properties for a layer from the file and update the layer
@@ -1959,14 +1959,14 @@ BOOL_T ReadLayers(char *line)
 	if (!GetArgs(line, "dddduddddqc", &inx, &visible, &frozen, &onMap, &rgb,
 	             &module, &dontUseColor, &ColorFlags, &button_off, &name,
 	             &extra)) {
-		return FALSE;
+		return;
 	}
 	/* Check for old version: name here */
 	if (extra && strlen(extra) > 0) {
 		/* tie data version */
 		if (!GetArgs(extra, "dufffff", &inherit, &sclInx, &minRad, &maxGrd, &tieLen,
 		             &tieWid, &tieSpc)) {
-			return FALSE;
+			return;
 		}
 	} else {
 		sclInx = GetLayoutCurScale();
@@ -1993,7 +1993,7 @@ BOOL_T ReadLayers(char *line)
 	}
 
 	if (inx < 0 || inx >= NUM_LAYERS) {
-		return FALSE;
+		return;
 	}
 
 	tieData_t td = {TRUE, tieLen, tieWid, tieSpc};
@@ -2032,8 +2032,6 @@ BOOL_T ReadLayers(char *line)
 
 	// The last layer will set this correctly
 	maxLayer = inx;
-
-	return TRUE;
 }
 
 /**
@@ -2304,7 +2302,7 @@ void InitLayers(int cmdGroup)
 	}
 
 	AddPlaybackProc("SETCURRLAYER", PlaybackCurrLayer, NULL);
-	AddPlaybackProc("LAYERS", (playbackProc_p)ReadLayers, NULL);
+	AddPlaybackProc("LAYERS", ReadLayers, NULL);
 }
 
 addButtonCallBack_t InitLayersDialog(void)

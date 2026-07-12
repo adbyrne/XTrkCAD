@@ -1554,7 +1554,7 @@ static void DoMousew(wDraw_p d, void *context, wAction_t action, wDrawPix_t x,
 	}
 }
 
-static wBool_t PlaybackMain(char *line)
+static void PlaybackMain(char *line)
 {
 	int rc;
 	int action;
@@ -1571,10 +1571,9 @@ static wBool_t PlaybackMain(char *line)
 	} else {
 		PlaybackMouse(DoMouse, &tempD, (wAction_t)action, pos, wDrawColorBlack);
 	}
-	return TRUE;
 }
 
-static wBool_t PlaybackKey(char *line)
+static void PlaybackKey(char *line)
 {
 	int rc;
 	int action = C_TEXT;
@@ -1592,7 +1591,6 @@ static wBool_t PlaybackKey(char *line)
 		action = action | (unsigned int)c << 8;
 		PlaybackMouse(DoMouse, &tempD, (wAction_t)action, pos, wDrawColorBlack);
 	}
-	return TRUE;
 }
 
 /*****************************************************************************
@@ -1718,8 +1716,8 @@ EXPORT void DrawInit(int initialZoom)
 
 	MapWindowCreate();
 
-	AddPlaybackProc("MOUSE ", (playbackProc_p)PlaybackMain, NULL);
-	AddPlaybackProc("KEY ", (playbackProc_p)PlaybackKey, NULL);
+	AddPlaybackProc("MOUSE ", PlaybackMain, NULL);
+	AddPlaybackProc("KEY ", PlaybackKey, NULL);
 
 	SetZoomRadio( mainD.scale );
 	InfoScale();
