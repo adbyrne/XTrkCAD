@@ -2856,7 +2856,7 @@ static void NewTurnOk( void * context )
 		strcpy( cp, "\"" );
 		cp += 1;
 	}
-	CHECK( cp-tempCustom <= sizeof tempCustom );
+	CHECK( (size_t)(cp-tempCustom) <= sizeof tempCustom );
 
 	int tdInx = 0;
 	for ( const char * pPT = curDesign->sParamType; *pPT; pPT++, tdInx++ ) {

@@ -52,7 +52,7 @@ int carProtoSegCnt;
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
 
-#define ACTION_COUNT(arr) (sizeof(arr) / sizeof(arr[0]))
+#define ACTION_COUNT(arr) ((int)(sizeof(arr) / sizeof(arr[0])))
 
 #define MAKE_ACTION_SEQUENCE(actions_array) \
     { actions_array, ACTION_COUNT(actions_array) }

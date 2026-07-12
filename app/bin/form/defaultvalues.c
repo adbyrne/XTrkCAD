@@ -332,7 +332,7 @@ EXPORT void FormUpdatePrefs( void )
 					}
 					len = wListGetColumnWidths( (wList_p)p->control, listDataP->colCnt, colWidths );
 					cp = message;
-					for ( col=0; col<len; col++ ) {
+					for ( col=0; col<(int)len; col++ ) {
 						sprintf( cp, "%ld ", colWidths[col] );
 						cp += strlen(cp);
 					}

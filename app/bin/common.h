@@ -160,7 +160,7 @@ typedef struct {
 // Syntactic suger for exported (non-static) objects
 #define EXPORT
 
-#define COUNT(A) (sizeof(A)/sizeof(A[0]))
+#define COUNT(A) ((int)(sizeof(A)/sizeof(A[0])))
 
 #define STR_SIZE		(256)
 #define STR_SHORT_SIZE	(80)

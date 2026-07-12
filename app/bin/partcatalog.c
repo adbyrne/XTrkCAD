@@ -328,7 +328,7 @@ FilterKeyword(char *word)
 		return (true);
 	}
 
-	for (int i = 0; i < sizeof(stopwords) / sizeof(char *); i++) {
+	for (int i = 0; i < (int)(sizeof(stopwords) / sizeof(char *)); i++) {
 		if (!XtcStricmp(word, stopwords+i)) {
 			return (true);
 		}
@@ -486,7 +486,7 @@ FindWord(IndexEntry *index, int length, char *search, IndexEntry **entries)
 			DL_FOREACH(index, current) {
 				size_t ldist = levenshtein(search, current->keyWord);
 				LOG1(log_params, ("Distance of: <%s> is %d\n", current->keyWord, ldist));
-				if (ldist == maxdistance) {
+				if (ldist == (size_t)maxdistance) {
 					if (current->references->cnt > maxProbability) {
 						if (!result) {
 							result = MyMalloc(sizeof(IndexEntry));

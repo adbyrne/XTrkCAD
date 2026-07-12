@@ -285,9 +285,9 @@ prepare_drawing(struct draw *bd, wDrawWidth width, wDrawLineType_e lineType,
 
 	/* Batch mode: flush if attributes changed or batch is full */
 	if (bd->pathOpen &&
-	    (bd->activeColor != (long)color ||
+	    (bd->activeColor != (wDrawColor)color ||
 	     bd->activeWidth != (double)width ||
-	     bd->activeStyle != (int)lineType ||
+	     bd->activeStyle != (wDrawLineType_e)lineType ||
 	     bd->fill != fill_mode ||
 	     bd->batchCount >= BATCH_LIMIT)) {
 		flush_path_if_open(bd, cairoCtx);

@@ -577,7 +577,7 @@ EXPORT wIndex_t AddCommand(procCommand_t cmdProc, const char * helpKey,
 
 EXPORT void PlaybackCommand(const char * line, wIndex_t lineNum)
 {
-	size_t inx;
+	int inx;
 	wIndex_t buttInx;
 	size_t len1, len2;
 	len1 = strlen(line + 8);

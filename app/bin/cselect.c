@@ -625,7 +625,7 @@ static int DoModuleTracks( int moduleLayer, doModuleTrackCallBack_t doit,
 	trk = NULL;
 	int cnt = 0;
 	while ( TrackIterate( &trk ) ) {
-		if (GetTrkLayer(trk) == moduleLayer) {
+		if ((int)GetTrkLayer(trk) == moduleLayer) {
 			doit( trk, val );
 			cnt++;
 		}
@@ -1655,7 +1655,7 @@ void DrawHighlightLayer(int layer)
 		if (!GetTrkSelected(ts)) {
 			continue;
 		}
-		if (GetTrkLayer(ts) != layer) {
+		if ((int)GetTrkLayer(ts) != layer) {
 			continue;
 		}
 		coOrd hi,lo;

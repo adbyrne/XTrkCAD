@@ -729,7 +729,7 @@ EXPORT SCALE_FIT_T FindScaleCompatible(SCALE_FIT_TYPE_T type, char * scale1,
 				}
 				//Is it the same until the next ','
 				cq=strstr(cp,",");
-				if (cq && (cq-cp == strlen(scale2))) {
+				if (cq && ((size_t)(cq-cp) == strlen(scale2))) {
 					found = TRUE;
 					break;
 				} else { cp=cq; }
@@ -752,7 +752,7 @@ EXPORT SCALE_FIT_T FindScaleCompatible(SCALE_FIT_TYPE_T type, char * scale1,
 				}
 				//Is it the same until the next ','
 				cq=strstr(cp,",");
-				if (cq && (cq-cp == strlen(scale1))) {
+				if (cq && ((size_t)(cq-cp) == strlen(scale1))) {
 					found = TRUE;
 					break;
 				} else { cp=cq; }
@@ -769,14 +769,14 @@ EXPORT void ScaleLengthIncrement(
         DIST_T length )
 {
 	char * cp;
-	size_t len;
+	int len;
 	if (scaleInfo(scale).length == 0.0) {
 		if (units == UNITS_METRIC) {
 			cp = "999.99m SCALE Flex Track";
 		} else {
 			cp = "999' 11\" SCALE Flex Track";
 		}
-		len = strlen( cp )+1;
+		len = (int)strlen( cp )+1;
 		if (len > enumerateMaxDescLen) {
 			enumerateMaxDescLen = (int)len;
 		}
@@ -787,7 +787,7 @@ EXPORT void ScaleLengthIncrement(
 EXPORT void ScaleLengthEnd( void )
 {
 	wIndex_t si;
-	size_t count;
+	int count;
 	DIST_T length;
 	char tmp[STR_SIZE];
 	FLOAT_T flexLen;
@@ -801,7 +801,7 @@ EXPORT void ScaleLengthEnd( void )
 		tmp[0] = '\0';
 		if ((length=scaleInfo(si).length) != 0) {
 			sprintf( tmp, "%s %s Flex Track", FormatDistance(length), scaleInfo(si).scale );
-			for (count = strlen(tmp); count<enumerateMaxDescLen; count++) {
+			for (count = (int)strlen(tmp); count<enumerateMaxDescLen; count++) {
 				tmp[count] = ' ';
 			}
 			tmp[enumerateMaxDescLen] = '\0';

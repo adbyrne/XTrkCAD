@@ -91,7 +91,7 @@ static int log_undo = 0;
 
 BOOL_T ReadStream( stream_t * stream, void * ptr, int size )
 {
-	size_t binx, boff, brem;
+	long binx, boff, brem;
 	streamBlocks_p blk;
 	if ( stream->curr+size > stream->end ) {
 		UndoFail( "Overrun on stream", (uintptr_t)(stream->curr+size), __FILE__,
@@ -125,7 +125,7 @@ BOOL_T ReadStream( stream_t * stream, void * ptr, int size )
 
 BOOL_T WriteStream( stream_p stream, void * ptr, int size )
 {
-	size_t binx, boff, brem;
+	long binx, boff, brem;
 	streamBlocks_p blk;
 	LOG( log_undo, 5,
 	     ( "WriteStream( , "SLOG_FMT", %d ) %ld "SLOG_FMT" "SLOG_FMT"\n", (uintptr_t)ptr,
@@ -165,7 +165,7 @@ BOOL_T WriteStream( stream_p stream, void * ptr, int size )
 
 BOOL_T TrimStream( stream_p stream, uintptr_t off )
 {
-	size_t binx, cnt, inx;
+	long binx, cnt, inx;
 	streamBlocks_p blk;
 	LOG( log_undo, 3, ( "    TrimStream( , %ld )\n", off ) )
 	binx = off/BSTREAM_SIZE;
@@ -209,7 +209,7 @@ void ClearStream( stream_p stream )
 
 BOOL_T TruncateStream( stream_p stream, uintptr_t off )
 {
-	size_t binx, boff, cnt, inx;
+	long binx, boff, cnt, inx;
 	streamBlocks_p blk;
 	LOG( log_undo, 3, ( "TruncateStream( , %ld )\n", off ) )
 	binx = off/BSTREAM_SIZE;
