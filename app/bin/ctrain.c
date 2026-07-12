@@ -2321,7 +2321,7 @@ static void TrainTimeStartPause(void)
 }
 
 
-static BOOL_T TrainTimeDoPause(char * line)
+static void TrainTimeDoPause(char * line)
 {
 	BOOL_T drawCarEnable2;
 	playbackTrainPause = atol(line);
@@ -2368,12 +2368,10 @@ static BOOL_T TrainTimeDoPause(char * line)
 			trainMovieFrameNext = trainMovieFrameDelay;
 		}
 	}
-
-	return TRUE;
 }
 
 
-static BOOL_T TrainDoMovie(char * line)
+static void TrainDoMovie(char * line)
 {
 	/* on/off, scale, orig, size */
 	long fps;
@@ -2384,7 +2382,7 @@ static BOOL_T TrainDoMovie(char * line)
 
 	if (!GetArgs(line, "lfpp", &fps, &trainMovieD.scale, &trainMovieD.orig,
 	             &trainMovieD.size)) {
-		return FALSE;
+		return;
 	}
 
 	if (fps > 0) {
@@ -2394,7 +2392,6 @@ static BOOL_T TrainDoMovie(char * line)
 	}
 
 	trainMovieFrameNext = 0;
-	return TRUE;
 }
 
 void AttachTrains(void)
@@ -3007,7 +3004,7 @@ static void CmdTrainStopGo(void * unused)
 	}
 }
 
-static BOOL_T TrainStopGoPlayback(char * line)
+static void TrainStopGoPlayback(char * line)
 {
 	while (*line && isspace((unsigned char)*line)) {
 		line++;
@@ -3016,8 +3013,6 @@ static BOOL_T TrainStopGoPlayback(char * line)
 	if ((strcasecmp(line, "STOP") == 0) != (trainsState == TRAINS_STOP)) {
 		CmdTrainStopGo(NULL);
 	}
-
-	return TRUE;
 }
 
 
@@ -3253,8 +3248,8 @@ void InitCmdTrain(wMenu_p menu)
 	                              0, TrainFunc, I2VP(DO_DELCAR));
 	trainPopupMI[DO_DELTRAIN]   = wMenuPushCreate(trainPopupM, "",
 	                              _("Remove Train"), 0, TrainFunc, I2VP(DO_DELTRAIN));
-	AddPlaybackProc("TRAINSTOPGO", (playbackProc_p)TrainStopGoPlayback, NULL);
-	AddPlaybackProc("TRAINPAUSE", (playbackProc_p)TrainTimeDoPause, NULL);
-	AddPlaybackProc("TRAINMOVIE", (playbackProc_p)TrainDoMovie, NULL);
+	AddPlaybackProc("TRAINSTOPGO", TrainStopGoPlayback, NULL);
+	AddPlaybackProc("TRAINPAUSE", TrainTimeDoPause, NULL);
+	AddPlaybackProc("TRAINMOVIE", TrainDoMovie, NULL);
 }
 

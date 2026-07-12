@@ -462,6 +462,18 @@ remove_row(GtkTreeRowReference* ref, GtkTreeModel* model)
 
 }
 
+static void
+free_row_reference_cb(gpointer data, gpointer user_data)
+{
+	gtk_tree_row_reference_free((GtkTreeRowReference*)data);
+}
+
+static void
+free_tree_path_cb(gpointer data, gpointer user_data)
+{
+	gtk_tree_path_free((GtkTreePath*)data);
+}
+
 /* delete all selected rows from a list store, thanks to Andrew Krause */
 
 void
@@ -488,8 +500,8 @@ wListDeleteSelected(wControl_p list)
 
 	g_list_foreach(references, (GFunc)remove_row, model);
 
-	g_list_foreach(references, (GFunc)gtk_tree_row_reference_free, NULL);
-	g_list_foreach(rows, (GFunc)gtk_tree_path_free, NULL);
+	g_list_foreach(references, free_row_reference_cb, NULL);
+	g_list_foreach(rows, free_tree_path_cb, NULL);
 	g_list_free(references);
 	g_list_free(rows);
 

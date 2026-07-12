@@ -710,7 +710,7 @@ static int h_clock;
 
 EXPORT long circleMode;
 
-static void ComputeHelix( paramGroup_p, int, void * );
+static wBool_t ComputeHelix( paramGroup_cp, int, void * );
 
 static paramFloatRange_t r0_360 = { 0, 360 };
 static paramFloatRange_t r0_1000000 = { 0, 1000000 };
@@ -736,8 +736,8 @@ static paramData_t circleRadiusPLs[] = {
 static paramGroup_t circleRadiusPG = { "circle", PGO_FULLDIALOGFROMBUILDER, circleRadiusPLs, COUNT( circleRadiusPLs ) };
 
 
-static void ComputeHelix(
-        paramGroup_p pg,
+static wBool_t ComputeHelix(
+        paramGroup_cp pg,
         int h_inx,
         void * data )
 {
@@ -745,7 +745,7 @@ static void ComputeHelix(
 	DIST_T length;
 	long updates = 0;
 	if ( h_inx < 0 || h_inx >= COUNT( h_orders ) ) {
-		return;
+		return TRUE;
 	}
 	FormFetchData( &helixPG );
 	totTurns = helixDataCur.turns + helixDataCur.angSep/360.0;
@@ -815,6 +815,7 @@ static void ComputeHelix(
 		strcpy( message, "                           " );
 	}
 	FormLoadMessage( &helixPG, I_HELIXMSG, message );
+	return TRUE;
 }
 
 
@@ -844,7 +845,7 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 				helixW = FormCreateDialog(&helixPG, MakeWindowTitle(_("Helix")),
 				                          NULL, NULL,
 				                          _("Cancel"), FormCancel_Current,
-				                          TRUE, 0, (paramChangeProc)ComputeHelix);
+				                          TRUE, 0, ComputeHelix);
 			}
 			helixDataCur = helixDataOld;
 			FormLoadControls(&helixPG);

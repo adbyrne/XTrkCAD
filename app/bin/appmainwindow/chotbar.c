@@ -534,7 +534,7 @@ EXPORT void HotBarCancel( void )
 }
 
 
-static BOOL_T HotBarSelectPlayback( char * line )
+static void HotBarSelectPlayback( char * line )
 {
 	while (*line && isspace((unsigned char)*line) ) { line++; }
 	for ( int inx=0; inx<hotBarMap_da.cnt; inx++ ) {
@@ -554,10 +554,9 @@ static BOOL_T HotBarSelectPlayback( char * line )
 			}
 			HotBarHighlight( hotBarCurrSelect, fixed_x );
 			FakeDownMouseState();
-			return TRUE;
+			return;
 		}
 	}
-	return FALSE;
 }
 
 
@@ -717,7 +716,7 @@ EXPORT void InitHotBar( void )
 	long v;
 
 	AddParam( "BARSCALE", SetHotBarScale );
-	AddPlaybackProc( "HOTBARSELECT", (playbackProc_p)HotBarSelectPlayback, NULL );
+	AddPlaybackProc( "HOTBARSELECT", HotBarSelectPlayback, NULL );
 
 	RegisterChangeNotification( ChangeHotBar );
 

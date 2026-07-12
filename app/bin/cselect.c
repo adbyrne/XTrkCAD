@@ -399,6 +399,11 @@ static void RedrawSelectedTracksBoundary()
 }
 
 
+EXPORT void SetAllTrackSelectCB( void * context )
+{
+	SetAllTrackSelect( (BOOL_T)VP2L(context) );
+}
+
 EXPORT void SetAllTrackSelect( BOOL_T select )
 {
 	track_p trk;
@@ -739,6 +744,11 @@ static void SelectLineType( void* widthVP )
 }
 
 static BOOL_T doingDouble;
+
+EXPORT void SelectDeleteCB( void * context )
+{
+	SelectDelete();
+}
 
 EXPORT int SelectDelete( void )
 {
@@ -3803,7 +3813,7 @@ EXPORT void InitCmdSelect2( wMenu_p menu )
 	                I2VP( 3));
 	wMenuSeparatorCreate( selectPopup1M );
 	wMenuPushCreate(selectPopup1M, "", _("Select All"), 0,
-	                (wMenuCallBack_p) SetAllTrackSelect, I2VP( 1));
+	                SetAllTrackSelectCB, I2VP( 1));
 	wMenuPushCreate(selectPopup1M, "",_("Select Current Layer"), 0,
 	                SelectCurrentLayer, I2VP( 0));
 	AddIndexMenu( selectPopup1M, SelectByIndex);
@@ -3824,7 +3834,7 @@ EXPORT void InitCmdSelect2( wMenu_p menu )
 	wMenuSeparatorCreate( selectPopup2M );
 	AddIndexMenu( selectPopup2M, SelectByIndex);
 	wMenuPushCreate(selectPopup2M, "", _("Deselect All"), 0,
-	                (wMenuCallBack_p) SetAllTrackSelect, I2VP( 0));
+	                SetAllTrackSelectCB, I2VP( 0));
 	wMenuSeparatorCreate( selectPopup2M );
 	wMenuPushCreate(selectPopup2M, "", _("Properties -'?'"), 0, CallPushDescribe,
 	                I2VP(0));
@@ -3888,7 +3898,7 @@ EXPORT void InitCmdDelete( void )
 	wIcon_p icon;
 	icon = CreateToolbarIconFromResource( "delete.png");
 	AddToolbarButton( "cmdDelete", icon, IC_SELECTED,
-	                  (wButtonCallBack_p)SelectDelete, 0 );
+	                  SelectDeleteCB, 0 );
 }
 
 EXPORT void InitCmdTies( void )
