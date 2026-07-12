@@ -874,7 +874,6 @@ wControl_p wListCreate(
 {
 	wControl_p bl;
 	struct list* lcontrol;
-	static wWinPix_t zeroPos = 0;
 
 
 	bl = wlibControlNew(B_LIST, parent, helpStr, context);
@@ -908,7 +907,6 @@ wControl_p wListCreate(
 
 		if (colCnt <= 0) {
 			colCnt = 1;
-			colWidths = &zeroPos;
 		}
 
 		//bl->colCnt = colCnt;
