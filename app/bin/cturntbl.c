@@ -394,7 +394,7 @@ static BOOL_T ReadTurntable( char * line )
 	xx->pos = p;
 	xx->radius = r;
 	xx->currEp = currEp;
-	if (xx->currEp > GetTrkEndPtCnt(trk)) { xx->currEp = 0; }
+	if (xx->currEp >= GetTrkEndPtCnt(trk)) { xx->currEp = 0; }
 	xx->reverse = 0;
 	ComputeTurntableBoundingBox( trk );
 	return TRUE;
