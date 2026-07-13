@@ -403,7 +403,7 @@ static BOOL_T ReadTurnoutParam(
 	PATHPTR_T cp;
 	long options = 0;
 
-	if (!GetArgs(firstLine + 8, "sqc", scale, &title, &cp)) {
+	if (!GetArgs(firstLine + 8, "s9qc", scale, &title, &cp)) {
 		return FALSE;
 	}
 	if (cp != NULL)

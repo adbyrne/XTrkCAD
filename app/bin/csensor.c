@@ -300,7 +300,7 @@ static BOOL_T ReadSensor ( char * line )
 	char scale[10];
 	wIndex_t layer;
 	sensorData_p xx;
-	if (!GetArgs(line+7,"dLsdpqq",&index,&layer,scale, &visible, &orig,&name,
+	if (!GetArgs(line+7,"dLs9dpqq",&index,&layer,scale, &visible, &orig,&name,
 	             &script)) {
 		return FALSE;
 	}

@@ -637,7 +637,7 @@ static BOOL_T ReadCornu( char * line )
 	long options;
 //	char * cp = NULL;
 
-	if (!GetArgs( line+6, "dLl00sdpffppffp",
+	if (!GetArgs( line+6, "dLl00s9dpffppffp",
 	              &index, &layer, &options, scale, &visible, &p0, &a0, &r0, &c0, &p1, &a1, &r1,
 	              &c1 ) ) {
 		return FALSE;

@@ -672,7 +672,7 @@ static BOOL_T ReadBezier( char * line )
 	LWIDTH_T lineWidth;
 
 	TRKTYP_T trkTyp = strncmp(line,"BEZIER",6)==0?T_BEZIER:T_BZRLIN;
-	if (!GetArgs( line+6, "dLluwsdppppdp",
+	if (!GetArgs( line+6, "dLluws9dppppdp",
 	              &index, &layer, &options, &rgb, &lineWidth, scale, &visible, &p0, &c1, &c2, &p1,
 	              &lt, &dp ) ) {
 		return FALSE;

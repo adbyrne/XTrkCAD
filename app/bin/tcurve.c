@@ -915,8 +915,8 @@ static BOOL_T ReadCurve( char * line )
 	long helixTurns = 0;
 	coOrd descriptionOff = { 0.0, 0.0 };
 
-	if (!GetArgs( line+6, paramVersion<3?"dXZsdpYfc":paramVersion<9
-	              ?"dLl00sdpYfc":"dLl00sdpffc",
+	if (!GetArgs( line+6, paramVersion<3?"dXZs9dpYfc":paramVersion<9
+	              ?"dLl00s9dpYfc":"dLl00s9dpffc",
 	              &index, &layer, &options, scale, &visible, &p, &elev, &r, &cp ) ) {
 		return FALSE;
 	}

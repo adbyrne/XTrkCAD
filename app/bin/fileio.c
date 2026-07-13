@@ -205,7 +205,9 @@ EXPORT void SyntaxError(
  * f - *pf = number
  * z - *pf = 0.0
  * p - *pp = ( number, number ) a coOrd
- * s - *ps = string
+ * s - *ps = string, bounded by a mandatory inline width (e.g. "s9" for a
+ *     10-byte buffer, mirroring scanf's "%9s") -- the width is the max
+ *     characters copied, not counting the terminating NUL
  * q - *ps = quoted string
  * c - *qp = position of next non-space char or NULL
  */
@@ -334,12 +336,34 @@ EXPORT BOOL_T GetArgs(
 			cp = cq;
 			*pp = p;
 			break;
-		case 's':
+		case 's': {
+			char * ps0;
+			size_t maxLen = 0;
 			ps = va_arg( ap, char * );
+			/* Mandatory inline width, e.g. "s9" -- see format-chars comment
+			 * above. A missing width is a caller bug (every real call site
+			 * has a fixed-size destination buffer), not malformed input, so
+			 * it's enforced with CHECK() rather than sError. */
+			while (isdigit((unsigned char)format[1])) {
+				maxLen = maxLen * 10 + (size_t)(format[1] - '0');
+				format++;
+			}
+			CHECK( maxLen > 0 );
 			while (isspace((unsigned char)*cp)) { cp++; }
-			while (*cp && !isspace((unsigned char)*cp)) { *ps++ = *cp++; }
+			ps0 = ps;
+			while (*cp && !isspace((unsigned char)*cp)) {
+				if ((size_t)(ps - ps0) >= maxLen) {
+					sError = "%s: value too long";
+					break;
+				}
+				*ps++ = *cp++;
+			}
+			if (sError) {
+				break;
+			}
 			*ps++ = '\0';
 			break;
+		}
 		case 'q':
 			qp = va_arg( ap, char * * );
 			if (*cp != '\"')

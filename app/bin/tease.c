@@ -996,8 +996,8 @@ static BOOL_T ReadJoint(
 	char * cp = NULL;
 	coOrd descriptionOff = {0.0,0.0};
 
-	if ( !GetArgs( line+6, paramVersion<3?"dXZsdffffdddpYfc":paramVersion<9
-	               ?"dLl00sdffffdddpYfc":"dLl00sdffffdddpffc",
+	if ( !GetArgs( line+6, paramVersion<3?"dXZs9dffffdddpYfc":paramVersion<9
+	               ?"dLl00s9dffffdddpYfc":"dLl00s9dffffdddpffc",
 	               &index, &layer, &options, scale, &visible, &e.l0, &e.l1, &e.R, &e.L,
 	               &e.flip, &e.negate, &e.Scurve, &e.pos, &elev, &e.angle, &cp) ) {
 		return FALSE;

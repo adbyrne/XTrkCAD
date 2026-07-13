@@ -280,7 +280,7 @@ static BOOL_T ReadStructureParam(
 	static dynArr_t pierInfo_da;
 #define pierInfo(N) DYNARR_N( pierInfo_t, pierInfo_da, N )
 
-	if ( !GetArgs( firstLine+10, "sq", scale, &title ) ) {
+	if ( !GetArgs( firstLine+10, "s9q", scale, &title ) ) {
 		return FALSE;
 	}
 	if ( !ReadSegs() ) {
