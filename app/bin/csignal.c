@@ -364,7 +364,7 @@ static BOOL_T ReadSignal ( char * line )
 	char scale[10];
 	wIndex_t layer;
 	signalData_p xx;
-	if (!GetArgs(line+6,"dLsdpfdq",&index,&layer,scale, &visible, &orig,
+	if (!GetArgs(line+6,"dLs9dpfdq",&index,&layer,scale, &visible, &orig,
 	             &angle, &numHeads,&name)) {
 		return FALSE;
 	}

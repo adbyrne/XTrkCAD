@@ -318,7 +318,7 @@ static BOOL_T ReadControl ( char * line )
 	char scale[10];
 	wIndex_t layer;
 	controlData_p xx;
-	if (!GetArgs(line+7,"dLsdpqqq",&index,&layer,scale, &visible, &orig,&name,
+	if (!GetArgs(line+7,"dLs9dpqqq",&index,&layer,scale, &visible, &orig,&name,
 	             &onscript,&offscript)) {
 		return FALSE;
 	}

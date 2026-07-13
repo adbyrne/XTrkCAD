@@ -152,7 +152,7 @@ EXPORT BOOL_T CarItemRead(
 	long longCenterOffset;
 	char* sNote = NULL;
 
-	if (!GetArgs(line + 4, "lsqll" "ff0lffl" "fflll000000c",
+	if (!GetArgs(line + 4, "ls9qll" "ff0lffl" "fflll000000c",
 	             &itemIndex, scale, &title, &options, &type,
 	             &dim.carLength, &dim.carWidth, &longCenterOffset, &dim.truckCenter,
 	             &dim.coupledLength, &rgb,

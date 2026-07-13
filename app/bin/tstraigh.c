@@ -562,7 +562,7 @@ static BOOL_T ReadStraight( char * line )
 	char * cp = NULL;
 	coOrd descriptionOff = { 0.0, 0.0 };
 
-	if ( !GetArgs( line+8, paramVersion<3?"dXZsdc":"dLl00sdc", &index, &layer,
+	if ( !GetArgs( line+8, paramVersion<3?"dXZs9dc":"dLl00s9dc", &index, &layer,
 	               &options, scale, &visible, &cp ) ) {
 		return FALSE;
 	}
