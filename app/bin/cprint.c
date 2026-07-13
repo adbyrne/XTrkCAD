@@ -629,7 +629,7 @@ static paramData_t customMarginPLs[] = {
 	{ PD_FLOAT, &customMargin.left, "marginL", PDO_DIM|PDO_NOPREF, &r0_1, NULL, BO_IGNFOCUS, NULL },
 #define I_PM_COUNT (4)
 #define I_PM_MESSAGE (4)
-	{ PD_MESSAGE, NULL, NULL, 0, NULL },
+	{ PD_MESSAGE, NULL, "printerName", 0, NULL },
 #define I_PM_RESET (5)
 	{ PD_BUTTON, PrintMarginReset, "marginReset", PDO_DLGCMDBUTTON, NULL, N_("Reset") }
 };

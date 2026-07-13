@@ -27,6 +27,7 @@
     <file preprocess="xml-stripblanks">outputbitmap.ui</file>
     <file preprocess="xml-stripblanks">partcatalog.ui</file>
     <file preprocess="xml-stripblanks">pricelist.ui</file>
+    <file preprocess="xml-stripblanks">printMargin.ui</file>
     <file preprocess="xml-stripblanks">prmfile.ui</file>
     <file preprocess="xml-stripblanks">print.ui</file>
     <file preprocess="xml-stripblanks">profile.ui</file>

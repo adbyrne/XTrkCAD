@@ -675,14 +675,15 @@
                             <property name="can-focus">False</property>
                             <property name="orientation">vertical</property>
                             <property name="visible">True</property>
+                            <property name="valign">Center</property>
                             <child>
                               <object class="GtkCheckButton">
                                 <property name="can-focus">True</property>
                                 <property name="draw-indicator">True</property>
                                 <property name="label" translatable="yes">Ignore </property>
                                 <property name="receives-default">False</property>
-                                <property name="vexpand">True</property>
                                 <property name="visible">True</property>
+                                <property name="valign">Center</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
