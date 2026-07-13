@@ -1354,17 +1354,17 @@ BOOL_T ReadCompound(
 	long lineType = 0;
 
 	if (paramVersion<3) {
-		if ( !GetArgs( line, "dXsdpfq",
+		if ( !GetArgs( line, "dXs9dpfq",
 		               &index, &layer, scale, &visible, &orig, &angle, &title ) ) {
 			return FALSE;
 		}
 	} else if (paramVersion <= 5 && trkType == T_STRUCTURE) {
-		if ( !GetArgs( line, "dL00sdpfq",
+		if ( !GetArgs( line, "dL00s9dpfq",
 		               &index, &layer, scale, &visible, &orig, &angle, &title ) ) {
 			return FALSE;
 		}
 	} else {
-		if ( !GetArgs( line, paramVersion<9?"dLlldsdpYfq":"dLlldsdpffq",
+		if ( !GetArgs( line, paramVersion<9?"dLllds9dpYfq":"dLllds9dpffq",
 		               &index, &layer, &options, &position, &lineType, scale, &visible, &orig, &elev,
 		               &angle, &title ) ) {
 			return FALSE;

@@ -353,7 +353,7 @@ static BOOL_T CarPartRead(char* line)
 	long rgb;
 	long longCenterOffset;
 
-	if (!GetArgs(line + 8, "sqllff0lffl",
+	if (!GetArgs(line + 8, "s9qllff0lffl",
 		scale, &title, &options, &type, &dim.carLength, &dim.carWidth,
 		&longCenterOffset, &dim.truckCenter, &dim.coupledLength, &rgb)) {
 		return FALSE;
