@@ -372,10 +372,10 @@ static BOOL_T ReadTurntable( char * line )
 	int currEp;
 
 	if ( !GetArgs( line+10,
-	               paramVersion<3?"dXsdpYfX":
-	               paramVersion<9?"dL000sdpYfX":
-	               paramVersion<10?"dL000sdpffX":
-	               "dL000sdpffd",
+	               paramVersion<3?"dXs9dpYfX":
+	               paramVersion<9?"dL000s9dpYfX":
+	               paramVersion<10?"dL000s9dpffX":
+	               "dL000s9dpffd",
 	               &index, &layer, scale, &visible, &p, &elev, &r, &currEp )) {
 		return FALSE;
 	}

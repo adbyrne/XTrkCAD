@@ -76,18 +76,17 @@ void AbortProg(const char *cond, const char *file, int line, const char *msg)
 extern BOOL_T GetArgs(char *line, const char *format, ...);
 
 /* Representative format strings, taken verbatim from real call sites (not
- * invented), covering the numeric/coordinate and quoted-string format
- * codes.
+ * invented), covering the numeric/coordinate, quoted-string, and (as of the
+ * bounds-check fix) bounded-string format codes.
  *
- * Deliberately NOT covering every format code GetArgs() supports: one of
- * them lacks an internal bounds check on the destination it writes to, and
- * an earlier version of this harness that exercised it found a crash
- * within seconds. Fixing that needs an API-level change (a length bound
- * threaded through the format spec and every call site), which is out of
- * scope for this harness -- tracked separately, not detailed here.
- * Excluding it keeps this CI job a clean, meaningful gate on the format
- * codes that ARE expected to be safe, rather than perpetually red on a
- * known, already-tracked issue.
+ * The 's' format code used to lack any internal bounds check on the
+ * destination it writes to, and an earlier version of this harness that
+ * exercised it found a crash within seconds. Fixed with a mandatory inline
+ * width in the format spec (e.g. "s9" for a 10-byte buffer, mirroring
+ * scanf's "%9s") applied at every real call site -- variant 2 below
+ * exercises that fixed path directly against a fixed-size buffer matching
+ * the real call sites' declared size, so an out-of-bounds write here would
+ * be a genuine regression.
  */
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
@@ -95,7 +94,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		return 0;
 	}
 
-	int variant = data[0] % 2;
+	int variant = data[0] % 3;
 	const uint8_t *lineData = data + 1;
 	size_t lineSize = size - 1;
 
@@ -122,6 +121,12 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		char *q0 = NULL, *c0 = NULL;
 		GetArgs(line, "qc", &q0, &c0);
 		free(q0);
+		break;
+	}
+	case 2: {
+		/* Matches the real call sites' "char scale[10]" + "s9". */
+		char s0[10];
+		GetArgs(line, "s9", s0);
 		break;
 	}
 	}
