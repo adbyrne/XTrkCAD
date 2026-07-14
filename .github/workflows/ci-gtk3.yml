@@ -303,23 +303,30 @@ jobs:
     # astyle's --dry-run always exits 0, so the gate parses its output for
     # "Formatted" lines rather than relying on the exit code.
     #
-    # Pinned to ubuntu-24.04 (not ubuntu-latest): the canonical astyle version
-    # this gate enforces is whatever `apt-get install astyle` resolves to, so
-    # if "latest" silently moves to a newer Ubuntu release with a newer astyle
-    # package, the enforced formatting could drift without anyone noticing.
-    # Pinning the OS freezes the apt-resolved astyle version too. See SF #638
-    # discussion (2026-07-12) for the real-world drift this guards against:
-    # an older/different astyle version (not proven to be OS-specific)
-    # produced different continuation-line indentation for the same input.
+    # astyle is built from source and pinned to ASTYLE_VERSION rather than
+    # installed via apt: the apt-resolved version drifts silently whenever
+    # the distro package updates, which is exactly what caused the drift in
+    # SF #638 (2026-07-12) — an older/different astyle version produced
+    # different continuation-line indentation for the same input. A later
+    # comment on that bug asked for CI to pin 3.6.x specifically; building
+    # from source lets every job (this one, astyle-check-macos,
+    # astyle-check-windows) run the identical version regardless of what
+    # each platform's package manager happens to ship.
     runs-on: ubuntu-24.04
+    env:
+      ASTYLE_VERSION: 3.6.13
     steps:
       - uses: actions/checkout@v5
-      - name: Install astyle
-        run: sudo apt-get update -q && sudo apt-get install -y astyle
+      - name: Build astyle ${{ env.ASTYLE_VERSION }} from source
+        run: |
+          curl -sL -o astyle.tar.bz2 "https://sourceforge.net/projects/astyle/files/astyle/astyle%20${ASTYLE_VERSION%.*}/astyle-${ASTYLE_VERSION}.tar.bz2/download"
+          tar xjf astyle.tar.bz2
+          make -C "astyle-${ASTYLE_VERSION}/build/gcc" -j"$(nproc)"
       - name: Check formatting (dry-run)
         run: |
-          astyle --version
-          OUTPUT=$(astyle --options=app/lib/astylerc --dry-run -Q --recursive --ignore-exclude-errors \
+          ASTYLE="$PWD/astyle-${ASTYLE_VERSION}/build/gcc/bin/astyle"
+          "$ASTYLE" --version
+          OUTPUT=$("$ASTYLE" --options=app/lib/astylerc --dry-run -Q --recursive --ignore-exclude-errors \
             --exclude=wrapbox \
             --exclude=unittest \
             "app/bin/*.c" "app/bin/*.h" "app/wlib/*.c" "app/wlib/*.h" 2>&1 | grep '^Formatted' || true)
@@ -331,25 +338,33 @@ jobs:
           echo "All files conform to app/lib/astylerc."
 
   astyle-check-macos:
-    # Report-only, NOT gating: verifies whether Homebrew's astyle on macOS
-    # agrees with the pinned Linux astyle-check gate above for the same
-    # source tree. Added 2026-07-13 after an SF reviewer found historical
-    # cross-changeset indentation drift on cjoin.c and asked whether astyle
-    # is platform-dependent. Kept report-only (not a hard gate) because
-    # Homebrew's astyle version isn't pinned the way apt's is here — a
-    # version disagreement would fail this job for reasons unrelated to the
-    # PR's actual content. Once we have enough data on whether brew's
-    # version matches Linux's, consider promoting this to gating or pinning
-    # a specific formula version.
+    # Report-only, NOT gating: verifies that astyle built from source on
+    # macOS agrees with the pinned Linux astyle-check gate above for the
+    # same source tree. Added 2026-07-13 after an SF reviewer found
+    # historical cross-changeset indentation drift on cjoin.c and asked
+    # whether astyle is platform-dependent. Originally used `brew install
+    # astyle`, but Homebrew's formula isn't version-pinned; switched
+    # 2026-07-14 to build the same ASTYLE_VERSION from source as the Linux
+    # gate (see astyle-check's comment — SF #638 asked for 3.6.x to be
+    # pinned everywhere) so this job now isolates compiler/OS differences
+    # rather than astyle-version differences. Kept report-only since a
+    # disagreement here would still point to a toolchain quirk unrelated to
+    # the PR's actual content.
     runs-on: macos-latest
+    env:
+      ASTYLE_VERSION: 3.6.13
     steps:
       - uses: actions/checkout@v5
-      - name: Install astyle
-        run: brew install astyle
+      - name: Build astyle ${{ env.ASTYLE_VERSION }} from source
+        run: |
+          curl -sL -o astyle.tar.bz2 "https://sourceforge.net/projects/astyle/files/astyle/astyle%20${ASTYLE_VERSION%.*}/astyle-${ASTYLE_VERSION}.tar.bz2/download"
+          tar xjf astyle.tar.bz2
+          make -C "astyle-${ASTYLE_VERSION}/build/gcc" -j"$(sysctl -n hw.ncpu)"
       - name: Compare formatting output (non-fatal)
         run: |
-          astyle --version
-          OUTPUT=$(astyle --options=app/lib/astylerc --dry-run -Q --recursive --ignore-exclude-errors \
+          ASTYLE="$PWD/astyle-${ASTYLE_VERSION}/build/gcc/bin/astyle"
+          "$ASTYLE" --version
+          OUTPUT=$("$ASTYLE" --options=app/lib/astylerc --dry-run -Q --recursive --ignore-exclude-errors \
             --exclude=wrapbox \
             --exclude=unittest \
             "app/bin/*.c" "app/bin/*.h" "app/wlib/*.c" "app/wlib/*.h" 2>&1 | grep '^Formatted' || true)
@@ -364,22 +379,33 @@ jobs:
     # Report-only, NOT gating — see astyle-check-macos above for rationale.
     # Uses MSYS2 (matching c-tests-windows-msys2's toolchain) rather than a
     # native Win32 astyle build, since that's the toolchain actually used to
-    # build this project on Windows.
+    # build this project on Windows. Originally installed
+    # mingw-w64-x86_64-astyle via pacman; switched 2026-07-14 to build the
+    # same pinned ASTYLE_VERSION from source (see astyle-check's comment)
+    # so all three astyle jobs run the identical version.
     runs-on: windows-latest
     defaults:
       run:
         shell: msys2 {0}
+    env:
+      ASTYLE_VERSION: 3.6.13
     steps:
       - uses: actions/checkout@v5
       - uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
           update: false
-          install: mingw-w64-x86_64-astyle
+          install: mingw-w64-x86_64-gcc make
+      - name: Build astyle ${{ env.ASTYLE_VERSION }} from source
+        run: |
+          curl -sL -o astyle.tar.bz2 "https://sourceforge.net/projects/astyle/files/astyle/astyle%20${ASTYLE_VERSION%.*}/astyle-${ASTYLE_VERSION}.tar.bz2/download"
+          tar xjf astyle.tar.bz2
+          make -C "astyle-${ASTYLE_VERSION}/build/gcc" -j"$(nproc)"
       - name: Compare formatting output (non-fatal)
         run: |
-          astyle --version
-          OUTPUT=$(astyle --options=app/lib/astylerc --dry-run -Q --recursive --ignore-exclude-errors \
+          ASTYLE="$PWD/astyle-${ASTYLE_VERSION}/build/gcc/bin/astyle"
+          "$ASTYLE" --version
+          OUTPUT=$("$ASTYLE" --options=app/lib/astylerc --dry-run -Q --recursive --ignore-exclude-errors \
             --exclude=wrapbox \
             --exclude=unittest \
             "app/bin/*.c" "app/bin/*.h" "app/wlib/*.c" "app/wlib/*.h" 2>&1 | grep '^Formatted' || true)
