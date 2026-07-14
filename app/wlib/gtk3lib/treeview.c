@@ -137,7 +137,7 @@ wlibTreeViewSetSelected(wControl_p b, int index)
 		gint childs;
 
 		childs = gtk_tree_model_iter_n_children (GTK_TREE_MODEL(lcontrol->listStore),
-		                NULL );
+		         NULL );
 
 		if(index < childs) {
 			gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(lcontrol->listStore),

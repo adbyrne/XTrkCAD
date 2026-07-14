@@ -148,7 +148,7 @@ static void LayoutElevW(
 	switch ( inx ) {
 	case I_HEIGHT:
 		h = wControlGetHeight( elevationPLs[I_MODE].control )/(COUNT(
-		                        elevModeLabels )-1);
+		                elevModeLabels )-1);
 #ifndef WINDOWS
 		h += 3;
 #endif

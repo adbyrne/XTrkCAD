@@ -64,7 +64,7 @@ static int
 GetRowCount(struct list* lcontrol)
 {
 	int count = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(lcontrol->listStore),
-	                NULL);
+	            NULL);
 	if (count == 1) {
 		lcontrol->last = 0;
 	}

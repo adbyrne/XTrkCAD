@@ -1105,9 +1105,9 @@ static void CreateBoxAnchors(int index, pts_t pt[4])
 	coOrd pp;
 	for (int i=0; i<4; i++) {
 		pp.x = (i==3?((((pt[0].pt.x - pt[i].pt.x)/2))+pt[i].pt.x):((
-		                        pt[i+1].pt.x - pt[i].pt.x)/2)+pt[i].pt.x);
+		                pt[i+1].pt.x - pt[i].pt.x)/2)+pt[i].pt.x);
 		pp.y = (i==3?((((pt[0].pt.y - pt[i].pt.y)/2))+pt[i].pt.y):((
-		                        pt[i+1].pt.y - pt[i].pt.y)/2)+pt[i].pt.y);
+		                pt[i+1].pt.y - pt[i].pt.y)/2)+pt[i].pt.y);
 
 		DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
 		DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pp,90.0*(i-1)+a,

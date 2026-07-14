@@ -313,9 +313,9 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle,
 			width.y = lwidth * fabs(sin(D2R(FindAngle(p0, p1))));
 		} else if ( segPtr->type == SEG_BENCH ) {
 			width.x = BenchGetWidth( segPtr->u.l.option ) * fabs(cos( D2R( FindAngle(p0,
-			                p1) ) ) ) / 2.0;
+			          p1) ) ) ) / 2.0;
 			width.y = BenchGetWidth( segPtr->u.l.option ) * fabs(sin( D2R( FindAngle(p0,
-			                p1) ) ) ) / 2.0;
+			          p1) ) ) ) / 2.0;
 		}
 		break;
 	case SEG_POLY:
@@ -835,7 +835,7 @@ EXPORT DIST_T DistanceSegs(
 				hi.x /= 2.0;
 				hi.y /= 2.0;
 				dd = 0.1*FindDistance(hi, p1)/FindDistance(lo,
-				                hi);  // Proportion to mean that the closer we to the center or the smaller the target in overlapping cases, the more likely we pick it
+				        hi);  // Proportion to mean that the closer we to the center or the smaller the target in overlapping cases, the more likely we pick it
 				break;
 			}
 			hi.x /= 2.0;   // rough center of rectangle

@@ -3227,11 +3227,11 @@ void InitCmdTrain(wMenu_p menu)
 	                              TrainFunc, I2VP(DO_FLIPCAR));
 #ifdef CAR_CLEARANCE
 	trainPopupMI[DO_PENCILS_ON]	= wMenuPushCreate(trainPopupM, "",
-	                                  _("Clearance Lines On"), 0,
-	                                  TrainFunc, I2VP(DO_PENCILS_ON));
+	                               _("Clearance Lines On"), 0,
+	                               TrainFunc, I2VP(DO_PENCILS_ON));
 	trainPopupMI[DO_PENCILS_OFF]	= wMenuPushCreate(trainPopupM, "",
-	                                  _("Clearance Lines Off"), 0,
-	                                  TrainFunc, I2VP(DO_PENCILS_OFF));
+	                                _("Clearance Lines Off"), 0,
+	                                TrainFunc, I2VP(DO_PENCILS_OFF));
 #endif
 	trainPopupMI[DO_FLIPTRAIN]  = wMenuPushCreate(trainPopupM, "", _("Flip Train"),
 	                              0, TrainFunc, I2VP(DO_FLIPTRAIN));

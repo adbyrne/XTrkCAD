@@ -526,18 +526,18 @@ CreateControl(paramData_p pd, char* helpStr,	unsigned x,	unsigned y)
 		width = pd->winData ? (wWinPix_t)VP2L(pd->winData) : (wWinPix_t)
 		        LISTDEFAULTWIDTH;
 		pd->control = (wControl_p)wComboBoxCreate(win, x, y, helpStr,
-		                _(pd->winLabel), pd->winOption, 10, width, NULL,
-		                ListPush, pd);
+		              _(pd->winLabel), pd->winOption, 10, width, NULL,
+		              ListPush, pd);
 		//listDataP->height = wControlGetHeight(pd->control);
 		break;
 	case PD_COLORLIST:
 		pd->control = (wControl_p)wColorSelectButtonCreate(win, x, y, helpStr,
-		                _(pd->winLabel), pd->winOption, 1, NULL, ColorSelectPush, pd);
+		              _(pd->winLabel), pd->winOption, 1, NULL, ColorSelectPush, pd);
 		break;
 	case PD_MESSAGE:
 		pd->control = (wControl_p)wMessageCreateEx(win,
-		                x, y, helpStr, 1,
-		                pd->valueP ? _(pd->valueP) : " ", pd->winOption);
+		              x, y, helpStr, 1,
+		              pd->valueP ? _(pd->valueP) : " ", pd->winOption);
 		break;
 	case PD_BUTTON:
 		pd->control = (wControl_p)wButtonCreate(win, x, y, helpStr, _(pd->winLabel),

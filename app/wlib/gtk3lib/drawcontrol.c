@@ -129,9 +129,9 @@ CreateNewSurface(GtkWidget* widget, cairo_surface_t* oldSurface)
 	}
 
 	newSurface = gdk_window_create_similar_surface(gtk_widget_get_window(widget),
-	                CAIRO_CONTENT_COLOR_ALPHA,
-	                gtk_widget_get_allocated_width(widget),
-	                gtk_widget_get_allocated_height(widget));
+	             CAIRO_CONTENT_COLOR_ALPHA,
+	             gtk_widget_get_allocated_width(widget),
+	             gtk_widget_get_allocated_height(widget));
 
 	if(newSurface) { /* Initialize the surface */
 		ClearSurface(newSurface);

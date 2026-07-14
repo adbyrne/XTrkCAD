@@ -275,7 +275,7 @@ EXPORT BOOL_T RefreshCompound(
 			return refreshReturnVal;
 		}
 		to = (turnoutInfo_t*)wListGetItemContext( (wList_p)
-		                refreshSpecialPLs[REFRESH_L].control, refreshSpecialInx );
+		        refreshSpecialPLs[REFRESH_L].control, refreshSpecialInx );
 		if ( to != NULL &&
 		     RefreshCompound1( trk, to ) ) {
 			DYNARR_APPEND( refreshSpecial_t, refreshSpecial_da, 10 );

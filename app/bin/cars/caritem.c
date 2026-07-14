@@ -348,11 +348,11 @@ EXPORT void CarItemFindCouplerMountPoint(
 	// Get the distance to translate
 	DIST_T d[2];
 	d[0] = item->dim.carLength / 2.0 - couplerLength - (item->dim.truckCenter / 2.0
-	                +
-	                item->dim.truckCenterOffset);
+	        +
+	        item->dim.truckCenterOffset);
 	d[1] = item->dim.carLength / 2.0 - couplerLength - (item->dim.truckCenter / 2.0
-	                -
-	                item->dim.truckCenterOffset);
+	        -
+	        item->dim.truckCenterOffset);
 
 	// And translate
 	Translate(&pos[0], trvTrk0.pos, angle[0], d[0]);

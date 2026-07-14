@@ -286,7 +286,7 @@ void EnumerateEnd(void)
 	/**  \TODO Fix layout of summary line, why -3? */
 	if (enableListPrices) {
 		len = strlen( message ) - strlen( _("Total")) - max( 9,
-		                strlen(_("Extended"))) - 3 ;
+		        strlen(_("Extended"))) - 3 ;
 		memset ( message, ' ', len );
 		cp = message+len;
 		sprintf( cp, ("%s |%9.2f\n"), _("Total"), enumerateTotal );

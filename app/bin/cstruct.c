@@ -643,7 +643,7 @@ static wBool_t StructureDlgUpdate(
 	turnoutInfo_t * to;
 	if ( inx != I_LIST ) { return(0); }
 	to = (turnoutInfo_t*)wListGetItemContext( pg->paramPtr[inx].control,
-	                (wIndex_t)*(long*)valueP );
+	        (wIndex_t)*(long*)valueP );
 	NewStructure();
 	curStructure = to;
 	ShowPierL();
