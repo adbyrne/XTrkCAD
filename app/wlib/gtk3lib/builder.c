@@ -126,7 +126,7 @@ wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr,
 		exit(1);
 	}
 	w->widget = (GtkWidget *)gtk_builder_get_object(dcontrol->builder,
-	                nameStr);
+	            nameStr);
 	if (!w->widget) {
 		GString *errorMessage = g_string_new("Could not find window object ");
 		g_string_append( errorMessage, nameStr);

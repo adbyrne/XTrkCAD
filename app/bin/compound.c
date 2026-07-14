@@ -1694,7 +1694,7 @@ BOOL_T EnumerateCompound( track_p trk )
 					               EnumCompound(inx).price,
 					               EnumCompound(inx).name,
 					               DynStringSize(&(EnumCompound(inx).indexes))?DynStringToCStr(&(EnumCompound(
-					                                       inx).indexes)):NULL);
+					                               inx).indexes)):NULL);
 				}
 				DynStringFree(&(EnumCompound(inx).indexes));
 			}

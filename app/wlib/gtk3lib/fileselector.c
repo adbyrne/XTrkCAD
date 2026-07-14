@@ -179,11 +179,11 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 	if (fs->window == NULL) {
 
 		fs->window = gtk_file_chooser_native_new(fs->title,
-		                NULL,
-		                (fs->mode == FS_LOAD ? GTK_FILE_CHOOSER_ACTION_OPEN :
-		                 GTK_FILE_CHOOSER_ACTION_SAVE),
-		                (fs->mode == FS_LOAD ? ("Open") : ("Save")),
-		                ("Cancel"));
+		             NULL,
+		             (fs->mode == FS_LOAD ? GTK_FILE_CHOOSER_ACTION_OPEN :
+		              GTK_FILE_CHOOSER_ACTION_SAVE),
+		             (fs->mode == FS_LOAD ? ("Open") : ("Save")),
+		             ("Cancel"));
 
 		if (fs->window==0) { abort(); }
 

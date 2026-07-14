@@ -1125,7 +1125,7 @@ static void Playback(void)
 			}
 			if (documentAutoSnapshot) {
 				snapshot_d.dpi = snapshot_d.scale = snapshot_d.orig.x =
-				                snapshot_d.orig.y = snapshot_d.size.x = snapshot_d.size.y = -1;
+				snapshot_d.orig.y = snapshot_d.size.x = snapshot_d.size.y = -1;
 				TakeSnapshot(&snapshot_d);
 			}
 			if (playbackNonStop) {
@@ -1289,7 +1289,7 @@ static void Playback(void)
 				continue;
 			}
 			snapshot_d.dpi = snapshot_d.scale = snapshot_d.orig.x =
-			                snapshot_d.orig.y = snapshot_d.size.x = snapshot_d.size.y = -1;
+			snapshot_d.orig.y = snapshot_d.size.x = snapshot_d.size.y = -1;
 			cp = paramLine + 8;
 			while (*cp && isspace((unsigned char)*cp)) {
 				cp++;

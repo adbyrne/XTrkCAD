@@ -652,7 +652,7 @@ static wBool_t RenderProfilePage(int pageNr, void * data)
 	}
 	size.y -= titleH+(printVert?PBT*2:PBT)+PBB(printProfileFontSize);
 	size.x -= 4.0/mainD.dpi+PBL(printProfileFontSize)+(printVert?PBR(
-	                        printProfileFontSize)/4.0:PBR(printProfileFontSize));
+	                  printProfileFontSize)/4.0:PBR(printProfileFontSize));
 	printRatio = size.y/size.x;
 	if (printRatio < screenRatio) {
 		printProfileD.scale = screenSize.y/size.y;

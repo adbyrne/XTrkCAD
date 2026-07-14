@@ -2091,7 +2091,7 @@ static wBool_t TurnoutDlgUpdate(
 	turnoutInfo_t* to;
 	if (inx != I_LIST) { return(FALSE); }
 	to = (turnoutInfo_t*)wListGetItemContext(pg->paramPtr[inx].control,
-	                (wIndex_t) * (long*)valueP);
+	        (wIndex_t) * (long*)valueP);
 	AddTurnout();
 	curTurnout = to;
 	RedrawTurnout( turnoutD.d, NULL, 0, 0 );

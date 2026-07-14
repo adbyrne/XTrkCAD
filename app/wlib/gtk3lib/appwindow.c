@@ -137,7 +137,7 @@ on_widget_deleted(GtkWidget* window, GdkEvent* event, gpointer userData)
 {
 	if (appMainWindow->attributes.window.winProc) {
 		bool rc = appMainWindow->attributes.window.winProc(appMainWindow,
-		                wClose_e, userData, NULL);
+		          wClose_e, userData, NULL);
 		if (!rc) {
 			wPrefFlush(NULL);
 		}

@@ -205,7 +205,7 @@ ReloadDeletedParamFile(int fileindex)
 	curParamFileIndex = fileindex;
 	paramFileInfo(curParamFileIndex).valid = TRUE;
 	paramFileInfo(curParamFileIndex).deleted = !ReadParams(0, NULL,
-	                paramFileInfo(curParamFileIndex).name);
+	        paramFileInfo(curParamFileIndex).name);
 	paramFileInfo(curParamFileIndex).contents = MyStrdup(curContents);
 
 	SetParamFileState(curParamFileIndex);
