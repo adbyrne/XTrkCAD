@@ -10,15 +10,38 @@ on:
 
 jobs:
   doxygen:
+    # Doxygen is pinned to DOXYGEN_VERSION (official prebuilt Linux binary,
+    # not the apt package) rather than left to whatever Ubuntu's repo
+    # resolves to -- avoids the kind of silent tool drift astyle hit in SF
+    # #638. Ubuntu 24.04 ships 1.9.8; Ubuntu 26.04 already ships 1.15.0.
+    #
+    # docs/doxygen/Doxyfile.in was ported from Hg on 2026-07-16 to close a
+    # git/Hg divergence (git's copy predated an upstream 2026-05-07 tightening
+    # -- SF rev 6446/6432 -- and had separately drifted onto a different
+    # Doxygen-version template). WARN_AS_ERROR is deliberately kept at NO
+    # here even though Hg now sets FAIL_ON_WARNINGS: flipping it surfaces
+    # ~435 pre-existing @param/return-type doc gaps that need their own
+    # triage-or-suppress pass first (same treatment as quality-plan Phase
+    # 9/12's other backlog decisions), not a silent gate change bundled into
+    # an unrelated CI-tooling PR.
     runs-on: ubuntu-latest
+    env:
+      DOXYGEN_VERSION: 1.9.8
     steps:
       - uses: actions/checkout@v5
       - name: Install dependencies
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y cmake ninja-build libgtk-3-dev doxygen graphviz libzip-dev zlib1g-dev
+          sudo apt-get install -y cmake ninja-build libgtk-3-dev graphviz libzip-dev zlib1g-dev
+      - name: Install pinned Doxygen ${{ env.DOXYGEN_VERSION }}
+        run: |
+          curl -sL -o doxygen.tar.gz "https://github.com/doxygen/doxygen/releases/download/Release_${DOXYGEN_VERSION//./_}/doxygen-${DOXYGEN_VERSION}.linux.bin.tar.gz"
+          tar xzf doxygen.tar.gz
+          echo "$PWD/doxygen-${DOXYGEN_VERSION}/bin" >> "$GITHUB_PATH"
       - name: Configure
-        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_USE_DOXYGEN=ON -DXTRKCAD_TESTING=OFF
+        run: |
+          doxygen --version
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_USE_DOXYGEN=ON -DXTRKCAD_TESTING=OFF
       - name: Build docs
         run: cmake --build build --target docs-doxygen
 
