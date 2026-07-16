@@ -214,6 +214,11 @@ jobs:
     # design). cppcheck's selfAssignment check can't see through the macro
     # and flags every call as a no-op assignment; verified 2026-07-11 that
     # all 29 instances across both files are this same pattern, not bugs.
+    #
+    # Vendored-code exclusion list (quality-plan-gtk3v2main-part2.md Phase 8):
+    # this job's file list (app/bin/*.c app/dynstring/*.c) is a non-recursive
+    # shell glob, so it never reaches app/wlib/gtk3lib/wrapbox/ or
+    # app/tools/halibut/ — out of scope by construction, no exclude needed.
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -269,6 +274,11 @@ jobs:
     # so clang-tidy can't get real compile flags for them and errors out.
     # readability-*/modernize-* deliberately excluded for now -- expected to
     # be high-volume style-only noise on this legacy C codebase.
+    #
+    # Vendored-code exclusion list (quality-plan-gtk3v2main-part2.md Phase 8):
+    # the `find app/bin app/dynstring app/cornu` root list never reaches
+    # app/wlib/gtk3lib/wrapbox/ or app/tools/halibut/ — out of scope by
+    # construction, no exclude needed.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -298,10 +308,28 @@ jobs:
           path: clang-tidy.txt
 
   astyle-check:
-    # Gating: fails if any tracked app/bin or app/wlib file (excluding vendored
-    # eggwrapbox.c and unittest/) is not conformant with app/lib/astylerc.
-    # astyle's --dry-run always exits 0, so the gate parses its output for
-    # "Formatted" lines rather than relying on the exit code.
+    # Gating: fails if any tracked app/bin or app/wlib file is not conformant
+    # with app/lib/astylerc. astyle's --dry-run always exits 0, so the gate
+    # parses its output for "Formatted" lines rather than relying on the exit
+    # code.
+    #
+    # Vendored-code exclusion list (quality-plan-gtk3v2main-part2.md Phase 8
+    # — encoded here so it doesn't need to be re-derived by hand each phase):
+    #   - app/wlib/gtk3lib/wrapbox/eggwrapbox.c and testwrapbox.c: upstream
+    #     GTK "eggwrapbox" widget, vendored verbatim. Both excluded via
+    #     --exclude=wrapbox (matches the directory; verified empirically that
+    #     astyle's --exclude matches full path components, not substrings, so
+    #     this can't accidentally match an unrelated file).
+    #   - app/tools/halibut/: vendored doc-processing tool. Never in scope
+    #     here by construction — this job's file globs only cover app/bin and
+    #     app/wlib, and halibut lives under app/tools.
+    #   - unittest/ dirs: excluded separately (see quality-plan-gtk3v2main.md
+    #     Phase 0) — some unittest sources are deliberately non-conformant.
+    #
+    # TEMPORARY (remove once the in-progress work lands, see bug-tracker.md):
+    # app/bin/cars/ is excluded at a developer's request while they actively
+    # rework files there — a continuously-changing directory would otherwise
+    # trip this gate on formatting drift unrelated to any given PR.
     #
     # astyle is built from source and pinned to ASTYLE_VERSION rather than
     # installed via apt: the apt-resolved version drifts silently whenever
@@ -329,6 +357,7 @@ jobs:
           OUTPUT=$("$ASTYLE" --options=app/lib/astylerc --dry-run -Q --recursive --ignore-exclude-errors \
             --exclude=wrapbox \
             --exclude=unittest \
+            --exclude=cars \
             "app/bin/*.c" "app/bin/*.h" "app/wlib/*.c" "app/wlib/*.h" 2>&1 | grep '^Formatted' || true)
           if [ -n "$OUTPUT" ]; then
             echo "$OUTPUT"
