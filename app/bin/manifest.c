@@ -39,9 +39,9 @@ extern int log_zip;
  *
  * There is one reserved name - "background" which is for the image file that is used as a layout background
  *
- *\param IN nameOfLayout - the layout this is a manifest for
- *\param IN background - the full filepath to the background image (or NULL) -> TODO this will become an array with a count
- *\param IN DependencyDir - the relative path in the archive to the directory in which the included object(s) will be stored
+ *\param[in] nameOfLayout - the layout this is a manifest for
+ *\param[in] background - the full filepath to the background image (or NULL) -> TODO this will become an array with a count
+ *\param[in] DependencyDir - the relative path in the archive to the directory in which the included object(s) will be stored
  *
  *\returns a String containing the JSON object
  */
@@ -89,8 +89,8 @@ char* CreateManifest(char* nameOfLayout, char* background,
 
 /**************************************************************************
  * Pull in a Manifest File and extract values from it
- * \param IN manifest - the full path to the mainifest.json file
- * \param IN zip_directory - the path to the directory for extracted objects
+ * \param[in] manifest - the full path to the mainifest.json file
+ * \param[in] zip_directory - the path to the directory for extracted objects
  *
  * \returns - the layout filename
  */

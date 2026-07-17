@@ -284,7 +284,6 @@ CreateLayoutForText(struct draw *bd, cairo_t *cr, char *text, wFont_p font,
  * \param fs IN font size
  * \param color IN text color
  * \param opts IN ???
- * \return
  */
 
 void
@@ -355,7 +354,6 @@ wBasicDrawString (wControl_p bd, wDrawPix_t x, wDrawPix_t y, double a,
  * \param x1, y1 IN bottom right corner
  * \param color IN fill color
  * \param opts IN options
- * \return
  */
 
 void
@@ -383,8 +381,7 @@ wBasicDrawFillRectangle (wControl_p bd, wDrawPix_t x0, wDrawPix_t y0,
  * \param cnt IN the number of points
  * \param color IN fill color
  * \param opts IN options
- * \paran fill IN Fill or not
- * \return
+ * \param[in] fill Fill or not
  */
 
 void
@@ -503,7 +500,6 @@ wBasicDrawFillPolygon (wControl_p bd, wDrawPix_t p[][2],
  * \param r IN radius
  * \param color IN fill color
  * \param opts IN options
- * \return
  */
 
 void

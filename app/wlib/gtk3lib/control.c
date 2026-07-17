@@ -51,7 +51,7 @@ wlibControlNew(wType_e type, wControl_p parent, const char *name, void* context)
 	return(newControl);
 }
 /**
- * Cause the control <b> to be displayed or hidden.
+ * Cause the control \a b to be displayed or hidden.
  * Used to hide control (such as a list) while it is being updated.
  *
  * \param b IN Control
@@ -101,7 +101,7 @@ wControlGetActive(wControl_p control)
 }
 
 /**
- * Cause the control <b> to be marked active or inactive.
+ * Cause the control \a b to be marked active or inactive.
  * Inactive controls donot respond to actions.
  *
  * \param b IN Control
@@ -128,10 +128,10 @@ void wControlActive(
 }
 
 /**
- * Returns the width of <label>.
+ * Returns the width of \a label.
  * This is used for computing window layout.
  * Typically the width to the longest label is computed and used as
- * the X-position for <controls>.
+ * the X-position for controls.
  *
  * \param label IN label
  * \returns width of label including some space

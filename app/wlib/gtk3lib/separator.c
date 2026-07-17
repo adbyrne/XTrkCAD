@@ -1,5 +1,5 @@
 /**
- * \file   seperator.c
+ * \file   separator.c
  * \brief  Separator control
  */
 

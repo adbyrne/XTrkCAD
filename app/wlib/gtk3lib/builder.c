@@ -90,10 +90,10 @@ wlibExistsTemplate(const char *name)
  * In the window object the builder field will be set with the loaded object
  * and the gtkwin field populated
  *
- * \param IN winType passed through to wlibAlloc
- * \param IN labelStr the name that will be shown in the title of the window
- * \param IN nameStr the name to look up
- * \param IN option the creation options
+ * \param[in] winType passed through to wlibAlloc
+ * \param[in] labelStr the name that will be shown in the title of the window
+ * \param[in] nameStr the name to look up
+ * \param[in] option the creation options
  * \param INOUT attributes passed through to wlibAlloc
  * \return the window object pointer
  *
@@ -101,7 +101,7 @@ wlibExistsTemplate(const char *name)
  */
 
 
-/** \TODO: Refactor - remove unused parameters, rename Dialog to Window */
+/** \todo Refactor - remove unused parameters, rename Dialog to Window */
 wControl_p
 wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr,
                         long option, void *attributes )
@@ -142,10 +142,10 @@ wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr,
 }
 /**
  * GetWidgetFromName
- * \param IN win  			Window
- * \param IN dialogname  	The first part of name
- * \param IN suffix			The last part of the name
- * \param IN ignore_failure	If object can't be found, shall we continue?
+ * \param[in] win  			Window
+ * \param[in] dialogname  	The first part of name
+ * \param[in] suffix			The last part of the name
+ * \param[in] ignore_failure	If object can't be found, shall we continue?
  */
 GtkWidget *
 wlibGetWidgetFromName( wControl_p parent, const char *dialogname,
@@ -200,9 +200,9 @@ wlibWidgetFromIdWarn(wControl_p win, const char *id)
 /*
  * Find the widget in the loaded template for this window.
  * When finding labels, errors can be ignored as this implies a fixed label
- * \param IN win Pointer to the window object
- * \param IN id  The name to be found
- * \param IN ignore Should we continue the program if the name can't be found?
+ * \param[in] win Pointer to the window object
+ * \param[in] id  The name to be found
+ * \param[in] ignore Should we continue the program if the name can't be found?
  * \return the widget or NULL
  */
 

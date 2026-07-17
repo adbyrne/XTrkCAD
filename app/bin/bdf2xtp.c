@@ -1,4 +1,4 @@
-/** \file bdf2xtp
+/** \file bdf2xtp.c
  *	Bdf2xtp translates .bdf files (which are source files for Winrail track libraries) to .xtp files
  */
 

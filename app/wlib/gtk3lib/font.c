@@ -77,7 +77,6 @@ static wFont_p curFont = NULL;
  * \param fontSelectionDialog IN dialog
  * \param response IN response code from dialog
  * \param attributes IN unused
- * \return
  */
 
 static void fontSelectionDialogCallback(GtkFontChooserDialog
@@ -256,7 +255,6 @@ PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget,
 
 /**
  * Destroy a previously allocated  Pango layout
- * \return
  */
 
 void wlibFontDestroyPangoLayout(PangoLayout *layout)
@@ -267,7 +265,6 @@ void wlibFontDestroyPangoLayout(PangoLayout *layout)
 
 /**
  * Initialize font attributes
- * \return
  */
 
 void wInitializeFonts()
@@ -281,7 +278,6 @@ void wInitializeFonts()
  * Initialize and run the font dialog
  *
  * \param title IN dialog box title
- * \return
  */
 
 void wSelectFont(
@@ -409,7 +405,6 @@ wFontSize_t wSelectedFontSize(void)
  * Set the default font size
  *
  * \param size IN font size
- * \return    describe the return value
  */
 
 void wSetSelectedFontSize(wFontSize_t size)

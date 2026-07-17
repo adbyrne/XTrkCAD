@@ -64,7 +64,6 @@ static dynArr_t lines_array;
  * Perform redrawing of the lines window
  *
  * \param b IN window handle
- * \return
  */
 
 static void linesRepaint(wControl_p b)
@@ -119,7 +118,6 @@ static void linesRepaint(wControl_p b)
  *
  * \param bl IN window
  * \param visible IN new visibility state
- * \return
  */
 
 void wlibLineShow(

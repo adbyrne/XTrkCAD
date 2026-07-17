@@ -1,5 +1,5 @@
 /**
- * \file   stickytoggle.h
+ * \file   stickytogglebutton.h
  * \brief
  *
  * \author Martin Fischer

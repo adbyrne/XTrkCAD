@@ -84,7 +84,6 @@ UpdateMenuList(struct recentuse *ru)
  *
  * \param widget IN the GtkWidget
  * \param value  IN the menu list item
- * \return
  */
 
 static void ActivateListMenuItem(
@@ -207,7 +206,6 @@ PushListEntry(wControl_p list, const char* label, const char* context)
  * \param index 	IN position of new menu item
  * \param labelStr 	IN the menu label for the new item
  * \param context	IN application context for the new item
- * \return
  */
 
 void wMenuListAdd(

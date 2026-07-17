@@ -1,4 +1,4 @@
-/** \file cmisc.c
+/** \file cdescribe.c
  * Handling of the 'Describe' dialog
  */
 
@@ -86,7 +86,7 @@ static void CreateEditableLayersList()
 /**
  * Search a layer in the list of editable layers.
  *
- * \param IN layer layer to search
+ * \param[in] layer layer to search
  * \return the index into the list
  */
 

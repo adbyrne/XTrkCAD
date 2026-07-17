@@ -161,7 +161,7 @@ void FormLoadMessage(
 }
 
 /** Load all the controls in a parameter group.
- * \param IN pointer to parameter group to be loaded
+ * \param[in] pointer to parameter group to be loaded
  */
 
 void FormLoadControls(paramGroup_p pg)

@@ -50,7 +50,6 @@ static char **myargv; /**< command line options */
  * Initialize the application name for later use
  *
  * \param _appName IN Name of application
- * \return
  */
 
 void

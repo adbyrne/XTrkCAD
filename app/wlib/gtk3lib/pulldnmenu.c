@@ -44,7 +44,6 @@
  *
  * \param widget IN widget that emitted the signal
  * \param value  IN application context
- * \return
  */
 
 static void pushMenuItem(
@@ -323,7 +322,6 @@ wControl_p wMenuRadioCreate(
  * Set radio button active
  *
  * \param mi 		IN menu entry for radio button
- * \return
  */
 
 void wMenuRadioSetActive(
@@ -375,7 +373,6 @@ wControl_p wMenuPushCreate(
  *
  * \param mi 		IN menu entry
  * \param enable 	IN new state
- * \return
  */
 
 void wMenuPushEnable(
@@ -432,7 +429,6 @@ wControl_p wMenuMenuCreate(
  * Create a menu separator
  *
  * \param mi 		IN menu entry
- * \return
  */
 
 void wMenuSeparatorCreate(
@@ -527,7 +523,6 @@ wBool_t wMenuToggleSet(
  *
  * \param mi 		IN menu entry
  * \param enable 	IN new state
- * \return
  */
 
 void wMenuToggleEnable(
@@ -545,7 +540,6 @@ void wMenuToggleEnable(
  *
  * \param m 		IN menu entry
  * \param labelStr 	IN new text
- * \return
  */
 
 void wMenuSetLabel( wMenu_p m, const char * labelStr)
@@ -572,7 +566,7 @@ wMenuGetLabel(wControl_p menuitem)
 /**
  * Create a pulldown menu
  *
- *  * ### Usage in dialogs
+ * ### Usage in dialogs
  *
  * - Runtime: no
  * - Builder: yes

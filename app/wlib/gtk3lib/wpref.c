@@ -60,7 +60,6 @@ static GKeyFile *prefs;
  *
  * \param name name of file, if NULL or empty string, the default file is used
  * \param update force update (ignored)
- * \return
  */
 
 static void readPrefs( char * name, wBool_t update )

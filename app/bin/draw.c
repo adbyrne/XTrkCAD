@@ -299,7 +299,6 @@ EXPORT void TempRedraw(void)
  * \param [out]     posY    y position of bitmap
  * \param [out]     pWidth  width of bitmap in destination coordinates
  *
- * \returns true on success, false otherwise
  */
 
 void TranslateBackground(drawCmd_p drawP, POS_T origX, POS_T origY,
@@ -645,10 +644,10 @@ static void ConstraintOrig(coOrd * orig, coOrd size, wBool_t bNoBorder,
 /**
  * Initialize the menu for setting zoom factors.
  *
- * \param IN zoomM		Menu to which radio button is added
- * \param IN zoomSubM	Second menu to which radio button is added, ignored if NULL
- * \param IN ctxMenu1
- * \param IN ctxMenu2
+ * \param[in] zoomM		Menu to which radio button is added
+ * \param[in] zoomSubM	Second menu to which radio button is added, ignored if NULL
+ * \param[in] ctxMenu1
+ * \param[in] ctxMenu2
  *
  */
 
@@ -684,7 +683,7 @@ EXPORT void InitCmdZoom(wMenu_p zoomM, wMenu_p zoomSubM, wMenu_p ctxMenu1,
 /**
  * Set radio button(s) corresponding to current scale.
  *
- * \param IN scale		current scale
+ * \param[in] scale		current scale
  *
  */
 
@@ -717,7 +716,7 @@ static void SetZoomRadio(DIST_T scale)
 /**
  * Find current scale
  *
- * \param IN scale current scale
+ * \param[in] scale current scale
  * \return index in scale table or -1 if error
  *
  */
@@ -969,7 +968,7 @@ EXPORT void DoZoomDown(void *mode)
  * Zoom to user selected value. This is the callback function for the
  * user-selectable preset zoom values.
  *
- * \param IN scale current pScale
+ * \param[in] scale current pScale
  *
  */
 static void DoZoom(void *pScaleVP)
@@ -1122,7 +1121,6 @@ EXPORT void FakeDownMouseState(void) { mouseState = mouseLeftPending; }
  *
  * \param x OUT pointer x position
  * \param y OUT pointer y position
- * \return
  */
 
 void GetMousePosition(wDrawPix_t * x, wDrawPix_t * y)

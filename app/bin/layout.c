@@ -533,7 +533,7 @@ static wBool_t file_changed;
 bool haveBackground = false;
 BOOL_T backgroundVisible = TRUE;
 
-/**  \TODO: why use a global here that is never changed */
+/**  \todo why use a global here that is never changed */
 char * noname = "";
 
 wControl_p backgroundB;

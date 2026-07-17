@@ -58,7 +58,6 @@
  * \param b IN window handle
  * \param w IN new width
  * \param h IN new height
- * \return
  *
  */
 
@@ -82,7 +81,6 @@ void wBoxSetSize(
  * \param y IN y position
  * \param w IN width
  * \param h IN height
- * \return
  */
 
 void wlibDrawBox(

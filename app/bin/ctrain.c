@@ -799,7 +799,6 @@ static wIndex_t FindLoco(
  * \param d IN drawing area for slider
  * \param d IN the dialog
  * \param w, h IN unused?
- * \return    describe the return value
  */
 
 static void SpeedRedraw(

@@ -236,7 +236,6 @@ SearchUILoadResults(void)
  * If there is at least one selected file, Apply is enabled
  * If there are entries in the list, Select All is enabled
  *
- * \return
  */
 
 static void UpdateSearchUiButton(void)
@@ -345,7 +344,6 @@ SearchUiClearFilter(void *ptr)
  * Select all files in the list
  *
  * \param junk IN ignored
- * \return
  */
 
 static void SearchUiSelectAll(void *junk)

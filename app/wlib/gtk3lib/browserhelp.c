@@ -54,7 +54,7 @@ TopicToUrl(gchar** helpUrl, const char* topic)
 }
 
 /**
- * Invoke the system's default browser to display help for <topic>. First the
+ * Invoke the system's default browser to display help for \a topic. First the
  * system's standard xdg-open command is attempted. If that is not available, the
  * version included with the XTrackCAD installation is executed.
  *

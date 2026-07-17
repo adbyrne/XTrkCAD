@@ -66,7 +66,7 @@ char *ChildProgramFile(char *parentProgram)
 
 
 /**
- * Invoke the help system to display help for <topic>.
+ * Invoke the help system to display help for \a topic.
  *
  * \param topic IN topic string
  */

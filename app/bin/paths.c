@@ -93,7 +93,6 @@ AddPath(const char *type, char*path)
  *
  * \param pathType IN file type
  * \param fileName IN fully qualified filename
- * \return
  *
  */
 
@@ -125,7 +124,7 @@ void SetCurrentPath(
  * 4. the user's home directory as default
  * Search is finished when one of the options returns a valid path
  *
- * \param IN pathType the type
+ * \param[in] pathType the type
  * \return pointer to path of NULL if not existing
  */
 

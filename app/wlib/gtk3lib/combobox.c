@@ -98,7 +98,6 @@ wIndex_t wComboBoxGetCount(wControl_p b)
  * Clear the whole combobox
  *
  * \param b IN combobox
- * \return
  */
 
 void
@@ -198,8 +197,8 @@ void wListSetValue(
 }
 
 /**
- * Makes the <val>th entry (0-origin) the current selection.
- * If <val> if '-1' then no entry is selected.
+ * Makes the \a val'th entry (0-origin) the current selection.
+ * If \a val is '-1' then no entry is selected.
  *
  * \param b		IN combobox
  * \param val	IN the index
@@ -394,16 +393,16 @@ static void ComboBoxEntryEntered(
  * BL_EDITABLE
  * : add and edit field to the combobox
  *
- *	\param IN parent    Parent window
- *	\param IN x, y      position
- *	\param IN helpStr   Help string
- *	\param IN labelStr  Label
- *	\param IN option    Options
- *	\param IN number    unused
- *	\param IN width     Width
- *	\param IN valueP    selected index
- *	\param IN action    Callback
- *	\param IN context      Context
+ *	\param[in] parent    Parent window
+ *	\param[in] x, y      position
+ *	\param[in] helpStr   Help string
+ *	\param[in] labelStr  Label
+ *	\param[in] option    Options
+ *	\param[in] number    unused
+ *	\param[in] width     Width
+ *	\param[in] valueP    selected index
+ *	\param[in] action    Callback
+ *	\param[in] context      Context
  */
 
 wControl_p wComboBoxCreate(
@@ -493,14 +492,14 @@ wControl_p wComboBoxCreate(
  *
  * - Builder: yes
  *
- *	\param IN parent    Parent window
- *	\param IN helpStr   Help string
- *	\param IN labelStr  Label
- *	\param IN option    Options
- *	\param IN width     Width
- *	\param IN valueP    selected index
- *	\param IN action    Callback
- *	\param IN context      Context
+ *	\param[in] parent    Parent window
+ *	\param[in] helpStr   Help string
+ *	\param[in] labelStr  Label
+ *	\param[in] option    Options
+ *	\param[in] width     Width
+ *	\param[in] valueP    selected index
+ *	\param[in] action    Callback
+ *	\param[in] context      Context
  */
 
 wControl_p wComboBoxCreateForToolbar(

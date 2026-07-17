@@ -123,9 +123,9 @@ GetZipDirectoryName(enum ArchiveOps op)
 /*****************************************************************************
  * Add directory to archive
  *
- * \param IN zip 		The open zip archive handle
- * \param IN dir_path 	The path to add
- * \param IN prefix 	The prefix in the archive
+ * \param[in] zip 		The open zip archive handle
+ * \param[in] dir_path 	The path to add
+ * \param[in] prefix 	The prefix in the archive
  *
  * \returns 	TRUE if OK
  */
@@ -237,8 +237,8 @@ BOOL_T AddDirectoryToArchive(
 /***********************************************************************
  * Create Archive
  *
- * \param IN dir_path The place to create the archive
- * \param IN fileName The name of the archive
+ * \param[in] dir_path The place to create the archive
+ * \param[in] fileName The name of the archive
  *
  * \return TRUE if ok
  */
@@ -315,9 +315,9 @@ BOOL_T CreateArchive(
 /**************************************************************************
  * Unpack_Archive_for
  *
- * \param IN pathName the name of the archive
- * \param IN fileName just the filename and extension of the layout
- * \param IN tempDir The directory to use to unpack into
+ * \param[in] pathName the name of the archive
+ * \param[in] fileName just the filename and extension of the layout
+ * \param[in] tempDir The directory to use to unpack into
  *
  * \returns TRUE if all worked
  */

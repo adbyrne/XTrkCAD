@@ -261,7 +261,6 @@ EXPORT const char * AbortMessage(
  * \param iLineNumber IN line number of fault
  * \param sMsg IN extra message with additional info
  *
- * \return No return
  */
 EXPORT void AbortProg(
         const char * sCond,

@@ -144,7 +144,6 @@ colorChange(GtkColorButton *widget, wControl_p user_data)
  *
  * \param bb IN button
  * \param color IN palette index for color to use
- * \return    describe the return value
  */
 
 void wColorSelectButtonSetColor(
@@ -191,15 +190,15 @@ wDrawColor wColorSelectButtonGetColor(
  * BB_DEFAULT
  * : set button as default for dialog
  *
- * \param IN parent parent window
- * \param IN x, y		x, y position in grid
- * \param IN helpStr	tooltip help string
- * \param IN labelStr	title for color selection dialog
- * \param IN option
- * \param IN width
- * \param IN valueP		current color
- * \param IN action		button callback procedure
- * \param IN context		user context to pass to callback procedure
+ * \param[in] parent parent window
+ * \param[in] x, y		x, y position in grid
+ * \param[in] helpStr	tooltip help string
+ * \param[in] labelStr	title for color selection dialog
+ * \param[in] option
+ * \param[in] width
+ * \param[in] valueP		current color
+ * \param[in] action		button callback procedure
+ * \param[in] context		user context to pass to callback procedure
  *
  * \return bb handle for created button
  *

@@ -85,7 +85,6 @@ GetRowCount(struct list* lcontrol)
  * Remove all entries from the list
  *
  * \param b IN list
- * \return
  */
 
 void wListClear(
@@ -100,8 +99,8 @@ void wListClear(
 }
 
 /**
- * Makes the <val>th entry (0-origin) the current selection.
- * If <val> if '-1' then no entry is selected.
+ * Makes the \a element'th entry (0-origin) the current selection.
+ * If \a element is '-1' then no entry is selected.
  * \param b IN List
  * \param element IN Index
  */
@@ -405,7 +404,6 @@ wIndex_t wListGetSelectedCount(
  * Select all items in list.
  *
  * \param bl IN list handle
- * \return
  */
 
 void wListSelectAll(wControl_p bl)
@@ -678,7 +676,7 @@ wListAddValuesArr(wControl_p b,
  * \param bm	IN Entry bitmap
  * \param itemData IN User context
  * \param labelStr IN label
- * \param		IN variable number of strings, terminated with NULL
+ * \param[in] variable number of strings, terminated with NULL
  *
  * \return		row count
  */

@@ -984,7 +984,6 @@ static void LayerDefault()
  * pressed and the operation is performed.
  *
  * \param[IN] data identifier for the button pressed
- * \return
  */
 
 static void DoLayerOp(void *data)
@@ -1104,7 +1103,6 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
  * Fill a layer dropbox with the current layer settings
  *
  * \param listLayers the dropbox
- * \return
  */
 void FillLayerList(wControl_p listLayers)
 {
@@ -1131,8 +1129,8 @@ void FillLayerList(wControl_p listLayers)
 /**
  * Initialize the layer lists.
  *
- * \param IN pointer to function that actually initialize tha data structures
- * \param IN current layer (0...NUM_LAYERS), (-1) for no change
+ * \param[in] pointer to function that actually initialize tha data structures
+ * \param[in] current layer (0...NUM_LAYERS), (-1) for no change
  */
 static void InitializeLayers(void LayerInitFunc(void), int newCurrLayer)
 {
@@ -2059,7 +2057,7 @@ static BOOL_T IsLayerConfigured(unsigned int layerNumber)
 /**
  * Save the layer information to the file.
  *
- * \paran f IN open file handle
+ * \param[in] f open file handle
  * \return always TRUE
  */
 
@@ -2116,7 +2114,7 @@ BOOL_T WriteLayers(FILE *f)
  * This function is called when the Done button on the layer dialog is pressed.
  * It hides the layer dialog and updates the layer information.
  *
- * \param IN ignored
+ * \param[in] ignored
  *
  */
 static void LayerOk(void *unused)

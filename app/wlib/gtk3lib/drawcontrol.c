@@ -463,17 +463,17 @@ static gint draw_char_release_event(
 	}
 }
 
+// check for alphanumeric key without modifier key being pressed
+#define ISALPHANUMERICKEY(key) ((key) <= 0xFF && !(event->state & (GDK_CONTROL_MASK | GDK_MOD1_MASK)))
+
 /**
- * .
+ * Handle a key-press event on the draw control.
  *
  * \param widget
  * \param event
  * \param drawControl
  * \return
  */
-
-// check for alphanumeric key without modifier key being pressed
-#define ISALPHANUMERICKEY(key) ((key) <= 0xFF && !(event->state & (GDK_CONTROL_MASK | GDK_MOD1_MASK)))
 
 static gint draw_char_event(
         GtkWidget* widget,
@@ -621,14 +621,14 @@ draw_tooltip(GtkWidget* widget, gint x, gint y, gboolean kbd,
  *
  * ### Options
  *
- *	\param IN parent		Parent window
- *	\param IN x, y			position
- *	\param IN helpStr		Help string
- *	\param IN option		Options
- *	\param IN width, height	Size
- *	\param IN attributes			Context
- *	\param IN redraw		pointer to redraw function
- *	\param IN action		pointer to action function
+ *	\param[in] parent		Parent window
+ *	\param[in] x, y			position
+ *	\param[in] helpStr		Help string
+ *	\param[in] option		Options
+ *	\param[in] width, height	Size
+ *	\param[in] attributes			Context
+ *	\param[in] redraw		pointer to redraw function
+ *	\param[in] action		pointer to action function
  */
 
 
