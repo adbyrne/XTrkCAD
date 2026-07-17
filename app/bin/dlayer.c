@@ -983,7 +983,7 @@ static void LayerDefault()
  * layer dialog, this function is called. The parameter identifies the button
  * pressed and the operation is performed.
  *
- * \param[IN] data identifier for the button pressed
+ * \param[in] data identifier for the button pressed
  */
 
 static void DoLayerOp(void *data)
@@ -1129,8 +1129,8 @@ void FillLayerList(wControl_p listLayers)
 /**
  * Initialize the layer lists.
  *
- * \param[in] pointer to function that actually initialize tha data structures
- * \param[in] current layer (0...NUM_LAYERS), (-1) for no change
+ * \param[in] LayerInitFunc pointer to function that actually initialize tha data structures
+ * \param[in] newCurrLayer current layer (0...NUM_LAYERS), (-1) for no change
  */
 static void InitializeLayers(void LayerInitFunc(void), int newCurrLayer)
 {
@@ -1398,7 +1398,7 @@ static void LayerPrefLoad(void)
 /**
  * Increment the count of objects on a given layer.
  *
- * \param index IN the layer to change
+ * \param layer IN the layer to change
  */
 
 void IncrementLayerObjects(unsigned int layer)
@@ -1410,7 +1410,7 @@ void IncrementLayerObjects(unsigned int layer)
 /**
  * Decrement the count of objects on a given layer.
  *
- * \param index IN the layer to change
+ * \param layer IN the layer to change
  */
 
 void DecrementLayerObjects(unsigned int layer)
@@ -2114,8 +2114,7 @@ BOOL_T WriteLayers(FILE *f)
  * This function is called when the Done button on the layer dialog is pressed.
  * It hides the layer dialog and updates the layer information.
  *
- * \param[in] ignored
- *
+ * \param unused unused
  */
 static void LayerOk(void *unused)
 {

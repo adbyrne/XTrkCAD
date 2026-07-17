@@ -67,13 +67,12 @@ static wBool_t maximize_at_next_show = FALSE;
  *****************************************************************************
  */
 
+#ifdef TODO_UNUSED
 /**
  * Get the "monitor" size for the window (strictly the nearest or most used monitor)
  * Note in OSX there is one giant virtual monitor so this doesn't work to force resize down...
  *
  */
-
-#ifdef TODO_UNUSED
 static GdkRectangle getMonitorDimensions(GtkWidget * widget)
 {
 	/** TODO: monitor dimensions are returned to caller, better call with reference ?*/
@@ -112,6 +111,7 @@ static GdkRectangle getMonitorDimensions(GtkWidget * widget)
 }
 #endif
 
+#ifdef TODO_UNUSED
 /**
  * Get the window size from the resource (.rc) file.  The size is saved under the key
  * SECTIONWINDOWSIZE.window name
@@ -119,8 +119,6 @@ static GdkRectangle getMonitorDimensions(GtkWidget * widget)
  * \param win IN window
  * \param nameStr IN window name
  */
-
-#ifdef TODO_UNUSED
 static void getWinSize(wWin_p win, const char * nameStr)
 {
 	int w=50, h=50;
@@ -187,14 +185,13 @@ static void saveSize(wWin_p win)
 	}
 }
 
+#ifdef TODO_UNUSED
 /**
  * Get the window position from the resource (.rc) file.  The position is saved under the key
  * SECTIONWINDOWPOS.window name
  *
  * \param win IN window
  */
-
-#ifdef TODO_UNUSED
 static void getPos(wWin_p win)
 {
 	char *cp1, *cp2;
@@ -481,8 +478,8 @@ wBool_t wWinIsMaximized(wWin_p win)
 /**
  * Sets the title of \a win to \a title.
  *
- * \param varname1 IN window
- * \param varname2 IN new title
+ * \param win IN window
+ * \param title IN new title
  */
 
 void wWinSetTitle(
@@ -495,8 +492,8 @@ void wWinSetTitle(
 /**
  * Sets the window \a win to busy or not busy. Sets the cursor accordingly
  *
- * \param varname1 IN window
- * \param varname2 IN TRUE if busy, FALSE otherwise
+ * \param win IN window
+ * \param busy IN TRUE if busy, FALSE otherwise
  */
 
 void wWinSetBusy(
@@ -617,6 +614,7 @@ void wWinDoCancel(
 	//}
 }
 
+#ifdef TODO_UNUSED
 /*
  ******************************************************************************
  *
@@ -624,7 +622,6 @@ void wWinDoCancel(
  *
  ******************************************************************************
  */
-#ifdef TODO_UNUSED
 static int window_redraw(
         wWin_p win,
         wBool_t doWinProc)
@@ -1122,23 +1119,6 @@ wlibCreateCustomStyle(void)
 //     return newWindow;
 // }
 
-
-// /**
-//  * Create a window.
-//  * Default width and height are replaced by values stored in the configuration
-//  * file (.rc)
-//  *
-//  * \param parent IN parent window
-//  * \param winType IN type of window
-//  * \param x IN default width
-//  * \param y IN default height
-//  * \param labelStr IN window title
-//  * \param nameStr IN name of window
-//  * \param option IN misc options for placement and sizing of window
-//  * \param winProc IN window procedure
-//  * \param data IN additional data to pass to the window procedure
-//  * \return  the newly created window
-//  */
 
 // wControl_p wlibCreateFromTemplate(
 //         wControl_p parent,

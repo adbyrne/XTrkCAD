@@ -171,13 +171,12 @@ EXPORT char* FormatSmallDistance(
 	return FormatDistanceEx(valF, format);
 }
 
+#ifdef TODO_UNUSED
 /*****************************************************************************
  *
  *
  *
  */
-
-#ifdef TODO_UNUSED
 static wBool_t ParamIntegerRangeCheck(paramData_p p, long valL);
 static wBool_t ParamFloatRangeCheck(paramData_p p, FLOAT_T valF);
 #endif

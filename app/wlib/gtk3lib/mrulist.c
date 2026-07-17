@@ -35,7 +35,7 @@ typedef struct {
 /**
  *  Initialize list.
  *
- * \param max_capacity, -1 for unlimited (almost)
+ * \param max_capacity -1 for unlimited (almost)
  *
  * \return handle for list
  */
@@ -57,6 +57,8 @@ labelcmp(const void* ptr1, const char* label)
 	return(g_strcmp0(entry1->label, label));
 }
 
+#define IS_LIST_FULL(mrulist) (mrulist->max_capacity != -1 && (int)g_queue_get_length(mrulist->elements) > mrulist->max_capacity)
+
 /**
  * add entry and move to front if it already exists.
  *
@@ -66,8 +68,6 @@ labelcmp(const void* ptr1, const char* label)
  *
  * \return pointer to data if element was removed, ie. when capacity was reached, NULL otherwise
  */
-
-#define IS_LIST_FULL(mrulist) (mrulist->max_capacity != -1 && (int)g_queue_get_length(mrulist->elements) > mrulist->max_capacity)
 
 void *MRUTouchEntry(MRUList* list, const char* label, void *entry)
 {
@@ -199,13 +199,6 @@ void * MRURemoveEntry(MRUList* list, const char* label)
 	return NULL;
 }
 
-/**
- * clear list. Removes all elements from list and frees the allocated memory.
- * NOTE: allocations for user data have to be freed before calling this function
- *
- * \param list  list handle
- */
-
 void
 free_element(gpointer data, gpointer user_data)
 {
@@ -217,6 +210,12 @@ free_element(gpointer data, gpointer user_data)
 	}
 }
 
+/**
+ * clear list. Removes all elements from list and frees the allocated memory.
+ * NOTE: allocations for user data have to be freed before calling this function
+ *
+ * \param list  list handle
+ */
 
 void MRUClear(MRUList* list)
 {

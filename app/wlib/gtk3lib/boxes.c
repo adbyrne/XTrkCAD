@@ -183,14 +183,13 @@ void wlibDrawBox(
 //     }
 }
 
+#ifdef TODO_NOTUSED
 /**
  * Force repainting of box window
  *
  * \param b IN box window
  * \return
  */
-
-#ifdef TODO_NOTUSED
 static void boxRepaint(wControl_p b)
 {
 	//wBox_p bb = (wBox_p)(b);
@@ -208,7 +207,7 @@ static void boxRepaint(wControl_p b)
  * \param labelStr IN label text (ignored)
  * \param boxTyp IN style
  * \param bw IN x width
- * \param by IN y width
+ * \param bh IN y width
  * \return window handle for newly created box
  */
 

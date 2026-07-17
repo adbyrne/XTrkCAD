@@ -135,7 +135,7 @@ void wListSetIndex(
  * \param model IN searched model
  * \param path IN unused
  * \param iter IN current iterator
- * \param context IN/OUT pointer to context structure with search criteria
+ * \param attributes IN/OUT pointer to context structure with search criteria
  * \return TRUE if identical, FALSE otherwise
  */
 
@@ -344,7 +344,7 @@ wIndex_t wListGetValues(
 
 /**
  * Check whether row is selected
- * \param b IN widget
+ * \param listControl IN widget
  * \param inx IN row
  * \returns TRUE if selected, FALSE if not existant or unselected
  */
@@ -674,9 +674,9 @@ wListAddValuesArr(wControl_p b,
  *
  * \param b		IN widget
  * \param bm	IN Entry bitmap
- * \param itemData IN User context
+ * \param itemInfo IN User context
  * \param labelStr IN label
- * \param[in] variable number of strings, terminated with NULL
+ * \param ... variable number of strings, terminated with NULL
  *
  * \return		row count
  */
@@ -729,7 +729,7 @@ wIndex_t wListAddValueVar(
  *
  * \param b		IN widget
  * \param bm	IN Entry bitmap
- * \param itemData IN User context
+ * \param itemInfo IN User context
  * \param labelStr IN label
  *
  * \returns number of rows
@@ -953,8 +953,17 @@ wControl_p wListCreate(
  * \todo Improve or discard totally, in this case, remove from param.c \
  * as well.
  *
- * \param varname1 IN this is a variable
- * \param varname2 OUT and another one that is modified
+ * \param parent IN Parent window
+ * \param x IN X-position
+ * \param y IN Y-position
+ * \param helpStr IN Help string
+ * \param labelStr IN Label
+ * \param option IN Options
+ * \param number IN Number of displayed list entries
+ * \param width IN Width
+ * \param valueP IN Selected index
+ * \param action IN Callback
+ * \param attributes IN Context
  * \return    describe the return value
  */
 

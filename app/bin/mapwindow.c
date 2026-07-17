@@ -37,8 +37,8 @@
 
 #include <time.h>
 
-/** Timing helpers — output goes through lprintf so it respects log levels */
 #ifdef _WIN32
+/** Timing helpers — output goes through lprintf so it respects log levels */
 #define TIMER_START(var) ((void)0)
 #define TIMER_LOG(var, label) ((void)0)
 #else
@@ -332,13 +332,12 @@ static wBool_t MapRedraw( wControl_p bd, void* pContex, wWinPix_t px,
 }
 
 
+#ifdef TODO_UNUSED
 /*
  * Set mapW size to fit the rescaled map
  *
  * \param reset IN
  */
-
-#ifdef TODO_UNUSED
 static int mapBorderH = 24;
 static int mapBorderW = 24;
 #endif

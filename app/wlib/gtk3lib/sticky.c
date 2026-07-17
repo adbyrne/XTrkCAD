@@ -110,7 +110,7 @@
 //}
 
 
-/**
+/*
  * Signal handler for button selection in radio buttons and toggle
  * button group
  *
@@ -139,7 +139,7 @@
 //}
 
 
-/**
+/*
  * Create a group of toggle buttons.
  *
  * ### Usage in dialogs, created by
@@ -268,7 +268,7 @@ static GtkWidget *GetActionButton(wControl_p toolbarButton)
  * Set the status of the button
  *
  * \param bb    IN the button
- * \param value IN TRUE for pressed in, FALSE for raised
+ * \param newState IN TRUE for pressed in, FALSE for raised
  */
 
 void wStickySetBusy(wControl_p bb, int newState)
@@ -327,7 +327,7 @@ static void toolbarClicked(StickyToggleButton* widget, gpointer value)
  * \param option IN		options
  * \param width IN		unused
  * \param action IN		callback
- * \param styleContext IN		user styleContext as styleContext
+ * \param context IN		user context
  * \returns button control
  *
  */

@@ -131,7 +131,7 @@ CountCatalogEntries(Catalog *catalog)
 /**
  * Empty a catalog. All data nodes including their allocated memory are freed. On
  *
- * \param listHeader IN the list
+ * \param catalog IN the list
  */
 
 EXPORT void
@@ -239,6 +239,7 @@ IsExistingContents(Catalog *catalog, const char *contents, BOOL_T silent)
  * \param entry existing entry to be updated
  * \param path filename to add
  * \param contents contents description
+ * \param tag entry tag
  */
 
 EXPORT void
@@ -508,8 +509,7 @@ FindWord(IndexEntry *index, int length, char *search, IndexEntry **entries)
 /**
  * Create and initialize the data structure for the track library
  *
- * \param trackLibrary OUT the newly allocated track library
- * \return TRUE on success
+ * \return the newly allocated track library
  */
 
 ParameterLib *
@@ -545,7 +545,7 @@ DestroyLibrary(ParameterLib *library)
 /**
  * Scan directory and add all parameter files found to the catalog
  *
- * \param trackLib IN the catalog
+ * \param paramLib IN the catalog
  * \param directory IN directory to scan
  * \return number of files found
  */
@@ -832,7 +832,7 @@ unsigned countWords(char *str)
  *
  * \param library IN the library
  * \param searchExpression	IN keyword to search for
- * \param resultEntries IN list header for result list
+ * \param results IN list header for result list
  * \return number of found entries
  */
 
@@ -1008,7 +1008,7 @@ GetParameterFileContent(char *file)
  * Get the first scale values from a parameter file. Returned strings have to be MyFreed after use
  *
  * \param file IN xtpfile
- * \param array of one of three char results (Track, Structure and Car)
+ * \return array of one of three char results (Track, Structure and Car)
  */
 
 char *
