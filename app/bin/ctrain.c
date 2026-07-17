@@ -797,7 +797,7 @@ static wIndex_t FindLoco(
  * correct position and update the odometer.
  *
  * \param d IN drawing area for slider
- * \param d IN the dialog
+ * \param context IN the dialog
  * \param w, h IN unused?
  */
 

@@ -185,7 +185,7 @@ EXPORT turnoutInfo_t* CreateNewTurnout(
 /**
  * Delete a turnout parameter from the list and free the related memory
  *
- * \param [IN] toInfo turnout definition to be deleted
+ * \param[in] toInfo turnout definition to be deleted
  *
  * \returns True if it succeeds
  */
@@ -214,7 +214,7 @@ DeleteTurnout(void* toInfo)
  * Due to the way the definitions are loaded from file it is safe to
  * assume that they form a contiguous block in the array.
  *
- * \param [IN] fileIndex parameter file
+ * \param[in] fileIndex parameter file
  */
 
 void
@@ -302,6 +302,7 @@ GetTrackCompatibility(int paramFileIndex, SCALEINX_T scaleIndex) {
  * \param segCnt
  * \param segs
  * \param paths
+ * \param sTitle
  *
  * \returns -1 if a track segment is not on a path
  */
@@ -1816,9 +1817,11 @@ EXPORT void AdvanceTurnoutPositionIndicator(
  * \param trk IN existing track
  * \param pos IN ??
  * \param sep IN distance between existing and new track
+ * \param factor IN scale factor
  * \param newTrk OUT new track piece
  * \param p0R OUT starting point of new piece
  * \param p1R OUT ending point of new piece
+ * \param track IN whether new piece is a track
  * \return    always TRUE
  */
 

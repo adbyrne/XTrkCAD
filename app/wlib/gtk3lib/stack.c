@@ -60,7 +60,7 @@ wStackPageShow(wControl_p stack, const char* pageName)
  * \param option IN Options
  * \param width IN Width of button
  * \param action IN Callback
- * \param styleContext IN User styleContext
+ * \param context IN User context
  * \returns button widget
 
  *

@@ -236,7 +236,7 @@ void DescribeLinkNote(track_p trk, char * str, CSIZE_T len)
  * Take a new note track element and initialize it. It will be
  * initialized with defaults and can then be edited by the user.
  *
- * \param the newly created trk
+ * \param pos position of the newly created note
  */
 
 void NewLinkNoteUI( coOrd pos )

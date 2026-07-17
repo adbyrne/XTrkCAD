@@ -297,7 +297,7 @@ static bool ignoreClick;
  * Set the status of the button
  *
  * \param bb    IN the button
- * \param value IN TRUE for pressed in, FALSE for raised
+ * \param newState IN TRUE for pressed in, FALSE for raised
  */
 
 void wButtonSetBusy(wControl_p bb, int newState)
@@ -353,7 +353,7 @@ static void toolbarClicked(GtkToggleButton *widget, gpointer value)
  * \param option IN		options
  * \param width IN		unused
  * \param action IN		callback
- * \param styleContext IN		user styleContext as styleContext
+ * \param context IN		user context
  * \returns button control
  *
  */

@@ -42,6 +42,7 @@ static int tooltipsCount;
  * Initialize tooltip array
  *
  * \param bh IN pointer to list of tooltips
+ * \param count IN number of tooltips
  */
 
 void wInitTooltip( wTooltip_t * bh, unsigned int count )
@@ -54,7 +55,7 @@ void wInitTooltip( wTooltip_t * bh, unsigned int count )
  * Set the help topic string for \a b to \a help.
  *
  * \param b IN control
- * \param help IN tip
+ * \param newTip IN tip
  */
 
 void wTooltipSetText(
@@ -150,7 +151,7 @@ void wTooltipSet(wControl_p control, const char *dialog, const char* dialogItem)
  *
  * \param widget		IN widget
  * \param dialog		IN name of dialog
- * \param dialogitem	IN name of item within dialog
+ * \param dialogItem	IN name of item within dialog
  */
 
 void wlibAddTooltip(

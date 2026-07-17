@@ -46,7 +46,7 @@
 /**
  * Invoke the system's default application to open a file.
  *
- * \param topic IN URI of document
+ * \param filename IN URI of document
  *
  * \return 0 on success, error code on failure
  */

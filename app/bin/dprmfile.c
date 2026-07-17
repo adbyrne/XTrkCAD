@@ -250,7 +250,7 @@ UpdateParamFileProperties( bool newState)
 /**
  * Mark selected files as favorite
  *
- * \param favorite IN FALSE = remove, TRUE = set favorite
+ * \param setFavorite IN FALSE = remove, TRUE = set favorite
  */
 
 static void ParamFileFavorite(void * setFavorite)

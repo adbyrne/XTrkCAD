@@ -1000,6 +1000,7 @@ static void DrawDtoInit()
  *
  * \param d The drawing object
  * \param scaleInx The layout/track scale index
+ * \param omitTies Whether to omit ties
  * \param color The tie color. If black the color is read from the global tieColor in DrawTie().
  */
 static void DrawNormalTurnout(
@@ -1236,6 +1237,7 @@ static void DrawNormalTurnout(
  *
  * \param d The drawing object
  * \param scaleInx The layout/track scale index
+ * \param omitTies Whether to omit ties
  * \param color The tie color. If black the color is read from the global tieColor in DrawTie().
  */
 static void DrawCurvedTurnout(
@@ -1492,6 +1494,7 @@ static void DrawCurvedTurnout(
   *
   * \param d The drawing object
   * \param scaleInx The layout/track scale index
+  * \param omitTies Whether to omit ties
   * \param color The tie color. If black the color is read from the global tieColor in DrawTie().
   */
 static void DrawXingTurnout(
@@ -1824,6 +1827,7 @@ static void DrawXingTurnout(
  *
  * \param d The drawing object
  * \param scaleInx The layout/track scale index
+ * \param omitTies Whether to omit ties
  * \param color The tie color. If black the color is read from the global tieColor in DrawTie().
  */
 static void DrawCrossTurnout(

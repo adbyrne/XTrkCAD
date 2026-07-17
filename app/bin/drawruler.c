@@ -120,6 +120,7 @@ void DrawMarkers(void)
  * @param a         Ruler angle (0.0 = vertical, 90.0 = horizontal)
  * @param tickSide  Which side the ticks extend to
  * @param maxTickPx Maximum tick length in pixels
+ * @param bgColor   Background color
  */
 static void DrawRulerBackground(drawCmd_p d, coOrd pos0, coOrd pos1,
                                 wAngle_t a, int tickSide, int maxTickPx,

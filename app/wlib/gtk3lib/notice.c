@@ -127,9 +127,9 @@ int wNotice(
  * Pushing the third button returns -1
  *
  * \param msg Text to display in message box
- * \param yes First button label
- * \param no  Second label (or 'NULL')
- * \param cancel Third button label (or 'NULL')
+ * \param affirmative First button label
+ * \param cancel  Second label (or 'NULL')
+ * \param alternate Third button label (or 'NULL')
  *
  * \returns 1, 0 or -1
  */

@@ -166,7 +166,7 @@ void wPrefSetInteger(
  * \param section IN section in preferences file
  * \param name IN name of parameter
  * \param res OUT resulting value
- * \param default IN default value
+ * \param def IN default value
  * \return TRUE if value was found, FALSE if default is returned
  */
 

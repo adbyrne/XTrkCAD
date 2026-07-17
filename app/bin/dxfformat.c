@@ -85,7 +85,7 @@ void DxfFormatPosition(DynString *result, int type, double value)
 * Build and format the line style definition
 *
 * \param result OUT buffer for result
-* \param type IN line style
+* \param style IN line style
 */
 
 void DxfLineStyle(DynString *result, int style)
@@ -103,7 +103,6 @@ void DxfLineStyle(DynString *result, int style)
 * to the basic layer name. The result is appended to the existing result buffer.
 *
 * \param output OUT buffer for result
-* \param basename IN base part of  name
 * \param layer IN layer number
 */
 
@@ -156,8 +155,8 @@ DxfAppendInteger(DynString *output, int type, int value)
 /**
 * Build and format the line style definition. The result is appended to the existing result buffer.
 *
-* \param result OUT buffer for result
-* \param type IN line style 0 CONTINUOUS, 1 DASHED or 2 DOT
+* \param output OUT buffer for result
+* \param style IN line style 0 CONTINUOUS, 1 DASHED or 2 DOT
 */
 
 static void

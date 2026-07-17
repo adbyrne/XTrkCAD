@@ -594,7 +594,8 @@ static drawCmd_t printProfileD = {
  * landscape.
  * \todo Rework the layout of the printout
  *
- * \param junk IN
+ * \param pageNr IN
+ * \param data IN
  * \return
  */
 

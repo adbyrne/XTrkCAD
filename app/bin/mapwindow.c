@@ -248,7 +248,7 @@ static void DoMapPan(wAction_t action, coOrd pos)
 /**
  * Redraw the Map window using the Scale derived from the Window size and Room size
  * \param bd [inout] Map canvas - not used
- * \param pContext [inout] Param context - not used
+ * \param pContex [inout] Param context - not used
  * \param px, py [in] canvas size
  */
 static wBool_t MapRedraw( wControl_p bd, void* pContex, wWinPix_t px,

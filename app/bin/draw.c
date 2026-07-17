@@ -519,6 +519,7 @@ EXPORT void MainLayout(wBool_t bRedraw, wBool_t bNoBorder)
  *
  * \param win wlib window information
  * \param e the wlib event
+ * \param refresh refresh data (unused)
  * \param data additional data (unused)
  */
 
@@ -647,7 +648,7 @@ static void ConstraintOrig(coOrd * orig, coOrd size, wBool_t bNoBorder,
  * \param[in] zoomM		Menu to which radio button is added
  * \param[in] zoomSubM	Second menu to which radio button is added, ignored if NULL
  * \param[in] ctxMenu1
- * \param[in] ctxMenu2
+ * \param[in] panMenu
  *
  */
 
@@ -968,7 +969,7 @@ EXPORT void DoZoomDown(void *mode)
  * Zoom to user selected value. This is the callback function for the
  * user-selectable preset zoom values.
  *
- * \param[in] scale current pScale
+ * \param[in] pScaleVP current pScale
  *
  */
 static void DoZoom(void *pScaleVP)

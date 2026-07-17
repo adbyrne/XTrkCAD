@@ -123,6 +123,7 @@ CreateEntry(const char* label, int state)
  *
  * \param m 		IN menu to be extended
  * \param helpStr 	IN reference into help
+ * \param sorder 	IN sort order
  * \param max 		IN maximum number of elements
  * \param action 	IN callback function
  * \return menu entry

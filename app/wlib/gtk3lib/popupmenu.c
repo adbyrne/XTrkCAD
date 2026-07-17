@@ -49,7 +49,7 @@ static gint popup_char_event(
 /**
  * Create a popup menu (context menu)
  *
- * \param w 		IN parent window
+ * \param parent 		IN parent window
  * \param labelStr 	IN label
  * \return    the created menu
  */

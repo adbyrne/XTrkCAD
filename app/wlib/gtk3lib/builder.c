@@ -142,7 +142,7 @@ wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr,
 }
 /**
  * GetWidgetFromName
- * \param[in] win  			Window
+ * \param[in] parent  			Window
  * \param[in] dialogname  	The first part of name
  * \param[in] suffix			The last part of the name
  * \param[in] ignore_failure	If object can't be found, shall we continue?

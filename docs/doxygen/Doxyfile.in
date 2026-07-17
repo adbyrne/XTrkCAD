@@ -798,13 +798,14 @@ WARN_NO_PARAMDOC       = NO
 # NOTE: upstream Hg (SF rev 6446/6432, 2026-05-07) enabled FAIL_ON_WARNINGS
 # here; this file was ported from Hg on 2026-07-16 to close a longstanding
 # git/Hg divergence (git's copy predated that change and had drifted onto a
-# different Doxygen-version template entirely). Deliberately kept at NO for
-# now -- reconciling to FAIL_ON_WARNINGS surfaces ~435 pre-existing
-# @param/return-type doc gaps across app/bin and app/wlib/gtk3lib that need
-# their own triage-or-suppress pass (same treatment as the quality plan's
-# Phase 9/12 backlog decisions), not a silent gate flip.
+# different Doxygen-version template entirely). Deliberately kept at NO
+# initially (930 pre-existing @param/return-type doc gaps across app/bin and
+# app/wlib/gtk3lib) while those were triaged and fixed in bugs #650/#651
+# (Doxyfile sync), #653/#654 (doc-comment triage, 930 -> 0 outside
+# app/bin/cars -- see .claude/doxygen-triage-plan.md for the full history).
+# Now matches Hg, gating for real.
 
-WARN_AS_ERROR          = NO
+WARN_AS_ERROR          = FAIL_ON_WARNINGS
 
 # The WARN_FORMAT tag determines the format of the warning messages that doxygen
 # can produce. The string should contain the $file, $line, and $text tags, which
@@ -893,7 +894,11 @@ EXCLUDE_SYMLINKS       = NO
 # Note that the wildcards are matched against the file with absolute path, so to
 # exclude all test directories for example use the pattern */test/*
 
-EXCLUDE_PATTERNS       =
+# TEMPORARY: app/bin/cars/ is excluded from the WARN_AS_ERROR gate below at a
+# developer's request while they actively rework files there (same precedent
+# as the astyle-check CI gate, see bug #649/#654) -- remove this exclusion
+# once that work lands and its own doxygen warnings are fixed/merged.
+EXCLUDE_PATTERNS       = */app/bin/cars/*
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the

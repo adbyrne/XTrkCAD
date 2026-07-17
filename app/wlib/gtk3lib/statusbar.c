@@ -61,12 +61,8 @@ void wStatusSetValue(
  * Create a window for a simple text.
  *
  * \param[in] parent Handle of parent window
- * \param[in] x position in x direction
- * \param[in] y position in y direction
  * \param[in] labelStr ???
- * \param[in] width horizontal size of window
  * \param[in] message message to display ( null terminated )
- * \param[in] flags display options
  * \return handle for created window
  */
 

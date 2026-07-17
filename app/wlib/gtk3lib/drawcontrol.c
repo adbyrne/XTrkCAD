@@ -560,7 +560,7 @@ static gint draw_char_event(
  * Handle realize signal. A cross is created as the new cursor.
  *
  * \param widget	see GTK documentation
- * \param attributes		unused
+ * \param unused		unused
  */
 
 void
@@ -626,7 +626,7 @@ draw_tooltip(GtkWidget* widget, gint x, gint y, gboolean kbd,
  *	\param[in] helpStr		Help string
  *	\param[in] option		Options
  *	\param[in] width, height	Size
- *	\param[in] attributes			Context
+ *	\param[in] context			Context
  *	\param[in] redraw		pointer to redraw function
  *	\param[in] action		pointer to action function
  */

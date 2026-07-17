@@ -162,7 +162,7 @@ EXPORT coOrd GetSegEndPt(
 /**
  * Calculate the bounding box for a string.
  *
- * \param coOrd IN position of text
+ * \param pos IN position of text
  * \param angle IN text angle
  * \param str IN the string
  * \param fs IN size of font

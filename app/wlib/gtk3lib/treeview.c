@@ -76,7 +76,7 @@ wTreeViewGetCount(wControl_p b)
  * Get the user attributes for a list element
  *
  * \param b IN widget
- * \param inx IN row
+ * \param row IN row
  * \returns the user attributes for the specified row
  */
 
@@ -184,6 +184,7 @@ wlibNewTreeView(GtkListStore *ls, int showTitles, int multiSelection)
  * column
  *
  * \param tv IN treeview
+ * \param visibility IN initial visibility
  * \param renderer IN renderer to use
  * \param attribute IN attribute for column
  * \param value IN value to set

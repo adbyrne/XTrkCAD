@@ -46,7 +46,7 @@ __attribute__((weak)) wBool_t CheckHelpTopicExists(const char * topic) { return 
 /**
  * Create the fully qualified filename for the help helper
  *
- * \param parent IN path and filename of parent process
+ * \param parentProgram IN path and filename of parent process
  * \return filename for the child process
  */
 
@@ -67,8 +67,6 @@ char *ChildProgramFile(char *parentProgram)
 
 /**
  * Invoke the help system to display help for \a topic.
- *
- * \param topic IN topic string
  */
 
 void wHelp(const char * topic)

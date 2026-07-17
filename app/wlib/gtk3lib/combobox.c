@@ -97,7 +97,7 @@ wIndex_t wComboBoxGetCount(wControl_p b)
 /**
  * Clear the whole combobox
  *
- * \param b IN combobox
+ * \param control IN combobox
  */
 
 void
@@ -143,6 +143,7 @@ void *wComboBoxGetItemContext(wControl_p b, wIndex_t inx)
  *
  * \param b		IN the combobox
  * \param text	IN string to add
+ * \param attributes	IN user attributes
  * \return    new number of rows
  */
 
@@ -250,7 +251,7 @@ wBool_t wComboBoxSetValues(
  * Or handles user entered text.
  *
  * \param comboBox  IN the combobox
- * \param context      IN user context / pointer to the control
+ * \param attributes      IN user context / pointer to the control
  * \return
  *
  * \todo Refactor !!

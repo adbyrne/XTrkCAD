@@ -149,7 +149,7 @@ EXPORT turnoutInfo_t * CreateNewStructure(
  * Delete a structure definition from memory.
  * \todo Find a better way to handle Custom Structures (see CreateNewStructure)
  *
- * \param [IN] structure the structure to be deleted
+ * \param[in] structure the structure to be deleted
  */
 
 BOOL_T

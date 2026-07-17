@@ -396,8 +396,6 @@ void load_into_view(char *file, int requested_view)
 
 /**
  * Invoke the help system to display help for \a topic.
- *
- * \param topic IN topic string
  */
 
 void wHelp(const char * topic)

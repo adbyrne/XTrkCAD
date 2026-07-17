@@ -519,6 +519,12 @@ const char *wGetUserHomeDir(void);
 void wSetAudio(bool setting);
 void wBeep(void);
 
+/**
+ * Invoke the platform help system to display help for \a topic.
+ * Platform-specific implementation in browserhelp.c/ixhelp.c/osxhelp.c.
+ *
+ * \param topic IN topic string
+ */
 void wHelp(const char *);
 
 unsigned wOpenFileExternal(char *filename);
