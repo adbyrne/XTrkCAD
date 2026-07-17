@@ -431,7 +431,7 @@ void wDrawLine(
 /**
  * Draw an arc around a specified center
  *
- * \param drawControl IN ?
+ * \param drawingArea IN ?
  * \param x0, y0 IN  center of arc
  * \param r IN radius
  * \param angle0, angle1 IN start and end angle

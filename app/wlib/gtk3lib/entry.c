@@ -167,7 +167,8 @@ wlibEntrySetValid(wControl_p entry, bool valid)
  * Signal handler for changes in an entry field
  *
  * \param widget 		IN
- * \param entry field 	IN
+ * \param event 	IN
+ * \param b 	IN
  * \return
  */
 

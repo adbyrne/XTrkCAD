@@ -558,14 +558,12 @@ static void textChanged(GtkWidget* widget, wControl_p bt)
  *
  * \param parent IN parent window
  * \param x IN x position
- * \param Y IN y position
+ * \param y IN y position
  * \param helpStr IN balloon help string
  * \param labelStr IN Button label ???
  * \param option IN
  * \param width IN
- * \param valueP IN Current color ???
- * \param action IN Button callback procedure
- * \param attributes IN ???
+ * \param height IN
  * \return 	bb handle for created text widget
  *
  * \todo Options BT_HSCROLL, BT_CHARUNITS, BT_FIXEDFONT, BT_TOP

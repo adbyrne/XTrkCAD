@@ -239,7 +239,6 @@ FileEditOK(void *junk)
 /**
  * Show the attachment edit dialog. Create if non-existant
  *
- * \param trk IN track element to edit
  * \param windowTitle IN title for the edit dialog window
  */
 
@@ -324,7 +323,7 @@ void DescribeFileNote(track_p trk, char * str, CSIZE_T len)
  * Take a new note track element and initialize it. It will be
  * initialized with defaults and can then be edited by the user.
  *
- * \param the newly created trk
+ * \param pos position of the newly created note
  */
 
 void NewFileNoteUI(coOrd pos)

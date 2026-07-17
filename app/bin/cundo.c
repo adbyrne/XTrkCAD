@@ -454,7 +454,7 @@ static BOOL_T DeleteInStream( stream_p stream, uintptr_t start, uintptr_t end )
  * \param stream
  * \param start
  * \param end
- * \param trk
+ * \param trk0
  *
  * Note: does not set trk->delete flag
  */

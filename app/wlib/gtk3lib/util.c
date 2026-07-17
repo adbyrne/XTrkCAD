@@ -399,6 +399,7 @@ extern long dontHideCursor;
 /**
  * Set the cursor in GTK
  *
+ * \param bd IN
  * \param cursor IN
  */
 

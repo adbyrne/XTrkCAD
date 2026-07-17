@@ -182,6 +182,7 @@ static double fontFactor = 1.0;
  * \param height_p OUT height of layout
  * \param ascent_p OUT ascent of layout
  * \param descent_p OUT descent of layout
+ * \param baseline_p OUT baseline of layout
  * \return    the created Pango layout
  */
 

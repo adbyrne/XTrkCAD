@@ -157,6 +157,7 @@ EXPORT DIST_T GetTrkDistance( track_cp trk, coOrd * pos )
  * \param complain IN show error message if there is no other piece of track
  * \param track IN
  * \param ignoreHidden IN decide whether hidden track is ignored or not
+ * \param t IN track to search from, or NULL
  * \return   NULL if there is no track, pointer to track otherwise
  */
 
@@ -2706,6 +2707,7 @@ EXPORT wDrawColor roadbedColor;
  * Draw tracks with 2 rails when zoomed in
  *
  * \param		d	drawing context
+ * \param		factor	zoom factor
  * \return	true is we draw tracks with 2 rails
  */
 EXPORT BOOL_T DrawTwoRails( drawCmd_p d, DIST_T factor )

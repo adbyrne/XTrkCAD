@@ -57,8 +57,10 @@ BasicDrawSetColor (cairo_t *cr, wDrawColor color)
  *
  * \param cr
  * \param lineWidth
+ * \param minLineWidth
  * \param lineType
  * \param opts
+ * \param scale_adjust
  */
 
 static void
@@ -183,6 +185,7 @@ wBasicDrawLine (wControl_p bd, wDrawPix_t x0, wDrawPix_t y0,
  * \param angle0, angle1 IN start and end angle
  * \param drawCenter draw marking for center
  * \param width line width
+ * \param minWidth minimum line width
  * \param lineType
  * \param color color
  * \param opts ?
@@ -276,12 +279,15 @@ CreateLayoutForText(struct draw *bd, cairo_t *cr, char *text, wFont_p font,
  * treated differently. The starting point is transformed, then the
  * string is rotated and scaled as needed. Finally the string position
  * translated to the starting point calculated previously.
+ * \param bd IN draw control
  * \param x IN x position in pixels
  * \param y IN y position in pixels
  * \param a IN angle of baseline in degrees. Positive is clockwise, 0 is direction of positive x axis
  * \param s IN string to print
  * \param fp IN font
  * \param fs IN font size
+ * \param width IN width
+ * \param minWidth IN minimum width
  * \param color IN text color
  * \param opts IN ???
  */
@@ -378,10 +384,12 @@ wBasicDrawFillRectangle (wControl_p bd, wDrawPix_t x0, wDrawPix_t y0,
  *
  * \param bd
  * \param p IN a list of x and y coordinates
+ * \param type IN line types for each point
  * \param cnt IN the number of points
  * \param color IN fill color
  * \param opts IN options
  * \param[in] fill Fill or not
+ * \param[in] open whether the polygon is open
  */
 
 void

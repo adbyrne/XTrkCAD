@@ -100,7 +100,7 @@ static wBool_t LayoutDlgUpdate(paramGroup_p pg, int inx, void * valueP);
 /**
 * Update the full file name. Do not do anything if the new filename is identical to the old one.
 *
-* \param filename IN the new filename
+* \param fileName IN the new filename
 */
 
 void
@@ -125,7 +125,7 @@ SetLayoutFullPath(const char *fileName)
 * Set the minimum radius for the selected scale/gauge into the dialog
 *
 * \param scaleName IN name of the scale/gauge eg. HOn3
-* \param defaltValue IN default value will be used if no preference is set
+* \param defaultValue IN default value will be used if no preference is set
 */
 void
 LoadLayoutMinRadiusPref(char *scaleName, double defaultValue)
@@ -142,7 +142,7 @@ LoadLayoutMinRadiusPref(char *scaleName, double defaultValue)
 * Set the maximum grade for the selected scale/gauge into the dialog
 *
 * \param scaleName IN name of the scale/gauge eg. HOn3
-* \param defaltValue IN default value will be used if no preference is set
+* \param defaultValue IN default value will be used if no preference is set
 */
 void
 LoadLayoutMaxGradePref(char* scaleName, double defaultValue)
@@ -876,7 +876,6 @@ void DoLayout(void * unused)
 
 /**
  * @brief Callback for Menu and Shortcut key to open Layout Dialog.
- * @param void
  * @return Address of layout dialog (DoLayout)
 */
 EXPORT addButtonCallBack_t LayoutInit(void)
@@ -1076,7 +1075,6 @@ static struct wFilSel_t * settingsRead_fs;
 
 /**
  * @brief Read button in Layout. File Open dialog to read a Settings file (*.xset)
- * @param void
  */
 static void SettingsRead( void )
 {
@@ -1109,7 +1107,6 @@ static struct wFilSel_t * settingsWrite_fs;
 
 /**
  * @brief Write button in Layout. File Save dialog for a settings file (*.xset)
- * @param void
 */
 static void SettingsWrite( void  )
 {

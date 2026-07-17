@@ -74,7 +74,7 @@ ConvertUTF8ToSystem(unsigned char *in)
  * Requires convert to UTF-8 If at least one character is >127 the string
  * has to be converted.
  *
- * \param [in9 string the string.
+ * \param [in] string the string.
  *
  * \returns True if conversion is required, false if not.
  */

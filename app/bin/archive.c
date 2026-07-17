@@ -84,7 +84,7 @@ int log_zip = 0;
 /**
  * Create the full path for temporary directories used in zip archive operations
  *
- * \param archive operation
+ * \param op archive operation
  * \return pointer to full path, must be free'd by caller
  */
 

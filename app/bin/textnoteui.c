@@ -121,8 +121,8 @@ TextEditOK(void *junk)
 /**
  * Create the edit dialog for text notes.
  *
- * \param trk IN selected note
  * \param title IN dialog title
+ * \param textData IN note text
  */
 static void
 CreateEditTextNote(char *title, char * textData )
@@ -192,7 +192,7 @@ void DescribeTextNote(track_p trk, char * str, CSIZE_T len)
 /**
  * Show the UI for entering new text notes
  *
- * \param xx Note object data
+ * \param pos Note position
  */
 
 void NewTextNoteUI(coOrd pos )

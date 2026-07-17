@@ -172,7 +172,7 @@ void wlibButtonDoAction(wControl_p bb)
 
 /**
  * Signal handler for button click
- * \param control IN the control or NULL for autorepeat
+ * \param widget IN the control or NULL for autorepeat
  * \param value IN the button handle (same as control???)
  */
 
@@ -341,7 +341,7 @@ static void SetAutoRepeat(wControl_p button)
  * \param option IN Options
  * \param width IN Width of button
  * \param action IN Callback
- * \param styleContext IN User styleContext
+ * \param context IN User context
  * \returns button control
  *
  */

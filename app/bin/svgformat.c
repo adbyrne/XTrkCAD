@@ -152,6 +152,7 @@ SvgDestroyStyleCache(void)
  * \param colorRGB	RGB value
  * \param width     line width
  * \param fill		true to fill
+ * \param lineStyle line style
  */
 
 static void
@@ -258,7 +259,7 @@ SvgLineCommand(SVGParent *svg, double x0,
  * \param 		   x1	   The first x value.
  * \param 		   y1	   The first y value.
  * \param 		   color   The color.
- * \param 		   fill		Specifies the fill options.
+ * \param 		   lineStyle	Specifies the line style.
  */
 
 void
@@ -583,7 +584,7 @@ SvgPrologue(SVGDocument *parent, char *id, int layerCount, double x0, double y0,
  * Add formatting to the resulting document by adding whitespace
  *
  * \param  node to be formatted
- * \param  see minixml docu, position in XML tag
+ * \param  where minixml docu, position in XML tag
  *
  * \returns Null if it no character to add, else a pointer to the additional chars.
  */

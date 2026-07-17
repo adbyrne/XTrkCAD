@@ -67,7 +67,7 @@ GetExtension(const char* fname)
  *
  * \param parent IN parent window
  * \param x, y   IN position in parent window
- * \param option IN ignored for now
+ * \param options IN ignored for now
  * \param iconP  IN icon to use in XPM format
  * \return    the control
  */
@@ -161,7 +161,7 @@ CheckFileFormat(const char* fileName)
 /**
 * Export as bitmap file.
 *
-* \param d IN the drawing area ?
+* \param drawingControl IN the drawing area ?
 * \param fileName IN  fully qualified filename for the bitmap file.
 * \return    TRUE on success, FALSE on error
 */

@@ -44,7 +44,6 @@ static struct pathTable *FindPath(const char *type);
 * Find the path for a given type in the hash table
 *
 * \param type IN the searched type
-* \param entry OUT the table entry
 * \return
 */
 

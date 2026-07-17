@@ -237,9 +237,8 @@ EXPORT wBool_t ParseRoomSize(
 /**
  * Parameter file parser definitions
  *
- * \param [IN] name command
- * \param [IN] proc function for reading the parameter definition
- * \param [IN] delete if not NULL function for freeing the definition
+ * \param[in] name command
+ * \param[in] proc function for reading the parameter definition
  */
 EXPORT void AddParam(
         char * name,
@@ -1159,8 +1158,7 @@ EXPORT int ExistsCheckpoint( void )
 /**
  * Load checkpoint file
  *
- * \param if TRUE reuse old filename
- * \param filename returned
+ * \param sameName IN TRUE reuse old filename
  * \return TRUE if exists, FALSE otherwise
  *
  */

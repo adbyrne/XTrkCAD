@@ -230,6 +230,7 @@ wFTLabelCreate(const char* text, wDrawColor color)
  * Change the color of a label
  *
  * \param icon		the icon
+ * \param color		the new color
  */
 
 void

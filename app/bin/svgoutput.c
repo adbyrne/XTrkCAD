@@ -301,7 +301,7 @@ static void SvgDrawFillCircle(drawCmd_p d, coOrd center, DIST_T radius,
  * \param  corner1 The first corner.
  * \param  corner2 The second corner.
  * \param  color   The color.
- * \param  pattern Specifies the pattern.
+ * \param  fillOpt Specifies the fill option.
  */
 
 static void

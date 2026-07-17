@@ -80,6 +80,9 @@ ScaleValueChanged(GtkRange* range, gpointer data)
  *
  * \param parent    IN parent window
  * \param id        IN identifier of object
+ * \param valuePointer IN pointer to value
+ * \param action    IN callback
+ * \param context   IN user context
  *
  * \returns toggle button widget
  */

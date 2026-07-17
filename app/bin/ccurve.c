@@ -1059,7 +1059,7 @@ EXPORT void InitCmdCurve( wMenu_p menu )
 * Append the helix command to the pulldown menu. The helix doesn't use an icon, so it is only
 * available through the pulldown
 *
-* \param varname1 IN pulldown menu
+* \param menu IN pulldown menu
 */
 
 void InitCmdHelix(wMenu_p menu)

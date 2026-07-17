@@ -227,6 +227,7 @@ void DynStringFree(DynString *s)
 /**
 * Create a newly allocated copy of the passed dynamic string.
 *
+* \param s2 IN destination for the copy
 * \param s IN the dynamic string
 * \return the newly allocated dynamic string
 */
@@ -403,8 +404,8 @@ void DynStringCatCStrs(DynString *s, ...)
 * Concatenate a variable number of dynamic string to another dynamic string.
 * The list of source strings has to be terminated by a NULL pointer.
 *
-* \param s IN the destination dynamic string
-* \param s2 IN the source dynamic strings
+* \param s1 IN the destination dynamic string
+* \param ... IN the source dynamic strings
 */
 
 void DynStringCatStrs(DynString *s1, ...)

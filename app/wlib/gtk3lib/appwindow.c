@@ -152,7 +152,8 @@ on_widget_deleted(GtkWidget* window, GdkEvent* event, gpointer userData)
  * This signal handler sets the maximum height of the scrolled window to the
  * height needed by the toolbar.
  *
- * \param self, param allocation IN see GTK3 documentation
+ * \param self IN see GTK3 documentation
+ * \param allocation IN see GTK3 documentation
  * \param user_data	IN the scrolled window
  */
 

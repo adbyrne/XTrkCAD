@@ -374,7 +374,7 @@ UpdateBitmapDialog( void )
 /**
  * Check input from bitmap options dialog and trigger file name selection
  *
- * \param [in,out] junk If non-null, the junk.
+ * \param [in,out] unused If non-null, the junk.
  */
 
 static void OutputBitMapOk( void * unused )
@@ -411,7 +411,7 @@ static void OutputBitMapChange( long changes )
 /**
  * Executes the output bit map operation
  *
- * \param [in,out] unused.
+ * \param [in,out] unused
  */
 
 static void DoOutputBitMap( void* unused )

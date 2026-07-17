@@ -36,7 +36,7 @@
  * Create the toolbar container of the main window and place inside the container passed as
  * parameter.
  *
- * \param toolbarScrolled IN the container
+ * \param container IN the container
  * \return a WrapBox Container for the toolbar widgets
  */
 
