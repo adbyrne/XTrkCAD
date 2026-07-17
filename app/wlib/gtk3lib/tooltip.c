@@ -42,7 +42,6 @@ static int tooltipsCount;
  * Initialize tooltip array
  *
  * \param bh IN pointer to list of tooltips
- * \return
  */
 
 void wInitTooltip( wTooltip_t * bh, unsigned int count )
@@ -52,7 +51,7 @@ void wInitTooltip( wTooltip_t * bh, unsigned int count )
 }
 
 /**
- * Set the help topic string for <b> to <help>.
+ * Set the help topic string for \a b to \a help.
  *
  * \param b IN control
  * \param help IN tip
@@ -113,7 +112,7 @@ static int binarySearch(wTooltip_t arr[], int l, int r, const char* key)
  * Search for the widgets tooltip in the list of tooltips. Performs a binary
  * search on the array.
  *
- * \param	field	IN the id of the widget, usually <dialogname>-<widgetname>
+ * \param	field	IN the id of the widget, usually \<dialogname\>-\<widgetname\>
  * \return	index of the tooltip
  */
 

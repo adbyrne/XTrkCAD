@@ -52,10 +52,10 @@ wNoteBookGetActivePage(wControl_p notebook)
  *
  * ### CSS
  *
- * \param IN parent		Handle of parent window
- * \param IN labelStr		identifier
- * \param IN activePage	page opened at creation
- * \param IN flags		unused
+ * \param[in] parent		Handle of parent window
+ * \param[in] labelStr		identifier
+ * \param[in] activePage	page opened at creation
+ * \param[in] flags		unused
  * \return handle for created widget
  */
 

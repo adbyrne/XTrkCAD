@@ -115,8 +115,8 @@ lookup_widget(GtkWidget *widget, const gchar *widget_name)
  * The separator position is read from the resource configuration and set accordingly.
  * Also a callback is specified that will be executed when the slider has been moved.
  *
- * \PARAM container IN the container into which the pane will be stuffed.
- * \PARAM property IN the name of the property for the slider position
+ * \param container IN the container into which the pane will be stuffed.
+ * \param property IN the name of the property for the slider position
  *
  * \return the HPaned handle
  */
@@ -145,11 +145,11 @@ CreateHPaned(GtkBox *container, char *property)
  * Handler for the delete-event issued on the help window.We are saving window
  * information (eg. position) and are hiding the window instead of closing it.
  *
- * \PARAM win IN the window to be destroyed
- * \PARAM event IN unused
- * \PARAM ptr IN unused
+ * \param win IN the window to be destroyed
+ * \param event IN unused
+ * \param ptr IN unused
  *
- * \RETURN FALSE
+ * \return FALSE
  */
 
 static gboolean
@@ -269,7 +269,7 @@ void initialize_buttons(GtkWidget *main_vbox, GtkWidget *content_hpane)
 /**
  * Create the help windows including all contained widgets and the needed HTML documents.
  *
- * \RETURN handle of the created window.
+ * \return handle of the created window.
  */
 
 GtkWidget*
@@ -395,7 +395,7 @@ void load_into_view(char *file, int requested_view)
 }
 
 /**
- * Invoke the help system to display help for <topic>.
+ * Invoke the help system to display help for \a topic.
  *
  * \param topic IN topic string
  */

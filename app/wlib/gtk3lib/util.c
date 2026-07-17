@@ -147,7 +147,6 @@ GdkPixbuf* wlibPixbufFromXBM( wIcon_p ip)
  * \param b IN widget
  * \param x,y IN position in grid
  * \param labelStr IN label to add
- * \returns size of label
  */
 
 void wlibAddLabel(wControl_p b, wWinPix_t x, wWinPix_t y, const char * labelStr)
@@ -365,7 +364,6 @@ wSetAudio(bool setting)
 
 /**
  * Beep!
- * \return
  */
 void wBeep(void)
 {
@@ -390,7 +388,6 @@ void wFlush(
 
 /**
  * Not implemented
- * \returns
  */
 
 void wWinTop(wControl_p win)
@@ -713,7 +710,6 @@ wBool_t wlibHandleAccelKey(
  *
  * \param b1 IN  first control
  * \param b2 IN  second control
- * \return    none
  */
 
 void wControlLinkedSet(wControl_p b1, wControl_p b2)
@@ -733,7 +729,6 @@ void wControlLinkedSet(wControl_p b1, wControl_p b2)
  *
  * \param b IN  control
  * \param active IN  state
- * \return    none
  */
 
 void wControlLinkedActive(wControl_p b, int active)

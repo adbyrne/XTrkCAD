@@ -125,7 +125,6 @@ void ParamCheckSumLine(char * line)
  * Set the compatibility state of a parameter file
  *
  * \param index parameter file number in list
- * \return
  */
 
 void SetParamFileState(int index)

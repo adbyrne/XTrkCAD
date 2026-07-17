@@ -1,4 +1,4 @@
-/** \file stringutils.h
+/** \file shortentext.h
  * String handling utilities
  */
 

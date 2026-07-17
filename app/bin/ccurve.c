@@ -1060,7 +1060,6 @@ EXPORT void InitCmdCurve( wMenu_p menu )
 * available through the pulldown
 *
 * \param varname1 IN pulldown menu
-* \return
 */
 
 void InitCmdHelix(wMenu_p menu)

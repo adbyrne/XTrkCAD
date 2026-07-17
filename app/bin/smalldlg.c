@@ -150,7 +150,7 @@ static void CreateTipW( void )
  * the last tip shown is retrieved from the preferences and the next tip is
  * selected. At the end, the index of the shown tip is saved into the preferences.
  *
- * \param IN flags see definitions in smalldlg.h for possible values
+ * \param[in] flags see definitions in smalldlg.h for possible values
  *
  */
 

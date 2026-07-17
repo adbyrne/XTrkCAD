@@ -155,8 +155,8 @@ static scaleInfo_p GetScaleInfo( SCALEINX_T scaleInx )
  * scale/ gauge combination is stored in a linear list. The index in that list for a given scale and the
  * gauge is returned by this function. Note that there is no error checking on parameters!
  *
- * \param IN scaleInx index into list of scale descriptions
- * \param IN gaugeInx index into list of gauges available for this scale
+ * \param[in] scaleInx index into list of scale descriptions
+ * \param[in] gaugeInx index into list of gauges available for this scale
  * \return  index into master list of scale/gauge combinations
  */
 
@@ -234,9 +234,9 @@ EXPORT tieData_t GetScaleTieData( SCALEINX_T si )
 		sprintf( message, "tiedata-%s", s->scale );
 		defLength = (96.0-54.0)/s->ratio+s->gauge;
 
-		/** @prefs [tiedata-<SCALE>] length, width, spacing Sets tie drawing data.
+		/** @prefs [tiedata-\<SCALE\>] length, width, spacing Sets tie drawing data.
 		* Example for 6"x8"x6' ties spaced 20" in HOn3 (slash separates 4 lines):
-		* [tiedata-HOn3] \ length=0.83 \ width=0.07 \ spacing=0.23
+		* [tiedata-HOn3] \\ length=0.83 \\ width=0.07 \\ spacing=0.23
 		*/
 		wPrefGetFloat( message, "length", &s->tieData.length, defLength );
 		wPrefGetFloat( message, "width", &s->tieData.width, 16.0/s->ratio );
@@ -1031,8 +1031,8 @@ static void RescaleDlgUpdate(
  * Get the scale gauge information for the selected track pieces.
  * FIXME: special cases like tracks pieces with different gauges or scale need to be handled
  *
- * \param IN trk track element
- * \param IN unused
+ * \param[in] trk track element
+ * \param[in] unused
  * \return TRUE;
  */
 

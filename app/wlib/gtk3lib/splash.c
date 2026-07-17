@@ -40,8 +40,8 @@ static GtkLabel *message;	/**< window handle for progress message */
  * Create the splash window shown during startup. The function loads the logo
  * bitmap and displays the program name and version as passed.
  *
- * \param IN  appName the product name to be shown
- * \param IN  appVer  the product version to be shown
+ * \param[in]  appName the product name to be shown
+ * \param[in]  appVer  the product version to be shown
  * \return    TRUE if window was created, FALSE if an error occured
  */
 

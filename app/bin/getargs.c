@@ -44,9 +44,9 @@
  * The user has the choice to cancel the operation or to continue. If operation is
  * canceled the open file is closed.
  *
- * \param IN msg error message
- * \param IN showLine set to true if current line should be included in error message
- * \param IN ... variable number additional error information
+ * \param[in] msg error message
+ * \param[in] showLine set to true if current line should be included in error message
+ * \param[in] ... variable number additional error information
  * \return TRUE to continue, FALSE to abort operation
  *
  */

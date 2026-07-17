@@ -145,15 +145,15 @@ static void DialogProc(
 /**
  * Create a dialog box from data definition.
  *
- * \param IN group	data definition for the dialog
- * \param IN title  title of the new dialog
- * \param IN okLabel text for the affirmative button
- * \param IN okProc	subroutine to call when ok is pressed
- * \param IN cancelLabel text for the cancel button
- * \param IN cancelProc if not NULL a subroutine for Cancel event. If NULL no cancel button is created
- * \param IN needHelpButton if TRUE a help button is created
- * \param IN winOption ???
- * \param IN changeProc ???
+ * \param[in] group	data definition for the dialog
+ * \param[in] title  title of the new dialog
+ * \param[in] okLabel text for the affirmative button
+ * \param[in] okProc	subroutine to call when ok is pressed
+ * \param[in] cancelLabel text for the cancel button
+ * \param[in] cancelProc if not NULL a subroutine for Cancel event. If NULL no cancel button is created
+ * \param[in] needHelpButton if TRUE a help button is created
+ * \param[in] winOption ???
+ * \param[in] changeProc ???
  */
 
 wControl_p FormCreateDialog(

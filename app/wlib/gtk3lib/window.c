@@ -269,7 +269,7 @@ wBool_t wWinIsTemplated(wWin_p win)
 }
 
 /**
- * Returns the dimensions of <win>.
+ * Returns the dimensions of \a win.
  *
  * \param win IN window handle
  * \param width OUT width of window
@@ -340,7 +340,7 @@ void wWinSetDefaultSize(wControl_p win, wWinPix_t w, wWinPix_t h)
 }
 
 /**
- * Shows or hides window <win>.
+ * Shows or hides window \a win.
  *
  * \param win IN window
  * \param show IN visibility state
@@ -479,7 +479,7 @@ wBool_t wWinIsMaximized(wWin_p win)
 }
 
 /**
- * Sets the title of <win> to <title>.
+ * Sets the title of \a win to \a title.
  *
  * \param varname1 IN window
  * \param varname2 IN new title
@@ -493,7 +493,7 @@ void wWinSetTitle(
 }
 
 /**
- * Sets the window <win> to busy or not busy. Sets the cursor accordingly
+ * Sets the window \a win to busy or not busy. Sets the cursor accordingly
  *
  * \param varname1 IN window
  * \param varname2 IN TRUE if busy, FALSE otherwise
@@ -533,7 +533,6 @@ void wWinSetBusy(
  *
  * \param win0 IN window
  * \param modal IN TRUE if window is application modal, FALSE otherwise
- * \return
  */
 
 void wlibDoModal(
@@ -576,7 +575,7 @@ void wlibDoModal(
 }
 
 /**
- * Returns the Title of <win>.
+ * Returns the Title of \a win.
  *
  * \param win IN window
  * \return    pointer to window title
@@ -928,7 +927,7 @@ wlibCreateCustomStyle(void)
  */
 
 
-/**
+/*
  * Create a window.
  * Default width and height are replaced by values stored in the configuration
  * file (.rc)
@@ -1230,7 +1229,6 @@ wlibCreateCustomStyle(void)
  * call back is called with wQuit_e.
  *
  * \param rc IN exit code
- * \return    never returns
  *
  * \todo Move to a more appropriate file (main or appwindow?)
  */

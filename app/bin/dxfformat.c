@@ -276,7 +276,7 @@ DxfTextCommand(DynString *result, int layer, double x,
  * definition of the measurement system (metric or English) vie the $MEASUREMENT variable
  * and the units i.e. inches for English and mm for metric.
  *
- * \PARAM result OUT buffer for the completed command
+ * \param result OUT buffer for the completed command
  */
 
 void
@@ -307,8 +307,8 @@ DxfUnits(DynString *result)
 * Define a size of dimensions. The default values are taken from
 * static array dxfDimensionDefaults
 *
-* \PARAM result OUT the completed command is appended to this buffer
-* \PARAM dimension IN dimension variable to set
+* \param result OUT the completed command is appended to this buffer
+* \param dimension IN dimension variable to set
 */
 
 void

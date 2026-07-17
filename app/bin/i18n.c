@@ -27,13 +27,13 @@
 
 /**
  * Initialize gettext environment. By default, the language files are installed
- * in <install_dir>\share\locale\<language>
+ * in \<install_dir\>\\share\\locale\\\<language\>
  * The install dir is derived from the library directory by removing the last
  * directory in the path (xtrkcad)
  * Directory layout on Windows is:
- * <install_dir>\bin\
- *              \share\xtrkcad
- *				      \locale
+ * \<install_dir\>\\bin\\
+ *              \\share\\xtrkcad
+ *				      \\locale
  */
 void InitGettext( void )
 {

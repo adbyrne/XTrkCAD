@@ -48,7 +48,6 @@
  *
  * \param b 	IN widget to be updated
  * \param arg 	IN new string value
- * \return
  */
 
 void wEntrySetValue(
@@ -74,7 +73,6 @@ void wEntrySetValue(
  *
  * \param b 	IN widget to be updated
  * \param w 	IN new width for w chars
- * \return
  */
 
 void wEntrySetWidth(

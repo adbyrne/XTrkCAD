@@ -1,4 +1,4 @@
-/** \file chndlto.c
+/** \file chndldto.c
  * Handlaid turnout
  *
  */

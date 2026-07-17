@@ -46,7 +46,6 @@
  *
  * \param b IN widget
  * \param arg IN new text
- * \return
  */
 
 void wMessageSetValue(
@@ -63,7 +62,6 @@ void wMessageSetValue(
  *
  * \param b IN widget
  * \param width IN  new width
- * \return
  */
 
 void wMessageSetWidth(
@@ -177,13 +175,13 @@ wWinPix_t wMessageGetHeight(long flags)
  * .smallLabel
  * : Style for small font
  *
- * \param IN parent		Handle of parent window
- * \param IN x			position in x direction
- * \param IN y			position in y direction
- * \param IN labelStr	identifier
- * \param IN width		horizontal column span of widget
- * \param IN message	message to display ( null terminated )
- * \param IN flags		display options
+ * \param[in] parent		Handle of parent window
+ * \param[in] x			position in x direction
+ * \param[in] y			position in y direction
+ * \param[in] labelStr	identifier
+ * \param[in] width		horizontal column span of widget
+ * \param[in] message	message to display ( null terminated )
+ * \param[in] flags		display options
  * \return handle for created widget
  */
 

@@ -331,11 +331,11 @@ static char * checkPtFileNameBackup;
 
 /** Read the layout design.
  *
- * \param IN pathName filename including directory
- * \param IN fileName pointer to filename part in pathName
- * \param IN full
- * \param IN noSetCurDir if FALSE current directory is changed to file location
- * \param IN complain  if FALSE error messages are supressed
+ * \param[in] pathName filename including directory
+ * \param[in] fileName pointer to filename part in pathName
+ * \param[in] full
+ * \param[in] noSetCurDir if FALSE current directory is changed to file location
+ * \param[in] complain  if FALSE error messages are supressed
  *
  * \return FALSE in case of load error
  */
@@ -759,8 +759,8 @@ static BOOL_T DoSaveTracks(
 /************************************************
  * Copy Dependency - copy file into another directory
  *
- * \param IN name
- * \param IN target_dir
+ * \param[in] name
+ * \param[in] target_dir
  *
  * \returns TRUE for success
  *
@@ -1098,8 +1098,6 @@ EXPORT void TryCheckPoint()
  * normally through the exit choice, files and directories that were created
  * temporarily are removed: xtrkcad.ckp
  *
- * \param none
- * \return none
  *
  */
 
@@ -1118,10 +1116,8 @@ EXPORT void CleanupCheckpointFiles( void )
 /**
  * Remove all temporary files used for archive handling. When the program terminates
  * normally through the exit choice, files and directories that were created
- * temporarily are removed: zip_in.<pid> and zip_out.<pid>
+ * temporarily are removed: zip_in.\<pid\> and zip_out.\<pid\>
  *
- * \param none
- * \return none
  *
  */
 
@@ -1142,7 +1138,6 @@ EXPORT void CleanupTempArchive(void)
  * Check for existence of checkpoint file. Existence of a checkpoint file means that XTrkCAD was not properly
  * terminated.
  *
- * \param none
  * \return TRUE if exists, FALSE otherwise
  *
  */

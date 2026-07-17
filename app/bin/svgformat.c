@@ -209,8 +209,8 @@ SvgAddRealUnit(mxml_node_t *node, char *name, double value)
 * A fictional value for the resolution is assumed. As final
 * rendering is done by the client, this is not really relevant.
 *
-* \PARAM [in, out]	node	the XML node
-* \PARAM [in]		name	name of attribute
+* \param [in, out]	node	the XML node
+* \param [in]		name	name of attribute
 * \param [in]		value	size
 */
 

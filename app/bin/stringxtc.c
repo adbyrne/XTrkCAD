@@ -15,9 +15,9 @@
 
 /**
  * strscpy - Copy a C-string into a sized buffer
- * @dest: Where to copy the string to
- * @src: Where to copy the string from
- * @count: Size of destination buffer
+ * \param dest Where to copy the string to
+ * \param src Where to copy the string from
+ * \param count Size of destination buffer
  *
  * Copy the string, or as much of it as fits, into the dest buffer.  The
  * behavior is undefined if the string buffers overlap.  The destination

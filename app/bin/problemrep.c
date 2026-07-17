@@ -118,7 +118,7 @@ SaveSystemInfo(char* dir)
  * Replace the directory name in a configuration file line. Assumption is that
  * the name of the directory starts after the '=' (Windows) or ':' (UNIX)
  *
- * \para  result	pointer to DynString for result, DynString is cleared if
+ * \param result	pointer to DynString for result, DynString is cleared if
  *					directory was not found
  * \param in		line from configuration file
  * \param dir		directory name to look for

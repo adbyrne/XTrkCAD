@@ -74,7 +74,7 @@ TagButtonClicked(GtkWidget *widget, void *userdata)
 /**
  * Create a tag. A tag is a combined widget consisting of a box, a label and a button.
  *
- *  * ### Usage in dialogs
+ * ### Usage in dialogs
  *
  * - Runtime: no
  * - Builder: yes

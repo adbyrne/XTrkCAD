@@ -283,7 +283,7 @@ void EnumerateEnd(void)
 
 	CreateTableFooter();
 
-	/**  \TODO Fix layout of summary line, why -3? */
+	/**  \todo Fix layout of summary line, why -3? */
 	if (enableListPrices) {
 		len = strlen( message ) - strlen( _("Total")) - max( 9,
 		        strlen(_("Extended"))) - 3 ;

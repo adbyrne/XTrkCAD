@@ -134,7 +134,7 @@ wlibListStoreClear(GtkListStore *listStore)
 
 /**
  * Create a list store. The list store will have one column for user
- * attributes that will not be displayed, a column for a bitmap and <cnt>
+ * attributes that will not be displayed, a column for a bitmap and \a colCnt
  * columns for text strings.
  *
  * \param colCnt IN number of additional columns
@@ -204,7 +204,6 @@ wlibListStoreUpdateIter(GtkListStore *ls, GtkTreeIter *iter, char *labels)
  *
  * \param ls IN the list store
  * \param id IN id
- * \returns number columns added
  */
 
 void

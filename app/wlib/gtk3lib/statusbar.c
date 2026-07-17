@@ -44,7 +44,6 @@ struct wStatus_t {
  *
  * \param b IN widget
  * \param arg IN new text
- * \return
  */
 
 void wStatusSetValue(
@@ -61,13 +60,13 @@ void wStatusSetValue(
 /**
  * Create a window for a simple text.
  *
- * \param IN parent Handle of parent window
- * \param IN x position in x direction
- * \param IN y position in y direction
- * \param IN labelStr ???
- * \param IN width horizontal size of window
- * \param IN message message to display ( null terminated )
- * \param IN flags display options
+ * \param[in] parent Handle of parent window
+ * \param[in] x position in x direction
+ * \param[in] y position in y direction
+ * \param[in] labelStr ???
+ * \param[in] width horizontal size of window
+ * \param[in] message message to display ( null terminated )
+ * \param[in] flags display options
  * \return handle for created window
  */
 
@@ -152,7 +151,6 @@ wStatusSetRequiredHeight(wControl_p label, long flags)
  *
  * \param b IN widget
  * \param width IN  new width
- * \return
  */
 
 void wStatusSetWidth(

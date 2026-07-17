@@ -97,7 +97,7 @@ wTreeViewGetItemContext(wControl_p b, int row)
 
 /**
  * Returns the current selected list entry.
- * If <val> if '-1' then no entry is selected.
+ * Returns -1 if no entry is selected.
  *
  * \param b IN widget
  * \returns row of selected entry or -1 if none is selected
@@ -282,7 +282,7 @@ wlibTreeViewShowIcon(GtkTreeView *tv)
 	gtk_tree_view_column_set_visible(column, TRUE);
 }
 
-/**
+/*
  * Add text to the text columns of the tree view and update the context
  * information
  *
@@ -318,7 +318,7 @@ wlibTreeViewShowIcon(GtkTreeView *tv)
  * order to make sure, that the list box is fully visible or has a
  * scrollbar.
  *
- * \param b IN the list box
+ * \param control IN the list box
  * \param label IN the text labels
  * \param bm IN bitmap to show at start
  * \param id_p IN user attributes

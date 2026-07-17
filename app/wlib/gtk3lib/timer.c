@@ -59,7 +59,7 @@ static gint doAlarm(
 }
 
 /**
- * Alarm for <count> milliseconds.
+ * Alarm for \a count milliseconds.
  *
  * \param count IN time to wait
  * \param func IN function called when timer expires
@@ -97,7 +97,7 @@ void wlibSetTrigger(
 }
 
 /**
- * Pause for <count> milliseconds. The function waits for a condition that
+ * Pause for \a duration milliseconds. The function waits for a condition that
  * is never met. So it blocks until it runs into a timeout.
  *
  * \param duration IN  duration of pause in milliseconds

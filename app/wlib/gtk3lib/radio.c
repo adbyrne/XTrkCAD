@@ -222,7 +222,7 @@ void RuntimeCreateRadiobuttons(long option, wControl_p b,
 /**
  * Create a group of radio buttons.
  *
- *  * ### Usage in dialogs
+ * ### Usage in dialogs
  *
  * - Runtime: yes
  * - Builder: yes

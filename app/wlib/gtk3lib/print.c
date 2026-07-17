@@ -412,7 +412,6 @@ void wPrintClip(wDrawPix_t x, wDrawPix_t y, wDrawPix_t w, wDrawPix_t h)
 
 /**
  * Get the paper dimensions and margins and setup the internal variables
- * \return
  */
 
 static void
@@ -446,7 +445,6 @@ WlibGetPaperSize(void)
  * \param rMargin OUT right margin in inches
  * \param bMargin OUT bottom margin in inches
  * \param lMargin OUT left margin in inches
- * \return
  */
 
 void wPrintGetMargins(
@@ -466,7 +464,6 @@ void wPrintGetMargins(
  * currently selected paper.
  * \param w OUT physical width of the paper in inches
  * \param h OUT physical height of the paper in inches
- * \return
  */
 
 void wPrintGetPageSize(
@@ -860,7 +857,6 @@ wBool_t wPrintDocRun(void)
 
 /**
  * Finish the print operation and release the render bridge.
- * \return
  */
 
 void wPrintDocEnd(void)

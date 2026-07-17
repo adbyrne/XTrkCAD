@@ -251,7 +251,6 @@ UpdateParamFileProperties( bool newState)
  * Mark selected files as favorite
  *
  * \param favorite IN FALSE = remove, TRUE = set favorite
- * \return
  */
 
 static void ParamFileFavorite(void * setFavorite)
@@ -311,7 +310,6 @@ ParamChangeSelectedFiles(unsigned paramFileChange)
  * Refresh selected files.
  *
  * \param action IN FALSE = unload, TRUE = reload parameter files
- * \return
  */
 
 static void ParamRefreshSelectedFiles(void * action)
@@ -353,7 +351,6 @@ static void ParamUnloadSelectedFiles(void * action)
  * Select all files in the list and set action button
  *
  * \param junk IN ignored
- * \return
  */
 
 static void ParamFileSelectAll(void *junk)

@@ -64,7 +64,6 @@ struct PrintData {
  * change flag.
  *
  * \param bt IN text entry
- * \return
  */
 
 void wTextClear(wControl_p bt)
@@ -84,7 +83,6 @@ void wTextClear(wControl_p bt)
  *
  * \param bt IN text buffer
  * \param text IN text to append
- * \return
  */
 
 void wTextAppend(wControl_p bt,
@@ -440,7 +438,6 @@ int wTextGetSize(wControl_p bt)
  * \param bt IN the text widget
  * \param text IN the buffer
  * \param len IN maximum number of bytes to return, including '\0'
- * \return
  */
 
 void wTextGetText(wControl_p bt, char* text, int len)
@@ -457,7 +454,6 @@ void wTextGetText(wControl_p bt, char* text, int len)
  *
  * \param bt IN the text widget
  * \param ro IN read only flag
- * \return
  */
 
 void wTextSetReadonly(wControl_p bt, wBool_t ro)
@@ -489,7 +485,6 @@ wBool_t wTextGetModified(wControl_p bt)
  * \param bt IN the text widget
  * \param w IN width
  * \param h IN height
- * \return
  */
 
 void wTextSetSize(wControl_p bt, wWinPix_t w, wWinPix_t h)
@@ -507,7 +502,6 @@ void wTextSetSize(wControl_p bt, wWinPix_t w, wWinPix_t h)
  * \param cols IN text columns
  * \param width OUT width in pixel
  * \param height OUT height in pixel
- * \return
  */
 
 void wTextComputeSize(wControl_p bt, wWinPix_t rows, wWinPix_t cols,
@@ -523,7 +517,6 @@ void wTextComputeSize(wControl_p bt, wWinPix_t rows, wWinPix_t cols,
  *
  * \param bt IN the text widget
  * \param pos IN position
- * \return
  */
 
 void wTextSetPosition(wControl_p bt, int pos)
@@ -536,7 +529,6 @@ void wTextSetPosition(wControl_p bt, int pos)
  *
  * \param widget IN
  * \param bt IN text entry field
- * \return
  */
 
 static void textChanged(GtkWidget* widget, wControl_p bt)
