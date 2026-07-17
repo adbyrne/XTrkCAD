@@ -35,7 +35,7 @@
 
 /**
  * Get attributes of one row in a list
- * \param b IN list widget
+ * \param ls IN list widget
  * \param inx IN row to retrieve
  * \param childR IN list for attributes (?)
  * \returns
@@ -202,8 +202,9 @@ wlibListStoreUpdateIter(GtkListStore *ls, GtkTreeIter *iter, char *labels)
 /**
  * Add a row to the list store
  *
- * \param ls IN the list store
- * \param id IN id
+ * \param store IN the list store
+ * \param iter IN position
+ * \param data IN row data
  */
 
 void
@@ -217,9 +218,9 @@ wlibListStoreAppendRow(GtkListStore* store, GtkTreeIter *iter, wListItem_p data)
  * Add a pixbuf to the list store. The pixbuf is unref'ed so it will be freed
  * with the list store.
  *
- * \param ls IN list store
+ * \param store IN list store
  * \param iter IN position
- * \param pixbuf IN pixbuf to add
+ * \param icon IN icon to add
  */
 
 void
@@ -255,7 +256,6 @@ wlibListStoreSetData(GtkListStore* store, GtkTreeIter* iter, int column,
  *
  * \param ls IN list store
  * \param row IN row in list store
- * \param cols IN number of columns to set
  * \param labels IN tab separated list of texts
  * \param bm IN bitmap
  * \return count of updated text fields

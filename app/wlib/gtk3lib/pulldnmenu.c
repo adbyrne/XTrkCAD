@@ -85,8 +85,6 @@ static void pushMenuItem(
 /**
  * Add a accelerator key to a widget
  *
- * @param w         IN unused(?)
- * @param menu      IN unused(?)
  * @param menu_item IN owning widget
  * @param acclKey   IN the accelerator key
  */
@@ -199,6 +197,7 @@ ChangeToUnderscore(const char *label)
  * \param mtype 	IN type of new entry
  * \param helpStr 	IN help topic
  * \param labelStr 	IN display label
+ * \param acclKey 	IN accelerator key
  */
 
 static void CreateMenuItem(
@@ -295,7 +294,6 @@ static void CreateMenuItem(
  * \param acclKey 	IN accelerator key to add
  * \param action 	IN callback function
  * \param context	IN application context
- * \param helpStr 	IN
  * \return menu entry
  */
 
@@ -428,7 +426,7 @@ wControl_p wMenuMenuCreate(
 /**
  * Create a menu separator
  *
- * \param mi 		IN menu entry
+ * \param m 		IN menu entry
  */
 
 void wMenuSeparatorCreate(
@@ -521,7 +519,7 @@ wBool_t wMenuToggleSet(
 /**
  * Enable menu entry containing a check box
  *
- * \param mi 		IN menu entry
+ * \param mt 		IN menu entry
  * \param enable 	IN new state
  */
 
@@ -551,7 +549,7 @@ void wMenuSetLabel( wMenu_p m, const char * labelStr)
 /**
  * Get the text for a menu entry
  *
- * \param m IN menu entry
+ * \param menuitem IN menu entry
  * \return  pointer to menu label
  */
 
@@ -661,7 +659,7 @@ wControl_p wMenuBarAdd(
  *
  * \param m 	IN
  * \param func 	IN
- * \param context 	IN
+ * \param attributes 	IN
  */
 
 void wMenuSetTraceCallBack(

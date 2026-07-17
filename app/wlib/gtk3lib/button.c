@@ -45,6 +45,7 @@ static void ApplySplitButtonStyle(GtkWidget *splitButton);
 
 int wlibRecursionTrace = 0;
 
+#ifdef TODO_UNUSED
 /*
  *****************************************************************************
  *
@@ -52,8 +53,6 @@ int wlibRecursionTrace = 0;
  *
  *****************************************************************************
  */
-
-#ifdef TODO_UNUSED
 static void DestroyImage(GtkWidget *image, gpointer unused)
 {
 	gtk_widget_destroy(image);
@@ -109,7 +108,7 @@ bool IsNewIcon(wIcon_p new, wIcon_p old)
 	return (false);
 }
 
-/**
+/*
  * Replace the icon of a button.
  *
  * \param bb		IN button handle

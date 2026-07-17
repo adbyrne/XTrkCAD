@@ -1695,12 +1695,12 @@ EXPORT wIndex_t InitCmdPrint( wMenu_p menu )
 	                      opts, ACCL_PRINT, NULL );
 }
 
+#ifdef TEST
 /*****************************************************************************
  *
  * TEST
  *
  */
-#ifdef TEST
 
 wDrawable_t printD, mainD;
 

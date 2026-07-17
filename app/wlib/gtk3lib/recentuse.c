@@ -45,7 +45,7 @@ struct listentry {					/**< context of items in recently used list */
 /**
  * Update the MRU list.
  *
- * \param ml	IN the list
+ * \param ru	IN the list
  */
 
 static void
@@ -117,14 +117,6 @@ CreateEntry(const char* label, int state)
 
 	return(newItem);
 }
-
-/**
- * Create the widget list for recently used. The array
- * is allocated and the menu entries are created.
- *
- * \param list	IN/OUT list pointer
- * \param max	IN maximum number of elements
- */
 
 /**
  * Create a list menu entry
@@ -244,7 +236,7 @@ void wMenuListDelete(
  *
  * \param ml 	IN menu list
  * \param index IN item within list
- * \param context	OUT	application context
+ * \param attributes	OUT	application context
  * \return    item label
  */
 
