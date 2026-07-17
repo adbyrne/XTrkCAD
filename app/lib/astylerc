@@ -5,3 +5,4 @@
 --keep-one-line-blocks
 --keep-one-line-statements
 --min-conditional-indent=0
+--lineend=linux
