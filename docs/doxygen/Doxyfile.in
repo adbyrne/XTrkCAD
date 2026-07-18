@@ -1173,7 +1173,7 @@ HTML_FILE_EXTENSION    = .html
 # of the possible markers and block names see the documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_HEADER            =
+HTML_HEADER            = "@XTrkCAD_SOURCE_DIR@/docs/doxygen/header.html"
 
 # The HTML_FOOTER tag can be used to specify a user-defined HTML footer for each
 # generated HTML page. If the tag is left blank doxygen will generate a standard
@@ -1184,6 +1184,12 @@ HTML_HEADER            =
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
 HTML_FOOTER            =
+
+# Doxygen's own built-in copy-to-clipboard button on code blocks is disabled
+# (NO) in favor of Doxygen Awesome's fragment-copy-button JS extension, which
+# is what the theme's own docs say to do when using that extension.
+
+HTML_COPY_CLIPBOARD    = NO
 
 # The HTML_STYLESHEET tag can be used to specify a user-defined cascading style
 # sheet that is used by each HTML page. It can be used to fine-tune the look of
@@ -1208,7 +1214,9 @@ HTML_STYLESHEET        =
 # list). For an example see the documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_STYLESHEET  =
+HTML_EXTRA_STYLESHEET  = "@DOXYGEN_AWESOME_CSS_DIR@/doxygen-awesome.css" \
+                         "@DOXYGEN_AWESOME_CSS_DIR@/doxygen-awesome-sidebar-only.css" \
+                         "@DOXYGEN_AWESOME_CSS_DIR@/doxygen-awesome-sidebar-only-darkmode-toggle.css"
 
 # The HTML_EXTRA_FILES tag can be used to specify one or more extra images or
 # other source files which should be copied to the HTML output directory. Note
@@ -1218,7 +1226,17 @@ HTML_EXTRA_STYLESHEET  =
 # files will be copied as-is; there are no commands or markers available.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_FILES       =
+HTML_EXTRA_FILES       = "@DOXYGEN_AWESOME_CSS_DIR@/doxygen-awesome-darkmode-toggle.js" \
+                         "@DOXYGEN_AWESOME_CSS_DIR@/doxygen-awesome-fragment-copy-button.js" \
+                         "@DOXYGEN_AWESOME_CSS_DIR@/doxygen-awesome-paragraph-link.js" \
+                         "@DOXYGEN_AWESOME_CSS_DIR@/doxygen-awesome-interactive-toc.js"
+
+# HTML_COLORSTYLE is required (set to LIGHT) by the Doxygen Awesome theme for
+# Doxygen >= 1.9.5 -- the theme manages its own light/dark switching via the
+# dark-mode-toggle JS extension instead, so AUTO_LIGHT/AUTO_DARK/TOGGLE would
+# conflict with it.
+
+HTML_COLORSTYLE        = LIGHT
 
 # The HTML_COLORSTYLE_HUE tag controls the color of the HTML output. Doxygen
 # will adjust the colors in the style sheet and background images according to
@@ -1478,9 +1496,22 @@ ECLIPSE_DOC_ID         = org.doxygen.Project
 # it. Since the tabs in the index contain the same information as the navigation
 # tree, you can set this option to YES if you also set GENERATE_TREEVIEW to YES.
 # The default value is: NO.
+#
+# Deliberately set to YES here, deviating from Doxygen Awesome's own
+# documented sidebar-only recommendation of NO: with NO, the search box ends
+# up rendered inside Doxygen's classic top tab bar (a <li id="searchBoxPos2">
+# at the end of the full tab/submenu list), which the sidebar-only theme's
+# CSS clips out of view along with the rest of that tab bar -- verified
+# empirically (a rendered screenshot showed no visible search box or
+# dark-mode toggle button at all with DISABLE_INDEX=NO). With YES, the
+# classic tab bar is skipped entirely and the search box renders directly in
+# the title row's own <td> instead, un-clipped, which the theme's CSS styles
+# correctly -- verified both render and work. GENERATE_TREEVIEW=YES already
+# gives full navigation via the sidebar tree, so nothing is lost by disabling
+# the redundant tab-bar index.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-DISABLE_INDEX          = NO
+DISABLE_INDEX          = YES
 
 # The GENERATE_TREEVIEW tag is used to specify whether a tree-like index
 # structure should be generated to display hierarchical information. If the tag
@@ -1498,6 +1529,18 @@ DISABLE_INDEX          = NO
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
 GENERATE_TREEVIEW      = YES
+
+# FULL_SIDEBAR is a Doxygen Awesome sidebar-only-theme setting -- NO keeps the
+# top title/search bar and puts only file/page/class navigation in the
+# sidebar, which is what the theme's sidebar-only CSS variant expects.
+
+FULL_SIDEBAR           = NO
+
+# Doxygen's own built-in per-page outline panel is disabled (NO) in favor of
+# Doxygen Awesome's interactive-toc JS extension, which is what the theme's
+# own docs say to do when using that extension (Doxygen >= 1.14.0).
+
+PAGE_OUTLINE_PANEL     = NO
 
 # The ENUM_VALUES_PER_LINE tag can be used to set the number of enum values that
 # doxygen will group on one line in the generated HTML documentation.
