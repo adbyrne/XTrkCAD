@@ -95,8 +95,19 @@ of packing a small integer into that context instead of a real pointer.
 
 ## Building and testing
 
-The commands below are what CI actually runs (`.github/workflows/ci-gtk3.yml`), with the CI-only
-bits called out — a local desktop build doesn't need everything CI needs.
+Not sure what's already installed? Run `tools/check-build-deps.sh` first (Linux, macOS, and
+Windows via an MSYS2 MINGW64 shell all work — it detects which platform it's on). It's read-only
+— it reports what's missing and the exact command to install it, without installing or changing
+anything itself.
+
+The commands below are what CI actually runs, with the CI-only bits called out — a local desktop
+build doesn't need everything CI needs. The full, authoritative CI configuration lives in
+`.github/workflows/` (`ci-gtk3.yml` for this branch, plus `ci.yml` for the GTK2 `main` branch,
+`codeql.yml`, and `release.yml`) — worth reading directly if you have a GitHub account and want
+more detail than the summary below, e.g. exact job-by-job dependency lists or the release
+packaging steps. If you're working purely from the SourceForge/Hg checkout, these files are
+still present in this tree even though Mercurial itself doesn't run them — GitHub Actions only
+executes off the `git` mirror at `github.com/adbyrne/XTrkCAD`.
 
 ### Linux (x86_64 and ARM64)
 
