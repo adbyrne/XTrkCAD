@@ -29,4 +29,7 @@ XTrkCAD is a C application built from several libraries that link into one execu
 `track.c`/`track.h` (the base track type) and `draw.c` (the drawing and geometry core) are the
 two files most of the rest of the application builds on.
 
+See the \subpage devguide for coding conventions, error-handling patterns, and how to build and
+test locally on each platform.
+
 Use the search box or the file/class browser in the sidebar to navigate from here.

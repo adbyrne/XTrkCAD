@@ -163,7 +163,8 @@ FULL_PATH_NAMES        = YES
 # will be relative from the directory where doxygen is started.
 # This tag requires that the tag FULL_PATH_NAMES is set to YES.
 
-STRIP_FROM_PATH        = "@XTrkCAD_SOURCE_DIR@/app/"
+STRIP_FROM_PATH        = "@XTrkCAD_SOURCE_DIR@/app/" \
+                         "@XTrkCAD_SOURCE_DIR@"
 
 # The STRIP_FROM_INC_PATH tag can be used to strip a user-defined part of the
 # path mentioned in the documentation of a class, which tells the reader which
@@ -838,7 +839,8 @@ INPUT                  = "@XTrkCAD_SOURCE_DIR@/app/bin" \
                          "@XTrkCAD_SOURCE_DIR@/app/wlib/include/wlib.h" \
                          "@XTrkCAD_SOURCE_DIR@/app/dynstring" \
                          "@XTrkCAD_SOURCE_DIR@/app/bin/cars" \
-                         "@XTrkCAD_SOURCE_DIR@/docs/doxygen/mainpage.md"
+                         "@XTrkCAD_SOURCE_DIR@/docs/doxygen/mainpage.md" \
+                         "@XTrkCAD_SOURCE_DIR@/docs/doxygen/devguide.md"
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
