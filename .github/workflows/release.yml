@@ -340,6 +340,45 @@ jobs:
           path: build/*.exe
           retention-days: 14
 
+  # ── Doxygen documentation — built and uploaded on every push ──────────────
+  # Gives a browsable "latest docs" artifact without waiting for a version
+  # tag or for the Hg bug branches behind any given doc change to clear
+  # their SF review window and merge into GTK3V2MAIN -- this job tracks
+  # whatever's on the git mirror right now.
+  package-docs:
+    runs-on: ubuntu-latest
+    env:
+      DOXYGEN_VERSION: 1.15.0
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build libgtk-3-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext
+
+      - name: Install pinned Doxygen ${{ env.DOXYGEN_VERSION }}
+        run: |
+          curl -sL -o doxygen.tar.gz "https://github.com/doxygen/doxygen/releases/download/Release_${DOXYGEN_VERSION//./_}/doxygen-${DOXYGEN_VERSION}.linux.bin.tar.gz"
+          tar xzf doxygen.tar.gz
+          echo "$PWD/doxygen-${DOXYGEN_VERSION}/bin" >> "$GITHUB_PATH"
+
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DXTRKCAD_USE_DOXYGEN=ON -DXTRKCAD_TESTING=OFF
+
+      - name: Build docs
+        run: cmake --build build --target docs-doxygen
+
+      - name: Archive docs
+        run: tar -czf xtrkcad-docs.tar.gz -C build/docs/doxygen/html .
+
+      - name: Upload docs
+        uses: actions/upload-artifact@v7
+        with:
+          name: xtrkcad-docs-html
+          path: xtrkcad-docs.tar.gz
+          retention-days: 14
+
   # ── GitHub Release — created only on version tags ──────────────────────────
   github-release:
     needs: [package-linux, package-linux-arm64-ubuntu, package-linux-arm64-debian, package-macos, package-windows]
