@@ -182,3 +182,16 @@ curl -sL -o doxygen.tar.gz \
 tar xzf doxygen.tar.gz
 export PATH="$PWD/doxygen-1.15.0/bin:$PATH"
 ```
+
+AStyle isn't available as a prebuilt binary from upstream, so CI builds it from source rather
+than trusting the OS package (that's the whole point of the pin — see the note above). Reproduce
+it the same way:
+
+```sh
+ASTYLE_VERSION=3.6.13
+curl -sL -o astyle.tar.bz2 \
+    "https://sourceforge.net/projects/astyle/files/astyle/astyle%20${ASTYLE_VERSION%.*}/astyle-${ASTYLE_VERSION}.tar.bz2/download"
+tar xjf astyle.tar.bz2
+make -C "astyle-${ASTYLE_VERSION}/build/gcc" -j"$(nproc)"
+export PATH="$PWD/astyle-${ASTYLE_VERSION}/build/gcc/bin:$PATH"
+```
