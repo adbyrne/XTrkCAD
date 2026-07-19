@@ -40,6 +40,11 @@ if(UNIX)
     add_compile_options("-Wall")
     # glib 2.0 deprecated GTypeDebugFlags and GTimeVal, gtk2 has not been updated
     add_compile_options("-Wno-deprecated-declarations")
+    # paramData_t/descData_t positional aggregate literals (dialog control tables
+    # throughout app/bin) deliberately set only their leading fields and rely on
+    # C's implicit zero-init for the rest -- a longstanding codebase idiom, not
+    # latent bugs. Suppress rather than force a large, regression-risk rewrite.
+    add_compile_options("-Wno-missing-field-initializers")
 endif()
 
 # Set Win64 flag when a 64 bit build is selected
@@ -76,6 +81,11 @@ if(WIN32)
 		# that the UNIX build already applies unconditionally.
 		add_compile_options(-Wno-incompatible-pointer-types)
 		add_compile_options(-Wno-deprecated-declarations)
+		# paramData_t/descData_t positional aggregate literals (dialog control tables
+		# throughout app/bin) deliberately set only their leading fields and rely on
+		# C's implicit zero-init for the rest -- a longstanding codebase idiom, not
+		# latent bugs. Suppress rather than force a large, regression-risk rewrite.
+		add_compile_options(-Wno-missing-field-initializers)
 	endif()
 
 	add_compile_definitions(

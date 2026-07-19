@@ -551,39 +551,39 @@ static struct {
 } drawData;
 typedef enum { E0, E1, PP, CE, AL, LA, A1, A2, RD, LN, HT, WT, PV, VC, LW, LT, CO, BG, BX, FL, OP, BE, OR, DS, TP, TA, TS, TX, LK, OI, RA, LY, END } drawDesc_e;
 
-#define xE0 { DESC_POS, N_("End Pt 1: X,Y"), &drawData.endPt[0] }
-#define xE1 { DESC_POS, N_("End Pt 2: X,Y"), &drawData.endPt[1] }
-#define xPP  { DESC_POS, N_("First Point: X,Y"), &drawData.endPt[0] }
-#define xCE { DESC_POS, N_("Center: X,Y"), &drawData.center }
-#define xAL { DESC_FLOAT, N_("Angular Length"), &drawData.angle }
-#define xLA  { DESC_FLOAT, N_("Line Angle"), &drawData.angle }
-#define xA1 { DESC_ANGLE, N_("CCW Angle"), &drawData.angle0 }
-#define xA2 { DESC_ANGLE, N_("CW Angle"), &drawData.angle1 }
-#define xRD { DESC_DIM, N_("Radius"), &drawData.radius }
-#define xLN { DESC_DIM, N_("Length"), &drawData.length }
-#define xHT { DESC_DIM, N_("Height"), &drawData.height }
-#define xWT { DESC_DIM, N_("Width"), &drawData.width }
-#define xPV { DESC_PIVOT, N_("Pivot"), &drawData.pivot }
-#define xVC { DESC_LONG, N_("Point Count"), &drawData.pointCount }
-#define xLW { DESC_DIM, N_("Line Width"), &drawData.lineWidth }
-#define xLT { DESC_LIST, N_("Line Type"), &drawData.lineType }
-#define xCO { DESC_COLOR, N_("Color"), &drawData.color }
-#define xBG { DESC_COLOR, N_("Bg Color"), &drawData.bg_color }
-#define xBX { DESC_BOXED, N_("Boxed"), &drawData.boxed }
-#define xFL { DESC_BOXED, N_("Filled"), &drawData.filled }
-#define xOP { DESC_BOXED, N_("Open End"), &drawData.open }
-#define xBE { DESC_LIST, N_("Lumber"), &drawData.benchChoice }
-#define xOR { DESC_LIST, N_("Orientation"), &drawData.benchOrient }
-#define xDS { DESC_LIST, N_("Size"), &drawData.dimenSize }
-#define xTP { DESC_POS, N_("Text Origin: X,Y"), &drawData.endPt[0] }
-#define xTA { DESC_FLOAT, N_("Text Angle"), &drawData.angle }
-#define xTS { DESC_EDITABLELIST, N_("Font Size"), &drawData.fontSizeInx }
-#define xTX { DESC_TEXT, N_("Text"), &drawData.text }
-#define xLK { DESC_BOXED, N_("Lock To Origin"), &drawData.lock_origin}
-#define xOI { DESC_POS, N_("Rot Origin: X,Y"), &drawData.origin }
-#define xRA { DESC_FLOAT, N_("Rotate By"), &drawData.rotate_angle }
-#define xLY { DESC_LAYER, N_("Layer"), &drawData.layer }
-#define xEND { DESC_NULL }
+#define xE0 { .type = DESC_POS, .label = N_("End Pt 1: X,Y"), .valueP = &drawData.endPt[0] }
+#define xE1 { .type = DESC_POS, .label = N_("End Pt 2: X,Y"), .valueP = &drawData.endPt[1] }
+#define xPP  { .type = DESC_POS, .label = N_("First Point: X,Y"), .valueP = &drawData.endPt[0] }
+#define xCE { .type = DESC_POS, .label = N_("Center: X,Y"), .valueP = &drawData.center }
+#define xAL { .type = DESC_FLOAT, .label = N_("Angular Length"), .valueP = &drawData.angle }
+#define xLA  { .type = DESC_FLOAT, .label = N_("Line Angle"), .valueP = &drawData.angle }
+#define xA1 { .type = DESC_ANGLE, .label = N_("CCW Angle"), .valueP = &drawData.angle0 }
+#define xA2 { .type = DESC_ANGLE, .label = N_("CW Angle"), .valueP = &drawData.angle1 }
+#define xRD { .type = DESC_DIM, .label = N_("Radius"), .valueP = &drawData.radius }
+#define xLN { .type = DESC_DIM, .label = N_("Length"), .valueP = &drawData.length }
+#define xHT { .type = DESC_DIM, .label = N_("Height"), .valueP = &drawData.height }
+#define xWT { .type = DESC_DIM, .label = N_("Width"), .valueP = &drawData.width }
+#define xPV { .type = DESC_PIVOT, .label = N_("Pivot"), .valueP = &drawData.pivot }
+#define xVC { .type = DESC_LONG, .label = N_("Point Count"), .valueP = &drawData.pointCount }
+#define xLW { .type = DESC_DIM, .label = N_("Line Width"), .valueP = &drawData.lineWidth }
+#define xLT { .type = DESC_LIST, .label = N_("Line Type"), .valueP = &drawData.lineType }
+#define xCO { .type = DESC_COLOR, .label = N_("Color"), .valueP = &drawData.color }
+#define xBG { .type = DESC_COLOR, .label = N_("Bg Color"), .valueP = &drawData.bg_color }
+#define xBX { .type = DESC_BOXED, .label = N_("Boxed"), .valueP = &drawData.boxed }
+#define xFL { .type = DESC_BOXED, .label = N_("Filled"), .valueP = &drawData.filled }
+#define xOP { .type = DESC_BOXED, .label = N_("Open End"), .valueP = &drawData.open }
+#define xBE { .type = DESC_LIST, .label = N_("Lumber"), .valueP = &drawData.benchChoice }
+#define xOR { .type = DESC_LIST, .label = N_("Orientation"), .valueP = &drawData.benchOrient }
+#define xDS { .type = DESC_LIST, .label = N_("Size"), .valueP = &drawData.dimenSize }
+#define xTP { .type = DESC_POS, .label = N_("Text Origin: X,Y"), .valueP = &drawData.endPt[0] }
+#define xTA { .type = DESC_FLOAT, .label = N_("Text Angle"), .valueP = &drawData.angle }
+#define xTS { .type = DESC_EDITABLELIST, .label = N_("Font Size"), .valueP = &drawData.fontSizeInx }
+#define xTX { .type = DESC_TEXT, .label = N_("Text"), .valueP = &drawData.text }
+#define xLK { .type = DESC_BOXED, .label = N_("Lock To Origin"), .valueP = &drawData.lock_origin}
+#define xOI { .type = DESC_POS, .label = N_("Rot Origin: X,Y"), .valueP = &drawData.origin }
+#define xRA { .type = DESC_FLOAT, .label = N_("Rotate By"), .valueP = &drawData.rotate_angle }
+#define xLY { .type = DESC_LAYER, .label = N_("Layer"), .valueP = &drawData.layer }
+#define xEND { .type = DESC_NULL }
 
 static int drawSegInx;
 
