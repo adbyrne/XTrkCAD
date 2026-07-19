@@ -358,7 +358,7 @@ static void UpdateCornu( track_p trk, int inx, descData_p descUpd,
 		cornData.center[0] = xx->c[0];
 		cornuDesc[P0].mode |= DESC_CHANGE;
 		cornuDesc[C0].mode |= DESC_CHANGE;
-	/* falls through */
+		__attribute__((fallthrough));
 	case P1:
 		if (GetTrkEndTrk(trk,1)) { break; }
 		updateEndPts = TRUE;

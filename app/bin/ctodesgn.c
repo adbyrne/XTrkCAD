@@ -2977,7 +2977,7 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 			wControlShow( turnDesignPLs[I_TOSLIPMODE+1].control, TRUE );
 			turnDesignPLs[I_TOSLIPMODE].bShown = TRUE;
 			turnDesignPLs[I_TOSLIPMODE].option &= ~PDO_DLGIGNORE;
-		// fall thru
+			__attribute__((fallthrough));
 		case NTO_REGULAR:
 		case NTO_CURVED:
 		case NTO_WYE:
@@ -3048,6 +3048,15 @@ static void ShowTurnoutDesigner( void * context )
 	customTurnout1 = NULL;
 	customTurnout2 = NULL;
 	wShow( newTurnW );
+}
+
+// ShowTurnoutDesigner() is registered with a non-NULL context (dp), so the
+// playback dispatcher (macro.c) always calls it with that same pointer --
+// void*/char* are representation-identical, but this wrapper matches the
+// real playbackProc_p signature instead of casting through a mismatch.
+static void ShowTurnoutDesignerPlayback( char * data )
+{
+	ShowTurnoutDesigner( (void *) data );
 }
 
 
@@ -3304,7 +3313,7 @@ EXPORT void InitNewTurn( wMenu_p m )
 		wMenuPushCreate( m, NULL, _(dp->label), 0,
 		                 ShowTurnoutDesigner, dp );
 		sprintf( message, "%s SHOW %s", TURNOUTDESIGNER, dp->label );
-		AddPlaybackProc( message, (playbackProc_p)ShowTurnoutDesigner, dp );
+		AddPlaybackProc( message, ShowTurnoutDesignerPlayback, dp );
 		int iDescCount = 0;
 		for ( const char * pPT = dp->sParamType; *pPT; pPT++ ) {
 			if ( *pPT == '-' ) { continue; }

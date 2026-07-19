@@ -251,7 +251,7 @@ FormSaveDefaultValues(paramGroup_p pg)
 			break;
 		case PD_LIST:
 			SaveListColumnWidths(pg->nameStr, p);
-		//no break!
+			__attribute__((fallthrough));
 		case PD_DROPLIST:
 		case PD_COMBOLIST:
 			//if ((p->option & PDO_LISTINDEX)) {
@@ -342,7 +342,7 @@ EXPORT void FormUpdatePrefs( void )
 					wPrefSetString( PREFSECT, prefName, message );
 					prefName[len] = '\0';
 				}
-			/* fall through */
+				__attribute__((fallthrough));
 			case PD_DROPLIST:
 			case PD_COMBOLIST:
 				if ( (p->option&PDO_LISTINDEX) ) {

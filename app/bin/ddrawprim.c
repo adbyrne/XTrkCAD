@@ -402,7 +402,7 @@ static void DDrawRectangle(drawCmd_p d, coOrd orig, coOrd size,
 			break;
 		case DRAW_TRANSPARENT:
 			opts |= wDrawOptTransparent;
-		/* Fallthru */
+			__attribute__((fallthrough));
 		case DRAW_FILL:
 			if (d->options & DC_ROUND) {
 				x = round(x);
@@ -1067,7 +1067,7 @@ static void BDrawRectangle(drawCmd_p d, coOrd orig, coOrd size,
 			break;
 		case DRAW_TRANSPARENT:
 			opts |= wDrawOptTransparent;
-		/* Fallthru */
+			__attribute__((fallthrough));
 		case DRAW_FILL:
 			if (d->options & DC_ROUND) { x = round(x); y = round(y); }
 			wBasicDrawFillRectangle(d->d, x, y, w, h, color, opts);

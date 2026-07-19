@@ -148,7 +148,7 @@ static void DoMapPan(wAction_t action, coOrd pos)
 		} else {
 			break;
 		}
-	/* fall through */
+		__attribute__((fallthrough));
 	case C_MOVE:
 		if (mode != movePan) {
 			break;

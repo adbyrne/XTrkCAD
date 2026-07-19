@@ -2079,7 +2079,7 @@ static void RedrawTurnout( wControl_p d, void * context, wWinPix_t x,
 }
 
 
-static void TurnoutOk(void)
+static void TurnoutOk(void const * arg)
 {
 	AddTurnout();
 	Reset();
@@ -2900,7 +2900,7 @@ EXPORT STATUS_T CmdTurnoutAction(
 		if ((action >> 8) != ' ') {
 			return C_CONTINUE;
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_OK:
 		DYNARR_RESET(trkSeg_t, anchors_da);
 		AddTurnout();
@@ -2941,7 +2941,7 @@ static STATUS_T CmdTurnout(
 	case C_START:
 		if (turnoutW == NULL) {
 			turnoutW = FormCreateDialog(&turnoutPG, MakeWindowTitle(_("Add Fixed-Track")),
-			                            NULL, (paramActionOkProc)TurnoutOk,
+			                            NULL, TurnoutOk,
 			                            NULL, NULL,
 			                            TRUE,
 			                            F_RESIZE | F_RECALLSIZE | PD_F_ALT_CANCELLABEL, TurnoutDlgUpdate);
@@ -2978,12 +2978,12 @@ static STATUS_T CmdTurnout(
 		if (((action & 0xFF) == C_DOWN) && (MyGetKeyState() & WKEY_CTRL)) {
 			return CmdTurnoutAction(C_RDOWN, pos);        //Convert CTRL into Right
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_MOVE:
 		if (MyGetKeyState() & WKEY_CTRL) {
 			return CmdTurnoutAction(C_RMOVE, pos);
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_RMOVE:
 		return CmdTurnoutAction(action, pos);
 
@@ -3127,7 +3127,7 @@ static STATUS_T CmdTurnoutHotBar(
 		if (MyGetKeyState() & WKEY_CTRL) {
 			return CmdTurnoutAction(C_RDOWN, pos);
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_RDOWN:
 		return CmdTurnoutAction(action, pos);
 
@@ -3135,7 +3135,7 @@ static STATUS_T CmdTurnoutHotBar(
 		if (MyGetKeyState() & WKEY_CTRL) {
 			return CmdTurnoutAction(C_RMOVE, pos);
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_RMOVE:
 		return CmdTurnoutAction(action, pos);
 
@@ -3143,7 +3143,7 @@ static STATUS_T CmdTurnoutHotBar(
 		if (MyGetKeyState() & WKEY_CTRL) {
 			return CmdTurnoutAction(C_RUP, pos);
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_RUP:
 		InfoMessage(
 		        _("Left-Drag to place, Ctrl+Left-Drag or Right-Drag to Rotate, Space or Enter to accept, Esc to Cancel"));
@@ -3155,14 +3155,14 @@ static STATUS_T CmdTurnoutHotBar(
 		if ((action >> 8) != ' ') {
 			return C_CONTINUE;
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_OK:
 		CmdTurnoutAction(action, pos);
 		return C_CONTINUE;
 
 	case C_CANCEL:
 		HotBarCancel();
-	/* falls through */
+		__attribute__((fallthrough));
 	default:
 		return CmdTurnoutAction(action, pos);
 	}

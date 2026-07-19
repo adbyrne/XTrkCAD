@@ -114,6 +114,15 @@ static void ButtonCancel(paramGroup_p group)
 	}
 }
 
+// wHelp() genuinely uses its argument as a topic string; the button
+// dispatcher really does deliver the MyStrdup(helpStr) context here, so this
+// wrapper matches wButtonCallBack_p's real signature instead of casting
+// wHelp()'s const char* parameter through a mismatch.
+static void ButtonHelp(void *context)
+{
+	wHelp((const char *)context);
+}
+
 
 static void DialogProc(
         wControl_p win,
@@ -172,7 +181,7 @@ wControl_p FormCreateDialog(
 
 	winOption &= ~PD_F_ALT_CANCELLABEL;
 	group->okProc = okProc;
-	if ( cancelProc == (paramActionCancelProc)FormCancel_Null ) {
+	if ( cancelProc == FormCancel_Null ) {
 		cancelProc = NULL;
 	}
 	group->cancelProc = cancelProc;
@@ -208,7 +217,7 @@ wControl_p FormCreateDialog(
 		sprintf(helpStr, "cmd%s", group->nameStr);
 		helpStr[3] = toupper((unsigned char)helpStr[3]);
 		group->helpB = wButtonCreate(group->win, 0, 0, "id_help", _("Help"), BB_HELP, 0,
-		                             (wButtonCallBack_p)wHelp, MyStrdup(helpStr));
+		                             ButtonHelp, MyStrdup(helpStr));
 	}
 
 	LOG(log_form, 1, ("DialogsCreateDialog/"));

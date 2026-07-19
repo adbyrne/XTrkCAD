@@ -43,7 +43,7 @@ void FormCancel_Undo(paramGroup_p group );
 void FormCancel_Current(paramGroup_p group);
 void FormCancel_Reset(paramGroup_p group);
 void FormCancel_Restore(paramGroup_p group);
-void FormCancel_Null(paramGroup_p group);
+void FormCancel_Null(paramGroup_cp group);
 
 #define FormCancel_Custom( PROC ) PROC
 

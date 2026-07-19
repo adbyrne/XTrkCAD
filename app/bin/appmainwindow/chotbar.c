@@ -508,7 +508,7 @@ static void SelectHotBar( wControl_p d, void * context, wAction_t action,
 
 		HandleSelection(inx, fixed_x);
 	}
-	/* fall through */
+	__attribute__((fallthrough));
 	case wActionGetTooltip: {
 		DIST_T fixed_x;
 		int inx = FindIndex(w, &fixed_x);

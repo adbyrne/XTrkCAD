@@ -2655,7 +2655,7 @@ STATUS_T CmdMoveDescription(
 			return C_ERROR;
 		}
 		SetAllTrackSelect( FALSE );
-	/* falls through */
+		__attribute__((fallthrough));
 	case wActionMove:
 		if ( labelWhen < 2 || mainD.scale > labelScale ) {
 			return C_CONTINUE;
@@ -2735,7 +2735,7 @@ STATUS_T CmdMoveDescription(
 		if (ep == -1 ) {
 			DrawTrack( moveDescTrk, &mainD, wDrawColorWhite );
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_MOVE:
 		if (moveDescTrk == NULL ) {
 			return C_CONTINUE;
@@ -2744,7 +2744,7 @@ STATUS_T CmdMoveDescription(
 		UndoModify( moveDescTrk );
 		ClrTrkBits( moveDescTrk, TB_HIDEDESC );
 		hidden = FALSE;
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_UP:
 		if ( labelWhen < 2 || mainD.scale > labelScale ) {
 			return C_CONTINUE;
@@ -3418,7 +3418,7 @@ static STATUS_T CmdSelect(
 			SelectDelete();
 			break;
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_RMOVE:
 	case C_MOVE:
 		if (doingDouble) {
