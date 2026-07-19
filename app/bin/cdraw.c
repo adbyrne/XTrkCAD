@@ -2528,7 +2528,7 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 		return FALSE;
 	}
 	*leftover = NULL;
-	if (tempSegs(0).type != -1) {
+	if ((unsigned char)tempSegs(0).type != (unsigned char) -1) {
 		*leftover = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
 		struct extraDataDraw_t * yy = GET_EXTRA_DATA(*leftover, T_DRAW,
 		                              extraDataDraw_t);
