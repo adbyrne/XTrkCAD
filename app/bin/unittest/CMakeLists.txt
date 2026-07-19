@@ -25,8 +25,9 @@ add_executable( pathstest
 
 # pathstest.c #includes ../paths.c directly; same vendored uthash.h
 # macro-attribution exemption as the real paths.c compilation unit in
-# app/bin/CMakeLists.txt (Phase 12, SF #663).
-if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
+# app/bin/CMakeLists.txt (Phase 12, SF #663). CMAKE_C_COMPILER_ID is
+# "AppleClang" (not "Clang") for Xcode/macOS Clang -- match both.
+if(CMAKE_C_COMPILER_ID MATCHES "Clang")
     set_source_files_properties(pathstest.c PROPERTIES COMPILE_OPTIONS "-Wno-error=implicit-fallthrough")
 endif()
 

@@ -103,7 +103,9 @@ add_library(xtrkcad-lib "")
 # call site (not a real switch fallthrough in this file) -- exempt this one
 # file from the ratchet rather than the vendored uthash.h header itself,
 # since it's the only owned file that hits this macro-attribution quirk.
-if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
+# CMAKE_C_COMPILER_ID is "AppleClang" (not "Clang") for Xcode/macOS Clang --
+# match both (caught by c-tests-macos CI failing without this).
+if(CMAKE_C_COMPILER_ID MATCHES "Clang")
     set_source_files_properties(paths.c PROPERTIES COMPILE_OPTIONS "-Wno-error=implicit-fallthrough")
 endif()
 
