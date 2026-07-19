@@ -114,12 +114,12 @@ static char ModifyOp = 1;
 static char DeleteOp = 2;
 
 #define INC_UNDO_INX( INX ) {\
-		if (++INX >= UNDO_STACK_SIZE) \
-			INX = 0; \
+		if (++(INX) >= UNDO_STACK_SIZE) \
+			(INX) = 0; \
 		}
 #define DEC_UNDO_INX( INX ) {\
-		if (--INX < 0) \
-			INX = UNDO_STACK_SIZE-1; \
+		if (--(INX) < 0) \
+			(INX) = UNDO_STACK_SIZE-1; \
 		}
 
 static stream_t undoStream;

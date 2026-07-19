@@ -1508,7 +1508,7 @@ static toDesignSchema_t * LoadCurvedCornuSegs(
 
 	wIndex_t pathLen = (wIndex_t)strlen(pathChar)+1;
 
-	for (uint8_t i=0; i<OuterEndSeg; i++) {
+	for (int i=0; i<OuterEndSeg; i++) {
 		pathChar[pathLen] = i+1;
 		pathLen++;
 	}
@@ -1520,11 +1520,11 @@ static toDesignSchema_t * LoadCurvedCornuSegs(
 	sprintf(&pathChar[pathLen],"%s","Reverse");
 
 	pathLen += (wIndex_t)strlen(&pathChar[pathLen])+1;
-	for (uint8_t i=0; i<ToeSeg; i++) {
+	for (int i=0; i<ToeSeg; i++) {
 		pathChar[pathLen] = i+1;
 		pathLen++;
 	}
-	for (uint8_t i=OuterEndSeg; i<InnerEndSeg; i++) {
+	for (int i=OuterEndSeg; i<InnerEndSeg; i++) {
 		pathChar[pathLen] = i+1;
 		pathLen++;
 	}
@@ -2104,7 +2104,7 @@ static toDesignSchema_t * LoadWye3WayCornuSegs(
 	if (tdType == NTO_CORNU3WAY) {
 		strcpy(pathChar,"Normal");  /* Also resets array */
 		pathLen = (wIndex_t)strlen(pathChar)+1;
-		for (uint8_t i=0; i<CenterEndSeg; i++) {
+		for (int i=0; i<CenterEndSeg; i++) {
 			pathChar[pathLen] = i+1;
 			pathLen++;
 		}
@@ -2118,18 +2118,18 @@ static toDesignSchema_t * LoadWye3WayCornuSegs(
 		strcpy(pathChar,"Left");
 		pathLen = (wIndex_t)strlen(pathChar)+1;
 	}
-	for (uint8_t i=0; i<Toe1Seg; i++) {
+	for (int i=0; i<Toe1Seg; i++) {
 		pathChar[pathLen] = i+1;
 		pathLen++;
 	}
 	if ((tdType == NTO_CORNU3WAY) && !LH_first && (newTurnToeR != newTurnToeL)) {
-		for (uint8_t i=Toe1Seg; i<Toe2Seg; i++) {
+		for (int i=Toe1Seg; i<Toe2Seg; i++) {
 			pathChar[pathLen] = i+1;
 			pathLen++;
 		}
 	}
 
-	for (uint8_t i=CenterEndSeg; i<LeftEndSeg; i++) {
+	for (int i=CenterEndSeg; i<LeftEndSeg; i++) {
 		pathChar[pathLen] = i+1;
 		pathLen++;
 	}
@@ -2142,17 +2142,17 @@ static toDesignSchema_t * LoadWye3WayCornuSegs(
 	sprintf(&pathChar[pathLen],"%s","Right");
 	pathLen += (wIndex_t)strlen(&pathChar[pathLen])+1;
 
-	for (uint8_t i=0; i<Toe1Seg; i++) {
+	for (int i=0; i<Toe1Seg; i++) {
 		pathChar[pathLen] = i+1;
 		pathLen++;
 	}
 	if ((tdType == NTO_CORNU3WAY) && LH_first && (newTurnToeR != newTurnToeL)) {
-		for (uint8_t i=Toe1Seg; i<Toe2Seg; i++) {
+		for (int i=Toe1Seg; i<Toe2Seg; i++) {
 			pathChar[pathLen] = i+1;
 			pathLen++;
 		}
 	}
-	for (uint8_t i=LeftEndSeg; i<RightEndSeg; i++) {
+	for (int i=LeftEndSeg; i<RightEndSeg; i++) {
 		pathChar[pathLen] = i+1;
 		pathLen++;
 	}

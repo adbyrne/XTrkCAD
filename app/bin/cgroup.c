@@ -1586,6 +1586,11 @@ static void GroupOk( void * unused )
 		for ( pinx=0; pinx<pathElem_da.cnt; pinx++ ) {
 			ppp = &pathElem(pinx);
 			for ( PATHPTR_T pPaths=ppp->path; pPaths && *pPaths; pPaths++ ) {
+				// PATHPTR_T (signed char) deliberately encodes "segment N,
+				// flipped" as -(N+1); the sign must survive this conversion
+				// to int (see the "if (inx<0) inx=-inx;" below). Casting to
+				// unsigned char first would corrupt the encoding.
+				// NOLINTNEXTLINE(bugprone-signed-char-misuse)
 				inx = *pPaths;
 				if ( inx<0 ) {
 					inx = - inx;

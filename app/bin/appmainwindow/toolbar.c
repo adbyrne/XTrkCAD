@@ -68,7 +68,7 @@ static long toolbarSet;
 *
 */
 #define GETBIT(value, bitpos )     ((value) & (1UL << (bitpos)))
-#define ISBITSET(value, bitpos )   (((value)&(1UL <<bitpos))!=0)
+#define ISBITSET(value, bitpos )   (((value)&(1UL <<(bitpos)))!=0)
 #define CLEARBIT(value, bitpos )   ((value) & ~(1UL <<(bitpos)))
 #define SETBIT(value, bitpos)      ((value) | (1UL <<(bitpos)))
 

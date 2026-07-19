@@ -123,6 +123,10 @@ EXPORT long colorDraw = 0;
  */
 EXPORT void ActivateTrack( track_cp trk)
 {
+	// TRKTYP_T (signed char) uses -1 (T_NOTRACK) as a "no track type" sentinel;
+	// the sign must survive this conversion to int. Casting to unsigned char
+	// first would turn that sentinel into 255.
+	// NOLINTNEXTLINE(bugprone-signed-char-misuse)
 	int inx = GetTrkType(trk);
 	if (trackCmds( inx )->activate != NULL) {
 		trackCmds( inx )->activate (trk);
@@ -1762,8 +1766,8 @@ EXPORT BOOL_T ExportTracks( FILE * f, coOrd * offset )
  */
 
 
-#define SET_BIT( set, bit ) set[bit>>3] |= (1<<(bit&7))
-#define BIT_SET( set, bit ) (set[bit>>3] & (1<<(bit&7)))
+#define SET_BIT( set, bit ) (set)[(bit)>>3] |= (1<<((bit)&7))
+#define BIT_SET( set, bit ) ((set)[(bit)>>3] & (1<<((bit)&7)))
 
 static FILE * auditFile = NULL;
 static BOOL_T auditStop = TRUE;

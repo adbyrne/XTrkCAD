@@ -157,7 +157,7 @@ static struct {
 	.criteria = 0,
 };
 
-#define GET_TAG_FROM_COUNT(x) ((carInvPLs + I_CI_SORT1 + x)->control)
+#define GET_TAG_FROM_COUNT(x) ((carInvPLs + I_CI_SORT1 + (x))->control)
 
 /**
  * Remove a tag from the list and update the ui. The tags to the right of the deleted tag are

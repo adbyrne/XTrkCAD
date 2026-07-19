@@ -31,8 +31,8 @@
 
 #include "formprivate.h"
 
-#define CHECKUPPERLIMIT(rangeCheck) (!(rangeCheck & PDO_NORANGECHECK_HIGH ))
-#define CHECKLOWERLIMIT(rangeCheck) (!(rangeCheck & PDO_NORANGECHECK_LOW ))
+#define CHECKUPPERLIMIT(rangeCheck) (!((rangeCheck) & PDO_NORANGECHECK_HIGH ))
+#define CHECKLOWERLIMIT(rangeCheck) (!((rangeCheck) & PDO_NORANGECHECK_LOW ))
 
 static void
 ShowErrorMessage(paramData_p p, const char *message)

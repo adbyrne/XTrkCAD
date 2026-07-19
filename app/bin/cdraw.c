@@ -2171,7 +2171,7 @@ static BOOL_T GetParamsDraw( int inx, track_p trk, coOrd pos,
 			params->ep = 0;
 		} else { params->ep = 1; }
 		BOOL_T back = FALSE;
-		coOrd curr_pos = params->bezierPoints[params->ep*3];
+		coOrd curr_pos = params->bezierPoints[(ptrdiff_t)params->ep*3];
 		BOOL_T first = TRUE;
 		for (int i = 0; i<xx->segs[0].bezSegs.cnt; i++) {
 			trkSeg_p segPtr = &DYNARR_N(trkSeg_t,xx->segs[0].bezSegs,
