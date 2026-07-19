@@ -77,6 +77,9 @@ PartListStoreAddPart(DataStore* store, const Part* part)
 	                   -1);
 
 	// get the zero based index of the newly added row
+	// GTK_TREE_MODEL() is GTK's own type-check-cast macro (through
+	// GTypeInstance*); required, unavoidable GTK idiom.
+	// NOLINTNEXTLINE(bugprone-casting-through-void)
 	return(gtk_tree_model_iter_n_children(GTK_TREE_MODEL(store->listStore),
 	                                      NULL) - 1);
 }
@@ -86,8 +89,12 @@ void PartListStoreGetPart(DataStore* store, unsigned index, Part* part)
 	GtkTreeIter iter;
 	GtkTreePath* treepath = gtk_tree_path_new_from_indices(index, -1);
 
+	// GTK_TREE_MODEL() is GTK's own type-check-cast macro; required,
+	// unavoidable GTK idiom.
+	// NOLINTNEXTLINE(bugprone-casting-through-void)
 	gtk_tree_model_get_iter(GTK_TREE_MODEL(store->listStore), &iter,  treepath);
 
+	// NOLINTNEXTLINE(bugprone-casting-through-void)
 	gtk_tree_model_get(GTK_TREE_MODEL(store->listStore), &iter,
 	                   COLUMN_DESCRIPTION, &part->description,
 	                   COLUMN_MANUFACTURER, &part->manufacturer,
@@ -108,8 +115,10 @@ bool PartListUpdatePrice(DataStore* store, unsigned index, char * price,
 	GtkTreePath* treepath = gtk_tree_path_new_from_indices(index, -1);
 	unsigned wasInvalid;
 
+	// NOLINTNEXTLINE(bugprone-casting-through-void)
 	gtk_tree_model_get_iter(GTK_TREE_MODEL(store->listStore), &iter,  treepath);
 
+	// NOLINTNEXTLINE(bugprone-casting-through-void)
 	gtk_tree_model_get(GTK_TREE_MODEL(store->listStore), &iter,
 	                   COLUMN_INVALIDPRICE, &wasInvalid,
 	                   -1);
