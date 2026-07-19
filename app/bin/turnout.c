@@ -512,7 +512,7 @@ void GetTurnoutType()
 			int intersect = FindIntersection(&pos, p1, a1, p2, a2);
 
 			if (intersect) {
-				if (strCnt == 2 && dtod.pathCnt == 2) {
+				if (dtod.pathCnt == 2) {
 					if ((a0 <= 61) && (a0 >= -61)) {
 						dtod.toType = DTO_XING;
 					} else {
@@ -525,7 +525,7 @@ void GetTurnoutType()
 				}
 			}
 			// No intersect, it could be a crossover
-			else if (strCnt == 2) {
+			else {
 				if (dtod.pathCnt == 4 && lftCnt == 1 && rgtCnt == 1) {
 					dtod.toType = DTO_DCROSS;
 				} else if (dtod.pathCnt == 3) {
@@ -1894,7 +1894,6 @@ static void DrawCrossTurnout(
 //	q2 = dto[secPath].baseLast;
 
 	len = FindDistance(s1, s2);
-	angle = dto[strPath].angle;
 
 	cnt = (int)floor(len / dtod.td.spacing + 0.5);
 	if (cnt > 0) {

@@ -141,7 +141,9 @@ static void CreateTipW( void )
 		}
 	}
 
-	fclose(tipF);
+	if (tipF) {
+		fclose(tipF);
+	}
 	free(filename);
 }
 

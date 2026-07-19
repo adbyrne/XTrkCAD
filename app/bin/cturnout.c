@@ -1901,7 +1901,7 @@ static BOOL_T MakeParallelTurnout(
 			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			tempSegs(0).color = wDrawColorBlack;
 			tempSegs(0).lineWidth = 0;
-			tempSegs(0).type = track ? SEG_STRTRK : SEG_STRLIN;
+			tempSegs(0).type = SEG_STRLIN;
 			tempSegs(0).u.l.pos[0] = endPts[0];
 			tempSegs(0).u.l.pos[1] = endPts[1];
 			*newTrk = MakeDrawFromSeg(zero, 0.0, &tempSegs(0));

@@ -74,11 +74,11 @@ strscat(char* dest, const char* src, size_t count)
 {
 	long sptr = 0;
 	long dptr = strlen(dest);
-	count -= dptr;
 
-	if (count <= 0) {
+	if ((size_t)dptr >= count) {
 		return -E2BIG;
 	}
+	count -= dptr;
 
 	while (count) {
 		char c;

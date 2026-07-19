@@ -408,7 +408,6 @@ static void PrintGaudyBox(
 	fp = wStandardFont( F_TIMES, FALSE, FALSE );
 	p00.x = pageW-((157.0/72.0)+0.05); p00.y = 0.5+0.25+0.05;
 	DrawString( &page_d, p00, 0.0, dat, fp, 14.0, wDrawColorBlack );
-	p00.y = 0.5+0.05;
 
 	DrawTextSize( &mainD, GetLayoutTitle(), fp, 14.0, FALSE, &textsize );
 	p00.x = (pageW/2.0)-(textsize.x/2.0);

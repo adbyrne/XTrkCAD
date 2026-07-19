@@ -73,6 +73,7 @@ EXPORT wIndex_t GetPathsLength( PATHPTR_T paths )
 {
 	PATHPTR_T pp;
 	CHECK( paths != NULL );
+	if ( paths == NULL ) { return 0; }
 	for ( pp = paths; pp[0]; pp+=2 )
 		for ( pp += strlen( (char*)pp ); pp[0] || pp[1]; pp++ );
 	return (wIndex_t)(pp - paths + 1);
@@ -386,7 +387,6 @@ turnoutInfo_t * FindCompound( long type, char * scale, char * title )
 			if ( IsParamValid(to->paramFileIndex) &&
 			     to->segCnt > 0 &&
 			     (scaleInx == -1 || to->scaleInx == scaleInx ) &&
-			     to->segCnt != 0 &&
 			     strcmp( to->title, title ) == 0 ) {
 				return to;
 			}
@@ -397,7 +397,6 @@ turnoutInfo_t * FindCompound( long type, char * scale, char * title )
 			if ( IsParamValid(to->paramFileIndex) &&
 			     to->segCnt > 0 &&
 			     (scaleInx == -1 || to->scaleInx == scaleInx ) &&
-			     to->segCnt != 0 &&
 			     strcmp( to->title, title ) == 0 ) {
 				return to;
 			}
@@ -1584,7 +1583,6 @@ void FlipCompound(
 			if ( IsParamValid(to->paramFileIndex) &&
 			     to->segCnt > 0 &&
 			     to->scaleInx == GetTrkScale(trk) &&
-			     to->segCnt != 0 &&
 			     to->endCnt == epCnt ) {
 				d1 = 0;
 				a1 = 0;

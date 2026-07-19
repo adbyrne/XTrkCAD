@@ -829,6 +829,9 @@ EXPORT void TakeSnapshot(drawCmd_t *d)
 		return;
 	}
 	DrawTracks(d, d->scale, d->orig, d->size);
+	// cppcheck-suppress knownConditionTrueFalse
+	// snapshotMouse is a never-wired-up feature flag (always FALSE); the
+	// mouse-cursor bitmap is never drawn on playback snapshots today.
 	if (snapshotMouse && playbackBm) {
 		DrawBitMap(d, playbackPos, playbackBm, playbackColor);
 	}

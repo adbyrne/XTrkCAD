@@ -2802,6 +2802,9 @@ static void OutputTurnoutDef(
 		                              TempEndPtsCount(), TempEndPt(0) );
 	}
 
+	// cppcheck-suppress knownConditionTrueFalse
+	// foundR is never assigned TRUE anywhere (vestigial, no live setter);
+	// the replace-confirmation check works correctly via FindCompound() alone.
 	if ( bFirst &&
 	     customTurnout == NULL &&
 	     ( foundR || FindCompound( FIND_TURNOUT, newTurnScaleName, message ) ) ) {
@@ -3087,7 +3090,11 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 	}
 
 	SetupTurnoutDesignerW(dp);
+	// to's only caller (dcmpnd.c) already dereferences to->endCnt/customInfo/
+	// title before calling EditCustomTurnout, so to can never be NULL here.
+	// cppcheck-suppress nullPointerRedundantCheck
 	newTurnTrackGauge = GetScaleTrackGauge( to->scaleInx );
+	// cppcheck-suppress nullPointerRedundantCheck
 	newTurnScaleName = GetScaleName( to->scaleInx );
 	strcpy( newTurnManufacturer, mfg );
 	strcpy( newTurnLeftDesc, descL );
@@ -3126,6 +3133,10 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 	customTurnout2 = to1;
 
 	segsDiff = FALSE;
+	// cppcheck-suppress nullPointerRedundantCheck
+	// to's only caller (dcmpnd.c) already dereferences to->endCnt/customInfo/
+	// title before calling EditCustomTurnout, so to can never be NULL here;
+	// to->customInfo/scaleInx are also dereferenced unconditionally above.
 	if ( to ) {
 		LoadSegs( dp, TRUE );
 		segsDiff = FALSE;

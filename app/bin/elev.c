@@ -644,7 +644,6 @@ static void RedrawCompGradeElev( track_p trk, EPINX_T ep )
 	if ( mode == ELEV_COMP || mode == ELEV_GRADE ) {
 		pos = GetTrkEndPos( trk, ep );
 		if (!OFF_MAIND( pos, pos ) ) {
-			trk1 = GetTrkEndTrk( trk, ep );
 			if ( (trk1=GetTrkEndTrk(trk,ep)) && GetTrkIndex(trk1)<GetTrkIndex(trk) ) {
 				ep = GetEndPtConnectedToMe( trk1, trk );
 				trk = trk1;

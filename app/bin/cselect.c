@@ -3077,7 +3077,7 @@ static BOOL_T SelectArea(
 					}
 				} else {
 					if (add) {
-						if (selectMode == 0 && add) {
+						if (selectMode == 0) {
 							DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
 						}
 						if (!GetTrkSelected(trk)) {

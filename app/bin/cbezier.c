@@ -635,7 +635,6 @@ EXPORT STATUS_T AdjustBezCurve(
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (Da.state != PICK_POINT) { return C_CONTINUE; }
-		if (Da.state != PICK_POINT) { return C_CONTINUE; }
 		for (int i=0; i<4; i++) {
 			if (i==0 && Da.trk[0]) { continue; }
 			if (i==3 && Da.trk[1]) { continue; }   //ignore locked points
@@ -702,16 +701,15 @@ EXPORT STATUS_T AdjustBezCurve(
 			b = AnalyseCurve(Da.pos,&fx,&fy,&cusp);
 			if (b==ENDS) {
 				wBeep();
-				InfoMessage(_("Bezier Curve Invalid has identical end points Change End Point"),
-				            b==CUSP?"Cusp":"Loop");
+				InfoMessage(
+				        _("Bezier Curve Invalid has identical end points Change End Point"));
 			} else if ( b == CUSP || b == LOOP) {
 				wBeep();
 				InfoMessage(_("Bezier Curve Invalid has %s Change End Point"),
 				            b==CUSP?"Cusp":"Loop");
 			} else if ( b == COINCIDENT ) {
 				wBeep();
-				InfoMessage(_("Bezier Curve Invalid has three co-incident points"),
-				            b==CUSP?"Cusp":"Loop");
+				InfoMessage(_("Bezier Curve Invalid has three co-incident points"));
 			} else if ( b == LINE ) {
 				InfoMessage(_("Bezier is Straight Line"));
 			} else
@@ -767,16 +765,15 @@ EXPORT STATUS_T AdjustBezCurve(
 			b = AnalyseCurve(Da.pos,&fx,&fy,&cusp);
 			if (b==ENDS) {
 				wBeep();
-				InfoMessage(_("Bezier curve invalid has identical end points Change End Point"),
-				            b==CUSP?"Cusp":"Loop");
+				InfoMessage(
+				        _("Bezier curve invalid has identical end points Change End Point"));
 			} else if ( b == CUSP || b == LOOP) {
 				wBeep();
 				InfoMessage(_("Bezier curve invalid has %s Change End Point"),
 				            b==CUSP?"Cusp":"Loop");
 			} else if ( b == COINCIDENT ) {
 				wBeep();
-				InfoMessage(_("Bezier curve invalid has three co-incident points"),
-				            b==CUSP?"Cusp":"Loop");
+				InfoMessage(_("Bezier curve invalid has three co-incident points"));
 			} else if ( b == LINE) {
 				InfoMessage(_("Bezier curve is straight line"));
 			}

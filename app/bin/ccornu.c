@@ -2895,8 +2895,7 @@ static STATUS_T cmdCornuCreate(
 		HotBarCancel();
 		CmdCornu(C_CANCEL, pos);
 		createState = 0;
-		rc = C_TERMINATE;
-	/* falls through */
+		return C_TERMINATE;
 	case C_START:
 		createState = 0;
 		commandContext = I2VP(cornuCmdHotBar);

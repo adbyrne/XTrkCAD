@@ -291,6 +291,9 @@ static BOOL_T bCacheElev = TRUE;
 EXPORT BOOL_T GetTrkEndElevCachedHeight (track_p trk, EPINX_T e,
                 DIST_T * height, DIST_T * grade)
 {
+	// cppcheck-suppress knownConditionTrueFalse
+	// bCacheElev is never set FALSE anywhere in the codebase (no debug
+	// toggle wired up); the cache is unconditionally enabled by design.
 	if ( ! bCacheElev ) {
 		return FALSE;
 	}

@@ -456,6 +456,10 @@ EXPORT struct extraDataBase_t * GetTrkExtraData( track_cp trk,
 	}
 #ifdef CHECK_EXTRA_DATA
 	CHECK( trk->extraData );
+	// Every NewTrack() call site passes a non-zero extraSize, so a live
+	// track's extraData is always allocated; deleted tracks already
+	// returned above. trk->extraData can't be NULL here.
+	// cppcheck-suppress nullPointerRedundantCheck
 	CHECK( trk->type == trk->extraData->trkType );
 	CHECK( trkType == T_NOTRACK || trk->type == trkType );
 #endif
@@ -546,6 +550,8 @@ void SetTrkLayer( track_p trk, int layer )
 
 	if (useCurrentLayer) {
 		trk->layer = (unsigned int)curLayer;
+	} else if (layer < 0 || layer >= NUM_LAYERS) {
+		trk->layer = 0;
 	} else {
 		trk->layer = (unsigned int)layer;
 	}

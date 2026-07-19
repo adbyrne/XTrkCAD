@@ -1020,6 +1020,10 @@ EXPORT wIndex_t AddMenuButton(wMenu_p menu, procCommand_t command,
 	// Menu Entry Creation
 	// ========================================================================
 
+	// nameStr is unchanged since the Sticky Button Setup check above; kept
+	// as a separate guard to preserve the phase-by-phase structure of this
+	// function rather than merging two logically distinct sections.
+	// cppcheck-suppress duplicateCondition
 	if (nameStr[0] != '\0') {
 		wMenu_p targetMenu = (buttonGroupPopupM && commandsSubmenu) ?
 		                     commandsSubmenu : menu;

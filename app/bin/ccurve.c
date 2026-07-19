@@ -246,7 +246,6 @@ EXPORT STATUS_T CreateCurve(
 			else { message(_("Drag along curve start") ); }
 			break;
 		case crvCmdFromTangent:
-			Da.create_state = FIRSTEND_DEF;
 			tempSegs(0).type = SEG_STRLIN;
 			tempSegs(0).color = color;
 			Da.create_state = CENTER_DEF;
