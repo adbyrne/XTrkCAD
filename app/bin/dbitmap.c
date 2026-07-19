@@ -408,12 +408,6 @@ static void OutputBitMapChange( long changes )
 	return;
 }
 
-/**
- * Executes the output bit map operation
- *
- * \param [in,out] unused
- */
-
 // outputBitMapPLs[] has no PD_STRING control, so changeProc's return value
 // is never consulted for this dialog (only StringPush() propagates it) --
 // this wrapper matches paramChangeProc's real signature instead of casting
@@ -425,6 +419,12 @@ static wBool_t UpdateBitmapDialogChangeProc( paramGroup_cp group, int inx,
 	UpdateBitmapDialog();
 	return TRUE;
 }
+
+/**
+ * Executes the output bit map operation
+ *
+ * \param [in,out] unused
+ */
 
 static void DoOutputBitMap( void* unused )
 {
