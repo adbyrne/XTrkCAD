@@ -361,7 +361,7 @@ static void ProcessDxfFile(
 
 	int color = 0;
 	int colorRGB = -1;
-	wDrawLineType_e lineType;
+	int lineType;
 	double thick = 0.0;
 	double radius = 0.0;
 	double startAngle = 0.0;
