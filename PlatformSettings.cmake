@@ -45,6 +45,25 @@ if(UNIX)
     # C's implicit zero-init for the rest -- a longstanding codebase idiom, not
     # latent bugs. Suppress rather than force a large, regression-risk rewrite.
     add_compile_options("-Wno-missing-field-initializers")
+    # Ratchet: Phases 4-6 of the GTK3V2MAIN quality plan brought these
+    # categories to zero for owned code. Promote to errors so a future PR
+    # can't silently reintroduce them. The few remaining instances are all
+    # in vendored third-party targets (halibut/xtrkcad-charset/wrapbox),
+    # which carry their own -Wno-error= overrides for exactly these.
+    add_compile_options(-Werror=sign-compare)
+    add_compile_options(-Werror=type-limits)
+    add_compile_options(-Werror=absolute-value)
+    add_compile_options(-Werror=unused-but-set-parameter)
+    if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+        # cast-function-type and implicit-fallthrough are genuinely zero for
+        # owned code under GCC (verified directly, GCC 16), but Clang applies
+        # a stricter cast-mismatch sub-check and a different fallthrough-
+        # annotation syntax that surface pre-existing findings Phase 4-6
+        # never audited (~90 and ~115 instances respectively, tracked
+        # separately as SF #662/#663) -- not yet safe to gate under Clang.
+        add_compile_options(-Werror=cast-function-type)
+        add_compile_options(-Werror=implicit-fallthrough)
+    endif()
 endif()
 
 # Set Win64 flag when a 64 bit build is selected
@@ -86,6 +105,25 @@ if(WIN32)
 		# C's implicit zero-init for the rest -- a longstanding codebase idiom, not
 		# latent bugs. Suppress rather than force a large, regression-risk rewrite.
 		add_compile_options(-Wno-missing-field-initializers)
+		# Ratchet: Phases 4-6 of the GTK3V2MAIN quality plan brought these
+		# categories to zero for owned code. Promote to errors so a future PR
+		# can't silently reintroduce them. The few remaining instances are all
+		# in vendored third-party targets (halibut/xtrkcad-charset/wrapbox),
+		# which carry their own -Wno-error= overrides for exactly these.
+		add_compile_options(-Werror=sign-compare)
+		add_compile_options(-Werror=type-limits)
+		add_compile_options(-Werror=absolute-value)
+		add_compile_options(-Werror=unused-but-set-parameter)
+		if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+			# cast-function-type and implicit-fallthrough are genuinely zero for
+			# owned code under GCC (verified directly, GCC 16), but Clang applies
+			# a stricter cast-mismatch sub-check and a different fallthrough-
+			# annotation syntax that surface pre-existing findings Phase 4-6
+			# never audited (~90 and ~115 instances respectively, tracked
+			# separately as SF #662/#663) -- not yet safe to gate under Clang.
+			add_compile_options(-Werror=cast-function-type)
+			add_compile_options(-Werror=implicit-fallthrough)
+		endif()
 	endif()
 
 	add_compile_definitions(

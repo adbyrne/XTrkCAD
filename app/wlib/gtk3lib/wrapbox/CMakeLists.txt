@@ -33,3 +33,10 @@ target_include_directories(testwrapbox
 	PRIVATE
 	${GTK3_INCLUDE_DIRS}
 )
+
+# Vendored code (Gtk+ eggwrapbox): predates the project's warning ratchet
+# (GTK3V2MAIN quality plan Phase 10) and isn't ours to fix upstream.
+if(UNIX OR (WIN32 AND NOT MSVC))
+	target_compile_options(wrapbox PRIVATE -Wno-error=sign-compare)
+	target_compile_options(testwrapbox PRIVATE -Wno-error=sign-compare)
+endif()

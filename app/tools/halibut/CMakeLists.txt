@@ -31,5 +31,11 @@ set_target_properties(
 )
 target_link_libraries(halibut PRIVATE xtrkcad-charset)
 
+# Vendored code: deflate.c predates the project's warning ratchet
+# (GTK3V2MAIN quality plan Phase 10) and isn't ours to fix upstream.
+if(UNIX OR (WIN32 AND NOT MSVC))
+	target_compile_options(halibut PRIVATE -Wno-error=sign-compare)
+endif()
+
 add_subdirectory(charset)
 
