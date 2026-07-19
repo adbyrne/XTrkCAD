@@ -104,8 +104,8 @@ static void MainPix2CoOrd(drawCmd_p d, wDrawPix_t px, wDrawPix_t py,
 }
 
 #define DRAWOPTS(D)                                                            \
-  (((D->options & DC_TEMP) ? wDrawOptTemp : 0) |                               \
-   ((D->options & DC_OUTLINE) ? wDrawOutlineFont : 0))
+  ((((D)->options & DC_TEMP) ? wDrawOptTemp : 0) |                             \
+   (((D)->options & DC_OUTLINE) ? wDrawOutlineFont : 0))
 
 /****************************************************************************
  *

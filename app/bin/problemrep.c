@@ -636,6 +636,9 @@ ProblemDataCollect()
 	for (int i = 0; i < GetParamFileCount(); i++) {
 		char* file = GetParamFileName(i);
 
+		// Truthy strncmp() is intentional: non-zero means "not a prefix
+		// match", i.e. file is outside the app lib dir (local/custom).
+		// NOLINTNEXTLINE(bugprone-suspicious-string-compare)
 		if (strncmp(file, wGetAppLibDir(), strlen(wGetAppLibDir()))) {
 			char* destfile;
 			ProblemrepUpdateW(_("Get local parameter file %s\n"), file);

@@ -838,6 +838,10 @@ static void ProcessDxfFile(
 
 	char* p = strstr(pathName[0], ".dxf");
 	if (p != NULL) {
+		// ".dxf" and ".xti" are both exactly 4 chars, so this in-place
+		// replacement preserves whatever followed ".dxf" (including its
+		// NUL terminator) unchanged.
+		// NOLINTNEXTLINE(bugprone-not-null-terminated-result)
 		memcpy(p, ".xti", 4);
 	}
 

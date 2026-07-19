@@ -1046,6 +1046,9 @@ static BOOL_T SelectedScaleGauge( track_p trk, BOOL_T unused )
 
 	scale = GetTrkScale( trk );
 	scaleName = GetScaleName( scale );
+	// Truthy strcmp() is intentional: skip only when scaleName is literally
+	// the "*" wildcard/no-scale sentinel.
+	// NOLINTNEXTLINE(bugprone-suspicious-string-compare)
 	if( strcmp( scaleName, "*" )) {
 		GetScaleGauge( scale, &scaleInx, &gaugeInx );
 		// Determine scale

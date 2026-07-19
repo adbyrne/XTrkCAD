@@ -33,7 +33,7 @@
 #include "common.h"
 
 #define SVGDPIFACTOR 90.0					/**< the assumed resolution of the svg, 90 is what Inkscape uses */
-#define ROUND2PIXEL( value ) ((int)floor(value * SVGDPIFACTOR + 0.5))
+#define ROUND2PIXEL( value ) ((int)floor((value) * SVGDPIFACTOR + 0.5))
 
 typedef struct sCssStyle {
 	DynString name;
@@ -307,8 +307,8 @@ SvgPolyLineCommand(SVGParent *svg, int cnt, double *points, int color,
 	for (int i = 0; i < cnt; i++) {
 		DynStringPrintf(&pos,
 		                "%d,%d ",
-		                (int)floor(points[i * 2] * SVGDPIFACTOR + 0.5),
-		                (int)floor(points[ i * 2 + 1] * SVGDPIFACTOR + 0.5));
+		                (int)floor(points[(ptrdiff_t)i * 2] * SVGDPIFACTOR + 0.5),
+		                (int)floor(points[(ptrdiff_t)i * 2 + 1] * SVGDPIFACTOR + 0.5));
 
 		DynStringCatStr(&pointList, &pos);
 		DynStringClear(&pos);

@@ -223,6 +223,9 @@ static void ChangeDim( void )
 	if (bm.bm) {
 		for ( x=bm.x0; x<bm.x1; x++ ) {
 			for ( y=bm.y0; y<bm.y1; y++ ) {
+				// BITMAP()'s backing array only ever stores 0/1 (see the
+				// writer sites below); sign-extension can't change the value.
+				// NOLINTNEXTLINE(bugprone-signed-char-misuse)
 				selected = BITMAP( bm, x, y );
 				if (selected) {
 					p0.x = bm.orig.x + x * bm.size.x + bm.size.x/2.0;
@@ -294,6 +297,9 @@ static void SelectPage( coOrd pos )
 	if ( x<bm.x0 || x>=bm.x1 || y<bm.y0 || y>=bm.y1) {
 		return;
 	}
+	// BITMAP()'s backing array only ever stores 0/1; sign-extension can't
+	// change the value.
+	// NOLINTNEXTLINE(bugprone-signed-char-misuse)
 	selected = BITMAP( bm, x, y );
 	pageCount += (selected?-1:1);
 	BITMAP( bm, x, y ) = !selected;

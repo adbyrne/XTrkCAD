@@ -184,6 +184,10 @@ EXPORT char * ConvertFromEscapedText(const char * text)
 	int cout_i = 0;
 	int c;
 	while (text[text_i]) {
+		// c is only ever compared against '\\'/'n'/'t' (all <0x80, so
+		// sign-extension can't cause a false match) and later truncated
+		// back to a single byte, reproducing the original bit pattern.
+		// NOLINTNEXTLINE(bugprone-signed-char-misuse)
 		c = text[text_i];
 		switch (state) {
 		case CHARACTER:

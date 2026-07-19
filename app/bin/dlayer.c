@@ -1512,6 +1512,9 @@ static void LayerUpdate(void)
 	char oldLinkList[STR_LONG_SIZE];
 	GetLayerLinkString((int)layerSelected, oldLinkList);
 
+	// Truthy strcmp() usage below is intentional: non-zero ("different")
+	// correctly triggers SetFileChanged() in this OR-chain of dirty-checks.
+	// NOLINTNEXTLINE(bugprone-suspicious-string-compare)
 	if (strcmp(layers[(int)layerSelected].name, layerName) ||
 	    layerColor != layers[(int)layerSelected].color ||
 	    layers[(int)layerSelected].useColor != (BOOL_T)layerUseColor ||
@@ -1529,7 +1532,9 @@ static void LayerUpdate(void)
 	    layers[(int)layerSelected].tieData.length != layerTieData.length ||
 	    layers[(int)layerSelected].tieData.width != layerTieData.width ||
 	    layers[(int)layerSelected].tieData.spacing != layerTieData.spacing ||
+	    // NOLINTNEXTLINE(bugprone-suspicious-string-compare)
 	    strcmp(layers[(int)layerSelected].settingsName, settingsName) ||
+	    // NOLINTNEXTLINE(bugprone-suspicious-string-compare)
 	    strcmp(oldLinkList, layerLinkList)) {
 		SetFileChanged();
 	}

@@ -60,7 +60,7 @@ void ParamLayoutDialogOrig(paramGroup_p pg);
 void ParamDialogOkActiveOrig(paramGroup_p pg, int active);
 void ParamCreateControlsOrig(paramGroup_p pg, paramChangeProc changeProc);
 
-#define USESBUILDER(pg) ((pg->options)&PGO_FULLDIALOGFROMBUILDER)
+#define USESBUILDER(pg) (((pg)->options)&PGO_FULLDIALOGFROMBUILDER)
 
 EXPORT void XParamLoadControls(
         paramGroup_p pg)

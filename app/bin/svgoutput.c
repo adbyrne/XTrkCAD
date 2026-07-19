@@ -249,19 +249,19 @@ static void SvgDrawFillPoly(
         wDrawColor color, wDrawWidth width, drawFill_e fillStyle)
 {
 	int i;
-	double *points = malloc((cnt + 1) * 2 * sizeof(double));
+	double *points = malloc((size_t)(cnt + 1) * 2 * sizeof(double));
 	CHECK( points );
 
 	unsigned lineOpt = SvgDrawGetLineStyle(d);
 
 	for (i = 0; i < cnt; i++) {
-		points[i * 2] = pts[i].x;
-		points[i * 2 + 1] = roomSize.y - pts[i].y;
+		points[(ptrdiff_t)i * 2] = pts[i].x;
+		points[(ptrdiff_t)i * 2 + 1] = roomSize.y - pts[i].y;
 	}
 
 	if (fillStyle == DRAW_CLOSED || fillStyle == DRAW_FILL) {
-		points[i * 2] = points[0];
-		points[i * 2 + 1] = points[1];
+		points[(ptrdiff_t)i * 2] = points[0];
+		points[(ptrdiff_t)i * 2 + 1] = points[1];
 		cnt++;
 	}
 

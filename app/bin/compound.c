@@ -630,6 +630,10 @@ EXPORT void GetSegInxEP(
         EPINX_T * segEP )
 {
 	int inx;
+	// segChar deliberately encodes "segment N, flipped" as -(N+1); the sign
+	// must survive this conversion to int (decode below relies on it).
+	// Casting to unsigned char first would corrupt the encoding.
+	// NOLINTNEXTLINE(bugprone-signed-char-misuse)
 	inx = segChar;
 	if (inx > 0 ) {
 		*segInx = (inx)-1;

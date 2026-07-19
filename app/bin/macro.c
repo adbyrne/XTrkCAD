@@ -1116,6 +1116,10 @@ static void Playback(void)
 			continue;
 		}
 		LOG(log_playback, 3, ("%3d: %s\n", paramLineNum, paramLine));
+		// N=5 (strlen("STEP")+1) is a deliberate exact-match idiom requiring
+		// paramLine[4]=='\0' too; paramLine is always a valid terminated
+		// string (fgets + Stripcr()), so no OOB read risk either way.
+		// NOLINTNEXTLINE(bugprone-not-null-terminated-result)
 		if (strncmp(paramLine, "STEP", 5) == 0) {
 			paramTogglePlaybackHilite = TRUE;
 			wWinTop(demoW);
@@ -1334,7 +1338,7 @@ static void Playback(void)
 			if (strncmp(paramLine, "MOUSE ", 6) == 0) {
 				thisCmd = mouseCmd;
 			}
-			if (strncmp(paramLine, "MAP ", 6) == 0) {
+			if (strncmp(paramLine, "MAP ", 4) == 0) {
 				thisCmd = mouseCmd;
 			}
 #ifdef UTFCONVERT

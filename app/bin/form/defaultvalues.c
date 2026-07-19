@@ -28,7 +28,7 @@
 #include <dynstring.h>
 #include "formprivate.h"
 
-#define HASDEFAULT(p) (p->nameStr && p->valueP && !(p->option&PDO_NOPREF))
+#define HASDEFAULT(p) ((p)->nameStr && (p)->valueP && !((p)->option&PDO_NOPREF))
 
 static void
 DefaultFromListIndex(const char *section, const char *namePrimary,

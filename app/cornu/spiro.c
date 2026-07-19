@@ -782,9 +782,9 @@ spiro_iter(spiro_seg *s, bandmat *m, int *perm, double *v, int n)
 	}
 	if (cyclic) {
 		memcpy(m + nmat, m, sizeof(bandmat) * nmat);
-		memcpy(m + 2 * nmat, m, sizeof(bandmat) * nmat);
+		memcpy(m + 2L * nmat, m, sizeof(bandmat) * nmat);
 		memcpy(v + nmat, v, sizeof(double) * nmat);
-		memcpy(v + 2 * nmat, v, sizeof(double) * nmat);
+		memcpy(v + 2L * nmat, v, sizeof(double) * nmat);
 		n_invert = 3 * nmat;
 		j = nmat;
 	} else {

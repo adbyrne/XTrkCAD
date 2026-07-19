@@ -45,6 +45,9 @@ RemoveFormatChars( char *source, char *dest )
 				lastChar = ' ';
 			}
 		} else {
+			// lastChar is only ever compared against ' ' (0x20); a
+			// sign-extended high-bit-set byte is still != ' ' either way.
+			// NOLINTNEXTLINE(bugprone-signed-char-misuse)
 			lastChar = *source;
 			*dest++ = lastChar;
 		}
