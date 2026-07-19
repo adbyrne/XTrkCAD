@@ -626,8 +626,9 @@ static BOOL_T AddScale(
 	char scale[40];
 	scaleInfo_p s;
 
-	if ( (rc=sscanf( line, "SCALE %[^,]," SCANF_FLOAT_FORMAT "," SCANF_FLOAT_FORMAT
-	                 "",
+	if ( (rc=sscanf( line, "SCALE %39[^,]," SCANF_FLOAT_FORMAT ","
+	                 SCANF_FLOAT_FORMAT
+	                       "",
 	                 scale, &ratio, &gauge )) != 3) {
 		SyntaxError( "SCALE", rc, 3 );
 		return FALSE;
@@ -669,7 +670,7 @@ static BOOL_T AddScaleFit(
 	BOOL_T rc;
 	scaleComp_p s;
 
-	if ( (rc=sscanf( line, "SCALEFIT %s %s %s %s",
+	if ( (rc=sscanf( line, "SCALEFIT %19s %19s %255s %255s",
 	                 type, result, scales, matches )) != 4) {
 		SyntaxError( "SCALEFIT", rc, 4 );
 		return FALSE;

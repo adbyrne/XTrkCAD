@@ -325,8 +325,7 @@ EXPORT turnoutInfo_t * StructAdd( long mode, SCALEINX_T scale, wControl_p list,
 		to = structureInfo(inx);
 		if ( IsParamValid(to->paramFileIndex) &&
 		     to->segCnt > 0 &&
-		     (FIT_NONE != CompatibleScale( FIT_STRUCTURE, to->scaleInx, scale )) &&
-		     to->segCnt != 0 ) {
+		     (FIT_NONE != CompatibleScale( FIT_STRUCTURE, to->scaleInx, scale )) ) {
 			if (to1 == NULL) {
 				to1 = to;
 			}

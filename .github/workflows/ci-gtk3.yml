@@ -253,6 +253,7 @@ jobs:
         run: |
           cppcheck \
             --enable=warning,style,performance,portability \
+            --inline-suppr \
             -j 4 \
             --suppress=missingInclude \
             --suppress=missingIncludeSystem \

@@ -111,9 +111,9 @@ char* ParseManifest(char* manifest, char* zip_directory)
 	ConvertUTF8ToSystem(layoutname);
 #endif // UTFCONVERT
 
-	LOG(log_zip, 1, ("Zip-Manifest %s \n", layoutname))
+	LOG(log_zip, 1, ("Zip-Manifest %s \n", layoutname ? layoutname : "(none)"))
 #if DEBUG
-	fprintf(stderr, "Layout name %s \n", layoutname);
+	fprintf(stderr, "Layout name %s \n", layoutname ? layoutname : "(none)");
 #endif
 
 	cJSON* dependencies = cJSON_GetObjectItemCaseSensitive(json_manifest,

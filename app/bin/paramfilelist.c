@@ -147,7 +147,7 @@ static BOOL_T UpdateParamFiles(void)
 					if ( cp ) {
 						LOG1( log_paramupdate, ( "ParmUpdate:  Upd CONTENTS %s (was %s) -> %s\n",
 						                         newContents,
-						                         cp?cp:"<>", fileNameP ) );
+						                         cp, fileNameP ) );
 					} else {
 						LOG1( log_paramupdate, ( "ParmUpdate:  New CONTENTS %s\n", newContents ) );
 					}

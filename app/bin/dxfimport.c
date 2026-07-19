@@ -405,8 +405,7 @@ static void ProcessDxfFile(
 	eSection = eNone;
 
 	count = 0;
-	while (dxfFile
-	       && ReadDxfPair(dxfFile)) {
+	while (ReadDxfPair(dxfFile)) {
 		count += 2;
 		// BOOL_T old_skip = skip;
 		// skip = FALSE;
@@ -829,10 +828,8 @@ static void ProcessDxfFile(
 			}
 		}
 
-	if (dxfFile) {
-		fclose(dxfFile);
-		dxfFile = NULL;
-	}
+	fclose(dxfFile);
+	dxfFile = NULL;
 
 	// Change the extension to create the XTI file
 	MakeFullpath(&pathName, workingDir, nameOfFile, NULL);
@@ -855,9 +852,7 @@ static void ProcessDxfFile(
 	for (int i = 0; i < DxfOutputCount; i++) {
 		fprintf(xtiFile, "%s\n", DxfOutput[i]);
 	}
-	if (xtiFile) {
-		fclose(xtiFile);
-	}
+	fclose(xtiFile);
 
 
 	// Clean up

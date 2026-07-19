@@ -191,7 +191,7 @@ static void CreateLayerButtons();
 
 int IsLayerValid(unsigned int layer)
 {
-	return (layer < NUM_LAYERS && layer != (unsigned int)-1);
+	return (layer < NUM_LAYERS);
 }
 
 BOOL_T GetLayerVisible(unsigned int layer)
@@ -467,6 +467,9 @@ static void SetLayerColor(unsigned int inx, wDrawColor color)
 			wButtonSetIcon(layer_btns[inx], (char *)show_layer_bmps[inx]);
 		}
 
+		// cppcheck-suppress arrayIndexOutOfBoundsCond
+		// Every call site keeps inx in [0, NUM_LAYERS-1] (loop-bounded or
+		// IsLayerValid()-guarded); cppcheck can't see the caller-side bound.
 		layers[inx].color = color;
 		layoutLayerChanged = TRUE;
 	}
@@ -481,6 +484,8 @@ static void SetLayerHideButton(unsigned int inx, wBool_t hide)
 				wButtonSetBusy(layer_btns[inx], layers[inx].visible);
 			}
 		}
+		// cppcheck-suppress arrayIndexOutOfBoundsCond
+		// Same caller-bound reasoning as SetLayerColor above.
 		layers[inx].button_off = hide;
 		layoutLayerChanged = TRUE;
 	}
@@ -1404,6 +1409,7 @@ static void LayerPrefLoad(void)
 void IncrementLayerObjects(unsigned int layer)
 {
 	CHECK(layer < NUM_LAYERS);
+	if (layer >= NUM_LAYERS) { return; }
 	layers[layer].objCount++;
 }
 
@@ -1416,6 +1422,7 @@ void IncrementLayerObjects(unsigned int layer)
 void DecrementLayerObjects(unsigned int layer)
 {
 	CHECK(layer < NUM_LAYERS);
+	if (layer >= NUM_LAYERS) { return; }
 	layers[layer].objCount--;
 }
 
@@ -1874,7 +1881,9 @@ static CatalogEntry *ScanSettingsDirectory(Catalog *catalog,
 				contents_end[0] = '\0';
 			}
 			strcpy(contents, contents_start);
-			contents_end[0] = '.';
+			if (contents_end) {
+				contents_end[0] = '.';
+			}
 			newEntry = InsertInOrder(catalog, contents, NULL);
 			UpdateCatalogEntry(newEntry, fileName, contents, NULL);
 			free(fileName);

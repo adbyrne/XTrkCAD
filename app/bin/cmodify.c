@@ -200,7 +200,6 @@ static STATUS_T ModifyDraw(wAction_t action, coOrd pos)
 			return ModifyTrack( Dex.Trk, action, pos );
 		}
 		//Enter/Space/Tab does not
-		if ((action>>8 !=32) && (action>>8 != 13) && (action>>8 != 9)) { return C_CONTINUE; }
 		if (((action>>8) == 9 && (MyGetKeyState()&WKEY_SHIFT))) { return C_TERMINATE; }
 	/* falls through */
 	case C_OK:

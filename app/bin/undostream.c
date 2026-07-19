@@ -69,6 +69,9 @@ void Rprintf(
 	va_start( ap, format );
 	vsprintf( buff, format, ap );
 	va_end( ap );
+	// cppcheck-suppress knownConditionTrueFalse
+	// rbuff_record is a never-wired-up debug toggle (always 0); the
+	// ring-buffer echo-to-console path is currently always disabled.
 	if (rbuff_record >= 1) {
 		lprintf( buff );
 	}

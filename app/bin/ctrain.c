@@ -206,12 +206,15 @@ static void UpdateCar(
 		const char * cp;
 		numberChanged = FALSE;
 
+		// cppcheck-suppress nullPointerRedundantCheck
+		// wEntryGetValue() wraps gtk_entry_get_text(), which per GTK's
+		// contract never returns NULL (empty string at worst).
 		cp = wEntryGetValue( carDesc[NM].control0);
 		max_str = sizeof(carData.number);
-		if (max_str && strlen(cp)>max_str) {
+		if (strlen(cp)>max_str) {
 			NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_str-1);
 		}
-		if (cp && strcmp(CarItemNumber(xx->item), cp) != 0) {
+		if (strcmp(CarItemNumber(xx->item), cp) != 0) {
 			numberChanged = TRUE;
 			carData.number[0] = '\0';
 			strncat(carData.number, cp, max_str - 1);
@@ -934,7 +937,7 @@ static void ControllerDialogSync(
 	inx = wListGetIndex((wList_p)dlg->trainPGp->paramPtr[I_LIST].control);
 
 	if (dlg->train) {
-		if (inx >= 0 && inx < locoList_da.cnt && dlg->train &&
+		if (inx >= 0 && inx < locoList_da.cnt &&
 		    dlg->train != locoList(inx).loco) {
 			inx = FindLoco(dlg->train);
 
@@ -2029,15 +2032,15 @@ static void PlaceTrain(
 
 	/* check for coupling to other cars */
 	if (doCheckCoupling) {
-		if (xx0->trvTrk.trk)
+		if (xx0->trvTrk.trk) {
 			if (!CheckCoupling(car0, 0, doCheckCrash)) {
 				return;
 			}
 
-		if (xx0->trvTrk.trk)
 			if (!CheckCoupling(car0, 1, doCheckCrash)) {
 				return;
 			}
+		}
 	}
 
 	PlaceCar(car0);

@@ -256,6 +256,7 @@ static wBool_t MapRedraw( wControl_p bd, void* pContex, wWinPix_t px,
 {
 #ifndef WIN32
 	log_mapredraw = LogFindIndex("mapredraw");
+	log_mapsize = LogFindIndex("mapsize");
 
 	log_calls("size: %ldx%ld", px, py);
 #endif

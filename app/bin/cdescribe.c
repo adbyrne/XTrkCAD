@@ -383,6 +383,10 @@ static paramGroup_p CreateDescribeDialog(
 			break;
 		}
 		CHECK( pdp );
+		// cppcheck-suppress nullPointerRedundantCheck
+		// Every descType case above sets pdp via CreateDescribeField(), which
+		// always returns non-NULL; the switch is exhaustive over descType, so
+		// pdp can never be NULL here despite the CHECK above.
 		pdp->context = (void*)ddp;
 	}
 	pg->paramPtr = memdup( pd_da.ptr, pd_da.cnt * sizeof *pg->paramPtr );

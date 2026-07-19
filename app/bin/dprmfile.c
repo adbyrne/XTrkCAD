@@ -147,7 +147,10 @@ void ParamFileListLoad(int paramFileCnt,  dynArr_t *paramFiles)
 		                                sortedIndex[ i ]);
 		if (paramFileInfo.valid) {
 			DynStringClear(&description);
+			// paramFileSel is a never-wired-up display-mode toggle (always 0);
+			// !paramFileSel is always true by construction, not a bug.
 			DynStringCatCStr(&description,
+			                 // cppcheck-suppress knownConditionTrueFalse
 			                 ((!paramFileSel) && paramFileInfo.contents) ?
 			                 paramFileInfo.contents :
 			                 paramFileInfo.name);

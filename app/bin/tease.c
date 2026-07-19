@@ -1563,7 +1563,7 @@ static BOOL_T MakeParallelJoint(
 			for ( inx=0; inx<cnt; inx++ ) {
 				tempSegs(inx).color = wDrawColorBlack;
 				tempSegs(inx).lineWidth = 0;
-				tempSegs(inx).type = track?SEG_STRTRK:SEG_STRLIN;
+				tempSegs(inx).type = SEG_STRLIN;
 				if ( inx == 0 ) {
 					GetJointPos( &tempSegs(inx).u.l.pos[0], NULL, l0, R, L, P, A, xx->negate );
 				} else {

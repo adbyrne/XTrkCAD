@@ -1301,7 +1301,6 @@ static BOOL_T MakeParallelBezier(
 	p = pos;
 	DistanceBezier(trk, &p);
 	a2 = NormalizeAngle(FindAngle(pos,p)-a0);
-	a2 = NormalizeAngle(FindAngle(pos,p)-a0);
 	//find parallel move x and y for points
 	for (int i =0; i<4; i++) {
 		np[i] = xx->pos[i];

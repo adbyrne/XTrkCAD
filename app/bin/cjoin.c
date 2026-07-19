@@ -310,6 +310,9 @@ static STATUS_T AdjustJoint(
 		} else {
 			pc = Dj.inp[0].params.arcP;
 		}
+		// JoinWithCurve() always returns TRUE; failure is signaled via
+		// Dj.jRes.type == curveTypeNone instead, checked by the caller.
+		// cppcheck-suppress knownConditionTrueFalse
 		if (!JoinWithCurve( pc, Dj.inp[0].params.arcR,
 		                    Dj.inp[0].params.ep, p1, normalAngle, &Dj.jRes )) {
 			return FALSE;
@@ -324,6 +327,9 @@ static STATUS_T AdjustJoint(
 		} else {
 			p0 = Dj.inp[0].params.lineOrig;
 		}
+		// JoinWithStraight() always returns TRUE; failure is signaled via
+		// Dj.jRes.type == curveTypeNone instead, checked by the caller.
+		// cppcheck-suppress knownConditionTrueFalse
 		if (!JoinWithStraight( p0, Dj.inp[0].params.angle, p1, Dj.inp[1].params.angle,
 		                       &Dj.jRes )) {
 			return FALSE;

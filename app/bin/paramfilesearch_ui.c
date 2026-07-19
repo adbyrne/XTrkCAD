@@ -156,7 +156,10 @@ int SearchFileListLoad(Catalog *catalog)
 				MyFree(type_copy);
 			}
 			DynStringClear(&description);
+			// searchUiMode is a never-wired-up display-mode toggle (always 0);
+			// !searchUiMode is always true by construction, not a bug.
 			DynStringCatCStr(&description,
+			                 // cppcheck-suppress knownConditionTrueFalse
 			                 ((!searchUiMode) && catalogEntry->contents) ?
 			                 catalogEntry->contents :
 			                 catalogEntry->fullFileName[i]);

@@ -939,11 +939,9 @@ static void AdvanceTurntablePositionIndicator(
 			//If back end moving, flip result
 			if (fabs(DifferenceBetweenAngles(FindAngle(xx->pos,pos),GetTrkEndAngle(trk,
 			                                 xx->currEp)))>90) {
-				if (epfound>=0 && epfound != xx->currEp) {
-					reverse = TRUE;
-					xx->reverse = !xx->reverse;
-					train_reversed = !train_reversed;
-				}
+				reverse = TRUE;
+				xx->reverse = !xx->reverse;
+				train_reversed = !train_reversed;
 			}
 		}
 		xx->currEp = epfound;

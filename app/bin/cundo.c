@@ -924,6 +924,10 @@ void UndoUndo( void * unused )
 
 	//redrawAll = (us->newCnt+us->modCnt) > incrementalDrawLimit;
 	redrawAll = TRUE;
+	// cppcheck-suppress knownConditionTrueFalse
+	// Incremental redraw is deliberately disabled above (hardcoded TRUE);
+	// this always does a full redraw instead. Not a bug, just an
+	// optimization currently switched off.
 	if (!redrawAll) {
 		for (trk=us->newTrks; trk; trk=trk->next ) {
 			UndrawNewTrack( trk );
@@ -1010,6 +1014,10 @@ void UndoRedo( void * unused )
 
 	//redrawAll = (us->newCnt+us->modCnt) > incrementalDrawLimit;
 	redrawAll = TRUE;
+	// cppcheck-suppress knownConditionTrueFalse
+	// Incremental redraw is deliberately disabled above (hardcoded TRUE);
+	// this always does a full redraw instead. Not a bug, just an
+	// optimization currently switched off.
 	if (!redrawAll) {
 		RedrawInStream( &redoStream, us->redoStart, us->redoEnd, FALSE );
 	}

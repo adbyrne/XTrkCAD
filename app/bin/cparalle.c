@@ -145,7 +145,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 		if (!Dpa.anchor_Trk) {
 			return C_CONTINUE;
 		}
-		if (Dpa.anchor_Trk && !CheckTrackLayerSilent(Dpa.anchor_Trk)) {
+		if (!CheckTrackLayerSilent(Dpa.anchor_Trk)) {
 			Dpa.anchor_Trk = NULL;
 			return C_CONTINUE;
 		}

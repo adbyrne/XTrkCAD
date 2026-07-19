@@ -666,10 +666,8 @@ static void UpdateDraw( track_p trk, int drawDescInx, descUpdate_t * descUpd,
 		return;
 	}
 	segPtr = &xx->segs[drawSegInx];
-	if ( drawSegInx == -1 ) {
-		if (segPtr->type != SEG_TEXT) { return; }
-//DESC-TODO		else { inx = TX; }  //Always look at TextField for SEG_TEXT on "Done"
-	}
+	if (segPtr->type != SEG_TEXT) { return; }
+//DESC-TODO	else { inx = TX; }  //Always look at TextField for SEG_TEXT on "Done"
 	if ( drawDescInx == -1 ) { return; }
 
 	CHECK( drawDescInx >= 0 && drawDescInx < curDescCnt );
@@ -1032,7 +1030,7 @@ static void UpdateDraw( track_p trk, int drawDescInx, descUpdate_t * descUpd,
 			REORIGIN( pt, segPtr->u.p.pts[i].pt, 0.0, xx->orig );
 			pt.x += off.x;
 			pt.y += off.y;
-			if (i<5) {
+			if (i<4) {
 				drawData.endPt[i] = pt;
 			}
 			UNREORIGIN( segPtr->u.p.pts[i].pt, pt, 0.0, xx->orig );
