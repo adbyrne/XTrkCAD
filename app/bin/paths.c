@@ -52,6 +52,7 @@ FindPath(const char *type)
 {
 	struct pathTable *entry;
 	/* cppcheck-suppress uninitvar */ /* uthash macro initializes internal fields */
+	// NOLINTNEXTLINE(bugprone-casting-through-void) -- vendored uthash.h macro
 	HASH_FIND_STR(paths, type, entry);
 	return (entry);
 }

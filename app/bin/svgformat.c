@@ -20,6 +20,9 @@
 *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+// _USE_MATH_DEFINES is mandated by the Windows CRT to expose M_PI etc. from
+// math.h; the reserved-identifier naming isn't ours to change.
+// NOLINTNEXTLINE(bugprone-reserved-identifier)
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <stdarg.h>
