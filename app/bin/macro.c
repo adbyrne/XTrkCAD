@@ -525,7 +525,7 @@ static void PlaybackCursor(drawCmd_p d, playbackProc proc, wAction_t action,
 		      : arrow3_bm);
 		Flash(playbackColor = rightDragColor);
 		proc(action, pos);
-	/* falls through */
+		__attribute__((fallthrough));
 
 	case C_MOVE:
 		bm = ((MyGetKeyState() & WKEY_SHIFT)  ? arrow3_shift_bm
@@ -557,7 +557,7 @@ static void PlaybackCursor(drawCmd_p d, playbackProc proc, wAction_t action,
 		      : arrowr3_bm);
 		Flash(playbackColor = leftDragColor);
 		proc(action, pos);
-	/* falls through */
+		__attribute__((fallthrough));
 
 	case C_RMOVE:
 		bm = ((MyGetKeyState() & WKEY_SHIFT)  ? arrowr3_shift_bm

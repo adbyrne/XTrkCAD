@@ -1138,6 +1138,22 @@ static void MiscMenuItemCreate(wMenu_p m1, wMenu_p m2, const char * name,
 //static wMenu_p toolbarM;
 static addButtonCallBack_t paramFilesCallback;
 
+// wPrintSetup() takes a wPrintSetupCallBack_p, but its callback parameter is
+// never used (see app/wlib/gtk3lib/print.c) -- this wrapper lets it be used
+// as a menu/toolbar callback without casting through a mismatched signature.
+static void PrintSetupMenuCB(void *context)
+{
+	wPrintSetup(NULL);
+}
+
+// wMenuPopupShow() takes a wControl_p (an ordinary object pointer,
+// representation-identical to void*); this wrapper matches
+// wButtonCallBack_p's real signature instead of casting through a mismatch.
+static void ZoomChooserButtonCB(void *context)
+{
+	wMenuPopupShow((wControl_p)context);
+}
+
 EXPORT void CreateMenus(void)
 {
 	log_menu =  LogFindIndex( "menu" );
@@ -1310,12 +1326,12 @@ EXPORT void CreateMenus(void)
 
 	cmdGroup = BG_PRINT;
 	MiscMenuItemCreate(fileM, NULL, "printSetup", _("P&rint Setup ..."),
-	                   ACCL_PRINTSETUP, (wMenuCallBack_p) wPrintSetup, 0,
+	                   ACCL_PRINTSETUP, PrintSetupMenuCB, 0,
 	                   I2VP(0));
 	InitCmdPrint(fileM);
 	AddToolbarButton("menuFile-setup",
 	                 CreateToolbarIconFromResource("doc-setup.png"),
-	                 IC_MODETRAIN_TOO, (wMenuCallBack_p) wPrintSetup, I2VP(0));
+	                 IC_MODETRAIN_TOO, PrintSetupMenuCB, I2VP(0));
 
 	wMenuSeparatorCreate(fileM);
 	MiscMenuItemCreate(fileM, NULL, "cmdImport", _("&Import"), ACCL_IMPORT,
@@ -1369,7 +1385,7 @@ EXPORT void CreateMenus(void)
 	zoomM = wMenuPopupCreate(mainW, "");
 	AddToolbarButton("cmdZoom", CreateToolbarIconFromResource("zoom-choose.png"),
 	                 IC_MODETRAIN_TOO,
-	                 (wButtonCallBack_p) wMenuPopupShow, zoomM);
+	                 ZoomChooserButtonCB, zoomM);
 	zoomDownB = AddToolbarButton("cmdZoomOut",
 	                             CreateToolbarIconFromResource("zoom-out.png"),
 	                             IC_MODETRAIN_TOO, DoZoomDown, NULL);

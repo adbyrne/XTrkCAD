@@ -98,6 +98,15 @@ set_target_properties(lines cnvdsgn PROPERTIES FOLDER LineSymbols)
 
 add_library(xtrkcad-lib "")
 
+# paths.c's HASH_FIND_STR/HASH_ADD_STR calls expand from the vendored
+# uthash.h macro, which Clang's -Wimplicit-fallthrough misattributes to the
+# call site (not a real switch fallthrough in this file) -- exempt this one
+# file from the ratchet rather than the vendored uthash.h header itself,
+# since it's the only owned file that hits this macro-attribution quirk.
+if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    set_source_files_properties(paths.c PROPERTIES COMPILE_OPTIONS "-Wno-error=implicit-fallthrough")
+endif()
+
 target_sources(xtrkcad-lib
  PRIVATE
     appdefaults.c

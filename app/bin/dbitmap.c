@@ -414,6 +414,18 @@ static void OutputBitMapChange( long changes )
  * \param [in,out] unused
  */
 
+// outputBitMapPLs[] has no PD_STRING control, so changeProc's return value
+// is never consulted for this dialog (only StringPush() propagates it) --
+// this wrapper matches paramChangeProc's real signature instead of casting
+// UpdateBitmapDialog() (a real void(void) function, also called directly
+// elsewhere) through a mismatch.
+static wBool_t UpdateBitmapDialogChangeProc( paramGroup_cp group, int inx,
+                void * value )
+{
+	UpdateBitmapDialog();
+	return TRUE;
+}
+
 static void DoOutputBitMap( void* unused )
 {
 	if( outputBitMapW == NULL ) {
@@ -425,7 +437,7 @@ static void DoOutputBitMap( void* unused )
 		                                  FormCancel_Current,
 		                                  TRUE,
 		                                  0,
-		                                  ( paramChangeProc )UpdateBitmapDialog );
+		                                  UpdateBitmapDialogChangeProc );
 	}
 
 	FormLoadControls( &outputBitMapPG );

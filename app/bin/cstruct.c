@@ -652,7 +652,7 @@ static wBool_t StructureDlgUpdate(
 }
 
 
-static void DoStructOk( void )
+static void DoStructOk( void const * arg )
 {
 	NewStructure();
 	Reset();
@@ -993,7 +993,7 @@ EXPORT STATUS_T CmdStructureAction(
 		if ((action>>8) != ' ') {
 			return C_CONTINUE;
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_OK:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		NewStructure();
@@ -1028,7 +1028,7 @@ static STATUS_T CmdStructure(
 	case C_START:
 		if (structureW == NULL) {
 			structureW = FormCreateDialog( &structurePG, MakeWindowTitle(_("Structure")),
-			                               NULL, (paramActionOkProc)DoStructOk,
+			                               NULL, DoStructOk,
 			                               NULL, NULL,
 			                               TRUE,
 			                               0l,
@@ -1068,7 +1068,7 @@ static STATUS_T CmdStructure(
 		if (MyGetKeyState()&WKEY_CTRL) {
 			return CmdStructureAction( C_RDOWN, pos );
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_RDOWN:
 		FormDialogOkActive( &structurePG, TRUE );
 		if (hideStructureWindow) {
@@ -1079,7 +1079,7 @@ static STATUS_T CmdStructure(
 		if (MyGetKeyState()&WKEY_CTRL) {
 			return CmdStructureAction( C_RMOVE, pos );
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_RMOVE:
 		return CmdStructureAction( action, pos );
 	case C_RUP:
@@ -1229,14 +1229,14 @@ static STATUS_T CmdStructureHotBar(
 		if ((action>>8) != ' ') {
 			return C_CONTINUE;
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_OK:
 		CmdStructureAction( action, pos );
 		return C_CONTINUE;
 
 	case C_CANCEL:
 		HotBarCancel();
-	/* falls through */
+		__attribute__((fallthrough));
 	default:
 		return CmdStructureAction( action, pos );
 	}

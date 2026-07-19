@@ -102,7 +102,7 @@ EXPORT void FormCancel_Restore(
 /* Cancel button, no Cancel button
  */
 EXPORT void FormCancel_Null(
-        paramGroup_p group)
+        paramGroup_cp group)
 {
 }
 

@@ -62,7 +62,7 @@ static wControl_p easementW;
 
 static void EasementSel( long );
 static void SetEasement( DIST_T, void * );
-static void EasementOk( void );
+static void EasementOk( void const * arg );
 
 static char *easementChoiceLabels[] = { N_("None"), N_("Sharp"), N_("Normal"), N_("Broad"), N_("Cornu"), NULL };
 static paramFloatRange_t r0n1_100 = { -1.0, 100.0, 60 };
@@ -166,7 +166,7 @@ static void SetEasement(
 }
 
 
-static void EasementOk( void )
+static void EasementOk( void const * arg )
 {
 	FormLoadControls( &easementPG );
 	SetEasement( easementVal, I2VP(FALSE) );
@@ -242,7 +242,7 @@ static void DoEasement( void * unused )
 {
 	if (easementW == NULL) {
 		easementW = FormCreateDialog( &easementPG, MakeWindowTitle(N_("Easement")),
-		                              _("Ok"), (paramActionOkProc)EasementOk,
+		                              _("Ok"), EasementOk,
 		                              NULL, NULL,
 		                              TRUE, 0, EasementDlgUpdate );
 		SetEasement( easementVal, I2VP(TRUE) );

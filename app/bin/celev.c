@@ -486,7 +486,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 			elevTrk = NULL;
 			return C_CONTINUE;
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_LCLICK:
 		;
 		p0= pos;

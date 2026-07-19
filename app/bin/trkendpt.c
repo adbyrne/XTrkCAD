@@ -467,7 +467,7 @@ EXPORT STATUS_T EndPtDescriptionMove(
 //		p1 = pos;
 		e->option |= ELEV_VISIBLE; //Make sure we make visible
 		DrawEndElev( &mainD, trk, ep, wDrawColorWhite );
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_MOVE:
 	case C_UP:
 //		p1 = pos;

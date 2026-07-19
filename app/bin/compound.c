@@ -574,7 +574,7 @@ STATUS_T CompoundDescriptionMove(
 		editMode = TRUE;
 		REORIGIN( p0, xx->descriptionOrig, xx->angle, xx->orig )
 		DrawCompoundDescription( trk, &mainD, wDrawColorWhite );
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_MOVE:
 	case C_UP:
 		color = GetTrkColor( trk, &mainD );

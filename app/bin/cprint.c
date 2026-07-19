@@ -778,9 +778,17 @@ static void DoPrintMargin( void )
 /*
  * Misc buttons
  */
+// wPrintSetup()'s callback parameter is documented/verified unused (see
+// app/wlib/gtk3lib/print.c) -- this wrapper matches its real signature
+// without lying about DoPrintScale's actual (no-argument) one.
+static void PrintScaleSetupCB( wBool_t needed )
+{
+	DoPrintScale();
+}
+
 static void DoPrintSetup( void )
 {
-	wPrintSetup( (wPrintSetupCallBack_p)DoPrintScale );
+	wPrintSetup( PrintScaleSetupCB );
 	sPrinterName = wPrintGetName();
 	GetMargins();
 	SetMaxPageSize( TRUE );

@@ -54,15 +54,28 @@ if(UNIX)
     add_compile_options(-Werror=type-limits)
     add_compile_options(-Werror=absolute-value)
     add_compile_options(-Werror=unused-but-set-parameter)
+    # implicit-fallthrough was initially GCC-only (Phase 10) because Clang
+    # doesn't recognize this codebase's comment-style fallthrough annotation
+    # -- never audited by the original GCC-only verification. Phase 12
+    # (SF #663) fixed the ~73 genuine fallthrough sites and standardized on
+    # __attribute__((fallthrough)) (recognized by both compilers), so it
+    # ratchets universally now, no GNU-only guard needed.
+    add_compile_options(-Werror=implicit-fallthrough)
     if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-        # cast-function-type and implicit-fallthrough are genuinely zero for
-        # owned code under GCC (verified directly, GCC 16), but Clang applies
-        # a stricter cast-mismatch sub-check and a different fallthrough-
-        # annotation syntax that surface pre-existing findings Phase 4-6
-        # never audited (~90 and ~115 instances respectively, tracked
-        # separately as SF #662/#663) -- not yet safe to gate under Clang.
+        # cast-function-type stays GCC-only. Under Clang, this same flag
+        # name also promotes a separate, stricter sub-check
+        # (-Wcast-function-type-strict) that flags ~106 GTK/GLib generic-
+        # callback-cast idiom instances (GCallback, GCompareFunc,
+        # G_DEFINE_TYPE-generated code) as well as vendored code -- verified
+        # directly (Clang 22, ccache disabled to rule out stale results)
+        # that even the "plain" flag name pulls -strict in under Clang, so
+        # it can't be ratcheted there without also flagging that permanently-
+        # accepted idiom. Phase 12 (SF #662) fixed the ~13 genuine project-
+        # typedef cast mismatches that WERE real bugs among the findings;
+        # the rest -- see SF #662 for the full accounting -- are a
+        # permanent, un-ratcheted Clang-only false-positive class, not
+        # tracked as debt.
         add_compile_options(-Werror=cast-function-type)
-        add_compile_options(-Werror=implicit-fallthrough)
     endif()
 endif()
 
@@ -114,15 +127,13 @@ if(WIN32)
 		add_compile_options(-Werror=type-limits)
 		add_compile_options(-Werror=absolute-value)
 		add_compile_options(-Werror=unused-but-set-parameter)
+		# See the matching UNIX-branch comment above (Phase 12, SF #662/#663):
+		# implicit-fallthrough ratchets universally now; cast-function-type
+		# stays GCC-only (Clang's -Wcast-function-type-strict sub-check is
+		# not separable from it, and permanently un-ratcheted -- see #662).
+		add_compile_options(-Werror=implicit-fallthrough)
 		if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-			# cast-function-type and implicit-fallthrough are genuinely zero for
-			# owned code under GCC (verified directly, GCC 16), but Clang applies
-			# a stricter cast-mismatch sub-check and a different fallthrough-
-			# annotation syntax that surface pre-existing findings Phase 4-6
-			# never audited (~90 and ~115 instances respectively, tracked
-			# separately as SF #662/#663) -- not yet safe to gate under Clang.
 			add_compile_options(-Werror=cast-function-type)
-			add_compile_options(-Werror=implicit-fallthrough)
 		endif()
 	endif()
 

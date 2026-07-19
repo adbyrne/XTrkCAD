@@ -2154,7 +2154,7 @@ static void LayerDlgUpdate(paramGroup_p pg, int inx, void *valueP)
 
 	case I_MAP:
 		layerRedrawMap = TRUE;
-	/* falls through */
+		__attribute__((fallthrough));
 	case I_VIS:
 	case I_FRZ:
 	case I_MOD:

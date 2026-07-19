@@ -833,7 +833,7 @@ static STATUS_T ModifyStraight( track_p trk, wAction_t action, coOrd pos )
 		tempSegs(0).lineWidth = 0;
 		tempSegs(0).u.l.pos[0] = GetTrkEndPos( trk, 1-ep );
 		InfoMessage( _("Drag to change track length") );
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_MOVE:
 		d = FindDistance( tempSegs(0).u.l.pos[0], pos );
 		valid = TRUE;

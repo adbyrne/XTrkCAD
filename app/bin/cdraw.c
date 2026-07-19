@@ -747,6 +747,7 @@ static void UpdateDraw( track_p trk, int drawDescInx, descUpdate_t * descUpd,
 				break;
 			case SEG_TEXT:
 				UNREORIGIN( segPtr->u.t.pos, segPtr->u.t.pos, 0.0, off );
+				__attribute__((fallthrough));
 			default:;
 			}
 		} else {
@@ -825,7 +826,7 @@ static void UpdateDraw( track_p trk, int drawDescInx, descUpdate_t * descUpd,
 				UNREORIGIN(segPtr->u.c.center,drawData.center,0.0,drawData.origin);
 				DrawDescSetMode(CE, DESC_CHANGE);
 				DrawDescSetMode(A1, DESC_CHANGE);
-			/* falls through */
+				__attribute__((fallthrough));
 			case SEG_FILCRCL:
 				REORIGIN(drawData.center, segPtr->u.c.center, angle,
 				         drawData.origin);  //Remove angle
@@ -1849,7 +1850,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		}
 		ignoredDraw = NULL;
 		if (rc == C_CONTINUE) { break; }
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_FINISH:
 		ignoredDraw = trk;
 		rc = DrawGeomModify( C_FINISH, pos, &drawModCmdContext  );
@@ -3008,10 +3009,10 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			InfoDefaultControls();
 			infoSubst = FALSE;
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case wActionLDrag:
 		FormFetchData(&linestylePG);
-	/* falls through */
+		__attribute__((fallthrough));
 	case wActionMove:
 	case wActionRDown:
 	case wActionRDrag:

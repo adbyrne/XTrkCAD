@@ -485,7 +485,7 @@ STATUS_T DrawGeomMouse(
 			break;
 		case OP_FILLBOX:
 			lineWidth = 0;
-		/* falls through */
+			__attribute__((fallthrough));
 		case OP_BOX:
 			DYNARR_SET( trkSeg_t, tempSegs_da, 4 );
 			for ( inx=0; inx<4; inx++ ) {
@@ -586,7 +586,7 @@ STATUS_T DrawGeomMouse(
 					pos1 = p;
 				}
 			}
-		/* falls through */
+			__attribute__((fallthrough));
 		case OP_LINE:
 		case OP_DIMLINE:
 		case OP_BENCH:
@@ -1736,7 +1736,7 @@ static STATUS_T DrawGeomPolyModify(
 		}
 		if (action>>8 != 32 && action>>8 != 13 && action>>8 !=9) { return C_CONTINUE; }
 		if (action>>8 == 9 && (MyGetKeyState() & WKEY_SHIFT) != 0) { return C_TERMINATE; }
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_CONFIRM:
 	case C_OK:
 	case C_FINISH:
@@ -2345,7 +2345,7 @@ STATUS_T DrawGeomModify(
 					locked = TRUE;
 				}
 			}
-		/* falls through */
+			__attribute__((fallthrough));
 		case SEG_STRLIN:
 		case SEG_DIMLIN:
 		case SEG_BENCH:
@@ -2759,7 +2759,7 @@ STATUS_T DrawGeomModify(
 		}
 
 		if (action>>8 != 32 && action>>8 != 13) { return C_CONTINUE; }
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_CONFIRM:
 		return C_CONTINUE;
 	/* falls through */

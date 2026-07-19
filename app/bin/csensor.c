@@ -464,7 +464,7 @@ static STATUS_T CmdSensor ( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 	case C_DOWN:
 		create = TRUE;
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_MOVE:
 		SnapPos(&pos);
 		sensor_pos = pos;

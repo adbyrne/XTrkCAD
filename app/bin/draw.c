@@ -1281,7 +1281,7 @@ static void DoMouse(wAction_t action, coOrd pos)
 			ConfirmReset(TRUE);
 			return;
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_MODKEY:
 	case C_MOVE:
 	case C_UP:
