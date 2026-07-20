@@ -34,7 +34,7 @@
 #define SEARCHDELIMITER " \t\n\r/"
 #define LDISTANCELIMIT (2)
 
-static char *stopwords = {
+static char *stopwords[] = {
 	"scale",
 };
 
@@ -329,8 +329,8 @@ FilterKeyword(char *word)
 		return (true);
 	}
 
-	for (int i = 0; i < (int)(sizeof(stopwords) / sizeof(char *)); i++) {
-		if (!XtcStricmp(word, stopwords+i)) {
+	for (int i = 0; i < (int)(sizeof(stopwords) / sizeof(stopwords[0])); i++) {
+		if (!XtcStricmp(word, stopwords[i])) {
 			return (true);
 		}
 	}
