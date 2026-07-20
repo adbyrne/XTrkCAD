@@ -332,6 +332,38 @@ jobs:
           name: clang-tidy-gtk3
           path: clang-tidy.txt
 
+  codespell:
+    # Report-only: scans comments/strings/identifiers in app/bin and app/wlib for common
+    # misspellings. ~1300 findings surfaced the first time this was run (2026-07-20),
+    # a mix of genuine typos (e.g. "existance", "lenght", "supressed") and expected
+    # false positives on short C-style abbreviations (e.g. "parm"/"Parms" for
+    # "param(s)") and valid British spellings (e.g. "co-ordinate") -- an ignore-list
+    # can be tuned once someone triages the backlog; not yet a quality gate.
+    #
+    # Vendored-code exclusion: app/wlib/gtk3lib/wrapbox/ and app/tools/halibut/ are
+    # skipped via --skip (same vendored list as astyle-check/quality-plan-gtk3v2main-part2.md
+    # Phase 8) -- app/tools/halibut/ isn't reached by this job's scope anyway, but
+    # app/wlib is, so wrapbox/ does need the explicit skip here unlike cppcheck-deep.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install codespell
+        run: sudo apt-get update -q && sudo apt-get install -y codespell
+      - name: Run codespell (non-fatal)
+        run: |
+          codespell app/bin app/wlib \
+            --skip='*/wrapbox/*,*/halibut/*' \
+            -q 3 > codespell.txt 2>&1 || true
+      - name: Summarise findings
+        run: |
+          COUNT=$(wc -l < codespell.txt || echo 0)
+          echo "Total findings: $COUNT"
+      - name: Upload findings
+        uses: actions/upload-artifact@v7
+        with:
+          name: codespell-gtk3
+          path: codespell.txt
+
   astyle-check:
     # Gating: fails if any tracked app/bin or app/wlib file is not conformant
     # with app/lib/astylerc. astyle's --dry-run always exits 0, so the gate
