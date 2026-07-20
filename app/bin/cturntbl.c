@@ -460,7 +460,7 @@ static BOOL_T FindTurntableEndPt(
         EPINX_T *epR,
         BOOL_T *reverseR )
 {
-	EPINX_T ep, /*ep0,*/ epCnt=GetTrkEndPtCnt(trk);
+	EPINX_T ep, /*ep0,*/ epCnt;
 	ANGLE_T angle=*angleR, angle0, angle1;
 	for (ep=0,/*ep0=-1,*/epCnt=GetTrkEndPtCnt(trk),angle0=370.0; ep<epCnt; ep++) {
 		if ( (GetTrkEndTrk(trk,ep)) == NULL ) {

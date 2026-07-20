@@ -2883,7 +2883,7 @@ static STATUS_T cmdCornuCreate(
 		Da.endHandle[0].end_valid = Da.endHandle[1].end_valid = FALSE;
 		return C_TERMINATE;
 	case C_TEXT:
-		if ((action>>8) != ' ' && (action>>8) != 32) {
+		if ((action>>8) != ' ') {
 			return CmdCornu(action,pos);
 		}
 		__attribute__((fallthrough));
