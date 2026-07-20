@@ -166,6 +166,43 @@ bug:
 - **Valgrind** — `ctest -T memcheck --overwrite MemoryCheckCommand=$(which valgrind)`.
   `PreferenceTest` is excluded here too, for the same GTK3-internals reason.
 
+### Running with debug logging (`-d`)
+
+`ctest` verifies unit-testable logic; it can't confirm an interactive-only fix (a dialog, a draw
+path, a mouse-driven command) actually behaves correctly. For that, run the real app with its
+built-in per-module debug logging: `-d <category>=<level>` (repeat the flag once per category;
+`-d <category>` alone defaults to level 1), optionally with `-l <file>` to redirect output to a
+file instead of stdout. There's no `-d help`/discovery flag — category names are scattered across
+~44 files as calls to `LogFindIndex("name")`; grep for that in `app/bin/` to find one relevant to
+what you're debugging. A few that exist today: `join` (`cjoin.c`), `mapsize`/`mapredraw`
+(`mapwindow.c`), `block` (`cblock.c`), `switchmotor` (`cswitchmotor.c`), `undo` (`cundo.c`),
+`command` (`command.c`), `signal` (`csignal.c`), `menu` (`menu.c`), `scale` (`scale.c`).
+
+**A plain `cmake --build` isn't enough to run the result interactively.** At startup the binary
+locates its resource directory — `xtrkcad.xtq`, `xtrkcad.tip`, the `icons16/24/32.gresource`
+files, param files, locale `.mo` files — via `wGetAppLibDir()`
+(`app/wlib/gtk3lib/unix/ixpaths.c`), which checks the `XTRKCADGTKLIB` env var first, then
+`<binary-dir>/../share/xtrkcad-gtk` relative to the running executable, then falls back to
+`/usr/share`/`/usr/local/share`. None of that layout exists in a raw out-of-source build
+directory — those files are placed only by CMake's `install()` rules, not by `cmake --build` — so
+running `build-gtk3v2main/app/bin/xtrkcad` directly fails to find them. Do a real (scratch)
+install first:
+
+```sh
+cmake --build build-gtk3v2main
+cmake --install build-gtk3v2main --prefix build-gtk3v2main/install
+build-gtk3v2main/install/bin/xtrkcad -d join=3
+```
+
+With `--prefix` placed one level above `bin/` like this, the `../share/xtrkcad-gtk` relative
+lookup finds everything automatically. If the scratch prefix lives somewhere else instead (e.g.
+`/tmp`), point `XTRKCADGTKLIB` at the installed `share/xtrkcad-gtk` directory explicitly:
+
+```sh
+cmake --install build-gtk3v2main --prefix /tmp/xtrkcad-scratch
+XTRKCADGTKLIB=/tmp/xtrkcad-scratch/share/xtrkcad-gtk /tmp/xtrkcad-scratch/bin/xtrkcad -d join=3
+```
+
 ### Tool versions
 
 Doxygen and AStyle are explicitly version-pinned in CI; everything else uses whatever the CI
