@@ -2779,6 +2779,8 @@ EXPORT BOOL_T OnTableEdgeEndPt( track_p trk, coOrd * pos )
 EXPORT BOOL_T GetClosestEndPt( track_p trk, coOrd * pos)
 {
 	struct extraDataDraw_t *xx;
+	DIST_T dd0,dd1;
+	coOrd p00, p0 = {0}, p1 = {0};
 
 	if (GetTrkType(trk) == T_DRAW) {
 		ignoredTableEdge = NULL;
@@ -2786,61 +2788,58 @@ EXPORT BOOL_T GetClosestEndPt( track_p trk, coOrd * pos)
 		if (xx->segCnt < 1) {
 			return FALSE;
 		}
-		DIST_T dd0,dd1;
-		coOrd p00, p0 = {0}, p1 = {0};
 		p00 = *pos;
-		if (GetTrkType(trk) == T_DRAW) {
-			Rotate(&p00,xx->orig,-xx->angle);
-			p00.x -= xx->orig.x;
-			p00.y -= xx->orig.y;
-			switch (xx->segs[0].type) {
-			case SEG_CRVLIN:
-				PointOnCircle( &p0, xx->segs[0].u.c.center, fabs(xx->segs[0].u.c.radius),
-				               xx->segs[0].u.c.a0 );
-				dd0 = FindDistance( p00, p0);
-				PointOnCircle( &p1, xx->segs[0].u.c.center, fabs(xx->segs[0].u.c.radius),
-				               xx->segs[0].u.c.a0 + xx->segs[0].u.c.a1);
-				dd1 = FindDistance( p00, p1);
-				break;
-			case SEG_STRLIN:
-				dd0 = FindDistance( p00, xx->segs[0].u.l.pos[0]);
-				p0 = xx->segs[0].u.l.pos[0];
-				dd1 = FindDistance( p00, xx->segs[0].u.l.pos[1]);
-				p1 = xx->segs[0].u.l.pos[1];
-				break;
-			case SEG_BEZLIN:
-				dd0 = FindDistance( p00, xx->segs[0].u.b.pos[0]);
-				p0 = xx->segs[0].u.b.pos[0];
-				dd1 = FindDistance( p00, xx->segs[0].u.b.pos[3]);
-				p1 = xx->segs[0].u.b.pos[3];
-				break;
-			default:
-				return FALSE;
-			}
-			p0.x += xx->orig.x;
-			p0.y += xx->orig.y;
-			Rotate(&p0,xx->orig,xx->angle);
-			p1.x += xx->orig.x;
-			p1.y += xx->orig.y;
-			Rotate(&p1,xx->orig,xx->angle);
-		} else if (GetTrkType(trk) == T_BZRLIN) {
-			coOrd p0,p1;
-			xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
+		Rotate(&p00,xx->orig,-xx->angle);
+		p00.x -= xx->orig.x;
+		p00.y -= xx->orig.y;
+		switch (xx->segs[0].type) {
+		case SEG_CRVLIN:
+			PointOnCircle( &p0, xx->segs[0].u.c.center, fabs(xx->segs[0].u.c.radius),
+			               xx->segs[0].u.c.a0 );
+			dd0 = FindDistance( p00, p0);
+			PointOnCircle( &p1, xx->segs[0].u.c.center, fabs(xx->segs[0].u.c.radius),
+			               xx->segs[0].u.c.a0 + xx->segs[0].u.c.a1);
+			dd1 = FindDistance( p00, p1);
+			break;
+		case SEG_STRLIN:
+			dd0 = FindDistance( p00, xx->segs[0].u.l.pos[0]);
+			p0 = xx->segs[0].u.l.pos[0];
+			dd1 = FindDistance( p00, xx->segs[0].u.l.pos[1]);
+			p1 = xx->segs[0].u.l.pos[1];
+			break;
+		case SEG_BEZLIN:
+			dd0 = FindDistance( p00, xx->segs[0].u.b.pos[0]);
 			p0 = xx->segs[0].u.b.pos[0];
+			dd1 = FindDistance( p00, xx->segs[0].u.b.pos[3]);
 			p1 = xx->segs[0].u.b.pos[3];
-			dd0 = FindDistance(p00,p0);
-			dd1 = FindDistance(p00,p1);
-		} else { return FALSE; }
-		if (dd0>dd1) {
-			* pos = p1;
-			return TRUE;
-
-		} else {
-			* pos = p0;
-			return TRUE;
+			break;
+		default:
+			return FALSE;
 		}
+		p0.x += xx->orig.x;
+		p0.y += xx->orig.y;
+		Rotate(&p0,xx->orig,xx->angle);
+		p1.x += xx->orig.x;
+		p1.y += xx->orig.y;
+		Rotate(&p1,xx->orig,xx->angle);
+	} else if (GetTrkType(trk) == T_BZRLIN) {
+		struct extraDataBezier_t *xxb = GET_EXTRA_DATA(trk, T_BZRLIN,
+		                                extraDataBezier_t);
+		p00 = *pos;
+		p0 = xxb->pos[0];
+		p1 = xxb->pos[3];
+		dd0 = FindDistance(p00,p0);
+		dd1 = FindDistance(p00,p1);
+	} else {
+		return FALSE;
 	}
-	return FALSE;
+	if (dd0>dd1) {
+		* pos = p1;
+		return TRUE;
+	} else {
+		* pos = p0;
+		return TRUE;
+	}
 }
 
 
