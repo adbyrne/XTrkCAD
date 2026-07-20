@@ -334,11 +334,23 @@ jobs:
 
   codespell:
     # Report-only: scans comments/strings/identifiers in app/bin and app/wlib for common
-    # misspellings. ~1300 findings surfaced the first time this was run (2026-07-20),
-    # a mix of genuine typos (e.g. "existance", "lenght", "supressed") and expected
-    # false positives on short C-style abbreviations (e.g. "parm"/"Parms" for
-    # "param(s)") and valid British spellings (e.g. "co-ordinate") -- an ignore-list
-    # can be tuned once someone triages the backlog; not yet a quality gate.
+    # misspellings. 134 findings on the real (post-cleanup) baseline, 2026-07-20 -- see
+    # .claude/codespell-triage-plan.md for the working backlog. Not yet a quality gate.
+    #
+    # *.ai (Adobe Illustrator icon sources) are explicitly skipped: they're not text
+    # files, and codespell parsing them as text produced ~1090 pieces of pure garbage
+    # ("nD", "bU", "UE", ...) on the first run -- 82% of the initial ~1300-finding total
+    # was this one false-positive source, confirmed by re-running with *.ai excluded.
+    #
+    # .github/codespell-ignore.txt holds confirmed false positives: short C-style
+    # identifier/abbreviation names that only coincidentally fuzzy-match a real word
+    # once codespell tokenizes on camelCase boundaries (easeR, parm/parms, protoL,
+    # drawM, groupD, sCond, RMOVE, siz) plus one valid British spelling (co-ordinate).
+    # Genuine misspellings embedded IN identifier names themselves (modifyable,
+    # editted, childs) are deliberately left un-ignored and tracked in the triage plan
+    # instead -- fixing those means renaming the identifier everywhere it's used, not
+    # just editing a comment, so they need a real (if small) code change, not a
+    # spell-check suppression.
     #
     # Vendored-code exclusion: app/wlib/gtk3lib/wrapbox/ and app/tools/halibut/ are
     # skipped via --skip (same vendored list as astyle-check/quality-plan-gtk3v2main-part2.md
@@ -352,7 +364,8 @@ jobs:
       - name: Run codespell (non-fatal)
         run: |
           codespell app/bin app/wlib \
-            --skip='*/wrapbox/*,*/halibut/*' \
+            --skip='*/wrapbox/*,*/halibut/*,*.ai' \
+            --ignore-words=.github/codespell-ignore.txt \
             -q 3 > codespell.txt 2>&1 || true
       - name: Summarise findings
         run: |
