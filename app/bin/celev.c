@@ -36,7 +36,6 @@ static long elevModeV;
 static char elevStationV[STR_SIZE];
 static DIST_T elevHeightV = 0.0;
 
-static DIST_T elevOldValue;
 static track_p elevTrk;
 static EPINX_T elevEp;
 static BOOL_T elevUndo = FALSE;
@@ -268,7 +267,6 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 	EPINX_T ep1;
 
 	DoElevUpdate( NULL, 1, NULL );
-	elevOldValue = 0.0;
 	elevHeightV = 0.0;
 	elevStationV[0] = 0;
 	elevTrk = trk;
@@ -291,7 +289,6 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 			radio = 2;
 		}
 		elevHeightV = GetTrkEndElevHeight(trk,ep);
-		elevOldValue = elevHeightV;
 		FormLoadSingleControl( &elevationPG, I_HEIGHT );
 		FormControlActive( &elevationPG, I_HEIGHT, TRUE );
 		break;

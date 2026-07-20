@@ -1560,7 +1560,7 @@ EXPORT BOOL_T ReadTrack( char * line )
 	if (bsearchRead) {
 		if (sortedCmds == NULL) {
 			sortedCmds = (trackCmd_t**)MyMalloc( (trackCmds_da.cnt-1) * sizeof *
-			                                     (trackCmd_t*)0 );
+			                                     (trackCmd_t**)0 );
 			for (inx=1; inx<trackCmds_da.cnt; inx++) {
 				sortedCmds[inx-1] = trackCmds(inx);
 			}
