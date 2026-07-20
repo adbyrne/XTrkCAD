@@ -2802,9 +2802,9 @@ static void OutputTurnoutDef(
 		                              TempEndPtsCount(), TempEndPt(0) );
 	}
 
-	// cppcheck-suppress knownConditionTrueFalse
 	// foundR is never assigned TRUE anywhere (vestigial, no live setter);
 	// the replace-confirmation check works correctly via FindCompound() alone.
+	// cppcheck-suppress knownConditionTrueFalse
 	if ( bFirst &&
 	     customTurnout == NULL &&
 	     ( foundR || FindCompound( FIND_TURNOUT, newTurnScaleName, message ) ) ) {
