@@ -1643,7 +1643,7 @@ static void GroupOk( void * unused )
 					PATHPTR_T pPaths = ppp->path;
 					flip = ppp->flip;
 					if ( pPaths == NULL ) {
-						ErrorMessage( MSG_GROUP_NO_PATHS, _("Ok"), NULL );
+						ErrorMessage( MSG_GROUP_NO_PATHS );
 						wDrawDelayUpdate( mainD.d, FALSE );
 						wHide( groupW );
 						return;

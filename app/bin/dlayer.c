@@ -1328,7 +1328,7 @@ static void LayerPrefLoad(void)
 			layerValue = wPrefGetString(LAYERPREF_SECTION, layerOption);
 
 			if (layerValue) {
-				strncpy(layers[inx].name, layerValue, sizeof(layers[inx].name-1));
+				strncpy(layers[inx].name, layerValue, sizeof(layers[inx].name)-1);
 				(layers[inx].name)[sizeof(layers[inx].name)-1] = '\0';
 			} else {
 				*(layers[inx].name) = '\0';
