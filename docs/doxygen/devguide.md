@@ -107,7 +107,9 @@ build doesn't need everything CI needs. The full, authoritative CI configuration
 more detail than the summary below, e.g. exact job-by-job dependency lists or the release
 packaging steps. If you're working purely from the SourceForge/Hg checkout, these files are
 still present in this tree even though Mercurial itself doesn't run them — GitHub Actions only
-executes off the `git` mirror at `github.com/adbyrne/XTrkCAD`.
+executes off a `git` mirror, e.g. `github.com/$GITHUB_USER/XTrkCAD` (see
+[Running CI on your own GitHub fork](#running-ci-on-your-own-github-fork) below for how to set
+one up).
 
 ### Linux (x86_64 and ARM64)
 
@@ -206,3 +208,37 @@ tar xjf astyle.tar.bz2
 make -C "astyle-${ASTYLE_VERSION}/build/gcc" -j"$(nproc)"
 export PATH="$PWD/astyle-${ASTYLE_VERSION}/build/gcc/bin:$PATH"
 ```
+
+## Running CI on your own GitHub fork {#running-ci-on-your-own-github-fork}
+
+SourceForge Mercurial is this project's canonical source — GitHub only exists here so pushes can
+run the workflows in `.github/workflows/` as free, automatic CI before a change is sent upstream
+as an Hg patch. There's no single shared XTrkCAD repo on GitHub for that; each developer points
+Actions at a plain, empty repo they create under their own account. Throughout this guide (and in
+`.github/README.md`), `$GITHUB_USER` stands for whichever GitHub username you're using this way —
+substitute your own everywhere you see it, or just `export GITHUB_USER=yourname` so the commands
+below work as written.
+
+1. Create a GitHub account if you don't already have one.
+2. Create a new repository under your account — with the [`gh` CLI](https://cli.github.com/):
+   ```sh
+   gh repo create "$GITHUB_USER/XTrkCAD" --public --source=. --remote=github
+   ```
+   or via the web UI, then add the remote yourself:
+   ```sh
+   git remote add github "https://github.com/$GITHUB_USER/XTrkCAD.git"
+   ```
+3. Push a branch:
+   ```sh
+   git push github your-branch-name
+   ```
+   Actions is on by default for repos you own, so `.github/workflows/*.yml` starts running as
+   soon as the push lands — no separate enable step.
+4. Watch the run at `https://github.com/$GITHUB_USER/XTrkCAD/actions`, or with
+   `gh run watch` if you have the `gh` CLI authenticated.
+
+`release.yml`'s `package-docs` and release-packaging jobs are deliberately scoped to pushes on
+`GTK3V2MAIN`/`main` specifically (see that workflow's own `on:` block) — they won't fire on an
+arbitrary feature branch on your fork. That's expected: those two jobs build release artifacts
+for the project maintainer's own release process, not per-developer CI, so there's nothing to set
+up for them here.
