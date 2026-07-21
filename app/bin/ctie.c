@@ -30,8 +30,6 @@
 //#include "include/paramfile.h"
 #include "common-ui.h"
 
-static int log_tieList;
-
 /****************************************************************************
 *
 * TIE DATA

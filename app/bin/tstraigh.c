@@ -42,7 +42,7 @@ typedef struct extraDataStraight_t {
 } extraDataStraight_t;
 
 
-/** @logcmd @showrefby straight=n tstraigh.c */
+/** @logcmd @showrefby `straight=n` `tstraigh.c` — straight-track draw endpoints (`DrawStraight`) */
 static int log_straight = 0;
 
 /****************************************
@@ -1167,4 +1167,5 @@ track_p NewStraightTrack( coOrd p0, coOrd p1 )
 void InitTrkStraight( void )
 {
 	T_STRAIGHT = InitObject( &straightCmds );
+	log_straight = LogFindIndex( "straight" );
 }
