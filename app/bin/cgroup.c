@@ -51,6 +51,7 @@
  *
  */
 
+/** @logcmd @showrefby `group=n` `cgroup.c` */
 static int log_group=-1;
 
 static dynArr_t pathPtr_da;

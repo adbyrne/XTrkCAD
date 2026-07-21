@@ -33,7 +33,7 @@
 #include "icons.h"
 
 static BOOL_T debug = 0;
-/** @logcmd @showrefby join=n cjoin.c */
+/** @logcmd @showrefby `join=n` `cjoin.c` */
 static int log_join = 0;
 typedef struct {
 	curveType_e type;
@@ -1575,7 +1575,7 @@ void InitCmdJoin( wMenu_p menu )
 	               CreateToolbarIconFromResource("join-line.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
 	ButtonGroupEnd();
-	/** @logcmd @showrefby join=n cjoin.c Log Join Lines and Tracks command */
+	/** @logcmd @showrefby `join=n` `cjoin.c` — Log Join Lines and Tracks command */
 	log_join = LogFindIndex( "join" );
 }
 

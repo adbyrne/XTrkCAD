@@ -789,6 +789,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	int resumeWork;
 	int versionChanged;
 	char * logFileName = NULL;
+	/** @logcmd @showrefby `init=n` `misc.c` */
 	int log_init = 0;
 	int initialZoom = 0;
 	char * initialFile = NULL;

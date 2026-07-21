@@ -62,6 +62,7 @@ static coOrd paste_offset, cursor_offset;
 EXPORT wBool_t bExample = FALSE;
 EXPORT wBool_t bReadOnly = FALSE;
 
+/** @logcmd @showrefby `timereadfile=n` `fileio.c` */
 static int log_timereadfile = 0;
 
 #ifdef WINDOWS

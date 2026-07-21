@@ -111,7 +111,9 @@ static void DrawAllCars(track_p);
 static void TrainTimeEndPause(void);
 static void TrainTimeStartPause(void);
 
+/** @logcmd @showrefby `trainMove=n` `ctrain.c` */
 static int log_trainMove;
+/** @logcmd @showrefby `trainPlayback=n` `ctrain.c` */
 static int log_trainPlayback;
 
 static track_p trainHighlighted;

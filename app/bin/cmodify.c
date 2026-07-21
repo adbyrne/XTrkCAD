@@ -880,7 +880,7 @@ void InitCmdModify( wMenu_p menu )
 	modifyCmdInx = AddMenuButton( menu, CmdModify, "cmdModify", _("Modify"),
 	                              CreateToolbarIconFromResource("extend.png"), LEVEL0_50,
 	                              IC_STICKY|IC_POPUP|IC_WANT_MOVE|IC_CMDMENU, ACCL_MODIFY, NULL );
-	/** @logcmd @showrefby modify=n cmodify.c Log Modify command */
+	/** @logcmd @showrefby `modify=n` `cmodify.c` — Log Modify command */
 	log_modify = LogFindIndex( "modify" );
 	modPopupM = MenuRegister( "Modify Context Menu" );
 	wMenuPushCreate(modPopupM, "cmdSelectMode", GetBalloonHelpStr("cmdSelectMode"),

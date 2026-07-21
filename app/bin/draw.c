@@ -67,11 +67,17 @@ static void DoMouse(wAction_t action, coOrd pos);
 
 static void DoZoom(void *pScaleVP);
 
+/** @logcmd @showrefby `pan=n` `draw.c` */
 EXPORT int log_pan = 0;
+/** @logcmd @showrefby `zoom=n` `draw.c` */
 static int log_zoom = 0;
+/** @logcmd @showrefby `mouse=n` `draw.c` */
 static int log_mouse = 0;
+/** @logcmd @showrefby `redraw=n` `draw.c` */
 static int log_redraw = 0;
+/** @logcmd @showrefby `mapsize=n` `draw.c` */
 static int log_size = 0;
+/** @logcmd @showrefby `timemainredraw=n` `draw.c` */
 static int log_timemainredraw = 0;
 
 /****************************************************************************

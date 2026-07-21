@@ -53,6 +53,7 @@
 
 EXPORT TRKTYP_T T_CORNU = -1;
 
+/** @logcmd @showrefby `Cornu=n` `tcornu.c` */
 static int log_cornu = 0;
 
 static DIST_T GetLengthCornu( track_p );
@@ -924,6 +925,7 @@ BOOL_T MoveCornuEndPt ( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d0 )
 	}
 	return FALSE;
 }
+/** @logcmd @showrefby `traverseCornu=n` `tcornu.c` */
 static int log_traverseCornu = 0;
 /*
  * TraverseCornu is used to position a train/car.

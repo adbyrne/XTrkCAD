@@ -63,6 +63,7 @@
 
 EXPORT TRKTYP_T T_BLOCK = -1;
 
+/** @logcmd @showrefby `block=n` `cblock.c` */
 static int log_block = 0;
 
 static void NoDrawLine(drawCmd_p d, coOrd p0, coOrd p1, wDrawWidth width,

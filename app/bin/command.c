@@ -62,6 +62,7 @@ EXPORT int commandCnt = 0;
 
 static wIndex_t curCommand = 0;
 
+/** @logcmd @showrefby `command=n` `command.c` */
 static int log_command;
 
 

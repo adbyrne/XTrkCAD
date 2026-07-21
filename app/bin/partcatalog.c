@@ -38,6 +38,7 @@ static char *stopwords[] = {
 	"scale",
 };
 
+/** @logcmd @showrefby `params=n` `partcatalog.c` */
 static int log_params;
 
 /**

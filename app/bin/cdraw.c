@@ -57,6 +57,7 @@ static wControl_p drawModDashDotDot;
 static wControl_p drawModCenterDot;
 static wControl_p drawModPhantom;
 
+/** @logcmd @showrefby `describedraw=n` `cdraw.c` */
 int log_describedraw = 0;
 
 static long fontSizeList[] = {

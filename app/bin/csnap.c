@@ -31,6 +31,7 @@
 #include "wlib.h"
 
 #define bigdot_width 2
+/** @logcmd @showrefby `timedrawgrid=n` `csnap.c` */
 int log_timedrawgrid = 0;
 
 /*****************************************************************************

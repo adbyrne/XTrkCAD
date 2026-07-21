@@ -58,6 +58,7 @@ static int StorageLogCurrent = 0;
 
 static unsigned long guard0 = 0xDEADBEEF;
 static unsigned long guard1 = 0xAF00BA8A;
+/** @logcmd @showrefby `malloc=n` `mymalloc.c` */
 static int log_malloc;
 
 void SetMallocLog()

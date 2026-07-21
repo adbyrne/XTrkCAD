@@ -62,7 +62,9 @@
 #define MAP_BORDER_PIXELS 2
 #define SCREEN_SIZE_FACTOR 0.5
 
+/** @logcmd @showrefby `mapsize=n` `mapwindow.c` */
 static int log_mapsize = 0;
+/** @logcmd @showrefby `mapredraw=n` `mapwindow.c` */
 static int log_mapredraw = 0;
 
 

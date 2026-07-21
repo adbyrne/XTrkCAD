@@ -41,6 +41,7 @@ dynArr_t paramFileInfo_da;
 int curParamFileIndex = PARAM_DEMO;
 
 static int log_params;
+/** @logcmd @showrefby `paramupdate=n` `paramfilelist.c` */
 static int log_paramupdate;
 
 static char * customPath;
@@ -491,8 +492,8 @@ addButtonCallBack_t ParamFilesInit(void)
  */
 BOOL_T ParamFileListInit(void)
 {
-	/** @logcmd @showrefby params=n paramfilelist.c Log ReadParams
-	 * (including scale file (xtq), custom file (*.cus) and other params (xtp))
+	/** @logcmd @showrefby `params=n` `paramfilelist.c` — parameter-file loading, including the
+	 * scale file (`.xtq`), custom file (`.cus`), and other `.xtp` files
 	 */
 	log_params = LogFindIndex("params");
 	log_paramupdate = LogFindIndex("paramupdate");

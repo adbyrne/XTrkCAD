@@ -32,6 +32,7 @@
 #include "note.h"
 #include "form.h"
 
+/** @logcmd @showrefby `describe=n` `cdescribe.c` */
 static int log_describe = 0;
 
 int bOldDescribe = FALSE;

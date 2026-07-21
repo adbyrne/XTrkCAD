@@ -45,8 +45,10 @@
 EXPORT long adjTimer;
 static void DemoInitValues(void);
 
+/** @logcmd @showrefby `playbackcursor=n` `macro.c` */
 static int log_playbackCursor = 0;
 EXPORT BOOL_T paramTogglePlaybackHilite;
+/** @logcmd @showrefby `playback=n` `macro.c` */
 static int log_playback = 0;
 
 /*****************************************************************************
@@ -858,6 +860,7 @@ EXPORT void TakeSnapshot(drawCmd_t *d)
 /*
  * Regression test
  */
+/** @logcmd @showrefby `regression=n` `macro.c` */
 static int log_regression = 0;
 static int nRegressionFail = 0;
 

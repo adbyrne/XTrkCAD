@@ -42,6 +42,7 @@ EXPORT dynArr_t structureInfo_da;
 
 static wIndex_t pierListInx;
 EXPORT turnoutInfo_t * curStructure = NULL;
+/** @logcmd @showrefby `Structure=n` `cstruct.c` */
 static int log_structure = 0;
 
 static wMenu_p structPopupM;

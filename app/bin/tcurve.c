@@ -41,7 +41,9 @@ typedef struct extraDataCurve_t {
 	coOrd descriptionOff;
 } extraDataCurve_t;
 
+/** @logcmd @showrefby `curve=n` `tcurve.c` */
 static int log_curve = 0;
+/** @logcmd @showrefby `curveSegs=n` `tcurve.c` */
 static int log_curveSegs = 0;
 
 static DIST_T GetLengthCurve( track_p );

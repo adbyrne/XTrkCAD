@@ -840,7 +840,7 @@ INPUT                  = "@XTrkCAD_SOURCE_DIR@/app/bin" \
                          "@XTrkCAD_SOURCE_DIR@/app/dynstring" \
                          "@XTrkCAD_SOURCE_DIR@/app/bin/cars" \
                          "@XTrkCAD_SOURCE_DIR@/docs/doxygen/mainpage.md" \
-                         "@XTrkCAD_SOURCE_DIR@/docs/doxygen/devguide.md"
+                         "@XTrkCAD_SOURCE_DIR@/docs/doxygen/logcommands.md"
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses

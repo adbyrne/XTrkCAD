@@ -72,6 +72,7 @@ static int cmdGroup;
 static void HandleCmdGroupChange(int currentGroup);
 static wMenu_p buttonGroupPopupM = NULL;
 
+/** @logcmd @showrefby `menu=n` `menu.c` */
 static int log_menu;
 /*--------------------------------------------------------------------*/
 typedef struct {

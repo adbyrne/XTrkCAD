@@ -49,6 +49,7 @@
 EXPORT TRKTYP_T T_BEZIER = -1;
 EXPORT TRKTYP_T T_BZRLIN = -1;
 
+/** @logcmd @showrefby `Bezier=n` `tbezier.c` */
 static int log_bezier = 0;
 
 static DIST_T GetLengthBezier( track_p );
@@ -822,7 +823,9 @@ static BOOL_T SplitBezier( track_p trk, coOrd pos, EPINX_T ep,
 	return TRUE;
 }
 
+/** @logcmd @showrefby `traverseBezier=n` `tbezier.c` */
 static int log_traverseBezier = 0;
+/** @logcmd @showrefby `traverseBezierSegs=n` `tbezier.c` */
 static int log_bezierSegments = 0;
 /*
  * TraverseBezier is used to position a train/car.
