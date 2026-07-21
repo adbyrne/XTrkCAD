@@ -41,6 +41,71 @@ arbitrary feature branch on your fork. That's expected: those two jobs build rel
 for the project maintainer's own release process, not per-developer CI, so there's nothing to set
 up for them here.
 
+# CI tooling overview {#ci-tooling-overview}
+
+This branch's CI is `.github/workflows/ci-gtk3.yml` (`ci.yml` covers the GTK2 `%main` branch,
+`codeql.yml` and `release.yml` are separate workflows — see below). Read the workflow file
+directly for exact command lines; this is a map of what each job checks and whether it can fail
+your run, not a copy of it.
+
+## Gating jobs (a failure here fails the run)
+
+- **`doxygen`** — builds this documentation with the pinned Doxygen 1.15.0 and `WARN_AS_ERROR`;
+  any warning (a broken `\ref`, a stale `@param`, an unresolved anchor) fails the job.
+- **`c-tests-linux`, `c-tests-arm64`, `c-tests-linux-clang`, `c-tests-macos`,
+  `c-tests-windows-msys2`, `c-tests-sanitizers`, `c-tests-valgrind`** — build plus `ctest` across
+  compilers (GCC, Clang, AppleClang, MinGW GCC), platforms, and architectures, plus ASan/UBSan and
+  Valgrind runs (`PreferenceTest` excluded from both — see
+  \ref advanced-optional-local-checks "Advanced/optional local checks" in the
+  \ref index "Developer Documentation" page for why).
+- **`cppcheck`** — cppcheck's default check set only, `--error-exitcode=1`.
+- **`astyle-check`** — AStyle 3.6.13 (built from source, pinned — an unpinned version once
+  produced different formatting for identical input, SF #638) dry-run conformance to
+  `app/lib/astylerc`, scoped to `app/bin`/`app/wlib` only. Vendored code
+  (`app/wlib/gtk3lib/wrapbox/`, `app/tools/halibut/`) and `unittest/` directories are excluded by
+  design; `app/bin/cars/` is a temporary exclusion for in-progress work (see the job's own
+  comments and `bug-tracker.md` for current status).
+- **`fuzz-getargs`** — a bounded-time libFuzzer regression run of the `fuzz_getargs` harness (not
+  continuous fuzzing; catches regressions in previously-fixed `GetArgs()` bugs like SF #645).
+
+## Report-only jobs (upload an artifact, never fail the run)
+
+- **`cppcheck-deep`** — cppcheck's full check set, beyond the gating job's defaults.
+- **`clang-tidy`** — a conservative `bugprone-*`/`performance-*`/`portability-*` check-set.
+- **`codespell`** — scans comments, strings, and identifiers in `app/bin`/`app/wlib` for common
+  misspellings.
+- **`astyle-check-macos`, `astyle-check-windows`** — compare each platform's from-source-built
+  astyle output against Linux's, to catch astyle itself behaving differently per OS (not code
+  formatting drift — that's what the gating `astyle-check` job is for).
+- **`compiler-warnings`, `compiler-warnings-macos`, `compiler-warnings-windows`** — captures
+  `-Wall -Wextra` build output as an artifact on each platform.
+- **`coverage`** — generates an lcov HTML report and uploads it as an artifact.
+
+Every report-only job's findings land as a downloadable artifact on the workflow run's summary
+page (Actions tab → the run → Artifacts); each job's own "Upload findings"/"Upload warning log"
+step names it. **CodeQL** is a separate workflow (`codeql.yml`) — it runs on push/PR and a weekly
+Monday cron, and its results show up in the repo's Security tab rather than as an artifact.
+
+## The warning-count ratchet
+
+`PlatformSettings.cmake` promotes specific warning categories to `-Werror=` once a phase has
+brought their count to zero for owned code, so a new PR can't silently reintroduce them:
+`sign-compare`, `type-limits`, `absolute-value`, `unused-but-set-parameter`, and
+`implicit-fallthrough` are gated on both GCC and Clang; `cast-function-type` stays GCC-only.
+That last exception is deliberate, not an oversight: Clang's equivalent
+`-Wcast-function-type-strict` sub-check additionally flags ~106 instances of GLib/GTK's own
+mandated generic-callback-cast idiom (`GCallback`, `GCompareFunc`, `G_DEFINE_TYPE`-generated code)
+that aren't realistically fixable without abandoning GTK's own type-safety pattern — documented as
+permanently-accepted non-ratchetable noise (SF #662) rather than ratcheted like the rest.
+`implicit-fallthrough` reached universal (GCC+Clang) status the same way: 73 genuine sites were
+standardized on `__attribute__((fallthrough))`, recognized identically by both compilers, before
+the Clang-only guard was dropped (SF #663).
+
+The large-volume cppcheck/clang-tidy categories that Phase 13 sampled and decided *not* to
+bulk-suppress (`variableScope`, `bugprone-narrowing-conversions`, and others) are deliberately
+left visible in the `cppcheck-deep`/`clang-tidy` report-only artifacts instead — see
+\ref code-quality-process-and-patterns "Code quality: process and patterns" below for why.
+
 # Code quality: process and patterns {#code-quality-process-and-patterns}
 
 CI runs several static-analysis tools on this branch (AStyle formatting, CodeQL, `cppcheck-deep`,

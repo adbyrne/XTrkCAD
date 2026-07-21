@@ -187,7 +187,7 @@ cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 ```
 
-### Advanced/optional local checks
+### Advanced/optional local checks {#advanced-optional-local-checks}
 
 Not part of the everyday build/test loop, but available if you're chasing a specific class of
 bug:
