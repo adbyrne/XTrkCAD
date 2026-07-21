@@ -92,7 +92,9 @@ typedef struct extraDataEase_t {
 
 #define EASE_MIN_X	(0.01)
 
+/** @logcmd @showrefby `ease=n` `tease.c` */
 static int log_ease;
+/** @logcmd @showrefby `traverseJoint=n` `tease.c` */
 static int log_traverseJoint;
 
 

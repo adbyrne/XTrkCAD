@@ -64,6 +64,7 @@
 
 EXPORT TRKTYP_T T_SWITCHMOTOR = -1;
 
+/** @logcmd @showrefby `switchmotor=n` `cswitchmotor.c` */
 static int log_switchmotor = 0;
 
 

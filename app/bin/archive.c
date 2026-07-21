@@ -33,7 +33,10 @@
 #include "common-ui.h"
 #include "fileio.h"
 
+/** @logcmd @showrefby `zip=n` `archive.c` — per-entry detail while unpacking a zip archive
+ * (`UnpackArchiveFor`) */
 int log_zip = 0;
+static BOOL_T log_zipInitted = FALSE;
 
 //char *
 //NativeToUtf8(const char *nativeString)
@@ -339,6 +342,10 @@ BOOL_T UnpackArchiveFor(
 	FILE  *fd;
 	long long sum;
 
+	if ( !log_zipInitted ) {
+		log_zip = LogFindIndex( "zip" );
+		log_zipInitted = TRUE;
+	}
 	char *destBuffer = MyStrdup(pathName);
 #ifdef UTFCONVERT
 	destBuffer = Convert2UTF8(destBuffer);

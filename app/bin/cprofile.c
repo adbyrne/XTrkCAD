@@ -106,6 +106,7 @@ static track_p profilePopupTrk;
 static EPINX_T profilePopupEp;
 static wMenuToggle_p profilePopupToggles[3];
 
+/** @logcmd @showrefby `profile=n` `cprofile.c` */
 static int log_profile = 0;
 
 #define LABELH (labelH*fontSize/screenProfileFontSize)

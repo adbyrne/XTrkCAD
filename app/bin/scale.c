@@ -107,6 +107,7 @@ static dynArr_t scaleDesc_da;
 
 static BOOL_T DoSetScaleDesc( SCALEINX_T scaleInx );
 
+/** @logcmd @showrefby `scale=n` `scale.c` */
 static int log_scale = 0;
 
 /**

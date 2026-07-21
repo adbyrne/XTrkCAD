@@ -51,13 +51,13 @@ EXPORT turnoutInfo_t* curTurnout = NULL;
 EXPORT long curTurnoutEp = 0;
 //static int curTurnoutInx = -1;
 
-/** @logcmd @showrefby turnout=n cturnout.c */
+/** @logcmd @showrefby `turnout=n` `cturnout.c` */
 static int log_turnout = 0;
-/** @logcmd @showrefby traverseTurnout=n cturnout.c */
+/** @logcmd @showrefby `traverseTurnout=n` `cturnout.c` */
 static int log_traverseTurnout = 0;
-/** @logcmd @showrefby suppresscheckpaths=n cturnout.c */
+/** @logcmd @showrefby `suppresscheckpaths=n` `cturnout.c` */
 static int log_suppressCheckPaths = 0;
-/** @logcmd @showrefby splitturnout=n cturnout.c */
+/** @logcmd @showrefby `splitturnout=n` `cturnout.c` */
 static int log_splitturnout = 0;
 
 static wMenu_p turnoutPopupM;

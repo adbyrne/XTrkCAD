@@ -98,6 +98,7 @@ static wMenu_p printGridPopupM;
 
 static wIndex_t pageCount = 0;
 
+/** @logcmd @showrefby `print=n` `cprint.c` */
 static int log_print = 0;
 
 static void PrintSnapShot( void );

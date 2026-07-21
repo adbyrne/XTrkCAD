@@ -37,7 +37,9 @@
 #include "misc.h"
 #include "common-ui.h"
 
+/** @logcmd @showrefby `cornuturnoutdesigner=n` `ctodesgn.c` */
 static int log_cornuturnoutdesigner;
+/** @logcmd @showrefby `turnoutdesigner=n` `ctodesgn.c` */
 static int log_turnoutdesigner;
 
 char tempCustom[4096];

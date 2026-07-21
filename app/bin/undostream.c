@@ -90,7 +90,15 @@ void Rprintf(
  *
  */
 
+/** @logcmd @showrefby `undo=n` `undostream.c` — undo/redo ring-buffer stream I/O
+ * (`ReadStream`/`WriteStream`/`TrimStream`/`TruncateStream`); a separate registration from
+ * `cundo.c`'s own `undo` category, but the same name, so one `-d undo=n` drives both */
 static int log_undo = 0;
+
+void InitUndoStream( void )
+{
+	log_undo = LogFindIndex( "undo" );
+}
 
 BOOL_T ReadStream( stream_t * stream, void * ptr, int size )
 {

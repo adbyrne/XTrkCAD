@@ -79,5 +79,6 @@ BOOL_T WriteStream(stream_p stream, void *ptr, int size);
 BOOL_T TrimStream(stream_p stream, uintptr_t off);
 void ClearStream(stream_p stream);
 BOOL_T TruncateStream(stream_p stream, uintptr_t off);
+void InitUndoStream(void);
 
 #endif /* HAVE_UNDOSTREAM_H */

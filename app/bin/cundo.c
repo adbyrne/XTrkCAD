@@ -83,6 +83,8 @@
  *
  */
 
+/** @logcmd @showrefby `undo=n` `cundo.c` — undo/redo transaction stack (`InitCmdUndo`); see also
+ * `undostream.c`'s separate `undo` registration for the underlying stream I/O */
 static int log_undo = 0;	/**< loglevel, can only be set at compile time */
 
 #define UNDO_STACK_SIZE (10)
@@ -1070,4 +1072,5 @@ void UndoRedo( void * unused )
 void InitCmdUndo( void )
 {
 	log_undo = LogFindIndex( "undo" );
+	InitUndoStream();
 }

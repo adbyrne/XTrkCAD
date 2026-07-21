@@ -135,6 +135,7 @@ void ParamFileListLoad(int paramFileCnt,  dynArr_t *paramFiles)
 	DynString description;
 	DynStringMalloc(&description, STR_SHORT_SIZE);
 	int *sortedIndex = MyMalloc(sizeof(int)*paramFileCnt);
+	/** @logcmd @showrefby `params=n` `dprmfile.c` */
 	int log_params = LogFindIndex("params");
 
 	SortParamFileList(paramFileCnt, paramFiles, sortedIndex);

@@ -62,6 +62,7 @@
 
 EXPORT TRKTYP_T T_SENSOR = -1;
 
+/** @logcmd @showrefby `sensor=n` `csensor.c` */
 static int log_sensor = 0;
 
 typedef struct sensorData_t {

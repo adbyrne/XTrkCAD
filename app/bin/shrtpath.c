@@ -23,6 +23,7 @@
 #include "shrtpath.h"
 #include "track.h"
 
+/** @logcmd @showrefby `shortPath=n` `shrtpath.c` */
 EXPORT int log_shortPath;
 static int log_shortPathInitted;
 

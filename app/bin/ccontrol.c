@@ -62,6 +62,7 @@
 
 EXPORT TRKTYP_T T_CONTROL = -1;
 
+/** @logcmd @showrefby `control=n` `ccontrol.c` */
 static int log_control = 0;
 
 typedef struct controlData_t {

@@ -63,6 +63,7 @@
 
 EXPORT TRKTYP_T T_SIGNAL = -1;
 
+/** @logcmd @showrefby `signal=n` `csignal.c` */
 static int log_signal = 0;
 
 typedef struct signalAspect_t {
