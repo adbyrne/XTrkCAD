@@ -4,6 +4,12 @@ name: Release (GTK3V2MAIN)
 # tests pass. Packages are uploaded as GitHub Actions artifacts (14-day
 # retention) on every push. When a version tag (v*.*.*) is pushed, a
 # permanent GitHub Release is also created with all packages attached.
+#
+# Two more things happen on every ordinary GTK3V2MAIN push (not on tags or
+# workflow_dispatch), giving stable links that never expire or change:
+#   - publish-latest-release rolls the packages into a single moving
+#     "latest-gtk3v2main" GitHub Release (prerelease, not marked "Latest").
+#   - deploy-pages redeploys Doxygen + the user guide to GitHub Pages.
 
 on:
   push:
@@ -379,9 +385,137 @@ jobs:
           path: xtrkcad-docs.tar.gz
           retention-days: 14
 
+      - name: Build user guide
+        # help-html (app/doc/CMakeLists.txt) is normally part of the default
+        # 'all' target, but this job only builds docs-doxygen above, so it
+        # still needs building explicitly here (cmake resolves its halibut/
+        # msgfiles dependencies automatically).
+        run: cmake --build build --target help-html
+
+      - name: Archive user guide
+        # png.d/ and the stylesheet are install()-ed alongside html/ (see
+        # app/doc/CMakeLists.txt) rather than generated into the build tree,
+        # so copy them in manually — this job doesn't do a full `cmake
+        # --install` since the rest of the app isn't built here.
+        run: |
+          cp -r app/doc/png.d build/app/doc/html/
+          cp app/doc/xtrkcad_lin.css build/app/doc/html/
+          tar -czf xtrkcad-userguide.tar.gz -C build/app/doc/html .
+
+      - name: Upload user guide
+        uses: actions/upload-artifact@v7
+        with:
+          name: xtrkcad-userguide-html
+          path: xtrkcad-userguide.tar.gz
+          retention-days: 14
+
+  # ── GitHub Pages — Doxygen + user guide, redeployed on every push ─────────
+  # Gives stable, permanent URLs that always reflect the latest successful
+  # build, unlike the 14-day artifacts above (whose links change every run):
+  #   https://adbyrne.github.io/XTrkCAD/doxygen/
+  #   https://adbyrne.github.io/XTrkCAD/userguide/
+  deploy-pages:
+    needs: package-docs
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download docs artifacts
+        uses: actions/download-artifact@v7
+        with:
+          pattern: 'xtrkcad-*-html'
+          path: downloaded
+
+      - name: Assemble Pages site
+        run: |
+          mkdir -p site/doxygen site/userguide
+          tar -xzf downloaded/xtrkcad-docs-html/xtrkcad-docs.tar.gz -C site/doxygen
+          tar -xzf downloaded/xtrkcad-userguide-html/xtrkcad-userguide.tar.gz -C site/userguide
+          cat > site/index.html <<'PAGEEOF'
+          <!doctype html>
+          <html lang="en">
+          <head><meta charset="utf-8"><title>XTrkCAD GTK3V2MAIN — Latest Docs</title></head>
+          <body>
+          <h1>XTrkCAD (GTK3V2MAIN) — Latest Documentation</h1>
+          <p>Redeployed automatically on every successful push to GTK3V2MAIN.</p>
+          <ul>
+            <li><a href="doxygen/">Developer documentation (Doxygen)</a></li>
+            <li><a href="userguide/">User guide</a></li>
+            <li><a href="https://github.com/adbyrne/XTrkCAD/releases/tag/latest-gtk3v2main">Latest development build (packages)</a></li>
+          </ul>
+          </body>
+          </html>
+          PAGEEOF
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # ── "Latest" GitHub Release — rolling, tracks the newest GTK3V2MAIN push ──
+  # Unlike the artifacts above, this is one permanent, unchanging URL:
+  #   https://github.com/adbyrne/XTrkCAD/releases/tag/latest-gtk3v2main
+  # Only runs on ordinary GTK3V2MAIN pushes: version tags get their own
+  # permanent release via github-release below, and workflow_dispatch runs
+  # (which may opt into experimental NSIS/DMG builds) are excluded so those
+  # can't silently replace the normal rolling-release assets.
+  publish-latest-release:
+    needs: [package-linux, package-linux-arm64-ubuntu, package-linux-arm64-debian, package-macos, package-windows]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/GTK3V2MAIN'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: latest-gtk3v2main-release
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Download all packages
+        uses: actions/download-artifact@v7
+        with:
+          path: release-packages
+          merge-multiple: true
+
+      - name: List packages
+        run: find release-packages -type f | sort
+
+      - name: Update rolling 'latest-gtk3v2main' release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mapfile -t FILES < <(find release-packages -type f | sort)
+          gh release delete latest-gtk3v2main --yes --cleanup-tag || true
+          gh release create latest-gtk3v2main \
+            --title "GTK3V2MAIN — Latest Development Build" \
+            --target "${{ github.sha }}" \
+            --notes "$(printf '%s\n' \
+              '**Automatically updated on every successful push to GTK3V2MAIN.**' \
+              '' \
+              'This is an unstable development build, not a tagged release — for' \
+              'production use, see the [tagged releases](https://github.com/adbyrne/XTrkCAD/releases).' \
+              '' \
+              "Built from commit ${{ github.sha }}." \
+              '' \
+              '[Doxygen developer docs](https://adbyrne.github.io/XTrkCAD/doxygen/) · [User guide](https://adbyrne.github.io/XTrkCAD/userguide/)')" \
+            --prerelease \
+            --latest=false \
+            "${FILES[@]}"
+
   # ── GitHub Release — created only on version tags ──────────────────────────
   github-release:
-    needs: [package-linux, package-linux-arm64-ubuntu, package-linux-arm64-debian, package-macos, package-windows]
+    needs: [package-linux, package-linux-arm64-ubuntu, package-linux-arm64-debian, package-macos, package-windows, package-docs]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
