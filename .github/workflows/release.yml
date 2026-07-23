@@ -488,6 +488,15 @@ jobs:
           path: release-packages
           merge-multiple: true
 
+      - name: Remove GitHub Pages deployment bundle
+        # actions/upload-pages-artifact (used by deploy-pages) also uploads a
+        # regular workflow artifact named "github-pages" whose file is always
+        # called artifact.tar — an opaque tarball of the whole Pages site,
+        # not a real package. With no name filter above, download-artifact
+        # pulls it in alongside the real packages; strip it out explicitly
+        # rather than relying on glob-pattern filtering syntax.
+        run: rm -f release-packages/artifact.tar
+
       - name: List packages
         run: find release-packages -type f | sort
 
@@ -528,6 +537,11 @@ jobs:
         with:
           path: release-packages
           merge-multiple: true
+
+      - name: Remove GitHub Pages deployment bundle
+        # See the same step in publish-latest-release above — the
+        # deploy-pages job's artifact isn't a real package.
+        run: rm -f release-packages/artifact.tar
 
       - name: List packages
         run: find release-packages -type f | sort
