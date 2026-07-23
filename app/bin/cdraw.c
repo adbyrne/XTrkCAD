@@ -1312,6 +1312,11 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	case SEG_TEXT:
 		REORIGIN( drawData.endPt[0], segPtr->u.t.pos, xx->angle, xx->orig );
 		UNREORIGIN( segPtr->u.t.pos, drawData.endPt[0], 0.0, xx->orig );
+		// Unlike lines/curves/polygons, text has its own angle independent of
+		// position (DrawSegsO renders it at xx->angle + u.t.angle); fold the
+		// compound's angle in before it's discarded below, or the text's
+		// contribution from the compound's rotation is silently lost (SF #559).
+		segPtr->u.t.angle = NormalizeAngle( segPtr->u.t.angle + xx->angle );
 		xx->angle = 0.0;
 		drawData.angle = segPtr->u.t.angle;  //Text Angle
 		drawData.origin = xx->orig;
