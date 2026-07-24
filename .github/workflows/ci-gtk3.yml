@@ -26,6 +26,7 @@ jobs:
     # suppressed first (see .claude/doxygen-triage-plan.md; down to 402 as
     # of 2026-07-17, from an original 930).
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       DOXYGEN_VERSION: 1.15.0
     steps:
@@ -48,6 +49,7 @@ jobs:
 
   c-tests-linux:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
       - name: Install dependencies
@@ -64,6 +66,7 @@ jobs:
   c-tests-arm64:
     # Native ARM64 runner — same architecture as Raspberry Pi 3/4/5
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
       - name: Install dependencies
@@ -79,6 +82,7 @@ jobs:
 
   c-tests-linux-clang:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
       - name: Install dependencies
@@ -94,6 +98,7 @@ jobs:
 
   c-tests-macos:
     runs-on: macos-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
       - name: Install dependencies
@@ -101,7 +106,8 @@ jobs:
       - name: Configure
         run: |
           GTK_PREFIX=$(brew --prefix gtk+3)
-          export PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
+          PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
+          export PKG_CONFIG_PATH
           GTK_LDFLAGS=$(pkg-config --libs-only-L gtk+-3.0)
           cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
             -DCMAKE_PREFIX_PATH="$GTK_PREFIX;$(brew --prefix)" \
@@ -117,6 +123,7 @@ jobs:
     # mswlib was removed from GTK3V2MAIN in SF r6508; Windows now builds
     # against GTK3 directly using the official GTK Windows runtime (MSYS2).
     runs-on: windows-latest
+    timeout-minutes: 30
     defaults:
       run:
         shell: msys2 {0}
@@ -151,6 +158,7 @@ jobs:
 
   c-tests-sanitizers:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
       - name: Install dependencies
@@ -171,6 +179,7 @@ jobs:
 
   c-tests-valgrind:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
       - name: Install dependencies
@@ -188,7 +197,7 @@ jobs:
           ctest --test-dir build --output-on-failure \
             -E PreferenceTest \
             -T memcheck \
-            --overwrite MemoryCheckCommand=$(which valgrind) \
+            --overwrite "MemoryCheckCommand=$(which valgrind)" \
             --overwrite "MemoryCheckCommandOptions=--error-exitcode=1 --track-origins=yes --leak-check=full"
 
   cppcheck:
@@ -305,6 +314,7 @@ jobs:
     # app/wlib/gtk3lib/wrapbox/ or app/tools/halibut/ — out of scope by
     # construction, no exclude needed.
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
       - name: Install dependencies
@@ -317,8 +327,8 @@ jobs:
           cmake --build build
       - name: Run clang-tidy (non-fatal)
         run: |
-          FILES=$(find app/bin app/dynstring app/cornu -name "*.c" | grep -v unittest | grep -vE 'bdf2xtp\.c|helphelper\.c|ppedit_gtk1\.c')
-          clang-tidy --checks='-*,bugprone-*,performance-*,portability-*' -p build $FILES > clang-tidy.txt 2>&1 || true
+          mapfile -t FILES < <(find app/bin app/dynstring app/cornu -name "*.c" | grep -v unittest | grep -vE 'bdf2xtp\.c|helphelper\.c|ppedit_gtk1\.c')
+          clang-tidy --checks='-*,bugprone-*,performance-*,portability-*' -p build "${FILES[@]}" > clang-tidy.txt 2>&1 || true
       - name: Summarise findings
         run: |
           COUNT=$(grep -cE '\[[a-zA-Z.-]+\]$' clang-tidy.txt || echo 0)
@@ -357,6 +367,7 @@ jobs:
     # Phase 8) -- app/tools/halibut/ isn't reached by this job's scope anyway, but
     # app/wlib is, so wrapbox/ does need the explicit skip here unlike cppcheck-deep.
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
       - name: Install codespell
@@ -411,6 +422,7 @@ jobs:
     # astyle-check-windows) run the identical version regardless of what
     # each platform's package manager happens to ship.
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     env:
       ASTYLE_VERSION: 3.6.13
     steps:
@@ -450,6 +462,7 @@ jobs:
     # disagreement here would still point to a toolchain quirk unrelated to
     # the PR's actual content.
     runs-on: macos-latest
+    timeout-minutes: 20
     env:
       ASTYLE_VERSION: 3.6.13
     steps:
@@ -483,6 +496,7 @@ jobs:
     # same pinned ASTYLE_VERSION from source (see astyle-check's comment)
     # so all three astyle jobs run the identical version.
     runs-on: windows-latest
+    timeout-minutes: 30
     defaults:
       run:
         shell: msys2 {0}
@@ -529,6 +543,7 @@ jobs:
     # already-tracked issue instead of being a useful gate against new
     # regressions.
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
       - name: Install dependencies
@@ -546,6 +561,7 @@ jobs:
     # Report-only: captures -Wall -Wextra output as an artifact.
     # Does NOT fail the build — legacy code has pre-existing warnings.
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
       - name: Install dependencies
@@ -577,6 +593,7 @@ jobs:
   compiler-warnings-macos:
     # Report-only: captures -Wall -Wextra output on macOS/clang as an artifact.
     runs-on: macos-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
       - name: Install dependencies
@@ -584,7 +601,8 @@ jobs:
       - name: Configure with -Wall -Wextra
         run: |
           GTK_PREFIX=$(brew --prefix gtk+3)
-          export PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
+          PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
+          export PKG_CONFIG_PATH
           GTK_LDFLAGS=$(pkg-config --libs-only-L gtk+-3.0)
           cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
             -DCMAKE_PREFIX_PATH="$GTK_PREFIX;$(brew --prefix)" \
@@ -612,6 +630,7 @@ jobs:
   compiler-warnings-windows:
     # Report-only: captures -Wall -Wextra output on Windows/MinGW64 as an artifact.
     runs-on: windows-latest
+    timeout-minutes: 30
     defaults:
       run:
         shell: msys2 {0}
@@ -660,6 +679,7 @@ jobs:
   coverage:
     # Report-only: generates an lcov HTML report and uploads it as an artifact.
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
       - name: Install dependencies
