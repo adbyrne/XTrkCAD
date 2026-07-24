@@ -91,34 +91,6 @@ static paramGroup_t mapPG = { "map", PGO_NODEFAULTPROC | PGO_FULLDIALOGFROMBUILD
 EXPORT wControl_p mapW;
 EXPORT BOOL_T mapVisible;
 
-#ifndef WIN32
-#include <stdio.h>
-#include <execinfo.h>
-
-static void
-log_calls(const char *fmt,...)
-{
-	void *callstack[3];
-	char **symbols;
-	char buffer[80];
-
-	// Capture the top 3 frames (0=this func, 1=caller, 2=caller's caller)
-	int frames = backtrace(callstack, 3);
-	symbols = backtrace_symbols(callstack, frames);
-
-	va_list args;
-	va_start(args, fmt );
-
-	// symbols[2] is the callee context, symbols[1] is the direct caller
-	LOG(log_mapredraw, 1, ("[%s] => [%s] | ", symbols[2], symbols[1]));
-	vsnprintf(buffer, sizeof(buffer), fmt, args);
-	LOG(log_mapredraw, 1, ("%s\n", buffer));
-
-	va_end(args);
-	free(symbols);
-}
-#endif
-
 void MapDrawBoundingBox(BOOL_T set)
 {
 	CHECK(mainD.d);
@@ -259,8 +231,6 @@ static wBool_t MapRedraw( wControl_p bd, void* pContex, wWinPix_t px,
 #ifndef WIN32
 	log_mapredraw = LogFindIndex("mapredraw");
 	log_mapsize = LogFindIndex("mapsize");
-
-	log_calls("size: %ldx%ld", px, py);
 #endif
 	if (inPlaybackQuit) {
 		return FALSE;
@@ -349,9 +319,6 @@ void MapChangeScale()
 {
 	wWinPix_t w, h;
 	FLOAT_T fw, fh;
-#ifndef WIN32
-	log_calls("MapChangeScale()");
-#endif
 
 	// Restrict map size to SCREEN_SIZE_FACTOR of screen
 	FLOAT_T fScaleW = mapD.size.x / (displayWidth * SCREEN_SIZE_FACTOR / mapD.dpi);
