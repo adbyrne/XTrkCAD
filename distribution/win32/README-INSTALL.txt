@@ -9,9 +9,11 @@ INSTALLATION
 1. Extract the ZIP archive to a folder of your choice, for example:
        C:\Program Files\XTrkCAD\
 
-2. Run bin\xtrkcad.exe from the extracted folder.
+2. Run bin\xtrkcad-<version>.exe from the extracted folder (the binary name
+   includes the version, e.g. xtrkcad-5.4.0.exe, so multiple versions can be
+   extracted to different folders and run side by side).
 
-   To create a desktop shortcut: right-click xtrkcad.exe and choose
+   To create a desktop shortcut: right-click xtrkcad-<version>.exe and choose
    "Send to > Desktop (create shortcut)".
 
 SMARTSCREEN WARNING
@@ -26,7 +28,7 @@ FILE ASSOCIATIONS
 XTrkCAD layout files (.xtc, .xtce) are not automatically associated
 with the application when using the ZIP archive. To associate them:
 right-click a .xtc file, choose "Open with" -> "Choose another app",
-browse to xtrkcad.exe, and tick "Always use this app".
+browse to bin\xtrkcad-<version>.exe, and tick "Always use this app".
 
 For automatic file associations and a Start Menu entry, use the
 NSIS installer (.exe) instead of this ZIP archive.

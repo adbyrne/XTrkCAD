@@ -37,7 +37,7 @@
 
 
 char * sProdName = Product;
-char * sProdNameLower = product"-gtk";
+char * sProdNameLower = product "-" XTRKCAD_VERSION;
 char * sProdNameUpper = PRODUCT;
 
 char * sEnvExtra = PRODUCT "EXTRA";

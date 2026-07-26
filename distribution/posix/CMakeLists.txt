@@ -8,14 +8,20 @@ set(CPACK_RPM_PACKAGE_GROUP "Applications/Engineering")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}////xtrkcad-desc.txt")
 set(CPACK_PACKAGE_FILE_NAME "xtrkcad-setup-${XTRKCAD_VERSION}-${CPACK_PACKAGE_RELEASE}.${CMAKE_SYSTEM_PROCESSOR}")
 
-if(XTRKCAD_BETA MATCHES "-beta")
+if(XTRKCAD_VERSION_MODIFIER MATCHES "^Beta")
 	set(CPACK_INSTALL_PREFIX "/usr/local" )
 else()
 	set(CPACK_INSTALL_PREFIX "/usr" )
 endif()
-set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_SOURCE_DIR}/postinst;${CMAKE_CURRENT_SOURCE_DIR}/prerm")
-
 set(CPACK_PACKAGING_INSTALL_PREFIX ${CPACK_INSTALL_PREFIX})
+
+# Generate postinst/prerm from templates so they know this build's actual
+# install location instead of a hand-maintained guess (previously hardcoded
+# to /usr/local/share/xtrkcad-beta unconditionally, which silently broke
+# desktop/mime registration on every non-beta build).
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/postinst.in ${CMAKE_CURRENT_BINARY_DIR}/postinst @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/prerm.in ${CMAKE_CURRENT_BINARY_DIR}/prerm @ONLY)
+set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_BINARY_DIR}/postinst;${CMAKE_CURRENT_BINARY_DIR}/prerm")
 
 # get the specific configuration for each packager
 set(CPACK_PROJECT_CONFIG_FILE ${CMAKE_CURRENT_SOURCE_DIR}/package.txt)
@@ -60,7 +66,10 @@ set(CPACK_RPM_CHANGELOG_FILE "${CMAKE_CURRENT_SOURCE_DIR}////changelog.txt")
 
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 
-set(CPACK_DEBIAN_PACKAGE_NAME "xtrkcad${XTRKCAD_BETA}")
+# Debian package names must be all-lowercase; guard against a future Dev/Beta
+# modifier (today's "5.4.0" is already lowercase-safe).
+string(TOLOWER "${XTRKCAD_BIN}" CPACK_DEBIAN_PACKAGE_NAME)
+set(CPACK_RPM_PACKAGE_NAME "${XTRKCAD_BIN}")
 
 set(CPACK_DEBIAN_PACKAGE_VERSION "1:${XTRKCAD_VERSION}")
 
@@ -102,8 +111,8 @@ set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "xtrkcad.org")
 
-set(CPACK_PACKAGE_EXECUTABLES "xtrkcad;XTrkCAD ${XTRKCAD_VERSION}")
+set(CPACK_PACKAGE_EXECUTABLES "${XTRKCAD_BIN};XTrkCAD ${XTRKCAD_VERSION}")
 
-set(CPACK_CREATE_DESKTOP_LINKS "xtrkcad")
+set(CPACK_CREATE_DESKTOP_LINKS "${XTRKCAD_BIN}")
 
 include(CPack)

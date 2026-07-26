@@ -165,9 +165,9 @@ function(updatepofile locale)
 
     set(xtc_locale_targets
 		${xtc_locale_targets}
-		${i18n_BINARY_DIR}/${localeid}/LC_MESSAGES/xtrkcad.mo
+		${mofile}
 		PARENT_SCOPE
-   	)	
+   	)
 endfunction()
 
 #

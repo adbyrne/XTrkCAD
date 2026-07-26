@@ -10,8 +10,8 @@ include( CheckSymbolExists )
 #	4. add individual .lin-files as dependency to "lines"
 #
 
-# build GA or Beta executable
-set( XTRKCAD_BIN "xtrkcad${XTRKCAD_BETA}" )
+# XTRKCAD_BIN (the versioned executable name) is defined once in the
+# top-level CMakeLists.txt so packaging and the executable target agree.
 
 set( XTRKCAD_CORE_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 

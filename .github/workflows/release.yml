@@ -289,7 +289,7 @@ jobs:
         # icon theme) needed for a working installation.
         run: |
           STAGING="$(pwd)/staging"
-          BINARY="$STAGING/bin/xtrkcad.exe"
+          BINARY="$STAGING/bin/xtrkcad-${XTRKCAD_VERSION}.exe"
           MINGW=/mingw64
 
           # Collect DLL dependencies (filter to MinGW64 only)

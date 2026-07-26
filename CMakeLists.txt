@@ -116,14 +116,23 @@ endif()
 
 set(XTRKCAD_BIN_INSTALL_DIR "bin")
 set(XTRKCAD_LOCALE_INSTALL_DIR "share/locale")
-set(XTRKCAD_PACKAGE "xtrkcad")
-set(XTRKCAD_BETA "")
-if(UNIX AND NOT APPLE)
-    if(XTRKCAD_VERSION_MODIFIER MATCHES "^Beta")
-        set(XTRKCAD_BETA "-beta")
-    endif()
-endif()
-set(XTRKCAD_SHARE_INSTALL_DIR "share/xtrkcad-gtk${XTRKCAD_BETA}")
+
+# XTRKCAD_BIN is the single source of truth for this build's identity: the
+# installed binary name, package name, desktop file name, and (via the same
+# XTRKCAD_VERSION string reused in app/bin/custom.c) the runtime work/prefs
+# directory name. Embedding the version lets multiple GTK3V2MAIN point
+# releases install side by side and run simultaneously without colliding.
+set(XTRKCAD_BIN "xtrkcad-${XTRKCAD_VERSION}")
+set(XTRKCAD_SHARE_INSTALL_DIR "share/${XTRKCAD_BIN}")
+
+# XTRKCAD_PACKAGE doubles as the gettext domain name (app/i18n/CMakeLists.txt,
+# app/bin/i18n.c's bindtextdomain/textdomain calls) and therefore the
+# installed .mo filename under the *shared* system locale tree
+# (XTRKCAD_LOCALE_INSTALL_DIR, deliberately not version-scoped — gettext
+# catalogs belong in the standard /usr/share/locale search path). Reusing
+# XTRKCAD_BIN here keeps each version's .mo file distinctly named so two
+# versions' translations don't overwrite each other in that shared directory.
+set(XTRKCAD_PACKAGE "${XTRKCAD_BIN}")
 
 # Enable use of a configuration file ...
 add_definitions(-DXTRKCAD_CMAKE_BUILD)
