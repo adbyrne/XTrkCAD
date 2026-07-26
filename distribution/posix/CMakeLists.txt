@@ -21,6 +21,17 @@ set(CPACK_PACKAGING_INSTALL_PREFIX ${CPACK_INSTALL_PREFIX})
 # desktop/mime registration on every non-beta build).
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/postinst.in ${CMAKE_CURRENT_BINARY_DIR}/postinst @ONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/prerm.in ${CMAKE_CURRENT_BINARY_DIR}/prerm @ONLY)
+# configure_file() does not carry over the executable bit the static files
+# used to have — dpkg refuses to run non-executable maintainer scripts, so
+# this has to be set explicitly.
+file(CHMOD ${CMAKE_CURRENT_BINARY_DIR}/postinst PERMISSIONS
+	OWNER_READ OWNER_WRITE OWNER_EXECUTE
+	GROUP_READ GROUP_EXECUTE
+	WORLD_READ WORLD_EXECUTE)
+file(CHMOD ${CMAKE_CURRENT_BINARY_DIR}/prerm PERMISSIONS
+	OWNER_READ OWNER_WRITE OWNER_EXECUTE
+	GROUP_READ GROUP_EXECUTE
+	WORLD_READ WORLD_EXECUTE)
 set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_BINARY_DIR}/postinst;${CMAKE_CURRENT_BINARY_DIR}/prerm")
 
 # get the specific configuration for each packager
