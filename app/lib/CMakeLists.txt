@@ -60,13 +60,15 @@ else()
 endif()
 
 if(UNIX AND NOT APPLE)
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad-setup.in ${CMAKE_CURRENT_BINARY_DIR}/xtrkcad-setup @ONLY)
 	install(PROGRAMS
-		xtrkcad-setup
+		${CMAKE_CURRENT_BINARY_DIR}/xtrkcad-setup
 		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
 		)
 	install(FILES
 		xtrkcad.png
 		DESTINATION "${XTRKCAD_SHARE_INSTALL_DIR}/pixmaps"
+		RENAME "${XTRKCAD_BIN}.png"
 		)
 	if (XTRKCAD_BUILD_FLATPAK)
 		install(FILES
@@ -90,10 +92,10 @@ if(UNIX AND NOT APPLE)
 			RENAME io.sourceforge.xtrkcad_fork.xtrkcad-gtk.svg
 			)
 	else()
+		configure_file(${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad.desktop.in ${CMAKE_CURRENT_BINARY_DIR}/${XTRKCAD_BIN}.desktop @ONLY)
 		install(FILES
-			xtrkcad${XTRKCAD_BETA}.desktop
+			${CMAKE_CURRENT_BINARY_DIR}/${XTRKCAD_BIN}.desktop
 			DESTINATION "${XTRKCAD_SHARE_INSTALL_DIR}/applications"
-			RENAME xtrkcad.desktop
 			)
 		install(FILES
 			xtrkcad.xml

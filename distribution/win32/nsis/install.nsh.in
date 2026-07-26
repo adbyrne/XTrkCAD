@@ -1,9 +1,10 @@
 ;
-; This file is included from the CMake generated NSIS file during install.
+; This file is generated (configure_file) from install.nsh.in and included
+; from the CMake generated NSIS file during install.
 ;
 
-CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\XTrackCAD ReadMe.lnk" "notepad.exe" "$INSTDIR\share\xtrkcad\ReadMe.txt"
-CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\XTrackCAD CHANGELOG.lnk" "notepad.exe" "$INSTDIR\share\xtrkcad\CHANGELOG.txt"
+CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\XTrackCAD ReadMe.lnk" "notepad.exe" "$INSTDIR\@XTRKCAD_SHARE_INSTALL_DIR_WIN@\ReadMe.txt"
+CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\XTrackCAD CHANGELOG.lnk" "notepad.exe" "$INSTDIR\@XTRKCAD_SHARE_INSTALL_DIR_WIN@\CHANGELOG.txt"
 
 
 ;
@@ -30,8 +31,8 @@ CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\XTrackCAD CHANGELOG.lnk" "notepad.
     WriteRegStr HKCR ".xtce" "" "XTrackCAD.Design"
     WriteRegStr HKCR "XTrackCAD.Design" "" "XTrackCAD Layout Design"
     WriteRegStr HKCR "XTrackCAD.Design\shell" "" "open"
-    WriteRegStr HKCR "XTrackCAD.Design\DefaultIcon" "" '$INSTDIR\bin\xtrkcad.exe,0'
-    WriteRegStr HKCR "XTrackCAD.Design\shell\open\command" "" '$INSTDIR\bin\xtrkcad.exe "%1"'
+    WriteRegStr HKCR "XTrackCAD.Design\DefaultIcon" "" '$INSTDIR\bin\@XTRKCAD_BIN@.exe,0'
+    WriteRegStr HKCR "XTrackCAD.Design\shell\open\command" "" '$INSTDIR\bin\@XTRKCAD_BIN@.exe "%1"'
 
   System::Call 'Shell32::SHChangeNotify(i 0x8000000, i 0, i 0, i 0)'
 
