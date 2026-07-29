@@ -256,6 +256,17 @@ tracked independently from the GTK2 default branch's 5.3.x line. To cut a releas
 `git tag v5.4.0 && git push origin v5.4.0` — GitHub Actions (`release.yml`) automatically
 builds packages and creates a draft GitHub Release.
 
+**GTK3V2MAIN dev-build hash suffix:** `ProgramVersion.cmake` appends a fourth, dot-separated
+component to `XTRKCAD_VERSION` — a short VCS hash of the checked-out commit (e.g.
+`5.4.0.8b67f185`) — on every build that is *not* the exact commit a `v<version>` tag points at.
+Detected automatically at configure time from either a git or an Hg checkout (this file's own
+build applies either way). This is what lets successive dev builds of the same nominal version
+install side by side without colliding, on top of #673's per-version package/binary naming. A
+tagged release build drops the suffix and keeps the plain three-part version. After tagging a
+release, bump `XTRKCAD_RELEASE_VERSION` (and `XTRKCAD_VERSION_MODIFIER`, if used) for the next
+dev cycle — every subsequent untagged build picks up the hash automatically, no further manual
+step needed.
+
 ## File Formats
 
 - `.xtc` / `.xtce` — native layout files (`.xtce` adds background-image support, v5.2+)
