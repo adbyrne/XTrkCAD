@@ -2562,6 +2562,12 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 	return TRUE;
 }
 
+// Cap on how far a polygon/polyline vertex offset (SEG_POLY/SEG_FILPOLY case
+// below) can extend past a naive miter join, to avoid the classic unbounded
+// spike/self-crossing failure mode at sharp corners (SF #560) -- same fix
+// SVG/PostScript stroke rendering uses (their default miterLimit is 4).
+#define PARALLEL_MITER_LIMIT (4.0)
+
 static BOOL_T MakeParallelDraw(
         track_p trk,
         coOrd pos,
@@ -2700,8 +2706,11 @@ static BOOL_T MakeParallelDraw(
 				}
 			}
 
+			DIST_T miterDist = fabs(sep/cos(D2R(b)));
+			DIST_T miterMax = fabs(sep)*PARALLEL_MITER_LIMIT;
+			if (miterDist > miterMax) { miterDist = miterMax; }
 			Translate(&tempSegs(0).u.p.pts[i].pt,tempSegs(0).u.p.pts[i].pt,a+angle,
-			          fabs(sep/cos(D2R(b))));
+			          miterDist);
 		}
 		if (newTrkR) {
 			*newTrkR = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
