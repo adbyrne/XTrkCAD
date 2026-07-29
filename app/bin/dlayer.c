@@ -404,6 +404,12 @@ void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
 		layers[curLayer].frozen = FALSE;        //Make sure the layer is not frozen
 	}
 
+	// The current layer can never be a Module (LayerUpdate() enforces this on
+	// the dialog side with a notice) -- clear it here too so switching the
+	// active layer to a Module layer can't silently create the same
+	// inconsistent state, which used to get wiped without warning the next
+	// time the Layers dialog was opened (SF #603).
+	layers[curLayer].module = FALSE;
 
 	if (!layers[curLayer].visible) {
 		FlipLayer(I2VP(inx));
@@ -1815,6 +1821,18 @@ BOOL_T ReadLayers(char * line)
 			ErrorMessage( MSG_NOT_UNFROZEN_LAYER );
 			layers[curLayer].frozen = FALSE;
 		}
+
+		// Same invariant as SetCurrLayer(): the current layer can't be a
+		// Module. A legacy/inconsistent file could have both set (SF #603);
+		// resolve it the same way on load.
+		layers[curLayer].module = FALSE;
+
+		// Same invariant as SetCurrLayer(): the current layer must be
+		// visible. SetCurrLayer() enforces this interactively via
+		// FlipLayer(), but that also toggles related linked layers and
+		// touches live widgets -- not appropriate mid-file-load, so just
+		// fix the flag directly here, matching how frozen is handled above.
+		layers[curLayer].visible = TRUE;
 
 		if (layerL) {
 			wListSetIndex(layerL, curLayer);
