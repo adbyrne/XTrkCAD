@@ -353,6 +353,276 @@ static void MidpointTests(void **state)
 	ASSERT_COORD(mid, -1.0, 1.0);
 }
 
+/* -----------------------------------------------------------------------
+ * max / min
+ * ----------------------------------------------------------------------- */
+
+static void MaxMinTests(void **state)
+{
+	(void)state;
+	ASSERT_DBL(max(3.0, 5.0), 5.0);
+	ASSERT_DBL(max(5.0, 3.0), 5.0);
+	ASSERT_DBL(max(-1.0, -2.0), -1.0);
+	ASSERT_DBL(min(3.0, 5.0), 3.0);
+	ASSERT_DBL(min(5.0, 3.0), 3.0);
+	ASSERT_DBL(min(-1.0, -2.0), -2.0);
+}
+
+/* -----------------------------------------------------------------------
+ * swap functions
+ * ----------------------------------------------------------------------- */
+
+static void SwapTests(void **state)
+{
+	(void)state;
+	int ia = 1, ib = 2;
+	swapInt(&ia, &ib);
+	assert_int_equal(ia, 2);
+	assert_int_equal(ib, 1);
+
+	double da = 1.5, db = 2.5;
+	swapDouble(&da, &db);
+	ASSERT_DBL(da, 2.5);
+	ASSERT_DBL(db, 1.5);
+
+	coOrd ca = {1.0, 2.0}, cb = {3.0, 4.0};
+	swapCoord(&ca, &cb);
+	ASSERT_COORD(ca, 3.0, 4.0);
+	ASSERT_COORD(cb, 1.0, 2.0);
+}
+
+/* -----------------------------------------------------------------------
+ * CoOrdEqual / IsAligned / AngleInRange / InRect
+ * ----------------------------------------------------------------------- */
+
+static void CoordPredicateTests(void **state)
+{
+	(void)state;
+	coOrd p0 = {1.0, 2.0}, p1 = {1.0, 2.0};
+	assert_true(CoOrdEqual(p0, p1));
+	p1.x = 1.5;
+	assert_false(CoOrdEqual(p0, p1));
+
+	/* IsAligned: true when a1-a2 is within ±90° */
+	assert_true(IsAligned(45.0, 45.0));
+	assert_true(IsAligned(45.0, 0.0));    /* 45° apart */
+	assert_false(IsAligned(91.0, 0.0));   /* 91° apart */
+	assert_false(IsAligned(0.0, 180.0));  /* opposite directions */
+
+	/* AngleInRange: 0=in, -1=beyond end, 1=before start */
+	assert_int_equal(AngleInRange(45.0,  0.0, 90.0),  0);   /* mid-range */
+	assert_int_equal(AngleInRange(0.0,   0.0, 90.0),  0);   /* at start */
+	assert_int_equal(AngleInRange(90.0,  0.0, 90.0),  0);   /* at end */
+	assert_int_equal(AngleInRange(135.0, 0.0, 90.0), -1);   /* beyond end */
+	assert_int_equal(AngleInRange(350.0, 0.0, 90.0),  1);   /* before start */
+
+	/* InRect: box is [0,0] to [rect.x, rect.y] */
+	coOrd pos, rect = {5.0, 5.0};
+	pos.x = 2.0; pos.y = 2.0; assert_true(InRect(pos, rect));
+	pos.x = 0.0; pos.y = 0.0; assert_true(InRect(pos, rect));
+	pos.x = 5.0; pos.y = 5.0; assert_true(InRect(pos, rect));
+	pos.x = 6.0; pos.y = 2.0; assert_false(InRect(pos, rect));
+	pos.x = 2.0; pos.y = -1.0; assert_false(InRect(pos, rect));
+}
+
+/* -----------------------------------------------------------------------
+ * AddCoOrd / ConstrainR
+ * ----------------------------------------------------------------------- */
+
+static void VectorOpTests(void **state)
+{
+	(void)state;
+	coOrd p0 = {0.0, 0.0}, p1 = {0.0, 1.0}, res;
+
+	/* angle=0: no rotation, pure addition */
+	res = AddCoOrd(p0, p1, 0.0);
+	ASSERT_COORD(res, 0.0, 1.0);
+
+	/* angle=90°: rotates {0,1} east to {1,0}, then adds to {1,2} */
+	coOrd base = {1.0, 2.0};
+	res = AddCoOrd(base, p1, 90.0);
+	ASSERT_COORD(res, 2.0, 2.0);
+
+	/* ConstrainR rounds to nearest radiusGranularity (1/8 = 0.125) */
+	ASSERT_DBL(ConstrainR(1.0),   1.0);
+	ASSERT_DBL(ConstrainR(1.125), 1.125);
+	ASSERT_DBL(ConstrainR(0.9),   0.875);  /* nearest 0.125 multiple */
+	ASSERT_DBL(ConstrainR(1.07),  1.125);  /* rounds up */
+}
+
+/* -----------------------------------------------------------------------
+ * PickArcEndPt / PickLineEndPt
+ * ----------------------------------------------------------------------- */
+
+static void PickEndPtTests(void **state)
+{
+	(void)state;
+	coOrd pc = {0.0, 0.0};
+	coOrd p_east  = {1.0,  0.0};  /* east  of center → angle 90° */
+	coOrd p_north = {0.0,  1.0};  /* north of center → angle  0° */
+	coOrd p_south = {0.0, -1.0};  /* south of center → angle 180° */
+
+	/* PickArcEndPt: returns 0 if p1 is "left" of p0 on arc (a > 180) */
+	assert_int_equal(PickArcEndPt(pc, p_east, p_north), 0);  /* 0°-90°: 270° turn → 0 */
+	assert_int_equal(PickArcEndPt(pc, p_east, p_south), 1);  /* 90°-180°: 90° turn → 1 */
+
+	/* PickLineEndPt: returns 0 if p1 is ahead of line through p0 at a0 */
+	coOrd p0 = {0.0, 0.0};
+	coOrd ahead  = {0.0,  1.0};   /* north = ahead when a0=0 */
+	coOrd behind = {0.0, -1.0};   /* south = behind when a0=0 */
+	assert_int_equal(PickLineEndPt(p0, 0.0, ahead),  0);
+	assert_int_equal(PickLineEndPt(p0, 0.0, behind), 1);
+}
+
+/* -----------------------------------------------------------------------
+ * FindPos
+ * ----------------------------------------------------------------------- */
+
+static void FindPosTests(void **state)
+{
+	(void)state;
+	coOrd orig = {0.0, 0.0}, pos, res;
+	double beyond;
+
+	/* Point 1 unit right and 3 units north of a north-pointing line of length 10.
+	 * Along-line projection = 3, perpendicular = 1, no overshoot. */
+	pos.x = 1.0; pos.y = 3.0;
+	FindPos(&res, &beyond, pos, orig, 0.0, 10.0);
+	ASSERT_DBL(res.x, 3.0);
+	ASSERT_DBL(res.y, 1.0);
+	ASSERT_DBL(beyond, 0.0);
+
+	/* Point beyond end of segment: projection clamped to length, beyond > 0 */
+	pos.x = 0.0; pos.y = 15.0;
+	FindPos(&res, NULL, pos, orig, 0.0, 10.0);
+	ASSERT_DBL(res.x, 10.0);
+	ASSERT_DBL(res.y, 0.0);
+}
+
+/* -----------------------------------------------------------------------
+ * LineDistance
+ * ----------------------------------------------------------------------- */
+
+static void LineDistanceTests(void **state)
+{
+	(void)state;
+	coOrd p, p0 = {0.0, 0.0}, p1 = {0.0, 5.0};
+	double d;
+
+	/* Point beside mid-segment: perpendicular distance = 1, closest pt = (0,3) */
+	p.x = 1.0; p.y = 3.0;
+	d = LineDistance(&p, p0, p1);
+	ASSERT_DBL(d, 1.0);
+	ASSERT_COORD(p, 0.0, 3.0);
+
+	/* Point past end of segment: snaps to p1, returns distance to p1 */
+	p.x = 1.0; p.y = 7.0;
+	d = LineDistance(&p, p0, p1);
+	ASSERT_DBL(d, sqrt(1.0*1.0 + 2.0*2.0));
+	ASSERT_COORD(p, 0.0, 5.0);
+
+	/* Point before start of segment: snaps to p0 */
+	p.x = 1.0; p.y = -1.0;
+	d = LineDistance(&p, p0, p1);
+	ASSERT_DBL(d, sqrt(1.0*1.0 + 1.0*1.0));
+	ASSERT_COORD(p, 0.0, 0.0);
+}
+
+/* -----------------------------------------------------------------------
+ * CircleDistance
+ * ----------------------------------------------------------------------- */
+
+static void CircleDistanceTests(void **state)
+{
+	(void)state;
+	coOrd c = {0.0, 0.0}, p;
+	double d;
+
+	/* Full circle (a1=360): point at (6,0), circle r=5 → distance 1, snaps to (5,0) */
+	p.x = 6.0; p.y = 0.0;
+	d = CircleDistance(&p, c, 5.0, 0.0, 360.0);
+	ASSERT_DBL(d, 1.0);
+	ASSERT_COORD(p, 5.0, 0.0);
+
+	/* Point inside circle: distance = r - d = 5-3=2, snaps to surface */
+	p.x = 3.0; p.y = 0.0;
+	d = CircleDistance(&p, c, 5.0, 0.0, 360.0);
+	ASSERT_DBL(d, 2.0);
+	ASSERT_COORD(p, 5.0, 0.0);
+}
+
+/* -----------------------------------------------------------------------
+ * FindCentroid
+ * ----------------------------------------------------------------------- */
+
+static void FindCentroidTests(void **state)
+{
+	(void)state;
+	pts_t sq[4];
+	coOrd c;
+
+	/* Square [0,0]-[4,4]: centroid = (2,2) */
+	sq[0].pt.x = 0.0; sq[0].pt.y = 0.0;
+	sq[1].pt.x = 4.0; sq[1].pt.y = 0.0;
+	sq[2].pt.x = 4.0; sq[2].pt.y = 4.0;
+	sq[3].pt.x = 0.0; sq[3].pt.y = 4.0;
+	c = FindCentroid(4, sq);
+	ASSERT_COORD(c, 2.0, 2.0);
+}
+
+/* -----------------------------------------------------------------------
+ * FindArcCenter
+ * ----------------------------------------------------------------------- */
+
+static void FindArcCenterTests(void **state)
+{
+	(void)state;
+	coOrd p0 = {0.0, 0.0}, p1 = {2.0, 0.0}, center;
+	double arc_angle;
+	double r = sqrt(2.0);
+
+	/* Two points 2 units apart with radius sqrt(2):
+	 * center should be equidistant (sqrt(2)) from both endpoints. */
+	arc_angle = FindArcCenter(&center, p0, p1, r);
+	ASSERT_DBL(FindDistance(center, p0), r);
+	ASSERT_DBL(FindDistance(center, p1), r);
+	assert_true(arc_angle > 0.0 && arc_angle <= 180.0);
+}
+
+/* -----------------------------------------------------------------------
+ * ClipLine (also exercises static IntersectLine / IntersectBox)
+ * ----------------------------------------------------------------------- */
+
+static void ClipLineTests(void **state)
+{
+	(void)state;
+	coOrd p0, p1, orig = {0.0, 0.0}, size = {10.0, 10.0};
+	BOOL_T rc;
+
+	/* Both inside: no clipping */
+	p0.x = 2.0; p0.y = 2.0;
+	p1.x = 8.0; p1.y = 8.0;
+	rc = ClipLine(&p0, &p1, orig, 0.0, size);
+	assert_true(rc);
+	ASSERT_COORD(p0, 2.0, 2.0);
+	ASSERT_COORD(p1, 8.0, 8.0);
+
+	/* Both outside same side: no intersection */
+	p0.x = 12.0; p0.y = 2.0;
+	p1.x = 15.0; p1.y = 5.0;
+	rc = ClipLine(&p0, &p1, orig, 0.0, size);
+	assert_false(rc);
+
+	/* p0 inside, p1 exits right side: clips p1 to x=10 */
+	p0.x = 5.0; p0.y = 5.0;
+	p1.x = 15.0; p1.y = 5.0;
+	rc = ClipLine(&p0, &p1, orig, 0.0, size);
+	assert_true(rc);
+	ASSERT_COORD(p0, 5.0, 5.0);
+	ASSERT_DBL(p1.x, 10.0);
+	ASSERT_DBL(p1.y, 5.0);
+}
+
 int main(void)
 {
 	const struct CMUnitTest tests[] = {
@@ -367,6 +637,17 @@ int main(void)
 		cmocka_unit_test(CircleCircleIntersectionTests),
 		cmocka_unit_test(CircleLineIntersectionTests),
 		cmocka_unit_test(MidpointTests),
+		cmocka_unit_test(MaxMinTests),
+		cmocka_unit_test(SwapTests),
+		cmocka_unit_test(CoordPredicateTests),
+		cmocka_unit_test(VectorOpTests),
+		cmocka_unit_test(PickEndPtTests),
+		cmocka_unit_test(FindPosTests),
+		cmocka_unit_test(LineDistanceTests),
+		cmocka_unit_test(CircleDistanceTests),
+		cmocka_unit_test(FindCentroidTests),
+		cmocka_unit_test(FindArcCenterTests),
+		cmocka_unit_test(ClipLineTests),
 	};
 	return cmocka_run_group_tests(tests, NULL, NULL);
 }

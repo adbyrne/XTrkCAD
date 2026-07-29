@@ -124,11 +124,40 @@ static void Makepath(void **state)
 	free(path);
 }
 
+static void ConvertPath(void **state)
+{
+	char path[] = "Test\\Path\\file.xtc";
+	(void)state;
+	ConvertPathForward(path);
+	assert_string_equal(path, "Test/Path/file.xtc");
+}
+
+static void FindFilenameTest(void **state)
+{
+	char withpath[] = TESTFILE;
+	char nopath[]   = TESTFILENAME;
+	(void)state;
+	assert_string_equal(FindFilename(withpath), TESTFILENAME);
+	assert_string_equal(FindFilename(nopath),   TESTFILENAME);
+}
+
+static void FindExtensionTest(void **state)
+{
+	char withext[] = "layout.xtc";
+	char noext[]   = "layout";
+	(void)state;
+	assert_string_equal(FindFileExtension(withext), "xtc");
+	assert_string_equal(FindFileExtension(noext),   "");
+}
+
 int main(void)
 {
 	const struct CMUnitTest tests[] = {
 		cmocka_unit_test(SetGetPath),
 		cmocka_unit_test(Makepath),
+		cmocka_unit_test(ConvertPath),
+		cmocka_unit_test(FindFilenameTest),
+		cmocka_unit_test(FindExtensionTest),
 	};
 	return cmocka_run_group_tests(tests, NULL, NULL);
 }
