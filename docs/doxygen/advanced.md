@@ -106,6 +106,43 @@ bulk-suppress (`variableScope`, `bugprone-narrowing-conversions`, and others) ar
 left visible in the `cppcheck-deep`/`clang-tidy` report-only artifacts instead — see
 \ref code-quality-process-and-patterns "Code quality: process and patterns" below for why.
 
+# Packaging and versioning {#packaging-and-versioning}
+
+`ProgramVersion.cmake` defines `XTRKCAD_VERSION` from three plain numbers
+(`XTRKCAD_MAJOR_VERSION.XTRKCAD_MINOR_VERSION.XTRKCAD_RELEASE_VERSION`, plus an optional
+`XTRKCAD_VERSION_MODIFIER` suffix like `Dev`), then — on this branch only — extends it with two
+more layers so that different builds of GTK3V2MAIN can coexist on one machine instead of silently
+overwriting each other.
+
+## Per-version identity (SF #673)
+
+`XTRKCAD_BIN` (`CMakeLists.txt`), set to `xtrkcad-${XTRKCAD_VERSION}`, is the single source of
+truth for a build's on-disk identity: the installed binary name, the `.deb`/`.rpm`/NSIS package
+name, the `.desktop` filename, the share/gettext-domain directory name, and (via the same
+`XTRKCAD_VERSION` string reused in `app/bin/custom.c`) the runtime work/prefs directory. Before
+this, all of those were the fixed literal `xtrkcad`/`xtrkcad-beta` on every branch, so installing
+a GTK3V2MAIN 5.4.0 build over an existing GTK2 5.3.x install looked like an in-place upgrade to
+the package manager and silently clobbered it. Embedding the version means two different point
+releases now install and run side by side.
+
+## Dev-build hash suffix
+
+Distinct point releases weren't the whole problem: every ordinary push to GTK3V2MAIN mainline
+between tagged releases still carries the *same* `XTRKCAD_VERSION` (there's no version bump
+per-commit), so successive dev builds would still collide with each other under the scheme above.
+`ProgramVersion.cmake` closes that gap by appending a fourth, dot-separated component — a short
+VCS hash of the checked-out commit, e.g. `5.4.0.8b67f185` — to any build that isn't the exact
+commit a `v<version>` tag points at. The check works from either a git or an Hg checkout (detected
+by the presence of `.git`/`.hg` under `CMAKE_SOURCE_DIR`), since this file is shared by both
+source trees (see the \ref index "Developer Documentation" page's note on SourceForge Hg vs. the
+GitHub git mirror).
+
+A tagged release build — `git tag v5.4.1 && git push origin v5.4.1`, see `release.yml`'s
+`github-release` job — resolves to the plain three-part version, no hash. The release workflow is
+otherwise unchanged: after tagging, bump `XTRKCAD_RELEASE_VERSION` (and `XTRKCAD_VERSION_MODIFIER`
+if used) for the next dev cycle in the same commit or a prompt follow-up — every build after that
+picks the hash suffix back up automatically, with no separate manual toggle needed per commit.
+
 # Code quality: process and patterns {#code-quality-process-and-patterns}
 
 CI runs several static-analysis tools on this branch (AStyle formatting, CodeQL, `cppcheck-deep`,

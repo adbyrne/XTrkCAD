@@ -11,9 +11,11 @@ string(TIMESTAMP XTRKCAD_BUILD_TIMESTAMP "%a %b %d %H:%M:%S UTC %Y" UTC)
 string(TIMESTAMP XTRKCAD_BUILD_DATE "%Y-%m-%d" UTC)
 string(REGEX REPLACE "^.*/" "" XTRKCAD_BASE_NAME ${XTRKCAD_SHARE_INSTALL_DIR})
 string(REGEX REPLACE ${XTRKCAD_PACKAGE} "" XTRKCAD_SUFFIX_NAME ${XTRKCAD_BASE_NAME})
-execute_process(COMMAND ${Hg_EXECUTABLE} "log" "-r" "." "-T" "'{rev}'" WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}" OUTPUT_VARIABLE XTRKCAD_SRC_CHANGESET)
-string(REGEX MATCH "[0-9]+" XTRKCAD_SRC_CHANGESET ${XTRKCAD_SRC_CHANGESET})
-set(FLATPAK_FILE ${CMAKE_BINARY_DIR}/xtrkcad-${XTRKCAD_VERSION}-${XTRKCAD_SRC_CHANGESET}.${CMAKE_SYSTEM_PROCESSOR}.flatpak)
+# XTRKCAD_VERSION (ProgramVersion.cmake) already carries a dev-build hash
+# suffix when this isn't an exact tagged release, so it alone is enough to
+# distinguish successive dev builds here — no separate changeset suffix
+# needed (previously used a Hg-only, non-portable local revision number).
+set(FLATPAK_FILE ${CMAKE_BINARY_DIR}/xtrkcad-${XTRKCAD_VERSION}.${CMAKE_SYSTEM_PROCESSOR}.flatpak)
 string(REGEX REPLACE "^.*/" "" FLATPAK_BASE_FILE ${FLATPAK_FILE})
 
 # source .in file prefixes

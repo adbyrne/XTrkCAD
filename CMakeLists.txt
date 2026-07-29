@@ -122,6 +122,9 @@ set(XTRKCAD_LOCALE_INSTALL_DIR "share/locale")
 # XTRKCAD_VERSION string reused in app/bin/custom.c) the runtime work/prefs
 # directory name. Embedding the version lets multiple GTK3V2MAIN point
 # releases install side by side and run simultaneously without colliding.
+# XTRKCAD_VERSION itself (ProgramVersion.cmake) also carries a dev-build
+# hash suffix on untagged builds, so this disambiguates successive dev
+# builds of the same nominal version too, not just distinct point releases.
 set(XTRKCAD_BIN "xtrkcad-${XTRKCAD_VERSION}")
 set(XTRKCAD_SHARE_INSTALL_DIR "share/${XTRKCAD_BIN}")
 
