@@ -268,6 +268,16 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 				                   0) + (180.0+connectAngle/2.0));
 				if (a < connectAngle) {
 					DrawEndPt(&mainD, t0, ep0, wDrawColorWhite);
+					// Snap to t0's exact endpoint coordinate before connecting --
+					// t's endpoint was computed independently by offsetting Dpa.Trk,
+					// so even when within connectAngle/connectDistance it may not be
+					// bit-for-bit identical to t0's (SF #542: two independently
+					// parallel-offset tracks that share a source joint can end up too
+					// far apart to auto-connect at all, especially for curves where
+					// the offset math is angle/radius-dependent and amplifies any
+					// pre-existing mismatch between the source tracks).
+					EPINX_T epN = 0;
+					MoveEndPt(&t, &epN, GetTrkEndPos(t0, ep0), 0);
 					ConnectTracks(t0, ep0, t, 0);
 					DrawEndPt(&mainD, t0, ep0, wDrawColorBlack);
 				}
@@ -277,6 +287,9 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 				                   1) + (180.0+connectAngle/2.0));
 				if (a < connectAngle) {
 					DrawEndPt(&mainD, t1, ep1, wDrawColorWhite);
+					// Same snap as above, see the comment there (SF #542).
+					EPINX_T epN = 1;
+					MoveEndPt(&t, &epN, GetTrkEndPos(t1, ep1), 0);
 					ConnectTracks(t1, ep1, t, 1);
 					DrawEndPt(&mainD, t1, ep1, wDrawColorBlack);
 				}
