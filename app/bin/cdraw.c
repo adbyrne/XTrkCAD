@@ -1414,12 +1414,26 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	DoDescribe( title, trk, curDescData, UpdateDraw );
 	if ( segPtr->type==SEG_BENCH && DrawDescGetControl(BE)!=NULL
 	     && DrawDescGetControl(OR)!=NULL) {
+		// BenchLoadLists() clears and repopulates the BE list, ending with its
+		// own internal wListSetIndex(choiceL, 0). That fires a real GTK
+		// "changed" signal, which reaches case BE: below *before* this
+		// function gets to restore the correct selection -- clobbering
+		// drawData.benchChoice/benchOrient (and, via that, segPtr->u.l.option)
+		// to whatever sits at list index 0. Snapshot into locals first and
+		// restore/recompute from them, not from the (possibly-clobbered)
+		// drawData fields directly (GTK3 issue #22).
+		wIndex_t savedBenchChoice = drawData.benchChoice;
+		wIndex_t savedBenchOrient = drawData.benchOrient;
 		BenchLoadLists( DrawDescGetControl(BE),
 		                DrawDescGetControl(OR) );
+		drawData.benchChoice = savedBenchChoice;
+		drawData.benchOrient = savedBenchOrient;
 		wListSetIndex( DrawDescGetControl(BE), drawData.benchChoice );
 		BenchUpdateOrientationList( VP2L(wListGetItemContext(
 		                DrawDescGetControl(BE), drawData.benchChoice)),DrawDescGetControl(OR));
 		wListSetIndex( DrawDescGetControl(OR), drawData.benchOrient );
+		segPtr->u.l.option = GetBenchData( VP2L(wListGetItemContext(
+		                DrawDescGetControl(BE), drawData.benchChoice)), drawData.benchOrient );
 	}
 	if ( (segPtr->type==SEG_STRLIN || segPtr->type==SEG_CRVLIN
 	      || segPtr->type==SEG_POLY) && DrawDescGetControl(LT)!=NULL) {
