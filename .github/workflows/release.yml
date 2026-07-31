@@ -54,7 +54,14 @@ jobs:
         run: cmake --build build
 
       - name: Test
-        run: xvfb-run ctest --test-dir build --output-on-failure
+        # The ~47 individual per-demo regression tests (XTRKCAD_REGRESSION_TESTING's
+        # auto-detect default is ON here) are for local dev targeting only and are
+        # not self-contained standalone -- see app/bin/RegressionTests.cmake. Mirror
+        # ci-gtk3.yml: run everything else, then gate separately on the single-process
+        # RegressionSuite (label regression-ci).
+        run: |
+          xvfb-run ctest --test-dir build --output-on-failure -LE regression
+          xvfb-run ctest --test-dir build --output-on-failure -L regression-ci
 
       - name: Package (DEB + RPM + STGZ + source archives)
         run: |
@@ -101,7 +108,11 @@ jobs:
         run: cmake --build build
 
       - name: Test
-        run: xvfb-run ctest --test-dir build --output-on-failure
+        # See package-linux's Test step comment: the per-demo regression tests
+        # aren't self-contained standalone, so gate separately on RegressionSuite.
+        run: |
+          xvfb-run ctest --test-dir build --output-on-failure -LE regression
+          xvfb-run ctest --test-dir build --output-on-failure -L regression-ci
 
       - name: Package (DEB)
         run: cd build && cpack -G DEB
@@ -145,7 +156,11 @@ jobs:
         run: cmake --build build
 
       - name: Test
-        run: xvfb-run ctest --test-dir build --output-on-failure
+        # See package-linux's Test step comment: the per-demo regression tests
+        # aren't self-contained standalone, so gate separately on RegressionSuite.
+        run: |
+          xvfb-run ctest --test-dir build --output-on-failure -LE regression
+          xvfb-run ctest --test-dir build --output-on-failure -L regression-ci
 
       - name: Package (DEB)
         run: |
