@@ -667,8 +667,14 @@ static void UpdateDraw( track_p trk, int drawDescInx, descUpdate_t * descUpd,
 		return;
 	}
 	segPtr = &xx->segs[drawSegInx];
-	if (segPtr->type != SEG_TEXT) { return; }
-//DESC-TODO	else { inx = TX; }  //Always look at TextField for SEG_TEXT on "Done"
+	// drawDescInx == -1 means no specific field changed (e.g. dialog-open callback with
+	// nothing to commit yet) -- distinct from drawSegInx above. Do NOT add a
+	// `segPtr->type != SEG_TEXT` guard here: this switch below handles field commits for
+	// every drawn-object type (SEG_STRLIN/SEG_DIMLIN/SEG_BENCH/SEG_TBLEDGE/SEG_CRVLIN/...),
+	// not just text. A prior "cleanup" (SF #664, Hg r6745) hoisted such a guard out of a
+	// narrow drawSegInx==-1-only branch to run unconditionally here, which silently broke
+	// Describe-field commits for every non-text object -- undetected for ~2 weeks because
+	// -T regression testing was unusable at the time (see GTK3 issue #26).
 	if ( drawDescInx == -1 ) { return; }
 
 	CHECK( drawDescInx >= 0 && drawDescInx < curDescCnt );

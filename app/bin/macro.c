@@ -2038,11 +2038,25 @@ static void ParamPlayback(char *line)
 			wControlHilite((wControl_p)button, FALSE);
 		}
 		if (!button) {
-			NoticeMessage("Unknown PARAM: %s", _("Ok"), NULL, line);
+			// Headless -T run: NoticeMessage() is a modal dialog that would hang
+			// forever with nothing to click it. A group matched but no field/ok/
+			// cancel token did -- most likely a stale index from a descData_t
+			// layout change (see cdescribe.c's CreateDescribeField); log instead
+			// of hanging so this is at least visible in the test output.
+			if (bRunTests) {
+				lprintf( "PLAYBACK: unknown PARAM (matched group '%s', no field/ok/cancel): %s\n",
+				         pg->nameStr, line );
+			} else {
+				NoticeMessage("Unknown PARAM: %s", _("Ok"), NULL, line);
+			}
 		}
 		return;
 	}
-	NoticeMessage("Unknown PARAM: %s", _("Ok"), NULL, line);
+	if (bRunTests) {
+		lprintf( "PLAYBACK: unknown PARAM (no matching dialog group): %s\n", line );
+	} else {
+		NoticeMessage("Unknown PARAM: %s", _("Ok"), NULL, line);
+	}
 }
 
 static void ParamCheck(char *line)
@@ -2188,7 +2202,12 @@ static void ParamCheck(char *line)
 		return;
 		//	 }
 	}
-	NoticeMessage("Unknown PARAMCHECK: %s", _("Ok"), NULL, line);
+	if (bRunTests) {
+		lprintf( "PLAYBACK: unknown PARAMCHECK (no matching dialog group): %s\n",
+		         line );
+	} else {
+		NoticeMessage("Unknown PARAMCHECK: %s", _("Ok"), NULL, line);
+	}
 }
 
 static long ParamIntRestore(paramGroup_cp pg, int class)
