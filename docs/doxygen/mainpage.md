@@ -216,6 +216,13 @@ bug:
   alone). Both together make `ctest -j N` safe for the whole suite from a normal desktop checkout
   — the cheap non-display unit tests elsewhere in the project parallelize freely, while regression
   tests still run one at a time relative to each other and to everything else.
+  **Known gap**: a handful of demos that drive a `JoinTrack` move/drag-preview animation
+  (`dmjnmove.xtr`, `dmconn1.xtr`, `dmconn2.xtr`) can fail their embedded `REGRESSION CHECK`
+  assertions when run standalone via `-R Regression.<demo>.xtr` on a cold first paint, even though
+  they pass inside the full `RegressionSuite` — a reentrant `wDrawStart` call in the join
+  drag-preview draw path (see [gtk3issues #21](https://sourceforge.net/p/xtrkcad-fork/gtk3issues/21/)).
+  If one of these fails standalone but the full suite passes, that's this known issue, not a new
+  regression.
 
 ### Running with debug logging (`-d`) {#running-with-debug-logging}
 
