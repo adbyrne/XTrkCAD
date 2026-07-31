@@ -59,20 +59,8 @@ endforeach()
 # tests above are for local dev targeting (`ctest -R Regression.dmease.xtr`) --
 # running all ~47 of them individually would multiply process/X-session startup
 # overhead far past the single-process run.
-#
-# dmbench.xtr is temporarily dropped from this CI-gating list: it fails on a
-# real, already-tracked, unfixed bug (GTK3 issue #22, "lumber size resets to
-# 1x1 on describe" -- see project_gtk3_issue26_regression memory), not a
-# tooling problem. It still runs individually via its own Regression.dmbench.xtr
-# per-demo test above. Remove this exclusion once #22 is fixed so the suite is
-# gating on the true full set again.
-set(_xtrkcad_regression_ci_known_broken "dmbench.xtr")
-set(_xtrkcad_regression_ci_demos ${_xtrkcad_demo_names})
-list(REMOVE_ITEM _xtrkcad_regression_ci_demos ${_xtrkcad_regression_ci_known_broken})
-list(JOIN _xtrkcad_regression_ci_demos "," _xtrkcad_regression_ci_target)
-
 add_test(NAME RegressionSuite
-    COMMAND ${_xtrkcad_regression_wrapper} ${_xtrkcad_regression_exe} "-T${_xtrkcad_regression_ci_target}"
+    COMMAND ${_xtrkcad_regression_wrapper} ${_xtrkcad_regression_exe} -T
 )
 set_tests_properties(RegressionSuite PROPERTIES
     FIXTURES_REQUIRED regression_install
