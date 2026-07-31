@@ -192,14 +192,26 @@ BOOL_T UndoFail( char * cause, uintptr_t val, char * fileName,
 	FILE * outf;
 	time_t clock;
 	char *temp;
-	NoticeMessage( MSG_UNDO_ASSERT, _("Ok"), NULL, fileName, lineNumber, val, val,
-	               cause );
+	if (bRunTests) {
+		// Headless regression run: NoticeMessage() is a modal dialog that
+		// would hang forever waiting for a click that never comes. Log
+		// instead — the diagnostics below still get written to sUndoF.
+		lprintf( "UNDO ASSERT FAILED: %s @ %s:%d (val=%lld)\n", cause, fileName,
+		         lineNumber, (long long)val );
+	} else {
+		NoticeMessage( MSG_UNDO_ASSERT, _("Ok"), NULL, fileName, lineNumber, val, val,
+		               cause );
+	}
 	MakeFullpath(&temp, workingDir, sUndoF, NULL);
 	outf = fopen( temp, "a+" );
 	free(temp);
 	if ( outf == NULL ) {
-		NoticeMessage(  MSG_OPEN_FAIL, _("Ok"), NULL, _("Undo Trace"), temp,
-		                strerror(errno) );
+		if (bRunTests) {
+			lprintf( "UndoFail: could not open trace file: %s\n", strerror(errno) );
+		} else {
+			NoticeMessage(  MSG_OPEN_FAIL, _("Ok"), NULL, _("Undo Trace"), temp,
+			                strerror(errno) );
+		}
 		return FALSE;
 	}
 	time( &clock );

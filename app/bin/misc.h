@@ -66,6 +66,11 @@ extern long hideSelectionWindow;	// not used
 extern char * ConvertFromEscapedText(const char * text);
 extern char * ConvertToEscapedText(const char * text);
 
+/* TRUE while running under -T (regression tests) — see misc.c. Assertion/
+ * abort handlers (AbortProg here, UndoFail in cundo.c) check this to skip
+ * blocking modal dialogs that would otherwise hang a headless run forever. */
+extern BOOL_T bRunTests;
+
 extern const char * AbortMessage( const char *, ... );
 extern void AbortProg( const char *, const char *, int, const char * );
 #ifdef LOG_CHECK_COVERAGE
@@ -269,7 +274,7 @@ void SetFileChanged(void);
 
 /* macro.c */
 extern long adjTimer;
-int RegressionTestAll();
+int RegressionTestAll(const char *target);
 extern FILE * recordF;
 extern wBool_t inPlayback;
 extern wBool_t inPlaybackQuit;
