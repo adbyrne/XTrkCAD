@@ -61,7 +61,7 @@ jobs:
         # RegressionSuite (label regression-ci).
         run: |
           xvfb-run ctest --test-dir build --output-on-failure -LE regression
-          xvfb-run ctest --test-dir build --output-on-failure -L regression-ci
+          ctest --test-dir build --output-on-failure -L regression-ci
 
       - name: Package (DEB + RPM + STGZ + source archives)
         run: |
@@ -112,7 +112,7 @@ jobs:
         # aren't self-contained standalone, so gate separately on RegressionSuite.
         run: |
           xvfb-run ctest --test-dir build --output-on-failure -LE regression
-          xvfb-run ctest --test-dir build --output-on-failure -L regression-ci
+          ctest --test-dir build --output-on-failure -L regression-ci
 
       - name: Package (DEB)
         run: cd build && cpack -G DEB
@@ -160,7 +160,7 @@ jobs:
         # aren't self-contained standalone, so gate separately on RegressionSuite.
         run: |
           xvfb-run ctest --test-dir build --output-on-failure -LE regression
-          xvfb-run ctest --test-dir build --output-on-failure -L regression-ci
+          ctest --test-dir build --output-on-failure -L regression-ci
 
       - name: Package (DEB)
         run: |
