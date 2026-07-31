@@ -18,9 +18,30 @@ add_test(NAME RegressionInstall
 set_tests_properties(RegressionInstall PROPERTIES
     FIXTURES_SETUP regression_install
     LABELS "regression"
+    RUN_SERIAL TRUE
 )
 
 set(_xtrkcad_regression_exe "${XTRKCAD_REGRESSION_INSTALL_PREFIX}/${XTRKCAD_BIN_INSTALL_DIR}/${XTRKCAD_BIN}")
+
+# Every regression test gets its own scratch HOME. XTrkCAD persists state to
+# $HOME/.xtrkcad/xtrkcad.rc (a benchwork-lumber catalog, an MRU color list, ...)
+# that mutates across runs -- two regression tests sharing one real $HOME can
+# produce a false FAIL from state left over by an earlier run (confirmed
+# empirically during the GTK3 issue #22 investigation: a second same-machine
+# run against the real $HOME produced a spurious dmdimlin.xtr Color mismatch
+# that vanished under an isolated $HOME). This does NOT by itself make these
+# tests safe under `ctest -j N`, though -- see RUN_SERIAL below.
+set(XTRKCAD_REGRESSION_HOME_ROOT "${CMAKE_BINARY_DIR}/regression-homes")
+
+# RUN_SERIAL: every regression test below gets this. xvfb-run -a's own
+# free-display detection isn't atomic against other concurrent xvfb-run
+# instances (confirmed empirically: a batch of the per-demo tests under
+# `ctest -j 4` failed 8/48, all cleanly reproducing as passes when rerun
+# alone -- a parallel-execution artifact, not real demo bugs, and distinct
+# from the $HOME-sharing issue above, which isolated HOMEs already fixed).
+# RUN_SERIAL keeps regression tests from ever overlapping *each other* while
+# still letting `ctest -j N` freely parallelize the cheap non-display unit
+# tests elsewhere in the suite around them.
 
 # Each test wraps itself in its own xvfb-run instance (rather than relying on a
 # job-level `xvfb-run ctest ...` wrapper) so per-demo tests don't collide over a
@@ -44,6 +65,8 @@ foreach(_xtrkcad_demo_line ${_xtrkcad_demo_lines})
 endforeach()
 
 foreach(_xtrkcad_demo ${_xtrkcad_demo_names})
+    set(_xtrkcad_demo_home "${XTRKCAD_REGRESSION_HOME_ROOT}/${_xtrkcad_demo}")
+    file(MAKE_DIRECTORY "${_xtrkcad_demo_home}")
     add_test(NAME "Regression.${_xtrkcad_demo}"
         COMMAND ${_xtrkcad_regression_wrapper} ${_xtrkcad_regression_exe} "-T${_xtrkcad_demo}"
     )
@@ -51,6 +74,8 @@ foreach(_xtrkcad_demo ${_xtrkcad_demo_names})
         FIXTURES_REQUIRED regression_install
         LABELS "regression"
         TIMEOUT 120
+        ENVIRONMENT "HOME=${_xtrkcad_demo_home}"
+        RUN_SERIAL TRUE
     )
 endforeach()
 
@@ -59,6 +84,8 @@ endforeach()
 # tests above are for local dev targeting (`ctest -R Regression.dmease.xtr`) --
 # running all ~47 of them individually would multiply process/X-session startup
 # overhead far past the single-process run.
+set(_xtrkcad_regression_suite_home "${XTRKCAD_REGRESSION_HOME_ROOT}/RegressionSuite")
+file(MAKE_DIRECTORY "${_xtrkcad_regression_suite_home}")
 add_test(NAME RegressionSuite
     COMMAND ${_xtrkcad_regression_wrapper} ${_xtrkcad_regression_exe} -T
 )
@@ -66,4 +93,6 @@ set_tests_properties(RegressionSuite PROPERTIES
     FIXTURES_REQUIRED regression_install
     LABELS "regression;regression-ci"
     TIMEOUT 900
+    ENVIRONMENT "HOME=${_xtrkcad_regression_suite_home}"
+    RUN_SERIAL TRUE
 )

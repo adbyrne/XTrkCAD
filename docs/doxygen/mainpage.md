@@ -207,7 +207,15 @@ bug:
   need a real installed tree, not just the build tree, because `wGetAppLibDir()`
   (`app/wlib/gtk3lib/unix/ixpaths.c`) can't find `demos`/`params`/compiled icon resources in the
   build tree alone; a `RegressionInstall` `ctest` fixture runs `cmake --install` into a scratch
-  prefix automatically before any regression test executes.
+  prefix automatically before any regression test executes. Each regression test also gets its
+  own scratch `$HOME` (XTrkCAD persists a benchwork-lumber catalog, an MRU color list, etc. to
+  `$HOME/.xtrkcad/xtrkcad.rc`, and two runs sharing a real `$HOME` can produce a false FAIL from
+  state an earlier run left behind) and `RUN_SERIAL TRUE` (`xvfb-run -a`'s free-display detection
+  isn't atomic against other concurrent `xvfb-run` instances, confirmed empirically: a batch of
+  the per-demo tests under `ctest -j 4` failed 8/48, all cleanly reproducing as passes when rerun
+  alone). Both together make `ctest -j N` safe for the whole suite from a normal desktop checkout
+  — the cheap non-display unit tests elsewhere in the project parallelize freely, while regression
+  tests still run one at a time relative to each other and to everything else.
 
 ### Running with debug logging (`-d`) {#running-with-debug-logging}
 
