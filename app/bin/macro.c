@@ -2203,7 +2203,8 @@ static void ParamCheck(char *line)
 		//	 }
 	}
 	if (bRunTests) {
-		lprintf( "PLAYBACK: unknown PARAMCHECK (no matching dialog group): %s\n", line );
+		lprintf( "PLAYBACK: unknown PARAMCHECK (no matching dialog group): %s\n",
+		         line );
 	} else {
 		NoticeMessage("Unknown PARAMCHECK: %s", _("Ok"), NULL, line);
 	}
