@@ -444,6 +444,10 @@ if(XTRKCAD_TESTING AND CMOCKA_FOUND)
     add_subdirectory( unittest )
 endif()
 
+if(XTRKCAD_REGRESSION_TESTING)
+    include( "${CMAKE_CURRENT_LIST_DIR}/RegressionTests.cmake" )
+endif()
+
 if(XTRKCAD_FUZZ)
     add_subdirectory( fuzz )
 endif()

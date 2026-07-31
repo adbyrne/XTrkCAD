@@ -61,7 +61,34 @@ jobs:
       - name: Build
         run: cmake --build build
       - name: Test
-        run: xvfb-run ctest --test-dir build --output-on-failure
+        # GTK3 issue #26's demo-playback regression suite has its own job
+        # (regression-gtk3) -- exclude it here so it doesn't get picked up by
+        # XTRKCAD_REGRESSION_TESTING's auto-detect default and slow this job down.
+        run: xvfb-run ctest --test-dir build --output-on-failure -LE regression
+
+  regression-gtk3:
+    # GTK3 issue #26's demo-playback regression suite (RegressionTestAll(), the
+    # -T flag). Split into its own job rather than folded into c-tests-linux so
+    # the fast unit-test feedback loop there isn't held up by this job's ~9
+    # minute single-process playback baseline. Gates on the RegressionSuite
+    # ctest target only (label regression-ci) -- not the ~47 individual
+    # per-demo tests also registered by XTRKCAD_REGRESSION_TESTING, which exist
+    # for local dev targeting (`ctest -R Regression.dmease.xtr`) and would
+    # multiply per-test process/X-session startup overhead in CI.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext xvfb
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_REGRESSION_TESTING=ON
+      - name: Build
+        run: cmake --build build
+      - name: Regression suite
+        run: ctest --test-dir build -L regression-ci --output-on-failure
 
   c-tests-arm64:
     # Native ARM64 runner — same architecture as Raspberry Pi 3/4/5
@@ -78,7 +105,8 @@ jobs:
       - name: Build
         run: cmake --build build
       - name: Test
-        run: xvfb-run ctest --test-dir build --output-on-failure
+        # See c-tests-linux: regression-gtk3 covers the GTK3 issue #26 suite.
+        run: xvfb-run ctest --test-dir build --output-on-failure -LE regression
 
   c-tests-linux-clang:
     runs-on: ubuntu-latest
@@ -94,7 +122,8 @@ jobs:
       - name: Build
         run: cmake --build build
       - name: Test
-        run: xvfb-run ctest --test-dir build --output-on-failure
+        # See c-tests-linux: regression-gtk3 covers the GTK3 issue #26 suite.
+        run: xvfb-run ctest --test-dir build --output-on-failure -LE regression
 
   c-tests-macos:
     runs-on: macos-latest
@@ -175,7 +204,9 @@ jobs:
           UBSAN_OPTIONS: "abort_on_error=1:print_stacktrace=1"
         # PreferenceTest requires a GTK3 display and triggers GTK3 internal
         # allocations that ASAN flags as leaks. It is covered by c-tests-linux.
-        run: ctest --test-dir build --output-on-failure -E PreferenceTest
+        # -LE regression: see c-tests-linux; the GTK3 issue #26 suite has its
+        # own job (regression-gtk3), not sanitizer-instrumented.
+        run: ctest --test-dir build --output-on-failure -E PreferenceTest -LE regression
 
   c-tests-valgrind:
     runs-on: ubuntu-latest
@@ -193,9 +224,12 @@ jobs:
       - name: Test under Valgrind
         # PreferenceTest requires a GTK3 display; GTK3 internals also trigger
         # many Valgrind false-positives. It is covered by c-tests-linux.
+        # -LE regression: see c-tests-linux; the GTK3 issue #26 suite has its
+        # own job (regression-gtk3), not Valgrind-instrumented.
         run: |
           ctest --test-dir build --output-on-failure \
             -E PreferenceTest \
+            -LE regression \
             -T memcheck \
             --overwrite "MemoryCheckCommand=$(which valgrind)" \
             --overwrite "MemoryCheckCommandOptions=--error-exitcode=1 --track-origins=yes --leak-check=full"
@@ -693,7 +727,9 @@ jobs:
       - name: Build
         run: cmake --build build
       - name: Run tests
-        run: xvfb-run ctest --test-dir build --output-on-failure
+        # -LE regression: see c-tests-linux; the GTK3 issue #26 suite has its
+        # own job (regression-gtk3), not built with --coverage instrumentation.
+        run: xvfb-run ctest --test-dir build --output-on-failure -LE regression
       - name: Collect coverage
         run: |
           lcov --capture --directory build \
