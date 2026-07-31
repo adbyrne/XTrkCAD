@@ -1139,7 +1139,10 @@ static void Playback(void)
 				TakeSnapshot(&snapshot_d);
 			}
 			if (playbackNonStop) {
-				wPause(1000);
+				// bRunTests (-T): skip the human-observable pacing pause,
+				// nothing is watching. Interactive Shift-held auto-play
+				// (also playbackNonStop) keeps its full 1s pause.
+				wPause(bRunTests ? 0 : 1000);
 				EnableButtons(FALSE);
 			} else {
 				SetInPlayback(FALSE);
@@ -1653,15 +1656,69 @@ error:
 // static void ParamPlayback( char * );
 // static void ParamCheck( char * );
 /**
- * Run all regression tests
+ * Filter demoList_da down to just the demo(s) named in target, matched
+ * case-insensitively against each demo's file basename, with or without
+ * the .xtr extension. target may name more than one demo, comma-separated;
+ * matches run in the order given. Exits the process with an error listing
+ * the valid names if nothing matches, rather than silently falling back to
+ * running everything.
  *
+ * \param target IN comma-separated demo name(s), e.g. "dmease,dmhelix.xtr"
+ */
+static void FilterDemoList(const char *target)
+{
+	dynArr_t filtered;
+	char *names, *name, *savePtr;
+	int i;
+	BOOL_T anyMatched = FALSE;
+
+	DYNARR_INIT(demoList_t, filtered);
+	names = MyStrdup(target);
+	for (name = strtok_r(names, ",", &savePtr); name != NULL;
+	     name = strtok_r(NULL, ",", &savePtr)) {
+		BOOL_T matched = FALSE;
+		for (i = 0; i < demoList_da.cnt; i++) {
+			const char *base = FindFilename(demoList(i).fileName);
+			size_t nameLen = strlen(name);
+			if (strcasecmp(base, name) == 0 ||
+			    (strncasecmp(base, name, nameLen) == 0 &&
+			     strcasecmp(base + nameLen, ".xtr") == 0)) {
+				DYNARR_APPEND(demoList_t, filtered, 5);
+				DYNARR_LAST(demoList_t, filtered) = demoList(i);
+				matched = TRUE;
+			}
+		}
+		if (!matched) {
+			lprintf("-T: no demo matches '%s'\n", name);
+		}
+		anyMatched |= matched;
+	}
+	MyFree(names);
+	if (!anyMatched) {
+		lprintf("-T: none of the requested demo(s) matched. Valid names:\n");
+		for (i = 0; i < demoList_da.cnt; i++) {
+			lprintf("  %s\n", FindFilename(demoList(i).fileName));
+		}
+		exit(1);
+	}
+	demoList_da = filtered;
+}
+
+/**
+ * Run regression tests. If target is non-NULL, only the named demo(s) run
+ * (see FilterDemoList) instead of the full suite in xtrkcad.xtq.
+ *
+ * \param target IN NULL for the full suite, else a comma-separated demo list
  * return	number of failed tests
  */
-EXPORT int RegressionTestAll()
+EXPORT int RegressionTestAll(const char *target)
 {
 	playbackNonStop = TRUE;
-	playbackSpeed = 5;
+	SetPlaybackSpeed(5);
 	CreateDemoW();
+	if (target != NULL) {
+		FilterDemoList(target);
+	}
 	curDemo = 0;
 	PlaybackSetup();
 	Playback();

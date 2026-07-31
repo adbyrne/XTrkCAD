@@ -275,6 +275,13 @@ EXPORT void AbortProg(
 	static BOOL_T abort2 = FALSE;
 	snprintf( message, sizeof message, "%s: %s:%d %s", sCond, sFileName,
 	          iLineNumber, sMsg?sMsg:"" );
+	if (bRunTests) {
+		// Headless regression run: a modal dialog here would hang forever
+		// waiting for a click that never comes. Log and abort() instead,
+		// matching the interactive "ABORT" choice below.
+		lprintf( "CHECK FAILED: %s\n", message );
+		abort();
+	}
 	if (abort2) {
 		wNoticeWithIcon( NT_ERROR, message, _("ABORT"), NULL);
 	} else {
@@ -783,6 +790,11 @@ InitAudio()
 	wSetAudio(enableAudio);
 }
 
+/* TRUE while running under -T (regression tests). Assertion/abort handlers
+ * check this to skip blocking modal dialogs that would otherwise hang a
+ * headless run forever waiting for a click that never comes. */
+EXPORT BOOL_T bRunTests = FALSE;
+
 EXPORT wControl_p wMain(int argc, char * argv[])
 {
 	int c;
@@ -798,7 +810,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	char *cp;
 	char buffer[STR_SIZE];
 	unsigned int i;
-	BOOL_T bRunTests = FALSE;
+	char *testTarget = NULL;
 
 	strcpy(buffer, sProdNameLower);
 
@@ -819,7 +831,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	opterr = 0;
 	LogSet("dummy",0);
 
-	while ((c = getopt(argc, argv, "vl:d:c:mVT")) != -1)
+	while ((c = getopt(argc, argv, "vl:d:c:mVT::")) != -1)
 		switch (c) {
 		case 'c': /* configuration name */
 			/* test for valid filename */
@@ -868,9 +880,10 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 			printf("Version: %s\n",XTRKCAD_VERSION);
 			exit(0);
 			break;
-		case 'T': // run tests
+		case 'T': // run tests, optionally scoped to a comma-separated demo list (-Tdemo1,demo2)
 			LogSet( "regression", 2 );
 			bRunTests = TRUE;
+			testTarget = optarg;
 			break;
 		default:
 			CHECK(FALSE);
@@ -1092,7 +1105,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 
 	inMainW = FALSE;
 	if ( bRunTests ) {
-		int nFail = RegressionTestAll();
+		int nFail = RegressionTestAll(testTarget);
 		if ( nFail == 0 ) {
 			lprintf( "Regression Tests Pass\n" );
 			exit( 0 );
