@@ -197,6 +197,21 @@ bug:
   ASan's leak detector; that test still runs normally elsewhere).
 - **Valgrind** — `ctest -T memcheck --overwrite MemoryCheckCommand=$(which valgrind)`.
   `PreferenceTest` is excluded here too, for the same GTK3-internals reason.
+- **Regression demo-playback suite** — `-DXTRKCAD_REGRESSION_TESTING=ON` (auto-enabled on Linux
+  when `xvfb-run` or an existing `DISPLAY` is found) adds ~47 per-demo `ctest` targets, one per
+  entry in `app/lib/xtrkcad.xtq`'s `DEMO` list, for targeting a single demo during local
+  debugging (`ctest -R Regression.dmease.xtr`), plus a `RegressionSuite` test (label
+  `regression-ci`) that replays every demo in one process — what CI actually gates on, via its
+  own `regression-gtk3` job (`ctest --test-dir build -L regression-ci`), rather than the 47
+  individual tests, to avoid multiplying per-test process/X-session startup overhead. These tests
+  need a real installed tree, not just the build tree, because `wGetAppLibDir()`
+  (`app/wlib/gtk3lib/unix/ixpaths.c`) can't find `demos`/`params`/compiled icon resources in the
+  build tree alone; a `RegressionInstall` `ctest` fixture runs `cmake --install` into a scratch
+  prefix automatically before any regression test executes. `dmbench.xtr` is temporarily excluded
+  from `RegressionSuite`'s target list — it fails on GTK3 issue #22 (lumber size resets on
+  Describe), a real unfixed bug, not a tooling problem — though it still runs individually via
+  its own per-demo test; remove the exclusion in `app/bin/RegressionTests.cmake` once #22 is
+  fixed.
 
 ### Running with debug logging (`-d`) {#running-with-debug-logging}
 

@@ -57,7 +57,14 @@ your run, not a copy of it.
   compilers (GCC, Clang, AppleClang, MinGW GCC), platforms, and architectures, plus ASan/UBSan and
   Valgrind runs (`PreferenceTest` excluded from both — see
   \ref advanced-optional-local-checks "Advanced/optional local checks" in the
-  \ref index "Developer Documentation" page for why).
+  \ref index "Developer Documentation" page for why). All pass `-LE regression` so the demo
+  regression suite (see `regression-gtk3` below) isn't picked up here too.
+- **`regression-gtk3`** — replays the full demo suite (`RegressionTestAll()`, the `-T` flag) in
+  one process via the `RegressionSuite` `ctest` target (see
+  \ref advanced-optional-local-checks "Advanced/optional local checks" in the
+  \ref index "Developer Documentation" page for the full `XTRKCAD_REGRESSION_TESTING` writeup).
+  Kept out of `c-tests-linux` rather than folded in, since its ~9-minute single-process playback
+  baseline would slow down that job's fast unit-test feedback loop.
 - **`cppcheck`** — cppcheck's default check set only, `--error-exitcode=1`.
 - **`astyle-check`** — AStyle 3.6.13 (built from source, pinned — an unpinned version once
   produced different formatting for identical input, SF #638) dry-run conformance to
