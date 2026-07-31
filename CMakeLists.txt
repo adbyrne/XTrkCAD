@@ -46,6 +46,21 @@ if(CMOCKA_FOUND)
     option(XTRKCAD_TESTING "Build unittests" ON)
 endif()
 
+# GUI demo-playback regression tests (RegressionTestAll(), the -T flag; see GTK3
+# issue #26). These drive a real GTK3 window, so they need an X display -- default
+# to ON only where one can plausibly be provided (Linux, with xvfb-run found or a
+# DISPLAY already set), alongside the unit-test infrastructure they piggyback on.
+set(_xtrkcad_regression_default OFF)
+if(XTRKCAD_TESTING AND CMOCKA_FOUND AND UNIX AND NOT APPLE)
+    find_program(XVFB_RUN_EXECUTABLE xvfb-run)
+    if(XVFB_RUN_EXECUTABLE OR DEFINED ENV{DISPLAY})
+        set(_xtrkcad_regression_default ON)
+    endif()
+endif()
+option(XTRKCAD_REGRESSION_TESTING
+    "Build GUI demo-playback regression tests (requires xvfb-run or an existing X DISPLAY)"
+    ${_xtrkcad_regression_default})
+
 option(XTRKCAD_SANITIZE "Build unit tests with AddressSanitizer + UBSan (Linux/GCC or Clang only)" OFF)
 option(XTRKCAD_FUZZ "Build libFuzzer harnesses (Clang only, requires -fsanitize=fuzzer support)" OFF)
 
