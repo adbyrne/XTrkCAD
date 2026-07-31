@@ -207,11 +207,7 @@ bug:
   need a real installed tree, not just the build tree, because `wGetAppLibDir()`
   (`app/wlib/gtk3lib/unix/ixpaths.c`) can't find `demos`/`params`/compiled icon resources in the
   build tree alone; a `RegressionInstall` `ctest` fixture runs `cmake --install` into a scratch
-  prefix automatically before any regression test executes. `dmbench.xtr` is temporarily excluded
-  from `RegressionSuite`'s target list — it fails on GTK3 issue #22 (lumber size resets on
-  Describe), a real unfixed bug, not a tooling problem — though it still runs individually via
-  its own per-demo test; remove the exclusion in `app/bin/RegressionTests.cmake` once #22 is
-  fixed.
+  prefix automatically before any regression test executes.
 
 ### Running with debug logging (`-d`) {#running-with-debug-logging}
 
