@@ -272,8 +272,18 @@ static void DrawTempContent(void)
 
 	DrawMarkers();
 	RulerRedraw(FALSE);
-	RedrawPlaybackCursor(); /* If in playback */
 	wDrawFinish(tempD.d);
+
+	/* Outside the batch: RedrawPlaybackCursor() ends with wFlush(), which
+	 * pumps the GTK main loop synchronously. On a cold first paint there can
+	 * be a pending window layout/configure event still queued, and pumping
+	 * the loop from inside an active wDrawStart/wDrawFinish batch lets that
+	 * event's handler reenter drawing (MainLayout -> MainRedraw -> wDrawStart)
+	 * before this batch closes, corrupting the single shared cairoCtx (GTK3
+	 * issue #21). RedrawPlaybackCursor()'s own drawing doesn't need an
+	 * open batch -- prepare_drawing() (gtk3lib/drawcairo.c) already falls
+	 * back to a one-shot cairo context per call when none is active. */
+	RedrawPlaybackCursor(); /* If in playback */
 }
 
 /* Update temp_surface after executing a command
