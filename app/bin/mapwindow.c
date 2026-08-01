@@ -244,9 +244,18 @@ static wBool_t MapRedraw( wControl_p bd, void* pContex, wWinPix_t px,
 		wDrawDelayUpdate(mapD.d, TRUE);
 	}
 
-	wBool_t bTemp = wDrawSetTempMode(mapD.d, FALSE);
+	/* Same reasoning as MainProc's wResize_e handler (draw.c, GTK3 issue
+	 * #24): this is a real GTK resize callback, so it can fire reentrant
+	 * while someone else's temp draw on mapD.d is still in progress. Save/
+	 * restore with the NoClear variant -- this only ever displaces an
+	 * in-progress mode for the duration of this redraw, not starting a
+	 * fresh temp-drawing pass, and the normal clear-on-restore would wipe
+	 * out content the interrupted caller already legitimately drew
+	 * (plausibly what gtk3issues #4 -- "Resizing main or map -> no
+	 * redraw" -- is reporting). */
+	wBool_t bTemp = wDrawSetTempModeNoClear(mapD.d, FALSE);
 	if (bTemp) {
-		printf("MapRedraw TempMode\n");
+		LOG(log_mapredraw, 1, ("MapRedraw: reentrant during temp draw\n"));
 	}
 
 	if (log_mapsize >= 2) {
@@ -298,7 +307,7 @@ static wBool_t MapRedraw( wControl_p bd, void* pContex, wWinPix_t px,
 	MapDrawBoundingBox(TRUE);
 	TIMER_LOG(redraw, "MapRedraw draw");
 
-	wDrawSetTempMode(mapD.d, bTemp);
+	wDrawSetTempModeNoClear(mapD.d, bTemp);
 	wDrawDelayUpdate(mapD.d, FALSE);
 
 	return TRUE;

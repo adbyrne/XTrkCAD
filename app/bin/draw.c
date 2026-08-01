@@ -613,9 +613,18 @@ wBool_t MainProc(wControl_p win, winProcEvent e, void *refresh, void *data)
 		    ("MainProc/Resize: %d %s %ld %ld\n", cMP++,
 		     refresh == NULL ? "RDW" : "---", width, height));
 		if (height >= 0) {
-			wBool_t bTemp = wDrawSetTempMode(mainD.d, FALSE);
+			/* This handler is a real GTK signal callback, so it can fire
+			 * reentrant while someone else's DrawTempContent()-style temp
+			 * draw is still in progress (mainD.d == tempD.d -- the same
+			 * widget). Save/restore bTempMode with the NoClear variant:
+			 * this is only ever displacing an in-progress mode for the
+			 * duration of this resize, not starting a fresh temp-drawing
+			 * pass, and wDrawSetTempMode()'s normal clear-on-restore would
+			 * wipe out content the interrupted caller already legitimately
+			 * drew (GTK3 issue #24). */
+			wBool_t bTemp = wDrawSetTempModeNoClear(mainD.d, FALSE);
 			if (bTemp) {
-				printf("MainProc TempMode\n");
+				LOG(log_redraw, 1, ("MainProc/Resize: reentrant during temp draw\n"));
 			}
 
 			/* Remember the center of the current view BEFORE the size changes */
@@ -636,7 +645,7 @@ wBool_t MainProc(wControl_p win, winProcEvent e, void *refresh, void *data)
 			MainLayout(!refresh, constrainMain != 0); /* MainProc: wResize_e event */
 			wPrefSetInteger("draw", "mainwidth", (int)width);
 			wPrefSetInteger("draw", "mainheight", (int)height);
-			wDrawSetTempMode(mainD.d, bTemp);
+			wDrawSetTempModeNoClear(mainD.d, bTemp);
 		} else {
 			MapDrawBoundingBox(TRUE);
 		}
