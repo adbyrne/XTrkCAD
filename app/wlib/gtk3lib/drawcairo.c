@@ -209,13 +209,48 @@ static cairo_t *gtkDrawCreateCairoContext(struct draw *bd,
 	return cairo;
 }
 
+/**
+ * Set whether draw calls on this widget target the temp (overlay) surface
+ * or the main surface, without the side effect of `wDrawSetTempMode()`'s
+ * clear-on-entry. Correct for a caller that only ever *temporarily displaces*
+ * the mode to do unrelated work and hands it back -- e.g. a reentrant real
+ * GTK signal handler (`MainProc`'s `wResize_e`, GTK3 issue #24) that fires
+ * mid-way through someone else's still-in-progress temp draw. That restore
+ * is not "starting a new temp session"; clearing here would wipe content
+ * the interrupted caller already legitimately drew.
+ *
+ * \param bd IN the widget
+ * \param bTemp IN the mode to set
+ * \return the previous mode, exactly as `wDrawSetTempMode()` does
+ */
+wBool_t wDrawSetTempModeNoClear(
+        wControl_p bd,
+        wBool_t bTemp )
+{
+	wBool_t ret = bd->attributes.draw.bTempMode;
+	bd->attributes.draw.bTempMode = bTemp;
+	return ret;
+}
+
+/**
+ * Set whether draw calls on this widget target the temp (overlay) surface
+ * or the main surface. Entering temp mode from main mode (`FALSE` ->
+ * `TRUE`) clears the temp surface first -- correct for a caller genuinely
+ * starting a fresh temp-drawing pass, which is what nearly every call site
+ * means by this. A caller that instead needs to *restore* a mode it only
+ * temporarily displaced (not start anything new) should use
+ * `wDrawSetTempModeNoClear()` for that restore, or risk erasing another
+ * caller's already-drawn content out from under it (GTK3 issue #24).
+ *
+ * \param bd IN the widget
+ * \param bTemp IN the mode to set
+ * \return the previous mode
+ */
 wBool_t wDrawSetTempMode(
         wControl_p bd,
         wBool_t bTemp )
 {
-
-	wBool_t ret = bd->attributes.draw.bTempMode;
-	bd->attributes.draw.bTempMode = bTemp;
+	wBool_t ret = wDrawSetTempModeNoClear( bd, bTemp );
 	if ( ret == FALSE && bTemp == TRUE ) {
 		// Main to Temp drawing
 		wDrawClearTemp( bd );

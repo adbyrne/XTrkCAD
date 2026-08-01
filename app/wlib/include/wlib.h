@@ -890,6 +890,7 @@ void wDrawClear(wControl_p bd);
 
 void wDrawClearTemp(wControl_p drawingArea);
 wBool_t wDrawSetTempMode(wControl_p bd, wBool_t bTemp);
+wBool_t wDrawSetTempModeNoClear(wControl_p bd, wBool_t bTemp);
 
 void wDrawDelayUpdate(wControl_p, wBool_t);
 void wDrawClip(wControl_p drawingArea, wDrawPix_t x, wDrawPix_t y, wDrawPix_t w,
