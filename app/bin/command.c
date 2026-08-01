@@ -257,7 +257,8 @@ static BOOL_T CheckClick(wAction_t *action, coOrd *pos, BOOL_T checkLeft,
 			if (timeDelta > dragTimeout || distDelta > dragDistance) {
 				LOG(log_command, 2,
 				    ("CheckClick: C_MOVE promoted to C_DOWN (drag) -- timeDelta=%ld/%ld distDelta=%0.3f/%0.3f pos=[%0.3f %0.3f] pos0=[%0.3f %0.3f]\n",
-				     timeDelta, dragTimeout, distDelta, dragDistance, pos->x, pos->y, pos0.x, pos0.y));
+				     timeDelta, dragTimeout, distDelta, dragDistance, pos->x, pos->y, pos0.x,
+				     pos0.y));
 				time0 = 0;
 				*pos = pos0;
 				*action = C_DOWN;
