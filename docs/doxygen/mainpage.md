@@ -157,6 +157,12 @@ CI adds `xvfb` and runs tests under `xvfb-run` because its runners have no displ
 desktop session doesn't need that wrapper. The ARM64 and Clang (`-DCMAKE_C_COMPILER=clang`)
 variants use the identical steps otherwise.
 
+This plain `ctest` also picks up the demo-playback regression tests: `XTRKCAD_REGRESSION_TESTING`
+auto-enables on Linux whenever `DISPLAY` is set (any normal desktop session) or `xvfb-run` is
+found, with no extra flag needed. See the
+\ref advanced-optional-local-checks "Regression demo-playback suite" note below for a known
+false-failure case (gtk3issues #21) this can surface.
+
 ### macOS
 
 ```sh
