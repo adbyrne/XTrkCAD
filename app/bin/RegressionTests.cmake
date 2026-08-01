@@ -21,6 +21,18 @@ set_tests_properties(RegressionInstall PROPERTIES
     RUN_SERIAL TRUE
 )
 
+set(_xtrkcad_regression_exe "${XTRKCAD_REGRESSION_INSTALL_PREFIX}/${XTRKCAD_BIN_INSTALL_DIR}/${XTRKCAD_BIN}")
+
+# Every regression test gets its own scratch HOME. XTrkCAD persists state to
+# $HOME/.xtrkcad/xtrkcad.rc (a benchwork-lumber catalog, an MRU color list, ...)
+# that mutates across runs -- two regression tests sharing one real $HOME can
+# produce a false FAIL from state left over by an earlier run (confirmed
+# empirically during the GTK3 issue #22 investigation: a second same-machine
+# run against the real $HOME produced a spurious dmdimlin.xtr Color mismatch
+# that vanished under an isolated $HOME). This does NOT by itself make these
+# tests safe under `ctest -j N`, though -- see RUN_SERIAL below.
+set(XTRKCAD_REGRESSION_HOME_ROOT "${CMAKE_BINARY_DIR}/regression-homes")
+
 # Wipe every demo's scratch $HOME at the start of each ctest invocation, not
 # just once at CMake configure time. Without this, a process that's killed
 # uncleanly mid-run (e.g. by ctest's own TIMEOUT, which sends a hard kill
@@ -34,27 +46,17 @@ set_tests_properties(RegressionInstall PROPERTIES
 # regression. Confirmed as the actual (non-)cause of an apparent hang
 # "regression" that briefly looked like it was introduced by the GTK3 issue
 # #24 fix (PR #75) -- the fix was fine, a prior timeout's leftover checkpoint
-# file was not.
+# file was not. Reuses XTRKCAD_REGRESSION_HOME_ROOT (set just above) rather
+# than a second hardcoded "${CMAKE_BINARY_DIR}/regression-homes" literal --
+# the two must never drift apart.
 add_test(NAME RegressionCleanHomes
-    COMMAND ${CMAKE_COMMAND} -E rm -rf "${CMAKE_BINARY_DIR}/regression-homes"
+    COMMAND ${CMAKE_COMMAND} -E rm -rf "${XTRKCAD_REGRESSION_HOME_ROOT}"
 )
 set_tests_properties(RegressionCleanHomes PROPERTIES
     FIXTURES_SETUP regression_clean_homes
     LABELS "regression"
     RUN_SERIAL TRUE
 )
-
-set(_xtrkcad_regression_exe "${XTRKCAD_REGRESSION_INSTALL_PREFIX}/${XTRKCAD_BIN_INSTALL_DIR}/${XTRKCAD_BIN}")
-
-# Every regression test gets its own scratch HOME. XTrkCAD persists state to
-# $HOME/.xtrkcad/xtrkcad.rc (a benchwork-lumber catalog, an MRU color list, ...)
-# that mutates across runs -- two regression tests sharing one real $HOME can
-# produce a false FAIL from state left over by an earlier run (confirmed
-# empirically during the GTK3 issue #22 investigation: a second same-machine
-# run against the real $HOME produced a spurious dmdimlin.xtr Color mismatch
-# that vanished under an isolated $HOME). This does NOT by itself make these
-# tests safe under `ctest -j N`, though -- see RUN_SERIAL below.
-set(XTRKCAD_REGRESSION_HOME_ROOT "${CMAKE_BINARY_DIR}/regression-homes")
 
 # RUN_SERIAL: every regression test below gets this. xvfb-run -a's own
 # free-display detection isn't atomic against other concurrent xvfb-run
