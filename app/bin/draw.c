@@ -498,7 +498,19 @@ EXPORT void MainLayout(wBool_t bRedraw, wBool_t bNoBorder)
 		}
 	}
 	LOG(log_pan, 2, ("PixelBins=%0.6f\n", pixelBins));
-	ConstraintOrig(&mainD.orig, mainD.size, bNoBorder, TRUE);
+	/* Skip during demo playback: a demo script sets its own deterministic
+	 * viewport via an explicit ORIG command, but any real GTK layout event
+	 * that fires during playback (including the delayed cold-start
+	 * configure-event -- see GTK3 issue #21) calls MainLayout() too, and
+	 * ConstraintOrig() would then re-clamp mainD.orig based on whatever
+	 * mainD.size happens to be at that non-deterministic moment, silently
+	 * overriding the demo's intended origin. Confirmed empirically: a cold
+	 * standalone run of dmjnmove.xtr drifted mainD.orig.y from the demo's
+	 * specified 0.0 to 1.75 mid-playback; a warm run (inside the full
+	 * RegressionSuite) did not. */
+	if (!inPlayback) {
+		ConstraintOrig(&mainD.orig, mainD.size, bNoBorder, TRUE);
+	}
 	tempD.orig = mainD.orig;
 	tempD.size = mainD.size;
 	mainCenter.x = mainD.orig.x + mainD.size.x / 2.0;
