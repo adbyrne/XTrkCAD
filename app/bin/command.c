@@ -190,6 +190,39 @@ EXPORT void Reset(void)
 	(void) commandList[curCommand].cmdProc( C_START, zero);
 }
 
+/**
+ * Disambiguate a click from a drag for commands that opt in via `IC_LCLICK`.
+ *
+ * A `C_DOWN` is always held back (returns FALSE, `time0`/`pos0` recorded);
+ * the decision is made on the next `C_MOVE` or `C_UP`. If a `C_MOVE` arrives
+ * more than `dragTimeout` ms after the down, or more than `dragDistance`
+ * units away from it, it's relabeled to `C_DOWN` and treated as a genuine
+ * drag-start; a `C_UP` that arrives without a promoting `C_MOVE` first is
+ * relabeled to `C_LCLICK` (a plain click).
+ *
+ * This only works correctly when every `C_MOVE`/`C_UP` this function sees
+ * genuinely belongs to the in-progress click -- `time0`/`pos0` are file-
+ * scope statics, not per-command state. During `-T` demo playback, a
+ * spurious real event reaching `DoMouse()` (see `MainLayout()`'s
+ * `!inPlayback` guard on its temp-draw-refresh block) can inject a
+ * `C_MOVE` at an unrelated position mid-click; since `dragDistance` is
+ * usually the tighter of the two promotion checks and playback's own
+ * synthesized `C_MOVE`s intentionally reuse the click's exact position
+ * (distance 0), a *real* stray event landing anywhere else is exactly the
+ * kind of large `distDelta` that wrongly promotes the click to a drag
+ * (GTK3 issue #21 -- confirmed via `-d command=2`, see the `LOG` calls
+ * below).
+ *
+ * \param action IN/OUT the action being dispatched; may be relabeled
+ * \param pos IN/OUT the position; reset to the original down position if
+ *            relabeled to C_DOWN
+ * \param checkLeft IN whether the current command opted into left-click
+ *                  disambiguation (`IC_LCLICK`); if false this is a no-op
+ *                  for left-button actions
+ * \param checkRight IN same as checkLeft, for the right button
+ * \return TRUE if action should be dispatched to the current command as-is
+ *         (possibly relabeled), FALSE if it should be swallowed this round
+ */
 static BOOL_T CheckClick(wAction_t *action, coOrd *pos, BOOL_T checkLeft,
                          BOOL_T checkRight)
 {
@@ -222,6 +255,10 @@ static BOOL_T CheckClick(wAction_t *action, coOrd *pos, BOOL_T checkLeft,
 			timeDelta = time1 - time0;
 			distDelta = FindDistance(*pos, pos0);
 			if (timeDelta > dragTimeout || distDelta > dragDistance) {
+				LOG(log_command, 2,
+				    ("CheckClick: C_MOVE promoted to C_DOWN (drag) -- timeDelta=%ld/%ld distDelta=%0.3f/%0.3f pos=[%0.3f %0.3f] pos0=[%0.3f %0.3f]\n",
+				     timeDelta, dragTimeout, distDelta, dragDistance, pos->x, pos->y, pos0.x,
+				     pos0.y));
 				time0 = 0;
 				*pos = pos0;
 				*action = C_DOWN;
@@ -238,6 +275,9 @@ static BOOL_T CheckClick(wAction_t *action, coOrd *pos, BOOL_T checkLeft,
 			time1 = wGetTimer() - adjTimer;
 			timeDelta = time1 - time0;
 			distDelta = FindDistance(*pos, pos0);
+			LOG(log_command, 2,
+			    ("CheckClick: C_UP -> C_LCLICK -- timeDelta=%ld pos=[%0.3f %0.3f]\n",
+			     timeDelta, pos->x, pos->y));
 			time0 = 0;
 			*action = C_LCLICK;
 		}
@@ -279,6 +319,29 @@ static BOOL_T CheckClick(wAction_t *action, coOrd *pos, BOOL_T checkLeft,
 	return TRUE;
 }
 
+/**
+ * Dispatch a mouse/key action to the current command's `cmdProc`, applying
+ * a few cross-cutting checks first: `IC_WANT_MOVE`/`IC_WANT_MODKEYS` opt-in,
+ * `CheckClick()`'s click-vs-drag disambiguation for commands that opted
+ * into `IC_LCLICK`, and right-click menu handling. On a "bExit" outcome
+ * (opted out, or the click is still being held back pending drag/click
+ * resolution) the command never sees this call at all -- only a
+ * `TempRedraw()` happens instead.
+ *
+ * `action` may be relabeled by `CheckClick()` before the command sees it:
+ * a `C_DOWN` is always held back initially; a later `C_MOVE` either stays
+ * held back or gets relabeled to `C_DOWN` (drag-start); a `C_UP` without a
+ * promoting `C_MOVE` first gets relabeled to `C_LCLICK` (plain click). See
+ * `CheckClick()`'s doc comment -- this relabeling is exactly what a
+ * spurious, non-scripted `DoMouse()` call during `-T` demo playback can
+ * throw off (GTK3 issue #21).
+ *
+ * \param action IN the action to dispatch (may be relabeled internally,
+ *               see above)
+ * \param pos IN the position associated with the action
+ * \return the current command's own return value, or C_CONTINUE if the
+ *         command was never actually called this round
+ */
 EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos)
 {
 	wAction_t rc;
