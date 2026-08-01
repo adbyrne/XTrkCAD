@@ -230,6 +230,15 @@ bug:
   drag-preview draw path (see [gtk3issues #21](https://sourceforge.net/p/xtrkcad-fork/gtk3issues/21/)).
   If one of these fails standalone but the full suite passes, that's this known issue, not a new
   regression.
+- **`dmjnss.xtr` excluded from `RegressionSuite` on arm64** — its "join straights cornu" check
+  fails deterministically on arm64 Release builds (~0.1 degree cornu-join angle divergence).
+  Root cause not yet found: tried and ruled out AArch64 FMA-contraction of `spiro.c`'s
+  Newton-Raphson solver (forcing `-ffp-contract=off` on the cornu library had zero effect on the
+  actual failing job, so something else is going on). `app/bin/RegressionTests.cmake` excludes it
+  from `RegressionSuite`'s demo list whenever `CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64"`
+  (see [gtk3issues #28](https://sourceforge.net/p/xtrkcad-fork/gtk3issues/28/)) so CI can still
+  gate on the rest of the suite on that architecture. Temporary — remove the exclusion once #28
+  is actually root-caused and fixed, don't leave it in place indefinitely.
 
 ### Running with debug logging (`-d`) {#running-with-debug-logging}
 
