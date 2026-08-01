@@ -21,6 +21,29 @@ set_tests_properties(RegressionInstall PROPERTIES
     RUN_SERIAL TRUE
 )
 
+# Wipe every demo's scratch $HOME at the start of each ctest invocation, not
+# just once at CMake configure time. Without this, a process that's killed
+# uncleanly mid-run (e.g. by ctest's own TIMEOUT, which sends a hard kill
+# signal with no chance for the app to clean up its own state) can leave
+# behind a stale checkpoint file. XTrkCAD's own startup logic (OfferCheckpoint,
+# misc.c) then treats that as "program was not terminated properly" and pops
+# a blocking modal resume/discard dialog, which hangs forever under a headless
+# regression run with no one to click it -- and since the scratch HOME persists
+# across ctest invocations, that one bad kill poisons every subsequent run of
+# the same demo indefinitely, looking exactly like a real, reproducible
+# regression. Confirmed as the actual (non-)cause of an apparent hang
+# "regression" that briefly looked like it was introduced by the GTK3 issue
+# #24 fix (PR #75) -- the fix was fine, a prior timeout's leftover checkpoint
+# file was not.
+add_test(NAME RegressionCleanHomes
+    COMMAND ${CMAKE_COMMAND} -E rm -rf "${CMAKE_BINARY_DIR}/regression-homes"
+)
+set_tests_properties(RegressionCleanHomes PROPERTIES
+    FIXTURES_SETUP regression_clean_homes
+    LABELS "regression"
+    RUN_SERIAL TRUE
+)
+
 set(_xtrkcad_regression_exe "${XTRKCAD_REGRESSION_INSTALL_PREFIX}/${XTRKCAD_BIN_INSTALL_DIR}/${XTRKCAD_BIN}")
 
 # Every regression test gets its own scratch HOME. XTrkCAD persists state to
@@ -71,7 +94,7 @@ foreach(_xtrkcad_demo ${_xtrkcad_demo_names})
         COMMAND ${_xtrkcad_regression_wrapper} ${_xtrkcad_regression_exe} "-T${_xtrkcad_demo}"
     )
     set_tests_properties("Regression.${_xtrkcad_demo}" PROPERTIES
-        FIXTURES_REQUIRED regression_install
+        FIXTURES_REQUIRED "regression_install;regression_clean_homes"
         LABELS "regression"
         TIMEOUT 120
         ENVIRONMENT "HOME=${_xtrkcad_demo_home}"
@@ -106,7 +129,7 @@ add_test(NAME RegressionSuite
     COMMAND ${_xtrkcad_regression_wrapper} ${_xtrkcad_regression_exe} ${_xtrkcad_regression_suite_command}
 )
 set_tests_properties(RegressionSuite PROPERTIES
-    FIXTURES_REQUIRED regression_install
+    FIXTURES_REQUIRED "regression_install;regression_clean_homes"
     LABELS "regression;regression-ci"
     TIMEOUT 900
     ENVIRONMENT "HOME=${_xtrkcad_regression_suite_home}"
