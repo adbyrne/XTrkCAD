@@ -25,6 +25,7 @@
 #include "cundo.h"
 #include "layout.h"
 #include "icons.h"
+#include "misc.h"
 #include "param.h"
 #include "shrtpath.h"
 #include "track.h"
@@ -801,7 +802,13 @@ static void SelProfileW(
 		oldElev = elev;
 		profElem(inx).elev = oldElev;
 		RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
-		wPause(500l);
+		/* Pacing pause so a human can watch the elevation-drag update --
+		 * skipped under bRunTests (-T), same reasoning as the sibling
+		 * wPause(bRunTests ? 0 : 1000) in macro.c's PlaybackMain(). This one
+		 * fires on every C_MOVE during dmprof.xtr's scripted elevation drag,
+		 * so left unconditional it was 500ms * however many drag steps the
+		 * demo scripts, unconditionally padding every -T run. */
+		wPause(bRunTests ? 0 : 500l);
 		break;
 	case C_UP:
 		if (profileUndo == FALSE) {

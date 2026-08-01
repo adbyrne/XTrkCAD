@@ -448,12 +448,18 @@ EXPORT void RedrawPlaybackCursor()
 		if (bDoFlash && playbackTimer == 0) {
 			MacroDrawBitMap(FLASH_PLUS, flash_bm, playbackPos, flashColor);
 			wDrawSetTempMode(playbackD->d, FALSE);
-			wPause(flashTO * 2);
+			/* Pacing pause for the click-target flash animation -- skipped
+			 * under bRunTests (-T), same reasoning as the sibling
+			 * wPause(bRunTests ? 0 : 1000) in PlaybackMain() below. Flash()
+			 * fires on essentially every scripted MOUSE click across every
+			 * demo, so left unconditional this was one of the largest
+			 * unconditional-pause contributors to total -T runtime. */
+			wPause(bRunTests ? 0 : flashTO * 2);
 			wDrawSetTempMode(playbackD->d, TRUE);
 			if (flashTwice) {
 				MacroDrawBitMap(FLASH_PLUS, flash_bm, playbackPos, flashColor);
 				wDrawSetTempMode(playbackD->d, FALSE);
-				wPause(flashTO * 2);
+				wPause(bRunTests ? 0 : flashTO * 2);
 				wDrawSetTempMode(playbackD->d, TRUE);
 			}
 			bDoFlash = FALSE;
@@ -628,6 +634,21 @@ EXPORT void PlaybackMouse(playbackProc proc, drawCmd_p d, wAction_t action,
 //  However it only is displayed over the main canvas, we can't draw over the
 //  toolbar
 
+/**
+ * Highlight (and, if `MOVECURSORTOCOMMANDBUTTON` is defined, animate the
+ * simulated cursor moving to) a toolbar button during demo playback, e.g.
+ * from `PlaybackButtonMouse()` selecting a command. The pacing pause is
+ * skipped under `bRunTests` (-T) -- nothing is watching a regression run,
+ * and at one full second per `COMMAND` step this was unconditionally
+ * padding every `-T` run's total time, same reasoning as the sibling
+ * `wPause(bRunTests ? 0 : 1000)` a few hundred lines below in
+ * `PlaybackMain()`.
+ *
+ * \param d IN the draw context the cursor animation would draw into
+ * \param pos IN target position (only used by the `MOVECURSORTOCOMMANDBUTTON` path)
+ * \param direct IN whether to draw/pause directly (only used by the `MOVECURSORTOCOMMANDBUTTON` path)
+ * \param control IN the toolbar button control to highlight
+ */
 EXPORT void MovePlaybackCursor(drawCmd_p d, coOrd pos, wBool_t direct,
                                wControl_p control)
 {
@@ -652,7 +673,7 @@ EXPORT void MovePlaybackCursor(drawCmd_p d, coOrd pos, wBool_t direct,
 	MacroDrawBitMap(MOVE_PLYBCK3, arrow3_bm, pos, rightDragColor);
 	MacroDrawBitMap(MOVE_PLYBCK4, arrow0_bm, pos, wDrawColorBlack);
 	if (direct) {
-		wPause(1000);
+		wPause(bRunTests ? 0 : 1000);
 		wControlHilite(control, FALSE);
 	}
 	wDrawSetTempMode(d->d, bTemp);
@@ -661,7 +682,7 @@ EXPORT void MovePlaybackCursor(drawCmd_p d, coOrd pos, wBool_t direct,
 	// Just hilight the button
 	if (control) {
 		wControlHilite(control, TRUE);
-		wPause(1000);
+		wPause(bRunTests ? 0 : 1000);
 		wControlHilite(control, FALSE);
 	}
 #endif
