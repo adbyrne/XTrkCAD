@@ -422,6 +422,51 @@ jobs:
           name: codespell-gtk3
           path: codespell.txt
 
+  docs-drift-check:
+    # Non-blocking reminder, not a gate. Doxygen's own build-time gate (the doxygen job
+    # above) catches broken doc *syntax* -- it can't catch doc *content* that's gone
+    # stale because the CI/CMake behavior it describes changed underneath it. That
+    # exact gap bit twice in one session 2026-07-31: a devguide caveat about a known
+    # regression-test false-failure (gtk3issues #21) was added to docs/doxygen/mainpage.md
+    # in the same PR as the CI fix it explains (PR #67), then a second, separate gap
+    # (the Linux quickstart's plain `ctest` silently picking up the same false-failure
+    # class) was only caught by a follow-up human question, not any automation -- see
+    # bug-tracker.md's Action Queue item 17 and PR #68. This job just flags -- via a
+    # step-summary comment, not a failing check -- when a PR touches CI workflows or
+    # CMake build files without touching docs/doxygen/, so a reviewer gets nudged to
+    # ask "does this need a devguide update?" instead of relying on catching it by eye.
+    # Deliberately a path-based heuristic, not a semantic check: it can't tell a
+    # docs-irrelevant change (e.g. a timeout bump) from one that actually needs a
+    # devguide update, so false positives are expected and fine -- it's a prompt for a
+    # human judgment call, not a verdict.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Check for CI/CMake changes without a matching docs update
+        run: |
+          CHANGED=$(git diff --name-only "origin/${{ github.base_ref }}"...HEAD)
+          CI_CMAKE_CHANGED=$(echo "$CHANGED" | grep -E '^(\.github/workflows/|CMakeLists\.txt$|.*\.cmake$)' || true)
+          DOCS_CHANGED=$(echo "$CHANGED" | grep -E '^docs/doxygen/' || true)
+          if [ -n "$CI_CMAKE_CHANGED" ] && [ -z "$DOCS_CHANGED" ]; then
+            {
+              echo "### :memo: Devguide reminder"
+              echo
+              echo "This PR changes CI workflow or CMake build files but not \`docs/doxygen/\`:"
+              echo
+              echo '```'
+              echo "$CI_CMAKE_CHANGED"
+              echo '```'
+              echo
+              echo "If this change affects behavior the devguide describes (build/test steps,"
+              echo "CI gates, CMake options), please update \`docs/doxygen/mainpage.md\`/"
+              echo "\`advanced.md\` too. If not, this is just a heuristic nudge -- ignore it."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
   astyle-check:
     # Gating: fails if any tracked app/bin or app/wlib file is not conformant
     # with app/lib/astylerc. astyle's --dry-run always exits 0, so the gate
