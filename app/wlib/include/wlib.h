@@ -59,7 +59,8 @@ typedef struct wInteger_t *wInteger_p;
 typedef struct wFloat_t *wFloat_p;
 typedef struct wList_t *wList_p;
 typedef struct wChoice_t *wChoice_p;
-typedef struct wDraw_t *wDraw_p;
+// typedef struct wDraw_t *wDraw_p;
+#define wDraw_p wControl_p
 typedef struct wMenu_t *wMenu_p;
 #define wMenu_p wControl_p
 typedef struct wText_t *wText_p;
