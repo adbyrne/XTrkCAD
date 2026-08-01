@@ -182,6 +182,7 @@ struct draw {
 	unsigned delayUpdate;
 	GdkPixbuf *pixbuf; /** \todo Check necessity */
 	GdkPixbuf *background;
+	GdkPixbuf *pixbufBackup; //< snapshot saved by wDrawSaveImage/wDrawRestoreImage
 	cairo_t *cr;
 	double scale_adjust; /** \todo Check necessity */
 	double scale_text;   /** \todo Check necessity */
@@ -618,46 +619,6 @@ GtkPageSetup *wlibPrefGetPageSetup(void);
 void wlibPrefSetPageSetup(GtkPageSetup *page_setup);
 
 /* print.c */
-struct wDraw_t {
-	WOBJ_COMMON
-	void *context;
-	wDrawActionCallBack_p action;
-	wDrawRedrawCallBack_p redraw;
-
-	cairo_surface_t *surface;
-	cairo_surface_t *temp_surface;
-
-	cairo_t *printContext;
-	cairo_surface_t *curPrintSurface;
-
-	wBool_t clip_set;
-	GdkRectangle rect;
-
-	GdkPixbuf *pixbuf;
-	GdkPixbuf *pixbufBackup;
-
-	double dpi;
-	double scale_adjust;
-	double scale_text;
-
-	wDrawWidth lineWidth;
-	wDrawOpts opts;
-	wWinPix_t maxW;
-	wWinPix_t maxH;
-	unsigned long lastColor;
-	wBool_t lastColorInverted;
-	const char *helpStr;
-
-	wWinPix_t lastX;
-	wWinPix_t lastY;
-
-	wBool_t delayUpdate;
-	GdkPixbuf *background;
-
-	wBool_t bTempMode;
-	unsigned drawDestination;
-};
-
 void WlibApplySettings(GtkPrintOperation *op);
 void WlibSaveSettings(GtkPrintOperation *op);
 
