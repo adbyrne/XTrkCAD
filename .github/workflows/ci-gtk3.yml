@@ -90,6 +90,34 @@ jobs:
       - name: Regression suite
         run: ctest --test-dir build -L regression-ci --output-on-failure
 
+  regression-gtk3-standalone:
+    # Companion to regression-gtk3 above: runs the ~47 individual per-demo
+    # tests (label "regression", excluding "regression-ci") that job
+    # deliberately skips. These exercise each demo standalone in its own
+    # fresh process, which is a meaningfully different code path from
+    # RegressionSuite's single warm process -- several real bugs (GTK3
+    # issues #21, #24) only ever manifested cold/standalone and passed
+    # RegressionSuite fine, so this job exists to actually catch that class
+    # going forward rather than relying on someone happening to run these
+    # locally. Self-contained (own checkout/build) matching every other job
+    # in this file, even though it duplicates the build regression-gtk3
+    # already does -- keeps each job simple and independently rerunnable,
+    # at the cost of some redundant build time.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext xvfb
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_REGRESSION_TESTING=ON
+      - name: Build
+        run: cmake --build build
+      - name: Standalone per-demo regression tests
+        run: ctest --test-dir build -L "^regression$" -LE "regression-ci" --output-on-failure
+
   c-tests-arm64:
     # Native ARM64 runner — same architecture as Raspberry Pi 3/4/5
     runs-on: ubuntu-24.04-arm
