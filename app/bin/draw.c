@@ -246,9 +246,17 @@ EXPORT void SetMainSize(void)
 	tempD.size = mainD.size;
 }
 
-/* Draw all temp-surface content: current command feedback (clipped to the
- * inner drawing area) followed by markers, rulers and playback cursor
- * (unclipped so they can extend into the border margins).
+/**
+ * Draw all temp-surface content: current command feedback (clipped to the
+ * inner drawing area) followed by markers and rulers (unclipped so they can
+ * extend into the border margins), all inside one `wDrawStart`/`wDrawFinish`
+ * batch. `RedrawPlaybackCursor()` runs last and *outside* that batch --
+ * deliberately, not an oversight: it ends with `wFlush()`, which pumps the
+ * GTK main loop synchronously, and doing that from inside an open batch let
+ * a delayed cold-start layout event reenter drawing and corrupt the shared
+ * Cairo context (GTK3 issue #21). It doesn't need the batch anyway -- the
+ * drawing backend falls back to a one-shot context per call when none is
+ * active.
  *
  * The caller must already be in temp mode (wDrawSetTempMode TRUE).
  */
@@ -456,8 +464,27 @@ EXPORT void MainRedraw(void)
 
 }
 
-/*
- * Layout main window in response to Pan/Zoom
+/**
+ * Layout main window in response to Pan/Zoom, a window resize, or any other
+ * event that changes mainD's size/scale/origin.
+ *
+ * Also fires on every real GTK layout event received while this callback is
+ * reached via the window's own configure/size-allocate signal chain -- on a
+ * cold process (first paint in a fresh window) that delivery can be delayed
+ * and end up interleaved with unrelated work already in progress, including
+ * -T demo playback. Two `!inPlayback`-guarded blocks in this function exist
+ * specifically to keep that interleaving harmless (GTK3 issue #21):
+ * - The `ConstraintOrig()` call would otherwise re-clamp `mainD.orig` using
+ *   whatever `mainD.size` happens to be at that non-deterministic moment,
+ *   silently overriding a demo script's explicit `ORIG` command.
+ * - The temp-draw-refresh block at the end would otherwise synthesize a
+ *   `DoMouse(wActionMove, pos)` call from `mousePositionx`/`mousePositiony`
+ *   (globals that track the *real* mouse's last pixel position, and sit at
+ *   their zero default until real mouse input ever moves them) -- landing
+ *   wherever pixel (0,0) currently maps to in model space, and corrupting
+ *   `CheckClick()`'s click-vs-drag state machine (`command.c`) if it fires
+ *   mid-click during playback. Confirmed empirically to misclassify a
+ *   demo's first Ctrl-click multi-select as a drag, cold-start only.
  *
  * \param bRedraw Redraw mainD
  * \param bNoBorder Don't allow mainD.orig to go negative
@@ -521,7 +548,24 @@ EXPORT void MainLayout(wBool_t bRedraw, wBool_t bNoBorder)
 		MainRedraw();
 	}
 
-	if (bRedraw && wDrawDoTempDraw) { /* Temporary until mswlib supports TempDraw */
+	/* Same convention as the ConstraintOrig guard above (and autoPan's own
+	 * !inPlayback guard in DoMousew()): this block refreshes the current
+	 * command's hover/drag preview for wherever the real mouse currently
+	 * is, using mousePositionx/mousePositiony -- globals that track the
+	 * last real mouse pixel position and sit at their zero default until
+	 * real mouse input ever moves them. During -T demo playback there is
+	 * no real mouse to refresh for; PlaybackMain() drives DoMouse() itself
+	 * with its own deterministic, scripted actions. Without this guard, a
+	 * MainLayout() call that fires mid-playback (e.g. the same delayed
+	 * cold-start configure-event already implicated elsewhere in GTK3
+	 * issue #21) synthesizes a spurious DoMouse(wActionMove, pos) using
+	 * that stale zero position, landing wherever pixel (0,0) currently
+	 * maps to in model space -- confirmed empirically to corrupt
+	 * CheckClick()'s click-vs-drag state machine (command.c) mid-sequence,
+	 * silently misclassifying a demo's first Ctrl-click multi-select as a
+	 * drag on a cold start only. */
+	if (bRedraw && wDrawDoTempDraw &&
+	    !inPlayback) { /* Temporary until mswlib supports TempDraw */
 		wAction_t action = wActionMove;
 		coOrd pos;
 		if (mouseState == mouseLeft) {
@@ -536,6 +580,9 @@ EXPORT void MainLayout(wBool_t bRedraw, wBool_t bNoBorder)
 		static int iRecursion = 0;
 		iRecursion++;
 		if (iRecursion == 1) {
+			LOG(log_mouse, 1,
+			    ("MainLayout: synthesizing DoMouse( %d, %0.3f, %0.3f ) for current mouse position\n",
+			     action, pos.x, pos.y));
 			DoMouse(action, pos);
 		}
 		iRecursion--;
@@ -628,6 +675,23 @@ EXPORT void DoRedraw(void)
 
 EXPORT coOrd mainCenter;
 
+/**
+ * Clamp a viewport origin so the visible area stays within (or reasonably
+ * near, if `!bNoBorder`) the layout's room bounds, and optionally round it
+ * to `pixelBins`.
+ *
+ * Called from `MainLayout()` on every real layout event -- but not during
+ * `-T` demo playback (see the `!inPlayback` guard at that call site): a
+ * demo script sets its own deterministic viewport via an explicit `ORIG`
+ * command, and clamping against `size` at whatever non-deterministic moment
+ * a delayed layout event happens to fire would silently override it
+ * (GTK3 issue #21).
+ *
+ * \param orig IN/OUT the origin to clamp, modified in place
+ * \param size IN the current viewport size
+ * \param bNoBorder IN if true, don't allow orig to go negative
+ * \param bRound IN if true, round the clamped result to pixelBins
+ */
 static void ConstraintOrig(coOrd * orig, coOrd size, wBool_t bNoBorder,
                            wBool_t bRound)
 {
@@ -1488,6 +1552,21 @@ static void DoMouse(wAction_t action, coOrd pos)
 }
 
 wDrawPix_t autoPanFactor = 10;
+/**
+ * wlib's real GTK mouse-event callback for the main drawing area -- pixel
+ * coordinates in, `DoMouse()` dispatch out, plus autopan-while-dragging
+ * along the way (skipped via `!inPlayback` below, since there's no real
+ * drag to autopan for during scripted playback).
+ *
+ * Confirmed empirically (GTK3 issue #21 investigation) that this callback
+ * never fires at all under a headless Xvfb `-T` regression run -- so it
+ * was *not* the source of a real, spurious mouse event corrupting
+ * `CheckClick()`'s state during playback, despite first looking like the
+ * obvious suspect (any real GTK mouse input reaching `DoMouse()`
+ * unguarded). The actual source was `MainLayout()`'s own temp-draw-refresh
+ * block synthesizing a `DoMouse()` call internally -- see that function's
+ * doc comment.
+ */
 static void DoMousew(wDraw_p d, void *context, wAction_t action, wDrawPix_t x,
                      wDrawPix_t y)
 {

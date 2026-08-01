@@ -426,6 +426,19 @@ static void SetPlaybackSpeed(wIndex_t inx)
 	playbackSpeed = inx;
 }
 
+/**
+ * Draw (or flash) the simulated cursor bitmap at the current playback
+ * position, then `wFlush()` so it's actually visible before the next
+ * scripted step. A no-op unless `inPlayback` and a playback cursor bitmap
+ * are both set.
+ *
+ * Called from `DrawTempContent()` (`draw.c`), deliberately *after* that
+ * function's own `wDrawStart`/`wDrawFinish` batch has already closed, not
+ * from within it -- see that function's doc comment for why (GTK3 issue
+ * #21: `wFlush()` pumps the GTK main loop synchronously, and doing that
+ * from inside an open batch let a delayed cold-start layout event reenter
+ * drawing and corrupt the shared Cairo context).
+ */
 EXPORT void RedrawPlaybackCursor()
 {
 	if (playbackD && playbackBm && inPlayback) {
