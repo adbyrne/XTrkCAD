@@ -1328,6 +1328,7 @@ static void LayerPrefLoad(void)
 
 			inx = atoi(prefString);
 			if(inx < 0 || inx >=NUM_LAYERS) {
+				prefString = strtok(NULL, ",");
 				continue;
 			}
 
@@ -1376,7 +1377,8 @@ static void LayerPrefLoad(void)
 			sprintf(layerOption, LAYERPREF_LIST ".%d", inx);
 			layerValue = wPrefGetString(LAYERPREF_SECTION, layerOption);
 			if (layerValue) {
-				strcpy(listValue, layerValue);
+				strncpy(listValue, layerValue, sizeof(listValue) - 1);
+				listValue[sizeof(listValue) - 1] = '\0';
 				PutLayerListArray(inx, listValue);
 			} else {
 				listValue[0] = '\0';
