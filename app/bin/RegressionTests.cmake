@@ -33,6 +33,34 @@ set(_xtrkcad_regression_exe "${XTRKCAD_REGRESSION_INSTALL_PREFIX}/${XTRKCAD_BIN_
 # tests safe under `ctest -j N`, though -- see RUN_SERIAL below.
 set(XTRKCAD_REGRESSION_HOME_ROOT "${CMAKE_BINARY_DIR}/regression-homes")
 
+# Scan the same DEMO list ReadDemo()/PlaybackSetup() build at runtime from
+# xtrkcad.xtq, so this per-demo ctest target list can't drift from the actual
+# demo menu / what -T's own name-matching accepts. Done here, ahead of
+# RegressionCleanHomes below, so that test's recreate list can include every
+# demo's home directory.
+file(STRINGS "${CMAKE_SOURCE_DIR}/app/lib/xtrkcad.xtq" _xtrkcad_demo_lines REGEX "^DEMO ")
+set(_xtrkcad_demo_names "")
+foreach(_xtrkcad_demo_line ${_xtrkcad_demo_lines})
+    string(REGEX REPLACE "^DEMO \"[^\"]*\" +([^ ]+\\.xtr).*$" "\\1" _xtrkcad_demo_file "${_xtrkcad_demo_line}")
+    list(APPEND _xtrkcad_demo_names "${_xtrkcad_demo_file}")
+endforeach()
+
+set(_xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/RegressionSuite")
+foreach(_xtrkcad_demo ${_xtrkcad_demo_names})
+    list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/${_xtrkcad_demo}")
+endforeach()
+
+# _xtrkcad_regression_home_dirs is a CMake list (semicolon-separated
+# internally) -- embedding it directly in the quoted sh -c string below would
+# leave those semicolons literal, e.g. `mkdir -p /a;/b;/c`, which sh parses as
+# three separate commands (`mkdir -p /a`, then tries to *run* `/b`, then
+# `/c`), not one mkdir with three arguments. Build a properly quoted,
+# space-separated argument string instead.
+set(_xtrkcad_regression_mkdir_args "")
+foreach(_xtrkcad_dir ${_xtrkcad_regression_home_dirs})
+    string(APPEND _xtrkcad_regression_mkdir_args " '${_xtrkcad_dir}'")
+endforeach()
+
 # Wipe every demo's scratch $HOME at the start of each ctest invocation, not
 # just once at CMake configure time. Without this, a process that's killed
 # uncleanly mid-run (e.g. by ctest's own TIMEOUT, which sends a hard kill
@@ -46,11 +74,22 @@ set(XTRKCAD_REGRESSION_HOME_ROOT "${CMAKE_BINARY_DIR}/regression-homes")
 # regression. Confirmed as the actual (non-)cause of an apparent hang
 # "regression" that briefly looked like it was introduced by the GTK3 issue
 # #24 fix (PR #75) -- the fix was fine, a prior timeout's leftover checkpoint
-# file was not. Reuses XTRKCAD_REGRESSION_HOME_ROOT (set just above) rather
-# than a second hardcoded "${CMAKE_BINARY_DIR}/regression-homes" literal --
-# the two must never drift apart.
+# file was not.
+#
+# The rm -rf MUST be immediately followed by recreating every directory it
+# just removed: wGetAppWorkDir() (app/wlib/gtk3lib/unix/ixpaths.c) creates
+# only $HOME/.xtrkcad via a plain, non-recursive g_mkdir() -- it never creates
+# $HOME itself. Leaving $HOME missing makes that mkdir fail with ENOENT, which
+# XTrkCAD treats as fatal and reports via a blocking modal dialog with no one
+# to click it under Xvfb -- indistinguishable from a hang. Confirmed
+# empirically (PR #76): this exact gap, introduced by an earlier version of
+# this fix that only did the rm -rf, hung RegressionSuite for its full 900s
+# TIMEOUT and hung Regression.dmintro.xtr (the first standalone test to run)
+# until the CI job was killed. sh -c is used rather than a second ctest test
+# because these two steps must run as one atomic unit ahead of every
+# regression test -- Linux/Xvfb-only, matching the rest of this file.
 add_test(NAME RegressionCleanHomes
-    COMMAND ${CMAKE_COMMAND} -E rm -rf "${XTRKCAD_REGRESSION_HOME_ROOT}"
+    COMMAND sh -c "rm -rf '${XTRKCAD_REGRESSION_HOME_ROOT}' && mkdir -p${_xtrkcad_regression_mkdir_args}"
 )
 set_tests_properties(RegressionCleanHomes PROPERTIES
     FIXTURES_SETUP regression_clean_homes
@@ -79,19 +118,8 @@ else()
     set(_xtrkcad_regression_wrapper "")
 endif()
 
-# Scan the same DEMO list ReadDemo()/PlaybackSetup() build at runtime from
-# xtrkcad.xtq, so this per-demo ctest target list can't drift from the actual
-# demo menu / what -T's own name-matching accepts.
-file(STRINGS "${CMAKE_SOURCE_DIR}/app/lib/xtrkcad.xtq" _xtrkcad_demo_lines REGEX "^DEMO ")
-set(_xtrkcad_demo_names "")
-foreach(_xtrkcad_demo_line ${_xtrkcad_demo_lines})
-    string(REGEX REPLACE "^DEMO \"[^\"]*\" +([^ ]+\\.xtr).*$" "\\1" _xtrkcad_demo_file "${_xtrkcad_demo_line}")
-    list(APPEND _xtrkcad_demo_names "${_xtrkcad_demo_file}")
-endforeach()
-
 foreach(_xtrkcad_demo ${_xtrkcad_demo_names})
     set(_xtrkcad_demo_home "${XTRKCAD_REGRESSION_HOME_ROOT}/${_xtrkcad_demo}")
-    file(MAKE_DIRECTORY "${_xtrkcad_demo_home}")
     add_test(NAME "Regression.${_xtrkcad_demo}"
         COMMAND ${_xtrkcad_regression_wrapper} ${_xtrkcad_regression_exe} "-T${_xtrkcad_demo}"
     )
@@ -126,7 +154,6 @@ else()
 endif()
 
 set(_xtrkcad_regression_suite_home "${XTRKCAD_REGRESSION_HOME_ROOT}/RegressionSuite")
-file(MAKE_DIRECTORY "${_xtrkcad_regression_suite_home}")
 add_test(NAME RegressionSuite
     COMMAND ${_xtrkcad_regression_wrapper} ${_xtrkcad_regression_exe} ${_xtrkcad_regression_suite_command}
 )
