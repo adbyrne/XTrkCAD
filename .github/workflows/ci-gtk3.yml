@@ -88,7 +88,7 @@ jobs:
       - name: Build
         run: cmake --build build
       - name: Regression suite
-        run: ctest --test-dir build -L regression-ci --output-on-failure
+        run: ctest --test-dir build -L regression-ci --output-on-failure -VV
 
   regression-gtk3-standalone:
     # Companion to regression-gtk3 above: runs the ~47 individual per-demo
@@ -116,7 +116,7 @@ jobs:
       - name: Build
         run: cmake --build build
       - name: Standalone per-demo regression tests
-        run: ctest --test-dir build -L "^regression$" -LE "regression-ci" --output-on-failure
+        run: ctest --test-dir build -L "^regression$" -LE "regression-ci" --output-on-failure -VV
 
   c-tests-arm64:
     # Native ARM64 runner — same architecture as Raspberry Pi 3/4/5
