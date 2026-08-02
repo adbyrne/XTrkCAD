@@ -118,11 +118,41 @@ else()
     set(_xtrkcad_regression_wrapper "")
 endif()
 
+# Shell-quote a CMake list into a single space-separated argument string, e.g.
+# ("/usr/bin/xvfb-run" "-a" "--") -> " '/usr/bin/xvfb-run' '-a' '--'". Used to
+# fold a variable number of leading wrapper args into one sh -c COMMAND
+# string below (see xtrkcad_add_regression_test).
+function(_xtrkcad_shell_quote_list out_var)
+    set(_result "")
+    foreach(_item ${ARGN})
+        string(APPEND _result " '${_item}'")
+    endforeach()
+    set(${out_var} "${_result}" PARENT_SCOPE)
+endfunction()
+
+_xtrkcad_shell_quote_list(_xtrkcad_wrapper_sh ${_xtrkcad_regression_wrapper})
+
+# On a REGRESSION FAIL, CheckRegressionResult() (app/bin/track.c) appends the
+# full actual-vs-expected track dump to $HOME/.<XTRKCAD_BIN>/xtrkcad.regress
+# (confirmed empirically -- e.g. RegressionSuite's own scratch HOME held
+# .xtrkcad-5.4.0.<hash>/ after a passing run) -- real diagnostic detail well
+# beyond the one-line "FAIL: ..." message that already reaches stdout. That
+# file would otherwise just sit in a directory nobody looks at, and once
+# RegressionCleanHomes wipes it ahead of the *next* test, it's gone for good.
+# Every regression test's COMMAND is wrapped in sh -c so that, on a nonzero
+# exit, this dump happens before ctest's own captured output ends -- visible
+# directly in `ctest --output-on-failure`/`-VV` and in the CI log.
+function(xtrkcad_add_regression_test _name _home)
+    set(_regress_file "${_home}/.${XTRKCAD_BIN}/xtrkcad.regress")
+    _xtrkcad_shell_quote_list(_args_sh ${ARGN})
+    add_test(NAME "${_name}"
+        COMMAND sh -c "${_xtrkcad_wrapper_sh} '${_xtrkcad_regression_exe}'${_args_sh}; code=$?; if [ $code -ne 0 ] && [ -f '${_regress_file}' ]; then echo '--- xtrkcad.regress (actual vs expected tracks) ---'; cat '${_regress_file}'; fi; exit $code"
+    )
+endfunction()
+
 foreach(_xtrkcad_demo ${_xtrkcad_demo_names})
     set(_xtrkcad_demo_home "${XTRKCAD_REGRESSION_HOME_ROOT}/${_xtrkcad_demo}")
-    add_test(NAME "Regression.${_xtrkcad_demo}"
-        COMMAND ${_xtrkcad_regression_wrapper} ${_xtrkcad_regression_exe} "-T${_xtrkcad_demo}"
-    )
+    xtrkcad_add_regression_test("Regression.${_xtrkcad_demo}" "${_xtrkcad_demo_home}" "-T${_xtrkcad_demo}")
     set_tests_properties("Regression.${_xtrkcad_demo}" PROPERTIES
         FIXTURES_REQUIRED "regression_install;regression_clean_homes"
         LABELS "regression"
@@ -154,9 +184,7 @@ else()
 endif()
 
 set(_xtrkcad_regression_suite_home "${XTRKCAD_REGRESSION_HOME_ROOT}/RegressionSuite")
-add_test(NAME RegressionSuite
-    COMMAND ${_xtrkcad_regression_wrapper} ${_xtrkcad_regression_exe} ${_xtrkcad_regression_suite_command}
-)
+xtrkcad_add_regression_test(RegressionSuite "${_xtrkcad_regression_suite_home}" ${_xtrkcad_regression_suite_command})
 set_tests_properties(RegressionSuite PROPERTIES
     FIXTURES_REQUIRED "regression_install;regression_clean_homes"
     LABELS "regression;regression-ci"
