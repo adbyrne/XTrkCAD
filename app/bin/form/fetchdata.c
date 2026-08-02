@@ -122,7 +122,8 @@ FormFetchData(paramGroup_p pg)
 
 		case PD_STRING:
 			stringV = wEntryGetValue(p->control);
-			strcpy((char*)p->valueP, stringV);
+			strncpy((char*)p->valueP, stringV, p->max_string - 1);
+			((char*)p->valueP)[p->max_string - 1] = '\0';
 			break;
 
 		case PD_MESSAGE:
