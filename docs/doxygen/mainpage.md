@@ -215,13 +215,27 @@ bug:
   build tree alone; a `RegressionInstall` `ctest` fixture runs `cmake --install` into a scratch
   prefix automatically before any regression test executes. Each regression test also gets its
   own scratch `$HOME` (XTrkCAD persists a benchwork-lumber catalog, an MRU color list, etc. to
-  `$HOME/.xtrkcad/xtrkcad.rc`, and two runs sharing a real `$HOME` can produce a false FAIL from
-  state an earlier run left behind) and `RUN_SERIAL TRUE` (`xvfb-run -a`'s free-display detection
-  isn't atomic against other concurrent `xvfb-run` instances, confirmed empirically: a batch of
-  the per-demo tests under `ctest -j 4` failed 8/48, all cleanly reproducing as passes when rerun
-  alone). Both together make `ctest -j N` safe for the whole suite from a normal desktop checkout
-  — the cheap non-display unit tests elsewhere in the project parallelize freely, while regression
-  tests still run one at a time relative to each other and to everything else.
+  `$HOME/.<binary-name>/xtrkcad.rc` — the directory is version/build-hash-qualified, e.g.
+  `.xtrkcad-5.4.0.<hash>`, not plain `.xtrkcad`; and two runs sharing a real `$HOME` can produce a
+  false FAIL from state an earlier run left behind) and `RUN_SERIAL TRUE` (`xvfb-run -a`'s
+  free-display detection isn't atomic against other concurrent `xvfb-run` instances, confirmed
+  empirically: a batch of the per-demo tests under `ctest -j 4` failed 8/48, all cleanly
+  reproducing as passes when rerun alone). Both together make `ctest -j N` safe for the whole
+  suite from a normal desktop checkout — the cheap non-display unit tests elsewhere in the
+  project parallelize freely, while regression tests still run one at a time relative to each
+  other and to everything else. A `RegressionCleanHomes` fixture wipes and recreates every scratch
+  `$HOME` at the *start of each ctest invocation* (not just once at CMake configure time), so a
+  process killed uncleanly by e.g. `ctest`'s own `TIMEOUT` can't leave behind a stale checkpoint
+  file that would otherwise make `OfferCheckpoint()` (`misc.c`) pop a blocking resume/discard
+  dialog on the *next* run — invisible and unclickable under a headless Xvfb session, which looks
+  exactly like a hung regression. The wipe must recreate every directory it just removed, not just
+  the root: `wGetAppWorkDir()` creates only `$HOME/.<binary-name>` via a non-recursive `g_mkdir()`,
+  which fails with `ENOENT` (and pops that same kind of unclickable modal) if `$HOME` itself is
+  missing (see [gtk3issues #24](https://sourceforge.net/p/xtrkcad-fork/gtk3issues/24/)). On a
+  `REGRESSION FAIL`, each test's `COMMAND` also cats `$HOME/.<binary-name>/xtrkcad.regress` — the
+  full actual-vs-expected track dump `CheckRegressionResult()` (`track.c`) writes there — to stdout
+  before exiting, so that detail is visible in `ctest --output-on-failure`/`-VV` output instead of
+  sitting in a directory the next test's `RegressionCleanHomes` run is about to delete.
 - **`dmjnss.xtr` excluded from `RegressionSuite` on arm64** — its "join straights cornu" check
   fails deterministically on arm64 Release builds (~0.1 degree cornu-join angle divergence).
   Root cause not yet found: tried and ruled out AArch64 FMA-contraction of `spiro.c`'s
