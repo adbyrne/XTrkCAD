@@ -236,6 +236,14 @@ bug:
   full actual-vs-expected track dump `CheckRegressionResult()` (`track.c`) writes there — to stdout
   before exiting, so that detail is visible in `ctest --output-on-failure`/`-VV` output instead of
   sitting in a directory the next test's `RegressionCleanHomes` run is about to delete.
+- **`regression-gtk3-standalone` CI job** — runs the per-demo targets individually
+  (`ctest --test-dir build -L "^regression$" -LE "regression-ci"`), separately from the
+  `regression-gtk3` job's single-process `RegressionSuite` run. The two setups aren't
+  interchangeable: some cold-start-only bugs only reproduce standalone (a fresh process, first
+  paint) and pass inside the full suite (where the same demo runs warm, after other demos have
+  already drained any startup event backlog) — see
+  [gtk3issues #21](https://sourceforge.net/p/xtrkcad-fork/gtk3issues/21/)'s `wDrawStart`
+  reentrancy and mouse-synthesis bugs, both of which needed this standalone mode to catch.
 - **`dmjnss.xtr` excluded from `RegressionSuite` on arm64** — its "join straights cornu" check
   fails deterministically on arm64 Release builds (~0.1 degree cornu-join angle divergence).
   Root cause not yet found: tried and ruled out AArch64 FMA-contraction of `spiro.c`'s

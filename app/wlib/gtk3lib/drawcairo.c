@@ -1149,33 +1149,66 @@ void wDrawBitMap(
 
 
 
+/**
+ * Snapshot the drawing area's current surface into `pixbufBackup`, replacing
+ * any previous snapshot. Used by `ctrain.c`'s train-car redraw to capture
+ * the track/scenery background once, then repeatedly `wDrawRestoreImage()`
+ * it under each car frame instead of redrawing the whole layout.
+ *
+ * `bd` is `wControl_p` (aliased as `wDraw_p`, see `wlib.h`) -- a real B_DRAW
+ * control allocated by `wDrawCreate()`, never a standalone struct of its
+ * own. Earlier code here dereferenced `bd` directly as a distinct
+ * `struct wDraw_t *` layout that was never actually allocated anywhere in
+ * gtk3lib (a leftover from the GTK2 `gtklib` port, where `wDrawCreate` did
+ * allocate a real, dedicated `struct wDraw_t`) -- a heap out-of-bounds
+ * read/write once `struct wDraw_t`'s `pixbufBackup` offset (288, in the
+ * 408-byte struct) landed past the real 240-byte `struct control`
+ * allocation. Confirmed via `sizeof`/`offsetof` and reproduced the reported
+ * garbage `pixbufBackup` pointer exactly (GTK3 issue #19).
+ *
+ * \param bd IN the drawing area control
+ */
 void wDrawSaveImage(
         wDraw_p bd )
 {
-	if ( bd->pixbufBackup ) {
-		g_object_unref( bd->pixbufBackup );
+	struct draw *d = CONTROL_GET_ATTRIBUTES_PTR(bd, draw);
+	g_assert(bd->type == B_DRAW);
+
+	if ( d->pixbufBackup ) {
+		g_object_unref( d->pixbufBackup );
 	}
-	bd->pixbufBackup = gdk_pixbuf_get_from_surface( bd->surface, 0, 0, bd->w,
-	                   bd->h );
+	d->pixbufBackup = gdk_pixbuf_get_from_surface( d->surface, 0, 0, d->width,
+	                  d->height );
 
 }
 
 
+/**
+ * Paint the snapshot saved by `wDrawSaveImage()` back onto the drawing
+ * area's surface, undoing whatever was drawn on top of it since (a no-op if
+ * no snapshot has been saved yet). See `wDrawSaveImage()`'s doc comment for
+ * why `bd` is `wControl_p`, not a standalone `wDraw_t`.
+ *
+ * \param bd IN the drawing area control
+ */
 void wDrawRestoreImage(
         wDraw_p bd )
 {
-	if ( bd->pixbufBackup ) {
+	struct draw *d = CONTROL_GET_ATTRIBUTES_PTR(bd, draw);
+	g_assert(bd->type == B_DRAW);
+
+	if ( d->pixbufBackup ) {
 
 		cairo_t * cr;
-		cr = cairo_create(bd->surface);
-		gdk_cairo_set_source_pixbuf(cr, bd->pixbufBackup, 0, 0);
+		cr = cairo_create(d->surface);
+		gdk_cairo_set_source_pixbuf(cr, d->pixbufBackup, 0, 0);
 		cairo_paint(cr);
 		cairo_destroy(cr);
 
 		cr = NULL;
 
-		if ( bd->delayUpdate || bd->widget == NULL ) { return; }
-		gtk_widget_queue_draw_area( bd->widget, 0, 0, bd->w, bd->h );
+		if ( d->delayUpdate || bd->widget == NULL ) { return; }
+		gtk_widget_queue_draw_area( bd->widget, 0, 0, d->width, d->height );
 	}
 }
 
