@@ -126,7 +126,7 @@ EXPORT EPINX_T TempEndPtsCount( void )
 
 EXPORT trkEndPt_p TempEndPt( EPINX_T ep )
 {
-	CHECK( ep < tempEndPts_da.cnt );
+	CHECK( ep >= 0 && ep < tempEndPts_da.cnt );
 	return &DYNARR_N( trkEndPt_t, tempEndPts_da, ep );
 }
 
@@ -160,7 +160,7 @@ EXPORT void SwapEndPts(
 
 EXPORT void SetTrkEndPoint( track_p trk, EPINX_T ep, coOrd pos, ANGLE_T angle )
 {
-	CHECK( ep < GetTrkEndPtCnt(trk) );
+	CHECK( ep >= 0 && ep < GetTrkEndPtCnt(trk) );
 	// check  setTrkEndPoint: endPt is not connected
 	CHECK( GetEndPtTrack( GetTrkEndPt( trk, ep ) ) == NULL );
 	SetEndPt( GetTrkEndPt( trk, ep ), pos, angle );
@@ -170,42 +170,42 @@ EXPORT void SetTrkEndPoint( track_p trk, EPINX_T ep, coOrd pos, ANGLE_T angle )
 EXPORT void SetTrkEndPointSilent( track_p trk, EPINX_T ep, coOrd pos,
                                   ANGLE_T angle )
 {
-	CHECK( ep < GetTrkEndPtCnt(trk) );
+	CHECK( ep >= 0 && ep < GetTrkEndPtCnt(trk) );
 	SetEndPt( GetTrkEndPt( trk, ep ), pos, angle );
 }
 
 
 EXPORT coOrd GetTrkEndPos( track_p trk, EPINX_T ep )
 {
-	CHECK( ep < GetTrkEndPtCnt(trk) );
+	CHECK( ep >= 0 && ep < GetTrkEndPtCnt(trk) );
 	return GetTrkEndPt(trk,ep)->pos;
 }
 
 
 EXPORT ANGLE_T GetTrkEndAngle( track_p trk, EPINX_T ep )
 {
-	CHECK( ep < GetTrkEndPtCnt(trk) );
+	CHECK( ep >= 0 && ep < GetTrkEndPtCnt(trk) );
 	return GetTrkEndPt(trk,ep)->angle;
 }
 
 
 EXPORT track_p GetTrkEndTrk( track_p trk, EPINX_T ep )
 {
-	CHECK( ep < GetTrkEndPtCnt(trk) );
+	CHECK( ep >= 0 && ep < GetTrkEndPtCnt(trk) );
 	return GetTrkEndPt(trk,ep)->track;
 }
 
 
 EXPORT long GetTrkEndOption( track_p trk, EPINX_T ep )
 {
-	CHECK( ep < GetTrkEndPtCnt(trk) );
+	CHECK( ep >= 0 && ep < GetTrkEndPtCnt(trk) );
 	return GetTrkEndPt(trk,ep)->option;
 }
 
 
 EXPORT long SetTrkEndOption( track_p trk, EPINX_T ep, long option )
 {
-	CHECK( ep < GetTrkEndPtCnt(trk) );
+	CHECK( ep >= 0 && ep < GetTrkEndPtCnt(trk) );
 	return GetTrkEndPt(trk,ep)->option = option;
 }
 

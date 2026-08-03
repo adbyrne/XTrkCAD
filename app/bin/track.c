@@ -438,7 +438,7 @@ EXPORT EPINX_T GetTrkEndPtCnt( track_cp trk )
 
 EXPORT trkEndPt_p GetTrkEndPt(track_cp trk, EPINX_T ep )
 {
-	CHECK( ep < GetTrkEndPtCnt(trk) );
+	CHECK( ep >= 0 && ep < GetTrkEndPtCnt(trk) );
 	return EndPtIndex( trk->endPt, ep );
 }
 
@@ -732,6 +732,9 @@ EXPORT void ConnectAllEndPts(track_p trk0)
 		// Not near another track?
 		if (trk2 == NULL) { continue; }
 		EPINX_T ep2 = PickUnconnectedEndPointSilent(pos0, trk2);
+
+		// No unconnected endpoint on trk2 close enough to consider?
+		if (ep2 < 0) { continue; }
 
 		// Close enough?
 		coOrd pos2 = GetTrkEndPos(trk2, ep2);
