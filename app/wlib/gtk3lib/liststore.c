@@ -116,20 +116,32 @@ wlibListStoreClear(GtkListStore *listStore)
 {
 	wListItem_p id_p;
 	int i = 0;
+	GPtrArray *items;
 
 	g_assert(listStore != NULL);
 
+	/* Collect every row's context first and defer freeing until after
+	 * gtk_list_store_clear() returns -- clearing can reentrantly fire
+	 * selection-changed signals (via GtkTreeView's cursor reset) whose
+	 * handlers read this same context data, so freeing it up front left
+	 * those handlers touching already-freed memory. */
+	items = g_ptr_array_new();
 	id_p = wlibListStoreGetContext(listStore, i++);
-
 	while (id_p) {
-		if (id_p->label) {
-			g_free(id_p->label);
-		}
-		g_free(id_p);
+		g_ptr_array_add(items, id_p);
 		id_p = wlibListStoreGetContext(listStore, i++);
 	}
 
 	gtk_list_store_clear(listStore);
+
+	for (unsigned int j = 0; j < items->len; j++) {
+		id_p = g_ptr_array_index(items, j);
+		if (id_p->label) {
+			g_free(id_p->label);
+		}
+		g_free(id_p);
+	}
+	g_ptr_array_free(items, TRUE);
 }
 
 /**
