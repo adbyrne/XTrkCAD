@@ -97,6 +97,11 @@ CompareParameterFiles(const void *index1, const void *index2)
 	paramFileInfo_t paramFile2 = DYNARR_N(paramFileInfo_t, (*sortFiles),
 	                                      *(int*)index2);
 
+	if (!paramFile1.valid || !paramFile2.valid) {
+		// Unloaded entries have freed name/contents (see UnloadParamFile()) --
+		// never touch them, just group by validity so qsort stays well-defined.
+		return (paramFile2.valid - paramFile1.valid);
+	}
 	if (paramFile2.trackState != paramFile1.trackState) {
 		return (paramFile2.trackState - paramFile1.trackState);
 	} else {

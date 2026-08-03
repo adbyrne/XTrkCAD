@@ -231,3 +231,17 @@ inferred from a tool's message alone.
   `log_*` declaration while completing the \ref log "Log Commands" catalog — `tstraigh.c`'s
   `straight`, `archive.c`'s `zip`, and `undostream.c`'s own separate `undo` registration all had
   this bug (fixed in SF #671's later commits).
+- **Code reads/frees a shared record without checking whether it's still valid.** A dynamic array
+  slot or list-widget row marked "deleted"/"unloaded" via its own flag, but still iterated or
+  compared by code that doesn't check that flag first. SF #675 — `dprmfile.c`'s
+  `CompareParameterFiles()` (a `qsort()` comparator) called `strcmp()` on a just-unloaded, freed
+  parameter file's `.contents` without checking `.valid`, and `wlibListStoreClear()`
+  (`liststore.c`) freed every row's context data *before* calling `gtk_list_store_clear()` — which
+  can reentrantly fire a `selection-changed` signal mid-clear, whose handler
+  (`wlibTreeSelectionChanged()`) then wrote into the already-freed context of a row GTK hadn't
+  actually removed yet. Fixed by making the comparator group invalid entries by validity alone
+  (never touching their freed fields), and by deferring the free in `wlibListStoreClear()` until
+  after `gtk_list_store_clear()` fully returns. SF #676 — the same "no validity check" shape,
+  independently: `GetParamFileName()`/`GetParamFileContents()` (`paramfile.c`) returned a freed,
+  un-nulled pointer unconditionally, and `problemrep.c`'s `ProblemDataCollect()` (Help → Collect
+  Problem Info) read it for every parameter file by index with no check.
