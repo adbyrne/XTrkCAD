@@ -2888,9 +2888,9 @@ static drawContext_t drawCmdContext = {
 	OP_LINE
 };
 
-static wIndex_t benchChoice;
-static wIndex_t benchOrient;
-static wIndex_t dimArrowSize;
+static long benchChoice;
+static long benchOrient;
+static long dimArrowSize;
 wDrawColor lineColor = 1;
 LWIDTH_T lineWidth = 0;
 wDrawColor benchColor;

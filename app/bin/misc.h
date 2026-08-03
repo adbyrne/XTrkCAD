@@ -30,7 +30,7 @@
  * Globals
  */
 
-extern int iconSize;
+extern long iconSize;
 extern wWinPix_t displayWidth;
 extern wWinPix_t displayHeight;
 extern wControl_p mainW;

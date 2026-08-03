@@ -32,7 +32,7 @@
 
 static wControl_p prefW;
 static long displayUnits;
-static wIndex_t distanceFormatInx;
+static long distanceFormatInx;
 
 
 static void UpdateMeasureFmt(void);

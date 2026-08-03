@@ -67,8 +67,8 @@ static int ImportDxf(int cnt, char** fileName, void* data);
 static void ProcessDxfFile(char** filePath, char* fileName,
                            BOOL_T complain);
 
-static int importDxfTrack = 0;
-static int importDxfXti = 0;
+static long importDxfTrack = 0;
+static long importDxfXti = 0;
 
 static char* importDxfTrackLabels[] = { N_("Layer 0 Track"), NULL };
 static char* importDxfXtiLabels[] = { N_("No Import"), N_("Import XTI"), N_("Import Module"), NULL };
