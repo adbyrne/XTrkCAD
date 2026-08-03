@@ -121,6 +121,7 @@ int process(mode_e mode, char * json, FILE * outFile)
 
 end:
 	cJSON_Delete(message_json);
+	free(messageList);
 	return status;
 }
 

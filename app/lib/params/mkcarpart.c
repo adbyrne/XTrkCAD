@@ -212,7 +212,7 @@ void canonicalize_( char * name )
 			*cq++ = *cp;
 		}
 	}
-	while ( cq[-1] == ' ' ) { cq--; }
+	while ( cq != name && cq[-1] == ' ' ) { cq--; }
 	*cq++ = '\0';
 }
 
@@ -433,7 +433,7 @@ void processFile(
 				}
 				while ( *tab[inx] == ' ' ) { tab[inx]++; }
 				cq = tab[inx]+strlen(tab[inx]);
-				while ( cq[-1] == ' ' ) { cq--; }
+				while ( cq != tab[inx] && cq[-1] == ' ' ) { cq--; }
 				*cq = '\0';
 			}
 			for ( ; inx<(int)(sizeof tab/sizeof tab[0]); inx++ ) {
