@@ -47,8 +47,8 @@ static struct {
 	long fontSizeInx;
 	char text[STR_LONG_SIZE];
 	wDrawColor color;
-	BOOL_T boxed;
-	BOOL_T filled;
+	long boxed;
+	long filled;
 	wDrawColor bg_color;
 } Dt;
 

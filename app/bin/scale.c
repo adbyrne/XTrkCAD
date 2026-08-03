@@ -855,8 +855,8 @@ static char rescaleFromGaugeStr[20];
 static long rescaleMode;
 static wIndex_t rescaleFromScaleInx;
 static wIndex_t rescaleFromGaugeInx;
-static SCALEDESCINX_T rescaleToScaleInx;
-static GAUGEINX_T rescaleToGaugeInx;
+static long rescaleToScaleInx;
+static long rescaleToGaugeInx;
 static wIndex_t rescaleToInx;
 static long rescaleNoChangeDim = FALSE;
 static FLOAT_T rescalePercent;
@@ -988,7 +988,7 @@ static void RescaleDlgUpdate(
 
 	case I_RESCALE_TO_SCALE:
 		LoadGaugeList(rescalePLs[I_RESCALE_TO_GAUGE].control,
-		              *((int *)valueP) );
+		              (int)*((long *)valueP) );
 		rescaleToGaugeInx = 0;
 		FormLoadSingleControl( pg, I_RESCALE_TO_GAUGE );
 		FormLoadSingleControl( pg, I_RESCALE_TO_SCALE );
@@ -1122,7 +1122,11 @@ EXPORT void DoRescale( void * unused )
 	}
 
 	// get To scale and gauge (current)
-	GetScaleGauge( GetLayoutCurScale(), &rescaleToScaleInx, &rescaleToGaugeInx );
+	SCALEDESCINX_T toScaleInx;
+	GAUGEINX_T toGaugeInx;
+	GetScaleGauge( GetLayoutCurScale(), &toScaleInx, &toGaugeInx );
+	rescaleToScaleInx = toScaleInx;
+	rescaleToGaugeInx = toGaugeInx;
 
 	RescaleDlgUpdate( &rescalePG, I_RESCALE_CHANGE, &rescaleMode );
 

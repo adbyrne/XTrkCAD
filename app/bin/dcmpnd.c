@@ -146,7 +146,7 @@ typedef struct {
 } refreshSpecial_t;
 static dynArr_t refreshSpecial_da;
 #define refreshSpecial(N) DYNARR_N( refreshSpecial_t, refreshSpecial_da, N )
-static wIndex_t refreshSpecialInx;
+static long refreshSpecialInx;
 static BOOL_T refreshReturnVal;
 static void RefreshSkip( void * junk );
 static paramListData_t refreshSpecialListData = { 30, 600, 0, NULL, NULL };

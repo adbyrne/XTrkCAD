@@ -49,7 +49,7 @@
  *
  */
 
-EXPORT int iconSize = 0;
+EXPORT long iconSize = 0;
 
 EXPORT wWinPix_t displayWidth;
 EXPORT wWinPix_t displayHeight;

@@ -561,9 +561,9 @@ ToolbarLoadConfig(void)
 		fprintf(recordF, "PARAMETER %s %s -> %ld", TOOLBAR_SECTION,
 		        TOOLBAR_LAYER_BUTTONS, layerCount);
 
-	wPrefGetInteger("pref", "iconsize", (long*)&iconSize, 0);
+	wPrefGetInteger("pref", "iconsize", &iconSize, 0);
 	if (recordF)
-		fprintf(recordF, "PARAMETER %s %s -> %d", "pref",
+		fprintf(recordF, "PARAMETER %s %s -> %ld", "pref",
 		        "iconsize", iconSize);
 
 	LoadIconResource(iconSize);

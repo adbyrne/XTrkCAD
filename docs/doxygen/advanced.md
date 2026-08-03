@@ -259,3 +259,16 @@ inferred from a tool's message alone.
   `ConnectAllEndPts()` passed such a sentinel straight into `GetTrkEndPos()` with no check,
   reading before the endpoint array's allocation; fixed at the caller, and defensively at all 8
   `CHECK( ep < ... )` sites across `track.c`/`trkendpt.c` (now `CHECK( ep >= 0 && ep < ... )`).
+- **A param-dialog binding declared a narrower C type than the framework actually reads/writes.**
+  `app/bin/form/defaultvalues.c`'s `FormLoadDefaultValues()` reinterprets every `PD_RADIO`/
+  `PD_TOGGLE`/`PD_LONG`/`PD_SCALE`/`PD_COLORLIST`/`PDO_LISTINDEX`-flagged `PD_LIST`/`PD_COMBOLIST`
+  binding's `void *valueP` as `long *`, unconditionally — regardless of the bound variable's real
+  declared type. A `static int`, a `BOOL_T` (`typedef int`), or a `wIndex_t`/`SCALEDESCINX_T`/
+  `GAUGEINX_T` (all also `typedef int`) bound this way is a real 4-byte overflow on every
+  preferences load on a 64-bit Linux build, not a theoretical one — a pre-64-bit-era assumption
+  (`int`/`long` were the same width on 32-bit and still are under Windows' LLP64 model) that only
+  breaks under LP64. SF #677 — 12 separate sites across `misc.c`, `dxfimport.c`, `ctext.c`,
+  `dpreferences.c`, `cdraw.c`, `dcmpnd.c`, and `scale.c`, one of which (`toolbar.c`'s `iconSize`
+  read) had an explicit `(long*)` cast specifically to silence the compiler warning that should
+  have caught the mismatch — a cast hiding a real bug rather than the deliberate, visible
+  narrowing the \ref index "Developer Documentation" page's Casts section calls for.
