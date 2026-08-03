@@ -252,3 +252,10 @@ inferred from a tool's message alone.
   (`//Add Guard for flip backwards`) shows it was added deliberately, just on the wrong side of
   `&&`. Distinct from the `&&`/`||`-swapped pattern above — the operator was already correct here,
   only the operand order was backwards.
+- **A bounds check covers only the upper limit, so a negative sentinel value slips through.**
+  `CHECK( ep < GetTrkEndPtCnt(trk) )` is true for *any* negative `ep`, not just valid indices — and
+  this codebase uses `-1` as a real "not found" sentinel elsewhere (e.g.
+  `PickUnconnectedEndPointSilent()`'s own return value). SF #678 — `track.c`'s
+  `ConnectAllEndPts()` passed such a sentinel straight into `GetTrkEndPos()` with no check,
+  reading before the endpoint array's allocation; fixed at the caller, and defensively at all 8
+  `CHECK( ep < ... )` sites across `track.c`/`trkendpt.c` (now `CHECK( ep >= 0 && ep < ... )`).
