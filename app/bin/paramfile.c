@@ -98,6 +98,11 @@ bool IsParamFileDeleted(int inx)
 	return paramFileInfo(inx).deleted;
 }
 
+bool IsParamFileValid(int inx)
+{
+	return paramFileInfo(inx).valid;
+}
+
 bool IsParamFileFavorite(int inx)
 {
 	return paramFileInfo(inx).favorite;

@@ -555,10 +555,15 @@ UnloadParamFile(wIndex_t fileIndex)
 
 	MyFree(paramFileI->name);
 	MyFree(paramFileI->contents);
+	paramFileI->name = NULL;
+	paramFileI->contents = NULL;
 
 	paramFileI->valid = FALSE;
 
 	for (int i = 0; i < paramFileInfo_da.cnt; i++) {
+		if (!paramFileInfo(i).valid) {
+			continue;
+		}
 		LOG1(log_params, ("UnloadParamFiles: = %s: %d\n", paramFileInfo(i).contents,
 		                  paramFileInfo(i).trackState))
 	}

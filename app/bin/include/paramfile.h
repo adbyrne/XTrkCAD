@@ -11,6 +11,7 @@ extern dynArr_t paramFileInfo_da;
 void ParamCheckSumLine(char * line);
 wBool_t IsParamValid(int fileInx);
 bool IsParamFileDeleted(int fileInx);
+bool IsParamFileValid(int fileInx);
 bool IsParamFileFavorite(int fileInx);
 void SetParamFileState(int index);
 int ReadParamFile(const char *fileName);
