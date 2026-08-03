@@ -985,7 +985,7 @@ STATUS_T DrawGeomMouse(
 			    || (context->Op == OP_POLYLINE)) {
 				DYNARR_SET( trkSeg_t, tempSegs_da, segCnt );
 				//If last segment wasn't just a point, add another starting on its end
-				if (!IsClose(FindDistance(tempSegs(segCnt-1).u.l.pos[0],
+				if (segCnt > 0 && !IsClose(FindDistance(tempSegs(segCnt-1).u.l.pos[0],
 				                          tempSegs(segCnt-1).u.l.pos[1]))) {
 					DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
 					segPtr = &DYNARR_LAST( trkSeg_t, tempSegs_da );

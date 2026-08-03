@@ -272,3 +272,9 @@ inferred from a tool's message alone.
   read) had an explicit `(long*)` cast specifically to silence the compiler warning that should
   have caught the mismatch — a cast hiding a real bug rather than the deliberate, visible
   narrowing the \ref index "Developer Documentation" page's Casts section calls for.
+- **An index derived from `count - 1` where `count` can legitimately be zero.** SF #680 —
+  `drawgeom.c`'s `DrawGeomMouse()` read `tempSegs(segCnt-1)` when closing a polygon/polyline via
+  Tab/Enter/Space, without checking `segCnt > 0` first; pressing the close key before placing any
+  point reads one element before the (just-resized-to-empty) array. Fixed by skipping the check
+  entirely when `segCnt == 0` — correct behavior, not just crash-avoidance, since there's no "last
+  segment" to compare against yet.
