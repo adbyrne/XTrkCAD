@@ -184,12 +184,24 @@ batch of findings.
   2 days, case by case) → Hg merge. A CI-configuration-only change with no application code (a new
   report-only job, a workflow tweak) can skip the Hg bug branch entirely, since Hg has nothing to
   carry — but it still gets an SF ticket.
+- **Static tools and a live sanitizer run catch different classes of bug — run both.** cppcheck/
+  clang-tidy/CodeQL never execute the code; they can't catch a mismatch that only manifests at
+  runtime against a specific input (a struct field one size too small, a sentinel value an
+  unrelated caller forgot to check). Building with `-DXTRKCAD_SANITIZE=ON` and actually running
+  the app — interactively, or better, the full demo-playback `RegressionSuite` — surfaces a
+  different, complementary set of real bugs. SF #675, #677–#680 were all found exactly this way in
+  one session: none of them showed up in any of `cppcheck`/`cppcheck-deep`/`clang-tidy`'s existing
+  findings for the same files, because none of those tools model "this `void *` gets reinterpreted
+  as a different-sized type at runtime based on a tag" or "this loop condition dereferences before
+  its own bounds guard." See SF #682 for a concrete gap this exposed: CI's sanitizer job and its
+  regression-suite job had never actually been run together.
 
 ## Bug patterns found in this codebase
 
 Real defect classes this project's history has actually hit, not a hypothetical checklist — each
-one below was found by the static-analysis process above and confirmed by reading the code, not
-inferred from a tool's message alone.
+one below was found by the static-analysis process above, or by the live-sanitizer/regression
+combination described just above it, and confirmed by reading the code, not inferred from a
+tool's message alone.
 
 - **Variable shadowing hides an intended write to an outer/global variable.** A local variable
   sharing a global's name silently absorbs writes meant for the global. SF #669 — `cgroup.c`'s
