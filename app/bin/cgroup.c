@@ -1650,7 +1650,7 @@ static void GroupOk( void * unused )
 						return;
 					}
 					if ( flip ) { pPaths += strlen((char *)pPaths)-1; }
-					while ( *pPaths && (pPaths >= ppp->path) ) {      //Add Guard for flip backwards
+					while ( (pPaths >= ppp->path) && *pPaths ) {      //Add Guard for flip backwards
 						DYNARR_APPEND( char, pathPtr_da, 10 );
 						pathChar = *pPaths;
 						flip1 = flip;

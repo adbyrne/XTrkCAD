@@ -245,3 +245,10 @@ inferred from a tool's message alone.
   independently: `GetParamFileName()`/`GetParamFileContents()` (`paramfile.c`) returned a freed,
   un-nulled pointer unconditionally, and `problemrep.c`'s `ProblemDataCollect()` (Help → Collect
   Problem Info) read it for every parameter file by index with no check.
+- **A short-circuit bounds guard placed after the access it's meant to protect.** `&&` evaluates
+  left to right, so `while ( *p && (p >= bufStart) )` dereferences `p` *before* checking whether
+  it's still in bounds — the guard only stops the *next* iteration. SF #679 — `cgroup.c`'s
+  `GroupOk()`, walking a path buffer backward; the guard's own inline comment
+  (`//Add Guard for flip backwards`) shows it was added deliberately, just on the wrong side of
+  `&&`. Distinct from the `&&`/`||`-swapped pattern above — the operator was already correct here,
+  only the operand order was backwards.
