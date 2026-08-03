@@ -634,6 +634,11 @@ ProblemDataCollect()
 	mkdir(subdirectory, 0700);
 
 	for (int i = 0; i < GetParamFileCount(); i++) {
+		if (!IsParamFileValid(i)) {
+			// Unloaded file: name/contents were freed, skip rather than
+			// touch a dangling pointer (GTK3 issue #5).
+			continue;
+		}
 		char* file = GetParamFileName(i);
 
 		// Truthy strncmp() is intentional: non-zero means "not a prefix
