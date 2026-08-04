@@ -65,6 +65,11 @@ your run, not a copy of it.
   \ref index "Developer Documentation" page for the full `XTRKCAD_REGRESSION_TESTING` writeup).
   Kept out of `c-tests-linux` rather than folded in, since its ~9-minute single-process playback
   baseline would slow down that job's fast unit-test feedback loop.
+- **`regression-gtk3-sanitizers`** — the same `RegressionSuite` run as `regression-gtk3`, but
+  ASan/UBSan-instrumented (mirrors `c-tests-sanitizers`' configure line). Closes the SF #682 gap:
+  `c-tests-sanitizers` excludes regression (`-LE regression`) and `regression-gtk3` isn't
+  sanitizer-instrumented, so the combination that found SF #675/#677–#680 previously only happened
+  when someone ran it locally — see the "Static tools and a live sanitizer run" bullet below.
 - **`cppcheck`** — cppcheck's default check set only, `--error-exitcode=1`.
 - **`astyle-check`** — AStyle 3.6.13 (built from source, pinned — an unpinned version once
   produced different formatting for identical input, SF #638) dry-run conformance to
@@ -193,8 +198,14 @@ batch of findings.
   one session: none of them showed up in any of `cppcheck`/`cppcheck-deep`/`clang-tidy`'s existing
   findings for the same files, because none of those tools model "this `void *` gets reinterpreted
   as a different-sized type at runtime based on a tag" or "this loop condition dereferences before
-  its own bounds guard." See SF #682 for a concrete gap this exposed: CI's sanitizer job and its
-  regression-suite job had never actually been run together.
+  its own bounds guard." SF #682 documented a concrete gap this exposed: CI's sanitizer job and its
+  regression-suite job had never actually been run together. Closed by adding
+  `regression-gtk3-sanitizers` (`ci-gtk3.yml`), which runs the full `RegressionSuite` under
+  `-DXTRKCAD_SANITIZE=ON` — the same combination that found #675/#677–#680, now on every PR instead
+  of only when someone thinks to run it locally. Scoped to `RegressionSuite` itself, not
+  `regression-gtk3-standalone`'s ~47 per-demo cold-start tests, to keep the added CI time bounded
+  (~3 minutes observed locally) against unproven additional benefit from sanitizing the standalone
+  path too.
 
 ## Bug patterns found in this codebase
 
