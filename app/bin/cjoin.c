@@ -133,9 +133,6 @@ static BOOL_T JoinWithStraight(
 		d = FindDistance( pos1, Px );
 		k = NormalizeAngle( FindAngle(pos1, Px) - a1 );
 		c = (b > 180.0) ? (360.0-b) : b;
-		if (k < 90.0 || k > 270.0) {
-			c += 180.0;
-		}
 		LOG( log_join, 3, ("     Px=[%0.3f %0.3f] b=%0.3f c=%0.3f d=%0.3f k=%0.3f\n",
 		                   Px.x, Px.y, b, c, d, k ) )
 		res->arcR = d * sin(D2R(c/2.0))/cos(D2R(c/2.0));
