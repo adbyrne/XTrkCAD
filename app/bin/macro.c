@@ -26,6 +26,7 @@
 #include "compound.h"
 #include "cundo.h"
 #include "custom.h"
+#include "directory.h"
 #include "draw.h"
 #include "fileio.h"
 #include "form.h"
@@ -891,6 +892,143 @@ EXPORT void TakeSnapshot(drawCmd_t *d)
 	}
 }
 
+/** @logcmd @showrefby `visualdiff=n` `macro.c` */
+static int log_visualdiff = 0;
+
+/**
+ * Render the current layout to an offscreen bitmap and save it as a PNG at
+ * an explicit path. Used by DoRegression()'s -d visualdiff hook to capture
+ * a picture of what a REGRESSION block saved/checked, for visually diffing
+ * two versions' output against each other (a text diff of track coordinates
+ * can miss a change that's obvious in a picture -- see SF #667/#26, where a
+ * fixture regen silently dropped a join's connector tracks and the numeric
+ * diff alone didn't make that visible).
+ *
+ * Kept independent of TakeSnapshot() above rather than sharing its body --
+ * TakeSnapshot() drives an existing, currently-unreachable (documentEnable
+ * is hardcoded off) auto-numbered-illustration feature, and this avoids any
+ * risk of perturbing that code path's behavior for the sake of DRYing up
+ * two call sites of a debug-only feature.
+ *
+ * \param pngPath IN full path to write the PNG to
+ */
+static void SaveRegressionSnapshot(const char *pngPath)
+{
+	drawCmd_t d = snapshot_d;
+	wWinPix_t ix, iy;
+	track_p trk = NULL;
+	coOrd hi, lo, bot = {0.0, 0.0}, top = {0.0, 0.0};
+	BOOL_T first = TRUE;
+	const DIST_T margin = 1.0;
+	const wWinPix_t maxDim = 4000;
+
+	// Deliberately not mainD.orig/mainD.size: those track the live window's
+	// current viewport, which is unreliable at an arbitrary point mid
+	// headless -T playback (observed empirically: mainD.size.y went negative
+	// mid-run, producing an invalid bitmap height that made
+	// gdk_pixbuf_get_from_surface fail its assertion, which made
+	// wBitmapWriteFile pop a NoticeMessage -- a modal dialog with no
+	// headless-mode awareness, hanging forever under Xvfb, the same bug
+	// class as AbortProg/UndoFail before RegressionTests.cmake's fixes).
+	// Computing our own bounding box from the actual track data is
+	// self-contained and can't be thrown off by transient view state.
+	while (TrackIterate(&trk)) {
+		GetBoundingBox(trk, &hi, &lo);
+		if (first) {
+			first = FALSE;
+			bot = lo;
+			top = hi;
+		} else {
+			if (lo.x < bot.x) {
+				bot.x = lo.x;
+			}
+			if (lo.y < bot.y) {
+				bot.y = lo.y;
+			}
+			if (hi.x > top.x) {
+				top.x = hi.x;
+			}
+			if (hi.y > top.y) {
+				top.y = hi.y;
+			}
+		}
+	}
+	if (first) {
+		return; /* no tracks to snapshot */
+	}
+
+	d.dpi = mainD.dpi;
+	d.scale = mainD.scale > 0.0 ? mainD.scale : 8.0;
+	d.orig.x = bot.x - margin;
+	d.orig.y = bot.y - margin;
+	d.size.x = (top.x - bot.x) + margin * 2;
+	d.size.y = (top.y - bot.y) + margin * 2;
+
+	ix = (wWinPix_t)(d.dpi * d.size.x / d.scale);
+	iy = (wWinPix_t)(d.dpi * d.size.y / d.scale);
+	if (ix > maxDim || iy > maxDim) {
+		DIST_T grow = (ix > iy) ? ((DIST_T)ix / maxDim) : ((DIST_T)iy / maxDim);
+		d.scale *= grow;
+		ix = (wWinPix_t)(d.dpi * d.size.x / d.scale);
+		iy = (wWinPix_t)(d.dpi * d.size.y / d.scale);
+	}
+	// EXPORTBITMAP, not TakeSnapshot()'s literal 8 -- wBitmapCreate() only
+	// creates a real cairo surface when (arg & EXPORTBITMAP); TakeSnapshot()'s
+	// own `8` doesn't have that bit set (EXPORTBITMAP == 1), so it silently
+	// takes the no-op branch and leaves draw->surface unset. Confirmed via
+	// dbitmap.c's working "Export Bitmap" feature, the only other caller,
+	// which does pass EXPORTBITMAP. Pre-existing bug in TakeSnapshot() too,
+	// left as-is there since that whole feature is unreachable dead code
+	// (documentEnable hardcoded off) -- not fixing unrelated dead code here.
+	d.d = wBitmapCreate(ix, iy, EXPORTBITMAP);
+	if (d.d == NULL) {
+		return;
+	}
+	DrawTracks(&d, d.scale, d.orig, d.size);
+	coOrd p0, s1;
+	DIST_T off = 0.02;
+	p0.x = off * d.scale;
+	p0.y = off * d.scale;
+	s1.x = d.size.x - off * 2 * d.scale;
+	s1.y = d.size.y - off * 2 * d.scale;
+	DrawRectangle(&d, p0, s1, wDrawColorBlack, DRAW_CLOSED);
+	wBitmapWriteFile(d.d, pngPath);
+	wBitmapDelete(d.d);
+}
+
+/**
+ * Build `<workingDir>/visualdiff/<basename of demoFile, minus its
+ * extension>-<suffix>.png` (creating the visualdiff directory if needed) and
+ * save a snapshot there. Shared by DoRegression()'s per-REGRESSION-block
+ * hook and the end-of-playback "final view" hook below.
+ *
+ * \param demoFile IN full path of the demo file currently playing
+ * \param suffix IN distinguishes multiple snapshots of the same demo, e.g.
+ *        "L92" for the REGRESSION block at line 92, or "final" for the
+ *        end-of-playback snapshot
+ */
+static void SaveVisualDiffSnapshot(char *demoFile, const char *suffix)
+{
+	char *visualDiffDir = NULL;
+	char *pngPath = NULL;
+	char baseName[STR_SIZE];
+	char pngName[STR_SIZE + 32];
+	char *ext;
+	strncpy(baseName, FindFilename(demoFile), sizeof(baseName) - 1);
+	baseName[sizeof(baseName) - 1] = '\0';
+	ext = strrchr(baseName, '.');
+	if (ext) {
+		*ext = '\0';
+	}
+	snprintf(pngName, sizeof(pngName), "%s-%s.png", baseName, suffix);
+	MakeFullpath(&visualDiffDir, workingDir, "visualdiff", NULL);
+	SafeCreateDir(visualDiffDir);
+	MakeFullpath(&pngPath, visualDiffDir, pngName, NULL);
+	SaveRegressionSnapshot(pngPath);
+	free(visualDiffDir);
+	free(pngPath);
+}
+
 /*
  * Regression test
  */
@@ -961,6 +1099,11 @@ static BOOL_T DoRegression(char *sFileName)
 			}
 		}
 		break;
+	}
+	if (log_visualdiff > 0 && eRegression != REGRESSION_NONE) {
+		char suffix[16];
+		snprintf(suffix, sizeof(suffix), "L%d", paramLineNum);
+		SaveVisualDiffSnapshot(sFileName, suffix);
 	}
 	free(sRegressionFile);
 
@@ -1075,6 +1218,14 @@ static void Playback(void)
 		}
 		if (paramFile == NULL ||
 		    fgets(paramLine, STR_LONG_SIZE, paramFile) == NULL) {
+			// Capture the demo that just finished's end state before
+			// CloseDemoWindows()/Reset() below clear it. paramFileName is
+			// NULL on the very first iteration (no demo has run yet), and
+			// still refers to the just-finished demo here -- it isn't
+			// reassigned to the next demo until later in this same block.
+			if (log_visualdiff > 0 && paramFileName != NULL) {
+				SaveVisualDiffSnapshot(paramFileName, "final");
+			}
 			paramTogglePlaybackHilite = FALSE;
 			CloseDemoWindows();
 			if (paramFile) {
@@ -2515,6 +2666,7 @@ EXPORT BOOL_T MacroInit(void)
 	log_playbackCursor = LogFindIndex("playbackcursor");
 	log_regression = LogFindIndex("regression");
 	log_playback = LogFindIndex("playback");
+	log_visualdiff = LogFindIndex("visualdiff");
 
 	return TRUE;
 }
