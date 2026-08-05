@@ -2,7 +2,7 @@
 Name=XTrackCAD
 Comment=Design model railroad layouts
 Exec=run-xtrkcad.sh
-Icon=@FLATPAK_DOMAIN@.@XTRKCAD_BASE_NAME@
+Icon=@FLATPAK_DOMAIN@.@FLATPAK_BASE_NAME@
 Terminal=false
 Type=Application
 Categories=Graphics

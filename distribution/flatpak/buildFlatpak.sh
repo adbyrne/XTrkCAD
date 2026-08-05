@@ -13,8 +13,8 @@ DEBUG=no
 #   U S A G E
 #####################################################################
 usage() {
-    cat <<EOF
-Usage: $ME
+	cat <<EOF
+Usage: $ME [-d]
 
 This script creates a flatpak from this source. The flatpak will end
 up in the build directory of root of this source tree.
@@ -27,13 +27,13 @@ Pre-requisities:
     flatpak-builder
     xdg-desktop-portal-gtk (log out or reboot after install)
 
-Known issues:
-  - still uses gtk2
+Options:
+  -d    do a debug build
 EOF
-    exit 1
+	exit 1
 }
 if [ "$1" = "-h" ]; then
-    usage
+	usage
 fi
 
 #####################################################################
@@ -41,30 +41,52 @@ fi
 #####################################################################
 PROGRAM_VERSION=ProgramVersion.cmake
 if [ ! -f $PROGRAM_VERSION ]; then
-    cd ../..
+	cd ../..
 fi
 if [ ! -f $PROGRAM_VERSION ]; then
-    echo
-    echo "ERROR: not in the correct directory"
-    echo
-    usage
-    exit 1
+	echo
+	echo "ERROR: not in the correct directory"
+	echo
+	usage
+	exit 1
 fi
+
+HERE=$(pwd)
+BUILD_TYPE=""
+cleanup() {
+	trap - 0 1 2 3 15 21 22
+	if [ -n "$BUILD_TYPE" ]; then
+		hg revert -C $HERE/app/bin/smalldlg.c
+	fi
+}
+
+trap cleanup 0 1 2 3 15 21 22
+
 #####################################################################
 #   C R E A T E   C H E C K   B U I L D   E N V
 #####################################################################
-HERE=$(pwd)
 mkdir -p build
 cd build || exit 1
 rm -f *flatpak
 command -v flatpak >/dev/null 2>&1 || {
-    echo "Missing flatpak tool"
-    exit 1
+	echo "Missing flatpak tool"
+	exit 1
 }
 command -v flatpak-builder >/dev/null 2>&1 || {
-    echo "Missing flatpak-builder tool"
-    exit 1
+	echo "Missing flatpak-builder tool"
+	exit 1
 }
+#####################################################################
+#   D E B U G   B U I L D
+#####################################################################
+if [ "$1" = "-d" ]; then
+	SF_VERSION=$(hg branch)
+	CHANGESETREV=$(hg log -r . -T '{rev}')
+	CHANGESET=$(hg log -r . -T '{shortest(node,12)}')
+	sed -i "s/^#define DESCRIPTION .*/#define DESCRIPTION N_(\"Debug XtrackCad build from $SF_VERSION (changeset $CHANGESETREV:$CHANGESET).\")/" ../app/bin/smalldlg.c
+	BUILD_TYPE="-DCMAKE_BUILD_TYPE=Debug"
+fi
+
 #####################################################################
 #   B U I L D
 #####################################################################
@@ -72,9 +94,9 @@ NCPU=$(lscpu -rp=CPU | tail -1)
 NCPU=$((NCPU + 1))
 MAXLOAD=$((NCPU * 2))
 if command -v ninja >/dev/null 2>&1 && [ ! -s Makefile ]; then
-    cmake -DXTRKCAD_BUILD_FLATPAK=1 -G Ninja -B . -S $HERE
-    ninja -j${NCPU} -l${MAXLOAD} flatpak || exit 1
+	cmake $DEBUG_FLATPAK $BUILD_TYPE -DXTRKCAD_BUILD_FLATPAK=1 -G Ninja -B . -S $HERE
+	ninja -j${NCPU} -l${MAXLOAD} flatpak || exit 1
 else
-    cmake -DXTRKCAD_BUILD_FLATPAK=1 -B . -S $HERE
-    make -j${NCPU} -l${MAXLOAD} flatpak || exit 1
+	cmake $DEBUG_FLATPAK $BUILD_TYPE -DXTRKCAD_BUILD_FLATPAK=1 -B . -S $HERE
+	make -j${NCPU} -l${MAXLOAD} flatpak || exit 1
 fi

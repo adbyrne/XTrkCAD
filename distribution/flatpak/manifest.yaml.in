@@ -1,4 +1,4 @@
-id: @FLATPAK_DOMAIN@.@XTRKCAD_BASE_NAME@
+id: @FLATPAK_DOMAIN@.@FLATPAK_BASE_NAME@
 runtime: org.freedesktop.Platform
 runtime-version: '25.08'
 sdk: org.freedesktop.Sdk
@@ -11,7 +11,7 @@ finish-args:
   - --share=ipc
   - --device=dri
   - --filesystem=home
-  - --env=XTRKCAD_APP_ID=@FLATPAK_DOMAIN@.@XTRKCAD_BASE_NAME@
+  - --env=XTRKCAD_APP_ID=@FLATPAK_DOMAIN@.@FLATPAK_BASE_NAME@
 
 modules:
   - name: libzip
