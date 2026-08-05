@@ -366,6 +366,207 @@ jobs:
   # tag or for the Hg bug branches behind any given doc change to clear
   # their SF review window and merge into GTK3V2MAIN -- this job tracks
   # whatever's on the git mirror right now.
+  package-coverage:
+    # Published (not just PR-artifact) coverage report -- mirrors ci-gtk3.yml's
+    # `coverage` job (unit tests + full regression suite, branch coverage
+    # enabled; see that job's comment and .claude/devml-coverage-report-
+    # 2026-08-05.md for why unit-tests-only was found to be nearly
+    # meaningless: ~3,400 instrumented lines vs. ~64,000 once the regression
+    # suite actually runs the app). Kept as a separate job here (rather than
+    # reusing ci-gtk3.yml's artifact) since release.yml is a distinct
+    # workflow trigger (push/tag, not pull_request) with no access to a PR
+    # run's artifacts.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext xvfb lcov
+      - name: Configure with coverage flags
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
+            -DCMAKE_C_FLAGS="--coverage" -DCMAKE_EXE_LINKER_FLAGS="--coverage"
+      - name: Build
+        run: cmake --build build
+      - name: Run tests (unit + full regression suite)
+        run: xvfb-run ctest --test-dir build --output-on-failure
+      - name: Collect coverage
+        run: |
+          lcov --capture --directory build \
+               --output-file build/coverage.info \
+               --ignore-errors mismatch --rc branch_coverage=1
+          lcov --remove build/coverage.info \
+               '/usr/*' '*/build/*' '*/unittest/*' '*/tools/*' \
+               --output-file build/coverage-filtered.info \
+               --ignore-errors unused --rc branch_coverage=1
+          genhtml build/coverage-filtered.info \
+                  --output-directory coverage-html \
+                  --title "XTrkCAD coverage (GTK3, unit + regression suite)" \
+                  --rc branch_coverage=1
+          lcov --summary build/coverage-filtered.info --rc branch_coverage=1
+      - name: Archive coverage report
+        run: tar -czf xtrkcad-coverage.tar.gz -C coverage-html .
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v7
+        with:
+          name: xtrkcad-coverage-html
+          path: xtrkcad-coverage.tar.gz
+          retention-days: 14
+
+  package-cppcheck-deep:
+    # Published version of ci-gtk3.yml's report-only cppcheck-deep job -- see
+    # that job's comment for the suppression rationale (kept in sync by hand,
+    # both jobs run the same command).
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install cppcheck
+        run: sudo apt-get update -q && sudo apt-get install -y cppcheck
+      - name: Run cppcheck (deep, non-fatal)
+        run: |
+          cppcheck \
+            --enable=warning,style,performance,portability \
+            --inline-suppr \
+            -j 4 \
+            --suppress=missingInclude \
+            --suppress=missingIncludeSystem \
+            --suppress=nullPointerOutOfMemory \
+            --suppress=nullPointerOutOfResources \
+            --suppress=nullPointerArithmeticOutOfMemory \
+            --suppress=syntaxError:app/bin/archive.c \
+            --suppress=syntaxError:app/bin/cturntbl.c \
+            --suppress=syntaxError:app/bin/directory.c \
+            --suppress=syntaxError:app/bin/paths.c \
+            --suppress=syntaxError:app/bin/utility.c \
+            --suppress=unknownMacro:app/bin/custom.c \
+            --suppress=ctunullpointer:app/bin/track.c \
+            --suppress=uninitvar:app/bin/levenshtein.c \
+            --suppress=uninitvar:app/bin/problemrep.c \
+            --suppress=uninitvar:app/bin/paths.c \
+            --suppress=nullPointer:app/bin/partcatalog.c \
+            --suppress=missingReturn:app/bin/cturnout.c \
+            --suppress=ctuPointerArith:app/bin/cturnout.c \
+            --suppress=selfAssignment:app/bin/cdraw.c \
+            --suppress=selfAssignment:app/bin/drawgeom.c \
+            -I app/bin -I app/bin/include -I app/wlib/include \
+            app/bin/*.c app/dynstring/*.c > cppcheck-deep.txt 2>&1 || true
+      - name: Format as HTML
+        run: |
+          mkdir -p report
+          tools/format-findings-report.sh cppcheck-deep.txt report/index.html \
+            "cppcheck-deep findings (GTK3V2MAIN)" bracketed \
+            "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/"
+      - name: Archive report
+        run: tar -czf xtrkcad-cppcheck-deep.tar.gz -C report .
+      - name: Upload report
+        uses: actions/upload-artifact@v7
+        with:
+          name: xtrkcad-cppcheck-deep-html
+          path: xtrkcad-cppcheck-deep.tar.gz
+          retention-days: 14
+
+  package-clang-tidy:
+    # Published version of ci-gtk3.yml's report-only clang-tidy job -- see
+    # that job's comment for scope rationale (kept in sync by hand, both
+    # jobs run the same command).
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build clang-tidy libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext
+      - name: Configure and build (need generated headers for clang-tidy to parse cleanly)
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          cmake --build build
+      - name: Run clang-tidy (non-fatal)
+        run: |
+          mapfile -t FILES < <(find app/bin app/dynstring app/cornu -name "*.c" | grep -v unittest | grep -vE 'bdf2xtp\.c|helphelper\.c|ppedit_gtk1\.c')
+          clang-tidy --checks='-*,bugprone-*,performance-*,portability-*' -p build "${FILES[@]}" > clang-tidy.txt 2>&1 || true
+      - name: Format as HTML
+        run: |
+          mkdir -p report
+          tools/format-findings-report.sh clang-tidy.txt report/index.html \
+            "clang-tidy findings (GTK3V2MAIN)" bracketed \
+            "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/"
+      - name: Archive report
+        run: tar -czf xtrkcad-clang-tidy.tar.gz -C report .
+      - name: Upload report
+        uses: actions/upload-artifact@v7
+        with:
+          name: xtrkcad-clang-tidy-html
+          path: xtrkcad-clang-tidy.tar.gz
+          retention-days: 14
+
+  package-codespell:
+    # Published version of ci-gtk3.yml's report-only codespell job -- see
+    # that job's comment for the exclusion/ignore-list rationale (kept in
+    # sync by hand, both jobs run the same command).
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install codespell
+        run: sudo apt-get update -q && sudo apt-get install -y codespell
+      - name: Run codespell (non-fatal)
+        run: |
+          codespell app/bin app/wlib \
+            --skip='*/wrapbox/*,*/halibut/*,*.ai' \
+            --ignore-words=.github/codespell-ignore.txt \
+            -q 3 > codespell.txt 2>&1 || true
+      - name: Format as HTML
+        run: |
+          mkdir -p report
+          tools/format-findings-report.sh codespell.txt report/index.html \
+            "codespell findings (GTK3V2MAIN)" codespell \
+            "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/"
+      - name: Archive report
+        run: tar -czf xtrkcad-codespell.tar.gz -C report .
+      - name: Upload report
+        uses: actions/upload-artifact@v7
+        with:
+          name: xtrkcad-codespell-html
+          path: xtrkcad-codespell.tar.gz
+          retention-days: 14
+
+  package-compiler-warnings:
+    # Published version of ci-gtk3.yml's report-only compiler-warnings job
+    # (Linux only -- the most complete/representative of the three platform
+    # variants; macos/windows stay PR-artifact-only for now).
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin
+      - name: Configure with -Wall -Wextra
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
+            -DCMAKE_C_FLAGS="-Wall -Wextra -Wno-unused-parameter"
+      - name: Build (warnings captured, non-fatal)
+        run: cmake --build build 2>&1 | tee build/warnings.txt || true
+      - name: Format as HTML
+        run: |
+          mkdir -p report
+          tools/format-findings-report.sh build/warnings.txt report/index.html \
+            "Compiler warnings, -Wall -Wextra (GTK3V2MAIN, Linux)" bracketed \
+            "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/"
+      - name: Archive report
+        run: tar -czf xtrkcad-compiler-warnings.tar.gz -C report .
+      - name: Upload report
+        uses: actions/upload-artifact@v7
+        with:
+          name: xtrkcad-compiler-warnings-html
+          path: xtrkcad-compiler-warnings.tar.gz
+          retention-days: 14
+
   package-docs:
     runs-on: ubuntu-latest
     env:
@@ -430,7 +631,13 @@ jobs:
   #   https://adbyrne.github.io/XTrkCAD/doxygen/
   #   https://adbyrne.github.io/XTrkCAD/userguide/
   deploy-pages:
-    needs: package-docs
+    needs:
+      - package-docs
+      - package-coverage
+      - package-cppcheck-deep
+      - package-clang-tidy
+      - package-codespell
+      - package-compiler-warnings
     runs-on: ubuntu-latest
     permissions:
       pages: write
@@ -447,9 +654,14 @@ jobs:
 
       - name: Assemble Pages site
         run: |
-          mkdir -p site/doxygen site/userguide
+          mkdir -p site/doxygen site/userguide site/coverage site/cppcheck-deep site/clang-tidy site/codespell site/compiler-warnings
           tar -xzf downloaded/xtrkcad-docs-html/xtrkcad-docs.tar.gz -C site/doxygen
           tar -xzf downloaded/xtrkcad-userguide-html/xtrkcad-userguide.tar.gz -C site/userguide
+          tar -xzf downloaded/xtrkcad-coverage-html/xtrkcad-coverage.tar.gz -C site/coverage
+          tar -xzf downloaded/xtrkcad-cppcheck-deep-html/xtrkcad-cppcheck-deep.tar.gz -C site/cppcheck-deep
+          tar -xzf downloaded/xtrkcad-clang-tidy-html/xtrkcad-clang-tidy.tar.gz -C site/clang-tidy
+          tar -xzf downloaded/xtrkcad-codespell-html/xtrkcad-codespell.tar.gz -C site/codespell
+          tar -xzf downloaded/xtrkcad-compiler-warnings-html/xtrkcad-compiler-warnings.tar.gz -C site/compiler-warnings
           cat > site/index.html <<'PAGEEOF'
           <!doctype html>
           <html lang="en">
@@ -461,6 +673,16 @@ jobs:
             <li><a href="doxygen/">Developer documentation (Doxygen)</a></li>
             <li><a href="userguide/">User guide</a></li>
             <li><a href="https://github.com/adbyrne/XTrkCAD/releases/tag/latest-gtk3v2main">Latest development build (packages)</a></li>
+          </ul>
+          <h2>Analysis reports</h2>
+          <p>Report-only, non-gating -- findings backlogs, not build failures. Each link back to the
+          exact commit's source on GitHub.</p>
+          <ul>
+            <li><a href="coverage/">Code coverage</a> (unit tests + full regression suite, branch coverage)</li>
+            <li><a href="cppcheck-deep/">cppcheck (deep)</a></li>
+            <li><a href="clang-tidy/">clang-tidy</a></li>
+            <li><a href="codespell/">codespell</a></li>
+            <li><a href="compiler-warnings/">Compiler warnings</a> (-Wall -Wextra, Linux)</li>
           </ul>
           </body>
           </html>

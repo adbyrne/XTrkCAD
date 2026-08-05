@@ -817,8 +817,21 @@ jobs:
 
   coverage:
     # Report-only: generates an lcov HTML report and uploads it as an artifact.
+    #
+    # Runs unit tests AND the full regression demo-playback suite together
+    # (no -LE regression filter) with branch coverage enabled. A unit-tests-
+    # only measurement was found 2026-08-05 to be nearly meaningless: only
+    # ~3,400 lines even get instrumented that way (essentially none of
+    # app/bin's real command/draw/UI code links into any CMocka binary), vs.
+    # ~64,000 lines once the regression suite runs the actual app binary.
+    # Branch coverage specifically is what's diagnostic for the #667 class of
+    # bug (JoinWithStraight() was called 318 times by the suite -- function-
+    # level coverage would show it as exercised -- but one always-false
+    # branch inside it never took the true path once). See
+    # .claude/devml-coverage-report-2026-08-05.md (sent to the dev mailing
+    # list) for the full writeup.
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
       - name: Install dependencies
@@ -831,23 +844,29 @@ jobs:
             -DCMAKE_C_FLAGS="--coverage" -DCMAKE_EXE_LINKER_FLAGS="--coverage"
       - name: Build
         run: cmake --build build
-      - name: Run tests
-        # -LE regression: see c-tests-linux; the GTK3 issue #26 suite has its
-        # own job (regression-gtk3), not built with --coverage instrumentation.
-        run: xvfb-run ctest --test-dir build --output-on-failure -LE regression
+      - name: Run tests (unit + full regression suite)
+        # Outer xvfb-run: PreferenceTest (a plain unit test, not itself
+        # regression-labeled) needs a real DISPLAY on CI's headless runners,
+        # same reason c-tests-linux's -LE regression run has one. Regression
+        # tests each additionally self-wrap in their own nested xvfb-run
+        # (RegressionTests.cmake bakes that into every regression test's
+        # COMMAND unconditionally) -- nesting is harmless, each xvfb-run
+        # picks its own free display number.
+        run: xvfb-run ctest --test-dir build --output-on-failure
       - name: Collect coverage
         run: |
           lcov --capture --directory build \
                --output-file build/coverage.info \
-               --ignore-errors mismatch
+               --ignore-errors mismatch --rc branch_coverage=1
           lcov --remove build/coverage.info \
                '/usr/*' '*/build/*' '*/unittest/*' '*/tools/*' \
                --output-file build/coverage-filtered.info \
-               --ignore-errors unused
+               --ignore-errors unused --rc branch_coverage=1
           genhtml build/coverage-filtered.info \
                   --output-directory build/coverage-html \
-                  --title "XTrkCAD unit test coverage (GTK3)"
-          lcov --summary build/coverage-filtered.info
+                  --title "XTrkCAD coverage (GTK3, unit + regression suite)" \
+                  --rc branch_coverage=1
+          lcov --summary build/coverage-filtered.info --rc branch_coverage=1
       - name: Upload coverage report
         uses: actions/upload-artifact@v7
         with:
