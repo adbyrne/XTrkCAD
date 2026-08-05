@@ -638,6 +638,13 @@ jobs:
       - package-clang-tidy
       - package-codespell
       - package-compiler-warnings
+    # Only ordinary GTK3V2MAIN pushes redeploy the live public site -- this
+    # job previously had no such guard despite this file's own header
+    # comment claiming one (found 2026-08-05 while wiring up the new
+    # package-* report jobs, needed a way to workflow_dispatch-test them
+    # without publishing untested branch content live). Matches
+    # publish-latest-release's existing guard below.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/GTK3V2MAIN'
     runs-on: ubuntu-latest
     permissions:
       pages: write
