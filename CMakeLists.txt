@@ -140,9 +140,16 @@ set(XTRKCAD_LOCALE_INSTALL_DIR "share/locale")
 # XTRKCAD_VERSION itself (ProgramVersion.cmake) also carries a dev-build
 # hash suffix on untagged builds, so this disambiguates successive dev
 # builds of the same nominal version too, not just distinct point releases.
-set(XTRKCAD_BIN "xtrkcad-${XTRKCAD_VERSION}")
-set(XTRKCAD_SHARE_INSTALL_DIR "share/${XTRKCAD_BIN}")
+#
+# Note: flatpak builds cannot have periods in the name since periods delimit
+#       the namespace.
+if (XTRKCAD_BUILD_FLATPAK)
+	set(XTRKCAD_BIN "xtrkcad-gtk")
+else()
+	set(XTRKCAD_BIN "xtrkcad-${XTRKCAD_VERSION}")
+endif()
 
+set(XTRKCAD_SHARE_INSTALL_DIR "share/${XTRKCAD_BIN}")
 # XTRKCAD_PACKAGE doubles as the gettext domain name (app/i18n/CMakeLists.txt,
 # app/bin/i18n.c's bindtextdomain/textdomain calls) and therefore the
 # installed .mo filename under the *shared* system locale tree
