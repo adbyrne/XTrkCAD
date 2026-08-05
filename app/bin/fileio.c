@@ -329,6 +329,22 @@ static char * checkPtFileName1;
 static char * checkPtFileName2;
 static char * checkPtFileNameBackup;
 
+/**
+ * Compute checkPtFileName1/checkPtFileName2 if not already done. DoCheckPoint()
+ * needs both set before it can save/rename a checkpoint; historically only
+ * ExistsCheckpoint() computed them, as a side effect of its own unrelated
+ * existence check, so any startup path that skipped calling ExistsCheckpoint()
+ * (e.g. -T regression-test mode, which has no reason to probe for a resumable
+ * checkpoint) left DoCheckPoint() trying to save to a NULL filename the first
+ * time a checkpoint was actually due. Idempotent and cheap, so both callers
+ * can call it unconditionally rather than relying on call order.
+ */
+static void EnsureCheckpointFileNames( void )
+{
+	MakeFullpath(&checkPtFileName1, workingDir, sCheckPointF, NULL);
+	MakeFullpath(&checkPtFileName2, workingDir, sCheckPoint1F, NULL);
+}
+
 /** Read the layout design.
  *
  * \param[in] pathName filename including directory
@@ -1028,6 +1044,8 @@ static void DoCheckPoint( void )
 {
 	int rc;
 
+	EnsureCheckpointFileNames();
+
 	if (!checkPtFileNameBackup || (changed <= checkPtInterval+1)) {
 		sprintf(sCheckPointBF,"%s00.bkp",GetLayoutFilename());
 		MakeFullpath(&checkPtFileNameBackup, workingDir, sCheckPointBF, NULL);
@@ -1146,8 +1164,7 @@ EXPORT int ExistsCheckpoint( void )
 {
 	struct stat fileStat;
 
-	MakeFullpath(&checkPtFileName1, workingDir, sCheckPointF, NULL);
-	MakeFullpath(&checkPtFileName2, workingDir, sCheckPoint1F, NULL);
+	EnsureCheckpointFileNames();
 
 	if ( !stat( checkPtFileName1, &fileStat ) ) {
 		return TRUE;

@@ -1072,7 +1072,11 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 
 	/* check for existing checkpoint file */
 	resumeWork = FALSE;
-	if (ExistsCheckpoint()) {
+	if (!bRunTests && ExistsCheckpoint()) {
+		// Headless regression run: OfferCheckpoint()'s modal would hang
+		// forever waiting for a click that never comes, if a prior -T run
+		// against this same $HOME left a checkpoint behind. -T mode never
+		// wants to resume a prior session's work anyway.
 		resumeWork = OfferCheckpoint();
 	}
 
