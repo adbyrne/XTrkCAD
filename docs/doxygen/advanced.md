@@ -98,6 +98,52 @@ page (Actions tab → the run → Artifacts); each job's own "Upload findings"/"
 step names it. **CodeQL** is a separate workflow (`codeql.yml`) — it runs on push/PR and a weekly
 Monday cron, and its results show up in the repo's Security tab rather than as an artifact.
 
+Five of these (`coverage`, `cppcheck-deep`, `clang-tidy`, `codespell`, `compiler-warnings`) are
+additionally published as permanent, browsable HTML at
+[adbyrne.github.io/XTrkCAD](https://adbyrne.github.io/XTrkCAD/), redeployed on every push to
+`GTK3V2MAIN` by `release.yml`'s `package-coverage`/`package-cppcheck-deep`/`package-clang-tidy`/
+`package-codespell`/`package-compiler-warnings` jobs (separate from the `ci-gtk3.yml` jobs of the
+same underlying command, which stay PR-artifact-only for fast per-PR feedback). The four plain-text
+tools are formatted into grouped, linkable HTML by `tools/format-findings-report.sh` — see below.
+
+### Reproducing a report locally
+
+Each report is just a CMake/CTest build plus one external tool, runnable outside CI the same way
+any other build is. The coverage job:
+
+```sh
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
+    -DCMAKE_C_FLAGS="--coverage" -DCMAKE_EXE_LINKER_FLAGS="--coverage"
+cmake --build build
+ctest --test-dir build --output-on-failure   # unit tests + full regression suite
+lcov --capture --directory build --output-file build/coverage.info \
+    --ignore-errors mismatch --rc branch_coverage=1
+lcov --remove build/coverage.info '/usr/*' '*/build/*' '*/unittest/*' '*/tools/*' \
+    --output-file build/coverage-filtered.info --ignore-errors unused --rc branch_coverage=1
+genhtml build/coverage-filtered.info --output-directory coverage-html --rc branch_coverage=1
+```
+
+`cppcheck-deep`/`clang-tidy`/`codespell` each run their own analysis command straight from
+`ci-gtk3.yml`'s (or `release.yml`'s, identical) job definition — copy the `run:` step verbatim,
+it needs no CI-specific setup. `compiler-warnings` is just `cmake --build` with
+`-DCMAKE_C_FLAGS="-Wall -Wextra -Wno-unused-parameter"` piped through `tee`.
+
+Once you have a plain-text findings file (cppcheck/clang-tidy/compiler-warnings output, or
+codespell's), turn it into the same grouped, GitHub-linked HTML the published site shows with
+`tools/format-findings-report.sh`:
+
+```sh
+tools/format-findings-report.sh <input.txt> <output.html> "<title>" <bracketed|codespell> <blob-base-url>
+```
+
+`bracketed` handles cppcheck/clang-tidy/compiler-warning lines ending in `[category]`;
+`codespell` handles its `file:line: word ==> suggestion` shape instead. `<blob-base-url>` is
+prepended to each finding's `file#Lline` to build its link — pass a real GitHub blob URL (e.g.
+`https://github.com/adbyrne/XTrkCAD/blob/$(git rev-parse HEAD)/`) to get working links against
+your own checkout, or omit meaningful linking entirely by passing any placeholder if you just
+want the grouped local HTML view. The `coverage` report doesn't go through this script — `genhtml`
+already produces its own linked, per-line HTML.
+
 ## The warning-count ratchet
 
 `PlatformSettings.cmake` promotes specific warning categories to `-Werror=` once a phase has
