@@ -655,10 +655,32 @@ jobs:
     permissions:
       pages: write
       id-token: write
+      actions: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Remove stale github-pages artifacts from earlier attempts
+        # actions/deploy-pages fetches the run's "github-pages" artifact by
+        # name and errors out ("Multiple artifacts named github-pages were
+        # unexpectedly found") if more than one exists. That happens
+        # whenever this job is re-run after a previous attempt already got
+        # as far as "Upload Pages artifact" -- e.g. attempt 1 uploads fine
+        # but then times out on GitHub's Pages backend (deployment_queued),
+        # and a re-run of just this job uploads a second one. Artifacts
+        # aren't cleaned up between attempts of the same run, so clear any
+        # pre-existing ones before uploading a fresh copy (found 2026-08-06,
+        # run 31105550052).
+        run: |
+          gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" \
+            --paginate --jq '.artifacts[] | select(.name=="github-pages") | .id' |
+          while read -r id; do
+            echo "Deleting stale github-pages artifact $id"
+            gh api -X DELETE "repos/${{ github.repository }}/actions/artifacts/$id"
+          done
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Download docs artifacts
         uses: actions/download-artifact@v7
         with:
