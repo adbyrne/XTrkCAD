@@ -423,6 +423,11 @@ jobs:
         run: |
           mapfile -t FILES < <(find app/bin app/dynstring app/cornu -name "*.c" | grep -v unittest | grep -vE 'bdf2xtp\.c|helphelper\.c|ppedit_gtk1\.c')
           clang-tidy --checks='-*,bugprone-*,performance-*,portability-*' -p build "${FILES[@]}" > clang-tidy.txt 2>&1 || true
+          # compile_commands.json stores absolute paths, so clang-tidy emits
+          # diagnostics as e.g. "/home/runner/work/XTrkCAD/XTrkCAD/app/bin/foo.c:12:...".
+          # Strip the workspace prefix so this artifact's paths stay repo-relative,
+          # matching package-clang-tidy in release.yml (kept in sync by hand).
+          sed -i "s|${GITHUB_WORKSPACE}/||g" clang-tidy.txt
       - name: Summarise findings
         run: |
           COUNT=$(grep -cE '\[[a-zA-Z.-]+\]$' clang-tidy.txt || echo 0)

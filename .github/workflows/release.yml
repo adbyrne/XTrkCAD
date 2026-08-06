@@ -488,6 +488,12 @@ jobs:
         run: |
           mapfile -t FILES < <(find app/bin app/dynstring app/cornu -name "*.c" | grep -v unittest | grep -vE 'bdf2xtp\.c|helphelper\.c|ppedit_gtk1\.c')
           clang-tidy --checks='-*,bugprone-*,performance-*,portability-*' -p build "${FILES[@]}" > clang-tidy.txt 2>&1 || true
+          # compile_commands.json stores absolute paths, so clang-tidy emits
+          # diagnostics as e.g. "/home/runner/work/XTrkCAD/XTrkCAD/app/bin/foo.c:12:...".
+          # format-findings-report.sh expects repo-relative paths (like
+          # cppcheck/codespell/compiler-warnings already produce) -- strip the
+          # workspace prefix so its GitHub blob links resolve.
+          sed -i "s|${GITHUB_WORKSPACE}/||g" clang-tidy.txt
       - name: Format as HTML
         run: |
           mkdir -p report
