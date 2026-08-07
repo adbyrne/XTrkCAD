@@ -46,6 +46,22 @@ $extrastylesheet
     DoxygenAwesomeParagraphLink.init()
     DoxygenAwesomeInteractiveToc.init()
 </script>
+<script type="text/javascript">
+(function () {
+  function fixTop() {
+    var top = document.getElementById('top');
+    if (!top) return;
+    top.style.marginBottom = '0';
+    top.style.maxWidth = 'none';
+  }
+
+  if (document.readyState === 'complete') {
+    fixTop();
+  } else {
+    window.addEventListener('load', fixTop);
+  }
+})();
+</script>
 </head>
 <body>
 <!--BEGIN FULL_SIDEBAR-->
