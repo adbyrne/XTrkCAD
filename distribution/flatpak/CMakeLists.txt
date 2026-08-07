@@ -7,10 +7,15 @@ endif()
 set(FLATPAK_REPO "temp.repo")
 set(FLATPAK_WORK_DIR "temp.work")
 set(FLATPAK_BUILD_SCRIPT "${CMAKE_SOURCE_DIR}/distribution/flatpak/buildFlatpak.sh")
+# minimize changes to app/lib/xtrkcad.metainfo.xml
+string(REGEX REPLACE "\\.[0-9a-f][0-9a-f][0-9a-f][0-9a-f]+" "" FLATPAK_VERSION ${XTRKCAD_VERSION})
+#message(NOTICE "FLATPAK_VERSION=${FLATPAK_VERSION}")
+set(FLATPAK_SUFFIX_NAME "-gtk")
+set(FLATPAK_PACKAGE "xtrkcad${FLATPAK_SUFFIX_NAME}")
+set(FLATPAK_BASE_NAME "xtrkcad${FLATPAK_SUFFIX_NAME}")
+set(FLATPAK_SHARE_INSTALL_DIR "share/${FLATPAK_PACKAGE}")
 string(TIMESTAMP XTRKCAD_BUILD_TIMESTAMP "%a %b %d %H:%M:%S UTC %Y" UTC)
 string(TIMESTAMP XTRKCAD_BUILD_DATE "%Y-%m-%d" UTC)
-string(REGEX REPLACE "^.*/" "" XTRKCAD_BASE_NAME ${XTRKCAD_SHARE_INSTALL_DIR})
-string(REGEX REPLACE ${XTRKCAD_PACKAGE} "" XTRKCAD_SUFFIX_NAME ${XTRKCAD_BASE_NAME})
 # XTRKCAD_VERSION (ProgramVersion.cmake) already carries a dev-build hash
 # suffix when this isn't an exact tagged release, so it alone is enough to
 # distinguish successive dev builds here — no separate changeset suffix
@@ -100,7 +105,7 @@ add_custom_command(
     COMMAND ${Flatpak_EXECUTABLE} build-bundle
             ${FLATPAK_REPO}
             ${FLATPAK_FILE}
-            ${FLATPAK_DOMAIN}.${XTRKCAD_BASE_NAME}
+	    ${FLATPAK_DOMAIN}.${FLATPAK_BASE_NAME}
     COMMAND rm -rf ${FLATPAK_REPO}
     COMMENT "Re-compiling xtrkcad within flatpak Sdk; this could take a while ..."
     DEPENDS ${_XTRK_MANIFEST_FILE} ${_XTRK_DESKTOP_FILE} ${CMAKE_SOURCE_DIR}/app/lib/${_XTRK_META_FILE}
