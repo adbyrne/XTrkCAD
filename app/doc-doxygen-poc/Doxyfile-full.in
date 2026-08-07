@@ -1,0 +1,27 @@
+# Doxyfile for the full-corpus Halibut -> Doxygen user-guide conversion (all 19
+# app/doc/*.but files run through tools/but-to-doxygen.py, not just the
+# hand-picked POC slice). See .claude/halibut-doxygen-investigation-plan.md in
+# the working directory this was authored in. Not the real devguide Doxyfile,
+# not wired into any release/install target -- CI-test-only, opt-in via
+# `cmake --build <dir> --target help-doxygen-full`.
+
+PROJECT_NAME           = "XTrkCAD User Guide (Doxygen conversion, full corpus)"
+OUTPUT_DIRECTORY       = "@doc_full_BINARY_DIR@"
+INPUT                  = "@doc_full_CONVERTED_DIR@"
+FILE_PATTERNS          = *.dox
+IMAGE_PATH             = "@doc_full_CONVERTED_DIR@/images"
+RECURSIVE              = NO
+
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+GENERATE_LATEX         = NO
+GENERATE_TREEVIEW      = NO
+DISABLE_INDEX          = NO
+SEARCHENGINE           = NO
+SOURCE_BROWSER         = NO
+SHOW_FILES             = NO
+SHOW_NAMESPACES        = NO
+QUIET                  = YES
+WARN_IF_UNDOCUMENTED   = NO
+WARN_AS_ERROR          = NO
+MARKDOWN_SUPPORT       = YES
