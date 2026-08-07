@@ -41,9 +41,23 @@ if(DOXYGEN_FOUND)
 			COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile-full
 			COMMENT "Converting all app/doc/*.but files and building the full Doxygen user-guide conversion"
 		)
+		# Compares help-doxygen-full's output against the real halibut-built
+		# guide (app/doc/CMakeLists.txt's help-html target, built into
+		# ${CMAKE_BINARY_DIR}/app/doc/html) page by page, so dev review can
+		# focus on pages that actually changed instead of eyeballing all
+		# 234+ pages -- see tools/compare-userguide-html.py.
+		add_custom_target(help-doxygen-compare
+			COMMAND ${Python3_EXECUTABLE}
+				${CMAKE_CURRENT_SOURCE_DIR}/../../tools/compare-userguide-html.py
+				${CMAKE_BINARY_DIR}/app/doc/html
+				${doc_full_BINARY_DIR}/html
+				${CMAKE_CURRENT_BINARY_DIR}/comparison-report.md
+			COMMENT "Comparing halibut vs. Doxygen-converted user-guide HTML"
+		)
+		add_dependencies(help-doxygen-compare help-doxygen-full help-html)
 	else()
-		message(STATUS "Python3 interpreter not found -- help-doxygen-full target not available")
+		message(STATUS "Python3 interpreter not found -- help-doxygen-full/help-doxygen-compare targets not available")
 	endif()
 else()
-	message(STATUS "Doxygen not found -- help-doxygen-poc/help-doxygen-full targets not available")
+	message(STATUS "Doxygen not found -- help-doxygen-poc/help-doxygen-full/help-doxygen-compare targets not available")
 endif()

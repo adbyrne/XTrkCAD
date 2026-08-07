@@ -37,7 +37,15 @@ DEFINE_RE = re.compile(r'\\define\{(\w+)\}\s*(.*)')
 HEADING_RE = re.compile(r'^\\(H|A|C|S|S2|S3)\{([^}]+)\}\s*(.*)$')
 COMMENT_RE = re.compile(r'^\\#')
 
-LEVEL_ORDER = {'C': 0, 'H': 0, 'A': 0, 'S': 1, 'S2': 2, 'S3': 3}
+# C (chapter) and A (appendix) are containers whose OWN page has no real body
+# text of its own in the source -- halibut auto-generates their visible
+# "2.1 Add Menu, 2.1.1 Circle Track..." TOC listing from the document
+# structure. H (heading) sections nest *beneath* them, not alongside --
+# confirmed real via a full-corpus diff against the halibut build (2026-08-08):
+# treating C/H as the same level (as an earlier version of this table did)
+# broke parent/child tracking, so chapter/appendix pages like commandMenus.html
+# lost their \subpage list and rendered with no body content at all.
+LEVEL_ORDER = {'C': 0, 'A': 0, 'H': 1, 'S': 2, 'S2': 3, 'S3': 4}
 
 
 @dataclass
@@ -175,6 +183,18 @@ def convert_inline(text, macros, source_file, line_no, anchor, defer_anchors=Non
 	# parse_but_file) uses literal "<"/">", so this is safe to do
 	# unconditionally on the raw source text.
 	text = text.replace('<', '&lt;').replace('>', '&gt;')
+
+	# halibut's own literal-brace escape ("\{"/"\}", e.g. "\{0,0\}" for a
+	# coordinate notation, 3 occurrences in changem.but) happens to also be
+	# Doxygen's own escape for a literal brace, so it isn't obviously wrong
+	# -- but confirmed via a real, minimized build that it destabilizes
+	# Doxygen's markdown parser when it lands inside list content: not just
+	# a warning ("End of list marker found without any preceding list
+	# items"), but real, silent content corruption on a *later*, unrelated
+	# page (cmdRaiseElev.html rendered trackDescribeBezier's text instead
+	# of its own). HTML entities have no special meaning to Doxygen's
+	# comment/command parser at all, sidestepping the interaction entirely.
+	text = text.replace('\\{', '&#123;').replace('\\}', '&#125;')
 
 	# Bare \i immediately before another command with no braces of its own
 	# (e.g. "\i\e{Circle Radius}" -- confirmed real, 3 occurrences total,
@@ -438,13 +458,21 @@ def parse_but_file(path, macros):
 		if stripped.startswith('\\n'):
 			if in_list:
 				# \n mid-list is just a fresh paragraph within the same
-				# item in this corpus (word-wrapped source), not a new item
-				# -- indent it so Markdown treats it as part of the
-				# preceding list item's own paragraph rather than ending
-				# the list.
+				# item in this corpus (word-wrapped source), not a new
+				# item. Tried indenting it 2 spaces to make Markdown treat
+				# it as a proper new paragraph within the list item --
+				# rejected: confirmed via a real build that this triggers
+				# "End of list marker found without any preceding list
+				# items" AND actually corrupts a *different, later* page's
+				# rendered content (cmdRaiseElev.html picked up
+				# trackDescribeBezier's text) -- not just a warning, real
+				# content corruption Doxygen's own build log never flags.
+				# Plain lazy continuation (no indent, folds into the same
+				# paragraph rather than starting a new one) sacrifices a
+				# paragraph break but doesn't destabilize the parser.
 				body = stripped[2:].strip()
 				if current is not None:
-					current.body_lines.append('  ' + convert_inline(body, macros, source_file, line_no, current.anchor))
+					current.body_lines.append(convert_inline(body, macros, source_file, line_no, current.anchor))
 				continue
 			close_list()
 			body = stripped[2:].strip()
@@ -494,11 +522,15 @@ def parse_but_file(path, macros):
 		if in_list and is_plain_continuation:
 			# Word-wrapped continuation of the paragraph a \dd/\dt started
 			# (the common case: real prose in this corpus wraps across
-			# several physical lines with no per-line directive) -- indent
-			# so Markdown folds it into the same list item instead of
-			# ending the list.
+			# several physical lines with no per-line directive). No
+			# indentation -- plain CommonMark lazy continuation (a
+			# non-blank, non-block-starting line immediately following a
+			# list item folds into it with no indent needed) -- matches
+			# the \n-mid-list fix above; indenting was found to
+			# destabilize Doxygen's markdown parser on some pages, not
+			# just draw a warning.
 			if current is not None:
-				current.body_lines.append('  ' + convert_inline(line, macros, source_file, line_no, current.anchor))
+				current.body_lines.append(convert_inline(line, macros, source_file, line_no, current.anchor))
 			continue
 
 		# A genuinely new/unrecognized top-level directive ends the list.

@@ -607,10 +607,35 @@ jobs:
           path: xtrkcad-docs.tar.gz
           retention-days: 14
 
+      - name: Build user guide
+        # help-html (app/doc/CMakeLists.txt) is normally part of the default
+        # 'all' target, but this job only builds docs-doxygen above, so it
+        # still needs building explicitly here (cmake resolves its halibut/
+        # msgfiles dependencies automatically). Built before the Doxygen
+        # conversion below since the comparison step needs both.
+        run: cmake --build build --target help-html
+
+      - name: Archive user guide
+        # png.d/ and the stylesheet are install()-ed alongside html/ (see
+        # app/doc/CMakeLists.txt) rather than generated into the build tree,
+        # so copy them in manually — this job doesn't do a full `cmake
+        # --install` since the rest of the app isn't built here.
+        run: |
+          cp -r app/doc/png.d build/app/doc/html/
+          cp app/doc/xtrkcad_lin.css build/app/doc/html/
+          tar -czf xtrkcad-userguide.tar.gz -C build/app/doc/html .
+
+      - name: Upload user guide
+        uses: actions/upload-artifact@v7
+        with:
+          name: xtrkcad-userguide-html
+          path: xtrkcad-userguide.tar.gz
+          retention-days: 14
+
       - name: Build Doxygen user-guide conversion (SF feature-requests #219, CI test only)
         # Runs tools/but-to-doxygen.py across all app/doc/*.but files and
         # builds the result with Doxygen, side by side with the real
-        # halibut-built guide below -- for dev review, not a replacement.
+        # halibut-built guide above -- for dev review, not a replacement.
         # workflow_dispatch-only: this is a manual CI dry-run to prove the
         # conversion builds cleanly in CI, not something that should run (or
         # publish anything) on every ordinary push.
@@ -629,28 +654,24 @@ jobs:
           path: xtrkcad-userguide-doxygen-conversion.tar.gz
           retention-days: 14
 
-      - name: Build user guide
-        # help-html (app/doc/CMakeLists.txt) is normally part of the default
-        # 'all' target, but this job only builds docs-doxygen above, so it
-        # still needs building explicitly here (cmake resolves its halibut/
-        # msgfiles dependencies automatically).
-        run: cmake --build build --target help-html
+      - name: Compare halibut vs. Doxygen user guide
+        # Diffs every matching topic page's visible text (word-level
+        # similarity, not just a warning count) so dev review can focus on
+        # pages that actually changed -- see
+        # tools/compare-userguide-html.py. Needs both builds above, so it
+        # runs last; help-doxygen-compare re-runs help-doxygen-full itself
+        # (already built, so effectively a no-op) rather than depending on
+        # the CI step directly, since CMake target dependencies don't cross
+        # into "already ran this shell step" state.
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: cmake --build build --target help-doxygen-compare
 
-      - name: Archive user guide
-        # png.d/ and the stylesheet are install()-ed alongside html/ (see
-        # app/doc/CMakeLists.txt) rather than generated into the build tree,
-        # so copy them in manually — this job doesn't do a full `cmake
-        # --install` since the rest of the app isn't built here.
-        run: |
-          cp -r app/doc/png.d build/app/doc/html/
-          cp app/doc/xtrkcad_lin.css build/app/doc/html/
-          tar -czf xtrkcad-userguide.tar.gz -C build/app/doc/html .
-
-      - name: Upload user guide
+      - name: Upload comparison report
+        if: ${{ github.event_name == 'workflow_dispatch' }}
         uses: actions/upload-artifact@v7
         with:
-          name: xtrkcad-userguide-html
-          path: xtrkcad-userguide.tar.gz
+          name: xtrkcad-userguide-comparison-report
+          path: build/app/doc-doxygen-poc/comparison-report.md
           retention-days: 14
 
   # ── GitHub Pages — Doxygen + user guide, redeployed on every push ─────────
