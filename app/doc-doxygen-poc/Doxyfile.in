@@ -1,0 +1,30 @@
+# Minimal Doxyfile for the Halibut -> Doxygen user-guide proof-of-concept
+# (SF #220-adjacent investigation, see .claude/halibut-doxygen-investigation-plan.md
+# in the working directory this was authored in). NOT the real devguide Doxyfile --
+# deliberately separate and minimal, builds only the handful of converted pages in
+# this directory, side by side with the real halibut build. Not wired into any
+# release/install target.
+
+PROJECT_NAME           = "XTrkCAD User Guide (proof-of-concept)"
+OUTPUT_DIRECTORY       = "@doc_poc_BINARY_DIR@"
+INPUT                  = "@CMAKE_CURRENT_SOURCE_DIR@"
+FILE_PATTERNS          = *.md \
+                          *.dox
+IMAGE_PATH             = "@CMAKE_CURRENT_SOURCE_DIR@/images"
+RECURSIVE              = NO
+EXCLUDE                = "@CMAKE_CURRENT_SOURCE_DIR@/Doxyfile.in" \
+                          "@CMAKE_CURRENT_SOURCE_DIR@/CMakeLists.txt"
+
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+GENERATE_LATEX         = NO
+GENERATE_TREEVIEW      = NO
+DISABLE_INDEX          = NO
+SEARCHENGINE           = NO
+SOURCE_BROWSER         = NO
+SHOW_FILES             = NO
+SHOW_NAMESPACES        = NO
+QUIET                  = YES
+WARN_IF_UNDOCUMENTED   = NO
+WARN_AS_ERROR          = NO
+MARKDOWN_SUPPORT       = YES

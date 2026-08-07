@@ -1,0 +1,37 @@
+/* Prototype of genmessages.c's dumpHelp() retargeted to Doxygen syntax, instead
+ * of halibut syntax. Real dumpHelp() emits ONE \S{key} block per message into
+ * ONE stream (messages.but) -- this mirrors that exact structure with \page
+ * blocks instead, one per message, all in this one file. Confirmed via a
+ * throwaway test that \page (unlike a markdown "# heading {#anchor}") DOES
+ * produce a separate output page per block even when several appear in one
+ * input file -- so, unlike an earlier (wrong) conclusion in this
+ * investigation, genmessages.c does NOT need restructuring to write one file
+ * per message; only the per-message emitted syntax changes.
+ *
+ * Just 2 of the real 130 messages.in entries, for the SF #220-adjacent
+ * Halibut -> Doxygen proof-of-concept (see
+ * .claude/halibut-doxygen-investigation-plan.md).
+ */
+
+/**
+\page MSG_BETA_NOTICE XTrackCAD Version %s: Please note that this Beta Version of XTrackCAD is still undergoing final testing before its official release. The sole purpose of this Beta Version is to conduct testing and obtain feedback. Should you encounter any bugs, glitches, lack of functionality or other problems, please let us know immediately so we can rectify these accordingly. Your help in this regard is greatly appreciated!
+
+XTrackCAD Version %s: Please note that this Beta Version of XTrackCAD is still
+undergoing final testing before its official release. The sole purpose of this
+Beta Version is to conduct testing and obtain feedback. Should you encounter any
+bugs, glitches, lack of functionality or other problems, please let us know
+immediately so we can rectify these accordingly. Your help in this regard is
+greatly appreciated!
+*/
+
+/**
+\page MSG_CANT_PLACE_FROGPOINTS Frog|Points cannot be placed on a turnout, circle or helix.
+
+The frog or points of a hand-laid turnout cannot be placed on a turnout, circle
+or helix track. Choose a straight or curved section of track or use the
+**Split** command to create a curve from the circle track.
+
+Refer to \ref cmdHandLaidTurnout "hand laid turnouts" for detail regarding hand
+laid turnouts or \ref cmdSplitTrack "the Split command" for detail regarding the
+**Split** command.
+*/
