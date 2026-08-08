@@ -18,8 +18,11 @@ Also reports:
     matching Doxygen page at all. Includes both the expected/out-of-scope
     messages.but-generated category (topic names start with "MSG_") and any
     other name, which is a real, unconverted content gap worth flagging
-    (e.g. this is how intro.but.in's 21 headings -- a 20th source file never
-    fed into the converter -- were found to be entirely missing, 2026-08-08).
+    (this is how intro.but.in's 21 headings -- a 20th source file not yet
+    fed into the converter -- were first found to be entirely missing,
+    2026-08-08; intro.but.in was converted later the same day, and a
+    smaller, still-unexplained "other" list remains -- see the plan file's
+    Next Session Plan items #3 and #5).
   - doxygen-only pages: topics with no halibut match, after excluding
     Doxygen's own generated navigation infrastructure (dir_*.html,
     doxygen_crawl.html, pages.html, index-generated.html, search.html) --
@@ -86,7 +89,13 @@ def extract_doxygen_text(path):
     # after the search-box/header/breadcrumb chrome -- grabbing the whole
     # <body> the way extract_halibut_text() does would pollute every score
     # with identical search-widget JS/text, masking real differences.
-    m = re.search(r'<div class="contents">(.*)', html, re.S)
+    # Bounded at Doxygen's own "<!-- contents -->" end marker, not just
+    # "rest of file": GENERATE_TREEVIEW (enabled 2026-08-08) adds a new
+    # per-page "page-nav-panel" div right after the real content, which an
+    # earlier, unbounded ".*" swept in too, diluting scores across the
+    # whole corpus (confirmed real: avg similarity dropped 0.907 -> 0.889
+    # purely from this, no actual content regression).
+    m = re.search(r'<div class="contents">(.*?)</div><!-- contents -->', html, re.S)
     body = m.group(1) if m else html
     text = strip_tags(body)
     return normalize(text)
@@ -238,11 +247,14 @@ def main():
         f.write(', '.join(f'`{n}`' for n in halibut_only_msg) if halibut_only_msg else '(none)')
         f.write('\n\n')
         f.write(f'{len(halibut_only_other)} are NOT from `messages.in` -- these are real content '
-                'this converter run never touched and need investigating (as of 2026-08-08, '
-                'confirmed this is `intro.but.in`, a 21-heading, 939-line 20th source file '
-                'excluded from the file glob because it also defines macros/index taxonomy that '
-                'need a human, not a script -- but its plain content headings could still be '
-                'converted the same mechanical way as everything else):\n\n')
+                'this converter run never touched and need investigating. NOT intro.but.in '
+                '(that earlier hypothesis, from before intro.but.in was converted, was wrong: '
+                'converting it on 2026-08-08 left this list unchanged). Likely halibut\'s own '
+                'auto-generated navigation/index pages (contents/index/IndexPage/messageList) '
+                'plus the anchor-ID-with-periods filename-mismatch pages (v4.0.3_revisions/ '
+                'v4.0.x_revisions, which also show up under a different sanitized name in the '
+                'Doxygen-only list below) -- not yet root-caused, see the plan file\'s Next '
+                'Session Plan items #3 and #5:\n\n')
         f.write(', '.join(f'`{n}`' for n in halibut_only_other) if halibut_only_other else '(none)')
         f.write('\n\n')
 

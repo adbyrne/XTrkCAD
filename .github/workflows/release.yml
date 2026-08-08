@@ -591,6 +591,20 @@ jobs:
           tar xzf doxygen.tar.gz
           echo "$PWD/doxygen-${DOXYGEN_VERSION}/bin" >> "$GITHUB_PATH"
 
+      - name: Convert Halibut sources to Doxygen (SF feature-requests #219, CI test only)
+        # tools/but-to-doxygen.py is a one-time, external text-conversion
+        # step (app/doc/*.but -> .dox, intro.but.in -> intro.dox.in) -- it
+        # is NOT invoked by CMake (regular builds must not require Python
+        # at all, see .claude/halibut-doxygen-investigation-plan.md). Runs
+        # before "Configure" below: intro.dox.in's "@XTRKCAD_VERSION@"
+        # token is resolved by an ordinary, configure-time configure_file()
+        # call in app/doc-doxygen-poc/CMakeLists.txt (same mechanism
+        # app/doc/CMakeLists.txt already uses for intro.but.in ->
+        # intro.but), which needs intro.dox.in to already exist on disk
+        # when CMake configures.
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: python3 tools/but-to-doxygen.py app/doc build/app/doc-doxygen-poc/converted
+
       - name: Configure
         run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DXTRKCAD_USE_DOXYGEN=ON -DXTRKCAD_TESTING=OFF
 
@@ -633,12 +647,12 @@ jobs:
           retention-days: 14
 
       - name: Build Doxygen user-guide conversion (SF feature-requests #219, CI test only)
-        # Runs tools/but-to-doxygen.py across all app/doc/*.but files and
-        # builds the result with Doxygen, side by side with the real
-        # halibut-built guide above -- for dev review, not a replacement.
-        # workflow_dispatch-only: this is a manual CI dry-run to prove the
-        # conversion builds cleanly in CI, not something that should run (or
-        # publish anything) on every ordinary push.
+        # Builds the already-converted .dox/.dox.in files (see the "Convert
+        # Halibut sources to Doxygen" step above) with Doxygen, side by side
+        # with the real halibut-built guide above -- for dev review, not a
+        # replacement. workflow_dispatch-only: this is a manual CI dry-run
+        # to prove the conversion builds cleanly in CI, not something that
+        # should run (or publish anything) on every ordinary push.
         if: ${{ github.event_name == 'workflow_dispatch' }}
         run: cmake --build build --target help-doxygen-full
 

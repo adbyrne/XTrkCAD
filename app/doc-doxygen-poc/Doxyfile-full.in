@@ -15,8 +15,19 @@ RECURSIVE              = NO
 GENERATE_HTML          = YES
 HTML_OUTPUT            = html
 GENERATE_LATEX         = NO
-GENERATE_TREEVIEW      = NO
+# Real, native left-sidebar navigation tree built from the \page/\subpage
+# hierarchy we already generate -- this is what replaces halibut's own
+# "Contents" breadcrumb link (2026-08-08 user feedback): a persistent,
+# collapsible, searchable tree beats a single top-of-page link to a
+# separate contents page.
+GENERATE_TREEVIEW      = YES
 DISABLE_INDEX          = NO
+# Custom layout adds an "Index" tab (pointing at our already-generated
+# index-generated.dox) alongside the default "Main Page"/"Related Pages"
+# tabs -- see DoxygenLayout.xml and 2026-08-08 user feedback (halibut's own
+# "Index" breadcrumb link should become part of the persistent tab/sidebar
+# chrome, not a per-page link).
+LAYOUT_FILE            = "@CMAKE_CURRENT_SOURCE_DIR@/DoxygenLayout.xml"
 SEARCHENGINE           = NO
 SOURCE_BROWSER         = NO
 SHOW_FILES             = NO

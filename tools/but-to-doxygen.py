@@ -6,7 +6,8 @@ Prototype/investigation tool for the Halibut -> Doxygen user-guide migration
 converts the directive set validated in Phase 3's hand conversion
 (\\H/\\S/\\S2/\\S3/\\A/\\C headings -> \\page, \\e/\\f/\\c/\\q inline formatting,
 \\b/\\dd bullets, \\G images, \\K/\\k cross-references -> \\ref, \\W external
-links) across every app/doc/*.but file in one pass, and -- just as
+links) across every app/doc/*.but file (and intro.but.in, the one templated
+source -- see load_macros()'s version parameter) in one pass, and -- just as
 importantly -- LOGS every site it can't convert with full confidence
 (\\dd/\\dt/\\lcont definition-list structure, \\i/\\I/\\ii index-registration
 directives with no Doxygen equivalent, unrecognized directives) instead of
@@ -14,7 +15,7 @@ guessing silently. Not a full formal parser -- the format is regular enough
 for line-oriented regex handling, verified against real content during
 Phase 3.
 
-Usage: tools/but-to-doxygen.py <but-source-dir> <output-dir>
+Usage: tools/but-to-doxygen.py <but-source-dir> <output-dir> [<version>]
 
 Output: one <name>.dox file per input .but file (all its \\H/\\S/\\S2/\\S3/\\A/\\C
 sections as separate \\page blocks, nested ones linked via \\subpage from
@@ -46,6 +47,29 @@ COMMENT_RE = re.compile(r'^\\#')
 # broke parent/child tracking, so chapter/appendix pages like commandMenus.html
 # lost their \subpage list and rendered with no body content at all.
 LEVEL_ORDER = {'C': 0, 'A': 0, 'H': 1, 'S': 2, 'S2': 3, 'S3': 4}
+
+# halibut's real book order -- must track app/doc/CMakeLists.txt's
+# target_sources list (confirmed real: support.html, intro's last page in
+# the real halibut build, correctly links next="commandMenus.html", addm's
+# first page). Without this, Doxygen has no way to know these files' root
+# \page (top-level, no \subpage parent) form one linear book -- it falls
+# back to alphabetizing all unparented roots by TITLE in the sidebar tree
+# ("Change Menu" before "Command Menus" before "Draw Menu" ... with
+# "Introduction To XTrackCAD" buried in the middle), not even by filename,
+# confirmed via a real build's navtreedata.js (2026-08-08 user feedback).
+# osxconf.but/linconf.but are CMake's if(APPLE)/else() choice for ONE
+# platform build; both included here since a single combined conversion
+# covers both. chmconf.but is referenced NOWHERE in CMakeLists.txt (dead,
+# orphaned -- see the Windows CHM removal noted in CLAUDE.md/bug-tracker.md)
+# but still included at the very end so it doesn't become a stray
+# unparented alphabetical sidebar entry either.
+CANONICAL_FILE_ORDER = [
+	'intro.but.in', 'addm.but', 'changem.but', 'drawm.but', 'editm.but',
+	'filem.but', 'helpm.but', 'hotbar.but', 'macrom.but', 'managem.but',
+	'optionm.but', 'statusbar.but', 'view_winm.but', 'navigation.but',
+	'appendix.but', 'upgrade.but', 'warranty.but', 'osxconf.but',
+	'linconf.but', 'chmconf.but',
+]
 
 
 @dataclass
@@ -92,7 +116,7 @@ def make_index_anchor(display_text, page_anchor):
 	return anchor_id
 
 
-def load_macros(doc_dir):
+def load_macros(doc_dir, version=None):
 	macros = {}
 	intro_in = os.path.join(doc_dir, 'intro.but.in')
 	if os.path.exists(intro_in):
@@ -101,6 +125,18 @@ def load_macros(doc_dir):
 				m = DEFINE_RE.match(line.strip())
 				if m:
 					macros[m.group(1)] = m.group(2).strip()
+	if version:
+		# intro.but.in's \define{XTCWinPack}/\XTCRPMPack/\XTCStgzPack expand
+		# to filenames containing the literal CMake template token
+		# "@XTRKCAD_VERSION@" (substituted by configure_file() when the real
+		# halibut build turns intro.but.in into intro.but -- see
+		# app/doc/CMakeLists.txt). Now that intro.but.in itself is converted
+		# by this script (see main()'s .but.in handling below), resolve the
+		# token here the same way, from a caller-supplied real version
+		# string, so pages that use these macros (e.g. \S{MSWinInstall})
+		# don't leak the literal template token into the committed .dox.
+		for name in macros:
+			macros[name] = macros[name].replace('@XTRKCAD_VERSION@', version)
 	return macros
 
 
@@ -130,6 +166,13 @@ def strip_braced(text, cmd):
 		out.append(('MATCH', inner))
 		i = k
 	return out
+
+
+def sub_braced(text, cmd, transform):
+	"""re.sub-style wrapper around strip_braced: apply transform(inner) to
+	every \\cmd{...} match and reassemble."""
+	return ''.join(transform(part[1]) if isinstance(part, tuple) else part
+	               for part in strip_braced(text, cmd))
 
 
 def convert_inline(text, macros, source_file, line_no, anchor, defer_anchors=None):
@@ -162,7 +205,13 @@ def convert_inline(text, macros, source_file, line_no, anchor, defer_anchors=Non
 	# a backtick code span markdown never interprets "*" as emphasis, so
 	# escaping it there would leak a literal backslash into visible code
 	# text (real case: \c{*.xtp} must render as `*.xtp`, not `\*.xtp`).
-	text = re.sub(r'\\c\{([^}]*)\}', lambda m: f'`{m.group(1)}`', text)
+	# Brace-depth-aware (via sub_braced/strip_braced), not a plain "stop at
+	# first }" regex: intro.but.in has \c{\{HOME\}/.xtrkcad/} -- halibut's
+	# own literal-brace escape used *inside* a \c{} span. A naive [^}]*
+	# regex stops at the '}' half of the inner "\}" escape, truncating the
+	# match and leaking "}/.xtrkcad/}." as stray trailing text (confirmed
+	# via a real build before this fix).
+	text = sub_braced(text, 'c', lambda inner: f'`{inner}`')
 
 	# Escape literal "*" in the source prose (e.g. "An asterisk (*) after the
 	# filename..." in navigation.but, or "2 * Coupler Length" in managem.but)
@@ -231,8 +280,18 @@ def convert_inline(text, macros, source_file, line_no, anchor, defer_anchors=Non
 	# auto-text behavior for \K without an explicit override).
 	text = re.sub(r'\\[Kk]\{([^}]*)\}', lambda m: f'\\ref {m.group(1)}', text)
 
-	# \f{...} bold (XTrkCad's own added directive)
-	text = re.sub(r'\\f\{([^}]*)\}', lambda m: f'**{m.group(1)}**', text)
+	# \f{...} bold (XTrkCad's own added directive). Real <b> HTML, not
+	# markdown "**...**": confirmed via a minimal, isolated Doxygen build
+	# that "**word**" silently loses its OPENING "**" (closing one stays as
+	# literal text) whenever it's the first thing in a paragraph -- a real
+	# Doxygen markdown-parser quirk, not a converter bug (mid-sentence bold
+	# is unaffected). \f{} very often lands at a paragraph's start (used
+	# both for inline emphasis and as informal sub-headings throughout the
+	# corpus), so this hit constantly. halibut itself renders \f{} as
+	# plain <strong> (confirmed against a real halibut build, e.g.
+	# whyXTrackCAD.html) -- <b> is the exact same visual weight, so this is
+	# equivalence with halibut's own output, not an upgrade beyond it.
+	text = re.sub(r'\\f\{([^}]*)\}', lambda m: f'<b>{m.group(1)}</b>', text)
 
 	# \q{...} quoted UI-option text
 	text = re.sub(r'\\q\{([^}]*)\}', lambda m: f'"{m.group(1)}"', text)
@@ -282,7 +341,9 @@ def convert_inline(text, macros, source_file, line_no, anchor, defer_anchors=Non
 			# i_repl above.
 			defer_anchors.append(idx_id)
 			return m.group(1)
-		return f'**{m.group(1)}** \\anchor {idx_id} '
+		# <b> HTML, not markdown "**...**" -- same paragraph-start bug as
+		# \f{} above, see that comment.
+		return f'<b>{m.group(1)}</b> \\anchor {idx_id} '
 	text = re.sub(r'\\ii\{([^}]*)\}', ii_repl, text)
 
 	# \I{...} silent index-only registration -- no visible text in the
@@ -364,11 +425,39 @@ def parse_but_file(path, macros):
 	# same <ul>/<li> HTML, but Markdown's own list parser (unlike Doxygen's
 	# manual HTML tag tracker) already handles word-wrapped continuation
 	# lines and mixes safely with everything else on the page.
+	#
+	# dt_open tracks halibut's real \dl semantics on top of that flat
+	# scheme: a \dt's following \dd(s), up until the next \dt or the list's
+	# end, are its children -- indent them 2 spaces to open a genuine
+	# nested Markdown sub-list under the \dt bullet (matching halibut's own
+	# real <dl>/<dt>/<dd> rendering, which browsers indent by default; our
+	# flat bullets lost that visual hierarchy entirely). A \dd with no
+	# open \dt (confirmed the common case, see above) stays flat, exactly
+	# as before. Confirmed via a real, isolated Doxygen build: this nests
+	# correctly, including a word-wrapped continuation line for the nested
+	# \dd left *unindented* (plain CommonMark lazy continuation still
+	# attaches it to the right list item -- no indentation needed there,
+	# consistent with how continuation lines already work everywhere else
+	# in this parser).
 	in_list = False
+	dt_open = False
+	# lcont_open: true while inside a multi-line \lcont{...} block (opening
+	# brace alone on its own line, closed later by a bare "}" on its own
+	# line -- 71 of 112 \lcont{} occurrences in the real corpus are this
+	# shape). halibut's \lcont means "this content, often a nested \b
+	# bullet list, continues inside the CURRENT still-open \dd/\dt item" --
+	# semantically the opposite of a list-closing event. \b bullets emitted
+	# while lcont_open indent one level deeper than the current \dt/\dd
+	# context (matching halibut's real <dd><ul>...</ul></dd> structure,
+	# confirmed via a real build); the closing "}" is consumed silently
+	# (see the dedicated check below) instead of leaking as literal text.
+	lcont_open = False
 
 	def close_list():
-		nonlocal in_list
+		nonlocal in_list, dt_open, lcont_open
 		in_list = False
+		dt_open = False
+		lcont_open = False
 
 	blank_spacer_re = re.compile(r'^\\u[0-9A-Fa-f]+$')
 
@@ -422,37 +511,85 @@ def parse_but_file(path, macros):
 			continue
 
 		if stripped.startswith('\\lcont{'):
-			close_list()
-			log(source_file, line_no, current.anchor if current else '?',
-			    'lcont', 'list-continuation block -- flattened into surrounding text, needs manual review for correct nesting')
-			# Strip the wrapper, keep inner content as best-effort.
+			# Deliberately NOT close_list(): \lcont always means "this
+			# content continues inside the CURRENT still-open \dd/\dt
+			# item", never a list-closing event -- closing the list here
+			# was itself a real bug (confirmed via a real build: it
+			# silently broke nesting for every \dt/\dd sequence that had a
+			# \lcont anywhere in the middle, e.g. every \lcont{\u000}
+			# blank-continuation marker, not just the multi-line blocks).
 			inner = stripped[len('\\lcont{'):]
 			if inner.endswith('}'):
+				# Self-closed on one line (e.g. "\lcont{\u000}", 40 of 112
+				# real occurrences) -- unchanged from before, just without
+				# the close_list() call.
 				inner = inner[:-1]
-			if current is not None and inner.strip():
-				current.body_lines.append(
-				    convert_inline(inner, macros, source_file, line_no, current.anchor))
+				if current is not None and inner.strip():
+					current.body_lines.append(
+					    convert_inline(inner, macros, source_file, line_no, current.anchor))
+			else:
+				# Multi-line block: content (typically nested \b bullets,
+				# see the \b handler below) follows on subsequent lines,
+				# closed later by a bare "}" on its own line (handled
+				# next). 71 of 112 real occurrences are this shape.
+				log(source_file, line_no, current.anchor if current else '?',
+				    'lcont', 'multi-line list-continuation block -- nested content indented one level deeper, see \\b handler')
+				lcont_open = True
+			continue
+
+		if stripped == '}' and lcont_open:
+			# The multi-line \lcont{...} block's closing brace -- consume
+			# silently instead of leaking as a literal "}" line (confirmed
+			# real bug: e.g. whyXTrackCAD.html rendered a stray "<p>}</p>"
+			# between the "Flexible and Powerful Printing" sublist and the
+			# next \dd, because nothing previously recognized this line at
+			# all).
+			lcont_open = False
 			continue
 
 		if stripped.startswith('\\dd'):
 			body = stripped[3:].strip()
 			if current is not None:
 				in_list = True
-				current.body_lines.append('- ' + convert_inline(body, macros, source_file, line_no, current.anchor))
+				marker = '  - ' if dt_open else '- '
+				current.body_lines.append(marker + convert_inline(body, macros, source_file, line_no, current.anchor))
 			continue
 
 		if stripped.startswith('\\dt'):
 			body = stripped[3:].strip()
 			if current is not None:
 				in_list = True
-				current.body_lines.append('- **' + convert_inline(body, macros, source_file, line_no, current.anchor) + '**')
+				dt_open = True
+				# <b> HTML, not markdown "**...**": a plain-text \dt term is
+				# fine either way (list items aren't affected by \f{}'s
+				# paragraph-start bug, confirmed via a real build), but a
+				# \dt whose own content contains other markup (\f{}/\i{},
+				# now already <em>/<b>/<a> HTML by the time it gets here)
+				# produces "**<b>...</b>**" -- markdown bold wrapping HTML
+				# -- which Doxygen's parser also fails to close correctly
+				# (confirmed real: bugs.html, mouseBcmd.html, cmdPrint.html,
+				# mainW.html). <b> avoids this combination entirely.
+				current.body_lines.append('- <b>' + convert_inline(body, macros, source_file, line_no, current.anchor) + '</b>')
 			continue
 
 		if stripped.startswith('\\b'):
-			close_list()
 			body = stripped[2:].strip()
 			if current is not None:
-				current.body_lines.append('- ' + convert_inline(body, macros, source_file, line_no, current.anchor))
+				if lcont_open:
+					# Nested inside an open \lcont block -- one level
+					# deeper than whatever \dt/\dd context is already
+					# active (matching halibut's real <dd><ul>...</ul></dd>
+					# structure, confirmed via a real build), and does NOT
+					# close that outer context (a \dd/\dt after this \lcont
+					# closes must still see the same dt_open state).
+					marker = '    - ' if dt_open else '  - '
+				else:
+					# Standalone \b (the common case, e.g. a page's own
+					# top-level feature list) still resets any prior
+					# \dt/\dd list state, same as always.
+					close_list()
+					marker = '- '
+				current.body_lines.append(marker + convert_inline(body, macros, source_file, line_no, current.anchor))
 			continue
 
 		if stripped.startswith('\\n'):
@@ -528,7 +665,18 @@ def parse_but_file(path, macros):
 			# list item folds into it with no indent needed) -- matches
 			# the \n-mid-list fix above; indenting was found to
 			# destabilize Doxygen's markdown parser on some pages, not
-			# just draw a warning.
+			# just draw a warning. Tried indenting this to match the
+			# nested \b depth while lcont_open specifically (to fix a
+			# trailing plain-prose paragraph after a nested \b sublist,
+			# e.g. mainW.html's "Note:" case) -- rejected: confirmed via a
+			# real, full-corpus build that this indents *every*
+			# plain-continuation line while lcont_open, including the far
+			# more common word-wrapped continuation of a \b bullet's own
+			# text, which broke worse elsewhere (2 warnings -> 6, more
+			# pages flagged). The "Note:"-after-sublist case is a real,
+			# remaining imperfection (navigation.dox, 2 warnings) --
+			# logged, not fixed; distinguishing the two cases needs more
+			# than "are we inside an open \lcont".
 			if current is not None:
 				current.body_lines.append(convert_inline(line, macros, source_file, line_no, current.anchor))
 			continue
@@ -547,21 +695,68 @@ def parse_but_file(path, macros):
 	return pages
 
 
-def write_dox(pages, source_file, out_dir):
+def write_dox(pages, source_file, out_dir, keep_template=False,
+              mainpage_anchor=None, extra_subpages=None):
 	by_anchor = {p.anchor: p for p in pages}
 	for p in pages:
 		if p.parent and p.parent in by_anchor:
 			by_anchor[p.parent].children.append(p.anchor)
 
-	out_path = os.path.join(out_dir, os.path.splitext(source_file)[0] + '.dox')
+	# mainpage_anchor/extra_subpages (only ever set for intro.but.in's
+	# "index" page, from main()'s cross-file pass): promotes that one page
+	# to \mainpage (Doxygen's real "Main Page" tab target, and -- since
+	# \mainpage's own implicit reference name is literally "index", which
+	# is already this page's anchor -- a natural fit, not a renaming) and
+	# appends every *other* file's own root page(s) as additional
+	# \subpage entries, in halibut's real book order, after this page's
+	# own natural children. This is what gives every other file's
+	# top-level page a parent, fixing the alphabetical-sidebar bug -- see
+	# CANONICAL_FILE_ORDER's comment.
+	if mainpage_anchor and mainpage_anchor in by_anchor and extra_subpages:
+		by_anchor[mainpage_anchor].children.extend(extra_subpages)
+
+	# strip *both* extensions off a "<name>.but.in" source (os.path.splitext
+	# only strips one, which would otherwise produce "intro.but.dox").
+	stem = re.sub(r'\.but(\.in)?$', '', source_file)
+	# keep_template (only ever true for intro.but.in, run without a
+	# --version argument -- the intended default for the real one-time
+	# bootstrap conversion, see main()): the output still contains the
+	# literal "@XTRKCAD_VERSION@" token unresolved, so name it .dox.in, not
+	# .dox, the same live-template signal intro.but.in itself already used.
+	# This converter is meant to run ONCE and have its output committed as
+	# the real, permanent source (see the plan file's "Important direction
+	# correction" note) -- baking a real version string into that commit
+	# would go stale on every future release. Keeping the template marker
+	# means an ordinary, permanent configure_file() call in CMakeLists.txt
+	# (see app/doc-doxygen-poc/CMakeLists.txt) resolves the version on
+	# every build forever -- no Python involved at build time at all --
+	# exactly like intro.but.in -> intro.but already does today for the
+	# halibut build (app/doc/CMakeLists.txt).
+	out_path = os.path.join(out_dir, stem + ('.dox.in' if keep_template else '.dox'))
 	with open(out_path, 'w', encoding='utf-8') as f:
 		f.write(f'/* Auto-converted from {source_file} by tools/but-to-doxygen.py.\n')
 		f.write(' * See .claude/halibut-doxygen-investigation-plan.md and\n')
 		f.write(' * conversion-log.md for anything flagged during conversion. */\n\n')
 		for p in pages:
 			f.write('/**\n')
-			f.write(f'\\page {p.anchor} {p.title}\n\n')
+			if p.anchor == mainpage_anchor:
+				f.write(f'\\mainpage {p.title}\n\n')
+			else:
+				f.write(f'\\page {p.anchor} {p.title}\n\n')
 			body = '\n'.join(p.body_lines).strip()
+			# Collapse any run of 2+ consecutive blank lines down to one.
+			# Semantically identical in Markdown (a single blank line
+			# already fully separates paragraphs/list items; extra blank
+			# lines never added visible spacing), but confirmed via a
+			# real, bisected Doxygen build to matter for list-nesting
+			# specifically: whenever two real blank body_lines entries
+			# land back to back right before a \dt that follows nested
+			# \dd/\lcont content -- several different combinations of
+			# blank source lines and absorbed \u000/\rule spacers produce
+			# this, not just one specific site -- Doxygen's list parser
+			# treats the list as ended before reaching the nested
+			# continuation ("Invalid list item found" on the *next* \dt).
+			body = re.sub(r'\n{3,}', '\n\n', body)
 			f.write(body + '\n')
 			if p.children:
 				f.write('\n')
@@ -600,25 +795,80 @@ def write_index_page(out_dir):
 
 
 def main():
-	if len(sys.argv) != 3:
-		print(f'Usage: {sys.argv[0]} <but-source-dir> <output-dir>', file=sys.stderr)
+	if len(sys.argv) not in (3, 4):
+		print(f'Usage: {sys.argv[0]} <but-source-dir> <output-dir> [<version>]', file=sys.stderr)
 		sys.exit(1)
 
 	doc_dir, out_dir = sys.argv[1], sys.argv[2]
+	# Optional, and NOT the intended default: resolves the literal
+	# "@XTRKCAD_VERSION@" CMake template token that intro.but.in's
+	# \XTCWinPack/\XTCRPMPack/\XTCStgzPack macros expand to (see
+	# load_macros()) into a real version string right now, in this run's
+	# output. This script is meant to run ONCE, with its output committed
+	# as the real permanent source (see the plan file) -- a version baked
+	# in at that one conversion moment would go stale on every later
+	# release. Leave this unset for that real run: intro.but.in's page then
+	# writes out as intro.dox.in (template preserved, see write_dox()).
+	# This converter never touches CMake/Doxygen itself -- it's a one-time,
+	# external text-conversion step (see app/doc-doxygen-poc/CMakeLists.txt
+	# and release.yml's "Convert Halibut sources to Doxygen" step) -- so an
+	# ordinary, permanent configure_file() call in CMakeLists.txt is what
+	# actually resolves the version, on every build forever, with no
+	# Python involved at build time at all. Only pass a version here for a
+	# one-off fully-resolved dry run/demo.
+	version = sys.argv[3] if len(sys.argv) == 4 else None
 	images_dir = os.path.join(out_dir, 'images')
 	os.makedirs(out_dir, exist_ok=True)
 	os.makedirs(images_dir, exist_ok=True)
 
-	macros = load_macros(doc_dir)
+	macros = load_macros(doc_dir, version=version)
 
-	but_files = sorted(f for f in os.listdir(doc_dir) if f.endswith('.but'))
+	found_files = set(f for f in os.listdir(doc_dir) if f.endswith('.but') or f.endswith('.but.in'))
+	but_files = [f for f in CANONICAL_FILE_ORDER if f in found_files]
+	unlisted = sorted(found_files - set(but_files))
+	if unlisted:
+		# A new .but file was added to app/doc/ without updating
+		# CANONICAL_FILE_ORDER -- still convert it (append at the end,
+		# alphabetically among itself) rather than silently dropping it
+		# from the corpus, but flag it since its sidebar position will be
+		# wrong until CANONICAL_FILE_ORDER is updated to match
+		# app/doc/CMakeLists.txt's real target_sources order.
+		log('(main)', 0, '?', 'unlisted-file',
+		    f'found but not in CANONICAL_FILE_ORDER, appended at the end: {", ".join(unlisted)} -- update CANONICAL_FILE_ORDER to match app/doc/CMakeLists.txt')
+		but_files += unlisted
+
 	all_anchors = {}
 	copied_images = set()
 
+	# Pass 1: parse every file first (need every file's own root pages
+	# before any file is written, to build intro's cross-file \mainpage
+	# subpage list below).
+	pages_by_file = {}
 	for fname in but_files:
+		pages_by_file[fname] = parse_but_file(os.path.join(doc_dir, fname), macros)
+
+	# Every file's own root-level page(s) (no \subpage parent within that
+	# file), in CANONICAL_FILE_ORDER, each file's own roots in document
+	# order -- becomes intro.but.in's "index" page's \subpage list, on top
+	# of its own existing children, so the whole corpus is one ordered
+	# tree instead of a pile of alphabetically-sorted unparented roots
+	# (see CANONICAL_FILE_ORDER's comment). intro.but.in's own root
+	# ("index" itself) is excluded since it's about to become the parent.
+	extra_subpages = []
+	for fname in but_files:
+		if fname == 'intro.but.in':
+			continue
+		extra_subpages += [p.anchor for p in pages_by_file[fname] if p.parent is None]
+
+	# Pass 2: write every file, now that pass 1 has everything needed.
+	for fname in but_files:
+		pages = pages_by_file[fname]
 		path = os.path.join(doc_dir, fname)
-		pages = parse_but_file(path, macros)
-		write_dox(pages, fname, out_dir)
+		keep_template = fname.endswith('.but.in') and version is None
+		is_intro = fname == 'intro.but.in'
+		write_dox(pages, fname, out_dir, keep_template=keep_template,
+		          mainpage_anchor='index' if is_intro else None,
+		          extra_subpages=extra_subpages if is_intro else None)
 		for p in pages:
 			if p.anchor in all_anchors:
 				log(fname, 0, p.anchor, 'duplicate-anchor',
