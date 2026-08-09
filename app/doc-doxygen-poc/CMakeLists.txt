@@ -23,6 +23,29 @@ if(DOXYGEN_FOUND)
 	set(doc_full_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/full)
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile-full.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile-full @ONLY)
 
+	# messages.in's ~130 auto-generated message-explanation topics, already
+	# in Doxygen syntax -- unlike the rest of doc_full_CONVERTED_DIR (a
+	# one-time hand-reviewed conversion via tools/but-to-doxygen.py, see
+	# that script's own comments), this comes from real, always-regenerated
+	# C tooling: app/help/genmessages.c, via app/help/CMakeLists.txt's
+	# msgfiles ALL target (which writes messages.h + messages.dox into
+	# messagefile_BINARY_DIR on every build -- halibut's \S{}/\H{} output
+	# was removed from genmessages.c entirely on this branch, not kept
+	# side by side). Copied here so Doxyfile-full's FILE_PATTERNS=*.dox
+	# picks it up from the same directory as everything else -- see
+	# tools/but-to-doxygen.py's CANONICAL_FILE_ORDER for how its root page
+	# ("messageList") is spliced into the sidebar between appendix.but and
+	# upgrade.but to match halibut's real book order.
+	add_custom_command(
+		OUTPUT ${doc_full_CONVERTED_DIR}/messages.dox
+		DEPENDS ${messagefile_BINARY_DIR}/messages.dox
+		COMMAND ${CMAKE_COMMAND} -E make_directory ${doc_full_CONVERTED_DIR}
+		COMMAND ${CMAKE_COMMAND} -E copy
+			${messagefile_BINARY_DIR}/messages.dox
+			${doc_full_CONVERTED_DIR}/messages.dox
+		COMMENT "Copying genmessages' Doxygen-syntax messages.dox into the conversion output directory"
+	)
+
 	# tools/but-to-doxygen.py is a one-time, EXTERNAL conversion step (run
 	# by hand, or as its own CI step before "Configure" -- see release.yml)
 	# -- it is deliberately NOT invoked from here. CMake's job is only to
@@ -47,6 +70,7 @@ if(DOXYGEN_FOUND)
 
 	add_custom_target(help-doxygen-full
 		COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile-full
+		DEPENDS ${doc_full_CONVERTED_DIR}/messages.dox
 		COMMENT "Building the full Doxygen user-guide conversion (run tools/but-to-doxygen.py first)"
 	)
 

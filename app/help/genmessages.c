@@ -46,15 +46,6 @@ struct transTbl {
 
 /* ATTENTION: make sure that the characters are in the same order as the equivalent escape sequences below */
 
-/* translation table for unicode sequences understood by Halibut */
-struct transTbl toUnicode = {
-	"\xB0\0",
-	{
-		"\\u00B0",
-		"\\0"
-	}
-};
-
 /* translation table for escape sequences understood by C compiler */
 
 struct transTbl toC = {
@@ -64,6 +55,28 @@ struct transTbl toC = {
 		"\\\\",
 		"\\\"",
 		"\\0"
+	}
+};
+
+/* escape a literal backtick before \c{} below adds real ones -- see
+ * ConvertToDoxygen()'s ordering comment */
+struct transTbl toBacktickEscape = {
+	"`",
+	{
+		"\\`"
+	}
+};
+
+/* escape literal '*' and '<'/'>' in prose so Doxygen's Markdown/HTML parser
+ * doesn't misread them as emphasis markers or tags -- run only AFTER \c{}
+ * has already produced its own real backticks/content, see
+ * ConvertToDoxygen() */
+struct transTbl toAsteriskAngleEscape = {
+	"*<>",
+	{
+		"\\*",
+		"&lt;",
+		"&gt;"
 	}
 };
 
@@ -117,6 +130,280 @@ TranslateString(char *srcString, struct transTbl *trTbl)
 }
 
 
+/* minimal growable string buffer, used only by ReplaceBraced/ReplaceW below */
+typedef struct {
+	char *buf;
+	size_t len;
+	size_t cap;
+} DBuf;
+
+static void
+DBufInit(DBuf *d)
+{
+	d->cap = 256;
+	d->buf = malloc(d->cap);
+	d->buf[0] = '\0';
+	d->len = 0;
+}
+
+static void
+DBufAppendN(DBuf *d, const char *s, size_t n)
+{
+	if (d->len + n + 1 > d->cap) {
+		while (d->len + n + 1 > d->cap) {
+			d->cap *= 2;
+		}
+
+		d->buf = realloc(d->buf, d->cap);
+	}
+
+	memcpy(d->buf + d->len, s, n);
+	d->len += n;
+	d->buf[d->len] = '\0';
+}
+
+static void
+DBufAppend(DBuf *d, const char *s)
+{
+	DBufAppendN(d, s, strlen(s));
+}
+
+/**
+ * Given cp pointing at an opening '{', return the matching closing '}',
+ * counting nested {...} pairs -- e.g. messages.in's
+ * "\W{url}{\e{XTrackCAD} Website}" nests \e{}'s own braces inside \W{}'s
+ * second argument. Returns NULL if unbalanced.
+ */
+static const char *
+FindMatchingBrace(const char *cp)
+{
+	int depth = 1;
+	cp++;
+
+	while (*cp) {
+		if (*cp == '{') {
+			depth++;
+		} else if (*cp == '}') {
+			depth--;
+
+			if (depth == 0) {
+				return cp;
+			}
+		}
+
+		cp++;
+	}
+
+	return NULL;
+}
+
+/**
+ * Replace every "\<cmd>{inner}" in src with prefix+inner+suffix. Handles
+ * one level of brace nesting inside inner (see FindMatchingBrace) --
+ * confirmed necessary for \W{}'s second argument, and applied here too for
+ * consistency/robustness even though no bare \c/\K/\k/\f/\q/\e{} in the
+ * current messages.in corpus nests. Returns a newly malloc'd string; caller
+ * frees.
+ */
+char *
+ReplaceBraced(const char *src, const char *cmd, const char *prefix,
+              const char *suffix)
+{
+	size_t cmdLen = strlen(cmd);
+	const char *cp = src;
+	DBuf d;
+	DBufInit(&d);
+
+	while (*cp) {
+		if (cp[0] == '\\' && strncmp(cp + 1, cmd, cmdLen) == 0 &&
+		    cp[1 + cmdLen] == '{') {
+			const char *openBrace = cp + 1 + cmdLen;
+			const char *closeBrace = FindMatchingBrace(openBrace);
+
+			if (closeBrace) {
+				const char *innerStart = openBrace + 1;
+				DBufAppend(&d, prefix);
+				DBufAppendN(&d, innerStart, closeBrace - innerStart);
+				DBufAppend(&d, suffix);
+				cp = closeBrace + 1;
+				continue;
+			}
+		}
+
+		DBufAppendN(&d, cp, 1);
+		cp++;
+	}
+
+	return d.buf;
+}
+
+/**
+ * Replace every "\W{url}{text}" external-link directive with Doxygen/
+ * Markdown's "[text](url)". text commonly nests another macro's own braces
+ * (e.g. "\W{url}{\e{XTrackCAD} Website}", 7 occurrences in messages.in) --
+ * see FindMatchingBrace.
+ */
+char *
+ReplaceW(const char *src)
+{
+	const char *cp = src;
+	DBuf d;
+	DBufInit(&d);
+
+	while (*cp) {
+		if (cp[0] == '\\' && cp[1] == 'W' && cp[2] == '{') {
+			const char *urlOpen = cp + 2;
+			const char *urlClose = FindMatchingBrace(urlOpen);
+
+			if (urlClose && urlClose[1] == '{') {
+				const char *textOpen = urlClose + 1;
+				const char *textClose = FindMatchingBrace(textOpen);
+
+				if (textClose) {
+					const char *urlStart = urlOpen + 1;
+					const char *textStart = textOpen + 1;
+					DBufAppendN(&d, "[", 1);
+					DBufAppendN(&d, textStart, textClose - textStart);
+					DBufAppend(&d, "](");
+					DBufAppendN(&d, urlStart, urlClose - urlStart);
+					DBufAppendN(&d, ")", 1);
+					cp = textClose + 1;
+					continue;
+				}
+			}
+		}
+
+		DBufAppendN(&d, cp, 1);
+		cp++;
+	}
+
+	return d.buf;
+}
+
+/**
+ * halibut's \uXXXX unicode-codepoint escape, used directly as literal text
+ * in messages.in's source (not raw bytes) for characters like the degree
+ * sign (e.g. "0 degrees and 360 degrees"). Codepoints below 0x20 are XTrkCad's
+ * own blank-line spacer shorthand (\u000, \u00) with no visible output;
+ * anything else becomes a numeric HTML character reference, which
+ * Doxygen/HTML renders correctly regardless of source file encoding.
+ * Mirrors tools/but-to-doxygen.py's u_repl().
+ */
+char *
+ReplaceUnicodeEscapes(const char *src)
+{
+	const char *cp = src;
+	DBuf d;
+	DBufInit(&d);
+
+	while (*cp) {
+		if (cp[0] == '\\' && cp[1] == 'u' && isxdigit((unsigned char)cp[2])) {
+			const char *hexStart = cp + 2;
+			const char *hexEnd = hexStart;
+			char hexBuf[16];
+			size_t hexLen;
+			long codepoint;
+
+			while (isxdigit((unsigned char)*hexEnd)) {
+				hexEnd++;
+			}
+
+			hexLen = (size_t)(hexEnd - hexStart);
+
+			if (hexLen >= sizeof hexBuf) {
+				hexLen = sizeof hexBuf - 1;
+			}
+
+			memcpy(hexBuf, hexStart, hexLen);
+			hexBuf[hexLen] = '\0';
+			codepoint = strtol(hexBuf, NULL, 16);
+
+			if (codepoint >= 0x20) {
+				char numBuf[32];
+				snprintf(numBuf, sizeof numBuf, "&#%ld;", codepoint);
+				DBufAppend(&d, numBuf);
+			}
+
+			cp = hexEnd;
+			continue;
+		}
+
+		DBufAppendN(&d, cp, 1);
+		cp++;
+	}
+
+	return d.buf;
+}
+
+/**
+ * halibut's \b bullet-list-item marker, always at the start of its own
+ * line in messages.in (no \lcont/nesting in this corpus, unlike the wider
+ * .but corpus tools/but-to-doxygen.py has to handle) -- convert to a
+ * Markdown "- " bullet.
+ */
+char *
+ReplaceBulletLines(const char *src)
+{
+	const char *cp = src;
+	DBuf d;
+	DBufInit(&d);
+	int atLineStart = 1;
+
+	while (*cp) {
+		if (atLineStart && cp[0] == '\\' && cp[1] == 'b' && cp[2] == ' ') {
+			DBufAppend(&d, "- ");
+			cp += 3;
+			atLineStart = 0;
+			continue;
+		}
+
+		atLineStart = (*cp == '\n');
+		DBufAppendN(&d, cp, 1);
+		cp++;
+	}
+
+	return d.buf;
+}
+
+/**
+ * Convert the subset of halibut markup actually used in messages.in (\b,
+ * \uXXXX, \c, \W, \K/\k, \f, \q, \e, plus escaping of literal backtick,
+ * asterisk, and angle brackets) to Doxygen/Markdown syntax. Ordering
+ * mirrors tools/but-to-doxygen.py's convert_inline(): backtick escape and
+ * \c{} must run before the asterisk/angle-bracket escape, or \c{}'s own
+ * generated content would get double-escaped.
+ */
+char *
+ConvertToDoxygen(char *srcString)
+{
+	char *s0, *s1, *s2, *s3, *s4, *s5, *s6, *s7, *s8, *s9, *result;
+
+	s0 = ReplaceUnicodeEscapes(srcString);
+	s1 = ReplaceBulletLines(s0);
+	free(s0);
+	s2 = TranslateString(s1, &toBacktickEscape);
+	free(s1);
+	s3 = ReplaceBraced(s2, "c", "`", "`");
+	free(s2);
+	s4 = TranslateString(s3, &toAsteriskAngleEscape);
+	free(s3);
+	s5 = ReplaceW(s4);
+	free(s4);
+	s6 = ReplaceBraced(s5, "K", "\\ref ", "");
+	free(s5);
+	s7 = ReplaceBraced(s6, "k", "\\ref ", "");
+	free(s6);
+	s8 = ReplaceBraced(s7, "f", "<b>", "</b>");
+	free(s7);
+	s9 = ReplaceBraced(s8, "q", "\"", "\"");
+	free(s8);
+	result = ReplaceBraced(s9, "e", "_", "_");
+	free(s9);
+
+	return result;
+}
+
+
 int cmpHelpMsg(const void * a, const void * b)
 {
 	helpMsg_p aa = (helpMsg_p)a;
@@ -136,30 +423,44 @@ void unescapeString(FILE * f, char * str)
 }
 
 /**
- * Generate the file in help source format ( ie. the BUT file )
+ * Generate the help file in Doxygen syntax -- see SF feature-requests #219 /
+ * .claude/halibut-doxygen-investigation-plan.md. Emits one \page block per
+ * message under a "messageList" root page (the fixed anchor id
+ * tools/but-to-doxygen.py's CANONICAL_FILE_ORDER splices into the sidebar
+ * between appendix.but and upgrade.but). Halibut's \S{key}/\H{} output is
+ * gone -- this branch is retiring halibut, not running the two side by
+ * side (the still-halibut-based app/doc/CMakeLists.txt production build is
+ * a separate, not-yet-updated step).
  */
 
 void dumpHelp(FILE *hlpsrcF)
 {
 	int inx;
 
-	fputs("\\#\n * DO NOT EDIT! This file has been automatically created by genmessages.\n * Changes to this file will be overwritten.\n",
+	fputs("/* DO NOT EDIT! This file has been automatically created by genmessages.\n * Changes to this file will be overwritten. */\n\n",
 	      hlpsrcF);
-	fprintf(hlpsrcF, "\n\n\\H{messageList} Message Explanations\n\n");
 	/* sort in alphabetical order */
 	qsort(helpMsgs, helpMsgCnt, sizeof helpMsgs[0], cmpHelpMsg);
 
+	fprintf(hlpsrcF, "/**\n\\page messageList Message Explanations\n\n");
+
+	for (inx=0; inx<helpMsgCnt; inx++) {
+		fprintf(hlpsrcF, "- \\subpage %s\n", helpMsgs[inx].key);
+	}
+
+	fprintf(hlpsrcF, "*/\n\n");
+
 	/* now save all the help messages */
 	for (inx=0; inx<helpMsgCnt; inx++) {
-		char *transStr;
+		char *docStr;
 
-		transStr = TranslateString(helpMsgs[inx].title, &toUnicode);
-		fprintf(hlpsrcF, "\\S{%s} %s\n\n", helpMsgs[inx].key, transStr);
-		free(transStr);
-		transStr = TranslateString(helpMsgs[inx].help, &toUnicode);
-		fprintf(hlpsrcF, "%s\n\n", transStr);
-		free(transStr);
-		fprintf(hlpsrcF, "\n\n\\rule\n\n");
+		docStr = ConvertToDoxygen(helpMsgs[inx].title);
+		fprintf(hlpsrcF, "/**\n\\page %s %s\n\n", helpMsgs[inx].key, docStr);
+		free(docStr);
+
+		docStr = ConvertToDoxygen(helpMsgs[inx].help);
+		fprintf(hlpsrcF, "%s\n*/\n\n", docStr);
+		free(docStr);
 	}
 }
 

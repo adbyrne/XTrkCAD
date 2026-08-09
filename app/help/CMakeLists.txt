@@ -48,14 +48,21 @@ add_custom_target(tooltips ALL
 	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/tooltiptext.c
 )
 
+# genmessages.c now emits Doxygen syntax only (halibut's \S{}/\H{} output was
+# removed -- see SF feature-requests #219 / this branch's investigation, and
+# .claude/halibut-doxygen-investigation-plan.md). messages.but is gone;
+# app/doc/CMakeLists.txt's still-halibut-based help-html target (which lists
+# messages.but as one of its sources) is not updated by this change and will
+# fail until that separate, not-yet-done step catches up -- acceptable on
+# this branch, which exists only for the Doxygen conversion work.
 add_custom_command(
- 	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/messages.h ${CMAKE_CURRENT_BINARY_DIR}/messages.but
+ 	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/messages.h ${CMAKE_CURRENT_BINARY_DIR}/messages.dox
 	DEPENDS genmessages ${CMAKE_CURRENT_SOURCE_DIR}/messages.in
- 	COMMAND $<TARGET_FILE:genmessages> ${GENMESSAGES_OPTS} ${CMAKE_CURRENT_SOURCE_DIR}/messages.in ${CMAKE_CURRENT_BINARY_DIR}/messages.but
+ 	COMMAND $<TARGET_FILE:genmessages> ${GENMESSAGES_OPTS} ${CMAKE_CURRENT_SOURCE_DIR}/messages.in ${CMAKE_CURRENT_BINARY_DIR}/messages.dox
 )
 
 add_custom_target(msgfiles ALL
-	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/messages.h ${CMAKE_CURRENT_BINARY_DIR}/messages.but
+	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/messages.h ${CMAKE_CURRENT_BINARY_DIR}/messages.dox
 )
 
 install(

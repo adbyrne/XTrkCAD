@@ -71,6 +71,16 @@ CANONICAL_FILE_ORDER = [
 	'linconf.but', 'chmconf.but',
 ]
 
+# messages.but sits here in the real book order (see app/doc/CMakeLists.txt's
+# target_sources, between appendix.but and upgrade.but) but is deliberately
+# NOT in CANONICAL_FILE_ORDER above: it's not a static file this script
+# parses at all -- it's build-tree output from app/help/genmessages.c's own
+# -doxygen mode, already valid Doxygen syntax (see
+# app/doc-doxygen-poc/CMakeLists.txt), landing directly in out_dir. This
+# script only needs to know its fixed root-page anchor id to splice it into
+# the \mainpage subpage list at the right position -- see main() below.
+MESSAGES_ROOT_ANCHOR = 'messageList'
+
 
 @dataclass
 class Page:
@@ -859,6 +869,16 @@ def main():
 		if fname == 'intro.but.in':
 			continue
 		extra_subpages += [p.anchor for p in pages_by_file[fname] if p.parent is None]
+		# messages.but's real book position -- see MESSAGES_ROOT_ANCHOR's
+		# comment. Spliced in unconditionally (not gated on the generated
+		# messages.dox actually existing on disk): app/doc-doxygen-poc/
+		# CMakeLists.txt's help-doxygen-full target always regenerates it
+		# before building, so by the time Doxygen actually runs the
+		# \subpage reference here resolves; if that generation step were
+		# ever skipped, Doxygen's own "unable to resolve reference" warning
+		# is the right signal, not a silent gap here.
+		if fname == 'appendix.but':
+			extra_subpages.append(MESSAGES_ROOT_ANCHOR)
 
 	# Pass 2: write every file, now that pass 1 has everything needed.
 	for fname in but_files:
