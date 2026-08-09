@@ -8,12 +8,13 @@
   <navindex>
     <tab type="mainpage" visible="yes" title=""/>
     <tab type="pages" visible="yes" title="" intro=""/>
-    <!-- Custom tab (2026-08-08 user feedback): halibut's own "Index"
-         breadcrumb link becomes a persistent tab here instead of a
-         per-page link, pointing at index-generated.dox -- the alphabetized
-         back-of-book index tools/but-to-doxygen.py already rebuilds from
-         every \i/\I/\ii occurrence (see write_index_page()). -->
-    <tab type="user" url="@ref index-generated" title="Index"/>
+    <!-- The custom "Index" tab that used to live here (2026-08-08 user
+         feedback, @ref index-generated) is gone as of 2026-08-09:
+         index-generated.dox now has a real \subpage parent (the synthetic
+         \mainpage table of contents, see tools/but-to-doxygen.py's
+         write_mainpage()), matching halibut's real contents.html, which
+         lists "Index" as the last top-level sibling, not a separate
+         persistent tab. Keeping this tab too would show it twice. -->
     <tab type="topics" visible="yes" title="" intro=""/>
     <tab type="modules" visible="yes" title="" intro="">
       <tab type="modulelist" visible="yes" title="" intro=""/>
