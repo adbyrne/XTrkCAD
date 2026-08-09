@@ -202,12 +202,24 @@ FindMatchingBrace(const char *cp)
  * one level of brace nesting inside inner (see FindMatchingBrace) --
  * confirmed necessary for \W{}'s second argument, and applied here too for
  * consistency/robustness even though no bare \c/\K/\k/\f/\q/\e{} in the
- * current messages.in corpus nests. Returns a newly malloc'd string; caller
- * frees.
+ * current messages.in corpus nests.
+ *
+ * escapeQuotes: when true, every literal '"' in inner is escaped to
+ * "&quot;" before being appended -- required when prefix/suffix are real
+ * HTML tags (<b>/<i>, used for \f{}/\e{}). Confirmed via an isolated
+ * Doxygen build (2026-08-09, same finding as tools/but-to-doxygen.py's
+ * escape_quote_in_tag()) that a literal '"' between an opening and closing
+ * HTML tag makes Doxygen's parser think it's inside a quoted attribute
+ * value and keep scanning PAST the real closing tag for the next '"' --
+ * real cross-content corruption, not just a warning. Not needed for
+ * \c/\K/\k (no real HTML tags involved) or \q{} (its own prefix/suffix
+ * ARE literal quote characters, by design).
+ *
+ * Returns a newly malloc'd string; caller frees.
  */
 char *
 ReplaceBraced(const char *src, const char *cmd, const char *prefix,
-              const char *suffix)
+              const char *suffix, int escapeQuotes)
 {
 	size_t cmdLen = strlen(cmd);
 	const char *cp = src;
@@ -223,7 +235,21 @@ ReplaceBraced(const char *src, const char *cmd, const char *prefix,
 			if (closeBrace) {
 				const char *innerStart = openBrace + 1;
 				DBufAppend(&d, prefix);
-				DBufAppendN(&d, innerStart, closeBrace - innerStart);
+
+				if (escapeQuotes) {
+					const char *ip;
+
+					for (ip = innerStart; ip < closeBrace; ip++) {
+						if (*ip == '"') {
+							DBufAppend(&d, "&quot;");
+						} else {
+							DBufAppendN(&d, ip, 1);
+						}
+					}
+				} else {
+					DBufAppendN(&d, innerStart, closeBrace - innerStart);
+				}
+
 				DBufAppend(&d, suffix);
 				cp = closeBrace + 1;
 				continue;
@@ -281,12 +307,51 @@ ReplaceW(const char *src)
 }
 
 /**
+ * Append the UTF-8 encoding of one Unicode codepoint to d.
+ */
+static void
+AppendUtf8Codepoint(DBuf *d, long codepoint)
+{
+	unsigned char bytes[4];
+	int n = 0;
+
+	if (codepoint <= 0x7F) {
+		bytes[n++] = (unsigned char)codepoint;
+	} else if (codepoint <= 0x7FF) {
+		bytes[n++] = (unsigned char)(0xC0 | (codepoint >> 6));
+		bytes[n++] = (unsigned char)(0x80 | (codepoint & 0x3F));
+	} else if (codepoint <= 0xFFFF) {
+		bytes[n++] = (unsigned char)(0xE0 | (codepoint >> 12));
+		bytes[n++] = (unsigned char)(0x80 | ((codepoint >> 6) & 0x3F));
+		bytes[n++] = (unsigned char)(0x80 | (codepoint & 0x3F));
+	} else {
+		bytes[n++] = (unsigned char)(0xF0 | (codepoint >> 18));
+		bytes[n++] = (unsigned char)(0x80 | ((codepoint >> 12) & 0x3F));
+		bytes[n++] = (unsigned char)(0x80 | ((codepoint >> 6) & 0x3F));
+		bytes[n++] = (unsigned char)(0x80 | (codepoint & 0x3F));
+	}
+
+	DBufAppendN(d, (const char *)bytes, (size_t)n);
+}
+
+/**
  * halibut's \uXXXX unicode-codepoint escape, used directly as literal text
  * in messages.in's source (not raw bytes) for characters like the degree
  * sign (e.g. "0 degrees and 360 degrees"). Codepoints below 0x20 are XTrkCad's
  * own blank-line spacer shorthand (\u000, \u00) with no visible output;
- * anything else becomes a numeric HTML character reference, which
- * Doxygen/HTML renders correctly regardless of source file encoding.
+ * anything else becomes the real UTF-8 character. NOT an HTML numeric
+ * entity (&#176; etc.) -- confirmed via an isolated Doxygen build
+ * (2026-08-09) that Doxygen HTML-escapes the leading "&" of any "&#NNN;"
+ * reference rather than decoding it, in every context (plain prose, list
+ * items, \c{} code spans), so it always shows up as literal "&#176;" text
+ * in the browser instead of the character -- exactly the real bug reported
+ * against the degree signs in Angle/Radius/Connection-parameter message
+ * pages. A real UTF-8 character renders correctly in all the same
+ * contexts and was verified not to trigger the unrelated Doxygen list-
+ * parser corruption bug that HTML-entity-escaping braces originally
+ * guarded against (see tools/but-to-doxygen.py's matching fix and
+ * comment) -- that bug is specific to Doxygen's OWN "\{"/"\}" escape
+ * syntax, not to real characters in general.
  * Mirrors tools/but-to-doxygen.py's u_repl().
  */
 char *
@@ -319,9 +384,7 @@ ReplaceUnicodeEscapes(const char *src)
 			codepoint = strtol(hexBuf, NULL, 16);
 
 			if (codepoint >= 0x20) {
-				char numBuf[32];
-				snprintf(numBuf, sizeof numBuf, "&#%ld;", codepoint);
-				DBufAppend(&d, numBuf);
+				AppendUtf8Codepoint(&d, codepoint);
 			}
 
 			cp = hexEnd;
@@ -383,21 +446,21 @@ ConvertToDoxygen(char *srcString)
 	free(s0);
 	s2 = TranslateString(s1, &toBacktickEscape);
 	free(s1);
-	s3 = ReplaceBraced(s2, "c", "`", "`");
+	s3 = ReplaceBraced(s2, "c", "`", "`", 0);
 	free(s2);
 	s4 = TranslateString(s3, &toAsteriskAngleEscape);
 	free(s3);
 	s5 = ReplaceW(s4);
 	free(s4);
-	s6 = ReplaceBraced(s5, "K", "\\ref ", "");
+	s6 = ReplaceBraced(s5, "K", "\\ref ", "", 0);
 	free(s5);
-	s7 = ReplaceBraced(s6, "k", "\\ref ", "");
+	s7 = ReplaceBraced(s6, "k", "\\ref ", "", 0);
 	free(s6);
-	s8 = ReplaceBraced(s7, "f", "<b>", "</b>");
+	s8 = ReplaceBraced(s7, "f", "<b>", "</b>", 1);
 	free(s7);
-	s9 = ReplaceBraced(s8, "q", "\"", "\"");
+	s9 = ReplaceBraced(s8, "q", "\"", "\"", 0);
 	free(s8);
-	result = ReplaceBraced(s9, "e", "_", "_");
+	result = ReplaceBraced(s9, "e", "<i>", "</i>", 1);
 	free(s9);
 
 	return result;

@@ -185,6 +185,79 @@ def sub_braced(text, cmd, transform):
 	               for part in strip_braced(text, cmd))
 
 
+def escape_quote_in_tag(s):
+	"""Escape literal '"' before wrapping content in a real <i>/<b> HTML
+	tag (used by \\e{}/\\f{}/\\i{}/\\ii{}'s non-title-line output below).
+	Confirmed via an isolated Doxygen build (2026-08-09, real corpus
+	occurrence: navigation.but's \\e{12ft 4 1/2in, 12' 4.5", ...}) that a
+	literal '"' between an opening and closing tag makes Doxygen's HTML
+	parser think it's inside a quoted attribute value -- it then keeps
+	scanning PAST the real closing tag for the next '"' it can find
+	anywhere later in the page, silently swallowing everything in between
+	into one giant emphasis span (real, confirmed cross-content
+	corruption, not just a warning, though it does also warn: "end of
+	comment block while expecting command </i>"). A named HTML entity
+	(matching \\uXXXX's degree-sign fix and CANONICAL_FILE_ORDER's brace
+	fix -- named/raw, never numeric &#NNN; entities, see their comments)
+	renders correctly and was confirmed not to reproduce the corruption.
+	Not needed/applied for '"' outside these tags, or for \\q{}'s own
+	generated quotes (added later in the pipeline than this) -- both
+	confirmed safe as real '"' characters via the same isolated build."""
+	return s.replace('"', '&quot;')
+
+
+def convert_w(text):
+	"""\\W{url}{text} external link -> Doxygen/Markdown "[text](url)". Both
+	url and text are brace-depth-aware (not the plain "[^}]*" regex this
+	used before) -- confirmed necessary: text commonly nests another
+	macro's own braces, e.g. "\\W{url}{\\e{XTrackCAD} Fork Website}" (5 real
+	occurrences: intro.but.in x4, upgrade.but x1). The old regex stopped at
+	\\e{}'s own closing brace, truncating the link text and leaving a
+	dangling, unpaired "_" after the malformed markdown link -- rendered as
+	literal underscores in the browser (real user report, 2026-08-09)."""
+	def scan_braced(start):
+		"""From just after an opening '{' at start-1, return (end, balanced)
+		where end is the index just past the matching '}' (or len(text) if
+		never balanced)."""
+		depth = 1
+		k = start
+		while k < len(text) and depth > 0:
+			if text[k] == '{':
+				depth += 1
+			elif text[k] == '}':
+				depth -= 1
+			k += 1
+		return k, depth == 0
+
+	out = []
+	i = 0
+	pat = '\\W{'
+	while True:
+		j = text.find(pat, i)
+		if j == -1:
+			out.append(text[i:])
+			break
+		out.append(text[i:j])
+
+		url_start = j + len(pat)
+		url_end, url_balanced = scan_braced(url_start)
+		has_second_group = url_balanced and url_end < len(text) and text[url_end] == '{'
+		if not has_second_group:
+			# Not a real \W{...}{...} (unbalanced url arg, or no second
+			# group) -- leave as-is rather than guessing.
+			out.append(text[j:url_end])
+			i = url_end
+			continue
+
+		url = text[url_start:url_end - 1]
+		text_start = url_end + 1
+		text_end, _ = scan_braced(text_start)
+		link_text = text[text_start:text_end - 1]
+		out.append(f'[{link_text}]({url})')
+		i = text_end
+	return ''.join(out)
+
+
 def convert_inline(text, macros, source_file, line_no, anchor, defer_anchors=None):
 	"""Apply all inline-directive substitutions to one line/paragraph of body
 	text. Returns the converted text; side-effects LOG for lossy/uncertain
@@ -244,16 +317,39 @@ def convert_inline(text, macros, source_file, line_no, anchor, defer_anchors=Non
 	text = text.replace('<', '&lt;').replace('>', '&gt;')
 
 	# halibut's own literal-brace escape ("\{"/"\}", e.g. "\{0,0\}" for a
-	# coordinate notation, 3 occurrences in changem.but) happens to also be
-	# Doxygen's own escape for a literal brace, so it isn't obviously wrong
-	# -- but confirmed via a real, minimized build that it destabilizes
-	# Doxygen's markdown parser when it lands inside list content: not just
-	# a warning ("End of list marker found without any preceding list
-	# items"), but real, silent content corruption on a *later*, unrelated
-	# page (cmdRaiseElev.html rendered trackDescribeBezier's text instead
-	# of its own). HTML entities have no special meaning to Doxygen's
-	# comment/command parser at all, sidestepping the interaction entirely.
-	text = text.replace('\\{', '&#123;').replace('\\}', '&#125;')
+	# coordinate notation). Two prior findings, both real, both confirmed
+	# via isolated builds:
+	#
+	# 1. (2026-08-08) Leaving it as "\{"/"\}" -- Doxygen's OWN escape
+	#    syntax for a literal brace, so not obviously wrong -- destabilizes
+	#    Doxygen's markdown parser when it lands inside list content: real,
+	#    silent cross-page content corruption (cmdRaiseElev.html rendered
+	#    trackDescribeBezier's text instead of its own), not just a
+	#    warning. HTML numeric entities (&#123;/&#125;) were adopted to
+	#    sidestep this, since they have no special meaning to Doxygen's
+	#    comment/command parser at all.
+	#
+	# 2. (2026-08-09) Those entities themselves never render: real user
+	#    reports across ~10 pages (Directories Overview's "{HOME}", Common
+	#    Draw Object Fields'/Cornu/Bezier Track Object Fields' "{0,0}",
+	#    Protractor's "{Left-Drag", etc.) all showed the literal text
+	#    "&#123;"/"&#125;" in the browser instead of "{"/"}". Confirmed via
+	#    an isolated Doxygen build: Doxygen HTML-escapes the "&" in any
+	#    "&#NNN;" numeric reference (producing "&amp;#NNN;") rather than
+	#    decoding it, in every context tested (plain prose, list items,
+	#    and inside \c{} code spans, where a numeric reference could never
+	#    have rendered anyway -- CommonMark spec never decodes entities
+	#    inside code spans, they're always literal).
+	#
+	# Fix, verified via the same isolated-build method as finding 1 (two
+	# \page blocks, a list item with the brace on the first page, plain
+	# prose on the second, checked for both correct rendering AND that the
+	# second page's content doesn't bleed): plain, real "{"/"}" characters
+	# (no backslash, not an entity) render correctly in every context
+	# AND do not reproduce finding 1's corruption -- it's specifically
+	# Doxygen's own "\{"/"\}" escape sequence that destabilizes the list
+	# parser, not an unescaped brace character.
+	text = text.replace('\\{', '{').replace('\\}', '}')
 
 	# Bare \i immediately before another command with no braces of its own
 	# (e.g. "\i\e{Circle Radius}" -- confirmed real, 3 occurrences total,
@@ -273,10 +369,10 @@ def convert_inline(text, macros, source_file, line_no, anchor, defer_anchors=Non
 	text = re.sub(r'\\i(\\[a-zA-Z]+)', bare_i_repl, text)
 
 	# \W{url}{text} external link -- do before other brace commands since it
-	# has two brace groups.
-	def w_repl(m):
-		return f'[{m.group(2)}]({m.group(1)})'
-	text = re.sub(r'\\W\{([^}]*)\}\{([^}]*)\}', w_repl, text)
+	# has two brace groups. See convert_w()'s own docstring: brace-depth-
+	# aware, not a plain "[^}]*" regex (needed for nested macros like
+	# \e{} inside the text argument).
+	text = convert_w(text)
 
 	# \G{path} image embed -- flatten to basename, images/ dir holds them all.
 	def g_repl(m):
@@ -301,26 +397,66 @@ def convert_inline(text, macros, source_file, line_no, anchor, defer_anchors=Non
 	# plain <strong> (confirmed against a real halibut build, e.g.
 	# whyXTrackCAD.html) -- <b> is the exact same visual weight, so this is
 	# equivalence with halibut's own output, not an upgrade beyond it.
-	text = re.sub(r'\\f\{([^}]*)\}', lambda m: f'<b>{m.group(1)}</b>', text)
+	# Brace-depth-aware (via sub_braced), not a plain "[^}]*" regex --
+	# confirmed real: intro.but.in has \f{Parameter Files (\K{cmdPrmfile})},
+	# a nested command inside \f{}'s own argument. Currently harmless only
+	# because \K/\k happens to run before \f{} in this pipeline (so its
+	# braces are already gone by the time \f{}'s own match runs) -- fixed
+	# properly rather than left order-dependent, same reasoning as \c{}'s
+	# existing brace-depth handling and \e{}'s below (which IS live-broken
+	# by this exact class of bug, see \e{}'s own comment).
+	text = sub_braced(text, 'f', lambda inner: f'<b>{escape_quote_in_tag(inner)}</b>')
 
-	# \q{...} quoted UI-option text
-	text = re.sub(r'\\q\{([^}]*)\}', lambda m: f'"{m.group(1)}"', text)
+	# \q{...} quoted UI-option text. Brace-depth-aware for the same reason
+	# as \f{} above, even though no real \q{\cmd{...}} nesting exists in
+	# the corpus today.
+	text = sub_braced(text, 'q', lambda inner: f'"{inner}"')
 
-	# \e{...} emphasis -> italics. (Any literal "*" inside is already escaped
-	# by the whole-text pass above, e.g. \e{*.xtc}.)
-	def e_repl(m):
-		return f'_{m.group(1)}_'
-	text = re.sub(r'\\e\{([^}]*)\}', e_repl, text)
+	# \e{...} emphasis -> italics. Real <i> HTML, not markdown "_..._" --
+	# confirmed via isolated Doxygen builds (2026-08-09, real user reports
+	# across ~7 pages) that Doxygen's markdown emphasis parser drops
+	# underscore emphasis entirely in two real, common shapes in this
+	# corpus: intraword (\e{Left-Click}ing -> "_Left-Click_ing", the
+	# closing "_" immediately followed by more word characters, e.g.
+	# appendix.but/addm.but/drawm.but's "ing" suffix pattern) and
+	# adjacent to a literal "[" (\e{Ctrl+Shift+[} -> "_Ctrl+Shift+[_",
+	# navigation.but's keyboard-shortcut list -- "[" appears to trigger
+	# Doxygen's link-reference scanning and corrupts the emphasis match).
+	# Tried "*...*" first since CommonMark's spec allows intraword
+	# emphasis for asterisks but not underscores -- confirmed via the same
+	# isolated-build method that Doxygen's implementation doesn't honor
+	# that distinction either and drops asterisk emphasis in both shapes
+	# too. Real <i> tags (matching \f{}'s existing <b> fix immediately
+	# below, same underlying reasoning) sidestep Markdown's emphasis
+	# parsing entirely and were confirmed correct in both broken shapes
+	# plus the normal case.
+	#
+	# Brace-depth-aware (via sub_braced), not a plain "[^}]*" regex --
+	# confirmed real AND live-broken: view_winm.but/changem.but both have
+	# \e{\i{Zoom/Pan Shortcut Keys}}, a nested \i{} inside \e{}'s own
+	# argument. \i{} runs AFTER \e{} in this pipeline, so \e{}'s old plain
+	# regex stopped at \i{}'s still-unprocessed closing brace, truncating
+	# the match and leaving a stray "}" that \i{}'s OWN later regex then
+	# absorbed as trailing text -- confirmed real via the generated index
+	# page showing a corrupted entry ("Zoom/Pan Shortcut Keys</i>") and a
+	# real Doxygen warning ("found </i> tag without matching <i>"), found
+	# investigating the underscore-emphasis bug above, 2026-08-09.
+	text = sub_braced(text, 'e', lambda inner: f'<i>{escape_quote_in_tag(inner)}</i>')
 
 	# \i{...} visible italic + index registration. Keep the visible text AND
 	# preserve the indexing semantic via a Doxygen \anchor right after it --
 	# index-generated.dox (built at the end of the run) collects every one
 	# of these into a real alphabetized index page, same as halibut's own
 	# automatic index, instead of just discarding the registration.
-	def i_repl(m):
-		idx_id = make_index_anchor(m.group(1), anchor)
+	# Brace-depth-aware (via sub_braced) for all three of \i{}/\ii{}/\I{}
+	# below, not a plain "[^}]*" regex -- confirmed real: intro.but.in has
+	# \i{Removing \e{XTrackCAD}}, a nested \e{} inside \i{}'s own argument
+	# (currently harmless only because \e{} runs before \i{} in this
+	# pipeline, same order-dependency reasoning as \f{}'s comment above).
+	def i_repl(inner):
+		idx_id = make_index_anchor(inner, anchor)
 		log(source_file, line_no, anchor, 'index-term',
-		    f'\\i{{{m.group(1)}}} -> italic + \\anchor {idx_id}, collected into index-generated.dox')
+		    f'\\i{{{inner}}} -> italic + \\anchor {idx_id}, collected into index-generated.dox')
 		if defer_anchors is not None:
 			# Plain text only, no "_..._" emphasis markers -- confirmed via
 			# a real build: markdown emphasis embedded directly in a \page
@@ -330,31 +466,35 @@ def convert_inline(text, macros, source_file, line_no, anchor, defer_anchors=Non
 			# Values_", which threw off later, unrelated _..._ emphasis on
 			# the same page with an "expecting command </em>" warning).
 			defer_anchors.append(idx_id)
-			return m.group(1)
+			return inner
 		# Trailing space is required, not cosmetic: halibut's own source
 		# often butts \i{...}/\I{...} directly against the next word with
 		# no space (e.g. "\I{Run Trains}During this command..."). Without
 		# it, "\anchor idx_..." swallows the following word as part of the
 		# anchor name, and every \ref to that anchor then dangles
 		# (confirmed via a real build: idx_Run_Trains_219 unresolved).
-		return f'_{m.group(1)}_ \\anchor {idx_id} '
-	text = re.sub(r'\\i\{([^}]*)\}', i_repl, text)
+		# Real <i> HTML, not markdown "_..._" -- same fix as \e{} above,
+		# same reasoning (confirmed via the same isolated-build method:
+		# Doxygen drops underscore -- and asterisk -- emphasis in the
+		# intraword and "["-adjacent shapes real \i{} occurrences hit too).
+		return f'<i>{escape_quote_in_tag(inner)}</i> \\anchor {idx_id} '
+	text = sub_braced(text, 'i', i_repl)
 
 	# \ii{...} rare double-emphasis/index variant -- treat as bold, same
 	# anchor-and-collect treatment.
-	def ii_repl(m):
-		idx_id = make_index_anchor(m.group(1), anchor)
+	def ii_repl(inner):
+		idx_id = make_index_anchor(inner, anchor)
 		log(source_file, line_no, anchor, 'index-term',
-		    f'\\ii{{{m.group(1)}}} -> bold + \\anchor {idx_id}, collected into index-generated.dox (rare directive, only 3 uses total)')
+		    f'\\ii{{{inner}}} -> bold + \\anchor {idx_id}, collected into index-generated.dox (rare directive, only 3 uses total)')
 		if defer_anchors is not None:
 			# Plain text only in a \page TITLE line -- same reasoning as
 			# i_repl above.
 			defer_anchors.append(idx_id)
-			return m.group(1)
+			return inner
 		# <b> HTML, not markdown "**...**" -- same paragraph-start bug as
 		# \f{} above, see that comment.
-		return f'<b>{m.group(1)}</b> \\anchor {idx_id} '
-	text = re.sub(r'\\ii\{([^}]*)\}', ii_repl, text)
+		return f'<b>{escape_quote_in_tag(inner)}</b> \\anchor {idx_id} '
+	text = sub_braced(text, 'ii', ii_repl)
 
 	# \I{...} silent index-only registration -- no visible text in the
 	# original either, so just the \anchor (no italic/bold wrapper),
@@ -362,15 +502,15 @@ def convert_inline(text, macros, source_file, line_no, anchor, defer_anchors=Non
 	# (e.g. "\S{cmdUndo} Undo and Redo \I{Undo} \I{Redo}") registering
 	# multiple index aliases for one page -- confirmed via the real corpus,
 	# this is the single biggest reason defer_anchors exists.
-	def cap_i_repl(m):
-		idx_id = make_index_anchor(m.group(1), anchor)
+	def cap_i_repl(inner):
+		idx_id = make_index_anchor(inner, anchor)
 		log(source_file, line_no, anchor, 'index-term-silent',
-		    f'\\I{{{m.group(1)}}} -> \\anchor {idx_id} only (matches original: no visible output), collected into index-generated.dox')
+		    f'\\I{{{inner}}} -> \\anchor {idx_id} only (matches original: no visible output), collected into index-generated.dox')
 		if defer_anchors is not None:
 			defer_anchors.append(idx_id)
 			return ''
 		return f'\\anchor {idx_id} '
-	text = re.sub(r'\\I\{([^}]*)\}', cap_i_repl, text)
+	text = sub_braced(text, 'I', cap_i_repl)
 
 	# \u000 / \u00B0 etc: \u000 is XTrkCad's blank-line spacer (no visible
 	# text) -- drop. Other \uXXXX are literal unicode codepoints -- decode.
@@ -413,15 +553,32 @@ def convert_inline(text, macros, source_file, line_no, anchor, defer_anchors=Non
 	return text
 
 
-def parse_but_file(path, macros):
+def parse_but_file(path, macros, stack):
 	"""Parse one .but file into a flat list of Page objects (document order),
-	with parent/child relationships recorded for \\subpage linking."""
+	with parent/child relationships recorded for \\subpage linking.
+
+	stack: the (level, anchor) heading-ancestry list, SHARED and mutated
+	across every file in CANONICAL_FILE_ORDER (see main()), not local to
+	this file. Confirmed real and necessary: 11 of the corpus's 20 files
+	(changem.but, drawm.but, editm.but, filem.but, helpm.but, hotbar.but,
+	macrom.but, managem.but, optionm.but, statusbar.but, view_winm.but)
+	open with a bare \\H{} heading, not their own \\C{}/\\A{} chapter --
+	in halibut's real book, they CONTINUE addm.but's still-open
+	\\C{commandMenus} chapter (confirmed via the real .but source: none of
+	them starts a new \\C/\\A). A fresh per-file stack (the old behavior)
+	always saw these as parentless, promoting all 11 to independent
+	top-level sidebar entries instead of children of "Command Menus" --
+	confirmed real via a user report, 2026-08-09 ("Command Menus" showing
+	only its one "Add Menu" child). A real \\C{}/\\A{} heading is
+	self-correcting even with a shared stack: LEVEL_ORDER's C/A level (0)
+	pops the entire stack before pushing itself (see the "while stack and
+	stack[-1][0] >= level" pop loop below), so navigation.but's/
+	appendix.but's/etc.'s own chapter starts are unaffected."""
 	source_file = os.path.basename(path)
 	with open(path, encoding='utf-8') as f:
 		lines = f.readlines()
 
 	pages = []
-	stack = []  # (level, anchor) -- current open ancestry
 	current = None
 	# Halibut's \dt/\dd definition-list pair. Tried real HTML <dl>/<dt>/<dd>
 	# first (Doxygen's HTML validator rejects it: \dd with no preceding \dt
@@ -666,7 +823,7 @@ def parse_but_file(path, macros):
 		known_inline_starts = ('f', 'e', 'c', 'q', 'i', 'ii', 'I', 'K', 'k', 'W', 'G', 'u')
 		is_plain_continuation = not unrec or unrec.group(1) in known_inline_starts
 
-		if in_list and is_plain_continuation:
+		if (in_list or lcont_open) and is_plain_continuation:
 			# Word-wrapped continuation of the paragraph a \dd/\dt started
 			# (the common case: real prose in this corpus wraps across
 			# several physical lines with no per-line directive). No
@@ -687,6 +844,20 @@ def parse_but_file(path, macros):
 			# remaining imperfection (navigation.dox, 2 warnings) --
 			# logged, not fixed; distinguishing the two cases needs more
 			# than "are we inside an open \lcont".
+			#
+			# "or lcont_open" (2026-08-09): an \lcont{...} block can also
+			# hold a plain paragraph directly, not just nested \b bullets
+			# (e.g. intro.but.in's Working Directory page, the check-point
+			# frequency paragraph). Without this, such a line didn't match
+			# "in_list" (\lcont{ alone doesn't set in_list, only
+			# lcont_open -- it's not itself a list item) and fell through
+			# to the catch-all below, which calls close_list() and so
+			# clears lcont_open before the block's own closing "}" line is
+			# reached -- the "}" then had nothing left to recognize it and
+			# leaked into the page as literal text (confirmed real: a
+			# stray "<p>}</p>" on the rendered page, reported by a user
+			# 2026-08-09, same failure shape as the cmdRaiseElev.html bug
+			# this handler's sibling check already fixed once).
 			if current is not None:
 				current.body_lines.append(convert_inline(line, macros, source_file, line_no, current.anchor))
 			continue
@@ -707,10 +878,16 @@ def parse_but_file(path, macros):
 
 def write_dox(pages, source_file, out_dir, keep_template=False,
               mainpage_anchor=None, extra_subpages=None):
+	# Parent/child linking (p.parent -> the parent Page's .children list) is
+	# done globally in main(), across ALL files' pages together, before
+	# write_dox() is ever called -- not per-file here. Necessary since a
+	# page's parent is often in a DIFFERENT file (see parse_but_file()'s
+	# shared-stack comment: 11 of 20 files have their top heading parented
+	# into addm.but's "Command Menus" chapter). by_anchor here is only for
+	# the mainpage_anchor lookup below, which is always intro.but.in's own
+	# page, always in THIS file's own pages when keep_template/mainpage_anchor
+	# apply.
 	by_anchor = {p.anchor: p for p in pages}
-	for p in pages:
-		if p.parent and p.parent in by_anchor:
-			by_anchor[p.parent].children.append(p.anchor)
 
 	# mainpage_anchor/extra_subpages (only ever set for intro.but.in's
 	# "index" page, from main()'s cross-file pass): promotes that one page
@@ -852,18 +1029,35 @@ def main():
 
 	# Pass 1: parse every file first (need every file's own root pages
 	# before any file is written, to build intro's cross-file \mainpage
-	# subpage list below).
+	# subpage list below). heading_stack is SHARED and mutated across every
+	# file, in CANONICAL_FILE_ORDER (document order) -- see
+	# parse_but_file()'s own docstring for why: 11 files continue a chapter
+	# opened in an earlier file rather than starting their own.
 	pages_by_file = {}
+	heading_stack = []
 	for fname in but_files:
-		pages_by_file[fname] = parse_but_file(os.path.join(doc_dir, fname), macros)
+		pages_by_file[fname] = parse_but_file(os.path.join(doc_dir, fname), macros, heading_stack)
 
-	# Every file's own root-level page(s) (no \subpage parent within that
-	# file), in CANONICAL_FILE_ORDER, each file's own roots in document
-	# order -- becomes intro.but.in's "index" page's \subpage list, on top
-	# of its own existing children, so the whole corpus is one ordered
-	# tree instead of a pile of alphabetically-sorted unparented roots
-	# (see CANONICAL_FILE_ORDER's comment). intro.but.in's own root
-	# ("index" itself) is excluded since it's about to become the parent.
+	# Parent/child linking, globally across every file's pages together --
+	# NOT per-file (see write_dox()'s own comment): a page's parent is
+	# often in a different file now that heading_stack above threads
+	# chapter continuation across file boundaries.
+	all_pages_flat = [p for fname in but_files for p in pages_by_file[fname]]
+	by_anchor_global = {p.anchor: p for p in all_pages_flat}
+	for p in all_pages_flat:
+		if p.parent and p.parent in by_anchor_global:
+			by_anchor_global[p.parent].children.append(p.anchor)
+
+	# Every file's own true root-level page(s) (p.parent is None -- thanks
+	# to heading_stack above, this now correctly means "opens a new \C{}/
+	# \A{} chapter", not just "first heading in this file"; the 11 files
+	# that continue a prior file's chapter no longer qualify), in
+	# CANONICAL_FILE_ORDER, each file's own roots in document order --
+	# becomes intro.but.in's "index" page's \subpage list, on top of its
+	# own existing children, so the whole corpus is one ordered tree
+	# instead of a pile of alphabetically-sorted unparented roots (see
+	# CANONICAL_FILE_ORDER's comment). intro.but.in's own root ("index"
+	# itself) is excluded since it's about to become the parent.
 	extra_subpages = []
 	for fname in but_files:
 		if fname == 'intro.but.in':
