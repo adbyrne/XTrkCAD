@@ -8,9 +8,11 @@ set(FLATPAK_REPO "temp.repo")
 set(FLATPAK_WORK_DIR "temp.work")
 set(FLATPAK_BUILD_SCRIPT "${CMAKE_SOURCE_DIR}/distribution/flatpak/buildFlatpak.sh")
 # minimize changes to app/lib/xtrkcad.metainfo.xml
-string(REGEX REPLACE "\\.[0-9a-f][0-9a-f][0-9a-f][0-9a-f]+" "" FLATPAK_VERSION ${XTRKCAD_VERSION})
+#string(REGEX REPLACE "\\.[0-9a-f][0-9a-f][0-9a-f][0-9a-f]+" "" FLATPAK_VERSION ${XTRKCAD_VERSION})
+set(FLATPAK_VERSION "${XTRKCAD_VERSION}")
 #message(NOTICE "FLATPAK_VERSION=${FLATPAK_VERSION}")
-set(FLATPAK_SUFFIX_NAME "-gtk")
+string(REPLACE "." "_" FLATPAK_VERSION_ID "${FLATPAK_VERSION}")
+set(FLATPAK_SUFFIX_NAME "-${FLATPAK_VERSION_ID}")
 set(FLATPAK_PACKAGE "xtrkcad${FLATPAK_SUFFIX_NAME}")
 set(FLATPAK_BASE_NAME "xtrkcad${FLATPAK_SUFFIX_NAME}")
 set(FLATPAK_SHARE_INSTALL_DIR "share/${FLATPAK_PACKAGE}")
@@ -34,7 +36,7 @@ set(FLATPAK_DOMAIN "io.sourceforge.xtrkcad_fork")
 # flatpak domain local build
 #set(FLATPAK_DOMAIN "org.xtrkcad")
 
-set(_XTRK_DESKTOP_FILE "xtrkcad.desktop")
+set(_XTRK_DESKTOP_FILE "xtrkcad.flatpak.desktop")
 set(_XTRK_META_FILE "xtrkcad.metainfo.xml")
 set(_XTRK_MANIFEST_FILE "xtrkcad.manifest.yaml")
 
@@ -55,8 +57,8 @@ string(CONCAT _XTRK_DESKTOP_IN_FILE
 #   will be modified for your checking in pleasure.
 #######################################################################
 
-# updates source on purpose for flathub builds
-configure_file(${_XTRK_DESKTOP_IN_FILE} "${CMAKE_CURRENT_SOURCE_DIR}/${_XTRK_DESKTOP_FILE}")
+# updates source on purpose for flathub builds for versioning (reverted with hg)
+configure_file(${_XTRK_DESKTOP_IN_FILE} "${CMAKE_SOURCE_DIR}/app/lib/${_XTRK_DESKTOP_FILE}")
 
 # metainfo.xml.in
 string(CONCAT _XTRK_META_IN_FILE
@@ -66,7 +68,8 @@ string(CONCAT _XTRK_META_IN_FILE
        ".in"
       )
 
-# updates source on purpose for flathub builds; the date needs manual update before source archiving
+# updates source on purpose for flathub builds for versioning (reverted with hg);
+# the date needs manual update before source archiving
 configure_file(${_XTRK_META_IN_FILE} "${CMAKE_SOURCE_DIR}/app/lib/${_XTRK_META_FILE}")
 
 # manifest.yaml.in
@@ -99,7 +102,7 @@ add_custom_command(
             --state-dir=${FLATPAK_STATE_DIR}
             --force-clean --user --install --repo=${FLATPAK_REPO}
             --install-deps-from=flathub
-            ${FLATPAK_WORK_DIR} ${_XTRK_MANIFEST_FILE}
+	    ${FLATPAK_WORK_DIR} ${_XTRK_MANIFEST_FILE}
     #COMMAND sh -c "flatpak run --command=flatpak-builder-lint org.flatpak.Builder repo ${FLATPAK_REPO} || echo 'Flatpak lint ERROR: finish-args-home-filesystem-access and *screenshot* are ok, others need correcting'" VERBATIM
     COMMAND rm -rf ${FLATPAK_WORK_DIR}
     COMMAND ${Flatpak_EXECUTABLE} build-bundle
@@ -108,7 +111,7 @@ add_custom_command(
 	    ${FLATPAK_DOMAIN}.${FLATPAK_BASE_NAME}
     COMMAND rm -rf ${FLATPAK_REPO}
     COMMENT "Re-compiling xtrkcad within flatpak Sdk; this could take a while ..."
-    DEPENDS ${_XTRK_MANIFEST_FILE} ${_XTRK_DESKTOP_FILE} ${CMAKE_SOURCE_DIR}/app/lib/${_XTRK_META_FILE}
+    DEPENDS ${_XTRK_MANIFEST_FILE} ${CMAKE_SOURCE_DIR}/app/lib/${_XTRK_DESKTOP_FILE} ${CMAKE_SOURCE_DIR}/app/lib/${_XTRK_META_FILE}
 )
 
 # makes for an easy target: "make flatpak" or "ninja flatpak"

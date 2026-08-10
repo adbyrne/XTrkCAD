@@ -56,7 +56,11 @@ BUILD_TYPE=""
 cleanup() {
 	trap - 0 1 2 3 15 21 22
 	if [ -n "$BUILD_TYPE" ]; then
+		# remove change to About
 		hg revert -C $HERE/app/bin/smalldlg.c
+		# remove changes based on versioning hash
+		hg revert -C $HERE/app/lib/xtrkcad.metainfo.xml
+		hg revert -C $HERE/app/lib/xtrkcad.flatpak.desktop
 	fi
 }
 

@@ -63,6 +63,18 @@ modules:
     cleanup:
       - '*'
 
+  - name: mercurial
+    # needed due to versioning (hg not part of flatpak builder sandbox)
+    buildsystem: simple
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/c6/1c/39e11d3bdafc57434a94e272675484f6a19af788cd3d4e052267940b3800/mercurial-7.2.3-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl
+        sha256: 7092bdc23934c17bd63e529c3750b72109263d8af976d2e9c97c745d358012e9
+    build-commands:
+      - pip3 install --no-index --find-links=file://$PWD --prefix=/app mercurial
+    cleanup:
+      - '*'
+
   - name: xtrkcad
     buildsystem: cmake-ninja
     sources:
