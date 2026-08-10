@@ -1570,14 +1570,14 @@ static STATUS_T CmdPrint(
 			                             _("Cancel"), FormCancel_Reset,
 			                             TRUE, 0, PrintDlgUpdate );
 		}
+		// GTK's portable print API only populates a printer name in
+		// GtkPrintSettings after a print dialog has actually been run once
+		// (see wPrintGetName()'s doc comment in gtk3lib/print.c) -- Page Setup
+		// doesn't populate it either, so on a fresh install this can never
+		// resolve and used to loop here forever. sPrinterName is otherwise
+		// only used as a preference-key prefix for per-printer margins, so an
+		// empty name just falls back to a shared default-margins key instead.
 		sPrinterName = wPrintGetName();
-		while ( !sPrinterName || *sPrinterName == '\0' ) {
-			int rc = NoticeMessage( MSG_NO_PRINTER_SELECTED, _("Ok"), _("Cancel") );
-			if ( rc <= 0 ) {
-				return C_TERMINATE;
-			}
-			DoPrintSetup();
-		}
 		GetMargins();
 		wShow( printWin );
 		SetMaxPageSize( TRUE );
