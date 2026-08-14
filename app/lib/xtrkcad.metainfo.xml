@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>io.sourceforge.xtrkcad_fork.xtrkcad-gtk</id>
-  <name>XTrackCAD-gtk</name>
+  <id>io.sourceforge.xtrkcad_fork.xtrkcad-5_4_0</id>
+  <name>XTrackCAD-5_4_0</name>
   <summary>Design model railroad layouts</summary>
   <description>
     <p>XTrackCAD is a CAD (computer-aided design) program for designing model railroad layouts.</p>
@@ -11,7 +11,7 @@
     <release version="5.4.0" date="1969-12-31"/>
   </releases>
   <content_rating type="oars-1.1" />
-  <launchable type="desktop-id">io.sourceforge.xtrkcad_fork.xtrkcad-gtk.desktop</launchable>
+  <launchable type="desktop-id">io.sourceforge.xtrkcad_fork.xtrkcad-5_4_0.desktop</launchable>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0</project_license>
   <url type="bugtracker">https://sourceforge.net/p/xtrkcad-fork/bugs/</url>
@@ -26,7 +26,7 @@
       <caption>Example port_dinllean.xtc</caption>
     </screenshot>
   </screenshots>
-  <developer id="io.sourceforge.xtrkcad_fork.xtrkcad-gtk">
+  <developer id="io.sourceforge.xtrkcad_fork.xtrkcad-5_4_0">
     <name>xtrkcad developers</name>
   </developer>
 </component>

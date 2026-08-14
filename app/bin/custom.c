@@ -42,14 +42,10 @@ char * sProdName = Product;
  * \var sProdNameLower
  * Lowercase product name
  *
- * When `XTRKCAD_BUILD_FLATPAK` is defined, the product name is appended with "-gtk".
- *
- * Otherwise, the product name is appended with "-XTRKCAD_VERSION".
- *
  * For flatpak builds, this should not contain any periods.
  */
 #if XTRKCAD_BUILD_FLATPAK
-char * sProdNameLower = product "-gtk";
+char * sProdNameLower = product "-" XTRKCAD_VERSION_ID;
 #else
 char * sProdNameLower = product "-" XTRKCAD_VERSION;
 #endif
