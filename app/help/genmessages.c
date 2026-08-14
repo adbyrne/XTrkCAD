@@ -21,13 +21,48 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 #ifdef WINDOWS
 #if _MSC_VER >=1400
 #define strdup _strdup
 #endif
+#include <io.h>
+#define open _open
+#define fdopen _fdopen
+#define O_CREAT_MODE _S_IREAD | _S_IWRITE
+#else
+#include <unistd.h>
+#define O_CREAT_MODE 0644
 #endif
 
+/* fopen(path, "w") creates the file with permissions controlled entirely by
+ * the process umask (typically fine, but not explicit) -- open() with an
+ * explicit mode plus O_TRUNC (fopen's "w" always truncates) is the portable
+ * way to actually restrict it, same intent on both platforms even though
+ * the mode bits mean different things (POSIX permission bits vs.
+ * MSVCRT's read/write attribute flags). */
+static FILE *
+FOpenRestricted(const char *path)
+{
+	int fd = open(path, O_CREAT | O_WRONLY | O_TRUNC, O_CREAT_MODE);
+
+	if (fd < 0) {
+		return NULL;
+	}
+
+	return fdopen(fd, "w");
+}
+
 #define I18NHEADERFILE "i18n.h"
+
+/* bounds-checked replacements for the strcpy/strcat calls below -- dst must
+ * be a real array (sizeof(dst) needs to be the buffer size, not a decayed
+ * pointer size), true for every call site in this file. Truncates rather
+ * than overflowing if a message.in line is longer than the fixed-size
+ * accumulator buffers. */
+#define SAFE_COPY(dst, src) snprintf((dst), sizeof(dst), "%s", (src))
+#define SAFE_CAT(dst, src) strncat((dst), (src), sizeof(dst) - strlen(dst) - 1)
 
 typedef struct helpMsg_t * helpMsg_p;
 typedef struct helpMsg_t {
@@ -565,7 +600,14 @@ int main(int argc, char * argv[])
 		inFileIdx = 1;	/* first argument is input file */
 	}
 
-	/* open the file for reading */
+	/* open the file for reading -- CodeQL flags argv-derived fopen() paths
+	 * as cpp/path-injection, but that query targets programs that open
+	 * paths on behalf of some other, less-trusted caller (e.g. a network
+	 * service); this is a build-time CLI code generator whose entire job
+	 * is "open the file you're told to open" -- the caller (CMake, driven
+	 * by this project's own CMakeLists.txt) and the invoking user are the
+	 * same trust boundary. No sanitization would make sense here without
+	 * breaking the tool. */
 	inF = fopen(argv[ inFileIdx ], "r");
 
 	if (!inF) {
@@ -574,7 +616,7 @@ int main(int argc, char * argv[])
 	}
 
 	/* open the include file to generate */
-	hdrF = fopen("messages.h", "w");
+	hdrF = FOpenRestricted("messages.h");
 
 	if (!hdrF) {
 		fprintf(stderr, "Could not open messages.h for writing!\n");
@@ -585,7 +627,7 @@ int main(int argc, char * argv[])
 	      hdrF);
 	fputs("#ifndef HAVE_MESSAGES_H\n#define HAVE_MESSAGES_H\n", hdrF);
 	/* open the help file to generate */
-	outF = fopen(argv[ inFileIdx + 1 ], "w");
+	outF = FOpenRestricted(argv[ inFileIdx + 1 ]);
 
 	if (!inF) {
 		fprintf(stderr, "Could not open %s for writing!\n", argv[ inFileIdx ]);
@@ -621,7 +663,7 @@ int main(int argc, char * argv[])
 				}
 
 			/* save the name of the message */
-			strcpy(msgName, buff + 8);
+			SAFE_COPY(msgName, buff + 8);
 			msgAlt[0] = 0;
 			msgTitle[0] = 0;
 			msgHelp[0] = 0;
@@ -688,28 +730,28 @@ int main(int argc, char * argv[])
 				if (msgTitle[0]) {
 					/* if yes, keep the first part as the short text */
 					if (msgAlt[0] == 0) {
-						strcpy(msgAlt, msgTitle);
-						strcat(msgAlt, "...");
+						SAFE_COPY(msgAlt, msgTitle);
+						SAFE_CAT(msgAlt, "...");
 					}
 
 					/* add a newline to the first part */
-					strcat(msgTitle, "\n");
+					SAFE_CAT(msgTitle, "\n");
 				}
 
 				/* now save the buffer into the message title */
-				strcat(msgTitle, buff);
+				SAFE_CAT(msgTitle, buff);
 			} else if (mode == m_alt) {
 				/* an alternate text was explicitly specified, save */
 				if (msgAlt[ 0 ]) {
-					strcat(msgAlt, " ");
-					strcat(msgAlt, buff);
+					SAFE_CAT(msgAlt, " ");
+					SAFE_CAT(msgAlt, buff);
 				} else {
-					strcpy(msgAlt, buff);
+					SAFE_COPY(msgAlt, buff);
 				}
 			} else if (mode == m_help) {
 				/* we are reading the help text, save in buffer */
-				strcat(msgHelp, buff);
-				strcat(msgHelp, "\n");
+				SAFE_CAT(msgHelp, buff);
+				SAFE_CAT(msgHelp, "\n");
 			}
 		}
 	}
