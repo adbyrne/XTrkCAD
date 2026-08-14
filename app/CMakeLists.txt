@@ -11,7 +11,6 @@ add_subdirectory(dynstring)
 add_subdirectory(cJSON)
 add_subdirectory(wlib)
 add_subdirectory(doc)
-add_subdirectory(doc-doxygen-poc)
 add_subdirectory(lib)
 
 # i18n can be found here

@@ -1,0 +1,924 @@
+/* Auto-converted from navigation.but by tools/but-to-doxygen.py.
+ * See .claude/halibut-doxygen-investigation-plan.md and
+ * conversion-log.md for anything flagged during conversion. */
+
+/**
+\page navigation Navigation
+
+The Main Window includes a title bar along the top that describes the contents of the window, followed by a tool bar that contains user interface buttons. Most of the window's remaining area is used to display the layout. A footer border contains information including system messages. 
+
+Most windows can be opened, closed, resized, minimized, and moved around the screen. The close, minimize, and zoom buttons are located on the right side of the title bar. Minimizing a window will close the contents of the window, but store a reference to it in the Task bar. Closing a window will make it disappear completely (so you may be asked to save your changes first). To move a window, click on the title bar and drag the window where you want it.
+
+- \subpage mainW
+- \subpage generaloperation
+- \subpage kbshortcuts
+- \subpage cmdAcclKeys
+
+*/
+
+/**
+\page mainW Main Window Overview
+
+\anchor idx_Main_Window_Overview_254
+
+- <b>Main Window Overview</b>
+
+  - ![](maintagged.png)
+
+  - The size of the main window can be changed by dragging on the resizing borders.
+
+  - Minimizing the <i>Main Window</i> will minimize all <i>XTrackCAD</i> windows.
+
+- <b>The <b>Main Window</b> contains (from the top down):</b>
+
+- <b><i>Title bar</i></b>
+
+  - ![](title.png)
+
+  - Current filename, <i>XTrackCAD</i> version number, and window manager buttons. An asterisk (\*) after the filename indicates that there are unsaved changes.
+
+- <b><i>Menu Bar</i></b>
+
+  - ![](menu.png)
+
+  - Contains from left to right;
+
+    - File (\ref fileM)
+
+    - Edit (\ref editM)
+
+    - View (\ref viewM)
+
+    - Add (\ref addM)
+
+    - Change (\ref changeM)
+
+    - Draw (\ref cmdDraw)
+
+    - Manage (\ref manageM)
+
+    - Options (\ref optionM)
+
+    - Macro (\ref macroM)
+
+    - Window (\ref windowM) and;
+
+    - Help (\ref helpM) menu buttons.
+
+- <b><i>Tool Bar</i></b>
+
+  - ![](toolbar.png)
+
+  - Manipulate track and other objects
+The toolbar buttons size can be adjusted using a User Preference in the .ini or .rc file 
+(on Windows or Mac/Linux) in the xtrkcad directory.  
+If running Linux or Mac
+a line `"Preference.LargeIcons: 1.5"` can be added. The scale value can be from 1.0 to 2.0 only.
+The corresponding configuration Windows would be
+
+\verbatim
+[Preference]
+LargeIcons=1.5
+\endverbatim
+
+<i>Note</i> The configuration file uses the language specific definitions for the decimal separator.
+Eg. in Germany, where the comma is used,  the correct value would be`LargeIcons=1,5`.
+
+- <b><i>Hot Bar</i> (\ref cmdHotBar)</b>
+
+  - ![](hotbar.png)
+
+  - Scrolling list of Turnouts and Structures
+
+- <b><i>Main Canvas</i></b>
+
+  - ![](maincanvas.png)
+
+  - Main drawing area with rulers along each side.
+
+  - The <b>Main Canvas</b> is where all tracks and objects (and optional background image) are drawn.
+
+  - The <b>Background Image</b> is drawn on the main canvas if specified in the \ref cmdLayout menu.
+
+  - The center of the <b>Main Canvas</b> can be moved (Panned) using the;
+
+    - ARROW Keys
+
+    - Left-Click and drag in \ref cmdZoom
+
+    - "@" key in <b>Select</b>, <b>Modify</b> and <b>Pan/Zoom</b>.
+
+    - Mouse Wheel - adding <i>Shift</i> key will Pan the screen up and down. Adding <i>Ctrl</i> as well Pans left and right.
+
+    - Horizontal Mouse Wheel - adding <i>Shift</i> key will Pan the screen left and Right (if available)
+
+    - Scroll Left and Right - if the scroll left and right guestures are mapped to the trackpad by the operating system, with <i>Shift</i> depressed the screen will Pan.
+
+    - On mice and systems that support Three Button Mice, holding the <i>Middle Mouse Button</i> while dragging, will Pan the canvas.
+
+  - The <b>Main Canvas</b> can be panned so that the area beyond the room boundaries is shown (the <b>grey</b> area).  The <b>Constrain Drawing Area to Room Boundaries</b> option on the <b>Display</b> (\ref cmdDisplay) dialog under the <b>Options</b> (\ref optionM) menu forces the <b>Main Canvas</b> stop panning once the room boundary is reached.
+Holding the <i>Control</i> key while panning will invert the value of this setting. 
+
+  - The scale of the <b>Main Canvas</b> can be changed using the;
+
+    - <b>Zoom</b> selections (\ref cmdZoom) under the <b>View</b> (\ref viewM) menu
+
+    - <b>Zoom</b> buttons on the <b>Tool-bar</b>
+
+    - Mouse Wheel
+
+    - PAGE UP and PAGE DOWN keys
+
+    - <b>Pan/Zoom</b> \ref cmdPan button on the <b>Tool-bar</b>
+
+<b>Note:</b> If The scale 1:1 is reached, "Macro Zoom" mode can be entered using CTRL+PageDown - with repeated presses a scale of 10::1 is possible. 
+
+  - When <b>Zooming</b>, the Main Canvas will retain the center of the display if
+<b>Constrain Drawing Area to Room Boundaries</b> is not set.
+Otherwise, as much of the room as possible is displayed, and any <b>grey</b> area will be to the right and above the room.
+
+ 
+  - Tracks will be drawn with two lines and ties if you zoom in. When the drawing scale is 1:1 a dashed centerline is also drawn for each track.
+
+  - The ARROW keys move the <b>Canvas</b> left, right, up or down by half a screen. If Shift is used together with the arrow keys, the movement will be 1/20th of screen in the selected direction.
+
+  - In many commands, the result that will result from clicking the mouse is shown by <i>anchors</i> which highlight the track object or feature in blue that will be affected as the mouse is dragged over the canvas and becomes close enough to select it.
+
+- <b><i>Map Window</i></b>
+
+  - ![](map.png)
+
+  - You can change which portion of the layout is displayed by using the <b>Map Window</b> (\ref cmdMap).
+
+- <b><i>Status Bar</i></b>
+
+  - ![](statusbar.png)
+
+  - Contains from left to right;
+
+    - Drawing scale of the Main Canvas,
+
+    - X position of the cursor,
+
+    - Y position of the cursor,
+
+    - Status and informational messages
+
+*/
+
+/**
+\page generaloperation General Operation 
+
+\anchor idx_Dialogs_255
+
+Most Windows open with three standard dialog buttons:
+
+- <b>Cancel</b> - Cancels dialog. Layout reverts back to its previous state.
+<b>Cancel</b> may be absent if reverting the action is not applicable.
+If the action affected objects on the layout, they can by reverted with the <b>Undo</b> command.
+
+- <b>Help</b> - Invokes on-line help for current command or dialog.
+
+- <b>OK</b> - Completes the dialog action. Layout is updated with current changes.
+
+- \subpage enterValue
+- \subpage cmdMap
+
+*/
+
+/**
+\page enterValue Entering Values
+
+\anchor idx_Entering_Values_256
+
+Lengths and Distances can be entered in a variety of formats;
+
+- <i>12ft 4 1/2in, 12' 4.5&quot;, 148.500, 1.234m, 123.4cm or 1234mm</i> are all valid values.
+
+- Adding the Equal Sign (`=`) key after an entry will reformat the value entered to your preferred length format (\ref cmdPref).
+
+- Adding the "`p`" key after an entry will convert a prototype measurement to a scale measurement by dividing the value entered by the ratio for the current scale.
+
+- Adding the "`s`" key after an entry will convert a scale measurement to a prototype measurement.
+
+The conversion will happen when the <i>Tab</i> key is used, or the cursor is moved to a different entry box.
+
+*/
+
+/**
+\page cmdMap Map Window
+
+\anchor idx_Map_Window_257
+
+![](map.png)
+
+The <i>Map Window</i> area shows the complete layout at a reduced scale.  A highlighted (reverse video) area shows what portion is visible in the Main Window (\ref mainW).  The highlighted area can be Left+Dragged (\ref windowTerms) around the layout to change the origin of the Main Canvas.  The highlighted area changes size as Zoom In (\ref viewM) and Zoom Out (\ref viewM) are selected.
+
+You can also Right+Drag (\ref windowTerms) on the Map window to set the origin and scale of the Main Canvas.
+
+The size of the <i>Map Window</i> changes when you change the Room Size (see \ref cmdLayout).  You can also change the Map Scale (\ref cmdDisplay) on the Display (\ref cmdDisplay) dialog to change the size of the <i>Map Window</i>.
+
+If you close the <i>Map Window</i>, you can reopen it by the <i>Window</i> menu.
+
+Visibility of the <i>Map Window</i> can be toggled by pressing <i>Ctrl+Space</i>
+
+*/
+
+/**
+\page kbshortcuts Keyboard Shortcuts 
+
+\anchor idx_Keyboard_Shortcuts_258
+\anchor idx_Shortcut_Keys_259
+
+The term Shortcut key refers to specific key combinations which are used to accomplish an action which otherwise would be accomplished by moving a MOUSE and /or selecting from a Menu. Shortcut keys are often key combinations consisting of the letter key pressed along with the Alt or Ctrl key.
+
+Instead of using the menus or the buttons on the <b>Tool-bar</b> (\ref mainW), most <i>XTrackCAD</i> commands may be invoked through use of Shortcut keys.
+
+- The `RETURN` key has the same effect as pressing the <b>OK</b> button on the current dialog.
+
+- The `ESCAPE` key cancels the current command.  All selected tracks are unselected.  The <b>Properties</b> (\ref cmdDescribe) or <b>Select</b> (\ref cmdSelect) command becomes the current command.
+
+- The `F1` key opens the Help page for the currently selected command. `Shift+F1` opens the Contents Help Page.
+
+- The `PAGE UP` and `PAGE DOWN` keys will zoom out or zoom in.
+
+- The `ARROWS` key will pan the canvas right, left, up and down.
+
+- The `DELETE` or the `BackSpace` key invokes the <b>Delete</b> (\ref cmdDelete) command.
+
+Several Shortcut key commands are used in conjunction with the mouse. These commands are listed in \ref cmdAcclKeys.
+
+- \subpage cmdAdd
+- \subpage cmdChange
+- \subpage kbshortcutdraw
+- \subpage cmdEdit
+- \subpage cmdFile
+- \subpage kbshortcutHotBar
+- \subpage cmdMacro
+- \subpage kbshortcutMainCanvas
+- \subpage cmdManage
+- \subpage cmdOption
+- \subpage cmdView
+
+*/
+
+/**
+\page cmdAdd Add Commands
+
+- <b>Add Commands</b>
+
+  - Create
+
+    - Circle track from
+
+    - center - <i>Ctrl+0</i>
+
+    - fixed radius circle - <i>Ctrl+8</i>
+
+    - tangent - <i>Ctrl+9</i>
+
+- Curve track from
+
+  - center - <i>Ctrl+6</i>
+
+  - chord - <i>Ctrl+7</i>
+
+  - endpoint - <i>Ctrl+4</i>
+
+  - tangent - <i>Ctrl+5</i>
+
+- Hand laid turnout - <i>Ctrl+Shift+I</i>
+
+- Straight track - <i>Ctrl+G</i>
+
+- Turntable - <i>Ctrl+Shift+N</i>
+
+}
+
+- Helix dialog and construction tool - <i>Ctrl+Shift+H</i>
+
+- Structure dialog - <i>Ctrl+Shift+C</i>
+
+- Turnout dialog - <i>Ctrl+T</i>
+
+*/
+
+/**
+\page cmdChange Change Commands
+
+- <b>Change Commands</b>
+
+  - Connect two sectional tracks - <i>Ctrl+Shift+J</i>
+
+  - Elevation dialog - <i>Ctrl+Shift+E</i>
+
+  - Join two tracks - <i>Ctrl+J</i>
+
+  - Properties dialog - <i>Ctrl+?</i>
+
+  - Modify or extend track - <i>Ctrl+M</i>
+
+  - Move
+
+    - description - <i>Ctrl+Shift+Z</i>
+
+    - selected object - <i>Ctrl+Shift+M</i>
+
+  - Profile dialog - <i>Ctrl+Shift+F</i>
+
+  - Rotate selected object - <i>Ctrl+Shift+R</i>
+
+  - Select tool - <i>Ctrl+E</i>
+
+  - Split flex-track - <i>Ctrl+Shift+S</i>
+
+*/
+
+/**
+\page kbshortcutdraw Draw Commands
+
+
+
+- \subpage addText
+- \subpage cmdDrawCircle
+- \subpage cmdDrawCurve
+- \subpage cmdDrawShape
+- \subpage cmdDrawStraight
+- \subpage NoteDialog
+
+*/
+
+/**
+\page addText Add Text
+
+Add Text
+
+- Add Text to drawing area - <i>Ctrl+Shift+X</i>
+
+*/
+
+/**
+\page cmdDrawCircle Draw Circles
+
+Draw Circles
+
+- Draw circle outline from
+
+  - center to tangent point (Edge) - <i>Ctrl+Shift+0</i>
+
+  - tangent point (Edge) to center - <i>Ctrl+Shift+9</i>
+
+- Draw circle filled from
+
+  - center to tangent point (Edge) - <i>Ctrl+Alt+0</i>
+
+  - tangent point (Edge) to center - <i>Ctrl+Alt+9</i>
+
+*/
+
+/**
+\page cmdDrawCurve Draw Curved Lines
+
+Draw Curved Lines
+
+- Draw curved lines from;
+
+  - center to endpoint - <i>Ctrl+Shift+6</i>
+
+  - chord - <i>Ctrl+Shift+7</i>
+
+  - endpoint in direction of curve - <i>Ctrl+Shift+4</i>
+
+  - endpoint to center - <i>Ctrl+Shift+5</i>
+
+*/
+
+/**
+\page cmdDrawShape Draw Shapes
+
+Draw Shapes
+
+- Draw shape
+
+  - Box outline - <i>Ctrl+Shift+[</i>
+
+  - Filled Box - <i>Ctrl+Alt+[</i>
+
+  - Filled Polygon - <i>Ctrl+Alt+2</i>
+
+  - Poly-line - <i>Ctrl+Shift+2</i>
+
+*/
+
+/**
+\page cmdDrawStraight Draw Straight Objects
+
+Draw Straight Objects
+
+- Draw straight object
+
+  - <i>Bench-work</i> \anchor idx_Bench_work_260  - <i>Ctrl+B</i>
+
+  - Dimension Line - <i>Ctrl+Shift+D</i>
+
+  - Straight Line - <i>Ctrl+Shift+1</i>
+
+  - Table Edge - <i>Ctrl+Shift+)</i>
+
+*/
+
+/**
+\page NoteDialog Note Dialog
+
+Note Dialog
+
+- Note dialog (\ref cmdNote) - <i>Ctrl+Alt+N</i>
+
+*/
+
+/**
+\page cmdEdit Edit Commands
+
+- <b>Edit Commands</b>
+
+  - Copy select objects to the clipboard - <i>Ctrl+C</i> or <i>Ctrl+Insert</i>
+
+  - Cut select objects - <i>Ctrl+X</i> or <i>Shift+Delete</i>
+
+  - Draw selected tracks with
+
+    - thin lines - <i>Ctrl+1</i>
+
+    - medium lines - <i>Ctrl+2</i>
+
+    - thick lines - <i>Ctrl+3</i>
+
+  - Delete selected object(s) - <i>Delete</i> or <i>Ctrl+D</i>
+
+  - Deselect all objects - <i>Alt+Shift+A</i> or <i>Esc</i>
+
+  - Hide selected tracks in a Tunnel - <i>Ctrl+Shift+T</i>
+
+  - Move Selected tracks
+
+    - above others - <i>Ctrl+Shift+B</i>
+
+    - below others - <i>Ctrl+Shift+W</i>
+
+  - Paste from clipboard to layout - <i>Ctrl+V</i> or <i>Shift+Insert</i>
+
+  - Redo last undone command - <i>Ctrl+R</i>
+
+  - Select all objects - <i>Ctrl+Shift+A</i>
+
+  - Undo last command - <i>Ctrl+Z</i> or <i>Shift+Backspace</i>
+
+*/
+
+/**
+\page cmdFile File Commands
+
+- <b>File Commands</b>
+
+  - Create a new layout - <i>Ctrl+N</i>
+
+  - Edit layout description Note (\ref cmdNote) - <i>Ctrl+Alt+T</i>
+
+  - Export
+
+    - Selected objects to a <i>.xti</i> file - <i>Ctrl+Alt+X</i>
+
+    - To Bitmap (\ref cmdOutputbitmap) - <i>Ctrl+Shift+Q</i>
+
+  - Import from a <i>.xti</i> file - <i>Ctrl+Alt+I</i>
+
+  - Manipulate Parameter Files (\ref cmdPrmfile) - <i>Ctrl+Alt+S</i>
+
+  - Open layout file - <i>Ctrl+O</i>
+
+  - Print Command (\ref cmdPrint) - <i>Ctrl+P</i>
+
+  - Save As another file - <i>Ctrl+A</i>
+
+  - Save the current layout - <i>Ctrl+S</i>
+
+*/
+
+/**
+\page kbshortcutHotBar Hot Bar
+
+\anchor idx_Hot_Bar_261
+
+- <b>Hot Bar</b>
+
+  - These actions take effect if the Hot Bar has keyboard focus.
+
+    - Move Hot Bar multiple entries
+
+    - left - <i>Shift+Left Arrow</i>
+
+    - right - <i>Shift+Right Arrow</i>
+
+- Move Hot Bar one entry
+
+  - left - <i>Left Arrow</i>
+
+  - right - <i>Right Arrow</i>
+
+- Pop-up menu of Hot Bar categories - <i>Right-Click</i>
+
+- Set relative position of Hot Bar - <i>1, 2 ... 9, 0</i>
+
+}
+
+*/
+
+/**
+\page cmdMacro Macro Commands
+
+- <b>Macro Commands</b>
+
+  - Play Back a macro file (\ref macroM) - <i>Ctrl+Alt+B</i>
+
+  - Record a macro file (\ref macroM) - <i>Ctrl+Alt+R</i>
+
+*/
+
+/**
+\page kbshortcutMainCanvas Main Drawing Canvas
+
+\anchor idx_Main_Drawing_Canvas_262
+
+- <b>Main Drawing Canvas</b>
+
+  - These actions take effect if the Main Drawing Canvas has keyboard focus.
+
+  - Move Canvas:
+
+    - Down - <i>Down Arrow</i>
+
+    - Left - <i>Left Arrow</i>
+
+    - Right - <i>Right Arrow</i>
+
+    - Up - <i>Up Arrow</i>
+
+  - Map Window:
+
+    - On / Off - <i>Ctrl+Space</i>
+
+}
+
+  - On some systems support Three Button Mice, holding down the <i>Middle Mouse Button</i> and dragging will pan the Canvas.  Note: not all system support this operation, even with a Three Button Mouse.
+
+*/
+
+/**
+\page cmdManage Manage Commands
+
+- <b>Manage Commands</b>
+
+  - Car Inventory dialog - <i>Ctrl+Alt+V</i>
+
+  - Custom Management dialog (\ref cmdCustmgm) - <i>Ctrl+Alt+U</i>
+
+  - Generate a Parts List (\ref cmdEnum) - <i>Ctrl+Alt+L</i>
+
+  - Group objects (\ref cmdGroup) - <i>Ctrl+Shift+G</i>
+
+  - Layers dialog (\ref cmdLayer) - <i>Ctrl+Alt+Y</i>
+
+  - Ungroup objects (\ref cmdGroup) - <i>Ctrl+Shift+U</i>
+
+  - Update Prices (\ref cmdPricelist) - <i>Ctrl+Alt+Q</i>
+
+*/
+
+/**
+\page cmdOption Option Commands
+
+- <b>Options Commands</b>
+
+  - Colors dialog (\ref cmdRgbcolor) - <i>Ctrl+Alt+C</i>
+
+  - Command Options dialog (\ref cmdCmdopt) - <i>Ctrl+Alt+M</i>
+
+  - Display dialog (\ref cmdDisplay) - <i>Ctrl+Alt+D</i>
+
+  - Easement Options dialog - <i>Ctrl+Alt+E</i>
+
+  - Font dialog (\ref fontSelW) - <i>Ctrl+Alt+F</i>
+
+  - Layout dialog (\ref cmdLayout) - <i>Ctrl+Alt+A</i>
+
+  - Preferences dialog (\ref cmdPref) - <i>Ctrl+Alt+P</i>
+
+  - Sticky commands dialog (\ref cmdSticky) - <i>Ctrl+Alt+K</i>
+
+*/
+
+/**
+\page cmdView View Commands
+
+- <b>View Commands</b>
+
+  - Redraw
+
+    - all - <i>Ctrl+Shift+L</i>
+
+    - main window - <i>Ctrl+L</i>
+
+  - Snap Grid dialog (\ref cmdGrid) - <i>Ctrl+Alt+G</i>
+
+  - Zoom
+
+    - in - <i>Ctrl++, Page Down</i>
+
+    - out - <i>Ctrl+-, Page Up</i>
+
+*/
+
+/**
+\page cmdAcclKeys Mouse Actions
+
+\anchor idx_Mouse_Actions_263
+
+<i>XTrackCAD</i> uses the left and right mouse buttons when manipulating tracks and other objects on the layout.  Their meaning depends on the particular command:
+
+<i>Select Command</i>
+
+The <i>Select</i> command actions are affected by the mode selected in <b>Options-&gt;Command-&gt;Select</b>.  
+Note - Objects in a Module Layer are selected and deselected as a group.
+
+- <b><i>Left-Click</i></b>
+ 
+  - Single Item Mode -&gt; Selects one object at a time, deselects other objects.
+Add Item Mode -&gt; Adds unselected objects, deselects if the object is already selected.
+If the click is on an area without objects and <b>SelectZero</b> is set, all objects are deselected.
+
+- <b><i>Shift-Left-Click</i></b>
+
+  - Selects all connected tracks from the one clicked up to the next selected item in each direction.
+
+- <b><i>Ctrl+Left-Click</i></b>
+
+  - Single Item Mode -&gt; Adds an object to the selection, deselects if the object is already selected.
+Add Item Mode -&gt; Selects just this item and deselects other objects.
+If the click is on an area without objects and <b>SelectZero</b> is set, all objects are deselected.
+
+- <b><i>Double-Left-Click</i></b>
+
+  - Opens Modify for Cornu and Draw Objects other than Text, Activates Link and Document Notes, otherwise opens Properties.
+
+- <b><i>Left+Drag</i></b>
+
+  - Single Item Mode -&gt; Selects all objects in an rubber-banded area and deselects all others.
+Add Item Mode -&gt; Adds items in the rubber-banded area.  
+
+- <b><i>Shift+Left-Drag</i></b>
+
+  - Moves selected objects if in a selected area, if off selected objects, like Left-Drag.
+
+- <b><i>Ctrl+Left-Drag</i></b>
+
+  - Rotates selected objects if in a selected area, if off selected objects, like Left-Drag.
+
+- <b><i>Right-Click</i></b>
+
+  - Displays a pop-up menu of context commands (in Select, Move, Modify and Rotate commands). If some track is selected, the menu has operations to perform on it, if not, it will have a command context menu.
+
+- <b><i>Shift+Right-Click</i></b>
+
+  - Displays a pop-up menu of commands.  Displays the other context menu than Right-Click.
+
+- <b><i>Right+Drag</i></b>
+
+  - Deselects all objects in an rubber-banded area from the current set.
+
+- <b><i>Rotate Wheel</i></b>
+
+  - Zooms drawing area in and out.  Modern computers with Trackpads often map this guesture to two-finger drag.
+
+<i>When Moving and Rotating</i> ( Placing Turnouts and Structures, Moving the Print and Snap Grids, ... ):
+
+- <b><i>(Shift+Left+Drag)</i></b>
+
+  - Moves the objects or grid.
+
+- <b><i>(Ctrl+Left+Drag)</i></b>
+
+  - Rotates the objects or grid about the pivot point, which is the point you started the drag operation.
+
+Some other commands use the `Shift` or `Ctrl` key to modify the meaning of button presses.
+
+- \subpage mouseBcmd
+
+*/
+
+/**
+\page mouseBcmd Context Sensitive Menus
+
+\anchor idx_Context_Sensitive_Menus_264
+
+For all commands listed below, a <i>Right-Click</i> will display a context sensitive pop-up command list menu.  For some commands (noted below), a <i>Shift+Right-Click</i> will display a context sensitive pop-up command options menu.  The operation of <i>Right-Click</i> and <i>Shift+Right-Click</i> can be reversed by an item on the Command Options (\ref cmdCmdopt) dialog.
+
+The Shortcut key for each command is listed after the command name.
+
+- <b>Circle Track Command (\ref cmdCircle)</b>
+
+  - Drag from
+
+    - center to circle tangent point (Edge) - <i>Ctrl+0</i>
+
+    - circle tangent point (Edge) to center - <i>Ctrl+9</i>
+
+  - Position fixed radius circle - <i>Ctrl+8</i>
+
+- <b>Connect Command (\ref cmdConnect) - <i>Ctrl+Shift+J</i></b>
+
+  - Remove adjustments starting from an unconnected endpoint - <i>Shift+Left-Click</i>
+
+  - Select endpoints to connect - <i>Left-Click</i>
+
+- <b>Curved Track Commands (\ref cmdCurve)</b>
+
+  - Drag from 1st endpoint
+
+    - in curve direction - <i>Ctrl+4</i>
+
+    - to Center - <i>Ctrl+5</i>
+
+    - to 2nd endpoint (Chord) - <i>Ctrl+7</i>
+
+  - Drag from Center to 1st endpoint - <i>Ctrl+6</i>
+
+- <b>Properties Command (\ref cmdDescribe) - <i>Ctrl+?</i></b>
+
+  - Display property sheet for the object - <i>Left-Click</i>
+
+- <b>Elevation Command (\ref cmdElevation) - <i>Ctrl+Shift+E</i></b>
+
+  - Choose endpoint - <i>Left-Click</i>
+
+  - Move Elevation Marker - <i>Right+Drag</i>
+
+  - Split track and choose endpoint - <i>Shift+Left-Click</i>
+
+- <b>Flip Command (\ref cmdFlip)</b>
+
+  - Draw Mirror line - <i>Left+Drag</i>
+
+- <b>Hand-laid Turnout Command (\ref cmdHandLaidTurnout) - <i>Ctrl+Shift+I</i></b>
+
+  - Define
+
+    - frog position and angle - <i>(1st Left+Drag)</i>
+
+    - points position - <i>(2nd Left+Drag)</i>
+
+- <b>Helix Track Command (\ref cmdHelix) - <i>Ctrl+Shift+H</i></b>
+
+  - Position Helix - <i>(Left+Drag)</i>
+
+- <b>Join Command (\ref cmdJoin) - <i>Ctrl+J</i></b>
+
+  - Join tracks - <i>(Left+Drag)</i>
+
+  - Move selected tracks to join with unselected endpoint - <i>Shift+Left-Click</i>
+
+- <b>Modify Command (\ref cmdModify) - <i>Ctrl+M</i></b>
+
+  - Change
+
+    - length or make tangent to curve - <i>Left+Drag</i>
+
+    - radius - <i>Shift+Left+Drag</i>
+
+  - Extend track - <i>Right+Drag</i>
+
+- <b>Move Command (\ref cmdMove) - <i>Ctrl+Shift+M</i></b>
+
+  - Command Options: how to draw moving objects (\ref cmdAcclKeys) - <i>Shift+Right-Click</i>
+
+  - Move Selected objects - <i>Left+Drag</i>
+
+- <b>Move Description Command (\ref cmdMoveLabel) - <i>Ctrl+Shift+Z</i></b>
+
+  - Move Description - <i>Left+Drag</i>
+
+  - Toggle Label display for Curved, Helix and Turnout tracks (\ref cmdAcclKeys). - <i>Shift+Right-Click</i>
+
+- <b>Note Command (\ref cmdNote) - <i>Ctrl+Alt+N</i></b>
+
+  - Position Note - <i>Left+Drag</i>
+
+- <b>Parallel Command (\ref cmdParallel) - <i>Ctrl+Shift+P</i></b>
+
+  - Position Parallel track relative to selected track - <i>(Left+Drag)</i>
+
+- <b>Print Command (\ref cmdPrint) - <i>Ctrl+P</i></b>
+
+  - Command Options: rotate by specified amount (\ref cmdAcclKeys) - <i>(Shift+Right-Click)</i>
+
+  - Move Print grid - <i>Shift+Left+Drag</i>
+
+  - Rotate Print grid - <i>Shift+Right+Drag</i>
+
+  - Select or unselect pages - <i>Left-Click</i>
+
+- <b>Profile Command (\ref cmdProfile) - <i>Ctrl+Shift+F</i></b>
+
+  - Add tracks to path from path end to chosen endpoint - <i>(Left-Click)</i>
+
+  - Command Options: change Elevation type - <i>(Shift+Right-Click)</i> (\ref cmdAcclKeys)
+
+- <b>Rotate Command (\ref cmdRotate) - <i>Ctrl+Shift+R</i></b>
+
+  - Command Options: how to draw moving objects and rotate by specified amount (\ref cmdAcclKeys) - <i>Shift+Right-Click</i>
+
+  - Rotate Selected objects - <i>Left+Drag</i>
+
+    - in increments of 15° - <i>Ctrl+Left+Drag</i>
+
+- <b>Ruler Command (\ref cmdRuler)</b>
+
+  - Position Ruler - <i>Left+Drag</i>
+
+- <b>Angle Command (\ref cmdAngle)</b>
+
+  - Position Protractor - <i>Left-Drag</i>
+
+- <b>Select Command (\ref cmdSelect) - <i>Ctrl+E</i></b>
+
+  - Command Options: how to draw moving objects and rotate by specified amount (\ref cmdAcclKeys) - <i>Shift+Right-Click</i>
+
+  - Move
+
+    - selected objects - <i>Shift+Left+Drag</i>
+
+    - labels - <i>Ctrl+Left+Drag</i>
+
+  - Rotate selected objects - <i>Ctrl+Left-Drag</i>
+
+    - in increments of 15° - <i>Ctrl+Shift+Left+Drag</i>
+
+- <b>Snap Grid Command (\ref cmdGrid) - <i>Ctrl+Alt+G</i></b>
+
+  - Command Options: rotate by specified amount (\ref cmdAcclKeys) - <i>Shift+Right-Click</i>
+
+  - Move Snap Grid - <i>Left+Drag</i>
+
+  - Rotate Snap Grid - <i>Right+Drag</i>
+
+- <b>Split Track Command (\ref cmdSplitTrack) - <i>Ctrl+Shift+S</i></b>
+
+  - As above, plus trim turnouts - <i>Shift+Left-Click</i>
+
+  - Change block gaps (\ref cmdAcclKeys) - <i>Shift+Right-Click</i>
+
+  - If at endpoint: disconnect track, otherwise: split track - <i>Left-Click</i>
+
+- <b><i>Straight Track</i> \anchor idx_Straight_Track_265  Command (\ref cmdStraight) - <i>Ctrl+G</i></b>
+
+  - Place 1st and 2nd endpoints - <i>Left+Drag</i>
+
+- <b>Structure Command (\ref cmdStructure) - <i>Ctrl+Shift+C</i></b>
+
+  - Command Options: rotate by specified amount (\ref cmdAcclKeys) - <i>Shift+Right-Click</i>
+
+  - Place Structure - <i>Left+Drag</i>
+
+  - Rotate - <i>Right+Drag</i>
+
+- <b>Text Command (\ref cmdText) - <i>Ctrl+Shift+X</i></b>
+
+  - Command Options: change Font (\ref cmdAcclKeys) - <i>Shift+Right-Click</i>
+
+  - Position text - <i>Left+Drag</i>
+
+- <b>Train Simulation Command (\ref cmdTrain)</b>
+
+  - Command Options: uncouple car, flip or remove cars or Trains, set MU Master - <i>Right-Click</i>
+
+  - Move a Car or Train - <i>Left+Drag</i>
+
+  - Switch a <i>Turnout</i> or rotate a <i>Turntable</i> - <i>Shift+Left-Click</i>
+
+- <b>Turntable Command (\ref cmdTurntable) - <i>Ctrl+Shift+N</i></b>
+
+  - Position Turntable - <i>Left+Drag</i>
+
+- <b>Turnout Command (\ref cmdNewFixedTrack) - <i>Ctrl+T</i></b>
+
+  - Choose next Active endpoint when placing Turnouts - <i>Shift+Left-Click</i>
+
+  - Command Options: rotate by specified amount (\ref cmdAcclKeys) - <i>Shift+Right-Click</i>
+
+  - Place Turnout - <i>Left+Drag</i>
+
+  - Rotate - <i>Right+Drag</i>
+
+  - Suppress auto-adjustment positioning when placing Turnouts - <i>Shift+Left+Drag</i>
+
+*/
+

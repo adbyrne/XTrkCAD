@@ -1,0 +1,25 @@
+/* Auto-converted from statusbar.but by tools/but-to-doxygen.py.
+ * See .claude/halibut-doxygen-investigation-plan.md and
+ * conversion-log.md for anything flagged during conversion. */
+
+/**
+\page cmdStatusbar Status Bar
+
+The <i>Status Bar</i> contains fields that can be modified depending on command:
+
+- The Line Width and Color for <i>Straight Line</i>, <i>Curved Line</i>, <i>Circle</i>, <i>Polygon</i>, <i>Box</i> or <i>PolyLine</i> objects. The Line Width is specified in pixels for the current Drawing Scale. Zooming (\ref viewM) in or out causes the lines to be drawn wider or narrower.
+
+- The Color for <i>Filled Circles</i> or <i>Polygons</i>.
+
+- The size of a <i>Dimension Line</i> (<i>Tiny</i>, <i>Small</i>, <i>Medium</i> or <i>Large</i>)
+
+- The type, size and orientation of lumber used for <i>Bench-work</i> (regular rectangular, L-Girder or T-Girder).
+
+- The seperation and radius factor for Parallel commands
+
+- The diameter of a Turntable
+
+- After and add or during a Modify of a Draw object or segment, length, radius and/or relative angles are shown in modifiable fields.  These will change the dimensions of the last object when <b>Enter</b> or <b>Tab</b> is pressed or the cursor leaves the entry field.
+
+*/
+

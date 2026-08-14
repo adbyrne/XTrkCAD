@@ -1,0 +1,159 @@
+/* Auto-converted from view_winm.but by tools/but-to-doxygen.py.
+ * See .claude/halibut-doxygen-investigation-plan.md and
+ * conversion-log.md for anything flagged during conversion. */
+
+/**
+\page viewM View Menu
+
+\anchor idx_View_Menu_246
+
+![](mview.png)
+
+The <b>View Menu</b> shows commands affecting the display of the <b>Main Canvas</b> (\ref mainW).
+
+- <b>Change Grid</b> - Displays the <b>Snap Grid</b> dialog.  The <b>Snap Grid</b> forces the cursor (for some commands) to be on a grid to control track placement.
+
+- <b>Enable SnapGrid</b> - Enables (or disables) the <b>Snap Grid</b> (\ref cmdGrid).
+
+- <b>Redraw</b> - Redraws the <b>Main Canvas</b>.
+
+- <b>Redraw All</b> - Redraws the <b>Main Canvas</b> and the <b>Map Window</b> (\ref cmdMap).
+
+- <b>Show Snap-Grid</b> - \anchor idx_Snap_Grid_247  Toggles display of the <b>Snap Grid</b> on and off.
+
+- <b>Magnetic Snap On/Off</b> - Toggles <i>Magnetic Snap</i> \anchor idx_Magnetic_Snap_248  (\ref cmdMagneticSnap) for Add Operations on and off.  The magnets make tracks auto-align and shapes touch when the cursor or object is close.  They can be defeated on each operation by holding down <i>Alt</i>.  If the Magnets are off, holding down <i>Alt</i> will enable them.
+
+- ![](bmap.png) <b> Show/Hide Map</b> - Toggles display of the <b>Map Window</b> \anchor idx_Map_Window_249  on and off.
+
+- <b>Toolbar Options</b> - Command button groups displayed on the <b>Toolbar</b> are selected using the Toolbar Options Dialog (\ref toolbarOpts).
+
+- <b>Pan/Zoom</b> - move or resize the viewport using the mouse (\ref cmdPan).
+
+- ![](mzoomscale.png)
+
+- <b>Zoom</b> - This sub-menu is used to select a specific drawing scale ratio for the <b>Main Canvas</b>.
+
+- <b>Zoom In</b> - Increases magnification of the <b>Main Canvas</b>.
+
+- <b>Zoom Out</b> - Decreases magnification of the <b>Main Canvas</b>.
+
+When zooming in or out, the corresponding highlighted area of the <b>Map Window</b> (\ref cmdMap) changes size to match that which appears on the <b>Main Canvas</b> (\ref mainW).
+
+- \subpage cmdMagneticSnap
+- \subpage cmdGrid
+- \subpage toolbarOpts
+- \subpage cmdZoom
+
+*/
+
+/**
+\page cmdMagneticSnap Magnetic Snap
+
+The <b>MagneticSnap</b> feature eases constructing and assembling Tracks and Draw objects by "snapping" the end of new objects to existing objects. 
+For existing track objects the point snapped to is always an open end point. 
+The snap operates when "close" to the object (a few pixels distant) and an anchor point (a blue circle) is displayed when this will occur if the mouse is clicked. 
+
+When Adding Draw line objects, the snap point is the nearest point on the existing object. 
+A snap to the end of a line object can be selected by positioning the cursor close to the end of the line but off it, in the direction of the line. This will ensure the closest point is the end.
+
+The <b>MagneticSnap</b> feature is enabled and disabled using either the magnet icon which is part of the <b>SnapGrid</b> Toolbar button set, or using the View (\ref viewM) menu.
+
+For each part of an Add or Move or Rotate operation, the current state of <b>MagneticSnap</b> can be temporarily inverted using the <b>Alt</b> key. 
+This enables snapping to be inhibited for a single part of an operation (or conversely enabled for just one part).
+
+*/
+
+/**
+\page cmdGrid Grid Dialog
+
+\anchor idx_Grid_Dialog_250
+
+The <b>Grid</b> dialog, displayed by <b>Change Grid</b> on the View (\ref viewM) menu, specifies the origin, angle and other parameters of the Snap Grid.  
+The Snap Grid can sbe used to snap the position of the cursor during the <b>Curve</b> (\ref cmdCurve), <b>Circle</b> (\ref cmdCircle), <b>Cornu</b> (\ref cmdCornu), <b>Modify</b> (\ref cmdModify), <b>Straight</b> (\ref cmdStraight), <b>Draw</b> (\ref cmdDraw) and <b>Turntable</b> (\ref cmdTurntable) commands.
+
+![](grid.png)
+
+The <b>Grid</b> dialog contains controls affecting the horizontal and vertical snap grid lines.  Each dimension can be independently controlled.
+
+- The <b>Spacing</b> value specifies the distance between major grid lines, which are drawn as solid lines on the layout. The value of the distance is entered in either inches or centimeters depending on the value of the <b>Units</b> setting in Options-&gt;Preferencecs (\ref cmdPref) menu.
+
+- The <b>Divisions</b> value adds the minor Grid lines between the major Grid lines, which are drawn as a series of dots on the layout.  Specifying a value of 0 or 1 as the division value removes the minor grid lines.
+
+- The Grid can be enabled or disabled in each dimension via the <b>Enable</b> check box. The action of snapping is secondary to <b>Magnetic Snap</b> if enabled, and is suppressed if <b>Alt</b> is held.
+
+- The <b>X</b> and <b>Y</b> coordinates relate to the anchor point of the X and Y Axis. Default values for <b>X</b> and <b>Y</b> are zero (0). Entering a value of one for <b>X</b> causes the Main grid line on the Drawing Canvas to shift left one unit. Entering a value of two causes the Main grid line to shift by two units and so on. The <b>Y</b> axis is affected in the similar manner except the grid moves down rather than left.
+
+- Negative values can be used for X and Y values. Using such cause the Main Grid to shift right for the X Axis and up for the Y Axis.
+
+- The A coordinate relates to the Angle of grid rotation. The default value for this coordinate is zero. Entering a value greater than 0 and less than 90 will cause the Main Grid to rotate clockwise by the number of degrees entered. Entering a negative value causes the grid to rotate counter-clockwise.
+
+The origin and angle of the Grid can be adjusted directly or by dragging on the layout.  <i>Left+Drag</i> moves the origin of the Grid, and <i>Right+Drag</i> rotates the grid.  <i>Shift+Right-Click</i> (\ref cmdAcclKeys) displays a pop-up menu allowing rotation of the grid by various predefined angles.
+
+Whether the Snap Grid is drawn is controlled by the <b>Show</b> check-box.  Also, if the layout is Zoomed Out (\ref cmdZoom) the minor and major grid lines may be too close together to be drawn.  The minimum pixel distance between grid lines is controlled by the <b>Min Grid Spacing</b> value on the <b>Preferences</b> (\ref cmdPref) dialog.
+
+<b>Note:</b> on slow machines drawing the Grid can take noticeable time.  Performance can be improved by selecting a larger value for <b>Min Grid Spacing</b>.
+
+![](bgsnap.png) <b>Grid Buttons</b> on the Tool-bar (\ref mainW) can be used to Enable/Disable and to Show/Hide the Snap Grid.
+
+*/
+
+/**
+\page toolbarOpts Toolbar Options
+
+\anchor idx_Toolbar_Options_251
+
+![](toolbopt.png)
+
+Command button groups displayed on the <b>Toolbar</b> are selected using the Toolbar Options Dialog (\ref toolbarOpts). If none of the command button groups are selected, the <b>Toolbar</b> is not shown.
+<b>Select All</b> quickly selects all button groups for display. <b>Invert</b> inverts the current selection eg. displayed groups will be switched off and vice versa.
+
+*/
+
+/**
+\page cmdZoom Zoom
+
+\anchor idx_Zoom_252
+
+![](bgzoom.png)
+
+The <b>Zoom In</b> and <b>Zoom Out</b> actions can also be accessed using buttons on the Tool Bar or usig the <b>Pan/Zoom</b> Mode button.  The Mouse Wheel, PAGE DOWN and PAGE UP keys can also be used to zoom in and out.
+
+Holding down the Shift key while clicking the <b>Zoom In</b> or <b>Zoom Out</b> buttons sets the Drawing Scale to a <i>Programmed Zoom</i> value.
+
+- <i><i>Zoom/Pan Shortcut Keys</i> \anchor idx_Zoom_Pan_Shortcut_Keys_253 </i>
+
+  - Keys '1'-'9' set the zoom to between 1::1 and 1::9.
+
+  - Key 'e' sets the zoom to a value that allows all the room to be shown and moves the origin of bottom left of the window to be 0,0
+
+  - Key 's' sets the zoom to show the selected set of objects and pans the window to center the highlit area.
+
+  - Key '0' or 'o' keeps the zoom as is, but moves the origin of the bottom left of the window to 0,0
+
+  - Key 'c' moves the center of the window to the cursor position
+
+Normally a zoom in more of more than 1:1 is not possible, however if the Ctrl key is held down while the <b>Zoom In</b> button is pressed a zoom less that 1:1 can be achieved. This function is useful when working on detail.
+
+Pressing the middle Zoom button on the Tool Bar pop-ups a list of Zoom factors that can be select from.
+
+<i>Note</i> - The value of Zoom 1:1 will be set using 96 dpi as a default, it can be overriden using a Configuration Value in the Preferences section of ScreenDPI.
+
+- See <b>Main Window Overview</b> (\ref mainW) for details on how to <b>Pan</b> the <b>Main Canvas</b>.
+
+*/
+
+/**
+\page windowM Window Menu
+
+![](mwindow.png)
+
+The <b>Window Menu</b> typically contains selections for bringing any open window into view. It's used as follows;
+
+- <i>XTrackCAD</i> permits multiple dialog windows to be open at any one time. When a large number of windows are open it can become difficult to locate and bring a specific window into focus. Use the <b>Window Menu</b> function to select and bring the desired window to the top of the screen.
+
+- ![](openwindows.png)
+
+- Apart from bringing the <b>Map Window</b> (\ref cmdMap) to the foreground, the <b>Map</b> menu item can also be used to re-opened a closed <b>Map Window</b>.
+
+*/
+

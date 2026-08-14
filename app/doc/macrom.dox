@@ -1,0 +1,25 @@
+/* Auto-converted from macrom.but by tools/but-to-doxygen.py.
+ * See .claude/halibut-doxygen-investigation-plan.md and
+ * conversion-log.md for anything flagged during conversion. */
+
+/**
+\page macroM Macro Menu
+
+![](mmacro.png)
+
+The <b>Macro Menu</b> shows commands that can be used to <b>Record</b> and <b>Playback</b> commands.
+
+- <b>Record</b> - Displays the <b>Record</b> dialog (after prompting for a file name). The current layout state and most subsequent actions will be saved in the recording file.
+
+  - Messages can be inserted into the recording file by pressing the <b>Message</b> button on the <b>Record</b> dialog then entering a message in the text display.
+
+  - Press the <b>End</b> button to end entry of the message and resume recording.
+
+  - Press the <b>Stop</b> button to stop recording.
+
+- <b>Playback</b> - Displays the <b>Playback</b> dialog (after prompting for a file name). This is used to playback previously recorded sessions. <b>Note:</b> the layout state will be saved during playbacks and restored after.
+
+The <b>Record</b> command is useful if it becomes necessary to report a bug in <i>XTrackCAD</i>.
+
+*/
+

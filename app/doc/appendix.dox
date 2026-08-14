@@ -1,0 +1,296 @@
+/* Auto-converted from appendix.but by tools/but-to-doxygen.py.
+ * See .claude/halibut-doxygen-investigation-plan.md and
+ * conversion-log.md for anything flagged during conversion. */
+
+/**
+\page faqs Frequently Asked Questions
+
+
+
+- \subpage faqsTransfer
+- \subpage faqsHotBar
+- \subpage faqsPrototype
+- \subpage faqsJoin
+
+*/
+
+/**
+\page faqsTransfer Moving from Design to Roadbed 
+
+\anchor idx_printDesignToRoadbed_266
+
+<b>Your design is complete and your now ready to lay track. How do you go from the computer screen to the roadbed?</b>
+
+The best way to move your design from computer to roadbed is to print out a full scale copy (or portions) of the layout. During the print process the orientation of the print grid can be adjusted so the printout will line up with the tracks. 
+
+If you have cut-sheet printer (like a laser or ink-jet) set the Ignore Page Margins toggle on the print dialog. Normally there is an unprintable margin around the edge of the page and <i>XTrackCAD</i> only prints on the printable area, which means you would have to trim or overlay the pages. 
+Setting the Ignore Page Margins toggle makes <i>XTrackCAD</i> ignore this margin so you can just abut the paper. Also, turn on Print Roadbed Outline and set your roadbed width. 
+
+For large scale printouts, the ability of many platforms to print as PDF is very helpful. Commercial printers can oftem print very large strips of paper.
+
+Once you have a full scale print-out of your layout (or portion, if you have a larger layout you don't want to do it all at once) you need to transfer this to the roadbed. Here's two methods that can be used:
+
+- Use a spray adhesive (such as 3M Super 77) to glue the print-out to the roadbed. This is very messy, takes more glue than expected and is very unforgiving of mistakes. You may want to use this method only for small sections of very complicated track-work.
+
+- Tape the print-out to the roadbed then using a tracing wheel (available at Sewing shops), trace the center-line of the track and roadbed outline. At this point consider places when you'll want to widen the roadbed to support signals, switch machines, joints etc.
+
+- Some users have reported that they successfully used the DXF export to get a file into Computer Controlled Machines that can cut out trackbed.
+
+*/
+
+/**
+\page faqsHotBar Hot Bar Items Missing!
+
+<b>After installing XTrackCAD the Hot Bar is not active; the arrows to the left and the right of the Hot Bar are a grey colour instead of black, the Hot Bar is blank and also does not scroll.</b>
+
+There's nothing wrong, you just need to load a track or structure Parameter file. Open the <b>Parameter dialog</b> window (<b>File&gt;Parameter</b>) then click on Browse. A list of `\*.xtp` files with names like `atlasn55.xtp` should appear. Select whichever file or files are appropriate for your needs then click the OK button. Click OK on the Parameter File dialog and you should now have objects displayed on the Hot Bar.
+
+Notes:
+
+Only elements that fit the selected scale are available in the Hot Bar. Thus if you're sure the parameter file has been loaded via the <b>File&gt;Parameter</b> dialog, make sure the correct scale has been selected for the layout (<b>Options&gt;Layout</b>).
+
+If a long list of parameter files is selected, movement within the Hot Bar can be slow. If you right-click on the Hot Bar, a list of available parameter sets is shown. By <i>Left-Click</i>ing the desired parameter set, the Hot Bar is immediately scrolled to the first element in that parameter set.
+
+When a new layout is created or when <i>XTrackCAD</i> is started for the first time, the scale of the layout defaults to N scale. Do not forget to change the scale in order to see tracks from other scales in the Hot Bar!
+
+*/
+
+/**
+\page faqsPrototype Unable to Add Cars to Inventory!
+
+<b>After installing</b> <i>XTrackCAD</i> <b>you're unable to add cars to the Car Inventory list; a message stating &quot;No Car Prototypes are defined....&quot; appears when you attempt to add cars to the Car Inventory list.</b>
+
+There's nothing wrong, you just need to load a Prototype definition file.
+
+<i>XTrackCAD</i> includes a parameter file which defines many common North American Prototypes. The file is named `protoam.xtp`. It's loaded into <i>XTrackCAD</i> in the same way that a track, structure or car Parameter file would be loaded.
+
+- Open the <b>Parameter dialog</b> window (<b>File&gt;Parameter</b>) then click on Browse. Scroll through the list of `\*.xtp` files to locate the file named `protoam.xtp`. Select this file then click the OK button. Click OK on the Parameter File dialog to complete installation of the prototype file. You should now be able to add cars to the Car Inventory list.
+
+Other prototype definitions can be created using the Car Prototype dialog. Refer to \ref carprototype for detail.
+
+*/
+
+/**
+\page faqsJoin How Do I Place and Join Tracks
+
+<b>How do I join tracks, place turnouts, build a yard etc?</b>
+
+First take a look at the help file. Then try the demos (<b>Help&gt;Demos</b> menu). This should answer a lot of questions on how to use <i>XTrackCAD</i>. Please visit [The XTrackCAD Wiki](http://www.xtrkcad.org/Wikka/HomePage) if you need help, especially if you find the documentation unclear or think some area needs improvement.
+
+*/
+
+/**
+\page glossary Glossary
+
+This section contains a helpful listing of Window and <i>XTrackCAD</i> terminology.
+
+- \subpage windowTerms
+- \subpage generalTerms
+- \subpage controlElementScripts
+
+*/
+
+/**
+\page windowTerms Window Terms
+
+\anchor idx_Window_Terms_267
+
+Menu and sub-menu items are indicated by <i>File&gt;Open</i>, which means select the <i>File</i> menu and then select the <i>Open</i> menu item.
+
+<b>Balloon Help</b> - short help message which is displayed as you move the mouse pointer over a control.
+
+<b>Canvas</b> - an area within a window where objects are drawn.
+
+<b>Check Box</b> - a button with a small square indicator to the left of its text.  A check mark appears in the indicator when the button is selected.
+
+<b>Click</b> - press and then release the left mouse button.
+
+<b>Drag</b> - press and hold down the left mouse button and move the mouse to 'drag' the cursor on the screen.
+
+<b>Dialog</b> - a type of window in which you input information.
+
+<b>Drop Down List</b> - a list-box which is only displayed when you click on the 'drop-down' button.
+
+<b>Edit Box</b> - an area where you can enter a String, Integer or Floating Point value.
+
+<b>Highlighted</b> - an area on the Canvas which is in inverse-video.
+
+<b>Left-Click</b> - same as <i>Click</i>, used in contexts where <i>Right-Click</i> is also used.
+
+<b>Left+Drag</b> - same as <i>Drag</i>, used in contexts where <i>Right+Drag</i> is also used.
+
+<b>Mouse Pointer</b> - is most often an arrow that is you can use to point at different objects on your screen. When the pointer is over an object, you can <i>Click</i> a mouse button to perform an action on that object (such as selecting the object).
+
+<b>Press</b> - click on a button.
+
+<b>Radio Button</b> - a button with a small round indicator to the left of its text.  The indicator is filled when the button is selected.
+
+<b>Radio Button Group</b> - a group of radio buttons which indicate mutually exclusive choices.
+
+<b>Resizing Border</b> - a thick border around re-sizable windows that you can use to change the window size.
+
+<b>Right-Click</b> - press and then release the right mouse button.
+
+<b>Right Drag</b> - press and hold down the right mouse button and move the mouse to 'drag' the cursor on the screen.
+
+<b>Select</b> - click on an object to indicate you want to do something with it.
+
+<b>Shift+Left-Click</b> - <i>Left-Click</i> while holding down the <i>Shift</i> key.
+
+<b>Shift+Right-Click</b> - <i>Right-Click</i> while holding down the <i>Shift</i> key.
+
+*/
+
+/**
+\page generalTerms XTrackCAD Terms
+
+\anchor idx_XTrackCAD_Terms_268
+
+<b>Active Endpoint</b> - when placing a turnout, the endpoint which is used as a 'handle' when moved along other tracks.
+
+<b>Auto-connect</b> - when placing turnouts (\ref cmdHotBar) and creating parallel (\ref cmdParallel) tracks, the new track will automatically be connected to other tracks if the tracks are aligned properly.
+
+<b>Block Gap</b> - provides control by dividing the layout into electrically isolated blocks, where trains can be slowed or stopped by lowering or cutting the power to a block. Dividing a layout into blocks also permits operators to run more than one train on a layout with much less risk of a fast train catching up with and hitting a slow train. Blocks can also trigger signals or other animated accessories on the layout, adding more realism (or whimsy) to the layout. Three-rail systems will often insulate one of the common rails on a section of track, and use a passing train to complete the circuit and activate an accessory.
+
+<b>Cornu</b> -  \* Cornu curves are a family of mathematically defined curves that define spirals that Euler spirals and elastica come from.
+They have the useful property for us that curvature increases linearly along the curve which
+means the acceleration towards the center of the curve also increases evenly. Railways have long understood that
+smoothly changing the radius is key to passenger comfort and reduced derailments. The railway versions of these
+curves were variously called easements, Talbot or Euler spirals.
+
+<b>DXF Format</b> - Abbreviation of <b>D</b>ata <b>E</b>xchange <b>F</b>ile, a two-dimensional graphics file format supported by virtually all PC-based CAD products. It was created by AutoDesk for the AutoCAD system. 
+
+<b>Easement</b> - special sections of gradually curving track used to connect straight and curved tracks (or two curved tracks). Easements reduce the effects of sudden changes in track curves which can cause derailments. They also look great!
+
+<b>Endpoint</b> - One of the most important concepts in <i>XTrackCAD</i> is the endpoint.  A piece of flex-track has an endpoint at each end.  An endpoint has a position and an angle and it can be connected to other endpoints.  The endpoints control where the track is placed and how it is connected.
+
+- Turnouts have several endpoints (normally 3).
+
+- Turntables have a varying number.
+
+<b>Error Message</b> - an error message displayed in the Status Bar (\ref mainW) accompanied by a beep.
+
+\anchor idx_Fixed_track_269 <b>Fixed-track</b> -
+These include Turnouts, Sectional tracks and Grouped objects.
+They are defined in Parameter Files (\ref cmdPrmfile), or created using the <b>Turnout Designer</b> (\ref cmdTurnoutNew) or the <b>Group</b> (\ref cmdGroup) command.
+They are selected for placement on the layout using the <b>Hot Bar</b> (\ref cmdHotBar) or the <b>Fixed-Track</b> (\ref cmdNewFixedTrack) dialog.
+They can not be directly altered, but can be decomposed with the <b>Ungroup</b> (\ref cmdUngroup) command and some cases trimed (\ref splitDivide).
+
+\anchor idx_Flex_track_270 <b>Flex-track</b> -
+Flexible sections of track used on a layout.
+It usually comes in straight, three-foot-long sections which can be bent or shaped as needed.
+These include Straight, Curved, Easements, Cornu and Bezier tracks.
+This term is also used for hand-laid track.
+They are created by invoking the corresponding command and dragging on the layout.
+<b>Easements</b> (\ref cmdEasement) are created automatically when joining tracks.
+
+<b>Frog</b> - the place on a turnout track where one rail crosses the other.
+
+<b>Gauge</b> - The distance between the inside of the heads of track rails. Most real railroads in North America and Europe are built to a standard gauge of 4'-8 1/2". Narrow gauge means rails with a width less than standard gauge. For example, On3 means O scale trains with three scale feet between the rails.
+
+<b>Handlaid</b> -  Track that's built with handmade ties, rail, and spikes.
+
+<b>Helix</b> - A rising curve which turns around an axis like a corkscrew. Used on multilevel layouts to allow trains to go from one level to another.
+
+<b>Info Message</b> - an informational message displayed in the Status Bar (\ref mainW).
+
+<b>Object</b> - an item on the layout, such as a track segment, table edge, line, note or text.
+
+<b>Points</b> - the part of the Turnout that moves to select a path.
+
+<b>S-Curve</b> - (aka <b>Reverse Curve</b>) a curve which bends in one direction and then the other, forming an S-like shape, without any appreciable length of straight track between the two curves
+
+<b>Sectional Track</b> - prefabricated track which cannot be bent, split or changed.
+A type of <b>Fixed-Track</b>.
+
+<b>Selected Endpoint</b> - when selecting track for various reasons the selected endpoint is the one closest to the selection point.
+
+<b>Tangent</b> - A line, curve, or surface meeting another line, curve, or surface at a common point.
+
+<b>Track Segment</b> - any piece of flex-track, turnout or sectional track.
+
+<b>Turnout</b> - A piece of track that allows a train to go from one track to another. Called a switch on a real railroad. Referred to by number. For example, a no. 6 turnout spreads one unit for each six units of travel measured from the frog (the point at which two rails join to form a V).
+
+Turnouts are a type of 'Fixed-track' which includes Sectional Tracks and Grouped Objects.
+
+- In <i>XTrackCAD</i>, <i>Turnouts</i> also include sectional Tracks, crossings and forms of prefabricated (non-flex) track.
+
+<b>Turnout Frog</b> - the place on the turnout track where one rail crosses the other.
+
+<b>Turnout Number</b> - the ratio of the number of units along the center line of a switch frog traversed for each unit the frog spreads to the sides. A No. 4 frog diverges 1 unit for every 4 it moves ahead; a No. 6, 1 for every 6 units. Although we usually refer to a turnout or switch number, in reality the measurement is for the frog. 
+
+<b>Turnout Points</b> - the part of the Turnout that moves to select a path.
+
+<b>Unconnected Endpoint</b> - an endpoint which is not connected to another.
+
+*/
+
+/**
+\page controlElementScripts Control Element Scripts and the Model RR System's Dispatcher
+
+Notes about control element scripts and the Model RR System's Dispatcher 
+program in OpenLCB mode:
+
+When using the Model RR System's Dispatcher program in OpenLCB mode to create 
+CTC panels, the panel elements can have their LCC event IDs automatically 
+populated from the information in the XTrackCAD file, if the proper syntax is 
+observed.
+
+A LCC event id is a 64-bit number, represented as eight pairs of hexadevimal
+digits (0-9, a-f/A-F) separated by periods (.). Each pair represents one 8-bit
+byte of the event id. This event id is either produced by a sensor or logic
+element or is consumed by a control/device or a logic element.
+
+For blocks the occupency script contains a pair of LCC event ids, separated by 
+a colon (:).  The first LCC event id is produced by the occupency detector 
+when the train enters the block and the second LCC event id is produced by the 
+occupency detector when the train leaves the block.
+
+For switchmotors the point sense script contains a pair of LCC event ids, 
+separated by a colon (:).  The first LCC event id is produced by the point 
+sensor when the points are aligned in the "normal" position (typically aligned 
+to the main) and the second LCC event id is produced by the point sensor when 
+the points are aligned in the "reverse" position (typically aligned to the 
+spur).  The normal and reverse script each contain a signal LCC event id.  
+These events are produced by the CTC Panel when the control point Code button 
+is pressed (clicked) and are consumed by the switch motor.
+
+For signals, the aspect name is a space separated list of the color(s) of the
+signal heads from top to bottom and the aspect script is a LCC event id that
+is consumed to produce that aspect. Presumably, the LCC event id is produced
+by a logic element (presumably a mast group in a Tower-LCC or similar device)
+or virtual track circuit in a Tower-LCC or similar device.
+
+*/
+
+/**
+\page messages Messages and Explanations
+
+
+
+- \subpage messageType
+- \subpage messageList
+
+*/
+
+/**
+\page messageType Message Types
+
+\anchor idx_Message_Types_271
+
+<i>XTrackCAD</i> generates three types of messages:
+
+- <i>Notices</i>, which appear in their own window and require you to press a button to make a choice or dismiss them.
+
+- <i>Error messages</i>, which appear in the <b>Status-bar</b> (\ref mainW) and are accompanied by a beep.
+
+- <i>Information messages</i>, which appear in the <b>Status-bar</b> (\ref mainW) without a beep.
+
+- <i>Notices</i> and <i>Error messages</i> that might be encountered are listed here with a explanation. The <b>Recent Messages</b> menu item on the <b>Help</b> (\ref helpM) menu contains a list of the most recent messages.  Selecting one of the entries presents information on the particular message.
+
+- The notation <i>abc|xyx</i> indicates the message can appear with either of the values (<i>abc</i> or <i>xyz</i>).  Items in <i>UPPERCASE</i> indicate numeric (such as lengths) or string (such as filenames) values.
+
+messageList provides detail explanation of each information or error message.
+
+*/
+

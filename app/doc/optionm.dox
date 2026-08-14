@@ -1,0 +1,382 @@
+/* Auto-converted from optionm.but by tools/but-to-doxygen.py.
+ * See .claude/halibut-doxygen-investigation-plan.md and
+ * conversion-log.md for anything flagged during conversion. */
+
+/**
+\page optionM Options Menu
+
+\anchor idx_Options_Menu_231
+
+![](moptions.png)
+
+The <b>Options Menu</b> shows commands to change configuration options.
+
+- <b>Colors</b> - Displays the Colors (\ref cmdRgbcolor) dialog.
+
+- <b>Command</b> - Displays the Command Options (\ref cmdCmdopt) dialog.
+
+- <b>Display</b> - Displays the Display (\ref cmdDisplay) dialog.
+
+- <b>Easement</b> - Displays the easement (\ref cmdEasement) dialog which controls how easements (spiral transition curves) are used to join tracks.
+
+- <b>Fonts</b> - Displays the font selection (\ref fontSelW) dialog which selects the font used by the text (\ref cmdText) command.  This command is only available on UNIX based systems.
+
+- <b>Layout</b> - Displays the layout (\ref cmdLayout) dialog.
+
+- <b>Preferences</b> - Displays the Preferences (\ref cmdPref) dialog.
+
+- <b>Sticky</b> - Displays the Sticky Commands (\ref cmdSticky) dialog.
+
+- \subpage cmdRgbcolor
+- \subpage cmdCmdopt
+- \subpage cmdDisplay
+- \subpage cmdEasement
+- \subpage fontSelW
+- \subpage cmdLayout
+- \subpage cmdPref
+- \subpage cmdSticky
+
+*/
+
+/**
+\page cmdRgbcolor Colors Dialog
+
+\anchor idx_Colors_Dialog_232
+
+The <b>Colors</b> dialog is invoked from the Options (\ref optionM) menu
+
+![](colorw.png)
+
+The <b>Colors</b> dialog controls the color that various objects are drawn.
+
+- <b>Border</b> - Sets color of Rulers, Room Boundaries and Table Edges.
+
+- <b>Exception Track</b> - Sets color of <i>Exceptional Tracks</i> (\ref cmdLayout). Those which exceed the specified grade or are have a radius smaller than the minimum set.
+
+- <b>Marker</b> - Sets color of short lines drawn on the Ruler of the Main (\ref mainW) window to indicate cursor position.
+
+- <b>Normal Tracks</b> - Sets color of normal track.
+
+- <b>Primary Axis</b> - Sets color of the large cross displayed when positioning the <b>Snap Grid</b> (\ref cmdGrid) or the <b>Print Grid</b> (\ref cmdPrint).
+
+- <b>Profile Path</b> - color of the path when using the <b>Profile</b> (\ref cmdProfile) command.
+
+- <b>Secondary Axis</b> - Sets color of the large cross displayed when positioning the <b>Snap Grid</b> (\ref cmdGrid) or the <b>Print Grid</b> (\ref cmdPrint).
+
+- <b>Selected Tracks</b> - Sets color of Selected track.
+
+- <b>Snap Grid</b> - the Grid displayed by the <b>Snap Grid</b> (\ref cmdGrid) dialog.
+
+- <b>Track Ties</b> - color of ties (if drawn).
+
+- <b>Bridge Base</b> - color of Bridge fill between the parapets.
+
+- <b>Track Roadbed</b> - color of Roadbed fill under the track.
+
+*/
+
+/**
+\page cmdCmdopt Command Option Dialog
+
+\anchor idx_Command_Option_Dialog_233
+
+The <b>Command Option</b> dialog is invoked from the Options (\ref optionM) menu
+
+![](cmdopt.png)
+
+The <b>Command Option</b> dialog contains items which control the behavior of some commands.
+
+- <b>Default Command</b> - selects the <b>Properties</b> (\ref cmdDescribe) or <b>Select</b> (\ref cmdSelect) as the default command which is invoked when any other command (if not <b>Sticky</b> (\ref cmdSticky)) is canceled or completed.
+
+- <i>Right-Click</i> - will either display a pop-up menu of available commands or command-specific options depending on whether the <i>Shift</i> key is being held down or not.  This option allows you to choose which operation occurs.
+
+- <i>Select-Mode</i> - will either (a) only select the current item unless Ctrl is added or (b) will add the current item to the selection unless Ctrl is added in which case it will only select this item.
+
+- <i>Select-Zero</i> - if selected will perform <b>Deselect All</b> if the selection is not on an object.
+
+*/
+
+/**
+\page cmdDisplay Display Dialog
+
+\anchor idx_Display_Dialog_234
+
+The <b>Display</b> dialog is invoked from the Options (\ref optionM) menu
+
+![](displayopt.png)
+
+The <b>Display</b> dialog contains items which control the display of objects on the Main window.
+
+- <b>Auto Pan</b> - if enabled, dragging near the edge of the Main Canvas (\ref mainW) will cause the canvas to move to follow the mouse.
+
+- <b>Car Labels</b> - controls the grouping and display of <b>Cars</b> on the <b>Hot Bar</b> (\ref cmdHotBar) during the <b>Train</b> (\ref cmdTrain) command.  This can be a combination of <b>Prototype</b>, <b>Manufacturer</b>, <b>Part Number</b> and <b>Item</b>.
+
+- <b>Color Tracks</b> - when set to layers, tracks are drawn with color of the layer (\ref cmdLayer) they belong to and not the normal track color.
+This can be disabled in the Layer dialog for each Layer by unchecking the <b>Use Color</b> checkbox.
+
+- <b>Color Draws</b> - when set to layers, non-tracks (lines, table edges and structures) are drawn with color of the layer (\ref cmdLayer) they belong to rather than based on thier own object setting.
+This can be disabled in the Layer dialog for each Layer by unchecking the <b>Use Color</b> checkbox.
+
+- <b>Constrain Drawing Area to Room Boundaries</b> - when Zooming and moving the Main Canvas (\ref mainW) may show areas beyond the boundaries of the room.
+Setting this option constrains the Main Canvas to minimize these areas (the <b>grey</b> area).
+
+- <b>Dont Hide System Cursor</b> - when XTrackCAD substitutes a specialized cursor to show actions that will occur (or are occuring) it will normallly hide the System Cursor.  This option suppresses this behaviour and leaves the system cursor in place.
+
+- <b>Draw EndPts</b> - when to draw endpoints between connected track: never, only for turnouts or for all tracks.
+
+- <b>Draw Unconnected EndPts</b> - how to draw unconnected endpoints; normally, with a thick line or with a thick line in the exception color.
+
+- <b>Draw Ties</b> - how to draw ties under the rails when the drawing Scale is smaller than half of the <b>Two Rail Scale</b>. Note that \ref cmdTies can be used to hide ties for selected tracks.
+
+- <b>Draw Centers</b> - enable or disable drawing of center markings (ie. crosshairs) for curved track.
+
+- <b>Draw Tunnel</b> - how to draw hidden tracks (\ref cmdTunnel), either not at all, as dashed lines or as normal solid lines (which might be faster).
+
+- <b>Hide Trains On Hidden Track</b> - controls whether trains (\ref cmdTrain) on invisible layers (\ref cmdLayer) or hidden tracks (\ref cmdTunnel) (if hidden tracks are not drawn) are displayed.
+
+- <b>Hot Bar Labels</b> - controls the format of titles for objects on the <b>Hot Bar</b> (\ref cmdHotBar).
+
+- <b>Label Enable</b> - individual control over whether to display various types of labels.  You may want to turn some of these off if your layout is too cluttered.
+
+  - <i>Cars</i> - Reporting mark labels on cars - the content shown on the Cars label is either the Repmarks (if the Rep Number is set), or the car index number (with a "#" before it). See the Car Part dialog \ref carpart.
+
+  - <i>EndPt Elevations</i> - Elevation markers attached to endpoints.
+
+  - <i>Lengths</i> - Length of flex-track attached to ends of turnouts all the way to the next turnout.
+
+  - <i>Track Descriptions</i> - Title of each turnout and sectional track, optional details of each piece of Flexible Track. These can be shown or hidden using the Move Description \ref cmdMoveLabel command.
+
+  - <i>Track Elevations</i> - Computed elevations at the center of each track.
+
+- <b>Label Font Size</b> - controls font size for Labels on layout.
+
+- <b>Layout Labels</b> - controls the format of titles for Turnouts and Structures displayed on the Layout.
+
+- <b>Label Scale</b> - the program will draw labels only when the drawing Scale is smaller or equal to this value.
+
+- <b>List Labels</b> - controls the format of titles for turnouts and structures displayed in lists (such as the <b>Parts List</b> (\ref cmdEnum)).
+
+- <b>Live Map</b> - if checked then the Main Window (\ref mainW) will be updated as you drag on the <b>Map Window</b> (\ref cmdMap).  Note that this can be slow.
+
+- <b>Map Scale</b> - scale of the Map (\ref cmdMap) window.  Increase this value to make the <b>Map</b> window smaller when working with large layouts.  <b>Note:</b> you cannot make the <b>Map</b> window larger than the screen.
+
+- <b>Train Update Delay</b> - number of milliseconds between updates in the <b>Train Simulation</b> (\ref cmdTrain) mode.  A lower value will generate a smoother display but reduces system responsiveness.
+
+- <b>Two Rail Scale</b> - draw tracks using two lines when the drawing Scale is smaller than this value.
+
+*/
+
+/**
+\page cmdEasement Easements
+
+\anchor idx_Easements_235
+
+Easements are special sections of gradually curving track used to connect straight and curved tracks (or two curved tracks). Easements reduce the effects of sudden changes in track curves which can cause jerky motion and derailments.
+
+Easements can be created every time you <b>Join</b> (\ref cmdJoin) tracks, <b>Extend</b> (\ref extendTrack) a track or create a <b>Tangent</b> (\ref createTangent) track.
+
+When using easements, an error message will be generated if tracks have a radius that is too small or are too short for the transition curve.
+
+The <b>Easement</b> dialog is invoked from the Options (\ref optionM) menu.
+
+- ![](easew.png)
+
+- <b>Value</b> - allows fine tuning of the easement parameters (restricted to values &gt;= 0.5).
+
+- <b>R</b> - minimum radius of the curved track.
+
+- <b>X</b> - offset between a straight and curved track.
+
+- <b>L</b> - length of the transition track.
+
+- Radio button group with <b>None</b>, <b>Sharp</b>, <b>Normal</b>, <b>Broad</b> and <b>Cornu</b>. Corresponding <b>Value</b>s for these buttons are 0, 0.5, 1.0, 2.0 and -1.0. Select <b>None</b> to turn easements off.
+
+For traditional fixed sharpness easements see \ref EasementsTraditional, for Cornu Easements see \ref EasementsCornu.
+
+- \subpage EasementsCornu
+- \subpage EasementsTraditional
+- \subpage EasementsSectional
+
+*/
+
+/**
+\page EasementsCornu Cornu Easements
+
+\anchor idx_Cornu_Easements_236
+
+The Cornu Easements work in a different way to the other easements. They use all the space available to minimize sharpness, so you can control the sharpness for each curve you draw by the distance apart, radius and angle of the two end points.
+
+The Cornu is a mathematical curve that has the property that the curvature (inverse of the radius) varies linearly along its length. Using an open-source Cornu library written by Dr Raph Levin, we can calculate an Cornu easment to suit the end conditions of radius, curve center, angle and position. A Cornu easement can be constructed between two tracks by using the values of these parameters.
+
+To draw an cornu easement see \ref joinCornu, to Modify it afterwards see \ref chgCornu.
+
+*/
+
+/**
+\page EasementsTraditional Easements with Fixed Sharpness
+
+\anchor idx_Easements_with_Fixed_Sharpness_237
+
+The values <b>R</b>, <b>X</b> and <b>L</b> are read-only. They are set using the radio buttons or the <b>Value</b> field which can be set to 0 (No Easment) or between 0.21 (sharpest Easement) 100 (broadest Easment).
+
+These values indicate the worst case of joining a straight track with a curve of radius <b>R</b>. The two tracks are separated by the offset <b>X</b> while the easement curve extends for <b>L/2</b> inches or centimeters to each side of the endpoints.
+
+The formula used to draw non-Cornu easements is:
+
+\verbatim
+x = l * l * l / (6 * R * L)
+r = L * R/l
+\endverbatim
+
+where
+
+- <b>l</b> is the distance along the tangent to the easement.
+
+- <b>R</b> is the final radius of the easement.
+
+- <b>L</b> is the total length of the easement along the tangent.
+
+- <b>x</b> is the offset from the tangent at <b>l</b>.
+
+- <b>r</b> is the radius of easement curve at <b>l</b>.
+
+The Easement Button (![](beasement.png)) on the Main Window (\ref mainW) changes its label to indicate the current easement value.
+
+The following diagrams illustrates the <b>R</b>, <b>X</b> and <b>L</b> values and the resulting easement curve.
+
+![](easeex1.png)
+
+![](easeex2.png)
+
+If curves with a radius larger than <b>R</b> or two curves (that bend in the same direction) are being connecting then the easement curve will be shorter and the offset smaller.  If the computed offset is small then no easement is generated.
+
+A curved track that bends in one direction and then bends in the opposite direction is an <i>S-curve</i>.  This will generate the worst case easement which is two easement curves placed end to end.
+
+Refer to instruction in \ref EasementsSectional when using sectional track.
+
+*/
+
+/**
+\page EasementsSectional Easements and Sectional Track
+
+\anchor idx_Easements_and_Sectional_Track_238
+
+Easements require the possibility of creating track with arbitrary radii. Therefore easements are not possible if sectional track is used. It is best to turn <b>Easements</b> off when using sectional track.
+
+*/
+
+/**
+\page fontSelW Font Selection
+
+\anchor idx_Font_Selection_239
+
+The font selection dialog allows selection of the font used by the text (\ref cmdText) command.  This command is valid only on UNIX based systems.
+
+![](fonts.png)
+
+*/
+
+/**
+\page cmdLayout Layout Dialog
+
+\anchor idx_Layout_Dialog_240
+
+The <b>Layout Options</b> dialog, displayed by the Options (\ref optionM) or the File (\ref fileM menu, contains items controlling the current layout.
+
+- ![](layout.png)
+
+- <b>Gauge</b> - Drop down menu used to select track gauge.
+
+- <b>Height</b> - Height of layout drawing which, depending on the <b>Unit</b> setting (English or Metric) established in the <b>Preferences</b> dialog (\ref cmdPref), is measured in inches or centimeters.
+
+- <b>Room Width</b> - Width of layout drawing which, depending on the <b>Unit</b> setting (English or Metric) established in the <b>Preferences</b> dialog (\ref cmdPref), is measured in inches or centimeters.
+
+- <b>Scale</b> - Drop down menu used to select track scale.
+
+- <b>Title</b> - Two lines that can be used to enter title and subtitle descriptions for the layout. Information entered in these fields will be shown on any printout of your layout design.
+
+- <b>Maximum Track Grade</b> - Specifies maximum track elevation expressed as a percent (%). Tracks with a larger elevation are considered exceptional and drawn in the exception (\ref cmdRgbcolor) color.
+
+- <b>Minimum Track Radius</b> - Specifies minimum track radius (in inches or centimeters). Curved tracks with a smaller radius are considered exceptional and drawn in the exception (\ref cmdRgbcolor) color.
+
+- <b>Background File Name</b> - The last 40 characters of the full file pathname for the image used for a temporary background behind all the drawn objects. It is set using the <b>Browse</b> and reset with the <b>Clear</b> buttons.
+It is also cleared along with all the other background values after a <b>Open</b> or <b>New</b> command.
+The file is initally specified to be in the local file system. In order to send it along with the layout, use <b>Save As</b> command and specify the <i>Archive</i> \anchor idx_Archive_241  Archive format (\*.xtce).
+This will create a single zipped package file containing the layout and the image file which can be sent and will open on a different system.
+If this has been done, after <b>Open</b> of the archive, the image file path will point into the extracted archive file directory.
+It can be changed to a new local file and the next <b>Save</b> will rebuild the package using the new image file instead of the old one.
+
+- <b>Background Pos X, Y</b> - The offset of the bottom left corner of the background image from the origin (in inches or centimeters) after rotation.
+
+- <b>Background Size</b> - The model size (in inches or cm) to scale the base of the background image to (measured from bottom left to bottom right as displayed after any rotation has been applied). Note - A value of 0.0 means that no scaling is applied and the image is shown at its current size in pixels regardless of scale or zoom.
+
+- <b>Background Screen</b> - The amount of screening (from 0 to 100%) to apply to the background image. Screening allows objects drawn over the image to be seen more clearly. 0 means no screening, while 100% means noting will be shown.
+
+- <b>Background Angle</b> - The rotation angle to apply to the background image (in degrees) about its center before it is moved so that its bottom left corner is offset by the <b>Background Pos</b> setting.
+
+*/
+
+/**
+\page cmdPref Preferences Dialog
+
+\anchor idx_Preferences_Dialog_242
+
+This dialog controls some parameters which likely will not be changed frequently.
+
+- ![](pref.png)
+
+- <b>Angles</b> - controls the angle system. <b>Polar</b>: 0° is up and angles are measured clockwise, or <b>Cartesian</b>: 0° is to the right and angles are measured counter-clockwise.
+
+- <b>AutoSave</b> <i>AutoSave</i> \anchor idx_AutoSave_243  - specifies the number of Check Points taken before an AutoSave. The same number of checkpoints are retained in a circular archive set in the (\ref workDir) named for the layout file.  Setting this value to 0 disables AutoSave.
+
+- <b>Balloon Help</b> - disables the display of <b>Balloon Help</b> (\ref windowTerms) which usually is shown when the cursor is placed over a control.
+
+- <b>Enable Audio Signals</b> - turns on beeps for positive confirmations and warnings.
+
+- <b>Show Flex-track</b> - disables the display or <b>Flex-track</b> (\ref generalTerms) which is shown on the left of the Toolbar.
+
+- <b>Check Point</b> <i>AutoSave</i> \anchor idx_AutoSave_244  - specifies the Check Point frequency; the number of modifications made to the layout since the last save. The layout is automatically saved to the Check Point file (\ref workDir) when the Check Point frequency is reached. Setting this value to 0 disables use of the Checkpoint file <i>and AutoSave</i>. Upon restart, if the program was not saved normally, the user will be prompted to see if they want to resume at the last checkpoint.
+
+- <b>Connection Angle</b> - as below for Connection Distance for the angle between endpoints.
+
+- <b>Connection Distance</b> - the maximum distance between endpoints that can be connected.  This affects the <b>Join</b> (\ref cmdJoin) command and auto-connection during <b>Parallel</b> (\ref cmdParallel) commands and placing <b>Turnouts</b> (\ref cmdHotBar).  The default value for this field is 0.100 inches or 0.254 CM. Changing this value is not recommended.
+
+- <b>Drag Distance</b> - controls how far you can move the cursor (in pixels) before <i>XTrackCAD</i> considers the action to be a drag instead of a click.
+
+- <b>Drag Timeout</b> - controls how long you can hold a mouse button down (in milliseconds) before <i>XTrackCAD</i> considers the action to be a drag instead of a click.
+
+- <b>Length Format</b> - controls how lengths are displayed.  Combinations of feet and inches (or meters, centimeters and millimeters) with support for decimal or fractional measures. <b>Note:</b> lengths can be entered in any format and are converted on entry.
+
+- <b>Max Coupling Speed</b> - trains (\ref cmdTrain) moving faster than this speed will crash when running into other trains or hitting the end of a track or an open turnout.  Crashed trains must be manually moved back onto the track.
+
+- <b>Min Grid Spacing</b> - minimum distance between <b>Grid</b> (\ref cmdGrid) lines (in pixels).  If the grid lines are closer then drawing them is suppressed.
+
+- <b>Min Track Length</b> - specifies the minimum length of a track.  Shorter tracks will not be created.
+
+- <b>On Program Startup</b> - if set to "Load Last Layout", <i>XTrackCAD</i> will automatically re-open the layout file that was open when <i>XTrackCAD</i> last closed. Selecting "Start New Layout" opens a blank layout canvas.
+
+- <b>Turntable Angle</b> - minimum angle between adjacent tracks connected to a <b>Turntable</b> (\ref cmdTurntable).
+
+- <b>Units</b> - choose between English (inches) or Metric (centimeters) measurements.
+
+- <b>Write Settings</b> - Save the current settings to a named settings file
+
+- <b>Read Settings</b> - Load settings from a named settings file
+
+*/
+
+/**
+\page cmdSticky Sticky Dialog
+
+\anchor idx_Sticky_Dialog_245
+
+By default, when commands complete, the defined <b>Default Command</b> (\ref cmdCmdopt) becomes active.  If a command is <b>sticky</b>, the defined <b>Default Command</b> is ignored and the current command remains active after completion.
+
+The <b>Sticky</b> dialog controls which commands remain active after completion.
+
+![](sticky.png)
+
+Selecting a command makes it <b>sticky</b>. Un-selecting a command causes the defined <b>Default Command</b> to become active after command completion.
+
+*/
+
