@@ -626,11 +626,15 @@ int main(int argc, char * argv[])
 	fputs("/*\n * DO NOT EDIT! This file has been automatically created by genmessages.\n * Changes to this file will be overwritten.\n */\n",
 	      hdrF);
 	fputs("#ifndef HAVE_MESSAGES_H\n#define HAVE_MESSAGES_H\n", hdrF);
-	/* open the help file to generate */
+	/* open the help file to generate -- same argv-derived-path reasoning as
+	 * the input file above (build-time CLI tool, caller is this project's
+	 * own CMakeLists.txt, not an untrusted party); the CodeQL alert follows
+	 * the taint through FOpenRestricted() here since that's where the
+	 * actual open() call moved to. */
 	outF = FOpenRestricted(argv[ inFileIdx + 1 ]);
 
-	if (!inF) {
-		fprintf(stderr, "Could not open %s for writing!\n", argv[ inFileIdx ]);
+	if (!outF) {
+		fprintf(stderr, "Could not open %s for writing!\n", argv[ inFileIdx + 1 ]);
 		exit(1);
 	}
 
