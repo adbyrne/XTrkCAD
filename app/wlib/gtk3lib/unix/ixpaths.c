@@ -132,8 +132,8 @@ const char * wGetAppLibDir( void )
 
 	for (ep=envvar; *cp; cp++,ep++) {
 		*ep = toupper(*cp);
-		if ( * ep == '-' ) {
-			// Env Var cannot contain '-'
+		if ( * ep == '-' || *ep == '.') {
+			// Env Var cannot contain '-' or '.'
 			*ep = '_';
 		}
 	}
