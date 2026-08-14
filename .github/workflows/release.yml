@@ -19,6 +19,10 @@ on:
       - 'v*.*.*'
   workflow_dispatch:
     inputs:
+      publish_temp_release:
+        description: 'Publish packages to a temporary, branch-named prerelease (for review branches — see publish-temp-release job)'
+        type: boolean
+        default: false
       include_nsis:
         description: 'Build NSIS installer (experimental — DLLs not yet bundled via CMake install)'
         type: boolean
@@ -789,6 +793,72 @@ jobs:
               "Built from commit ${{ github.sha }}." \
               '' \
               '[Doxygen developer docs](https://adbyrne.github.io/XTrkCAD/doxygen/) · [User guide](https://adbyrne.github.io/XTrkCAD/userguide/)')" \
+            --prerelease \
+            --latest=false \
+            "${FILES[@]}"
+
+  # ── Temporary review-branch release — opt-in via workflow_dispatch ────────
+  # For review branches not going into GTK3V2MAIN yet (e.g. a large,
+  # one-way removal like the Halibut -> Doxygen migration) but where
+  # reviewers want real installable packages, not just a source checkout.
+  # Explicit opt-in only (publish_temp_release input, default false) so an
+  # ordinary CI-proving workflow_dispatch run never publishes anything.
+  # Tag is branch-derived and deleted+recreated on every dispatch (same
+  # rolling pattern as publish-latest-release above), so re-running updates
+  # it in place instead of accumulating releases. This is NOT a substitute
+  # for the real latest-gtk3v2main rolling release or a tagged release --
+  # delete the tag once the branch merges or is abandoned (github-release
+  # and publish-latest-release are both unaffected by this job).
+  publish-temp-release:
+    needs: [package-linux, package-linux-arm64-ubuntu, package-linux-arm64-debian, package-macos, package-windows]
+    if: github.event_name == 'workflow_dispatch' && inputs.publish_temp_release == true
+    runs-on: ubuntu-latest
+    concurrency:
+      group: temp-release-${{ github.ref_name }}
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Download all packages
+        uses: actions/download-artifact@v7
+        with:
+          path: release-packages
+          merge-multiple: true
+
+      - name: Remove GitHub Pages deployment bundle
+        # See publish-latest-release's identical step above for why.
+        run: rm -f release-packages/artifact.tar
+
+      - name: List packages
+        run: find release-packages -type f | sort
+
+      - name: Compute temp release tag
+        run: |
+          # GitHub tag/release names are more permissive than this needs to
+          # be strict about -- branch names here are already tag-safe, but
+          # sanitize defensively (slashes are the one real risk, e.g. a
+          # future user/foo-branch).
+          SAFE_REF="$(echo '${{ github.ref_name }}' | tr '/' '-')"
+          echo "TEMP_TAG=temp-${SAFE_REF}" >> "$GITHUB_ENV"
+
+      - name: Update the temporary release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mapfile -t FILES < <(find release-packages -type f | sort)
+          gh release delete "$TEMP_TAG" --yes --cleanup-tag || true
+          gh release create "$TEMP_TAG" \
+            --title "TEMP — ${{ github.ref_name }} (review build, not for production)" \
+            --target "${{ github.sha }}" \
+            --notes "$(printf '%s\n' \
+              '**Temporary review build — not a real release.**' \
+              '' \
+              "Branch \`${{ github.ref_name }}\`, commit ${{ github.sha }}." \
+              'This tag is deleted and recreated on every dispatch of this workflow' \
+              'for this branch, and should itself be deleted once the branch merges' \
+              'or is abandoned. Not linked from anywhere permanent.')" \
             --prerelease \
             --latest=false \
             "${FILES[@]}"
