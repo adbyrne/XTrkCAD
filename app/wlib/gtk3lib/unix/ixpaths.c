@@ -132,8 +132,8 @@ const char * wGetAppLibDir( void )
 
 	for (ep=envvar; *cp; cp++,ep++) {
 		*ep = toupper(*cp);
-		if ( * ep == '-' ) {
-			// Env Var cannot contain '-'
+		if ( * ep == '-' || *ep == '.') {
+			// Env Var cannot contain '-' or '.'
 			*ep = '_';
 		}
 	}
@@ -143,6 +143,7 @@ const char * wGetAppLibDir( void )
 	}
 	strcpy( ep, "LIB" );
 	ep = getenv( envvar );
+	//printf("DEBUG: %s=%s\n", envvar, ep);
 	searchDirs[ option++ ] = g_strdup( ep );
 
 	// option 2: relative path to share subdir
@@ -176,6 +177,7 @@ const char * wGetAppLibDir( void )
 	for(unsigned int i = 0; i < option; i++) {
 		if(IsExistingDirectory(searchDirs[ i ])) {
 			appLibDir = g_strdup(searchDirs[ i ]);
+			//printf("DEBUG: appLibDir=%s\n", appLibDir);
 			break;
 		}
 	}

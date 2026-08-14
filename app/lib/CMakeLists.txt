@@ -74,22 +74,22 @@ if(UNIX AND NOT APPLE)
 		install(FILES
 			xtrkcad.flatpak.desktop
 			DESTINATION "share/applications"
-			RENAME io.sourceforge.xtrkcad_fork.xtrkcad-gtk.desktop
+			RENAME io.sourceforge.xtrkcad_fork.${XTRKCAD_BIN}.desktop
 			)
 		install(FILES
 			xtrkcad.xml
 			DESTINATION "share/applications"
-			RENAME xtrkcad-gtk.xml
+			RENAME ${XTRKCAD_BIN}.xml
 			)
 		install(FILES
 			xtrkcad.metainfo.xml
 			DESTINATION "share/metainfo"
-			RENAME io.sourceforge.xtrkcad_fork.xtrkcad-gtk.metainfo.xml
+			RENAME io.sourceforge.xtrkcad_fork.${XTRKCAD_BIN}.metainfo.xml
 			)
 		install(FILES
 			xtrkcad_logo_128x128.svg
 			DESTINATION "share/icons/hicolor/scalable/apps"
-			RENAME io.sourceforge.xtrkcad_fork.xtrkcad-gtk.svg
+			RENAME io.sourceforge.xtrkcad_fork.${XTRKCAD_BIN}.svg
 			)
 	else()
 		configure_file(${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad.desktop.in ${CMAKE_CURRENT_BINARY_DIR}/${XTRKCAD_BIN}.desktop @ONLY)

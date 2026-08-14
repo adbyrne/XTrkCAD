@@ -40,6 +40,8 @@ make flatpak    # or "ninja flatpak" with minimal progress output
 flatpak run io.sourceforge.xtrkcad_fork.xtrkcad
 flatpak run io.sourceforge.xtrkcad_fork.xtrkcad-beta
 flatpak run io.sourceforge.xtrkcad_fork.xtrkcad-gtk
+flatpak run io.sourceforge.xtrkcad_fork.xtrkcad-5_4_0
+flatpak run io.sourceforge.xtrkcad_fork.xtrkcad-5_4_0_xxxxxxxxxxxx
 
 # Misc
 - paths in xtrkcad.rc need to change to flatpak xtrkcad lib location
@@ -51,9 +53,9 @@ flatpak run io.sourceforge.xtrkcad_fork.xtrkcad-gtk
   can keep their xtrkcad.rc file as is, but there will be pains in the transition
 - ./distribution/flatpak/buildFlatpak.sh will create build directory and build flatpak
 - special changes for gtk3
-  - desktop file uses icon ending in xtrkcad-gtk
-  - metainfo needs ids changed ending in xtrkcad-gtk (id, desktop-id, developer id)
-  - CMakeLists.txt install dir is share/xtrkcad-gtk
-  - app/lib/CMakeLists.txt uses xtrkcad-gtk
-  - common_source.sh copies from /app/share/xtrkcad-gtk
+  - desktop file uses icon ending in xtrkcad-gtk, xtrkcad-5_4_0, or xtrkcad-5_4_0_xxxxxxxxxxxx
+  - metainfo needs ids changed ending in xtrkcad-gtk, xtrkcad-5_4_0, or xtrkcad-5_4_0_xxxxxxxxxxxx (id, desktop-id, developer id)
+  - CMakeLists.txt install dir is share/xtrkcad-gtk, xtrkcad-5_4_0, or xtrkcad-5_4_0_xxxxxxxxxxxx
+  - app/lib/CMakeLists.txt uses xtrkcad-gtk, xtrkcad-5_4_0, or xtrkcad-5_4_0_xxxxxxxxxxxx
+  - common_source.sh copies from /app/share/xtrkcad-gtk, xtrkcad-5_4_0, or xtrkcad-5_4_0_xxxxxxxxxxxx depending on XTRKCAD_APP_ID
   - manifest change to set XTRKCAD_APP_ID env var
