@@ -283,11 +283,8 @@ static void SelectedTrackCountChange( void )
 {
 	static long oldCount = 0;
 	if (selectedTrackCount != oldCount) {
-		if (oldCount == 0) {
-			/* going non-0 */
-			EnableCommands();
-		} else if (selectedTrackCount == 0) {
-			/* going 0 */
+		if (oldCount == 0 || selectedTrackCount == 0) {
+			/* going non-0, or going 0 */
 			EnableCommands();
 		}
 		oldCount = selectedTrackCount;
@@ -603,9 +600,7 @@ static void SelectConnectedTracks(
 		if (display_only && !GetLayerFrozen(GetTrkLayer(trk))) {
 			DrawTrack(trk,&tempD,wDrawColorPreviewSelected );
 		} else if (!GetTrkSelected(trk)) {
-			if (GetLayerModule(GetTrkLayer(trk))) {
-				continue;
-			} else if (GetLayerFrozen(GetTrkLayer(trk))) {
+			if (GetLayerModule(GetTrkLayer(trk)) || GetLayerFrozen(GetTrkLayer(trk))) {
 				continue;
 			} else {
 				SelectOneTrack( trk, TRUE );
@@ -3154,9 +3149,8 @@ static STATUS_T SelectTrack(
 	}
 	if (MyGetKeyState() & WKEY_SHIFT) {						//All track up to
 		SelectConnectedTracks( trk, FALSE );
-	} else if ((MyGetKeyState() & WKEY_CTRL) && (selectMode==0)) {
-		SelectOneTrack( trk, !GetTrkSelected(trk) );
-	} else if (!(MyGetKeyState() & WKEY_CTRL) && (selectMode==1)) {
+	} else if (((MyGetKeyState() & WKEY_CTRL) && (selectMode==0))
+	           || (!(MyGetKeyState() & WKEY_CTRL) && (selectMode==1))) {
 		SelectOneTrack( trk, !GetTrkSelected(trk) );
 	} else {
 		SetAllTrackSelect( FALSE );							//Just this Track

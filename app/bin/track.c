@@ -257,9 +257,8 @@ EXPORT BOOL_T CheckTrackLayer( track_p trk )
 
 EXPORT BOOL_T CheckTrackLayerSilent( track_p trk )
 {
-	if (GetLayerFrozen( GetTrkLayer( trk ) ) ) {
-		return FALSE;
-	} else if (GetLayerModule( GetTrkLayer( trk ) ) ) {
+	if (GetLayerFrozen( GetTrkLayer( trk ) )
+	    || GetLayerModule( GetTrkLayer( trk ) ) ) {
 		return FALSE;
 	} else {
 		return TRUE;

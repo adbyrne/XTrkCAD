@@ -1289,11 +1289,8 @@ static void Playback(void)
 		thisCmd = otherCmd;
 		paramLineNum++;
 		Stripcr(paramLine);
-		if (paramLine[0] == '#') {
-			/* comment */
-			continue;
-		} else if (paramLine[0] == 0) {
-			/* empty paramLine */
+		if (paramLine[0] == '#' || paramLine[0] == 0) {
+			/* comment or empty paramLine */
 			continue;
 		} else if (ReadTrack(paramLine)) {
 			LOG(log_playback, 3, ("%3d: ReadTrack %s\n", paramLineNum, paramLine));
@@ -2363,7 +2360,6 @@ static void ParamCheck(char *line)
 		case PD_MENU:
 		case PD_MENUITEM:
 		case PD_BITMAP:
-			break;
 		case PD_SCALE:
 		case PD_NOTEBOOK:
 		case PD_TAG:
@@ -2505,7 +2501,6 @@ static long ParamIntRestore(paramGroup_cp pg, int class)
 		case PD_MENU:
 		case PD_MENUITEM:
 		case PD_BITMAP:
-			break;
 		default:
 			break;
 		}
@@ -2556,7 +2551,6 @@ static void ParamIntSave(paramGroup_cp pg, int class)
 			case PD_MENU:
 			case PD_MENUITEM:
 			case PD_BITMAP:
-				break;
 			default:
 				break;
 			}

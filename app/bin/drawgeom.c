@@ -341,12 +341,7 @@ STATUS_T DrawGeomMouse(
 					coOrd p = pos;
 					track_p t;
 					if (((t=OnTrack(&p,FALSE,FALSE))!=NULL) && (IsClose(FindDistance(p,pos))) ) {
-						if (context->Op == OP_DIMLINE ) {
-							CreateEndAnchor(p,FALSE);
-							// wSetCursor(mainD.d,wCursorNone);
-							movePos = p;
-							locked = TRUE;
-						} else if (!IsTrack(t)) {
+						if (context->Op == OP_DIMLINE || !IsTrack(t)) {
 							CreateEndAnchor(p,FALSE);
 							// wSetCursor(mainD.d,wCursorNone);
 							movePos = p;
@@ -810,14 +805,13 @@ STATUS_T DrawGeomMouse(
 		wSetCursor(mainD.d,defaultCursor);
 		if ((context->Op == OP_POLY) || (context->Op == OP_POLYLINE)
 		    || (context->Op == OP_FILLPOLY )
-		    || (context->Op == OP_BOX) || (context->Op == OP_FILLBOX) ) {
+		    || (context->Op == OP_BOX) || (context->Op == OP_FILLBOX)
+		    || (context->Op>=OP_FILLCIRCLE1 && context->Op<=OP_FILLCIRCLE3)
+		    || (context->Op>=OP_CIRCLE1 && context->Op<=OP_CIRCLE3) ) {
 			;
 		} else if (context->Op == OP_LINE || context->Op == OP_DIMLINE ||
 		           context->Op == OP_BENCH || context->Op == OP_TBLEDGE ) {
 			tempSegs(0).u.l.pos[1] = pos1;
-		} else if ((context->Op>=OP_FILLCIRCLE1 && context->Op<=OP_FILLCIRCLE3) ||
-		           (context->Op>=OP_CIRCLE1 && context->Op<=OP_CIRCLE3)) {
-			;
 		} else {
 			PlotCurve( drawGeomCurveMode, pos0, pos0x, pos1, &context->ArcData, FALSE,
 			           0.0 );
@@ -1068,9 +1062,6 @@ STATUS_T DrawGeomMouse(
 		return C_CONTINUE;
 
 	case C_CMDMENU:
-
-		return C_CONTINUE;
-
 	default:
 		return C_CONTINUE;
 	}

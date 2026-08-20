@@ -189,11 +189,7 @@ static char * CmdCornuHotBarProc(
 		DoCommandB( I2VP(cornuHotBarCmdInx) );
 		return NULL;
 	case HB_LISTTITLE:
-		sprintf(message,_("%s FlexTrack"),GetScaleName(GetLayoutCurScale()));
-		return message;
 	case HB_BARTITLE:
-		sprintf(message,_("%s FlexTrack"),GetScaleName(GetLayoutCurScale()));
-		return message;
 	case HB_FULLTITLE:
 		sprintf(message,_("%s FlexTrack"),GetScaleName(GetLayoutCurScale()));
 		return message;
@@ -747,12 +743,9 @@ BOOL_T CallCornu(coOrd pos[2], track_p trk[2], EPINX_T ep[2],
 			           && params.arcR == 0.0 ) {
 				cp->radius[i] = 0.0;
 				if (ep && ep[i]>=0) { cp->angle[i] = NormalizeAngle(params.track_angle+(ep[i]?180:0)); }  //Use point not end
-			} else if (params.type == curveTypeCurve) {
-				if (ep && ep[i]>=0) { cp->angle[i] = NormalizeAngle(params.track_angle+(ep[i]?180:0)); }
-				cp->radius[i] = params.arcR;
-				cp->center[i] = params.arcP;
-			} else if ((params.type == curveTypeCornu || params.type == curveTypeBezier)
-			           && params.arcR != 0.0 ) {
+			} else if (params.type == curveTypeCurve ||
+			           ((params.type == curveTypeCornu || params.type == curveTypeBezier)
+			            && params.arcR != 0.0 )) {
 				if (ep && ep[i]>=0) { cp->angle[i] = NormalizeAngle(params.track_angle+(ep[i]?180:0)); }
 				cp->radius[i] = params.arcR;
 				cp->center[i] = params.arcP;
@@ -3135,14 +3128,10 @@ static STATUS_T CmdConvertTo(
 		return C_CONTINUE;
 
 	case C_CANCEL:
-		return C_TERMINATE;
-
 	case C_OK:
 		return C_TERMINATE;
 
 	case C_CONFIRM:
-		return C_CONTINUE;
-
 	default:
 		return C_CONTINUE;
 	}
@@ -3256,14 +3245,10 @@ static STATUS_T CmdConvertFrom(
 		return C_CONTINUE;
 
 	case C_CANCEL:
-		return C_TERMINATE;
-
 	case C_OK:
 		return C_TERMINATE;
 
 	case C_CONFIRM:
-		return C_CONTINUE;
-
 	default:
 		return C_CONTINUE;
 	}

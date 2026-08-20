@@ -591,13 +591,12 @@ static void IntersectBox( coOrd *p1, coOrd p0, coOrd size, int x1, int y1 )
 	printf("    IntersectBox( P1=[%0.2f %0.2f] P0=[%0.2f %0.2f] S=[%0.2f %0.2f] X1=%d Y1=%d\n",
 	       p1->x, p1->y, p0.x, p0.y, size.x, size.y, x1, y1 );
 #endif
-	if ( y1!=0 &&
-	     IntersectLine( &p1->x, &p1->y, p0.x, p0.y, size.x,
-	                    (y1==-1?(POS_T)0.0:size.y) )) {
-		return;
-	} else if ( x1!=0 &&
-	            IntersectLine( &p1->y, &p1->x, p0.y, p0.x, size.y,
-	                           (x1==-1?(POS_T)0.0:size.x) )) {
+	if ( (y1!=0 &&
+	      IntersectLine( &p1->x, &p1->y, p0.x, p0.y, size.x,
+	                     (y1==-1?(POS_T)0.0:size.y) ))
+	     || (x1!=0 &&
+	         IntersectLine( &p1->y, &p1->x, p0.y, p0.x, size.y,
+	                        (x1==-1?(POS_T)0.0:size.x) ))) {
 		return;
 	}
 	printf("      intersectBox bogus\n" );
