@@ -833,7 +833,7 @@ static void SpeedRedraw(
 	}
 
 	y = (xx->speed/MAX_SPEED*((SLIDER_HEIGHT-SLIDER_THICKNESS))
-	     +SLIDER_THICKNESS/2);
+	     +SLIDER_THICKNESS/2.0);
 	drawColor  = wDrawFindColor(wRGB(160, 160, 160));
 	coOrd pos0, pos1, siz;
 	y /= speedD.dpi;
@@ -881,7 +881,7 @@ static void SpeedAction(
 		TrainTimeEndPause();
 
 		if (IsOnTrack(xx)) {
-			speed = ((FLOAT_T)((pos.y*speedD.dpi)-SLIDER_THICKNESS/2))/
+			speed = ((FLOAT_T)((pos.y*speedD.dpi)-SLIDER_THICKNESS/2.0))/
 			        (SLIDER_HEIGHT-SLIDER_THICKNESS)*MAX_SPEED;
 		} else {
 			speed = 0;
