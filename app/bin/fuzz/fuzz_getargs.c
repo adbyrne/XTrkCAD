@@ -27,8 +27,6 @@
 #include "fileio.h"
 #include "wlib.h"
 
-static int log_fuzz_getargs = -1;
-
 /* ---- Minimal non-blocking stubs for GetArgs()/InputError()'s dependencies ---- */
 
 char message[STR_HUGE_SIZE];
@@ -132,9 +130,9 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		break;
 	}
 	default:
-		if ( log_fuzz_getargs < 0 ) { log_fuzz_getargs = LogFindIndex( "fuzz_getargs" ); }
-		LOG( log_fuzz_getargs, 1, ( "unexpected variant %d in LLVMFuzzerTestOneInput\n",
-		                            variant ) )
+		// This fuzz harness links standalone against only getargs.c (see the file
+		// header comment), not lprintf.c, so LOG()/LogFindIndex() aren't available
+		// here. variant = data[0] % 3 makes this branch provably unreachable anyway.
 		break;
 	}
 
