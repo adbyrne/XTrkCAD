@@ -174,7 +174,9 @@ int main(int argc, char * argv[])
     int inFileIdx = 1;
     enum {m_init, m_title, m_alt, m_help } mode = m_init;
     char msgName[256];
-    char msgAlt[256];
+    /* Sized to match buff (the largest possible source of a SAFE_COPY into
+     * this) so long ALT/title lines can never be silently truncated. */
+    char msgAlt[4096];
     char msgTitle[1024];
     char msgHelp[4096];
     char *tName, *tAlt, *tTitle;
