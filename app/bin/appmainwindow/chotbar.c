@@ -606,7 +606,7 @@ void AddHotBarElement(
 		if (!isTrack) {
 			barScale = size.y/(((double)hotBarHeight-2.0)/hotBarD.dpi);
 		} else {
-			barScale = (trackGauge>0.1)?trackGauge*(36-hotBarHeight/2):10.0;
+			barScale = (trackGauge>0.1)?trackGauge*(36-(double)hotBarHeight/2):10.0;
 			if (size.y/barScale > ((double)hotBarHeight-2.0)/hotBarD.dpi) {
 				barScale = (size.y+2.0*trackGauge)/(((double)hotBarHeight-2.0)/hotBarD.dpi);
 			}

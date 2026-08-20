@@ -270,8 +270,10 @@ EXPORT void DrawGrid(
 		hMinSpacing = 0;
 		f = (long)ceil(minGridSpacing/hMajSpacing);
 		hMajSpacing *= f;
-		hMajCnt0 = (int)(hMajCnt0>=0?ceil(hMajCnt0/f):floor(hMajCnt0/f));
-		hMajCnt1 = (int)(hMajCnt1>=0?ceil(hMajCnt1/f):floor(hMajCnt1/f));
+		hMajCnt0 = (int)(hMajCnt0>=0?ceil((double)hMajCnt0/f):floor((
+		                         double)hMajCnt0/f));
+		hMajCnt1 = (int)(hMajCnt1>=0?ceil((double)hMajCnt1/f):floor((
+		                         double)hMajCnt1/f));
 	} else if (Hdivision <= 0) {
 		hMinCnt1 = (int)(hMajSpacing/vMinSpacing);
 		if (hMinCnt1 <= 0) {
@@ -293,8 +295,10 @@ EXPORT void DrawGrid(
 		vMinSpacing = 0;
 		f = (long)ceil(minGridSpacing/vMajSpacing);
 		vMajSpacing *= f;
-		vMajCnt0 = (int)(vMajCnt0>=0?ceil(vMajCnt0/f):floor(vMajCnt0/f));
-		vMajCnt1 = (int)(vMajCnt1>=0?ceil(vMajCnt1/f):floor(vMajCnt1/f));
+		vMajCnt0 = (int)(vMajCnt0>=0?ceil((double)vMajCnt0/f):floor((
+		                         double)vMajCnt0/f));
+		vMajCnt1 = (int)(vMajCnt1>=0?ceil((double)vMajCnt1/f):floor((
+		                         double)vMajCnt1/f));
 	} else if (Vdivision <= 0) {
 		vMinCnt1 = (int)(vMajSpacing/hMinSpacing);
 		if (vMinCnt1 <= 0) {

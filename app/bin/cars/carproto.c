@@ -349,8 +349,8 @@ static coOrd truckOutline[] = {
 };
 #define WO ((56.6-2)/2)
 #define WI ((56.6-12)/2)
-#define Wd (36/2)
-#define AW (8/2)
+#define Wd (36.0/2)
+#define AW (8.0/2)
 static coOrd wheelOutline[] = {
 	{ -Wd, -WO },
 
@@ -396,7 +396,7 @@ void CarProtoDrawTruck(
 	RotatePts(COUNT(truckOutline), p, zero, angle);
 	MovePts(COUNT(truckOutline), p, pos);
 	DrawPoly(d, COUNT(truckOutline), p, NULL, color, 0, DRAW_FILL);
-	pp.x = -70 / 2;
+	pp.x = -70.0 / 2;
 	pp.y = 0;
 	memcpy(p, wheelOutline, sizeof wheelOutline);
 	RescalePts(COUNT(wheelOutline), p, 1.0, width / 56.5);
@@ -405,7 +405,7 @@ void CarProtoDrawTruck(
 	RotatePts(COUNT(wheelOutline), p, zero, angle);
 	MovePts(COUNT(wheelOutline), p, pos);
 	DrawPoly(d, COUNT(wheelOutline), p, NULL, color, 0, DRAW_FILL);
-	pp.x = 70 / 2;
+	pp.x = 70.0 / 2;
 	memcpy(p, wheelOutline, sizeof wheelOutline);
 	RescalePts(COUNT(wheelOutline), p, 1.0, width / 56.5);
 	MovePts(COUNT(wheelOutline), p, pp);
