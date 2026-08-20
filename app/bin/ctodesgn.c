@@ -2592,6 +2592,11 @@ static toDesignSchema_t * LoadSegs(
 		case NTO_CORNU:
 			pp = LoadCurvedCornuSegs( dp->type );
 			if ( ! pp ) { return NULL; }
+			break;
+		default:
+			LOG( log_turnoutdesigner, 1, ( "unexpected dp->type %d in LoadSegs\n",
+			                               dp->type ) )
+			break;
 		}
 //#endif
 	}
@@ -3176,6 +3181,11 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 			wControlShow( turnDesignPLs[I_TOANGMODE+1].control, TRUE );
 			turnDesignPLs[I_TOANGMODE].bShown = TRUE;
 			turnDesignPLs[I_TOANGMODE].option &= ~PDO_DLGIGNORE;
+			break;
+		default:
+			LOG( log_turnoutdesigner, 1,
+			     ( "unexpected curDesign->type %d in SetupTurnoutDesignerW\n",
+			       curDesign->type ) )
 			break;
 		}
 		switch ( curDesign->type ) {

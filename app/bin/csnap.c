@@ -401,6 +401,9 @@ EXPORT STATUS_T GridAction(
 	case C_REDRAW:
 		DrawBigCross( *orig, *angle );
 		break;
+	default:
+		LOG( log_timedrawgrid, 1, ( "unexpected action %d in GridAction\n", action ) )
+		break;
 	}
 	return C_CONTINUE;
 }
@@ -777,6 +780,9 @@ EXPORT STATUS_T CmdGrid(
 	case C_CMDMENU:
 		menuPos = pos;
 		wMenuPopupShow( snapGridPopupM );
+		break;
+	default:
+		LOG( log_timedrawgrid, 1, ( "unexpected action %d in CmdGrid\n", action ) )
 		break;
 	}
 

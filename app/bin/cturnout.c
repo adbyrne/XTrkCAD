@@ -1633,6 +1633,10 @@ static BOOL_T GetParamsTurnout(int inx, track_p trk, coOrd pos,
 			params->arcA1 = segPtr->u.c.a1;
 			return TRUE;
 			break;
+		default:
+			LOG( log_turnout, 1, ( "unexpected segPtr->type %d in GetParamsTurnout\n",
+			                       segPtr->type ) )
+			break;
 		}
 		params->arcR = 0.0;
 		params->arcP = zero;

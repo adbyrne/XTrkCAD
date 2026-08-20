@@ -1234,6 +1234,10 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 			curDescMap = tblEdgeMap;
 			curDescCnt = COUNT( tblEdgeData );
 			break;
+		default:
+			LOG( log_describedraw, 1, ( "unexpected segPtr->type %d in DescribeDraw\n",
+			                            segPtr->type ) )
+			break;
 		}
 		break;
 	case SEG_CRVLIN:
@@ -3413,6 +3417,10 @@ static STATUS_T HandleSpecialCommands(wAction_t action, coOrd pos)
 			return C_CONTINUE;
 		}
 		break;
+	default:
+		LOG( log_describedraw, 1,
+		     ( "unexpected action & 0xFF %d in HandleSpecialCommands\n", action & 0xFF ) )
+		break;
 	}
 
 	if (drawCmdContext.Op == OP_BEZLIN) {
@@ -3743,6 +3751,9 @@ void MenuLine( void * keyVP )
 		case '6':
 			xx->lineType = DRAWLINEPHANTOM;
 			break;
+		default:
+			LOG( log_describedraw, 1, ( "unexpected key %d in MenuLine\n", key ) )
+			break;
 		}
 		MainRedraw(); // MenuLine
 	}
@@ -3775,6 +3786,9 @@ EXPORT void SetLineType( track_p trk, int width )
 				break;
 			case 6:
 				xx->lineType = DRAWLINEPHANTOM;
+				break;
+			default:
+				LOG( log_describedraw, 1, ( "unexpected width %d in SetLineType\n", width ) )
 				break;
 			}
 		}

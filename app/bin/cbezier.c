@@ -58,6 +58,8 @@
 #include "cundo.h"
 #include "compound.h"
 
+static int log_cbezier = -1;
+
 
 
 /*
@@ -960,6 +962,11 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG)
 	case C_REDRAW:
 		return AdjustBezCurve(C_REDRAW, pos, Da.track, xx->segsColor, xx->segsLineWidth,
 		                      InfoMessage);
+	default:
+		if ( log_cbezier < 0 ) { log_cbezier = LogFindIndex( "cbezier" ); }
+		LOG( log_cbezier, 1, ( "unexpected action&0xFF %d in AdjustBezCurve\n",
+		                       action&0xFF ) )
+		break;
 	}
 
 	return C_CONTINUE;

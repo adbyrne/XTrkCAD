@@ -772,6 +772,9 @@ static int SwitchmotorMgmProc ( int cmd, void * data )
 			sprintf( message, "%s\t%d", xx->name, GetTrkIndex(xx->turnout));
 		}
 		break;
+	default:
+		LOG( log_switchmotor, 1, ( "unexpected cmd %d in SwitchmotorMgmProc\n", cmd ) )
+		break;
 	}
 	return FALSE;
 }

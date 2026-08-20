@@ -1528,6 +1528,9 @@ static STATUS_T CmdProfile(wAction_t action, coOrd pos)
 			HilightProfileElevations(wWinIsVisible(profileW));
 		}
 		return C_CONTINUE;
+	default:
+		LOG( log_profile, 1, ( "unexpected action %d in CmdProfile\n", action ) )
+		break;
 	}
 	return C_CONTINUE;
 }

@@ -30,6 +30,8 @@
 #include "trkendptx.h"
 #include "draw.h"
 
+static int log_trkendpt = -1;
+
 
 /************************************************************************
  * Basic Access
@@ -487,6 +489,11 @@ EXPORT STATUS_T EndPtDescriptionMove(
 
 	case C_REDRAW:
 		DrawEndElev( &tempD, trk, ep, drawColorPreviewSelected );
+		break;
+	default:
+		if ( log_trkendpt < 0 ) { log_trkendpt = LogFindIndex( "trkendpt" ); }
+		LOG( log_trkendpt, 1, ( "unexpected action %d in EndPtDescriptionMove\n",
+		                        action ) )
 		break;
 	}
 	return C_CONTINUE;

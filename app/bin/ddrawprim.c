@@ -27,6 +27,8 @@
 #include "misc.h"
 #include "track.h"
 
+static int log_ddrawprim = -1;
+
 /* Accessor functions for border widths, defined in draw.c */
 extern int GetLBorder(void);
 extern int GetBBorder(void);
@@ -615,6 +617,10 @@ EXPORT void DrawBoxedString(int style, drawCmd_p d, coOrd pos, char *text,
 	case BOX_BACKGROUND:
 		DrawPoly(d, 4, p, NULL, wDrawColorWhite, 0, DRAW_FILL);
 		DrawString(d, p0, 0.0, text, fp, fs, color);
+		break;
+	default:
+		if ( log_ddrawprim < 0 ) { log_ddrawprim = LogFindIndex( "ddrawprim" ); }
+		LOG( log_ddrawprim, 1, ( "unexpected style %d in DrawBoxedString\n", style ) )
 		break;
 	}
 }

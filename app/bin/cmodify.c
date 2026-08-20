@@ -141,6 +141,10 @@ static STATUS_T ModifyBezier(wAction_t action, coOrd pos)
 	case C_REDRAW:
 		rc = CmdBezModify(Dex.Trk, action, pos, trackGauge);
 		break;
+	default:
+		LOG( log_modify, 1, ( "unexpected action&0xFF %d in CreateRadiusAnchor\n",
+		                      action&0xFF ) )
+		break;
 	}
 	return rc;
 }
@@ -172,6 +176,10 @@ static STATUS_T ModifyCornu(wAction_t action, coOrd pos)
 		break;
 	case C_REDRAW:
 		rc = CmdCornuModify(Dex.Trk, action, pos, trackGauge);
+		break;
+	default:
+		LOG( log_modify, 1, ( "unexpected action&0xFF %d in CreateRadiusAnchor\n",
+		                      action&0xFF ) )
 		break;
 	}
 	return rc;

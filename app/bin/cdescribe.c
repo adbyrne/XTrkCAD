@@ -691,6 +691,9 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 
 	case C_FINISH:
 		return C_CONTINUE;
+	default:
+		LOG( log_describe, 1, ( "unexpected action %d in CmdDescribe\n", action ) )
+		break;
 	}
 
 

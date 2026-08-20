@@ -31,6 +31,8 @@
 #include "common-ui.h"
 #include "icons.h"
 
+static int log_chndldto = -1;
+
 #define PTRACE(X)
 
 /*
@@ -314,6 +316,12 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 					trk2b = NewCurvedTrack( segP->u.c.center, fabs(segP->u.c.radius), segP->u.c.a0,
 					                        segP->u.c.a1, 0 );
 					ep2b = (right?0:1);
+					break;
+				default:
+					if ( log_chndldto < 0 ) { log_chndldto = LogFindIndex( "chndldto" ); }
+					LOG( log_chndldto, 1, ( "unexpected segP->type %d in CmdHandLaidTurnout\n",
+					                        segP->type ) )
+					break;
 				}
 				if (trk2 == NULL) {
 					trk2 = trk2b;
@@ -369,6 +377,11 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 	case C_CANCEL:
 		return C_CONTINUE;
 
+	default:
+		if ( log_chndldto < 0 ) { log_chndldto = LogFindIndex( "chndldto" ); }
+		LOG( log_chndldto, 1, ( "unexpected action %d in CmdHandLaidTurnout\n",
+		                        action ) )
+		break;
 	}
 
 	return C_CONTINUE;

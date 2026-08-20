@@ -1990,6 +1990,9 @@ static void CarDlgUpdate(
 		redraw = TRUE;
 		break;
 
+	default:
+		LOG( log_carDlgState, 1, ( "unexpected inx %d in CarDlgUpdate\n", inx ) )
+		break;
 	}
 
 	if ( checkTruckCenter && carDlgDim.carLength > 0 ) {

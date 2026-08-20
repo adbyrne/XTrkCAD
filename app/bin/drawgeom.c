@@ -27,6 +27,8 @@
 #include "track.h"
 #include "common-ui.h"
 
+static int log_drawgeom = -1;
+
 static long drawGeomCurveMode;
 
 #define contextSegs(N) DYNARR_N( trkSeg_t, context->Segs_da, N )
@@ -427,6 +429,11 @@ STATUS_T DrawGeomMouse(
 				tempSegs(0).type = SEG_BENCH;
 				tempSegs(0).color = benchColor;
 				break;
+			default:
+				if ( log_drawgeom < 0 ) { log_drawgeom = LogFindIndex( "drawgeom" ); }
+				LOG( log_drawgeom, 1, ( "unexpected context->Op %d in DrawGeomMouse\n",
+				                        context->Op ) )
+				break;
 			}
 			tempSegs(0).lineWidth = lineWidth;
 			tempSegs(0).u.l.pos[0] = tempSegs(0).u.l.pos[1] = pos;
@@ -456,6 +463,11 @@ STATUS_T DrawGeomMouse(
 				case OP_CURVE2: drawGeomCurveMode = crvCmdFromTangent; break;
 				case OP_CURVE3: drawGeomCurveMode = crvCmdFromCenter; break;
 				case OP_CURVE4: drawGeomCurveMode = crvCmdFromChord; break;
+				default:
+					if ( log_drawgeom < 0 ) { log_drawgeom = LogFindIndex( "drawgeom" ); }
+					LOG( log_drawgeom, 1, ( "unexpected context->Op %d in DrawGeomMouse\n",
+					                        context->Op ) )
+					break;
 				}
 				CreateCurve( C_START, pos, FALSE, lineColor, lineWidth, drawGeomCurveMode,
 				             &anchors_da, context->message );
@@ -537,6 +549,11 @@ STATUS_T DrawGeomMouse(
 			context->State = 1;
 			segCnt = tempSegs_da.cnt;
 			context->message(_("+Alt - reverse Magnetic Snap or +Ctrl - lock to 90 deg"));
+			break;
+		default:
+			if ( log_drawgeom < 0 ) { log_drawgeom = LogFindIndex( "drawgeom" ); }
+			LOG( log_drawgeom, 1, ( "unexpected context->Op %d in DrawGeomMouse\n",
+			                        context->Op ) )
 			break;
 		}
 		return C_CONTINUE;
@@ -776,6 +793,11 @@ STATUS_T DrawGeomMouse(
 			context->message( _("Width = %s, Height = %s"),
 			                  FormatDistance(fabs(pos1.x - pos0.x)), FormatDistance(fabs(pos1.y - pos0.y)) );
 			break;
+		default:
+			if ( log_drawgeom < 0 ) { log_drawgeom = LogFindIndex( "drawgeom" ); }
+			LOG( log_drawgeom, 1, ( "unexpected context->Op %d in DrawGeomMouse\n",
+			                        context->Op ) )
+			break;
 		}
 		wSetCursor(mainD.d,wCursorNone);
 		return C_CONTINUE;
@@ -958,6 +980,11 @@ STATUS_T DrawGeomMouse(
 			context->index = text_inx;
 			segCnt = tempSegs_da.cnt;
 			return C_CONTINUE;
+		default:
+			if ( log_drawgeom < 0 ) { log_drawgeom = LogFindIndex( "drawgeom" ); }
+			LOG( log_drawgeom, 1, ( "unexpected context->Op %d in UnknownFunc\n",
+			                        context->Op ) )
+			break;
 		}
 		context->Started = FALSE;
 		/*CheckOk();*/
@@ -2754,6 +2781,11 @@ STATUS_T DrawGeomModify(
 			case 'u':
 				tempSegs(0).type = SEG_POLY;
 				context->type = SEG_POLY;
+				break;
+			default:
+				if ( log_drawgeom < 0 ) { log_drawgeom = LogFindIndex( "drawgeom" ); }
+				LOG( log_drawgeom, 1, ( "unexpected action>>8 %d in UnknownFunc\n",
+				                        action>>8 ) )
 				break;
 			}
 		}

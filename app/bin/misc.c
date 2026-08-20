@@ -40,6 +40,8 @@
 
 #include <inttypes.h>
 
+static int log_misc = -1;
+
 #define DEFAULT_SCALE ("N")
 
 
@@ -116,6 +118,11 @@ EXPORT char * ConvertToEscapedText(const char * text)
 			break;
 		case '\"':
 			add++;
+			break;
+		default:
+			if ( log_misc < 0 ) { log_misc = LogFindIndex( "misc" ); }
+			LOG( log_misc, 1, ( "unexpected text[text_i] %d in ConvertToEscapedText\n",
+			                    text[text_i] ) )
 			break;
 		}
 		text_i++;
@@ -213,6 +220,10 @@ EXPORT char * ConvertFromEscapedText(const char * text)
 				cout[cout_i] = '\t';
 				cout_i++;
 				break;	// TAB
+			default:
+				if ( log_misc < 0 ) { log_misc = LogFindIndex( "misc" ); }
+				LOG( log_misc, 1, ( "unexpected c %d in ConvertFromEscapedText\n", c ) )
+				break;
 			}
 			state = CHARACTER;
 			break;
@@ -468,6 +479,10 @@ EXPORT bool Confirm(char * label2, doSaveCallBack_p after)
 		//LayoutBackGroundInit(FALSE);
 		//LayoutBackGroundSave();
 		DoSave(after);
+		break;
+	default:
+		if ( log_misc < 0 ) { log_misc = LogFindIndex( "misc" ); }
+		LOG( log_misc, 1, ( "unexpected rc %d in Confirm\n", rc ) )
 		break;
 	}
 	return(rc != 0);

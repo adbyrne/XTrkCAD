@@ -34,6 +34,8 @@
 #include "draw.h"
 #include "include/paramfile.h"
 #include "common-ui.h"
+
+static int log_compound = -1;
 
 /*****************************************************************************
  *
@@ -597,6 +599,12 @@ STATUS_T CompoundDescriptionMove(
 			DrawCompoundDescription( trk, &tempD, wDrawColorBlue );
 			DrawLine( &tempD, p0, p1, 0, wDrawColorBlue );
 		}
+		break;
+	default:
+		if ( log_compound < 0 ) { log_compound = LogFindIndex( "compound" ); }
+		LOG( log_compound, 1, ( "unexpected action %d in CompoundDescriptionMove\n",
+		                        action ) )
+		break;
 	}
 
 
@@ -876,6 +884,10 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd,
 			DrawCompoundDescription( trk, &mainD, GetTrkColor(trk,&tempD) );
 		}
 		return;
+	default:
+		if ( log_compound < 0 ) { log_compound = LogFindIndex( "compound" ); }
+		LOG( log_compound, 1, ( "unexpected inx %d in UpdateCompound\n", inx ) )
+		break;
 	}
 
 	UndrawNewTrack( trk );
@@ -1296,6 +1308,11 @@ EXPORT void SetCompoundLineType( track_p trk, int width )
 		break;
 	case 6:
 		xx->lineType = DRAWLINEPHANTOM;
+		break;
+	default:
+		if ( log_compound < 0 ) { log_compound = LogFindIndex( "compound" ); }
+		LOG( log_compound, 1, ( "unexpected width %d in SetCompoundLineType\n",
+		                        width ) )
 		break;
 	}
 }

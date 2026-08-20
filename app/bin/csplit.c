@@ -29,6 +29,8 @@
 #include "fileio.h"
 #include "common-ui.h"
 
+static int log_csplit = -1;
+
 static wMenu_p splitPopupM[2];
 static wMenuToggle_p splitPopupMI[2][4];
 static track_p splitTrkTrk[2];
@@ -292,6 +294,10 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
 		            0 );
 		break;
+	default:
+		if ( log_csplit < 0 ) { log_csplit = LogFindIndex( "csplit" ); }
+		LOG( log_csplit, 1, ( "unexpected action %d in CmdSplitTrack\n", action ) )
+		break;
 	}
 
 	return C_CONTINUE;
@@ -351,6 +357,10 @@ static STATUS_T CmdSplitDraw( wAction_t action, coOrd pos )
 	case C_REDRAW:
 		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
 		            0 );
+		break;
+	default:
+		if ( log_csplit < 0 ) { log_csplit = LogFindIndex( "csplit" ); }
+		LOG( log_csplit, 1, ( "unexpected action %d in CmdSplitDraw\n", action ) )
 		break;
 	}
 

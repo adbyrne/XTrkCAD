@@ -557,6 +557,9 @@ EXPORT void SetBezierLineType( track_p trk, int width )
 		case 6:
 			xx->lineType = DRAWLINEPHANTOM;
 			break;
+		default:
+			LOG( log_bezier, 1, ( "unexpected width %d in SetBezierLineType\n", width ) )
+			break;
 		}
 	}
 }

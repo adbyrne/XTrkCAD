@@ -31,6 +31,8 @@
 #include "paths.h"
 #include "track.h"
 
+static int log_denum = -1;
+
 static wControl_p enumW;
 
 #define ENUMOP_SAVE		(1)
@@ -98,6 +100,11 @@ static void DoEnumOp(
 	case ENUMOP_CLOSE:
 		wHide( enumW );
 		FormUpdate( &enumPG );
+		break;
+	default:
+		if ( log_denum < 0 ) { log_denum = LogFindIndex( "denum" ); }
+		LOG( log_denum, 1, ( "unexpected VP2L(data) %d in DoEnumOp\n", VP2L(data) ) )
+		break;
 	}
 }
 

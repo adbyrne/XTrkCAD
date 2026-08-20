@@ -216,6 +216,9 @@ static void UpdateSensorProperties (  track_p trk, int inx, descData_p
 		}
 
 		break;
+	default:
+		LOG( log_sensor, 1, ( "unexpected inx %d in UpdateSensorProperties\n", inx ) )
+		break;
 	}
 }
 
@@ -550,6 +553,9 @@ static int SensorMgmProc ( int cmd, void * data )
 		break;
 	case CONTMGM_GET_TITLE:
 		sprintf(message,"%s",xx->name);
+		break;
+	default:
+		LOG( log_sensor, 1, ( "unexpected cmd %d in SensorMgmProc\n", cmd ) )
 		break;
 	}
 	return FALSE;

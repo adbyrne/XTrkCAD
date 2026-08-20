@@ -1990,6 +1990,9 @@ EXPORT void PlotCurve(
 		                pos2),curveData->curveRadius);
 		curveData->type = curveTypeCurve;
 		break;
+	default:
+		LOG( log_curve, 1, ( "unexpected mode %d in PlotCurve\n", mode ) )
+		break;
 	}
 }
 

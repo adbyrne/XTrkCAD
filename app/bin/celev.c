@@ -30,6 +30,8 @@
 #include "ccurve.h"
 #include "include/form.h"
 
+static int log_celev = -1;
+
 static wWin_p elevW;
 
 static long elevModeV;
@@ -202,6 +204,10 @@ static void DoElevUpdate( paramGroup_p pg, int inx, void * valueP )
 			break;
 		case 5:
 			FormControlActive( &elevationPG, I_STATION, TRUE );
+			break;
+		default:
+			if ( log_celev < 0 ) { log_celev = LogFindIndex( "celev" ); }
+			LOG( log_celev, 1, ( "unexpected mode %d in DoElevUpdate\n", mode ) )
 			break;
 		}
 		elevModeV = mode;
@@ -534,6 +540,10 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		}
 		CmdMoveDescription( action, pos );
 		return C_CONTINUE;
+	default:
+		if ( log_celev < 0 ) { log_celev = LogFindIndex( "celev" ); }
+		LOG( log_celev, 1, ( "unexpected action %d in CmdElevation\n", action ) )
+		break;
 	}
 	return C_CONTINUE;
 }

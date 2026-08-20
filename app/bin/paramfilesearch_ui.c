@@ -31,6 +31,8 @@
 #include "directory.h"
 #include "layout.h"
 
+static int log_paramfilesearch_ui = -1;
+
 static ParameterLib *trackLibrary;			/**< Track Library          */
 static Catalog currentCat;					/**< catalog being shown    */
 
@@ -409,6 +411,11 @@ static wBool_t SearchUiDlgUpdate(
 		break;
 	case -1:
 		SearchUiOk(valueP);
+		break;
+	default:
+		if ( log_paramfilesearch_ui < 0 ) { log_paramfilesearch_ui = LogFindIndex( "paramfilesearch_ui" ); }
+		LOG( log_paramfilesearch_ui, 1, ( "unexpected inx %d in SearchUiDlgUpdate\n",
+		                                  inx ) )
 		break;
 	}
 

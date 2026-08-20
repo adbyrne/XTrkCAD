@@ -1548,7 +1548,11 @@ errorReturn:
 			InfoDefaultControls();
 		}
 		infoSubst = FALSE;
+		break;
 
+	default:
+		LOG( log_join, 1, ( "unexpected action&0xFF %d in CmdJoin\n", action&0xFF ) )
+		break;
 	}
 
 

@@ -505,6 +505,9 @@ int CarPartCustMgmProc(int cmd, void * data )
 		         tabs[rd_inx].len?", ":"", tabs[rd_inx].len, tabs[rd_inx].ptr,
 		         tabs[T_NUMBER].len?" ":"", tabs[T_NUMBER].len, tabs[T_NUMBER].ptr );
 		return TRUE;
+	default:
+		LOG( log_carPart, 1, ( "unexpected cmd %d in CarPartCustMgmProc\n", cmd ) )
+		break;
 	}
 	return FALSE;
 }

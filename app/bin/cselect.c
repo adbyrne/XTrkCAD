@@ -39,6 +39,8 @@
 #include "common-ui.h"
 #include "ctrain.h"
 
+static int log_cselect = -1;
+
 #define SETMOVEMODE "MOVEMODE"
 
 EXPORT wIndex_t selectCmdInx;
@@ -2344,6 +2346,10 @@ static STATUS_T CmdRotate(
 		DrawMovedTracks();
 		break;
 
+	default:
+		if ( log_cselect < 0 ) { log_cselect = LogFindIndex( "cselect" ); }
+		LOG( log_cselect, 1, ( "unexpected action %d in CmdRotate\n", action ) )
+		break;
 	}
 	return C_CONTINUE;
 }
@@ -2775,6 +2781,10 @@ STATUS_T CmdMoveDescription(
 		case 6:
 			JointDescriptionMove( moveDescTrk, action, pos);
 			break;
+		default:
+			if ( log_cselect < 0 ) { log_cselect = LogFindIndex( "cselect" ); }
+			LOG( log_cselect, 1, ( "unexpected mode %d in CmdMoveDescription\n", mode ) )
+			break;
 		}
 		hidden = FALSE;
 		if ( action == C_UP ) {
@@ -3097,6 +3107,10 @@ static BOOL_T SelectArea(
 		}
 		break;
 
+	default:
+		if ( log_cselect < 0 ) { log_cselect = LogFindIndex( "cselect" ); }
+		LOG( log_cselect, 1, ( "unexpected action %d in SelectArea\n", action ) )
+		break;
 	}
 	return FALSE;
 }

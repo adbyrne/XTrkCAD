@@ -1354,6 +1354,10 @@ static void ControllerDialogUpdate(
 		/* Close window */
 		CmdTrainExit(NULL);
 		break;
+	default:
+		LOG( log_trainMove, 1, ( "unexpected inx %d in ControllerDialogUpdate\n",
+		                         inx ) )
+		break;
 	}
 
 	/*ControllerDialogSync( dlg );*/
@@ -2968,6 +2972,9 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 		trk0 = NULL;
 		trainHighlighted = NULL;
 		return C_TERMINATE;
+	default:
+		LOG( log_trainMove, 1, ( "unexpected action %d in CmdTrain\n", action ) )
+		break;
 	}
 
 	return C_CONTINUE;
@@ -3187,6 +3194,10 @@ static void TrainFunc(
 			ControllerDialogSync(curTrainDlg);
 		}
 
+		break;
+	default:
+		LOG( log_trainMove, 1, ( "unexpected VP2L(action) %d in TrainFunc\n",
+		                         VP2L(action) ) )
 		break;
 	}
 

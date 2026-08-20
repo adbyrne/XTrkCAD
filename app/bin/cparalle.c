@@ -30,6 +30,8 @@
 #include "common-ui.h"
 #include "icons.h"
 
+static int log_cparalle = -1;
+
 static struct {
 	track_p Trk;
 	coOrd orig;
@@ -305,6 +307,11 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 		InfoDefaultControls();
 		return C_TERMINATE;
 
+	default:
+		if ( log_cparalle < 0 ) { log_cparalle = LogFindIndex( "cparalle" ); }
+		LOG( log_cparalle, 1, ( "unexpected action&0xFF %d in CmdParallel\n",
+		                        action&0xFF ) )
+		break;
 	}
 	return C_CONTINUE;
 }

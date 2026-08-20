@@ -1339,6 +1339,10 @@ static void DoMouse(wAction_t action, coOrd pos)
 		panStart.x = pos.x - mainD.orig.x;
 		panStart.y = pos.y - mainD.orig.y;
 		break;
+	default:
+		LOG( log_redraw, 1, ( "unexpected action & 0xFF %d in DoMouse\n",
+		                      action & 0xFF ) )
+		break;
 	}
 
 	inError = FALSE;
@@ -1556,6 +1560,9 @@ static void DoMouse(wAction_t action, coOrd pos)
 	case C_TERMINATE:
 		Reset();
 		DoCurCommand(C_START, zero);
+		break;
+	default:
+		LOG( log_redraw, 1, ( "unexpected rc %d in DoMouse\n", rc ) )
 		break;
 	}
 }
@@ -2017,6 +2024,10 @@ static STATUS_T CmdPan(wAction_t action, coOrd pos)
 		menuPos = pos;
 		wMenuPopupShow(panPopupM);
 		return C_CONTINUE;
+		break;
+	default:
+		LOG( log_redraw, 1, ( "unexpected action & 0xFF %d in CmdPan\n",
+		                      action & 0xFF ) )
 		break;
 	}
 

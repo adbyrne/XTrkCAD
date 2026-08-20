@@ -30,6 +30,8 @@
 #include "paths.h"
 #include "track.h"
 
+static int log_dprmfile = -1;
+
 static struct wFilSel_t * paramFile_fs;
 
 #define FAVORITE_PARAM 1
@@ -386,6 +388,10 @@ static void ParamFileDlgUpdate(
 	switch (inx) {
 	case I_PRMFILLIST:
 		UpdateParamFileButton();
+		break;
+	default:
+		if ( log_dprmfile < 0 ) { log_dprmfile = LogFindIndex( "dprmfile" ); }
+		LOG( log_dprmfile, 1, ( "unexpected inx %d in ParamFileDlgUpdate\n", inx ) )
 		break;
 	}
 }
