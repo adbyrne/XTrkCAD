@@ -126,7 +126,11 @@ genhtml build/coverage-filtered.info --output-directory coverage-html --rc branc
 `cppcheck-deep`/`clang-tidy`/`codespell` each run their own analysis command straight from
 `ci-gtk3.yml`'s (or `release.yml`'s, identical) job definition — copy the `run:` step verbatim,
 it needs no CI-specific setup. `compiler-warnings` is just `cmake --build` with
-`-DCMAKE_C_FLAGS="-Wall -Wextra -Wno-unused-parameter"` piped through `tee`.
+`-DCMAKE_C_FLAGS="-Wall -Wextra -Wno-unused-parameter"` piped through `tee`. `clang-tidy`'s own
+configure step passes `-DCMAKE_C_COMPILER=clang` (SF #693) — reproducing it locally needs `clang`
+itself installed, not just the `clang-tidy` binary, or `CMAKE_C_COMPILER_ID` resolves to the
+system default compiler and two of `PlatformSettings.cmake`'s Clang-conditional exemptions
+silently stop applying.
 
 Once you have a plain-text findings file (cppcheck/clang-tidy/compiler-warnings output, or
 codespell's), turn it into the same grouped, GitHub-linked HTML the published site shows with
