@@ -491,7 +491,7 @@ EXPORT void MoveSegs(
 			FixUpBezierSeg(s->u.b.pos,s,s->type == SEG_BEZTRK);
 			break;
 		default:
-			if ( log_trkseg < 0 ) log_trkseg = LogFindIndex( "trkseg" );
+			if ( log_trkseg < 0 ) { log_trkseg = LogFindIndex( "trkseg" ); }
 			LOG( log_trkseg, 1, ( "unexpected seg type %d in MoveSegs\n", s->type ) )
 			break;
 		}
@@ -547,7 +547,7 @@ EXPORT void RotateSegs(
 			FixUpBezierSeg(s->u.b.pos,s,s->type == SEG_BEZTRK);
 			break;
 		default:
-			if ( log_trkseg < 0 ) log_trkseg = LogFindIndex( "trkseg" );
+			if ( log_trkseg < 0 ) { log_trkseg = LogFindIndex( "trkseg" ); }
 			LOG( log_trkseg, 1, ( "unexpected seg type %d in RotateSegs\n", s->type ) )
 			break;
 		}
@@ -613,7 +613,7 @@ EXPORT void FlipSegs(
 			FixUpBezierSeg(s->u.b.pos,s,s->type == SEG_BEZTRK);
 			break;
 		default:
-			if ( log_trkseg < 0 ) log_trkseg = LogFindIndex( "trkseg" );
+			if ( log_trkseg < 0 ) { log_trkseg = LogFindIndex( "trkseg" ); }
 			LOG( log_trkseg, 1, ( "unexpected seg type %d in FlipSegs\n", s->type ) )
 			break;
 		}
@@ -688,7 +688,7 @@ EXPORT void RescaleSegs(
 			break;
 
 		default:
-			if ( log_trkseg < 0 ) log_trkseg = LogFindIndex( "trkseg" );
+			if ( log_trkseg < 0 ) { log_trkseg = LogFindIndex( "trkseg" ); }
 			LOG( log_trkseg, 1, ( "unexpected seg type %d in RescaleSegs\n", s->type ) )
 			break;
 		}
@@ -1064,7 +1064,7 @@ static void Hsv2rgb(
 			b = q;
 			break;
 		default:
-			if ( log_trkseg < 0 ) log_trkseg = LogFindIndex( "trkseg" );
+			if ( log_trkseg < 0 ) { log_trkseg = LogFindIndex( "trkseg" ); }
 			LOG( log_trkseg, 1, ( "unexpected hue sector %d in Hsv2rgb\n", i ) )
 			break;
 		}
@@ -1659,8 +1659,9 @@ EXPORT BOOL_T WriteSegsEnd(
 #endif
 			break;
 		default:
-			if ( log_trkseg < 0 ) log_trkseg = LogFindIndex( "trkseg" );
-			LOG( log_trkseg, 1, ( "unexpected seg type %d in WriteSegsEnd\n", segs[i].type ) )
+			if ( log_trkseg < 0 ) { log_trkseg = LogFindIndex( "trkseg" ); }
+			LOG( log_trkseg, 1, ( "unexpected seg type %d in WriteSegsEnd\n",
+			                      segs[i].type ) )
 			break;
 		}
 	}
@@ -1890,14 +1891,14 @@ EXPORT void DrawSegsO(
 						DrawLine(d, p0, p1, 3, color);
 						break;
 					default:
-						if ( log_trkseg < 0 ) log_trkseg = LogFindIndex( "trkseg" );
+						if ( log_trkseg < 0 ) { log_trkseg = LogFindIndex( "trkseg" ); }
 						LOG( log_trkseg, 1, ( "unexpected seg type %d in DrawSegsO\n", segPtr->type ) )
 						break;
 					}
 				}
 				break;
 			default:
-				if ( log_trkseg < 0 ) log_trkseg = LogFindIndex( "trkseg" );
+				if ( log_trkseg < 0 ) { log_trkseg = LogFindIndex( "trkseg" ); }
 				LOG( log_trkseg, 1, ( "unexpected seg type %d in DrawSegsO\n", segPtr->type ) )
 				break;
 			}
@@ -2007,8 +2008,9 @@ EXPORT void DrawSegsO(
 					DrawLine( d, p0, p1, (d->options&DC_THICK)?thick:w, color1 );
 					break;
 				default:
-					if ( log_trkseg < 0 ) log_trkseg = LogFindIndex( "trkseg" );
-					LOG( log_trkseg, 1, ( "unexpected seg type %d in DrawSegsO bezier subseg\n", tempPtr->type ) )
+					if ( log_trkseg < 0 ) { log_trkseg = LogFindIndex( "trkseg" ); }
+					LOG( log_trkseg, 1, ( "unexpected seg type %d in DrawSegsO bezier subseg\n",
+					                      tempPtr->type ) )
 					break;
 				}
 			}
@@ -2094,7 +2096,7 @@ EXPORT void DrawSegsO(
 			}
 			break;
 		default:
-			if ( log_trkseg < 0 ) log_trkseg = LogFindIndex( "trkseg" );
+			if ( log_trkseg < 0 ) { log_trkseg = LogFindIndex( "trkseg" ); }
 			LOG( log_trkseg, 1, ( "unexpected seg type %d in DrawSegsO\n", segPtr->type ) )
 			break;
 		}
