@@ -484,13 +484,18 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y cmake ninja-build clang-tidy libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext
+          sudo apt-get install -y cmake ninja-build clang clang-tidy libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext
       - name: Configure and build (need generated headers for clang-tidy to parse cleanly)
         run: |
-          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          # -DCMAKE_C_COMPILER=clang (SF #693) -- see ci-gtk3.yml's matching job for the full
+          # rationale (kept in sync by hand): without it, CMAKE_C_COMPILER_ID resolves to gcc,
+          # which flips two Clang-conditional exemptions backwards and can abort the run early.
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_C_COMPILER=clang
           cmake --build build
       - name: Run clang-tidy (non-fatal)
         run: |
+          # See ci-gtk3.yml's matching job: utility.c/misc.c are each legitimately compiled twice
+          # (two targets), so clang-tidy's "[N/139]" counter can exceed 139 -- expected, not a bug.
           mapfile -t FILES < <(find app/bin app/dynstring app/cornu -name "*.c" | grep -v unittest | grep -vE 'bdf2xtp\.c|helphelper\.c|ppedit_gtk1\.c')
           clang-tidy --checks='-*,bugprone-*,performance-*,portability-*' -p build "${FILES[@]}" > clang-tidy.txt 2>&1 || true
           # compile_commands.json stores absolute paths, so clang-tidy emits
