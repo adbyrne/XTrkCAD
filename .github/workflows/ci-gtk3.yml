@@ -414,13 +414,27 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y cmake ninja-build clang-tidy libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext
+          sudo apt-get install -y cmake ninja-build clang clang-tidy libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext
       - name: Configure and build (need generated headers for clang-tidy to parse cleanly)
         run: |
-          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          # -DCMAKE_C_COMPILER=clang (SF #693) matters beyond just matching clang-tidy's own
+          # frontend: without it CMAKE_C_COMPILER_ID resolves to the runner's default gcc, which
+          # flips two PlatformSettings.cmake/CMakeLists.txt Clang-conditional guards backwards --
+          # wrongly enabling the GCC-only -Werror=cast-function-type (which Clang's frontend
+          # treats as also promoting the noisy -Wcast-function-type-strict sub-check to a hard
+          # error) and wrongly skipping paths.c's -Wno-error=implicit-fallthrough exemption.
+          # Together those blew through Clang's error-emission ceiling and aborted the run early
+          # ("too many errors emitted, stopping now"), misattributed to whichever file was queued
+          # last rather than any real problem in that file.
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_C_COMPILER=clang
           cmake --build build
       - name: Run clang-tidy (non-fatal)
         run: |
+          # utility.c/misc.c are each legitimately compiled into two targets (xtrkcad-lib plus a
+          # separate tool: cnvdsgn, and an app/i18n extraction tool respectively), so they get two
+          # compile_commands.json entries each -- clang-tidy's own "[N/139]" progress counter can
+          # exceed the 139 filename arguments below by a couple as a result. That's expected, not
+          # a sign of a duplicate/broken entry.
           mapfile -t FILES < <(find app/bin app/dynstring app/cornu -name "*.c" | grep -v unittest | grep -vE 'bdf2xtp\.c|helphelper\.c|ppedit_gtk1\.c')
           clang-tidy --checks='-*,bugprone-*,performance-*,portability-*' -p build "${FILES[@]}" > clang-tidy.txt 2>&1 || true
           # compile_commands.json stores absolute paths, so clang-tidy emits
