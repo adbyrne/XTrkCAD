@@ -1348,6 +1348,10 @@ EXPORT void DrawTrackElev( track_cp trk, drawCmd_p d, BOOL_T drawIt )
 		break;
 	case ELEV_ALONE:
 		return;
+	default:
+		LOG( log_fillElev, 1, ( "unexpected GetTrkElevMode(trk) %d in DrawTrackElev\n",
+		                        GetTrkElevMode(trk) ) )
+		break;
 	}
 	if ( !drawIt ) {
 		color = wDrawColorWhite;

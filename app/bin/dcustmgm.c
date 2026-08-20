@@ -31,6 +31,8 @@
 #include "include/utf8convert.h"
 #endif
 
+static int log_dcustmgm = -1;
+
 static void CustomEdit( void * action );
 static void CustomDelete( void * action );
 static void CustomExport( void * action );
@@ -152,6 +154,10 @@ SelectNew(void *context)
 		break;
 	case I_NEWPROTO:
 		handler = CarDlgAddProto;
+		break;
+	default:
+		if ( log_dcustmgm < 0 ) { log_dcustmgm = LogFindIndex( "dcustmgm" ); }
+		LOG( log_dcustmgm, 1, ( "unexpected index %d in SelectNew\n", index ) )
 		break;
 	}
 	label = wMenuGetLabel(menuItem->control);

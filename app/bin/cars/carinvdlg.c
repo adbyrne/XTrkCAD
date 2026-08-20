@@ -233,6 +233,9 @@ AddNew(void *context)
 	case I_CI_NEWPROTO:
 		handler = CarDlgAddProto;
 		break;
+	default:
+		LOG( log_carInvDlg, 1, ( "unexpected index %d in AddNew\n", index ) )
+		break;
 	}
 	label = wMenuGetLabel(menuItem->control);
 

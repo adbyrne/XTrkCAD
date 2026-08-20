@@ -1016,6 +1016,9 @@ static void RescaleDlgUpdate(
 		break;
 	case -1:
 		break;
+	default:
+		LOG( log_scale, 1, ( "unexpected inx %d in RescaleDlgUpdate\n", inx ) )
+		break;
 	}
 	wBool_t bOkActive = TRUE;
 	if ( rescaleMode == 0 ) {

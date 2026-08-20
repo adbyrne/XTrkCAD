@@ -245,6 +245,9 @@ static void UpdateControlProperties (  track_p trk, int inx, descData_p
 			DrawNewTrack( trk );
 		}
 		break;
+	default:
+		LOG( log_control, 1, ( "unexpected inx %d in UpdateControlProperties\n", inx ) )
+		break;
 	}
 }
 
@@ -594,6 +597,9 @@ static int ControlMgmProc ( int cmd, void * data )
 		break;
 	case CONTMGM_GET_TITLE:
 		sprintf(message,"%s",xx->name);
+		break;
+	default:
+		LOG( log_control, 1, ( "unexpected cmd %d in ControlMgmProc\n", cmd ) )
 		break;
 	}
 	return FALSE;

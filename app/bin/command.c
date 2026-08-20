@@ -315,6 +315,9 @@ static BOOL_T CheckClick(wAction_t *action, coOrd *pos, BOOL_T checkLeft,
 			*action = C_RCLICK;
 		}
 		break;
+	default:
+		LOG( log_command, 1, ( "unexpected *action %d in CheckClick\n", *action ) )
+		break;
 	}
 	return TRUE;
 }
@@ -441,6 +444,9 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos)
 		case C_TERMINATE:
 			InfoMessage("");
 			Reset();
+			break;
+		default:
+			LOG( log_command, 1, ( "unexpected rc %d in DoCurCommand\n", rc ) )
 			break;
 		}
 	}
@@ -590,6 +596,9 @@ EXPORT void DoCommandB(void * data)
 			InfoMessage("");
 		}
 		Reset();
+		break;
+	default:
+		LOG( log_command, 1, ( "unexpected rc %d in DoCommandB\n", rc ) )
 		break;
 	}
 	inDoCommandB = FALSE;

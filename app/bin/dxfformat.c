@@ -94,6 +94,11 @@ void DxfLineStyle(DynString *result, int style)
 	switch ( style ) {
 	case 1: s = "DASHEDTINY"; break;
 	case 2: s = "DOTTINY"; break;
+	default:
+		// dxfformat.c is deliberately decoupled from common.h/misc.h (used by the
+		// standalone dxfformattest unit target), so no LOG()/LogFindIndex() here --
+		// any other style value keeps the CONTINUOUS default set above.
+		break;
 	}
 	DynStringPrintf(result, DXF_INDENT "6\n%s\n", s);
 }

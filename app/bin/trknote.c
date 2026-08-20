@@ -32,6 +32,8 @@
 #include "track.h"
 #include "include/utf8convert.h"
 
+static int log_trknote = -1;
+
 EXPORT TRKTYP_T T_NOTE = -1;
 
 static wDrawBitMap_p note_bm, link_bm, document_bm;
@@ -543,6 +545,10 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 		case OP_NOTEFILE:
 			NewFileNoteUI(pos);
 			break;
+		default:
+			if ( log_trknote < 0 ) { log_trknote = LogFindIndex( "trknote" ); }
+			LOG( log_trknote, 1, ( "unexpected curNoteType %d in CmdNote\n", curNoteType ) )
+			break;
 		}
 
 		return C_CONTINUE;
@@ -559,6 +565,10 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 			case OP_NOTEFILE:
 				DrawBitMap(&tempD, oldPos, document_bm, normalColor);
 				break;
+			default:
+				if ( log_trknote < 0 ) { log_trknote = LogFindIndex( "trknote" ); }
+				LOG( log_trknote, 1, ( "unexpected curNoteType %d in CmdNote\n", curNoteType ) )
+				break;
 			}
 		}
 		return C_CONTINUE;
@@ -567,6 +577,10 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 		DescribeDone( NULL );
 		state_on = FALSE;
 		return C_CONTINUE;
+	default:
+		if ( log_trknote < 0 ) { log_trknote = LogFindIndex( "trknote" ); }
+		LOG( log_trknote, 1, ( "unexpected action %d in CmdNote\n", action ) )
+		break;
 	}
 
 	return C_CONTINUE;

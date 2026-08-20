@@ -103,6 +103,10 @@ static int Cmp_carHotbar(
 				                 max(tabs1[T_PROTO].len, tabs2[T_PROTO].len));
 			}
 			break;
+		default:
+			LOG( log_carList, 1, ( "unexpected mode & 0x000F %d in Cmp_carHotbar\n",
+			                       mode & 0x000F ) )
+			break;
 		}
 	}
 	return rc;
@@ -315,6 +319,10 @@ static char * FormatCarTitle(
 		case 5:
 			strcpy( cp, typeListMap[CarProtoFindTypeCode(item->type)].name );
 			cp += strlen(cp);
+			break;
+		default:
+			LOG( log_carList, 1, ( "unexpected mode&0x000F %d in FormatCarTitle\n",
+			                       mode&0x000F ) )
 			break;
 		}
 		*cp++ = '/';

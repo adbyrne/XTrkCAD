@@ -29,6 +29,8 @@
 #include "misc.h"
 #include "common-ui.h"
 
+static int log_ctext = -1;
+
 static wMenu_p textPopupM;
 
 /*****************************************************************************
@@ -233,6 +235,11 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		menuPos = pos;
 		wMenuPopupShow( textPopupM );
 		return C_CONTINUE;
+	default:
+		if ( log_ctext < 0 ) { log_ctext = LogFindIndex( "ctext" ); }
+		LOG( log_ctext, 1, ( "unexpected action & 0xFF %d in CmdText\n",
+		                     action & 0xFF ) )
+		break;
 	}
 	return C_CONTINUE;
 }

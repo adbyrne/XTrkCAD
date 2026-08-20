@@ -38,6 +38,8 @@
 #include "xtrkcad-config.h"
 #include <form.h>
 
+static int log_dlayer = -1;
+
 /*****************************************************************************
  *
  * LAYERS
@@ -1023,6 +1025,10 @@ static void DoLayerOp(void *data)
 
 	case ENUMLAYER_DEFAULT:
 		LayerDefault();
+		break;
+	default:
+		if ( log_dlayer < 0 ) { log_dlayer = LogFindIndex( "dlayer" ); }
+		LOG( log_dlayer, 1, ( "unexpected VP2L(data) %d in DoLayerOp\n", VP2L(data) ) )
 		break;
 	}
 
@@ -2208,6 +2214,10 @@ static void LayerDlgUpdate(paramGroup_p pg, int inx, void *valueP)
 			strcpy(settingsName, (char *)wListGetItemContext(
 			               settingsListL, (wIndex_t) * (long *)valueP));
 		}
+		break;
+	default:
+		if ( log_dlayer < 0 ) { log_dlayer = LogFindIndex( "dlayer" ); }
+		LOG( log_dlayer, 1, ( "unexpected inx %d in LayerDlgUpdate\n", inx ) )
 		break;
 	}
 }

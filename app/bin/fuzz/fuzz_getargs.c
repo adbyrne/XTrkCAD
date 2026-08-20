@@ -129,6 +129,11 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		GetArgs(line, "s9", s0);
 		break;
 	}
+	default:
+		// This fuzz harness links standalone against only getargs.c (see the file
+		// header comment), not lprintf.c, so LOG()/LogFindIndex() aren't available
+		// here. variant = data[0] % 3 makes this branch provably unreachable anyway.
+		break;
 	}
 
 	free(line);

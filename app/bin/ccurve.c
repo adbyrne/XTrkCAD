@@ -37,6 +37,8 @@
 #include "layout.h"
 #include "common-ui.h"
 
+static int log_ccurve = -1;
+
 /*
  * STATE INFO
  */
@@ -181,6 +183,10 @@ EXPORT STATUS_T CreateCurve(
 		case crvCmdFromChord:
 			message(_("Drag from one to other end of chord") );
 			break;
+		default:
+			if ( log_ccurve < 0 ) { log_ccurve = LogFindIndex( "ccurve" ); }
+			LOG( log_ccurve, 1, ( "unexpected curveMode %d in CreateCurve\n", curveMode ) )
+			break;
 		}
 		return C_CONTINUE;
 	case C_DOWN:
@@ -273,6 +279,10 @@ EXPORT STATUS_T CreateCurve(
 			else {
 				message( _("Drag to other end of chord") );
 			}
+			break;
+		default:
+			if ( log_ccurve < 0 ) { log_ccurve = LogFindIndex( "ccurve" ); }
+			LOG( log_ccurve, 1, ( "unexpected mode %d in CreateCurve\n", mode ) )
 			break;
 		}
 		tempSegs(0).u.l.pos[0] = tempSegs(0).u.l.pos[1] = pos;
@@ -368,6 +378,10 @@ EXPORT STATUS_T CreateCurve(
 				                     TRUE, wDrawColorBlue );
 			}
 			break;
+		default:
+			if ( log_ccurve < 0 ) { log_ccurve = LogFindIndex( "ccurve" ); }
+			LOG( log_ccurve, 1, ( "unexpected mode %d in CreateCurve\n", mode ) )
+			break;
 		}
 		return C_CONTINUE;
 	case C_UP:
@@ -412,6 +426,10 @@ EXPORT STATUS_T CreateCurve(
 			for (int i=0; i<(*anchor_array).cnt; i++) {
 				DYNARR_N(trkSeg_t,*anchor_array,i).color = drawColorRed;
 			}
+			break;
+		default:
+			if ( log_ccurve < 0 ) { log_ccurve = LogFindIndex( "ccurve" ); }
+			LOG( log_ccurve, 1, ( "unexpected mode %d in CreateCurve\n", mode ) )
 			break;
 		}
 		//message( _("Drag on Red arrows to adjust curve") );
@@ -676,6 +694,10 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		segCnt = 0;
 		return C_CONTINUE;
 
+	default:
+		if ( log_ccurve < 0 ) { log_ccurve = LogFindIndex( "ccurve" ); }
+		LOG( log_ccurve, 1, ( "unexpected action %d in CmdCurve\n", action ) )
+		break;
 	}
 
 	return C_CONTINUE;
@@ -785,6 +807,10 @@ static wBool_t ComputeHelix(
 	case H_GRADE:
 	case H_RADIUS:
 		break;
+	default:
+		if ( log_ccurve < 0 ) { log_ccurve = LogFindIndex( "ccurve" ); }
+		LOG( log_ccurve, 1, ( "unexpected h_inx %d in ComputeHelix\n", h_inx ) )
+		break;
 	}
 	if ( totTurns > 0.0 ) {
 		if ( h_orders[H_RADIUS]>=h_orders[H_GRADE] ||
@@ -868,6 +894,11 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 				InfoDefaultControls();
 				InfoMessage(_("Click on Circle Center"));
 				break;
+			default:
+				if ( log_ccurve < 0 ) { log_ccurve = LogFindIndex( "ccurve" ); }
+				LOG( log_ccurve, 1, ( "unexpected circleMode %d in CmdCircleCommon\n",
+				                      circleMode ) )
+				break;
 			}
 		}
 		SetAllTrackSelect( FALSE );
@@ -903,6 +934,11 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 				InfoDefaultControls();
 				InfoMessage(_("Drag to Edge"));
 				break;
+			default:
+				if ( log_ccurve < 0 ) { log_ccurve = LogFindIndex( "ccurve" ); }
+				LOG( log_ccurve, 1, ( "unexpected circleMode %d in CmdCircleCommon\n",
+				                      circleMode ) )
+				break;
 			}
 		}
 		SnapPos(&pos);
@@ -927,6 +963,11 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 			case circleCmdFromTangent:
 				circleRadius = FindDistance(tempSegs(0).u.c.center, pos0);
 				InfoMessage(_("Radius=%s"), FormatDistance(circleRadius));
+				break;
+			default:
+				if ( log_ccurve < 0 ) { log_ccurve = LogFindIndex( "ccurve" ); }
+				LOG( log_ccurve, 1, ( "unexpected circleMode %d in CmdCircleCommon\n",
+				                      circleMode ) )
 				break;
 			}
 		}

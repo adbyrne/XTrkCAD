@@ -33,6 +33,8 @@
 #include "common-ui.h"
 #include "cselect.h"
 
+static int log_dcmpnd = -1;
+
 /*****************************************************************************
  *
  * Refresh Compound
@@ -460,6 +462,10 @@ static int CompoundCustMgmProc(
 		sprintf( message, "%.*s\t%s\t%.*s\t%.*s", mL, mP, GetScaleName(to->scaleInx),
 		         nL, nP, pL, pP );
 		return TRUE;
+	default:
+		if ( log_dcmpnd < 0 ) { log_dcmpnd = LogFindIndex( "dcmpnd" ); }
+		LOG( log_dcmpnd, 1, ( "unexpected cmd %d in CompoundCustMgmProc\n", cmd ) )
+		break;
 	}
 	return FALSE;
 }

@@ -27,6 +27,8 @@
 #include "draw.h"
 #include "track.h"
 
+static int log_turnout = -1;
+
 /* Draw turnout data */
 
 /**
@@ -257,6 +259,11 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx)
 			return -1;
 		}
 		break;
+	default:
+		if ( log_turnout < 0 ) { log_turnout = LogFindIndex( "turnout" ); }
+		LOG( log_turnout, 1, ( "unexpected segPtr->type %d in GetTurnoutPaths\n",
+		                       segPtr->type ) )
+		break;
 	}
 
 	pp = GetPaths(trk);
@@ -339,6 +346,12 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx)
 						}
 						n--; // remove that last point count
 						dto[pathCnt].n = n;
+						break;
+					default:
+						if ( log_turnout < 0 ) { log_turnout = LogFindIndex( "turnout" ); }
+						LOG( log_turnout, 1, ( "unexpected segPtr->type %d in GetTurnoutPaths\n",
+						                       segPtr->type ) )
+						break;
 					}
 					pp++;
 				}
@@ -437,6 +450,11 @@ void GetTurnoutType()
 			} else {
 				dtod.crv2Path = i;
 			}
+			break;
+		default:
+			if ( log_turnout < 0 ) { log_turnout = LogFindIndex( "turnout" ); }
+			LOG( log_turnout, 1, ( "unexpected dto[i].type %d in GetTurnoutType\n",
+			                       dto[i].type ) )
 			break;
 		}
 	}
@@ -1052,7 +1070,16 @@ static void DrawNormalTurnout(
 		case 2:
 			othPath = 0; secPath = 1;
 			break;
+		default:
+			if ( log_turnout < 0 ) { log_turnout = LogFindIndex( "turnout" ); }
+			LOG( log_turnout, 1, ( "unexpected strPath %d in DrawNormalTurnout\n",
+			                       strPath ) )
+			break;
 		}
+		break;
+	default:
+		if ( log_turnout < 0 ) { log_turnout = LogFindIndex( "turnout" ); }
+		LOG( log_turnout, 1, ( "unexpected toType %d in DrawNormalTurnout\n", toType ) )
 		break;
 	}
 
@@ -1545,6 +1572,10 @@ static void DrawXingTurnout(
 				secPath = i;
 			}
 		}
+		break;
+	default:
+		if ( log_turnout < 0 ) { log_turnout = LogFindIndex( "turnout" ); }
+		LOG( log_turnout, 1, ( "unexpected toType %d in DrawXingTurnout\n", toType ) )
 		break;
 	}
 

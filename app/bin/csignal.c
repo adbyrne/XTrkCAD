@@ -284,6 +284,9 @@ static void UpdateSignalProperties ( track_p trk, int inx, descData_p
 			DrawNewTrack( trk );
 		}
 		break;
+	default:
+		LOG( log_signal, 1, ( "unexpected inx %d in UpdateSignalProperties\n", inx ) )
+		break;
 	}
 }
 
@@ -901,6 +904,9 @@ static int SignalMgmProc ( int cmd, void * data )
 		break;
 	case CONTMGM_GET_TITLE:
 		sprintf(message,"%s",xx->name);
+		break;
+	default:
+		LOG( log_signal, 1, ( "unexpected cmd %d in SignalMgmProc\n", cmd ) )
 		break;
 	}
 	return FALSE;

@@ -484,6 +484,9 @@ int CarProtoCustMgmProc( int cmd, void * data )
 		sprintf( message, "\t%s\t\t%s\t%s", _("Prototype"),
 		         _(typeListMap[CarProtoFindTypeCode(protoP->type)].name), protoP->desc );
 		return TRUE;
+	default:
+		LOG( log_carPart, 1, ( "unexpected cmd %d in CarProtoCustMgmProc\n", cmd ) )
+		break;
 	}
 	return FALSE;
 }

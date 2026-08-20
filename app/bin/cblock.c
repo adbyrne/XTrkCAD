@@ -1001,6 +1001,9 @@ static int BlockMgmProc ( int cmd, void * data )
 			needComma = TRUE;
 		}
 		break;
+	default:
+		LOG( log_block, 1, ( "unexpected cmd %d in BlockMgmProc\n", cmd ) )
+		break;
 	}
 	return FALSE;
 }

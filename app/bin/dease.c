@@ -30,6 +30,8 @@
 #include "form.h"
 #include "track.h"
 
+static int log_dease = -1;
+
 EXPORT DIST_T easementVal = 0.0;
 EXPORT DIST_T easeR = 0.0;
 EXPORT DIST_T easeL = 0.0;
@@ -217,6 +219,10 @@ static void EasementDlgUpdate(
 		break;
 	case I_EASESEL:
 		EasementSel( *(long*)valueP );
+		break;
+	default:
+		if ( log_dease < 0 ) { log_dease = LogFindIndex( "dease" ); }
+		LOG( log_dease, 1, ( "unexpected inx %d in EasementDlgUpdate\n", inx ) )
 		break;
 	}
 }

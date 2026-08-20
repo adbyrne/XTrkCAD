@@ -30,6 +30,8 @@
 #include "param.h"
 #include "track.h"
 
+static int log_dpreferences = -1;
+
 static wControl_p prefW;
 static long displayUnits;
 static long distanceFormatInx;
@@ -248,6 +250,10 @@ static void OptionDlgUpdate(
 			//	_("Turning on CheckPointing"));
 			UpdateChkPtInterval(10);
 		}
+		break;
+	default:
+		if ( log_dpreferences < 0 ) { log_dpreferences = LogFindIndex( "dpreferences" ); }
+		LOG( log_dpreferences, 1, ( "unexpected inx %d in OptionDlgUpdate\n", inx ) )
 		break;
 	}
 }

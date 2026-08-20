@@ -84,6 +84,8 @@
 #include "fileio.h"
 #include "common-ui.h"
 
+static int log_ccornu = -1;
+
 
 typedef struct {
 	coOrd end_center;
@@ -2240,6 +2242,11 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos,
 
 	case C_REDRAW:
 		return AdjustCornuCurve(C_REDRAW, pos, InfoMessage);
+	default:
+		if ( log_ccornu < 0 ) { log_ccornu = LogFindIndex( "ccornu" ); }
+		LOG( log_ccornu, 1, ( "unexpected action&0xFF %d in cornuModDlgUpdate\n",
+		                      action&0xFF ) )
+		break;
 	}
 
 	return C_CONTINUE;
