@@ -315,7 +315,7 @@ static paramGroup_p CreateDescribeDialog(
 			pdp->winLabel = NULL;
 			pdp->option |= PDO_SAMEROW;
 			// Point to 2nd double of a coOrd
-			pdp->valueP = pdp[-1].valueP + offsetof( coOrd, y );
+			pdp->valueP = (char *)pdp[-1].valueP + offsetof( coOrd, y );
 			break;
 		case DESC_POS3D:
 			pdp = CreateDescribeField( PD_FLOAT, pg, ddp );
@@ -325,7 +325,7 @@ static paramGroup_p CreateDescribeDialog(
 			pdp->winLabel = NULL;
 			pdp->option |= PDO_SAMEROW;
 			pdp->context = (void*)ddp;
-			pdp->valueP = pdp[-1].valueP + offsetof( coOrd, y );
+			pdp->valueP = (char *)pdp[-1].valueP + offsetof( coOrd, y );
 			pdp = CreateDescribeField( PD_FLOAT, pg, ddp );
 			pdp->winLabel = NULL;
 			pdp->option |=  PDO_SAMEROW | PDO_DIM;
