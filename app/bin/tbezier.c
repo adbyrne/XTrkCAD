@@ -1591,7 +1591,7 @@ EXPORT void BezierSegProc(
 			segProcData.traverse2.dist = dist;    					//distance left
 			segProcData.traverse2.segDir = backwards;				//which way
 			segProcData.traverse2.pos = p2;
-			segProcData.traverse2.angle = NormalizeAngle(a2 + neg_seg?180:0);
+			segProcData.traverse2.angle = NormalizeAngle(a2 + (neg_seg?180:0));
 			LOG( log_bezierSegments, 2,
 			     ( "    BezTr2-Loop A%0.3f P[%0.3f %0.3f] D%0.3f SI%d B%d RS%d\n", a2, p2.x,
 			       p2.y, dist, inx, backwards, reverse_seg ))

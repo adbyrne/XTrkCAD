@@ -2292,10 +2292,10 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 		tempSegs(0).color = xx->segs[0].color;
 		tempSegs(0).lineWidth = xx->segs[0].lineWidth;
 		tempSegs(0).type = xx->segs[0].type;
-		tempSegs(0).u.l.pos[0] = 1-ep?p0:pos;
-		tempSegs(0).u.l.pos[1] = 1-ep?pos:p1;
-		xx->segs[0].u.l.pos[0] = 1-ep?pos:p0;
-		xx->segs[0].u.l.pos[1] = 1-ep?p1:pos;
+		tempSegs(0).u.l.pos[0] = (1-ep)?p0:pos;
+		tempSegs(0).u.l.pos[1] = (1-ep)?pos:p1;
+		xx->segs[0].u.l.pos[0] = (1-ep)?pos:p0;
+		xx->segs[0].u.l.pos[1] = (1-ep)?p1:pos;
 		break;
 	case SEG_CRVLIN:
 	case SEG_FILCRCL: ;

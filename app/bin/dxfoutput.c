@@ -43,7 +43,7 @@ static void DxfLine(
         wDrawColor color)
 {
 	long c = wDrawGetRGB( color );
-	long s = d->options & DC_DASH ? 1 : (d->options & DC_DOT ? 2 : 0);
+	long s = (d->options & DC_DASH) ? 1 : ((d->options & DC_DOT) ? 2 : 0);
 
 	DynString command = NaS;
 	DynStringMalloc(&command, 100);
@@ -68,7 +68,7 @@ static void DxfArc(
         wDrawColor color)
 {
 	long c = wDrawGetRGB( color );
-	long s = d->options & DC_DASH ? 1 : (d->options & DC_DOT ? 2 : 0);
+	long s = (d->options & DC_DASH) ? 1 : ((d->options & DC_DOT) ? 2 : 0);
 
 	DynString command = NaS;
 	DynStringMalloc(&command, 100);
