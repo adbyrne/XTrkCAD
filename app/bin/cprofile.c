@@ -288,11 +288,10 @@ static void DrawProfile(drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert)
 	pt = points(0);
 	DrawLine(D, pb, pt, lw, snapGridColor);
 	DrawArc(D, pt, 0.05, 0, 360, TRUE, 2, wDrawColorGrey40);
-	if (units==UNITS_ENGLISH) {
-		sprintf(message, "%0.1f", PutDim(profElem(0).elev)+0.05);
-	} else {
-		sprintf(message, "%0.1f", PutDim(profElem(0).elev)+0.05);
-	}
+	// PutDim() already converts units==UNITS_METRIC internally, so this value is
+	// correct either way; unlike its siblings below (dist labels), it doesn't append
+	// a unit suffix ("ft"/"m"/"cm") -- possibly an unfinished feature, not fixed here.
+	sprintf(message, "%0.1f", PutDim(profElem(0).elev)+0.05);
 	if (printVert) {
 		pl.x = pt.x + LABELH/2.0/prof.scaleX*D->scale;
 		pl.y = pt.y + 2.0/mainD.dpi/prof.scaleY*D->scale + GetDim(prof.incrC) / 16;;
@@ -1013,11 +1012,9 @@ static int ProfileShortestPathFunc(
 		break;
 
 	case SPTC_IGNNXTTRK:
-		if (EndPtIsIgnoredElev(trk,ep)) {
-			rc0 = 1;
-		} else if ((GetTrkBits(trk)&TB_PROFILEPATH)!=0) {
-			rc0 = 1;
-		} else if ((!EndPtIsDefinedElev(trk,ep)) && GetTrkEndTrk(trk,ep)==NULL) {
+		if (EndPtIsIgnoredElev(trk,ep)
+		    || (GetTrkBits(trk)&TB_PROFILEPATH)!=0
+		    || ((!EndPtIsDefinedElev(trk,ep)) && GetTrkEndTrk(trk,ep)==NULL)) {
 			rc0 = 1;
 		} else {
 			rc0 = 0;
