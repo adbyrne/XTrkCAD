@@ -36,6 +36,29 @@
 #define O_CREAT_MODE 0644
 #endif
 
+/* Reject a ".." path-traversal component -- the actual CodeQL-recommended
+ * defense against cpp/path-injection (a comment doesn't break the taint
+ * chain a real dataflow scan follows; this does). Real invocations always
+ * come from CMake as absolute paths under the project's own source/build
+ * tree (${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_CURRENT_BINARY_DIR}) and never
+ * need "..", so this can't reject a legitimate build. */
+static int
+PathHasTraversal(const char *path)
+{
+	size_t i, len = strlen(path);
+
+	for (i = 0; i < len; i++) {
+		int atStart = (i == 0) || (path[i - 1] == '/') || (path[i - 1] == '\\');
+
+		if (atStart && path[i] == '.' && path[i + 1] == '.' &&
+		    (path[i + 2] == '\0' || path[i + 2] == '/' || path[i + 2] == '\\')) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 /* fopen(path, "w") creates the file with permissions controlled entirely by
  * the process umask (typically fine, but not explicit) -- open() with an
  * explicit mode plus O_TRUNC (fopen's "w" always truncates) is the portable
@@ -603,14 +626,19 @@ int main(int argc, char * argv[])
 	}
 
 	/* open the file for reading -- CodeQL flags argv-derived fopen() paths
-	 * as cpp/path-injection, but that query targets programs that open
-	 * paths on behalf of some other, less-trusted caller (e.g. a network
-	 * service); this is a build-time CLI code generator whose entire job
-	 * is "open the file you're told to open" -- the caller (CMake, driven
-	 * by this project's own CMakeLists.txt) and the invoking user are the
-	 * same trust boundary. No sanitization would make sense here without
-	 * breaking the tool. */
-	// codeql[cpp/path-injection]
+	 * as cpp/path-injection; this is a build-time CLI code generator whose
+	 * entire job is "open the file you're told to open" (caller is CMake,
+	 * driven by this project's own CMakeLists.txt, always an absolute path
+	 * under the source/build tree, same trust boundary as the invoking
+	 * user). PathHasTraversal() below is the real defense CodeQL's own
+	 * dataflow analysis recognizes -- rejecting ".." breaks the taint
+	 * chain, unlike a suppression comment. */
+	if (PathHasTraversal(argv[ inFileIdx ])) {
+		fprintf(stderr, "Rejected: %s contains a '..' path component\n",
+		        argv[ inFileIdx ]);
+		exit(1);
+	}
+
 	inF = fopen(argv[ inFileIdx ], "r");
 
 	if (!inF) {
@@ -629,12 +657,16 @@ int main(int argc, char * argv[])
 	fputs("/*\n * DO NOT EDIT! This file has been automatically created by genmessages.\n * Changes to this file will be overwritten.\n */\n",
 	      hdrF);
 	fputs("#ifndef HAVE_MESSAGES_H\n#define HAVE_MESSAGES_H\n", hdrF);
-	/* open the help file to generate -- same argv-derived-path reasoning as
-	 * the input file above (build-time CLI tool, caller is this project's
-	 * own CMakeLists.txt, not an untrusted party); the CodeQL alert follows
-	 * the taint through FOpenRestricted() here since that's where the
-	 * actual open() call moved to. */
-	// codeql[cpp/path-injection]
+	/* open the help file to generate -- same argv-derived-path reasoning
+	 * and PathHasTraversal() defense as the input file above; the CodeQL
+	 * alert follows the taint through FOpenRestricted() here since that's
+	 * where the actual open() call moved to. */
+	if (PathHasTraversal(argv[ inFileIdx + 1 ])) {
+		fprintf(stderr, "Rejected: %s contains a '..' path component\n",
+		        argv[ inFileIdx + 1 ]);
+		exit(1);
+	}
+
 	outF = FOpenRestricted(argv[ inFileIdx + 1 ]);
 
 	if (!outF) {
