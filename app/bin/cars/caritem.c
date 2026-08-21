@@ -30,6 +30,7 @@
 #include "cars.h"
 
 dynArr_t carItemInfo_da;
+BOOL_T carItemListChanged;
 
 
 #define N_CONDLISTMAP			(6)
@@ -98,6 +99,11 @@ carItem_p CarItemNew(
 	} else {
 		if (item->title) { MyFree(item->title); }
 		if (item->data.number) { MyFree(item->data.number); }
+		if (item->data.notes) { MyFree(item->data.notes); }
+		if (item->segPtr) {
+			FreeFilledDraw(item->segCnt, item->segPtr);
+			MyFree(item->segPtr);
+		}
 	}
 	item->index = itemIndex;
 	item->scaleInx = scale;
@@ -125,7 +131,76 @@ carItem_p CarItemNew(
 	item->segCnt = 0;
 	item->segPtr = NULL;
 	LoadRoadnameList(&tabs[T_ROADNAME], &tabs[T_REPMARK]);
+	carItemListChanged = TRUE;
 	return item;
+}
+
+/* Remove a roster item from carItemInfo_da and free everything it owns.
+ * Symmetric with CarProtoDelete/CarPartDelete, and the rollback primitive
+ * for the atomic-commit path (Phase E): a car staged by CarItemNew that must
+ * be un-created when a later step of the same commit fails.
+ *
+ * Only unhooks the on-layout track (item->car) when one exists and is not
+ * already deleted -- a freshly staged item has item->car == NULL (CarItemNew
+ * never sets it; only CarItemPlace/read-back do), so the common rollback case
+ * touches nothing but memory. The loco-list entry is dropped before the track
+ * so the weak reference in the loco list can't dangle, matching CarItemShelve
+ * (CarItemIsLoco is defined below this point and not prototyped in an included
+ * header, so call its one-liner body -- IsLocoType(type) -- directly instead).
+ *
+ * carItemInfo_da is a flat array of carItem_t* appended with DYNARR_APPEND
+ * (not a LookupListElem list), so removal is a scan for the slot followed by
+ * DYNARR_REMOVE, which shifts the tail of live pointers down over it -- the
+ * same shape as the item-index scan in CarItemFindIndex. Does NOT refresh the
+ * inventory list or the carItemHotbar_da mirror; the caller owns that, just as
+ * CarItemNew leaves list refresh to CarDlgOk rather than doing it inline. */
+EXPORT void CarItemDelete(
+        carItem_p item)
+{
+	int inx;
+
+	if (item == NULL) {
+		return;
+	}
+
+	if (item->car != NULL && !IsTrackDeleted(item->car)) {
+		if (IsLocoType(item->type)) {
+			LocoListChangeEntry(item->car, NULL);
+		}
+		DeleteTrack(item->car, FALSE);
+	}
+
+	for (inx = 0; inx < carItemInfo_da.cnt; inx++) {
+		if (carItemInfo(inx) == item) {
+			DYNARR_REMOVE(carItem_t*, carItemInfo_da, inx);
+			break;
+		}
+	}
+
+	if (item->title) {
+		MyFree(item->title);
+	}
+	if (item->data.number) {
+		MyFree(item->data.number);
+	}
+	if (item->data.notes) {
+		MyFree(item->data.notes);
+	}
+	if (item->segPtr) {
+		FreeFilledDraw(item->segCnt, item->segPtr);
+		MyFree(item->segPtr);
+	}
+	MyFree(item);
+}
+
+long OffsetInchesToFile(double inches)
+{
+	return (long)(inches * 1000);
+}
+
+double OffsetFileToInches(long fileValue)
+{
+	return fileValue / 1000.0;
 }
 
 EXPORT BOOL_T CarItemRead(
@@ -159,7 +234,7 @@ EXPORT BOOL_T CarItemRead(
 	             &purchPrice, &currPrice, &condition, &purchDate, &serviceDate, &cp)) {
 		return FALSE;
 	}
-	dim.truckCenterOffset = longCenterOffset / 1000.0;
+	dim.truckCenterOffset = OffsetFileToInches(longCenterOffset);
 	if (paramVersion < VERSION_INLINENOTE) {
 		if ((options & CAR_ITEM_HASNOTES)) {
 			sNote = ReadMultilineText();
@@ -199,11 +274,11 @@ static BOOL_T CarItemWrite(
         carItem_t* item,
         BOOL_T layout)
 {
-	long options = (item->options & CAR_DESC_BITS);
+	long options = (item->options & CAR_DESC_BITS) & ~CAR_DESC_IS_LOCO;
 	coOrd pos;
 	ANGLE_T angle;
 	BOOL_T rc = TRUE;
-	long longCenterOffset = (long)(item->dim.truckCenterOffset * 1000);
+	long longCenterOffset = OffsetInchesToFile(item->dim.truckCenterOffset);
 
 	SetCLocale();
 
@@ -287,7 +362,7 @@ EXPORT void CarItemGetSegs(
 		orig = protoP->orig;
 	} else {
 		CarProtoDlgCreateDummyOutline(&item->segCnt, &segPtr,
-		                              (item->options & CAR_DESC_IS_LOCO) != 0, item->dim.carLength,
+		                              IsLocoType(item->type), item->dim.carLength,
 		                              item->dim.carWidth,
 		                              item->color);
 		orig = zero;
@@ -380,12 +455,10 @@ EXPORT void CarItemSize(
 
 EXPORT void CarItemSetNumber(carItem_p item, char* number)
 {
-	if (item->data.number && number[0]) {
+	if (item->data.number) {
 		MyFree(item->data.number);
 	}
-	if (number[0]) {
-		item->data.number = MyStrdup(number);
-	}
+	item->data.number = MyStrdup(number);
 }
 
 
@@ -417,15 +490,15 @@ EXPORT DIST_T CarItemCoupledLength(
 
 EXPORT BOOL_T CarItemIsLoco(carItem_p item)
 {
-	return (item->options & CAR_DESC_IS_LOCO) == (CAR_DESC_IS_LOCO);
+	return IsLocoType(item->type);
 }
 
 
 EXPORT BOOL_T CarItemIsLocoMaster(
         carItem_p item)
 {
-	return (item->options & (CAR_DESC_IS_LOCO | CAR_DESC_IS_LOCO_MASTER)) ==
-	       (CAR_DESC_IS_LOCO | CAR_DESC_IS_LOCO_MASTER);
+	return IsLocoType(item->type) &&
+	       (item->options & CAR_DESC_IS_LOCO_MASTER) != 0;
 }
 
 
@@ -462,11 +535,12 @@ static DIST_T CarItemCouplerLength(
 EXPORT char* CarItemDescribe(
         carItem_p item,
         long mode,
-        long* index)
+        long* index,
+        char* desc)
 {
 	tabString_t tabs[7];
 	char* cp;
-	static char desc[STR_LONG_SIZE];
+	unsigned long umode = (unsigned long)mode;
 
 	TabStringExtract(item->title, 7, tabs);
 	cp = desc;
@@ -474,18 +548,18 @@ EXPORT char* CarItemDescribe(
 		sprintf(cp, "%ld ", item->index);
 		cp = desc + strlen(cp);
 	}
-	if ((mode & 0xF) != 1 && ((mode >> 4) & 0xF) != 1 && ((mode >> 8) & 0xF) != 1
-	    && ((mode >> 12) & 0xF) != 1) {
+	if ((umode & 0xF) != 1 && ((umode >> 4) & 0xF) != 1 && ((umode >> 8) & 0xF) != 1
+	    && ((umode >> 12) & 0xF) != 1) {
 		cp = TabStringCpy(cp, &tabs[T_MANUF]);
 		*cp++ = ' ';
 	}
-	if ((mode & 0xF) != 3 && ((mode >> 4) & 0xF) != 3 && ((mode >> 8) & 0xF) != 3
-	    && ((mode >> 12) & 0xF) != 3) {
+	if ((umode & 0xF) != 3 && ((umode >> 4) & 0xF) != 3 && ((umode >> 8) & 0xF) != 3
+	    && ((umode >> 12) & 0xF) != 3) {
 		cp = TabStringCpy(cp, &tabs[T_PART]);
 		*cp++ = ' ';
 	}
-	if ((mode & 0xF) != 2 && ((mode >> 4) & 0xF) != 2 && ((mode >> 8) & 0xF) != 2
-	    && ((mode >> 12) & 0xF) != 2) {
+	if ((umode & 0xF) != 2 && ((umode >> 4) & 0xF) != 2 && ((umode >> 8) & 0xF) != 2
+	    && ((umode >> 12) & 0xF) != 2) {
 		cp = TabStringCpy(cp, &tabs[T_PROTO]);
 		*cp++ = ' ';
 	}
@@ -506,7 +580,11 @@ EXPORT char* CarItemDescribe(
 			*cp++ = ' ';
 		}
 	}
-	*--cp = '\0';
+	if (cp > desc) {
+		*--cp = '\0';
+	} else {
+		*cp = '\0';
+	}
 	if (index != NULL) {
 		*index = item->index;
 	}
@@ -528,7 +606,7 @@ EXPORT void CarItemLoadList(void* unused)
 /**
  * Move a CarItem from the layout to the Shelf
  *
- * \item car item to be moved
+ * \param item car item to be moved
  */
 EXPORT void CarItemShelve(
         carItem_p item)
@@ -577,16 +655,13 @@ EXPORT void CarItemDraw(
         track_p traverse)
 {
 	coOrd size, pos, pos2;
-	DIST_T length;
-	wFont_p fp;
-	wDrawWidth width;
-	trkSeg_t simpleSegs[1];
 	pts_t simplePts[4];
 	int dir;
 	static int couplerLineWidth = 3;
 
 	CarItemSize(item, &size);
 	if (!DrawTwoRails(d, 1)) {
+		trkSeg_t simpleSegs[1];
 		simplePts[0].pt.x = simplePts[3].pt.x = -size.x / 2.0;
 		simplePts[1].pt.x = simplePts[2].pt.x = size.x / 2.0;
 		simplePts[0].pt.y = simplePts[1].pt.y = -size.y / 2.0;
@@ -613,8 +688,7 @@ EXPORT void CarItemDraw(
 	}
 
 	if (drawCarTrucks) {
-
-		length = item->dim.truckCenter / 2.0;
+		DIST_T length = item->dim.truckCenter / 2.0;
 		double offset = CarItemTruckOffset(item);
 		Translate(&pos, item->pos, item->angle,
 		          length + (direction ? offset : -offset));
@@ -625,20 +699,20 @@ EXPORT void CarItemDraw(
 	}
 
 	if ((labelEnable & LABELENABLE_CARS)) {
-		fp = wStandardFont(F_HELV, FALSE, FALSE);
+		wFont_p fp = wStandardFont(F_HELV, FALSE, FALSE);
 		DrawBoxedString(BOX_BACKGROUND, d, item->pos, item->data.number, fp,
 		                (wFontSize_t)descriptionFontSize, color, 0.0);
 	}
 
 	/* draw loco head light */
-	if ((item->options & CAR_DESC_IS_LOCO) != 0) {
+	if (IsLocoType(item->type)) {
 		Translate(&pos, item->pos, item->angle + (direction ? 180.0 : 0.0),
 		          size.x / 2.0 - trackGauge / 2.0);
 		if (locoIsMaster) {
 			DrawFillCircle(d, pos, trackGauge / 2.0,
 			               (color == wDrawColorBlack ? drawColorGold : color));
 		} else {
-			width = (wDrawWidth)floor(trackGauge / 8.0 * d->dpi / d->scale);
+			wDrawWidth width = (wDrawWidth)floor(trackGauge / 8.0 * d->dpi / d->scale);
 			DrawArc(d, pos, trackGauge / 2.0, 0.0, 360.0, FALSE, width,
 			        (color == wDrawColorBlack ? drawColorGold : color));
 		}

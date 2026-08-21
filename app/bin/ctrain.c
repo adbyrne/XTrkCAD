@@ -258,11 +258,12 @@ static void DescribeCar(
 {
 	struct extraDataCar_t *xx = GET_EXTRA_DATA(trk, T_CAR, extraDataCar_t);
 	char * cp;
+	char descBuf[STR_LONG_SIZE];
 	coOrd size;
 	CarItemSize(xx->item, &size);
 	carData.length = size.x;
 	carData.width = size.y;
-	cp = CarItemDescribe(xx->item, 0, &carData.index);
+	cp = CarItemDescribe(xx->item, 0, &carData.index, descBuf);
 
 	carData.number[0] = '\0';
 	strncat(carData.number, CarItemNumber(xx->item),
@@ -271,7 +272,7 @@ static void DescribeCar(
 	strncat(str, cp, len - 1);
 	carData.pos = xx->trvTrk.pos;
 	carData.angle = xx->trvTrk.angle;
-	cp = CarItemDescribe(xx->item, -1, NULL);
+	cp = CarItemDescribe(xx->item, -1, NULL, descBuf);
 	carData.desc[0] = '\0';
 	strncat(carData.desc, cp, sizeof(carData.desc) - 1);
 

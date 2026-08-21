@@ -63,6 +63,13 @@ typedef nameLongMap_t *nameLongMap_p;
 
 extern nameLongMap_t typeListMap[];
 
+/* Loco vs. non-loco is a band of the "type" code, not a stored bit: 1010x/
+ * 1020x/1030x (Diesel/Steam/Elect Loco) fall in [10000,19999], every other
+ * category is outside it. */
+#define CAR_TYPE_LOCO_MIN (10000L)
+#define CAR_TYPE_LOCO_MAX (19999L)
+BOOL_T IsLocoType(long type);
+
 wIndex_t MapCondition(long conditionValue);
 
 extern dynArr_t carProto_da;
@@ -78,6 +85,7 @@ carProto_p CarProtoNew(carProto_p proto, int paramFileIndex, char *desc,
                        long options, long type, const carDim_t *dim, wIndex_t segCnt, trkSeg_p segPtr);
 BOOL_T CarProtoWrite(FILE *f, const carProto_t *proto);
 BOOL_T CarProtoCustomSave(FILE *f);
+void CarProtoDelete(carProto_p protoP);
 
 void CarProtoDrawTruck(
         drawCmd_t *d,
@@ -95,9 +103,11 @@ void CarProtoDrawCoupler(
 
 void InitCarProto(void);
 int CarProtoCustMgmProc(int cmd, void *data);
+extern BOOL_T carProtoListChanged;
 
 // carpart
 extern BOOL_T roadnameMapChanged;
+extern BOOL_T carPartListChanged;
 
 struct roadnameMap_s {
 	char *roadname;
@@ -134,6 +144,7 @@ carPart_p CarPartNew(carPart_p partP, int paramFileIndex, SCALEINX_T scaleInx,
                      char *title, long options, long type, const carDim_p dim, wDrawColor color);
 BOOL_T CarDescCustomSave(FILE *f);
 BOOL_T CarPartWrite(FILE *f, carPart_p partP);
+void CarPartDelete(carPart_p partP);
 
 BOOL_T CheckAvail(carPartParent_p parentP);
 
@@ -189,6 +200,12 @@ typedef struct carItem_s *carItem_p;
 
 extern dynArr_t carItemInfo_da;
 extern carItem_p carDlgUpdateItemPtr;
+/* Set by CarItemNew, consumed (and cleared) by carinvdlg.c's CHANGE_PARAMS
+ * handler -- same poll-and-consume pattern as carProtoListChanged/
+ * carPartListChanged, see CarCustMgmChanged in dcar.c. Lets the roster
+ * dialog notice a car added/edited by the (non-modal) car editor while the
+ * roster dialog itself stays open in the background. */
+extern BOOL_T carItemListChanged;
 #define carItemInfo(N) DYNARR_N(carItem_t *, carItemInfo_da, N)
 
 #define carItemHotbar(N) DYNARR_N(carItem_p, carItemHotbar_da, N)
@@ -213,7 +230,11 @@ carItem_p CarItemNew(
 extern nameLongMap_t condListMap[];
 
 EXPORT long CarItemFindIndex(carItem_p item);
+EXPORT void CarItemDelete(carItem_p item);
 void CarItemGetSegs(carItem_p item);
+
+long OffsetInchesToFile(double inches);
+double OffsetFileToInches(long fileValue);
 
 // carinv
 
@@ -223,7 +244,158 @@ void CarInvListUpdate(carItem_p item);
 
 void InitCarInvDlg(void);
 
+//careditlogic
+typedef enum {
+	S_Error,
+	S_ItemSel, S_PartnoSel, S_ProtoSel
+} carDlgState_e;
+
+/* Moved from careditdlg.c so CarValidateIdentity (below) can take a level
+ * instead of a state -- keeps careditlogic.c free of any careditdlg.c
+ * dependency. CarDlgStateLevel's implementation stays in careditdlg.c. */
+typedef enum {
+	LVL_PROTO = 0,          /* real-world type            (S_ProtoSel)          */
+	LVL_MODEL = 1,          /* manufacturer catalog model (S_PartnoSel)         */
+	LVL_CAR   = 2,          /* owned roster car / item    (S_ItemSel/ItemEnter) */
+	LVL_NONE  = -1
+} carDlgLevel_e;
+
+carDlgLevel_e CarDlgStateLevel( carDlgState_e st );
+
+typedef enum {
+	CAR_DATE_OK,
+	CAR_DATE_EMPTY, /* leer -> valL = 0, kein Fehler */
+	CAR_DATE_NOT_NUMERIC,
+	CAR_DATE_WRONG_LENGTH,
+	CAR_DATE_OUT_OF_RANGE,
+	CAR_DATE_BAD_MONTH,
+	CAR_DATE_BAD_DAY
+} carDateResult_e;
+carDateResult_e CarValidateDate(const char *str, long *result);
+
+typedef enum { RS_UNRESOLVED, RS_RESOLVED, RS_NEW } resState_e;
+resState_e CarDlgResState( wIndex_t inx, const char *str );
+wBool_t CarValidatePrice(const char *str, FLOAT_T *price);
+void SetNextPartno(char* partnoStr);
+carDim_t SeedProtoDimsFromCatalog( carDim_t catalogDim, wIndex_t scaleInx );
+
+#define CAR_DIMS_LENGTH_BAD        (1u << 0)   /* carLength */
+#define CAR_DIMS_WIDTH_BAD         (1u << 1)   /* carWidth */
+#define CAR_DIMS_TRKCENTER_BAD     (1u << 2)   /* truckCenter */
+#define CAR_DIMS_TRKOFFSET_BAD     (1u << 3)   /* truckCenterOffset */
+#define CAR_DIMS_CPLDLEN_BAD       (1u << 4)   /* coupledLength */
+
+unsigned CarValidateDims( const carDim_t *dims );
+
+
+#define CAR_IDENT_PROTO_EMPTY   (1u << 0)
+#define CAR_IDENT_MANUF_EMPTY   (1u << 1)
+#define CAR_IDENT_PARTNO_EMPTY	(1u << 2)
+#define CAR_IDENT_CATALOG_UNRESOLVED (1u << 3)
+#define CAR_IDENT_PROTO_UNRESOLVED (1u << 4)
+
+unsigned CarValidateIdentity(
+        carDlgLevel_e level, resState_e resCatalog, resState_e resProto,
+        const char *manufStr, const char *protoStr, const char *partnoStr );
+
+
+/* --- atomic commit (careditlogic.c) ------------------------------------ *
+ * Staged, UI-free description of everything one press of the car dialog's OK
+ * must create. CarDlgOk fills this from the live dialog fields (all string
+ * members BORROWED from carDlg*Str except protoSegPtr, see below), then hands
+ * it to CommitStaged, which creates the in-memory objects in dependency order
+ * -- prototype, then catalog part, then N roster cars -- and, only once all of
+ * them exist, persists via the injected save hook. Any failure at any step
+ * unwinds everything THIS commit newly created, in reverse order, and reports
+ * failure without persisting: a half-built car never reaches the arrays or
+ * disk. An object is rollback-eligible only when THIS commit genuinely minted
+ * it -- i.e. its make* flag is set, its updateXPtr is NULL (create, not edit),
+ * AND CarProtoFind/CarPartFind found nothing before the create (not coalesced
+ * onto an existing same-key record). Edited or coalesced-onto records are
+ * never deleted on rollback; only freshly allocated ones are. */
+typedef struct {
+	/* prototype (created iff makeProto). protoName is BOTH the title's
+	 * T_PROTO field and the prototype's desc -- one string. protoSegPtr is
+	 * the one OWNED member: CarDlgOk hands over a heap buffer (always heap,
+	 * even the dummy outline is memdup'd) and CommitStaged frees it in every
+	 * return path. protoDim is already scaled to real-world by CarDlgOk. */
+	BOOL_T     makeProto;
+	char      *protoName;
+	carDim_t   protoDim;
+	wIndex_t   protoSegCnt;
+	trkSeg_p   protoSegPtr;      /* OWNED; CommitStaged frees */
+	carProto_p updateProtoPtr;   /* non-NULL: edit-in-place; never rolled back */
+
+	/* part + item shared identity. manuf/partno are also the CarPartFind
+	 * pre-existence key (desc is NOT part of the key, so it's title-only).
+	 * The seven title fields join, in this order, to the tab string both
+	 * CarPartNew and CarItemNew re-extract (careditdlg.c:2497):
+	 *   manuf \t protoName \t descField \t partno \t roadname \t repmark \t number */
+	char      *manuf;
+	char      *descField;
+	char      *partno;
+	char      *roadname;
+	char      *repmark;
+	char      *number;          /* T_NUMBER; autoNumber bumps a COPY per car */
+
+	BOOL_T     makePart;        /* resCatalog == RS_NEW && partno typed */
+	carPart_p  updatePartPtr;    /* non-NULL: edit-in-place; never rolled back */
+
+	SCALEINX_T scaleInx;
+	long       options;
+	long       type;            /* typeListMap[...].value, already resolved */
+	carDim_t   dim;             /* model-scale dims for part + items */
+	wDrawColor color;
+
+	/* roster cars (created iff makeItems; count == quantity >= 1) */
+	BOOL_T     makeItems;
+	long       quantity;
+	carItem_p  updateItemPtr;   /* non-NULL: edit-in-place; quantity forced to 1 */
+	long       itemIndexStart;  /* car i gets itemIndexStart + i (create path) */
+	BOOL_T     autoNumber;      /* quantity>1 && multiNum==0 && !editing: bump
+	                             * trailing integer of `number` per car, but only
+	                             * when it's a clean positive int (else all share) */
+
+	/* per-item data, applied to every car in the loop. notesText is the
+	 * finished note (UTF-8, single trailing '\n', extracted once by CarDlgOk);
+	 * NULL/"" means clear any notes CarItemNew left on the item. */
+	FLOAT_T    purchPrice;
+	FLOAT_T    currPrice;
+	long       condition;
+	long       purchDate;
+	long       serviceDate;
+	const char *notesText;
+} commitPlan_t;
+
+/* Persistence hook: TRUE on success. CarDlgOk passes a thin wrapper over
+ * CarDlgSaveCustom; tests pass a stub (counting calls / forcing FALSE) so
+ * CommitStaged runs with no real file. Called at most once, after all
+ * in-memory creation succeeds. */
+typedef BOOL_T (*commitSaveFn_t)( void *ctx );
+
+/* What CommitStaged created, for the caller's UI wrap-up (message text, list
+ * refresh, roadname reload, prefs/index control). Zeroed on failure. protoP/
+ * partP are non-NULL only when THIS commit minted them (not when coalesced
+ * onto an existing record), so the caller must not assume them set just
+ * because makeProto/makePart were requested. */
+typedef struct {
+	carProto_p protoP;
+	carPart_p  partP;
+	carItem_p  lastItemP;       /* last roster car created (for CarInvListAdd) */
+	long       itemsCreated;
+	long       nextItemIndex;   /* itemIndexStart + itemsCreated; caller writes
+	                             * to prefs and reloads the index control (UI) */
+} commitResult_t;
+
+BOOL_T CommitStaged( const commitPlan_t *plan, commitSaveFn_t save,
+                     void *saveCtx,
+                     commitResult_t *out );
+
+void CarProtoDelete( carProto_p protoP );  /* here for CommitStaged rollback */
+
+
 // careditdlg
+
 
 void CarDlgAddItem(void);
 void CarDlgUpdItem(void);

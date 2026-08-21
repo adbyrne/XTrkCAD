@@ -30,6 +30,7 @@
 
 #include "include/cars.h"
 #include "carsprivate.h"
+#include "misc.h"
 
 #define FormControlShow(a,b,c)
 
@@ -60,9 +61,9 @@ static void CsvFormatLong(FILE* f, long val, const char* sep);
 static void CsvFormatFloat(FILE* f, FLOAT_T val, int digits, const char* sep);
 static void CsvFormatString(FILE* f, char* str, int len, const char* sep);
 
+static void AddItem(void);
 static void SelectOrder(void *context);
 static void DeleteTag(void *context );
-static void AddNew(void *context);
 static void LaunchItemEditor(void);
 static void DeleteOrShelveSelected(void);
 static carItem_p FindCurrentItem(void);
@@ -90,9 +91,6 @@ enum {
 	I_CI_IMPORT_CSV,
 	I_CI_EXPORT_CSV,
 	I_CI_PRINT,
-	I_CI_SELECT_NEW,
-	I_CI_NEWPART,
-	I_CI_NEWPROTO,
 	I_CI_SORT1,
 	I_CI_SORT2,
 	I_CI_SORT3,
@@ -123,14 +121,11 @@ static paramData_t carInvPLs[] = {
 	[I_CI_LIST] = { PD_LIST, &carInvInx, "list", 0, NULL, NULL, 0 },
 	[I_CI_FIND] = { PD_BUTTON, FindCurrentItem, "find", 0, NULL },
 	[I_CI_EDIT] = { PD_BUTTON, LaunchItemEditor, "edit", 0, NULL },
-	[I_CI_ADD] = { PD_BUTTON, NULL, "add", 0, NULL  },
+	[I_CI_ADD] = { PD_BUTTON, AddItem, "add", 0, NULL  },
 	[I_CI_DELETE] = { PD_BUTTON, DeleteOrShelveSelected, "delete", 0, NULL },
 	[I_CI_IMPORT_CSV] = { PD_BUTTON, ImportCsv, "import", 0, NULL},
 	[I_CI_EXPORT_CSV] = { PD_BUTTON, ExportCsv, "export", 0, NULL},
 	[I_CI_PRINT] = { PD_BUTTON, SaveText, "savetext", 0, NULL},
-	[I_CI_SELECT_NEW] = { PD_MENU, &selected, "select_newobj"},
-	[I_CI_NEWPART] = { PD_MENUITEM, AddNew, "newpart", .context = I2VP(I_CI_NEWPART) },
-	[I_CI_NEWPROTO] = { PD_MENUITEM, AddNew, "newproto", .context = I2VP(I_CI_NEWPROTO) },
 	[I_CI_SELECT_SORT_MENU] = { PD_MENU, &selected, "sort_order" },
 	[I_CI_SELECT_SORT] = { PD_BUTTON, NULL, "select_sort"},
 	[ S_INDEX ] = { PD_MENUITEM, SelectOrder, "s-index", .context = I2VP(S_INDEX) },
@@ -218,41 +213,44 @@ SelectOrder(void *context)
 }
 
 static void
-AddNew(void *context)
+AddItem(void)
 {
-	unsigned index = (unsigned)((long)context);
-	void(*handler)(void);
-	const char *label;
-	paramData_p menuItem = carInvPLs+index;
-
-	// get selected function
-	switch(index) {
-	case I_CI_NEWPART:
-		handler = CarDlgAddDesc;
-		break;
-	case I_CI_NEWPROTO:
-		handler = CarDlgAddProto;
-		break;
-	default:
-		LOG( log_carInvDlg, 1, ( "unexpected index %d in AddNew\n", index ) )
-		break;
+	if (carProto_da.cnt <= 0) {
+		NoticeMessage(MSG_NO_CARPROTO, _("Ok"), NULL);
+		return;
 	}
-	label = wMenuGetLabel(menuItem->control);
+	carDlgUpdateItemPtr = NULL;
+	CarDlgAddItem();
 
-	// configure the button
-	wButtonSetLabel((carInvPLs+I_CI_ADD)->control, label);
-	carInvPLs[I_CI_ADD].valueP = handler;
+	LoadSortedList();
 }
 
-// static void Add(void)
-// {
-// 	if (carProto_da.cnt <= 0) {
-// 		NoticeMessage(MSG_NO_CARPROTO, _("Ok"), NULL);
-// 		return;
-// 	}
-// 	carDlgUpdateItemPtr = NULL;
 
-// 	CarDlgAddItem();
+// static void
+// AddNew(void *context)
+// {
+// 	unsigned index = (unsigned)((long)context);
+// 	void(*handler)(void);
+// 	const char *label;
+// 	paramData_p menuItem = carInvPLs+index;
+
+// 	// get selected function
+// 	switch(index) {
+// 	case I_CI_NEWITEM:
+// 		handler = AddItem;
+// 		break;
+// 	case I_CI_NEWPART:
+// 		handler = CarDlgAddDesc;
+// 		break;
+// 	case I_CI_NEWPROTO:
+// 		handler = CarDlgAddProto;
+// 		break;
+// 	}
+// 	label = wMenuGetLabel(menuItem->control);
+
+// 	// configure the button
+// 	wButtonSetLabel((carInvPLs+I_CI_ADD)->control, label);
+// 	carInvPLs[I_CI_ADD].valueP = handler;
 // }
 
 
@@ -271,7 +269,7 @@ static void
 DeleteOrShelveSelected(void)
 {
 	carItem_p item;
-	wIndex_t inx, inx1, cnt, selcnt;
+	wIndex_t inx, cnt, selcnt;
 	wBool_t bShowMsg = FALSE;
 	wBool_t bNeedReload = FALSE;
 
@@ -305,13 +303,7 @@ DeleteOrShelveSelected(void)
 			LOG(log_carInvDlg, 1, ("CarInvDlgDeleteShelve( %d, %s\n", inx,
 			                       item->title));
 			wListDelete((wList_p)carInvPLs[I_CI_LIST].control, inx);
-			if (item->title) { MyFree(item->title); }
-			if (item->data.number) { MyFree(item->data.number); }
-			MyFree(item);
-			for (inx1 = inx; inx1 < carItemInfo_da.cnt - 1; inx1++) {
-				carItemInfo(inx1) = carItemInfo(inx1 + 1);
-			}
-			carItemInfo_da.cnt -= 1;
+			CarItemDelete(item);
 			inx--;
 			cnt--;
 			bNeedReload = TRUE; //DB
@@ -360,7 +352,7 @@ static int Cmp_carInvItem(
 
 	TabStringExtract(item1->title, MAX_SUBSTRING_COUNT, tabs1);
 	TabStringExtract(item2->title, MAX_SUBSTRING_COUNT, tabs2);
-	for (inx = 0, rc = 0; inx <= sortorder.criteria && rc == 0; inx++) {
+	for (inx = 0, rc = 0; inx < sortorder.criteria && rc == 0; inx++) {
 		switch (sortorder.carInvSort[inx]) {
 		case S_INDEX:
 			rc = (int)(item1->index - item2->index);
@@ -420,7 +412,7 @@ static int Cmp_carInvItem(
 
 static void LoadSortedList(void)
 {
-	wIndex_t selected;
+	wIndex_t selectedItem;
 
 	qsort(&carItemInfo(0), carItemInfo_da.cnt, sizeof carItemInfo(0),
 	      Cmp_carInvItem);
@@ -432,11 +424,10 @@ static void LoadSortedList(void)
 		FormatDisplayItem(item);
 	}
 
-	selected = wListGetIndex(carInvPLs[I_CI_LIST].control);
+	selectedItem = wListGetIndex(carInvPLs[I_CI_LIST].control);
 	FormControlActive(&carInvPG, I_CI_FIND, TRUE);
-	FormControlActive(&carInvPG, I_CI_EDIT, selected >= 0 );
-	FormControlActive(&carInvPG, I_CI_DELETE, selected >= 0);
-	//wButtonSetLabel((wButton_p)(carInvPLs[I_CI_DELETE].control), "");
+	FormControlActive(&carInvPG, I_CI_EDIT, selectedItem >= 0 );
+	FormControlActive(&carInvPG, I_CI_DELETE, selectedItem >= 0);
 	FormControlActive(&carInvPG, I_CI_EXPORT_CSV, carItemInfo_da.cnt > 0);
 	FormControlActive(&carInvPG, I_CI_PRINT, carItemInfo_da.cnt > 0);
 }
@@ -450,7 +441,7 @@ static void FormatDisplayItem(carItem_p item)
 	char* manuf;
 	char* road;
 	char notes[SMALL_STRING_LEN];
-	char carLocation[MAX_SUBSTRING_COUNT];
+	char carLocation[SMALL_STRING_LEN];
 	tabString_t tabs[MAX_SUBSTRING_COUNT];
 	char line[LARGE_STRING_LEN];
 
@@ -509,7 +500,6 @@ static void CarInvDlgUpdate(
         void* valueP)
 {
 	carItem_p item = NULL;
-	wIndex_t cnt, selinx, selcnt;
 
 	if (inx >= I_CI_SORT1 && inx <= I_CI_SORT4 ) {
 		item = FindCurrentItem();
@@ -521,7 +511,9 @@ static void CarInvDlgUpdate(
 			}
 		}
 	} else if (inx == I_CI_LIST) {
-		cnt = wListGetCount(carInvPLs[I_CI_LIST].control);
+		wIndex_t cnt = wListGetCount(carInvPLs[I_CI_LIST].control);
+		wIndex_t selinx;
+		wIndex_t selcnt;
 		wIndex_t nOnShelf = 0;
 		wIndex_t nOnLayout = 0;
 		for (selinx = selcnt = 0; selinx < cnt; selinx++) {
@@ -567,7 +559,7 @@ typedef enum {
 char *columnHeaders[] = {
 	N_("#"),
 	N_("Part"),
-	N_("Description"),
+	N_("Prototype"),
 	N_("Rep Mark"),
 	N_("PurDate"),
 	N_("PurPrice"),
@@ -589,7 +581,6 @@ static void UpdateColumnWidths(unsigned int *widths, size_t count,
 
 static void CalculateColumnWidths(unsigned int *widths, size_t count )
 {
-	carItem_p item;
 	tabString_t tabs[MAX_SUBSTRING_COUNT];
 
 	memset(widths, 0, sizeof(unsigned int ) * count);
@@ -597,6 +588,7 @@ static void CalculateColumnWidths(unsigned int *widths, size_t count )
 	for (int inx = 0; inx < carItemInfo_da.cnt; inx++) {
 		unsigned int width;
 		char buffer[SMALL_STRING_LEN];
+		carItem_p item;
 
 		item = carItemInfo(inx);
 		TabStringExtract(item->title, MAX_SUBSTRING_COUNT, tabs);
@@ -655,10 +647,9 @@ TextExportString(FILE *fh, int width, const char *string)
 static void
 TextExportDate(FILE *fh, int width, unsigned long dateValue)
 {
-	char buffer[SMALL_STRING_LEN];
-
 	if (dateValue > 0) {
-		snprintf(buffer, SMALL_STRING_LEN, "%ld", dateValue);
+		char buffer[SMALL_STRING_LEN];
+		snprintf(buffer, SMALL_STRING_LEN, "%lu", dateValue);
 		fprintf(fh, "%*.*s ", width, width, buffer);
 	} else {
 		fprintf(fh, "%*s ", width, " ");
@@ -668,9 +659,8 @@ TextExportDate(FILE *fh, int width, unsigned long dateValue)
 static void
 TextExportValue(FILE *fh, int width, double value)
 {
-	char buffer[SMALL_STRING_LEN];
-
 	if (value > 0) {
+		char buffer[SMALL_STRING_LEN];
 		snprintf(buffer, SMALL_STRING_LEN, "%0.2f", value);
 		fprintf(fh, "%*.*s ", width, width, buffer);
 	} else {
@@ -679,7 +669,8 @@ TextExportValue(FILE *fh, int width, double value)
 }
 
 static void
-WriteExportHeader( FILE* fh, unsigned int *widths, size_t count, char **label )
+WriteExportHeader( FILE* fh, const unsigned int *widths, size_t count,
+                   char **label )
 {
 	for(int inx = 0; inx < (int)count; inx++) {
 		TextExportString(fh, widths[inx], label[inx]);
@@ -688,7 +679,8 @@ WriteExportHeader( FILE* fh, unsigned int *widths, size_t count, char **label )
 }
 
 static void
-WriteExportItem(FILE *fh, unsigned int *widths, unsigned count, carItem_p item)
+WriteExportItem(FILE *fh, const unsigned int *widths, unsigned count,
+                carItem_p item)
 {
 	tabString_t tabs[MAX_SUBSTRING_COUNT];
 	char buffer[SMALL_STRING_LEN];
@@ -743,11 +735,12 @@ WriteExportNotes(FILE *fh, const char *notes, unsigned indent)
 {
 	const char *cp1;
 	const char *cp0;
-	int len;
 
 	if (notes) {
 		cp0 = notes;
 		while (1) {
+			int len;
+
 			cp1 = strchr(cp0, '\n');
 			if (cp1) {
 				len = (int)(cp1 - cp0);
@@ -772,7 +765,6 @@ static int CarInvSaveText(
         void* data)
 {
 	FILE* f;
-	carItem_p item;
 	unsigned int widths[MAX_TEXT_COLUMNS];
 	char *exportfile;
 
@@ -799,7 +791,7 @@ static int CarInvSaveText(
 	WriteExportHeader(f, widths, MAX_TEXT_COLUMNS, columnHeaders);
 
 	for (int inx = 0; inx < carItemInfo_da.cnt; inx++) {
-		item = carItemInfo(inx);
+		carItem_p item = carItemInfo(inx);
 
 		WriteExportItem(f, widths, MAX_TEXT_COLUMNS, item);
 
@@ -845,11 +837,14 @@ static int ParseCsvLine(
         char* line,
         int max_elem,
         tabString_t* tabs,
-        const int* map)
+        const int* map,
+        BOOL_T* truncated)
 {
 	int elem = 0;
 	char* cp, * cq, * ptr;
 	int rc, len;
+
+	if (truncated) { *truncated = FALSE; }
 
 	cp = line;
 	for (cq = cp + strlen(cp) - 1; cq > cp && isspace((unsigned char)*cq); cq--);
@@ -896,6 +891,7 @@ static int ParseCsvLine(
 		if (*cp) { cp++; }
 		elem++;
 	}
+	if (truncated && elem >= max_elem && *cp) { *truncated = TRUE; }
 	return elem;
 }
 
@@ -991,6 +987,7 @@ ValidateImportHeaders(FILE *fh, char *csvLine, int *map, int mapSize)
 	BOOL_T columnUsed[COUNT(carCsvColumnTitles)] = {FALSE};
 	int numCol;
 	int requiredCols = 0;
+	BOOL_T truncated;
 
 	/* Initialize map to identity */
 	for (int j = 0; j < mapSize; j++) {
@@ -998,12 +995,12 @@ ValidateImportHeaders(FILE *fh, char *csvLine, int *map, int mapSize)
 	}
 
 	/* Parse header line */
-	numCol = ParseCsvLine(csvLine, mapSize, tabs, map);
+	numCol = ParseCsvLine(csvLine, mapSize, tabs, map, &truncated);
 	if (numCol <= 0) {
 		return FALSE;
 	}
 
-	if (numCol > mapSize) {
+	if (truncated) {
 		NoticeMessage(MSG_CARIMP_TOO_MANY_COLUMNS, _("Continue"), NULL);
 		return FALSE;
 	}
@@ -1072,31 +1069,38 @@ UseDefaultsFromPart(carPart_p part, tabString_p tabs, carDim_t *dim)
 	}
 }
 
-static void
-BuildTitle(char *title, tabString_t *tabs)
+/* Copy at most (end-dst) bytes of tab->ptr into dst, truncating rather than
+ * overflowing when a CSV field is longer than the destination has room for.
+ * Returns the position just past the copied bytes (never past end). */
+static char *
+BoundedTabCopy(char *dst, char *end, const tabString_t *tab)
 {
-	char *nextPos;
+	int len = tab->len;
+	if (dst + len > end) { len = (int)(end - dst); }
+	if (len > 0) { memcpy(dst, tab->ptr, len); }
+	return dst + len;
+}
 
-	nextPos = TabStringCpy(title, &tabs[M_MANUF]);
-	*nextPos++ = '\t';
-	nextPos = TabStringCpy(nextPos, &tabs[M_PROTO]);
-	*nextPos++ = '\t';
-	nextPos = TabStringCpy(nextPos, &tabs[M_DESC]);
-	*nextPos++ = '\t';
-	nextPos = TabStringCpy(nextPos, &tabs[M_PARTNO]);
-	*nextPos++ = '\t';
-	nextPos = TabStringCpy(nextPos, &tabs[M_ROADNAME]);
-	*nextPos++ = '\t';
-	nextPos = TabStringCpy(nextPos, &tabs[M_REPMARK]);
-	*nextPos++ = '\t';
-	nextPos = TabStringCpy(nextPos, &tabs[M_NUMBER]);
+static void
+BuildTitle(char *title, size_t titleSize, tabString_t *tabs)
+{
+	char *nextPos = title;
+	char *end = title + titleSize - 1;   /* leave room for the final NUL */
+	static const int fields[] = {
+		M_MANUF, M_PROTO, M_DESC, M_PARTNO, M_ROADNAME, M_REPMARK, M_NUMBER
+	};
+
+	for (unsigned i = 0; i < COUNT(fields); i++) {
+		nextPos = BoundedTabCopy(nextPos, end, &tabs[fields[i]]);
+		if (i + 1 < COUNT(fields) && nextPos < end) { *nextPos++ = '\t'; }
+	}
 	*nextPos = '\0';
 }
 
 /**
  * Convert notes from CSV format to internal format (allocates memory)
  *
- * Replaces <NL> markers with actual newlines.
+ * Replaces \<NL\> markers with actual newlines.
  * Returns allocated string that caller must free with MyFree().
  *
  * @param notesTab  Tab string containing CSV notes field
@@ -1151,14 +1155,14 @@ static char* ConvertNotesFromCsv(const tabString_t* notesTab)
 }
 
 static carItem_p
-CreateItemFromCsv(tabString_t *tabs, long *dlgIndex)
+CreateItemFromCsv(tabString_t *tabs, long *dlgIndex,
+                  BOOL_T *duplicateIndexError)
 {
 	SCALEINX_T scale;
 	long index;
-	unsigned duplicateIndexError = 0;
 	carDim_t dim;
 	carPart_p partP = NULL;
-	char *title[STR_LONG_SIZE];
+	char title[STR_LONG_SIZE];
 	carItem_p item;
 
 	FLOAT_T purchPrice, currPrice;
@@ -1176,10 +1180,10 @@ CreateItemFromCsv(tabString_t *tabs, long *dlgIndex)
 	} else {
 		carDlgItemIndex = index;
 		if (!CheckCarDlgItemIndex(&index)) {
-			// report only once
-			if (!duplicateIndexError) {
+			// report only once per import
+			if (!*duplicateIndexError) {
 				NoticeMessage(MSG_CARIMP_DUP_INDEX, _("Ok"), NULL);
-				duplicateIndexError++;
+				*duplicateIndexError = TRUE;
 			}
 			carDlgItemIndex = index;
 		}
@@ -1203,7 +1207,7 @@ CreateItemFromCsv(tabString_t *tabs, long *dlgIndex)
 		}
 	}
 
-	BuildTitle(title, tabs );
+	BuildTitle(title, sizeof title, tabs );
 
 	options = TabGetLong(&tabs[M_OPTIONS]);
 	type = TabGetLong(&tabs[M_TYPE]);
@@ -1215,7 +1219,9 @@ CreateItemFromCsv(tabString_t *tabs, long *dlgIndex)
 	srvcDate = TabGetLong(&tabs[M_SRVDATE]);
 	if (dim.carLength <= 0 || dim.carWidth <= 0 || dim.coupledLength <= 0
 	    || dim.truckCenter <= 0) {
-		int rc = NoticeMessage(MSG_CARIMP_MISSING_DIMS, _("Yes"), _("No"), message);
+		char buffer[ SMALL_STRING_LEN];
+		snprintf(buffer, SMALL_STRING_LEN, N_("Dimensions must be greater than 0"));
+		int rc = NoticeMessage(MSG_CARIMP_MISSING_DIMS, _("Yes"), _("No"), buffer);
 		if (rc <= 0) {
 			return NULL;
 		}
@@ -1242,6 +1248,7 @@ CarInvImportCsv(
 
 	tabString_t tabs[MAX_CSV_COLUMNS];
 	int map[MAX_CSV_COLUMNS];;
+	BOOL_T duplicateIndexError = FALSE;
 
 	CHECK(fileName != NULL);
 	CHECK(files == 1);
@@ -1274,7 +1281,7 @@ CarInvImportCsv(
 
 		int cnt;
 
-		cnt = ParseCsvLine(buffer, MAX_CSV_COLUMNS, tabs, map);
+		cnt = ParseCsvLine(buffer, MAX_CSV_COLUMNS, tabs, map, NULL);
 		if (cnt == -1) {
 			NoticeMessage(MSG_CARIMP_MISSING_COLUMNS, _("OK"), NULL);
 			fclose(f);
@@ -1282,7 +1289,7 @@ CarInvImportCsv(
 			return FALSE;
 		}
 
-		item = CreateItemFromCsv(tabs, &carDlgItemIndex);
+		item = CreateItemFromCsv(tabs, &carDlgItemIndex, &duplicateIndexError);
 		if(!item) {
 			fclose(f);
 			SetUserLocale();
@@ -1498,6 +1505,23 @@ static void ButtonOk(paramGroup_p group)
 
 }
 
+/* The car editor (careditdlg.c) is a separate, non-modal window -- adding or
+ * editing a car there doesn't close this dialog, so its list only refreshed
+ * on next open. carItemListChanged (set by CarItemNew) plus this CHANGE_PARAMS
+ * handler mirrors dcustmgm.c's CustMgmChange/CarCustMgmChanged pattern to
+ * pick that up live while the roster stays open in the background. */
+static void CarInvDlgChange(long changes)
+{
+	if ((changes & CHANGE_PARAMS) == 0 ||
+	    carInvPG.win == NULL || !wWinIsVisible(carInvPG.win)) {
+		return;
+	}
+	if (carItemListChanged) {
+		carItemListChanged = FALSE;
+		LoadSortedList();
+	}
+}
+
 EXPORT void DoCarDlg(void* unused)
 {
 	if (carInvPG.win == NULL) {
@@ -1506,7 +1530,7 @@ EXPORT void DoCarDlg(void* unused)
 		                 NULL, NULL, TRUE,
 		                 0,
 		                 CarInvDlgUpdate);
-		AddNew(I2VP(I_CI_NEWPART));
+//		AddNew(I2VP(I_CI_NEWITEM));
 	}
 	LoadSortedList();
 	wShow(carInvPG.win);
@@ -1517,4 +1541,5 @@ void InitCarInvDlg(void)
 {
 	FormRegister( &carInvPG );
 	log_carInvDlg = LogFindIndex("carInvDlg");
+	RegisterChangeNotification( CarInvDlgChange );
 }

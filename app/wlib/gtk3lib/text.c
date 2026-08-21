@@ -417,7 +417,7 @@ wBool_t wTextPrint(
 
 
 /**
- * Get the length of text
+ * Get the total memory required for the text
  *
  * \param bt IN the text widget
  * \return    length of string including terminating \0

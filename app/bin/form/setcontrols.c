@@ -85,3 +85,44 @@ EXPORT void FormHilite(
 		wControlHilite( control, FALSE );
 	}
 }
+void
+FormGroupReveal(paramGroup_p pg, const char *id, BOOL_T reveal)
+{
+	wRevealerShow(pg->win, id, reveal); 
+}
+
+EXPORT void FormGroupSetShadow(
+        paramGroup_p pg,
+        const char *id,
+        BOOL_T shown )
+{
+	wFrameSetShadow( pg->win, id, shown );
+}
+
+
+static wControl_p
+FormGroupExpanderFind(paramGroup_p pg, const char *id)
+{
+	for (int inx = 0; inx < pg->paramCnt; inx++) {
+		paramData_p p = pg->paramPtr + inx;
+		if (p->type == PD_EXPANDER && p->nameStr &&
+		    strcmp(p->nameStr, id) == 0) {
+			return p->control;
+		}
+	}
+	return NULL;
+}
+
+void
+FormGroupExpanderShow(paramGroup_p pg, const char *id, BOOL_T reveal)
+{
+	wControl_p b = FormGroupExpanderFind(pg, id);
+	if (b) { wExpanderShow(b, reveal); }
+}
+
+void
+FormGroupExpanderSetSummary(paramGroup_p pg, const char *id, const char *summary)
+{
+	wControl_p b = FormGroupExpanderFind(pg, id);
+	if (b) { wExpanderSetSummary(b, summary); }
+}

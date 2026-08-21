@@ -87,8 +87,11 @@ void FormLoadSingleControl(
 		break;
 	case PD_LIST:
 	case PD_DROPLIST:
-	case PD_COMBOLIST:
 		wListSetIndex(p->control, *(wIndex_t*)p->valueP);
+		p->oldD.l = *(wIndex_t*)p->valueP;
+		break;
+	case PD_COMBOLIST: 
+		wComboBoxSetIndex(p->control, *(wIndex_t*)p->valueP);
 		p->oldD.l = *(wIndex_t*)p->valueP;
 		break;
 	case PD_COLORLIST:

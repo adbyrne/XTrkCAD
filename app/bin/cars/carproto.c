@@ -48,7 +48,7 @@ nameLongMap_t typeListMap[N_TYPELISTMAP] = {
 	{ N_("Other"),  90100 }
 };
 
-static BOOL_T carProtoListChanged;
+BOOL_T carProtoListChanged;
 
 static pts_t dummyOutlineSegPts[5];
 static trkSeg_t dummyOutlineSegs;
@@ -102,6 +102,12 @@ void CarProtoDlgCreateDummyOutline(
 	pts->pt_type = 0;
 }
 
+BOOL_T IsLocoType(
+        long type)
+{
+	return type >= CAR_TYPE_LOCO_MIN && type <= CAR_TYPE_LOCO_MAX;
+}
+
 int CarProtoFindTypeCode(
         long code)
 {
@@ -152,7 +158,6 @@ carProto_p CarProtoLookup(
 		proto->desc = MyStrdup(desc);
 		proto->contentsLabel = "Car Prototype";
 		proto->paramFileIndex = PARAM_LAYOUT;
-		proto->options = (isLoco ? CAR_DESC_IS_LOCO : 0);
 		proto->dim.carLength = length;
 		proto->dim.carWidth = width;
 		proto->dim.truckCenter = length - 2.0 * 59.0;
@@ -197,6 +202,11 @@ carProto_p CarProtoNew(
 	proto->options = options;
 	proto->type = type;
 	proto->dim = *dim;
+
+	if (proto->segPtr != NULL) {
+		FreeFilledDraw(proto->segCnt, proto->segPtr);
+		MyFree(proto->segPtr);
+	}
 	proto->segCnt = segCnt;
 
 	proto->segPtr = (trkSeg_p)memdup(segPtr,
@@ -219,6 +229,7 @@ void CarProtoDelete(carProto_p protoP)
 		MyFree(protoP->desc);
 	}
 	if (protoP->segPtr) {
+		FreeFilledDraw(protoP->segCnt, protoP->segPtr);
 		MyFree(protoP->segPtr);
 	}
 	MyFree(protoP);
@@ -230,7 +241,7 @@ void CarProtoDelete(carProto_p protoP)
 * Due to the way the definitions are loaded from file it is safe to
 * assume that they form a contiguous block in the array.
 *
-* \param [IN] fileIndex parameter file
+* \param[in] fileIndex parameter file
 */
 
 void DeleteCarProto(int fileIndex)
@@ -258,7 +269,9 @@ static BOOL_T CarProtoRead(char* line)
 	             &dim.truckCenter, &dim.coupledLength)) {
 		return FALSE;
 	}
-	dim.truckCenterOffset = longCenterOffset / 1000.0;
+	/* truck-center-offset is car-only (spec §3/§4); ignore whatever is in
+	 * this reserved slot rather than treating it as a real proto value. */
+	dim.truckCenterOffset = 0.0;
 	if (!ReadSegs()) {
 		return FALSE;
 	}
@@ -276,11 +289,12 @@ BOOL_T CarProtoWrite(FILE* f,const carProto_t* proto)
 
 	SetCLocale();
 
-	long longCenterOffset = (long)(proto->dim.truckCenterOffset * 1000);
-
-	rc &= fprintf(f, "CARPROTO \"%s\" %ld %ld %0.3f %0.3f 0 %ld %0.3f %0.3f\n",
-	              PutTitle(proto->desc), proto->options, proto->type, proto->dim.carLength,
-	              proto->dim.carWidth, longCenterOffset, proto->dim.truckCenter,
+	/* truck-center-offset is car-only (spec §3/§4); the second reserved "0"
+	 * is a fixed placeholder here, never proto->dim.truckCenterOffset. */
+	rc &= fprintf(f, "CARPROTO \"%s\" %ld %ld %0.3f %0.3f 0 0 %0.3f %0.3f\n",
+	              PutTitle(proto->desc), proto->options & ~CAR_DESC_IS_LOCO, proto->type,
+	              proto->dim.carLength,
+	              proto->dim.carWidth, proto->dim.truckCenter,
 	              proto->dim.coupledLength) > 0;
 	rc &= WriteSegs(f, proto->segCnt, proto->segPtr);
 
@@ -451,7 +465,7 @@ void CarProtoDrawCoupler(
 	p[0].x = p[1].x = -(length - 12.0);
 	pp.x = length - 12.0;
 	pp.y = 0;
-	/**   \TODO - if length > 6 then draw Sills */
+	/**   \todo - if length > 6 then draw Sills */
 	MovePts(COUNT(couplerOutline), p, pp);
 	RescalePts(COUNT(couplerOutline), p, ratio, ratio);
 	RotatePts(COUNT(couplerOutline), p, zero, angle - 90.0);
@@ -481,7 +495,7 @@ int CarProtoCustMgmProc( int cmd, void * data )
 		CarProtoDelete( protoP );
 		return TRUE;
 	case CUSTMGM_GET_TITLE:
-		sprintf( message, "\t%s\t\t%s\t%s", _("Prototype"),
+		sprintf( message, "%s\t\t%s\t%s", _("Prototype"),
 		         _(typeListMap[CarProtoFindTypeCode(protoP->type)].name), protoP->desc );
 		return TRUE;
 	default:

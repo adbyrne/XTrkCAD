@@ -165,10 +165,12 @@ target_sources(xtrkcad-lib
     custom.h
     dbench.c
     dbitmap.c
+    cars/carcommit.c
     cars/caritem.c
     cars/carpart.c
     cars/carproto.c
     cars/careditdlg.c
+    cars/careditlogic.c
     cars/carinvdlg.c
     cars/dcar.c
     cars/tabstring.c

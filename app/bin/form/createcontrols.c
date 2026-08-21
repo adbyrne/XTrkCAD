@@ -120,9 +120,20 @@ static void ListPush(wIndex_t inx, const char* val, wIndex_t op,
 	long valL;
 
 	switch (p->type) {
+	case PD_COMBOLIST:
+		if (op == LIST_OP_ICONPRESS || op == LIST_OP_FOCUSOUT) {
+			if ((p->option & PDO_NOPSHACT) == 0 && p->group->changeProc) {
+				/* NULL payload -- distinguishes an icon-press/focus-out from
+				 * a real change, which always passes a valueP above. Both
+				 * ops share the same NULL-payload dispatch since callers
+				 * (e.g. CarDlgUpdate) treat them identically. */
+				p->group->changeProc(p->group, (int)(p - p->group->paramPtr), NULL);
+			}
+			break;
+		}
+		__attribute__((fallthrough));
 	case PD_LIST:
 	case PD_DROPLIST:
-	case PD_COMBOLIST:
 		if (DO_MACRO_RECORD(p)) {
 			FormMacroRecord("PARAMETER %s %s %d %s\n", p->group->nameStr, p->nameStr, inx,
 			                val);
@@ -165,10 +176,25 @@ static void IntegerPush(const char* value, void* dp)
 	valL = FormIntegerGetValue(p, value);
 	if(p->bInvalid) {
 		// LOG(log_form, 1, (" -> InvalidNumber\n"));
+		/* Don't rely on changeProc to re-gate Ok: a genuinely unparseable/
+		 * out-of-range value must not reach the dialog's bound variable, so
+		 * changeProc (and whatever validation it runs) never fires for this
+		 * edit. FormCheckInputs re-scans every field's own bInvalid (not
+		 * just this one), so it also covers other fields left invalid by
+		 * this same early-return path, and it sets the Ok button's tooltip
+		 * to explain why. */
+		if (p->group->okB) {
+			wControlActive((wControl_p)p->group->okB,
+			               FormCheckInputs(p->group, (wControl_p)p->group->okB));
+		}
 		return;
 	}
 
 	if (!FormIntegerRangeCheck(p, valL)) {
+		if (p->group->okB) {
+			wControlActive((wControl_p)p->group->okB,
+			               FormCheckInputs(p->group, (wControl_p)p->group->okB));
+		}
 		return;
 	}
 
@@ -213,10 +239,22 @@ static void FloatPush(const char* value, void * dp)
 
 	valF = FormFloatGetValue(p, value);
 	if(p->bInvalid) {
+		/* See the matching comment in IntegerPush: FormCheckInputs re-gates
+		 * Ok (and its tooltip) from every field's bInvalid, since changeProc
+		 * never runs for a value we refuse to write into the dialog's bound
+		 * variable. */
+		if (p->group->okB) {
+			wControlActive((wControl_p)p->group->okB,
+			               FormCheckInputs(p->group, (wControl_p)p->group->okB));
+		}
 		return;
 	}
 
 	if (!FormFloatRangeCheck(p, valF)) {
+		if (p->group->okB) {
+			wControlActive((wControl_p)p->group->okB,
+			               FormCheckInputs(p->group, (wControl_p)p->group->okB));
+		}
 		return;
 	}
 	p->bInvalid = FALSE;
@@ -288,6 +326,31 @@ ScalePush(FLOAT_T value, void* dp)
 		p->group->changeProc(p->group, (int)(p - p->group->paramPtr), &value);
 	}
 
+}
+
+static void
+ExpanderToggleShim(wControl_p b, const char *id, wBool_t revealed, void *context)
+{
+	paramData_p p = (paramData_p)context;
+	long valL = revealed ? 1 : 0;
+
+	if (DO_MACRO_RECORD(p)) {
+		FormMacroRecord("PARAMETER %s %s %ld\n",
+		                p->group->nameStr, p->nameStr, valL);
+	}
+	if ((p->option & PDO_NOPSHACT) == 0 && p->group->changeProc) {
+		p->group->changeProc(p->group, (int)(p - p->group->paramPtr), &valL);
+	}
+}
+
+static void
+NotebookPush(long page, void* dp)
+{
+	paramData_p p = (paramData_p)dp;
+
+	if ((p->option & PDO_NOPSHACT) == 0 && p->group->changeProc) {
+		p->group->changeProc(p->group, (int)(p - p->group->paramPtr), &page);
+	}
 }
 
 static void
@@ -534,6 +597,12 @@ CreateControl(paramData_p pd, char* helpStr,	unsigned x,	unsigned y)
 		pd->control = (wControl_p)wColorSelectButtonCreate(win, x, y, helpStr,
 		              _(pd->winLabel), pd->winOption, 1, NULL, ColorSelectPush, pd);
 		break;
+	case PD_EXPANDER:
+		pd->control = wExpanderCreate(win, pd->nameStr, win, pd);
+		if (pd->control) {
+			wExpanderSetToggleCallback(pd->control, ExpanderToggleShim);
+		}
+		break;		
 	case PD_MESSAGE:
 		pd->control = (wControl_p)wMessageCreateEx(win,
 		              x, y, helpStr, 1,
@@ -565,7 +634,7 @@ CreateControl(paramData_p pd, char* helpStr,	unsigned x,	unsigned y)
 		pd->control = wScaleCreate(win, helpStr, pd->valueP, ScalePush, pd);
 		break;
 	case PD_NOTEBOOK:
-		pd->control = wNotebookCreate(win, helpStr, 0, 0L);
+		pd->control = wNotebookCreate(win, helpStr, 0, 0L, NotebookPush, pd);
 		break;
 	case PD_TAG:
 		pd->control = wTagCreate(win, helpStr, _(pd->winLabel), pd->valueP,

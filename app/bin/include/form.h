@@ -30,6 +30,7 @@ void FormMenuPush(void* dp);
 void FormStartRecord(FILE* fileHandle);
 void FormMacroRecord(char* format, ...);
 void FormGroupRecord(paramGroup_cp pg);
+void FormErrorState( paramData_p p, wBool_t valid, const char *reason );
 
 wBool_t FormIntegerRangeCheck(paramData_p p, long valL);
 wBool_t FormFloatRangeCheck(paramData_p p, FLOAT_T valF);
@@ -50,6 +51,14 @@ void FormCancel_Null(paramGroup_cp group);
 void FormControlActive(paramGroup_p pg, int inx, BOOL_T active);
 void FormControlShow(paramGroup_p pg, int inx, BOOL_T bShow);
 EXPORT void FormHilite( wWin_p win, wControl_p control, BOOL_T hilite );
+void FormGroupReveal(paramGroup_p pg, const char *id, BOOL_T reveal);
+typedef void (*paramExpanderToggleProc)(paramGroup_p pg, const char *id,
+                                        BOOL_T revealed, void *context);
+
+void FormGroupExpanderShow(paramGroup_p pg, const char *id, BOOL_T reveal);
+void FormGroupExpanderSetSummary(paramGroup_p pg, const char *id,
+                                 const char *summary);
+void FormGroupSetShadow(paramGroup_p pg, const char *id, BOOL_T shown);
 void FormResetInvalid( wControl_p win );
 
 void FormMenuPush(void* dp);

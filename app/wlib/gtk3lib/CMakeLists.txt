@@ -20,6 +20,7 @@ target_sources(xtrkcad-wlib
  combobox.c
  drawcontrol.c
  entry.c
+ expander.c
   fileselector.c
  freetypelabel.c
  keystate.c
@@ -37,6 +38,7 @@ target_sources(xtrkcad-wlib
  radio.c
  recentuse.c
  resourcefile.c
+ revealer.c
  scalectrl.c
  separator.c
  stack.c

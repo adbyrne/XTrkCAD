@@ -24,7 +24,7 @@ extern carItem_p currCarItemPtr;
 
 
 DIST_T CarItemCoupledLength(carItem_p);
-char* CarItemDescribe(carItem_p, long, long*);
+char* CarItemDescribe(carItem_p, long, long*, char*);
 void CarItemDraw(drawCmd_p, carItem_p, wDrawColor, int, BOOL_T, vector_p,
                  track_p);
 void CarItemFindCouplerMountPoint(carItem_p, traverseTrack_t, coOrd[2]);

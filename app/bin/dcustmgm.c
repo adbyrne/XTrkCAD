@@ -44,6 +44,13 @@ static const char * customTypes[] = { "Car Part", "Car Prototype", NULL };
 #endif
 static wIndex_t selectedType;
 
+/* Guards CustomDlgUpdate against GTK's synchronous selection-changed signal,
+ * which can fire re-entrantly out of wListClear() (via gtk_list_store_clear)
+ * while a row is selected. LoadCustomMgmList() frees every row's context
+ * before clearing the list; without this guard, that re-entrant call reads
+ * an already-freed context and crashes. */
+static BOOL_T custMgmLoading = FALSE;
+
 static wWinPix_t customListWidths[] = { 18, 100, 30, 80, 220 };
 static const char * customListTitles[] = { "", N_("Manufacturer"),
                                            N_("Scale"), N_("Part No"), N_("Description")
@@ -85,7 +92,11 @@ static wBool_t CustomDlgUpdate(
         void *valueP )
 {
 	custMgmContext_p context = NULL;
-	wIndex_t selcnt = wListGetSelectedCount(customPLs[I_CUSTOMLIST].control );
+	wIndex_t selcnt;
+
+	if ( custMgmLoading ) { return(TRUE); }
+
+	selcnt = wListGetSelectedCount(customPLs[I_CUSTOMLIST].control );
 
 	if ( inx != I_CUSTOMLIST ) { return(TRUE); }
 
@@ -353,6 +364,8 @@ static void LoadCustomMgmList( void )
 	long tempL;
 	custMgmContext_p context;
 
+	custMgmLoading = TRUE;
+
 	curInx = wListGetIndex( customSelL );
 
 	if ( curInx >= 0 ) {
@@ -373,6 +386,7 @@ static void LoadCustomMgmList( void )
 	CarCustMgmLoad();
 
 	tempL = -1;
+	custMgmLoading = FALSE;
 	CustomDlgUpdate( &customPG, I_CUSTOMLIST, &tempL );
 	wControlShow( (wControl_p)customSelL, TRUE );
 }
@@ -389,6 +403,16 @@ static void CustMgmChange( long changes )
 	}
 	if ((changes&CHANGE_PARAMS) == 0 ||
 	    customPG.win == NULL || !wWinIsVisible(customPG.win) ) {
+		return;
+	}
+
+	if ( CarCustMgmChanged() ) {
+		/* A new custom prototype/catalog part was created elsewhere (e.g. the
+		 * car editor's "+" icon flow) -- the shortcut below only patches the
+		 * currently selected row's title, so it would never surface a brand
+		 * new entry while one happens to be selected here. Force a full
+		 * rebuild instead. */
+		LoadCustomMgmList();
 		return;
 	}
 

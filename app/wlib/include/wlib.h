@@ -654,6 +654,18 @@ void wTooltipSet(wControl_p control, const char *dialog,
 void wTooltipSetText(wControl_p control, const char *tooltipText);
 void wControlSetContext(wControl_p, void *);
 void wControlHilite(wControl_p, wBool_t);
+void wRevealerShow(wControl_p win, const char *id, wBool_t reveal);
+typedef void (*wExpanderToggleCallback_p)(wControl_p win, const char *id,
+                                          wBool_t revealed, void *context);
+
+wControl_p wExpanderCreate(wWin_p parent, const char *id, wControl_p win,
+                           void *context);
+void wExpanderShow(wControl_p b, wBool_t reveal);
+void wExpanderSetToggleCallback(wControl_p b, wExpanderToggleCallback_p action);
+void wExpanderSetSummary(wControl_p b, const char *summary);
+void wFrameSetError(wControl_p win, const char *id, wBool_t error);
+void wFrameSetLabel(wControl_p win, const char *id, const char *text);
+void wFrameSetShadow(wControl_p win, const char *id, wBool_t shown);
 
 void wControlLinkedSet(wControl_p b1, wControl_p b2);
 void wControlLinkedActive(wControl_p b, int active);
@@ -701,6 +713,17 @@ typedef void (*wListCallBack_p)(unsigned int, const char *, unsigned int,
 #define BL_NODATASTORE                                                         \
   (1L << 24) /**< do no create a datastore from builder                        \
               */
+#define BL_ADDICON                                                            \
+  (1L << 25) /**< show a "+" secondary icon on a has-entry combo's entry */
+#define BL_FOCUSOUT                                                           \
+  (1L << 26) /**< call action with LIST_OP_FOCUSOUT when a has-entry          \
+                 combo's entry loses focus */
+
+/* op values passed to wListCallBack_p */
+#define LIST_OP_PROGRAMMATIC 0 /**< value set from code, not user action */
+#define LIST_OP_CHANGED 1      /**< user changed the selection/text */
+#define LIST_OP_ICONPRESS 2    /**< user pressed the BL_ADDICON "+" icon */
+#define LIST_OP_FOCUSOUT 3     /**< BL_FOCUSOUT: entry lost focus */
 
 /* lists, droplists and combo boxes */
 wControl_p wListCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
@@ -1100,8 +1123,11 @@ void wAttachAccelKey(wAccelKey_e, int, wAccelKeyCallBack_p, void *);
  */
 
 int wNoteBookGetActivePage(wControl_p notebook);
+void wNoteBookSetActivePage(wControl_p notebook, int page);
+void wNoteBookShowTabs(wControl_p notebook, wBool_t show);
 wControl_p wNotebookCreate(wControl_p parent, const char *labelStr,
-                           unsigned activePage, long flags);
+                           unsigned activePage, long flags,
+                           wChoiceCallBack_p action, void *context);
 
 /*------------------------------------------------------------------------------
  *
