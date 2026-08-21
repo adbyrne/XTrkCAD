@@ -126,7 +126,7 @@ end:
 }
 
 
-int main(int argc, char * argv[])
+int main(int argc, const char * argv[])
 {
 	FILE * inFile, * outFile;
 	char *jsonData;
@@ -152,17 +152,15 @@ int main(int argc, char * argv[])
 		exit(1);
 	}
 
-	if (inFile) {
-		unsigned int length;
-		fseek(inFile, 0, SEEK_END);
-		length = ftell(inFile);
-		fseek(inFile, 0, SEEK_SET);
-		jsonData = malloc(length + 1);
-		if (jsonData) {
-			jsonData[ fread(jsonData, 1, length, inFile) ] = '\0';
-		}
-		fclose(inFile);
+	unsigned int length;
+	fseek(inFile, 0, SEEK_END);
+	length = ftell(inFile);
+	fseek(inFile, 0, SEEK_SET);
+	jsonData = malloc(length + 1);
+	if (jsonData) {
+		jsonData[ fread(jsonData, 1, length, inFile) ] = '\0';
 	}
+	fclose(inFile);
 
 	outFile = fopen(argv[3], "w");
 	if (outFile == NULL) {

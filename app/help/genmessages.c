@@ -117,12 +117,12 @@ struct transTbl toAsteriskAngleEscape = {
 
 
 char *
-TranslateString(char *srcString, struct transTbl *trTbl)
+TranslateString(char *srcString, const struct transTbl *trTbl)
 {
 	char *destString;
 	char *cp;
 	size_t bufLen = strlen(srcString) + 1;
-	char *idx;
+	const char *idx;
 
 	/* calculate the expected result length */
 	for (cp = srcString; *cp; cp++) {
@@ -189,7 +189,12 @@ DBufAppendN(DBuf *d, const char *s, size_t n)
 			d->cap *= 2;
 		}
 
-		d->buf = realloc(d->buf, d->cap);
+		char *newBuf = realloc(d->buf, d->cap);
+		if (!newBuf) {
+			fprintf(stderr, "Could not grow buffer to %zu bytes!\n", d->cap);
+			exit(1);
+		}
+		d->buf = newBuf;
 	}
 
 	memcpy(d->buf + d->len, s, n);
@@ -472,7 +477,7 @@ ReplaceBulletLines(const char *src)
  * generated content would get double-escaped.
  */
 char *
-ConvertToDoxygen(char *srcString)
+ConvertToDoxygen(const char *srcString)
 {
 	char *s0, *s1, *s2, *s3, *s4, *s5, *s6, *s7, *s8, *s9, *result;
 
@@ -509,7 +514,7 @@ int cmpHelpMsg(const void * a, const void * b)
 	return strcmp(aa->title, bb->title);
 }
 
-void unescapeString(FILE * f, char * str)
+void unescapeString(FILE * f, const char * str)
 {
 	while (*str) {
 		if (*str != '\\') {
