@@ -615,6 +615,7 @@ int main(int argc, char * argv[])
 	 * by this project's own CMakeLists.txt) and the invoking user are the
 	 * same trust boundary. No sanitization would make sense here without
 	 * breaking the tool. */
+	// codeql[cpp/path-injection]
 	inF = fopen(argv[ inFileIdx ], "r");
 
 	if (!inF) {
@@ -638,6 +639,7 @@ int main(int argc, char * argv[])
 	 * own CMakeLists.txt, not an untrusted party); the CodeQL alert follows
 	 * the taint through FOpenRestricted() here since that's where the
 	 * actual open() call moved to. */
+	// codeql[cpp/path-injection]
 	outF = FOpenRestricted(argv[ inFileIdx + 1 ]);
 
 	if (!outF) {
