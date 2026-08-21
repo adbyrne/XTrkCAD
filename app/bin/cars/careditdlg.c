@@ -1523,9 +1523,9 @@ static void CarDlgActLoadInfoFromUpdateItem( void )
 	carDlgCouplerMount = (carDlgUpdateItemPtr->options&CAR_DESC_COUPLER_MODE_BODY)!=
 	                     0;
 	carDlgPurchPrice = carDlgUpdateItemPtr->data.purchPrice;
-	sprintf( carDlgPurchPriceStr, "%0.2f", carDlgPurchPrice );
+	snprintf( carDlgPurchPriceStr, STR_SIZE, "%0.2f", carDlgPurchPrice );
 	carDlgCurrPrice = carDlgUpdateItemPtr->data.currPrice;
-	sprintf( carDlgCurrPriceStr, "%0.2f", carDlgCurrPrice );
+	snprintf( carDlgCurrPriceStr, STR_SIZE, "%0.2f", carDlgCurrPrice );
 	carDlgCondition = carDlgUpdateItemPtr->data.condition;
 	carDlgConditionInx = MapCondition( carDlgUpdateItemPtr->data.condition );
 	carDlgPurchDate = carDlgUpdateItemPtr->data.purchDate;
