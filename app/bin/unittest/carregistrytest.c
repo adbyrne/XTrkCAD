@@ -31,17 +31,6 @@
 #include <math.h>
 #include <cmocka.h>
 
-/* On Windows, cmocka.h pulls in <windows.h>, which #defines min/max as
- * function-like macros -- colliding with the double min(double,double)
- * stub below (needed under its own name to satisfy tabstring.c's Cmp_part,
- * which calls the real utility.c:53 min() this target doesn't link). */
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
-
 #include "common.h"
 #include "cars/carsprivate.h"
 #include "cars/listelem.h"
@@ -98,7 +87,14 @@ void AbortProg(const char *scond, const char *file, int line, const char *msg)
 	abort();
 }
 
-/* utility.c:53 -- Cmp_part's min(cmp_key->partnoL, part_elem->partnoL) */
+/* utility.c:53 -- Cmp_part's min(cmp_key->partnoL, part_elem->partnoL).
+ * On Windows, something pulled in transitively via common.h #defines min
+ * as a function-like macro (Windows SDK headers' min/max) -- #undef right
+ * before this definition, not just after cmocka.h, since the redefinition
+ * happens later than that in the include chain. */
+#ifdef min
+#undef min
+#endif
 double min(double a, double b) { return a < b ? a : b; }
 
 /* Referenced only from CarProto/CarPartWrite/CustMgmProc/Init -- never
