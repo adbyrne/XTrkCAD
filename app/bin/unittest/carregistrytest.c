@@ -8,20 +8,23 @@
  * and CarPartNew/CarPartFind (the auto-create-on-commit logic the whole
  * rework depends on) are exercised as real, not copied, code.
  *
- * CarProtoRead/CarProtoWrite/CarPartRead/CarPartWrite/CustMgmProc/Init
- * (the other functions in these two files) pull in real file I/O
- * (GetArgs/PutTitle/SetCLocale/AddParam), careditdlg.c (CarDlgUpdProto/
- * CarDlgUpdPart), and scale.c -- out of scope for this pass (see the plan
- * doc). Rather than stub all of that too, the symbols those never-called
- * functions reference (SetCLocale/PutTitle/WriteSegs/SetUserLocale/
- * GetScaleName/customMgmF/CarDlgUpdProto/CarDlgUpdPart/
- * carDlgUpdateProtoPtr/carDlgUpdatePartPtr) are stubbed below, same as the
- * rest of this section, so the link doesn't need every real dependency
- * resolved. (An earlier version of this target instead relied on
- * -ffunction-sections/--gc-sections to prune those never-called functions'
- * sections -- dropped because it's linker/compiler-version-dependent
- * (passed with local gcc 16/ld 2.46, failed with CI's older Ubuntu
- * toolchain) and Apple's linker doesn't support --gc-sections at all.)
+ * CarProtoRead/CarProtoWrite/CarPartRead/CarPartWrite/CustMgmProc/Init/
+ * GetCarProtoCompatibility/GetCarPartCompatibility/CheckAvail (the other
+ * functions in these two files, plus RotatePts's Rotate() dependency in
+ * transform_pts.c) pull in real file I/O, scale.c, and draw.c dependencies
+ * this target does not otherwise need -- out of scope for this pass (see
+ * the plan doc). Every symbol they transitively reference is stubbed
+ * below, so the link doesn't depend on any of that real functionality.
+ *
+ * This target deliberately does NOT use -ffunction-sections/--gc-sections
+ * (or any other dead-code-stripping) to avoid stubbing these -- that was
+ * tried and reverted: it's both linker-version-dependent (passed with
+ * local gcc 16/ld 2.46, failed with CI's older Ubuntu ld) and
+ * linker-family-dependent (Apple's ld doesn't support --gc-sections at
+ * all; MinGW's ld accepts the flag but didn't prune these particular
+ * functions either, apparently due to the .refptr indirection thunks PE/
+ * COFF uses for potentially-cross-DLL data symbols). Explicit stubs are
+ * the only approach that's deterministic on every toolchain.
  */
 
 #include <stdarg.h>
@@ -113,6 +116,25 @@ carPart_p carDlgUpdatePartPtr;
 carProto_p carDlgUpdateProtoPtr;
 void CarDlgUpdPart(void) {}
 void CarDlgUpdProto(void) {}
+
+/* Referenced only from CarProto/CarPartRead/GetCarProto/PartCompatibility/
+ * CheckAvail/InitCarProto/InitCarPart -- never called by the test cases
+ * below; see the file header comment. */
+BOOL_T GetArgs(char *line, const char *fmt, ...) { (void)line; (void)fmt; return TRUE; }
+SCALEINX_T LookupScale(const char *scaleName) { (void)scaleName; return 0; }
+wBool_t IsParamValid(int fileInx) { (void)fileInx; return FALSE; }
+SCALE_FIT_T CompatibleScale(SCALE_FIT_TYPE_T type, SCALEINX_T s1, SCALEINX_T s2)
+{
+	(void)type; (void)s1; (void)s2;
+	return 0;
+}
+void AddParam(char *name, readParam_t proc) { (void)name; (void)proc; }
+int LogFindIndex(const char *name) { (void)name; return 0; }
+BOOL_T ReadSegs(void) { return TRUE; }
+wDrawColor drawColorBlack;
+int curParamFileIndex;
+dynArr_t tempSegs_da;
+void Rotate(coOrd *p, coOrd orig, double angle) { (void)p; (void)orig; (void)angle; }
 
 /* -----------------------------------------------------------------------
  * Fixture reset -- empties carProto_da/carPartParent_da/roadnameMap_da (and
