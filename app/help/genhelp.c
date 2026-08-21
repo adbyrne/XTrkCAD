@@ -146,6 +146,14 @@ int main(int argc, char * argv[])
 		exit(1);
 	}
 
+	/* open the JSON file for reading -- CodeQL flags argv-derived fopen()
+	 * paths as cpp/path-injection, same false-positive class already
+	 * documented in genmessages.c: this is build-time CLI code generator
+	 * tooling whose entire job is "open the file you're told to open" --
+	 * the caller (CMake, driven by this project's own CMakeLists.txt) and
+	 * the invoking user are the same trust boundary. No sanitization would
+	 * make sense here without breaking the tool. */
+	// codeql[cpp/path-injection]
 	inFile = fopen(argv[2], "r");
 	if (inFile == NULL) {
 		perror(argv[2]);
@@ -164,6 +172,9 @@ int main(int argc, char * argv[])
 		fclose(inFile);
 	}
 
+	/* open the file to generate -- same argv-derived-path reasoning as the
+	 * input file above. */
+	// codeql[cpp/path-injection]
 	outFile = fopen(argv[3], "w");
 	if (outFile == NULL) {
 		perror(argv[3]);
