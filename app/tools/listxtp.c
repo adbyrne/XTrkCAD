@@ -53,8 +53,8 @@
 int
 Compare( const void *s1, const void * s2 )
 {
-	char *str1 = *(char **)s1;
-	char *str2 = *(char **)s2;
+	const char *str1 = *(char **)s1;
+	const char *str2 = *(char **)s2;
 
 	return( strcmp( str1, str2 ));
 }
@@ -67,7 +67,7 @@ main( int argc, char **argv )
 	char buffer1[ 512 ];
 	int found;
 	DIR *d;
-	struct dirent *ent;
+	const struct dirent *ent;
 	FILE *fh;
 	struct stat buf;
 	char filename[ 256 ];
