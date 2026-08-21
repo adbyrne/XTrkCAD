@@ -83,6 +83,13 @@ EllipsizeString(char *source, char *dest, size_t length)
 
 	position = length - 1;
 	while (position) {
+		// cppcheck-suppress arrayIndexThenCheck
+		// position is already bounds-safe by construction (set to length-1,
+		// only ever decremented, loop guarded by while(position)) and
+		// resultString is guaranteed at least length+1 bytes via the
+		// resultString[length] = '\0' write above. The right-hand check here
+		// is an unrelated ellipsis-room test, not an array-bounds check --
+		// cppcheck can't tell the two apart.
 		if (resultString[position] == ' ' && position <= (length - sizeof(ELLIPSIZE))) {
 			strcpy(resultString + position, ELLIPSIZE);
 			break;
