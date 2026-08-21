@@ -75,8 +75,7 @@ your run, not a copy of it.
   produced different formatting for identical input, SF #638) dry-run conformance to
   `app/lib/astylerc`, scoped to `app/bin`/`app/wlib` only. Vendored code
   (`app/wlib/gtk3lib/wrapbox/`, `app/tools/halibut/`) and `unittest/` directories are excluded by
-  design; `app/bin/cars/` is a temporary exclusion for in-progress work (see the job's own
-  comments and `bug-tracker.md` for current status).
+  design.
 - **`fuzz-getargs`** — a bounded-time libFuzzer regression run of the `fuzz_getargs` harness (not
   continuous fuzzing; catches regressions in previously-fixed `GetArgs()` bugs like SF #645).
 
@@ -234,30 +233,42 @@ batch of findings.
   the statement's first line, and any explanatory comment placed between the directive and the
   code silently breaks it. This recurred independently in both #667 (cppcheck) and #665
   (clang-tidy).
-- **CodeQL has its own inline suppression syntax, and its own way to verify one actually
-  works.** `// codeql[query-id]` (e.g. `// codeql[cpp/path-injection]`) on the line immediately
-  before the flagged statement — same placement discipline as `cppcheck-suppress`/
-  `NOLINTNEXTLINE` above. The gotcha is specific to CodeQL though: a PR's own check summarizing
-  "0 new alerts" is **not** proof the suppression worked if the alert already existed on the
-  base branch before your PR — pre-existing alerts are never "new" regardless of whether they're
-  actually suppressed, so a trivial no-op PR would show the same "0 new alerts" result. Verify
-  instead with `gh api repos/OWNER/REPO/code-scanning/analyses` and find your PR's own
-  `refs/pull/N/merge` entry — its `results_count` reflects what CodeQL actually found scanning
-  that commit, independent of the "new vs. base" framing. `results_count: 0` after adding the
-  suppression (vs. a nonzero count on an earlier PR that touched the same lines without one) is
-  real evidence; a green "no new alerts" check by itself is not. Also worth checking every
-  flagged location individually before assuming one fix covers a whole finding class — SF #709
-  found a second, previously undocumented pair of the identical `cpp/path-injection` pattern in
-  `genhelp.c` this way, sitting right next to the already-known `genmessages.c` pair with no
-  suppression or explanation at all.
+- **CodeQL inline suppression comments (`// codeql[query-id]`) turned out not to be durable in
+  practice — prefer fixing the actual taint path instead.** They were tried first for SF #709's
+  `cpp/path-injection` findings in `genmessages.c`/`genhelp.c` (same placement discipline as
+  `cppcheck-suppress`/`NOLINTNEXTLINE` above: the line immediately before the flagged statement),
+  verified via `gh api repos/OWNER/REPO/code-scanning/analyses`'s `results_count` for the PR's own
+  `refs/pull/N/merge` entry (0 vs. a nonzero count on an earlier PR touching the same lines
+  without one) — that looked like real evidence, but checking GitHub's own Security tab directly
+  (`is:open rule:cpp/path-injection`) showed the alerts were still open regardless. Replaced with
+  real input validation instead — a `PathHasTraversal()` check rejecting `..` path components
+  before every argv-derived `fopen()`/`FOpenRestricted()` call — which a small, isolated PR (#113)
+  confirmed passes CodeQL cleanly with 0 alerts. **The Security tab, not a `results_count`
+  number or a PR check, is the trustworthy signal for whether an alert is genuinely gone.** Also
+  worth checking every flagged location individually before assuming one fix covers a whole
+  finding class — SF #709 found a second, previously undocumented pair of the identical
+  `cpp/path-injection` pattern in `genhelp.c` this way, sitting right next to the already-known
+  `genmessages.c` pair with no suppression or explanation at all.
 - **CodeQL alerts can resurface as "new" on a large-diff PR even when nothing about the flagged
   code actually changed** — its own re-scan fallback for diffs past some size threshold
   re-evaluates more broadly than a normal incremental diff, and pre-existing, already-understood
-  code can get relabeled "new" in the PR check as a result. Confirmed twice (PR #60, PR #100) on
-  this project. An inline suppression comment is durable against this (it prevents the alert
-  from being generated at all, not just filtered from a "new vs. base" diff); GitHub's Security
-  tab "Dismiss alert" button is not proven durable against it, since a "new" alert from the
-  rescan fallback isn't guaranteed to be treated as the same tracked alert you dismissed.
+  code can get relabeled "new" in the PR check as a result. Confirmed three times now (PR #60,
+  PR #100, PR #109) on this project — PR #109 flagged `genhelp.c:177`/`198` again even though
+  both lines are the exact `fopen()` calls, each already guarded by a `PathHasTraversal()` check
+  5 lines above (confirmed via `git show` on the PR branch, not just eyeballing HEAD). Real input
+  validation is durable against this in the sense that the underlying vulnerability class is
+  actually fixed — but the PR check itself will still show a spurious "N new alerts" on a
+  large-enough diff regardless, so don't expect a clean check as proof; verify the flagged lines
+  directly instead, same as above.
+- **Don't assume every new CodeQL alert on a PR is the known rescan false-positive pattern above
+  — investigate each one on its own merits.** PR #114 (unrelated to genhelp.c/genmessages.c)
+  flagged a genuinely different, real finding: `sprintf(buf, "%0.2f", someDouble)` into a fixed
+  256-byte buffer in `careditdlg.c` (SF #711) — `%f` has no upper bound on output length for an
+  arbitrary `double`, so this was a real (if practically edge-case, given these are car-price
+  fields) fixed-buffer overflow, fixed with `snprintf(..., STR_SIZE, ...)`. The two patterns look
+  identical from the PR checks list (both show as "CodeQL: fail" with a short duration) — the
+  only way to tell them apart is pulling the actual annotation data
+  (`gh api repos/OWNER/REPO/check-runs/ID/annotations`) and reading what line/rule it flags.
 - **The branch/ticket pipeline for a fix found this way:** SF ticket → Hg bug branch (stacked on
   any unmerged prior work it depends on) → git PR → CI green → merge → a review window (roughly
   2 days, case by case) → Hg merge. A CI-configuration-only change with no application code (a new
