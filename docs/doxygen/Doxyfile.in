@@ -903,11 +903,7 @@ EXCLUDE_SYMLINKS       = NO
 # Note that the wildcards are matched against the file with absolute path, so to
 # exclude all test directories for example use the pattern */test/*
 
-# TEMPORARY: app/bin/cars/ is excluded from the WARN_AS_ERROR gate below at a
-# developer's request while they actively rework files there (same precedent
-# as the astyle-check CI gate, see bug #649/#654) -- remove this exclusion
-# once that work lands and its own doxygen warnings are fixed/merged.
-EXCLUDE_PATTERNS       = */app/bin/cars/*
+EXCLUDE_PATTERNS       =
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the

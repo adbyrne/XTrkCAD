@@ -53,7 +53,8 @@ typedef enum {
 	PD_BITMAP,
 	PD_SCALE,
 	PD_NOTEBOOK,
-	PD_TAG
+	PD_TAG,
+	PD_EXPANDER
 } parameterType;
 
 // PD_FLOAT modifiers

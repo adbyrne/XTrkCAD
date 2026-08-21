@@ -205,6 +205,7 @@ typedef int (*custMgmCallBack_p)( int, void * );
 void CustMgmLoad( wIcon_p, custMgmCallBack_p, void * );
 void CompoundCustMgmLoad();
 void CarCustMgmLoad();
+BOOL_T CarCustMgmChanged();
 BOOL_T CompoundCustomSave(FILE*);
 BOOL_T CarCustomSave(FILE*);
 

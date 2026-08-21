@@ -42,6 +42,7 @@ dynArr_t carPartParent_da;
 dynArr_t roadnameMap_da;
 #define roadnameMap(N) DYNARR_N(roadnameMap_p, roadnameMap_da, N)
 BOOL_T roadnameMapChanged;
+BOOL_T carPartListChanged;
 
 typedef struct {
 	tabString_t manuf;
@@ -189,6 +190,7 @@ static void CarPartParentDelete(
         carPartParent_p parentP)
 {
 	RemoveListElem(&carPartParent_da, parentP);
+	DYNARR_FREE(carPart_p, parentP->parts_da);
 	MyFree(parentP->manuf);
 	MyFree(parentP->proto);
 	MyFree(parentP);
@@ -245,7 +247,7 @@ carPart_p CarPartNew(
 	tabString_t tabs[7];
 
 	TabStringExtract(title, 7, tabs);
-	if (TabStringCmp("Undecorated", &tabs[T_MANUF]) == 0 ||
+	if (TabStringCmp("Unknown", &tabs[T_MANUF]) == 0 ||
 	    TabStringCmp("Custom", &tabs[T_MANUF]) == 0 ||
 	    tabs[T_PART].len == 0) {
 		return NULL;
@@ -264,39 +266,71 @@ carPart_p CarPartNew(
 		LOG(log_carPart, 2, ("new car part: %s (%d) at %d\n", title, paramFileIndex,
 		                     lookupListIndex))
 	}
-	if (partP != NULL) {
-		CarPartUnlink(partP);
-		if (partP->title != NULL) {
-			MyFree(partP->title);
-		}
-		LOG(log_carPart, 2, ("upd car part: %s (%d)\n", title, paramFileIndex))
-	}
 	LoadRoadnameList(&tabs[T_ROADNAME], &tabs[T_REPMARK]);
 	parentP = CarPartParentNew(tabs[T_MANUF].ptr, tabs[T_MANUF].len,
 	                           tabs[T_PROTO].ptr, tabs[T_PROTO].len, scaleInx);
-	cmp_key.title = title;
-	cmp_key.parent = parentP;
 	cmp_key.paramFileIndex = paramFileIndex;
-	cmp_key.options = options;
-	cmp_key.type = type;
-	cmp_key.dim = *dim;
-	cmp_key.color = color;
 	cmp_key.partnoP = tabs[T_PART].ptr;
 	cmp_key.partnoL = tabs[T_PART].len;
-	partP = (carPart_p)LookupListElem(&parentP->parts_da, &cmp_key, Cmp_part,
-	                                  sizeof * partP);
+
+	/* Editing an existing part (partP != NULL, e.g. from CarDlgUpdPart) used
+	 * to unconditionally CarPartUnlink() then re-look-up/insert into
+	 * parentP->parts_da -- but since the entry was *just* removed from that
+	 * same array, the lookup could never find it again, so every edit
+	 * silently allocated a brand-new struct and left the original orphaned
+	 * (stale data shown to anything still holding that pointer, e.g. a
+	 * still-open custom-management list -- and leaked, since nothing freed
+	 * it). Mirror CarProtoNew's update semantics: when nothing about the
+	 * sort key actually changed (same parent, same part number), mutate the
+	 * existing struct in place so any pointer held elsewhere keeps
+	 * referring to the record that was just edited. Only unlink+relocate
+	 * when the part is genuinely moving to a different manufacturer/
+	 * prototype/scale or part number. */
+	if (partP != NULL && !(partP->parent == parentP &&
+	                       Cmp_part(&cmp_key, partP) == 0)) {
+		if (partP->parent == parentP) {
+			/* Same manufacturer/prototype/scale, only the sort key (partno
+			 * or paramFileIndex) changed -- remove from the array directly
+			 * rather than through CarPartUnlink(), which would delete
+			 * parentP itself if this was its last part, leaving the
+			 * parentP we reuse below dangling (use-after-free). */
+			RemoveListElem(&parentP->parts_da, partP);
+		} else {
+			CarPartUnlink(partP);
+		}
+		if (partP->title != NULL) {
+			MyFree(partP->title);
+		}
+		MyFree(partP);
+		partP = NULL;
+		LOG(log_carPart, 2, ("upd car part (moved): %s (%d)\n", title, paramFileIndex))
+	} else if (partP != NULL) {
+		LOG(log_carPart, 2, ("upd car part: %s (%d)\n", title, paramFileIndex))
+	}
+
+	if (partP == NULL) {
+		cmp_key.parent = parentP;
+		partP = (carPart_p)LookupListElem(&parentP->parts_da, &cmp_key, Cmp_part,
+		                                  sizeof * partP);
+	}
 	if (partP->title != NULL) {
 		MyFree(partP->title);
 	}
-	*partP = cmp_key;
+	partP->parent = parentP;
+	partP->paramFileIndex = paramFileIndex;
+	partP->options = options;
+	partP->type = type;
+	partP->dim = *dim;
+	partP->color = color;
 	sprintf(message, "\t\t%s", tabs[2].ptr);
 	partP->title = MyStrdup(message);
 	partP->partnoP = partP->title + 2 + tabs[2].len + 1;;
 	partP->partnoL = tabs[T_PART].len;
+	carPartListChanged = TRUE;
 	return partP;
 }
 
-static void CarPartDelete(carPart_p partP)
+void CarPartDelete(carPart_p partP)
 {
 	if (partP == NULL) {
 		return;
@@ -314,7 +348,7 @@ static void CarPartDelete(carPart_p partP)
 * are linked from CarPartParents, again DYNARRs. Thes parents are created
 * from part definition and only contain manufacturer and type information.
 *
-* \param [IN] fileIndex parameter file
+* \param[in] fileIndex parameter file
 */
 
 void DeleteCarPart(int fileIndex)
@@ -357,7 +391,9 @@ static BOOL_T CarPartRead(char* line)
 	             &longCenterOffset, &dim.truckCenter, &dim.coupledLength, &rgb)) {
 		return FALSE;
 	}
-	dim.truckCenterOffset = longCenterOffset / 1000.0;
+	/* truck-center-offset is car-only (spec §3/§4); ignore whatever is in
+	 * this reserved slot rather than treating it as a real part value. */
+	dim.truckCenterOffset = 0.0;
 	CarPartNew(NULL, curParamFileIndex, LookupScale(scale), title, options, type,
 	           &dim, wDrawFindColor(rgb));
 	MyFree(title);
@@ -372,7 +408,6 @@ BOOL_T CarPartWrite(
 	BOOL_T rc = TRUE;
 	const carPartParent_p parentP = partP->parent;
 	tabString_t tabs[7];
-	long longCenterOffset = (long)(partP->dim.truckCenterOffset * 1000);
 
 	SetCLocale();
 
@@ -386,9 +421,11 @@ BOOL_T CarPartWrite(
 	        tabs[T_NUMBER].len, tabs[T_NUMBER].ptr);
 	rc &= fprintf(f, "CARPART %s \"%s\"", GetScaleName(partP->parent->scale),
 	              PutTitle(message)) > 0;
-	rc &= fprintf(f, " %ld %ld %0.3f %0.3f 0 %ld %0.3f %0.3f %ld\n",
-	              partP->options, partP->type, partP->dim.carLength, partP->dim.carWidth,
-	              longCenterOffset,
+	/* truck-center-offset is car-only (spec §3/§4); the second reserved "0"
+	 * is a fixed placeholder here, never partP->dim.truckCenterOffset. */
+	rc &= fprintf(f, " %ld %ld %0.3f %0.3f 0 0 %0.3f %0.3f %ld\n",
+	              partP->options & ~CAR_DESC_IS_LOCO, partP->type, partP->dim.carLength,
+	              partP->dim.carWidth,
 	              partP->dim.truckCenter, partP->dim.coupledLength,
 	              wDrawGetRGB(partP->color)) > 0;
 
@@ -397,18 +434,17 @@ BOOL_T CarPartWrite(
 	return rc;
 }
 
-BOOL_T CarDescCustomSave(	FILE* f)
+BOOL_T CarDescCustomSave( FILE* f)
 {
 	int parentX;
 	int partX;
-	carPart_p partP;
 	BOOL_T rc = TRUE;
 
 	for (parentX = 0; parentX < carPartParent_da.cnt; parentX++) {
 		carPartParent_p parentP;
 		parentP = carPartParent(parentX);
 		for (partX = 0; partX < parentP->parts_da.cnt; partX++) {
-			partP = carPart(parentP, partX);
+			carPart_p partP = carPart(parentP, partX);
 			if (partP->paramFileIndex == PARAM_CUSTOM) {
 				rc &= CarPartWrite(f, partP);
 			}
@@ -496,7 +532,7 @@ int CarPartCustMgmProc(int cmd, void * data )
 		if ( tabs[T_REPMARK].len == 0 ) {
 			rd_inx = T_ROADNAME;
 		}
-		sprintf( message, "\t%s\t%s\t%.*s\t%s%s%.*s%s%.*s%s%.*s",
+		sprintf( message, "%s\t%s\t%.*s\t%s%s%.*s%s%.*s%s%.*s",
 		         partP->parent->manuf,
 		         GetScaleName(partP->parent->scale),
 		         tabs[T_PART].len, tabs[T_PART].ptr,

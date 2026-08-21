@@ -36,13 +36,13 @@ DefaultFromListIndex(const char *section, const char *namePrimary,
 {
 	long value;
 
-	if (!wPrefGetInteger(section, namePrimary, &value, *(long *)p->valueP)) {
+	if (!wPrefGetInteger(section, namePrimary, &value, *(wIndex_t *)p->valueP)) {
 		wPrefGetInteger(sectionAlt, nameAlt, &value, value);
 	}
 	if (p->control) {
 		wListSetIndex(p->control, (wIndex_t)value);
 	}
-	*(long *)p->valueP = value;
+	*(wIndex_t *)p->valueP = (wIndex_t)value;
 }
 
 static void
@@ -320,7 +320,7 @@ EXPORT void FormUpdatePrefs( void )
 				break;
 			case PD_LIST:
 				listDataP = (paramListData_t*)p->winData;
-				if ( p->control && listDataP->colCnt > 0 ) {
+				if ( p->control && listDataP && listDataP->colCnt > 0 ) {
 					if ( maxColCnt < listDataP->colCnt ) {
 						if ( maxColCnt == 0 ) {
 							colWidths = (wWinPix_t*)MyMalloc( listDataP->colCnt * sizeof * colWidths );

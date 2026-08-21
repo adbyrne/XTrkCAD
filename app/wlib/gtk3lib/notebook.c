@@ -40,6 +40,34 @@ wNoteBookGetActivePage(wControl_p notebook)
 	return(gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook->widget)));
 }
 
+void
+wNoteBookSetActivePage(wControl_p notebook, int page)
+{
+	g_assert(notebook->type == B_NOTEBOOK);
+
+	gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook->widget), page);
+}
+
+void
+wNoteBookShowTabs(wControl_p notebook, wBool_t show)
+{
+	g_assert(notebook->type == B_NOTEBOOK);
+
+	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(notebook->widget), show != FALSE);
+}
+
+static void
+NotebookSwitchPage(GtkNotebook *notebook, GtkWidget *page, guint page_num,
+                   gpointer data)
+{
+	wControl_p control = (wControl_p)data;
+	struct notebook *nbAttr = CONTROL_GET_ATTRIBUTES_PTR(control, notebook);
+
+	if (nbAttr->action) {
+		nbAttr->action((long)page_num, control->context);
+	}
+}
+
 /**
  * Create a notebook
  *
@@ -56,6 +84,8 @@ wNoteBookGetActivePage(wControl_p notebook)
  * \param[in] labelStr		identifier
  * \param[in] activePage	page opened at creation
  * \param[in] flags		unused
+ * \param[in] action		called with the new page number on tab switch
+ * \param[in] context	passed through to action
  * \return handle for created widget
  */
 
@@ -63,16 +93,24 @@ wControl_p wNotebookCreate(
         wControl_p	parent,
         const char* labelStr,
         unsigned	activePage,
-        long flags)
+        long flags,
+        wChoiceCallBack_p action,
+        void *context)
 {
 	wControl_p b;
+	struct notebook *nbAttr;
 
 	b = wlibControlNew(B_NOTEBOOK, parent, NULL, NULL);
+	nbAttr = CONTROL_GET_ATTRIBUTES_PTR(b, notebook);
+	nbAttr->action = action;
+	b->context = context;
 
 	if (ISDEFINEDINBUILDER(parent)) {
 		b->widget = wlibWidgetFromIdWarn(parent, labelStr);
 		if (b->widget) {
 			gtk_notebook_set_current_page(GTK_NOTEBOOK(b->widget), activePage);
+			g_signal_connect_after(b->widget, "switch-page",
+			                       G_CALLBACK(NotebookSwitchPage), (gpointer)b);
 		}
 	} else {
 		g_assert(FALSE);

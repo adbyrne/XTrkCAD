@@ -122,6 +122,14 @@ void *wComboBoxGetItemContext(wControl_p b, wIndex_t inx)
 	GtkTreeIter iter;
 	wListItem_p attributes = NULL;
 
+	if (inx < 0) {
+		/* -1 is the established "nothing selected" sentinel used
+		 * throughout the app for combo-box indices; gtk_tree_model_
+		 * iter_nth_child() asserts on a negative n, so guard here rather
+		 * than at every call site. */
+		return NULL;
+	}
+
 	if (gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->attributes.list.listStore),
 	                                  &iter, NULL,
 	                                  inx)) {
@@ -197,6 +205,8 @@ void wListSetValue(
 	}
 }
 
+static int ComboBoxChanged(GtkComboBox *comboBox, gpointer attributes);
+
 /**
  * Makes the \a val'th entry (0-origin) the current selection.
  * If \a val is '-1' then no entry is selected.
@@ -206,10 +216,53 @@ void wListSetValue(
  *
  */
 
+// 	void wComboBoxSetIndex(wControl_p b, int val)
+// {
+//     GtkComboBox *combo = GTK_COMBO_BOX(b->widget);
+
+//     /* Force update even when the active index is unchanged */
+//     gtk_combo_box_set_active(combo, -1);
+//     gtk_combo_box_set_active(combo, val);
+
+//     /* For has-entry comboboxes, make sure the entry text reflects the row */
+//     if (val >= 0 && gtk_combo_box_get_has_entry(combo)) {
+//         GtkTreeIter iter;
+//         struct list *lcontrol = CONTROL_GET_ATTRIBUTES_PTR(b, list);
+//         if (gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(lcontrol->listStore),
+//                                           &iter, NULL, val)) {
+//             gchar *text = NULL;
+//             gtk_tree_model_get(GTK_TREE_MODEL(lcontrol->listStore), &iter,
+//                                LISTCOL_TEXT, &text, -1);
+//             if (text) {
+//                 GtkEntry *entry = GTK_ENTRY(gtk_bin_get_child(GTK_BIN(b->widget)));
+//                 if (entry) {
+//                     gtk_entry_set_text(entry, text);
+//                 }
+//                 g_free(text);
+//             }
+//         }
+//     }
+// }
+
 void wComboBoxSetIndex(wControl_p b, int val)
 {
-	gtk_combo_box_set_active(GTK_COMBO_BOX(b->widget), val);
+	GtkComboBox *combo = GTK_COMBO_BOX(b->widget);
+
+	/* Block "changed" while forcing the display to refresh: setting the
+	 * same index again would otherwise not fire "changed" at all (a no-op
+	 * in GTK), but the -1/val reset below does fire it -- and since this
+	 * function is called to programmatically sync a widget to state the
+	 * application already knows, letting that reach ComboBoxChanged/the
+	 * dialog's change callback re-enters this same function with the same
+	 * value, recursing until the stack overflows. */
+	g_signal_handlers_block_by_func(combo, G_CALLBACK(ComboBoxChanged), b);
+	if (gtk_combo_box_get_active(combo) == val) {
+		gtk_combo_box_set_active(combo, -1);
+	}
+	gtk_combo_box_set_active(combo, val);
+	g_signal_handlers_unblock_by_func(combo, G_CALLBACK(ComboBoxChanged), b);
 }
+
 
 /**
  * Set the values for a row in the combobox
@@ -329,6 +382,70 @@ static int ComboBoxChanged(
 }
 
 /**
+ * Signal handler for the secondary ("+") icon on a has-entry combo's entry.
+ * Forwards straight to the combo's existing action callback with
+ * LIST_OP_ICONPRESS, reusing the same dispatch path as ComboBoxChanged.
+ *
+ * \param entry    IN the GtkEntry the icon is attached to
+ * \param pos      IN which icon (primary/secondary) was pressed
+ * \param event    IN the triggering GdkEvent
+ * \param attributes IN user context / pointer to the control
+ */
+
+static void ComboBoxIconPressed(
+        GtkEntry * entry,
+        GtkEntryIconPosition pos,
+        GdkEvent * event,
+        gpointer attributes)
+{
+	wControl_p bl = (wControl_p)attributes;
+	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(bl, list);
+
+	if (pos != GTK_ENTRY_ICON_SECONDARY || !lcontrol->action) {
+		return;
+	}
+	lcontrol->action(-1, "", LIST_OP_ICONPRESS, bl->context, NULL);
+}
+
+/**
+ * Signal handler for the "focus-out-event" on a has-entry combo's entry.
+ * Forwards to the combo's existing action callback with LIST_OP_FOCUSOUT,
+ * reusing the same dispatch path as ComboBoxChanged/ComboBoxIconPressed.
+ * Only connected when BL_FOCUSOUT was set at creation time, to avoid
+ * regressions in dialogs that don't expect the extra callback.
+ *
+ * \param widget   IN the GtkEntry the handler is attached to
+ * \param event    IN the triggering GdkEventFocus
+ * \param attributes IN user context / pointer to the control
+ */
+
+static gboolean ComboBoxFocusOut(
+        GtkWidget * widget,
+        GdkEventFocus * event,
+        gpointer attributes)
+{
+	wControl_p bl = (wControl_p)attributes;
+	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(bl, list);
+
+	if (lcontrol->action) {
+		lcontrol->action(-1, "", LIST_OP_FOCUSOUT, bl->context, NULL);
+	}
+	return FALSE;
+}
+
+static void
+disable_combo_button_focus (GtkComboBox *widget, gpointer data)
+{
+	if (GTK_IS_TOGGLE_BUTTON (widget)) {
+		gtk_widget_set_can_focus (widget, FALSE);
+	}
+
+	if (GTK_IS_CONTAINER (widget))
+		gtk_container_forall (GTK_CONTAINER (widget),
+		                      (GtkCallback) disable_combo_button_focus, NULL);
+}
+
+/**
  * Create a combobox for a given liststore
  *
  * \param ls        IN list store for combobox
@@ -438,6 +555,19 @@ wControl_p wComboBoxCreate(
 			abort();
 		}
 
+		if (gtk_combo_box_get_has_entry(GTK_COMBO_BOX(b->widget))) {
+			// Without this, gtk_combo_box_set_active() (wComboBoxSetIndex,
+			// used to reload the widget's displayed value) never updates
+			// the entry's text -- only the internal selection state.
+			gtk_combo_box_set_entry_text_column(GTK_COMBO_BOX(b->widget),
+			                                    LISTCOL_TEXT);
+
+			// the arrow down button should not get focus when entry field is
+			// present. without this, tab'ing through the dialog would stop
+			// twice at a combobox
+			disable_combo_button_focus (b->widget, NULL);
+		}
+
 	} else {
 
 		// create tree store for storing the contents
@@ -481,6 +611,24 @@ wControl_p wComboBoxCreate(
 
 	g_signal_connect(G_OBJECT(b->widget), "changed",
 	                 G_CALLBACK(ComboBoxChanged), b);
+
+	if ((option & BL_ADDICON) &&
+	    gtk_combo_box_get_has_entry(GTK_COMBO_BOX(b->widget))) {
+		GtkWidget *entry = gtk_bin_get_child(GTK_BIN(b->widget));
+		gtk_entry_set_icon_from_icon_name(GTK_ENTRY(entry),
+		                                  GTK_ENTRY_ICON_SECONDARY, "list-add-symbolic");
+		gtk_entry_set_icon_tooltip_text(GTK_ENTRY(entry),
+		                                GTK_ENTRY_ICON_SECONDARY, _("Add new"));
+		g_signal_connect(entry, "icon-press",
+		                 G_CALLBACK(ComboBoxIconPressed), b);
+	}
+
+	if ((option & BL_FOCUSOUT) &&
+	    gtk_combo_box_get_has_entry(GTK_COMBO_BOX(b->widget))) {
+		GtkWidget *entry = gtk_bin_get_child(GTK_BIN(b->widget));
+		g_signal_connect(entry, "focus-out-event",
+		                 G_CALLBACK(ComboBoxFocusOut), b);
+	}
 
 //	wlibAddTooltip(b->widget, parent->name, helpStr);
 	return b;

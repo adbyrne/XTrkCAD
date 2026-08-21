@@ -168,6 +168,7 @@ static char* newCarLabels[2] = { newCarLabel1, NULL };
 void CarUpdateHotbarList()
 {
 	wWinPix_t w, h;
+	char descBuf[STR_LONG_SIZE];
 
 	/** \todo extract the following code to its own function and put into dcar.c */
 	wListClear((wList_p)newCarPLs[0].control);
@@ -178,7 +179,7 @@ void CarUpdateHotbarList()
 		if (item->car && !IsTrackDeleted(item->car)) {
 			continue;
 		}
-		cp = CarItemDescribe(item, 0, NULL);
+		cp = CarItemDescribe(item, 0, NULL, descBuf);
 		wListAddValue((wList_p)newCarPLs[0].control, cp, NULL, I2VP(inx));
 	}
 	/*wListSetValue( (wList_p)newCarPLs[0].control, "Select a car" );*/
@@ -208,6 +209,7 @@ static char* CarItemHotbarProc(
 	long mode;
 	char* cp;
 	wWinPix_t w, h;
+	char descBuf[STR_LONG_SIZE];
 
 	CHECK(carItemInx < carItemHotbar_da.cnt);
 	item = carItemHotbar(carItemInx);
@@ -228,7 +230,7 @@ static char* CarItemHotbarProc(
 				if (item->car && !IsTrackDeleted(item->car)) {
 					continue;
 				}
-				cp = CarItemDescribe(item, mode, NULL);
+				cp = CarItemDescribe(item, mode, NULL, descBuf);
 				wListAddValue((wList_p)newCarPLs[0].control, cp, NULL, I2VP(inx));
 			}
 			/*wListSetValue( (wList_p)newCarPLs[0].control, "Select a car" );*/
@@ -248,7 +250,7 @@ static char* CarItemHotbarProc(
 			}
 		} else {
 			// InfoSubstituteControls(NULL, NULL);
-			cp = CarItemDescribe(item, 0, NULL);
+			cp = CarItemDescribe(item, 0, NULL, descBuf);
 			InfoMessage(cp);
 		}
 		break;
@@ -380,7 +382,15 @@ EXPORT void ClearCars( void )
 {
 	int inx;
 	for ( inx=0; inx<carItemInfo_da.cnt; inx++ ) {
-		MyFree( carItemInfo(inx) );
+		carItem_p item = carItemInfo(inx);
+		if (item->title) { MyFree(item->title); }
+		if (item->data.number) { MyFree(item->data.number); }
+		if (item->data.notes) { MyFree(item->data.notes); }
+		if (item->segPtr) {
+			FreeFilledDraw(item->segCnt, item->segPtr);
+			MyFree(item->segPtr);
+		}
+		MyFree( item );
 	}
 	DYNARR_FREE( carItem_t*, carItemInfo_da );
 }
@@ -470,5 +480,22 @@ EXPORT void CarCustMgmLoad( void )
 			CustMgmLoad( carprotoI, CarProtoCustMgmProc, carProtoP );
 		}
 	}
+}
+
+
+/**
+ * Test whether a custom prototype or catalog part has been created since
+ * the last call, consuming the flag either way. The car editor (careditdlg.c)
+ * can create new PARAM_CUSTOM prototypes/parts while the Custom Management
+ * dialog is open; this lets its change-notification handler force a full
+ * list rebuild even if a row happens to be selected there (see dcustmgm.c).
+ */
+
+EXPORT BOOL_T CarCustMgmChanged( void )
+{
+	BOOL_T changed = carProtoListChanged || carPartListChanged;
+	carProtoListChanged = FALSE;
+	carPartListChanged = FALSE;
+	return changed;
 }
 

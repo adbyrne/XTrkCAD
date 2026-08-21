@@ -48,6 +48,28 @@ ClearErrorMessage(paramData_p p)
 	wControlHilite(p->control, FALSE);
 }
 
+/**
+ * Central error-state toggle for a form field: keeps the bInvalid flag and the
+ * visual presentation (highlight + tooltip) in lockstep, so a field can never
+ * be flagged invalid for the commit gate without also showing the user why.
+ * reason is used only when valid==FALSE; pass NULL (or "") when valid.
+ *
+ * \param data	parameter definition
+ * \param valid state of the form field
+ * \param reason error message, see above for details
+ */
+
+void
+FormErrorState( paramData_p p, wBool_t valid, const char *reason )
+{
+	p->bInvalid = !valid;
+	if ( valid ) {
+		ClearErrorMessage( p );
+	} else {
+		ShowErrorMessage( p, reason );
+	}
+}
+
 unsigned long
 FormIntegerGetValue(paramData_p data, const char *enteredValue)
 {

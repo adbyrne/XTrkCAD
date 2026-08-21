@@ -105,6 +105,7 @@ typedef enum {
 	B_COLORBUTTON,
 	B_STACK,
 	B_NOTEBOOK,
+	B_EXPANDER,
 	M_MENU,
 	M_SUBMENU,
 	M_PUSH,
@@ -203,6 +204,12 @@ struct entry {
 	wEntryCallBack_p action; //< callback
 };
 
+struct expander {
+	wExpanderToggleCallback_p action;        /* user-toggle callback        */
+	unsigned long             notifyHandler; /* notify::expanded handler id  */
+	int                       inProgrammaticSet; /* guard: suppress action   */
+};
+
 struct list {
 	GtkListStore *listStore;
 	GtkTreeView *treeView;
@@ -260,6 +267,10 @@ struct scale {
 	double *valuePointer;
 };
 
+struct notebook {
+	wChoiceCallBack_p action;
+};
+
 struct stack {
 	void *callback;
 };
@@ -306,7 +317,9 @@ struct control {
 		struct colorbutton colorbutton;
 		struct draw draw;
 		struct entry entry;
+		struct expander expander;
 		struct message message;
+		struct notebook notebook;
 		struct text text;
 		struct list list;
 		struct menu menu;

@@ -91,13 +91,14 @@ framed box box.framed {
     border: 1px solid orange;
 }
 
-combobox {
-    -gtkcombobox-appears-as-list: 1;
+.panel-invalid {
+    border: 2px solid red;
 }
 
 @define-color contrasted_bg mix(@theme_fg_color, @theme_bg_color, 0.7);
 
 .tag {
-    background-color: @contrasted_bg;
+    background-color: rgb(255, 191, 0);
     border-radius: 6px;
+    padding: 6px;
 }

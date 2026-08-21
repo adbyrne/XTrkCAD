@@ -148,6 +148,77 @@ target_link_libraries(undostreamtest ${LIBS})
 
 add_test(UndoStreamTest undostreamtest)
 
+# cars/ pure functions (rolling-stock dialog rework, Phase A)
+
+add_executable(carstest
+	carstest.c
+	../cars/tabstring.c
+	../cars/transform_pts.c
+)
+
+target_include_directories(carstest PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../cars
+    ${CMAKE_SOURCE_DIR}/app/wlib/include
+)
+
+target_link_libraries(carstest PRIVATE ${LIBS})
+if(UNIX)
+	target_link_libraries(carstest PRIVATE m)
+endif()
+
+add_test(CarsTest carstest)
+
+# cars/ registry functions, linked directly (rolling-stock dialog rework, Phase H)
+
+add_executable(carregistrytest
+	carregistrytest.c
+	../cars/carproto.c
+	../cars/carpart.c
+	../cars/listelem.c
+	../cars/tabstring.c
+	../cars/transform_pts.c
+)
+
+target_include_directories(carregistrytest PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../cars
+    ${CMAKE_SOURCE_DIR}/app/wlib/include
+)
+
+target_link_libraries(carregistrytest PRIVATE ${LIBS})
+if(UNIX)
+	target_link_libraries(carregistrytest PRIVATE m)
+endif()
+
+add_test(CarRegistryTest carregistrytest)
+
+# cars/careditlogic.c -- pure validation/resolution helpers used by the car
+# edit dialog's Ok-gating and commit-time checks (rolling-stock dialog
+# rework). Only external dependency is GetScaleRatio (scale.c), stubbed in
+# the test file -- no gc-sections trick needed here.
+
+add_executable(careditlogictest
+	careditlogictest.c
+	../cars/careditlogic.c
+)
+
+target_include_directories(careditlogictest PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../cars
+    ${CMAKE_SOURCE_DIR}/app/wlib/include
+)
+
+target_link_libraries(careditlogictest PRIVATE ${LIBS})
+if(UNIX)
+	target_link_libraries(careditlogictest PRIVATE m)
+endif()
+
+add_test(CarEditLogicTest careditlogictest)
+
 set_target_properties(
 	dxfformattest
 	shortentest
@@ -157,12 +228,15 @@ set_target_properties(
 	beziertest
 	cornutest
 	undostreamtest
+	carstest
+	carregistrytest
+	careditlogictest
  	PROPERTIES FOLDER UnitTests
  )
 
 if(XTRKCAD_SANITIZE AND UNIX)
 	set(SANITIZE_FLAGS -fsanitize=address,undefined -fno-omit-frame-pointer)
-	foreach(t dxfformattest shortentest defaultstest pathstest utilitytest beziertest cornutest undostreamtest)
+	foreach(t dxfformattest shortentest defaultstest pathstest utilitytest beziertest cornutest undostreamtest carstest carregistrytest careditlogictest)
 		target_compile_options(${t} PRIVATE ${SANITIZE_FLAGS})
 		target_link_options(${t} PRIVATE ${SANITIZE_FLAGS})
 	endforeach()

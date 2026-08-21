@@ -391,8 +391,16 @@ wControl_p wButtonCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
 	}
 	gtk_widget_show_all(b->widget);
 	//g_signal_connect(G_OBJECT(b->widget), "clicked", G_CALLBACK(buttonClick), b);
-	g_signal_connect(G_OBJECT(b->widget), "button-press-event",
-	                 G_CALLBACK(buttonPress), b);
+	if (GTK_IS_MENU_BUTTON(b->widget) &&
+	    gtk_menu_button_get_popup(GTK_MENU_BUTTON(b->widget)) != NULL) {
+		/* A GtkMenuButton with a builder-defined popup opens it from its
+		 * own default button-press handling; stealing the event here
+		 * (as done below for plain buttons) would stop that from firing
+		 * and the popup would never appear. */
+	} else {
+		g_signal_connect(G_OBJECT(b->widget), "button-press-event",
+		                 G_CALLBACK(buttonPress), b);
+	}
 
 	if (option & BO_REPEAT) {
 		SetAutoRepeat(b);
