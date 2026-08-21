@@ -234,6 +234,30 @@ batch of findings.
   the statement's first line, and any explanatory comment placed between the directive and the
   code silently breaks it. This recurred independently in both #667 (cppcheck) and #665
   (clang-tidy).
+- **CodeQL has its own inline suppression syntax, and its own way to verify one actually
+  works.** `// codeql[query-id]` (e.g. `// codeql[cpp/path-injection]`) on the line immediately
+  before the flagged statement — same placement discipline as `cppcheck-suppress`/
+  `NOLINTNEXTLINE` above. The gotcha is specific to CodeQL though: a PR's own check summarizing
+  "0 new alerts" is **not** proof the suppression worked if the alert already existed on the
+  base branch before your PR — pre-existing alerts are never "new" regardless of whether they're
+  actually suppressed, so a trivial no-op PR would show the same "0 new alerts" result. Verify
+  instead with `gh api repos/OWNER/REPO/code-scanning/analyses` and find your PR's own
+  `refs/pull/N/merge` entry — its `results_count` reflects what CodeQL actually found scanning
+  that commit, independent of the "new vs. base" framing. `results_count: 0` after adding the
+  suppression (vs. a nonzero count on an earlier PR that touched the same lines without one) is
+  real evidence; a green "no new alerts" check by itself is not. Also worth checking every
+  flagged location individually before assuming one fix covers a whole finding class — SF #709
+  found a second, previously undocumented pair of the identical `cpp/path-injection` pattern in
+  `genhelp.c` this way, sitting right next to the already-known `genmessages.c` pair with no
+  suppression or explanation at all.
+- **CodeQL alerts can resurface as "new" on a large-diff PR even when nothing about the flagged
+  code actually changed** — its own re-scan fallback for diffs past some size threshold
+  re-evaluates more broadly than a normal incremental diff, and pre-existing, already-understood
+  code can get relabeled "new" in the PR check as a result. Confirmed twice (PR #60, PR #100) on
+  this project. An inline suppression comment is durable against this (it prevents the alert
+  from being generated at all, not just filtered from a "new vs. base" diff); GitHub's Security
+  tab "Dismiss alert" button is not proven durable against it, since a "new" alert from the
+  rescan fallback isn't guaranteed to be treated as the same tracked alert you dismissed.
 - **The branch/ticket pipeline for a fix found this way:** SF ticket → Hg bug branch (stacked on
   any unmerged prior work it depends on) → git PR → CI green → merge → a review window (roughly
   2 days, case by case) → Hg merge. A CI-configuration-only change with no application code (a new
