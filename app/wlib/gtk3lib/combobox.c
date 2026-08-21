@@ -436,12 +436,13 @@ static gboolean ComboBoxFocusOut(
 static void
 disable_combo_button_focus (GtkComboBox *widget, gpointer data)
 {
-	if (GTK_IS_TOGGLE_BUTTON (widget))
-        gtk_widget_set_can_focus (widget, FALSE);
+	if (GTK_IS_TOGGLE_BUTTON (widget)) {
+		gtk_widget_set_can_focus (widget, FALSE);
+	}
 
-    if (GTK_IS_CONTAINER (widget))
-        gtk_container_forall (GTK_CONTAINER (widget),
-                              (GtkCallback) disable_combo_button_focus, NULL);
+	if (GTK_IS_CONTAINER (widget))
+		gtk_container_forall (GTK_CONTAINER (widget),
+		                      (GtkCallback) disable_combo_button_focus, NULL);
 }
 
 /**
@@ -561,9 +562,9 @@ wControl_p wComboBoxCreate(
 			gtk_combo_box_set_entry_text_column(GTK_COMBO_BOX(b->widget),
 			                                    LISTCOL_TEXT);
 
-			// the arrow down button should not get focus when entry field is 
+			// the arrow down button should not get focus when entry field is
 			// present. without this, tab'ing through the dialog would stop
-			// twice at a combobox 
+			// twice at a combobox
 			disable_combo_button_focus (b->widget, NULL);
 		}
 
@@ -612,18 +613,18 @@ wControl_p wComboBoxCreate(
 	                 G_CALLBACK(ComboBoxChanged), b);
 
 	if ((option & BL_ADDICON) &&
-	                gtk_combo_box_get_has_entry(GTK_COMBO_BOX(b->widget))) {
+	    gtk_combo_box_get_has_entry(GTK_COMBO_BOX(b->widget))) {
 		GtkWidget *entry = gtk_bin_get_child(GTK_BIN(b->widget));
 		gtk_entry_set_icon_from_icon_name(GTK_ENTRY(entry),
-		                GTK_ENTRY_ICON_SECONDARY, "list-add-symbolic");
+		                                  GTK_ENTRY_ICON_SECONDARY, "list-add-symbolic");
 		gtk_entry_set_icon_tooltip_text(GTK_ENTRY(entry),
-		                GTK_ENTRY_ICON_SECONDARY, _("Add new"));
+		                                GTK_ENTRY_ICON_SECONDARY, _("Add new"));
 		g_signal_connect(entry, "icon-press",
 		                 G_CALLBACK(ComboBoxIconPressed), b);
 	}
 
 	if ((option & BL_FOCUSOUT) &&
-	                gtk_combo_box_get_has_entry(GTK_COMBO_BOX(b->widget))) {
+	    gtk_combo_box_get_has_entry(GTK_COMBO_BOX(b->widget))) {
 		GtkWidget *entry = gtk_bin_get_child(GTK_BIN(b->widget));
 		g_signal_connect(entry, "focus-out-event",
 		                 G_CALLBACK(ComboBoxFocusOut), b);

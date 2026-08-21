@@ -52,7 +52,7 @@ ClearErrorMessage(paramData_p p)
  * Central error-state toggle for a form field: keeps the bInvalid flag and the
  * visual presentation (highlight + tooltip) in lockstep, so a field can never
  * be flagged invalid for the commit gate without also showing the user why.
- * reason is used only when valid==FALSE; pass NULL (or "") when valid. 
+ * reason is used only when valid==FALSE; pass NULL (or "") when valid.
  *
  * \param data	parameter definition
  * \param valid state of the form field

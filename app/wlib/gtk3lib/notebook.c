@@ -110,7 +110,7 @@ wControl_p wNotebookCreate(
 		if (b->widget) {
 			gtk_notebook_set_current_page(GTK_NOTEBOOK(b->widget), activePage);
 			g_signal_connect_after(b->widget, "switch-page",
-			                        G_CALLBACK(NotebookSwitchPage), (gpointer)b);
+			                       G_CALLBACK(NotebookSwitchPage), (gpointer)b);
 		}
 	} else {
 		g_assert(FALSE);

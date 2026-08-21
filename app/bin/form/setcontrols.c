@@ -88,7 +88,7 @@ EXPORT void FormHilite(
 void
 FormGroupReveal(paramGroup_p pg, const char *id, BOOL_T reveal)
 {
-	wRevealerShow(pg->win, id, reveal); 
+	wRevealerShow(pg->win, id, reveal);
 }
 
 EXPORT void FormGroupSetShadow(
@@ -121,7 +121,8 @@ FormGroupExpanderShow(paramGroup_p pg, const char *id, BOOL_T reveal)
 }
 
 void
-FormGroupExpanderSetSummary(paramGroup_p pg, const char *id, const char *summary)
+FormGroupExpanderSetSummary(paramGroup_p pg, const char *id,
+                            const char *summary)
 {
 	wControl_p b = FormGroupExpanderFind(pg, id);
 	if (b) { wExpanderSetSummary(b, summary); }

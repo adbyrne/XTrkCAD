@@ -1,5 +1,5 @@
 /** \file expander.c
- * code for the expander 
+ * code for the expander
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -57,7 +57,7 @@ wExpanderCreate(wWin_p parent, const char *id, wControl_p win, void *context)
 
 	e = CONTROL_GET_ATTRIBUTES_PTR(b, expander);
 	e->notifyHandler = g_signal_connect(widget, "notify::expanded",
-	                       G_CALLBACK(expanderExpandedNotify), b);
+	                                    G_CALLBACK(expanderExpandedNotify), b);
 	return b;
 }
 

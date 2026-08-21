@@ -565,11 +565,6 @@ jobs:
     #   - unittest/ dirs: excluded separately (see quality-plan-gtk3v2main.md
     #     Phase 0) — some unittest sources are deliberately non-conformant.
     #
-    # TEMPORARY (remove once the in-progress work lands, see bug-tracker.md):
-    # app/bin/cars/ is excluded at a developer's request while they actively
-    # rework files there — a continuously-changing directory would otherwise
-    # trip this gate on formatting drift unrelated to any given PR.
-    #
     # astyle is built from source and pinned to ASTYLE_VERSION rather than
     # installed via apt: the apt-resolved version drifts silently whenever
     # the distro package updates, which is exactly what caused the drift in
@@ -597,7 +592,6 @@ jobs:
           OUTPUT=$("$ASTYLE" --options=app/lib/astylerc --dry-run -Q --recursive --ignore-exclude-errors \
             --exclude=wrapbox \
             --exclude=unittest \
-            --exclude=cars \
             "app/bin/*.c" "app/bin/*.h" "app/wlib/*.c" "app/wlib/*.h" 2>&1 | grep '^Formatted' || true)
           if [ -n "$OUTPUT" ]; then
             echo "$OUTPUT"

@@ -90,7 +90,7 @@ void FormLoadSingleControl(
 		wListSetIndex(p->control, *(wIndex_t*)p->valueP);
 		p->oldD.l = *(wIndex_t*)p->valueP;
 		break;
-	case PD_COMBOLIST: 
+	case PD_COMBOLIST:
 		wComboBoxSetIndex(p->control, *(wIndex_t*)p->valueP);
 		p->oldD.l = *(wIndex_t*)p->valueP;
 		break;

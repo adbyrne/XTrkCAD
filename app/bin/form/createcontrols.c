@@ -329,7 +329,8 @@ ScalePush(FLOAT_T value, void* dp)
 }
 
 static void
-ExpanderToggleShim(wControl_p b, const char *id, wBool_t revealed, void *context)
+ExpanderToggleShim(wControl_p b, const char *id, wBool_t revealed,
+                   void *context)
 {
 	paramData_p p = (paramData_p)context;
 	long valL = revealed ? 1 : 0;
@@ -602,7 +603,7 @@ CreateControl(paramData_p pd, char* helpStr,	unsigned x,	unsigned y)
 		if (pd->control) {
 			wExpanderSetToggleCallback(pd->control, ExpanderToggleShim);
 		}
-		break;		
+		break;
 	case PD_MESSAGE:
 		pd->control = (wControl_p)wMessageCreateEx(win,
 		              x, y, helpStr, 1,

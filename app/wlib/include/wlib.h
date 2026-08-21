@@ -656,7 +656,7 @@ void wControlSetContext(wControl_p, void *);
 void wControlHilite(wControl_p, wBool_t);
 void wRevealerShow(wControl_p win, const char *id, wBool_t reveal);
 typedef void (*wExpanderToggleCallback_p)(wControl_p win, const char *id,
-                                          wBool_t revealed, void *context);
+                wBool_t revealed, void *context);
 
 wControl_p wExpanderCreate(wWin_p parent, const char *id, wControl_p win,
                            void *context);

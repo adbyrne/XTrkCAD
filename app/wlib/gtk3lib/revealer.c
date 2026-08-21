@@ -88,7 +88,7 @@ wFrameSetShadow(wControl_p win, const char *id, wBool_t shown)
 	if (!widget) { return; }
 	if (GTK_IS_FRAME(widget)) {
 		gtk_frame_set_shadow_type(GTK_FRAME(widget),
-		                           shown ? GTK_SHADOW_IN : GTK_SHADOW_NONE);
+		                          shown ? GTK_SHADOW_IN : GTK_SHADOW_NONE);
 	}
 }
 

@@ -12,11 +12,16 @@
  * (the other functions in these two files) pull in real file I/O
  * (GetArgs/PutTitle/SetCLocale/AddParam), careditdlg.c (CarDlgUpdProto/
  * CarDlgUpdPart), and scale.c -- out of scope for this pass (see the plan
- * doc). Rather than stub all of that too, this target is compiled with
- * -ffunction-sections and linked with --gc-sections so the linker drops
- * those never-called functions' sections instead of requiring every symbol
- * they reference to resolve. Only symbols reachable from CarProtoNew/Find/
- * Lookup and CarPartNew/Find themselves need stubbing below.
+ * doc). This target is compiled with -ffunction-sections and linked with
+ * --gc-sections so the linker *can* drop those never-called functions'
+ * sections. That pruning is a linker/compiler-version-dependent optimization,
+ * though, not a guarantee (confirmed: passes with local gcc 16/ld 2.46, fails
+ * with CI's Ubuntu toolchain, leaving SetCLocale/PutTitle/WriteSegs/
+ * SetUserLocale/GetScaleName/customMgmF/CarDlgUpdProto/CarDlgUpdPart/
+ * carDlgUpdateProtoPtr/carDlgUpdatePartPtr undefined at link time) -- so the
+ * symbols those never-called functions reference are also stubbed below,
+ * same as the rest of this section, to make the link deterministic
+ * regardless of toolchain.
  */
 
 #include <stdarg.h>
@@ -84,6 +89,23 @@ void AbortProg(const char *scond, const char *file, int line, const char *msg)
 
 /* utility.c:53 -- Cmp_part's min(cmp_key->partnoL, part_elem->partnoL) */
 double min(double a, double b) { return a < b ? a : b; }
+
+/* Referenced only from CarProto/CarPartWrite/CustMgmProc/Init -- never
+ * called by the test cases below; see the file header comment. */
+void SetCLocale(void) {}
+void SetUserLocale(void) {}
+char *PutTitle(char *cp) { return cp; }
+BOOL_T WriteSegs(FILE *f, wIndex_t segCnt, trkSeg_p segs)
+{
+	(void)f; (void)segCnt; (void)segs;
+	return TRUE;
+}
+char *GetScaleName(SCALEINX_T scaleInx) { (void)scaleInx; return NULL; }
+FILE *customMgmF;
+carPart_p carDlgUpdatePartPtr;
+carProto_p carDlgUpdateProtoPtr;
+void CarDlgUpdPart(void) {}
+void CarDlgUpdProto(void) {}
 
 /* -----------------------------------------------------------------------
  * Fixture reset -- empties carProto_da/carPartParent_da/roadnameMap_da (and
