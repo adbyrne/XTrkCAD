@@ -196,7 +196,7 @@ END
 MESSAGE MSG_LAYER_MODULE
 Cannot turn current layer into a Module
 HELP
-The current \f{Layer} is where new objects are created. It's not possible to turn this layer into a module, since then the objects can't be chnaged or added. Change the current \f{Layer} to some other \f{Layer} before trying to make this Layer into a module.
+The current \f{Layer} is where new objects are created. It's not possible to turn this layer into a module, since then the objects can't be changed or added. Change the current \f{Layer} to some other \f{Layer} before trying to make this Layer into a module.
 
 Refer to \k{cmdLayer} for detail.
 END
@@ -449,7 +449,7 @@ END
 
 #fileio.c
 MESSAGE MSG_DXF_LINE_ERROR
-While processing DXF file %s, an error occured. 
+While processing DXF file %s, an error occurred.
 HELP
 The DXF file that you loaded generated an error.
 END
@@ -529,7 +529,7 @@ Label description is hidden
 HELP
 The \f{Move Description} command can only be used when labels are visible on the layout. Labels can be hidden using the Context Menu.
 
-Use the Context Menu to toggle a track's visbility on and off.
+Use the Context Menu to toggle a track's visibility on and off.
 
 END
 
@@ -709,9 +709,9 @@ END
 
 # cparalle.c
 MESSAGE MSG_PARALLEL_SEP_GTR_0
-Parallel separation must be greater than 0, or the new guage must be different than the old.
+Parallel separation must be greater than 0, or the new gauge must be different than the old.
 HELP
-A parallel track with an identical gauge and separation of 0 or less cannot be created. Specify a positive value in the \f{Separation} field that appears in the Status Bar, or select a track with a different guage.
+A parallel track with an identical gauge and separation of 0 or less cannot be created. Specify a positive value in the \f{Separation} field that appears in the Status Bar, or select a track with a different gauge.
 
 Refer to \k{cmdParallel} for detail.
 END
@@ -1609,7 +1609,7 @@ HELP
 Internal error: an invalid scale index has been generated.
 You can substitute the layout's current scale (recommended).
 
-If you do not want to use the currrent scale:
+If you do not want to use the current scale:
 
 \b Choose "Unknown".
 
