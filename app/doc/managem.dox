@@ -1,0 +1,647 @@
+/* Auto-converted from managem.but by tools/but-to-doxygen.py.
+ * See .claude/halibut-doxygen-investigation-plan.md and
+ * conversion-log.md for anything flagged during conversion. */
+
+/**
+\page manageM Manage Menu
+
+\anchor idx_Manage_Menu_212
+
+![](mmanage.png)
+
+The <b>Manage Menu</b> shows commands affecting the <b>Main Canvas</b> (\ref mainW).
+
+- <b>Car Inventory</b> - displays the dialog (\ref cmdCarinv) to update your list of cars and locomotives.
+
+- <b>Custom Defined Parts</b> - displays the <b>Custom Defined Parts</b> (\ref cmdCustmgm) dialog to manipulate custom turnout, structure and rolling stock designs.
+
+- <b>Layout Control Elements</b> - display the <b>Layout Control Elements</b> (\ref cmdContmgm) dialog to manipulate blocks, turnout motors and signals.
+
+- <b>Group</b> - creates a <b>Structure</b> or <b>Turnout</b> definition from the selected (\ref cmdSelect) objects. See the <b>Group</b> command (\ref cmdGroup) for details.
+
+- <b>Layers</b> - displays the Layer (\ref cmdLayer) dialog.
+
+- <b>Parts List</b> - Invokes the Parts List (\ref cmdEnum) command.  This command produces a list of all selected turnouts and sectional tracks and the total length of flex-track.
+
+- <b>Price List</b> - Displays the <b>Price List</b> (\ref cmdPricelist) dialog to specify prices for tracks and structures.
+
+- <b>Train</b> - Run trains on the designed layout
+
+- <b>Turnout Designer</b> - displays a menu list of Turnout Designer (\ref cmdTurnoutNew) dialogs.
+
+- <b>Ungroup</b> - breaks apart any selected (\ref cmdSelect) turnouts and structures into their basic lines (\ref cmdDraw) and track segments.
+
+- <b>Update Turnout and Structures</b> - replaces (\ref cmdRefreshSpecial) any selected (\ref cmdSelect) <b>Turnouts</b> and <b>Structures</b> with the definitions from updated <b>parameter files</b> (\ref cmdPrmfile).
+
+- \subpage cmdCarinv
+- \subpage cmdCustmgm
+- \subpage cmdContmgm
+- \subpage cmdGroup
+- \subpage cmdLayer
+- \subpage cmdEnum
+- \subpage cmdPricelist
+- \subpage cmdTrain
+- \subpage cmdTurnoutNew
+- \subpage cmdRefreshSpecial
+- \subpage cmdUngroup
+
+*/
+
+/**
+\page cmdCarinv Car Inventory
+
+\anchor idx_Car_Inventory_213
+
+This dialog is used to manage your list of cars and locomotives.
+
+![](carinv.png)
+
+The main part of this dialog contains a detailed list of each car and locomotive in your inventory.  The list can be sorted on different columns by selecting column names in the <b>Sort Drop Down Lists</b> along the top of the dialog.  The width of the columns can be adjusted by <i>Left+Drag</i> on the lines between the column titles.
+
+Cars are placed on the layout by using the <b>Train Simulation</b> (\ref cmdTrain) command.
+
+The <b>Find</b> button will center the <b>Main Window</b> (\ref mainW) on the selected car.  This button is only enabled for cars which are on the Layout (indicated by co-ordinates in the Location column).  If the car on a track that is hidden and <b>Trains on Hidden Track</b> (\ref cmdDisplay) is set to <b>Hide</b>, then the car (and any attached cars) will be made visible.
+
+The <b>Edit</b> button invokes the <b>Car</b> dialog (\ref cmdCarpart) to modify the selected car.  This button is disabled if more than one (or no) car is selected or if the selected car is on the Layout.  
+
+The <b>Add</b> button is to add a new Car. Refer to \ref faqsPrototype if an error occurs when attempting to add inventory to this list.
+
+The <b>Delete|Shelve</b> button serves two functions: 
+If all selected cars are on the layout then this button shows <b>Shelve</b> and it moves them from the layout and returns them to the <b>Shelf</b>.
+If all selected cars are on the <b>Shelf</b> then this button shows <b>Delete</b> and they will be deleted from the Inventory.
+Otherwise, the button is blank and disabled.
+
+The <b>Import</b> and <b>Export</b> buttons read and write a <i>Comma-Separated-Value (CSV)</i> file.  This file format can be read and written by many applications. It can be used to transfer car inventory data between different applications. This file contains the following columns (the first four are required when Importing):
+
+- <i>Scale</i> - example: HO, HOn3, N, O etc
+
+- <i>Manufacturer</i> and <i>Partno</i>
+
+- <i>Prototype</i> - example: GP40
+
+- <i>Index</i> - an unique numeric identifier (optional)
+
+- <i>Roadname</i>, <i>Repmark</i> and <i>Number</i> - example: Burlington Northern, BN, 1234
+
+- <i>Type</i> - enter one of the following:
+
+  - 10101(Diesel),
+
+  - 10201(Steam),
+
+  - 10301(Electric),
+
+  - 30100(Freight),
+
+  - 50100(Passenger),
+
+  - 70100(M-O-W) or;
+
+  - 90100(Other)
+
+- <i>Options</i> - bit map of
+
+  - 0x0001 - Body Mounted Couplers
+
+  - 0x0002 - Locomotive
+
+  - Other bits can be ignored
+
+- <i>CarLength</i>, <i>CarWidth</i>, <i>CoupledLength</i>, <i>Truch Center Offset</i> and <i>TruckCenter</i> - car dimensions in inches
+
+- <i>Color</i> - encoded as (Red \* 65536 + Green \* 256 + Blue)
+
+- <i>PurchPrice</i>, <i>CurrPrice</i>, <i>PurchDate</i> and <i>ServiceDate</i> - numeric values - dates are in the form yyyymmdd, where yyyy is the year, mm the month, dd the day
+
+- <i>Condition</i> - enter one of the following:
+
+  - 100(Mint),
+
+  - 80(Excellent),
+
+  - 60(Good),
+
+  - 40(Fair),
+
+  - 20(Poor) or;
+
+  - 0(N/A)
+
+- <i>Notes</i> - free form text
+
+The <b>List</b> button creates a text file listing your inventory.
+
+- \subpage cmdCarpart
+- \subpage carpart
+- \subpage carprototype
+
+*/
+
+/**
+\page cmdCarpart Car Item Dialog
+
+\anchor idx_Car_Item_Dialog_214
+
+This dialog is invoked from the <b>Car Inventory</b> (\ref cmdCarinv) and the <b>Custom Management</b> (\ref cmdCustmgm) dialogs.
+
+The dialog can be displayed in three different ways and is used to create or edit <b>Car Items</b>, <b>Car Part</b> definitions or <b>Prototype</b> definitions.
+
+The <b>Add</b> button creates a new definition.  The dialog remains open so you can enter multiple definitions. You can <b>Close</b> the dialog when you are finished. If you are editing an existing definition then the <b>Add</b> button will be replaced by the <b>Update</b> button which updates the selected definition and closes the dialog.
+
+The <b>New</b> button on the <b>Car Item</b> dialog invokes the <b>Car Part</b> or <b>Car Prototype</b> dialog which you can use to create new part or prototype definitions for your cars.  The <b>New</b> button on the <b>Car Part</b> dialog invokes the <b>Car Prototype</b> dialog.
+
+<b>Car Item Dialog</b>
+
+![](caritem.png)
+
+The dialog contains:
+
+- <b>Car Description</b> which contains lists of <b>Manufacturer</b>, <b>Prototype</b> and <b>Part Number</b> which are used to select the Car Part.  The <b>Manufacturer</b> list contains the entries <b>Custom</b> and <b>Unknown</b> for special Car Parts.  For these entries you can enter the <b>Part Number</b> and <b>Description</b> fields.
+
+  - If the manufacturer of your car is not listed in the <b>Manufacturer</b> list you can type in the new name. Also, if the <b>Part</b> is not listed you can enter a new part number.  The new part will be added to the list of Custom Car Parts (\ref cmdCustmgm).
+
+- The <b>Mode</b> Radio button group lets you choose between the <b>Information</b> controls described here or the <b>Customize</b> controls described in the next section.  You would use the <b>Customize</b> option to change Road name, Number or Color if you have repainted the car or to adjust the dimensions.
+
+- Details about the individual car item such as <b>Index</b>, <b>Price</b> and <b>Condition</b>, <b>Dates</b> and <b>Notes</b>.  The <b>Index</b> value must be unique for all car items.
+
+  - To enter multiple <b>New Cars</b> you can set the <b>Quantity</b> field to a value greater than one. The <b>Numbers</b> Radio button group specifies whether the new car's numbers will be sequential (such as 1234, 1235, ...) or repeated.
+
+- <b>Message Line</b> which will contain instructions if there any fields that need to be completed.
+
+*/
+
+/**
+\page carpart Car Part Dialog
+
+\anchor idx_Car_Part_Dialog_215
+
+This dialog is similar the the <b>Car Item</b> dialog except that the <b>Car Item Information</b> section is not displayed.  The <b>Manufacturer</b> Drop Down List is editable so you can enter a new manufacturer, and you must enter a <b>Part Number</b>.  If you are adding a new car part, the <b>Part Number</b> field will be incremented (if it is a numeric value) so you can enter a number of car parts.
+
+![](carpart.png)
+
+The middle section contains:
+
+- The <b>Road</b>, <b>Reporting Mark</b>, <b>Number</b> and <b>Color</b>.  You can choose a <b>Road name</b> from the list of known road names or enter a new value.  If known, the <i>reporting mark</i> (road name abbreviation) is filled in. These values control what label content is shown for Cars. If a reporting number is present the rep mark and the rep number will be used if the Cars Label Option is on in \ref cmdDisplay
+
+- <b>Car Dimensions</b> which contain the major dimensions of the car and how the coupler is mounted on the car. The <b>Coupler Length</b> is measured from the edge of the car body to the pulling face of the coupler.  It is equivalent to half the separation between two coupled cars.
+
+  - When entering values, the `p` key will convert a prototype measurement to a scale measurement.
+
+  - The length dimension has the following relationship, so changing one value will affect the others:
+
+- <b>Coupled Length = Car Length + 2 \* Coupler Length</b>
+
+- The <i>Center Offset</i> moves the center of the two trucks from the center of the Car.
+This is a common feature of steam locomotives and means the envelope of the engine requires greater seperation between tracks on small radius curves.
+The minimum clearance needed can be seen by placing the car with the greatest distance from the center of the trucks to the corner on the inner radius and the car with the greatest distance between the trucks on the outer radius.
+See NMRA TN-7 Curved Track Centerline and Obstacle Clearance Calculation Methodology. 
+
+}
+
+- A diagram showing the position of the trucks and couplers.
+
+*/
+
+/**
+\page carprototype Car Prototype Dialog
+
+\anchor idx_Car_Prototype_Dialog_216
+
+This dialog is used to create or edit prototype definitions.
+
+![](carproto.png)
+
+The first section contains the name of the <b>Prototype</b> and its <b>Type</b>.
+
+If this dialog was invoked from the <b>Car Item</b> or <b>Car Part</b> dialog then the prototype diagram will be copied from the selected part. Otherwise, the prototype is drawn as the default image which is a simple blue rectangle or, if it is a locomotive, with one end angled.
+
+The <b>Import</b> button creates a prototype definition from the selected (\ref cmdSelect) lines and shapes.  To use this, first create a set of shapes (<b>Filled Rectangles, Polygons, Circles, Lines</b> etc) using the Draw (\ref cmdDraw) commands on the main canvas.  <b>Select</b> the shapes and use the <b>Import</b> button.
+
+The <b>Reset</b> button will reset the figure to the default image.
+
+If this dialog is invoked by the <b>New</b> button on the <b>Car</b> or <b>Car Part</b> dialog then the initial image will be copied from the prototype displayed on those dialogs.  You can use this to make variations of existing prototypes.
+
+The <b>Color</b> control on the <b>Car Part</b> dialog will replace any color of the <b>Imported</b> shapes which is not Black or a shade of gray with the selected hue.
+
+The <b>Flip</b> button flips the diagram horizontally.  For locomotives, the forward direction is to the right.
+
+Unlike the other dialogs, dimensions in this dialog are in prototype units.  When entering values, the `s` key will convert a scale measurement to a prototype measurement.
+
+*/
+
+/**
+\page cmdCustmgm Custom Management
+
+\anchor idx_Custom_Management_217
+
+The <b>Custom Management</b> dialog allows you change the properties of turnouts, sectional track, structures, car parts and prototypes you have designed with the <b>Turnout Designer</b> (\ref cmdTurnoutNew), <b>Group</b> (\ref cmdGroup) or <b>Car</b> (\ref cmdCarpart) commands.  You can also move selected objects to a <b>Parameter File</b> (\ref cmdPrmfile).
+
+![](custmgm.png)
+
+The <b>Edit</b> button invokes the appropriate designer or editor dialog for the selected item. This button is disabled if more than one (or no) object is selected.
+
+- The <b>Turnout Designer</b> (\ref cmdTurnoutNew) is used to modify the selected turnout design.  If you wish to modify cosmetic details on a turnout or sectional track use the <b>Group</b> (\ref cmdGroup) command to add them to an existing definition.
+
+- <b>Structures</b> and old <b>Turnout Designs</b> use the <b>Rename Dialog</b> to change the Manufacturer,  Description or Part Number values.  For these objects the <b>Edit</b> button's label changes to <b>Rename</b>. <b>Structures</b> are not edited using this dialog but by using the <b>Ungroup</b> (\ref cmdUngroup) and <b>Group</b> (\ref cmdGroup) commands.
+
+- The <b>Car</b> (\ref cmdCarpart) dialog is used to modify <b>Car Prototype</b> and <b>Car Parts</b>.
+
+The <b>Delete</b> button removes the selected entries from the `xtrkcad.cus` (\ref directories) file when you exit the dialog.
+
+The <b>Move To</b> button moves the selected entries to a <b>Parameter File</b> (\ref cmdPrmfile).  If the <b>Parameter File</b> does not currently exist than you will be prompted to supply a contents description line for the file.  In case the parameter file already exists, the selected entries are appended to this file.
+
+The <b>New</b> buttons invokes the Car (\ref cmdCarpart) dialog to create a new <b>Car Prototype</b> or <b>Car Part</b>.
+
+*/
+
+/**
+\page cmdContmgm Layout Control Elements Dialog
+
+\anchor idx_Layout_Control_Elements_Dialog_218
+
+This dialog is used to manage layout control elements (blocks, switchmotors, and signals).
+
+Control Elements are elements related to layout control: blocks (occupancy
+detection), switchmotors (actuators to "throw" turnouts), signals, controls
+(other actuator or output devices), and sensors (other sensor or input
+devices). These elements don't relate to directly "physical" items on the
+layout, but instead refer to the elements used by the layout control software.
+These elements contain "scripts", which are really just textual items that
+provide information for the layout control software and provide a bridge
+between physical layout elements (like tracks or turnouts) and the layout
+control software. These textual items could be actual software code or could
+be LCC Events (for I/O device elements on a LCC network) or DCC addresses for
+stationary decoders, etc. XTrackCAD does not impose any sort of syntax or format
+-- that is left up to other software that might load and parse the XTrkCAD
+layout file. All that XTrackCAD does is provide a unified place for this
+information to be stored and to provide a mapping (association) between this
+control information and the layout itself.
+
+![](lcemanager.png)
+
+The main part of this dialog contains a list of the currently defined layout
+control elements (blocks, switchmotors, signals, controls, and sensors),
+along with the tracks they relate to. These elements are added to the layout
+either from their Hotbar menus or from the Add menu.
+
+The <b>Edit</b> button allows for editing a control element. And the <b>Delete</b> button 
+deletes the selected element(s).
+
+*/
+
+/**
+\page cmdGroup Group Dialog
+
+\anchor idx_Group_Dialog_219
+
+The <b>Group</b> command combines the selected (\ref cmdSelect) Lines and Shapes (\ref cmdDraw) to create structures (\ref cmdHotBar).  You can give the structure (\ref cmdHotBar) a title consisting of Manufacturer, Description and Part Number on the <b>Group</b> dialog.
+
+![](cgroup.png)
+
+The title will be pre-populated with the title of the last <b>Structure</b> you <b>ungrouped</b> (\ref manageM).
+
+You can include <b>Turnouts</b>, <b>Sectional</b>, <b>Straight</b> or <b>Curved</b> tracks in the selected objects which allows you to add cosmetic details to a <b>Turnout</b> definitions, or create a new <b>Turnout</b> definition. This can also be used to if there are fixed-track locations on a structure, like on an engine shed.
+
+<b>Group</b> is intended to operate on simple groups of track segments.  If you intend to group a large number of track segments, you should consider using <b>Import Module</b> (see \ref cmdLayer),
+
+To modify a <b>Structure</b> or <b>Turnout</b> definition, first place the object on the layout, select and then <b>Ungroup</b> the object.  Now the parts of the object can be edited using the <b>Modify</b> (\ref cmdModify), <b>Draw</b> (\ref cmdDraw) or other commands.  Once completed, select the object parts and use the <b>Group</b> command to update the definition (or create a new one by changing the title).
+
+The <b>Group</b> dialog shows the Manufacturer, Description and part number (Title) of the new definition. Initial values are based on selected turnouts and structures or on the last <b>Ungroup</b>ed object (\ref cmdUngroup).
+The <b>Turntable/TransferTable/DblSlipSwitch</b>? toggle button controls whether non-conflicting <b>Paths</b> should be combined or keep separate, see <b>Paths</b> below.
+The <b>Replace with new group</b>? toggle button is used if you want to replace the selected objects with the new definition.
+All fields listed in this dialog window must contain data.
+
+The definition data will be added to the `xtrkcad.cus` (\ref directories) file for later use. Please consider contributing this information for others to use.
+
+If you modify a definition from a <i>XTrackCAD</i> Library parameter file, the new definition will replace the existing definition on the <b>Hot Bar</b> (\ref cmdHotBar), otherwise it will be added to the end of the <b>Hot Bar</b>. You can use the <b>Custom Management</b> (\ref cmdCustmgm) dialog to change the title or delete custom definitions.
+
+<b>Note:</b> 
+The selected tracks are decomposed into segments, which are simple tracks and drawing object (lines, curves, polygons ... ).
+Any track segments must appear in the first 127 segments.
+This implies a limit of 127 track segments.
+
+- You can re-order the segment list by
+
+  - Ungroup the selected tracks
+
+  - Unselect all, and select the tracks you want to group
+
+  - <b>Move selected objects to bottom</b>
+
+  - Add the non-tracks object to the selected track segments
+
+  - Retry the <b>Group</b> command
+
+<b>Paths</b> define which segments are followed by a train in Train mode.
+Normally, if two paths follow paths of separate segments, then the paths are combined.
+For example a simple turnout would have two paths, but since the paths share some common segments, the paths are not combined.
+A Crossing has two paths but since they don't have any segments in common, the two paths are combined into one.
+A Turntable can have many distinct paths but only one would be valid at any time.  In this case we don't want to combine paths and the toggle would be checked.
+
+*/
+
+/**
+\page cmdLayer Layers Dialog
+
+\anchor idx_Layers_Dialog_220
+
+Each object is contained in a layer - which is a custom group of objects that do not have a particular visual order, but can be treated as a set for certain commands.  
+Objects which are created independently of other objects (such as straight tracks (\ref cmdStraight) or text (\ref cmdText)) are created in the current layer.  
+Objects which are associated with other objects (such as tracks created by the <b>Modify</b> (\ref cmdModify) or <b>Join</b> (\ref cmdJoin) commands) are created in the same layer as the associated object(s).
+
+The <b>Layers</b> dialog allows you to change various attributes of each of the 99 possible <b>layers</b>.
+
+Attributes associated with a layout are stored within the associated layout file and apply only to the layout that's open at the time of a change. 
+It is possible to apply attributes from one layout file to another using the <b>Load</b> and <b>Save</b> buttons.
+
+![](dlayers.png)
+
+The drop down list at the top of the dialog selects the <b>Layer</b> you are interested in. Frozen layers are preceeded by a `\*`, Module layers are proceeded by a `m`, non-empty layers are preceded by a `+` and empty layers by a `-`.
+
+The <b>Name</b> edit box contains the name of the <b>Layer</b>.  This name is listed in the <b>Current Layer</b> drop down list on the <b>Tool-bar</b> (\ref mainW).  Also the <b>Name</b> is displayed as the balloon help for the corresponding <b>Layer Button</b>.
+
+The <b>Color</b> button specifies the color of tracks if either of the two <b>Color Layers</b> (\ref cmdDisplay) radio buttons on the <b>Display</b> dialog is checked and the <b>Use Color</b> button for this layer is checked.
+
+The <b>Visible</b> check-box controls whether the <b>Layer</b> is drawn on the Main (\ref mainW) window.
+
+The <b>Frozen</b> check-box indicates that tracks in that <b>Layer</b> can not be modified or deleted.
+
+The <b>On Map</b> check-box controls whether the <b>Layer</b> is drawn on the Map (\ref cmdMap) window.
+
+The <b>Module</b> check-box controls whether the <b>Layer</b> is selected/deselected and so moved or rotated as a group - this can be used to denote a track module in a modular layout - allowing the modules to be positioned as units. 
+Objects in a Module Layer can not be individually modified.  
+One way of getting a modules in is to build a library with <b>Export</b> and then <b>Import As Module</b> - this creates one layer per module, names it and sets the <b>Module</b> check-box.  
+
+The <b>No Button</b> check-box selects if the <b>Layer</b> has a button to hide/show it. You may choose not to have a button if the layer is empty or if it is a sub-layer controlled by another layer.
+
+The <b>Linked Layers</b> text box can contain a semi-colon-delimited set of layer numbers that will be shown and hidden along with this layer when its show/hidden state is changed. A blank means no layers are linked. The layers can have buttons or not.
+
+You cannot uncheck <b>Visible</b> or check <b>Frozen</b> for the <b>Current Layer</b>.
+
+The <b>Load Settings</b> specifies a settings (.xset) filename in the XTrackCAD working directory that is loaded when this layer is made current.  Only the values contained in the file will be set.
+If this name is blank the default values (all those in use when any layer that has no Load Settings file value was last used) will be reloaded (or retained). The dropbox contains all the names of files in that directory.
+
+The <b>Count</b> field displays the number of objects in the selected Layer.
+
+The <b>Save</b> button stores layer attributes in the `xtrkcad.ini` file so they may be loaded into an existing or new file. Once saved and unless reset to <i>XTrackCAD</i> <b>Default</b>, modified layer information is applied to each new file.
+
+The <b>Load</b> button reads layer attributes from the `xtrkcad.ini` file then applies it to each layer of the current layout file.
+
+The <b>Defaults</b> button restores layer attributes to default <i>XTrackCAD</i> settings.
+
+The bottom of the dialog contains the <b>Number of Layer Buttons</b> integer edit box.  This controls the number of <b>Layer Buttons</b> displayed on the <b>Tool-bar</b> (\ref mainW). These buttons make it easy to switch between layers. The maximum number of <b>Layer Buttons</b> that can be displayed is 99.  Layers with "no-button" set do not count towards the Number of Layer Buttons.
+
+![](blayer.png)
+
+The <b>Layer Buttons</b> on the Tool-bar (\ref mainW) control which layer is the <b>current Layer</b> and which <b>Layers</b> are displayed on the Main Canvas. These buttons are a short cut for the <b>Visible</b> check-box on the <b>Layers</b> dialog for the corresponding layer.
+
+The current layer is selected by picking a value from the drop down layer list.  If the Layer you've selected was not visible, it will be shown.
+
+You can hide (or show if not visible) the different layers by pushing one of the <b>Layer Buttons</b> on the Toolbar (if you have configured the toolbar (\ref toolbarOpts) to show the Layer buttons).  If a layer is not visible then the corresponding layer button will be raised.  The active or current layer cannot be hidden.
+
+The color of each layer button shows the color that will be used to draw tracks or draw objects in that layer, if you have selected the <b>Color Layers</b> (\ref cmdDisplay) on the <b>Display</b> dialog. The <b>Use Color</b> button allows this layer to opt in or out - which can be usefu if you want to color other layers but a layer contains pre-colored objects (like Structures or Scenery).
+ 
+Any selected objects are unselected when the Layer is set to not visible.  If a layer is not visible, you cannot select objects in the Layer.  It is as if the objects do not exist until you show the layer again.
+
+The <b>Move To Current Layer</b> command on Edit menu (\ref editM) will move all selected (\ref cmdSelect) tracks to the current Layer.
+
+Objects are drawn on the map window, if the Layer they are on has <b>On Map</b> checked.
+
+*/
+
+/**
+\page cmdEnum Parts List 
+
+\anchor idx_Parts_List_221
+\anchor idx_Enumerate_222
+
+The <b>Parts List</b> command produces a list of all selected (\ref cmdSelect) turnouts, sectional track and bench-work. It also computes total length of selected flex-track.
+
+If no objects are selected, all objects are enumerated.
+
+![](partslist.png)
+
+The <b>Save As...</b> button opens a <i>File Save</i> dialog window that's used to name and save the parts list to a file.
+
+The <b>Print</b> button opens the <i>Print</i> dialog which is used to facilitate printing of the parts list.
+
+The <b>Close</b> button terminates the <b>Parts List</b> command.
+
+The <b>Parts List</b> dialog will list pricing for selected objects if the <i>Prices</i> check box is checked.  Prices are set using the Price List (\ref cmdPricelist) dialog.
+
+The <b>Parts List</b> dialog will list the index numbers of each type of named track in a comma delimited list on a new line if the <i>Indexes</i> check box is checked. This list can be used in the Select By Index (\ref cmdSelectIndex) command.
+
+Hint: you can use the <b>Parts List</b> command to measure the length of selected flex-track.
+
+*/
+
+/**
+\page cmdPricelist Price List
+
+\anchor idx_Price_List_223
+
+The <b>Price List</b> dialog allows entry of prices for Turnouts, Sectional Track and Structures.  Only those objects from loaded Parameter Files (\ref cmdPrmfile) or <i>Custom Designs</i> for the current Scale (\ref cmdLayout) are listed.
+
+![](pricelist.png)
+
+The price of a selected object can be changed in the <i>Cost</i> edit box that's located above the "Price" column.
+
+The price of a length of <i>Flex-Track</i> for the current Scale (\ref cmdLayout) is listed at the bottom of the dialog.  You can specify the <i>Length</i> in <i>Inches</i> or <i>Centimeters</i>.  To specify the price for other <i>Scales</i> change Scale (\ref cmdLayout) on the Layout (\ref cmdLayout) window.
+
+The Parts List (\ref cmdEnum) dialog lists prices for selected objects if the <i>Prices</i> check box on the dialog window is selected.
+
+*/
+
+/**
+\page cmdTrain Train Mode 
+
+\anchor idx_Train_Mode_224
+\anchor idx_Simulation_225
+
+![](btrain.png) The <b>Train</b> command lets you place and run Trains on the layout.
+
+\anchor idx_Run_Trains_226 During this command, the Tool Bar and Hot Bar are changed.  Most of the Tool Bar buttons are replaced by the <i>Go/Stop</i> and <i>Exit</i> buttons.  The <i>Go/Stop</i> button toggles between Pausing all Trains and allowing Trains to Run.  The <i>Exit</i> button terminates the Train Simulation and returns to Layout Design mode.
+The Hot Bar becomes the <b>Shelf</b>.
+
+![](trainbar.png)
+
+- <b><i>Selecting New Cars</i></b>
+
+  - The <b>Shelf</b> contains the Cars and Locomotives which have not been placed on the Layout.  Cars are created and managed using the Car Inventory (\ref cmdCarinv) dialog.
+
+  - Each item on the <b>Shelf</b> can represent a group of Cars.  Cars can be grouped by Prototype, Manufacturer and/or Part Number.  They can also be listed as individual Car Items.  This grouping is controlled by <i>Car Labels</i> Drop Down List on the Display (\ref cmdDisplay) dialog.
+
+  - To place a Car, select it from the <b>Shelf</b>.  If the <b>Shelf</b> is displaying Cars in groups (and not as individual Car Items) then a Drop Down List is displayed on the Status Bar (\ref mainW) containing the individual Car Items in that group.
+
+  - If you are not displaying the <b>Shelf</b>, then the <i>New Car</i> button (![](bnewcar.png)) will be shown on the Tool Bar.  Pressing this button will display the Drop Down List on the Status Bar (\ref mainW) containing all of your Car Items that have not yet been placed on the layout.
+
+  - ![](trainsimulator.png)
+
+  - ![](statusbartrain.png)
+
+  - ![](carlist.png)
+
+- <b><i>Placing Cars</i></b>
+
+  - Once you have selected a new Car, or have selected an existing Car on the Layout, you can position it by using the mouse to drag it around the Layout.  If the Car is coupled to other Cars then the whole set of Cars is moved. If you place the Car on a Track, that Car (and the other coupled Cars) will be aligned along the track.
+
+  - <b>Note:</b> If you move the tracks but not the cars (or vice-versa) using the Move (\ref cmdMove) or Rotate (\ref cmdRotate) commands the cars will not remain attached to the tracks.  If the cars are moved close to a track, then they will be aligned when the <i>Train Simulation</i> command is next invoked.
+
+- <b><i>Coupling Cars</i></b>
+
+  - If a Car is moved along a track to another Car then the Cars will be coupled together.
+
+- <b><i>Uncoupling Cars</i></b>
+
+  - To uncouple Cars, Right-Click between the Cars then select <i>Uncouple</i> from the pop-up menu.
+
+  - ![](mtrainmanagement.png)
+
+- <b><i>Change Train or Car Orientation</i></b>
+
+  - The orientation of a Train or Car can be reversed by Right-Click over the appropriate object then selecting either <i>Flip Train</i> or <i>Flip Car</i> from the pop-up menu.
+
+- <b><i>Remove Train or Car From Layout</i></b>
+
+  - To remove a Train or Car from the layout, Right-Click over the appropriate object then select either <i>Remove Train</i> or <i>Remove Car</i> from the pop-up menu.
+
+- <b><i>Change Reporting number of Car on Layout</i></b>
+
+  - To change the reporting number, Right-Click over the Car and then select <i>Properties</i> and update the field. This value will be shown in the car if Labels are shown and in the <i>Train Control</i> Window.
+
+- <b><i>Trains</i></b>
+
+  - A Train consists of one or more Locomotives coupled to other Cars.  One Locomotive will be the <i>MU Master</i> for the Train.  The <i>MU Master</i> can be changed by Right-Clicking on a Locomotive and selecting <i>MU Master</i> from the pop-up menu.  The <i>MU Master</i> is drawn with a solid Yellow head light indicating the direction is moving.  If a Train is split by uncoupling between Locomotives, then two Trains will be created, each with their own <i>MU Master</i>.
+
+- <b><i>Train Control</i></b>
+
+  - ![](trainctrl.png)
+
+  - The <i>Train Control</i> dialog is used to set the speed and direction of Trains.  The dialog contains a list of Trains (listed by their <i>MU Master</i> Locomotive reporting number).  Before each Train on the list is either a Red circle (indicating the Train is stopped) or a Green circle (indicating the Train is moving).
+
+  - Any number of Trains can be running, although it might be difficult to keep track of more than a few.
+
+  - For the selected Train, the Train Control dialog lists
+
+  - Train status: indicating that the Train is moving, is paused or the reason if the Train is stopped.
+
+  - The position of the Train
+
+  - A slider which controls the speed of the Train in Scale Miles-Per-Hour or Kilometers-Per-Hour.
+
+  - The Odometer which measures the total distance travelled by the train, which can be reset by pressing the <i>0</i> button.
+
+  - The <i>Find</i> button which positions the Main Window (\ref mainW) to show the Train.  If the Trains on a track that's hidden and Hide Trains on Hidden Track (\ref cmdDisplay) is <i>Enabled</i> then the Train will be made visible until the next time it moves.
+
+  - The <i>Follow</i> toggle button which causes the Main Window (\ref mainW) to follow the Train as it moves.  The <i>Follow</i> toggle can only be set on one Train at a time, and it is cleared if you press the <i>Find</i> button or otherwise manually move the main canvas.
+
+  - The <i>Auto Reverse</i> toggle button which causes the Train to change direction when it hits the end of a track.
+
+  - The Direction radio button group which controls the direction (<i>Forward</i> or <i>Reverse</i>) of the Train.
+
+  - The <i>Stop</i> button which sets the Trains speed to 0.
+
+- <b><i>Train Operation</i></b>
+
+  - Once a Train is moving, it will continue to move until it is Stopped manually, hits the end of track or an open Turnout.  If the Train 'runs into' other Cars, those Cars will be coupled to the Train.  If Trains speed is faster than the Max Coupling Speed (\ref cmdPref) then the Train will crash and must be manually moved back onto the track.
+
+  - If two Trains are coupled, one of the two <i>MU Masters</i> will be chosen as the <i>MU Master</i> for the combined Train.
+
+  - The motion of all Trains can be Paused by clicking the <i>Go/Stop</i> button on the Main Window Tool Bar. Pressing the <i>Escape</i> key has the same effect as clicking on the <i>Stop</i> button.  This allows you set Turnout positions or make other changes.  When Train command starts, the <i>Go/Stop</i> button is in the <i>Stop</i> position and must be clicked before Trains move.
+
+- <b><i>Turnouts and Turntables</i></b>
+
+  - Turnout positions are indicated by Red lines connecting the endpoints on the route through the Turnout. Trains will follow this route through the Turnout.  If you <i>Shift+Left-Click</i> on the Turnout, the next position will used and Red line changed to indicate the new position.
+
+  - Turntables can be turned by using <i>Shift+Left-Click</i> on the endpoint you want the Turntable bridge to move to.  If you click on the Turntable where there is no endpoint, the Turntable will turn to the next endpoint beyond that point in the direction of the click relative to the nearest end of the turntable bridge. To turn the Turntable 180°, <i>Shift+Left-Click</i> on the current endpoint again.
+
+*/
+
+/**
+\page cmdTurnoutNew Turnout Designer
+
+\anchor idx_Turnout_Designer_227
+
+The <b>Turnout Designer</b> allows you to define new turnouts and sectional track pieces.
+
+![](mmanageturnoutdesign.png)
+
+The Turnout Designer sub-menu is pictured above. As demonstrated by the sub-menu a number of different dialogs are available for creation of custom turnout and sectional track components. New turnouts and sectional track is added to Custom Management (\ref cmdCustmgm) and Turnout Manager (\ref cmdNewFixedTrack) using the <b>Turnout Designer</b>.
+
+The follow dialog is for a regular turnout.
+
+![](turndes.png)
+
+Each dialog shows a diagram of the turnout and has fields to enter dimensions.  The dimensions should be as accurate as possible.  The various types of dimensions are:
+
+- <b>Length</b> - measured from the base of the turnout to the centerline at the end of the turnout.  Length is measured parallel to the centerline of the straight leg of the turnout.  For track that ends on a curve (such as the curved leg of a regular turnout) measure the distance from the base to each rail and average the values.
+
+- <b>Offset</b> - measured from the centerline of the straight leg of the turnout to the centerline of the track at the end of the turnout.
+
+- <b>Angle</b> - angle at the end of turnout to the centerline of the straight leg of the turnout.  This angle may not be the same as the <i>Frog</i> angle of the turnout if the rails curve past the <i>Frog</i>.  The <b>Frog Number|Degrees</b> Radio button group controls whether the value is expressed in Frog Number or Degrees.
+
+- <b>Manufacturer</b> - name of the Manufacturer
+
+- <b>Description</b> - description of the turnout including size and rail code number, e.g., 'Left Hand #4'. This information is shown when a place the mouse pointer over the respective symbol on th <b>Tool-bar</b>. Therefor it should be made sure that the data entered here are helpful in finding the correct turnout.
+
+- <b>#</b> - part number, e.g., '999-123'.
+
+- <b>Roadbed Width</b> - if greater than the track gauge then lines are drawn along the edges of the turnout to represent the attached roadbed available on some types of sectional track and turnouts.
+
+- <b>Line Width</b> - the width of the roadbed lines, measured in pixels when the layout drawing scale (\ref viewM) is 1:1.
+
+- <b>Color</b> - color of the roadbed lines.
+
+The rail height (<i>Code</i>) can be added to the <b>Manufacturer</b>, e.g., Peco-55, or the <b>Description</b>, e.g., Medium Right, Code 55.
+
+The scale is the current scale from the <b>Scale Drop Down List</b> on the <b>Layout</b> dialog (\ref cmdLayout).  
+
+<b>Manufacturer</b>, <b>Description</b> and <b>Part Number (#)</b> comprise the title of the turnout.  These values are used in the <b>Turnout Selection dialog</b> (\ref cmdNewFixedTrack) and the <b>Parts List</b> (\ref cmdEnum).  For regular and curved turnouts there are separate <b>Descriptions</b> and <b>Part Numbers</b> for the right and left hand turnouts.
+
+The <b>Print</b> button prints a full size diagram of the turnout.  You can use this to check your dimensions and make any required changes.  You should expect to make several printouts as you refine your dimensions.
+
+The <b>OK</b> button completes the design.  The new turnout is added to the list in the <b>Turnout Selection</b> dialog.  The turnout data is saved in the `xtrkcad.cus` (\ref directories) file for the next time you use <i>XTrackCAD</i>.  Please consider contributing this information for others to use via the on-line addresses. You can change the Parameters or Title of existing designs by using the <b>Custom Management</b> (\ref cmdCustmgm) dialog.
+
+The <b>Cancel</b> button removes the <b>Turnout Designer</b> dialog.
+
+<i>Creating Turnout Designs</i>
+
+- It is best to start by marking the endpoints of the turnout on a piece of paper.  Extend the curved leg of the turnout (try attaching a straight sectional track) and measure the angle.  Frog numbers are easiest to calculate.
+
+- Enter your data and press <b>Print</b>, if you have an accurate printer.  Check the dimensions of the turnout against the printout and make adjustments as necessary.  Concentrate on the lengths and offsets first, then adjust the angles.
+
+- The resulting turnout is an approximation.  In particular the curves will not be correct, but this is not important for placing turnouts.
+
+- The new <i>Cornu Turnouts</i> \anchor idx_Cornu_Turnouts_228  allow you to build turnouts that have curved ends. The dialogs include radius information that can be set to zero for a straight end. The turnouts will be composed of simple curves and tracks and when extended the end radius will be used.
+
+- The Group (\ref cmdGroup) command can be used to add cosmetic details to <b>Turnout</b> definitions.
+
+*/
+
+/**
+\page cmdRefreshSpecial Update Turnouts and Structures
+
+\anchor idx_Update_Turnouts_and_Structures_229
+
+This command updates (or refreshes) selected turnouts, sectional tracks and structures on your layout with the current definitions from the loaded parameter files (\ref cmdPrmfile).  Each selected object that is found in a parameter file is updated with the current definition.
+
+If an object can be found and if a new track definition fits in the same footprint, (i.e., has the same number of endpoints and all the endpoints have the same position and angle) then a dialog is displayed which contains suitable definitions that you can choose from.  You can <b>Skip</b> the current object or <b>Cancel</b> to skip all the remaining objects.
+
+Otherwise the update fails and must be done manually using <b>Delete</b> and <b>Add</b>.
+
+If an object has been updated then it is unselected, otherwise it will remain selected at the end of this command.
+
+*/
+
+/**
+\page cmdUngroup Ungroup
+
+\anchor idx_Ungroup_230
+
+<b>Ungroup</b> allows existing definitions to be modified and the resulting objects recombined with the <b>Group</b> (\ref cmdGroup) command to update the definition.  Turnouts are composed of individual straight and curved segments.  Segments that form the points (\ref generalTerms) of the turnout remain combined as an <i>Ungrouped Turnout</i>, and the other segments are replaced by straight and curved tracks.
+
+One-ended Turnouts (AKA Bumpers) are converted to Staight tracks by <b>Ungroup</b>.
+These can be converted back to a Bumper by manually editting the <b>Grouped</b> definition and removing the unwanted End-Point by deleting the correspnding <b>E</b> line.
+
+*/
+

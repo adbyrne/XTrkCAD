@@ -1,0 +1,80 @@
+/* Auto-converted from helpm.but by tools/but-to-doxygen.py.
+ * See .claude/halibut-doxygen-investigation-plan.md and
+ * conversion-log.md for anything flagged during conversion. */
+
+/**
+\page helpM Help Menu
+
+![](mhelp.png)
+
+The <b>Help Menu</b> displays information on various topics. The contents of the menu vary depending on the operating system.
+
+- The <b>Help</b> command opens the Help Window at the Contents Page.
+
+- The <b>Help Command Context</b> command opens the Help Window at the page for the current Command.
+
+- ![](mhelprecent.png)
+
+- <i>Recent Messages</i>
+
+The <b>Recent Messages</b> command opens a cascading menu containing recent error messages and notices you have received. Selecting one of them displays additional information about the message.
+
+The <b>Collect Problem Info</b> command helps you to put together the information and files that might help the developers to analyze and fix possible bugs.
+
+- ![](problemdata.png)
+
+- <i>Collect Problem Info</i>
+
+The command removes userids and other private information from the files. The results are stored in a compressed (zip-)  file and placed in the same
+directory as the affected layout file. 
+
+- ![](dtipofday.png)
+
+- <i>Tip of The Day</i>
+
+The <b>Tip of the Day</b> item displays a useful tip about the operation of <i>XTrackCAD</i>. By default, a new tip is displayed each time you start the program.
+
+- ![](mhelpdemos.png)
+
+- <i>Demo Menu</i>
+
+The <b>Demos</b> command (\ref cmdDemo) opens a cascading menu which invokes various demonstrations of <i>XTrackCAD</i> features.
+
+The <b>Examples</b> command displays the list of included example programs which you can examine.
+
+- \subpage cmdDemo
+
+*/
+
+/**
+\page cmdDemo Demo Mode
+
+\anchor idx_Demo_Mode_208
+
+The <b>Demos</b> menu item, under the <b>Help</b> (\ref helpM) menu, shows a cascading menu 
+of choices to demonstrate various features and commands.
+
+![](mhelpdemos.png)
+
+In demonstration mode <i>XTrackCAD</i> is driven by a script file (such as created by the <b>Record</b> (\ref macroM) command). The cursor is simulated on the Main Window (\ref mainW) and the <i>XTrackCAD</i> windows (except the <b>Demo</b> window) are inactive. Also, simulated input on dialogs is indicated by a border momentarily drawn around the control.
+
+The <b>Demo</b> dialog is displayed which contains a number of control buttons and a text area that shows comments on the demonstration being run.
+
+- ![](demo.png)
+
+- <b>Next</b> - skip to the next demonstration.  If you hold down the <i>Shift</i> key then you will jump back to the previous demonstration.
+
+- <b>Quit</b> - quit demonstration mode.
+
+- <b>Speed</b> - controls the speed of the demonstration.
+
+- <b>Step</b> - advance to the next step of the current demonstration.
+
+The state of the layout is saved when running demonstrations.
+
+A number of options and controls (such as scale) are changed while running demonstrations. These will be restored when the demonstration is finished.
+
+You can adjust Window sizes and positions while the demonstration is running to better see what is happening.
+
+*/
+

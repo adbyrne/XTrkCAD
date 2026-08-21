@@ -1,0 +1,34 @@
+# Doxyfile for the real, installed end-user User Guide -- built from the
+# .dox/.dox.in files in this directory (converted from the former vendored
+# Halibut sources by tools/but-to-doxygen.py; see
+# .claude/halibut-doxygen-investigation-plan.md for the conversion history).
+# messages.dox (app/help/genmessages.c's Doxygen-syntax output, one of
+# INPUT's directories below) is regenerated on every build; everything else
+# here is committed, hand-reviewed source, not regenerated.
+
+PROJECT_NAME           = "XTrkCAD User Guide"
+OUTPUT_DIRECTORY       = "@CMAKE_CURRENT_BINARY_DIR@"
+INPUT                  = "@CMAKE_CURRENT_SOURCE_DIR@" \
+                          "@CMAKE_CURRENT_BINARY_DIR@" \
+                          "@messagefile_BINARY_DIR@"
+FILE_PATTERNS          = *.dox
+IMAGE_PATH             = "@CMAKE_CURRENT_SOURCE_DIR@/images"
+RECURSIVE              = NO
+
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+GENERATE_LATEX         = NO
+# Native left-sidebar navigation tree built from the \page/\subpage
+# hierarchy, replacing halibut's own "Contents"/"Index" breadcrumb links --
+# see DoxygenLayout.xml.
+GENERATE_TREEVIEW      = YES
+DISABLE_INDEX          = NO
+LAYOUT_FILE            = "@CMAKE_CURRENT_SOURCE_DIR@/DoxygenLayout.xml"
+SEARCHENGINE           = NO
+SOURCE_BROWSER         = NO
+SHOW_FILES             = NO
+SHOW_NAMESPACES        = NO
+QUIET                  = YES
+WARN_IF_UNDOCUMENTED   = NO
+WARN_AS_ERROR          = NO
+MARKDOWN_SUPPORT       = YES

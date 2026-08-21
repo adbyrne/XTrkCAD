@@ -1,0 +1,81 @@
+/* Auto-converted from hotbar.but by tools/but-to-doxygen.py.
+ * See .claude/halibut-doxygen-investigation-plan.md and
+ * conversion-log.md for anything flagged during conversion. */
+
+/**
+\page cmdHotBar Hot Bar
+
+![](hotbar.png)
+
+The <i>Hot Bar</i> starts with a flex-track of the current gauge, and then a scrolling list of all the turnouts, sectional track and structures available through the Turnout (\ref cmdNewFixedTrack) and Structure (\ref cmdStructure) commands. The Description and/or Part Number under each object can be displayed by enabling the <i>Hot Bar Labels</i> radio button on the Display (\ref cmdDisplay) dialog.
+
+Only those items taken from files which are in the current scale/gauge are displayed in the HotBar. They are shown in order - A Flex-track - then the Contents of Files in the File-&gt;Parameter Files... List in listed order - and then any Custom objects created in this Layout as listed in the Manage-&gt;Custom Defined Parts dialog.
+
+The arrow buttons on either side of the <i>Hot bar</i> move the list one object to the right or left. Holding down the Shift key will move the list by greater amounts.  About eight `Shift+Click`s are required to move the list through the entire range of objects. Also, pressing the keys `1` through `9` and `0` will cause the <i>Hot Bar</i> to jump relative spots on the list.
+
+A `Right-Click` over the <i>Hot Bar</i> will display a pop-up menu listing the files with contents on the <i>Hot Bar</i>. Selecting an item from this list causes the <i>Hot Bar</i> to jump to the relative spot on the whole list.
+
+Objects on the <i>Hot Bar</i> are placed on the drawing canvas by first selecting an object by <i>Cicking</i> it on the <i>Hot Bar</i>. Then <i>Click</i> and <i>Drag</i> on the Main window, rotating it with `Right-Drag` to position it, and then pressing the `Space` key to set it in place.
+
+For <i>Turnouts</i>, see below for additional details on the <i>Active EndPoint</i>.
+
+- \subpage Flex-track
+- \subpage hbStructures
+- \subpage hbTurnouts
+
+*/
+
+/**
+\page Flex-track Flex-track
+
+\anchor idx_Flex_track_209
+
+A Flex-track unit can be placed for convienience on the left-hand side of the HotBar. 
+This is can be hidden by an option in \ref cmdPref. It can be recognised because it is the only diagonally facing track element and has a label "FLEX". 
+It is used by `Left-Click` selecting it, and `Left-Click` clicking on the layout where the first end should be placed, and then `Left-Click` for the second end. 
+If either end is over an unconnected end and <b>Shift</b> was not held, the flex-track will be connected to the track and the end angle and radius will be set from the track. 
+If an end was not over an unconnected end, it can be manipulated by left dragging out the end angle before releasing. 
+If the second end is not on a track end, differing end angles will produce a smooth curve, if both ends are unconnected, simply `Left-Click` without dragging produces a straight track. 
+Once both ends have been defined, the track can then be manipulated like a \ref chgCornu Cornu Curved Track, by selecting and moving ends, adding and removing "pins" and altering the end anchor angle and radius if the flex-track is not connected at that end.  
+If the disconnected end is dragged and the button released while over an open end of another track, it will be connected to it in the manner of a Join with a Cornu easement.
+
+A Flex-track will form a Straight Track if the ends have zero radius and are in a line with opposed end angles. 
+If the ends are not aligned but the end angles are opposed it will be a simple S-curve. 
+It will be a smooth monotonic curve if the ends are not in a line and the end angle lines and chord form a triangle. Otherwise it will be a complex S-curve. 		.
+
+*/
+
+/**
+\page hbStructures Structures
+
+\anchor idx_Structures_210
+
+<i>Structures</i> are placed on the layout in the same way as turnouts (\ref hbTurnouts) except no Active EndPoint exists and they do not align with existing track.
+
+Refer to \ref cmdStructure for information pertaining to use of the <i>Structure</i> dialog.
+
+*/
+
+/**
+\page hbTurnouts Turnouts
+
+\anchor idx_Turnouts_211
+
+<i>Turnouts</i> have an <i>Active EndPoint</i> (\ref generalTerms) which is the handle used to position the <i>Turnout</i>. You can change the <i>Active EndPoint</i> by a `Shift+Left-Click` which causes the next endpoint to become Active. 
+
+If you `Left+Drag` a turnout onto a track, the Active EndPoint (\ref generalTerms) is aligned with the selected track. On flex-track, you can flip the turnout by moving the cursor from one side of the track centerline to the other. On another turnout, the new turnout will be placed at the endpoint closest to the cursor.
+
+<i>XTrackCAD</i> will automatically connect the turnout's endpoints to any other tracks they are aligned with. The number of endpoints that will be connected is displayed on the Status Bar, as well as the Maximum displacement between these endpoints and the tracks they will be connected to. <i>XTrackCAD</i> will adjust the position of the Turnout to give you the best fit for locating the turnout.  You can override this adjustment by holding down the <i>Shift</i> key while <i>Dragging</i>.
+
+`Right+Drag` or `Ctrl+Left+Drag` (\ref windowTerms) can be used to rotate the turnout on the layout. `Shift+Right-Click` (\ref cmdAcclKeys) displays a pop-up menu allowing you to rotate the turnout by various angles.
+
+When you press the `Space` key, the turnout is positioned on the layout. Any tracks that are aligned with any of the turnout's endpoints will be connected to the turnout automatically. If you are using the Turnout (\ref cmdNewFixedTrack) command then you can also click the <i>OK</i> button on the dialog.
+
+If you choose another turnout or change commands after beginning to place a turnout on the layout, the turnout will be created as if it is attached to another track.  Otherwise it will be removed.
+
+If the Drawing Scale is smaller or equal to the Label Scale (\ref cmdDisplay) then Turnouts will be labeled with their description when drawn. The individual labels can be can be turned off by the Move Description(\ref cmdMoveLabel) command, or all Turnout labels can be disabled by using the Display (\ref cmdDisplay) dialog. As well, the length of any connected Flex-track will be indicated at each endpoint.
+
+Refer to \ref cmdNewFixedTrack for information pertaining to use of the <i>Turnout</i> dialog.
+
+*/
+
