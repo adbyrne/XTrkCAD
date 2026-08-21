@@ -12,16 +12,16 @@
  * (the other functions in these two files) pull in real file I/O
  * (GetArgs/PutTitle/SetCLocale/AddParam), careditdlg.c (CarDlgUpdProto/
  * CarDlgUpdPart), and scale.c -- out of scope for this pass (see the plan
- * doc). This target is compiled with -ffunction-sections and linked with
- * --gc-sections so the linker *can* drop those never-called functions'
- * sections. That pruning is a linker/compiler-version-dependent optimization,
- * though, not a guarantee (confirmed: passes with local gcc 16/ld 2.46, fails
- * with CI's Ubuntu toolchain, leaving SetCLocale/PutTitle/WriteSegs/
- * SetUserLocale/GetScaleName/customMgmF/CarDlgUpdProto/CarDlgUpdPart/
- * carDlgUpdateProtoPtr/carDlgUpdatePartPtr undefined at link time) -- so the
- * symbols those never-called functions reference are also stubbed below,
- * same as the rest of this section, to make the link deterministic
- * regardless of toolchain.
+ * doc). Rather than stub all of that too, the symbols those never-called
+ * functions reference (SetCLocale/PutTitle/WriteSegs/SetUserLocale/
+ * GetScaleName/customMgmF/CarDlgUpdProto/CarDlgUpdPart/
+ * carDlgUpdateProtoPtr/carDlgUpdatePartPtr) are stubbed below, same as the
+ * rest of this section, so the link doesn't need every real dependency
+ * resolved. (An earlier version of this target instead relied on
+ * -ffunction-sections/--gc-sections to prune those never-called functions'
+ * sections -- dropped because it's linker/compiler-version-dependent
+ * (passed with local gcc 16/ld 2.46, failed with CI's older Ubuntu
+ * toolchain) and Apple's linker doesn't support --gc-sections at all.)
  */
 
 #include <stdarg.h>
@@ -30,6 +30,17 @@
 #include <string.h>
 #include <math.h>
 #include <cmocka.h>
+
+/* On Windows, cmocka.h pulls in <windows.h>, which #defines min/max as
+ * function-like macros -- colliding with the double min(double,double)
+ * stub below (needed under its own name to satisfy tabstring.c's Cmp_part,
+ * which calls the real utility.c:53 min() this target doesn't link). */
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
 
 #include "common.h"
 #include "cars/carsprivate.h"
@@ -170,7 +181,7 @@ static void CarProtoFindTests(void **state)
 	(void)state;
 	carDim_t dim = { 40.0, 9.0, 28.0, 0.0, 44.0 };
 	carProto_p proto = CarProtoNew(NULL, PARAM_CUSTOM, "Gondola", 0, 30100,
-	                                &dim, 0, NULL);
+	                               &dim, 0, NULL);
 
 	assert_non_null(proto);
 	assert_ptr_equal(CarProtoFind("Gondola"), proto);
@@ -183,7 +194,7 @@ static void CarProtoNewCreatesTests(void **state)
 	(void)state;
 	carDim_t dim = { 40.0, 9.0, 28.0, 0.0, 44.0 };
 	carProto_p proto = CarProtoNew(NULL, PARAM_CUSTOM, "40' Boxcar", 7, 30100,
-	                                &dim, 0, NULL);
+	                               &dim, 0, NULL);
 
 	assert_non_null(proto);
 	assert_string_equal(proto->desc, "40' Boxcar");
@@ -200,7 +211,7 @@ static void CarProtoNewCustomProtectedFromReloadTests(void **state)
 	carDim_t stockDim = { 50.0, 10.0, 30.0, 0.0, 54.0 };
 
 	carProto_p proto = CarProtoNew(NULL, PARAM_CUSTOM, "Shared Boxcar", 1,
-	                                30100, &customDim, 0, NULL);
+	                               30100, &customDim, 0, NULL);
 	assert_non_null(proto);
 	assert_int_equal(proto->paramFileIndex, PARAM_CUSTOM);
 
@@ -208,7 +219,7 @@ static void CarProtoNewCustomProtectedFromReloadTests(void **state)
 	 * entry -- this is the exact guard the auto-create-on-commit path
 	 * relies on to never overwrite a user's customization. */
 	carProto_p reloaded = CarProtoNew(NULL, PARAM_LAYOUT, "Shared Boxcar", 99,
-	                                   99999, &stockDim, 0, NULL);
+	                                  99999, &stockDim, 0, NULL);
 	assert_ptr_equal(reloaded, proto);
 	assert_int_equal(proto->paramFileIndex, PARAM_CUSTOM);
 	assert_int_equal(proto->options, 1);
@@ -223,9 +234,9 @@ static void CarProtoNewInPlaceEditPreservesIdentityTests(void **state)
 	carDim_t dim2 = { 45.0, 9.5, 30.0, 0.0, 48.0 };
 
 	carProto_p proto = CarProtoNew(NULL, PARAM_CUSTOM, "Editable Boxcar", 0,
-	                                30100, &dim1, 0, NULL);
+	                               30100, &dim1, 0, NULL);
 	carProto_p edited = CarProtoNew(NULL, PARAM_CUSTOM, "Editable Boxcar", 5,
-	                                 30200, &dim2, 0, NULL);
+	                                30200, &dim2, 0, NULL);
 
 	assert_ptr_equal(edited, proto);
 	assert_int_equal(proto->options, 5);
@@ -353,16 +364,16 @@ int main(void)
 		cmocka_unit_test_teardown(CarProtoFindTests, Teardown),
 		cmocka_unit_test_teardown(CarProtoNewCreatesTests, Teardown),
 		cmocka_unit_test_teardown(CarProtoNewCustomProtectedFromReloadTests,
-		                          Teardown),
+		Teardown),
 		cmocka_unit_test_teardown(CarProtoNewInPlaceEditPreservesIdentityTests,
-		                          Teardown),
+		Teardown),
 		cmocka_unit_test_teardown(CarProtoLookupCreateMissingTests, Teardown),
 		cmocka_unit_test_teardown(CarPartNewRejectsUnknownOrCustomManufTests,
-		                          Teardown),
+		Teardown),
 		cmocka_unit_test_teardown(CarPartNewCreatesTests, Teardown),
 		cmocka_unit_test_teardown(CarPartFindTests, Teardown),
 		cmocka_unit_test_teardown(CarPartNewInPlaceEditPreservesIdentityTests,
-		                          Teardown),
+		Teardown),
 		cmocka_unit_test_teardown(CarPartNewMovedRelocatesTests, Teardown),
 	};
 	return cmocka_run_group_tests(tests, NULL, NULL);

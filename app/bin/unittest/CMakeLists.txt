@@ -181,14 +181,6 @@ add_executable(carregistrytest
 	../cars/transform_pts.c
 )
 
-# CMAKE_ENABLE_EXPORTS (PlatformSettings.cmake, global) adds --export-dynamic/
-# -rdynamic to every executable, which keeps every function's section alive
-# for the dynamic symbol table -- defeating --gc-sections below (it would
-# otherwise drop CarProtoRead/Write/CustMgmProc/Init* and their real file-I/O
-# and careditdlg.c dependencies, which this target does not stub). Opt this
-# target out.
-set_target_properties(carregistrytest PROPERTIES ENABLE_EXPORTS OFF)
-
 target_include_directories(carregistrytest PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/..
     ${CMAKE_CURRENT_SOURCE_DIR}/../include
@@ -196,15 +188,30 @@ target_include_directories(carregistrytest PRIVATE
     ${CMAKE_SOURCE_DIR}/app/wlib/include
 )
 
+# CMAKE_ENABLE_EXPORTS (PlatformSettings.cmake, global) adds --export-dynamic/
+# -rdynamic to every executable, which keeps every function's section alive
+# for the dynamic symbol table -- defeating the dead-code stripping below.
+# Opt this target out.
+set_target_properties(carregistrytest PROPERTIES ENABLE_EXPORTS OFF)
+
 target_link_libraries(carregistrytest PRIVATE ${LIBS})
 if(UNIX)
 	target_link_libraries(carregistrytest PRIVATE m)
-	# carproto.c/carpart.c also define CarProtoRead/CarProtoWrite/
-	# *CustMgmProc/Init* etc., which pull in real file I/O and careditdlg.c
-	# symbols this target does not stub. Function-section GC drops those
-	# never-called functions' sections instead of requiring every symbol
-	# they reference to resolve -- see carregistrytest.c's header comment.
-	target_compile_options(carregistrytest PRIVATE -ffunction-sections)
+endif()
+
+# carproto.c/carpart.c also define CarProtoRead/CarPartRead/InitCarProto/
+# InitCarPart etc., which pull in real file I/O (GetArgs/AddParam/...),
+# scale.c, and other real dependencies this target does not stub (only the
+# leaf symbols those functions reach are stubbed in carregistrytest.c, per
+# its header comment -- CarProtoRead/InitCarProto etc. themselves are not).
+# -ffunction-sections + dead-code stripping at link time drops those
+# never-called functions' sections instead of requiring everything they
+# transitively reach to resolve. The stripping flag differs by linker:
+# Apple's ld doesn't understand GNU ld's --gc-sections.
+target_compile_options(carregistrytest PRIVATE -ffunction-sections)
+if(APPLE)
+	target_link_options(carregistrytest PRIVATE -Wl,-dead_strip)
+else()
 	target_link_options(carregistrytest PRIVATE -Wl,--gc-sections)
 endif()
 
