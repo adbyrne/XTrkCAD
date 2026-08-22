@@ -8,8 +8,8 @@ set(FLATPAK_REPO "temp.repo")
 set(FLATPAK_WORK_DIR "temp.work")
 set(FLATPAK_BUILD_SCRIPT "${CMAKE_SOURCE_DIR}/distribution/flatpak/buildFlatpak.sh")
 # minimize changes to app/lib/xtrkcad.metainfo.xml
-#string(REGEX REPLACE "\\.[0-9a-f][0-9a-f][0-9a-f][0-9a-f]+" "" FLATPAK_VERSION ${XTRKCAD_VERSION})
-set(FLATPAK_VERSION "${XTRKCAD_VERSION}")
+#string(REGEX REPLACE "\\.[0-9a-f][0-9a-f][0-9a-f][0-9a-f]+" "" FLATPAK_VERSION ${XTRKCAD_FILE_VERSION})
+set(FLATPAK_VERSION "${XTRKCAD_FILE_VERSION}")
 #message(NOTICE "FLATPAK_VERSION=${FLATPAK_VERSION}")
 string(REPLACE "." "_" FLATPAK_VERSION_ID "${FLATPAK_VERSION}")
 set(FLATPAK_SUFFIX_NAME "-${FLATPAK_VERSION_ID}")
@@ -18,11 +18,12 @@ set(FLATPAK_BASE_NAME "xtrkcad${FLATPAK_SUFFIX_NAME}")
 set(FLATPAK_SHARE_INSTALL_DIR "share/${FLATPAK_PACKAGE}")
 string(TIMESTAMP XTRKCAD_BUILD_TIMESTAMP "%a %b %d %H:%M:%S UTC %Y" UTC)
 string(TIMESTAMP XTRKCAD_BUILD_DATE "%Y-%m-%d" UTC)
-# XTRKCAD_VERSION (ProgramVersion.cmake) already carries a dev-build hash
-# suffix when this isn't an exact tagged release, so it alone is enough to
-# distinguish successive dev builds here — no separate changeset suffix
-# needed (previously used a Hg-only, non-portable local revision number).
-set(FLATPAK_FILE ${CMAKE_BINARY_DIR}/xtrkcad-${XTRKCAD_VERSION}.${CMAKE_SYSTEM_PROCESSOR}.flatpak)
+# XTRKCAD_FILE_VERSION (ProgramVersion.cmake) already carries a dev-build
+# hash suffix when this isn't an exact tagged release and
+# XTRKCAD_APPEND_SRC_HASH is on, so it alone is enough to distinguish
+# successive dev builds here — no separate changeset suffix needed
+# (previously used a Hg-only, non-portable local revision number).
+set(FLATPAK_FILE ${CMAKE_BINARY_DIR}/xtrkcad-${XTRKCAD_FILE_VERSION}.${CMAKE_SYSTEM_PROCESSOR}.flatpak)
 string(REGEX REPLACE "^.*/" "" FLATPAK_BASE_FILE ${FLATPAK_FILE})
 
 # source .in file prefixes

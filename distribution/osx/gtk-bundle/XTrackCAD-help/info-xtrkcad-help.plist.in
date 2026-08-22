@@ -13,9 +13,9 @@
     <key>CFBundlePackageName</key>
     <string>XTrackCAD</string>
     <key>CFBundleShortVersionString</key>
-    <string>@XTRKCAD_VERSION@</string>
+    <string>@XTRKCAD_FILE_VERSION@</string>
     <key>CFBundleVersion</key>
-    <string>@XTRKCAD_VERSION@</string>
+    <string>@XTRKCAD_FILE_VERSION@</string>
     <key>CFBundleDisplayName</key>
     <string>XTrackCAD-Help</string>
     <key>HPDBookAccessPath</key>

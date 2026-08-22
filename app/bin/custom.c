@@ -47,7 +47,7 @@ char * sProdName = Product;
 #if XTRKCAD_BUILD_FLATPAK
 char * sProdNameLower = product "-" XTRKCAD_VERSION_ID;
 #else
-char * sProdNameLower = product "-" XTRKCAD_VERSION;
+char * sProdNameLower = product "-" XTRKCAD_FILE_VERSION;
 #endif
 char * sProdNameUpper = PRODUCT;
 

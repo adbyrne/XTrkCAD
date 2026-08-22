@@ -7,7 +7,7 @@
 		<key>CFBundleExecutable</key>
 		<string>XTrackCAD</string>
 		<key>CFBundleGetInfoString</key>
-		<string>@XTRKCAD_VERSION@</string>
+		<string>@XTRKCAD_FILE_VERSION@</string>
 		<key>CFBundleHelpBookFolder</key>
 		<string>XTrackCAD.help</string>
 		<key>CFBundleHelpBookName</key>

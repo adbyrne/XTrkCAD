@@ -134,20 +134,22 @@ set(XTRKCAD_LOCALE_INSTALL_DIR "share/locale")
 
 # XTRKCAD_BIN is the single source of truth for this build's identity: the
 # installed binary name, package name, desktop file name, and (via the same
-# XTRKCAD_VERSION string reused in app/bin/custom.c) the runtime work/prefs
-# directory name. Embedding the version lets multiple GTK3V2MAIN point
-# releases install side by side and run simultaneously without colliding.
-# XTRKCAD_VERSION itself (ProgramVersion.cmake) also carries a dev-build
-# hash suffix on untagged builds, so this disambiguates successive dev
-# builds of the same nominal version too, not just distinct point releases.
+# XTRKCAD_FILE_VERSION string reused in app/bin/custom.c) the runtime
+# work/prefs directory name. Embedding the version lets multiple GTK3V2MAIN
+# point releases install side by side and run simultaneously without
+# colliding. XTRKCAD_FILE_VERSION (ProgramVersion.cmake) also carries a
+# dev-build hash suffix on untagged builds when XTRKCAD_APPEND_SRC_HASH is
+# on, so this disambiguates successive dev builds of the same nominal
+# version too, not just distinct point releases — see ProgramVersion.cmake
+# for why filenames use XTRKCAD_FILE_VERSION rather than XTRKCAD_VERSION.
 #
 # Note: flatpak builds cannot have periods in the name since periods delimit
 #       the namespace.
 if (XTRKCAD_BUILD_FLATPAK)
-	string(REPLACE "." "_" XTRKCAD_VERSION_ID "${XTRKCAD_VERSION}")
+	string(REPLACE "." "_" XTRKCAD_VERSION_ID "${XTRKCAD_FILE_VERSION}")
 	set(XTRKCAD_BIN "xtrkcad-${XTRKCAD_VERSION_ID}")
 else()
-	set(XTRKCAD_BIN "xtrkcad-${XTRKCAD_VERSION}")
+	set(XTRKCAD_BIN "xtrkcad-${XTRKCAD_FILE_VERSION}")
 endif()
 
 set(XTRKCAD_SHARE_INSTALL_DIR "share/${XTRKCAD_BIN}")
