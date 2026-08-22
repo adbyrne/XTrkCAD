@@ -193,6 +193,36 @@ cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 ```
 
+### Dev-build filename hash suffix
+
+Every untagged dev build's *compiled-in* version string (About dialog, `--version` CLI output)
+always carries a short VCS-hash fourth component, e.g. `5.4.0.8b67f185` — but by default its
+*filename/install path* (binary name, work/prefs directory, package filenames) stays the plain
+three-part version, so a new dev build just overwrites the previous one in place, matching what
+a developer coming from the historic three-part version expects. Add
+`-DXTRKCAD_APPEND_SRC_HASH=ON` to also give the filename/install path its own hash, so successive
+dev builds of the same nominal version can install side by side instead of colliding — this is
+what CI does automatically (SF #712; see `ProgramVersion.cmake` for the full
+`XTRKCAD_VERSION`/`XTRKCAD_FILE_VERSION` split). A tagged release build is unaffected either
+way — both variables drop the hash and stay the plain three-part version.
+
+```sh
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_APPEND_SRC_HASH=ON
+cmake --build build
+```
+
+**To build one specific past commit:** check out the exact commit first, *then* explicitly
+reconfigure — don't rely on `cmake --build` alone to notice the checkout, since CMake only
+re-runs its configure step when a file it tracks (`CMakeLists.txt`, `ProgramVersion.cmake`)
+actually changed on disk, so switching commits that don't touch those files leaves the
+*previous* commit's hash silently baked into the build.
+
+```sh
+git checkout <commit-hash>                       # or: hg update -r <commit-hash>
+cmake -B build -S . -DXTRKCAD_APPEND_SRC_HASH=ON  # force the reconfigure
+cmake --build build
+```
+
 ### Advanced/optional local checks {#advanced-optional-local-checks}
 
 Not part of the everyday build/test loop, but available if you're chasing a specific class of
