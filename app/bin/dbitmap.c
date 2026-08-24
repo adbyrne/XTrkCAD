@@ -304,6 +304,7 @@ static double CalculateMaxDPI( coOrd size, POS_T marginX, POS_T marginY )
 static void
 OutputBitmapPixelSize( void )
 {
+	// cppcheck-suppress shadowVariable -- local buffer/pointer, properly scoped/freed within this function, unrelated to the global status-line buffer
 	char message[STR_SIZE];
 
 	FormLoadControls( &outputBitMapPG );

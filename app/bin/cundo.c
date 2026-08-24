@@ -576,6 +576,10 @@ static int undoIgnoreEmpty = 0;
 /**
  * Start an Undo transcation
  *
+ * \note Marks the layout as changed (calls SetFileChanged()) as soon as a real, non-empty
+ *       transaction begins -- callers that open an undo transaction do not need to call
+ *       SetFileChanged() themselves afterward.
+ *
  * \param label help text for balloon help
  * \param format logging info
  *

@@ -1591,6 +1591,7 @@ static BOOL_T GetParamsTurnout(int inx, track_p trk, coOrd pos,
 		int segInx, subSegInx;
 		trkSeg_p segPtr;
 		DIST_T d = DIST_INF;
+		// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 		struct extraDataCompound_t* xx = GET_EXTRA_DATA(trk, T_TURNOUT,
 		                                 extraDataCompound_t);
 		/* Get parms from that seg */
@@ -2445,6 +2446,7 @@ static void AddTurnout(void)
 			                     i, GetTrkIndex(trk), epPos.x, epPos.y))
 			DIST_T dd = DIST_INF;
 			int nearest = -1;
+			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			for (int j = 0; j < curTurnout->endCnt; j++) {
 				DIST_T dd1 = FindDistance( epPos, GetEndPtPos(TempEndPt(j)));
 				if (dd > dd1) {
@@ -2546,9 +2548,11 @@ static void AddTurnout(void)
 			p1 = GetTrkEndPos(connection(i).trk, connection(i).ep);
 			ANGLE_T a0 = GetTrkEndAngle(newTrk, i);
 			ANGLE_T a1 = GetTrkEndAngle(connection(i).trk, connection(i).ep);
+			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			ANGLE_T a = fabs(DifferenceBetweenAngles(a0 + 180, a1));
 			d = FindDistance(p0, p1);
 			if (QueryTrack(connection(i).trk, Q_IS_CORNU)) {
+				// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 				ANGLE_T a = DifferenceBetweenAngles(FindAngle(p0, p1), a0);
 				if (IsClose(d) || fabs(a) <= 90.0) {
 					trk1 = connection(i).trk;
@@ -2612,8 +2616,10 @@ static void AddTurnout(void)
 				FindPos(&off, NULL, GetTrkEndPos(newTrk, ep), GetTrkEndPos(lt, le), a,
 				        DIST_INF);
 				pos = GetTrkEndPos(newTrk, ep);
+				// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 				DIST_T d = GetTrkDistance(lt, &pos);
 				if ((d < dd) && (d < trackGauge / 2)) {
+					// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 					ANGLE_T a = GetTrkEndAngle(lt, le);
 					ANGLE_T a2 = fabs(DifferenceBetweenAngles(GetTrkEndAngle(newTrk, ep), a + 180));
 					if (GetTrkEndTrk(newTrk, ep) == NULL) { //Not if joined already

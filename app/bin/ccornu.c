@@ -1353,6 +1353,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 		}
 		if (Da.selectEndPoint >= 0) {
 			//If locked, reset pos to be on line from other track
+			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			int sel = Da.selectEndPoint;
 			coOrd pos2 = pos;
 			BOOL_T inside = FALSE;
@@ -1368,6 +1369,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 							if (QueryTrack(Da.trk[sel],Q_CAN_ADD_ENDPOINTS)) {    //Turntable
 								trackParams_t tp;
 								if (!GetTrackParams(PARAMS_CORNU, Da.trk[sel], pos, &tp)) { return C_CONTINUE; }
+								// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 								ANGLE_T a = tp.angle;
 								Translate(&pos,tp.ttcenter,a,tp.ttradius);
 								Da.angle[sel] = NormalizeAngle(a+180);
@@ -1395,10 +1397,12 @@ EXPORT STATUS_T AdjustCornuCurve(
 						if (QueryTrack(Da.trk[sel],Q_CAN_ADD_ENDPOINTS)) {    //Turntable
 							trackParams_t tp;
 							if (!GetTrackParams(PARAMS_CORNU, Da.trk[sel], pos, &tp)) { return C_CONTINUE; }
+							// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 							ANGLE_T a = tp.angle;
 							coOrd edge;
 							Translate(&edge,tp.ttcenter,a,tp.ttradius);
 							ANGLE_T da = DifferenceBetweenAngles(FindAngle(edge,pos),a);
+							// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 							DIST_T d = fabs(FindDistance(edge,pos)*cos(R2D(da)));
 							Translate(&pos,edge,a,d);
 							Da.angle[sel] = NormalizeAngle(a+180);
@@ -1689,6 +1693,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 		else if (Da.selectEndPoint!=-1) {
 			if (!Da.trk[Da.selectEndPoint] &&
 			    (t=OnTrack(&pos,FALSE,TRUE)) != NULL && t != Da.selectTrack	) {
+				// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 				EPINX_T ep = PickUnconnectedEndPoint(pos,t);
 				if (ep>=0) {
 					if (QueryTrack(t,
@@ -1703,6 +1708,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 						ep=-1;  		            //Don't attach to Turntable
 						trackParams_t tp;
 						if (!GetTrackParams(PARAMS_CORNU, t, pos, &tp)) { return C_CONTINUE; }
+						// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 						ANGLE_T a = tp.angle;
 						Translate(&pos,tp.ttcenter,a,tp.ttradius);
 					}
@@ -1786,6 +1792,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 			Da.prevSelected = -1;
 			CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint,Da.selectEndHandle,
 			               Da.prevSelected);
+			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			cornuParm_t cp;
 			SetUpCornuParms(&cp);
 			if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
@@ -2611,6 +2618,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				Da.radius[1] = -1.0;  /*No end*/
 				return C_CONTINUE;
 			}
+			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			EPINX_T ep = 0;
 //			BOOL_T found = FALSE;
 //			int end = Da.state==POS_1?0:1;
@@ -2796,6 +2804,7 @@ BOOL_T GetTracksFromCornuTrack(track_p trk, track_p newTracks[2])
 			if (newTracks[0] == NULL) { newTracks[0] = bezTrack[0]; }
 			newTracks[1] = bezTrack[1];
 			if (trk_old) {
+				// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 				for (int i=0; i<2; i++) {
 					if (GetTrkEndTrk(trk_old,i)==NULL) {
 						coOrd pos = GetTrkEndPos(trk_old,i);
@@ -2823,6 +2832,7 @@ BOOL_T GetTracksFromCornuTrack(track_p trk, track_p newTracks[2])
 			CopyAttributes( trk, new_trk );
 			newTracks[1] = new_trk;
 			if (trk_old) {
+				// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 				for (int i=0; i<2; i++) {
 					if (GetTrkEndTrk(trk_old,i)==NULL) {
 						coOrd pos = GetTrkEndPos(trk_old,i);

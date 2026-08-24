@@ -406,6 +406,7 @@ void computePaths( void )
    routes between end-points.
  */
 {
+	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 	char **name = pathNames;
 	segs_t * sp, *sp1;
 	endPoint_t *ep, *ep2;

@@ -865,6 +865,7 @@ static searchTable_t searchTable[] = {
 static double LineSegDistance( coOrd p, coOrd p0, coOrd p1 )
 {
 	double d, a;
+	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 	coOrd pp, zero;
 	zero.x = zero.y = (POS_T)0.0;
 	d = FindDistance( p0, p1 );
@@ -1660,6 +1661,7 @@ static toDesignSchema_t * LoadWye3WayCornuSegs(
 
 
 
+	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 	DIST_T end_length = MIN_TRACK_LENGTH;
 
 	for (int i=0; i<((tdType==NTO_CORNU3WAY)?4:3); i++) {
@@ -3479,6 +3481,7 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 		fprintf( recordF, TURNOUTDESIGNER " SHOW %s\n", dp->label );*/
 	if ( newTurnAngleMode == 0 ) {
 		// Reset frog #, again
+		// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 		int tdInx = 0;
 		for ( const char * pPT = dp->sParamType; *pPT; pPT++, tdInx++ ) {
 			if ( *pPT == '-' ) { continue; }

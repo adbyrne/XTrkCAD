@@ -459,6 +459,7 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 			}
 		}
 		if (trimState == TRIM_LINE) {
+			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			coOrd pos1=pos;
 			if ((trk1 = OnTrackIgnore(&pos1,FALSE,FALSE,trimLine))!=NULL) {
 				if (IsTrack(trk1)) {

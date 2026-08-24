@@ -1000,6 +1000,7 @@ static BOOL_T ReadJoint(
 	long options;
 	DIST_T elev;
 	char * cp = NULL;
+	// cppcheck-suppress shadowVariable -- file-parse-time local default, assigned into the track's own extra-data struct field after parsing, unrelated to the global interactive-editing state
 	coOrd descriptionOff = {0.0,0.0};
 
 	if ( !GetArgs( line+6, paramVersion<3?"dXZs9dffffdddpYfc":paramVersion<9

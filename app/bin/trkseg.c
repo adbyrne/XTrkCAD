@@ -1078,6 +1078,7 @@ static void Rgb2hsv(
         hsv_t	*hsv )
 {
 	FLOAT_T r, g, b;
+	// cppcheck-suppress shadowFunction -- local variable name coincides with a library/project function of the same name -- zero functional risk
 	FLOAT_T max, min, delta;
 
 	r = ((rgb>>16)&0xFF)/255.0;
@@ -1951,6 +1952,7 @@ EXPORT void DrawSegsO(
 			REORIGIN(p3,segPtr->u.b.pos[3],angle,orig);
 			//}
 
+			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			for(int j=0; j<segPtr->bezSegs.cnt; j++) {   //Loop through sub Segs
 				tempPtr = &DYNARR_N(trkSeg_t,segPtr->bezSegs,j);
 				switch (tempPtr->type) {

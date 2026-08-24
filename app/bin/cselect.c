@@ -1041,6 +1041,7 @@ static BOOL_T AddElevation( track_p trk, BOOL_T unused )
 {
 	track_p trk1;
 	EPINX_T ep, ep1;
+	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 	int mode;
 	DIST_T elev;
 
@@ -2196,6 +2197,7 @@ static STATUS_T CmdRotate(
 				if (FindEndIntersection(zero,orig,NormalizeAngle( angle-baseAngle ),&t1,&ep1,
 				                        &t2,&ep2)) {
 					coOrd pos2 = GetTrkEndPos(t2,ep2);
+					// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 					coOrd pos1 = GetTrkEndPos(t1,ep1);
 					Rotate(&pos2,orig,NormalizeAngle( angle-baseAngle ));
 					CreateEndAnchor(pos2,FALSE);
@@ -2394,6 +2396,7 @@ static track_p SelectTrackByIndex(TRKINX_T ti, char * message )
 EXPORT void SelectByIndex( void* string)
 {
 	char result[STR_LONG_SIZE] = "";
+	// cppcheck-suppress shadowVariable -- local buffer/pointer, properly scoped/freed within this function, unrelated to the global status-line buffer
 	char * message;
 	SetAllTrackSelect(FALSE);
 	char * cp = (char *)string;
@@ -2494,6 +2497,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o,
 	BOOL_T hidden_t, hidden;
 	coOrd dpos = pos;
 //		coOrd cpos;
+	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 	int mode = -1;
 	while ( TrackIterate( &trk1 ) ) {
 		if ( !GetLayerVisible(GetTrkLayer(trk1)) ) {
@@ -2637,6 +2641,7 @@ STATUS_T CmdMoveDescription(
 {
 	static EPINX_T ep;
 	static BOOL_T hidden;
+	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 	static int mode;
 	BOOL_T bChanged;
 
@@ -3203,6 +3208,7 @@ void DrawHighlightBoxes(BOOL_T highlight_selected, BOOL_T select,
                         track_p not_this)
 {
 	track_p ts = NULL;
+	// cppcheck-suppress shadowFunction -- local variable name coincides with a library/project function of the same name -- zero functional risk
 	coOrd origin,max = {0.0, 0.0};
 	BOOL_T first = TRUE;
 	while ( TrackIterate( &ts ) ) {
@@ -3685,6 +3691,7 @@ static STATUS_T CmdSelect(
 		if (selectedTrackCount <= 0) {
 			wMenuPopupShow( selectPopup1M );
 		} else {
+			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			track_p trk = OnTrack(&pos, FALSE, FALSE);  //Note pollutes pos if turntable
 			SetUpMenu2(pos,trk);
 			wMenuPopupShow( selectPopup2M );

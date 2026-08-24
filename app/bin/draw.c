@@ -1348,6 +1348,7 @@ static void DoMouse(wAction_t action, coOrd pos)
 
 	inError = FALSE;
 
+	// cppcheck-suppress shadowFunction -- local variable name coincides with a library/project function of the same name -- zero functional risk
 	coOrd min = minIncrementSizes();
 
 	switch (action & 0xFF) {

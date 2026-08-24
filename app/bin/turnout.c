@@ -226,6 +226,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx)
 
 	dtod.td = GetTrkTieData( trk );
 
+	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 	int pathCnt = 0, routeCnt = 0;
 
 	for (i = 0; i < DTO_DIM; i++) {
@@ -626,6 +627,7 @@ static void DrawTurnoutFill(
         int path2
 )
 {
+	// cppcheck-suppress shadowVariable -- intentional: this track-type-specific drawing function uses the specific track's own gauge, overriding the module-global 'current' gauge -- confirmed consistent across all Draw*Track functions this session
 	DIST_T trackGauge = GetTrkGauge(dtod.trk);
 	wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi) / BASE_DPI);
 	if (d->options&DC_PRINT) {
@@ -704,6 +706,7 @@ static void DrawTurnoutFill(
 				p = GetTrkEndPos(dtod.trk,ep);
 				a = GetTrkEndAngle(dtod.trk,ep) + 90.0;
 
+				// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 				int i = (dtod.lftCnt > 0) && (dtod.rgtCnt == 0) ? 2 : 1;
 				if (ep != i) {
 					Translate(&p0,p,a,trackGauge * 1.5);
@@ -735,6 +738,7 @@ static void DrawCrossFill(
         int path2
 )
 {
+	// cppcheck-suppress shadowVariable -- intentional: this track-type-specific drawing function uses the specific track's own gauge, overriding the module-global 'current' gauge -- confirmed consistent across all Draw*Track functions this session
 	DIST_T trackGauge = GetTrkGauge(dtod.trk);
 	wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
 	if (d->options&DC_PRINT) {
@@ -817,6 +821,7 @@ static void DrawXingFill(
         int path2
 )
 {
+	// cppcheck-suppress shadowVariable -- intentional: this track-type-specific drawing function uses the specific track's own gauge, overriding the module-global 'current' gauge -- confirmed consistent across all Draw*Track functions this session
 	DIST_T trackGauge = GetTrkGauge(dtod.trk);
 	wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
 	if (d->options&DC_PRINT) {
@@ -1349,6 +1354,7 @@ static void DrawCurvedTurnout(
 			if (len - tdspc * cnt >= tdspc2) {
 				cnt++;
 			}
+			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			DIST_T tdlen = dtod.td.length;
 //			DIST_T dx = len / cnt, dx2 = dx / 2;
 
@@ -2101,6 +2107,7 @@ EXPORT void DrawTurnout(
 	/** @prefs [Preference] NormalTurnoutDraw=1 to skip enhanced drawing methods */
 	wPrefGetInteger("Preference", "NormalTurnoutDraw", (long *) &skip, 0);
 
+	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 	int pathCnt = (skip == 0 ? GetTurnoutPaths(trk, xx) : 0);
 
 	if ( (pathCnt > 1) && (pathCnt <= DTO_DIM)

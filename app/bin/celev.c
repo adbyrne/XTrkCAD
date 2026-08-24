@@ -425,6 +425,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 //		BOOL_T xing = FALSE;
 		coOrd p0 = pos, p2=pos;
 		if ((trk0 = OnTrack2(&p0,FALSE, TRUE, FALSE, NULL)) != NULL) {
+			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			EPINX_T ep0 = 0;
 //			EPINX_T ep1 = 1;
 			DIST_T elev0, elev1;

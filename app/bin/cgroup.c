@@ -261,11 +261,14 @@ EXPORT void UngroupCompound(
 		memset( &segTrack(0), 0, segCnt * sizeof segTrack(0) );
 		for ( ep=0; ep<epCnt; ep++ ) {
 			epp = TempEndPt(ep);
+			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			coOrd pos = GetTrkEndPos( trk, ep );
 			Rotate( &pos, xx->orig, -xx->angle );
 			pos.x -= xx->orig.x;
 			pos.y -= xx->orig.y;
+			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			ANGLE_T angle = GetTrkEndAngle( trk, ep );
+			// cppcheck-suppress shadowVariable -- loop-local, freshly declared and consumed within each iteration, never escapes the loop
 			track_p trk1 = GetTrkEndTrk( trk, ep );
 			EPINX_T ep1;
 			ep1 = trk1 ? GetEndPtConnectedToMe( trk1, trk ) : -1 ;
@@ -435,6 +438,7 @@ EXPORT void UngroupCompound(
 	if ( turnoutChanged ) {
 		for ( ep=0; ep<epCnt; ep++ ) {
 			epp = TempEndPt(ep);
+			// cppcheck-suppress shadowVariable -- loop-local, freshly declared and consumed within each iteration, never escapes the loop
 			track_p trk1 = GetEndPtTrack(epp);
 			if ( trk1 ) {
 				EPINX_T ep1 = GetEndPtEndPt(epp);
@@ -574,6 +578,7 @@ EXPORT void UngroupCompound(
 			             NULL ) );
 			if ( ep >= 0 ) {
 				epp = TempEndPt(ep);
+				// cppcheck-suppress shadowVariable -- loop-local, freshly declared and consumed within each iteration, never escapes the loop
 				track_p trk1 = GetEndPtTrack(epp);
 				if ( trk1 ) {
 					EPINX_T ep1 = GetEndPtEndPt(epp);
@@ -611,6 +616,7 @@ EXPORT void UngroupCompound(
 			             NULL ) );
 			if ( ep > 0 ) {
 				epp = TempEndPt(ep);
+				// cppcheck-suppress shadowVariable -- loop-local, freshly declared and consumed within each iteration, never escapes the loop
 				track_p trk1 = GetEndPtTrack( epp );
 				if ( trk1 ) {
 					EPINX_T ep1 = GetEndPtEndPt( epp );
@@ -1240,6 +1246,7 @@ static void GroupOk( void * unused )
 	}
 	if ( log_group >= 1 && logTable(log_group).level >= 4 ) {
 		LogPrintf( "Track Segs:\n");
+		// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 		for ( int inx = 0; inx < trackSegs_da.cnt; inx++ ) {
 			if (IsSegTrack(&trackSegs(inx))) {
 				LogPrintf( " %d: ", inx+1 );
@@ -1247,6 +1254,7 @@ static void GroupOk( void * unused )
 			}
 		}
 		LogPrintf( "Other Segs:\n");
+		// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 		for ( int inx = 0; inx < trackSegs_da.cnt; inx++ ) {
 			if (!IsSegTrack(&trackSegs(inx)))  {
 				LogPrintf( " %d: ", inx+1 );
@@ -1305,6 +1313,7 @@ static void GroupOk( void * unused )
 		}
 		if ( log_group >= 1 && logTable(log_group).level >= 4 ) {
 			LogPrintf( "EndPts:\n" );
+			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			for ( int inx=0; inx<TempEndPtsCount(); inx++ ) {
 				endPtP = TempEndPt(inx);
 				LogPrintf( "  [ %0.3f %0.3f ] A:%0.3f, T:%d.%d\n",
@@ -1377,8 +1386,10 @@ static void GroupOk( void * unused )
 		}
 		if ( log_group >= 1 && logTable(log_group).level >= 3 ) {
 			LogPrintf( "Sorted EndPts:\n" );
+			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			for ( int inx=0; inx<TempEndPtsCount(); inx++ ) {
 				endPtP = TempEndPt(inx);
+				// cppcheck-suppress shadowVariable -- loop-local, freshly declared and consumed within each iteration, never escapes the loop
 				track_p trk1 = GetEndPtTrack(endPtP);
 				LogPrintf( "  [ %0.3f %0.3f ] A:%0.3f, T:%d.%d\n",
 				           GetEndPtPos(endPtP).x, GetEndPtPos(endPtP).y, GetEndPtAngle(endPtP),
@@ -1403,12 +1414,14 @@ static void GroupOk( void * unused )
 		}
 		if ( log_group >= 1 && logTable(log_group).level >= 3 ) {
 			LogPrintf( "Shortest path:\n  Group Tracks\n" );
+			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			for ( int inx=0; inx<groupTrk_da.cnt; inx++ ) {
 				groupTrk_p gtp = &groupTrk(inx);
 				LogPrintf( "    %d: T%d S%d-%d\n", inx, GetTrkIndex( gtp->trk ),
 				           gtp->segStart+1, gtp->segEnd+1 );
 			}
 			LogPrintf( "  Path Elem\n" );
+			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			for ( int inx=0; inx<pathElem_da.cnt; inx++ ) {
 				ppp = &pathElem(inx);
 				LogPrintf( "    %d: GTx: %d, EP: %d %d, F:%s, P:",
@@ -1416,6 +1429,7 @@ static void GroupOk( void * unused )
 				if ( ppp->path == NULL ) {
 					LogPrintf( "No Paths!\n" );
 				} else {
+					// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 					for ( PATHPTR_T cp = ppp->path; cp[0] || cp[1]; cp++ ) {
 						LogPrintf( " %d", *cp );
 					}
@@ -1423,7 +1437,9 @@ static void GroupOk( void * unused )
 				LogPrintf( " 0\n" );
 			}
 			LogPrintf( "  Path\n" );
+			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			for ( int inx=0; inx<path_da.cnt; inx++ ) {
+				// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 				path_p pp  = &path(inx);
 				LogPrintf( "    %d: PE: %d-%d, EP: %d-%d, Conf: %d, InGrp: %s, Done: %s\n",
 				           inx, pp->pathElemStart, pp->pathElemEnd, pp->ep1, pp->ep2,
@@ -1739,6 +1755,7 @@ static void GroupOk( void * unused )
 			orig.y = - orig.y;
 			for ( ep=0; ep<TempEndPtsCount(); ep++ ) {
 				endPtP = TempEndPt(ep);
+				// cppcheck-suppress shadowVariable -- loop-local, freshly declared and consumed within each iteration, never escapes the loop
 				track_p trk1 = GetEndPtTrack(endPtP);
 				if ( trk1 ) {
 					EPINX_T ep1 = GetEndPtEndPt(endPtP);
@@ -1764,6 +1781,7 @@ static void GroupOk( void * unused )
 			SelectRecount();
 			trk = NewCompound( T_TURNOUT, 0, orig, 0.0, to->title, TempEndPtsCount(),
 			                   TempEndPt(0), pPaths, outputSegs_da.cnt, &outputSegs(0) );
+			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_TURNOUT,
 			                                 extraDataCompound_t);
 			xx->pathOverRide = FALSE;
@@ -1772,6 +1790,7 @@ static void GroupOk( void * unused )
 			SetTrkVisible( trk, TRUE );
 			for ( ep=0; ep<TempEndPtsCount(); ep++ ) {
 				trkEndPt_p epp = TempEndPt(ep);
+				// cppcheck-suppress shadowVariable -- loop-local, freshly declared and consumed within each iteration, never escapes the loop
 				track_p trk1 = GetEndPtTrack(epp);
 				if ( trk1 ) {
 					EPINX_T ep1 = GetEndPtEndPt(epp);

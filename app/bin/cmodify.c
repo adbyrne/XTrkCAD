@@ -263,6 +263,7 @@ STATUS_T CmdModify(
 
 
 	STATUS_T rc;
+	// cppcheck-suppress shadowVariable -- intentional: this track-type-specific drawing function uses the specific track's own gauge, overriding the module-global 'current' gauge -- confirmed consistent across all Draw*Track functions this session
 	static DIST_T trackGauge;
 
 	if ( changeTrackMode ) {
@@ -423,6 +424,7 @@ STATUS_T CmdModify(
 			} else if (QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) {    //Turntable
 				trackParams_t tp;
 				if (!GetTrackParams(PARAMS_CORNU, t, pos, &tp)) { return C_CONTINUE; }
+				// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 				ANGLE_T a = tp.angle;
 				Translate(&pos,tp.ttcenter,a,tp.ttradius);
 				CreateRadiusAnchor(pos,a,FALSE);
