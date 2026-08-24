@@ -903,7 +903,7 @@ static void AdvanceTurntablePositionIndicator(
 	                                   extraDataTurntable_t);
 	EPINX_T ep;
 	ANGLE_T angle0, angle1;
-	BOOL_T reverse=FALSE, train_reversed = FALSE;
+	BOOL_T train_reversed = FALSE;
 	EPINX_T epCnt=GetTrkEndPtCnt(trk);
 	EPINX_T epbest = -1, epfound = -1;
 	coOrd inpos = *posR;
@@ -932,27 +932,20 @@ static void AdvanceTurntablePositionIndicator(
 	}
 	if (epfound>=0) {
 		if (xx->currEp == epfound ) {
-			reverse = TRUE;
 			xx->reverse = !xx->reverse;
 			train_reversed = !train_reversed;
 		} else {
 			//If back end moving, flip result
 			if (fabs(DifferenceBetweenAngles(FindAngle(xx->pos,pos),GetTrkEndAngle(trk,
 			                                 xx->currEp)))>90) {
-				reverse = TRUE;
 				xx->reverse = !xx->reverse;
 				train_reversed = !train_reversed;
 			}
 		}
 		xx->currEp = epfound;
 		angle1 = GetTrkEndAngle(trk,xx->currEp);
-		if (!reverse) {
-			*angleR = NormalizeAngle(angle1+(train_reversed?180:0));
-			Translate( posR, xx->pos, *angleR, FindDistance(*posR,xx->pos) );
-		} else {
-			*angleR = NormalizeAngle(angle1+(train_reversed?180:0));
-			Translate(posR, xx->pos, *angleR, FindDistance(*posR,xx->pos) );
-		}
+		*angleR = NormalizeAngle(angle1+(train_reversed?180:0));
+		Translate( posR, xx->pos, *angleR, FindDistance(*posR,xx->pos) );
 		coOrd outpos = *posR;
 		if (debug) {
 			InfoMessage("AO:%0.3f PO:(%0.3f,%0.3f) AI:%0.3f PI:(%0.3f,%0.3f)",*angleR,
