@@ -840,7 +840,7 @@ void process( tokenDesc_t * tp, arg_t *args )
 		if ((cp=getLine())==NULL) {
 			return;
 		}
-		if ((rc=sscanf( line, "%lf %s", &angle, bits ) ) != 2) {
+		if ((rc=sscanf( line, "%lf %127s", &angle, bits ) ) != 2) {
 			fprintf( stderr, "syntax error: %d: %s\n", lineCount, line );
 			flushInput();
 			return;
@@ -920,7 +920,7 @@ void process( tokenDesc_t * tp, arg_t *args )
 		if ((cp=getLine())==NULL) {
 			return;
 		}
-		if ((rc=sscanf( line, "%lf %lf %s", &length2, &offset, bits ) ) != 3) {
+		if ((rc=sscanf( line, "%lf %lf %127s", &length2, &offset, bits ) ) != 3) {
 			fprintf( stderr, "syntax error: %d: %s\n", lineCount, line );
 			flushInput();
 			return;
@@ -939,7 +939,7 @@ void process( tokenDesc_t * tp, arg_t *args )
 		if ((cp=getLine())==NULL) {
 			return;
 		}
-		if ((rc=sscanf( line, "%lf %lf %s", &length2, &offset, bits ) ) != 3) {
+		if ((rc=sscanf( line, "%lf %lf %127s", &length2, &offset, bits ) ) != 3) {
 			fprintf( stderr, "syntax error: %d: %s\n", lineCount, line );
 			flushInput();
 			return;

@@ -557,7 +557,6 @@ CHANGE_TRACK:
 					if (Dex.params.ep == -1) {
 						Dex.Trk = NULL;
 						return C_CONTINUE;
-						break;
 					}
 					if (Dex.params.ep == 0) {
 						Dex.params.arcR = -Dex.params.arcR;

@@ -629,7 +629,6 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			FormGroupRecord(&curvePG);
 			return C_CONTINUE;
 		} else if ((curveMode == crvCmdFromChord && Da.state == 0 && Da.trk)) {
-			pos = Da.middle;
 			if ((d = FindDistance(Da.pos0,Da.pos1))<minLength) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
 				return C_TERMINATE;

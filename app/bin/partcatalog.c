@@ -1086,7 +1086,7 @@ GetParameterFileScale(const char *file)
 
 #ifdef MEMWATCH
 /** this is used to test for memory leaks. It should show no leaks from functions in this source file */
-RunMemoryTest(char *directory)
+void RunMemoryTest(char *directory)
 {
 	ParameterLib *library;
 	SearchResult *results;

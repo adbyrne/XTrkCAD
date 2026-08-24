@@ -202,9 +202,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		                Dt.boxed, Dt.filled, Dt.bg_color, DEFAULT_TEXT_ANGLE, NULL, NULL );
 		return C_CONTINUE;
 	case C_CANCEL:
-		if (Dt.state != POSITION_TEXT) {
-			Dt.state = POSITION_TEXT;
-		}
+		Dt.state = POSITION_TEXT;
 		InfoDefaultControls();
 		return C_TERMINATE;
 	case C_OK:
