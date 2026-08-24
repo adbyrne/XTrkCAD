@@ -550,7 +550,8 @@ void addSegCornu(dynArr_t * const array_p, trkSeg_p seg)
 		s->u = seg->u;
 	}
 }
-EXPORT void SetKnots(spiro_cp knots[], coOrd posk[], char type[], int count)
+EXPORT void SetKnots(spiro_cp knots[], coOrd posk[], const char type[],
+                     int count)
 {
 	for (int i = 0; i < count; i++) {
 		knots[i].x = posk[i].x;
@@ -559,17 +560,12 @@ EXPORT void SetKnots(spiro_cp knots[], coOrd posk[], char type[], int count)
 	}
 }
 
-typedef struct {
-	coOrd pos;
-	char ty;
-} points_t;
-
 // Take in extra points within Cornu
 // G2 (position only k1'' = k2'' = 0); Also Cornu <-> Cornu
 // G4 (position only - splitable for Cornu - a G4 point) k1''= k2''
 
 BOOL_T CallCornuM(dynArr_t extra_points, BOOL_T end[2], coOrd pos[2],
-                  cornuParm_t * cp, dynArr_t * array_p, BOOL_T spots)
+                  const cornuParm_t * cp, dynArr_t * array_p, BOOL_T spots)
 {
 	DYNARR_RESET( trkSeg_t, *array_p );
 	//Create LH knots

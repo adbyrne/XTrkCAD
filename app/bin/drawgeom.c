@@ -41,7 +41,7 @@ static dynArr_t select_da;
 #define point_selected(N) DYNARR_N( wBool_t, select_da, N)
 #define anchors(N) DYNARR_N( trkSeg_t, anchors_da, N)
 
-static void EndPoly( drawContext_t * context, int cnt, wBool_t open)
+static void EndPoly( const drawContext_t * context, int cnt, wBool_t open)
 {
 	trkSeg_p segPtr;
 	track_p trk;
@@ -152,7 +152,7 @@ static void CreateSquareAnchor(coOrd p)
 	                        anchors(i+3).u.l.pos[0].y = p.y+d/2;
 }
 
-BOOL_T FindTempNear(drawContext_t *context, coOrd *p)
+BOOL_T FindTempNear(const drawContext_t *context, coOrd *p)
 {
 	if (context->State == 2) {
 		if ((context->Op >= OP_CURVE1) && (context->Op <= OP_CURVE4)) {

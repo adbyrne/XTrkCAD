@@ -338,7 +338,7 @@ wBool_t IsAngleClose( ANGLE_T, ANGLE_T );
 wBool_t IsDistClose( DIST_T, DIST_T );
 wBool_t IsWidthClose( DIST_T, DIST_T );
 wBool_t IsColorClose( wDrawColor, wDrawColor );
-wBool_t CheckRegressionResult( long regressionVersion, char * sFileName,
+wBool_t CheckRegressionResult( long regressionVersion, const char * sFileName,
                                wBool_t bQuiet );
 
 void MoveTrack( track_p, coOrd );
@@ -478,7 +478,7 @@ void DrawEndElev( drawCmd_p, track_p, EPINX_T, wDrawColor );
 DIST_T EndPtDescriptionDistance( coOrd, track_p, EPINX_T, coOrd *,
                                  BOOL_T show_hidden, BOOL_T * hidden );
 STATUS_T EndPtDescriptionMove( track_p, EPINX_T, wAction_t, coOrd );
-void SetTrkEndElev( track_p, EPINX_T, int, DIST_T, char * );
+void SetTrkEndElev( track_p, EPINX_T, int, DIST_T, const char * );
 void GetTrkEndElev( track_p trk, EPINX_T e, int *option, DIST_T *height );
 int GetTrkEndElevMode( track_p, EPINX_T );
 int GetTrkEndElevUnmaskedMode( track_p, EPINX_T );
@@ -565,7 +565,7 @@ void UpdateAllElevations( void );
 DIST_T GetElevation( track_p );
 void ClrTrkElev( track_p );
 void SetTrkElevModes( BOOL_T, track_p, EPINX_T, track_p, EPINX_T );
-void UpdateTrkEndElev( track_p, EPINX_T, int, DIST_T, char * );
+void UpdateTrkEndElev( track_p, EPINX_T, int, DIST_T, const char * );
 void DrawTrackElev( track_p, drawCmd_p, BOOL_T );
 
 /* cdraw.c */

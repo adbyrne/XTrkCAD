@@ -51,7 +51,7 @@
 void *MyMalloc(size_t n) { return malloc(n); }
 void *MyRealloc(void *p, size_t n) { return realloc(p, n); }
 void MyFree(void *p) { free(p); }
-void *memdup(void *p, size_t n)
+void *memdup(const void *p, size_t n)
 {
 	void *out;
 	if (n == 0) { return NULL; }

@@ -494,7 +494,8 @@ static void CreateOriginAnchor(coOrd origin, wBool_t trans_selected)
 EXPORT void DrawOriginAnchor(track_p trk)
 {
 	if (!trk || GetTrkType(trk) != T_DRAW) { return; }
-	struct extraDataDraw_t * xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
+	const struct extraDataDraw_t * xx = GET_EXTRA_DATA(trk, T_DRAW,
+	                                    extraDataDraw_t);
 	if ((xx->orig.x != 0.0) || (xx->orig.y !=0.0) ) {
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		CreateOriginAnchor(xx->orig,FALSE);
@@ -1403,6 +1404,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		default:
 			break;
 		}
+		curDescData[inx].mode |= mode;
 	}
 
 	snprintf( str, len, _("%s(%d) Layer=%d"), title, GetTrkIndex(trk),
@@ -2066,7 +2068,8 @@ static BOOL_T ReplayDraw(
 
 static BOOL_T QueryDraw( track_p trk, int query )
 {
-	struct extraDataDraw_t * xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
+	const struct extraDataDraw_t * xx = GET_EXTRA_DATA(trk, T_DRAW,
+	                                    extraDataDraw_t);
 	switch(query) {
 	case Q_IS_DRAW:
 		return TRUE;
@@ -3432,37 +3435,36 @@ static STATUS_T HandleSpecialCommands(wAction_t action, coOrd pos)
 typedef struct {
 	char *iconfile;
 	int OP;
-	char * shortName;
 	char * cmdName;
 	char * helpKey;
 	long acclKey;
 } drawData_t;
 
 static drawData_t dlineCmds[] = {
-	{ "straight-line.png", OP_LINE, N_("Line"), N_("Draw Line"), "cmdDrawLine", ACCL_DRAWLINE},
-	{ "dimension.png", OP_DIMLINE, N_("Dimension Line"), N_("Draw Dimension Line"), "cmdDrawDimLine", ACCL_DRAWDIMLINE},
-	{ "benchwork.png", OP_BENCH, N_("Benchwork"), N_("Draw Benchwork"), "cmdDrawBench", ACCL_DRAWBENCH},
-	{ "table-edge.png", OP_TBLEDGE, N_("Table Edge"), N_("Draw Table Edge"), "cmdDrawTableEdge", ACCL_DRAWTBLEDGE}
+	{ "straight-line.png", OP_LINE, N_("Draw Line"), "cmdDrawLine", ACCL_DRAWLINE},
+	{ "dimension.png", OP_DIMLINE, N_("Draw Dimension Line"), "cmdDrawDimLine", ACCL_DRAWDIMLINE},
+	{ "benchwork.png", OP_BENCH, N_("Draw Benchwork"), "cmdDrawBench", ACCL_DRAWBENCH},
+	{ "table-edge.png", OP_TBLEDGE, N_("Draw Table Edge"), "cmdDrawTableEdge", ACCL_DRAWTBLEDGE}
 };
 static drawData_t dcurveCmds[] = {
-	{ "curved-line-end.png", OP_CURVE1, N_("Curve End"), N_("Draw Curve from End"), "cmdDrawCurveEndPt", ACCL_DRAWCURVE1},
-	{ "curved-line-tangent.png", OP_CURVE2, N_("Curve Tangent"), N_("Draw Curve from Tangent"), "cmdDrawCurveTangent", ACCL_DRAWCURVE2},
-	{ "curved-line-middle.png", OP_CURVE3, N_("Curve Center"), N_("Draw Curve from Center"), "cmdDrawCurveCenter", ACCL_DRAWCURVE3},
-	{ "curved-line-chord.png", OP_CURVE4, N_("Curve Chord"), N_("Draw Curve from Chord"), "cmdDrawCurveChord", ACCL_DRAWCURVE4},
-	{ "bezier-line.png", OP_BEZLIN, N_("Bezier Curve"), N_("Draw Bezier"), "cmdDrawBezierCurve", ACCL_DRAWBEZLINE}
+	{ "curved-line-end.png", OP_CURVE1, N_("Draw Curve from End"), "cmdDrawCurveEndPt", ACCL_DRAWCURVE1},
+	{ "curved-line-tangent.png", OP_CURVE2, N_("Draw Curve from Tangent"), "cmdDrawCurveTangent", ACCL_DRAWCURVE2},
+	{ "curved-line-middle.png", OP_CURVE3, N_("Draw Curve from Center"), "cmdDrawCurveCenter", ACCL_DRAWCURVE3},
+	{ "curved-line-chord.png", OP_CURVE4, N_("Draw Curve from Chord"), "cmdDrawCurveChord", ACCL_DRAWCURVE4},
+	{ "bezier-line.png", OP_BEZLIN, N_("Draw Bezier"), "cmdDrawBezierCurve", ACCL_DRAWBEZLINE}
 };
 static drawData_t dcircleCmds[] = {
-	{ "circle-line-center.png", OP_CIRCLE3, N_("Circle Center"), N_("Draw Circle from Center"), "cmdDrawCircleCenter", ACCL_DRAWCIRCLE2},
-	{ "circle-line-tangent.png", OP_CIRCLE2, N_("Circle Tangent"), N_("Draw Circle from Tangent"), "cmdDrawCircleTangent", ACCL_DRAWCIRCLE3},
-	{ "circle-filled-center.png", OP_FILLCIRCLE3, N_("Circle Filled Center"), N_("Draw Filled Circle from Center"), "cmdDrawFilledCircleCenter", ACCL_DRAWFILLCIRCLE2},
-	{ "circle-filled-tangent.png", OP_FILLCIRCLE2, N_("Circle Filled Tangent"), N_("Draw Filled Circle from Tangent"), "cmdDrawFilledCircleTangent", ACCL_DRAWFILLCIRCLE3}
+	{ "circle-line-center.png", OP_CIRCLE3, N_("Draw Circle from Center"), "cmdDrawCircleCenter", ACCL_DRAWCIRCLE2},
+	{ "circle-line-tangent.png", OP_CIRCLE2, N_("Draw Circle from Tangent"), "cmdDrawCircleTangent", ACCL_DRAWCIRCLE3},
+	{ "circle-filled-center.png", OP_FILLCIRCLE3, N_("Draw Filled Circle from Center"), "cmdDrawFilledCircleCenter", ACCL_DRAWFILLCIRCLE2},
+	{ "circle-filled-tangent.png", OP_FILLCIRCLE2, N_("Draw Filled Circle from Tangent"), "cmdDrawFilledCircleTangent", ACCL_DRAWFILLCIRCLE3}
 };
 static drawData_t dshapeCmds[] = {
-	{ "box.png", OP_BOX, N_("Box"), N_("Draw Box"), "cmdDrawBox", ACCL_DRAWBOX},
-	{ "filled-box.png", OP_FILLBOX, N_("Filled Box"), N_("Draw Filled Box"), "cmdDrawFilledBox", ACCL_DRAWFILLBOX},
-	{ "polygon.png", OP_POLY, N_("Polygon"), N_("Draw Polygon"), "cmdDrawPolygon", ACCL_DRAWPOLY},
-	{ "filled-polygon.png", OP_FILLPOLY, N_("Filled Polygon"), N_("Draw Filled Polygon"), "cmdDrawFilledPolygon", ACCL_DRAWFILLPOLYGON},
-	{ "polyline.png", OP_POLYLINE, N_("PolyLine"), N_("Draw PolyLine"), "cmdDrawPolyline", ACCL_DRAWPOLYLINE},
+	{ "box.png", OP_BOX, N_("Draw Box"), "cmdDrawBox", ACCL_DRAWBOX},
+	{ "filled-box.png", OP_FILLBOX, N_("Draw Filled Box"), "cmdDrawFilledBox", ACCL_DRAWFILLBOX},
+	{ "polygon.png", OP_POLY, N_("Draw Polygon"), "cmdDrawPolygon", ACCL_DRAWPOLY},
+	{ "filled-polygon.png", OP_FILLPOLY, N_("Draw Filled Polygon"), "cmdDrawFilledPolygon", ACCL_DRAWFILLPOLYGON},
+	{ "polyline.png", OP_POLYLINE, N_("Draw PolyLine"), "cmdDrawPolyline", ACCL_DRAWPOLYLINE},
 };
 
 typedef struct {
@@ -3471,9 +3473,6 @@ typedef struct {
 	char * stickyLabel;
 	int cnt;
 	drawData_t * data;
-	long acclKey;
-	wIndex_t cmdInx;
-	int curr;
 } drawStuff_t;
 
 static drawStuff_t drawStuff[4] = {
@@ -3632,7 +3631,7 @@ EXPORT track_p NewText(
         wIndex_t index,
         coOrd pos,
         ANGLE_T angle,
-        char * text,
+        const char * text,
         CSIZE_T textSize,
         wDrawColor color,
         BOOL_T boxed,

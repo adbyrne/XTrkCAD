@@ -41,16 +41,15 @@ static wDrawBitMap_p note_bm, link_bm, document_bm;
 typedef struct {
 	char *icon;
 	int OP;
-	char * shortName;
 	char * cmdName;
 	char * helpKey;
 	long acclKey;
 } trknoteData_t;
 
 static trknoteData_t noteTypes[] = {
-	{ "sticky-note.png", OP_NOTETEXT, N_("Note"), N_("Text Note"), "cmdTextNote", ACCL_NOTE},
-	{ "sticky-link.png", OP_NOTELINK, N_("Link"), N_("Weblink"), "cmdLinkNote", 0L},
-	{ "sticky-doc.png", OP_NOTEFILE, N_("Document"), N_("Document"), "cmdFileNote", 0L},
+	{ "sticky-note.png", OP_NOTETEXT, N_("Text Note"), "cmdTextNote", ACCL_NOTE},
+	{ "sticky-link.png", OP_NOTELINK, N_("Weblink"), "cmdLinkNote", 0L},
+	{ "sticky-doc.png", OP_NOTEFILE, N_("Document"), "cmdFileNote", 0L},
 };
 
 static long curNoteType;
@@ -126,7 +125,7 @@ static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 
 static DIST_T DistanceNote(track_p t, coOrd * p)
 {
-	struct extraDataNote_t *xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
+	const struct extraDataNote_t *xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
 	DIST_T d;
 	d = FindDistance(*p, xx->pos);
 
@@ -459,8 +458,10 @@ static BOOL_T QueryNote( track_p trk, int query )
 
 static wBool_t CompareNote( track_cp trk1, track_cp trk2 )
 {
-	struct extraDataNote_t *xx1 = GET_EXTRA_DATA( trk1, T_NOTE, extraDataNote_t );
-	struct extraDataNote_t *xx2 = GET_EXTRA_DATA( trk2, T_NOTE, extraDataNote_t );
+	const struct extraDataNote_t *xx1 = GET_EXTRA_DATA( trk1, T_NOTE,
+	                                    extraDataNote_t );
+	const struct extraDataNote_t *xx2 = GET_EXTRA_DATA( trk2, T_NOTE,
+	                                    extraDataNote_t );
 	char * cp = message + strlen(message);
 	REGRESS_CHECK_POS( "Pos", xx1, xx2, pos )
 	REGRESS_CHECK_INT( "Op", xx1, xx2, op )

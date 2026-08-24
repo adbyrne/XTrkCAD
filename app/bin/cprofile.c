@@ -439,7 +439,7 @@ static void RedrawProfileW( wDraw_p d, void * context, wWinPix_t x,
 	coOrd size;
 	int divC;
 	DIST_T maxE, rngE;
-	profElem_t *p;
+	const profElem_t *p;
 	wFont_p fp;
 	POS_T w;
 	coOrd textsize;

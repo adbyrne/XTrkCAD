@@ -311,7 +311,7 @@ char *GetLayerName(unsigned int layer)
 	}
 }
 
-void SetLayerName(unsigned int layer, char *name)
+void SetLayerName(unsigned int layer, const char *name)
 {
 	if (IsLayerValid(layer)) {
 		strncpy(layers[layer].name, name, sizeof(layers[layer].name) - 1);
@@ -724,7 +724,7 @@ static paramGroup_t layerPG = {"layer", PGO_FULLDIALOGFROMBUILDER, layerPLs,
 /**
  * Reload the listbox showing the current catalog
  */
-static int LoadFileListLoad(Catalog *catalog, char *name)
+static int LoadFileListLoad(Catalog *catalog, const char *name)
 {
 	CatalogEntry *currentEntry = catalog->head;
 	DynString description;
@@ -1177,7 +1177,7 @@ static void InitializeLayers(void LayerInitFunc(void), int newCurrLayer)
 /**
  * Save an integer to Prefs
  */
-static void layerSetInteger(unsigned int inx, char prefName[], long value)
+static void layerSetInteger(unsigned int inx, const char prefName[], long value)
 {
 	char buffer[80];
 	char name[80];
@@ -1189,7 +1189,7 @@ static void layerSetInteger(unsigned int inx, char prefName[], long value)
 /**
  * Save a float to Prefs
  */
-static void layerSetFloat(unsigned int inx, char prefName[], double value)
+static void layerSetFloat(unsigned int inx, const char prefName[], double value)
 {
 	char buffer[80];
 	char name[80];
@@ -1282,7 +1282,8 @@ static void LayerPrefSave(void)
 /**
  * Load an integer from Prefs
  */
-static void layerGetInteger(unsigned int inx, char prefName[], long *value,
+static void layerGetInteger(unsigned int inx, const char prefName[],
+                            long *value,
                             int deflt)
 {
 	char buffer[80];
@@ -1295,7 +1296,8 @@ static void layerGetInteger(unsigned int inx, char prefName[], long *value,
 /**
  * Load a float from Prefs
  */
-static void layerGetFloat(unsigned int inx, char prefName[], double *value,
+static void layerGetFloat(unsigned int inx, const char prefName[],
+                          double *value,
                           double deflt)
 {
 	char buffer[80];
@@ -1792,7 +1794,7 @@ void SaveLayers(void)
 void RestoreLayers(void)
 {
 	int inx;
-	char *label;
+	const char *label;
 	wDrawColor color;
 	if (layers_save == NULL) { return; }
 	memcpy(layers, layers_save, NUM_LAYERS * sizeof layers[0]);

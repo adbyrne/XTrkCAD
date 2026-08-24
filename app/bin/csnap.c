@@ -143,7 +143,7 @@ static void DrawGridLine(
         drawCmd_p D,
         wDrawColor Color,
         coOrd orig,
-        coOrd * size,
+        const coOrd * size,
         DIST_T dpi,
         BOOL_T clip,
         coOrd p0,
@@ -487,7 +487,7 @@ EXPORT BOOL_T SnapPosAngle( coOrd * pos, ANGLE_T * angle )
 }
 
 
-static void DrawASnapGrid( gridHVData * gridP, drawCmd_p d, coOrd size,
+static void DrawASnapGrid( const gridHVData * gridP, drawCmd_p d, coOrd size,
                            BOOL_T drawDivisions )
 {
 	if (gridP->Horz.Spacing <= 0.0 && gridP->Vert.Spacing <= 0.0) {

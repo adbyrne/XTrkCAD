@@ -169,7 +169,7 @@ static int GetElevMode( void )
 {
 	int mode;
 	int newMode;
-	static int modeMap[7] = { ELEV_NONE, ELEV_DEF|ELEV_VISIBLE, ELEV_DEF, ELEV_COMP|ELEV_VISIBLE, ELEV_GRADE|ELEV_VISIBLE, ELEV_STATION|ELEV_VISIBLE, ELEV_IGNORE };
+	static const int modeMap[7] = { ELEV_NONE, ELEV_DEF|ELEV_VISIBLE, ELEV_DEF, ELEV_COMP|ELEV_VISIBLE, ELEV_GRADE|ELEV_VISIBLE, ELEV_STATION|ELEV_VISIBLE, ELEV_IGNORE };
 	mode = (int)elevModeV;
 	if (mode<0||mode>=7) {
 		return -1;

@@ -908,7 +908,7 @@ static void ComputeIslandElev(
 {
 	int i1, i2;
 	coOrd hi, lo, pos;
-	pivot_t * pp;
+	const pivot_t * pp;
 	DIST_T elev;
 	DIST_T totalDist;
 	elevdist_t * w;
@@ -1222,11 +1222,11 @@ EXPORT void UpdateTrkEndElev(
         EPINX_T ep,
         int newMode,
         DIST_T newElev,
-        char * newStation )
+        const char * newStation )
 {
 	int oldMode;
 	DIST_T oldElev;
-	char * oldStation;
+	const char * oldStation;
 	BOOL_T changed = TRUE;
 	track_p trk1;
 //	EPINX_T ep1;

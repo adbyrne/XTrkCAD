@@ -1541,7 +1541,7 @@ EXPORT BOOL_T WriteSegsEnd(
 	BOOL_T rc = TRUE;
 	long option;
 	char * escaped_text;
-	char* trackText;
+	const char* trackText;
 #ifdef UTFCONVERT
 	char* out = NULL;
 #endif

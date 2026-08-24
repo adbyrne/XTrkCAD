@@ -255,7 +255,7 @@ static void DescribeCar(
         CSIZE_T len)
 {
 	struct extraDataCar_t *xx = GET_EXTRA_DATA(trk, T_CAR, extraDataCar_t);
-	char * cp;
+	const char * cp;
 	char descBuf[STR_LONG_SIZE];
 	coOrd size;
 	CarItemSize(xx->item, &size);
@@ -356,7 +356,7 @@ static void DrawCar(
 	struct extraDataCar_t * xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
 	int dir;
 	vector_t coupler[2];
-	struct extraDataCar_t * xx1;
+	const struct extraDataCar_t * xx1;
 	int dir1;
 
 	if (drawCarEnable == FALSE) {
@@ -1408,7 +1408,6 @@ static trainControlDlg_p CreateTrainControlDlg(void)
 
 static struct {
 	STATE_T state;
-	coOrd pos0;
 } Dtrain;
 
 
@@ -1516,7 +1515,7 @@ static track_p FindCar(
 	coOrd pos0, pos1;
 	track_p trk, trk1;
 	DIST_T dist1 = DIST_INF, dist;
-	struct extraDataCar_t * xx;
+	const struct extraDataCar_t * xx;
 	trk1 = NULL;
 
 	for (trk=NULL; TrackIterate(&trk);) {
@@ -2531,7 +2530,7 @@ static BOOL_T TrainOnMovableTrack(
         track_p *trainR)
 {
 	track_p train;
-	struct extraDataCar_t * xx;
+	const struct extraDataCar_t * xx;
 	int dir;
 
 	for (train=NULL; TrackIterate(&train);) {

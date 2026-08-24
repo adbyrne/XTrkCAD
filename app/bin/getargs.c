@@ -52,7 +52,7 @@
  */
 
 EXPORT int InputError(
-        char * msg,
+        const char * msg,
         BOOL_T showLine,
         ... )
 {
@@ -142,7 +142,7 @@ EXPORT BOOL_T GetArgs(
 	char * ps;
 	char ** qp;
 	va_list ap;
-	char * sError = NULL;
+	const char * sError = NULL;
 
 	cp = line;
 	va_start( ap, format );
@@ -245,7 +245,7 @@ EXPORT BOOL_T GetArgs(
 			*pp = p;
 			break;
 		case 's': {
-			char * ps0;
+			const char * ps0;
 			size_t maxLen = 0;
 			ps = va_arg( ap, char * );
 			/* Mandatory inline width, e.g. "s9" -- see format-chars comment

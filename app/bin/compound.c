@@ -53,8 +53,8 @@ static int log_compound = -1;
  */
 EXPORT PATHPTR_T GetPaths( track_p trk )
 {
-	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_NOTRACK,
-	                                  extraDataCompound_t );
+	const struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_NOTRACK,
+	                                        extraDataCompound_t );
 	if ( GetTrkType(trk) == T_STRUCTURE && xx->paths != NULL ) {
 		LogPrintf( "GetPaths( STRUCTURE, paths!=NULL )\n" );
 	}
@@ -153,8 +153,8 @@ EXPORT long GetCurrPathIndex( track_p trk )
 	if ( GetTrkType( trk ) != T_TURNOUT ) {
 		return 0;
 	}
-	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_TURNOUT,
-	                                  extraDataCompound_t );
+	const struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_TURNOUT,
+	                                        extraDataCompound_t );
 	return xx->currPathIndex;
 }
 
@@ -177,7 +177,7 @@ EXPORT void SetCurrPathIndex( track_p trk, long position )
  *
  * \param to IN
  */
-PATHPTR_T GetParamPaths( turnoutInfo_t * to )
+PATHPTR_T GetParamPaths( const turnoutInfo_t * to )
 {
 	return to->paths;
 }
@@ -279,7 +279,8 @@ EXPORT void FormatCompoundTitle(
         long format,
         char * title )
 {
-	char *cp1, *cp2=NULL, *cq;
+	const char *cp1;
+	char *cp2=NULL, *cq;
 	size_t len;
 	FLOAT_T price;
 	BOOL_T needSep;
@@ -372,7 +373,8 @@ void ComputeCompoundBoundingBox(
 }
 
 
-turnoutInfo_t * FindCompound( long type, char * scale, char * title )
+turnoutInfo_t * FindCompound( long type, const char * scale,
+                              const char * title )
 {
 	turnoutInfo_t * to;
 	wIndex_t inx;
@@ -407,7 +409,7 @@ turnoutInfo_t * FindCompound( long type, char * scale, char * title )
 }
 
 
-char * CompoundGetTitle( turnoutInfo_t * to )
+char * CompoundGetTitle( const turnoutInfo_t * to )
 {
 	return to->title;
 }
@@ -720,7 +722,6 @@ static struct {
 	char partno[STR_SIZE];
 	long epCnt;
 	long segCnt;
-	long pathCnt;
 	FLOAT_T grade;
 	DIST_T length;
 	drawLineType_e linetype;
@@ -1324,7 +1325,7 @@ EXPORT track_p NewCompound(
         TRKINX_T index,
         coOrd pos,
         ANGLE_T angle,
-        char * title,
+        const char * title,
         EPINX_T epCnt,
         trkEndPt_p epp0,
         PATHPTR_T paths,
@@ -1526,7 +1527,8 @@ void FlipCompound(
 	int mL, nL, pL;
 	char *type, *mfg, *descL, *partL, *descR, *partR, *cp;
 	wIndex_t inx;
-	turnoutInfo_t *to, *toBest;
+	turnoutInfo_t *to;
+	const turnoutInfo_t *toBest;
 	coOrd endPos[4];
 	ANGLE_T endAngle[4];
 	DIST_T d2, d1, d0;

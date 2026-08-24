@@ -57,7 +57,6 @@ static struct {
 	BOOL_T lock0;
 	coOrd middle;
 	coOrd end0;
-	coOrd end1;
 } Da;
 
 static long curveMode;

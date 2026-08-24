@@ -149,7 +149,7 @@ EXPORT void SyntaxError(
 
 
 
-wBool_t IsEND( char * sEnd )
+wBool_t IsEND( const char * sEnd )
 {
 	char * cp;
 	wBool_t bAllowNakedENDs = paramVersion < VERSION_NONAKEDENDS;
@@ -298,7 +298,7 @@ EXPORT char * PutTitle( char * cp )
 
 void SetWindowTitle( void )
 {
-	char *filename;
+	const char *filename;
 
 	if ( changed > 2 || inPlayback ) {
 		return;
@@ -670,11 +670,11 @@ int LoadTracks(
 	return TRUE;
 }
 
-void AddToRecentFiles(char* displayFileName, char* fullFileName)
+void AddToRecentFiles(const char* displayFileName, const char* fullFileName)
 {
 	if (!bExample && (displayFileName != NULL)) {
-		char* copyFile = MyStrdup(fullFileName);
-		char* listName = FindFilename(strdup(fullFileName));
+		const char* copyFile = MyStrdup(fullFileName);
+		const char* listName = FindFilename(strdup(fullFileName));
 		wMenuListAdd(fileList_ml, 0, listName, copyFile);
 
 		SaveRecentFileList();
@@ -711,7 +711,7 @@ SaveRecentFileList()
 
 EXPORT void DoFileList(
         int index,
-        char * label,
+        const char * label,
         void * data )
 {
 	char *pathName = (char*)data;
@@ -1193,7 +1193,7 @@ EXPORT int LoadCheckpoint( BOOL_T sameName )
 
 		if (sameName) {
 			long iExample;
-			char * initialFile = (char*)wPrefGetString("misc", "lastlayout");
+			const char * initialFile = (char*)wPrefGetString("misc", "lastlayout");
 			wPrefGetInteger("misc", "lastlayoutexample", &iExample, 0);
 			bExample = (iExample == 1);
 			if (initialFile && strlen(initialFile)) {
@@ -1247,7 +1247,7 @@ static int ImportTracks(
         char **fileName,
         void * data )
 {
-	char *nameOfFile;
+	const char *nameOfFile;
 	long paramVersionOld = paramVersion;
 
 	CHECK( fileName != NULL );
@@ -1286,7 +1286,7 @@ static int ImportTracks(
 	return TRUE;
 }
 
-static void DoImport( void * type )
+static void DoImport( const void * type )
 {
 	if (importFile_fs == NULL)
 		importFile_fs = wFilSelCreate( mainW, FS_LOAD, 0,

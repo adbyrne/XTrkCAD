@@ -638,7 +638,7 @@ EXPORT int LoadImageFile(
 */
 void LayoutBackGroundSave(void)
 {
-	char * background = GetLayoutBackGroundFullPath();
+	const char * background = GetLayoutBackGroundFullPath();
 	wPrefSetString("layout", "BackgroundPath", background);
 	wPrefSetFloat("layout", "BackgroundPosX", thisLayout.props.backgroundPos.x);
 	wPrefSetFloat("layout", "BackgroundPosY", thisLayout.props.backgroundPos.y);
@@ -1043,7 +1043,7 @@ EXPORT int DoSettingsRead(
         char ** fileName,
         void * data )
 {
-	char * pref;
+	const char * pref;
 	CHECK( files == 1 );
 	if (fileName == NULL) { wPrefsLoad(NULL); }
 	else { wPrefsLoad(fileName[0]); }

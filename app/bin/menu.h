@@ -60,7 +60,7 @@ extern void SelectFont(void * unused);
 extern void DoSticky(void * unused);
 
 extern void EnableMenus( void );
-extern void MessageListAppend( char *, const char * );
+extern void MessageListAppend( const char *, const char * );
 extern const char * GetBalloonHelpStr(const char * helpKey);
 extern wControl_p AddToolbarButton(const char * helpStr, wIcon_p icon,
                                    long options,

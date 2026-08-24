@@ -131,8 +131,8 @@ static track_p NewTurntable( coOrd p, DIST_T r )
 
 static ANGLE_T ConstrainTurntableAngle( track_p trk, coOrd pos )
 {
-	struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
-	                                  extraDataTurntable_t);
+	const struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	                                        extraDataTurntable_t);
 	ANGLE_T a, al, ah, aa, aaa;
 	EPINX_T inx, cnt;
 
@@ -177,8 +177,8 @@ static ANGLE_T ConstrainTurntableAngle( track_p trk, coOrd pos )
 
 static EPINX_T NewTurntableEndPt( track_p trk, ANGLE_T angle )
 {
-	struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
-	                                  extraDataTurntable_t);
+	const struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	                                        extraDataTurntable_t);
 	EPINX_T ep = -1;
 	/* Reuse an old empty ep if it exists */
 	for (int i =0; i< GetTrkEndPtCnt(trk)-1; i++) {
@@ -199,8 +199,8 @@ static EPINX_T NewTurntableEndPt( track_p trk, ANGLE_T angle )
 
 static void TurntableGetCenter( track_p trk, coOrd * center, DIST_T * radius)
 {
-	struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
-	                                  extraDataTurntable_t);
+	const struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	                                        extraDataTurntable_t);
 	*center = xx->pos;
 	*radius = xx->radius;
 }
@@ -240,8 +240,8 @@ static void DrawTurntable( track_p t, drawCmd_p d, wDrawColor color )
 
 static DIST_T DistanceTurntable( track_p trk, coOrd * p )
 {
-	struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
-	                                  extraDataTurntable_t);
+	const struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	                                        extraDataTurntable_t);
 	DIST_T d;
 	ANGLE_T a;
 	coOrd pos0, pos1;
@@ -309,8 +309,8 @@ static void UpdateTurntable( track_p trk, int inx, descData_p descUpd,
 
 static void DescribeTurntable( track_p trk, char * str, CSIZE_T len )
 {
-	struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
-	                                  extraDataTurntable_t);
+	const struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	                                        extraDataTurntable_t);
 	sprintf( str, _("Turntable(%d): Layer=%d Center=[%s %s] Diameter=%s #EP=%d"),
 	         GetTrkIndex(trk), GetTrkLayer(trk)+1,
 	         FormatDistance(xx->pos.x), FormatDistance(xx->pos.y),
@@ -339,8 +339,8 @@ static void DeleteTurntable( track_p t )
 
 static BOOL_T WriteTurntable( track_p t, FILE * f )
 {
-	struct extraDataTurntable_t *xx = GET_EXTRA_DATA(t, T_TURNTABLE,
-	                                  extraDataTurntable_t);
+	const struct extraDataTurntable_t *xx = GET_EXTRA_DATA(t, T_TURNTABLE,
+	                                        extraDataTurntable_t);
 	EPINX_T ep;
 	BOOL_T rc = TRUE;
 	int j = -1, k = 0;
@@ -429,8 +429,8 @@ static void RescaleTurntable( track_p trk, FLOAT_T ratio )
 static ANGLE_T GetAngleTurntable( track_p trk, coOrd pos, EPINX_T * ep0,
                                   EPINX_T * ep1 )
 {
-	struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
-	                                  extraDataTurntable_t);
+	const struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	                                        extraDataTurntable_t);
 	if ( programMode == MODE_DESIGN ) {
 		return FindAngle( xx->pos, pos );
 	} else {
@@ -502,8 +502,8 @@ static EPINX_T FindTurntableNextEndPt(
 {
 
 	EPINX_T ep,epfound=-1,epCnt;
-	struct extraDataTurntable_t * xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
-	                                   extraDataTurntable_t);
+	const struct extraDataTurntable_t * xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	        extraDataTurntable_t);
 	ANGLE_T a = FindAngle(xx->pos,pos);
 	ANGLE_T foundangle = 370.0;
 	ANGLE_T diff = DifferenceBetweenAngles(GetTrkEndAngle(trk,xx->currEp),a);
@@ -539,8 +539,8 @@ static BOOL_T CheckTraverseTurntable(
         track_p trk,
         coOrd pos )
 {
-	struct extraDataTurntable_t * xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
-	                                   extraDataTurntable_t);
+	const struct extraDataTurntable_t * xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	        extraDataTurntable_t);
 	ANGLE_T angle;
 
 	if ( !ValidateTurntablePosition( trk ) ) {
@@ -561,8 +561,8 @@ static BOOL_T TraverseTurntable(
         DIST_T * distR )
 {
 	track_p trk = trvTrk->trk;
-	struct extraDataTurntable_t * xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
-	                                   extraDataTurntable_t);
+	const struct extraDataTurntable_t * xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	        extraDataTurntable_t);
 	coOrd pos0;
 	DIST_T dist, dist1;
 	ANGLE_T angle, angle1;
@@ -620,7 +620,7 @@ static BOOL_T TraverseTurntable(
 
 static BOOL_T EnumerateTurntable( track_p trk )
 {
-	struct extraDataTurntable_t *xx;
+	const struct extraDataTurntable_t *xx;
 	static dynArr_t turntables_da;
 #define turntables(N) DYNARR_N( FLOAT_T, turntables_da, N )
 	int inx;
@@ -800,8 +800,8 @@ static BOOL_T MoveEndPtTurntable( track_p *trk, EPINX_T *ep, coOrd pos,
 	if (!found) {
 		*ep = NewTurntableEndPt(*trk,angle0);
 	} else {
-		struct extraDataTurntable_t *xx = GET_EXTRA_DATA(*trk, T_TURNTABLE,
-		                                  extraDataTurntable_t);
+		const struct extraDataTurntable_t *xx = GET_EXTRA_DATA(*trk, T_TURNTABLE,
+		                                        extraDataTurntable_t);
 		coOrd pos1;
 		PointOnCircle( &pos1, xx->pos, xx->radius, angle0 );
 		SetTrkEndPoint(*trk, *ep, pos1, angle0);   //Reuse
@@ -853,8 +853,8 @@ BOOL_T debug = 0;
 
 static void DrawTurntablePositionIndicator( track_p trk, wDrawColor color )
 {
-	struct extraDataTurntable_t * xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
-	                                   extraDataTurntable_t);
+	const struct extraDataTurntable_t * xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	        extraDataTurntable_t);
 	coOrd pos0, pos1;
 	ANGLE_T angle;
 
@@ -879,10 +879,10 @@ static void DrawTurntablePositionIndicator( track_p trk, wDrawColor color )
 
 static wBool_t CompareTurntable( track_cp trk1, track_cp trk2 )
 {
-	struct extraDataTurntable_t *xx1 = GET_EXTRA_DATA( trk1, T_TURNTABLE,
-	                                   extraDataTurntable_t );
-	struct extraDataTurntable_t *xx2 = GET_EXTRA_DATA( trk2, T_TURNTABLE,
-	                                   extraDataTurntable_t );
+	const struct extraDataTurntable_t *xx1 = GET_EXTRA_DATA( trk1, T_TURNTABLE,
+	        extraDataTurntable_t );
+	const struct extraDataTurntable_t *xx2 = GET_EXTRA_DATA( trk2, T_TURNTABLE,
+	        extraDataTurntable_t );
 	char * cp = message + strlen(message);
 	REGRESS_CHECK_POS( "Pos", xx1, xx2, pos )
 	REGRESS_CHECK_DIST( "Radius", xx1, xx2, radius )

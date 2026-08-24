@@ -63,7 +63,7 @@ static wIcon_p ecornu_bm;
 static wControl_p easementW;
 
 static void EasementSel( long );
-static void SetEasement( DIST_T, void * );
+static void SetEasement( DIST_T, const void * );
 static void EasementOk( void const * arg );
 
 static char *easementChoiceLabels[] = { N_("None"), N_("Sharp"), N_("Normal"), N_("Broad"), N_("Cornu"), NULL };
@@ -86,7 +86,7 @@ static paramGroup_t easementPG = { "easement", PGO_RECORD|PGO_FULLDIALOGFROMBUIL
 
 static void SetEasement(
         DIST_T val,
-        void * update )
+        const void * update )
 /*
  * Set transition-curve parameters (R and L).
  */

@@ -505,7 +505,7 @@ EXPORT void CompoundCustMgmLoad( void )
 
 wIndex_t FindListItemByContext(
         wControl_p listP,
-        void * context )
+        const void * context )
 {
 	if ( listP == NULL ) {
 		return -1;
@@ -514,7 +514,7 @@ wIndex_t FindListItemByContext(
 		return -1;
 	}
 	for ( wIndex_t inx = 0; inx < wListGetCount( listP ); ++inx ) {
-		void * itemContext = wListGetItemContext( listP, inx );
+		const void * itemContext = wListGetItemContext( listP, inx );
 		if ( itemContext != NULL ) {
 			if ( itemContext == context ) {
 				return inx;

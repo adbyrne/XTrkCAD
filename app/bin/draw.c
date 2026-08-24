@@ -598,7 +598,8 @@ EXPORT void MainLayout(wBool_t bRedraw, wBool_t bNoBorder)
  * \param data additional data (unused)
  */
 
-wBool_t MainProc(wControl_p win, winProcEvent e, void *refresh, void *data)
+wBool_t MainProc(wControl_p win, winProcEvent e, const void *refresh,
+                 void *data)
 {
 	static int cMP = 0;
 	wWinPix_t width, height;
@@ -919,7 +920,7 @@ void DoNewScale(DIST_T scale)
  * popup or mousewheel
  */
 
-EXPORT void DoZoomUp(void *mode)
+EXPORT void DoZoomUp(const void *mode)
 {
 	long newScale;
 	int i;
@@ -1036,7 +1037,7 @@ EXPORT void DoZoomExtents(void *mode)
  * popup or mousewheel
  */
 
-EXPORT void DoZoomDown(void *mode)
+EXPORT void DoZoomDown(const void *mode)
 {
 	long newScale;
 	int i;
@@ -1075,7 +1076,7 @@ EXPORT void DoZoomDown(void *mode)
  */
 static void DoZoom(void *pScaleVP)
 {
-	DIST_T *pScale = pScaleVP;
+	const DIST_T *pScale = pScaleVP;
 	DIST_T scale = *pScale;
 
 	if (scale != mainD.scale) {

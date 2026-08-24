@@ -64,7 +64,7 @@ static paramGroup_t enumPG = { "enum", PGO_FULLDIALOGFROMBUILDER, enumPLs, COUNT
 static struct wFilSel_t * enumFile_fs;
 
 
-static int count_utf8_chars(char *s)
+static int count_utf8_chars(const char *s)
 {
 	int i = 0, j = 0;
 	while (s[i]) {
@@ -125,8 +125,8 @@ static FLOAT_T enumerateTotal;
 void EnumerateList(
         long count,
         FLOAT_T price,
-        char * desc,
-        char * indexes )
+        const char * desc,
+        const char * indexes )
 {
 	char * cp;
 	long len;
@@ -153,7 +153,7 @@ void EnumerateList(
 void
 AddDateString(DynString* output)
 {
-	struct tm *tm;
+	const struct tm *tm;
 	time_t currentTime;
 	size_t length = 8;
 	char* formatted = malloc(length);

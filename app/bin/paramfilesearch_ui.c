@@ -135,7 +135,7 @@ int SearchFileListLoad(Catalog *catalog)
 			if (catalogEntry->tag && searchFitMode != 0) {
 				char * type_copy = MyStrdup(catalogEntry->tag);
 				char * cp = type_copy;
-				char * type = strtok(cp, " \t");
+				const char * type = strtok(cp, " \t");
 				SCALE_FIT_TYPE_T fit_type = FIT_STRUCTURE;
 				if (strcmp(type,TURNOUTCOMMAND) == 0) {
 					fit_type = FIT_TURNOUT;
@@ -144,7 +144,7 @@ int SearchFileListLoad(Catalog *catalog)
 				} else if ((strcmp(type,CARCOMMAND)==0) || (strcmp(type,CARPROTOCOMMAND)==0)) {
 					fit_type = FIT_CAR;
 				}
-				char * scale = strtok(NULL, " \t\n");
+				const char * scale = strtok(NULL, " \t\n");
 				if (scale) {
 					SCALEINX_T scale1 = LookupScale(scale);
 					SCALEINX_T scale2 = GetLayoutCurScale();
@@ -435,7 +435,7 @@ static char *
 GetParamsPath()
 {
 	char * params_path;
-	char *params_pref;
+	const char *params_pref;
 	params_pref = wPrefGetString(FILESECTION, PARAMDIRECTORY);
 
 	if (!params_pref) {

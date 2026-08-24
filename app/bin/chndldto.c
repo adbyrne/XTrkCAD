@@ -48,7 +48,6 @@ static struct {
 	ANGLE_T reverseA;
 	DIST_T frogNo;
 	ANGLE_T frogA;
-	curveData_t curveData;
 } Dhlt;
 
 

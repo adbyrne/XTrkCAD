@@ -529,8 +529,8 @@ static BOOL_T WriteStraight( track_p t, FILE * f )
 {
 	int bits;
 	long options;
-	struct extraDataStraight_t *xx = GET_EXTRA_DATA(t, T_STRAIGHT,
-	                                 extraDataStraight_t);
+	const struct extraDataStraight_t *xx = GET_EXTRA_DATA(t, T_STRAIGHT,
+	                                       extraDataStraight_t);
 	BOOL_T rc = TRUE;
 
 	options = GetTrkWidth(t) & 0x0F;
