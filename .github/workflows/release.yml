@@ -37,7 +37,7 @@ jobs:
   package-linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Install dependencies
         run: |
@@ -91,7 +91,7 @@ jobs:
   package-linux-arm64-ubuntu:
     runs-on: ubuntu-24.04-arm
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Install dependencies
         run: |
@@ -140,7 +140,7 @@ jobs:
       - name: Install git (required by actions/checkout)
         run: apt-get update -q && apt-get install -y git
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Install dependencies
         run: |
@@ -184,7 +184,7 @@ jobs:
   package-macos:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Install dependencies
         run: brew install ninja gtk+3 cmocka libzip librsvg doxygen
@@ -258,7 +258,7 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: msys2/setup-msys2@v2
         with:
@@ -384,7 +384,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Install dependencies
         run: |
           sudo apt-get update -q
@@ -427,7 +427,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Install cppcheck
         run: sudo apt-get update -q && sudo apt-get install -y cppcheck
       - name: Run cppcheck (deep, non-fatal)
@@ -480,7 +480,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Install dependencies
         run: |
           sudo apt-get update -q
@@ -526,7 +526,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Install codespell
         run: sudo apt-get update -q && sudo apt-get install -y codespell
       - name: Run codespell (non-fatal)
@@ -557,7 +557,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Install dependencies
         run: |
           sudo apt-get update -q
@@ -588,7 +588,7 @@ jobs:
     env:
       DOXYGEN_VERSION: 1.15.0
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Install dependencies
         run: |
@@ -690,7 +690,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
       - name: Download docs artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: 'xtrkcad-*-html'
           path: downloaded
@@ -732,16 +732,16 @@ jobs:
           PAGEEOF
 
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: site
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
   # ── "Latest" GitHub Release — rolling, tracks the newest GTK3V2MAIN push ──
   # Unlike the artifacts above, this is one permanent, unchanging URL:
@@ -760,10 +760,10 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Download all packages
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           path: release-packages
           merge-multiple: true
@@ -824,10 +824,10 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Download all packages
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           path: release-packages
           merge-multiple: true
@@ -876,10 +876,10 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Download all packages
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           path: release-packages
           merge-multiple: true
