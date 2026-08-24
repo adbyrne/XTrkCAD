@@ -338,7 +338,7 @@ CreateHelpWindow(void)
 	main_view = webkit_web_view_new();
 	contents_view = webkit_web_view_new();
 	// must be done here as it gets locked down later
-	load_into_view("contents.html", CONTENTS_VIEW);
+	load_into_view("index.html", CONTENTS_VIEW);
 	gtk_widget_set_size_request(GTK_WIDGET(wHelpWindow), x, y);
 
 	main_vbox = gtk_vbox_new(FALSE, 5);
