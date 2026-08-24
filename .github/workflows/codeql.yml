@@ -25,7 +25,7 @@ jobs:
       matrix:
         language: [ 'c-cpp' ]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Install dependencies
         run: |
