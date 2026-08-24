@@ -197,8 +197,6 @@ static STATUS_T ModifyDraw(wAction_t action, coOrd pos)
 	case C_DOWN:
 	case C_MOVE:
 	case C_UP:
-		rc = ModifyTrack( Dex.Trk, action, pos );
-		break;
 	case wActionMove:
 		rc = ModifyTrack( Dex.Trk, action, pos );
 		break;

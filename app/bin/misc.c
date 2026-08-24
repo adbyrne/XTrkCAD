@@ -108,14 +108,8 @@ EXPORT char * ConvertToEscapedText(const char * text)
 	while (text[text_i]) {
 		switch (text[text_i]) {
 		case '\n':
-			add++;
-			break;
 		case '\t':
-			add++;
-			break;
 		case '\\':
-			add++;
-			break;
 		case '\"':
 			add++;
 			break;

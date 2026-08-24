@@ -112,7 +112,7 @@ LinkDlgUpdate(
 	case I_ORIGX:
 	case I_ORIGY:
 		// TODO: Redraw bitmap at new location
-		break;
+		__attribute__((fallthrough));
 	default:
 		break;
 	}

@@ -1705,9 +1705,7 @@ static BOOL_T QueryTurnout(track_p trk, int query)
 	case Q_NOT_PLACE_FROGPOINTS:
 	case Q_HAS_DESC:
 	case Q_MODIFY_REDRAW_DONT_UNDRAW_TRACK:
-		return TRUE;
 	case Q_MODIFY_CAN_SPLIT:
-		return TRUE;
 	case Q_IS_TURNOUT:
 		return TRUE;
 	case Q_CAN_PARALLEL:
@@ -1723,7 +1721,6 @@ static BOOL_T QueryTurnout(track_p trk, int query)
 		return ( path[2] != 0 );
 	}
 	case Q_CORNU_CAN_MODIFY:
-		return FALSE;
 	default:
 		return FALSE;
 	}

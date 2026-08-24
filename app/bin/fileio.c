@@ -633,13 +633,7 @@ int LoadTracks(
 
 	}
 
-	if ( bExample ) {
-		bReadOnly = TRUE;
-	} else if ( access( fileName[0], W_OK ) == -1 ) {
-		bReadOnly = TRUE;
-	} else {
-		bReadOnly = FALSE;
-	}
+	bReadOnly = bExample || ( access( fileName[0], W_OK ) == -1 );
 
 	char *copyOfFileName = MyStrdup(fileName[0]);
 

@@ -2012,10 +2012,7 @@ static STATUS_T CmdPan(wAction_t action, coOrd pos)
 			PanHere(I2VP(0)); /* CmdPan C_TEXT 'c' */
 		}
 
-		if ((action >> 8) == 0x0D) {
-			wSetCursor(mainD.d, defaultCursor);
-			return C_TERMINATE;
-		} else if ((action >> 8) == 0x1B) {
+		if ((action >> 8) == 0x0D || (action >> 8) == 0x1B) {
 			wSetCursor(mainD.d, defaultCursor);
 			return C_TERMINATE;
 		}

@@ -174,14 +174,6 @@ EXPORT BOOL_T GetArgs(
 			*pf = 0;
 			break;
 		case 'L':
-			pi = va_arg( ap, int * );
-			*pi = (int)strtol( cp, &cq, 10 );
-			if (cp == cq) {
-				sError = "%s: expected integer";
-				break;
-			}
-			cp = cq;
-			break;
 		case 'd':
 			pi = va_arg( ap, int * );
 			*pi = (int)strtol( cp, &cq, 10 );

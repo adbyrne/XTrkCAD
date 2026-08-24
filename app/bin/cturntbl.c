@@ -832,7 +832,6 @@ static BOOL_T QueryTurntable( track_p trk, int query )
 		return TRUE;
 	case Q_MODIFY_CAN_SPLIT:
 	case Q_CORNU_CAN_MODIFY:
-		return FALSE;
 	default:
 		return FALSE;
 	}

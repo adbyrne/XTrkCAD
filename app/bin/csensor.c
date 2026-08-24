@@ -160,9 +160,7 @@ static void UpdateSensorProperties (  track_p trk, int inx, descData_p
 
 	switch (inx) {
 	case NM:
-		break;
 	case PS:
-		break;
 	case SC:
 		break;
 	case -1:

@@ -1076,9 +1076,7 @@ static STATUS_T CmdJoin(
 			}
 			rc = C_CONTINUE;
 			if ( MergeTracks( Dj.inp[0].trk, Dj.inp[0].params.ep,
-			                  Dj.inp[1].trk, Dj.inp[1].params.ep ) ) {
-				rc = C_TERMINATE;
-			} else if (only_merge) {
+			                  Dj.inp[1].trk, Dj.inp[1].params.ep ) || only_merge ) {
 				rc = C_TERMINATE;
 			} else if ( Dj.inp[0].params.ep >= 0 && Dj.inp[1].params.ep >= 0 ) {
 				if ( Dj.inp[0].params.type == curveTypeStraight &&

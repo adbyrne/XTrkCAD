@@ -169,11 +169,8 @@ static void UpdateControlProperties (  track_p trk, int inx, descData_p
 
 	switch (inx) {
 	case NM:
-		break;
 	case PS:
-		break;
 	case ON:
-		break;
 	case OF:
 		break;
 	case -1:
@@ -529,7 +526,6 @@ static STATUS_T CmdControl ( wAction_t action, coOrd pos )
 		}
 		return C_CONTINUE;
 	case C_CANCEL:
-		return C_CONTINUE;
 	default:
 		return C_CONTINUE;
 	}

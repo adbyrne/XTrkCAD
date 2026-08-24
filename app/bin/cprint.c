@@ -1084,11 +1084,7 @@ PrintNextPageNumbers(int x, int y, DIST_T pageW, DIST_T pageH)
 	PrintNextPageNumberAt(x, y + 1, p00);
 
 	// below
-	if (printFormat == PORTRAIT) {
-		p00.y = 10.0 / 72.0;
-	} else {
-		p00.y = 10.0 / 72.0;
-	}
+	p00.y = 10.0 / 72.0;
 	PrintNextPageNumberAt(x, y-1, p00);
 
 	// right
@@ -1102,11 +1098,7 @@ PrintNextPageNumbers(int x, int y, DIST_T pageW, DIST_T pageH)
 	PrintNextPageNumberAt(x+1, y, p00);
 
 	// left
-	if (printFormat == PORTRAIT) {
-		p00.x = 10.0 / 72.0;
-	} else {
-		p00.x = 10.0 / 72.0;
-	}
+	p00.x = 10.0 / 72.0;
 	PrintNextPageNumberAt(x-1, y, p00);
 	return (TRUE);
 }

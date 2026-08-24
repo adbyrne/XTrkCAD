@@ -1239,11 +1239,7 @@ static BOOL_T QueryCornu( track_p trk, int query )
 		return fabs(xx->minCurveRadius) < (GetLayoutMinTrackRadius()-EPSILON);
 	}
 	case Q_IS_CORNU:
-		return TRUE;
-		break;
 	case Q_ISTRACK:
-		return TRUE;
-		break;
 	case Q_CAN_PARALLEL:
 		return TRUE;
 		break;

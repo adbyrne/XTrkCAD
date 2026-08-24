@@ -108,14 +108,13 @@ static BOOL_T RefreshCompound1(
 		     CheckCompoundEndPoint( trk, 1, to, 1, TRUE ) ) {
 			flip = TRUE;
 			ok = TRUE;
-		} else if ( ep > 0 && epCnt == 3 &&
-		            CheckCompoundEndPoint( trk, 1, to, 2, FALSE ) &&
-		            CheckCompoundEndPoint( trk, 2, to, 1, FALSE ) ) {
-			ok = TRUE;
-		} else if ( ep > 0 && epCnt == 4 &&
-		            CheckCompoundEndPoint( trk, 1, to, 3, FALSE ) &&
-		            CheckCompoundEndPoint( trk, 2, to, 2, FALSE ) &&
-		            CheckCompoundEndPoint( trk, 3, to, 1, FALSE ) ) {
+		} else if ( ( ep > 0 && epCnt == 3 &&
+		              CheckCompoundEndPoint( trk, 1, to, 2, FALSE ) &&
+		              CheckCompoundEndPoint( trk, 2, to, 1, FALSE ) ) ||
+		            ( ep > 0 && epCnt == 4 &&
+		              CheckCompoundEndPoint( trk, 1, to, 3, FALSE ) &&
+		              CheckCompoundEndPoint( trk, 2, to, 2, FALSE ) &&
+		              CheckCompoundEndPoint( trk, 3, to, 1, FALSE ) ) ) {
 			ok = TRUE;
 		} else {
 			return FALSE;

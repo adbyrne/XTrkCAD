@@ -177,11 +177,6 @@ FormLoadDefaultValues(paramGroup_p pg)
 				}
 				break;
 			case PD_COLORLIST:
-				if (!wPrefGetInteger(pg->nameStr, p->nameStr, p->valueP, *(long*)p->valueP)) {
-					wPrefGetInteger(prefSectAlternative, DynStringToCStr(&prefNameAlternative),
-					                p->valueP, *(long*)p->valueP);
-				}
-				break;
 			case PD_LONG:
 			case PD_SCALE:
 				if (!wPrefGetInteger(pg->nameStr, p->nameStr, p->valueP, *(long*)p->valueP)) {
