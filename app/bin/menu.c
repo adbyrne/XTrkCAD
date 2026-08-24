@@ -539,7 +539,8 @@ EXPORT void EnableMenus( void )
 		if (menuPG.paramPtr[inx].control == NULL) {
 			continue;
 		}
-		enable = !(((menuPG.paramPtr[inx].option & IC_SELECTED) && selectedTrackCount <= 0)
+		enable = !(((menuPG.paramPtr[inx].option & IC_SELECTED)
+		            && selectedTrackCount <= 0)
 		           || ((programMode == MODE_TRAIN
 		                && (menuPG.paramPtr[inx].option & (IC_MODETRAIN_TOO | IC_MODETRAIN_ONLY))
 		                == 0)
