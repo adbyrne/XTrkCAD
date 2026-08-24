@@ -641,7 +641,7 @@ static BOOL_T WriteBezier( track_p t, FILE * f )
 	bits = GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0)|
 	       (GetTrkRoadbed(t)?1<<4:0);
 	rc &= fprintf(f,
-	              "%s %d %u %ld %ld %0.6f %s %d %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %d %0.6f %0.6f \n",
+	              "%s %d %u %ld %lu %0.6f %s %d %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %d %0.6f %0.6f \n",
 	              track?"BEZIER":"BZRLIN",GetTrkIndex(t), GetTrkLayer(t), (long)options,
 	              wDrawGetRGB(xx->segsColor), xx->segsLineWidth,
 	              GetTrkScaleName(t), bits,

@@ -311,7 +311,7 @@ static void DescribeTurntable( track_p trk, char * str, CSIZE_T len )
 {
 	const struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
 	                                        extraDataTurntable_t);
-	sprintf( str, _("Turntable(%d): Layer=%d Center=[%s %s] Diameter=%s #EP=%d"),
+	sprintf( str, _("Turntable(%d): Layer=%u Center=[%s %s] Diameter=%s #EP=%d"),
 	         GetTrkIndex(trk), GetTrkLayer(trk)+1,
 	         FormatDistance(xx->pos.x), FormatDistance(xx->pos.y),
 	         FormatDistance(xx->radius * 2.0), GetTrkEndPtCnt(trk) );
@@ -348,7 +348,7 @@ static BOOL_T WriteTurntable( track_p t, FILE * f )
 		if (GetTrkEndTrk(t,ep)) { j++; }
 		if (ep == xx->currEp) { k=j; }     //Write out the curr->Ep reset to real endPts
 	}
-	rc &= fprintf(f, "TURNTABLE %d %d 0 0 0 %s %d %0.6f %0.6f 0 %0.6f %d\n",
+	rc &= fprintf(f, "TURNTABLE %d %u 0 0 0 %s %d %0.6f %0.6f 0 %0.6f %d\n",
 	              GetTrkIndex(t), GetTrkLayer(t), GetTrkScaleName(t), GetTrkVisible(t),
 	              xx->pos.x, xx->pos.y, xx->radius, k )>0;
 	for (ep=0; ep<GetTrkEndPtCnt(t); ep++) {

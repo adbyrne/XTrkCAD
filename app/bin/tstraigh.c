@@ -209,7 +209,7 @@ static void DescribeStraight( track_p trk, char * str, CSIZE_T len )
 {
 	int fix0, fix1;
 	sprintf( str,
-	         _("Straight Track(%d): Layer=%d Length=%s EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"),
+	         _("Straight Track(%d): Layer=%u Length=%s EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"),
 	         GetTrkIndex(trk),
 	         GetTrkLayer(trk)+1,
 	         FormatDistance(FindDistance( GetTrkEndPos(trk,0), GetTrkEndPos(trk,1) )),
@@ -541,7 +541,7 @@ static BOOL_T WriteStraight( track_p t, FILE * f )
 	}
 	bits = GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0)|
 	       (GetTrkRoadbed(t)?1<<4:0);
-	rc &= fprintf(f, "STRAIGHT %d %d %ld 0 0 %s %d %0.6f %0.6f\n",
+	rc &= fprintf(f, "STRAIGHT %d %u %ld 0 0 %s %d %0.6f %0.6f\n",
 	              GetTrkIndex(t), GetTrkLayer(t), options,
 	              GetTrkScaleName(t), bits, xx->descriptionOff.x, xx->descriptionOff.y )>0;
 	rc &= WriteEndPt( f, t, 0 );

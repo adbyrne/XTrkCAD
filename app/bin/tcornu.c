@@ -597,7 +597,7 @@ static BOOL_T WriteCornu( track_p t, FILE * f )
 	bits = GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0)|
 	       (GetTrkRoadbed(t)?1<<4:0);
 	rc &= fprintf(f,
-	              "%s %d %d %ld 0 0 %s %d %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f \n",
+	              "%s %d %u %ld 0 0 %s %d %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f \n",
 	              "CORNU",GetTrkIndex(t), GetTrkLayer(t), (long)options,
 	              GetTrkScaleName(t), bits,
 	              xx->pos[0].x, xx->pos[0].y,

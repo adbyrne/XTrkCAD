@@ -554,7 +554,7 @@ static void DescribeJoint(
 	int fix0, fix1;
 
 	sprintf( str,
-	         _("Joint Track(%d): Layer=%d Length=%0.3f EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"),
+	         _("Joint Track(%d): Layer=%u Length=%0.3f EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"),
 	         GetTrkIndex(trk),
 	         GetTrkLayer(trk)+1,
 	         GetLengthJoint( trk ),
@@ -974,7 +974,7 @@ static BOOL_T WriteJoint(
 	bits = GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0)|
 	       (GetTrkRoadbed(t)?1<<4:0);
 	rc &= fprintf(f,
-	              "JOINT %d %d %ld 0 0 %s %d %0.6f %0.6f %0.6f %0.6f %d %d %d %0.6f %0.6f 0 %0.6f %0.6f %0.6f\n",
+	              "JOINT %d %u %ld 0 0 %s %d %0.6f %0.6f %0.6f %0.6f %d %d %d %0.6f %0.6f 0 %0.6f %0.6f %0.6f\n",
 	              GetTrkIndex(t), GetTrkLayer(t), options,
 	              GetTrkScaleName(t), bits, xx->l0, xx->l1, xx->R, xx->L,
 	              xx->flip, xx->negate, xx->Scurve, xx->pos.x, xx->pos.y, xx->angle,

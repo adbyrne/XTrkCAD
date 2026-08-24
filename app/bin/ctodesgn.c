@@ -2964,7 +2964,7 @@ static void NewTurnOk( void * context )
 		cp += strlen(cp);
 	}
 
-	sprintf( cp, " %0.6f %0.6f %ld", newTurnRoadbedWidth,
+	sprintf( cp, " %0.6f %0.6f %lu", newTurnRoadbedWidth,
 	         newTurnRoadbedLineWidth, newTurnRoadbedColor );
 	customInfoP = MyStrdup( tempCustom );
 	strcpy( tempCustom, message );
