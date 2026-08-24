@@ -221,16 +221,14 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 		}
 		splitTrkEP[0] = PickEndPoint( pos, splitTrkTrk[0] );
 		angle = NormalizeAngle(GetTrkEndAngle( splitTrkTrk[0], splitTrkEP[0] ));
-		if ( angle <= 45.0 ) {
+		if ( angle <= 45.0 || angle > 315.0 ) {
 			quad = 0;
 		} else if ( angle <= 135.0 ) {
 			quad = 1;
 		} else if ( angle <= 225.0 ) {
 			quad = 2;
-		} else if ( angle <= 315.0 ) {
-			quad = 3;
 		} else {
-			quad = 0;
+			quad = 3;
 		}
 		splitTrkFlip = (quad<2);
 		if ( (splitTrkTrk[1] = GetTrkEndTrk( splitTrkTrk[0],

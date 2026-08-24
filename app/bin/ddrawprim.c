@@ -788,8 +788,6 @@ static void TempSegPoly(drawCmd_p d, int cnt, coOrd *pts, int *types,
 	case DRAW_CLOSED:
 		break;
 	case DRAW_FILL:
-		fill = 1;
-		break;
 	case DRAW_TRANSPARENT:
 		fill = 1;
 		break;

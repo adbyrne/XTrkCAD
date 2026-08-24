@@ -878,8 +878,6 @@ static STATUS_T CmdPull(
 		break;
 
 	case C_CANCEL:
-		return C_TERMINATE;
-
 	case C_OK:
 		return C_TERMINATE;
 

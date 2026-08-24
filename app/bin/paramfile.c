@@ -59,9 +59,7 @@ wBool_t IsParamValid(
 {
 	if (fileInx == PARAM_DEMO) {
 		return (curDemo >= 0);
-	} else if (fileInx == PARAM_CUSTOM) {
-		return TRUE;
-	} else if (fileInx == PARAM_LAYOUT) {
+	} else if (fileInx == PARAM_CUSTOM || fileInx == PARAM_LAYOUT) {
 		return TRUE;
 	} else if (fileInx >= 0 && fileInx < paramFileInfo_da.cnt) {
 		return (!paramFileInfo(fileInx).deleted);
@@ -279,10 +277,8 @@ bool ReadParams(
 			goto nextLine;
 		}
 		ParamCheckSumLine(paramLine);
-		if (paramLine[0] == '#') {
-			/* comment */
-		} else if (paramLine[0] == 0) {
-			/* empty paramLine */
+		if (paramLine[0] == '#' || paramLine[0] == 0) {
+			/* comment or empty paramLine */
 		} else if (strncmp(paramLine, "INCLUDE ", 8) == 0) {
 			cp = &paramLine[8];
 			while (*cp && isspace((unsigned char)*cp)) {

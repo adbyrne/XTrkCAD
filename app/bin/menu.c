@@ -539,17 +539,13 @@ EXPORT void EnableMenus( void )
 		if (menuPG.paramPtr[inx].control == NULL) {
 			continue;
 		}
-		if ((menuPG.paramPtr[inx].option & IC_SELECTED) && selectedTrackCount <= 0) {
-			enable = FALSE;
-		} else if ((programMode == MODE_TRAIN
-		            && (menuPG.paramPtr[inx].option & (IC_MODETRAIN_TOO | IC_MODETRAIN_ONLY))
-		            == 0)
-		           || (programMode != MODE_TRAIN
-		               && (menuPG.paramPtr[inx].option & IC_MODETRAIN_ONLY) != 0)) {
-			enable = FALSE;
-		} else {
-			enable = TRUE;
-		}
+		enable = !(((menuPG.paramPtr[inx].option & IC_SELECTED)
+		            && selectedTrackCount <= 0)
+		           || ((programMode == MODE_TRAIN
+		                && (menuPG.paramPtr[inx].option & (IC_MODETRAIN_TOO | IC_MODETRAIN_ONLY))
+		                == 0)
+		               || (programMode != MODE_TRAIN
+		                   && (menuPG.paramPtr[inx].option & IC_MODETRAIN_ONLY) != 0)));
 		wMenuPushEnable(menuPG.paramPtr[inx].control, enable);
 	}
 }

@@ -431,7 +431,6 @@ static BOOL_T QueryStructure( track_p trk, int query )
 {
 	switch ( query ) {
 	case Q_HAS_DESC:
-		return TRUE;
 	case Q_IS_STRUCTURE:
 		return TRUE;
 	default:

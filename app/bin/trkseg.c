@@ -2274,13 +2274,11 @@ EXPORT wBool_t CompareSegs(
 		// EndPts
 		case SEG_UNCEP:
 		case SEG_CONEP:
-			break;
 		// Turnout/Struct
 		case SEG_PATH:
 		case SEG_SPEC:
 		case SEG_CUST:
 		case SEG_DOFF:
-			break;
 		default:
 			break;
 		}

@@ -127,14 +127,9 @@ EXPORT void EnableCommands(void)
 	    ( "COMMAND enable S%d M%d\n", selectedTrackCount, programMode ))
 	for (inx = 0; inx < commandCnt; inx++) {
 		if (commandList[inx].buttInx) {
-			if ((commandList[inx].options & IC_SELECTED)
-			    && selectedTrackCount <= 0) {
-				enable = FALSE;
-			} else if (IsCommandEnabled(programMode, commandList[inx].options )) {
-				enable = TRUE;
-			} else {
-				enable = FALSE;
-			}
+			enable = !((commandList[inx].options & IC_SELECTED)
+			           && selectedTrackCount <= 0)
+			         && IsCommandEnabled(programMode, commandList[inx].options );
 			if (commandList[inx].enabled != enable) {
 				if (commandList[inx].buttInx >= 0) {
 					ToolbarButtonEnable(commandList[inx].buttInx, enable );

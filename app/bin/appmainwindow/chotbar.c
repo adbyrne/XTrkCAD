@@ -400,9 +400,7 @@ static void HandleArrowKeys(wAction_t action)
 		DoHotBarLeft(NULL);
 		break;
 	case wAccelKey_Up:
-		break;
 	case wAccelKey_Down:
-		break;
 	default:
 		break;
 	}

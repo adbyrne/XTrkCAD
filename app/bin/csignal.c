@@ -236,10 +236,11 @@ static void UpdateSignalProperties ( track_p trk, int inx, descData_p
 	BOOL_T isChanged, nChanged, pChanged, oChanged;
 
 	switch (inx) {
-	case NM: break;
-	case PS: break;
-	case OR: break;
-	case HD: break;
+	case NM:
+	case PS:
+	case OR:
+	case HD:
+		break;
 	case -1:
 		isChanged = nChanged = pChanged = oChanged = FALSE;
 		thename = wEntryGetValue( signalDesc[NM].control0 );

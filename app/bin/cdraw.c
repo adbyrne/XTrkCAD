@@ -1760,8 +1760,6 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		}
 		break;
 	case wActionMove:
-		rc = DrawGeomModify( action, pos, &drawModCmdContext );
-		break;
 	case C_REDRAW:
 		rc = DrawGeomModify( action, pos, &drawModCmdContext );
 		break;
