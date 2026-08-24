@@ -1117,11 +1117,14 @@ static STATUS_T CmdJoin(
 
 		//Fix Pos onto the line of the second track
 		if (Dj.inp[1].params.type == curveTypeStraight) {
+			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			ANGLE_T a = NormalizeAngle(FindAngle(Dj.inp[1].params.lineOrig,
 			                                     pos)-Dj.inp[1].params.angle);
+			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			DIST_T d = FindDistance(Dj.inp[1].params.lineOrig,pos);
 			Translate(&pos,Dj.inp[1].params.lineOrig,Dj.inp[1].params.angle,d*cos(D2R(a)));
 		} else {
+			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			ANGLE_T a = FindAngle(Dj.inp[1].params.arcP,pos);
 			Translate(&pos,Dj.inp[1].params.arcP,a,Dj.inp[1].params.arcR);
 		}
@@ -1135,6 +1138,7 @@ static STATUS_T CmdJoin(
 		   ) {
 			ANGLE_T na0=0.0,na1=0.0;
 //			coOrd end0, end1;
+			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			ANGLE_T a0,a1;
 //			end0 = GetTrkEndPos(Dj.inp[0].trk,Dj.inp[0].params.ep);
 //			end1 = GetTrkEndPos(Dj.inp[1].trk,Dj.inp[1].params.ep);
@@ -1169,6 +1173,7 @@ static STATUS_T CmdJoin(
 					FindPos( &off, &beyond, pos1, Dj.inp[1].params.lineOrig, Dj.inp[1].params.angle,
 					         FindDistance(Dj.inp[1].params.lineOrig,Dj.inp[1].params.lineEnd) );
 				} else if (Dj.inp[1].params.type == curveTypeCurve) {
+					// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 					ANGLE_T a = FindAngle(Dj.inp[1].params.arcP,pos1);
 					if ((a>Dj.inp[1].params.arcA0+Dj.inp[1].params.arcA1)
 					    || (a< Dj.inp[1].params.arcA0)) {

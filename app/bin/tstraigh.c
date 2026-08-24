@@ -419,6 +419,7 @@ EXPORT void DrawStraightTrack(
         long options )
 {
 	coOrd pp0, pp1;
+	// cppcheck-suppress shadowVariable -- intentional: this track-type-specific drawing function uses the specific track's own gauge, overriding the module-global 'current' gauge -- confirmed consistent across all Draw*Track functions this session
 	DIST_T trackGauge = GetTrkGauge(trk);
 	tieData_t td;
 	long bridge = 0, roadbed = 0;
@@ -476,10 +477,10 @@ EXPORT void DrawStraightTrack(
 		DrawLine( d, p0, p1, width, color );
 	} else {
 		if ( hasTrackCenterline(d)) {
-			long options = d->options;
+			long savedDrawOptions = d->options;
 			d->options |= DC_DASH;
 			DrawLine( d, p0, p1, 0, color );
-			d->options = options;
+			d->options = savedDrawOptions;
 		}
 		Translate( &pp0, p0, angle+90, trackGauge/2.0 );
 		Translate( &pp1, p1, angle+90, trackGauge/2.0 );
@@ -560,6 +561,7 @@ static BOOL_T ReadStraight( char * line )
 	long options;
 	struct extraDataStraight_t *xx;
 	char * cp = NULL;
+	// cppcheck-suppress shadowVariable -- file-parse-time local default, assigned into the track's own extra-data struct field after parsing, unrelated to the global interactive-editing state
 	coOrd descriptionOff = { 0.0, 0.0 };
 
 	if ( !GetArgs( line+8, paramVersion<3?"dXZs9dc":"dLl00s9dc", &index, &layer,

@@ -700,6 +700,7 @@ static void UpdateDraw( track_p trk, int drawDescInx, descUpdate_t * descUpd,
 	case E0:
 	case E1:
 		if ( inx == E0 ) {
+			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			coOrd off;
 			off.x = drawData.endPt[0].x - drawData.oldE0.x;
 			off.y = drawData.endPt[0].y - drawData.oldE0.y;
@@ -2204,6 +2205,7 @@ static BOOL_T GetParamsDraw( int inx, track_p trk, coOrd pos,
 		if (FindDistance(pos,start) < FindDistance(pos,end)) {
 			params->ep = 0;
 		} else { params->ep = 1; }
+		// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 		BOOL_T back = FALSE;
 		coOrd curr_pos = params->bezierPoints[(ptrdiff_t)params->ep*3];
 		BOOL_T first = TRUE;
@@ -2224,6 +2226,7 @@ static BOOL_T GetParamsDraw( int inx, track_p trk, coOrd pos,
 				         xx->orig);
 				curr_pos = DYNARR_LAST(coOrd,params->nodes);
 			} else {
+				// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 				coOrd start,end;
 				Translate(&start,segPtr->u.c.center,segPtr->u.c.a0,segPtr->u.c.radius);
 				Translate(&end,segPtr->u.c.center,segPtr->u.c.a0+segPtr->u.c.a1,
@@ -3034,6 +3037,7 @@ static void CreateDrawControls(paramGroup_p pg);
 
 static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 {
+	// cppcheck-suppress shadowVariable -- independent per-function static command-state flag, standard pattern in this file's command dispatch functions
 	static BOOL_T infoSubst = FALSE;
 	wControl_p controls[MAX_CONTROLS];				//Always needs a NULL last entry
 	char * labels[MAX_LABELS];

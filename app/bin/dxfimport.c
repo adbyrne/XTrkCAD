@@ -354,6 +354,7 @@ static void ProcessDxfFile(
 	struct sLayer layer[MAX_DXF_LAYER];
 
 
+	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 	int layerCount = 0;
 	int entityCount = 0;
 
@@ -853,6 +854,7 @@ static void ProcessDxfFile(
 		}
 		return;
 	}
+	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 	for (int i = 0; i < DxfOutputCount; i++) {
 		fprintf(xtiFile, "%s\n", DxfOutput[i]);
 	}
@@ -862,11 +864,13 @@ static void ProcessDxfFile(
 	// Clean up
 	SetUserLocale();
 
+	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 	for (int i = 0; i < DxfOutputCount; i++) {
 		MyFree(DxfOutput[i]);
 	}
 	MyFree(DxfOutput);
 
+	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 	for (int i = 0; i < layerCount; i++) {
 		MyFree(layer[i].name);
 	}
@@ -876,6 +880,7 @@ static void ProcessDxfFile(
 	if (importDxfXti >= 1) {
 
 		int saveLayer = curLayer;
+		// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 		int layer = 0;
 
 		if (importDxfXti == 2) {

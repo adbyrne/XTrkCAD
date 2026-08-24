@@ -274,6 +274,19 @@ batch of findings.
   2 days, case by case) → Hg merge. A CI-configuration-only change with no application code (a new
   report-only job, a workflow tweak) can skip the Hg bug branch entirely, since Hg has nothing to
   carry — but it still gets an SF ticket.
+- **A finding's reported line number is tied to the exact tree state it was pulled against — never
+  reuse it against a different tree.** This project runs an Hg branch (behind) and a git branch
+  (merged ahead) side by side, often for days at a time. Pulling a fresh CI artifact from the git
+  side and then applying its line numbers as edit coordinates on the Hg side (or vice versa) will
+  silently drift wherever the two trees' line counts have diverged — even a handful of unrelated
+  `const`-correctness edits or dead-code deletions upstream shifts everything below them. SF #726
+  — a 111-finding `shadowVariable`/`shadowFunction` suppress-comment sweep applied git-derived line
+  numbers to the Hg tree; ~35% of the inserted comments landed one or more statements away from
+  their intended target (confirmed by re-running cppcheck after the edit and finding a third of the
+  findings still unsuppressed, not by the insertion script's own success output). Fixed by
+  reverting the uncommitted Hg-side edits and regenerating the finding list fresh **against the Hg
+  tree itself** before reapplying. Re-pull per tree, every time — a "fresh" artifact is only fresh
+  for the tree it was generated against.
 - **Static tools and a live sanitizer run catch different classes of bug — run both.** cppcheck/
   clang-tidy/CodeQL never execute the code; they can't catch a mismatch that only manifests at
   runtime against a specific input (a struct field one size too small, a sentinel value an
@@ -386,3 +399,39 @@ tool's message alone.
   point reads one element before the (just-resized-to-empty) array. Fixed by skipping the check
   entirely when `segCnt == 0` — correct behavior, not just crash-avoidance, since there's no "last
   segment" to compare against yet.
+
+## Confirmed-safe codebase conventions (not bugs, but non-obvious enough to document)
+
+Unlike the section above, these are cases where deep verification confirmed the code is doing
+exactly what it should — captured because the shape looks suspicious enough on first read (or on
+a static-analysis tool's flag) that a future session would otherwise re-derive the same answer
+from scratch, or worse, "fix" something that isn't broken.
+
+- **`trackGauge` is deliberately re-declared as a local in every track-type-specific `Draw*Track`
+  function, shadowing the module-global `DIST_T trackGauge` (`track.c`).** The global holds
+  whatever gauge is "current" for new-track creation; each `Draw*Track` function instead wants the
+  *specific track it's drawing*'s own gauge, so it shadows the name with
+  `DIST_T trackGauge = GetTrkGauge(trk);` (or, in `cmodify.c`'s `CmdModify()`, a `static` version
+  persisted across a modify-command's mouse-drag lifecycle, reset to `0.0` on `C_START`). Confirmed
+  present and correctly assigned-before-use in `cmodify.c`, `tcurve.c`, `track.c`, `tstraigh.c`,
+  and all 3 of `turnout.c`'s instances (SF #721) — same intentional pattern everywhere it recurs,
+  not a one-off. `cppcheck-deep`'s `shadowVariable` check has no way to know these are different
+  gauges by design; each site carries a `// cppcheck-suppress shadowVariable` explaining this.
+- **A `static` local persisting mouse-command state across calls, sharing a name with something
+  else at file or global scope, is this codebase's standard idiom for multi-step command
+  dispatch** (`CmdModify`, `CmdDraw`, and similar `C_START`/`C_MOVE`/`C_UP`-style dispatchers). The
+  static survives between the separate invocations that make up one drag/click sequence and is
+  reset explicitly on `C_START`; several files (`cdraw.c`, `ccurve.c`, `ccornu.c`, `cjoin.c`) each
+  declare their own independent `static BOOL_T infoSubst` for this purpose — these are unrelated,
+  fully self-contained per-function statics that merely share a generic name, not a cross-function
+  interaction.
+- **`UndoStart()` (`cundo.c`) calls `SetFileChanged()` internally** — a caller that opens an undo
+  transaction (`UndoStart()` → `UndoModify()`/`UndoNew()`/`UndoDelete()` → implicit close) does
+  **not** need to call `SetFileChanged()` itself; the layout-dirty flag (`layout.c`'s
+  `EXPORT wIndex_t changed`) is already marked the moment a real (non-empty) transaction begins.
+  The handful of call sites that *do* call `SetFileChanged()` directly (`textnoteui.c`,
+  `linknoteui.c`, `filenoteui.c`, `dlayer.c`) are redundant-but-harmless, not evidence that it's
+  otherwise required. Discovered while verifying `cblock.c`'s `UpdateBlock()` — a dialog handler
+  with a local `BOOL_T changed` shadowing the global of the same name and *no* direct
+  `SetFileChanged()` call anywhere in the file, which looked like a real "renaming a block doesn't
+  mark the file dirty" bug until tracing `UndoStart()`'s own body settled it.

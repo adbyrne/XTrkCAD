@@ -783,6 +783,7 @@ EXPORT void DrawCurvedTrack(
         wDrawColor color,
         long options )
 {
+	// cppcheck-suppress shadowVariable -- intentional: this track-type-specific drawing function uses the specific track's own gauge, overriding the module-global 'current' gauge -- confirmed consistent across all Draw*Track functions this session
 	DIST_T trackGauge = GetTrkGauge(trk);
 	tieData_t td;
 	wDrawWidth width=0;
@@ -846,10 +847,10 @@ EXPORT void DrawCurvedTrack(
 		DrawArc( d, p, r, a0, a1, iDrawCenter, width, color );
 	} else {
 		if ( hasTrackCenterline(d)) {
-			long options = d->options;
+			long savedDrawOptions = d->options;
 			d->options |= DC_DASH;
 			DrawArc( d, p, r, a0, a1, 0, 0, color );
-			d->options = options;
+			d->options = savedDrawOptions;
 		}
 		DrawArc( d, p, r+trackGauge/2.0, a0, a1, 0, width, color );
 		DrawArc( d, p, r-trackGauge/2.0, a0, a1, iDrawCenter, width, color );
@@ -921,6 +922,7 @@ static BOOL_T ReadCurve( char * line )
 	long options;
 	char * cp = NULL;
 	long helixTurns = 0;
+	// cppcheck-suppress shadowVariable -- file-parse-time local default, assigned into the track's own extra-data struct field after parsing, unrelated to the global interactive-editing state
 	coOrd descriptionOff = { 0.0, 0.0 };
 
 	if (!GetArgs( line+6, paramVersion<3?"dXZs9dpYfc":paramVersion<9

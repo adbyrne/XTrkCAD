@@ -1227,6 +1227,7 @@ EXPORT void UpdateTrkEndElev(
 	int oldMode;
 	DIST_T oldElev;
 	const char * oldStation;
+	// cppcheck-suppress shadowVariable -- local control-flow flag, confirmed unrelated to the global file-dirty flag of the same name
 	BOOL_T changed = TRUE;
 	track_p trk1;
 //	EPINX_T ep1;

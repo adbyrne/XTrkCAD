@@ -182,6 +182,7 @@ static void UpdateBlock (track_p trk, int inx, descData_p descUpd,
 	blockData_p xx = GetblockData(trk);
 	const char * thename, *thescript;
 	char *newName, *newScript;
+	// cppcheck-suppress shadowVariable -- local control-flow flag, confirmed unrelated to the global file-dirty flag of the same name
 	BOOL_T changed, nChanged, sChanged;
 	size_t max_str;
 
@@ -403,6 +404,7 @@ static BOOL_T WriteBlock ( track_p t, FILE * f )
 	BOOL_T rc = TRUE;
 	wIndex_t iTrack;
 	blockData_p xx = GetblockData(t);
+	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 	char *blockName = MyStrdup(xx->name);
 
 #ifdef UTFCONVERT

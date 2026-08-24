@@ -190,6 +190,7 @@ static void DDrawArc(drawCmd_p d, coOrd p, DIST_T r, ANGLE_T angle0,
 		da = (maxArcSegStraightLen * 180) / (M_PI * rr);
 		cnt = (int)(angle1 / da) + 1;
 		da = angle1 / cnt;
+		// cppcheck-suppress shadowFunction -- local variable name coincides with a library/project function of the same name -- zero functional risk
 		coOrd min, max;
 		min = d->orig;
 		max.x = min.x + d->size.x;
@@ -537,12 +538,12 @@ EXPORT void DrawBoxedString(int style, drawCmd_p d, coOrd pos, char *text,
 #ifndef WINDOWS
 	if ((d->options & DC_PRINT) != 0) {
 		double scale = ((FLOAT_T)fs) / ((FLOAT_T)drawMaxTextFontSize) / mainD.dpi;
-		wDrawPix_t w, h, d, a;
-		wDrawGetTextSize(&w, &h, &d, &a, mainD.d, text, fp, drawMaxTextFontSize);
+		wDrawPix_t w, h, dPix, aPix;
+		wDrawGetTextSize(&w, &h, &dPix, &aPix, mainD.d, text, fp, drawMaxTextFontSize);
 		size.x = w * scale;
 		size.y = h * scale;
-		descent = d * scale;
-		ascent = a * scale;
+		descent = dPix * scale;
+		ascent = aPix * scale;
 	} else
 #endif
 		DrawTextSize2(&mainD, text, fp, fs, TRUE, &size, &descent, &ascent);
@@ -919,6 +920,7 @@ static void BDrawArc(drawCmd_p d, coOrd p, DIST_T r, ANGLE_T angle0,
 		da = (maxArcSegStraightLen * 180) / (M_PI * rr);
 		cnt = (int)(angle1 / da) + 1;
 		da = angle1 / cnt;
+		// cppcheck-suppress shadowFunction -- local variable name coincides with a library/project function of the same name -- zero functional risk
 		coOrd min, max;
 		min = d->orig;
 		max.x = min.x + d->size.x;

@@ -3038,6 +3038,7 @@ EXPORT void DrawEndPt(
 	coOrd p0,p1,p2;
 	BOOL_T sepBoundary;
 	BOOL_T showBridge = 1;
+	// cppcheck-suppress shadowVariable -- intentional: this track-type-specific drawing function uses the specific track's own gauge, overriding the module-global 'current' gauge -- confirmed consistent across all Draw*Track functions this session
 	DIST_T trackGauge;
 	wDrawWidth width;
 	wDrawWidth width2;

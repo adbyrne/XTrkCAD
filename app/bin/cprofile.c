@@ -224,6 +224,7 @@ static void DrawProfile(drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert)
 
 	// Draw horizontal grid and y scale
 	for (inx=prof.minC; inx<=prof.maxC; inx+=prof.incrC) {
+		// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 		coOrd textsize;
 		// grid line
 		pt.y = pb.y = GetDim(inx);

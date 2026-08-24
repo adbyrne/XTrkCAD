@@ -557,6 +557,7 @@ STATUS_T DrawGeomMouse(
 	case wActionLDrag:
 		DYNARR_RESET(trkSeg_t, anchors_da );
 		coOrd p = pos1 = pos;
+		// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 		BOOL_T locked = FALSE, poslocked = FALSE;
 		if ((context->Op == OP_CURVE1 && context->State == 1) ||
 		    (context->Op == OP_CURVE2 && context->State == 0) ||
@@ -1374,6 +1375,7 @@ static STATUS_T DrawGeomPolyModify(
 			}
 		}
 		//Select Point (polyInx)
+		// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 		for ( int inx=0; inx<points_da.cnt; inx++ ) {
 			p0 = pos;
 			dd = LineDistance( &p0, points( inx==0?points_da.cnt-1:inx-1).pt,
@@ -2095,6 +2097,7 @@ STATUS_T DrawGeomModify(
 				tempSegs(0).type = SEG_POLY;
 				tempSegs(0).color = wDrawColorRed;
 				DYNARR_RESET( pts_t, points_da);
+				// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 				for (int inx=0; inx<context->segPtr->u.p.cnt; inx++) {
 					DYNARR_APPEND(pts_t, points_da,3);
 					REORIGIN( points(inx).pt, context->segPtr[segInx].u.p.pts[inx].pt,

@@ -176,6 +176,7 @@ static void DrawRulerWithBackground(drawCmd_p d, coOrd pos0, coOrd pos1,
 	DIST_T len;
 	int digit;
 	char quote = ' ';
+	// cppcheck-suppress shadowVariable -- local buffer/pointer, properly scoped/freed within this function, unrelated to the global status-line buffer
 	char message[STR_SHORT_SIZE];
 	coOrd d_orig, d_size;
 	wFontSize_t fs;

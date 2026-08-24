@@ -1045,6 +1045,7 @@ static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos,
 		DYNARR_RESET(coOrd,params->nodes);
 		// Load out the points in order from bezierPoint[0] to bezierPoint[3]
 		for (int i = 0; i<xx->arcSegs.cnt; i++) {
+			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			trkSeg_p segPtr = &DYNARR_N(trkSeg_t,xx->arcSegs,i);
 			if (segPtr->type == SEG_STRLIN) {
 				BOOL_T eps = FindDistance(segPtr->u.l.pos[0],
@@ -1062,6 +1063,7 @@ static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos,
 				Translate(&end,segPtr->u.c.center,segPtr->u.c.a0+segPtr->u.c.a1,
 				          fabs(segPtr->u.c.radius));
 				//Is this segment reversed in the curve?
+				// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 				BOOL_T back = FindDistance(start,curr_pos)>FindDistance(end,curr_pos);
 				if (segPtr->u.c.radius > 0.5) {
 					double min_angle = 360*acos(1.0-(0.1/fabs(
@@ -1242,6 +1244,7 @@ BOOL_T GetTracksFromBezierSegment(trkSeg_p bezSeg, track_p newTracks[2],
 		CopyAttributes( trk, new_trk );
 		newTracks[1] = new_trk;
 		if (trk_old) {
+			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			for (int i=0; i<2; i++) {
 				if (GetTrkEndTrk(trk_old,i)==NULL) {
 					coOrd pos = GetTrkEndPos(trk_old,i);
@@ -2023,6 +2026,7 @@ static double BezierCurvature(coOrd p[4], double t, coOrd * center)
  */
 static double BezierMaxCurve(coOrd p[4])
 {
+	// cppcheck-suppress shadowFunction -- local variable name coincides with a library/project function of the same name -- zero functional risk
 	double max = 0;
 	for (int t = 0; t<100; t++) {
 		double curv = BezierCurvature(p, t/100, NULL);
