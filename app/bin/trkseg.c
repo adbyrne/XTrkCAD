@@ -1549,34 +1549,34 @@ EXPORT BOOL_T WriteSegsEnd(
 	for ( i=0; i<segCnt; i++ ) {
 		switch ( segs[i].type ) {
 		case SEG_STRTRK:
-			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f %0.6f\n",
+			rc &= fprintf( f, "\t%c %lu %0.6f %0.6f %0.6f %0.6f %0.6f\n",
 			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.l.pos[0].x, segs[i].u.l.pos[0].y,
 			               segs[i].u.l.pos[1].x, segs[i].u.l.pos[1].y ) > 0;
 			break;
 		case SEG_STRLIN:
 		case SEG_TBLEDGE:
-			rc &= fprintf( f, "\t%c3 %ld %0.6f %0.6f %0.6f 0 %0.6f %0.6f 0\n",
+			rc &= fprintf( f, "\t%c3 %lu %0.6f %0.6f %0.6f 0 %0.6f %0.6f 0\n",
 			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.l.pos[0].x, segs[i].u.l.pos[0].y,
 			               segs[i].u.l.pos[1].x, segs[i].u.l.pos[1].y ) > 0;
 			break;
 		case SEG_DIMLIN:
-			rc &= fprintf( f, "\t%c3 %ld %0.6f %0.6f %0.6f 0 %0.6f %0.6f 0 %ld\n",
+			rc &= fprintf( f, "\t%c3 %lu %0.6f %0.6f %0.6f 0 %0.6f %0.6f 0 %ld\n",
 			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.l.pos[0].x, segs[i].u.l.pos[0].y,
 			               segs[i].u.l.pos[1].x, segs[i].u.l.pos[1].y,
 			               segs[i].u.l.option ) > 0;
 			break;
 		case SEG_BENCH:
-			rc &= fprintf( f, "\t%c3 %ld %0.6f %0.6f %0.6f 0 %0.6f %0.6f 0 %ld\n",
+			rc &= fprintf( f, "\t%c3 %lu %0.6f %0.6f %0.6f 0 %0.6f %0.6f 0 %ld\n",
 			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.l.pos[0].x, segs[i].u.l.pos[0].y,
 			               segs[i].u.l.pos[1].x, segs[i].u.l.pos[1].y,
 			               BenchOutputOption(segs[i].u.l.option) ) > 0;
 			break;
 		case SEG_CRVTRK:
-			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f\n",
+			rc &= fprintf( f, "\t%c %lu %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f\n",
 			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.c.radius,
 			               segs[i].u.c.center.x, segs[i].u.c.center.y,
@@ -1586,7 +1586,7 @@ EXPORT BOOL_T WriteSegsEnd(
 			option = (segs[i].u.j.negate?1:0) + (segs[i].u.j.flip?2:0) +
 			         (segs[i].u.j.Scurve?4:0);
 			rc &= fprintf( f,
-			               "\t%c %ld %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %ld\n",
+			               "\t%c %lu %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %ld\n",
 			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.j.pos.x, segs[i].u.j.pos.y,
 			               segs[i].u.j.angle,
@@ -1599,7 +1599,7 @@ EXPORT BOOL_T WriteSegsEnd(
 		case SEG_BEZTRK:
 		case SEG_BEZLIN:
 			rc &= fprintf( f,
-			               "\t%c3 %ld %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f\n",
+			               "\t%c3 %lu %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f\n",
 			               segs[i].type, wDrawGetRGB(segs[i].color),
 			               segs[i].lineWidth,
 			               segs[i].u.l.pos[0].x, segs[i].u.l.pos[0].y,
@@ -1612,7 +1612,7 @@ EXPORT BOOL_T WriteSegsEnd(
 			rc &= fprintf(f,"\tSUBSEND\n");
 			break;
 		case SEG_CRVLIN:
-			rc &= fprintf( f, "\t%c3 %ld %0.6f %0.6f %0.6f %0.6f 0 %0.6f %0.6f\n",
+			rc &= fprintf( f, "\t%c3 %lu %0.6f %0.6f %0.6f %0.6f 0 %0.6f %0.6f\n",
 			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.c.radius,
 			               segs[i].u.c.center.x, segs[i].u.c.center.y,
@@ -1620,7 +1620,7 @@ EXPORT BOOL_T WriteSegsEnd(
 
 			break;
 		case SEG_FILCRCL:
-			rc &= fprintf( f, "\t%c3 %ld %0.6f %0.6f %0.6f %0.6f 0\n",
+			rc &= fprintf( f, "\t%c3 %lu %0.6f %0.6f %0.6f %0.6f 0\n",
 			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.c.radius,
 			               segs[i].u.c.center.x, segs[i].u.c.center.y ) > 0;
@@ -1628,7 +1628,7 @@ EXPORT BOOL_T WriteSegsEnd(
 		case SEG_POLY:
 		case SEG_FILPOLY:
 // TODO: to be consistent, we should add a dummy 0 for elev. See ReadSegs/SEG_POLY
-			rc &= fprintf( f, "\t%c4 %ld %0.6f %d %d \n",
+			rc &= fprintf( f, "\t%c4 %lu %0.6f %d %d \n",
 			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.p.cnt, segs[i].u.p.polyType ) > 0;
 			for ( j=0; j<segs[i].u.p.cnt; j++ )
@@ -1648,7 +1648,7 @@ EXPORT BOOL_T WriteSegsEnd(
 			trackText = segs[i].u.t.string;
 #endif // UTFCONVERT
 			escaped_text = ConvertToEscapedText(trackText);
-			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %d %0.6f \"%s\" %d %ld\n",
+			rc &= fprintf( f, "\t%c %lu %0.6f %0.6f %0.6f %d %0.6f \"%s\" %d %lu\n",
 			               segs[i].type, wDrawGetRGB(segs[i].color),
 			               segs[i].u.t.pos.x, segs[i].u.t.pos.y, segs[i].u.t.angle,
 			               segs[i].u.t.boxed, segs[i].u.t.fontSize,

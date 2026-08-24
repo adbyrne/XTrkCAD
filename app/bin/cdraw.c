@@ -1407,7 +1407,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		curDescData[inx].mode |= mode;
 	}
 
-	snprintf( str, len, _("%s(%d) Layer=%d"), title, GetTrkIndex(trk),
+	snprintf( str, len, _("%s(%d) Layer=%u"), title, GetTrkIndex(trk),
 	          GetTrkLayer(trk)+1 );
 
 	if (!inDescribeCmd) { return; }
@@ -1500,7 +1500,7 @@ static BOOL_T WriteDraw( track_p t, FILE * f )
 {
 	struct extraDataDraw_t * xx = GET_EXTRA_DATA(t, T_DRAW, extraDataDraw_t);
 	BOOL_T rc = TRUE;
-	rc &= fprintf(f, "DRAW %d %d %d 0 0 %0.6f %0.6f 0 %0.6f\n", GetTrkIndex(t),
+	rc &= fprintf(f, "DRAW %d %u %d 0 0 %0.6f %0.6f 0 %0.6f\n", GetTrkIndex(t),
 	              GetTrkLayer(t),
 	              xx->lineType,
 	              xx->orig.x, xx->orig.y, xx->angle )>0;

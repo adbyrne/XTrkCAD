@@ -595,7 +595,7 @@ static void DescribeCurve( track_p trk, char * str, CSIZE_T len )
 	if (xx->helixTurns > 0) {
 		d += (xx->helixTurns-(xx->circle?1:0)) * xx->radius * 2.0 * M_PI;
 		sprintf( str,
-		         _("Helix Track(%d): Layer=%d Radius=%s Turns=%ld Length=%s Center=[%s,%s] EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"),
+		         _("Helix Track(%d): Layer=%u Radius=%s Turns=%ld Length=%s Center=[%s,%s] EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"),
 		         GetTrkIndex(trk),
 		         GetTrkLayer(trk)+1,
 		         FormatDistance(xx->radius),
@@ -606,7 +606,7 @@ static void DescribeCurve( track_p trk, char * str, CSIZE_T len )
 		         GetTrkEndPosXY(trk,1), GetTrkEndAngle(trk,1) );
 	} else {
 		sprintf( str,
-		         _("Curved Track(%d): Layer=%d Radius=%s Length=%s Center=[%s,%s] EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"),
+		         _("Curved Track(%d): Layer=%u Radius=%s Length=%s Center=[%s,%s] EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"),
 		         GetTrkIndex(trk),
 		         GetTrkLayer(trk)+1,
 		         FormatDistance(xx->radius),
@@ -897,7 +897,7 @@ static BOOL_T WriteCurve( track_p t, FILE * f )
 	bits = GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0)|
 	       (GetTrkRoadbed(t)?1<<4:0);
 	rc &= fprintf(f,
-	              "CURVE %d %d %ld 0 0 %s %d %0.6f %0.6f 0 %0.6f %ld %0.6f %0.6f\n",
+	              "CURVE %d %u %ld 0 0 %s %d %0.6f %0.6f 0 %0.6f %ld %0.6f %0.6f\n",
 	              GetTrkIndex(t), GetTrkLayer(t), (long)options,
 	              GetTrkScaleName(t), bits, xx->pos.x, xx->pos.y, xx->radius,
 	              xx->helixTurns, xx->descriptionOff.x, xx->descriptionOff.y )>0;

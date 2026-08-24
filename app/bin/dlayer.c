@@ -2120,7 +2120,7 @@ BOOL_T WriteLayers(FILE *f)
 	for (inx = 0; inx < NUM_LAYERS; inx++) {
 		if (IsLayerConfigured(inx)) {
 			fprintf(f,
-			        "LAYERS %u %d %d %d %ld %d %d %d %d \"%s\" %d %d %.6f %.6f %.6f "
+			        "LAYERS %u %d %d %d %lu %d %d %d %d \"%s\" %d %d %.6f %.6f %.6f "
 			        "%.6f %.6f\n",
 			        inx, layers[inx].visible, layers[inx].frozen, layers[inx].onMap,
 			        layers[inx].color, layers[inx].module,

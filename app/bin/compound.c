@@ -1245,7 +1245,7 @@ BOOL_T WriteCompound(
 	lineType = xx->lineType;
 	bits = GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0)|
 	       (GetTrkRoadbed(t)?1<<4:0);
-	rc &= fprintf(f, "%s %d %d %ld %ld %d %s %d %0.6f %0.6f 0 %0.6f \"%s\"\n",
+	rc &= fprintf(f, "%s %d %u %ld %ld %d %s %d %0.6f %0.6f 0 %0.6f \"%s\"\n",
 	              GetTrkTypeName(t),
 	              GetTrkIndex(t), GetTrkLayer(t), options,
 	              GetCurrPathIndex(t), lineType,
