@@ -297,7 +297,8 @@ void InfoDefaultControls(void);
 
 void MapGrid(coOrd, coOrd, ANGLE_T, coOrd, ANGLE_T, POS_T, POS_T, int *, int *,
              int *, int *);
-void DrawGrid(drawCmd_p, coOrd *, POS_T, POS_T, long, long, coOrd, ANGLE_T,
+void DrawGrid(drawCmd_p, const coOrd *, POS_T, POS_T, long, long, coOrd,
+              ANGLE_T,
               wDrawColor, BOOL_T);
 STATUS_T GridAction(wAction_t, coOrd, coOrd *, DIST_T *);
 

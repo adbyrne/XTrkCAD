@@ -1296,13 +1296,13 @@ static void DoImport( const void * type )
 	wFilSelect( importFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 }
 
-EXPORT void DoImportObjects( void * unused )
+EXPORT void DoImportObjects( const void * unused )
 {
 	importAsModule = FALSE;
 	DoImport( unused );
 }
 
-EXPORT void DoImportModule( void * unused )
+EXPORT void DoImportModule( const void * unused )
 {
 	importAsModule = TRUE;
 	DoImport( unused );

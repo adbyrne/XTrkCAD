@@ -659,7 +659,7 @@ void flushInput( void )
 }
 
 
-void process( tokenDesc_t * tp, arg_t *args )
+void process( const tokenDesc_t * tp, arg_t *args )
 /* process a tokenized line */
 {
 

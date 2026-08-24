@@ -165,7 +165,7 @@ static void DrawGridLine(
 
 EXPORT void DrawGrid(
         drawCmd_p D,
-        coOrd * size,
+        const coOrd * size,
         POS_T hMajSpacing,
         POS_T vMajSpacing,
         long Hdivision,
