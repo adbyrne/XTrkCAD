@@ -149,7 +149,7 @@ static void ComputePause(void)
 }
 #endif
 
-EXPORT void RecordMouse(char *name, wAction_t action, POS_T px, POS_T py)
+EXPORT void RecordMouse(const char *name, wAction_t action, POS_T px, POS_T py)
 {
 	int keyState;
 	if (action == C_MOVE || action == C_RMOVE || (action & 0xFF) == C_TEXT) {
@@ -775,7 +775,7 @@ EXPORT int MyGetKeyState(void)
 	}
 }
 
-EXPORT void AddPlaybackProc(char *label, playbackProc_p proc, void *data)
+EXPORT void AddPlaybackProc(const char *label, playbackProc_p proc, void *data)
 {
 	DYNARR_APPEND(playbackProc_t, playbackProc_da, 10);
 	playbackProc(playbackProc_da.cnt - 1).label = MyStrdup(label);
@@ -2397,7 +2397,7 @@ static long ParamIntRestore(paramGroup_cp pg, int class)
 	int inx;
 	paramData_p p;
 	FLOAT_T valR;
-	char *valS;
+	const char *valS;
 	paramOldData_t *oldP;
 
 	for (p = pg->paramPtr, inx = 0; p < &pg->paramPtr[pg->paramCnt]; p++, inx++) {
@@ -2595,7 +2595,7 @@ EXPORT void ParamTurnOffDelays(BOOL_T disable)
 	disablePlaybackDelays = disable;
 }
 
-void ParamDlgProc(wWin_p win, winProcEvent e, void *refresh, void *data)
+void ParamDlgProc(wWin_p win, winProcEvent e, void *refresh, const void *data)
 {
 	paramGroup_cp pg = (paramGroup_cp)data;
 	switch (e) {

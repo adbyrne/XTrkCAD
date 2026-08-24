@@ -172,7 +172,7 @@ CatalogDiscard(Catalog *catalog)
  */
 
 static int
-CompareEntries(CatalogEntry *a, CatalogEntry *b)
+CompareEntries(const CatalogEntry *a, const CatalogEntry *b)
 {
 	return XtcStricmp(a->contents, b->contents);
 }
@@ -244,7 +244,8 @@ IsExistingContents(Catalog *catalog, const char *contents, BOOL_T silent)
  */
 
 EXPORT void
-UpdateCatalogEntry(CatalogEntry *entry, char *path, char *contents, char *tag)
+UpdateCatalogEntry(CatalogEntry *entry, const char *path, const char *contents,
+                   const char *tag)
 {
 	if (!entry->contents) {
 		MyFree(entry->contents);
@@ -324,7 +325,7 @@ GetNextParameterFile(DIR *dir, const char *dirName, char **fileName)
  */
 
 bool
-FilterKeyword(char *word)
+FilterKeyword(const char *word)
 {
 	if (strlen(word) == 1 && strpbrk(word, PUNCTUATION)) {
 		return (true);
@@ -403,7 +404,7 @@ CreateKeywordIndex(ParameterLib *library)
 	wordListPtr = wordList;
 
 	DL_FOREACH(listOfEntries, curParamFile) {
-		char *word;
+		const char *word;
 		char *content = strdup(curParamFile->contents);
 
 		word = strtok(content, SEARCHDELIMITER);
@@ -889,7 +890,8 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
 				// if first keyword -> initialize result set
 				for (int j = 0; j < entries->references->cnt; j++) {
 					CatalogEntry *newEntry = MyMalloc(sizeof(CatalogEntry));
-					CatalogEntry *foundEntry = DYNARR_N(CatalogEntry *, *(entries->references), j);
+					const CatalogEntry *foundEntry = DYNARR_N(CatalogEntry *,
+					                                 *(entries->references), j);
 					newEntry->contents = MyStrdup(foundEntry->contents);
 					newEntry->tag = MyStrdup(foundEntry->tag);
 					newEntry->files = foundEntry->files;
@@ -907,7 +909,8 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
 				DL_FOREACH_SAFE(results->subCatalog.head, current, temp) {
 					int found = 0;
 					for (int j = 0; j < entries->references->cnt; j++) {
-						CatalogEntry *foundEntry = DYNARR_N(CatalogEntry *, *(entries->references), j);
+						const CatalogEntry *foundEntry = DYNARR_N(CatalogEntry *,
+						                                 *(entries->references), j);
 
 						if (strcmp(foundEntry->contents,current->contents)==0) {
 							found = TRUE;
@@ -972,7 +975,7 @@ SearchDiscardResult(SearchResult *res)
  */
 
 char *
-GetParameterFileContent(char *file)
+GetParameterFileContent(const char *file)
 {
 	FILE *fh;
 	char *result = NULL;
@@ -1013,7 +1016,7 @@ GetParameterFileContent(char *file)
  */
 
 char *
-GetParameterFileScale(char *file)
+GetParameterFileScale(const char *file)
 {
 	FILE *fh;
 	char *scale = NULL;

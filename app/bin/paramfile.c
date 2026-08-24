@@ -74,7 +74,7 @@ char *GetParamFileDir(void)
 }
 
 void
-SetParamFileDir(char *fullPath)
+SetParamFileDir(const char *fullPath)
 {
 	SetCurrentPath(PARAMETERPATHKEY, fullPath);
 }

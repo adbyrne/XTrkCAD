@@ -339,7 +339,7 @@ FilterLayoutNote(FILE* out, char* work)
 {
 	DynString result;
 	bool isDocument = false;
-	char* token;
+	const char* token;
 
 	DynStringMalloc(&result, FILENAME_MAX);
 
@@ -574,7 +574,7 @@ ZipProblemData(const char* src)
 	char* dest = MyStrdup(GetLayoutFullPath());
 	char* out;
 	char *filename = strrchr(dest, PATH_SEPARATOR[0]) + 1;
-	struct tm* currentTime;
+	const struct tm* currentTime;
 	time_t clock;
 	char timestamp[80];
 

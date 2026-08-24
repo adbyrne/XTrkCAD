@@ -84,7 +84,7 @@ static void RecordMalloc(void* p, size_t size)
 	}
 }
 
-static void RecordMyFree(void* p)
+static void RecordMyFree(const void* p)
 {
 	slog_p log_p = StorageLog;
 	if (log_p) {
@@ -233,7 +233,7 @@ EXPORT void MyFree(void* ptr)
 	}
 }
 
-EXPORT void* memdup(void* src, size_t size)
+EXPORT void* memdup(const void* src, size_t size)
 {
 	void* p;
 	p = MyMalloc(size);

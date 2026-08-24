@@ -257,12 +257,12 @@ MakeFullpath(char **str, ...)
  */
 void AddDefaultExtension(char *filename, const char *default_ext)
 {
-	char *dot = strrchr(filename, '.');
+	const char *dot = strrchr(filename, '.');
 	char *slash = strrchr(filename, '/');
 	char *backslash = strrchr(filename, '\\');
 
 	// Find the last path separator (if any)
-	char *last_sep = (slash > backslash) ? slash : backslash;
+	const char *last_sep = (slash > backslash) ? slash : backslash;
 
 	// Check if dot exists and comes after the last path separator
 	// (to avoid treating directories like "folder.name" as having extensions)

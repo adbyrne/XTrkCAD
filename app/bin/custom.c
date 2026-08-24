@@ -84,7 +84,7 @@ int iMinParamVersion = MINPARAMVERSION;
 long lParamKey = PARAMKEY;
 
 
-EXPORT char * MakeWindowTitle( char * name )
+EXPORT char * MakeWindowTitle( const char * name )
 {
 	static char title[STR_SHORT_SIZE];
 	sprintf( title, "%s", name );

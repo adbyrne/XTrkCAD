@@ -67,7 +67,7 @@ static DIST_T GetLengthCornu( track_p );
 /*
  * Run after any changes to the Cornu points
  */
-void SetUpCornuParmFromTracks(track_p trk[2],cornuParm_t * cp,
+void SetUpCornuParmFromTracks(track_p const trk[2],cornuParm_t * cp,
                               struct extraDataCornu_t* xx)
 {
 	if (!trk[0]) {
@@ -216,11 +216,6 @@ DIST_T CornuDescriptionDistance(
 	return FindDistance( p1, pos );
 }
 
-typedef struct {
-	coOrd pos;
-	ANGLE_T angle;
-} pos_angle_t;
-
 static void DrawCornuDescription(
         track_p trk,
         drawCmd_p d,
@@ -310,9 +305,6 @@ static struct {
 	DIST_T maxRateOfChange;
 	ANGLE_T windingAngle;
 	unsigned int layerNumber;
-	dynArr_t segs;
-	long lineWidth;
-	wDrawColor color;
 } cornData;
 
 typedef enum { P0, A0, R0, C0, Z0, P1, A1, R1, C1, Z1, RA, RR, WA, LN, GR, LY } cornuDesc_e;
@@ -918,7 +910,8 @@ BOOL_T MoveCornuEndPt ( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d0 )
 			UndrawNewTrack( trk2 );
 			DeleteTrack(trk2,TRUE);
 		}
-		struct extraDataCornu_t *xx = GET_EXTRA_DATA(*trk, T_CORNU, extraDataCornu_t);
+		const struct extraDataCornu_t *xx = GET_EXTRA_DATA(*trk, T_CORNU,
+		                                    extraDataCornu_t);
 		SetTrkEndPoint( *trk, *ep, *ep?xx->pos[1]:xx->pos[0], *ep?xx->a[1]:xx->a[0] );
 		DrawNewTrack( *trk );
 		return TRUE;
@@ -1055,7 +1048,8 @@ static BOOL_T EnumerateCornu( track_p trk )
 {
 
 	if (trk != NULL) {
-		struct extraDataCornu_t *xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
+		const struct extraDataCornu_t *xx = GET_EXTRA_DATA(trk, T_CORNU,
+		                                    extraDataCornu_t);
 		DIST_T d;
 		d = max(CornuOffsetLength(xx->arcSegs,-GetTrkGauge(trk)/2.0),
 		        CornuOffsetLength(xx->arcSegs,GetTrkGauge(trk)/2.0));
@@ -1235,7 +1229,8 @@ static BOOL_T QueryCornu( track_p trk, int query )
 		return TRUE;
 		break;
 	case Q_EXCEPTION: {
-		struct extraDataCornu_t * xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
+		const struct extraDataCornu_t * xx = GET_EXTRA_DATA(trk, T_CORNU,
+		                                     extraDataCornu_t);
 		return fabs(xx->minCurveRadius) < (GetLayoutMinTrackRadius()-EPSILON);
 	}
 	case Q_IS_CORNU:
@@ -1482,10 +1477,10 @@ EXPORT BOOL_T RebuildCornu (track_p trk)
 
 static wBool_t CompareCornu( track_cp trk1, track_cp trk2 )
 {
-	struct extraDataCornu_t *xx1 = GET_EXTRA_DATA( trk1, T_CORNU,
-	                               extraDataCornu_t );
-	struct extraDataCornu_t *xx2 = GET_EXTRA_DATA( trk2, T_CORNU,
-	                               extraDataCornu_t );
+	const struct extraDataCornu_t *xx1 = GET_EXTRA_DATA( trk1, T_CORNU,
+	                                     extraDataCornu_t );
+	const struct extraDataCornu_t *xx2 = GET_EXTRA_DATA( trk2, T_CORNU,
+	                                     extraDataCornu_t );
 	char * cp = message + strlen(message);
 	REGRESS_CHECK_POS( "Pos[0]", xx1, xx2, pos[0] )
 	REGRESS_CHECK_POS( "Pos[1]", xx1, xx2, pos[1] )

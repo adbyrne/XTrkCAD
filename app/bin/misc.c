@@ -615,7 +615,7 @@ EXPORT void CloseDemoWindows(void)
 	DYNARR_RESET( wWin_p, demoWindows_da );
 }
 
-EXPORT void DefaultProc(wControl_p win, winProcEvent e, void * data)
+EXPORT void DefaultProc(wControl_p win, winProcEvent e, const void * data)
 {
 	switch (e) {
 	case wClose_e:
@@ -714,7 +714,7 @@ static char * accelKeyNames[] = { "Del", "Ins", "Home", "End", "Pgup", "Pgdn",
 static void SetAccelKeys()
 {
 	for ( int iAccelKey = 0; iAccelKey < COUNT( aAccelKeys ); iAccelKey++ ) {
-		struct accelKey_s * akP = &aAccelKeys[iAccelKey];
+		const struct accelKey_s * akP = &aAccelKeys[iAccelKey];
 		int eKey = akP->eKey;
 		int iMode = akP->iMode;
 		const char * sPrefValue = wPrefGetString("accelKey", akP->sPrefName);
@@ -819,7 +819,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	char *cp;
 	char buffer[STR_SIZE];
 	unsigned int i;
-	char *testTarget = NULL;
+	const char *testTarget = NULL;
 
 	strcpy(buffer, sProdNameLower);
 

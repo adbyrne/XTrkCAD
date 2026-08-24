@@ -44,7 +44,7 @@ DIST_T GetLayerMinTrackRadius( unsigned int layer );
 ANGLE_T GetLayerMaxTrackGrade( unsigned int layer );
 void SetLayerModule(unsigned int, BOOL_T);
 char * GetLayerName( unsigned int );
-void SetLayerName(unsigned int layer, char* name);
+void SetLayerName(unsigned int layer, const char* name);
 void ReadLayers( char * );
 BOOL_T WriteLayers( FILE * );
 char * FormatLayerName(unsigned int layerNumber);

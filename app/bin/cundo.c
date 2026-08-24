@@ -142,14 +142,14 @@ void UndoSuspend( void )
 }
 
 
-static void DumpStream( FILE * outf, stream_p stream, char * name )
+static void DumpStream( FILE * outf, stream_p stream, const char * name )
 {
 	long binx;
 	long i, j;
 	uintptr_t off;
 	streamBlocks_p blk;
 	int zeroCnt;
-	static char zeros[16] = { 0 };
+	static const char zeros[16] = { 0 };
 	fprintf( outf, "Dumping %s\n", name );
 	off = stream->startBInx*BSTREAM_SIZE;
 	zeroCnt = 0;

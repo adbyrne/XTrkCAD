@@ -625,7 +625,8 @@ EXPORT void DrawBoxedString(int style, drawCmd_p d, coOrd pos, char *text,
 	}
 }
 
-EXPORT void DrawTextSize2(drawCmd_p dp, char *text, wFont_p fp, wFontSize_t fs,
+EXPORT void DrawTextSize2(drawCmd_p dp, const char *text, wFont_p fp,
+                          wFontSize_t fs,
                           BOOL_T relative, coOrd *size, POS_T *descent,
                           POS_T *ascent)
 {

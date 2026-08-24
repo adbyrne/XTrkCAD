@@ -162,7 +162,7 @@ static BOOL_T UpdateParamFiles(void)
 					for (int fileNo = 1; ; fileNo++) {
 						char fileNoS[4+10+1];
 						sprintf(fileNoS, "File%d", fileNo);
-						char * prevContents = wPrefGetString("Parameter File Names", fileNoS);
+						const char * prevContents = wPrefGetString("Parameter File Names", fileNoS);
 						if (prevContents == NULL || *prevContents == '\0') {
 							// End of list
 							break;
@@ -445,7 +445,7 @@ static void ReadCustom(void)
  * Open the custom file where user-defined turnouts, cars and such are stored
  */
 
-FILE * OpenCustom(char *mode)
+FILE * OpenCustom(const char *mode)
 {
 	FILE * ret = NULL;
 

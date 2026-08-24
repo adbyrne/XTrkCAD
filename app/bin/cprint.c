@@ -366,7 +366,7 @@ static void PrintGaudyBox(
         coOrd roomSize )
 {
 	coOrd p00, p01, p10, p11;
-	struct tm *tm;
+	const struct tm *tm;
 	time_t clock;
 	char dat[STR_SIZE];
 	wFont_p fp;
@@ -438,7 +438,7 @@ static void PrintGaudyBox(
 static void PrintPlainBox(
         int x,
         int y,
-        coOrd *corners )
+        const coOrd *corners )
 {
 	coOrd p00, p01, p10, p11;
 	char tmp[30];

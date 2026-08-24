@@ -104,7 +104,7 @@ CompareStyle(sCssStyle *a, sCssStyle *b)
  */
 
 static char *
-SvgAddStyleToCache(DynString *styleDef)
+SvgAddStyleToCache(const DynString *styleDef)
 {
 	sCssStyle *style;
 	sCssStyle *result;
@@ -296,7 +296,7 @@ SvgRectCommand(SVGParent *svg, double x0, double y0, double x1, double y1,
  */
 
 void
-SvgPolyLineCommand(SVGParent *svg, int cnt, double *points, int color,
+SvgPolyLineCommand(SVGParent *svg, int cnt, const double *points, int color,
                    double width, bool fill, unsigned lineStyle)
 {
 	mxml_node_t *xmlData;
@@ -662,7 +662,7 @@ whitespace_cb(mxml_node_t *node, int where)
  */
 
 bool
-SvgSaveFile(SVGDocument *svg, char *filename)
+SvgSaveFile(SVGDocument *svg, const char *filename)
 {
 	FILE *svgF;
 

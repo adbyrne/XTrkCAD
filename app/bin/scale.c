@@ -557,7 +557,7 @@ static BOOL_T DoSetScaleDesc( SCALEINX_T scaleInx )
 	SCALEDESCINX_T descInx;
 	scaleDesc_p scaleDescP = NULL;
 	gaugeInfo_p g;
-	char *cp;
+	const char *cp;
 //	DIST_T ratio;
 	char buf[ 80 ];
 	size_t len;
@@ -702,8 +702,9 @@ static BOOL_T AddScaleFit(
 	return TRUE;
 }
 
-EXPORT SCALE_FIT_T FindScaleCompatible(SCALE_FIT_TYPE_T type, char * scale1,
-                                       char * scale2)
+EXPORT SCALE_FIT_T FindScaleCompatible(SCALE_FIT_TYPE_T type,
+                                       const char * scale1,
+                                       const char * scale2)
 {
 
 	char * cp, * cq;
@@ -770,7 +771,7 @@ EXPORT void ScaleLengthIncrement(
         SCALEINX_T scale,
         DIST_T length )
 {
-	char * cp;
+	const char * cp;
 	int len;
 	if (scaleInfo(scale).length == 0.0) {
 		if (units == UNITS_METRIC) {
@@ -1043,7 +1044,7 @@ static void RescaleDlgUpdate(
 
 static BOOL_T SelectedScaleGauge( track_p trk, BOOL_T unused )
 {
-	char *scaleName;
+	const char *scaleName;
 	SCALEINX_T scale;
 	SCALEDESCINX_T scaleInx;
 	GAUGEINX_T gaugeInx;

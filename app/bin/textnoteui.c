@@ -125,7 +125,7 @@ TextEditOK(void *junk)
  * \param textData IN note text
  */
 static void
-CreateEditTextNote(char *title, char * textData )
+CreateEditTextNote(char *title, const char * textData )
 {
 	// create the dialog if necessary
 	if (!textNoteW) {
@@ -197,7 +197,7 @@ void DescribeTextNote(track_p trk, char * str, CSIZE_T len)
 
 void NewTextNoteUI(coOrd pos )
 {
-	char *tmpPtrText = _("Replace this text with your note");
+	const char *tmpPtrText = _("Replace this text with your note");
 
 	textNoteData.pos = pos;
 	textNoteData.layer = curLayer;

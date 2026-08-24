@@ -89,7 +89,7 @@ void DoNote(void * unused)
 BOOL_T WriteMainNote(FILE* f)
 {
 	BOOL_T rc = TRUE;
-	char *noteText = mainText;
+	const char *noteText = mainText;
 
 	if (noteText && *noteText) {
 #ifdef UTFCONVERT

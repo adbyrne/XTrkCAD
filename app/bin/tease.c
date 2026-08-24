@@ -372,7 +372,7 @@ static track_p NewJoint(
         DIST_T trackGauge,
         DIST_T R,
         DIST_T L,
-        easementData_t * e )
+        const easementData_t * e )
 /*
  * Allocate a joint track segment.
  * Allocate a track, save relevant data from (*e),
@@ -452,7 +452,7 @@ static track_p NewJoint(
 
 static DIST_T GetLengthJoint( track_p trk )
 {
-	struct extraDataEase_t *xx;
+	const struct extraDataEase_t *xx;
 	DIST_T d0, d1;
 	xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	d0 = JoinD( xx->l0, xx->R, xx->L );
@@ -466,7 +466,7 @@ static DIST_T GetLengthJoint( track_p trk )
 
 static DIST_T GetFlexLengthJoint( track_p trk )
 {
-	struct extraDataEase_t *xx;
+	const struct extraDataEase_t *xx;
 	DIST_T d0, d1, d3;
 	xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	d0 = JoinD( xx->l0, xx->R+(GetTrkGauge(trk)/2.0), xx->L );
@@ -549,7 +549,8 @@ static void DescribeJoint(
  * Print some interesting info about the track.
  */
 {
-	struct extraDataEase_t *xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
+	const struct extraDataEase_t *xx = GET_EXTRA_DATA(trk, T_EASEMENT,
+	                                   extraDataEase_t);
 	int fix0, fix1;
 
 	sprintf( str,
@@ -674,7 +675,8 @@ static DIST_T DistanceJoint(
  * Determine how close (p) is to (t).
  */
 {
-	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
+	const struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT,
+	                                    extraDataEase_t);
 	return JointDistance( p, xx->pos, xx->angle, xx->l0, xx->l1, xx->R, xx->L,
 	                      xx->negate, xx->Scurve );
 }
@@ -937,7 +939,8 @@ static void DrawJoint(
  * Draw a transition-curve.
  */
 {
-	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
+	const struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT,
+	                                    extraDataEase_t);
 	long widthOptions = 0;
 
 	DrawJointTrack( d, xx->pos, xx->angle, xx->l0, xx->l1, xx->R, xx->L, xx->negate,
@@ -958,7 +961,8 @@ static BOOL_T WriteJoint(
  * Write track data to a file (f).
  */
 {
-	struct extraDataEase_t * xx = GET_EXTRA_DATA(t, T_EASEMENT, extraDataEase_t);
+	const struct extraDataEase_t * xx = GET_EXTRA_DATA(t, T_EASEMENT,
+	                                    extraDataEase_t);
 	BOOL_T rc = TRUE;
 	int bits;
 	long options = (long)GetTrkWidth(t);
@@ -1084,7 +1088,8 @@ static ANGLE_T GetAngleJoint( track_p trk, coOrd pos, EPINX_T * ep0,
 {
 	DIST_T l;
 	ANGLE_T a;
-	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
+	const struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT,
+	                                    extraDataEase_t);
 	if ( ep0 && ep1 ) {
 		if (xx->flip) {
 			*ep0 = 1;
@@ -1306,7 +1311,8 @@ static BOOL_T TraverseJointTrack(
         DIST_T * distR )
 {
 	track_p trk = trvTrk->trk;
-	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
+	const struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT,
+	                                    extraDataEase_t);
 	BOOL_T rc;
 	EPINX_T ep;
 	ANGLE_T angle;
@@ -1360,7 +1366,8 @@ static BOOL_T MergeJoint(
 	coOrd pos;
 	ANGLE_T a;
 	struct extraDataEase_t *xx0 = GET_EXTRA_DATA(trk0, T_EASEMENT, extraDataEase_t);
-	struct extraDataEase_t *xx1 = GET_EXTRA_DATA(trk1, T_EASEMENT, extraDataEase_t);
+	const struct extraDataEase_t *xx1 = GET_EXTRA_DATA(trk1, T_EASEMENT,
+	                                    extraDataEase_t);
 
 	if ( ep0 == ep1 ) {
 		return FALSE;
@@ -1436,7 +1443,8 @@ static BOOL_T MoveEndPtJoint( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d )
 
 static BOOL_T QueryJoint( track_p trk, int query )
 {
-	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
+	const struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT,
+	                                    extraDataEase_t);
 	track_p trk1;
 
 	switch ( query ) {
@@ -1604,10 +1612,10 @@ static BOOL_T MakeParallelJoint(
 
 static wBool_t CompareJoint( track_cp trk1, track_cp trk2 )
 {
-	struct extraDataEase_t *xx1 = GET_EXTRA_DATA( trk1, T_EASEMENT,
-	                              extraDataEase_t );
-	struct extraDataEase_t *xx2 = GET_EXTRA_DATA( trk2, T_EASEMENT,
-	                              extraDataEase_t );
+	const struct extraDataEase_t *xx1 = GET_EXTRA_DATA( trk1, T_EASEMENT,
+	                                    extraDataEase_t );
+	const struct extraDataEase_t *xx2 = GET_EXTRA_DATA( trk2, T_EASEMENT,
+	                                    extraDataEase_t );
 	char * cp = message + strlen(message);
 	REGRESS_CHECK_DIST( "L0", xx1, xx2, l0 );
 	REGRESS_CHECK_DIST( "L1", xx1, xx2, l1 );
@@ -1956,7 +1964,7 @@ EXPORT void UndoJoint(
         track_p trk1,
         EPINX_T ep1 )
 {
-	struct extraDataEase_t * xx;
+	const struct extraDataEase_t * xx;
 	DIST_T d;
 
 	if ( GetTrkType(trk1) != T_EASEMENT ) {

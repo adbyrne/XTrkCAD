@@ -33,7 +33,8 @@ typedef  mxml_node_t SVGDocument;
 void SvgAddCSSStyle(SVGParent *svg);
 void SvgLineCommand(SVGParent *svg, double x0, double y0, double x1, double y1,
                     double w, long c, unsigned lineOpt);
-void SvgPolyLineCommand(SVGParent *svg, int cnt, double *points, int color,
+void SvgPolyLineCommand(SVGParent *svg, int cnt, const double *points,
+                        int color,
                         double width, bool fill, unsigned lineStyle);
 void SvgRectCommand(SVGParent *svg, double x0, double y0, double x1, double y1,
                     int color, unsigned linestyle);
@@ -49,7 +50,7 @@ SVGDocument *SvgCreateDocument(void);
 SVGParent *SvgPrologue(SVGDocument *result, char *id, int layerCount, double x0,
                        double y0, double x1, double y1);
 
-bool SvgSaveFile(SVGDocument *svg, char *filename);
+bool SvgSaveFile(SVGDocument *svg, const char *filename);
 void SvgDestroyDocument(SVGDocument *svg);
 #endif // !HAVE_SVGFORMAT_H
 

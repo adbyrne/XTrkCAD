@@ -116,8 +116,8 @@ static paramGroup_t turnoutPG = { "turnout", PGO_FULLDIALOGFROMBUILDER, turnoutP
 
 
 EXPORT turnoutInfo_t* CreateNewTurnout(
-        char* scale,
-        char* title,
+        const char* scale,
+        const char* title,
         wIndex_t segCnt,
         trkSeg_p segData,
         PATHPTR_T paths,
@@ -281,7 +281,7 @@ GetTrackCompatibility(int paramFileIndex, SCALEINX_T scaleIndex) {
 	// loop over all parameter entries or until a exact fit is found
 	for (i = 0; i < turnoutInfo_da.cnt && ret < PARAMFILE_FIT; i++)
 	{
-		turnoutInfo_t* to = turnoutInfo(i);
+		const turnoutInfo_t* to = turnoutInfo(i);
 		if (to->paramFileIndex == paramFileIndex) {
 			SCALE_FIT_T fit = CompatibleScale(FIT_TURNOUT, to->scaleInx, scaleIndex);
 			if (fit == FIT_EXACT) {
@@ -691,7 +691,7 @@ static coOrd MapPathPos(
 }
 
 static trkSeg_p MapPathSeg(
-        struct extraDataCompound_t* xx,
+        const struct extraDataCompound_t* xx,
         signed char segInx)
 {
 
@@ -1928,8 +1928,8 @@ static wBool_t CompareTurnout(track_cp trk1, track_cp trk2)
 {
 	struct extraDataCompound_t* xx1 = GET_EXTRA_DATA(trk1, T_TURNOUT,
 	                                  extraDataCompound_t);
-	struct extraDataCompound_t* xx2 = GET_EXTRA_DATA(trk2, T_TURNOUT,
-	                                  extraDataCompound_t);
+	const struct extraDataCompound_t* xx2 = GET_EXTRA_DATA(trk2, T_TURNOUT,
+	                                        extraDataCompound_t);
 	char* cp = message + strlen(message);
 	REGRESS_CHECK_POS("Orig", xx1, xx2, orig)
 	REGRESS_CHECK_ANGLE("Angle", xx1, xx2, angle)
@@ -2023,7 +2023,7 @@ static void RescaleTurnout(void)
 
 static void TurnoutChange(long changes)
 {
-	static char* lastScaleName = NULL;
+	static const char* lastScaleName = NULL;
 	if (turnoutW == NULL) {
 		return;
 	}

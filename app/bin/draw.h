@@ -251,7 +251,8 @@ void DrawBoxedString(int, drawCmd_p, coOrd, char *, wFont_p, wFontSize_t,
                      wDrawColor, ANGLE_T);
 void DrawMultiLineTextSize(drawCmd_p dp, char * text, wFont_p fp,
                            wFontSize_t fs, BOOL_T relative, coOrd * size, coOrd * lastline);
-void DrawTextSize2(drawCmd_p, char *, wFont_p, wFontSize_t, BOOL_T, coOrd *,
+void DrawTextSize2(drawCmd_p, const char *, wFont_p, wFontSize_t, BOOL_T,
+                   coOrd *,
                    POS_T *, POS_T *);
 void DrawTextSize(drawCmd_p, char *, wFont_p, wFontSize_t, BOOL_T, coOrd *);
 void DrawMultiString(drawCmd_p d, coOrd pos, char * text, wFont_p fp,
@@ -267,13 +268,13 @@ void MainRedraw(void);
 void MainLayout(wBool_t, wBool_t);
 void TempRedraw(void);
 void DrawRuler(drawCmd_p, coOrd, coOrd, DIST_T, int, int, wDrawColor);
-wBool_t MainProc(wControl_p window, winProcEvent event, void *refresh,
+wBool_t MainProc(wControl_p window, winProcEvent event, const void *refresh,
                  void *context);
 void InitInfoBar(void);
 void InitColor(void);
 void DrawInit(int);
-void DoZoomUp(void * modeVP);
-void DoZoomDown(void * modeVP);
+void DoZoomUp(const void * modeVP);
+void DoZoomDown(const void * modeVP);
 void DoZoomExtents( void * modeVP);
 void DoNewScale(DIST_T scale);
 int DoPanKeyAction(wAction_t action);
@@ -303,7 +304,7 @@ STATUS_T GridAction(wAction_t, coOrd, coOrd *, DIST_T *);
 void ResetMouseState(void);
 void FakeDownMouseState(void);
 void GetMousePosition(wDrawPix_t  *x, wDrawPix_t *y);
-void RecordMouse(char *, wAction_t, POS_T, POS_T);
+void RecordMouse(const char *, wAction_t, POS_T, POS_T);
 extern long playbackDelay;
 void MovePlaybackCursor(drawCmd_p, coOrd pos, wBool_t, wControl_p);
 typedef void (*playbackProc)(wAction_t, coOrd);

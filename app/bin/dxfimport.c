@@ -198,7 +198,7 @@ static bool ReadDxfPair(FILE* dxfFile)
 }
 
 // Get the line type code from the DXF text
-static wDrawLineType_e dxfLineType(char dxfValue[50])
+static wDrawLineType_e dxfLineType(const char dxfValue[50])
 {
 	wDrawLineType_e lineType = wDrawLineSolid;
 
@@ -246,7 +246,7 @@ char** DxfOutput;				// Track Output lines
 
 // Allocate memory for a line of output and assign to output
 // Reallocate array space if needed
-static BOOL_T dxfAddOutput(char tmp[])
+static BOOL_T dxfAddOutput(const char tmp[])
 {
 	size_t len = strlen(tmp) + 1;
 	char* outpt = MyMalloc(len * sizeof(char));

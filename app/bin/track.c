@@ -1313,7 +1313,7 @@ static wBool_t CompareTrack( track_cp trk1, track_cp trk2 )
 	return trackCmds( GetTrkType( trk1 ) )->compare( trk1, trk2 );
 }
 
-EXPORT int CheckRegressionResult( long regressVersion,char * sFileName,
+EXPORT int CheckRegressionResult( long regressVersion,const char * sFileName,
                                   wBool_t bQuiet )
 {
 	wBool_t bWroteActualTracks = FALSE;

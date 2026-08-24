@@ -46,7 +46,7 @@ extern int log_zip;
  *\returns a String containing the JSON object
  */
 
-char* CreateManifest(char* nameOfLayout, char* background,
+char* CreateManifest(const char* nameOfLayout, char* background,
                      char* dependencyDir)
 {
 	cJSON* manifest = cJSON_CreateObject();
@@ -140,17 +140,17 @@ char* ParseManifest(char* manifest, char* zip_directory)
 			printf("Link to background image %s \n", background_file[0]);
 #endif
 			LoadImageFile(1, &background_file[0], NULL);
-			cJSON* size = cJSON_GetObjectItemCaseSensitive(dependency, "size");
+			const cJSON* size = cJSON_GetObjectItemCaseSensitive(dependency, "size");
 			SetLayoutBackGroundSize(size->valuedouble);
-			cJSON* posx = cJSON_GetObjectItemCaseSensitive(dependency, "pos-x");
-			cJSON* posy = cJSON_GetObjectItemCaseSensitive(dependency, "pos-y");
+			const cJSON* posx = cJSON_GetObjectItemCaseSensitive(dependency, "pos-x");
+			const cJSON* posy = cJSON_GetObjectItemCaseSensitive(dependency, "pos-y");
 			coOrd pos;
 			pos.x = posx->valuedouble;
 			pos.y = posy->valuedouble;
 			SetLayoutBackGroundPos(pos);
-			cJSON* screen = cJSON_GetObjectItemCaseSensitive(dependency, "screen");
+			const cJSON* screen = cJSON_GetObjectItemCaseSensitive(dependency, "screen");
 			SetLayoutBackGroundScreen((int)screen->valuedouble);
-			cJSON* angle = cJSON_GetObjectItemCaseSensitive(dependency, "angle");
+			const cJSON* angle = cJSON_GetObjectItemCaseSensitive(dependency, "angle");
 			SetLayoutBackGroundAngle(angle->valuedouble);
 			LayoutBackGroundSave();      //Force out Values	to override saved
 		}

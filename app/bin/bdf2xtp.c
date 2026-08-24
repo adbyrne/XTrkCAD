@@ -548,7 +548,7 @@ void generateTurnout( void )
 	segs_t *sp;
 	line_t *lp;
 	endPoint_t *ep;
-	double d, a, aa, aaa, a0, a1;
+	double a0, a1;
 	coOrd center;
 
 	fprintf( fout, "TURNOUT %s \"%s %s\"\n", scale, partNo, name );
@@ -581,7 +581,7 @@ void generateTurnout( void )
 }
 
 
-void reset( tokenDesc_t * tp, arg_t *args )
+void reset( const tokenDesc_t * tp, arg_t *args )
 /* Start of a new turnout or structure */
 {
 	int inx;
@@ -670,10 +670,9 @@ void process( tokenDesc_t * tp, arg_t *args )
 	static double angle;
 	double length, length2;
 	double width, width2, offset;
-	double a0, a1;
 	static char bits[128];
 	int rc;
-	char * cp;
+	const char * cp;
 	line_t * lp;
 	coOrd pos0, pos1;
 	static int threeway;
@@ -1111,7 +1110,6 @@ void parse( void )
 {
 	char *cp, *cpp;
 	char strings[512], *sp;
-	int len;
 	tokenDesc_t *tp;
 	int tlen;
 	arg_t args[10];
@@ -1207,7 +1205,7 @@ nextLine:
 int main ( int argc, char * argv[] )
 /* main: handle options, open files */
 {
-	char * contents = NULL;
+	const char * contents = NULL;
 	argv++;
 	argc--;
 	while (argc > 2) {

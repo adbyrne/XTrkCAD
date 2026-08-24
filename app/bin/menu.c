@@ -559,7 +559,7 @@ static wControl_p messageList_ml;
 #define MESSAGE_LIST_EMPTY			N_("No Messages")
 
 EXPORT void MessageListAppend(
-        char * cp1,
+        const char * cp1,
         const char * msgSrc )
 {
 	static wBool_t messageListIsEmpty = TRUE;
@@ -573,7 +573,8 @@ EXPORT void MessageListAppend(
 
 static void ShowMessageHelp(int index, const char * label, void * data)
 {
-	char msgKey[STR_SIZE], *cp, *msgSrc;
+	char msgKey[STR_SIZE];
+	const char *cp, *msgSrc;
 	msgSrc = (char*) data;
 	if (!msgSrc) {
 		return;

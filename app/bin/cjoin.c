@@ -52,7 +52,6 @@ static struct {
 		TRKTYP_T realType;
 		track_p trk;
 		coOrd pos;
-		EPINX_T ep;
 		trackParams_t params;
 	} inp[2];
 	joinRes_t jRes;
@@ -455,14 +454,11 @@ static struct {
 	int joinMoveState;
 	track_p curr_line;
 	struct {
-		TRKTYP_T realType;
 		track_p line;
 		coOrd pos;
 		coOrd end;
 		int cnt;
 	} inp[2];
-	joinRes_t jRes;
-	coOrd inp_pos[2];
 	dynArr_t anchors_da;
 	trackParams_t params;
 	dynArr_t newLine;

@@ -101,7 +101,7 @@ extern void DoShowWindow(int index, const char * name, void * data);
 extern void wShow( wControl_p window);
 extern void wHide( wControl_p window );
 extern void CloseDemoWindows( void );
-extern void DefaultProc( wControl_p win, winProcEvent, void * data);
+extern void DefaultProc( wControl_p win, winProcEvent, const void * data);
 typedef void (*changeNotificationCallBack_t)( long );
 #define CHANGE_SCALE	(1<<0)
 #define CHANGE_PARAMS	(1<<1)
@@ -136,7 +136,7 @@ addButtonCallBack_t ParamFilesInit( void );
 addButtonCallBack_t ControlMgrInit ( void );
 
 /* cdraw.c */
-track_p NewText( wIndex_t index, coOrd p, ANGLE_T angle, char * text,
+track_p NewText( wIndex_t index, coOrd p, ANGLE_T angle, const char * text,
                  CSIZE_T textSize, wDrawColor color, BOOL_T boxed,
                  BOOL_T filled, wDrawColor bg_color);
 void LoadFontSizeList( wControl_p control, long fontSize);
@@ -228,7 +228,7 @@ extern DIST_T easeL;
 
 /* denum.c */
 extern int enumerateMaxDescLen;
-void EnumerateList( long, FLOAT_T, char *, char * );
+void EnumerateList( long, FLOAT_T, const char *, const char * );
 void EnumerateStart(void);
 void EnumerateEnd(void);
 
@@ -294,7 +294,7 @@ extern dynArr_t logTable_da;
 extern time_t logClock;
 void LogOpen( char * );
 void LogClose( void );
-void LogSet( char *, int );
+void LogSet( const char *, int );
 int LogFindIndex( const char * );
 void LogPrintf( const char *, ... );
 #define LOG( DBINX, DBLVL, DBMSG ) \

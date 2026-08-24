@@ -217,7 +217,7 @@ EXPORT long SetTrkEndOption( track_p trk, EPINX_T ep, long option )
  */
 
 EXPORT void SetTrkEndElev( track_p trk, EPINX_T ep, int option, DIST_T height,
-                           char * station )
+                           const char * station )
 {
 	track_p trk1;
 	EPINX_T ep1;

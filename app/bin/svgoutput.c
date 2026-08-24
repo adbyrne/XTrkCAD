@@ -341,7 +341,7 @@ static drawCmd_t svgD = {
  */
 
 static char *
-CreateValidId(char *base)
+CreateValidId(const char *base)
 {
 	const char *idHead = "id";
 	char *out = MyMalloc(strlen(idHead) + strlen(base) + 1);
@@ -377,7 +377,7 @@ CreateValidId(char *base)
 
 static char * SvgGetId(void)
 {
-	char *fileName = GetLayoutFilename();
+	const char *fileName = GetLayoutFilename();
 	char *id = NULL;
 
 	if (fileName) {
@@ -399,7 +399,7 @@ static char * SvgGetId(void)
 
 static void SvgSetTitle(drawCmd_p d)
 {
-	char *tmp = GetLayoutTitle();
+	const char *tmp = GetLayoutTitle();
 	char *title;
 
 	if (tmp) {

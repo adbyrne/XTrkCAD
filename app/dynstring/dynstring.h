@@ -44,15 +44,15 @@ typedef struct DynString DynString;
 #define STR_FREEABLE (1ULL << 31)
 #endif
 
-size_t DynStringSize(DynString * s);
+size_t DynStringSize(const DynString * s);
 
 DynString * DynStringMalloc(DynString *s, size_t size);
 void DynStringClear(DynString *s);
 void DynStringRealloc(DynString * s);
 void DynStringResize(DynString * s, size_t size);
 void DynStringFree(DynString * s);
-DynString * DynStringDupStr(DynString *s2, DynString * s);
-void DynStringCpyStr(DynString * dest, DynString * src);
+DynString * DynStringDupStr(DynString *s2, const DynString * s);
+void DynStringCpyStr(DynString * dest, const DynString * src);
 char * DynStringToCStr(DynString * s);
 void DynStringNCatCStr(DynString * s, size_t len, const char * str);
 void DynStringCatCStr(DynString * s, const char * str);

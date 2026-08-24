@@ -274,7 +274,6 @@ static struct {
 	ANGLE_T angle[2];
 	DIST_T radius[2];
 	coOrd center[2];
-	dynArr_t segs;
 	LWIDTH_T lineWidth;
 	wDrawColor color;
 	long lineType;
@@ -961,7 +960,8 @@ static BOOL_T EnumerateBezier( track_p trk )
 
 	if ((trk != NULL) && (GetTrkType(trk) == T_BEZIER)) {
 		DIST_T d;
-		struct extraDataBezier_t *xx = GET_EXTRA_DATA(trk, T_BEZIER, extraDataBezier_t);
+		const struct extraDataBezier_t *xx = GET_EXTRA_DATA(trk, T_BEZIER,
+		                                     extraDataBezier_t);
 		d = max(BezierOffsetLength(xx->arcSegs,-GetTrkGauge(trk)/2.0),
 		        BezierOffsetLength(xx->arcSegs,GetTrkGauge(trk)/2.0));
 		ScaleLengthIncrement( GetTrkScale(trk), d );
@@ -1124,8 +1124,8 @@ static BOOL_T TrimBezier( track_p trk, EPINX_T ep, DIST_T dist, coOrd endpos,
 
 static BOOL_T QueryBezier( track_p trk, int query )
 {
-	struct extraDataBezier_t * xx = GET_EXTRA_DATA(trk, T_NOTRACK,
-	                                extraDataBezier_t);
+	const struct extraDataBezier_t * xx = GET_EXTRA_DATA(trk, T_NOTRACK,
+	                                      extraDataBezier_t);
 	switch ( query ) {
 	case Q_CAN_GROUP:
 		return FALSE;
@@ -1365,7 +1365,7 @@ BOOL_T RebuildBezier (track_p trk)
 BOOL_T MoveBezierEndPt ( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d0 )
 {
 	track_p trk2;
-	struct extraDataBezier_t *xx;
+	const struct extraDataBezier_t *xx;
 	if (SplitTrack(*trk,pos,*ep,&trk2,TRUE)) {
 		if (trk2) {
 			UndrawNewTrack( trk2 );
@@ -1382,10 +1382,10 @@ BOOL_T MoveBezierEndPt ( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d0 )
 
 static wBool_t CompareBezier( track_cp trk1, track_cp trk2 )
 {
-	struct extraDataBezier_t *xx1 = GET_EXTRA_DATA( trk1, T_NOTRACK,
-	                                extraDataBezier_t );
-	struct extraDataBezier_t *xx2 = GET_EXTRA_DATA( trk2, T_NOTRACK,
-	                                extraDataBezier_t );
+	const struct extraDataBezier_t *xx1 = GET_EXTRA_DATA( trk1, T_NOTRACK,
+	                                      extraDataBezier_t );
+	const struct extraDataBezier_t *xx2 = GET_EXTRA_DATA( trk2, T_NOTRACK,
+	                                      extraDataBezier_t );
 	char * cp = message + strlen(message);
 	REGRESS_CHECK_POS( "Pos[0]", xx1, xx2, pos[0] )
 	REGRESS_CHECK_POS( "Pos[1]", xx1, xx2, pos[1] )

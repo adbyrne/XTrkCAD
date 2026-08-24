@@ -102,7 +102,6 @@ main( int argc, char **argv )
 {
 	int handleOfPipe = 0;
 	char buffer[ 100 ];
-	char issue[ 100 ];
 
 	int len;
 	int finished = 0;

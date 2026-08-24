@@ -2801,7 +2801,7 @@ static void NewTurnPrint(
 	double topMargin, rightMargin, bottomMargin, leftMargin;
 	int ii, jj;
 	coOrd orig, size;
-	toDesignSchema_t * pp;
+	const toDesignSchema_t * pp;
 	POS_T tmp;
 
 	if ((pp=LoadSegs( curDesign, TRUE )) == NULL) {
@@ -3041,7 +3041,7 @@ static void RedrawDesigner(
 
 	/* compute bounding box to center the drawing */
 	for (i = 0; i < curDesign->lineCnt; i++) {
-		wLines_t *l = &curDesign->lines[i];
+		const wLines_t *l = &curDesign->lines[i];
 		if (l->width == 2) { continue; }
 		double lx0 = l->x0 * designerScale, lx1 = l->x1 * designerScale;
 		double ly0 = l->y0 * designerScale, ly1 = l->y1 * designerScale;
@@ -3056,7 +3056,7 @@ static void RedrawDesigner(
 	designerYOff = (actualH / 2.0 - 1.0) - (y_min + y_max) / 2.0;
 
 	for (i = 0; i < curDesign->lineCnt; i++) {
-		wLines_t *l = &curDesign->lines[i];
+		const wLines_t *l = &curDesign->lines[i];
 		if (l->width == 2) { continue; }
 		wDrawLine(designerD.d,
 		          (wDrawPix_t)(l->x0 * designerScale + designerXOff),
@@ -3068,7 +3068,7 @@ static void RedrawDesigner(
 	}
 
 	for (i = 0; i < curDesign->lineCnt; i++) {
-		wLines_t *l = &curDesign->lines[i];
+		const wLines_t *l = &curDesign->lines[i];
 		if (l->width != 2) { continue; }
 		cx = (wDrawPix_t)(l->x0 * designerScale + designerXOff);
 		cy = (wDrawPix_t)(l->y0 * designerScale + designerYOff);
@@ -3095,7 +3095,7 @@ static void ClickDesigner(
 	px = (wDrawPix_t)(pos.x * designerD.dpi / designerD.scale);
 	py = (wDrawPix_t)(pos.y * designerD.dpi / designerD.scale);
 	for (i = 0; i < curDesign->lineCnt; i++) {
-		wLines_t *l = &curDesign->lines[i];
+		const wLines_t *l = &curDesign->lines[i];
 		if (l->width != 2) { continue; }
 		cx = (wDrawPix_t)(l->x0 * designerScale + designerXOff);
 		cy = (wDrawPix_t)(l->y0 * designerScale + designerYOff);

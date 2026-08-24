@@ -17,7 +17,7 @@
 * \return    the length of the string in bytes
 */
 
-size_t DynStringSize(DynString *s)
+size_t DynStringSize(const DynString *s)
 {
 	if (isnas(s)) {
 		return 0;
@@ -233,7 +233,7 @@ void DynStringFree(DynString *s)
 */
 
 /* Create a new string as a copy of an old one */
-DynString *DynStringDupStr(DynString *s2, DynString *s)
+DynString *DynStringDupStr(DynString *s2, const DynString *s)
 {
 //    DynString nas = NaS;
 
@@ -255,7 +255,7 @@ DynString *DynStringDupStr(DynString *s2, DynString *s)
 * \param src IN the source dynamic string
 */
 
-void DynStringCpyStr(DynString *dest, DynString *src)
+void DynStringCpyStr(DynString *dest, const DynString *src)
 {
 	/* Are we no a string */
 	if (isnas(src)) {

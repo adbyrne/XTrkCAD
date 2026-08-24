@@ -92,8 +92,8 @@ static paramGroup_t structurePG = { "structure", PGO_FULLDIALOGFROMBUILDER, stru
  */
 
 EXPORT turnoutInfo_t * CreateNewStructure(
-        char * scale,
-        char * title,
+        const char * scale,
+        const char * title,
         wIndex_t segCnt,
         trkSeg_p segData,
         BOOL_T updateList )
@@ -250,7 +250,7 @@ GetStructureCompatibility(int paramFileIndex, SCALEINX_T scaleIndex) {
 
 	for (i = 0; i < structureInfo_da.cnt; i++)
 	{
-		turnoutInfo_t *to = structureInfo(i);
+		const turnoutInfo_t *to = structureInfo(i);
 		if (to->paramFileIndex == paramFileIndex) {
 			SCALE_FIT_T fit = CompatibleScale(FIT_STRUCTURE,to->scaleInx,scaleIndex);
 			if (fit == FIT_EXACT) {
@@ -443,8 +443,8 @@ static wBool_t CompareStruct( track_cp trk1, track_cp trk2 )
 {
 	struct extraDataCompound_t *xx1 = GET_EXTRA_DATA( trk1, T_STRUCTURE,
 	                                  extraDataCompound_t );
-	struct extraDataCompound_t *xx2 = GET_EXTRA_DATA( trk2, T_STRUCTURE,
-	                                  extraDataCompound_t );
+	const struct extraDataCompound_t *xx2 = GET_EXTRA_DATA( trk2, T_STRUCTURE,
+	                                        extraDataCompound_t );
 	char * cp = message + strlen(message);
 	REGRESS_CHECK_POS( "Orig", xx1, xx2, orig )
 	REGRESS_CHECK_ANGLE( "Angle", xx1, xx2, angle )
@@ -568,7 +568,7 @@ static void RescaleStructure( void )
 
 static void structureChange( long changes )
 {
-	static char * lastScaleName = NULL;
+	static const char * lastScaleName = NULL;
 	if (structureW == NULL) {
 		return;
 	}
