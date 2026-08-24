@@ -386,7 +386,7 @@ static void DrawStructure(
 		d->options |= DC_CENTER;
 		break;
 	case DRAWLINEPHANTOM:
-		d->options |= DC_CENTER;
+		d->options |= DC_PHANTOM;
 		break;
 	}
 	DrawSegs( d, xx->orig, xx->angle, xx->segs, xx->segCnt, 0.0, color );
