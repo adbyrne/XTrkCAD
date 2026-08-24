@@ -639,7 +639,7 @@ STATUS_T DrawGeomMouse(
 		case OP_FILLPOLY:
 		case OP_POLYLINE:
 			if ((MyGetKeyState() & WKEY_CTRL) == WKEY_CTRL ) {
-				coOrd last_point = zero;
+				coOrd last_point;
 				ANGLE_T last_angle;
 //				ANGLE_T initial_angle;
 				if (tempSegs_da.cnt == 1) {

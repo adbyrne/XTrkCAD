@@ -1817,7 +1817,7 @@ static BOOL_T ReadDemo(char *line)
 			goto error;
 		}
 		*cp++ = '\0';
-		while (*cp && *cp == ' ') {
+		while (*cp == ' ') {
 			cp++;
 		}
 		if (strlen(cp) == 0) {

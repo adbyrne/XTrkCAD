@@ -936,7 +936,7 @@ EXPORT void DoZoomUp(const void *mode)
 		 * To jump into macro mode, the CTRL-key has to be pressed and held.
 		 */
 		if (mainD.scale != 1.0 ||
-		    (mainD.scale == 1.0 && (MyGetKeyState() & WKEY_CTRL))) {
+		    (MyGetKeyState() & WKEY_CTRL)) {
 			if (i) {
 				if (mainD.scale <= 1.0) {
 					InfoMessage(_("Macro Zoom Mode"));

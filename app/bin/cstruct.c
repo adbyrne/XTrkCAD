@@ -1093,7 +1093,6 @@ static STATUS_T CmdStructure(
 		InfoMessage(
 		        _("Left drag to move, right drag to rotate, or press Return or click Ok to finalize") );
 		return CmdStructureAction( action, pos );
-		return C_CONTINUE;
 
 	case C_LCLICK:
 		CmdStructureAction( action, pos );

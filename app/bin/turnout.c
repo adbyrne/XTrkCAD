@@ -1118,7 +1118,7 @@ static void DrawNormalTurnout(
 		DIST_T tdlen = dtod.td.length;
 		DIST_T tdmax = (toType == DTO_WYE) ? 2.0 * tdlen : 2.5 * tdlen;
 		DIST_T tdwid = dtod.td.width;
-		DIST_T px = len, dlenx = dx / 2;
+		DIST_T px, dlenx = dx / 2;
 
 		cnt = cnt > 1 ? cnt - 1 : 1;
 		for (px = dlenx; cnt; cnt--, px += dx) {

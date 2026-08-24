@@ -837,13 +837,11 @@ void CreateBothEnds(int selectEndPoint, int selectMidPoint, int selectEndHandle,
 	selectable[0] = !Da.trk[0] || (
 	                        Da.trk[0] && !QueryTrack(Da.trk[0],Q_IS_CORNU)
 	                        && !QueryTrack(Da.trk[0],Q_CAN_MODIFY_CONTROL_POINTS));
-	modifyable[0] = !Da.trk[0] || (
-	                        Da.trk[0] && QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY));
+	modifyable[0] = !Da.trk[0] || QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY);
 	selectable[1] = !Da.trk[1] || (
 	                        Da.trk[1] && !QueryTrack(Da.trk[1],Q_IS_CORNU)
 	                        && !QueryTrack(Da.trk[1],Q_CAN_MODIFY_CONTROL_POINTS));
-	modifyable[1] = !Da.trk[1] || (
-	                        Da.trk[1] && QueryTrack(Da.trk[1],Q_CORNU_CAN_MODIFY));
+	modifyable[1] = !Da.trk[1] || QueryTrack(Da.trk[1],Q_CORNU_CAN_MODIFY);
 
 	Da.endHandle[0].angle_selected = (selectEndHandle==1)?TRUE:FALSE;
 	Da.endHandle[0].radius_selected = (selectEndHandle==0)?TRUE:FALSE;
