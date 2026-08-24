@@ -49,7 +49,7 @@ DoHelpMenu(void *data)
 
 	switch (func) {
 	case SHOWHELPCONTENTS:
-		wHelp("contents");
+		wHelp("index");
 		break;
 
 	case SHOWHELPFORCOMMAND:
