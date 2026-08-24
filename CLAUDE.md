@@ -82,9 +82,18 @@ claiming full sync.
 Run the verification script instead:
 
 ```sh
-xtrkcad-verify-sync xtrkcad-hg-gtk3v2main tip xtrkcad-git-gtk3 GTK3V2MAIN
-# for the default/GTK2 branch: xtrkcad-verify-sync xtrkcad-hg tip xtrkcad-git main
+xtrkcad-verify-sync xtrkcad-hg-gtk3v2main GTK3V2MAIN xtrkcad-git-gtk3 GTK3V2MAIN
+# for the default/GTK2 branch: xtrkcad-verify-sync xtrkcad-hg default xtrkcad-git main
 ```
+
+**Always pass the Hg branch name explicitly (as shown above), never bare `tip`.** In a
+multi-branch Hg repo, `tip` means the single most-recently-committed revision *repo-wide*, not
+"the tip of the branch you're comparing" — if another contributor's unrelated branch (their own
+feature work, e.g. `KensTest`/`newtrainrun`) happens to be more recently committed, `tip` silently
+resolves there instead, producing a huge bogus diff that looks like real drift but isn't (this is
+exactly what inflated the 2026-08-14 `default`-branch check to "375 unexpected differences" — the
+real number was 2). The script now refuses to compare across a branch mismatch and exits with an
+error explaining the fix, but avoid tripping it in the first place by never using `tip`.
 
 It archives both trees and diffs every file under `app/`, filtered against the maintained
 allowlist at `.claude/sync-exceptions.txt`. `PASS` means the git tree is byte-for-byte identical
