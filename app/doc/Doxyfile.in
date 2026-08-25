@@ -18,6 +18,18 @@ RECURSIVE              = NO
 GENERATE_HTML          = YES
 HTML_OUTPUT            = html
 GENERATE_LATEX         = NO
+
+# Doxygen's default for this is platform-dependent (case-sensitive on Linux,
+# case-insensitive on Windows/macOS), so unpinned it silently generates
+# lowercased page filenames (cmdblock.html) on Windows/macOS while keeping
+# case-preserved ones (cmdBlock.html) on Linux -- discovered when SF #729/
+# #730's app/doc/check_help_links.py (which does exact-case matching, since
+# wHelp()'s runtime topic lookup is exact-case too) passed on every Linux CI
+# job but failed release.yml's package-windows/package-macos with literally
+# every non-"index" topic reported missing. Pinned explicitly so the User
+# Guide's actual shipped filenames -- and what wHelp() can find at runtime --
+# don't silently depend on which platform happened to package the release.
+CASE_SENSE_NAMES        = YES
 # Native left-sidebar navigation tree built from the \page/\subpage
 # hierarchy, replacing halibut's own "Contents"/"Index" breadcrumb links --
 # see DoxygenLayout.xml.
