@@ -189,6 +189,14 @@ static struct { const char *dialogName; const char *page; } dialogHelpAliases[]
 	{ "elev", "cmdElevation" },
 	{ "cornuMod", "chgCornu" },
 
+	/* SF #730 batch 3: sub-features of Custom Management with no page of
+	 * their own, but explicitly described within cmdCustmgm's content
+	 * (dcustmgm.c's "Contents Label" dialog; dcmpnd.c's rename dialog,
+	 * matching cmdCustmgm's "Structures ... use the Rename Dialog to
+	 * change the Manufacturer, Description or Part Number values"). */
+	{ "contents", "cmdCustmgm" },
+	{ "rename", "cmdCustmgm" },
+
 	/* cdraw.c's draw-tool property panels -> the matching Draw-menu page
 	 * (each confirmed to discuss the same width/color fields). */
 	{ "linedata", "cmdDrawLine" },
