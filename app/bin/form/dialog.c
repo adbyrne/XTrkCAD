@@ -171,6 +171,67 @@ static struct { const char *dialogName; const char *page; } dialogHelpAliases[]
 = {
 	/* Content confirmed by reading the target page, not name similarity. */
 	{ "index", "cmdSelectIndex" }, /* menu.c's "Select Index" dialog */
+
+	/* SF #730 batch 2: create/edit dialogs whose page already covers both
+	 * (e.g. cmdBlock's "name and script" fields serve blockedit too). */
+	{ "blockedit", "cmdBlock" },
+	{ "switchmotoredit", "cmdSwitchmotor" },
+	{ "controledit", "cmdControl" },
+	{ "sensoredit", "cmdSensor" },
+	{ "signaledit", "cmdSignal" },
+	{ "aspectedit", "cmdSignal" }, /* cmdSignal's "list of aspects" section */
+
+	/* Same command/feature, different existing page name. */
+	{ "turnout", "cmdNewFixedTrack" }, /* cturnout.c's Fixed-Track dialog */
+	{ "joinfixed", "cmdJoinTrack" },
+	{ "addElev", "cmdRaiseElev" }, /* "Raise or lower all selected tracks" */
+	{ "curvefixed", "cmdCurve" }, /* the "desired radius" field cmdCurve documents */
+	{ "elev", "cmdElevation" },
+	{ "cornuMod", "chgCornu" },
+
+	/* SF #730 batch 3: sub-features of Custom Management with no page of
+	 * their own, but explicitly described within cmdCustmgm's content
+	 * (dcustmgm.c's "Contents Label" dialog; dcmpnd.c's rename dialog,
+	 * matching cmdCustmgm's "Structures ... use the Rename Dialog to
+	 * change the Manufacturer, Description or Part Number values"). */
+	{ "contents", "cmdCustmgm" },
+	{ "rename", "cmdCustmgm" },
+
+	/* SF #730 batch 4: small dialogs described within their parent menu's
+	 * overview page rather than getting one of their own -- added a bullet
+	 * to that page for each (helpm.dox/optionm.dox) rather than guess at
+	 * standalone content. "misc"/"pier"/"linestyle"/"filledobject" and
+	 * drawModCircle deliberately have no entry here despite being in
+	 * known_missing_dialog_help.txt: traced their creation and confirmed
+	 * none of them ever call FormCreateDialog() (only FormCreateControls(),
+	 * embedding them as inline status-bar controls) -- their Help button
+	 * literally never exists to click, so there's nothing to fix yet. */
+	{ "about", "helpM" },
+	{ "tip", "helpM" }, /* "Tip of the Day" bullet, already in helpm.dox */
+	{ "problemdata", "helpM" }, /* "Collect Problem Info" bullet, already there */
+	{ "debug", "optionM" },
+	{ "record", "macroM" }, /* macrom.dox already documents Record/Message/End/Stop */
+
+	/* cdraw.c's draw-tool property panels -> the matching Draw-menu page
+	 * (each confirmed to discuss the same width/color fields). */
+	{ "linedata", "cmdDrawLine" },
+	{ "curvedata", "cmdDrawCurves" },
+	{ "circledata", "cmdDrawCircles" },
+	{ "polygondata", "cmdDrawPolygon" },
+	{ "boxdata", "cmdDrawBox" },
+	{ "benchstyle", "cmdDrawBench" },
+	{ "dimensionstyle", "cmdDrawDimLine" },
+
+	/* Modify-a-drawn-shape property panels -> chgDraw (Lines/Curves/Boxes
+	 * covered inline there) or its dedicated Polygon/PolyLine subpage.
+	 * drawModCircle deliberately NOT aliased -- chgDraw doesn't cover
+	 * Circles explicitly, unlike the other 4 shapes; left tracked in
+	 * known_missing_dialog_help.txt pending real content or a better match. */
+	{ "drawModStraight", "chgDraw" },
+	{ "drawModCurve", "chgDraw" },
+	{ "drawModRect", "chgDraw" },
+	{ "drawModPoly", "polyModify" },
+
 	{ NULL, NULL }
 };
 

@@ -399,6 +399,43 @@ tool's message alone.
   point reads one element before the (just-resized-to-empty) array. Fixed by skipping the check
   entirely when `segCnt == 0` — correct behavior, not just crash-avoidance, since there's no "last
   segment" to compare against yet.
+- **A Doxygen tag's platform-dependent default silently diverges across CI, invisible until a
+  real cross-platform build hits it.** `CASE_SENSE_NAMES` (unset = Doxygen's own default) is
+  case-sensitive on Linux, case-insensitive on Windows/macOS — so an unpinned `Doxyfile` generates
+  case-preserved page filenames (`cmdBlock.html`) on Linux but lowercased ones (`cmdblock.html`)
+  on Windows/macOS. SF #729/#730 — `app/doc/Doxyfile.in` (the User Guide config, separate from
+  `docs/doxygen/Doxyfile.in` used to build *this* page, which already pinned it correctly) had no
+  explicit value; every `ci-gtk3.yml` job that exercises it only runs on Linux, so the divergence
+  was invisible until `release.yml`'s Windows/macOS packaging jobs (which only run on push, i.e.
+  only *after* a merge, never during PR review) hit it for real, failing a new exact-case-matching
+  CTest (`HelpLinksCheck`) with literally every topic but `index.html` (Doxygen's own
+  always-generated landing page, name unaffected by this setting) reported missing — that specific
+  fingerprint (one page fine, everything else broken, Linux-only passing) is what pointed at
+  filename casing rather than a build-ordering or path-resolution bug. Fixed by pinning
+  `CASE_SENSE_NAMES = YES` explicitly. Worth checking any Doxyfile whose output filenames are
+  referenced by code (not just browsed by a human) for other unpinned platform-dependent defaults.
+- **A whole source file with real-looking, `EXPORT`-marked functions that isn't actually compiled
+  into anything.** `app/bin/paramwrapper.c` (header comment: "Wrapper around old Param*()
+  functions to facilitate simple switch to new variants" — an apparent leftover transitional shim)
+  is not listed in `app/bin/CMakeLists.txt`'s `target_sources(xtrkcad-lib ...)` at all, confirmed
+  both by `grep` and by a genuine link error (`undefined reference`) after adding a new function
+  there and building with `CCACHE_DISABLE=1` from a truly clean tree — an earlier build had
+  silently kept reporting success because a stale ccache-cached object satisfied the link. Found
+  during SF #730; see \ref ci-tooling-overview "CI tooling overview" above for the general ccache
+  gotcha. If a change to `paramwrapper.c` ever seems to have no effect, this is why — verify with
+  `nm <binary> | grep <symbol>` before assuming the edit landed.
+- **A UI event-handler case statement that looks live but is permanently unreachable.**
+  `app/wlib/gtk3lib/dialog.c` has a `GTK_RESPONSE_HELP` switch case inside a function meant to
+  handle a `GtkDialog`'s "response" signal — but `wWinDialogCreate()` (the only place a dialog
+  built this way gets created) never calls `g_signal_connect(dialog, "response", ...)`, so that
+  function can never run regardless of what it contains. It's also independently broken by an
+  unclosed `/**` comment a few lines above it that swallows the function's entire signature and
+  body (through to the next real `*/`, which happens to belong to the *next* function's docblock)
+  — found while tracing SF #730's real Help-button mechanism (`app/bin/form/dialog.c`'s
+  `FormCreateDialog()`, which wires the Help button's click handler directly, bypassing the
+  response-signal path entirely). Neither the dead code path nor the unclosed comment has been
+  fixed — fixing the comment wouldn't make the function reachable, and the function has no
+  purpose to reach. Documented here so a future session doesn't re-diagnose the same dead end.
 
 ## Confirmed-safe codebase conventions (not bugs, but non-obvious enough to document)
 

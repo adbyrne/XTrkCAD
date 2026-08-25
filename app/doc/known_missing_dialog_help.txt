@@ -9,39 +9,18 @@
 # stale in the other direction either.
 #
 # See .claude/plan-sf730-dialog-help-links.md for the batch plan.
+# Batches 1-4 (31 of 36 originally-tracked dialogs resolved, all via
+# aliasing to real existing content -- zero new pages authored) landed.
+# These final 5 are deliberately left unaliased: traced each one's
+# creation and confirmed none of them ever calls FormCreateDialog() --
+# only FormCreateControls(), embedding them as inline status-bar controls
+# rather than a real popup dialog. Their Help button literally never
+# exists to click, so there's nothing to fix here (yet -- if one of these
+# is ever changed to a real dialog, this check will immediately flag it).
 
-about
-addElev
-aspectedit
-benchstyle
-blockedit
-boxdata
-circledata
-contents
-controledit
-cornuMod
-curvedata
-curvefixed
-debug
-dimensionstyle
-drawModCircle
-drawModCurve
-drawModPoly
-drawModRect
-drawModStraight
-elev
 filledobject
-joinfixed
-linedata
 linestyle
 misc
 pier
-polygondata
-problemdata
-record
-rename
-sensoredit
-signaledit
-switchmotoredit
-tip
-turnout
+
+drawModCircle

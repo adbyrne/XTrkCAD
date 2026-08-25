@@ -9,6 +9,14 @@ This is the developer-facing documentation, generated from source comments with
 Everything here has been checked against the current `GTK3V2MAIN` source rather than assumed —
 see inline notes where something changed since it was first written up.
 
+**This is a separate Doxygen project from the User Guide.** The application's own in-app help
+(`Help > Contents`, F1 command-context help, every dialog's own `Help` button) is a *different*,
+independently-built Doxygen config — `app/doc/Doxyfile.in`, source in `app/doc/*.dox`, the
+`help-html` CMake target — with its own INPUT set that doesn't overlap this one's (`app/bin/`,
+`app/wlib/gtk3lib/`, this file). See \ref ci-tooling-overview "CI tooling overview" in
+`advanced.md` for how `help-links-check` verifies every runtime help link actually resolves in
+that separate build.
+
 \tableofcontents
 
 ## Source layout

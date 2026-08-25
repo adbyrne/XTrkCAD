@@ -42,6 +42,8 @@ The <b>Demos</b> command (\ref cmdDemo) opens a cascading menu which invokes var
 
 The <b>Examples</b> command displays the list of included example programs which you can examine.
 
+The <b>About</b> command displays the <i>XTrackCAD</i> version, license and copyright information.
+
 - \subpage cmdDemo
 
 */
