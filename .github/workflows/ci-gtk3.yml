@@ -48,14 +48,35 @@ jobs:
         run: cmake --build build --target docs-doxygen
 
   help-links-check:
-    # Gating. Verifies every command-context help (F1) link actually resolves.
-    # app/wlib/gtk3lib/help.c's DoHelpMenu() (SHOWHELPFORCOMMAND case) opens
-    # file:///<AppLibDir>/html/<GetCurCommandName()>.html with no fallback --
-    # if the page is missing the user just gets a generic file-not-found
-    # notice. GetCurCommandName() only ever returns a helpKey that was
-    # registered via AddMenuButton() (traced through menu.c's AddMenuButton
-    # -> AddCommand wrapper chain -- AddToolbarButton's helpStr, by contrast,
-    # is tooltip text only and isn't reachable from GetCurCommandName()).
+    # Gating. Verifies every runtime wHelp() topic actually resolves -- two
+    # independent families, both audited while chasing a dev's "cmdTurnoutHotBar.html
+    # not found" report:
+    #
+    #   - Command-context help (F1): app/wlib/gtk3lib/help.c's DoHelpMenu()
+    #     (SHOWHELPFORCOMMAND case) opens GetCurCommandName(), which only ever
+    #     returns a helpKey registered via AddMenuButton() (menu.c's
+    #     AddMenuButton -> AddCommand wrapper chain -- AddToolbarButton's
+    #     helpStr, by contrast, is tooltip text only, not reachable here).
+    #     SF #729, 5 broken links found and fixed.
+    #
+    #   - Per-dialog Help button: app/wlib/gtk3lib/dialog.c's GTK_RESPONSE_HELP
+    #     handler opens GetDialogHelpTopic(dialog->name) (SF #730,
+    #     app/bin/paramwrapper.c) -- dialog->name itself is deliberately never
+    #     renamed to fix a broken link (it also keys window-position prefs and
+    #     every field-level tooltip via app/wlib/gtk3lib/tooltip.c's
+    #     "<dialog>-<field>" lookup), so GetDialogHelpTopic() redirects through
+    #     a small alias table instead. 70 of 71 dialogs had no matching page
+    #     when #730 was filed -- fixed in verified batches, tracked on the
+    #     ticket, not all at once.
+    #
+    # Both checked by the single source of truth app/doc/check_help_links.py
+    # (also run as the HelpLinksCheck ctest when Doxygen+Python3 are found
+    # locally -- see app/doc/CMakeLists.txt) rather than duplicating the
+    # extraction logic here. Its own file header has the full extraction
+    # details, including the multi-line-AddMenuButton() extraction bug SF #729
+    # found in this job's first-draft version (a naive `grep -E` misses any
+    # call whose args span multiple lines -- cmdStructureHotBar was invisible
+    # to it for exactly that reason).
     #
     # This is a *different* Doxygen run than the doxygen job above: that one
     # builds the internal API docs (docs/doxygen/Doxyfile.in, gated by
@@ -65,24 +86,6 @@ jobs:
     # needed). Confirmed empirically 2026-08-25 that the two targets' INPUT
     # sets don't overlap at all -- app/doc/*.dox (where every \page cmd...
     # topic lives) isn't in the internal-docs job's INPUT.
-    #
-    # Found via SF #729 (cmdTurnoutHotBar.html + 4 more missing after the
-    # SF #219 Halibut->Doxygen migration, same regression class as #728's
-    # Contents-link fix) -- confirmed with a real local Doxygen 1.16.1 build
-    # of help-html, not guessed from page IDs (Doxygen's page-id-to-filename
-    # mapping isn't always literal -- CASE_SENSE_NAMES/SHORT_NAMES can change
-    # it, so this reads the real generated app/doc/html/*.html file list).
-    # All 5 fixed in the same commit that added this job's real gate below
-    # (2 got real new pages, 3 had their code's helpKey literal corrected to
-    # match an existing page that already documented the same action).
-    #
-    # The key-extraction step below found a real 5th broken link
-    # (cmdStructureHotBar) that a first-draft single-line grep regex missed,
-    # because that one AddMenuButton() call's helpKey argument sits on a
-    # different line than the call itself -- grep matches line-by-line, so a
-    # naive `grep -E 'AddMenuButton\(...\)'` silently skips any call whose
-    # arguments span multiple lines. Fixed by extracting with Python (reads
-    # the whole file, matches balanced parens across newlines) instead.
     #
     # GTK3V2MAIN only: default/GTK2 still uses Halibut, which resolves help
     # topics differently -- same scoping as SF #728.
@@ -107,43 +110,8 @@ jobs:
           cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=OFF
       - name: Build User Guide (help-html)
         run: cmake --build build --target help-html
-      - name: Verify every command-context help key has a matching page
-        run: |
-          python3 - <<'PYEOF'
-          import glob, os, re, sys
-
-          keys = set()
-          for path in glob.glob("app/bin/*.c"):
-              text = open(path).read()
-              for m in re.finditer(r"AddMenuButton\s*\(([^;]*?)\)", text, re.S):
-                  parts, depth, cur = [], 0, ""
-                  for ch in m.group(1):
-                      if ch == "(":
-                          depth += 1
-                      elif ch == ")":
-                          depth -= 1
-                      if ch == "," and depth == 0:
-                          parts.append(cur)
-                          cur = ""
-                      else:
-                          cur += ch
-                  parts.append(cur)
-                  if len(parts) >= 3:
-                      km = re.match(r'^\s*"([A-Za-z0-9_]+)"', parts[2])
-                      if km:
-                          keys.add(km.group(1))
-
-          keys.add("index")
-
-          missing = sorted(k for k in keys if not os.path.isfile(f"build/app/doc/html/{k}.html"))
-          if missing:
-              print(f"::error::Command-context help (F1, DoHelpMenu's SHOWHELPFORCOMMAND) "
-                    f"references pages missing from the built User Guide: {' '.join(missing)}")
-              print("Each AddMenuButton() helpKey above needs a matching '\\page <key>' in "
-                    "app/doc/*.dox, or the code's helpKey needs fixing to match an existing page.")
-              sys.exit(1)
-          print(f"All {len(keys)} command-context help keys resolve to a real User Guide page.")
-          PYEOF
+      - name: Verify every wHelp() topic has a matching page
+        run: python3 app/doc/check_help_links.py . build/app/doc/html
 
   c-tests-linux:
     runs-on: ubuntu-latest

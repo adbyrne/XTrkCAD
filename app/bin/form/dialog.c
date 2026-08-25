@@ -23,6 +23,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include <ctype.h>
+#include <string.h>
+
 #include <wlib.h>
 #include <param.h>
 #include <dynarray.h>
@@ -152,6 +155,49 @@ static void DialogProc(
 
 
 /**
+ * Alias table for GetDialogHelpTopic(). Maps a paramGroup_t dialog name to a
+ * User Guide page (the *.dox files under app/doc) for the minority of
+ * dialogs whose own name doesn't produce a real page under the standard
+ * "cmd" + Capitalize(name) transform below -- e.g. a dialog whose logical
+ * topic already has a differently-named existing page, or (temporarily,
+ * until real content exists) an entry tracked in
+ * app/doc/known_missing_dialog_help.txt.
+ *
+ * SF #730. Entries added in verified batches -- each one confirmed by
+ * reading the target page's actual content, not assumed from name
+ * similarity alone.
+ */
+static struct { const char *dialogName; const char *page; } dialogHelpAliases[]
+= {
+	/* Content confirmed by reading the target page, not name similarity. */
+	{ "index", "cmdSelectIndex" }, /* menu.c's "Select Index" dialog */
+	{ NULL, NULL }
+};
+
+/**
+ * Resolve a dialog's Help-button topic. Given a paramGroup_t's own name,
+ * returns either an alias to an existing page confirmed to document it, or
+ * "cmd" + the name with its first letter capitalized -- the transform this
+ * function replaces (previously computed inline in FormCreateDialog, moved
+ * here so the same logic can consult the alias table first) -- written into
+ * buffer (size bufferSize) and returned. Most dialogs' bare name already
+ * produces a real page this way (e.g. "block" -> cmdBlock); only genuine
+ * mismatches need an alias-table entry.
+ */
+static const char * GetDialogHelpTopic(const char *dialogName, char *buffer,
+                                       size_t bufferSize)
+{
+	for (int i = 0; dialogHelpAliases[i].dialogName; i++) {
+		if (strcmp(dialogHelpAliases[i].dialogName, dialogName) == 0) {
+			return dialogHelpAliases[i].page;
+		}
+	}
+	snprintf(buffer, bufferSize, "cmd%s", dialogName);
+	buffer[3] = toupper((unsigned char)buffer[3]);
+	return buffer;
+}
+
+/**
  * Create a dialog box from data definition.
  *
  * \param[in] group	data definition for the dialog
@@ -214,10 +260,13 @@ wControl_p FormCreateDialog(
 		                               0, ButtonCancel, group);
 	}
 	if (needHelpButton) {
-		sprintf(helpStr, "cmd%s", group->nameStr);
-		helpStr[3] = toupper((unsigned char)helpStr[3]);
+		/* SF #730: GetDialogHelpTopic() (app/bin/paramwrapper.c) applies the
+		 * same "cmd" + Capitalize(name) default this used to compute inline,
+		 * plus a small alias table for the minority of dialogs it doesn't
+		 * fit. */
 		group->helpB = wButtonCreate(group->win, 0, 0, "id_help", _("Help"), BB_HELP, 0,
-		                             ButtonHelp, MyStrdup(helpStr));
+		                             ButtonHelp, MyStrdup(GetDialogHelpTopic(group->nameStr, helpStr,
+		                                     sizeof(helpStr))));
 	}
 
 	LOG(log_form, 1, ("DialogsCreateDialog/"));
