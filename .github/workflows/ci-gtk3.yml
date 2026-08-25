@@ -47,6 +47,88 @@ jobs:
       - name: Build docs
         run: cmake --build build --target docs-doxygen
 
+  help-links-check:
+    # Gating. Verifies every command-context help (F1) link actually resolves.
+    # app/wlib/gtk3lib/help.c's DoHelpMenu() (SHOWHELPFORCOMMAND case) opens
+    # file:///<AppLibDir>/html/<GetCurCommandName()>.html with no fallback --
+    # if the page is missing the user just gets a generic file-not-found
+    # notice. GetCurCommandName() only ever returns a helpKey that was
+    # registered via AddMenuButton() (traced through menu.c's AddMenuButton
+    # -> AddCommand wrapper chain -- AddToolbarButton's helpStr, by contrast,
+    # is tooltip text only and isn't reachable from GetCurCommandName()).
+    #
+    # This is a *different* Doxygen run than the doxygen job above: that one
+    # builds the internal API docs (docs/doxygen/Doxyfile.in, gated by
+    # XTRKCAD_USE_DOXYGEN); this job builds the User Guide the app actually
+    # ships and wHelp() points at (app/doc/Doxyfile.in, the help-html
+    # target -- builds automatically whenever Doxygen is found, no flag
+    # needed). Confirmed empirically 2026-08-25 that the two targets' INPUT
+    # sets don't overlap at all -- app/doc/*.dox (where every \page cmd...
+    # topic lives) isn't in the internal-docs job's INPUT.
+    #
+    # Found via SF #729 (cmdTurnoutHotBar.html + 3 more missing after the
+    # SF #219 Halibut->Doxygen migration, same regression class as #728's
+    # Contents-link fix) -- confirmed with a real local Doxygen 1.16.1 build
+    # of help-html, not guessed from page IDs (Doxygen's page-id-to-filename
+    # mapping isn't always literal -- CASE_SENSE_NAMES/SHORT_NAMES can change
+    # it, so this reads the real generated app/doc/html/*.html file list).
+    #
+    # GTK3V2MAIN only: default/GTK2 still uses Halibut, which resolves help
+    # topics differently -- same scoping as SF #728.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DOXYGEN_VERSION: 1.15.0
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build libgtk-3-dev graphviz libzip-dev zlib1g-dev
+      - name: Install pinned Doxygen ${{ env.DOXYGEN_VERSION }}
+        run: |
+          curl -sL -o doxygen.tar.gz "https://github.com/doxygen/doxygen/releases/download/Release_${DOXYGEN_VERSION//./_}/doxygen-${DOXYGEN_VERSION}.linux.bin.tar.gz"
+          tar xzf doxygen.tar.gz
+          echo "$PWD/doxygen-${DOXYGEN_VERSION}/bin" >> "$GITHUB_PATH"
+      - name: Configure
+        run: |
+          doxygen --version
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=OFF
+      - name: Build User Guide (help-html)
+        run: cmake --build build --target help-html
+      - name: Verify every command-context help key has a matching page
+        run: |
+          # Known gap, tracked at SF #729 (filed 2026-08-25, same session this
+          # job was added): 4 pre-existing broken links found when this check
+          # was built, deliberately not fixed here since the actual fix
+          # (author real content for cmdTurnoutHotBar vs. rename the 3
+          # *Create keys to reuse their near-match existing page) is a doc
+          # content call, not a mechanical one. Remove entries from this list
+          # as #729 lands so the gate goes back to catching 100% of drift.
+          KNOWN_MISSING="cmdTurnoutHotBar cmdBlockCreate cmdCornuCreate cmdSwitchMotorCreate"
+
+          MISSING=""
+          while IFS= read -r key; do
+            [ -f "build/app/doc/html/${key}.html" ] || MISSING="$MISSING $key"
+          done < <(grep -rhoE 'AddMenuButton\([^,]+,[^,]+,\s*"[A-Za-z0-9_]+"' app/bin/*.c \
+                    | grep -oE '"[A-Za-z0-9_]+"$' | tr -d '"' | sort -u)
+          [ -f "build/app/doc/html/index.html" ] || MISSING="$MISSING index"
+
+          NEW_MISSING=""
+          for key in $MISSING; do
+            case " $KNOWN_MISSING " in
+              *" $key "*) ;;
+              *) NEW_MISSING="$NEW_MISSING $key" ;;
+            esac
+          done
+
+          if [ -n "$NEW_MISSING" ]; then
+            echo "::error::Command-context help (F1, DoHelpMenu's SHOWHELPFORCOMMAND) references pages missing from the built User Guide, beyond the already-tracked SF #729 set:$NEW_MISSING"
+            echo "Each AddMenuButton() helpKey above needs a matching '\\page <key>' in app/doc/*.dox, or the code's helpKey needs fixing to match an existing page."
+            exit 1
+          fi
+          echo "No new broken command-context help links (known SF #729 gap:$KNOWN_MISSING)."
+
   c-tests-linux:
     runs-on: ubuntu-latest
     timeout-minutes: 15
