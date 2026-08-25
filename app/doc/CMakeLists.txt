@@ -42,6 +42,25 @@ if(DOXYGEN_FOUND)
 		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
 	)
 
+	# SF #729/#730: verifies every runtime wHelp() topic (command-context F1
+	# help and per-dialog Help buttons) resolves to a real page in the User
+	# Guide that just got built above. Only registered when XTRKCAD_TESTING is
+	# on, matching every other ctest -- help-html itself builds regardless
+	# (Doxygen-found is its only gate), so this stays available to run by hand
+	# even in a non-testing configure.
+	if(XTRKCAD_TESTING)
+		find_package(Python3 QUIET COMPONENTS Interpreter)
+		if(Python3_FOUND)
+			add_test(
+				NAME HelpLinksCheck
+				COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/check_help_links.py
+					${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/html
+			)
+		else()
+			message(STATUS "Python3 not found -- HelpLinksCheck ctest will not be registered")
+		endif()
+	endif()
+
 	# Apple Help Book packaging (XTRKCAD_USE_APPLEHELP) is a separate, non-default
 	# help viewer from the browser-based wHelp() the real release ships on every
 	# platform including macOS (XTRKCAD_USE_APPLEHELP=OFF in release.yml, see
