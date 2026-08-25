@@ -3267,7 +3267,7 @@ EXPORT void InitCmdCornu( wMenu_p menu )
 	AddMenuButton( menu, CmdConvertFrom, "cmdConvertFrom", _("Convert From Cornu"),
 	               CreateToolbarIconFromResource("convert-from.png"), LEVEL0_50,
 	               IC_STICKY|IC_LCLICK|IC_POPUP3|IC_WANT_MOVE,ACCL_CONVERTFR, NULL );
-	cornuHotBarCmdInx = AddMenuButton(menu, cmdCornuCreate, "cmdCornuCreate", "",
+	cornuHotBarCmdInx = AddMenuButton(menu, cmdCornuCreate, "cmdCornu", "",
 	                                  NULL, LEVEL0_50, IC_STICKY|IC_POPUP3|IC_WANT_MOVE, 0, NULL);
 	ButtonGroupEnd();
 

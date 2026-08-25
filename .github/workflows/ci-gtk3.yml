@@ -66,12 +66,23 @@ jobs:
     # sets don't overlap at all -- app/doc/*.dox (where every \page cmd...
     # topic lives) isn't in the internal-docs job's INPUT.
     #
-    # Found via SF #729 (cmdTurnoutHotBar.html + 3 more missing after the
+    # Found via SF #729 (cmdTurnoutHotBar.html + 4 more missing after the
     # SF #219 Halibut->Doxygen migration, same regression class as #728's
     # Contents-link fix) -- confirmed with a real local Doxygen 1.16.1 build
     # of help-html, not guessed from page IDs (Doxygen's page-id-to-filename
     # mapping isn't always literal -- CASE_SENSE_NAMES/SHORT_NAMES can change
     # it, so this reads the real generated app/doc/html/*.html file list).
+    # All 5 fixed in the same commit that added this job's real gate below
+    # (2 got real new pages, 3 had their code's helpKey literal corrected to
+    # match an existing page that already documented the same action).
+    #
+    # The key-extraction step below found a real 5th broken link
+    # (cmdStructureHotBar) that a first-draft single-line grep regex missed,
+    # because that one AddMenuButton() call's helpKey argument sits on a
+    # different line than the call itself -- grep matches line-by-line, so a
+    # naive `grep -E 'AddMenuButton\(...\)'` silently skips any call whose
+    # arguments span multiple lines. Fixed by extracting with Python (reads
+    # the whole file, matches balanced parens across newlines) instead.
     #
     # GTK3V2MAIN only: default/GTK2 still uses Halibut, which resolves help
     # topics differently -- same scoping as SF #728.
@@ -98,36 +109,41 @@ jobs:
         run: cmake --build build --target help-html
       - name: Verify every command-context help key has a matching page
         run: |
-          # Known gap, tracked at SF #729 (filed 2026-08-25, same session this
-          # job was added): 4 pre-existing broken links found when this check
-          # was built, deliberately not fixed here since the actual fix
-          # (author real content for cmdTurnoutHotBar vs. rename the 3
-          # *Create keys to reuse their near-match existing page) is a doc
-          # content call, not a mechanical one. Remove entries from this list
-          # as #729 lands so the gate goes back to catching 100% of drift.
-          KNOWN_MISSING="cmdTurnoutHotBar cmdBlockCreate cmdCornuCreate cmdSwitchMotorCreate"
+          python3 - <<'PYEOF'
+          import glob, os, re, sys
 
-          MISSING=""
-          while IFS= read -r key; do
-            [ -f "build/app/doc/html/${key}.html" ] || MISSING="$MISSING $key"
-          done < <(grep -rhoE 'AddMenuButton\([^,]+,[^,]+,\s*"[A-Za-z0-9_]+"' app/bin/*.c \
-                    | grep -oE '"[A-Za-z0-9_]+"$' | tr -d '"' | sort -u)
-          [ -f "build/app/doc/html/index.html" ] || MISSING="$MISSING index"
+          keys = set()
+          for path in glob.glob("app/bin/*.c"):
+              text = open(path).read()
+              for m in re.finditer(r"AddMenuButton\s*\(([^;]*?)\)", text, re.S):
+                  parts, depth, cur = [], 0, ""
+                  for ch in m.group(1):
+                      if ch == "(":
+                          depth += 1
+                      elif ch == ")":
+                          depth -= 1
+                      if ch == "," and depth == 0:
+                          parts.append(cur)
+                          cur = ""
+                      else:
+                          cur += ch
+                  parts.append(cur)
+                  if len(parts) >= 3:
+                      km = re.match(r'^\s*"([A-Za-z0-9_]+)"', parts[2])
+                      if km:
+                          keys.add(km.group(1))
 
-          NEW_MISSING=""
-          for key in $MISSING; do
-            case " $KNOWN_MISSING " in
-              *" $key "*) ;;
-              *) NEW_MISSING="$NEW_MISSING $key" ;;
-            esac
-          done
+          keys.add("index")
 
-          if [ -n "$NEW_MISSING" ]; then
-            echo "::error::Command-context help (F1, DoHelpMenu's SHOWHELPFORCOMMAND) references pages missing from the built User Guide, beyond the already-tracked SF #729 set:$NEW_MISSING"
-            echo "Each AddMenuButton() helpKey above needs a matching '\\page <key>' in app/doc/*.dox, or the code's helpKey needs fixing to match an existing page."
-            exit 1
-          fi
-          echo "No new broken command-context help links (known SF #729 gap:$KNOWN_MISSING)."
+          missing = sorted(k for k in keys if not os.path.isfile(f"build/app/doc/html/{k}.html"))
+          if missing:
+              print(f"::error::Command-context help (F1, DoHelpMenu's SHOWHELPFORCOMMAND) "
+                    f"references pages missing from the built User Guide: {' '.join(missing)}")
+              print("Each AddMenuButton() helpKey above needs a matching '\\page <key>' in "
+                    "app/doc/*.dox, or the code's helpKey needs fixing to match an existing page.")
+              sys.exit(1)
+          print(f"All {len(keys)} command-context help keys resolve to a real User Guide page.")
+          PYEOF
 
   c-tests-linux:
     runs-on: ubuntu-latest
