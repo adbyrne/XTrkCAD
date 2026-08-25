@@ -800,7 +800,7 @@ EXPORT void InitCmdSwitchMotor( wMenu_p menu )
 	switchmotorNormal[0] = '\0';
 	switchmotorReverse[0] = '\0';
 	switchmotorPointSense[0] = '\0';
-	AddMenuButton( menu, CmdSwitchMotorCreate, "cmdSwitchMotorCreate",
+	AddMenuButton( menu, CmdSwitchMotorCreate, "cmdSwitchmotor",
 	               _("Switch Motor"), CreateToolbarIconFromResource( "switch-motor.png"),
 	               LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_SWITCHMOTOR1,
 	               NULL );

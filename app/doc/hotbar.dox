@@ -79,3 +79,17 @@ Refer to \ref cmdNewFixedTrack for information pertaining to use of the <i>Turno
 
 */
 
+/**
+\page cmdTurnoutHotBar Place Turnout from Hot Bar
+
+Place the selected turnout from the <i>Hot Bar</i> and draw it into position: `Left-Drag` to place, `Ctrl+Left-Drag` or `Right-Drag` to rotate, `Space` or `Enter` to accept, `Esc` to cancel. See \ref hbTurnouts for details on the <i>Active EndPoint</i>.
+
+*/
+
+/**
+\page cmdStructureHotBar Place Structure from Hot Bar
+
+Place the selected structure from the <i>Hot Bar</i> and draw it into position: `Left-Drag` to place, `Ctrl+Left-Drag` or `Right-Drag` to rotate, `Space` or `Enter` to accept, `Esc` to cancel. See \ref hbStructures for details.
+
+*/
+

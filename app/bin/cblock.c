@@ -1032,7 +1032,7 @@ EXPORT void InitCmdBlock( wMenu_p menu )
 {
 	blockName[0] = '\0';
 	blockScript[0] = '\0';
-	AddMenuButton( menu, CmdBlockCreate, "cmdBlockCreate", _("Block"),
+	AddMenuButton( menu, CmdBlockCreate, "cmdBlock", _("Block"),
 	               CreateToolbarIconFromResource( "block.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2, ACCL_BLOCK1, NULL );
 	FormRegister( &blockPG );
