@@ -27,6 +27,8 @@ The <b>Options Menu</b> shows commands to change configuration options.
 
 - <b>Sticky</b> - Displays the Sticky Commands (\ref cmdSticky) dialog.
 
+- <b>Debug</b> - Only shown when extra/developer buttons are enabled. Displays a dialog listing every debug log category with a level control for each, plus a Test Mallocs button, for developers investigating an issue.
+
 - \subpage cmdRgbcolor
 - \subpage cmdCmdopt
 - \subpage cmdDisplay

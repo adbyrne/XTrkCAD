@@ -197,6 +197,21 @@ static struct { const char *dialogName; const char *page; } dialogHelpAliases[]
 	{ "contents", "cmdCustmgm" },
 	{ "rename", "cmdCustmgm" },
 
+	/* SF #730 batch 4: small dialogs described within their parent menu's
+	 * overview page rather than getting one of their own -- added a bullet
+	 * to that page for each (helpm.dox/optionm.dox) rather than guess at
+	 * standalone content. "misc"/"pier"/"linestyle"/"filledobject" and
+	 * drawModCircle deliberately have no entry here despite being in
+	 * known_missing_dialog_help.txt: traced their creation and confirmed
+	 * none of them ever call FormCreateDialog() (only FormCreateControls(),
+	 * embedding them as inline status-bar controls) -- their Help button
+	 * literally never exists to click, so there's nothing to fix yet. */
+	{ "about", "helpM" },
+	{ "tip", "helpM" }, /* "Tip of the Day" bullet, already in helpm.dox */
+	{ "problemdata", "helpM" }, /* "Collect Problem Info" bullet, already there */
+	{ "debug", "optionM" },
+	{ "record", "macroM" }, /* macrom.dox already documents Record/Message/End/Stop */
+
 	/* cdraw.c's draw-tool property panels -> the matching Draw-menu page
 	 * (each confirmed to discuss the same width/color fields). */
 	{ "linedata", "cmdDrawLine" },
