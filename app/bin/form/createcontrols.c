@@ -584,9 +584,8 @@ CreateControl(paramData_p pd, char* helpStr,	unsigned x,	unsigned y)
 	case PD_DROPLIST:
 		width = pd->winData ? (wWinPix_t)VP2L(pd->winData) : (wWinPix_t)
 		        LISTDEFAULTWIDTH;
-		pd->control = (wControl_p)wComboBoxCreate(win, x, y, helpStr,
-		              _(pd->winLabel), pd->winOption, 10, width, NULL,
-		              ListPush, pd);
+		//pd->control = (wControl_p)wDropListCreate(win, xx, yy, helpStr,
+		//	_(pd->winLabel), pd->winOption, 10, w, NULL, ParamListPush, pd);
 		break;
 	case PD_COMBOLIST:
 		width = pd->winData ? (wWinPix_t)VP2L(pd->winData) : (wWinPix_t)
