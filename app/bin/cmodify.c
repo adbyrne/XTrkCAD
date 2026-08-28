@@ -413,7 +413,8 @@ STATUS_T CmdModify(
 		if (modifyBezierMode) { return ModifyBezier(wActionMove, pos); }
 		track_p t;
 		wSetCursor(mainD.d,defaultCursor);
-		if (((t=OnTrack(&pos,FALSE,TRUE))!= NULL) && CheckTrackLayerSilent( t )) {
+		t=OnTrack(&pos,FALSE,TRUE);
+		if ((t != NULL) && CheckTrackLayerSilent( t )) {
 			EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
 			if (QueryTrack( t, Q_IS_CORNU )) {
 				CreateCornuAnchor(pos,FALSE);

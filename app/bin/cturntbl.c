@@ -669,7 +669,8 @@ static STATUS_T ModifyTurntable( track_p trk, wAction_t action, coOrd pos )
 		__attribute__((fallthrough));
 	case C_MOVE:
 		valid = FALSE;
-		if ( (angle = ConstrainTurntableAngle( trk, pos )) < 0.0) {
+		angle = ConstrainTurntableAngle( trk, pos );
+		if ( angle < 0.0) {
 			;
 		} else if ((r=FindDistance( ttCenter, pos )) < ttRadius) {
 			ErrorMessage( MSG_POINT_INSIDE_TURNTABLE );

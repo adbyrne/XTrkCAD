@@ -597,7 +597,8 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 
 
 	case C_DOWN:
-		if ((trk = OnTrack(&pos, FALSE, FALSE)) == NULL) {
+		trk = OnTrack(&pos, FALSE, FALSE);
+		if (trk == NULL) {
 			// Not a track - ignore
 			return C_CONTINUE;
 		}

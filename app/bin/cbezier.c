@@ -735,8 +735,8 @@ EXPORT STATUS_T AdjustBezCurve(
 		p = pos;
 		if (track && (Da.selectPoint == 0 || Da.selectPoint == 3)) {  //EPs
 			if ((MyGetKeyState() & WKEY_SHIFT) != 0) {   //Snap Track
-				if ((t = OnTrackIgnore(&p, FALSE, TRUE,
-				                       Da.selectTrack)) != NULL) { //Snap to endPoint
+				t = OnTrackIgnore(&p, FALSE, TRUE, Da.selectTrack);
+				if (t != NULL) { //Snap to endPoint
 					ep = PickUnconnectedEndPointSilent(p, t);
 					if (ep != -1) {
 						Da.trk[Da.selectPoint/3] = t;
@@ -1103,7 +1103,8 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			if (Da.track) {
 				if (lock) {
 					pos = movePos;
-					if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
+					t = OnTrack(&p, FALSE, TRUE);
+					if (t != NULL) {
 						ep = PickUnconnectedEndPointSilent(p, t);
 						if (ep != -1) {
 							if (GetTrkGauge(t) != GetScaleTrackGauge(GetLayoutCurScale())) {
@@ -1158,7 +1159,8 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		if ( Da.state != POS_1 && Da.state != POS_2) { return C_CONTINUE; }  //Don't snap CPs
 		if (Da.track)  {
 			if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {
-				if ((t = OnTrack(&pos, FALSE, TRUE)) != NULL) {
+				t = OnTrack(&pos, FALSE, TRUE);
+				if (t != NULL) {
 					EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
 					if (ep != -1) {
 						lock = TRUE;
@@ -1172,7 +1174,8 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			}
 		} else {
 			if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {
-				if ((t = OnTrack(&pos,FALSE, FALSE)) != NULL) {
+				t = OnTrack(&pos,FALSE, FALSE);
+				if (t != NULL) {
 					CreateEndAnchor(pos,TRUE);
 					lock = TRUE;
 					movePos = pos;

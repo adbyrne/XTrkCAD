@@ -82,7 +82,8 @@ EXPORT int InputError(
 		mp[avail] = '\0';
 	}
 	strcat( mp, _("\nDo you want to continue?") );
-	if (!(ret = wNoticeWithIcon( NT_ERROR, message, _("Continue"), _("Stop") ))) {
+	ret = wNoticeWithIcon( NT_ERROR, message, _("Continue"), _("Stop") );
+	if (!ret) {
 		if ( paramFile ) {
 			fclose(paramFile);
 			paramFile = NULL;

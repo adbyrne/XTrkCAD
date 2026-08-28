@@ -130,7 +130,8 @@ static void PlaceCar(track_p);
 		} \
 		{ \
 			track_p walk_cars_temp1; \
-			if ( (walk_cars_temp1=GetTrkEndTrk(CAR,DIR)) == NULL ) break; \
+			walk_cars_temp1=GetTrkEndTrk(CAR,DIR); \
+			if ( walk_cars_temp1 == NULL ) break; \
 			(DIR)=(GetTrkEndTrk(walk_cars_temp1,0)==(CAR)?1:0); \
 			(CAR)=walk_cars_temp1; \
 		} \
@@ -381,7 +382,8 @@ static void DrawCar(
 		track_p car1;
 		coupler[dir].pos = xx->couplerPos[dir];
 
-		if ((car1 = GetTrkEndTrk(car,dir))) {
+		car1 = GetTrkEndTrk(car,dir);
+		if (car1) {
 			xx1 = GET_EXTRA_DATA(car1, T_CAR, extraDataCar_t);
 			dir1 = (GetTrkEndTrk(car1,0)==car)?0:1;
 			coupler[dir].angle = FindAngle(xx->couplerPos[dir], xx1->couplerPos[dir1]);
@@ -2699,7 +2701,8 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 				LocoListChangeEntry(NULL, currCar);
 			}
 
-			if ((trk0 = OnTrack(&pos0, FALSE, TRUE))) {
+			trk0 = OnTrack(&pos0, FALSE, TRUE);
+			if (trk0) {
 				xx->trvTrk.angle = GetAngleAtPoint(trk0, pos0, &ep0, &ep1);
 
 				if (NormalizeAngle(FindAngle(pos, pos0) - xx->trvTrk.angle) > 180.0) {
@@ -2818,7 +2821,8 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 			pos0 = pos;
 			programMode = MODE_DESIGN;
 
-			if ((trk0=OnTrack(&pos,FALSE,TRUE)) &&
+			trk0=OnTrack(&pos,FALSE,TRUE);
+			if (trk0 &&
 			    QueryTrack(trk0, Q_CAN_NEXT_POSITION) &&
 			    TrainOnMovableTrack(trk0, &trk1)) {
 				if (trk1) {

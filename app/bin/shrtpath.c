@@ -189,8 +189,9 @@ static BOOL_T AddPath(
 			goto skipNode;
 		}
 		if ( epCnt > 2 ) {
-			if ( (epN=DoShortPathFunc( func, "MATCHANY", SPTC_MATCHANY, trk, ep1, -1, dist,
-			                           data )) >= 0 ) {
+			epN=DoShortPathFunc( func, "MATCHANY", SPTC_MATCHANY, trk, ep1, -1, dist,
+			                     data );
+			if ( epN >= 0 ) {
 				/* special match */
 				/*dist += GetTrkLength( trk, ep1, epN );*/
 				AddTrackToNode( trk, ep1, epN, dist );

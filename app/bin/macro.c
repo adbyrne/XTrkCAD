@@ -1150,7 +1150,8 @@ static void PlaybackSetup(void)
 	SaveTrackState();
 	EnableButtons(TRUE);
 
-	if((backgroundShown = GetLayoutBackGroundVisible())) {
+	backgroundShown = GetLayoutBackGroundVisible();
+	if(backgroundShown) {
 		BackgroundToggleShow(NULL);
 	}
 

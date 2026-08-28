@@ -81,7 +81,8 @@ BOOL_T DeleteDirectory(const char *dir_path)
 	}
 
 	// if not possible to read the directory for this user
-	if ((dir = opendir(dir_path)) == NULL) {
+	dir = opendir(dir_path);
+	if (dir == NULL) {
 		NoticeMessage(MSG_DIR_OPEN_FAIL,
 		              _("Continue"), NULL, dir_path);
 		return FALSE;

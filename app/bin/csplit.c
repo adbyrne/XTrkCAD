@@ -231,8 +231,8 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 			quad = 3;
 		}
 		splitTrkFlip = (quad<2);
-		if ( (splitTrkTrk[1] = GetTrkEndTrk( splitTrkTrk[0],
-		                                     splitTrkEP[0] ) ) == NULL ) {
+		splitTrkTrk[1] = GetTrkEndTrk( splitTrkTrk[0], splitTrkEP[0] );
+		if ( splitTrkTrk[1] == NULL ) {
 			ErrorMessage( MSG_BAD_BLOCKGAP );
 			return C_CONTINUE;
 		}
@@ -255,7 +255,8 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		onTrackInSplit = TRUE;
-		if ((trk0 = OnTrack( &pos, FALSE, TRUE ))!=NULL
+		trk0 = OnTrack( &pos, FALSE, TRUE );
+		if (trk0!=NULL
 		    && CheckTrackLayerSilent( trk0 )) {
 			ep0 = PickEndPoint( pos, trk0 );
 			if ( ep0 < 0 ) {
@@ -278,7 +279,8 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 				CreateSplitAnchor(pos,trk0,FALSE);
 			}
 		} else {
-			if ((trk0 = OnTrack( &pos, FALSE, FALSE))!=NULL
+			trk0 = OnTrack( &pos, FALSE, FALSE);
+			if (trk0!=NULL
 			    && CheckTrackLayerSilent( trk0 )) {
 				if (QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
 					CreateSplitAnchor(pos,trk0, FALSE);
@@ -319,7 +321,8 @@ static STATUS_T CmdSplitDraw( wAction_t action, coOrd pos )
 		break;
 	case C_UP:
 		onTrackInSplit = TRUE;
-		if ((trk0 = OnTrack( &pos, FALSE, FALSE))!=NULL
+		trk0 = OnTrack( &pos, FALSE, FALSE);
+		if (trk0!=NULL
 		    && CheckTrackLayerSilent( trk0 )) {
 			if (IsTrack(trk0)) { return C_CONTINUE; }
 			if (!QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
@@ -343,7 +346,8 @@ static STATUS_T CmdSplitDraw( wAction_t action, coOrd pos )
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		onTrackInSplit = TRUE;
-		if ((trk0 = OnTrack( &pos, FALSE, FALSE))!=NULL
+		trk0 = OnTrack( &pos, FALSE, FALSE);
+		if (trk0!=NULL
 		    && CheckTrackLayerSilent( trk0 )) {
 			if (IsTrack(trk0)) { break; }
 			if (QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
@@ -390,7 +394,8 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 		break;
 	case C_UP:
 		if (trimState == TRIM_NONE) {
-			if ((trk0 = OnTrack( &pos, FALSE, FALSE))!=NULL
+			trk0 = OnTrack( &pos, FALSE, FALSE);
+			if (trk0!=NULL
 			    && CheckTrackLayerSilent( trk0 )) {
 				if (IsTrack(trk0))  {
 					InfoMessage(_("Can't Trim with a Track"));
@@ -408,7 +413,8 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 			return C_TERMINATE;
 		}
 		coOrd pos1 = pos;
-		if ((trk1 = OnTrackIgnore(&pos1,FALSE,FALSE,trimLine))!=NULL) {
+		trk1 = OnTrackIgnore(&pos1,FALSE,FALSE,trimLine);
+		if (trk1!=NULL) {
 			if (IsTrack(trk1)) {
 				InfoMessage(_("Can't Split a track object"));
 				wBeep();
@@ -450,7 +456,8 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		trk = NULL;
 		if (trimState == TRIM_NONE) {
-			if ((trk0 = OnTrack( &pos, FALSE, FALSE))!=NULL
+			trk0 = OnTrack( &pos, FALSE, FALSE);
+			if (trk0!=NULL
 			    && CheckTrackLayerSilent( trk0 )) {
 				if (IsTrack(trk0)) { break; }
 				if (QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
@@ -461,7 +468,8 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 		if (trimState == TRIM_LINE) {
 			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			coOrd pos1=pos;
-			if ((trk1 = OnTrackIgnore(&pos1,FALSE,FALSE,trimLine))!=NULL) {
+			trk1 = OnTrackIgnore(&pos1,FALSE,FALSE,trimLine);
+			if (trk1!=NULL) {
 				if (IsTrack(trk1)) {
 					return C_CONTINUE;
 				}

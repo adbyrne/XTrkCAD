@@ -340,7 +340,8 @@ STATUS_T DrawGeomMouse(
 				if (((MyGetKeyState() & WKEY_ALT)==0) == magneticSnap ) {
 					coOrd p = pos;
 					track_p t;
-					if (((t=OnTrack(&p,FALSE,FALSE))!=NULL) && (IsClose(FindDistance(p,pos))) ) {
+					t=OnTrack(&p,FALSE,FALSE);
+					if ((t!=NULL) && (IsClose(FindDistance(p,pos))) ) {
 						if (context->Op == OP_DIMLINE || !IsTrack(t)) {
 							CreateEndAnchor(p,FALSE);
 							// wSetCursor(mainD.d,wCursorNone);

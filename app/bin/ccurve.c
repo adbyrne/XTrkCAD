@@ -203,7 +203,8 @@ EXPORT STATUS_T CreateCurve(
 			if ((mode == crvCmdFromEP1 || mode == crvCmdFromTangent
 			     || (mode == crvCmdFromChord))  &&
 			    ((MyGetKeyState() & WKEY_ALT) == 0 ) == magneticSnap) {
-				if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
+				t = OnTrack(&p, FALSE, TRUE);
+				if (t != NULL) {
 					EPINX_T ep = PickUnconnectedEndPointSilent(p, t);
 					if (ep != -1) {
 						if (GetTrkScale(t) != (char)GetLayoutCurScale()) {
@@ -219,7 +220,8 @@ EXPORT STATUS_T CreateCurve(
 				}
 			}
 		} else {
-			if (((t = OnTrack(&p, FALSE, FALSE)) != NULL) && IsClose(FindDistance(p,pos))) {
+			t = OnTrack(&p, FALSE, FALSE);
+			if (t != NULL && IsClose(FindDistance(p,pos))) {
 				if (!IsTrack(t)) {
 					pos = p;
 					found = TRUE;
@@ -506,7 +508,8 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		if ((Da.state<0) && (curveMode != crvCmdFromCenter)) {
 			DYNARR_RESET(trkSeg_t,anchors_da);
 			if (((MyGetKeyState() & WKEY_ALT)==0) == magneticSnap) {
-				if ((t=OnTrack(&pos,FALSE,TRUE))!= NULL) {
+				t=OnTrack(&pos,FALSE,TRUE);
+				if (t != NULL) {
 					if (GetTrkGauge(t) == GetScaleTrackGauge(GetLayoutCurScale())) {
 						EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
 						if (ep != -1) {
@@ -610,7 +613,8 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		if (Da.state<0) { return C_CONTINUE; }
 		if (Da.state == 0 && ((curveMode != crvCmdFromChord)
 		                      || (curveMode == crvCmdFromChord && !Da.trk))) {
-			if ((d = FindDistance(Da.pos0,Da.pos1))<minLength) {
+			d = FindDistance(Da.pos0,Da.pos1);
+			if (d<minLength) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
 				return C_TERMINATE;
 			}
@@ -629,7 +633,8 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			FormGroupRecord(&curvePG);
 			return C_CONTINUE;
 		} else if ((curveMode == crvCmdFromChord && Da.state == 0 && Da.trk)) {
-			if ((d = FindDistance(Da.pos0,Da.pos1))<minLength) {
+			d = FindDistance(Da.pos0,Da.pos1);
+			if (d<minLength) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
 				return C_TERMINATE;
 			}
@@ -641,7 +646,8 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		Da.state = -1;
 		DYNARR_RESET(trkSeg_t,anchors_da);          // No More anchors for this one
 		if (Da.curveData.type == curveTypeStraight) {
-			if ((d = FindDistance( Da.pos0, Da.curveData.pos1 )) < minLength) {
+			d = FindDistance( Da.pos0, Da.curveData.pos1 );
+			if (d < minLength) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
 				return C_TERMINATE;
 			}
@@ -653,8 +659,8 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			}
 			UndoEnd();
 		} else if (Da.curveData.type == curveTypeCurve) {
-			if ((d = Da.curveData.curveRadius * Da.curveData.a1 *2.0*M_PI/360.0) <
-			    minLength) {
+			d = Da.curveData.curveRadius * Da.curveData.a1 *2.0*M_PI/360.0;
+			if (d < minLength) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
 				return C_TERMINATE;
 			}

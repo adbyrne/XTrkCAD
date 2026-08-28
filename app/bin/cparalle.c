@@ -226,7 +226,8 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 		if (parType == PAR_TRACK) {
 			p = p0;
 			DYNARR_RESET( trkSeg_t, tempSegs_da );
-			if ((t0=OnTrack(&p, FALSE, TRUE)) != NULL) {
+			t0=OnTrack(&p, FALSE, TRUE);
+			if (t0 != NULL) {
 				ep0 = PickEndPoint(p, t0);
 				if (ep0 < 0 || GetTrkEndTrk(t0,ep0) != NULL) {
 					t0 = NULL;
@@ -239,7 +240,8 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 				}
 			}
 			p = p1;
-			if ((t1=OnTrack(&p, FALSE, TRUE)) != NULL) {
+			t1=OnTrack(&p, FALSE, TRUE);
+			if (t1 != NULL) {
 				ep1 = PickEndPoint(p, t1);
 				if (ep1 < 0 || GetTrkEndTrk(t1,ep1) != NULL) {
 					t1 = NULL;

@@ -400,7 +400,8 @@ BOOL_T ReadTrackFile(
 		paramLineNum++;
 		if (strlen(paramLine) == (sizeof paramLine) -1 &&
 		    paramLine[(sizeof paramLine)-1] != '\n') {
-			if ( !(ret = InputError( "Line too long", TRUE ))) {
+			ret = InputError( "Line too long", TRUE );
+			if ( !ret ) {
 				break;
 			}
 		}
@@ -436,7 +437,8 @@ BOOL_T ReadTrackFile(
 				break;
 			}
 		} else if (!full) {
-			if ( !(ret = InputError( "unknown command", TRUE ))) {
+			ret = InputError( "unknown command", TRUE );
+			if ( !ret ) {
 				break;
 			}
 		} else if (strncmp( paramLine, "TITLE1 ", 7 ) == 0) {
@@ -455,13 +457,15 @@ BOOL_T ReadTrackFile(
 				/*wFloatSetValue( roomSizeXPD.control, PutDim(roomSize.x) );*/
 				/*wFloatSetValue( roomSizeYPD.control, PutDim(roomSize.y) );*/
 			} else {
-				if ( !(ret = InputError( "ROOMSIZE: bad value", TRUE ))) {
+				ret = InputError( "ROOMSIZE: bad value", TRUE );
+				if ( !ret ) {
 					break;
 				}
 			}
 		} else if (strncmp( paramLine, "SCALE ", 6 ) == 0) {
 			if ( !DoSetScale( paramLine+6 ) ) {
-				if ( !(ret = InputError( "SCALE: bad value", TRUE ))) {
+				ret = InputError( "SCALE: bad value", TRUE );
+				if ( !ret ) {
 					break;
 				}
 			}

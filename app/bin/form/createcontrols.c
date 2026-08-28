@@ -540,7 +540,8 @@ CreateControl(paramData_p pd, char* helpStr,	unsigned x,	unsigned y)
 
 	static wMenu_p menu = NULL;
 
-	if ((win = pd->group->win) == NULL) {
+	win = pd->group->win;
+	if (win == NULL) {
 		win = mainW;
 	}
 

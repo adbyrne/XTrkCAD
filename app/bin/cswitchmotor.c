@@ -630,7 +630,8 @@ static STATUS_T CmdSwitchMotorCreate( wAction_t action, coOrd pos )
 		SetAllTrackSelect( FALSE );
 		return C_CONTINUE;
 	case C_DOWN:
-		if ((trk = OnTrack(&pos, TRUE, TRUE )) == NULL) {
+		trk = OnTrack(&pos, TRUE, TRUE );
+		if (trk == NULL) {
 			return C_CONTINUE;
 		}
 		if (GetTrkType( trk ) != T_TURNOUT) {

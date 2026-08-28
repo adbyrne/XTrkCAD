@@ -1506,7 +1506,8 @@ EXPORT STATUS_T AdjustCornuCurve(
 					if (Da.selectTrack) {					//We have track
 						if (!Da.trk[sel]
 						    && ((t = OnTrackIgnore(&pos,FALSE,TRUE,Da.selectTrack))!= NULL) ) {
-							if ((ep = PickUnconnectedEndPointSilent(pos,t))>=0) {
+							ep = PickUnconnectedEndPointSilent(pos,t);
+							if (ep>=0) {
 								pos = GetTrkEndPos(t,ep);
 								if (IsClose(FindDistance(pos,pos)/2)) {
 									CreateCornuEndAnchor(pos,FALSE);
@@ -1516,8 +1517,10 @@ EXPORT STATUS_T AdjustCornuCurve(
 					} else {									//Not yet a track
 						coOrd p = pos;
 						Da.angle[sel] = GetOpenAngle(Da.pos,Da.angle,sel);
-						if ((t = OnTrack(&p,FALSE,TRUE)) !=NULL ) {
-							if ((ep = PickUnconnectedEndPointSilent(pos,t))>=0) {
+						t = OnTrack(&p,FALSE,TRUE);
+						if (t != NULL) {
+							ep = PickUnconnectedEndPointSilent(pos,t);
+							if (ep>=0) {
 								p = GetTrkEndPos(t,ep);
 								if (IsClose(FindDistance(p,pos)/2)) {
 									CreateCornuEndAnchor(p,FALSE);
@@ -1837,7 +1840,8 @@ EXPORT STATUS_T AdjustCornuCurve(
 
 			for (int i=0; i<Da.mid_points.cnt; i++) {
 				sub_pos[1] = DYNARR_N(coOrd,Da.mid_points,i);
-				if ((trk1 = CreateCornuFromPoints(sub_pos,end_point))== NULL) { return C_TERMINATE; }
+				trk1 = CreateCornuFromPoints(sub_pos,end_point);
+				if (trk1 == NULL) { return C_TERMINATE; }
 				if (Da.trk[0]) {
 					CopyAttributes( Da.trk[0], trk1 );
 				} else if (Da.trk[1]) {
@@ -1856,7 +1860,8 @@ EXPORT STATUS_T AdjustCornuCurve(
 			sub_pos[1] = Da.pos[1];
 			end_point[1] = TRUE;
 			if (Da.radius[1] == -1) { end_point[1] = FALSE; }
-			if ((trk1 = CreateCornuFromPoints(sub_pos,end_point)) == NULL) { return C_TERMINATE; }
+			trk1 = CreateCornuFromPoints(sub_pos,end_point);
+			if (trk1 == NULL) { return C_TERMINATE; }
 			if (Da.trk[0]) {
 				CopyAttributes( Da.trk[0], trk1 );
 			} else if (Da.trk[1]) {
@@ -2133,7 +2138,8 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos,
 		track_p first_trk= NULL,trk1=NULL,trk2 = NULL;
 		for (int i=0; i<Da.mid_points.cnt; i++) {
 			sub_pos[1] = DYNARR_N(coOrd,Da.mid_points,i);
-			if ((trk1 = CreateCornuFromPoints(sub_pos, end_point))== NULL) {
+			trk1 = CreateCornuFromPoints(sub_pos, end_point);
+			if (trk1 == NULL) {
 				wBeep();
 				InfoMessage(
 				        _("Cornu Create Failed for p1[%0.3f,%0.3f] p2[%0.3f,%0.3f], c1[%0.3f,%0.3f] c2[%0.3f,%0.3f], a1=%0.3f a2=%0.3f, r1=%s r2=%s"),
@@ -2164,7 +2170,8 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos,
 		}
 		sub_pos[1] = Da.pos[1];
 		end_point[1] = TRUE;
-		if ((trk1 = CreateCornuFromPoints(sub_pos,end_point)) == NULL) {
+		trk1 = CreateCornuFromPoints(sub_pos,end_point);
+		if (trk1 == NULL) {
 			wBeep();
 			InfoMessage(
 			        _("Cornu Create Failed for p1[%0.3f,%0.3f] p2[%0.3f,%0.3f], c1[%0.3f,%0.3f] c2[%0.3f,%0.3f], a1=%0.3f a2=%0.3f, r1=%s r2=%s"),
@@ -2418,7 +2425,8 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			if (Da.state != NONE) { end=1; }
 			EPINX_T ep = -1;
 			//Lock to endpoint if one is available and under pointer
-			if ((t = OnTrack(&p, FALSE, TRUE)) != NULL && t != Da.selectTrack) {
+			t = OnTrack(&p, FALSE, TRUE);
+			if (t != NULL && t != Da.selectTrack) {
 				if (QueryTrack(t,
 				               Q_HAS_VARIABLE_ENDPOINTS)) {    //Circle/Helix find if there is an open slot and where
 					if ((GetTrkEndTrk(t,0) != NULL) && (GetTrkEndTrk(t,1) != NULL)) {
@@ -2557,7 +2565,8 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		t = NULL;
 		if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {
 			//Lock to endpoint if one is available and under pointer
-			if ((t = OnTrack(&pos, FALSE, TRUE)) != NULL && t != Da.selectTrack) {
+			t = OnTrack(&pos, FALSE, TRUE);
+			if (t != NULL && t != Da.selectTrack) {
 				if (QueryTrack(t,
 				               Q_HAS_VARIABLE_ENDPOINTS)) {    //Circle/Helix find if there is an open slot and where
 					if ((GetTrkEndTrk(t,0) != NULL) && (GetTrkEndTrk(t,1) != NULL)) {
@@ -2930,7 +2939,8 @@ static STATUS_T CmdConvertTo(
 	switch (action) {
 
 	case wActionMove:
-		if ((trk = OnTrack(&pos,FALSE,TRUE)) == NULL) { return C_CONTINUE; }
+		trk = OnTrack(&pos,FALSE,TRUE);
+		if (trk == NULL) { return C_CONTINUE; }
 		if (!QueryTrack(trk, Q_CORNU_CAN_MODIFY) &&  //Not Fixed Track/Turnout/Turntable
 		    !QueryTrack(trk, Q_IGNORE_EASEMENT_ON_EXTEND )) {
 			trk = NULL;
@@ -2938,7 +2948,8 @@ static STATUS_T CmdConvertTo(
 		return C_CONTINUE;
 
 	case C_LCLICK:
-		if ((trk = OnTrack(&pos,FALSE,TRUE))!=NULL) {
+		trk = OnTrack(&pos,FALSE,TRUE);
+		if (trk!=NULL) {
 			SetTrkBits(trk,TB_SELECTED);
 			selectedTrackCount = 1;
 		} else {
@@ -3066,7 +3077,8 @@ static STATUS_T CmdConvertTo(
 
 			for (int i=0; i<Da.mid_points.cnt; i++) {
 				sub_pos[1] = DYNARR_N(coOrd,Da.mid_points,i);
-				if ((trk1 = CreateCornuFromPoints(sub_pos,end_point))== NULL) { continue; }
+				trk1 = CreateCornuFromPoints(sub_pos,end_point);
+				if (trk1 == NULL) { continue; }
 				if (Da.trk[0]) {
 					CopyAttributes( Da.trk[0], trk1 );
 				} else if (Da.trk[1]) {
@@ -3085,7 +3097,8 @@ static STATUS_T CmdConvertTo(
 			sub_pos[1] = Da.pos[1];
 			end_point[1] = TRUE;
 			if (Da.radius[1] == -1) { end_point[1] = FALSE; }
-			if ((trk1 = CreateCornuFromPoints(sub_pos,end_point)) == NULL) { continue; }
+			trk1 = CreateCornuFromPoints(sub_pos,end_point);
+			if (trk1 == NULL) { continue; }
 			created++;
 			DrawNewTrack(trk1);
 			if (Da.trk[0]) {
@@ -3150,7 +3163,8 @@ static STATUS_T CmdConvertFrom(
 	switch (action) {
 
 	case wActionMove:
-		if ((trk = OnTrack(&pos,FALSE,TRUE)) == NULL) { return C_CONTINUE; }
+		trk = OnTrack(&pos,FALSE,TRUE);
+		if (trk == NULL) { return C_CONTINUE; }
 		if ((!(GetTrkType(trk) == T_CORNU)) ||
 		    (!(GetTrkType(trk) == T_BEZIER))) {
 			trk = NULL;
@@ -3158,7 +3172,8 @@ static STATUS_T CmdConvertFrom(
 		return C_CONTINUE;
 
 	case C_LCLICK:
-		if ((trk = OnTrack(&pos,FALSE,TRUE))!=NULL) {
+		trk = OnTrack(&pos,FALSE,TRUE);
+		if (trk!=NULL) {
 			SetTrkBits(trk,TB_SELECTED);
 			selectedTrackCount = 1;
 			trk = NULL;

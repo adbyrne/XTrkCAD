@@ -392,9 +392,12 @@ static int Cmp_benchEnum(
 	benchEnum_p bp1 = (benchEnum_p)p1;
 	benchEnum_p bp2 = (benchEnum_p)p2;
 	long diff;
-	if ( ( diff = bp1->type-bp2->type ) != 0 ) { return (int)diff; }
-	if ( ( diff = bp1->width-bp2->width ) != 0 ) { return (int)diff; }
-	if ( ( diff = bp1->height-bp2->height ) != 0 ) { return (int)diff; }
+	diff = bp1->type-bp2->type;
+	if ( diff != 0 ) { return (int)diff; }
+	diff = bp1->width-bp2->width;
+	if ( diff != 0 ) { return (int)diff; }
+	diff = bp1->height-bp2->height;
+	if ( diff != 0 ) { return (int)diff; }
 	return 0;
 }
 

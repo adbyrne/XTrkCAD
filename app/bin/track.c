@@ -1160,7 +1160,8 @@ EXPORT BOOL_T DeleteTrack( track_p trk, BOOL_T all )
 	}
 	for (i=0; i<trk->endCnt; i++) {
 		trkEndPt_p epp = EndPtIndex( trk->endPt, i );
-		if ((trk2=GetEndPtTrack(epp)) != NULL) {
+		trk2=GetEndPtTrack(epp);
+		if (trk2 != NULL) {
 			ep2 = GetEndPtConnectedToMe( trk2, trk );
 			DisconnectTracks( trk2, ep2, trk, i );
 			if ( QueryTrack(trk,Q_CANNOT_BE_ON_END) ) {
@@ -1866,7 +1867,8 @@ EXPORT void AuditTracks( char * event, ... )
 			sprintf( msgp, "T%d: index bigger than max %d\n", trk->index, max_index );
 			AuditPrint( msg );
 		}
-		if ((auditCmd = trackCmds( trk->type )->audit) != NULL) {
+		auditCmd = trackCmds( trk->type )->audit;
+		if (auditCmd != NULL) {
 			if (!auditCmd( trk, msgp )) {
 				AuditPrint( msg );
 			}
@@ -1880,7 +1882,8 @@ EXPORT void AuditTracks( char * event, ... )
 		}
 		for (i=0; i<trk->endCnt; i++) {
 			trkEndPt_p epp = EndPtIndex( trk->endPt, i );
-			if ( (tn = GetEndPtTrack(epp)) != NULL ) {
+			tn = GetEndPtTrack(epp);
+			if ( tn != NULL ) {
 				if (IsTrackDeleted(tn)) {
 					sprintf( msgp, "T%d[%d]: T%d is deleted\n", trk->index, i, tn->index );
 					AuditPrint( msg );
@@ -2106,7 +2109,8 @@ EXPORT ANGLE_T GetAngleAtPoint( track_p trk, coOrd pos, EPINX_T *ep0,
 {
 	ANGLE_T (*getAngleCmd)( track_p, coOrd, EPINX_T *, EPINX_T * );
 
-	if ((getAngleCmd = trackCmds(trk->type)->getAngle) != NULL) {
+	getAngleCmd = trackCmds(trk->type)->getAngle;
+	if (getAngleCmd != NULL) {
 		return getAngleCmd( trk, pos, ep0, ep1 );
 	} else {
 		NoticeMessage( MSG_GAAP_BAD_TYPE, _("Continue"), NULL, trk->type, trk->index );
@@ -2126,7 +2130,8 @@ EXPORT BOOL_T SplitTrack( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 	coOrd pos0;
 
 	if (!IsTrack(trk)) {
-		if ((splitCmd = trackCmds(trk->type)->split) == NULL) { return FALSE; }
+		splitCmd = trackCmds(trk->type)->split;
+		if (splitCmd == NULL) { return FALSE; }
 		UndrawNewTrack( trk );
 		UndoModify( trk );
 		rc = splitCmd( trk, pos, ep, leftover, &epl, &ep1 );
@@ -2147,7 +2152,8 @@ EXPORT BOOL_T SplitTrack( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 
 	trkEndPt_p epp = EndPtIndex( trk->endPt, ep );
 	pos0 = GetEndPtPos( epp );
-	if (((splitCmd = trackCmds(trk->type)->split) == NULL)) {
+	splitCmd = trackCmds(trk->type)->split;
+	if (splitCmd == NULL) {
 		if (!(FindDistance( pos0, pos) <= minLength)) {
 			ErrorMessage(MSG_SPLITTED_OBJECT_TOO_SHORT, PutDim(fabs(minLength)));
 			return FALSE;
@@ -2155,7 +2161,8 @@ EXPORT BOOL_T SplitTrack( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 	}
 	UndrawNewTrack( trk );
 	UndoModify( trk );
-	if ((d = FindDistance( pos0, pos )) <= minLength) {
+	d = FindDistance( pos0, pos );
+	if (d <= minLength) {
 		/* easy: just disconnect */
 		trk2 = GetEndPtTrack(epp);
 		if (trk2 != NULL) {
@@ -3131,6 +3138,7 @@ EXPORT void DrawEndPt(
 			}
 			showBridge = 0;
 		}
+		// NOLINTNEXTLINE(bugprone-branch-clone) -- SF #704: own-visibility vs layer-visibility priority chain; Martin Fischer confirmed this is a cosmetic mis-rendering under contradictory track-vs-layer visibility, hard-to-impossible to trigger through the normal draw path, closed wont-fix
 	} else if((!GetTrkVisible(trk)) && GetTrkVisible(trk1)) {
 		showBridge = 0;
 	} else if(GetLayerVisible(GetTrkLayer(trk))
@@ -3146,6 +3154,7 @@ EXPORT void DrawEndPt(
 	} else if(!GetLayerVisible(GetTrkLayer(trk))
 	          && GetLayerVisible(GetTrkLayer(trk1))) {
 		showBridge = 0;
+		// NOLINTNEXTLINE(bugprone-branch-clone) -- SF #704: same own-visibility/layer-visibility priority chain flagged above; Martin Fischer confirmed cosmetic-only, closed wont-fix
 	} else if(sepBoundary) {
 		;
 	} else if((drawEndPtV == 1 && (QueryTrack(trk,Q_DRAWENDPTV_1)
@@ -3282,7 +3291,8 @@ EXPORT void HilightElevations( BOOL_T hilight )
 		for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
 			GetTrkEndElev( trk, ep, &mode, &elev );
 			if ((mode&ELEV_MASK)==ELEV_DEF || (mode&ELEV_MASK)==ELEV_IGNORE) {
-				if ((trk1=GetTrkEndTrk(trk,ep)) != NULL &&
+				trk1=GetTrkEndTrk(trk,ep);
+				if (trk1 != NULL &&
 				    GetTrkIndex(trk1) < GetTrkIndex(trk)) {
 					continue;
 				}

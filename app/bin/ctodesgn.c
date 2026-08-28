@@ -2806,7 +2806,8 @@ static void NewTurnPrint(
 	const toDesignSchema_t * pp;
 	POS_T tmp;
 
-	if ((pp=LoadSegs( curDesign, TRUE )) == NULL) {
+	pp=LoadSegs( curDesign, TRUE );
+	if (pp == NULL) {
 		return;
 	}
 	if (includeNontrackSegments && customTurnout1) {
@@ -2926,7 +2927,8 @@ static void NewTurnOk( void * context )
 	//
 	// Generate segments and endPts
 	//
-	if ( ( pp=LoadSegs( curDesign, TRUE ) ) == NULL ) { return; }
+	pp=LoadSegs( curDesign, TRUE );
+	if ( pp == NULL ) { return; }
 
 	f = OpenCustom("a");
 

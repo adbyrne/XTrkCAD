@@ -424,7 +424,8 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		}
 //		BOOL_T xing = FALSE;
 		coOrd p0 = pos, p2=pos;
-		if ((trk0 = OnTrack2(&p0,FALSE, TRUE, FALSE, NULL)) != NULL) {
+		trk0 = OnTrack2(&p0,FALSE, TRUE, FALSE, NULL);
+		if (trk0 != NULL) {
 			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			EPINX_T ep0 = 0;
 //			EPINX_T ep1 = 1;
@@ -439,7 +440,8 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 				return C_CONTINUE;
 			}
 			if (((MyGetKeyState()&WKEY_ALT))) {   //Add square with Alt
-				if ((trk1 = OnTrack2(&p2,FALSE, TRUE, FALSE, trk0)) != NULL) {
+				trk1 = OnTrack2(&p2,FALSE, TRUE, FALSE, trk0);
+				if (trk1 != NULL) {
 					if (IsClose(FindDistance(p0,p2))) {
 						if (GetEndPtConnectedToMe(trk0,
 						                          trk1) == -1) {	//Not simply connected to each other!!!
@@ -461,7 +463,8 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 					}
 				}
 			}
-			if ((ep0 = PickEndPoint( p0, trk0 )) != -1)  {
+			ep0 = PickEndPoint( p0, trk0 );
+			if (ep0 != -1)  {
 				if ((MyGetKeyState()&WKEY_SHIFT) && QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)
 				    && !(QueryTrack(trk0,Q_IS_TURNOUT))) {
 					InfoMessage( _("Click to split here - elevation %0.3f"), PutDim(elev0));
@@ -494,7 +497,8 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 	case C_LCLICK:
 		;
 		p0= pos;
-		if ((trk0 = OnTrack( &p0, TRUE, TRUE )) == NULL) {
+		trk0 = OnTrack( &p0, TRUE, TRUE );
+		if (trk0 == NULL) {
 			wHide(elevW);
 			elevTrk = NULL;
 			InfoMessage( _("Click on end, +Shift to split, +Ctrl to move description") );

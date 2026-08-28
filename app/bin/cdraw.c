@@ -2801,7 +2801,8 @@ EXPORT BOOL_T OnTableEdgeEndPt( track_p trk, coOrd * pos )
 	coOrd pos1 = *pos;
 
 	ignoredTableEdge = trk;
-	if ((trk1 = OnTrack( &pos1, FALSE, FALSE )) != NULL &&
+	trk1 = OnTrack( &pos1, FALSE, FALSE );
+	if (trk1 != NULL &&
 	    GetTrkType(trk1) == T_DRAW) {
 		ignoredTableEdge = NULL;
 		xx = GET_EXTRA_DATA(trk1, T_DRAW, extraDataDraw_t);

@@ -232,7 +232,8 @@ EXPORT BOOL_T RefreshCompound(
 			}
 		}
 	}
-	if ( ( to = FindCompound( FIND_TURNOUT|FIND_STRUCT, NULL, xx->title ) ) != NULL
+	to = FindCompound( FIND_TURNOUT|FIND_STRUCT, NULL, xx->title );
+	if ( to != NULL
 	     &&
 	     RefreshCompound1( trk, to ) ) {
 		return TRUE;
