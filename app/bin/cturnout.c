@@ -917,6 +917,7 @@ static void SplitTurnoutCheckEndPt(
         PATHPTR_T path,
         int dir,
         trkSeg_p segs,
+        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
         coOrd epPos,
         coOrd splitPos)
 {
@@ -1830,6 +1831,7 @@ EXPORT void AdvanceTurnoutPositionIndicator(
 static BOOL_T MakeParallelTurnout(
         track_p trk,
         coOrd pos,
+        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
         DIST_T sep,
         DIST_T factor,
         track_p* newTrk,
@@ -2060,6 +2062,7 @@ static void TurnoutChange(long changes)
 	return;
 }
 
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 static void RedrawTurnout( wControl_p d, void * context, wWinPix_t x,
                            wWinPix_t y )
 {

@@ -218,6 +218,7 @@ static DIST_T JoinD(
 
 
 static DIST_T GetLfromD(
+        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
         DIST_T D,
         DIST_T R,
         DIST_T L )
@@ -640,6 +641,7 @@ EXPORT DIST_T JointDistance(
         coOrd pos,
         ANGLE_T angle,
         DIST_T l0,
+        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
         DIST_T l1,
         DIST_T R,
         DIST_T L,
@@ -734,6 +736,7 @@ EXPORT coOrd GetJointSegEndPos(
         coOrd pos,
         ANGLE_T angle,
         DIST_T l0,
+        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
         DIST_T l1,
         DIST_T R,
         DIST_T L,
