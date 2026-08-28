@@ -244,7 +244,8 @@ void LoadParamFileList(void)
 		// Rewire to the latest system level
 #define SHAREPARAMS (PATH_SEPARATOR "share" PATH_SEPARATOR "xtrkcad" PATH_SEPARATOR "params" PATH_SEPARATOR)
 #define SHAREBETAPARAMS (PATH_SEPARATOR "share" PATH_SEPARATOR "xtrkcad-beta" PATH_SEPARATOR "params" PATH_SEPARATOR)
-		if ((share= strstr(fileName,SHAREPARAMS))) {
+		share= strstr(fileName,SHAREPARAMS);
+		if (share) {
 			share += strlen(SHAREPARAMS);
 		}
 #ifndef WINDOWS

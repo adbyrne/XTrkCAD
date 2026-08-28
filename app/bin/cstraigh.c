@@ -85,7 +85,8 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		BOOL_T found = FALSE;
 		Dl.trk = NULL;
 		if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {
-			if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
+			t = OnTrack(&p, FALSE, TRUE);
+			if (t != NULL) {
 				EPINX_T ep = PickUnconnectedEndPointSilent(p, t);
 				if (ep != -1) {
 					if (GetTrkGauge(t) != GetScaleTrackGauge(GetLayoutCurScale())) {
@@ -119,7 +120,8 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		if (!Dl.down) {
 			if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {
 				p = pos;
-				if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
+				t = OnTrack(&p, FALSE, TRUE);
+				if (t != NULL) {
 					if (GetTrkGauge(t) == GetScaleTrackGauge(GetLayoutCurScale())) {
 						EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
 						if (ep != -1) {
@@ -167,7 +169,8 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 				Translate( &pos, Dl.pos0, angle, FindDistance( Dl.pos0, pos ));
 			} else { pos = Dl.pos0; }
 		} else { SnapPos( &pos ); }
-		if ((dist=FindDistance( Dl.pos0, pos )) <= minLength) {
+		dist=FindDistance( Dl.pos0, pos );
+		if (dist <= minLength) {
 			ErrorMessage( MSG_TRK_TOO_SHORT, "Straight ", PutDim(fabs(minLength-dist)) );
 			return C_TERMINATE;
 		}

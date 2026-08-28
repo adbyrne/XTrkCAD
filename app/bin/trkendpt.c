@@ -232,7 +232,8 @@ EXPORT void SetTrkEndElev( track_p trk, EPINX_T ep, int option, DIST_T height,
 		}
 		epp->elev.u.name = MyStrdup(station);
 	}
-	if ( (trk1=GetTrkEndTrk(trk, ep)) != NULL ) {
+	trk1=GetTrkEndTrk(trk, ep);
+	if ( trk1 != NULL ) {
 		ep1 = GetEndPtConnectedToMe( trk1, trk );
 		if (ep1 >= 0) {
 			trkEndPt_p epp1 = GetTrkEndPt( trk1, ep1 );
@@ -351,7 +352,8 @@ EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep,
 	     (elev->option&ELEV_VISIBLE)==0 ) {
 		return;
 	}
-	if ( (trk1=GetTrkEndTrk(trk,ep)) && GetTrkIndex(trk1)<GetTrkIndex(trk) ) {
+	trk1=GetTrkEndTrk(trk,ep);
+	if ( trk1 && GetTrkIndex(trk1)<GetTrkIndex(trk) ) {
 		return;
 	}
 
@@ -430,7 +432,8 @@ EXPORT DIST_T EndPtDescriptionDistance(
 	if (((e->option&ELEV_VISIBLE)==0) && !show_hidden) {
 		return DIST_INF;
 	}
-	if ((trk1=GetTrkEndTrk(trk,ep)) && GetTrkIndex(trk1)<GetTrkIndex(trk)) {
+	trk1=GetTrkEndTrk(trk,ep);
+	if (trk1 && GetTrkIndex(trk1)<GetTrkIndex(trk)) {
 		return DIST_INF;
 	}
 	if ((e->option&ELEV_VISIBLE)==0) {					//Hidden - disregard offset
@@ -475,7 +478,8 @@ EXPORT STATUS_T EndPtDescriptionMove(
 //		p1 = pos;
 		e->doff.x = (pos.x-p0.x);
 		e->doff.y = (pos.y-p0.y);
-		if ((trk1=GetTrkEndTrk(trk,ep))) {
+		trk1=GetTrkEndTrk(trk,ep);
+		if (trk1) {
 			EPINX_T ep1 = GetEndPtConnectedToMe(trk1,trk);
 			trkEndPt_p epp = GetTrkEndPt( trk1, ep1 );
 //			e1 = &trk1->endPt[GetEndPtConnectedToMe(trk1,trk)].elev;

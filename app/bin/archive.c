@@ -159,7 +159,8 @@ BOOL_T AddDirectoryToArchive(
 	}
 
 	// if not possible to read the directory for this user
-	if ((dir = opendir(dir_path)) == NULL) {
+	dir = opendir(dir_path);
+	if (dir == NULL) {
 		NoticeMessage(MSG_OPEN_DIR_FAIL,
 		              _("Continue"), NULL, dir_path);
 		return FALSE;
@@ -268,7 +269,8 @@ BOOL_T CreateArchive(
 
 	MyFree(archive);
 
-	if ((za = zip_open(archiveUtf8, ZIP_CREATE, &err)) == NULL) {
+	za = zip_open(archiveUtf8, ZIP_CREATE, &err);
+	if (za == NULL) {
 		zip_error_init_with_code(&error, err);
 		NoticeMessage(MSG_ZIP_CREATE_FAIL, _("Continue"), NULL, archiveUtf8,
 		              zip_error_strerror(&error));
@@ -352,7 +354,8 @@ BOOL_T UnpackArchiveFor(
 #endif // UTFCONVERT
 
 
-	if ((za = zip_open(destBuffer, 0, &err)) == NULL) {
+	za = zip_open(destBuffer, 0, &err);
+	if (za == NULL) {
 		zip_error_init_with_code(&error, err);
 		NoticeMessage(MSG_ZIP_OPEN_FAIL, _("Continue"), NULL, pathName,
 		              zip_error_strerror(&error));

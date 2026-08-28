@@ -820,7 +820,8 @@ BOOL_T UndoDelete( track_p trk )
 		if (us->newTrks == trk) {
 			us->newTrks = trk->next;
 		}
-		if (!(ptrk = FindParent( trk, __LINE__ ))) {
+		ptrk = FindParent( trk, __LINE__ );
+		if (!ptrk) {
 			return FALSE;
 		}
 		if (trk->next == NULL) {
@@ -956,7 +957,8 @@ void UndoUndo( void * unused )
 	if (us->needRedo) {
 		us->redoStart = us->redoEnd = redoStream.end;
 	}
-	if (!(us->oldTail=FindParent(us->newTrks,__LINE__))) {
+	us->oldTail=FindParent(us->newTrks,__LINE__);
+	if (!us->oldTail) {
 		return;
 	}
 	us->newTail = to_last;

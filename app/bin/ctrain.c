@@ -130,7 +130,8 @@ static void PlaceCar(track_p);
 		} \
 		{ \
 			track_p walk_cars_temp1; \
-			if ( (walk_cars_temp1=GetTrkEndTrk(CAR,DIR)) == NULL ) break; \
+			walk_cars_temp1=GetTrkEndTrk(CAR,DIR); \
+			if ( walk_cars_temp1 == NULL ) break; \
 			(DIR)=(GetTrkEndTrk(walk_cars_temp1,0)==(CAR)?1:0); \
 			(CAR)=walk_cars_temp1; \
 		} \
@@ -381,7 +382,8 @@ static void DrawCar(
 		track_p car1;
 		coupler[dir].pos = xx->couplerPos[dir];
 
-		if ((car1 = GetTrkEndTrk(car,dir))) {
+		car1 = GetTrkEndTrk(car,dir);
+		if (car1) {
 			xx1 = GET_EXTRA_DATA(car1, T_CAR, extraDataCar_t);
 			dir1 = (GetTrkEndTrk(car1,0)==car)?0:1;
 			coupler[dir].angle = FindAngle(xx->couplerPos[dir], xx1->couplerPos[dir1]);
@@ -735,43 +737,39 @@ drawCmd_t speedD = {
 	CoOrd2Pix
 };
 static paramDrawData_t speedParamData = { SLIDER_WIDTH, SLIDER_HEIGHT, SpeedRedraw, SpeedAction, &speedD };
-#ifndef WINDOWS
-static paramListData_t listData = { 3, 120 };
-#endif
-static char * trainFollowMeLabels[] = { N_("Follow"), NULL };
-static char * trainAutoReverseLabels[] = { N_("Auto Reverse"), NULL };
-static paramData_t trainPLs[] = {
-#define I_LIST				(0)
-#ifdef WINDOWS
-	/*0*/ { PD_COMBOLIST, NULL, "list", PDO_NOPREF|PDO_NOPSHUPD, I2VP(120), NULL, 0 },
-#else
-	/*0*/ { PD_LIST, NULL, "list", PDO_NOPREF|PDO_NOPSHUPD, &listData, NULL, 0 },
-#endif
-#define I_STATUS			(1)
-	{ PD_MESSAGE, NULL, "mess0", 0, I2VP(120) },
-#define I_POS				(2)
-	{ PD_MESSAGE, NULL, "mess1", 0, I2VP(120) },
-#define I_SLIDER			(3)
-	{ PD_DRAW, NULL, "speed", PDO_NOPSHUPD|PDO_DLGSETY, &speedParamData },
-#define I_DIST				(4)
-	{ PD_STRING, NULL, "distance", PDO_DLGNEWCOLUMN, I2VP(20-SLIDER_WIDTH), NULL, BO_READONLY },
-#define I_ZERO				(5)
-	{ PD_BUTTON, NULL, "zeroDistance", PDO_NOPSHUPD|PDO_NOPREF|PDO_DLGHORZ, NULL, NULL, BO_ICON },
-#define I_GOTO				(6)
-	{ PD_BUTTON, NULL, "goto", PDO_NOPSHUPD|PDO_NOPREF|PDO_DLGWIDE, NULL, N_("Find") },
-#define I_FOLLOW			(7)
-	{ PD_TOGGLE, NULL, "follow", PDO_NOPREF|PDO_DLGWIDE, trainFollowMeLabels, NULL, BC_HORIZONTAL|BC_NOBORDER },
-#define I_AUTORVRS			(8)
-	{ PD_TOGGLE, NULL, "autoreverse", PDO_NOPREF, trainAutoReverseLabels, NULL, BC_HORIZONTAL|BC_NOBORDER },
-#define I_DIR				(9)
-	{ PD_BUTTON, NULL, "direction", PDO_NOPREF|PDO_DLGWIDE, NULL, N_("Forward"), 0 },
-#define I_STOP				(10)
-	{ PD_BUTTON, NULL, "stop", PDO_DLGWIDE, NULL, N_("Stop") },
-#define I_SPEED				(11)
-	{ PD_MESSAGE, NULL, "mess2", PDO_DLGIGNOREX, I2VP(120) }
+
+typedef enum {
+	I_LIST,
+	I_STATUS,
+	I_POS,
+	I_SLIDER,
+	I_DIST,
+	I_ZERO,
+	I_GOTO,
+	I_FOLLOW,
+	I_AUTORVRS,
+	I_DIR,
+	I_STOP,
+	I_SPEED,
+	I_COUNT
+} trainParm_e;
+
+static paramData_t trainPLs[I_COUNT] = {
+	[I_LIST]     = { PD_LIST, NULL, "list", PDO_NOPREF|PDO_NOPSHUPD, NULL, NULL, 0 },
+	[I_STATUS]   = { PD_MESSAGE, NULL, "mess0", 0, I2VP(120) },
+	[I_POS]      = { PD_MESSAGE, NULL, "mess1", 0, I2VP(120) },
+	[I_SLIDER]   = { PD_DRAW, NULL, "speed", PDO_NOPSHUPD|PDO_DLGSETY, &speedParamData },
+	[I_DIST]     = { PD_STRING, NULL, "distance", 0, I2VP(20-SLIDER_WIDTH), NULL, BO_READONLY },
+	[I_ZERO]     = { PD_BUTTON, NULL, "zeroDistance", PDO_NOPSHUPD|PDO_NOPREF, NULL },
+	[I_GOTO]     = { PD_BUTTON, NULL, "goto", PDO_NOPSHUPD|PDO_NOPREF, NULL, NULL },
+	[I_FOLLOW]   = { PD_TOGGLE, NULL, "follow", PDO_NOPREF, NULL, NULL, BC_HORIZONTAL|BC_NOBORDER },
+	[I_AUTORVRS] = { PD_TOGGLE, NULL, "autoreverse", PDO_NOPREF, NULL, NULL, BC_HORIZONTAL|BC_NOBORDER },
+	[I_DIR]      = { PD_BUTTON, NULL, "direction", PDO_NOPREF, NULL, NULL, 0 },
+	[I_STOP]     = { PD_BUTTON, NULL, "stop", 0, NULL, NULL },
+	[I_SPEED]    = { PD_MESSAGE, NULL, "mess2", 0, I2VP(120) },
 };
 
-static paramGroup_t trainPG = { "train", PGO_FULLDIALOGFROMBUILDER, trainPLs, COUNT( trainPLs ) };
+static paramGroup_t trainPG = { "train", PGO_FULLDIALOGFROMBUILDER, trainPLs, I_COUNT };
 
 
 typedef struct {
@@ -2699,7 +2697,8 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 				LocoListChangeEntry(NULL, currCar);
 			}
 
-			if ((trk0 = OnTrack(&pos0, FALSE, TRUE))) {
+			trk0 = OnTrack(&pos0, FALSE, TRUE);
+			if (trk0) {
 				xx->trvTrk.angle = GetAngleAtPoint(trk0, pos0, &ep0, &ep1);
 
 				if (NormalizeAngle(FindAngle(pos, pos0) - xx->trvTrk.angle) > 180.0) {
@@ -2818,7 +2817,8 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 			pos0 = pos;
 			programMode = MODE_DESIGN;
 
-			if ((trk0=OnTrack(&pos,FALSE,TRUE)) &&
+			trk0=OnTrack(&pos,FALSE,TRUE);
+			if (trk0 &&
 			    QueryTrack(trk0, Q_CAN_NEXT_POSITION) &&
 			    TrainOnMovableTrack(trk0, &trk1)) {
 				if (trk1) {
@@ -2916,13 +2916,13 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 		wDrawSaveImage(mainD.d);
 		DrawAllCars(trainHighlighted);
 
-		wWinGetSize(mainW, &w, &h);
-		w -= wControlGetPosX(newCarControls[0]) + 4;
+		// wWinGetSize(mainW, &w, &h);
+		// w -= wControlGetPosX(newCarControls[0]) + 4;
 
-		if (w > 20) {
-			wListSetSize((wList_p)newCarControls[0], w,
-			             wControlGetHeight(newCarControls[0]));
-		}
+		// if (w > 20) {
+		// 	wListSetSize((wList_p)newCarControls[0], w,
+		// 	             wControlGetHeight(newCarControls[0]));
+		// }
 
 
 
@@ -3026,6 +3026,12 @@ static void TrainStopGoPlayback(char * line)
 
 static void CmdTrainExit(void * unused)
 {
+	// Do the actual mode exit directly - Reset() no longer cancels the
+	// current command while programMode == MODE_TRAIN (see command.c), so
+	// leave train mode and hand curCommand back to the describe tool
+	// first; Reset() then only does its normal design-mode cleanup.
+	CmdTrain(C_CANCEL, zero);
+	SetCurrentCommand(describeCmdInx);
 	Reset();
 	InfoDefaultControls();
 }
@@ -3212,7 +3218,7 @@ void InitCmdTrain(wMenu_p menu)
 {
 	log_trainMove = LogFindIndex("trainMove");
 	log_trainPlayback = LogFindIndex("trainPlayback");
-	trainPLs[I_ZERO].winLabel = (char*)CreateSymbolFromResource("zero.png");
+	//trainPLs[I_ZERO].winLabel = (char*)CreateSymbolFromResource("zero.png");
 	FormRegister(&trainPG);
 	trainCmdInx = AddMenuButton(menu, CmdTrain, "cmdTrain", _("Run Trains"),
 	                            CreateToolbarIconFromResource("train.png"), LEVEL0_50,

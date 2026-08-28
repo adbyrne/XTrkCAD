@@ -2118,7 +2118,8 @@ static wIndex_t TOpickEndPoint(
 	inx = 0;
 	for (i = 1; i < to->endCnt; i++) {
 		posI = GetEndPtPos(EndPtIndex(to->endPt, i));
-		if ((dd = FindDistance(p, posI)) < d) {
+		dd = FindDistance(p, posI);
+		if (dd < d) {
 			d = dd;
 			inx = i;
 		}
@@ -2259,7 +2260,8 @@ static void PlaceTurnoutTrial(
 			epAngle = NormalizeAngle(GetEndPtAngle(EndPtIndex(curTurnout->endPt,
 			                                       (EPINX_T)i)) + angle);
 			conPos = epPos;
-			if ((trk = OnTrack(&conPos, FALSE, TRUE)) != NULL &&
+			trk = OnTrack(&conPos, FALSE, TRUE);
+			if (trk != NULL &&
 			    !GetLayerFrozen(GetTrkLayer(trk)) &&
 			    !GetLayerModule(GetTrkLayer(trk))) {
 				v->off = FindDistance(epPos, conPos);
@@ -2437,7 +2439,8 @@ static void AddTurnout(void)
 		leftover(i).ep = -1;
 		/* connect each endPt ... */
 		epPos = GetEndPtPos( TempEndPt(i) );
-		if ((trk = OnTrack(&epPos, FALSE, TRUE)) != NULL
+		trk = OnTrack(&epPos, FALSE, TRUE);
+		if (trk != NULL
 		    &&    //Adjust epPos onto existing track
 		    (!GetLayerFrozen(GetTrkLayer(trk))) &&
 		    (!GetLayerModule(GetTrkLayer(trk))) &&
@@ -2590,7 +2593,8 @@ static void AddTurnout(void)
 	            GetTrkIndex(newTrk));
 	/* deal with the leftovers */
 	for (i = 0; i < curTurnout->endCnt; i++) {
-		if ((trk = leftover(i).trk) != NULL) {
+		trk = leftover(i).trk;
+		if (trk != NULL) {
 			CHECK( !IsTrackDeleted(trk) );
 			/* move endPt beyond the turnout */
 			/* it it is short then delete it */

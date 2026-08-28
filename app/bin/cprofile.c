@@ -986,8 +986,10 @@ static int ProfileShortestPathFunc(
 		} else {
 			EPINX_T epN;
 			epN = GetEndPtConnectedToMe(trkN, trk);
+			// NOLINTNEXTLINE(bugprone-branch-clone) -- SF #703: rare edge case (a turnout with two endpoints already connected, hit again via a third); Martin Fischer investigated and found no simple way to trigger via the UI, closed wont-fix
 			if (trkN == pathStartTrk && epN == pathStartEp) {
 				pathMatch = 1;
+				// NOLINTNEXTLINE(bugprone-branch-clone) -- SF #703: same rare edge case as above
 			} else if (trkN == pathEndTrk && epN == pathEndEp) {
 				pathMatch = 2;
 			} else if (trkN == pathStartTrk && trkN == pathEndTrk) {
@@ -1484,7 +1486,8 @@ static STATUS_T CmdProfile(wAction_t action, coOrd pos)
 		return C_CONTINUE;
 	case C_LCLICK:
 		InfoMessage("");
-		if ((trk0 = OnTrack(&pos, TRUE, TRUE)) != NULL) {
+		trk0 = OnTrack(&pos, TRUE, TRUE);
+		if (trk0 != NULL) {
 			EPINX_T ep0;
 			ep0 = PickEndPoint(pos, trk0);
 			if (ep0 >= 0) {
@@ -1493,7 +1496,8 @@ static STATUS_T CmdProfile(wAction_t action, coOrd pos)
 		}
 		return C_CONTINUE;
 	case C_CMDMENU:
-		if ((profilePopupTrk = OnTrack(&pos, TRUE, TRUE)) != NULL) {
+		profilePopupTrk = OnTrack(&pos, TRUE, TRUE);
+		if (profilePopupTrk != NULL) {
 			profilePopupEp = PickEndPoint(pos, profilePopupTrk);
 			if (profilePopupEp >= 0) {
 				int mode;

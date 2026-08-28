@@ -627,18 +627,20 @@ static BOOL_T AddScale(
 	char scale[40];
 	scaleInfo_p s;
 
-	if ( (rc=sscanf( line, "SCALE %39[^,]," SCANF_FLOAT_FORMAT ","
-	                 SCANF_FLOAT_FORMAT
-	                       "",
-	                 scale, &ratio, &gauge )) != 3) {
+	rc=sscanf( line, "SCALE %39[^,]," SCANF_FLOAT_FORMAT ","
+	           SCANF_FLOAT_FORMAT
+	                 "",
+	           scale, &ratio, &gauge );
+	if ( rc != 3) {
 		SyntaxError( "SCALE", rc, 3 );
 		return FALSE;
 	}
 	for (i=0; i<3; i++) {
 		line = GetNextLine();
-		if ( (rc=sscanf( line, "" SCANF_FLOAT_FORMAT "," SCANF_FLOAT_FORMAT ","
-		                 SCANF_FLOAT_FORMAT "",
-		                 &R[i], &X[i], &L[i] )) != 3 ) {
+		rc=sscanf( line, "" SCANF_FLOAT_FORMAT "," SCANF_FLOAT_FORMAT ","
+		           SCANF_FLOAT_FORMAT "",
+		           &R[i], &X[i], &L[i] );
+		if ( rc != 3 ) {
 			SyntaxError( "SCALE easement", rc, 3 );
 			return FALSE;
 		}
@@ -671,8 +673,9 @@ static BOOL_T AddScaleFit(
 	BOOL_T rc;
 	scaleComp_p s;
 
-	if ( (rc=sscanf( line, "SCALEFIT %19s %19s %255s %255s",
-	                 type, result, scales, matches )) != 4) {
+	rc=sscanf( line, "SCALEFIT %19s %19s %255s %255s",
+	           type, result, scales, matches );
+	if ( rc != 4) {
 		SyntaxError( "SCALEFIT", rc, 4 );
 		return FALSE;
 	}
@@ -802,7 +805,8 @@ EXPORT void ScaleLengthEnd( void )
 		wPrefGetInteger( tmp, "flex unit", &flexUnit, 0 );
 		wPrefGetFloat( tmp, "flex cost", &flexCost, 0.0 );
 		tmp[0] = '\0';
-		if ((length=scaleInfo(si).length) != 0) {
+		length=scaleInfo(si).length;
+		if (length != 0) {
 			sprintf( tmp, "%s %s Flex Track", FormatDistance(length), scaleInfo(si).scale );
 			for (count = (int)strlen(tmp); count<enumerateMaxDescLen; count++) {
 				tmp[count] = ' ';
@@ -890,7 +894,8 @@ static BOOL_T RescaleDoIt( track_p trk, BOOL_T unused )
 	UndoModify(trk);
 	if ( rescalePercent != 100.0 ) {
 		for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
-			if ((trk1 = GetTrkEndTrk(trk,ep)) != NULL &&
+			trk1 = GetTrkEndTrk(trk,ep);
+			if (trk1 != NULL &&
 			    !GetTrkSelected(trk1)) {
 				ep1 = GetEndPtConnectedToMe( trk1, trk );
 				DisconnectTracks( trk, ep, trk1, ep1 );

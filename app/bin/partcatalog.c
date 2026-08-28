@@ -570,7 +570,8 @@ CreateCatalogFromDir(ParameterLib *paramLib, char *directory)
 			char *scale = GetParameterFileScale(fileName);
 
 
-			if ((existingEntry = IsExistingContents(catalog, contents, FALSE))) {
+			existingEntry = IsExistingContents(catalog, contents, FALSE);
+			if (existingEntry) {
 				UpdateCatalogEntry(existingEntry, fileName, contents, scale);
 			} else {
 				CatalogEntry *newEntry;

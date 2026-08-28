@@ -301,7 +301,8 @@ static void DrawTrackAndEndPts(
 
 	DrawTrack( trk, &mainD, color );
 	for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
-		if ((trk2=GetTrkEndTrk(trk,ep)) != NULL) {
+		trk2=GetTrkEndTrk(trk,ep);
+		if (trk2 != NULL) {
 			CHECK( !IsTrackDeleted(trk) );
 			ep2 = GetEndPtConnectedToMe( trk2, trk );
 			DrawEndPt( &mainD, trk2, ep2,
@@ -825,11 +826,13 @@ static BOOL_T FlipHidden( track_p trk, BOOL_T unused )
 	}
 	/*DrawNewTrack( trk );*/
 	DrawTrackAndEndPts( trk, wDrawColorBlack );
-	for (i=0; i<GetTrkEndPtCnt(trk); i++)
-		if ((trk2=GetTrkEndTrk(trk,i)) != NULL) {
+	for (i=0; i<GetTrkEndPtCnt(trk); i++) {
+		trk2=GetTrkEndTrk(trk,i);
+		if (trk2 != NULL) {
 			UndoModify( trk2 );
 			/*DrawNewTrack( trk2 );*/
 		}
+	}
 	return TRUE;
 }
 
@@ -1046,7 +1049,8 @@ static BOOL_T AddElevation( track_p trk, BOOL_T unused )
 	DIST_T elev;
 
 	for ( ep=0; ep<GetTrkEndPtCnt(trk); ep++ ) {
-		if ((trk1=GetTrkEndTrk(trk,ep))) {
+		trk1=GetTrkEndTrk(trk,ep);
+		if (trk1) {
 			ep1 = GetEndPtConnectedToMe( trk1, trk );
 			if (ep1 >= 0) {
 				if (GetTrkSelected(trk1) && GetTrkIndex(trk1)<GetTrkIndex(trk)) {
@@ -1421,7 +1425,8 @@ static void MoveTracks(
 			RotateTrack( trk, orig, angle );
 		}
 		for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
-			if ((trk1 = GetTrkEndTrk(trk,ep)) != NULL &&
+			trk1 = GetTrkEndTrk(trk,ep);
+			if (trk1 != NULL &&
 			    !GetTrkSelected(trk1)) {
 				ep1 = GetEndPtConnectedToMe( trk1, trk );
 				DisconnectTracks( trk, ep, trk1, ep1 );
@@ -1440,7 +1445,8 @@ static void MoveTracks(
 		}
 		for (int i=0; i<2; i++) {
 			track_p te;
-			if ((te = GetTrkEndTrk(trk,i)) && !GetTrkSelected(te)) {
+			te = GetTrkEndTrk(trk,i);
+			if (te && !GetTrkSelected(te)) {
 				fixed_end = TRUE;
 			}
 		}
@@ -1452,7 +1458,8 @@ static void MoveTracks(
 				RotateTrack( trk, orig, angle );
 			}
 			for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
-				if ((trk1 = GetTrkEndTrk(trk,ep)) != NULL &&
+				trk1 = GetTrkEndTrk(trk,ep);
+				if (trk1 != NULL &&
 				    !GetTrkSelected(trk1)) {
 					ep1 = GetEndPtConnectedToMe( trk1, trk );
 					DisconnectTracks( trk, ep, trk1, ep1 );
@@ -1461,7 +1468,8 @@ static void MoveTracks(
 			}
 		} else {
 			for (int i=0; i<2; i++) {
-				if ((trk1 = GetTrkEndTrk(trk,i)) && GetTrkSelected(trk1)) {
+				trk1 = GetTrkEndTrk(trk,i);
+				if (trk1 && GetTrkSelected(trk1)) {
 					ep1 = GetEndPtConnectedToMe( trk1, trk );
 					DisconnectTracks(trk,i,trk1,ep1);
 					GetTrackParams(PARAMS_CORNU,trk1,GetTrkEndPos(trk1,ep1),&trackParms);
@@ -1586,7 +1594,8 @@ wBool_t FindEndIntersection(coOrd base, coOrd orig, ANGLE_T angle, track_p * t1,
 		track_p ts = Tlist(inx);
 		for (int i=0; i<GetTrkEndPtCnt(ts); i++) { //All EndPoints
 			track_p ct;
-			if ((ct = GetTrkEndTrk(ts,i))!=NULL) {
+			ct = GetTrkEndTrk(ts,i);
+			if (ct!=NULL) {
 				if (GetTrkSelected(ct) || QueryTrack(ts,Q_IS_CORNU)) {
 					continue;    // Another selected track or Cornu - ignore
 				}
@@ -1602,7 +1611,8 @@ wBool_t FindEndIntersection(coOrd base, coOrd orig, ANGLE_T angle, track_p * t1,
 			coOrd pos2;
 			pos2 = pos1;
 			track_p tt;
-			if ((tt=OnTrackIgnore(&pos2,FALSE,TRUE,ts))!=NULL) {
+			tt=OnTrackIgnore(&pos2,FALSE,TRUE,ts);
+			if (tt!=NULL) {
 				if (GetTrkGauge(ts) != GetTrkGauge(tt)) {
 					continue;    //Ignore if different gauges
 				}
@@ -2607,7 +2617,8 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o,
 		}
 		return trk;
 	} else {  // Return other track for description (not near to description but nearest to track)
-		if ((trk1 = OnTrack(&pos1, FALSE, FALSE))==NULL) {
+		trk1 = OnTrack(&pos1, FALSE, FALSE);
+		if (trk1==NULL) {
 			return NULL;
 		}
 		if (!QueryTrack( trk1, Q_HAS_DESC )) {
@@ -2668,7 +2679,8 @@ STATUS_T CmdMoveDescription(
 		}
 		mode = moveDescMode
 		       -1;   // -1 means everything, 0 means elevations only, 1 means descriptions only
-		if ((moveDescTrk=FindTrackDescription(pos,&ep,&mode,TRUE,&hidden))!=NULL) {
+		moveDescTrk=FindTrackDescription(pos,&ep,&mode,TRUE,&hidden);
+		if (moveDescTrk!=NULL) {
 			if (mode==0) {
 				InfoMessage(_("Elevation description"));
 			} else {
@@ -2870,7 +2882,8 @@ static void FlipTracks(
 			DrawTrack( trk, &mapD, wDrawColorWhite );
 		}
 		for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
-			if ((trk1 = GetTrkEndTrk(trk,ep)) != NULL &&
+			trk1 = GetTrkEndTrk(trk,ep);
+			if (trk1 != NULL &&
 			    !GetTrkSelected(trk1)) {
 				ep1 = GetEndPtConnectedToMe( trk1, trk );
 				DisconnectTracks( trk, ep, trk1, ep1 );
@@ -3122,7 +3135,8 @@ static STATUS_T SelectTrack(
 	track_p trk;
 	char msg[STR_SIZE];
 
-	if (((trk = OnTrack( &pos, FALSE, FALSE )) == NULL)
+	trk = OnTrack( &pos, FALSE, FALSE );
+	if ((trk == NULL)
 	    && selectZero) {   //If option set and !ctrl or unset and ctrl
 		SetAllTrackSelect( FALSE );							//Unselect all
 		return C_CONTINUE;
@@ -3169,7 +3183,8 @@ static STATUS_T SelectTrack(
 static STATUS_T Activate( coOrd pos)
 {
 	track_p trk;
-	if ((trk = OnTrack( &pos, TRUE, FALSE )) == NULL) {
+	trk = OnTrack( &pos, TRUE, FALSE );
+	if (trk == NULL) {
 		return C_CONTINUE;
 	}
 	if (GetLayerModule(GetTrkLayer(trk))) {
@@ -3362,7 +3377,8 @@ static STATUS_T CmdSelect(
 			}
 		}
 		if (selectedTrackCount>0) {
-			if ((ht = IsInsideABox(pos)) != NULL) {
+			ht = IsInsideABox(pos);
+			if (ht != NULL) {
 				if ((MyGetKeyState()&WKEY_SHIFT)) {
 					CreateMoveAnchor(pos);
 //					showMode = SHOWMOVE;
@@ -3662,7 +3678,8 @@ static STATUS_T CmdSelect(
 		}
 		switch (mode) {
 		case AREA:
-			if ((ht = OnTrack(&pos,FALSE,FALSE))!=NULL) {
+			ht = OnTrack(&pos,FALSE,FALSE);
+			if (ht!=NULL) {
 				if (QueryTrack( ht, Q_CAN_MODIFY_CONTROL_POINTS ) ||
 				    QueryTrack( ht, Q_IS_CORNU ) ||
 				    (QueryTrack( ht, Q_IS_DRAW ) && !QueryTrack( ht, Q_IS_TEXT ))) {
@@ -3718,7 +3735,8 @@ static STATUS_T CmdSelect(
 			PanMenuEnter(I2VP('o'));
 		}
 		if ((action>>8) == '?') {
-			if((moveDescTrk = OnTrack(&pos,FALSE,FALSE)) != NULL) {
+			moveDescTrk = OnTrack(&pos,FALSE,FALSE);
+			if(moveDescTrk != NULL) {
 				moveDescPos = pos;
 			}
 			CallPushDescribe(I2VP(0));

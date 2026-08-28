@@ -555,7 +555,8 @@ static void ComputeForkElev( void )
 	forkCnt = 0;
 	for (i1=0; i1<fork_da.cnt; i1++) {
 		n1 = &fork(i1);
-		if ((trk=n1->trk)) {
+		trk=n1->trk;
+		if (trk) {
 			cnt = GetTrkEndPtCnt(n1->trk);
 			if (cnt<=0) {
 				continue;
@@ -584,7 +585,8 @@ static void ComputeForkElev( void )
 
 			/* Also check my EPs */
 			for (ep=0; ep<cnt; ep++) {
-				if ( (trk1=GetTrkEndTrk(trk,ep)) ) {
+				trk1=GetTrkEndTrk(trk,ep);
+				if ( trk1 ) {
 					SetTrkBits( trk1, TB_PROCESSED );
 				}
 				if (!EndPtIsDefinedElev(trk,ep)) {
@@ -644,7 +646,8 @@ static void RedrawCompGradeElev( track_p trk, EPINX_T ep )
 	if ( mode == ELEV_COMP || mode == ELEV_GRADE ) {
 		pos = GetTrkEndPos( trk, ep );
 		if (!OFF_MAIND( pos, pos ) ) {
-			if ( (trk1=GetTrkEndTrk(trk,ep)) && GetTrkIndex(trk1)<GetTrkIndex(trk) ) {
+			trk1=GetTrkEndTrk(trk,ep);
+			if ( trk1 && GetTrkIndex(trk1)<GetTrkIndex(trk) ) {
 				ep = GetEndPtConnectedToMe( trk1, trk );
 				trk = trk1;
 			}
@@ -1261,7 +1264,8 @@ EXPORT void UpdateTrkEndElev(
 		}
 	}
 	UndoModify( trk );
-	if ( (trk1 = GetTrkEndTrk( trk, ep )) ) {
+	trk1 = GetTrkEndTrk( trk, ep );
+	if ( trk1 ) {
 		UndoModify( trk1 );
 	}
 	DrawEndPt2( &mainD, trk, ep, drawColorWhite );

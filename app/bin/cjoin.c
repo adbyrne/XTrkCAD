@@ -403,7 +403,8 @@ static STATUS_T DoMoveToJoin( coOrd pos )
 		ErrorMessage( MSG_NO_SELECTED_TRK );
 		return C_CONTINUE;
 	}
-	if ( (Dj.inp[Dj.joinMoveState].trk = OnTrack( &pos, TRUE, TRUE )) == NULL ) {
+	Dj.inp[Dj.joinMoveState].trk = OnTrack( &pos, TRUE, TRUE );
+	if ( Dj.inp[Dj.joinMoveState].trk == NULL ) {
 		return C_CONTINUE;
 	}
 	// if (Dj.joinMoveState == 0 && !CheckTrackLayerSilent( Dj.inp[Dj.joinMoveState].trk ) )
@@ -931,7 +932,8 @@ static STATUS_T CmdJoin(
 			return CmdCornu(action, pos);
 		}
 		if ( Dj.state >= 2) { return C_CONTINUE; }
-		if ( (trk = OnTrack( &pos, FALSE, TRUE )) == NULL) {
+		trk = OnTrack( &pos, FALSE, TRUE );
+		if ( trk == NULL) {
 			return C_CONTINUE;
 		}
 		if (!CheckTrackLayer( trk ) ) {
@@ -983,7 +985,8 @@ static STATUS_T CmdJoin(
 		Dj.joinMoveState = 0;
 		/* Populate (Dj.inp[0]) and check for connecting abutting tracks */
 		if (Dj.state == 0) {
-			if ( (Dj.inp[0].trk = OnTrack( &pos, TRUE, TRUE )) == NULL) {
+			Dj.inp[0].trk = OnTrack( &pos, TRUE, TRUE );
+			if ( Dj.inp[0].trk == NULL) {
 				return C_CONTINUE;
 			}
 			if (!CheckTrackLayer( Dj.inp[0].trk ) ) {
@@ -1013,7 +1016,8 @@ static STATUS_T CmdJoin(
 			FormGroupRecord(&joinPG);
 			return C_CONTINUE;
 		} else {
-			if ( (Dj.inp[1].trk = OnTrack( &pos, FALSE, TRUE )) == NULL) {
+			Dj.inp[1].trk = OnTrack( &pos, FALSE, TRUE );
+			if ( Dj.inp[1].trk == NULL) {
 				return C_CONTINUE;
 			}
 			if (!CheckTrackLayer( Dj.inp[1].trk ) ) {

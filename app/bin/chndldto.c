@@ -80,7 +80,8 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 
 	case C_DOWN:
 		if (Dhlt.state == 0) {
-			if ((Dhlt.normalT = OnTrack( &pos, TRUE, TRUE )) == NULL) {
+			Dhlt.normalT = OnTrack( &pos, TRUE, TRUE );
+			if (Dhlt.normalT == NULL) {
 				break;
 			}
 			if ( QueryTrack( Dhlt.normalT, Q_NOT_PLACE_FROGPOINTS ) ) {
@@ -148,7 +149,8 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 		} else if ( Dhlt.state == 2 ) {
 			DYNARR_RESET( trkSeg_t, tempSegs_da );
 			pointP = pos;
-			if ((pointT = OnTrack( &pointP, TRUE, TRUE )) == NULL) {
+			pointT = OnTrack( &pointP, TRUE, TRUE );
+			if (pointT == NULL) {
 				break;
 			}
 			if ( QueryTrack( pointT, Q_NOT_PLACE_FROGPOINTS ) ) {
@@ -174,7 +176,8 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 			}
 			PTRACE(( "r=%c a=%0.1f ", right?'T':'F', angle ))
 			Translate( &off, pointP, pointA+180.0, trackGauge*2.0 );
-			if ((trk = OnTrack( &off, TRUE, TRUE )) == NULL) {
+			trk = OnTrack( &off, TRUE, TRUE );
+			if (trk == NULL) {
 				break;
 			}
 			if ( QueryTrack( trk, Q_NOT_PLACE_FROGPOINTS ) ) {

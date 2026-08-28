@@ -540,7 +540,8 @@ static void PullTracks(
 		} else {
 			ReverseSectionList( 0, cnt1 );
 		}
-		if ((rc=MinimizeCosts())==0) {
+		rc=MinimizeCosts();
+		if (rc==0) {
 			MoveSectionTracks();
 		} else {
 			if (rc == DIST_FAULT) {
@@ -760,8 +761,10 @@ static STATUS_T CmdPull(
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if ((MyGetKeyState() & WKEY_SHIFT) == 0 ) {
 			if (trk1 == NULL) {
-				if ((t1= OnTrack( &pos, FALSE, TRUE )) != NULL) {
-					if ((t_ep1 = PickUnconnectedEndPointSilent( pos, t1 )) < 0) {
+				t1= OnTrack( &pos, FALSE, TRUE );
+				if (t1 != NULL) {
+					t_ep1 = PickUnconnectedEndPointSilent( pos, t1 );
+					if (t_ep1 < 0) {
 						if (QueryTrack(t1, Q_CAN_ADD_ENDPOINTS)) {
 							DrawTrack(t1,&mainD,wDrawColorBlue);
 							t_turn1 = TRUE;
@@ -776,8 +779,10 @@ static STATUS_T CmdPull(
 					if (t_turn1) { DrawTrack(t1,&mainD,wDrawColorBlue); }
 					else { CreateConnectAnchor(t_ep1,t1,FALSE); }
 				}
-				if ((t2= OnTrackIgnore( &pos, FALSE, TRUE, t1 )) != NULL) {
-					if ((t_ep2 = PickUnconnectedEndPointSilent( pos, t2 )) < 0) {
+				t2= OnTrackIgnore( &pos, FALSE, TRUE, t1 );
+				if (t2 != NULL) {
+					t_ep2 = PickUnconnectedEndPointSilent( pos, t2 );
+					if (t_ep2 < 0) {
 						if (QueryTrack(t2, Q_CAN_ADD_ENDPOINTS)) {
 							DrawTrack(t2,&mainD,wDrawColorBlue);
 							t_turn2 = TRUE;
@@ -805,8 +810,10 @@ static STATUS_T CmdPull(
 	case C_LCLICK:
 		if ( (MyGetKeyState() & WKEY_SHIFT) == 0 ) {   //No shift - try and join
 			if (trk1 == NULL) {
-				if ((trk1 = OnTrack( &pos, TRUE, TRUE )) != NULL) {
-					if ((ep1 = PickUnconnectedEndPoint( pos, trk1 )) < 0) {
+				trk1 = OnTrack( &pos, TRUE, TRUE );
+				if (trk1 != NULL) {
+					ep1 = PickUnconnectedEndPoint( pos, trk1 );
+					if (ep1 < 0) {
 						if (QueryTrack(trk1, Q_CAN_ADD_ENDPOINTS)) {
 							turntable = TRUE;
 							ep1 = -1;
@@ -817,12 +824,14 @@ static STATUS_T CmdPull(
 
 				}
 			} else {
-				if ((trk2 = OnTrackIgnore( &pos, TRUE, TRUE, trk1 )) != NULL) {
+				trk2 = OnTrackIgnore( &pos, TRUE, TRUE, trk1 );
+				if (trk2 != NULL) {
 					if (trk2 == trk1) {
 						InfoMessage( _("Same Track! - please select another") );
 						return C_CONTINUE;
 					}
-					if ((ep2 = PickUnconnectedEndPoint( pos, trk2 )) >= 0 ) {
+					ep2 = PickUnconnectedEndPoint( pos, trk2 );
+					if (ep2 >= 0 ) {
 						PullTracks( trk1, ep1, trk2, ep2 );
 						trk1 = NULL;
 						inError = TRUE;
