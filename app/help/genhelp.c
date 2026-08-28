@@ -61,7 +61,7 @@ CompareMessages(const void *msg1, const void *msg2)
 	              ((const struct messageData *)msg2)->line));
 }
 
-int process(mode_e mode, char * json, FILE * outFile)
+int process(mode_e mode, const char * json, FILE * outFile)
 {
 	const cJSON *messages = NULL;
 	const cJSON *messageLine = NULL;

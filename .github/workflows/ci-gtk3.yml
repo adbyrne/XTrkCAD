@@ -361,6 +361,10 @@ jobs:
             --overwrite "MemoryCheckCommandOptions=--error-exitcode=1 --track-origins=yes --leak-check=full"
 
   cppcheck:
+    # app/help + app/tools/listxtp.c added SF #701/#729-730 follow-up (bug-tracker.md Action
+    # Queue item 22) -- these directories were never in scope for any QA job. app/tools/dirent.c
+    # is a vendored public-domain Win32 dirent shim (Kevlin Henney, 1997/2003), excluded the same
+    # way app/wlib/gtk3lib/wrapbox/ is out of scope by construction below.
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -391,7 +395,8 @@ jobs:
             --suppress=missingReturn:app/bin/cturnout.c \
             --suppress=ctuPointerArith:app/bin/cturnout.c \
             -I app/bin -I app/bin/include -I app/wlib/include \
-            app/bin/*.c app/dynstring/*.c
+            app/bin/*.c app/dynstring/*.c \
+            app/help/*.c app/tools/listxtp.c
 
   cppcheck-deep:
     # Report-only: the gating `cppcheck` job above only runs cppcheck's default
@@ -409,9 +414,12 @@ jobs:
     # all 29 instances across both files are this same pattern, not bugs.
     #
     # Vendored-code exclusion list (quality-plan-gtk3v2main-part2.md Phase 8):
-    # this job's file list (app/bin/*.c app/dynstring/*.c) is a non-recursive
-    # shell glob, so it never reaches app/wlib/gtk3lib/wrapbox/ or
-    # app/tools/halibut/ — out of scope by construction, no exclude needed.
+    # this job's file list is a non-recursive shell glob, so it never reaches
+    # app/wlib/gtk3lib/wrapbox/ — out of scope by construction, no exclude
+    # needed (app/tools/halibut/ was deleted, SF #219). app/tools/dirent.c IS
+    # reached by the app/help+app/tools widening below (SF #701/#729-730
+    # follow-up) and is explicitly excluded -- vendored public-domain Win32
+    # dirent shim.
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -445,7 +453,8 @@ jobs:
             --suppress=selfAssignment:app/bin/cdraw.c \
             --suppress=selfAssignment:app/bin/drawgeom.c \
             -I app/bin -I app/bin/include -I app/wlib/include \
-            app/bin/*.c app/dynstring/*.c > cppcheck-deep.txt 2>&1 || true
+            app/bin/*.c app/dynstring/*.c \
+            app/help/*.c app/tools/listxtp.c > cppcheck-deep.txt 2>&1 || true
       - name: Summarise findings
         run: |
           COUNT=$(grep -cE '\[[a-zA-Z]+\]$' cppcheck-deep.txt || echo 0)
@@ -461,18 +470,22 @@ jobs:
 
   clang-tidy:
     # Report-only: conservative check-set (bugprone-*/performance-*/portability-*)
-    # scoped to app/bin+app/dynstring+app/cornu. Excludes bdf2xtp.c and
-    # ppedit_gtk1.c (dead code, not referenced by any CMakeLists.txt target)
-    # and helphelper.c (macOS-only, if(APPLE) in app/bin/CMakeLists.txt) --
-    # none of the three are part of the Linux build's compile_commands.json,
-    # so clang-tidy can't get real compile flags for them and errors out.
+    # scoped to app/bin+app/dynstring+app/cornu+app/help+app/tools (the last
+    # two added SF #701/#729-730 follow-up, bug-tracker.md Action Queue item
+    # 22). Excludes bdf2xtp.c and ppedit_gtk1.c (dead code, not referenced by
+    # any CMakeLists.txt target) and helphelper.c (macOS-only, if(APPLE) in
+    # app/bin/CMakeLists.txt) -- none of the three are part of the Linux
+    # build's compile_commands.json, so clang-tidy can't get real compile
+    # flags for them and errors out. Also excludes app/tools/dirent.c/
+    # dirent.h, a vendored public-domain Win32 dirent shim (Kevlin Henney,
+    # 1997/2003) -- same treatment as the other vendored exclusions below.
     # readability-*/modernize-* deliberately excluded for now -- expected to
     # be high-volume style-only noise on this legacy C codebase.
     #
     # Vendored-code exclusion list (quality-plan-gtk3v2main-part2.md Phase 8):
-    # the `find app/bin app/dynstring app/cornu` root list never reaches
-    # app/wlib/gtk3lib/wrapbox/ or app/tools/halibut/ — out of scope by
-    # construction, no exclude needed.
+    # the `find app/bin app/dynstring app/cornu app/help app/tools` root list
+    # never reaches app/wlib/gtk3lib/wrapbox/ or app/tools/halibut/ (deleted,
+    # SF #219) — out of scope by construction, no exclude needed for those.
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -501,7 +514,7 @@ jobs:
           # compile_commands.json entries each -- clang-tidy's own "[N/139]" progress counter can
           # exceed the 139 filename arguments below by a couple as a result. That's expected, not
           # a sign of a duplicate/broken entry.
-          mapfile -t FILES < <(find app/bin app/dynstring app/cornu -name "*.c" | grep -v unittest | grep -vE 'bdf2xtp\.c|helphelper\.c|ppedit_gtk1\.c')
+          mapfile -t FILES < <(find app/bin app/dynstring app/cornu app/help app/tools -name "*.c" | grep -v unittest | grep -vE 'bdf2xtp\.c|helphelper\.c|ppedit_gtk1\.c|app/tools/dirent\.c')
           clang-tidy --checks='-*,bugprone-*,performance-*,portability-*' -p build "${FILES[@]}" > clang-tidy.txt 2>&1 || true
           # compile_commands.json stores absolute paths, so clang-tidy emits
           # diagnostics as e.g. "/home/runner/work/XTrkCAD/XTrkCAD/app/bin/foo.c:12:...".
@@ -541,10 +554,16 @@ jobs:
     # just editing a comment, so they need a real (if small) code change, not a
     # spell-check suppression.
     #
-    # Vendored-code exclusion: app/wlib/gtk3lib/wrapbox/ and app/tools/halibut/ are
-    # skipped via --skip (same vendored list as astyle-check/quality-plan-gtk3v2main-part2.md
-    # Phase 8) -- app/tools/halibut/ isn't reached by this job's scope anyway, but
-    # app/wlib is, so wrapbox/ does need the explicit skip here unlike cppcheck-deep.
+    # Vendored-code exclusion: app/wlib/gtk3lib/wrapbox/ is skipped via --skip (same
+    # vendored list as astyle-check/quality-plan-gtk3v2main-part2.md Phase 8); the
+    # */halibut/* skip pattern below is now a harmless no-op (app/tools/halibut/ was
+    # deleted, SF #219) kept only so a stray halibut/ directory can't silently reappear
+    # unscanned. app/wlib needs its own explicit wrapbox/ skip unlike cppcheck-deep,
+    # since this job's scope is directory-based, not a non-recursive glob.
+    # app/help+app/tools added SF #701/#729-730 follow-up (bug-tracker.md Action Queue
+    # item 22) -- being directory-based this also now scans messages.in/tooltiptext.json/
+    # xtrkcad.tip (real content) and mkimage1/mkimage3/HACKING (low-value but harmless);
+    # app/tools/dirent.c/dirent.h skipped as vendored, same as the other two jobs above.
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -553,8 +572,8 @@ jobs:
         run: sudo apt-get update -q && sudo apt-get install -y codespell
       - name: Run codespell (non-fatal)
         run: |
-          codespell app/bin app/wlib \
-            --skip='*/wrapbox/*,*/halibut/*,*.ai' \
+          codespell app/bin app/wlib app/help app/tools \
+            --skip='*/wrapbox/*,*/halibut/*,*.ai,*/dirent.c,*/dirent.h' \
             --ignore-words=.github/codespell-ignore.txt \
             -q 3 > codespell.txt 2>&1 || true
       - name: Summarise findings
@@ -613,10 +632,11 @@ jobs:
           fi
 
   astyle-check:
-    # Gating: fails if any tracked app/bin or app/wlib file is not conformant
-    # with app/lib/astylerc. astyle's --dry-run always exits 0, so the gate
-    # parses its output for "Formatted" lines rather than relying on the exit
-    # code.
+    # Gating: fails if any tracked app/bin, app/wlib, app/help, or app/tools file is not
+    # conformant with app/lib/astylerc (the last two added SF #701/#729-730 follow-up,
+    # bug-tracker.md Action Queue item 22; confirmed 0 findings before widening). astyle's
+    # --dry-run always exits 0, so the gate parses its output for "Formatted" lines rather
+    # than relying on the exit code.
     #
     # Vendored-code exclusion list (quality-plan-gtk3v2main-part2.md Phase 8
     # — encoded here so it doesn't need to be re-derived by hand each phase):
@@ -625,9 +645,11 @@ jobs:
     #     --exclude=wrapbox (matches the directory; verified empirically that
     #     astyle's --exclude matches full path components, not substrings, so
     #     this can't accidentally match an unrelated file).
-    #   - app/tools/halibut/: vendored doc-processing tool. Never in scope
-    #     here by construction — this job's file globs only cover app/bin and
-    #     app/wlib, and halibut lives under app/tools.
+    #   - app/tools/halibut/: vendored doc-processing tool. Deleted (SF #219);
+    #     kept documented here in case a reviewer wonders why it's absent.
+    #   - app/tools/dirent.c/dirent.h: vendored public-domain Win32 dirent
+    #     shim (Kevlin Henney, 1997/2003), excluded via --exclude=dirent.c/
+    #     --exclude=dirent.h now that app/tools is in this job's scope.
     #   - unittest/ dirs: excluded separately (see quality-plan-gtk3v2main.md
     #     Phase 0) — some unittest sources are deliberately non-conformant.
     #
@@ -658,7 +680,9 @@ jobs:
           OUTPUT=$("$ASTYLE" --options=app/lib/astylerc --dry-run -Q --recursive --ignore-exclude-errors \
             --exclude=wrapbox \
             --exclude=unittest \
-            "app/bin/*.c" "app/bin/*.h" "app/wlib/*.c" "app/wlib/*.h" 2>&1 | grep '^Formatted' || true)
+            --exclude=dirent.c \
+            --exclude=dirent.h \
+            "app/bin/*.c" "app/bin/*.h" "app/wlib/*.c" "app/wlib/*.h" "app/help/*.c" "app/help/*.h" "app/tools/*.c" "app/tools/*.h" 2>&1 | grep '^Formatted' || true)
           if [ -n "$OUTPUT" ]; then
             echo "$OUTPUT"
             echo "::error::Non-conformant files found. Run: astyle --options=app/lib/astylerc <file>"
@@ -697,7 +721,9 @@ jobs:
           OUTPUT=$("$ASTYLE" --options=app/lib/astylerc --dry-run -Q --recursive --ignore-exclude-errors \
             --exclude=wrapbox \
             --exclude=unittest \
-            "app/bin/*.c" "app/bin/*.h" "app/wlib/*.c" "app/wlib/*.h" 2>&1 | grep '^Formatted' || true)
+            --exclude=dirent.c \
+            --exclude=dirent.h \
+            "app/bin/*.c" "app/bin/*.h" "app/wlib/*.c" "app/wlib/*.h" "app/help/*.c" "app/help/*.h" "app/tools/*.c" "app/tools/*.h" 2>&1 | grep '^Formatted' || true)
           if [ -n "$OUTPUT" ]; then
             echo "$OUTPUT"
             echo "::warning::macOS astyle disagrees with the pinned Linux astyle-check gate on the files above — see job comment for context."
@@ -739,7 +765,9 @@ jobs:
           OUTPUT=$("$ASTYLE" --options=app/lib/astylerc --dry-run -Q --recursive --ignore-exclude-errors \
             --exclude=wrapbox \
             --exclude=unittest \
-            "app/bin/*.c" "app/bin/*.h" "app/wlib/*.c" "app/wlib/*.h" 2>&1 | grep '^Formatted' || true)
+            --exclude=dirent.c \
+            --exclude=dirent.h \
+            "app/bin/*.c" "app/bin/*.h" "app/wlib/*.c" "app/wlib/*.h" "app/help/*.c" "app/help/*.h" "app/tools/*.c" "app/tools/*.h" 2>&1 | grep '^Formatted' || true)
           if [ -n "$OUTPUT" ]; then
             echo "$OUTPUT"
             echo "::warning::Windows/MSYS2 astyle disagrees with the pinned Linux astyle-check gate on the files above — see job comment for context."
