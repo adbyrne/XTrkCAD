@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- Created with Cambalache 0.96.3 -->
+<!-- Created with Cambalache 1.0.2 -->
 <interface>
   <!-- interface-name appwindow.ui -->
   <requires lib="gtk+" version="3.20"/>
@@ -10,20 +10,6 @@
       <column type="gpointer"/>
       <column type="gchararray"/>
     </columns>
-    <!--data>
-      <row>
-        <col id="3">Tiny</col>
-      </row>
-      <row>
-        <col id="3">Small</col>
-      </row>
-      <row>
-        <col id="3">Medium</col>
-      </row>
-      <row>
-        <col id="3">Large</col>
-      </row>
-    </data-->
   </object>
   <object class="GtkListStore" id="benchorientlist">
     <columns>
@@ -42,6 +28,14 @@
     </columns>
   </object>
   <object class="GtkListStore" id="fontsizeList">
+    <columns>
+      <column type="gboolean"/>
+      <column type="gpointer"/>
+      <column type="gpointer"/>
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="newcarlist">
     <columns>
       <column type="gboolean"/>
       <column type="gpointer"/>
@@ -1207,14 +1201,14 @@
                 </child>
                 <child>
                   <object class="GtkBox">
-                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="spacing">6</property>
+                    <property name="visible">True</property>
                     <child>
                       <object class="GtkLabel">
-                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="label" translatable="yes">Length</property>
+                        <property name="visible">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1224,8 +1218,8 @@
                     </child>
                     <child>
                       <object class="GtkEntry" id="dms-length">
-                        <property name="visible">True</property>
                         <property name="can-focus">True</property>
+                        <property name="visible">True</property>
                         <property name="width-chars">6</property>
                       </object>
                       <packing>
@@ -1236,9 +1230,9 @@
                     </child>
                     <child>
                       <object class="GtkLabel">
-                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="label" translatable="yes">Angle</property>
+                        <property name="visible">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1248,8 +1242,8 @@
                     </child>
                     <child>
                       <object class="GtkEntry" id="dms-angle">
-                        <property name="visible">True</property>
                         <property name="can-focus">True</property>
+                        <property name="visible">True</property>
                         <property name="width-chars">6</property>
                       </object>
                       <packing>
@@ -1266,14 +1260,14 @@
                 </child>
                 <child>
                   <object class="GtkBox">
-                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="spacing">6</property>
+                    <property name="visible">True</property>
                     <child>
                       <object class="GtkLabel">
-                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="label" translatable="yes">Radius</property>
+                        <property name="visible">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1283,8 +1277,8 @@
                     </child>
                     <child>
                       <object class="GtkEntry" id="dmu-radius">
-                        <property name="visible">True</property>
                         <property name="can-focus">True</property>
+                        <property name="visible">True</property>
                         <property name="width-chars">6</property>
                       </object>
                       <packing>
@@ -1295,9 +1289,9 @@
                     </child>
                     <child>
                       <object class="GtkLabel">
-                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="label" translatable="yes">Angle</property>
+                        <property name="visible">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1307,8 +1301,8 @@
                     </child>
                     <child>
                       <object class="GtkEntry" id="dmu-angle">
-                        <property name="visible">True</property>
                         <property name="can-focus">True</property>
+                        <property name="visible">True</property>
                         <property name="width-chars">6</property>
                       </object>
                       <packing>
@@ -1325,14 +1319,14 @@
                 </child>
                 <child>
                   <object class="GtkBox">
-                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="spacing">6</property>
+                    <property name="visible">True</property>
                     <child>
                       <object class="GtkLabel">
-                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="label" translatable="yes">Radius</property>
+                        <property name="visible">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1342,8 +1336,8 @@
                     </child>
                     <child>
                       <object class="GtkEntry" id="dmi-radius">
-                        <property name="visible">True</property>
                         <property name="can-focus">True</property>
+                        <property name="visible">True</property>
                         <property name="width-chars">6</property>
                       </object>
                       <packing>
@@ -1354,9 +1348,9 @@
                     </child>
                     <child>
                       <object class="GtkLabel">
-                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="label" translatable="yes">X3</property>
+                        <property name="visible">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1366,8 +1360,8 @@
                     </child>
                     <child>
                       <object class="GtkEntry" id="X4">
-                        <property name="visible">True</property>
                         <property name="can-focus">True</property>
+                        <property name="visible">True</property>
                         <property name="width-chars">6</property>
                       </object>
                       <packing>
@@ -1384,14 +1378,14 @@
                 </child>
                 <child>
                   <object class="GtkBox">
-                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="spacing">6</property>
+                    <property name="visible">True</property>
                     <child>
                       <object class="GtkLabel">
-                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="label" translatable="yes">Seg Lth</property>
+                        <property name="visible">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1401,8 +1395,8 @@
                     </child>
                     <child>
                       <object class="GtkEntry" id="dmp-length">
-                        <property name="visible">True</property>
                         <property name="can-focus">True</property>
+                        <property name="visible">True</property>
                         <property name="width-chars">6</property>
                       </object>
                       <packing>
@@ -1413,9 +1407,9 @@
                     </child>
                     <child>
                       <object class="GtkLabel">
-                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="label" translatable="yes">Reg Ang</property>
+                        <property name="visible">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1425,8 +1419,8 @@
                     </child>
                     <child>
                       <object class="GtkEntry" id="dmp-angle">
-                        <property name="visible">True</property>
                         <property name="can-focus">True</property>
+                        <property name="visible">True</property>
                         <property name="width-chars">6</property>
                       </object>
                       <packing>
@@ -1443,14 +1437,14 @@
                 </child>
                 <child>
                   <object class="GtkBox">
-                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="spacing">6</property>
+                    <property name="visible">True</property>
                     <child>
                       <object class="GtkLabel">
-                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="label" translatable="yes">Width</property>
+                        <property name="visible">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1460,8 +1454,8 @@
                     </child>
                     <child>
                       <object class="GtkEntry" id="dmr-width">
-                        <property name="visible">True</property>
                         <property name="can-focus">True</property>
+                        <property name="visible">True</property>
                         <property name="width-chars">6</property>
                       </object>
                       <packing>
@@ -1472,9 +1466,9 @@
                     </child>
                     <child>
                       <object class="GtkLabel">
-                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="label" translatable="yes">Height</property>
+                        <property name="visible">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1484,8 +1478,8 @@
                     </child>
                     <child>
                       <object class="GtkEntry" id="dmr-height">
-                        <property name="visible">True</property>
                         <property name="can-focus">True</property>
+                        <property name="visible">True</property>
                         <property name="width-chars">6</property>
                       </object>
                       <packing>
@@ -1498,6 +1492,52 @@
                   <packing>
                     <property name="name">drawModRect</property>
                     <property name="position">22</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="can-focus">False</property>
+                    <property name="spacing">6</property>
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkLabel" id="newcardesc">
+                        <property name="can-focus">False</property>
+                        <property name="label">label text</property>
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="newcarsel">
+                        <property name="can-focus">True</property>
+                        <property name="hexpand">True</property>
+                        <property name="visible">True</property>
+                        <property name="model">newcarlist</property>
+                        <child>
+                          <object class="GtkCellRendererText">
+                            <property name="max-width-chars">0</property>
+                            <property name="width-chars">40</property>
+                          </object>
+                          <!-- Custom child fragments -->
+                          <attributes>
+                            <attribute name="text">3</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">newCar</property>
+                    <property name="position">23</property>
                   </packing>
                 </child>
                 <child>

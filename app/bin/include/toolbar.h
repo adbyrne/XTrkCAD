@@ -48,6 +48,7 @@ extern void ToolbarUpdateButton(wIndex_t button, wIndex_t command,
                                 wIcon_p icon, const char* helpKey, void* context);
 extern void ToolbarLoadConfig(void);
 extern void ToolbarControlAdd(wControl_p control, long options, int cmdGroup);
+extern void ToolbarGapAdd(wControl_p control, long options, int cmdGroup);
 
 
 wIndex_t AddCommand(procCommand_t cmdProc, const char* helpKey,

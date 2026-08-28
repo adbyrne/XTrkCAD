@@ -153,23 +153,38 @@ EXPORT wIndex_t GetCurrentCommand()
 	return curCommand;
 }
 
+EXPORT void SetCurrentCommand(wIndex_t inx)
+{
+	curCommand = inx;
+}
+
 EXPORT void Reset(void)
 {
 	if (recordF) {
 		fprintf(recordF, "RESET\n");
 		fflush(recordF);
 	}
-	LOG(log_command, 2,
-	    ( "COMMAND CANCEL %s\n", commandList[curCommand].helpKey ))
-	commandList[curCommand].cmdProc( C_CANCEL, zero);
-	if (commandList[curCommand].buttInx >= 0) {
-		ToolbarButtonBusy(commandList[curCommand].buttInx, FALSE);
-	}
-	curCommand = (preSelect ? selectCmdInx : describeCmdInx);
-	wSetCursor(mainD.d, preSelect ? defaultCursor : wCursorQuestion);
-	commandContext = commandList[curCommand].context;
-	if (commandList[curCommand].buttInx >= 0) {
-		ToolbarButtonBusy(commandList[curCommand].buttInx, TRUE);
+
+	// Train Mode is a persistent mode, not a one-shot command - a nested
+	// dialog opened from within it (eg. a car's Properties) must not be
+	// able to cancel it just by closing itself through this generic
+	// reset path. Only an explicit mode exit (CmdTrainExit) may do that,
+	// and it calls CmdTrain(C_CANCEL, ...) directly before invoking
+	// Reset(), so by the time Reset() runs here programMode is already
+	// back to MODE_DESIGN and this guard no longer applies.
+	if (programMode != MODE_TRAIN) {
+		LOG(log_command, 2,
+		    ( "COMMAND CANCEL %s\n", commandList[curCommand].helpKey ))
+		commandList[curCommand].cmdProc( C_CANCEL, zero);
+		if (commandList[curCommand].buttInx >= 0) {
+			ToolbarButtonBusy(commandList[curCommand].buttInx, FALSE);
+		}
+		curCommand = (preSelect ? selectCmdInx : describeCmdInx);
+		wSetCursor(mainD.d, preSelect ? defaultCursor : wCursorQuestion);
+		commandContext = commandList[curCommand].context;
+		if (commandList[curCommand].buttInx >= 0) {
+			ToolbarButtonBusy(commandList[curCommand].buttInx, TRUE);
+		}
 	}
 
 	DYNARR_RESET( trkSeg_t, tempSegs_da );
@@ -180,9 +195,12 @@ EXPORT void Reset(void)
 	DoRedraw(); // Reset
 	EnableCommands();
 	ResetMouseState();
-	LOG(log_command, 1,
-	    ( "COMMAND RESET %s\n", commandList[curCommand].helpKey ))
-	(void) commandList[curCommand].cmdProc( C_START, zero);
+
+	if (programMode != MODE_TRAIN) {
+		LOG(log_command, 1,
+		    ( "COMMAND RESET %s\n", commandList[curCommand].helpKey ))
+		(void) commandList[curCommand].cmdProc( C_START, zero);
+	}
 }
 
 /**

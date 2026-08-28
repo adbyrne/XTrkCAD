@@ -407,6 +407,46 @@ static void HandleArrowKeys(wAction_t action)
 	return;
 }
 
+/**
+ * Escape characters that are special to Pango markup (&, <, >, ', ")
+ * so that arbitrary part-file text (e.g. manufacturer names containing
+ * '&') can be embedded safely in a markup string.
+ */
+static char* EscapeMarkupText(const char* in)
+{
+	DynString escaped;
+	DynStringMalloc(&escaped, strlen(in) + 1);
+
+	for (const char* p = in; *p; p++) {
+		switch (*p) {
+		case '&':
+			DynStringCatCStr(&escaped, "&amp;");
+			break;
+		case '<':
+			DynStringCatCStr(&escaped, "&lt;");
+			break;
+		case '>':
+			DynStringCatCStr(&escaped, "&gt;");
+			break;
+		case '\'':
+			DynStringCatCStr(&escaped, "&apos;");
+			break;
+		case '"':
+			DynStringCatCStr(&escaped, "&quot;");
+			break;
+		default: {
+			char buf[2] = { *p, '\0' };
+			DynStringCatCStr(&escaped, buf);
+			break;
+		}
+		}
+	}
+
+	char* result = MyStrdup(DynStringToCStr(&escaped));
+	DynStringFree(&escaped);
+	return result;
+}
+
 static void HandleTooltip(wControl_p control, int inx)
 {
 	hotBarMap_t* tbm = &hotBarMap(inx);
@@ -431,19 +471,26 @@ static void HandleTooltip(wControl_p control, int inx)
 	partno = strtok(NULL, "\t");
 	if (!partno) { partno = ""; }
 
+	char* escManufacturer = EscapeMarkupText(manufacturer);
+	char* escDescription = EscapeMarkupText(description);
+	char* escPartno = EscapeMarkupText(partno);
+
 	DynStringPrintf(&hotbarContextMenu.tooltip,
 	                "%s\r<span color=\"grey\" font_scale=\"small-caps\">%s</span>\r"
 	                "%s\r<span color=\"grey\" font_scale=\"small-caps\">%s</span>\r"
 	                "%s\r<span color=\"grey\" font_scale=\"small-caps\">%s</span>",
-	                manufacturer,
+	                escManufacturer,
 	                N_("Manufacturer"),
-	                description,
+	                escDescription,
 	                N_("Description"),
-	                partno,
+	                escPartno,
 	                N_("Part #"));
 
 	wControlSetCustomTooltip( control, DynStringToCStr(&hotbarContextMenu.tooltip));
 
+	MyFree(escManufacturer);
+	MyFree(escDescription);
+	MyFree(escPartno);
 	MyFree(copyOfTitle);
 }
 

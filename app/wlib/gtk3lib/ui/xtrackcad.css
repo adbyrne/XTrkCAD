@@ -102,3 +102,7 @@ framed box box.framed {
     border-radius: 6px;
     padding: 6px;
 }
+
+button.mono label {
+    font-family: monospace;
+}
