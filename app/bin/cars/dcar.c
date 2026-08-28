@@ -148,15 +148,19 @@ EXPORT void AddHotBarCarDesc(void)
 	}
 }
 
+#define I_NEWCARSEL  (0)
+#define I_NEWCARDESC (1)
+
 static long newCarInx;
 static paramData_t newCarPLs[] = {
-	{ PD_DROPLIST, &newCarInx, "index", PDO_DLGWIDE, I2VP(400), N_("Item") }
+	{ PD_DROPLIST, &newCarInx, "newcarsel", PDO_DLGWIDE, I2VP(400), N_("Item") },
+	{ PD_MESSAGE, NULL, "newcardesc", 0, NULL }
 };
 static void CarItemHotbarUpdate(
         paramGroup_p pg,
         int inx,
         void* data);
-static paramGroup_t newCarPG = { "train-newcar", 0, newCarPLs, COUNT(newCarPLs),
+static paramGroup_t newCarPG = { "newCar", PGO_FULLDIALOGFROMBUILDER, newCarPLs, COUNT(newCarPLs),
                                  NULL, NULL, NULL, 0L, CarItemHotbarUpdate
                                };
 EXPORT wControl_p newCarControls[2];
@@ -165,10 +169,36 @@ static char newCarLabel1[STR_SIZE];
 static char* newCarLabels[2] = { newCarLabel1, NULL };
 #endif
 
+/**
+ * Format a car item's Description and Manufacturer, separated by a slash,
+ * for display in the "newcardesc" status bar field.
+ *
+ * \param item  IN  car item
+ * \param buf   OUT buffer, at least STR_LONG_SIZE bytes
+ * \return      buf
+ */
+
+static char* FormatCarDescManuf(carItem_p item, char* buf)
+{
+	tabString_t tabs[7];
+	char* cp;
+
+	TabStringExtract(item->title, 7, tabs);
+	// item->title tab order is manuf, proto, desc, partno, roadname,
+	// repmark, number (see CommitBuildTitle()) - T_PROTO is the field
+	// that actually carries the car's descriptive name; T_DESC is a
+	// separate, usually-empty free-text field.
+	cp = TabStringCpy(buf, &tabs[T_PROTO]);
+	*cp++ = '/';
+	TabStringCpy(cp, &tabs[T_MANUF]);
+	return buf;
+}
+
 void CarUpdateHotbarList()
 {
-	wWinPix_t w, h;
 	char descBuf[STR_LONG_SIZE];
+	char descManufBuf[STR_LONG_SIZE];
+	carItem_p firstItem = NULL;
 
 	/** \todo extract the following code to its own function and put into dcar.c */
 	wListClear((wList_p)newCarPLs[0].control);
@@ -179,21 +209,19 @@ void CarUpdateHotbarList()
 		if (item->car && !IsTrackDeleted(item->car)) {
 			continue;
 		}
+		if (firstItem == NULL) {
+			firstItem = item;
+		}
 		cp = CarItemDescribe(item, 0, NULL, descBuf);
-		wListAddValue((wList_p)newCarPLs[0].control, cp, NULL, I2VP(inx));
+		wComboBoxAddValue(newCarPLs[0].control, cp, I2VP(inx));
 	}
 	/*wListSetValue( (wList_p)newCarPLs[0].control, "Select a car" );*/
 	wListSetIndex((wList_p)newCarPLs[0].control, 0);
 	strcpy(newCarLabel1, _("Select"));
 	FormLoadSingleControl(&newCarPG, 0);
-	// InfoSubstituteControls(newCarControls, newCarLabels);
-
-	wWinGetSize(mainW, &w, &h);
-	w -= wControlGetPosX(newCarControls[0]) + 4;
-	if (w > 20) {
-		wListSetSize((wList_p)newCarControls[0], w,
-		             wControlGetHeight(newCarControls[0]));
-	}
+	InfoSetControls(mainW, "newCar");
+	FormLoadMessage(&newCarPG, I_NEWCARDESC,
+	                firstItem ? FormatCarDescManuf(firstItem, descManufBuf) : "");
 }
 
 
@@ -205,11 +233,12 @@ static char* CarItemHotbarProc(
 {
 	wIndex_t carItemInx = (wIndex_t)VP2L(data);
 	carItem_p item;
+	carItem_p firstItem;
 	wIndex_t inx;
 	long mode;
 	char* cp;
-	wWinPix_t w, h;
 	char descBuf[STR_LONG_SIZE];
+	char descManufBuf[STR_LONG_SIZE];
 
 	CHECK(carItemInx < carItemHotbar_da.cnt);
 	item = carItemHotbar(carItemInx);
@@ -221,6 +250,7 @@ static char* CarItemHotbarProc(
 		currCarItemPtr = item;
 		mode = carHotbarModes[carHotbarModeInx];
 		if ((mode & 0xF000) == 0) {
+			firstItem = NULL;
 			wListClear((wList_p)newCarPLs[0].control);
 			for (inx = carItemInx;
 			     inx < carItemHotbar_da.cnt && (inx == carItemInx
@@ -230,8 +260,11 @@ static char* CarItemHotbarProc(
 				if (item->car && !IsTrackDeleted(item->car)) {
 					continue;
 				}
+				if (firstItem == NULL) {
+					firstItem = item;
+				}
 				cp = CarItemDescribe(item, mode, NULL, descBuf);
-				wListAddValue((wList_p)newCarPLs[0].control, cp, NULL, I2VP(inx));
+				wComboBoxAddValue(newCarPLs[0].control, cp, I2VP(inx));
 			}
 			/*wListSetValue( (wList_p)newCarPLs[0].control, "Select a car" );*/
 			wListSetIndex((wList_p)newCarPLs[0].control, 0);
@@ -241,13 +274,9 @@ static char* CarItemHotbarProc(
 			FormLoadControls(&newCarPG);
 			FormGroupRecord(&newCarPG);
 
-			// InfoSubstituteControls(newCarControls, newCarLabels);
-			wWinGetSize(mainW, &w, &h);
-			w -= wControlGetPosX(newCarControls[0]) + 4;
-			if (w > 20) {
-				wListSetSize((wList_p)newCarControls[0], w,
-				             wControlGetHeight(newCarControls[0]));
-			}
+			InfoSetControls(mainW, "newCar");
+			FormLoadMessage(&newCarPG, I_NEWCARDESC,
+			                firstItem ? FormatCarDescManuf(firstItem, descManufBuf) : "");
 		} else {
 			// InfoSubstituteControls(NULL, NULL);
 			cp = CarItemDescribe(item, 0, NULL, descBuf);
@@ -278,7 +307,8 @@ static void CarItemHotbarUpdate(
 {
 	wIndex_t carItemInx;
 	carItem_p item;
-	if (inx == 0) {
+	char descManufBuf[STR_LONG_SIZE];
+	if (inx == I_NEWCARSEL) {
 		carItemInx = (wIndex_t) * (long*)data;
 		if (carItemInx < 0) {
 			return;
@@ -289,6 +319,7 @@ static void CarItemHotbarUpdate(
 		item = carItemHotbar(carItemInx);
 		if (item != NULL) {
 			currCarItemPtr = item;
+			FormLoadMessage(pg, I_NEWCARDESC, FormatCarDescManuf(item, descManufBuf));
 		}
 	}
 }

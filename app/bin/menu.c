@@ -906,7 +906,7 @@ static void AddGapAfterGroup(int prevGroup)
 
 	if (separator) {
 		long option = (prevGroup & BG_BIGGAP) ? BO_BIGGAP : BO_GAP;
-		ToolbarControlAdd(separator, option, prevGroup);
+		ToolbarGapAdd(separator, option, prevGroup);
 	}
 }
 

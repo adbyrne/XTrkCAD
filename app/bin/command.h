@@ -105,6 +105,7 @@ const char * GetCurCommandName( void );
 EXPORT bool IsCommandEnabled(long mode, long options);
 void EnableCommands( void );
 wIndex_t GetCurrentCommand(void);
+void SetCurrentCommand(wIndex_t inx);
 void Reset( void );
 wBool_t DoCurCommand( wAction_t, coOrd );
 int ConfirmReset( BOOL_T );

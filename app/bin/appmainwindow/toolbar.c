@@ -45,7 +45,7 @@ struct sToolbarState {
 static void InitializeToolbarDialog(void);
 static void ToolbarChange(long changes);
 static void ToolbarOk(void* unused);
-static void ToolbarButtonPlace(struct sToolbarState* tbState, wIndex_t inx);
+static wBool_t ToolbarButtonPlace(struct sToolbarState* tbState, wIndex_t inx);
 static void SaveToolbarConfig(void);
 
 // toolbar properties
@@ -83,6 +83,7 @@ static struct {
 	long options;
 	int group;
 	wIndex_t cmdInx;
+	wBool_t isGap;
 } buttonList[BUTTON_MAX];
 
 EXPORT int buttonCnt = 0; // TODO-misc-refactor
@@ -159,7 +160,7 @@ InitializeToolbarDialog(void)
 static void ToolbarChange(long changes)
 {
 	if ((changes & CHANGE_TOOLBAR)) {
-		//MainProc(mainW, wResize_e, NULL, NULL);
+		ToolbarLayout(NULL);
 	}
 }
 
@@ -281,9 +282,10 @@ IsButtonVisible(int group, long mode, long options, long layerButtons)
  * Get visibility of a button and display it.
  *
  * \param inx   index into button list
+ * \return      TRUE if the button was made visible
  */
 
-static void ToolbarButtonPlace(struct sToolbarState *tbState, wIndex_t inx)
+static wBool_t ToolbarButtonPlace(struct sToolbarState *tbState, wIndex_t inx)
 {
 	int currentGroup = buttonList[inx].group;
 
@@ -300,22 +302,26 @@ static void ToolbarButtonPlace(struct sToolbarState *tbState, wIndex_t inx)
 			    GetLayerHidden(tbState->layerButton - FIXEDLAYERCONTROLS)) {
 				wControlShow(buttonList[inx].control, FALSE);
 				tbState->layerButton++;
+				return FALSE;
 			} else {
 				// count number of shown layer buttons
 				if (currentGroup == BG_LAYER) {
 					tbState->layerButton++;
 				}
 				wControlShow(buttonList[inx].control, TRUE);
+				return TRUE;
 			}
 		} else {
 			wControlShow(buttonList[inx].control, FALSE);
 		}
 	}
+	return FALSE;
 }
 
 EXPORT void ToolbarLayout(void* data)
 {
 	int inx;
+	wIndex_t pendingGap = -1;
 	struct sToolbarState state = {
 		.previousGroup = 0,
 		.nextX = 0,
@@ -324,7 +330,30 @@ EXPORT void ToolbarLayout(void* data)
 	};
 
 	for (inx = 0; inx < buttonCnt; inx++) {
-		ToolbarButtonPlace(&state, inx);
+		if (buttonList[inx].isGap) {
+			// Gaps are resolved once we know whether a visible button
+			// follows - collapse a run of gaps left behind by several
+			// consecutive hidden groups (eg. in Train Mode) down to the
+			// single gap immediately before the next visible button.
+			if (pendingGap >= 0 && buttonList[pendingGap].control) {
+				wControlShow(buttonList[pendingGap].control, FALSE);
+			}
+			if (buttonList[inx].control) {
+				wControlShow(buttonList[inx].control, FALSE);
+			}
+			pendingGap = inx;
+			continue;
+		}
+		if (ToolbarButtonPlace(&state, inx) && pendingGap >= 0) {
+			if (buttonList[pendingGap].control) {
+				wControlShow(buttonList[pendingGap].control, TRUE);
+			}
+			pendingGap = -1;
+		}
+	}
+	// No trailing gap needed once the last real button has been placed.
+	if (pendingGap >= 0 && buttonList[pendingGap].control) {
+		wControlShow(buttonList[pendingGap].control, FALSE);
 	}
 
 	if (ISBITSET(toolbarSet, BG_HOTBAR)) {
@@ -412,7 +441,26 @@ EXPORT void ToolbarControlAdd(wControl_p control, long options, int cmdGroup)
 	//buttonList[buttonCnt].y = 0;
 	buttonList[buttonCnt].control = control;
 	buttonList[buttonCnt].cmdInx = -1;
+	buttonList[buttonCnt].isGap = FALSE;
 	buttonCnt++;
+}
+
+/**
+ * Add a gap (separator) control to the toolbar. Kept distinct from
+ * ToolbarControlAdd() because the BO_GAP/BO_BIGGAP width flags share their
+ * bit positions with unrelated IC_* command option flags - a gap is marked
+ * explicitly here instead of being inferred from `options`, so ToolbarLayout
+ * can reliably tell gaps apart from ordinary command buttons.
+ *
+ * \param control   the separator control to add
+ * \param options   BO_GAP or BO_BIGGAP
+ * \param cmdGroup  group of the command preceding the gap
+ */
+
+EXPORT void ToolbarGapAdd(wControl_p control, long options, int cmdGroup)
+{
+	ToolbarControlAdd(control, options, cmdGroup);
+	buttonList[buttonCnt - 1].isGap = TRUE;
 }
 
 /**
