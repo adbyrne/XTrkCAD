@@ -50,6 +50,7 @@ static wDrawBitMap_p cross0_bm;
 #define DEFAULTGRIDSPACING (1.0)
 
 EXPORT void MapGrid(
+        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
         coOrd orig,
         coOrd size,
         ANGLE_T angle,

@@ -805,6 +805,7 @@ static wIndex_t FindLoco(
 static void SpeedRedraw(
         wDraw_p d,
         void * context,
+        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
         wWinPix_t w,
         wWinPix_t h)
 {

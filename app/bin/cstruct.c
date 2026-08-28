@@ -603,6 +603,7 @@ static void structureChange( long changes )
 
 
 
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 static void RedrawStructure( wControl_p d, void * context, wWinPix_t x,
                              wWinPix_t y )
 {

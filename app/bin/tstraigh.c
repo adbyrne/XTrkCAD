@@ -944,6 +944,7 @@ static void FlipStraight(
 static BOOL_T MakeParallelStraight(
         track_p trk,
         coOrd pos,
+        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
         DIST_T sep,
         DIST_T factor,
         track_p * newTrkR,

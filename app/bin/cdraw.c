@@ -2599,6 +2599,7 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 static BOOL_T MakeParallelDraw(
         track_p trk,
         coOrd pos,
+        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
         DIST_T sep,
         DIST_T factor,
         track_p * newTrkR,

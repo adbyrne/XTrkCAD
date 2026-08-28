@@ -79,6 +79,7 @@ static void NoDrawPoly( drawCmd_p d, int cnt, coOrd * pts, int * types,
                         wDrawColor color, wDrawWidth width, drawFill_e eFillOpt ) {}
 static void NoDrawFillCircle( drawCmd_p d, coOrd p, DIST_T r,
                               wDrawColor color ) {}
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 static void NoDrawRectangle( drawCmd_p d, coOrd orig, coOrd size,
                              wDrawColor color, drawFill_e eFill ) {}
 
