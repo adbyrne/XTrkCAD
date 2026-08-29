@@ -60,8 +60,8 @@ cleanup() {
 		hg revert -C $HERE/app/bin/smalldlg.c
 	fi
 	# remove changes based on versioning hash
-	hg revert -C $HERE/app/lib/xtrkcad.metainfo.xml
-	hg revert -C $HERE/app/lib/xtrkcad.flatpak.desktop
+	hg revert -C $HERE/app/lib/xtrkcad.metainfo.xml 2>/dev/null
+	hg revert -C $HERE/app/lib/xtrkcad.flatpak.desktop 2>/dev/null
 }
 
 trap cleanup 0 1 2 3 15 21 22
@@ -84,10 +84,8 @@ command -v flatpak-builder >/dev/null 2>&1 || {
 #   D E B U G   B U I L D
 #####################################################################
 if [ "$1" = "-d" ]; then
-	SF_VERSION=$(hg branch)
-	CHANGESETREV=$(hg log -r . -T '{rev}')
-	CHANGESET=$(hg log -r . -T '{shortest(node,12)}')
-	sed -i "s/^#define DESCRIPTION .*/#define DESCRIPTION N_(\"Debug XtrackCad build from $SF_VERSION (changeset $CHANGESETREV:$CHANGESET).\")/" ../app/bin/smalldlg.c
+	BUILD_FROM=$(hg log -r . -T 'Debug XtrackCad build from {branch} {rev}:{node|short}')
+	sed -i "s/^#define DESCRIPTION .*/#define DESCRIPTION N_(\"${BUILD_FROM}.\")/" ../app/bin/smalldlg.c
 	BUILD_TYPE="-DCMAKE_BUILD_TYPE=Debug"
 fi
 

@@ -1,8 +1,9 @@
 [Desktop Entry]
 Name=XTrackCAD
 Comment=Design model railroad layouts
-Exec=run-xtrkcad.sh
+Exec=run-xtrkcad.sh %f
+MimeType=application/x-xtrkcad;
 Icon=@FLATPAK_DOMAIN@.@FLATPAK_BASE_NAME@
 Terminal=false
 Type=Application
-Categories=Graphics
+Categories=Graphics;

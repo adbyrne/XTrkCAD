@@ -145,9 +145,11 @@ set(XTRKCAD_LOCALE_INSTALL_DIR "share/locale")
 #
 # Note: flatpak builds cannot have periods in the name since periods delimit
 #       the namespace.
-if (XTRKCAD_BUILD_FLATPAK)
+if (XTRKCAD_BUILD_FLATPAK AND XTRKCAD_FLATPAK_NOVERSION)
+	set(XTRKCAD_BIN "xtrkcad")
+elseif (XTRKCAD_BUILD_FLATPAK)
 	string(REPLACE "." "_" XTRKCAD_VERSION_ID "${XTRKCAD_FILE_VERSION}")
-	set(XTRKCAD_BIN "xtrkcad-${XTRKCAD_VERSION_ID}")
+	set(XTRKCAD_BIN "xtrkcad${XTRKCAD_VERSION_ID}")
 else()
 	set(XTRKCAD_BIN "xtrkcad-${XTRKCAD_FILE_VERSION}")
 endif()

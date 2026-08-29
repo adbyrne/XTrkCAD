@@ -42,10 +42,12 @@ char * sProdName = Product;
  * \var sProdNameLower
  * Lowercase product name
  *
- * For flatpak builds, this should not contain any periods.
+ * For local flatpak builds, this should not contain any periods.
+ *
+ * For flathub flatpak builds, this should only be "xtrkcad".
  */
 #if XTRKCAD_BUILD_FLATPAK
-char * sProdNameLower = product "-" XTRKCAD_VERSION_ID;
+char * sProdNameLower = product XTRKCAD_VERSION_ID;
 #else
 char * sProdNameLower = product "-" XTRKCAD_FILE_VERSION;
 #endif
