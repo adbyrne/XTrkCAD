@@ -193,9 +193,6 @@ double FindAngle( coOrd p0, coOrd p1 )
 
 BOOL_T PointOnCircle( coOrd * resP, coOrd center, double radius, double angle )
 {
-	double r;
-	r = sin(D2R(angle));
-	r = radius * r;
 	resP->x = center.x + (POS_T)(radius * sin(D2R(angle)));
 	resP->y = center.y + (POS_T)(radius * cos(D2R(angle)));
 	return 1;
