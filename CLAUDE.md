@@ -134,6 +134,17 @@ line. On `FAIL`, either reconcile the listed files or, if the difference is genu
 (e.g. a feature port that's blocked, or local test coverage never contributed upstream), add it
 to `sync-exceptions.txt` with a reason comment — don't silently ignore the failure.
 
+**A large FAIL isn't necessarily a new problem.** Files belonging to git-merged-but-not-yet-Hg-merged
+`needs-review` tickets (bug-tracker.md's SF Bugs table — e.g. #732/#733/#734 as of 2026-08-29) will
+show up here every time until each clears its own review window; that's expected, temporary drift,
+not something to add to `sync-exceptions.txt` (which is for *permanent* deliberate divergences).
+Before reconciling or exception-listing anything, check whether the file is already explained by an
+open `needs-review` row — confirmed useful 2026-08-29 when a 67-file FAIL turned out to be ~44
+already-tracked pending-review files + 14 already-decided-against glade retirement + only 2
+genuinely new gaps (Ken Shaffer's flatpak/doc-branding work, untouched by git since Aug 10/25).
+Categorize file-by-file with `hg log -r "file('path')"` vs `git log -- path` (compare dates/authors,
+not just presence of a diff) rather than assuming every FAIL entry needs action.
+
 ### 5 — Clear the pending file
 
 ```sh
