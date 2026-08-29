@@ -24,11 +24,14 @@ which looks like an SF-side credential problem but usually isn't (see incident 2
 `sf-sync-pending` file (see below for why). This costs a few seconds and never mutates anything:
 
 ```sh
-hg -R /home/abyrne/XTrkCAD/xtrkcad-hg incoming -r "branch('GTK3V2MAIN') or branch('default')" \
+hg -R /home/abyrne/XTrkCAD/xtrkcad-hg incoming -b GTK3V2MAIN -b default \
     --template '{rev}:{node|short} {branch} {author|person}: {desc|firstline}\n'
 ```
 
-(Exit code 1 with "no changes found" means nothing pending — that's success, not an error.) Also
+(Exit code 1 with "no changes found" means nothing pending — that's success, not an error. Use
+`-b BRANCH` flags, not a `-r "branch(...) or branch(...)"` revset — `hg incoming -r` resolves its
+argument against the *remote* peer, which doesn't support revset function syntax and aborts with
+`abort: unknown revision`; confirmed 2026-08-29.) Also
 still check the pending file, since it can carry a manual-merge note the live check above won't
 show (e.g. a patch the sync script couldn't auto-apply, saved under `.claude/patches/`):
 
