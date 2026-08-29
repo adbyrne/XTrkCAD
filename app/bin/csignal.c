@@ -233,7 +233,7 @@ static void UpdateSignalProperties ( track_p trk, int inx, descData_p
 	signalData_p xx = GetsignalData( trk );
 	const char *thename;
 	char *newName;
-	BOOL_T isChanged, nChanged, pChanged, oChanged;
+	BOOL_T nChanged, pChanged, oChanged;
 
 	switch (inx) {
 	case NM:
@@ -242,10 +242,10 @@ static void UpdateSignalProperties ( track_p trk, int inx, descData_p
 	case HD:
 		break;
 	case -1:
-		isChanged = nChanged = pChanged = oChanged = FALSE;
+		nChanged = pChanged = oChanged = FALSE;
 		thename = wEntryGetValue( signalDesc[NM].control0 );
 		if (strcmp(thename,xx->name) != 0) {
-			nChanged = isChanged = TRUE;
+			nChanged = TRUE;
 			unsigned int max_str = signalDesc[NM].max_string;
 			if (max_str && strlen(thename)>max_str) {
 				newName = MyMalloc(max_str);
@@ -257,10 +257,10 @@ static void UpdateSignalProperties ( track_p trk, int inx, descData_p
 
 		if (signalProperties.pos.x != xx->orig.x ||
 		    signalProperties.pos.y != xx->orig.y) {
-			pChanged = isChanged = TRUE;
+			pChanged = TRUE;
 		}
 		if (signalProperties.orient != xx->angle) {
-			oChanged = isChanged = TRUE;
+			oChanged = TRUE;
 		}
 		if (!changed) { break; }
 		if (needUndoStart) {
