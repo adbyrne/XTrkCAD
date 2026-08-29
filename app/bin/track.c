@@ -3204,7 +3204,6 @@ EXPORT void DrawTracks( drawCmd_p d, DIST_T scale, coOrd orig, coOrd size )
 {
 	track_cp trk;
 	TRKINX_T inx;
-	wIndex_t count = 0;
 	coOrd lo, hi;
 	BOOL_T doSelectRecount = FALSE;
 	unsigned long time0 = wGetTimer();
@@ -3233,7 +3232,6 @@ EXPORT void DrawTracks( drawCmd_p d, DIST_T scale, coOrd orig, coOrd size )
 		}
 		currTracks++;
 		DrawTrack( trk, d, wDrawColorBlack );
-		count++;
 	}
 
 	LOG(log_timedrawtracks, 1,
@@ -3259,14 +3257,10 @@ EXPORT void DrawTracks( drawCmd_p d, DIST_T scale, coOrd orig, coOrd size )
 EXPORT void DrawSelectedTracks( drawCmd_p d, BOOL_T all )
 {
 	track_cp trk;
-	wIndex_t count;
-
-	count = 0;
 
 	TRK_ITERATE( trk ) {
 		if ( (all && GetLayerVisible(GetTrkLayer(trk))) || GetTrkSelected( trk ) ) {
 			DrawTrack( trk, d, wDrawColorBlack );
-			count++;
 		}
 	}
 

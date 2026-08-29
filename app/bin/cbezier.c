@@ -370,7 +370,6 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track,
 	bCurveData_t arc;
 	DYNARR_RESET( trkSeg_t, *segs ); // wipe out
 	BOOL_T safety;
-	int col = 0;
 
 	double prev_e = 0.0;
 	// we do a binary search to find the "good `t` closest to no-longer-good"
@@ -383,12 +382,11 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track,
 		// booleans:
 		BOOL_T curr_good = FALSE, prev_good, done;
 		// numbers:
-		double t_m, step = 0;
+		double t_m;
 		// step 2: find the best possible arc
 		do {						// !done
 			prev_good = curr_good;   //remember last time
 			t_m = (t_s + t_e)/2;
-			step++;
 			start_point = getPoint(pos, t_s); //Start of arc
 			mid_point = getPoint(pos, t_m);  //Middle of trial arc
 			end_point = getPoint(pos, t_e);  //End of trial Arc
@@ -486,7 +484,6 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track,
 		}
 		addSegBezier(segs, &curveSeg);		//Add to array of segs used
 		t_s = prev_e;
-		col++;
 	} while(prev_e < 1.0);
 
 	return TRUE;

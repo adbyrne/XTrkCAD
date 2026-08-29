@@ -2604,7 +2604,6 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 	EPINX_T ep0, ep1;
 	int dir;
 	struct extraDataCar_t * xx=NULL;
-	wWinPix_t w, h;
 	char msg[STR_SIZE];
 
 	switch (action) {
@@ -2916,6 +2915,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 		wDrawSaveImage(mainD.d);
 		DrawAllCars(trainHighlighted);
 
+		// wWinPix_t w, h;
 		// wWinGetSize(mainW, &w, &h);
 		// w -= wControlGetPosX(newCarControls[0]) + 4;
 

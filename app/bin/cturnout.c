@@ -975,7 +975,7 @@ EXPORT BOOL_T SplitTurnoutCheck(
 	PATHPTR_T pp, pp1, pp2;
 	unsigned char c;
 	char* cp;
-	int negCnt, posCnt, dir;
+	int posCnt, dir;
 //	int pathCnt;
 	segProcData_t segProcDataSplit;
 	segProcData_t segProcDataNewTrack;
@@ -1136,11 +1136,9 @@ foundSeg:
 	if (segProcDataSplit.split.length[s0] > minLength) {
 		pp += splitTurnoutDir;
 	}
-	negCnt = 0;
 	while (*pp) {
 		GetSegInxEP(*pp, &segInx, &segEP);
 		segIndexMap(segInx) = -segIndexMap(segInx);
-		negCnt++;
 		pp += splitTurnoutDir;
 	}
 	for (segInx = posCnt = 0; segInx < xx->segCnt; segInx++) {
@@ -1215,7 +1213,6 @@ foundSeg:
 	/*
 	 * 7. Convert trailing segments to new tracks
 	 */
-	int trks = 0;
 	path = splitTurnoutPath;
 	if (segProcDataSplit.split.length[s1] < minLength) {
 		path += splitTurnoutDir;
@@ -1241,7 +1238,6 @@ foundSeg:
 			trk2 = segProcDataNewTrack.newTrack.trk;
 			ep2 = 1 - epN;
 		}
-		++trks;
 		path += splitTurnoutDir;
 	}
 
