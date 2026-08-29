@@ -2205,8 +2205,6 @@ static BOOL_T GetParamsDraw( int inx, track_p trk, coOrd pos,
 		if (FindDistance(pos,start) < FindDistance(pos,end)) {
 			params->ep = 0;
 		} else { params->ep = 1; }
-		// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-		BOOL_T back = FALSE;
 		coOrd curr_pos = params->bezierPoints[(ptrdiff_t)params->ep*3];
 		BOOL_T first = TRUE;
 		for (int i = 0; i<xx->segs[0].bezSegs.cnt; i++) {
@@ -2313,7 +2311,6 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 		if (xx->segs[0].type == SEG_FILCRCL ||
 		    (xx->segs[0].type == SEG_CRVLIN && xx->segs[0].u.c.a1 >= 360.0)) {
 			Translate(&c0,c,FindAngle(c,pos),xx->segs[0].u.c.radius);
-			c1 = c0;
 			xx->segs[0].type = SEG_CRVLIN;
 			xx->segs[0].u.c.a0 = FindAngle(c,c0);
 			xx->segs[0].u.c.a1 = 355.0;

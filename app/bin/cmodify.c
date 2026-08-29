@@ -256,7 +256,6 @@ STATUS_T CmdModify(
 	track_p trk, trk1;
 	ANGLE_T a0;
 	DIST_T d;
-	ANGLE_T a;
 	EPINX_T inx;
 	curveType_e curveType;
 	static BOOL_T changeTrackMode;
@@ -720,13 +719,9 @@ extendTrackMove:
 			if (da < 0.0) {
 				da = 2*M_PI + da;
 			}
-			a = NormalizeAngle( Dex.angle - FindAngle( Dex.pos00,
-			                    Dex.curveData.curvePos ) );
-			if ( a < 180.0 ) {
-				a = NormalizeAngle( Dex.curveData.a0-90 );
-			} else {
-				a = NormalizeAngle( Dex.curveData.a0+Dex.curveData.a1+90.0 );
-			}
+			LOG( log_modify, 2, ("A0diff=%0.3f\n",
+			                     NormalizeAngle( Dex.angle - FindAngle( Dex.pos00,
+			                                     Dex.curveData.curvePos ) ) ) )
 			Dex.valid = TRUE;
 			if (action != C_RDOWN)
 				InfoMessage( _("Curve Track: Radius=%s Length=%s Angle=%0.3f"),

@@ -366,11 +366,6 @@ static void LoadCustomMgmList( void )
 
 	custMgmLoading = TRUE;
 
-	curInx = wListGetIndex( customSelL );
-
-	if ( curInx >= 0 ) {
-		context = (custMgmContext_p)wListGetItemContext( customSelL, curInx );
-	}
 	cnt = wListGetCount( customSelL );
 	for ( curInx=0; curInx<cnt; curInx++ ) {
 		context = (custMgmContext_p)wListGetItemContext( customSelL, curInx );
@@ -378,7 +373,6 @@ static void LoadCustomMgmList( void )
 			MyFree( context );
 		}
 	}
-	curInx = wListGetIndex( customSelL );
 	wControlShow( (wControl_p)customSelL, FALSE );
 	wListClear( customSelL );
 

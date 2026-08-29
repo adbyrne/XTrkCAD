@@ -1530,7 +1530,6 @@ static BOOL_T MakeParallelJoint(
 	angle = R2D(asin(xx->L/2/xx->R));
 	A = xx->angle;
 	R = xx->R + sep*sin(D2R(angle));
-	dl = JoinD( xx->l1, xx->R, xx->L ) - JoinD( xx->l0, xx->R, xx->L );
 	/*printf( "D = %0.3f %0.3f\n", d, dl );*/
 	d /= d0;
 	R = xx->R * d;

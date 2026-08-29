@@ -736,7 +736,6 @@ nextStep:
 	i3 = elist_da.cnt;
 	for (i2=0; i2<elist_da.cnt; i2++) {
 		trk1 = elist(i2).trk;
-		ep1 = elist(i2).ep;
 		if ( GetTrkOnElevPath( trk1, &e1 ) ) {
 			i3=i2;
 			break;

@@ -135,7 +135,6 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 			}
 			if (!found && SnapPos( &pos )) {
 				CreateEndAnchor(pos,FALSE);
-				found = TRUE;
 			}
 			return C_CONTINUE;
 		}
@@ -148,7 +147,6 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 			} else { pos = Dl.pos0; }
 		} else if (SnapPos( &pos )) {
 			CreateEndAnchor(pos,FALSE);
-			found = TRUE;
 		}
 
 		InfoMessage( _("Straight Track Length=%s Angle=%0.3f"),

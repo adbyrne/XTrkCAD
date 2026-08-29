@@ -72,7 +72,6 @@ char* CreateManifest(const char* nameOfLayout, char* background,
 #endif
 			cJSON_AddStringToObject(b_object, "filename", backg);
 			MyFree(backg);
-			backg = MyStrdup(background);
 			cJSON_AddStringToObject(b_object, "arch-path", dependencyDir);
 			cJSON_AddNumberToObject(b_object, "size", GetLayoutBackGroundSize());
 			cJSON_AddNumberToObject(b_object, "pos-x", GetLayoutBackGroundPos().x);

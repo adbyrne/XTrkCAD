@@ -1054,7 +1054,6 @@ static STATUS_T CmdJoin(
 			if ( (Dj.inp[0].params.ep >=0) &&
 			     (GetTrkEndTrk(Dj.inp[0].trk,Dj.inp[0].params.ep) != NULL)) {
 				if (GetTrkEndTrk(Dj.inp[0].trk,Dj.inp[0].params.ep) != Dj.inp[1].trk) {
-					only_merge = TRUE;
 					ErrorMessage( MSG_TRK_ALREADY_CONN, _("First") );
 					return C_CONTINUE;
 				}
@@ -1062,7 +1061,6 @@ static STATUS_T CmdJoin(
 			if ( (Dj.inp[1].params.ep >= 0) &&
 			     (GetTrkEndTrk(Dj.inp[1].trk,Dj.inp[1].params.ep) != NULL)) {
 				if (GetTrkEndTrk(Dj.inp[1].trk,Dj.inp[1].params.ep) != Dj.inp[0].trk) {
-					only_merge = TRUE;
 					ErrorMessage( MSG_TRK_ALREADY_CONN, _("Second") );
 					return C_CONTINUE;
 				}
