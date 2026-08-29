@@ -7,10 +7,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 The SourceForge Hg remote (`hg.code.sf.net`) requires the passphrase-protected key
 `~/.ssh/id_ed25519`. Non-interactive SSH (the weekly sync timer, or any `hg pull`/`push` run by
 Claude) cannot supply the passphrase, so the key must already be loaded in the user's
-`ssh-agent`. Check at the start of every session:
+`ssh-agent`. Check at the start of every session by comparing fingerprints — `ssh-add -l` prints
+each loaded key's *comment* field (which may not be the filename; e.g. this key's comment is the
+user's email, not `id_ed25519`), so grepping for the filename string gives a false "NOT LOADED":
 
 ```sh
-ssh-add -l | grep -q id_ed25519 || echo "NOT LOADED"
+ssh-add -l | grep -qF "$(ssh-keygen -lf ~/.ssh/id_ed25519.pub | awk '{print $2}')" || echo "NOT LOADED"
 ```
 
 If not loaded, ask the user to run (via `!` so it's interactive and can prompt for the
