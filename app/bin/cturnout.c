@@ -1548,7 +1548,6 @@ static BOOL_T GetParamsTurnout(int inx, track_p trk, coOrd pos,
 				}
 			}
 			GetSegInxEP(pathCurr[0], &segInx, &segEP);
-			seg = xx->segs + segInx;
 			d = 0.0;
 			//Loop through segs on path from endPt adding
 			while (pathCurr[0]) {

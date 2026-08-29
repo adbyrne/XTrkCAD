@@ -372,7 +372,7 @@ static void ProcessDxfFile(
 	double y1 = 0.0;
 	double x2 = 0.0;
 	double y2 = 0.0;
-	int layerIdx = 0;
+	int layerIdx;
 	int visibility = 2;
 
 	double vrt_x[20];

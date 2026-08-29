@@ -306,7 +306,6 @@ EXPORT void FormatCompoundTitle(
 		}
 		strcpy( cq, title );
 	} else {
-		len = 0;
 		needSep = FALSE;
 		if ((format&LABEL_MANUF) && cp1-title>1) {
 			len = cp1-title;
@@ -334,7 +333,6 @@ EXPORT void FormatCompoundTitle(
 		if ((format&LABEL_DESCR) || !(format&LABEL_PARTNO)) {
 			if ( needSep ) {
 				*cq++ = ' ';
-				needSep = FALSE;
 			}
 			if ( (format&LABEL_FLIPPED) ) {
 				memcpy( cq, "Flipped ", 8 );
@@ -350,7 +348,6 @@ EXPORT void FormatCompoundTitle(
 			}
 			memcpy( cq, cp1+1, cp2-cp1-1 );
 			cq += cp2-cp1-1;
-			needSep = TRUE;
 		}
 		*cq = '\0';
 	}

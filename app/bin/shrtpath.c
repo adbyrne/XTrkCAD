@@ -246,7 +246,7 @@ int FindShortestPath(
 	int inxCurr = 0;
 	pathNode_p pCurr;
 	pathNode_p pNext;
-	int pinx=0;
+	int pinx;
 	DIST_T minDist;
 	int rc = 0;
 	EPINX_T ep2, epCnt, ep3;

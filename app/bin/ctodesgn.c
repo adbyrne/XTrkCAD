@@ -1625,7 +1625,6 @@ static toDesignSchema_t * LoadCurvedCornuSegs(
 	pathChar[pathLen] = 0;
 	pathLen++;
 	pathChar[pathLen] = 0;
-	pathLen++;
 
 	CornuSchema.paths = (signed char *)pathChar;
 	return &CornuSchema;
@@ -2254,7 +2253,6 @@ static toDesignSchema_t * LoadWye3WayCornuSegs(
 	pathChar[pathLen] = 0;
 	pathLen++;
 	pathChar[pathLen] = 0;
-	pathLen++;
 
 	toDesignSchema_t * pp =
 	        (tdType==NTO_CORNU3WAY ? &CornuTriSchema : &CornuWyeSchema );

@@ -226,8 +226,6 @@ static void LoadControlMgmList( void )
 	long tempL;
 	contMgmContext_p context;
 
-	curInx = wListGetIndex( controlSelL );
-
 	cnt = wListGetCount( controlSelL );
 	for ( curInx=0; curInx<cnt; curInx++ ) {
 		context = (contMgmContext_p)wListGetItemContext( controlSelL, curInx );
@@ -235,7 +233,6 @@ static void LoadControlMgmList( void )
 			MyFree( context );
 		}
 	}
-	curInx = wListGetIndex( controlSelL );
 	wControlShow( (wControl_p)controlSelL, FALSE );
 	wListClear( controlSelL );
 
