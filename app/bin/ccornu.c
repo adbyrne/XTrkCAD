@@ -1094,7 +1094,6 @@ EXPORT STATUS_T AdjustCornuCurve(
 	track_p t;
 	DIST_T d;
 	ANGLE_T a, a2;
-	EPINX_T ep;
 	cornuParm_t cp;
 
 	Da.cmdType = VP2L(commandContext);
@@ -1314,7 +1313,6 @@ EXPORT STATUS_T AdjustCornuCurve(
 			return C_CONTINUE;
 		} else {
 			if (Da.selectEndPoint >=0 ) {
-				pos = Da.pos[Da.selectEndPoint];
 				if (Da.extend[Da.selectEndPoint]) {
 					InfoMessage( _("Drag out end of Cornu"));
 				} else if (Da.trk[Da.selectEndPoint]) {
@@ -1323,14 +1321,11 @@ EXPORT STATUS_T AdjustCornuCurve(
 					InfoMessage( _("Drag to move"));
 				}
 			} else if (Da.selectMidPoint >=0 ) {
-				pos = DYNARR_N(coOrd,Da.mid_points,Da.selectMidPoint);
 				InfoMessage( _("Drag point to new location, Delete to remove"));
 			} else {
 				if (Da.selectEndHandle%2 == 0) {
-					pos = Da.endHandle[Da.selectEndHandle/2].end_center;
 					InfoMessage( _("Drag to change end radius"));
 				} else {
-					pos = Da.endHandle[Da.selectEndHandle/2].end_curve;
 					InfoMessage( _("Drag to change end angle"));
 				}
 			}
@@ -1506,7 +1501,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 					if (Da.selectTrack) {					//We have track
 						if (!Da.trk[sel]
 						    && ((t = OnTrackIgnore(&pos,FALSE,TRUE,Da.selectTrack))!= NULL) ) {
-							ep = PickUnconnectedEndPointSilent(pos,t);
+							EPINX_T ep = PickUnconnectedEndPointSilent(pos,t);
 							if (ep>=0) {
 								pos = GetTrkEndPos(t,ep);
 								if (IsClose(FindDistance(pos,pos)/2)) {
@@ -1519,7 +1514,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 						Da.angle[sel] = GetOpenAngle(Da.pos,Da.angle,sel);
 						t = OnTrack(&p,FALSE,TRUE);
 						if (t != NULL) {
-							ep = PickUnconnectedEndPointSilent(pos,t);
+							EPINX_T ep = PickUnconnectedEndPointSilent(pos,t);
 							if (ep>=0) {
 								p = GetTrkEndPos(t,ep);
 								if (IsClose(FindDistance(p,pos)/2)) {
@@ -1691,12 +1686,10 @@ EXPORT STATUS_T AdjustCornuCurve(
 			Da.state = PICK_POINT;
 			return C_CONTINUE;
 		}
-		ep = 0;
 		if (Da.selectMidPoint!=-1) { Da.prevSelected = Da.selectMidPoint; }
 		else if (Da.selectEndPoint!=-1) {
 			if (!Da.trk[Da.selectEndPoint] &&
 			    (t=OnTrack(&pos,FALSE,TRUE)) != NULL && t != Da.selectTrack	) {
-				// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 				EPINX_T ep = PickUnconnectedEndPoint(pos,t);
 				if (ep>=0) {
 					if (QueryTrack(t,

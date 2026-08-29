@@ -2123,7 +2123,7 @@ EXPORT BOOL_T SplitTrack( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
                           BOOL_T disconnect )
 {
 	DIST_T d;
-	track_p trk0, trk2, trkl;
+	track_p trk2, trkl;
 	EPINX_T epl, ep0, ep1, ep2=-1, epCnt;
 	BOOL_T rc;
 	BOOL_T (*splitCmd)( track_p, coOrd, EPINX_T, track_p *, EPINX_T *, EPINX_T * );
@@ -2143,7 +2143,6 @@ EXPORT BOOL_T SplitTrack( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 		return rc;
 	}
 
-	trk0 = trk;
 	epl = ep;
 	epCnt = GetTrkEndPtCnt(trk);
 	*leftover = NULL;
@@ -2181,6 +2180,7 @@ EXPORT BOOL_T SplitTrack( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 
 
 	} else if ( epCnt == 2 &&
+	            // cppcheck-suppress unreadVariable
 	            (d = FindDistance( GetEndPtPos(EndPtIndex(trk->endPt,1-ep)),
 	                               pos )) <= minLength) {
 		/* easy: just disconnect */
@@ -2227,6 +2227,7 @@ EXPORT BOOL_T SplitTrack( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 			}
 			ep0 = 1-epl;
 			while ( 1 ) {
+				track_p trk0;
 				CopyAttributes( trk, trkl );
 				ClrTrkElev( trkl );
 				trk0 = GetTrkEndTrk(trkl,ep0);
@@ -2247,6 +2248,7 @@ EXPORT BOOL_T SplitTrack( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 			trkl = *leftover;
 			ep0 = 1-epl;
 			while ( 1 ) {
+				track_p trk0;
 				DrawNewTrack( trkl );
 				trk0 = GetTrkEndTrk(trkl,ep0);
 				if ( trk0 == NULL || trk0 == trk2 || trk0->type == T_TURNOUT) {
