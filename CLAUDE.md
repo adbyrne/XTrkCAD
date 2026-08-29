@@ -20,17 +20,49 @@ which looks like an SF-side credential problem but usually isn't (see incident 2
 
 ## Session startup — upstream sync check
 
-**At the start of every session**, check for the pending upstream-sync notification:
+**At the start of every session**, do a live, read-only check against SF — don't just trust the
+`sf-sync-pending` file (see below for why). This costs a few seconds and never mutates anything:
 
 ```sh
-cat /home/abyrne/XTrkCAD/.claude/sf-sync-pending   # non-empty = upstream changes waiting
+hg -R /home/abyrne/XTrkCAD/xtrkcad-hg incoming -r "branch('GTK3V2MAIN') or branch('default')" \
+    --template '{rev}:{node|short} {branch} {author|person}: {desc|firstline}\n'
 ```
 
-If the file is non-empty, tell the user which branches have new SF changes (the file lists the
-git test-branch names) and ask: **"Upstream SF changes are pending — want me to compile and
-test them locally, then push to GitHub CI?"**
+(Exit code 1 with "no changes found" means nothing pending — that's success, not an error.) Also
+still check the pending file, since it can carry a manual-merge note the live check above won't
+show (e.g. a patch the sync script couldn't auto-apply, saved under `.claude/patches/`):
 
-If yes, run the following workflow:
+```sh
+cat /home/abyrne/XTrkCAD/.claude/sf-sync-pending   # non-empty = a prior run left something for you
+```
+
+**Why both, not just the pending file:** the weekly `xtrkcad-sf-sync` timer (Monday 08:00) is the
+only thing that writes that file, and it has repeatedly failed silently between runs — 24
+`hg pull` failures logged in `.claude/sf-sync.log` as of 2026-08-29, almost all
+`Could not resolve hostname hg.code.sf.net` (DNS not up yet at boot, despite
+`network-online.target`). A failed run doesn't retry until the following Monday and doesn't touch
+the pending file, so a whole week of upstream commits (including straight-to-`GTK3V2MAIN`
+merges from other contributors, e.g. Martin Fischer) can land invisibly — confirmed 2026-08-29
+when a live check found six unflagged `GTK3V2MAIN` merge/topic-branch commits (SF #719, #721,
+#729/#730) that the pending file said nothing about. The live check above is the fix: it asks SF
+directly every session instead of trusting a periodic job's last output.
+
+If either check surfaces something, tell the user which branches have new SF changes and ask:
+**"Upstream SF changes are pending — want me to compile and test them locally, then push to
+GitHub CI?"**
+
+If yes, run the following workflow (note step 0, needed only when the live check above found
+things the pending file didn't already know about):
+
+### 0 — Pull if the live check found changes the pending file didn't
+
+```sh
+hg -R xtrkcad-hg pull
+hg -R xtrkcad-hg-gtk3v2main pull
+```
+
+Then continue at step 1. (If `sf-sync-pending` already covered it — the normal case — the Hg
+working copies are already up to date and this step is a no-op.)
 
 ### 1 — Local compile (Linux GTK3)
 
