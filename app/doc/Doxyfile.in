@@ -7,6 +7,9 @@
 # here is committed, hand-reviewed source, not regenerated.
 
 PROJECT_NAME           = "XTrkCAD User Guide"
+PROJECT_NUMBER         = "Version @XTRKCAD_VERSION@"
+PROJECT_ICON           = "@CMAKE_CURRENT_SOURCE_DIR@/images/xtrkcad_logo.gif"
+WARN_LOGFILE           = ./doxygen.log
 OUTPUT_DIRECTORY       = "@CMAKE_CURRENT_BINARY_DIR@"
 INPUT                  = "@CMAKE_CURRENT_SOURCE_DIR@" \
                           "@CMAKE_CURRENT_BINARY_DIR@" \
@@ -44,3 +47,4 @@ QUIET                  = YES
 WARN_IF_UNDOCUMENTED   = NO
 WARN_AS_ERROR          = NO
 MARKDOWN_SUPPORT       = YES
+HTML_EXTRA_STYLESHEET  = "@CMAKE_CURRENT_SOURCE_DIR@/style.css"

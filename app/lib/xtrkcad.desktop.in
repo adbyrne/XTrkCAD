@@ -1,8 +1,9 @@
 [Desktop Entry]
 Name=XTrackCAD @XTRKCAD_VERSION@
 Comment=Design model railroad layouts
-Exec=@XTRKCAD_BIN@
+Exec=@XTRKCAD_BIN@ %f
+MimeType=application/x-xtrkcad;
 Icon=@XTRKCAD_BIN@
 Terminal=false
 Type=Application
-Categories=Graphics
+Categories=Graphics;

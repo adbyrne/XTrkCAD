@@ -78,8 +78,8 @@ if(UNIX AND NOT APPLE)
 			)
 		install(FILES
 			xtrkcad.xml
-			DESTINATION "share/applications"
-			RENAME ${XTRKCAD_BIN}.xml
+			DESTINATION "share/mime/packages"
+			RENAME io.sourceforge.xtrkcad_fork.${XTRKCAD_BIN}.xml
 			)
 		install(FILES
 			xtrkcad.metainfo.xml

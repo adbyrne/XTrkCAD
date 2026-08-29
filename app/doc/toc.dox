@@ -5,6 +5,10 @@
 /**
 \mainpage XTrackCAD User's Manual
 
+<div id=xtrkcad-logo>
+\image html xtrkcad_logo.gif
+</div>
+
 - \subpage introduction
 - \subpage commandMenus
 - \subpage navigation
