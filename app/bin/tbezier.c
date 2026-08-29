@@ -622,6 +622,8 @@ static void DeleteBezier( track_p t )
 	for (int i=0; i<xx->arcSegs.cnt; i++) {
 		trkSeg_t s = DYNARR_N(trkSeg_t,xx->arcSegs,i);
 		if (s.type == SEG_BEZTRK || s.type == SEG_BEZLIN) {
+			// cppcheck-suppress unreadVariable -- DYNARR_FREE's .max/.cnt reset on a
+			// local copy about to go out of scope; the MyFree() it also does is not dead
 			DYNARR_FREE( trkSeg_t, s.bezSegs );
 		}
 	}

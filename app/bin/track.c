@@ -3420,6 +3420,8 @@ EXPORT void AddTrkDetails(drawCmd_p d,track_p trk,coOrd pos, DIST_T length,
 	wFont_p fp = wStandardFont( F_TIMES, FALSE, FALSE );
 	DrawBoxedString(BOX_BOX,d,pos,message,fp,(wFontSize_t)descriptionFontSize,color,
 	                0.0);
+	// cppcheck-suppress unreadVariable -- DYNARR_FREE's .max/.cnt reset on a
+	// local about to go out of scope; the MyFree() it also does is not dead
 	DYNARR_FREE( pos_angle_t, pos_array );
 }
 

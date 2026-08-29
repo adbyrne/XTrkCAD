@@ -124,6 +124,7 @@ static void PlaceCar(track_p);
 #define WALK_CARS_START( CAR, XX, DIR ) \
 	while (1) { \
 		(XX) = GET_EXTRA_DATA(CAR, T_CAR, extraDataCar_t);\
+		(void)(XX);\
 		{ \
 
 #define WALK_CARS_END( CAR, XX, DIR ) \
@@ -2019,14 +2020,12 @@ static void PlaceTrain(
 	LOG(log_trainMove, 2, ("  placeTrain: %s [%0.3f %0.3f] A%0.3f",
 	                       CarItemNumber(xx0->item), xx0->trvTrk.pos.x, xx0->trvTrk.pos.y,
 	                       xx0->trvTrk.angle))
-	car_curr = car0;
 
 	for (dir0=0; dir0<2; dir0++) {
 		int dir;
 		struct extraDataCar_t  *xx;
 		car_curr = car0;
 		dir = dir0;
-		xx = xx0;
 		WALK_CARS_START(car_curr, xx, dir)
 		SetIgnored(xx);
 		WALK_CARS_END(car_curr, xx, dir);
@@ -2727,7 +2726,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 					for (dir=0; dir<2; dir++) {
 						int dir1 = dir;
 						track_p car1 = currCar;
-						struct extraDataCar_t * xx1 = GET_EXTRA_DATA(car1, T_CAR, extraDataCar_t);
+						struct extraDataCar_t * xx1;
 						LogPrintf("dir=%d\n", dir1);
 						WALK_CARS_START(car1, xx1, dir1)
 						LogPrintf("  %s [%0.3f,%d]\n", CarItemNumber(xx1->item), xx1->trvTrk.angle,

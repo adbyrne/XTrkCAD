@@ -253,7 +253,6 @@ STATUS_T DrawGeomMouse(
 		case OP_LINE:
 		case OP_BENCH:
 		case OP_TBLEDGE:
-			a1 = FindAngle(pos0,pos1);
 			Translate(&tempSegs(0).u.l.pos[1],tempSegs(0).u.l.pos[0],context->angle,
 			          context->length);
 			lastPos = pos1 = tempSegs(0).u.l.pos[1];
@@ -1454,7 +1453,7 @@ static STATUS_T DrawGeomPolyModify(
 				}
 			}
 		}
-		int last_inx = -1;
+		int last_inx;
 //			int  next_inx = -1;
 		ANGLE_T an1, an0;
 		if (first_inx >=0) {
@@ -1905,9 +1904,7 @@ STATUS_T DrawGeomOriginMove(
 		if (context->state == MOD_ORIGIN || context->state == MOD_AFTER_ORIG) {
 			context->state = MOD_ORIGIN;
 			DYNARR_RESET(trkSeg_t,anchors_da);
-			if (IsClose(FindDistance(pos,context->rot_center))) {
-				pos = context->rot_center;
-			} else {
+			if (!IsClose(FindDistance(pos,context->rot_center))) {
 				context->rot_center = pos;
 			}
 			CreateOriginAnchor(context->rot_center, TRUE);

@@ -1340,6 +1340,8 @@ static void DrawMovedTracks( void )
 	int inx;
 	track_p trk;
 	dynArr_t cornu_segs;
+	// cppcheck-suppress unreadVariable -- DYNARR_INIT's .max/.cnt are reset again
+	// by DYNARR_RESET below before any read; its .ptr=NULL is not dead
 	DYNARR_INIT( trkSeg_t, cornu_segs );
 
 	DrawSegsDA( &tempD, NULL, moveOrig, moveAngle, &tempSegs_da, 0.0, selectedColor,

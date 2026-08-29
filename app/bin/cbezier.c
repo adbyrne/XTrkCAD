@@ -364,7 +364,7 @@ EXPORT enum BezierType AnalyseCurve(coOrd inpos[4], double *Rfx, double *Rfy,
 EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track,
                              wDrawColor color, LWIDTH_T lineWidth)
 {
-	double t_s = 0.0, t_e = 1.0;
+	double t_s = 0.0, t_e;
 	double errorThreshold = 0.05;
 	bCurveData_t prev_arc = {0}; /* sentinel: .end==0.0 means no arc found yet */
 	bCurveData_t arc;
@@ -381,7 +381,7 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track,
 		// points:
 		coOrd start_point, mid_point, end_point;
 		// booleans:
-		BOOL_T curr_good = FALSE, prev_good = FALSE, done = FALSE;
+		BOOL_T curr_good = FALSE, prev_good, done;
 		// numbers:
 		double t_m, step = 0;
 		// step 2: find the best possible arc
@@ -435,11 +435,9 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track,
 								                arc.curveData.a1));
 
 								arc.curveData.a1 += FindAngle(d, getPoint(pos,1.0));
-								t_e = 1.0;
 							}
 						}
 						prev_arc = arc;
-						done = TRUE;
 						break;
 					}
 					// if not, move it up by half the iteration distance or to end
@@ -729,7 +727,6 @@ EXPORT STATUS_T AdjustBezCurve(
 	case C_UP:
 		if (Da.state != POINT_PICKED) { return C_CONTINUE; }
 		//Take last pos and decide if it should be snapped to a track because SHIFT is held (pos0 and pos3)
-		ep = 0;
 		BOOL_T found = FALSE;
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		p = pos;
@@ -1110,7 +1107,6 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 							if (GetTrkGauge(t) != GetScaleTrackGauge(GetLayoutCurScale())) {
 								wBeep();
 								InfoMessage(_("Track is different gauge"));
-								ep = -1;
 								t = NULL;
 							} else {
 								Da.trk[end] = t;

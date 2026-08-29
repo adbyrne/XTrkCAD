@@ -60,8 +60,6 @@ OSStatus MyGoToHelpPage (CFStringRef pagePath, CFStringRef anchorName)
 	                     myApplicationBundle,
 	                     CFSTR("CFBundleHelpBookName"));
 	if (myBookName == NULL) {
-		myBookName = CFStringCreateWithCString(NULL, "XTrackCAD Help",
-		                                       kCFStringEncodingMacRoman);
 		printf("HelpHelper: Defaulting to 'XTrackCAD Help'\n" );
 		err = fnfErr;
 		return err;
@@ -105,8 +103,8 @@ main( int argc, char **argv )
 
 	int len;
 	int finished = 0;
-	int numBytes = 0;
-	int numBytes2 = 0;
+	int numBytes;
+	int numBytes2;
 
 	printf( "HelpHelper: starting!\n" );
 
