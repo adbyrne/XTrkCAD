@@ -1038,11 +1038,7 @@ static void DrawNormalTurnout(
 	ANGLE_T angle;
 	coOrd s1, s2, p1, p2, q1, q2;
 	int p0, q0;
-//	int s0;
 	ANGLE_T a0;
-
-
-//	DIST_T trackGauge = GetTrkGauge(dtod.trk);
 
 	DrawDtoInit();
 

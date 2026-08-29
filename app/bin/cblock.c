@@ -324,7 +324,6 @@ static BOOL_T blockCheckContiguousPath()
 	DIST_T dist;
 	ANGLE_T angle;
 	/*int pathElemStart = 0;*/
-	coOrd endPtOrig = zero;
 	BOOL_T IsConnectedP;
 	trkEndPt_p endPtP;
 	TempEndPtsReset();
@@ -354,10 +353,6 @@ static BOOL_T blockCheckContiguousPath()
 					   we don't want DeleteTrack to look at
 					   them. */
 					SetEndPtTrack( endPtP, NULL );
-					// TODO-EPP What is this for?
-					SetEndPtEndPt( endPtP, (trk1?GetEndPtConnectedToMe(trk1,trk):-1) );
-					endPtOrig.x += GetEndPtPos(endPtP).x;
-					endPtOrig.y += GetEndPtPos(endPtP).y;
 				}
 			} else {
 				IsConnectedP = TRUE;
