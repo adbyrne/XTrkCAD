@@ -29,10 +29,10 @@
 static wControl_p cmdoptW;
 
 static paramData_t cmdoptPLs[] = {
-	{ PD_RADIO, &preSelect, "preselect", PDO_NOPSHUPD, .context = (void *)CHANGE_CMDOPT },
-	{ PD_RADIO, &rightClickMode, "rightclickmode", PDO_NOPSHUPD, .context = (void*)CHANGE_CMDOPT},
-	{ PD_RADIO, &selectMode, "selectmode", PDO_NOPSHUPD, .context = (void*)CHANGE_CMDOPT},
-	{ PD_TOGGLE, &selectZero, "selectzero", PDO_NOPSHUPD, .context = (void*)CHANGE_CMDOPT}
+	{ PD_RADIO, &preSelect, "preselect", PDO_NOPSHUPD, .context = I2VP(CHANGE_CMDOPT) },
+	{ PD_RADIO, &rightClickMode, "rightclickmode", PDO_NOPSHUPD, .context = I2VP(CHANGE_CMDOPT)},
+	{ PD_RADIO, &selectMode, "selectmode", PDO_NOPSHUPD, .context = I2VP(CHANGE_CMDOPT)},
+	{ PD_TOGGLE, &selectZero, "selectzero", PDO_NOPSHUPD, .context = I2VP(CHANGE_CMDOPT)}
 };
 static paramGroup_t cmdoptPG = { "cmdopt", PGO_RECORD | PGO_PREFMISC | PGO_FULLDIALOGFROMBUILDER, cmdoptPLs, COUNT(cmdoptPLs) };
 
