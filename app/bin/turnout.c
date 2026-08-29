@@ -681,7 +681,6 @@ static void DrawTurnoutFill(
 				DrawLine( d,b3,b4,width2,drawColorBlack );
 			}
 
-			b1 = b2;
 			b3 = b4;
 			b5 = b6;
 		}
@@ -879,7 +878,6 @@ static void DrawXingFill(
 				if (fillType==0) {
 					DrawLine( d,b3,b4,width2,drawColorBlack );
 				}
-				b1 = b2;
 				b3 = b4;
 				b5 = b6;
 			}
@@ -1102,9 +1100,6 @@ static void DrawNormalTurnout(
 		s2 = dto[strPath].ptsLast;
 	}
 	// Diverging vector(s)
-	p1 = dto[othPath].pts[0];
-	p2 = dto[othPath].ptsLast;
-	q1 = dto[secPath].pts[0];
 	q2 = dto[secPath].ptsLast;
 
 	len = FindDistance(s1, s2);
@@ -1152,7 +1147,6 @@ static void DrawNormalTurnout(
 
 		// Asymmetric? Use longer ties for remaining two tracks (strPath, othPath)
 		DIST_T sx = px; // Save these values for second code block
-		int s0 = p0;
 		if ((dtod.toType == DTO_THREE) && (px + dx >= dto[secPath].baseLast.x)) {
 			for ( ; cnt; cnt--, px += dx) {
 				if (px >= dto[othPath].base[p0 + 1].x) { p0++; }
@@ -1193,7 +1187,6 @@ static void DrawNormalTurnout(
 		// Restore saved values
 		if (dtod.toType == DTO_THREE) {
 			px = sx;
-			p0 = s0;
 		}
 
 		// Asymmetric? Use longer ties for remaining two tracks (strPath, secPath)
@@ -1242,7 +1235,7 @@ static void DrawNormalTurnout(
 		// Final ties at end
 		if (dtod.toType == DTO_THREE) {
 
-			int n = (int)(dto[strPath].baseLast.x);
+			int n;
 			if (px + dx < len) {
 				angle = FindAngle(s1, s2);
 				DIST_T lenr = len - px + dlenx;
@@ -1314,9 +1307,9 @@ static void DrawCurvedTurnout(
 	int pn = dto[othPath].n;
 	int qn = dto[secPath].n;
 	int p0 = 0, q0 = 0;
-	DIST_T px = 0, qx = 0, dy = 0, dy1 = 0, dy2 = 0;
+	DIST_T px = 0, qx = 0, dy, dy1, dy2;
 
-	double cosAdj = 1.0;
+	double cosAdj;
 
 	angle = 0;
 	px = tdspc2;
@@ -1782,7 +1775,6 @@ static void DrawXingTurnout(
 	}
 
 	p0 = q0 = 0;
-	tdlen = dtod.td.length;
 
 	dx = len / cnt;
 	dx2 = dx / 2;
@@ -1932,7 +1924,7 @@ static void DrawCrossTurnout(
 	if (cnt > 0) {
 		DIST_T px = 0;
 		DIST_T dy, dy1, dy2;
-		int cflag = 0;
+		int cflag;
 		dy = dto[str2Path].base[0].y - dto[strPath].base[0].y;
 
 		dx = len / cnt;

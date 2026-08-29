@@ -1566,7 +1566,7 @@ EXPORT void BezierSegProc(
 		segProcData.traverse2.angle = data->traverse2.angle;
 		segProcData.traverse2.segDir = data->traverse2.segDir;
 		segs_backwards = data->traverse2.segs_backwards;
-		BOOL_T backwards = data->traverse2.segDir;
+		BOOL_T backwards;
 		inx = data->traverse2.BezSegInx;							//Special from Traverse1
 		while (inx>=0 && inx<segPtr->bezSegs.cnt) {
 			subSegsPtr = &DYNARR_N(trkSeg_t,segPtr->bezSegs,inx);
