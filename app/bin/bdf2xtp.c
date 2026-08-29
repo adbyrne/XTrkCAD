@@ -730,10 +730,12 @@ void process( tokenDesc_t * tp, arg_t *args )
 		endPoint_p->pos.x = 0.0;
 		endPoint_p->a = 270.0;
 		endPoint_p++;
-		if ((cp=getLine())==NULL) {
+		cp=getLine();
+		if (cp==NULL) {
 			return;
 		}
-		if ((rc=sscanf( line, "%lf %lf", &radius, &angle ) ) != 2) {
+		rc=sscanf( line, "%lf %lf", &radius, &angle );
+		if (rc != 2) {
 			fprintf( stderr, "syntax error: %d: %s\n", lineCount, line );
 			flushInput();
 			return;
@@ -748,10 +750,12 @@ void process( tokenDesc_t * tp, arg_t *args )
 		seg_p->radius = -radius;
 		endPoint_p++;
 		seg_p++;
-		if ((cp=getLine())==NULL) {
+		cp=getLine();
+		if (cp==NULL) {
 			return;
 		}
-		if ((rc=sscanf( line, "%lf %lf", &radius2, &angle ) ) != 2) {
+		rc=sscanf( line, "%lf %lf", &radius2, &angle );
+		if (rc != 2) {
 			fprintf( stderr, "syntax error: %d: %s\n", lineCount, line );
 			flushInput();
 			return;
@@ -838,10 +842,12 @@ void process( tokenDesc_t * tp, arg_t *args )
 
 	case ACT_TURNTABLE:
 		reset( tp, args );
-		if ((cp=getLine())==NULL) {
+		cp=getLine();
+		if (cp==NULL) {
 			return;
 		}
-		if ((rc=sscanf( line, "%lf %s", &angle, bits ) ) != 2) {
+		rc=sscanf( line, "%lf %s", &angle, bits );
+		if (rc != 2) {
 			fprintf( stderr, "syntax error: %d: %s\n", lineCount, line );
 			flushInput();
 			return;
@@ -918,10 +924,12 @@ void process( tokenDesc_t * tp, arg_t *args )
 		         (width-width2)/2.0, 0.0, (width-width2)/2.0, length );
 		fprintf( fout, "\tL %ld 0 %0.6f %0.6f %0.6f %0.6f\n", color,
 		         width-(width-width2)/2.0, 0.0, width-(width-width2)/2.0, length );
-		if ((cp=getLine())==NULL) {
+		cp=getLine();
+		if (cp==NULL) {
 			return;
 		}
-		if ((rc=sscanf( line, "%lf %lf %s", &length2, &offset, bits ) ) != 3) {
+		rc=sscanf( line, "%lf %lf %s", &length2, &offset, bits );
+		if (rc != 3) {
 			fprintf( stderr, "syntax error: %d: %s\n", lineCount, line );
 			flushInput();
 			return;
@@ -937,10 +945,12 @@ void process( tokenDesc_t * tp, arg_t *args )
 			}
 			offset += length2;
 		}
-		if ((cp=getLine())==NULL) {
+		cp=getLine();
+		if (cp==NULL) {
 			return;
 		}
-		if ((rc=sscanf( line, "%lf %lf %s", &length2, &offset, bits ) ) != 3) {
+		rc=sscanf( line, "%lf %lf %s", &length2, &offset, bits );
+		if (rc != 3) {
 			fprintf( stderr, "syntax error: %d: %s\n", lineCount, line );
 			flushInput();
 			return;
