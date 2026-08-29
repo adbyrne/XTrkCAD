@@ -217,8 +217,12 @@ Useful CMake options:
 
 Unit tests use [CMocka](https://cmocka.org/). Test sources: `app/bin/unittest/` and `app/dynstring/unittest/`.
 
-- **default branch**: 8 tests pass (`ctest --test-dir build`)
-- **GTK3V2MAIN branch**: 9 tests pass (adds `PreferenceTest` from GTK3 wlib)
+- **default branch**: 9 tests pass (`ctest --test-dir build`) — corrected 2026-08-29, was
+  documented as 8 (a stale count; verified via `ctest -N`, includes `DXFOutputTest`)
+- **GTK3V2MAIN branch**: 64 tests pass (`ctest --test-dir build-gtk3v2main`) — corrected
+  2026-08-29, was badly stale at "9 tests (adds `PreferenceTest`)"; the suite grew substantially
+  since that note was written (`RegressionSuite`, `HelpLinksCheck`, `CarsTest`/`CarRegistryTest`/
+  `CarEditLogicTest`, etc. — verified via repeated `ctest --output-on-failure` runs this session)
 
 ```sh
 ctest --test-dir build                  # default branch
