@@ -1357,7 +1357,6 @@ static STATUS_T DrawGeomPolyModify(
 		polyInx = -1;
 		coOrd p0;
 		double dd;
-		int inx;
 		if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) != WKEY_SHIFT) {
 			if (selected_count <2 ) {
 				//Wipe out selection(s) if we don't have multiple already (i,e. move with >1 selected)
@@ -1375,7 +1374,6 @@ static STATUS_T DrawGeomPolyModify(
 			}
 		}
 		//Select Point (polyInx)
-		// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 		for ( int inx=0; inx<points_da.cnt; inx++ ) {
 			p0 = pos;
 			dd = LineDistance( &p0, points( inx==0?points_da.cnt-1:inx-1).pt,
@@ -1396,7 +1394,7 @@ static STATUS_T DrawGeomPolyModify(
 			return C_CONTINUE; //Not close to any line
 		}
 		polyState = POLYPOINT_SELECTED;
-		inx = polyInx==0?points_da.cnt-1:polyInx-1;
+		int inx = polyInx==0?points_da.cnt-1:polyInx-1;
 		//Find if the point is to be added
 		d = FindDistance( points(inx).pt, pos );
 		dd = FindDistance( points(inx).pt, points(polyInx).pt );
@@ -2025,7 +2023,6 @@ STATUS_T DrawGeomModify(
 	static BOOL_T corner_mode;
 	static BOOL_T polyMode;
 //	static ANGLE_T original_angle;
-	int inx, inx2;
 //	int inx1;
 	DIST_T d, d1, d2, dd;
 //	coOrd * newPts = NULL;
@@ -2095,7 +2092,6 @@ STATUS_T DrawGeomModify(
 				tempSegs(0).type = SEG_POLY;
 				tempSegs(0).color = wDrawColorRed;
 				DYNARR_RESET( pts_t, points_da);
-				// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 				for (int inx=0; inx<context->segPtr->u.p.cnt; inx++) {
 					DYNARR_APPEND(pts_t, points_da,3);
 					REORIGIN( points(inx).pt, context->segPtr[segInx].u.p.pts[inx].pt,
@@ -2282,7 +2278,8 @@ STATUS_T DrawGeomModify(
 			context->state = MOD_SELECTED_PT;
 			break;
 		case SEG_POLY:
-		case SEG_FILPOLY:
+		case SEG_FILPOLY: {
+			int inx, inx2;
 			d = 10000;
 			polyInx = 0;
 			wSetCursor(mainD.d,wCursorNone);
@@ -2329,6 +2326,7 @@ STATUS_T DrawGeomModify(
 			}
 			context->state = MOD_SELECTED_PT;
 			return C_CONTINUE;
+		}
 		case SEG_TEXT:
 			segInx = -1;
 			return C_ERROR;

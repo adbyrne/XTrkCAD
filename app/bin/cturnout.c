@@ -1515,10 +1515,10 @@ static STATUS_T ModifyTurnout(track_p trk, wAction_t action, coOrd pos)
 static BOOL_T GetParamsTurnout(int inx, track_p trk, coOrd pos,
                                trackParams_t* params)
 {
-	struct extraDataCompound_t* xx;
-	xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 	params->type = curveTypeStraight;
 	if (inx == PARAMS_TURNOUT) {
+		struct extraDataCompound_t* xx = GET_EXTRA_DATA(trk, T_TURNOUT,
+		                                 extraDataCompound_t);
 		params->len = 0.0;
 		int epCnt = GetTrkEndPtCnt(trk);
 		if (epCnt < 3) {
@@ -1587,7 +1587,6 @@ static BOOL_T GetParamsTurnout(int inx, track_p trk, coOrd pos,
 		int segInx, subSegInx;
 		trkSeg_p segPtr;
 		DIST_T d = DIST_INF;
-		// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 		struct extraDataCompound_t* xx = GET_EXTRA_DATA(trk, T_TURNOUT,
 		                                 extraDataCompound_t);
 		/* Get parms from that seg */
@@ -2390,10 +2389,8 @@ static void AddTurnout(void)
 	track_p trk, trk1;
 	struct extraDataCompound_t* xx;
 	coOrd epPos;
-	DIST_T d;
-	ANGLE_T a, aa;
 	EPINX_T ep0, ep1, epx, epy;
-	wIndex_t i, j;
+	wIndex_t i;
 	typedef struct {
 		track_p trk;
 		EPINX_T ep;
@@ -2443,11 +2440,12 @@ static void AddTurnout(void)
 		    (!GetLayerFrozen(GetTrkLayer(trk))) &&
 		    (!GetLayerModule(GetTrkLayer(trk))) &&
 		    (!QueryTrack(trk, Q_CANNOT_PLACE_TURNOUT))) {
+			DIST_T d;
+			ANGLE_T a, aa;
 			LOG(log_turnout, 1, ("ep[%d] on T%d @(%0.3f %0.3f)\n",
 			                     i, GetTrkIndex(trk), epPos.x, epPos.y))
 			DIST_T dd = DIST_INF;
 			int nearest = -1;
-			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			for (int j = 0; j < curTurnout->endCnt; j++) {
 				DIST_T dd1 = FindDistance( epPos, GetEndPtPos(TempEndPt(j)));
 				if (dd > dd1) {
@@ -2495,7 +2493,7 @@ static void AddTurnout(void)
 					if (leftover(i).trk != NULL) {
 						leftover(i).ep = 1 - epx;
 						/* did we already split this track? */
-						for (j = 0; j < i; j++) {
+						for (wIndex_t j = 0; j < i; j++) {
 							if (connection(i).trk == leftover(j).trk) {
 								/* yes.  Remove the latest leftover piece */
 								LOG(log_turnout, 1, ("   deleting leftover T%d\n",
@@ -2549,9 +2547,8 @@ static void AddTurnout(void)
 			p1 = GetTrkEndPos(connection(i).trk, connection(i).ep);
 			ANGLE_T a0 = GetTrkEndAngle(newTrk, i);
 			ANGLE_T a1 = GetTrkEndAngle(connection(i).trk, connection(i).ep);
-			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			ANGLE_T a = fabs(DifferenceBetweenAngles(a0 + 180, a1));
-			d = FindDistance(p0, p1);
+			DIST_T d = FindDistance(p0, p1);
 			if (QueryTrack(connection(i).trk, Q_IS_CORNU)) {
 				// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 				ANGLE_T a = DifferenceBetweenAngles(FindAngle(p0, p1), a0);
@@ -2613,12 +2610,11 @@ static void AddTurnout(void)
 			trackParams_t params;
 			maxX = 0.0;
 			DIST_T dd = DIST_INF;
-			a = NormalizeAngle(GetTrkEndAngle(lt, le) + 180.0);
+			ANGLE_T a = NormalizeAngle(GetTrkEndAngle(lt, le) + 180.0);
 			for (ep = 0; ep < curTurnout->endCnt; ep++) {
 				FindPos(&off, NULL, GetTrkEndPos(newTrk, ep), GetTrkEndPos(lt, le), a,
 				        DIST_INF);
 				pos = GetTrkEndPos(newTrk, ep);
-				// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 				DIST_T d = GetTrkDistance(lt, &pos);
 				if ((d < dd) && (d < trackGauge / 2)) {
 					// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)

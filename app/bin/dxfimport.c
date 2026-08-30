@@ -804,10 +804,8 @@ static void ProcessDxfFile(
 	dxfAddOutput(tmp);
 
 	// Find and fix connected end points
-	int i;
-	int j;
-	for (i = 0; i < DxfEndPtCount; i++)
-		for (j = 0; j < DxfEndPtCount; j++) {
+	for (int i = 0; i < DxfEndPtCount; i++)
+		for (int j = 0; j < DxfEndPtCount; j++) {
 
 			if ((i != j) && (DxfEndPt[i].entity != DxfEndPt[j].entity)) {
 				double a = NormalizeAngle(180.0 + DxfEndPt[i].angle - DxfEndPt[j].angle +
@@ -854,7 +852,6 @@ static void ProcessDxfFile(
 		}
 		return;
 	}
-	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 	for (int i = 0; i < DxfOutputCount; i++) {
 		fprintf(xtiFile, "%s\n", DxfOutput[i]);
 	}
@@ -864,13 +861,11 @@ static void ProcessDxfFile(
 	// Clean up
 	SetUserLocale();
 
-	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 	for (int i = 0; i < DxfOutputCount; i++) {
 		MyFree(DxfOutput[i]);
 	}
 	MyFree(DxfOutput);
 
-	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 	for (int i = 0; i < layerCount; i++) {
 		MyFree(layer[i].name);
 	}

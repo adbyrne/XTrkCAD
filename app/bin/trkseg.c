@@ -1808,7 +1808,7 @@ EXPORT void DrawSegsO(
         wDrawColor color,
         long options )
 {
-	wIndex_t i, j;
+	wIndex_t i;
 	coOrd p0, p1, p2, p3, c;
 	ANGLE_T a0;
 	wDrawColor color1, color2;
@@ -1952,7 +1952,6 @@ EXPORT void DrawSegsO(
 			REORIGIN(p3,segPtr->u.b.pos[3],angle,orig);
 			//}
 
-			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			for(int j=0; j<segPtr->bezSegs.cnt; j++) {   //Loop through sub Segs
 				tempPtr = &DYNARR_N(trkSeg_t,segPtr->bezSegs,j);
 				switch (tempPtr->type) {
@@ -2039,7 +2038,7 @@ EXPORT void DrawSegsO(
 			coOrd *tempPts = malloc(sizeof(coOrd)*segPtr->u.p.cnt);
 			int *tempTypes = malloc(sizeof(int)*segPtr->u.p.cnt);
 //				coOrd tempPts[segPtr->u.p.cnt];
-			for (j=0; j<segPtr->u.p.cnt; j++) {
+			for (int j=0; j<segPtr->u.p.cnt; j++) {
 				REORIGIN( tempPts[j], segPtr->u.p.pts[j].pt, angle, orig );
 				tempTypes[j] = segPtr->u.p.pts[j].pt_type;
 			}
