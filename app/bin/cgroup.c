@@ -527,8 +527,8 @@ EXPORT void UngroupCompound(
 		orig.x = xx->orig.x - orig.x;
 		orig.y = xx->orig.y - orig.y;
 		track_p trk1 = NewCompound( T_TURNOUT, 0, orig, xx->angle, xx->title,
-		                    TempEndPtsCount()-epCnt1, TempEndPt(epCnt1), (PATHPTR_T)&pathPtr(0),
-		                    tempSegs_da.cnt, &tempSegs(0) );
+		                            TempEndPtsCount()-epCnt1, TempEndPt(epCnt1), (PATHPTR_T)&pathPtr(0),
+		                            tempSegs_da.cnt, &tempSegs(0) );
 		xx1 = GET_EXTRA_DATA(trk1, T_TURNOUT, extraDataCompound_t);
 		xx1->ungrouped = TRUE;
 		xx1->pathOverRide = xx->pathOverRide;
@@ -1182,7 +1182,8 @@ static void GroupOk( void * unused )
 			groupP->totalSegStart = tempSegs_da.cnt+trackSegs_da.cnt;
 			if (IsTrack(trk)) { hasTracks = TRUE; }
 			if ( GetTrkType(trk) == T_TURNOUT || GetTrkType(trk) == T_STRUCTURE) {
-				struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
+				struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK,
+				                                 extraDataCompound_t);
 				for ( pinx=0; pinx<xx->segCnt; pinx++ ) {
 					segPtr = &xx->segs[pinx];
 					if ( IsSegTrack(segPtr) ) {

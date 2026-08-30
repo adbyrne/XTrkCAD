@@ -1517,7 +1517,8 @@ static BOOL_T GetParamsTurnout(int inx, track_p trk, coOrd pos,
 {
 	params->type = curveTypeStraight;
 	if (inx == PARAMS_TURNOUT) {
-		struct extraDataCompound_t* xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
+		struct extraDataCompound_t* xx = GET_EXTRA_DATA(trk, T_TURNOUT,
+		                                 extraDataCompound_t);
 		params->len = 0.0;
 		int epCnt = GetTrkEndPtCnt(trk);
 		if (epCnt < 3) {

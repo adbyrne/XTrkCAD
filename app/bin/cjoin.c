@@ -1285,91 +1285,91 @@ static STATUS_T CmdJoin(
 		}
 
 		{
-		DIST_T d;
-		switch ( Dj.inp[0].params.type ) {
-		case curveTypeStraight:
-			FindPos( &off, &beyond, Dj.inp_pos[0], Dj.inp[0].params.lineOrig,
-			         Dj.inp[0].params.angle, DIST_INF );
-			if (beyond < 0.0) {
-				InfoMessage(_("Beyond end of 1st track"));
+			DIST_T d;
+			switch ( Dj.inp[0].params.type ) {
+			case curveTypeStraight:
+				FindPos( &off, &beyond, Dj.inp_pos[0], Dj.inp[0].params.lineOrig,
+				         Dj.inp[0].params.angle, DIST_INF );
+				if (beyond < 0.0) {
+					InfoMessage(_("Beyond end of 1st track"));
+					goto errorReturn;
+					/*Dj.jRes.type = curveTypeNone;
+					return C_CONTINUE;*/
+				}
+				d = FindDistance( Dj.inp_pos[0], Dj.inp[0].params.lineOrig );
+				break;
+			case curveTypeCurve:
+				if (IsCurveCircle(Dj.inp[0].trk)) {
+					d = DIST_INF;
+				} else {
+					ANGLE_T a = FindAngle( Dj.inp[0].params.arcP, Dj.inp_pos[0] );
+					ANGLE_T a1;
+					if (Dj.inp[0].params.ep == 0) {
+						a1 = NormalizeAngle( Dj.inp[0].params.arcA0+Dj.inp[0].params.arcA1-a );
+					} else {
+						a1 = NormalizeAngle( a-Dj.inp[0].params.arcA0 );
+					}
+					d = Dj.inp[0].params.arcR * a1 * 2.0*M_PI/360.0;
+				}
+				break;
+			case curveTypeCornu:
+			case curveTypeBezier:
+			case curveTypeNone:
+				InfoMessage( _("First Track Type not supported for non-Cornu Join") );
+				goto errorReturn;
+			default:
+				CHECKMSG( FALSE, ( "cmdJoin - unknown type[0] %d",
+				                   (int)(Dj.inp[0].params.type) ) );
+			}
+			d -= Dj.jointD[0].d0;
+			if ( d <= minLength ) {
+				ErrorMessage( MSG_TRK_TOO_SHORT, _("First "), PutDim(fabs(minLength-d)) );
 				goto errorReturn;
 				/*Dj.jRes.type = curveTypeNone;
 				return C_CONTINUE;*/
 			}
-			d = FindDistance( Dj.inp_pos[0], Dj.inp[0].params.lineOrig );
-			break;
-		case curveTypeCurve:
-			if (IsCurveCircle(Dj.inp[0].trk)) {
-				d = DIST_INF;
-			} else {
-				ANGLE_T a = FindAngle( Dj.inp[0].params.arcP, Dj.inp_pos[0] );
-				ANGLE_T a1;
-				if (Dj.inp[0].params.ep == 0) {
-					a1 = NormalizeAngle( Dj.inp[0].params.arcA0+Dj.inp[0].params.arcA1-a );
-				} else {
-					a1 = NormalizeAngle( a-Dj.inp[0].params.arcA0 );
-				}
-				d = Dj.inp[0].params.arcR * a1 * 2.0*M_PI/360.0;
-			}
-			break;
-		case curveTypeCornu:
-		case curveTypeBezier:
-		case curveTypeNone:
-			InfoMessage( _("First Track Type not supported for non-Cornu Join") );
-			goto errorReturn;
-		default:
-			CHECKMSG( FALSE, ( "cmdJoin - unknown type[0] %d",
-			                   (int)(Dj.inp[0].params.type) ) );
-		}
-		d -= Dj.jointD[0].d0;
-		if ( d <= minLength ) {
-			ErrorMessage( MSG_TRK_TOO_SHORT, _("First "), PutDim(fabs(minLength-d)) );
-			goto errorReturn;
-			/*Dj.jRes.type = curveTypeNone;
-			return C_CONTINUE;*/
-		}
 		}
 
 		{
-		DIST_T d;
-		switch ( Dj.inp[1].params.type ) {
-		case curveTypeStraight:
-			d = FindDistance( Dj.inp_pos[1], Dj.inp[1].params.lineOrig );
-			break;
-		case curveTypeCurve:
-			if (IsCurveCircle(Dj.inp[1].trk)) {
-				d = DIST_INF;
-			} else {
-				ANGLE_T a = FindAngle( Dj.inp[1].params.arcP, Dj.inp_pos[1] );
-				ANGLE_T a1;
-				if (Dj.inp[1].params.ep == 0) {
-					a1 = NormalizeAngle( Dj.inp[1].params.arcA0+Dj.inp[1].params.arcA1-a );
+			DIST_T d;
+			switch ( Dj.inp[1].params.type ) {
+			case curveTypeStraight:
+				d = FindDistance( Dj.inp_pos[1], Dj.inp[1].params.lineOrig );
+				break;
+			case curveTypeCurve:
+				if (IsCurveCircle(Dj.inp[1].trk)) {
+					d = DIST_INF;
 				} else {
-					a1 = NormalizeAngle( a-Dj.inp[1].params.arcA0 );
+					ANGLE_T a = FindAngle( Dj.inp[1].params.arcP, Dj.inp_pos[1] );
+					ANGLE_T a1;
+					if (Dj.inp[1].params.ep == 0) {
+						a1 = NormalizeAngle( Dj.inp[1].params.arcA0+Dj.inp[1].params.arcA1-a );
+					} else {
+						a1 = NormalizeAngle( a-Dj.inp[1].params.arcA0 );
+					}
+					d = Dj.inp[1].params.arcR * a1 * 2.0*M_PI/360.0;
 				}
-				d = Dj.inp[1].params.arcR * a1 * 2.0*M_PI/360.0;
+				break;
+			case curveTypeCornu:
+			case curveTypeBezier:
+			case curveTypeNone:
+				InfoMessage( _("Second Track Type not supported for non-Cornu Join") );
+				goto errorReturn;
+			default:
+				CHECKMSG( FALSE, ( "cmdJoin - unknown type[1]", Dj.inp[1].params.type ) );
 			}
-			break;
-		case curveTypeCornu:
-		case curveTypeBezier:
-		case curveTypeNone:
-			InfoMessage( _("Second Track Type not supported for non-Cornu Join") );
-			goto errorReturn;
-		default:
-			CHECKMSG( FALSE, ( "cmdJoin - unknown type[1]", Dj.inp[1].params.type ) );
-		}
-		d -= Dj.jointD[1].d0;
-		if ( d <= minLength ) {
-			ErrorMessage( MSG_TRK_TOO_SHORT, _("Second "), PutDim(fabs(minLength-d)) );
-			goto errorReturn;
-			/*Dj.jRes.type = curveTypeNone;
-			return C_CONTINUE;*/
-		}
+			d -= Dj.jointD[1].d0;
+			if ( d <= minLength ) {
+				ErrorMessage( MSG_TRK_TOO_SHORT, _("Second "), PutDim(fabs(minLength-d)) );
+				goto errorReturn;
+				/*Dj.jRes.type = curveTypeNone;
+				return C_CONTINUE;*/
+			}
 		}
 
 		l = Dj.jointD[0].d0 + Dj.jointD[1].d0;
 		if ( l > 0.0 ) {
-			DIST_T d;
+			DIST_T d = 0;
 			if ( Dj.jRes.type == curveTypeCurve ) {
 				d = Dj.jRes.arcR * Dj.jRes.arcA1 * 2.0*M_PI/360.0;
 			} else if ( Dj.jRes.type == curveTypeStraight ) {
