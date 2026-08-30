@@ -2121,10 +2121,10 @@ static BOOL_T GetParamsDraw( int inx, track_p trk, coOrd pos,
 	if (inx != PARAMS_NODES ) { return FALSE; }
 	DYNARR_RESET(coOrd,params->nodes);
 	BOOL_T back = FALSE;
-	coOrd start,end;
 	switch (xx->segs[0].type) {
-	case SEG_POLY:
+	case SEG_POLY: {
 		if (xx->segs[0].u.p.polyType != POLYLINE) { return FALSE; }
+		coOrd start,end;
 		REORIGIN(start,xx->segs[0].u.p.pts[0].pt,xx->angle,xx->orig);
 		REORIGIN(end,xx->segs[0].u.p.pts[xx->segs[0].u.p.cnt-1].pt,xx->angle,xx->orig);
 		params->ep = 1;
@@ -2143,8 +2143,10 @@ static BOOL_T GetParamsDraw( int inx, track_p trk, coOrd pos,
 		params->lineOrig = DYNARR_N(coOrd,params->nodes,0);
 		params->lineEnd = DYNARR_LAST(coOrd,params->nodes);
 		return TRUE;
+	}
 
-	case SEG_STRLIN:;
+	case SEG_STRLIN: {
+		coOrd start,end;
 		REORIGIN(start,xx->segs[0].u.l.pos[0],xx->angle,xx->orig);
 		REORIGIN(end,xx->segs[0].u.l.pos[1],xx->angle,xx->orig);
 		params->ep = 1;
@@ -2159,8 +2161,10 @@ static BOOL_T GetParamsDraw( int inx, track_p trk, coOrd pos,
 		params->lineOrig = DYNARR_N(coOrd,params->nodes,0);
 		params->lineEnd = DYNARR_LAST(coOrd,params->nodes);
 		return TRUE;
+	}
 
-	case SEG_CRVLIN:;
+	case SEG_CRVLIN: {
+		coOrd start,end;
 		Translate(&start,xx->segs[0].u.c.center,xx->segs[0].u.c.a0,
 		          fabs(xx->segs[0].u.c.radius));
 		REORIGIN(start,start,xx->angle,xx->orig);
@@ -2198,13 +2202,17 @@ static BOOL_T GetParamsDraw( int inx, track_p trk, coOrd pos,
 		params->lineEnd = DYNARR_LAST(coOrd,params->nodes);
 		params->ep = 1;
 		return TRUE;
+	}
 
-	case SEG_BEZLIN:
-		REORIGIN(start,xx->segs[0].u.b.pos[0],xx->angle,xx->orig);
-		REORIGIN(end,xx->segs[0].u.b.pos[3],xx->angle,xx->orig);
-		if (FindDistance(pos,start) < FindDistance(pos,end)) {
-			params->ep = 0;
-		} else { params->ep = 1; }
+	case SEG_BEZLIN: {
+		{
+			coOrd start,end;
+			REORIGIN(start,xx->segs[0].u.b.pos[0],xx->angle,xx->orig);
+			REORIGIN(end,xx->segs[0].u.b.pos[3],xx->angle,xx->orig);
+			if (FindDistance(pos,start) < FindDistance(pos,end)) {
+				params->ep = 0;
+			} else { params->ep = 1; }
+		}
 		coOrd curr_pos = params->bezierPoints[(ptrdiff_t)params->ep*3];
 		BOOL_T first = TRUE;
 		for (int i = 0; i<xx->segs[0].bezSegs.cnt; i++) {
@@ -2224,7 +2232,6 @@ static BOOL_T GetParamsDraw( int inx, track_p trk, coOrd pos,
 				         xx->orig);
 				curr_pos = DYNARR_LAST(coOrd,params->nodes);
 			} else {
-				// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 				coOrd start,end;
 				Translate(&start,segPtr->u.c.center,segPtr->u.c.a0,segPtr->u.c.radius);
 				Translate(&end,segPtr->u.c.center,segPtr->u.c.a0+segPtr->u.c.a1,
@@ -2265,6 +2272,7 @@ static BOOL_T GetParamsDraw( int inx, track_p trk, coOrd pos,
 		params->lineOrig = DYNARR_N(coOrd,params->nodes,0);
 		params->lineEnd = DYNARR_LAST(coOrd,params->nodes);
 		return TRUE;
+	}
 
 	default:
 		return FALSE;

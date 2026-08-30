@@ -1092,9 +1092,6 @@ EXPORT STATUS_T AdjustCornuCurve(
         cornuMessageProc message )
 {
 	track_p t;
-	DIST_T d;
-	ANGLE_T a, a2;
-	cornuParm_t cp;
 
 	Da.cmdType = VP2L(commandContext);
 
@@ -1104,7 +1101,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 
 	switch ( action & 0xFF) {
 
-	case C_START:
+	case C_START: {
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		infoSubst = FALSE;
 		Da.selectEndPoint = -1;
@@ -1117,6 +1114,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 		CreateBothEnds(Da.selectEndPoint, Da.selectMidPoint,Da.selectEndHandle,
 		               Da.prevSelected);
 		DYNARR_RESET( trkSeg_t, Da.crvSegs_da );
+		cornuParm_t cp;
 		SetUpCornuParms(&cp);
 		if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
 		else { Da.crvSegs_da_cnt = 0; }
@@ -1124,8 +1122,9 @@ EXPORT STATUS_T AdjustCornuCurve(
 		InfoMessage( _("Select Point, or Add Point") );
 		TempRedraw(); // AdjustCornuCurve C_START
 		return C_CONTINUE;
+	}
 
-	case C_UPDATE:
+	case C_UPDATE: {
 		if (Da.state != PICK_POINT && Da.prevSelected>-1) { return C_CONTINUE; }
 		int sel = Da.prevSelected;
 		if (Da.trk[sel]) { return C_CONTINUE; }    //Track Here - should never happen
@@ -1136,12 +1135,14 @@ EXPORT STATUS_T AdjustCornuCurve(
 			          cornuModCmdContext.radius);
 		}
 		CreateBothEnds(Da.prevSelected,-1,-1,Da.prevSelected);
+		cornuParm_t cp;
 		SetUpCornuParms(&cp);
 		if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
 		else { Da.crvSegs_da_cnt = 0; }
 		Da.minRadius = CornuMinRadius(Da.pos,Da.crvSegs_da);
 		return C_CONTINUE;
 		break;
+	}
 
 	case wActionMove:
 		if (Da.state == NONE || Da.state == PICK_POINT) {
@@ -1161,6 +1162,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 			CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint,Da.selectEndHandle,
 			               Da.prevSelected);
 			Da.selectEndPoint = -1;
+			DIST_T d;
 			for (int i=0; i<Da.mid_points.cnt; i++) {
 				d = FindDistance(DYNARR_N(coOrd,Da.mid_points,i),pos);
 				if (IsClose(d)) {
@@ -1195,7 +1197,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 		}
 		return C_CONTINUE;
 
-	case C_DOWN:
+	case C_DOWN: {
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (Da.state != PICK_POINT) { return C_CONTINUE; }
 		Da.selectEndPoint = -1;
@@ -1206,6 +1208,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 			InfoDefaultControls();
 			infoSubst = FALSE;
 		}
+		DIST_T d;
 		for (int i=0; i<2; i++) {
 			d = FindDistance(Da.pos[i],pos);
 			if (IsClose(d)) {
@@ -1333,13 +1336,15 @@ EXPORT STATUS_T AdjustCornuCurve(
 		}
 		CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint,Da.selectEndHandle,
 		               Da.prevSelected);
+		cornuParm_t cp;
 		SetUpCornuParms(&cp);
 		if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
 		else { Da.crvSegs_da_cnt = 0; }
 		Da.minRadius = CornuMinRadius(Da.pos, Da.crvSegs_da);
 		return C_CONTINUE;
+	}
 
-	case C_MOVE:
+	case C_MOVE: {
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (Da.state != POINT_PICKED) {
 			InfoMessage(
@@ -1348,7 +1353,6 @@ EXPORT STATUS_T AdjustCornuCurve(
 		}
 		if (Da.selectEndPoint >= 0) {
 			//If locked, reset pos to be on line from other track
-			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			int sel = Da.selectEndPoint;
 			coOrd pos2 = pos;
 			BOOL_T inside = FALSE;
@@ -1364,10 +1368,10 @@ EXPORT STATUS_T AdjustCornuCurve(
 							if (QueryTrack(Da.trk[sel],Q_CAN_ADD_ENDPOINTS)) {    //Turntable
 								trackParams_t tp;
 								if (!GetTrackParams(PARAMS_CORNU, Da.trk[sel], pos, &tp)) { return C_CONTINUE; }
-								// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 								ANGLE_T a = tp.angle;
 								Translate(&pos,tp.ttcenter,a,tp.ttradius);
 								Da.angle[sel] = NormalizeAngle(a+180);
+								cornuParm_t cp;
 								SetUpCornuParms(&cp);
 								if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
 								else { Da.crvSegs_da_cnt = 0; }
@@ -1392,12 +1396,10 @@ EXPORT STATUS_T AdjustCornuCurve(
 						if (QueryTrack(Da.trk[sel],Q_CAN_ADD_ENDPOINTS)) {    //Turntable
 							trackParams_t tp;
 							if (!GetTrackParams(PARAMS_CORNU, Da.trk[sel], pos, &tp)) { return C_CONTINUE; }
-							// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 							ANGLE_T a = tp.angle;
 							coOrd edge;
 							Translate(&edge,tp.ttcenter,a,tp.ttradius);
 							ANGLE_T da = DifferenceBetweenAngles(FindAngle(edge,pos),a);
-							// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 							DIST_T d = fabs(FindDistance(edge,pos)*cos(R2D(da)));
 							Translate(&pos,edge,a,d);
 							Da.angle[sel] = NormalizeAngle(a+180);
@@ -1410,6 +1412,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 							Da.extendSeg[sel].u.l.pos[1-sel] = pos;
 							Da.extendSeg[sel].u.l.pos[sel] = edge;
 							Da.extend[sel] = TRUE;
+							cornuParm_t cp;
 							SetUpCornuParms(&cp);
 							if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
 							else { Da.crvSegs_da_cnt = 0; }
@@ -1447,8 +1450,11 @@ EXPORT STATUS_T AdjustCornuCurve(
 				}
 			}
 			if(!Da.trk[sel]) {			//Cornu with no end
+				ANGLE_T a, a2;
+				DIST_T d;
 				if (((MyGetKeyState() & WKEY_SHIFT) != 0)
 				    && Da.selectTrack) {   //Extend end locked
+					cornuParm_t cp;
 					SetUpCornuParms(&cp);
 					CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,FALSE);
 					if (Da.radius[sel] == 0)  {                //Straight
@@ -1525,6 +1531,8 @@ EXPORT STATUS_T AdjustCornuCurve(
 					}
 				}
 			} else {									//Cornu with ends
+				ANGLE_T a, a2;
+				DIST_T d;
 				if (inside) { Da.pos[sel] = pos; }
 				if (!GetConnectedTrackParms(Da.trk[sel],pos,sel,Da.ep[sel],inside?FALSE:TRUE)) {
 					wBeep();
@@ -1658,6 +1666,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 		}
 		CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint,Da.selectEndHandle,
 		               Da.prevSelected);
+		cornuParm_t cp;
 		SetUpCornuParms(
 		        &cp);    //In case we want to use these because the ends are not on the track
 		if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
@@ -1679,8 +1688,9 @@ EXPORT STATUS_T AdjustCornuCurve(
 		        FormatDistance(CornuLength(Da.pos,Da.crvSegs_da)),
 		        FormatDistance(CornuTotalWindingArc(Da.pos,Da.crvSegs_da)));
 		return C_CONTINUE;
+	}
 
-	case C_UP:
+	case C_UP: {
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (Da.state != POINT_PICKED) {
 			Da.state = PICK_POINT;
@@ -1704,7 +1714,6 @@ EXPORT STATUS_T AdjustCornuCurve(
 						ep=-1;  		            //Don't attach to Turntable
 						trackParams_t tp;
 						if (!GetTrackParams(PARAMS_CORNU, t, pos, &tp)) { return C_CONTINUE; }
-						// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 						ANGLE_T a = tp.angle;
 						Translate(&pos,tp.ttcenter,a,tp.ttradius);
 					}
@@ -1766,6 +1775,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 		Da.selectEndPoint = -1; Da.selectMidPoint = -1;
 		CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint,Da.selectEndHandle,
 		               Da.prevSelected);
+		cornuParm_t cp;
 		SetUpCornuParms(&cp);
 		if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
 		else { Da.crvSegs_da_cnt = 0; }
@@ -1774,6 +1784,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 		//        _("Pick on point to adjust it along track - Delete to remove, Enter to confirm, ESC to abort"));
 		Da.state = PICK_POINT;
 		return C_CONTINUE;
+	}
 
 	case C_TEXT:
 		DYNARR_RESET(trkSeg_t,anchors_da);
@@ -1788,7 +1799,6 @@ EXPORT STATUS_T AdjustCornuCurve(
 			Da.prevSelected = -1;
 			CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint,Da.selectEndHandle,
 			               Da.prevSelected);
-			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			cornuParm_t cp;
 			SetUpCornuParms(&cp);
 			if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
@@ -2549,7 +2559,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		}
 		return C_CONTINUE;
 
-	case wActionMove:
+	case wActionMove: {
 		lock = FALSE;
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (Da.state != NONE && Da.state != LOC_2) { return C_CONTINUE; }
@@ -2597,6 +2607,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		}
 
 		return C_CONTINUE;
+	}
 
 	case C_MOVE:
 		if (Da.state == NONE) {    //First point not created
@@ -2620,7 +2631,6 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				Da.radius[1] = -1.0;  /*No end*/
 				return C_CONTINUE;
 			}
-			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			EPINX_T ep = 0;
 //			BOOL_T found = FALSE;
 //			int end = Da.state==POS_1?0:1;

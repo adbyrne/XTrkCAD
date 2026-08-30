@@ -885,7 +885,7 @@ static STATUS_T CmdJoin(
  * Join 2 tracks.
  */
 {
-	DIST_T d=0, l;
+	DIST_T l;
 	coOrd off, p1;
 	EPINX_T ep;
 	track_p trk=NULL;
@@ -893,7 +893,6 @@ static STATUS_T CmdJoin(
 	STATUS_T rc;
 	ANGLE_T normalAngle=0;
 	EPINX_T inx;
-	ANGLE_T a, a1;
 	DIST_T eR[2];
 	BOOL_T ok;
 	trkSeg_p p;
@@ -1119,14 +1118,11 @@ static STATUS_T CmdJoin(
 
 		//Fix Pos onto the line of the second track
 		if (Dj.inp[1].params.type == curveTypeStraight) {
-			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			ANGLE_T a = NormalizeAngle(FindAngle(Dj.inp[1].params.lineOrig,
 			                                     pos)-Dj.inp[1].params.angle);
-			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			DIST_T d = FindDistance(Dj.inp[1].params.lineOrig,pos);
 			Translate(&pos,Dj.inp[1].params.lineOrig,Dj.inp[1].params.angle,d*cos(D2R(a)));
 		} else {
-			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			ANGLE_T a = FindAngle(Dj.inp[1].params.arcP,pos);
 			Translate(&pos,Dj.inp[1].params.arcP,a,Dj.inp[1].params.arcR);
 		}
@@ -1140,7 +1136,6 @@ static STATUS_T CmdJoin(
 		   ) {
 			ANGLE_T na0=0.0,na1=0.0;
 //			coOrd end0, end1;
-			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			ANGLE_T a0,a1;
 //			end0 = GetTrkEndPos(Dj.inp[0].trk,Dj.inp[0].params.ep);
 //			end1 = GetTrkEndPos(Dj.inp[1].trk,Dj.inp[1].params.ep);
@@ -1175,7 +1170,6 @@ static STATUS_T CmdJoin(
 					FindPos( &off, &beyond, pos1, Dj.inp[1].params.lineOrig, Dj.inp[1].params.angle,
 					         FindDistance(Dj.inp[1].params.lineOrig,Dj.inp[1].params.lineEnd) );
 				} else if (Dj.inp[1].params.type == curveTypeCurve) {
-					// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 					ANGLE_T a = FindAngle(Dj.inp[1].params.arcP,pos1);
 					if ((a>Dj.inp[1].params.arcA0+Dj.inp[1].params.arcA1)
 					    || (a< Dj.inp[1].params.arcA0)) {
@@ -1272,7 +1266,7 @@ static STATUS_T CmdJoin(
 		if ( Dj.jointD[0].x!=0.0 || Dj.jointD[1].x!=0.0 ) {
 
 			/* Compute the transition-curve, hopefully twice is enough */
-			a1 = Dj.inp[1].params.angle + (Dj.jointD[1].negate?-90.0:+90.0);
+			ANGLE_T a1 = Dj.inp[1].params.angle + (Dj.jointD[1].negate?-90.0:+90.0);
 			if ((!AdjustJoint( TRUE, a1, eR, normalAngle )) ||
 			    (!AdjustJoint( TRUE, a1, eR, normalAngle )) ) {
 				goto errorReturn;
@@ -1290,6 +1284,8 @@ static STATUS_T CmdJoin(
 			}
 		}
 
+		{
+		DIST_T d;
 		switch ( Dj.inp[0].params.type ) {
 		case curveTypeStraight:
 			FindPos( &off, &beyond, Dj.inp_pos[0], Dj.inp[0].params.lineOrig,
@@ -1306,7 +1302,8 @@ static STATUS_T CmdJoin(
 			if (IsCurveCircle(Dj.inp[0].trk)) {
 				d = DIST_INF;
 			} else {
-				a = FindAngle( Dj.inp[0].params.arcP, Dj.inp_pos[0] );
+				ANGLE_T a = FindAngle( Dj.inp[0].params.arcP, Dj.inp_pos[0] );
+				ANGLE_T a1;
 				if (Dj.inp[0].params.ep == 0) {
 					a1 = NormalizeAngle( Dj.inp[0].params.arcA0+Dj.inp[0].params.arcA1-a );
 				} else {
@@ -1331,7 +1328,10 @@ static STATUS_T CmdJoin(
 			/*Dj.jRes.type = curveTypeNone;
 			return C_CONTINUE;*/
 		}
+		}
 
+		{
+		DIST_T d;
 		switch ( Dj.inp[1].params.type ) {
 		case curveTypeStraight:
 			d = FindDistance( Dj.inp_pos[1], Dj.inp[1].params.lineOrig );
@@ -1340,7 +1340,8 @@ static STATUS_T CmdJoin(
 			if (IsCurveCircle(Dj.inp[1].trk)) {
 				d = DIST_INF;
 			} else {
-				a = FindAngle( Dj.inp[1].params.arcP, Dj.inp_pos[1] );
+				ANGLE_T a = FindAngle( Dj.inp[1].params.arcP, Dj.inp_pos[1] );
+				ANGLE_T a1;
 				if (Dj.inp[1].params.ep == 0) {
 					a1 = NormalizeAngle( Dj.inp[1].params.arcA0+Dj.inp[1].params.arcA1-a );
 				} else {
@@ -1364,9 +1365,11 @@ static STATUS_T CmdJoin(
 			/*Dj.jRes.type = curveTypeNone;
 			return C_CONTINUE;*/
 		}
+		}
 
 		l = Dj.jointD[0].d0 + Dj.jointD[1].d0;
 		if ( l > 0.0 ) {
+			DIST_T d;
 			if ( Dj.jRes.type == curveTypeCurve ) {
 				d = Dj.jRes.arcR * Dj.jRes.arcA1 * 2.0*M_PI/360.0;
 			} else if ( Dj.jRes.type == curveTypeStraight ) {
@@ -1393,8 +1396,8 @@ static STATUS_T CmdJoin(
 				if (IsCurveCircle( Dj.inp[ep].trk )) {
 					break;
 				}
-				a = FindAngle( Dj.inp[ep].params.arcP, Dj.inp_pos[ep] );
-				a1 = NormalizeAngle( a-Dj.inp[ep].params.arcA0 );
+				ANGLE_T a = FindAngle( Dj.inp[ep].params.arcP, Dj.inp_pos[ep] );
+				ANGLE_T a1 = NormalizeAngle( a-Dj.inp[ep].params.arcA0 );
 				if (a1 <= Dj.inp[ep].params.arcA1) {
 					break;
 				}

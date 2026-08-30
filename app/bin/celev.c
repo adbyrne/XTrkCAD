@@ -384,7 +384,6 @@ static BOOL_T GetPointElev(track_p trk, coOrd pos, DIST_T * height)
 static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 {
 	track_p trk0, trk1;
-	EPINX_T ep0;
 //	int oldTrackCount;
 
 	switch (action) {
@@ -426,7 +425,6 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		coOrd p0 = pos, p2=pos;
 		trk0 = OnTrack2(&p0,FALSE, TRUE, FALSE, NULL);
 		if (trk0 != NULL) {
-			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			EPINX_T ep0 = 0;
 //			EPINX_T ep1 = 1;
 			DIST_T elev0, elev1;
@@ -503,7 +501,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 			elevTrk = NULL;
 			InfoMessage( _("Click on end, +Shift to split, +Ctrl to move description") );
 		} else {
-			ep0 = PickEndPoint( p0, trk0 );
+			EPINX_T ep0 = PickEndPoint( p0, trk0 );
 			if ( (MyGetKeyState()&WKEY_SHIFT) ) {
 				UndoStart( _("Split track"), "SplitTrack( T%d[%d] )", GetTrkIndex(trk0), ep0 );
 //				oldTrackCount = trackCount;

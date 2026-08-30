@@ -2009,7 +2009,6 @@ static STATUS_T CmdRotate(
 	static BOOL_T direction_set;
 	static track_p trk;
 	ANGLE_T angle1;
-	coOrd pos1;
 	static int state;
 
 	static EPINX_T ep1;
@@ -2072,7 +2071,7 @@ static STATUS_T CmdRotate(
 			/*DrawLine( &mainD, base, orig, 0, wDrawColorBlack );
 			DrawMovedTracks(FALSE, orig, angle);*/
 		} else {
-			pos1 = pos;
+			coOrd pos1 = pos;
 			drawnAngle = FALSE;
 			onTrackInSplit = TRUE;
 			trk = OnTrack( &pos, TRUE, FALSE );
@@ -2126,7 +2125,7 @@ static STATUS_T CmdRotate(
 			return C_CONTINUE;
 		}
 		if ( rotateAlignState == 2 ) {
-			pos1 = pos;
+			coOrd pos1 = pos;
 			onTrackInSplit = TRUE;
 			trk = OnTrack( &pos, TRUE, FALSE );
 			onTrackInSplit = FALSE;
@@ -2211,7 +2210,6 @@ static STATUS_T CmdRotate(
 				if (FindEndIntersection(zero,orig,NormalizeAngle( angle-baseAngle ),&t1,&ep1,
 				                        &t2,&ep2)) {
 					coOrd pos2 = GetTrkEndPos(t2,ep2);
-					// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 					coOrd pos1 = GetTrkEndPos(t1,ep1);
 					Rotate(&pos2,orig,NormalizeAngle( angle-baseAngle ));
 					CreateEndAnchor(pos2,FALSE);

@@ -392,7 +392,7 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 	case C_MOVE:
 		return C_CONTINUE;
 		break;
-	case C_UP:
+	case C_UP: {
 		if (trimState == TRIM_NONE) {
 			trk0 = OnTrack( &pos, FALSE, FALSE);
 			if (trk0!=NULL
@@ -451,7 +451,7 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 		MainRedraw();
 		InfoMessage( _("Select another draw object to Trim, or Space to Deselect") );
 		return C_CONTINUE;
-		break;
+	}
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		trk = NULL;
@@ -466,7 +466,6 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 			}
 		}
 		if (trimState == TRIM_LINE) {
-			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 			coOrd pos1=pos;
 			trk1 = OnTrackIgnore(&pos1,FALSE,FALSE,trimLine);
 			if (trk1!=NULL) {
