@@ -105,10 +105,9 @@ static EPINX_T FindEP(
         trkEndPt_p endPts,
         coOrd pos )
 {
-	DIST_T dist;
 	EPINX_T ep;
 	for ( ep=0; ep<epCnt; ep++ ) {
-		dist = FindDistance( pos, GetEndPtPos( EndPtIndex( endPts, ep ) ) );
+		DIST_T dist = FindDistance( pos, GetEndPtPos( EndPtIndex( endPts, ep ) ) );
 		if ( dist < connectDistance ) {
 			return ep;
 		}
@@ -1016,7 +1015,6 @@ static BOOL_T CheckPathEndPt(
 	                                 extraDataCompound_t);
 	wIndex_t segInx;
 	EPINX_T segEP, epCnt;
-	DIST_T d;
 	coOrd pos;
 
 	GetSegInxEP( cc, &segInx, &segEP );
@@ -1025,7 +1023,7 @@ static BOOL_T CheckPathEndPt(
 	REORIGIN1( pos, xx->angle, xx->orig );
 	epCnt = GetTrkEndPtCnt(trk);
 	for ( ep=0; ep<epCnt; ep++ ) {
-		d = FindDistance( pos, GetTrkEndPos( trk, ep ) );
+		DIST_T d = FindDistance( pos, GetTrkEndPos( trk, ep ) );
 		if ( d < connectDistance ) {
 			return TRUE;
 		}
