@@ -127,12 +127,13 @@ static void MoveConnectedTracks(
         coOrd pos,
         ANGLE_T angle )
 {
-	EPINX_T ep, ep2;
+	EPINX_T ep;
 	track_p trk;
-	coOrd p;
-	ANGLE_T a;
 
 	while (1) {
+		EPINX_T ep2;
+		coOrd p;
+		ANGLE_T a;
 		p = GetTrkEndPos( trk1, ep1 );
 		p.x = pos.x - p.x;
 		p.y = pos.y - p.y;
@@ -162,11 +163,11 @@ static void ReverseSectionList(
         int start, int end )
 {
 	int up, down;
-	section_t tmpUp, tmpDown;
-	EPINX_T tmpEp;
-	coOrd tmpPos;
-	ANGLE_T tmpA;
 	for (down=start,up=end-1; down<=up; down++,up-- ) {
+		section_t tmpUp, tmpDown;
+		EPINX_T tmpEp;
+		coOrd tmpPos;
+		ANGLE_T tmpA;
 		tmpUp = section(up);
 		tmpEp=tmpUp.ep[0]; tmpUp.ep[0]=tmpUp.ep[1]; tmpUp.ep[1]=tmpEp;
 		tmpPos=tmpUp.p[0]; tmpUp.p[0]=tmpUp.p[1]; tmpUp.p[1]=tmpPos;
@@ -193,16 +194,14 @@ static void ReverseSectionList(
 
 static int CheckConnections( void )
 {
-	section_p sp;
 	int rc;
 	int inx;
-	DIST_T dist;
-	ANGLE_T angle;
 	rc = 0;
 	for (inx = 1; inx<section_da.cnt; inx++) {
-		sp = &section(inx);
-		dist = FindDistance( sp[0].p[0], sp[-1].p[1] );
-		angle = NormalizeAngle( sp[0].a[0] - sp[-1].a[1] + 180.0 + connectAngle/2 );
+		section_p sp = &section(inx);
+		DIST_T dist = FindDistance( sp[0].p[0], sp[-1].p[1] );
+		ANGLE_T angle = NormalizeAngle( sp[0].a[0] - sp[-1].a[1] + 180.0 +
+		                                connectAngle/2 );
 		if (dist > connectDistance) {
 			rc |= DIST_FAULT;
 		}
@@ -275,12 +274,10 @@ static double ComputeContrib(
         EPINX_T ep )
 {
 	int inx;
-	section_p sp;
-	ANGLE_T a;
 	double contrib = 0.0;
 	for (inx=start; inx<=end; inx++ ) {
-		sp = &section(inx);
-		a = NormalizeAngle(angle - sp->a[ep] + 180.0);
+		section_p sp = &section(inx);
+		ANGLE_T a = NormalizeAngle(angle - sp->a[ep] + 180.0);
 		sp->contrib = (a>270.0||a<90.0)?fabs(cos(a)):0.0;
 		contrib += sp->contrib;
 	}
@@ -371,12 +368,10 @@ static void AdjustSections( coOrd p1 )
 
 static void DumpSections( void )
 {
-	section_p sp;
 	int inx;
-	DIST_T dist;
 	for (inx = 1; inx<section_da.cnt; inx++) {
-		sp = &section(inx);
-		dist = FindDistance( sp[0].p[0], sp[-1].p[1] );
+		section_p sp = &section(inx);
+		DIST_T dist = FindDistance( sp[0].p[0], sp[-1].p[1] );
 		printf( "%2d[%d] X%0.3f Y%0.3f A%0.3f T%0.3f C%0.3f x%0.3f y%0.3f [%0.3f %0.3f] [%0.3f %0.3f] dd%0.3f da%0.3f\n",
 		        inx, GetTrkIndex(sp->trk), sp->costs[0].X, sp->costs[0].Y, sp->costs[0].A,
 		        sp->costs[0].T,
@@ -434,9 +429,10 @@ static void MoveSectionTracks( void )
 {
 	int inx, cnt;
 	section_p sp;
-	coOrd amount, oldPos;
+	coOrd amount;
 	cnt = 0;
 	for (inx=1; inx<section_da.cnt-1; inx++) {
+		coOrd oldPos;
 		sp = &section(inx);
 		oldPos = GetTrkEndPos( sp->trk, sp->ep[0] );
 		amount.x = sp->p[0].x-oldPos.x;
@@ -467,7 +463,6 @@ static void PullTracks(
 	ANGLE_T a;
 	coOrd p1, p2;
 	ANGLE_T a1, a2;
-	coOrd p;
 	int cnt1;
 //	int cnt2;
 	int rc;
@@ -512,6 +507,7 @@ static void PullTracks(
 	}
 //	cnt2 = section_da.cnt - cnt1;
 	if ( e1 == freeEnd && e2 == freeEnd ) {
+		coOrd p;
 		p.x = (p1.x+p2.x)/2.0;
 		p.y = (p1.y+p2.y)/2.0;
 		a = NormalizeAngle( (a1-(a2+180.0)) );
@@ -575,8 +571,6 @@ static void TightenTracks(
 {
 	track_p trk1;
 	EPINX_T ep1, ep2;
-	coOrd p0, p1;
-	ANGLE_T a0, a1;
 	int cnt;
 	UndoStart(_("Tighten Tracks"), "TightenTracks(T%d[%d])", GetTrkIndex(trk), ep );
 	while ( (ep2=GetNextTrk(trk,ep,&trk1,&ep1,0)) >= 0 && trk1 != NULL ) {
@@ -590,6 +584,8 @@ static void TightenTracks(
 	ep1 = GetEndPtConnectedToMe( trk1, trk );
 	cnt = 0;
 	while(1) {
+		coOrd p0, p1;
+		ANGLE_T a0, a1;
 		p0 = GetTrkEndPos( trk, ep );
 		a0 = NormalizeAngle( GetTrkEndAngle( trk, ep ) + 180.0 );
 		p1 = GetTrkEndPos( trk1, ep1 );
@@ -683,8 +679,8 @@ STATUS_T ConnectMultiple()
 	for (int i=0; i<2;
 	     i++) { // Try twice - in case later joins help earlier ones and to try close ones first
 		while ( TrackIterate( &trk1 ) ) {
-			BOOL_T found = FALSE;
 			if ( GetTrkSelected( trk1 ) ) {
+				BOOL_T found = FALSE;
 				for (ep1=0; ep1<GetTrkEndPtCnt(trk1); ep1++) {
 					if (!GetTrkEndTrk( trk1, ep1 )) {
 						trk2 = NULL;
@@ -733,9 +729,8 @@ static STATUS_T CmdPull(
 
 	static track_p trk1, t1, t2;
 	static BOOL_T t_turn1, t_turn2;
-	static EPINX_T ep1, t_ep1, t_ep2;
+	static EPINX_T ep1, t_ep1;
 	track_p trk2;
-	EPINX_T ep2;
 	static BOOL_T turntable;
 
 //	int countTracksR0 = 0, countTracksR1 = 0, possibleEndPoints = 0;
@@ -781,6 +776,7 @@ static STATUS_T CmdPull(
 				}
 				t2= OnTrackIgnore( &pos, FALSE, TRUE, t1 );
 				if (t2 != NULL) {
+					static EPINX_T t_ep2;
 					t_ep2 = PickUnconnectedEndPointSilent( pos, t2 );
 					if (t_ep2 < 0) {
 						if (QueryTrack(t2, Q_CAN_ADD_ENDPOINTS)) {
@@ -830,7 +826,7 @@ static STATUS_T CmdPull(
 						InfoMessage( _("Same Track! - please select another") );
 						return C_CONTINUE;
 					}
-					ep2 = PickUnconnectedEndPoint( pos, trk2 );
+					EPINX_T ep2 = PickUnconnectedEndPoint( pos, trk2 );
 					if (ep2 >= 0 ) {
 						PullTracks( trk1, ep1, trk2, ep2 );
 						trk1 = NULL;
