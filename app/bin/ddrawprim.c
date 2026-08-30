@@ -119,14 +119,13 @@ static void DDrawLine(drawCmd_p d, coOrd p0, coOrd p1, wDrawWidth width,
                       wDrawColor color)
 {
 	wDrawPix_t x0, y0, x1, y1;
-	BOOL_T in0 = FALSE, in1 = FALSE;
-	coOrd orig, size;
 	int lborder = GetLBorder();
 	int bborder = GetBBorder();
 	if (d == &mapD && !mapVisible) {
 		return;
 	}
 	if ((d->options & DC_NOCLIP) == 0) {
+		BOOL_T in0 = FALSE, in1 = FALSE;
 		if (d->angle == 0.0) {
 			in0 = (p0.x >= d->orig.x && p0.x <= d->orig.x + d->size.x &&
 			       p0.y >= d->orig.y && p0.y <= d->orig.y + d->size.y);
@@ -134,8 +133,8 @@ static void DDrawLine(drawCmd_p d, coOrd p0, coOrd p1, wDrawWidth width,
 			       p1.y >= d->orig.y && p1.y <= d->orig.y + d->size.y);
 		}
 		if ((!in0) || (!in1)) {
-			orig = d->orig;
-			size = d->size;
+			coOrd orig = d->orig;
+			coOrd size = d->size;
 			if (d->options & DC_TICKS) {
 				orig.x -= lborder / d->dpi * d->scale;
 				orig.y -= bborder / d->dpi * d->scale;
@@ -177,18 +176,16 @@ static void DDrawArc(drawCmd_p d, coOrd p, DIST_T r, ANGLE_T angle0,
                      wDrawColor color)
 {
 	wDrawPix_t x, y;
-	ANGLE_T da;
 	coOrd p0, p1;
 	DIST_T rr;
-	int i, cnt;
 
 	if (d == &mapD && !mapVisible) {
 		return;
 	}
 	rr = (r / d->scale) * d->dpi + 0.5;
 	if (rr > wDrawGetMaxRadius(d->d)) {
-		da = (maxArcSegStraightLen * 180) / (M_PI * rr);
-		cnt = (int)(angle1 / da) + 1;
+		ANGLE_T da = (maxArcSegStraightLen * 180) / (M_PI * rr);
+		int cnt = (int)(angle1 / da) + 1;
 		da = angle1 / cnt;
 		// cppcheck-suppress shadowFunction -- local variable name coincides with a library/project function of the same name -- zero functional risk
 		coOrd min, max;
@@ -196,7 +193,7 @@ static void DDrawArc(drawCmd_p d, coOrd p, DIST_T r, ANGLE_T angle0,
 		max.x = min.x + d->size.x;
 		max.y = min.y + d->size.y;
 		PointOnCircle(&p0, p, r, angle0);
-		for (i = 1; i <= cnt; i++) {
+		for (int i = 1; i <= cnt; i++) {
 			angle0 += da;
 			PointOnCircle(&p1, p, r, angle0);
 			if (d->angle == 0.0 &&
@@ -452,7 +449,6 @@ EXPORT void DrawMultiString(drawCmd_p d, coOrd pos, char *text, wFont_p fp,
                             coOrd *lo, coOrd *hi)
 {
 	char *cp;
-	char *cp1;
 	POS_T lineH;
 	coOrd size, size2, posl, orig;
 	POS_T descent, ascent;
@@ -486,7 +482,7 @@ EXPORT void DrawMultiString(drawCmd_p d, coOrd pos, char *text, wFont_p fp,
 	lineH = (ascent + descent) * 1.0;
 	cp = line;
 	while (*text) {
-		cp1 = cp;
+		char *cp1 = cp;
 		while (*text != '\0' && *text != '\n') {
 			*cp++ = *text++;
 		}
@@ -664,10 +660,9 @@ EXPORT void DrawMultiLineTextSize(drawCmd_p dp, char *text, wFont_p fp,
                                   wFontSize_t fs, BOOL_T relative, coOrd *size,
                                   coOrd *lastline)
 {
-	POS_T descent, ascent, lineW, lineH;
+	POS_T descent, ascent, lineH;
 	coOrd textsize, blocksize;
 
-	char *cp;
 	char *line = malloc(strlen(text) + 1);
 
 	DrawTextSize2(&mainD, "Aqlip", fp, fs, TRUE, &textsize, &descent, &ascent);
@@ -677,14 +672,14 @@ EXPORT void DrawMultiLineTextSize(drawCmd_p dp, char *text, wFont_p fp,
 	lastline->x = 0;
 	lastline->y = 0;
 	while (text && *text != '\0') {
-		cp = line;
+		char *cp = line;
 		while (*text != '\0' && *text != '\n') {
 			*cp++ = *text++;
 		}
 		*cp = '\0';
 		blocksize.y += lineH;
 		DrawTextSize2(&mainD, line, fp, fs, TRUE, &textsize, &descent, &ascent);
-		lineW = textsize.x;
+		POS_T lineW = textsize.x;
 		if (lineW > blocksize.x) {
 			blocksize.x = lineW;
 		}
@@ -864,12 +859,11 @@ static void BDrawLine(drawCmd_p d, coOrd p0, coOrd p1, wDrawWidth width,
                       wDrawColor color)
 {
 	wDrawPix_t x0, y0, x1, y1;
-	BOOL_T in0 = FALSE, in1 = FALSE;
-	coOrd orig, size;
 	int lborder = GetLBorder();
 	int bborder = GetBBorder();
 	if (d == &mapD && !mapVisible) { return; }
 	if ((d->options & DC_NOCLIP) == 0) {
+		BOOL_T in0 = FALSE, in1 = FALSE;
 		if (d->angle == 0.0) {
 			in0 = (p0.x >= d->orig.x && p0.x <= d->orig.x + d->size.x &&
 			       p0.y >= d->orig.y && p0.y <= d->orig.y + d->size.y);
@@ -877,8 +871,8 @@ static void BDrawLine(drawCmd_p d, coOrd p0, coOrd p1, wDrawWidth width,
 			       p1.y >= d->orig.y && p1.y <= d->orig.y + d->size.y);
 		}
 		if ((!in0) || (!in1)) {
-			orig = d->orig;
-			size = d->size;
+			coOrd orig = d->orig;
+			coOrd size = d->size;
 			if (d->options & DC_TICKS) {
 				orig.x -= lborder / d->dpi * d->scale;
 				orig.y -= bborder / d->dpi * d->scale;
@@ -909,16 +903,14 @@ static void BDrawArc(drawCmd_p d, coOrd p, DIST_T r, ANGLE_T angle0,
                      wDrawColor color)
 {
 	wDrawPix_t x, y;
-	ANGLE_T da;
 	coOrd p0, p1;
 	DIST_T rr;
-	int i, cnt;
 
 	if (d == &mapD && !mapVisible) { return; }
 	rr = (r / d->scale) * d->dpi + 0.5;
 	if (rr > wDrawGetMaxRadius(d->d)) {
-		da = (maxArcSegStraightLen * 180) / (M_PI * rr);
-		cnt = (int)(angle1 / da) + 1;
+		ANGLE_T da = (maxArcSegStraightLen * 180) / (M_PI * rr);
+		int cnt = (int)(angle1 / da) + 1;
 		da = angle1 / cnt;
 		// cppcheck-suppress shadowFunction -- local variable name coincides with a library/project function of the same name -- zero functional risk
 		coOrd min, max;
@@ -926,7 +918,7 @@ static void BDrawArc(drawCmd_p d, coOrd p, DIST_T r, ANGLE_T angle0,
 		max.x = min.x + d->size.x;
 		max.y = min.y + d->size.y;
 		PointOnCircle(&p0, p, r, angle0);
-		for (i = 1; i <= cnt; i++) {
+		for (int i = 1; i <= cnt; i++) {
 			angle0 += da;
 			PointOnCircle(&p1, p, r, angle0);
 			if (d->angle == 0.0 &&

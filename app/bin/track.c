@@ -647,8 +647,7 @@ EXPORT void CopyAttributes( track_p src, track_p dst )
 EXPORT EPINX_T PickEndPoint( coOrd p, track_cp trk )
 {
 	EPINX_T inx, i;
-	DIST_T d, dd;
-	coOrd pos;
+	DIST_T d;
 	if (trk->endCnt <= 0) {
 		return -1;
 	}
@@ -660,8 +659,8 @@ EXPORT EPINX_T PickEndPoint( coOrd p, track_cp trk )
 	d = FindDistance( p, GetEndPtPos( trk->endPt ) );
 	inx = 0;
 	for ( i=1; i<trk->endCnt; i++ ) {
-		pos = GetEndPtPos( EndPtIndex( trk->endPt, i ) );
-		dd=FindDistance(p, pos);
+		coOrd pos = GetEndPtPos( EndPtIndex( trk->endPt, i ) );
+		DIST_T dd=FindDistance(p, pos);
 		if (dd < d) {
 			d = dd;
 			inx = i;
@@ -1549,8 +1548,7 @@ static int CompareCmds( const void * a, const void * b )
 
 EXPORT BOOL_T ReadTrack( char * line )
 {
-	TRKINX_T inx, lo, hi;
-	int cmp;
+	TRKINX_T inx;
 	if (strncmp( paramLine, "TABLEEDGE ", 10 ) == 0) {
 		ReadTableEdge( paramLine+10 );
 		return TRUE;
@@ -1570,11 +1568,11 @@ EXPORT BOOL_T ReadTrack( char * line )
 			qsort( sortedCmds, trackCmds_da.cnt-1, sizeof *(trackCmd_t**)0, CompareCmds );
 		}
 
-		lo = 0;
-		hi = trackCmds_da.cnt-2;
+		TRKINX_T lo = 0;
+		TRKINX_T hi = trackCmds_da.cnt-2;
 		do {
 			inx = (lo+hi)/2;
-			cmp = strncmp( line, sortedCmds[inx]->name, strlen(sortedCmds[inx]->name) );
+			int cmp = strncmp( line, sortedCmds[inx]->name, strlen(sortedCmds[inx]->name) );
 			if (cmp == 0) {
 				return sortedCmds[inx]->read(line);
 			} else if (cmp < 0) {
@@ -2124,7 +2122,7 @@ EXPORT BOOL_T SplitTrack( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 {
 	DIST_T d;
 	track_p trk2, trkl;
-	EPINX_T epl, ep0, ep1, ep2=-1, epCnt;
+	EPINX_T epl, ep1, ep2=-1, epCnt;
 	BOOL_T rc;
 	BOOL_T (*splitCmd)( track_p, coOrd, EPINX_T, track_p *, EPINX_T *, EPINX_T * );
 	coOrd pos0;
@@ -2221,7 +2219,7 @@ EXPORT BOOL_T SplitTrack( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 		ClrTrkElev( trk );
 		if (*leftover) {
 			trkl = *leftover;
-			ep0 = epl;
+			EPINX_T ep0 = epl;
 			if ( !disconnect ) {
 				ConnectTracks( trk, ep, trkl, epl );
 			}
@@ -2246,7 +2244,7 @@ EXPORT BOOL_T SplitTrack( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 		DrawNewTrack( trk );
 		if (*leftover) {
 			trkl = *leftover;
-			ep0 = 1-epl;
+			EPINX_T ep0 = 1-epl;
 			while ( 1 ) {
 				track_p trk0;
 				DrawNewTrack( trkl );
@@ -2268,7 +2266,6 @@ EXPORT BOOL_T TraverseTrack(
         DIST_T * distR )
 {
 	track_p oldTrk;
-	EPINX_T ep;
 
 	while ( *distR > 0.0 && trvTrk->trk ) {
 		if ( trackCmds((trvTrk->trk)->type)->traverse == NULL ) {
@@ -2284,7 +2281,7 @@ EXPORT BOOL_T TraverseTrack(
 		if ( !trvTrk->trk ) {
 			return FALSE;
 		}
-		ep = GetNearestEndPtConnectedToMe( trvTrk->trk, oldTrk, trvTrk->pos );
+		EPINX_T ep = GetNearestEndPtConnectedToMe( trvTrk->trk, oldTrk, trvTrk->pos );
 		if ( ep != -1 ) {
 			trvTrk->pos = GetTrkEndPos( trvTrk->trk, ep );
 			trvTrk->angle = NormalizeAngle( GetTrkEndAngle( trvTrk->trk, ep ) + 180.0 );
@@ -2623,8 +2620,7 @@ EXPORT char * GetTrkTypeName( track_p trk )
 EXPORT DIST_T GetFlexLength( track_p trk0, EPINX_T ep, coOrd * pos )
 {
 	track_p trk = trk0, trk1;
-	EPINX_T ep1;
-	DIST_T d, dd;
+	DIST_T d;
 
 	d = 0.0;
 	while(1) {
@@ -2635,14 +2631,14 @@ EXPORT DIST_T GetFlexLength( track_p trk0, EPINX_T ep, coOrd * pos )
 		if (trk1 == trk0) {
 			break;
 		}
-		ep1 = GetEndPtConnectedToMe( trk1, trk );
+		EPINX_T ep1 = GetEndPtConnectedToMe( trk1, trk );
 		if (ep1 < 0 || ep1 > 1) {
 			break;
 		}
 		if (trackCmds(trk1->type)->getLength == NULL) {
 			break;
 		}
-		dd = trackCmds(trk1->type)->getLength(trk1);
+		DIST_T dd = trackCmds(trk1->type)->getLength(trk1);
 		if (dd <= 0.0) {
 			break;
 		}
@@ -2660,7 +2656,7 @@ EXPORT DIST_T GetFlexLength( track_p trk0, EPINX_T ep, coOrd * pos )
 
 EXPORT DIST_T GetTrkLength( track_p trk, EPINX_T ep0, EPINX_T ep1 )
 {
-	coOrd pos0, pos1;
+	coOrd pos1;
 	DIST_T d;
 	if (ep0 == ep1) {
 		return 0.0;
@@ -2671,7 +2667,7 @@ EXPORT DIST_T GetTrkLength( track_p trk, EPINX_T ep0, EPINX_T ep1 )
 		}
 		return d;
 	} else {
-		pos0 = GetTrkEndPos(trk,ep0);
+		coOrd pos0 = GetTrkEndPos(trk,ep0);
 		if (ep1==-1) {
 			// Usual case for asking about distance to center of turnout for grades
 			if (trk->type==T_TURNOUT) {
@@ -2863,12 +2859,12 @@ EXPORT void DrawTie(
  */
 EXPORT wDrawColor GetTrkColor( track_p trk, drawCmd_p d )
 {
-	DIST_T len, elev0, elev1;
+	DIST_T elev0, elev1;
 	ANGLE_T grade = 0.0;
 
 	if ( IsTrack( trk ) && GetTrkEndPtCnt(trk) == 2 ) {
 		ComputeElev( trk, 0, FALSE, &elev0, NULL, FALSE );
-		len = GetTrkLength( trk, 0, 1 );
+		DIST_T len = GetTrkLength( trk, 0, 1 );
 		ComputeElev( trk, 1, FALSE, &elev1, NULL, FALSE );
 		if (len>0.1) {
 			grade = fabs( (elev1-elev0)/len)*100.0;
@@ -3189,11 +3185,10 @@ EXPORT void DrawEndPt2(
         wDrawColor color )
 {
 	track_p trk1;
-	EPINX_T ep1;
 	DrawEndPt( d, trk, ep, color );
 	trk1 = GetTrkEndTrk( trk, ep );
 	if (trk1) {
-		ep1 = GetEndPtConnectedToMe( trk1, trk );
+		EPINX_T ep1 = GetEndPtConnectedToMe( trk1, trk );
 		if (ep1>=0) {
 			DrawEndPt( d, trk1, ep1, color );
 		}
@@ -3205,7 +3200,6 @@ static unsigned currTracks;
 EXPORT void DrawTracks( drawCmd_p d, DIST_T scale, coOrd orig, coOrd size )
 {
 	track_cp trk;
-	TRKINX_T inx;
 	coOrd lo, hi;
 	BOOL_T doSelectRecount = FALSE;
 	unsigned long time0 = wGetTimer();
@@ -3241,7 +3235,7 @@ EXPORT void DrawTracks( drawCmd_p d, DIST_T scale, coOrd orig, coOrd size )
 	     currTracks));
 
 	if (d == &mainD) {
-		for (inx=1; inx<trackCmds_da.cnt; inx++)
+		for (TRKINX_T inx=1; inx<trackCmds_da.cnt; inx++)
 			if (trackCmds(inx)->redraw != NULL) {
 				trackCmds(inx)->redraw();
 			}
@@ -3332,7 +3326,6 @@ EXPORT void LabelLengths( drawCmd_p d, track_p trk, wDrawColor color )
 	wFontSize_t fs;
 	EPINX_T i;
 	coOrd p0, p1;
-	DIST_T dist;
 	char * msg;
 	coOrd textsize;
 
@@ -3343,7 +3336,7 @@ EXPORT void LabelLengths( drawCmd_p d, track_p trk, wDrawColor color )
 	fs = (float)descriptionFontSize/d->scale;
 	for (i=0; i<GetTrkEndPtCnt(trk); i++) {
 		p0 = GetTrkEndPos( trk, i );
-		dist = GetFlexLength( trk, i, &p1 );
+		DIST_T dist = GetFlexLength( trk, i, &p1 );
 		if (dist < 0.1) {
 			continue;
 		}
