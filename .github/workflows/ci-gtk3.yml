@@ -499,6 +499,18 @@ jobs:
     # the `find app/bin app/dynstring app/cornu app/help app/tools` root list
     # never reaches app/wlib/gtk3lib/wrapbox/ or app/tools/halibut/ (deleted,
     # SF #219) — out of scope by construction, no exclude needed for those.
+    #
+    # Also excludes (2026-08-31, found while investigating report quality):
+    # app/bin/uthash.h + app/bin/include/utlist.h (Troy D. Hanson, vendored,
+    # same BSD-style header-only libraries) and app/cJSON/cJSON.h (Dave
+    # Gamble, vendored, has its own LICENSE file) via --exclude-header-filter
+    # -- 199 of 859 post-header-filter findings (23%) traced to these three
+    # vendored headers, almost all bugprone-macro-parentheses firing inside
+    # uthash.h's own macro definitions, not fixable without diverging from
+    # upstream. app/bin/stringxtc.c (Linus Torvalds, vendored Linux kernel
+    # string routines, 1 finding) can't go through header-filter since it's
+    # compiled as its own main file, not reached as a header -- excluded from
+    # the file list instead, same treatment as dirent.c below.
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -527,7 +539,7 @@ jobs:
           # compile_commands.json entries each -- clang-tidy's own "[N/139]" progress counter can
           # exceed the 139 filename arguments below by a couple as a result. That's expected, not
           # a sign of a duplicate/broken entry.
-          mapfile -t FILES < <(find app/bin app/dynstring app/cornu app/help app/tools -name "*.c" | grep -v unittest | grep -vE 'bdf2xtp\.c|helphelper\.c|ppedit_gtk1\.c|app/tools/dirent\.c')
+          mapfile -t FILES < <(find app/bin app/dynstring app/cornu app/help app/tools -name "*.c" | grep -v unittest | grep -vE 'bdf2xtp\.c|helphelper\.c|ppedit_gtk1\.c|app/tools/dirent\.c|app/bin/stringxtc\.c')
           # --header-filter='.*/app/' matters beyond style: without it, clang-tidy
           # reports on every system header (GTK/glib/atk from /usr/include, pulled
           # in via plain -I not -isystem so clang-tidy's own default system-header
@@ -536,8 +548,10 @@ jobs:
           # from headers this project doesn't own. Verified this drops exactly
           # that 2161 with 858 of 859 real project findings surviving untouched
           # (the 1-finding gap is measurement noise between two ad hoc runs, not
-          # lost data).
-          clang-tidy --header-filter='.*/app/' --checks='-*,bugprone-*,performance-*,portability-*,-bugprone-easily-swappable-parameters' -p build "${FILES[@]}" > clang-tidy.txt 2>&1 || true
+          # lost data). --exclude-header-filter further removes uthash.h/
+          # utlist.h/cJSON.h (vendored, see comment above) -- see this job's
+          # top comment for the 199-finding/23% measurement.
+          clang-tidy --header-filter='.*/app/' --exclude-header-filter='uthash\.h|utlist\.h|cJSON\.h' --checks='-*,bugprone-*,performance-*,portability-*,-bugprone-easily-swappable-parameters' -p build "${FILES[@]}" > clang-tidy.txt 2>&1 || true
           # compile_commands.json stores absolute paths, so clang-tidy emits
           # diagnostics as e.g. "/home/runner/work/XTrkCAD/XTrkCAD/app/bin/foo.c:12:...".
           # Strip the workspace prefix so this artifact's paths stay repo-relative,
