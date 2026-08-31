@@ -400,7 +400,6 @@ void SetCurrLayer(wIndex_t inx, const char *name, wIndex_t op,
 		return;
 	}
 
-	char *array[1];
 	if (!layers[inx].settingsName[0] ||
 	    strcmp(layers[inx].settingsName, " ") == 0) {
 		if (lastSettings[0]) {
@@ -412,6 +411,7 @@ void SetCurrLayer(wIndex_t inx, const char *name, wIndex_t op,
 			if (!lastSettings[0]) {
 				wPrefFlush("");
 			} // Save Last Settings for no settings file
+			char *array[1];
 			array[0] = layers[inx].settingsName;
 			DoSettingsRead(1, array, NULL);
 		}
@@ -938,15 +938,13 @@ static void LayerAdd()
  */
 static void LayerDelete()
 {
-	unsigned int inx;
-
 	if (layers[layerSelected].objCount > 0) {
 		NoticeMessage(_("Layer must not have any objects in it."), _("Ok"), NULL);
 		return;
 	}
 
 	if (layerSelected <= maxLayer) {
-		for (inx = layerSelected; inx < maxLayer; inx++) {
+		for (unsigned int inx = layerSelected; inx < maxLayer; inx++) {
 			layers[inx] = layers[inx + 1];
 		}
 		LayerSystemDefault(maxLayer);
@@ -1795,14 +1793,13 @@ void RestoreLayers(void)
 {
 	int inx;
 	const char *label;
-	wDrawColor color;
 	if (layers_save == NULL) { return; }
 	memcpy(layers, layers_save, NUM_LAYERS * sizeof layers[0]);
 	free(layers_save);
 	layers_save = NULL;
 
 	for (inx = 0; inx < NUM_BUTTONS; inx++) {
-		color = layers[inx].color;
+		wDrawColor color = layers[inx].color;
 		layers[inx].color = -1;
 		SetLayerColor(inx, color);
 

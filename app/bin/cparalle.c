@@ -92,11 +92,9 @@ SaveSeparation(long type)
 
 static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 {
-	DIST_T d;
 	track_p t=NULL;
 	coOrd p;
 	static coOrd p0, p1;
-	ANGLE_T a;
 	track_p t0, t1;
 	EPINX_T ep0=-1, ep1=-1;
 	paramGroup_p parGroup;
@@ -224,6 +222,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 		}
 		t0=t1=NULL;
 		if (parType == PAR_TRACK) {
+			DIST_T d;
 			p = p0;
 			DYNARR_RESET( trkSeg_t, tempSegs_da );
 			t0=OnTrack(&p, FALSE, TRUE);
@@ -267,6 +266,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 
 			SetTrkBits(t,(GetTrkBits(t)&TB_HIDEDESC) | (GetTrkBits(Dpa.Trk)&~TB_HIDEDESC));
 
+			ANGLE_T a;
 			if (t0) {
 				a = NormalizeAngle(GetTrkEndAngle(t0, ep0) - GetTrkEndAngle(t,
 				                   0) + (180.0+connectAngle/2.0));

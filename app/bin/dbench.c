@@ -230,10 +230,8 @@ EXPORT void DrawBench(
 {
 	long orient;
 	coOrd pp[4];
-	ANGLE_T a;
-	DIST_T width, thickness=0.75;
+	DIST_T width;
 	long type;
-	long oldOptions;
 	long lwidth;
 
 	orient = benchData&0xFF;
@@ -244,6 +242,7 @@ EXPORT void DrawBench(
 	if ( lwidth <= 3 ) {
 		DrawLine( d, p0, p1, (wDrawWidth)lwidth, color1 );
 	} else {
+		ANGLE_T a;
 		width /= 2.0;
 		a = FindAngle( p0, p1 );
 		Translate( &pp[0], p0, a+90, width );
@@ -257,7 +256,8 @@ EXPORT void DrawBench(
 		        d->funcs == &tempSegDrawFuncs ) {
 			DrawPoly( d, 4, pp, NULL, color2, 0, DRAW_CLOSED );
 			if ( color1 != color2 && type != B_RECT ) {
-				oldOptions = d->options;
+				DIST_T thickness=0.75;
+				long oldOptions = d->options;
 				if ( type == B_LGRIDER || orient == 1 || orient == 2 ) {
 					if ( type == B_LGRIDER && lgirderFlangeDashed[orient] ) {
 						d->options |= DC_DASH;

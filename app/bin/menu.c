@@ -657,10 +657,9 @@ wControl_p AddToolbarButton(const char* helpStr, wIcon_p icon, long options,
                             wButtonCallBack_p action, void* context)
 {
 	wControl_p bb;
-	wIndex_t inx;
 
 	if (context == NULL) {
-		for (inx = 0; inx < menuPG.paramCnt; inx++) {
+		for (wIndex_t inx = 0; inx < menuPG.paramCnt; inx++) {
 			if (action != DoCommandB && menuPG.paramPtr[inx].valueP == I2VP(action)) {
 				// button is used to trigger a menu entry
 				context = &menuPG.paramPtr[inx];
@@ -950,7 +949,6 @@ EXPORT wIndex_t AddMenuButton(wMenu_p menu, procCommand_t command,
 
 	wIndex_t buttInx = -1;
 	wBool_t newButtonGroup = FALSE;
-	wBool_t useSplitButton;
 	long stickyMask = 0;
 	wControl_p cmdMenus[NUM_CMDMENUS] = {NULL, NULL, NULL, NULL};
 
@@ -974,7 +972,7 @@ EXPORT wIndex_t AddMenuButton(wMenu_p menu, procCommand_t command,
 			}
 		} else {
 			// Not in button group yet
-			useSplitButton = WillNeedDropdown();
+			wBool_t useSplitButton = WillNeedDropdown();
 
 			if (useSplitButton) {
 				// Create popup menu first

@@ -146,7 +146,7 @@ static void SignalBoundingBox (coOrd orig, ANGLE_T angle,wIndex_t numHeads,
 {
 	coOrd p1, p2, headp1, headp2;
 	ANGLE_T x_angle, y_angle;
-	DIST_T hoffset,delta;
+	DIST_T hoffset;
 	wIndex_t ihead;
 
 	x_angle = 90-(360-angle);
@@ -178,7 +178,7 @@ static void SignalBoundingBox (coOrd orig, ANGLE_T angle,wIndex_t numHeads,
 	for (ihead = 0; ihead < numHeads; ihead++) {
 		Translate (&p1, orig, x_angle, MASTX * signal_SF / scaleRatio);
 		Translate (&p1, p1,   y_angle, (hoffset+HEADR) * signal_SF / scaleRatio);
-		delta = HEADR * signal_SF / scaleRatio;
+		DIST_T delta = HEADR * signal_SF / scaleRatio;
 		headp1.x = p1.x - delta;
 		headp1.y = p1.y - delta;
 		headp2.x = p1.x + delta;
@@ -543,7 +543,6 @@ static void SignalEditOk ( void * junk )
 	track_p trk;
 	signalData_p xx;
 	wIndex_t ia;
-	CSIZE_T newsize;
 
 	if (signalCreate_P) {
 		UndoStart( _("Create Signal"), "Create Signal");
@@ -562,8 +561,9 @@ static void SignalEditOk ( void * junk )
 				(&(xx->aspectList))[ia].aspectName = NULL;
 				(&(xx->aspectList))[ia].aspectScript = NULL;
 			}
-			newsize = sizeof(signalData_t)+(sizeof(signalAspect_t)*(signalAspect_da.cnt-1))
-			          +1;
+			CSIZE_T newsize = sizeof(signalData_t)+(sizeof(signalAspect_t)*
+			                                        (signalAspect_da.cnt-1))
+			                  +1;
 			ResizeExtraData( trk, newsize );
 			xx = GetsignalData(trk);
 		}
@@ -739,7 +739,6 @@ static void AspectDelete( void * action )
 static void EditSignalDialog()
 {
 	signalData_p xx;
-	wIndex_t ia;
 
 	if ( !signalEditW ) {
 		FormRegister( &signalEditPG );
@@ -765,7 +764,7 @@ static void EditSignalDialog()
 		signalEditAngle = xx->angle;
 		wListClear( aspectSelL );
 		DYNARR_RESET( signalAspect_p, signalAspect_da );
-		for (ia = 0; ia < xx->numAspects; ia++) {
+		for (wIndex_t ia = 0; ia < xx->numAspects; ia++) {
 			snprintf(message,sizeof(message),"%s\t%s",(&(xx->aspectList))[ia].aspectName,
 			         (&(xx->aspectList))[ia].aspectScript);
 			wListAddValue( aspectSelL, message, NULL, NULL );
