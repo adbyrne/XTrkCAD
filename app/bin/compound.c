@@ -216,10 +216,10 @@ EXPORT BOOL_T WriteCompoundPathsEndPtsSegs(
         trkEndPt_p endPts )
 {
 	int i;
-	PATHPTR_T pp;
 
 	BOOL_T rc = TRUE;
 	if ( paths ) {
+		PATHPTR_T pp;
 		for ( pp=paths; *pp; pp+=2 ) {
 			rc &= fprintf( f, "\tP \"%s\"", pp )>0;
 			for ( pp+=strlen((char *)pp)+1; pp[0]!=0 || pp[1]!=0; pp++ ) {
@@ -281,9 +281,7 @@ EXPORT void FormatCompoundTitle(
 {
 	const char *cp1;
 	char *cp2=NULL, *cq;
-	size_t len;
 	FLOAT_T price;
-	BOOL_T needSep;
 	cq = message;
 	if (format&LABEL_COST) {
 		FormatCompoundTitle( LABEL_MANUF|LABEL_DESCR|LABEL_PARTNO, title );
@@ -306,9 +304,9 @@ EXPORT void FormatCompoundTitle(
 		}
 		strcpy( cq, title );
 	} else {
-		needSep = FALSE;
+		BOOL_T needSep = FALSE;
 		if ((format&LABEL_MANUF) && cp1-title>1) {
-			len = cp1-title;
+			size_t len = cp1-title;
 			memcpy( cq, title, len );
 			cq += len;
 			needSep = TRUE;
@@ -658,11 +656,9 @@ DIST_T DistanceCompound(
 {
 	struct extraDataCompound_t *xx = GET_EXTRA_DATA(t, T_NOTRACK,
 	                                 extraDataCompound_t);
-	EPINX_T ep;
 	DIST_T d0;
 //	DIST_T d1;
 	coOrd p0, p2;
-	PATHPTR_T path;
 	int segInx;
 	EPINX_T segEP;
 	segProcData_t segProcData;
@@ -672,7 +668,7 @@ DIST_T DistanceCompound(
 	} else if ( programMode != MODE_TRAIN || GetTrkEndPtCnt(t) <= 0 ) {
 		d0 = DistanceSegs( xx->orig, xx->angle, xx->segCnt, xx->segs, p, NULL );
 		if (programMode != MODE_TRAIN && GetTrkEndPtCnt(t) > 0 && d0 < DIST_INF) {
-			ep = PickEndPoint( *p, t );
+			EPINX_T ep = PickEndPoint( *p, t );
 			*p = GetTrkEndPos(t,ep);
 		}
 	} else {
@@ -681,7 +677,7 @@ DIST_T DistanceCompound(
 		p0.x -= xx->orig.x;
 		p0.y -= xx->orig.y;
 		d0 = DIST_INF;
-		path = GetCurrPath( t );
+		PATHPTR_T path = GetCurrPath( t );
 		for ( path += strlen((char *)path)+1; path[0] || path[1]; path++ ) {
 			if ( path[0] != 0 ) {
 //				d1 = DIST_INF;
@@ -1022,7 +1018,7 @@ void DescribeCompound(
 	                                 extraDataCompound_t);
 	int fix;
 	EPINX_T ep, epCnt;
-	char * mP, *nP, *pP, *cnP;
+	char * mP, *nP, *pP;
 	int mL, nL, pL;
 	long mode;
 	long listLabelsOption = listLabels;
@@ -1085,7 +1081,7 @@ void DescribeCompound(
 		compoundData.manuf[0] = 0;
 	}
 	if (nP) {
-		cnP = compoundData.name;
+		char * cnP = compoundData.name;
 		if ( xx->flipped ) {
 			memcpy( cnP, "Flipped ", 8 );
 			cnP += 8;
@@ -1519,17 +1515,13 @@ void FlipCompound(
 {
 	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK,
 	                                 extraDataCompound_t);
-	EPINX_T ep, epCnt;
+	EPINX_T epCnt;
 	char * mP, *nP, *pP;
 	int mL, nL, pL;
 	char *type, *mfg, *descL, *partL, *descR, *partR, *cp;
-	wIndex_t inx;
 	turnoutInfo_t *to;
 	const turnoutInfo_t *toBest;
 	coOrd endPos[4];
-	ANGLE_T endAngle[4];
-	DIST_T d2, d1, d0;
-	ANGLE_T a2, a1;
 #define SMALLVALUE (0.001)
 
 	FlipPoint( &xx->orig, orig, angle );
@@ -1566,6 +1558,8 @@ void FlipCompound(
 		}
 	}
 	if ( epCnt == 3 || epCnt == 4 ) {
+		EPINX_T ep;
+		ANGLE_T endAngle[4];
 		for ( ep=0; ep<epCnt; ep++ ) {
 			endPos[ep] = GetTrkEndPos( trk, ep );
 			endAngle[ep] = NormalizeAngle( GetTrkEndAngle( trk, ep ) - xx->angle );
@@ -1597,25 +1591,25 @@ void FlipCompound(
 			}
 		}
 		toBest = NULL;
-		d0 = 0.0;
-		for (inx=0; inx<turnoutInfo_da.cnt; inx++) {
+		DIST_T d0 = 0.0;
+		for (wIndex_t inx=0; inx<turnoutInfo_da.cnt; inx++) {
 			to = turnoutInfo(inx);
 			if ( IsParamValid(to->paramFileIndex) &&
 			     to->segCnt > 0 &&
 			     to->scaleInx == GetTrkScale(trk) &&
 			     to->endCnt == epCnt ) {
-				d1 = 0;
-				a1 = 0;
+				DIST_T d1 = 0;
+				ANGLE_T a1 = 0;
 				for ( ep=0; ep<epCnt; ep++ ) {
 					trkEndPt_p epp = EndPtIndex( to->endPt, ep );
-					d2 = FindDistance( endPos[ep], GetEndPtPos(epp) );
+					DIST_T d2 = FindDistance( endPos[ep], GetEndPtPos(epp) );
 					if ( d2 > SMALLVALUE ) {
 						break;
 					}
 					if ( d2 > d1 ) {
 						d1 = d2;
 					}
-					a2 = NormalizeAngle( endAngle[ep] - GetEndPtAngle(epp) + 0.05 );
+					ANGLE_T a2 = NormalizeAngle( endAngle[ep] - GetEndPtAngle(epp) + 0.05 );
 					if ( a2 > 0.1 ) {
 						break;
 					}

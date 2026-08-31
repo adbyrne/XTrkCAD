@@ -149,7 +149,6 @@ BOOL_T ComputeElev(
 	BOOL_T rc = FALSE;
 
 	track_p trk1;
-	EPINX_T ep1;
 	rc = TRUE;
 	if ( EndPtIsDefinedElev(trk,ep) ) {
 		elev0 = GetTrkEndElevHeight(trk,ep);
@@ -158,7 +157,7 @@ BOOL_T ComputeElev(
 		trk1 = GetTrkEndTrk( trk, ep );
 		if (trk1!=NULL) {
 			// Compute weighted average of the 2 track elevation
-			ep1 = GetEndPtConnectedToMe(trk1,trk);
+			EPINX_T ep1 = GetEndPtConnectedToMe(trk1,trk);
 			if (force || (!GetTrkEndElevCachedHeight(trk1,ep1,&elev0,&grade))) {
 				// Not cached, need to compute
 				DIST_T elev1, dist0, dist1;
@@ -214,14 +213,14 @@ static dynArr_t defelev_da;
 static void FindDefElev( void )
 {
 	track_p trk;
-	EPINX_T ep, cnt;
+	EPINX_T ep;
 	defelev_t * dep;
 	long time0 = wGetTimer();
 
 	DYNARR_RESET( defelev_t, defelev_da );
 	trk = NULL;
 	while ( TrackIterate( &trk ) ) {
-		cnt = GetTrkEndPtCnt( trk );
+		EPINX_T cnt = GetTrkEndPtCnt( trk );
 		for ( ep = 0; ep < cnt; ep++ ) {
 			if ( !EndPtIsDefinedElev( trk, ep ) ) {
 				continue;
@@ -454,12 +453,11 @@ static void FindForks( void )
  */
 {
 	int i;
-	defelev_t * dep;
 	long time0 = wGetTimer();
 
 	DYNARR_RESET( fork_t, fork_da );
 	for ( i=0; i<defelev_da.cnt; i++ ) {
-		dep = &defelev(i);
+		defelev_t * dep = &defelev(i);
 
 		ClrAllTrkBits( TB_PROCESSED );
 		LOG( log_fillElev, 3, ( "   findForks from T%d:%d\n", GetTrkIndex(dep->trk),
@@ -640,11 +638,10 @@ static void ComputeForkElev( void )
 static void RedrawCompGradeElev( track_p trk, EPINX_T ep )
 {
 	int mode;
-	coOrd pos;
 	track_p trk1;
 	mode = GetTrkEndElevMode( trk, ep );
 	if ( mode == ELEV_COMP || mode == ELEV_GRADE ) {
-		pos = GetTrkEndPos( trk, ep );
+		coOrd pos = GetTrkEndPos( trk, ep );
 		if (!OFF_MAIND( pos, pos ) ) {
 			trk1=GetTrkEndTrk(trk,ep);
 			if ( trk1 && GetTrkIndex(trk1)<GetTrkIndex(trk) ) {
@@ -806,13 +803,12 @@ static void PropogateDefElevs( void )
  */
 {
 	int i1;
-	defelev_t * dep;
 	DIST_T e;
 	long time0 = wGetTimer();
 
 	/* propogate elevs between DefElev pts (not handled by propogateForkElevs) */
 	for ( i1=0; i1<defelev_da.cnt; i1++ ) {
-		dep = &defelev(i1);
+		defelev_t * dep = &defelev(i1);
 		if (GetTrkOnElevPath( dep->trk, &e ))
 			/* propogateForkElevs beat us to it */
 		{
@@ -856,7 +852,7 @@ static void SurveyIsland(
 {
 	int i1;
 	track_p trk1;
-	EPINX_T ep, cnt;
+	EPINX_T ep;
 	pivot_t * pp;
 	coOrd hi, lo;
 	DIST_T elev;
@@ -871,7 +867,7 @@ static void SurveyIsland(
 		if ( GetTrkIndex(trk) == checkTrk ) {
 			printf( "found in island\n" );
 		}
-		cnt = GetTrkEndPtCnt(trk);
+		EPINX_T cnt = GetTrkEndPtCnt(trk);
 		for ( ep=0; ep<cnt; ep++ ) {
 			trk1 = GetTrkEndTrk( trk, ep );
 			if ( EndPtIsDefinedElev(trk,ep)) {
@@ -915,7 +911,7 @@ static void ComputeIslandElev(
 	DIST_T totalDist;
 	elevdist_t * w;
 	int mode;
-	EPINX_T ep, epCnt;
+	EPINX_T ep;
 
 	SurveyIsland( trk, TRUE );
 
@@ -954,7 +950,7 @@ static void ComputeIslandElev(
 
 	for ( i1=0; i1<elist_da.cnt; i1++ ) {
 		trk = elist(i1).trk;
-		epCnt = GetTrkEndPtCnt( trk );
+		EPINX_T epCnt = GetTrkEndPtCnt( trk );
 		for ( ep=0; ep<epCnt; ep++ ) {
 			mode = GetTrkEndElevMode( trk, ep );
 			if ( (mode == ELEV_GRADE || mode == ELEV_COMP) ) {
@@ -1018,9 +1014,8 @@ EXPORT void RecomputeElevations( void * unused )
 				printf( "noelev\n" );
 			}
 			EPINX_T ep;
-			int mode;
 			for ( ep=0; ep<GetTrkEndPtCnt(trk); ep++ ) {
-				mode = GetTrkEndElevMode( trk, ep );
+				int mode = GetTrkEndElevMode( trk, ep );
 				ComputeElev( trk, ep, FALSE, &elev, NULL, FALSE );
 				printf( "T%4.4d[%2.2d] = %s:%0.3f\n",
 				        GetTrkIndex(trk), ep,
@@ -1140,8 +1135,7 @@ EXPORT void SetTrkElevModes( BOOL_T connect, track_p trk0, EPINX_T ep0,
                              track_p trk1, EPINX_T ep1 )
 {
 	int mode0, mode1;
-	DIST_T elev, diff, elev0, elev1;
-	char * station;
+	DIST_T elev;
 	BOOL_T update = TRUE;
 
 	mode0 = GetTrkElevMode( trk0 );
@@ -1174,14 +1168,14 @@ EXPORT void SetTrkElevModes( BOOL_T connect, track_p trk0, EPINX_T ep0,
 		mode0 = GetTrkEndElevMode( trk0, ep0 );
 		mode1 = GetTrkEndElevMode( trk1, ep1 );
 		elev = 0.0;
-		station = NULL;
+		char * station = NULL;
 		if (mode0 == ELEV_DEF && mode1 == ELEV_DEF) {
 			mode0 = GetTrkEndElevUnmaskedMode( trk0,
 			                                   ep0 ) | GetTrkEndElevUnmaskedMode( trk1, ep1 );
-			elev0 = GetTrkEndElevHeight( trk0, ep0 );
-			elev1 = GetTrkEndElevHeight( trk1, ep1 );
+			DIST_T elev0 = GetTrkEndElevHeight( trk0, ep0 );
+			DIST_T elev1 = GetTrkEndElevHeight( trk1, ep1 );
 			elev = (elev0+elev1)/2.0;
-			diff = fabs( elev0-elev1 );
+			DIST_T diff = fabs( elev0-elev1 );
 			if (diff>0.1) {
 				ErrorMessage( MSG_JOIN_DIFFER_ELEV, PutDim(diff) );
 			}
@@ -1227,8 +1221,6 @@ EXPORT void UpdateTrkEndElev(
         const char * newStation )
 {
 	int oldMode;
-	DIST_T oldElev;
-	const char * oldStation;
 	// cppcheck-suppress shadowVariable -- local control-flow flag, confirmed unrelated to the global file-dirty flag of the same name
 	BOOL_T changed = TRUE;
 	track_p trk1;
@@ -1237,8 +1229,8 @@ EXPORT void UpdateTrkEndElev(
 	oldMode = GetTrkEndElevUnmaskedMode( trk, ep );
 	if ( (oldMode&ELEV_MASK) == (newMode&ELEV_MASK) ) {
 		switch ( (oldMode&ELEV_MASK) ) {
-		case ELEV_DEF:
-			oldElev = GetTrkEndElevHeight( trk, ep );
+		case ELEV_DEF: {
+			DIST_T oldElev = GetTrkEndElevHeight( trk, ep );
 			if ( oldElev == newElev ) {
 				if ( oldMode == newMode ) {
 					return;
@@ -1246,12 +1238,14 @@ EXPORT void UpdateTrkEndElev(
 				changed = FALSE;
 			}
 			break;
-		case ELEV_STATION:
-			oldStation = GetTrkEndElevStation( trk, ep );
+		}
+		case ELEV_STATION: {
+			const char * oldStation = GetTrkEndElevStation( trk, ep );
 			if ( strcmp( oldStation, newStation ) == 0 ) {
 				return;
 			}
 			break;
+		}
 		default:
 			return;
 		}

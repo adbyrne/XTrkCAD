@@ -53,16 +53,15 @@ static struct {
 
 static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 {
-	ANGLE_T angle, angle2, angle3, reverseR, pointA, reverseA1, angle0;
-	EPINX_T ep, ep1, ep2, ep2a=-1, ep2b=-1, pointEp0, pointEp1;
-	DIST_T dist, reverseD, pointD;
+	EPINX_T ep1, ep2, pointEp0, pointEp1;
+	DIST_T dist;
 	coOrd off, intersectP;
-	coOrd pointP, pointP1, reverseC, point0;
+	coOrd pointP, pointP1, reverseC;
 //	coOrd pointC;
 	track_p trk, trk1, trk2, trk2a=NULL, trk2b=NULL, pointT;
 	trkSeg_p segP;
 	BOOL_T right;
-	track_p trks[4], *trkpp;
+	track_p trks[4];
 
 	switch (action) {
 
@@ -158,15 +157,15 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 				break;
 			}
 			dist = FindDistance( Dhlt.normalP, pointP );
-			pointA = GetAngleAtPoint( pointT, pointP, &pointEp0, &pointEp1 );
-			angle = NormalizeAngle( pointA + 180.0 - Dhlt.reverseA );
+			ANGLE_T pointA = GetAngleAtPoint( pointT, pointP, &pointEp0, &pointEp1 );
+			ANGLE_T angle = NormalizeAngle( pointA + 180.0 - Dhlt.reverseA );
 			PTRACE(( "rA=%0.1f pA=%0.1f a=%0.1f ", Dhlt.reverseA, pointA, angle ))
 			if ( angle > 90.0 &&  angle < 270.0 ) {
 				pointA = NormalizeAngle( pointA + 180.0 );
 				angle = NormalizeAngle( angle + 180.0 );
 				PTRACE(( " {pA=%0.1f a=%0.1f} ", pointA, angle ))
 			} else {
-				ep = pointEp0; pointEp0 = pointEp1; pointEp1 = ep;
+				EPINX_T ep = pointEp0; pointEp0 = pointEp1; pointEp1 = ep;
 			}
 			if (angle > 180.0) {
 				angle = 360.0 - angle;
@@ -202,7 +201,7 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 				PTRACE(("\n"))
 				break;
 			}
-			angle2 = FindAngle( zero, off );
+			ANGLE_T angle2 = FindAngle( zero, off );
 			PTRACE(( "a2=%0.1f\n", angle2 ))
 			if (angle < 0.5) {
 				if ( off.x < connectDistance ) {
@@ -227,8 +226,9 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 				                       pointA+180.0 )) {
 					break;
 				}
-				reverseD = FindDistance( Dhlt.reverseP, intersectP );
-				pointD = FindDistance( pointP, intersectP );
+				DIST_T reverseD = FindDistance( Dhlt.reverseP, intersectP );
+				DIST_T pointD = FindDistance( pointP, intersectP );
+				ANGLE_T reverseR;
 				if (reverseD > pointD) {
 					reverseR = pointD/tan(D2R(angle/2.0));
 					Translate( &reverseC, pointP, pointA+(right?-90:+90), reverseR );
@@ -256,13 +256,13 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 					Translate( &pointP1, pointP, pointA+(right?-90:+90), reverseR );
 					dist = FindDistance( reverseC, pointP );
 					angle2 = R2D( asin( reverseR/dist ) );
-					angle3 = FindAngle( pointP, reverseC );
+					ANGLE_T angle3 = FindAngle( pointP, reverseC );
 					if (right) {
 						angle2 = NormalizeAngle(angle3 - pointA+180) - angle2;
 					} else {
 						angle2 = NormalizeAngle(pointA+180 - angle3) - angle2;
 					}
-					reverseA1 = angle-angle2;
+					ANGLE_T reverseA1 = angle-angle2;
 					PTRACE(( " a2=%0.1f rA1=%0.1f\n", angle2, reverseA1 ))
 					DYNARR_SET( trkSeg_t, tempSegs_da, 3 );
 					tempSegs(0).type = SEG_STRTRK;
@@ -304,10 +304,11 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 			if (!RemoveTrack( &trk1, &ep1, &dist )) {
 				break;
 			}
-			point0 = GetTrkEndPos( trk1, ep1 );
-			angle0 = NormalizeAngle(GetTrkEndAngle(trk1,ep1)+180.0);
+			coOrd point0 = GetTrkEndPos( trk1, ep1 );
+			ANGLE_T angle0 = NormalizeAngle(GetTrkEndAngle(trk1,ep1)+180.0);
 			trk2 = NULL;
-			trkpp = trks;
+			EPINX_T ep2a=-1, ep2b=-1;
+			track_p *trkpp = trks;
 			for (segP=&tempSegs(0); segP < &tempSegs(tempSegs_da.cnt); segP++ ) {
 				switch (segP->type) {
 				case SEG_STRTRK:
