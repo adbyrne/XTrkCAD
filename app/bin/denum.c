@@ -128,10 +128,10 @@ void EnumerateList(
         const char * desc,
         const char * indexes )
 {
-	char * cp;
-	long len;
 	sprintf( message, "%*ld | %s\n", count_utf8_chars(_("Count")), count, desc );
 	if (enableListPrices) {
+		char * cp;
+		long len;
 		cp = message + strlen( message )-1;
 		len = (long)enumerateMaxDescLen-(long)strlen(desc);
 		if (len<0) { len = 0; }
@@ -284,14 +284,14 @@ void EnumerateStart(void)
 
 void EnumerateEnd(void)
 {
-	size_t len;
-	char * cp;
 	ScaleLengthEnd();
 
 	CreateTableFooter();
 
 	/**  \todo Fix layout of summary line, why -3? */
 	if (enableListPrices) {
+		size_t len;
+		char * cp;
 		len = strlen( message ) - strlen( _("Total")) - max( 9,
 		        strlen(_("Extended"))) - 3 ;
 		memset ( message, ' ', len );

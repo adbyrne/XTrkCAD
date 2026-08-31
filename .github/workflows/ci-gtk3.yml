@@ -503,14 +503,37 @@ jobs:
     # Also excludes (2026-08-31, found while investigating report quality):
     # app/bin/uthash.h + app/bin/include/utlist.h (Troy D. Hanson, vendored,
     # same BSD-style header-only libraries) and app/cJSON/cJSON.h (Dave
-    # Gamble, vendored, has its own LICENSE file) via --exclude-header-filter
-    # -- 199 of 859 post-header-filter findings (23%) traced to these three
-    # vendored headers, almost all bugprone-macro-parentheses firing inside
-    # uthash.h's own macro definitions, not fixable without diverging from
-    # upstream. app/bin/stringxtc.c (Linus Torvalds, vendored Linux kernel
-    # string routines, 1 finding) can't go through header-filter since it's
-    # compiled as its own main file, not reached as a header -- excluded from
-    # the file list instead, same treatment as dirent.c below.
+    # Gamble, vendored, has its own LICENSE file) -- 199 of 859
+    # post-header-filter findings (23%) traced to these three vendored
+    # headers, almost all bugprone-macro-parentheses firing inside uthash.h's
+    # own macro definitions, not fixable without diverging from upstream.
+    # app/bin/stringxtc.c (Linus Torvalds, vendored Linux kernel string
+    # routines, 1 finding) can't go through header-filter since it's compiled
+    # as its own main file, not reached as a header -- excluded from the file
+    # list instead, same treatment as dirent.c below.
+    #
+    # NOTE (2026-08-31): this exclusion was originally implemented via
+    # --exclude-header-filter, which is broken on this job's actual runner --
+    # ubuntu-latest's apt clang-tidy package predates the flag entirely and
+    # exits immediately with "Unknown command line argument", and the `|| true`
+    # on the invocation swallowed that failure silently, leaving
+    # clang-tidy.txt with just the two-line error and the job reporting a
+    # false "Total findings: 0" for this whole job's lifetime (confirmed via
+    # the actual uploaded clang-tidy-gtk3 artifact from the first run after
+    # the flag was added). --exclude-header-filter can't be replaced with a
+    # plain file-list exclusion either: uthash.h/utlist.h/cJSON.h are headers,
+    # not their own compilation units, so they're never in ${FILES[@]} to
+    # begin with -- the findings come from *diagnostics reported inside them*
+    # when included by a real project .c file. Fixed by post-filtering
+    # clang-tidy.txt after the run instead (see the awk step below), which
+    # reproduces --exclude-header-filter's actual semantics on any clang-tidy
+    # version: drop a finding only when its own primary file:line:col is
+    # inside one of the three vendored headers, while leaving alone
+    # diagnostics whose *notes* merely trace back through a uthash.h macro
+    # expansion -- those notes belong to a real finding in project code and
+    # must stay. Verified against a full local run: 902 raw findings (current
+    # baseline) -> 711 after this filter, with zero remaining primary
+    # (warning:/error:) lines pointing at the three vendored headers.
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -548,15 +571,24 @@ jobs:
           # from headers this project doesn't own. Verified this drops exactly
           # that 2161 with 858 of 859 real project findings surviving untouched
           # (the 1-finding gap is measurement noise between two ad hoc runs, not
-          # lost data). --exclude-header-filter further removes uthash.h/
-          # utlist.h/cJSON.h (vendored, see comment above) -- see this job's
-          # top comment for the 199-finding/23% measurement.
-          clang-tidy --header-filter='.*/app/' --exclude-header-filter='uthash\.h|utlist\.h|cJSON\.h' --checks='-*,bugprone-*,performance-*,portability-*,-bugprone-easily-swappable-parameters' -p build "${FILES[@]}" > clang-tidy.txt 2>&1 || true
+          # lost data).
+          clang-tidy --header-filter='.*/app/' --checks='-*,bugprone-*,performance-*,portability-*,-bugprone-easily-swappable-parameters' -p build "${FILES[@]}" > clang-tidy.txt 2>&1 || true
           # compile_commands.json stores absolute paths, so clang-tidy emits
           # diagnostics as e.g. "/home/runner/work/XTrkCAD/XTrkCAD/app/bin/foo.c:12:...".
           # Strip the workspace prefix so this artifact's paths stay repo-relative,
           # matching package-clang-tidy in release.yml (kept in sync by hand).
           sed -i "s|${GITHUB_WORKSPACE}/||g" clang-tidy.txt
+          # Post-filter out uthash.h/utlist.h/cJSON.h (vendored, see top comment) --
+          # reimplements --exclude-header-filter's semantics by hand since the
+          # runner's clang-tidy predates that flag (see top comment's NOTE for how
+          # this was found). A "block" starts at a line whose own file:line:col is a
+          # warning:/error: (never a note:, which only continues the parent block --
+          # dropping on note: too would wrongly discard real findings whose macro
+          # expansion trace merely passes through uthash.h) and runs until the next
+          # such line; drop the block only when ITS OWN path matches one of the three
+          # vendored headers.
+          awk 'BEGIN{keep=1} /^[^:]+:[0-9]+:[0-9]+: (warning|error):/ { keep = ($0 !~ /(uthash\.h|utlist\.h|cJSON\.h):[0-9]+:[0-9]+:/) } keep' clang-tidy.txt > clang-tidy.filtered.txt
+          mv clang-tidy.filtered.txt clang-tidy.txt
       - name: Summarise findings
         run: |
           COUNT=$(grep -cE '\[[a-zA-Z.-]+\]$' clang-tidy.txt || echo 0)

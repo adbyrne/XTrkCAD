@@ -1370,14 +1370,14 @@ BOOL_T RebuildBezier (track_p trk)
 BOOL_T MoveBezierEndPt ( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d0 )
 {
 	track_p trk2;
-	const struct extraDataBezier_t *xx;
 	if (SplitTrack(*trk,pos,*ep,&trk2,TRUE)) {
 		if (trk2) {
 			UndrawNewTrack( trk2 );
 			DeleteTrack(trk2,TRUE);
 		}
 		UndrawNewTrack( *trk );
-		xx = GET_EXTRA_DATA(*trk, T_NOTRACK, extraDataBezier_t);
+		const struct extraDataBezier_t *xx = GET_EXTRA_DATA(*trk, T_NOTRACK,
+		                                     extraDataBezier_t);
 		SetTrkEndPoint( *trk, *ep, *ep?xx->pos[3]:xx->pos[0], *ep?xx->a1:xx->a0 );
 		DrawNewTrack( *trk );
 		return TRUE;
@@ -1566,7 +1566,6 @@ EXPORT void BezierSegProc(
 		segProcData.traverse2.angle = data->traverse2.angle;
 		segProcData.traverse2.segDir = data->traverse2.segDir;
 		segs_backwards = data->traverse2.segs_backwards;
-		BOOL_T backwards;
 		inx = data->traverse2.BezSegInx;							//Special from Traverse1
 		while (inx>=0 && inx<segPtr->bezSegs.cnt) {
 			subSegsPtr = &DYNARR_N(trkSeg_t,segPtr->bezSegs,inx);
@@ -1591,7 +1590,7 @@ EXPORT void BezierSegProc(
 			subSegsPtr = &DYNARR_N(trkSeg_t,segPtr->bezSegs,inx);
 			SegProc(SEGPROC_TRAVERSE1, subSegsPtr, &segProcData);
 			BOOL_T reverse_seg = segProcData.traverse1.reverse_seg;        //For Info only
-			backwards = segProcData.traverse1.backwards;
+			BOOL_T backwards = segProcData.traverse1.backwards;
 			BOOL_T neg_seg = segProcData.traverse1.negative;
 			dist += segProcData.traverse1.dist;             		//Add extra if needed - this is if we have to go from the other end of this seg
 			segProcData.traverse2.dist = dist;    					//distance left
@@ -1839,10 +1838,9 @@ static DIST_T BezierMathDistance( coOrd * pos, coOrd p[4], int segments,
 {
 	DIST_T dd = DIST_INF;
 	double t = 0.0;
-	coOrd pt;
 	coOrd save_pt = p[0];
 	for (int i=0; i<=segments; i++) {
-		pt = BezierPointByParameter(p, (double)i/segments);
+		coOrd pt = BezierPointByParameter(p, (double)i/segments);
 		if (FindDistance(*pos,pt) < dd) {
 			dd = FindDistance(*pos,pt);
 			t = (double)i/segments;
@@ -1926,7 +1924,6 @@ static void BezierSplit(coOrd input[4], coOrd left[4], coOrd right[4],
  */
 double BezierAddLengthIfClose(coOrd start[4], double error)
 {
-	coOrd left[4], right[4];                  /* bez poly splits */
 	double len = 0.0;                         /* arc length */
 	double chord;                             /* chord length */
 	int index;                                /* misc counter */
@@ -1939,6 +1936,7 @@ double BezierAddLengthIfClose(coOrd start[4], double error)
 	chord = FindDistance(start[0],start[3]); //find chord length
 
 	if((len-chord) > error)  {					// If error too large -
+		coOrd left[4], right[4];                  /* bez poly splits */
 		BezierSplit(start,left,right,0.5);               /* split in two */
 		len = BezierAddLengthIfClose(left, error);        /* recurse left side */
 		len += BezierAddLengthIfClose(right, error);       /* recurse right side */

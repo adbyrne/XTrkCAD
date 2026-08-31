@@ -243,12 +243,11 @@ static DIST_T DistanceTurntable( track_p trk, coOrd * p )
 	const struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
 	                                        extraDataTurntable_t);
 	DIST_T d;
-	ANGLE_T a;
 	coOrd pos0, pos1;
 
 	d = FindDistance( xx->pos, *p ) - xx->radius;    //OK to be negative
 	if ( programMode == MODE_DESIGN ) {
-		a = FindAngle( xx->pos, *p );
+		ANGLE_T a = FindAngle( xx->pos, *p );
 		Translate( p, xx->pos, a, d+xx->radius );
 	} else {
 		if ( !ValidateTurntablePosition(trk) ) {
@@ -656,7 +655,6 @@ static STATUS_T ModifyTurntable( track_p trk, wAction_t action, coOrd pos )
 	static ANGLE_T angle;
 	static BOOL_T valid;
 
-	DIST_T r;
 	EPINX_T ep;
 	track_p trk1;
 
@@ -667,7 +665,8 @@ static STATUS_T ModifyTurntable( track_p trk, wAction_t action, coOrd pos )
 		tempSegs(0).lineWidth = 0;
 		InfoMessage( _("Drag to create stall track") );
 		__attribute__((fallthrough));
-	case C_MOVE:
+	case C_MOVE: {
+		DIST_T r;
 		valid = FALSE;
 		angle = ConstrainTurntableAngle( trk, pos );
 		if ( angle < 0.0) {
@@ -689,6 +688,7 @@ static STATUS_T ModifyTurntable( track_p trk, wAction_t action, coOrd pos )
 			valid = TRUE;
 		}
 		return C_CONTINUE;
+	}
 
 	case C_UP:
 		if (!valid) {
@@ -715,14 +715,13 @@ EXPORT BOOL_T ConnectTurntableTracks(
 {
 	coOrd center, pos;
 	DIST_T radius;
-	DIST_T dist;
 	if (!QueryTrack(trk1,Q_CAN_ADD_ENDPOINTS)) { return FALSE; }
 	TurntableGetCenter( trk1, &center, &radius );
 	pos = GetTrkEndPos(trk2,ep2);
 	ANGLE_T angle = FindAngle(center, GetTrkEndPos(trk2,ep2));
 	if (fabs(DifferenceBetweenAngles(GetTrkEndAngle(trk2,ep2),
 	                                 angle+180)) <= connectAngle) {
-		dist = FindDistance(center,pos)-radius;
+		DIST_T dist = FindDistance(center,pos)-radius;
 		if (dist < connectDistance) {
 			UndoStart( _("Connect Turntable Tracks"),
 			           "TurnTracks(T%d[%d] T%d[%d] D%0.3f A%0.3F )",
@@ -902,7 +901,7 @@ static void AdvanceTurntablePositionIndicator(
 	struct extraDataTurntable_t * xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
 	                                   extraDataTurntable_t);
 	EPINX_T ep;
-	ANGLE_T angle0, angle1;
+	ANGLE_T angle0;
 	BOOL_T train_reversed = FALSE;
 	EPINX_T epCnt=GetTrkEndPtCnt(trk);
 	EPINX_T epbest = -1, epfound = -1;
@@ -943,11 +942,11 @@ static void AdvanceTurntablePositionIndicator(
 			}
 		}
 		xx->currEp = epfound;
-		angle1 = GetTrkEndAngle(trk,xx->currEp);
+		ANGLE_T angle1 = GetTrkEndAngle(trk,xx->currEp);
 		*angleR = NormalizeAngle(angle1+(train_reversed?180:0));
 		Translate( posR, xx->pos, *angleR, FindDistance(*posR,xx->pos) );
-		coOrd outpos = *posR;
 		if (debug) {
+			coOrd outpos = *posR;
 			InfoMessage("AO:%0.3f PO:(%0.3f,%0.3f) AI:%0.3f PI:(%0.3f,%0.3f)",*angleR,
 			            outpos.x,outpos.y,inangle,inpos.x,inpos.y);
 		}

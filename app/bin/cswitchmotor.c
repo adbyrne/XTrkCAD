@@ -239,12 +239,11 @@ static void UpdateSwitchMotor (track_p trk, int inx, descData_p descUpd,
 	const char * thename, *thenormal, *thereverse, *thepointsense;
 	char *newName, *newNormal, *newReverse, *newPointSense;
 
-	BOOL_T isChanged, nChanged, norChanged, revChanged, psChanged;
-
 	LOG( log_switchmotor, 1, ("*** UpdateSwitchMotor(): needUndoStart = %d\n",
 	                          needUndoStart))
 	if ( inx == -1 ) {
 		unsigned int max_str;
+		BOOL_T isChanged, nChanged, norChanged, revChanged, psChanged;
 
 		nChanged = norChanged = revChanged = psChanged = isChanged = FALSE;
 		thename = wEntryGetValue(switchmotorDesc[NM].control0 );

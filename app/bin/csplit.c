@@ -42,14 +42,14 @@ static dynArr_t anchors_da;
 static void ChangeSplitEPMode( void * mode )
 {
 	long imode = VP2L(mode);
-	long option;
-	int inx0, inx;
+	int inx0;
 
 	UndoStart( _("Set Block Gaps"), "Set Block Gaps" );
 	DrawEndPt( &mainD, splitTrkTrk[0], splitTrkEP[0], wDrawColorWhite );
 	DrawEndPt( &mainD, splitTrkTrk[1], splitTrkEP[1], wDrawColorWhite );
 	for ( inx0=0; inx0<2; inx0++ ) {
-		inx = splitTrkFlip?1-inx0:inx0;
+		int inx = splitTrkFlip?1-inx0:inx0;
+		long option;
 		UndoModify( splitTrkTrk[inx] );
 		option = GetTrkEndOption( splitTrkTrk[inx], splitTrkEP[inx] );
 		option &= ~EPOPT_GAPPED;
@@ -306,7 +306,6 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 static STATUS_T CmdSplitDraw( wAction_t action, coOrd pos )
 {
 	track_p trk0, trk1;
-	EPINX_T ep0 = 0;
 //	int oldTrackCount;
 
 	switch (action) {
@@ -331,6 +330,7 @@ static STATUS_T CmdSplitDraw( wAction_t action, coOrd pos )
 				return C_CONTINUE;
 			}
 			onTrackInSplit = FALSE;
+			EPINX_T ep0 = 0;
 			UndoStart( _("Split Draw"), "SplitDraw( T%d[%d] )", GetTrkIndex(trk0), ep0 );
 //			oldTrackCount = trackCount;
 			SplitTrack( trk0, pos, ep0, &trk1, FALSE );
@@ -374,7 +374,6 @@ typedef enum {TRIM_NONE, TRIM_LINE} TrimState_e;
 static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 {
 	track_p trk0, trk1, trk2;
-	EPINX_T ep0 = 0;
 	static TrimState_e trimState;
 	static track_p trimLine;
 	static track_p trk;
@@ -441,6 +440,7 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 
 		ANGLE_T a = GetAngleAtPoint(trk1,pos1,NULL,NULL);
 		ANGLE_T aa = DifferenceBetweenAngles(a,FindAngle(pos1,pos));
+		EPINX_T ep0;
 		if (fabs(aa)<90 ) { ep0 = 1; }
 		else { ep0 = 0; }
 

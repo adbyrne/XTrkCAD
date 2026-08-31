@@ -173,14 +173,13 @@ static void DrawRulerWithBackground(drawCmd_p d, coOrd pos0, coOrd pos1,
 	wAngle_t a, aa;
 	DIST_T start, end;
 	long inch, lastInch;
-	DIST_T len;
 	int digit;
 	char quote = ' ';
 	// cppcheck-suppress shadowVariable -- local buffer/pointer, properly scoped/freed within this function, unrelated to the global status-line buffer
 	char message[STR_SHORT_SIZE];
 	coOrd d_orig, d_size;
 	wFontSize_t fs;
-	long mm, mm0, mm1, power, skip;
+	long skip;
 
 	static double lengths[] = {0,   2.0, 4.0, 2.0, 6.0, 2.0, 4.0, 2.0, 8.0,
 	                           2.0, 4.0, 2.0, 6.0, 2.0, 4.0, 2.0, 0.0
@@ -264,9 +263,10 @@ static void DrawRulerWithBackground(drawCmd_p d, coOrd pos0, coOrd pos1,
   } while (0)
 
 	if (units == UNITS_METRIC) {
-		mm0 = (int)ceil(start * 25.4 - 0.5);
-		mm1 = (int)floor(end * 25.4 + 0.5);
-		len = 5;
+		long mm0 = (int)ceil(start * 25.4 - 0.5);
+		long mm1 = (int)floor(end * 25.4 + 0.5);
+		DIST_T len = 5;
+		long power;
 		if (d->scale <= 1) {
 			power = 1;
 		} else if (d->scale <= 8) {
@@ -290,7 +290,7 @@ static void DrawRulerWithBackground(drawCmd_p d, coOrd pos0, coOrd pos1,
 			if (power == 1000) {
 				len = 10;
 			}
-			for (mm = ((mm0 + (mm0 > 0 ? power - 1 : 0)) / power) * power;
+			for (long mm = ((mm0 + (mm0 > 0 ? power - 1 : 0)) / power) * power;
 			     mm <= mm1; mm += power) {
 				if (power == 1000 || mm % (power * 10) != 0) {
 					Translate(&p0, orig, a, mm / 25.4);
