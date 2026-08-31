@@ -289,7 +289,6 @@ char * StringTrim(char *s)
 
 static void SearchUiDoSearch(void * ptr)
 {
-	unsigned result;
 	SearchResult *currentResults = MyMalloc(sizeof(SearchResult));
 	char * search;
 
@@ -300,7 +299,7 @@ static void SearchUiDoSearch(void * ptr)
 	search = StringTrim(searchUiQuery);
 
 	if (search[0]) {
-		result = SearchLibrary(trackLibrary, search, currentResults);
+		unsigned result = SearchLibrary(trackLibrary, search, currentResults);
 
 		if (result) {
 

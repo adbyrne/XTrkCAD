@@ -119,9 +119,8 @@ void FormGroupRecord(
 void
 FormMacroRecord(char* format, ...)
 {
-	va_list args;
-
 	if (macroFile) {
+		va_list args;
 
 		va_start(args, format);
 		vfprintf(macroFile, format, args);

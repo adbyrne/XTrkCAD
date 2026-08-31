@@ -471,7 +471,6 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		Da.pos0 = pos;
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		segCnt = 0;
-		STATUS_T rcode;
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (curvePLs[0].control==NULL) {
 			FormCreateControls(&curvePG);
@@ -485,8 +484,8 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			if (lock) { pos = movePos; }
 			Da.pos0 = Da.pos1 = pos;
 			Da.state = 0;
-			rcode = CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode,
-			                     &anchors_da, InfoMessage );
+			STATUS_T rcode = CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode,
+			                              &anchors_da, InfoMessage );
 			segCnt = tempSegs_da.cnt ;
 			if (!Da.down) { Da.state = -1; }
 			return rcode;

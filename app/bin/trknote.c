@@ -85,13 +85,13 @@ static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 {
 	struct extraDataNote_t *xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
 	coOrd p[5];
-	int type[5];
 
 
 	if ((d->options & DC_SIMPLE) || mainD.scale >= 16) {
 		//while the icon is moved, draw a square with a lopped off corner
 		//because CmdMove draws all selected object into tempSeg and
 		//tempSegDrawFuncs doesn't have a BitMap drawing func
+		int type[5];
 		DIST_T dist;
 		dist = 0.8 + 0.1*(mainD.scale-16)/4;
 		p[0].x = p[1].x = xx->pos.x - dist;

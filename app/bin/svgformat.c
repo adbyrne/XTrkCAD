@@ -469,9 +469,8 @@ SvgTextCommand(SVGParent *svg, double x,
 void
 SvgAddTitle(SVGParent *svg, char *title)
 {
-	mxml_node_t *titleNode;
 	if (title) {
-		titleNode = mxmlNewElement(MXML_NO_PARENT, "title");
+		mxml_node_t *titleNode = mxmlNewElement(MXML_NO_PARENT, "title");
 		mxmlNewText(titleNode, false, title);
 
 		mxmlAdd(svg, MXML_ADD_BEFORE, MXML_ADD_TO_PARENT, titleNode);

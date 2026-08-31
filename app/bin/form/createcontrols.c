@@ -394,7 +394,6 @@ GetDefaultColumnFormat(paramListData_t *listData, wWinPix_t* widths,
 static int
 GetUserColumnWidths(paramData_p paramData, int columns, wWinPix_t* widths)
 {
-	wWinPix_t colWidth;
 	DynString preference;
 	char* cp;
 
@@ -406,7 +405,7 @@ GetUserColumnWidths(paramData_p paramData, int columns, wWinPix_t* widths)
 	if (cp != NULL) {
 		for (int column = 0; column < columns; column++) {
 			char* cq;
-			colWidth = (wWinPix_t)strtol(cp, &cq, 10);
+			wWinPix_t colWidth = (wWinPix_t)strtol(cp, &cq, 10);
 			if (cp == cq) {
 				break;
 			}

@@ -143,12 +143,11 @@ wBool_t FormIntegerRangeCheck(paramData_p p, long valL)
 
 static FLOAT_T FloatGetValue(const char *enteredValue,	BOOL_T* validP)
 {
-	FLOAT_T valF;
 	char* cp2;
 
 	while (isspace((unsigned char)*enteredValue)) { enteredValue++; }
 	if (*enteredValue) {
-		valF = strtod(enteredValue, &cp2);
+		FLOAT_T valF = strtod(enteredValue, &cp2);
 		if (*cp2 != 0) {
 			*validP = FALSE;
 			return 0.0;
