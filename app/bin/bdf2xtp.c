@@ -370,12 +370,11 @@ void searchSegs( segs_t * sp, int ep )
 */
 {
 	segs_t *sp1;
-	int inx;
 
 	sp->mark = 1;
 	curPath[curPathInx] = (ep==0?-((sp-segs)+1):((sp-segs)+1));
 	if (sp->ep[ep] != NULL) {
-		inx = abs(curPath[0]);
+		int inx = abs(curPath[0]);
 		if ( (sp-segs)+1 < inx ) {
 			return;
 		}

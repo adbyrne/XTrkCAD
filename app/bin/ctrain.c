@@ -203,11 +203,11 @@ static void UpdateCar(
         descData_p descUpd,
         BOOL_T needUndoStart)
 {
-	unsigned int max_str;
 	struct extraDataCar_t *xx = GET_EXTRA_DATA(trk, T_CAR, extraDataCar_t);
 	if (inx == -1) {
 		BOOL_T numberChanged;
 		const char * cp;
+		unsigned int max_str;
 		numberChanged = FALSE;
 
 		// cppcheck-suppress nullPointerRedundantCheck

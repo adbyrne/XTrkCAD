@@ -233,14 +233,13 @@ static BOOL_T GetDistance(char** cpp, FLOAT_T* distP)
 FLOAT_T
 FormDecodeFloat(const char* enteredValue, 	BOOL_T* validP)
 {
-	FLOAT_T valF;
 	const char* cp1;
 	char* cp2;
 	cp1 = enteredValue;
 
 	while (isspace((unsigned char)*cp1)) { cp1++; }
 	if (*cp1) {
-		valF = strtod(cp1, &cp2);
+		FLOAT_T valF = strtod(cp1, &cp2);
 		if (*cp2 != 0) {
 			parseErrorMessage = _("Invalid Number");
 			*validP = FALSE;

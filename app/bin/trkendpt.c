@@ -220,7 +220,6 @@ EXPORT void SetTrkEndElev( track_p trk, EPINX_T ep, int option, DIST_T height,
                            const char * station )
 {
 	track_p trk1;
-	EPINX_T ep1;
 	trkEndPt_p epp = GetTrkEndPt( trk, ep );
 	epp->elev.option = option;
 	epp->elev.cacheSet = FALSE;
@@ -234,7 +233,7 @@ EXPORT void SetTrkEndElev( track_p trk, EPINX_T ep, int option, DIST_T height,
 	}
 	trk1=GetTrkEndTrk(trk, ep);
 	if ( trk1 != NULL ) {
-		ep1 = GetEndPtConnectedToMe( trk1, trk );
+		EPINX_T ep1 = GetEndPtConnectedToMe( trk1, trk );
 		if (ep1 >= 0) {
 			trkEndPt_p epp1 = GetTrkEndPt( trk1, ep1 );
 			epp1->elev.option = option;

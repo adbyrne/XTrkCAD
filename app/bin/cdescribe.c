@@ -303,9 +303,8 @@ static paramGroup_p CreateDescribeDialog(
 	pg->nameStr = sTitle;
 	LOG( log_describe, 2, ( "CreateDescribeDialog %s\n", sTitle ) );
 	DYNARR_RESET( paramData_t, pd_da );
-	paramData_p pdp;
 	for (descData_p ddp=data; ddp->type != DESC_NULL; ddp++) {
-		pdp = NULL;
+		paramData_p pdp = NULL;
 		switch( ddp->type ) {
 		case DESC_POS:
 			pdp = CreateDescribeField( PD_FLOAT, pg, ddp );

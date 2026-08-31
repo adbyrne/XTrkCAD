@@ -362,13 +362,13 @@ static void LoadCustomMgmList( void )
 {
 	wIndex_t curInx, cnt=0;
 	long tempL;
-	custMgmContext_p context;
 
 	custMgmLoading = TRUE;
 
 	cnt = wListGetCount( customSelL );
 	for ( curInx=0; curInx<cnt; curInx++ ) {
-		context = (custMgmContext_p)wListGetItemContext( customSelL, curInx );
+		custMgmContext_p context = (custMgmContext_p)wListGetItemContext( customSelL,
+		                           curInx );
 		if ( context ) {
 			MyFree( context );
 		}

@@ -385,7 +385,6 @@ static int CompoundCustMgmProc(
 {
 	turnoutInfo_t * to = (turnoutInfo_t*)data;
 	turnoutInfo_t * to2=NULL;
-	int inx;
 	char * mP, *pP, *nP;
 	int mL, pL, nL;
 	BOOL_T rc = TRUE;
@@ -436,6 +435,7 @@ static int CompoundCustMgmProc(
 			FormLoadControls( &renamePG );
 			wShow( renamePG.win );
 		} else {
+			int inx;
 			for (inx=0; inx<turnoutInfo_da.cnt && to!=turnoutInfo(inx); inx++);
 			if ( inx > 0 &&
 			     turnoutInfo(inx-1)->customInfo &&

@@ -1139,10 +1139,8 @@ EXPORT void CleanupCheckpointFiles( void )
 
 EXPORT void CleanupTempArchive(void)
 {
-	char* tempDir;
-
 	for (int i = ARCHIVE_READ; i <= ARCHIVE_WRITE; ++i) {
-		tempDir = GetZipDirectoryName(i);
+		char* tempDir = GetZipDirectoryName(i);
 		if (tempDir) {
 			DeleteDirectory(tempDir);
 			free(tempDir);

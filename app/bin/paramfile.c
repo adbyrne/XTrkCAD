@@ -133,14 +133,13 @@ void ParamCheckSumLine(char * line)
 void SetParamFileState(int index)
 {
 	enum paramFileState state = PARAMFILE_NOTUSABLE;
-	enum paramFileState newState;
 	SCALEINX_T scale = GetLayoutCurScale();
 
 	//Set yet?
 	if (scale>=0) {
 		for (int i = 0; i < COMPATIBILITYCHECKSCOUNT && state < PARAMFILE_FIT &&
 		     state != PARAMFILE_UNLOADED; i++) {
-			newState = (*GetCompatibility[i])(index, scale);
+			enum paramFileState newState = (*GetCompatibility[i])(index, scale);
 			if (newState > state || newState == PARAMFILE_UNLOADED) {
 				state = newState;
 			}
