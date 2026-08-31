@@ -214,8 +214,6 @@ EXPORT int StartRecord(int cnt, char **pathName, void *context)
 static void DoRecordButton(void *context)
 {
 	static wBool_t recordingMessage = FALSE;
-	char *cp;
-	int len;
 
 	switch ((int)VP2L(context)) {
 	case 0: /* Stop */
@@ -234,11 +232,11 @@ static void DoRecordButton(void *context)
 
 	case 4: /* End */
 		if (recordingMessage) {
-			len = wTextGetSize(recordT);
+			int len = wTextGetSize(recordT);
 			if (len == 0) {
 				break;
 			}
-			cp = (char *)MyMalloc(len + 2);
+			char *cp = (char *)MyMalloc(len + 2);
 			wTextGetText(recordT, cp, len);
 			if (cp[len - 1] == '\n') {
 				len--;
@@ -475,10 +473,6 @@ EXPORT void RedrawPlaybackCursor()
 static void MoveCursor(drawCmd_p d, playbackProc proc, wAction_t action,
                        coOrd pos, wDrawBitMap_p bm, wDrawColor color)
 {
-	DIST_T dist;
-	coOrd dpos;
-	int i, steps;
-
 	if (d == NULL) {
 		return;
 	}
@@ -486,16 +480,17 @@ static void MoveCursor(drawCmd_p d, playbackProc proc, wAction_t action,
 	if (playbackTimer == 0 /*&& !didPause*/) {
 		playbackBm = bm;
 		playbackColor = color;
-		dist = FindDistance(playbackPos, pos);
-		steps = (int)(dist / (PixelsPerStep * d->scale / d->dpi)) + 1;
+		DIST_T dist = FindDistance(playbackPos, pos);
+		int steps = (int)(dist / (PixelsPerStep * d->scale / d->dpi)) + 1;
 		LOG(log_playbackCursor, 1,
 		    ("PBC: [%0.3f %0.3f] - [%0.3f %0.3f] Dist:%0.3f Steps:%d\n",
 		     playbackPos.x, playbackPos.y, pos.x, pos.y, dist, steps));
 
+		coOrd dpos;
 		dpos.x = (pos.x - playbackPos.x) / steps;
 		dpos.y = (pos.y - playbackPos.y) / steps;
 
-		for (i = 1; i <= steps; i++) {
+		for (int i = 1; i <= steps; i++) {
 			playbackPos.x += dpos.x;
 			playbackPos.y += dpos.y;
 			if (proc != NULL) {
@@ -1125,11 +1120,10 @@ static void EnableButtons(BOOL_T enable)
 
 EXPORT void PlaybackMessage(char *line)
 {
-	char *cp;
 	wTextAppend(demoT, _(line));
 	if (documentCopy && documentFile) {
 		if (strncmp(line, "__________", 10) != 0) {
-			for (cp = line; *cp; cp++) {
+			for (char *cp = line; *cp; cp++) {
 				switch (*cp) {
 				case '<':
 					fprintf(documentFile, "$B");
@@ -1747,13 +1741,12 @@ static char *demoInitParams[] = {
 
 static void DemoInitValues(void)
 {
-	int inx;
 	char **cpp;
 	static playbackProc_p paramPlaybackProc = NULL;
 	static coOrd roomSize = {96.0, 48.0};
 	char scaleName[10];
 	if (paramPlaybackProc == NULL) {
-		for (inx = 0; inx < playbackProc_da.cnt; inx++) {
+		for (int inx = 0; inx < playbackProc_da.cnt; inx++) {
 			if (strncmp("PARAMETER", playbackProc(inx).label, 9) == 0) {
 				paramPlaybackProc = playbackProc(inx).proc;
 				break;
@@ -2517,10 +2510,9 @@ static long ParamIntRestore(paramGroup_cp pg, int class)
 static void ParamIntSave(paramGroup_cp pg, int class)
 {
 	paramData_p p;
-	paramOldData_t *oldP;
 
 	for (p = pg->paramPtr; p < &pg->paramPtr[pg->paramCnt]; p++) {
-		oldP = (class == 0) ? &p->oldD : &p->demoD;
+		paramOldData_t *oldP = (class == 0) ? &p->oldD : &p->demoD;
 		if (p->valueP) {
 			switch (p->type) {
 			case PD_LONG:

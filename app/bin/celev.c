@@ -183,7 +183,7 @@ static int GetElevMode( void )
 static void DoElevUpdate( paramGroup_p pg, int inx, void * valueP )
 {
 	int oldMode, newMode;
-	DIST_T elevNewValue, elevOldValue, diff;
+	DIST_T elevNewValue;
 
 	if ( inx == 0 ) {
 		long mode = *(long*)valueP;
@@ -227,8 +227,8 @@ static void DoElevUpdate( paramGroup_p pg, int inx, void * valueP )
 	}
 	if (oldMode == newMode) {
 		if ((newMode&ELEV_MASK) == ELEV_DEF) {
-			elevOldValue = GetTrkEndElevHeight( elevTrk, elevEp );
-			diff = fabs( elevOldValue-elevNewValue );
+			DIST_T elevOldValue = GetTrkEndElevHeight( elevTrk, elevEp );
+			DIST_T diff = fabs( elevOldValue-elevNewValue );
 			if ( diff < 0.02 ) {
 				return;
 			}
@@ -266,11 +266,10 @@ static void DoElevHilight( void * junk )
 static void ElevSelect( track_p trk, EPINX_T ep )
 {
 	int mode;
-	DIST_T elevX, grade, elev, dist;
+	DIST_T elevX, grade;
 	long radio;
 	BOOL_T gradeOk = TRUE;
 	track_p trk1;
-	EPINX_T ep1;
 
 	DoElevUpdate( NULL, 1, NULL );
 	elevHeightV = 0.0;
@@ -326,8 +325,9 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 		sprintf( message, "%0.1f%%", fabs(round(grade*1000.0)/10.0) );
 	} else {
 		if ( EndPtIsDefinedElev(trk,ep) ) {
-			elev = GetElevation(trk);
-			dist = GetTrkLength(trk,ep,-1);
+			EPINX_T ep1;
+			DIST_T elev = GetElevation(trk);
+			DIST_T dist = GetTrkLength(trk,ep,-1);
 			if (dist>0.1) {
 				sprintf( message, "%0.1f%%", fabs(round(((elev-elevX)/dist)*1000.0))/10.0 );
 			} else {
@@ -357,13 +357,13 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 
 static BOOL_T GetPointElev(track_p trk, coOrd pos, DIST_T * height)
 {
-	DIST_T elev0, elev1, dist0, dist1;
+	DIST_T elev0, elev1;
 	if ( IsTrack( trk ) && GetTrkEndPtCnt(trk) == 2 ) {
 		if ( GetTrkLength( trk, 0, 1 ) < 0.1 ) {
 			return FALSE;
 		}
-		dist0 = FindDistance(pos,GetTrkEndPos(trk,0));
-		dist1 = FindDistance(pos,GetTrkEndPos(trk,1));
+		DIST_T dist0 = FindDistance(pos,GetTrkEndPos(trk,0));
+		DIST_T dist1 = FindDistance(pos,GetTrkEndPos(trk,1));
 		ComputeElev( trk, 0, FALSE, &elev0, NULL, FALSE );
 		ComputeElev( trk, 1, FALSE, &elev1, NULL, FALSE );
 		if (dist1+dist0 <= 0.1) {

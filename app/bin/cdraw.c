@@ -70,7 +70,7 @@ EXPORT void LoadFontSizeList(
         wControl_p list,
         long curFontSize)
 {
-	wIndex_t curInx = 0, inx1;
+	wIndex_t curInx = 0;
 	int inx;
 	wListClear(list);
 	for (inx = 0; inx < COUNT( fontSizeList ); inx++) {
@@ -80,7 +80,7 @@ EXPORT void LoadFontSizeList(
 			curInx = wComboBoxAddValue(list, message, I2VP(curFontSize));
 		}
 		sprintf(message, "%ld", fontSizeList[inx]);
-		inx1 = wComboBoxAddValue(list, message, I2VP(fontSizeList[inx]));
+		wIndex_t inx1 = wComboBoxAddValue(list, message, I2VP(fontSizeList[inx]));
 		if (curFontSize == fontSizeList[inx]) {
 			curInx = inx1;
 		}
@@ -114,7 +114,6 @@ EXPORT void UpdateFontSizeList(
         wControl_p list,
         wIndex_t listInx )
 {
-	long fontSize;
 	long largeFontSize;
 	wPrefGetInteger( "misc", "large-font-size", &largeFontSize, 500 );
 
@@ -123,7 +122,7 @@ EXPORT void UpdateFontSizeList(
 	} else {
 		wListGetValues( list, message, sizeof message, NULL, NULL );
 		if ( message[0] != '\0' ) {
-			fontSize = atol( message );
+			long fontSize = atol( message );
 			if ( fontSize <= 0 ) {
 				NoticeMessage( _("Font Size must be > 0"), _("Ok"), NULL );
 				sprintf( message, "%ld", *fontSizeR );
@@ -658,7 +657,6 @@ static void UpdateDraw( track_p trk, int drawDescInx, descUpdate_t * descUpd,
 {
 	struct extraDataDraw_t *xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
 	trkSeg_p segPtr;
-	coOrd mid;
 	long fontSize;
 
 	LOG( log_describedraw, 1, ( "DrawUpdate %d %s\n", drawDescInx,
@@ -966,7 +964,8 @@ static void UpdateDraw( track_p trk, int drawDescInx, descUpdate_t * descUpd,
 				UNREORIGIN( segPtr->u.l.pos[0], drawData.endPt[0], 0.0, xx->orig );
 				DrawDescSetMode(E0, DESC_CHANGE);
 				break;
-			case DESC_PIVOT_MID:
+			case DESC_PIVOT_MID: {
+				coOrd mid;
 				mid.x = (drawData.endPt[0].x+drawData.endPt[1].x)/2.0;
 				mid.y = (drawData.endPt[0].y+drawData.endPt[1].y)/2.0;
 				Translate( &drawData.endPt[0], mid, drawData.angle+180.0, drawData.length/2.0 );
@@ -976,6 +975,7 @@ static void UpdateDraw( track_p trk, int drawDescInx, descUpdate_t * descUpd,
 				DrawDescSetMode(E0, DESC_CHANGE);
 				DrawDescSetMode(E1, DESC_CHANGE);
 				break;
+			}
 			default:
 				break;
 			}
@@ -1963,8 +1963,6 @@ static BOOL_T EnumerateDraw(
         track_p trk )
 {
 	struct extraDataDraw_t * xx;
-	int inx;
-	trkSeg_p segPtr;
 
 	if ( trk ) {
 		xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
@@ -1972,8 +1970,8 @@ static BOOL_T EnumerateDraw(
 			return FALSE;
 		}
 		BOOL_T content = FALSE;
-		for ( inx=0; inx<xx->segCnt; inx++ ) {
-			segPtr = &xx->segs[inx];
+		for ( int inx=0; inx<xx->segCnt; inx++ ) {
+			trkSeg_p segPtr = &xx->segs[inx];
 			if ( segPtr->type == SEG_BENCH ) {
 				CountBench( segPtr->u.l.option, FindDistance( segPtr->u.l.pos[0],
 				                segPtr->u.l.pos[1] ) );
@@ -3496,15 +3494,13 @@ static drawStuff_t drawStuff[4] = {
 
 static void ChangeDraw( long changes )
 {
-	wIndex_t choice, orient;
-
 	if ( changes & CHANGE_UNITS ) {
 		wControl_p choiceControl = benchstylePLs[BENCH_CHOICE].control;
 		wControl_p orientControl = benchstylePLs[BENCH_ORIENTATION].control;
 
 		if (choiceControl && orientControl) {
-			choice = wListGetIndex( choiceControl );
-			orient = wListGetIndex( orientControl );
+			wIndex_t choice = wListGetIndex( choiceControl );
+			wIndex_t orient = wListGetIndex( orientControl );
 			BenchLoadLists( choiceControl, orientControl );
 			wListSetIndex(choiceControl, choice );
 			wListSetIndex(orientControl, orient );

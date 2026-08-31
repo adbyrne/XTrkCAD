@@ -180,8 +180,7 @@ static BOOL_T JoinWithCurve(
  */
 {
 	coOrd p1, pt;
-	DIST_T d, r;
-	ANGLE_T a, aa, A0, A1;
+	ANGLE_T a, aa;
 
 	/* Compute angle of line connecting endPoints: */
 	Translate( &p1, pos1, a1, -r0 );
@@ -214,13 +213,14 @@ static BOOL_T JoinWithCurve(
 
 	} else {
 		/* Curve: */
-		d = FindDistance( p1, pos0 ) / 2.0;
-		r = d/cos(D2R(a));
+		DIST_T d = FindDistance( p1, pos0 ) / 2.0;
+		DIST_T r = d/cos(D2R(a));
 		Translate( &res->arcP, p1, a1, r );
 		res->arcR = r-r0;
 		LOG( log_join, 3,
 		     ("     Curved d=%0.3f C=[%0.3f %0.3f], r=%0.3f a=%0.3f arcR=%0.3f\n",
 		      d, res->arcP.x, res->arcP.y, r, a, res->arcR ) )
+		ANGLE_T A0, A1;
 		if ( (ep0==0) == (res->arcR<0) ) {
 			A1 = 180 + 2*a;
 			A0 = a1;
@@ -1136,12 +1136,12 @@ static STATUS_T CmdJoin(
 		   ) {
 			ANGLE_T na0=0.0,na1=0.0;
 //			coOrd end0, end1;
-			ANGLE_T a0,a1;
 //			end0 = GetTrkEndPos(Dj.inp[0].trk,Dj.inp[0].params.ep);
 //			end1 = GetTrkEndPos(Dj.inp[1].trk,Dj.inp[1].params.ep);
 			if (Dj.inp[0].params.type == curveTypeStraight) {
-				a0 = DifferenceBetweenAngles(Dj.inp[0].params.angle,FindAngle(Dj.jRes.pos[0],
-				                             pos));
+				ANGLE_T a0 = DifferenceBetweenAngles(Dj.inp[0].params.angle,
+				                                     FindAngle(Dj.jRes.pos[0],
+				                                             pos));
 				na0 = NormalizeAngle( Dj.inp[0].params.angle +
 				                      ((a0>0.0)?90.0:-90.0));
 			} else {
@@ -1152,8 +1152,8 @@ static STATUS_T CmdJoin(
 			}
 			//Now Second Line offset
 			if (Dj.inp[1].params.type == curveTypeStraight) {
-				a1 = DifferenceBetweenAngles(Dj.inp[1].params.angle,FindAngle(pos,
-				                             Dj.jRes.pos[0]));
+				ANGLE_T a1 = DifferenceBetweenAngles(Dj.inp[1].params.angle,FindAngle(pos,
+				                                     Dj.jRes.pos[0]));
 				na1 = NormalizeAngle( Dj.inp[1].params.angle +
 				                      ((a1>0.0)?90.0:-90.0));
 			} else {
