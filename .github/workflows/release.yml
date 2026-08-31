@@ -497,7 +497,7 @@ jobs:
           # See ci-gtk3.yml's matching job: utility.c/misc.c are each legitimately compiled twice
           # (two targets), so clang-tidy's "[N/139]" counter can exceed 139 -- expected, not a bug.
           mapfile -t FILES < <(find app/bin app/dynstring app/cornu app/help app/tools -name "*.c" | grep -v unittest | grep -vE 'bdf2xtp\.c|helphelper\.c|ppedit_gtk1\.c|app/tools/dirent\.c')
-          clang-tidy --checks='-*,bugprone-*,performance-*,portability-*' -p build "${FILES[@]}" > clang-tidy.txt 2>&1 || true
+          clang-tidy --checks='-*,bugprone-*,performance-*,portability-*,-bugprone-easily-swappable-parameters' -p build "${FILES[@]}" > clang-tidy.txt 2>&1 || true
           # compile_commands.json stores absolute paths, so clang-tidy emits
           # diagnostics as e.g. "/home/runner/work/XTrkCAD/XTrkCAD/app/bin/foo.c:12:...".
           # format-findings-report.sh expects repo-relative paths (like
