@@ -1295,7 +1295,6 @@ static STATUS_T ModifyCurve( track_p trk, wAction_t action, coOrd pos )
 
 	ANGLE_T a;
 	DIST_T r, d;
-	track_p trk1;
 	struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
 
 	switch ( action ) {
@@ -1407,7 +1406,7 @@ static STATUS_T ModifyCurve( track_p trk, wAction_t action, coOrd pos )
 		}
 		if (valid) {
 			if (arcTangent) {
-				trk1 = NewStraightTrack( tangentOrig, tangentEnd );
+				track_p trk1 = NewStraightTrack( tangentOrig, tangentEnd );
 				CopyAttributes( trk, trk1 );
 				/*UndrawNewTrack( trk );*/
 				AdjustCurveEndPt( trk, ep, angle );

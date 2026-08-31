@@ -172,20 +172,12 @@ static void DrawRulerWithBackground(drawCmd_p d, coOrd pos0, coOrd pos1,
 	coOrd orig = pos0;
 	wAngle_t a, aa;
 	DIST_T start, end;
-	long inch, lastInch;
-	int digit;
-	char quote = ' ';
 	// cppcheck-suppress shadowVariable -- local buffer/pointer, properly scoped/freed within this function, unrelated to the global status-line buffer
 	char message[STR_SHORT_SIZE];
 	coOrd d_orig, d_size;
 	wFontSize_t fs;
 	long skip;
 
-	static double lengths[] = {0,   2.0, 4.0, 2.0, 6.0, 2.0, 4.0, 2.0, 8.0,
-	                           2.0, 4.0, 2.0, 6.0, 2.0, 4.0, 2.0, 0.0
-	                          };
-	int fraction, incr, firstFraction, lastFraction;
-	int majorLength;
 	coOrd p0, p1;
 
 	/* Fetch border metrics for label positioning */
@@ -326,6 +318,15 @@ static void DrawRulerWithBackground(drawCmd_p d, coOrd pos0, coOrd pos1,
 			}
 		}
 	} else {
+		static double lengths[] = {0,   2.0, 4.0, 2.0, 6.0, 2.0, 4.0, 2.0, 8.0,
+		                           2.0, 4.0, 2.0, 6.0, 2.0, 4.0, 2.0, 0.0
+		                          };
+		int fraction, incr, firstFraction, lastFraction;
+		int majorLength;
+		long inch, lastInch;
+		int digit;
+		char quote = ' ';
+
 		if (d->scale <= 1) {
 			incr = 1;         /* @brief 16ths of an inch */
 		} else if (d->scale <= 3) {

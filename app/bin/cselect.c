@@ -297,11 +297,10 @@ static void DrawTrackAndEndPts(
         wDrawColor color )
 {
 	EPINX_T ep, ep2;
-	track_p trk2;
 
 	DrawTrack( trk, &mainD, color );
 	for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
-		trk2=GetTrkEndTrk(trk,ep);
+		track_p trk2=GetTrkEndTrk(trk,ep);
 		if (trk2 != NULL) {
 			CHECK( !IsTrackDeleted(trk) );
 			ep2 = GetEndPtConnectedToMe( trk2, trk );
@@ -1040,14 +1039,13 @@ EXPORT void ClearElevations( void * unused )
 static DIST_T elevDelta;
 static BOOL_T AddElevation( track_p trk, BOOL_T unused )
 {
-	track_p trk1;
 	EPINX_T ep, ep1;
 	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 	int mode;
 	DIST_T elev;
 
 	for ( ep=0; ep<GetTrkEndPtCnt(trk); ep++ ) {
-		trk1=GetTrkEndTrk(trk,ep);
+		track_p trk1=GetTrkEndTrk(trk,ep);
 		if (trk1) {
 			ep1 = GetEndPtConnectedToMe( trk1, trk );
 			if (ep1 >= 0) {

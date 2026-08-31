@@ -883,12 +883,11 @@ static paramGroup_t rescalePG = { "rescale", PGO_FULLDIALOGFROMBUILDER, rescaleP
 static coOrd rescaleShift;
 static BOOL_T RescaleDoIt( track_p trk, BOOL_T unused )
 {
-	track_p trk1;
 	UndrawNewTrack( trk );
 	UndoModify(trk);
 	if ( rescalePercent != 100.0 ) {
 		for (EPINX_T ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
-			trk1 = GetTrkEndTrk(trk,ep);
+			track_p trk1 = GetTrkEndTrk(trk,ep);
 			if (trk1 != NULL &&
 			    !GetTrkSelected(trk1)) {
 				EPINX_T ep1 = GetEndPtConnectedToMe( trk1, trk );

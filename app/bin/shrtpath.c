@@ -243,7 +243,6 @@ int FindShortestPath(
         void * data )
 {
 	int inxCurr = 0;
-	pathNode_p pCurr;
 	pathNode_p pNext;
 	int pinx;
 	int rc = 0;
@@ -290,7 +289,7 @@ int FindShortestPath(
 			break;
 		}
 		if (log_shortPath>=4) { DumpPaths(inxCurr); }
-		pCurr = &pathNode(inxCurr);
+		pathNode_p pCurr = &pathNode(inxCurr);
 		pCurr->state = Final;
 		if ( pCurr->contTrk == NULL ) {
 			if ( !DoShortPathFunc( func, "VALID", SPTC_VALID,

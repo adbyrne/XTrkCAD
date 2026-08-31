@@ -586,7 +586,6 @@ static STATUS_T CmdJoinLine(
 			Dl.inp[1].pos = Dl.params.lineOrig;
 			Dl.inp[1].end = Dl.params.lineEnd;
 			int old_cnt = DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.cnt;
-			BOOL_T join_near = FALSE;
 			if (Dl.inp[1].line == Dl.inp[0].line) {
 				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts = MyRealloc(DYNARR_LAST(trkSeg_t,
 				        Dl.newLine).u.p.pts,sizeof(pts_t)*(old_cnt+1));
@@ -594,6 +593,7 @@ static STATUS_T CmdJoinLine(
 				        Dl.newLine).u.p.pts[0];   // Joined up Polygon
 				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.cnt += 1;
 			} else {
+				BOOL_T join_near = FALSE;
 				if (IsClose(FindDistance(Dl.inp[0].pos,Dl.inp[1].pos))) {
 					join_near = TRUE;
 				}

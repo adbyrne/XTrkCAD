@@ -3080,9 +3080,8 @@ static char* CmdTurnoutHotBarProc(
 EXPORT void AddHotBarTurnouts(void)
 {
 	wIndex_t inx;
-	turnoutInfo_t* to;
 	for (inx = 0; inx < turnoutInfo_da.cnt; inx++) {
-		to = turnoutInfo(inx);
+		turnoutInfo_t* to = turnoutInfo(inx);
 		if (!(IsParamValid(to->paramFileIndex) &&
 		      to->segCnt > 0 &&
 		      (FIT_NONE != CompatibleScale(FIT_TURNOUT, to->scaleInx,
