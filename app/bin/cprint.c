@@ -200,11 +200,10 @@ UpdatePageCount()
 
 static void ChangeDim( void )
 {
-	int x, y, x0, x1, y0, y1;
+	int x0, x1, y0, y1;
 	coOrd p0;
 	int size;
 	bitmap_t tmpBm;
-	BOOL_T selected;
 
 	MapGrid( zero, mapD.size, 0.0, currPrintGrid.orig, currPrintGrid.angle,
 	         currPrintGrid.size.x, currPrintGrid.size.y,
@@ -222,12 +221,12 @@ static void ChangeDim( void )
 	memset( bm0.bm, 0, bm0.memsize );
 	pageCount = 0;
 	if (bm.bm) {
-		for ( x=bm.x0; x<bm.x1; x++ ) {
-			for ( y=bm.y0; y<bm.y1; y++ ) {
+		for ( int x=bm.x0; x<bm.x1; x++ ) {
+			for ( int y=bm.y0; y<bm.y1; y++ ) {
 				// BITMAP()'s backing array only ever stores 0/1 (see the
 				// writer sites below); sign-extension can't change the value.
 				// NOLINTNEXTLINE(bugprone-signed-char-misuse)
-				selected = BITMAP( bm, x, y );
+				BOOL_T selected = BITMAP( bm, x, y );
 				if (selected) {
 					p0.x = bm.orig.x + x * bm.size.x + bm.size.x/2.0;
 					p0.y = bm.orig.y + y * bm.size.y + bm.size.y/2.0;
@@ -548,7 +547,7 @@ static void PrintUpdate( int inx0 )
 
 static void SetMaxPageSize( BOOL_T doScale )
 {
-	WDOUBLE_T temp, x, y;
+	WDOUBLE_T x, y;
 	wPrintGetPageSize( &x, &y );
 	if (!bIgnoreMargins) {
 		x -= (customMargin.left+customMargin.right);
@@ -558,7 +557,7 @@ static void SetMaxPageSize( BOOL_T doScale )
 	maxPageSize.y = y;
 	realPageSize = maxPageSize;
 	if ( (printFormat == PORTRAIT) == (maxPageSize.x > maxPageSize.y) ) {
-		temp = maxPageSize.x;
+		WDOUBLE_T temp = maxPageSize.x;
 		maxPageSize.x = maxPageSize.y;
 		maxPageSize.y = temp;
 		printRotate = TRUE;
@@ -826,13 +825,12 @@ static void PrintSnapShot( void )
 	long scaleH, scaleV;
 	int i;
 	coOrd pageSize;
-	POS_T t;
 
 	PrintClear();
 	SetMaxPageSize( FALSE );
 	pageSize = realPageSize;
 	if (pageSize.x > pageSize.y) {
-		t = pageSize.x;
+		POS_T t = pageSize.x;
 		pageSize.x = pageSize.y;
 		pageSize.y = t;
 	}
@@ -1001,16 +999,16 @@ FormatPageNumber(int x, int y)
 static bool
 PrintPageNumber(int x, int y, DIST_T width, DIST_T height)
 {
-	coOrd printPosition;
 	coOrd textSize;
 
 	char *positionText;
 	wFont_p fp = wStandardFont(F_HELV, TRUE, FALSE);
-	wFontSize_t fs = 64.0;
 
 	positionText = FormatPageNumber(x, y);
 
 	if (strcmp(positionText,"(-/-)") != 0) {
+		coOrd printPosition;
+		wFontSize_t fs = 64.0;
 		// even though we're printing into page_d, mainD must be used here
 		DrawTextSize(&mainD, positionText, fp, fs, TRUE, &textSize);
 
@@ -1047,11 +1045,11 @@ PrintNextPageNumberAt(int x, int y, coOrd position)
 {
 	char *pageNumber;
 	wFont_p fp = wStandardFont(F_HELV, FALSE, FALSE);
-	wFontSize_t fs = 8.0;
 
 	pageNumber = FormatPageNumber(x, y);
 	//Suppress garbage page numbers
 	if (strcmp(pageNumber,"(-/-)") != 0) {
+		wFontSize_t fs = 8.0;
 		DrawString(&page_d, position, 0.0, pageNumber, fp, fs, wDrawColorBlack);
 	}
 	free(pageNumber);
@@ -1107,12 +1105,13 @@ static BOOL_T PrintPage(
         int x,
         int y )
 {
-	coOrd orig, p[4], psave[4], minP, maxP;
-	int i;
-	coOrd clipOrig, clipSize;
-	coOrd roomSize;
+	coOrd orig, p[4];
 
 	if (BITMAP(bm,x,y)) {
+		coOrd psave[4], minP, maxP;
+		int i;
+		coOrd clipOrig, clipSize;
+		coOrd roomSize;
 		orig.x = currPrintGrid.orig.x + x*currPrintGrid.size.x;
 		orig.y = currPrintGrid.orig.y + y*currPrintGrid.size.y;
 		orig.x += printerMargin.left;

@@ -93,7 +93,6 @@ EXPORT coOrd GetSegEndPt(
 	coOrd pos;
 	ANGLE_T angle, a, a0, a1 = 0.0;
 	DIST_T r;
-	POS_T x0, y0, x1, y1;
 
 	switch (segPtr->type) {
 	case SEG_STRTRK:
@@ -117,10 +116,10 @@ EXPORT coOrd GetSegEndPt(
 			angle = NormalizeAngle( a-90 );
 		}
 		if (bounds) {
-			x0 = r * sin(D2R(a0));
-			x1 = r * sin(D2R(a0+a1));
-			y0 = r * cos(D2R(a0));
-			y1 = r * cos(D2R(a0+a1));
+			POS_T x0 = r * sin(D2R(a0));
+			POS_T x1 = r * sin(D2R(a0+a1));
+			POS_T y0 = r * cos(D2R(a0));
+			POS_T y1 = r * cos(D2R(a0+a1));
 			if (ep == 0) {
 				pos.x = segPtr->u.c.center.x + (((a0<=270.0)&&(a0+a1>=270.0)) ?
 				                                (-r) : min(x0,x1));
@@ -230,10 +229,8 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle,
                            coOrd *lo, coOrd *hi )
 {
 	int inx;
-	coOrd p0, p1, pBez, pc;
-	ANGLE_T a0, a1;
+	coOrd p0, p1, pBez;
 	coOrd width;
-	DIST_T radius;
 	LWIDTH_T lwidth;
 
 	width = zero;
@@ -276,10 +273,11 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle,
 		     (segPtr->type == SEG_CRVLIN) ) {
 			/* TODO: be more precise about curved line width */
 			width.x = width.y = lwidth;
+			coOrd pc;
 			REORIGIN( pc, segPtr->u.c.center, angle, xlat );
-			a0 = NormalizeAngle( segPtr->u.c.a0 + angle );
-			a1 = segPtr->u.c.a1;
-			radius = fabs(segPtr->u.c.radius);
+			ANGLE_T a0 = NormalizeAngle( segPtr->u.c.a0 + angle );
+			ANGLE_T a1 = segPtr->u.c.a1;
+			DIST_T radius = fabs(segPtr->u.c.radius);
 			if ( a1 >= 360.0 ) {
 				lo->x = pc.x - radius;
 				lo->y = pc.y - radius;
@@ -1079,7 +1077,7 @@ static void Rgb2hsv(
 {
 	FLOAT_T r, g, b;
 	// cppcheck-suppress shadowFunction -- local variable name coincides with a library/project function of the same name -- zero functional risk
-	FLOAT_T max, min, delta;
+	FLOAT_T max, min;
 
 	r = ((rgb>>16)&0xFF)/255.0;
 	g = ((rgb>>8)&0xFF)/255.0;
@@ -1112,7 +1110,7 @@ static void Rgb2hsv(
 	if (hsv->s == 0.0) {
 		hsv->h = -1.0;
 	} else {
-		delta = max - min;
+		FLOAT_T delta = max - min;
 
 		if (r == max) {
 			hsv->h = (g - b) / delta;
@@ -1221,9 +1219,7 @@ EXPORT BOOL_T ReadSegs( void )
 	long rgb;
 	int i;
 	DIST_T elev0, elev1;
-	BOOL_T hasElev;
 	BOOL_T isPolyV1, isPolyV2;
-	BOOL_T improvedEnds;
 	char type;
 	char * plain_text;
 	long option;
@@ -1238,8 +1234,8 @@ EXPORT BOOL_T ReadSegs( void )
 	AppendPath(0);	// End of all paths
 	while ( rc && ((cp = GetNextLine()) != NULL) ) {
 		while (isspace(*cp)) { cp++; }
-		hasElev = FALSE;
-		improvedEnds = FALSE;
+		BOOL_T hasElev = FALSE;
+		BOOL_T improvedEnds = FALSE;
 		if ( IsEND( END_SEGS ) ) {
 			return TRUE;
 		}
