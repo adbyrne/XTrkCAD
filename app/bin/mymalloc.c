@@ -99,16 +99,14 @@ static void RecordMyFree(const void* p)
 
 EXPORT BOOL_T TestMallocs()
 {
-	size_t oldSize;
 	size_t testedMallocs = 0;
-	void* old;
 	slog_p log_p = StorageLog;
 	BOOL_T rc = TRUE;
 	if (log_p) {
 		for (int i = 0; i < StorageLogCurrent; i++) {
 			if (log_p[i].freed) { continue; }
-			old = log_p[i].storage_p;
-			oldSize = log_p[i].storage_size;
+			void* old = log_p[i].storage_p;
+			size_t oldSize = log_p[i].storage_size;
 			if (*(unsigned long*)((char*)old - sizeof(unsigned long)) != guard0) {
 				LogPrintf("Guard 0 hosed, " SLOG_FMT " size: %llu \n", (uintptr_t)old, oldSize);
 				rc = FALSE;

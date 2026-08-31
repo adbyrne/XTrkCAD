@@ -71,13 +71,12 @@ static int DoShortPathFunc( shortestPathFunc_p func, char * title, SPTF_CMD cmd,
 
 static void DumpPaths( int pinx )
 {
-	pathNode_p pPath;
 	trackep_p pTrackep;
 	int tinx;
 
 	lprintf("    Current = %d\n", pinx );
 	for (pinx=0; pinx<pathNode_da.cnt; pinx++) {
-		pPath = &pathNode(pinx);
+		pathNode_p pPath = &pathNode(pinx);
 		lprintf( "      %3d: S%c T%d:%d D%0.3f T%d:%d",
 		         pinx,
 		         pPath->state==Unknown?'U':pPath->state==Working?'W':pPath->state==Final?'F':'?',
@@ -247,7 +246,6 @@ int FindShortestPath(
 	pathNode_p pCurr;
 	pathNode_p pNext;
 	int pinx;
-	DIST_T minDist;
 	int rc = 0;
 	EPINX_T ep2, epCnt, ep3;
 	static dynArr_t ep_da;
@@ -278,7 +276,7 @@ int FindShortestPath(
 
 	while (1) {
 		/* select next final node */
-		minDist = 0.0;
+		DIST_T minDist = 0.0;
 		inxCurr = -1;
 		for (pinx=0; pinx<pathNode_da.cnt; pinx++) {
 			pNext = &pathNode(pinx);

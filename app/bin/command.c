@@ -471,8 +471,8 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos)
  */
 EXPORT int ConfirmReset(BOOL_T retry)
 {
-	wAction_t rc;
 	if (curCommand != describeCmdInx) {
+		wAction_t rc;
 		LOG(log_command, 3,
 		    ( "COMMAND CONFIRM %s\n", commandList[curCommand].helpKey ))
 		rc = commandList[curCommand].cmdProc( C_CONFIRM, zero);
@@ -664,11 +664,10 @@ EXPORT wIndex_t AddCommand(procCommand_t cmdProc, const char * helpKey,
 EXPORT void PlaybackCommand(const char * line, wIndex_t lineNum)
 {
 	int inx;
-	wIndex_t buttInx;
-	size_t len1, len2;
+	size_t len1;
 	len1 = strlen(line + 8);
 	for (inx = 0; inx < commandCnt; inx++) {
-		len2 = strlen(commandList[inx].helpKey + 3);
+		size_t len2 = strlen(commandList[inx].helpKey + 3);
 		if (len1 == len2
 		    && strncmp(line + 8, commandList[inx].helpKey + 3, len2) == 0) {
 			break;
@@ -678,7 +677,7 @@ EXPORT void PlaybackCommand(const char * line, wIndex_t lineNum)
 		fprintf(stderr, "Unknown playback COMMAND command %d : %s\n", lineNum,
 		        line);
 	} else {
-		buttInx = commandList[inx].buttInx;
+		wIndex_t buttInx = commandList[inx].buttInx;
 		if ((commandList[inx].buttInx) >= 0) {
 			PlaybackButtonMouse(commandList[inx].buttInx);
 		}

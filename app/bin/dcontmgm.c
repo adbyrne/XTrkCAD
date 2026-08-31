@@ -190,11 +190,10 @@ static void ControlDelete( void * action )
 static void ControlDone( void * action )
 {
 	contMgmContext_p context = NULL;
-	wIndex_t linx, lcnt;
 
 	if (AnyHILIGHT) {
-		lcnt = wListGetCount(controlPLs[0].control );
-		for (linx=0;
+		wIndex_t lcnt = wListGetCount(controlPLs[0].control );
+		for (wIndex_t linx=0;
 		     linx < lcnt;
 		     linx++ ) {
 			context = (contMgmContext_p)wListGetItemContext( controlSelL, linx );
@@ -224,11 +223,11 @@ static void LoadControlMgmList( void )
 {
 	wIndex_t curInx, cnt=0;
 	long tempL;
-	contMgmContext_p context;
 
 	cnt = wListGetCount( controlSelL );
 	for ( curInx=0; curInx<cnt; curInx++ ) {
-		context = (contMgmContext_p)wListGetItemContext( controlSelL, curInx );
+		contMgmContext_p context = (contMgmContext_p)wListGetItemContext( controlSelL,
+		                           curInx );
 		if ( context ) {
 			MyFree( context );
 		}
