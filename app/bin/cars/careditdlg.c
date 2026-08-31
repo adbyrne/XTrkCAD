@@ -479,14 +479,13 @@ static void CarDlgLoadRoadnameList( void )
  */
 {
 	wIndex_t inx;
-	roadnameMap_p roadnameMapP;
 
 	if ( !roadnameMapChanged ) { return; }
 	wComboBoxClear( carDlgPLs[I_CD_ROADNAME_LIST].control );
 	wComboBoxAddValue( carDlgPLs[I_CD_ROADNAME_LIST].control, _("Undecorated"),
 	                   NULL );
 	for ( inx=0; inx<roadnameMap_da.cnt; inx++ ) {
-		roadnameMapP = DYNARR_N(roadnameMap_p, roadnameMap_da, inx);
+		roadnameMap_p roadnameMapP = DYNARR_N(roadnameMap_p, roadnameMap_da, inx);
 		wComboBoxAddValue( carDlgPLs[I_CD_ROADNAME_LIST].control,
 		                   roadnameMapP->roadname, roadnameMapP );
 		if ( strcasecmp( carDlgRoadnameStr, roadnameMapP->roadname )==0 ) {
@@ -583,10 +582,9 @@ static BOOL_T CarDlgLoadProtoList(
         BOOL_T loadTypeList )
 {
 	carPartParent_p parentP;
-	wIndex_t inx, listInx, inx1;
+	wIndex_t inx, listInx;
 	BOOL_T found;
 	carProto_p protoP;
-	carPart_p partP;
 	char * firstName;
 	int typeCount[N_TYPELISTMAP];
 	int listTypeInx, currTypeInx;
@@ -649,8 +647,8 @@ static BOOL_T CarDlgLoadProtoList(
 				continue;
 			}
 			found = FALSE;
-			for ( inx1=0; inx1<parentP->parts_da.cnt; inx1++ ) {
-				partP = carPart( parentP, inx1 );
+			for ( wIndex_t inx1=0; inx1<parentP->parts_da.cnt; inx1++ ) {
+				carPart_p partP = carPart( parentP, inx1 );
 				currTypeInx = CarProtoFindTypeCode(partP->type);
 				typeCount[currTypeInx]++;
 				if ( listTypeInx < 0 ) {
@@ -854,8 +852,6 @@ static BOOL_T CarDlgLoadLists(
         SCALEINX_T scale )
 {
 	BOOL_T loadCustomUnknown = isItem;
-	DIST_T ratio;
-	carPartParent_p parentP;
 	static carProto_t protoTmp;
 	static char protoTmpDesc[STR_SIZE];
 
@@ -872,8 +868,8 @@ static BOOL_T CarDlgLoadLists(
 		isItem = FALSE;
 	}
 	if ( isItem ) {
-		parentP = (carPartParent_p)wComboBoxGetItemContext(
-		                  carDlgPLs[I_CD_MANUF_LIST].control, carDlgManufInx );
+		carPartParent_p parentP = (carPartParent_p)wComboBoxGetItemContext(
+		                                  carDlgPLs[I_CD_MANUF_LIST].control, carDlgManufInx );
 		if ( parentP ) {
 			if ( tabs ) { TabStringCpy( carDlgProtoStr, &tabs[T_PROTO] ); }
 			if ( CarDlgLoadProtoList( carDlgManufStr, scale, TRUE ) || !tabs ) {
@@ -891,7 +887,7 @@ static BOOL_T CarDlgLoadLists(
 	if ( tabs ) { TabStringCpy( carDlgProtoStr, &tabs[T_PROTO] ); }
 	if ( !CarDlgLoadProtoList( NULL, 0, TRUE ) && tabs ) {
 		/* create dummy proto */
-		ratio = GetScaleRatio( scale );
+		DIST_T ratio = GetScaleRatio( scale );
 		protoTmp.contentsLabel = "temporary";
 		protoTmp.paramFileIndex = PARAM_LAYOUT;
 		strcpy( protoTmpDesc, carDlgProtoStr );
@@ -1406,7 +1402,6 @@ static void CarDlgActLoadDimsFromProtoList( void )
 {
 	carProto_p protoP = (carProto_p)wComboBoxGetItemContext(
 	                            carDlgPLs[I_CD_PROTOTYPE_LIST].control, carDlgProtoInx );
-	DIST_T ratio;
 	if ( protoP ) {
 		CarDlgLoadDimsFromProto( protoP );
 		carDlgTypeInx = CarProtoFindTypeCode( protoP->type );
@@ -1418,7 +1413,7 @@ static void CarDlgActLoadDimsFromProtoList( void )
 		 * it back to 0 here silently discarded that choice and made
 		 * every new, unresolved car/catalog model commit as "Diesel
 		 * Loco" regardless of the selected kind. */
-		ratio = GetScaleRatio( carDlgScaleInx );
+		DIST_T ratio = GetScaleRatio( carDlgScaleInx );
 		carDlgDim.carLength = 50*12/ratio;
 		carDlgDim.carWidth = 10*12/ratio;
 		carDlgDim.coupledLength = carDlgDim.carLength+carDlgCouplerLength*2;
@@ -1504,7 +1499,6 @@ static void CarDlgPushDims( void )
 static void CarDlgActLoadInfoFromUpdateItem( void )
 {
 	tabString_t tabs[7];
-	char * cp;
 
 	carDlgScaleInx = carDlgUpdateItemPtr->scaleInx;
 	carDlgItemIndex = carDlgUpdateItemPtr->index;
@@ -1545,7 +1539,7 @@ static void CarDlgActLoadInfoFromUpdateItem( void )
 	if ( carDlgUpdateItemPtr->data.notes ) {
 		strncpy( message, carDlgUpdateItemPtr->data.notes, sizeof message );
 		message[sizeof message - 1] = '\0';
-		for ( cp=message; *cp; cp++ ) {
+		for ( char * cp=message; *cp; cp++ ) {
 			if ( *cp == '\n' ) { *cp = ' '; }
 		}
 		wTextAppend( (wText_p)carDlgPLs[I_CD_NOTES].control, message );
@@ -2332,9 +2326,6 @@ static void CarDlgUpdate(
 
 static void CarDlgNewDesc( void )
 {
-	char savedManufStr[STR_SIZE];
-	char savedProtoStr[STR_SIZE];
-
 	carDlgNewPartPtr = NULL;
 	carDlgNewProtoPtr = NULL;
 	carDlgUpdatePartPtr = NULL;
@@ -2347,6 +2338,8 @@ static void CarDlgNewDesc( void )
 	 * legitimately open the nested "New catalog model" panel per the
 	 * filtered-picker/explicit-create design. */
 	if ( CUR_LEVEL == LVL_CAR && !carDlgResolving ) {
+		char savedManufStr[STR_SIZE];
+		char savedProtoStr[STR_SIZE];
 		carDlgResolving = TRUE;
 		CarDlgPushDims();
 		strcpy( savedManufStr, carDlgManufStr );
@@ -2737,7 +2730,6 @@ static void CarDlgOk( void * unused )
 {
 	long options = 0;
 	tabString_t tabs[7];
-	char title[STR_LONG_SIZE*2];
 	unsigned resultIdent;
 	commitPlan_t plan;
 	commitResult_t result;
@@ -2982,6 +2974,7 @@ static void CarDlgOk( void * unused )
 	if ( S_ITEM ) {
 		if ( carDlgUpdateItemPtr == NULL ) {
 			if ( result.partP ) {
+				char title[STR_LONG_SIZE*2];
 				sprintf( title, "%s\t%s\t%s\t%s\t%s\t%s\t%s", carDlgManufStr, carDlgProtoStr,
 				         carDlgDescStr, carDlgPartnoStr, carDlgRoadnameStr, carDlgRepmarkStr,
 				         carDlgNumberStr );
@@ -3078,7 +3071,6 @@ static void CarDlgLayout(
 void DoCarPartDlg( void )
 {
 	paramData_t * pd;
-	int inx;
 
 	if ( carDlgPG.win == NULL ) {
 		FormCreateDialog( &carDlgPG,
@@ -3102,12 +3094,12 @@ void DoCarPartDlg( void )
 		}
 		roadnameMapChanged = TRUE;
 
-		for ( inx=0; inx<N_CONDLISTMAP; inx++ ) {
+		for ( int inx=0; inx<N_CONDLISTMAP; inx++ ) {
 			wComboBoxAddValue( carDlgPLs[I_CD_COND].control, _(condListMap[inx].name),
 			                   I2VP(condListMap[inx].value) );
 		}
 
-		for ( inx=0; inx<N_TYPELISTMAP; inx++ ) {
+		for ( int inx=0; inx<N_TYPELISTMAP; inx++ ) {
 			wComboBoxAddValue( carDlgPLs[I_CD_PROTOKIND_LIST].control,
 			                   _(typeListMap[inx].name), I2VP(typeListMap[inx].value) );
 		}

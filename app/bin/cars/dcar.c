@@ -234,7 +234,6 @@ static char* CarItemHotbarProc(
 	wIndex_t carItemInx = (wIndex_t)VP2L(data);
 	carItem_p item;
 	carItem_p firstItem;
-	wIndex_t inx;
 	long mode;
 	char* cp;
 	char descBuf[STR_LONG_SIZE];
@@ -252,7 +251,7 @@ static char* CarItemHotbarProc(
 		if ((mode & 0xF000) == 0) {
 			firstItem = NULL;
 			wListClear((wList_p)newCarPLs[0].control);
-			for (inx = carItemInx;
+			for (wIndex_t inx = carItemInx;
 			     inx < carItemHotbar_da.cnt && (inx == carItemInx
 			                                    || Cmp_carHotbar(&carItemHotbar(carItemInx), &carItemHotbar(inx)) == 0);
 			     inx++) {
@@ -305,11 +304,10 @@ static void CarItemHotbarUpdate(
         int inx,
         void* data)
 {
-	wIndex_t carItemInx;
 	carItem_p item;
 	char descManufBuf[STR_LONG_SIZE];
 	if (inx == I_NEWCARSEL) {
-		carItemInx = (wIndex_t) * (long*)data;
+		wIndex_t carItemInx = (wIndex_t) * (long*)data;
 		if (carItemInx < 0) {
 			return;
 		}
@@ -369,9 +367,8 @@ EXPORT int CarAvailableCount( void )
 {
 	wIndex_t inx;
 	int cnt = 0;
-	carItem_t * item;
 	for ( inx=0; inx < carItemHotbar_da.cnt; inx ++ ) {
-		item = carItemHotbar(inx);
+		carItem_t * item = carItemHotbar(inx);
 		if (FIT_NONE == CompatibleScale( FIT_CAR, item->scaleInx,
 		                                 GetLayoutCurScale())) {
 			continue;
@@ -478,9 +475,7 @@ EXPORT void InitCarDlg( void )
 EXPORT void CarCustMgmLoad( void )
 {
 	long parentX, partX, protoX;
-	carPartParent_p parentP;
 	carPart_p partP;
-	carProto_p carProtoP;
 	static wIcon_p carpartI = NULL;
 	static wIcon_p carprotoI = NULL;
 
@@ -492,7 +487,7 @@ EXPORT void CarCustMgmLoad( void )
 	}
 
 	for ( parentX=0; parentX<carPartParent_da.cnt; parentX++ ) {
-		parentP = carPartParent(parentX);
+		carPartParent_p parentP = carPartParent(parentX);
 		for ( partX=0; partX<parentP->parts_da.cnt; partX++ ) {
 			partP = carPart(parentP,partX);
 			if ( partP->paramFileIndex != PARAM_CUSTOM ) {
@@ -503,7 +498,7 @@ EXPORT void CarCustMgmLoad( void )
 	}
 
 	for ( protoX=0; protoX<carProto_da.cnt; protoX++ ) {
-		carProtoP = carProto(protoX);
+		carProto_p carProtoP = carProto(protoX);
 		if ( carProtoP->paramFileIndex != PARAM_CUSTOM ) {
 			continue;
 		}
