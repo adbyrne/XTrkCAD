@@ -107,7 +107,6 @@ EXPORT BOOL_T UpdateDescStraight(
         descData_p desc,
         long pivot )
 {
-	coOrd mid;
 	if ( inx == e0 || inx == e1 ) {
 		*(DIST_T*)desc[ln].valueP = FindDistance( *(coOrd*)desc[e0].valueP,
 		                            *(coOrd*)desc[e1].valueP );
@@ -139,7 +138,8 @@ EXPORT BOOL_T UpdateDescStraight(
 			           *(ANGLE_T*)desc[an].valueP+180.0, *(DIST_T*)desc[ln].valueP );
 			desc[e0].mode |= DESC_CHANGE;
 			break;
-		case DESC_PIVOT_MID:
+		case DESC_PIVOT_MID: {
+			coOrd mid;
 			mid.x = (((coOrd*)desc[e0].valueP)->x+((coOrd*)desc[e1].valueP)->x)/2.0;
 			mid.y = (((coOrd*)desc[e0].valueP)->y+((coOrd*)desc[e1].valueP)->y)/2.0;
 			Translate( (coOrd*)desc[e0].valueP, mid, *(ANGLE_T*)desc[an].valueP+180.0,
@@ -149,6 +149,7 @@ EXPORT BOOL_T UpdateDescStraight(
 			desc[e0].mode |= DESC_CHANGE;
 			desc[e1].mode |= DESC_CHANGE;
 			break;
+		}
 		default:
 			break;
 		}
@@ -380,7 +381,7 @@ EXPORT void DrawStraightTies(
         wDrawColor color )
 {
 	DIST_T tieOff0=0.0, tieOff1=0.0;
-	DIST_T len, dlen;
+	DIST_T len;
 	coOrd pos;
 	int cnt;
 	ANGLE_T angle;
@@ -397,7 +398,7 @@ EXPORT void DrawStraightTies(
 		cnt++;
 	}
 	if ( cnt != 0 ) {
-		dlen = FindDistance( p0, p1 )/cnt;
+		DIST_T dlen = FindDistance( p0, p1 )/cnt;
 //		double endsize = FindDistance( p0, p1 )-cnt*dlen-td->width;
 		for ( len=dlen/2; cnt; cnt--,len+=dlen ) {
 			Translate( &pos, p0, angle, len );
@@ -421,7 +422,6 @@ EXPORT void DrawStraightTrack(
 	coOrd pp0, pp1;
 	// cppcheck-suppress shadowVariable -- intentional: this track-type-specific drawing function uses the specific track's own gauge, overriding the module-global 'current' gauge -- confirmed consistent across all Draw*Track functions this session
 	DIST_T trackGauge = GetTrkGauge(trk);
-	tieData_t td;
 	long bridge = 0, roadbed = 0;
 	if ( trk ) {
 		bridge = GetTrkBridge(trk);
@@ -467,7 +467,7 @@ EXPORT void DrawStraightTrack(
 	}
 
 	if ( DoDrawTies( d, trk ) ) {
-		td = GetTrkTieData( trk );
+		tieData_t td = GetTrkTieData( trk );
 		DrawStraightTies( d, td, p0, p1, color );
 	}
 	if ( color == wDrawColorBlack ) {
@@ -691,9 +691,8 @@ static BOOL_T TraverseStraight( traverseTrack_p trvTrk, DIST_T * distR )
 
 static BOOL_T EnumerateStraight( track_p trk )
 {
-	DIST_T d;
 	if (trk != NULL) {
-		d = FindDistance( GetTrkEndPos( trk, 0 ), GetTrkEndPos( trk, 1 ) );
+		DIST_T d = FindDistance( GetTrkEndPos( trk, 0 ), GetTrkEndPos( trk, 1 ) );
 		ScaleLengthIncrement( GetTrkScale(trk), d );
 		return TRUE;
 	}
@@ -734,7 +733,7 @@ BOOL_T ExtendStraightToJoin(
 	track_p trk0x, trk1x, trk2;
 	EPINX_T ep0x=-1, ep1x=-1;
 	coOrd pos0, pos1;
-	ANGLE_T a0, a1, aa;
+	ANGLE_T a0, a1;
 
 	a0 = GetTrkEndAngle( trk0, ep0 );
 	a1 = GetTrkEndAngle( trk1, ep1 );
@@ -752,7 +751,7 @@ BOOL_T ExtendStraightToJoin(
 
 	if ( GetTrkType(trk0) != T_STRAIGHT &&
 	     GetTrkType(trk1) != T_STRAIGHT ) {
-		aa = FindAngle( pos0, pos1 );
+		ANGLE_T aa = FindAngle( pos0, pos1 );
 		aa = NormalizeAngle( aa-a0+connectAngle/2.0);
 		if (aa > connectAngle) {
 			return FALSE;

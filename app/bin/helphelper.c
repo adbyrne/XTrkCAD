@@ -99,19 +99,17 @@ int
 main( int argc, char **argv )
 {
 	int handleOfPipe = 0;
-	char buffer[ 100 ];
 
 	int len;
-	int finished = 0;
-	int numBytes;
-	int numBytes2;
 
 	printf( "HelpHelper: starting!\n" );
 
 	handleOfPipe = open( HELPCOMMANDPIPE, O_RDONLY );
 	if( handleOfPipe ) {
+		int finished = 0;
 		printf( "HelpHelper: opened pipe for reading\n" );
 		while( !finished ) {
+			int numBytes;
 			printf( "HelpHelper: reading from pipe...\n" );
 			numBytes = read( handleOfPipe, &len, sizeof( int ));
 
@@ -119,6 +117,8 @@ main( int argc, char **argv )
 				printf( "HelpHelper: read %d bytes\n", numBytes );
 			}
 			if( numBytes == sizeof(int)) {
+				char buffer[ 100 ];
+				int numBytes2;
 				printf( "HelpHelper: Expecting %d bytes\n", len );
 				numBytes2 = read( handleOfPipe, buffer, len + 1 );
 				buffer[numBytes2] = '\0';

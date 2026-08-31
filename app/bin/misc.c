@@ -183,13 +183,12 @@ EXPORT char * ConvertFromEscapedText(const char * text)
 	char * cout = MyMalloc(strlen(text) + 1);  //always equal to or shorter than
 	int text_i = 0;
 	int cout_i = 0;
-	int c;
 	while (text[text_i]) {
 		// c is only ever compared against '\\'/'n'/'t' (all <0x80, so
 		// sign-extension can't cause a false match) and later truncated
 		// back to a single byte, reproducing the original bit pattern.
 		// NOLINTNEXTLINE(bugprone-signed-char-misuse)
-		c = text[text_i];
+		int c = text[text_i];
 		switch (state) {
 		case CHARACTER:
 			if (c == '\\') {
@@ -553,13 +552,12 @@ static dynArr_t demoWindows_da;
 
 EXPORT void wShow(wControl_p win)
 {
-	int inx;
-
 	if(!win) {
 		return;
 	}
 
 	if (inPlayback && win != demoW) {
+		int inx;
 		wWinSetBusy(win, TRUE);
 		for (inx = 0; inx < demoWindows_da.cnt; inx++)
 			if ( demoWindows(inx) == win) {
@@ -588,7 +586,6 @@ EXPORT void wShow(wControl_p win)
 
 EXPORT void wHide(wControl_p win)
 {
-	int inx;
 	wWinShow(win, FALSE);
 	wWinSetBusy(win, FALSE);
 
@@ -599,7 +596,7 @@ EXPORT void wHide(wControl_p win)
 	wMenuListDelete(winList_mi, wWinGetTitle(win));
 	FormResetInvalid( win );
 	if (inPlayback)
-		for (inx = 0; inx < demoWindows_da.cnt; inx++)
+		for (int inx = 0; inx < demoWindows_da.cnt; inx++)
 			if ( demoWindows(inx) == win) {
 				demoWindows(inx) = NULL;
 			}
@@ -815,7 +812,6 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	int initialZoom = 0;
 	char * initialFile = NULL;
 	const char * pref;
-	coOrd roomSize;
 	char *cp;
 	char buffer[STR_SIZE];
 	unsigned int i;
@@ -949,6 +945,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 
 	if (!initialFile) {
 		WDOUBLE_T tmp;
+		coOrd roomSize;
 		LOG1(log_init, ( "set roomsize\n" ))
 		wPrefGetFloat("draw", "roomsizeX", &tmp, 96.0);
 		roomSize.x = tmp;

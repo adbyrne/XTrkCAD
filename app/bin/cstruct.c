@@ -274,7 +274,6 @@ static BOOL_T ReadStructureParam(
 	char *title;
 	turnoutInfo_t * to;
 	char * cp;
-	static dynArr_t pierInfo_da;
 #define pierInfo(N) DYNARR_N( pierInfo_t, pierInfo_da, N )
 
 	if ( !GetArgs( firstLine+10, "s9q", scale, &title ) ) {
@@ -289,6 +288,7 @@ static BOOL_T ReadStructureParam(
 	}
 	if (tempSpecial[0] != '\0') {
 		if (strncmp( tempSpecial, PIER, strlen(PIER) ) == 0) {
+			static dynArr_t pierInfo_da;
 			DYNARR_RESET( pierInfo_t, pierInfo_da );
 			to->special = TOpierInfo;
 			cp = tempSpecial+strlen(PIER);
@@ -504,18 +504,15 @@ static paramGroup_t pierPG = { "pier", 0, pierPLs, COUNT( pierPLs ) };
 
 static void ShowPierL( void )
 {
-	int inx;
-	wIndex_t currInx;
 	wControl_p controls[2];
-	char * labels[1];
 
 	if ( curStructure->special==TOpierInfo && curStructure->u.pierInfo.cnt > 1) {
 		if (pierL == NULL) {
 			FormCreateControls( &pierPG );
 		}
-		currInx = wListGetIndex( pierL );
+		wIndex_t currInx = wListGetIndex( pierL );
 		wListClear( pierL );
-		for (inx=0; inx<curStructure->u.pierInfo.cnt; inx++) {
+		for (int inx=0; inx<curStructure->u.pierInfo.cnt; inx++) {
 			wListAddValue( pierL, curStructure->u.pierInfo.info[inx].name, NULL, NULL );
 		}
 		if ( currInx < 0 ) {
@@ -525,6 +522,7 @@ static void ShowPierL( void )
 			currInx = curStructure->u.pierInfo.cnt-1;
 		}
 		wListSetIndex( pierL, currInx );
+		char * labels[1];
 		controls[0] = (wControl_p)pierL;
 		controls[1] = NULL;
 		labels[0] = N_("Pier Number");
@@ -840,7 +838,6 @@ EXPORT STATUS_T CmdStructureAction(
 
 	ANGLE_T angle;
 	static BOOL_T validAngle;
-	static ANGLE_T baseAngle;
 	static coOrd origPos;
 	static ANGLE_T origAngle;
 	static coOrd rot0, rot1;
@@ -930,6 +927,7 @@ EXPORT STATUS_T CmdStructureAction(
 		rot1 = pos;
 		if ( FindDistance( rot0, rot1 ) > (6.0/BASE_DPI)*mainD.scale ) {
 			angle = FindAngle( rot0, rot1 );
+			static ANGLE_T baseAngle;
 			if (!validAngle) {
 				baseAngle = angle;
 				validAngle = TRUE;

@@ -499,17 +499,27 @@ jobs:
           # --header-filter='.*/app/' rationale also in that job's comment (kept in sync by hand):
           # without it, system headers (GTK/glib/atk) pulled in via plain -I dominate the report
           # with unfixable noise -- 72% of raw findings, 2026-08-31 measurement.
-          # --exclude-header-filter drops uthash.h/utlist.h/cJSON.h (vendored, 199 findings/23%
-          # of what's left after the header-filter) and stringxtc.c (vendored, excluded from the
-          # file list below instead since it's a main file, not reached as a header).
+          # Vendored-header exclusion (uthash.h/utlist.h/cJSON.h, 199 findings/23% of what's left
+          # after the header-filter) and stringxtc.c (vendored, excluded from the file list below
+          # instead since it's a main file, not reached as a header) -- see ci-gtk3.yml's matching
+          # job for why this is a post-filter awk step below rather than --exclude-header-filter
+          # (that flag isn't supported by this runner's clang-tidy version; the invocation errored
+          # out silently under `|| true` and this job published a false "0 findings" report for its
+          # whole lifetime until this was found, 2026-08-31 -- kept in sync by hand).
           mapfile -t FILES < <(find app/bin app/dynstring app/cornu app/help app/tools -name "*.c" | grep -v unittest | grep -vE 'bdf2xtp\.c|helphelper\.c|ppedit_gtk1\.c|app/tools/dirent\.c|app/bin/stringxtc\.c')
-          clang-tidy --header-filter='.*/app/' --exclude-header-filter='uthash\.h|utlist\.h|cJSON\.h' --checks='-*,bugprone-*,performance-*,portability-*,-bugprone-easily-swappable-parameters' -p build "${FILES[@]}" > clang-tidy.txt 2>&1 || true
+          clang-tidy --header-filter='.*/app/' --checks='-*,bugprone-*,performance-*,portability-*,-bugprone-easily-swappable-parameters' -p build "${FILES[@]}" > clang-tidy.txt 2>&1 || true
           # compile_commands.json stores absolute paths, so clang-tidy emits
           # diagnostics as e.g. "/home/runner/work/XTrkCAD/XTrkCAD/app/bin/foo.c:12:...".
           # format-findings-report.sh expects repo-relative paths (like
           # cppcheck/codespell/compiler-warnings already produce) -- strip the
           # workspace prefix so its GitHub blob links resolve.
           sed -i "s|${GITHUB_WORKSPACE}/||g" clang-tidy.txt
+          # Drop a finding block only when its own primary file:line:col (a warning:/error:
+          # line, never a note: continuation -- notes tracing a macro expansion back through
+          # uthash.h belong to a real finding in project code and must stay) is one of the
+          # three vendored headers.
+          awk 'BEGIN{keep=1} /^[^:]+:[0-9]+:[0-9]+: (warning|error):/ { keep = ($0 !~ /(uthash\.h|utlist\.h|cJSON\.h):[0-9]+:[0-9]+:/) } keep' clang-tidy.txt > clang-tidy.filtered.txt
+          mv clang-tidy.filtered.txt clang-tidy.txt
       - name: Format as HTML
         run: |
           mkdir -p report
