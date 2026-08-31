@@ -2265,13 +2265,11 @@ EXPORT BOOL_T TraverseTrack(
         traverseTrack_p trvTrk,
         DIST_T * distR )
 {
-	track_p oldTrk;
-
 	while ( *distR > 0.0 && trvTrk->trk ) {
 		if ( trackCmds((trvTrk->trk)->type)->traverse == NULL ) {
 			return FALSE;
 		}
-		oldTrk = trvTrk->trk;
+		track_p oldTrk = trvTrk->trk;
 		if ( !trackCmds((trvTrk->trk)->type)->traverse( trvTrk, distR ) ) {
 			return FALSE;
 		}

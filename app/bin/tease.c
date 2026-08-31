@@ -1890,8 +1890,6 @@ BOOL_T JoinTracks(
  * Connect the tracks.
  */
 {
-	track_p joint;
-
 	LOG( log_ease, 1, ( "join T%d[%d] @[%0.3f %0.3f], T%d[%d] @[%0.3f %0.3f]\n",
 	                    GetTrkIndex(trk0), ep0, pos0.x, pos0.y, GetTrkIndex(trk1), ep1, pos1.x,
 	                    pos1.y ) )
@@ -1927,6 +1925,7 @@ BOOL_T JoinTracks(
 		ConnectTracks( trk0, ep0, trk1, ep1 );
 	} else {
 		/* Connect with transition-curve */
+		track_p joint;
 		if (easementVal<0.0) {   //Cornu Easements
 			coOrd pos[2];
 			pos[0] = GetTrkEndPos(trk0,ep0);

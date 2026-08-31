@@ -58,7 +58,7 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 	coOrd off, intersectP;
 	coOrd pointP, pointP1, reverseC;
 //	coOrd pointC;
-	track_p trk, trk1, trk2, trk2a=NULL, trk2b=NULL, pointT;
+	track_p trk1, trk2, trk2a=NULL, trk2b=NULL, pointT;
 	trkSeg_p segP;
 	BOOL_T right;
 	track_p trks[4];
@@ -175,7 +175,7 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 			}
 			PTRACE(( "r=%c a=%0.1f ", right?'T':'F', angle ))
 			Translate( &off, pointP, pointA+180.0, trackGauge*2.0 );
-			trk = OnTrack( &off, TRUE, TRUE );
+			track_p trk = OnTrack( &off, TRUE, TRUE );
 			if (trk == NULL) {
 				break;
 			}

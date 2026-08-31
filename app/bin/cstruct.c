@@ -1152,9 +1152,8 @@ static char * CmdStructureHotBarProc(
 EXPORT void AddHotBarStructures( void )
 {
 	wIndex_t inx;
-	turnoutInfo_t * to;
 	for ( inx=0; inx < structureInfo_da.cnt; inx ++ ) {
-		to = structureInfo(inx);
+		turnoutInfo_t * to = structureInfo(inx);
 		if ( !( IsParamValid(to->paramFileIndex) &&
 		        to->segCnt > 0 &&
 		        (FIT_NONE != CompatibleScale( FIT_STRUCTURE, to->scaleInx,

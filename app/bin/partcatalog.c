@@ -1092,11 +1092,11 @@ GetParameterFileScale(const char *file)
 void RunMemoryTest(char *directory)
 {
 	ParameterLib *library;
-	SearchResult *results;
 
 	mwInit();
 	library = InitLibrary();
 	if (library) {
+		SearchResult *results;
 		CreateCatalogFromDir(library, directory);
 		CreateLibraryIndex(library);
 		results = MyMalloc(sizeof(SearchResult));

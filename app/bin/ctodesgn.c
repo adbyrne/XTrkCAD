@@ -1253,10 +1253,8 @@ static void AppendSegs(dynArr_t * target, dynArr_t * source)
 #define sourceSegs(N) DYNARR_N( trkSeg_t, *source, N )
 #define targetSegs(N) DYNARR_N( trkSeg_t, *target, N )
 
-	trkSeg_p src;
-
 	for (int i=0; i<source->cnt; i++) {
-		src = &sourceSegs(i);
+		trkSeg_p src = &sourceSegs(i);
 		addSegBezier(target, src);
 	}
 }

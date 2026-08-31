@@ -730,7 +730,6 @@ static STATUS_T CmdPull(
 	static track_p trk1, t1, t2;
 	static BOOL_T t_turn1, t_turn2;
 	static EPINX_T ep1, t_ep1;
-	track_p trk2;
 	static BOOL_T turntable;
 
 //	int countTracksR0 = 0, countTracksR1 = 0, possibleEndPoints = 0;
@@ -820,7 +819,7 @@ static STATUS_T CmdPull(
 
 				}
 			} else {
-				trk2 = OnTrackIgnore( &pos, TRUE, TRUE, trk1 );
+				track_p trk2 = OnTrackIgnore( &pos, TRUE, TRUE, trk1 );
 				if (trk2 != NULL) {
 					if (trk2 == trk1) {
 						InfoMessage( _("Same Track! - please select another") );

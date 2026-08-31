@@ -1008,8 +1008,7 @@ static void Hsv2rgb(
         hsv_t	hsv,
         long	*rgb )
 {
-	int i;
-	FLOAT_T f, w, q, t, r=0, g=0, b=0;
+	FLOAT_T r=0, g=0, b=0;
 
 	if (hsv.s == 0.0) {
 		hsv.s = 0.000001;
@@ -1024,11 +1023,11 @@ static void Hsv2rgb(
 			hsv.h = 0.0;
 		}
 		hsv.h = hsv.h / 60.0;
-		i = (int) hsv.h;
-		f = hsv.h - i;
-		w = hsv.v * (1.0 - hsv.s);
-		q = hsv.v * (1.0 - (hsv.s * f));
-		t = hsv.v * (1.0 - (hsv.s * (1.0 - f)));
+		int i = (int) hsv.h;
+		FLOAT_T f = hsv.h - i;
+		FLOAT_T w = hsv.v * (1.0 - hsv.s);
+		FLOAT_T q = hsv.v * (1.0 - (hsv.s * f));
+		FLOAT_T t = hsv.v * (1.0 - (hsv.s * (1.0 - f)));
 
 		switch (i) {
 		case 0:

@@ -243,7 +243,7 @@ static DIST_T DistanceTurntable( track_p trk, coOrd * p )
 	const struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
 	                                        extraDataTurntable_t);
 	DIST_T d;
-	coOrd pos0, pos1;
+	coOrd pos1;
 
 	d = FindDistance( xx->pos, *p ) - xx->radius;    //OK to be negative
 	if ( programMode == MODE_DESIGN ) {
@@ -253,7 +253,7 @@ static DIST_T DistanceTurntable( track_p trk, coOrd * p )
 		if ( !ValidateTurntablePosition(trk) ) {
 			return DIST_INF;
 		}
-		pos0 = GetTrkEndPos(trk,xx->currEp);
+		coOrd pos0 = GetTrkEndPos(trk,xx->currEp);
 		Translate( &pos1, xx->pos, GetTrkEndAngle(trk,xx->currEp)+180.0, xx->radius );
 		LineDistance( p, pos0, pos1 );
 	}
