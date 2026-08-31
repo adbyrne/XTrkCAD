@@ -1112,32 +1112,19 @@ static void LogSeg(
 static void GroupOk( void * unused )
 {
 	turnoutInfo_t * to;
-	EPINX_T ep, epCnt, epN;
 	coOrd orig, size;
 	FILE * f = NULL;
-	BOOL_T rc = TRUE;
 	track_p trk;
-	path_t * pp, *ppN;
+	path_t * pp;
 	pathElem_p ppp;
 	groupTrk_p groupP;
-	BOOL_T flip, flip1, allDone;
-	DIST_T dist;
-	ANGLE_T angle, angleN;
-	pathElem_t pathElemTemp;
-
-	trkSeg_p segPtr;
-	int segCnt;
-	static dynArr_t conflictMap_da;
 #define conflictMap( I, J )		DYNARR_N( int, conflictMap_da, (I)*(path_da.cnt)+(J) )
 #define segFlip( N )			DYNARR_N( int, conflictMap_da, (N) )
-	static dynArr_t groupOrder_da;
 #define groupOrder( N )			DYNARR_N( int, groupOrder_da, N )
-	static dynArr_t groupMap_da;
 #define groupMap( I, J )		DYNARR_N( int, groupMap_da, (I)*(path_da.cnt+1)+(J) )
-	int groupCnt;
-	int pinx, pinx2, ginx, ginx2, gpinx2;
+	trkSeg_p segPtr;
+	int segCnt;
 	trkEndPt_p endPtP;
-	signed char pathChar;
 
 	DYNARR_RESET( trkSeg_t, trackSegs_da );
 	DYNARR_RESET( trkSeg_t, tempSegs_da );
@@ -1182,7 +1169,7 @@ static void GroupOk( void * unused )
 			if ( GetTrkType(trk) == T_TURNOUT || GetTrkType(trk) == T_STRUCTURE) {
 				struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK,
 				                                 extraDataCompound_t);
-				for ( pinx=0; pinx<xx->segCnt; pinx++ ) {
+				for ( int pinx=0; pinx<xx->segCnt; pinx++ ) {
 					segPtr = &xx->segs[pinx];
 					if ( IsSegTrack(segPtr) ) {
 						DYNARR_APPEND( trkSeg_t, trackSegs_da, 10 );
@@ -1275,15 +1262,16 @@ static void GroupOk( void * unused )
 		endPtOrig = zero;
 		for ( int inx=0; inx<groupTrk_da.cnt; inx++ ) {
 			trk = groupTrk(inx).trk;
-			epCnt = GetTrkEndPtCnt(trk);
-			for ( ep=0; ep<epCnt; ep++ ) {
+			EPINX_T epCnt = GetTrkEndPtCnt(trk);
+			for ( EPINX_T ep=0; ep<epCnt; ep++ ) {
 				track_p trk1 = GetTrkEndTrk(trk,ep);
 				if ( trk1 == NULL || !GetTrkSelected(trk1) ) {
 					/* boundary EP */
+					EPINX_T epN;
 					for ( epN=0; epN<TempEndPtsCount(); epN++ ) {
-						dist = FindDistance( GetTrkEndPos(trk,ep), GetEndPtPos(TempEndPt(epN)) );
-						angle = NormalizeAngle( GetTrkEndAngle(trk,
-						                                       ep) - GetEndPtAngle(TempEndPt(epN)) + connectAngle/2.0 );
+						DIST_T dist = FindDistance( GetTrkEndPos(trk,ep), GetEndPtPos(TempEndPt(epN)) );
+						ANGLE_T angle = NormalizeAngle( GetTrkEndAngle(trk,
+						                                ep) - GetEndPtAngle(TempEndPt(epN)) + connectAngle/2.0 );
 						if ( dist < connectDistance && angle < connectAngle ) {
 							break;
 						}
@@ -1356,12 +1344,10 @@ static void GroupOk( void * unused )
 		 */
 		endPtOrig.x /= TempEndPtsCount();
 		endPtOrig.y /= TempEndPtsCount();
-		angleN = 270.0;
-		epN = -1;
-		for ( ep=0; ep<TempEndPtsCount(); ep++ ) {
-			angle = FindAngle(endPtOrig,GetEndPtPos(TempEndPt(ep)));
+		ANGLE_T angleN = 270.0;
+		for ( EPINX_T ep=0; ep<TempEndPtsCount(); ep++ ) {
+			ANGLE_T angle = FindAngle(endPtOrig,GetEndPtPos(TempEndPt(ep)));
 			if ( fabs(angle-270.0) < angleN ) {
-				epN = ep;
 				angleN = fabs(angle-270.0);
 				endPtAngle = angle;
 			}
@@ -1372,7 +1358,7 @@ static void GroupOk( void * unused )
 		                             TempEndPtsCount()-1)) ) >
 		     NormalizeAngle( GetEndPtAngle(TempEndPt(1)) - GetEndPtAngle(TempEndPt(0)) ) ) {
 
-			for ( ep=1; ep<(TempEndPtsCount()+1)/2; ep++ ) {
+			for ( EPINX_T ep=1; ep<(TempEndPtsCount()+1)/2; ep++ ) {
 				SwapEndPts( TempEndPt(0), ep, TempEndPtsCount()-ep );
 			}
 		}
@@ -1392,13 +1378,13 @@ static void GroupOk( void * unused )
 		 */
 		for ( int inx=0; inx<groupTrk_da.cnt; inx++ ) {
 			trk = groupTrk(inx).trk;
-			epCnt = GetTrkEndPtCnt(trk);
-			for ( ep=0; ep<epCnt; ep++ ) {
+			EPINX_T epCnt = GetTrkEndPtCnt(trk);
+			for ( EPINX_T ep=0; ep<epCnt; ep++ ) {
 				track_p trk1 = GetTrkEndTrk(trk,ep);
 				if ( trk1 == NULL || !GetTrkSelected(trk1) ) {
 					/* boundary EP */
 					LOG( log_group, 3, ("FindShortPath: T%d.%d\n", GetTrkIndex(trk), ep ) );
-					rc = FindShortestPath( trk, ep, FALSE, GroupShortestPathFunc, NULL );
+					FindShortestPath( trk, ep, FALSE, GroupShortestPathFunc, NULL );
 				}
 			}
 		}
@@ -1441,17 +1427,17 @@ static void GroupOk( void * unused )
 			wHide( groupW );
 			return;
 		}
-		allDone = FALSE;
+		BOOL_T allDone = FALSE;
 		path(0).done = TRUE;
 		while ( !allDone ) {
 			allDone = TRUE;
 			int inx = -1;
-			for ( pinx=0; pinx<path_da.cnt; pinx++ ) {
+			for ( int pinx=0; pinx<path_da.cnt; pinx++ ) {
 				pp = &path(pinx);
 				if ( pp->done ) { continue; }
-				for ( pinx2=0; pinx2<path_da.cnt; pinx2++ ) {
+				for ( int pinx2=0; pinx2<path_da.cnt; pinx2++ ) {
 					if ( pinx2==pinx ) { continue; }
-					ppN = &path(pinx2);
+					path_t *ppN = &path(pinx2);
 					if ( pp->ep1 == ppN->ep1 ||
 					     pp->ep2 == ppN->ep2 ) {
 						pp->done = TRUE;
@@ -1465,20 +1451,20 @@ static void GroupOk( void * unused )
 						allDone = FALSE;
 						LOG( log_group, 1, ( "P%d aligns flipped with P%d\n", pinx, pinx2 ) );
 						inx = (pp->pathElemStart+pp->pathElemEnd-1)/2;
-						for ( ginx=pp->pathElemStart,ginx2=pp->pathElemEnd; ginx<=inx;
+						for ( int ginx=pp->pathElemStart,ginx2=pp->pathElemEnd; ginx<=inx;
 						      ginx++,ginx2-- ) {
-							pathElemTemp = pathElem(ginx);
+							pathElem_t pathElemTemp = pathElem(ginx);
 							pathElem(ginx) = pathElem(ginx2);
 							pathElem(ginx2) = pathElemTemp;
 						}
-						for ( ginx=pp->pathElemStart; ginx<=pp->pathElemEnd; ginx++ ) {
+						for ( int ginx=pp->pathElemStart; ginx<=pp->pathElemEnd; ginx++ ) {
 							ppp = &pathElem(ginx);
-							ep = ppp->ep1;
+							EPINX_T ep = ppp->ep1;
 							ppp->ep1 = ppp->ep2;
 							ppp->ep2 = ep;
 							ppp->flip = !ppp->flip;
 						}
-						ep = pp->ep1;
+						EPINX_T ep = pp->ep1;
 						pp->ep1 = pp->ep2;
 						pp->ep2 = ep;
 						break;
@@ -1495,10 +1481,10 @@ static void GroupOk( void * unused )
 		}
 		if ( log_group >= 1 && logTable(log_group).level >= 1 ) {
 			LogPrintf( "Group Paths\n" );
-			for ( pinx=0; pinx<path_da.cnt; pinx++ ) {
+			for ( int pinx=0; pinx<path_da.cnt; pinx++ ) {
 				pp = &path(pinx);
 				LogPrintf( "  P%2d:%d.%d ", pinx, pp->ep1, pp->ep2 );
-				for ( pinx2=pp->pathElemEnd; pinx2>=pp->pathElemStart; pinx2-- ) {
+				for ( int pinx2=pp->pathElemEnd; pinx2>=pp->pathElemStart; pinx2-- ) {
 					ppp = &pathElem(pinx2);
 					LogPrintf( " %sT%d:%d.%d", ppp->flip?"-":"",
 					           GetTrkIndex(groupTrk(ppp->groupInx).trk), ppp->ep1, ppp->ep2 );
@@ -1511,10 +1497,11 @@ static void GroupOk( void * unused )
 		/*
 		 * 5: Create Conflict Map
 		 */
+		static dynArr_t conflictMap_da;
 		DYNARR_SET( int, conflictMap_da, path_da.cnt*path_da.cnt );
 		memset( &conflictMap(0,0), 0, conflictMap_da.cnt * sizeof conflictMap(0,0) );
-		for ( pinx=0; pinx<path_da.cnt; pinx++ ) {
-			for ( pinx2=pinx+1; pinx2<path_da.cnt; pinx2++ ) {
+		for ( int pinx=0; pinx<path_da.cnt; pinx++ ) {
+			for ( int pinx2=pinx+1; pinx2<path_da.cnt; pinx2++ ) {
 				if ( ConflictPaths( &path(pinx), &path(pinx2) ) ) {
 					conflictMap( pinx, pinx2 ) = conflictMap( pinx2, pinx ) = TRUE;
 					path(pinx).conflicts++;
@@ -1526,26 +1513,29 @@ static void GroupOk( void * unused )
 		/*
 		 * Sort Paths by number of conflicts
 		 */
+		static dynArr_t groupOrder_da;
 		DYNARR_SET( int, groupOrder_da, path_da.cnt );
-		for ( pinx=0; pinx<path_da.cnt; pinx++ ) { groupOrder(pinx) = pinx; }
+		for ( int pinx=0; pinx<path_da.cnt; pinx++ ) { groupOrder(pinx) = pinx; }
 		qsort( &groupOrder(0), path_da.cnt, sizeof groupOrder(0), CmpGroupOrder );
 
 		/*
 		 * Group Paths, 1st pass:
 		 */
+		static dynArr_t groupMap_da;
 		DYNARR_SET( int, groupMap_da, path_da.cnt*(path_da.cnt+1) );
 		memset( &groupMap(0,0), -1, groupMap_da.cnt * sizeof groupMap(0,0) );
-		groupCnt = 0;
-		for ( pinx=0; pinx<path_da.cnt; pinx++ ) {
+		int groupCnt = 0;
+		for ( int pinx=0; pinx<path_da.cnt; pinx++ ) {
 			pp = &path(groupOrder(pinx));
 			if ( pp->inGroup ) { continue; }
 			pp->inGroup = TRUE;
 			groupCnt++;
 			groupMap( groupCnt-1, 0 ) = groupOrder(pinx);
-			ginx = 1;
-			for ( pinx2=pinx+1; pinx2<path_da.cnt; pinx2++ ) {
-				gpinx2 = groupOrder(pinx2);
+			int ginx = 1;
+			for ( int pinx2=pinx+1; pinx2<path_da.cnt; pinx2++ ) {
+				int gpinx2 = groupOrder(pinx2);
 				if ( path(gpinx2).inGroup ) { continue; }
+				int ginx2;
 				for ( ginx2=0; ginx2<ginx
 				      && !conflictMap(groupMap(groupCnt-1,ginx2),gpinx2); ginx2++ );
 				if ( ginx2<ginx ) { continue; }
@@ -1557,10 +1547,12 @@ static void GroupOk( void * unused )
 		/*
 		 * Group Paths: 2nd pass:
 		 */
-		for ( pinx=0; pinx<groupCnt; pinx++ ) {
+		for ( int pinx=0; pinx<groupCnt; pinx++ ) {
+			int ginx;
 			for ( ginx=0; groupMap(pinx,ginx)>=0; ginx++ );
-			for ( pinx2=0; pinx2<path_da.cnt; pinx2++ ) {
-				gpinx2 = groupOrder(pinx2);
+			for ( int pinx2=0; pinx2<path_da.cnt; pinx2++ ) {
+				int gpinx2 = groupOrder(pinx2);
+				int ginx2;
 				for ( ginx2=0; ginx2<ginx && groupMap(pinx,ginx2)!=gpinx2; ginx2++ );
 				if ( ginx2<ginx ) { continue; }		/* already on list */
 				for ( ginx2=0; ginx2<ginx
@@ -1572,9 +1564,9 @@ static void GroupOk( void * unused )
 
 		if ( log_group >= 1 && logTable(log_group).level >= 3 ) {
 			LogPrintf( "Group Map\n");
-			for ( pinx=0; pinx<groupCnt; pinx++ ) {
+			for ( int pinx=0; pinx<groupCnt; pinx++ ) {
 				LogPrintf( "G%d:", pinx );
-				for ( ginx=0; groupMap(pinx,ginx) >= 0; ginx++ ) {
+				for ( int ginx=0; groupMap(pinx,ginx) >= 0; ginx++ ) {
 					LogPrintf( " %d: %d", ginx, groupMap(pinx,ginx) );
 				}
 				LogPrintf( "\n" );
@@ -1586,7 +1578,7 @@ static void GroupOk( void * unused )
 		 */
 		DYNARR_SET( int, conflictMap_da, trackSegs_da.cnt );
 		memset( &segFlip(0), 0, trackSegs_da.cnt * sizeof segFlip(0) );
-		for ( pinx=0; pinx<pathElem_da.cnt; pinx++ ) {
+		for ( int pinx=0; pinx<pathElem_da.cnt; pinx++ ) {
 			ppp = &pathElem(pinx);
 			for ( PATHPTR_T pPaths=ppp->path; pPaths && *pPaths; pPaths++ ) {
 				// PATHPTR_T (signed char) deliberately encodes "segment N,
@@ -1599,7 +1591,7 @@ static void GroupOk( void * unused )
 					inx = - inx;
 				}
 				CHECK( inx <= trackSegs_da.cnt );
-				flip = *pPaths<0;
+				BOOL_T flip = *pPaths<0;
 				if ( ppp->flip ) {
 					flip = !flip;
 				}
@@ -1616,7 +1608,7 @@ static void GroupOk( void * unused )
 		 * Flip each segment that is used as flipped more than not
 		 */
 		LOG( log_group, 3, ( "Flipping Segments:" ) );
-		for ( pinx=0; pinx<trackSegs_da.cnt; pinx++ ) {
+		for ( int pinx=0; pinx<trackSegs_da.cnt; pinx++ ) {
 			if ( segFlip(pinx) < 0 ) {
 				SegProc( SEGPROC_FLIP, &trackSegs(pinx), NULL );
 				LOG( log_group, 3, ( " %d", pinx ) );
@@ -1627,24 +1619,24 @@ static void GroupOk( void * unused )
 		/*
 		 * 7: Output Path lists
 		 */
-		for ( pinx=0; pinx<groupCnt; pinx++ ) {
+		for ( int pinx=0; pinx<groupCnt; pinx++ ) {
 			sprintf( message, "P%d", pinx );
 			int inx = pathPtr_da.cnt;
 			DYNARR_SET( char, pathPtr_da, inx+(int)strlen(message)+1 );
 			memcpy( &pathPtr(inx), message, pathPtr_da.cnt-inx );
-			for ( ginx=0; groupMap(pinx,ginx) >= 0; ginx++ ) {
+			for ( int ginx=0; groupMap(pinx,ginx) >= 0; ginx++ ) {
 				pp = &path(groupMap(pinx,ginx));
 				LOG( log_group, 3,
 				     ("  Group Map(%d, %d): elem %d-%d, EP %d %d, Conflicts %d, inGrp %d, Done: %s\n",
 				      pinx, ginx, pp->pathElemStart, pp->pathElemEnd, pp->ep1, pp->ep2, pp->conflicts,
 				      pp->inGroup, pp->done?"T":"F" ) );
-				for ( pinx2=pp->pathElemEnd; pinx2>=pp->pathElemStart; pinx2-- ) {
+				for ( int pinx2=pp->pathElemEnd; pinx2>=pp->pathElemStart; pinx2-- ) {
 					ppp = &pathElem( pinx2 );
 					LOG( log_group, 3, ("    PE %d: GI %d, EP %d %d, Flip %d =", pinx2,
 					                    ppp->groupInx, ppp->ep1, ppp->ep2, ppp->flip ));
 					groupP = &groupTrk( ppp->groupInx );
 					PATHPTR_T pPaths = ppp->path;
-					flip = ppp->flip;
+					BOOL_T flip = ppp->flip;
 					if ( pPaths == NULL ) {
 						ErrorMessage( MSG_GROUP_NO_PATHS );
 						wDrawDelayUpdate( mainD.d, FALSE );
@@ -1654,8 +1646,8 @@ static void GroupOk( void * unused )
 					if ( flip ) { pPaths += strlen((char *)pPaths)-1; }
 					while ( (pPaths >= ppp->path) && *pPaths ) {      //Add Guard for flip backwards
 						DYNARR_APPEND( char, pathPtr_da, 10 );
-						pathChar = *pPaths;
-						flip1 = flip;
+						signed char pathChar = *pPaths;
+						BOOL_T flip1 = flip;
 						if ( pathChar < 0 ) {
 							flip1 = !flip;
 							pathChar = - pathChar;
@@ -1698,7 +1690,7 @@ static void GroupOk( void * unused )
 		orig.x = - GetEndPtPos(TempEndPt(0)).x;
 		orig.y = - GetEndPtPos(TempEndPt(0)).y;
 		MoveSegs( outputSegs_da.cnt, &outputSegs(0), orig );
-		for ( ep=0; ep<TempEndPtsCount(); ep++ ) {
+		for ( EPINX_T ep=0; ep<TempEndPtsCount(); ep++ ) {
 			trkEndPt_p epp = TempEndPt(ep);
 			coOrd pos = GetEndPtPos(epp);
 			pos.x += orig.x;
@@ -1726,10 +1718,10 @@ static void GroupOk( void * unused )
 		f = OpenCustom("a");
 		if (f && to) {
 			SetCLocale();
-			rc &= fprintf( f, "TURNOUT %s \"%s\" %ld\n", curScaleName, PutTitle(to->title),
-			               options )>0;
-			rc &= WriteCompoundPathsEndPtsSegs( f, pPaths, outputSegs_da.cnt,
-			                                    &outputSegs(0), TempEndPtsCount(), TempEndPt(0) );
+			fprintf( f, "TURNOUT %s \"%s\" %ld\n", curScaleName, PutTitle(to->title),
+			         options );
+			WriteCompoundPathsEndPtsSegs( f, pPaths, outputSegs_da.cnt,
+			                              &outputSegs(0), TempEndPtsCount(), TempEndPt(0) );
 			SetUserLocale();
 		}
 		if ( groupReplace ) {
@@ -1739,13 +1731,13 @@ static void GroupOk( void * unused )
 			UndoStart( _("Group Tracks"), "group" );
 			orig.x = - orig.x;
 			orig.y = - orig.y;
-			for ( ep=0; ep<TempEndPtsCount(); ep++ ) {
+			for ( EPINX_T ep=0; ep<TempEndPtsCount(); ep++ ) {
 				endPtP = TempEndPt(ep);
 				track_p trk1 = GetEndPtTrack(endPtP);
 				if ( trk1 ) {
 					EPINX_T ep1 = GetEndPtEndPt(endPtP);
 					trk = GetTrkEndTrk( trk1, ep1 );
-					epN = GetEndPtConnectedToMe( trk, trk1 );
+					EPINX_T epN = GetEndPtConnectedToMe( trk, trk1 );
 					DrawEndPt( &mainD, trk1, ep1, wDrawColorWhite );
 					DrawEndPt( &mainD, trk, epN, wDrawColorWhite );
 					DisconnectTracks( trk, epN, trk1, ep1 );
@@ -1772,7 +1764,7 @@ static void GroupOk( void * unused )
 			xx->pathNoCombine = groupNoCombine;
 
 			SetTrkVisible( trk, TRUE );
-			for ( ep=0; ep<TempEndPtsCount(); ep++ ) {
+			for ( EPINX_T ep=0; ep<TempEndPtsCount(); ep++ ) {
 				trkEndPt_p epp = TempEndPt(ep);
 				track_p trk1 = GetEndPtTrack(epp);
 				if ( trk1 ) {
@@ -1796,9 +1788,9 @@ static void GroupOk( void * unused )
 		f = OpenCustom("a");
 		if (f && to) {
 			SetCLocale();
-			rc &= fprintf( f, "STRUCTURE %s \"%s\"\n", curScaleName,
-			               PutTitle(groupTitle) )>0;
-			rc &= WriteSegs( f, trackSegs_da.cnt, &trackSegs(0) );
+			fprintf( f, "STRUCTURE %s \"%s\"\n", curScaleName,
+			         PutTitle(groupTitle) );
+			WriteSegs( f, trackSegs_da.cnt, &trackSegs(0) );
 			SetUserLocale();
 		}
 		if ( groupReplace ) {
