@@ -587,7 +587,9 @@ jobs:
     # Inventory of every cppcheck-suppress/NOLINT(NEXTLINE) comment in
     # app/bin, split into boilerplate (generic "confirmed via broad
     # sampling" reasoning from a prior bulk-approval pass) vs. specific
-    # (individualized reasoning) vs. unreasoned (no "--" reason at all).
+    # (individualized reasoning) vs. unreasoned (no reason found at all,
+    # checking inline "-- reason" text, a same-line trailing block comment,
+    # and comment lines immediately following the suppress line).
     # A boilerplate suppress is the one most likely to be hiding a fully
     # removable case -- see SF #749's ccornu.c `ep` discovery, found only
     # because that one happened to get individually re-traced. Answers
