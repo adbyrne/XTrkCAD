@@ -64,14 +64,14 @@ static void FormatFraction(
         const char* unitFmt)
 {
 	char* cp = *cpp;
-	long integ;
-	long f1, f2;
-	char* space = "";
 
 	if (!rational) {
 		sprintf(cp, "%0.*f", digits, valF);
 		cp += strlen(cp);
 	} else {
+		long integ;
+		long f1, f2;
+		char* space = "";
 		integ = (long)floor(valF);
 		valF -= (FLOAT_T)integ;
 		for (f2 = 1; digits > 0; digits--, f2 *= 2);
@@ -109,7 +109,6 @@ EXPORT char* FormatDistanceEx(
 {
 	char* cp;
 	int digits;
-	long feet;
 	char* metricInd;
 
 	if (++formatStringInx >= N_STRING) {
@@ -127,7 +126,7 @@ EXPORT char* FormatDistanceEx(
 		               (distanceFormat & DISTFMT_FRACT) == DISTFMT_FRACT_FRC, valF, "");
 		return formatStrings[formatStringInx];
 	} else if (units == UNITS_ENGLISH) {
-		feet = (long)(floor)(valF / 12.0);
+		long feet = (long)(floor)(valF / 12.0);
 		valF -= feet * 12.0;
 		if (feet != 0) {
 			sprintf(cp, "%ld%s", feet,

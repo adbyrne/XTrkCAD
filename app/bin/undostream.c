@@ -177,7 +177,6 @@ BOOL_T WriteStream( stream_p stream, void * ptr, int size )
 BOOL_T TrimStream( stream_p stream, uintptr_t off )
 {
 	long binx, cnt, inx;
-	streamBlocks_p blk;
 	LOG( log_undo, 3, ( "    TrimStream( , %ld )\n", off ) )
 	binx = off/BSTREAM_SIZE;
 	cnt = binx-stream->startBInx;
@@ -190,7 +189,7 @@ BOOL_T TrimStream( stream_p stream, uintptr_t off )
 		return TRUE;
 	}
 	for (inx=0; inx<cnt; inx++) {
-		blk = DYNARR_N( streamBlocks_p, stream->stream_da, inx );
+		streamBlocks_p blk = DYNARR_N( streamBlocks_p, stream->stream_da, inx );
 		MyFree( blk );
 	}
 	for (inx=cnt; inx<stream->stream_da.cnt; inx++ ) {
@@ -207,9 +206,8 @@ BOOL_T TrimStream( stream_p stream, uintptr_t off )
 void ClearStream( stream_p stream )
 {
 	long inx;
-	streamBlocks_p blk;
 	for (inx=0; inx<stream->stream_da.cnt; inx++) {
-		blk = DYNARR_N( streamBlocks_p, stream->stream_da, inx );
+		streamBlocks_p blk = DYNARR_N( streamBlocks_p, stream->stream_da, inx );
 		MyFree( blk );
 	}
 	DYNARR_FREE( streamBlocks_p, stream->stream_da );
@@ -221,7 +219,6 @@ void ClearStream( stream_p stream )
 BOOL_T TruncateStream( stream_p stream, uintptr_t off )
 {
 	long binx, boff, cnt, inx;
-	streamBlocks_p blk;
 	LOG( log_undo, 3, ( "TruncateStream( , %ld )\n", off ) )
 	binx = off/BSTREAM_SIZE;
 	boff = off%BSTREAM_SIZE;
@@ -240,7 +237,7 @@ BOOL_T TruncateStream( stream_p stream, uintptr_t off )
 		return TRUE;
 	}
 	for (inx=binx; inx<stream->stream_da.cnt; inx++) {
-		blk = DYNARR_N( streamBlocks_p, stream->stream_da, inx );
+		streamBlocks_p blk = DYNARR_N( streamBlocks_p, stream->stream_da, inx );
 		MyFree( blk );
 	}
 	DYNARR_SET( streamBlocks_p, stream->stream_da, (wIndex_t)binx );

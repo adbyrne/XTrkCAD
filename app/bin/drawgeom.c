@@ -81,7 +81,6 @@ static void EndPoly( const drawContext_t * context, int cnt, wBool_t open)
 
 static void DrawGeomOk( BOOL_T started )
 {
-	track_p trk;
 	int inx;
 
 	if (tempSegs_da.cnt <= 0) {
@@ -91,7 +90,7 @@ static void DrawGeomOk( BOOL_T started )
 		UndoStart( _("Create Lines"), "newDraw" );
 	}
 	for ( inx=0; inx<tempSegs_da.cnt; inx++ ) {
-		trk = MakeDrawFromSeg( zero, 0.0, &tempSegs(inx) );
+		track_p trk = MakeDrawFromSeg( zero, 0.0, &tempSegs(inx) );
 		DrawNewTrack( trk );
 	}
 	DYNARR_RESET( trkSeg_t, tempSegs_da );
@@ -2024,7 +2023,7 @@ STATUS_T DrawGeomModify(
 	static BOOL_T polyMode;
 //	static ANGLE_T original_angle;
 //	int inx1;
-	DIST_T d, d1, d2, dd;
+	DIST_T d, d2, dd;
 //	coOrd * newPts = NULL;
 	switch ( action&0xFF ) {
 	case C_START:
@@ -2297,7 +2296,7 @@ STATUS_T DrawGeomModify(
 				}
 			}
 			if (!corner_mode) {
-				d1 = FindDistance( points(inx_line).pt, pos );
+				DIST_T d1 = FindDistance( points(inx_line).pt, pos );
 				d2 = FindDistance( points(inx_line==0?3:inx_line-1).pt, pos );
 				if (d2<d1) {
 					polyInx = inx_line==0?3:inx_line-1;
@@ -2387,7 +2386,7 @@ STATUS_T DrawGeomModify(
 			break;
 		}
 		int prior_pnt, next_pnt, orig_pnt;
-		ANGLE_T prior_angle, next_angle, line_angle;
+		ANGLE_T prior_angle, next_angle;
 		switch (tempSegs(0).type) {
 		case SEG_TBLEDGE:
 		case SEG_STRLIN:
@@ -2529,6 +2528,7 @@ STATUS_T DrawGeomModify(
 			wSetCursor(mainD.d,wCursorNone);
 			if (!corner_mode) {
 				/* Constrain movement to be perpendicular */
+				ANGLE_T line_angle;
 				d = FindDistance(start_pos, pos);
 				line_angle = NormalizeAngle(FindAngle(points(inx_line).pt,
 				                                      points(inx_line==3?0:inx_line+1).pt));
