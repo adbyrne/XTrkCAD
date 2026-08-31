@@ -225,7 +225,6 @@ EXPORT void ValidateTieData( tieData_p td )
 EXPORT tieData_t GetScaleTieData( SCALEINX_T si )
 {
 	scaleInfo_p s;
-	DIST_T defLength;
 
 	if ( si == SCALE_DEMO ) {
 		return tieData_demo;
@@ -233,7 +232,7 @@ EXPORT tieData_t GetScaleTieData( SCALEINX_T si )
 	s = GetScaleInfo(si);
 	if ( !s->tieDataValid ) {
 		sprintf( message, "tiedata-%s", s->scale );
-		defLength = (96.0-54.0)/s->ratio+s->gauge;
+		DIST_T defLength = (96.0-54.0)/s->ratio+s->gauge;
 
 		/** @prefs [tiedata-\<SCALE\>] length, width, spacing Sets tie drawing data.
 		* Example for 6"x8"x6' ties spaced 20" in HOn3 (slash separates 4 lines):
@@ -272,7 +271,6 @@ SetScaleDescGauge(SCALEINX_T scaleInx)
 EXPORT SCALEINX_T LookupScale( const char * name )
 {
 	wIndex_t scaleInx;
-	DIST_T gauge;
 	LOG( log_scale, 2, ( "  LookupScale(%s)", name ) );
 	if ( strcmp( name, "*" ) == 0 ) {
 		LOG( log_scale, 2, ( " .any = %d\n", SCALE_ANY ) );
@@ -290,7 +288,7 @@ EXPORT SCALEINX_T LookupScale( const char * name )
 		}
 	}
 	if ( isdigit((unsigned char)name[0]) ) {
-		gauge = atof( name );
+		DIST_T gauge = atof( name );
 		for ( scaleInx=0; scaleInx<scaleInfo_da.cnt; scaleInx++ ) {
 			if (scaleInfo(scaleInx).gauge == gauge) {
 				LOG( log_scale, 2, ( " .gauge = %d\n", scaleInx ) );
@@ -553,18 +551,16 @@ EXPORT BOOL_T DoSetScale(
 
 static BOOL_T DoSetScaleDesc( SCALEINX_T scaleInx )
 {
-	SCALEINX_T work;
 	SCALEDESCINX_T descInx;
 	scaleDesc_p scaleDescP = NULL;
 	gaugeInfo_p g;
 	const char *cp;
 //	DIST_T ratio;
 	char buf[ 80 ];
-	size_t len;
 
 
 	for( descInx = 0; descInx < scaleDesc_da.cnt; descInx++ ) {
-		work = GetScaleInx( descInx, 0 );
+		SCALEINX_T work = GetScaleInx( descInx, 0 );
 		if( scaleInfo(work).ratio == scaleInfo(scaleInx).ratio ) {
 			if( !strncmp( scaleInfo(work).scale, scaleInfo(scaleInx).scale,
 			              strlen(scaleInfo(work).scale))) {
@@ -590,6 +586,7 @@ static BOOL_T DoSetScaleDesc( SCALEINX_T scaleInx )
 	} else {
 		/* if yes, is this a new gauge to the scale? */
 		cp = strchr( scaleDescP->scaleDescStr, ' ' );
+		size_t len;
 		if( cp ) {
 			len = cp - scaleDescP->scaleDescStr;
 		} else {
@@ -774,15 +771,14 @@ EXPORT void ScaleLengthIncrement(
         SCALEINX_T scale,
         DIST_T length )
 {
-	const char * cp;
-	int len;
 	if (scaleInfo(scale).length == 0.0) {
+		const char * cp;
 		if (units == UNITS_METRIC) {
 			cp = "999.99m SCALE Flex Track";
 		} else {
 			cp = "999' 11\" SCALE Flex Track";
 		}
-		len = (int)strlen( cp )+1;
+		int len = (int)strlen( cp )+1;
 		if (len > enumerateMaxDescLen) {
 			enumerateMaxDescLen = (int)len;
 		}
@@ -794,7 +790,6 @@ EXPORT void ScaleLengthEnd( void )
 {
 	wIndex_t si;
 	int count;
-	DIST_T length;
 	char tmp[STR_SIZE];
 	FLOAT_T flexLen;
 	long flexUnit;
@@ -805,7 +800,7 @@ EXPORT void ScaleLengthEnd( void )
 		wPrefGetInteger( tmp, "flex unit", &flexUnit, 0 );
 		wPrefGetFloat( tmp, "flex cost", &flexCost, 0.0 );
 		tmp[0] = '\0';
-		length=scaleInfo(si).length;
+		DIST_T length=scaleInfo(si).length;
 		if (length != 0) {
 			sprintf( tmp, "%s %s Flex Track", FormatDistance(length), scaleInfo(si).scale );
 			for (count = (int)strlen(tmp); count<enumerateMaxDescLen; count++) {
@@ -888,16 +883,15 @@ static paramGroup_t rescalePG = { "rescale", PGO_FULLDIALOGFROMBUILDER, rescaleP
 static coOrd rescaleShift;
 static BOOL_T RescaleDoIt( track_p trk, BOOL_T unused )
 {
-	EPINX_T ep, ep1;
 	track_p trk1;
 	UndrawNewTrack( trk );
 	UndoModify(trk);
 	if ( rescalePercent != 100.0 ) {
-		for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
+		for (EPINX_T ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
 			trk1 = GetTrkEndTrk(trk,ep);
 			if (trk1 != NULL &&
 			    !GetTrkSelected(trk1)) {
-				ep1 = GetEndPtConnectedToMe( trk1, trk );
+				EPINX_T ep1 = GetEndPtConnectedToMe( trk1, trk );
 				DisconnectTracks( trk, ep, trk1, ep1 );
 			}
 		}

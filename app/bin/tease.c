@@ -223,11 +223,11 @@ static DIST_T GetLfromD(
         DIST_T R,
         DIST_T L )
 {
-	DIST_T deltaD, d, l, deltaL;
+	DIST_T deltaD, l, deltaL;
 	l = L/2.0;
 	deltaL = L/4.0;
 	while ( deltaL>0.0001 ) {
-		d = JoinD(l,R,L);
+		DIST_T d = JoinD(l,R,L);
 		if ( d < D ) {
 			deltaD = D-d;
 		} else {
@@ -259,8 +259,8 @@ EXPORT STATUS_T ComputeJoint(
  * origin to origin.
  */
 {
-	DIST_T t, l0, l1, d0, d1, rr0, rr1, xx;
-	ANGLE_T a, a0, a1;
+	DIST_T l0, l1, d0, d1, rr0, rr1, xx;
+	ANGLE_T a0, a1;
 	coOrd rp0, rpc0, rp1, rpc1;
 
 	LOG( log_ease, 4, ( "ComputeJoint( %0.3f, %0.3f )\n", r0, r1 ) )
@@ -315,7 +315,7 @@ EXPORT STATUS_T ComputeJoint(
 		e->flip = FALSE;
 		if ( r1 == 0 || (r0 != 0 && r1 > r0 ) ) {
 			e->flip = TRUE;
-			t=r0; r0=r1; r1=t;
+			DIST_T t=r0; r0=r1; r1=t;
 		}
 		if (r0 == 0) {
 			if (r1 == 0) {
@@ -334,7 +334,7 @@ EXPORT STATUS_T ComputeJoint(
 			ComputeJoinPos( l0, easeR, easeL, &rr0, NULL, &rp0, &rpc0 );
 			l1 = FindL( r1, easeR, easeL );
 			ComputeJoinPos( l1, easeR, easeL, &rr1, NULL, &rp1, &rpc1 );
-			a = FindAngle( rpc0, rpc1 );
+			ANGLE_T a = FindAngle( rpc0, rpc1 );
 			a0 = a - FindAngle(rpc0, rp0);/*???*/
 			a1 = FindAngle(rpc1, rp1) - a;
 			xx = rr0 - ( rr1 + FindDistance(rpc0, rpc1) );
@@ -703,7 +703,6 @@ static void DrawJointSegment(
  * at angle (A) from origin (P).
  */
 {
-	DIST_T ll;
 	wIndex_t i;
 	coOrd p0, p1;
 	ANGLE_T a0, a1;
@@ -720,7 +719,7 @@ static void DrawJointSegment(
 	GetJointPos( &p0, NULL, l0, R, L, P, A, N );
 	for (i=1; i<=cnt1; i++) {
 		a0 += a1;
-		ll = sqrt( sin(D2R(a0)) * 2 * R * L );
+		DIST_T ll = sqrt( sin(D2R(a0)) * 2 * R * L );
 		GetJointPos( &p1, NULL, ll, R, L, P, A, N );
 		if (widthOptions&DTS_CENTERONLY) {
 			DrawLine(d,p0,p1,thick,color);
@@ -883,7 +882,6 @@ EXPORT void DrawJointTrack(
         long options )
 {
 	wIndex_t cnt;
-	DIST_T len;
 	trkSeg_p segPtr;
 
 	if ( (d->options&DC_SEGTRACK) ) {
@@ -906,7 +904,7 @@ EXPORT void DrawJointTrack(
 	LOG( log_ease, 4, ( "DJT( (X%0.3f Y%0.3f A%0.3f) \n", pos.x, pos.y, angle ) )
 	if (!Scurve) {
 		/* print segments about 0.20" long */
-		len = (l0-l1)/(0.20*d->scale);
+		DIST_T len = (l0-l1)/(0.20*d->scale);
 		cnt = (int)ceil(fabs(len));
 		if (cnt == 0) { cnt = 1; }
 		DrawJointSegment( d, cnt, l0, l1, R, L, pos,
@@ -1318,7 +1316,6 @@ static BOOL_T TraverseJointTrack(
 	const struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT,
 	                                    extraDataEase_t);
 	BOOL_T rc;
-	EPINX_T ep;
 	ANGLE_T angle;
 	BOOL_T flip;
 
@@ -1327,7 +1324,7 @@ static BOOL_T TraverseJointTrack(
 	rc = TraverseJoint( &trvTrk->pos, &trvTrk->angle, distR, xx->pos, xx->angle,
 	                    xx->l0, xx->l1, xx->R, xx->L, xx->negate, flip, xx->Scurve );
 	if ( *distR > 0 ) {
-		ep = (flip?0:1);
+		EPINX_T ep = (flip?0:1);
 		if ( xx->flip ) {
 			ep = 1-ep;
 		}
@@ -1498,8 +1495,7 @@ static BOOL_T MakeParallelJoint(
         coOrd * p1R,
         BOOL_T track)
 {
-	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t),
-	                         *xx1;
+	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	ANGLE_T angle, A;
 	coOrd p0, p1, P, q1, r1;
 	DIST_T d, d0;
@@ -1555,7 +1551,8 @@ static BOOL_T MakeParallelJoint(
 	if ( newTrkR ) {
 		if (track) {
 			*newTrkR = NewTrack( 0, T_EASEMENT, 2, sizeof *xx );
-			xx1 = GET_EXTRA_DATA( *newTrkR, T_EASEMENT, extraDataEase_t );
+			struct extraDataEase_t *xx1 = GET_EXTRA_DATA( *newTrkR, T_EASEMENT,
+			                              extraDataEase_t );
 			*xx1 = *xx;
 			xx1->angle = A;
 			xx1->R = R;

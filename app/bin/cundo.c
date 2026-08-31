@@ -147,14 +147,13 @@ static void DumpStream( FILE * outf, stream_p stream, const char * name )
 	long binx;
 	long i, j;
 	uintptr_t off;
-	streamBlocks_p blk;
 	int zeroCnt;
 	static const char zeros[16] = { 0 };
 	fprintf( outf, "Dumping %s\n", name );
 	off = stream->startBInx*BSTREAM_SIZE;
 	zeroCnt = 0;
 	for ( binx=0; binx<stream->stream_da.cnt; binx++ ) {
-		blk = DYNARR_N( streamBlocks_p, stream->stream_da, binx );
+		streamBlocks_p blk = DYNARR_N( streamBlocks_p, stream->stream_da, binx );
 		for ( i=0; i<BSTREAM_SIZE; i+= 16 ) {
 			if ( memcmp( &((*blk)[i]), zeros, 16 ) == 0 ) {
 				zeroCnt++;
@@ -188,7 +187,6 @@ BOOL_T UndoFail( char * cause, uintptr_t val, char * fileName,
                  int lineNumber )
 {
 	int inx, cnt;
-	undoStack_p us;
 	FILE * outf;
 	time_t clock;
 	char *temp;
@@ -229,7 +227,7 @@ BOOL_T UndoFail( char * cause, uintptr_t val, char * fileName,
 		inx = 0;
 	}
 	for (cnt=0; cnt<UNDO_STACK_SIZE; cnt++) {
-		us = &undoStack[inx];
+		undoStack_p us = &undoStack[inx];
 		fprintf( outf,
 		         "US[%d]: M:%d N:%d D:%d TC:%d NT:"SLOG_FMT" OT:"SLOG_FMT" NT:"SLOG_FMT" US:"SLOG_FMT" UE:"SLOG_FMT" RS:"SLOG_FMT" RE:"SLOG_FMT" NR:%d\n",
 		         inx, us->modCnt, us->newCnt, us->delCnt, us->trackCount,
@@ -333,13 +331,12 @@ static BOOL_T ReadObject( stream_p stream, BOOL_T needRedo )
 		return FALSE;
 	}
 	long Addsize;
-	void * tempBuff;
 	/* Fix up pts to be as big as it was before -> because it may have changed since */
 	if (!ReadStream (stream, &Addsize, sizeof Addsize)) {
 		return FALSE;
 	}
 	if (Addsize) {
-		tempBuff = MyMalloc(Addsize);
+		void * tempBuff = MyMalloc(Addsize);
 		if (!ReadStream( stream, tempBuff, Addsize )) {
 			return FALSE;
 		}
@@ -478,16 +475,15 @@ static BOOL_T SetDeleteOpInStream( stream_p stream, uintptr_t start,
 	char op;
 	track_p trk;
 	track_t tempTrk;
-	size_t binx, boff;
 	streamBlocks_p blk;
 
 	LOG( log_undo, 3, ( "        SetDeleteOpInStream T%d @ "SLOG_FMT"\n",
 	                    GetTrkIndex(trk0), (uintptr_t)trk0) );
 	stream->curr = start;
 	while (stream->curr < end) {
-		binx = stream->curr/BSTREAM_SIZE;
+		size_t binx = stream->curr/BSTREAM_SIZE;
 		binx -= stream->startBInx;
-		boff = stream->curr%BSTREAM_SIZE;
+		size_t boff = stream->curr%BSTREAM_SIZE;
 		if (!ReadStream( stream, &op, sizeof op )) {
 			return FALSE;
 		}
@@ -524,9 +520,6 @@ static void SetButtons( BOOL_T undoSetting, BOOL_T redoSetting )
 {
 	static BOOL_T undoButtonEnabled = FALSE;
 	static BOOL_T redoButtonEnabled = FALSE;
-	int index;
-	static char undoHelp[STR_SHORT_SIZE];
-	static char redoHelp[STR_SHORT_SIZE];
 
 	if (undoButtonEnabled != undoSetting) {
 		wControlActive( (wControl_p)undoB, undoSetting );
@@ -537,14 +530,16 @@ static void SetButtons( BOOL_T undoSetting, BOOL_T redoSetting )
 		redoButtonEnabled = redoSetting;
 	}
 	if (undoSetting) {
+		static char undoHelp[STR_SHORT_SIZE];
 		sprintf( undoHelp, _("Undo: %s"), undoStack[undoHead].label );
 		wTooltipSetText( (wControl_p)undoB, undoHelp );
 	} else {
 		wTooltipSet((wControl_p)undoB, NULL, "cmdUndo");
 	}
 	if (redoSetting) {
-		index = undoHead;
+		int index = undoHead;
 		INC_UNDO_INX(index);
+		static char redoHelp[STR_SHORT_SIZE];
 		sprintf( redoHelp, _("Redo: %s"), undoStack[index].label );
 		wTooltipSetText( (wControl_p)redoB, redoHelp );
 	} else {
