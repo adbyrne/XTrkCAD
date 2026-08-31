@@ -191,15 +191,15 @@ double BezError(coOrd pos[4], coOrd center, coOrd start_point, double start,
 
 double DistanceToLineSegment(coOrd p, coOrd l1, coOrd l2)
 {
-	double A = p.x - l1.x;
-	double B = p.y - l1.y;
 	double C = l2.x - l1.x;
 	double D = l2.y - l1.y;
 
-	double dot = A * C + B * D;
 	double len_sq = C * C + D * D;
 	double param = -1;
 	if (len_sq != 0) { //non 0 length line
+		double A = p.x - l1.x;
+		double B = p.y - l1.y;
+		double dot = A * C + B * D;
 		param = dot / len_sq;
 	}
 
@@ -364,32 +364,28 @@ EXPORT enum BezierType AnalyseCurve(coOrd inpos[4], double *Rfx, double *Rfy,
 EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track,
                              wDrawColor color, LWIDTH_T lineWidth)
 {
-	double t_s = 0.0, t_e;
+	double t_s = 0.0;
 	double errorThreshold = 0.05;
 	bCurveData_t prev_arc = {0}; /* sentinel: .end==0.0 means no arc found yet */
 	bCurveData_t arc;
 	DYNARR_RESET( trkSeg_t, *segs ); // wipe out
-	BOOL_T safety;
 
 	double prev_e = 0.0;
 	// we do a binary search to find the "good `t` closest to no-longer-good"
 	do {
-		safety=FALSE;
+		BOOL_T safety=FALSE;
 		// step 1: start with the maximum possible arc length
-		t_e = 1.0;
-		// points:
-		coOrd start_point, mid_point, end_point;
+		double t_e = 1.0;
 		// booleans:
-		BOOL_T curr_good = FALSE, prev_good, done;
-		// numbers:
-		double t_m;
+		BOOL_T curr_good = FALSE, done;
 		// step 2: find the best possible arc
 		do {						// !done
-			prev_good = curr_good;   //remember last time
-			t_m = (t_s + t_e)/2;
-			start_point = getPoint(pos, t_s); //Start of arc
-			mid_point = getPoint(pos, t_m);  //Middle of trial arc
-			end_point = getPoint(pos, t_e);  //End of trial Arc
+			BOOL_T prev_good = curr_good;   //remember last time
+			double t_m = (t_s + t_e)/2;
+			// points:
+			coOrd start_point = getPoint(pos, t_s); //Start of arc
+			coOrd mid_point = getPoint(pos, t_m);  //Middle of trial arc
+			coOrd end_point = getPoint(pos, t_e);  //End of trial Arc
 
 			PlotCurve( crvCmdFromChord, start_point, end_point, mid_point,
 			           &(arc.curveData), FALSE, 0.0 );  //Find Arc through three points
@@ -606,7 +602,6 @@ EXPORT STATUS_T AdjustBezCurve(
 	static coOrd pos0, /* pos3,*/ p;
 	enum BezierType b;
 	DIST_T dd;
-	EPINX_T ep;
 	double fx, fy, cusp;
 //	int controlArm = -1;
 
@@ -731,7 +726,7 @@ EXPORT STATUS_T AdjustBezCurve(
 			if ((MyGetKeyState() & WKEY_SHIFT) != 0) {   //Snap Track
 				t = OnTrackIgnore(&p, FALSE, TRUE, Da.selectTrack);
 				if (t != NULL) { //Snap to endPoint
-					ep = PickUnconnectedEndPointSilent(p, t);
+					EPINX_T ep = PickUnconnectedEndPointSilent(p, t);
 					if (ep != -1) {
 						Da.trk[Da.selectPoint/3] = t;
 						Da.ep[Da.selectPoint/3] = ep;
@@ -1093,13 +1088,12 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			coOrd p = pos;
 //			BOOL_T found = FALSE;
 			int end = Da.state==POS_1?0:1;
-			EPINX_T ep;
 			if (Da.track) {
 				if (lock) {
 					pos = movePos;
 					t = OnTrack(&p, FALSE, TRUE);
 					if (t != NULL) {
-						ep = PickUnconnectedEndPointSilent(p, t);
+						EPINX_T ep = PickUnconnectedEndPointSilent(p, t);
 						if (ep != -1) {
 							if (GetTrkGauge(t) != GetScaleTrackGauge(GetLayoutCurScale())) {
 								wBeep();

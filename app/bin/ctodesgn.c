@@ -990,9 +990,8 @@ EXPORT long ComputeTurnoutRoadbedSide(
 {
 	DIST_T length;
 	int rbw;
-	unsigned long res, res1;
+	unsigned long res;
 	searchTable_t * p;
-	double where;
 	trkSeg_p sp;
 
 	sp = &segPtr[segInx];
@@ -1009,8 +1008,8 @@ EXPORT long ComputeTurnoutRoadbedSide(
 		if ( (p->width < rbw && res==0xFFFFFFFF) || res==0 ) {
 			break;
 		}
-		res1 = (p->mask & res);
-		where = p->start*length/32.0;
+		unsigned long res1 = (p->mask & res);
+		double where = p->start*length/32.0;
 		if (p->width >= rbw || (res1!=p->mask && res1!=0)) {
 			if (HittestTurnoutRoadbed(segPtr, segCnt, segInx, side, p->start)) {
 				res &= ~p->bits;
@@ -1040,7 +1039,7 @@ EXPORT long ComputeTurnoutRoadbedSide(
 	DIST_T length;
 	int bitWidth;
 	unsigned long res, mask;
-	int hit0, hit1, inx0, inx1;
+	int hit0, inx0, inx1;
 	int i, j, k, hitx;
 
 	sp = &segPtr[segInx];
@@ -1066,8 +1065,8 @@ EXPORT long ComputeTurnoutRoadbedSide(
 		if ( inx1 > 31 ) {
 			inx1 = 31;
 		}
-		hit1 = HittestTurnoutRoadbed( segPtr, segCnt, segInx, side, inx1,
-		                              roadbedWidth );
+		int hit1 = HittestTurnoutRoadbed( segPtr, segCnt, segInx, side, inx1,
+		                                  roadbedWidth );
 		if ( debugComputeRoadbed>=3 ) { printf( "     HT[%d]=%d\n", inx1, hit1 ); }
 		if ( hit0 != hit1 ) {
 			i=inx0;
@@ -1121,7 +1120,7 @@ static void AddRoadbedPieces(
         int first,
         int last )
 {
-	DIST_T d0, d1;
+	DIST_T d0;
 	ANGLE_T a0, a1;
 	coOrd p0, p1;
 	trkSeg_p sp, sq;
@@ -1131,6 +1130,7 @@ static void AddRoadbedPieces(
 	}
 	sp = &tempSegs(inx);
 	if ( sp->type == SEG_STRTRK ) {
+		DIST_T d1;
 		d0 = FindDistance( sp->u.l.pos[0], sp->u.l.pos[1] );
 		a0 = FindAngle( sp->u.l.pos[0], sp->u.l.pos[1] );
 		d1 = d0*first/32.0;
@@ -1203,8 +1203,7 @@ static void AddRoadbedToOneSide(
         int inx,
         ANGLE_T side )
 {
-	unsigned long res, res1;
-	int b0, b1;
+	unsigned long res;
 
 	res = ComputeTurnoutRoadbedSide( &tempSegs(0), trkCnt, inx, side,
 	                                 newTurnRoadbedWidth );
@@ -1213,6 +1212,8 @@ static void AddRoadbedToOneSide(
 	} else if ( res == 0xFFFFFFFF ) {
 		AddRoadbedPieces( inx, side, 0, 32 );
 	} else {
+		int b0, b1;
+		unsigned long res1;
 		for ( b0=0, res1=0x00000001; res1&&(res1&res); b0++,res1<<=1 );
 		for ( b1=32,res1=0x80000000; res1&&(res1&res); b1--,res1>>=1 );
 		AddRoadbedPieces( inx, side, 0, b0 );
@@ -1224,13 +1225,12 @@ static void AddRoadbedToOneSide(
 static void AddRoadbed( void )
 {
 	int trkCnt, inx;
-	trkSeg_p sp;
 	if ( newTurnRoadbedWidth < newTurnTrackGauge ) {
 		return;
 	}
 	trkCnt = tempSegs_da.cnt;
 	for ( inx=0; inx<trkCnt; inx++ ) {
-		sp = &tempSegs(inx);
+		trkSeg_p sp = &tempSegs(inx);
 		if ( sp->type!=SEG_STRTRK && sp->type!=SEG_CRVTRK ) {
 			continue;
 		}
@@ -2303,14 +2303,12 @@ static toDesignSchema_t * LoadSegs(
         wBool_t bFirst )
 {
 	wIndex_t s;
-	int p, p0, p1;
+	int p0, p1;
 	DIST_T d;
 	static toDesignSchema_t * pp;
 	char *segOrder;
 	coOrd pos;
 	wIndex_t segCnt = 0;
-	ANGLE_T angle0;//, angle1, angle3;
-	trkSeg_p segPtr;
 	pp = dp->paths;
 
 	DYNARR_RESET( trkSeg_t, tempSegs_da );
@@ -2525,7 +2523,7 @@ static toDesignSchema_t * LoadSegs(
 				NoticeMessage( MSG_TODSGN_CROSSOVER_TOO_SHORT, _("Ok"), NULL );
 				return NULL;
 			}
-			angle0 = R2D( atan2( fabs(tdVal[1]), d ) );
+			ANGLE_T angle0 = R2D( atan2( fabs(tdVal[1]), d ) );
 			points[0].y = 0.0; points[0].x = 0.0;
 			points[1].y = 0.0; points[1].x = tdVal[0];
 			points[2].y = fabs(tdVal[1]); points[2].x = 0.0;
@@ -2616,7 +2614,7 @@ static toDesignSchema_t * LoadSegs(
 		DYNARR_SET( trkSeg_t, tempSegs_da, segCnt );
 		memset( &tempSegs(0), 0, segCnt * sizeof tempSegs(0) );
 		for ( s=0; s<segCnt; s++ ) {
-			segPtr = &tempSegs(s);
+			trkSeg_p segPtr = &tempSegs(s);
 			segPtr->color = wDrawColorBlack;
 			if (*segOrder <= '9') {
 				p0 = *segOrder++ - '0';
@@ -2628,7 +2626,7 @@ static toDesignSchema_t * LoadSegs(
 			} else {
 				p1 = *segOrder++ - 'A' + 10;
 			}
-			p = *segOrder++ - '0';
+			int p = *segOrder++ - '0';
 			if (p == 3) {
 				/* cornu */
 			} else if (p != 0) {
