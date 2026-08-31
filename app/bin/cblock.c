@@ -183,12 +183,12 @@ static void UpdateBlock (track_p trk, int inx, descData_p descUpd,
 	blockData_p xx = GetblockData(trk);
 	const char * thename, *thescript;
 	char *newName, *newScript;
-	// cppcheck-suppress shadowVariable -- local control-flow flag, confirmed unrelated to the global file-dirty flag of the same name
-	BOOL_T changed, nChanged, sChanged;
-	size_t max_str;
 
 	LOG( log_block, 1, ("*** UpdateBlock(): needUndoStart = %d\n",needUndoStart))
 	if ( inx == -1 ) {
+		size_t max_str;
+		// cppcheck-suppress shadowVariable -- local control-flow flag, confirmed unrelated to the global file-dirty flag of the same name
+		BOOL_T changed, nChanged, sChanged;
 		nChanged = sChanged = changed = FALSE;
 		thename = wEntryGetValue( blockDesc[NM].control0 );
 
@@ -318,20 +318,19 @@ static int blockDebug (track_p trk)
 
 static BOOL_T blockCheckContiguousPath()
 {
-	EPINX_T ep, epCnt, epN;
+	EPINX_T ep, epN;
 	int inx;
 	track_p trk, trk1;
 	DIST_T dist;
 	ANGLE_T angle;
 	/*int pathElemStart = 0;*/
-	BOOL_T IsConnectedP;
 	trkEndPt_p endPtP;
 	TempEndPtsReset();
 
 	for ( inx=0; inx<blockTrk_da.cnt; inx++ ) {
 		trk = blockTrk(inx).t;
-		epCnt = GetTrkEndPtCnt(trk);
-		IsConnectedP = FALSE;
+		EPINX_T epCnt = GetTrkEndPtCnt(trk);
+		BOOL_T IsConnectedP = FALSE;
 		for ( ep=0; ep<epCnt; ep++ ) {
 			trk1 = GetTrkEndTrk(trk,ep);
 			if ( trk1 == NULL || !GetTrkSelected(trk1) ) {
@@ -578,11 +577,7 @@ static track_p FindBlock (track_p trk)
 
 static void BlockOk ( void * junk )
 {
-	blockData_p xx,xx1;
 	track_p trk,trk1;
-	wIndex_t iTrack;
-	EPINX_T ep;
-	trkEndPt_p endPtP;
 
 	LOG( log_block, 1, ("*** BlockOk()\n"))
 	DYNARR_RESET( btrackinfo_p *, blockTrk_da );
@@ -628,12 +623,13 @@ static void BlockOk ( void * junk )
 		LOG( log_block, 1, ("*** BlockOk(): %d tracks in block\n",blockTrk_da.cnt))
 		trk = NewTrack(0, T_BLOCK, TempEndPtsCount(),
 		               sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt-1))+1);
+		EPINX_T ep;
 		for ( ep=0; ep<TempEndPtsCount(); ep++) {
-			endPtP = TempEndPt(ep);
+			trkEndPt_p endPtP = TempEndPt(ep);
 			SetTrkEndPoint( trk, ep, GetEndPtPos(endPtP), GetEndPtAngle(endPtP) );
 		}
 
-		xx = GetblockData( trk );
+		blockData_p xx = GetblockData( trk );
 		LOG(log_block, 1, ("*** BlockOk(): trk = %p (%d), xx = %p\n", trk,
 		                   GetTrkIndex(trk), xx))
 		xx->name = MyStrdup(blockName);
@@ -644,12 +640,12 @@ static void BlockOk ( void * junk )
 		if (!trk1) {
 			first_block = trk;
 		} else {
-			xx1 = GetblockData(trk1);
+			blockData_p xx1 = GetblockData(trk1);
 			xx1->next_block = trk;
 		}
 		xx->next_block = NULL;
 		last_block = trk;
-		for (iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++) {
+		for (wIndex_t iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++) {
 			LOG( log_block, 1, ("*** BlockOk(): copying track T%d\n",tracklist(iTrack).i))
 			tracklist(iTrack).i = blockTrk(iTrack).i;
 			tracklist(iTrack).t = blockTrk(iTrack).t;

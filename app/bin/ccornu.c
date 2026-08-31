@@ -585,13 +585,12 @@ BOOL_T CallCornuM(dynArr_t extra_points, BOOL_T end[2], coOrd pos[2],
 
 	Da.bezc = new_bezctx_xtrkcad(array_p,ends,spots,tempD.scale*0.15/4);
 
-	coOrd pos0 = pos[0];
-
 	if (end[0]) {
 		type[0] = SPIRO_OPEN_CONTOUR;
 		type[1] = SPIRO_G2;
 		type[2] = SPIRO_RIGHT;
 		if (cp->radius[0] == 0.0) {
+			coOrd pos0 = pos[0];
 			Translate(&posk[0],pos0,cp->angle[0],10);
 			Translate(&posk[1],pos0,cp->angle[0],5);
 		} else {
@@ -615,13 +614,13 @@ BOOL_T CallCornuM(dynArr_t extra_points, BOOL_T end[2], coOrd pos[2],
 	}
 
 	posk[(end[0]?3:1)+extra_points.cnt] = pos[1];
-	coOrd pos1 = pos[1];
 
 	if (end[1]) {
 		type[(end[0]?3:1)+extra_points.cnt] = SPIRO_LEFT;
 		type[(end[0]?3:1)+extra_points.cnt+1] = SPIRO_G2;
 		type[(end[0]?3:1)+extra_points.cnt+2] = SPIRO_END_OPEN_CONTOUR;
 		if (cp->radius[1] == 0.0) {
+			coOrd pos1 = pos[1];
 			Translate(&posk[(end[0]?3:1)+extra_points.cnt+1],pos1,cp->angle[1],5);
 			Translate(&posk[(end[0]?3:1)+extra_points.cnt+2],pos1,cp->angle[1],10);
 		} else {
@@ -665,11 +664,11 @@ EXPORT BOOL_T CallCornu0(coOrd pos[2], coOrd center[2], ANGLE_T angle[2],
 
 	Da.bezc = new_bezctx_xtrkcad(array_p,ends,spots,tempD.scale*0.15/4);
 
-	coOrd pos0 = pos[0];
 	type[0] = SPIRO_OPEN_CONTOUR;
 
 
 	if (radius[0] == 0.0) {
+		coOrd pos0 = pos[0];
 		Translate(&posk[0],pos0,angle[0],10);
 		Translate(&posk[1],pos0,angle[0],5);
 	} else {
@@ -688,9 +687,8 @@ EXPORT BOOL_T CallCornu0(coOrd pos[2], coOrd center[2], ANGLE_T angle[2],
 	posk[3] = pos[1];
 	type[3] = SPIRO_LEFT;
 
-	coOrd pos1 = pos[1];
-
 	if (radius[1] == 0.0 ) {
+		coOrd pos1 = pos[1];
 		Translate(&posk[4],pos1,angle[1],5);
 		Translate(&posk[5],pos1,angle[1],10);
 	} else {
@@ -1450,10 +1448,9 @@ EXPORT STATUS_T AdjustCornuCurve(
 				}
 			}
 			if(!Da.trk[sel]) {			//Cornu with no end
-				ANGLE_T a, a2;
-				DIST_T d;
 				if (((MyGetKeyState() & WKEY_SHIFT) != 0)
 				    && Da.selectTrack) {   //Extend end locked
+					ANGLE_T a;
 					cornuParm_t cp;
 					SetUpCornuParms(&cp);
 					CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,FALSE);
@@ -1462,7 +1459,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 						Da.extendSeg[sel].lineWidth = 0;
 						Da.extendSeg[sel].color = wDrawColorBlack;
 						Da.extendSeg[sel].u.l.pos[1-sel] = Da.pos[sel];
-						d = FindDistance( Da.extendSeg[sel].u.l.pos[1-sel], pos );
+						DIST_T d = FindDistance( Da.extendSeg[sel].u.l.pos[1-sel], pos );
 						a = NormalizeAngle(Da.angle[sel]-FindAngle(pos,Da.pos[sel]));
 						if (cos(D2R(a))<=0) {
 							Translate( &Da.extendSeg[sel].u.l.pos[sel],
@@ -1479,7 +1476,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 						Da.extendSeg[sel].u.c.radius = Da.radius[sel];
 						a = FindAngle( Da.center[sel], pos );
 						PointOnCircle( &pos, Da.extendSeg[sel].u.c.center, Da.radius[sel], a );
-						a2 = FindAngle(Da.extendSeg[sel].u.c.center,Da.pos[sel]);
+						ANGLE_T a2 = FindAngle(Da.extendSeg[sel].u.c.center,Da.pos[sel]);
 						if (((Da.angle[sel] < 180) && (a2>90 && a2<270)) ||
 						    ((Da.angle[sel] > 180) && (a2<90 || a2>270))) {
 							Da.extendSeg[sel].u.c.a0 = a;
@@ -1531,8 +1528,6 @@ EXPORT STATUS_T AdjustCornuCurve(
 					}
 				}
 			} else {									//Cornu with ends
-				ANGLE_T a, a2;
-				DIST_T d;
 				if (inside) { Da.pos[sel] = pos; }
 				if (!GetConnectedTrackParms(Da.trk[sel],pos,sel,Da.ep[sel],inside?FALSE:TRUE)) {
 					wBeep();
@@ -1540,6 +1535,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 				}
 				CorrectHelixAngles();
 				if (!inside) {										 //Extend the track
+					ANGLE_T a;
 					if (Da.trackType[sel] == curveTypeStraight) {    //Extend with a straight
 						Da.extendSeg[sel].type = SEG_STRTRK;
 						Da.extendSeg[sel].lineWidth = 0;
@@ -1561,7 +1557,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 							Da.pos[sel] = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
 						} else {
 							Da.extend[sel] = TRUE;
-							d = FindDistance( Da.extendSeg[sel].u.l.pos[0], pos );
+							DIST_T d = FindDistance( Da.extendSeg[sel].u.l.pos[0], pos );
 							Translate( &Da.extendSeg[sel].u.l.pos[1],
 							           Da.extendSeg[sel].u.l.pos[0],
 							           Da.angle[sel], -d * cos(D2R(a)));
@@ -1575,7 +1571,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 						Da.extendSeg[sel].u.c.radius = Da.radius[sel];
 						a = FindAngle( Da.center[sel], pos );
 						PointOnCircle( &pos, Da.center[sel], Da.radius[sel], a );
-						a2 = FindAngle(Da.center[sel],GetTrkEndPos(Da.trk[sel],Da.ep[sel]));
+						ANGLE_T a2 = FindAngle(Da.center[sel],GetTrkEndPos(Da.trk[sel],Da.ep[sel]));
 						if ((Da.angle[sel] < 180 && (a2>90 && a2 <270))  ||
 						    (Da.angle[sel] > 180 && (a2<90 || a2 >270))) {
 							Da.extendSeg[sel].u.c.a0 = a2;

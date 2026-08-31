@@ -482,6 +482,19 @@ jobs:
     # readability-*/modernize-* deliberately excluded for now -- expected to
     # be high-volume style-only noise on this legacy C codebase.
     #
+    # bugprone-easily-swappable-parameters also excluded (2026-08-31): ~305
+    # instances, 4th-largest category. SF #734 traced the highest-risk subset
+    # (20 findings where clang-tidy flags parameters of the exact same
+    # declared type, e.g. two coOrd/DIST_T args) to every call site and found
+    # zero real bugs -- all pass arguments in declared order via
+    # identically-named locals/struct fields, or are registered once into a
+    # compiler-enforced function-pointer dispatch table where a swap can't
+    # happen. The remaining ~100 "broader convertible types" instances (two
+    # BOOL_T flags, etc.) were never worth auditing on the same evidence.
+    # Given this check's near-zero real hit rate here against a C codebase
+    # whose calling convention already mitigates the risk it warns about,
+    # filtered out entirely rather than left as permanent unactioned noise.
+    #
     # Vendored-code exclusion list (quality-plan-gtk3v2main-part2.md Phase 8):
     # the `find app/bin app/dynstring app/cornu app/help app/tools` root list
     # never reaches app/wlib/gtk3lib/wrapbox/ or app/tools/halibut/ (deleted,
@@ -515,7 +528,16 @@ jobs:
           # exceed the 139 filename arguments below by a couple as a result. That's expected, not
           # a sign of a duplicate/broken entry.
           mapfile -t FILES < <(find app/bin app/dynstring app/cornu app/help app/tools -name "*.c" | grep -v unittest | grep -vE 'bdf2xtp\.c|helphelper\.c|ppedit_gtk1\.c|app/tools/dirent\.c')
-          clang-tidy --checks='-*,bugprone-*,performance-*,portability-*' -p build "${FILES[@]}" > clang-tidy.txt 2>&1 || true
+          # --header-filter='.*/app/' matters beyond style: without it, clang-tidy
+          # reports on every system header (GTK/glib/atk from /usr/include, pulled
+          # in via plain -I not -isystem so clang-tidy's own default system-header
+          # exclusion doesn't apply to them) as if it were our own code -- 2161 of
+          # 3019 raw findings (72%, 2026-08-31 measurement) were unfixable noise
+          # from headers this project doesn't own. Verified this drops exactly
+          # that 2161 with 858 of 859 real project findings surviving untouched
+          # (the 1-finding gap is measurement noise between two ad hoc runs, not
+          # lost data).
+          clang-tidy --header-filter='.*/app/' --checks='-*,bugprone-*,performance-*,portability-*,-bugprone-easily-swappable-parameters' -p build "${FILES[@]}" > clang-tidy.txt 2>&1 || true
           # compile_commands.json stores absolute paths, so clang-tidy emits
           # diagnostics as e.g. "/home/runner/work/XTrkCAD/XTrkCAD/app/bin/foo.c:12:...".
           # Strip the workspace prefix so this artifact's paths stay repo-relative,

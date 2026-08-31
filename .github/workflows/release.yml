@@ -496,8 +496,11 @@ jobs:
         run: |
           # See ci-gtk3.yml's matching job: utility.c/misc.c are each legitimately compiled twice
           # (two targets), so clang-tidy's "[N/139]" counter can exceed 139 -- expected, not a bug.
+          # --header-filter='.*/app/' rationale also in that job's comment (kept in sync by hand):
+          # without it, system headers (GTK/glib/atk) pulled in via plain -I dominate the report
+          # with unfixable noise -- 72% of raw findings, 2026-08-31 measurement.
           mapfile -t FILES < <(find app/bin app/dynstring app/cornu app/help app/tools -name "*.c" | grep -v unittest | grep -vE 'bdf2xtp\.c|helphelper\.c|ppedit_gtk1\.c|app/tools/dirent\.c')
-          clang-tidy --checks='-*,bugprone-*,performance-*,portability-*' -p build "${FILES[@]}" > clang-tidy.txt 2>&1 || true
+          clang-tidy --header-filter='.*/app/' --checks='-*,bugprone-*,performance-*,portability-*,-bugprone-easily-swappable-parameters' -p build "${FILES[@]}" > clang-tidy.txt 2>&1 || true
           # compile_commands.json stores absolute paths, so clang-tidy emits
           # diagnostics as e.g. "/home/runner/work/XTrkCAD/XTrkCAD/app/bin/foo.c:12:...".
           # format-findings-report.sh expects repo-relative paths (like
@@ -587,7 +590,9 @@ jobs:
     # Inventory of every cppcheck-suppress/NOLINT(NEXTLINE) comment in
     # app/bin, split into boilerplate (generic "confirmed via broad
     # sampling" reasoning from a prior bulk-approval pass) vs. specific
-    # (individualized reasoning) vs. unreasoned (no "--" reason at all).
+    # (individualized reasoning) vs. unreasoned (no reason found at all,
+    # checking inline "-- reason" text, a same-line trailing block comment,
+    # and comment lines immediately following the suppress line).
     # A boilerplate suppress is the one most likely to be hiding a fully
     # removable case -- see SF #749's ccornu.c `ep` discovery, found only
     # because that one happened to get individually re-traced. Answers

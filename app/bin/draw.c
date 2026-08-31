@@ -601,11 +601,11 @@ EXPORT void MainLayout(wBool_t bRedraw, wBool_t bNoBorder)
 wBool_t MainProc(wControl_p win, winProcEvent e, const void *refresh,
                  void *data)
 {
-	static int cMP = 0;
 	wWinPix_t width, height;
 	switch (e) {
 
-	case wResize_e:
+	case wResize_e: {
+		static int cMP = 0;
 		if (mainD.d == NULL) {
 			return FALSE;
 		}
@@ -651,6 +651,7 @@ wBool_t MainProc(wControl_p win, winProcEvent e, const void *refresh,
 			MapDrawBoundingBox(TRUE);
 		}
 		break;
+	}
 	case wState_e:
 		wPrefSetInteger("draw", "maximized", wWinIsMaximized(win));
 		break;
@@ -923,11 +924,10 @@ void DoNewScale(DIST_T scale)
 EXPORT void DoZoomUp(const void *mode)
 {
 	long newScale;
-	int i;
 
 	LOG(log_zoom, 2, ("DoZoomUp KS:%x\n", MyGetKeyState()));
 	if (mode != NULL || (MyGetKeyState() & WKEY_SHIFT) == 0) {
-		i = ScaleInx(mainD.scale);
+		int i = ScaleInx(mainD.scale);
 		if (i < 0) {
 			i = NearestScaleInx(mainD.scale, FALSE);
 		}
@@ -1040,11 +1040,10 @@ EXPORT void DoZoomExtents(void *mode)
 EXPORT void DoZoomDown(const void *mode)
 {
 	long newScale;
-	int i;
 
 	LOG(log_zoom, 2, ("DoZoomDown KS:%x\n", MyGetKeyState()));
 	if (mode != NULL || (MyGetKeyState() & WKEY_SHIFT) == 0) {
-		i = ScaleInx(mainD.scale);
+		int i = ScaleInx(mainD.scale);
 		if (i < 0) {
 			i = NearestScaleInx(mainD.scale, TRUE);
 		}
@@ -1407,8 +1406,8 @@ static void DoMouse(wAction_t action, coOrd pos)
 		    mousePositiony < bborder || mousePositiony > hh_z - TBORDER) {
 			break;
 		}
-		coOrd anchor = pos;
 		{
+			coOrd anchor = pos;
 			DIST_T oldScale = mainD.scale;
 			int idx = ScaleInx(oldScale);
 			if (idx < 0) { idx = NearestScaleInx(oldScale, FALSE); }
@@ -1458,8 +1457,8 @@ static void DoMouse(wAction_t action, coOrd pos)
 		    mousePositiony < bborder || mousePositiony > hh_z2 - TBORDER) {
 			break;
 		}
-		coOrd anchor = pos;
 		{
+			coOrd anchor = pos;
 			DIST_T oldScale = mainD.scale;
 			int idx = ScaleInx(oldScale);
 			if (idx < 0) { idx = NearestScaleInx(oldScale, TRUE); }
@@ -1589,12 +1588,10 @@ static void DoMousew(wDraw_p d, void *context, wAction_t action, wDrawPix_t x,
                      wDrawPix_t y)
 {
 	coOrd pos;
-	coOrd orig;
 	wWinPix_t w, h;
-	static wDrawPix_t lastX, lastY;
-	DIST_T minDist;
 	wDrawGetSize(mainD.d, &w, &h);
 	if (autoPan && !inPlayback) {
+		static wDrawPix_t lastX, lastY;
 		if ( action == wActionLDown || action == wActionRDown
 		     || action == wActionScrollDown ||
 		     (action == wActionLDrag && mouseState == mouseLeftPending)) {
@@ -1602,7 +1599,7 @@ static void DoMousew(wDraw_p d, void *context, wAction_t action, wDrawPix_t x,
 			lastY = y;
 		}
 		if (action == wActionLDrag || action == wActionRDrag) {
-			orig = mainD.orig;
+			coOrd orig = mainD.orig;
 			if ((x < 10 && x < lastX) || (x > w - 10 && x > lastX) ||
 			    (y < 10 && y < lastY) || (y > h - 10 && y > lastY)) {
 				mainD.Pix2CoOrd(&mainD, x, y, &pos);
@@ -1614,6 +1611,7 @@ static void DoMousew(wDraw_p d, void *context, wAction_t action, wDrawPix_t x,
 				        (pos.y - (mainD.orig.y + mainD.size.y / 2.0)) / autoPanFactor;
 				if (orig.x != mainD.orig.x || orig.y != mainD.orig.y) {
 					if (mainD.scale >= 1) {
+						DIST_T minDist;
 						if (units == UNITS_ENGLISH) {
 							minDist = 1.0;
 						} else {
@@ -1858,7 +1856,7 @@ static STATUS_T CmdPan(wAction_t action, coOrd pos)
 
 	static coOrd base, size;
 
-	DIST_T scale_x, scale_y;
+	DIST_T scale_x;
 
 	static coOrd start_pos;
 	if (action == C_DOWN) {
@@ -1944,7 +1942,7 @@ static STATUS_T CmdPan(wAction_t action, coOrd pos)
 				break;
 			}
 			scale_x = size.x / mainD.size.x * mainD.scale;
-			scale_y = size.y / mainD.size.y * mainD.scale;
+			DIST_T scale_y = size.y / mainD.size.y * mainD.scale;
 
 			if (scale_x < scale_y) {
 				scale_x = scale_y;

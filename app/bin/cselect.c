@@ -477,14 +477,13 @@ EXPORT void OrphanedTrackSelect( void *ptr )
 {
 	track_p trk;
 	EPINX_T ep;
-	int cnt ;
 
 	trk = NULL;
 
 	while( TrackIterate( &trk ) ) {
-		cnt = 0;
 		if( GetLayerVisible( GetTrkLayer( trk ) && !GetLayerModule(GetTrkLayer(trk))
 		                     && !GetLayerFrozen(GetTrkLayer(trk)))) {
+			int cnt = 0;
 			for( ep = 0; ep < GetTrkEndPtCnt( trk ); ep++ ) {
 				if( GetTrkEndTrk( trk, ep ) ) {
 					cnt++;
@@ -804,7 +803,6 @@ BOOL_T flipHiddenDoSelectRecount;
 static BOOL_T FlipHidden( track_p trk, BOOL_T unused )
 {
 	EPINX_T i;
-	track_p trk2;
 
 	DrawTrackAndEndPts( trk, wDrawColorWhite );
 	/*UndrawNewTrack( trk );
@@ -827,7 +825,7 @@ static BOOL_T FlipHidden( track_p trk, BOOL_T unused )
 	/*DrawNewTrack( trk );*/
 	DrawTrackAndEndPts( trk, wDrawColorBlack );
 	for (i=0; i<GetTrkEndPtCnt(trk); i++) {
-		trk2=GetTrkEndTrk(trk,i);
+		track_p trk2=GetTrkEndTrk(trk,i);
 		if (trk2 != NULL) {
 			UndoModify( trk2 );
 			/*DrawNewTrack( trk2 );*/
@@ -1111,11 +1109,10 @@ EXPORT void WriteSelectedTracksToTempSegs( void )
 static void DrawSelectedTracksD( drawCmd_p d, wDrawColor color )
 {
 	wIndex_t inx;
-	track_p trk;
 	coOrd lo, hi;
 	/*wDrawDelayUpdate( d->d, TRUE );*/
 	for (inx=0; inx<tlist_da.cnt; inx++) {
-		trk = Tlist(inx);
+		track_p trk = Tlist(inx);
 		if (d != &mapD) {
 			GetBoundingBox( trk, &hi, &lo );
 			if ( OFF_D( d->orig, d->size, lo, hi ) ) {
@@ -1215,13 +1212,12 @@ static int movedCnt;
 static void AccumulateTracks( void )
 {
 	wIndex_t inx;
-	track_p trk;
 	coOrd lo, hi;
 
 	/*wDrawDelayUpdate( moveD.d, TRUE );*/
 	movedCnt =0;
 	for ( inx = 0; inx<tlist_da.cnt; inx++ ) {
-		trk = Tlist(inx);
+		track_p trk = Tlist(inx);
 		if (trk) {
 			GetBoundingBox( trk, &hi, &lo );
 			if (lo.x <= moveD_hi.x && hi.x >= moveD_lo.x &&
@@ -1259,9 +1255,8 @@ static void AddEndCornus()
 
 static void RemoveEndCornus()
 {
-	track_p tc;
 	for (int i=0; i<auto_select_da.cnt; i++) {
-		tc = DYNARR_N(track_p,auto_select_da,i);
+		track_p tc = DYNARR_N(track_p,auto_select_da,i);
 		SelectOneTrack( tc, FALSE );
 		RemoveSelectedTrack(tc);
 	}
@@ -1290,8 +1285,6 @@ static void GetMovedTracks( BOOL_T undraw )
 
 static void SetMoveD( BOOL_T moveB, coOrd orig, ANGLE_T angle )
 {
-	int inx;
-
 	moveOrig.x = orig.x;
 	moveOrig.y = orig.y;
 	moveAngle = angle;
@@ -1315,7 +1308,7 @@ static void SetMoveD( BOOL_T moveB, coOrd orig, ANGLE_T angle )
 		moveD_hi = mainD.orig;
 		Rotate( &moveD_hi, orig, -angle );
 		moveD_lo = moveD_hi;
-		for (inx=0; inx<3; inx++) {
+		for (int inx=0; inx<3; inx++) {
 			Rotate( &corner[inx], orig, -angle );
 			if (corner[inx].x < moveD_lo.x) {
 				moveD_lo.x = corner[inx].x;
@@ -1352,11 +1345,11 @@ static void DrawMovedTracks( void )
 		if (QueryTrack(trk,Q_IS_CORNU)) {
 			DYNARR_RESET(trkSeg_t,cornu_segs);
 			coOrd pos[2];
-			DIST_T radius[2];
-			ANGLE_T angle[2];
 			coOrd center[2];
 			trackParams_t trackParams;
 			if (GetTrackParams(PARAMS_CORNU, trk, zero, &trackParams)) {
+				DIST_T radius[2];
+				ANGLE_T angle[2];
 				for (int i=0; i<2; i++) {
 					pos[i] = trackParams.cornuEnd[i];
 					center[i] = trackParams.cornuCenter[i];
@@ -2308,9 +2301,9 @@ static STATUS_T CmdRotate(
 			break;
 		}
 		if ( rotateAlignState != 2 ) {
-			DIST_T width = tempD.scale*0.15;
 			DrawLine( &tempD, base, orig, 0, wDrawColorBlue );
 			if (drawnAngle) {
+				DIST_T width = tempD.scale*0.15;
 				DrawLine( &tempD, orig_base, orig, (wDrawWidth)width/2, wDrawColorBlue );
 				ANGLE_T a = DifferenceBetweenAngles(FindAngle(orig, orig_base),FindAngle(orig,
 				                                    base));
@@ -2974,7 +2967,6 @@ static BOOL_T SelectArea(
 	static coOrd base, size, lo, hi;
 	static BOOL_T add;
 	static BOOL_T subtract;
-	int cnt;
 
 	track_p trk;
 
@@ -3017,7 +3009,7 @@ static BOOL_T SelectArea(
 			state = 0;
 			add = (action == C_UP);
 			subtract = (action == C_RUP);
-			cnt = 0;
+			int cnt = 0;
 			trk = NULL;
 			if (add && (selectMode == 0)) {
 				SetAllTrackSelect( FALSE );    //Remove all tracks first
