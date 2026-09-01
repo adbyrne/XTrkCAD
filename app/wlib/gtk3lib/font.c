@@ -73,7 +73,7 @@ static wFont_p curFont = NULL;
 /**
  * Callback for font selection dialog
  *
- * \param fontSelectionDialog IN dialog
+ * \param thisfontSelectionDialog IN dialog
  * \param response IN response code from dialog
  * \param attributes IN unused
  */

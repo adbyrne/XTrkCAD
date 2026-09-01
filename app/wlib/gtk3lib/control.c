@@ -210,9 +210,8 @@ void wControlSetFocus(
 
 /**
  * Highlight a control by giving it a colored frame.
- * \param b IN the control
+ * \param control IN the control
  * \param hilite IN TRUE for highlighting on, FALSE off
- * \returns
  */
 
 void wControlHilite(

@@ -525,8 +525,7 @@ void wMenuToggleEnable(
 
 /*-----------------------------------------------------------------*/
 
-/**
- * Set the text for a menu
+/* Set the text for a menu (unimplemented, kept commented out)
  *
  * \param m 		IN menu entry
  * \param labelStr 	IN new text
