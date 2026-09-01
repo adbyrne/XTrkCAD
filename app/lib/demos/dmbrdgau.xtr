@@ -1,0 +1,37 @@
+# SF #767 regression demo: bridge parapet must use the track's own gauge,
+# not whatever gauge is currently selected for creating new track.
+VERSION 10
+DEMOINIT
+ORIG 8.000 0.000 0.000
+STRAIGHT 1 0 0 0 0 N 10
+	E4 0.000000 0.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	T4 2 10.000000 0.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	END
+STRAIGHT 2 0 0 0 0 N 2
+	T4 1 10.000000 0.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	E4 20.000000 0.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	END
+SCALE HO
+REDRAW
+RESET
+MESSAGE
+Track 1 is N scale and marked as a Bridge; Track 2 (N scale, not a
+Bridge) is connected to it. The currently-selected scale for creating
+new track is HO -- deliberately different from these tracks' own N
+scale, to reproduce SF #767 (DrawEndPt()'s bridge parapet must use the
+track's own gauge, not the current scale's).
+END
+STEP
+REGRESSION START 12  - bridge gauge mismatch
+# demos/dmbrdgau.xtr - 25
+STRAIGHT 1 0 0 0 0 N 10 0.000000 0.000000
+	E4 0.000000 0.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	T4 2 10.000000 0.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	END$SEGS
+STRAIGHT 2 0 0 0 0 N 2 0.000000 0.000000
+	T4 1 10.000000 0.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	E4 20.000000 0.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	END$SEGS
+REGRESSION END
+STEP
+CLEAR
