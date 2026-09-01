@@ -1047,43 +1047,42 @@ static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos,
 		DYNARR_RESET(coOrd,params->nodes);
 		// Load out the points in order from bezierPoint[0] to bezierPoint[3]
 		for (int i = 0; i<xx->arcSegs.cnt; i++) {
-			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-			trkSeg_p segPtr = &DYNARR_N(trkSeg_t,xx->arcSegs,i);
-			if (segPtr->type == SEG_STRLIN) {
-				BOOL_T eps = FindDistance(segPtr->u.l.pos[0],
-				                          curr_pos)>FindDistance(segPtr->u.l.pos[1],curr_pos);
+			trkSeg_p nodeSegPtr = &DYNARR_N(trkSeg_t,xx->arcSegs,i);
+			if (nodeSegPtr->type == SEG_STRLIN) {
+				BOOL_T eps = FindDistance(nodeSegPtr->u.l.pos[0],
+				                          curr_pos)>FindDistance(nodeSegPtr->u.l.pos[1],curr_pos);
 				if (first) {
 					first = FALSE;
 					DYNARR_APPEND(coOrd,params->nodes,1);
-					DYNARR_LAST(coOrd,params->nodes) = segPtr->u.l.pos[eps];
+					DYNARR_LAST(coOrd,params->nodes) = nodeSegPtr->u.l.pos[eps];
 				}
 				DYNARR_APPEND(coOrd,params->nodes,1);
-				DYNARR_LAST(coOrd,params->nodes) = segPtr->u.l.pos[1-eps];
+				DYNARR_LAST(coOrd,params->nodes) = nodeSegPtr->u.l.pos[1-eps];
 			} else {
 				coOrd start,end;
-				Translate(&start,segPtr->u.c.center,segPtr->u.c.a0,fabs(segPtr->u.c.radius));
-				Translate(&end,segPtr->u.c.center,segPtr->u.c.a0+segPtr->u.c.a1,
-				          fabs(segPtr->u.c.radius));
+				Translate(&start,nodeSegPtr->u.c.center,nodeSegPtr->u.c.a0,
+				          fabs(nodeSegPtr->u.c.radius));
+				Translate(&end,nodeSegPtr->u.c.center,nodeSegPtr->u.c.a0+nodeSegPtr->u.c.a1,
+				          fabs(nodeSegPtr->u.c.radius));
 				//Is this segment reversed in the curve?
-				// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-				BOOL_T back = FindDistance(start,curr_pos)>FindDistance(end,curr_pos);
-				if (segPtr->u.c.radius > 0.5) {
+				BOOL_T segReversed = FindDistance(start,curr_pos)>FindDistance(end,curr_pos);
+				if (nodeSegPtr->u.c.radius > 0.5) {
 					double min_angle = 360*acos(1.0-(0.1/fabs(
-					                segPtr->u.c.radius)))/M_PI;    //Error max is 0.1"
-					double number = ceil(segPtr->u.c.a1/min_angle);
-					double arc_size = segPtr->u.c.a1/number;
-					if (back) {
+					                nodeSegPtr->u.c.radius)))/M_PI;    //Error max is 0.1"
+					double number = ceil(nodeSegPtr->u.c.a1/min_angle);
+					double arc_size = nodeSegPtr->u.c.a1/number;
+					if (segReversed) {
 						//If back, list sub-points in reverse. If first show first position, else skip
 						for (int j=(((int)number)-(1-first)); j>=0; j--) {
 							DYNARR_APPEND(coOrd,params->nodes,((int)number));
-							Translate(&DYNARR_LAST(coOrd,params->nodes),segPtr->u.c.center,
-							          segPtr->u.c.a0+j*arc_size,fabs(segPtr->u.c.radius) );
+							Translate(&DYNARR_LAST(coOrd,params->nodes),nodeSegPtr->u.c.center,
+							          nodeSegPtr->u.c.a0+j*arc_size,fabs(nodeSegPtr->u.c.radius) );
 						}
 					} else {
 						for (int j=(1-first); j<=number; j++) {
 							DYNARR_APPEND(coOrd,params->nodes,((int)number));
-							Translate(&DYNARR_LAST(coOrd,params->nodes),segPtr->u.c.center,
-							          segPtr->u.c.a0+j*arc_size,fabs(segPtr->u.c.radius) );
+							Translate(&DYNARR_LAST(coOrd,params->nodes),nodeSegPtr->u.c.center,
+							          nodeSegPtr->u.c.a0+j*arc_size,fabs(nodeSegPtr->u.c.radius) );
 						}
 					}
 					first = FALSE;
@@ -1091,10 +1090,10 @@ static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos,
 					if (first) {
 						first = FALSE;
 						DYNARR_APPEND(coOrd,params->nodes,1);
-						DYNARR_LAST(coOrd,params->nodes) = back?end:start;
+						DYNARR_LAST(coOrd,params->nodes) = segReversed?end:start;
 					}
 					DYNARR_APPEND(coOrd,params->nodes,1);
-					DYNARR_LAST(coOrd,params->nodes) = back?start:end;
+					DYNARR_LAST(coOrd,params->nodes) = segReversed?start:end;
 				}
 			}
 			curr_pos = DYNARR_LAST(coOrd,params->nodes);
@@ -1246,16 +1245,15 @@ BOOL_T GetTracksFromBezierSegment(trkSeg_p bezSeg, track_p newTracks[2],
 		CopyAttributes( trk, new_trk );
 		newTracks[1] = new_trk;
 		if (trk_old) {
-			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-			for (int i=0; i<2; i++) {
-				if (GetTrkEndTrk(trk_old,i)==NULL) {
-					coOrd pos = GetTrkEndPos(trk_old,i);
+			for (int epi=0; epi<2; epi++) {
+				if (GetTrkEndTrk(trk_old,epi)==NULL) {
+					coOrd pos = GetTrkEndPos(trk_old,epi);
 					EPINX_T ep_n = PickUnconnectedEndPoint(pos,new_trk);
-					if ((connectDistance >= FindDistance(GetTrkEndPos(trk_old,i),
+					if ((connectDistance >= FindDistance(GetTrkEndPos(trk_old,epi),
 					                                     GetTrkEndPos(new_trk,ep_n))) &&
-					    (connectAngle >= fabs(DifferenceBetweenAngles(GetTrkEndAngle(trk_old,i),
+					    (connectAngle >= fabs(DifferenceBetweenAngles(GetTrkEndAngle(trk_old,epi),
 					                          GetTrkEndAngle(new_trk,ep_n)+180))) ) {
-						ConnectTracks(trk_old,i,new_trk,ep_n);
+						ConnectTracks(trk_old,epi,new_trk,ep_n);
 						break;
 					}
 				}
@@ -2026,13 +2024,12 @@ static double BezierCurvature(coOrd p[4], double t, coOrd * center)
  */
 static double BezierMaxCurve(coOrd p[4])
 {
-	// cppcheck-suppress shadowFunction -- local variable name coincides with a library/project function of the same name -- zero functional risk
-	double max = 0;
+	double maxCurve = 0;
 	for (int t = 0; t<100; t++) {
 		double curv = BezierCurvature(p, t/100, NULL);
-		if (max<curv) { max = curv; }
+		if (maxCurve<curv) { maxCurve = curv; }
 	}
-	return max;
+	return maxCurve;
 }
 
 /**

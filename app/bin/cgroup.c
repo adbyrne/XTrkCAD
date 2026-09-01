@@ -259,22 +259,21 @@ EXPORT void UngroupCompound(
 		memset( &segTrack(0), 0, segCnt * sizeof segTrack(0) );
 		for ( ep=0; ep<epCnt; ep++ ) {
 			epp = TempEndPt(ep);
-			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-			coOrd pos = GetTrkEndPos( trk, ep );
-			Rotate( &pos, xx->orig, -xx->angle );
-			pos.x -= xx->orig.x;
-			pos.y -= xx->orig.y;
-			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-			ANGLE_T angle = GetTrkEndAngle( trk, ep );
+			coOrd epPos = GetTrkEndPos( trk, ep );
+			Rotate( &epPos, xx->orig, -xx->angle );
+			epPos.x -= xx->orig.x;
+			epPos.y -= xx->orig.y;
+			ANGLE_T epAngle = GetTrkEndAngle( trk, ep );
 			track_p trk1 = GetTrkEndTrk( trk, ep );
 			EPINX_T ep1;
 			ep1 = trk1 ? GetEndPtConnectedToMe( trk1, trk ) : -1 ;
-			SetEndPt( epp, pos, angle );
+			SetEndPt( epp, epPos, epAngle );
 			SetEndPtTrack( epp, trk1 );
 			// Remember what EP on trk1 was connecting to me
 			SetEndPtEndPt( epp, ep1 );
-			LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, pos.x, pos.y,
-			                     angle, trk1?GetTrkIndex(trk1):-1, ep1 ) );
+			LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epPos.x,
+			                     epPos.y,
+			                     epAngle, trk1?GetTrkIndex(trk1):-1, ep1 ) );
 		}
 
 		/* 3: Count number of times each segment is referenced
@@ -1412,11 +1411,10 @@ static void GroupOk( void * unused )
 			}
 			LogPrintf( "  Path\n" );
 			for ( int inx=0; inx<path_da.cnt; inx++ ) {
-				// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-				path_p pp  = &path(inx);
+				path_p logPp  = &path(inx);
 				LogPrintf( "    %d: PE: %d-%d, EP: %d-%d, Conf: %d, InGrp: %s, Done: %s\n",
-				           inx, pp->pathElemStart, pp->pathElemEnd, pp->ep1, pp->ep2,
-				           pp->conflicts, pp->inGroup?"T":"F", pp->done?"T":"F" );
+				           inx, logPp->pathElemStart, logPp->pathElemEnd, logPp->ep1, logPp->ep2,
+				           logPp->conflicts, logPp->inGroup?"T":"F", logPp->done?"T":"F" );
 			}
 		}
 		/*

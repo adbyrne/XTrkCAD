@@ -1075,33 +1075,32 @@ static void Rgb2hsv(
         hsv_t	*hsv )
 {
 	FLOAT_T r, g, b;
-	// cppcheck-suppress shadowFunction -- local variable name coincides with a library/project function of the same name -- zero functional risk
-	FLOAT_T max, min;
+	FLOAT_T rgbMax, rgbMin;
 
 	r = ((rgb>>16)&0xFF)/255.0;
 	g = ((rgb>>8)&0xFF)/255.0;
 	b = ((rgb)&0xFF)/255.0;
 
-	max = r;
-	if (g > max) {
-		max = g;
+	rgbMax = r;
+	if (g > rgbMax) {
+		rgbMax = g;
 	}
-	if (b > max) {
-		max = b;
-	}
-
-	min = r;
-	if (g < min) {
-		min = g;
-	}
-	if (b < min) {
-		min = b;
+	if (b > rgbMax) {
+		rgbMax = b;
 	}
 
-	hsv->v = max;
+	rgbMin = r;
+	if (g < rgbMin) {
+		rgbMin = g;
+	}
+	if (b < rgbMin) {
+		rgbMin = b;
+	}
 
-	if (max != 0.0) {
-		hsv->s = (max - min) / max;
+	hsv->v = rgbMax;
+
+	if (rgbMax != 0.0) {
+		hsv->s = (rgbMax - rgbMin) / rgbMax;
 	} else {
 		hsv->s = 0.0;
 	}
@@ -1109,13 +1108,13 @@ static void Rgb2hsv(
 	if (hsv->s == 0.0) {
 		hsv->h = -1.0;
 	} else {
-		FLOAT_T delta = max - min;
+		FLOAT_T delta = rgbMax - rgbMin;
 
-		if (r == max) {
+		if (r == rgbMax) {
 			hsv->h = (g - b) / delta;
-		} else if (g == max) {
+		} else if (g == rgbMax) {
 			hsv->h = 2.0 + (b - r) / delta;
-		} else if (b == max) {
+		} else if (b == rgbMax) {
 			hsv->h = 4.0 + (r - g) / delta;
 		}
 
