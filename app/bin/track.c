@@ -3174,8 +3174,8 @@ EXPORT void DrawEndPt(
 		Translate(&p0,p,a,trkGauge * 1.5);
 		Translate(&p1,p0,a - 45.0,trkGauge * 1.5);
 		DrawLine(d,p0,p1,width2,color);
-		Translate(&p0,p,a,-trackGauge * 1.5);
-		Translate(&p1,p0,a + 45.0,-trackGauge * 1.5);
+		Translate(&p0,p,a,-trkGauge * 1.5);
+		Translate(&p1,p0,a + 45.0,-trkGauge * 1.5);
 		DrawLine(d,p0,p1,width2,color);
 	}
 }
