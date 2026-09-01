@@ -54,31 +54,18 @@ void wMessageSetValue(
 {
 	g_assert(b != NULL);
 
-	gtk_label_set_text(GTK_LABEL(b->widget), wlibConvertInput(arg));
+	if(arg &&b->widget) {
+		gtk_label_set_text(GTK_LABEL(b->widget), wlibConvertInput(arg));
+	}
 }
-
-/**
- * Set the width of the widget
- *
- * \param b IN widget
- * \param width IN  new width
- */
-
-void wMessageSetWidth(
-        wControl_p b,
-        wWinPix_t width)
-{
-	g_assert(b != NULL);
-
-	gtk_widget_set_size_request(b->widget, width, -1);
-}
-
 
 void wMessageSetLength(wControl_p control, size_t length)
 {
 	g_assert(control != NULL);
 
-	gtk_label_set_width_chars(GTK_LABEL(control->widget), (int)length);
+	if(control->widget) {
+		gtk_label_set_width_chars(GTK_LABEL(control->widget), (int)length);
+	}
 }
 
 /**
@@ -229,5 +216,3 @@ wControl_p wMessageCreateEx(
 
 	return b;
 }
-
-

@@ -136,8 +136,8 @@ void wlibLineShow(
  * \param lines IN list of line coordinates
  * \return handle of new window
  *
- * \todo At the moment the widget is not connected to any widget so can't be
- * drawn on screen. Check implementation and necessity
+ * \todo As at 5.4.0 lines are only used to draw a page outing in print
+ * margins. By using a frame there this control could be removed.
  */
 
 wLine_p wLineCreate(

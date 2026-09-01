@@ -127,7 +127,7 @@ void* MRUAppendEntry(MRUList* list, const char* label, void* entry)
 }
 
 /**
- * get most recent entry.
+ * get most recent entry. Unused but might become helpful.
  *
  * \param list  list handle
  * \return      user pointer

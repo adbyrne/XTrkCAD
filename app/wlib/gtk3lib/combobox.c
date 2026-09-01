@@ -41,6 +41,7 @@ extern int iDebugList;
 /* define the column count for the tree model */
 #define COMBOBOX_TEXTCOLUMNS 1
 
+static int ComboBoxChanged(GtkComboBox *comboBox, gpointer attributes);
 
 /**
  * Show the context columns in the combobox. If combobox has an entry field
@@ -91,7 +92,6 @@ wlibComboBoxAddColumns(GtkWidget *comboBox, int columns)
 wIndex_t wComboBoxGetCount(wControl_p b)
 {
 	return b->attributes.list.count;
-//	return (gtk_tree_model_iter_n_children(GTK_TREE_MODEL(b->attributes.list.treeView), NULL));
 }
 
 /**
@@ -205,8 +205,6 @@ void wListSetValue(
 	}
 }
 
-static int ComboBoxChanged(GtkComboBox *comboBox, gpointer attributes);
-
 /**
  * Makes the \a val'th entry (0-origin) the current selection.
  * If \a val is '-1' then no entry is selected.
@@ -215,34 +213,6 @@ static int ComboBoxChanged(GtkComboBox *comboBox, gpointer attributes);
  * \param val	IN the index
  *
  */
-
-// 	void wComboBoxSetIndex(wControl_p b, int val)
-// {
-//     GtkComboBox *combo = GTK_COMBO_BOX(b->widget);
-
-//     /* Force update even when the active index is unchanged */
-//     gtk_combo_box_set_active(combo, -1);
-//     gtk_combo_box_set_active(combo, val);
-
-//     /* For has-entry comboboxes, make sure the entry text reflects the row */
-//     if (val >= 0 && gtk_combo_box_get_has_entry(combo)) {
-//         GtkTreeIter iter;
-//         struct list *lcontrol = CONTROL_GET_ATTRIBUTES_PTR(b, list);
-//         if (gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(lcontrol->listStore),
-//                                           &iter, NULL, val)) {
-//             gchar *text = NULL;
-//             gtk_tree_model_get(GTK_TREE_MODEL(lcontrol->listStore), &iter,
-//                                LISTCOL_TEXT, &text, -1);
-//             if (text) {
-//                 GtkEntry *entry = GTK_ENTRY(gtk_bin_get_child(GTK_BIN(b->widget)));
-//                 if (entry) {
-//                     gtk_entry_set_text(entry, text);
-//                 }
-//                 g_free(text);
-//             }
-//         }
-//     }
-// }
 
 void wComboBoxSetIndex(wControl_p b, int val)
 {
@@ -306,8 +276,6 @@ wBool_t wComboBoxSetValues(
  * \param comboBox  IN the combobox
  * \param attributes      IN user context / pointer to the control
  * \return
- *
- * \todo Refactor !!
  */
 
 static int ComboBoxChanged(
@@ -467,38 +435,6 @@ wlibNewComboBox(GtkListStore *ls, int editable)
 	return (widget);
 }
 
-#ifdef TODO_UNUSED
-/**
- * Signal handler for the "changed"-signal in combobox's entry field.
- * Get the entered text and calls the 'action' for handling of entered
- * value.
- * *
- * \param entry	IN entry field of the combobox
- * \param context	IN pointer to control
- * \return
- */
-
-static void ComboBoxEntryEntered(
-        GtkEntry *entry,
-        gpointer userData)
-{
-	const gchar *text;
-	wControl_p c = userData;
-	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(c, list);
-
-	text = gtk_entry_get_text(entry);
-
-	if (text && *text != '\0') {
-		gchar *copyOfText = g_strdup(text);
-		lcontrol->editted = TRUE;
-		lcontrol->action(-1, copyOfText, 1, ((wControl_p)userData)->context, NULL);
-		g_free((gpointer)copyOfText);
-	} else {
-		wBeep();
-	}
-}
-#endif
-
 /**
  * Create a combobox. The combobox is created having one text column.
  *
@@ -585,11 +521,6 @@ wControl_p wComboBoxCreate(
 			abort();
 		}
 
-
-		// combo's style
-		//gtk_rc_parse_string("style \"my-style\" { GtkComboBox::appears-as-list = 1 } widget \"*.mycombo\" style \"my-style\"  ");
-		// gtk_widget_set_name(b->widget, "mycombo");
-
 		wlibBasicGridAttach(parent, b->widget, x, y, width, 1);
 
 		if (labelStr) {
@@ -630,7 +561,6 @@ wControl_p wComboBoxCreate(
 		                 G_CALLBACK(ComboBoxFocusOut), b);
 	}
 
-//	wlibAddTooltip(b->widget, parent->name, helpStr);
 	return b;
 }
 

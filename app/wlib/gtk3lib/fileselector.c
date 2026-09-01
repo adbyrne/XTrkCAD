@@ -1,4 +1,3 @@
-#include "wlib.h"
 /** \file fileselector.c
  * Create and handle file selectors
  */
@@ -27,10 +26,10 @@
 #define GSEAL_ENABLE
 
 #include <gtk/gtk.h>
+
+#include "wlib.h"
 #include "gtkint.h"
 #include "i18n.h"
-
-
 
 struct wFilSel_t {
 	wType_e type;                       /**< */

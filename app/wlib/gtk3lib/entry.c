@@ -69,20 +69,6 @@ void wEntrySetValue(
 }
 
 /**
- * Set the width of the entry field
- *
- * \param b 	IN widget to be updated
- * \param w 	IN new width for w chars
- */
-
-void wEntrySetWidth(
-        wControl_p b,
-        wWinPix_t w)
-{
-	gtk_entry_set_width_chars(GTK_ENTRY(b->widget), w);
-}
-
-/**
  * Return the entered value
  *
  * \param b IN entry field
@@ -98,70 +84,6 @@ const char *wEntryGetValue(
 
 	return gtk_entry_get_text(GTK_ENTRY(b->widget));
 }
-
-#ifdef TODO_UNUSED
-/**
- * Signal handler for 'activate' signal: enter pressed - callback with the
- * current value and then select the whole default value
- *
- * \param widget 	IN the edit field
- * \param b 		IN the control
- * \return
- *
- * \todo Check necessity probably used by BO_ENTER
- */
-
-static gboolean entryActivated(
-        GtkEntry *widget,
-        wControl_p b)
-{
-	const char *s;
-	const char * output = "\n";
-	struct entry* entry = NULL;
-
-	if ( !b ) {
-		return( FALSE );
-	}
-
-	entry = CONTROL_GET_ATTRIBUTES_PTR(b, entry);
-
-	s = wEntryGetValue(b);
-
-	if (entry->valueP) {
-		strcpy(entry->valueP, s);
-	}
-
-	if (entry->action) {
-		//b->enter_pressed = TRUE;
-		entry->action( output, b->context);
-	}
-
-	// select the complete default value to make editing it easier
-	gtk_editable_select_region( GTK_EDITABLE( widget ), 0, -1 );
-	return( TRUE );
-}
-#endif
-
-#ifdef TODO_UNUSED
-/**
- * Visually set the entry field to show whether the valus entered is valid.
- *
- * \param entry	IN	entry field
- * \param valid	IN	true = no error indication, false indicate error (see CSS)
- */
-
-static void
-wlibEntrySetValid(wControl_p entry, bool valid)
-{
-	GtkStyleContext* context = gtk_widget_get_style_context(GTK_WIDGET(
-	                                   entry->widget));
-	if (valid) {
-		gtk_style_context_remove_class(context, "error");
-	} else {
-		gtk_style_context_add_class(context, "error");
-	}
-}
-#endif
 
 /**
  * Signal handler for changes in an entry field
@@ -279,7 +201,6 @@ wControl_p wEntryCreate(
 	}
 	// link into help
 	wlibAddTooltip(b->widget, parent->name, helpStr);
-	//wlibAddTooltip(b->widget, helpStr);
 
 	gtk_widget_set_can_focus( G_OBJECT(b->widget), TRUE );
 	gtk_widget_add_events(b->widget, GDK_FOCUS_CHANGE_MASK);

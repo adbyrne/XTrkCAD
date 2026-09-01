@@ -28,7 +28,6 @@
 #define GSEAL_ENABLE
 
 #include <gtk/gtk.h>
-#include "wrapbox/eggwrapbox.h"
 
 #include <wlib.h>
 #include "gtkint.h"
@@ -80,7 +79,6 @@ wControl_p wSeparatorCreateForToolbar(wControl_p parent, int width)
 	control->type = B_SEPARATOR;
 	control->parent = parent;
 	control->widget = GTK_WIDGET(separator);
-//    control->shown = TRUE;
 
 	gtk_widget_show(GTK_WIDGET(separator));
 	wlibAddButtonToToolbar(  control, NULL);

@@ -25,7 +25,7 @@
 #define GTK_DISABLE_DEPRECATED
 #define GSEAL_ENABLE
 
-
+#include <gtk/gtk.h>
 #include "gtkint.h"
 
 static void
@@ -44,7 +44,8 @@ expanderExpandedNotify(GObject *obj, GParamSpec *pspec, gpointer user)
 }
 
 wControl_p
-wExpanderCreate(wWin_p parent, const char *id, wControl_p win, void *context)
+wExpanderCreate(wControl_p parent, const char *id, wControl_p win,
+                void *context)
 {
 	GtkWidget *widget = wlibWidgetFromIdWarn(win, id);
 	wControl_p b;

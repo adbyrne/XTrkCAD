@@ -45,51 +45,6 @@ static void ApplySplitButtonStyle(GtkWidget *splitButton);
 
 int wlibRecursionTrace = 0;
 
-#ifdef TODO_UNUSED
-/*
- *****************************************************************************
- *
- * Simple Buttons
- *
- *****************************************************************************
- */
-static void DestroyImage(GtkWidget *image, gpointer unused)
-{
-	gtk_widget_destroy(image);
-}
-#endif
-
-#ifdef TODO_UNUSED
-static GtkWidget *SetPixbufToButton(GtkWidget *button, GdkPixbuf *pixbuf)
-{
-	GtkWidget *image;
-
-	if (gtk_container_child_type(GTK_CONTAINER(button)) == G_TYPE_NONE) {
-		GList *children = gtk_container_get_children(GTK_CONTAINER(button));
-		DestroyImage(g_list_nth_data(children, 0), NULL);
-		g_list_free(children);
-	}
-
-	image = gtk_image_new_from_pixbuf(pixbuf);
-	gtk_container_add(GTK_CONTAINER(button), image);
-	gtk_widget_show(image);
-
-	return (image);
-}
-#endif
-
-#ifdef TODO_UNUSED
-static void RemovePixbuf(GtkWidget *button)
-{
-	if (GTK_IS_BIN(button)) {
-		GtkWidget *child = gtk_bin_get_child(GTK_BIN(button));
-		if (GTK_IS_IMAGE(child)) {
-			gtk_image_clear(GTK_IMAGE(child));
-		}
-	}
-}
-#endif
-
 bool IsNewIcon(wIcon_p new, wIcon_p old)
 {
 
@@ -108,32 +63,6 @@ bool IsNewIcon(wIcon_p new, wIcon_p old)
 	return (false);
 }
 
-/*
- * Replace the icon of a button.
- *
- * \param bb		IN button handle
- * \param iconData	IN icon data
- */
-
-// void wButtonSetIcon(wControl_p control, wIcon_p icon)
-// {
-// 	GdkPixbuf* pixbuf = NULL;
-
-// 	if (control->attributes.button.icon) {
-// 		if (!IsNewIcon(icon, control->attributes.button.icon)) {
-// 			return;
-// 		}
-// 		RemovePixbuf(control->widget);
-// 	}
-
-// 	pixbuf = icon->bits;
-
-// 	if (pixbuf) {
-// 		SetPixbufToButton(control->widget, pixbuf);
-
-// 		control->attributes.button.icon = icon;
-// 	}
-// }
 
 /**
  * Change the label of a button. This can be used to set the text
@@ -212,16 +141,6 @@ static void buttonPress(GtkWidget *widget, GdkEventButton *event,
 	}
 }
 
-#ifdef TODO_UNUSED
-/**
- * Called after expose event default hander - allows the button to be outlined
- */
-static wBool_t drawButton(GtkWidget *widget, cairo_t *cr, gpointer g)
-{
-	return wControlExpose(widget, cr, (wControl_p)g);
-}
-#endif
-
 #define REPEAT_INITIAL_DELAY 500
 #define REPEAT_DELAY 150
 
@@ -253,7 +172,6 @@ static gboolean on_button_press(GtkWidget *widget, GdkEventButton *event,
 	wControl_p button = (wControl_p)user_data;
 
 	if (event->button == GDK_BUTTON_PRIMARY) {
-		// ar_button->is_pressed = TRUE;
 		button->attributes.button.is_pressed = TRUE;
 
 		// start first timeout after initial delay
@@ -390,7 +308,7 @@ wControl_p wButtonCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
 		}
 	}
 	gtk_widget_show_all(b->widget);
-	//g_signal_connect(G_OBJECT(b->widget), "clicked", G_CALLBACK(buttonClick), b);
+
 	if (GTK_IS_MENU_BUTTON(b->widget) &&
 	    gtk_menu_button_get_popup(GTK_MENU_BUTTON(b->widget)) != NULL) {
 		/* A GtkMenuButton with a builder-defined popup opens it from its
@@ -407,19 +325,9 @@ wControl_p wButtonCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
 	}
 
 	wlibAddTooltip(b->widget, parent->name, helpStr);
-	//	wlibAddTooltip(b->widget, helpStr);
 
 	return b;
 }
-
-#ifdef TODO_UNUSED
-static char *down16[] = {"7 4 5 1",          " 	c None",
-                         ".	c #666666", "+	c #959595",
-                         "@	c #6C6C6C", "#	c #676767",
-                         ".......",          "+.....+",
-                         " +.@#+ ",          "  +.+  "
-                        };
-#endif
 
 /**
  * Create a toolbar button
@@ -600,12 +508,6 @@ void wButtonSetContext(wControl_p button, void *context)
 
 	// Update the control's data field
 	button->context = context;
-
-	// Also update the button attributes if they exist
-	// struct button* buttonAttributes = CONTROL_GET_ATTRIBUTES_PTR(button,
-	// button); if (buttonAttributes) {
-	//     buttonAttributes->context = context;
-	// }
 }
 
 /**

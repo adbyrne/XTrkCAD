@@ -77,18 +77,12 @@ wBitmapViewCreate( wControl_p parent, wWinPix_t x, wWinPix_t y, long options,
                    const wIcon_p iconP )
 {
 	wControl_p bt;
-#ifdef TODO_UNUSED
-	struct bitmap* bm;
-#endif
 	GdkPixbuf *pixbuf = NULL;
 
 	g_assert(iconP->gtkIconType == ICON_PIXBUF_FROM_RESOURCE ||
 	         iconP->gtkIconType == ICON_PIXBUF_FROM_TEXT);
 
 	bt = wlibControlNew(B_BITMAP, parent, NULL, NULL);
-#ifdef TODO_UNUSED
-	bm = CONTROL_GET_ATTRIBUTES_PTR(bt, bitmap);
-#endif
 
 	/* create the bitmap from supplied image attributes */
 	pixbuf = iconP->bits;
@@ -205,18 +199,13 @@ wBitmapCreate(wWinPix_t w, wWinPix_t h, int arg)
 	bd = (wControl_p)wlibControlNew(B_DRAW, NULL, NULL, NULL);
 	draw = CONTROL_GET_ATTRIBUTES_PTR(bd, draw);
 
-	//bd->lastColor = -1;
-
 	double dpi;
 
 	wPrefGetFloat(PREFSECTION, DPISET, &dpi, 96.0);
 
 	draw->dpi = dpi;
-	//draw->maxW =
 	draw->width = w;
-	//draw->maxH =
 	draw->height = h;
-	//draw->clip_set = FALSE;
 	draw->scale_adjust = 1.0;
 	draw->scale_text = 1.0;
 
@@ -238,16 +227,6 @@ wBitmapCreate(wWinPix_t w, wWinPix_t h, int arg)
 		cairo_scale(draw->cr, 1.0, -1.0);
 
 		wBasicClear(bd);
-	} else {
-		//bd->pixbuf = gdk_pixbuf_get_from_window(gtk_widget_get_window(GTK_WIDGET(
-		//	gtkMainW->gtkwin)), 0, 0, w, h);
-		//if (bd->pixbuf == NULL) {
-		//	wNoticeWithIcon(NT_ERROR, "CreateBitMap: pixmap_new failed", "Ok", NULL);
-		//	return FALSE;
-		//}
-		//bd->drawDestination = 0;
-		//wDrawClear(bd);
-
 	}
 	return bd;
 
@@ -270,7 +249,6 @@ wBool_t wBitmapDelete(wControl_p d)
 		drawArea->pixbuf = NULL;
 	}
 
-//	drawArea->clip_set = FALSE;
 	return TRUE;
 }
 

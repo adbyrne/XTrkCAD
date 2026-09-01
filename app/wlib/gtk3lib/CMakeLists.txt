@@ -14,7 +14,6 @@ target_sources(xtrkcad-wlib
  appwindow.c
  basicdraw.c
  bitmap.c
- boxes.c
  button.c
  color.c
  combobox.c
@@ -102,10 +101,13 @@ if(APPLE)
     PRIVATE
               browserhelp.c)
         else()
-            PKG_CHECK_MODULES(GTK_WEBKIT "webkit-1.0" REQUIRED)
-            target_sources(xtrkcad-wlib
-    PRIVATE
-              ixhelp.c)
+            message(FATAL_ERROR
+                "XTRKCAD_USE_BROWSER=OFF requests the built-in WebKitGTK help viewer on "
+                "APPLE, but ixhelp.c (the WebKit-1.0 help viewer implementation) was "
+                "removed as dead code (unreachable: webkit-1.0 has no GTK3 equivalent, "
+                "same reasoning as the non-APPLE branch below). Re-run cmake with "
+                "-DXTRKCAD_USE_BROWSER=ON to show help in the system's default browser "
+                "instead.")
         endif()
     endif()
 else()

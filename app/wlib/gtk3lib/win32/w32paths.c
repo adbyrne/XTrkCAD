@@ -103,7 +103,6 @@ wGetAppLibDir(void)
  */
 const char* wGetAppWorkDir(void)
 {
-	char* cp;
 	int rc;
 	gchar* tempIniFile = NULL;
 	gchar* tempDir = NULL;
@@ -124,6 +123,8 @@ const char* wGetAppWorkDir(void)
 		if (g_ascii_strncasecmp(tempDir, "installdir", strlen(tempDir)) == 0) {
 			g_strlcpy(tempDir, appLibDir, MAX_PATH);
 		} else {
+			char* cp;
+
 			cp = &tempDir[strlen(tempDir) - 1];
 			while (cp > tempDir && *cp == '\\') { *cp-- = 0; }
 		}

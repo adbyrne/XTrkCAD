@@ -119,6 +119,9 @@ CreatePixbufFromFTLabel(const char* text, wDrawColor color)
  * Load a font from file using freetype. This allows to use fonts that are not installed by the
  * operating system.
  *
+ * Note: this function is unused at XTrackCAD 5.4.0 time but was used and tested during
+ * development. So it is left in place for possible future usage
+ *
  * \param filename path to font
  * \return font size or 0.0 on error
  *
@@ -153,8 +156,8 @@ wFTLabelLoadFontFromFile(const char* filename)
 }
 
 /**
- * Load a font from file using freetype. This allows to use fonts that are not installed by the
- * operating system.
+ * Load a font from a resource using freetype. This allows to use fonts that
+ * are not installed by the operating system.
  *
  * \param filename path to font
  * \return font size or 0.0 on error

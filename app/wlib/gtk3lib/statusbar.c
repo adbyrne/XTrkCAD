@@ -85,39 +85,9 @@ wControl_p wStatusCreate(
 }
 
 /**
- * Get the anticipated length of a message field
- *
- * \param testString IN string that should fit into the message box
- * \return expected width of message box
- */
-
-wWinPix_t
-wStatusGetWidth(const char *testString)
-{
-	printf("Function at line %d in %s is not implemented!\n", __LINE__, __FILE__);
-	return(0);
-//   GtkWidget *entry;
-//   GtkRequisition min_req, nat_req;
-
-//   entry = gtk_entry_new();
-//   g_object_ref_sink(entry);
-
-//   gtk_entry_set_has_frame(GTK_ENTRY(entry), FALSE);
-//   gtk_entry_set_width_chars(GTK_ENTRY(entry), strlen(testString));
-//   gtk_entry_set_max_length(GTK_ENTRY(entry), strlen(testString));
-
-////   gtk_widget_get_preferred_size(entry, NULL, &requisition);
-//   gtk_widget_get_preferred_size(entry, &min_req, &nat_req);
-//   gtk_widget_destroy(entry);
-//   g_object_unref(entry);
-
-//   return (nat_req.width);
-}
-
-/**
  * Set height of message text
  *
- * \todo Are text properties actually used? remove if not
+ * \todo Are text properties actually used? remove parameter flags if not
  *
  * \param label IN text label
  * \param flags IN text properties (large or small size)
@@ -140,24 +110,6 @@ wStatusSetRequiredHeight(wControl_p label, long flags)
 	pango_font_metrics_unref(fontMetrics);
 
 	return(height);
-}
-
-/**
- * Set the width of the widget
- *
- * \param b IN widget
- * \param width IN  new width
- */
-
-void wStatusSetWidth(
-        wControl_p b,
-        wWinPix_t width)
-{
-	printf("Function at line %d in %s is not implemented!\n", __LINE__, __FILE__);
-	return;
-
-//   b->labelWidth = width;
-//   gtk_widget_set_size_request(b->labelWidget, width, -1);
 }
 
 void wStatusSetVisibleControlSet(wControl_p mainWindow,

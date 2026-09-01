@@ -57,9 +57,6 @@
 #include "wlib.h"
 #include "i18n.h"
 
-extern wDrawColor wDrawColorWhite;
-extern wDrawColor wDrawColorBlack;
-
 /*****************************************************************************
  *
  * MACROS
@@ -417,8 +414,6 @@ void wPrintClip(wDrawPix_t x, wDrawPix_t y, wDrawPix_t w, wDrawPix_t h)
 static void
 WlibGetPaperSize(void)
 {
-	double temp;
-
 	if (!page_setup) {
 		return;
 	}
@@ -433,6 +428,7 @@ WlibGetPaperSize(void)
 	// XTrackCAD does page orientation itself. Basic assumption is that the
 	// paper is always oriented in portrait mode. Ignore settings by user
 	if (paperHeight < paperWidth) {
+		double temp;
 		temp = paperHeight;
 		paperHeight = paperWidth;
 		paperWidth = temp;
@@ -519,8 +515,8 @@ static double printDpi =
 static void
 WlibSetupResolution(GtkPrintContext *context)
 {
-	char * sEnvScale = PRODUCT "PRINTSCALE";
-	char * sEnvTextScale = PRODUCT "PRINTTEXTSCALE";
+	const char * sEnvScale = PRODUCT "PRINTSCALE";
+	const char * sEnvTextScale = PRODUCT "PRINTTEXTSCALE";
 	double printScale, printTextScale;
 
 	scale_text = 1.0;

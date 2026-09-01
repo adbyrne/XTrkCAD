@@ -361,16 +361,14 @@ wBool_t wTextPrint(
         wControl_p bt)
 {
 	GtkPrintOperation* operation;
-	GtkWidget* dialog;
 	GError* error = NULL;
-	gint res;
 	struct PrintData* attributes;
 
-	/* Create a new print operation, applying saved print settings if they exist. */
+	/* Create a new print operation */
 	operation = gtk_print_operation_new();
-	//wlibApplySettings(operation);
 	attributes = g_malloc0(sizeof(struct PrintData));
 	if (attributes) {
+		gint res;
 		attributes->font_size = 10.0;
 		attributes->tb = bt;
 
@@ -393,6 +391,8 @@ wBool_t wTextPrint(
 		/* Otherwise, report that the print operation has failed. */
 		else {
 			if (error) {
+				GtkWidget* dialog;
+
 				dialog = gtk_message_dialog_new(GTK_WINDOW(wlibAppWinGetMain()),
 				                                GTK_DIALOG_DESTROY_WITH_PARENT,
 				                                GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
@@ -402,11 +402,6 @@ wBool_t wTextPrint(
 				gtk_widget_destroy(dialog);
 			}
 		}
-
-		//g_free(attributes);
-
-		//g_object_ref_sink(operation);
-		//g_object_unref(operation);
 
 		return TRUE;
 	} else {
@@ -460,11 +455,6 @@ void wTextSetReadonly(wControl_p bt, wBool_t ro)
 {
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(bt->attributes.text.text	), !ro);
 
-	//if (ro) {
-	//	bt->option |= BO_READONLY;
-	//} else {
-	//	bt->option &= ~BO_READONLY;
-	//}
 }
 
 /**
@@ -491,25 +481,6 @@ void wTextSetSize(wControl_p bt, wWinPix_t w, wWinPix_t h)
 {
 	gtk_widget_set_size_request(bt->widget, w, h);
 
-}
-
-/**
- * calculate the required size of the widget based on number of lines and columns
- * \todo this calculation is based on a fixed size font and is not useful in a generic setup
- *
- * \param bt IN the text widget
- * \param rows IN text rows
- * \param cols IN text columns
- * \param width OUT width in pixel
- * \param height OUT height in pixel
- */
-
-void wTextComputeSize(wControl_p bt, wWinPix_t rows, wWinPix_t cols,
-                      wWinPix_t* width,
-                      wWinPix_t* height)
-{
-	*width = rows * 7;
-	*height = cols * 14;
 }
 
 /**
@@ -628,9 +599,6 @@ wTextCreate(wControl_p parent,
 	// show the widgets
 	gtk_widget_show_all(tcontrol->text);
 	gtk_widget_show_all(bt->widget);
-
-	// wlibAddTooltip(tcontrol->text, parent->name, helpStr);
-	// wlibAddHelpString(bt->widget, helpStr);
 
 	tcontrol->option = option;
 

@@ -42,10 +42,6 @@
 #define CENTERMARK_LENGTH (60) /**< size of cross marking center of circles */
 #define DASH_LENGTH (8.0)
 
-/* MINLINEWIDTHBITMAP and MINLINEWIDTHPRINT are defined in wlib.h */
-
-extern wWin_p gtkMainW;
-
 #define CSS_FILENAME "xtrackcad.css"
 
 extern int wlibRecursionTrace;
@@ -73,9 +69,6 @@ int MRUGetCount(MRUList *list);
 void *MRURemoveEntry(MRUList *list, const char *label);
 void MRUClear(MRUList *list);
 void MRUDestroy(MRUList *list);
-
-// typedef enum { M_MENU, M_SEPARATOR, M_PUSH, M_LIST, M_LISTITEM, M_TOGGLE,
-// M_RADIO } mtype_e;
 
 typedef enum {
 	W_MAIN,
@@ -452,26 +445,16 @@ struct wIcon_t {
 };
 
 /* boxes.c */
-void wlibDrawBox(wWin_p win, wBoxType_e style, wWinPix_t x, wWinPix_t y,
-                 wWinPix_t w, wWinPix_t h);
 
 /* builder.c */
-wControl_p wlibDialogFromTemplate(int winType, const char *labelStr,
-                                  const char *nameStr, long option,
-                                  void *attributes);
 GString *wlibFileNameFromDialog(const char *dialog);
-GtkWidget *wlibGetWidgetFromName(wControl_p parent, const char *dialogname,
-                                 const char *suffix, wBool_t ignore_failures);
 GtkWidget *wlibWidgetFromId(wControl_p win, const char *id);
 GtkWidget *wlibWidgetFromIdWarn(wControl_p win, const char *id);
-void wlibAddContentFromTemplate(wWin_p win, const char *nameStr);
 GtkWidget *wlibCreateWindowFromBuilder(wControl_p window, const char *nameStr,
                                        long option);
 bool wlibExistsTemplate(const char *name);
 
 /* button.c */
-void wlibSetLabel(GtkWidget *widget, long option, const char *labelStr,
-                  GtkLabel **labelG, GtkWidget **imageG);
 void wlibButtonDoAction(wControl_p bb);
 void wlibAddButtonToToolbar(wControl_p buttonControl, const char *helpStr);
 
@@ -490,7 +473,6 @@ typedef struct {
 GdkRGBA wlibGetColor(wDrawColor color, wBool_t normal);
 
 /* control.c */
-wBool_t wControlExpose(GtkWidget *widget, cairo_t *cr, wControl_p b);
 wControl_p wlibControlNew(wType_e type, wControl_p parent, const char *name,
                           void *context);
 
@@ -506,20 +488,6 @@ enum columns {
 	LISTCOL_TEXT,        /**< starting point for text columns */
 };
 
-/**
- * \todo partly convert to union for combobox vs.listbox. treeView is valid for
- * listBox, editted and last for combobox
- * union {
- *		struct {
- * 			int editted;
- *			int last;
- *		} cd;
- *		struct {
- *			GkTreeView *treeView
- *		} tv;
- * } listData;
- */
-
 struct wList_t {
 	wType_e type;
 	GtkWidget *widget;
@@ -532,20 +500,6 @@ struct wList_t {
 	wListCallBack_p action;
 	int recursion;
 };
-
-GtkWidget *wlibNewDropList(GtkListStore *ls, int editable);
-
-wIndex_t wDropListGetCount(wControl_p b);
-void wDropListClear(wList_p b);
-void *wDropListGetItemContext(wControl_p b, wIndex_t inx);
-void wDropListAddValue(wControl_p b, char *text, wListItem_p attributes);
-void wDropListSetIndex(wList_p b, int val);
-wBool_t wDropListSetValues(wControl_p b, wIndex_t row, const char *labelStr,
-                           wIcon_p bm, void *itemData);
-wList_p wDropListCreate(wWin_p parent, wWinPix_t x, wWinPix_t y,
-                        const char *helpStr, const char *labelStr, long option,
-                        long number, wWinPix_t width, long *valueP,
-                        wListCallBack_p action, void *attributes);
 
 /* entry.c */
 
@@ -577,16 +531,9 @@ wListItem_p wlibListItemGet(GtkListStore *ls, wIndex_t inx, GList **childR);
 void *wlibListStoreGetContext(GtkListStore *ls, int inx);
 void wlibListStoreClear(GtkListStore *listStore);
 GtkListStore *wlibNewListStore(int colCnt);
-void wlibListStoreSetPixbuf(GtkListStore *ls, GtkTreeIter *iter,
-                            GdkPixbuf *pixbuf);
-int wlibListStoreAddData(GtkListStore *ls, GdkPixbuf *pixbuf, wListItem_p id);
 int wlibListStoreUpdateValues(GtkListStore *ls, int row, char *labels,
                               wIcon_p bm);
-void wlibListStoreAddRow(GtkListStore *listStore, wIcon_p icon,
-                         wListItem_p userData, const char *label);
 
-void wlibListStoreSetContext(GtkListStore *store, GtkTreeIter *iter,
-                             wListItem_p data);
 void wlibListStoreAppendRow(GtkListStore *store, GtkTreeIter *iter,
                             wListItem_p data);
 void wlibListStoreSetIcon(GtkListStore *store, GtkTreeIter *iter, wIcon_p icon);
@@ -598,8 +545,6 @@ GtkApplication *wlibGetApp(void);
 
 /* menu.c */
 
-int getMlistOrigin(wMenuList_p ml, GList **pChildren);
-
 /* misc.c */
 typedef struct accelData_t {
 	wAccelKey_e key;
@@ -608,14 +553,8 @@ typedef struct accelData_t {
 	void *data;
 } accelData_t;
 
-GdkPixbuf *wlibPixbufFromXBM(wIcon_p ip);
 void wlibAddLabel(wControl_p b, wWinPix_t x, wWinPix_t y, const char *labelStr);
-void *wlibAlloc(wWin_p parent, wType_e type, wWinPix_t origX, wWinPix_t origY,
-                const char *labelStr, int size, void *attributes);
-void wlibComputePos(wControl_p b);
 void wlibControlGetSize(wControl_p b);
-void wlibAddButton(wControl_p b);
-wControl_p wlibGetControlFromPos(wWin_p win, wWinPix_t x, wWinPix_t y);
 char *wlibConvertInput(const char *inString);
 char *wlibConvertOutput(const char *inString);
 struct accelData_t *wlibFindAccelKey(GdkEventKey *event);
@@ -638,7 +577,6 @@ void WlibSaveSettings(GtkPrintOperation *op);
 // static void wlibGetPaperSize(void);
 
 /* single.c */
-void wlibStringUpdate();
 
 /* splash.c */
 
@@ -653,9 +591,6 @@ void wlibSetTrigger(wControl_p b, setTriggerCallback_p trigger);
 void wlibToggleGroupsInit(void);
 void wlibToggleGroupConnect(const gchar *group_name, GCallback callback,
                             wControl_p  user_data);
-/**
- * \todo Check usage of labelStr
- */
 struct wChoice_t {
 	wType_e type;
 	GtkWidget *widget;
@@ -682,30 +617,19 @@ GtkTreeView *wlibNewTreeView(GtkListStore *ls, int showTitles,
                              int multiSelection);
 int wlibTreeViewAddColumns(GtkTreeView *tv, int count);
 int wlibAddColumnTitles(GtkTreeView *tv, const char **titles);
-int wlibTreeViewAddData(GtkTreeView *tv, wIcon_p bm, wListItem_p userData,
-                        const char *labelStr);
-void wlibTreeViewAddRow(wControl_p b, wIcon_p bm, wListItem_p id_p,
-                        const char *labelStr);
 gboolean changeSelection(GtkTreeSelection *selection, GtkTreeModel *model,
                          GtkTreePath *path, gboolean path_currently_selected,
                          gpointer attributes);
 void wlibTreeViewShowIcon(GtkTreeView *tv);
 
 int wTreeViewGetCount(wControl_p b);
-void wTreeViewClear(wList_p b);
 void *wTreeViewGetItemContext(wControl_p b, int row);
 
 void wlibTreeSelectionChanged(GtkTreeSelection *selection, void *context);
 
 /* window.c */
-void wlibDoModal(wWin_p win0, wBool_t modal);
 wBool_t UpdateModifierKeyState(GdkEventKey *event);
 wBool_t UpdateModifierKeyStateFromButton(GdkEventButton *event);
-wControl_p wlibCreateFromTemplate(wControl_p parent, int winType, wWinPix_t x,
-                                  wWinPix_t y, const char *labelStr,
-                                  const char *nameStr, long option,
-                                  wWinCallBack_p winProc, void *attributes);
-void wlibAddButtonToolbar(wButton_p button);
 void wlibBasicGridAttach(wControl_p parent, GtkWidget *widget, unsigned xPos,
                          unsigned yPos, unsigned colSpan, unsigned rowSpan);
 /* wpref.c */

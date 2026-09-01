@@ -54,21 +54,6 @@ CheckGrabFocus(wControl_p control)
 }
 
 /**
- * Paint a surface to an existing cairo context. The surface is drawn on top
- * of the existing layer.
- *
- * \param cr		cairo context
- * \param surface	surface to paint
- */
-
-void
-PaintOverSurface(cairo_t* cr, cairo_surface_t* surface)
-{
-	cairo_set_source_surface(cr, surface, 0, 0);
-	cairo_paint(cr);
-}
-
-/**
  * Clear a cairo surface.
  *
  * \param surface

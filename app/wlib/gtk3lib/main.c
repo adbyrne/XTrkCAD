@@ -91,13 +91,13 @@ LoadStyles(void)
 }
 
 static void
-activate(GtkApplication *app, gpointer user_data)
+activate(GtkApplication *application, gpointer user_data)
 {
 	// signal is not handled by xtrackcad, so a dummy is needed
 }
 
 static void
-startup(GtkApplication *app)
+startup(GtkApplication *application )
 {
 	g_resources_register(wlib_get_resource());
 	g_resources_register(symbols_get_resource());

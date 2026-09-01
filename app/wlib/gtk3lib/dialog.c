@@ -25,8 +25,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "glib-object.h"
-#include "glib.h"
+
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
 #define GTK_DISABLE_DEPRECATED
@@ -34,12 +33,11 @@
 
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
+#include "glib-object.h"
+#include "glib.h"
 
 #include "gtkint.h"
 #include "i18n.h"
-
-#include "resources.h"
-
 
 /**
  * Place widget into the grid of a basic dialog window.
@@ -90,8 +88,8 @@ void wSameRowAdd(void *samerow, wControl_p ctl)
 static void
 RestoreWindowSizePos(GtkWidget* window, const char* name)
 {
-	char *winSize = wPrefGetStringBasic(name, "size");
-	char* winPos = wPrefGetStringBasic(name, "pos");
+	const char *winSize = wPrefGetStringBasic(name, "size");
+	const char* winPos = wPrefGetStringBasic(name, "pos");
 	gchar** parsedString;
 	gint x = 0;
 	gint y = 0;
@@ -112,7 +110,7 @@ RestoreWindowSizePos(GtkWidget* window, const char* name)
 		g_strfreev(parsedString);
 	}
 
-	/** \todo check screen size  */
+	/** \todo check screen size and clamp the size to a value smaller than the screen */
 
 	if (width != 0 && height != 0) {
 		gtk_window_set_default_size(GTK_WINDOW(window), width, height);
@@ -152,25 +150,6 @@ wDialogSaveSizePos(wControl_p dialog)
 }
 
 /**
- * default buttons. Selecting Help causes the help function to be executed.
- *
-	winProcEvent event = 0;
-	SaveWindowSizePos(GTK_WIDGET(self), dialog->name);
-
-	switch (response_id) {
-	case GTK_RESPONSE_OK:
-		event = wAccept_e;
-		break;
-	case GTK_RESPONSE_CANCEL:
-	case GTK_RESPONSE_DELETE_EVENT:
-		event = wCancel_e;
-		break;
-	case GTK_RESPONSE_HELP:
-		wHelp(dialog->name);
-		return;
-	}
-	dialog->attributes.window.winProc(dialog, event, NULL, NULL);
-}
  * Configure a button.
  *
  * \param dialog    the dialog holding the button
@@ -314,29 +293,3 @@ wWinDialogCreate(wControl_p parent,
 
 	return(winDialog);
 }
-
-#ifdef TODO_UNUSED
-static wWin_p wWinPopupCreate(
-        wWindow_p parent,
-        wWinPix_t x,
-        wWinPix_t y,
-        const char* helpStr,
-        const char* labelStr,
-        const char* nameStr,
-        long option,
-        wWinCallBack_p winProc,
-        void* attributes)
-{
-	wWin_p win = NULL;
-	//if (parent == NULL) {
-	//    if (gtkMainW == NULL) {
-	//        abort();
-	//    }
-	//    parent = gtkMainW;
-	//}
-	printf("%s:%d not implemented\n", __FILE__, __LINE__);
-	//win = wWinCommonCreate(parent, W_POPUP, x, y, labelStr, nameStr, option,
-	//    winProc, context);
-	return win;
-}
-#endif

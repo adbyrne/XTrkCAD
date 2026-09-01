@@ -120,7 +120,7 @@ wTagCreate(
 			continue;
 		}
 
-		printf("Child of tag %s is ignored!\n", helpStr);
+		fprintf(stderr, "Child of tag %s is ignored!\n", helpStr);
 	}
 	g_list_free(children);
 
