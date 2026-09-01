@@ -41,7 +41,7 @@ XTrkCAD is a C application built from several libraries that link into one execu
 `track.c`/`track.h` (the base track type) and `draw.c` (the drawing and geometry core) are the
 two files most of the rest of the application builds on. Coding conventions and error-handling
 patterns follow below; building and testing locally on each platform is covered on the
-\subpage building "Building and Testing" page — or use the search box or the file/class browser
+\ref building "Building and Testing" page — or use the search box or the file/class browser
 in the sidebar to jump straight to a specific symbol instead of reading top to bottom.
 
 ## Source naming convention
@@ -132,8 +132,6 @@ collectively `wControl` (`app/wlib/include/wlib.h`). Most of these notify applic
 events (a button press, text entry) via a callback function pointer supplied when the object is
 created, along with a `void *` context value — see the cast macros above for the common pattern
 of packing a small integer into that context instead of a real pointer.
-
-## Building and testing
 
 See the \subpage building "Building and Testing" page for local build steps per platform,
 CI details, tool-version pins, and advanced checks (sanitizers, valgrind, the regression
