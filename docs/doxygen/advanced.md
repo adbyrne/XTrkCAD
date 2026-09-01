@@ -147,6 +147,33 @@ your own checkout, or omit meaningful linking entirely by passing any placeholde
 want the grouped local HTML view. The `coverage` report doesn't go through this script — `genhtml`
 already produces its own linked, per-line HTML.
 
+The gating `cppcheck` job (default/error-only severity, distinct from the report-only
+`cppcheck-deep` above) isn't documented anywhere else, unlike `cppcheck-deep` — reproduce it the
+same "copy the `run:` step verbatim" way:
+
+```sh
+cppcheck --error-exitcode=1 -j 4 \
+    --suppress=missingInclude --suppress=missingIncludeSystem \
+    --suppress=nullPointerOutOfMemory --suppress=nullPointerOutOfResources \
+    --suppress=nullPointerArithmeticOutOfMemory \
+    --suppress=syntaxError:app/bin/archive.c --suppress=syntaxError:app/bin/cturntbl.c \
+    --suppress=syntaxError:app/bin/directory.c --suppress=syntaxError:app/bin/paths.c \
+    --suppress=syntaxError:app/bin/utility.c --suppress=unknownMacro:app/bin/custom.c \
+    --suppress=ctunullpointer:app/bin/track.c --suppress=uninitvar:app/bin/levenshtein.c \
+    --suppress=uninitvar:app/bin/problemrep.c --suppress=uninitvar:app/bin/paths.c \
+    --suppress=nullPointer:app/bin/partcatalog.c --suppress=missingReturn:app/bin/cturnout.c \
+    --suppress=ctuPointerArith:app/bin/cturnout.c \
+    -I app/bin -I app/bin/include -I app/wlib/include \
+    app/bin/*.c app/dynstring/*.c app/help/*.c app/tools/listxtp.c
+```
+
+(`ci-gtk3.yml` is the source of truth for this list — re-copy it if the two ever drift, rather
+than trusting this snapshot indefinitely.) The remaining gating jobs — `astyle-check`, the
+`ctest` unit/regression suite, and `docs-doxygen` itself — are just this project's everyday
+build/test/format loop rather than anything CI-specific, and are already documented in full on the
+\subpage building "Building and Testing" page and in the project's `CLAUDE.md` Code Formatting
+section; nothing to add here beyond pointing at those.
+
 ## The warning-count ratchet
 
 `PlatformSettings.cmake` promotes specific warning categories to `-Werror=` once a phase has
@@ -212,6 +239,16 @@ warning-count ratchet that locks in categories already brought to zero so they c
 regress. Working through their findings across many sessions converged on a process, and turned up
 several defect classes that kept recurring — both captured here for whoever picks up the next
 batch of findings.
+
+**Goals for QA.** The aim is to reach, and hold, zero suppressed findings per category in owned
+code — by fixing the underlying defect or narrowing the variable's scope, not by suppressing the
+tool's complaint. A suppress comment is a last resort for a confirmed non-bug the tool can't be
+taught to recognize (see the `trackGauge`/`infoSubst` entries below), never the default response
+to a large finding count. The bullets right below embody this in practice; this line just says it
+up front. Current status: `shadowVariable` is at zero across all of `app/bin` (SF #764/#765/#766,
+2026-09-01, closing what had been the last large-volume category); `variableScope` has been
+reduced to a documented minimum (2026-08-31); a for-loop index-variable sweep is the next open
+category, not yet started.
 
 ## Static-analysis workflow
 
@@ -444,24 +481,33 @@ exactly what it should — captured because the shape looks suspicious enough on
 a static-analysis tool's flag) that a future session would otherwise re-derive the same answer
 from scratch, or worse, "fix" something that isn't broken.
 
-- **`trackGauge` is deliberately re-declared as a local in every track-type-specific `Draw*Track`
-  function, shadowing the module-global `DIST_T trackGauge` (`track.c`).** The global holds
+- **`trackGauge` used to be deliberately re-declared as a local in every track-type-specific
+  `Draw*Track` function, shadowing the module-global `DIST_T trackGauge` (`track.c`) — no longer
+  true as of the shadowVariable full re-audit (SF #764/#765/#766, 2026-09-01).** The global holds
   whatever gauge is "current" for new-track creation; each `Draw*Track` function instead wants the
-  *specific track it's drawing*'s own gauge, so it shadows the name with
+  *specific track it's drawing*'s own gauge, so it used to shadow the name with
   `DIST_T trackGauge = GetTrkGauge(trk);` (or, in `cmodify.c`'s `CmdModify()`, a `static` version
-  persisted across a modify-command's mouse-drag lifecycle, reset to `0.0` on `C_START`). Confirmed
-  present and correctly assigned-before-use in `cmodify.c`, `tcurve.c`, `track.c`, `tstraigh.c`,
-  and all 3 of `turnout.c`'s instances (SF #721) — same intentional pattern everywhere it recurs,
-  not a one-off. `cppcheck-deep`'s `shadowVariable` check has no way to know these are different
-  gauges by design; each site carries a `// cppcheck-suppress shadowVariable` explaining this.
+  persisted across a modify-command's mouse-drag lifecycle, reset to `0.0` on `C_START`) — present
+  and correctly assigned-before-use in `cmodify.c`, `tcurve.c`, `track.c`, `tstraigh.c`, and all 3
+  of `turnout.c`'s instances (SF #721), each individually suppressed with a
+  `// cppcheck-suppress shadowVariable` since `cppcheck-deep` had no way to know these were
+  different gauges by design. The audit eliminated the shadow entirely instead of continuing to
+  suppress it — renamed to `trkGauge` (or `modTrackGauge` in `cmodify.c`'s static case) everywhere
+  it recurred. Zero `cppcheck-suppress shadowVariable` comments remain in any of these files now.
+  One rename was incomplete on first pass — two sites in `track.c`'s `DrawEndPt()` were missed and
+  kept reading the now-unrelated global, a real behavior change once the shadow was gone; fixed
+  separately (SF #767).
 - **A `static` local persisting mouse-command state across calls, sharing a name with something
   else at file or global scope, is this codebase's standard idiom for multi-step command
   dispatch** (`CmdModify`, `CmdDraw`, and similar `C_START`/`C_MOVE`/`C_UP`-style dispatchers). The
   static survives between the separate invocations that make up one drag/click sequence and is
-  reset explicitly on `C_START`; several files (`cdraw.c`, `ccurve.c`, `ccornu.c`, `cjoin.c`) each
-  declare their own independent `static BOOL_T infoSubst` for this purpose — these are unrelated,
-  fully self-contained per-function statics that merely share a generic name, not a cross-function
-  interaction.
+  reset explicitly on `C_START`; `cdraw.c`, `ccurve.c`, `ccornu.c`, and `cjoin.c` each declare their
+  own independent `static BOOL_T infoSubst` for this purpose — these are unrelated, fully
+  self-contained per-function statics that merely share a generic name, not a cross-function
+  interaction. (`cdraw.c`'s `CmdDraw()` renamed its own copy to `drawInfoSubst` during the
+  shadowVariable full re-audit, SF #765 — the file also has a separate, untouched file-scope
+  `infoSubst` used elsewhere, so the file still has "an" `infoSubst`, just not the one `CmdDraw()`
+  itself uses.)
 - **`UndoStart()` (`cundo.c`) calls `SetFileChanged()` internally** — a caller that opens an undo
   transaction (`UndoStart()` → `UndoModify()`/`UndoNew()`/`UndoDelete()` → implicit close) does
   **not** need to call `SetFileChanged()` itself; the layout-dirty flag (`layout.c`'s
@@ -469,6 +515,7 @@ from scratch, or worse, "fix" something that isn't broken.
   The handful of call sites that *do* call `SetFileChanged()` directly (`textnoteui.c`,
   `linknoteui.c`, `filenoteui.c`, `dlayer.c`) are redundant-but-harmless, not evidence that it's
   otherwise required. Discovered while verifying `cblock.c`'s `UpdateBlock()` — a dialog handler
-  with a local `BOOL_T changed` shadowing the global of the same name and *no* direct
-  `SetFileChanged()` call anywhere in the file, which looked like a real "renaming a block doesn't
-  mark the file dirty" bug until tracing `UndoStart()`'s own body settled it.
+  with a local `BOOL_T changed` (renamed `blockChanged` by the shadowVariable full re-audit,
+  SF #765 — it shadowed the global of the same name at the time this was investigated) and *no*
+  direct `SetFileChanged()` call anywhere in the file, which looked like a real "renaming a block
+  doesn't mark the file dirty" bug until tracing `UndoStart()`'s own body settled it.
