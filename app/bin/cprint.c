@@ -1152,9 +1152,8 @@ static BOOL_T PrintPage(
 			Translate( &print_d.orig, orig, currPrintGrid.angle+180.0, printScale );
 			print_d.size.y += printScale;
 		}
-		// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-		for (int i=0; i<4; i++) {
-			psave[i] = p[i];
+		for (int j=0; j<4; j++) {
+			psave[j] = p[j];
 		}
 		if (printRotate) {
 			rotateCW = (printFormat != PORTRAIT);
