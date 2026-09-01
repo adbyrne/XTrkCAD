@@ -20,7 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "pango/pango-font.h"
 #include <math.h>
 
 #define GTK_DISABLE_SINGLE_INCLUDES
@@ -74,18 +73,18 @@ static wFont_p curFont = NULL;
 /**
  * Callback for font selection dialog
  *
- * \param fontSelectionDialog IN dialog
+ * \param thisfontSelectionDialog IN dialog
  * \param response IN response code from dialog
  * \param attributes IN unused
  */
 
 static void fontSelectionDialogCallback(GtkFontChooserDialog
-                                        *fontSelectionDialog, gint response, gpointer attributes)
+                                        *thisfontSelectionDialog, gint response, gpointer attributes)
 {
 	if (response == GTK_RESPONSE_APPLY || response == GTK_RESPONSE_OK) {
 		gchar *fontName;
 
-		fontName = gtk_font_chooser_get_font(GTK_FONT_CHOOSER(fontSelectionDialog));
+		fontName = gtk_font_chooser_get_font(GTK_FONT_CHOOSER(thisfontSelectionDialog));
 		wPrefSetString("font", "name", fontName);
 		pango_font_description_free(curFont->fontDescription);
 		curFont->fontDescription = pango_font_description_from_string(fontName);
@@ -103,7 +102,7 @@ static void fontSelectionDialogCallback(GtkFontChooserDialog
 	}
 
 	if (response == GTK_RESPONSE_OK || response == GTK_RESPONSE_CANCEL) {
-		gtk_widget_hide(GTK_WIDGET(fontSelectionDialog));
+		gtk_widget_hide(GTK_WIDGET(thisfontSelectionDialog));
 	}
 }
 
@@ -141,8 +140,14 @@ static wBool_t fontInit()
 				PangoFontDescription *fontDescription = pango_font_description_from_string(
 				                fontNames[s++]);
 				wFont_p standardFont = (wFont_p) malloc(sizeof(struct wFont_t));
-				standardFont->fontDescription = fontDescription;
-				standardFonts[i-F_TIMES][j][k] = standardFont;
+
+				if(standardFont) {
+					standardFont->fontDescription = fontDescription;
+					standardFonts[i-F_TIMES][j][k] = standardFont;
+				} else {
+					fprintf(stderr, "Failed to allocate memory for standardFont. Aborting...\n");
+					abort();
+				}
 			}
 		}
 	}
@@ -165,10 +170,7 @@ static wBool_t fontInit()
 	return TRUE;
 }
 
-
-static double fontFactor = 1.0;
-
-#define FONTSIZE_TO_PANGOSIZE(fs) ((gint) ((fs) * (fontFactor) + .5))
+#define FONTSIZE_TO_PANGOSIZE(fs) ((gint) ((fs) + .5))
 
 /**
  * Create a Pango layout with a specified font and font size
@@ -205,7 +207,7 @@ PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget,
 	}
 
 	PangoLayout *layout = NULL;
-	gchar *utf8 = wlibConvertInput(s);
+	const gchar *utf8 = wlibConvertInput(s);
 
 	layout = pango_cairo_create_layout((cairo_t *) cairo);
 	pango_layout_set_text(layout, utf8, -1);

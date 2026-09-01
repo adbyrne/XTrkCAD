@@ -149,24 +149,6 @@ on_widget_deleted(GtkWidget* window, GdkEvent* event, gpointer userData)
 }
 
 /**
- * This signal handler sets the maximum height of the scrolled window to the
- * height needed by the toolbar.
- *
- * \param self IN see GTK3 documentation
- * \param allocation IN see GTK3 documentation
- * \param user_data	IN the scrolled window
- */
-
-void
-signalSizeAlloc(GtkWidget* self,
-                GtkAllocation* allocation,
-                gpointer user_data)
-{
-	gtk_scrolled_window_set_max_content_height(GTK_SCROLLED_WINDOW(user_data),
-	                allocation->height);
-}
-
-/**
  * Initialize the application's main window. This function does the necessary
  * initialization of the application including creation of the main window.
  *
@@ -193,7 +175,7 @@ wControl_p wWinMainCreate(
         wWinCallBack_p winProc, /* Call back function */
         void *context)			 /* User context */
 {
-	char *pos;
+	const char *pos;
 	struct window* wcontrol;
 
 	pos = strchr(name, ';');
@@ -205,9 +187,6 @@ wControl_p wWinMainCreate(
 		/* if not found, application name and configuration name are same */
 		strcpy(wConfigName, name);
 	}
-
-	wDrawColorWhite = wDrawFindColor(0xFFFFFF);
-	wDrawColorBlack = wDrawFindColor(0x000000);
 
 	appMainWindow = wlibControlNew(W_MAIN, NULL, nameStr, context);
 

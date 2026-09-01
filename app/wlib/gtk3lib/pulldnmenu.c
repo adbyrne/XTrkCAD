@@ -60,10 +60,6 @@ static void pushMenuItem(
 			mi->action( m->context );
 		}
 		break;
-	//case M_TOGGLE:
-	//    mt = (wMenuToggle_p)m;
-	//    mt->action( mt->context );
-	//    break;
 	case M_RADIO:
 		/* NOTE: action is only called when radio button is activated,
 		not when deactivated */
@@ -74,12 +70,10 @@ static void pushMenuItem(
 	case M_MENU:
 		return;
 	default:
-		/*fprintf(stderr," Oops menu\n");*/
+		fprintf(stderr," Oops menu\n");
 		return;
 	}
-	// if( MPARENT(m)->traceFunc ) {
-	// 	MPARENT(m)->traceFunc( MPARENT( m ), m->oc.labelStr,  MPARENT(m)->traceData );
-	//}
+
 }
 
 /**
@@ -332,8 +326,6 @@ void wMenuRadioSetActive(
  * push buttons in menu
  */
 
-
-
 /**
  * Create a menu entry
  *
@@ -533,18 +525,17 @@ void wMenuToggleEnable(
 
 /*-----------------------------------------------------------------*/
 
-/**
- * Set the text for a menu
+/* Set the text for a menu (unimplemented, kept commented out)
  *
  * \param m 		IN menu entry
  * \param labelStr 	IN new text
  */
 
-void wMenuSetLabel( wMenu_p m, const char * labelStr)
-{
-	printf("%s:%d Not implemented!", __FILE__, __LINE__);
-//	 wlibSetLabel( m->oc.widget, m->option, labelStr, &m->labelG, &m->imageG );
-}
+// void wMenuSetLabel( wMenu_p m, const char * labelStr)
+// {
+// 	printf("%s:%d Not implemented!", __FILE__, __LINE__);
+// //	 wlibSetLabel( m->oc.widget, m->option, labelStr, &m->labelG, &m->imageG );
+// }
 
 /**
  * Get the text for a menu entry
@@ -601,17 +592,6 @@ wMenu_p wMenuCreate(
 		m->attributes.menu.option = F_DEFINEDINBUILDER;
 	}
 
-	// 	wMenuSetLabel( m, labelStr );
-	// 	gtk_fixed_put( GTK_FIXED(parent->widget), m->widget, m->realX, m->realY );
-	// 	wlibControlGetSize( (wControl_p)m );
-	// 	if ( m->w < 80 && (m->option&BO_ICON)==0) {
-	// 		m->w = 80;
-	// 		gtk_widget_set_size_request( m->widget, m->w, m->h );
-	// 	}
-	// gtk_widget_show( m->widget );
-	// wlibAddButton( (wControl_p)m );
-	// wlibAddHelpString( m->widget, helpStr );
-
 	wlibAddTooltip(m->widget, parent->name, helpStr);
 
 	return m;
@@ -655,7 +635,7 @@ wControl_p wMenuBarAdd(
 /*-----------------------------------------------------------------*/
 
 /**
- * ?? Seems to be related to macro / automatic playback functionality
+ *
  *
  * \param m 	IN
  * \param func 	IN
@@ -673,7 +653,8 @@ void wMenuSetTraceCallBack(
 }
 
 /**
- * ??? same as above
+ * automatic playback functionality
+ *
  * \param m 	IN
  * \param label IN
  * \return    describe the return value
@@ -683,7 +664,7 @@ wBool_t wMenuAction(
         wControl_p m,
         const char * label )
 {
-	struct menu* menu = CONTROL_GET_ATTRIBUTES_PTR(m, menu);
+	const struct menu* menu = CONTROL_GET_ATTRIBUTES_PTR(m, menu);
 	struct menuitem * menuitem;
 	for ( wControl_p mi = menu->first;
 	      mi != NULL;
@@ -710,10 +691,9 @@ wBool_t wMenuAction(
 				break;
 			case M_MENU:
 				break;
-//			case M_LIST:
-//				break;
+
 			default:
-				/*fprintf(stderr, "Oops: wMenuAction\n");*/
+				fprintf(stderr, "Oops: wMenuAction\n");
 				break;
 			}
 			return TRUE;

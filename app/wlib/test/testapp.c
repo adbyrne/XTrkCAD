@@ -580,7 +580,7 @@ SimpleDynamic(void* unused)
 	wControl_p	combo = wComboBoxCreate(dialog, 1, 8, "combobox", NULL, 0L, 0, 1,
 	                                    NULL, ComboBoxAction, NULL);
 
-	for (int i = 0; i < COMBOLINES; i++) {
+	for (unsigned long i = 0; i < COMBOLINES; i++) {
 		wComboBoxAddValue(combo, comboLines[i], NULL);
 	}
 
@@ -953,7 +953,7 @@ void TestMenu(wControl_p mainW)
 	               );
 
 	menu4 = wMenuMenuCreate(menu1, NULL, "Recently used");
-	menuList = wMenuListCreate(menu4, NULL, 10, RecentUsedCallback);
+//	menuList = wMenuListCreate(menu4, NULL, 10, RecentUsedCallback);
 
 	/* create a separator before 'Quit' */
 
@@ -1046,7 +1046,7 @@ void TestMenu(wControl_p mainW)
 	wControl_p menuRecent;
 	wControl_p menuDesigns;
 	menuRecent = wMenuMenuCreate(menu, NULL, "Recently used");
-	menuDesigns = wMenuListCreate(menuRecent, NULL, 10, RecentUsedDesigns);
+//	menuDesigns = wMenuListCreate(menuRecent, NULL, 10, RecentUsedDesigns);
 
 	wMenuPushCreate(menu,
 	                NULL,

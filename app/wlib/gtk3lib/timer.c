@@ -129,20 +129,21 @@ void wPause(long duration)		/* milliseconds */
 }
 
 /**
- * Get time expired since start???
- * \todo Check where start time is initialized!!!
+ * Get time expired since start
  *
- * \returns time in seconds
+ * \returns time in milliseconds
  */
 
 unsigned long wGetTimer(void)
 {
-	GDateTime *now = g_date_time_new_now_local();
+	GDateTime *now;
 	GTimeSpan elapsed;
 	if (!start) {
 		start = g_date_time_new_now_local();
+		return 0;
 	}
 
+	now = g_date_time_new_now_local();
 	elapsed = g_date_time_difference(now, start) / 1000L;
 	g_date_time_unref(now);
 

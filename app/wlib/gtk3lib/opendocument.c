@@ -32,12 +32,8 @@
 
 #else
 
-#include "dynstring.h"
-
 #if defined(__APPLE__) && defined(__MACH__)
 #define DEFAULTOPENCOMMAND "open"
-#else
-#define DEFAULTOPENCOMMAND "xdg-open"
 #endif
 
 #endif
@@ -50,8 +46,6 @@
  *
  * \return 0 on success, error code on failure
  */
-
-/**  \todo Test UNIX case, change to glib string functions */
 
 unsigned wOpenFileExternal(char * filename)
 {

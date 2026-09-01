@@ -19,6 +19,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+//#include "misc.h"
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
 #define GTK_DISABLE_DEPRECATED
@@ -268,7 +269,7 @@ wIndex_t wListGetValues(
         void * * itemDataRet)
 {
 	wListItem_p id_p;
-	wIndex_t inx;
+
 	const char * entry_value = "";
 	void * item_data = NULL;
 	struct list* lcontrol;
@@ -277,13 +278,11 @@ wIndex_t wListGetValues(
 	g_assert(bl->attributes.list.listStore != NULL);
 
 	lcontrol = CONTROL_GET_ATTRIBUTES_PTR(bl, list);
-	inx = lcontrol->last;
 
 	if (bl->type == B_COMBOBOX && lcontrol->editted) {
 
 		if (gtk_combo_box_get_has_entry(GTK_COMBO_BOX(bl->widget))) {
 			/* Nothing selected, user is entering text directly */
-//			inx = -1;
 			GtkEntry* entry = GTK_ENTRY(gtk_bin_get_child(GTK_BIN(bl->widget)));
 			if (entry == NULL) {
 				return 0;
@@ -294,15 +293,14 @@ wIndex_t wListGetValues(
 			}
 		}
 
-
 		GtkBin *bin = GTK_BIN( bl->widget );
 		GtkCellView *cellView = gtk_bin_get_child( bin );
 		GtkEntry *entry = GTK_ENTRY( cellView );
 		entry_value = gtk_entry_get_text( entry );
-		//entry_value = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN( bl->widget))));
 		item_data = NULL;
-		inx = lcontrol->last = -1;
+		lcontrol->last = -1;
 	} else {
+		wIndex_t inx;
 		int count = gtk_tree_model_iter_n_children(
 		                    GTK_TREE_MODEL(lcontrol->listStore), NULL);
 		//Make sure in range
@@ -367,14 +365,6 @@ wBool_t wListGetItemSelected(
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(list->treeView));
 	return(gtk_tree_selection_iter_is_selected(selection, &iter));
 
-
-	//id_p = wlibListStoreGetContext(listControl->listStore, inx);
-
-	//if (id_p) {
-	//	return id_p->selected;
-	//} else {
-	//	return FALSE;
-	//}
 }
 
 /**
@@ -479,7 +469,6 @@ wListDeleteSelected(wControl_p list)
 {
 	GtkTreeSelection* selection;
 	GtkTreeModel* model;
-	GtkTreeRowReference* ref;
 	GList* rows, *ptr, *references = NULL;
 
 	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(list, list);
@@ -490,6 +479,7 @@ wListDeleteSelected(wControl_p list)
 
 	ptr = rows;
 	while (ptr != NULL) {
+		GtkTreeRowReference* ref;
 		ref = gtk_tree_row_reference_new(model, (GtkTreePath*)ptr->data);
 		references = g_list_prepend(references, gtk_tree_row_reference_copy(ref));
 		gtk_tree_row_reference_free(ref);
@@ -522,7 +512,9 @@ void wListDelete(
 	g_assert(b->attributes.list.listStore != 0);
 
 	if (b->type == B_COMBOBOX) {
-		wNotice("Deleting from dropboxes is not implemented!", "Continue", NULL);
+		fprintf(stderr, "Deleting from dropboxes is not implemented!");
+		wExit(1);
+
 	} else {
 		gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(lcontrol->listStore),
 		                              &iter,
@@ -600,7 +592,7 @@ NewListRow(wControl_p control, const char* labelStr, void* addInfo)
 	struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(control, list);
 
 	itemData = wlibAllocateListItem(control, labelStr,
-	                                addInfo); /** \todo Check and rework usage of wListItem */
+	                                addInfo);
 	wlibListStoreAppendRow(lcontrol->listStore, &iter, itemData);
 
 	return(iter);
@@ -616,24 +608,10 @@ AddIconToRow(struct list *lcontrol, GtkTreeIter *iterPointer, wIcon_p bm)
 	}
 }
 
-#ifdef TODO_UNUSED
-static void
-AddDataToRow(struct list* lcontrol, GtkTreeIter* iterPointer,
-             const char* labelStr, va_list arguments)
-{
-	int column = 0;
-	while (labelStr) {
-		wlibListStoreSetData(lcontrol->listStore, iterPointer, column, labelStr);
-		column++;
-		labelStr = va_arg(arguments, char*);
-	}
-}
-#endif
-
 static void
 AddDataArrayToRow(struct list* lcontrol, GtkTreeIter* iterPointer, char **data)
 {
-	char* value = *data;
+	const char* value = *data;
 	int column = 0;
 
 	while (value) {
@@ -756,27 +734,6 @@ wIndex_t wListAddValue(
 	g_strfreev(data);
 
 	return(rowCount);
-}
-
-
-/**
- * Set the size of the list
- *
- * \param bl IN widget
- * \param w IN width
- * \param h IN height (ignored for droplist)
- */
-
-void wListSetSize(wControl_p bl, wWinPix_t w, wWinPix_t h)
-{
-	//if (bl->type == B_DROPLIST) {
-	//    gtk_widget_set_size_request(bl->widget, w, -1);
-	//} else {
-	//    gtk_widget_set_size_request(bl->widget, w, h);
-	//}
-
-	//bl->w = w;
-	//bl->h = h;
 }
 
 void
@@ -907,10 +864,6 @@ wControl_p wListCreate(
 			colCnt = 1;
 		}
 
-		//bl->colCnt = colCnt;
-		//bl->colWidths = (wWinPix_t*)malloc(colCnt * sizeof * (wWinPix_t*)0);
-		//memcpy(bl->colWidths, colWidths, colCnt * sizeof * (wWinPix_t*)0);
-
 		/* create the attributes structure for context */
 		lcontrol->listStore = wlibNewListStore(colCnt);
 		/* create the widget for the list store */
@@ -934,54 +887,14 @@ wControl_p wListCreate(
 		                               GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
 		gtk_container_add(GTK_CONTAINER(bl->widget), GTK_WIDGET(lcontrol->treeView));
-
-		if (labelStr) {
-			// bl->labelW = wlibAddLabel((wControl_p)bl, labelStr);
-		}
 	}
 
 	gtk_widget_show_all(bl->widget);
 
 	wlibAddTooltip(bl->widget, parent->name, helpStr);
-	//wlibAddTooltip(bl->widget, helpStr);
 
 	return bl;
 }
 
-/**
- * Create a single column list box (not what the names suggests!)
- * \todo Improve or discard totally, in this case, remove from param.c \
- * as well.
- *
- * \param parent IN Parent window
- * \param x IN X-position
- * \param y IN Y-position
- * \param helpStr IN Help string
- * \param labelStr IN Label
- * \param option IN Options
- * \param number IN Number of displayed list entries
- * \param width IN Width
- * \param valueP IN Selected index
- * \param action IN Callback
- * \param attributes IN Context
- * \return    describe the return value
- */
-
-wControl_p wComboListCreate(
-        wControl_p	parent,		/* Parent window */
-        wWinPix_t	x,		/* X-position */
-        wWinPix_t	y,		/* Y-position */
-        const char 	* helpStr,	/* Help string */
-        const char	* labelStr,	/* Label */
-        long	option,		/* Options */
-        long	number,		/* Number of displayed list entries */
-        wWinPix_t	width,		/* Width */
-        long	*valueP,	/* Selected index */
-        wListCallBack_p action,	/* Callback */
-        void 	*attributes)		/* Context */
-{
-	wNotice("ComboLists are not implemented!", "Abort", NULL);
-	abort();
-}
 
 

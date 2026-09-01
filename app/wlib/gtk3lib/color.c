@@ -30,8 +30,8 @@
 
 #include "gtkint.h"
 
-wDrawColor wDrawColorWhite;
-wDrawColor wDrawColorBlack;
+wDrawColor wDrawColorWhite = 0xFFFFFF;
+wDrawColor wDrawColorBlack = 0x000000;
 
 #define RGB(R,G,B) ( ((long)((R)&0xFF)<<16) | ((long)((G)&0xFF)<<8) | ((long)((B)&0xFF)) )
 #define RGBA(RGB,A) ( ((long)((RGB)&0xFFFFFF)) | ((long)((A)&0xFF)<<24) )
@@ -62,8 +62,6 @@ wDrawColor wDrawColorGray(
  * \param color IN index into palette
  * \param normal IN normal or inverted color
  * \return  the selected color definition
- *
- * \todo Check usage
  */
 
 GdkRGBA wlibGetColor(
@@ -185,6 +183,7 @@ wDrawColor wColorSelectButtonGetColor(
  * ### Usage in dialogs
  *
  * - runtime: yes
+ * - builder: yes
  *
  * ### Options
  * BB_DEFAULT
@@ -201,8 +200,6 @@ wDrawColor wColorSelectButtonGetColor(
  * \param[in] context		user context to pass to callback procedure
  *
  * \return bb handle for created button
- *
- * \todo Color button in builder definition
  *
  */
 

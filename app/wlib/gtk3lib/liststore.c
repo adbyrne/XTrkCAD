@@ -76,13 +76,13 @@ wlibListStoreGetContext(GtkListStore *ls, int inx)
 {
 	GtkTreeIter iter;
 	gchar *string = NULL;
-	gboolean result;
 	gint childs;
 
 	childs = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(ls),
 	                                        NULL);
 
 	if (inx < childs) {
+		gboolean result;
 		result = gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(ls),
 		                                       &iter,
 		                                       NULL,
@@ -95,7 +95,7 @@ wlibListStoreGetContext(GtkListStore *ls, int inx)
 			                   &string,
 			                   -1);
 		} else {
-			printf("Invalid index %d for list!\n", inx);
+			fprintf(stderr, "Invalid index %d for list!\n", inx);
 
 		}
 	}
@@ -185,7 +185,7 @@ wlibNewListStore(int colCnt)
  */
 
 static int
-wlibListStoreUpdateIter(GtkListStore *ls, GtkTreeIter *iter, char *labels)
+wlibListStoreUpdateIter(GtkListStore *ls, GtkTreeIter *iter, const char *labels)
 {
 	char *convertedLabels;
 	char *text;
@@ -194,7 +194,7 @@ wlibListStoreUpdateIter(GtkListStore *ls, GtkTreeIter *iter, char *labels)
 
 	convertedLabels = g_strdup(wlibConvertInput(labels));
 	start = convertedLabels;
-	/** \todo replace strchr with g_strsplit */
+
 	while ((text = strchr(start, '\t')) != NULL) {
 		*text = '\0';
 		gtk_list_store_set(ls, iter, LISTCOL_TEXT + current, start, -1);
@@ -248,20 +248,6 @@ wlibListStoreSetData(GtkListStore* store, GtkTreeIter* iter, int column,
 	gtk_list_store_set(store, iter, LISTCOL_TEXT+column, label, -1);
 }
 
-//void
-//wlibListStoreAddRow(GtkListStore* listStore, wIcon_p icon, wListItem_p userData, const char* label)
-//{
-//	GtkTreeIter iter;
-//
-//	ListStoreAppendRow(listStore, &iter, userData);
-//
-//	if (icon) {
-//		ListStoreSetIcon(listStore, &iter, icon);
-//	}
-//
-//	ListStoreSetData(listStore, &iter, label);
-//}
-
 /**
  * Change a row in the list store. The passed strings are placed
  * in the first cols text columns of the list store.
@@ -288,9 +274,6 @@ wlibListStoreUpdateValues(GtkListStore *ls, int row, char *labels,
 	count = wlibListStoreUpdateIter(ls, &iter, labels);
 
 	if (bm) {
-		//GdkPixbuf *pixbuf;
-
-		//pixbuf = wlibMakePixbuf(bm);
 		wlibListStoreSetIcon(ls, &iter, bm);
 	}
 

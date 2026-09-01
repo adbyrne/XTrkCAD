@@ -382,7 +382,6 @@ wControl_p wToggleCreateForToolbar(
 
 	wButtonSetIcon(buttonControl, icon);
 
-	/** \todo BO_ABUT should be renamed to BO_OVERFLOW_MENU and be included with the button */
 	if (option & BO_ABUT) {
 		wlibSetAbutStyle(buttonControl->widget);
 	}

@@ -38,8 +38,6 @@
 #include "dynarr.h"
 #include "i18n.h"
 
-extern wWin_p gtkMainW;
-
 long debugWindow = 0;
 
 char wConfigName[ 256 ];
@@ -59,23 +57,13 @@ const char * wNames[] = {
 	"RADIO",
 	"TOGGLE",
 	"DRAW",
-	"MENU"
+	"MENU",
 	"MULTITEXT",
 	"MESSAGE",
 	"LINES",
 	"MENUITEM",
 	"BOX"
 };
-
-
-#if 0
-static wBool_t reverseIcon =
-#if defined(linux)
-        FALSE;
-#else
-        TRUE;
-#endif
-#endif
 
 static bool audioOn;
 
@@ -86,60 +74,6 @@ static bool audioOn;
  *
  *****************************************************************************
  */
-
-/**
- * Create a pixbuf from a two colored bitmap in XBM format.
- *
- * \param ip the XBM data
- * \returns the pixbuf
- * \todo Compare to similar function in pixbuf.c
- */
-
-GdkPixbuf* wlibPixbufFromXBM( wIcon_p ip)
-{
-	GdkPixbuf * pixbuf;
-
-	char line0[40];
-	char line2[40];
-
-	char ** pixmapData;
-	int row, col, wb;
-	long rgb;
-	const char * bits;
-
-	wb = (ip->w + 7) / 8;
-	pixmapData = (char**) malloc((3 + ip->h) * sizeof *pixmapData);
-	pixmapData[0] = line0;
-	rgb = ip->color;
-
-	sprintf(line0, " %ld %ld 2 1", ip->w, ip->h);
-	sprintf(line2, "# c #%2.2lx%2.2lx%2.2lx", (rgb >> 16)&0xFF, (rgb >> 8)&0xFF,
-	        rgb & 0xFF);
-	pixmapData[1] = ". c None s None";
-	pixmapData[2] = line2;
-	bits = (const char *)ip->bits;
-
-	for (row = 0; row < ip->h; row++) {
-		pixmapData[row + 3] = (char*) malloc((ip->w + 1) * sizeof **pixmapData);
-
-		for (col = 0; col < ip->w; col++) {
-			if (bits[ row * wb + (col >> 3) ] & (1 << (col & 07))) {
-				pixmapData[row + 3][col] = '#';
-			} else {
-				pixmapData[row + 3][col] = '.';
-			}
-		}
-		pixmapData[row + 3][ip->w] = 0;
-	}
-
-	pixbuf = gdk_pixbuf_new_from_xpm_data((const char **) pixmapData);
-
-	for (row = 0; row < ip->h; row++) {
-		free(pixmapData[row + 3]);
-	}
-	free(pixmapData);
-	return pixbuf;
-}
 
 /**
  * Add a label to an existing widget
@@ -159,88 +93,6 @@ void wlibAddLabel(wControl_p b, wWinPix_t x, wWinPix_t y, const char * labelStr)
 	}
 }
 
-/**
- * Allocate and initialize the data structure for a new widget
- *
- * \param parent IN parent window
- * \param type IN type of new widget
- * \param origX IN x position
- * \param origY IN y position
- * \param labelStr IN text label
- * \param size IN size
- * \param data IN user data to keep with widget
- * \returns
- */
-
-void * wlibAlloc(
-        wWin_p parent,
-        wType_e type,
-        wWinPix_t origX,
-        wWinPix_t origY,
-        const char * labelStr,
-        int size,
-        void * data)
-{
-	printf("Not implemented wlibAlloc() %s %d\n", __FILE__, __LINE__);
-	return(NULL);
-	//wControl_p w = (wControl_p) malloc(size);
-	//char * cp;
-	//memset(w, 0, size);
-
-	//if (w == NULL) {
-	//    abort();
-	//}
-
-	//w->outline = FALSE;
-
-	//w->type = type;
-	//w->parent = parent;
-	//w->origX = origX;
-	//w->origY = origY;
-
-	//if (labelStr) {
-	//    cp = (char*) malloc(strlen(labelStr) + 1);
-	//    w->labelStr = cp;
-
-	//    for (; *labelStr; labelStr++)
-	//        if (*labelStr != '&') {
-	//            *cp++ = *labelStr;
-	//        }
-
-	//    *cp = 0;
-	//}
-
-	//w->doneProc = NULL;
-	//w->data = data;
-	//return w;
-}
-
-/**
- * Calculate the position for a widget
- *
- * \param b IN widget
- */
-
-void wlibComputePos(
-        wControl_p b)
-{
-	printf("Not implemented wlibComputePos() %s %d\n", __FILE__, __LINE__);
-	//wWin_p w = b->parent;
-
-	//if (b->origX >= 0) {
-	//    b->realX = b->origX;
-	//}
-	//else {
-	//    b->realX = w->lastX + (-b->origX) - 1;
-	//}
-
-	//if (b->origY >= 0) {
-	//    b->realY = b->origY + BORDERSIZE + ((w->option & F_MENUBAR) ? w->menu_height : 0);
-	//}
-	//else {
-	//    b->realY = w->lastY + (-b->origY) - 1;
-	//}
-}
 
 /**
  * Initialize the internal structure with the size of the widget
@@ -253,95 +105,7 @@ void wlibControlGetSize(
 {
 	GtkRequisition requisition;
 	gtk_widget_get_preferred_size(b->widget, NULL, &requisition);
-//    b->w = requisition.width;
-//    b->h = requisition.height;
 }
-
-/**
- * ???
- * \param b IN widget
- */
-
-void wlibAddButton(
-        wControl_p b)
-{
-	printf("Not implemented wlibAddButton() %s %d\n", __FILE__, __LINE__);
-	//wWin_p win = b->parent;
-	//wBool_t resize = FALSE;
-
-	//if (win->first == NULL) {
-	//    win->first = b;
-	//}
-	//else {
-	//    win->last->next = b;
-	//}
-
-	//win->last = b;
-	//b->next = NULL;
-	//b->parent = win;
-	//win->lastX = b->realX + b->w;
-	//win->lastY = b->realY + b->h;
-
-	//if (win->option & F_AUTOSIZE) {
-	//    if (win->lastX > win->realX) {
-	//        win->realX = win->lastX;
-
-	//        if (win->w != (win->realX + win->origX)) {
-	//            resize = TRUE;
-	//            win->w = (win->realX + win->origX);
-	//        }
-	//    }
-
-	//    if (win->lastY > win->realY) {
-	//        win->realY = win->lastY;
-
-	//        if (win->h != (win->realY + win->origY)) {
-	//            resize = TRUE;
-	//            win->h = (win->realY + win->origY);
-	//        }
-	//    }
-
-	//    if (win->shown) {
-	//        if (resize) {
-	//            gtk_widget_set_size_request(win->gtkwin, win->w, win->h);
-	//            gtk_widget_set_size_request(win->widget, win->w, win->h);
-	//        }
-	//    }
-	//}
-}
-
-/**
- * Find the widget at a position
- * \param win IN searched widget's parent window
- * \param x IN x position inside parent
- * \param y IN y position inside parent
- * \returns the widget, NULL if none at the position
- */
-
-wControl_p wlibGetControlFromPos(
-        wWin_p win,
-        wWinPix_t x,
-        wWinPix_t y)
-{
-	printf("Not implemented wlibGetControlFromPos() %s %d\n", __FILE__, __LINE__);
-	//wControl_p b;
-	//wWinPix_t xx, yy;
-
-	//for (b = win->first; b != NULL; b = b->next) {
-	//    if (b->widget && gtk_widget_get_visible(b->widget)) {
-	//        xx = b->realX;
-	//        yy = b->realY;
-
-	//        if (xx <= x && x < xx + b->w &&
-	//            yy <= y && y < yy + b->h) {
-	//            return b;
-	//        }
-	//    }
-	//}
-
-	return NULL;
-}
-
 
 /*
  *****************************************************************************
@@ -407,7 +171,7 @@ void wSetCursor(wControl_p bd, wCursor_t cursor)
 {
 	static GdkCursor * gdkcursors[wCursorQuestion+1];
 	GdkCursor * gdkcursor;
-	//GdkWindow * gdkwindow = gtk_widget_get_window(GTK_WIDGET(win->gtkwin));;
+
 	GdkWindow * gdkwindow = gdk_get_default_root_window();
 	GdkDisplay * display = gdk_window_get_display(gdkwindow);
 	if ((cursor == wCursorNone) && dontHideCursor) { return; }  //Ignore if we dont want to suppress
@@ -706,8 +470,6 @@ wBool_t wlibHandleAccelKey(
 /**
  * Add control to circular list of synonymous controls. Synonymous controls are kept in sync by
  * calling wControlLinkedActive for one member of the list
- * \todo This is similar to the concept of action in gtk/glib \
- * Maybe this would be easier to use
  *
  * \param b1 IN  first control
  * \param b2 IN  second control

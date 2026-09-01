@@ -59,14 +59,8 @@ wControl_p wMenuPopupCreate(
         const char* labelStr)
 {
 	wControl_p popupControl = NULL;
-#ifdef TODO_UNUSED
-	struct menu* popupAttributes;
-#endif
 
 	popupControl = wlibControlNew(B_MENU, parent, NULL, NULL);
-#ifdef TODO_UNUSED
-	popupAttributes = CONTROL_GET_ATTRIBUTES_PTR(popupControl, menu);
-#endif
 
 	popupControl->widget = gtk_menu_new();
 

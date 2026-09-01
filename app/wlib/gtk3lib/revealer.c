@@ -1,5 +1,7 @@
 /** \file revealer.c
  * GtkRevealer / GtkFrame helpers for builder-defined nested panels
+ *
+ * was tested but has not find use. Left for possible future development
  */
 /*
  * Copyright 2026 Martin Fischer <m_fischer@sf.net>

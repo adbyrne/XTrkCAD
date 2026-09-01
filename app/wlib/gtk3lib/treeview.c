@@ -283,60 +283,6 @@ wlibTreeViewShowIcon(GtkTreeView *tv)
 	gtk_tree_view_column_set_visible(column, TRUE);
 }
 
-/*
- * Add text to the text columns of the tree view and update the context
- * information
- *
- * \param tv IN treeview
- * \param cols IN number of cols to change
- * \param label IN tab separated string of values
- * \param userData IN additional context information
- * \returns
- */
-
-//int
-//wlibTreeViewAddData(GtkTreeView *tv, wIcon_p bm, wListItem_p userData, const char* label)
-//{
-//	GtkListStore* listStore = GTK_LIST_STORE(gtk_tree_view_get_model(tv));
-//
-//	wlibListStoreAddRow(listStore, bm, userData, label);
-//
-//	if (bm) {
-//		GtkTreeViewColumn *column;
-//
-//		// first column in list store has pixbuf
-//		column = gtk_tree_view_get_column(GTK_TREE_VIEW(tv), TREEVIEWCOL_BITMAP );
-//		gtk_tree_view_column_set_visible(column, TRUE);
-//	}
-//
-//	return 0;
-//}
-
-
-
-/**
- * Add a row to the tree view. As necessary the adjustment is update in
- * order to make sure, that the list box is fully visible or has a
- * scrollbar.
- *
- * \param control IN the list box
- * \param label IN the text labels
- * \param bm IN bitmap to show at start
- * \param id_p IN user attributes
- */
-
-
-void
-wlibTreeViewAddRow(wControl_p control, wIcon_p bm, wListItem_p id_p,
-                   const char* label)
-{
-	//struct list* lcontrol = CONTROL_GET_ATTRIBUTES_PTR(control, list);
-
-	//wlibTreeViewAddData(lcontrol->treeView, bm, id_p, (char*)label);
-
-	//ScrollToLastLine(control);
-}
-
 /**
  * Function for handling a selection change. The internal attributes structure
  * for the changed row is updated. If a handler function for the list

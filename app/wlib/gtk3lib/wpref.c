@@ -405,11 +405,12 @@ wlibPrefGetPageSetup(void)
 
 	if (!page_setup) {
 		// ignore file not found error as defaults will be used
-		GtkDialog *dialog;
 		// G_FILE_ERROR_NAMETOOLONG = section missing; gtk_page_setup_new_from_key_file
 		// returns this when the group is absent (gtk_print_settings_new_from_key_file
 		// returns G_FILE_ERROR_NOENT for the same condition — GTK inconsistency)
 		if (err->code != G_FILE_ERROR_NAMETOOLONG) {
+			GtkDialog *dialog;
+
 			dialog = gtk_message_dialog_new(wlibAppWinGetMain(),
 			                                GTK_DIALOG_DESTROY_WITH_PARENT,
 			                                GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,

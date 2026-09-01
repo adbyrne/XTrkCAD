@@ -1,6 +1,5 @@
 /** \file recentuse.c
- * Recently used list management
- * \todo This is not only "recent use" but any type of menu list
+ * menu list management
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -32,9 +31,6 @@
 
 #include "gtkint.h"
 #include "i18n.h"
-
-#define WLISTITEM	"wListItem"		/**< id for object context */
-#define WLISTMENU	"wListMenu"		/**< id for reference to main list context */
 
 struct listentry {					/**< context of items in recently used list */
 	GtkWidget* menuentry;			// text label for menu
@@ -72,7 +68,6 @@ UpdateMenuList(struct recentuse *ru)
 
 			gtk_widget_set_sensitive(entry->menuentry, TRUE);
 			gtk_widget_show(entry->menuentry);
-			//g_object_set_data(G_OBJECT(ru->widgets[i]), WLISTITEM, entry);
 		}
 
 	}
@@ -93,20 +88,12 @@ static void ActivateListMenuItem(
 	struct listentry* userdata = (struct listentry*)value;
 	struct recentuse *ru = userdata->recentuse;
 
-	//// pointer to the list item
-	//struct listentry *item = g_object_get_data(G_OBJECT(widget), WLISTITEM);
-	//struct recentuse *list = g_object_get_data(G_OBJECT(widget), WLISTMENU);
-
 	if (ru->action) {
 		(*ru->action)(0,
 		              gtk_menu_item_get_label(GTK_MENU_ITEM(userdata->menuentry)),
 		              (char *)userdata->context); // CAST_AWAY_CONST
 	}
 
-	//// update order of elements in list
-	//list->elements = g_slist_remove(list->elements, item );
-	//list->elements = g_slist_prepend(list->elements, item );
-	//ShowMenuList(list);
 }
 
 GtkWidget*
@@ -164,13 +151,11 @@ PushListEntry(wControl_p list, const char* label, const char* context)
 {
 	struct recentuse *ru = CONTROL_GET_ATTRIBUTES_PTR(list, recentuse);
 	struct listentry *newEntry;
-	char* name;
+	const char* name;
 
 	newEntry = g_malloc0(sizeof( struct listentry));
 	newEntry->context = context;
 	newEntry->menuentry = CreateEntry(label, TRUE);
-	//printf("CreateEntry newEntry: %p menuentry: %p\n", (void*)newEntry,
-	//       (void*)newEntry->menuentry);
 	newEntry->recentuse = ru;
 
 	gtk_menu_shell_append(GTK_MENU_SHELL(ru->parentMenu->widget),
@@ -253,9 +238,8 @@ wMenuListGet(wControl_p ml, int index, void** attributes)
 		entry = MRUGetNth(ru->mrulist, index);
 		if (entry) {
 			*attributes = (void*)((struct listentry*)entry)->context;
+			return(((struct listentry*)entry)->context);
 		}
-
-		return(((struct listentry*)entry)->context);
 	}
 	return(NULL);
 }
@@ -278,8 +262,6 @@ void wMenuListClear(
 		struct listentry * nextEntry = (struct listentry *)user_data;
 
 		if (nextEntry) {
-			//printf("DestroyEntry nextEntry: %p menuentry: %p\n", (void*)nextEntry,
-			//       (void*)nextEntry->menuentry);
 			gtk_widget_destroy(nextEntry->menuentry);
 			g_free(nextEntry);
 		}

@@ -1,5 +1,5 @@
 /** \file drawcairo.c
- * Basic drawing functions
+ * Basic drawing functions for interactive drawing area
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -59,8 +59,6 @@ struct wDrawBitMap_t {
 	cairo_pattern_t* pattern;
 };
 
-struct draw * psPrint_d;
-
 #ifndef BATCH_LIMIT
 #define BATCH_LIMIT 100
 #endif
@@ -81,17 +79,9 @@ static void finish_drawing(struct draw *bd, cairo_t *cr);
  *
  */
 
-#define LBORDER (22)
-#define RBORDER (6)
-#define TBORDER (6)
-#define BBORDER (20)
-
 #define INMAPX(D,X)	(X)
 #define INMAPY(D,Y)	(((D)->height-1) - (Y))
-#define OUTMAPX(D,X)	(X)
-#define OUTMAPY(D,Y)	(((D)->height-1) - (Y))
 
-
 /*******************************************************************************
  *
  * Basic Drawing Functions
@@ -195,7 +185,6 @@ static cairo_t *gtkDrawCreateCairoContext(struct draw *bd,
 
 
 	GdkRGBA gcolor = wlibGetColor(color, TRUE);
-	/*bd->lastColor = */
 	GtkDrawSetColor(cairo, color, &gcolor);
 
 	if (bd->clipregion) {
@@ -358,42 +347,6 @@ static void finish_drawing(struct draw *bd, cairo_t *cr)
 	}
 }
 
-#ifdef CURSOR_SURFACE
-cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wWinPix_t width,
-                             wWinPix_t height, wDrawColor color, wDrawOpts opts)
-{
-
-	cairo_t * cairo = NULL;
-
-	assert(surface);
-
-	if ((opts&wDrawOptCursor) || (opts&wDrawOptCursorRmv)) {
-
-		if ( surface->width != width || surface->height != height) {
-			if (surface->surface) { cairo_surface_destroy(surface->surface); }
-			surface->surface = cairo_image_surface_create( CAIRO_FORMAT_ARGB32, width,
-			                   height );
-			surface->width = width;
-			surface->height = height;
-
-		}
-
-		cairo = gtkDrawCreateCairoCursorContext(ct,surface->surface,0,wDrawLineSolid,
-		                                        color, opts);
-		cairo_save(cairo);
-		cairo_set_source_rgba(cairo, 0.0, 0.0, 0.0, 0.0);
-		cairo_paint(cairo);
-		cairo_restore(cairo);
-		surface->show = TRUE;
-		cairo_set_operator(cairo,CAIRO_OPERATOR_SOURCE);
-
-	}
-
-	return cairo;
-
-}
-#endif
-
 void wDrawDelayUpdate(
         wControl_p bd,
         wBool_t delay )
@@ -401,7 +354,7 @@ void wDrawDelayUpdate(
 	cairo_rectangle_int_t update_rect;
 
 	if ( (!delay) && bd->attributes.draw.delayUpdate ) {
-		if ( iDrawLog >= 1 ) { printf( "wDrawDelayUpdate( %d -> %d ) - update\n", bd->attributes.draw.delayUpdate, delay ); }
+		if ( iDrawLog >= 1 ) { printf( "wDrawDelayUpdate( %u -> %d ) - update\n", bd->attributes.draw.delayUpdate, delay ); }
 		update_rect.x = 0;
 		update_rect.y = 0;
 		wDrawGetSize(bd, (wWinPix_t *)&update_rect.width,
@@ -411,7 +364,7 @@ void wDrawDelayUpdate(
 		cairo_region_destroy(cairo_region);
 		gtk_widget_queue_draw(bd->widget);
 	} else {
-		if ( iDrawLog >= 2 ) { printf( "wDrawDelayUpdate( %d -> %d ) - update\n", bd->attributes.draw.delayUpdate, delay ); }
+		if ( iDrawLog >= 2 ) { printf( "wDrawDelayUpdate( %u -> %d ) - update\n", bd->attributes.draw.delayUpdate, delay ); }
 	}
 	bd->attributes.draw.delayUpdate = delay;
 }
@@ -435,10 +388,12 @@ void wDrawLine(
 		return;
 	}
 
+	// cppcheck-suppress-begin selfAssignment
 	x0 = INMAPX(bd,x0);
 	y0 = INMAPY(bd,y0);
 	x1 = INMAPX(bd,x1);
 	y1 = INMAPY(bd,y1);
+	// cppcheck-suppress-end selfAssignment
 
 	cairo_t* cr = prepare_drawing(bd, width, lineType, color, opts, FALSE);
 
@@ -546,33 +501,6 @@ void wDrawArc(
 	}
 }
 
-void wDrawPoint(
-        wControl_p drawingArea,
-        wDrawPix_t x0, wDrawPix_t y0,
-        wDrawColor color,
-        wDrawOpts opts )
-{
-	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
-	g_assert(drawingArea->type == B_DRAW);
-
-	if (bd->drawDestination == DIRECTCAIRO) {
-		return;
-	}
-
-	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color,
-	                 opts);
-	cairo_new_path(cairo);
-	cairo_arc(cairo, INMAPX(bd, x0), INMAPY(bd, y0), 0.75, 0, 2 * M_PI);
-	cairo_stroke(cairo);
-	gtkDrawDestroyCairoContext(cairo);
-	if (drawingArea->widget && !bd->delayUpdate) {
-		gtk_widget_queue_draw_area(drawingArea->widget,INMAPX(bd,x0-0.75),INMAPY(bd,
-		                           y0+0.75),2,
-		                           2);
-	}
-
-}
-
 /*******************************************************************************
  *
  * Strings
@@ -607,6 +535,7 @@ void wDrawString(
 		return;
 	}
 
+	// cppcheck-suppress selfAssignment
 	x = INMAPX(bd,x);
 	y = INMAPY(bd,y);
 
@@ -696,13 +625,11 @@ void wDrawGetTextSize(
 	*w = textWidth;
 	*h = textHeight;
 	*a = ascent;
-	//*d = textHeight-ascent;
 	*d = descent;
 
 	gtkDrawDestroyCairoContext(cairo);
 }
 
-
 /*******************************************************************************
  *
  * Basic Drawing Functions
@@ -754,6 +681,7 @@ void wDrawFilledRectangle(
 		return;
 	}
 
+	// cppcheck-suppress selfAssignment
 	x = INMAPX(bd,x);
 	y = INMAPY(bd,y)-h;
 
@@ -818,6 +746,7 @@ void wDrawPolygon(
 		if (points == NULL) {
 			points = (GdkPoint*)malloc( cnt*sizeof *points );
 		} else {
+			//cppcheck-suppress memleakOnRealloc
 			points = (GdkPoint*)realloc( points, cnt*sizeof *points );
 		}
 		if (points == NULL) {
@@ -1010,12 +939,6 @@ void wDrawClear( wControl_p drawingArea )
 	wDrawClearTemp(drawingArea);
 }
 
-void * wDrawGetContext(
-        wControl_p drawingArea )
-{
-	return drawingArea->context;
-}
-
 /*******************************************************************************
  *
  * Bit Maps
@@ -1147,8 +1070,6 @@ void wDrawBitMap(
  *
 *******************************************************************************/
 
-
-
 /**
  * Snapshot the drawing area's current surface into `pixbufBackup`, replacing
  * any previous snapshot. Used by `ctrain.c`'s train-car redraw to capture
@@ -1211,30 +1132,6 @@ void wDrawRestoreImage(
 		gtk_widget_queue_draw_area( bd->widget, 0, 0, d->width, d->height );
 	}
 }
-
-void wDrawSetSize(
-        wControl_p drawingArea,
-        wWinPix_t w,
-        wWinPix_t h, void * redraw)
-{
-	if (drawingArea == NULL) {
-		fprintf(stderr,"resizeDraw: no client data\n");
-		return;
-	}
-
-	g_assert(drawingArea->type == B_DRAW);
-
-	if ( iDrawLog >= 1 ) {
-		printf( "%ld: wDrawSetSize %ld+%ld %s\n", lDrawCnt, w, h, redraw?"Redraw":"" );
-	}
-
-	/* Negative values crashes the program */
-	if (w < 0 || h < 0) {
-		return;
-	}
-	gtk_widget_set_size_request(drawingArea->widget, w, h);
-}
-
 
 void wDrawGetSize(
         wControl_p drawingArea,
@@ -1315,6 +1212,7 @@ void wDrawClipClear(wControl_p drawingArea)
  * Background
  *
  ******************************************************************************/
+
 int wDrawSetBackground(    wControl_p drawingArea, char * path, char ** error)
 {
 	GError *err = NULL;
@@ -1413,12 +1311,13 @@ void wDrawShowBackground( wControl_p drawingArea, wWinPix_t pos_x,
 		int pixels_width = gdk_pixbuf_get_width(drawControl->background);
 		int pixels_height = gdk_pixbuf_get_height(drawControl->background);
 		double scale;
-		double posx,posy,width,sized;
+		double posx,posy;
 		posx = (double)pos_x;
 		posy = (double)pos_y;
 		if (size == 0) {
 			scale = 1.0;
 		} else {
+			double width,sized;
 			sized = (double)size;
 			width = (double)pixels_width;
 			scale = sized/width;
@@ -1428,8 +1327,6 @@ void wDrawShowBackground( wControl_p drawingArea, wWinPix_t pos_x,
 		posy = (double)drawControl->height-((pixels_height*fabs(cos(
 		                rad))+pixels_width*fabs(sin(
 		                                rad)))*scale)-posy;
-		//width = (double)(pixels_width*scale);
-		//height = (double)(pixels_height*scale);
 		cairo_translate(cairo,posx,posy);
 		cairo_scale(cairo, scale, scale);
 		cairo_translate(cairo, fabs(pixels_width/2.0*cos(rad))+fabs(

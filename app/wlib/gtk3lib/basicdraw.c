@@ -32,8 +32,6 @@
 
 #include "gtkint.h"
 
-static int iBasicLog = 1;
-
 /**
  * Set the drawing color. The color table entry is fetched and converted
  * to RGBA format, where alpha is considered to be maximum, no transparency
@@ -68,11 +66,6 @@ BasicDrawSetLineType (cairo_t *cr, double lineWidth, double minLineWidth,
                       wDrawLineType_e lineType, wDrawOpts opts,
                       double scale_adjust)
 {
-#ifdef TODO_UNUSED
-	double dashes[] = { DASH_LENGTH, 3 };		//Reduce gap in between dashes
-	static int len_dashes = sizeof(dashes) / sizeof(dashes[0]);
-#endif
-
 	if (lineWidth < 0.0) {
 		lineWidth = P2I(-lineWidth) * 2.0 / scale_adjust;
 	}
@@ -136,10 +129,6 @@ void
 wBasicClear (wControl_p bd)
 {
 	struct draw *draw = CONTROL_GET_ATTRIBUTES_PTR(bd, draw);
-
-	if (iBasicLog >= 1) {
-		printf ("wBasicClear %d+%d\n", draw->width, draw->height);
-	}
 
 	cairo_set_source_rgb(draw->cr, 255, 255, 255);
 	cairo_paint(draw->cr);
@@ -243,7 +232,8 @@ wBasicDrawArc (wControl_p bd, wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r,
 }
 
 static PangoLayout *
-CreateLayoutForText(struct draw *bd, cairo_t *cr, char *text, wFont_p font,
+CreateLayoutForText(const struct draw *bd, cairo_t *cr, const char *text,
+                    wFont_p font,
                     double size )
 {
 	PangoLayout* layout;
@@ -294,7 +284,7 @@ CreateLayoutForText(struct draw *bd, cairo_t *cr, char *text, wFont_p font,
 
 void
 wBasicDrawString (wControl_p bd, wDrawPix_t x, wDrawPix_t y, double a,
-                  char *s,
+                  const char *s,
                   wFont_p fp, double fs, double width, double minWidth,
                   wDrawColor color, wDrawOpts opts)
 {
@@ -394,7 +384,7 @@ wBasicDrawFillRectangle (wControl_p bd, wDrawPix_t x0, wDrawPix_t y0,
 
 void
 wBasicDrawFillPolygon (wControl_p bd, wDrawPix_t p[][2],
-                       wPolyLine_e type[],
+                       const wPolyLine_e type[],
                        int cnt, wDrawColor color, wDrawOpts opts, int fill,
                        int open)
 {
@@ -442,7 +432,7 @@ wBasicDrawFillPolygon (wControl_p bd, wDrawPix_t p[][2],
 		mid4[1] = (mid1[1] - p[inx][1]) / 2 + p[inx][1];
 		wDrawPix_t save[2];
 		if (inx == 0) {
-			if (!type || (type && type[0] == wPolyLineStraight) || open) {
+			if (!type || (type[0] == wPolyLineStraight) || open) {
 				cairo_move_to (cr, p[0][0], p[0][1]);
 				save[0] = p[0][0];
 				save[1] = p[0][1];
@@ -467,12 +457,12 @@ wBasicDrawFillPolygon (wControl_p bd, wDrawPix_t p[][2],
 				save[0] = mid0[0];
 				save[1] = mid0[1];
 			}
-		} else if (!type || (type && type[inx] == wPolyLineStraight)
+		} else if (!type || (type[inx] == wPolyLineStraight)
 		           || (open && (inx == cnt - 1))) {
 			cairo_line_to (cr, p[inx][0], p[inx][1]);
 		} else {
 			cairo_line_to (cr, mid0[0], mid0[1]);
-			if (type && type[inx] == wPolyLineSmooth)
+			if (type[inx] == wPolyLineSmooth)
 				cairo_curve_to (cr,
 				                p[inx][0],
 				                p[inx][1],

@@ -43,14 +43,6 @@ wLoadResourceFile(const char* filename)
 	if (resource) {
 		g_resources_register(resource);
 
-		//char **children = g_resources_enumerate_children( "/", 0, &error);
-
-		//int i = 0;
-		//while (children[i]) {
-		//	printf("%s\n", children[i++]);
-		//}
-		//
-		//g_strfreev(children);
 	}
 
 	return(TRUE);

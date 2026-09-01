@@ -37,6 +37,7 @@ typedef enum {
 #define IS_STICKY_TOGGLE_BUTTON(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), STICKY_TOGGLE_BUTTON_TYPE))
 #define IS_STICKY_TOGGLE_BUTTON_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass), STICKY_TOGGLE_BUTTON_TYPE))
 
+// cppcheck-suppress unknownMacro
 G_DECLARE_FINAL_TYPE(StickyToggleButton, sticky_toggle_button, STICKY,
                      TOGGLE_BUTTON, GtkToggleButton)
 

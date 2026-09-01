@@ -293,6 +293,7 @@ wToggleGroupRegister( wControl_p toggle,
 	// check that the widget has a boolean property "active". This allows all types
 	// of toggles / switches to be used with a ToggleGroup
 
+	// cppcheck-suppress constVariablePointer
 	GParamSpec *pspec = g_object_class_find_property(
 	                            G_OBJECT_GET_CLASS(toggle->widget), "active");
 	g_return_val_if_fail(pspec != NULL, TOGGLE_GROUP_ERROR);
@@ -344,6 +345,7 @@ wToggleGroupExists(const gchar *group_name)
 	if (!groups) {
 		return FALSE;
 	}
+	// cppcheck-suppress constVariablePointer
 	ToggleGroup *grp = g_hash_table_lookup(groups, group_name);
 	return (grp && grp->master);
 }
