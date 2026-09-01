@@ -2812,16 +2812,15 @@ BOOL_T GetTracksFromCornuTrack(track_p trk, track_p newTracks[2])
 			if (newTracks[0] == NULL) { newTracks[0] = bezTrack[0]; }
 			newTracks[1] = bezTrack[1];
 			if (trk_old) {
-				// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-				for (int i=0; i<2; i++) {
-					if (GetTrkEndTrk(trk_old,i)==NULL) {
-						coOrd pos = GetTrkEndPos(trk_old,i);
+				for (int j=0; j<2; j++) {
+					if (GetTrkEndTrk(trk_old,j)==NULL) {
+						coOrd pos = GetTrkEndPos(trk_old,j);
 						EPINX_T ep_n = PickUnconnectedEndPoint(pos,bezTrack[0]);
-						if ((connectDistance >= FindDistance(GetTrkEndPos(trk_old,i),
+						if ((connectDistance >= FindDistance(GetTrkEndPos(trk_old,j),
 						                                     GetTrkEndPos(bezTrack[0],ep_n))) &&
-						    (connectAngle >= fabs(DifferenceBetweenAngles(GetTrkEndAngle(trk_old,i),
+						    (connectAngle >= fabs(DifferenceBetweenAngles(GetTrkEndAngle(trk_old,j),
 						                          GetTrkEndAngle(bezTrack[0],ep_n)+180))) ) {
-							ConnectTracks(trk_old,i,bezTrack[0],ep_n);
+							ConnectTracks(trk_old,j,bezTrack[0],ep_n);
 							break;
 						}
 					}
@@ -2840,16 +2839,15 @@ BOOL_T GetTracksFromCornuTrack(track_p trk, track_p newTracks[2])
 			CopyAttributes( trk, new_trk );
 			newTracks[1] = new_trk;
 			if (trk_old) {
-				// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-				for (int i=0; i<2; i++) {
-					if (GetTrkEndTrk(trk_old,i)==NULL) {
-						coOrd pos = GetTrkEndPos(trk_old,i);
+				for (int j=0; j<2; j++) {
+					if (GetTrkEndTrk(trk_old,j)==NULL) {
+						coOrd pos = GetTrkEndPos(trk_old,j);
 						EPINX_T ep_n = PickUnconnectedEndPoint(pos,new_trk);
-						if ((connectDistance >= FindDistance(GetTrkEndPos(trk_old,i),
+						if ((connectDistance >= FindDistance(GetTrkEndPos(trk_old,j),
 						                                     GetTrkEndPos(new_trk,ep_n))) &&
-						    (connectAngle >= fabs(DifferenceBetweenAngles(GetTrkEndAngle(trk_old,i),
+						    (connectAngle >= fabs(DifferenceBetweenAngles(GetTrkEndAngle(trk_old,j),
 						                          GetTrkEndAngle(new_trk,ep_n)+180)))) {
-							ConnectTracks(trk_old,i,new_trk,ep_n);
+							ConnectTracks(trk_old,j,new_trk,ep_n);
 							break;
 						}
 					}

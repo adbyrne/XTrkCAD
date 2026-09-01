@@ -787,8 +787,7 @@ EXPORT void DrawCurvedTrack(
         wDrawColor color,
         long options )
 {
-	// cppcheck-suppress shadowVariable -- intentional: this track-type-specific drawing function uses the specific track's own gauge, overriding the module-global 'current' gauge -- confirmed consistent across all Draw*Track functions this session
-	DIST_T trackGauge = GetTrkGauge(trk);
+	DIST_T trkGauge = GetTrkGauge(trk);
 	wDrawWidth width=0;
 	trkSeg_p segPtr;
 	long bridge = 0, roadbed = 0;
@@ -828,7 +827,7 @@ EXPORT void DrawCurvedTrack(
 
 	// Draw a solid background
 	if(bridge|roadbed) {
-		wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi / d->scale);
+		wDrawWidth width3 = (wDrawWidth)round(trkGauge * 3 * d->dpi / d->scale);
 		DrawArc( d, p, r, a0, a1, 0, width3, bridge?bridgeColor:roadbedColor );
 	}
 
@@ -855,9 +854,9 @@ EXPORT void DrawCurvedTrack(
 			DrawArc( d, p, r, a0, a1, 0, 0, color );
 			d->options = savedDrawOptions;
 		}
-		DrawArc( d, p, r+trackGauge/2.0, a0, a1, 0, width, color );
-		DrawArc( d, p, r-trackGauge/2.0, a0, a1, iDrawCenter, width, color );
-		if ( (d->options&DC_PRINT) && roadbedWidth > trackGauge
+		DrawArc( d, p, r+trkGauge/2.0, a0, a1, 0, width, color );
+		DrawArc( d, p, r-trkGauge/2.0, a0, a1, iDrawCenter, width, color );
+		if ( (d->options&DC_PRINT) && roadbedWidth > trkGauge
 		     && DrawTwoRails( d, 1 ) ) {
 			wDrawWidth rbw = (wDrawWidth)floor(roadbedLineWidth*(d->dpi/d->scale)+0.5);
 			if ( options&DTS_RIGHT ) {
@@ -874,8 +873,8 @@ EXPORT void DrawCurvedTrack(
 			width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
 		}
 
-		DrawArc( d, p, r+(trackGauge*1.5), a0, a1, 0, width2, color );
-		DrawArc( d, p, r-(trackGauge*1.5), a0, a1, 0, width2, color );
+		DrawArc( d, p, r+(trkGauge*1.5), a0, a1, 0, width2, color );
+		DrawArc( d, p, r-(trkGauge*1.5), a0, a1, 0, width2, color );
 	}
 
 }
@@ -925,8 +924,7 @@ static BOOL_T ReadCurve( char * line )
 	long options;
 	char * cp = NULL;
 	long helixTurns = 0;
-	// cppcheck-suppress shadowVariable -- file-parse-time local default, assigned into the track's own extra-data struct field after parsing, unrelated to the global interactive-editing state
-	coOrd descriptionOff = { 0.0, 0.0 };
+	coOrd savedDescOff = { 0.0, 0.0 };
 
 	if (!GetArgs( line+6, paramVersion<3?"dXZs9dpYfc":paramVersion<9
 	              ?"dLl00s9dpYfc":"dLl00s9dpffc",
@@ -934,7 +932,7 @@ static BOOL_T ReadCurve( char * line )
 		return FALSE;
 	}
 	if (cp) {
-		if ( !GetArgs( cp, "lp", &helixTurns, &descriptionOff ) ) {
+		if ( !GetArgs( cp, "lp", &helixTurns, &savedDescOff ) ) {
 			return FALSE;
 		}
 	}
@@ -944,7 +942,7 @@ static BOOL_T ReadCurve( char * line )
 	t = NewTrack( index, T_CURVE, 0, sizeof *xx );
 	xx = GET_EXTRA_DATA(t, T_CURVE, extraDataCurve_t);
 	xx->helixTurns = helixTurns;
-	xx->descriptionOff = descriptionOff;
+	xx->descriptionOff = savedDescOff;
 	if ( paramVersion < 3 ) {
 		SetTrkVisible(t, visible!=0);
 		SetTrkNoTies(t, FALSE);

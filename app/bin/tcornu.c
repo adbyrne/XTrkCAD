@@ -701,7 +701,6 @@ static void RescaleCornu( track_p trk, FLOAT_T ratio )
 
 }
 
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 EXPORT BOOL_T SetCornuEndPt(track_p trk, EPINX_T inx, coOrd pos, coOrd center,
                             ANGLE_T angle, DIST_T radius)
 {

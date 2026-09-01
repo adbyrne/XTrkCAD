@@ -896,9 +896,8 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
 					newEntry->contents = MyStrdup(foundEntry->contents);
 					newEntry->tag = MyStrdup(foundEntry->tag);
 					newEntry->files = foundEntry->files;
-					// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-					for (unsigned int i=0; i<newEntry->files; i++) {
-						newEntry->fullFileName[i] = MyStrdup(foundEntry->fullFileName[i]);
+					for (unsigned int fileIdx=0; fileIdx<newEntry->files; fileIdx++) {
+						newEntry->fullFileName[fileIdx] = MyStrdup(foundEntry->fullFileName[fileIdx]);
 					}
 
 					DL_APPEND(results->subCatalog.head, newEntry);
@@ -923,9 +922,8 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
 						DL_DELETE(results->subCatalog.head, current);
 						MyFree(current->contents);
 						MyFree(current->tag);
-						// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-						for (unsigned int i=0; i<current->files; i++) {
-							MyFree(current->fullFileName[i]);
+						for (unsigned int fileIdx=0; fileIdx<current->files; fileIdx++) {
+							MyFree(current->fullFileName[fileIdx]);
 						}
 						MyFree(current);
 					}

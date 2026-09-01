@@ -79,7 +79,6 @@ static void NoDrawPoly( drawCmd_p d, int cnt, coOrd * pts, int * types,
                         wDrawColor color, wDrawWidth width, drawFill_e eFillOpt ) {}
 static void NoDrawFillCircle( drawCmd_p d, coOrd p, DIST_T r,
                               wDrawColor color ) {}
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 static void NoDrawRectangle( drawCmd_p d, coOrd orig, coOrd size,
                              wDrawColor color, drawFill_e eFill ) {}
 
@@ -187,13 +186,12 @@ static void UpdateBlock (track_p trk, int inx, descData_p descUpd,
 	LOG( log_block, 1, ("*** UpdateBlock(): needUndoStart = %d\n",needUndoStart))
 	if ( inx == -1 ) {
 		size_t max_str;
-		// cppcheck-suppress shadowVariable -- local control-flow flag, confirmed unrelated to the global file-dirty flag of the same name
-		BOOL_T changed, nChanged, sChanged;
-		nChanged = sChanged = changed = FALSE;
+		BOOL_T blockChanged, nChanged, sChanged;
+		nChanged = sChanged = blockChanged = FALSE;
 		thename = wEntryGetValue( blockDesc[NM].control0 );
 
 		if ( !xx->name || strcmp( thename, xx->name ) != 0 ) {
-			nChanged = changed = TRUE;
+			nChanged = blockChanged = TRUE;
 			max_str = blockDesc[NM].max_string;
 			if (max_str && strlen(thename)>max_str-1) {
 				newName = MyMalloc(max_str);
@@ -205,7 +203,7 @@ static void UpdateBlock (track_p trk, int inx, descData_p descUpd,
 
 		thescript = wEntryGetValue( blockDesc[SC].control0 );
 		if ( !xx->script || strcmp( thescript, xx->script ) != 0 ) {
-			sChanged = changed = TRUE;
+			sChanged = blockChanged = TRUE;
 			max_str = blockDesc[SC].max_string;
 			if (max_str && strlen(thescript)>max_str-1) {
 				newScript = MyMalloc(max_str);
@@ -214,7 +212,7 @@ static void UpdateBlock (track_p trk, int inx, descData_p descUpd,
 				NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_str-1);
 			} else { newScript = MyStrdup(thescript); }
 		}
-		if ( ! changed ) { return; }
+		if ( ! blockChanged ) { return; }
 		if ( needUndoStart ) {
 			UndoStart( _("Change block"), "Change block" );
 		}
@@ -399,22 +397,21 @@ static BOOL_T WriteBlock ( track_p t, FILE * f )
 	BOOL_T rc = TRUE;
 	wIndex_t iTrack;
 	blockData_p xx = GetblockData(t);
-	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-	char *blockName = MyStrdup(xx->name);
+	char *blockNameCopy = MyStrdup(xx->name);
 
 #ifdef UTFCONVERT
-	blockName = Convert2UTF8(blockName);
+	blockNameCopy = Convert2UTF8(blockNameCopy);
 #endif // UTFCONVERT
 
 	rc &= fprintf(f, "BLOCK %d \"%s\" \"%s\"\n",
-	              GetTrkIndex(t), blockName, xx->script)>0;
+	              GetTrkIndex(t), blockNameCopy, xx->script)>0;
 	for (iTrack = 0; iTrack < xx->numTracks && rc; iTrack++) {
 		if ((&(xx->trackList))[iTrack].t == NULL) { continue; }
 		rc &= fprintf(f, "\tTRK %d\n",
 		              GetTrkIndex((&(xx->trackList))[iTrack].t))>0;
 	}
 	rc &= fprintf( f, "\t%s\n", END_BLOCK )>0;
-	MyFree(blockName);
+	MyFree(blockNameCopy);
 	return rc;
 }
 

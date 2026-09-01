@@ -171,7 +171,6 @@ static wBool_t ScrollButtonStatus(void)
 	return TRUE;
 }
 static void
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 DrawElement(hotBarMap_t* tbm, DIST_T baseX, DIST_T barWidth, DIST_T barHeight,
             DIST_T labelX)
 {
@@ -238,7 +237,6 @@ DrawFixedElements(DIST_T barWidth, DIST_T barHeight)
 }
 
 static int
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 DrawVariableElements(DIST_T xStart, DIST_T barWidth, DIST_T barHeight)
 {
 	int inx;
@@ -637,7 +635,6 @@ void AddToContextMenu(char* contentsLabel, BOOL_T isFixed)
 EXPORT
 void AddHotBarElement(
         char * contentsLabel,
-        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
         coOrd size,
         coOrd orig,
         BOOL_T isTrack,

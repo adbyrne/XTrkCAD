@@ -354,8 +354,7 @@ static void ProcessDxfFile(
 	struct sLayer layer[MAX_DXF_LAYER];
 
 
-	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-	int layerCount = 0;
+	int dxfLayerCount = 0;
 	int entityCount = 0;
 
 	char dxfLayer[50];
@@ -424,17 +423,17 @@ static void ProcessDxfFile(
 
 				// Write the layer data into a list
 				if (inLayers) {
-					if (layerCount < MAX_DXF_LAYER) {
-						layer[layerCount].line = count;
+					if (dxfLayerCount < MAX_DXF_LAYER) {
+						layer[dxfLayerCount].line = count;
 						size_t len = strlen(dxfGroup);
-						layer[layerCount].name = MyMalloc((len + 1) * sizeof(char));
-						strncpy(layer[layerCount].name, dxfGroup, len);
-						layer[layerCount].color = (colorRGB >= 0 ? colorRGB : (color == 7 ? 0 :
-						                           (color > 0 && color < 256 ? color : 0)));
-						layer[layerCount].lineType = lineType;
-						layer[layerCount].thick = thick;
+						layer[dxfLayerCount].name = MyMalloc((len + 1) * sizeof(char));
+						strncpy(layer[dxfLayerCount].name, dxfGroup, len);
+						layer[dxfLayerCount].color = (colorRGB >= 0 ? colorRGB : (color == 7 ? 0 :
+						                              (color > 0 && color < 256 ? color : 0)));
+						layer[dxfLayerCount].lineType = lineType;
+						layer[dxfLayerCount].thick = thick;
 
-						layerCount++;
+						dxfLayerCount++;
 					} else {
 						NoticeMessage(MSG_TOO_MANY_LAYERS, _("Ok"), NULL, fileName, MAX_DXF_LAYER);
 						return;
@@ -448,7 +447,7 @@ static void ProcessDxfFile(
 					layerIdx = curLayer;
 
 					if (color < 0 || lineType < 0 || thick < 0) {
-						for (int i = 0; i < layerCount; i++) {
+						for (int i = 0; i < dxfLayerCount; i++) {
 							if (strncmp(dxfLayer, layer[i].name, sizeof dxfLayer) == 0) {
 								if (color < 0) {
 									color = layer[i].color;
@@ -866,7 +865,7 @@ static void ProcessDxfFile(
 	}
 	MyFree(DxfOutput);
 
-	for (int i = 0; i < layerCount; i++) {
+	for (int i = 0; i < dxfLayerCount; i++) {
 		MyFree(layer[i].name);
 	}
 
@@ -875,27 +874,26 @@ static void ProcessDxfFile(
 	if (importDxfXti >= 1) {
 
 		int saveLayer = curLayer;
-		// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-		int layer = 0;
+		int xtiLayer = 0;
 
 		if (importDxfXti == 2) {
-			layer = FindUnusedLayer(0);
-			if (layer == -1) {
+			xtiLayer = FindUnusedLayer(0);
+			if (xtiLayer == -1) {
 				NoticeMessage(MSG_NO_EMPTY_LAYER, _("Ok"), NULL, fileName, 0);
 				return;
 			}
 			char LayerName[80];
 			LayerName[0] = '\0';
 			sprintf(LayerName, _("Module - %s"), fileName);
-			SetCurrLayer(layer, NULL, 0, NULL, NULL);
-			SetLayerName(layer, LayerName);
+			SetCurrLayer(xtiLayer, NULL, 0, NULL, NULL);
+			SetLayerName(xtiLayer, LayerName);
 		}
 
 		ParamSetInReadTracks(TRUE);
 		BOOL_T ret = ReadTrackFile(pathName[0], fileName, FALSE, TRUE, TRUE);
 
 		if (ret) {
-			if (importDxfXti == 2) { SetLayerModule(layer, TRUE); }
+			if (importDxfXti == 2) { SetLayerModule(xtiLayer, TRUE); }
 			useCurrentLayer = FALSE;
 		}
 		SetCurrLayer(saveLayer, NULL, 0, NULL, NULL);

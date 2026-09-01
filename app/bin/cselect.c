@@ -1383,7 +1383,6 @@ static void MoveTracks(
         BOOL_T eraseFirst,
         BOOL_T move,
         BOOL_T rotate,
-        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
         coOrd base,
         coOrd orig,
         ANGLE_T angle,
@@ -1577,7 +1576,6 @@ void FreeTempStrings()
 }
 
 
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 wBool_t FindEndIntersection(coOrd base, coOrd orig, ANGLE_T angle, track_p * t1,
                             EPINX_T * ep1, track_p * t2, EPINX_T * ep2)
 {

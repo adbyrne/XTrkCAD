@@ -262,8 +262,7 @@ STATUS_T CmdModify(
 
 
 	STATUS_T rc;
-	// cppcheck-suppress shadowVariable -- intentional: this track-type-specific drawing function uses the specific track's own gauge, overriding the module-global 'current' gauge -- confirmed consistent across all Draw*Track functions this session
-	static DIST_T trackGauge;
+	static DIST_T modTrackGauge;
 
 	if ( changeTrackMode ) {
 		if ( action == C_MOVE ) {
@@ -283,7 +282,7 @@ STATUS_T CmdModify(
 		Dex.Trk = NULL;
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		/*ChangeParameter( &easementPD );*/
-		trackGauge = 0.0;
+		modTrackGauge = 0.0;
 		changeTrackMode = modifyRulerMode = FALSE;
 		modifyBezierMode = FALSE;
 		modifyCornuMode = FALSE;
@@ -334,7 +333,7 @@ STATUS_T CmdModify(
 
 			return C_ERROR;
 		}
-		trackGauge = (IsTrack(Dex.Trk)?GetTrkGauge(Dex.Trk):0.0);
+		modTrackGauge = (IsTrack(Dex.Trk)?GetTrkGauge(Dex.Trk):0.0);
 		if (QueryTrack( Dex.Trk, Q_CAN_MODIFY_CONTROL_POINTS )) { //Bezier
 			modifyBezierMode = TRUE;
 			if (ModifyBezier(C_START, pos) != C_CONTINUE) {			//Call Start with track
@@ -424,7 +423,6 @@ STATUS_T CmdModify(
 			} else if (QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) {    //Turntable
 				trackParams_t tp;
 				if (!GetTrackParams(PARAMS_CORNU, t, pos, &tp)) { return C_CONTINUE; }
-				// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
 				ANGLE_T a = tp.angle;
 				Translate(&pos,tp.ttcenter,a,tp.ttradius);
 				CreateRadiusAnchor(pos,a,FALSE);
@@ -552,7 +550,7 @@ extendTrack:
 					Dex.Trk = NULL;
 					return C_ERROR;
 				}
-				trackGauge = GetTrkGauge( Dex.Trk );
+				modTrackGauge = GetTrkGauge( Dex.Trk );
 				Dex.pos00 = pos;
 CHANGE_TRACK:
 				if (GetTrackParams( PARAMS_EXTEND, Dex.Trk, Dex.pos00, &Dex.params)) {
@@ -674,7 +672,7 @@ extendTrackMove:
 					}
 					Dex.jointD.negate = DifferenceBetweenAngles(Dex.angle,FindAngle(Dex.pos00,
 					                    pos))<0.0;
-					Dex.jointD.x = 2*trackGauge;  //Signal an easement present to JoinTracks
+					Dex.jointD.x = 2*modTrackGauge;  //Signal an easement present to JoinTracks
 				} else {
 					if ( easeR > 0.0 && Dex.r1 < easeR ) {
 						ErrorMessage( MSG_RADIUS_LSS_EASE_MIN,
@@ -793,9 +791,11 @@ extendTrackUp:
 		if (modifyBezierMode) { return ModifyBezier(C_REDRAW, pos); }
 		if (modifyCornuMode) { return ModifyCornu(C_REDRAW, pos); }
 		if (modifyDrawMode) { return ModifyDraw(C_REDRAW, pos); }
-		DrawSegsDA( &tempD, NULL, zero, 0.0, &tempSegs_da, trackGauge, wDrawColorBlack,
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &tempSegs_da, modTrackGauge,
+		            wDrawColorBlack,
 		            0 );
-		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, modTrackGauge,
+		            wDrawColorBlack,
 		            0 );
 
 		return C_CONTINUE;
