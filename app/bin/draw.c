@@ -1347,8 +1347,7 @@ static void DoMouse(wAction_t action, coOrd pos)
 
 	inError = FALSE;
 
-	// cppcheck-suppress shadowFunction -- local variable name coincides with a library/project function of the same name -- zero functional risk
-	coOrd min = minIncrementSizes();
+	coOrd minStep = minIncrementSizes();
 
 	switch (action & 0xFF) {
 	case C_DOWN:
@@ -1491,28 +1490,28 @@ static void DoMouse(wAction_t action, coOrd pos)
 	}
 	case C_SCROLLUP:
 		panCenter.y = panCenter.y +
-		              ((mainD.size.y / 20 > min.y) ? mainD.size.y / 20 : min.y);
+		              ((mainD.size.y / 20 > minStep.y) ? mainD.size.y / 20 : minStep.y);
 		LOG(log_pan, 2,
 		    ("PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y));
 		PanHere(I2VP(1));
 		break;
 	case C_SCROLLDOWN:
 		panCenter.y = panCenter.y -
-		              ((mainD.size.y / 20 > min.y) ? mainD.size.y / 20 : min.y);
+		              ((mainD.size.y / 20 > minStep.y) ? mainD.size.y / 20 : minStep.y);
 		LOG(log_pan, 2,
 		    ("PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y));
 		PanHere(I2VP(1));
 		break;
 	case C_SCROLLLEFT:
 		panCenter.x = panCenter.x -
-		              ((mainD.size.x / 20 > min.x) ? mainD.size.x / 20 : min.x);
+		              ((mainD.size.x / 20 > minStep.x) ? mainD.size.x / 20 : minStep.x);
 		LOG(log_pan, 2,
 		    ("PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y));
 		PanHere(I2VP(1));
 		break;
 	case C_SCROLLRIGHT:
 		panCenter.x = panCenter.x +
-		              ((mainD.size.x / 20 > min.x) ? mainD.size.x / 20 : min.x);
+		              ((mainD.size.x / 20 > minStep.x) ? mainD.size.x / 20 : minStep.x);
 		LOG(log_pan, 2,
 		    ("PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y));
 		PanHere(I2VP(1));

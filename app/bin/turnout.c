@@ -227,8 +227,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx)
 
 	dtod.td = GetTrkTieData( trk );
 
-	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-	int pathCnt = 0, routeCnt = 0;
+	int dtoPathCnt = 0, dtoRouteCnt = 0;
 
 	for (i = 0; i < DTO_DIM; i++) {
 		dto[i].n = 0;
@@ -274,8 +273,8 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx)
 
 		ANGLE_T angle = 0;
 		while (pp[0]) {
-			if (pathCnt < DTO_DIM) {
-				dto[pathCnt].type = 'S';
+			if (dtoPathCnt < DTO_DIM) {
+				dto[dtoPathCnt].type = 'S';
 				while (pp[0]) {
 					GetSegInxEP(pp[0], &segInx, &segEP);
 					// trkSeg_p
@@ -285,14 +284,14 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx)
 						p0 = segPtr->u.l.pos[0];
 						p1 = segPtr->u.l.pos[1];
 
-						wIndex_t n = dto[pathCnt].n;
-						dto[pathCnt].trkSeg[n] = segPtr;
-						dto[pathCnt].base[n] = p0;
+						wIndex_t n = dto[dtoPathCnt].n;
+						dto[dtoPathCnt].trkSeg[n] = segPtr;
+						dto[dtoPathCnt].base[n] = p0;
 						n++;
-						dto[pathCnt].trkSeg[n] = segPtr;
-						dto[pathCnt].base[n] = p1;
+						dto[dtoPathCnt].trkSeg[n] = segPtr;
+						dto[dtoPathCnt].base[n] = p1;
 						// n++;
-						dto[pathCnt].n = n;
+						dto[dtoPathCnt].n = n;
 
 						if (n >= DTO_SEGS - 1) { return -1; }
 
@@ -301,7 +300,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx)
 					case SEG_CRVTRK:
 						r = fabs(segPtr->u.c.radius);
 
-						dto[pathCnt].type = segPtr->u.c.center.y < 0 ? 'R' : 'L';
+						dto[dtoPathCnt].type = segPtr->u.c.center.y < 0 ? 'R' : 'L';
 
 						a0 = segPtr->u.c.a0;
 						a1 = segPtr->u.c.a1;
@@ -316,30 +315,30 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx)
 						if (cnt <= 0) { cnt = 1; }
 
 						aa1 = a1 / cnt;
-						if (dto[pathCnt].type == 'R') {
+						if (dto[dtoPathCnt].type == 'R') {
 							aa0 = a0;
 						} else {
 							aa0 = a0 + a1;
 							aa1 = -aa1;
 						}
 						PointOnCircle(&p0, segPtr->u.c.center, r, aa0);
-						n = dto[pathCnt].n;
-						dto[pathCnt].c[n] = segPtr->u.c.center;
-						dto[pathCnt].r[n] = r;
-						dto[pathCnt].trkSeg[n] = segPtr;
-						dto[pathCnt].base[n] = p0;
+						n = dto[dtoPathCnt].n;
+						dto[dtoPathCnt].c[n] = segPtr->u.c.center;
+						dto[dtoPathCnt].r[n] = r;
+						dto[dtoPathCnt].trkSeg[n] = segPtr;
+						dto[dtoPathCnt].base[n] = p0;
 						n++;
-						dto[pathCnt].n = n;
+						dto[dtoPathCnt].n = n;
 
 						while (cnt > 0) {
 							aa0 += aa1;
 							PointOnCircle(&p0, segPtr->u.c.center, r, aa0);
 
-							// n = dto[pathCnt].n;
-							dto[pathCnt].c[n] = segPtr->u.c.center;
-							dto[pathCnt].r[n] = r;
-							dto[pathCnt].trkSeg[n] = segPtr;
-							dto[pathCnt].base[n] = p0;
+							// n = dto[dtoPathCnt].n;
+							dto[dtoPathCnt].c[n] = segPtr->u.c.center;
+							dto[dtoPathCnt].r[n] = r;
+							dto[dtoPathCnt].trkSeg[n] = segPtr;
+							dto[dtoPathCnt].base[n] = p0;
 							n++;
 
 							if (n >= DTO_SEGS - 1) { return -1; }
@@ -347,7 +346,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx)
 							cnt--;
 						}
 						n--; // remove that last point count
-						dto[pathCnt].n = n;
+						dto[dtoPathCnt].n = n;
 						break;
 					default:
 						if ( log_turnout < 0 ) { log_turnout = LogFindIndex( "turnout" ); }
@@ -358,27 +357,27 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx)
 					pp++;
 				}
 				// Include the last point
-				dto[pathCnt].crvAngle = angle;
-				dto[pathCnt].n++;
+				dto[dtoPathCnt].crvAngle = angle;
+				dto[dtoPathCnt].n++;
 			}
 
-			pathCnt++;
-			if (pathCnt > DTO_DIM) { return -1; }
+			dtoPathCnt++;
+			if (dtoPathCnt > DTO_DIM) { return -1; }
 			pp++;
 		}
-		routeCnt++;
+		dtoRouteCnt++;
 		pp++;
 	}
-	dtod.pathCnt = pathCnt;
-	dtod.routeCnt = routeCnt;
+	dtod.pathCnt = dtoPathCnt;
+	dtod.routeCnt = dtoRouteCnt;
 	dtod.endCnt = GetTrkEndPtCnt( trk );
 
 	// Guard value: n < DTO_SEGS - 2
-	for (i = 0; i < pathCnt; i++) {
+	for (i = 0; i < dtoPathCnt; i++) {
 		dto[i].pts[dto[i].n].x = DIST_INF;
 	}
 
-	return pathCnt;
+	return dtoPathCnt;
 }
 
 /**
@@ -628,8 +627,7 @@ static void DrawTurnoutFill(
         int path2
 )
 {
-	// cppcheck-suppress shadowVariable -- intentional: this track-type-specific drawing function uses the specific track's own gauge, overriding the module-global 'current' gauge -- confirmed consistent across all Draw*Track functions this session
-	DIST_T trackGauge = GetTrkGauge(dtod.trk);
+	DIST_T trkGauge = GetTrkGauge(dtod.trk);
 	wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi) / BASE_DPI);
 	if (d->options&DC_PRINT) {
 		width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
@@ -649,7 +647,7 @@ static void DrawTurnoutFill(
 
 	if (dtod.toType == DTO_THREE) {
 		i = dtod.strPath;
-		DIST_T dy = fabs(dto[i].dy[0]) + trackGauge * fillWidth;
+		DIST_T dy = fabs(dto[i].dy[0]) + trkGauge * fillWidth;
 		b1 = dto[i].pts[0];
 		Translate(&b3,b1,(angle + a),dy);
 		b1 = dto[i].pts[dto[i].n - 1];
@@ -664,12 +662,12 @@ static void DrawTurnoutFill(
 	}
 
 	for (i = i1; 1; i = i2,a = 180.0) {
-		DIST_T dy = fabs(dto[i].dy[0]) + trackGauge * fillWidth;
+		DIST_T dy = fabs(dto[i].dy[0]) + trkGauge * fillWidth;
 		b1 = dto[i].pts[0];
 		Translate(&b3,b1,(angle + a),dy);
 		Translate(&b5,b1,(angle + a),-(dy * 0.75));
 		for (j = 1; j < dto[i].n; j++) {
-			dy = fabs(dto[i].dy[j]) + trackGauge * fillWidth;
+			dy = fabs(dto[i].dy[j]) + trkGauge * fillWidth;
 			b2 = dto[i].pts[j];
 			Translate(&b4,b2,(angle + a),dy);
 			Translate(&b6,b2,(angle + a),-(dy * 0.75));
@@ -705,16 +703,15 @@ static void DrawTurnoutFill(
 				p = GetTrkEndPos(dtod.trk,ep);
 				a = GetTrkEndAngle(dtod.trk,ep) + 90.0;
 
-				// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-				int i = (dtod.lftCnt > 0) && (dtod.rgtCnt == 0) ? 2 : 1;
-				if (ep != i) {
-					Translate(&p0,p,a,trackGauge * 1.5);
-					Translate(&p1,p0,a - 45.0,trackGauge * 1.5);
+				int skipEp = (dtod.lftCnt > 0) && (dtod.rgtCnt == 0) ? 2 : 1;
+				if (ep != skipEp) {
+					Translate(&p0,p,a,trkGauge * 1.5);
+					Translate(&p1,p0,a - 45.0,trkGauge * 1.5);
 					DrawLine(d,p0,p1,width2,drawColorBlack);
 				}
-				if (ep != (3 - i)) {
-					Translate(&p0,p,a,-trackGauge * 1.5);
-					Translate(&p1,p0,a + 45.0,-trackGauge * 1.5);
+				if (ep != (3 - skipEp)) {
+					Translate(&p0,p,a,-trkGauge * 1.5);
+					Translate(&p1,p0,a + 45.0,-trkGauge * 1.5);
 					DrawLine(d,p0,p1,width2,drawColorBlack);
 				}
 			}
@@ -737,8 +734,7 @@ static void DrawCrossFill(
         int path2
 )
 {
-	// cppcheck-suppress shadowVariable -- intentional: this track-type-specific drawing function uses the specific track's own gauge, overriding the module-global 'current' gauge -- confirmed consistent across all Draw*Track functions this session
-	DIST_T trackGauge = GetTrkGauge(dtod.trk);
+	DIST_T trkGauge = GetTrkGauge(dtod.trk);
 	wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
 	if (d->options&DC_PRINT) {
 		width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
@@ -757,7 +753,7 @@ static void DrawCrossFill(
 		// a = -a;
 	}
 
-	DIST_T dy = fabs(dto[i1].dy[0]) + trackGauge * fillWidth;
+	DIST_T dy = fabs(dto[i1].dy[0]) + trkGauge * fillWidth;
 	b1 = dto[i1].pts[0];
 	Translate(&b3,b1,(angle + a),dy);
 	b1 = dto[i1].pts[dto[i1].n-1];
@@ -790,13 +786,13 @@ static void DrawCrossFill(
 				a = GetTrkEndAngle(dtod.trk,ep) + 90.0;
 
 				if ((ep == 1) || (ep == 2)) {
-					Translate(&p0,p,a,trackGauge * 1.5);
-					Translate(&p1,p0,a - 45.0,trackGauge * 1.5);
+					Translate(&p0,p,a,trkGauge * 1.5);
+					Translate(&p1,p0,a - 45.0,trkGauge * 1.5);
 					DrawLine(d,p0,p1,width2,drawColorBlack);
 				}
 				if ((ep == 0) || (ep == 3)) {
-					Translate(&p0,p,a,-trackGauge * 1.5);
-					Translate(&p1,p0,a + 45.0,-trackGauge * 1.5);
+					Translate(&p0,p,a,-trkGauge * 1.5);
+					Translate(&p1,p0,a + 45.0,-trkGauge * 1.5);
 					DrawLine(d,p0,p1,width2,drawColorBlack);
 				}
 			}
@@ -819,8 +815,7 @@ static void DrawXingFill(
         int path2
 )
 {
-	// cppcheck-suppress shadowVariable -- intentional: this track-type-specific drawing function uses the specific track's own gauge, overriding the module-global 'current' gauge -- confirmed consistent across all Draw*Track functions this session
-	DIST_T trackGauge = GetTrkGauge(dtod.trk);
+	DIST_T trkGauge = GetTrkGauge(dtod.trk);
 	wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
 	if (d->options&DC_PRINT) {
 		width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
@@ -833,7 +828,7 @@ static void DrawXingFill(
 	i2 = dtod.str2Path;
 
 	// Fill both straight sections
-	wDrawWidth width3 = (wDrawWidth)round(trackGauge * 2 * fillWidth * d->dpi /
+	wDrawWidth width3 = (wDrawWidth)round(trkGauge * 2 * fillWidth * d->dpi /
 	                                      d->scale);
 	wDrawColor color = (fillType==0?bridgeColor:roadbedColor);
 	b1 = dto[i1].pts[0];
@@ -854,7 +849,7 @@ static void DrawXingFill(
 	BOOL_T hasLeft = 0, hasRgt = 0;
 	ANGLE_T angle = dtod.xx->angle, a = 0.0;
 	for (i = i1; 1; i = i2,a = 180.0) {
-		DIST_T dy = fabs(dto[i].dy[0]) + trackGauge * fillWidth;
+		DIST_T dy = fabs(dto[i].dy[0]) + trkGauge * fillWidth;
 		b1 = dto[i].pts[0];
 		Translate(&b3,b1,(angle + a),dy);
 		Translate(&b5,b1,(angle + a),-(dy * 0.75));
@@ -865,7 +860,7 @@ static void DrawXingFill(
 				hasRgt = 1;
 			}
 			for (j = 1; j < dto[i].n; j++) {
-				dy = fabs(dto[i].dy[j]) + trackGauge * fillWidth;
+				dy = fabs(dto[i].dy[j]) + trkGauge * fillWidth;
 				b2 = dto[i].pts[j];
 				Translate(&b4,b2,(angle + a),dy);
 				Translate(&b6,b2,(angle + a),-(dy * 0.75));
@@ -890,7 +885,7 @@ static void DrawXingFill(
 		i1 = dtod.strPath;
 		i2 = dtod.str2Path;
 		if (!hasRgt&&fillType==0) {
-			DIST_T dy = trackGauge * 1.5;
+			DIST_T dy = trkGauge * 1.5;
 			ANGLE_T a1, a2;
 			b1 = dto[i1].pts[0];
 			a1 = dto[i1].angle + 90;
@@ -908,7 +903,7 @@ static void DrawXingFill(
 		}
 
 		if (!hasLeft&&fillType==0) {
-			DIST_T dy = trackGauge * 1.5;
+			DIST_T dy = trkGauge * 1.5;
 			ANGLE_T a1, a2;
 			b1 = dto[i2].pts[0];
 			a1 = dto[i2].angle - 90;
@@ -926,7 +921,7 @@ static void DrawXingFill(
 		}
 
 		if (dtod.toType == DTO_XNG9 && fillType==0) {
-			DIST_T dy = trackGauge * 1.5;
+			DIST_T dy = trkGauge * 1.5;
 			ANGLE_T a1, a2;
 			b1 = dto[i1].pts[dto[i1].n - 1];
 			a1 = dto[i1].angle + 90;
@@ -972,13 +967,13 @@ static void DrawXingFill(
 				a = GetTrkEndAngle(dtod.trk,ep) + 90.0;
 
 				if ((dtod.toType == DTO_XNG9) || (ep == 2) || (ep == 3)) {
-					Translate(&p0,p,a,trackGauge * 1.5);
-					Translate(&p1,p0,a - 45.0,trackGauge * 1.5);
+					Translate(&p0,p,a,trkGauge * 1.5);
+					Translate(&p1,p0,a - 45.0,trkGauge * 1.5);
 					DrawLine(d,p0,p1,width2,drawColorBlack);
 				}
 				if ((dtod.toType == DTO_XNG9) || (ep == 0) || (ep == 1)) {
-					Translate(&p0,p,a,-trackGauge * 1.5);
-					Translate(&p1,p0,a + 45.0,-trackGauge * 1.5);
+					Translate(&p0,p,a,-trkGauge * 1.5);
+					Translate(&p1,p0,a + 45.0,-trkGauge * 1.5);
 					DrawLine(d,p0,p1,width2,drawColorBlack);
 				}
 			}
@@ -1343,8 +1338,6 @@ static void DrawCurvedTurnout(
 //			DIST_T dx = len / cnt, dx2 = dx / 2;
 
 			if (cnt != 0) {
-				// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-				DIST_T tdlen = dtod.td.length;
 				dang = (len / cnt) * 360 / (2 * M_PI * r);
 				DIST_T dx = len / cnt, dx2 = dx / 2;
 
@@ -2092,10 +2085,9 @@ EXPORT void DrawTurnout(
 	/** @prefs [Preference] NormalTurnoutDraw=1 to skip enhanced drawing methods */
 	wPrefGetInteger("Preference", "NormalTurnoutDraw", (long *) &skip, 0);
 
-	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-	int pathCnt = (skip == 0 ? GetTurnoutPaths(trk, xx) : 0);
+	int dtoPathCnt = (skip == 0 ? GetTurnoutPaths(trk, xx) : 0);
 
-	if ( (pathCnt > 1) && (pathCnt <= DTO_DIM)
+	if ( (dtoPathCnt > 1) && (dtoPathCnt <= DTO_DIM)
 	     && ( GetTrkEndPtCnt( trk ) <= 4)
 	     && (xx->special == TOnormal) ) {
 

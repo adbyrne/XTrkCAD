@@ -187,19 +187,19 @@ static void DDrawArc(drawCmd_p d, coOrd p, DIST_T r, ANGLE_T angle0,
 		ANGLE_T da = (maxArcSegStraightLen * 180) / (M_PI * rr);
 		int cnt = (int)(angle1 / da) + 1;
 		da = angle1 / cnt;
-		// cppcheck-suppress shadowFunction -- local variable name coincides with a library/project function of the same name -- zero functional risk
-		coOrd min, max;
-		min = d->orig;
-		max.x = min.x + d->size.x;
-		max.y = min.y + d->size.y;
+		coOrd viewMin, viewMax;
+		viewMin = d->orig;
+		viewMax.x = viewMin.x + d->size.x;
+		viewMax.y = viewMin.y + d->size.y;
 		PointOnCircle(&p0, p, r, angle0);
 		for (int i = 1; i <= cnt; i++) {
 			angle0 += da;
 			PointOnCircle(&p1, p, r, angle0);
 			if (d->angle == 0.0 &&
-			    ((p0.x >= min.x && p0.x <= max.x && p0.y >= min.y && p0.y <= max.y) ||
-			     (p1.x >= min.x && p1.x <= max.x && p1.y >= min.y &&
-			      p1.y <= max.y))) {
+			    ((p0.x >= viewMin.x && p0.x <= viewMax.x && p0.y >= viewMin.y
+			      && p0.y <= viewMax.y) ||
+			     (p1.x >= viewMin.x && p1.x <= viewMax.x && p1.y >= viewMin.y &&
+			      p1.y <= viewMax.y))) {
 				DrawLine(d, p0, p1, width, color);
 			} else {
 				coOrd clip0 = p0, clip1 = p1;
@@ -912,18 +912,19 @@ static void BDrawArc(drawCmd_p d, coOrd p, DIST_T r, ANGLE_T angle0,
 		ANGLE_T da = (maxArcSegStraightLen * 180) / (M_PI * rr);
 		int cnt = (int)(angle1 / da) + 1;
 		da = angle1 / cnt;
-		// cppcheck-suppress shadowFunction -- local variable name coincides with a library/project function of the same name -- zero functional risk
-		coOrd min, max;
-		min = d->orig;
-		max.x = min.x + d->size.x;
-		max.y = min.y + d->size.y;
+		coOrd viewMin, viewMax;
+		viewMin = d->orig;
+		viewMax.x = viewMin.x + d->size.x;
+		viewMax.y = viewMin.y + d->size.y;
 		PointOnCircle(&p0, p, r, angle0);
 		for (int i = 1; i <= cnt; i++) {
 			angle0 += da;
 			PointOnCircle(&p1, p, r, angle0);
 			if (d->angle == 0.0 &&
-			    ((p0.x >= min.x && p0.x <= max.x && p0.y >= min.y && p0.y <= max.y) ||
-			     (p1.x >= min.x && p1.x <= max.x && p1.y >= min.y && p1.y <= max.y))) {
+			    ((p0.x >= viewMin.x && p0.x <= viewMax.x && p0.y >= viewMin.y
+			      && p0.y <= viewMax.y) ||
+			     (p1.x >= viewMin.x && p1.x <= viewMax.x && p1.y >= viewMin.y
+			      && p1.y <= viewMax.y))) {
 				DrawLine(d, p0, p1, width, color);
 			} else {
 				coOrd clip0 = p0, clip1 = p1;

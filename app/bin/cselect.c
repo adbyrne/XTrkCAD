@@ -1040,8 +1040,7 @@ static DIST_T elevDelta;
 static BOOL_T AddElevation( track_p trk, BOOL_T unused )
 {
 	EPINX_T ep, ep1;
-	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-	int mode;
+	int elevMode;
 	DIST_T elev;
 
 	for ( ep=0; ep<GetTrkEndPtCnt(trk); ep++ ) {
@@ -1056,9 +1055,9 @@ static BOOL_T AddElevation( track_p trk, BOOL_T unused )
 		}
 		if (EndPtIsDefinedElev(trk,ep)) {
 			DrawEndPt2( &mainD, trk, ep, wDrawColorWhite );
-			mode = GetTrkEndElevUnmaskedMode(trk,ep);
+			elevMode = GetTrkEndElevUnmaskedMode(trk,ep);
 			elev = GetTrkEndElevHeight(trk,ep);
-			SetTrkEndElev( trk, ep, mode, elev+elevDelta, NULL );
+			SetTrkEndElev( trk, ep, elevMode, elev+elevDelta, NULL );
 			ClrTrkElev( trk );
 			DrawEndPt2( &mainD, trk, ep, wDrawColorBlack );
 		}
@@ -2397,8 +2396,7 @@ static track_p SelectTrackByIndex(TRKINX_T ti, char * message )
 EXPORT void SelectByIndex( void* string)
 {
 	char result[STR_LONG_SIZE] = "";
-	// cppcheck-suppress shadowVariable -- local buffer/pointer, properly scoped/freed within this function, unrelated to the global status-line buffer
-	char * message;
+	char * trkMsg;
 	SetAllTrackSelect(FALSE);
 	char * cp = (char *)string;
 	cp = strtok(cp,",");
@@ -2407,12 +2405,12 @@ EXPORT void SelectByIndex( void* string)
 	while (cp) {
 		long ti = strtol(cp,&cp,0);
 		if (ti>0) {
-			message = MyMalloc(STR_LONG_SIZE);
-			trk = SelectTrackByIndex(ti, message);
-			if (!trk || message[0]) {
+			trkMsg = MyMalloc(STR_LONG_SIZE);
+			trk = SelectTrackByIndex(ti, trkMsg);
+			if (!trk || trkMsg[0]) {
 				size_t len = strlen(result);
-				snprintf(result+len,(sizeof(result) - len),"I:%ld %s", ti, message);
-				MyFree(message);
+				snprintf(result+len,(sizeof(result) - len),"I:%ld %s", ti, trkMsg);
+				MyFree(trkMsg);
 			}
 		}
 		cp = strtok(NULL,",");
@@ -2498,8 +2496,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o,
 	BOOL_T hidden_t, hidden;
 	coOrd dpos = pos;
 //		coOrd cpos;
-	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-	int mode = -1;
+	int foundMode = -1;
 	while ( TrackIterate( &trk1 ) ) {
 		if ( !GetLayerVisible(GetTrkLayer(trk1)) ) {
 			continue;
@@ -2517,7 +2514,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o,
 					dd = d;
 					trk = trk1;
 					ep = ep1;
-					mode = 0;
+					foundMode = 0;
 					hidden = FALSE;
 //						cpos= dpos;
 				}
@@ -2542,7 +2539,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o,
 			dd = d;
 			trk = trk1;
 			ep = -1;
-			mode = 1;
+			foundMode = 1;
 			hidden = hidden_t;
 //				cpos = dpos;
 		}
@@ -2551,7 +2548,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o,
 			dd = d;
 			trk = trk1;
 			ep = -1;
-			mode = 2;
+			foundMode = 2;
 			hidden = hidden_t;
 //				cpos = dpos;
 		}
@@ -2560,7 +2557,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o,
 			dd = d;
 			trk = trk1;
 			ep = -1;
-			mode = 3;
+			foundMode = 3;
 			hidden = hidden_t;
 //				cpos = dpos;
 		}
@@ -2569,7 +2566,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o,
 			dd = d;
 			trk = trk1;
 			ep = -1;
-			mode = 4;
+			foundMode = 4;
 			hidden = hidden_t;
 //				cpos = dpos;
 		}
@@ -2578,7 +2575,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o,
 			dd = d;
 			trk = trk1;
 			ep = -1;
-			mode = 5;
+			foundMode = 5;
 			hidden = hidden_t;
 //				cpos = dpos;
 		}
@@ -2587,7 +2584,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o,
 			dd = d;
 			trk = trk1;
 			ep = -1;
-			mode = 6;
+			foundMode = 6;
 			hidden = hidden_t;
 //				cpos = dpos;
 		}
@@ -2601,7 +2598,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o,
 			*ep_o = ep;
 		}
 		if (mode_o) {
-			*mode_o = mode;
+			*mode_o = foundMode;
 		}
 		if (hidden_o) {
 			*hidden_o = hidden;
@@ -2643,8 +2640,7 @@ STATUS_T CmdMoveDescription(
 {
 	static EPINX_T ep;
 	static BOOL_T hidden;
-	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-	static int mode;
+	static int descMode;
 	BOOL_T bChanged;
 
 	moveDescMode = VP2L(
@@ -2656,7 +2652,7 @@ STATUS_T CmdMoveDescription(
 		moveDescTrk = NULL;
 		moveDescPos = zero;
 		hidden = FALSE;
-		mode = -1;
+		descMode = -1;
 		if ( labelWhen < 2 || mainD.scale > labelScale ||
 		     (labelEnable&(LABELENABLE_TRKDESC|LABELENABLE_ENDPT_ELEV))==0 ) {
 			ErrorMessage( MSG_DESC_NOT_VISIBLE );
@@ -2668,11 +2664,11 @@ STATUS_T CmdMoveDescription(
 		if ( labelWhen < 2 || mainD.scale > labelScale ) {
 			return C_CONTINUE;
 		}
-		mode = moveDescMode
-		       -1;   // -1 means everything, 0 means elevations only, 1 means descriptions only
-		moveDescTrk=FindTrackDescription(pos,&ep,&mode,TRUE,&hidden);
+		descMode = moveDescMode
+		           -1;   // -1 means everything, 0 means elevations only, 1 means descriptions only
+		moveDescTrk=FindTrackDescription(pos,&ep,&descMode,TRUE,&hidden);
 		if (moveDescTrk!=NULL) {
-			if (mode==0) {
+			if (descMode==0) {
 				InfoMessage(_("Elevation description"));
 			} else {
 				if (moveDescMode == 1) {
@@ -2697,7 +2693,7 @@ STATUS_T CmdMoveDescription(
 		if (!moveDescTrk) {
 			return C_CONTINUE;
 		}
-		if (mode == 0) {
+		if (descMode == 0) {
 			return C_CONTINUE;
 		}
 		bChanged = FALSE;
@@ -2731,8 +2727,8 @@ STATUS_T CmdMoveDescription(
 			ErrorMessage( MSG_DESC_NOT_VISIBLE );
 			return C_ERROR;
 		}
-		mode = moveDescMode-1;
-		moveDescTrk = FindTrackDescription(pos,&ep,&mode,TRUE,&hidden);
+		descMode = moveDescMode-1;
+		moveDescTrk = FindTrackDescription(pos,&ep,&descMode,TRUE,&hidden);
 		if (moveDescTrk == NULL ) {
 			return C_CONTINUE;
 		}
@@ -2762,7 +2758,7 @@ STATUS_T CmdMoveDescription(
 			return C_CONTINUE;
 		}
 //		int rc = C_CONTINUE;
-		switch (mode) {
+		switch (descMode) {
 		case 0:
 			EndPtDescriptionMove( moveDescTrk, ep, action, pos );
 			break;
@@ -2786,7 +2782,8 @@ STATUS_T CmdMoveDescription(
 			break;
 		default:
 			if ( log_cselect < 0 ) { log_cselect = LogFindIndex( "cselect" ); }
-			LOG( log_cselect, 1, ( "unexpected mode %d in CmdMoveDescription\n", mode ) )
+			LOG( log_cselect, 1, ( "unexpected descMode %d in CmdMoveDescription\n",
+			                       descMode ) )
 			break;
 		}
 		hidden = FALSE;
@@ -2801,7 +2798,7 @@ STATUS_T CmdMoveDescription(
 			return C_CONTINUE;
 		}
 		if ( moveDescTrk ) {
-			if (mode==0) {
+			if (descMode==0) {
 				DrawEndPt2( &tempD, moveDescTrk, ep, drawColorPreviewSelected );
 			} else {
 				if (hidden) {
@@ -2813,7 +2810,7 @@ STATUS_T CmdMoveDescription(
 		}
 		break;
 	case C_CMDMENU:
-		if (moveDescTrk != NULL && mode !=0) {
+		if (moveDescTrk != NULL && descMode !=0) {
 			if ( GetLayerFrozen( GetTrkLayer( moveDescTrk ) ) ) {
 				moveDescTrk = NULL;
 				break;
@@ -3213,8 +3210,7 @@ void DrawHighlightBoxes(BOOL_T highlight_selected, BOOL_T select,
                         track_p not_this)
 {
 	track_p ts = NULL;
-	// cppcheck-suppress shadowFunction -- local variable name coincides with a library/project function of the same name -- zero functional risk
-	coOrd origin,max = {0.0, 0.0};
+	coOrd origin,boxMax = {0.0, 0.0};
 	BOOL_T first = TRUE;
 	while ( TrackIterate( &ts ) ) {
 		if ( !GetLayerVisible( GetTrkLayer( ts))) {
@@ -3234,7 +3230,7 @@ void DrawHighlightBoxes(BOOL_T highlight_selected, BOOL_T select,
 		GetBoundingBox(ts, &hi, &lo);
 		if (first) {
 			origin = lo;
-			max = hi;
+			boxMax = hi;
 			first = FALSE;
 		} else {
 			if (lo.x <origin.x) {
@@ -3243,18 +3239,18 @@ void DrawHighlightBoxes(BOOL_T highlight_selected, BOOL_T select,
 			if (lo.y <origin.y) {
 				origin.y = lo.y;
 			}
-			if (hi.x >max.x) {
-				max.x = hi.x;
+			if (hi.x >boxMax.x) {
+				boxMax.x = hi.x;
 			}
-			if (hi.y >max.y) {
-				max.y = hi.y;
+			if (hi.y >boxMax.y) {
+				boxMax.y = hi.y;
 			}
 		}
 	}
 	if (!first) {
 		coOrd size;
-		size.x = max.x-origin.x;
-		size.y = max.y-origin.y;
+		size.x = boxMax.x-origin.x;
+		size.y = boxMax.y-origin.y;
 		origin.x -= 5*tempD.scale/tempD.dpi;
 		origin.y -= 5*tempD.scale/tempD.dpi;
 		size.x += 10*tempD.scale/tempD.dpi;
@@ -3698,9 +3694,8 @@ static STATUS_T CmdSelect(
 		if (selectedTrackCount <= 0) {
 			wMenuPopupShow( selectPopup1M );
 		} else {
-			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-			track_p trk = OnTrack(&pos, FALSE, FALSE);  //Note pollutes pos if turntable
-			SetUpMenu2(pos,trk);
+			track_p menuTrk = OnTrack(&pos, FALSE, FALSE);  //Note pollutes pos if turntable
+			SetUpMenu2(pos,menuTrk);
 			wMenuPopupShow( selectPopup2M );
 		}
 		return C_CONTINUE;
