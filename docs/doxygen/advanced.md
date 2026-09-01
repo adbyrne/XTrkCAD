@@ -171,7 +171,7 @@ cppcheck --error-exitcode=1 -j 4 \
 than trusting this snapshot indefinitely.) The remaining gating jobs — `astyle-check`, the
 `ctest` unit/regression suite, and `docs-doxygen` itself — are just this project's everyday
 build/test/format loop rather than anything CI-specific, and are already documented in full on the
-\subpage building "Building and Testing" page and in the project's `CLAUDE.md` Code Formatting
+\ref building "Building and Testing" page and in the project's `CLAUDE.md` Code Formatting
 section; nothing to add here beyond pointing at those.
 
 ## The warning-count ratchet
