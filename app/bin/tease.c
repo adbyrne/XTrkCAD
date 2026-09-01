@@ -1001,8 +1001,7 @@ static BOOL_T ReadJoint(
 	long options;
 	DIST_T elev;
 	char * cp = NULL;
-	// cppcheck-suppress shadowVariable -- file-parse-time local default, assigned into the track's own extra-data struct field after parsing, unrelated to the global interactive-editing state
-	coOrd descriptionOff = {0.0,0.0};
+	coOrd savedDescOff = {0.0,0.0};
 
 	if ( !GetArgs( line+6, paramVersion<3?"dXZs9dffffdddpYfc":paramVersion<9
 	               ?"dLl00s9dffffdddpYfc":"dLl00s9dffffdddpffc",
@@ -1011,7 +1010,7 @@ static BOOL_T ReadJoint(
 		return FALSE;
 	}
 	if (cp) {
-		if (!GetArgs(cp,"p",&descriptionOff)) {
+		if (!GetArgs(cp,"p",&savedDescOff)) {
 			return FALSE;
 		}
 	}
@@ -1020,7 +1019,7 @@ static BOOL_T ReadJoint(
 	}
 	trk = NewTrack( index, T_EASEMENT, 0, sizeof e );
 	xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
-	xx->descriptionOff = descriptionOff;
+	xx->descriptionOff = savedDescOff;
 	if ( paramVersion < 3 ) {
 		SetTrkVisible(trk, visible!=0);
 		SetTrkNoTies(trk, FALSE);

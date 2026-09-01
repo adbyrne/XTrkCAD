@@ -36,14 +36,13 @@ static paramFloatRange_t r1_1000 = { 1, 1000 };
 long GetChanges( paramGroup_p pg )
 {
 	long changes = 0;
-	// cppcheck-suppress shadowVariable -- local control-flow flag, confirmed unrelated to the global file-dirty flag of the same name
-	long changed = FormUpdate(pg);
+	long changedMask = FormUpdate(pg);
 
-	for ( int inx=0; changed; inx++ ) {
-		if ( changed&1 ) {
+	for ( int inx=0; changedMask; inx++ ) {
+		if ( changedMask&1 ) {
 			changes |= VP2L(pg->paramPtr[inx].context);
 		}
-		changed >>= 1;
+		changedMask >>= 1;
 	}
 	return changes;
 }

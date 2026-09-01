@@ -172,8 +172,7 @@ static void DrawRulerWithBackground(drawCmd_p d, coOrd pos0, coOrd pos1,
 	coOrd orig = pos0;
 	wAngle_t a, aa;
 	DIST_T start, end;
-	// cppcheck-suppress shadowVariable -- local buffer/pointer, properly scoped/freed within this function, unrelated to the global status-line buffer
-	char message[STR_SHORT_SIZE];
+	char rulerLabel[STR_SHORT_SIZE];
 	coOrd d_orig, d_size;
 	wFontSize_t fs;
 	long skip;
@@ -296,11 +295,11 @@ static void DrawRulerWithBackground(drawCmd_p d, coOrd pos0, coOrd pos1,
 						int boxStyle = BOX_BACKGROUND;
 						if (mm % 100 != 0) {
 							/* @brief Sub-metre digit label at smaller font size */
-							sprintf(message, "%ld", mm / 10 % 10);
+							sprintf(rulerLabel, "%ld", mm / 10 % 10);
 							fs = rulerFontSize * 2 / 3;
 						} else {
 							/* @brief Main metre label formatted as e.g. "1.5" */
-							sprintf(message, "%0.1f", mm / 1000.0);
+							snprintf(rulerLabel, sizeof(rulerLabel), "%0.1f", mm / 1000.0);
 							fs = rulerFontSize;
 						}
 						if (a == 0.0) {
@@ -311,7 +310,7 @@ static void DrawRulerWithBackground(drawCmd_p d, coOrd pos0, coOrd pos1,
 						} else {
 							LABEL_POS_HORIZONTAL(p0, len, boxStyle);
 						}
-						DrawBoxedString(boxStyle, d, p0, message, rulerFp,
+						DrawBoxedString(boxStyle, d, p0, rulerLabel, rulerFp,
 						                fs * d->scale, color, 0);
 					}
 				}
@@ -418,8 +417,8 @@ static void DrawRulerWithBackground(drawCmd_p d, coOrd pos0, coOrd pos1,
 							} else {
 								LABEL_POS_HORIZONTAL(p0, majorLength, boxStyle);
 							}
-							sprintf(message, "%d%c", digit, quote);
-							DrawBoxedString(boxStyle, d, p0, message, rulerFp,
+							sprintf(rulerLabel, "%d%c", digit, quote);
+							DrawBoxedString(boxStyle, d, p0, rulerLabel, rulerFp,
 							                fs * d->scale, color, 0);
 						}
 					}

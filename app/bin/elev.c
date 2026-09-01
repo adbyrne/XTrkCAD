@@ -1221,8 +1221,7 @@ EXPORT void UpdateTrkEndElev(
         const char * newStation )
 {
 	int oldMode;
-	// cppcheck-suppress shadowVariable -- local control-flow flag, confirmed unrelated to the global file-dirty flag of the same name
-	BOOL_T changed = TRUE;
+	BOOL_T elevChanged = TRUE;
 	track_p trk1;
 //	EPINX_T ep1;
 
@@ -1235,7 +1234,7 @@ EXPORT void UpdateTrkEndElev(
 				if ( oldMode == newMode ) {
 					return;
 				}
-				changed = FALSE;
+				elevChanged = FALSE;
 			}
 			break;
 		}
@@ -1250,10 +1249,10 @@ EXPORT void UpdateTrkEndElev(
 			return;
 		}
 	} else {
-		changed = TRUE;
+		elevChanged = TRUE;
 		if ( (newMode&ELEV_MASK)==ELEV_DEF || (oldMode&ELEV_MASK)==ELEV_DEF ||
 		     (newMode&ELEV_MASK)==ELEV_IGNORE || (oldMode&ELEV_MASK)==ELEV_IGNORE ) {
-			changed = TRUE;
+			elevChanged = TRUE;
 		}
 	}
 	UndoModify( trk );
@@ -1264,7 +1263,7 @@ EXPORT void UpdateTrkEndElev(
 	DrawEndPt2( &mainD, trk, ep, drawColorWhite );
 	SetTrkEndElev( trk, ep, newMode, newElev, newStation );
 	DrawEndPt2( &mainD, trk, ep, drawColorBlack );
-	if ( changed ) {
+	if ( elevChanged ) {
 		ClrTrkElev( trk );
 		if ( trk1 ) {
 //			ep1 = GetEndPtConnectedToMe( trk1, trk );

@@ -1462,6 +1462,11 @@ static BOOL_T TraverseTurnout(
 static STATUS_T ModifyTurnout(track_p trk, wAction_t action, coOrd pos)
 {
 	struct extraDataCompound_t* xx;
+	// cppcheck-suppress variableScope -- static cross-call state: this modal drag/rotate command
+	// handler is invoked repeatedly (C_DOWN/C_MOVE/C_UP/etc) with different wAction_t values over
+	// time, and ep set on one call must survive to be read on a later call; cppcheck's single-pass
+	// analysis can't see that cross-call read-after-write dependency, so it wrongly suggests
+	// narrowing into a single call's branch (confirmed via SF #752/#759 investigation)
 	static EPINX_T ep;
 //	static wBool_t curved;
 

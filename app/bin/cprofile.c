@@ -224,16 +224,16 @@ static void DrawProfile(drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert)
 
 	// Draw horizontal grid and y scale
 	for (inx=prof.minC; inx<=prof.maxC; inx+=prof.incrC) {
-		// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-		coOrd textsize;
+		coOrd gridTextsize;
 		// grid line
 		pt.y = pb.y = GetDim(inx);
 		DrawLine(D, pb, pt, 0, snapGridColor);
 		// scale
 		sprintf(message, "%d", inx);
 		DrawTextSize(&mainD, message, wStandardFont(F_HELV, FALSE, FALSE),
-		             screenProfileFontSize, FALSE, &textsize);
-		pl.x = ((-3.0/mainD.dpi) - textsize.y*0.5 - textsize.x) / prof.scaleX*D->scale;
+		             screenProfileFontSize, FALSE, &gridTextsize);
+		pl.x = ((-3.0/mainD.dpi) - gridTextsize.y*0.5 - gridTextsize.x) /
+		       prof.scaleX*D->scale;
 		pl.y = pb.y-LABELH/2/prof.scaleY*D->scale;
 
 		DrawString(D, pl, 0.0, message, fp, fontSize*D->scale, borderColor);

@@ -119,9 +119,8 @@ char* ParseManifest(char* manifest, char* zip_directory)
 	                      "dependencies");
 	cJSON* dependency;
 	cJSON_ArrayForEach(dependency, dependencies) {
-		// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-		cJSON* name = cJSON_GetObjectItemCaseSensitive(dependency, "name");
-		if (strcmp(cJSON_GetStringValue(name), "background") == 0) {
+		cJSON* depName = cJSON_GetObjectItemCaseSensitive(dependency, "name");
+		if (strcmp(cJSON_GetStringValue(depName), "background") == 0) {
 			char *file;
 			char *path;
 			cJSON* filename = cJSON_GetObjectItemCaseSensitive(dependency, "filename");

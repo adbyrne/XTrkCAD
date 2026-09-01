@@ -2361,6 +2361,12 @@ EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
 	track_p trk1;
 	trackParams_t params;
 	static wBool_t curved;
+	// cppcheck-suppress variableScope -- static cross-call state: this modal drag/rotate command
+	// handler is invoked repeatedly (C_DOWN/C_MOVE/C_UP/etc) with different wAction_t values over
+	// time, and end_angle set on one call must survive to be read on a later call (confirmed read
+	// before being set within the same call, proving the cross-call dependency) -- cppcheck's
+	// single-pass analysis can't see this and wrongly suggests narrowing into a single call's
+	// branch (confirmed via SF #752/#759 investigation)
 	static ANGLE_T end_angle;
 
 	switch ( action ) {
@@ -3041,8 +3047,7 @@ EXPORT void DrawEndPt(
 	coOrd p0,p1,p2;
 	BOOL_T sepBoundary;
 	BOOL_T showBridge = 1;
-	// cppcheck-suppress shadowVariable -- intentional: this track-type-specific drawing function uses the specific track's own gauge, overriding the module-global 'current' gauge -- confirmed consistent across all Draw*Track functions this session
-	DIST_T trackGauge;
+	DIST_T trkGauge;
 	wDrawWidth width;
 	wDrawWidth width2;
 
@@ -3075,9 +3080,9 @@ EXPORT void DrawEndPt(
 	p = GetTrkEndPos(trk,ep);
 	a = GetTrkEndAngle(trk,ep) + 90.0;
 
-	trackGauge = GetTrkGauge(trk);
+	trkGauge = GetTrkGauge(trk);
 	if(trk1 == NULL) {
-		DrawUnconnectedEndPt(d,p,a,trackGauge,color);
+		DrawUnconnectedEndPt(d,p,a,trkGauge,color);
 		return;
 	}
 
@@ -3086,7 +3091,7 @@ EXPORT void DrawEndPt(
 		if(inDrawTracks && (d->options & DC_PRINT) == 0 && importTrack == NULL
 		   && GetTrkSelected(trk) && (!GetTrkSelected(trk1))) {
 			DIST_T len;
-			len = trackGauge * 2.0;
+			len = trkGauge * 2.0;
 			if(len < 0.10 * d->scale) {
 				len = 0.10 * d->scale;
 			}
@@ -3109,25 +3114,25 @@ EXPORT void DrawEndPt(
 	// is the endpoint a transition into a tunnel?
 	if(GetTrkVisible(trk) && (!GetTrkVisible(trk1))) {
 		// yes, draw tunnel portal
-		Translate(&p0,p,a,trackGauge);
-		Translate(&p1,p,a + 180,trackGauge);
+		Translate(&p0,p,a,trkGauge);
+		Translate(&p1,p,a + 180,trkGauge);
 		DrawLine(d,p0,p1,width2,color);
-		Translate(&p2,p0,a + 45,trackGauge / 2.0);
+		Translate(&p2,p0,a + 45,trkGauge / 2.0);
 		DrawLine(d,p0,p2,width2,color);
-		Translate(&p2,p1,a + 135,trackGauge / 2.0);
+		Translate(&p2,p1,a + 135,trkGauge / 2.0);
 		DrawLine(d,p1,p2,width2,color);
 		if(d == &mainD) {
-			width = (wDrawWidth)ceil(trackGauge * d->dpi / 2.0 / d->scale);
+			width = (wDrawWidth)ceil(trkGauge * d->dpi / 2.0 / d->scale);
 			if(width > 1) {
 				if((GetTrkEndOption(trk,ep) & EPOPT_GAPPED) != 0) {
-					Translate(&p0,p,a,trackGauge);
+					Translate(&p0,p,a,trkGauge);
 					DrawLine(d,p0,p,width,color);
 				}
 				trk1 = GetTrkEndTrk(trk,ep);
 				if(trk1) {
 					ep = GetEndPtConnectedToMe(trk1,trk);
 					if((GetTrkEndOption(trk1,ep) & EPOPT_GAPPED) != 0) {
-						Translate(&p0,p,a + 180.0,trackGauge);
+						Translate(&p0,p,a + 180.0,trkGauge);
 						DrawLine(d,p0,p,width,color);
 					}
 				}
@@ -3140,10 +3145,10 @@ EXPORT void DrawEndPt(
 	} else if(GetLayerVisible(GetTrkLayer(trk))
 	          && !GetLayerVisible(GetTrkLayer(trk1))) {
 		a -= 90.0;
-		Translate(&p,p,a,trackGauge / 2.0);
-		Translate(&p0,p,a - 135.0,trackGauge * 2.0);
+		Translate(&p,p,a,trkGauge / 2.0);
+		Translate(&p0,p,a - 135.0,trkGauge * 2.0);
 		DrawLine(d,p0,p,width2,color);
-		Translate(&p0,p,a + 135.0,trackGauge * 2.0);
+		Translate(&p0,p,a + 135.0,trkGauge * 2.0);
 		DrawLine(d,p0,p,width2,color);
 
 		showBridge = 0;
@@ -3155,10 +3160,10 @@ EXPORT void DrawEndPt(
 		;
 	} else if((drawEndPtV == 1 && (QueryTrack(trk,Q_DRAWENDPTV_1)
 	                               || QueryTrack(trk1,Q_DRAWENDPTV_1))) || (drawEndPtV == 2)) {
-		Translate(&p0,p,a,trackGauge);
+		Translate(&p0,p,a,trkGauge);
 		width = 0;
 		if(d != &mapD && d != &tempD && (GetTrkEndOption(trk,ep) & EPOPT_GAPPED) != 0) {
-			width = (wDrawWidth)ceil(trackGauge * d->dpi / 2.0 / d->scale);
+			width = (wDrawWidth)ceil(trkGauge * d->dpi / 2.0 / d->scale);
 		}
 		DrawLine(d,p0,p,width,color);
 	} else {
@@ -3166,8 +3171,8 @@ EXPORT void DrawEndPt(
 	}
 
 	if(showBridge && GetTrkBridge(trk) && (!GetTrkBridge(trk1))) {
-		Translate(&p0,p,a,trackGauge * 1.5);
-		Translate(&p1,p0,a - 45.0,trackGauge * 1.5);
+		Translate(&p0,p,a,trkGauge * 1.5);
+		Translate(&p1,p0,a - 45.0,trkGauge * 1.5);
 		DrawLine(d,p0,p1,width2,color);
 		Translate(&p0,p,a,-trackGauge * 1.5);
 		Translate(&p1,p0,a + 45.0,-trackGauge * 1.5);

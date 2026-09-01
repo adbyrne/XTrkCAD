@@ -556,8 +556,7 @@ STATUS_T DrawGeomMouse(
 	case wActionLDrag:
 		DYNARR_RESET(trkSeg_t, anchors_da );
 		coOrd p = pos1 = pos;
-		// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-		BOOL_T locked = FALSE, poslocked = FALSE;
+		BOOL_T dragLocked = FALSE, poslocked = FALSE;
 		if ((context->Op == OP_CURVE1 && context->State == 1) ||
 		    (context->Op == OP_CURVE2 && context->State == 0) ||
 		    (context->Op == OP_CURVE4 && context->State != 1) ||
@@ -594,7 +593,7 @@ STATUS_T DrawGeomMouse(
 			    WKEY_CTRL) {  //If +Ctrl, snap to table edge end
 				p = pos;
 				if (OnTableEdgeEndPt( NULL, &p )) {
-					locked = TRUE;
+					dragLocked = TRUE;
 					pos1 = p;
 				}
 			}
@@ -602,7 +601,7 @@ STATUS_T DrawGeomMouse(
 		case OP_LINE:
 		case OP_DIMLINE:
 		case OP_BENCH:
-			if (!locked
+			if (!dragLocked
 			    && ((MyGetKeyState() & WKEY_CTRL) ==
 			        WKEY_CTRL )) { //If not found already +Ctl = Right Angle
 				//Snap to Right-Angle from previous or from 0
@@ -763,7 +762,7 @@ STATUS_T DrawGeomMouse(
 		case OP_CIRCLE2:
 		case OP_FILLCIRCLE2:
 			tempSegs(0).u.c.center = pos1;
-			if (context->State == 1 && locked) { CreateEndAnchor(pos1, FALSE); }
+			if (context->State == 1 && dragLocked) { CreateEndAnchor(pos1, FALSE); }
 			else { wSetCursor(mainD.d,defaultCursor); }
 			tempSegs(0).u.c.radius = FindDistance( pos0, pos1 );
 			context->message( _("Radius = %s"),
@@ -784,7 +783,7 @@ STATUS_T DrawGeomMouse(
 			                                   tempSegs(1).u.l.pos[1].x = tempSegs(2).u.l.pos[0].x = pos1.x;
 			tempSegs(1).u.l.pos[1].y = tempSegs(2).u.l.pos[0].y =
 			                                   tempSegs(2).u.l.pos[1].y = tempSegs(3).u.l.pos[0].y = pos1.y;
-			if (locked) { CreateEndAnchor(pos1,FALSE); }
+			if (dragLocked) { CreateEndAnchor(pos1,FALSE); }
 			context->message( _("Width = %s, Height = %s"),
 			                  FormatDistance(fabs(pos1.x - pos0.x)), FormatDistance(fabs(pos1.y - pos0.y)) );
 			break;
