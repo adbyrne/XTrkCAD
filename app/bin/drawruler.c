@@ -299,7 +299,7 @@ static void DrawRulerWithBackground(drawCmd_p d, coOrd pos0, coOrd pos1,
 							fs = rulerFontSize * 2 / 3;
 						} else {
 							/* @brief Main metre label formatted as e.g. "1.5" */
-							sprintf(rulerLabel, "%0.1f", mm / 1000.0);
+							snprintf(rulerLabel, sizeof(rulerLabel), "%0.1f", mm / 1000.0);
 							fs = rulerFontSize;
 						}
 						if (a == 0.0) {
