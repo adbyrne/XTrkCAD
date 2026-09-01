@@ -485,6 +485,7 @@ DEMO "Rotate" dmrotate.xtr
 DEMO "Flip" dmflip.xtr
 DEMO "Control Panels" dmctlpnl.xtr
 DEMO "Notes" dmnotes.xtr
+DEMO "Bridge Gauge" dmbrdgau.xtr
 #DEMO "Text" dmtext.xtr
 #DEMOGROUP Example
 #DEMO "MR Layout Design" dmmrlay.xtr
