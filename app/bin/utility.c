@@ -464,14 +464,13 @@ EPINX_T PickLineEndPt( coOrd p0, double a0, coOrd p1 )
 double LineDistance( coOrd *p, coOrd p0, coOrd p1 )
 {
 	double d, a;
-	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-	coOrd pp, zero;
-	zero.x = zero.y = (POS_T)0.0;
+	coOrd pp;
+	coOrd origin = { 0.0, 0.0 };
 	d = FindDistance( p0, p1 );
 	a = FindAngle( p0, p1 );
 	pp.x = p->x-p0.x;
 	pp.y = p->y-p0.y;
-	Rotate( &pp, zero, -a );
+	Rotate( &pp, origin, -a );
 	if (pp.y < 0.0-EPSILON) {
 		d = FindDistance( p0, *p );
 		*p = p0;
@@ -524,10 +523,9 @@ coOrd MidPtCoOrd(coOrd p0, coOrd p1)
 
 coOrd AddCoOrd( coOrd p0, coOrd p1, double a )
 {
-	// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-	coOrd res, zero;
-	zero.x = zero.y = (POS_T)0.0;
-	Rotate(&p1, zero, a );
+	coOrd res;
+	coOrd origin = { 0.0, 0.0 };
+	Rotate(&p1, origin, a );
 	res.x = p0.x + p1.x;
 	res.y = p0.y + p1.y;
 	return res;

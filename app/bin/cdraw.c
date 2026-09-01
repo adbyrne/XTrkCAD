@@ -698,18 +698,17 @@ static void UpdateDraw( track_p trk, int drawDescInx, descUpdate_t * descUpd,
 	case E0:
 	case E1:
 		if ( inx == E0 ) {
-			// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-			coOrd off;
-			off.x = drawData.endPt[0].x - drawData.oldE0.x;
-			off.y = drawData.endPt[0].y - drawData.oldE0.y;
+			coOrd e0Off;
+			e0Off.x = drawData.endPt[0].x - drawData.oldE0.x;
+			e0Off.y = drawData.endPt[0].y - drawData.oldE0.y;
 			switch(segPtr->type) {					//E0 does not alter length - translates
 			case SEG_STRLIN:
 			case SEG_DIMLIN:
 			case SEG_BENCH:
 			case SEG_TBLEDGE:
 				UNREORIGIN( segPtr->u.l.pos[0], drawData.endPt[0], 0.0, xx->orig );
-				drawData.endPt[1].x = off.x+drawData.endPt[1].x;
-				drawData.endPt[1].y = off.y+drawData.endPt[1].y;
+				drawData.endPt[1].x = e0Off.x+drawData.endPt[1].x;
+				drawData.endPt[1].y = e0Off.y+drawData.endPt[1].y;
 				UNREORIGIN( segPtr->u.l.pos[1], drawData.endPt[1], 0.0, xx->orig );
 				DrawDescSetMode(E1, DESC_CHANGE);
 				break;
@@ -2602,7 +2601,6 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 static BOOL_T MakeParallelDraw(
         track_p trk,
         coOrd pos,
-        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
         DIST_T sep,
         DIST_T factor,
         track_p * newTrkR,
@@ -3042,23 +3040,22 @@ static void CreateDrawControls(paramGroup_p pg);
 
 static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 {
-	// cppcheck-suppress shadowVariable -- independent per-function static command-state flag, standard pattern in this file's command dispatch functions
-	static BOOL_T infoSubst = FALSE;
+	static BOOL_T drawInfoSubst = FALSE;
 	wControl_p controls[MAX_CONTROLS];				//Always needs a NULL last entry
 	char * labels[MAX_LABELS];
 
 	switch (action&0xFF) {
 
 	case C_START:
-		return(HandleStartCommand(action, &infoSubst));
+		return(HandleStartCommand(action, &drawInfoSubst));
 
 		return C_CONTINUE;
 
 	case wActionLDown:
 		ConfigureLineColor();
-		if ( infoSubst ) {
+		if ( drawInfoSubst ) {
 			InfoDefaultControls();
-			infoSubst = FALSE;
+			drawInfoSubst = FALSE;
 		}
 		__attribute__((fallthrough));
 	case wActionLDrag:
@@ -3071,7 +3068,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 
 	case wActionLUp:
 	case wActionRUp:
-		return HandleMouseUpEvents(controls, labels, action, pos, &infoSubst);
+		return HandleMouseUpEvents(controls, labels, action, pos, &drawInfoSubst);
 
 	case C_CANCEL:
 	case C_TEXT:

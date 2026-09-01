@@ -433,7 +433,6 @@ static void ProfileCoOrd2Pix(
  * Redraw profile window
  */
 
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 static void RedrawProfileW( wDraw_p d, void * context, wWinPix_t x,
                             wWinPix_t y )
 {

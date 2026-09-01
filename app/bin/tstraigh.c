@@ -420,8 +420,7 @@ EXPORT void DrawStraightTrack(
         long options )
 {
 	coOrd pp0, pp1;
-	// cppcheck-suppress shadowVariable -- intentional: this track-type-specific drawing function uses the specific track's own gauge, overriding the module-global 'current' gauge -- confirmed consistent across all Draw*Track functions this session
-	DIST_T trackGauge = GetTrkGauge(trk);
+	DIST_T trkGauge = GetTrkGauge(trk);
 	long bridge = 0, roadbed = 0;
 	if ( trk ) {
 		bridge = GetTrkBridge(trk);
@@ -462,7 +461,7 @@ EXPORT void DrawStraightTrack(
 
 	// Draw solid background
 	if(bridge|roadbed) {
-		wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi / d->scale);
+		wDrawWidth width3 = (wDrawWidth)round(trkGauge * 3 * d->dpi / d->scale);
 		DrawLine(d,p0,p1,width3,bridge?bridgeColor:roadbedColor);
 	}
 
@@ -482,15 +481,15 @@ EXPORT void DrawStraightTrack(
 			DrawLine( d, p0, p1, 0, color );
 			d->options = savedDrawOptions;
 		}
-		Translate( &pp0, p0, angle+90, trackGauge/2.0 );
-		Translate( &pp1, p1, angle+90, trackGauge/2.0 );
+		Translate( &pp0, p0, angle+90, trkGauge/2.0 );
+		Translate( &pp1, p1, angle+90, trkGauge/2.0 );
 		DrawLine( d, pp0, pp1, width, color );
 
-		Translate( &pp0, p0, angle-90, trackGauge/2.0 );
-		Translate( &pp1, p1, angle-90, trackGauge/2.0 );
+		Translate( &pp0, p0, angle-90, trkGauge/2.0 );
+		Translate( &pp1, p1, angle-90, trkGauge/2.0 );
 		DrawLine( d, pp0, pp1, width, color );
 
-		if ( (d->options&DC_PRINT) && roadbedWidth > trackGauge && DrawTwoRails(d,1) ) {
+		if ( (d->options&DC_PRINT) && roadbedWidth > trkGauge && DrawTwoRails(d,1) ) {
 			wDrawWidth rbw = (wDrawWidth)floor(roadbedLineWidth*(d->dpi/d->scale)+0.5);
 			if ( options&DTS_RIGHT ) {
 				Translate( &pp0, p0, angle+90, roadbedWidth/2.0 );
@@ -511,12 +510,12 @@ EXPORT void DrawStraightTrack(
 			width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
 		}
 
-		Translate( &pp0, p0, angle-90, trackGauge*1.5 );
-		Translate( &pp1, p1, angle-90, trackGauge*1.5 );
+		Translate( &pp0, p0, angle-90, trkGauge*1.5 );
+		Translate( &pp1, p1, angle-90, trkGauge*1.5 );
 		DrawLine( d, pp0, pp1, width2, color );
 
-		Translate( &pp0, p0, angle+90, trackGauge*1.5 );
-		Translate( &pp1, p1, angle+90, trackGauge*1.5 );
+		Translate( &pp0, p0, angle+90, trkGauge*1.5 );
+		Translate( &pp1, p1, angle+90, trkGauge*1.5 );
 		DrawLine( d, pp0, pp1, width2, color);
 	}
 }
@@ -561,15 +560,14 @@ static BOOL_T ReadStraight( char * line )
 	long options;
 	struct extraDataStraight_t *xx;
 	char * cp = NULL;
-	// cppcheck-suppress shadowVariable -- file-parse-time local default, assigned into the track's own extra-data struct field after parsing, unrelated to the global interactive-editing state
-	coOrd descriptionOff = { 0.0, 0.0 };
+	coOrd savedDescOff = { 0.0, 0.0 };
 
 	if ( !GetArgs( line+8, paramVersion<3?"dXZs9dc":"dLl00s9dc", &index, &layer,
 	               &options, scale, &visible, &cp ) ) {
 		return FALSE;
 	}
 	if (cp) {
-		if (!GetArgs(cp,"p",&descriptionOff)) {
+		if (!GetArgs(cp,"p",&savedDescOff)) {
 			return FALSE;
 		}
 	}
@@ -578,7 +576,7 @@ static BOOL_T ReadStraight( char * line )
 	}
 	trk = NewTrack( index, T_STRAIGHT, 0, sizeof *xx );
 	xx = GET_EXTRA_DATA(trk, T_STRAIGHT, extraDataStraight_t);
-	xx->descriptionOff = descriptionOff;
+	xx->descriptionOff = savedDescOff;
 	SetTrkScale( trk, LookupScale(scale) );
 	if ( paramVersion < 3 ) {
 		SetTrkVisible(trk, visible!=0);
@@ -943,7 +941,6 @@ static void FlipStraight(
 static BOOL_T MakeParallelStraight(
         track_p trk,
         coOrd pos,
-        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
         DIST_T sep,
         DIST_T factor,
         track_p * newTrkR,

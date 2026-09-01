@@ -917,7 +917,6 @@ static void SplitTurnoutCheckEndPt(
         PATHPTR_T path,
         int dir,
         trkSeg_p segs,
-        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
         coOrd epPos,
         coOrd splitPos)
 {
@@ -1830,7 +1829,6 @@ EXPORT void AdvanceTurnoutPositionIndicator(
 static BOOL_T MakeParallelTurnout(
         track_p trk,
         coOrd pos,
-        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
         DIST_T sep,
         DIST_T factor,
         track_p* newTrk,
@@ -2062,7 +2060,6 @@ static void TurnoutChange(long changes)
 	return;
 }
 
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 static void RedrawTurnout( wControl_p d, void * context, wWinPix_t x,
                            wWinPix_t y )
 {
@@ -2555,9 +2552,8 @@ static void AddTurnout(void)
 			ANGLE_T a = fabs(DifferenceBetweenAngles(a0 + 180, a1));
 			DIST_T d = FindDistance(p0, p1);
 			if (QueryTrack(connection(i).trk, Q_IS_CORNU)) {
-				// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-				ANGLE_T a = DifferenceBetweenAngles(FindAngle(p0, p1), a0);
-				if (IsClose(d) || fabs(a) <= 90.0) {
+				ANGLE_T cornuA = DifferenceBetweenAngles(FindAngle(p0, p1), a0);
+				if (IsClose(d) || fabs(cornuA) <= 90.0) {
 					trk1 = connection(i).trk;
 					ep0 = connection(i).ep;
 					if (GetTrkEndTrk(trk1, ep0)) { continue; }
@@ -2622,9 +2618,9 @@ static void AddTurnout(void)
 				pos = GetTrkEndPos(newTrk, ep);
 				DIST_T d = GetTrkDistance(lt, &pos);
 				if ((d < dd) && (d < trackGauge / 2)) {
-					// cppcheck-suppress shadowVariable -- loop-local variable, scoped and consumed only within its own block, confirmed via broad sampling this session (see docs/doxygen/advanced.md)
-					ANGLE_T a = GetTrkEndAngle(lt, le);
-					ANGLE_T a2 = fabs(DifferenceBetweenAngles(GetTrkEndAngle(newTrk, ep), a + 180));
+					ANGLE_T ltEndA = GetTrkEndAngle(lt, le);
+					ANGLE_T a2 = fabs(DifferenceBetweenAngles(GetTrkEndAngle(newTrk, ep),
+					                  ltEndA + 180));
 					if (GetTrkEndTrk(newTrk, ep) == NULL) { //Not if joined already
 						if (a2 < 90 && QueryTrack(lt, Q_IS_CORNU)) { //And Cornu in the right direction
 							GetTrackParams(PARAMS_EXTEND, newTrk, GetTrkEndPos(newTrk, ep), &params);

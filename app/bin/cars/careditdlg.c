@@ -376,7 +376,6 @@ static void CarDlgLoadDimsFromProto( carProto_p protoP )
 }
 
 static void CarDlgRedraw(
-        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
         wDraw_p d, void * context, wWinPix_t x, wWinPix_t y )
 {
 	wWinPix_t w, h;
