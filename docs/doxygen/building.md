@@ -1,0 +1,280 @@
+\page building Building and Testing
+
+Not sure what's already installed? Run `tools/check-build-deps.sh` first (Linux, macOS, and
+Windows via an MSYS2 MINGW64 shell all work — it detects which platform it's on). It's read-only
+— it reports what's missing and the exact command to install it, without installing or changing
+anything itself.
+
+The commands below are what CI actually runs, with the CI-only bits called out — a local desktop
+build doesn't need everything CI needs. The full, authoritative CI configuration lives in
+`.github/workflows/` (`ci-gtk3.yml` for this branch, plus `ci.yml` for the GTK2 `main` branch,
+`codeql.yml`, and `release.yml`) — worth reading directly if you have a GitHub account and want
+more detail than the summary below, e.g. exact job-by-job dependency lists or the release
+packaging steps. If you're working purely from the SourceForge/Hg checkout, these files are
+still present in this tree even though Mercurial itself doesn't run them — GitHub Actions only
+executes off a `git` mirror, e.g. `github.com/$GITHUB_USER/XTrkCAD` (see
+\ref running-ci-on-your-own-github-fork "Running CI on your own GitHub fork" in the
+\ref advanced "Advanced Topics" page for how to set one up).
+
+\tableofcontents
+
+# Linux (x86_64 and ARM64)
+
+```sh
+sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev \
+    libmxml-dev librsvg2-bin gettext
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
+cmake --build build
+ctest --test-dir build --output-on-failure
+```
+
+CI adds `xvfb` and runs tests under `xvfb-run` because its runners have no display; a normal
+desktop session doesn't need that wrapper. The ARM64 and Clang (`-DCMAKE_C_COMPILER=clang`)
+variants use the identical steps otherwise.
+
+This plain `ctest` also picks up the demo-playback regression tests: `XTRKCAD_REGRESSION_TESTING`
+auto-enables on Linux whenever `DISPLAY` is set (any normal desktop session) or `xvfb-run` is
+found, with no extra flag needed. See the
+\ref advanced-optional-local-checks "Regression demo-playback suite" note below for a known
+false-failure case (gtk3issues #21) this can surface.
+
+# macOS
+
+```sh
+brew install ninja gtk+3 cmocka libzip librsvg
+GTK_PREFIX=$(brew --prefix gtk+3)
+export PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
+    -DCMAKE_PREFIX_PATH="$GTK_PREFIX;$(brew --prefix)" \
+    -DCMAKE_EXE_LINKER_FLAGS="$(pkg-config --libs-only-L gtk+-3.0)" \
+    -DXTRKCAD_USE_APPLEHELP=OFF -DXTRKCAD_USE_BROWSER=ON
+cmake --build build
+ctest --test-dir build --output-on-failure
+```
+
+# Windows (MSYS2/MinGW64)
+
+Run from an MSYS2 MINGW64 shell. This is GTK3V2MAIN's only supported Windows path — the older
+MSVC/`mswlib` build was removed from this branch (SF r6508); `app/wlib/mswlib/` in the source
+tree is historical/`default`-branch code, not what this branch links against.
+
+```sh
+pacman -S --needed mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja \
+    mingw-w64-x86_64-pkg-config mingw-w64-x86_64-gtk3 mingw-w64-x86_64-zlib \
+    mingw-w64-x86_64-libzip mingw-w64-x86_64-mxml mingw-w64-x86_64-librsvg \
+    mingw-w64-x86_64-gettext mingw-w64-x86_64-cmocka
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_USE_GETTEXT=OFF
+cmake --build build --parallel
+ctest --test-dir build --output-on-failure
+```
+
+# Dev-build filename hash suffix
+
+Every untagged dev build's *compiled-in* version string (About dialog, `--version` CLI output)
+always carries a short VCS-hash fourth component, e.g. `5.4.0.8b67f185` — but by default its
+*filename/install path* (binary name, work/prefs directory, package filenames) stays the plain
+three-part version, so a new dev build just overwrites the previous one in place, matching what
+a developer coming from the historic three-part version expects. Add
+`-DXTRKCAD_APPEND_SRC_HASH=ON` to also give the filename/install path its own hash, so successive
+dev builds of the same nominal version can install side by side instead of colliding — this is
+what CI does automatically (SF #712; see `ProgramVersion.cmake` for the full
+`XTRKCAD_VERSION`/`XTRKCAD_FILE_VERSION` split). A tagged release build is unaffected either
+way — both variables drop the hash and stay the plain three-part version.
+
+```sh
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_APPEND_SRC_HASH=ON
+cmake --build build
+```
+
+**To build one specific past commit:** check out the exact commit first, *then* explicitly
+reconfigure — don't rely on `cmake --build` alone to notice the checkout, since CMake only
+re-runs its configure step when a file it tracks (`CMakeLists.txt`, `ProgramVersion.cmake`)
+actually changed on disk, so switching commits that don't touch those files leaves the
+*previous* commit's hash silently baked into the build.
+
+```sh
+git checkout <commit-hash>                       # or: hg update -r <commit-hash>
+cmake -B build -S . -DXTRKCAD_APPEND_SRC_HASH=ON  # force the reconfigure
+cmake --build build
+```
+
+# Advanced/optional local checks {#advanced-optional-local-checks}
+
+Not part of the everyday build/test loop, but available if you're chasing a specific class of
+bug:
+
+- **Sanitizers** — `-DXTRKCAD_SANITIZE=ON -DCMAKE_C_COMPILER=clang` builds with ASan/UBSan.
+  `PreferenceTest` is excluded when running under it (GTK3's own internal allocations trip
+  ASan's leak detector; that test still runs normally elsewhere).
+- **Valgrind** — `ctest -T memcheck --overwrite MemoryCheckCommand=$(which valgrind)`.
+  `PreferenceTest` is excluded here too, for the same GTK3-internals reason.
+- **Regression demo-playback suite** — `-DXTRKCAD_REGRESSION_TESTING=ON` (auto-enabled on Linux
+  when `xvfb-run` or an existing `DISPLAY` is found) adds ~47 per-demo `ctest` targets, one per
+  entry in `app/lib/xtrkcad.xtq`'s `DEMO` list, for targeting a single demo during local
+  debugging (`ctest -R Regression.dmease.xtr`), plus a `RegressionSuite` test (label
+  `regression-ci`) that replays every demo in one process — what CI actually gates on, via its
+  own `regression-gtk3` job (`ctest --test-dir build -L regression-ci`), rather than the 47
+  individual tests, to avoid multiplying per-test process/X-session startup overhead. These tests
+  need a real installed tree, not just the build tree, because `wGetAppLibDir()`
+  (`app/wlib/gtk3lib/unix/ixpaths.c`) can't find `demos`/`params`/compiled icon resources in the
+  build tree alone; a `RegressionInstall` `ctest` fixture runs `cmake --install` into a scratch
+  prefix automatically before any regression test executes. Each regression test also gets its
+  own scratch `$HOME` (XTrkCAD persists a benchwork-lumber catalog, an MRU color list, etc. to
+  `$HOME/.<binary-name>/xtrkcad.rc` — the directory is version/build-hash-qualified, e.g.
+  `.xtrkcad-5.4.0.<hash>`, not plain `.xtrkcad`; and two runs sharing a real `$HOME` can produce a
+  false FAIL from state an earlier run left behind) and `RUN_SERIAL TRUE` (`xvfb-run -a`'s
+  free-display detection isn't atomic against other concurrent `xvfb-run` instances, confirmed
+  empirically: a batch of the per-demo tests under `ctest -j 4` failed 8/48, all cleanly
+  reproducing as passes when rerun alone). Both together make `ctest -j N` safe for the whole
+  suite from a normal desktop checkout — the cheap non-display unit tests elsewhere in the
+  project parallelize freely, while regression tests still run one at a time relative to each
+  other and to everything else. A `RegressionCleanHomes` fixture wipes and recreates every scratch
+  `$HOME` at the *start of each ctest invocation* (not just once at CMake configure time), so a
+  process killed uncleanly by e.g. `ctest`'s own `TIMEOUT` can't leave behind a stale checkpoint
+  file that would otherwise make `OfferCheckpoint()` (`misc.c`) pop a blocking resume/discard
+  dialog on the *next* run — invisible and unclickable under a headless Xvfb session, which looks
+  exactly like a hung regression. The wipe must recreate every directory it just removed, not just
+  the root: `wGetAppWorkDir()` creates only `$HOME/.<binary-name>` via a non-recursive `g_mkdir()`,
+  which fails with `ENOENT` (and pops that same kind of unclickable modal) if `$HOME` itself is
+  missing (see [gtk3issues #24](https://sourceforge.net/p/xtrkcad-fork/gtk3issues/24/)). On a
+  `REGRESSION FAIL`, each test's `COMMAND` also cats `$HOME/.<binary-name>/xtrkcad.regress` — the
+  full actual-vs-expected track dump `CheckRegressionResult()` (`track.c`) writes there — to stdout
+  before exiting, so that detail is visible in `ctest --output-on-failure`/`-VV` output instead of
+  sitting in a directory the next test's `RegressionCleanHomes` run is about to delete.
+- **`regression-gtk3-standalone` CI job** — runs the per-demo targets individually
+  (`ctest --test-dir build -L "^regression$" -LE "regression-ci"`), separately from the
+  `regression-gtk3` job's single-process `RegressionSuite` run. The two setups aren't
+  interchangeable: some cold-start-only bugs only reproduce standalone (a fresh process, first
+  paint) and pass inside the full suite (where the same demo runs warm, after other demos have
+  already drained any startup event backlog) — see
+  [gtk3issues #21](https://sourceforge.net/p/xtrkcad-fork/gtk3issues/21/)'s `wDrawStart`
+  reentrancy and mouse-synthesis bugs, both of which needed this standalone mode to catch.
+- **`dmjnss.xtr` excluded from `RegressionSuite` on arm64** — its "join straights cornu" check
+  fails deterministically on arm64 Release builds (~0.1 degree cornu-join angle divergence).
+  Root cause not yet found: tried and ruled out AArch64 FMA-contraction of `spiro.c`'s
+  Newton-Raphson solver (forcing `-ffp-contract=off` on the cornu library had zero effect on the
+  actual failing job, so something else is going on). `app/bin/RegressionTests.cmake` excludes it
+  from `RegressionSuite`'s demo list whenever `CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64"`
+  (see [gtk3issues #28](https://sourceforge.net/p/xtrkcad-fork/gtk3issues/28/)) so CI can still
+  gate on the rest of the suite on that architecture. Temporary — remove the exclusion once #28
+  is actually root-caused and fixed, don't leave it in place indefinitely.
+- **Visual pre/post diffing (`-d visualdiff=1`)** — the regression suite's `REGRESSION START`/`END`
+  blocks compare track coordinates as text, which can miss a change that's obvious in a picture
+  (SF #667/#26: a fixture regen silently dropped a join's connector tracks, and the numeric diff
+  alone didn't make that visible). `-d visualdiff=1 -T<demo>.xtr` renders a PNG at every
+  `REGRESSION` block and once more at end-of-playback (`$HOME/.<binary-name>/visualdiff/`), using
+  the layout's own track bounding box rather than the live window's viewport (which isn't reliable
+  off-screen). `tools/regression-visual-diff.sh <before-ref> <after-ref> <demo.xtr>` builds two
+  refs, runs both, and diffs the resulting images with ImageMagick — useful for join/curve/geometry
+  changes specifically. The end-of-playback screenshots also feed the \ref regression-tests
+  "Regression Test Demos" page, generated by `tools/generate-regression-docs.sh`.
+
+# Running with debug logging (`-d`) {#running-with-debug-logging}
+
+`ctest` verifies unit-testable logic; it can't confirm an interactive-only fix (a dialog, a draw
+path, a mouse-driven command) actually behaves correctly. For that, run the real app with its
+built-in per-module debug logging: `-d <category>=<level>` (repeat the flag once per category;
+`-d <category>` alone defaults to level 1), optionally with `-l <file>` to redirect output to a
+file instead of stdout. There's no `-d help`/discovery flag — see the \ref log "Log Commands"
+page for the full catalog of category names and which file registers each one. That page is
+generated from `@logcmd` doc comments next to each category's registration in the source (the
+same `\xrefitem`-based mechanism Doxygen uses for its own Todo/Bug/Deprecated lists), so it stays
+in sync with the code; if a category you need isn't listed there, its registration is missing the
+annotation, not necessarily missing outright — grep `app/bin/` for `LogFindIndex("<category>")`
+to confirm either way.
+
+**Adding a new category**, e.g. `foo` in `cfoo.c`:
+
+```
+/** @logcmd @showrefby `foo=n` `cfoo.c` — what this actually logs, if not obvious from the name */
+static int log_foo = 0;
+```
+
+Keep the `category=n` syntax and the filename each in their own backtick-span — that's what keeps
+the generated \ref log "Log Commands" list readable as a table-like scan instead of a run-on
+sentence; the free-text description after the em dash is optional and can be left off entirely for
+a self-explanatory category.
+
+then, in whichever function already runs once at startup for that module (an `Init*()` the app
+calls on launch — see `InitTrkStraight()` in `tstraigh.c` for the simplest example), register it:
+
+```c
+log_foo = LogFindIndex( "foo" );
+```
+
+If the module has no such single init point (a plain utility file with several independent entry
+points, not an object with a lifecycle), use a one-time lazy-init guard at the top of the entry
+point instead — see `log_zipInitted` in `archive.c`. Either way, wrap the actual debug output in
+`LOG( log_foo, <level>, ( "format...\n", args... ) )`; the macro is a no-op until someone passes
+`-d foo=<level>` on the command line. The `@logcmd` comment is what makes the category show up on
+the \ref log "Log Commands" page — the `LogFindIndex()` call is what makes `-d foo=N` actually do
+anything; a category needs both; either one alone would recreate one of the four dead/undocumented
+categories fixed in the same session that finished this catalog.
+
+**A plain `cmake --build` isn't enough to run the result interactively.** At startup the binary
+locates its resource directory — `xtrkcad.xtq`, `xtrkcad.tip`, the `icons16/24/32.gresource`
+files, param files, locale `.mo` files — via `wGetAppLibDir()`
+(`app/wlib/gtk3lib/unix/ixpaths.c`), which checks the `XTRKCADGTKLIB` env var first, then
+`<binary-dir>/../share/xtrkcad-gtk` relative to the running executable, then falls back to
+`/usr/share`/`/usr/local/share`. None of that layout exists in a raw out-of-source build
+directory — those files are placed only by CMake's `install()` rules, not by `cmake --build` — so
+running `build-gtk3v2main/app/bin/xtrkcad` directly fails to find them. Do a real (scratch)
+install first:
+
+```sh
+cmake --build build-gtk3v2main
+cmake --install build-gtk3v2main --prefix build-gtk3v2main/install
+build-gtk3v2main/install/bin/xtrkcad -d join=3
+```
+
+With `--prefix` placed one level above `bin/` like this, the `../share/xtrkcad-gtk` relative
+lookup finds everything automatically. If the scratch prefix lives somewhere else instead (e.g.
+`/tmp`), point `XTRKCADGTKLIB` at the installed `share/xtrkcad-gtk` directory explicitly:
+
+```sh
+cmake --install build-gtk3v2main --prefix /tmp/xtrkcad-scratch
+XTRKCADGTKLIB=/tmp/xtrkcad-scratch/share/xtrkcad-gtk /tmp/xtrkcad-scratch/bin/xtrkcad -d join=3
+```
+
+# Tool versions
+
+Doxygen and AStyle are explicitly version-pinned in CI; everything else uses whatever the CI
+runner image currently provides. The AStyle pin exists specifically because an unpinned version
+once produced different formatting output for identical input (SF #638) — if you're chasing a
+formatting or doc-generation mismatch against CI, matching these two matters more than matching
+anything else in this table.
+
+| Tool | Pin status | Currently tested (as of 2026-07-18 — unpinned rows drift as CI runner images update) |
+|------|-----------|------------------------------------------|
+| Doxygen | pinned | 1.15.0, all platforms |
+| AStyle | pinned | 3.6.13, all platforms (built from source, not the OS package) |
+| CMake | floor/ceiling only (`3.20`–`4.0`) | 3.28.3 (Linux), 4.3.3 (Windows/MSYS2) |
+| cppcheck | unpinned | 2.13.0 (Ubuntu 24.04) |
+| clang-tidy | unpinned | 18.0 (Ubuntu 24.04) |
+| GCC (Linux) | unpinned | 13.3.0 (Ubuntu 24.04.4 LTS) |
+| Clang (Linux) | unpinned | 18.0 (Ubuntu 24.04) |
+| AppleClang (macOS) | unpinned | 21.0.0.21000101 (macOS 26.4) |
+| MinGW GCC (Windows) | unpinned | 16.1.0 (via MSYS2) |
+
+To reproduce the pinned Doxygen build locally rather than whatever version your package manager
+provides:
+
+```sh
+curl -sL -o doxygen.tar.gz \
+    "https://github.com/doxygen/doxygen/releases/download/Release_1_15_0/doxygen-1.15.0.linux.bin.tar.gz"
+tar xzf doxygen.tar.gz
+export PATH="$PWD/doxygen-1.15.0/bin:$PATH"
+```
+
+AStyle isn't available as a prebuilt binary from upstream, so CI builds it from source rather
+than trusting the OS package (that's the whole point of the pin — see the note above). Reproduce
+it the same way:
+
+```sh
+ASTYLE_VERSION=3.6.13
+curl -sL -o astyle.tar.bz2 \
+    "https://sourceforge.net/projects/astyle/files/astyle/astyle%20${ASTYLE_VERSION%.*}/astyle-${ASTYLE_VERSION}.tar.bz2/download"
+tar xjf astyle.tar.bz2
+make -C "astyle-${ASTYLE_VERSION}/build/gcc" -j"$(nproc)"
+export PATH="$PWD/astyle-${ASTYLE_VERSION}/build/gcc/bin:$PATH"
+```
