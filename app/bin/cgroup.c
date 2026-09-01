@@ -1114,6 +1114,7 @@ static void GroupOk( void * unused )
 	turnoutInfo_t * to;
 	coOrd orig, size;
 	FILE * f = NULL;
+	BOOL_T rc = TRUE;
 	track_p trk;
 	path_t * pp;
 	pathElem_p ppp;
@@ -1718,10 +1719,10 @@ static void GroupOk( void * unused )
 		f = OpenCustom("a");
 		if (f && to) {
 			SetCLocale();
-			fprintf( f, "TURNOUT %s \"%s\" %ld\n", curScaleName, PutTitle(to->title),
-			         options );
-			WriteCompoundPathsEndPtsSegs( f, pPaths, outputSegs_da.cnt,
-			                              &outputSegs(0), TempEndPtsCount(), TempEndPt(0) );
+			rc &= fprintf( f, "TURNOUT %s \"%s\" %ld\n", curScaleName, PutTitle(to->title),
+			               options )>0;
+			rc &= WriteCompoundPathsEndPtsSegs( f, pPaths, outputSegs_da.cnt,
+			                                    &outputSegs(0), TempEndPtsCount(), TempEndPt(0) );
 			SetUserLocale();
 		}
 		if ( groupReplace ) {
@@ -1788,9 +1789,9 @@ static void GroupOk( void * unused )
 		f = OpenCustom("a");
 		if (f && to) {
 			SetCLocale();
-			fprintf( f, "STRUCTURE %s \"%s\"\n", curScaleName,
-			         PutTitle(groupTitle) );
-			WriteSegs( f, trackSegs_da.cnt, &trackSegs(0) );
+			rc &= fprintf( f, "STRUCTURE %s \"%s\"\n", curScaleName,
+			               PutTitle(groupTitle) )>0;
+			rc &= WriteSegs( f, trackSegs_da.cnt, &trackSegs(0) );
 			SetUserLocale();
 		}
 		if ( groupReplace ) {
@@ -1813,7 +1814,13 @@ static void GroupOk( void * unused )
 			EnableCommands();
 		}
 	}
-	if (f) { fclose(f); }
+	if (f) {
+		if ( !rc ) {
+			NoticeMessage( MSG_WRITE_FAILURE, _("Ok"), NULL, strerror(errno),
+			               _("Custom") );
+		}
+		fclose(f);
+	}
 	DoChangeNotification( CHANGE_PARAMS );
 	wHide( groupW );
 	wDrawDelayUpdate( mainD.d, FALSE );
