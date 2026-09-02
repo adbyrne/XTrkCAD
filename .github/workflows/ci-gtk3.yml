@@ -904,6 +904,11 @@ jobs:
   compiler-warnings:
     # Report-only: captures -Wall -Wextra output as an artifact.
     # Does NOT fail the build — legacy code has pre-existing warnings.
+    #
+    # gettext added 2026-09-02: missing here (unlike every other Linux job in this file)
+    # caused the build to stall generating locale .mo files with no msgfmt available,
+    # running the job into its 15-minute timeout instead of failing fast -- see
+    # project_compiler_warnings_job_gettext_gap memory, first hit weeks earlier.
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -911,7 +916,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin
+          sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext
       - name: Configure with -Wall -Wextra
         run: |
           cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
