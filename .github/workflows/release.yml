@@ -620,11 +620,14 @@ jobs:
 
   package-suppress-inventory:
     # Inventory of every cppcheck-suppress/NOLINT(NEXTLINE) comment in
-    # app/bin, split into boilerplate (generic "confirmed via broad
-    # sampling" reasoning from a prior bulk-approval pass) vs. specific
-    # (individualized reasoning) vs. unreasoned (no reason found at all,
-    # checking inline "-- reason" text, a same-line trailing block comment,
-    # and comment lines immediately following the suppress line).
+    # app/bin (+ app/wlib/gtk3lib, added 2026-09-02 once cppcheck's own
+    # scope widened there -- see tools/scan-suppressions.sh's usage
+    # comment for why each root is scanned non-recursively), split into
+    # boilerplate (generic "confirmed via broad sampling" reasoning from
+    # a prior bulk-approval pass) vs. specific (individualized reasoning)
+    # vs. unreasoned (no reason found at all, checking inline "-- reason"
+    # text, a same-line trailing block comment, and comment lines
+    # immediately following the suppress line).
     # A boilerplate suppress is the one most likely to be hiding a fully
     # removable case -- see SF #749's ccornu.c `ep` discovery, found only
     # because that one happened to get individually re-traced. Answers
@@ -635,7 +638,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Scan for suppress comments
-        run: tools/scan-suppressions.sh > suppressions.txt
+        run: tools/scan-suppressions.sh app/bin app/wlib/gtk3lib app/wlib/gtk3lib/unix > suppressions.txt
       - name: Format as HTML
         run: |
           mkdir -p report
