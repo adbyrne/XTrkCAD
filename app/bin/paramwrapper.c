@@ -44,9 +44,9 @@ void ParamTurnOffDelaysOrig(bool disable);
 void ParamMenuPushOrig(void*);
 wBool_t ParamCheckInputsOrig(paramGroup_p pg, wControl_p b);
 void ParamInitOrig(void);
-void ParamResetInvalidOrig(wWin_p win);
+void ParamResetInvalidOrig(wControl_p win);
 void ParamControlShowOrig(paramGroup_p pg, wIndex_t inx, wBool_t bShow);
-wWin_p ParamCreateDialogOrig(
+wControl_p ParamCreateDialogOrig(
         paramGroup_p group,
         char* title,
         char* okLabel,
@@ -188,7 +188,7 @@ EXPORT wBool_t XParamCheckInputs(
 }
 
 
-EXPORT void XParamResetInvalid(wWin_p win)
+EXPORT void XParamResetInvalid(wControl_p win)
 {
 
 	//FormResetInvalid(win);
@@ -289,7 +289,7 @@ EXPORT void XParamCreateControls(
 }
 
 EXPORT void XParamHilite(
-        wWin_p win,
+        wControl_p win,
         wControl_p control,
         BOOL_T hilite)
 {
@@ -321,7 +321,7 @@ EXPORT void XParamCancel_Restore(
 }
 
 EXPORT void XParamCancel_Undo(
-        wWin_p winP)
+        wControl_p winP)
 {
 	printf("%s:%d Old Param Function used\n", __FILE__, __LINE__);
 }

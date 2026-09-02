@@ -68,7 +68,7 @@ EXPORT void FormCancel_Undo(
 }
 #else
 EXPORT void FormCancel_Undo(
-        wWin_p winP)
+        wControl_p winP)
 {
 	wHide(winP);
 }

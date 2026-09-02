@@ -167,7 +167,7 @@ static void RefreshSpecialOk(
 	wHide( refreshSpecialPG.win );
 }
 static void RefreshSpecialCancel(
-        wWin_p win )
+        wControl_p win )
 {
 	refreshSpecialInx = -1;
 	refreshReturnVal = FALSE;

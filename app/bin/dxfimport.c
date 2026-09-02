@@ -78,7 +78,7 @@ static paramData_t importDxfPLs[] = {
 	/*1*/ { PD_RADIO, &importDxfXti, "xti", PDO_NOPREF, &importDxfXtiLabels, NULL }
 };
 static paramGroup_t importDxfPG = { "importDxf", 0, importDxfPLs, COUNT(importDxfPLs) };
-static wWin_p importDxfW;
+static wControl_p importDxfW;
 
 /* Called from File menu */
 EXPORT void DoImportDxf(void* unused)

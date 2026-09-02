@@ -23,7 +23,6 @@ target_sources(xtrkcad-wlib
   fileselector.c
  freetypelabel.c
  keystate.c
-  lines.c
  list.c
  liststore.c
   main.c

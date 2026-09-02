@@ -50,7 +50,7 @@ void FormCancel_Null(paramGroup_cp group);
 
 void FormControlActive(paramGroup_p pg, int inx, BOOL_T active);
 void FormControlShow(paramGroup_p pg, int inx, BOOL_T bShow);
-EXPORT void FormHilite( wWin_p win, wControl_p control, BOOL_T hilite );
+EXPORT void FormHilite( wControl_p win, wControl_p control, BOOL_T hilite );
 void FormGroupReveal(paramGroup_p pg, const char *id, BOOL_T reveal);
 typedef void (*paramExpanderToggleProc)(paramGroup_p pg, const char *id,
                                         BOOL_T revealed, void *context);

@@ -76,7 +76,7 @@ char tempCustom[4096];
 #define NTO_CORNU3WAY   (17)
 
 
-static wWin_p newTurnW;
+static wControl_p newTurnW;
 
 #define DESIGNER_CANVAS_W  260
 #define DESIGNER_CANVAS_H  180

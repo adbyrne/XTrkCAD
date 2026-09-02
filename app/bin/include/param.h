@@ -263,7 +263,7 @@ void ParamTurnOffDelays(BOOL_T disable);
 
 
 void ParamMenuPush( void * );
-void ParamHilite( wWin_p, wControl_p, BOOL_T );
+void ParamHilite( wControl_p, wControl_p, BOOL_T );
 wBool_t ParamCheckInputs( paramGroup_p pg, wControl_p b );
 
 void ParamInit( void );
@@ -297,7 +297,7 @@ long GetChanges(paramGroup_p pg);
 #ifdef PARAMCANCEL_NEWUNDO
 //extern void* ParamCancel_Undo;
 #else
-void ParamCancel_Undo(wWin_p);
+void ParamCancel_Undo(wControl_p);
 #endif
 
 // Cancel leaves values in current state
@@ -324,7 +324,7 @@ void ParamLayoutDialog( paramGroup_p );
 
 void ParamDialogOkActive( paramGroup_p, int );
 
-void ParamResetInvalid( wWin_p win );
+void ParamResetInvalid( wControl_p win );
 
 void ParamControlShow( paramGroup_t *, wIndex_t, wBool_t );
 

@@ -707,7 +707,7 @@ static int numTrainDlg;
 #define MAX_SPEED				(100.0)
 
 typedef struct {
-	wWin_p win;
+	wControl_p win;
 	wIndex_t inx;
 	track_p train;
 	long direction;

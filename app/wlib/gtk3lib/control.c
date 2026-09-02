@@ -62,11 +62,6 @@ void wControlShow(
         wControl_p b,
         wBool_t show)
 {
-	if (b->type == B_LINES) {
-		wlibLineShow((wLine_p)b, show);
-		return;
-	}
-
 	if (b->widget == NULL) {
 		abort();
 	}

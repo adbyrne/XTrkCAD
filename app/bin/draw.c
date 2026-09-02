@@ -652,9 +652,6 @@ wBool_t MainProc(wControl_p win, winProcEvent e, const void *refresh,
 		}
 		break;
 	}
-	case wState_e:
-		wPrefSetInteger("draw", "maximized", wWinIsMaximized(win));
-		break;
 	case wQuit_e:
 		CleanupCustom();
 		break;

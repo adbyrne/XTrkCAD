@@ -91,8 +91,8 @@ static long iPrintScale = 16;
 static coOrd maxPageSize;
 static coOrd realPageSize;
 
-static wWin_p printWin = NULL;
-static wWin_p customMarginWin = NULL;
+static wControl_p printWin = NULL;
+static wControl_p customMarginWin = NULL;
 
 static wMenu_p printGridPopupM;
 
@@ -640,42 +640,6 @@ static paramData_t customMarginPLs[] = {
 };
 static paramGroup_t customMarginPG = { "printMargin", PGO_PREFMISCGROUP|PGO_NODEFAULTPROC|PGO_FULLDIALOGFROMBUILDER, customMarginPLs, COUNT( customMarginPLs ) };
 
-static wLines_t aPmLines[] = {
-	{ 1,  25,  11,  94,  11 },
-	{ 1,  94,  11,  94, 111 },
-	{ 1,  94, 111,  25, 111 },
-	{ 1,  25, 111,  25,  11 }
-};
-#ifdef TODO_UNUSED
-static int pmxoff=14;
-static int pmyoff=5;
-
-static void PrintMarginLayout(
-        paramData_t * pd,
-        int index,
-        wWinPix_t colX,
-        wWinPix_t * w,
-        wWinPix_t * h )
-{
-	if ( index < I_PM_FIRST || index > (I_PM_MESSAGE) ) {
-		return;
-	}
-	if ( index == I_PM_MESSAGE ) {
-		*h = wControlGetPosY( customMarginPLs[I_PM_FIRST+2].control ) +
-		     wControlGetHeight( customMarginPLs[I_PM_FIRST+2].control );
-		return;
-	}
-	wWinPix_t x0, y0;
-	x0 = (aPmLines[index-I_PM_FIRST].x0+aPmLines[index-I_PM_FIRST].x1)/2;
-	y0 = (aPmLines[index-I_PM_FIRST].y0+aPmLines[index-I_PM_FIRST].y1)/2;
-	x0 -= pmxoff;
-	y0 -= pmyoff;
-	*w = x0;
-	*h = y0;
-}
-#endif
-
-
 static const char * sPrinterName = NULL;
 
 /**
@@ -751,7 +715,6 @@ static void PrintMarginReset()
 static void DoPrintMargin( void )
 {
 	if ( customMarginWin == NULL ) {
-		int x=10, y=10;
 		customMarginWin = FormCreateDialog( &customMarginPG,
 		                                    MakeWindowTitle(_("Print Margins")),
 		                                    _("Ok"), DoPrintMarginOk,
@@ -760,13 +723,6 @@ static void DoPrintMargin( void )
 		if ( customMarginWin == NULL ) {
 			return;
 		}
-		for ( int i=0; i<COUNT( aPmLines ); i++ ) {
-			aPmLines[i].x0 += x;
-			aPmLines[i].x1 += x;
-			aPmLines[i].y0 += y;
-			aPmLines[i].y1 += y;
-		}
-		wLineCreate( customMarginWin, NULL, COUNT( aPmLines ), aPmLines );
 	}
 	wMessageSetValue( (wMessage_p)customMarginPLs[I_PM_MESSAGE].control,
 	                  sPrinterName );
