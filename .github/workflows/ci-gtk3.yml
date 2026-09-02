@@ -364,7 +364,19 @@ jobs:
     # app/help + app/tools/listxtp.c added SF #701/#729-730 follow-up (bug-tracker.md Action
     # Queue item 22) -- these directories were never in scope for any QA job. app/tools/dirent.c
     # is a vendored public-domain Win32 dirent shim (Kevlin Henney, 1997/2003), excluded the same
-    # way app/wlib/gtk3lib/wrapbox/ is out of scope by construction below.
+    # way app/wlib/gtk3lib/wrapbox/ and app/wlib/gtk3lib/win32/ are out of scope by construction
+    # below (non-recursive glob never reaches those subdirs, same treatment as
+    # app/bin/unittest/).
+    #
+    # app/wlib/gtk3lib(+unix/) added 2026-09-02 (queued since the app/bin shadowVariable/for-loop
+    # gates landed -- see project memory). --inline-suppr added at the same time so the existing
+    # `//cppcheck-suppress memleakOnRealloc` comment on drawcairo.c's realloc actually takes
+    # effect here (it already worked in cppcheck-deep below, which had --inline-suppr already;
+    # the gating job didn't, so widening scope surfaced it as a hard error). unknownMacro on
+    # stickytogglebutton.h is cppcheck not understanding the GObject G_DECLARE_FINAL_TYPE macro,
+    # same category as the existing custom.c suppression below. A real memleak on osxhelp.c's
+    # (APPLE-only, not built on this Linux runner) early-return paths was fixed directly rather
+    # than suppressed.
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -375,6 +387,7 @@ jobs:
         run: |
           cppcheck \
             --error-exitcode=1 \
+            --inline-suppr \
             -j 4 \
             --suppress=missingInclude \
             --suppress=missingIncludeSystem \
@@ -387,6 +400,7 @@ jobs:
             --suppress=syntaxError:app/bin/paths.c \
             --suppress=syntaxError:app/bin/utility.c \
             --suppress=unknownMacro:app/bin/custom.c \
+            --suppress=unknownMacro:app/wlib/gtk3lib/stickytogglebutton.h \
             --suppress=ctunullpointer:app/bin/track.c \
             --suppress=uninitvar:app/bin/levenshtein.c \
             --suppress=uninitvar:app/bin/problemrep.c \
@@ -394,9 +408,10 @@ jobs:
             --suppress=nullPointer:app/bin/partcatalog.c \
             --suppress=missingReturn:app/bin/cturnout.c \
             --suppress=ctuPointerArith:app/bin/cturnout.c \
-            -I app/bin -I app/bin/include -I app/wlib/include \
+            -I app/bin -I app/bin/include -I app/wlib/include -I app/wlib/gtk3lib \
             app/bin/*.c app/dynstring/*.c \
-            app/help/*.c app/tools/listxtp.c
+            app/help/*.c app/tools/listxtp.c \
+            app/wlib/gtk3lib/*.c app/wlib/gtk3lib/unix/*.c
 
   cppcheck-deep:
     # Report-only: the gating `cppcheck` job above only runs cppcheck's default
@@ -420,6 +435,9 @@ jobs:
     # reached by the app/help+app/tools widening below (SF #701/#729-730
     # follow-up) and is explicitly excluded -- vendored public-domain Win32
     # dirent shim.
+    #
+    # app/wlib/gtk3lib(+unix/) added 2026-09-02, same scope/exclusions as the gating `cppcheck`
+    # job above (queued since the app/bin shadowVariable/for-loop gates landed).
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -443,6 +461,7 @@ jobs:
             --suppress=syntaxError:app/bin/paths.c \
             --suppress=syntaxError:app/bin/utility.c \
             --suppress=unknownMacro:app/bin/custom.c \
+            --suppress=unknownMacro:app/wlib/gtk3lib/stickytogglebutton.h \
             --suppress=ctunullpointer:app/bin/track.c \
             --suppress=uninitvar:app/bin/levenshtein.c \
             --suppress=uninitvar:app/bin/problemrep.c \
@@ -452,9 +471,10 @@ jobs:
             --suppress=ctuPointerArith:app/bin/cturnout.c \
             --suppress=selfAssignment:app/bin/cdraw.c \
             --suppress=selfAssignment:app/bin/drawgeom.c \
-            -I app/bin -I app/bin/include -I app/wlib/include \
+            -I app/bin -I app/bin/include -I app/wlib/include -I app/wlib/gtk3lib \
             app/bin/*.c app/dynstring/*.c \
-            app/help/*.c app/tools/listxtp.c > cppcheck-deep.txt 2>&1 || true
+            app/help/*.c app/tools/listxtp.c \
+            app/wlib/gtk3lib/*.c app/wlib/gtk3lib/unix/*.c > cppcheck-deep.txt 2>&1 || true
       - name: Summarise findings
         run: |
           COUNT=$(grep -cE '\[[a-zA-Z]+\]$' cppcheck-deep.txt || echo 0)
@@ -497,8 +517,18 @@ jobs:
     #
     # Vendored-code exclusion list (quality-plan-gtk3v2main-part2.md Phase 8):
     # the `find app/bin app/dynstring app/cornu app/help app/tools` root list
-    # never reaches app/wlib/gtk3lib/wrapbox/ or app/tools/halibut/ (deleted,
-    # SF #219) — out of scope by construction, no exclude needed for those.
+    # never reaches app/tools/halibut/ (deleted, SF #219) — out of scope by
+    # construction, no exclude needed.
+    #
+    # app/wlib/gtk3lib added 2026-09-02 (queued since the app/bin shadowVariable/for-loop gates
+    # landed). Unlike the other roots, `find` here IS recursive into gtk3lib's subdirectories, so
+    # two exclusions are explicit rather than by construction: win32/ (Windows-only sources,
+    # gtk3lib/CMakeLists.txt guards them behind if(WIN32) so they're never in this Linux build's
+    # compile_commands.json -- same "clang-tidy can't get real compile flags" problem as
+    # bdf2xtp.c/helphelper.c/ppedit_gtk1.c above) and wrapbox/ (vendored GTK "eggwrapbox" widget,
+    # same treatment as astyle-check's --exclude=wrapbox below -- it IS built on Linux via its own
+    # add_subdirectory(), so it needs an explicit exclude unlike win32/). gtk3lib/unix/ has no
+    # exclusion -- it's real project code, built and in scope.
     #
     # Also excludes (2026-08-31, found while investigating report quality):
     # app/bin/uthash.h + app/bin/include/utlist.h (Troy D. Hanson, vendored,
@@ -562,7 +592,7 @@ jobs:
           # compile_commands.json entries each -- clang-tidy's own "[N/139]" progress counter can
           # exceed the 139 filename arguments below by a couple as a result. That's expected, not
           # a sign of a duplicate/broken entry.
-          mapfile -t FILES < <(find app/bin app/dynstring app/cornu app/help app/tools -name "*.c" | grep -v unittest | grep -vE 'bdf2xtp\.c|helphelper\.c|ppedit_gtk1\.c|app/tools/dirent\.c|app/bin/stringxtc\.c')
+          mapfile -t FILES < <(find app/bin app/dynstring app/cornu app/help app/tools app/wlib/gtk3lib -name "*.c" | grep -v unittest | grep -vE 'bdf2xtp\.c|helphelper\.c|ppedit_gtk1\.c|app/tools/dirent\.c|app/bin/stringxtc\.c|app/wlib/gtk3lib/win32/|app/wlib/gtk3lib/wrapbox/')
           # --header-filter='.*/app/' matters beyond style: without it, clang-tidy
           # reports on every system header (GTK/glib/atk from /usr/include, pulled
           # in via plain -I not -isystem so clang-tidy's own default system-header
