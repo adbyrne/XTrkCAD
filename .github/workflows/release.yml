@@ -424,6 +424,12 @@ jobs:
     # Published version of ci-gtk3.yml's report-only cppcheck-deep job -- see
     # that job's comment for the suppression rationale (kept in sync by hand,
     # both jobs run the same command).
+    #
+    # 2026-09-02: brought back in sync after drifting on TWO widenings that only
+    # landed in ci-gtk3.yml -- app/help + app/tools/listxtp.c (SF #701/#729-730,
+    # an older gap) and app/wlib/gtk3lib(+unix/) (this session's gate work). The
+    # published report had zero app/wlib findings as a result; see
+    # ci-gtk3.yml's cppcheck-deep job for the full app/wlib exclusion rationale.
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -447,6 +453,7 @@ jobs:
             --suppress=syntaxError:app/bin/paths.c \
             --suppress=syntaxError:app/bin/utility.c \
             --suppress=unknownMacro:app/bin/custom.c \
+            --suppress=unknownMacro:app/wlib/gtk3lib/stickytogglebutton.h \
             --suppress=ctunullpointer:app/bin/track.c \
             --suppress=uninitvar:app/bin/levenshtein.c \
             --suppress=uninitvar:app/bin/problemrep.c \
@@ -456,8 +463,10 @@ jobs:
             --suppress=ctuPointerArith:app/bin/cturnout.c \
             --suppress=selfAssignment:app/bin/cdraw.c \
             --suppress=selfAssignment:app/bin/drawgeom.c \
-            -I app/bin -I app/bin/include -I app/wlib/include \
-            app/bin/*.c app/dynstring/*.c > cppcheck-deep.txt 2>&1 || true
+            -I app/bin -I app/bin/include -I app/wlib/include -I app/wlib/gtk3lib \
+            app/bin/*.c app/dynstring/*.c \
+            app/help/*.c app/tools/listxtp.c \
+            app/wlib/gtk3lib/*.c app/wlib/gtk3lib/unix/*.c > cppcheck-deep.txt 2>&1 || true
       - name: Format as HTML
         run: |
           mkdir -p report
@@ -477,6 +486,10 @@ jobs:
     # Published version of ci-gtk3.yml's report-only clang-tidy job -- see
     # that job's comment for scope rationale (kept in sync by hand, both
     # jobs run the same command).
+    #
+    # 2026-09-02: added app/wlib/gtk3lib (with win32/wrapbox exclusions) to stay in sync
+    # with ci-gtk3.yml's widening -- had drifted, publishing a report with no app/wlib
+    # findings even after that job started scanning it.
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -506,7 +519,7 @@ jobs:
           # (that flag isn't supported by this runner's clang-tidy version; the invocation errored
           # out silently under `|| true` and this job published a false "0 findings" report for its
           # whole lifetime until this was found, 2026-08-31 -- kept in sync by hand).
-          mapfile -t FILES < <(find app/bin app/dynstring app/cornu app/help app/tools -name "*.c" | grep -v unittest | grep -vE 'bdf2xtp\.c|helphelper\.c|ppedit_gtk1\.c|app/tools/dirent\.c|app/bin/stringxtc\.c')
+          mapfile -t FILES < <(find app/bin app/dynstring app/cornu app/help app/tools app/wlib/gtk3lib -name "*.c" | grep -v unittest | grep -vE 'bdf2xtp\.c|helphelper\.c|ppedit_gtk1\.c|app/tools/dirent\.c|app/bin/stringxtc\.c|app/wlib/gtk3lib/win32/|app/wlib/gtk3lib/wrapbox/')
           clang-tidy --header-filter='.*/app/' --checks='-*,bugprone-*,performance-*,portability-*,-bugprone-easily-swappable-parameters' -p build "${FILES[@]}" > clang-tidy.txt 2>&1 || true
           # compile_commands.json stores absolute paths, so clang-tidy emits
           # diagnostics as e.g. "/home/runner/work/XTrkCAD/XTrkCAD/app/bin/foo.c:12:...".
