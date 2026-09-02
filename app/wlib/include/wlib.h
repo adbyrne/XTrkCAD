@@ -50,8 +50,6 @@ typedef struct _DataStore DataStore;
 /*
  * Opaque Pointers
  */
-typedef struct wWin_t *wWin_p;
-typedef struct wWindow_t *wWindow_p;
 typedef struct control *wControl_p;
 typedef struct wButton_t *wButton_p;
 typedef struct wEntry_t *wEntry_p;
@@ -65,7 +63,6 @@ typedef struct wMenu_t *wMenu_p;
 #define wMenu_p wControl_p
 typedef struct wText_t *wText_p;
 typedef struct wMessage_t *wMessage_p;
-typedef struct wLine_t *wLine_p;
 //typedef struct wMenuList_t *wMenuList_p;
 typedef struct wMenuPush_t *wMenuPush_p;
 typedef struct wMenuRadio_t *wMenuRadio_p;
@@ -108,7 +105,6 @@ extern long wDebugFont;
 typedef enum {
 	wClose_e,
 	wResize_e,
-	wState_e,
 	wQuit_e,
 	wRedraw_e,
 	wCancel_e,
@@ -471,9 +467,6 @@ typedef struct {
 	int x1, y1;
 } wLines_t, *wLines_p;
 
-wLine_p wLineCreate(wWindow_p parent, const char *labelStr, int count,
-                    wLines_t *lines);
-
 /*------------------------------------------------------------------------------
  *
  * System Interface
@@ -551,15 +544,12 @@ wControl_p wMain(int, char *[]);
 void wWinSetAspectRatio(wControl_p win, wWinPix_t x, wWinPix_t y);
 void wWinShow(wControl_p control, wBool_t visibility);
 wBool_t wWinIsVisible(wControl_p window);
-wBool_t wWinIsMaximized(wWin_p win);
 void wWinGetSize(wControl_p window, wWinPix_t *width, wWinPix_t *height);
 void wWinSetSize(wControl_p, wWinPix_t, wWinPix_t);
 void wWinSetTitle(wControl_p window, const char *title);
 void wWinSetBusy(wControl_p win, wBool_t busy);
 const char *wWinGetTitle(wControl_p window);
-void wWinClear(wWin_p, wWinPix_t, wWinPix_t, wWinPix_t, wWinPix_t);
 void wWinTop(wControl_p window);
-void wWinDoCancel(wWin_p);
 void wWinBlockEnable(wBool_t);
 void wSetGeometry(wControl_p win, wWinPix_t min_width, wWinPix_t max_width,
                   wWinPix_t min_height, wWinPix_t max_height,

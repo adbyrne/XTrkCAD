@@ -172,18 +172,6 @@ wBool_t wWinIsVisible(
 }
 
 /**
- * Returns whether the window is maximized.
- *
- * \param win IN window
- * \return    TRUE if maximized, FALSE otherwise
- */
-
-wBool_t wWinIsMaximized(wWin_p win)
-{
-	return win->maximize_initially;
-}
-
-/**
  * Sets the title of \a win to \a title.
  *
  * \param win IN window
@@ -242,46 +230,7 @@ const char * wWinGetTitle(
 	return gtk_window_get_title(GTK_WINDOW(win->widget));
 }
 
-void wWinDoCancel(
-        wWin_p win)
-{
-
-}
 
-/**
- * Event handler for window state changes (maximize)
- * Handles maximize event by storing the new state in the internal structure and
- * calling the event handler
- *
- * \param widget gtk widget
- * \param event event information
- * \param win the wlib internal window data
- * \return TRUE if win is valid,
- */
-
-gboolean window_state_event(
-        GtkWidget *widget,
-        GdkEventWindowState *event,
-        wControl_p win)
-{
-	struct window* windowAttributes = CONTROL_GET_ATTRIBUTES_PTR(win, window);
-	if (!win) {
-		return (FALSE);
-	}
-
-	windowAttributes->maximize_initially = FALSE;
-
-	if (event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED) {
-		windowAttributes->maximize_initially = TRUE;
-	}
-
-	if (windowAttributes->winProc) {
-		windowAttributes->winProc(win, wState_e, NULL, windowAttributes);
-	}
-
-	return TRUE;
-}
-
 void wSetGeometry(wControl_p win, wWinPix_t min_width, wWinPix_t max_width,
                   wWinPix_t min_height, wWinPix_t max_height, wWinPix_t base_width,
                   wWinPix_t base_height, double aspect_ratio )

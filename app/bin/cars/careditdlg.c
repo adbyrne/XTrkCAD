@@ -2509,7 +2509,7 @@ static void CarDlgProtoFocusOut( void )
 }
 
 
-static void CarDlgClose( wWin_p win )
+static void CarDlgClose( wControl_p win )
 {
 	tabString_t tabs[7];
 
@@ -2581,7 +2581,7 @@ static void CarDlgClose( wWin_p win )
  * pushed level's frozen count (carDlgStk[i].changed) must be checked too,
  * not just the current innermost one, so real changes made before
  * descending into the nested panel still get flagged. */
-static void CarDlgCancel( wWin_p win )
+static void CarDlgCancel( wControl_p win )
 {
 	wIndex_t i;
 	BOOL_T anyChanged = carDlgChanged != 0;

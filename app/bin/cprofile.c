@@ -704,7 +704,7 @@ static void DoProfilePrint(void * junk)
  *
  **************************************************************************/
 
-static wWin_p profileW;
+static wControl_p profileW;
 
 static BOOL_T profileUndo = FALSE;
 static void DoProfileChange(void *junk);

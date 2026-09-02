@@ -39,7 +39,7 @@ static Catalog currentCat;					/**< catalog being shown    */
 /* define the search / browse dialog */
 
 static void SearchUiDefault(void);
-static void SearchUiApply(wWin_p junk);
+static void SearchUiApply(wControl_p junk);
 static void SearchUiSelectAll(void *junk);
 static void SearchUiDoSearch(void *junk);
 static void SearchUiClearFilter(void *ptr);
@@ -375,7 +375,7 @@ void SearchUiOk(void * junk)
  * \param junk IN/OUT ignored
  */
 
-static void SearchUiApply(wWin_p junk)
+static void SearchUiApply(wControl_p junk)
 {
 	SearchUILoadResults();
 }

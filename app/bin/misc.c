@@ -569,7 +569,7 @@ EXPORT void wShow(wControl_p win)
 					break;
 				}
 			if (inx >= demoWindows_da.cnt) {
-				DYNARR_APPEND(wWin_p, demoWindows_da, 10);
+				DYNARR_APPEND(wControl_p, demoWindows_da, 10);
 				inx = demoWindows_da.cnt - 1;
 			}
 			demoWindows(inx) = win;
@@ -609,7 +609,7 @@ EXPORT void CloseDemoWindows(void)
 		if ( demoWindows(inx) != NULL) {
 			wHide(demoWindows(inx));
 		}
-	DYNARR_RESET( wWin_p, demoWindows_da );
+	DYNARR_RESET( wControl_p, demoWindows_da );
 }
 
 EXPORT void DefaultProc(wControl_p win, winProcEvent e, const void * data)
@@ -620,7 +620,6 @@ EXPORT void DefaultProc(wControl_p win, winProcEvent e, const void * data)
 		if (data != NULL) {
 			ConfirmReset( FALSE);
 		}
-		wWinDoCancel(win);
 		break;
 	default:
 		break;

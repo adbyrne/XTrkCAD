@@ -32,7 +32,7 @@
 
 static int log_celev = -1;
 
-static wWin_p elevW;
+static wControl_p elevW;
 
 static long elevModeV;
 static char elevStationV[STR_SIZE];

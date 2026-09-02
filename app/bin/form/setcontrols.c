@@ -69,7 +69,7 @@ EXPORT void FormControlShow (
 
 
 EXPORT void FormHilite(
-        wWin_p win,
+        wControl_p win,
         wControl_p control,
         BOOL_T hilite )
 {

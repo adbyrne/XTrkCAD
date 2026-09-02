@@ -2588,7 +2588,8 @@ EXPORT void ParamTurnOffDelays(BOOL_T disable)
 	disablePlaybackDelays = disable;
 }
 
-void ParamDlgProc(wWin_p win, winProcEvent e, void *refresh, const void *data)
+void ParamDlgProc(wControl_p win, winProcEvent e, void *refresh,
+                  const void *data)
 {
 	paramGroup_cp pg = (paramGroup_cp)data;
 	switch (e) {

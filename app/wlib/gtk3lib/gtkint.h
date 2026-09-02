@@ -90,7 +90,6 @@ typedef enum {
 	B_MENU,
 	B_MULTITEXT,
 	B_MESSAGE,
-	B_LINES,
 	B_MENUITEM,
 	B_BOX,
 	B_BITMAP,
@@ -111,8 +110,6 @@ typedef enum {
 	B_SEPARATOR
 } wType_e;
 
-typedef void (*repaintProcCallback_p)(wControl_p);
-typedef void (*doneProcCallback_p)(wControl_p b);
 typedef void (*setTriggerCallback_p)(wControl_p b);
 
 /*
@@ -331,84 +328,6 @@ struct control {
 #define ISDEFINEDINBUILDER(parent)                                             \
   ((parent)->attributes.window.option & F_DEFINEDINBUILDER)
 
-struct wObjCommon {
-	wType_e type;      /**< type of control */
-	wWin_p parent;     /**< parent control */
-	long option;       /**< creation options*/
-	void *attributes;  /**< application additional attributes */
-	GtkWidget *widget; /**< GTK widget */
-	gchar *helpTopic;
-	gchar *name;
-	gchar *labelStr;
-};
-
-struct wWindow_t {
-	wType_e type;
-	wWinCallBack_p winProc;      /**< window procedure */
-	GtkWidget *menubar;          /**< GTK menubar handle if present */
-	GtkWidget *toolbar;          /**< GTK toolbar handle if present */
-	GtkContainer *statusbar;     /**< GTK statusbar handle if present */
-	GtkAccelGroup *accelGroup;   /**< accelerator group connected to Window */
-	GtkDrawingArea *drawingArea; /**< the drawing area */
-	GtkWidget *gtkWindow;        /**< the GTK window */
-	GtkBuilder *builder;
-	const char *name; /**< unique name for window */
-	const char *helpTopic;
-};
-
-/** /todo Check necessity of above fields */
-
-// typedef struct wWindow_t * wWindow_p;
-
-#define WOBJ_COMMON                                                            \
-  wType_e type;                                                                \
-  wControl_p next;                                                             \
-  wControl_p synonym;                                                          \
-  wWin_p parent;                                                               \
-  wWinPix_t origX, origY;                                                      \
-  wWinPix_t realX, realY;                                                      \
-  wWinPix_t default_size_x, default_size_y;                                    \
-  wWinPix_t labelW;                                                            \
-  wWinPix_t w, h;                                                              \
-  int maximize_initially;                                                      \
-  long option;                                                                 \
-  const char *labelStr;                                                        \
-  repaintProcCallback_p repaintProc;                                           \
-  GtkWidget *widget;                                                           \
-  GtkWidget *label;                                                            \
-  doneProcCallback_p doneProc;                                                 \
-  cairo_t *cr;                                                                 \
-  /* CURSOR_SURFACE wCursorSurface_t cursor_surface;*/                         \
-  wBool_t outline;                                                             \
-  void *attributes;                                                            \
-  int fromTemplate; /**< widget was build from ui template */                  \
-  char *template_id;
-
-struct wWin_t {
-	WOBJ_COMMON
-	GtkWidget *gtkwin; /**< GTK window */
-	wWinPix_t lastX, lastY;
-	wControl_p first, last;
-	wWinCallBack_p winProc; /**< window procedure */
-	wBool_t shown;          /**< visibility state */
-	const char *nameStr;    /**< window name (not title) */
-	GtkWidget *menubar;     /**< menubar handle (if exists) */
-	GtkWidget *toolbar;
-	int menu_height;
-	int gc_linewidth; /**< ??? */
-	wBool_t busy;
-	int resizeTimer; /** resizing **/
-	int resizeW, resizeH;
-	int timer_idle_count;
-	int timer_busy_count;
-	int modalLevel;
-	GtkBuilder *builder;
-};
-
-// struct wControl_t {
-//		WOBJ_COMMON
-//		};
-
 typedef struct wListItem_t *wListItem_p;
 
 struct wListItem_t {
@@ -518,9 +437,6 @@ const char *wlibFontTranslate(wFont_p fp);
 void wlibFTLabelChangeColor(wIcon_p button, wDrawColor newColor);
 
 /* help.c */
-
-/* lines.c */
-void wlibLineShow(wLine_p bl, wBool_t visible);
 
 /* list.c */
 int CompareListData(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter,
