@@ -22,14 +22,30 @@
 # had a perfectly good reason one or two lines below -- caught by the user
 # spot-checking the published report against dlayer.c's source.
 #
-# Usage: scan-suppressions.sh [source-root] > suppressions.txt
-#   source-root defaults to app/bin (the only directory with any
-#   cppcheck-suppress/NOLINT comments as of 2026-08-30 -- app/wlib,
-#   app/help, app/tools, app/dynstring, app/cornu have none)
+# Found 2026-09-02, once app/wlib/gtk3lib was added as a root: the category
+# regex didn't handle cppcheck's block form (`cppcheck-suppress-begin CAT`
+# / `cppcheck-suppress-end CAT`, used in drawcairo.c) -- the `-begin`/`-end`
+# suffix broke the `[[:space:]]+` match right after "cppcheck-suppress",
+# so the whole unmatched line fell through as a garbled category string.
+# Fixed by making that suffix optional in the regex.
+#
+# Usage: scan-suppressions.sh [source-root ...] > suppressions.txt
+#   One or more source-roots, each scanned non-recursively (*.c/*.h directly
+#   under it, matching the same non-recursive-glob convention the cppcheck
+#   CI jobs use to stay out of vendored/test subdirs like wrapbox/, win32/,
+#   unittest/ by construction). Defaults to app/bin alone if none given.
+#   app/wlib/gtk3lib (+ its unix/ subdir) added 2026-09-02, once cppcheck's
+#   own scope widened there and picked up real suppress comments (8 lines
+#   across drawcairo.c/togglegroup.c/stickytogglebutton.h) that this
+#   inventory had been silently missing.
 
 set -euo pipefail
 
-ROOT="${1:-app/bin}"
+if [ "$#" -eq 0 ]; then
+	ROOTS=(app/bin)
+else
+	ROOTS=("$@")
+fi
 
 BOILERPLATE_RE='confirmed via broad sampling this session|freshly declared and consumed within each iteration, never escapes the loop'
 
@@ -58,11 +74,12 @@ trailing_comment_reason() {
 }
 
 shopt -s nullglob
+for ROOT in "${ROOTS[@]}"; do
 for f in "$ROOT"/*.c "$ROOT"/*.h; do
 	[ -f "$f" ] || continue
 	grep -n "cppcheck-suppress\|NOLINTNEXTLINE(\|NOLINT(" "$f" 2>/dev/null | while IFS=: read -r lineno content; do
 		if echo "$content" | grep -q "cppcheck-suppress"; then
-			cat=$(echo "$content" | sed -E 's/.*cppcheck-suppress[[:space:]]+([A-Za-z0-9_]+).*/\1/')
+			cat=$(echo "$content" | sed -E 's/.*cppcheck-suppress(-begin|-end)?[[:space:]]+([A-Za-z0-9_]+).*/\2/')
 			if echo "$content" | grep -q -- '--'; then
 				reason=$(echo "$content" | sed -E 's/.*--[[:space:]]*//')
 			elif echo "$content" | grep -qE '\*/[[:space:]]*/\*'; then
@@ -84,4 +101,5 @@ for f in "$ROOT"/*.c "$ROOT"/*.h; do
 			printf '%s:%s: clang-tidy suppress (no reason comment) [%s]\n' "$f" "$lineno" "$check"
 		fi
 	done || true
+done
 done
