@@ -93,15 +93,15 @@ static void DoReportsOp(
 /** Duplicated from denum.c's AddDateString() -- see file header. */
 static void AddReportDateString(DynString* output)
 {
-	const struct tm *tm;
+	struct tm tm;
 	time_t currentTime;
 	size_t length = 8;
 	char* formatted = malloc(length);
 
 	time(&currentTime);
-	tm = localtime(&currentTime);
+	localtime_r(&currentTime, &tm);
 
-	while (!strftime(formatted, length, "%x\n\n", tm)) {
+	while (!strftime(formatted, length, "%x\n\n", &tm)) {
 		char *tmp;
 		length *= 2;
 		tmp = realloc(formatted, length);
