@@ -1,7 +1,3 @@
-/* Auto-converted from drawm.but by tools/but-to-doxygen.py.
- * See .claude/halibut-doxygen-investigation-plan.md and
- * conversion-log.md for anything flagged during conversion. */
-
 /**
 \page cmdDraw Draw Menu
 
