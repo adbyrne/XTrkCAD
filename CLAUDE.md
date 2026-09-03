@@ -52,7 +52,35 @@ when a live check found six unflagged `GTK3V2MAIN` merge/topic-branch commits (S
 #729/#730) that the pending file said nothing about. The live check above is the fix: it asks SF
 directly every session instead of trusting a periodic job's last output.
 
-If either check surfaces something, tell the user which branches have new SF changes and ask:
+**Also check the second hop — the GTK3V2MAIN working copy vs. its own local mirror.**
+`xtrkcad-hg-gtk3v2main` (where GTK3V2MAIN edits actually happen) pulls from `xtrkcad-hg` locally,
+not from SF directly, so the SF-vs-`xtrkcad-hg` check above can come back completely clean while
+`xtrkcad-hg-gtk3v2main` is still behind `xtrkcad-hg` itself. Confirmed 2026-09-03: `xtrkcad-hg`
+was byte-for-byte synced with SF (a merge had already landed in both), but
+`xtrkcad-hg-gtk3v2main` was 2 changesets behind `xtrkcad-hg` — this read as "SF is broken/has an
+unreconciled conflict" until traced back to a stale working copy. Check every session,
+unconditionally (not just when the SF check above finds something):
+
+```sh
+hg -R /home/abyrne/XTrkCAD/xtrkcad-hg-gtk3v2main incoming -b GTK3V2MAIN \
+    --template '{rev}:{node|short} {branch} {author|person}: {desc|firstline}\n'
+```
+
+If it reports anything, just pull and update immediately — no need to ask first. This is a
+same-machine, local-to-local sync of content that's already vetted (either it's the user's own
+prior work pushed up from this same working copy, or upstream SF content the user already
+approved pulling into `xtrkcad-hg` via the check above), so there's nothing new here to review:
+
+```sh
+hg -R /home/abyrne/XTrkCAD/xtrkcad-hg-gtk3v2main status   # must be clean before pulling
+hg -R /home/abyrne/XTrkCAD/xtrkcad-hg-gtk3v2main pull
+hg -R /home/abyrne/XTrkCAD/xtrkcad-hg-gtk3v2main update GTK3V2MAIN
+```
+
+If `status` isn't clean, stop and reconcile the in-progress work first rather than pulling on top
+of it.
+
+If either of the two checks above (SF vs. `xtrkcad-hg`, pending file) surfaces something, tell the user which branches have new SF changes and ask:
 **"Upstream SF changes are pending — want me to compile and test them locally, then push to
 GitHub CI?"**
 
