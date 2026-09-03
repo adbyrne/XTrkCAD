@@ -56,6 +56,14 @@
 
 static wControl_p reportsW;
 
+/** The hidden control that backs Save/Print (ReportsRefreshPrintText()) --
+ * deliberately NOT a paramData_t/PD_TEXT entry in reportsPLs[] below, so it
+ * isn't tied to reportsW's builder-defined dialog. Created once, lazily, in
+ * ReportsShowText() via wTextCreate()'s genuinely standalone/no-.ui-needed
+ * code path (text.c) against its own permanently-unshown backing window --
+ * see that call site for why. */
+static wControl_p reportsT;
+
 #define REPORTSOP_SAVE  (1)
 #define REPORTSOP_PRINT (2)
 
@@ -69,14 +77,10 @@ static const char * reportsListTitles[] = {
 };
 static paramListData_t reportsListData = { 8, 300, 4, reportsListWidths, reportsListTitles };
 
-static paramTextData_t reportsTextData = { 0, 0 };
 static paramData_t reportsPLs[] = {
 #define I_REPORTSLIST (0)
 #define reportsList (reportsPLs[I_REPORTSLIST].control)
 	{ PD_LIST, NULL, "list", PDO_DLGRESIZE, &reportsListData, NULL, 0 },
-#define I_REPORTSTEXT (1)
-#define reportsT (reportsPLs[I_REPORTSTEXT].control)
-	{ PD_TEXT, NULL, "text", PDO_DLGRESIZE, &reportsTextData },
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, I2VP(REPORTSOP_SAVE) },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, I2VP(REPORTSOP_PRINT) },
 	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
@@ -291,15 +295,31 @@ void ReportsShowText(const char *title)
 		                             ReportsDlgUpdate );
 		reportsFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, title,
 		                                sReportsFilePattern, DoReportsSave, NULL );
-		/* reports.ui's "text"/"scrollwindow" visible=False hint is NOT
-		 * what actually hides this control -- wTextCreate() (text.c)
-		 * unconditionally calls gtk_widget_show_all() on itself at the
-		 * end of its own construction, overriding the .ui's visible
-		 * property regardless of what it says. Confirmed empirically: a
-		 * real screenshot showed an empty visible box where reportsT
-		 * should have been invisible. wControlShow(FALSE) here, run once
-		 * after creation, is what actually hides it. */
-		wControlShow( (wControl_p)reportsT, FALSE );
+		/* reportsT backs Save/Print only -- it's never shown to the user
+		 * (see ReportsRefreshPrintText()) -- so instead of creating it as
+		 * a .ui-bound PD_TEXT control and then fighting wTextCreate()'s
+		 * unconditional gtk_widget_show_all() (an earlier version of this
+		 * code did exactly that: a real screenshot caught it leaving an
+		 * empty visible box, worked around with wControlShow(FALSE)),
+		 * give it its own backing window that's simply never wShow()n.
+		 * "Never shown" needs an explicit push, though --
+		 * wWinDialogCreate() (dialog.c) unconditionally calls
+		 * gtk_widget_show() on itself at the end of its own construction
+		 * (the same style of gotcha as wTextCreate()'s force-show,
+		 * confirmed the same way: a real backing window DID appear on
+		 * screen as a small stray window before this wControlShow() line
+		 * was added). This also means reportsT is created via
+		 * wTextCreate()'s standalone/no-.ui-needed code path (parent
+		 * lacks F_DEFINEDINBUILDER) -- otherwise unexercised anywhere in
+		 * this codebase (checked: not even wlib/test/testapp.c calls
+		 * wTextCreate() against a non-builder parent). */
+		{
+			wControl_p reportsTBacking = wWinDialogCreate( NULL, NULL, NULL,
+			                             "reportstextbacking", 0L, NULL, NULL );
+			wControlShow( reportsTBacking, FALSE );
+			reportsT = wTextCreate( reportsTBacking, 0, 0, NULL, NULL,
+			                        BO_READONLY, 0, 0 );
+		}
 	}
 	/* NOTE: subsequent calls reuse the same window/title -- fine while
 	 * phase 1 is the only report; retitling on reuse becomes relevant
