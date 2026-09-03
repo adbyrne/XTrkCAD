@@ -65,6 +65,76 @@
         <property name="spacing">6</property>
 
         <child>
+          <object class="GtkScrolledWindow" id="list">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="min-content-height">150</property>
+            <property name="shadow-type">in</property>
+            <child>
+              <object class="GtkTreeView" id="treeview">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="enable-grid-lines">vertical</property>
+                <property name="model">liststore</property>
+                <child>
+                  <object class="GtkTreeViewColumn" id="listtrack">
+                    <property name="resizable">True</property>
+                    <property name="title" translatable="yes">Track</property>
+                    <child>
+                      <object class="GtkCellRendererText" />
+                      <attributes>
+                        <attribute name="text">3</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="listx">
+                    <property name="resizable">True</property>
+                    <property name="title" translatable="yes">X</property>
+                    <child>
+                      <object class="GtkCellRendererText" />
+                      <attributes>
+                        <attribute name="text">4</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="listy">
+                    <property name="resizable">True</property>
+                    <property name="title" translatable="yes">Y</property>
+                    <child>
+                      <object class="GtkCellRendererText" />
+                      <attributes>
+                        <attribute name="text">5</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="listangle">
+                    <property name="resizable">True</property>
+                    <property name="title" translatable="yes">Angle</property>
+                    <child>
+                      <object class="GtkCellRendererText" />
+                      <attributes>
+                        <attribute name="text">6</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkScrolledWindow" id="scrollwindow">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -90,10 +160,28 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">0</property>
+            <property name="position">1</property>
           </packing>
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkListStore" id="liststore">
+    <columns>
+      <!-- column-name error_color -->
+      <column type="gboolean" />
+      <!-- column-name userdata -->
+      <column type="gpointer" />
+      <!-- column-name bitmap -->
+      <column type="GdkPixbuf" />
+      <!-- column-name track -->
+      <column type="gchararray" />
+      <!-- column-name x -->
+      <column type="gchararray" />
+      <!-- column-name y -->
+      <column type="gchararray" />
+      <!-- column-name angle -->
+      <column type="gchararray" />
+    </columns>
   </object>
 </interface>

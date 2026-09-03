@@ -71,6 +71,10 @@ The <b>Colors</b> dialog controls the color that various objects are drawn.
 
 - <b>Track Roadbed</b> - color of Roadbed fill under the track.
 
+- <b>Report Indicator</b> - color of the temporary marker drawn on the layout when a row is
+  selected in a Reports (\ref reportsM) window, e.g. the Unconnected Endpoints Report
+  (\ref cmdReports).
+
 */
 
 /**

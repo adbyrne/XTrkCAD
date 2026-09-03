@@ -31,6 +31,7 @@
 #include "layout.h"
 #include "mapwindow.h"
 #include "misc.h"
+#include "reports.h"
 #include "track.h"
 #include "wlib.h"
 
@@ -142,6 +143,7 @@ EXPORT wDrawColor elevColorIgnore;
 EXPORT wDrawColor elevColorDefined;
 EXPORT wDrawColor profilePathColor;
 EXPORT wDrawColor exceptionColor;
+EXPORT wDrawColor reportIndicatorColor;
 
 DIST_T closeDist = 0.100;
 
@@ -280,6 +282,7 @@ static void DrawTempContent(void)
 
 	DrawMarkers();
 	RulerRedraw(FALSE);
+	ReportsDrawIndicator(&tempD);
 	wDrawFinish(tempD.d);
 
 	/* Outside the batch: RedrawPlaybackCursor() ends with wFlush(), which
@@ -1779,6 +1782,8 @@ EXPORT void InitColor(void)
 	profilePathColor = drawColorPurple;
 	exceptionColor = wDrawFindColor(wRGB(255, 89, 0));
 	tieColor = wDrawFindColor(wRGB(153, 89, 68));
+	reportIndicatorColor = wDrawFindColor(wRGB(255, 0,
+	                                      255)); /* magenta -- distinct from every other default above */
 }
 
 EXPORT void DrawInit(int initialZoom)

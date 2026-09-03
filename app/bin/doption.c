@@ -170,7 +170,8 @@ static paramData_t colorPLs[] = {
 	{ PD_COLORLIST, &exceptionColor, "exception", PDO_NOPSHUPD, NULL, NULL, 0, I2VP(CHANGE_MAIN) },
 	{ PD_COLORLIST, &tieColor, "tie", PDO_NOPSHUPD, NULL, NULL, 0, I2VP(CHANGE_MAIN) },
 	{ PD_COLORLIST, &bridgeColor, "bridge", PDO_NOPSHUPD, NULL, NULL, 0, I2VP(CHANGE_MAIN) },
-	{ PD_COLORLIST, &roadbedColor, "roadbed", PDO_NOPSHUPD, NULL, NULL, 0, I2VP(CHANGE_MAIN) }
+	{ PD_COLORLIST, &roadbedColor, "roadbed", PDO_NOPSHUPD, NULL, NULL, 0, I2VP(CHANGE_MAIN) },
+	{ PD_COLORLIST, &reportIndicatorColor, "reportindicator", PDO_NOPSHUPD, NULL, NULL, 0, I2VP(CHANGE_MAIN) }
 };
 static paramGroup_t colorPG = { "rgbcolor", PGO_RECORD|PGO_FULLDIALOGFROMBUILDER, colorPLs, COUNT( colorPLs ) };
 

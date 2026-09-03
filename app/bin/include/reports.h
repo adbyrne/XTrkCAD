@@ -28,13 +28,18 @@
 #include "xtctypes.h"
 
 /** One open (unconnected) track endpoint, as returned by the compute pass
- * and formatted by ReportsFormatUnconnectedList(). Mirrors the MCP
- * reference implementation's find_unconnected_endpoints() return shape
- * (track_id, x, y, angle) -- deliberately no other fields, for parity. */
+ * and formatted by ReportsFormatUnconnectedList(). trackId/pos/angle mirror
+ * the MCP reference implementation's find_unconnected_endpoints() return
+ * shape exactly, for parity -- scale is a phase-1.5 addition (not part of
+ * that parity contract), needed so the interactive indicator can size
+ * itself to the endpoint's own track scale rather than assuming one
+ * layout-wide scale. Appended at the end so existing positional
+ * initializers (tests included) don't need updating. */
 typedef struct {
 	TRKINX_T trackId;
 	coOrd    pos;
 	ANGLE_T  angle;
+	SCALEINX_T scale;
 } reportsEndPt_t;
 
 /**
@@ -67,5 +72,23 @@ void ReportsShowText(const char *title, DynString *content);
  * \param[in] unused menu-callback signature, unused
  */
 void ReportsUnconnectedEndpoints(void *unused);
+
+/**
+ * Draw the current interactive-navigation indicator (phase 1.5), if one is
+ * active -- an open circle at the last-clicked report row's position, no-op
+ * otherwise. Called once per redraw from draw.c's DrawTempContent(), the
+ * same transient/never-saved-to-file drawing pass the ruler crosshair and
+ * command-feedback markers already use.
+ *
+ * Takes `void *` rather than `drawCmd_p` so this shared header (also
+ * included by the lightweight reportstest.c CMocka target) doesn't need to
+ * pull in draw.h; the real definition in reports.c casts back to
+ * `drawCmd_p` internally. The only caller (draw.c) already has a real
+ * `drawCmd_p` to pass, so the implicit `drawCmd_p` -> `void *` conversion
+ * at the call site is always safe.
+ *
+ * \param[in] d the drawCmd_p (mainD/tempD) to draw into
+ */
+void ReportsDrawIndicator(void *d);
 
 #endif // REPORTS_H

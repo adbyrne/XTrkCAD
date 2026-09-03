@@ -29,6 +29,13 @@ A track with more than two endpoints (for example a turntable) can
 contribute more than one row to the report -- one row per unconnected
 endpoint on that track, not one row per track.
 
+Selecting a row in the list pans the <b>Main Canvas</b> (\ref mainW) to
+that endpoint's position and draws a temporary open-circle indicator there,
+so you can quickly find any listed endpoint on the layout. The indicator
+is purely visual -- it's never saved with the layout and disappears as
+soon as the report window closes. Its color can be changed on the
+<b>Colors</b> (\ref cmdRgbcolor) dialog, under <b>Report Indicator</b>.
+
 \todo Add a reportuncon.png screenshot (app/doc/images/) once the dialog
 has been visually verified -- deliberately not referenced here yet rather
 than pointing at a file that doesn't exist (see managem.dox's cmdEnum page
