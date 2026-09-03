@@ -162,13 +162,24 @@ static void AddReportDateString(DynString* output)
  * (checked); this is deliberately minimal (re-centers at the current zoom
  * level, does not change scale).
  *
+ * Sets mainD.orig directly (matching draw.c's own PanHere()'s exact same
+ * centering math), then calls MainLayout() rather than a bare
+ * MainRedraw() -- MainLayout() is what actually keeps everything in sync
+ * after mainD.orig changes: it re-syncs tempD.orig/tempD.size to match
+ * (the surface ReportsDrawIndicator() draws into -- without this the
+ * first attempt's indicator was invisible until some unrelated event,
+ * e.g. refocusing the window, forced a real MainLayout() and resynced
+ * tempD for us) and calls MapDrawBoundingBox() (the first attempt also
+ * missed this -- the Map window's viewport-position indicator never
+ * moved). A bare MainRedraw() only repaints; it does neither.
+ *
  * \param[in] pos the layout coordinate to center on
  */
 static void ReportsCenterOn(coOrd pos)
 {
 	mainD.orig.x = pos.x - mainD.size.x / 2.0;
 	mainD.orig.y = pos.y - mainD.size.y / 2.0;
-	MainRedraw();
+	MainLayout( TRUE, FALSE );
 }
 
 /**
