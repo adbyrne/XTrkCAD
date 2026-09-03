@@ -79,6 +79,7 @@ char * sRecordFilePattern = NULL;
 char * sNoteFilePattern = NULL;
 char * sLogFilePattern = NULL;
 char * sPartsListFilePattern = NULL;
+char * sReportsFilePattern = NULL;
 
 char * sVersion = Version;
 int iParamVersion = PARAMVERSION;
@@ -215,6 +216,10 @@ void InitCustom( void )
 		sprintf(buf, _("%s PartsList Files (*.txt)|*.txt"), Product);
 		sPartsListFilePattern = strdup(buf);
 	}
+	if (sReportsFilePattern == NULL) {
+		sprintf(buf, _("%s Report Files (*.txt)|*.txt"), Product);
+		sReportsFilePattern = strdup(buf);
+	}
 
 	free(buf);
 }
@@ -262,5 +267,9 @@ void CleanupCustom( void )
 	if (sPartsListFilePattern) {
 		free(sPartsListFilePattern);
 		sPartsListFilePattern = NULL;
+	}
+	if (sReportsFilePattern) {
+		free(sReportsFilePattern);
+		sReportsFilePattern = NULL;
 	}
 }

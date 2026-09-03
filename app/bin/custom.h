@@ -54,6 +54,7 @@ extern char * sRecordFilePattern;
 extern char * sNoteFilePattern;
 extern char * sLogFilePattern;
 extern char * sPartsListFilePattern;
+extern char * sReportsFilePattern;
 
 extern char * sVersion;
 extern int iParamVersion;

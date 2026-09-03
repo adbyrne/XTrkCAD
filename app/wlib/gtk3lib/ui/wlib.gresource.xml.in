@@ -33,6 +33,7 @@
     <file preprocess="xml-stripblanks">print.ui</file>
     <file preprocess="xml-stripblanks">profile.ui</file>
     <file preprocess="xml-stripblanks">record.ui</file>
+    <file preprocess="xml-stripblanks">reports.ui</file>
     <file preprocess="xml-stripblanks">rescale.ui</file>
     <file preprocess="xml-stripblanks">rgbcolor.ui</file>
     <file preprocess="xml-stripblanks">searchgui.ui</file>
