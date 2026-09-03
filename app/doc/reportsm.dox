@@ -22,6 +22,8 @@ in the entire layout that is not connected to another track -- one row per
 open endpoint, giving its <b>Track</b> id, <b>X</b>/<b>Y</b> position and
 <b>Angle</b>.
 
+![](reportuncon.png)
+
 Unlike the Parts List (\ref cmdEnum) command, this report always covers the
 whole layout; it does not consider the current selection (\ref cmdSelect).
 
@@ -35,11 +37,6 @@ so you can quickly find any listed endpoint on the layout. The indicator
 is purely visual -- it's never saved with the layout and disappears as
 soon as the report window closes. Its color can be changed on the
 <b>Colors</b> (\ref cmdRgbcolor) dialog, under <b>Report Indicator</b>.
-
-\todo Add a reportuncon.png screenshot (app/doc/images/) once the dialog
-has been visually verified -- deliberately not referenced here yet rather
-than pointing at a file that doesn't exist (see managem.dox's cmdEnum page
-for the screenshot convention this should follow).
 
 The <b>Save As...</b> button opens a <i>File Save</i> dialog window that's
 used to name and save the report to a text file.

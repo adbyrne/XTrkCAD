@@ -291,6 +291,15 @@ void ReportsShowText(const char *title)
 		                             ReportsDlgUpdate );
 		reportsFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, title,
 		                                sReportsFilePattern, DoReportsSave, NULL );
+		/* reports.ui's "text"/"scrollwindow" visible=False hint is NOT
+		 * what actually hides this control -- wTextCreate() (text.c)
+		 * unconditionally calls gtk_widget_show_all() on itself at the
+		 * end of its own construction, overriding the .ui's visible
+		 * property regardless of what it says. Confirmed empirically: a
+		 * real screenshot showed an empty visible box where reportsT
+		 * should have been invisible. wControlShow(FALSE) here, run once
+		 * after creation, is what actually hides it. */
+		wControlShow( (wControl_p)reportsT, FALSE );
 	}
 	/* NOTE: subsequent calls reuse the same window/title -- fine while
 	 * phase 1 is the only report; retitling on reuse becomes relevant
