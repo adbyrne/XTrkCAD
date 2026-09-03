@@ -375,6 +375,14 @@ EXPORT void InitTrkTrack( void )
 
 
 
+/**
+ * The track's unique, file-stable index (the id used in .xtc/.xtce T
+ * records and shown to the user in dialogs/reports).
+ *
+ * \param[in] trk the track
+ * \return the track's index
+ */
+
 EXPORT TRKINX_T GetTrkIndex( track_p trk )
 {
 	return trk->index;
@@ -428,6 +436,14 @@ EXPORT void GetBoundingBox( track_p trk, coOrd *hi, coOrd *lo )
 	lo->x = (POS_T)trk->lo.x;
 	lo->y = (POS_T)trk->lo.y;
 }
+
+/**
+ * Number of endpoints a track object has (2 for most track types, but a
+ * turntable-style object has one per spoke/radial position).
+ *
+ * \param[in] trk the track
+ * \return endpoint count
+ */
 
 EXPORT EPINX_T GetTrkEndPtCnt( track_cp trk )
 {
