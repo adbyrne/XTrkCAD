@@ -197,6 +197,7 @@ extern wDrawColor crossMinorColor;
 extern wDrawColor snapGridColor;
 extern wDrawColor selectedColor;
 extern wDrawColor profilePathColor;
+extern wDrawColor reportIndicatorColor;
 
 BOOL_T IsClose(DIST_T);
 
