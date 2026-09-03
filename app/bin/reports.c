@@ -5,11 +5,12 @@
  * generic from the start, meant for every future report phase to reuse)
  * plus the phase-1 report itself, unconnected track endpoints.
  *
- * count_utf8_chars()/the date-header logic are deliberately duplicated
- * from denum.c rather than shared, to keep this feature's first PR scoped
- * to new files only -- see the phase-1 implementation plan's "Shared
- * helper duplication" section for the reasoning and the follow-up cleanup
- * this leaves flagged (extract both to app/dynstring/).
+ * The date-header logic (AddReportDateString()) is deliberately duplicated
+ * from denum.c's AddDateString() rather than shared, to keep this
+ * feature's first PR scoped to new files only -- see the phase-1
+ * implementation plan's "Shared helper duplication" section for the
+ * reasoning and the follow-up cleanup this leaves flagged (extract to
+ * app/dynstring/).
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -61,17 +62,6 @@ static paramData_t reportsPLs[] = {
 static paramGroup_t reportsPG = { "reports", PGO_FULLDIALOGFROMBUILDER, reportsPLs, COUNT( reportsPLs ) };
 
 static struct wFilSel_t * reportsFile_fs;
-
-/** Duplicated from denum.c's local helper -- see file header. */
-static int count_utf8_chars(const char *s)
-{
-	int i = 0, j = 0;
-	while (s[i]) {
-		if ((s[i] & 0xc0) != 0x80) { j++; }
-		i++;
-	}
-	return j;
-}
 
 static int DoReportsSave(
         int files,
@@ -197,9 +187,19 @@ void ReportsUnconnectedEndpoints( void * unused )
 		DynStringCatCStrs( &content, "\n", _("No unconnected endpoints found."), "\n",
 		                   NULL );
 	} else {
-		DynStringPrintf( &content, "\n%*s | %8s | %8s | %7s\n",
-		                 count_utf8_chars(_("Track")), _("Track"),
-		                 _("X"), _("Y"), _("Angle") );
+		/* snprintf into a local buffer, then append -- DynStringPrintf()
+		 * formats INTO its target starting at offset 0 (replacing whatever
+		 * was already there, same as plain sprintf into a fresh buffer),
+		 * it does not append. Calling it directly on `content` here would
+		 * silently wipe out the header ReportsAddHeader() just wrote --
+		 * exactly the bug this comment is here to stop someone
+		 * reintroducing. Width 6 for the Track column matches
+		 * ReportsFormatUnconnectedList()'s "%6d" exactly, so header and
+		 * data rows stay aligned. */
+		char headerLine[64];
+		snprintf( headerLine, sizeof headerLine, "\n%6s | %8s | %8s | %7s\n",
+		          _("Track"), _("X"), _("Y"), _("Angle") );
+		DynStringCatCStr( &content, headerLine );
 		ReportsFormatUnconnectedList( &content, &DYNARR_N(reportsEndPt_t, list_da, 0),
 		                              list_da.cnt );
 	}
