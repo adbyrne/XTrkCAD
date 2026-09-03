@@ -177,6 +177,14 @@ EXPORT void SetTrkEndPointSilent( track_p trk, EPINX_T ep, coOrd pos,
 }
 
 
+/**
+ * Position of one of a track's endpoints, in layout coordinates.
+ *
+ * \param[in] trk the track
+ * \param[in] ep endpoint index, 0 <= ep < GetTrkEndPtCnt(trk)
+ * \return the endpoint's position
+ */
+
 EXPORT coOrd GetTrkEndPos( track_p trk, EPINX_T ep )
 {
 	CHECK( ep >= 0 && ep < GetTrkEndPtCnt(trk) );
@@ -184,12 +192,32 @@ EXPORT coOrd GetTrkEndPos( track_p trk, EPINX_T ep )
 }
 
 
+/**
+ * Direction a track's endpoint points, in degrees.
+ *
+ * \param[in] trk the track
+ * \param[in] ep endpoint index, 0 <= ep < GetTrkEndPtCnt(trk)
+ * \return the endpoint's angle
+ */
+
 EXPORT ANGLE_T GetTrkEndAngle( track_p trk, EPINX_T ep )
 {
 	CHECK( ep >= 0 && ep < GetTrkEndPtCnt(trk) );
 	return GetTrkEndPt(trk,ep)->angle;
 }
 
+
+/**
+ * The track connected to one of a track's endpoints, if any. This is the
+ * canonical "is this endpoint open?" check used throughout the codebase
+ * (e.g. ConnectAllEndPts()) and by the Reports feature's unconnected-
+ * endpoints report: a NULL return means the endpoint is unconnected/open,
+ * not an error.
+ *
+ * \param[in] trk the track
+ * \param[in] ep endpoint index, 0 <= ep < GetTrkEndPtCnt(trk)
+ * \return the connected track, or NULL if the endpoint is open
+ */
 
 EXPORT track_p GetTrkEndTrk( track_p trk, EPINX_T ep )
 {
