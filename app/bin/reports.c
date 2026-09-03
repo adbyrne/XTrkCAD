@@ -99,7 +99,11 @@ static void AddReportDateString(DynString* output)
 	char* formatted = malloc(length);
 
 	time(&currentTime);
+#ifdef WINDOWS
+	localtime_s(&tm, &currentTime);
+#else
 	localtime_r(&currentTime, &tm);
+#endif
 
 	while (!strftime(formatted, length, "%x\n\n", &tm)) {
 		char *tmp;
