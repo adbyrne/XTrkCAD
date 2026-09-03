@@ -66,6 +66,7 @@ extern wBool_t executableOk;
 #define MACROPATHKEY "macro"
 #define CUSTOMPATHKEY "custom"
 #define ARCHIVEPATHKEY "archive"
+#define REPORTPATHKEY "reports"
 
 typedef struct {
 	char * name;

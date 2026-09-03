@@ -1,0 +1,46 @@
+/**
+\page reportsM Reports Menu
+
+The <b>Reports</b> Menu shows commands that generate a read-only report about
+the current layout (\ref mainW). Each report opens in its own window with
+<b>Save...</b>, <b>Print...</b> and <b>Page Setup...</b> buttons, the same as
+the Parts List (\ref cmdEnum) window.
+
+- <b>Unconnected Endpoints</b> - displays the <b>Unconnected Endpoints
+  Report</b> (\ref cmdReports) dialog, listing every track endpoint in the
+  layout that isn't connected to another track.
+
+- \subpage cmdReports
+
+*/
+
+/**
+\page cmdReports Unconnected Endpoints Report
+
+The <b>Unconnected Endpoints Report</b> command lists every track endpoint
+in the entire layout that is not connected to another track -- one row per
+open endpoint, giving its <b>Track</b> id, <b>X</b>/<b>Y</b> position and
+<b>Angle</b>.
+
+Unlike the Parts List (\ref cmdEnum) command, this report always covers the
+whole layout; it does not consider the current selection (\ref cmdSelect).
+
+A track with more than two endpoints (for example a turntable) can
+contribute more than one row to the report -- one row per unconnected
+endpoint on that track, not one row per track.
+
+\todo Add a reportuncon.png screenshot (app/doc/images/) once the dialog
+has been visually verified -- deliberately not referenced here yet rather
+than pointing at a file that doesn't exist (see managem.dox's cmdEnum page
+for the screenshot convention this should follow).
+
+The <b>Save As...</b> button opens a <i>File Save</i> dialog window that's
+used to name and save the report to a text file.
+
+The <b>Print</b> button opens the <i>Print</i> dialog which is used to
+print the report.
+
+The <b>Done</b> button closes the <b>Unconnected Endpoints Report</b>
+window.
+
+*/

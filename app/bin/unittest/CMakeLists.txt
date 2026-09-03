@@ -219,6 +219,26 @@ endif()
 
 add_test(CarEditLogicTest careditlogictest)
 
+# reports.c's pure row-formatting function (Reports feature, SF #217 phase
+# 1), split into reportsformat.c so this target stays a small pure-logic
+# link like careditlogictest, instead of stubbing reports.c's wlib/track-
+# database dependency surface the way carregistrytest.c has to.
+
+add_executable(reportstest
+	reportstest.c
+	../reportsformat.c
+)
+
+target_include_directories(reportstest PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
+    ${CMAKE_SOURCE_DIR}/app/wlib/include
+)
+
+target_link_libraries(reportstest PRIVATE dynstring ${LIBS})
+
+add_test(ReportsTest reportstest)
+
 set_target_properties(
 	dxfformattest
 	shortentest
@@ -231,12 +251,13 @@ set_target_properties(
 	carstest
 	carregistrytest
 	careditlogictest
+	reportstest
  	PROPERTIES FOLDER UnitTests
  )
 
 if(XTRKCAD_SANITIZE AND UNIX)
 	set(SANITIZE_FLAGS -fsanitize=address,undefined -fno-omit-frame-pointer)
-	foreach(t dxfformattest shortentest defaultstest pathstest utilitytest beziertest cornutest undostreamtest carstest carregistrytest careditlogictest)
+	foreach(t dxfformattest shortentest defaultstest pathstest utilitytest beziertest cornutest undostreamtest carstest carregistrytest careditlogictest reportstest)
 		target_compile_options(${t} PRIVATE ${SANITIZE_FLAGS})
 		target_link_options(${t} PRIVATE ${SANITIZE_FLAGS})
 	endforeach()

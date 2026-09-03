@@ -34,6 +34,7 @@
 #include "mapwindow.h"
 #include "paths.h"
 #include "problemrep.h"
+#include "reports.h"
 #include "smalldlg.h"
 #include "common-ui.h"
 #include "ctrain.h"
@@ -1154,7 +1155,7 @@ EXPORT void CreateMenus(void)
 {
 	log_menu =  LogFindIndex( "menu" );
 	wMenu_p fileM, editM, viewM, optionM, windowM, macroM, helpM,
-	        manageM, addM, changeM, drawM;
+	        manageM, addM, changeM, drawM, reportsM;
 	wMenu_p zoomM, zoomSubM;
 
 	wControl_p zoomInM, zoomOutM, zoomExtentsM;
@@ -1168,6 +1169,7 @@ EXPORT void CreateMenus(void)
 	changeM = wMenuBarAdd(mainW, "menuChange", _("_Change"));
 	drawM = wMenuBarAdd(mainW, "menuDraw", _("_Draw"));
 	manageM = wMenuBarAdd(mainW, "menuManage", _("_Manage"));
+	reportsM = wMenuBarAdd(mainW, "menuReports", _("_Reports"));
 	optionM = wMenuBarAdd(mainW, "menuOption", _("_Options"));
 	macroM = wMenuBarAdd(mainW, "menuMacro", _("Mac_ro"));
 	windowM = wMenuBarAdd(mainW, "menuWindow", _("_Window"));
@@ -1768,6 +1770,10 @@ EXPORT void CreateMenus(void)
 	                   NULL);
 	MiscMenuItemCreate(manageM, NULL, "cmdPricelist", _("Price List..."),
 	                   ACCL_PRICELIST, PriceListInit(), 0, NULL);
+
+	MiscMenuItemCreate(reportsM, NULL, "cmdReportsUnconnected",
+	                   _("&Unconnected Endpoints ..."), ACCL_REPORTSUNCONN,
+	                   ReportsUnconnectedEndpoints, 0, NULL);
 
 	cmdGroup = BG_LAYER;
 

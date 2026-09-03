@@ -234,6 +234,8 @@ target_sources(xtrkcad-lib
     paths.h
     problemrep.c
     problemrepui.c
+    reports.c
+    reportsformat.c
  scale.c
  scale.h
     shortentext.c
@@ -271,6 +273,7 @@ target_sources(xtrkcad-lib
     include/paramfilelist.h
     include/partcatalog.h
     include/problemrep.h
+    include/reports.h
     include/stringxtc.h
     include/utlist.h
 )
