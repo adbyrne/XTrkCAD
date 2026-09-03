@@ -98,6 +98,22 @@ static BOOL_T reportIndicatorActive = FALSE;
 static coOrd reportIndicatorPos;
 static SCALEINX_T reportIndicatorScale;
 
+static void ReportsBuildText(DynString *out);
+
+/** Refresh the hidden `reportsT` text control from the current report
+ * (reportsCurrentList_da) right before Save or Print actually use it --
+ * see reports.ui's comment on "scrollwindow"/"text" for why this control
+ * exists at all despite never being shown. */
+static void ReportsRefreshPrintText(void)
+{
+	DynString content;
+
+	ReportsBuildText( &content );
+	wTextClear( reportsT );
+	wTextAppend( reportsT, DynStringToCStr(&content) );
+	DynStringFree( &content );
+}
+
 static int DoReportsSave(
         int files,
         char **fileName,
@@ -107,6 +123,7 @@ static int DoReportsSave(
 	CHECK( files == 1 );
 
 	SetCurrentPath( REPORTPATHKEY, fileName[0] );
+	ReportsRefreshPrintText();
 	return wTextSave( reportsT, fileName[ 0 ] );
 }
 
@@ -118,6 +135,7 @@ static void DoReportsOp(
 		wFilSelect( reportsFile_fs, GetCurrentPath(REPORTPATHKEY) );
 		break;
 	case REPORTSOP_PRINT:
+		ReportsRefreshPrintText();
 		wTextPrint( reportsT );
 		break;
 	default:
@@ -262,7 +280,7 @@ static void ReportsCancel(paramGroup_p pg)
 	FormCancel_Current(pg);
 }
 
-void ReportsShowText(const char *title, DynString *content)
+void ReportsShowText(const char *title)
 {
 	if (reportsW == NULL) {
 		FormRegister( &reportsPG );
@@ -277,11 +295,14 @@ void ReportsShowText(const char *title, DynString *content)
 	/* NOTE: subsequent calls reuse the same window/title -- fine while
 	 * phase 1 is the only report; retitling on reuse becomes relevant
 	 * once phase 2 adds a second report type, deliberately not solved
-	 * here (see the phase-1 implementation plan). */
-
-	wTextClear( reportsT );
-	wTextAppend( reportsT, DynStringToCStr(content) );
-	wTextSetPosition( reportsT, 0 );
+	 * here (see the phase-1 implementation plan).
+	 *
+	 * Deliberately does NOT touch reportsT here -- unlike phase 1's
+	 * original design, the hidden text control is no longer kept in sync
+	 * eagerly every time a report is shown; it's built fresh only when
+	 * Save/Print are actually clicked (ReportsRefreshPrintText()), so it
+	 * always reflects the current report without needing to be rebuilt on
+	 * every regeneration whether or not it's ever used. */
 
 	FormLoadControls( &reportsPG );
 	wShow( reportsW );
@@ -323,10 +344,42 @@ static void ReportsPopulateList(void)
 	}
 }
 
+/** Build the full formatted report text (header + column-aligned rows)
+ * fresh from reportsCurrentList_da. Used only by ReportsRefreshPrintText()
+ * -- i.e. only when Save or Print is actually clicked -- so it always
+ * reflects whatever the list is currently showing, never a stale copy
+ * from an earlier ReportsUnconnectedEndpoints() call. */
+static void ReportsBuildText(DynString *out)
+{
+	DynStringMalloc( out, 256 );
+	ReportsAddHeader( out, _("Unconnected Endpoints Report") );
+
+	if ( reportsCurrentList_da.cnt == 0 ) {
+		DynStringCatCStrs( out, "\n", _("No unconnected endpoints found."), "\n",
+		                   NULL );
+	} else {
+		/* snprintf into a local buffer, then append -- DynStringPrintf()
+		 * formats INTO its target starting at offset 0 (replacing whatever
+		 * was already there, same as plain sprintf into a fresh buffer),
+		 * it does not append. Calling it directly on `out` here would
+		 * silently wipe out the header ReportsAddHeader() just wrote --
+		 * exactly the bug this comment is here to stop someone
+		 * reintroducing. Width 6 for the Track column matches
+		 * ReportsFormatUnconnectedList()'s "%6d" exactly, so header and
+		 * data rows stay aligned. */
+		char headerLine[64];
+		snprintf( headerLine, sizeof headerLine, "\n%6s | %8s | %8s | %7s\n",
+		          _("Track"), _("X"), _("Y"), _("Angle") );
+		DynStringCatCStr( out, headerLine );
+		ReportsFormatUnconnectedList( out, &DYNARR_N(reportsEndPt_t,
+		                              reportsCurrentList_da, 0),
+		                              reportsCurrentList_da.cnt );
+	}
+}
+
 void ReportsUnconnectedEndpoints( void * unused )
 {
 	track_p trk;
-	DynString content;
 
 	ReportsClearIndicator();
 	DYNARR_FREE( reportsEndPt_t, reportsCurrentList_da );
@@ -347,33 +400,6 @@ void ReportsUnconnectedEndpoints( void * unused )
 		}
 	}
 
-	DynStringMalloc( &content, 256 );
-	ReportsAddHeader( &content, _("Unconnected Endpoints Report") );
-
-	if ( reportsCurrentList_da.cnt == 0 ) {
-		DynStringCatCStrs( &content, "\n", _("No unconnected endpoints found."), "\n",
-		                   NULL );
-	} else {
-		/* snprintf into a local buffer, then append -- DynStringPrintf()
-		 * formats INTO its target starting at offset 0 (replacing whatever
-		 * was already there, same as plain sprintf into a fresh buffer),
-		 * it does not append. Calling it directly on `content` here would
-		 * silently wipe out the header ReportsAddHeader() just wrote --
-		 * exactly the bug this comment is here to stop someone
-		 * reintroducing. Width 6 for the Track column matches
-		 * ReportsFormatUnconnectedList()'s "%6d" exactly, so header and
-		 * data rows stay aligned. */
-		char headerLine[64];
-		snprintf( headerLine, sizeof headerLine, "\n%6s | %8s | %8s | %7s\n",
-		          _("Track"), _("X"), _("Y"), _("Angle") );
-		DynStringCatCStr( &content, headerLine );
-		ReportsFormatUnconnectedList( &content, &DYNARR_N(reportsEndPt_t,
-		                              reportsCurrentList_da, 0),
-		                              reportsCurrentList_da.cnt );
-	}
-
-	ReportsShowText( _("Unconnected Endpoints Report"), &content );
+	ReportsShowText( _("Unconnected Endpoints Report") );
 	ReportsPopulateList();
-
-	DynStringFree( &content );
 }

@@ -57,13 +57,15 @@ void ReportsFormatUnconnectedList(DynString *out, const reportsEndPt_t *list,
                                   int count);
 
 /**
- * Show a report in the generic, reusable report viewer (Save/Print/Print
- * Setup, same `denum.c`-style dialog for every report phase).
+ * Show a report in the generic, reusable report viewer -- an interactive,
+ * selectable list (Save/Print/Print Setup buttons; Save/Print are built
+ * fresh from the report's current rows on demand when clicked, not from
+ * pre-formatted text passed in here -- see reports.c's ReportsBuildText()/
+ * ReportsRefreshPrintText()).
  *
  * \param[in] title dialog title, e.g. "Unconnected Endpoints Report"
- * \param[in] content report body text, already fully formatted
  */
-void ReportsShowText(const char *title, DynString *content);
+void ReportsShowText(const char *title);
 
 /**
  * Menu callback (phase 1): compute the unconnected-endpoints list for the
