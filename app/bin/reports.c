@@ -1,18 +1,27 @@
 /** \file reports.c
- * Native "Reports" feature (SF #217), phase 1: a generic report-text
- * viewer (Save/Print/Print Setup, same shape as denum.c's "Parts List"
- * dialog -- see the phase-1 implementation plan for why this is built
+ * Native "Reports" feature (SF #217), phase 1: a generic report viewer
+ * (Refresh/Save/Print/Print Setup, same button shape as denum.c's "Parts
+ * List" dialog -- see the phase-1 implementation plan for why this is built
  * generic from the start, meant for every future report phase to reuse)
  * plus the phase-1 report itself, unconnected track endpoints.
  *
  * Phase 1.5 (SF #772, folded into the same ticket -- see the phase-1.5
  * implementation plan) adds interactive click-to-navigate: selecting a row
- * in the (new, alongside the original text view) list control pans the
- * main canvas to that endpoint and draws a transient open-circle
- * indicator. The indicator is a pure draw-overlay (drawn each redraw from
- * draw.c's DrawTempContent(), see ReportsDrawIndicator()) -- never a real
- * track object, so it can never end up in a saved .xtc/.xtce file and
- * needs no undo/redo handling.
+ * in the visible PD_LIST control pans the main canvas to that endpoint and
+ * draws a transient open-circle indicator. The indicator is a pure
+ * draw-overlay (drawn each redraw from draw.c's DrawTempContent(), see
+ * ReportsDrawIndicator()) -- never a real track object, so it can never end
+ * up in a saved .xtc/.xtce file and needs no undo/redo handling.
+ *
+ * The list is also grouped/flagged for "Nearby" endpoints -- see
+ * ReportsMarkNearby() -- and can be recomputed in place via the Refresh
+ * button (reportsRefreshProc) without closing/reopening the dialog.
+ *
+ * Save/Print build their output on demand (ReportsBuildText()/
+ * ReportsRefreshPrintText()) into a hidden PD_TEXT-equivalent control
+ * (reportsT) that's never shown to the user -- see ReportsShowText() for why
+ * it's created via wTextCreate()'s standalone/no-.ui-needed code path
+ * rather than as a builder-bound paramData_t entry.
  *
  * The date-header logic (AddReportDateString()) is deliberately duplicated
  * from denum.c's AddDateString() rather than shared, to keep this
@@ -52,6 +61,7 @@
 #include "paths.h"
 #include "scale.h"
 #include "track.h"
+#include "utility.h"
 #include "include/reports.h"
 
 static wControl_p reportsW;
@@ -64,23 +74,33 @@ static wControl_p reportsW;
  * see that call site for why. */
 static wControl_p reportsT;
 
-#define REPORTSOP_SAVE  (1)
-#define REPORTSOP_PRINT (2)
+#define REPORTSOP_SAVE    (1)
+#define REPORTSOP_PRINT   (2)
+#define REPORTSOP_REFRESH (3)
+
+/** Set by whichever report type is currently showing (only
+ * ReportsUnconnectedEndpoints() today) each time it calls ReportsShowText(),
+ * so the generic Refresh button can recompute + repopulate the current
+ * report in place without this shared viewer needing to know which specific
+ * report is active. Any future report phase should set this the same way
+ * when it calls ReportsShowText(). */
+static void (*reportsRefreshProc)(void *) = NULL;
 
 static void DoReportsOp(void *data);
 static void ReportsDlgUpdate(paramGroup_p pg, int inx, void *valueP);
 static void ReportsCancel(paramGroup_p pg);
 
-static wWinPix_t reportsListWidths[] = { 60, 80, 80, 70 };
+static wWinPix_t reportsListWidths[] = { 60, 80, 80, 70, 60 };
 static const char * reportsListTitles[] = {
-	N_("Track"), N_("X"), N_("Y"), N_("Angle")
+	N_("Track"), N_("X"), N_("Y"), N_("Angle"), N_("Nearby")
 };
-static paramListData_t reportsListData = { 8, 300, 4, reportsListWidths, reportsListTitles };
+static paramListData_t reportsListData = { 8, 300, 5, reportsListWidths, reportsListTitles };
 
 static paramData_t reportsPLs[] = {
 #define I_REPORTSLIST (0)
 #define reportsList (reportsPLs[I_REPORTSLIST].control)
 	{ PD_LIST, NULL, "list", PDO_DLGRESIZE, &reportsListData, NULL, 0 },
+	{ PD_BUTTON, DoReportsOp, "refresh", 0, NULL, NULL, 0, I2VP(REPORTSOP_REFRESH) },
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, I2VP(REPORTSOP_SAVE) },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, I2VP(REPORTSOP_PRINT) },
 	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
@@ -141,6 +161,11 @@ static void DoReportsOp(
 	case REPORTSOP_PRINT:
 		ReportsRefreshPrintText();
 		wTextPrint( reportsT );
+		break;
+	case REPORTSOP_REFRESH:
+		if ( reportsRefreshProc ) {
+			reportsRefreshProc( NULL );
+		}
 		break;
 	default:
 		break;
@@ -353,12 +378,70 @@ static void ReportsAddHeader(DynString *out, const char *reportTitle)
 	AddReportDateString(out);
 }
 
+/** Flag entries with another open endpoint, on a *different* track, within
+ * connectDistance (track.h -- the same threshold/definition of "close
+ * enough to connect" used throughout track.c/cturnout.c/ccornu.c/etc.), then
+ * group flagged entries first in reportsCurrentList_da -- a default row
+ * order, not a filter, every entry stays present either way. Endpoints on
+ * the *same* track (e.g. a turntable's own spokes) never flag each other --
+ * those are expected to sit close together and aren't a missed connection.
+ * O(n^2) distance check; fine at this report's realistic scale (checked
+ * against the layout23.xtc fixture, 100+ rows). Must run after the compute
+ * loop that fills reportsCurrentList_da and before ReportsPopulateList(),
+ * since row order here becomes list row order there. */
+static void ReportsMarkNearby(void)
+{
+	int i, j, cnt, outIdx;
+	reportsEndPt_t *entries;
+	reportsEndPt_t *grouped;
+
+	cnt = reportsCurrentList_da.cnt;
+	if ( cnt == 0 ) {
+		return;
+	}
+	entries = (reportsEndPt_t *)reportsCurrentList_da.ptr;
+
+	for ( i = 0; i < cnt; i++ ) {
+		entries[i].nearby = FALSE;
+	}
+	for ( i = 0; i < cnt; i++ ) {
+		for ( j = i + 1; j < cnt; j++ ) {
+			if ( entries[i].trackId == entries[j].trackId ) {
+				continue;
+			}
+			if ( FindDistance(entries[i].pos, entries[j].pos) <= connectDistance ) {
+				entries[i].nearby = TRUE;
+				entries[j].nearby = TRUE;
+			}
+		}
+	}
+
+	grouped = malloc( cnt * sizeof *grouped );
+	outIdx = 0;
+	for ( i = 0; i < cnt; i++ ) {
+		if ( entries[i].nearby ) {
+			grouped[outIdx++] = entries[i];
+		}
+	}
+	for ( i = 0; i < cnt; i++ ) {
+		if ( !entries[i].nearby ) {
+			grouped[outIdx++] = entries[i];
+		}
+	}
+	memcpy( entries, grouped, cnt * sizeof *grouped );
+	free( grouped );
+}
+
 /** Populate the interactive list (phase 1.5) from reportsCurrentList_da --
  * one row per entry, tab-separated (wListAddValue() splits on tabs into
  * columns), each row's context set to that entry's address so
  * ReportsDlgUpdate() can recover it on selection. Must run after
  * ReportsShowText() has run at least once (the list control doesn't exist
- * before the dialog's first creation). */
+ * before the dialog's first creation).
+ *
+ * Rows are shown in reportsCurrentList_da's own order -- ReportsMarkNearby()
+ * has already grouped nearby-flagged entries first, all rows still present,
+ * nothing filtered. */
 static void ReportsPopulateList(void)
 {
 	int i;
@@ -367,8 +450,9 @@ static void ReportsPopulateList(void)
 	wListClear( reportsList );
 	for ( i = 0; i < reportsCurrentList_da.cnt; i++ ) {
 		reportsEndPt_t *entry = &DYNARR_N(reportsEndPt_t, reportsCurrentList_da, i);
-		snprintf( row, sizeof row, "%d\t%.3f\t%.3f\t%.3f",
-		          entry->trackId, entry->pos.x, entry->pos.y, entry->angle );
+		snprintf( row, sizeof row, "%d\t%.3f\t%.3f\t%.3f\t%s",
+		          entry->trackId, entry->pos.x, entry->pos.y, entry->angle,
+		          entry->nearby ? _("Yes") : "" );
 		wListAddValue( reportsList, row, NULL, entry );
 	}
 }
@@ -410,6 +494,7 @@ void ReportsUnconnectedEndpoints( void * unused )
 {
 	track_p trk;
 
+	reportsRefreshProc = ReportsUnconnectedEndpoints;
 	ReportsClearIndicator();
 	DYNARR_FREE( reportsEndPt_t, reportsCurrentList_da );
 	DYNARR_INIT( reportsEndPt_t, reportsCurrentList_da );
@@ -429,6 +514,7 @@ void ReportsUnconnectedEndpoints( void * unused )
 		}
 	}
 
+	ReportsMarkNearby();
 	ReportsShowText( _("Unconnected Endpoints Report") );
 	ReportsPopulateList();
 }

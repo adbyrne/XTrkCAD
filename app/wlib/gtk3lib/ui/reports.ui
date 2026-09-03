@@ -15,6 +15,15 @@
       </object>
     </child>
     <child type="action">
+      <object class="GtkButton" id="refresh">
+        <property name="label" translatable="yes">_Refresh</property>
+        <property name="use-underline">True</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+      </object>
+    </child>
+    <child type="action">
       <object class="GtkButton" id="print">
         <property name="label" translatable="yes">_Print...</property>
         <property name="use-underline">True</property>
@@ -56,6 +65,7 @@
       <action-widget response="1">print</action-widget>
       <action-widget response="2">printsetup</action-widget>
       <action-widget response="3">save</action-widget>
+      <action-widget response="4">refresh</action-widget>
     </action-widgets>
     <child internal-child="vbox">
       <object class="GtkBox">
@@ -126,6 +136,18 @@
                     </child>
                   </object>
                 </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="listnearby">
+                    <property name="resizable">True</property>
+                    <property name="title" translatable="yes">Nearby</property>
+                    <child>
+                      <object class="GtkCellRendererText" />
+                      <attributes>
+                        <attribute name="text">7</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
               </object>
             </child>
           </object>
@@ -153,6 +175,8 @@
       <!-- column-name y -->
       <column type="gchararray" />
       <!-- column-name angle -->
+      <column type="gchararray" />
+      <!-- column-name nearby -->
       <column type="gchararray" />
     </columns>
   </object>

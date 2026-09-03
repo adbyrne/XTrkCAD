@@ -19,8 +19,8 @@ the Parts List (\ref cmdEnum) window.
 
 The <b>Unconnected Endpoints Report</b> command lists every track endpoint
 in the entire layout that is not connected to another track -- one row per
-open endpoint, giving its <b>Track</b> id, <b>X</b>/<b>Y</b> position and
-<b>Angle</b>.
+open endpoint, giving its <b>Track</b> id, <b>X</b>/<b>Y</b> position,
+<b>Angle</b>, and whether it's <b>Nearby</b> another open endpoint.
 
 ![](reportuncon.png)
 
@@ -31,12 +31,24 @@ A track with more than two endpoints (for example a turntable) can
 contribute more than one row to the report -- one row per unconnected
 endpoint on that track, not one row per track.
 
+The <b>Nearby</b> column flags an endpoint when another open endpoint, on a
+<i>different</i> track, lies within the layout's Connection Distance
+preference (Options > \ref cmdPref) -- the same distance the editor
+itself uses to decide whether two endpoints are close enough to connect.
+A flagged pair usually means a missed connection rather than a deliberate
+dead end. Flagged rows are listed first, grouped together; every row stays
+in the list either way, nothing is filtered out.
+
 Selecting a row in the list pans the <b>Main Canvas</b> (\ref mainW) to
 that endpoint's position and draws a temporary open-circle indicator there,
 so you can quickly find any listed endpoint on the layout. The indicator
 is purely visual -- it's never saved with the layout and disappears as
 soon as the report window closes. Its color can be changed on the
 <b>Colors</b> (\ref cmdRgbcolor) dialog, under <b>Report Indicator</b>.
+
+The <b>Refresh</b> button recomputes the report in place -- useful after
+fixing a flagged endpoint elsewhere in the layout, without closing and
+reopening the report window.
 
 The <b>Save As...</b> button opens a <i>File Save</i> dialog window that's
 used to name and save the report to a text file.

@@ -40,6 +40,15 @@ typedef struct {
 	coOrd    pos;
 	ANGLE_T  angle;
 	SCALEINX_T scale;
+	/** TRUE if another open endpoint, on a *different* track, lies within
+	 * connectDistance (track.h) of this one -- i.e. this one looks like a
+	 * missed connection rather than a deliberate dead-end stub. Computed
+	 * by ReportsUnconnectedEndpoints() after the full list is known (needs
+	 * every other entry to compare against), not by the compute loop that
+	 * fills the rest of this struct. Appended at the end, after `scale`,
+	 * so existing positional initializers (tests included) don't need
+	 * updating. */
+	BOOL_T nearby;
 } reportsEndPt_t;
 
 /**
