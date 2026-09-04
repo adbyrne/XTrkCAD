@@ -458,12 +458,12 @@ static void ReportsShowDialog(reportsDialog_t *rd, const char *title)
 	if (rd->window == NULL) {
 		FormRegister( rd->pg );
 		rd->window = FormCreateDialog( rd->pg, MakeWindowTitle(title),
-		                              NULL, NULL,
-		                              NULL, rd->cancelProc ? rd->cancelProc : FormCancel_Current,
-		                              TRUE, F_RESIZE,
-		                              rd->changeProc );
+		                               NULL, NULL,
+		                               NULL, rd->cancelProc ? rd->cancelProc : FormCancel_Current,
+		                               TRUE, F_RESIZE,
+		                               rd->changeProc );
 		rd->fileSel = wFilSelCreate( mainW, FS_SAVE, 0, title,
-		                            sReportsFilePattern, DoReportsSave, rd );
+		                             sReportsFilePattern, DoReportsSave, rd );
 		/* rd->text backs Save/Print only -- it's never shown to the user
 		 * (see ReportsRefreshPrintText()) -- so instead of creating it as
 		 * a .ui-bound PD_TEXT control and then fighting wTextCreate()'s
@@ -484,7 +484,7 @@ static void ReportsShowDialog(reportsDialog_t *rd, const char *title)
 		 * wTextCreate() against a non-builder parent). */
 		{
 			wControl_p textBacking = wWinDialogCreate( NULL, NULL, NULL,
-			                             "reportstextbacking", 0L, NULL, NULL );
+			                         "reportstextbacking", 0L, NULL, NULL );
 			wControlShow( textBacking, FALSE );
 			rd->text = wTextCreate( textBacking, 0, 0, NULL, NULL,
 			                        BO_READONLY, 0, 0 );
@@ -722,8 +722,8 @@ static const char * reportsTurnoutListTitles[] = {
 	N_("Layer"), N_("Name"), N_("Feet"), N_("Turnouts"), N_("Density/100ft"), N_("Flag")
 };
 static paramListData_t reportsTurnoutListData = { 8, 400, 6, reportsTurnoutListWidths,
-                reportsTurnoutListTitles
-              };
+                                                  reportsTurnoutListTitles
+                                                };
 
 static paramData_t reportsTurnoutPLs[] = {
 #define I_REPORTSTURNOUTSUMMARY (0)
@@ -738,8 +738,8 @@ static paramData_t reportsTurnoutPLs[] = {
 	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
 };
 static paramGroup_t reportsTurnoutPG = { "reportsturnout", PGO_FULLDIALOGFROMBUILDER,
-                reportsTurnoutPLs, COUNT( reportsTurnoutPLs )
-              };
+                                         reportsTurnoutPLs, COUNT( reportsTurnoutPLs )
+                                       };
 
 /** The current Turnout Density report's by-layer rows -- same
  * outlives-the-compute-function lifetime rule as reportsCurrentList_da
