@@ -1665,6 +1665,27 @@ EXPORT BOOL_T WriteSegsEnd(
 }
 
 
+/**
+ * Dispatch a segment-geometry operation (distance/length/draw/etc., see
+ * segProc_e) to the type-specific implementation for `segPtr`. Handles
+ * seven of the SEG_* types (trkseg.h): the four real track types
+ * (SEG_STRTRK/SEG_CRVTRK/SEG_JNTTRK/SEG_BEZTRK) and their three
+ * decorative-line counterparts (SEG_STRLIN/SEG_CRVLIN/SEG_BEZLIN, drawn
+ * the same way but not real connectivity geometry). Anything else in
+ * the SEG_* list (SEG_POLY, SEG_BENCH, SEG_TEXT, SEG_TBLEDGE, ...) has
+ * no case here at all and CHECKMSG(FALSE, ...)-aborts the whole
+ * program -- this is a genuine "should never happen" assertion, not a
+ * graceful fallback, so callers walking a segment array from data that
+ * isn't guaranteed to only contain these seven types (e.g. a turnout/
+ * compound part's own PATH -- see IsSegTrack()'s doc comment and
+ * GetParamsTurnout(), cturnout.c) must filter first, not assume every
+ * segment they encounter is safe to pass here. Confirmed via a real
+ * crash report, SF #778.
+ *
+ * \param[in] cmd which operation to perform
+ * \param[in] segPtr the segment; must be one of the seven types above
+ * \param[in,out] data operation-specific input/output, see segProcData_t
+ */
 EXPORT void SegProc(
         segProc_e cmd,
         trkSeg_p segPtr,
