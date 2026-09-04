@@ -18,7 +18,7 @@ executes off a `git` mirror, e.g. `github.com/$GITHUB_USER/XTrkCAD` (see
 
 \tableofcontents
 
-# Linux (x86_64 and ARM64)
+# Linux (x86_64 and ARM64) {#linux-build-test}
 
 ```sh
 sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev \
@@ -37,6 +37,8 @@ auto-enables on Linux whenever `DISPLAY` is set (any normal desktop session) or 
 found, with no extra flag needed. See the
 \ref advanced-optional-local-checks "Regression demo-playback suite" note below for a known
 false-failure case (gtk3issues #21) this can surface.
+
+For flatpak information, see \subpage flatpak.
 
 # macOS
 

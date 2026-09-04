@@ -846,6 +846,7 @@ INPUT                  = "@XTrkCAD_SOURCE_DIR@/app/bin" \
                          "@XTrkCAD_SOURCE_DIR@/docs/doxygen/mainpage.md" \
                          "@XTrkCAD_SOURCE_DIR@/docs/doxygen/building.md" \
                          "@XTrkCAD_SOURCE_DIR@/docs/doxygen/advanced.md" \
+                         "@XTrkCAD_SOURCE_DIR@/docs/doxygen/flatpak.md" \
                          "@XTrkCAD_SOURCE_DIR@/docs/doxygen/logcommands.md" \
                          "@XTrkCAD_SOURCE_DIR@/docs/doxygen/regression-tests.md"
 

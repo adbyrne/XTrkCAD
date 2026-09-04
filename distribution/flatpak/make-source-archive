@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-if [ $# -ne 1 ]; then
-	echo "$0 <BLDDIR>"
-	echo "Create source tar ball"
+if [ "$1" = "-h" ]; then
+	echo "$0"
+	echo "Create source tar ball in build directory"
 	echo "Run from <SRCDIR>/distribution/flatpak"
 	echo "Computes sha256 checksum which must be updated in manifest file"
 	exit 0
@@ -10,18 +10,27 @@ fi
 
 SRCDIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 cd -- "$SRCDIR"
-BLDDIR=$1
+BLDDIR=build
 
 cd ../..
+
+BUILD_TYPE="-DCMAKE_BUILD_TYPE=Debug"
+if command -v ninja >/dev/null 2>&1 && [ ! -s Makefile ]; then
+	cmake $BUILD_TYPE -DXTRKCAD_BUILD_FLATPAK=1 -G Ninja -B $BLDDIR -S .
+else
+	cmake $BUILD_TYPE -DXTRKCAD_BUILD_FLATPAK=1 -B $BLDDIR -S .
+fi
+hg revert -C app/lib/xtrkcad.metainfo.xml 2>/dev/null
+hg revert -C app/lib/xtrkcad.flatpak.desktop 2>/dev/null
+
+TODAY=$(date --utc '+%Z %Y-%m-%d %H:00')
+TAROPTS='--sort=name --mtime="$TODAY" --owner=0 --group=0 --numeric-owner --format=gnu'
 if [ -f $HOME/.tarignore ]; then
 	# get list of excludes from a file
-	tar cf ${BLDDIR}/source.tar --exclude-from=$HOME/.tarignore .
+	eval tar cf ${BLDDIR}/source.tar $TAROPTS --exclude-from=$HOME/.tarignore .
 else
-	tar cf ${BLDDIR}/source.tar --exclude-vcs --exclude=build --exclude-vcs-ignores .
+	eval tar cf ${BLDDIR}/source.tar $TAROPTS --exclude-vcs --exclude=$BLDDIR --exclude-vcs-ignores .
 fi
-# current flatpak builds everything, so these additions not necessary
-#cd $BLDDIR/../../app/bin
-#tar rf ${BLDDIR}/source.tar ./bitmaps
 
 cd $BLDDIR
 rm -f source.tar.gz
