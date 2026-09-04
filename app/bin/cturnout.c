@@ -1517,6 +1517,33 @@ static STATUS_T ModifyTurnout(track_p trk, wAction_t action, coOrd pos)
 }
 
 
+/**
+ * turnout/compound-specific implementation of GetTrackParams() -- see
+ * that function's own doc comment (track.c) for the general contract.
+ * The `PARAMS_TURNOUT` branch (used by GetTrkLength()) walks the
+ * turnout's current path (GetCurrPath()) to find the nearest track
+ * segment to `pos` and sum the path's track length from there.
+ *
+ * That walk only trusts segments where IsSegTrack() is true (trkseg.h)
+ * -- a turnout/compound part's PATH data can reference a non-track
+ * segment (e.g. a decorative SEG_POLY outline, on a malformed custom
+ * part that's really a signal or other prop reusing the turnout/
+ * compound mechanism, not a genuine switch). SegProc()'s dispatch
+ * (trkseg.c) has no case for anything but the four track segment types
+ * and aborts the whole program on anything else -- confirmed via a
+ * real crash report, SF #778 (root-caused via a full coredump
+ * backtrace: a redraw needing this turnout's length hit exactly this
+ * path). A turnout whose current path has no track segments at all
+ * legitimately gets a zero `params->len`, not a crash.
+ *
+ * \param[in] inx which GetTrackParams() query mode (PARAMS_TURNOUT
+ *     handled here; others fall through to the generic end-point/curve
+ *     handling below)
+ * \param[in] trk the turnout/compound track
+ * \param[in] pos position used to pick the nearest path/segment
+ * \param[out] params filled in; params->len is 0.0 if the current path
+ *     has no real track segments
+ */
 static BOOL_T GetParamsTurnout(int inx, track_p trk, coOrd pos,
                                trackParams_t* params)
 {
@@ -1528,6 +1555,7 @@ static BOOL_T GetParamsTurnout(int inx, track_p trk, coOrd pos,
 		int epCnt = GetTrkEndPtCnt(trk);
 		if (epCnt < 3) {
 			double d = DIST_INF;
+			BOOL_T foundTrackSeg = FALSE;
 			params->centroid = zero;
 			//calculate path length from endPt (either to end or to other end)
 			segProcData_t segProcData;
@@ -1543,23 +1571,56 @@ static BOOL_T GetParamsTurnout(int inx, track_p trk, coOrd pos,
 					continue;
 				}
 				GetSegInxEP(path[0], &segInx, &segEP);
+				/* A turnout/compound part's own PATH can reference a segment
+				 * that isn't actually track (e.g. a decorative SEG_POLY
+				 * outline on a malformed custom part that's really a signal
+				 * or other prop, not a real switch) -- confirmed via a real
+				 * crash report (SF #778): SegProc()'s dispatch has no case
+				 * for anything but the four track segment types and
+				 * CHECKMSG(FALSE, ...)-aborts the whole program on
+				 * anything else. Bounds-check segInx too, same defensive
+				 * reasoning -- a malformed part's path could just as easily
+				 * reference an out-of-range index. Skip both cases (as if
+				 * this path entry contributed nothing) rather than trusting
+				 * every path-referenced segment is walkable. */
+				if (segInx < 0 || segInx >= xx->segCnt) {
+					continue;
+				}
 				segPtr = xx->segs + segInx;
+				if (!IsSegTrack(segPtr)) {
+					continue;
+				}
 				segProcData.distance.pos1 = pos;
 				SegProc(SEGPROC_DISTANCE, segPtr, &segProcData);
 				if (segProcData.distance.dd < d) {
 					d = segProcData.distance.dd;
 					pathCurr = path;
+					foundTrackSeg = TRUE;
 				}
 			}
-			GetSegInxEP(pathCurr[0], &segInx, &segEP);
 			d = 0.0;
-			//Loop through segs on path from endPt adding
-			while (pathCurr[0]) {
+			/* Only walk the length-summing loop below if a real track
+			 * segment was actually found above -- otherwise pathCurr is
+			 * still its initial value (the start of the path-name area,
+			 * never advanced into real segment-index bytes) and walking it
+			 * would read garbage, same crash risk as above by a different
+			 * route. A turnout whose current path has no track segments
+			 * at all (e.g. the malformed-part case SF #778 was filed
+			 * against) legitimately has zero path length. */
+			if (foundTrackSeg) {
 				GetSegInxEP(pathCurr[0], &segInx, &segEP);
-				trkSeg_p seg = xx->segs + segInx;
-				SegProc(SEGPROC_LENGTH, seg, &segProcData);
-				d += segProcData.length.length;
-				pathCurr += segEP ? 1 : -1;
+				//Loop through segs on path from endPt adding
+				while (pathCurr[0]) {
+					GetSegInxEP(pathCurr[0], &segInx, &segEP);
+					if (segInx >= 0 && segInx < xx->segCnt) {
+						trkSeg_p seg = xx->segs + segInx;
+						if (IsSegTrack(seg)) {
+							SegProc(SEGPROC_LENGTH, seg, &segProcData);
+							d += segProcData.length.length;
+						}
+					}
+					pathCurr += segEP ? 1 : -1;
+				}
 			}
 			params->len = d;
 		} else {
