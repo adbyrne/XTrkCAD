@@ -214,6 +214,69 @@ static void test_curvehist_buckets(void **state)
 	DynStringFree(&out);
 }
 
+static void test_carsperfoot_known_scales(void **state)
+{
+	(void) state;
+	assert_true(ReportsCarsPerFoot("HO") == 2.0);
+	assert_true(ReportsCarsPerFoot("N") == 4.0);
+	assert_true(ReportsCarsPerFoot("O") == 1.0);
+	assert_true(ReportsCarsPerFoot("Z") == 5.0);
+	assert_true(ReportsCarsPerFoot("G") == 0.5);
+}
+
+static void test_carsperfoot_narrow_gauge(void **state)
+{
+	(void) state;
+	assert_true(ReportsCarsPerFoot("HOn3") == 2.0);
+	assert_true(ReportsCarsPerFoot("On3") == 1.0);
+}
+
+static void test_carsperfoot_case_insensitive(void **state)
+{
+	(void) state;
+	assert_true(ReportsCarsPerFoot("ho") == 2.0);
+	assert_true(ReportsCarsPerFoot("on3") == 1.0);
+	assert_true(ReportsCarsPerFoot("HON3") == 2.0);
+}
+
+static void test_carsperfoot_unknown_defaults_2(void **state)
+{
+	(void) state;
+	assert_true(ReportsCarsPerFoot("Q") == 2.0);
+	assert_true(ReportsCarsPerFoot("") == 2.0);
+}
+
+static void test_carsperfoot_null_defaults_2(void **state)
+{
+	(void) state;
+	assert_true(ReportsCarsPerFoot(NULL) == 2.0);
+}
+
+static void test_curvebucket_under_12(void **state)
+{
+	(void) state;
+	assert_string_equal(ReportsCurveBucketLabel(0.0), "< 12in");
+	assert_string_equal(ReportsCurveBucketLabel(11.99), "< 12in");
+}
+
+static void test_curvebucket_boundaries_exclusive_upper(void **state)
+{
+	(void) state;
+	assert_string_equal(ReportsCurveBucketLabel(12.0), "12-18in");
+	assert_string_equal(ReportsCurveBucketLabel(17.99), "12-18in");
+	assert_string_equal(ReportsCurveBucketLabel(18.0), "18-24in");
+	assert_string_equal(ReportsCurveBucketLabel(23.99), "18-24in");
+	assert_string_equal(ReportsCurveBucketLabel(24.0), "24-36in");
+	assert_string_equal(ReportsCurveBucketLabel(35.99), "24-36in");
+	assert_string_equal(ReportsCurveBucketLabel(36.0), "> 36in");
+}
+
+static void test_curvebucket_large_radius(void **state)
+{
+	(void) state;
+	assert_string_equal(ReportsCurveBucketLabel(1000.0), "> 36in");
+}
+
 static void test_turnout_empty_list(void **state)
 {
 	(void) state;
@@ -516,6 +579,14 @@ int main(void)
 		cmocka_unit_test(test_tracklen_zero_total_no_crash),
 		cmocka_unit_test(test_curvehist_empty),
 		cmocka_unit_test(test_curvehist_buckets),
+		cmocka_unit_test(test_carsperfoot_known_scales),
+		cmocka_unit_test(test_carsperfoot_narrow_gauge),
+		cmocka_unit_test(test_carsperfoot_case_insensitive),
+		cmocka_unit_test(test_carsperfoot_unknown_defaults_2),
+		cmocka_unit_test(test_carsperfoot_null_defaults_2),
+		cmocka_unit_test(test_curvebucket_under_12),
+		cmocka_unit_test(test_curvebucket_boundaries_exclusive_upper),
+		cmocka_unit_test(test_curvebucket_large_radius),
 		cmocka_unit_test(test_turnout_empty_list),
 		cmocka_unit_test(test_turnout_normal_no_flag),
 		cmocka_unit_test(test_turnout_heavy_flagged),

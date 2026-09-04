@@ -1,0 +1,32 @@
+VERSION 2
+DEMOINIT
+ORIG 0.000 0.000 0.000
+STRAIGHT 1 DEMO 1
+	E 0.000000 0.000000 180.000000
+	T 2 4.000000 0.000000 0.000000
+	END
+STRAIGHT 2 DEMO 1
+	T 1 4.000000 0.000000 180.000000
+	E 8.000000 0.000000 0.000000
+	END
+NOTE 3 0 0 0 9.917000 7.167000 0 32
+A zero-endpoint object (regression check for the same TRK_ITERATE
+endpoint-count guard SF #776 fixed for Turnout Density -- see
+[[feedback_trk_iterate_endpoint_guard]]).
+    END
+REDRAW
+RESET
+STEP
+COMMAND CurveEndPt
+MOUSE 2 6.500 1.625
+MOUSE 3 31.250 2.750
+MOUSE 4 31.250 2.750
+MOUSE 2 31.125 2.500
+MOUSE 3 20.375 17.875
+MOUSE 4 20.375 17.875
+RESET
+RESET
+STEP
+PARAMETER misc cmdReportsCurveStats
+PARAMETER reportscurvestats cancel
+CLEAR

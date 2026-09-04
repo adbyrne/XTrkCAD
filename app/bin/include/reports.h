@@ -1,6 +1,13 @@
 /** \file reports.h
  * Native "Reports" feature (SF #217): a generic viewer shared by every
  * report phase, plus the phase-1 (unconnected endpoints) report itself.
+ *
+ * Several structs/functions below note where they mirror "the MCP
+ * reference implementation" -- an external MCP project (a separate
+ * Python tool, not part of this source tree) used during design to
+ * ground native field shapes/thresholds against a working implementation
+ * rather than guessing. Every such mention below is design history, not
+ * a citation a reader here can open and check.
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -111,6 +118,29 @@ typedef struct {
 void ReportsFormatTrackLengthList(DynString *out,
                                   const reportsTrackLenLayer_t *list, int count, DIST_T totalFt);
 
+/**
+ * Cars-per-real-foot factor for a scale name, Fugate methodology (MRH Oct
+ * 2014, ~44ft car incl. couplers) -- same table `get_operation_density()`'s
+ * `cars_per_real_ft()` uses on the MCP side, ported for parity: O=1.0,
+ * S=1.5, HO=2.0, N=4.0, Z=5.0, G=0.5, TT=3.0, I=0.75; narrow-gauge variants
+ * (HOn3/On3/Sn3/Nn3) match their parent scale's body length. Case-
+ * insensitive match against the whole table -- the MCP reference's own
+ * lookup (`CARS_PER_FT.get(scale.upper(), CARS_PER_FT.get(scale, 2.0))`)
+ * is only actually case-insensitive for the plain-uppercase entries
+ * (`scale.upper()` never equals a mixed-case key like "HOn3"), so e.g.
+ * "on3"/"ON3" silently fall through to its 2.0 default instead of On3's
+ * real 1.0 -- an incidental quirk of the two-tier dict lookup, not a
+ * deliberate design choice, so not reproduced here (2026-09-04: matches
+ * the underlying data/thresholds, not incidental reference behavior, same
+ * standing as ReportsFormatTurnoutList()'s HEAVY-flag cleanup). Falls back
+ * to 2.0 (HO's own factor, the single most common scale) for anything not
+ * in the table, same default the MCP reference uses.
+ *
+ * \param[in] scaleName e.g. "HO", "On3" (GetScaleName(GetLayoutCurScale())
+ *     on the caller's side) -- NULL also falls back to 2.0
+ */
+DIST_T ReportsCarsPerFoot(const char *scaleName);
+
 /** One radius-range bucket in the curve-stats histogram. Mirrors
  * get_curve_stats()'s radius_distribution dict (label -> count); label is
  * caller-owned (a literal, e.g. "< 12in"), not copied. */
@@ -126,6 +156,22 @@ typedef struct {
  */
 void ReportsFormatCurveHistogram(DynString *out,
                                  const reportsCurveBucket_t *list, int count);
+
+/**
+ * Classify a curve's radius into one of get_curve_stats()'s five
+ * radius_distribution buckets (model inches, same boundaries as the MCP
+ * reference): "< 12in", "12-18in", "18-24in", "24-36in", "> 36in" (an
+ * ASCII hyphen, not the MCP reference's Unicode en-dash -- a cosmetic
+ * difference, not a data one, same "data parity not text parity" standing
+ * as this batch's other formatters). Pure boundary decision, split out for
+ * direct unit testing same as ReportsIsTurnoutHeavy()/
+ * ReportsClassifyEquipment(). Every boundary is the bucket's own upper
+ * bound, exclusive (radius == 12.0 falls in "12-18in", not "< 12in").
+ *
+ * \param[in] radius the curve's radius (GetCurveRadius()), model inches
+ * \return a literal string, safe to store without copying
+ */
+const char *ReportsCurveBucketLabel(DIST_T radius);
 
 /** One layer's row in the turnout-density report. `heavy` is TRUE when
  * density > 10.0/100ft (strict). Field shape originally mirrored
@@ -283,6 +329,51 @@ void ReportsUnconnectedEndpoints(void *unused);
  * \param[in] unused menu-callback signature, unused
  */
 void ReportsTurnoutDensity(void *unused);
+
+/**
+ * Menu callback (phase 2): compute and show/refresh the Track Lengths
+ * report -- total and by-layer track length (feet/inches), turnout count,
+ * and car capacity (ReportsCarsPerFoot(), Fugate methodology) per layer.
+ * Report-only, no click-to-navigate/indicator, same shape as
+ * ReportsTurnoutDensity(). Shares that function's `GetTrkEndPtCnt(trk) >=
+ * 2` guard before any `GetTrkLength()` call -- see
+ * [[feedback_trk_iterate_endpoint_guard]] (memory) / SF #776's fix.
+ *
+ * \param[in] unused menu-callback signature, unused
+ */
+void ReportsTrackLengths(void *unused);
+
+/**
+ * Menu callback (phase 2): compute and show/refresh the Curve Stats
+ * report -- curve count, min/max/mean radius (model inches), and a
+ * radius-distribution histogram (ReportsCurveBucketLabel()). Report-only,
+ * no click-to-navigate/indicator. Uses GetCurveRadius() (ccurve.h), not
+ * GetTrackParams(PARAMS_CORNU, ...) -- see that function's own doc
+ * comment (tcurve.c) for why the more general accessor isn't safe to call
+ * on every TRK_ITERATE object.
+ *
+ * \param[in] unused menu-callback signature, unused
+ */
+void ReportsCurveStats(void *unused);
+
+/**
+ * Menu callback (phase 2, last of the batch): compute and show/refresh
+ * the Equipment Suitability report -- classifies a fixed list of 11
+ * equipment classes (short/standard/long freight cars, diesel/steam
+ * locomotives by size, passenger cars) against the layout's minimum
+ * usable curve radius (ReportsClassifyEquipment(), PASS/MARGINAL/FAIL).
+ * Unlike the other three phase-2 reports, this one doesn't walk
+ * TRK_ITERATE for a by-layer breakdown -- it only needs the layout-wide
+ * minimum curve radius (via GetCurveRadius(), same as Curve Stats, with
+ * curves under 9in excluded as likely decorative -- matches the external
+ * MCP project's own reference behavior) and a scale-adjustment factor
+ * (LookupScale("HO")/GetScaleRatio() vs. the layout's own
+ * GetLayoutCurScale()/GetScaleRatio()). Report-only, no
+ * click-to-navigate/indicator.
+ *
+ * \param[in] unused menu-callback signature, unused
+ */
+void ReportsEquipmentSuitability(void *unused);
 
 /**
  * Draw the current interactive-navigation indicator (phase 1.5), if one is

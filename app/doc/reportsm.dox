@@ -14,9 +14,28 @@ the Parts List (\ref cmdEnum) window.
   (\ref cmdReportsturnout) dialog, listing turnout counts and track length
   by layer, and flagging switching-heavy layers.
 
+- <b>Track Lengths</b> - displays the <b>Track Lengths Report</b>
+  (\ref cmdReportstracklen) dialog, listing total track length, turnout
+  count, and estimated car capacity by layer.
+
+- <b>Curve Stats</b> - displays the <b>Curve Stats Report</b>
+  (\ref cmdReportscurvestats) dialog, listing the layout's curve count,
+  radius range, and a radius-distribution histogram.
+
+- <b>Equipment Suitability</b> - displays the <b>Equipment Suitability
+  Report</b> (\ref cmdReportsequipment) dialog, rating common equipment
+  classes (freight cars, locomotives, passenger cars) against the
+  layout's minimum usable curve radius.
+
 - \subpage cmdReports
 
 - \subpage cmdReportsturnout
+
+- \subpage cmdReportstracklen
+
+- \subpage cmdReportscurvestats
+
+- \subpage cmdReportsequipment
 
 */
 
@@ -106,5 +125,120 @@ The <b>Print</b> button opens the <i>Print</i> dialog which is used to
 print the report.
 
 The <b>Done</b> button closes the <b>Turnout Density Report</b> window.
+
+*/
+
+/**
+\page cmdReportstracklen Track Lengths Report
+
+The <b>Track Lengths Report</b> command lists, for each layer with any
+track on it, the total track length in feet, the turnout count, and the
+estimated <b>car capacity</b> -- how many average freight cars (~44ft
+including couplers, Joe Fugate's operations-planning methodology, MRH Oct
+2014) would fit end-to-end along that layer's track, scaled to the
+layout's own scale.
+
+A summary line above the list gives the layout's total track length,
+turnout count, and total estimated car capacity, updated whenever the
+report is generated or refreshed.
+
+Unlike the Parts List (\ref cmdEnum) command, this report always covers the
+whole layout; it does not consider the current selection (\ref cmdSelect).
+Like the Turnout Density Report (\ref cmdReportsturnout), this report has
+no click-to-navigate -- it's a layout-wide statistic, not a list of
+specific locations to visit.
+
+The <b>Refresh</b> button recomputes the report in place -- useful after
+changing track elsewhere in the layout, without closing and reopening the
+report window.
+
+The <b>Save As...</b> button opens a <i>File Save</i> dialog window that's
+used to name and save the report to a text file.
+
+The <b>Print</b> button opens the <i>Print</i> dialog which is used to
+print the report.
+
+The <b>Done</b> button closes the <b>Track Lengths Report</b> window.
+
+*/
+
+/**
+\page cmdReportscurvestats Curve Stats Report
+
+The <b>Curve Stats Report</b> command summarizes every curved track's
+radius across the whole layout: total curve count, the minimum, maximum,
+and mean radius, and a histogram bucketing every curve into one of five
+radius ranges (under 12in, 12-18in, 18-24in, 24-36in, and over 36in,
+model-scale inches). The minimum radius is the single most useful number
+here -- it determines which locomotives and passenger cars will operate
+reliably on the layout.
+
+A summary line above the list gives the curve count and radius range,
+updated whenever the report is generated or refreshed.
+
+Unlike the Parts List (\ref cmdEnum) command, this report always covers the
+whole layout; it does not consider the current selection (\ref cmdSelect).
+Like the Turnout Density Report (\ref cmdReportsturnout), this report has
+no click-to-navigate -- it's a layout-wide statistic, not a list of
+specific locations to visit.
+
+The <b>Refresh</b> button recomputes the report in place -- useful after
+changing curves elsewhere in the layout, without closing and reopening the
+report window.
+
+The <b>Save As...</b> button opens a <i>File Save</i> dialog window that's
+used to name and save the report to a text file.
+
+The <b>Print</b> button opens the <i>Print</i> dialog which is used to
+print the report.
+
+The <b>Done</b> button closes the <b>Curve Stats Report</b> window.
+
+*/
+
+/**
+\page cmdReportsequipment Equipment Suitability Report
+
+The <b>Equipment Suitability Report</b> command rates a fixed list of
+common equipment classes (short/standard/long freight cars, 4- and
+6-axle diesels, small/medium/large/articulated steam locomotives, and
+standard/long passenger cars) against the layout's minimum usable curve
+radius -- the tightest curve any piece of equipment must be able to
+negotiate to run anywhere on the layout. Each class shows <b>PASS</b>
+(comfortably fits), <b>MARGINAL</b> (within 2 scale inches of the
+minimum -- may bind or derail on some equipment), or <b>FAIL</b> (won't
+reliably negotiate the tightest curve).
+
+Curves under 9 scale inches are excluded from the minimum-radius scan as
+likely decorative (for example a small-radius spur into a scenic detail,
+not something rolling stock actually needs to run through at speed).
+
+A summary line above the list gives the layout's minimum usable curve
+radius and how many equipment classes were rated, updated whenever the
+report is generated or refreshed. If the layout has no curves at or
+above the 9in decorative-curve cutoff, the summary and list both say so
+instead.
+
+Unlike the Parts List (\ref cmdEnum) command, this report always covers the
+whole layout; it does not consider the current selection (\ref cmdSelect).
+Like the other phase-2 reports (\ref cmdReportsturnout,
+\ref cmdReportstracklen, \ref cmdReportscurvestats), this report has no
+click-to-navigate -- it's a layout-wide statistic, not a list of specific
+locations to visit.
+
+The <b>Refresh</b> button recomputes the report in place -- useful after
+changing curves elsewhere in the layout, without closing and reopening the
+report window.
+
+The <b>Save As...</b> button opens a <i>File Save</i> dialog window that's
+used to name and save the report to a text file. The saved/printed text
+groups equipment classes under PASS/MARGINAL/FAIL headings, unlike the
+interactive list above (which keeps the fixed equipment-class order).
+
+The <b>Print</b> button opens the <i>Print</i> dialog which is used to
+print the report.
+
+The <b>Done</b> button closes the <b>Equipment Suitability Report</b>
+window.
 
 */
