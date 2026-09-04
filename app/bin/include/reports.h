@@ -65,33 +65,224 @@ typedef struct {
 void ReportsFormatUnconnectedList(DynString *out, const reportsEndPt_t *list,
                                   int count);
 
+/* ---------------------------------------------------------------------
+ * Phase 2 batch (track lengths / curve stats / turnout density /
+ * equipment suitability) -- SF #217, report-only (no click-to-navigate,
+ * no draw indicator, unlike phase 1). Row structs, formatters, and the
+ * two pure classification helpers below were written test-first
+ * 2026-09-04 (unittest/reportstest.c) and are now implemented in
+ * reportsformat.c; the compute pass that walks the live layout to fill
+ * these rows in is still to come. `name` fields
+ * are borrowed `const char *` (GetLayerName()'s own return convention),
+ * not owned by the row -- caller must keep the layout alive for the
+ * formatter call's duration, same lifetime rule GetLayerName() itself
+ * already implies elsewhere in the app.
+ * ------------------------------------------------------------------- */
+
+/** One layer's row in the track-lengths report. Mirrors the MCP
+ * get_track_lengths() by_layer breakdown shape (no write_track_lengths_report
+ * exists to match text formatting against -- get_track_lengths/get_curve_stats
+ * are the only MCP parity targets for phase 2's first third, and they return
+ * structured data, not report text, so this row layout is a fresh design,
+ * not a port -- 2026-09-04: explicitly not required to match the MCP text
+ * layout, this and the other phase-2 formatters below improve on it where
+ * it helps readability). */
+typedef struct {
+	unsigned int layer;
+	const char *name;
+	DIST_T lengthFt;
+	DIST_T lengthIn;
+	int turnoutCount;
+	int carCapacity;
+} reportsTrackLenLayer_t;
+
 /**
- * Show a report in the generic, reusable report viewer -- a one-line
- * summary label above an interactive, selectable list (Save/Print/Print
- * Setup buttons; Save/Print are built fresh from the report's current rows
- * on demand when clicked, not from pre-formatted text passed in here --
- * see reports.c's ReportsBuildText()/ReportsRefreshPrintText()). This call
- * only creates/shows the dialog frame -- the caller is responsible for
- * setting the summary label's text (`wMessageSetValue(reportsSummary, ...)`
- * in reports.c) and populating the list afterward; ReportsShowText() itself
- * doesn't touch either.
+ * Format the track-lengths by-layer table body, one row per layer, plus a
+ * trailing "% of total" column computed from totalFt (2026-09-04 addition,
+ * no MCP equivalent -- more useful at a glance than raw feet alone).
+ * totalFt <= 0 renders every row's percent as 0.0, not a divide-by-zero.
+ * Pure function, see ReportsFormatUnconnectedList()'s doc comment for the
+ * header/footer-stays-with-caller rationale.
  *
- * \param[in] title dialog title, e.g. "Unconnected Endpoints Report"
+ * \param[in] totalFt sum of every row's lengthFt (not recomputed from
+ *     list[] -- passed explicitly so the caller's own total, e.g. one that
+ *     might include layers not in this filtered list, is authoritative)
  */
-void ReportsShowText(const char *title);
+void ReportsFormatTrackLengthList(DynString *out,
+                                  const reportsTrackLenLayer_t *list, int count, DIST_T totalFt);
+
+/** One radius-range bucket in the curve-stats histogram. Mirrors
+ * get_curve_stats()'s radius_distribution dict (label -> count); label is
+ * caller-owned (a literal, e.g. "< 12in"), not copied. */
+typedef struct {
+	const char *label;
+	int count;
+} reportsCurveBucket_t;
+
+/**
+ * Format the curve-radius histogram body, one row per bucket, in whatever
+ * order the caller passes them (the compute pass is responsible for a
+ * stable/meaningful bucket order -- this formatter does not sort).
+ */
+void ReportsFormatCurveHistogram(DynString *out,
+                                 const reportsCurveBucket_t *list, int count);
+
+/** One layer's row in the turnout-density report. `heavy` is TRUE when
+ * density > 10.0/100ft (strict). Field shape originally mirrored
+ * write_turnout_report()'s BY LAYER table; the row content is unchanged
+ * but the *display* diverges from that MCP text as of 2026-09-04 (see
+ * ReportsFormatTurnoutList()) -- exact text parity was never required,
+ * only the underlying data/threshold. */
+typedef struct {
+	unsigned int layer;
+	const char *name;
+	DIST_T feet;
+	int turnoutCount;
+	DIST_T density;
+	BOOL_T heavy;
+} reportsTurnoutLayer_t;
+
+/**
+ * Format the turnout-density BY LAYER table body, one row per layer,
+ * **sorted by density descending** (stable -- ties keep the caller's
+ * original relative order) so switching-heavy layers surface immediately
+ * without scanning a flag column. Heavy rows get a trailing right-aligned
+ * "HEAVY" word instead of the MCP reference's "***"; non-heavy rows have
+ * no flag text or trailing whitespace at all (2026-09-04: replaces an
+ * earlier byte-parity port of the MCP layout that left two trailing
+ * spaces on every non-flagged row -- sloppy output, not a deliberate
+ * choice, worth fixing outright rather than preserving for parity's sake).
+ */
+void ReportsFormatTurnoutList(DynString *out,
+                              const reportsTurnoutLayer_t *list, int count);
+
+/**
+ * TRUE if a layer's turnout density counts as "switching-heavy" (the
+ * "HEAVY" flag), i.e. density > 10.0/100ft. Pure boundary decision, split
+ * out of the compute pass specifically so it's directly unit-testable
+ * rather than only verifiable via an .xtr fixture -- originally ported
+ * from write_turnout_report()'s `density > 10.0` (strict, not >=).
+ *
+ * The 10.0 threshold is a hardcoded literal, same as this report's other
+ * magic numbers (equipment suitability's 2" MARGINAL margin, phase 1's
+ * `connectDistance` before it became a real preference). Flagged
+ * 2026-09-04 as a good future-preference candidate -- worth exposing as a
+ * user setting (Prefs > Reports, alongside `reportIndicatorColor`) once
+ * this report ships and there's real usage to justify it, rather than
+ * guessing at a UI now. Not done in this pass -- logged, not implemented.
+ */
+BOOL_T ReportsIsTurnoutHeavy(DIST_T density);
+
+/** One turnout with fewer than 3 endpoints (possibly broken/incomplete),
+ * mirrors write_turnout_report()'s PARTIAL TURNOUTS list. */
+typedef struct {
+	TRKINX_T trackId;
+	int endPtCnt;
+	unsigned int layer;
+} reportsPartialTurnout_t;
+
+/** Format the partial-turnouts list body, one row per entry. Count == 0
+ * formats as an empty string, same convention as
+ * ReportsFormatUnconnectedList() -- the "None found." message is a
+ * translatable string and belongs to the caller, not this pure function. */
+void ReportsFormatPartialTurnoutList(DynString *out,
+                                     const reportsPartialTurnout_t *list, int count);
+
+/** PASS/MARGINAL/FAIL classification for one equipment class against the
+ * layout's minimum curve radius. Values match write_equipment_report()'s
+ * three literal status strings exactly (parity target) -- not translated,
+ * same as that report's own untranslated ASCII tokens. */
+typedef enum {
+	REPORTS_EQUIP_PASS,
+	REPORTS_EQUIP_MARGINAL,
+	REPORTS_EQUIP_FAIL
+} reportsEquipStatus_e;
+
+/** One equipment class's row in the equipment-suitability report.
+ * `thresholdIn` is already scale-adjusted by the caller (HO-reference
+ * threshold * scale factor) -- this formatter does no scaling itself.
+ * Row content originally mirrored write_equipment_report()'s
+ * COMPATIBILITY table; the *display* diverges as of 2026-09-04 (grouped
+ * by status, see ReportsFormatEquipmentList()) -- text parity was never
+ * required, only the PASS/MARGINAL/FAIL decision itself. */
+typedef struct {
+	const char *name;
+	DIST_T thresholdIn;
+	reportsEquipStatus_e status;
+} reportsEquipClass_t;
+
+/**
+ * Format the equipment-suitability table body, **grouped under PASS /
+ * MARGINAL / FAIL subheadings** (in that order; a status with no rows
+ * gets no heading at all) instead of one flat list with a per-row status
+ * column -- lets a user see what doesn't fit at a glance instead of
+ * scanning every row (2026-09-04, replaces an earlier flat byte-parity
+ * port of the MCP layout). Within each group, rows keep the caller's
+ * original relative order (stable, e.g. cheapest-to-hardest equipment
+ * class order). A blank line separates consecutive non-empty groups; none
+ * trails the last group.
+ */
+void ReportsFormatEquipmentList(DynString *out,
+                                const reportsEquipClass_t *list, int count);
+
+/**
+ * Classify one equipment class's (already scale-adjusted) minimum radius
+ * threshold against the layout's actual minimum curve radius. Pure
+ * boundary decision, split out of the compute pass for direct unit
+ * testing (see ReportsIsTurnoutHeavy()'s rationale above). Matches
+ * write_equipment_report() exactly: PASS if minRadius >= thresholdIn;
+ * MARGINAL if minRadius >= thresholdIn - 2.0*scaleFactor (inclusive,
+ * `>=`); FAIL otherwise. The 2" MARGINAL margin is itself scale-adjusted
+ * in the MCP reference (`thresh - 2.0 * sf`) -- easy to miss when
+ * thresholdIn is already pre-scaled, hence the separate scaleFactor
+ * parameter rather than baking a flat 2.0 into this function.
+ *
+ * The 2.0" MARGINAL margin is a hardcoded literal, same future-preference
+ * candidate as ReportsIsTurnoutHeavy()'s 10.0 threshold above -- worth
+ * exposing as a user setting once this report has shipped and there's
+ * real usage to justify a UI for it. Not made configurable in this pass.
+ *
+ * \param[in] minRadius the layout's actual minimum curve radius (already
+ *     scale-adjusted, same units as thresholdIn)
+ * \param[in] thresholdIn the equipment class's minimum radius threshold
+ *     (already scale-adjusted by the caller: HO-reference threshold *
+ *     scaleFactor)
+ * \param[in] scaleFactor HO_ratio / this layout's scale ratio -- the same
+ *     factor used to produce thresholdIn, needed again here to scale the
+ *     2" MARGINAL margin
+ */
+reportsEquipStatus_e ReportsClassifyEquipment(DIST_T minRadius,
+                DIST_T thresholdIn, DIST_T scaleFactor);
 
 /**
  * Menu callback (phase 1), also reused directly as the Refresh button's
- * `reportsRefreshProc` (see reports.c) since it always recomputes from
- * scratch: walk the current layout for every open (unconnected) track
- * endpoint, flag/group Nearby ones (ReportsMarkNearby()), show/update the
- * report dialog (ReportsShowText(), then the summary label and the
- * interactive list via ReportsPopulateList()), and log a one-line summary
- * to the "reports" debug category (`-d reports=1`) for live-testing.
+ * refresh proc (see reports.c's `reportsDialog_t.refreshProc`) since it
+ * always recomputes from scratch: walk the current layout for every open
+ * (unconnected) track endpoint, flag/group Nearby ones
+ * (ReportsMarkNearby()), show/update the report dialog (the internal,
+ * generic `ReportsShowDialog()` -- see reports.c; every report phase
+ * shares this same viewer machinery, parameterized by a `reportsDialog_t`
+ * instance per report -- then the summary label and the interactive list
+ * via ReportsPopulateList()), and log a one-line summary to the "reports"
+ * debug category (`-d reports=1`) for live-testing.
  *
  * \param[in] unused menu-callback signature, unused
  */
 void ReportsUnconnectedEndpoints(void *unused);
+
+/**
+ * Menu callback (phase 2): compute and show/refresh the Turnout Density
+ * report -- total and by-layer track length/turnout counts, density per
+ * 100ft of track (ReportsFormatTurnoutList()), switching-heavy layers
+ * flagged via ReportsIsTurnoutHeavy(), and a partial-turnouts list (fewer
+ * than 3 endpoints -- folded into the Save/Print text only, not a second
+ * interactive list, per the phase-2 implementation plan). Report-only,
+ * unlike phase 1: no click-to-navigate, no draw indicator -- the
+ * `reportsturnout.ui` dialog has no row-selection changeProc at all.
+ *
+ * \param[in] unused menu-callback signature, unused
+ */
+void ReportsTurnoutDensity(void *unused);
 
 /**
  * Draw the current interactive-navigation indicator (phase 1.5), if one is

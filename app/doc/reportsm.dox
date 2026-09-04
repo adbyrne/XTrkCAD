@@ -10,7 +10,13 @@ the Parts List (\ref cmdEnum) window.
   Report</b> (\ref cmdReports) dialog, listing every track endpoint in the
   layout that isn't connected to another track.
 
+- <b>Turnout Density</b> - displays the <b>Turnout Density Report</b>
+  (\ref cmdReportsturnout) dialog, listing turnout counts and track length
+  by layer, and flagging switching-heavy layers.
+
 - \subpage cmdReports
+
+- \subpage cmdReportsturnout
 
 */
 
@@ -62,5 +68,43 @@ print the report.
 
 The <b>Done</b> button closes the <b>Unconnected Endpoints Report</b>
 window.
+
+*/
+
+/**
+\page cmdReportsturnout Turnout Density Report
+
+The <b>Turnout Density Report</b> command lists, for each layer with any
+track on it, the total track length in feet, the turnout count, and the
+turnout density (turnouts per 100ft of track) -- one row per layer, sorted
+by density, highest first. A layer whose density exceeds 10 turnouts per
+100ft is flagged <b>HEAVY</b> (a common sign of a staging yard or other
+switching-heavy area).
+
+A summary line above the list gives the layout's total turnout count,
+total track length, and overall density, updated whenever the report is
+generated or refreshed.
+
+Unlike the Parts List (\ref cmdEnum) command, this report always covers the
+whole layout; it does not consider the current selection (\ref cmdSelect).
+
+Any turnout with fewer than 3 endpoints (possibly broken or incomplete) is
+listed separately in the <b>Save...</b>/<b>Print</b> output, under
+<b>PARTIAL TURNOUTS</b>; the summary line notes when any exist. Unlike the
+Unconnected Endpoints Report (\ref cmdReports), this report has no
+click-to-navigate -- it's a layout-wide statistic, not a list of specific
+locations to visit.
+
+The <b>Refresh</b> button recomputes the report in place -- useful after
+changing turnouts or track elsewhere in the layout, without closing and
+reopening the report window.
+
+The <b>Save As...</b> button opens a <i>File Save</i> dialog window that's
+used to name and save the report to a text file.
+
+The <b>Print</b> button opens the <i>Print</i> dialog which is used to
+print the report.
+
+The <b>Done</b> button closes the <b>Turnout Density Report</b> window.
 
 */
