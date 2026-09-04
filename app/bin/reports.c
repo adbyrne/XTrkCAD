@@ -64,6 +64,14 @@
 #include "utility.h"
 #include "include/reports.h"
 
+/** Debug log category for manual/visual testing (`-d reports=1 -l <file>`)
+ * -- covers report-open/recompute, row-click navigation, and toolbar
+ * button presses. Lazily resolved via LogFindIndex(), same pattern as
+ * every other file's `log_*` (see misc.c's `log_misc`). Added 2026-09-04
+ * specifically so a session can tail a log file while a person clicks
+ * through the report UI, without needing screen access. */
+static int log_reports = -1;
+
 static wControl_p reportsW;
 
 /** The hidden control that backs Save/Print (ReportsRefreshPrintText()) --
@@ -97,7 +105,10 @@ static const char * reportsListTitles[] = {
 static paramListData_t reportsListData = { 8, 300, 5, reportsListWidths, reportsListTitles };
 
 static paramData_t reportsPLs[] = {
-#define I_REPORTSLIST (0)
+#define I_REPORTSSUMMARY (0)
+#define reportsSummary (reportsPLs[I_REPORTSSUMMARY].control)
+	{ PD_MESSAGE, "", "summary", 0, I2VP(37) },
+#define I_REPORTSLIST (1)
 #define reportsList (reportsPLs[I_REPORTSLIST].control)
 	{ PD_LIST, NULL, "list", PDO_DLGRESIZE, &reportsListData, NULL, 0 },
 	{ PD_BUTTON, DoReportsOp, "refresh", 0, NULL, NULL, 0, I2VP(REPORTSOP_REFRESH) },
@@ -115,6 +126,23 @@ static struct wFilSel_t * reportsFile_fs;
  * that builds it. Replaced (old rows freed first) each time a report is
  * (re)generated; see ReportsUnconnectedEndpoints(). */
 static dynArr_t reportsCurrentList_da;
+
+/** TRUE while ReportsPopulateList() is clearing/rebuilding reportsList.
+ * Found 2026-09-04 (real crash, not hypothetical -- SIGSEGV in
+ * DrawRulerWithBackground, root-caused via coredumpctl backtrace):
+ * wListClear()'s row deletions make GTK relocate the tree view's cursor,
+ * which *synchronously* re-fires ReportsDlgUpdate() (the selection-changed
+ * handler) mid-clear, before the new rows exist -- so it reads a stale
+ * per-row context pointer into the *previous* report's reportsEndPt_t
+ * array, already DYNARR_FREE()'d by ReportsUnconnectedEndpoints() just
+ * before this call. That dangling read produced garbage track IDs, a
+ * garbage scale index (surfaced as a spurious "Scale index ... is not
+ * valid" notice), and eventually a NaN position that crashed ruler
+ * drawing. ReportsDlgUpdate() checks this flag and no-ops while it's set
+ * -- selection state is meaningless during a clear/repopulate transition
+ * regardless of what garbage or valid data it might resolve to, so this
+ * guards the transition itself rather than trying to validate the data. */
+static BOOL_T reportsPopulating = FALSE;
 
 /** Phase 1.5 interactive-navigation indicator state -- see
  * ReportsSetIndicator()/ReportsClearIndicator()/ReportsDrawIndicator(). */
@@ -154,15 +182,20 @@ static int DoReportsSave(
 static void DoReportsOp(
         void * data )
 {
+	if ( log_reports < 0 ) { log_reports = LogFindIndex( "reports" ); }
+
 	switch( VP2L(data) ) {
 	case REPORTSOP_SAVE:
+		LOG( log_reports, 1, ( "reports: Save clicked\n" ) )
 		wFilSelect( reportsFile_fs, GetCurrentPath(REPORTPATHKEY) );
 		break;
 	case REPORTSOP_PRINT:
+		LOG( log_reports, 1, ( "reports: Print clicked\n" ) )
 		ReportsRefreshPrintText();
 		wTextPrint( reportsT );
 		break;
 	case REPORTSOP_REFRESH:
+		LOG( log_reports, 1, ( "reports: Refresh clicked\n" ) )
 		if ( reportsRefreshProc ) {
 			reportsRefreshProc( NULL );
 		}
@@ -287,6 +320,13 @@ static void ReportsDlgUpdate(paramGroup_p pg, int inx, void *valueP)
 		return;
 	}
 
+	/* Ignore selection-changed events GTK fires synchronously mid-clear/
+	 * repopulate (ReportsPopulateList()) -- see reportsPopulating's doc
+	 * comment. Real crash without this guard, not a hypothetical. */
+	if (reportsPopulating) {
+		return;
+	}
+
 	sel = wListGetIndex(reportsList);
 	if (sel < 0) {
 		return;
@@ -295,6 +335,10 @@ static void ReportsDlgUpdate(paramGroup_p pg, int inx, void *valueP)
 	if (!entry) {
 		return;
 	}
+
+	if ( log_reports < 0 ) { log_reports = LogFindIndex( "reports" ); }
+	LOG( log_reports, 1, ( "reports: row %d selected -> track %d @ (%.3f,%.3f)\n",
+	                       sel, entry->trackId, entry->pos.x, entry->pos.y ) )
 
 	ReportsSetIndicator(entry->pos, entry->scale);
 }
@@ -447,6 +491,13 @@ static void ReportsPopulateList(void)
 	int i;
 	char row[128];
 
+	/* Guards both directions -- wListClear()'s deletions AND the
+	 * wListAddValue() loop below can each make GTK synchronously fire a
+	 * selection-changed signal (cursor relocating to the nearest
+	 * surviving row on delete, or auto-selecting a newly-added first row)
+	 * -- see reportsPopulating's doc comment for the crash this caused. */
+	reportsPopulating = TRUE;
+
 	wListClear( reportsList );
 	for ( i = 0; i < reportsCurrentList_da.cnt; i++ ) {
 		reportsEndPt_t *entry = &DYNARR_N(reportsEndPt_t, reportsCurrentList_da, i);
@@ -455,6 +506,8 @@ static void ReportsPopulateList(void)
 		          entry->nearby ? _("Yes") : "" );
 		wListAddValue( reportsList, row, NULL, entry );
 	}
+
+	reportsPopulating = FALSE;
 }
 
 /** Build the full formatted report text (header + column-aligned rows)
@@ -515,6 +568,28 @@ void ReportsUnconnectedEndpoints( void * unused )
 	}
 
 	ReportsMarkNearby();
-	ReportsShowText( _("Unconnected Endpoints Report") );
+
+	{
+		int i, nearbyCnt = 0;
+		char summary[128];
+
+		for ( i = 0; i < reportsCurrentList_da.cnt; i++ ) {
+			if ( DYNARR_N( reportsEndPt_t, reportsCurrentList_da, i ).nearby ) {
+				nearbyCnt++;
+			}
+		}
+
+		if ( log_reports < 0 ) { log_reports = LogFindIndex( "reports" ); }
+		LOG( log_reports, 1,
+		     ( "reports: Unconnected Endpoints computed -- %d open endpoint(s), %d flagged nearby\n",
+		       reportsCurrentList_da.cnt, nearbyCnt ) )
+
+		ReportsShowText( _("Unconnected Endpoints Report") );
+		snprintf( summary, sizeof summary,
+		          _("%d open endpoint(s), %d flagged Nearby"),
+		          reportsCurrentList_da.cnt, nearbyCnt );
+		wMessageSetValue( reportsSummary, summary );
+	}
+
 	ReportsPopulateList();
 }
