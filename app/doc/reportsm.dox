@@ -24,6 +24,10 @@ open endpoint, giving its <b>Track</b> id, <b>X</b>/<b>Y</b> position,
 
 ![](reportuncon.png)
 
+A summary line above the list gives the total count of open endpoints and how
+many are flagged <b>Nearby</b>, updated whenever the report is generated or
+refreshed.
+
 Unlike the Parts List (\ref cmdEnum) command, this report always covers the
 whole layout; it does not consider the current selection (\ref cmdSelect).
 
