@@ -20,6 +20,12 @@ TURNOUT 3 DEMO 1 14.750000 9.333333 -16.389478 "Peco-55	Medium Right	SL-E395F"
 	C 0 0 23.136000 0.351000 -23.136000 0.004000 9.700000
 	S 0 0 4.251000 -0.331000 5.370000 -0.522000
 	END
+NOTE 4 0 0 0 9.917000 7.167000 0 32
+A zero-endpoint object (regression check for SF #776's real crash: the
+compute pass must not call GetTrkLength() on objects with fewer than 2
+endpoints -- TRK_ITERATE walks every track-list object, not just track
+with a real length).
+    END
 REDRAW
 RESET
 STEP

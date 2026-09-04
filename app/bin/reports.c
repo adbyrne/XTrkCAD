@@ -838,7 +838,21 @@ void ReportsTurnoutDensity( void * unused )
 
 	TRK_ITERATE( trk ) {
 		unsigned int trkLayer = GetTrkLayer(trk);
-		DIST_T lengthFt = GetTrkLength(trk, 0, 1) / 12.0;
+		/* GetTrkLength(trk,0,1) reads endpoints 0 and 1 unconditionally
+		 * (track.c) -- TRK_ITERATE walks every object on the track list,
+		 * not just track with a real length (benchwork, notes, groups,
+		 * ...), and a turnout with fewer than 2 endpoints is exactly what
+		 * this report's own PARTIAL TURNOUTS section exists to flag. Any
+		 * of these crash a CHECK() in GetTrkEndPos (trkendpt.c) without
+		 * this guard -- confirmed the hard way (real crash on a live
+		 * layout, 2026-09-04) after this fixture's synthetic dmreport-
+		 * turnout.xtr, built with only 2-endpoint straights and one
+		 * 3-endpoint turnout, had nothing under 2 endpoints to catch it.
+		 * Matches the MCP reference's own guard
+		 * (TrackObject.length_model_inches(): "if len(eps) < 2: return
+		 * 0.0"), just not carried over into this port originally. */
+		DIST_T lengthFt = (GetTrkEndPtCnt(trk) >= 2) ?
+		                  GetTrkLength(trk, 0, 1) / 12.0 : 0.0;
 		BOOL_T isTurnout = (GetTrkType(trk) == T_TURNOUT);
 
 		if ( trkLayer < NUM_LAYERS ) {
