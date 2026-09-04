@@ -15,13 +15,29 @@
  *
  * The list is also grouped/flagged for "Nearby" endpoints -- see
  * ReportsMarkNearby() -- and can be recomputed in place via the Refresh
- * button (reportsRefreshProc) without closing/reopening the dialog.
+ * button (`reportsDialog_t.refreshProc`) without closing/reopening the
+ * dialog.
  *
  * Save/Print build their output on demand (ReportsBuildText()/
  * ReportsRefreshPrintText()) into a hidden PD_TEXT-equivalent control
- * (reportsT) that's never shown to the user -- see ReportsShowText() for why
- * it's created via wTextCreate()'s standalone/no-.ui-needed code path
- * rather than as a builder-bound paramData_t entry.
+ * (`reportsDialog_t.text`) that's never shown to the user -- see
+ * ReportsShowDialog() for why it's created via wTextCreate()'s
+ * standalone/no-.ui-needed code path rather than as a builder-bound
+ * paramData_t entry.
+ *
+ * Phase 2 (track lengths/curve stats/turnout density/equipment
+ * suitability -- see the phase-2 implementation plan) is report-only, no
+ * click-to-navigate/indicator, and needs its own dialog per report (each
+ * with a genuinely different PD_LIST column shape -- `reportsturnout.ui`
+ * for this file's first phase-2 report, Turnout Density). This is the
+ * point at which the phase-1-only plumbing above (originally hardcoded to
+ * a single `reportsW`/`reportsT`/`reportsFile_fs`/`reportsRefreshProc` set
+ * of module statics) was generalized into `reportsDialog_t` -- one
+ * instance per report phase, all sharing the same `ReportsShowDialog()`/
+ * `DoReportsOp()`/`ReportsRefreshPrintText()` machinery -- see
+ * `reportsDialog_t`'s own doc comment for why this was deferred until a
+ * second report type existed to prove the shape against, rather than
+ * speculatively generalized in phase 1.
  *
  * The date-header logic (AddReportDateString()) is deliberately duplicated
  * from denum.c's AddDateString() rather than shared, to keep this
@@ -54,6 +70,7 @@
 
 #include "custom.h"
 #include <dynstring.h>
+#include "dlayer.h"
 #include "draw.h"
 #include "fileio.h"
 #include "layout.h"
@@ -72,31 +89,86 @@
  * through the report UI, without needing screen access. */
 static int log_reports = -1;
 
-static wControl_p reportsW;
-
-/** The hidden control that backs Save/Print (ReportsRefreshPrintText()) --
- * deliberately NOT a paramData_t/PD_TEXT entry in reportsPLs[] below, so it
- * isn't tied to reportsW's builder-defined dialog. Created once, lazily, in
- * ReportsShowText() via wTextCreate()'s genuinely standalone/no-.ui-needed
- * code path (text.c) against its own permanently-unshown backing window --
- * see that call site for why. */
-static wControl_p reportsT;
-
 #define REPORTSOP_SAVE    (1)
 #define REPORTSOP_PRINT   (2)
 #define REPORTSOP_REFRESH (3)
 
-/** Set by whichever report type is currently showing (only
- * ReportsUnconnectedEndpoints() today) each time it calls ReportsShowText(),
- * so the generic Refresh button can recompute + repopulate the current
- * report in place without this shared viewer needing to know which specific
- * report is active. Any future report phase should set this the same way
- * when it calls ReportsShowText(). */
-static void (*reportsRefreshProc)(void *) = NULL;
+/** Bundles the per-report-phase state the shared viewer plumbing needs --
+ * one instance per report phase (`reportsUnconnectedDlg` for phase 1,
+ * `reportsTurnoutDlg` for phase 2's Turnout Density, etc.). Originally
+ * this was all hardcoded to phase 1's own module statics
+ * (`reportsW`/`reportsT`/`reportsFile_fs`/a single shared
+ * `reportsRefreshProc`); phase 1's own implementation plan flagged
+ * "retitling on reuse becomes relevant once phase 2 adds a second report
+ * type, deliberately not solved here" -- this struct is that resolution,
+ * written once a second report type actually existed to prove the shape
+ * against rather than speculatively upfront. Each report phase gets its
+ * own dialog/window (never retitled/reused across report types), so no
+ * retitling logic is needed after all -- see ReportsShowDialog(). */
+typedef struct {
+	paramGroup_p pg;
+	/** Dialog window, created lazily on first ReportsShowDialog() call. */
+	wControl_p window;
+	/** Hidden control backing Save/Print (ReportsRefreshPrintText()) --
+	 * deliberately NOT a paramData_t/PD_TEXT entry in the report's own
+	 * paramData_t[] array, so it isn't tied to that builder-defined
+	 * dialog. Created once, lazily, in ReportsShowDialog() via
+	 * wTextCreate()'s genuinely standalone/no-.ui-needed code path
+	 * (text.c) against its own permanently-unshown backing window -- see
+	 * that call site for why. */
+	wControl_p text;
+	struct wFilSel_t *fileSel;
+	/** Builds this report's full Save/Print text fresh from its current
+	 * rows (header + formatted body, e.g. ReportsBuildText()). */
+	void (*buildText)(DynString *out);
+	/** Recompute + repopulate this report in place -- what the shared
+	 * Refresh button calls. Always the report's own menu-callback
+	 * function (e.g. ReportsUnconnectedEndpoints()), since that always
+	 * recomputes from scratch already. */
+	void (*refreshProc)(void *);
+	/** Row-selection changeProc, or NULL for a report-only phase with no
+	 * click-to-navigate (phase 2's whole batch) -- passed straight
+	 * through to FormCreateDialog(). */
+	paramChangeProc changeProc;
+	/** Dialog-cancel handler, or NULL to use the default
+	 * FormCancel_Current (nothing extra to clean up on close). Phase 1
+	 * uses this to clear its interactive-navigation indicator
+	 * (ReportsCancel()); report-only phases don't need it. */
+	paramActionCancelProc cancelProc;
+} reportsDialog_t;
+
+/** Ties one report's PD_BUTTON entry (Save/Print/Refresh) to both which
+ * dialog it belongs to and which operation it performs -- the single
+ * `void *context` a paramData_t button callback receives (see
+ * form/createcontrols.c's ButtonPush()) has to carry both now that
+ * DoReportsOp() is shared across every report phase's dialog. */
+typedef struct {
+	reportsDialog_t *rd;
+	int op;
+} reportsOpCtx_t;
 
 static void DoReportsOp(void *data);
 static void ReportsDlgUpdate(paramGroup_p pg, int inx, void *valueP);
 static void ReportsCancel(paramGroup_p pg);
+static void ReportsShowDialog(reportsDialog_t *rd, const char *title);
+
+/** Tentative declaration -- reportsUnconnectedDlg (below) needs `&reportsPG`
+ * before reportsPLs[]/reportsPG's own full definition can be written (the
+ * definitions are mutually referential: the button paramData_t entries need
+ * their reportsOpCtx_t's `&reportsUnconnectedDlg`, which needs `&reportsPG`).
+ * Given its own initializer further down, same as any other static. */
+static paramGroup_t reportsPG;
+static void ReportsBuildText(DynString *out);
+
+/** Phase 1's dialog state -- see reportsDialog_t's doc comment. */
+static reportsDialog_t reportsUnconnectedDlg = {
+	&reportsPG, NULL, NULL, NULL,
+	ReportsBuildText, ReportsUnconnectedEndpoints,
+	ReportsDlgUpdate, ReportsCancel
+};
+static reportsOpCtx_t reportsUnconnectedRefreshOp = { &reportsUnconnectedDlg, REPORTSOP_REFRESH };
+static reportsOpCtx_t reportsUnconnectedSaveOp    = { &reportsUnconnectedDlg, REPORTSOP_SAVE };
+static reportsOpCtx_t reportsUnconnectedPrintOp   = { &reportsUnconnectedDlg, REPORTSOP_PRINT };
 
 static wWinPix_t reportsListWidths[] = { 60, 80, 80, 70, 60 };
 static const char * reportsListTitles[] = {
@@ -111,14 +183,12 @@ static paramData_t reportsPLs[] = {
 #define I_REPORTSLIST (1)
 #define reportsList (reportsPLs[I_REPORTSLIST].control)
 	{ PD_LIST, NULL, "list", PDO_DLGRESIZE, &reportsListData, NULL, 0 },
-	{ PD_BUTTON, DoReportsOp, "refresh", 0, NULL, NULL, 0, I2VP(REPORTSOP_REFRESH) },
-	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, I2VP(REPORTSOP_SAVE) },
-	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, I2VP(REPORTSOP_PRINT) },
+	{ PD_BUTTON, DoReportsOp, "refresh", 0, NULL, NULL, 0, &reportsUnconnectedRefreshOp },
+	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsUnconnectedSaveOp },
+	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsUnconnectedPrintOp },
 	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
 };
 static paramGroup_t reportsPG = { "reports", PGO_FULLDIALOGFROMBUILDER, reportsPLs, COUNT( reportsPLs ) };
-
-static struct wFilSel_t * reportsFile_fs;
 
 /** The current report's rows, kept alive for as long as the dialog might
  * still reference them via the list's per-row context pointers (phase
@@ -152,52 +222,63 @@ static SCALEINX_T reportIndicatorScale;
 
 static void ReportsBuildText(DynString *out);
 
-/** Refresh the hidden `reportsT` text control from the current report
- * (reportsCurrentList_da) right before Save or Print actually use it --
- * see reports.ui's comment on "scrollwindow"/"text" for why this control
- * exists at all despite never being shown. */
-static void ReportsRefreshPrintText(void)
+/** Refresh `rd`'s hidden text control from its current report rows right
+ * before Save or Print actually use it -- see reports.ui's comment on
+ * "scrollwindow"/"text" for why this control exists at all despite never
+ * being shown. */
+static void ReportsRefreshPrintText(reportsDialog_t *rd)
 {
 	DynString content;
 
-	ReportsBuildText( &content );
-	wTextClear( reportsT );
-	wTextAppend( reportsT, DynStringToCStr(&content) );
+	rd->buildText( &content );
+	wTextClear( rd->text );
+	wTextAppend( rd->text, DynStringToCStr(&content) );
 	DynStringFree( &content );
 }
 
+/** wFilSelCallBack_p for every report's Save file selector -- `data` is
+ * the `reportsDialog_t *` passed as wFilSelCreate()'s context in
+ * ReportsShowDialog(), so this one callback serves every report phase. */
 static int DoReportsSave(
         int files,
         char **fileName,
         void * data )
 {
+	reportsDialog_t *rd = (reportsDialog_t *)data;
+
 	CHECK( fileName != NULL );
 	CHECK( files == 1 );
 
 	SetCurrentPath( REPORTPATHKEY, fileName[0] );
-	ReportsRefreshPrintText();
-	return wTextSave( reportsT, fileName[ 0 ] );
+	ReportsRefreshPrintText( rd );
+	return wTextSave( rd->text, fileName[ 0 ] );
 }
 
+/** PD_BUTTON callback for every report's Refresh/Save/Print buttons --
+ * `data` is the button's own `reportsOpCtx_t *` (its paramData_t entry's
+ * `context` field), which carries both which dialog and which operation,
+ * so this one callback serves every report phase's dialog. */
 static void DoReportsOp(
         void * data )
 {
+	reportsOpCtx_t *ctx = (reportsOpCtx_t *)data;
+
 	if ( log_reports < 0 ) { log_reports = LogFindIndex( "reports" ); }
 
-	switch( VP2L(data) ) {
+	switch( ctx->op ) {
 	case REPORTSOP_SAVE:
 		LOG( log_reports, 1, ( "reports: Save clicked\n" ) )
-		wFilSelect( reportsFile_fs, GetCurrentPath(REPORTPATHKEY) );
+		wFilSelect( ctx->rd->fileSel, GetCurrentPath(REPORTPATHKEY) );
 		break;
 	case REPORTSOP_PRINT:
 		LOG( log_reports, 1, ( "reports: Print clicked\n" ) )
-		ReportsRefreshPrintText();
-		wTextPrint( reportsT );
+		ReportsRefreshPrintText( ctx->rd );
+		wTextPrint( ctx->rd->text );
 		break;
 	case REPORTSOP_REFRESH:
 		LOG( log_reports, 1, ( "reports: Refresh clicked\n" ) )
-		if ( reportsRefreshProc ) {
-			reportsRefreshProc( NULL );
+		if ( ctx->rd->refreshProc ) {
+			ctx->rd->refreshProc( NULL );
 		}
 		break;
 	default:
@@ -353,18 +434,37 @@ static void ReportsCancel(paramGroup_p pg)
 	FormCancel_Current(pg);
 }
 
-void ReportsShowText(const char *title)
+/**
+ * Show one report's dialog in the generic, reusable report viewer -- a
+ * one-line summary label above an interactive, selectable list (Save/
+ * Print/Print Setup buttons; Save/Print are built fresh from the report's
+ * current rows on demand when clicked, not from pre-formatted text passed
+ * in here -- see ReportsBuildText()/ReportsRefreshPrintText()). This call
+ * only creates/shows the dialog frame -- the caller is responsible for
+ * setting the summary label's text and populating the list afterward;
+ * ReportsShowDialog() itself doesn't touch either.
+ *
+ * Each `reportsDialog_t` gets its own window/dialog, created lazily on
+ * first call and reused (never retitled) on every subsequent call for
+ * that same report -- unlike phase 1's original single-report design,
+ * this no longer needs a "what if a second report type reuses this
+ * window" answer, since every report phase now gets its own `rd`.
+ *
+ * \param[in,out] rd this report phase's dialog state
+ * \param[in] title dialog title, e.g. "Unconnected Endpoints Report"
+ */
+static void ReportsShowDialog(reportsDialog_t *rd, const char *title)
 {
-	if (reportsW == NULL) {
-		FormRegister( &reportsPG );
-		reportsW = FormCreateDialog( &reportsPG, MakeWindowTitle(title),
-		                             NULL, NULL,
-		                             NULL, ReportsCancel,
-		                             TRUE, F_RESIZE,
-		                             ReportsDlgUpdate );
-		reportsFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, title,
-		                                sReportsFilePattern, DoReportsSave, NULL );
-		/* reportsT backs Save/Print only -- it's never shown to the user
+	if (rd->window == NULL) {
+		FormRegister( rd->pg );
+		rd->window = FormCreateDialog( rd->pg, MakeWindowTitle(title),
+		                              NULL, NULL,
+		                              NULL, rd->cancelProc ? rd->cancelProc : FormCancel_Current,
+		                              TRUE, F_RESIZE,
+		                              rd->changeProc );
+		rd->fileSel = wFilSelCreate( mainW, FS_SAVE, 0, title,
+		                            sReportsFilePattern, DoReportsSave, rd );
+		/* rd->text backs Save/Print only -- it's never shown to the user
 		 * (see ReportsRefreshPrintText()) -- so instead of creating it as
 		 * a .ui-bound PD_TEXT control and then fighting wTextCreate()'s
 		 * unconditional gtk_widget_show_all() (an earlier version of this
@@ -377,33 +477,28 @@ void ReportsShowText(const char *title)
 		 * (the same style of gotcha as wTextCreate()'s force-show,
 		 * confirmed the same way: a real backing window DID appear on
 		 * screen as a small stray window before this wControlShow() line
-		 * was added). This also means reportsT is created via
+		 * was added). This also means rd->text is created via
 		 * wTextCreate()'s standalone/no-.ui-needed code path (parent
 		 * lacks F_DEFINEDINBUILDER) -- otherwise unexercised anywhere in
 		 * this codebase (checked: not even wlib/test/testapp.c calls
 		 * wTextCreate() against a non-builder parent). */
 		{
-			wControl_p reportsTBacking = wWinDialogCreate( NULL, NULL, NULL,
+			wControl_p textBacking = wWinDialogCreate( NULL, NULL, NULL,
 			                             "reportstextbacking", 0L, NULL, NULL );
-			wControlShow( reportsTBacking, FALSE );
-			reportsT = wTextCreate( reportsTBacking, 0, 0, NULL, NULL,
+			wControlShow( textBacking, FALSE );
+			rd->text = wTextCreate( textBacking, 0, 0, NULL, NULL,
 			                        BO_READONLY, 0, 0 );
 		}
 	}
-	/* NOTE: subsequent calls reuse the same window/title -- fine while
-	 * phase 1 is the only report; retitling on reuse becomes relevant
-	 * once phase 2 adds a second report type, deliberately not solved
-	 * here (see the phase-1 implementation plan).
-	 *
-	 * Deliberately does NOT touch reportsT here -- unlike phase 1's
-	 * original design, the hidden text control is no longer kept in sync
-	 * eagerly every time a report is shown; it's built fresh only when
-	 * Save/Print are actually clicked (ReportsRefreshPrintText()), so it
-	 * always reflects the current report without needing to be rebuilt on
-	 * every regeneration whether or not it's ever used. */
+	/* Deliberately does NOT touch rd->text here -- the hidden text
+	 * control is not kept in sync eagerly every time a report is shown;
+	 * it's built fresh only when Save/Print are actually clicked
+	 * (ReportsRefreshPrintText()), so it always reflects the current
+	 * report without needing to be rebuilt on every regeneration whether
+	 * or not it's ever used. */
 
-	FormLoadControls( &reportsPG );
-	wShow( reportsW );
+	FormLoadControls( rd->pg );
+	wShow( rd->window );
 }
 
 /** Header text shared by every report: product/layout title + date.
@@ -480,7 +575,7 @@ static void ReportsMarkNearby(void)
  * one row per entry, tab-separated (wListAddValue() splits on tabs into
  * columns), each row's context set to that entry's address so
  * ReportsDlgUpdate() can recover it on selection. Must run after
- * ReportsShowText() has run at least once (the list control doesn't exist
+ * ReportsShowDialog() has run at least once (the list control doesn't exist
  * before the dialog's first creation).
  *
  * Rows are shown in reportsCurrentList_da's own order -- ReportsMarkNearby()
@@ -547,7 +642,6 @@ void ReportsUnconnectedEndpoints( void * unused )
 {
 	track_p trk;
 
-	reportsRefreshProc = ReportsUnconnectedEndpoints;
 	ReportsClearIndicator();
 	DYNARR_FREE( reportsEndPt_t, reportsCurrentList_da );
 	DYNARR_INIT( reportsEndPt_t, reportsCurrentList_da );
@@ -584,7 +678,7 @@ void ReportsUnconnectedEndpoints( void * unused )
 		     ( "reports: Unconnected Endpoints computed -- %d open endpoint(s), %d flagged nearby\n",
 		       reportsCurrentList_da.cnt, nearbyCnt ) )
 
-		ReportsShowText( _("Unconnected Endpoints Report") );
+		ReportsShowDialog( &reportsUnconnectedDlg, _("Unconnected Endpoints Report") );
 		snprintf( summary, sizeof summary,
 		          _("%d open endpoint(s), %d flagged Nearby"),
 		          reportsCurrentList_da.cnt, nearbyCnt );
@@ -592,4 +686,215 @@ void ReportsUnconnectedEndpoints( void * unused )
 	}
 
 	ReportsPopulateList();
+}
+
+/* ---------------------------------------------------------------------
+ * Phase 2 (SF #217): Turnout Density -- first of the phase-2 batch
+ * (track lengths/curve stats/turnout density/equipment suitability), and
+ * the proof-of-pattern slice for the other three: report-only (no
+ * click-to-navigate, no draw indicator), own `.ui` dialog
+ * (reportsturnout.ui) with a summary PD_MESSAGE + one PD_LIST table, own
+ * reportsDialog_t instance sharing the same ReportsShowDialog()/
+ * DoReportsOp() plumbing phase 1 uses. See the phase-2 implementation
+ * plan for the compute-pass primitives (GetTrkLength()/GetTrkLayer()/
+ * GetTrkType()==T_TURNOUT) and MCP-parity notes.
+ * ------------------------------------------------------------------- */
+
+/** Tentative declaration -- same reason as reportsPG above. */
+static paramGroup_t reportsTurnoutPG;
+static void ReportsBuildTurnoutText(DynString *out);
+
+/** Phase 2's Turnout Density dialog state -- report-only, so no
+ * changeProc/cancelProc (NULL means "no row-selection handling" /
+ * "use the default FormCancel_Current", respectively -- see
+ * reportsDialog_t's doc comment). */
+static reportsDialog_t reportsTurnoutDlg = {
+	&reportsTurnoutPG, NULL, NULL, NULL,
+	ReportsBuildTurnoutText, ReportsTurnoutDensity,
+	NULL, NULL
+};
+static reportsOpCtx_t reportsTurnoutRefreshOp = { &reportsTurnoutDlg, REPORTSOP_REFRESH };
+static reportsOpCtx_t reportsTurnoutSaveOp    = { &reportsTurnoutDlg, REPORTSOP_SAVE };
+static reportsOpCtx_t reportsTurnoutPrintOp   = { &reportsTurnoutDlg, REPORTSOP_PRINT };
+
+static wWinPix_t reportsTurnoutListWidths[] = { 50, 150, 70, 70, 90, 60 };
+static const char * reportsTurnoutListTitles[] = {
+	N_("Layer"), N_("Name"), N_("Feet"), N_("Turnouts"), N_("Density/100ft"), N_("Flag")
+};
+static paramListData_t reportsTurnoutListData = { 8, 400, 6, reportsTurnoutListWidths,
+                reportsTurnoutListTitles
+              };
+
+static paramData_t reportsTurnoutPLs[] = {
+#define I_REPORTSTURNOUTSUMMARY (0)
+#define reportsTurnoutSummary (reportsTurnoutPLs[I_REPORTSTURNOUTSUMMARY].control)
+	{ PD_MESSAGE, "", "summary", 0, I2VP(37) },
+#define I_REPORTSTURNOUTLIST (1)
+#define reportsTurnoutList (reportsTurnoutPLs[I_REPORTSTURNOUTLIST].control)
+	{ PD_LIST, NULL, "list", PDO_DLGRESIZE, &reportsTurnoutListData, NULL, 0 },
+	{ PD_BUTTON, DoReportsOp, "refresh", 0, NULL, NULL, 0, &reportsTurnoutRefreshOp },
+	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsTurnoutSaveOp },
+	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsTurnoutPrintOp },
+	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
+};
+static paramGroup_t reportsTurnoutPG = { "reportsturnout", PGO_FULLDIALOGFROMBUILDER,
+                reportsTurnoutPLs, COUNT( reportsTurnoutPLs )
+              };
+
+/** The current Turnout Density report's by-layer rows -- same
+ * outlives-the-compute-function lifetime rule as reportsCurrentList_da
+ * (phase 1), even though nothing here needs a per-row context pointer
+ * (report-only, no click-to-navigate). Replaced (old rows freed first)
+ * each time the report is (re)generated. */
+static dynArr_t reportsTurnoutList_da;
+
+/** Turnouts with fewer than 3 endpoints -- folded into the Save/Print
+ * text only (ReportsBuildTurnoutText()), never a second interactive list
+ * (see the phase-2 implementation plan's dialog-architecture section). */
+static dynArr_t reportsTurnoutPartial_da;
+
+/** Populate the interactive list from reportsTurnoutList_da -- one row
+ * per layer, tab-separated (wListAddValue() splits on tabs into
+ * columns), in reportsTurnoutList_da's own (layer-ascending) order.
+ * Unlike ReportsPopulateList() (phase 1), no reportsPopulating guard is
+ * needed: this dialog has no changeProc, so GTK's synchronous
+ * selection-changed signal during wListClear()/wListAddValue() has
+ * nothing to call back into. Must run after ReportsShowDialog() has run
+ * at least once for this dialog (the list control doesn't exist before
+ * the dialog's first creation). */
+static void ReportsPopulateTurnoutList(void)
+{
+	int i;
+	char row[160];
+
+	wListClear( reportsTurnoutList );
+	for ( i = 0; i < reportsTurnoutList_da.cnt; i++ ) {
+		reportsTurnoutLayer_t *entry = &DYNARR_N(reportsTurnoutLayer_t,
+		                               reportsTurnoutList_da, i);
+		snprintf( row, sizeof row, "%u\t%s\t%.1f\t%d\t%.1f\t%s",
+		          entry->layer, entry->name, entry->feet, entry->turnoutCount,
+		          entry->density, entry->heavy ? _("HEAVY") : "" );
+		wListAddValue( reportsTurnoutList, row, NULL, NULL );
+	}
+}
+
+/** Build the full formatted Turnout Density report text (header +
+ * by-layer table + partial-turnouts list) fresh from
+ * reportsTurnoutList_da/reportsTurnoutPartial_da. Used only by
+ * ReportsRefreshPrintText() -- i.e. only when Save or Print is actually
+ * clicked -- so it always reflects whatever the list is currently
+ * showing, never a stale copy from an earlier ReportsTurnoutDensity()
+ * call. */
+static void ReportsBuildTurnoutText(DynString *out)
+{
+	DynStringMalloc( out, 256 );
+	ReportsAddHeader( out, _("Turnout Density Report") );
+
+	if ( reportsTurnoutList_da.cnt == 0 ) {
+		DynStringCatCStrs( out, "\n", _("No track found."), "\n", NULL );
+	} else {
+		/* snprintf into a local buffer, then append -- see
+		 * ReportsBuildText()'s comment on the same pattern for why
+		 * DynStringPrintf() directly on `out` would be wrong here. */
+		char headerLine[96];
+		snprintf( headerLine, sizeof headerLine, "\n%5s  %-16s  %8s  %5s  %14s\n",
+		          _("Lyr"), _("Name"), _("Feet"), _("T/O"), _("Density/100ft") );
+		DynStringCatCStr( out, headerLine );
+		ReportsFormatTurnoutList( out, &DYNARR_N(reportsTurnoutLayer_t,
+		                          reportsTurnoutList_da, 0),
+		                          reportsTurnoutList_da.cnt );
+	}
+
+	DynStringCatCStrs( out, "\n",
+	                   _("PARTIAL TURNOUTS (fewer than 3 endpoints -- may be broken/incomplete)"),
+	                   "\n", NULL );
+	if ( reportsTurnoutPartial_da.cnt == 0 ) {
+		DynStringCatCStrs( out, "  ", _("None found."), "\n", NULL );
+	} else {
+		ReportsFormatPartialTurnoutList( out, &DYNARR_N(reportsPartialTurnout_t,
+		                                 reportsTurnoutPartial_da, 0),
+		                                 reportsTurnoutPartial_da.cnt );
+	}
+}
+
+void ReportsTurnoutDensity( void * unused )
+{
+	track_p trk;
+	DIST_T layerFeet[NUM_LAYERS];
+	int layerTurnouts[NUM_LAYERS];
+	unsigned int layer;
+	DIST_T totalFt = 0.0;
+	int totalTurnouts = 0;
+
+	for ( layer = 0; layer < NUM_LAYERS; layer++ ) {
+		layerFeet[layer] = 0.0;
+		layerTurnouts[layer] = 0;
+	}
+
+	DYNARR_FREE( reportsTurnoutLayer_t, reportsTurnoutList_da );
+	DYNARR_INIT( reportsTurnoutLayer_t, reportsTurnoutList_da );
+	DYNARR_FREE( reportsPartialTurnout_t, reportsTurnoutPartial_da );
+	DYNARR_INIT( reportsPartialTurnout_t, reportsTurnoutPartial_da );
+
+	TRK_ITERATE( trk ) {
+		unsigned int trkLayer = GetTrkLayer(trk);
+		DIST_T lengthFt = GetTrkLength(trk, 0, 1) / 12.0;
+		BOOL_T isTurnout = (GetTrkType(trk) == T_TURNOUT);
+
+		if ( trkLayer < NUM_LAYERS ) {
+			layerFeet[trkLayer] += lengthFt;
+			if ( isTurnout ) {
+				layerTurnouts[trkLayer]++;
+			}
+		}
+		totalFt += lengthFt;
+		if ( isTurnout ) {
+			totalTurnouts++;
+			if ( GetTrkEndPtCnt(trk) < 3 ) {
+				reportsPartialTurnout_t *p;
+				DYNARR_APPEND( reportsPartialTurnout_t, reportsTurnoutPartial_da, 5 );
+				p = &DYNARR_LAST( reportsPartialTurnout_t, reportsTurnoutPartial_da );
+				p->trackId = GetTrkIndex(trk);
+				p->endPtCnt = GetTrkEndPtCnt(trk);
+				p->layer = trkLayer;
+			}
+		}
+	}
+
+	for ( layer = 0; layer < NUM_LAYERS; layer++ ) {
+		reportsTurnoutLayer_t *row;
+
+		if ( layerFeet[layer] <= 0.0 && layerTurnouts[layer] == 0 ) {
+			continue;
+		}
+		DYNARR_APPEND( reportsTurnoutLayer_t, reportsTurnoutList_da, 10 );
+		row = &DYNARR_LAST( reportsTurnoutLayer_t, reportsTurnoutList_da );
+		row->layer = layer;
+		row->name = GetLayerName(layer);
+		row->feet = layerFeet[layer];
+		row->turnoutCount = layerTurnouts[layer];
+		row->density = layerFeet[layer] > 0.0 ?
+		               (layerTurnouts[layer] / layerFeet[layer] * 100.0) : 0.0;
+		row->heavy = ReportsIsTurnoutHeavy(row->density);
+	}
+
+	{
+		DIST_T globalDensity = totalFt > 0.0 ? (totalTurnouts / totalFt * 100.0) : 0.0;
+		char summary[160];
+
+		if ( log_reports < 0 ) { log_reports = LogFindIndex( "reports" ); }
+		LOG( log_reports, 1,
+		     ( "reports: Turnout Density computed -- %d turnout(s), %.1f ft track, %.1f/100ft, %d partial\n",
+		       totalTurnouts, totalFt, globalDensity, reportsTurnoutPartial_da.cnt ) )
+
+		ReportsShowDialog( &reportsTurnoutDlg, _("Turnout Density Report") );
+		snprintf( summary, sizeof summary,
+		          _("%d turnout(s), %.1f ft track, %.1f per 100ft overall%s"),
+		          totalTurnouts, totalFt, globalDensity,
+		          reportsTurnoutPartial_da.cnt > 0 ?
+		          _(" (partial turnouts found -- see Save/Print)") : "" );
+		wMessageSetValue( reportsTurnoutSummary, summary );
+	}
+
+	ReportsPopulateTurnoutList();
 }

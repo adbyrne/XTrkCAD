@@ -1774,6 +1774,9 @@ EXPORT void CreateMenus(void)
 	MiscMenuItemCreate(reportsM, NULL, "cmdReportsUnconnected",
 	                   _("&Unconnected Endpoints ..."), ACCL_REPORTSUNCONN,
 	                   ReportsUnconnectedEndpoints, 0, NULL);
+	MiscMenuItemCreate(reportsM, NULL, "cmdReportsTurnout",
+	                   _("&Turnout Density ..."), ACCL_REPORTSTURNOUT,
+	                   ReportsTurnoutDensity, 0, NULL);
 
 	cmdGroup = BG_LAYER;
 
