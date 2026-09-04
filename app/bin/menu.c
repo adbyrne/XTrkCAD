@@ -1777,6 +1777,15 @@ EXPORT void CreateMenus(void)
 	MiscMenuItemCreate(reportsM, NULL, "cmdReportsTurnout",
 	                   _("&Turnout Density ..."), ACCL_REPORTSTURNOUT,
 	                   ReportsTurnoutDensity, 0, NULL);
+	MiscMenuItemCreate(reportsM, NULL, "cmdReportsTrackLen",
+	                   _("Track &Lengths ..."), ACCL_REPORTSTRACKLEN,
+	                   ReportsTrackLengths, 0, NULL);
+	MiscMenuItemCreate(reportsM, NULL, "cmdReportsCurveStats",
+	                   _("&Curve Stats ..."), ACCL_REPORTSCURVESTATS,
+	                   ReportsCurveStats, 0, NULL);
+	MiscMenuItemCreate(reportsM, NULL, "cmdReportsEquipment",
+	                   _("&Equipment Suitability ..."), ACCL_REPORTSEQUIPMENT,
+	                   ReportsEquipmentSuitability, 0, NULL);
 
 	cmdGroup = BG_LAYER;
 

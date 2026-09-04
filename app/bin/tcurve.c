@@ -153,6 +153,40 @@ BOOL_T IsCurveCircle( track_p t )
 }
 
 
+/**
+ * A curve track's radius, with no side effects -- 0.0 for anything that
+ * isn't a T_CURVE (same "wrong type -> harmless default" convention as
+ * IsCurveCircle() above, not an error). Added for the Reports feature's
+ * Curve Stats compute pass (SF #217 phase 2): the more general
+ * GetTrackParams(PARAMS_CORNU, trk, pos, &params) route (reading
+ * params.arcR) was the originally-planned accessor, but reading the real
+ * implementation (GetParamsCurve()) found two problems that rule it out
+ * for a background report scan -- (1) GetTrackParams() itself CHECK(FALSE)s
+ * if the track type has no getTrackParams handler at all, so calling it on
+ * an arbitrary TRK_ITERATE object would need the same
+ * GetTrkType(trk)==T_CURVE guard this function already does internally, and
+ * (2) GetParamsCurve() calls ErrorMessage() (a real GUI popup) when
+ * easeR > 0.0 (an easement minimum-radius setting) and the curve's own
+ * radius is below it -- exactly the kind of "every curve" scan a Curve
+ * Stats report needs to do, which would spam that popup once per
+ * undersized curve. This is the same direct field read GetTrkCurveCenter()
+ * (this file, static) already does internally, exposed instead of routed
+ * back through GetTrackParams().
+ *
+ * \param[in] t the track
+ * \return the curve's radius, or 0.0 if `t` isn't a T_CURVE
+ */
+DIST_T GetCurveRadius( track_p t )
+{
+	const struct extraDataCurve_t *xx;
+	if ( GetTrkType(t) != T_CURVE ) {
+		return 0.0;
+	}
+	xx = GET_EXTRA_DATA(t, T_CURVE, extraDataCurve_t);
+	return xx->radius;
+}
+
+
 BOOL_T GetCurveMiddle( track_p trk, coOrd * pos )
 {
 	const struct extraDataCurve_t *xx;

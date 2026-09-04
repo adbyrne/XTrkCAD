@@ -70,6 +70,7 @@
 
 #include "custom.h"
 #include <dynstring.h>
+#include "ccurve.h"
 #include "dlayer.h"
 #include "draw.h"
 #include "fileio.h"
@@ -911,4 +912,558 @@ void ReportsTurnoutDensity( void * unused )
 	}
 
 	ReportsPopulateTurnoutList();
+}
+
+/* ---------------------------------------------------------------------
+ * Phase 2 (SF #217): Track Lengths -- second of the batch, same
+ * report-only shape as Turnout Density (own .ui dialog, own
+ * reportsDialog_t instance, no click-to-navigate/indicator). Compute
+ * pass shares Turnout Density's GetTrkEndPtCnt(trk) >= 2 guard before
+ * calling GetTrkLength() -- see [[feedback_trk_iterate_endpoint_guard]]
+ * (memory) / SF #776's fix; this report's own synthetic fixture also
+ * includes a zero-endpoint object from the start, not added after a
+ * live crash this time.
+ * ------------------------------------------------------------------- */
+
+/** Tentative declaration -- same reason as reportsPG above. */
+static paramGroup_t reportsTrackLenPG;
+static void ReportsBuildTrackLenText(DynString *out);
+
+static reportsDialog_t reportsTrackLenDlg = {
+	&reportsTrackLenPG, NULL, NULL, NULL,
+	ReportsBuildTrackLenText, ReportsTrackLengths,
+	NULL, NULL
+};
+static reportsOpCtx_t reportsTrackLenRefreshOp = { &reportsTrackLenDlg, REPORTSOP_REFRESH };
+static reportsOpCtx_t reportsTrackLenSaveOp    = { &reportsTrackLenDlg, REPORTSOP_SAVE };
+static reportsOpCtx_t reportsTrackLenPrintOp   = { &reportsTrackLenDlg, REPORTSOP_PRINT };
+
+static wWinPix_t reportsTrackLenListWidths[] = { 50, 150, 70, 70, 60, 60 };
+static const char * reportsTrackLenListTitles[] = {
+	N_("Layer"), N_("Name"), N_("Feet"), N_("Turnouts"), N_("Cars"), N_("% Total")
+};
+static paramListData_t reportsTrackLenListData = { 8, 400, 6, reportsTrackLenListWidths,
+                                                   reportsTrackLenListTitles
+                                                 };
+
+static paramData_t reportsTrackLenPLs[] = {
+#define I_REPORTSTRACKLENSUMMARY (0)
+#define reportsTrackLenSummary (reportsTrackLenPLs[I_REPORTSTRACKLENSUMMARY].control)
+	{ PD_MESSAGE, "", "summary", 0, I2VP(37) },
+#define I_REPORTSTRACKLENLIST (1)
+#define reportsTrackLenList (reportsTrackLenPLs[I_REPORTSTRACKLENLIST].control)
+	{ PD_LIST, NULL, "list", PDO_DLGRESIZE, &reportsTrackLenListData, NULL, 0 },
+	{ PD_BUTTON, DoReportsOp, "refresh", 0, NULL, NULL, 0, &reportsTrackLenRefreshOp },
+	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsTrackLenSaveOp },
+	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsTrackLenPrintOp },
+	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
+};
+static paramGroup_t reportsTrackLenPG = { "reportstracklen", PGO_FULLDIALOGFROMBUILDER,
+                                          reportsTrackLenPLs, COUNT( reportsTrackLenPLs )
+                                        };
+
+/** The current Track Lengths report's by-layer rows -- same lifetime rule
+ * as reportsTurnoutList_da. */
+static dynArr_t reportsTrackLenList_da;
+
+/** Sum of every row's lengthFt -- kept alongside reportsTrackLenList_da
+ * so both ReportsPopulateTrackLenList() (the live "% Total" column) and
+ * ReportsBuildTrackLenText() (ReportsFormatTrackLengthList()'s totalFt
+ * parameter) can compute percentages without re-summing the array
+ * themselves or risking the two disagreeing. */
+static DIST_T reportsTrackLenTotalFt;
+
+/** Populate the interactive list from reportsTrackLenList_da -- one row
+ * per layer, tab-separated. Same no-reportsPopulating-guard-needed
+ * reasoning as ReportsPopulateTurnoutList() (no changeProc on this
+ * dialog). */
+static void ReportsPopulateTrackLenList(void)
+{
+	int i;
+	char row[160];
+
+	wListClear( reportsTrackLenList );
+	for ( i = 0; i < reportsTrackLenList_da.cnt; i++ ) {
+		reportsTrackLenLayer_t *entry = &DYNARR_N(reportsTrackLenLayer_t,
+		                                reportsTrackLenList_da, i);
+		DIST_T pct = reportsTrackLenTotalFt > 0.0 ?
+		             (entry->lengthFt / reportsTrackLenTotalFt * 100.0) : 0.0;
+
+		snprintf( row, sizeof row, "%u\t%s\t%.1f\t%d\t%d\t%.1f%%",
+		          entry->layer, entry->name, entry->lengthFt,
+		          entry->turnoutCount, entry->carCapacity, pct );
+		wListAddValue( reportsTrackLenList, row, NULL, NULL );
+	}
+}
+
+/** Build the full formatted Track Lengths report text (header + by-layer
+ * table) fresh from reportsTrackLenList_da/reportsTrackLenTotalFt. Used
+ * only by ReportsRefreshPrintText() (Save/Print), same as
+ * ReportsBuildTurnoutText(). */
+static void ReportsBuildTrackLenText(DynString *out)
+{
+	DynStringMalloc( out, 256 );
+	ReportsAddHeader( out, _("Track Lengths Report") );
+
+	if ( reportsTrackLenList_da.cnt == 0 ) {
+		DynStringCatCStrs( out, "\n", _("No track found."), "\n", NULL );
+	} else {
+		char headerLine[112];
+		snprintf( headerLine, sizeof headerLine,
+		          "\n%5s  %-16s  %8s  %9s  %5s  %5s  %6s\n",
+		          _("Lyr"), _("Name"), _("Feet"), _("Inches"), _("T/O"), _("Cars"), _("% Tot") );
+		DynStringCatCStr( out, headerLine );
+		ReportsFormatTrackLengthList( out, &DYNARR_N(reportsTrackLenLayer_t,
+		                              reportsTrackLenList_da, 0),
+		                              reportsTrackLenList_da.cnt, reportsTrackLenTotalFt );
+	}
+}
+
+void ReportsTrackLengths( void * unused )
+{
+	track_p trk;
+	DIST_T layerFeet[NUM_LAYERS];
+	int layerTurnouts[NUM_LAYERS];
+	unsigned int layer;
+	DIST_T totalFt = 0.0;
+	int totalTurnouts = 0;
+	DIST_T carsPerFt = ReportsCarsPerFoot( GetScaleName( GetLayoutCurScale() ) );
+
+	for ( layer = 0; layer < NUM_LAYERS; layer++ ) {
+		layerFeet[layer] = 0.0;
+		layerTurnouts[layer] = 0;
+	}
+
+	DYNARR_FREE( reportsTrackLenLayer_t, reportsTrackLenList_da );
+	DYNARR_INIT( reportsTrackLenLayer_t, reportsTrackLenList_da );
+
+	TRK_ITERATE( trk ) {
+		unsigned int trkLayer = GetTrkLayer(trk);
+		/* Same guard as ReportsTurnoutDensity() -- see that function's
+		 * comment for the real crash this prevents. */
+		DIST_T lengthFt = (GetTrkEndPtCnt(trk) >= 2) ?
+		                  GetTrkLength(trk, 0, 1) / 12.0 : 0.0;
+		BOOL_T isTurnout = (GetTrkType(trk) == T_TURNOUT);
+
+		if ( trkLayer < NUM_LAYERS ) {
+			layerFeet[trkLayer] += lengthFt;
+			if ( isTurnout ) {
+				layerTurnouts[trkLayer]++;
+			}
+		}
+		totalFt += lengthFt;
+		if ( isTurnout ) {
+			totalTurnouts++;
+		}
+	}
+
+	for ( layer = 0; layer < NUM_LAYERS; layer++ ) {
+		reportsTrackLenLayer_t *row;
+
+		if ( layerFeet[layer] <= 0.0 && layerTurnouts[layer] == 0 ) {
+			continue;
+		}
+		DYNARR_APPEND( reportsTrackLenLayer_t, reportsTrackLenList_da, 10 );
+		row = &DYNARR_LAST( reportsTrackLenLayer_t, reportsTrackLenList_da );
+		row->layer = layer;
+		row->name = GetLayerName(layer);
+		row->lengthFt = layerFeet[layer];
+		row->lengthIn = layerFeet[layer] * 12.0;
+		row->turnoutCount = layerTurnouts[layer];
+		row->carCapacity = (int)(layerFeet[layer] * carsPerFt);
+	}
+	reportsTrackLenTotalFt = totalFt;
+
+	{
+		int totalCarCapacity = (int)(totalFt * carsPerFt);
+		char summary[160];
+
+		if ( log_reports < 0 ) { log_reports = LogFindIndex( "reports" ); }
+		LOG( log_reports, 1,
+		     ( "reports: Track Lengths computed -- %.1f ft track, %d turnout(s), %d car(s) capacity\n",
+		       totalFt, totalTurnouts, totalCarCapacity ) )
+
+		ReportsShowDialog( &reportsTrackLenDlg, _("Track Lengths Report") );
+		snprintf( summary, sizeof summary,
+		          _("%.1f ft track, %d turnout(s), ~%d car(s) capacity"),
+		          totalFt, totalTurnouts, totalCarCapacity );
+		wMessageSetValue( reportsTrackLenSummary, summary );
+	}
+
+	ReportsPopulateTrackLenList();
+}
+
+/* ---------------------------------------------------------------------
+ * Phase 2 (SF #217): Curve Stats -- third of the batch, same
+ * report-only shape as Turnout Density/Track Lengths. Uses
+ * GetCurveRadius() (ccurve.h), not GetTrackParams(PARAMS_CORNU, ...) --
+ * see that function's own doc comment (tcurve.c) for why the originally-
+ * planned accessor isn't safe to call on every TRK_ITERATE object (a
+ * CHECK(FALSE) crash risk for non-getTrackParams types, same class of bug
+ * as SF #776's fix, plus a real ErrorMessage() popup risk on undersized
+ * curves under easement mode).
+ * ------------------------------------------------------------------- */
+
+/** Tentative declaration -- same reason as reportsPG above. */
+static paramGroup_t reportsCurvePG;
+static void ReportsBuildCurveText(DynString *out);
+
+static reportsDialog_t reportsCurveDlg = {
+	&reportsCurvePG, NULL, NULL, NULL,
+	ReportsBuildCurveText, ReportsCurveStats,
+	NULL, NULL
+};
+static reportsOpCtx_t reportsCurveRefreshOp = { &reportsCurveDlg, REPORTSOP_REFRESH };
+static reportsOpCtx_t reportsCurveSaveOp    = { &reportsCurveDlg, REPORTSOP_SAVE };
+static reportsOpCtx_t reportsCurvePrintOp   = { &reportsCurveDlg, REPORTSOP_PRINT };
+
+static wWinPix_t reportsCurveListWidths[] = { 90, 70 };
+static const char * reportsCurveListTitles[] = {
+	N_("Range"), N_("Count")
+};
+static paramListData_t reportsCurveListData = { 8, 300, 2, reportsCurveListWidths,
+                                                reportsCurveListTitles
+                                              };
+
+static paramData_t reportsCurvePLs[] = {
+#define I_REPORTSCURVESUMMARY (0)
+#define reportsCurveSummary (reportsCurvePLs[I_REPORTSCURVESUMMARY].control)
+	{ PD_MESSAGE, "", "summary", 0, I2VP(37) },
+#define I_REPORTSCURVELIST (1)
+#define reportsCurveList (reportsCurvePLs[I_REPORTSCURVELIST].control)
+	{ PD_LIST, NULL, "list", PDO_DLGRESIZE, &reportsCurveListData, NULL, 0 },
+	{ PD_BUTTON, DoReportsOp, "refresh", 0, NULL, NULL, 0, &reportsCurveRefreshOp },
+	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsCurveSaveOp },
+	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsCurvePrintOp },
+	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
+};
+static paramGroup_t reportsCurvePG = { "reportscurvestats", PGO_FULLDIALOGFROMBUILDER,
+                                       reportsCurvePLs, COUNT( reportsCurvePLs )
+                                     };
+
+/** The current Curve Stats report's rows -- always exactly 5
+ * (ReportsCurveBucketLabel()'s fixed bucket set), including zero-count
+ * buckets: unlike the MCP reference's own radius_distribution dict
+ * (which only includes buckets a curve actually falls in), always
+ * showing all 5 lets a viewer see the whole distribution shape at a
+ * glance -- e.g. "no curves under 12in" reads as a real, positive
+ * finding rather than a row that's simply missing (2026-09-04, same
+ * "improve display, keep the underlying data/thresholds" standing as
+ * Turnout Density's HEAVY flag). */
+static dynArr_t reportsCurveList_da;
+
+/** Populate the interactive list from reportsCurveList_da -- one row per
+ * bucket, tab-separated, in ReportsCurveStats()'s fixed bucket order. */
+static void ReportsPopulateCurveList(void)
+{
+	int i;
+	char row[64];
+
+	wListClear( reportsCurveList );
+	for ( i = 0; i < reportsCurveList_da.cnt; i++ ) {
+		reportsCurveBucket_t *entry = &DYNARR_N(reportsCurveBucket_t,
+		                                        reportsCurveList_da, i);
+		snprintf( row, sizeof row, "%s\t%d", entry->label, entry->count );
+		wListAddValue( reportsCurveList, row, NULL, NULL );
+	}
+}
+
+/** Build the full formatted Curve Stats report text (header + histogram)
+ * fresh from reportsCurveList_da. Used only by ReportsRefreshPrintText()
+ * (Save/Print), same as the other phase-2 reports' own build-text
+ * functions. */
+static void ReportsBuildCurveText(DynString *out)
+{
+	DynStringMalloc( out, 256 );
+	ReportsAddHeader( out, _("Curve Stats Report") );
+
+	if ( reportsCurveList_da.cnt == 0 ) {
+		DynStringCatCStrs( out, "\n", _("No curves found."), "\n", NULL );
+	} else {
+		char headerLine[48];
+		snprintf( headerLine, sizeof headerLine, "\n%-8s  %5s\n", _("Range"),
+		          _("Count") );
+		DynStringCatCStr( out, headerLine );
+		ReportsFormatCurveHistogram( out, &DYNARR_N(reportsCurveBucket_t,
+		                             reportsCurveList_da, 0), reportsCurveList_da.cnt );
+	}
+}
+
+void ReportsCurveStats( void * unused )
+{
+	track_p trk;
+	int curveCount = 0;
+	DIST_T minR = 0.0, maxR = 0.0, sumR = 0.0;
+	/* Must match ReportsCurveBucketLabel()'s (reportsformat.c) own bucket
+	 * set/order exactly -- compared by string below, not re-derived from
+	 * the radius thresholds a second time here, so the two can't drift
+	 * apart silently. */
+	static const char * const bucketLabels[] = {
+		"< 12in", "12-18in", "18-24in", "24-36in", "> 36in"
+	};
+	int bucketCounts[5] = { 0, 0, 0, 0, 0 };
+	int i;
+
+	DYNARR_FREE( reportsCurveBucket_t, reportsCurveList_da );
+	DYNARR_INIT( reportsCurveBucket_t, reportsCurveList_da );
+
+	TRK_ITERATE( trk ) {
+		/* GetCurveRadius() itself already guards on GetTrkType(trk) ==
+		 * T_CURVE (returns 0.0 otherwise) -- safe to call unconditionally
+		 * on every TRK_ITERATE object, no CHECK()/ErrorMessage() risk;
+		 * see that function's own doc comment (tcurve.c). */
+		DIST_T r = GetCurveRadius(trk);
+		const char *label;
+
+		if ( r <= 0.0 ) {
+			continue;
+		}
+		curveCount++;
+		if ( curveCount == 1 || r < minR ) {
+			minR = r;
+		}
+		if ( curveCount == 1 || r > maxR ) {
+			maxR = r;
+		}
+		sumR += r;
+
+		label = ReportsCurveBucketLabel(r);
+		for ( i = 0; i < 5; i++ ) {
+			if ( strcmp(label, bucketLabels[i]) == 0 ) {
+				bucketCounts[i]++;
+				break;
+			}
+		}
+	}
+
+	for ( i = 0; i < 5; i++ ) {
+		reportsCurveBucket_t *row;
+		DYNARR_APPEND( reportsCurveBucket_t, reportsCurveList_da, 5 );
+		row = &DYNARR_LAST( reportsCurveBucket_t, reportsCurveList_da );
+		row->label = bucketLabels[i];
+		row->count = bucketCounts[i];
+	}
+
+	{
+		DIST_T meanR = curveCount > 0 ? (sumR / curveCount) : 0.0;
+		char summary[160];
+
+		if ( log_reports < 0 ) { log_reports = LogFindIndex( "reports" ); }
+		LOG( log_reports, 1,
+		     ( "reports: Curve Stats computed -- %d curve(s), min %.2f, max %.2f, mean %.2f\n",
+		       curveCount, minR, maxR, meanR ) )
+
+		ReportsShowDialog( &reportsCurveDlg, _("Curve Stats Report") );
+		if ( curveCount > 0 ) {
+			snprintf( summary, sizeof summary,
+			          _("%d curve(s), radius %.1f-%.1f in (mean %.1f)"),
+			          curveCount, minR, maxR, meanR );
+		} else {
+			snprintf( summary, sizeof summary, "%s", _("No curves found") );
+		}
+		wMessageSetValue( reportsCurveSummary, summary );
+	}
+
+	ReportsPopulateCurveList();
+}
+
+/* ---------------------------------------------------------------------
+ * Phase 2 (SF #217): Equipment Suitability -- last of the batch. Unlike
+ * the other three, this compute pass doesn't walk TRK_ITERATE for a
+ * by-layer breakdown -- it only needs the layout-wide minimum usable
+ * curve radius (same GetCurveRadius() as Curve Stats) and a fixed,
+ * scale-adjusted equipment-class list, classified via the already-built
+ * ReportsClassifyEquipment(). Same report-only shape (own .ui dialog,
+ * own reportsDialog_t instance, no click-to-navigate/indicator) as the
+ * other three.
+ * ------------------------------------------------------------------- */
+
+/** Fixed equipment-class list (name, HO-reference minimum radius in
+ * inches) -- ported from an external MCP project's reference
+ * implementation for data parity (design history, not a citation a
+ * reader here can open -- see reports.h's file header). Each threshold
+ * is scale-adjusted at compute time (ReportsEquipmentSuitability()) via
+ * `thresholdIn * scaleFactor`, matching ReportsClassifyEquipment()'s own
+ * contract. */
+static const struct {
+	const char *name;
+	DIST_T hoThresholdIn;
+} reportsEquipThresholds[] = {
+	{ N_("Short freight car (< 40 ft)"), 15.0 },
+	{ N_("Standard freight car (40-50 ft)"), 18.0 },
+	{ N_("Long freight car (55-60 ft flatcar)"), 22.0 },
+	{ N_("4-axle diesel (GP/RS-type)"), 18.0 },
+	{ N_("6-axle diesel (SD40/ES44)"), 22.0 },
+	{ N_("Small/medium steam (2-6-0, 2-8-0, 4-6-0)"), 18.0 },
+	{ N_("Medium steam (4-6-2, 2-8-2, 4-6-4)"), 22.0 },
+	{ N_("Large steam (4-8-4, 2-10-4, 4-8-2)"), 24.0 },
+	{ N_("Articulated steam (2-8-8-2, 4-8-8-4)"), 28.0 },
+	{ N_("Standard passenger car (85 ft)"), 22.0 },
+	{ N_("Long passenger car (Superliner)"), 28.0 },
+};
+#define REPORTS_EQUIP_COUNT (sizeof reportsEquipThresholds / sizeof reportsEquipThresholds[0])
+
+/** Curves under this radius are excluded from the minimum-radius scan as
+ * likely decorative (e.g. a small radius used for a spur into a scenic
+ * detail, not something rolling stock actually needs to negotiate at
+ * speed) -- matches the external MCP project's own reference behavior.
+ * Same future-preference-candidate standing as ReportsIsTurnoutHeavy()'s
+ * 10.0 threshold -- not made configurable in this pass. */
+#define REPORTS_EQUIP_MIN_USABLE_RADIUS (9.0)
+
+/** Tentative declaration -- same reason as reportsPG above. */
+static paramGroup_t reportsEquipPG;
+static void ReportsBuildEquipText(DynString *out);
+
+static reportsDialog_t reportsEquipDlg = {
+	&reportsEquipPG, NULL, NULL, NULL,
+	ReportsBuildEquipText, ReportsEquipmentSuitability,
+	NULL, NULL
+};
+static reportsOpCtx_t reportsEquipRefreshOp = { &reportsEquipDlg, REPORTSOP_REFRESH };
+static reportsOpCtx_t reportsEquipSaveOp    = { &reportsEquipDlg, REPORTSOP_SAVE };
+static reportsOpCtx_t reportsEquipPrintOp   = { &reportsEquipDlg, REPORTSOP_PRINT };
+
+static wWinPix_t reportsEquipListWidths[] = { 260, 90, 80 };
+static const char * reportsEquipListTitles[] = {
+	N_("Equipment Class"), N_("Min Radius"), N_("Status")
+};
+static paramListData_t reportsEquipListData = { 8, 400, 3, reportsEquipListWidths,
+                                                reportsEquipListTitles
+                                              };
+
+static paramData_t reportsEquipPLs[] = {
+#define I_REPORTSEQUIPSUMMARY (0)
+#define reportsEquipSummary (reportsEquipPLs[I_REPORTSEQUIPSUMMARY].control)
+	{ PD_MESSAGE, "", "summary", 0, I2VP(37) },
+#define I_REPORTSEQUIPLIST (1)
+#define reportsEquipList (reportsEquipPLs[I_REPORTSEQUIPLIST].control)
+	{ PD_LIST, NULL, "list", PDO_DLGRESIZE, &reportsEquipListData, NULL, 0 },
+	{ PD_BUTTON, DoReportsOp, "refresh", 0, NULL, NULL, 0, &reportsEquipRefreshOp },
+	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsEquipSaveOp },
+	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsEquipPrintOp },
+	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
+};
+static paramGroup_t reportsEquipPG = { "reportsequipment", PGO_FULLDIALOGFROMBUILDER,
+                                       reportsEquipPLs, COUNT( reportsEquipPLs )
+                                     };
+
+/** The current Equipment Suitability report's rows -- always exactly
+ * REPORTS_EQUIP_COUNT (the fixed equipment-class list above), in that
+ * list's own order (not grouped by status -- ReportsFormatEquipmentList()
+ * does that grouping for the Save/Print text only, same as the other
+ * phase-2 reports keep their interactive list in a different order than
+ * their own Save/Print text). */
+static dynArr_t reportsEquipList_da;
+
+/** Populate the interactive list from reportsEquipList_da -- one row per
+ * equipment class, tab-separated. */
+static void ReportsPopulateEquipList(void)
+{
+	int i;
+	char row[192];
+
+	wListClear( reportsEquipList );
+	for ( i = 0; i < reportsEquipList_da.cnt; i++ ) {
+		reportsEquipClass_t *entry = &DYNARR_N(reportsEquipClass_t, reportsEquipList_da,
+		                                       i);
+		const char *statusStr = entry->status == REPORTS_EQUIP_PASS ? _("PASS") :
+		                        entry->status == REPORTS_EQUIP_MARGINAL ? _("MARGINAL") : _("FAIL");
+
+		snprintf( row, sizeof row, "%s\t%.1f\"\t%s",
+		          entry->name, entry->thresholdIn, statusStr );
+		wListAddValue( reportsEquipList, row, NULL, NULL );
+	}
+}
+
+/** Build the full formatted Equipment Suitability report text (header +
+ * PASS/MARGINAL/FAIL-grouped table) fresh from reportsEquipList_da. Used
+ * only by ReportsRefreshPrintText() (Save/Print), same as the other
+ * phase-2 reports' own build-text functions. */
+static void ReportsBuildEquipText(DynString *out)
+{
+	DynStringMalloc( out, 256 );
+	ReportsAddHeader( out, _("Equipment Suitability Report") );
+
+	if ( reportsEquipList_da.cnt == 0 ) {
+		DynStringCatCStrs( out, "\n",
+		                   _("No usable curves found -- cannot assess equipment suitability."),
+		                   "\n", NULL );
+	} else {
+		DynStringCatCStr( out, "\n" );
+		ReportsFormatEquipmentList( out, &DYNARR_N(reportsEquipClass_t,
+		                            reportsEquipList_da, 0), reportsEquipList_da.cnt );
+	}
+}
+
+void ReportsEquipmentSuitability( void * unused )
+{
+	track_p trk;
+	BOOL_T haveRadius = FALSE;
+	DIST_T minR = 0.0;
+	DIST_T scaleFactor;
+	size_t i;
+
+	{
+		SCALEINX_T hoIdx = LookupScale( "HO" );
+		DIST_T hoRatio = GetScaleRatio( hoIdx );
+		DIST_T curRatio = GetScaleRatio( GetLayoutCurScale() );
+
+		scaleFactor = curRatio > 0.0 ? hoRatio / curRatio : 1.0;
+	}
+
+	TRK_ITERATE( trk ) {
+		/* GetCurveRadius() already guards on GetTrkType(trk) == T_CURVE
+		 * (returns 0.0 otherwise) -- see that function's own doc comment
+		 * (tcurve.c). Curves under REPORTS_EQUIP_MIN_USABLE_RADIUS are
+		 * excluded as likely decorative, matching the external MCP
+		 * project's own reference behavior. */
+		DIST_T r = GetCurveRadius(trk);
+
+		if ( r < REPORTS_EQUIP_MIN_USABLE_RADIUS ) {
+			continue;
+		}
+		if ( !haveRadius || r < minR ) {
+			minR = r;
+			haveRadius = TRUE;
+		}
+	}
+
+	DYNARR_FREE( reportsEquipClass_t, reportsEquipList_da );
+	DYNARR_INIT( reportsEquipClass_t, reportsEquipList_da );
+
+	if ( haveRadius ) {
+		for ( i = 0; i < REPORTS_EQUIP_COUNT; i++ ) {
+			reportsEquipClass_t *row;
+			DIST_T thresholdIn = reportsEquipThresholds[i].hoThresholdIn * scaleFactor;
+
+			DYNARR_APPEND( reportsEquipClass_t, reportsEquipList_da, REPORTS_EQUIP_COUNT );
+			row = &DYNARR_LAST( reportsEquipClass_t, reportsEquipList_da );
+			row->name = _(reportsEquipThresholds[i].name);
+			row->thresholdIn = thresholdIn;
+			row->status = ReportsClassifyEquipment( minR, thresholdIn, scaleFactor );
+		}
+	}
+
+	{
+		char summary[160];
+
+		if ( log_reports < 0 ) { log_reports = LogFindIndex( "reports" ); }
+		LOG( log_reports, 1,
+		     ( "reports: Equipment Suitability computed -- min radius %.2f, %d class(es) rated\n",
+		       minR, (int) reportsEquipList_da.cnt ) )
+
+		ReportsShowDialog( &reportsEquipDlg, _("Equipment Suitability Report") );
+		if ( haveRadius ) {
+			snprintf( summary, sizeof summary,
+			          _("Min usable curve radius %.1f in -- %d equipment class(es) rated"),
+			          minR, (int) reportsEquipList_da.cnt );
+		} else {
+			snprintf( summary, sizeof summary, "%s",
+			          _("No usable curves found -- cannot assess equipment suitability") );
+		}
+		wMessageSetValue( reportsEquipSummary, summary );
+	}
+
+	ReportsPopulateEquipList();
 }

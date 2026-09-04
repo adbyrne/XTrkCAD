@@ -28,6 +28,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <strings.h>
 
 #include "include/reports.h"
 
@@ -46,12 +47,13 @@ void ReportsFormatUnconnectedList(DynString *out, const reportsEndPt_t *list,
 }
 
 /* Phase 2 batch (track lengths / curve stats / turnout density / equipment
- * suitability) -- SF #217. Data/thresholds started as ports of the MCP
- * reference implementation (write_turnout_report()/write_equipment_report()
- * in mcp/src/xtrkcad_mcp/server.py); as of 2026-09-04, exact *text* parity
- * with those is explicitly not required (user request) -- the row layouts
- * below are this file's own design, improved for readability where it
- * helps, not a byte-for-byte port. */
+ * suitability) -- SF #217. Data/thresholds started as ports of an external
+ * MCP project's reference implementation (its write_turnout_report()/
+ * write_equipment_report() functions -- design history, not a citation a
+ * reader here can open); as of 2026-09-04, exact *text* parity with those
+ * is explicitly not required (user request) -- the row layouts below are
+ * this file's own design, improved for readability where it helps, not a
+ * byte-for-byte port. */
 
 void ReportsFormatTrackLengthList(DynString *out,
                                   const reportsTrackLenLayer_t *list, int count, DIST_T totalFt)
@@ -80,6 +82,45 @@ void ReportsFormatCurveHistogram(DynString *out,
 		snprintf(line, sizeof line, "  %-8s  %5d\n", list[i].label, list[i].count);
 		DynStringCatCStr(out, line);
 	}
+}
+
+DIST_T ReportsCarsPerFoot(const char *scaleName)
+{
+	static const struct {
+		const char *name;
+		DIST_T factor;
+	} table[] = {
+		{ "O", 1.0 }, { "S", 1.5 }, { "HO", 2.0 }, { "N", 4.0 }, { "Z", 5.0 },
+		{ "HOn3", 2.0 }, { "On3", 1.0 }, { "Sn3", 1.5 }, { "Nn3", 4.0 },
+		{ "G", 0.5 }, { "TT", 3.0 }, { "I", 0.75 },
+	};
+	size_t i;
+
+	if (scaleName) {
+		for (i = 0; i < sizeof table / sizeof table[0]; i++) {
+			if (strcasecmp(scaleName, table[i].name) == 0) {
+				return table[i].factor;
+			}
+		}
+	}
+	return 2.0;
+}
+
+const char *ReportsCurveBucketLabel(DIST_T radius)
+{
+	if (radius < 12.0) {
+		return "< 12in";
+	}
+	if (radius < 18.0) {
+		return "12-18in";
+	}
+	if (radius < 24.0) {
+		return "18-24in";
+	}
+	if (radius < 36.0) {
+		return "24-36in";
+	}
+	return "> 36in";
 }
 
 /* Sorts a local index array by list[idx].density descending, stable
