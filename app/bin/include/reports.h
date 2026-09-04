@@ -66,19 +66,28 @@ void ReportsFormatUnconnectedList(DynString *out, const reportsEndPt_t *list,
                                   int count);
 
 /**
- * Show a report in the generic, reusable report viewer -- an interactive,
- * selectable list (Save/Print/Print Setup buttons; Save/Print are built
- * fresh from the report's current rows on demand when clicked, not from
- * pre-formatted text passed in here -- see reports.c's ReportsBuildText()/
- * ReportsRefreshPrintText()).
+ * Show a report in the generic, reusable report viewer -- a one-line
+ * summary label above an interactive, selectable list (Save/Print/Print
+ * Setup buttons; Save/Print are built fresh from the report's current rows
+ * on demand when clicked, not from pre-formatted text passed in here --
+ * see reports.c's ReportsBuildText()/ReportsRefreshPrintText()). This call
+ * only creates/shows the dialog frame -- the caller is responsible for
+ * setting the summary label's text (`wMessageSetValue(reportsSummary, ...)`
+ * in reports.c) and populating the list afterward; ReportsShowText() itself
+ * doesn't touch either.
  *
  * \param[in] title dialog title, e.g. "Unconnected Endpoints Report"
  */
 void ReportsShowText(const char *title);
 
 /**
- * Menu callback (phase 1): compute the unconnected-endpoints list for the
- * current layout and show it via ReportsShowText().
+ * Menu callback (phase 1), also reused directly as the Refresh button's
+ * `reportsRefreshProc` (see reports.c) since it always recomputes from
+ * scratch: walk the current layout for every open (unconnected) track
+ * endpoint, flag/group Nearby ones (ReportsMarkNearby()), show/update the
+ * report dialog (ReportsShowText(), then the summary label and the
+ * interactive list via ReportsPopulateList()), and log a one-line summary
+ * to the "reports" debug category (`-d reports=1`) for live-testing.
  *
  * \param[in] unused menu-callback signature, unused
  */
