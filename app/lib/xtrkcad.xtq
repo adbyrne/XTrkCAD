@@ -491,6 +491,8 @@ DEMO "Turnout Density Report" dmreportturnout.xtr
 DEMO "Track Lengths Report" dmreporttracklen.xtr
 DEMO "Curve Stats Report" dmreportcurve.xtr
 DEMO "Equipment Suitability Report" dmreportequip.xtr
+DEMO "Gaps Report" dmreportgaps.xtr
+DEMO "Kinked Joints Report" dmreportkinked.xtr
 #DEMO "Text" dmtext.xtr
 #DEMOGROUP Example
 #DEMO "MR Layout Design" dmmrlay.xtr

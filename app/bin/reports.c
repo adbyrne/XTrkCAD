@@ -1467,3 +1467,508 @@ void ReportsEquipmentSuitability( void * unused )
 
 	ReportsPopulateEquipList();
 }
+
+/* ---------------------------------------------------------------------
+ * Phase 3/3a (SF #217, SF #779): Gaps and Kinked Joints. Both interactive
+ * (click-to-navigate + draw indicator), same phase-1/1.5 shape -- own
+ * .ui dialog (reportsgaps.ui/reportskinked.ui), own reportsDialog_t
+ * instance with a real changeProc/cancelProc (unlike the phase-2 batch
+ * above, which passes NULL/NULL). This is the first reuse of those two
+ * fields since phase 1 introduced them -- see the phase-3/3a
+ * implementation plan for the full design record.
+ *
+ * Both share the phase-1.5 indicator statics
+ * (reportIndicatorActive/Pos/Scale, ReportsDrawIndicator()) with phase 1
+ * and each other -- that state is a single set of module-level globals,
+ * not per-dialog, so if two interactive report dialogs are open at once
+ * and a row is clicked in each, the second click's indicator simply
+ * replaces the first's (last-clicked-anywhere wins, globally). This was
+ * already true with only phase 1 shipped; it just wasn't reachable until
+ * a second interactive dialog existed. Not fixed here (would mean keying
+ * the indicator state off the reportsDialog_t itself) -- see the
+ * implementation plan's "still open" list.
+ * ------------------------------------------------------------------- */
+
+/** Tentative declaration -- same reason as reportsPG above. */
+static paramGroup_t reportsGapsPG;
+static void ReportsBuildGapsText(DynString *out);
+static void ReportsDlgUpdateGaps(paramGroup_p pg, int inx, void *valueP);
+static void ReportsCancelGaps(paramGroup_p pg);
+
+static reportsDialog_t reportsGapsDlg = {
+	&reportsGapsPG, NULL, NULL, NULL,
+	ReportsBuildGapsText, ReportsGaps,
+	ReportsDlgUpdateGaps, ReportsCancelGaps
+};
+static reportsOpCtx_t reportsGapsRefreshOp = { &reportsGapsDlg, REPORTSOP_REFRESH };
+static reportsOpCtx_t reportsGapsSaveOp    = { &reportsGapsDlg, REPORTSOP_SAVE };
+static reportsOpCtx_t reportsGapsPrintOp   = { &reportsGapsDlg, REPORTSOP_PRINT };
+
+static wWinPix_t reportsGapsListWidths[] = { 70, 70, 90 };
+static const char * reportsGapsListTitles[] = {
+	N_("Track A"), N_("Track B"), N_("Gap (in)")
+};
+static paramListData_t reportsGapsListData = { 8, 300, 3, reportsGapsListWidths,
+                                               reportsGapsListTitles
+                                             };
+
+static paramData_t reportsGapsPLs[] = {
+#define I_REPORTSGAPSSUMMARY (0)
+#define reportsGapsSummary (reportsGapsPLs[I_REPORTSGAPSSUMMARY].control)
+	{ PD_MESSAGE, "", "summary", 0, I2VP(37) },
+#define I_REPORTSGAPSLIST (1)
+#define reportsGapsList (reportsGapsPLs[I_REPORTSGAPSLIST].control)
+	{ PD_LIST, NULL, "list", PDO_DLGRESIZE, &reportsGapsListData, NULL, 0 },
+	{ PD_BUTTON, DoReportsOp, "refresh", 0, NULL, NULL, 0, &reportsGapsRefreshOp },
+	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsGapsSaveOp },
+	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsGapsPrintOp },
+	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
+};
+static paramGroup_t reportsGapsPG = { "reportsgaps", PGO_FULLDIALOGFROMBUILDER,
+                                      reportsGapsPLs, COUNT( reportsGapsPLs )
+                                    };
+
+/** The current Gaps report's near-miss pairs -- same outlives-the-compute-
+ * function lifetime rule as reportsCurrentList_da (phase 1), since each
+ * row's list context pointer must stay valid for click-to-navigate.
+ * Replaced (old rows freed first) each time the report is (re)generated. */
+static dynArr_t reportsGapsList_da;
+
+/** Count of open endpoints with no near-miss partner (not a second
+ * interactive list -- folded into the summary line + Save/Print text
+ * only, same PARTIAL TURNOUTS precedent as phase 2). Recomputed alongside
+ * reportsGapsList_da each call. */
+static int reportsGapsIsolatedCnt = 0;
+
+/** Count of open endpoints excluded from the pairing analysis because
+ * they belong to a turntable (QueryTrack(trk, Q_CAN_ADD_ENDPOINTS)) --
+ * turntable stalls are open by design, not a missed connection. Matches
+ * the external MCP project's own write_gaps_report() design (reports
+ * turntable stalls as a count, never pairs them). */
+static int reportsGapsTurntableCnt = 0;
+
+/** TRUE while ReportsPopulateGapsList() is clearing/rebuilding
+ * reportsGapsList -- same re-entrancy guard as reportsPopulating (phase
+ * 1), see that flag's own doc comment for the real SF #772 crash this
+ * pattern exists to prevent. Not optional for a dialog with a changeProc. */
+static BOOL_T reportsGapsPopulating = FALSE;
+
+/** Populate the interactive list from reportsGapsList_da -- one row per
+ * near-miss pair, tab-separated, each row's context set to that pair's
+ * address so ReportsDlgUpdateGaps() can recover it on selection. */
+static void ReportsPopulateGapsList(void)
+{
+	int i;
+	char row[64];
+
+	reportsGapsPopulating = TRUE;
+
+	wListClear( reportsGapsList );
+	for ( i = 0; i < reportsGapsList_da.cnt; i++ ) {
+		reportsGapPair_t *entry = &DYNARR_N(reportsGapPair_t, reportsGapsList_da, i);
+		snprintf( row, sizeof row, "%d\t%d\t%.4f",
+		          entry->trackA, entry->trackB, entry->gapIn );
+		wListAddValue( reportsGapsList, row, NULL, entry );
+	}
+
+	reportsGapsPopulating = FALSE;
+}
+
+/** paramGroup_t changeProc for the Gaps dialog -- selecting a row pans/
+ * indicates at the pair's midpoint (using trackA's own scale for the
+ * indicator radius, see reportsGapPair_t's doc comment). Same guard/
+ * recovery shape as phase 1's ReportsDlgUpdate(). */
+static void ReportsDlgUpdateGaps(paramGroup_p pg, int inx, void *valueP)
+{
+	wIndex_t sel;
+	reportsGapPair_t *entry;
+	coOrd mid;
+
+	if (inx != I_REPORTSGAPSLIST) {
+		return;
+	}
+	if (reportsGapsPopulating) {
+		return;
+	}
+
+	sel = wListGetIndex(reportsGapsList);
+	if (sel < 0) {
+		return;
+	}
+	entry = (reportsGapPair_t *)wListGetItemContext(reportsGapsList, sel);
+	if (!entry) {
+		return;
+	}
+
+	if ( log_reports < 0 ) { log_reports = LogFindIndex( "reports" ); }
+	LOG( log_reports, 1,
+	     ( "reports: gaps row %d selected -> track %d <-> %d, gap=%.4f\n",
+	       sel, entry->trackA, entry->trackB, entry->gapIn ) )
+
+	mid.x = (entry->posA.x + entry->posB.x) / 2.0;
+	mid.y = (entry->posA.y + entry->posB.y) / 2.0;
+	ReportsSetIndicator(mid, entry->scale);
+}
+
+/** paramActionCancelProc for the Gaps dialog -- same shape as phase 1's
+ * ReportsCancel(). */
+static void ReportsCancelGaps(paramGroup_p pg)
+{
+	ReportsClearIndicator();
+	FormCancel_Current(pg);
+}
+
+/** Build the full formatted Gaps report text (header + summary counts +
+ * near-miss-pairs table) fresh from reportsGapsList_da/
+ * reportsGapsIsolatedCnt/reportsGapsTurntableCnt. Used only by
+ * ReportsRefreshPrintText() (Save/Print). */
+static void ReportsBuildGapsText(DynString *out)
+{
+	char summaryLine[200];
+
+	DynStringMalloc( out, 256 );
+	ReportsAddHeader( out, _("Gaps Report") );
+
+	snprintf( summaryLine, sizeof summaryLine,
+	          "\n%s: %d\n%s: %d\n%s: %d\n",
+	          _("Near-miss pairs"), reportsGapsList_da.cnt,
+	          _("Isolated open endpoints"), reportsGapsIsolatedCnt,
+	          _("Turntable stalls excluded"), reportsGapsTurntableCnt );
+	DynStringCatCStr( out, summaryLine );
+
+	if ( reportsGapsList_da.cnt == 0 ) {
+		DynStringCatCStrs( out, "\n", _("No near-miss pairs found."), "\n", NULL );
+	} else {
+		char headerLine[64];
+		snprintf( headerLine, sizeof headerLine, "\n%6s | %6s | %8s\n",
+		          _("Trk A"), _("Trk B"), _("Gap") );
+		DynStringCatCStr( out, headerLine );
+		ReportsFormatGapList( out, &DYNARR_N(reportsGapPair_t, reportsGapsList_da, 0),
+		                      reportsGapsList_da.cnt );
+	}
+}
+
+/** One open (unconnected) endpoint, scratch data local to ReportsGaps()'s
+ * own pairing pass -- unlike reportsGapPair_t (which must survive for
+ * click-to-navigate), this never leaves the function, freed before
+ * ReportsGaps() returns. */
+typedef struct {
+	TRKINX_T trackId;
+	coOrd    pos;
+	SCALEINX_T scale;
+	BOOL_T   paired;
+} reportsGapOpenEndPt_t;
+
+void ReportsGaps( void * unused )
+{
+	track_p trk;
+	dynArr_t open_da;
+	reportsGapOpenEndPt_t *entries;
+	int i, j, cnt;
+	int turntableCnt = 0;
+	int isolatedCnt = 0;
+
+	ReportsClearIndicator();
+	DYNARR_FREE( reportsGapPair_t, reportsGapsList_da );
+	DYNARR_INIT( reportsGapPair_t, reportsGapsList_da );
+
+	/* open_da is a fresh local, not a static -- DYNARR_INIT (not FREE)
+	 * here, same local-vs-static distinction as every other dynArr_t in
+	 * this file. Freed explicitly below before returning. */
+	DYNARR_INIT( reportsGapOpenEndPt_t, open_da );
+
+	TRK_ITERATE( trk ) {
+		EPINX_T ep;
+		/* Turntable stalls are open by design -- excluded from the
+		 * pairing analysis entirely (counted separately), matching the
+		 * external MCP project's own write_gaps_report() design. Unlike
+		 * phase 1's own Unconnected Endpoints report (which lists every
+		 * open endpoint including turntable stalls), this is a
+		 * deliberate divergence between the two reports, not a bug to
+		 * reconcile -- see the implementation plan's decision #3. */
+		BOOL_T isTurntable = QueryTrack( trk, Q_CAN_ADD_ENDPOINTS );
+
+		for ( ep = 0; ep < GetTrkEndPtCnt(trk); ep++ ) {
+			if ( GetTrkEndTrk(trk, ep) != NULL ) {
+				continue;
+			}
+			if ( isTurntable ) {
+				turntableCnt++;
+				continue;
+			}
+			{
+				reportsGapOpenEndPt_t *entry;
+				DYNARR_APPEND( reportsGapOpenEndPt_t, open_da, 10 );
+				entry = &DYNARR_LAST( reportsGapOpenEndPt_t, open_da );
+				entry->trackId = GetTrkIndex(trk);
+				entry->pos = GetTrkEndPos(trk, ep);
+				entry->scale = GetTrkScale(trk);
+				entry->paired = FALSE;
+			}
+		}
+	}
+
+	cnt = open_da.cnt;
+	entries = (reportsGapOpenEndPt_t *)open_da.ptr;
+
+	/* O(n^2) near-miss pairing, same realistic-scale justification as
+	 * phase 1's ReportsMarkNearby() (checked against layout23.xtc, 100+
+	 * rows). Same-track pairs excluded (a same-track pair this short is a
+	 * legitimate stub, not a missed connection) -- a deliberate, more
+	 * correct divergence from the external MCP reference's own
+	 * _near_miss_pairs(), which has no such exclusion. */
+	for ( i = 0; i < cnt; i++ ) {
+		for ( j = i + 1; j < cnt; j++ ) {
+			DIST_T dist;
+
+			if ( entries[i].trackId == entries[j].trackId ) {
+				continue;
+			}
+			dist = FindDistance( entries[i].pos, entries[j].pos );
+			if ( dist <= connectDistance ) {
+				reportsGapPair_t *pair;
+				DYNARR_APPEND( reportsGapPair_t, reportsGapsList_da, 10 );
+				pair = &DYNARR_LAST( reportsGapPair_t, reportsGapsList_da );
+				pair->trackA = entries[i].trackId;
+				pair->posA = entries[i].pos;
+				pair->trackB = entries[j].trackId;
+				pair->posB = entries[j].pos;
+				pair->gapIn = dist;
+				pair->scale = entries[i].scale;
+				entries[i].paired = TRUE;
+				entries[j].paired = TRUE;
+			}
+		}
+	}
+
+	for ( i = 0; i < cnt; i++ ) {
+		if ( !entries[i].paired ) {
+			isolatedCnt++;
+		}
+	}
+
+	DYNARR_FREE( reportsGapOpenEndPt_t, open_da );
+
+	reportsGapsIsolatedCnt = isolatedCnt;
+	reportsGapsTurntableCnt = turntableCnt;
+
+	{
+		char summary[200];
+
+		if ( log_reports < 0 ) { log_reports = LogFindIndex( "reports" ); }
+		LOG( log_reports, 1,
+		     ( "reports: Gaps computed -- %d pair(s), %d isolated, %d turntable stall(s) excluded\n",
+		       reportsGapsList_da.cnt, isolatedCnt, turntableCnt ) )
+
+		ReportsShowDialog( &reportsGapsDlg, _("Gaps Report") );
+		snprintf( summary, sizeof summary,
+		          _("%d near-miss pair(s), %d isolated open endpoint(s), %d turntable stall(s) excluded"),
+		          reportsGapsList_da.cnt, isolatedCnt, turntableCnt );
+		wMessageSetValue( reportsGapsSummary, summary );
+	}
+
+	ReportsPopulateGapsList();
+}
+
+/* ---------------------------------------------------------------------
+ * Phase 3a (SF #217, SF #779): Kinked Joints -- same interactive shape as
+ * Gaps above, different detection: already-connected joints whose angle
+ * discontinuity exceeds connectAngle. No MCP counterpart, see reports.h's
+ * reportsKinkedJoint_t doc comment.
+ * ------------------------------------------------------------------- */
+
+/** Tentative declaration -- same reason as reportsPG above. */
+static paramGroup_t reportsKinkedPG;
+static void ReportsBuildKinkedText(DynString *out);
+static void ReportsDlgUpdateKinked(paramGroup_p pg, int inx, void *valueP);
+static void ReportsCancelKinked(paramGroup_p pg);
+
+static reportsDialog_t reportsKinkedDlg = {
+	&reportsKinkedPG, NULL, NULL, NULL,
+	ReportsBuildKinkedText, ReportsKinkedJoints,
+	ReportsDlgUpdateKinked, ReportsCancelKinked
+};
+static reportsOpCtx_t reportsKinkedRefreshOp = { &reportsKinkedDlg, REPORTSOP_REFRESH };
+static reportsOpCtx_t reportsKinkedSaveOp    = { &reportsKinkedDlg, REPORTSOP_SAVE };
+static reportsOpCtx_t reportsKinkedPrintOp   = { &reportsKinkedDlg, REPORTSOP_PRINT };
+
+static wWinPix_t reportsKinkedListWidths[] = { 70, 70, 100 };
+static const char * reportsKinkedListTitles[] = {
+	N_("Track A"), N_("Track B"), N_("Angle Diff (deg)")
+};
+static paramListData_t reportsKinkedListData = { 8, 300, 3, reportsKinkedListWidths,
+                                                 reportsKinkedListTitles
+                                               };
+
+static paramData_t reportsKinkedPLs[] = {
+#define I_REPORTSKINKEDSUMMARY (0)
+#define reportsKinkedSummary (reportsKinkedPLs[I_REPORTSKINKEDSUMMARY].control)
+	{ PD_MESSAGE, "", "summary", 0, I2VP(37) },
+#define I_REPORTSKINKEDLIST (1)
+#define reportsKinkedList (reportsKinkedPLs[I_REPORTSKINKEDLIST].control)
+	{ PD_LIST, NULL, "list", PDO_DLGRESIZE, &reportsKinkedListData, NULL, 0 },
+	{ PD_BUTTON, DoReportsOp, "refresh", 0, NULL, NULL, 0, &reportsKinkedRefreshOp },
+	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsKinkedSaveOp },
+	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsKinkedPrintOp },
+	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
+};
+static paramGroup_t reportsKinkedPG = { "reportskinked", PGO_FULLDIALOGFROMBUILDER,
+                                        reportsKinkedPLs, COUNT( reportsKinkedPLs )
+                                      };
+
+/** The current Kinked Joints report's rows -- same outlives-the-compute-
+ * function lifetime rule as reportsGapsList_da above. */
+static dynArr_t reportsKinkedList_da;
+
+/** Same re-entrancy guard as reportsGapsPopulating above. */
+static BOOL_T reportsKinkedPopulating = FALSE;
+
+/** Populate the interactive list from reportsKinkedList_da -- one row per
+ * kinked joint, tab-separated. */
+static void ReportsPopulateKinkedList(void)
+{
+	int i;
+	char row[64];
+
+	reportsKinkedPopulating = TRUE;
+
+	wListClear( reportsKinkedList );
+	for ( i = 0; i < reportsKinkedList_da.cnt; i++ ) {
+		reportsKinkedJoint_t *entry = &DYNARR_N(reportsKinkedJoint_t,
+		                                        reportsKinkedList_da, i);
+		snprintf( row, sizeof row, "%d\t%d\t%.3f",
+		          entry->trackA, entry->trackB, entry->angleDelta );
+		wListAddValue( reportsKinkedList, row, NULL, entry );
+	}
+
+	reportsKinkedPopulating = FALSE;
+}
+
+/** paramGroup_t changeProc for the Kinked Joints dialog -- selecting a
+ * row pans/indicates at the joint's own position. */
+static void ReportsDlgUpdateKinked(paramGroup_p pg, int inx, void *valueP)
+{
+	wIndex_t sel;
+	reportsKinkedJoint_t *entry;
+
+	if (inx != I_REPORTSKINKEDLIST) {
+		return;
+	}
+	if (reportsKinkedPopulating) {
+		return;
+	}
+
+	sel = wListGetIndex(reportsKinkedList);
+	if (sel < 0) {
+		return;
+	}
+	entry = (reportsKinkedJoint_t *)wListGetItemContext(reportsKinkedList, sel);
+	if (!entry) {
+		return;
+	}
+
+	if ( log_reports < 0 ) { log_reports = LogFindIndex( "reports" ); }
+	LOG( log_reports, 1,
+	     ( "reports: kinked row %d selected -> track %d <-> %d, delta=%.3f\n",
+	       sel, entry->trackA, entry->trackB, entry->angleDelta ) )
+
+	ReportsSetIndicator(entry->pos, entry->scale);
+}
+
+/** paramActionCancelProc for the Kinked Joints dialog. */
+static void ReportsCancelKinked(paramGroup_p pg)
+{
+	ReportsClearIndicator();
+	FormCancel_Current(pg);
+}
+
+/** Build the full formatted Kinked Joints report text fresh from
+ * reportsKinkedList_da. Used only by ReportsRefreshPrintText(). */
+static void ReportsBuildKinkedText(DynString *out)
+{
+	DynStringMalloc( out, 256 );
+	ReportsAddHeader( out, _("Kinked Joints Report") );
+
+	if ( reportsKinkedList_da.cnt == 0 ) {
+		DynStringCatCStrs( out, "\n", _("No kinked joints found."), "\n", NULL );
+	} else {
+		char headerLine[64];
+		snprintf( headerLine, sizeof headerLine, "\n%6s | %6s | %7s\n",
+		          _("Trk A"), _("Trk B"), _("Angle") );
+		DynStringCatCStr( out, headerLine );
+		ReportsFormatKinkedList( out, &DYNARR_N(reportsKinkedJoint_t,
+		                                        reportsKinkedList_da, 0),
+		                         reportsKinkedList_da.cnt );
+	}
+}
+
+void ReportsKinkedJoints( void * unused )
+{
+	track_p trk;
+
+	ReportsClearIndicator();
+	DYNARR_FREE( reportsKinkedJoint_t, reportsKinkedList_da );
+	DYNARR_INIT( reportsKinkedJoint_t, reportsKinkedList_da );
+
+	TRK_ITERATE( trk ) {
+		EPINX_T ep;
+
+		for ( ep = 0; ep < GetTrkEndPtCnt(trk); ep++ ) {
+			track_p other = GetTrkEndTrk(trk, ep);
+			EPINX_T otherEp;
+			ANGLE_T delta;
+
+			if ( other == NULL || other == trk ) {
+				continue;
+			}
+			/* Dedup: TRK_ITERATE visits every joint from both sides (once
+			 * via trk's endpoint, once via other's) -- only emit a row
+			 * from the lower-indexed side. */
+			if ( GetTrkIndex(trk) >= GetTrkIndex(other) ) {
+				continue;
+			}
+
+			otherEp = GetEndPtConnectedToMe( other, trk );
+			if ( otherEp < 0 ) {
+				/* Shouldn't happen -- GetTrkEndTrk() above already
+				 * confirmed trk and other are connected, so other must
+				 * have a reverse endpoint back to trk. Defensive only. */
+				continue;
+			}
+
+			/* Same formula ConnectTracks() itself uses at connect-time
+			 * (track.c) -- a kinked joint is one that would fail that
+			 * same re-check today, i.e. real post-connect drift/
+			 * corruption, not a new invented tolerance. */
+			delta = fabs( DifferenceBetweenAngles( GetTrkEndAngle(trk, ep),
+			                                       GetTrkEndAngle(other, otherEp) + 180.0 ) );
+			if ( delta > connectAngle ) {
+				reportsKinkedJoint_t *row;
+				DYNARR_APPEND( reportsKinkedJoint_t, reportsKinkedList_da, 10 );
+				row = &DYNARR_LAST( reportsKinkedJoint_t, reportsKinkedList_da );
+				row->trackA = GetTrkIndex(trk);
+				row->trackB = GetTrkIndex(other);
+				row->pos = GetTrkEndPos(trk, ep);
+				row->angleDelta = delta;
+				row->scale = GetTrkScale(trk);
+			}
+		}
+	}
+
+	{
+		char summary[160];
+
+		if ( log_reports < 0 ) { log_reports = LogFindIndex( "reports" ); }
+		LOG( log_reports, 1,
+		     ( "reports: Kinked Joints computed -- %d joint(s) beyond %.2f deg tolerance\n",
+		       reportsKinkedList_da.cnt, connectAngle ) )
+
+		ReportsShowDialog( &reportsKinkedDlg, _("Kinked Joints Report") );
+		snprintf( summary, sizeof summary,
+		          _("%d kinked joint(s) found (beyond %.1f deg Connection Angle tolerance)"),
+		          reportsKinkedList_da.cnt, connectAngle );
+		wMessageSetValue( reportsKinkedSummary, summary );
+	}
+
+	ReportsPopulateKinkedList();
+}

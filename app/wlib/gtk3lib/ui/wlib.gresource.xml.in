@@ -36,6 +36,8 @@
     <file preprocess="xml-stripblanks">reports.ui</file>
     <file preprocess="xml-stripblanks">reportscurvestats.ui</file>
     <file preprocess="xml-stripblanks">reportsequipment.ui</file>
+    <file preprocess="xml-stripblanks">reportsgaps.ui</file>
+    <file preprocess="xml-stripblanks">reportskinked.ui</file>
     <file preprocess="xml-stripblanks">reportstracklen.ui</file>
     <file preprocess="xml-stripblanks">reportsturnout.ui</file>
     <file preprocess="xml-stripblanks">rescale.ui</file>
