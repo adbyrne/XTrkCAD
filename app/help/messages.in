@@ -523,6 +523,15 @@ HELP
 You are connecting two \e{endpoints} which differ in heights by N.NNN. The elevation of the connection will be the average of the two heights. You should check if this is a problem.
 END
 
+# elev.c:SetTrkElevModes
+MESSAGE MSG_JOIN_DIFFER_STATION
+Joining endpoints with different elevation stations ("%s" and "%s")
+ALT
+Joining endpoints with different elevation stations
+HELP
+You are connecting two \e{endpoints} which carry different elevation \e{station} names. The connection will keep the first endpoint's station name. You should check if this is a problem.
+END
+
 # cselect.c:cmdMoveDescription
 MESSAGE MSG_TRK_DESC_NOT_VISIBLE
 Label description is hidden

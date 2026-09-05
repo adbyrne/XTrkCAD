@@ -463,8 +463,10 @@ static void PickEndPtTests(void **state)
 	coOrd p_south = {0.0, -1.0};  /* south of center → angle 180° */
 
 	/* PickArcEndPt: returns 0 if p1 is "left" of p0 on arc (a > 180) */
-	assert_int_equal(PickArcEndPt(pc, p_east, p_north), 0);  /* 0°-90°: 270° turn → 0 */
-	assert_int_equal(PickArcEndPt(pc, p_east, p_south), 1);  /* 90°-180°: 90° turn → 1 */
+	assert_int_equal(PickArcEndPt(pc, p_east, p_north),
+	                 0);  /* 0°-90°: 270° turn → 0 */
+	assert_int_equal(PickArcEndPt(pc, p_east, p_south),
+	                 1);  /* 90°-180°: 90° turn → 1 */
 
 	/* PickLineEndPt: returns 0 if p1 is ahead of line through p0 at a0 */
 	coOrd p0 = {0.0, 0.0};
@@ -621,6 +623,30 @@ static void ClipLineTests(void **state)
 	ASSERT_COORD(p0, 5.0, 5.0);
 	ASSERT_DBL(p1.x, 10.0);
 	ASSERT_DBL(p1.y, 5.0);
+
+	/*
+	 * p0 inside, p1 exits exactly through the (10,10) corner.  The clip
+	 * point must land bit-exactly on the corner regardless of the line's
+	 * approach direction: run the same geometry forwards and reversed and
+	 * require an identical result (would differ at ~1e-14 without the
+	 * corner snap in IntersectBox).
+	 */
+	{
+		coOrd a0, a1, b0, b1;
+		a0.x = 1.6159106655850985; a0.y = 9.471232329137557;
+		a1.x = 14.37774532650758;  a1.y = 10.276095602944562;
+		b0 = a0; b1 = a1;
+		rc = ClipLine(&a0, &a1, orig, 0.0, size);
+		assert_true(rc);
+		assert_true(a1.x == 10.0);
+		assert_true(a1.y == 10.0);
+
+		/* reversed: exterior point passed first, interior second */
+		rc = ClipLine(&b1, &b0, orig, 0.0, size);
+		assert_true(rc);
+		assert_true(b1.x == a1.x);
+		assert_true(b1.y == a1.y);
+	}
 }
 
 int main(void)

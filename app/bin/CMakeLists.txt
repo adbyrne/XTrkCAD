@@ -200,6 +200,8 @@ target_sources(xtrkcad-lib
     dxfimport.c
     dxfoutput.c
     elev.c
+    elevjoin.c
+    elevjoin.h
     file2uri.c
     file2uri.h
     fileio.c

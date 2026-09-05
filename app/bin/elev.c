@@ -24,6 +24,7 @@
 #include "tbezier.h"
 #include "tcornu.h"
 #include "cundo.h"
+#include "elevjoin.h"
 #include "param.h"
 #include "shrtpath.h"
 #include "track.h"
@@ -1165,44 +1166,36 @@ EXPORT void SetTrkElevModes( BOOL_T connect, track_p trk0, EPINX_T ep0,
 	}
 
 	if ( connect ) {
-		mode0 = GetTrkEndElevMode( trk0, ep0 );
-		mode1 = GetTrkEndElevMode( trk1, ep1 );
-		elev = 0.0;
-		char * station = NULL;
-		if (mode0 == ELEV_DEF && mode1 == ELEV_DEF) {
-			mode0 = GetTrkEndElevUnmaskedMode( trk0,
-			                                   ep0 ) | GetTrkEndElevUnmaskedMode( trk1, ep1 );
-			DIST_T elev0 = GetTrkEndElevHeight( trk0, ep0 );
-			DIST_T elev1 = GetTrkEndElevHeight( trk1, ep1 );
-			elev = (elev0+elev1)/2.0;
-			DIST_T diff = fabs( elev0-elev1 );
-			if (diff>0.1) {
-				ErrorMessage( MSG_JOIN_DIFFER_ELEV, PutDim(diff) );
-			}
-		} else if (mode0 == ELEV_DEF) {
-			mode0 = GetTrkEndElevUnmaskedMode( trk0, ep0 );
-			elev = GetTrkEndElevHeight( trk0, ep0 );
-		} else if (mode1 == ELEV_DEF) {
-			mode1 = GetTrkEndElevUnmaskedMode( trk1, ep1 );
-			elev = GetTrkEndElevHeight( trk1, ep1 );
-		} else if (mode0 == ELEV_STATION) {
-			station = GetTrkEndElevStation( trk0, ep0 );
-		} else if (mode1 == ELEV_STATION) {
-			station = GetTrkEndElevStation( trk1, ep1 );
-			mode0 = mode1;
-		} else if (mode0 == ELEV_GRADE) {
-			;
-		} else if (mode1 == ELEV_GRADE) {
-			mode0 = mode1;
-		} else if (mode0 == ELEV_COMP) {
-			;
-		} else if (mode1 == ELEV_COMP) {
-			mode0 = mode1;
-		} else {
-			;
+		endElev_t e0, e1;
+		joinElev_t j;
+
+		e0.mode = GetTrkEndElevMode( trk0, ep0 );
+		e0.unmasked = GetTrkEndElevUnmaskedMode( trk0, ep0 );
+		e0.height = EndPtIsDefinedElev( trk0, ep0 )
+		            ? GetTrkEndElevHeight( trk0, ep0 ) : 0.0;
+		e0.station = EndPtIsStationElev( trk0, ep0 )
+		             ? GetTrkEndElevStation( trk0, ep0 ) : NULL;
+
+		e1.mode = GetTrkEndElevMode( trk1, ep1 );
+		e1.unmasked = GetTrkEndElevUnmaskedMode( trk1, ep1 );
+		e1.height = EndPtIsDefinedElev( trk1, ep1 )
+		            ? GetTrkEndElevHeight( trk1, ep1 ) : 0.0;
+		e1.station = EndPtIsStationElev( trk1, ep1 )
+		             ? GetTrkEndElevStation( trk1, ep1 ) : NULL;
+
+		j = MergeJoinElev( e0, e1 );
+
+		if ( j.heightsDiffer ) {
+			ErrorMessage( MSG_JOIN_DIFFER_ELEV, PutDim( j.diff ) );
 		}
-		SetTrkEndElev( trk0, ep0, mode0, elev, station );
-		SetTrkEndElev( trk1, ep1, mode0, elev, station );
+		if ( j.stationsDiffer ) {
+			ErrorMessage( MSG_JOIN_DIFFER_STATION,
+			              e0.station ? e0.station : "",
+			              e1.station ? e1.station : "" );
+		}
+
+		SetTrkEndElev( trk0, ep0, j.mode, j.elev, j.station );
+		SetTrkEndElev( trk1, ep1, j.mode, j.elev, j.station );
 	}
 
 	if (update) {
