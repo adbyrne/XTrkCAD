@@ -1,6 +1,6 @@
 # XTrkCAD
 
-[![CI](https://github.com/adbyrne/XTrkCAD/actions/workflows/ci.yml/badge.svg)](https://github.com/adbyrne/XTrkCAD/actions/workflows/ci.yml)
+[![CI](../../actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
 [![License: GPL v2](https://img.shields.io/badge/License-GPL_v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 
 XTrkCAD is an open-source CAD tool for designing model railroad track layouts.
