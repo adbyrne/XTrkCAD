@@ -99,7 +99,8 @@ Monday cron, and its results show up in the repo's Security tab rather than as a
 
 Five of these (`coverage`, `cppcheck-deep`, `clang-tidy`, `codespell`, `compiler-warnings`) are
 additionally published as permanent, browsable HTML at
-[adbyrne.github.io/XTrkCAD](https://adbyrne.github.io/XTrkCAD/), redeployed on every push to
+`$GITHUB_USER.github.io/XTrkCAD` (GitHub Pages' default project-page URL for whichever fork's
+Actions is doing the deploying), redeployed on every push to
 `GTK3V2MAIN` by `release.yml`'s `package-coverage`/`package-cppcheck-deep`/`package-clang-tidy`/
 `package-codespell`/`package-compiler-warnings` jobs (separate from the `ci-gtk3.yml` jobs of the
 same underlying command, which stay PR-artifact-only for fast per-PR feedback). The four plain-text
@@ -142,9 +143,9 @@ tools/format-findings-report.sh <input.txt> <output.html> "<title>" <bracketed|c
 `bracketed` handles cppcheck/clang-tidy/compiler-warning lines ending in `[category]`;
 `codespell` handles its `file:line: word ==> suggestion` shape instead. `<blob-base-url>` is
 prepended to each finding's `file#Lline` to build its link — pass a real GitHub blob URL (e.g.
-`https://github.com/adbyrne/XTrkCAD/blob/$(git rev-parse HEAD)/`) to get working links against
-your own checkout, or omit meaningful linking entirely by passing any placeholder if you just
-want the grouped local HTML view. The `coverage` report doesn't go through this script — `genhtml`
+`https://github.com/$GITHUB_USER/XTrkCAD/blob/$(git rev-parse HEAD)/`) to get working links
+against your own checkout, or omit meaningful linking entirely by passing any placeholder if you
+just want the grouped local HTML view. The `coverage` report doesn't go through this script — `genhtml`
 already produces its own linked, per-line HTML.
 
 The gating `cppcheck` job (default/error-only severity, distinct from the report-only

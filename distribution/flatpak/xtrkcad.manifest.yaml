@@ -69,11 +69,18 @@ modules:
 
   - name: xtrkcad
     buildsystem: cmake-ninja
-    # Update url and sha256 to match the release tag being packaged.
+    # Flatpak manifests need one concrete, fetchable tarball URL -- unlike
+    # release.yml's own links, this can't be a relative path or a
+    # GitHub-Actions-context variable, since flatpak-builder resolves it
+    # outside CI, against whatever git mirror is actually being used to cut
+    # this Flathub submission. Update url and sha256 to match BOTH the
+    # release tag being packaged AND whichever fork's mirror holds it --
+    # this is a placeholder value, not this project's permanent home (that's
+    # SourceForge; see CLAUDE.md).
     # App ID: io.sourceforge.xtrkcad_fork.xtrkcad — update to a proper
     # reverse-DNS ID (e.g. org.xtrkcad.XTrkCAD) before Flathub submission.
     sources:
       - type: archive
-        url: https://github.com/adbyrne/XTrkCAD/archive/refs/tags/v5.4.0.tar.gz
+        url: https://github.com/REPLACE_WITH_YOUR_GITHUB_USER/XTrkCAD/archive/refs/tags/v5.4.0.tar.gz
         sha256: # fill in sha256 of the release archive when tagging v5.4.0
     builddir: true

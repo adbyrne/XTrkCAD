@@ -21,6 +21,17 @@ SET(CPACK_SOURCE_PACKAGE_FILE_NAME "xtrkcad-source-${XTRKCAD_FILE_VERSION}")
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/downloadpage.wiki.in ${CMAKE_BINARY_DIR}/downloadpage.wiki)
 
+# Second support link shown in the packaged README-INSTALL.txt files (win32/osx), alongside the
+# fixed https://xtrkcad.org line -- defaults to the canonical SourceForge project page rather
+# than any one contributor's personal git mirror, since that's this project's real, permanent
+# home regardless of who built a given package. A packaging job for a specific distribution
+# channel (e.g. one that wants to point users back at the exact repo/release a build came from)
+# can override this at configure time instead.
+if(NOT DEFINED XTRKCAD_PROJECT_URL)
+    set(XTRKCAD_PROJECT_URL "https://sourceforge.net/p/xtrkcad-fork/" CACHE STRING
+        "Secondary support URL shown in packaged README-INSTALL.txt files")
+endif()
+
 # Setup platform-specific packaging ...
 IF(APPLE)
 	ADD_SUBDIRECTORY(osx)

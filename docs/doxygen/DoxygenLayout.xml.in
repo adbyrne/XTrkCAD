@@ -6,13 +6,18 @@
     <tab type="mainpage" visible="yes" title=""/>
     <!-- Links out to the separate end-user User Guide (Doxygen-built as of
          SF feature-requests #219, see
-         .claude/halibut-doxygen-investigation-plan.md) -- absolute URL,
-         not relative, so it resolves correctly regardless of whether this
-         dev guide is being viewed locally or on the deployed GitHub Pages
-         site (which does put the two side by side under
-         .../XTrkCAD/doxygen/ and .../XTrkCAD/userguide/, but a local build
-         of just this target has no such sibling directory). -->
-    <tab type="user" visible="yes" title="User Guide" url="https://adbyrne.github.io/XTrkCAD/userguide/"/>
+         .claude/halibut-doxygen-investigation-plan.md). This file is a
+         CMake-configured template (see CMakeLists.txt in this directory) --
+         the URL below is @XTRKCAD_USERGUIDE_URL@, substituted at configure
+         time rather than hardcoded, since the right link depends on where
+         this page ends up being served from: a plain local build of this
+         target defaults to the relative path to a sibling app/doc/html
+         build, while a CI job that publishes this documentation elsewhere
+         (e.g. to a project's own GitHub Pages site, where the two guides are
+         deployed as siblings under a different layout) overrides it with
+         the real absolute URL for that deployment -- see release.yml's
+         package-docs job. Never hardcode a specific site/account here. -->
+    <tab type="user" visible="yes" title="User Guide" url="@XTRKCAD_USERGUIDE_URL@"/>
     <tab type="pages" visible="yes" title="" intro=""/>
     <tab type="topics" visible="yes" title="" intro=""/>
     <tab type="modules" visible="yes" title="" intro="">

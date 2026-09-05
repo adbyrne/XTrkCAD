@@ -25,7 +25,8 @@ if(MINGW)
     endif()
 endif()
 
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/README-INSTALL.txt"
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/README-INSTALL.txt.in" "${CMAKE_CURRENT_BINARY_DIR}/README-INSTALL.txt" @ONLY)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/README-INSTALL.txt"
     DESTINATION ".")
 
 add_subdirectory(nsis)
