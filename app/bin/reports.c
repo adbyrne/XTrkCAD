@@ -644,6 +644,32 @@ void ReportsUnconnectedEndpoints( void * unused )
 	track_p trk;
 
 	ReportsClearIndicator();
+
+	/* Clear the currently-visible list's rows (and their about-to-be-
+	 * stale context pointers) BEFORE freeing the backing array below --
+	 * otherwise, whenever this dialog is already open with real rows,
+	 * there's a live window (from here until ReportsPopulateList() runs
+	 * again at the end of this function) where the visible list still
+	 * references memory this function is about to free. Any GTK-driven
+	 * selection-changed signal landing in that window -- not necessarily
+	 * a literal click; a window move/focus event can trigger GTK to
+	 * re-touch the treeview's selection too -- reads a genuine dangling
+	 * pointer. Found via live user testing 2026-09-05 on the sibling
+	 * Gaps/Kinked Joints reports (same pattern, see
+	 * [[feedback_reports_stale_list_use_after_free]]), then confirmed
+	 * present here too. Only needed once the dialog/list actually exists
+	 * -- skip on the very first call, before ReportsShowDialog() has
+	 * created it. Distinct from reportsPopulating's own synchronous
+	 * mid-wListClear() reentrancy guard (SF #772) -- that one protects a
+	 * signal firing *during* this same clear call; this early clear
+	 * closes the wider window a *later, asynchronous* signal could land
+	 * in. */
+	if ( reportsUnconnectedDlg.window != NULL ) {
+		reportsPopulating = TRUE;
+		wListClear( reportsList );
+		reportsPopulating = FALSE;
+	}
+
 	DYNARR_FREE( reportsEndPt_t, reportsCurrentList_da );
 	DYNARR_INIT( reportsEndPt_t, reportsCurrentList_da );
 
@@ -1669,6 +1695,20 @@ void ReportsGaps( void * unused )
 	int isolatedCnt = 0;
 
 	ReportsClearIndicator();
+
+	/* Clear the visible list before freeing the array its rows'
+	 * contexts point into -- see ReportsUnconnectedEndpoints()'s doc
+	 * comment on the identical pattern for the full rationale. Found via
+	 * live user testing 2026-09-05: with this dialog already open
+	 * showing a real row, a subsequent refresh computing zero rows still
+	 * left a stale row-selection event readable moments later, reading
+	 * memory this function had already freed. */
+	if ( reportsGapsDlg.window != NULL ) {
+		reportsGapsPopulating = TRUE;
+		wListClear( reportsGapsList );
+		reportsGapsPopulating = FALSE;
+	}
+
 	DYNARR_FREE( reportsGapPair_t, reportsGapsList_da );
 	DYNARR_INIT( reportsGapPair_t, reportsGapsList_da );
 
@@ -1907,6 +1947,16 @@ void ReportsKinkedJoints( void * unused )
 	track_p trk;
 
 	ReportsClearIndicator();
+
+	/* Clear the visible list before freeing the array its rows'
+	 * contexts point into -- see ReportsUnconnectedEndpoints()'s doc
+	 * comment on the identical pattern for the full rationale. */
+	if ( reportsKinkedDlg.window != NULL ) {
+		reportsKinkedPopulating = TRUE;
+		wListClear( reportsKinkedList );
+		reportsKinkedPopulating = FALSE;
+	}
+
 	DYNARR_FREE( reportsKinkedJoint_t, reportsKinkedList_da );
 	DYNARR_INIT( reportsKinkedJoint_t, reportsKinkedList_da );
 
