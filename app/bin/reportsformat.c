@@ -35,13 +35,13 @@
 void ReportsFormatUnconnectedList(DynString *out, const reportsEndPt_t *list,
                                   int count)
 {
-	char line[128];
+	char line[160];
 	int i;
 
 	for (i = 0; i < count; i++) {
-		snprintf(line, sizeof line, "%6d | %8.3f | %8.3f | %7.3f\n",
-		         list[i].trackId, list[i].pos.x, list[i].pos.y,
-		         list[i].angle);
+		snprintf(line, sizeof line, "%6d | %5u | %-16s | %8.3f | %8.3f | %7.3f\n",
+		         list[i].trackId, list[i].layer, list[i].layerName,
+		         list[i].pos.x, list[i].pos.y, list[i].angle);
 		DynStringCatCStr(out, line);
 	}
 }
@@ -242,12 +242,15 @@ reportsEquipStatus_e ReportsClassifyEquipment(DIST_T minRadius,
 void ReportsFormatGapList(DynString *out, const reportsGapPair_t *list,
                           int count)
 {
-	char line[64];
+	char line[128];
 	int i;
 
 	for (i = 0; i < count; i++) {
-		snprintf(line, sizeof line, "%6d | %6d | %8.4f\n",
-		         list[i].trackA, list[i].trackB, list[i].gapIn);
+		snprintf(line, sizeof line,
+		         "%6d | %5u | %-14s | %6d | %5u | %-14s | %8.4f\n",
+		         list[i].trackA, list[i].layerA, list[i].layerNameA,
+		         list[i].trackB, list[i].layerB, list[i].layerNameB,
+		         list[i].gapIn);
 		DynStringCatCStr(out, line);
 	}
 }
@@ -255,12 +258,15 @@ void ReportsFormatGapList(DynString *out, const reportsGapPair_t *list,
 void ReportsFormatKinkedList(DynString *out, const reportsKinkedJoint_t *list,
                              int count)
 {
-	char line[64];
+	char line[128];
 	int i;
 
 	for (i = 0; i < count; i++) {
-		snprintf(line, sizeof line, "%6d | %6d | %7.3f\n",
-		         list[i].trackA, list[i].trackB, list[i].angleDelta);
+		snprintf(line, sizeof line,
+		         "%6d | %5u | %-14s | %6d | %5u | %-14s | %7.3f\n",
+		         list[i].trackA, list[i].layerA, list[i].layerNameA,
+		         list[i].trackB, list[i].layerB, list[i].layerNameB,
+		         list[i].angleDelta);
 		DynStringCatCStr(out, line);
 	}
 }

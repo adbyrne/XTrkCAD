@@ -56,6 +56,23 @@ typedef struct {
 	 * so existing positional initializers (tests included) don't need
 	 * updating. */
 	BOOL_T nearby;
+	/** 1-based layer number (matches the main UI's own display
+	 * convention, e.g. dlayer.c's layer selector -- the internal
+	 * GetTrkLayer() index is 0-based) and the layer's own assigned name
+	 * (GetLayerName(), borrowed pointer, same lifetime rule as
+	 * reportsTrackLenLayer_t's `name` field below). Added 2026-09-05,
+	 * after live user testing on a multi-level layout raised a real
+	 * correctness concern: two endpoints can sit at the same X/Y in the
+	 * shared 2D drawing but be on two different physical levels, so
+	 * `nearby`'s flat XY-distance check can't tell a genuine near-miss
+	 * from an unrelated overlap between levels. Showing each side's own
+	 * layer lets the user judge that for themselves -- the underlying
+	 * distance check itself is deliberately unchanged (user's explicit
+	 * call: label both sides, don't add a same-layer-only exclusion).
+	 * Appended at the end so existing positional initializers (tests
+	 * included) don't need updating. */
+	unsigned int layer;
+	const char *layerName;
 } reportsEndPt_t;
 
 /**
@@ -402,6 +419,15 @@ typedef struct {
 	coOrd    posB;
 	DIST_T   gapIn;
 	SCALEINX_T scale;
+	/** Each side's own 1-based layer number/name (see reportsEndPt_t's
+	 * `layer`/`layerName` doc comment for the full rationale -- a pair
+	 * near in shared XY can still be on two different physical levels on
+	 * a multi-level layout, so both sides need their own layer shown,
+	 * not just one). Added 2026-09-05. */
+	unsigned int layerA;
+	const char *layerNameA;
+	unsigned int layerB;
+	const char *layerNameB;
 } reportsGapPair_t;
 
 /**
@@ -455,6 +481,14 @@ typedef struct {
 	coOrd    pos;
 	ANGLE_T  angleDelta;
 	SCALEINX_T scale;
+	/** Each track's own 1-based layer number/name -- see
+	 * reportsGapPair_t's identical fields for the rationale (two tracks
+	 * meeting at one joint can still be organized on two different
+	 * layers/levels). Added 2026-09-05. */
+	unsigned int layerA;
+	const char *layerNameA;
+	unsigned int layerB;
+	const char *layerNameB;
 } reportsKinkedJoint_t;
 
 /**

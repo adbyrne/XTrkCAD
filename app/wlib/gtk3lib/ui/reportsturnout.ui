@@ -105,7 +105,7 @@
                 <child>
                   <object class="GtkTreeViewColumn" id="listlayer">
                     <property name="resizable">True</property>
-                    <property name="title" translatable="yes">Layer</property>
+                    <property name="title" translatable="yes">Layer #</property>
                     <child>
                       <object class="GtkCellRendererText" />
                       <attributes>
@@ -117,7 +117,7 @@
                 <child>
                   <object class="GtkTreeViewColumn" id="listname">
                     <property name="resizable">True</property>
-                    <property name="title" translatable="yes">Name</property>
+                    <property name="title" translatable="yes">Layer Name</property>
                     <child>
                       <object class="GtkCellRendererText" />
                       <attributes>

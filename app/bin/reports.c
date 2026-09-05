@@ -171,11 +171,11 @@ static reportsOpCtx_t reportsUnconnectedRefreshOp = { &reportsUnconnectedDlg, RE
 static reportsOpCtx_t reportsUnconnectedSaveOp    = { &reportsUnconnectedDlg, REPORTSOP_SAVE };
 static reportsOpCtx_t reportsUnconnectedPrintOp   = { &reportsUnconnectedDlg, REPORTSOP_PRINT };
 
-static wWinPix_t reportsListWidths[] = { 60, 80, 80, 70, 60 };
+static wWinPix_t reportsListWidths[] = { 60, 60, 110, 80, 80, 70, 60 };
 static const char * reportsListTitles[] = {
-	N_("Track"), N_("X"), N_("Y"), N_("Angle"), N_("Nearby")
+	N_("Track"), N_("Layer #"), N_("Layer Name"), N_("X"), N_("Y"), N_("Angle"), N_("Nearby")
 };
-static paramListData_t reportsListData = { 8, 300, 5, reportsListWidths, reportsListTitles };
+static paramListData_t reportsListData = { 8, 300, 7, reportsListWidths, reportsListTitles };
 
 static paramData_t reportsPLs[] = {
 #define I_REPORTSSUMMARY (0)
@@ -597,8 +597,9 @@ static void ReportsPopulateList(void)
 	wListClear( reportsList );
 	for ( i = 0; i < reportsCurrentList_da.cnt; i++ ) {
 		reportsEndPt_t *entry = &DYNARR_N(reportsEndPt_t, reportsCurrentList_da, i);
-		snprintf( row, sizeof row, "%d\t%.3f\t%.3f\t%.3f\t%s",
-		          entry->trackId, entry->pos.x, entry->pos.y, entry->angle,
+		snprintf( row, sizeof row, "%d\t%u\t%s\t%.3f\t%.3f\t%.3f\t%s",
+		          entry->trackId, entry->layer, entry->layerName,
+		          entry->pos.x, entry->pos.y, entry->angle,
 		          entry->nearby ? _("Yes") : "" );
 		wListAddValue( reportsList, row, NULL, entry );
 	}
@@ -629,9 +630,10 @@ static void ReportsBuildText(DynString *out)
 		 * reintroducing. Width 6 for the Track column matches
 		 * ReportsFormatUnconnectedList()'s "%6d" exactly, so header and
 		 * data rows stay aligned. */
-		char headerLine[64];
-		snprintf( headerLine, sizeof headerLine, "\n%6s | %8s | %8s | %7s\n",
-		          _("Track"), _("X"), _("Y"), _("Angle") );
+		char headerLine[96];
+		snprintf( headerLine, sizeof headerLine,
+		          "\n%6s | %5s | %-16s | %8s | %8s | %7s\n",
+		          _("Track"), _("Lyr"), _("Layer Name"), _("X"), _("Y"), _("Angle") );
 		DynStringCatCStr( out, headerLine );
 		ReportsFormatUnconnectedList( out, &DYNARR_N(reportsEndPt_t,
 		                              reportsCurrentList_da, 0),
@@ -684,6 +686,11 @@ void ReportsUnconnectedEndpoints( void * unused )
 				entry->pos = GetTrkEndPos(trk, ep);
 				entry->angle = GetTrkEndAngle(trk, ep);
 				entry->scale = GetTrkScale(trk);
+				/* +1: matches the main UI's own 1-based layer display
+				 * (dlayer.c) -- see reports.h's layer/layerName doc
+				 * comment. */
+				entry->layer = GetTrkLayer(trk) + 1;
+				entry->layerName = GetLayerName(GetTrkLayer(trk));
 			}
 		}
 	}
@@ -897,7 +904,9 @@ void ReportsTurnoutDensity( void * unused )
 				p = &DYNARR_LAST( reportsPartialTurnout_t, reportsTurnoutPartial_da );
 				p->trackId = GetTrkIndex(trk);
 				p->endPtCnt = GetTrkEndPtCnt(trk);
-				p->layer = trkLayer;
+				/* +1: see the identical comment in ReportsTurnoutDensity()'s
+				 * BY LAYER loop below -- same 0-based-vs-1-based mismatch. */
+				p->layer = trkLayer + 1;
 			}
 		}
 	}
@@ -910,7 +919,13 @@ void ReportsTurnoutDensity( void * unused )
 		}
 		DYNARR_APPEND( reportsTurnoutLayer_t, reportsTurnoutList_da, 10 );
 		row = &DYNARR_LAST( reportsTurnoutLayer_t, reportsTurnoutList_da );
-		row->layer = layer;
+		/* +1: the layer index is 0-based internally, but every other
+		 * layer-numbered UI in the app (the layer buttons, the layer
+		 * combo box -- see dlayer.c's "%2d %c %s", layerNumber + 1, ...)
+		 * displays 1-based numbers. Found via live user testing
+		 * 2026-09-05 -- the report's own Layer column read "4" for the
+		 * exact same layer the main window's selector showed as "5". */
+		row->layer = layer + 1;
 		row->name = GetLayerName(layer);
 		row->feet = layerFeet[layer];
 		row->turnoutCount = layerTurnouts[layer];
@@ -1091,7 +1106,11 @@ void ReportsTrackLengths( void * unused )
 		}
 		DYNARR_APPEND( reportsTrackLenLayer_t, reportsTrackLenList_da, 10 );
 		row = &DYNARR_LAST( reportsTrackLenLayer_t, reportsTrackLenList_da );
-		row->layer = layer;
+		/* +1: see the identical comment in ReportsTurnoutDensity() --
+		 * every other layer-numbered UI in the app displays 1-based
+		 * numbers, this report's Layer column was showing the raw
+		 * 0-based internal index instead. */
+		row->layer = layer + 1;
 		row->name = GetLayerName(layer);
 		row->lengthFt = layerFeet[layer];
 		row->lengthIn = layerFeet[layer] * 12.0;
@@ -1530,11 +1549,12 @@ static reportsOpCtx_t reportsGapsRefreshOp = { &reportsGapsDlg, REPORTSOP_REFRES
 static reportsOpCtx_t reportsGapsSaveOp    = { &reportsGapsDlg, REPORTSOP_SAVE };
 static reportsOpCtx_t reportsGapsPrintOp   = { &reportsGapsDlg, REPORTSOP_PRINT };
 
-static wWinPix_t reportsGapsListWidths[] = { 70, 70, 90 };
+static wWinPix_t reportsGapsListWidths[] = { 60, 60, 100, 60, 60, 100, 70 };
 static const char * reportsGapsListTitles[] = {
-	N_("Track A"), N_("Track B"), N_("Gap (in)")
+	N_("Track A"), N_("Layer A #"), N_("Layer A Name"),
+	N_("Track B"), N_("Layer B #"), N_("Layer B Name"), N_("Gap (in)")
 };
-static paramListData_t reportsGapsListData = { 8, 300, 3, reportsGapsListWidths,
+static paramListData_t reportsGapsListData = { 8, 400, 7, reportsGapsListWidths,
                                                reportsGapsListTitles
                                              };
 
@@ -1585,15 +1605,17 @@ static BOOL_T reportsGapsPopulating = FALSE;
 static void ReportsPopulateGapsList(void)
 {
 	int i;
-	char row[64];
+	char row[160];
 
 	reportsGapsPopulating = TRUE;
 
 	wListClear( reportsGapsList );
 	for ( i = 0; i < reportsGapsList_da.cnt; i++ ) {
 		reportsGapPair_t *entry = &DYNARR_N(reportsGapPair_t, reportsGapsList_da, i);
-		snprintf( row, sizeof row, "%d\t%d\t%.4f",
-		          entry->trackA, entry->trackB, entry->gapIn );
+		snprintf( row, sizeof row, "%d\t%u\t%s\t%d\t%u\t%s\t%.4f",
+		          entry->trackA, entry->layerA, entry->layerNameA,
+		          entry->trackB, entry->layerB, entry->layerNameB,
+		          entry->gapIn );
 		wListAddValue( reportsGapsList, row, NULL, entry );
 	}
 
@@ -1665,9 +1687,11 @@ static void ReportsBuildGapsText(DynString *out)
 	if ( reportsGapsList_da.cnt == 0 ) {
 		DynStringCatCStrs( out, "\n", _("No near-miss pairs found."), "\n", NULL );
 	} else {
-		char headerLine[64];
-		snprintf( headerLine, sizeof headerLine, "\n%6s | %6s | %8s\n",
-		          _("Trk A"), _("Trk B"), _("Gap") );
+		char headerLine[112];
+		snprintf( headerLine, sizeof headerLine,
+		          "\n%6s | %5s | %-14s | %6s | %5s | %-14s | %8s\n",
+		          _("Trk A"), _("Lyr A"), _("Layer A Name"),
+		          _("Trk B"), _("Lyr B"), _("Layer B Name"), _("Gap") );
 		DynStringCatCStr( out, headerLine );
 		ReportsFormatGapList( out, &DYNARR_N(reportsGapPair_t, reportsGapsList_da, 0),
 		                      reportsGapsList_da.cnt );
@@ -1683,6 +1707,8 @@ typedef struct {
 	coOrd    pos;
 	SCALEINX_T scale;
 	BOOL_T   paired;
+	unsigned int layer;
+	const char *layerName;
 } reportsGapOpenEndPt_t;
 
 void ReportsGaps( void * unused )
@@ -1744,6 +1770,8 @@ void ReportsGaps( void * unused )
 				entry->pos = GetTrkEndPos(trk, ep);
 				entry->scale = GetTrkScale(trk);
 				entry->paired = FALSE;
+				entry->layer = GetTrkLayer(trk) + 1;
+				entry->layerName = GetLayerName(GetTrkLayer(trk));
 			}
 		}
 	}
@@ -1775,6 +1803,10 @@ void ReportsGaps( void * unused )
 				pair->posB = entries[j].pos;
 				pair->gapIn = dist;
 				pair->scale = entries[i].scale;
+				pair->layerA = entries[i].layer;
+				pair->layerNameA = entries[i].layerName;
+				pair->layerB = entries[j].layer;
+				pair->layerNameB = entries[j].layerName;
 				entries[i].paired = TRUE;
 				entries[j].paired = TRUE;
 			}
@@ -1832,11 +1864,12 @@ static reportsOpCtx_t reportsKinkedRefreshOp = { &reportsKinkedDlg, REPORTSOP_RE
 static reportsOpCtx_t reportsKinkedSaveOp    = { &reportsKinkedDlg, REPORTSOP_SAVE };
 static reportsOpCtx_t reportsKinkedPrintOp   = { &reportsKinkedDlg, REPORTSOP_PRINT };
 
-static wWinPix_t reportsKinkedListWidths[] = { 70, 70, 100 };
+static wWinPix_t reportsKinkedListWidths[] = { 60, 60, 100, 60, 60, 100, 90 };
 static const char * reportsKinkedListTitles[] = {
-	N_("Track A"), N_("Track B"), N_("Angle Diff (deg)")
+	N_("Track A"), N_("Layer A #"), N_("Layer A Name"),
+	N_("Track B"), N_("Layer B #"), N_("Layer B Name"), N_("Angle Diff (deg)")
 };
-static paramListData_t reportsKinkedListData = { 8, 300, 3, reportsKinkedListWidths,
+static paramListData_t reportsKinkedListData = { 8, 400, 7, reportsKinkedListWidths,
                                                  reportsKinkedListTitles
                                                };
 
@@ -1868,7 +1901,7 @@ static BOOL_T reportsKinkedPopulating = FALSE;
 static void ReportsPopulateKinkedList(void)
 {
 	int i;
-	char row[64];
+	char row[160];
 
 	reportsKinkedPopulating = TRUE;
 
@@ -1876,8 +1909,10 @@ static void ReportsPopulateKinkedList(void)
 	for ( i = 0; i < reportsKinkedList_da.cnt; i++ ) {
 		reportsKinkedJoint_t *entry = &DYNARR_N(reportsKinkedJoint_t,
 		                                        reportsKinkedList_da, i);
-		snprintf( row, sizeof row, "%d\t%d\t%.3f",
-		          entry->trackA, entry->trackB, entry->angleDelta );
+		snprintf( row, sizeof row, "%d\t%u\t%s\t%d\t%u\t%s\t%.3f",
+		          entry->trackA, entry->layerA, entry->layerNameA,
+		          entry->trackB, entry->layerB, entry->layerNameB,
+		          entry->angleDelta );
 		wListAddValue( reportsKinkedList, row, NULL, entry );
 	}
 
@@ -1932,9 +1967,11 @@ static void ReportsBuildKinkedText(DynString *out)
 	if ( reportsKinkedList_da.cnt == 0 ) {
 		DynStringCatCStrs( out, "\n", _("No kinked joints found."), "\n", NULL );
 	} else {
-		char headerLine[64];
-		snprintf( headerLine, sizeof headerLine, "\n%6s | %6s | %7s\n",
-		          _("Trk A"), _("Trk B"), _("Angle") );
+		char headerLine[112];
+		snprintf( headerLine, sizeof headerLine,
+		          "\n%6s | %5s | %-14s | %6s | %5s | %-14s | %7s\n",
+		          _("Trk A"), _("Lyr A"), _("Layer A Name"),
+		          _("Trk B"), _("Lyr B"), _("Layer B Name"), _("Angle") );
 		DynStringCatCStr( out, headerLine );
 		ReportsFormatKinkedList( out, &DYNARR_N(reportsKinkedJoint_t,
 		                                        reportsKinkedList_da, 0),
@@ -2001,6 +2038,10 @@ void ReportsKinkedJoints( void * unused )
 				row->pos = GetTrkEndPos(trk, ep);
 				row->angleDelta = delta;
 				row->scale = GetTrkScale(trk);
+				row->layerA = GetTrkLayer(trk) + 1;
+				row->layerNameA = GetLayerName(GetTrkLayer(trk));
+				row->layerB = GetTrkLayer(other) + 1;
+				row->layerNameB = GetLayerName(GetTrkLayer(other));
 			}
 		}
 	}

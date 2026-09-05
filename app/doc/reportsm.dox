@@ -56,8 +56,12 @@ the Parts List (\ref cmdEnum) window.
 
 The <b>Unconnected Endpoints Report</b> command lists every track endpoint
 in the entire layout that is not connected to another track -- one row per
-open endpoint, giving its <b>Track</b> id, <b>X</b>/<b>Y</b> position,
-<b>Angle</b>, and whether it's <b>Nearby</b> another open endpoint.
+open endpoint, giving its <b>Track</b> id, the layer it's on (<b>Layer
+#</b>/<b>Layer Name</b>), its <b>X</b>/<b>Y</b> position, <b>Angle</b>, and
+whether it's <b>Nearby</b> another open endpoint. The layer number matches
+the main window's own layer buttons and layer selector (both 1-based) --
+useful for finding the right physical level to look at on a multi-level
+layout.
 
 ![](reportuncon.png)
 
@@ -112,6 +116,8 @@ by density, highest first. A layer whose density exceeds 10 turnouts per
 100ft is flagged <b>HEAVY</b> (a common sign of a staging yard or other
 switching-heavy area).
 
+![](reportturnout.png)
+
 A summary line above the list gives the layout's total turnout count,
 total track length, and overall density, updated whenever the report is
 generated or refreshed.
@@ -150,6 +156,8 @@ including couplers, Joe Fugate's operations-planning methodology, MRH Oct
 2014) would fit end-to-end along that layer's track, scaled to the
 layout's own scale.
 
+![](reporttracklen.png)
+
 A summary line above the list gives the layout's total track length,
 turnout count, and total estimated car capacity, updated whenever the
 report is generated or refreshed.
@@ -184,6 +192,8 @@ radius ranges (under 12in, 12-18in, 18-24in, 24-36in, and over 36in,
 model-scale inches). The minimum radius is the single most useful number
 here -- it determines which locomotives and passenger cars will operate
 reliably on the layout.
+
+![](reportcurve.png)
 
 A summary line above the list gives the curve count and radius range,
 updated whenever the report is generated or refreshed.
@@ -262,9 +272,13 @@ The <b>Gaps Report</b> command lists pairs of open (unconnected) track
 endpoints, on two different tracks, that lie within the layout's
 Connection Distance preference (Options > \ref cmdPref) of each other --
 the same distance the editor itself uses to decide whether two endpoints
-are close enough to connect. Each row gives <b>Track A</b>, <b>Track
-B</b>, and the <b>Gap</b> between them in inches. A pair like this
-usually means a missed connection rather than two deliberate dead ends.
+are close enough to connect. Each row gives <b>Track A</b> and <b>Track
+B</b> with each one's own layer (<b>Layer #</b>/<b>Layer Name</b>), and
+the <b>Gap</b> between them in inches. A pair like this usually means a
+missed connection rather than two deliberate dead ends -- but check both
+sides' layers first: on a multi-level layout, two endpoints can sit at
+the same X/Y position in the shared 2D drawing while actually being on
+two different physical levels, in which case the "gap" isn't a real one.
 
 ![](reportgaps.png)
 
@@ -317,7 +331,8 @@ that would fail the editor's own alignment check today if it were
 reconnected fresh. This usually means a track was moved or stretched
 without re-validating its connection, or the layout file was edited or
 imported from a source that didn't enforce the same tolerance. Each row
-gives <b>Track A</b>, <b>Track B</b>, and the angle discontinuity between
+gives <b>Track A</b> and <b>Track B</b> with each one's own layer
+(<b>Layer #</b>/<b>Layer Name</b>), and the angle discontinuity between
 them in degrees.
 
 ![](reportkinked.png)
