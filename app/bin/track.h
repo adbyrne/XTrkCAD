@@ -291,6 +291,17 @@ void CheckTrackLength( track_cp );
 track_p NewTrack( wIndex_t, TRKTYP_T, EPINX_T, CSIZE_T );
 void DescribeTrack( track_cp, char *, CSIZE_T );
 void ActivateTrack( track_cp );
+/** Find which endpoint of \p trk is connected to \p me, the reverse lookup
+ * of GetTrkEndTrk() -- given "I am \p me and I'm connected to \p trk
+ * somewhere," find where. Scans all of \p trk's endpoints linearly;
+ * \p trk must be non-NULL (dereferenced unconditionally, no NULL check).
+ *
+ * \param[in] trk the track to search, must be non-NULL
+ * \param[in] me the track \p trk should be connected to
+ * \return the endpoint index on \p trk connected to \p me, or -1 if \p trk
+ *     has no endpoint connected to \p me (e.g. they aren't actually
+ *     connected)
+ */
 EPINX_T GetEndPtConnectedToMe( track_p, track_p );
 EPINX_T GetNearestEndPtConnectedToMe( track_p, track_p, coOrd);
 void SetEndPts( track_p, EPINX_T );

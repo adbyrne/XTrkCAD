@@ -375,6 +375,122 @@ void ReportsCurveStats(void *unused);
  */
 void ReportsEquipmentSuitability(void *unused);
 
+/* ---------------------------------------------------------------------
+ * Phase 3/3a (SF #217, SF #779): Gaps and Kinked Joints -- both
+ * interactive (click-to-navigate + draw indicator), unlike the phase-2
+ * batch above -- the first reports since phase 1 to reuse
+ * reportsDialog_t's changeProc/cancelProc fields for real. See the
+ * phase-3/3a implementation plan for the full design/decisions record.
+ * ------------------------------------------------------------------- */
+
+/** One near-miss pair in the Gaps report: two open (unconnected) endpoints,
+ * on different tracks, within the layout's Connection Distance preference
+ * of each other -- likely a missed connection rather than two deliberate
+ * dead ends. Mirrors the shape of the external MCP project's own
+ * write_gaps_report() near-miss-pairs section (design history, not a
+ * citation a reader here can open) -- one row per *pair*, not one row per
+ * endpoint (that's phase 1's own Unconnected Endpoints report, which this
+ * one deliberately doesn't duplicate -- see the implementation plan's
+ * decision #2). `scale` is trackA's own scale (GetTrkScale()), used to
+ * size the interactive indicator when a row is selected -- an accepted
+ * minor inaccuracy if the pair happens to span two different layout
+ * scales, not worth solving for how rare that is in practice. */
+typedef struct {
+	TRKINX_T trackA;
+	coOrd    posA;
+	TRKINX_T trackB;
+	coOrd    posB;
+	DIST_T   gapIn;
+	SCALEINX_T scale;
+} reportsGapPair_t;
+
+/**
+ * Format the Gaps report's near-miss-pairs table body, one row per pair,
+ * in whatever order the caller passes them. Pure function -- no
+ * track_p/live layout state needed, safe to unit test directly against
+ * hand-built input. See ReportsFormatUnconnectedList()'s doc comment for
+ * the header/footer-stays-with-caller rationale.
+ *
+ * \param[in,out] out appended to, not cleared first
+ * \param[in] list array of near-miss pairs
+ * \param[in] count number of entries in list
+ */
+void ReportsFormatGapList(DynString *out, const reportsGapPair_t *list,
+                          int count);
+
+/**
+ * Menu callback (phase 3): compute and show/refresh the Gaps report --
+ * every open-endpoint near-miss pair within Connection Distance of each
+ * other (ReportsFormatGapList()), turntable stall endpoints excluded
+ * entirely from the pairing analysis (QueryTrack(trk, Q_CAN_ADD_ENDPOINTS)
+ * -- matches the external MCP project's own write_gaps_report() design,
+ * which reports turntable stalls as a separate count rather than pairing
+ * them). Isolated open endpoints (no near-miss partner) are counted in the
+ * summary line and included in Save/Print output only, not a second
+ * interactive list -- same rare-secondary-content precedent as phase 2's
+ * PARTIAL TURNOUTS section. Interactive: selecting a row pans/indicates at
+ * the pair's midpoint (ReportsCenterOn()/ReportsSetIndicator()).
+ *
+ * \param[in] unused menu-callback signature, unused
+ */
+void ReportsGaps(void *unused);
+
+/** One kinked joint in the Kinked Joints report: two already-connected
+ * tracks (GetTrkEndTrk() confirms the connection) whose endpoint angles
+ * have drifted out of the layout's Connection Angle tolerance since they
+ * were connected -- i.e. a joint that would fail today's own
+ * ConnectTracks() alignment check if reconnected fresh (see track.c's
+ * `d > connectDistance || a > connectAngle` check), meaning real
+ * post-connect corruption (a stretch/move that didn't re-validate, or a
+ * malformed import), not a newly-invented tolerance. No MCP counterpart --
+ * this row shape is a fresh native design, not a port. `pos` is the joint
+ * position from the lower-indexed track's own endpoint (GetTrkEndPos());
+ * `scale` is that same track's scale, used to size the interactive
+ * indicator. Each joint contributes exactly one row (deduplicated by only
+ * emitting when trackA's own index is lower than trackB's -- TRK_ITERATE
+ * would otherwise visit the same joint from both sides). */
+typedef struct {
+	TRKINX_T trackA;
+	TRKINX_T trackB;
+	coOrd    pos;
+	ANGLE_T  angleDelta;
+	SCALEINX_T scale;
+} reportsKinkedJoint_t;
+
+/**
+ * Format the Kinked Joints report's table body, one row per joint, in
+ * whatever order the caller passes them. Pure function, same
+ * header/footer-stays-with-caller contract as
+ * ReportsFormatUnconnectedList()/ReportsFormatGapList().
+ *
+ * \param[in,out] out appended to, not cleared first
+ * \param[in] list array of kinked joints
+ * \param[in] count number of entries in list
+ */
+void ReportsFormatKinkedList(DynString *out, const reportsKinkedJoint_t *list,
+                             int count);
+
+/**
+ * Menu callback (phase 3a): compute and show/refresh the Kinked Joints
+ * report -- every already-connected joint whose angle discontinuity
+ * exceeds the layout's Connection Angle preference
+ * (ReportsFormatKinkedList()), using the exact same formula
+ * ConnectTracks() itself uses at connect-time
+ * (`fabs(DifferenceBetweenAngles(GetTrkEndAngle(trk,ep),
+ * GetTrkEndAngle(other,otherEp) + 180.0))` via GetEndPtConnectedToMe() to
+ * find `otherEp`). A turnout endpoint connected out of tolerance is
+ * checked exactly like any other joint -- GetTrkEndTrk()/
+ * GetEndPtConnectedToMe() only ever describe connections between two
+ * different track_p objects, never a turnout's own internal PATH-segment
+ * geometry (SegProc()/IsSegTrack() territory, a different code path
+ * entirely -- see SF #778), so no special turnout exemption is needed or
+ * written here. Interactive: selecting a row pans/indicates at the
+ * joint's own position (ReportsCenterOn()/ReportsSetIndicator()).
+ *
+ * \param[in] unused menu-callback signature, unused
+ */
+void ReportsKinkedJoints(void *unused);
+
 /**
  * Draw the current interactive-navigation indicator (phase 1.5), if one is
  * active -- an open circle at the last-clicked report row's position, no-op

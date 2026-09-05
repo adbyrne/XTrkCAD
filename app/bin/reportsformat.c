@@ -232,3 +232,35 @@ reportsEquipStatus_e ReportsClassifyEquipment(DIST_T minRadius,
 	}
 	return REPORTS_EQUIP_FAIL;
 }
+
+/* Phase 3/3a batch (Gaps, Kinked Joints) -- SF #217/#779. Both interactive
+ * reports; these formatters are the pure/testable half only -- the compute
+ * passes that walk live track_p state (near-miss pairing, kinked-joint
+ * detection) live in reports.c, fixture/live-verified only, same split as
+ * every prior phase's compute pass. */
+
+void ReportsFormatGapList(DynString *out, const reportsGapPair_t *list,
+                          int count)
+{
+	char line[64];
+	int i;
+
+	for (i = 0; i < count; i++) {
+		snprintf(line, sizeof line, "%6d | %6d | %8.4f\n",
+		         list[i].trackA, list[i].trackB, list[i].gapIn);
+		DynStringCatCStr(out, line);
+	}
+}
+
+void ReportsFormatKinkedList(DynString *out, const reportsKinkedJoint_t *list,
+                             int count)
+{
+	char line[64];
+	int i;
+
+	for (i = 0; i < count; i++) {
+		snprintf(line, sizeof line, "%6d | %6d | %7.3f\n",
+		         list[i].trackA, list[i].trackB, list[i].angleDelta);
+		DynStringCatCStr(out, line);
+	}
+}

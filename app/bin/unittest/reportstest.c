@@ -565,6 +565,100 @@ static void test_classify_equipment_scaled_margin(void **state)
 	                 REPORTS_EQUIP_FAIL);
 }
 
+/* Phase 3/3a batch (Gaps, Kinked Joints) -- SF #217/#779. */
+
+static void test_gap_empty_list(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 16);
+
+	ReportsFormatGapList(&out, NULL, 0);
+
+	assert_string_equal(DynStringToCStr(&out), "");
+	DynStringFree(&out);
+}
+
+static void test_gap_single_row(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 32);
+	reportsGapPair_t list[1] = {
+		{ 3, { 0.0, 0.0 }, 7, { 0.08, 0.0 }, 0.08, 0 }
+	};
+
+	ReportsFormatGapList(&out, list, 1);
+
+	assert_string_equal(DynStringToCStr(&out),
+	                    "     3 |      7 |   0.0800\n");
+	DynStringFree(&out);
+}
+
+static void test_gap_multiple_rows(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 64);
+	reportsGapPair_t list[2] = {
+		{ 3,   { 0.0, 0.0 }, 7,   { 0.08, 0.0 }, 0.08,   0 },
+		{ 12,  { 0.0, 0.0 }, 145, { 0.0,  0.0 }, 0.0523, 0 }
+	};
+
+	ReportsFormatGapList(&out, list, 2);
+
+	assert_string_equal(DynStringToCStr(&out),
+	                    "     3 |      7 |   0.0800\n"
+	                    "    12 |    145 |   0.0523\n");
+	DynStringFree(&out);
+}
+
+static void test_kinked_empty_list(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 16);
+
+	ReportsFormatKinkedList(&out, NULL, 0);
+
+	assert_string_equal(DynStringToCStr(&out), "");
+	DynStringFree(&out);
+}
+
+static void test_kinked_single_row(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 32);
+	reportsKinkedJoint_t list[1] = {
+		{ 4, 9, { 0.0, 0.0 }, 3.5, 0 }
+	};
+
+	ReportsFormatKinkedList(&out, list, 1);
+
+	assert_string_equal(DynStringToCStr(&out),
+	                    "     4 |      9 |   3.500\n");
+	DynStringFree(&out);
+}
+
+static void test_kinked_multiple_rows(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 64);
+	reportsKinkedJoint_t list[2] = {
+		{ 4,   9,   { 0.0, 0.0 }, 3.5,   0 },
+		{ 100, 250, { 0.0, 0.0 }, 12.75, 0 }
+	};
+
+	ReportsFormatKinkedList(&out, list, 2);
+
+	assert_string_equal(DynStringToCStr(&out),
+	                    "     4 |      9 |   3.500\n"
+	                    "   100 |    250 |  12.750\n");
+	DynStringFree(&out);
+}
+
 int main(void)
 {
 	const struct CMUnitTest tests[] = {
@@ -606,6 +700,12 @@ int main(void)
 		cmocka_unit_test(test_classify_equipment_marginal_at_boundary),
 		cmocka_unit_test(test_classify_equipment_fail_just_under_margin),
 		cmocka_unit_test(test_classify_equipment_scaled_margin),
+		cmocka_unit_test(test_gap_empty_list),
+		cmocka_unit_test(test_gap_single_row),
+		cmocka_unit_test(test_gap_multiple_rows),
+		cmocka_unit_test(test_kinked_empty_list),
+		cmocka_unit_test(test_kinked_single_row),
+		cmocka_unit_test(test_kinked_multiple_rows),
 	};
 	return cmocka_run_group_tests(tests, NULL, NULL);
 }

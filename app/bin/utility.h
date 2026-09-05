@@ -49,6 +49,18 @@ void swapDouble(double* a, double* b);
 double FindDistance( coOrd p0, coOrd p1 );
 int CoOrdEqual(coOrd p0, coOrd p1);
 double NormalizeAngle( double a );
+/** Signed angular difference \p b - \p a, normalized into [-180,180].
+ * Direction matters -- this is \p b minus \p a, not the other way round
+ * (easy to get backwards at a call site). To test whether two angles are
+ * within a tolerance of each other regardless of direction, take
+ * `fabs(DifferenceBetweenAngles(a, b))` -- see ConnectTracks() (track.c)
+ * for the established pattern comparing an endpoint's own angle against
+ * the reverse (+180) of the angle it should be meeting.
+ *
+ * \param[in] a the angle subtracted from \p b, degrees
+ * \param[in] b the angle being compared, degrees
+ * \return \p b - \p a, normalized into [-180,180] degrees
+ */
 double DifferenceBetweenAngles(double a, double b);
 int AngleInRange(double a, double start, double size);
 int IsAligned( double a1, double a2 );
