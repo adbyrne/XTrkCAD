@@ -581,6 +581,15 @@ static BOOL_T IntersectLine( POS_T *fx0, POS_T *fy0, POS_T x1, POS_T y1,
 /*
  * intersectBox - find point on box boundary ([0,0],[size]) where
  *                line from p0 (interior) to p1 (exterior) intersects
+ *
+ * When p1 lies in a diagonal sector (x1!=0 && y1!=0) the line may exit
+ * through either the horizontal or the vertical edge, or exactly through
+ * the shared corner.  The two edge formulas are algebraically equivalent
+ * at the corner but round differently, so a corner exit would otherwise
+ * resolve to a sub-EPSILON-different point depending on which formula ran
+ * (i.e. on the calling line's approach direction).  Snap the solved
+ * coordinate to the exact corner when it lands within EPSILON of it, so
+ * the result is deterministic.
  */
 static void IntersectBox( coOrd *p1, coOrd p0, coOrd size, int x1, int y1 )
 {
@@ -588,12 +597,26 @@ static void IntersectBox( coOrd *p1, coOrd p0, coOrd size, int x1, int y1 )
 	printf("    IntersectBox( P1=[%0.2f %0.2f] P0=[%0.2f %0.2f] S=[%0.2f %0.2f] X1=%d Y1=%d\n",
 	       p1->x, p1->y, p0.x, p0.y, size.x, size.y, x1, y1 );
 #endif
-	if ( (y1!=0 &&
-	      IntersectLine( &p1->x, &p1->y, p0.x, p0.y, size.x,
-	                     (y1==-1?(POS_T)0.0:size.y) ))
-	     || (x1!=0 &&
-	         IntersectLine( &p1->y, &p1->x, p0.y, p0.x, size.y,
-	                        (x1==-1?(POS_T)0.0:size.x) ))) {
+	if ( y1!=0 &&
+	     IntersectLine( &p1->x, &p1->y, p0.x, p0.y, size.x,
+	                    (y1==-1?(POS_T)0.0:size.y) )) {
+		if ( x1!=0 ) {
+			POS_T xb = (x1==-1?(POS_T)0.0:size.x);
+			if ( fabs(p1->x - xb) < EPSILON ) {
+				p1->x = xb;
+			}
+		}
+		return;
+	}
+	if ( x1!=0 &&
+	     IntersectLine( &p1->y, &p1->x, p0.y, p0.x, size.y,
+	                    (x1==-1?(POS_T)0.0:size.x) )) {
+		if ( y1!=0 ) {
+			POS_T yb = (y1==-1?(POS_T)0.0:size.y);
+			if ( fabs(p1->y - yb) < EPSILON ) {
+				p1->y = yb;
+			}
+		}
 		return;
 	}
 	printf("      intersectBox bogus\n" );

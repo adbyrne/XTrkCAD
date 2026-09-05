@@ -239,6 +239,28 @@ target_link_libraries(reportstest PRIVATE dynstring ${LIBS})
 
 add_test(ReportsTest reportstest)
 
+# elevjoin.c -- pure endpoint elevation-mode merge logic extracted from
+# elev.c:SetTrkElevModes(). No dependency beyond libc and the ELEV_*
+# constants in track.h, so it links as the real source with no stubs.
+
+add_executable(elevjointest
+	elevjointest.c
+	../elevjoin.c
+)
+
+target_include_directories(elevjointest PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
+    ${CMAKE_SOURCE_DIR}/app/wlib/include
+)
+
+target_link_libraries(elevjointest PRIVATE ${LIBS})
+if(UNIX)
+	target_link_libraries(elevjointest PRIVATE m)
+endif()
+
+add_test(ElevJoinTest elevjointest)
+
 set_target_properties(
 	dxfformattest
 	shortentest
@@ -252,12 +274,13 @@ set_target_properties(
 	carregistrytest
 	careditlogictest
 	reportstest
+	elevjointest
  	PROPERTIES FOLDER UnitTests
  )
 
 if(XTRKCAD_SANITIZE AND UNIX)
 	set(SANITIZE_FLAGS -fsanitize=address,undefined -fno-omit-frame-pointer)
-	foreach(t dxfformattest shortentest defaultstest pathstest utilitytest beziertest cornutest undostreamtest carstest carregistrytest careditlogictest reportstest)
+	foreach(t dxfformattest shortentest defaultstest pathstest utilitytest beziertest cornutest undostreamtest carstest carregistrytest careditlogictest reportstest elevjointest)
 		target_compile_options(${t} PRIVATE ${SANITIZE_FLAGS})
 		target_link_options(${t} PRIVATE ${SANITIZE_FLAGS})
 	endforeach()
