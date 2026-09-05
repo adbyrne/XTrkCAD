@@ -33,13 +33,13 @@ static void test_single_row(void **state)
 	DynString out;
 	DynStringMalloc(&out, 16);
 	reportsEndPt_t list[1] = {
-		{ 1, { 0.0, 0.0 }, 180.0 }
+		{ 1, { 0.0, 0.0 }, 180.0, 0, 0, 1, "Main" }
 	};
 
 	ReportsFormatUnconnectedList(&out, list, 1);
 
 	assert_string_equal(DynStringToCStr(&out),
-	                    "     1 |    0.000 |    0.000 | 180.000\n");
+	                    "     1 |     1 | Main             |    0.000 |    0.000 | 180.000\n");
 	DynStringFree(&out);
 }
 
@@ -55,19 +55,19 @@ static void test_fixture_shaped_list(void **state)
 	DynString out;
 	DynStringMalloc(&out, 64);
 	reportsEndPt_t list[4] = {
-		{ 1, {  0.0, 0.0 }, 180.0 },
-		{ 2, {  8.0, 0.0 },   0.0 },
-		{ 3, {  0.0, 4.0 }, 180.0 },
-		{ 3, {  4.0, 4.0 },   0.0 },
+		{ 1, {  0.0, 0.0 }, 180.0, 0, 0, 1, "Main" },
+		{ 2, {  8.0, 0.0 },   0.0, 0, 0, 2, "Yard" },
+		{ 3, {  0.0, 4.0 }, 180.0, 0, 0, 1, "Main" },
+		{ 3, {  4.0, 4.0 },   0.0, 0, 0, 1, "Main" },
 	};
 
 	ReportsFormatUnconnectedList(&out, list, 4);
 
 	assert_string_equal(DynStringToCStr(&out),
-	                    "     1 |    0.000 |    0.000 | 180.000\n"
-	                    "     2 |    8.000 |    0.000 |   0.000\n"
-	                    "     3 |    0.000 |    4.000 | 180.000\n"
-	                    "     3 |    4.000 |    4.000 |   0.000\n");
+	                    "     1 |     1 | Main             |    0.000 |    0.000 | 180.000\n"
+	                    "     2 |     2 | Yard             |    8.000 |    0.000 |   0.000\n"
+	                    "     3 |     1 | Main             |    0.000 |    4.000 | 180.000\n"
+	                    "     3 |     1 | Main             |    4.000 |    4.000 |   0.000\n");
 	DynStringFree(&out);
 }
 
@@ -77,13 +77,13 @@ static void test_negative_and_fractional_values(void **state)
 	DynString out;
 	DynStringMalloc(&out, 16);
 	reportsEndPt_t list[1] = {
-		{ 42, { -1.5, 200.286947 }, 55.067831 }
+		{ 42, { -1.5, 200.286947 }, 55.067831, 0, 0, 3, "Staging" }
 	};
 
 	ReportsFormatUnconnectedList(&out, list, 1);
 
 	assert_string_equal(DynStringToCStr(&out),
-	                    "    42 |   -1.500 |  200.287 |  55.068\n");
+	                    "    42 |     3 | Staging          |   -1.500 |  200.287 |  55.068\n");
 	DynStringFree(&out);
 }
 
@@ -94,14 +94,14 @@ static void test_appends_not_overwrites(void **state)
 	DynStringMalloc(&out, 16);
 	DynStringCatCStr(&out, "existing content\n");
 	reportsEndPt_t list[1] = {
-		{ 1, { 0.0, 0.0 }, 0.0 }
+		{ 1, { 0.0, 0.0 }, 0.0, 0, 0, 1, "Main" }
 	};
 
 	ReportsFormatUnconnectedList(&out, list, 1);
 
 	assert_string_equal(DynStringToCStr(&out),
 	                    "existing content\n"
-	                    "     1 |    0.000 |    0.000 |   0.000\n");
+	                    "     1 |     1 | Main             |    0.000 |    0.000 |   0.000\n");
 	DynStringFree(&out);
 }
 
@@ -565,6 +565,103 @@ static void test_classify_equipment_scaled_margin(void **state)
 	                 REPORTS_EQUIP_FAIL);
 }
 
+/* Phase 3/3a batch (Gaps, Kinked Joints) -- SF #217/#779. */
+
+static void test_gap_empty_list(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 16);
+
+	ReportsFormatGapList(&out, NULL, 0);
+
+	assert_string_equal(DynStringToCStr(&out), "");
+	DynStringFree(&out);
+}
+
+static void test_gap_single_row(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 32);
+	reportsGapPair_t list[1] = {
+		{ 3, { 0.0, 0.0 }, 7, { 0.08, 0.0 }, 0.08, 0, 1, "Main", 1, "Main" }
+	};
+
+	ReportsFormatGapList(&out, list, 1);
+
+	assert_string_equal(DynStringToCStr(&out),
+	                    "     3 |     1 | Main           |      7 |     1 | Main           |   0.0800\n");
+	DynStringFree(&out);
+}
+
+/* Different layers on each side -- the case this column exists for: a
+ * multi-level layout can have two endpoints near in shared XY but on
+ * different physical levels, so both sides' own layer must be visible. */
+static void test_gap_multiple_rows(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 128);
+	reportsGapPair_t list[2] = {
+		{ 3,   { 0.0, 0.0 }, 7,   { 0.08, 0.0 }, 0.08,   0, 1, "Main", 1, "Main" },
+		{ 12,  { 0.0, 0.0 }, 145, { 0.0,  0.0 }, 0.0523, 0, 2, "Yard", 3, "Staging" }
+	};
+
+	ReportsFormatGapList(&out, list, 2);
+
+	assert_string_equal(DynStringToCStr(&out),
+	                    "     3 |     1 | Main           |      7 |     1 | Main           |   0.0800\n"
+	                    "    12 |     2 | Yard           |    145 |     3 | Staging        |   0.0523\n");
+	DynStringFree(&out);
+}
+
+static void test_kinked_empty_list(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 16);
+
+	ReportsFormatKinkedList(&out, NULL, 0);
+
+	assert_string_equal(DynStringToCStr(&out), "");
+	DynStringFree(&out);
+}
+
+static void test_kinked_single_row(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 32);
+	reportsKinkedJoint_t list[1] = {
+		{ 4, 9, { 0.0, 0.0 }, 3.5, 0, 1, "Main", 1, "Main" }
+	};
+
+	ReportsFormatKinkedList(&out, list, 1);
+
+	assert_string_equal(DynStringToCStr(&out),
+	                    "     4 |     1 | Main           |      9 |     1 | Main           |   3.500\n");
+	DynStringFree(&out);
+}
+
+static void test_kinked_multiple_rows(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 128);
+	reportsKinkedJoint_t list[2] = {
+		{ 4,   9,   { 0.0, 0.0 }, 3.5,   0, 1, "Main", 1, "Main" },
+		{ 100, 250, { 0.0, 0.0 }, 12.75, 0, 2, "Yard", 5, "Upper Deck" }
+	};
+
+	ReportsFormatKinkedList(&out, list, 2);
+
+	assert_string_equal(DynStringToCStr(&out),
+	                    "     4 |     1 | Main           |      9 |     1 | Main           |   3.500\n"
+	                    "   100 |     2 | Yard           |    250 |     5 | Upper Deck     |  12.750\n");
+	DynStringFree(&out);
+}
+
 int main(void)
 {
 	const struct CMUnitTest tests[] = {
@@ -606,6 +703,12 @@ int main(void)
 		cmocka_unit_test(test_classify_equipment_marginal_at_boundary),
 		cmocka_unit_test(test_classify_equipment_fail_just_under_margin),
 		cmocka_unit_test(test_classify_equipment_scaled_margin),
+		cmocka_unit_test(test_gap_empty_list),
+		cmocka_unit_test(test_gap_single_row),
+		cmocka_unit_test(test_gap_multiple_rows),
+		cmocka_unit_test(test_kinked_empty_list),
+		cmocka_unit_test(test_kinked_single_row),
+		cmocka_unit_test(test_kinked_multiple_rows),
 	};
 	return cmocka_run_group_tests(tests, NULL, NULL);
 }

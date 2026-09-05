@@ -115,13 +115,37 @@
                   </object>
                 </child>
                 <child>
+                  <object class="GtkTreeViewColumn" id="listlayer">
+                    <property name="resizable">True</property>
+                    <property name="title" translatable="yes">Layer #</property>
+                    <child>
+                      <object class="GtkCellRendererText" />
+                      <attributes>
+                        <attribute name="text">4</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="listlayername">
+                    <property name="resizable">True</property>
+                    <property name="title" translatable="yes">Layer Name</property>
+                    <child>
+                      <object class="GtkCellRendererText" />
+                      <attributes>
+                        <attribute name="text">5</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
                   <object class="GtkTreeViewColumn" id="listx">
                     <property name="resizable">True</property>
                     <property name="title" translatable="yes">X</property>
                     <child>
                       <object class="GtkCellRendererText" />
                       <attributes>
-                        <attribute name="text">4</attribute>
+                        <attribute name="text">6</attribute>
                       </attributes>
                     </child>
                   </object>
@@ -133,7 +157,7 @@
                     <child>
                       <object class="GtkCellRendererText" />
                       <attributes>
-                        <attribute name="text">5</attribute>
+                        <attribute name="text">7</attribute>
                       </attributes>
                     </child>
                   </object>
@@ -145,7 +169,7 @@
                     <child>
                       <object class="GtkCellRendererText" />
                       <attributes>
-                        <attribute name="text">6</attribute>
+                        <attribute name="text">8</attribute>
                       </attributes>
                     </child>
                   </object>
@@ -157,7 +181,7 @@
                     <child>
                       <object class="GtkCellRendererText" />
                       <attributes>
-                        <attribute name="text">7</attribute>
+                        <attribute name="text">9</attribute>
                       </attributes>
                     </child>
                   </object>
@@ -183,6 +207,10 @@
       <!-- column-name bitmap -->
       <column type="GdkPixbuf" />
       <!-- column-name track -->
+      <column type="gchararray" />
+      <!-- column-name layer -->
+      <column type="gchararray" />
+      <!-- column-name layername -->
       <column type="gchararray" />
       <!-- column-name x -->
       <column type="gchararray" />

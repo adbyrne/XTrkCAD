@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk" version="3.22" />
-  <object class="GtkDialog" id="reportstracklen">
+  <object class="GtkDialog" id="reportskinked">
     <property name="can-focus">False</property>
     <property name="border-width">12</property>
     <property name="type-hint">dialog</property>
     <property name="use-header-bar">0</property>
-    <property name="title" translatable="yes">Track Lengths Report</property>
+    <property name="title" translatable="yes">Report</property>
     <child type="action">
       <object class="GtkButton" id="id_help">
         <property name="use-underline">True</property>
@@ -94,7 +94,7 @@
             <property name="hexpand">True</property>
             <property name="vexpand">True</property>
             <property name="min-content-height">300</property>
-            <property name="min-content-width">500</property>
+            <property name="min-content-width">400</property>
             <property name="shadow-type">in</property>
             <child>
               <object class="GtkTreeView" id="treeview">
@@ -103,9 +103,9 @@
                 <property name="enable-grid-lines">vertical</property>
                 <property name="model">liststore</property>
                 <child>
-                  <object class="GtkTreeViewColumn" id="listlayer">
+                  <object class="GtkTreeViewColumn" id="listtracka">
                     <property name="resizable">True</property>
-                    <property name="title" translatable="yes">Layer #</property>
+                    <property name="title" translatable="yes">Track A</property>
                     <child>
                       <object class="GtkCellRendererText" />
                       <attributes>
@@ -115,9 +115,9 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkTreeViewColumn" id="listname">
+                  <object class="GtkTreeViewColumn" id="listlayera">
                     <property name="resizable">True</property>
-                    <property name="title" translatable="yes">Layer Name</property>
+                    <property name="title" translatable="yes">Layer A #</property>
                     <child>
                       <object class="GtkCellRendererText" />
                       <attributes>
@@ -127,9 +127,9 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkTreeViewColumn" id="listfeet">
+                  <object class="GtkTreeViewColumn" id="listlayernamea">
                     <property name="resizable">True</property>
-                    <property name="title" translatable="yes">Feet</property>
+                    <property name="title" translatable="yes">Layer A Name</property>
                     <child>
                       <object class="GtkCellRendererText" />
                       <attributes>
@@ -139,9 +139,9 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkTreeViewColumn" id="listturnouts">
+                  <object class="GtkTreeViewColumn" id="listtrackb">
                     <property name="resizable">True</property>
-                    <property name="title" translatable="yes">Turnouts</property>
+                    <property name="title" translatable="yes">Track B</property>
                     <child>
                       <object class="GtkCellRendererText" />
                       <attributes>
@@ -151,9 +151,9 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkTreeViewColumn" id="listcars">
+                  <object class="GtkTreeViewColumn" id="listlayerb">
                     <property name="resizable">True</property>
-                    <property name="title" translatable="yes">Cars</property>
+                    <property name="title" translatable="yes">Layer B #</property>
                     <child>
                       <object class="GtkCellRendererText" />
                       <attributes>
@@ -163,13 +163,25 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkTreeViewColumn" id="listpct">
+                  <object class="GtkTreeViewColumn" id="listlayernameb">
                     <property name="resizable">True</property>
-                    <property name="title" translatable="yes">% Total</property>
+                    <property name="title" translatable="yes">Layer B Name</property>
                     <child>
                       <object class="GtkCellRendererText" />
                       <attributes>
                         <attribute name="text">8</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="listangle">
+                    <property name="resizable">True</property>
+                    <property name="title" translatable="yes">Angle Diff (deg)</property>
+                    <child>
+                      <object class="GtkCellRendererText" />
+                      <attributes>
+                        <attribute name="text">9</attribute>
                       </attributes>
                     </child>
                   </object>
@@ -194,17 +206,19 @@
       <column type="gpointer" />
       <!-- column-name bitmap -->
       <column type="GdkPixbuf" />
-      <!-- column-name layer -->
+      <!-- column-name trackA -->
       <column type="gchararray" />
-      <!-- column-name name -->
+      <!-- column-name layerA -->
       <column type="gchararray" />
-      <!-- column-name feet -->
+      <!-- column-name layerNameA -->
       <column type="gchararray" />
-      <!-- column-name turnouts -->
+      <!-- column-name trackB -->
       <column type="gchararray" />
-      <!-- column-name cars -->
+      <!-- column-name layerB -->
       <column type="gchararray" />
-      <!-- column-name pct -->
+      <!-- column-name layerNameB -->
+      <column type="gchararray" />
+      <!-- column-name angle -->
       <column type="gchararray" />
     </columns>
   </object>

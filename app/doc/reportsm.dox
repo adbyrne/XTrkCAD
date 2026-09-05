@@ -27,6 +27,14 @@ the Parts List (\ref cmdEnum) window.
   classes (freight cars, locomotives, passenger cars) against the
   layout's minimum usable curve radius.
 
+- <b>Gaps</b> - displays the <b>Gaps Report</b> (\ref cmdReportsgaps)
+  dialog, listing pairs of open track endpoints that are close enough to
+  each other that they likely should be connected.
+
+- <b>Kinked Joints</b> - displays the <b>Kinked Joints Report</b>
+  (\ref cmdReportskinked) dialog, listing already-connected track joints
+  whose alignment has drifted out of tolerance.
+
 - \subpage cmdReports
 
 - \subpage cmdReportsturnout
@@ -37,6 +45,10 @@ the Parts List (\ref cmdEnum) window.
 
 - \subpage cmdReportsequipment
 
+- \subpage cmdReportsgaps
+
+- \subpage cmdReportskinked
+
 */
 
 /**
@@ -44,8 +56,12 @@ the Parts List (\ref cmdEnum) window.
 
 The <b>Unconnected Endpoints Report</b> command lists every track endpoint
 in the entire layout that is not connected to another track -- one row per
-open endpoint, giving its <b>Track</b> id, <b>X</b>/<b>Y</b> position,
-<b>Angle</b>, and whether it's <b>Nearby</b> another open endpoint.
+open endpoint, giving its <b>Track</b> id, the layer it's on (<b>Layer
+#</b>/<b>Layer Name</b>), its <b>X</b>/<b>Y</b> position, <b>Angle</b>, and
+whether it's <b>Nearby</b> another open endpoint. The layer number matches
+the main window's own layer buttons and layer selector (both 1-based) --
+useful for finding the right physical level to look at on a multi-level
+layout.
 
 ![](reportuncon.png)
 
@@ -100,6 +116,8 @@ by density, highest first. A layer whose density exceeds 10 turnouts per
 100ft is flagged <b>HEAVY</b> (a common sign of a staging yard or other
 switching-heavy area).
 
+![](reportturnout.png)
+
 A summary line above the list gives the layout's total turnout count,
 total track length, and overall density, updated whenever the report is
 generated or refreshed.
@@ -138,6 +156,8 @@ including couplers, Joe Fugate's operations-planning methodology, MRH Oct
 2014) would fit end-to-end along that layer's track, scaled to the
 layout's own scale.
 
+![](reporttracklen.png)
+
 A summary line above the list gives the layout's total track length,
 turnout count, and total estimated car capacity, updated whenever the
 report is generated or refreshed.
@@ -172,6 +192,8 @@ radius ranges (under 12in, 12-18in, 18-24in, 24-36in, and over 36in,
 model-scale inches). The minimum radius is the single most useful number
 here -- it determines which locomotives and passenger cars will operate
 reliably on the layout.
+
+![](reportcurve.png)
 
 A summary line above the list gives the curve count and radius range,
 updated whenever the report is generated or refreshed.
@@ -240,5 +262,105 @@ print the report.
 
 The <b>Done</b> button closes the <b>Equipment Suitability Report</b>
 window.
+
+*/
+
+/**
+\page cmdReportsgaps Gaps Report
+
+The <b>Gaps Report</b> command lists pairs of open (unconnected) track
+endpoints, on two different tracks, that lie within the layout's
+Connection Distance preference (Options > \ref cmdPref) of each other --
+the same distance the editor itself uses to decide whether two endpoints
+are close enough to connect. Each row gives <b>Track A</b> and <b>Track
+B</b> with each one's own layer (<b>Layer #</b>/<b>Layer Name</b>), and
+the <b>Gap</b> between them in inches. A pair like this usually means a
+missed connection rather than two deliberate dead ends -- but check both
+sides' layers first: on a multi-level layout, two endpoints can sit at
+the same X/Y position in the shared 2D drawing while actually being on
+two different physical levels, in which case the "gap" isn't a real one.
+
+![](reportgaps.png)
+
+A summary line above the list gives the number of near-miss pairs found,
+how many open endpoints have no nearby partner (<b>isolated</b>), and how
+many endpoints were excluded because they belong to a turntable, updated
+whenever the report is generated or refreshed.
+
+Turntable stall endpoints are always open by design and are excluded from
+this report's pairing analysis entirely -- they're counted in the summary
+line but never listed as a gap. This is a deliberate difference from the
+Unconnected Endpoints Report (\ref cmdReports), which lists every open
+endpoint including turntable stalls.
+
+Isolated open endpoints (no nearby partner) are not listed in the
+interactive table -- they're counted in the summary line, and listed in
+full in the Save/Print output.
+
+Unlike the Turnout Density Report (\ref cmdReportsturnout) and the other
+phase-2 reports, this report always covers the whole layout and is
+interactive, the same way the Unconnected Endpoints Report (\ref
+cmdReports) is: selecting a row pans the <b>Main Canvas</b> (\ref mainW)
+to the midpoint between the pair and draws a temporary open-circle
+indicator there. The indicator is purely visual -- it's never saved with
+the layout and disappears as soon as the report window closes. Its color
+can be changed on the <b>Colors</b> (\ref cmdRgbcolor) dialog, under
+<b>Report Indicator</b>.
+
+The <b>Refresh</b> button recomputes the report in place -- useful after
+fixing a flagged gap elsewhere in the layout, without closing and
+reopening the report window.
+
+The <b>Save As...</b> button opens a <i>File Save</i> dialog window that's
+used to name and save the report to a text file.
+
+The <b>Print</b> button opens the <i>Print</i> dialog which is used to
+print the report.
+
+The <b>Done</b> button closes the <b>Gaps Report</b> window.
+
+*/
+
+/**
+\page cmdReportskinked Kinked Joints Report
+
+The <b>Kinked Joints Report</b> command lists already-connected track
+joints whose alignment has drifted out of the layout's Connection Angle
+preference (Options > \ref cmdPref) since they were connected -- a joint
+that would fail the editor's own alignment check today if it were
+reconnected fresh. This usually means a track was moved or stretched
+without re-validating its connection, or the layout file was edited or
+imported from a source that didn't enforce the same tolerance. Each row
+gives <b>Track A</b> and <b>Track B</b> with each one's own layer
+(<b>Layer #</b>/<b>Layer Name</b>), and the angle discontinuity between
+them in degrees.
+
+![](reportkinked.png)
+
+A summary line above the list gives the number of kinked joints found and
+the Connection Angle tolerance they were checked against, updated
+whenever the report is generated or refreshed.
+
+Unlike the Turnout Density Report (\ref cmdReportsturnout) and the other
+phase-2 reports, this report always covers the whole layout and is
+interactive: selecting a row pans the <b>Main Canvas</b> (\ref mainW) to
+the joint's position and draws a temporary open-circle indicator there,
+the same way the Unconnected Endpoints Report (\ref cmdReports) and Gaps
+Report (\ref cmdReportsgaps) do. The indicator is purely visual -- it's
+never saved with the layout and disappears as soon as the report window
+closes. Its color can be changed on the <b>Colors</b> (\ref cmdRgbcolor)
+dialog, under <b>Report Indicator</b>.
+
+The <b>Refresh</b> button recomputes the report in place -- useful after
+fixing a flagged joint elsewhere in the layout, without closing and
+reopening the report window.
+
+The <b>Save As...</b> button opens a <i>File Save</i> dialog window that's
+used to name and save the report to a text file.
+
+The <b>Print</b> button opens the <i>Print</i> dialog which is used to
+print the report.
+
+The <b>Done</b> button closes the <b>Kinked Joints Report</b> window.
 
 */
