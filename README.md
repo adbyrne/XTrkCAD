@@ -1,13 +1,13 @@
 # XTrkCAD (GTK3V2MAIN)
 
-[![CI](https://github.com/adbyrne/XTrkCAD/actions/workflows/ci-gtk3.yml/badge.svg?branch=GTK3V2MAIN)](https://github.com/adbyrne/XTrkCAD/actions/workflows/ci-gtk3.yml)
+[![CI](../../actions/workflows/ci-gtk3.yml/badge.svg?branch=GTK3V2MAIN)](../../actions/workflows/ci-gtk3.yml)
 [![License: GPL v2](https://img.shields.io/badge/License-GPL_v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 
 XTrkCAD is an open-source CAD tool for designing model railroad track layouts.
 It supports a wide range of scales and manufacturers, with a rich library of
 turnouts, sectional track, and flex track.
 
-This branch is the GTK+ 3 successor to the [`main`](https://github.com/adbyrne/XTrkCAD/tree/main)
+This branch is the GTK+ 3 successor to the [`main`](../../tree/main)
 (GTK+ 2) branch — porting the UI layer to GTK3 while tracking the same upstream project.
 
 **Upstream project:** [XTrkCAD on SourceForge](https://sourceforge.net/projects/xtrkcad-fork/) —
@@ -15,9 +15,11 @@ the authoritative Mercurial repository and issue tracker live there.
 This fork tracks that upstream and layers on toolchain modernization, CI/CD,
 the GTK3 migration, and quality work (static analysis, sanitizers, coverage).
 
-**Documentation & reports:** [adbyrne.github.io/XTrkCAD](https://adbyrne.github.io/XTrkCAD/) —
-Doxygen developer docs, the user guide, and non-gating analysis reports (code coverage,
-cppcheck, clang-tidy, codespell, compiler warnings), redeployed on every push to this branch.
+**Documentation & reports:** published via GitHub Pages on every push to this branch (Doxygen
+developer docs, the user guide, and non-gating analysis reports — code coverage, cppcheck,
+clang-tidy, codespell, compiler warnings) at `<owner>.github.io/<repo>`, `<owner>/<repo>` being
+whichever fork's Actions did the deploying. See
+[`docs/doxygen/advanced.md`](docs/doxygen/advanced.md) for how this is wired up.
 
 ---
 
