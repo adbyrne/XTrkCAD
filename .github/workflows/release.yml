@@ -673,7 +673,14 @@ jobs:
           echo "$PWD/doxygen-${DOXYGEN_VERSION}/bin" >> "$GITHUB_PATH"
 
       - name: Configure
-        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DXTRKCAD_USE_DOXYGEN=ON -DXTRKCAD_TESTING=OFF
+        # XTRKCAD_USERGUIDE_URL overrides the dev guide's default (relative,
+        # same-build-tree) User Guide link with the real absolute URL this
+        # job's own Pages deployment below puts it at -- computed from this
+        # run's own repository context, not a hardcoded site/account, so it's
+        # correct for whichever fork's Actions is doing the deploying.
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DXTRKCAD_USE_DOXYGEN=ON -DXTRKCAD_TESTING=OFF \
+            -DXTRKCAD_USERGUIDE_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/userguide/"
 
       - name: Build docs
         run: cmake --build build --target docs-doxygen
@@ -713,8 +720,9 @@ jobs:
   # ── GitHub Pages — Doxygen + user guide, redeployed on every push ─────────
   # Gives stable, permanent URLs that always reflect the latest successful
   # build, unlike the 14-day artifacts above (whose links change every run):
-  #   https://adbyrne.github.io/XTrkCAD/doxygen/
-  #   https://adbyrne.github.io/XTrkCAD/userguide/
+  #   https://<owner>.github.io/<repo>/doxygen/
+  #   https://<owner>.github.io/<repo>/userguide/
+  # (<owner>/<repo> being whichever fork's Actions is doing the deploying.)
   deploy-pages:
     needs:
       - package-docs
@@ -788,7 +796,7 @@ jobs:
           <ul>
             <li><a href="doxygen/">Developer documentation (Doxygen)</a></li>
             <li><a href="userguide/">User guide</a></li>
-            <li><a href="https://github.com/adbyrne/XTrkCAD/releases/tag/latest-gtk3v2main">Latest development build (packages)</a></li>
+            <li><a href="${{ github.server_url }}/${{ github.repository }}/releases/tag/latest-gtk3v2main">Latest development build (packages)</a></li>
           </ul>
           <h2>Analysis reports</h2>
           <p>Report-only, non-gating -- findings backlogs, not build failures. Each link back to the
@@ -819,7 +827,7 @@ jobs:
 
   # ── "Latest" GitHub Release — rolling, tracks the newest GTK3V2MAIN push ──
   # Unlike the artifacts above, this is one permanent, unchanging URL:
-  #   https://github.com/adbyrne/XTrkCAD/releases/tag/latest-gtk3v2main
+  #   <server>/<owner>/<repo>/releases/tag/latest-gtk3v2main
   # Only runs on ordinary GTK3V2MAIN pushes: version tags get their own
   # permanent release via github-release below, and workflow_dispatch runs
   # (which may opt into experimental NSIS/DMG builds) are excluded so those
@@ -867,11 +875,11 @@ jobs:
               '**Automatically updated on every successful push to GTK3V2MAIN.**' \
               '' \
               'This is an unstable development build, not a tagged release — for' \
-              'production use, see the [tagged releases](https://github.com/adbyrne/XTrkCAD/releases).' \
+              "production use, see the [tagged releases](${{ github.server_url }}/${{ github.repository }}/releases)." \
               '' \
               "Built from commit ${{ github.sha }}." \
               '' \
-              '[Doxygen developer docs](https://adbyrne.github.io/XTrkCAD/doxygen/) · [User guide](https://adbyrne.github.io/XTrkCAD/userguide/)')" \
+              "[Doxygen developer docs](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/doxygen/) · [User guide](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/userguide/)")" \
             --prerelease \
             --latest=false \
             "${FILES[@]}"

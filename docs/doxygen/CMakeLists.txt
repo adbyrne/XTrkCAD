@@ -23,6 +23,19 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(doxygen-awesome-css)
 SET( DOXYGEN_AWESOME_CSS_DIR "${doxygen-awesome-css_SOURCE_DIR}" )
 
+# Where the dev guide's "User Guide" nav tab points -- a relative link that
+# resolves correctly for a normal local build (this target plus a sibling
+# app/doc help-html build under the same build tree). A CI job that deploys
+# this documentation somewhere the two guides aren't laid out this way (e.g.
+# release.yml's GitHub Pages job) overrides this at configure time with the
+# real absolute URL for that deployment -- computed from that job's own
+# context, never a hardcoded site/account.
+if(NOT DEFINED XTRKCAD_USERGUIDE_URL)
+    set(XTRKCAD_USERGUIDE_URL "../../app/doc/html/" CACHE STRING
+        "URL the dev guide's User Guide tab links to")
+endif()
+configure_file(${sourcedoc_SOURCE_DIR}/DoxygenLayout.xml.in ${sourcedoc_BINARY_DIR}/DoxygenLayout.xml @ONLY)
+
 configure_file(${sourcedoc_SOURCE_DIR}/Doxyfile.in ${sourcedoc_BINARY_DIR}/Doxyfile)
 
 add_custom_target(docs-doxygen

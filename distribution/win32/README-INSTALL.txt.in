@@ -36,4 +36,4 @@ NSIS installer (.exe) instead of this ZIP archive.
 SUPPORT
 -------
 https://xtrkcad.org
-https://github.com/adbyrne/XTrkCAD
+@XTRKCAD_PROJECT_URL@
