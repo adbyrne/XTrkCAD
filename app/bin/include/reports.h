@@ -31,6 +31,8 @@
 #ifndef REPORTS_H
 #define REPORTS_H
 
+#include <stddef.h>
+
 #include <dynstring.h>
 #include "xtctypes.h"
 
@@ -73,6 +75,21 @@ typedef struct {
 	 * included) don't need updating. */
 	unsigned int layer;
 	const char *layerName;
+	/** TRUE if every endpoint on this row's track is open -- a fully
+	 * disconnected/"ghost" track, as opposed to a deliberate dead-end
+	 * stub (one end joined, the other left open). Computed once per
+	 * track in the compute loop (needs every endpoint of that track, not
+	 * just this row's own). FALSE for a turntable (see `turntable`
+	 * below) even if every stall happens to be unconnected -- that's
+	 * normal for a turntable, not worth flagging the same way. Appended
+	 * at the end so existing positional initializers (tests included)
+	 * don't need updating. */
+	BOOL_T isolated;
+	/** TRUE if this endpoint belongs to a turntable
+	 * (QueryTrack(trk, Q_CAN_ADD_ENDPOINTS)) -- turntable stalls are
+	 * open by design, not a sign of a missed connection or a stray
+	 * track. Appended at the end, same reason as `isolated` above. */
+	BOOL_T turntable;
 } reportsEndPt_t;
 
 /**
@@ -88,6 +105,21 @@ typedef struct {
  */
 void ReportsFormatUnconnectedList(DynString *out, const reportsEndPt_t *list,
                                   int count);
+
+/**
+ * Build one row's free-text Note -- a comma-separated combination of
+ * whichever of "Turntable"/"Isolated"/"Nearby" apply to `entry` (in that
+ * order), or an empty string if none do. Plain text on purpose (not a
+ * fixed enum/boolean) so a future addition just appends another word
+ * here, no column-type or format-string change needed elsewhere. Pure
+ * function, safe to unit test directly.
+ *
+ * \param[in] entry the row to describe
+ * \param[out] buf note text, always NUL-terminated
+ * \param[in] bufSize size of buf
+ */
+void ReportsFormatEndPtNote(const reportsEndPt_t *entry, char *buf,
+                            size_t bufSize);
 
 /* ---------------------------------------------------------------------
  * Phase 2 batch (track lengths / curve stats / turnout density /
@@ -322,12 +354,15 @@ reportsEquipStatus_e ReportsClassifyEquipment(DIST_T minRadius,
  * refresh proc (see reports.c's `reportsDialog_t.refreshProc`) since it
  * always recomputes from scratch: walk the current layout for every open
  * (unconnected) track endpoint, flag/group Nearby ones
- * (ReportsMarkNearby()), show/update the report dialog (the internal,
- * generic `ReportsShowDialog()` -- see reports.c; every report phase
- * shares this same viewer machinery, parameterized by a `reportsDialog_t`
- * instance per report -- then the summary label and the interactive list
- * via ReportsPopulateList()), and log a one-line summary to the "reports"
- * debug category (`-d reports=1`) for live-testing.
+ * (ReportsMarkNearby()), determine each row's Isolated/Turntable status
+ * (`reportsEndPt_t.isolated`/`.turntable`), show/update the report dialog
+ * (the internal, generic `ReportsShowDialog()` -- see reports.c; every
+ * report phase shares this same viewer machinery, parameterized by a
+ * `reportsDialog_t` instance per report -- then the summary label and the
+ * interactive list via ReportsPopulateList(), whose free-text Note column
+ * combines all three -- see ReportsFormatEndPtNote()), and log a one-line
+ * summary to the "reports" debug category (`-d reports=1`) for
+ * live-testing.
  *
  * \param[in] unused menu-callback signature, unused
  */
@@ -339,7 +374,7 @@ void ReportsUnconnectedEndpoints(void *unused);
  * 100ft of track (ReportsFormatTurnoutList()), switching-heavy layers
  * flagged via ReportsIsTurnoutHeavy(), and a partial-turnouts list (fewer
  * than 3 endpoints -- folded into the Save/Print text only, not a second
- * interactive list, per the phase-2 implementation plan). Report-only,
+ * interactive list). Report-only,
  * unlike phase 1: no click-to-navigate, no draw indicator -- the
  * `reportsturnout.ui` dialog has no row-selection changeProc at all.
  *
@@ -353,8 +388,7 @@ void ReportsTurnoutDensity(void *unused);
  * and car capacity (ReportsCarsPerFoot(), Fugate methodology) per layer.
  * Report-only, no click-to-navigate/indicator, same shape as
  * ReportsTurnoutDensity(). Shares that function's `GetTrkEndPtCnt(trk) >=
- * 2` guard before any `GetTrkLength()` call -- see
- * [[feedback_trk_iterate_endpoint_guard]] (memory) / SF #776's fix.
+ * 2` guard before any `GetTrkLength()` call -- see SF #776's fix.
  *
  * \param[in] unused menu-callback signature, unused
  */
@@ -396,8 +430,7 @@ void ReportsEquipmentSuitability(void *unused);
  * Phase 3/3a (SF #217, SF #779): Gaps and Kinked Joints -- both
  * interactive (click-to-navigate + draw indicator), unlike the phase-2
  * batch above -- the first reports since phase 1 to reuse
- * reportsDialog_t's changeProc/cancelProc fields for real. See the
- * phase-3/3a implementation plan for the full design/decisions record.
+ * reportsDialog_t's changeProc/cancelProc fields for real.
  * ------------------------------------------------------------------- */
 
 /** One near-miss pair in the Gaps report: two open (unconnected) endpoints,
@@ -407,8 +440,8 @@ void ReportsEquipmentSuitability(void *unused);
  * write_gaps_report() near-miss-pairs section (design history, not a
  * citation a reader here can open) -- one row per *pair*, not one row per
  * endpoint (that's phase 1's own Unconnected Endpoints report, which this
- * one deliberately doesn't duplicate -- see the implementation plan's
- * decision #2). `scale` is trackA's own scale (GetTrkScale()), used to
+ * one deliberately doesn't duplicate). `scale` is trackA's own scale
+ * (GetTrkScale()), used to
  * size the interactive indicator when a row is selected -- an accepted
  * minor inaccuracy if the pair happens to span two different layout
  * scales, not worth solving for how rare that is in practice. */

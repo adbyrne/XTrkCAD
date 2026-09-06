@@ -133,6 +133,10 @@ events (a button press, text entry) via a callback function pointer supplied whe
 created, along with a `void *` context value — see the cast macros above for the common pattern
 of packing a small integer into that context instead of a real pointer.
 
+See the \subpage creating-a-report "Creating a New Report" page for how to add a new entry to
+the `Reports` menu (SF #217) -- the shared viewer, the two report shapes, and a step-by-step
+recipe with references into the current `reports.c`/`reports.h` source.
+
 See the \subpage building "Building and Testing" page for local build steps per platform,
 CI details, tool-version pins, and advanced checks (sanitizers, valgrind, the regression
 demo-playback suite, debug logging).

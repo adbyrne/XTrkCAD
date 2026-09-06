@@ -49,8 +49,7 @@ add_custom_target(tooltips ALL
 )
 
 # genmessages.c now emits Doxygen syntax only (halibut's \S{}/\H{} output was
-# removed -- see SF feature-requests #219 / this branch's investigation, and
-# .claude/halibut-doxygen-investigation-plan.md). messages.but is gone;
+# removed -- see SF feature-requests #219). messages.but is gone;
 # app/doc/CMakeLists.txt's still-halibut-based help-html target (which lists
 # messages.but as one of its sources) is not updated by this change and will
 # fail until that separate, not-yet-done step catches up -- acceptable on

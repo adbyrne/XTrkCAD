@@ -28,20 +28,49 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <strings.h>
 
 #include "include/reports.h"
+
+void ReportsFormatEndPtNote(const reportsEndPt_t *entry, char *buf,
+                            size_t bufSize)
+{
+	BOOL_T first = 1;
+
+	buf[0] = '\0';
+
+	/* Plain string concatenation, not a fixed enum/switch -- any subset
+	 * of these can apply to the same row (e.g. an isolated stub that
+	 * also happens to sit near another open endpoint), and a future
+	 * addition is just another `if` block, no format-string rework. */
+	if (entry->turntable) {
+		strncat(buf, "Turntable", bufSize - strlen(buf) - 1);
+		first = 0;
+	}
+	if (entry->isolated) {
+		if (!first) { strncat(buf, ", ", bufSize - strlen(buf) - 1); }
+		strncat(buf, "Isolated", bufSize - strlen(buf) - 1);
+		first = 0;
+	}
+	if (entry->nearby) {
+		if (!first) { strncat(buf, ", ", bufSize - strlen(buf) - 1); }
+		strncat(buf, "Nearby", bufSize - strlen(buf) - 1);
+	}
+}
 
 void ReportsFormatUnconnectedList(DynString *out, const reportsEndPt_t *list,
                                   int count)
 {
 	char line[160];
+	char note[32];
 	int i;
 
 	for (i = 0; i < count; i++) {
-		snprintf(line, sizeof line, "%6d | %5u | %-16s | %8.3f | %8.3f | %7.3f\n",
+		ReportsFormatEndPtNote(&list[i], note, sizeof note);
+		snprintf(line, sizeof line, "%6d | %5u | %-16s | %8.3f | %8.3f | %7.3f | %s\n",
 		         list[i].trackId, list[i].layer, list[i].layerName,
-		         list[i].pos.x, list[i].pos.y, list[i].angle);
+		         list[i].pos.x, list[i].pos.y, list[i].angle, note);
 		DynStringCatCStr(out, line);
 	}
 }

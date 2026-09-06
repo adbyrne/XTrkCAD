@@ -175,9 +175,9 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkTreeViewColumn" id="listnearby">
+                  <object class="GtkTreeViewColumn" id="listnote">
                     <property name="resizable">True</property>
-                    <property name="title" translatable="yes">Nearby</property>
+                    <property name="title" translatable="yes">Note</property>
                     <child>
                       <object class="GtkCellRendererText" />
                       <attributes>
@@ -218,7 +218,7 @@
       <column type="gchararray" />
       <!-- column-name angle -->
       <column type="gchararray" />
-      <!-- column-name nearby -->
+      <!-- column-name note -->
       <column type="gchararray" />
     </columns>
   </object>

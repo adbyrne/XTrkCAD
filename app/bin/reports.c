@@ -1,22 +1,26 @@
 /** \file reports.c
  * Native "Reports" feature (SF #217), phase 1: a generic report viewer
  * (Refresh/Save/Print/Print Setup, same button shape as denum.c's "Parts
- * List" dialog -- see the phase-1 implementation plan for why this is built
- * generic from the start, meant for every future report phase to reuse)
- * plus the phase-1 report itself, unconnected track endpoints.
+ * List" dialog -- built generic from the start so every future report
+ * phase can reuse it) plus the phase-1 report itself, unconnected track
+ * endpoints.
  *
- * Phase 1.5 (SF #772, folded into the same ticket -- see the phase-1.5
- * implementation plan) adds interactive click-to-navigate: selecting a row
- * in the visible PD_LIST control pans the main canvas to that endpoint and
- * draws a transient open-circle indicator. The indicator is a pure
- * draw-overlay (drawn each redraw from draw.c's DrawTempContent(), see
- * ReportsDrawIndicator()) -- never a real track object, so it can never end
- * up in a saved .xtc/.xtce file and needs no undo/redo handling.
+ * Phase 1.5 (SF #772, folded into the same ticket) adds interactive
+ * click-to-navigate: selecting a row in the visible PD_LIST control pans
+ * the main canvas to that endpoint and draws a transient open-circle
+ * indicator. The indicator is a pure draw-overlay (drawn each redraw from
+ * draw.c's DrawTempContent(), see ReportsDrawIndicator()) -- never a real
+ * track object, so it can never end up in a saved .xtc/.xtce file and
+ * needs no undo/redo handling.
  *
- * The list is also grouped/flagged for "Nearby" endpoints -- see
- * ReportsMarkNearby() -- and can be recomputed in place via the Refresh
- * button (`reportsDialog_t.refreshProc`) without closing/reopening the
- * dialog.
+ * The list is also grouped/flagged for "Nearby" endpoints (see
+ * ReportsMarkNearby()) and annotated with a free-text Note column --
+ * Nearby plus "Isolated" (every endpoint on the row's track is open, a
+ * fully disconnected/"ghost" track rather than a deliberate dead-end
+ * stub) and "Turntable" (the row's endpoint is a turntable stall, open
+ * by design) -- see ReportsFormatEndPtNote() (reportsformat.c). The list
+ * can be recomputed in place via the Refresh button
+ * (`reportsDialog_t.refreshProc`) without closing/reopening the dialog.
  *
  * Save/Print build their output on demand (ReportsBuildText()/
  * ReportsRefreshPrintText()) into a hidden PD_TEXT-equivalent control
@@ -26,8 +30,8 @@
  * paramData_t entry.
  *
  * Phase 2 (track lengths/curve stats/turnout density/equipment
- * suitability -- see the phase-2 implementation plan) is report-only, no
- * click-to-navigate/indicator, and needs its own dialog per report (each
+ * suitability) is report-only, no click-to-navigate/indicator, and needs
+ * its own dialog per report (each
  * with a genuinely different PD_LIST column shape -- `reportsturnout.ui`
  * for this file's first phase-2 report, Turnout Density). This is the
  * point at which the phase-1-only plumbing above (originally hardcoded to
@@ -41,10 +45,8 @@
  *
  * The date-header logic (AddReportDateString()) is deliberately duplicated
  * from denum.c's AddDateString() rather than shared, to keep this
- * feature's first PR scoped to new files only -- see the phase-1
- * implementation plan's "Shared helper duplication" section for the
- * reasoning and the follow-up cleanup this leaves flagged (extract to
- * app/dynstring/).
+ * feature's first PR scoped to new files only; the follow-up cleanup this
+ * leaves flagged is extracting a shared helper to app/dynstring/.
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -99,11 +101,12 @@ static int log_reports = -1;
  * `reportsTurnoutDlg` for phase 2's Turnout Density, etc.). Originally
  * this was all hardcoded to phase 1's own module statics
  * (`reportsW`/`reportsT`/`reportsFile_fs`/a single shared
- * `reportsRefreshProc`); phase 1's own implementation plan flagged
- * "retitling on reuse becomes relevant once phase 2 adds a second report
- * type, deliberately not solved here" -- this struct is that resolution,
- * written once a second report type actually existed to prove the shape
- * against rather than speculatively upfront. Each report phase gets its
+ * `reportsRefreshProc`); retitling on reuse was flagged in phase 1 as
+ * something that would only become relevant once a second report type
+ * existed, and deliberately not solved then -- this struct is that
+ * resolution, written once a second report type actually existed to prove
+ * the shape against rather than speculatively upfront. Each report phase
+ * gets its
  * own dialog/window (never retitled/reused across report types), so no
  * retitling logic is needed after all -- see ReportsShowDialog(). */
 typedef struct {
@@ -171,9 +174,9 @@ static reportsOpCtx_t reportsUnconnectedRefreshOp = { &reportsUnconnectedDlg, RE
 static reportsOpCtx_t reportsUnconnectedSaveOp    = { &reportsUnconnectedDlg, REPORTSOP_SAVE };
 static reportsOpCtx_t reportsUnconnectedPrintOp   = { &reportsUnconnectedDlg, REPORTSOP_PRINT };
 
-static wWinPix_t reportsListWidths[] = { 60, 60, 110, 80, 80, 70, 60 };
+static wWinPix_t reportsListWidths[] = { 60, 60, 110, 80, 80, 70, 130 };
 static const char * reportsListTitles[] = {
-	N_("Track"), N_("Layer #"), N_("Layer Name"), N_("X"), N_("Y"), N_("Angle"), N_("Nearby")
+	N_("Track"), N_("Layer #"), N_("Layer Name"), N_("X"), N_("Y"), N_("Angle"), N_("Note")
 };
 static paramListData_t reportsListData = { 8, 300, 7, reportsListWidths, reportsListTitles };
 
@@ -597,10 +600,13 @@ static void ReportsPopulateList(void)
 	wListClear( reportsList );
 	for ( i = 0; i < reportsCurrentList_da.cnt; i++ ) {
 		reportsEndPt_t *entry = &DYNARR_N(reportsEndPt_t, reportsCurrentList_da, i);
+		char note[32];
+
+		ReportsFormatEndPtNote( entry, note, sizeof note );
 		snprintf( row, sizeof row, "%d\t%u\t%s\t%.3f\t%.3f\t%.3f\t%s",
 		          entry->trackId, entry->layer, entry->layerName,
 		          entry->pos.x, entry->pos.y, entry->angle,
-		          entry->nearby ? _("Yes") : "" );
+		          note );
 		wListAddValue( reportsList, row, NULL, entry );
 	}
 
@@ -632,8 +638,9 @@ static void ReportsBuildText(DynString *out)
 		 * data rows stay aligned. */
 		char headerLine[96];
 		snprintf( headerLine, sizeof headerLine,
-		          "\n%6s | %5s | %-16s | %8s | %8s | %7s\n",
-		          _("Track"), _("Lyr"), _("Layer Name"), _("X"), _("Y"), _("Angle") );
+		          "\n%6s | %5s | %-16s | %8s | %8s | %7s | %s\n",
+		          _("Track"), _("Lyr"), _("Layer Name"), _("X"), _("Y"), _("Angle"),
+		          _("Note") );
 		DynStringCatCStr( out, headerLine );
 		ReportsFormatUnconnectedList( out, &DYNARR_N(reportsEndPt_t,
 		                              reportsCurrentList_da, 0),
@@ -657,9 +664,8 @@ void ReportsUnconnectedEndpoints( void * unused )
 	 * a literal click; a window move/focus event can trigger GTK to
 	 * re-touch the treeview's selection too -- reads a genuine dangling
 	 * pointer. Found via live user testing 2026-09-05 on the sibling
-	 * Gaps/Kinked Joints reports (same pattern, see
-	 * [[feedback_reports_stale_list_use_after_free]]), then confirmed
-	 * present here too. Only needed once the dialog/list actually exists
+	 * Gaps/Kinked Joints reports (same pattern), then confirmed present
+	 * here too. Only needed once the dialog/list actually exists
 	 * -- skip on the very first call, before ReportsShowDialog() has
 	 * created it. Distinct from reportsPopulating's own synchronous
 	 * mid-wListClear() reentrancy guard (SF #772) -- that one protects a
@@ -677,7 +683,24 @@ void ReportsUnconnectedEndpoints( void * unused )
 
 	TRK_ITERATE( trk ) {
 		EPINX_T ep;
-		for ( ep = 0; ep < GetTrkEndPtCnt(trk); ep++ ) {
+		EPINX_T epCnt = GetTrkEndPtCnt(trk);
+		/* Turntable stalls are open by design (QueryTrack(trk,
+		 * Q_CAN_ADD_ENDPOINTS) -- same test the Gaps report uses to
+		 * exclude them from its own pairing analysis), so they're
+		 * never flagged `isolated` below even though every stall is
+		 * typically open. */
+		BOOL_T isTurntable = QueryTrack( trk, Q_CAN_ADD_ENDPOINTS );
+		BOOL_T isIsolated = TRUE;
+
+		for ( ep = 0; ep < epCnt; ep++ ) {
+			if ( GetTrkEndTrk(trk, ep) != NULL ) {
+				isIsolated = FALSE;
+				break;
+			}
+		}
+		isIsolated = isIsolated && !isTurntable;
+
+		for ( ep = 0; ep < epCnt; ep++ ) {
 			if ( GetTrkEndTrk(trk, ep) == NULL ) {
 				reportsEndPt_t *entry;
 				DYNARR_APPEND( reportsEndPt_t, reportsCurrentList_da, 10 );
@@ -691,6 +714,8 @@ void ReportsUnconnectedEndpoints( void * unused )
 				 * comment. */
 				entry->layer = GetTrkLayer(trk) + 1;
 				entry->layerName = GetLayerName(GetTrkLayer(trk));
+				entry->isolated = isIsolated;
+				entry->turntable = isTurntable;
 			}
 		}
 	}
@@ -729,9 +754,9 @@ void ReportsUnconnectedEndpoints( void * unused )
  * click-to-navigate, no draw indicator), own `.ui` dialog
  * (reportsturnout.ui) with a summary PD_MESSAGE + one PD_LIST table, own
  * reportsDialog_t instance sharing the same ReportsShowDialog()/
- * DoReportsOp() plumbing phase 1 uses. See the phase-2 implementation
- * plan for the compute-pass primitives (GetTrkLength()/GetTrkLayer()/
- * GetTrkType()==T_TURNOUT) and MCP-parity notes.
+ * DoReportsOp() plumbing phase 1 uses. The compute pass walks TRK_ITERATE
+ * using GetTrkLength()/GetTrkLayer()/GetTrkType()==T_TURNOUT, mirroring
+ * the external MCP project's own turnout-density report.
  * ------------------------------------------------------------------- */
 
 /** Tentative declaration -- same reason as reportsPG above. */
@@ -783,8 +808,9 @@ static paramGroup_t reportsTurnoutPG = { "reportsturnout", PGO_FULLDIALOGFROMBUI
 static dynArr_t reportsTurnoutList_da;
 
 /** Turnouts with fewer than 3 endpoints -- folded into the Save/Print
- * text only (ReportsBuildTurnoutText()), never a second interactive list
- * (see the phase-2 implementation plan's dialog-architecture section). */
+ * text only (ReportsBuildTurnoutText()), never a second interactive list:
+ * Turnout Density has no click-to-navigate at all, so a second list
+ * would need dialog machinery this report doesn't otherwise use. */
 static dynArr_t reportsTurnoutPartial_da;
 
 /** Populate the interactive list from reportsTurnoutList_da -- one row
@@ -960,8 +986,8 @@ void ReportsTurnoutDensity( void * unused )
  * report-only shape as Turnout Density (own .ui dialog, own
  * reportsDialog_t instance, no click-to-navigate/indicator). Compute
  * pass shares Turnout Density's GetTrkEndPtCnt(trk) >= 2 guard before
- * calling GetTrkLength() -- see [[feedback_trk_iterate_endpoint_guard]]
- * (memory) / SF #776's fix; this report's own synthetic fixture also
+ * calling GetTrkLength() -- see SF #776's fix; this report's own
+ * synthetic fixture also
  * includes a zero-endpoint object from the start, not added after a
  * live crash this time.
  * ------------------------------------------------------------------- */
@@ -1519,8 +1545,7 @@ void ReportsEquipmentSuitability( void * unused )
  * .ui dialog (reportsgaps.ui/reportskinked.ui), own reportsDialog_t
  * instance with a real changeProc/cancelProc (unlike the phase-2 batch
  * above, which passes NULL/NULL). This is the first reuse of those two
- * fields since phase 1 introduced them -- see the phase-3/3a
- * implementation plan for the full design record.
+ * fields since phase 1 introduced them.
  *
  * Both share the phase-1.5 indicator statics
  * (reportIndicatorActive/Pos/Scale, ReportsDrawIndicator()) with phase 1
@@ -1530,8 +1555,9 @@ void ReportsEquipmentSuitability( void * unused )
  * replaces the first's (last-clicked-anywhere wins, globally). This was
  * already true with only phase 1 shipped; it just wasn't reachable until
  * a second interactive dialog existed. Not fixed here (would mean keying
- * the indicator state off the reportsDialog_t itself) -- see the
- * implementation plan's "still open" list.
+ * the indicator state off the reportsDialog_t itself) -- a known
+ * limitation, not yet worth a dedicated fix given how rarely two
+ * interactive report dialogs are open at once.
  * ------------------------------------------------------------------- */
 
 /** Tentative declaration -- same reason as reportsPG above. */
@@ -1751,7 +1777,7 @@ void ReportsGaps( void * unused )
 		 * phase 1's own Unconnected Endpoints report (which lists every
 		 * open endpoint including turntable stalls), this is a
 		 * deliberate divergence between the two reports, not a bug to
-		 * reconcile -- see the implementation plan's decision #3. */
+		 * reconcile. */
 		BOOL_T isTurntable = QueryTrack( trk, Q_CAN_ADD_ENDPOINTS );
 
 		for ( ep = 0; ep < GetTrkEndPtCnt(trk); ep++ ) {
