@@ -1,6 +1,5 @@
-/* Auto-converted from intro.but.in by tools/but-to-doxygen.py.
- * See .claude/halibut-doxygen-investigation-plan.md and
- * conversion-log.md for anything flagged during conversion. */
+/* Auto-converted from intro.but.in by tools/but-to-doxygen.py
+ * (SF feature-requests #219). */
 
 /**
 \page introduction Introduction To <i>XTrackCAD</i>

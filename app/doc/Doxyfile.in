@@ -1,7 +1,7 @@
 # Doxyfile for the real, installed end-user User Guide -- built from the
 # .dox/.dox.in files in this directory (converted from the former vendored
-# Halibut sources by tools/but-to-doxygen.py; see
-# .claude/halibut-doxygen-investigation-plan.md for the conversion history).
+# Halibut sources by tools/but-to-doxygen.py; SF feature-requests #219 is
+# the conversion's tracking ticket).
 # messages.dox (app/help/genmessages.c's Doxygen-syntax output, one of
 # INPUT's directories below) is regenerated on every build; everything else
 # here is committed, hand-reviewed source, not regenerated.

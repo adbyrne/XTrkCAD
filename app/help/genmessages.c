@@ -549,8 +549,8 @@ void unescapeString(FILE * f, const char * str)
 }
 
 /**
- * Generate the help file in Doxygen syntax -- see SF feature-requests #219 /
- * .claude/halibut-doxygen-investigation-plan.md. Emits one \page block per
+ * Generate the help file in Doxygen syntax -- see SF feature-requests #219.
+ * Emits one \page block per
  * message under a "messageList" root page (the fixed anchor id
  * tools/but-to-doxygen.py's CANONICAL_FILE_ORDER splices into the sidebar
  * between appendix.but and upgrade.but). Halibut's \S{key}/\H{} output is

@@ -12,8 +12,7 @@ if(DOXYGEN_FOUND)
 	# intro.dox.in is a template: CMake substitutes "@XTRKCAD_VERSION@" via
 	# configure_file() into the real intro.dox that Doxygen compiles, same
 	# mechanism this file used for intro.but.in -> intro.but before the
-	# Halibut -> Doxygen conversion (SF feature-requests #219, see
-	# .claude/halibut-doxygen-investigation-plan.md).
+	# Halibut -> Doxygen conversion (SF feature-requests #219).
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/intro.dox.in ${CMAKE_CURRENT_BINARY_DIR}/intro.dox @ONLY)
 
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)

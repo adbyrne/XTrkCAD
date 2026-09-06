@@ -39,7 +39,7 @@ static void test_single_row(void **state)
 	ReportsFormatUnconnectedList(&out, list, 1);
 
 	assert_string_equal(DynStringToCStr(&out),
-	                    "     1 |     1 | Main             |    0.000 |    0.000 | 180.000\n");
+	                    "     1 |     1 | Main             |    0.000 |    0.000 | 180.000 | \n");
 	DynStringFree(&out);
 }
 
@@ -48,26 +48,30 @@ static void test_single_row(void **state)
  * total -- one each on tracks 1/2, both on track 3 (which has no
  * connections at all). Track 3's two rows, in endpoint order, confirm
  * multiple open endpoints on the same track id are listed individually,
- * not rolled up (the turntable-parity decision from the phase-1 plan). */
+ * not rolled up. */
 static void test_fixture_shaped_list(void **state)
 {
 	(void) state;
 	DynString out;
 	DynStringMalloc(&out, 64);
+	/* Track 3's two rows are its only endpoints -- both open, so it's
+	 * flagged `isolated` (a fully disconnected/"ghost" track), unlike
+	 * tracks 1/2 which are each a deliberate dead-end stub (their other
+	 * endpoint is joined, not part of this list). */
 	reportsEndPt_t list[4] = {
-		{ 1, {  0.0, 0.0 }, 180.0, 0, 0, 1, "Main" },
-		{ 2, {  8.0, 0.0 },   0.0, 0, 0, 2, "Yard" },
-		{ 3, {  0.0, 4.0 }, 180.0, 0, 0, 1, "Main" },
-		{ 3, {  4.0, 4.0 },   0.0, 0, 0, 1, "Main" },
+		{ 1, {  0.0, 0.0 }, 180.0, 0, 0, 1, "Main", 0, 0 },
+		{ 2, {  8.0, 0.0 },   0.0, 0, 0, 2, "Yard", 0, 0 },
+		{ 3, {  0.0, 4.0 }, 180.0, 0, 0, 1, "Main", 1, 0 },
+		{ 3, {  4.0, 4.0 },   0.0, 0, 0, 1, "Main", 1, 0 },
 	};
 
 	ReportsFormatUnconnectedList(&out, list, 4);
 
 	assert_string_equal(DynStringToCStr(&out),
-	                    "     1 |     1 | Main             |    0.000 |    0.000 | 180.000\n"
-	                    "     2 |     2 | Yard             |    8.000 |    0.000 |   0.000\n"
-	                    "     3 |     1 | Main             |    0.000 |    4.000 | 180.000\n"
-	                    "     3 |     1 | Main             |    4.000 |    4.000 |   0.000\n");
+	                    "     1 |     1 | Main             |    0.000 |    0.000 | 180.000 | \n"
+	                    "     2 |     2 | Yard             |    8.000 |    0.000 |   0.000 | \n"
+	                    "     3 |     1 | Main             |    0.000 |    4.000 | 180.000 | Isolated\n"
+	                    "     3 |     1 | Main             |    4.000 |    4.000 |   0.000 | Isolated\n");
 	DynStringFree(&out);
 }
 
@@ -83,7 +87,7 @@ static void test_negative_and_fractional_values(void **state)
 	ReportsFormatUnconnectedList(&out, list, 1);
 
 	assert_string_equal(DynStringToCStr(&out),
-	                    "    42 |     3 | Staging          |   -1.500 |  200.287 |  55.068\n");
+	                    "    42 |     3 | Staging          |   -1.500 |  200.287 |  55.068 | \n");
 	DynStringFree(&out);
 }
 
@@ -101,8 +105,83 @@ static void test_appends_not_overwrites(void **state)
 
 	assert_string_equal(DynStringToCStr(&out),
 	                    "existing content\n"
-	                    "     1 |     1 | Main             |    0.000 |    0.000 |   0.000\n");
+	                    "     1 |     1 | Main             |    0.000 |    0.000 |   0.000 | \n");
 	DynStringFree(&out);
+}
+
+/* ReportsFormatEndPtNote() -- the free-text Note column. Plain
+ * concatenation, not a fixed enum, so any subset of Turntable/Isolated/
+ * Nearby can apply to the same row. */
+
+static void test_note_none_set(void **state)
+{
+	(void) state;
+	char buf[32];
+	reportsEndPt_t entry = { 1, { 0.0, 0.0 }, 0.0, 0, 0, 1, "Main", 0, 0 };
+
+	ReportsFormatEndPtNote(&entry, buf, sizeof buf);
+
+	assert_string_equal(buf, "");
+}
+
+static void test_note_nearby_only(void **state)
+{
+	(void) state;
+	char buf[32];
+	reportsEndPt_t entry = { 1, { 0.0, 0.0 }, 0.0, 0, 1, 1, "Main", 0, 0 };
+
+	ReportsFormatEndPtNote(&entry, buf, sizeof buf);
+
+	assert_string_equal(buf, "Nearby");
+}
+
+static void test_note_isolated_only(void **state)
+{
+	(void) state;
+	char buf[32];
+	reportsEndPt_t entry = { 1, { 0.0, 0.0 }, 0.0, 0, 0, 1, "Main", 1, 0 };
+
+	ReportsFormatEndPtNote(&entry, buf, sizeof buf);
+
+	assert_string_equal(buf, "Isolated");
+}
+
+static void test_note_turntable_only(void **state)
+{
+	(void) state;
+	char buf[32];
+	reportsEndPt_t entry = { 1, { 0.0, 0.0 }, 0.0, 0, 0, 1, "Main", 0, 1 };
+
+	ReportsFormatEndPtNote(&entry, buf, sizeof buf);
+
+	assert_string_equal(buf, "Turntable");
+}
+
+/* Isolated + Nearby together is a real, if unusual, case: two floating
+ * stub tracks left close enough to look like a missed connection. Not
+ * paired with `turntable` here -- ReportsUnconnectedEndpoints() never
+ * sets both `isolated` and `turntable` TRUE on the same row (see its own
+ * doc comment), so that combination is deliberately not exercised. */
+static void test_note_isolated_and_nearby(void **state)
+{
+	(void) state;
+	char buf[32];
+	reportsEndPt_t entry = { 1, { 0.0, 0.0 }, 0.0, 0, 1, 1, "Main", 1, 0 };
+
+	ReportsFormatEndPtNote(&entry, buf, sizeof buf);
+
+	assert_string_equal(buf, "Isolated, Nearby");
+}
+
+static void test_note_turntable_and_nearby(void **state)
+{
+	(void) state;
+	char buf[32];
+	reportsEndPt_t entry = { 1, { 0.0, 0.0 }, 0.0, 0, 1, 1, "Main", 0, 1 };
+
+	ReportsFormatEndPtNote(&entry, buf, sizeof buf);
+
+	assert_string_equal(buf, "Turntable, Nearby");
 }
 
 /* ---------------------------------------------------------------------
@@ -670,6 +749,12 @@ int main(void)
 		cmocka_unit_test(test_fixture_shaped_list),
 		cmocka_unit_test(test_negative_and_fractional_values),
 		cmocka_unit_test(test_appends_not_overwrites),
+		cmocka_unit_test(test_note_none_set),
+		cmocka_unit_test(test_note_nearby_only),
+		cmocka_unit_test(test_note_isolated_only),
+		cmocka_unit_test(test_note_turntable_only),
+		cmocka_unit_test(test_note_isolated_and_nearby),
+		cmocka_unit_test(test_note_turntable_and_nearby),
 		cmocka_unit_test(test_tracklen_empty_list),
 		cmocka_unit_test(test_tracklen_single_row_full_pct),
 		cmocka_unit_test(test_tracklen_multi_layer_pct),

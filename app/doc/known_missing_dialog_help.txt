@@ -8,7 +8,7 @@
 # entry here actually already resolves, so this list can't silently go
 # stale in the other direction either.
 #
-# See .claude/plan-sf730-dialog-help-links.md for the batch plan.
+# SF #730 is the tracking ticket for the batch plan below.
 # Batches 1-4 (31 of 36 originally-tracked dialogs resolved, all via
 # aliasing to real existing content -- zero new pages authored) landed.
 # These final 5 are deliberately left unaliased: traced each one's

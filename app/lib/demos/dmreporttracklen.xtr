@@ -22,8 +22,7 @@ TURNOUT 3 DEMO 1 14.750000 9.333333 -16.389478 "Peco-55	Medium Right	SL-E395F"
 	END
 NOTE 4 0 0 0 9.917000 7.167000 0 32
 A zero-endpoint object (regression check for the same TRK_ITERATE
-endpoint-count guard SF #776 fixed for Turnout Density -- see
-[[feedback_trk_iterate_endpoint_guard]]).
+endpoint-count guard SF #776 fixed for Turnout Density).
     END
 REDRAW
 RESET
