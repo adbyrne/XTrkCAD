@@ -100,7 +100,7 @@ IsExistingDirectory( char *name)
 /**
  * Find the directory where configuration files, help, demos etc are installed.
  *
- * Windows: the directory is expected to be at ..\share\xtrkcad
+ * Windows: the directory is expected to be at ..\\share\\xtrkcad
  *
  * Unix: The search order is:
  *  1. Directory specified by the XTRKCADLIB environment variable
