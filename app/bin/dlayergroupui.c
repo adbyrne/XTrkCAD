@@ -328,7 +328,7 @@ static void TransferSelected(wControl_p fromList, int groupIdx, BOOL_T adding)
 }
 
 /**
- * "→" button: add every selected row of the Available list to the
+ * "->" button: add every selected row of the Available list to the
  * selected group's membership. A no-op if no group is selected.
  *
  * \param action IN unused, required by the PD_BUTTON signature
@@ -347,7 +347,7 @@ static void GroupAddLayers(void *action)
 }
 
 /**
- * "←" button: remove every selected row of the Included list from the
+ * "<-" button: remove every selected row of the Included list from the
  * selected group's membership. A no-op if no group is selected.
  *
  * \param action IN unused, required by the PD_BUTTON signature
