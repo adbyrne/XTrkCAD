@@ -723,13 +723,13 @@ static void DescribeCurve( track_p trk, char * str, CSIZE_T len )
 		if ( !xx->circle ) {
 			crvDesc[SE].mode = DESC_RO;
 		}
-		DoDescribe( _("Helix Track"), trk, crvDesc, UpdateCurve );
+		DoDescribe( N_("Helix Track"), trk, crvDesc, UpdateCurve );
 	} else if ( xx->circle ) {
 		crvDesc[TU].mode |= DESC_IGNORE;
-		DoDescribe( _("Circle Track"), trk, crvDesc, UpdateCurve );
+		DoDescribe( N_("Circle Track"), trk, crvDesc, UpdateCurve );
 	} else {
 		crvDesc[TU].mode |= DESC_IGNORE;
-		DoDescribe( _("Curved Track"), trk, crvDesc, UpdateCurve );
+		DoDescribe( N_("Curved Track"), trk, crvDesc, UpdateCurve );
 	}
 }
 

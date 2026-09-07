@@ -283,7 +283,7 @@ static void DescribeCar(
 	                                carDesc[WD].mode = DESC_RO;
 	carDesc[DE].mode = DESC_RO;
 	carDesc[NM].mode = 0;
-	DoDescribe(_("Car"), trk, carDesc, UpdateCar);
+	DoDescribe(N_("Car"), trk, carDesc, UpdateCar);
 }
 
 

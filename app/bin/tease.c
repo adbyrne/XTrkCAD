@@ -602,7 +602,7 @@ static void DescribeJoint(
 	                  fix1?DESC_PIVOT_SECOND:
 	                  DESC_PIVOT_MID;
 
-	DoDescribe( _("Easement Track"), trk, jointDesc, UpdateJoint );
+	DoDescribe( N_("Easement Track"), trk, jointDesc, UpdateJoint );
 }
 
 static void GetJointPos(

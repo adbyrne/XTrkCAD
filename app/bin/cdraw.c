@@ -1199,7 +1199,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		xx->angle = 0.0;
 		switch (segPtr->type) {
 		case SEG_STRLIN:
-			title = _("Straight Line");
+			title = N_("Straight Line");
 			drawData.lineType = (wIndex_t)xx->lineType;
 			static descData_t straightDescData[] = { xE0, xE1, xLA, xLN, xPV, xLW, xLT, xCO, xLK, xOI, xRA, xLY, xEND };
 			static drawDesc_e straightDescMap[] = { E0, E1, LA, LN, PV, LW, LT, CO, LK, OI, RA, LY, END };
@@ -1209,7 +1209,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 			if (!drawData.lock_origin) { DrawDescSetMode(RA, DESC_RO); }
 			break;
 		case SEG_DIMLIN:
-			title = _("Dimension Line");
+			title = N_("Dimension Line");
 			drawData.dimenSize = (wIndex_t)segPtr->u.l.option;
 			static descData_t dimLineData[] = { xE0, xE1, xLA, xLN, xPV, xDS, xLY, xEND };
 			static drawDesc_e dimLineMap[] = { E0, E1, LA, LN, PV, DS, LY, END };
@@ -1218,7 +1218,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 			curDescCnt = COUNT( dimLineData );
 			break;
 		case SEG_BENCH:
-			title = _("Lumber");
+			title = N_("Lumber");
 			drawData.benchChoice = GetBenchListIndex( segPtr->u.l.option );
 			drawData.benchOrient = (wIndex_t)(segPtr->u.l.option&0xFF);
 			static descData_t benchData[] = { xE0, xE1, xLA, xLN, xPV, xCO, xBE, xOR, xLY, xEND };
@@ -1228,7 +1228,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 			curDescCnt = COUNT( benchData );
 			break;
 		case SEG_TBLEDGE:
-			title = _("Table Edge");
+			title = N_("Table Edge");
 			static descData_t tblEdgeData[] = { xE0, xE1, xLA, xLN, xPV, xLY, xEND };
 			static drawDesc_e tblEdgeMap[] = { E0, E1, LA, LN, PV, LY, END };
 			curDescData = tblEdgeData;
@@ -1251,7 +1251,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		// This sets CHANGE
 		drawData.lineType = (wIndex_t)xx->lineType;
 		if ( segPtr->u.c.a1 >= 360.0 ) {
-			title = _("Circle");
+			title = N_("Circle");
 			drawData.filled = FALSE;
 			drawData.length = 2*M_PI*segPtr->u.c.radius;
 			static descData_t circleData[] = { xCE, xRD, xLN, xLW, xLT, xCO, xFL, xLK, xOI, xRA, xLY, xEND };
@@ -1264,7 +1264,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 			drawData.angle0 = NormalizeAngle( segPtr->u.c.a0+xx->angle );
 			drawData.angle1 = NormalizeAngle( drawData.angle0+drawData.angle );
 			drawData.length = 2*M_PI*segPtr->u.c.radius*segPtr->u.c.a1/360;
-			title = _("Curved Line");
+			title = N_("Curved Line");
 			static descData_t curveData[] = { xCE, xAL, xA1, xA2, xRD, xLN, xPV, xLW, xLT, xCO, xLK, xOI, xRA, xLY, xEND };
 			static drawDesc_e curveMap[] = { CE, AL, A1, A2, RD, LN, PV, LW, LT, CO, LK, OI, RA, LY, END };
 			curDescData = curveData;
@@ -1282,7 +1282,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		drawData.origin = xx->orig;
 		drawData.filled = TRUE;
 		drawData.length = 0.0;
-		title = _("Filled Circle");
+		title = N_("Filled Circle");
 		static descData_t filledCircleData[] = { xCE, xRD, xLN, xCO, xPV, xFL, xLK, xOI, xRA, xEND };
 		static drawDesc_e filledCircleMap[] = { CE, RD, LN, CO, PV, FL, LK, OI, RA, END };
 		curDescData = filledCircleData;
@@ -1311,7 +1311,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 //mode		drawDesc[OP].mode = filled?DESC_RO:0;
 		switch (segPtr->u.p.polyType) {
 		case RECTANGLE:
-			title = filled?_("Filled Rectangle"):_("Rectangle");
+			title = filled?N_("Filled Rectangle"):N_("Rectangle");
 			drawData.width = FindDistance(segPtr->u.p.pts[0].pt, segPtr->u.p.pts[1].pt);
 			drawData.height = FindDistance(segPtr->u.p.pts[0].pt, segPtr->u.p.pts[3].pt);
 			for(int i=0; i<4; i++) {
@@ -1326,7 +1326,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 			if (!drawData.lock_origin) { DrawDescSetMode(RA, DESC_RO); }
 			break;
 		case POLYLINE:
-			title = _("Polyline");
+			title = N_("Polyline");
 			drawData.open=TRUE;
 			drawData.filled= FALSE;
 //DESC_RO			drawDesc[FL].mode = DESC_RO;
@@ -1338,7 +1338,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 			if (!drawData.lock_origin) { DrawDescSetMode(RA, DESC_RO); }
 			break;
 		default:
-			title = filled?_("Filled Polygon"):_("Polygon");
+			title = filled?N_("Filled Polygon"):N_("Polygon");
 			static descData_t polygonData[] = { xPP, xVC, xLW, xLT, xCO, xFL, xOP, xLK, xOI, xRA, xLY, xEND };
 			static drawDesc_e polygonMap[] = { PP, VC, LW, LT, CO, FL, OP, LK, OI, RA, LY, END };
 			curDescData = polygonData;
@@ -1362,7 +1362,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		drawData.text[sizeof drawData.text-1] ='\0';
 		drawData.boxed = segPtr->u.t.boxed;
 		drawData.filled = segPtr->u.t.filled;
-		title = _("Text");
+		title = N_("Text");
 		static descData_t textData[] = { xTP, xTS, xTX, xTA, xCO, xBG, xLK, xOI, xBX, xFL, xEND };
 		static drawDesc_e textMap[] = { TP, TS, TX, TA, CO, BG, LK, OI, BX, FL, END };
 		curDescData = textData;
@@ -1407,7 +1407,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		curDescData[inx].mode |= mode;
 	}
 
-	snprintf( str, len, _("%s(%d) Layer=%u"), title, GetTrkIndex(trk),
+	snprintf( str, len, _("%s(%d) Layer=%u"), _(title), GetTrkIndex(trk),
 	          GetTrkLayer(trk)+1 );
 
 	if (!inDescribeCmd) { return; }
