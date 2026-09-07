@@ -417,7 +417,11 @@ EXPORT void LayerGroupShowOnly(int groupIdx)
 
 		if (layers[inx].visible != shouldBeVisible) {
 			layers[inx].visible = shouldBeVisible;
-			if (!layers[inx].button_off && inx < NUM_BUTTONS && layer_btns[inx]) {
+			/* CodeQL cpp/offset-use-before-range-check: range-check inx
+			 * against NUM_BUTTONS before any array access, even though
+			 * layers[inx] itself is already safe under the enclosing
+			 * for loop's inx < NUM_LAYERS bound. */
+			if (inx < NUM_BUTTONS && !layers[inx].button_off && layer_btns[inx]) {
 				wButtonSetBusy(layer_btns[inx], layers[inx].visible);
 			}
 		}
@@ -2113,9 +2117,10 @@ void ReadLayers(char *line)
 /**
  * Parse a "LAYERGROUP ..." file-format line (SF #222 phase 0, SF #782).
  * Two sub-commands, mirroring LAYERS's own DEFINE-then-data-line shape:
- *   LAYERGROUP DEFINE <idx> "<name>"     -- creates group <idx>
- *   LAYERGROUP MEMBERS <idx> "<list>"    -- sets its members (must already
- *                                          exist via a prior DEFINE line)
+ *   LAYERGROUP DEFINE \<idx\> "\<name\>"     -- creates group \<idx\>
+ *   LAYERGROUP MEMBERS \<idx\> "\<list\>"    -- sets its members (must
+ *                                            already exist via a prior
+ *                                            DEFINE line)
  * Groups are created in file order starting at index 0 (LayerGroupCreate()
  * always assigns the next sequential index), so a well-formed file's
  * DEFINE lines are expected in ascending idx order; a mismatched idx is
