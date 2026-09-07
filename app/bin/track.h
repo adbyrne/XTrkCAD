@@ -545,6 +545,7 @@ void DoDescribe( char *, track_p, descData_p, descUpdate_t );
 void DescribeDone( void * );
 BOOL_T UpdateDescStraight( int, int, int, int, int, descData_p, long );
 STATUS_T CmdDescribe(wAction_t,coOrd);
+void ClearDescribe( void );
 
 
 /* compound.c */
