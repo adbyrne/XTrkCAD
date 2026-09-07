@@ -329,7 +329,7 @@ static void DescribeTurntable( track_p trk, char * str, CSIZE_T len )
 	                trntblData.epCnt>0?DESC_RO:0;
 	trntblDesc[EC].mode = DESC_RO;
 	trntblDesc[LY].mode = DESC_NOREDRAW;
-	DoDescribe( _("Turntable"), trk, trntblDesc, UpdateTurntable );
+	DoDescribe( N_("Turntable"), trk, trntblDesc, UpdateTurntable );
 }
 
 static void DeleteTurntable( track_p t )

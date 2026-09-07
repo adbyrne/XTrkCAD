@@ -1040,14 +1040,14 @@ void DescribeCompound(
 	}
 
 	if (GetTrkEndPtCnt(trk) < 1) {
-		trackType = _("Structure");
+		trackType = N_("Structure");
 	} else {
-		trackType = GetTrkEndPtCnt(trk) > 2 ? _("Turnout") : _("Sectional Track");
+		trackType = GetTrkEndPtCnt(trk) > 2 ? N_("Turnout") : N_("Sectional Track");
 	}
 	DynStringMalloc(&description, len);
 	DynStringPrintf(&description,
 	                _("%s (%d) Layer= %d %s"),
-	                trackType,
+	                _(trackType),
 	                GetTrkIndex(trk),
 	                GetTrkLayer(trk) + 1,
 	                message);

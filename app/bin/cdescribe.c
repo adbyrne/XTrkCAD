@@ -50,6 +50,7 @@ static wDrawColor descColor = 0;
 EXPORT BOOL_T descUndoStarted;
 static BOOL_T descNeedDrawHilite;
 EXPORT char * descTitle = "<>";
+static char descTitleBuf[STR_SIZE];	/* backing store for descTitle */
 
 static wMenu_p descPopupM;
 
@@ -402,13 +403,23 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 		return;
 	}
 
-	// Have we seen this type of object before?
+	// The caller passes an untranslated type name (N_("Straight Track"),
+	// ...). Register and look the dialog group up by a stable,
+	// locale-independent key (sKey); sTitle is the translated string, used
+	// only for what the user sees. Keying the lookup on the translated
+	// title instead left the group registered as e.g. "Describe
+	// Gleisgerade", so the English "PARAMETER Describe Straight Track ..."
+	// lines in the bundled demo scripts never matched under a non-English
+	// locale and the edits were silently dropped.
+	char sKey[STR_SIZE];
 	char sTitle[STR_SIZE];
-	snprintf( sTitle, sizeof sTitle, _("Describe %s"), title );
+	snprintf( sKey, sizeof sKey, "Describe %s", title );
+	snprintf( sTitle, sizeof sTitle, _("Describe %s"), _(title) );
+	descTitle = strcpy( descTitleBuf, sTitle );
 	paramGroup_p pg = NULL;
 	for ( int inx = 0; inx < descGroup_da.cnt; inx++ ) {
 		pg = descGroup( inx );
-		if ( strcmp( sTitle, pg->nameStr ) == 0 ) {
+		if ( strcmp( sKey, pg->nameStr ) == 0 ) {
 			break;
 		}
 		pg = NULL;
@@ -416,9 +427,8 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 
 	if ( pg == NULL ) {
 		// No: Create a new dialog for it
-		title = MyStrdup( sTitle );
-		pg = CreateDescribeDialog( title, data, update);
-		FormCreateDialog( pg, title,
+		pg = CreateDescribeDialog( MyStrdup( sKey ), data, update);
+		FormCreateDialog( pg, sTitle,
 		                  //_("Done"), DescribeDone,
 		                  NULL, NULL,
 		                  _("Done"), FormCancel_Reset,
@@ -450,8 +460,6 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 			}
 		}
 		FormRegister(pg);
-	} else {
-		title = pg->nameStr;
 	}
 
 	if ( describePG ) {
@@ -463,7 +471,6 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 	descTrk = trk;
 	descData = data;
 	descUpdateFunc = update;
-	descTitle = title;
 
 
 	int inx;
@@ -472,7 +479,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 	ro_mode = (GetLayerFrozen(GetTrkLayer(trk))?DESC_RO:0);
 
 	if (ro_mode) {
-		LOG( log_describe, 3, ( "DoDescribe-RO-layer: %s\n", title ) );
+		LOG( log_describe, 3, ( "DoDescribe-RO-layer: %s\n", sKey ) );
 		for (ddp=data; ddp->type != DESC_NULL; ddp++) {
 			if (ddp->mode&DESC_IGNORE) {
 				continue;
@@ -491,7 +498,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 			if ( ddp->type == DESC_POS3D ) {
 				wControlShow( ddp->control2, FALSE );
 			}
-			LOG( log_describe, 3, ( "Dodescribe-IGNORE-pd: %s.%s\n", title, ddp->label ) );
+			LOG( log_describe, 3, ( "Dodescribe-IGNORE-pd: %s.%s\n", sKey, ddp->label ) );
 			continue;
 		}
 
@@ -549,7 +556,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 
 	describePG = pg;
 	FormLoadControls(describePG);
-	sprintf(message, "%s (T%d)", title, GetTrkIndex(trk));
+	sprintf(message, "%s (T%d)", sTitle, GetTrkIndex(trk));
 	wWinSetTitle(describePG->win, message);
 	wShow(describePG->win);
 }
