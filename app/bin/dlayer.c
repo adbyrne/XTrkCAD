@@ -28,6 +28,7 @@
 #include "dynstring.h"
 #include "fileio.h"
 #include "icons.h"
+#include "include/dlayergroup.h"
 #include "include/partcatalog.h"
 #include "include/stringxtc.h"
 #include "include/toolbar.h"
@@ -386,6 +387,43 @@ EXPORT void FlipLayer(void *layerVP)
 			}
 		}
 	}
+}
+
+/**
+ * Show every layer that's a member of layer group \p groupIdx and hide
+ * every other layer, in one pass (SF #782 phase-0 scope item: a fast
+ * visibility action for the Manage Layer Groups dialog, so switching
+ * between e.g. a "Level 1" and "Level 2" group doesn't need toggling
+ * each layer by hand).
+ *
+ * The current layer is always left visible even if it isn't a member of
+ * \p groupIdx, matching the existing "can't hide the current layer"
+ * invariant enforced elsewhere (FlipLayer(), MSG_LAYER_HIDE) -- silently,
+ * not with a notice, since this is a bulk action over layers the user
+ * didn't individually pick.
+ *
+ * \param groupIdx IN group to show; a negative or out-of-range index is a
+ *                    no-op
+ */
+EXPORT void LayerGroupShowOnly(int groupIdx)
+{
+	if (groupIdx < 0 || groupIdx >= LayerGroupCount()) {
+		return;
+	}
+
+	for (unsigned int inx = 0; inx < NUM_LAYERS; inx++) {
+		BOOL_T shouldBeVisible = LayerGroupHasMember(groupIdx, (int)(inx + 1)) ||
+		                         inx == curLayer;
+
+		if (layers[inx].visible != shouldBeVisible) {
+			layers[inx].visible = shouldBeVisible;
+			if (!layers[inx].button_off && inx < NUM_BUTTONS && layer_btns[inx]) {
+				wButtonSetBusy(layer_btns[inx], layers[inx].visible);
+			}
+		}
+	}
+
+	DoRedraw();
 }
 
 static char lastSettings[STR_SHORT_SIZE];
@@ -2073,6 +2111,102 @@ void ReadLayers(char *line)
 }
 
 /**
+ * Parse a "LAYERGROUP ..." file-format line (SF #222 phase 0, SF #782).
+ * Two sub-commands, mirroring LAYERS's own DEFINE-then-data-line shape:
+ *   LAYERGROUP DEFINE <idx> "<name>"     -- creates group <idx>
+ *   LAYERGROUP MEMBERS <idx> "<list>"    -- sets its members (must already
+ *                                          exist via a prior DEFINE line)
+ * Groups are created in file order starting at index 0 (LayerGroupCreate()
+ * always assigns the next sequential index), so a well-formed file's
+ * DEFINE lines are expected in ascending idx order; a mismatched idx is
+ * silently ignored rather than corrupting the registry.
+ *
+ * \param line IN the remainder of the line after "LAYERGROUP "
+ */
+void ReadLayerGroups(char *line)
+{
+	int idx;
+	char *name, *members;
+
+	/* older files predate Layer Groups entirely */
+	if (paramVersion < 13) {
+		return;
+	}
+
+	if (strncmp(line, "DEFINE", 6) == 0) {
+		if (!GetArgs(line + 6, "dq", &idx, &name)) {
+			return;
+		}
+		if (idx == LayerGroupCount()) {
+			LayerGroupCreate(name);
+		}
+		MyFree(name);
+		return;
+	}
+
+	if (strncmp(line, "MEMBERS", 7) == 0) {
+		if (!GetArgs(line + 7, "dq", &idx, &members)) {
+			return;
+		}
+		LayerGroupParseMembers(idx, members);
+		MyFree(members);
+		return;
+	}
+}
+
+/**
+ * Write every defined Layer Group to the layout file as
+ * "LAYERGROUP DEFINE"/"LAYERGROUP MEMBERS" line pairs (SF #222 phase 0,
+ * SF #782). Called from WriteLayers() -- there is no separate top-level
+ * WriteLayerGroups call site.
+ *
+ * \param[in] f open file handle
+ */
+static void WriteLayerGroups(FILE *f)
+{
+	char membersBuf[STR_LONG_SIZE];
+
+	for (int i = 0; i < LayerGroupCount(); i++) {
+		fprintf(f, "LAYERGROUP DEFINE %d \"%s\"\n", i, LayerGroupName(i));
+		LayerGroupFormatMembers(i, membersBuf, sizeof membersBuf);
+		fprintf(f, "LAYERGROUP MEMBERS %d \"%s\"\n", i, membersBuf);
+	}
+}
+
+/**
+ * One-time migration of the old per-layer "Linked Layers" mechanism
+ * (layer_t.layerLinkList, the LAYERS LINK file line) into Layer Groups
+ * (SF #222 phase 0, SF #782): every layer's non-empty link list becomes
+ * (or joins) an auto-named group via LayerGroupMigrateFromLinkLists(),
+ * then every layer's link list is cleared so it is never written back out
+ * -- Groups are the sole on-disk representation of this data from here
+ * on. Called once by ReadTrackFile() after fully parsing a file whose
+ * paramVersion predates Layer Groups.
+ */
+void MigrateLayerLinksToGroups(void)
+{
+	int *linkLists[NUM_LAYERS];
+	int linkCounts[NUM_LAYERS];
+
+	for (unsigned int i = 0; i < NUM_LAYERS; i++) {
+		linkCounts[i] = layers[i].layerLinkList.cnt;
+		linkLists[i] = linkCounts[i] > 0 ? (int *) layers[i].layerLinkList.ptr : NULL;
+	}
+
+	int created = LayerGroupMigrateFromLinkLists(NUM_LAYERS, linkLists, linkCounts);
+
+	if (log_dlayer < 0) {
+		log_dlayer = LogFindIndex("dlayer");
+	}
+	LOG(log_dlayer, 1,
+	    ("dlayer: migrated Linked Layers to %d new Layer Group(s)\n", created))
+
+	for (unsigned int i = 0; i < NUM_LAYERS; i++) {
+		DYNARR_RESET(int, layers[i].layerLinkList);
+	}
+}
+
+/**
  * Find out whether layer information should be saved to the layout file.
  * Usually only layers where settings are off from the default are written.
  * NOTE: as a fix for a problem with XTrkCadReader a layer definition is
@@ -2141,6 +2275,9 @@ BOOL_T WriteLayers(FILE *f)
 			fprintf(f, "LAYERS SET %u \"%s\"\n", layerInx, layers[inx].settingsName);
 		}
 	}
+
+	WriteLayerGroups(f);
+
 	return TRUE;
 }
 
@@ -2344,6 +2481,7 @@ void InitLayers(int cmdGroup)
 
 	AddPlaybackProc("SETCURRLAYER", PlaybackCurrLayer, NULL);
 	AddPlaybackProc("LAYERS", ReadLayers, NULL);
+	AddPlaybackProc("LAYERGROUP", ReadLayerGroups, NULL);
 }
 
 addButtonCallBack_t InitLayersDialog(void)

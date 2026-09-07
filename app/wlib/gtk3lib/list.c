@@ -840,7 +840,13 @@ wControl_p wListCreate(
 	if (ISDEFINEDINBUILDER(parent)) {
 
 		bl->widget = wlibWidgetFromIdWarn(parent, helpStr);
-		lcontrol->treeView = GTK_TREE_VIEW(wlibWidgetFromIdWarn(parent, "treeview"));
+		/* The treeview is always the ScrolledWindow's sole child in every
+		 * .ui file -- read it directly off bl->widget (already resolved by
+		 * this control's own unique id above) instead of a second lookup
+		 * for a literal, builder-wide-unique id "treeview", which breaks
+		 * the instant a window's builder defines more than one PD_LIST
+		 * (SF #782: the Layer Groups dialog has three in one window). */
+		lcontrol->treeView = GTK_TREE_VIEW(gtk_bin_get_child(GTK_BIN(bl->widget)));
 		g_assert(lcontrol->treeView != NULL);
 
 		if (option & BL_NODATASTORE) {

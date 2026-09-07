@@ -261,6 +261,26 @@ endif()
 
 add_test(ElevJoinTest elevjointest)
 
+# Layer Groups (SF #222 phase 0, SF #782) -- pure group registry/data-model
+# logic, extracted into dlayergroup.c so it carries no dependency on
+# common.h/dynarray.h/wlib, same rationale as reportsformat.c/
+# cars/careditlogic.c.
+
+add_executable(layergrouptest
+	layergrouptest.c
+	../dlayergroup.c
+)
+
+target_include_directories(layergrouptest PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
+    ${CMAKE_SOURCE_DIR}/app/wlib/include
+)
+
+target_link_libraries(layergrouptest PRIVATE ${LIBS})
+
+add_test(LayerGroupTest layergrouptest)
+
 set_target_properties(
 	dxfformattest
 	shortentest
@@ -275,12 +295,13 @@ set_target_properties(
 	careditlogictest
 	reportstest
 	elevjointest
+	layergrouptest
  	PROPERTIES FOLDER UnitTests
  )
 
 if(XTRKCAD_SANITIZE AND UNIX)
 	set(SANITIZE_FLAGS -fsanitize=address,undefined -fno-omit-frame-pointer)
-	foreach(t dxfformattest shortentest defaultstest pathstest utilitytest beziertest cornutest undostreamtest carstest carregistrytest careditlogictest reportstest elevjointest)
+	foreach(t dxfformattest shortentest defaultstest pathstest utilitytest beziertest cornutest undostreamtest carstest carregistrytest careditlogictest reportstest elevjointest layergrouptest)
 		target_compile_options(${t} PRIVATE ${SANITIZE_FLAGS})
 		target_link_options(${t} PRIVATE ${SANITIZE_FLAGS})
 	endforeach()

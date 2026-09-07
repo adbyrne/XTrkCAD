@@ -17,6 +17,8 @@ The <b>Manage Menu</b> shows commands affecting the <b>Main Canvas</b> (\ref mai
 
 - <b>Layers</b> - displays the Layer (\ref cmdLayer) dialog.
 
+- <b>Layer Groups</b> - displays the Layer Groups (\ref cmdLayergroup) dialog.
+
 - <b>Parts List</b> - Invokes the Parts List (\ref cmdEnum) command.  This command produces a list of all selected turnouts and sectional tracks and the total length of flex-track.
 
 - <b>Price List</b> - Displays the <b>Price List</b> (\ref cmdPricelist) dialog to specify prices for tracks and structures.
@@ -34,6 +36,7 @@ The <b>Manage Menu</b> shows commands affecting the <b>Main Canvas</b> (\ref mai
 - \subpage cmdContmgm
 - \subpage cmdGroup
 - \subpage cmdLayer
+- \subpage cmdLayergroup
 - \subpage cmdEnum
 - \subpage cmdPricelist
 - \subpage cmdTrain
@@ -402,6 +405,41 @@ Any selected objects are unselected when the Layer is set to not visible.  If a 
 The <b>Move To Current Layer</b> command on Edit menu (\ref editM) will move all selected (\ref cmdSelect) tracks to the current Layer.
 
 Objects are drawn on the map window, if the Layer they are on has <b>On Map</b> checked.
+
+*/
+
+/**
+\page cmdLayergroup Layer Groups Dialog
+
+\anchor idx_Layer_Groups_Dialog_782
+
+A <b>Layer Group</b> is a named collection of <b>Layers</b> (\ref cmdLayer). A <b>Layer</b> can
+belong to any, all, or none of the <b>Layer Groups</b> you define -- membership in one group has
+no effect on membership in any other. Groups are meant for acting on a meaningful subset of layers
+at once, for example every layer belonging to one level of a multi-level layout, or every layer
+that represents staging track regardless of level.
+
+The <b>Layer Groups</b> dialog has two parts. The <b>Groups</b> list on the left shows every
+defined group; select one to work with it. The <b>New...</b> button creates a new, empty group
+after asking for its name. The <b>Rename...</b> button changes the selected group's name. The
+<b>Delete</b> button removes the selected group entirely (its member <b>Layers</b> are unaffected
+-- only the group itself goes away). The <b>Show Only</b> button hides every <b>Layer</b> except
+the selected group's members, a quick way to isolate one group's content on the <b>Main Window</b>
+(\ref mainW) without toggling each layer's visibility by hand; the current layer always stays
+visible even if it isn't a member of the group, matching the usual rule that the current layer
+can't be hidden.
+
+The right-hand side shows the selected group's membership as two lists, <b>Available</b> and
+<b>Included</b>. Every named <b>Layer</b> appears in exactly one of the two: <b>Included</b> if
+it's currently a member of the selected group, <b>Available</b> otherwise. Select one or more
+layers in either list (click, or Ctrl/Shift+click for several) and use the arrow buttons between
+the lists to move them: the right arrow adds the selected <b>Available</b> layers to the group,
+the left arrow removes the selected <b>Included</b> layers from it.
+
+If your layout file has layers using the older <b>Linked Layers</b> field (see the <b>Layers</b>
+dialog, \ref cmdLayer), opening that file automatically converts each layer's link list into a new,
+automatically-named group the first time the file is loaded -- the older field is retired once
+converted.
 
 */
 
