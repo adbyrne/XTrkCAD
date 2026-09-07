@@ -41,6 +41,9 @@ static paramGroup_t * describePG;
 EXPORT wIndex_t describeCmdInx;
 EXPORT BOOL_T inDescribeCmd;
 static track_p descTrk;
+/** Track currently under the cursor while the Describe command is active
+ * (set on every wActionMove, not just C_DOWN) -- see ClearDescribe(). */
+static track_p trk;
 
 static descData_p descData;
 static descUpdate_t descUpdateFunc;
@@ -242,6 +245,26 @@ EXPORT void DescribeDone(void * junk)
 	}
 	descNeedDrawHilite = FALSE;
 	describePG = NULL;
+}
+
+/**
+ * Reset the Describe command's cursor-tracking state (SF #785). \c trk is
+ * set on every mouse move while Describe is the active command (not just on
+ * a click) and is otherwise never cleared, so it can be left pointing at a
+ * track from whatever file was previously loaded -- if a new file is then
+ * loaded while Describe is still the active command, a redraw dispatched
+ * before the user moves the mouse again (\c C_REDRAW's \c else \c if
+ * (trk) branch) dereferences that stale pointer into memory \c
+ * ClearTracks() already freed. Confirmed via gdb (both a captured core
+ * dump and a live attach on the same repro: Describe a track by hovering
+ * over it, Save As, then File > Open a different file) that this, not \c
+ * descTrk (already reset correctly elsewhere), is the dangling pointer.
+ * Called from ClearTracks(), matching ClearNote()'s existing precedent for
+ * per-module state a new file load can invalidate.
+ */
+EXPORT void ClearDescribe(void)
+{
+	trk = NULL;
 }
 
 
@@ -580,7 +603,6 @@ static void DescChange(long changes)
 
 EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 {
-	static track_p trk;
 	char msg[STR_SIZE];
 
 	switch (action) {

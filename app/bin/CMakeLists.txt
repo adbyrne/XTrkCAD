@@ -5,7 +5,7 @@ include( CheckSymbolExists )
 # Create line symbols for turnouts from src definitions
 #
 #	1. Build converter cnvdsgn
-#   2. define target "lines" for all symols
+#	2. define target "lines" for all symbols
 #	3. create .lin-files using converter
 #	4. add individual .lin-files as dependency to "lines"
 #
@@ -110,17 +110,14 @@ if(CMAKE_C_COMPILER_ID MATCHES "Clang")
 endif()
 
 target_sources(xtrkcad-lib
- PRIVATE
+    PRIVATE
+    # Sources
     appdefaults.c
     archive.c
-    archive.h
     cbezier.c
-    cbezier.h
     cblock.c
     ccornu.c
-    ccornu.h
     ccurve.c
-    ccurve.h
     ccontrol.c
     cdescribe.c
     cdraw.c
@@ -128,41 +125,31 @@ target_sources(xtrkcad-lib
     cgroup.c
     chndldto.c
     cjoin.c
-    cjoin.h
     cmodify.c
     cnote.c
- command.c
- command.h
-    common-ui.h
+    command.c
     compound.c
-    compound.h
     cparalle.c
     cprint.c
     cprofile.c
     cpull.c
     cruler.c
     cselect.c
-    cselect.h
     csensor.c
     csnap.c
     csplit.c
     csignal.c
     cstraigh.c
-    cstraigh.h
     cstruct.c
     cswitchmotor.c
     ctext.c
     ctodesgn.c
     ctrain.c
-    ctrain.h
     cturnout.c
     cturntbl.c
     cundo.c
-    cundo.h
     undostream.c
-    undostream.h
     custom.c
-    custom.h
     dbench.c
     dbitmap.c
     cars/carcommit.c
@@ -184,91 +171,111 @@ target_sources(xtrkcad-lib
     dease.c
     denum.c
     directory.c
-    directory.h
     dlayer.c
- dlayer.h
+    dlayergroup.c
+    dlayergroupui.c
     doption.c
     dpreferences.c
     dprmfile.c
     draw.c
-    draw.h
     drawgeom.c
-    drawgeom.h
     drawruler.c
     dxfformat.c
-    dxfformat.h
     dxfimport.c
     dxfoutput.c
     elev.c
     elevjoin.c
-    elevjoin.h
     file2uri.c
-    file2uri.h
     fileio.c
-    fileio.h
     filenoteui.c
     getargs.c
     icons.c
     i18n.c
     layout.c
-    layout.h
     levenshtein.c
     linknoteui.c
     locale.c
     lprintf.c
     macro.c
     manifest.c
-    manifest.h
     mapwindow.c
-    mapwindow.h
- menu.h
- menu.c
+    menu.c
     misc.c
-    misc.h
     mymalloc.c
-    note.h
-#    param.c
+    # param.c
     paramfile.c
     paramfilelist.c
     paramfilesearch_ui.c
     partcatalog.c
     paths.c
-    paths.h
     problemrep.c
     problemrepui.c
     reports.c
     reportsformat.c
- scale.c
- scale.h
+    scale.c
     shortentext.c
-    shortentext.h
     shrtpath.c
-    shrtpath.h
     smalldlg.c
-    smalldlg.h
     stringxtc.c
     tbezier.c
-    tbezier.h
     tcornu.c
-    tcornu.h
     tcurve.c
     tease.c
     textnoteui.c
     track.c
-    track.h
-    trackx.h
     trkendpt.c
-    trkendpt.h
-    trkendptx.h
     trknote.c
- trkseg.h
     trkseg.c
     tstraigh.c
     turnout.c
-    uthash.h
     utility.c
-    utility.h
     validator.c
+
+    # Headers
+    archive.h
+    cbezier.h
+    ccornu.h
+    ccurve.h
+    cjoin.h
+    command.h
+    common-ui.h
+    compound.h
+    cselect.h
+    cstraigh.h
+    ctrain.h
+    cundo.h
+    undostream.h
+    custom.h
+    directory.h
+    dlayer.h
+    include/dlayergroup.h
+    include/dlayergroupui.h
+    draw.h
+    drawgeom.h
+    dxfformat.h
+    elevjoin.h
+    file2uri.h
+    fileio.h
+    layout.h
+    manifest.h
+    mapwindow.h
+    menu.h
+    misc.h
+    note.h
+    paths.h
+    scale.h
+    shortentext.h
+    shrtpath.h
+    smalldlg.h
+    tbezier.h
+    tcornu.h
+    track.h
+    trackx.h
+    trkendpt.h
+    trkendptx.h
+    trkseg.h
+    uthash.h
+    utility.h
     validator.h
     include/levenshtein.h
     include/paramfile.h
@@ -288,12 +295,12 @@ add_subdirectory(parts)
 
 if(WIN32)
     target_sources(xtrkcad-lib
-  PRIVATE
-   utf8convert.c
-   include/utf8convert.h
-            include/win32/dirent.h
-			winstubs.c
- )
+        PRIVATE
+        utf8convert.c
+        winstubs.c
+        include/utf8convert.h
+        include/win32/dirent.h
+    )
 endif()
 
 # This ensures that messages.h has been generated before we build xtrkcad-lib
@@ -338,14 +345,14 @@ endif()
 #
 add_executable(${XTRKCAD_BIN} WIN32 "" )
 
-# if SVG export is built and source files and dependency on MiniXML
+# If SVG export is enabled, add its source files and the MiniXML dependency.
 
 if(XTRKCAD_CREATE_SVG)
     target_sources(xtrkcad-lib
-  PRIVATE
-   svgformat.c
-   svgoutput.c
- )
+        PRIVATE
+        svgformat.c
+        svgoutput.c
+    )
 
     if(WIN32)
         target_link_libraries(xtrkcad-lib
@@ -366,10 +373,10 @@ if(XTRKCAD_CREATE_SVG)
 endif()
 
 target_sources(${XTRKCAD_BIN}
- PRIVATE
-  misc.c
-        ${messagefile_BINARY_DIR}/tooltiptext.c
-  xtrkcad.rc
+    PRIVATE
+    misc.c
+    ${messagefile_BINARY_DIR}/tooltiptext.c
+    xtrkcad.rc
 )
 add_dependencies(${XTRKCAD_BIN}
     tooltips

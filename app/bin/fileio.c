@@ -476,6 +476,8 @@ BOOL_T ReadTrackFile(
 			}
 		} else if (strncmp( paramLine, "LAYERS ", 7 ) == 0) {
 			ReadLayers( paramLine+7 );
+		} else if (strncmp( paramLine, "LAYERGROUP ", 11 ) == 0) {
+			ReadLayerGroups( paramLine+11 );
 		} else {
 			if (!old_skip) {
 				if (InputError(_("Unknown layout file object - skip until next good object?"),
@@ -496,6 +498,14 @@ BOOL_T ReadTrackFile(
 	if (paramFile) {
 		fclose(paramFile);
 		paramFile = NULL;
+	}
+
+	/* Layer Groups (SF #222 phase 0, SF #782): a full layout load whose
+	 * file predates Layer Groups gets its old per-layer Linked-Layers
+	 * data migrated into groups exactly once, here, after every LAYERS/
+	 * LAYERGROUP line has already been read. */
+	if ( full && paramVersion < 13 ) {
+		MigrateLayerLinksToGroups();
 	}
 
 	if ( ret ) {

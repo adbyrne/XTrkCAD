@@ -38,6 +38,7 @@
 #include "smalldlg.h"
 #include "common-ui.h"
 #include "ctrain.h"
+#include "include/dlayergroupui.h"
 
 #include "toolbar.h"
 #include "wlib.h"
@@ -1763,6 +1764,8 @@ EXPORT void CreateMenus(void)
 
 	MiscMenuItemCreate(manageM, NULL, "cmdLayer", _("Layers ..."), ACCL_LAYERS,
 	                   InitLayersDialog(), 0, NULL);
+	MiscMenuItemCreate(manageM, NULL, "cmdLayerGroups", _("Layer Groups ..."),
+	                   ACCL_LAYERGROUPS, InitLayerGroupsDialog(), 0, NULL);
 	wMenuSeparatorCreate(manageM);
 
 	MiscMenuItemCreate(manageM, NULL, "cmdEnumerate", _("Parts &List ..."),

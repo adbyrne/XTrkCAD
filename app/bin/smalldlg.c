@@ -98,10 +98,16 @@ static void CreateTipW( void )
 				continue;
 			}
 
-			/* remove CRs and LFs at end of line */
+			/* remove CRs and LFs at end of line -- a line that's just
+			 * "\n" (blank line, common as a separator between tips)
+			 * makes cp==buff before either check, so the first
+			 * decrement points one byte before the buffer; guard both
+			 * dereferences with a bounds check (SF #784: confirmed via
+			 * AddressSanitizer as a real stack-buffer-underflow, not
+			 * just a theoretical edge case). */
 			cp = buff+strlen(buff)-1;
-			if (*cp=='\n') { cp--; }
-			if (*cp=='\r') { cp--; }
+			if (cp >= buff && *cp=='\n') { cp--; }
+			if (cp >= buff && *cp=='\r') { cp--; }
 
 			/* get next line if the line was empty */
 			if (cp < buff) {

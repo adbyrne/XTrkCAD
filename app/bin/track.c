@@ -1095,6 +1095,7 @@ EXPORT void ClearTracks( void )
 	track_p curr, next;
 	UndoClear();
 	ClearNote();
+	ClearDescribe();
 	for (curr = to_first; curr; curr=next) {
 		next = curr->next;
 		FreeTrack( curr );
