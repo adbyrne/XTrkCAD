@@ -54,7 +54,7 @@ ClearErrorMessage(paramData_p p)
  * be flagged invalid for the commit gate without also showing the user why.
  * reason is used only when valid==FALSE; pass NULL (or "") when valid.
  *
- * \param data	parameter definition
+ * \param p	parameter definition
  * \param valid state of the form field
  * \param reason error message, see above for details
  */

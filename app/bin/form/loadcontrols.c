@@ -1,5 +1,5 @@
 /**
- * \file   loadcontrol.c
+ * \file   loadcontrols.c
  * \brief
  */
 
@@ -164,7 +164,7 @@ void FormLoadMessage(
 }
 
 /** Load all the controls in a parameter group.
- * \param[in] pointer to parameter group to be loaded
+ * \param[in] pg pointer to parameter group to be loaded
  */
 
 void FormLoadControls(paramGroup_p pg)

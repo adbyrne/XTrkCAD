@@ -142,7 +142,7 @@ FormFetchData(paramGroup_p pg)
 }
 
 
-/**  \TODO Seems like the following two functions are never used */
+/**  \todo Seems like the following two functions are never used */
 
 long
 FormIntRestore(paramGroup_p pg,	int class)
