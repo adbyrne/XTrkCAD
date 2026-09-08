@@ -1,5 +1,5 @@
 /**
- * \file   formmacro.c
+ * \file   macro.c
  * \brief  Macro record and replay
  *
  * \author Martin Fischer

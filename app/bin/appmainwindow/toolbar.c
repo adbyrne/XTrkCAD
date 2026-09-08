@@ -147,8 +147,6 @@ static paramGroup_t toolbarPG = { "toolbar", PGO_RECORD | PGO_FULLDIALOGFROMBUIL
  * Initialize the list of available options. The list of labels is created
  * from the allToolbarGroups array. Memory allocated here
  * is never freed as it might be used when opening the dialog
- *
- * \param unused
  */
 
 static void
@@ -262,7 +260,11 @@ ToolbarIsGroupVisible(int group)
  * Buttons are visible when the command is enabled or when additional
  * layer buttons need to be shown.
  *
- * \param inx
+ * \param group        button group to check
+ * \param mode         current command mode
+ * \param options      current command options
+ * \param layerButtons number of layer buttons currently shown
+ * \return             true if the button should be visible
  */
 
 bool
@@ -281,8 +283,9 @@ IsButtonVisible(int group, long mode, long options, long layerButtons)
 /**
  * Get visibility of a button and display it.
  *
- * \param inx   index into button list
- * \return      TRUE if the button was made visible
+ * \param tbState toolbar state to update
+ * \param inx     index into button list
+ * \return        TRUE if the button was made visible
  */
 
 static wBool_t ToolbarButtonPlace(struct sToolbarState *tbState, wIndex_t inx)
@@ -429,6 +432,7 @@ EXPORT void ToolbarButtonEnableIfSelect(bool selected)
  *
  * \param control   the control to add
  * \param options   control options
+ * \param cmdGroup  group the control belongs to
  */
 
 EXPORT void ToolbarControlAdd(wControl_p control, long options, int cmdGroup)
@@ -468,7 +472,6 @@ EXPORT void ToolbarGapAdd(wControl_p control, long options, int cmdGroup)
  *
  * \param button	the button
  * \param command	command to activate when button is pressed
- * \return
  */
 
 EXPORT void ToolbarButtonCommandLink(wIndex_t button, int command)
@@ -510,7 +513,7 @@ EXPORT void ToolbarUpdateButton(wIndex_t button, wIndex_t command,
 /**
  * Handle simulated button press during playbook.
  *
- * \param buttInx   selected button
+ * \param buttonInx selected button
  */
 EXPORT void PlaybackButtonMouse(wIndex_t buttonInx)
 {

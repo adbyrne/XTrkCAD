@@ -1,5 +1,5 @@
 /**
- * \file   dialogs.c
+ * \file   dialog.c
  * \brief
  *
  * \author Martin Fischer

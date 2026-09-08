@@ -1,5 +1,5 @@
 /**
- * \file   formdistance.c
+ * \file   formatdistance.c
  * \brief  Distance format functions, create and interpret
  */
 
