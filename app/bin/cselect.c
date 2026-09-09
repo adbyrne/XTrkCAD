@@ -1020,7 +1020,8 @@ EXPORT void DeselectLayer( unsigned int layer )
  * \param count IN number of entries in \p layerIndices
  * \param select IN TRUE to select, FALSE to deselect
  */
-EXPORT void SelectLayerSet( const unsigned int *layerIndices, int count, BOOL_T select )
+EXPORT void SelectLayerSet( const unsigned int *layerIndices, int count,
+                            BOOL_T select )
 {
 	BOOL_T wanted[NUM_LAYERS];
 	memset( wanted, FALSE, sizeof wanted );
