@@ -49,6 +49,8 @@ the Parts List (\ref cmdEnum) window.
 
 - \subpage cmdReportskinked
 
+- \subpage cmdReportsfilter
+
 */
 
 /**
@@ -101,6 +103,10 @@ used to name and save the report to a text file.
 The <b>Print</b> button opens the <i>Print</i> dialog which is used to
 print the report.
 
+The <b>Filter...</b> button (\ref cmdReportsfilter) opens a dialog to scope
+this report to specific Layers/Groups (\ref cmdLayergroup) -- every layer
+is included by default.
+
 The <b>Done</b> button closes the <b>Unconnected Endpoints Report</b>
 window.
 
@@ -142,6 +148,10 @@ used to name and save the report to a text file.
 The <b>Print</b> button opens the <i>Print</i> dialog which is used to
 print the report.
 
+The <b>Filter...</b> button (\ref cmdReportsfilter) opens a dialog to scope
+this report to specific Layers/Groups (\ref cmdLayergroup) -- every layer
+is included by default.
+
 The <b>Done</b> button closes the <b>Turnout Density Report</b> window.
 
 */
@@ -178,6 +188,10 @@ used to name and save the report to a text file.
 The <b>Print</b> button opens the <i>Print</i> dialog which is used to
 print the report.
 
+The <b>Filter...</b> button (\ref cmdReportsfilter) opens a dialog to scope
+this report to specific Layers/Groups (\ref cmdLayergroup) -- every layer
+is included by default.
+
 The <b>Done</b> button closes the <b>Track Lengths Report</b> window.
 
 */
@@ -213,6 +227,10 @@ used to name and save the report to a text file.
 
 The <b>Print</b> button opens the <i>Print</i> dialog which is used to
 print the report.
+
+The <b>Filter...</b> button (\ref cmdReportsfilter) opens a dialog to scope
+this report to specific Layers/Groups (\ref cmdLayergroup) -- every layer
+is included by default.
 
 The <b>Done</b> button closes the <b>Curve Stats Report</b> window.
 
@@ -259,6 +277,10 @@ interactive list above (which keeps the fixed equipment-class order).
 
 The <b>Print</b> button opens the <i>Print</i> dialog which is used to
 print the report.
+
+The <b>Filter...</b> button (\ref cmdReportsfilter) opens a dialog to scope
+this report to specific Layers/Groups (\ref cmdLayergroup) -- every layer
+is included by default.
 
 The <b>Done</b> button closes the <b>Equipment Suitability Report</b>
 window.
@@ -317,6 +339,12 @@ used to name and save the report to a text file.
 The <b>Print</b> button opens the <i>Print</i> dialog which is used to
 print the report.
 
+The <b>Filter...</b> button (\ref cmdReportsfilter) opens a dialog to scope
+this report to specific Layers/Groups (\ref cmdLayergroup) -- every layer
+is included by default. A filtered-out endpoint is excluded from pairing
+entirely, so a pair only appears when both its endpoints' layers are
+included.
+
 The <b>Done</b> button closes the <b>Gaps Report</b> window.
 
 */
@@ -361,6 +389,57 @@ used to name and save the report to a text file.
 The <b>Print</b> button opens the <i>Print</i> dialog which is used to
 print the report.
 
+The <b>Filter...</b> button (\ref cmdReportsfilter) opens a dialog to scope
+this report to specific Layers/Groups (\ref cmdLayergroup) -- every layer
+is included by default. A kinked joint only appears when both of its two
+tracks' layers are included.
+
 The <b>Done</b> button closes the <b>Kinked Joints Report</b> window.
+
+*/
+
+/**
+\page cmdReportsfilter Filter Layers/Groups
+
+The <b>Filter Layers/Groups</b> dialog scopes a report down to specific
+Layers and/or Layer Groups (\ref cmdLayergroup) -- one dialog shared by
+every report on the <b>Reports</b> menu (\ref reportsM), opened by that
+report's own <b>Filter...</b> button. Each report keeps its own,
+independent scope; changing one report's filter has no effect on any
+other.
+
+The <b>Layers</b> shuttle has two lists, <b>Available</b> and
+<b>Included</b>. Every named <b>Layer</b> appears in exactly one of the
+two: <b>Included</b> if it's currently in scope for the report,
+<b>Available</b> otherwise. By default every layer starts in
+<b>Available</b> -- an unfiltered report, covering the whole layout,
+exactly like before this dialog existed. Select one or more layers in
+either list (click, or Ctrl/Shift+click for several) and use the arrow
+buttons between the lists to move them: the right arrow includes the
+selected <b>Available</b> layers, the left arrow removes the selected
+<b>Included</b> layers, restoring them to <b>Available</b>. As soon as
+<b>Included</b> is empty again, the report goes back to covering every
+layer.
+
+The <b>Groups</b> list on the right shows every defined Layer Group
+(\ref cmdLayergroup). Select one or more and click <b>Add Group to
+Included</b> to move every one of their current members into
+<b>Included</b> in a single click -- a one-time snapshot of that group's
+membership, not a live link: editing the group's membership afterward has
+no effect on a filter already built from it, and the same layer can be
+included both directly and by an included group's membership with no
+difference in outcome. Each layer's row is still independently movable
+afterward, so you can include a whole group and then remove one of its
+layers, or start from a group and add a few more layers by hand.
+
+The <b>Clear Filter</b> button moves every layer back to <b>Available</b>
+in one click, restoring the unfiltered ("show every layer") state without
+shuttling each one back individually.
+
+Filter changes take effect the next time the report's own <b>Refresh</b>
+button is clicked -- the same way every other report change (editing
+track, changing a layer) already requires a <b>Refresh</b> to show up.
+
+The <b>Done</b> button closes the <b>Filter Layers/Groups</b> dialog.
 
 */

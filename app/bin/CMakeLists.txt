@@ -174,6 +174,7 @@ target_sources(xtrkcad-lib
     dlayer.c
     dlayergroup.c
     dlayergroupui.c
+    dreportsfilter.c
     dselectlayers.c
     doption.c
     dpreferences.c
@@ -251,6 +252,7 @@ target_sources(xtrkcad-lib
     dlayer.h
     include/dlayergroup.h
     include/dlayergroupui.h
+    include/dreportsfilter.h
     include/dselectlayers.h
     draw.h
     drawgeom.h
