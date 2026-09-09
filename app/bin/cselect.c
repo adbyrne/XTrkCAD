@@ -1005,6 +1005,51 @@ EXPORT void DeselectLayer( unsigned int layer )
 	RedrawSelectedTracksBoundary();
 }
 
+/**
+ * Select or deselect every track on any of \p layerIndices (0-based
+ * layer indices, \p count entries) -- generalizes SelectCurrentLayer()/
+ * DeselectLayer() to an arbitrary set of layers, for the "Select
+ * Layers/Groups..." dialog (dselectlayers.c, SF #787).
+ *
+ * When \p select is TRUE, a frozen layer's tracks are skipped (matching
+ * SelectCurrentLayer()'s single-layer guard), but only that layer -- unlike
+ * SelectCurrentLayer(), one frozen layer in the set doesn't block selecting
+ * the others. Deselecting has no such guard, matching DeselectLayer().
+ *
+ * \param layerIndices IN 0-based layer indices to act on
+ * \param count IN number of entries in \p layerIndices
+ * \param select IN TRUE to select, FALSE to deselect
+ */
+EXPORT void SelectLayerSet( const unsigned int *layerIndices, int count, BOOL_T select )
+{
+	BOOL_T wanted[NUM_LAYERS];
+	memset( wanted, FALSE, sizeof wanted );
+	for ( int i = 0; i < count; i++ ) {
+		if ( layerIndices[i] < NUM_LAYERS ) {
+			wanted[layerIndices[i]] = TRUE;
+		}
+	}
+
+	track_p trk;
+	trk = NULL;
+	while ( TrackIterate( &trk ) ) {
+		unsigned int layer = GetTrkLayer(trk);
+		if ( !wanted[layer] ) {
+			continue;
+		}
+		if ( select ) {
+			if ( !GetLayerFrozen(layer) && !GetTrkSelected(trk) ) {
+				SelectOneTrack( trk, TRUE );
+			}
+		} else {
+			if ( GetTrkSelected(trk) ) {
+				SelectOneTrack( trk, FALSE );
+			}
+		}
+	}
+	RedrawSelectedTracksBoundary();
+}
+
 
 static BOOL_T ClearElevation( track_p trk, BOOL_T unused )
 {

@@ -39,6 +39,7 @@
 #include "common-ui.h"
 #include "ctrain.h"
 #include "include/dlayergroupui.h"
+#include "include/dselectlayers.h"
 
 #include "toolbar.h"
 #include "wlib.h"
@@ -1432,6 +1433,8 @@ EXPORT void CreateMenus(void)
 	                    ACCL_SELECTALL, SetAllTrackSelectCB, 0, I2VP(TRUE) );
 	MiscMenuItemCreate( editM, NULL, "cmdSelectCurrentLayer",
 	                    _("Select Current Layer"), ACCL_SETCURLAYER, SelectCurrentLayer, 0, NULL);
+	MiscMenuItemCreate( editM, NULL, "cmdSelectLayersGroups",
+	                    _("Select Layers/Groups ..."), 0L, InitSelectLayersDialog(), 0, NULL);
 	MiscMenuItemCreate( editM, NULL, "cmdSelectByIndex", _("Select By Index"), 0L,
 	                    StartIndexDialog, 0, &SelectByIndex );
 	MiscMenuItemCreate( editM, NULL, "cmdDeselectAll", _("&Deselect All"),
