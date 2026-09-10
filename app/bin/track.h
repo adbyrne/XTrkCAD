@@ -51,24 +51,17 @@ extern long drawTunnel;
 extern long drawEndPtV;
 extern long drawUnconnectedEndPt;
 extern long centerDrawMode;
-extern wDrawColor selectedColor;
-extern wDrawColor normalColor;
+
 extern BOOL_T useCurrentLayer;
 extern unsigned int curTrackLayer;
 extern coOrd descriptionOff;
 extern DIST_T roadbedWidth;
 extern DIST_T roadbedLineWidth;
 extern long drawElevations;
-extern wDrawColor elevColorIgnore;
-extern wDrawColor elevColorDefined;
-extern wDrawColor exceptionColor;
 #define TIEDRAWMODE_NONE		(0)
 #define TIEDRAWMODE_OUTLINE		(1)
 #define TIEDRAWMODE_SOLID		(2)
 extern long tieDrawMode;
-extern wDrawColor tieColor;
-extern wDrawColor bridgeColor;
-extern wDrawColor roadbedColor;
 extern TRKINX_T max_index;
 
 typedef signed char * PATHPTR_T;

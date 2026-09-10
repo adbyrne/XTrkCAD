@@ -107,6 +107,8 @@ static void DisplayOk( void * junk )
 	long changes;
 	changes = GetChanges( &displayPG );
 	wHide( displayW );
+
+	FormSaveDefaultValues( &displayPG );
 	DoChangeNotification(changes);
 }
 
@@ -182,6 +184,8 @@ static void ColorOk( void * junk )
 	long changes;
 	changes = GetChanges( &colorPG );
 	wHide( colorW );
+
+	FormSaveDefaultValues( &colorPG );
 	if ( (changes&CHANGE_GRID) && GridIsVisible() ) {
 		changes |= CHANGE_MAIN;
 	}

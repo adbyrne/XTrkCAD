@@ -123,6 +123,8 @@ EXPORT wDrawColor drawColorGrey70;
 EXPORT wDrawColor drawColorGrey80;
 EXPORT wDrawColor drawColorGrey90;
 
+
+
 EXPORT DIST_T pixelBins = 80;
 
 /****************************************************************************
@@ -133,17 +135,22 @@ EXPORT DIST_T pixelBins = 80;
 
 EXPORT BOOL_T magneticSnap;
 
-EXPORT wDrawColor markerColor;
-EXPORT wDrawColor borderColor;
-EXPORT wDrawColor crossMajorColor;
-EXPORT wDrawColor crossMinorColor;
-EXPORT wDrawColor selectedColor;
-EXPORT wDrawColor normalColor;
-EXPORT wDrawColor elevColorIgnore;
-EXPORT wDrawColor elevColorDefined;
-EXPORT wDrawColor profilePathColor;
-EXPORT wDrawColor exceptionColor;
-EXPORT wDrawColor reportIndicatorColor;
+
+EXPORT wDrawColor normalColor          = wRGB(  0,   0,   0);
+EXPORT wDrawColor selectedColor        = wRGB(255,   0,   0);
+EXPORT wDrawColor exceptionColor       = wRGB(255,  89,   0);
+EXPORT wDrawColor tieColor             = wRGB(153,  89,  68);
+EXPORT wDrawColor bridgeColor          = wRGB( 64,  64,  64);
+EXPORT wDrawColor roadbedColor         = wRGB(128, 128, 128);
+EXPORT wDrawColor snapGridColor        = wRGB(  0, 255,   0);
+EXPORT wDrawColor markerColor          = wRGB(255,   0,   0);
+EXPORT wDrawColor borderColor          = wRGB(  0,   0,   0);
+EXPORT wDrawColor crossMajorColor      = wRGB(255,   0,   0);
+EXPORT wDrawColor crossMinorColor      = wRGB(  0,   0, 255);
+EXPORT wDrawColor profilePathColor     = wRGB(128,   0, 128);
+EXPORT wDrawColor reportIndicatorColor = wRGB(255,   0, 255);
+EXPORT wDrawColor elevColorIgnore      = wRGB(  0,   0, 255);
+EXPORT wDrawColor elevColorDefined     = wRGB(255, 215,   0);
 
 DIST_T closeDist = 0.100;
 
@@ -1770,20 +1777,6 @@ EXPORT void InitColor(void)
 	drawColorGrey70 = wDrawFindColor(wRGB(179, 179, 179));
 	drawColorGrey80 = wDrawFindColor(wRGB(204, 204, 204));
 	drawColorGrey90 = wDrawFindColor(wRGB(230, 230, 230));
-	snapGridColor = drawColorGreen;
-	markerColor = drawColorRed;
-	borderColor = drawColorBlack;
-	crossMajorColor = drawColorRed;
-	crossMinorColor = drawColorBlue;
-	selectedColor = drawColorRed;
-	normalColor = drawColorBlack;
-	elevColorIgnore = drawColorBlue;
-	elevColorDefined = drawColorGold;
-	profilePathColor = drawColorPurple;
-	exceptionColor = wDrawFindColor(wRGB(255, 89, 0));
-	tieColor = wDrawFindColor(wRGB(153, 89, 68));
-	reportIndicatorColor = wDrawFindColor(wRGB(255, 0,
-	                                      255)); /* magenta -- distinct from every other default above */
 }
 
 EXPORT void DrawInit(int initialZoom)
