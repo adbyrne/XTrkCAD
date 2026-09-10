@@ -58,6 +58,21 @@ static void test_create_null_or_empty_name_fails(void **state)
 	assert_int_equal(LayerGroupCount(), 0);
 }
 
+/* SF #789 gap review: two groups with the same name are indistinguishable
+ * in every Groups list in the UI (Layer Groups dialog, Select
+ * Layers/Groups, Reports/Print-Export filters), which previously silently
+ * happened -- only an empty name was ever rejected. */
+static void test_create_duplicate_name_fails(void **state)
+{
+	(void) state;
+	LayerGroupResetAll();
+	int a = LayerGroupCreate("Level 1");
+
+	assert_int_equal(LayerGroupCreate("Level 1"), -1);
+	assert_int_equal(LayerGroupCount(), 1);
+	assert_string_equal(LayerGroupName(a), "Level 1");
+}
+
 static void test_name_on_invalid_index_is_null(void **state)
 {
 	(void) state;
@@ -90,6 +105,23 @@ static void test_rename_invalid_index_or_name_fails(void **state)
 	assert_int_equal(LayerGroupRename(g, NULL), 0);
 	assert_int_equal(LayerGroupRename(g, ""), 0);
 	assert_string_equal(LayerGroupName(g), "Name");
+}
+
+/* Same #789 gap-review fix as test_create_duplicate_name_fails, but for
+ * Rename -- and renaming a group to its own current (unchanged) name must
+ * still succeed, not be rejected as a collision with itself. */
+static void test_rename_duplicate_name_fails(void **state)
+{
+	(void) state;
+	LayerGroupResetAll();
+	int a = LayerGroupCreate("Level 1");
+	int b = LayerGroupCreate("Level 2");
+
+	assert_int_equal(LayerGroupRename(b, "Level 1"), 0);
+	assert_string_equal(LayerGroupName(b), "Level 2");
+
+	assert_int_equal(LayerGroupRename(a, "Level 1"), 1);
+	assert_string_equal(LayerGroupName(a), "Level 1");
 }
 
 static void test_delete_shifts_later_indices_down(void **state)
@@ -406,9 +438,11 @@ int main(void)
 		cmocka_unit_test(test_starts_empty),
 		cmocka_unit_test(test_create_returns_increasing_index),
 		cmocka_unit_test(test_create_null_or_empty_name_fails),
+		cmocka_unit_test(test_create_duplicate_name_fails),
 		cmocka_unit_test(test_name_on_invalid_index_is_null),
 		cmocka_unit_test(test_rename),
 		cmocka_unit_test(test_rename_invalid_index_or_name_fails),
+		cmocka_unit_test(test_rename_duplicate_name_fails),
 		cmocka_unit_test(test_delete_shifts_later_indices_down),
 		cmocka_unit_test(test_delete_invalid_index_fails),
 		cmocka_unit_test(test_membership_add_has_remove),

@@ -235,6 +235,30 @@ static void FilterClear(void *action)
 }
 
 /**
+ * CHANGE_LAYER notification callback: this dialog's Available/Included and
+ * Groups lists are only ever populated when it's shown (RefreshFilterShuttle()/
+ * RefreshFilterGroupsList() in ShowReportsFilterDialog()), not on every
+ * relevant edit -- and it's non-modal (F_BLOCK is unimplemented on GTK3, see
+ * dialog.c's wWinDialogCreate()), so the Manage > Layer Groups dialog can be
+ * open and edited at the same time. Left unrefreshed, a Groups-list row's
+ * cached group index can point at a *different* group than the one displayed
+ * after a group elsewhere is deleted (LayerGroupDelete() shifts every later
+ * index down by one) -- FilterAddGroup() would then silently apply the wrong
+ * group's membership. Refresh live while visible, same pattern as dlayer.c's
+ * own LayerChange().
+ *
+ * \param changes IN change bitmask from DoChangeNotification()
+ */
+static void ReportsFilterChangeNotify(long changes)
+{
+	if ((changes & CHANGE_LAYER) && reportsFilterPG.win != NULL &&
+	    wWinIsVisible(reportsFilterPG.win)) {
+		RefreshFilterShuttle();
+		RefreshFilterGroupsList();
+	}
+}
+
+/**
  * Show the shared Filter dialog, creating it on first use, re-targeted at
  * \p filter.
  *
@@ -259,6 +283,7 @@ void ShowReportsFilterDialog(reportsFilter_t *filter)
 		FormCreateDialog(&reportsFilterPG, MakeWindowTitle(_("Filter Layers/Groups")),
 		                 NULL, NULL, NULL, FormCancel_Current,
 		                 TRUE, F_RESIZE|F_RECALLSIZE|F_BLOCK, NULL);
+		RegisterChangeNotification(ReportsFilterChangeNotify);
 	}
 
 	FormLoadControls(&reportsFilterPG);

@@ -187,6 +187,30 @@ static void DoDeselect(void *action)
 }
 
 /**
+ * CHANGE_LAYER notification callback: this dialog's Layers and Groups lists
+ * are only ever populated when it's shown (RefreshLayerList()/
+ * RefreshGroupsList() in DoSelectLayersDialog()), not on every relevant
+ * edit -- and it's non-modal (F_BLOCK is unimplemented on GTK3, see
+ * dialog.c's wWinDialogCreate()), so the Manage > Layer Groups dialog can be
+ * open and edited at the same time. Left unrefreshed, a Groups-list row's
+ * cached group index can point at a *different* group than the one displayed
+ * after a group elsewhere is deleted (LayerGroupDelete() shifts every later
+ * index down by one) -- selecting/deselecting by that stale row would
+ * silently act on the wrong group's membership. Refresh live while visible,
+ * same pattern as dlayer.c's own LayerChange().
+ *
+ * \param changes IN change bitmask from DoChangeNotification()
+ */
+static void SelectLayersChangeNotify(long changes)
+{
+	if ((changes & CHANGE_LAYER) && selectLayersPG.win != NULL &&
+	    wWinIsVisible(selectLayersPG.win)) {
+		RefreshLayerList();
+		RefreshGroupsList();
+	}
+}
+
+/**
  * Show the Select Layers/Groups dialog, creating it on first use. There is
  * no separate Ok action -- Select/Deselect already act on the canvas
  * selection immediately -- so \c okProc is NULL (matching reports.c's
@@ -203,6 +227,7 @@ static void DoSelectLayersDialog(void *unused)
 		FormCreateDialog(&selectLayersPG, MakeWindowTitle(_("Select Layers/Groups")),
 		                 NULL, NULL, NULL, FormCancel_Current,
 		                 TRUE, F_RESIZE|F_RECALLSIZE|F_BLOCK, NULL);
+		RegisterChangeNotification(SelectLayersChangeNotify);
 	}
 
 	FormLoadControls(&selectLayersPG);
