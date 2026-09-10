@@ -7,42 +7,36 @@
 
 The <b>Manage Menu</b> shows commands affecting the <b>Main Canvas</b> (\ref mainW).
 
-- <b>Car Inventory</b> - displays the dialog (\ref cmdCarinv) to update your list of cars and locomotives.
+- \subpage cmdCarinv -- update your list of cars and locomotives.
 
-- <b>Custom Defined Parts</b> - displays the <b>Custom Defined Parts</b> (\ref cmdCustmgm) dialog to manipulate custom turnout, structure and rolling stock designs.
+- \subpage cmdCustmgm -- manipulate custom turnout, structure and rolling
+  stock designs.
 
-- <b>Layout Control Elements</b> - display the <b>Layout Control Elements</b> (\ref cmdContmgm) dialog to manipulate blocks, turnout motors and signals.
+- \subpage cmdContmgm -- manipulate blocks, turnout motors and signals.
 
-- <b>Group</b> - creates a <b>Structure</b> or <b>Turnout</b> definition from the selected (\ref cmdSelect) objects. See the <b>Group</b> command (\ref cmdGroup) for details.
+- \subpage cmdGroup -- creates a Structure or Turnout definition from the
+  selected (\ref cmdSelect) objects.
 
-- <b>Layers</b> - displays the Layer (\ref cmdLayer) dialog.
-
-- <b>Layer Groups</b> - displays the Layer Groups (\ref cmdLayergroup) dialog.
-
-- <b>Parts List</b> - Invokes the Parts List (\ref cmdEnum) command.  This command produces a list of all selected turnouts and sectional tracks and the total length of flex-track.
-
-- <b>Price List</b> - Displays the <b>Price List</b> (\ref cmdPricelist) dialog to specify prices for tracks and structures.
-
-- <b>Train</b> - Run trains on the designed layout
-
-- <b>Turnout Designer</b> - displays a menu list of Turnout Designer (\ref cmdTurnoutNew) dialogs.
-
-- <b>Ungroup</b> - breaks apart any selected (\ref cmdSelect) turnouts and structures into their basic lines (\ref cmdDraw) and track segments.
-
-- <b>Update Turnout and Structures</b> - replaces (\ref cmdRefreshSpecial) any selected (\ref cmdSelect) <b>Turnouts</b> and <b>Structures</b> with the definitions from updated <b>parameter files</b> (\ref cmdPrmfile).
-
-- \subpage cmdCarinv
-- \subpage cmdCustmgm
-- \subpage cmdContmgm
-- \subpage cmdGroup
 - \subpage cmdLayer
+
 - \subpage cmdLayergroup
-- \subpage cmdEnum
-- \subpage cmdPricelist
-- \subpage cmdTrain
-- \subpage cmdTurnoutNew
-- \subpage cmdRefreshSpecial
-- \subpage cmdUngroup
+
+- \subpage cmdEnum -- lists all selected turnouts and sectional tracks
+  and the total length of flex-track.
+
+- \subpage cmdPricelist -- specify prices for tracks and structures.
+
+- \subpage cmdTrain -- run trains on the designed layout.
+
+- \subpage cmdTurnoutNew -- a menu list of Turnout Designer dialogs.
+
+- \subpage cmdRefreshSpecial -- replaces any selected (\ref cmdSelect)
+  Turnouts and Structures with the definitions from updated parameter
+  files (\ref cmdPrmfile).
+
+- \subpage cmdUngroup -- breaks apart any selected (\ref cmdSelect)
+  turnouts and structures into their basic lines (\ref cmdDraw) and
+  track segments.
 
 */
 
@@ -423,7 +417,9 @@ that represents staging track regardless of level.
 
 The <b>Layer Groups</b> dialog has two parts. The <b>Groups</b> list on the left shows every
 defined group; select one to work with it. The <b>New...</b> button creates a new, empty group
-after asking for its name. The <b>Rename...</b> button changes the selected group's name. The
+after asking for its name. The <b>Rename...</b> button changes the selected group's name. A group
+name must be unique -- <b>New...</b>/<b>Rename...</b> reject a name already used by another group,
+since every <b>Groups</b> list in the app identifies a group by its displayed name. The
 <b>Delete</b> button removes the selected group entirely (its member <b>Layers</b> are unaffected
 -- only the group itself goes away). The <b>Show Only</b> button hides every <b>Layer</b> except
 the selected group's members, a quick way to isolate one group's content on the <b>Main Window</b>
