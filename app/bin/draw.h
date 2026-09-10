@@ -197,7 +197,15 @@ extern wDrawColor crossMinorColor;
 extern wDrawColor snapGridColor;
 extern wDrawColor selectedColor;
 extern wDrawColor profilePathColor;
+/* magenta -- distinct from every other default above */
 extern wDrawColor reportIndicatorColor;
+extern wDrawColor normalColor;
+extern wDrawColor exceptionColor;
+extern wDrawColor tieColor;
+extern wDrawColor bridgeColor;
+extern wDrawColor roadbedColor;
+extern wDrawColor elevColorIgnore;
+extern wDrawColor elevColorDefined;
 
 BOOL_T IsClose(DIST_T);
 

@@ -2737,9 +2737,6 @@ EXPORT long drawTunnel = DRAW_TUNNEL_DASH;
  */
 
 EXPORT long tieDrawMode = TIEDRAWMODE_SOLID;
-EXPORT wDrawColor tieColor;
-EXPORT wDrawColor bridgeColor;
-EXPORT wDrawColor roadbedColor;
 
 /**
  * Draw tracks with 2 rails when zoomed in

@@ -418,8 +418,6 @@ EXPORT STATUS_T GridAction(
  *
  */
 
-EXPORT wDrawColor snapGridColor;
-
 typedef struct {
 	DIST_T Spacing;
 	long Division;
