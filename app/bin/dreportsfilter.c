@@ -235,13 +235,6 @@ static void FilterClear(void *action)
 }
 
 /**
- * Show the shared Filter dialog, creating it on first use, re-targeted at
- * \p filter.
- *
- * \param filter IN/OUT the report's own filter state to edit
- */
-
-/**
  * CHANGE_LAYER notification callback: this dialog's Available/Included and
  * Groups lists are only ever populated when it's shown (RefreshFilterShuttle()/
  * RefreshFilterGroupsList() in ShowReportsFilterDialog()), not on every
@@ -265,6 +258,12 @@ static void ReportsFilterChangeNotify(long changes)
 	}
 }
 
+/**
+ * Show the shared Filter dialog, creating it on first use, re-targeted at
+ * \p filter.
+ *
+ * \param filter IN/OUT the report's own filter state to edit
+ */
 void ShowReportsFilterDialog(reportsFilter_t *filter)
 {
 	currentFilter = filter;

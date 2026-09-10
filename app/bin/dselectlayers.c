@@ -187,18 +187,6 @@ static void DoDeselect(void *action)
 }
 
 /**
- * Show the Select Layers/Groups dialog, creating it on first use. There is
- * no separate Ok action -- Select/Deselect already act on the canvas
- * selection immediately -- so \c okProc is NULL (matching reports.c's
- * dialogs) and "Done" is just the Cancel button (labeled "_Done" in
- * selectlayers.ui) hiding the window via the default FormCancel_Current.
- * A non-NULL okProc would need an "id_ok" widget the .ui deliberately
- * doesn't define, since there's nothing for a separate Ok action to do.
- *
- * \param unused IN unused, required by the addButtonCallBack_t signature
- */
-
-/**
  * CHANGE_LAYER notification callback: this dialog's Layers and Groups lists
  * are only ever populated when it's shown (RefreshLayerList()/
  * RefreshGroupsList() in DoSelectLayersDialog()), not on every relevant
@@ -222,6 +210,17 @@ static void SelectLayersChangeNotify(long changes)
 	}
 }
 
+/**
+ * Show the Select Layers/Groups dialog, creating it on first use. There is
+ * no separate Ok action -- Select/Deselect already act on the canvas
+ * selection immediately -- so \c okProc is NULL (matching reports.c's
+ * dialogs) and "Done" is just the Cancel button (labeled "_Done" in
+ * selectlayers.ui) hiding the window via the default FormCancel_Current.
+ * A non-NULL okProc would need an "id_ok" widget the .ui deliberately
+ * doesn't define, since there's nothing for a separate Ok action to do.
+ *
+ * \param unused IN unused, required by the addButtonCallBack_t signature
+ */
 static void DoSelectLayersDialog(void *unused)
 {
 	if (selectLayersPG.win == NULL) {
