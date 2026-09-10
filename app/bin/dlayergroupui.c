@@ -122,6 +122,13 @@ static void LayerGroupNameOk(void *junk)
 	if (layerGroupNameTarget < 0) {
 		int idx = LayerGroupCreate(layerGroupNameBuf);
 		if (idx < 0) {
+			/* Only two ways to get here: an empty name (shouldn't happen,
+			 * the name field is required) or a name that collides with an
+			 * existing group -- every Groups list in the UI identifies a
+			 * group by its displayed name, so two same-named groups would
+			 * be indistinguishable there. */
+			ErrorMessage(_("A Layer Group named \"%s\" already exists."),
+			             layerGroupNameBuf);
 			return;
 		}
 
@@ -138,12 +145,20 @@ static void LayerGroupNameOk(void *junk)
 		FormControlActive(&layerGroupPG, I_GROUPDELETE, TRUE);
 		FormControlActive(&layerGroupPG, I_GROUPSHOWONLY, TRUE);
 	} else {
+		char oldName[LAYERGROUP_NAME_SIZE];
+		strncpy(oldName, LayerGroupName(layerGroupNameTarget), sizeof oldName - 1);
+		oldName[sizeof oldName - 1] = '\0';
+
+		if (!LayerGroupRename(layerGroupNameTarget, layerGroupNameBuf)) {
+			ErrorMessage(_("A Layer Group named \"%s\" already exists."),
+			             layerGroupNameBuf);
+			return;
+		}
+
 		LOGLAYERGROUPS()
 		LOG(log_layergroups, 1, ("layergroups: renamed group %d \"%s\" -> \"%s\"\n",
-		                         layerGroupNameTarget, LayerGroupName(layerGroupNameTarget),
-		                         layerGroupNameBuf))
+		                         layerGroupNameTarget, oldName, layerGroupNameBuf))
 
-		LayerGroupRename(layerGroupNameTarget, layerGroupNameBuf);
 		changed++;
 		DoChangeNotification(CHANGE_LAYER);
 		RefreshGroupList();

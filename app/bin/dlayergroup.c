@@ -44,6 +44,21 @@ static int GroupValid(int groupIdx)
 	return groupIdx >= 0 && groupIdx < groupCount;
 }
 
+/** TRUE if some group other than \p excludeIdx (pass -1 to check every
+ * group) is already named \p name -- every Groups list in the UI (Layer
+ * Groups dialog, Select Layers/Groups, Reports/Print-Export filters)
+ * identifies a group by its displayed name, so two same-named groups would
+ * be indistinguishable there even though they're distinct internally. */
+static int NameCollides(const char *name, int excludeIdx)
+{
+	for (int i = 0; i < groupCount; i++) {
+		if (i != excludeIdx && strcmp(groups[i].name, name) == 0) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
 void LayerGroupResetAll(void)
 {
 	for (int i = 0; i < groupCount; i++) {
@@ -62,7 +77,7 @@ int LayerGroupCount(void)
 
 int LayerGroupCreate(const char *name)
 {
-	if (name == NULL || name[0] == '\0') {
+	if (name == NULL || name[0] == '\0' || NameCollides(name, -1)) {
 		return -1;
 	}
 
@@ -101,7 +116,8 @@ int LayerGroupDelete(int groupIdx)
 
 int LayerGroupRename(int groupIdx, const char *newName)
 {
-	if (!GroupValid(groupIdx) || newName == NULL || newName[0] == '\0') {
+	if (!GroupValid(groupIdx) || newName == NULL || newName[0] == '\0' ||
+	    NameCollides(newName, groupIdx)) {
 		return 0;
 	}
 
