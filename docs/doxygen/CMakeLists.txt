@@ -30,8 +30,13 @@ SET( DOXYGEN_AWESOME_CSS_DIR "${doxygen-awesome-css_SOURCE_DIR}" )
 # release.yml's GitHub Pages job) overrides this at configure time with the
 # real absolute URL for that deployment -- computed from that job's own
 # context, never a hardcoded site/account.
+#
+# Relative to the generated HTML page that uses it (${sourcedoc_BINARY_DIR}/html/index.html),
+# not to this CMakeLists.txt's own binary dir -- SF #788: "../../app/doc/html/" landed one level
+# short, at build/docs/app/doc/html/ instead of build/app/doc/html/. Links straight to
+# index.html rather than the bare directory per str0belight's #780 comment.
 if(NOT DEFINED XTRKCAD_USERGUIDE_URL)
-    set(XTRKCAD_USERGUIDE_URL "../../app/doc/html/" CACHE STRING
+    set(XTRKCAD_USERGUIDE_URL "../../../app/doc/html/index.html" CACHE STRING
         "URL the dev guide's User Guide tab links to")
 endif()
 configure_file(${sourcedoc_SOURCE_DIR}/DoxygenLayout.xml.in ${sourcedoc_BINARY_DIR}/DoxygenLayout.xml @ONLY)

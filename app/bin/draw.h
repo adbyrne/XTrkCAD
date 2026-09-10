@@ -197,7 +197,8 @@ extern wDrawColor crossMinorColor;
 extern wDrawColor snapGridColor;
 extern wDrawColor selectedColor;
 extern wDrawColor profilePathColor;
-extern wDrawColor reportIndicatorColor; /* magenta -- distinct from every other default above */
+/* magenta -- distinct from every other default above */
+extern wDrawColor reportIndicatorColor;
 extern wDrawColor normalColor;
 extern wDrawColor exceptionColor;
 extern wDrawColor tieColor;
