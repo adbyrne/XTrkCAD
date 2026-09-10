@@ -413,6 +413,8 @@ Objects are drawn on the map window, if the Layer they are on has <b>On Map</b> 
 
 \anchor idx_Layer_Groups_Dialog_782
 
+![](dlayergroup.png)
+
 A <b>Layer Group</b> is a named collection of <b>Layers</b> (\ref cmdLayer). A <b>Layer</b> can
 belong to any, all, or none of the <b>Layer Groups</b> you define -- membership in one group has
 no effect on membership in any other. Groups are meant for acting on a meaningful subset of layers

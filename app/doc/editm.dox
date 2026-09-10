@@ -92,6 +92,8 @@ When an individual object is selected, its index number is displayed in the Info
 
 \anchor idx_Select_Layers_Groups_787
 
+![](dselectlayers.png)
+
 The <b>Select Layers/Groups</b> dialog selects or deselects all objects on any number of
 <b>Layers</b> (\ref cmdLayer) and/or <b>Layer Groups</b> (\ref cmdLayergroup) at once.
 
