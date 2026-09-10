@@ -380,6 +380,8 @@ The <b>Done</b> button closes the <b>Kinked Joints Report</b> window.
 /**
 \page cmdReportsfilter Filter Layers/Groups
 
+![](dreportsfilter.png)
+
 The <b>Filter Layers/Groups</b> dialog scopes a report down to specific
 Layers and/or Layer Groups (\ref cmdLayergroup) -- one dialog shared by
 every report on the <b>Reports</b> menu (\ref reportsM), opened by that

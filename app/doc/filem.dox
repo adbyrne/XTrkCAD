@@ -23,10 +23,12 @@ The <b>File Menu</b> shows file oriented commands for loading and saving layout 
 
 - ![](bexportbmap.png)<b>Export to Bitmap</b> - Creates a bitmap file (\ref cmdOutputbitmap) of the layout. The bitmap can be saved in either JPEG or PNG format.
 
-- ![](bexportdxf.png)<b>Export to DXF</b> - Exports objects to a file in DXF format (\ref generalTerms). If no objects are selected, all objects in visible layers are exported. If objects are selected they are exported. The exported file can then be imported into other CAD programs.
+- ![](bexportdxf.png)<b>Export to DXF</b> - Exports objects to a file in DXF format (\ref generalTerms): the current selection (\ref cmdSelect), or the scope set on the <b>Filter Layers/Groups for Print/Export</b> (\ref cmdPrintExportFilter) dialog if one is active. The exported file can then be imported into other CAD programs.
 
-- ![](bexportsvg.png) <b>Export to SVG</b> - Exports objects to a file in SVG format. If no objects are selected, all objects in visible layers are exported. If objects are selected they are exported. The exported file can then be imported into a vector drawing program like Inkscape
+- ![](bexportsvg.png) <b>Export to SVG</b> - Exports objects to a file in SVG format: the current selection (\ref cmdSelect) if any, otherwise every visible object -- or the scope set on the <b>Filter Layers/Groups for Print/Export</b> (\ref cmdPrintExportFilter) dialog if one is active. The exported file can then be imported into a vector drawing program like Inkscape
 or used for publishing on the web.
+
+- <b>Filter Layers/Groups for Print/Export</b> - opens the \ref cmdPrintExportFilter dialog to scope <b>Print</b> (\ref cmdPrint) and <b>Export to DXF</b>/<b>SVG</b> to specific <b>Layers</b> or <b>Layer Groups</b> (\ref cmdLayergroup).
 
 - ![](bimport.png) <b>Import</b> - Displays the file selection dialog which allows selection of an existing <i>XTrackCAD</i> Import (\ref cmdExport \*.xti) files. This function can be used to transfer parts like a yard design from one layout design to another.
 
@@ -58,6 +60,7 @@ or used for publishing on the web.
 - \subpage cmdOutputbitmap
 - \subpage ExportDXF
 - \subpage ExportSVG
+- \subpage cmdPrintExportFilter
 - \subpage cmdImport
 - \subpage cmdImportM
 - \subpage cmdImportDxf
@@ -127,7 +130,7 @@ does so for trackplans without an image background.
 
 ![](bexportdxf.png)
 
-This menu item displays a file selection dialog where a file name for exported objects can be entered.  All selected (\ref cmdSelect) objects are exported to the file. The export file will have an `dxf` extension.
+This menu item displays a file selection dialog where a file name for exported objects can be entered. If the <b>Filter Layers/Groups for Print/Export</b> dialog (\ref cmdPrintExportFilter) has an active scope, every visible object on an included Layer is exported regardless of selection; otherwise, the current selection (\ref cmdSelect) is exported -- and at least one of the two is required, or the command reports that nothing is selected. The export file will have an `dxf` extension.
 
 Exported files can then be imported into other CAD programs.
 
@@ -140,7 +143,7 @@ Exported files can then be imported into other CAD programs.
 
 ![](bexportsvg.png)
 
-This menu item displays a file selection dialog where a file name for exported objects can be entered.  All selected (\ref cmdSelect) objects are exported to the file. The export file will have an `svg` extension.
+This menu item displays a file selection dialog where a file name for exported objects can be entered. If the <b>Filter Layers/Groups for Print/Export</b> dialog (\ref cmdPrintExportFilter) has an active scope, every visible object on an included Layer is exported regardless of selection; otherwise the current selection (\ref cmdSelect) is exported if there is one, or every visible object if nothing is selected. The export file will have an `svg` extension.
 
 Files in SVG format can be used for different purposes.
 
@@ -151,6 +154,40 @@ allowing lossless resizing.
 Javascript, zooming and panning can be enabled. Appropiate scripts can easily be found using your favorite search engine.
 The generated SVG uses the layout description as a title that is shown by some browser. Also the drawing has an 'id' for manipulation by Javascript.
 This id is derived from the filename by removing all spaces and sticking the word 'id' in front. Eg exporting `stonega.xtc` the resulting id will be `idstonega`.
+
+*/
+
+/**
+\page cmdPrintExportFilter Filter Layers/Groups for Print/Export
+
+![](dprintexportfilter.png)
+
+The <b>Filter Layers/Groups for Print/Export</b> dialog scopes <b>Print</b>
+(\ref cmdPrint), <b>Export to DXF</b> (\ref ExportDXF), and <b>Export to
+SVG</b> (\ref ExportSVG) down to specific <b>Layers</b> and/or <b>Layer
+Groups</b> (\ref cmdLayergroup) -- the same Available/Included/Groups
+dialog and mechanics as the Reports menu's own <b>Filter Layers/Groups</b>
+dialog (\ref cmdReportsfilter), but a single filter shared across Print
+and both Export commands, not one per report.
+
+Unlike a report's filter, this one only ever narrows what a <b>Layer</b>'s
+own visibility (\ref cmdLayer) already allows through -- including a
+hidden layer here does not make it print or export; it still has to be
+made visible first. Once at least one layer is included, it also fully
+replaces the current selection (\ref cmdSelect) as the export scope for
+DXF/SVG, rather than requiring you to select matching tracks by hand
+first.
+
+Reachable from the <b>File</b> menu (\ref fileM), or from the <b>Filter
+Layers/Groups...</b> button on the <b>Print</b> (\ref cmdPrint) dialog --
+both open and edit the same shared filter.
+
+The <b>Clear Filter</b> button restores the unfiltered state: <b>Print</b>
+scoped only by <b>Layer</b> visibility, and <b>Export</b> scoped only by
+the current selection (or every visible object, for SVG, if nothing is
+selected).
+
+The <b>Done</b> button closes the dialog.
 
 */
 
@@ -372,11 +409,16 @@ The <b>Select All</b> button selects all pages for printing.
 
 The <b>Clear</b> button unselects all selected pages, so no pages will be printed.
 
+The <b>Filter Layers/Groups...</b> button opens the <b>Filter Layers/Groups
+for Print/Export</b> dialog (\ref cmdPrintExportFilter) to further scope
+what's printed to specific Layers or Layer Groups (\ref cmdLayergroup), on
+top of whatever Layer visibility already allows through.
+
 <i>Suggested Uses:</i>
 
 Use the <b>Snapshot</b> button to set the scale and orientation for a one-page printout of the layout.  Also set <b>Engineering Data</b> to add the Layout Title, Scale and other data for a summary.
 
-Use <b>Layers</b> (\ref cmdLayer) to control which tracks are visible (and printed).  Put bench-work, scenery or different tracks levels in separate layers and hide the layers you are not working with.
+Use <b>Layers</b> (\ref cmdLayer) to control which tracks are visible (and printed), or use the <b>Filter Layers/Groups...</b> button (\ref cmdPrintExportFilter) for a one-off scope without changing any layer's actual visibility.  Put bench-work, scenery or different tracks levels in separate layers and hide the layers you are not working with.
 
 To transfer the drawing to the layout without printing at 1:1, make the Snap Grid (\ref cmdGrid) visible and orient it to match your room or layout table.
 
