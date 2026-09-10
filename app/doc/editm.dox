@@ -98,13 +98,13 @@ The <b>Select Layers/Groups</b> dialog selects or deselects all objects on any n
 <b>Layers</b> (\ref cmdLayer) and/or <b>Layer Groups</b> (\ref cmdLayergroup) at once.
 
 The <b>Layers</b> list on the left and the <b>Groups</b> list on the right are independent;
-check any number of rows in either or both. Checking a <b>Layer Group</b> row does not check any
-individual <b>Layer</b> row -- the <b>Select</b>/<b>Deselect</b> buttons act on the union of every
-checked <b>Layer</b> plus every current member of every checked <b>Group</b> directly, without
-changing either list's checked rows. This means the two buttons can be used in sequence to
-fine-tune a selection: for example, checking a group and clicking <b>Select</b>, then separately
-checking one of that group's Layers and clicking <b>Deselect</b>, selects every Layer in the group
-except that one.
+select any number of rows in either or both (click, or Ctrl/Shift+click for several). Selecting a
+<b>Layer Group</b> row does not select any individual <b>Layer</b> row -- the
+<b>Select</b>/<b>Deselect</b> buttons act on the union of every selected <b>Layer</b> plus every
+current member of every selected <b>Group</b> directly, without changing either list's selected
+rows. This means the two buttons can be used in sequence to fine-tune a selection: for example,
+selecting a group and clicking <b>Select</b>, then separately selecting one of that group's Layers
+and clicking <b>Deselect</b>, selects every Layer in the group except that one.
 
 An object cannot be selected if its Layer is frozen (see the <b>Layers</b> dialog, \ref cmdLayer);
 deselecting has no such restriction.
