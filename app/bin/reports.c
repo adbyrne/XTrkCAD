@@ -82,6 +82,7 @@
 #include "scale.h"
 #include "track.h"
 #include "utility.h"
+#include "include/dreportsfilter.h"
 #include "include/reports.h"
 
 /** Debug log category for manual/visual testing (`-d reports=1 -l <file>`)
@@ -180,6 +181,22 @@ static const char * reportsListTitles[] = {
 };
 static paramListData_t reportsListData = { 8, 300, 7, reportsListWidths, reportsListTitles };
 
+/** This report's layer/group scope -- see dreportsfilter.h. Zero-
+ * initialized, so unfiltered (every layer shown) until the user opens
+ * the Filter dialog and includes at least one layer. */
+static reportsFilter_t reportsFilter;
+
+/** "Filter..." button: open the shared Filter dialog against this
+ * report's own reportsFilter. The user clicks Refresh afterward (same as
+ * any other change) to see the new scope take effect.
+ *
+ * \param unused IN unused, required by the PD_BUTTON signature
+ */
+static void DoReportsFilter(void *unused)
+{
+	ShowReportsFilterDialog(&reportsFilter);
+}
+
 static paramData_t reportsPLs[] = {
 #define I_REPORTSSUMMARY (0)
 #define reportsSummary (reportsPLs[I_REPORTSSUMMARY].control)
@@ -191,6 +208,7 @@ static paramData_t reportsPLs[] = {
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsUnconnectedSaveOp },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsUnconnectedPrintOp },
 	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
+	{ PD_BUTTON, DoReportsFilter, "filter", 0, NULL, NULL, 0, NULL },
 };
 static paramGroup_t reportsPG = { "reports", PGO_FULLDIALOGFROMBUILDER, reportsPLs, COUNT( reportsPLs ) };
 
@@ -683,7 +701,11 @@ void ReportsUnconnectedEndpoints( void * unused )
 
 	TRK_ITERATE( trk ) {
 		EPINX_T ep;
-		EPINX_T epCnt = GetTrkEndPtCnt(trk);
+		EPINX_T epCnt;
+		if ( !ReportsFilterLayerIncluded( &reportsFilter, GetTrkLayer(trk) ) ) {
+			continue;
+		}
+		epCnt = GetTrkEndPtCnt(trk);
 		/* Turntable stalls are open by design (QueryTrack(trk,
 		 * Q_CAN_ADD_ENDPOINTS) -- same test the Gaps report uses to
 		 * exclude them from its own pairing analysis), so they're
@@ -784,6 +806,18 @@ static paramListData_t reportsTurnoutListData = { 8, 400, 6, reportsTurnoutListW
                                                   reportsTurnoutListTitles
                                                 };
 
+/** This report's layer/group scope -- see dreportsfilter.h. */
+static reportsFilter_t reportsTurnoutFilter;
+
+/** "Filter..." button -- see DoReportsFilter() above for the shared shape.
+ *
+ * \param unused IN unused, required by the PD_BUTTON signature
+ */
+static void DoReportsTurnoutFilter(void *unused)
+{
+	ShowReportsFilterDialog(&reportsTurnoutFilter);
+}
+
 static paramData_t reportsTurnoutPLs[] = {
 #define I_REPORTSTURNOUTSUMMARY (0)
 #define reportsTurnoutSummary (reportsTurnoutPLs[I_REPORTSTURNOUTSUMMARY].control)
@@ -795,6 +829,7 @@ static paramData_t reportsTurnoutPLs[] = {
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsTurnoutSaveOp },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsTurnoutPrintOp },
 	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
+	{ PD_BUTTON, DoReportsTurnoutFilter, "filter", 0, NULL, NULL, 0, NULL },
 };
 static paramGroup_t reportsTurnoutPG = { "reportsturnout", PGO_FULLDIALOGFROMBUILDER,
                                          reportsTurnoutPLs, COUNT( reportsTurnoutPLs )
@@ -898,6 +933,10 @@ void ReportsTurnoutDensity( void * unused )
 
 	TRK_ITERATE( trk ) {
 		unsigned int trkLayer = GetTrkLayer(trk);
+		DIST_T lengthFt;
+		if ( !ReportsFilterLayerIncluded( &reportsTurnoutFilter, trkLayer ) ) {
+			continue;
+		}
 		/* GetTrkLength(trk,0,1) reads endpoints 0 and 1 unconditionally
 		 * (track.c) -- TRK_ITERATE walks every object on the track list,
 		 * not just track with a real length (benchwork, notes, groups,
@@ -911,8 +950,8 @@ void ReportsTurnoutDensity( void * unused )
 		 * Matches the MCP reference's own guard
 		 * (TrackObject.length_model_inches(): "if len(eps) < 2: return
 		 * 0.0"), just not carried over into this port originally. */
-		DIST_T lengthFt = (GetTrkEndPtCnt(trk) >= 2) ?
-		                  GetTrkLength(trk, 0, 1) / 12.0 : 0.0;
+		lengthFt = (GetTrkEndPtCnt(trk) >= 2) ?
+		           GetTrkLength(trk, 0, 1) / 12.0 : 0.0;
 		BOOL_T isTurnout = (GetTrkType(trk) == T_TURNOUT);
 
 		if ( trkLayer < NUM_LAYERS ) {
@@ -1013,6 +1052,18 @@ static paramListData_t reportsTrackLenListData = { 8, 400, 6, reportsTrackLenLis
                                                    reportsTrackLenListTitles
                                                  };
 
+/** This report's layer/group scope -- see dreportsfilter.h. */
+static reportsFilter_t reportsTrackLenFilter;
+
+/** "Filter..." button -- see DoReportsFilter() above for the shared shape.
+ *
+ * \param unused IN unused, required by the PD_BUTTON signature
+ */
+static void DoReportsTrackLenFilter(void *unused)
+{
+	ShowReportsFilterDialog(&reportsTrackLenFilter);
+}
+
 static paramData_t reportsTrackLenPLs[] = {
 #define I_REPORTSTRACKLENSUMMARY (0)
 #define reportsTrackLenSummary (reportsTrackLenPLs[I_REPORTSTRACKLENSUMMARY].control)
@@ -1024,6 +1075,7 @@ static paramData_t reportsTrackLenPLs[] = {
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsTrackLenSaveOp },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsTrackLenPrintOp },
 	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
+	{ PD_BUTTON, DoReportsTrackLenFilter, "filter", 0, NULL, NULL, 0, NULL },
 };
 static paramGroup_t reportsTrackLenPG = { "reportstracklen", PGO_FULLDIALOGFROMBUILDER,
                                           reportsTrackLenPLs, COUNT( reportsTrackLenPLs )
@@ -1106,11 +1158,16 @@ void ReportsTrackLengths( void * unused )
 
 	TRK_ITERATE( trk ) {
 		unsigned int trkLayer = GetTrkLayer(trk);
+		DIST_T lengthFt;
+		BOOL_T isTurnout;
+		if ( !ReportsFilterLayerIncluded( &reportsTrackLenFilter, trkLayer ) ) {
+			continue;
+		}
 		/* Same guard as ReportsTurnoutDensity() -- see that function's
 		 * comment for the real crash this prevents. */
-		DIST_T lengthFt = (GetTrkEndPtCnt(trk) >= 2) ?
-		                  GetTrkLength(trk, 0, 1) / 12.0 : 0.0;
-		BOOL_T isTurnout = (GetTrkType(trk) == T_TURNOUT);
+		lengthFt = (GetTrkEndPtCnt(trk) >= 2) ?
+		           GetTrkLength(trk, 0, 1) / 12.0 : 0.0;
+		isTurnout = (GetTrkType(trk) == T_TURNOUT);
 
 		if ( trkLayer < NUM_LAYERS ) {
 			layerFeet[trkLayer] += lengthFt;
@@ -1196,6 +1253,18 @@ static paramListData_t reportsCurveListData = { 8, 300, 2, reportsCurveListWidth
                                                 reportsCurveListTitles
                                               };
 
+/** This report's layer/group scope -- see dreportsfilter.h. */
+static reportsFilter_t reportsCurveFilter;
+
+/** "Filter..." button -- see DoReportsFilter() above for the shared shape.
+ *
+ * \param unused IN unused, required by the PD_BUTTON signature
+ */
+static void DoReportsCurveFilter(void *unused)
+{
+	ShowReportsFilterDialog(&reportsCurveFilter);
+}
+
 static paramData_t reportsCurvePLs[] = {
 #define I_REPORTSCURVESUMMARY (0)
 #define reportsCurveSummary (reportsCurvePLs[I_REPORTSCURVESUMMARY].control)
@@ -1207,6 +1276,7 @@ static paramData_t reportsCurvePLs[] = {
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsCurveSaveOp },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsCurvePrintOp },
 	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
+	{ PD_BUTTON, DoReportsCurveFilter, "filter", 0, NULL, NULL, 0, NULL },
 };
 static paramGroup_t reportsCurvePG = { "reportscurvestats", PGO_FULLDIALOGFROMBUILDER,
                                        reportsCurvePLs, COUNT( reportsCurvePLs )
@@ -1287,6 +1357,9 @@ void ReportsCurveStats( void * unused )
 		const char *label;
 
 		if ( r <= 0.0 ) {
+			continue;
+		}
+		if ( !ReportsFilterLayerIncluded( &reportsCurveFilter, GetTrkLayer(trk) ) ) {
 			continue;
 		}
 		curveCount++;
@@ -1403,6 +1476,18 @@ static paramListData_t reportsEquipListData = { 8, 400, 3, reportsEquipListWidth
                                                 reportsEquipListTitles
                                               };
 
+/** This report's layer/group scope -- see dreportsfilter.h. */
+static reportsFilter_t reportsEquipFilter;
+
+/** "Filter..." button -- see DoReportsFilter() above for the shared shape.
+ *
+ * \param unused IN unused, required by the PD_BUTTON signature
+ */
+static void DoReportsEquipFilter(void *unused)
+{
+	ShowReportsFilterDialog(&reportsEquipFilter);
+}
+
 static paramData_t reportsEquipPLs[] = {
 #define I_REPORTSEQUIPSUMMARY (0)
 #define reportsEquipSummary (reportsEquipPLs[I_REPORTSEQUIPSUMMARY].control)
@@ -1414,6 +1499,7 @@ static paramData_t reportsEquipPLs[] = {
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsEquipSaveOp },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsEquipPrintOp },
 	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
+	{ PD_BUTTON, DoReportsEquipFilter, "filter", 0, NULL, NULL, 0, NULL },
 };
 static paramGroup_t reportsEquipPG = { "reportsequipment", PGO_FULLDIALOGFROMBUILDER,
                                        reportsEquipPLs, COUNT( reportsEquipPLs )
@@ -1492,6 +1578,9 @@ void ReportsEquipmentSuitability( void * unused )
 		DIST_T r = GetCurveRadius(trk);
 
 		if ( r < REPORTS_EQUIP_MIN_USABLE_RADIUS ) {
+			continue;
+		}
+		if ( !ReportsFilterLayerIncluded( &reportsEquipFilter, GetTrkLayer(trk) ) ) {
 			continue;
 		}
 		if ( !haveRadius || r < minR ) {
@@ -1584,6 +1673,18 @@ static paramListData_t reportsGapsListData = { 8, 400, 7, reportsGapsListWidths,
                                                reportsGapsListTitles
                                              };
 
+/** This report's layer/group scope -- see dreportsfilter.h. */
+static reportsFilter_t reportsGapsFilter;
+
+/** "Filter..." button -- see DoReportsFilter() above for the shared shape.
+ *
+ * \param unused IN unused, required by the PD_BUTTON signature
+ */
+static void DoReportsGapsFilter(void *unused)
+{
+	ShowReportsFilterDialog(&reportsGapsFilter);
+}
+
 static paramData_t reportsGapsPLs[] = {
 #define I_REPORTSGAPSSUMMARY (0)
 #define reportsGapsSummary (reportsGapsPLs[I_REPORTSGAPSSUMMARY].control)
@@ -1595,6 +1696,7 @@ static paramData_t reportsGapsPLs[] = {
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsGapsSaveOp },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsGapsPrintOp },
 	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
+	{ PD_BUTTON, DoReportsGapsFilter, "filter", 0, NULL, NULL, 0, NULL },
 };
 static paramGroup_t reportsGapsPG = { "reportsgaps", PGO_FULLDIALOGFROMBUILDER,
                                       reportsGapsPLs, COUNT( reportsGapsPLs )
@@ -1788,6 +1890,9 @@ void ReportsGaps( void * unused )
 				turntableCnt++;
 				continue;
 			}
+			if ( !ReportsFilterLayerIncluded( &reportsGapsFilter, GetTrkLayer(trk) ) ) {
+				continue;
+			}
 			{
 				reportsGapOpenEndPt_t *entry;
 				DYNARR_APPEND( reportsGapOpenEndPt_t, open_da, 10 );
@@ -1899,6 +2004,18 @@ static paramListData_t reportsKinkedListData = { 8, 400, 7, reportsKinkedListWid
                                                  reportsKinkedListTitles
                                                };
 
+/** This report's layer/group scope -- see dreportsfilter.h. */
+static reportsFilter_t reportsKinkedFilter;
+
+/** "Filter..." button -- see DoReportsFilter() above for the shared shape.
+ *
+ * \param unused IN unused, required by the PD_BUTTON signature
+ */
+static void DoReportsKinkedFilter(void *unused)
+{
+	ShowReportsFilterDialog(&reportsKinkedFilter);
+}
+
 static paramData_t reportsKinkedPLs[] = {
 #define I_REPORTSKINKEDSUMMARY (0)
 #define reportsKinkedSummary (reportsKinkedPLs[I_REPORTSKINKEDSUMMARY].control)
@@ -1910,6 +2027,7 @@ static paramData_t reportsKinkedPLs[] = {
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsKinkedSaveOp },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsKinkedPrintOp },
 	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
+	{ PD_BUTTON, DoReportsKinkedFilter, "filter", 0, NULL, NULL, 0, NULL },
 };
 static paramGroup_t reportsKinkedPG = { "reportskinked", PGO_FULLDIALOGFROMBUILDER,
                                         reportsKinkedPLs, COUNT( reportsKinkedPLs )
@@ -2046,6 +2164,14 @@ void ReportsKinkedJoints( void * unused )
 				/* Shouldn't happen -- GetTrkEndTrk() above already
 				 * confirmed trk and other are connected, so other must
 				 * have a reverse endpoint back to trk. Defensive only. */
+				continue;
+			}
+			/* A kinked joint spans two tracks that may be on different
+			 * layers -- only counted if BOTH sides are in scope, matching
+			 * ReportsGaps()'s equivalent "both endpoints must be included"
+			 * behavior for its own cross-track pairs. */
+			if ( !ReportsFilterLayerIncluded( &reportsKinkedFilter, GetTrkLayer(trk) ) ||
+			     !ReportsFilterLayerIncluded( &reportsKinkedFilter, GetTrkLayer(other) ) ) {
 				continue;
 			}
 

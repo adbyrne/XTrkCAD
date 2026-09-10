@@ -37,6 +37,7 @@
     <file preprocess="xml-stripblanks">reports.ui</file>
     <file preprocess="xml-stripblanks">reportscurvestats.ui</file>
     <file preprocess="xml-stripblanks">reportsequipment.ui</file>
+    <file preprocess="xml-stripblanks">reportsfilter.ui</file>
     <file preprocess="xml-stripblanks">reportsgaps.ui</file>
     <file preprocess="xml-stripblanks">reportskinked.ui</file>
     <file preprocess="xml-stripblanks">reportstracklen.ui</file>
@@ -44,6 +45,7 @@
     <file preprocess="xml-stripblanks">rescale.ui</file>
     <file preprocess="xml-stripblanks">rgbcolor.ui</file>
     <file preprocess="xml-stripblanks">searchgui.ui</file>
+    <file preprocess="xml-stripblanks">selectlayers.ui</file>
     <file preprocess="xml-stripblanks">sensoredit.ui</file>
     <file preprocess="xml-stripblanks">signaledit.ui</file>
     <file preprocess="xml-stripblanks">structure.ui</file>

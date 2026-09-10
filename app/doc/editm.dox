@@ -28,6 +28,8 @@ The newly pasted parts are in <b>Selected</b> state and can easily be moved into
 
 - <i>Select Current Layer</i> \anchor idx_Select_Current_Layer_154  - selects all objects in the current Layer (\ref cmdLayer).
 
+- <i>Select Layers/Groups</i> - opens the Select Layers/Groups (\ref cmdSelectlayers) dialog, for selecting or deselecting all objects on any number of Layers and/or Layer Groups (\ref cmdLayergroup) at once.
+
 - <i>Select By Index</i> \anchor idx_Select_By_Index_155  - selects object by index number (\ref cmdSelectIndex).
 
 - <i>Deselect All</i> \anchor idx_Deselect_All_156  - unselects all objects on the layout. The same action can be achieved by pressing the ESC key.
@@ -56,6 +58,7 @@ The newly pasted parts are in <b>Selected</b> state and can easily be moved into
 For more information on working with selected objects, see the Select (\ref cmdSelect) command.
 
 - \subpage cmdSelectIndex
+- \subpage cmdSelectlayers
 - \subpage cmdAboveBelow
 - \subpage addshortcutkeys
 - \subpage cmdDelete
@@ -85,7 +88,29 @@ When an individual object is selected, its index number is displayed in the Info
 */
 
 /**
-\page cmdAboveBelow "Move To Front" and "Move to Back"  
+\page cmdSelectlayers Select Layers/Groups
+
+\anchor idx_Select_Layers_Groups_787
+
+The <b>Select Layers/Groups</b> dialog selects or deselects all objects on any number of
+<b>Layers</b> (\ref cmdLayer) and/or <b>Layer Groups</b> (\ref cmdLayergroup) at once.
+
+The <b>Layers</b> list on the left and the <b>Groups</b> list on the right are independent;
+check any number of rows in either or both. Checking a <b>Layer Group</b> row does not check any
+individual <b>Layer</b> row -- the <b>Select</b>/<b>Deselect</b> buttons act on the union of every
+checked <b>Layer</b> plus every current member of every checked <b>Group</b> directly, without
+changing either list's checked rows. This means the two buttons can be used in sequence to
+fine-tune a selection: for example, checking a group and clicking <b>Select</b>, then separately
+checking one of that group's Layers and clicking <b>Deselect</b>, selects every Layer in the group
+except that one.
+
+An object cannot be selected if its Layer is frozen (see the <b>Layers</b> dialog, \ref cmdLayer);
+deselecting has no such restriction.
+
+*/
+
+/**
+\page cmdAboveBelow "Move To Front" and "Move to Back"
 
 \anchor idx_Move_To_Front_179
 \anchor idx_Move_To_Back_180

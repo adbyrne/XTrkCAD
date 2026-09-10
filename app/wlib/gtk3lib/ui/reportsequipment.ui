@@ -51,6 +51,16 @@
       </object>
     </child>
     <child type="action">
+      <object class="GtkButton" id="filter">
+        <property name="label" translatable="yes">_Filter...</property>
+        <property name="tooltip-text" translatable="yes">Scope this report to selected Layers/Groups</property>
+        <property name="use-underline">True</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+      </object>
+    </child>
+    <child type="action">
       <object class="GtkButton" id="id_cancel">
         <property name="use-underline">True</property>
         <property name="can-default">True</property>
@@ -66,6 +76,7 @@
       <action-widget response="2">printsetup</action-widget>
       <action-widget response="3">save</action-widget>
       <action-widget response="4">refresh</action-widget>
+      <action-widget response="5">filter</action-widget>
     </action-widgets>
     <child internal-child="vbox">
       <object class="GtkBox">
