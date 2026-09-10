@@ -6,50 +6,29 @@ the current layout (\ref mainW). Each report opens in its own window with
 <b>Save...</b>, <b>Print...</b> and <b>Page Setup...</b> buttons, the same as
 the Parts List (\ref cmdEnum) window.
 
-- <b>Unconnected Endpoints</b> - displays the <b>Unconnected Endpoints
-  Report</b> (\ref cmdReports) dialog, listing every track endpoint in the
-  layout that isn't connected to another track.
+- \subpage cmdReports -- every track endpoint that isn't connected to
+  another track.
 
-- <b>Turnout Density</b> - displays the <b>Turnout Density Report</b>
-  (\ref cmdReportsturnout) dialog, listing turnout counts and track length
-  by layer, and flagging switching-heavy layers.
+- \subpage cmdReportsturnout -- turnout counts and track length by layer,
+  flagging switching-heavy layers.
 
-- <b>Track Lengths</b> - displays the <b>Track Lengths Report</b>
-  (\ref cmdReportstracklen) dialog, listing total track length, turnout
-  count, and estimated car capacity by layer.
+- \subpage cmdReportstracklen -- total track length, turnout count, and
+  estimated car capacity by layer.
 
-- <b>Curve Stats</b> - displays the <b>Curve Stats Report</b>
-  (\ref cmdReportscurvestats) dialog, listing the layout's curve count,
-  radius range, and a radius-distribution histogram.
+- \subpage cmdReportscurvestats -- the layout's curve count, radius
+  range, and a radius-distribution histogram.
 
-- <b>Equipment Suitability</b> - displays the <b>Equipment Suitability
-  Report</b> (\ref cmdReportsequipment) dialog, rating common equipment
-  classes (freight cars, locomotives, passenger cars) against the
-  layout's minimum usable curve radius.
+- \subpage cmdReportsequipment -- rates common equipment classes against
+  the layout's minimum usable curve radius.
 
-- <b>Gaps</b> - displays the <b>Gaps Report</b> (\ref cmdReportsgaps)
-  dialog, listing pairs of open track endpoints that are close enough to
-  each other that they likely should be connected.
+- \subpage cmdReportsgaps -- pairs of open track endpoints close enough
+  to each other that they likely should be connected.
 
-- <b>Kinked Joints</b> - displays the <b>Kinked Joints Report</b>
-  (\ref cmdReportskinked) dialog, listing already-connected track joints
-  whose alignment has drifted out of tolerance.
+- \subpage cmdReportskinked -- already-connected track joints whose
+  alignment has drifted out of tolerance.
 
-- \subpage cmdReports
-
-- \subpage cmdReportsturnout
-
-- \subpage cmdReportstracklen
-
-- \subpage cmdReportscurvestats
-
-- \subpage cmdReportsequipment
-
-- \subpage cmdReportsgaps
-
-- \subpage cmdReportskinked
-
-- \subpage cmdReportsfilter
+Most reports also offer a shared \subpage cmdReportsfilter dialog to scope
+the report down to specific Layers or Layer Groups (\ref cmdLayergroup).
 
 */
 
