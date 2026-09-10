@@ -39,6 +39,7 @@
 #include "common-ui.h"
 #include "ctrain.h"
 #include "include/dlayergroupui.h"
+#include "include/dprintexportfilter.h"
 #include "include/dselectlayers.h"
 
 #include "toolbar.h"
@@ -1351,12 +1352,19 @@ EXPORT void CreateMenus(void)
 	                   ACCL_PRINTBM, OutputBitMapInit(), 0,
 	                   NULL);
 	MiscMenuItemCreate(fileM, NULL, "cmdExportDXF", _("Export DXF"),
-	                   ACCL_EXPORTDXF, DoExportDxf, IC_SELECTED,
+	                   ACCL_EXPORTDXF, DoExportDxf, 0,
 	                   NULL);
 #if XTRKCAD_CREATE_SVG
 	MiscMenuItemCreate( fileM, NULL, "cmdExportSVG", _("Export SVG"),
-	                    ACCL_EXPORTSVG, DoExportSVG, IC_SELECTED, NULL);
+	                    ACCL_EXPORTSVG, DoExportSVG, 0, NULL);
 #endif
+	/* SF #789: no IC_SELECTED above -- the shared Print/Export filter
+	 * (dprintexportfilter.h) is an alternative scope to canvas selection,
+	 * not an addition to it, so these must stay enabled with nothing
+	 * selected; DoExportDxf/DoExportSVG check for that case themselves. */
+	MiscMenuItemCreate(fileM, NULL, "cmdPrintExportFilter",
+	                   _("Filter Layers/Groups for Print/Export..."),
+	                   ACCL_PRINTEXPORTFILTER, DoPrintExportFilter, 0, NULL);
 	wMenuSeparatorCreate(fileM);
 
 	paramFilesCallback = ParamFilesInit();
@@ -1830,7 +1838,8 @@ static void InitCmdExport(void)
 	                 IC_SELECTED | IC_ACCLKEY, DoExport, NULL);
 	AddToolbarButton("cmdExportDXF",
 	                 CreateToolbarIconFromResource("doc-export-dxf.png"),
-	                 IC_SELECTED | IC_ACCLKEY, DoExportDxf, I2VP(1));
+	                 IC_ACCLKEY, DoExportDxf,
+	                 I2VP(1)); // SF #789: no IC_SELECTED, see menu.c's file-menu registration
 	AddToolbarButton("cmdExportBmap",
 	                 CreateToolbarIconFromResource("doc-export-bmap.png"), IC_ACCLKEY,
 	                 OutputBitMapInit(), NULL);

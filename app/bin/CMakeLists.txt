@@ -174,6 +174,7 @@ target_sources(xtrkcad-lib
     dlayer.c
     dlayergroup.c
     dlayergroupui.c
+    dprintexportfilter.c
     dreportsfilter.c
     dselectlayers.c
     doption.c

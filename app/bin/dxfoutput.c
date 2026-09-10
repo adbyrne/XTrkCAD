@@ -32,6 +32,7 @@
 #include "track.h"
 #include "draw.h"
 #include "common-ui.h"
+#include "include/dprintexportfilter.h"
 
 static struct wFilSel_t * exportDXFFile_fs;
 
@@ -234,11 +235,14 @@ static int DoExportDXFTracks(
 
 void DoExportDxf(void* unused )
 {
-	//if (selectedTrackCount <= 0) {
-	//    ErrorMessage(MSG_NO_SELECTED_TRK);
-	//    return;
-	//}
-	CHECK(selectedTrackCount > 0);
+	/* SF #789: the shared Print/Export filter (dprintexportfilter.h) is an
+	 * alternative to a canvas selection, not an addition to it -- see
+	 * DrawSelectedTracks()'s own filter-overrides-selection handling. Only
+	 * require an actual selection when no filter is set. */
+	if (!ReportsFilterActive(&printExportFilter) && selectedTrackCount <= 0) {
+		ErrorMessage(MSG_NO_SELECTED_TRK);
+		return;
+	}
 
 	if (exportDXFFile_fs == NULL)
 		exportDXFFile_fs = wFilSelCreate(mainW, FS_SAVE, 0, _("Export to DXF"),
