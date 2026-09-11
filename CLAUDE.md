@@ -330,9 +330,14 @@ AStyle config. Installed alongside the binary.
 ### Build tools (`app/tools/`)
 
 Used only at build time:
-- `cnvdsgn.c` — converts turnout symbol sources (`.src` → `.lin`)
-- `bdf2xtp.c` — converts BDF bitmap fonts to XTP parameter files
-- `pngtoxpm` — converts PNG bitmaps to XPM (Windows)
+- `listxtp.c` — creates a contents list of all parameter files
+- `dirent.c`/`dirent.h` — vendored public-domain Win32 POSIX-`dirent` shim (Kevlin Henney,
+  1997/2003), Windows-only build of `listxtp`
+- `mkimage1`/`mkimage3` — shell scripts converting `.png` bitmaps to `.image1`/`.image3`
+
+(`cnvdsgn.c` actually lives in `app/bin/`, not here — corrected 2026-08-28; `pngtoxpm` doesn't
+exist anywhere in the current tree. `bdf2xtp.c`, formerly also in `app/bin/`, was removed as
+orphaned/unbuilt dead code — SF #735, confirmed by dev-ML consensus 2026-09-11.)
 
 ## Version
 
