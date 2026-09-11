@@ -107,6 +107,13 @@ A summary line above the list gives the layout's total turnout count,
 total track length, and overall density, updated whenever the report is
 generated or refreshed.
 
+<b>"Turnout" here means any turnout-type track object</b>, which includes
+crossings and single/double slip switches alongside ordinary turnouts --
+XTrkCAD stores all of these as the same underlying track type, since
+they're all compound, parameter-file-defined track pieces. A layout with
+plain turnouts plus a few crossings or slips will show a higher count here
+than a simple tally of powered switch machines would suggest.
+
 Unlike the Parts List (\ref cmdEnum) command, this report always covers the
 whole layout; it does not consider the current selection (\ref cmdSelect).
 
@@ -149,7 +156,9 @@ layout's own scale.
 
 A summary line above the list gives the layout's total track length,
 turnout count, and total estimated car capacity, updated whenever the
-report is generated or refreshed.
+report is generated or refreshed. The turnout count includes crossings and
+slip switches along with ordinary turnouts -- see the Turnout Density
+Report's note above (\ref cmdReportsturnout) for why.
 
 Unlike the Parts List (\ref cmdEnum) command, this report always covers the
 whole layout; it does not consider the current selection (\ref cmdSelect).
