@@ -712,6 +712,7 @@ static void DoProfileReset(void *junk);
 static void DoProfileDone(void * junk);
 static void DoProfileClear(void * junk);
 static void DoProfilePrint(void * junk);
+static void DoProfileCancel(paramGroup_p pg);
 static void DoProfileChangeMode(void * junk);
 static void SelProfileW(wIndex_t, coOrd);
 static void CloseProfileWindow(paramGroup_p pg, int event, void *data);
@@ -722,20 +723,15 @@ static paramData_t profilePLs[] = {
 #define I_PROFILEMSG			(1)
 	{	PD_MESSAGE, NULL, "message", PDO_DLGIGNOREX, I2VP(300) },
 #define I_CHANGEBUTTON 2
-	{	PD_BUTTON, DoProfileChange, "change", PDO_DLGCMDBUTTON, NULL, N_("Change") },
+	{	PD_BUTTON, DoProfileChange, "change", PDO_DLGCMDBUTTON, NULL},
 #define I_RESETBUTTON 3
-	{	PD_BUTTON, DoProfileReset, "reset", PDO_DLGCMDBUTTON, NULL, N_("Reset") },
+	{	PD_BUTTON, DoProfileReset, "reset", PDO_DLGCMDBUTTON, NULL},
 #define I_CLEARBUTTON 4
-	{	PD_BUTTON, DoProfileClear, "clear", PDO_DLGCMDBUTTON, NULL, N_("Clear") },
+	{	PD_BUTTON, DoProfileClear, "clear", PDO_DLGCMDBUTTON, NULL},
 #define I_PRINTBUTTON 5
-	{	PD_BUTTON, DoProfilePrint, "print", 0, NULL, N_("Print") }
+	{	PD_BUTTON, DoProfilePrint, "print", 0, NULL}
 };
 static paramGroup_t profilePG = { "profile", PGO_FULLDIALOGFROMBUILDER, profilePLs, COUNT( profilePLs ) };
-
-#define CHANGEBUTTON  ((wButton_p)profilePLs[I_CHANGEBUTTON].control)
-#define RESETBUTTON  ((wButton_p)profilePLs[I_RESETBUTTON].control)
-#define CLEARBUTTON  ((wButton_p)profilePLs[I_CLEARBUTTON].control)
-#define PRINTBUTTON  ((wButton_p)profilePLs[I_PRINTBUTTON].control)
 
 static void SelProfileW(
         wIndex_t action,
@@ -904,6 +900,19 @@ DoProfileChange(void *junk)
 
 
 static void DoProfileDone(void * junk)
+{
+	Reset();
+}
+
+
+/*
+ * Cancel button. FormCancel_Undo is a no-op under FORMCANCEL_NEWUNDO, so
+ * the button did nothing and the window stayed up. End the command the
+ * same way the window-manager close does (CloseProfileWindow): Reset()
+ * drives CmdProfile(C_CANCEL), which hides profileW and clears
+ * TB_PROFILEPATH.
+ */
+static void DoProfileCancel(paramGroup_p pg)
 {
 	Reset();
 }
@@ -1466,9 +1475,10 @@ static STATUS_T CmdProfile(wAction_t action, coOrd pos)
 			             screenProfileFontSize, FALSE, &textsize);
 			labelH = textsize.y;
 			labelW = textsize.x;
-			profileW = FormCreateDialog(&profilePG, MakeWindowTitle(_("Profile")), NULL,
-			                            NULL,
-			                            NULL, FormCancel_Undo, TRUE, F_RESIZE, CloseProfileWindow);
+			profileW = FormCreateDialog(&profilePG, MakeWindowTitle(_("Profile")),
+			                            NULL, DoProfileDone,
+			                            NULL, DoProfileCancel,
+			                            TRUE, F_RESIZE, CloseProfileWindow);
 		}
 		FormLoadControls(&profilePG);
 		FormGroupRecord(&profilePG);
@@ -1520,6 +1530,7 @@ static STATUS_T CmdProfile(wAction_t action, coOrd pos)
 		return C_CONTINUE;
 	case C_OK:
 		DoProfileDone(NULL);
+		wHide(profileW);
 		return C_TERMINATE;
 	case C_CANCEL:
 		wHide(profileW);
