@@ -1150,6 +1150,33 @@ void wDrawGetSize(
 }
 
 /**
+ * Constrain a drawing area's size request. A value of 0 in either axis
+ * leaves that axis unconstrained (GTK's -1), so the widget -- and any
+ * top-level window it is packed in -- can still be shrunk in that
+ * direction. Use this instead of routing a drawing area through
+ * wWinSetSize(), which is window API and misreads a draw control's
+ * attribute union.
+ *
+ * \param drawingArea IN the drawing area
+ * \param w IN requested width, or 0 for "do not constrain the width"
+ * \param h IN requested height, or 0 for "do not constrain the height"
+ */
+
+void wDrawSetSize(
+        wControl_p drawingArea,
+        wWinPix_t w,
+        wWinPix_t h )
+{
+	if (drawingArea->widget == NULL) {
+		return;
+	}
+
+	gtk_widget_set_size_request(drawingArea->widget,
+	                            w ? w : -1,
+	                            h ? h : -1);
+}
+
+/**
  * Return the resolution of a device in dpi
  *
  * \param d IN the device

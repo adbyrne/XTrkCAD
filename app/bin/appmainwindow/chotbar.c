@@ -115,10 +115,17 @@ static void HotBarHighlight( int inx, DIST_T fixed_x )
 	DrawRectangle( &hotBarD, orig, size, wDrawColorBlack, DRAW_TRANSPARENT );
 }
 
+/*
+ * w/h are the drawing area's current allocation when this is invoked as
+ * the wDraw redraw callback; they are not a size to impose. The hotbar's
+ * height is set separately (wDrawSetSize, from ChangeHotBar) whenever the
+ * label setting changes the row height -- feeding the allocated width back
+ * in here as a size request ratcheted the main window's minimum width up
+ * on every enlarge and blocked horizontal shrink.
+ */
 static void RedrawHotBar( wControl_p dd, void * data, wWinPix_t w,
                           wWinPix_t h  )
 {
-	wWinSetSize(hotBarD.d, w, h);
 	wDrawClear( hotBarD.d );
 
 	DIST_T barHeight = (DIST_T)(wControlGetHeight( (wControl_p)hotBarD.d ) -
@@ -743,7 +750,8 @@ EXPORT void ChangeHotBar( long changes )
 			hotBarCurrStart = 0;
 		}
 
-		RedrawHotBar( NULL, NULL, 0, hbHeight );
+		wDrawSetSize( hotBarD.d, 0, hbHeight );
+		RedrawHotBar( NULL, NULL, 0, 0 );
 		wFlush();
 	}
 }

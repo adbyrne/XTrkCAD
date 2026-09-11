@@ -825,6 +825,7 @@ void wDrawClipClear(wControl_p drawingArea);
 double wDrawGetDPI(wControl_p drawingArea);
 double wDrawGetMaxRadius(wControl_p drawingArea);
 void wDrawGetSize(wControl_p drawingArea, wWinPix_t *w, wWinPix_t *h);
+void wDrawSetSize(wControl_p drawingArea, wWinPix_t w, wWinPix_t h);
 
 /* Bitmaps */
 wDrawBitMap_p wDrawBitMapCreate(wControl_p drawingArea, int xpos, int ypos,
