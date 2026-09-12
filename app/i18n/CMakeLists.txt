@@ -82,33 +82,64 @@ foreach( file ${sourcefiles})
 endforeach()
 
 #
-# add file with translatable strings 
+# add file with translatable strings
+#
+# misc.c and tooltiptext.c are sources of the executable target, not of
+# xtrkcad-lib, so the loop above misses them. tooltiptext.c (the generated
+# balloon-help table, full of N_() strings) was called bllnhlp.c before the
+# Halibut->Doxygen help conversion; the old name here referred to a file
+# that is never generated any more, which aborted the whole .pot build.
 set(SOURCEFILES
 	"${xtrkcad-lib_SOURCE_DIR}/misc.c"
 	"${messagefile_BINARY_DIR}/messages.h"
 	"${CMAKE_CURRENT_BINARY_DIR}/custmsg.h"
-	"${XTrkCAD_BINARY_DIR}/app/help/bllnhlp.c"
+	"${messagefile_BINARY_DIR}/tooltiptext.c"
 )
 
 foreach( file ${SOURCEFILES})
-	cmake_path(RELATIVE_PATH 
-		file 
+	cmake_path(RELATIVE_PATH
+		file
 		BASE_DIRECTORY ${i18n_SOURCE_DIR}
 	)
 	list(APPEND xgt_source_files ${file})
 endforeach()
 
+#
+# Add the GtkBuilder .ui files. xgettext recognises them as GtkBuilder XML
+# by extension and extracts every translatable="yes" property, emitting a
+# "#: <file>:<line>" source reference for each so translators can see which
+# dialog a string belongs to. The list is taken straight from the wlib
+# gresource manifest, so it always matches the .ui files actually built
+# into the program - add one there and it is picked up here, with no second
+# list to keep in sync (this also skips orphaned .ui files like about.ui /
+# linkedit.ui that are not shipped).
+file(READ
+	"${XTrkCAD_SOURCE_DIR}/app/wlib/gtk3lib/ui/wlib.gresource.xml.in"
+	ui_gresource_manifest)
+string(REGEX MATCHALL "<file[^>]*>[^<]+\\.ui</file>"
+	ui_gresource_entries "${ui_gresource_manifest}")
+set(ui_source_files)
+foreach(entry ${ui_gresource_entries})
+	string(REGEX REPLACE "^<file[^>]*>([^<]+)</file>$" "\\1" ui_name "${entry}")
+	set(ui_abs "${XTrkCAD_SOURCE_DIR}/app/wlib/gtk3lib/ui/${ui_name}")
+	list(APPEND ui_source_files "${ui_abs}")
+	cmake_path(RELATIVE_PATH ui_abs
+		BASE_DIRECTORY ${i18n_SOURCE_DIR}
+		OUTPUT_VARIABLE ui_rel)
+	list(APPEND xgt_source_files "${ui_rel}")
+endforeach()
+
 # Extract strings and create xtrkcad.pot
 add_custom_command(
 	OUTPUT ${potfile}
-	COMMAND ${xtc_xgettext} 
-			${xgtkeywords} 
-			--add-comments=i18n 
-			-d ${GETTEXT_PACKAGE} 
-			-F 
-			-o ${potfile} 
+	COMMAND ${xtc_xgettext}
+			${xgtkeywords}
+			--add-comments=i18n
+			-d ${GETTEXT_PACKAGE}
+			-F
+			-o ${potfile}
 			--from-code=ISO-8859-15 ${xgt_source_files}
-	DEPENDS custmsg
+	DEPENDS custmsg msgfiles tooltips ${ui_source_files}
 	WORKING_DIRECTORY ${i18n_SOURCE_DIR}
 )
 
@@ -178,11 +209,15 @@ foreach(localeid ${xtrkcad_locale_ids})
 endforeach(localeid)
 
 
-# xTrackCAD must be built before this to
-# make sure that the dynamically generated files messages.h and bllnhlp.c are
-# up to date.
-add_custom_target(messages 
-	DEPENDS xtrkcad ${potfile}
+# Regenerate xtrkcad.pot. The .pot command above depends on custmsg (the
+# .xtq/.xtr/.tip extraction) and on the msgfiles / tooltips targets that
+# generate messages.h and tooltiptext.c, so the generated inputs are
+# current -- this used to say "DEPENDS xtrkcad", a target name that only
+# exists when XTRKCAD_BIN is the bare string "xtrkcad" (unversioned flatpak
+# builds); in every other configuration it was an unbuildable file
+# dependency that broke `ninja messages` and `ninja msgmerge-<locale>`.
+add_custom_target(messages
+	DEPENDS ${potfile}
 )
 
 set_target_properties(
