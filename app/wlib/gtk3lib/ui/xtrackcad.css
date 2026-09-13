@@ -103,6 +103,6 @@ framed box box.framed {
     padding: 6px;
 }
 
-button.mono label {
+textview.mono, button.mono label {
     font-family: monospace;
 }
