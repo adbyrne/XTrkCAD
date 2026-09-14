@@ -42,7 +42,7 @@
 /**
  * Invoke the system's default application to open a file.
  *
- * \param filename IN URI of document
+ * \param filename IN filename or URI of document
  *
  * \return 0 on success, error code on failure
  */
@@ -68,10 +68,21 @@ unsigned wOpenFileExternal(char * filename)
 #else
 	unsigned int result = 0;
 	GError *error = NULL;
+	gchar *uri;
 
-	gtk_show_uri_on_window(NULL, filename, GDK_CURRENT_TIME, &error);
-	if(error) {
+	if (g_uri_parse_scheme(filename)) {
+		uri = g_strdup(filename);
+	} else {
+		uri = g_filename_to_uri(filename, NULL, &error);
+	}
+
+	if (uri) {
+		gtk_show_uri_on_window(NULL, uri, GDK_CURRENT_TIME, &error);
+		g_free(uri);
+	}
+	if (error) {
 		result = error->code;
+		g_error_free(error);
 	}
 
 #endif

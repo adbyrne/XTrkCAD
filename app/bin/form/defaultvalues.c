@@ -212,6 +212,7 @@ FormLoadDefaultValues(paramGroup_p pg)
 			case PD_NOTEBOOK:
 			case PD_DROPLIST:
 			case PD_TAG:
+			case PD_EXPANDER:
 				break;
 			}
 		}
@@ -275,6 +276,7 @@ FormSaveDefaultValues(paramGroup_p pg)
 		case PD_BITMAP:
 		case PD_NOTEBOOK:
 		case PD_TAG:
+		case PD_EXPANDER:
 			break;
 		}
 	}
@@ -369,6 +371,7 @@ EXPORT void FormUpdatePrefs( void )
 			case PD_SCALE:
 			case PD_TAG:
 			case PD_NOTEBOOK:
+			case PD_EXPANDER:
 				break;
 			}
 		}

@@ -136,6 +136,7 @@ FormFetchData(paramGroup_p pg)
 		case PD_SCALE:
 		case PD_NOTEBOOK:
 		case PD_TAG:
+		case PD_EXPANDER:
 			break;
 		}
 	}
@@ -253,6 +254,7 @@ FormIntRestore(paramGroup_p pg,	int class)
 		case PD_SCALE:
 		case PD_NOTEBOOK:
 		case PD_TAG:
+		case PD_EXPANDER:
 			break;
 		}
 	}
@@ -302,6 +304,7 @@ void FormIntSave(paramGroup_p pg, int class)
 			case PD_SCALE:
 			case PD_NOTEBOOK:
 			case PD_TAG:
+			case PD_EXPANDER:
 				break;
 			}
 		}

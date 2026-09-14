@@ -2177,6 +2177,7 @@ static void ParamPlayback(char *line)
 			case PD_SCALE:
 			case PD_NOTEBOOK:
 			case PD_TAG:
+			case PD_EXPANDER:
 				break;
 			}
 			if (p->type != PD_DRAW && p->type != PD_MESSAGE && p->type != PD_MENU &&
@@ -2357,6 +2358,7 @@ static void ParamCheck(char *line)
 		case PD_SCALE:
 		case PD_NOTEBOOK:
 		case PD_TAG:
+		case PD_EXPANDER:
 			break;
 		}
 		if (hasError) {

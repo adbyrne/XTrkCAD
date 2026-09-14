@@ -63,7 +63,7 @@ void FormDialogOkActive(
 /* No Cancel button, Commnd can be undone
  */
 EXPORT void FormCancel_Undo(
-        paramGroup_p group)
+        paramGroup_cp group)
 {
 }
 #else
@@ -77,7 +77,7 @@ EXPORT void FormCancel_Undo(
 /* Cancel button, exits commands leaving control values as current
  */
 EXPORT void FormCancel_Current(
-        paramGroup_p group)
+        paramGroup_cp group)
 {
 	wHide(group->win);
 }
@@ -85,7 +85,7 @@ EXPORT void FormCancel_Current(
 /* As above, but always exit command
  */
 EXPORT void FormCancel_Reset(
-        paramGroup_p group)
+        paramGroup_cp group)
 {
 	ResetIfNotSticky();
 	FormCancel_Current(group);
@@ -94,7 +94,7 @@ EXPORT void FormCancel_Reset(
 /* Cancel button, exits commands restoring control values
  */
 EXPORT void FormCancel_Restore(
-        paramGroup_p group)
+        paramGroup_cp group)
 {
 	FormCancel_Current(group);
 }

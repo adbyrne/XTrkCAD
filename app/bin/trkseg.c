@@ -90,7 +90,7 @@ EXPORT coOrd GetSegEndPt(
         BOOL_T bounds,
         ANGLE_T * angleR )
 {
-	coOrd pos;
+	coOrd pos = zero;
 	ANGLE_T angle, a, a0, a1 = 0.0;
 	DIST_T r;
 
