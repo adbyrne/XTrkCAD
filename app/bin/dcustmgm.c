@@ -107,6 +107,9 @@ static wBool_t CustomDlgUpdate(
 			if (wListGetItemSelected(customPLs[I_CUSTOMLIST].control, linx)) {
 				context = (custMgmContext_p)wListGetItemContext(
 				                  pg->paramPtr[I_CUSTOMLIST].control, linx);
+				if (context == NULL) {
+					continue;
+				}
 
 				wButtonSetLabel(customPLs[I_CUSTOMEDIT].control,
 				                context->proc(CUSTMGM_CAN_EDIT, context->data) ? _("Edit") : _("Rename"));
@@ -154,9 +157,9 @@ static void
 SelectNew(void *context)
 {
 	unsigned index = (unsigned)VP2L(context);
-	void(*handler)(void);
+	void(*handler)(void) = NULL;
 	const char *label;
-	paramData_p menuItem = customPLs+index;;
+	paramData_p menuItem = customPLs+index;
 
 	// get selected function
 	switch(index) {
@@ -198,6 +201,9 @@ static void CustomDelete( void * action )
 			continue;
 		}
 		context = (custMgmContext_p)wListGetItemContext( customSelL, inx );
+		if ( context == NULL ) {
+			continue;
+		}
 		context->proc( CUSTMGM_DO_DELETE, context->data );
 		MyFree( context );
 	}
@@ -416,6 +422,9 @@ static void CustMgmChange( long changes )
 		     i++) {
 			if (wListGetItemSelected(customPLs[0].control, i)) {
 				custMgmContext_p context = (custMgmContext_p)wListGetItemContext(customSelL, i);
+				if (context == NULL) {
+					break;
+				}
 				context->proc(CUSTMGM_GET_TITLE, context->data);
 				wListSetValues(customPG.paramPtr[I_CUSTOMLIST].control, i, message, NULL, NULL);
 				break;

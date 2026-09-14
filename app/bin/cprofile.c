@@ -712,7 +712,7 @@ static void DoProfileReset(void *junk);
 static void DoProfileDone(void * junk);
 static void DoProfileClear(void * junk);
 static void DoProfilePrint(void * junk);
-static void DoProfileCancel(paramGroup_p pg);
+static void DoProfileCancel(paramGroup_cp pg);
 static void DoProfileChangeMode(void * junk);
 static void SelProfileW(wIndex_t, coOrd);
 static void CloseProfileWindow(paramGroup_p pg, int event, void *data);
@@ -912,7 +912,7 @@ static void DoProfileDone(void * junk)
  * drives CmdProfile(C_CANCEL), which hides profileW and clears
  * TB_PROFILEPATH.
  */
-static void DoProfileCancel(paramGroup_p pg)
+static void DoProfileCancel(paramGroup_cp pg)
 {
 	Reset();
 }

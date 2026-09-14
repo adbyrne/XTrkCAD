@@ -141,6 +141,7 @@ void FormLoadSingleControl(
 	case PD_BITMAP:
 	case PD_NOTEBOOK:
 	case PD_TAG:
+	case PD_EXPANDER:
 		break;
 	}
 }

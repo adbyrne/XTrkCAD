@@ -2105,7 +2105,6 @@ static STATUS_T CmdRotate(
 			/*DrawLine( &mainD, base, orig, 0, wDrawColorBlack );
 			DrawMovedTracks(FALSE, orig, angle);*/
 		} else {
-			coOrd pos1 = pos;
 			drawnAngle = FALSE;
 			onTrackInSplit = TRUE;
 			trk = OnTrack( &pos, TRUE, FALSE );

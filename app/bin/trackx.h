@@ -33,9 +33,9 @@ typedef struct track_t {
 	TRKTYP_T type;
 	unsigned int layer;
 	signed char scale;
-	BOOL_T modified:1;
+	unsigned modified:1;
 	unsigned deleted:1;
-	BOOL_T new:1;
+	unsigned new:1;
 	unsigned int width:2;
 	unsigned int elevMode:2;
 	unsigned int bits:14;	// Make sure all TB_ flags can fit

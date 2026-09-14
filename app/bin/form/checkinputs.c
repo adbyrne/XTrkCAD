@@ -509,6 +509,7 @@ long FormUpdate(
 		case PD_TAG:
 		case PD_SCALE:
 		case PD_NOTEBOOK:
+		case PD_EXPANDER:
 			break;
 		}
 	}

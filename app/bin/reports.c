@@ -154,7 +154,7 @@ typedef struct {
 
 static void DoReportsOp(void *data);
 static void ReportsDlgUpdate(paramGroup_p pg, int inx, void *valueP);
-static void ReportsCancel(paramGroup_p pg);
+static void ReportsCancel(paramGroup_cp pg);
 static void ReportsShowDialog(reportsDialog_t *rd, const char *title);
 
 /** Tentative declaration -- reportsUnconnectedDlg (below) needs `&reportsPG`
@@ -450,7 +450,7 @@ static void ReportsDlgUpdate(paramGroup_p pg, int inx, void *valueP)
  * dialog's normal cancel/close handling, so it doesn't linger on the
  * canvas after the report window is gone (matches the original design
  * note: the indicator is deleted when the report window closes). */
-static void ReportsCancel(paramGroup_p pg)
+static void ReportsCancel(paramGroup_cp pg)
 {
 	ReportsClearIndicator();
 	FormCancel_Current(pg);
@@ -1653,7 +1653,7 @@ void ReportsEquipmentSuitability( void * unused )
 static paramGroup_t reportsGapsPG;
 static void ReportsBuildGapsText(DynString *out);
 static void ReportsDlgUpdateGaps(paramGroup_p pg, int inx, void *valueP);
-static void ReportsCancelGaps(paramGroup_p pg);
+static void ReportsCancelGaps(paramGroup_cp pg);
 
 static reportsDialog_t reportsGapsDlg = {
 	&reportsGapsPG, NULL, NULL, NULL,
@@ -1788,7 +1788,7 @@ static void ReportsDlgUpdateGaps(paramGroup_p pg, int inx, void *valueP)
 
 /** paramActionCancelProc for the Gaps dialog -- same shape as phase 1's
  * ReportsCancel(). */
-static void ReportsCancelGaps(paramGroup_p pg)
+static void ReportsCancelGaps(paramGroup_cp pg)
 {
 	ReportsClearIndicator();
 	FormCancel_Current(pg);
@@ -1984,7 +1984,7 @@ void ReportsGaps( void * unused )
 static paramGroup_t reportsKinkedPG;
 static void ReportsBuildKinkedText(DynString *out);
 static void ReportsDlgUpdateKinked(paramGroup_p pg, int inx, void *valueP);
-static void ReportsCancelKinked(paramGroup_p pg);
+static void ReportsCancelKinked(paramGroup_cp pg);
 
 static reportsDialog_t reportsKinkedDlg = {
 	&reportsKinkedPG, NULL, NULL, NULL,
@@ -2095,7 +2095,7 @@ static void ReportsDlgUpdateKinked(paramGroup_p pg, int inx, void *valueP)
 }
 
 /** paramActionCancelProc for the Kinked Joints dialog. */
-static void ReportsCancelKinked(paramGroup_p pg)
+static void ReportsCancelKinked(paramGroup_cp pg)
 {
 	ReportsClearIndicator();
 	FormCancel_Current(pg);
