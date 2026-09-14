@@ -2166,14 +2166,14 @@ EXPORT void CleanSegs(dynArr_t * seg_p)
 {
 	if (seg_p->cnt ==0) { return; }
 	for (int i=0; i<seg_p->cnt; i++) {
-		trkSeg_t t = DYNARR_N(trkSeg_t,* seg_p,i);
-		if (t.type == SEG_BEZLIN || t.type == SEG_BEZTRK) {
-			DYNARR_FREE( trkSeg_t, t.bezSegs );
+		trkSeg_p t = &DYNARR_N(trkSeg_t,* seg_p,i);
+		if (t->type == SEG_BEZLIN || t->type == SEG_BEZTRK) {
+			DYNARR_FREE( trkSeg_t, t->bezSegs );
 		}
-		if (t.type == SEG_POLY || t.type == SEG_FILPOLY) {
-			if (t.u.p.pts) { MyFree(t.u.p.pts); }
-			t.u.p.cnt = 0;
-			t.u.p.pts = NULL;
+		if (t->type == SEG_POLY || t->type == SEG_FILPOLY) {
+			if (t->u.p.pts) { MyFree(t->u.p.pts); }
+			t->u.p.cnt = 0;
+			t->u.p.pts = NULL;
 		}
 	}
 
