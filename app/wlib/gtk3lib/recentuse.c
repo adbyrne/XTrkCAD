@@ -166,10 +166,21 @@ PushListEntry(wControl_p list, const char* label, const char* context)
 
 	name = g_strdup(wlibConvertInput(label));
 
+	struct listentry *displaced;
 	if (ru->sortorder == NEWEST_TOP) {
-		MRUTouchEntry(ru->mrulist, name, newEntry);
+		displaced = MRUTouchEntry(ru->mrulist, name, newEntry);
 	} else {
-		MRUAppendEntry(ru->mrulist, name, newEntry);
+		displaced = MRUAppendEntry(ru->mrulist, name, newEntry);
+	}
+	g_free((void*)name);
+
+	if (displaced) {
+		// no longer tracked -- either this label was already present (its
+		// entry got replaced by newEntry above) or capacity was reached
+		// and it was evicted; either way, drop its widget instead of
+		// leaking an orphan menu item
+		gtk_widget_destroy(displaced->menuentry);
+		g_free(displaced);
 	}
 
 	return(MRUGetCount(ru->mrulist));
