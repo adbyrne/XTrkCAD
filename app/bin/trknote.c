@@ -113,9 +113,11 @@ static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 
 		if (xx->op == OP_NOTELINK ||(inDescribeCmd && curNoteType == OP_NOTELINK)) {
 			bm = link_bm;
-		} else if (xx->op == OP_NOTEFILE || (inDescribeCmd && curNoteType == OP_NOTEFILE)) {
+		} else if (xx->op == OP_NOTEFILE || (inDescribeCmd
+		                                     && curNoteType == OP_NOTEFILE)) {
 			bm = document_bm;
-		} else if (xx->op == OP_NOTEJSON || (inDescribeCmd && curNoteType == OP_NOTEJSON)) {
+		} else if (xx->op == OP_NOTEJSON || (inDescribeCmd
+		                                     && curNoteType == OP_NOTEJSON)) {
 			bm = json_bm;
 		} else {
 			bm = note_bm;

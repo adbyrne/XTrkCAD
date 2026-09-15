@@ -59,7 +59,15 @@ add_dependencies(getargstest msgfiles)
 # calling it.
 set_target_properties(getargstest PROPERTIES ENABLE_EXPORTS FALSE)
 target_compile_options(getargstest PRIVATE -ffunction-sections -fdata-sections)
-target_link_options(getargstest PRIVATE -Wl,--gc-sections)
+if(APPLE)
+	# Apple's ld64 doesn't understand GNU's --gc-sections syntax at all
+	# ("ld: unknown options: --gc-sections", confirmed on the macOS CI
+	# runner) -- -dead_strip is its equivalent flag for the same
+	# per-symbol dead-code elimination.
+	target_link_options(getargstest PRIVATE -Wl,-dead_strip)
+else()
+	target_link_options(getargstest PRIVATE -Wl,--gc-sections)
+endif()
 
 target_link_libraries(getargstest ${LIBS})
 

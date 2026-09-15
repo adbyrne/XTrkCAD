@@ -62,15 +62,16 @@ struct {
  * Precise (not just length-based) check for whether \p buf's fixed-size
  * decode buffer usage on the next file load would risk overflowing
  * GetArgs()'s 'q'-format message[STR_HUGE_SIZE]. ConvertToEscapedText()
- * (misc.c) doubles four characters on write -- \\, \n, \t, and " -- but
- * GetArgs()'s 'q' read-side loop only reduces the "" (quote) pair back down;
- * \\, \n, and \t pass through that loop unreduced (their un-doubling happens
- * later, in ConvertFromEscapedText(), into a separate allocation that
- * doesn't count against this buffer). So each of those three characters in
- * \p buf adds one byte of decode-buffer usage the raw length alone doesn't
- * account for -- a JSON body can legitimately contain many of them (heavy
- * backslash content, or cJSON_Print()'s own real newlines/tabs from
- * pretty-printing) while staying short and perfectly valid.
+ * (misc.c) doubles four characters on write -- backslash, newline, tab, and
+ * double-quote -- but GetArgs()'s 'q' read-side loop only reduces the
+ * doubled-quote pair back down; the doubled backslash/newline/tab pass
+ * through that loop unreduced (their un-doubling happens later, in
+ * ConvertFromEscapedText(), into a separate allocation that doesn't count
+ * against this buffer). So each backslash/newline/tab byte in \p buf adds
+ * one byte of decode-buffer usage the raw length alone doesn't account for
+ * -- a JSON body can legitimately contain many of them (heavy backslash
+ * content, or cJSON_Print()'s own real newlines/tabs from pretty-printing)
+ * while staying short and perfectly valid.
  *
  * \param buf IN raw (unescaped) text
  * \param len IN length of buf
@@ -445,7 +446,8 @@ void DescribeJsonNote(track_p trk, char * str, CSIZE_T len)
  */
 void NewJsonNoteUI(coOrd pos )
 {
-	const char *tmpPtrText = _("Replace this text with a JSON object, e.g. {\"kind\": \"station\", \"id\": \"WP\"}");
+	const char *tmpPtrText =
+	        _("Replace this text with a JSON object, e.g. {\"kind\": \"station\", \"id\": \"WP\"}");
 
 	jsonNoteData.pos = pos;
 	jsonNoteData.layer = curLayer;
