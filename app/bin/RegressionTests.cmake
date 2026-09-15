@@ -132,6 +132,20 @@ endfunction()
 
 _xtrkcad_shell_quote_list(_xtrkcad_wrapper_sh ${_xtrkcad_regression_wrapper})
 
+# xvfb-run only overrides DISPLAY -- it leaves WAYLAND_DISPLAY untouched
+# (confirmed empirically). On a Wayland desktop, GTK3's backend auto-detect
+# then prefers Wayland over the X11 DISPLAY xvfb-run just set up, so the
+# wrapped xtrkcad connects straight to the *real* compositor instead of the
+# isolated Xvfb display -- real windows opening/closing and stealing focus
+# on the developer's actual desktop. Forcing GDK_BACKEND=x11 fixes it, but
+# only do so when WAYLAND_DISPLAY is actually set at test-run time: this
+# whole suite already requires xvfb-run or a real DISPLAY to even be
+# enabled (see XTRKCAD_REGRESSION_TESTING above), so assuming the X11 GDK
+# backend exists once we're in that branch isn't a new assumption -- and
+# a pure-X11 session or CI runner (no WAYLAND_DISPLAY) sees no change at
+# all.
+set(_xtrkcad_wayland_guard "if [ -n \"$WAYLAND_DISPLAY\" ]; then export GDK_BACKEND=x11; fi; ")
+
 # On a REGRESSION FAIL, CheckRegressionResult() (app/bin/track.c) appends the
 # full actual-vs-expected track dump to $HOME/.<XTRKCAD_BIN>/xtrkcad.regress
 # (confirmed empirically -- e.g. RegressionSuite's own scratch HOME held
@@ -146,7 +160,7 @@ function(xtrkcad_add_regression_test _name _home)
     set(_regress_file "${_home}/.${XTRKCAD_BIN}/xtrkcad.regress")
     _xtrkcad_shell_quote_list(_args_sh ${ARGN})
     add_test(NAME "${_name}"
-        COMMAND sh -c "${_xtrkcad_wrapper_sh} '${_xtrkcad_regression_exe}'${_args_sh}; code=$?; if [ $code -ne 0 ] && [ -f '${_regress_file}' ]; then echo '--- xtrkcad.regress (actual vs expected tracks) ---'; cat '${_regress_file}'; fi; exit $code"
+        COMMAND sh -c "${_xtrkcad_wayland_guard}${_xtrkcad_wrapper_sh} '${_xtrkcad_regression_exe}'${_args_sh}; code=$?; if [ $code -ne 0 ] && [ -f '${_regress_file}' ]; then echo '--- xtrkcad.regress (actual vs expected tracks) ---'; cat '${_regress_file}'; fi; exit $code"
     )
 endfunction()
 
