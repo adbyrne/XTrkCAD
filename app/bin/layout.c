@@ -559,6 +559,19 @@ int GetLayoutBackGroundVisible()
 }
 
 /**
+ * @brief Set background visibility through the toggle-group binding, so
+ * the toolbar button and menu items stay in sync (unlike assigning
+ * backgroundVisible directly, or calling BackgroundToggleShow() with no
+ * prior widget change -- both leave the bound widgets, and in the
+ * latter case backgroundVisible itself, unchanged).
+ * @param visible IN new visibility state
+*/
+void SetLayoutBackGroundVisible(BOOL_T visible)
+{
+	wToggleGroupSetActive(TOGGLEGRP_BG_VISIBLE, visible);
+}
+
+/**
  * @brief Returns status of layout background.
  * @return true if a background is defined, false otherwise
 */

@@ -147,7 +147,7 @@ CommitStaged( const commitPlan_t *plan, commitSaveFn_t save, void *saveCtx,
 			                   plan->scaleInx );
 		}
 		part = CarPartNew( plan->updatePartPtr, PARAM_CUSTOM, plan->scaleInx, title,
-		                   plan->options, plan->type, &plan->dim, plan->color );
+		                   plan->options, plan->type, (carDim_p) &plan->dim, plan->color );
 		MyFree( title );
 		if ( part == NULL ) {
 			goto fail;

@@ -167,7 +167,7 @@ EXPORT turnoutInfo_t* CreateNewTurnout(
 #ifdef TURNOUTCMD
 	if (updateList && turnoutListL != NULL) {
 		FormatCompoundTitle(LABEL_TABBED | LABEL_MANUF | LABEL_PARTNO | LABEL_DESCR,
-		                    title);
+		                    CAST_AWAY_CONST title);
 		if (message[0] != '\0') {
 			wListAddValue(turnoutListL, message, NULL, to);
 		}

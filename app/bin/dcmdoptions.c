@@ -41,7 +41,6 @@ static void CmdoptOk(void* junk)
 	long changes;
 	changes = GetChanges(&cmdoptPG);
 	wHide(cmdoptW);
-	FormSaveDefaultValues(&cmdoptPG);
 	DoChangeNotification(changes);
 }
 

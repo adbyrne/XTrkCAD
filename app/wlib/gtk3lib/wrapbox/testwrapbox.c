@@ -74,7 +74,7 @@ static void
 populate_wrapbox_wrappy (EggWrapBox *wrapbox)
 {
 	GtkWidget *widget, *frame;
-	gint i;
+	gulong i;
 
 	const gchar *strings[] = {
 		"These are", "some wrappy label", "texts", "of various", "lengths.",

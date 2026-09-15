@@ -8,7 +8,7 @@
 
 PROJECT_NAME           = "XTrkCAD User Guide"
 PROJECT_NUMBER         = "Version @XTRKCAD_VERSION@"
-PROJECT_ICON           = "@CMAKE_CURRENT_SOURCE_DIR@/images/xtrkcad_logo.gif"
+@HAVE_DOXYGEN_PROJECT_ICON@PROJECT_ICON           = "@CMAKE_CURRENT_SOURCE_DIR@/images/xtrkcad_logo.gif"
 WARN_LOGFILE           = ./doxygen.log
 OUTPUT_DIRECTORY       = "@CMAKE_CURRENT_BINARY_DIR@"
 INPUT                  = "@CMAKE_CURRENT_SOURCE_DIR@" \

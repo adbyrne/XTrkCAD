@@ -799,7 +799,7 @@ static void PlaybackQuit(void)
 	RestoreLayers();
 
 	if(backgroundShown) {
-		BackgroundToggleShow(NULL);
+		SetLayoutBackGroundVisible(TRUE);
 	}
 
 	mainD.scale = oldMainScale;
@@ -1146,7 +1146,7 @@ static void PlaybackSetup(void)
 
 	backgroundShown = GetLayoutBackGroundVisible();
 	if(backgroundShown) {
-		BackgroundToggleShow(NULL);
+		SetLayoutBackGroundVisible(FALSE);
 	}
 
 	SetPlaybackSpeed((wIndex_t)playbackSpeed);
