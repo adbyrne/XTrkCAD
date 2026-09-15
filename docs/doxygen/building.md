@@ -159,6 +159,13 @@ bug:
   (see [gtk3issues #28](https://sourceforge.net/p/xtrkcad-fork/gtk3issues/28/)) so CI can still
   gate on the rest of the suite on that architecture. Temporary — remove the exclusion once #28
   is actually root-caused and fixed, don't leave it in place indefinitely.
+- **Wayland desktop: regression tests forced to X11** — `xvfb-run` only overrides `DISPLAY`, not
+  `WAYLAND_DISPLAY`. On a Wayland session, GTK3's backend auto-detect then prefers the real
+  compositor over the X11 display `xvfb-run` just set up, so every regression test opened real
+  windows on the developer's own desktop and stole focus instead of running isolated inside the
+  virtual framebuffer. `app/bin/RegressionTests.cmake` wraps every regression test's command with
+  `if [ -n "$WAYLAND_DISPLAY" ]; then export GDK_BACKEND=x11; fi` — a no-op on a pure-X11 session
+  or a CI runner (no `WAYLAND_DISPLAY` there), a hard backend override on a Wayland desktop.
 - **Visual pre/post diffing (`-d visualdiff=1`)** — the regression suite's `REGRESSION START`/`END`
   blocks compare track coordinates as text, which can miss a change that's obvious in a picture
   (SF #667/#26: a fixture regen silently dropped a join's connector tracks, and the numeric diff
