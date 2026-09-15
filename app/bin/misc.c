@@ -800,6 +800,7 @@ InitAudio()
  * headless run forever waiting for a click that never comes. */
 EXPORT BOOL_T bRunTests = FALSE;
 
+#ifndef XTRKCAD_TESTBUILD_NO_WMAIN
 EXPORT wControl_p wMain(int argc, char * argv[])
 {
 	int c;
@@ -1125,6 +1126,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	}
 	return mainW;
 }
+#endif /* XTRKCAD_TESTBUILD_NO_WMAIN */
 
 /****************************************************************************
  *

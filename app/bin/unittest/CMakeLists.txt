@@ -45,19 +45,28 @@ add_dependencies(getargstest msgfiles)
 # whole application's entry point, transitively referencing ~100 other
 # symbols (menu/toolbar/undo/pref/audio/splash-screen init, etc.) that have
 # nothing to do with ConvertToEscapedText()/ConvertFromEscapedText(), the
-# only two functions this test actually needs from it. Since nothing here
-# calls wMain(), --gc-sections (with -ffunction-sections/-fdata-sections so
-# the linker can discard at per-function granularity) lets the linker
-# eliminate wMain()'s entire unreachable call graph instead of requiring
-# ~100 stub functions -- same technique fuzz_getargs.c's header comment
-# describes using for the analogous fileio.c extraction. This only works if
-# ENABLE_EXPORTS is turned back off for this one target -- PlatformSettings.cmake
-# sets CMAKE_ENABLE_EXPORTS TRUE globally (every executable gets
-# --export-dynamic/-rdynamic, for plugin/backtrace symbol resolution),
-# which forces every global symbol "live" and defeats --gc-sections
-# entirely; found empirically when wMain() stayed linked despite nothing
-# calling it.
+# only two functions this test actually needs from it.
+#
+# Originally tried relying purely on --gc-sections/-ffunction-sections
+# (with ENABLE_EXPORTS forced off, since PlatformSettings.cmake's global
+# CMAKE_ENABLE_EXPORTS TRUE otherwise adds --export-dynamic/-rdynamic and
+# keeps every global symbol "live") to let the linker discard wMain()'s
+# whole unreachable call graph -- this worked on Linux and macOS, but not
+# on Windows/MSYS2: confirmed via the actual CI job log that MinGW's ld
+# still pulled in wMain() and ~90 of its transitive dependencies as
+# unresolved externals despite the same flags, ENABLE_EXPORTS FALSE
+# included. Root cause not fully pinned down (Windows PE/COFF's
+# --export-all-symbols handling for EXE targets appears to keep global
+# symbols reachable for the link's purposes in a way ELF/Mach-O don't), so
+# rather than chase a third platform-specific linker workaround, wMain()'s
+# body is now excluded from compilation entirely for this target via
+# XTRKCAD_TESTBUILD_NO_WMAIN (misc.c's own #ifndef guard around it) --
+# deterministic on every platform, since the symbol and its call graph
+# never exist in this target's object file at all. The gc-sections/
+# dead_strip flags below are kept as a secondary, no-longer-load-bearing
+# cleanup for any other genuinely-unused code in the two linked files.
 set_target_properties(getargstest PROPERTIES ENABLE_EXPORTS FALSE)
+target_compile_definitions(getargstest PRIVATE XTRKCAD_TESTBUILD_NO_WMAIN)
 target_compile_options(getargstest PRIVATE -ffunction-sections -fdata-sections)
 if(APPLE)
 	# Apple's ld64 doesn't understand GNU's --gc-sections syntax at all
@@ -65,7 +74,7 @@ if(APPLE)
 	# runner) -- -dead_strip is its equivalent flag for the same
 	# per-symbol dead-code elimination.
 	target_link_options(getargstest PRIVATE -Wl,-dead_strip)
-else()
+elseif(NOT WIN32)
 	target_link_options(getargstest PRIVATE -Wl,--gc-sections)
 endif()
 

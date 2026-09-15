@@ -84,6 +84,17 @@ void DoSaveAs(void *doAfterSaveVP)
 	(void)doAfterSaveVP;
 }
 
+/* getargs.c's 'q' GetArgs case calls this directly (not through misc.c)
+ * when UTFCONVERT is defined -- Windows only (common.h). The real
+ * implementation (utf8convert.c) round-trips through wlib's codepage
+ * functions, which this test has no need to link just to prove the
+ * quote-doubling escape logic under test here; a no-op is behaviorally
+ * fine since every fixture string below is already plain ASCII/UTF-8. */
+void ConvertUTF8ToSystem(unsigned char *in)
+{
+	(void)in;
+}
+
 /* ---------------------------------------------------------------------
  * Round-trip: ConvertToEscapedText() (write side) -> GetArgs("qc", ...)
  * (read side, exercises both the quote-doubling loop in getargs.c and the
