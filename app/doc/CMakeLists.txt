@@ -15,6 +15,18 @@ if(DOXYGEN_FOUND)
 	# Halibut -> Doxygen conversion (SF feature-requests #219).
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/intro.dox.in ${CMAKE_CURRENT_BINARY_DIR}/intro.dox @ONLY)
 
+	# The Doxygen PROJECT_ICON configuration option was introduced in version
+	# 1.10.0. Disable that line in Doxyfile if the Doxygen version is before 1.10.0.
+	execute_process(COMMAND ${DOXYGEN_EXECUTABLE} "--version" OUTPUT_VARIABLE _Doxygen_VERSION ERROR_QUIET)
+	STRING(STRIP "${_Doxygen_VERSION}" _Doxygen_VERSION)
+	set(Doxygen_VERSION "${_Doxygen_VERSION}" CACHE STRING "Doxygen Version")
+
+	if ("${Doxygen_VERSION}" VERSION_LESS "1.10")
+	   set(HAVE_DOXYGEN_PROJECT_ICON "# ")
+	else()
+	   set(HAVE_DOXYGEN_PROJECT_ICON "")
+	endif()
+
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
 
 	file(GLOB doc_DOX_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.dox)

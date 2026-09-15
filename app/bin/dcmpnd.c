@@ -167,11 +167,11 @@ static void RefreshSpecialOk(
 	wHide( refreshSpecialPG.win );
 }
 static void RefreshSpecialCancel(
-        wControl_p win )
+        paramGroup_cp group )
 {
 	refreshSpecialInx = -1;
 	refreshReturnVal = FALSE;
-	wHide( refreshSpecialPG.win );
+	wHide( group->win );
 }
 static void RefreshSkip(
         void * junk )
@@ -369,6 +369,7 @@ EXPORT BOOL_T CompoundCustomSave(
 
 static void RenameOk( void * junk )
 {
+	FormFetchData( &renamePG );
 	sprintf( message, "%s\t%s\t%s", renameManuf, renameDesc, renamePartno );
 	if ( renameTo->title ) {
 		MyFree( renameTo->title );
@@ -429,7 +430,7 @@ static int CompoundCustMgmProc(
 				FormCreateDialog( &renamePG,
 				                  MakeWindowTitle(_("Rename Object")),
 				                  _("Ok"), RenameOk,
-				                  N_("Cancel"), wHide,
+				                  N_("Cancel"), FormCancel_Current,
 				                  TRUE, F_BLOCK, NULL);
 			}
 			FormLoadControls( &renamePG );

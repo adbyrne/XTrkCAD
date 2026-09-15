@@ -184,7 +184,6 @@ static void CarDlgRedraw( wDraw_p d, void * context, wWinPix_t x, wWinPix_t y );
 
 static paramDrawData_t carDlgDrawData = { 500, 120, CarDlgRedraw, NULL, &carDlgD };
 static paramTextData_t notesData = { 500, 156 };
-static char *multinumLabels[] = { N_("Sequential"), N_("Repeated"), NULL };
 static void CarDlgUpdate( paramGroup_p, int, void * );
 static void CarDlgNewDesc( void );
 static void CarDlgManufFocusOut( void );
@@ -2272,7 +2271,7 @@ static void CarDlgUpdate(
 		} else {
 			/* No transient status: show the commit disclosure as the resting
 			 * text (spec §8). */
-			FormLoadMessage( pg, I_CD_MSG, CarDlgCommitSummary() );
+			FormLoadMessage( pg, I_CD_MSG, CAST_AWAY_CONST CarDlgCommitSummary() );
 			ok = TRUE;
 		}
 		CarDlgUpdateSummaries( pg );          /* live expander summaries (R2) */

@@ -104,10 +104,11 @@ Not part of the everyday build/test loop, but available if you're chasing a spec
 bug:
 
 - **Sanitizers** — `-DXTRKCAD_SANITIZE=ON -DCMAKE_C_COMPILER=clang` builds with ASan/UBSan.
-  `PreferenceTest` is excluded when running under it (GTK3's own internal allocations trip
-  ASan's leak detector; that test still runs normally elsewhere).
+  `PreferenceTest` and `MRUListTest` (SF #794) are excluded when running under it (GTK3's own
+  internal allocations trip ASan's leak detector; both tests still run normally elsewhere,
+  e.g. under `c-tests-linux`'s `xvfb-run`).
 - **Valgrind** — `ctest -T memcheck --overwrite MemoryCheckCommand=$(which valgrind)`.
-  `PreferenceTest` is excluded here too, for the same GTK3-internals reason.
+  `PreferenceTest` and `MRUListTest` are excluded here too, for the same GTK3-internals reason.
 - **Regression demo-playback suite** — `-DXTRKCAD_REGRESSION_TESTING=ON` (auto-enabled on Linux
   when `xvfb-run` or an existing `DISPLAY` is found) adds ~47 per-demo `ctest` targets, one per
   entry in `app/lib/xtrkcad.xtq`'s `DEMO` list, for targeting a single demo during local

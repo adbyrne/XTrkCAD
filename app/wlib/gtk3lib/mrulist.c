@@ -66,7 +66,10 @@ labelcmp(const void* ptr1, const char* label)
  * \param label     unique identifier for new element
  * \param entry     pointer to be put into the list, owned by caller
  *
- * \return pointer to data if element was removed, ie. when capacity was reached, NULL otherwise
+ * \return pointer to the entry no longer tracked by the list -- either the
+ * previous entry for \p label (replaced by \p entry) or the oldest entry
+ * (evicted because capacity was reached); NULL if neither happened. The
+ * caller owns whatever is returned and must dispose of it.
  */
 
 void *MRUTouchEntry(MRUList* list, const char* label, void *entry)
@@ -78,9 +81,14 @@ void *MRUTouchEntry(MRUList* list, const char* label, void *entry)
 	                                  (GCompareFunc)labelcmp);
 
 	if (link) {
-		// already present, move to top
+		// already present: replace its data with the new entry and move to
+		// top; hand back the previous entry, which is no longer tracked
+		MRUEntry *existing = (MRUEntry *)link->data;
+		void *old_entry = existing->userdata;
+		existing->userdata = entry;
 		g_queue_unlink(list->elements, link);      // remove from current position
 		g_queue_push_head_link(list->elements, link);  // and add to top
+		return(old_entry);
 	} else {
 		// new entry, create and insert at top
 		MRUEntry *new_entry = g_malloc0(sizeof(MRUEntry));
@@ -107,7 +115,15 @@ void* MRUAppendEntry(MRUList* list, const char* label, void* entry)
 	const GList* link = g_queue_find_custom(list->elements, label,
 	                                        (GCompareFunc)labelcmp);
 
-	if (!link) {
+	if (link) {
+		// already present: this list preserves insertion order, so just
+		// replace its data in place; hand back the previous entry, which
+		// is no longer tracked
+		MRUEntry *existing = (MRUEntry *)link->data;
+		void *old_entry = existing->userdata;
+		existing->userdata = entry;
+		return(old_entry);
+	} else {
 		// new entry, create and insert at end
 		MRUEntry* new_entry = g_malloc0(sizeof(MRUEntry));
 		new_entry->label = g_strdup(label);

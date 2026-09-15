@@ -83,7 +83,7 @@ FormatWidthsList(unsigned count, wWinPix_t* widths, DynString *output)
 }
 
 static void
-SaveListColumnWidths(char *section, paramData_p listData)
+SaveListColumnWidths(const char *section, const char *key, paramData_p listData)
 {
 #ifdef TODO_UNUSED
 	paramListData_t *listDataP = (paramListData_t*)listData->winData;
@@ -100,7 +100,7 @@ SaveListColumnWidths(char *section, paramData_p listData)
 		DynStringMalloc(&columnWidthString, 20);
 
 		FormatWidthsList(count, colWidths, &columnWidthString);
-		wPrefSetString(section, "columnwidths", DynStringToCStr(&columnWidthString));
+		wPrefSetString(section, key, DynStringToCStr(&columnWidthString));
 
 		DynStringFree(&columnWidthString);
 		MyFree(colWidths);
@@ -220,86 +220,90 @@ FormLoadDefaultValues(paramGroup_p pg)
 	}
 }
 
+/**
+ * Write one paramData_t's current value into the preferences database
+ * under the given section/key. Shared by FormSaveDefaultValues (run
+ * from the Ok button for one dialog) and FormUpdatePrefs (run for every
+ * registered dialog at app-lifecycle checkpoints -- quit, save,
+ * save-as, load, open-example); both write into the dialog's own
+ * section, so whichever trigger fires first wins and the other is a
+ * harmless idempotent re-save.
+ */
+static void
+SaveParamPref(const char *section, const char *prefName, paramData_p p)
+{
+	char columnWidthsKey[STR_SHORT_SIZE];
+
+	switch (p->type) {
+	case PD_LONG:
+	case PD_RADIO:
+	case PD_TOGGLE:
+		wPrefSetInteger(section, prefName, *(long*)p->valueP);
+		break;
+	case PD_COLORLIST:
+		wPrefSetInteger(section, prefName, wDrawGetRGB(*(wDrawColor*)p->valueP));
+		break;
+	case PD_LIST:
+		snprintf(columnWidthsKey, sizeof(columnWidthsKey), "%s-columnwidths",
+		         prefName);
+		SaveListColumnWidths(section, columnWidthsKey, p);
+		__attribute__((fallthrough));
+	case PD_DROPLIST:
+	case PD_COMBOLIST:
+		if ((p->option & PDO_LISTINDEX)) {
+			wPrefSetInteger(section, prefName, *(wIndex_t*)p->valueP);
+		} else if (p->control) {
+			wListGetValues((wList_p)p->control, message, sizeof message, NULL, NULL);
+			wPrefSetString(section, prefName, message);
+		}
+		break;
+	case PD_FLOAT:
+	case PD_SCALE:
+		wPrefSetFloat(section, prefName, *(FLOAT_T*)p->valueP);
+		break;
+	case PD_STRING:
+		wPrefSetString(section, prefName, (char*)p->valueP);
+		break;
+	case PD_MESSAGE:
+	case PD_BUTTON:
+	case PD_DRAW:
+	case PD_TEXT:
+	case PD_MENU:
+	case PD_MENUITEM:
+	case PD_BITMAP:
+	case PD_NOTEBOOK:
+	case PD_TAG:
+	case PD_EXPANDER:
+		break;
+	}
+}
+
 void
 FormSaveDefaultValues(paramGroup_p pg)
 {
 
 	for (int i = 0; i < (pg->paramCnt); i++) {
 		paramData_p p = (pg->paramPtr) + i;
-		char prefNamePrimary[STR_SHORT_SIZE];
 
-		if (/*p->valueP == NULL || */p->nameStr ==
-		                             NULL) { /** \todo check for valueP == NULL */
+		if (p->valueP == NULL || p->nameStr == NULL) {
 			continue;
 		}
 		if ((p->option & PDO_DLGIGNORE)|| (p->option & PDO_NOPREF)) {
 			continue;
 		}
-		snprintf(prefNamePrimary, sizeof(prefNamePrimary), "%s-%s", pg->nameStr,
-		         p->nameStr);
 
-		switch (p->type) {
-		case PD_LONG:
-		case PD_RADIO:
-		case PD_TOGGLE:
-		case PD_COLORLIST:
-			wPrefSetInteger(pg->nameStr, p->nameStr, *(long*)p->valueP);
-			break;
-		case PD_LIST:
-			SaveListColumnWidths(pg->nameStr, p);
-			__attribute__((fallthrough));
-		case PD_DROPLIST:
-		case PD_COMBOLIST:
-			//if ((p->option & PDO_LISTINDEX)) {
-			//	wPrefSetInteger(prefSect, prefNamePrimary, *(wIndex_t*)p->valueP);
-			//}
-			//else {
-			//	if (p->control) {
-			//		wListGetValues((wList_p)p->control, message, sizeof message, NULL, NULL);
-			//		wPrefSetString(prefSect, prefNamePrimary, message);
-			//	}
-			//}
-			break;
-		case PD_FLOAT:
-		case PD_SCALE:
-			wPrefSetFloat(pg->nameStr, p->nameStr, *(FLOAT_T*)p->valueP);
-			break;
-		case PD_STRING:
-			wPrefSetString(pg->nameStr, p->nameStr, (char*)p->valueP);
-			break;
-		case PD_MESSAGE:
-		case PD_BUTTON:
-		case PD_DRAW:
-		case PD_TEXT:
-		case PD_MENU:
-		case PD_MENUITEM:
-		case PD_BITMAP:
-		case PD_NOTEBOOK:
-		case PD_TAG:
-		case PD_EXPANDER:
-			break;
-		}
+		SaveParamPref(pg->nameStr, p->nameStr, p);
 	}
 	wPrefFlush(NULL);
 }
 
 
-static const char * PREFSECT = "DialogItem";
 EXPORT void FormUpdatePrefs( void )
 {
 	paramData_p p;
-	long rgb;
-	char prefName[STR_SHORT_SIZE];
-	size_t len;
-	int col;
-	char * cp;
-	static wWinPix_t * colWidths;
-	static int maxColCnt = 0;
-	paramListData_t * listDataP;
 
 	for ( paramGroup_cp * ppg = DialogGroupIter(NULL); ppg;
 	      ppg = DialogGroupIter(ppg) ) {
-		//pg = paramGroups(inx);
 		if ((*ppg)->nameStr == NULL) { continue; }
 		for ( p=(*ppg)->paramPtr; p<&(*ppg)->paramPtr[(*ppg)->paramCnt]; p++ ) {
 			if (p->valueP == NULL || p->nameStr == NULL || (p->option&PDO_NOPREF)!=0 ) {
@@ -308,72 +312,7 @@ EXPORT void FormUpdatePrefs( void )
 			if ( (p->option&PDO_DLGIGNORE) != 0 ) {
 				continue;
 			}
-			snprintf( prefName, sizeof(prefName), "%s-%s", (*ppg)->nameStr, p->nameStr );
-			switch ( p->type ) {
-			case PD_LONG:
-			case PD_RADIO:
-			case PD_TOGGLE:
-				wPrefSetInteger( PREFSECT, prefName, *(long*)p->valueP );
-				break;
-			case PD_LIST:
-				listDataP = (paramListData_t*)p->winData;
-				if ( p->control && listDataP && listDataP->colCnt > 0 ) {
-					if ( maxColCnt < listDataP->colCnt ) {
-						if ( maxColCnt == 0 ) {
-							colWidths = (wWinPix_t*)MyMalloc( listDataP->colCnt * sizeof * colWidths );
-						} else {
-							colWidths = (wWinPix_t*)MyRealloc( colWidths,
-							                                   listDataP->colCnt * sizeof * colWidths );
-						}
-						maxColCnt = listDataP->colCnt;
-					}
-					len = wListGetColumnWidths( (wList_p)p->control, listDataP->colCnt, colWidths );
-					cp = message;
-					for ( col=0; col<(int)len; col++ ) {
-						sprintf( cp, "%ld ", colWidths[col] );
-						cp += strlen(cp);
-					}
-					*cp = '\0';
-					len = strlen( prefName );
-					strcpy( prefName+len, "-columnwidths" );
-					wPrefSetString( PREFSECT, prefName, message );
-					prefName[len] = '\0';
-				}
-				__attribute__((fallthrough));
-			case PD_DROPLIST:
-			case PD_COMBOLIST:
-				if ( (p->option&PDO_LISTINDEX) ) {
-					wPrefSetInteger( PREFSECT, prefName, *(wIndex_t*)p->valueP );
-				} else {
-					if (p->control) {
-						wListGetValues( (wList_p)p->control, message, sizeof message, NULL, NULL );
-						wPrefSetString( PREFSECT, prefName, message );
-					}
-				}
-				break;
-			case PD_COLORLIST:
-				rgb = wDrawGetRGB( *(wDrawColor*)p->valueP );
-				wPrefSetInteger( PREFSECT, prefName, rgb );
-				break;
-			case PD_FLOAT:
-				wPrefSetFloat( PREFSECT, prefName, *(FLOAT_T*)p->valueP );
-				break;
-			case PD_STRING:
-				wPrefSetString( PREFSECT, prefName, (char*)p->valueP );
-				break;
-			case PD_MESSAGE:
-			case PD_BUTTON:
-			case PD_DRAW:
-			case PD_TEXT:
-			case PD_MENU:
-			case PD_MENUITEM:
-			case PD_BITMAP:
-			case PD_SCALE:
-			case PD_TAG:
-			case PD_NOTEBOOK:
-			case PD_EXPANDER:
-				break;
-			}
+			SaveParamPref((*ppg)->nameStr, p->nameStr, p);
 		}
 	}
 }

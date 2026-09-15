@@ -12,6 +12,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "wlib.h"
 #include "../gtkint.h"
@@ -114,7 +115,10 @@ wControl_p wMain(int argc, char **argv)
 
 	wInitAppName("preftest");
 
-	cmocka_run_group_tests(tests, NULL, NULL);
-
-	return NULL;
+	// wMain()'s return value feeds GTK window management, not the process
+	// exit code (app/wlib/gtk3lib/main.c's startup() discards it and the
+	// real exit status comes from g_application_run(), unrelated to
+	// cmocka's result) -- so a failed assertion here would otherwise never
+	// make ctest see a non-zero exit code. Exit directly instead.
+	exit(cmocka_run_group_tests(tests, NULL, NULL));
 }

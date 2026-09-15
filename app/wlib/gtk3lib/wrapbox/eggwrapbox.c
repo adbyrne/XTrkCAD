@@ -994,9 +994,11 @@ egg_wrap_box_size_allocate (GtkWidget     *widget,
 		gint   line_length;
 		gint   item_size = 0;
 		gint   line_size = 0, min_fixed_line_size = 0, nat_fixed_line_size = 0;
-		gint   line_offset, item_offset, n_children, n_lines, line_count;
+		gint   line_offset, item_offset, n_children;
+		guint  n_lines, line_count;
 		gint   extra_pixels, extra_per_item = 0, extra_extra = 0;
-		gint   extra_line_pixels, extra_per_line = 0, extra_line_extra = 0;
+		gint   extra_line_pixels, extra_per_line = 0;
+		guint  extra_line_extra = 0;
 		gint   i, this_line_size;
 
 		get_average_item_size (box, priv->orientation, &min_item_size, &nat_item_size);
@@ -1290,9 +1292,10 @@ egg_wrap_box_size_allocate (GtkWidget     *widget,
 		GtkRequestedSize *sizes = NULL;
 		GList            *list = priv->children;
 		gboolean          first_line = TRUE;
-		gint              i, line_count = 0;
+		guint             i, line_count = 0;
 		gint              line_offset, item_offset;
-		gint              extra_per_line = 0, extra_line_extra = 0;
+		gint              extra_per_line = 0;
+		guint             extra_line_extra = 0;
 		gint              extra_pixels;
 		GArray           *array;
 
@@ -1356,7 +1359,7 @@ egg_wrap_box_size_allocate (GtkWidget     *widget,
 			GtkRequestedSize *line_sizes = (GtkRequestedSize *)line_array->data;
 			gint              line_size  = sizes[line_count].minimum_size;
 			gint              extra_per_item = 0;
-			gint              extra_extra = 0;
+			guint             extra_extra = 0;
 
 			/* Set line start offset */
 			item_offset = 0;
@@ -2616,7 +2619,9 @@ egg_wrap_box_reorder_child (EggWrapBox *box,
 	                           (GCompareFunc)find_child_in_list);
 	g_return_if_fail (list != NULL);
 
-	if (g_list_position (priv->children, list) != index) {
+	// We know g_list_position will return a non-negative value because
+	// we just found the child in the list.
+	if ((guint)g_list_position (priv->children, list) != index) {
 		child = list->data;
 		priv->children = g_list_delete_link (priv->children, list);
 		priv->children = g_list_insert (priv->children, child, index);
