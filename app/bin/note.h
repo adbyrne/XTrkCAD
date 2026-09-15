@@ -35,7 +35,8 @@
 enum noteCommands {
 	OP_NOTETEXT,
 	OP_NOTELINK,
-	OP_NOTEFILE
+	OP_NOTEFILE,
+	OP_NOTEJSON
 };
 
 /** hold the data for the note */
@@ -74,6 +75,11 @@ void ActivateFileNote(track_p trk);
 /* textnoteui.c */
 void NewTextNoteUI( coOrd );
 void DescribeTextNote(track_p trk, char * str, CSIZE_T len);
+
+/* jsonnoteui.c */
+void NewJsonNoteUI( coOrd );
+BOOL_T IsJsonNote(track_p trk);
+void DescribeJsonNote(track_p trk, char * str, CSIZE_T len);
 
 /* trknote.c */
 extern TRKTYP_T T_NOTE;
