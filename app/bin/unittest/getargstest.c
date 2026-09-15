@@ -95,6 +95,112 @@ void ConvertUTF8ToSystem(unsigned char *in)
 	(void)in;
 }
 
+/* wMain() itself is excluded from this target's compilation of misc.c
+ * (XTRKCAD_TESTBUILD_NO_WMAIN, see ../unittest/CMakeLists.txt) since it's
+ * the whole application's entry point and has nothing to do with
+ * ConvertToEscapedText()/ConvertFromEscapedText(), the only two functions
+ * this test actually needs from misc.c. That alone isn't sufficient on
+ * Windows/MSYS2, though: several *other* exported misc.c functions
+ * (SetAccelKeys/OfferCheckpoint/InitAudio/wShow/wHide/DoShowWindow/
+ * DefaultProc/AccelKeyDispatch/DoClearAfter, all normally only reachable
+ * from wMain(), plus their own transitive callees) still linked in and
+ * pulled their real dependencies along -- confirmed via the actual MSYS2
+ * CI job log that --gc-sections does not reliably discard globally-linked
+ * (non-static) functions from misc.c on this platform/toolchain, unlike
+ * Linux and macOS. Below are link-only stubs (exact prototypes copied from
+ * their real headers, so this compiles against the same declarations
+ * misc.c itself sees) for every symbol that surfaced as undefined this
+ * way -- none of them are ever actually invoked in these tests, since none
+ * of the now-dead misc.c call paths above run. */
+wControl_p aboutW = NULL;
+wBool_t bReadOnly = FALSE;
+wIndex_t changed = 0;
+wIndex_t checkPtMark = 0;
+wControl_p demoW = NULL;
+long enableAudio = 0;
+BOOL_T inError = FALSE;
+wBool_t inPlayback = FALSE;
+wControl_p mapW = NULL;
+wControl_p winList_mi = NULL;
+
+void CleanupCheckpointFiles(void) { }
+void CleanupTempArchive(void) { }
+void ClearTracks(void) { }
+int ConfirmReset(BOOL_T b) { (void)b; return 0; }
+void DoLayout(void *unused) { (void)unused; }
+void DoSave(void *doAfterSaveVP) { (void)doAfterSaveVP; }
+void DoZoomDown(const void *modeVP) { (void)modeVP; }
+void DoZoomUp(const void *modeVP) { (void)modeVP; }
+void EditCopy(void *unused) { (void)unused; }
+void EditCut(void *unused) { (void)unused; }
+void EditPaste(void *unused) { (void)unused; }
+void EnableCommands(void) { }
+void FormResetInvalid(wControl_p win) { (void)win; }
+void InfoDefaultControls(void) { }
+void LayoutBackGroundInit(BOOL_T clear) { (void)clear; }
+int LoadCheckpoint(BOOL_T b) { (void)b; return 0; }
+void LogClose(void) { }
+void MainRedraw(void) { }
+void MapWindowShow(int state) { (void)state; }
+void MessageListAppend(const char *a, const char *b) { (void)a; (void)b; }
+void Reset(void) { }
+void ResetLayers(void) { }
+void SaveState(void) { }
+void SetLayoutFullPath(const char *fileName) { (void)fileName; }
+void SetMessage(char *infotext) { (void)infotext; }
+void SetWindowTitle(void) { }
+void TrySelectDelete(void) { }
+void UndoUndo(void *unused) { (void)unused; }
+void wAttachAccelKey(wAccelKey_e k, int i, wAccelKeyCallBack_p cb, void *d)
+{
+	(void)k; (void)i; (void)cb; (void)d;
+}
+void wBeep(void) { }
+void wDoAccelHelp(wAccelKey_e key, void *d) { (void)key; (void)d; }
+void wExit(int code) { (void)code; }
+const char *wGetAppLibDir(void) { return NULL; }
+void wMenuListAdd(wControl_p ml, int index, const char *labelStr,
+		   const void *attributes)
+{
+	(void)ml; (void)index; (void)labelStr; (void)attributes;
+}
+void wMenuListDelete(wControl_p ml, const char *labelStr)
+{
+	(void)ml; (void)labelStr;
+}
+int wNotice(const char *msg, const char *yes, const char *no)
+{
+	(void)msg; (void)yes; (void)no;
+	return 0;
+}
+int wNotice3(const char *msg, const char *affirmative, const char *cancel,
+	     const char *alternate)
+{
+	(void)msg; (void)affirmative; (void)cancel; (void)alternate;
+	return 0;
+}
+wBool_t wPrefGetInteger(const char *section, const char *name, long *result,
+			 long defaultValue)
+{
+	(void)section; (void)name;
+	if (result) {
+		*result = defaultValue;
+	}
+	return FALSE;
+}
+char *wPrefGetString(const char *section, const char *name)
+{
+	(void)section; (void)name;
+	return NULL;
+}
+void wSetAudio(bool setting) { (void)setting; }
+const char *wWinGetTitle(wControl_p window) { (void)window; return NULL; }
+void wWinSetBusy(wControl_p win, wBool_t busy) { (void)win; (void)busy; }
+void wWinShow(wControl_p control, wBool_t visibility)
+{
+	(void)control; (void)visibility;
+}
+
 /* ---------------------------------------------------------------------
  * Round-trip: ConvertToEscapedText() (write side) -> GetArgs("qc", ...)
  * (read side, exercises both the quote-doubling loop in getargs.c and the
