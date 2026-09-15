@@ -194,6 +194,7 @@ target_sources(xtrkcad-lib
     getargs.c
     icons.c
     i18n.c
+    jsonnoteui.c
     layout.c
     levenshtein.c
     linknoteui.c

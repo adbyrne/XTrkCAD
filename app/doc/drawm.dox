@@ -244,13 +244,16 @@ The <b>Note</b> command allows you to
 
 - Attach <b>plain text notes</b> (\ref cmdTextNote),
 
-- Attach <b>weblinks</b> (\ref cmdLinkNote) or
+- Attach <b>weblinks</b> (\ref cmdLinkNote),
 
-- Attach <b>document references</b> (\ref cmdFileNote) to selected places on the layout.
+- Attach <b>document references</b> (\ref cmdFileNote) or
+
+- Attach <b>JSON notes</b> (\ref cmdJsonNote) to selected places on the layout.
 
 - \subpage cmdTextNote
 - \subpage cmdLinkNote
 - \subpage cmdFileNote
+- \subpage cmdJsonNote
 
 */
 
@@ -310,6 +313,39 @@ When in <b>Properties</b> (\ref cmdDescribe) mode, clicking on a <i>Document Not
  description.
 
 Double clicking on a document reference icon opens the document  in the default program.
+
+*/
+
+/**
+\page cmdJsonNote JSON Note
+
+Similar to text notes, you can place a note whose text is a raw JSON object
+on the layout -- e.g. <tt>{"kind": "station", "id": "WP"}</tt> -- instead
+of free-form text. This is meant for structured, machine-readable
+annotations (station/industry/siding metadata and similar) that external
+tools can read directly, rather than parsing free-form text.
+
+After releasing the mouse button, the <i>JSON Note Editor</i> dialog is
+displayed, with <b>Validate</b> and <b>Format</b> buttons alongside the text
+area.
+
+<b>Validate</b> checks that the current text is well-formed JSON <i>and</i>
+that it's a JSON object (<tt>{...}</tt>, not a bare array, string, number,
+or boolean) -- invalid text is highlighted and the <b>Done</b> button is
+disabled until it's fixed, the same way an invalid document path already
+blocks Done on the Document Editor (\ref cmdFileNote).
+
+<b>Format</b> pretty-prints the current text (re-indents it for
+readability) if it's currently valid; if not, it reports the same error
+<b>Validate</b> would.
+
+There is no fixed schema -- any valid JSON object is accepted. A
+<tt>"kind"</tt> field, when present, is shown on the status line and used
+by other tools to group notes.
+
+When in <b>Properties</b> (\ref cmdDescribe) mode, clicking on a <i>JSON
+Note</i> will display the <i>Property Sheet</i> to let you read or modify
+its JSON text.
 
 */
 
