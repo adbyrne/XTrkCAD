@@ -2231,11 +2231,13 @@ void ReportsKinkedJoints( void * unused )
 /** Tentative declaration -- same reason as reportsPG above. */
 static paramGroup_t reportsNotesPG;
 static void ReportsBuildNoteText(DynString *out);
+static void ReportsDlgUpdateNotes(paramGroup_p pg, int inx, void *valueP);
+static void ReportsCancelNotes(paramGroup_cp pg);
 
 static reportsDialog_t reportsNotesDlg = {
 	&reportsNotesPG, NULL, NULL, NULL,
 	ReportsBuildNoteText, ReportsNotes,
-	NULL, NULL
+	ReportsDlgUpdateNotes, ReportsCancelNotes
 };
 static reportsOpCtx_t reportsNotesRefreshOp = { &reportsNotesDlg, REPORTSOP_REFRESH };
 static reportsOpCtx_t reportsNotesSaveOp    = { &reportsNotesDlg, REPORTSOP_SAVE };
@@ -2292,8 +2294,18 @@ static paramGroup_t reportsNotesPG = { "reportsnotes", PGO_FULLDIALOGFROMBUILDER
 /** The current Notes Report's rows, in TRK_ITERATE order (not grouped by
  * kind -- ReportsFormatNoteList() does that grouping for the Save/Print
  * text only, same as every other grouped-output report keeps its
- * interactive list in a different order than its own Save/Print text). */
+ * interactive list in a different order than its own Save/Print text).
+ * Kept alive for as long as the dialog might reference it via the list's
+ * per-row context pointers (this report is interactive -- click-to-
+ * navigate, same as Gaps/Kinked Joints), not just a plain local. */
 static dynArr_t reportsNotesList_da;
+
+/** TRUE while ReportsPopulateNoteList() is clearing/rebuilding
+ * reportsNotesList -- same re-entrancy guard as reportsPopulating (phase
+ * 1)/reportsGapsPopulating, required for any interactive report's list;
+ * see reportsPopulating's own doc comment for the real SF #772 crash this
+ * pattern exists to prevent. */
+static BOOL_T reportsNotesPopulating = FALSE;
 
 /** Populate the Kind filter dropdown -- fixed 8-entry list, rebuilt on
  * each invocation same as FillLayerList()'s own convention. */
@@ -2311,11 +2323,15 @@ static void ReportsPopulateNoteKindFilter(void)
 }
 
 /** Populate the interactive list from reportsNotesList_da -- one row per
- * note, tab-separated. */
+ * note, tab-separated, each row's context set to that note's address so
+ * ReportsDlgUpdateNotes() can recover it on selection (interactive --
+ * click-to-navigate, same as Gaps/Kinked Joints/Unconnected Endpoints). */
 static void ReportsPopulateNoteList(void)
 {
 	int i;
 	char row[256];
+
+	reportsNotesPopulating = TRUE;
 
 	wListClear( reportsNotesList );
 	for ( i = 0; i < reportsNotesList_da.cnt; i++ ) {
@@ -2329,8 +2345,52 @@ static void ReportsPopulateNoteList(void)
 
 		snprintf( row, sizeof row, "%s\t%s\t%s\t%u",
 		          kindStr, entry->id, entry->label, entry->layer );
-		wListAddValue( reportsNotesList, row, NULL, NULL );
+		wListAddValue( reportsNotesList, row, NULL, entry );
 	}
+
+	reportsNotesPopulating = FALSE;
+}
+
+/** paramGroup_t changeProc for the Notes dialog -- selecting a row pans/
+ * indicates at that note's own position. Same guard/recovery shape as
+ * phase 1's ReportsDlgUpdate()/Gaps' ReportsDlgUpdateGaps(). */
+static void ReportsDlgUpdateNotes(paramGroup_p pg, int inx, void *valueP)
+{
+	wIndex_t sel;
+	reportsNoteRow_t *entry;
+	(void)pg;
+	(void)valueP;
+
+	if (inx != I_REPORTSNOTESLIST) {
+		return;
+	}
+	if (reportsNotesPopulating) {
+		return;
+	}
+
+	sel = wListGetIndex(reportsNotesList);
+	if (sel < 0) {
+		return;
+	}
+	entry = (reportsNoteRow_t *)wListGetItemContext(reportsNotesList, sel);
+	if (!entry) {
+		return;
+	}
+
+	if ( log_reports < 0 ) { log_reports = LogFindIndex( "reports" ); }
+	LOG( log_reports, 1,
+	     ( "reports: notes row %d selected -> note %d @ (%.3f,%.3f)\n",
+	       sel, entry->noteIndex, entry->pos.x, entry->pos.y ) )
+
+	ReportsSetIndicator(entry->pos, entry->scale);
+}
+
+/** paramActionCancelProc for the Notes dialog -- same shape as phase 1's
+ * ReportsCancel()/Gaps' ReportsCancelGaps(). */
+static void ReportsCancelNotes(paramGroup_cp pg)
+{
+	ReportsClearIndicator();
+	FormCancel_Current(pg);
 }
 
 /** Build the full formatted Notes Report text (header + kind-grouped
@@ -2370,10 +2430,10 @@ void ReportsNotes( void * unused )
 		reportsNoteKind_e kind = REPORTS_NOTE_OTHER;
 		char id[64] = "";
 		char label[128] = "";
+		struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE,
+		                              extraDataNote_t );
 
 		if ( IsJsonNote(trk) ) {
-			const struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE,
-			                                    extraDataNote_t );
 			cJSON *parsed = cJSON_Parse(xx->noteData.text);
 
 			if ( parsed != NULL && cJSON_IsObject(parsed) ) {
@@ -2405,8 +2465,6 @@ void ReportsNotes( void * unused )
 			 * label becomes a short raw-text preview -- matching
 			 * DescribeTextNote()'s own status-line precedent. Each legacy
 			 * note type keeps its text in a different union member. */
-			struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE,
-			                              extraDataNote_t );
 			char *raw = xx->op == OP_NOTETEXT ? xx->noteData.text :
 			            xx->op == OP_NOTELINK ? xx->noteData.linkData.title :
 			            xx->op == OP_NOTEFILE ? xx->noteData.fileData.title : NULL;
@@ -2434,6 +2492,8 @@ void ReportsNotes( void * unused )
 			strncpy( row->label, label, sizeof row->label - 1 );
 			row->layer = GetTrkLayer(trk) + 1;
 			row->noteIndex = GetTrkIndex(trk);
+			row->pos = xx->pos;
+			row->scale = GetTrkScale(trk);
 		}
 	}
 

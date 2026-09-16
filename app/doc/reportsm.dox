@@ -410,10 +410,11 @@ The <b>Kind</b> dropdown restricts the report to one kind at a time
 ("All kinds" is the default, unfiltered view) -- change it and click
 <b>Refresh</b> to re-run the report scoped to just that kind.
 
-Like the Turnout Density Report (\ref cmdReportsturnout) and the other
-phase-2 reports, this report has no click-to-navigate -- a note's position
-isn't a "go look at this" target the way a Gaps (\ref cmdReportsgaps) or
-Kinked Joints (\ref cmdReportskinked) row is.
+Selecting a row pans the <b>Main Canvas</b> (\ref mainW) to that note's
+position and draws a temporary open-circle indicator there, the same way
+the Gaps (\ref cmdReportsgaps) and Kinked Joints (\ref cmdReportskinked)
+reports do. The indicator is purely visual -- it's never saved with the
+layout and disappears as soon as the report window closes.
 
 The <b>Refresh</b> button recomputes the report in place -- useful after
 editing a note's JSON body elsewhere in the layout, without closing and

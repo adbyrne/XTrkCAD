@@ -607,6 +607,15 @@ typedef struct {
 	char label[128];
 	unsigned int layer;
 	TRKINX_T noteIndex;
+	/** The note's own position/scale -- interactive (click-to-navigate),
+	 * same as Gaps/Kinked Joints/Unconnected Endpoints, unlike the phase-2
+	 * batch this report otherwise mirrors. Not part of ReportsFormatNoteList()'s
+	 * printed text (matching Gaps' own precedent: posA/posB exist on
+	 * reportsGapPair_t purely for the interactive indicator, never printed) --
+	 * appended at the end so existing positional-initializer test literals
+	 * (reportstest.c) stay valid, zero-initialized by default. */
+	coOrd pos;
+	SCALEINX_T scale;
 } reportsNoteRow_t;
 
 /**
