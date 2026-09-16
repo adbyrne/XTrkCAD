@@ -56,7 +56,21 @@ struct {
 	coOrd pos;
 	int layer;
 	track_p trk;
+	long fieldObjectInx;
+	char fieldName[STR_SHORT_SIZE];
+	char fieldValue[STR_LONG_SIZE];
 } jsonNoteData;
+
+/* Structured field editor's Object dropdown: index 0 is always ROOT (an
+ * empty key path); indices 1..jsonFieldObjectCount-1 are the keys of every
+ * object-valued child found directly on ROOT (one level of nesting only --
+ * see JsonFieldRebuildObjectList()'s doc comment for why deeper isn't
+ * supported). Rebuilt from the note's *current* text -- see that function's
+ * doc comment for the "text box is the only source of truth" contract this
+ * whole editor follows. */
+#define JSONFIELD_MAXOBJECTS (32)
+static char jsonFieldObjectKeys[JSONFIELD_MAXOBJECTS][STR_SHORT_SIZE];
+static int jsonFieldObjectCount;
 
 /**
  * Precise (not just length-based) check for whether \p buf's fixed-size
@@ -91,6 +105,8 @@ JsonNoteLengthOk(const char *buf, int len)
 
 static void JsonNoteValidate(void *junk);
 static void JsonNoteFormat(void *junk);
+static void JsonFieldSave(void *junk);
+static void JsonFieldDelete(void *junk);
 static wBool_t JsonDlgUpdate(paramGroup_p pg, int inx, void *valueP);
 
 static paramTextData_t jsonNoteTextData = { 300, 150 };
@@ -109,6 +125,16 @@ static paramData_t jsonNotePLs[] = {
 	/*4*/ { PD_BUTTON, JsonNoteValidate, "validate", 0L, NULL },
 #define I_FORMAT (5)
 	/*5*/ { PD_BUTTON, JsonNoteFormat, "format", PDO_DLGHORZ, NULL },
+#define I_JSONOBJ (6)
+	/*6*/ { PD_COMBOLIST, &jsonNoteData.fieldObjectInx, "jsonobj", PDO_NOPREF | PDO_LISTINDEX, I2VP(120), N_("Object") },
+#define I_JSONNAME (7)
+	/*7*/ { PD_STRING, &jsonNoteData.fieldName, "jsonname", PDO_NOPREF, I2VP(100), N_("Name"), 0, 0, sizeof jsonNoteData.fieldName },
+#define I_JSONVALUE (8)
+	/*8*/ { PD_STRING, &jsonNoteData.fieldValue, "jsonvalue", PDO_NOPREF, I2VP(140), N_("Value"), 0, 0, sizeof jsonNoteData.fieldValue },
+#define I_JSONSAVE (9)
+	/*9*/ { PD_BUTTON, JsonFieldSave, "jsonfieldsave", 0L, NULL },
+#define I_JSONDELETE (10)
+	/*10*/ { PD_BUTTON, JsonFieldDelete, "jsonfielddelete", PDO_DLGHORZ, NULL },
 };
 
 static paramGroup_t jsonNotePG = { "jsonNote", PGO_FULLDIALOGFROMBUILDER, jsonNotePLs, COUNT( jsonNotePLs ) };
@@ -167,9 +193,270 @@ JsonNoteIsValid(const char **errMsg)
 }
 
 /**
+ * Rebuild the structured field editor's Object dropdown from \p root (ROOT
+ * itself, plus every object-valued key found directly on ROOT).
+ *
+ * Deliberately one level deep only, not a recursive tree-walk: none of the
+ * real JSON Note kinds (station/industry/storage/yard_track/house_track/
+ * reference) nest an object inside an object, so deeper traversal would be
+ * speculative complexity with no current caller -- revisit if a future kind
+ * ever needs real nesting.
+ *
+ * \param root IN the note's current text, already parsed (not consumed;
+ *        caller still owns and must cJSON_Delete it)
+ */
+static void
+JsonFieldRebuildObjectList(cJSON *root)
+{
+	wControl_p ctrl = jsonNotePLs[I_JSONOBJ].control;
+	wListClear(ctrl);
+	wComboBoxAddValue(ctrl, _("ROOT"), I2VP(0));
+	jsonFieldObjectKeys[0][0] = '\0';
+	jsonFieldObjectCount = 1;
+
+	cJSON *child = root->child;
+	while (child && jsonFieldObjectCount < JSONFIELD_MAXOBJECTS) {
+		if (cJSON_IsObject(child) && child->string) {
+			wComboBoxAddValue(ctrl, child->string, I2VP(jsonFieldObjectCount));
+			strncpy(jsonFieldObjectKeys[jsonFieldObjectCount], child->string,
+			        STR_SHORT_SIZE - 1);
+			jsonFieldObjectKeys[jsonFieldObjectCount][STR_SHORT_SIZE - 1] = '\0';
+			jsonFieldObjectCount++;
+		}
+		child = child->next;
+	}
+
+	if (jsonNoteData.fieldObjectInx >= jsonFieldObjectCount) {
+		jsonNoteData.fieldObjectInx = 0;
+	}
+	wListSetIndex(ctrl, (int)jsonNoteData.fieldObjectInx);
+}
+
+/**
+ * The cJSON object node currently selected in the Object dropdown -- \p root
+ * itself for ROOT (index 0), or the matching direct child for any other
+ * index. Returns NULL if the previously-selected key no longer exists on
+ * \p root (e.g. it was removed by a direct text-box edit since the dropdown
+ * was last rebuilt).
+ *
+ * \param root IN the note's current text, already parsed
+ * \return the selected object node, or NULL
+ */
+static cJSON *
+JsonFieldSelectedObject(cJSON *root)
+{
+	int inx = (int)jsonNoteData.fieldObjectInx;
+	if (inx <= 0 || inx >= jsonFieldObjectCount) {
+		return root;
+	}
+	cJSON *obj = cJSON_GetObjectItemCaseSensitive(root, jsonFieldObjectKeys[inx]);
+	return (obj && cJSON_IsObject(obj)) ? obj : NULL;
+}
+
+/**
+ * Report a structured-field-editor error via the Name field's tooltip/
+ * hilite, matching JsonNoteValidate()'s error-reporting mechanism for the
+ * main text field. Does not touch FormDialogOkActive -- Save/Delete on this
+ * row never blocks the dialog's own OK button, they simply refuse to act.
+ *
+ * \param msg IN user-facing reason
+ */
+static void
+JsonFieldReportError(const char *msg)
+{
+	JSONNOTE_LOG("jsonfield: %s\n", msg);
+	paramData_p p = &jsonNotePLs[I_JSONNAME];
+	wTooltipSetText(p->control, msg);
+	wControlHilite(p->control, TRUE);
+}
+
+/**
+ * Shared Save/Delete implementation for the structured field editor. The
+ * multi-line JSON text box is the single source of truth for the note's
+ * content at all times -- this control never maintains its own parallel
+ * data model. Every call re-parses the text box's *current* contents with
+ * cJSON, mutates the selected object's requested key only, pretty-prints
+ * the result (matching the Format button's own output), and writes it back
+ * into the text box. Undo/Redo, the oversized-body guard
+ * (JsonNoteLengthOk()), and Validate-on-save all operate purely on that
+ * text and require no changes to support this control.
+ *
+ * The value field is untyped: on Save, an entered value that parses as a
+ * bare JSON literal (a number, true, false, or null) is stored as that
+ * literal; anything else -- including text that merely looks like a quoted
+ * JSON string -- is stored as-is as a JSON string. Arrays, nested-object
+ * creation, and any value more complex than a scalar are out of scope for
+ * this control; author those directly in the text box instead.
+ *
+ * \param isDelete IN FALSE to add-or-update the Name/Value pair on the
+ *        selected object, TRUE to remove Name from it (Value is ignored)
+ */
+static void
+JsonFieldApplyEdit(BOOL_T isDelete)
+{
+	/* Object/Name/Value are plain GtkEntry/GtkComboBox widgets -- unlike
+	 * I_TEXT (whose own "changed" signal we already can't rely on, see
+	 * JsonDlgUpdate()'s comment), nothing pushes their live contents into
+	 * jsonNoteData automatically on every keystroke. Pull the current
+	 * widget values explicitly before reading them, matching the same
+	 * pattern other button-triggered handlers elsewhere in the app use
+	 * (e.g. dlayer.c's own I_LAYER-adjacent buttons). */
+	FormFetchData(&jsonNotePG);
+
+	const char *errMsg = NULL;
+	if (!JsonNoteIsValid(&errMsg)) {
+		JsonFieldReportError(errMsg);
+		return;
+	}
+	const char *name = jsonNoteData.fieldName;
+	if (name[0] == '\0') {
+		JsonFieldReportError(_("Name is required"));
+		return;
+	}
+
+	int len = wTextGetSize(jsonTextEntry);
+	char *buf = MyMalloc(len + 2);
+	wTextGetText(jsonTextEntry, buf, len);
+	cJSON *root = cJSON_Parse(buf);
+	MyFree(buf);
+	if (root == NULL || !cJSON_IsObject(root)) {
+		if (root) {
+			cJSON_Delete(root);
+		}
+		JsonFieldReportError(_("Current JSON is not a valid object"));
+		return;
+	}
+
+	cJSON *obj = JsonFieldSelectedObject(root);
+	if (obj == NULL) {
+		cJSON_Delete(root);
+		JsonFieldReportError(
+		        _("Selected object no longer exists -- Format/Validate first"));
+		return;
+	}
+
+	if (isDelete) {
+		if (!cJSON_HasObjectItem(obj, name)) {
+			cJSON_Delete(root);
+			JsonFieldReportError(_("No such name on the selected object"));
+			return;
+		}
+		cJSON_DeleteItemFromObjectCaseSensitive(obj, name);
+	} else {
+		cJSON *valueNode;
+		if (jsonNoteData.fieldValue[0] == '\0') {
+			/* Blank Value is repurposed as "start a new nested object here"
+			 * rather than the arguably-useless empty string -- the common
+			 * real need (confirmed live, 2026-09-16: a user immediately
+			 * wanted to build a nested "spots": {...} group) is starting a
+			 * new sub-group to fill in via this same row afterward, not
+			 * deliberately storing "". Since Save already re-syncs the
+			 * Object dropdown on success (see below), the new object is
+			 * immediately selectable with no extra step. */
+			valueNode = cJSON_CreateObject();
+		} else {
+			valueNode = cJSON_Parse(jsonNoteData.fieldValue);
+			if (valueNode != NULL &&
+			    !(cJSON_IsNumber(valueNode) || cJSON_IsBool(valueNode)
+			      || cJSON_IsNull(valueNode))) {
+				cJSON_Delete(valueNode);
+				valueNode = NULL;
+			}
+			if (valueNode == NULL) {
+				valueNode = cJSON_CreateString(jsonNoteData.fieldValue);
+			}
+		}
+		if (cJSON_HasObjectItem(obj, name)) {
+			cJSON_ReplaceItemInObjectCaseSensitive(obj, name, valueNode);
+		} else {
+			cJSON_AddItemToObject(obj, name, valueNode);
+		}
+	}
+
+	char *pretty = cJSON_Print(root);
+	cJSON_Delete(root);
+	if (pretty == NULL || !JsonNoteLengthOk(pretty, (int)strlen(pretty))) {
+		if (pretty) {
+			cJSON_free(pretty);
+		}
+		JsonFieldReportError(_("Too long -- would risk a crash reopening this file"));
+		return;
+	}
+
+	wTextClear(jsonTextEntry);
+	wTextAppend(jsonTextEntry, pretty);
+	JSONNOTE_LOG("jsonfield: %s '%s' on object #%ld, %d bytes\n",
+	             isDelete ? "deleted" : "saved", name, jsonNoteData.fieldObjectInx,
+	             (int)strlen(pretty));
+	cJSON_free(pretty);
+
+	/* Success: clear the Name/Value row (Object selection is left as-is --
+	 * adding several pairs to the same object in a row is the common case)
+	 * and re-validate, which also clears any stale error hilite on I_TEXT/
+	 * I_JSONNAME. Undo/Redo, Validate-on-save, and the oversized-body guard
+	 * all continue to work unmodified -- see this function's own doc
+	 * comment.
+	 *
+	 * wEntrySetValue() (wlib's entry.c) deliberately no-ops on a focused
+	 * entry -- "contents should not be changed programmatically while the
+	 * user is editing it". Worse, entry.c's own focus-out handler
+	 * (entryFocusOutEvent) copies the *widget's still-displayed* text back
+	 * into the bound struct field the moment focus leaves it -- so moving
+	 * focus away *before* clearing the struct would just have the focus-out
+	 * handler stomp the clear right back to the old text. Order matters:
+	 * move focus away FIRST (onto the main JSON text box -- not the Object
+	 * dropdown, which like the Layer combo it's modeled on has GTK
+	 * can-focus=False in jsonNote.ui and can never actually receive focus)
+	 * and wFlush() the resulting focus-out through, THEN clear the struct
+	 * fields, THEN FormLoadControls() -- so nothing is left with focus (or
+	 * pending a focus-out) that could re-sync stale text over the clear. */
+	wControlSetFocus(jsonTextEntry);
+	wFlush();
+	jsonNoteData.fieldName[0] = '\0';
+	jsonNoteData.fieldValue[0] = '\0';
+	paramData_p nameField = &jsonNotePLs[I_JSONNAME];
+	wControlHilite(nameField->control, FALSE);
+	FormLoadControls(&jsonNotePG);
+	JsonNoteValidate(NULL);
+}
+
+/**
+ * Callback for the structured field editor's Save button (add-or-update,
+ * an upsert -- there is no separate Add-only/Update-only action, since
+ * distinguishing them would need the same existence check either way and
+ * upsert removes an entire class of "wrong button for this key" user
+ * error). See JsonFieldApplyEdit()'s doc comment for the full contract.
+ *
+ * \param junk unused
+ */
+static void
+JsonFieldSave(void *junk)
+{
+	(void)junk;
+	JsonFieldApplyEdit(FALSE);
+}
+
+/**
+ * Callback for the structured field editor's Delete button. See
+ * JsonFieldApplyEdit()'s doc comment for the full contract.
+ *
+ * \param junk unused
+ */
+static void
+JsonFieldDelete(void *junk)
+{
+	(void)junk;
+	JsonFieldApplyEdit(TRUE);
+}
+
+/**
  * Callback for the Validate button: check the current text and reflect the
  * result via the same bInvalid/hilite/OK-active mechanism filenoteui.c
- * already uses for its I_PATH field.
+ * already uses for its I_PATH field. Also re-syncs the structured field
+ * editor's Object dropdown against the now-confirmed-valid text, since that
+ * control has no other reliable hook to notice a direct text-box edit that
+ * added/removed a nested object (see JsonDlgUpdate()'s I_TEXT case comment
+ * on why "changed" doesn't fire on every keystroke).
  *
  * \param junk unused
  */
@@ -191,6 +478,16 @@ JsonNoteValidate(void *junk)
 		p->bInvalid = FALSE;
 		wControlHilite(p->control, FALSE);
 		FormDialogOkActive(&jsonNotePG, TRUE);
+
+		int len = wTextGetSize(jsonTextEntry);
+		char *buf = MyMalloc(len + 2);
+		wTextGetText(jsonTextEntry, buf, len);
+		cJSON *root = cJSON_Parse(buf);
+		MyFree(buf);
+		if (root != NULL) {
+			JsonFieldRebuildObjectList(root);
+			cJSON_Delete(root);
+		}
 	}
 }
 
@@ -365,6 +662,18 @@ CreateEditJsonNote(char *title, const char *textData)
 	int noteLayer = jsonNoteData.layer;
 	FillLayerList(jsonNotePLs[I_LAYER].control);
 	jsonNoteData.layer = noteLayer;
+
+	/* Structured field editor: start each dialog open with a clean Name/
+	 * Value row and ROOT selected -- otherwise a previous note's leftover
+	 * values would appear to carry over into this one. JsonNoteValidate()
+	 * below rebuilds the Object dropdown itself once wTextAppend() above has
+	 * populated the text box for this note. */
+	jsonNoteData.fieldObjectInx = 0;
+	jsonNoteData.fieldName[0] = '\0';
+	jsonNoteData.fieldValue[0] = '\0';
+	paramData_p nameField = &jsonNotePLs[I_JSONNAME];
+	wControlHilite(nameField->control, FALSE);
+
 	FormLoadControls(&jsonNotePG);
 	descTitle = title;
 

@@ -195,6 +195,137 @@
                 <property name="width">2</property>
               </packing>
             </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="hexpand">False</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">_Object</property>
+                    <property name="use_underline">True</property>
+                    <property name="mnemonic-widget">jsonobj</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkComboBox" id="jsonobj">
+                    <property name="model">jsonObjList</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="jsonobjtextfield">
+                        <property name="width-chars">10</property>
+                      </object>
+                      <attributes>
+                        <attribute name="text">3</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">_Name</property>
+                    <property name="use_underline">True</property>
+                    <property name="mnemonic-widget">jsonname</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="jsonname">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="width_chars">12</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">_Value</property>
+                    <property name="use_underline">True</property>
+                    <property name="mnemonic-widget">jsonvalue</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="jsonvalue">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="width_chars">16</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">5</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">4</property>
+                <property name="width">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="hexpand">False</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkButton" id="jsonfieldsave">
+                    <property name="label" translatable="yes">_Save</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="use_underline">True</property>
+                    <property name="tooltip-text" translatable="yes">Add this Name/Value to the selected Object, or update it if Name already exists there</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="jsonfielddelete">
+                    <property name="label" translatable="yes">De_lete</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="use_underline">True</property>
+                    <property name="tooltip-text" translatable="yes">Remove Name from the selected Object</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">5</property>
+                <property name="width">2</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">True</property>
@@ -206,6 +337,14 @@
     </child>
   </object>
   <object class="GtkListStore" id="layerList">
+    <columns>
+      <column type="gboolean" />
+      <column type="gpointer" />
+      <column type="gpointer" />
+      <column type="gchararray" />
+    </columns>
+  </object>
+  <object class="GtkListStore" id="jsonObjList">
     <columns>
       <column type="gboolean" />
       <column type="gpointer" />
