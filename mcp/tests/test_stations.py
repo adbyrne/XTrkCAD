@@ -245,7 +245,7 @@ def test_write_md_report(tmp_path):
     from xtrkcad_mcp.server import write_station_distance_report
     msg = write_station_distance_report(str(STATION_FIXTURE), str(out))
     assert out.exists()
-    text = out.read_text()
+    text = out.read_text(encoding="utf-8")
     assert "Alpha" in text
     assert "Beta" in text
     assert "Station Distance Report" in text
@@ -258,7 +258,7 @@ def test_write_json_report(tmp_path):
     out = tmp_path / "distances.json"
     write_station_distance_report(str(STATION_FIXTURE), str(out), format="json")
     assert out.exists()
-    payload = json.loads(out.read_text())
+    payload = json.loads(out.read_text(encoding="utf-8"))
     assert "distances" in payload
     assert "stations" in payload
     assert "Alpha" in payload["stations"]
@@ -774,6 +774,6 @@ def test_export_layout_data_tool(tmp_path):
     assert result["industries"] == 1  # KIEL
     assert result["warnings"] == []
     import json
-    data = json.loads(out.read_text())
+    data = json.loads(out.read_text(encoding="utf-8"))
     assert data["layout"] == "export_test"
     assert data["scale"] == "HO"
