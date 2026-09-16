@@ -59,16 +59,16 @@ def test_parser_reads_station_notes():
     layout = parse_file(STATION_FIXTURE)
     assert layout.param_version == 12
     note_ids = {n.id for n in layout.notes}
-    # 30=STATION:Alpha, 11=STATION:Beta, 12=non-station, 13=STATION:Gamma
-    # 20=STORAGE:FreightHouse, 21=STORAGE:CarBarn
+    # 30=station:Alpha, 11=station:Beta, 12=non-station, 13=station:Gamma
+    # (all JSON Notes) 20=storage:FreightHouse, 21=storage:CarBarn
     assert {30, 11, 12, 13, 20, 21}.issubset(note_ids)
 
 
 def test_parser_note_op_and_text():
     layout = parse_file(STATION_FIXTURE)
     notes = {n.id: n for n in layout.notes}
-    assert notes[30].op == 0
-    assert notes[30].text == "STATION: Alpha"
+    assert notes[30].op == 3
+    assert json.loads(notes[30].text) == {"kind": "station", "id": "Alpha"}
     assert notes[30].x == pytest.approx(0.0)
     assert notes[30].y == pytest.approx(0.0)
 
@@ -140,6 +140,19 @@ def test_extract_stations_empty_when_no_notes():
     layout = parse_file(STATION_FIXTURE)
     layout.notes = []
     assert extract_stations(layout) == []
+
+
+def test_extract_stations_ignores_malformed_json_note():
+    """A JSON Note with invalid JSON, or a non-"station" kind, is skipped
+    silently -- not a crash, not a station."""
+    layout = parse_file(STATION_FIXTURE)
+    layout.notes.append(NoteObject(id=99, layer=0, x=0.0, y=0.0, op=3, text="not json"))
+    layout.notes.append(NoteObject(
+        id=100, layer=0, x=0.0, y=0.0, op=3,
+        text=json.dumps({"kind": "storage", "id": "Not A Station"}),
+    ))
+    names = {s.name for s in extract_stations(layout)}
+    assert names == {"Alpha", "Beta", "Gamma"}
 
 
 # ---------------------------------------------------------------------------
@@ -325,6 +338,19 @@ def test_station_notes_not_in_capacities():
     names = {r.name for r in results}
     assert "Alpha" not in names
     assert "Beta" not in names
+
+
+def test_capacity_ignores_malformed_json_note():
+    """A JSON Note with invalid JSON, or a non-"storage" kind, is skipped
+    silently -- not a crash, not a capacity result."""
+    layout = parse_file(STATION_FIXTURE)
+    layout.notes.append(NoteObject(id=99, layer=0, x=0.0, y=20.0, op=3, text="not json"))
+    layout.notes.append(NoteObject(
+        id=100, layer=0, x=0.0, y=20.0, op=3,
+        text=json.dumps({"kind": "station", "id": "Not A Storage Track"}),
+    ))
+    names = {r.name for r in compute_capacities(layout)}
+    assert names == {"Freight House", "Car Barn"}
 
 
 def test_get_siding_capacities_tool():

@@ -114,13 +114,13 @@ class TrackObject:
 
 @dataclass
 class NoteObject:
-    """A NOTE object from the layout — text, link, or file annotation."""
+    """A NOTE object from the layout — text, link, file, or JSON annotation."""
     id: int
     layer: int
     x: float
     y: float
-    op: int       # 0=text, 1=link, 2=file
-    text: str     # body text (text content, URL, or file path)
+    op: int       # 0=text, 1=link, 2=file, 3=json
+    text: str     # body text (text content, URL, file path, or raw JSON)
     title: str = ""  # title string for link/file notes
 
 
