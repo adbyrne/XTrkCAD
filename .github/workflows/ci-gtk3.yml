@@ -9,6 +9,22 @@ on:
       - GTK3V2MAIN
 
 jobs:
+  mcp-tests:
+    # MCP (mcp/) is GTK3V2MAIN-only by design (dropped from the GTK2 main
+    # branch in 14d0c9eb) -- this job has to live here, not in ci.yml, since
+    # ci.yml's own trigger only watches `main`, where mcp/ doesn't exist.
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.0.1
+      - name: Run MCP tests
+        working-directory: mcp
+        run: uv run --extra dev pytest -q
+
   doxygen:
     # Doxygen is pinned to DOXYGEN_VERSION (official prebuilt Linux binary,
     # not the apt package) rather than left to whatever Ubuntu's repo
