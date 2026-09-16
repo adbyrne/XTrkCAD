@@ -24,9 +24,9 @@ the Parts List (\ref cmdEnum) window.
 - \subpage cmdReportsgaps -- pairs of open track endpoints close enough
   to each other that they likely should be connected.
 
-- \subpage cmdReportsnotes -- every note on the layout, JSON Notes
-  grouped by kind (station/industry/storage/yard track/house track/
-  reference), everything else bucketed as Other Notes.
+- \subpage cmdReportsnotes -- every note on the layout, grouped by Type
+  (Text/Weblink/Document/JSON), then by name for JSON Notes registered
+  via Manage Notes.
 
 - \subpage cmdReportskinked -- already-connected track joints whose
   alignment has drifted out of tolerance.
@@ -392,28 +392,35 @@ The <b>Done</b> button closes the <b>Kinked Joints Report</b> window.
 /**
 \page cmdReportsnotes Notes Report
 
-The <b>Notes Report</b> command lists every note on the layout. A note
-created via the <b>JSON Note</b> command (\ref cmdJsonNote) whose body is a
-JSON object with a recognized <tt>"kind"</tt> field (station, industry,
-storage, yard track, house track, or reference) is grouped under that
-kind; every other note -- a Text/Weblink/Document note, or a JSON Note
-without a recognized kind -- is grouped under <b>Other Notes</b> instead,
-identified by a short preview of its text. Each row gives the note's
-<b>Kind</b>, <b>ID</b> (the JSON body's <tt>"id"</tt> field, empty for an
-Other Notes row), <b>Name/Label</b> (the kind-appropriate descriptive
-field, also empty for kinds that don't have one), and <b>Layer</b>.
+The <b>Notes Report</b> command lists every note on the layout. Each row's
+<b>ROOT Names</b> column shows either the note's Type (<b>Text</b>,
+<b>Weblink</b>, or <b>Document</b>) or, for a note created via the
+<b>JSON Note</b> command (\ref cmdJsonNote), whichever of its own
+ROOT-level field names -- the <b>Name</b> half of a Name:Value pair added
+via the JSON Note dialog's structured field editor -- matches a name
+registered in <b>Manage Notes</b>. A JSON Note groups by which field
+<i>name</i> it uses, not by the value of any particular field, so a note
+with a <tt>"spots"</tt> field groups under <b>spots</b> once that name is
+registered, whether or not the note has any other recognized field at
+all. Any JSON Note matching no registered name shows <b>ROOT</b> instead
+-- every JSON Note, until at least one name has been registered. <b>ID</b>
+is the JSON body's <tt>"id"</tt> field (empty for a non-JSON note),
+<b>Name/Label</b> is its <tt>"name"</tt> or <tt>"label"</tt> field,
+whichever is present (empty if neither is), and <b>Layer</b> is the
+note's layer.
 
 A summary line above the list gives the number of notes found, updated
 whenever the report is generated or refreshed.
 
 The <b>Type</b> dropdown restricts the report to one note type at a time --
 Text, Weblink, Document, or JSON ("All Types" is the default, unfiltered
-view). The <b>Kind</b> dropdown independently restricts the report to one
-kind at a time ("All kinds" is the default, unfiltered view); kind only
-applies to JSON Notes with a recognized <tt>"kind"</tt> field, so combining
-a Type filter of Text/Weblink/Document with a specific Kind produces an
-empty list. Change either dropdown and click <b>Refresh</b> to re-run the
-report with the new scope.
+view). The <b>ROOT Names</b> dropdown independently restricts the report
+to one registered name at a time ("All ROOT Names" is the default,
+unfiltered view); it only applies to JSON Notes matching a name
+registered via <b>Manage Notes</b>, so combining a Type filter of
+Text/Weblink/Document with a specific ROOT Names selection produces an
+empty list. Change either dropdown and click <b>Refresh</b> to re-run
+the report with the new scope.
 
 Selecting a row pans the <b>Main Canvas</b> (\ref mainW) to that note's
 position and draws a temporary open-circle indicator there, the same way
@@ -434,7 +441,8 @@ print the report.
 The <b>Layer Filter...</b> button (\ref cmdReportsfilter) opens a dialog to
 scope this report to specific Layers/Groups (\ref cmdLayergroup) -- every
 layer is included by default. This is a separate scope from the Type and
-Kind dropdowns above, which filter by note content rather than layer.
+ROOT Names dropdowns above, which filter by note content rather than
+layer.
 
 The <b>Done</b> button closes the <b>Notes Report</b> window.
 

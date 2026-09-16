@@ -561,48 +561,58 @@ void ReportsKinkedJoints(void *unused);
 
 /* ---------------------------------------------------------------------
  * Notes Report (SF #799, part of the JSON Note umbrella SF #795): every
- * note on the layout, JSON Notes grouped by their "kind" field (per
- * #795's schema table), everything else (Text/Weblink/Document notes,
- * plus any OP_NOTEJSON note without a recognized "kind") bucketed as
- * "Other Notes". Report-only, no click-to-navigate/indicator -- a note's
- * position isn't a "go look at this" target the way a gap or kinked
- * joint is. GTK3V2MAIN only, same Layer Groups/PARAMVERSION-13
+ * note on the layout, grouped first by Type (Text/Weblink/Document/JSON,
+ * a genuinely closed set) and then, within JSON, by "ROOT Names" -- a
+ * JSON note groups under whichever of its own ROOT-level field names
+ * (the "Name" in a structured field editor Name:Value pair, SF #798) is
+ * registered via the "Manage Notes" function, or "ROOT" if none of its
+ * own field names are registered (SF #800 phase 2; phase 1 added the
+ * Type filter, phase 3 will add the Manage Notes dialog itself, not
+ * built yet, so every JSON note falls under "ROOT" for now). This is
+ * deliberately about which field *names* a note happens to use, not the
+ * value of any particular field (in particular, not tied to a "kind"
+ * field specifically) -- matches the original motivating case, real
+ * notes using ad-hoc ROOT-level names ("spots", "meta", "message") with
+ * no "kind" field at all. Interactive (click-to-navigate) as of #799's
+ * own follow-up. GTK3V2MAIN only, same Layer Groups/PARAMVERSION-13
  * dependency as the rest of JSON Note.
  * ------------------------------------------------------------------- */
 
-/** Discriminates a Notes Report row's kind. REPORTS_NOTE_OTHER covers
- * every non-OP_NOTEJSON note and any OP_NOTEJSON note whose body doesn't
- * parse as an object or has no recognized "kind" string -- grouped
- * together as "Other Notes" rather than treated as an error, matching
- * jsonnoteui.c's own DescribeJsonNote() fallback-to-raw-text-preview
- * precedent for the same situation. */
-typedef enum {
-	REPORTS_NOTE_STATION,
-	REPORTS_NOTE_INDUSTRY,
-	REPORTS_NOTE_STORAGE,
-	REPORTS_NOTE_YARD_TRACK,
-	REPORTS_NOTE_HOUSE_TRACK,
-	REPORTS_NOTE_REFERENCE,
-	REPORTS_NOTE_OTHER
-} reportsNoteKind_e;
+/** Mirrors note.h's \c enum \c noteCommands values (0=text, 1=link,
+ * 2=file, 3=json) -- duplicated here rather than \c #include "note.h"
+ * because note.h pulls in common.h's full wlib/track-database chain,
+ * which reports.h must stay free of: reportsformat.c (pure text +
+ * cJSON, no wlib) includes this header and must keep linking against
+ * only dynstring+cJSON for reportstest's CMocka build. reports.c's
+ * compute pass assigns real \c xx->op values here directly -- both are
+ * plain ints under the hood, and note.h's own enum is a long-stable
+ * native file-format encoding not expected to change. */
+#define REPORTS_NOTE_OP_TEXT (0)
+#define REPORTS_NOTE_OP_LINK (1)
+#define REPORTS_NOTE_OP_FILE (2)
+#define REPORTS_NOTE_OP_JSON (3)
 
-/** One note's row in the Notes Report. \c id/\c label are already-extracted
- * plain strings, not raw JSON -- unlike ReportsNoteKindFromJson()/
- * ReportsNoteLabelField() below (which do need cJSON, to read a note's
- * "kind"/label field directly), the row struct and format function stay
- * plain data, matching every other report's reports.c (compute, track-
- * database-aware) / reportsformat.c (pure text + this JSON-reading pair,
- * still CMocka-testable since cJSON itself has no wlib/track-database
- * dependency) split. For a JSON Note, \c id is its "id" field (empty if
- * absent) and
- * \c label is "name" or "label" (whichever the note's kind uses, per
- * #795's schema table -- station/reference notes have neither, so \c label
- * is empty for those). For an "Other Notes" row, \c id is empty and
- * \c label is a short raw-text preview (RemoveFormatChars()+
- * EllipsizeString(), matching DescribeTextNote()'s own status-line
- * precedent). */
+/** One note's row in the Notes Report. \c id/\c label/\c group are
+ * already-extracted plain strings, not raw JSON -- the row struct and
+ * format function stay plain data, matching every other report's
+ * reports.c (compute, track-database-aware) / reportsformat.c (pure text)
+ * split. \c type is the note's own REPORTS_NOTE_OP_* value above (mirrors
+ * note.h's OP_NOTETEXT..OP_NOTEJSON) -- the Notes Report's Type
+ * grouping/filter, a genuinely closed set (SF #800 phase 1). \c group is
+ * meaningful only for REPORTS_NOTE_OP_JSON: the "ROOT Names" this note
+ * matched -- see ReportsNoteResolveGroup() for exactly what that means.
+ * For non-JSON notes \c group is unused (left empty); those group by
+ * Type alone. For a JSON Note, \c id is its "id" field (empty if absent)
+ * and \c label is "name" or "label", whichever is present (see
+ * ReportsNoteExtractLabel()) -- deliberately generic across whatever
+ * ROOT-level names a user actually types, not tied to SF #795's original
+ * fixed schema table any more (that's exactly what phase 2 drops). For a
+ * non-JSON note, \c id is empty and \c label is a short raw-text preview
+ * (RemoveFormatChars()+EllipsizeString(), matching DescribeTextNote()'s
+ * own status-line precedent). */
 typedef struct {
-	reportsNoteKind_e kind;
+	int type;
+	char group[64];
 	char id[64];
 	char label[128];
 	unsigned int layer;
@@ -619,47 +629,63 @@ typedef struct {
 } reportsNoteRow_t;
 
 /**
- * Format the Notes Report table body, grouped under a subheading per
- * \c reportsNoteKind_e value present in \p list (Stations / Industries /
- * Storage / Yard Tracks / House Tracks / Reference / Other Notes, in that
- * fixed order; a kind with no rows gets no heading at all) -- same
- * grouped-subheading shape as ReportsFormatEquipmentList(), generalized
- * from a 3-value status enum to this report's 7-value kind enum. Within
- * each group, rows keep the caller's original relative order. A blank
- * line separates consecutive non-empty groups; none trails the last group.
+ * Format the Notes Report table body. Groups first by \c type, in the
+ * fixed OP_NOTETEXT..OP_NOTEJSON order ("Text Notes"/"Weblink Notes"/
+ * "Document Notes"/one heading per distinct \c group value present among
+ * the OP_NOTEJSON rows, that last set sorted alphabetically -- "ROOT"
+ * included as an ordinary value, no special-casing, since nothing gives
+ * it priority over a real registered name once SF #800 phase 3 adds
+ * some). A type/group with no rows gets no heading at all. Within each
+ * group, rows keep the caller's original relative order. A blank line
+ * separates consecutive non-empty groups; none trails the last group.
  */
 void ReportsFormatNoteList(DynString *out, const reportsNoteRow_t *list,
                            int count);
 
 /**
- * JSON Note "kind" field -> reportsNoteKind_e, per SF #795's schema
- * table. Any string not in that fixed set (including no "kind" field at
- * all, or a non-string "kind") maps to REPORTS_NOTE_OTHER -- deliberately
- * permissive, matching jsonnoteui.c's own DescribeJsonNote() fallback for
- * the identical situation rather than treating it as an error.
+ * Resolve a JSON Note's group for report purposes: scans \p parsed's own
+ * ROOT-level field names (its direct object keys, one level deep only --
+ * matching the structured field editor's own Object-dropdown scope, SF
+ * #798) and returns the first one found in \p registeredNames[0..
+ * \p registeredCount), or the literal string "ROOT" if none of the
+ * note's own field names are registered. This is deliberately about
+ * which *names* a note happens to use, not the value of any particular
+ * field (in particular, not a "kind" field specifically) -- a note using
+ * `"spots": {"tank": 1, "box": 2}` groups under "spots" if that name is
+ * registered, whether or not the note has a "kind" field at all. The
+ * registry itself (SF #800 phase 3, the "Manage Notes" dialog, not built
+ * yet) always has zero entries for now, so every JSON Note falls under
+ * one flat "ROOT" group -- the correct, expected interim state per the
+ * phase 2/3 split agreed for this feature, not a bug. Kept as a pure
+ * function of an explicit registry array (not reading reports.c's own
+ * registry state directly) so it stays CMocka-testable without stubbing
+ * that state.
  *
  * \param[in] parsed an already-parsed JSON object (not consumed/freed)
+ * \param[in] registeredNames the "Manage Notes" registry's own strings
+ * \param[in] registeredCount how many entries \p registeredNames has
  */
-reportsNoteKind_e ReportsNoteKindFromJson(cJSON *parsed);
+const char *ReportsNoteResolveGroup(cJSON *parsed,
+                                    const char * const *registeredNames, int registeredCount);
 
 /**
- * The JSON body field this kind's label comes from ("name" for
- * industry/storage/house_track, "label" for yard_track), or NULL for a
- * kind with no label field in its schema (station/reference/other) --
- * per SF #795's schema table. Deliberately not attempting to show every
- * kind-specific field (terminus, within, mp_scale, ...) on this report's
- * summary row, same restraint DescribeJsonNote()'s status line already
- * applies -- that's what opening the note's own dialog is for.
+ * Extract a JSON Note's display label into \p buf ("" if none): tries the
+ * body's "name" field first, then "label", first present string wins --
+ * a deliberately generic two-key guess that covers every schema in use so
+ * far (industry/storage/house_track use "name", yard_track uses "label"),
+ * rather than a fixed per-kind lookup table (that per-kind coupling is
+ * exactly what phase 2 removes). \p buf is always NUL-terminated.
  */
-const char *ReportsNoteLabelField(reportsNoteKind_e kind);
+void ReportsNoteExtractLabel(cJSON *parsed, char *buf, size_t bufSize);
 
 /**
  * Menu callback: compute and show/refresh the Notes Report. Walks
  * TRK_ITERATE, filters GetTrkType(trk) == T_NOTE and
  * ReportsFilterLayerIncluded() (this report's own reportsFilter_t, same
  * shared Layer Group filter mechanism every other report uses), then
- * further restricts to one kind if the dialog's Kind filter is set to
- * anything but "All kinds". Report-only, no click-to-navigate/indicator.
+ * further restricts by Type and/or ROOT Names if either dialog dropdown
+ * is set to anything but its "All ..." default. Interactive
+ * (click-to-navigate), same as Gaps/Kinked Joints/Unconnected Endpoints.
  *
  * \param[in] unused menu-callback signature, unused
  */

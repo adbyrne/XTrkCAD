@@ -760,115 +760,129 @@ static void test_notes_single_row(void **state)
 	DynString out;
 	DynStringMalloc(&out, 64);
 	reportsNoteRow_t list[1] = {
-		{ REPORTS_NOTE_STATION, "WP", "", 1, 5 }
+		{ REPORTS_NOTE_OP_JSON, "ROOT", "WP", "", 1, 5 }
 	};
 
 	ReportsFormatNoteList(&out, list, 1);
 
 	assert_string_equal(DynStringToCStr(&out),
-	                    "Stations\n"
+	                    "ROOT\n"
 	                    "  ID  5: WP                                            layer 1\n");
 	DynStringFree(&out);
 }
 
-/* Input deliberately out of enum order -- the formatter must regroup into
- * the fixed Stations/Industries/Storage/Yard Tracks/House Tracks/
- * Reference/Other Notes order regardless of input order, with a blank
- * line between each non-empty group and none trailing the last one. */
+/* Input deliberately out of Type-then-alphabetical order -- the formatter
+ * must regroup into Text/Weblink/Document first, then JSON's distinct
+ * \c group values sorted alphabetically ("ROOT" before "Station"), with a
+ * blank line between each non-empty group and none trailing the last one. */
 static void test_notes_all_groups_present(void **state)
 {
 	(void) state;
 	DynString out;
 	DynStringMalloc(&out, 512);
-	reportsNoteRow_t list[7] = {
-		{ REPORTS_NOTE_OTHER, "", "a plain text note", 1, 1 },
-		{ REPORTS_NOTE_REFERENCE, "MP_ZERO", "", 1, 2 },
-		{ REPORTS_NOTE_HOUSE_TRACK, "QM1", "QM1", 2, 3 },
-		{ REPORTS_NOTE_YARD_TRACK, "WP", "Track 2", 2, 4 },
-		{ REPORTS_NOTE_STORAGE, "WP_COAL", "Coal trestle", 1, 5 },
-		{ REPORTS_NOTE_INDUSTRY, "TIMBER", "Timber Ltd", 1, 6 },
-		{ REPORTS_NOTE_STATION, "WP", "", 1, 7 },
+	reportsNoteRow_t list[5] = {
+		{ REPORTS_NOTE_OP_JSON, "Station", "MC", "", 1, 5 },
+		{ REPORTS_NOTE_OP_FILE, "", "", "a document note", 1, 3 },
+		{ REPORTS_NOTE_OP_JSON, "ROOT", "WP", "", 1, 4 },
+		{ REPORTS_NOTE_OP_LINK, "", "", "a weblink note", 1, 2 },
+		{ REPORTS_NOTE_OP_TEXT, "", "", "a plain text note", 1, 1 },
 	};
 
-	ReportsFormatNoteList(&out, list, 7);
+	ReportsFormatNoteList(&out, list, 5);
 
 	assert_string_equal(DynStringToCStr(&out),
-	                    "Stations\n"
-	                    "  ID  7: WP                                            layer 1\n"
+	                    "Text Notes\n"
+	                    "  ID  1:              a plain text note                layer 1\n"
 	                    "\n"
-	                    "Industries\n"
-	                    "  ID  6: TIMBER       Timber Ltd                       layer 1\n"
+	                    "Weblink Notes\n"
+	                    "  ID  2:              a weblink note                   layer 1\n"
 	                    "\n"
-	                    "Storage\n"
-	                    "  ID  5: WP_COAL      Coal trestle                     layer 1\n"
+	                    "Document Notes\n"
+	                    "  ID  3:              a document note                  layer 1\n"
 	                    "\n"
-	                    "Yard Tracks\n"
-	                    "  ID  4: WP           Track 2                          layer 2\n"
+	                    "ROOT\n"
+	                    "  ID  4: WP                                            layer 1\n"
 	                    "\n"
-	                    "House Tracks\n"
-	                    "  ID  3: QM1          QM1                              layer 2\n"
-	                    "\n"
-	                    "Reference\n"
-	                    "  ID  2: MP_ZERO                                       layer 1\n"
-	                    "\n"
-	                    "Other Notes\n"
-	                    "  ID  1:              a plain text note                layer 1\n");
+	                    "Station\n"
+	                    "  ID  5: MC                                            layer 1\n");
 	DynStringFree(&out);
 }
 
-/* MARGINAL-equivalent case: a kind absent entirely gets no heading, and
- * exactly one blank line separates the two groups that do appear. */
+/* A type/group absent entirely gets no heading, and exactly one blank
+ * line separates the two groups that do appear. */
 static void test_notes_skips_absent_group(void **state)
 {
 	(void) state;
 	DynString out;
 	DynStringMalloc(&out, 128);
 	reportsNoteRow_t list[2] = {
-		{ REPORTS_NOTE_STATION, "WP", "", 1, 1 },
-		{ REPORTS_NOTE_OTHER, "", "a link note", 1, 2 }
+		{ REPORTS_NOTE_OP_JSON, "ROOT", "WP", "", 1, 1 },
+		{ REPORTS_NOTE_OP_LINK, "", "", "a link note", 1, 2 }
 	};
 
 	ReportsFormatNoteList(&out, list, 2);
 
 	assert_string_equal(DynStringToCStr(&out),
-	                    "Stations\n"
-	                    "  ID  1: WP                                            layer 1\n"
+	                    "Weblink Notes\n"
+	                    "  ID  2:              a link note                      layer 1\n"
 	                    "\n"
-	                    "Other Notes\n"
-	                    "  ID  2:              a link note                      layer 1\n");
+	                    "ROOT\n"
+	                    "  ID  1: WP                                            layer 1\n");
 	DynStringFree(&out);
 }
 
-static void test_notes_kind_from_json(void **state)
+static void test_notes_resolve_group_empty_registry(void **state)
 {
 	(void) state;
-	cJSON *station = cJSON_Parse("{\"kind\":\"station\"}");
-	cJSON *industry = cJSON_Parse("{\"kind\":\"industry\"}");
-	cJSON *storage = cJSON_Parse("{\"kind\":\"storage\"}");
-	cJSON *yard = cJSON_Parse("{\"kind\":\"yard_track\"}");
-	cJSON *house = cJSON_Parse("{\"kind\":\"house_track\"}");
-	cJSON *reference = cJSON_Parse("{\"kind\":\"reference\"}");
-	cJSON *unknown = cJSON_Parse("{\"kind\":\"something_else\"}");
-	cJSON *missing = cJSON_Parse("{\"id\":\"WP\"}");
+	cJSON *note = cJSON_Parse("{\"kind\":\"station\",\"spots\":{\"tank\":1}}");
 
+	/* No registry entries at all (SF #800 phase 2's own state, until
+	 * phase 3's Manage Notes dialog exists) -- every JSON Note falls
+	 * under "ROOT" regardless of its own field names. */
+	assert_string_equal(ReportsNoteResolveGroup(note, NULL, 0), "ROOT");
+
+	cJSON_Delete(note);
+}
+
+static void test_notes_resolve_group_matches_field_name(void **state)
+{
 	(void) state;
-	assert_int_equal(ReportsNoteKindFromJson(station), REPORTS_NOTE_STATION);
-	assert_int_equal(ReportsNoteKindFromJson(industry), REPORTS_NOTE_INDUSTRY);
-	assert_int_equal(ReportsNoteKindFromJson(storage), REPORTS_NOTE_STORAGE);
-	assert_int_equal(ReportsNoteKindFromJson(yard), REPORTS_NOTE_YARD_TRACK);
-	assert_int_equal(ReportsNoteKindFromJson(house), REPORTS_NOTE_HOUSE_TRACK);
-	assert_int_equal(ReportsNoteKindFromJson(reference), REPORTS_NOTE_REFERENCE);
-	assert_int_equal(ReportsNoteKindFromJson(unknown), REPORTS_NOTE_OTHER);
-	assert_int_equal(ReportsNoteKindFromJson(missing), REPORTS_NOTE_OTHER);
+	/* The motivating case: a note with an ad-hoc ROOT-level name and no
+	 * "kind" field that fits any fixed vocabulary at all -- grouping is
+	 * about which field *name* the note has, not any field's value. */
+	cJSON *note = cJSON_Parse("{\"spots\":{\"tank\":1,\"box\":2}}");
+	const char *registry[] = { "meta", "spots" };
 
-	cJSON_Delete(station);
-	cJSON_Delete(industry);
-	cJSON_Delete(storage);
-	cJSON_Delete(yard);
-	cJSON_Delete(house);
-	cJSON_Delete(reference);
-	cJSON_Delete(unknown);
-	cJSON_Delete(missing);
+	assert_string_equal(ReportsNoteResolveGroup(note, registry, 2), "spots");
+
+	cJSON_Delete(note);
+}
+
+static void test_notes_resolve_group_no_match_falls_to_root(void **state)
+{
+	(void) state;
+	cJSON *note = cJSON_Parse("{\"kind\":\"station\",\"id\":\"WP\"}");
+	const char *registry[] = { "spots", "meta" };
+
+	/* Registry is non-empty, but neither registered name is one of this
+	 * note's own fields ("kind"/"id" aren't registered) -- falls to
+	 * "ROOT", same as the empty-registry case. */
+	assert_string_equal(ReportsNoteResolveGroup(note, registry, 2), "ROOT");
+
+	cJSON_Delete(note);
+}
+
+static void test_notes_resolve_group_registry_order_is_priority(void **state)
+{
+	(void) state;
+	/* A note with both registered names present -- the first name in
+	 * registry order wins, not the note's own key order. */
+	cJSON *note = cJSON_Parse("{\"spots\":{}, \"meta\":{}}");
+	const char *registry[] = { "meta", "spots" };
+
+	assert_string_equal(ReportsNoteResolveGroup(note, registry, 2), "meta");
+
+	cJSON_Delete(note);
 }
 
 int main(void)
@@ -928,7 +942,10 @@ int main(void)
 		cmocka_unit_test(test_notes_single_row),
 		cmocka_unit_test(test_notes_all_groups_present),
 		cmocka_unit_test(test_notes_skips_absent_group),
-		cmocka_unit_test(test_notes_kind_from_json),
+		cmocka_unit_test(test_notes_resolve_group_empty_registry),
+		cmocka_unit_test(test_notes_resolve_group_matches_field_name),
+		cmocka_unit_test(test_notes_resolve_group_no_match_falls_to_root),
+		cmocka_unit_test(test_notes_resolve_group_registry_order_is_priority),
 	};
 	return cmocka_run_group_tests(tests, NULL, NULL);
 }

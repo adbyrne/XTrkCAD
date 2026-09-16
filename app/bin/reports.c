@@ -2219,12 +2219,12 @@ void ReportsKinkedJoints( void * unused )
 }
 
 /* ---------------------------------------------------------------------
- * Notes Report (SF #799, part of the JSON Note umbrella SF #795). Report-
- * only (no click-to-navigate/indicator), same phase-2 shape as Equipment
- * Suitability above -- flat interactive list, grouped-by-category Save/
- * Print text (ReportsFormatNoteList()). Unlike every prior report, this
- * one also has a Kind filter (PD_DROPLIST, fixed 8-entry list, populated
- * once per compute pass same as FillLayerList()'s own "rebuild on each
+ * Notes Report (SF #799, part of the JSON Note umbrella SF #795).
+ * Interactive (click-to-navigate) as of #799's own follow-up, same
+ * grouped-by-category Save/Print text (ReportsFormatNoteList()) shape as
+ * Equipment Suitability above. Unlike every prior report, this one also
+ * has Type and ROOT Names filters (both PD_DROPLIST, rebuilt on each
+ * compute pass same as FillLayerList()'s own "rebuild on each
  * invocation" convention) alongside the standard Layer Group filter.
  * ------------------------------------------------------------------- */
 
@@ -2245,7 +2245,7 @@ static reportsOpCtx_t reportsNotesPrintOp   = { &reportsNotesDlg, REPORTSOP_PRIN
 
 static wWinPix_t reportsNotesListWidths[] = { 90, 80, 220, 60 };
 static const char * reportsNotesListTitles[] = {
-	N_("Kind"), N_("ID"), N_("Name/Label"), N_("Layer")
+	N_("ROOT Names"), N_("ID"), N_("Name/Label"), N_("Layer")
 };
 static paramListData_t reportsNotesListData = { 8, 400, 4, reportsNotesListWidths,
                                                 reportsNotesListTitles
@@ -2261,27 +2261,46 @@ static void DoReportsNotesFilter(void *unused)
 	ShowReportsFilterDialog(&reportsNotesFilter);
 }
 
-/** Kind filter: 0 = "All kinds", 1..7 map directly to reportsNoteKind_e
- * (REPORTS_NOTE_STATION..REPORTS_NOTE_OTHER) -- kept in that exact order
- * so `reportsNoteKindFilterInx - 1` is the enum value with no lookup
- * table needed. Only meaningful for Type "JSON" or "All Types" -- see
- * `reportsNoteTypeFilterInx` below, SF #800 phase 1. A future phase (SF
- * #800 phase 2) replaces this fixed list with free-text/managed-name
- * filtering; not done here. */
-static long reportsNoteKindFilterInx;
-static const char * reportsNoteKindFilterLabels[] = {
-	N_("All kinds"), N_("Station"), N_("Industry"), N_("Storage"),
-	N_("Yard Track"), N_("House Track"), N_("Reference"), N_("Other Notes")
-};
+/** ROOT Names filter (SF #800 phase 2): 0 = "All ROOT Names", 1..N map to
+ * the "Manage Notes" registry's own N registered names, in registry
+ * order -- built dynamically by ReportsPopulateNoteRootNamesFilter()
+ * every invocation, not a fixed list any more (that hardcoding is
+ * exactly what phase 2 removes). Only meaningful for Type "JSON" or "All
+ * Types" -- see `reportsNoteTypeFilterInx` below. No registry UI exists
+ * yet (SF #800 phase 3, the "Manage Notes" dialog, not built) --
+ * ReportsManagedName*() below are deliberate phase-3 stubs, always
+ * reporting zero registered names, so this dropdown always shows just
+ * "All ROOT Names" for now. That's the correct, expected interim state
+ * agreed for this phase, not a bug. */
+static long reportsNoteRootNamesFilterInx;
+
+/** SF #800 phase 3 stub: the "Manage Notes" registry always has zero
+ * entries until that dialog exists to populate it. Kept as its own
+ * function (not inlined into the filter-population/compute-pass call
+ * sites) so phase 3 is a single-function change, not a search-and-replace
+ * across reports.c. */
+static int ReportsManagedNameCount(void)
+{
+	return 0;
+}
+
+/** SF #800 phase 3 stub -- see ReportsManagedNameCount(); never actually
+ * called while that always returns 0, but given a real signature now so
+ * phase 3 doesn't need to touch any call site, only this definition. */
+static const char *ReportsManagedNameAt(int i)
+{
+	(void)i;
+	return "";
+}
 
 /** Type filter (SF #800 phase 1): 0 = "All Types", 1..4 map directly to
  * `enum noteCommands` (OP_NOTETEXT..OP_NOTEJSON, note.h) -- a genuinely
- * closed, fixed set (the four native note types), unlike the Kind filter
- * above, so hardcoding this list is fine. Independent of Kind -- filtering
- * to a non-JSON type still applies Kind too (a non-JSON note's `kind` is
- * always REPORTS_NOTE_OTHER, so combining e.g. Type=Weblink with a Kind
- * other than "All kinds"/"Other Notes" yields an empty, if unsurprising,
- * result). */
+ * closed, fixed set (the four native note types), unlike the ROOT Names
+ * filter above, so hardcoding this list is fine. Independent of ROOT
+ * Names -- filtering to a non-JSON type still applies ROOT Names too (a
+ * non-JSON note's resolved group is only ever set for JSON notes, so
+ * combining e.g. Type=Weblink with a ROOT Names filter other than "All
+ * ROOT Names" yields an empty, if unsurprising, result). */
 static long reportsNoteTypeFilterInx;
 static const char * reportsNoteTypeFilterLabels[] = {
 	N_("All Types"), N_("Text"), N_("Weblink"), N_("Document"), N_("JSON")
@@ -2294,9 +2313,9 @@ static paramData_t reportsNotesPLs[] = {
 #define I_REPORTSNOTESTYPEFILTER (1)
 #define reportsNotesTypeFilter (reportsNotesPLs[I_REPORTSNOTESTYPEFILTER].control)
 	{ PD_DROPLIST, &reportsNoteTypeFilterInx, "typefilter", PDO_NOPREF | PDO_LISTINDEX, I2VP(110), NULL, 0 },
-#define I_REPORTSNOTESKINDFILTER (2)
-#define reportsNotesKindFilter (reportsNotesPLs[I_REPORTSNOTESKINDFILTER].control)
-	{ PD_DROPLIST, &reportsNoteKindFilterInx, "kindfilter", PDO_NOPREF | PDO_LISTINDEX, I2VP(120), NULL, 0 },
+#define I_REPORTSNOTESROOTNAMESFILTER (2)
+#define reportsNotesRootNamesFilter (reportsNotesPLs[I_REPORTSNOTESROOTNAMESFILTER].control)
+	{ PD_DROPLIST, &reportsNoteRootNamesFilterInx, "rootnamesfilter", PDO_NOPREF | PDO_LISTINDEX, I2VP(120), NULL, 0 },
 #define I_REPORTSNOTESLIST (3)
 #define reportsNotesList (reportsNotesPLs[I_REPORTSNOTESLIST].control)
 	{ PD_LIST, NULL, "list", PDO_DLGRESIZE, &reportsNotesListData, NULL, 0 },
@@ -2310,8 +2329,8 @@ static paramGroup_t reportsNotesPG = { "reportsnotes", PGO_FULLDIALOGFROMBUILDER
                                        reportsNotesPLs, COUNT( reportsNotesPLs )
                                      };
 
-/** The current Notes Report's rows, in TRK_ITERATE order (not grouped by
- * kind -- ReportsFormatNoteList() does that grouping for the Save/Print
+/** The current Notes Report's rows, in TRK_ITERATE order (not grouped --
+ * ReportsFormatNoteList() does that grouping for the Save/Print
  * text only, same as every other grouped-output report keeps its
  * interactive list in a different order than its own Save/Print text).
  * Kept alive for as long as the dialog might reference it via the list's
@@ -2326,23 +2345,30 @@ static dynArr_t reportsNotesList_da;
  * pattern exists to prevent. */
 static BOOL_T reportsNotesPopulating = FALSE;
 
-/** Populate the Kind filter dropdown -- fixed 8-entry list, rebuilt on
- * each invocation same as FillLayerList()'s own convention. */
-static void ReportsPopulateNoteKindFilter(void)
+/** Populate the ROOT Names filter dropdown -- built from the "Manage
+ * Notes" registry (SF #800 phase 3, not built yet, so this is always
+ * just "All ROOT Names" for now), rebuilt on each invocation same as
+ * FillLayerList()'s own convention. */
+static void ReportsPopulateNoteRootNamesFilter(void)
 {
-	size_t i;
+	int i;
+	int count = ReportsManagedNameCount();
 
-	wListClear( reportsNotesKindFilter );
-	for ( i = 0; i < sizeof reportsNoteKindFilterLabels / sizeof
-	      reportsNoteKindFilterLabels[0]; i++ ) {
-		wComboBoxAddValue( reportsNotesKindFilter, _(reportsNoteKindFilterLabels[i]),
-		                   I2VP((int)i) );
+	wListClear( reportsNotesRootNamesFilter );
+	wComboBoxAddValue( reportsNotesRootNamesFilter, _("All ROOT Names"), I2VP(0) );
+	for ( i = 0; i < count; i++ ) {
+		wComboBoxAddValue( reportsNotesRootNamesFilter, ReportsManagedNameAt(i),
+		                   I2VP(i + 1) );
 	}
-	wListSetIndex( reportsNotesKindFilter, (int)reportsNoteKindFilterInx );
+	if ( reportsNoteRootNamesFilterInx > count ) {
+		reportsNoteRootNamesFilterInx = 0;
+	}
+	wListSetIndex( reportsNotesRootNamesFilter,
+	               (int)reportsNoteRootNamesFilterInx );
 }
 
 /** Populate the Type filter dropdown -- fixed 5-entry list (SF #800 phase
- * 1), rebuilt on each invocation same as the Kind filter's own
+ * 1), rebuilt on each invocation same as the ROOT Names filter's own
  * convention. */
 static void ReportsPopulateNoteTypeFilter(void)
 {
@@ -2364,22 +2390,28 @@ static void ReportsPopulateNoteTypeFilter(void)
 static void ReportsPopulateNoteList(void)
 {
 	int i;
-	char row[256];
+	/* id (63) + label (127) + group (63) + tabs/layer digits, with
+	 * headroom -- entry->group is a plain char[64] (reports.h), not a
+	 * short string literal like the Text/Weblink/Document branches, so
+	 * the compiler's worst-case bound is wider than it used to be. */
+	char row[320];
 
 	reportsNotesPopulating = TRUE;
 
 	wListClear( reportsNotesList );
 	for ( i = 0; i < reportsNotesList_da.cnt; i++ ) {
 		reportsNoteRow_t *entry = &DYNARR_N(reportsNoteRow_t, reportsNotesList_da, i);
-		const char *kindStr = entry->kind == REPORTS_NOTE_STATION ? _("Station") :
-		                      entry->kind == REPORTS_NOTE_INDUSTRY ? _("Industry") :
-		                      entry->kind == REPORTS_NOTE_STORAGE ? _("Storage") :
-		                      entry->kind == REPORTS_NOTE_YARD_TRACK ? _("Yard Track") :
-		                      entry->kind == REPORTS_NOTE_HOUSE_TRACK ? _("House Track") :
-		                      entry->kind == REPORTS_NOTE_REFERENCE ? _("Reference") : _("Other");
+		/* Non-JSON: show the Type itself (a closed set). JSON: show the
+		 * resolved ROOT Names group ("ROOT" until SF #800 phase 3
+		 * registers real names) -- entry->group is only ever set for
+		 * JSON rows. */
+		const char *rootNamesStr = entry->type == REPORTS_NOTE_OP_TEXT ? _("Text") :
+		                           entry->type == REPORTS_NOTE_OP_LINK ? _("Weblink") :
+		                           entry->type == REPORTS_NOTE_OP_FILE ? _("Document") :
+		                           entry->group;
 
 		snprintf( row, sizeof row, "%s\t%s\t%s\t%u",
-		          kindStr, entry->id, entry->label, entry->layer );
+		          rootNamesStr, entry->id, entry->label, entry->layer );
 		wListAddValue( reportsNotesList, row, NULL, entry );
 	}
 
@@ -2428,8 +2460,8 @@ static void ReportsCancelNotes(paramGroup_cp pg)
 	FormCancel_Current(pg);
 }
 
-/** Build the full formatted Notes Report text (header + kind-grouped
- * table) fresh from reportsNotesList_da. Used only by
+/** Build the full formatted Notes Report text (header + Type/ROOT-Names-
+ * grouped table) fresh from reportsNotesList_da. Used only by
  * ReportsRefreshPrintText() (Save/Print), same as every other report's
  * own build-text function. */
 static void ReportsBuildNoteText(DynString *out)
@@ -2449,7 +2481,23 @@ static void ReportsBuildNoteText(DynString *out)
 void ReportsNotes( void * unused )
 {
 	track_p trk;
+	/* Built once, not per-note -- the "Manage Notes" registry doesn't
+	 * change mid-compute. Always empty in SF #800 phase 2 (no registry
+	 * UI exists yet), so registeredNames is unused in practice, but
+	 * ReportsNoteResolveGroup() takes it as an explicit array (not
+	 * reports.c's own static state) so it stays CMocka-testable. */
+	const char *registeredNames[16];
+	int registeredCount = ReportsManagedNameCount();
+	int regI;
 	(void)unused;
+
+	if ( registeredCount > (int)(sizeof registeredNames / sizeof
+	                             registeredNames[0]) ) {
+		registeredCount = (int)(sizeof registeredNames / sizeof registeredNames[0]);
+	}
+	for ( regI = 0; regI < registeredCount; regI++ ) {
+		registeredNames[regI] = ReportsManagedNameAt(regI);
+	}
 
 	DYNARR_FREE( reportsNoteRow_t, reportsNotesList_da );
 	DYNARR_INIT( reportsNoteRow_t, reportsNotesList_da );
@@ -2468,13 +2516,15 @@ void ReportsNotes( void * unused )
 		/* Type filter (SF #800 phase 1): 0 = "All Types", 1..4 map
 		 * directly to enum noteCommands's OP_NOTETEXT..OP_NOTEJSON order
 		 * -- see reportsNoteTypeFilterLabels' own doc comment. Checked
-		 * before the more expensive JSON-kind computation below. */
+		 * before the more expensive JSON-group computation below. */
 		if ( reportsNoteTypeFilterInx > 0 &&
 		     (reportsNoteTypeFilterInx - 1) != (long)xx->op ) {
 			continue;
 		}
 
-		reportsNoteKind_e kind = REPORTS_NOTE_OTHER;
+		/* group is only ever set for a JSON note -- see reportsNoteRow_t's
+		 * own doc comment (reports.h). */
+		char group[64] = "";
 		char id[64] = "";
 		char label[128] = "";
 
@@ -2482,34 +2532,35 @@ void ReportsNotes( void * unused )
 			cJSON *parsed = cJSON_Parse(xx->noteData.text);
 
 			if ( parsed != NULL && cJSON_IsObject(parsed) ) {
-				kind = ReportsNoteKindFromJson(parsed);
+				strncpy( group, ReportsNoteResolveGroup(parsed, registeredNames,
+				                                        registeredCount),
+				         sizeof group - 1 );
 
 				cJSON *idField = cJSON_GetObjectItemCaseSensitive(parsed, "id");
 				if ( idField && cJSON_IsString(idField) && idField->valuestring ) {
 					strncpy( id, idField->valuestring, sizeof id - 1 );
 				}
 
-				const char *labelKey = ReportsNoteLabelField(kind);
-				if ( labelKey ) {
-					cJSON *labelField = cJSON_GetObjectItemCaseSensitive(parsed, labelKey);
-					if ( labelField && cJSON_IsString(labelField) && labelField->valuestring ) {
-						strncpy( label, labelField->valuestring, sizeof label - 1 );
-					}
-				}
+				ReportsNoteExtractLabel(parsed, label, sizeof label);
+			} else {
+				/* parsed == NULL or not an object: shouldn't happen for a
+				 * note saved through jsonnoteui.c's own Validate-on-save
+				 * gate, but a hand-edited file could produce it -- falls
+				 * through as an ungrouped JSON note rather than an error,
+				 * same graceful-degradation precedent as
+				 * ReportsNoteResolveGroup()'s own no-registered-fields
+				 * case. */
+				strncpy( group, "ROOT", sizeof group - 1 );
 			}
-			/* parsed == NULL or not an object: shouldn't happen for a note
-			 * saved through jsonnoteui.c's own Validate-on-save gate, but a
-			 * hand-edited file could produce it -- falls through with
-			 * kind/id/label at their REPORTS_NOTE_OTHER/empty defaults,
-			 * same graceful-degradation precedent as ReportsNoteKindFromJson(). */
 			if ( parsed ) {
 				cJSON_Delete(parsed);
 			}
 		} else {
-			/* Non-JSON note: kind stays REPORTS_NOTE_OTHER, id stays empty,
-			 * label becomes a short raw-text preview -- matching
-			 * DescribeTextNote()'s own status-line precedent. Each legacy
-			 * note type keeps its text in a different union member. */
+			/* Non-JSON note: group stays empty (grouped by Type alone),
+			 * id stays empty, label becomes a short raw-text preview --
+			 * matching DescribeTextNote()'s own status-line precedent.
+			 * Each legacy note type keeps its text in a different union
+			 * member. */
 			char *raw = xx->op == OP_NOTETEXT ? xx->noteData.text :
 			            xx->op == OP_NOTELINK ? xx->noteData.linkData.title :
 			            xx->op == OP_NOTEFILE ? xx->noteData.fileData.title : NULL;
@@ -2523,8 +2574,16 @@ void ReportsNotes( void * unused )
 			}
 		}
 
-		if ( reportsNoteKindFilterInx > 0 &&
-		     (reportsNoteKindFilterInx - 1) != (long)kind ) {
+		/* ROOT Names filter (SF #800 phase 2): only ever meaningful for
+		 * JSON notes -- a non-JSON note has no group, so any ROOT Names
+		 * filter but "All ROOT Names" excludes it, matching phase 1's
+		 * already-documented Type/ROOT-Names interaction.
+		 * reportsNoteRootNamesFilterInx - 1 indexes the (currently
+		 * always-empty) Manage Notes registry. */
+		if ( reportsNoteRootNamesFilterInx > 0 &&
+		     ( xx->op != OP_NOTEJSON ||
+		       strcmp( group, ReportsManagedNameAt((int)reportsNoteRootNamesFilterInx - 1) ) !=
+		       0 ) ) {
 			continue;
 		}
 
@@ -2532,7 +2591,8 @@ void ReportsNotes( void * unused )
 			reportsNoteRow_t *row;
 			DYNARR_APPEND( reportsNoteRow_t, reportsNotesList_da, 10 );
 			row = &DYNARR_LAST( reportsNoteRow_t, reportsNotesList_da );
-			row->kind = kind;
+			row->type = (int)xx->op;
+			strncpy( row->group, group, sizeof row->group - 1 );
 			strncpy( row->id, id, sizeof row->id - 1 );
 			strncpy( row->label, label, sizeof row->label - 1 );
 			row->layer = GetTrkLayer(trk) + 1;
@@ -2556,6 +2616,6 @@ void ReportsNotes( void * unused )
 	}
 
 	ReportsPopulateNoteTypeFilter();
-	ReportsPopulateNoteKindFilter();
+	ReportsPopulateNoteRootNamesFilter();
 	ReportsPopulateNoteList();
 }
