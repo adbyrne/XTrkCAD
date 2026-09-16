@@ -2264,21 +2264,40 @@ static void DoReportsNotesFilter(void *unused)
 /** Kind filter: 0 = "All kinds", 1..7 map directly to reportsNoteKind_e
  * (REPORTS_NOTE_STATION..REPORTS_NOTE_OTHER) -- kept in that exact order
  * so `reportsNoteKindFilterInx - 1` is the enum value with no lookup
- * table needed. */
+ * table needed. Only meaningful for Type "JSON" or "All Types" -- see
+ * `reportsNoteTypeFilterInx` below, SF #800 phase 1. A future phase (SF
+ * #800 phase 2) replaces this fixed list with free-text/managed-name
+ * filtering; not done here. */
 static long reportsNoteKindFilterInx;
 static const char * reportsNoteKindFilterLabels[] = {
 	N_("All kinds"), N_("Station"), N_("Industry"), N_("Storage"),
 	N_("Yard Track"), N_("House Track"), N_("Reference"), N_("Other Notes")
 };
 
+/** Type filter (SF #800 phase 1): 0 = "All Types", 1..4 map directly to
+ * `enum noteCommands` (OP_NOTETEXT..OP_NOTEJSON, note.h) -- a genuinely
+ * closed, fixed set (the four native note types), unlike the Kind filter
+ * above, so hardcoding this list is fine. Independent of Kind -- filtering
+ * to a non-JSON type still applies Kind too (a non-JSON note's `kind` is
+ * always REPORTS_NOTE_OTHER, so combining e.g. Type=Weblink with a Kind
+ * other than "All kinds"/"Other Notes" yields an empty, if unsurprising,
+ * result). */
+static long reportsNoteTypeFilterInx;
+static const char * reportsNoteTypeFilterLabels[] = {
+	N_("All Types"), N_("Text"), N_("Weblink"), N_("Document"), N_("JSON")
+};
+
 static paramData_t reportsNotesPLs[] = {
 #define I_REPORTSNOTESSUMMARY (0)
 #define reportsNotesSummary (reportsNotesPLs[I_REPORTSNOTESSUMMARY].control)
 	{ PD_MESSAGE, "", "summary", 0, I2VP(37) },
-#define I_REPORTSNOTESKINDFILTER (1)
+#define I_REPORTSNOTESTYPEFILTER (1)
+#define reportsNotesTypeFilter (reportsNotesPLs[I_REPORTSNOTESTYPEFILTER].control)
+	{ PD_DROPLIST, &reportsNoteTypeFilterInx, "typefilter", PDO_NOPREF | PDO_LISTINDEX, I2VP(110), NULL, 0 },
+#define I_REPORTSNOTESKINDFILTER (2)
 #define reportsNotesKindFilter (reportsNotesPLs[I_REPORTSNOTESKINDFILTER].control)
 	{ PD_DROPLIST, &reportsNoteKindFilterInx, "kindfilter", PDO_NOPREF | PDO_LISTINDEX, I2VP(120), NULL, 0 },
-#define I_REPORTSNOTESLIST (2)
+#define I_REPORTSNOTESLIST (3)
 #define reportsNotesList (reportsNotesPLs[I_REPORTSNOTESLIST].control)
 	{ PD_LIST, NULL, "list", PDO_DLGRESIZE, &reportsNotesListData, NULL, 0 },
 	{ PD_BUTTON, DoReportsOp, "refresh", 0, NULL, NULL, 0, &reportsNotesRefreshOp },
@@ -2320,6 +2339,22 @@ static void ReportsPopulateNoteKindFilter(void)
 		                   I2VP((int)i) );
 	}
 	wListSetIndex( reportsNotesKindFilter, (int)reportsNoteKindFilterInx );
+}
+
+/** Populate the Type filter dropdown -- fixed 5-entry list (SF #800 phase
+ * 1), rebuilt on each invocation same as the Kind filter's own
+ * convention. */
+static void ReportsPopulateNoteTypeFilter(void)
+{
+	size_t i;
+
+	wListClear( reportsNotesTypeFilter );
+	for ( i = 0; i < sizeof reportsNoteTypeFilterLabels / sizeof
+	      reportsNoteTypeFilterLabels[0]; i++ ) {
+		wComboBoxAddValue( reportsNotesTypeFilter, _(reportsNoteTypeFilterLabels[i]),
+		                   I2VP((int)i) );
+	}
+	wListSetIndex( reportsNotesTypeFilter, (int)reportsNoteTypeFilterInx );
 }
 
 /** Populate the interactive list from reportsNotesList_da -- one row per
@@ -2427,11 +2462,21 @@ void ReportsNotes( void * unused )
 			continue;
 		}
 
+		struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE,
+		                              extraDataNote_t );
+
+		/* Type filter (SF #800 phase 1): 0 = "All Types", 1..4 map
+		 * directly to enum noteCommands's OP_NOTETEXT..OP_NOTEJSON order
+		 * -- see reportsNoteTypeFilterLabels' own doc comment. Checked
+		 * before the more expensive JSON-kind computation below. */
+		if ( reportsNoteTypeFilterInx > 0 &&
+		     (reportsNoteTypeFilterInx - 1) != (long)xx->op ) {
+			continue;
+		}
+
 		reportsNoteKind_e kind = REPORTS_NOTE_OTHER;
 		char id[64] = "";
 		char label[128] = "";
-		struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE,
-		                              extraDataNote_t );
 
 		if ( IsJsonNote(trk) ) {
 			cJSON *parsed = cJSON_Parse(xx->noteData.text);
@@ -2510,6 +2555,7 @@ void ReportsNotes( void * unused )
 		wMessageSetValue( reportsNotesSummary, summary );
 	}
 
+	ReportsPopulateNoteTypeFilter();
 	ReportsPopulateNoteKindFilter();
 	ReportsPopulateNoteList();
 }

@@ -52,7 +52,7 @@
     </child>
     <child type="action">
       <object class="GtkButton" id="filter">
-        <property name="label" translatable="yes">_Filter...</property>
+        <property name="label" translatable="yes">_Layer Filter...</property>
         <property name="tooltip-text" translatable="yes">Scope this report to selected Layers/Groups</property>
         <property name="use-underline">True</property>
         <property name="visible">True</property>
@@ -107,13 +107,44 @@
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
+                <property name="label" translatable="yes">_Type</property>
+                <property name="use_underline">True</property>
+                <property name="mnemonic-widget">typefilter</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkComboBox" id="typefilter">
+                <property name="model">typefilterlist</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkCellRendererText" id="typefiltertextfield">
+                    <property name="width-chars">10</property>
+                  </object>
+                  <attributes>
+                    <attribute name="text">3</attribute>
+                  </attributes>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
                 <property name="label" translatable="yes">_Kind</property>
                 <property name="use_underline">True</property>
                 <property name="mnemonic-widget">kindfilter</property>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="position">0</property>
+                <property name="position">2</property>
               </packing>
             </child>
             <child>
@@ -132,7 +163,7 @@
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="position">1</property>
+                <property name="position">3</property>
               </packing>
             </child>
           </object>
@@ -236,6 +267,14 @@
     </columns>
   </object>
   <object class="GtkListStore" id="kindfilterlist">
+    <columns>
+      <column type="gboolean" />
+      <column type="gpointer" />
+      <column type="gpointer" />
+      <column type="gchararray" />
+    </columns>
+  </object>
+  <object class="GtkListStore" id="typefilterlist">
     <columns>
       <column type="gboolean" />
       <column type="gpointer" />

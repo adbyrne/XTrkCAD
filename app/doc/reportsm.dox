@@ -406,9 +406,14 @@ field, also empty for kinds that don't have one), and <b>Layer</b>.
 A summary line above the list gives the number of notes found, updated
 whenever the report is generated or refreshed.
 
-The <b>Kind</b> dropdown restricts the report to one kind at a time
-("All kinds" is the default, unfiltered view) -- change it and click
-<b>Refresh</b> to re-run the report scoped to just that kind.
+The <b>Type</b> dropdown restricts the report to one note type at a time --
+Text, Weblink, Document, or JSON ("All Types" is the default, unfiltered
+view). The <b>Kind</b> dropdown independently restricts the report to one
+kind at a time ("All kinds" is the default, unfiltered view); kind only
+applies to JSON Notes with a recognized <tt>"kind"</tt> field, so combining
+a Type filter of Text/Weblink/Document with a specific Kind produces an
+empty list. Change either dropdown and click <b>Refresh</b> to re-run the
+report with the new scope.
 
 Selecting a row pans the <b>Main Canvas</b> (\ref mainW) to that note's
 position and draws a temporary open-circle indicator there, the same way
@@ -426,9 +431,10 @@ used to name and save the report to a text file.
 The <b>Print</b> button opens the <i>Print</i> dialog which is used to
 print the report.
 
-The <b>Filter...</b> button (\ref cmdReportsfilter) opens a dialog to scope
-this report to specific Layers/Groups (\ref cmdLayergroup) -- every layer
-is included by default.
+The <b>Layer Filter...</b> button (\ref cmdReportsfilter) opens a dialog to
+scope this report to specific Layers/Groups (\ref cmdLayergroup) -- every
+layer is included by default. This is a separate scope from the Type and
+Kind dropdowns above, which filter by note content rather than layer.
 
 The <b>Done</b> button closes the <b>Notes Report</b> window.
 
