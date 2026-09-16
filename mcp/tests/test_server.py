@@ -62,7 +62,7 @@ def test_turntable_has_six_stall_endpoints():
 def test_gaps_report_separates_turntable_stalls(tmp_path):
     out = str(tmp_path / "gaps.txt")
     write_gaps_report(str(FIXTURE), out)
-    content = Path(out).read_text()
+    content = Path(out).read_text(encoding="utf-8")
 
     # Turntable stall count (6) should be on its own summary line
     assert "6" in content
@@ -76,7 +76,7 @@ def test_gaps_report_separates_turntable_stalls(tmp_path):
 def test_gaps_report_real_gaps_not_mixed_with_stalls(tmp_path):
     out = str(tmp_path / "gaps.txt")
     write_gaps_report(str(FIXTURE), out)
-    content = Path(out).read_text()
+    content = Path(out).read_text(encoding="utf-8")
 
     # Turntable track ID 4 should NOT appear in the "ALL OPEN TRACK ENDPOINTS" section
     lines = content.splitlines()
@@ -106,7 +106,7 @@ def test_write_radius_map_creates_svg(tmp_path):
 def test_radius_map_is_valid_svg(tmp_path):
     out = str(tmp_path / "radius_map.svg")
     write_radius_map(str(FIXTURE), out)
-    svg = Path(out).read_text()
+    svg = Path(out).read_text(encoding="utf-8")
     assert svg.startswith("<svg")
     assert "</svg>" in svg
 
@@ -115,7 +115,7 @@ def test_radius_map_flags_tight_curve(tmp_path):
     """Fixture CURVE 2 has radius=12\" which is below the 18\" HO minimum → must be red."""
     out = str(tmp_path / "radius_map.svg")
     write_radius_map(str(FIXTURE), out)
-    svg = Path(out).read_text()
+    svg = Path(out).read_text(encoding="utf-8")
     assert "curve-red" in svg
 
 
@@ -123,7 +123,7 @@ def test_radius_map_normal_curve_not_flagged_red(tmp_path):
     """Fixture CURVE 3 has radius=30\" which is above 2×18\"=36\"... actually 30<36 → yellow."""
     out = str(tmp_path / "radius_map.svg")
     write_radius_map(str(FIXTURE), out)
-    svg = Path(out).read_text()
+    svg = Path(out).read_text(encoding="utf-8")
     # 30\" is between 1.5×18=27 and 2×18=36 → yellow
     assert "curve-yellow" in svg
 
@@ -131,7 +131,7 @@ def test_radius_map_normal_curve_not_flagged_red(tmp_path):
 def test_radius_map_turntable_drawn_as_circle(tmp_path):
     out = str(tmp_path / "radius_map.svg")
     write_radius_map(str(FIXTURE), out)
-    svg = Path(out).read_text()
+    svg = Path(out).read_text(encoding="utf-8")
     assert 'class="turntable"' in svg
 
 
@@ -139,7 +139,7 @@ def test_radius_map_custom_flag_radius(tmp_path):
     """With flag_radius=35, CURVE 3 (r=30) should be flagged red."""
     out = str(tmp_path / "radius_map.svg")
     write_radius_map(str(FIXTURE), out, flag_radius=35.0)
-    svg = Path(out).read_text()
+    svg = Path(out).read_text(encoding="utf-8")
     # With flag_radius=35, 30 < 35 → red
     assert "curve-red" in svg
 
@@ -159,7 +159,7 @@ def test_write_plan_view_creates_file(tmp_path):
 def test_write_plan_view_is_valid_svg(tmp_path):
     out = str(tmp_path / "plan.svg")
     write_plan_view(str(HILLSIDE_CONFIG), out)
-    svg = Path(out).read_text()
+    svg = Path(out).read_text(encoding="utf-8")
     assert svg.startswith("<?xml")
     assert "<svg" in svg
     assert "</svg>" in svg
@@ -168,7 +168,7 @@ def test_write_plan_view_is_valid_svg(tmp_path):
 def test_write_plan_view_level_filter_l1(tmp_path):
     out = str(tmp_path / "plan_l1.svg")
     write_plan_view(str(HILLSIDE_CONFIG), out, level=1)
-    svg = Path(out).read_text()
+    svg = Path(out).read_text(encoding="utf-8")
     # L1 fill colour present; L2 fill colour absent
     assert _LEVEL_FILL_L1 in svg
     assert _LEVEL_FILL_L2 not in svg
@@ -177,7 +177,7 @@ def test_write_plan_view_level_filter_l1(tmp_path):
 def test_write_plan_view_level_filter_l2(tmp_path):
     out = str(tmp_path / "plan_l2.svg")
     write_plan_view(str(HILLSIDE_CONFIG), out, level=2)
-    svg = Path(out).read_text()
+    svg = Path(out).read_text(encoding="utf-8")
     assert _LEVEL_FILL_L2 in svg
     assert _LEVEL_FILL_L1 not in svg
 
@@ -185,7 +185,7 @@ def test_write_plan_view_level_filter_l2(tmp_path):
 def test_write_plan_view_all_levels_contains_both(tmp_path):
     out = str(tmp_path / "plan_all.svg")
     write_plan_view(str(HILLSIDE_CONFIG), out, level=0)
-    svg = Path(out).read_text()
+    svg = Path(out).read_text(encoding="utf-8")
     assert _LEVEL_FILL_L1 in svg
     assert _LEVEL_FILL_L2 in svg
 
@@ -197,7 +197,7 @@ _TRACK_STROKE = "#0D0D0D"
 def test_write_plan_view_without_xtc_has_no_track_overlay(tmp_path):
     out = str(tmp_path / "plan_no_track.svg")
     write_plan_view(str(HILLSIDE_CONFIG), out, level=1)
-    svg = Path(out).read_text()
+    svg = Path(out).read_text(encoding="utf-8")
     assert _TRACK_STROKE not in svg
     assert "Track</text>" not in svg
 
@@ -205,7 +205,7 @@ def test_write_plan_view_without_xtc_has_no_track_overlay(tmp_path):
 def test_write_plan_view_with_xtc_overlays_track(tmp_path):
     out = str(tmp_path / "plan_track.svg")
     write_plan_view(str(HILLSIDE_CONFIG), out, level=1, xtc_path=str(HILLSIDE_TRACK))
-    svg = Path(out).read_text()
+    svg = Path(out).read_text(encoding="utf-8")
     assert _TRACK_STROKE in svg
     assert "Track</text>" in svg
 
@@ -214,7 +214,7 @@ def test_write_plan_view_xtc_track_count_matches_level(tmp_path):
     """All 6 hillside_track.xtc STRAIGHTs are on L1-* layers, so 6 <line> overlays."""
     out = str(tmp_path / "plan_track.svg")
     write_plan_view(str(HILLSIDE_CONFIG), out, level=1, xtc_path=str(HILLSIDE_TRACK))
-    svg = Path(out).read_text()
+    svg = Path(out).read_text(encoding="utf-8")
     track_lines = [
         line for line in svg.splitlines()
         if line.startswith("<line") and _TRACK_STROKE in line
@@ -252,7 +252,7 @@ def test_write_plan_view_partition_splits_around_door(tmp_path):
     cfg = _door_partition_config(tmp_path, swing="none")
     out = str(tmp_path / "plan.svg")
     write_plan_view(str(cfg), out, level=0)
-    svg = Path(out).read_text()
+    svg = Path(out).read_text(encoding="utf-8")
     partition_polys = [
         line for line in svg.splitlines()
         if line.startswith("<polygon") and _PART_BG in line
@@ -266,7 +266,7 @@ def test_write_plan_view_partition_gap_independent_of_swing(tmp_path):
         cfg = _door_partition_config(tmp_path, swing=swing)
         out = str(tmp_path / f"plan_{swing}.svg")
         write_plan_view(str(cfg), out, level=0)
-        svg = Path(out).read_text()
+        svg = Path(out).read_text(encoding="utf-8")
         partition_polys = [
             line for line in svg.splitlines()
             if line.startswith("<polygon") and _PART_BG in line
@@ -294,7 +294,7 @@ def test_write_elevation_view_creates_file(tmp_path):
 def test_write_elevation_view_is_valid_svg(tmp_path):
     out = str(tmp_path / "elev.svg")
     write_elevation_view(str(HILLSIDE_CONFIG), out, wall="west")
-    svg = Path(out).read_text()
+    svg = Path(out).read_text(encoding="utf-8")
     assert svg.startswith("<?xml")
     assert "<svg" in svg
     assert "</svg>" in svg
@@ -316,7 +316,7 @@ def test_write_elevation_view_invalid_wall(tmp_path):
 def test_write_elevation_view_level_filter(tmp_path):
     out = str(tmp_path / "elev_l1.svg")
     write_elevation_view(str(HILLSIDE_CONFIG), out, wall="west", levels=[1])
-    svg = Path(out).read_text()
+    svg = Path(out).read_text(encoding="utf-8")
     assert _LEVEL_FILL_L1 in svg
 
 
@@ -436,7 +436,7 @@ def test_fix_dead_connections_no_op_when_clean(tmp_path):
 def test_gaps_report_md_has_markdown_table(tmp_path):
     out = tmp_path / "gaps.md"
     write_gaps_report(str(FIXTURE), str(out), format="md")
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "# Track Gaps Report" in content
     assert "| Item |" in content
 
@@ -444,7 +444,7 @@ def test_gaps_report_md_has_markdown_table(tmp_path):
 def test_gaps_report_html_is_html(tmp_path):
     out = tmp_path / "gaps.html"
     write_gaps_report(str(FIXTURE), str(out), format="html")
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "<html" in content
     assert "<table" in content
 
@@ -453,7 +453,7 @@ def test_gaps_report_json_is_valid(tmp_path):
     import json
     out = tmp_path / "gaps.json"
     write_gaps_report(str(FIXTURE), str(out), format="json")
-    data = json.loads(out.read_text())
+    data = json.loads(out.read_text(encoding="utf-8"))
     assert "open_endpoints" in data
     assert "near_miss_pairs" in data
     assert isinstance(data["endpoints"], list)
@@ -463,7 +463,7 @@ def test_equipment_report_json_has_equipment_list(tmp_path):
     import json
     out = tmp_path / "equip.json"
     write_equipment_report(str(FIXTURE), str(out), format="json")
-    data = json.loads(out.read_text())
+    data = json.loads(out.read_text(encoding="utf-8"))
     assert "equipment" in data
     assert isinstance(data["equipment"], list)
     assert all("status" in row for row in data["equipment"])
@@ -472,7 +472,7 @@ def test_equipment_report_json_has_equipment_list(tmp_path):
 def test_equipment_report_html_has_pass_class(tmp_path):
     out = tmp_path / "equip.html"
     write_equipment_report(str(FIXTURE), str(out), format="html")
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "pass" in content.lower()
     assert "<table" in content
 
@@ -480,7 +480,7 @@ def test_equipment_report_html_has_pass_class(tmp_path):
 def test_turnout_report_md_has_table(tmp_path):
     out = tmp_path / "turnout.md"
     write_turnout_report(str(FIXTURE), str(out), format="md")
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "# Turnout" in content
     assert "|" in content
 
@@ -489,7 +489,7 @@ def test_turnout_report_json_has_totals(tmp_path):
     import json
     out = tmp_path / "turnout.json"
     write_turnout_report(str(FIXTURE), str(out), format="json")
-    data = json.loads(out.read_text())
+    data = json.loads(out.read_text(encoding="utf-8"))
     assert "total_turnouts" in data
     assert "global_density_per_100ft" in data
 
@@ -497,7 +497,7 @@ def test_turnout_report_json_has_totals(tmp_path):
 def test_layout_report_md_has_headers(tmp_path):
     out = tmp_path / "layout.md"
     write_layout_report(str(FIXTURE), str(out), format="md")
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "# Layout Report" in content
     assert "## Curve Analysis" in content
 
@@ -506,7 +506,7 @@ def test_layout_report_json_has_track_counts(tmp_path):
     import json
     out = tmp_path / "layout.json"
     write_layout_report(str(FIXTURE), str(out), format="json")
-    data = json.loads(out.read_text())
+    data = json.loads(out.read_text(encoding="utf-8"))
     assert "total_tracks" in data
     assert "curves" in data
 
@@ -514,7 +514,7 @@ def test_layout_report_json_has_track_counts(tmp_path):
 def test_layout_report_html_is_valid_html(tmp_path):
     out = tmp_path / "layout.html"
     write_layout_report(str(FIXTURE), str(out), format="html")
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "<html" in content
     assert "Layout Report" in content
 
@@ -522,7 +522,7 @@ def test_layout_report_html_is_valid_html(tmp_path):
 def test_equipment_report_md_has_table(tmp_path):
     out = tmp_path / "equip.md"
     write_equipment_report(str(FIXTURE), str(out), format="md")
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "# Equipment" in content
     assert "|" in content
 
@@ -530,7 +530,7 @@ def test_equipment_report_md_has_table(tmp_path):
 def test_turnout_report_html_is_html(tmp_path):
     out = tmp_path / "turnout.html"
     write_turnout_report(str(FIXTURE), str(out), format="html")
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "<html" in content
     assert "<table" in content
 
@@ -539,7 +539,7 @@ def test_od_report_md_has_table(tmp_path):
     out = tmp_path / "od.md"
     layer_cats = {"0": "mainline", "1": "passing"}
     write_operation_density_report(str(FIXTURE), str(out), layer_categories=layer_cats, format="md")
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "# Operation Density" in content
     assert "|" in content
 
@@ -548,7 +548,7 @@ def test_od_report_html_is_html(tmp_path):
     out = tmp_path / "od.html"
     layer_cats = {"0": "mainline", "1": "passing"}
     write_operation_density_report(str(FIXTURE), str(out), layer_categories=layer_cats, format="html")
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "<html" in content
     assert "<table" in content
 
@@ -657,7 +657,7 @@ def test_od_report_txt_has_by_level_section(tmp_path):
     from xtrkcad_mcp.server import write_operation_density_report
     out = tmp_path / "od.txt"
     write_operation_density_report(str(FIXTURE), str(out))
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "TRACK BY LEVEL" in content
 
 
@@ -665,7 +665,7 @@ def test_od_report_md_has_by_level_section(tmp_path):
     from xtrkcad_mcp.server import write_operation_density_report
     out = tmp_path / "od.md"
     write_operation_density_report(str(FIXTURE), str(out), format="md")
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "## Track by Level" in content
 
 
@@ -673,7 +673,7 @@ def test_od_report_html_has_by_level_section(tmp_path):
     from xtrkcad_mcp.server import write_operation_density_report
     out = tmp_path / "od.html"
     write_operation_density_report(str(FIXTURE), str(out), format="html")
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "Track by Level" in content
 
 
@@ -712,7 +712,7 @@ def test_add_track_layers_adds_missing(tmp_path):
     result = add_track_layers(str(xtc), levels=1)
     assert result["added"] != []
     # All 6 standard types should now be present
-    content = xtc.read_text()
+    content = xtc.read_text(encoding="utf-8")
     for name in ["L1-Main", "L1-Passing", "L1-Storage", "L1-Staging", "L1-Connecting", "L1-Service"]:
         assert f'"{name}"' in content
 
@@ -730,7 +730,7 @@ def test_add_track_layers_ids_are_additive(tmp_path):
     xtc = _xtc_with_old_layers(tmp_path)
     result = add_track_layers(str(xtc), levels=1)
     assert result["added"] != []
-    content = xtc.read_text()
+    content = xtc.read_text(encoding="utf-8")
     # Max existing ID was 2 (L1-Benchwork); new layers must start at 3+
     layer_ids = [
         int(ln.split()[1])
@@ -752,7 +752,7 @@ def test_add_track_layers_detects_levels_automatically(tmp_path):
     """Omitting levels= should detect from existing L1-/L2- names."""
     xtc = _xtc_with_old_layers(tmp_path)
     # Add L2-Benchwork so level 2 is detectable
-    content = xtc.read_text()
+    content = xtc.read_text(encoding="utf-8")
     content = content.replace(
         "LAYERS CURRENT 1",
         'LAYERS 3 1 0 1 11393254 0 0 0 0 "L2-Benchwork" 1 0 0.000000 0.000000 0.000000 0.000000 0.000000\n'
@@ -788,7 +788,7 @@ def test_rename_layers_applies_mapping(tmp_path):
     result = rename_layers(str(xtc), {"My Yard": "L1-Staging", "Upper Main": "L2-Main"})
     assert len(result["renamed"]) == 2
     assert result["not_found"] == []
-    content = xtc.read_text()
+    content = xtc.read_text(encoding="utf-8")
     assert '"L1-Staging"' in content
     assert '"L2-Main"' in content
     assert '"My Yard"' not in content
@@ -798,7 +798,7 @@ def test_rename_layers_applies_mapping(tmp_path):
 def test_rename_layers_preserves_layer_id(tmp_path):
     xtc = _xtc_with_custom_names(tmp_path)
     rename_layers(str(xtc), {"My Yard": "L1-Staging"})
-    content = xtc.read_text()
+    content = xtc.read_text(encoding="utf-8")
     # Layer 50 should now have the new name, not layer 51
     assert 'LAYERS 50 1 0 1 0 0 0 0 0 "L1-Staging"' in content
 
@@ -845,7 +845,7 @@ def test_rename_layers_by_index_disambiguates_blank_names(tmp_path):
     xtc = _xtc_with_blank_named_layers(tmp_path)
     result = rename_layers(str(xtc), {"15": "L1-CO-Main", "16": "L1-CO-Passing"})
     assert len(result["renamed"]) == 2
-    content = xtc.read_text()
+    content = xtc.read_text(encoding="utf-8")
     assert 'LAYERS 15 1 0 1 0 0 0 0 0 "L1-CO-Main"' in content
     assert 'LAYERS 16 1 0 1 0 0 0 0 0 "L1-CO-Passing"' in content
 
@@ -875,35 +875,35 @@ def test_rename_layers_enables_auto_categorization(tmp_path):
 def test_layout_report_html_extension_autodetects(tmp_path):
     out = tmp_path / "report.html"
     write_layout_report(str(FIXTURE), str(out))  # no explicit format
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "<html" in content
 
 
 def test_layout_report_md_extension_autodetects(tmp_path):
     out = tmp_path / "report.md"
     write_layout_report(str(FIXTURE), str(out))  # no explicit format
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "# Layout Report" in content
 
 
 def test_gaps_report_html_extension_autodetects(tmp_path):
     out = tmp_path / "gaps.html"
     write_gaps_report(str(FIXTURE), str(out))  # no explicit format
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "<html" in content
 
 
 def test_equipment_report_md_extension_autodetects(tmp_path):
     out = tmp_path / "equip.md"
     write_equipment_report(str(FIXTURE), str(out))  # no explicit format
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "# Equipment" in content
 
 
 def test_turnout_report_html_extension_autodetects(tmp_path):
     out = tmp_path / "turnout.html"
     write_turnout_report(str(FIXTURE), str(out))  # no explicit format
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "<html" in content
 
 
@@ -968,7 +968,7 @@ def test_write_benchwork_report_creates_file(tmp_path):
 def test_write_benchwork_report_txt_has_sections(tmp_path):
     out = tmp_path / "benchwork.txt"
     write_benchwork_report(str(HILLSIDE_CONFIG), str(out))
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "west_wall" in content
     assert "north_wall" in content
     assert "east_wall" in content
@@ -977,21 +977,21 @@ def test_write_benchwork_report_txt_has_sections(tmp_path):
 def test_write_benchwork_report_txt_has_level(tmp_path):
     out = tmp_path / "benchwork.txt"
     write_benchwork_report(str(HILLSIDE_CONFIG), str(out))
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "LEVEL 1" in content
 
 
 def test_write_benchwork_report_txt_has_total_area(tmp_path):
     out = tmp_path / "benchwork.txt"
     write_benchwork_report(str(HILLSIDE_CONFIG), str(out))
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "TOTAL BENCHWORK AREA" in content
 
 
 def test_write_benchwork_report_md_format(tmp_path):
     out = tmp_path / "benchwork.md"
     write_benchwork_report(str(HILLSIDE_CONFIG), str(out), format="md")
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "# Benchwork Plan Report" in content
     assert "west_wall" in content
 
@@ -999,7 +999,7 @@ def test_write_benchwork_report_md_format(tmp_path):
 def test_write_benchwork_report_html_format(tmp_path):
     out = tmp_path / "benchwork.html"
     write_benchwork_report(str(HILLSIDE_CONFIG), str(out), format="html")
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "<html" in content
     assert "west_wall" in content
 
@@ -1007,7 +1007,7 @@ def test_write_benchwork_report_html_format(tmp_path):
 def test_write_benchwork_report_md_extension_autodetects(tmp_path):
     out = tmp_path / "benchwork.md"
     write_benchwork_report(str(HILLSIDE_CONFIG), str(out))  # no explicit format
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "# Benchwork Plan Report" in content
 
 
@@ -1016,5 +1016,5 @@ def test_write_benchwork_report_empty_config(tmp_path):
     cfg.write_text("name: Empty\nscale: HO\nroom: 12x16\n")
     out = tmp_path / "benchwork.txt"
     write_benchwork_report(str(cfg), str(out))
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "No benchwork sections" in content

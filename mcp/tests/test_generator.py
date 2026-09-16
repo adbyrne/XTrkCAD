@@ -151,7 +151,7 @@ def test_version_backup_creates_v1(tmp_path):
     backup = _version_backup(path)
     assert backup is not None
     assert backup.name == "layout_v1.xtc"
-    assert backup.read_text() == "original"
+    assert backup.read_text(encoding="utf-8") == "original"
 
 def test_version_backup_increments(tmp_path):
     path = tmp_path / "layout.xtc"
@@ -221,7 +221,7 @@ def test_generate_backup_on_overwrite(simple_config, tmp_path):
     out.write_text("old content")
     gen = generate(result.config, out)
     assert gen.backup_path is not None
-    assert gen.backup_path.read_text() == "old content"
+    assert gen.backup_path.read_text(encoding="utf-8") == "old content"
 
 
 def test_generate_output_parseable(simple_config, tmp_path):
@@ -392,7 +392,7 @@ def test_layer_scheme_floor_always_present(tmp_path):
     cfg.write_text("name: T\nscale: HO\nroom: 12x16\ngrid: []\n")
     out = tmp_path / "t.xtc"
     generate(load_config(cfg).config, out)
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert "LAYERS 0" in content
     assert '"Floor"' in content
     assert "LAYERS CURRENT 1" in content
@@ -404,7 +404,7 @@ def test_layer_scheme_level1_always_emitted(tmp_path):
     cfg.write_text("name: T\nscale: HO\nroom: 12x16\ngrid: []\n")
     out = tmp_path / "t.xtc"
     generate(load_config(cfg).config, out)
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     for name in ["L1-Main", "L1-Passing", "L1-Storage", "L1-Staging", "L1-Connecting", "L1-Service"]:
         assert f'"{name}"' in content
     assert '"L1-Benchwork"' in content
@@ -416,7 +416,7 @@ def test_layer_scheme_two_levels(tmp_path):
     cfg.write_text("name: T\nscale: HO\nroom: 12x16\nlevels: 2\ngrid: []\n")
     out = tmp_path / "t.xtc"
     generate(load_config(cfg).config, out)
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     for name in ["L1-Main", "L1-Benchwork", "L2-Main", "L2-Benchwork"]:
         assert f'"{name}"' in content
     assert "LAYERS 7" in content    # L1-Benchwork
@@ -429,7 +429,7 @@ def test_layer_scheme_track_colors(tmp_path):
     cfg.write_text("name: T\nscale: HO\nroom: 12x16\nlevels: 2\ngrid: []\n")
     out = tmp_path / "t.xtc"
     generate(load_config(cfg).config, out)
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     # L1-Main (layer 1) = black (0), L2-Main (layer 8) = dark-red (11534336)
     assert "LAYERS 1 1 0 1 0 " in content
     assert "LAYERS 8 1 0 1 11534336 " in content
@@ -440,7 +440,7 @@ def test_layer_scheme_benchwork_colors(tmp_path):
     cfg.write_text("name: T\nscale: HO\nroom: 12x16\nlevels: 2\ngrid: []\n")
     out = tmp_path / "t.xtc"
     generate(load_config(cfg).config, out)
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     # L1-Benchwork (layer 7) = light green (9498256), L2-Benchwork (layer 14) = light blue (11393254)
     assert "LAYERS 7 1 0 1 9498256 " in content
     assert "LAYERS 14 1 0 1 11393254 " in content
@@ -454,7 +454,7 @@ def test_track_types_filters_layers(tmp_path):
     )
     out = tmp_path / "t.xtc"
     generate(load_config(cfg).config, out)
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     assert '"L1-Main"' in content
     assert '"L1-Storage"' in content
     assert '"L1-Passing"' not in content
@@ -469,7 +469,7 @@ def test_track_types_default_emits_all_six(tmp_path):
     cfg.write_text("name: T\nscale: HO\nroom: 12x16\ngrid: []\n")
     out = tmp_path / "t.xtc"
     generate(load_config(cfg).config, out)
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     for name in ["L1-Main", "L1-Passing", "L1-Storage", "L1-Staging", "L1-Connecting", "L1-Service"]:
         assert f'"{name}"' in content
 
@@ -482,7 +482,7 @@ def test_distinct_track_colors_assigns_different_colors(tmp_path):
     )
     out = tmp_path / "t.xtc"
     generate(load_config(cfg).config, out)
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     # L1-Main = black (0), L1-Passing = teal (32896) — must differ
     assert "LAYERS 1 1 0 1 0 " in content        # Main: black
     assert "LAYERS 2 1 0 1 32896 " in content    # Passing: teal
@@ -493,7 +493,7 @@ def test_distinct_track_colors_default_false_uses_level_color(tmp_path):
     cfg.write_text("name: T\nscale: HO\nroom: 12x16\ngrid: []\n")
     out = tmp_path / "t.xtc"
     generate(load_config(cfg).config, out)
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     # All L1 track types should have the same color (black = 0)
     for layer_id in range(1, 7):
         assert f"LAYERS {layer_id} 1 0 1 0 " in content
@@ -516,7 +516,7 @@ def test_room_tableedges_always_present(tmp_path):
     out = tmp_path / "t.xtc"
     generate(load_config(cfg).config, out)
     tableedges = [
-        ln for ln in out.read_text().splitlines()
+        ln for ln in out.read_text(encoding="utf-8").splitlines()
         if ln.startswith("TABLEEDGE")
     ]
     assert len(tableedges) == 4
@@ -534,7 +534,7 @@ def _bw_xtc(tmp_path, sections_yaml: str, levels: int = 1) -> str:
     )
     out = tmp_path / "t.xtc"
     generate(load_config(cfg).config, out)
-    return out.read_text()
+    return out.read_text(encoding="utf-8")
 
 
 def test_benchwork_section_draws_on_benchwork_layer(tmp_path):
@@ -643,7 +643,7 @@ def test_grid_level_tag_selects_track_layer(tmp_path):
     )
     out = tmp_path / "t.xtc"
     generate(load_config(cfg).config, out)
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     # L2-Main = layer 8; template track headers should use layer 8
     track_lines = [
         ln for ln in content.splitlines()
@@ -662,7 +662,7 @@ def floor_plan_result(tmp_path):
     result = load_config(FLOOR_PLAN_CONFIG)
     out = tmp_path / "hillside.xtc"
     generate(result.config, out)
-    return out.read_text()
+    return out.read_text(encoding="utf-8")
 
 
 def _layer0_draws(content: str) -> list[str]:
@@ -722,14 +722,14 @@ def test_floor_plan_swing_none_no_clearance(tmp_path):
     )
     out = tmp_path / "t.xtc"
     generate(load_config(cfg).config, out)
-    assert len(_layer0_draws(out.read_text())) == 0
+    assert len(_layer0_draws(out.read_text(encoding="utf-8"))) == 0
 
 def test_floor_plan_no_extra_draws_without_floor_plan(tmp_path):
     cfg = tmp_path / "layout.yaml"
     cfg.write_text("name: T\nscale: HO\nroom: 12x16\ngrid: []\n")
     out = tmp_path / "t.xtc"
     generate(load_config(cfg).config, out)
-    assert len(_layer0_draws(out.read_text())) == 0
+    assert len(_layer0_draws(out.read_text(encoding="utf-8"))) == 0
 
 def test_floor_plan_generates_cleanly(tmp_path):
     result = load_config(FLOOR_PLAN_CONFIG)
@@ -766,7 +766,7 @@ def test_floor_plan_polygon_restricted(tmp_path):
     )
     out = tmp_path / "t.xtc"
     generate(load_config(cfg).config, out)
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
     # Triangle has 3 vertices → F4 ... 3 0
     assert "F4 12632256 0.000000 3 0" in content
     assert "163.000000 176.000000 0" in content
@@ -791,7 +791,7 @@ def test_floor_plan_partition_splits_around_door(tmp_path):
     )
     out = tmp_path / "t.xtc"
     generate(load_config(cfg).config, out)
-    layer0 = _layer0_draws(out.read_text())
+    layer0 = _layer0_draws(out.read_text(encoding="utf-8"))
     # One partition → split into 2 segments around the 32in door opening
     assert len(layer0) == 2
 
@@ -827,7 +827,7 @@ def test_merge_benchwork_preserves_extra_custom_layer(tmp_path):
     out = tmp_path / "merged.xtc"
 
     merge_benchwork_into(existing, load_config(cfg).config, out)
-    content = out.read_text()
+    content = out.read_text(encoding="utf-8")
 
     assert 'LAYERS 99 1 0 1 0 0 0 0 0 "L1-CO-Main"' in content
     assert "STRAIGHT 1 99" in content

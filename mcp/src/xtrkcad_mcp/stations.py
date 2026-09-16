@@ -24,6 +24,7 @@ so the count reflects only the usable straight/curve track.
 
 import datetime
 import heapq
+import json
 import math
 import re
 from dataclasses import dataclass, field
@@ -84,16 +85,19 @@ def model_in_to_proto_ft(model_in: float, scale: str) -> float:
 
 
 def extract_stations(layout: Layout) -> list[Station]:
-    """Find all STATION: text notes and snap each to the nearest track endpoint."""
+    """Find all STATION: text notes and JSON Notes and snap each to the nearest
+    track endpoint."""
     if not layout.tracks:
         return []
 
     stations: list[Station] = []
     for note in layout.notes:
-        if note.op != 0:
+        if note.op == 0:
+            parsed = _parse_station_note(note.text.strip())
+        elif note.op == 3:
+            parsed = _parse_station_json(note.text)
+        else:
             continue
-        text = note.text.strip()
-        parsed = _parse_station_note(text)
         if parsed is None:
             continue
         station_id, terminus, switchback, ref_tag = parsed
@@ -342,6 +346,26 @@ def _note_prefix(text: str) -> tuple[str, str] | None:
     return None
 
 
+def _note_prefix_json(text: str) -> tuple[str, str] | None:
+    """JSON Note equivalent of _note_prefix, storage only for now: a JSON body
+    shaped like {"kind": "storage", "id": <id>} -> ("storage", id).
+
+    INDUSTRY:/HOUSE_TRACK: have no JSON schema yet -- industry's id/name/
+    within-station shape in particular needs its own design pass, not
+    invented here without a fixture that actually exercises it.
+    """
+    try:
+        obj = json.loads(text)
+    except (json.JSONDecodeError, TypeError):
+        return None
+    if not isinstance(obj, dict) or obj.get("kind") != "storage":
+        return None
+    note_id = obj.get("id")
+    if not isinstance(note_id, str) or not note_id:
+        return None
+    return "storage", note_id
+
+
 def _parse_station_note(
     text: str,
 ) -> tuple[str, bool, bool, str | None] | None:
@@ -364,6 +388,26 @@ def _parse_station_note(
         elif tok.startswith('@') and len(tok) > 1:
             ref_tag = tok[1:]
     return station_id, terminus, switchback, ref_tag
+
+
+def _parse_station_json(text: str) -> tuple[str, bool, bool, str | None] | None:
+    """JSON Note equivalent of _parse_station_note: a JSON body shaped like
+    {"kind": "station", "id": <id>} -> (id, terminus, switchback, ref_tag),
+    matching _parse_station_note's return shape.
+
+    terminus/switchback/ref_tag have no JSON schema yet -- always
+    (False, False, None) until a fixture actually needs them.
+    """
+    try:
+        obj = json.loads(text)
+    except (json.JSONDecodeError, TypeError):
+        return None
+    if not isinstance(obj, dict) or obj.get("kind") != "station":
+        return None
+    station_id = obj.get("id")
+    if not isinstance(station_id, str) or not station_id:
+        return None
+    return station_id, False, False, None
 
 
 def _extract_mp_scale(layout: Layout) -> float:
@@ -549,9 +593,12 @@ def compute_capacities(layout: Layout) -> list[CapacityResult]:
     results: list[CapacityResult] = []
 
     for note in layout.notes:
-        if note.op != 0:
+        if note.op == 0:
+            parsed = _note_prefix(note.text)
+        elif note.op == 3:
+            parsed = _note_prefix_json(note.text)
+        else:
             continue
-        parsed = _note_prefix(note.text)
         if parsed is None:
             continue
         kind, name = parsed

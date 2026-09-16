@@ -49,13 +49,37 @@ def _parse_layers_line(line: str, layout: Layout) -> None:
     layout.layers[idx] = LayerInfo(index=idx, name=name, visible=visible)
 
 
+def _scan_quoted(line: str, start: int) -> tuple[str, int] | None:
+    """Scan a double-quoted field starting at line[start] == '"'.
+
+    A doubled quote ("") inside the field is an escaped literal quote, not a
+    terminator -- matches the native app's ConvertToEscapedText convention
+    (CSV-style quote doubling), needed to read JSON Note bodies correctly
+    since they're full of embedded '"' characters. Returns (unescaped
+    content, index just after the closing quote), or None if unterminated.
+    """
+    i = start + 1
+    out = []
+    n = len(line)
+    while i < n:
+        if line[i] == '"':
+            if i + 1 < n and line[i + 1] == '"':
+                out.append('"')
+                i += 2
+                continue
+            return "".join(out), i + 1
+        out.append(line[i])
+        i += 1
+    return None
+
+
 def _first_quoted(line: str) -> str:
     """Return the content of the first double-quoted string in line, or ''."""
     q1 = line.find('"')
     if q1 < 0:
         return ""
-    q2 = line.find('"', q1 + 1)
-    return line[q1 + 1:q2] if q2 > q1 else ""
+    result = _scan_quoted(line, q1)
+    return result[0] if result else ""
 
 
 def _two_quoted(line: str) -> tuple[str, str]:
@@ -63,16 +87,15 @@ def _two_quoted(line: str) -> tuple[str, str]:
     q1 = line.find('"')
     if q1 < 0:
         return "", ""
-    q2 = line.find('"', q1 + 1)
-    if q2 < 0:
+    first_result = _scan_quoted(line, q1)
+    if first_result is None:
         return "", ""
-    first = line[q1 + 1:q2]
-    rest = line[q2 + 1:]
-    q3 = rest.find('"')
-    if q3 < 0:
+    first, after = first_result
+    q2 = line.find('"', after)
+    if q2 < 0:
         return first, ""
-    q4 = rest.find('"', q3 + 1)
-    second = rest[q3 + 1:q4] if q4 > q3 else ""
+    second_result = _scan_quoted(line, q2)
+    second = second_result[0] if second_result else ""
     return first, second
 
 
