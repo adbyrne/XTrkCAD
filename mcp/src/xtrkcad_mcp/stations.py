@@ -392,11 +392,10 @@ def _parse_station_note(
 
 def _parse_station_json(text: str) -> tuple[str, bool, bool, str | None] | None:
     """JSON Note equivalent of _parse_station_note: a JSON body shaped like
-    {"kind": "station", "id": <id>} -> (id, terminus, switchback, ref_tag),
-    matching _parse_station_note's return shape.
-
-    terminus/switchback/ref_tag have no JSON schema yet -- always
-    (False, False, None) until a fixture actually needs them.
+    {"kind": "station", "id": <id>, "terminus": bool, "switchback": bool,
+    "ref_tag": <str>} -> (id, terminus, switchback, ref_tag), matching
+    _parse_station_note's return shape. Only "id" is required; the other
+    three default to False/False/None when absent.
     """
     try:
         obj = json.loads(text)
@@ -407,7 +406,12 @@ def _parse_station_json(text: str) -> tuple[str, bool, bool, str | None] | None:
     station_id = obj.get("id")
     if not isinstance(station_id, str) or not station_id:
         return None
-    return station_id, False, False, None
+    terminus = obj.get("terminus", False) is True
+    switchback = obj.get("switchback", False) is True
+    ref_tag = obj.get("ref_tag")
+    if not isinstance(ref_tag, str) or not ref_tag:
+        ref_tag = None
+    return station_id, terminus, switchback, ref_tag
 
 
 def _extract_mp_scale(layout: Layout) -> float:
