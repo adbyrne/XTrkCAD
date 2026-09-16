@@ -69,7 +69,9 @@ EXPORT wBool_t extraButtons = FALSE;
 EXPORT long
 onStartup; /**< controls behaviour after startup: load last layout if zero, else start with blank canvas */
 
+#ifndef XTRKCAD_TESTBUILD_NO_WMAIN
 static int verbose = 0;
+#endif /* XTRKCAD_TESTBUILD_NO_WMAIN */
 
 static BOOL_T inMainW = TRUE;
 
@@ -626,9 +628,11 @@ EXPORT void DefaultProc(wControl_p win, winProcEvent e, const void * data)
 	}
 }
 
+#ifndef XTRKCAD_TESTBUILD_NO_WMAIN
 static void NextWindow(void)
 {
 }
+#endif /* XTRKCAD_TESTBUILD_NO_WMAIN */
 
 
 
@@ -663,6 +667,7 @@ struct accelKey_s {
 	{ "help-context", wAccelKey_F1, 0, EA_HELP, 3 }
 };
 
+#ifndef XTRKCAD_TESTBUILD_NO_WMAIN
 static void AccelKeyDispatch( wAccelKey_e key, void * accelKeyIndexVP )
 {
 	int iAccelKeyIndex = (int)VP2L(accelKeyIndexVP);
@@ -743,7 +748,7 @@ static void SetAccelKeys()
 		wAttachAccelKey(eKey, iMode, AccelKeyDispatch, I2VP(iAccelKey));
 	}
 }
-
+#endif /* XTRKCAD_TESTBUILD_NO_WMAIN */
 
 
 /****************************************************************************
@@ -760,7 +765,7 @@ static void SetAccelKeys()
  *
  */
 
-
+#ifndef XTRKCAD_TESTBUILD_NO_WMAIN
 static int OfferCheckpoint( void )
 {
 	int ret = FALSE;
@@ -787,6 +792,7 @@ static int OfferCheckpoint( void )
 	}
 	return (ret>=0);
 }
+#endif /* XTRKCAD_TESTBUILD_NO_WMAIN */
 
 void
 InitAudio()
