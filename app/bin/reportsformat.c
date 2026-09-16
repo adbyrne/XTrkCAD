@@ -31,6 +31,8 @@
 #include <string.h>
 #include <strings.h>
 
+#include "cJSON.h"
+
 #include "include/reports.h"
 
 void ReportsFormatEndPtNote(const reportsEndPt_t *entry, char *buf,
@@ -297,5 +299,94 @@ void ReportsFormatKinkedList(DynString *out, const reportsKinkedJoint_t *list,
 		         list[i].trackB, list[i].layerB, list[i].layerNameB,
 		         list[i].angleDelta);
 		DynStringCatCStr(out, line);
+	}
+}
+
+/* Notes Report (SF #799) -- same grouped-subheading shape as
+ * ReportsFormatEquipmentList(), generalized from a 3-value status enum to
+ * this report's 7-value kind enum. */
+
+static const struct {
+	reportsNoteKind_e kind;
+	const char *heading;
+} reportsNoteGroups[] = {
+	{ REPORTS_NOTE_STATION, "Stations" },
+	{ REPORTS_NOTE_INDUSTRY, "Industries" },
+	{ REPORTS_NOTE_STORAGE, "Storage" },
+	{ REPORTS_NOTE_YARD_TRACK, "Yard Tracks" },
+	{ REPORTS_NOTE_HOUSE_TRACK, "House Tracks" },
+	{ REPORTS_NOTE_REFERENCE, "Reference" },
+	{ REPORTS_NOTE_OTHER, "Other Notes" },
+};
+
+static void ReportsFormatNoteGroup(DynString *out,
+                                   const reportsNoteRow_t *list, int count, reportsNoteKind_e kind,
+                                   const char *heading, BOOL_T *firstGroup)
+{
+	/* id (63 chars) + label (127 chars) + surrounding literal text, with
+	 * headroom -- both fields are already bounded by reportsNoteRow_t's
+	 * own array sizes, this just needs to be at least as large. */
+	char line[256];
+	int i;
+	BOOL_T any = 0;
+
+	for (i = 0; i < count; i++) {
+		if (list[i].kind != kind) {
+			continue;
+		}
+		if (!any) {
+			if (!*firstGroup) {
+				DynStringCatCStr(out, "\n");
+			}
+			DynStringCatCStr(out, heading);
+			DynStringCatCStr(out, "\n");
+			any = 1;
+			*firstGroup = 0;
+		}
+		snprintf(line, sizeof line, "  ID %2d: %-12s %-32s layer %u\n",
+		         list[i].noteIndex, list[i].id, list[i].label, list[i].layer);
+		DynStringCatCStr(out, line);
+	}
+}
+
+void ReportsFormatNoteList(DynString *out, const reportsNoteRow_t *list,
+                           int count)
+{
+	BOOL_T firstGroup = 1;
+	size_t i;
+
+	for (i = 0; i < sizeof reportsNoteGroups / sizeof reportsNoteGroups[0]; i++) {
+		ReportsFormatNoteGroup(out, list, count, reportsNoteGroups[i].kind,
+		                       reportsNoteGroups[i].heading, &firstGroup);
+	}
+}
+
+reportsNoteKind_e ReportsNoteKindFromJson(cJSON *parsed)
+{
+	cJSON *kind = cJSON_GetObjectItemCaseSensitive(parsed, "kind");
+
+	if (kind == NULL || !cJSON_IsString(kind) || kind->valuestring == NULL) {
+		return REPORTS_NOTE_OTHER;
+	}
+	if (strcmp(kind->valuestring, "station") == 0) { return REPORTS_NOTE_STATION; }
+	if (strcmp(kind->valuestring, "industry") == 0) { return REPORTS_NOTE_INDUSTRY; }
+	if (strcmp(kind->valuestring, "storage") == 0) { return REPORTS_NOTE_STORAGE; }
+	if (strcmp(kind->valuestring, "yard_track") == 0) { return REPORTS_NOTE_YARD_TRACK; }
+	if (strcmp(kind->valuestring, "house_track") == 0) { return REPORTS_NOTE_HOUSE_TRACK; }
+	if (strcmp(kind->valuestring, "reference") == 0) { return REPORTS_NOTE_REFERENCE; }
+	return REPORTS_NOTE_OTHER;
+}
+
+const char *ReportsNoteLabelField(reportsNoteKind_e kind)
+{
+	switch (kind) {
+	case REPORTS_NOTE_INDUSTRY:
+	case REPORTS_NOTE_STORAGE:
+	case REPORTS_NOTE_HOUSE_TRACK:
+		return "name";
+	case REPORTS_NOTE_YARD_TRACK:
+		return "label";
+	default:
+		return NULL;
 	}
 }

@@ -306,9 +306,13 @@ target_include_directories(reportstest PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/..
     ${CMAKE_CURRENT_SOURCE_DIR}/../include
     ${CMAKE_SOURCE_DIR}/app/wlib/include
+    ${CMAKE_SOURCE_DIR}/app/cJSON
 )
 
-target_link_libraries(reportstest PRIVATE dynstring ${LIBS})
+# ReportsFormatNoteList()'s cJSON-based kind-lookup helpers (SF #799) are
+# the first thing in this target to need cJSON -- everything else here is
+# libc + dynstring only.
+target_link_libraries(reportstest PRIVATE dynstring cJSON ${LIBS})
 
 add_test(ReportsTest reportstest)
 

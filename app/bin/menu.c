@@ -1806,6 +1806,9 @@ EXPORT void CreateMenus(void)
 	MiscMenuItemCreate(reportsM, NULL, "cmdReportsKinked",
 	                   _("&Kinked Joints ..."), ACCL_REPORTSKINKED,
 	                   ReportsKinkedJoints, 0, NULL);
+	MiscMenuItemCreate(reportsM, NULL, "cmdReportsNotes",
+	                   _("&Notes ..."), ACCL_REPORTSNOTES,
+	                   ReportsNotes, 0, NULL);
 
 	cmdGroup = BG_LAYER;
 
