@@ -138,9 +138,9 @@
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">_Kind</property>
+                <property name="label" translatable="yes">_ROOT Names</property>
                 <property name="use_underline">True</property>
-                <property name="mnemonic-widget">kindfilter</property>
+                <property name="mnemonic-widget">rootnamesfilter</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -148,13 +148,13 @@
               </packing>
             </child>
             <child>
-              <object class="GtkComboBox" id="kindfilter">
-                <property name="model">kindfilterlist</property>
+              <object class="GtkComboBox" id="rootnamesfilter">
+                <property name="model">rootnamesfilterlist</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkCellRendererText" id="kindfiltertextfield">
-                    <property name="width-chars">14</property>
+                  <object class="GtkCellRendererText" id="rootnamesfiltertextfield">
+                    <property name="width-chars">16</property>
                   </object>
                   <attributes>
                     <attribute name="text">3</attribute>
@@ -189,9 +189,9 @@
                 <property name="enable-grid-lines">vertical</property>
                 <property name="model">liststore</property>
                 <child>
-                  <object class="GtkTreeViewColumn" id="listkind">
+                  <object class="GtkTreeViewColumn" id="listrootnames">
                     <property name="resizable">True</property>
-                    <property name="title" translatable="yes">Kind</property>
+                    <property name="title" translatable="yes">ROOT Names</property>
                     <child>
                       <object class="GtkCellRendererText" />
                       <attributes>
@@ -256,7 +256,7 @@
       <column type="gpointer" />
       <!-- column-name bitmap -->
       <column type="GdkPixbuf" />
-      <!-- column-name kind -->
+      <!-- column-name rootnames -->
       <column type="gchararray" />
       <!-- column-name id -->
       <column type="gchararray" />
@@ -266,7 +266,7 @@
       <column type="gchararray" />
     </columns>
   </object>
-  <object class="GtkListStore" id="kindfilterlist">
+  <object class="GtkListStore" id="rootnamesfilterlist">
     <columns>
       <column type="gboolean" />
       <column type="gpointer" />
