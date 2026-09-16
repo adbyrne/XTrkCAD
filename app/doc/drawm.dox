@@ -13,33 +13,26 @@ There are 4 command buttons on the tool-bar used to draw Straight Objects, Curve
 
 Functions for drawing basic shapes and objects like lines and curves can be accessed from this menu.
 
-- <b>Circle Lines</b> - draw empty or filled circles. (\ref cmdDrawCircles)
+- <b>Circle Lines</b> - draw empty or filled circles. (\subpage cmdDrawCircles)
 
-- <b>Curved Lines</b> - are created in the same manner as curved tracks. (\ref cmdDrawCurves)
+- <b>Curved Lines</b> - are created in the same manner as curved tracks. (\subpage cmdDrawCurves)
 
-- <b>Note</b> - attach a note icon to a specific location on the layout. (\ref cmdNote)
+- <b>Note</b> - attach a note icon to a specific location on the layout. (\subpage cmdNote)
 
-- <b>Ruler</b> - create ruler and set visibility (\ref cmdRuler)
+- <b>Ruler</b> - create ruler and set visibility (\subpage cmdRuler)
 
-- <b>Protractor</b> - create protractor and set visibility (\ref cmdAngle)
+- <b>Protractor</b> - create protractor and set visibility (\subpage cmdAngle)
 
-- <b>Shapes</b> - draw boxes, polygons and poly-lines. (\ref cmdDrawShapes)
+- <b>Shapes</b> - draw boxes, polygons and poly-lines. (\subpage cmdDrawShapes)
 
 - <b>Straight Objects</b> - draw straight objects. (\ref cmdDrawStraight)
 
-- <b>Text</b> - allows entry of text directly onto the layout. (\ref cmdText)
+- <b>Text</b> - allows entry of text directly onto the layout. (\subpage cmdText)
 
 Some commands display controls on the Status Line (\ref mainW) to change line width, color or other attributes of the object.
 
-- \subpage cmdDrawCircles
-- \subpage cmdDrawCurves
-- \subpage cmdNote
-- \subpage cmdRuler
-- \subpage cmdAngle
-- \subpage cmdDrawShapes
 - \subpage cmdDrawStraights
 - \subpage DrawOrigin
-- \subpage cmdText
 
 */
 
@@ -55,18 +48,13 @@ The <b>Circle Line Width</b> field is a scaled dimension in inches if &gt;0. If 
 
 <b>Circles</b> and <b>Filled Circles</b> are created by selecting either the center position or a point on the edge of the circle and dragging to specify the radius.
 
-- \ref cmdDrawCircleTangent. Draw a Circle from the Edge.
+- \subpage cmdDrawCircleTangent. Draw a Circle from the Edge.
 
-- \ref cmdDrawCircleCenter. Draw a Circle from the Center.
+- \subpage cmdDrawCircleCenter. Draw a Circle from the Center.
 
-- \ref cmdDrawFilledCircleTangent. Draw a Filled Circle from the Edge.
+- \subpage cmdDrawFilledCircleTangent. Draw a Filled Circle from the Edge.
 
-- \ref cmdDrawFilledCircleCenter. Draw a Filled Circle from the Center.
-
-- \subpage cmdDrawCircleTangent
-- \subpage cmdDrawCircleCenter
-- \subpage cmdDrawFilledCircleTangent
-- \subpage cmdDrawFilledCircleCenter
+- \subpage cmdDrawFilledCircleCenter. Draw a Filled Circle from the Center.
 
 */
 
@@ -126,15 +114,15 @@ The <b>Curved Line Width</b> or <b>Bezier Line Width</b> field is a scaled dimen
 
 <b>Curved Lines</b> are created in the same manner as curved tracks.
 
-- (\ref cmdDrawCurveEndPt). Drag out the end point and then curve it.
+- (\subpage cmdDrawCurveEndPt). Drag out the end point and then curve it.
 
-- (\ref cmdDrawCurveCenter). Select the center and then an endpoint and drag out the curve.
+- (\subpage cmdDrawCurveCenter). Select the center and then an endpoint and drag out the curve.
 
-- (\ref cmdDrawCurveTangent). Select the end and drag out the center.
+- (\subpage cmdDrawCurveTangent). Select the end and drag out the center.
 
-- (\ref cmdDrawCurveChord). Drag from one end of the curve to the other to form the chord of the curve.
+- (\subpage cmdDrawCurveChord). Drag from one end of the curve to the other to form the chord of the curve.
 
-- (\ref cmdDrawBezierCurve). ![](dbezier.png) <i>Left-Drag</i> out control point from one end of the curve and then <i>Left-Drag</i> out the second control point from the other end.
+- (\subpage cmdDrawBezierCurve). ![](dbezier.png) <i>Left-Drag</i> out control point from one end of the curve and then <i>Left-Drag</i> out the second control point from the other end.
 
 If <b>MagneticSnap</b> (\ref cmdMagneticSnap) is enabled, the curve ends will snap to the nearest part of nearby Draw objects unless <i>Alt</i> is held.
 If Magnetic Snap is disabled, snapping to objects will only occur if <i>Alt</i> is held. 
@@ -147,12 +135,6 @@ Pressing `Shift+Tab` with the cursor on the drawing surface will remove the curr
 Even if `Esc` is pressed, the curve will already exist, it can be removed with <b>Undo</b>. 
 
 To adjust the curve with the mouse, <i>Left-Click</i> and <i>Left-Drag</i> an end or a the radius. Hit <i>Enter</i> or <i>Space</i> to accept, <i>Esc</i> to reject.
-
-- \subpage cmdDrawCurveEndPt
-- \subpage cmdDrawCurveTangent
-- \subpage cmdDrawCurveCenter
-- \subpage cmdDrawCurveChord
-- \subpage cmdDrawBezierCurve
 
 */
 
@@ -242,18 +224,13 @@ The first and second ends will act like \ref cmdDrawCurveEndPt with <b>MagneticS
 
 The <b>Note</b> command allows you to 
 
-- Attach <b>plain text notes</b> (\ref cmdTextNote),
+- Attach <b>plain text notes</b> (\subpage cmdTextNote),
 
-- Attach <b>weblinks</b> (\ref cmdLinkNote),
+- Attach <b>weblinks</b> (\subpage cmdLinkNote),
 
-- Attach <b>document references</b> (\ref cmdFileNote) or
+- Attach <b>document references</b> (\subpage cmdFileNote) or
 
-- Attach <b>JSON notes</b> (\ref cmdJsonNote) to selected places on the layout.
-
-- \subpage cmdTextNote
-- \subpage cmdLinkNote
-- \subpage cmdFileNote
-- \subpage cmdJsonNote
+- Attach <b>JSON notes</b> (\subpage cmdJsonNote) to selected places on the layout.
 
 */
 
@@ -429,15 +406,15 @@ The points of the <i>Protractor</i> can be modified using the <b>Modify</b> (\re
 
 Shapes are drawn by:
 
-- (\ref cmdDrawBox). Boxes
+- (\subpage cmdDrawBox). Boxes
 
-- (\ref cmdDrawFilledBox. Filled Boxes
+- (\subpage cmdDrawFilledBox). Filled Boxes
 
-- (\ref cmdDrawPolygon. Polygons
+- (\subpage cmdDrawPolygon). Polygons
 
-- (\ref cmdDrawFilledPolygon. Filled Polygons
+- (\subpage cmdDrawFilledPolygon). Filled Polygons
 
-- (\ref cmdDrawPolyline. PolyLines
+- (\subpage cmdDrawPolyline). PolyLines
 
 If <i>Sticky</i> is set for many draw line and curve objects, after the object is created, precise dimensions can be entered to alter the new object, before it is completed either with a `Space` or `Return` or `Tab` or by selecting a new operation.
 
@@ -445,12 +422,6 @@ The <b>Polygon</b> and <b>PolyLine</b> shapes are finished by pressing the `Spac
 All Polylines and Polygons must have more than 2 corners to be created successfully.
 
 Note that \ref cmdModify can be used on a Polygon or a Polyline after it has been finished to alter individual points and to make them curved or rounded points.
-
-- \subpage cmdDrawBox
-- \subpage cmdDrawFilledBox
-- \subpage cmdDrawPolygon
-- \subpage cmdDrawFilledPolygon
-- \subpage cmdDrawPolyline
 
 */
 
@@ -590,18 +561,13 @@ On the first polyline segemnt this will be at a multiple of 90 degrees to the ax
 
 Straight Objects are created by a <i>Left+Drag</i> (\ref windowTerms) on the layout.
 
-- (\ref cmdDrawLine). Creates a Straight Line
+- (\subpage cmdDrawLine). Creates a Straight Line
 
-- (\ref cmdDrawDimLine). Creates a <b>Dimension Line</b> of various sizes.
+- (\subpage cmdDrawDimLine). Creates a <b>Dimension Line</b> of various sizes.
 
-- (\ref cmdDrawBench). Creates <i>Bench-work</i> \anchor idx_Bench_work_136  using different types and orientation of lumber.
+- (\subpage cmdDrawBench). Creates <i>Bench-work</i> \anchor idx_Bench_work_136  using different types and orientation of lumber.
 
-- (\ref cmdDrawTableEdge). Creates a <b>Table Edge</b>
-
-- \subpage cmdDrawLine
-- \subpage cmdDrawDimLine
-- \subpage cmdDrawBench
-- \subpage cmdDrawTableEdge
+- (\subpage cmdDrawTableEdge). Creates a <b>Table Edge</b>
 
 */
 

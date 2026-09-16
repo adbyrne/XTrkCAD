@@ -31,55 +31,44 @@ The <b>Add Menu</b> has all the actions related to adding track pieces to the la
 
 - <i>Straight Track</i> \anchor idx_Straight_Track_15  `Ctrl+G` - lay straight track pieces of arbitrary lengths
 
-- <i>Curve Track</i> \anchor idx_Curve_Track_16  - lay curved track pieces using different modes for selecting start and endpoints and radius (\ref cmdCurve).
+- <i>Curve Track</i> \anchor idx_Curve_Track_16  - lay curved track pieces using different modes for selecting start and endpoints and radius (\subpage cmdCurve).
 
 - ![](maddcurve.png)
 
-- <i>Circle Track</i> \anchor idx_Circle_Track_17  \anchor idx_Track_Circle_18  - place a circle of track by selecting radius, tangent and or center (\ref cmdCircle).
+- <i>Circle Track</i> \anchor idx_Circle_Track_17  \anchor idx_Track_Circle_18  - place a circle of track by selecting radius, tangent and or center (\subpage cmdCircle).
 
 - ![](maddcircle.png)
 
 - <i>Parallel</i> \anchor idx_Parallel_19  - \anchor idx_Parallel_Track_20  \anchor idx_Track_Parallel_21  \anchor idx_Parallel_Line_22  \anchor idx_Line_Parallel_23 
-create parallel track or line to existing flex-track, straight or curved track. (\ref cmdParallel)
+create parallel track or line to existing flex-track, straight or curved track. (\subpage cmdParallel)
 
 - ![](maddparallel.png)
 
 - <i>Fixed-track</i> \anchor idx_Fixed_track_24  \anchor idx_Track_Fixed_25  `Ctrl+T` - select a piece of <b>Fixed-track</b> and place on layout.
 
-- <i>Hand-laid Turnout</i> \anchor idx_Hand_laid_Turnout_26  \anchor idx_Turnout_Hand_laid_27  `Ctrl+Shift+I` - lay a turnout in place on the layout. (\ref cmdHandLaidTurnout)
+- <i>Hand-laid Turnout</i> \anchor idx_Hand_laid_Turnout_26  \anchor idx_Turnout_Hand_laid_27  `Ctrl+Shift+I` - lay a turnout in place on the layout. (\subpage cmdHandLaidTurnout)
 
 - <i>Structure</i> \anchor idx_Structure_28  `Ctrl+Shift+C` - Add a predefined structure to the layout.
 
-- <i>Helix</i> \anchor idx_Helix_29  `Ctrl+Shift+H` - Add a helix. (\ref cmdHelix)
+- <i>Helix</i> \anchor idx_Helix_29  `Ctrl+Shift+H` - Add a helix. (\subpage cmdHelix)
 
-- <i>Custom Turntable</i> \anchor idx_Custom_Turntable_30  \anchor idx_Turntable_Custom_31  `Ctrl+Shift+N` - Place a turntable. (\ref cmdTurntable)
+- <i>Custom Turntable</i> \anchor idx_Custom_Turntable_30  \anchor idx_Turntable_Custom_31  `Ctrl+Shift+N` - Place a turntable. (\subpage cmdTurntable)
 
 - <i>Control Element</i> \anchor idx_Control_Element_32  - Create a control element.
 
-- <i>Block</i> \anchor idx_Block_33  \anchor idx_Control_Element_Block_34  - Create a block. (\ref cmdBlock)
+- <i>Block</i> \anchor idx_Block_33  \anchor idx_Control_Element_Block_34  - Create a block. (\subpage cmdBlock)
 
-- <i>Switchmotor</i> \anchor idx_Switchmotor_35  \anchor idx_Control_Element_Switchmotor_36  - Create a switchmotor. (\ref cmdSwitchmotor)
+- <i>Switchmotor</i> \anchor idx_Switchmotor_35  \anchor idx_Control_Element_Switchmotor_36  - Create a switchmotor. (\subpage cmdSwitchmotor)
 
-- <i>Signal</i> \anchor idx_Signal_37  \anchor idx_Control_Element_Signal_38  - Create a signal. (\ref cmdSignal)
+- <i>Signal</i> \anchor idx_Signal_37  \anchor idx_Control_Element_Signal_38  - Create a signal. (\subpage cmdSignal)
 
-- <i>Control</i> \anchor idx_Control_39  \anchor idx_Control_Element_Control_40  - Create a control. (\ref cmdControl)
+- <i>Control</i> \anchor idx_Control_39  \anchor idx_Control_Element_Control_40  - Create a control. (\subpage cmdControl)
 
-- <i>Sensor</i> \anchor idx_Sensor_41  \anchor idx_Control_Element_Sensor_42  - Create a sensor. (\ref cmdSensor)
+- <i>Sensor</i> \anchor idx_Sensor_41  \anchor idx_Control_Element_Sensor_42  - Create a sensor. (\subpage cmdSensor)
 
-- \subpage cmdCircle
-- \subpage cmdCurve
-- \subpage cmdHandLaidTurnout
-- \subpage cmdHelix
-- \subpage cmdParallel
 - \subpage cmdStraight
 - \subpage cmdStructure
 - \subpage cmdNewFixedTrack
-- \subpage cmdTurntable
-- \subpage cmdBlock
-- \subpage cmdSwitchmotor
-- \subpage cmdSignal
-- \subpage cmdControl
-- \subpage cmdSensor
 
 */
 
@@ -101,12 +90,12 @@ The drop down menu, which allows selection of the Circle Track creation method, 
 
 The three methods (with their Icons and Shortcut keys) used to create a Circle Track are:
 
-- ![](bcircl1.png) (\ref cmdCircleFixedRadius) `Control+8` - Use the Fixed Radius specified on the <i>Circle Radius</i>
+- ![](bcircl1.png) (\subpage cmdCircleFixedRadius) `Control+8` - Use the Fixed Radius specified on the <i>Circle Radius</i>
 control displayed on the Status Bar (\ref mainW). `Left-Drag` the Circle track into position.
 
-- ![](bcircl2.png) (\ref cmdCircleTangent) `Control+9` - `Left-Drag` from tangent point (Edge) of the Circle track to the Center.
+- ![](bcircl2.png) (\subpage cmdCircleTangent) `Control+9` - `Left-Drag` from tangent point (Edge) of the Circle track to the Center.
 
-- ![](bcircl3.png) (\ref cmdCircleCenter) `Control+0` - `Left-Drag` from the Center of the Circle track to the edge.
+- ![](bcircl3.png) (\subpage cmdCircleCenter) `Control+0` - `Left-Drag` from the Center of the Circle track to the edge.
 
 If Snap Grid (\ref cmdGrid) is enabled then circle centers will be constrained to the grid.
 
@@ -114,10 +103,6 @@ Circle tracks are useful for fitting curves into corners and other tight places.
 initial layout and finding out "what will fit".
 
 You can join to and from circles, after which they become curved tracks.
-
-- \subpage cmdCircleFixedRadius
-- \subpage cmdCircleTangent
-- \subpage cmdCircleCenter
 
 */
 
@@ -177,21 +162,21 @@ The six methods (with their Shortcut keys) used to create a Curved Track are:
 
 - 
 
-- ![](bcurve1.png) \ref cmdCurveEndPt `Control+4` - \anchor idx_End_Point_Curved_Track_50  \anchor idx_Curved_Track_End_Point_51 
+- ![](bcurve1.png) \subpage cmdCurveEndPt `Control+4` - \anchor idx_End_Point_Curved_Track_50  \anchor idx_Curved_Track_End_Point_51 
 Drag out the end and then set its radius by dragging the endpoint.
 
-- ![](bcurve2.png) \ref cmdCurveTangent `Control+5` - \anchor idx_Tangent_Curved_Track_52  \anchor idx_Curved_Track_Tangent_53 
+- ![](bcurve2.png) \subpage cmdCurveTangent `Control+5` - \anchor idx_Tangent_Curved_Track_52  \anchor idx_Curved_Track_Tangent_53 
 Drag from the an endpoint to the center and then drag the second enpoint around that center.
 
-- ![](bcurve3.png) \ref cmdCurveCenter `Control+6` - \anchor idx_Center_Curved_Track_54  \anchor idx_Curved_Track_Center_55 
+- ![](bcurve3.png) \subpage cmdCurveCenter `Control+6` - \anchor idx_Center_Curved_Track_54  \anchor idx_Curved_Track_Center_55 
 Drag from the Center of the Curved track to one of the endpoints. Position the second endpoint around the center.
 
-- ![](bcurve4.png) \ref cmdCurveChord `Control+7` - \anchor idx_Chord_Curved_Track_56  \anchor idx_Curved_Track_Chord_57 
+- ![](bcurve4.png) \subpage cmdCurveChord `Control+7` - \anchor idx_Chord_Curved_Track_56  \anchor idx_Curved_Track_Chord_57 
 Drag from one endpoint to the other endpoint to form the Chord of the Curve.  Drag the arc out to form the Curve.
 
-- ![](bezier.png) \ref cmdBezier - Construct a <i>Bezier Track</i> \anchor idx_Bezier_Track_58  \anchor idx_Track_Bezier_59  by placing its four control points.
+- ![](bezier.png) \subpage cmdBezier - Construct a <i>Bezier Track</i> \anchor idx_Bezier_Track_58  \anchor idx_Track_Bezier_59  by placing its four control points.
 
-- ![](bcornu.png) \ref cmdCornu - Construct a <i>Cornu Track</i> \anchor idx_Cornu_Track_60  \anchor idx_Track_Cornu_61  curve by selecting the end points and dragging to set the curve values.
+- ![](bcornu.png) \subpage cmdCornu - Construct a <i>Cornu Track</i> \anchor idx_Cornu_Track_60  \anchor idx_Track_Cornu_61  curve by selecting the end points and dragging to set the curve values.
 
 For the first four curve mthods, two Red arrow heads will be drawn after the first step to indicate where you can `Left-Drag` to complete the second step.
 
@@ -206,13 +191,6 @@ Optionally, the curve center point and radius can be displayed for the Curve. Th
 For Beziers and Cornus, the active control point will be drawn in red and the available endpoints are shown with circles.
 
 <b>Note:</b> You can also create Straight and Curved tracks using \ref cmdModify by `Left-Drag`ging out extra track from an open end-point.
-
-- \subpage cmdCurveEndPt
-- \subpage cmdCurveTangent
-- \subpage cmdCurveCenter
-- \subpage cmdCurveChord
-- \subpage cmdBezier
-- \subpage cmdCornu
 
 */
 
@@ -404,12 +382,9 @@ A label for the helix is drawn at it's the center.  If the elevations are set (e
 
 You can pick between two Parallel Commands:
 
-- \ref cmdParallelTrack. You can create a new track parallel to any straight, curved, bezier, cornu or easement track.
+- \subpage cmdParallelTrack. You can create a new track parallel to any straight, curved, bezier, cornu or easement track.
 
-- \ref cmdParallelLine. You can create a line parallel to any straight, curved, bezier, cornu or easement track or straight lines, curved lines and PolyLines.
-
-- \subpage cmdParallelTrack
-- \subpage cmdParallelLine
+- \subpage cmdParallelLine. You can create a line parallel to any straight, curved, bezier, cornu or easement track or straight lines, curved lines and PolyLines.
 
 */
 

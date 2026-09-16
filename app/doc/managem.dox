@@ -55,7 +55,7 @@ Cars are placed on the layout by using the <b>Train Simulation</b> (\ref cmdTrai
 
 The <b>Find</b> button will center the <b>Main Window</b> (\ref mainW) on the selected car.  This button is only enabled for cars which are on the Layout (indicated by co-ordinates in the Location column).  If the car on a track that is hidden and <b>Trains on Hidden Track</b> (\ref cmdDisplay) is set to <b>Hide</b>, then the car (and any attached cars) will be made visible.
 
-The <b>Edit</b> button invokes the <b>Car</b> dialog (\ref cmdCarpart) to modify the selected car.  This button is disabled if more than one (or no) car is selected or if the selected car is on the Layout.  
+The <b>Edit</b> button invokes the <b>Car</b> dialog (\subpage cmdCarpart) to modify the selected car.  This button is disabled if more than one (or no) car is selected or if the selected car is on the Layout.  
 
 The <b>Add</b> button is to add a new Car. Refer to \ref faqsPrototype if an error occurs when attempting to add inventory to this list.
 
@@ -124,7 +124,6 @@ The <b>Import</b> and <b>Export</b> buttons read and write a <i>Comma-Separated-
 
 The <b>List</b> button creates a text file listing your inventory.
 
-- \subpage cmdCarpart
 - \subpage carpart
 - \subpage carprototype
 

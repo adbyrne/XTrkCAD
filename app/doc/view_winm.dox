@@ -9,7 +9,7 @@ The <b>View Menu</b> shows commands affecting the display of the <b>Main Canvas<
 
 - <b>Change Grid</b> - Displays the <b>Snap Grid</b> dialog.  The <b>Snap Grid</b> forces the cursor (for some commands) to be on a grid to control track placement.
 
-- <b>Enable SnapGrid</b> - Enables (or disables) the <b>Snap Grid</b> (\ref cmdGrid).
+- <b>Enable SnapGrid</b> - Enables (or disables) the <b>Snap Grid</b> (\subpage cmdGrid).
 
 - <b>Redraw</b> - Redraws the <b>Main Canvas</b>.
 
@@ -17,11 +17,11 @@ The <b>View Menu</b> shows commands affecting the display of the <b>Main Canvas<
 
 - <b>Show Snap-Grid</b> - \anchor idx_Snap_Grid_247  Toggles display of the <b>Snap Grid</b> on and off.
 
-- <b>Magnetic Snap On/Off</b> - Toggles <i>Magnetic Snap</i> \anchor idx_Magnetic_Snap_248  (\ref cmdMagneticSnap) for Add Operations on and off.  The magnets make tracks auto-align and shapes touch when the cursor or object is close.  They can be defeated on each operation by holding down <i>Alt</i>.  If the Magnets are off, holding down <i>Alt</i> will enable them.
+- <b>Magnetic Snap On/Off</b> - Toggles <i>Magnetic Snap</i> \anchor idx_Magnetic_Snap_248  (\subpage cmdMagneticSnap) for Add Operations on and off.  The magnets make tracks auto-align and shapes touch when the cursor or object is close.  They can be defeated on each operation by holding down <i>Alt</i>.  If the Magnets are off, holding down <i>Alt</i> will enable them.
 
 - ![](bmap.png) <b> Show/Hide Map</b> - Toggles display of the <b>Map Window</b> \anchor idx_Map_Window_249  on and off.
 
-- <b>Toolbar Options</b> - Command button groups displayed on the <b>Toolbar</b> are selected using the Toolbar Options Dialog (\ref toolbarOpts).
+- <b>Toolbar Options</b> - Command button groups displayed on the <b>Toolbar</b> are selected using the Toolbar Options Dialog (\subpage toolbarOpts).
 
 - <b>Pan/Zoom</b> - move or resize the viewport using the mouse (\ref cmdPan).
 
@@ -35,9 +35,6 @@ The <b>View Menu</b> shows commands affecting the display of the <b>Main Canvas<
 
 When zooming in or out, the corresponding highlighted area of the <b>Map Window</b> (\ref cmdMap) changes size to match that which appears on the <b>Main Canvas</b> (\ref mainW).
 
-- \subpage cmdMagneticSnap
-- \subpage cmdGrid
-- \subpage toolbarOpts
 - \subpage cmdZoom
 
 */
