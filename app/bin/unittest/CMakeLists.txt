@@ -65,6 +65,14 @@ add_dependencies(getargstest msgfiles)
 # never exist in this target's object file at all. The gc-sections/
 # dead_strip flags below are kept as a secondary, no-longer-load-bearing
 # cleanup for any other genuinely-unused code in the two linked files.
+#
+# Side effect: any misc.c static that's only reachable from wMain() (e.g.
+# SetAccelKeys/OfferCheckpoint/AccelKeyDispatch/NextWindow, SF #796) shows up
+# as "defined but not used" in this target's -Wall -Wextra build once its
+# only caller is excluded, and must be wrapped in the same #ifndef guard.
+# SF #797 tracks extracting ConvertToEscapedText()/ConvertFromEscapedText()
+# into their own file so this target stops compiling all of misc.c and this
+# whole class of warning goes away permanently.
 set_target_properties(getargstest PROPERTIES ENABLE_EXPORTS FALSE)
 target_compile_definitions(getargstest PRIVATE XTRKCAD_TESTBUILD_NO_WMAIN)
 target_compile_options(getargstest PRIVATE -ffunction-sections -fdata-sections)
