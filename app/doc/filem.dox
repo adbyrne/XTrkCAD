@@ -21,20 +21,20 @@ The <b>File Menu</b> shows file oriented commands for loading and saving layout 
 
 - ![](bexport.png) <b>Export</b> - Exports objects to a file in <i>XTrackCAD</i> (\*.xti) format. If no objects are selected, all objects in visible layers are exported. If objects are selected they are exported. The exported file can then be imported into another layout design. Refer to the Import command listed below.
 
-- ![](bexportbmap.png)<b>Export to Bitmap</b> - Creates a bitmap file (\ref cmdOutputbitmap) of the layout. The bitmap can be saved in either JPEG or PNG format.
+- ![](bexportbmap.png)<b>Export to Bitmap</b> - Creates a bitmap file (\subpage cmdOutputbitmap) of the layout. The bitmap can be saved in either JPEG or PNG format.
 
 - ![](bexportdxf.png)<b>Export to DXF</b> - Exports objects to a file in DXF format (\ref generalTerms): the current selection (\ref cmdSelect), or the scope set on the <b>Filter Layers/Groups for Print/Export</b> (\ref cmdPrintExportFilter) dialog if one is active. The exported file can then be imported into other CAD programs.
 
 - ![](bexportsvg.png) <b>Export to SVG</b> - Exports objects to a file in SVG format: the current selection (\ref cmdSelect) if any, otherwise every visible object -- or the scope set on the <b>Filter Layers/Groups for Print/Export</b> (\ref cmdPrintExportFilter) dialog if one is active. The exported file can then be imported into a vector drawing program like Inkscape
 or used for publishing on the web.
 
-- <b>Filter Layers/Groups for Print/Export</b> - opens the \ref cmdPrintExportFilter dialog to scope <b>Print</b> (\ref cmdPrint) and <b>Export to DXF</b>/<b>SVG</b> to specific <b>Layers</b> or <b>Layer Groups</b> (\ref cmdLayergroup).
+- <b>Filter Layers/Groups for Print/Export</b> - opens the \subpage cmdPrintExportFilter dialog to scope <b>Print</b> (\ref cmdPrint) and <b>Export to DXF</b>/<b>SVG</b> to specific <b>Layers</b> or <b>Layer Groups</b> (\ref cmdLayergroup).
 
-- ![](bimport.png) <b>Import</b> - Displays the file selection dialog which allows selection of an existing <i>XTrackCAD</i> Import (\ref cmdExport \*.xti) files. This function can be used to transfer parts like a yard design from one layout design to another.
+- ![](bimport.png) <b>Import</b> - Displays the file selection dialog which allows selection of an existing <i>XTrackCAD</i> Import (\subpage cmdExport \*.xti) files. This function can be used to transfer parts like a yard design from one layout design to another.
 
 - ![](bimportmod.png) <b>Import Module</b> - Displays the file selection dialog which allows selection of an existing <i>XTrackCAD</i> Import (\ref cmdExport \*.xti) file. The imported parts are put into a empty layer, sets the layer name to the imported filename and sets the layer to be a module - see (\ref cmdLayer).
 
-- ![](bimportdxf.png) <b>Import DXF</b> - Displays a dialog which allows selection of options for (\ref cmdImportDxf \*.dxf) file. The "Layer 0 Track" option will create track from lines (STRAIGHT) and arcs (CURVE) in DXF layer 0. The DXF file is converted to an XTI file in the same folder as the DXF file. If "Import XTI" is slected, the XTI will be imported into the layout. if "Import Module" is selected it will be imported into an empty layer as a module - see (\ref cmdLayer).
+- ![](bimportdxf.png) <b>Import DXF</b> - Displays a dialog which allows selection of options for (\subpage cmdImportDxf \*.dxf) file. The "Layer 0 Track" option will create track from lines (STRAIGHT) and arcs (CURVE) in DXF layer 0. The DXF file is converted to an XTI file in the same folder as the DXF file. If "Import XTI" is slected, the XTI will be imported into the layout. if "Import Module" is selected it will be imported into an empty layer as a module - see (\ref cmdLayer).
 
 - <b>File List</b> - List of the five most recently used <i>XTrackCAD</i> files or archives.
 
@@ -44,11 +44,11 @@ or used for publishing on the web.
 
 - ![](bopen.png) <b>Open</b> - Displays the <b>File Open</b> dialog which allows an existing <i>XTrackCAD</i> file or archive to be selected and opened.  In case there are any unsaved changes on the current plan, a warning pop-up will be displayed and you'll have the option to cancel the operation.
 
-- ![](bparam.png) <b>Parameter Files</b> - Displays the <b>Parameter Files</b> dialog (\ref cmdPrmfile) to choose parameter files.
+- ![](bparam.png) <b>Parameter Files</b> - Displays the <b>Parameter Files</b> dialog (\subpage cmdPrmfile) to choose parameter files.
 
-- ![](bsetup.png) <b>Print Setup</b> - Shows the Printer Setup Dialog (\ref printSetup).
+- ![](bsetup.png) <b>Print Setup</b> - Shows the Printer Setup Dialog (\subpage printSetup).
 
-- ![](bprint.png) <b>Print</b> - Invokes the Print command (\ref cmdPrint).
+- ![](bprint.png) <b>Print</b> - Invokes the Print command (\subpage cmdPrint).
 
 - ![](brevert.png) <b>Revert</b> - Undoes all changes and returns to the last saved layout plan.
 
@@ -56,18 +56,11 @@ or used for publishing on the web.
 
 - ![](bsaveas.png) <b>Save As</b> - This command lets you make a copy of the track plan you are currently working on as an file (.xtc) or an archive (.xtce). It differs from the regular Save command. Save stores your data back into the folder (directory) it originally came from in the same filetype. "Save As" lets you give your plan a different name and/or put it in a different folder on your hard disk and chnage its filetype using the selection box at the bottom of the list of files or by hardcoding the extensions .xtc or .xtce (for an archive).
 
-- \subpage cmdExport
-- \subpage cmdOutputbitmap
 - \subpage ExportDXF
 - \subpage ExportSVG
-- \subpage cmdPrintExportFilter
 - \subpage cmdImport
 - \subpage cmdImportM
-- \subpage cmdImportDxf
-- \subpage cmdPrmfile
 - \subpage cmdSearchgui
-- \subpage cmdPrint
-- \subpage printSetup
 - \subpage cmdPrintMargin
 
 */
