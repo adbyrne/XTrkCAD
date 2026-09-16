@@ -343,15 +343,28 @@ JsonFieldApplyEdit(BOOL_T isDelete)
 		}
 		cJSON_DeleteItemFromObjectCaseSensitive(obj, name);
 	} else {
-		cJSON *valueNode = cJSON_Parse(jsonNoteData.fieldValue);
-		if (valueNode != NULL &&
-		    !(cJSON_IsNumber(valueNode) || cJSON_IsBool(valueNode)
-		      || cJSON_IsNull(valueNode))) {
-			cJSON_Delete(valueNode);
-			valueNode = NULL;
-		}
-		if (valueNode == NULL) {
-			valueNode = cJSON_CreateString(jsonNoteData.fieldValue);
+		cJSON *valueNode;
+		if (jsonNoteData.fieldValue[0] == '\0') {
+			/* Blank Value is repurposed as "start a new nested object here"
+			 * rather than the arguably-useless empty string -- the common
+			 * real need (confirmed live, 2026-09-16: a user immediately
+			 * wanted to build a nested "spots": {...} group) is starting a
+			 * new sub-group to fill in via this same row afterward, not
+			 * deliberately storing "". Since Save already re-syncs the
+			 * Object dropdown on success (see below), the new object is
+			 * immediately selectable with no extra step. */
+			valueNode = cJSON_CreateObject();
+		} else {
+			valueNode = cJSON_Parse(jsonNoteData.fieldValue);
+			if (valueNode != NULL &&
+			    !(cJSON_IsNumber(valueNode) || cJSON_IsBool(valueNode)
+			      || cJSON_IsNull(valueNode))) {
+				cJSON_Delete(valueNode);
+				valueNode = NULL;
+			}
+			if (valueNode == NULL) {
+				valueNode = cJSON_CreateString(jsonNoteData.fieldValue);
+			}
 		}
 		if (cJSON_HasObjectItem(obj, name)) {
 			cJSON_ReplaceItemInObjectCaseSensitive(obj, name, valueNode);

@@ -343,6 +343,45 @@ There is no fixed schema -- any valid JSON object is accepted. A
 <tt>"kind"</tt> field, when present, is shown on the status line and used
 by other tools to group notes.
 
+<h3>Structured field editor</h3>
+
+Below the text area, an <b>Object</b>/<b>Name</b>/<b>Value</b> row with
+<b>Save</b> and <b>Delete</b> buttons lets you add, change, or remove one
+name-value pair at a time without hand-typing JSON syntax. This is a
+formatting aid for simple values, not a full JSON editor -- arrays and
+anything more complex than a single value still need to be typed directly
+into the text area.
+
+- <b>Object</b> selects which object the edit applies to: <tt>ROOT</tt>
+  (the note's own top-level object) or any object nested one level directly
+  inside it. It only lists objects that already exist in the current text,
+  so it always starts at <tt>ROOT</tt> for a new note.
+- <b>Name</b> is the field name to add, change, or remove.
+- <b>Value</b> is the field's new value. It is entered as plain text, not
+  JSON -- type <tt>WP</tt> to store the string <tt>"WP"</tt>, no quotes
+  needed. A value that reads as a plain number, <tt>true</tt>,
+  <tt>false</tt>, or <tt>null</tt> is stored as that, e.g. entering
+  <tt>true</tt> for <b>Name</b> <tt>terminus</tt> stores the boolean
+  <tt>true</tt>, not the string <tt>"true"</tt>.
+- Leaving <b>Value</b> blank and clicking <b>Save</b> creates a new, empty
+  nested object under that <b>Name</b> instead of an empty string -- e.g.
+  with <b>Object</b> <tt>ROOT</tt>, <b>Name</b> <tt>spots</tt>, and
+  <b>Value</b> left blank, <b>Save</b> adds <tt>"spots": {}</tt>. That new
+  object then appears as a second choice in the <b>Object</b> dropdown, so
+  you can select it and use the same row to fill it in, e.g. <b>Name</b>
+  <tt>tank</tt> / <b>Value</b> <tt>1</tt> then <b>Name</b> <tt>box</tt> /
+  <b>Value</b> <tt>2</tt> to build
+  <tt>"spots": {"tank": 1, "box": 2}</tt> one field at a time.
+- <b>Save</b> adds <b>Name</b> to the selected <b>Object</b> if it isn't
+  already present, or updates its value in place if it is.
+- <b>Delete</b> removes <b>Name</b> from the selected <b>Object</b>. To
+  delete an entire nested object (not just one of its fields), select
+  <tt>ROOT</tt> (or whichever object contains it) rather than the object
+  itself, enter its name, and click <b>Delete</b> -- e.g. with
+  <b>Object</b> <tt>ROOT</tt> and <b>Name</b> <tt>spots</tt>, <b>Delete</b>
+  removes the whole <tt>"spots": {...}</tt> entry, contents included, in
+  one action.
+
 When in <b>Properties</b> (\ref cmdDescribe) mode, clicking on a <i>JSON
 Note</i> will display the <i>Property Sheet</i> to let you read or modify
 its JSON text.
