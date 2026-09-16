@@ -24,11 +24,14 @@ the Parts List (\ref cmdEnum) window.
 - \subpage cmdReportsgaps -- pairs of open track endpoints close enough
   to each other that they likely should be connected.
 
+- \subpage cmdReportsnotes -- every note on the layout, JSON Notes
+  grouped by kind (station/industry/storage/yard track/house track/
+  reference), everything else bucketed as Other Notes.
+
 - \subpage cmdReportskinked -- already-connected track joints whose
   alignment has drifted out of tolerance.
 
-Most reports also offer a shared \subpage cmdReportsfilter dialog to scope
-the report down to specific Layers or Layer Groups (\ref cmdLayergroup).
+- \subpage cmdReportsfilter
 
 */
 
@@ -383,6 +386,50 @@ is included by default. A kinked joint only appears when both of its two
 tracks' layers are included.
 
 The <b>Done</b> button closes the <b>Kinked Joints Report</b> window.
+
+*/
+
+/**
+\page cmdReportsnotes Notes Report
+
+The <b>Notes Report</b> command lists every note on the layout. A note
+created via the <b>JSON Note</b> command (\ref cmdJsonNote) whose body is a
+JSON object with a recognized <tt>"kind"</tt> field (station, industry,
+storage, yard track, house track, or reference) is grouped under that
+kind; every other note -- a Text/Weblink/Document note, or a JSON Note
+without a recognized kind -- is grouped under <b>Other Notes</b> instead,
+identified by a short preview of its text. Each row gives the note's
+<b>Kind</b>, <b>ID</b> (the JSON body's <tt>"id"</tt> field, empty for an
+Other Notes row), <b>Name/Label</b> (the kind-appropriate descriptive
+field, also empty for kinds that don't have one), and <b>Layer</b>.
+
+A summary line above the list gives the number of notes found, updated
+whenever the report is generated or refreshed.
+
+The <b>Kind</b> dropdown restricts the report to one kind at a time
+("All kinds" is the default, unfiltered view) -- change it and click
+<b>Refresh</b> to re-run the report scoped to just that kind.
+
+Like the Turnout Density Report (\ref cmdReportsturnout) and the other
+phase-2 reports, this report has no click-to-navigate -- a note's position
+isn't a "go look at this" target the way a Gaps (\ref cmdReportsgaps) or
+Kinked Joints (\ref cmdReportskinked) row is.
+
+The <b>Refresh</b> button recomputes the report in place -- useful after
+editing a note's JSON body elsewhere in the layout, without closing and
+reopening the report window.
+
+The <b>Save As...</b> button opens a <i>File Save</i> dialog window that's
+used to name and save the report to a text file.
+
+The <b>Print</b> button opens the <i>Print</i> dialog which is used to
+print the report.
+
+The <b>Filter...</b> button (\ref cmdReportsfilter) opens a dialog to scope
+this report to specific Layers/Groups (\ref cmdLayergroup) -- every layer
+is included by default.
+
+The <b>Done</b> button closes the <b>Notes Report</b> window.
 
 */
 

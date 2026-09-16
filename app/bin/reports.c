@@ -72,14 +72,17 @@
 
 #include "custom.h"
 #include <dynstring.h>
+#include "cJSON.h"
 #include "ccurve.h"
 #include "dlayer.h"
 #include "draw.h"
 #include "fileio.h"
 #include "layout.h"
 #include "form.h"
+#include "note.h"
 #include "paths.h"
 #include "scale.h"
+#include "shortentext.h"
 #include "track.h"
 #include "utility.h"
 #include "include/dreportsfilter.h"
@@ -701,11 +704,10 @@ void ReportsUnconnectedEndpoints( void * unused )
 
 	TRK_ITERATE( trk ) {
 		EPINX_T ep;
-		EPINX_T epCnt;
 		if ( !ReportsFilterLayerIncluded( &reportsFilter, GetTrkLayer(trk) ) ) {
 			continue;
 		}
-		epCnt = GetTrkEndPtCnt(trk);
+		EPINX_T epCnt = GetTrkEndPtCnt(trk);
 		/* Turntable stalls are open by design (QueryTrack(trk,
 		 * Q_CAN_ADD_ENDPOINTS) -- same test the Gaps report uses to
 		 * exclude them from its own pairing analysis), so they're
@@ -2214,4 +2216,240 @@ void ReportsKinkedJoints( void * unused )
 	}
 
 	ReportsPopulateKinkedList();
+}
+
+/* ---------------------------------------------------------------------
+ * Notes Report (SF #799, part of the JSON Note umbrella SF #795). Report-
+ * only (no click-to-navigate/indicator), same phase-2 shape as Equipment
+ * Suitability above -- flat interactive list, grouped-by-category Save/
+ * Print text (ReportsFormatNoteList()). Unlike every prior report, this
+ * one also has a Kind filter (PD_DROPLIST, fixed 8-entry list, populated
+ * once per compute pass same as FillLayerList()'s own "rebuild on each
+ * invocation" convention) alongside the standard Layer Group filter.
+ * ------------------------------------------------------------------- */
+
+/** Tentative declaration -- same reason as reportsPG above. */
+static paramGroup_t reportsNotesPG;
+static void ReportsBuildNoteText(DynString *out);
+
+static reportsDialog_t reportsNotesDlg = {
+	&reportsNotesPG, NULL, NULL, NULL,
+	ReportsBuildNoteText, ReportsNotes,
+	NULL, NULL
+};
+static reportsOpCtx_t reportsNotesRefreshOp = { &reportsNotesDlg, REPORTSOP_REFRESH };
+static reportsOpCtx_t reportsNotesSaveOp    = { &reportsNotesDlg, REPORTSOP_SAVE };
+static reportsOpCtx_t reportsNotesPrintOp   = { &reportsNotesDlg, REPORTSOP_PRINT };
+
+static wWinPix_t reportsNotesListWidths[] = { 90, 80, 220, 60 };
+static const char * reportsNotesListTitles[] = {
+	N_("Kind"), N_("ID"), N_("Name/Label"), N_("Layer")
+};
+static paramListData_t reportsNotesListData = { 8, 400, 4, reportsNotesListWidths,
+                                                reportsNotesListTitles
+                                              };
+
+/** This report's layer/group scope -- see dreportsfilter.h. */
+static reportsFilter_t reportsNotesFilter;
+
+/** "Filter..." button -- see DoReportsFilter() above for the shared shape. */
+static void DoReportsNotesFilter(void *unused)
+{
+	(void)unused;
+	ShowReportsFilterDialog(&reportsNotesFilter);
+}
+
+/** Kind filter: 0 = "All kinds", 1..7 map directly to reportsNoteKind_e
+ * (REPORTS_NOTE_STATION..REPORTS_NOTE_OTHER) -- kept in that exact order
+ * so `reportsNoteKindFilterInx - 1` is the enum value with no lookup
+ * table needed. */
+static long reportsNoteKindFilterInx;
+static const char * reportsNoteKindFilterLabels[] = {
+	N_("All kinds"), N_("Station"), N_("Industry"), N_("Storage"),
+	N_("Yard Track"), N_("House Track"), N_("Reference"), N_("Other Notes")
+};
+
+static paramData_t reportsNotesPLs[] = {
+#define I_REPORTSNOTESSUMMARY (0)
+#define reportsNotesSummary (reportsNotesPLs[I_REPORTSNOTESSUMMARY].control)
+	{ PD_MESSAGE, "", "summary", 0, I2VP(37) },
+#define I_REPORTSNOTESKINDFILTER (1)
+#define reportsNotesKindFilter (reportsNotesPLs[I_REPORTSNOTESKINDFILTER].control)
+	{ PD_DROPLIST, &reportsNoteKindFilterInx, "kindfilter", PDO_NOPREF | PDO_LISTINDEX, I2VP(120), NULL, 0 },
+#define I_REPORTSNOTESLIST (2)
+#define reportsNotesList (reportsNotesPLs[I_REPORTSNOTESLIST].control)
+	{ PD_LIST, NULL, "list", PDO_DLGRESIZE, &reportsNotesListData, NULL, 0 },
+	{ PD_BUTTON, DoReportsOp, "refresh", 0, NULL, NULL, 0, &reportsNotesRefreshOp },
+	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsNotesSaveOp },
+	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsNotesPrintOp },
+	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
+	{ PD_BUTTON, DoReportsNotesFilter, "filter", 0, NULL, NULL, 0, NULL },
+};
+static paramGroup_t reportsNotesPG = { "reportsnotes", PGO_FULLDIALOGFROMBUILDER,
+                                       reportsNotesPLs, COUNT( reportsNotesPLs )
+                                     };
+
+/** The current Notes Report's rows, in TRK_ITERATE order (not grouped by
+ * kind -- ReportsFormatNoteList() does that grouping for the Save/Print
+ * text only, same as every other grouped-output report keeps its
+ * interactive list in a different order than its own Save/Print text). */
+static dynArr_t reportsNotesList_da;
+
+/** Populate the Kind filter dropdown -- fixed 8-entry list, rebuilt on
+ * each invocation same as FillLayerList()'s own convention. */
+static void ReportsPopulateNoteKindFilter(void)
+{
+	size_t i;
+
+	wListClear( reportsNotesKindFilter );
+	for ( i = 0; i < sizeof reportsNoteKindFilterLabels / sizeof
+	      reportsNoteKindFilterLabels[0]; i++ ) {
+		wComboBoxAddValue( reportsNotesKindFilter, _(reportsNoteKindFilterLabels[i]),
+		                   I2VP((int)i) );
+	}
+	wListSetIndex( reportsNotesKindFilter, (int)reportsNoteKindFilterInx );
+}
+
+/** Populate the interactive list from reportsNotesList_da -- one row per
+ * note, tab-separated. */
+static void ReportsPopulateNoteList(void)
+{
+	int i;
+	char row[256];
+
+	wListClear( reportsNotesList );
+	for ( i = 0; i < reportsNotesList_da.cnt; i++ ) {
+		reportsNoteRow_t *entry = &DYNARR_N(reportsNoteRow_t, reportsNotesList_da, i);
+		const char *kindStr = entry->kind == REPORTS_NOTE_STATION ? _("Station") :
+		                      entry->kind == REPORTS_NOTE_INDUSTRY ? _("Industry") :
+		                      entry->kind == REPORTS_NOTE_STORAGE ? _("Storage") :
+		                      entry->kind == REPORTS_NOTE_YARD_TRACK ? _("Yard Track") :
+		                      entry->kind == REPORTS_NOTE_HOUSE_TRACK ? _("House Track") :
+		                      entry->kind == REPORTS_NOTE_REFERENCE ? _("Reference") : _("Other");
+
+		snprintf( row, sizeof row, "%s\t%s\t%s\t%u",
+		          kindStr, entry->id, entry->label, entry->layer );
+		wListAddValue( reportsNotesList, row, NULL, NULL );
+	}
+}
+
+/** Build the full formatted Notes Report text (header + kind-grouped
+ * table) fresh from reportsNotesList_da. Used only by
+ * ReportsRefreshPrintText() (Save/Print), same as every other report's
+ * own build-text function. */
+static void ReportsBuildNoteText(DynString *out)
+{
+	DynStringMalloc( out, 256 );
+	ReportsAddHeader( out, _("Notes Report") );
+
+	if ( reportsNotesList_da.cnt == 0 ) {
+		DynStringCatCStrs( out, "\n", _("No notes found."), "\n", NULL );
+	} else {
+		DynStringCatCStr( out, "\n" );
+		ReportsFormatNoteList( out, &DYNARR_N(reportsNoteRow_t,
+		                                      reportsNotesList_da, 0), reportsNotesList_da.cnt );
+	}
+}
+
+void ReportsNotes( void * unused )
+{
+	track_p trk;
+	(void)unused;
+
+	DYNARR_FREE( reportsNoteRow_t, reportsNotesList_da );
+	DYNARR_INIT( reportsNoteRow_t, reportsNotesList_da );
+
+	TRK_ITERATE( trk ) {
+		if ( GetTrkType(trk) != T_NOTE ) {
+			continue;
+		}
+		if ( !ReportsFilterLayerIncluded( &reportsNotesFilter, GetTrkLayer(trk) ) ) {
+			continue;
+		}
+
+		reportsNoteKind_e kind = REPORTS_NOTE_OTHER;
+		char id[64] = "";
+		char label[128] = "";
+
+		if ( IsJsonNote(trk) ) {
+			const struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE,
+			                                    extraDataNote_t );
+			cJSON *parsed = cJSON_Parse(xx->noteData.text);
+
+			if ( parsed != NULL && cJSON_IsObject(parsed) ) {
+				kind = ReportsNoteKindFromJson(parsed);
+
+				cJSON *idField = cJSON_GetObjectItemCaseSensitive(parsed, "id");
+				if ( idField && cJSON_IsString(idField) && idField->valuestring ) {
+					strncpy( id, idField->valuestring, sizeof id - 1 );
+				}
+
+				const char *labelKey = ReportsNoteLabelField(kind);
+				if ( labelKey ) {
+					cJSON *labelField = cJSON_GetObjectItemCaseSensitive(parsed, labelKey);
+					if ( labelField && cJSON_IsString(labelField) && labelField->valuestring ) {
+						strncpy( label, labelField->valuestring, sizeof label - 1 );
+					}
+				}
+			}
+			/* parsed == NULL or not an object: shouldn't happen for a note
+			 * saved through jsonnoteui.c's own Validate-on-save gate, but a
+			 * hand-edited file could produce it -- falls through with
+			 * kind/id/label at their REPORTS_NOTE_OTHER/empty defaults,
+			 * same graceful-degradation precedent as ReportsNoteKindFromJson(). */
+			if ( parsed ) {
+				cJSON_Delete(parsed);
+			}
+		} else {
+			/* Non-JSON note: kind stays REPORTS_NOTE_OTHER, id stays empty,
+			 * label becomes a short raw-text preview -- matching
+			 * DescribeTextNote()'s own status-line precedent. Each legacy
+			 * note type keeps its text in a different union member. */
+			struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE,
+			                              extraDataNote_t );
+			char *raw = xx->op == OP_NOTETEXT ? xx->noteData.text :
+			            xx->op == OP_NOTELINK ? xx->noteData.linkData.title :
+			            xx->op == OP_NOTEFILE ? xx->noteData.fileData.title : NULL;
+
+			if ( raw ) {
+				char *preview = MyMalloc(strlen(raw) + 1);
+				RemoveFormatChars(raw, preview);
+				EllipsizeString(preview, NULL, sizeof label - 1);
+				strncpy( label, preview, sizeof label - 1 );
+				MyFree(preview);
+			}
+		}
+
+		if ( reportsNoteKindFilterInx > 0 &&
+		     (reportsNoteKindFilterInx - 1) != (long)kind ) {
+			continue;
+		}
+
+		{
+			reportsNoteRow_t *row;
+			DYNARR_APPEND( reportsNoteRow_t, reportsNotesList_da, 10 );
+			row = &DYNARR_LAST( reportsNoteRow_t, reportsNotesList_da );
+			row->kind = kind;
+			strncpy( row->id, id, sizeof row->id - 1 );
+			strncpy( row->label, label, sizeof row->label - 1 );
+			row->layer = GetTrkLayer(trk) + 1;
+			row->noteIndex = GetTrkIndex(trk);
+		}
+	}
+
+	{
+		char summary[160];
+
+		if ( log_reports < 0 ) { log_reports = LogFindIndex( "reports" ); }
+		LOG( log_reports, 1,
+		     ( "reports: Notes computed -- %d note(s)\n", (int) reportsNotesList_da.cnt ) )
+
+		ReportsShowDialog( &reportsNotesDlg, _("Notes Report") );
+		snprintf( summary, sizeof summary, _("%d note(s) found"),
+		          (int) reportsNotesList_da.cnt );
+		wMessageSetValue( reportsNotesSummary, summary );
+	}
+
+	ReportsPopulateNoteKindFilter();
+	ReportsPopulateNoteList();
 }

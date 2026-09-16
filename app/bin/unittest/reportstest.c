@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include <dynstring.h>
+#include "cJSON.h"
 #include "../include/reports.h"
 
 static void test_empty_list(void **state)
@@ -741,6 +742,135 @@ static void test_kinked_multiple_rows(void **state)
 	DynStringFree(&out);
 }
 
+static void test_notes_empty_list(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 16);
+
+	ReportsFormatNoteList(&out, NULL, 0);
+
+	assert_string_equal(DynStringToCStr(&out), "");
+	DynStringFree(&out);
+}
+
+static void test_notes_single_row(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 64);
+	reportsNoteRow_t list[1] = {
+		{ REPORTS_NOTE_STATION, "WP", "", 1, 5 }
+	};
+
+	ReportsFormatNoteList(&out, list, 1);
+
+	assert_string_equal(DynStringToCStr(&out),
+	                    "Stations\n"
+	                    "  ID  5: WP                                            layer 1\n");
+	DynStringFree(&out);
+}
+
+/* Input deliberately out of enum order -- the formatter must regroup into
+ * the fixed Stations/Industries/Storage/Yard Tracks/House Tracks/
+ * Reference/Other Notes order regardless of input order, with a blank
+ * line between each non-empty group and none trailing the last one. */
+static void test_notes_all_groups_present(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 512);
+	reportsNoteRow_t list[7] = {
+		{ REPORTS_NOTE_OTHER, "", "a plain text note", 1, 1 },
+		{ REPORTS_NOTE_REFERENCE, "MP_ZERO", "", 1, 2 },
+		{ REPORTS_NOTE_HOUSE_TRACK, "QM1", "QM1", 2, 3 },
+		{ REPORTS_NOTE_YARD_TRACK, "WP", "Track 2", 2, 4 },
+		{ REPORTS_NOTE_STORAGE, "WP_COAL", "Coal trestle", 1, 5 },
+		{ REPORTS_NOTE_INDUSTRY, "TIMBER", "Timber Ltd", 1, 6 },
+		{ REPORTS_NOTE_STATION, "WP", "", 1, 7 },
+	};
+
+	ReportsFormatNoteList(&out, list, 7);
+
+	assert_string_equal(DynStringToCStr(&out),
+	                    "Stations\n"
+	                    "  ID  7: WP                                            layer 1\n"
+	                    "\n"
+	                    "Industries\n"
+	                    "  ID  6: TIMBER       Timber Ltd                       layer 1\n"
+	                    "\n"
+	                    "Storage\n"
+	                    "  ID  5: WP_COAL      Coal trestle                     layer 1\n"
+	                    "\n"
+	                    "Yard Tracks\n"
+	                    "  ID  4: WP           Track 2                          layer 2\n"
+	                    "\n"
+	                    "House Tracks\n"
+	                    "  ID  3: QM1          QM1                              layer 2\n"
+	                    "\n"
+	                    "Reference\n"
+	                    "  ID  2: MP_ZERO                                       layer 1\n"
+	                    "\n"
+	                    "Other Notes\n"
+	                    "  ID  1:              a plain text note                layer 1\n");
+	DynStringFree(&out);
+}
+
+/* MARGINAL-equivalent case: a kind absent entirely gets no heading, and
+ * exactly one blank line separates the two groups that do appear. */
+static void test_notes_skips_absent_group(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 128);
+	reportsNoteRow_t list[2] = {
+		{ REPORTS_NOTE_STATION, "WP", "", 1, 1 },
+		{ REPORTS_NOTE_OTHER, "", "a link note", 1, 2 }
+	};
+
+	ReportsFormatNoteList(&out, list, 2);
+
+	assert_string_equal(DynStringToCStr(&out),
+	                    "Stations\n"
+	                    "  ID  1: WP                                            layer 1\n"
+	                    "\n"
+	                    "Other Notes\n"
+	                    "  ID  2:              a link note                      layer 1\n");
+	DynStringFree(&out);
+}
+
+static void test_notes_kind_from_json(void **state)
+{
+	(void) state;
+	cJSON *station = cJSON_Parse("{\"kind\":\"station\"}");
+	cJSON *industry = cJSON_Parse("{\"kind\":\"industry\"}");
+	cJSON *storage = cJSON_Parse("{\"kind\":\"storage\"}");
+	cJSON *yard = cJSON_Parse("{\"kind\":\"yard_track\"}");
+	cJSON *house = cJSON_Parse("{\"kind\":\"house_track\"}");
+	cJSON *reference = cJSON_Parse("{\"kind\":\"reference\"}");
+	cJSON *unknown = cJSON_Parse("{\"kind\":\"something_else\"}");
+	cJSON *missing = cJSON_Parse("{\"id\":\"WP\"}");
+
+	(void) state;
+	assert_int_equal(ReportsNoteKindFromJson(station), REPORTS_NOTE_STATION);
+	assert_int_equal(ReportsNoteKindFromJson(industry), REPORTS_NOTE_INDUSTRY);
+	assert_int_equal(ReportsNoteKindFromJson(storage), REPORTS_NOTE_STORAGE);
+	assert_int_equal(ReportsNoteKindFromJson(yard), REPORTS_NOTE_YARD_TRACK);
+	assert_int_equal(ReportsNoteKindFromJson(house), REPORTS_NOTE_HOUSE_TRACK);
+	assert_int_equal(ReportsNoteKindFromJson(reference), REPORTS_NOTE_REFERENCE);
+	assert_int_equal(ReportsNoteKindFromJson(unknown), REPORTS_NOTE_OTHER);
+	assert_int_equal(ReportsNoteKindFromJson(missing), REPORTS_NOTE_OTHER);
+
+	cJSON_Delete(station);
+	cJSON_Delete(industry);
+	cJSON_Delete(storage);
+	cJSON_Delete(yard);
+	cJSON_Delete(house);
+	cJSON_Delete(reference);
+	cJSON_Delete(unknown);
+	cJSON_Delete(missing);
+}
+
 int main(void)
 {
 	const struct CMUnitTest tests[] = {
@@ -794,6 +924,11 @@ int main(void)
 		cmocka_unit_test(test_kinked_empty_list),
 		cmocka_unit_test(test_kinked_single_row),
 		cmocka_unit_test(test_kinked_multiple_rows),
+		cmocka_unit_test(test_notes_empty_list),
+		cmocka_unit_test(test_notes_single_row),
+		cmocka_unit_test(test_notes_all_groups_present),
+		cmocka_unit_test(test_notes_skips_absent_group),
+		cmocka_unit_test(test_notes_kind_from_json),
 	};
 	return cmocka_run_group_tests(tests, NULL, NULL);
 }
