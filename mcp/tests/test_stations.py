@@ -155,6 +155,24 @@ def test_extract_stations_ignores_malformed_json_note():
     assert names == {"Alpha", "Beta", "Gamma"}
 
 
+def test_extract_stations_json_reads_terminus_switchback_ref_tag():
+    """JSON station notes must carry terminus/switchback/ref_tag through,
+    same as the text 'STATION: <id> !TERM !SWB @ref' format does."""
+    layout = parse_file(STATION_FIXTURE)
+    layout.notes.append(NoteObject(
+        id=101, layer=0, x=0.0, y=0.0, op=3,
+        text=json.dumps({
+            "kind": "station", "id": "Delta",
+            "terminus": True, "switchback": True, "ref_tag": "MP_ZERO",
+        }),
+    ))
+    stations = {s.name: s for s in extract_stations(layout)}
+    delta = stations["Delta"]
+    assert delta.terminus is True
+    assert delta.switchback is True
+    assert delta.ref_tag == "MP_ZERO"
+
+
 # ---------------------------------------------------------------------------
 # compute_distances — full track graph
 # ---------------------------------------------------------------------------
