@@ -321,34 +321,16 @@ fields are always preserved rather than rejected. A <tt>"kind"</tt> field,
 when present, is shown on the status line and used by other tools to group
 notes.
 
-For operational metadata (stations, industries, and similar), the
-following <tt>"kind"</tt> values and fields are a documented convention,
-not an enforced schema -- nothing prevents saving a note that omits a
-listed field or uses a different <tt>"kind"</tt> altogether. Every kind's
-own identifying field is named <tt>"id"</tt> for consistency (this is also
-the field the Notes Report, \ref cmdReportsnotes, reads for its own ID
-column):
-
-- <tt>"station"</tt> -- <tt>id</tt> (required); optional <tt>terminus</tt>,
-  <tt>switchback</tt> (both booleans, default false); optional
-  <tt>ref_tag</tt> (string).
-- <tt>"industry"</tt> -- <tt>id</tt> (required); optional <tt>name</tt>
-  (defaults to <tt>id</tt>); optional <tt>station</tt> (the connected
-  station's own <tt>id</tt>).
-- <tt>"storage"</tt> -- <tt>id</tt> (required); optional <tt>name</tt>
-  (defaults to <tt>id</tt>).
-- <tt>"house_track"</tt> -- <tt>id</tt> (required): the <tt>id</tt> of
-  whichever station or industry this house track's capacity belongs to.
-- <tt>"yard_track"</tt> -- <tt>id</tt> (required, the yard/station this
-  track belongs to); <tt>label</tt> (required, this track's own display
-  label within the yard).
-- <tt>"reference"</tt> -- <tt>id</tt> (required, e.g. <tt>"MP_ZERO"</tt>);
-  optional <tt>mp_scale</tt> (number, layout inches per milepost, only
-  meaningful when <tt>id</tt> is <tt>"MP_ZERO"</tt>).
-
-A note's own layer (see \ref cmdLayer, \ref cmdLayergroup) identifies which
-railroad/entity it belongs to on a layout with more than one -- there is no
-separate field for this.
+For operational metadata (stations, industries, sidings, and similar), a
+documented naming convention for <tt>"kind"</tt> values and their fields --
+including how a note relates to the layer or railroad it belongs to on a
+multi-entity layout -- is planned as part of an upcoming Operations design
+session, and will be described in that future Operations section of the
+User Guide once it exists. Until then, <tt>"kind"</tt> is just a free-form
+label; nothing in JSON Note itself enforces any particular value or field
+set. A couple of illustrative examples of the kind of thing this could
+look like: <tt>{"kind": "station", "id": "WP"}</tt> or
+<tt>{"kind": "industry", "id": "QM1", "station": "WP"}</tt>.
 
 <h3>Structured field editor</h3>
 
