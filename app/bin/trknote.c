@@ -610,8 +610,8 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 
 /**
  * Parse a "MANAGENOTES ..." file-format line (SF #800 phase 3):
- *   MANAGENOTES "<name>"
- * registers <name> into the Manage Notes registry (notenames.h). A
+ *   MANAGENOTES "\<name\>"
+ * registers \<name\> into the Manage Notes registry (notenames.h). A
  * malformed line is silently ignored, same convention as ReadLayerGroups().
  *
  * The keyword is "MANAGENOTES", not the shorter "NOTENAME" originally
