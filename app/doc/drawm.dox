@@ -316,9 +316,39 @@ blocks Done on the Document Editor (\ref cmdFileNote).
 readability) if it's currently valid; if not, it reports the same error
 <b>Validate</b> would.
 
-There is no fixed schema -- any valid JSON object is accepted. A
-<tt>"kind"</tt> field, when present, is shown on the status line and used
-by other tools to group notes.
+There is no fixed schema -- any valid JSON object is accepted, and unknown
+fields are always preserved rather than rejected. A <tt>"kind"</tt> field,
+when present, is shown on the status line and used by other tools to group
+notes.
+
+For operational metadata (stations, industries, and similar), the
+following <tt>"kind"</tt> values and fields are a documented convention,
+not an enforced schema -- nothing prevents saving a note that omits a
+listed field or uses a different <tt>"kind"</tt> altogether. Every kind's
+own identifying field is named <tt>"id"</tt> for consistency (this is also
+the field the Notes Report, \ref cmdReportsnotes, reads for its own ID
+column):
+
+- <tt>"station"</tt> -- <tt>id</tt> (required); optional <tt>terminus</tt>,
+  <tt>switchback</tt> (both booleans, default false); optional
+  <tt>ref_tag</tt> (string).
+- <tt>"industry"</tt> -- <tt>id</tt> (required); optional <tt>name</tt>
+  (defaults to <tt>id</tt>); optional <tt>station</tt> (the connected
+  station's own <tt>id</tt>).
+- <tt>"storage"</tt> -- <tt>id</tt> (required); optional <tt>name</tt>
+  (defaults to <tt>id</tt>).
+- <tt>"house_track"</tt> -- <tt>id</tt> (required): the <tt>id</tt> of
+  whichever station or industry this house track's capacity belongs to.
+- <tt>"yard_track"</tt> -- <tt>id</tt> (required, the yard/station this
+  track belongs to); <tt>label</tt> (required, this track's own display
+  label within the yard).
+- <tt>"reference"</tt> -- <tt>id</tt> (required, e.g. <tt>"MP_ZERO"</tt>);
+  optional <tt>mp_scale</tt> (number, layout inches per milepost, only
+  meaningful when <tt>id</tt> is <tt>"MP_ZERO"</tt>).
+
+A note's own layer (see \ref cmdLayer, \ref cmdLayergroup) identifies which
+railroad/entity it belongs to on a layout with more than one -- there is no
+separate field for this.
 
 <h3>Structured field editor</h3>
 
