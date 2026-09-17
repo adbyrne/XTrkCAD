@@ -39,6 +39,7 @@
 #include "common-ui.h"
 #include "ctrain.h"
 #include "include/dlayergroupui.h"
+#include "include/dmanagenotesui.h"
 #include "include/dprintexportfilter.h"
 #include "include/dselectlayers.h"
 
@@ -1777,6 +1778,8 @@ EXPORT void CreateMenus(void)
 	                   InitLayersDialog(), 0, NULL);
 	MiscMenuItemCreate(manageM, NULL, "cmdLayerGroups", _("Layer Groups ..."),
 	                   ACCL_LAYERGROUPS, InitLayerGroupsDialog(), 0, NULL);
+	MiscMenuItemCreate(manageM, NULL, "cmdManagenotes", _("Notes ..."),
+	                   ACCL_MANAGENOTES, InitManageNotesDialog(), 0, NULL);
 	wMenuSeparatorCreate(manageM);
 
 	MiscMenuItemCreate(manageM, NULL, "cmdEnumerate", _("Parts &List ..."),

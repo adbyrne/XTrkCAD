@@ -358,6 +358,25 @@ target_link_libraries(layergrouptest PRIVATE ${LIBS})
 
 add_test(LayerGroupTest layergrouptest)
 
+# Manage Notes name registry (SF #800 phase 3) -- pure registry/data-model
+# logic, extracted into notenames.c so it carries no dependency on
+# common.h/dynarray.h/wlib, same rationale as dlayergroup.c above.
+
+add_executable(notenamestest
+	notenamestest.c
+	../notenames.c
+)
+
+target_include_directories(notenamestest PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
+    ${CMAKE_SOURCE_DIR}/app/wlib/include
+)
+
+target_link_libraries(notenamestest PRIVATE ${LIBS})
+
+add_test(NoteNamesTest notenamestest)
+
 set_target_properties(
 	dxfformattest
 	shortentest
@@ -373,12 +392,13 @@ set_target_properties(
 	reportstest
 	elevjointest
 	layergrouptest
+	notenamestest
  	PROPERTIES FOLDER UnitTests
  )
 
 if(XTRKCAD_SANITIZE AND UNIX)
 	set(SANITIZE_FLAGS -fsanitize=address,undefined -fno-omit-frame-pointer)
-	foreach(t dxfformattest shortentest defaultstest pathstest utilitytest beziertest cornutest undostreamtest carstest carregistrytest careditlogictest reportstest elevjointest layergrouptest)
+	foreach(t dxfformattest shortentest defaultstest pathstest utilitytest beziertest cornutest undostreamtest carstest carregistrytest careditlogictest reportstest elevjointest layergrouptest notenamestest)
 		target_compile_options(${t} PRIVATE ${SANITIZE_FLAGS})
 		target_link_options(${t} PRIVATE ${SANITIZE_FLAGS})
 	endforeach()

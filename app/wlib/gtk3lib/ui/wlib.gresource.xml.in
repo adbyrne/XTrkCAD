@@ -25,6 +25,7 @@
     <file preprocess="xml-stripblanks">layergroup.ui</file>
     <file preprocess="xml-stripblanks">layout.ui</file>
     <file preprocess="xml-stripblanks">linkNote.ui</file>
+    <file preprocess="xml-stripblanks">managenotes.ui</file>
     <file preprocess="xml-stripblanks">map.ui</file>
     <file preprocess="xml-stripblanks">note.ui</file>
     <file preprocess="xml-stripblanks">outputbitmap.ui</file>

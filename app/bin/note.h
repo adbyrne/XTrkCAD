@@ -86,4 +86,9 @@ extern TRKTYP_T T_NOTE;
 //void NoteStateSave(track_p trk);
 track_p NewNote(wIndex_t index, coOrd p, enum noteCommands command );
 
+/* SF #800 phase 3: MANAGENOTES file-format line read/write, doc comment on
+ * the definition in trknote.c */
+void ReadNoteNames(char *line);
+BOOL_T WriteNoteNames(FILE *f);
+
 #endif // !HAVE_NOTE_H

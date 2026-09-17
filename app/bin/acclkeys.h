@@ -144,6 +144,7 @@
 #define ACCL_CARINV		(WALT+WCTL+'v')
 #define ACCL_LAYERS		(WALT+WCTL+'y')
 #define ACCL_LAYERGROUPS	(WALT+WCTL+'j')
+#define ACCL_MANAGENOTES	(WALT+WCTL+'z')
 #define ACCL_SETCURLAYER		(0)
 #define ACCL_MOVCURLAYER		(0)
 #define ACCL_CLRELEV	(0)

@@ -86,6 +86,7 @@
 #include "track.h"
 #include "utility.h"
 #include "include/dreportsfilter.h"
+#include "include/notenames.h"
 #include "include/reports.h"
 
 /** Debug log category for manual/visual testing (`-d reports=1 -l <file>`)
@@ -2266,31 +2267,28 @@ static void DoReportsNotesFilter(void *unused)
  * order -- built dynamically by ReportsPopulateNoteRootNamesFilter()
  * every invocation, not a fixed list any more (that hardcoding is
  * exactly what phase 2 removes). Only meaningful for Type "JSON" or "All
- * Types" -- see `reportsNoteTypeFilterInx` below. No registry UI exists
- * yet (SF #800 phase 3, the "Manage Notes" dialog, not built) --
- * ReportsManagedName*() below are deliberate phase-3 stubs, always
- * reporting zero registered names, so this dropdown always shows just
- * "All ROOT Names" for now. That's the correct, expected interim state
- * agreed for this phase, not a bug. */
+ * Types" -- see `reportsNoteTypeFilterInx` below. SF #800 phase 3 (the
+ * "Manage Notes" dialog, dmanagenotesui.c) is what actually populates the
+ * registry these two functions read from (notenames.h); until the user
+ * registers a name there, NoteNameCount() is 0 and this dropdown shows
+ * just "All ROOT Names" -- the correct, expected empty-registry state,
+ * not a bug. */
 static long reportsNoteRootNamesFilterInx;
 
-/** SF #800 phase 3 stub: the "Manage Notes" registry always has zero
- * entries until that dialog exists to populate it. Kept as its own
+/** Thin wrapper over NoteNameCount() (notenames.h) -- kept as its own
  * function (not inlined into the filter-population/compute-pass call
- * sites) so phase 3 is a single-function change, not a search-and-replace
- * across reports.c. */
+ * sites) so the registry's real storage can change without touching any
+ * call site here, only this definition. */
 static int ReportsManagedNameCount(void)
 {
-	return 0;
+	return NoteNameCount();
 }
 
-/** SF #800 phase 3 stub -- see ReportsManagedNameCount(); never actually
- * called while that always returns 0, but given a real signature now so
- * phase 3 doesn't need to touch any call site, only this definition. */
+/** Thin wrapper over NoteNameAt() (notenames.h) -- see
+ * ReportsManagedNameCount(). */
 static const char *ReportsManagedNameAt(int i)
 {
-	(void)i;
-	return "";
+	return NoteNameAt(i);
 }
 
 /** Type filter (SF #800 phase 1): 0 = "All Types", 1..4 map directly to

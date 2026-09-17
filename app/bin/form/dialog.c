@@ -237,6 +237,11 @@ static struct { const char *dialogName; const char *page; } dialogHelpAliases[]
 	 * feature -- same page covers both. */
 	{ "layergroupname", "cmdLayergroup" },
 
+	/* SF #800 phase 3: the "enter a name" modal (Add) is a helper popup
+	 * of the Manage Notes dialog, same rationale as layergroupname
+	 * above. */
+	{ "managenotesname", "cmdManagenotes" },
+
 	{ NULL, NULL }
 };
 
