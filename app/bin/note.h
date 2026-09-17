@@ -86,4 +86,17 @@ extern TRKTYP_T T_NOTE;
 //void NoteStateSave(track_p trk);
 track_p NewNote(wIndex_t index, coOrd p, enum noteCommands command );
 
+/** Parse a "MANAGENOTES ..." file-format line (SF #800 phase 3): registers
+ * one Manage Notes ROOT-level name into notenames.h's registry.
+ * \param line IN the remainder of the line after "MANAGENOTES "
+ */
+void ReadNoteNames(char *line);
+
+/** Write every registered Manage Notes name (notenames.h) to the layout
+ * file as a "MANAGENOTES" line (SF #800 phase 3).
+ * \param[in] f open file handle
+ * \return TRUE on success
+ */
+BOOL_T WriteNoteNames(FILE *f);
+
 #endif // !HAVE_NOTE_H

@@ -174,6 +174,7 @@ target_sources(xtrkcad-lib
     dlayer.c
     dlayergroup.c
     dlayergroupui.c
+    dmanagenotesui.c
     dprintexportfilter.c
     dreportsfilter.c
     dselectlayers.c
@@ -206,6 +207,7 @@ target_sources(xtrkcad-lib
     menu.c
     misc.c
     mymalloc.c
+    notenames.c
     # param.c
     paramfile.c
     paramfilelist.c
@@ -254,6 +256,7 @@ target_sources(xtrkcad-lib
     dlayer.h
     include/dlayergroup.h
     include/dlayergroupui.h
+    include/dmanagenotesui.h
     include/dreportsfilter.h
     include/dselectlayers.h
     draw.h
@@ -267,6 +270,7 @@ target_sources(xtrkcad-lib
     mapwindow.h
     menu.h
     misc.h
+    include/notenames.h
     note.h
     paths.h
     scale.h

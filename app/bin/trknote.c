@@ -28,6 +28,7 @@
 #include "icons.h"
 #include "misc.h"
 #include "note.h"
+#include "include/notenames.h"
 #include "param.h"
 #include "track.h"
 #include "include/utf8convert.h"
@@ -605,6 +606,53 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 	}
 
 	return C_CONTINUE;
+}
+
+/**
+ * Parse a "MANAGENOTES ..." file-format line (SF #800 phase 3):
+ *   MANAGENOTES "<name>"
+ * registers <name> into the Manage Notes registry (notenames.h). A
+ * malformed line is silently ignored, same convention as ReadLayerGroups().
+ *
+ * The keyword is "MANAGENOTES", not the shorter "NOTENAME" originally
+ * used -- found live via Xvfb save/reload testing that ReadTrack()'s
+ * object-type dispatch (track.c) does a plain prefix strncmp() against
+ * every registered track type name with no word-boundary check, so a
+ * line starting with "NOTENAME " was silently swallowed by the "NOTE"
+ * track-object reader instead of ever reaching this function -- it tried
+ * to parse the remainder ("NAME \"kind\"") as NOTE's own numeric fields
+ * and failed with a confusing "expected integer" error. "MANAGENOTES"
+ * doesn't collide with any registered track type name.
+ *
+ * \param line IN the remainder of the line after "MANAGENOTES "
+ */
+void ReadNoteNames(char *line)
+{
+	char *name;
+
+	if (!GetArgs(line, "q", &name)) {
+		return;
+	}
+	NoteNameAdd(name);
+	MyFree(name);
+}
+
+/**
+ * Write every registered Manage Notes name (notenames.h) to the layout
+ * file as its own "MANAGENOTES" line (SF #800 phase 3).
+ *
+ * \param[in] f open file handle
+ * \return TRUE on success
+ */
+BOOL_T WriteNoteNames(FILE *f)
+{
+	BOOL_T rc = TRUE;
+
+	for (int i = 0; i < NoteNameCount(); i++) {
+		rc &= fprintf(f, "MANAGENOTES \"%s\"\n", NoteNameAt(i)) > 0;
+	}
+
+	return rc;
 }
 
 void InitTrkNote(wMenu_p menu)
