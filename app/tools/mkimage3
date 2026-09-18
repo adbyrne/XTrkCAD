@@ -1,0 +1,46 @@
+#!/usr/bin/bash
+if [ $# -lt 2 ] ; then
+	echo %0 'OUTDIR PNG ...'
+	echo 'Converts *{16,24,32}.png (pick one) files to .image3'
+	echo 'Run from BLDDIR/app/bin/bitmaps/png'
+	echo
+	echo '$ cd $BLDDIR/app/bin/bitmaps/png'
+	echo '$ $SRCDIR/app/tools/mkimage3 .. *16.png'
+	exit 1
+fi
+
+OUTDIR=$1
+if [ ! -d ${OUTDIR} ] ; then
+	echo ${OUTDIR} - not a directory
+	exit 1
+fi
+
+shift
+for XPMFILE in "$@" ; do
+	INBASE=`echo ${XPMFILE} \
+		| sed -e 's/\.png//' -e 's/16$//' -e 's/24$//' -e 's/32$//'`
+
+	if [ ! -f ${INBASE}16.png ] ; then
+		echo ${INBASE}16.png: not found
+		exit 1
+	fi
+	if [ ! -f ${INBASE}24.png ] ; then
+		echo ${INBASE}24.png: not found
+		exit 1
+	fi
+	if [ ! -f ${INBASE}32.png ] ; then
+		echo ${INBASE}32.png: not found
+		exit 1
+	fi
+
+	NAME=`basename ${INBASE} | sed -e 's/-/_/g'`
+	OUTFILE="${OUTDIR}"/"`basename ${INBASE}`"".image3"
+	> ${OUTFILE}
+( 
+	gdk-pixbuf-csource --stream --name ${NAME}16_image3 ${INBASE}16.png;  \
+	gdk-pixbuf-csource --stream --name ${NAME}24_image3 ${INBASE}24.png;  \
+	gdk-pixbuf-csource --stream --name ${NAME}32_image3 ${INBASE}32.png;  \
+	echo "static const char * ${NAME}_image3[3] = { ${NAME}16_image3, ${NAME}24_image3, ${NAME}32_image3 };" ) \
+	| sed -e 's/guint8/char/g' >> ${OUTFILE}
+
+done

@@ -1,0 +1,88 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  doxygen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build libgtk2.0-dev doxygen graphviz
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_USE_DOXYGEN=ON -DXTRKCAD_TESTING=OFF
+      - name: Build docs
+        run: cmake --build build --target docs-doxygen
+
+  c-tests-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build libgtk2.0-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
+      - name: Build
+        run: cmake --build build
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  c-tests-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install dependencies
+        # mxml (Mini-XML) is not in homebrew-core; it is optional (SVG export only)
+        run: brew install ninja gtk+ cmocka libzip librsvg
+      - name: Configure
+        # gtk+ and several of its deps (pango, atk, …) are keg-only in Homebrew
+        # and are not symlinked into /opt/homebrew/lib.  Ask pkg-config for the
+        # full set of -L flags so every keg's lib dir ends up on the linker path.
+        run: |
+          GTK_PREFIX=$(brew --prefix gtk+)
+          export PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
+          GTK_LDFLAGS=$(pkg-config --libs-only-L gtk+-2.0)
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
+            -DCMAKE_PREFIX_PATH="$GTK_PREFIX;$(brew --prefix)" \
+            -DCMAKE_EXE_LINKER_FLAGS="$GTK_LDFLAGS"
+      - name: Build
+        run: cmake --build build
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  c-tests-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Cache vcpkg packages
+        uses: actions/cache@v6
+        id: vcpkg-cache
+        with:
+          path: C:\vcpkg\installed
+          key: vcpkg-x64-windows-cmocka-zlib-libzip-freeimage-v1
+      - name: Install dependencies
+        if: steps.vcpkg-cache.outputs.cache-hit != 'true'
+        # Windows uses mswlib (Win32) backend — no GTK; mxml is optional (SVG export)
+        # FreeImage is required by CMake; pre-installed on Ubuntu runners but not Windows
+        run: vcpkg install cmocka:x64-windows zlib:x64-windows libzip:x64-windows freeimage:x64-windows
+      - name: Configure
+        # CMAKE_PREFIX_PATH points CMake at the vcpkg installed tree so all
+        # config-mode and module-mode finders (zlib, libzip, etc.) resolve.
+        # Ninja is a single-config generator — CMAKE_BUILD_TYPE set at configure time.
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" "-DCMAKE_PREFIX_PATH=$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows"
+      - name: Build
+        run: cmake --build build
+      - name: Test
+        run: ctest --test-dir build --output-on-failure

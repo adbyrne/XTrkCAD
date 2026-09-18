@@ -1,0 +1,49 @@
+VERSION 7
+DEMOINIT
+ORIG 8.000 0.000 0.000
+REDRAW
+RESET
+MESSAGE
+The demo also simulates entering values and selecting options on various dialogs.
+
+This is simulated by drawing a rectangle around the control when values are entered or changed.
+END
+STEP
+PARAMETER misc cmdDisplay
+MESSAGE
+_________________________________________
+
+Here we are going to make some changes to the Display dialog.  Notice how this is simulated.
+First we are setting 'Draw Tunnel' to 'Normal'
+END
+STEP
+PARAMETER display tunnels 2
+MESSAGE
+Now we're changing 'Label Font Size' to '56'
+END
+STEP
+PARAMETER display description-fontsize 56
+MESSAGE
+We'll change some other options
+END
+STEP
+PAUSE 500
+PARAMETER display layoutlabels 4
+PAUSE 500
+PARAMETER display layoutlabels 0
+PAUSE 500
+PARAMETER display mapscale 50
+PAUSE 500
+PARAMETER display carhotbarlabels 4 Manuf/Proto
+MESSAGE
+_________________________________________
+
+This effect is only used in demonstration mode.  During normal operation you will not see this.
+END
+STEP
+PARAMETER display cancel
+MESSAGE
+=========================================
+END
+STEP
+CLEAR

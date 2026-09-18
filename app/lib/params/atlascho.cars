@@ -1,0 +1,654 @@
+CONTENTS=Atlas HO Scale Cars
+MANUF=Atlas
+SCALE=HO
+ORDER=#RDN
+TYPE=freight
+COUPLERLENGTH=0.250
+#############################################
+#
+# Flat, 42'
+#
+#############################################
+PROTO=Flat, 42'
+DESC=Pulpwood Flat w/Logs
+PROTOLENGTH=504
+PART=1600%Undecorated%w/Open Ends
+PART=1601%Undecorated%w/Closed Ends
+PART=1602-1%Atlantic Coast Line%%70206
+PART=1602-3%Atlantic Coast Line%%70221
+PART=1602-4%Atlantic Coast Line%%70218
+PART=1603-1%Chesapeake & Ohio%%81781
+PART=1603-2%Chesapeake & Ohio%%81793
+PART=1603-3%Chesapeake & Ohio%%81226
+PART=1603-4%Chesapeake & Ohio%%81231
+PART=1604-2%Delaware & Hudson%%8050
+PART=1604-3%Delaware & Hudson%%8054
+PART=1605-1%Gulf, Mobile & Ohio%%4000
+PART=1605-2%Gulf, Mobile & Ohio%%4023
+PART=1605-4%Gulf, Mobile & Ohio%%4020
+PART=1606-1%Santa Fe%%92992
+PART=1606-2%Santa Fe%%92995
+PART=1606-3%Santa Fe%%92999
+PART=1606-4%Santa Fe%%92998
+PART=1606-5%Santa Fe%%92900
+PART=1606-6%Santa Fe%%92989
+PART=1607-1%Western Maryland%%402
+PART=1607-2%Western Maryland%%403
+PART=1607-3%Western Maryland%%407
+PART=1607-4%Western Maryland%%405
+PART=1607-5%Western Maryland%%410
+PART=1607-6%Western Maryland%%406
+PART=1608-3%Frisco%%4326
+PART=1609-3%Illinois Central%%7819
+PART=1610-3%Seaboard Coast Line%%670283
+PART=1611-1%Burlington Northern%%611300
+PART=1611-2%Burlington Northern%%611301
+PART=1612-1%Delaware & Hudson%%8026
+PART=1612-2%Delaware & Hudson%%8038
+PART=1612-3%Delaware & Hudson%%8000
+PART=1612-4%Delaware & Hudson%%8059
+PART=1613-1%Louisville & Nashville%%20500
+PART=1613-2%Louisville & Nashville%%20515
+PART=1613-3%Louisville & Nashville%%20553
+PART=1613-4%Louisville & Nashville%%20572
+PART=1614-1%Maine Central%%7711
+PART=1614-2%Maine Central%%7714
+PART=1615-1%NC & St. L%%80500
+PART=1615-2%NC & St. L%%80501
+PART=1616-1%ICG%%101367
+PART=1616-2%ICG%%101371
+PART=1617-1%St Louis, Brownsville & Mexico%%1050
+PART=1617-2%St Louis, Brownsville & Mexico%%1052
+#############################################
+#
+# Tank, 23,500 Gallon
+#
+#############################################
+PROTO=Tank, 55'
+DESC=23,500 Gallon
+PROTOLENGTH=660.000
+PART=1620%Undecorated
+PART=1621-1%GAF%%83122
+PART=1621-2%GAF%%83124
+PART=1622-1%Honeymead%%89154
+PART=1622-2%Honeymead%%89155
+PART=1623-1%Amoco%%84018
+PART=1623-2%Amoco%%84021
+PART=1624-1%Mobil%%14230
+PART=1624-2%Mobile%%14271
+PART=1625-1%Reilly Industries%%84612
+PART=1625-2%Reilly Industries%%84617
+PART=1626-1%Republic Car Line%%237103
+PART=1626-2%Republic Car Line%%2371103
+PART=1627-1%Califonia Rail Car%%3036
+PART=1627-2%Califonia Rail Car%%3042
+PART=1628-1%Mendota%%198289
+PART=1628-2%Mendota%%198292
+PART=1629-1%Union Carbide%%72474
+PART=1629-2%Union Carbide%%72487
+#############################################
+#
+# Box, 60', Sgl Door Auto Parts
+#
+#############################################
+PROTO=Box, 60'
+DESC=Sgl Door Auto Parts
+PROTOLENGTH=728.000
+PART=1650%Undecorated
+PART=1651-1%Baltimore & Ohio%%489942
+PART=1651-2%Baltimore & Ohio%%489946
+PART=1651-3%Baltimore & Ohio%%489949
+PART=1652-1%EL%%60827
+PART=1652-2%EL%%68036
+PART=1652-3%EL%%68060
+PART=1653-1%Grand Trunk Western%%306872
+PART=1653-2%Grand Trunk Western%%306886
+PART=1653-3%Grand Trunk Western%%306895
+PART=1654-1%MKT%%8510
+PART=1654-2%MKT%%8511
+PART=1655-1%Norfolk & Western%%600909
+PART=1655-2%Norfolk & Western%%600913
+PART=1655-3%Norfolk & Western%%600920
+PART=1656-1%Rock Island%%33805
+PART=1656-2%Rock Island%%33814
+PART=1656-3%Rock Island%%33826
+PART=1657-1%Western Maryland%%495980
+PART=1657-2%Western Maryland%%495985
+PART=1657-3%Western Maryland%%495988
+PART=1658-1%CSX%%172065
+PART=1658-2%CSX%%172625
+PART=1659-1%Norfolk Southern%%600931
+PART=1659-2%Norfolk Southern%%600942
+PART=1660-1%Canadian National%%799088
+PART=1660-2%Canadian National%%799423
+PART=1661-1%Canadian National 'Web Site'%%799440
+PART=1662-1%Cotton Belt%%63365
+PART=1662-2%Cotton Belt%%63380
+PART=1663-1%Rock Island%%33754
+PART=1663-2%Rock Island%%533815
+PART=1670%Undecorated
+PART=1671-1%Canadian Pacific%%205086
+PART=1671-2%Canadian Pacific%%205092
+PART=1672-1%Chessie System%%488725
+PART=1672-2%Chessie System%%488749
+PART=1673-1%DRGW%%63853
+PART=1673-2%DRGW%%63856
+PART=1674-1%Grand Trunk Western%%306348
+PART=1674-2%Grand Trunk Western%%306636
+PART=1675-1%Norfolk & Western%%600804
+PART=1675-2%Norfolk & Western%%600970
+PART=1676-1%Southern%%43139
+PART=1676-2%Southern%%43147
+PART=1677-1%Union Pacific%%960566
+PART=1677-2%Union Pacific%%960568
+PART=1678-1%Detroit, Toledo & Ironton%%25801
+PART=1678-2%Detroit, Toledo & Ironton%%25805
+#============================================
+DESC=Sgl Door Auto Part, Atlas 50th Anniversary Edition
+#============================================
+PART=1022
+#############################################
+#
+# Tank 40', 14,000 Gallon Kaolin
+#
+#############################################
+PROTO=Tank, 40'
+DESC=14,000 Gallon Kaolin
+PROTOLENGTH=480
+PART=1700%Undecorated
+PART=1701-4%J.M. Huber%%79348
+PART=1702-4%Englehard%%71986
+PART=1703-4%Georgia Kaolin%%73007
+PART=1703-5%Georgia Kaolin%%73011
+PART=1704-4%Thiele%%78044
+PART=1704-5%Thiele%%78052
+PART=1705-4%ECC International%%75715
+PART=1705-5%ECC International%%75720
+PART=1706-4%Dry Branch%%78806
+PART=1706-5%Dry Branch%%78812
+PART=1707-3%OMYA%%200977
+PART=1708-1%Thiele%%79114
+PART=1709-3%Dupont TiPure%%71612
+PART=1710-1%Freeport Kaolin%%89936
+PART=1710-2%Freeport Kaolin%%89940
+PART=1710-3%Freeport Kaolin%%89939
+PART=1711-1%ACFX%%72084
+PART=1711-2%ACFX%%75969
+PART=1712-1%Anglo-American Clays%%78630
+PART=1712-2%Anglo-American Clays%%78638
+PART=1713-1%Cyprus%%77829
+PART=1713-2%Cyprus%%77831
+PART=1714-1%Georgia Kaolin%%77826
+PART=1714-2%Georgia Kaolin%%78948
+PART=1715-1%Ontario Carbonate%%71473
+PART=1715-2%Ontario Carbonat%%71477
+PART=1716-1%SHPX%%203080
+PART=1716-2%SHPX%%203084
+#############################################
+#
+# Tank 65, 33,000 Gallon, LPG
+#
+#############################################
+PROTO=Tank, 65'
+DESC=33,000 Gallon, LPG
+PROTOLENGTH=780
+PART=1720%Undecorated
+PART=1721-4%ACFX%%17433
+PART=1721-5%ACFX%%17435
+PART=1721-6%ACFX%%17440
+PART=1723-5%Shell%%3012
+PART=1723-6%Shell%%3020
+PART=1728-5%Pyrofax Gas%%17001
+PART=1728-6%Pyrofax Gas%%17002
+PART=1729-4%Suburban Propane%%1312
+PART=1729-5%Suburban Propane%%1310
+PART=1729-6%Suburban Propane%%1319
+PART=1730-4%Union Texas Petroleum%%933019
+PART=1731-3%CNTX%%1211
+PART=1731-4%CNTX%%1220
+PART=1732-1%Cumberland Corp.%%17154
+PART=1732-2%Cumberland Corp.%%17157
+PART=1733-1%Virginian Petroleum%%1001
+PART=1733-2%Virginian Petroleum%%1002
+PART=1734-1%Calgas%%17429
+PART=1734-2%Calgas%%17433
+PART=1734-3%Calgas%%17430
+PART=1734-4%Calgas%%17432
+PART=1735-1%ACFX%%17740
+PART=1735-2%ACFX%%17745
+PART=1736-1%GLNX%%34247
+PART=1736-2%GLNX%%34249
+#############################################
+#
+# Box, 53', Evans Dbl Door
+#
+#############################################
+PROTO=Box, 53'
+DESC=Evans Dbl Door
+PROTOLENGTH=636.000
+PART=1750%Undecorated
+PART=1751-4%Burlington Northern%%750006
+PART=1751-5%Burlington Northern%%750014
+PART=1752-4%Ralston Purina%%106
+PART=1752-5%Ralston Purina%%167
+PART=1753-4%Union Pacific%%451352
+PART=1753-5%Union Pacific%%451317
+PART=1754-4%Chicago & Northwestern%%600639
+PART=1754-5%Chicago & Northwestern%%600636
+PART=1755-4%Boston & Maine%%119
+PART=1755-5%Boston & Maine%%110
+PART=1756-4%BC Rail%%800447
+PART=1756-5%BC Rail%%800430
+PART=1756-6%BC Rail%%800420
+PART=1756-7%BC Rail%%800445
+PART=1756-8%BC Rail%%800408
+PART=1756-9%BC Rail%%800480
+PART=1756-10%BC Rail%%800501
+PART=1756-11%BC Rail%%800523
+PART=1757-4%Evans Products%%11713
+PART=1758-2%Minneapolis, Northfield & Southern%%571
+PART=1759-1%North West Hardwood%%13150
+PART=1759-2%North West Hardwood%%10874
+PART=1759-3%Northwest Hardwoods%%13151
+PART=1759-4%Northwest Hardwoods%%13152
+PART=1761-1%Aloha Shake%%10392
+PART=1761-2%Aloha Shake%%10393
+PART=1762-1%Ogden Corporation%%11498
+PART=1762-2%Ogden Corporation%%11498
+PART=1763-1%Toledo, Peoria & Western%%50561
+PART=1763-1%Toledo, Peoria & Western%%50575
+PART=1764-1%Florida East Coast%%5035
+PART=1764-2%Florida East Coast%%5038
+PART=1765-1%Plywood Marketing%%10177
+PART=1765-2%Plywood Marketing%%10557
+PART=1766-1%Wisconson Central%%1029
+PART=1766-2%Wisconson Central%%1048
+PART=1766-3%Wisconsin Central%%1022
+PART=1766-4%Wisconsin Central%%1040
+PART=1771-1%Illinois Central%%150028
+PART=1771-2%Illinois Central%%150057
+PART=1772-1%Illinois Terminal%%900
+PART=1772-2%Illinois Termina%%912
+PART=1773-1%Jeld-Wen%%11293
+PART=1773-2%Jeld-Wen%%11301
+PART=1774-1%Louisiana Pacifi%%18024
+PART=1774-2%Louisiana Pacific%%18049
+PART=1775-1%Mountain Pine Lumber%%100
+PART=1775-2%Mountain Pine Lumber%%113
+PART=1776-1%Multnomah Plywood%%13027
+PART=1776-2%Multnomah Plywood%%13029
+PART=1777-1%Santa Fe%%10708
+PART=1777-2%Santa Fe%%10772
+PART=1777-3%Santa Fe%%3038
+PART=1777-4%Santa Fe%%11152
+PART=1778-1%Fort Vancouver Plywood%%11737
+PART=1778-2%Fort Vancouver Plywood%%11748
+PART=1779-1%Georgia-Pacific%%16001
+PART=1779-2%Georgia-Pacific%%16020
+PART=1780-1%Louisville, New Albany & Corydon%%5303
+PART=1780-2%Louisville, New Albany & Corydon%%5307
+PART=1781-1%Virginia Central%%5220
+PART=1781-2%Virginia Central%%5225
+PART=1782-1%Willamette Industries%%19001
+PART=1782-2%Willamette Industries%%19002
+PART=1783-1%Union Pacific%%50308
+PART=1783-2%Union Pacific%%50406
+PART=1788-1%Union Pacific%%451315
+PART=1788-2%Union Pacific%%451324
+PART=1784-1 %David J. Joseph Company %%101
+PART=1784-2%David J. Joseph Company%%109
+PART=1785-1%Doniphan, Kensett & Searcy%%776219
+PART=1785-2%Doniphan, Kensett & Searcy%%776227
+PART=1786-1%Masonite%%200
+PART=1786-2%Masonite%%220
+PART=1787-1%McCloud River%%12100
+PART=1787-2%McCloud River%%12107
+#############################################
+#
+# 36' Reefer Car
+#
+#############################################
+PROTO=Reefer, 36'
+DESC=
+PROTOLENGTH=432.000
+PART=6100%Undecorated%Standard hatch-grab irons
+PART=6101%Undecorated%Standard hatch-ladder
+PART=6104-1%Cudahy 'Putitan'%%1001
+PART=6104-2%Cudahy 'Sunlight'%%1058
+PART=6105-1%Hormel%%66000
+PART=6105-1%Hormel%%66001
+PART=6106-1%Swift%%4871
+PART=6106-2%Swift%%4906
+PART=6106-3%Swift%%4911
+PART=6106-4%Swift%%5003
+PART=6106-5%Swift%%4888
+PART=6106-6%Swift%%4901
+PART=6107-1%EAGLE BEER%%2900
+PART=6107-2%EAGLE BEER%%2901
+PART=6108-1%DECKER%%2565
+PART=6108-2%DECKER%%2569
+PART=6109-1%SELECTO%%308
+PART=6109-2%SELECTO%%314
+PART=6110-1%Clicquot Club%%1490
+PART=6110-2%Clicquot Club%%1491
+PART=6111-1%Dubuque Packing%%63053
+PART=6111-2%Dubuque Packing%%63058
+PART=6112-1%Krey's%%878
+PART=6112-2%Krey's%%879
+PART=6113-1%Nickel Plate%%300
+PART=6113-2%Nickel Plate%%305
+PART=6113-3%Nickel Plate%%302
+PART=6113-4%Nickel Plate%%308
+PART=6114-1%Nuckoll Packing Co.%%100
+PART=6114-2%Nuckoll Packing Co.%%101
+PART=6115-1%Wilson Car Lines%%9321
+PART=6115-2%Wilson Car Lines%%9323
+PART=6116-1%Page Milk%%1828
+PART=6116-2%Page Milk%%1829
+PART=6117-1%Pearl Brand%%2900
+PART=6117-2%Pearl Brand%%2901
+PART=6118-1%Peter Fox Beer%%4751
+PART=6118-2%Peter Fox Beer%%4757
+PART=6119-1%Pluto Water%%2688
+PART=6119-2%Pluto Water%%2689
+PART=6120-1%Southern Star%%207
+PART=6120-2%Southern Star%%208
+PART=6121-1%Wescott & Winks%%1043
+PART=6121-2%Wescott & Winks%%1058
+PART=6122-1%Columbus Packing%%147
+PART=6122-2%Columbus Packing%%148
+PART=6123-1%H.M. Noack%%3116
+PART=6123-2%H.M. Noack%%3117
+PART=6124-1%Kahn's%%1093
+PART=6124-2%Kahn's%%1099
+PART=6125-1%Quaker City%%728
+PART=6125-2%Quaker City%%729
+PART=6126-1%Rath's%%209
+PART=6126-2%Rath's%%210
+PART=6127-1%Swift's%%2430
+PART=6127-2%Swift's%%2431
+PART=6128-1%A&P%%12046
+PART=6128-2%A&P%%12047
+PART=6129-1%Bright Morning Butter %%1990
+PART=6129-2%Bright Morning Butter%%1991
+PART=6130-1%Evansville Packing Co.%%54
+PART=6130-2%Evansville Packing Co.%%55
+PART=6131-1%Kingan's%%237
+PART=6131-2%Kingan's%%1499
+PART=6132-1%Meyer Kornblum%%118
+PART=6132-2%Meyer Kornblum%%119
+#============================================
+DESC=War Bonds
+#============================================
+PART=HTDH-1%Swift%%6306
+PART=HTDH-2%Swift%%6307
+PART=HTDH-3%Swift%%6308
+PART=HTDH-4%Swift%%6309
+#############################################
+#
+# Hopper, Covered, 35', PS-2
+#
+#############################################
+PROTO=Hopper, Covered, 35'
+DESC=PS-2
+PROTOLENGTH=426.000
+PART=1598-1%Pennsylvania%%258043
+PART=1598-2%Pennsylvania%%258058
+PART=1599-1%Pittsburgh & Lake Erie%%1661
+PART=1599-2%Pittsburgh & Lake Erie%%1664
+PART=1800%Undecorated
+PART=1801-2%Boston & Maine%%5520
+PART=1801-3%Boston & Maine%%5544
+PART=1802-2%Burlington Northern%%424607
+PART=1803-1%Chessie%%5825
+PART=1803-2%Chessie System%%5848
+PART=1804-1%CR%%879821
+PART=1805-2%Cotton Belt%% 77177
+PART=1806-1%Southern%%900171
+PART=1806-2%Southern%%900170
+PART=1807-2%Union Pacific%%11449
+PART=1807-3%Union Pacific%%11420
+PART=1809-2%Chicago & North Western%%4127
+PART=1811-1%Rio Grande%% 18333
+PART=1811-2 %Rio Grande%%18330
+PART=1812-1%Baltimore & Ohio%%631381
+PART=1813-1%Santa Fe%%82290
+PART=1814-1%New Haven%% 117070
+PART=1814-2%New Haven%%117064
+PART=1815-1%Lehigh Valley%%50794
+PART=1816-3%Norfolk & Western%% 71211
+PART=1818-3%Maine Central%% 2499
+PART=1819-3%Great Northern%% 71504
+PART=1819-4%Great Northern%%71501
+PART=1823-1%Northern Pacific%% 75435
+PART=1823-2%Northern Pacific%% 75470
+PART=1823-3%Northern Pacific%%75444
+PART=1824-3%Lehigh & New England%%18107
+PART=1824-4%Lehigh & New England%% 18101
+PART=1825-3%Minneapolis & St. Louis%%70467
+PART=1826-3%Rock Island%%TBA
+PART=1824-5%Lehigh & New England%%18123
+PART=1834-1%American Potash%% 31242
+PART=1834-2%American Potash%% 31244
+PART=1834-3%American Potash%%31245
+PART=1835-1%Boraxo%% 31060
+PART=1835-2%Boraxo%% 31066
+PART=1835-3%Boraxo%%31061
+PART=1836-1%Central of Georgia%%1157
+PART=1836-2%Central of Georgia%%1177
+PART=1837-1%Chicago & North Western%% 95230
+PART=1837-2%Chicago & North Western%%95239
+PART=1837-7%C&NW%%70374
+PART=1838-1%Clinchfield%% 60106
+PART=1838-2%Clinchfield%% 60102
+PART=1838-3%Clinchfield*%%60110
+PART=1839-1%Imco%% 41011
+PART=1839-2%Imco%% 41013
+PART=1840-1%Kerr-McGee%% 31046
+PART=1840-2%Kerr-McGee%% 31048
+PART=1840-3%Kerr-McGee%%31050
+PART=1841-1%Lehigh Valley%% 50798
+PART=1841-2%Lehigh Valley%% 50834
+PART=1842-1%Penn Central%% 74203
+PART=1842-2%Penn Central%% 74204
+PART=1843-1%Rock Island%% 500700
+PART=1844-1%Wisconsin Central%% 81152
+PART=1844-2%Wisconsin Central%% 81155
+PART=1844-3%Wisconsin Central%%81158
+PART=1845-1%Burlington Northern%%424790
+PART=1845-2%Burlington Northern%%424792
+PART=1846-1%Conrail%%877031
+PART=1846-2%Conrail%%877045
+PART=1847-1%CSX*%%226560
+PART=1847-2%CSX*%%226563
+PART=1848-1%Delaware & Hudson%%12061
+PART=1848-2%Delaware & Hudson%%12065
+PART=1849-1%Jersey Central%%773
+PART=1849-2%Jersey Central%%846
+#############################################
+#
+# Hopper, Covered, 30', 2-Bay Offset-Side Open
+#
+#############################################
+PROTO=Hopper, 30'
+DESC=2-Bay Offset-Side Open
+PROTOLENGTH=360.000
+PART=1850%Undecorated
+PART=1851%Baltimore & Ohio%%234228
+PART=1853%P & LE (NYC)%%4120
+PART=1855%Santa Fe%%180810
+PART=1858%Jersey Central%%10001
+PART=1859-5%Northern Pacific%%70207
+PART=1859-6%Northern Pacific%%70221
+PART=1861%MOPAC%%59262
+PART=1862-5%Boston & Maine%%7160
+PART=1862-6%Boston & Maine%%7169
+PART=1863%CNW%%50343
+PART=1865-5%Chesapeake & Ohio*%%58535
+PART=1865-6%Chesapeake & Ohio*%%58550
+PART=1873-1%Alton%% 61061
+PART=1873-2%Alton%% 61099
+PART=1874-1%Baltimore & Ohio%% 640460
+PART=1874-2%Baltimore & Ohio%% 640511
+PART=1875-1%Cambria & Indiana%% 5192
+PART=1875-2%Cambria & Indiana%% 5211
+PART=1876-1%Central of Georgia%% 21809
+PART=1876-2%Central of Georgia%% 21820
+PART=1877-1%Norfolk Southern%% 9114
+PART=1877-2%Norfolk Southern%% 9149
+PART=1878-1%Pittsburgh & West Virginia%% 550
+PART=1878-2%Pittsburgh & West Virginia%% 570
+PART=1879-1%Southern%% 285652
+PART=1879-2%Southern%% 285669
+PART=1880-1%Canadian Pacific%%357013
+PART=1880-2%Canadian Pacific%%357249
+PART=1881-1%Chicago & Eastern Illinois*%%96212
+PART=1881-2%Chicago & Eastern Illinois*%%96430
+PART=1882-1%Delaware & Hudson%%9414
+PART=1882-2%Delaware & Hudson%%9522
+PART=1883-1%Jersey Central%%10303
+PART=1883-2%Jersey Central%%10311
+PART=1884-1%L&N 'The Old Reliable'%%60570
+PART=1884-2%L&N 'The Old Reliable'%%60577
+PART=1885-1%New York Central*%%876400
+PART=1885-2%New York Central*%%876404
+PART=1886-1%Pittsburg & Shawmut%%2633
+PART=1886-2%Pittsburg & Shawmut%%2789
+#############################################
+#
+# Hopper, 30', 2-Bay w/Oval Ends
+#
+#############################################
+PROTO=Hopper, 30'
+DESC=2-Bay w/Oval Ends
+PROTOLENGTH=360.000
+PART=1890%Undecorated
+PART=1891-6%Chesapeake & Ohio%%50341
+PART=1892-6%Clinchfield%%47243
+PART=1893-6%Nickel Plate Road%%33334
+#############################################
+#
+# Hopper, Cyl, 50', ACF 6-Bay
+#
+#############################################
+PROTO=Hopper, Cyl, 50'
+DESC=ACF 6-Bay
+PROTOLENGTH=612
+PART=1950%Undecorated
+PART=1951-4%Burlington Northern%%445027
+PART=1952-4%C&O%%835031
+PART=1952-5%Chessie%%835039
+PART=1953-4%Great Northern%%171029
+PART=1953-5%Great Northern%%171030
+PART=1955-4%SAL%%358035
+PART=1956-5%Burlington Northern%%443063
+PART=1957-5%Missouri Pacific%%710273
+PART=1957-6%Missouri Pacific%%710334
+PART=1965-1%MP%MP/UP Merger%710310
+PART=1965-2%MP%MP/UP Merger%710364
+PART=1966-1%Southern Pacific%%491010
+PART=1966-2%Southern Pacific%%491041
+PART=1978-1%Cotton Belt%%79020
+PART=1978-2%Cotton Belt%%79039
+#############################################
+#
+# Hopper, Cyl, 56', ACF 3-Bay
+#
+#############################################
+PROTO=Hopper, Cyl, 56'
+DESC=ACF 3-Bay
+PROTOLENGTH=676
+PART=1930%Undecorated
+PART=1931-4%Baltimore & Ohio%%837543
+PART=1932-4%CB&Q%%85402
+PART=1932-5%CB&Q%%85405
+PART=1933-4%Conrail%%885017
+PART=1933-5%Conrail%%885031
+PART=1934-4%Erie Lakawana%%20009
+PART=1935-5%Pennsylvania%%260022
+PART=1944-1%ACFX%%61959
+PART=1944-2%ACFX%%62800
+PART=1945-1%CSXT%%226014
+PART=1945-2%CSXT%%226018
+PART=1945-3%CSXT*%%225416
+PART=1945-4%CSXT*%%226045
+PART=1946-1%Hercules%%61928
+PART=1946-2%Hercules%%61929
+PART=1947-1%National Starch%%60388
+PART=1947-2%National Starch%%60390
+PART=1948-1%Penn Central%%884312
+PART=1948-2%Penn Central%%885265
+PART=1948-3%Penn Central%%885071
+PART=1948-4%Penn Central%%885226
+PART=1970-1%Baroid%%100
+PART=1970-2%Baroid%%101
+PART=1971-1%Conrail%%884812
+PART=1971-2%Conrail%%885217
+PART=1972-1%Cumberland Chemical%%60771
+PART=1972-2%Cumberland Chemical%%60774
+PART=1973-1%Hercules - Hi-Fax%%60301
+PART=1973-2%Hercules - Hi-Fax%%60303
+PART=1974-1%Trona%%62016
+PART=1974-2%Trona%%62017
+PART=1975-1%Union Carbide 'Recycled Plastics'%%50633
+PART=1975-2%Union Carbide%%50646
+PART=1976-1%USI Petrothen%%60414
+PART=1976-2%USI%%60416
+PART=1977-1%Canpotex%%45640
+PART=1977-2%Canpotex%%45651
+PART=1979-1%Grand Trunk Western%%315270
+PART=1979-2%Grand Trunk Western%%315302
+PART=1980-1%Hooker%%32035
+PART=1980-2%Hooker%%32036
+PART=1981-1 %Indusmin%%45673
+PART=1981-2%Indusmi%%45679
+#############################################
+#
+# Caboose, Ext Vision
+#
+#############################################
+PROTO=Caboose, Ext Vision
+DESC=
+PROTOLENGTH=469.000
+PART=1900%Undecorated
+PART=1901-3%Burlington Northern%%10531
+PART=1901-4%Burlington Northern%%10586
+PART=1903-4%Conrail%%22131
+PART=1902-1%Cotton Belt%%40
+PART=1902-2%Cotton Belt%%45
+PART=1907-1%Chessie System*%%C-3188 
+PART=1907-2%Chessie System*%%C-3190
+PART=1926-2%Delaware & Hudson%%35794
+PART=1926-3%Delaware & Hudson%%35797
+PART=1999%Undecorated%w/ Roof Walks  
+PART=1993%Chessie Safety #2%%3143
+PART=1994%Chessie Safety  #3%%903180
+PART=1994-4%Chessie Safety #4%%3163
+PART=1994-5%Chessie Safety #5%%903282
+PART=1994-6%Chessie Safety #6%%903246
+PART=1995%CSX%%903154
+PART=1996-1%Frisco%%252
+PART=1996-2%Frisco%257
+PART=1996-3%Frisco%%1288
+PART=1996-4%Frisco%%1291
+PART=1997-1%RF&P%%905
+PART=1997-2%RF&P%%906
+PART=6200-1%Alaska%%1085
+PART=6200-2%Alaska%%1087
+PART=6201-1%Burlington Route%%13651
+PART=6201-2%Burlington Route%%13653
+PART=6202-1%Conrail%%22137
+PART=6203-1%MKT%%100
+PART=6203-2%MK%%118
+PART=6204-1%Rio Grande%%1504
+PART=6204-2%Rio Grande%%1507
+PART=6205-1%SOO%%81
+PART=6205-2%SOO%%119
+PART=6206-1%Detroit & Toledo Shore Line%%130
+PART=6206-2%Detroit & Toledo Shore Line%%132
+PART=6207-1%Duluth, Winnipeg & Pacific%%53101
+PART=6207-2%Housatonic%%654
+PART=6208-1%Family Lines*%%1090
+PART=6208-2%Family Lines*%%1091
+PART=6209-1%Illinois Central Gulf%%199044
+PART=6209-2%Illinois Central Gulf%%199045

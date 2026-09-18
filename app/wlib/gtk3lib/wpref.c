@@ -1,0 +1,434 @@
+/** \file wpref.c
+ * Handle loading and saving preferences.
+ */
+
+/*  XTrkCad - Model Railroad CAD
+ *  Copyright (C) 2005 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define GTK_DISABLE_SINGLE_INCLUDES
+#define GDK_DISABLE_DEPRECATED
+#define GTK_DISABLE_DEPRECATED
+#define GSEAL_ENABLE
+
+
+#include <gtk/gtk.h>
+#include <gdk/gdk.h>
+
+#include "wlib.h"
+#include "gtkint.h"
+#include "dynarr.h"
+#include "i18n.h"
+
+#include "xtrkcad-config.h"
+
+extern char wConfigName[];
+
+
+/*
+ *******************************************************************************
+ *
+ * Preferences
+ *
+ *******************************************************************************
+ */
+
+static bool prefInitted = false;
+static GKeyFile *prefs;
+
+/**
+ * Read the preferences from an ini file into memory
+ *
+ * \param name name of file, if NULL or empty string, the default file is used
+ * \param update force update (ignored)
+ */
+
+static void readPrefs( char * name, wBool_t update )
+{
+	gchar *tmp;
+	const char * workDir;
+	GError *error = NULL;
+
+	prefInitted = TRUE;
+	workDir = wGetAppWorkDir();
+
+	if (name && name[0]) {
+		tmp = g_strdup( name );
+	} else {
+		tmp = g_strdup_printf("%s/%s.ini", workDir, wConfigName );
+	}
+
+	prefs = g_key_file_new();
+
+	g_key_file_load_from_file(prefs,
+	                          tmp,
+	                          G_KEY_FILE_KEEP_COMMENTS,
+	                          &error);
+	if(error) {
+		// ignore file does not exist condition, it will be created later
+		if(error->code != G_FILE_ERROR_NOENT) {
+			wNoticeWithIcon( NT_ERROR, error->message, _("Exit"), NULL);
+		}
+	}
+	g_free( tmp );
+}
+
+/**
+ * Store a string in the user preferences.
+ *
+ * \param section IN section in preferences file
+ * \param name IN name of parameter
+ * \param sval IN value to save
+ */
+
+void wPrefSetString(
+        const char * section,		/* Section */
+        const char * name,		/* Name */
+        const char * sval )		/* Value */
+{
+	if (!prefInitted) {
+		readPrefs("", FALSE);
+	}
+
+	g_key_file_set_string(prefs,
+	                      section,
+	                      name,
+	                      sval);
+}
+
+/**
+ * Get a string from the user preferences.
+ *
+ * \param section IN section in preferences file
+ * \param name IN name of parameter
+ */
+
+char * wPrefGetStringBasic(
+        const char * section,			/* Section */
+        const char * name )			/* Name */
+{
+
+	if (!prefInitted) {
+		readPrefs("", FALSE);
+	}
+
+	return g_key_file_get_string (prefs,
+	                              section,
+	                              name,
+	                              NULL);
+}
+
+/**
+ * Store an integer value in the user preferences.
+ *
+ * \param section IN section in preferences file
+ * \param name IN name of parameter
+ * \param lval IN value to save
+ */
+
+void wPrefSetInteger(
+        const char * section,		/* Section */
+        const char * name,		/* Name */
+        long lval )		/* Value */
+{
+	if (!prefInitted) {
+		readPrefs("", FALSE);
+	}
+
+	g_key_file_set_integer(prefs,
+	                       section,
+	                       name,
+	                       lval);
+}
+
+/**
+ * Read an integer value from the user preferences.
+ *
+ * \param section IN section in preferences file
+ * \param name IN name of parameter
+ * \param res OUT resulting value
+ * \param def IN default value
+ * \return TRUE if value was found, FALSE if default is returned
+ */
+
+wBool_t wPrefGetIntegerBasic(
+        const char * section,		/* Section */
+        const char * name,		/* Name */
+        long * res,		/* Address of result */
+        long def )		/* Default value */
+{
+	GError *error = NULL;
+	int result;
+
+	if (!prefInitted) {
+		readPrefs("", FALSE);
+	}
+
+	result = g_key_file_get_integer (prefs,
+	                                 section,
+	                                 name,
+	                                 &error);
+
+	if(error) {
+		*res = def;
+		return FALSE;
+	} else {
+		*res= result;
+		return TRUE;
+	}
+}
+
+/**
+ * Save a float value in the preferences file.
+ *
+ * \param section IN the file section into which the value should be saved
+ * \param name IN the name of the preference
+ * \param lval IN the value
+ */
+
+void wPrefSetFloat(
+        const char * section,		/* Section */
+        const char * name,		/* Name */
+        double lval )		/* Value */
+{
+	if (!prefInitted) {
+		readPrefs("", FALSE);
+	}
+
+	g_key_file_set_double(prefs,
+	                      section,
+	                      name,
+	                      lval);
+}
+
+/**
+ * Read a float from the preferencesd file.
+ *
+ * \param section IN the file section from which the value should be read
+ * \param name IN the name of the preference
+ * \param res OUT pointer for the value
+ * \param def IN	default value
+ * \return TRUE if value was read, FALSE if default value is used
+ */
+
+
+wBool_t wPrefGetFloatBasic(
+        const char * section,		/* Section */
+        const char * name,		/* Name */
+        double * res,		/* Address of result */
+        double def )		/* Default value */
+{
+	GError *error = NULL;
+	double result;
+
+	if (!prefInitted) {
+		readPrefs("", FALSE);
+	}
+
+	result = g_key_file_get_double(prefs,
+	                               section,
+	                               name,
+	                               &error);
+
+	if(error) {
+		*res = def;
+		return FALSE;
+	} else {
+		*res= result;
+		return TRUE;
+	}
+}
+
+void wPrefsLoad(char * name)
+{
+	readPrefs(name,TRUE);
+}
+
+/**
+ * Save the preferences to a key-value file (ini file)
+ *
+ * \param name if NULL use default filename, otherwise points to the name and
+ * path for the ini file
+ */
+void
+wPrefFlush(	char *name )
+{
+	GError *error = NULL;
+	const char *workDir;
+	char *tmp;
+
+	if (!prefInitted) {
+		return;
+	}
+
+	workDir = wGetAppWorkDir();
+	if (name && name[0]) {
+		tmp = g_strdup(name);
+	} else {
+		tmp = g_strdup_printf("%s/%s.ini", workDir, wConfigName );
+	}
+
+	g_key_file_save_to_file(prefs,
+	                        (const char *)tmp,
+	                        &error);
+
+	g_free(tmp);
+}
+
+/**
+ * Clear the preferences from memory
+ */
+
+void
+wPrefReset(void )
+{
+	prefInitted = FALSE;
+	g_key_file_free (prefs);
+}
+
+/**
+ * Split a line from the config file ie. an ini-file into separate tokens. The
+ * line is split into sections, name of value and value following. Pointers
+ * to the respective token are returned. These are zero-terminated.
+ * If a token is not present, NULL is returned instead.
+ * The input line is modified.
+ *
+ * \param line		input line, modified during excution of function
+ * \param section	section if present
+ * \param name		name of config value if present
+ * \param value		name of value if present
+ */
+
+void
+wPrefTokenize(char* line, char** section, char** name, char** value)
+{
+	*section = NULL;
+	*name = NULL;
+	*value = NULL;
+
+	if (*line == '[') {
+		*section = strtok(line, "[]");
+	} else {
+		*name = strtok(line, "=");
+		*value = strtok(NULL, "\n");
+	}
+}
+
+/**
+ * A valid line for a config file is created from the individual elements.
+ * Values not need for specific statement are ignored. Eg. when section is
+ * present, name and value are not used.
+ * The caller has to make sure, that the return buffer is large enough.
+ *
+ * \param section	section, returned inside squared brackets
+ * \param name		name, left side of '='
+ * \param value		value, right side of '='
+ * \param result	pointer to buffer for formated line.
+ */
+
+void
+wPrefFormatLine(const char* section, const char* name,
+                const char* value, char* result)
+{
+	if (!value || *value == '\0') {
+		value = "";
+	}
+
+	if (section) {
+		sprintf(result, "[%s]", section);
+	} else {
+		sprintf(result, "%s=%s", name, value);
+	}
+}
+
+GtkPrintSettings *
+wlibPrefGetPrintSettings(void)
+{
+	GError *err = NULL;
+	GtkPrintSettings *settings;
+
+	settings = gtk_print_settings_new_from_key_file(prefs, NULL, &err);
+
+	if (!settings) {
+		if (err->code != G_FILE_ERROR_NOENT) {
+			GtkWindow *dialog;
+			// G_FILE_ERROR_NOENT = section missing; gtk_print_settings_new_from_key_file
+			// returns this when the group is absent (gtk_page_setup_new_from_key_file
+			// returns G_FILE_ERROR_NAMETOOLONG for the same condition — GTK inconsistency)
+			dialog = gtk_message_dialog_new(
+			                 wlibAppWinGetMain(), GTK_DIALOG_DESTROY_WITH_PARENT,
+			                 GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "%s", err->message);
+			gtk_dialog_run(GTK_DIALOG(dialog));
+			gtk_widget_destroy(dialog);
+		} else {
+			// create  default print settings
+			settings = gtk_print_settings_new();
+		}
+		g_error_free(err);
+	}
+	return (settings);
+}
+
+void
+wlibPrefSetPrintSettings(GtkPrintSettings *settings)
+{
+	gtk_print_settings_to_key_file( settings, prefs, NULL);
+
+}
+
+GtkPageSetup *
+wlibPrefGetPageSetup(void)
+{
+	GError *err = NULL;
+	GtkPageSetup *page_setup;
+
+	page_setup = gtk_page_setup_new_from_key_file(prefs, NULL, &err);
+
+	if (!page_setup) {
+		// ignore file not found error as defaults will be used
+		// G_FILE_ERROR_NAMETOOLONG = section missing; gtk_page_setup_new_from_key_file
+		// returns this when the group is absent (gtk_print_settings_new_from_key_file
+		// returns G_FILE_ERROR_NOENT for the same condition — GTK inconsistency)
+		if (err->code != G_FILE_ERROR_NAMETOOLONG) {
+			GtkDialog *dialog;
+
+			dialog = gtk_message_dialog_new(wlibAppWinGetMain(),
+			                                GTK_DIALOG_DESTROY_WITH_PARENT,
+			                                GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+			                                "%s", err->message);
+			gtk_dialog_run(GTK_DIALOG(dialog));
+			gtk_widget_destroy(dialog);
+		} else {
+			page_setup = gtk_page_setup_new();
+		}
+
+		g_error_free(err);
+	}
+
+	return(page_setup);
+}
+
+void
+wlibPrefSetPageSetup(GtkPageSetup *page_setup)
+{
+	gtk_page_setup_to_key_file(page_setup, prefs, NULL);
+}

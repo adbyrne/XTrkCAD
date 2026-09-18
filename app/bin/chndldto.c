@@ -1,0 +1,400 @@
+/** \file chndldto.c
+ * Handlaid turnout
+ *
+ */
+
+/*  XTrkCad - Model Railroad CAD
+ *  Copyright (C) 2005 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+#include "ccurve.h"
+#include "cjoin.h"
+#include "compound.h"
+#include "cstraigh.h"
+#include "cundo.h"
+#include "track.h"
+#include "draw.h"
+#include "common-ui.h"
+#include "icons.h"
+
+static int log_chndldto = -1;
+
+#define PTRACE(X)
+
+/*
+ * STATE INFO
+ */
+static struct {
+	STATE_T state;
+	coOrd normalP;
+	ANGLE_T normalA;
+	track_p normalT;
+	coOrd reverseP;
+	coOrd reverseP1;
+	ANGLE_T reverseA;
+	DIST_T frogNo;
+	ANGLE_T frogA;
+} Dhlt;
+
+
+static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
+{
+	EPINX_T ep1, ep2, pointEp0, pointEp1;
+	DIST_T dist;
+	coOrd off, intersectP;
+	coOrd pointP, pointP1, reverseC;
+//	coOrd pointC;
+	track_p trk1, trk2, trk2a=NULL, trk2b=NULL, pointT;
+	trkSeg_p segP;
+	BOOL_T right;
+	track_p trks[4];
+
+	switch (action) {
+
+	case C_START:
+		InfoMessage( _("Place frog and drag angle") );
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
+		Dhlt.state = 0;
+		Dhlt.normalT = NULL;
+		DYNARR_SET( trkSeg_t, tempSegs_da, 2 );
+		tempSegs(0).color = drawColorBlack;
+		tempSegs(0).lineWidth = 0;
+		tempSegs(1).color = drawColorBlack;
+		tempSegs(1).lineWidth = 0;
+		return C_CONTINUE;
+
+	case C_DOWN:
+		if (Dhlt.state == 0) {
+			Dhlt.normalT = OnTrack( &pos, TRUE, TRUE );
+			if (Dhlt.normalT == NULL) {
+				break;
+			}
+			if ( QueryTrack( Dhlt.normalT, Q_NOT_PLACE_FROGPOINTS ) ) {
+				ErrorMessage( MSG_CANT_PLACE_FROGPOINTS, _("frog") );
+				Dhlt.normalT = NULL;
+				break;
+			}
+			Dhlt.normalP = Dhlt.reverseP = Dhlt.reverseP1 = pos;
+			Dhlt.normalA = GetAngleAtPoint( Dhlt.normalT, Dhlt.normalP, NULL, NULL );
+			InfoMessage( _("Drag to set angle") );
+			Dhlt.state = 1;
+//			pointC = pointP = pointP1 = reverseC = zero;
+			return C_CONTINUE;
+		}
+		__attribute__((fallthrough));
+
+	case C_MOVE:
+	case C_UP:
+		if (Dhlt.normalT == NULL) {
+			break;
+		}
+		if (Dhlt.state == 1) {
+			Dhlt.reverseP1 = pos;
+			Dhlt.reverseA = FindAngle( Dhlt.reverseP, Dhlt.reverseP1 );
+			Dhlt.frogA = NormalizeAngle( Dhlt.reverseA - Dhlt.normalA );
+			/*printf( "RA=%0.3f FA=%0.3f ", Dhlt.reverseA, Dhlt.frogA );*/
+			if (Dhlt.frogA > 270.0) {
+				Dhlt.frogA = 360.0-Dhlt.frogA;
+				right = FALSE;
+			} else if (Dhlt.frogA > 180) {
+				Dhlt.frogA = Dhlt.frogA - 180.0;
+				Dhlt.normalA = NormalizeAngle( Dhlt.normalA + 180.0 );
+				/*ep = Dhlt.normalEp0; Dhlt.normalEp0 = Dhlt.normalEp1; Dhlt.normalEp1 = ep;*/
+				right = TRUE;
+			} else if (Dhlt.frogA > 90.0) {
+				Dhlt.frogA = 180.0 - Dhlt.frogA;
+				Dhlt.normalA = NormalizeAngle( Dhlt.normalA + 180.0 );
+				/*ep = Dhlt.normalEp0; Dhlt.normalEp0 = Dhlt.normalEp1; Dhlt.normalEp1 = ep;*/
+				right = FALSE;
+			} else {
+				right = TRUE;
+			}
+			/*printf( "NA=%0.3f FA=%0.3f R=%d\n", Dhlt.normalA, Dhlt.frogA, right );*/
+			Dhlt.frogNo = tan(D2R(Dhlt.frogA));
+			if (Dhlt.frogNo > 0.01) {
+				Dhlt.frogNo = 1.0/Dhlt.frogNo;
+			} else {
+				Dhlt.frogNo = 0.0;
+			}
+			if (action == C_MOVE) {
+				if (Dhlt.frogNo != 0) {
+					InfoMessage( _("Angle = %0.2f Frog# = %0.2f"), Dhlt.frogA, Dhlt.frogNo );
+				} else {
+					InfoMessage( _("Frog angle is too close to 0") );
+				}
+			} else {
+				InfoMessage( _("Select point position") );
+				Dhlt.state = 2;
+				Translate( &Dhlt.reverseP, Dhlt.reverseP, Dhlt.normalA+(right?+90:-90),
+				           trackGauge );
+				Translate( &Dhlt.reverseP1, Dhlt.reverseP1, Dhlt.normalA+(right?+90:-90),
+				           trackGauge );
+			}
+			return C_CONTINUE;
+		} else if ( Dhlt.state == 2 ) {
+			DYNARR_RESET( trkSeg_t, tempSegs_da );
+			pointP = pos;
+			pointT = OnTrack( &pointP, TRUE, TRUE );
+			if (pointT == NULL) {
+				break;
+			}
+			if ( QueryTrack( pointT, Q_NOT_PLACE_FROGPOINTS ) ) {
+				ErrorMessage( MSG_CANT_PLACE_FROGPOINTS, _("points") );
+				break;
+			}
+			dist = FindDistance( Dhlt.normalP, pointP );
+			ANGLE_T pointA = GetAngleAtPoint( pointT, pointP, &pointEp0, &pointEp1 );
+			ANGLE_T angle = NormalizeAngle( pointA + 180.0 - Dhlt.reverseA );
+			PTRACE(( "rA=%0.1f pA=%0.1f a=%0.1f ", Dhlt.reverseA, pointA, angle ))
+			if ( angle > 90.0 &&  angle < 270.0 ) {
+				pointA = NormalizeAngle( pointA + 180.0 );
+				angle = NormalizeAngle( angle + 180.0 );
+				PTRACE(( " {pA=%0.1f a=%0.1f} ", pointA, angle ))
+			} else {
+				EPINX_T ep = pointEp0; pointEp0 = pointEp1; pointEp1 = ep;
+			}
+			if (angle > 180.0) {
+				angle = 360.0 - angle;
+				right = TRUE;
+			} else {
+				right = FALSE;
+			}
+			PTRACE(( "r=%c a=%0.1f ", right?'T':'F', angle ))
+			Translate( &off, pointP, pointA+180.0, trackGauge*2.0 );
+			track_p trk = OnTrack( &off, TRUE, TRUE );
+			if (trk == NULL) {
+				break;
+			}
+			if ( QueryTrack( trk, Q_NOT_PLACE_FROGPOINTS ) ) {
+				ErrorMessage( MSG_CANT_PLACE_FROGPOINTS, _("points") );
+				break;
+			}
+			off = pointP;
+			Rotate( &off, Dhlt.reverseP, 180-Dhlt.reverseA );
+			off.x -= Dhlt.reverseP.x;
+			off.y -= Dhlt.reverseP.y;
+			if (right) {
+				off.x = -off.x;
+			}
+			PTRACE(( "off=[%0.3f %0.3f] ", off.x, off.y ))
+			if (off.y < 0) {
+				ErrorMessage( MSG_MOVE_POINTS_OTHER_SIDE );
+				PTRACE(("\n"))
+				break;
+			}
+			if (off.x < 0) {
+				ErrorMessage( MSG_MOVE_POINTS_AWAY_CLOSE );
+				PTRACE(("\n"))
+				break;
+			}
+			ANGLE_T angle2 = FindAngle( zero, off );
+			PTRACE(( "a2=%0.1f\n", angle2 ))
+			if (angle < 0.5) {
+				if ( off.x < connectDistance ) {
+					DYNARR_SET( trkSeg_t, tempSegs_da, 2 );
+					tempSegs(0).type = SEG_STRTRK;
+					tempSegs(0).color = wDrawColorBlack;
+					tempSegs(0).u.l.pos[0] = pointP;
+					tempSegs(0).u.l.pos[1] = Dhlt.reverseP;
+					tempSegs(1).type = SEG_STRTRK;
+					tempSegs(1).color = wDrawColorBlack;
+					tempSegs(1).u.l.pos[0] = Dhlt.reverseP;
+					Translate( &tempSegs(1).u.l.pos[1], Dhlt.reverseP, Dhlt.reverseA, trackGauge );
+				} else {
+					ErrorMessage( MSG_MOVE_POINTS_AWAY_NO_INTERSECTION );
+					break;
+				}
+			} else if (angle < angle2) {
+				ErrorMessage( MSG_MOVE_POINTS_AWAY_NO_INTERSECTION );
+				break;
+			} else {
+				if (!FindIntersection( &intersectP, Dhlt.reverseP, Dhlt.reverseA+180.0, pointP,
+				                       pointA+180.0 )) {
+					break;
+				}
+				DIST_T reverseD = FindDistance( Dhlt.reverseP, intersectP );
+				DIST_T pointD = FindDistance( pointP, intersectP );
+				ANGLE_T reverseR;
+				if (reverseD > pointD) {
+					reverseR = pointD/tan(D2R(angle/2.0));
+					Translate( &reverseC, pointP, pointA+(right?-90:+90), reverseR );
+					PTRACE(( "rR=%0.3f rC=[%0.3f %0.3f]\n", reverseR, reverseC.x, reverseC.y ))
+					DYNARR_SET( trkSeg_t, tempSegs_da, 3 );
+					tempSegs(0).type = SEG_CRVTRK;
+					tempSegs(0).color = wDrawColorBlack;
+					tempSegs(0).u.c.center = reverseC;
+					tempSegs(0).u.c.radius = reverseR;
+					tempSegs(0).u.c.a0 = NormalizeAngle(pointA + (right?(+90.0):(-90.0-angle)) );
+					tempSegs(0).u.c.a1 = angle;
+					tempSegs(1).type = SEG_STRTRK;
+					tempSegs(1).color = wDrawColorBlack;
+					PointOnCircle( &tempSegs(1).u.l.pos[0], reverseC, reverseR,
+					               tempSegs(0).u.c.a0 + (right?angle:0.0) );
+					tempSegs(1).u.l.pos[1] = Dhlt.reverseP;
+					tempSegs(2).type = SEG_STRTRK;
+					tempSegs(2).color = wDrawColorBlack;
+					tempSegs(2).u.l.pos[0] = Dhlt.reverseP;
+					Translate( &tempSegs(2).u.l.pos[1], Dhlt.reverseP, Dhlt.reverseA, trackGauge );
+				} else {
+					reverseR = reverseD/tan(D2R(angle/2.0));
+					reverseR *= sqrt(reverseD/pointD);
+					Translate( &reverseC, Dhlt.reverseP, Dhlt.reverseA+(right?+90:-90), reverseR );
+					Translate( &pointP1, pointP, pointA+(right?-90:+90), reverseR );
+					dist = FindDistance( reverseC, pointP );
+					angle2 = R2D( asin( reverseR/dist ) );
+					ANGLE_T angle3 = FindAngle( pointP, reverseC );
+					if (right) {
+						angle2 = NormalizeAngle(angle3 - pointA+180) - angle2;
+					} else {
+						angle2 = NormalizeAngle(pointA+180 - angle3) - angle2;
+					}
+					ANGLE_T reverseA1 = angle-angle2;
+					PTRACE(( " a2=%0.1f rA1=%0.1f\n", angle2, reverseA1 ))
+					DYNARR_SET( trkSeg_t, tempSegs_da, 3 );
+					tempSegs(0).type = SEG_STRTRK;
+					tempSegs(0).color = wDrawColorBlack;
+					tempSegs(0).u.l.pos[0] = pointP;
+					tempSegs(1).u.c.a0 = NormalizeAngle(Dhlt.reverseA + (right?
+					                                    (-90.0-reverseA1):+90.0));
+					PointOnCircle( &tempSegs(0).u.l.pos[1], reverseC, reverseR,
+					               tempSegs(1).u.c.a0 + (right?0.0:reverseA1) );
+					tempSegs(1).type = SEG_CRVTRK;
+					tempSegs(1).color = wDrawColorBlack;
+					tempSegs(1).u.c.center = reverseC;
+					tempSegs(1).u.c.radius = reverseR;
+					tempSegs(1).u.c.a1 = reverseA1;
+					tempSegs(2).type = SEG_STRTRK;
+					tempSegs(2).color = wDrawColorBlack;
+					tempSegs(2).u.l.pos[0] = Dhlt.reverseP;
+					Translate( &tempSegs(2).u.l.pos[1], Dhlt.reverseP, Dhlt.reverseA, trackGauge );
+				}
+			}
+			if (action != C_UP) {
+				dist = FindDistance( pointP, Dhlt.normalP );
+				InfoMessage( _("Length = %0.2f Angle = %0.2f Frog# = %0.2f"), dist, Dhlt.frogA,
+				             Dhlt.frogNo );
+				return C_CONTINUE;
+			}
+			UndoStart( _("Create Hand Laid Turnout"), "Hndldto( T%d[%d] )",
+			           GetTrkIndex(pointT), pointEp0 );
+			UndoModify( pointT );
+			if (!SplitTrack( pointT, pointP, pointEp0, &trk1, TRUE )) {
+				break;
+			}
+			dist = trackGauge*2.0;
+			if ( !trk1 ) {
+				trk1 = pointT;
+				pointT = NULL;
+			}
+			ep1 = PickEndPoint( pointP, trk1 );
+			if (!RemoveTrack( &trk1, &ep1, &dist )) {
+				break;
+			}
+			coOrd point0 = GetTrkEndPos( trk1, ep1 );
+			ANGLE_T angle0 = NormalizeAngle(GetTrkEndAngle(trk1,ep1)+180.0);
+			trk2 = NULL;
+			EPINX_T ep2a=-1, ep2b=-1;
+			track_p *trkpp = trks;
+			for (segP=&tempSegs(0); segP < &tempSegs(tempSegs_da.cnt); segP++ ) {
+				switch (segP->type) {
+				case SEG_STRTRK:
+					trk2b = NewStraightTrack( segP->u.l.pos[0], segP->u.l.pos[1] );
+					ep2b = 0;
+					break;
+				case SEG_CRVTRK:
+					trk2b = NewCurvedTrack( segP->u.c.center, fabs(segP->u.c.radius), segP->u.c.a0,
+					                        segP->u.c.a1, 0 );
+					ep2b = (right?0:1);
+					break;
+				default:
+					if ( log_chndldto < 0 ) { log_chndldto = LogFindIndex( "chndldto" ); }
+					LOG( log_chndldto, 1, ( "unexpected segP->type %d in CmdHandLaidTurnout\n",
+					                        segP->type ) )
+					break;
+				}
+				if (trk2 == NULL) {
+					trk2 = trk2b;
+					ep2 = ep2b;
+				} else {
+					ConnectTracks( trk2a, ep2a, trk2b, ep2b );
+				}
+				*trkpp++ = trk2a = trk2b;
+				ep2a = 1-ep2b;
+			}
+			*trkpp = NULL;
+			dist = trackGauge*2.0;
+			if (!RemoveTrack( &trk2, &ep2, &dist )) {
+				break;
+			}
+			trk = NewHandLaidTurnout( pointP, pointA,
+			                          point0, angle0,
+			                          GetTrkEndPos(trk2,ep2), NormalizeAngle(GetTrkEndAngle(trk2,ep2)+180.0),
+			                          Dhlt.frogA );
+			DrawEndPt( &mainD, trk1, ep1, wDrawColorWhite );
+			if ( pointT ) {
+				DrawEndPt( &mainD, pointT, pointEp0, wDrawColorWhite );
+				ConnectTracks( trk, 0, pointT, pointEp0 );
+			}
+			ConnectTracks( trk, 2, trk2, ep2 );
+			ConnectTracks( trk, 1, trk1, ep1 );
+			DrawEndPt( &mainD, trk1, ep1, wDrawColorBlack );
+			DrawTrack( trk1, &mainD, wDrawColorBlack );
+			if ( pointT ) {
+				DrawEndPt( &mainD, pointT, pointEp0, wDrawColorBlack );
+				DrawTrack( pointT, &mainD, wDrawColorBlack );
+			}
+			DrawTrack( trk, &mainD, wDrawColorBlack );
+			for (trkpp=trks; *trkpp; trkpp++) {
+				DrawTrack( *trkpp, &mainD, wDrawColorBlack );
+			}
+
+			Dhlt.state = 0;
+			return C_TERMINATE;
+		}
+		__attribute__((fallthrough));
+
+	case C_REDRAW:
+		if (Dhlt.state >= 1) {
+			DrawLine( &tempD, Dhlt.reverseP, Dhlt.reverseP1, 0, wDrawColorBlack );
+		}
+		if (Dhlt.state >= 2) {
+			DrawSegsDA( &tempD, NULL, zero, 0.0, &tempSegs_da, trackGauge, wDrawColorBlack,
+			            0 );
+		}
+		return C_CONTINUE;
+
+	case C_CANCEL:
+		return C_CONTINUE;
+
+	default:
+		if ( log_chndldto < 0 ) { log_chndldto = LogFindIndex( "chndldto" ); }
+		LOG( log_chndldto, 1, ( "unexpected action %d in CmdHandLaidTurnout\n",
+		                        action ) )
+		break;
+	}
+
+	return C_CONTINUE;
+
+}
+
+
+EXPORT void InitCmdHandLaidTurnout( wMenu_p menu )
+{
+	AddMenuButton( menu, CmdHandLaidTurnout, "cmdHandLaidTurnout",
+	               _("HandLaidTurnout"), CreateToolbarIconFromResource("turnout-design.png"),
+	               LEVEL0_50, IC_STICKY|IC_INITNOTSTICKY|IC_POPUP2, ACCL_HNDLDTO, NULL );
+}

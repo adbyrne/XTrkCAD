@@ -1,0 +1,134 @@
+VERSION 1
+DEMOINIT
+ORIG 12.000 0.000 0.000
+PARAMETER display description-fontsize 18
+REDRAW
+RESET
+MOUSE 1 1.5 1.5
+MESSAGE
+In the drawing area of the main window you can see an hollow upwards arrow which represents the mouse cursor.  In this demo the mouse will move about to show you the actions of different commands.
+
+The hollow arrow represents the mouse cursor without a mouse button being pressed.
+END
+STEP
+MOUSE 1 34.560 28.000
+CLEAR
+MESSAGE
+When the left mouse button would be pressed, the mouse cursor appears to flash and the hollow arrow is replaced by a solid left-pointing red arrow while the button is pressed.
+
+Note: these color changes occur only during the demo to simulate mouse button presses.
+END
+STEP
+MOUSE 2 34.560 28.000
+#RESET
+MESSAGE
+_________________________________________
+
+Moving the mouse while a mouse button is pressed is called 'dragging'.
+END
+STEP
+MOUSE 3 36.160 4.000
+#RESET
+MESSAGE
+_________________________________________
+
+When the left mouse button is released, the mouse cursor flashes and the hollow up black arrow is restored.
+END
+STEP
+MOUSE 4 36.160 4.000
+RESET
+MESSAGE
+_________________________________________
+
+Dragging with the right button is simulated by a blue right-facing solid cursor.
+END
+STEP
+MOUSE 5 36.160 4.000
+MOUSE 6 3.680 4.800
+#RESET
+MESSAGE
+__________________________________________
+
+Release Right Click
+END
+STEP
+MOUSE 7 3.680 4.800
+RESET
+MESSAGE
+=========================================
+END
+STEP
+CLEAR
+MESSAGE
+Sometimes the Shift key is held down while using the mouse 
+
+This is indicated by an outlined arrow with the letter S near the arrow.
+END
+STEP
+KEYSTATE 2
+MOUSE 1 7.520 26.080
+RESET
+MESSAGE
+__________________________________________
+
+The left mouse button is held down with the Shift and dragged for a Left-Shift-Drag.  
+
+END
+STEP
+KEYSTATE 2
+MOUSE 2 7.520 26.080
+KEYSTATE 2
+MOUSE 3 7.520 4.800
+KEYSTATE 2
+MOUSE 4 7.520 4.800
+STEP
+CLEAR
+MESSAGE
+___________________________________________
+
+Sometimes the Control key is held down while using the mouse. 
+
+This is indicated with an upward filled arrow head with the letter C near the arrow 
+
+END
+STEP
+KEYSTATE 4
+MOUSE 1 7.520 26.080
+RESET
+MESSAGE
+__________________________________________
+
+If while the Control is held the Left mouse button is held down it is a Ctrl-Move and a Ctrl-Left-Drag.  
+
+This is indicated by an an left-facing open-headed arrow with the letter C near it.
+
+END
+STEP
+KEYSTATE 4
+MOUSE 2 7.520 26.080
+KEYSTATE 4
+MOUSE 3 3.680 4.800
+KEYSTATE 4
+MOUSE 4 3.680 4.800 
+RESET
+MESSAGE
+___________________________________________
+
+You can also use the Control key with the Right mouse button. 
+
+This is indicated with a right-facing filled arrow with an open arrow head and the letter C near the arrow 
+
+END
+STEP
+KEYSTATE 4
+MOUSE 5 3.680 4.080
+KEYSTATE 4
+MOUSE 6 26.520 26.080
+KEYSTATE 4
+MOUSE 7 26.520 26.080
+RESET
+MESSAGE
+=========================================
+END
+STEP
+CLEAR

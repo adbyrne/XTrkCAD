@@ -1,0 +1,244 @@
+/** \file appwindow.c
+ * Create and handle the application's main window
+ */
+
+/*  XTrkCad - Model Railroad CAD
+ *  Copyright (C) 2005 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+#define GTK_DISABLE_SINGLE_INCLUDES
+#define GDK_DISABLE_DEPRECATED
+#define GTK_DISABLE_DEPRECATED
+#define GSEAL_ENABLE
+
+#include <gtk/gtk.h>
+#include <gdk/gdk.h>
+#include "wrapbox/eggwrapbox.h"
+
+#include "gtkint.h"
+#include <wlib.h>
+
+#include "xtrkcad-config.h"
+
+static wControl_p appMainWindow;
+
+#define REDRAW_TIMEOUT 100
+
+/**
+ * Get the application's main window.
+ *
+ * \return pointer to window information
+ */
+
+GtkWidget *
+wlibAppWinGetMain()
+{
+	if(appMainWindow) {
+		return(appMainWindow->widget);
+	} else {
+		return(NULL);
+	}
+}
+
+/**
+ * Get the key accelerator group for the application. It is created during
+ * startup of the application
+ *
+ * \return GTK handle of acc group
+ */
+
+GtkAccelGroup*
+wlibAppWinGetAccelGroup()
+{
+	return(appMainWindow->attributes.window.accelGroup);
+}
+
+/**
+ * Get the container for the statusbar.
+ *
+ * \return GTK handle for the container
+ */
+
+GtkContainer *
+wlibAppWinGetStatusbar()
+{
+	return(appMainWindow->attributes.window.statusbar);
+}
+
+static gboolean resizeTime(wControl_p win)
+{
+	struct window *wcontrol = CONTROL_GET_ATTRIBUTES_PTR(win, window);
+
+	g_assert(win->type == W_MAIN);
+
+	if (wcontrol->size_changed) {
+		// do redraw
+		wcontrol->winProc(win, wResize_e, NULL, win);
+		wcontrol->size_changed = FALSE;
+		return (TRUE);	// Continue timer in case more changes come
+	}
+
+	wcontrol->resizeTimer = 0;
+	return FALSE;
+}
+
+static void on_size_allocate(
+        GtkWidget *widget,
+        GdkRectangle *allocation,
+        wControl_p win)
+{
+	struct window *wcontrol;
+	if (win == NULL) {
+		return;
+	}
+
+	g_assert(win->type == W_MAIN);
+
+	wcontrol = CONTROL_GET_ATTRIBUTES_PTR(win, window);
+	if (wcontrol->option & F_RESIZE) {
+		if (wcontrol->w != allocation->width || wcontrol->h != allocation->height) {
+			wcontrol->w = allocation->width;
+			wcontrol->h = allocation->height;
+			wcontrol->size_changed = TRUE;
+			if (wcontrol->resizeTimer == 0) {
+				wcontrol->resizeTimer = g_timeout_add(REDRAW_TIMEOUT, (GSourceFunc)resizeTime,
+				                                      win);
+			}
+		}
+	}
+}
+
+/**
+ * Handle the delete event for the main window. Calls the windows callback
+ * function that allows the window close operation to be cancelled
+ *
+ * \param window see GTK3 docs
+ * \param event
+ * \param userData
+ * \return
+ */
+
+static gboolean
+on_widget_deleted(GtkWidget* window, GdkEvent* event, gpointer userData)
+{
+	if (appMainWindow->attributes.window.winProc) {
+		bool rc = appMainWindow->attributes.window.winProc(appMainWindow,
+		          wClose_e, userData, NULL);
+		if (!rc) {
+			wPrefFlush(NULL);
+		}
+		return(rc);
+	}
+
+	wPrefFlush(NULL);
+	return FALSE;
+}
+
+/**
+ * Initialize the application's main window. This function does the necessary
+ * initialization of the application including creation of the main window.
+ *
+ * \param name IN internal name of the application. Used for filenames etc.
+ * \param x    IN Initial window width
+ * \param y    IN Initial window height
+ * \param helpStr IN Help topic string
+ * \param labelStr IN window title
+ * \param nameStr IN Window name
+ * \param option IN options for window creation
+ * \param winProc IN pointer to main window procedure
+ * \param context IN User context
+ * \return    window handle or NULL on error
+ */
+
+wControl_p wWinMainCreate(
+        const char *name,		 /* Application name */
+        wWinPix_t x,			 /* Initial window width */
+        wWinPix_t y,			 /* Initial window height */
+        const char *helpStr,	 /* Help topic string */
+        const char *labelStr,	 /* Window title */
+        const char *nameStr,	 /* Window name */
+        long option,			 /* Options */
+        wWinCallBack_p winProc, /* Call back function */
+        void *context)			 /* User context */
+{
+	const char *pos;
+	struct window* wcontrol;
+
+	pos = strchr(name, ';');
+
+	if (pos) {
+		/* if found, split application name and configuration name */
+		strcpy(wConfigName, pos + 1);
+	} else {
+		/* if not found, application name and configuration name are same */
+		strcpy(wConfigName, name);
+	}
+
+	appMainWindow = wlibControlNew(W_MAIN, NULL, nameStr, context);
+
+	wcontrol = CONTROL_GET_ATTRIBUTES_PTR(appMainWindow, window);
+	wcontrol->winProc = winProc;
+	wcontrol->option = option;
+
+	wcontrol->builder = gtk_builder_new_from_resource(
+	                            XTRKCAD_RESOURCE_PATH
+	                            "appwindow.ui");
+	if(!wcontrol->builder) {
+		fprintf(stderr, "Builder %s could not be found. Terminating\n", "appwindow.ui");
+		exit(1);
+	}
+
+	appMainWindow->widget = GTK_WIDGET(gtk_builder_get_object(
+	                wcontrol->builder,
+	                "main"));
+
+	// this is the main application window
+	gtk_application_add_window(wlibGetApp(),
+	                           GTK_WINDOW(appMainWindow->widget));
+
+	wcontrol->accelGroup = gtk_accel_group_new();
+	gtk_window_add_accel_group(GTK_WINDOW(appMainWindow->widget),
+	                           wcontrol->accelGroup);
+
+	gtk_window_set_title(GTK_WINDOW(appMainWindow->widget), labelStr);
+
+	if (option & F_MENUBAR) {
+		wcontrol->menubar = GTK_WIDGET(gtk_builder_get_object(
+		                                       wcontrol->builder,
+		                                       "menubar"));
+	}
+
+	GtkWidget* toolbarbox = GTK_WIDGET(gtk_builder_get_object(wcontrol->builder,
+	                                   "toolbarWindow"));
+	if (toolbarbox) {
+		wcontrol->toolbar =  wlibToolbarCreate(toolbarbox);
+	}
+
+	GtkContainer *statusbar = GTK_CONTAINER(gtk_builder_get_object(
+	                wcontrol->builder,
+	                "statusbar"));
+
+	wcontrol->statusbar = statusbar;
+
+	g_signal_connect(G_OBJECT(appMainWindow->widget),
+	                 "delete-event", G_CALLBACK(on_widget_deleted), NULL);
+	g_signal_connect(G_OBJECT(appMainWindow->widget),
+	                 "size-allocate", G_CALLBACK(on_size_allocate), appMainWindow);
+
+	gtk_widget_show_all(appMainWindow->widget);
+	return appMainWindow;
+}

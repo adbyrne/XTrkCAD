@@ -1,0 +1,206 @@
+/** \file cstraigh.c
+ * STRAIGHT
+ */
+
+/*  XTrkCad - Model Railroad CAD
+ *  Copyright (C) 2005 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+#include "cstraigh.h"
+#include "cselect.h"
+#include "cundo.h"
+#include "fileio.h"
+#include "icons.h"
+#include "param.h"
+#include "track.h"
+#include "layout.h"
+#include "common-ui.h"
+
+/*
+ * STATE INFO
+ */
+static struct {
+	coOrd pos0, pos1;
+	track_p trk;
+	EPINX_T ep;
+	BOOL_T down;
+} Dl;
+
+static dynArr_t anchors_da;
+#define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
+
+static void CreateEndAnchor(coOrd p, wBool_t lock)
+{
+	DIST_T d = tempD.scale*0.15;
+
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	int i = anchors_da.cnt-1;
+	anchors(i).type = lock?SEG_FILCRCL:SEG_CRVLIN;
+	anchors(i).color = wDrawColorBlue;
+	anchors(i).u.c.center = p;
+	anchors(i).u.c.radius = d/2;
+	anchors(i).u.c.a0 = 0.0;
+	anchors(i).u.c.a1 = 360.0;
+	anchors(i).lineWidth = 0;
+}
+
+
+static STATUS_T CmdStraight( wAction_t action, coOrd pos )
+{
+	track_p t;
+	DIST_T dist;
+	coOrd p;
+
+	switch (action&0xFF) {
+
+	case C_START:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		Dl.pos0=pos;
+		Dl.pos1=pos;
+		Dl.trk = NULL;
+		Dl.ep=-1;
+		Dl.down = FALSE;
+		InfoMessage(
+		        _("Place 1st endpoint of straight track, snap to unconnected endpoint") );
+		SetAllTrackSelect( FALSE );
+		return C_CONTINUE;
+
+	case C_DOWN:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		p = pos;
+		BOOL_T found = FALSE;
+		Dl.trk = NULL;
+		if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {
+			t = OnTrack(&p, FALSE, TRUE);
+			if (t != NULL) {
+				EPINX_T ep = PickUnconnectedEndPointSilent(p, t);
+				if (ep != -1) {
+					if (GetTrkGauge(t) != GetScaleTrackGauge(GetLayoutCurScale())) {
+						wBeep();
+						InfoMessage(_("Track is different gauge"));
+						return C_CONTINUE;
+					}
+					Dl.trk = t;
+					Dl.ep = ep;
+					pos = GetTrkEndPos(t, ep);
+					found = TRUE;
+				}
+			}
+		}
+		Dl.down = TRUE;
+		if (!found) { SnapPos( &pos ); }
+		Dl.pos0 = pos;
+		InfoMessage( _("Drag to place 2nd end point") );
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
+		tempSegs(0).color = wDrawColorBlack;
+		tempSegs(0).lineWidth = 0;
+		tempSegs(0).type = SEG_STRTRK;
+		tempSegs(0).u.l.pos[0] = pos;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
+		return C_CONTINUE;
+
+	case C_MOVE:
+	case wActionMove:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		found = FALSE;
+		if (!Dl.down) {
+			if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {
+				p = pos;
+				t = OnTrack(&p, FALSE, TRUE);
+				if (t != NULL) {
+					if (GetTrkGauge(t) == GetScaleTrackGauge(GetLayoutCurScale())) {
+						EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
+						if (ep != -1) {
+							if (GetTrkGauge(t) == GetScaleTrackGauge(GetLayoutCurScale())) {
+								CreateEndAnchor(GetTrkEndPos(t,ep),FALSE);
+								found = TRUE;
+							}
+						}
+					}
+				}
+			}
+			if (!found && SnapPos( &pos )) {
+				CreateEndAnchor(pos,FALSE);
+			}
+			return C_CONTINUE;
+		}
+		ANGLE_T angle, angle2;
+		if (Dl.trk && !(MyGetKeyState() & WKEY_SHIFT)) {
+			angle = NormalizeAngle(GetTrkEndAngle( Dl.trk, Dl.ep));
+			angle2 = NormalizeAngle(FindAngle(pos, Dl.pos0)-angle);
+			if (angle2 > 90.0 && angle2 < 270.0) {
+				Translate( &pos, Dl.pos0, angle, FindDistance( Dl.pos0, pos ) );
+			} else { pos = Dl.pos0; }
+		} else if (SnapPos( &pos )) {
+			CreateEndAnchor(pos,FALSE);
+		}
+
+		InfoMessage( _("Straight Track Length=%s Angle=%0.3f"),
+		             FormatDistance(FindDistance( Dl.pos0, pos )),
+		             PutAngle(FindAngle( Dl.pos0, pos )) );
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
+		tempSegs(0).u.l.pos[1] = pos;
+		return C_CONTINUE;
+
+	case C_UP:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		if (!Dl.down) { return C_CONTINUE; }
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
+		if (Dl.trk && !(MyGetKeyState() & WKEY_SHIFT)) {
+			angle = NormalizeAngle(GetTrkEndAngle( Dl.trk, Dl.ep));
+			angle2 = NormalizeAngle(FindAngle(pos, Dl.pos0)-angle);
+			if (angle2 > 90.0 && angle2 < 270.0) {
+				Translate( &pos, Dl.pos0, angle, FindDistance( Dl.pos0, pos ));
+			} else { pos = Dl.pos0; }
+		} else { SnapPos( &pos ); }
+		dist=FindDistance( Dl.pos0, pos );
+		if (dist <= minLength) {
+			ErrorMessage( MSG_TRK_TOO_SHORT, "Straight ", PutDim(fabs(minLength-dist)) );
+			return C_TERMINATE;
+		}
+		UndoStart( _("Create Straight Track"), "newStraight" );
+		t = NewStraightTrack( Dl.pos0, pos );
+		if (Dl.trk && !(MyGetKeyState() & WKEY_SHIFT)) {
+			ConnectTracks(Dl.trk, Dl.ep, t, 0);
+		}
+		UndoEnd();
+		DrawNewTrack(t);
+		return C_TERMINATE;
+
+	case C_REDRAW:
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
+		            0 );
+		if (Dl.down) {
+			DrawSegsDA( &tempD, NULL, zero, 0.0, &tempSegs_da, trackGauge, wDrawColorBlack,
+			            0 );
+		}
+		return C_CONTINUE;
+	case C_CANCEL:
+		Dl.down = FALSE;
+		return C_CONTINUE;
+
+	default:
+		return C_CONTINUE;
+	}
+}
+
+void InitCmdStraight( wMenu_p menu )
+{
+	AddMenuButton( menu, CmdStraight, "cmdStraight", _("Straight Track"),
+	               CreateToolbarIconFromResource("straight.png"), LEVEL0_50,
+	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_STRAIGHT, NULL );
+}

@@ -1,0 +1,15 @@
+layout: export_test
+mp_scale: 1.0   # 1 MP = 1 layout inch of track
+
+stations:
+  - id: WP
+    name: Williamsport
+    sequence: 0
+    types: [station, yard]
+    switchback: false
+
+  - id: XP
+    name: Xina Pass
+    sequence: 1
+    types: [station]
+    switchback: false

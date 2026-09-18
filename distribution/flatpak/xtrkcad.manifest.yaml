@@ -1,0 +1,86 @@
+# this is a copy from the git repo for flathub builds
+# IT WILL FAIL IF USED WITH FLATPAK BUILDER,
+# use "make flatpak" or "ninja flatpak" instead.
+id: io.sourceforge.xtrkcad_fork.xtrkcad
+runtime: org.freedesktop.Platform
+runtime-version: '25.08'
+sdk: org.freedesktop.Sdk
+command: run-xtrkcad.sh
+
+finish-args:
+  - --socket=x11
+  - --socket=cups
+  - --socket=pulseaudio
+  - --share=ipc
+  - --device=dri
+  - --filesystem=home
+
+modules:
+  - name: libzip
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DBUILD_DOC=OFF
+      - -DBUILD_EXAMPLES=OFF
+      - -DBUILD_REGRESS=OFF
+      - -DBUILD_TOOLS=OFF
+      - -DBUILD_OSSFUZZ=OFF
+      - -DBUILD_SHARED_LIBS=OFF
+      - -DENABLE_COMMONCRYPTO=OFF
+      - -DENABLE_GNUTLS=OFF
+      - -DENABLE_MBEDTLS=OFF
+      - -DENABLE_OPENSSL=OFF
+      - -DENABLE_WINDOWS_CRYPTO=OFF
+      - -DENABLE_BZIP2=OFF
+      - -DENABLE_LZMA=OFF
+      - -DENABLE_ZSTD=OFF
+      - -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+    sources:
+      - type: archive
+        url: https://github.com/nih-at/libzip/releases/download/v1.8.0/libzip-1.8.0.tar.gz
+        sha256: 30ee55868c0a698d3c600492f2bea4eb62c53849bcf696d21af5eb65f3f3839e
+    cleanup:
+      - '*'
+
+  - name: mxml
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DBUILD_SHARED_LIBS=OFF
+      - -DBUILD_TESTING=OFF
+      - -DBUILD_DOC=OFF
+    sources:
+      - type: archive
+        url: https://github.com/michaelrsweet/mxml/releases/download/v4.0.3/mxml-4.0.3.tar.gz
+        sha256: 3717da5b3829d6b37ef70db00ac1ec431bdb60faed8fde6538c11dc4aec13a7a
+    cleanup:
+      - '*'
+
+  - name: fake-inkscape
+    buildsystem: simple
+    sources:
+      - type: script
+        dest-filename: inkscape
+        commands:
+          - |
+            rsvg-convert "$@"
+    build-commands:
+      - install -Dm755 inkscape /app/bin/inkscape
+    cleanup:
+      - '*'
+
+  - name: xtrkcad
+    buildsystem: cmake-ninja
+    # Flatpak manifests need one concrete, fetchable tarball URL -- unlike
+    # release.yml's own links, this can't be a relative path or a
+    # GitHub-Actions-context variable, since flatpak-builder resolves it
+    # outside CI, against whatever git mirror is actually being used to cut
+    # this Flathub submission. Update url and sha256 to match BOTH the
+    # release tag being packaged AND whichever fork's mirror holds it --
+    # this is a placeholder value, not this project's permanent home (that's
+    # SourceForge; see CLAUDE.md).
+    # App ID: io.sourceforge.xtrkcad_fork.xtrkcad — update to a proper
+    # reverse-DNS ID (e.g. org.xtrkcad.XTrkCAD) before Flathub submission.
+    sources:
+      - type: archive
+        url: https://github.com/REPLACE_WITH_YOUR_GITHUB_USER/XTrkCAD/archive/refs/tags/v5.4.0.tar.gz
+        sha256: # fill in sha256 of the release archive when tagging v5.4.0
+    builddir: true

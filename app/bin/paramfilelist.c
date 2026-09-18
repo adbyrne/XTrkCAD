@@ -1,0 +1,594 @@
+/** \file paramfilelist.c
+ * Handling of the list of parameter files
+ */
+
+/*  XTrackCad - Model Railroad CAD
+ *  Copyright (C) 2019 Martin Fischer
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+
+#include "common.h"
+#include "compound.h"
+#include "ctrain.h"
+#include "custom.h"
+#include "dynstring.h"
+#include "fileio.h"
+#include "icons.h"
+#include "layout.h"
+#include "paths.h"
+#include "include/paramfile.h"
+#include "include/paramfilelist.h"
+#include "include/stringxtc.h"
+#include "common-ui.h"
+
+
+dynArr_t paramFileInfo_da;
+
+int curParamFileIndex = PARAM_DEMO;
+
+static int log_params;
+/** @logcmd @showrefby `paramupdate=n` `paramfilelist.c` */
+static int log_paramupdate;
+
+static char * customPath;
+static char * customPathBak;
+
+#define FAVORITESECTION "Parameter File Favorites"
+#define FAVORITETOTALS "Total"
+#define FAVORITEKEY "Favorite%d"
+#define	FAVORITEDELETED "Deleted%d"
+
+int GetParamFileCount()
+{
+	return (paramFileInfo_da.cnt);
+}
+
+/**
+ * Show parameter file  error message
+ *
+ * \param [in,out] file If non-null, the file.
+ */
+
+static void
+ReadParamError(char *file)
+{
+	DynString error_msg;
+	DynStringMalloc(&error_msg, 100);
+	DynStringPrintf(&error_msg,
+	                _("The parameter file: %s could not be found and was probably deleted or moved. "
+	                  "The file is removed from the active parameter file list."),
+	                file);
+	wNoticeWithIcon(NT_ERROR, DynStringToCStr(&error_msg), "OK", NULL);
+	DynStringFree(&error_msg);
+}
+
+
+/**
+ * Update the configuration file in case the name of a parameter file has changed.
+ * The function reads a list of new parameter filenames and gets the contents
+ * description for each file. If that contents is in use, i.e. is a loaded parameter
+ * file, the setting in the config file is updated to the new filename.
+ * First line of update file has the date of the update file.
+ * * Following lines have filenames, one per line.
+ *
+ * \return FALSE if update not possible or not necessary, TRUE if update successful
+ */
+
+static BOOL_T UpdateParamFiles(void)
+{
+	char fileName[STR_LONG_SIZE], *fileNameP;
+//  const char * cp;
+	FILE * updateF;
+	long updateTime = -1;
+	long lastTime;
+
+	MakeFullpath(&fileNameP, libDir, "xtrkcad.upd", NULL);
+	updateF = fopen(fileNameP, "r");
+	free(fileNameP);
+	if (updateF == NULL) {
+		return FALSE;
+	}
+	wPrefGetInteger("file", "updatetime", &lastTime, 0);
+
+	while ((fgets(fileName, STR_LONG_SIZE, updateF)) != NULL) {
+		if ( fileName[0] == '#' ) {
+			continue;
+		}
+		if ( updateTime == -1 ) {
+			updateTime = atol(fileName);
+			LOG1( log_paramupdate, ( "UpdateParamFiles Last: %ld, Update: %ld\n", lastTime,
+			                         updateTime ) );
+			if ( updateTime == 0 ) {
+				NoticeMessage( "xtrkcad.upd : invalid Update Time", _("OK"), NULL );
+				fclose(updateF);
+				return FALSE;
+			}
+			if (lastTime >= updateTime) {
+				fclose(updateF);
+				return FALSE;
+			}
+			continue;
+		}
+		FILE * paramF;
+
+		Stripcr(fileName);
+		InfoMessage(_("Updating %s"), fileName);
+		LOG1( log_paramupdate, ( "Updating %s\n", fileName ) );
+		MakeFullpath(&fileNameP, libDir, "params", fileName, NULL);
+		paramF = fopen(fileNameP, "r");
+		if (paramF == NULL) {
+			NoticeMessage(MSG_PRMFIL_OPEN_NEW, _("Ok"), NULL, fileNameP);
+			free(fileNameP);
+			continue;
+		}
+		char * newContents = NULL;
+		char * oldContents = NULL;
+		while ((fgets(message, sizeof message, paramF)) != NULL) {
+			if (strncmp(message, "CONTENTS ", 9) == 0) {
+				Stripcr(message);
+				if ( newContents == NULL ) {
+					// first CONTENTS
+					newContents = MyStrdup(message + 9);
+					// Get old CONTENTS->FILENAME mapping
+					char * cp = wPrefGetString("Parameter File Map", newContents);
+					if ( cp ) {
+						LOG1( log_paramupdate, ( "ParmUpdate:  Upd CONTENTS %s (was %s) -> %s\n",
+						                         newContents,
+						                         cp, fileNameP ) );
+					} else {
+						LOG1( log_paramupdate, ( "ParmUpdate:  New CONTENTS %s\n", newContents ) );
+					}
+					// Update CONTENTS->FILENAME mapping
+					wPrefSetString("Parameter File Map", newContents, fileNameP);
+				} else {
+					// Subsequent old CONTENTS
+					oldContents = message + 9;
+					LOG1( log_paramupdate, ( "  Old CONTENTS %s\n", oldContents ) );
+					// Check 'Parameter Files Names' map
+					for (int fileNo = 1; ; fileNo++) {
+						char fileNoS[4+10+1];
+						sprintf(fileNoS, "File%d", fileNo);
+						const char * prevContents = wPrefGetString("Parameter File Names", fileNoS);
+						if (prevContents == NULL || *prevContents == '\0') {
+							// End of list
+							break;
+						}
+						if ( strcmp( oldContents, prevContents ) == 0 ) {
+							// Update contents index map
+							LOG1( log_paramupdate, ( "ParamUpdate:  Found at %s -> %s\n", fileNoS,
+							                         newContents ) );
+							wPrefSetString( "Parameter File Names", fileNoS, newContents );
+							break;
+						}
+					}
+				}
+			}
+		}
+		if ( newContents ) {
+			MyFree( newContents );
+		}
+		fclose(paramF);
+		if (newContents == NULL) {
+			NoticeMessage(MSG_PRMFIL_NO_CONTENTS, _("Ok"), NULL, fileNameP);
+		}
+
+		free(fileNameP);
+	}
+	fclose(updateF);
+	LOG1( log_paramupdate, ( "Param updatetime -> %d\n", updateTime ) );
+	wPrefSetInteger("file", "updatetime", updateTime);
+	return TRUE;
+}
+
+/**
+ * Read the list of parameter files from configuration and load the files.
+ *
+ */
+void LoadParamFileList(void)
+{
+	int fileNo;
+	BOOL_T updated = FALSE;
+	long *favoriteList = NULL;
+	long favorites;
+	int nextFavorite = 0;
+
+	updated = UpdateParamFiles();
+
+	wPrefGetIntegerBasic(FAVORITESECTION, FAVORITETOTALS, &favorites, 0);
+	if (favorites) {
+		DynString topic;
+		favoriteList = MyMalloc(sizeof(long)*favorites);
+
+		DynStringMalloc(&topic, 16);
+		for (int i = 0; i < favorites; i++) {
+			DynStringPrintf(&topic, FAVORITEKEY, i);
+			wPrefGetIntegerBasic(FAVORITESECTION, DynStringToCStr(&topic), &favoriteList[i],
+			                     0);
+		}
+		DynStringFree(&topic);
+	}
+
+	for (fileNo = 1; ; fileNo++) {
+		char *fileName;
+		const char * contents;
+//      enum paramFileState structState = PARAMFILE_UNLOADED;
+
+
+		sprintf(message, "File%d", fileNo);
+		contents = wPrefGetString("Parameter File Names", message);
+		if (contents == NULL || *contents == '\0') {
+			break;
+		}
+		InfoMessage("Parameters for %s", contents);
+		fileName = wPrefGetString("Parameter File Map", contents);
+		if (fileName == NULL || *fileName == '\0') {
+			NoticeMessage(MSG_PRMFIL_NO_MAP, _("Ok"), NULL, contents);
+			continue;
+		}
+		char * share;
+
+		// Rewire to the latest system level
+#define SHAREPARAMS (PATH_SEPARATOR "share" PATH_SEPARATOR "xtrkcad" PATH_SEPARATOR "params" PATH_SEPARATOR)
+#define SHAREBETAPARAMS (PATH_SEPARATOR "share" PATH_SEPARATOR "xtrkcad-beta" PATH_SEPARATOR "params" PATH_SEPARATOR)
+		share= strstr(fileName,SHAREPARAMS);
+		if (share) {
+			share += strlen(SHAREPARAMS);
+		}
+#ifndef WINDOWS
+#ifndef __APPLE__
+		if ( share == NULL &&
+		     (share= strstr(fileName,SHAREBETAPARAMS))) {
+			share += strlen(SHAREBETAPARAMS);
+		}
+#endif
+#endif
+		if ( share ) {
+			MakeFullpath(&fileName, wGetAppLibDir(), "params", share, NULL);
+			LOG1( log_paramupdate, ( "Param LoadParamList: %s -> %s\n", contents,
+			                         fileName ) );
+			wPrefSetString("Parameter File Map", contents, fileName);
+		}
+
+		if (ReadParamFile(fileName) >= 0) {
+
+			if (curContents == NULL) {
+				curContents = curSubContents = MyStrdup(contents);
+			}
+			paramFileInfo(curParamFileIndex).contents = curContents;
+			if (favoriteList && fileNo == favoriteList[nextFavorite]) {
+				DynString topic;
+				long deleted;
+				DynStringMalloc(&topic, 16);
+				DynStringPrintf(&topic, FAVORITEDELETED, fileNo);
+
+				wPrefGetIntegerBasic(FAVORITESECTION, DynStringToCStr(&topic), &deleted, 0L);
+				paramFileInfo(curParamFileIndex).favorite = TRUE;
+				paramFileInfo(curParamFileIndex).deleted = deleted;
+				if (nextFavorite < favorites - 1) {
+					nextFavorite++;
+				}
+				DynStringFree(&topic);
+			}
+		} else {
+			ReadParamError(fileName);
+		}
+	}
+	curParamFileIndex = PARAM_CUSTOM;
+	if (updated) {
+		SaveParamFileList();
+	}
+
+	MyFree(favoriteList);
+}
+
+/**
+ * Save the currently selected parameter files. Parameter files that have been unloaded
+ * are not saved.
+ *
+ */
+
+void SaveParamFileList(void)
+{
+	int fileInx;
+	int fileNo;
+	int favorites;
+	char * contents, *cp;
+
+	for (fileInx = 0, fileNo = 1, favorites = 0; fileInx < paramFileInfo_da.cnt;
+	     fileInx++) {
+		if (paramFileInfo(fileInx).valid && (!paramFileInfo(fileInx).deleted ||
+		                                     paramFileInfo(fileInx).favorite)) {
+			sprintf(message, "File%d", fileNo);
+			contents = paramFileInfo(fileInx).contents;
+			for (cp = contents; *cp; cp++) {
+				if (*cp == '=' || *cp == '\'' || *cp == '"' || *cp == ':' || *cp == '.') {
+					*cp = ' ';
+				}
+			}
+			LOG1( log_paramupdate, ( "Param SaveFileList:  %s -> %s\n", message,
+			                         contents ) );
+			wPrefSetString("Parameter File Names", message, contents);
+			LOG1( log_paramupdate, ( "Param                %s -> %s\n", contents,
+			                         paramFileInfo(fileInx).name ) );
+			wPrefSetString("Parameter File Map", contents, paramFileInfo(fileInx).name);
+			if (paramFileInfo(fileInx).favorite) {
+				sprintf(message, FAVORITEKEY, favorites);
+				LOG1( log_paramupdate, ( "Param Favorite                %s -> %d\n", message,
+				                         fileNo ) );
+				wPrefSetInteger(FAVORITESECTION, message, fileNo);
+				sprintf(message, FAVORITEDELETED, fileNo);
+				LOG1( log_paramupdate, ( "Param                        %s -> %d\n", message,
+				                         paramFileInfo(fileInx).deleted ) );
+				wPrefSetInteger(FAVORITESECTION, message, paramFileInfo(fileInx).deleted);
+				favorites++;
+			}
+			fileNo++;
+		}
+	}
+	sprintf(message, "File%d", fileNo);
+	LOG1( log_paramupdate, ( "Param SaveFileList:  %s -> <>\n", message ) );
+	wPrefSetString("Parameter File Names", message, "");
+	LOG1( log_paramupdate, ( "Param Favorite       %s -> %d\n", FAVORITETOTALS,
+	                         favorites ) );
+	wPrefSetInteger(FAVORITESECTION, FAVORITETOTALS, favorites);
+}
+
+void
+UpdateParamFileList(void)
+{
+	for (size_t i = 0; i < (unsigned)paramFileInfo_da.cnt; i++) {
+		SetParamFileState((int)i);
+	}
+}
+
+
+
+/**
+ * Load the selected parameter files. This is a callback executed when the file selection dialog
+ * is closed.
+ * Steps:
+ * - the parameters are read from file
+ * - check is performed to see whether the content is already present, if yes the previously
+ * loaded content is invalidated
+ * - loaded parameter file is added to list of parameter files
+ * - if a parameter file dialog exists the list is updated. It is either rewritten in
+ * in case of an invalidated file or the new file is appended
+ * - the settings are updated
+ * These steps are repeated for every file in list
+ *
+ * \param files IN the number of filenames in the fileName array
+ * \param fileName IN an array of fully qualified filenames
+ * \param data IN ignored
+ * \return  TRUE on success, FALSE on error
+ */
+
+int LoadParamFile(
+        int files,
+        char ** fileName,
+        void * data)
+{
+	wIndex_t inx;
+	int i = 0;
+
+	CHECK(fileName != NULL);
+	CHECK(files > 0);
+
+	for (i = 0; i < files; i++) {
+//      enum paramFileState structState = PARAMFILE_UNLOADED;
+		int newIndex;
+
+		curContents = curSubContents = NULL;
+
+		newIndex = ReadParamFile(fileName[i]);
+		if (newIndex >= 0) {
+			// in case the contents is already present, make invalid
+			for (inx = 0; inx < newIndex; inx++) {
+				if (paramFileInfo(inx).valid &&
+				    strcmp(paramFileInfo(inx).contents, curContents) == 0) {
+					paramFileInfo(inx).valid = FALSE;
+					break;
+				}
+			}
+
+			LOG1( log_paramupdate, ( "Param Load: %s -> %s\n", curContents,
+			                         paramFileInfo(curParamFileIndex).name) );
+			wPrefSetString("Parameter File Map", curContents,
+			               paramFileInfo(curParamFileIndex).name);
+		} else {
+			ReadParamError(fileName[i]);
+		}
+	}
+	//Only set the ParamFileDir if not the system directory
+	if ( (!strstr(fileName[i-1],SHAREPARAMS))
+#ifndef WINDOWS
+#ifndef __APPLE__
+	     && (!strstr(fileName[i-1],SHAREBETAPARAMS))
+#endif
+#endif
+	   ) {
+		SetParamFileDir(fileName[i - 1]);
+	}
+	curParamFileIndex = PARAM_CUSTOM;
+	DoChangeNotification(CHANGE_PARAMS);
+	return TRUE;
+}
+
+static void ReadCustom(void)
+{
+	FILE * f;
+	MakeFullpath(&customPath, workingDir, sCustomF, NULL);
+	customPathBak = MyStrdup(customPath);
+	customPathBak[ strlen(customPathBak)-1 ] = '1';
+	f = fopen(customPath, "r");
+	if (f != NULL) {
+		fclose(f);
+		curParamFileIndex = PARAM_CUSTOM;
+		ReadParams(0, workingDir, sCustomF);
+	}
+}
+
+
+/**
+ * Open the custom file where user-defined turnouts, cars and such are stored
+ */
+
+FILE * OpenCustom(const char *mode)
+{
+	FILE * ret = NULL;
+
+	if (inPlayback) {
+		return NULL;
+	}
+	if (*mode == 'w') {
+		rename(customPath, customPathBak);
+	}
+	if (customPath) {
+		ret = fopen(customPath, mode);
+		if (ret == NULL) {
+			NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, _("Custom"), customPath,
+			              strerror(errno));
+		}
+	}
+
+	return ret;
+}
+/**
+ * Update and open the parameter files dialog box
+ *
+ * \param junk
+ */
+
+static void DoParamFileListDialog(void *junk)
+{
+	DoParamFiles(junk);
+	ParamFileListLoad(paramFileInfo_da.cnt, &paramFileInfo_da);
+
+}
+
+addButtonCallBack_t ParamFilesInit(void)
+{
+	RegisterChangeNotification(ParamFilesChange);
+	return &DoParamFileListDialog;
+}
+
+/**
+ * Get the initial parameter files. The Xtrkcad.xtq file containing scale and
+ * demo definitions is read.
+ *
+ * \return FALSE on error, TRUE otherwise
+ */
+BOOL_T ParamFileListInit(void)
+{
+	/** @logcmd @showrefby `params=n` `paramfilelist.c` — parameter-file loading, including the
+	 * scale file (`.xtq`), custom file (`.cus`), and other `.xtp` files
+	 */
+	log_params = LogFindIndex("params");
+	log_paramupdate = LogFindIndex("paramupdate");
+
+	SetCLocale();
+	// get the default definitions
+	if (ReadParams(lParamKey, libDir, sParamQF) == FALSE) {
+		SetUserLocale();
+		return FALSE;
+	}
+
+	curParamFileIndex = PARAM_CUSTOM;
+
+	if (lParamKey == 0) {
+		LoadParamFileList();
+		ReadCustom();
+	}
+
+	SetUserLocale();
+	return TRUE;
+
+}
+
+/**
+ * Deletes all parameter types described by index
+ *
+ * \param  index Zero-based index of the.
+ */
+
+static void
+DeleteAllParamTypes(int index)
+{
+
+	DeleteTurnoutParams(index);
+	DeleteCarProto(index);
+	DeleteCarPart(index);
+	DeleteStructures(index);
+}
+
+
+/**
+ * Unload parameter file: all parameter definitions from this file are deleted
+ * from memory. Strings allocated to store the filename and contents
+ * description are free'd as well.
+ * In order to keep the overall data structures consistent, the file info
+ * structure is not removed from the array but flagged as garbage
+ *
+ * \param  fileIndex Zero-based index of the file.
+ *
+ * \returns True if it succeeds, false if it fails.
+ */
+
+bool
+UnloadParamFile(wIndex_t fileIndex)
+{
+	paramFileInfo_p paramFileI = &paramFileInfo(fileIndex);
+
+	DeleteAllParamTypes(fileIndex);
+
+	MyFree(paramFileI->name);
+	MyFree(paramFileI->contents);
+	paramFileI->name = NULL;
+	paramFileI->contents = NULL;
+
+	paramFileI->valid = FALSE;
+
+	for (int i = 0; i < paramFileInfo_da.cnt; i++) {
+		if (!paramFileInfo(i).valid) {
+			continue;
+		}
+		LOG1(log_params, ("UnloadParamFiles: = %s: %d\n", paramFileInfo(i).contents,
+		                  paramFileInfo(i).trackState))
+	}
+
+	return (true);
+}
+
+/**
+ * Reload parameter file
+ *
+ * \param  index Zero-based index of the paramFileInfo struct.
+ *
+ * \returns True if it succeeds, false if it fails.
+ */
+
+bool
+ReloadParamFile(wIndex_t index)
+{
+	paramFileInfo_p paramFileI = &paramFileInfo(index);
+
+	DeleteAllParamTypes(index);
+	MyFree(paramFileI->contents);
+
+	ReloadDeletedParamFile(index);
+
+	return(true);
+}

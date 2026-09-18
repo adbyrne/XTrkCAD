@@ -1,0 +1,328 @@
+# XTrkCAD layout template library
+#
+# od_role maps to Fugate OD formula terms:
+#   storage   → max_cars += 0.8 × storage_ft
+#   staging   → max_cars += 0.8 × staging_ft; cars_moved += 0.4 × staging_ft × 2
+#   passing   → max_cars += 0.8 × passing_ft / 2; cars_moved += 0.4 × passing_ft
+#   connecting→ cars_moved += 0.4 × connecting_ft
+#   none      → not counted in OD
+#
+# All stub templates have stub: true — geometry replaced in Phase G.
+
+templates:
+
+  # ── Yards ──────────────────────────────────────────────────────────────────
+
+  - id: yard/single-ended
+    name: "Single-Ended Yard"
+    category: yard
+    description: "Stub-end yard; all tracks dead-end at one throat"
+    file: yard/single-ended.xtc
+    mainline_connection: single
+    od_role: storage
+    connection_points:
+      - throat
+    parameters:
+      - name: track_count
+        type: int
+        required: true
+        min: 2
+        max: 12
+        description: "Number of yard tracks"
+      - name: min_track_length
+        type: length
+        required: true
+        default: 60
+        unit: ft
+        description: "Minimum usable storage length per track"
+      - name: lead_length
+        type: length
+        required: false
+        unit: ft
+        description: "Throat lead to first switch (auto if omitted)"
+    stub: true
+
+  - id: yard/double-ended
+    name: "Double-Ended Yard"
+    category: yard
+    description: "Through yard; trains can enter and exit from either end"
+    file: yard/double-ended.xtc
+    mainline_connection: dual
+    od_role: storage
+    connection_points:
+      - throat-a
+      - throat-b
+    parameters:
+      - name: track_count
+        type: int
+        required: true
+        min: 2
+        max: 12
+        description: "Number of yard tracks"
+      - name: min_track_length
+        type: length
+        required: true
+        default: 60
+        unit: ft
+        description: "Minimum usable storage length per track"
+    stub: true
+
+  - id: yard/runaround
+    name: "Runaround Yard"
+    category: yard
+    description: "Single-track runaround loop; locomotive can get around cars"
+    file: yard/runaround.xtc
+    mainline_connection: single
+    od_role: storage
+    connection_points:
+      - throat
+    parameters:
+      - name: track_count
+        type: int
+        required: true
+        min: 2
+        max: 6
+        description: "Number of storage tracks including runaround"
+      - name: lead_length
+        type: length
+        required: false
+        default: 30
+        unit: ft
+        description: "Length of lead/runaround track"
+    stub: true
+
+  # ── Staging ────────────────────────────────────────────────────────────────
+
+  - id: staging/single-ended
+    name: "Single-Ended Staging"
+    category: staging
+    description: "Stub-end staging yard; trains arrive and depart same end"
+    file: staging/single-ended.xtc
+    mainline_connection: single
+    od_role: staging
+    connection_points:
+      - throat
+    parameters:
+      - name: track_count
+        type: int
+        required: true
+        min: 2
+        max: 16
+        description: "Number of staging tracks"
+      - name: min_length
+        type: length
+        required: true
+        default: 80
+        unit: ft
+        description: "Minimum staging track length (full train length)"
+    stub: true
+
+  - id: staging/double-ended
+    name: "Double-Ended Staging"
+    category: staging
+    description: "Through staging; trains in from one end, depart from the other"
+    file: staging/double-ended.xtc
+    mainline_connection: dual
+    od_role: staging
+    connection_points:
+      - throat-a
+      - throat-b
+    parameters:
+      - name: track_count
+        type: int
+        required: true
+        min: 2
+        max: 16
+        description: "Number of staging tracks"
+      - name: min_length
+        type: length
+        required: true
+        default: 80
+        unit: ft
+        description: "Minimum staging track length (full train length)"
+    stub: true
+
+  # ── Stations ───────────────────────────────────────────────────────────────
+
+  - id: station/passing-siding
+    name: "Passing Siding"
+    category: station
+    description: "Siding long enough to hold a train; allows meets on single main"
+    file: station/passing-siding.xtc
+    mainline_connection: dual
+    od_role: passing
+    connection_points:
+      - entry
+      - exit
+    parameters:
+      - name: length
+        type: length
+        required: true
+        default: 100
+        unit: ft
+        description: "Usable siding length"
+    stub: true
+
+  - id: station/stub-end
+    name: "Stub-End Station"
+    category: station
+    description: "Terminal-style station with stub tracks"
+    file: station/stub-end.xtc
+    mainline_connection: single
+    od_role: storage
+    connection_points:
+      - throat
+    parameters:
+      - name: track_count
+        type: int
+        required: true
+        default: 2
+        min: 1
+        max: 8
+        description: "Number of station tracks"
+      - name: length
+        type: length
+        required: false
+        default: 60
+        unit: ft
+        description: "Platform track length"
+    stub: true
+
+  # ── Mainline ───────────────────────────────────────────────────────────────
+
+  - id: mainline/curve
+    name: "Mainline Curve"
+    category: mainline
+    description: "A curved mainline section; radius and grade configurable"
+    file: mainline/curve.xtc
+    mainline_connection: dual
+    od_role: connecting
+    connection_points:
+      - entry
+      - exit
+    parameters:
+      - name: radius
+        type: length
+        required: false
+        unit: in
+        description: "Curve radius (uses layout default if omitted)"
+      - name: grade
+        type: float
+        required: false
+        default: 0.0
+        unit: pct
+        description: "Grade in percent"
+      - name: arc_angle
+        type: float
+        required: false
+        default: 90.0
+        unit: deg
+        description: "Arc sweep in degrees"
+    stub: true
+
+  - id: mainline/s-curve
+    name: "S-Curve"
+    category: mainline
+    description: "Two reverse curves; avoid without easements between them"
+    file: mainline/s-curve.xtc
+    mainline_connection: dual
+    od_role: connecting
+    connection_points:
+      - entry
+      - exit
+    parameters:
+      - name: radius
+        type: length
+        required: false
+        unit: in
+        description: "Curve radius (uses layout default if omitted)"
+      - name: tangent_length
+        type: length
+        required: false
+        default: 6
+        unit: in
+        description: "Straight tangent between curves (easement substitute)"
+    stub: true
+
+  # ── Helix ──────────────────────────────────────────────────────────────────
+
+  - id: helix/standard
+    name: "Helix"
+    category: helix
+    description: "Spiral ramp connecting layout levels; radius and grade define height"
+    file: helix/standard.xtc
+    mainline_connection: dual
+    od_role: connecting
+    connection_points:
+      - entry
+      - exit
+    parameters:
+      - name: radius
+        type: length
+        required: false
+        unit: in
+        description: "Helix radius (uses layout default if omitted)"
+      - name: grade
+        type: float
+        required: true
+        default: 2.0
+        unit: pct
+        description: "Grade in percent (2–3% typical)"
+      - name: rise
+        type: length
+        required: true
+        unit: in
+        description: "Total vertical rise needed"
+      - name: track_separation
+        type: length
+        required: false
+        default: 3
+        unit: in
+        description: "Vertical clearance between loops"
+    stub: true
+
+  # ── Sidings ────────────────────────────────────────────────────────────────
+
+  - id: siding/industry
+    name: "Industry Siding"
+    category: siding
+    description: "Spur track(s) serving one or more industries"
+    file: siding/industry.xtc
+    mainline_connection: single
+    od_role: storage
+    connection_points:
+      - switch
+    parameters:
+      - name: length
+        type: length
+        required: true
+        default: 40
+        unit: ft
+        description: "Spur track length"
+      - name: track_count
+        type: int
+        required: false
+        default: 1
+        min: 1
+        max: 4
+        description: "Number of industry spurs"
+    stub: true
+
+  - id: siding/team-track
+    name: "Team Track"
+    category: siding
+    description: "Public siding for carload freight; accessed from both ends"
+    file: siding/team-track.xtc
+    mainline_connection: single
+    od_role: passing
+    connection_points:
+      - entry
+      - exit
+    parameters:
+      - name: length
+        type: length
+        required: true
+        default: 60
+        unit: ft
+        description: "Team track length"
+    stub: true

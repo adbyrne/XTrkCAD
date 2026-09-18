@@ -1,0 +1,1086 @@
+name: CI (GTK3V2MAIN)
+on:
+  push:
+    branches:
+      - GTK3V2MAIN
+      - test/**
+  pull_request:
+    branches:
+      - GTK3V2MAIN
+
+jobs:
+  doxygen:
+    # Doxygen is pinned to DOXYGEN_VERSION (official prebuilt Linux binary,
+    # not the apt package) rather than left to whatever Ubuntu's repo
+    # resolves to -- avoids the kind of silent tool drift astyle hit in SF
+    # #638. Bumped 2026-07-17 from 1.9.8 to 1.15.0 (matches what Ubuntu
+    # 26.04 ships) after confirming identical warning output on the current
+    # tree between both versions.
+    #
+    # docs/doxygen/Doxyfile.in was ported from Hg on 2026-07-16 to close a
+    # git/Hg divergence (git's copy predated an upstream 2026-05-07 tightening
+    # -- SF rev 6446/6432 -- and had separately drifted onto a different
+    # Doxygen-version template). WARN_AS_ERROR is deliberately kept at NO
+    # here even though Hg now sets FAIL_ON_WARNINGS: flipping it needs the
+    # remaining pre-existing @param/return-type doc gaps triaged or
+    # suppressed first (see .claude/doxygen-triage-plan.md; down to 402 as
+    # of 2026-07-17, from an original 930).
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DOXYGEN_VERSION: 1.15.0
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build libgtk-3-dev graphviz libzip-dev zlib1g-dev
+      - name: Install pinned Doxygen ${{ env.DOXYGEN_VERSION }}
+        run: |
+          curl -sL -o doxygen.tar.gz "https://github.com/doxygen/doxygen/releases/download/Release_${DOXYGEN_VERSION//./_}/doxygen-${DOXYGEN_VERSION}.linux.bin.tar.gz"
+          tar xzf doxygen.tar.gz
+          echo "$PWD/doxygen-${DOXYGEN_VERSION}/bin" >> "$GITHUB_PATH"
+      - name: Configure
+        run: |
+          doxygen --version
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_USE_DOXYGEN=ON -DXTRKCAD_TESTING=OFF
+      - name: Build docs
+        run: cmake --build build --target docs-doxygen
+
+  help-links-check:
+    # Gating. Verifies every runtime wHelp() topic actually resolves -- two
+    # independent families, both audited while chasing a dev's "cmdTurnoutHotBar.html
+    # not found" report:
+    #
+    #   - Command-context help (F1): app/wlib/gtk3lib/help.c's DoHelpMenu()
+    #     (SHOWHELPFORCOMMAND case) opens GetCurCommandName(), which only ever
+    #     returns a helpKey registered via AddMenuButton() (menu.c's
+    #     AddMenuButton -> AddCommand wrapper chain -- AddToolbarButton's
+    #     helpStr, by contrast, is tooltip text only, not reachable here).
+    #     SF #729, 5 broken links found and fixed.
+    #
+    #   - Per-dialog Help button: app/wlib/gtk3lib/dialog.c's GTK_RESPONSE_HELP
+    #     handler opens GetDialogHelpTopic(dialog->name) (SF #730,
+    #     app/bin/paramwrapper.c) -- dialog->name itself is deliberately never
+    #     renamed to fix a broken link (it also keys window-position prefs and
+    #     every field-level tooltip via app/wlib/gtk3lib/tooltip.c's
+    #     "<dialog>-<field>" lookup), so GetDialogHelpTopic() redirects through
+    #     a small alias table instead. 70 of 71 dialogs had no matching page
+    #     when #730 was filed -- fixed in verified batches, tracked on the
+    #     ticket, not all at once.
+    #
+    # Both checked by the single source of truth app/doc/check_help_links.py
+    # (also run as the HelpLinksCheck ctest when Doxygen+Python3 are found
+    # locally -- see app/doc/CMakeLists.txt) rather than duplicating the
+    # extraction logic here. Its own file header has the full extraction
+    # details, including the multi-line-AddMenuButton() extraction bug SF #729
+    # found in this job's first-draft version (a naive `grep -E` misses any
+    # call whose args span multiple lines -- cmdStructureHotBar was invisible
+    # to it for exactly that reason).
+    #
+    # This is a *different* Doxygen run than the doxygen job above: that one
+    # builds the internal API docs (docs/doxygen/Doxyfile.in, gated by
+    # XTRKCAD_USE_DOXYGEN); this job builds the User Guide the app actually
+    # ships and wHelp() points at (app/doc/Doxyfile.in, the help-html
+    # target -- builds automatically whenever Doxygen is found, no flag
+    # needed). Confirmed empirically 2026-08-25 that the two targets' INPUT
+    # sets don't overlap at all -- app/doc/*.dox (where every \page cmd...
+    # topic lives) isn't in the internal-docs job's INPUT.
+    #
+    # GTK3V2MAIN only: default/GTK2 still uses Halibut, which resolves help
+    # topics differently -- same scoping as SF #728.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DOXYGEN_VERSION: 1.15.0
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build libgtk-3-dev graphviz libzip-dev zlib1g-dev
+      - name: Install pinned Doxygen ${{ env.DOXYGEN_VERSION }}
+        run: |
+          curl -sL -o doxygen.tar.gz "https://github.com/doxygen/doxygen/releases/download/Release_${DOXYGEN_VERSION//./_}/doxygen-${DOXYGEN_VERSION}.linux.bin.tar.gz"
+          tar xzf doxygen.tar.gz
+          echo "$PWD/doxygen-${DOXYGEN_VERSION}/bin" >> "$GITHUB_PATH"
+      - name: Configure
+        run: |
+          doxygen --version
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=OFF
+      - name: Build User Guide (help-html)
+        run: cmake --build build --target help-html
+      - name: Verify every wHelp() topic has a matching page
+        run: python3 app/doc/check_help_links.py . build/app/doc/html
+
+  c-tests-linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext xvfb
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
+      - name: Build
+        run: cmake --build build
+      - name: Test
+        # GTK3 issue #26's demo-playback regression suite has its own job
+        # (regression-gtk3) -- exclude it here so it doesn't get picked up by
+        # XTRKCAD_REGRESSION_TESTING's auto-detect default and slow this job down.
+        run: xvfb-run ctest --test-dir build --output-on-failure -LE regression
+
+  regression-gtk3:
+    # GTK3 issue #26's demo-playback regression suite (RegressionTestAll(), the
+    # -T flag). Split into its own job rather than folded into c-tests-linux so
+    # the fast unit-test feedback loop there isn't held up by this job's ~9
+    # minute single-process playback baseline. Gates on the RegressionSuite
+    # ctest target only (label regression-ci) -- not the ~47 individual
+    # per-demo tests also registered by XTRKCAD_REGRESSION_TESTING, which exist
+    # for local dev targeting (`ctest -R Regression.dmease.xtr`) and would
+    # multiply per-test process/X-session startup overhead in CI.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext xvfb
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_REGRESSION_TESTING=ON
+      - name: Build
+        run: cmake --build build
+      - name: Regression suite
+        run: ctest --test-dir build -L regression-ci --output-on-failure -VV
+
+  regression-gtk3-standalone:
+    # Companion to regression-gtk3 above: runs the ~47 individual per-demo
+    # tests (label "regression", excluding "regression-ci") that job
+    # deliberately skips. These exercise each demo standalone in its own
+    # fresh process, which is a meaningfully different code path from
+    # RegressionSuite's single warm process -- several real bugs (GTK3
+    # issues #21, #24) only ever manifested cold/standalone and passed
+    # RegressionSuite fine, so this job exists to actually catch that class
+    # going forward rather than relying on someone happening to run these
+    # locally. Self-contained (own checkout/build) matching every other job
+    # in this file, even though it duplicates the build regression-gtk3
+    # already does -- keeps each job simple and independently rerunnable,
+    # at the cost of some redundant build time.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext xvfb
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_REGRESSION_TESTING=ON
+      - name: Build
+        run: cmake --build build
+      - name: Standalone per-demo regression tests
+        run: ctest --test-dir build -L "^regression$" -LE "regression-ci" --output-on-failure -VV
+
+  c-tests-arm64:
+    # Native ARM64 runner — same architecture as Raspberry Pi 3/4/5
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext xvfb
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
+      - name: Build
+        run: cmake --build build
+      - name: Test
+        # See c-tests-linux: regression-gtk3 covers the GTK3 issue #26 suite.
+        run: xvfb-run ctest --test-dir build --output-on-failure -LE regression
+
+  c-tests-linux-clang:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build clang libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext xvfb
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DCMAKE_C_COMPILER=clang
+      - name: Build
+        run: cmake --build build
+      - name: Test
+        # See c-tests-linux: regression-gtk3 covers the GTK3 issue #26 suite.
+        run: xvfb-run ctest --test-dir build --output-on-failure -LE regression
+
+  c-tests-macos:
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install dependencies
+        run: brew install ninja gtk+3 cmocka libzip librsvg
+      - name: Configure
+        run: |
+          GTK_PREFIX=$(brew --prefix gtk+3)
+          PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
+          export PKG_CONFIG_PATH
+          GTK_LDFLAGS=$(pkg-config --libs-only-L gtk+-3.0)
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
+            -DCMAKE_PREFIX_PATH="$GTK_PREFIX;$(brew --prefix)" \
+            -DCMAKE_EXE_LINKER_FLAGS="$GTK_LDFLAGS" \
+            -DXTRKCAD_USE_APPLEHELP=OFF -DXTRKCAD_USE_BROWSER=ON
+      - name: Build
+        run: cmake --build build
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  c-tests-windows-msys2:
+    # GTK3 on Windows via MSYS2/MinGW64 — replaces the old mswlib/MSVC job.
+    # mswlib was removed from GTK3V2MAIN in SF r6508; Windows now builds
+    # against GTK3 directly using the official GTK Windows runtime (MSYS2).
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: false
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-pkg-config
+            mingw-w64-x86_64-gtk3
+            mingw-w64-x86_64-zlib
+            mingw-w64-x86_64-libzip
+            mingw-w64-x86_64-mxml
+            mingw-w64-x86_64-librsvg
+            mingw-w64-x86_64-gettext
+            mingw-w64-x86_64-cmocka
+      - name: Configure
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DXTRKCAD_TESTING=ON \
+            -DXTRKCAD_USE_GETTEXT=OFF
+      - name: Build
+        run: cmake --build build --parallel
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  c-tests-sanitizers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build clang libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext xvfb
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_SANITIZE=ON -DCMAKE_C_COMPILER=clang
+      - name: Build
+        run: cmake --build build
+      - name: Test
+        env:
+          ASAN_OPTIONS: "abort_on_error=1:detect_leaks=1"
+          UBSAN_OPTIONS: "abort_on_error=1:print_stacktrace=1"
+        # PreferenceTest and MRUListTest (SF #794) both require a GTK3 display
+        # and trigger GTK3 internal allocations that ASAN flags as leaks. Both
+        # are covered by c-tests-linux, which runs under xvfb-run.
+        # -LE regression: keeps this job's fast unit-test feedback loop from
+        # being held up by the ~3 minute sanitizer-instrumented playback run --
+        # see regression-gtk3-sanitizers below, which covers it separately.
+        run: ctest --test-dir build --output-on-failure -E "PreferenceTest|MRUListTest" -LE regression
+
+  regression-gtk3-sanitizers:
+    # Closes the gap SF #682 documented: c-tests-sanitizers above excludes the
+    # demo-playback regression suite (-LE regression), and regression-gtk3
+    # below isn't sanitizer-instrumented, so the two were never combined in
+    # CI -- only by a human happening to run them together locally, which is
+    # exactly how SF #675, #677-#680 were found (see docs/doxygen/advanced.md's
+    # "Static tools and a live sanitizer run catch different classes of bug").
+    # Scoped to RegressionSuite only (label regression-ci), not the ~47
+    # per-demo standalone tests regression-gtk3-standalone runs -- that's the
+    # combination that actually found those bugs, and doubling to standalone
+    # would multiply per-demo cold-start overhead under ASan instrumentation
+    # for unproven additional benefit; can be revisited if that job's own
+    # cold-start code path ever needs sanitizer coverage too.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build clang libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext xvfb
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_REGRESSION_TESTING=ON -DXTRKCAD_SANITIZE=ON -DCMAKE_C_COMPILER=clang
+      - name: Build
+        run: cmake --build build
+      - name: Regression suite
+        env:
+          ASAN_OPTIONS: "abort_on_error=1:detect_leaks=1"
+          UBSAN_OPTIONS: "abort_on_error=1:print_stacktrace=1"
+        run: ctest --test-dir build -L regression-ci --output-on-failure -VV
+
+  c-tests-valgrind:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext xvfb valgrind
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
+      - name: Build
+        run: cmake --build build
+      - name: Test under Valgrind
+        # PreferenceTest and MRUListTest (SF #794) both require a GTK3 display;
+        # GTK3 internals also trigger many Valgrind false-positives. Both are
+        # covered by c-tests-linux, which runs under xvfb-run.
+        # -LE regression: see c-tests-linux; the GTK3 issue #26 suite has its
+        # own job (regression-gtk3), not Valgrind-instrumented.
+        run: |
+          ctest --test-dir build --output-on-failure \
+            -E "PreferenceTest|MRUListTest" \
+            -LE regression \
+            -T memcheck \
+            --overwrite "MemoryCheckCommand=$(which valgrind)" \
+            --overwrite "MemoryCheckCommandOptions=--error-exitcode=1 --track-origins=yes --leak-check=full"
+
+  cppcheck:
+    # app/help + app/tools/listxtp.c added SF #701/#729-730 follow-up (bug-tracker.md Action
+    # Queue item 22) -- these directories were never in scope for any QA job. app/tools/dirent.c
+    # is a vendored public-domain Win32 dirent shim (Kevlin Henney, 1997/2003), excluded the same
+    # way app/wlib/gtk3lib/wrapbox/ and app/wlib/gtk3lib/win32/ are out of scope by construction
+    # below (non-recursive glob never reaches those subdirs, same treatment as
+    # app/bin/unittest/).
+    #
+    # app/wlib/gtk3lib(+unix/) added 2026-09-02 (queued since the app/bin shadowVariable/for-loop
+    # gates landed -- see project memory). --inline-suppr added at the same time so the existing
+    # `//cppcheck-suppress memleakOnRealloc` comment on drawcairo.c's realloc actually takes
+    # effect here (it already worked in cppcheck-deep below, which had --inline-suppr already;
+    # the gating job didn't, so widening scope surfaced it as a hard error). unknownMacro on
+    # stickytogglebutton.h is cppcheck not understanding the GObject G_DECLARE_FINAL_TYPE macro,
+    # same category as the existing custom.c suppression below. A real memleak on osxhelp.c's
+    # (APPLE-only, not built on this Linux runner) early-return paths was fixed directly rather
+    # than suppressed.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install cppcheck
+        run: sudo apt-get update -q && sudo apt-get install -y cppcheck
+      - name: Run cppcheck
+        run: |
+          cppcheck \
+            --error-exitcode=1 \
+            --inline-suppr \
+            -j 4 \
+            --suppress=missingInclude \
+            --suppress=missingIncludeSystem \
+            --suppress=nullPointerOutOfMemory \
+            --suppress=nullPointerOutOfResources \
+            --suppress=nullPointerArithmeticOutOfMemory \
+            --suppress=syntaxError:app/bin/archive.c \
+            --suppress=syntaxError:app/bin/cturntbl.c \
+            --suppress=syntaxError:app/bin/directory.c \
+            --suppress=syntaxError:app/bin/paths.c \
+            --suppress=syntaxError:app/bin/utility.c \
+            --suppress=unknownMacro:app/bin/custom.c \
+            --suppress=unknownMacro:app/wlib/gtk3lib/stickytogglebutton.h \
+            --suppress=ctunullpointer:app/bin/track.c \
+            --suppress=uninitvar:app/bin/levenshtein.c \
+            --suppress=uninitvar:app/bin/problemrep.c \
+            --suppress=uninitvar:app/bin/paths.c \
+            --suppress=nullPointer:app/bin/partcatalog.c \
+            --suppress=missingReturn:app/bin/cturnout.c \
+            --suppress=ctuPointerArith:app/bin/cturnout.c \
+            -I app/bin -I app/bin/include -I app/wlib/include -I app/wlib/gtk3lib \
+            app/bin/*.c app/dynstring/*.c \
+            app/help/*.c app/tools/listxtp.c \
+            app/wlib/gtk3lib/*.c app/wlib/gtk3lib/unix/*.c
+
+  cppcheck-deep:
+    # Report-only: the gating `cppcheck` job above only runs cppcheck's default
+    # (error-only) severity class. This runs the warning/style/performance/
+    # portability classes too -- most of what cppcheck actually checks -- but
+    # does NOT fail the build: ~1150 findings surfaced the first time this was
+    # run (2026-07-11), almost entirely pre-existing and untriaged. Findings
+    # here are a triage backlog, not yet a quality gate.
+    #
+    # selfAssignment is suppressed for cdraw.c/drawgeom.c specifically: both
+    # files use REORIGIN()/UNREORIGIN() macros as in-place coordinate
+    # transforms, always called as REORIGIN(x, x, ...) (dest == src by
+    # design). cppcheck's selfAssignment check can't see through the macro
+    # and flags every call as a no-op assignment; verified 2026-07-11 that
+    # all 29 instances across both files are this same pattern, not bugs.
+    #
+    # Vendored-code exclusion list (quality-plan-gtk3v2main-part2.md Phase 8):
+    # this job's file list is a non-recursive shell glob, so it never reaches
+    # app/wlib/gtk3lib/wrapbox/ — out of scope by construction, no exclude
+    # needed (app/tools/halibut/ was deleted, SF #219). app/tools/dirent.c IS
+    # reached by the app/help+app/tools widening below (SF #701/#729-730
+    # follow-up) and is explicitly excluded -- vendored public-domain Win32
+    # dirent shim.
+    #
+    # app/wlib/gtk3lib(+unix/) added 2026-09-02, same scope/exclusions as the gating `cppcheck`
+    # job above (queued since the app/bin shadowVariable/for-loop gates landed).
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install cppcheck
+        run: sudo apt-get update -q && sudo apt-get install -y cppcheck
+      - name: Run cppcheck (deep, non-fatal)
+        run: |
+          cppcheck \
+            --enable=warning,style,performance,portability \
+            --inline-suppr \
+            -j 4 \
+            --suppress=missingInclude \
+            --suppress=missingIncludeSystem \
+            --suppress=nullPointerOutOfMemory \
+            --suppress=nullPointerOutOfResources \
+            --suppress=nullPointerArithmeticOutOfMemory \
+            --suppress=syntaxError:app/bin/archive.c \
+            --suppress=syntaxError:app/bin/cturntbl.c \
+            --suppress=syntaxError:app/bin/directory.c \
+            --suppress=syntaxError:app/bin/paths.c \
+            --suppress=syntaxError:app/bin/utility.c \
+            --suppress=unknownMacro:app/bin/custom.c \
+            --suppress=unknownMacro:app/wlib/gtk3lib/stickytogglebutton.h \
+            --suppress=ctunullpointer:app/bin/track.c \
+            --suppress=uninitvar:app/bin/levenshtein.c \
+            --suppress=uninitvar:app/bin/problemrep.c \
+            --suppress=uninitvar:app/bin/paths.c \
+            --suppress=nullPointer:app/bin/partcatalog.c \
+            --suppress=missingReturn:app/bin/cturnout.c \
+            --suppress=ctuPointerArith:app/bin/cturnout.c \
+            --suppress=selfAssignment:app/bin/cdraw.c \
+            --suppress=selfAssignment:app/bin/drawgeom.c \
+            -I app/bin -I app/bin/include -I app/wlib/include -I app/wlib/gtk3lib \
+            app/bin/*.c app/dynstring/*.c \
+            app/help/*.c app/tools/listxtp.c \
+            app/wlib/gtk3lib/*.c app/wlib/gtk3lib/unix/*.c > cppcheck-deep.txt 2>&1 || true
+      - name: Summarise findings
+        run: |
+          COUNT=$(grep -cE '\[[a-zA-Z]+\]$' cppcheck-deep.txt || echo 0)
+          echo "Total findings: $COUNT"
+          echo ""
+          echo "=== By check ==="
+          grep -oE '\[[a-zA-Z]+\]$' cppcheck-deep.txt | sort | uniq -c | sort -rn || true
+      - name: Upload findings
+        uses: actions/upload-artifact@v7
+        with:
+          name: cppcheck-deep-gtk3
+          path: cppcheck-deep.txt
+
+  clang-tidy:
+    # Report-only: conservative check-set (bugprone-*/performance-*/portability-*)
+    # scoped to app/bin+app/dynstring+app/cornu+app/help+app/tools (the last
+    # two added SF #701/#729-730 follow-up, bug-tracker.md Action Queue item
+    # 22). Excludes bdf2xtp.c and ppedit_gtk1.c (dead code, not referenced by
+    # any CMakeLists.txt target) and helphelper.c (macOS-only, if(APPLE) in
+    # app/bin/CMakeLists.txt) -- none of the three are part of the Linux
+    # build's compile_commands.json, so clang-tidy can't get real compile
+    # flags for them and errors out. Also excludes app/tools/dirent.c/
+    # dirent.h, a vendored public-domain Win32 dirent shim (Kevlin Henney,
+    # 1997/2003) -- same treatment as the other vendored exclusions below.
+    # readability-*/modernize-* deliberately excluded for now -- expected to
+    # be high-volume style-only noise on this legacy C codebase.
+    #
+    # bugprone-easily-swappable-parameters also excluded (2026-08-31): ~305
+    # instances, 4th-largest category. SF #734 traced the highest-risk subset
+    # (20 findings where clang-tidy flags parameters of the exact same
+    # declared type, e.g. two coOrd/DIST_T args) to every call site and found
+    # zero real bugs -- all pass arguments in declared order via
+    # identically-named locals/struct fields, or are registered once into a
+    # compiler-enforced function-pointer dispatch table where a swap can't
+    # happen. The remaining ~100 "broader convertible types" instances (two
+    # BOOL_T flags, etc.) were never worth auditing on the same evidence.
+    # Given this check's near-zero real hit rate here against a C codebase
+    # whose calling convention already mitigates the risk it warns about,
+    # filtered out entirely rather than left as permanent unactioned noise.
+    #
+    # Vendored-code exclusion list (quality-plan-gtk3v2main-part2.md Phase 8):
+    # the `find app/bin app/dynstring app/cornu app/help app/tools` root list
+    # never reaches app/tools/halibut/ (deleted, SF #219) — out of scope by
+    # construction, no exclude needed.
+    #
+    # app/wlib/gtk3lib added 2026-09-02 (queued since the app/bin shadowVariable/for-loop gates
+    # landed). Unlike the other roots, `find` here IS recursive into gtk3lib's subdirectories, so
+    # two exclusions are explicit rather than by construction: win32/ (Windows-only sources,
+    # gtk3lib/CMakeLists.txt guards them behind if(WIN32) so they're never in this Linux build's
+    # compile_commands.json -- same "clang-tidy can't get real compile flags" problem as
+    # bdf2xtp.c/helphelper.c/ppedit_gtk1.c above) and wrapbox/ (vendored GTK "eggwrapbox" widget,
+    # same treatment as astyle-check's --exclude=wrapbox below -- it IS built on Linux via its own
+    # add_subdirectory(), so it needs an explicit exclude unlike win32/). gtk3lib/unix/ has no
+    # exclusion -- it's real project code, built and in scope.
+    #
+    # Also excludes (2026-08-31, found while investigating report quality):
+    # app/bin/uthash.h + app/bin/include/utlist.h (Troy D. Hanson, vendored,
+    # same BSD-style header-only libraries) and app/cJSON/cJSON.h (Dave
+    # Gamble, vendored, has its own LICENSE file) -- 199 of 859
+    # post-header-filter findings (23%) traced to these three vendored
+    # headers, almost all bugprone-macro-parentheses firing inside uthash.h's
+    # own macro definitions, not fixable without diverging from upstream.
+    # app/bin/stringxtc.c (Linus Torvalds, vendored Linux kernel string
+    # routines, 1 finding) can't go through header-filter since it's compiled
+    # as its own main file, not reached as a header -- excluded from the file
+    # list instead, same treatment as dirent.c below.
+    #
+    # NOTE (2026-08-31): this exclusion was originally implemented via
+    # --exclude-header-filter, which is broken on this job's actual runner --
+    # ubuntu-latest's apt clang-tidy package predates the flag entirely and
+    # exits immediately with "Unknown command line argument", and the `|| true`
+    # on the invocation swallowed that failure silently, leaving
+    # clang-tidy.txt with just the two-line error and the job reporting a
+    # false "Total findings: 0" for this whole job's lifetime (confirmed via
+    # the actual uploaded clang-tidy-gtk3 artifact from the first run after
+    # the flag was added). --exclude-header-filter can't be replaced with a
+    # plain file-list exclusion either: uthash.h/utlist.h/cJSON.h are headers,
+    # not their own compilation units, so they're never in ${FILES[@]} to
+    # begin with -- the findings come from *diagnostics reported inside them*
+    # when included by a real project .c file. Fixed by post-filtering
+    # clang-tidy.txt after the run instead (see the awk step below), which
+    # reproduces --exclude-header-filter's actual semantics on any clang-tidy
+    # version: drop a finding only when its own primary file:line:col is
+    # inside one of the three vendored headers, while leaving alone
+    # diagnostics whose *notes* merely trace back through a uthash.h macro
+    # expansion -- those notes belong to a real finding in project code and
+    # must stay. Verified against a full local run: 902 raw findings (current
+    # baseline) -> 711 after this filter, with zero remaining primary
+    # (warning:/error:) lines pointing at the three vendored headers.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build clang clang-tidy libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext
+      - name: Configure and build (need generated headers for clang-tidy to parse cleanly)
+        run: |
+          # -DCMAKE_C_COMPILER=clang (SF #693) matters beyond just matching clang-tidy's own
+          # frontend: without it CMAKE_C_COMPILER_ID resolves to the runner's default gcc, which
+          # flips two PlatformSettings.cmake/CMakeLists.txt Clang-conditional guards backwards --
+          # wrongly enabling the GCC-only -Werror=cast-function-type (which Clang's frontend
+          # treats as also promoting the noisy -Wcast-function-type-strict sub-check to a hard
+          # error) and wrongly skipping paths.c's -Wno-error=implicit-fallthrough exemption.
+          # Together those blew through Clang's error-emission ceiling and aborted the run early
+          # ("too many errors emitted, stopping now"), misattributed to whichever file was queued
+          # last rather than any real problem in that file.
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_C_COMPILER=clang
+          cmake --build build
+      - name: Run clang-tidy (non-fatal)
+        run: |
+          # utility.c/misc.c are each legitimately compiled into two targets (xtrkcad-lib plus a
+          # separate tool: cnvdsgn, and an app/i18n extraction tool respectively), so they get two
+          # compile_commands.json entries each -- clang-tidy's own "[N/139]" progress counter can
+          # exceed the 139 filename arguments below by a couple as a result. That's expected, not
+          # a sign of a duplicate/broken entry.
+          mapfile -t FILES < <(find app/bin app/dynstring app/cornu app/help app/tools app/wlib/gtk3lib -name "*.c" | grep -v unittest | grep -vE 'bdf2xtp\.c|helphelper\.c|ppedit_gtk1\.c|app/tools/dirent\.c|app/bin/stringxtc\.c|app/wlib/gtk3lib/win32/|app/wlib/gtk3lib/wrapbox/')
+          # --header-filter='.*/app/' matters beyond style: without it, clang-tidy
+          # reports on every system header (GTK/glib/atk from /usr/include, pulled
+          # in via plain -I not -isystem so clang-tidy's own default system-header
+          # exclusion doesn't apply to them) as if it were our own code -- 2161 of
+          # 3019 raw findings (72%, 2026-08-31 measurement) were unfixable noise
+          # from headers this project doesn't own. Verified this drops exactly
+          # that 2161 with 858 of 859 real project findings surviving untouched
+          # (the 1-finding gap is measurement noise between two ad hoc runs, not
+          # lost data).
+          clang-tidy --header-filter='.*/app/' --checks='-*,bugprone-*,performance-*,portability-*,-bugprone-easily-swappable-parameters' -p build "${FILES[@]}" > clang-tidy.txt 2>&1 || true
+          # compile_commands.json stores absolute paths, so clang-tidy emits
+          # diagnostics as e.g. "/home/runner/work/XTrkCAD/XTrkCAD/app/bin/foo.c:12:...".
+          # Strip the workspace prefix so this artifact's paths stay repo-relative,
+          # matching package-clang-tidy in release.yml (kept in sync by hand).
+          sed -i "s|${GITHUB_WORKSPACE}/||g" clang-tidy.txt
+          # Post-filter out uthash.h/utlist.h/cJSON.h (vendored, see top comment) --
+          # reimplements --exclude-header-filter's semantics by hand since the
+          # runner's clang-tidy predates that flag (see top comment's NOTE for how
+          # this was found). A "block" starts at a line whose own file:line:col is a
+          # warning:/error: (never a note:, which only continues the parent block --
+          # dropping on note: too would wrongly discard real findings whose macro
+          # expansion trace merely passes through uthash.h) and runs until the next
+          # such line; drop the block only when ITS OWN path matches one of the three
+          # vendored headers.
+          awk 'BEGIN{keep=1} /^[^:]+:[0-9]+:[0-9]+: (warning|error):/ { keep = ($0 !~ /(uthash\.h|utlist\.h|cJSON\.h):[0-9]+:[0-9]+:/) } keep' clang-tidy.txt > clang-tidy.filtered.txt
+          mv clang-tidy.filtered.txt clang-tidy.txt
+      - name: Summarise findings
+        run: |
+          COUNT=$(grep -cE '\[[a-zA-Z.-]+\]$' clang-tidy.txt || echo 0)
+          echo "Total findings: $COUNT"
+          echo ""
+          echo "=== By check ==="
+          grep -oE '\[[a-zA-Z.-]+\]$' clang-tidy.txt | sort | uniq -c | sort -rn || true
+      - name: Upload findings
+        uses: actions/upload-artifact@v7
+        with:
+          name: clang-tidy-gtk3
+          path: clang-tidy.txt
+
+  codespell:
+    # Report-only: scans comments/strings/identifiers in app/bin and app/wlib for common
+    # misspellings. 134 findings on the real (post-cleanup) baseline, 2026-07-20 -- see
+    # .claude/codespell-triage-plan.md for the working backlog. Not yet a quality gate.
+    #
+    # *.ai (Adobe Illustrator icon sources) are explicitly skipped: they're not text
+    # files, and codespell parsing them as text produced ~1090 pieces of pure garbage
+    # ("nD", "bU", "UE", ...) on the first run -- 82% of the initial ~1300-finding total
+    # was this one false-positive source, confirmed by re-running with *.ai excluded.
+    #
+    # .github/codespell-ignore.txt holds confirmed false positives: short C-style
+    # identifier/abbreviation names that only coincidentally fuzzy-match a real word
+    # once codespell tokenizes on camelCase boundaries (easeR, parm/parms, protoL,
+    # drawM, groupD, sCond, RMOVE, siz) plus one valid British spelling (co-ordinate).
+    # Genuine misspellings embedded IN identifier names themselves (modifyable,
+    # editted, childs) are deliberately left un-ignored and tracked in the triage plan
+    # instead -- fixing those means renaming the identifier everywhere it's used, not
+    # just editing a comment, so they need a real (if small) code change, not a
+    # spell-check suppression.
+    #
+    # Vendored-code exclusion: app/wlib/gtk3lib/wrapbox/ is skipped via --skip (same
+    # vendored list as astyle-check/quality-plan-gtk3v2main-part2.md Phase 8); the
+    # */halibut/* skip pattern below is now a harmless no-op (app/tools/halibut/ was
+    # deleted, SF #219) kept only so a stray halibut/ directory can't silently reappear
+    # unscanned. app/wlib needs its own explicit wrapbox/ skip unlike cppcheck-deep,
+    # since this job's scope is directory-based, not a non-recursive glob.
+    # app/help+app/tools added SF #701/#729-730 follow-up (bug-tracker.md Action Queue
+    # item 22) -- being directory-based this also now scans messages.in/tooltiptext.json/
+    # xtrkcad.tip (real content) and mkimage1/mkimage3/HACKING (low-value but harmless);
+    # app/tools/dirent.c/dirent.h skipped as vendored, same as the other two jobs above.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install codespell
+        run: sudo apt-get update -q && sudo apt-get install -y codespell
+      - name: Run codespell (non-fatal)
+        run: |
+          codespell app/bin app/wlib app/help app/tools \
+            --skip='*/wrapbox/*,*/halibut/*,*.ai,*/dirent.c,*/dirent.h' \
+            --ignore-words=.github/codespell-ignore.txt \
+            -q 3 > codespell.txt 2>&1 || true
+      - name: Summarise findings
+        run: |
+          COUNT=$(wc -l < codespell.txt || echo 0)
+          echo "Total findings: $COUNT"
+      - name: Upload findings
+        uses: actions/upload-artifact@v7
+        with:
+          name: codespell-gtk3
+          path: codespell.txt
+
+  docs-drift-check:
+    # Non-blocking reminder, not a gate. Doxygen's own build-time gate (the doxygen job
+    # above) catches broken doc *syntax* -- it can't catch doc *content* that's gone
+    # stale because the CI/CMake behavior it describes changed underneath it. That
+    # exact gap bit twice in one session 2026-07-31: a devguide caveat about a known
+    # regression-test false-failure (gtk3issues #21) was added to docs/doxygen/mainpage.md
+    # in the same PR as the CI fix it explains (PR #67), then a second, separate gap
+    # (the Linux quickstart's plain `ctest` silently picking up the same false-failure
+    # class) was only caught by a follow-up human question, not any automation -- see
+    # bug-tracker.md's Action Queue item 17 and PR #68. This job just flags -- via a
+    # step-summary comment, not a failing check -- when a PR touches CI workflows or
+    # CMake build files without touching docs/doxygen/, so a reviewer gets nudged to
+    # ask "does this need a devguide update?" instead of relying on catching it by eye.
+    # Deliberately a path-based heuristic, not a semantic check: it can't tell a
+    # docs-irrelevant change (e.g. a timeout bump) from one that actually needs a
+    # devguide update, so false positives are expected and fine -- it's a prompt for a
+    # human judgment call, not a verdict.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Check for CI/CMake changes without a matching docs update
+        run: |
+          CHANGED=$(git diff --name-only "origin/${{ github.base_ref }}"...HEAD)
+          CI_CMAKE_CHANGED=$(echo "$CHANGED" | grep -E '^(\.github/workflows/|CMakeLists\.txt$|.*\.cmake$)' || true)
+          DOCS_CHANGED=$(echo "$CHANGED" | grep -E '^docs/doxygen/' || true)
+          if [ -n "$CI_CMAKE_CHANGED" ] && [ -z "$DOCS_CHANGED" ]; then
+            {
+              echo "### :memo: Devguide reminder"
+              echo
+              echo "This PR changes CI workflow or CMake build files but not \`docs/doxygen/\`:"
+              echo
+              echo '```'
+              echo "$CI_CMAKE_CHANGED"
+              echo '```'
+              echo
+              echo "If this change affects behavior the devguide describes (build/test steps,"
+              echo "CI gates, CMake options), please update \`docs/doxygen/mainpage.md\`/"
+              echo "\`advanced.md\` too. If not, this is just a heuristic nudge -- ignore it."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  astyle-check:
+    # Gating: fails if any tracked app/bin, app/wlib, app/help, or app/tools file is not
+    # conformant with app/lib/astylerc (the last two added SF #701/#729-730 follow-up,
+    # bug-tracker.md Action Queue item 22; confirmed 0 findings before widening). astyle's
+    # --dry-run always exits 0, so the gate parses its output for "Formatted" lines rather
+    # than relying on the exit code.
+    #
+    # Vendored-code exclusion list (quality-plan-gtk3v2main-part2.md Phase 8
+    # — encoded here so it doesn't need to be re-derived by hand each phase):
+    #   - app/wlib/gtk3lib/wrapbox/eggwrapbox.c and testwrapbox.c: upstream
+    #     GTK "eggwrapbox" widget, vendored verbatim. Both excluded via
+    #     --exclude=wrapbox (matches the directory; verified empirically that
+    #     astyle's --exclude matches full path components, not substrings, so
+    #     this can't accidentally match an unrelated file).
+    #   - app/tools/halibut/: vendored doc-processing tool. Deleted (SF #219);
+    #     kept documented here in case a reviewer wonders why it's absent.
+    #   - app/tools/dirent.c/dirent.h: vendored public-domain Win32 dirent
+    #     shim (Kevlin Henney, 1997/2003), excluded via --exclude=dirent.c/
+    #     --exclude=dirent.h now that app/tools is in this job's scope.
+    #   - unittest/ dirs: excluded separately (see quality-plan-gtk3v2main.md
+    #     Phase 0) — some unittest sources are deliberately non-conformant.
+    #
+    # astyle is built from source and pinned to ASTYLE_VERSION rather than
+    # installed via apt: the apt-resolved version drifts silently whenever
+    # the distro package updates, which is exactly what caused the drift in
+    # SF #638 (2026-07-12) — an older/different astyle version produced
+    # different continuation-line indentation for the same input. A later
+    # comment on that bug asked for CI to pin 3.6.x specifically; building
+    # from source lets every job (this one, astyle-check-macos,
+    # astyle-check-windows) run the identical version regardless of what
+    # each platform's package manager happens to ship.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      ASTYLE_VERSION: 3.6.13
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build astyle ${{ env.ASTYLE_VERSION }} from source
+        run: |
+          curl -sL -o astyle.tar.bz2 "https://sourceforge.net/projects/astyle/files/astyle/astyle%20${ASTYLE_VERSION%.*}/astyle-${ASTYLE_VERSION}.tar.bz2/download"
+          tar xjf astyle.tar.bz2
+          make -C "astyle-${ASTYLE_VERSION}/build/gcc" -j"$(nproc)"
+      - name: Check formatting (dry-run)
+        run: |
+          ASTYLE="$PWD/astyle-${ASTYLE_VERSION}/build/gcc/bin/astyle"
+          "$ASTYLE" --version
+          OUTPUT=$("$ASTYLE" --options=app/lib/astylerc --dry-run -Q --recursive --ignore-exclude-errors \
+            --exclude=wrapbox \
+            --exclude=unittest \
+            --exclude=dirent.c \
+            --exclude=dirent.h \
+            "app/bin/*.c" "app/bin/*.h" "app/wlib/*.c" "app/wlib/*.h" "app/help/*.c" "app/help/*.h" "app/tools/*.c" "app/tools/*.h" 2>&1 | grep '^Formatted' || true)
+          if [ -n "$OUTPUT" ]; then
+            echo "$OUTPUT"
+            echo "::error::Non-conformant files found. Run: astyle --options=app/lib/astylerc <file>"
+            exit 1
+          fi
+          echo "All files conform to app/lib/astylerc."
+
+  astyle-check-macos:
+    # Report-only, NOT gating: verifies that astyle built from source on
+    # macOS agrees with the pinned Linux astyle-check gate above for the
+    # same source tree. Added 2026-07-13 after an SF reviewer found
+    # historical cross-changeset indentation drift on cjoin.c and asked
+    # whether astyle is platform-dependent. Originally used `brew install
+    # astyle`, but Homebrew's formula isn't version-pinned; switched
+    # 2026-07-14 to build the same ASTYLE_VERSION from source as the Linux
+    # gate (see astyle-check's comment — SF #638 asked for 3.6.x to be
+    # pinned everywhere) so this job now isolates compiler/OS differences
+    # rather than astyle-version differences. Kept report-only since a
+    # disagreement here would still point to a toolchain quirk unrelated to
+    # the PR's actual content.
+    runs-on: macos-latest
+    timeout-minutes: 20
+    env:
+      ASTYLE_VERSION: 3.6.13
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build astyle ${{ env.ASTYLE_VERSION }} from source
+        run: |
+          curl -sL -o astyle.tar.bz2 "https://sourceforge.net/projects/astyle/files/astyle/astyle%20${ASTYLE_VERSION%.*}/astyle-${ASTYLE_VERSION}.tar.bz2/download"
+          tar xjf astyle.tar.bz2
+          make -C "astyle-${ASTYLE_VERSION}/build/gcc" -j"$(sysctl -n hw.ncpu)"
+      - name: Compare formatting output (non-fatal)
+        run: |
+          ASTYLE="$PWD/astyle-${ASTYLE_VERSION}/build/gcc/bin/astyle"
+          "$ASTYLE" --version
+          OUTPUT=$("$ASTYLE" --options=app/lib/astylerc --dry-run -Q --recursive --ignore-exclude-errors \
+            --exclude=wrapbox \
+            --exclude=unittest \
+            --exclude=dirent.c \
+            --exclude=dirent.h \
+            "app/bin/*.c" "app/bin/*.h" "app/wlib/*.c" "app/wlib/*.h" "app/help/*.c" "app/help/*.h" "app/tools/*.c" "app/tools/*.h" 2>&1 | grep '^Formatted' || true)
+          if [ -n "$OUTPUT" ]; then
+            echo "$OUTPUT"
+            echo "::warning::macOS astyle disagrees with the pinned Linux astyle-check gate on the files above — see job comment for context."
+          else
+            echo "macOS astyle agrees with the Linux gate: all files conform."
+          fi
+
+  astyle-check-windows:
+    # Report-only, NOT gating — see astyle-check-macos above for rationale.
+    # Uses MSYS2 (matching c-tests-windows-msys2's toolchain) rather than a
+    # native Win32 astyle build, since that's the toolchain actually used to
+    # build this project on Windows. Originally installed
+    # mingw-w64-x86_64-astyle via pacman; switched 2026-07-14 to build the
+    # same pinned ASTYLE_VERSION from source (see astyle-check's comment)
+    # so all three astyle jobs run the identical version.
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: msys2 {0}
+    env:
+      ASTYLE_VERSION: 3.6.13
+    steps:
+      - uses: actions/checkout@v7
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: false
+          install: mingw-w64-x86_64-gcc make
+      - name: Build astyle ${{ env.ASTYLE_VERSION }} from source
+        run: |
+          curl -sL -o astyle.tar.bz2 "https://sourceforge.net/projects/astyle/files/astyle/astyle%20${ASTYLE_VERSION%.*}/astyle-${ASTYLE_VERSION}.tar.bz2/download"
+          tar xjf astyle.tar.bz2
+          make -C "astyle-${ASTYLE_VERSION}/build/gcc" -j"$(nproc)"
+      - name: Compare formatting output (non-fatal)
+        run: |
+          ASTYLE="$PWD/astyle-${ASTYLE_VERSION}/build/gcc/bin/astyle"
+          "$ASTYLE" --version
+          OUTPUT=$("$ASTYLE" --options=app/lib/astylerc --dry-run -Q --recursive --ignore-exclude-errors \
+            --exclude=wrapbox \
+            --exclude=unittest \
+            --exclude=dirent.c \
+            --exclude=dirent.h \
+            "app/bin/*.c" "app/bin/*.h" "app/wlib/*.c" "app/wlib/*.h" "app/help/*.c" "app/help/*.h" "app/tools/*.c" "app/tools/*.h" 2>&1 | grep '^Formatted' || true)
+          if [ -n "$OUTPUT" ]; then
+            echo "$OUTPUT"
+            echo "::warning::Windows/MSYS2 astyle disagrees with the pinned Linux astyle-check gate on the files above — see job comment for context."
+          else
+            echo "Windows/MSYS2 astyle agrees with the Linux gate: all files conform."
+          fi
+
+  fuzz-getargs:
+    # Gating, bounded-time regression check (not continuous fuzzing
+    # infrastructure) for GetArgs() (getargs.c), the format-string parser
+    # used throughout the .xtc/.xtr/.xtp file readers to pull typed fields
+    # out of untrusted file lines. Reuses the c-tests-sanitizers job's
+    # clang+ASan/UBSan toolchain, plus libFuzzer (-fsanitize=fuzzer).
+    #
+    # Deliberately covers only the format codes verified safe by an
+    # extended local fuzzing run (60M+ executions, 0 crashes) -- see
+    # fuzz_getargs.c's file comment for why one format code is excluded.
+    # Including it here would make this job permanently red on a known,
+    # already-tracked issue instead of being a useful gate against new
+    # regressions.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build clang libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext
+      - name: Configure and build fuzz_getargs
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=OFF -DXTRKCAD_FUZZ=ON -DCMAKE_C_COMPILER=clang
+          cmake --build build --target fuzz_getargs
+      - name: Run fuzz_getargs (bounded time budget)
+        run: ./build/app/bin/fuzz/fuzz_getargs -max_total_time=120
+
+  compiler-warnings:
+    # Report-only: captures -Wall -Wextra output as an artifact.
+    # Does NOT fail the build — legacy code has pre-existing warnings.
+    #
+    # gettext added 2026-09-02: missing here (unlike every other Linux job in this file)
+    # caused the build to stall generating locale .mo files with no msgfmt available,
+    # running the job into its 15-minute timeout instead of failing fast -- see
+    # project_compiler_warnings_job_gettext_gap memory, first hit weeks earlier.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext
+      - name: Configure with -Wall -Wextra
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
+            -DCMAKE_C_FLAGS="-Wall -Wextra -Wno-unused-parameter"
+      - name: Build (warnings captured, non-fatal)
+        run: cmake --build build 2>&1 | tee build/warnings.txt || true
+      - name: Summarise warnings
+        run: |
+          COUNT=$(grep -c ': warning:' build/warnings.txt || echo 0)
+          echo "Total warnings: $COUNT"
+          echo ""
+          echo "=== By warning flag ==="
+          grep ': warning:' build/warnings.txt | grep -oE '\[-W[^]]+\]' | sort | uniq -c | sort -rn || true
+          echo ""
+          echo "=== By file (top 20) ==="
+          grep ': warning:' build/warnings.txt | grep -oE '^[^:]+' | sed 's|.*/||' | sort | uniq -c | sort -rn | head -20 || true
+      - name: Upload warning log
+        uses: actions/upload-artifact@v7
+        with:
+          name: compiler-warnings-gtk3-linux
+          path: build/warnings.txt
+
+  compiler-warnings-macos:
+    # Report-only: captures -Wall -Wextra output on macOS/clang as an artifact.
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install dependencies
+        run: brew install ninja gtk+3 cmocka libzip librsvg
+      - name: Configure with -Wall -Wextra
+        run: |
+          GTK_PREFIX=$(brew --prefix gtk+3)
+          PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
+          export PKG_CONFIG_PATH
+          GTK_LDFLAGS=$(pkg-config --libs-only-L gtk+-3.0)
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
+            -DCMAKE_PREFIX_PATH="$GTK_PREFIX;$(brew --prefix)" \
+            -DCMAKE_EXE_LINKER_FLAGS="$GTK_LDFLAGS" \
+            -DXTRKCAD_USE_APPLEHELP=OFF -DXTRKCAD_USE_BROWSER=ON \
+            -DCMAKE_C_FLAGS="-Wall -Wextra -Wno-unused-parameter"
+      - name: Build (warnings captured, non-fatal)
+        run: cmake --build build 2>&1 | tee build/warnings.txt || true
+      - name: Summarise warnings
+        run: |
+          COUNT=$(grep -c ': warning:' build/warnings.txt || echo 0)
+          echo "Total warnings: $COUNT"
+          echo ""
+          echo "=== By warning flag ==="
+          grep ': warning:' build/warnings.txt | grep -oE '\[-W[^]]+\]' | sort | uniq -c | sort -rn || true
+          echo ""
+          echo "=== By file (top 20) ==="
+          grep ': warning:' build/warnings.txt | grep -oE '^[^:]+' | sed 's|.*/||' | sort | uniq -c | sort -rn | head -20 || true
+      - name: Upload warning log
+        uses: actions/upload-artifact@v7
+        with:
+          name: compiler-warnings-gtk3-macos
+          path: build/warnings.txt
+
+  compiler-warnings-windows:
+    # Report-only: captures -Wall -Wextra output on Windows/MinGW64 as an artifact.
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: false
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-pkg-config
+            mingw-w64-x86_64-gtk3
+            mingw-w64-x86_64-zlib
+            mingw-w64-x86_64-libzip
+            mingw-w64-x86_64-mxml
+            mingw-w64-x86_64-librsvg
+            mingw-w64-x86_64-cmocka
+      - name: Configure with -Wall -Wextra
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DXTRKCAD_TESTING=ON \
+            -DXTRKCAD_USE_GETTEXT=OFF \
+            -DCMAKE_C_FLAGS="-Wall -Wextra -Wno-unused-parameter"
+      - name: Build (warnings captured, non-fatal)
+        run: cmake --build build --parallel 2>&1 | tee build/warnings.txt || true
+      - name: Summarise warnings
+        run: |
+          COUNT=$(grep -c ': warning:' build/warnings.txt || echo 0)
+          echo "Total warnings: $COUNT"
+          echo ""
+          echo "=== By warning flag ==="
+          grep ': warning:' build/warnings.txt | grep -oE '\[-W[^]]+\]' | sort | uniq -c | sort -rn || true
+          echo ""
+          echo "=== By file (top 20) ==="
+          grep ': warning:' build/warnings.txt | grep -oE '^[^:]+' | sed 's|.*/||' | sort | uniq -c | sort -rn | head -20 || true
+      - name: Upload warning log
+        uses: actions/upload-artifact@v7
+        with:
+          name: compiler-warnings-gtk3-windows
+          path: build/warnings.txt
+
+  coverage:
+    # Report-only: generates an lcov HTML report and uploads it as an artifact.
+    #
+    # Runs unit tests AND the full regression demo-playback suite together
+    # (no -LE regression filter) with branch coverage enabled. A unit-tests-
+    # only measurement was found 2026-08-05 to be nearly meaningless: only
+    # ~3,400 lines even get instrumented that way (essentially none of
+    # app/bin's real command/draw/UI code links into any CMocka binary), vs.
+    # ~64,000 lines once the regression suite runs the actual app binary.
+    # Branch coverage specifically is what's diagnostic for the #667 class of
+    # bug (JoinWithStraight() was called 318 times by the suite -- function-
+    # level coverage would show it as exercised -- but one always-false
+    # branch inside it never took the true path once). See
+    # .claude/devml-coverage-report-2026-08-05.md (sent to the dev mailing
+    # list) for the full writeup.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext xvfb lcov
+      - name: Configure with coverage flags
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
+            -DCMAKE_C_FLAGS="--coverage" -DCMAKE_EXE_LINKER_FLAGS="--coverage"
+      - name: Build
+        run: cmake --build build
+      - name: Run tests (unit + full regression suite)
+        # Outer xvfb-run: PreferenceTest (a plain unit test, not itself
+        # regression-labeled) needs a real DISPLAY on CI's headless runners,
+        # same reason c-tests-linux's -LE regression run has one. Regression
+        # tests each additionally self-wrap in their own nested xvfb-run
+        # (RegressionTests.cmake bakes that into every regression test's
+        # COMMAND unconditionally) -- nesting is harmless, each xvfb-run
+        # picks its own free display number.
+        run: xvfb-run ctest --test-dir build --output-on-failure
+      - name: Collect coverage
+        run: |
+          lcov --capture --directory build \
+               --output-file build/coverage.info \
+               --ignore-errors mismatch --rc branch_coverage=1
+          lcov --remove build/coverage.info \
+               '/usr/*' '*/build/*' '*/unittest/*' '*/tools/*' \
+               --output-file build/coverage-filtered.info \
+               --ignore-errors unused --rc branch_coverage=1
+          genhtml build/coverage-filtered.info \
+                  --output-directory build/coverage-html \
+                  --title "XTrkCAD coverage (GTK3, unit + regression suite)" \
+                  --rc branch_coverage=1
+          lcov --summary build/coverage-filtered.info --rc branch_coverage=1
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-report-gtk3
+          path: build/coverage-html/

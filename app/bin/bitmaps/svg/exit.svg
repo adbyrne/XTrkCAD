@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   version="1.1"
+   id="Layer_1"
+   x="0px"
+   y="0px"
+   viewBox="0 0 48 48"
+   style="enable-background:new 0 0 48 48;"
+   xml:space="preserve"
+   sodipodi:docname="exit.svg"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"><metadata
+   id="metadata33"><rdf:RDF><cc:Work
+       rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /></cc:Work></rdf:RDF></metadata><defs
+   id="defs31" /><sodipodi:namedview
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1"
+   objecttolerance="10"
+   gridtolerance="10"
+   guidetolerance="10"
+   inkscape:pageopacity="0"
+   inkscape:pageshadow="2"
+   inkscape:window-width="1475"
+   inkscape:window-height="929"
+   id="namedview29"
+   showgrid="false"
+   inkscape:zoom="10.160412"
+   inkscape:cx="21.357402"
+   inkscape:cy="34.496633"
+   inkscape:window-x="0"
+   inkscape:window-y="0"
+   inkscape:window-maximized="0"
+   inkscape:current-layer="Layer_1"
+   inkscape:document-rotation="0"
+   inkscape:pagecheckerboard="0" />
+<style
+   type="text/css"
+   id="style2">
+	.st0{fill:none;stroke:#FBB03B;stroke-width:2;stroke-miterlimit:10;}
+	.st1{fill:none;stroke:#000000;stroke-miterlimit:10;}
+	.st2{stroke:#F80E00;stroke-width:2;stroke-miterlimit:10;}
+	.st3{fill:none;stroke:#F80E00;stroke-width:2;stroke-linecap:round;stroke-miterlimit:10;}
+	.st4{fill:none;stroke:#F80E00;stroke-miterlimit:10;}
+	.st5{font-family:'MyriadPro-Regular';}
+	.st6{font-size:12px;}
+</style>
+
+
+
+
+
+
+
+
+
+<line
+   class="st2"
+   x1="23.713451"
+   y1="26.070175"
+   x2="23.713451"
+   y2="3.7465641"
+   id="line22"
+   style="stroke:#cc0e00;stroke-width:4.5;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
+<polyline
+   class="st3"
+   points="28.5,15.8 24,11.4 19.8,15.6 "
+   id="polyline24"
+   transform="matrix(1.9103283,0,0,1.8174965,-22.134428,-16.972896)"
+   style="stroke:#cc0e00;stroke-width:2.41503;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
+
+<text
+   xml:space="preserve"
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:21.3333px;line-height:1.25;font-family:Arial;-inkscape-font-specification:'Arial Bold'"
+   x="-0.028499108"
+   y="46.119984"
+   id="text844"><tspan
+     sodipodi:role="line"
+     x="-0.028499108"
+     y="46.119984"
+     id="tspan1266">EXIT</tspan></text></svg>

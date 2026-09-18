@@ -1,0 +1,39 @@
+;
+; This file is generated (configure_file) from install.nsh.in and included
+; from the CMake generated NSIS file during install.
+;
+
+CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\XTrackCAD ReadMe.lnk" "notepad.exe" "$INSTDIR\@XTRKCAD_SHARE_INSTALL_DIR_WIN@\ReadMe.txt"
+CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\XTrackCAD CHANGELOG.lnk" "notepad.exe" "$INSTDIR\@XTRKCAD_SHARE_INSTALL_DIR_WIN@\CHANGELOG.txt"
+
+
+;
+;  create file association
+;
+; back up old value of .xtc
+  !define Index "Line${__LINE__}"
+  ReadRegStr $1 HKCR ".xtc" ""
+  StrCmp $1 "" "${Index}-NoBackup"
+    StrCmp $1 "XTrackCAD.Design" "${Index}-NoBackup"
+      WriteRegStr HKCR ".xtc" "backup_val" $1
+  "${Index}-NoBackup:"
+
+  ; back up old value of .xtce
+    !define /redef Index "Line${__LINE__}"
+    ReadRegStr $1 HKCR ".xtce" ""
+    StrCmp $1 "" "${Index}-NoBackup"
+      StrCmp $1 "XTrackCAD.Design" "${Index}-NoBackup"
+        WriteRegStr HKCR ".xtce" "backup_xtce" $1
+    "${Index}-NoBackup:"
+
+; create the new association
+    WriteRegStr HKCR ".xtc" "" "XTrackCAD.Design"
+    WriteRegStr HKCR ".xtce" "" "XTrackCAD.Design"
+    WriteRegStr HKCR "XTrackCAD.Design" "" "XTrackCAD Layout Design"
+    WriteRegStr HKCR "XTrackCAD.Design\shell" "" "open"
+    WriteRegStr HKCR "XTrackCAD.Design\DefaultIcon" "" '$INSTDIR\bin\@XTRKCAD_BIN@.exe,0'
+    WriteRegStr HKCR "XTrackCAD.Design\shell\open\command" "" '$INSTDIR\bin\@XTRKCAD_BIN@.exe "%1"'
+
+  System::Call 'Shell32::SHChangeNotify(i 0x8000000, i 0, i 0, i 0)'
+
+  !undef Index

@@ -1,0 +1,14 @@
+# hg uses this global ignore file for all tree-wide ignores
+.DS_Store
+.project
+.settings.json
+build/
+build32/
+.vs/
+_CPack_Packages/
+syntax: glob
+*.mo
+.vscode/launch.json
+.vscode/c_cpp_properties.json
+*.flatpak
+.cache/

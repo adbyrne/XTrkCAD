@@ -1,0 +1,17 @@
+#!/bin/sh
+LOGF=${HOME}/xtrkcad-setup.log
+if [ -f "${LOGF}" ] ; then
+	chmod 666 ${LOGF}
+	echo prerm: $* >> ${LOGF}
+else
+	LOGF=/dev/null
+fi
+
+# Generated (configure_file) from prerm.in — INSTALLDIR always matches this
+# build's actual XTRKCAD_SHARE_INSTALL_DIR, instead of a hand-maintained
+# guess that had to be toggled by hand for every GA/Beta build.
+INSTALLDIR=@CPACK_PACKAGING_INSTALL_PREFIX@/@XTRKCAD_SHARE_INSTALL_DIR@
+
+( su -c "sh ${INSTALLDIR}/xtrkcad-setup remove ${INSTALLDIR}" -l $SUDO_USER ) >> ${LOGF} 2>&1
+
+exit 0

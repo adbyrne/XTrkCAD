@@ -1,0 +1,3272 @@
+/** \file ctrain.c
+ * Functions related to running trains
+ */
+
+/*  XTrkCad - Model Railroad CAD
+ *  Copyright (C) 2005 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+#include "compound.h"
+#include "include/cars.h"
+#include "cselect.h"
+#include "ctrain.h"
+#include "cundo.h"
+#include "custom.h"
+#include "fileio.h"
+#include "icons.h"
+#include "layout.h"
+#include "param.h"
+#include "track.h"
+#include "common-ui.h"
+#include "form.h"
+
+#include "include/toolbar.h"
+
+long programMode;
+long maxCouplingSpeed = 100;
+long hideTrainsInTunnels;
+
+static int doDrawTurnoutPosition = 1;
+
+static TRKTYP_T T_CAR = -1;
+
+typedef enum { ST_NotOnTrack, ST_StopManual, ST_EndOfTrack, ST_OpenTurnout, ST_NoRoom, ST_Crashed } trainStatus_e;
+
+typedef struct extraDataCar_t {
+	extraDataBase_t base;
+	traverseTrack_t trvTrk;
+	long            state;
+	carItem_p       item;
+	double          speed;
+#ifdef CAR_CLEARANCE
+	BOOL_T 			pencils;
+#endif
+	BOOL_T          direction;
+	BOOL_T          autoReverse;
+	trainStatus_e   status;
+	DIST_T          distance;
+	coOrd           couplerPos[2];
+	unsigned int         trkLayer;
+} extraDataCar_t;
+#define NOTALAYER						(127)
+
+#define CAR_STATE_IGNORED				(1L<<17)
+#define CAR_STATE_PROCESSED				(1L<<18)
+#define CAR_STATE_LOCOISMASTER			(1L<<19)
+#define CAR_STATE_ONHIDENTRACK			(1L<<20)
+
+#define COUPLERCONNECTIONANGLE			45.0
+#define CRASHSPEEDDECAY					5
+
+#define IsOnTrack( XX )					((XX)->trvTrk.trk!=NULL)
+#define IsIgnored( XX )					(((XX)->state&CAR_STATE_IGNORED)!=0)
+#define SetIgnored( XX )				(XX)->state |= CAR_STATE_IGNORED
+#define ClrIgnored( XX )				(XX)->state &= ~CAR_STATE_IGNORED
+
+#define IsLocoMaster( XX )				CarItemIsLocoMaster((XX)->item)
+#define SetLocoMaster( XX )				CarItemSetLocoMaster((XX)->item,TRUE)
+#define ClrLocoMaster( XX )				CarItemSetLocoMaster((XX)->item,FALSE)
+#define IsProcessed( XX )				(((XX)->state&CAR_STATE_PROCESSED)!=0)
+#define SetProcessed( XX )				(XX)->state |= CAR_STATE_PROCESSED
+#define ClrProcessed( XX )				(XX)->state &= ~CAR_STATE_PROCESSED
+
+// Scroll the window before the train hits the edge
+#define OFF_F( ORIG, SIZE, LO, HI ) \
+    ( ( (HI).x < (ORIG).x+((SIZE).x)*0.2 && (ORIG).x > 0.0 ) || \
+      ( (LO).x > (ORIG).x+((SIZE).x)*0.8 && (ORIG).x+(SIZE).x < mapD.size.x ) || \
+      ( (HI).y < (ORIG).y+((SIZE).y)*0.2 && (ORIG).y > 0.0 ) || \
+      ( (LO).y > (ORIG).y+((SIZE).y)*0.8 && (ORIG).y+(SIZE).y < mapD.size.y ) )
+#define OFF_FOLLOW( LO, HI ) \
+    OFF_F( mainD.orig, mainD.size, LO, HI )
+
+static wButton_p newcarB;
+
+static void ControllerDialogSyncAll(void);
+static STATUS_T CmdTrain(wAction_t, coOrd);
+static wMenu_p trainPopupM;
+static wMenuPush_p trainPopupMI[11];
+static track_p followTrain = NULL;
+static coOrd followCenter;
+static BOOL_T trainsTimeoutPending;
+static enum { TRAINS_STOP, TRAINS_RUN, TRAINS_IDLE, TRAINS_PAUSE } trainsState;
+static wIcon_p stopI, goI;
+static wIcon_p stopB, goB;
+static void RestartTrains(void);
+static void DrawAllCars(track_p);
+//static void UncoupleCars(track_p, track_p);
+static void TrainTimeEndPause(void);
+static void TrainTimeStartPause(void);
+
+/** @logcmd @showrefby `trainMove=n` `ctrain.c` */
+static int log_trainMove;
+/** @logcmd @showrefby `trainPlayback=n` `ctrain.c` */
+static int log_trainPlayback;
+
+static track_p trainHighlighted;
+
+static void PlaceCar(track_p);
+
+
+#define WALK_CARS_START( CAR, XX, DIR ) \
+	while (1) { \
+		(XX) = GET_EXTRA_DATA(CAR, T_CAR, extraDataCar_t);\
+		(void)(XX);\
+		{ \
+
+#define WALK_CARS_END( CAR, XX, DIR ) \
+		} \
+		{ \
+			track_p walk_cars_temp1; \
+			walk_cars_temp1=GetTrkEndTrk(CAR,DIR); \
+			if ( walk_cars_temp1 == NULL ) break; \
+			(DIR)=(GetTrkEndTrk(walk_cars_temp1,0)==(CAR)?1:0); \
+			(CAR)=walk_cars_temp1; \
+		} \
+	}
+
+
+/*
+ *  Generic Commands
+ */
+
+void CarGetPos(
+        track_p car,
+        coOrd * posR,
+        ANGLE_T * angleR)
+{
+	struct extraDataCar_t * xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
+
+	CHECK (GetTrkType(car) == T_CAR);
+
+	*posR = xx->trvTrk.pos;
+	*angleR = xx->trvTrk.angle;
+}
+
+void CarSetVisible(
+        track_p car)
+{
+	struct extraDataCar_t * xx;
+	int dir;
+	dir = 0;
+	WALK_CARS_START(car, xx, dir)
+
+	CHECK( GetTrkType(car) == T_CAR );
+
+	WALK_CARS_END(car, xx, dir)
+	dir = 1-dir;
+	WALK_CARS_START(car, xx, dir) {
+		xx->state &= ~(CAR_STATE_ONHIDENTRACK);
+		xx->trkLayer = NOTALAYER;
+	}
+	WALK_CARS_END(car, xx, dir)
+}
+
+
+static struct {
+	long index;
+	coOrd pos;
+	ANGLE_T angle;
+	DIST_T length;
+	DIST_T width;
+	char desc[STR_SIZE];
+	char number[STR_SIZE];
+} carData;
+typedef enum { IT, PN, AN, LN, WD, DE, NM } carDesc_e;
+static descData_t carDesc[] = {
+	/*IT*/	{ DESC_LONG, N_("Index"), &carData.index },
+	/*PN*/	{ DESC_POS, N_("Position"), &carData.pos },
+	/*AN*/	{ DESC_ANGLE, N_("Angle"), &carData.angle },
+	/*LN*/	{ DESC_DIM, N_("Length"), &carData.length },
+	/*WD*/	{ DESC_DIM, N_("Width"), &carData.width },
+	/*DE*/	{ DESC_STRING, N_("Description"), &carData.desc, sizeof(carData.desc)  },
+	/*NM*/	{ DESC_STRING, N_("Report Marks"), &carData.number, sizeof(carData.number) },
+	{ DESC_NULL }
+};
+
+static void UpdateCar(
+        track_p trk,
+        int inx,
+        descData_p descUpd,
+        BOOL_T needUndoStart)
+{
+	struct extraDataCar_t *xx = GET_EXTRA_DATA(trk, T_CAR, extraDataCar_t);
+	if (inx == -1) {
+		BOOL_T numberChanged;
+		const char * cp;
+		unsigned int max_str;
+		numberChanged = FALSE;
+
+		// cppcheck-suppress nullPointerRedundantCheck
+		// wEntryGetValue() wraps gtk_entry_get_text(), which per GTK's
+		// contract never returns NULL (empty string at worst).
+		cp = wEntryGetValue( carDesc[NM].control0);
+		max_str = sizeof(carData.number);
+		if (strlen(cp)>max_str) {
+			NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_str-1);
+		}
+		if (strcmp(CarItemNumber(xx->item), cp) != 0) {
+			numberChanged = TRUE;
+			carData.number[0] = '\0';
+			strncat(carData.number, cp, max_str - 1);
+		}
+
+		if (!numberChanged) {
+			return;
+		}
+
+		if (needUndoStart) {
+			UndoStart(_("Change Track"), "Change Track");
+		}
+
+		UndoModify(trk);
+		CarItemSetNumber(xx->item, carData.number);
+		UndrawNewTrack(trk);
+		DrawNewTrack(trk);
+		return;
+	}
+
+	UndrawNewTrack(trk);
+
+	switch (inx) {
+	case NM:
+	default:
+		break;
+	}
+
+	DrawNewTrack(trk);
+}
+
+
+static void DescribeCar(
+        track_p trk,
+        char * str,
+        CSIZE_T len)
+{
+	struct extraDataCar_t *xx = GET_EXTRA_DATA(trk, T_CAR, extraDataCar_t);
+	const char * cp;
+	char descBuf[STR_LONG_SIZE];
+	coOrd size;
+	CarItemSize(xx->item, &size);
+	carData.length = size.x;
+	carData.width = size.y;
+	cp = CarItemDescribe(xx->item, 0, &carData.index, descBuf);
+
+	carData.number[0] = '\0';
+	strncat(carData.number, CarItemNumber(xx->item),
+	        sizeof(carData.number) - 1);
+	str[0] = '\0';
+	strncat(str, cp, len - 1);
+	carData.pos = xx->trvTrk.pos;
+	carData.angle = xx->trvTrk.angle;
+	cp = CarItemDescribe(xx->item, -1, NULL, descBuf);
+	carData.desc[0] = '\0';
+	strncat(carData.desc, cp, sizeof(carData.desc) - 1);
+
+	carDesc[IT].mode =
+	        carDesc[PN].mode =
+	                carDesc[AN].mode =
+	                        carDesc[LN].mode =
+	                                carDesc[WD].mode = DESC_RO;
+	carDesc[DE].mode = DESC_RO;
+	carDesc[NM].mode = 0;
+	DoDescribe(N_("Car"), trk, carDesc, UpdateCar);
+}
+
+
+void FlipTraverseTrack(
+        traverseTrack_p trvTrk)
+{
+	trvTrk->angle = NormalizeAngle(trvTrk->angle + 180.0);
+
+	if (trvTrk->length > 0) {
+		trvTrk->dist = trvTrk->length - trvTrk->dist;
+	}
+}
+
+
+BOOL_T TraverseTrack2(
+        traverseTrack_p trvTrk0,
+        DIST_T dist0)
+{
+	traverseTrack_t trvTrk = *trvTrk0;
+	DIST_T			dist = dist0;
+
+	if (dist0 < 0) {
+		dist = -dist;
+		FlipTraverseTrack(&trvTrk);
+	}
+
+	if (trvTrk.trk==NULL ||
+	    (!TraverseTrack(&trvTrk,&dist)) ||
+	    trvTrk.trk==NULL ||
+	    dist!=0.0) {
+		Translate(&trvTrk.pos, trvTrk.pos, trvTrk.angle, dist);
+
+	}
+
+	if (dist0 < 0) {
+		FlipTraverseTrack(&trvTrk);
+	}
+
+	*trvTrk0 = trvTrk;
+	return TRUE;
+}
+
+/***************
+ * When a track is deleted, cross check that the Traverse Track reference is removed.
+ */
+EXPORT void CheckCarTraverse(track_p track)
+{
+
+	track_p car;
+	for (car=NULL; TrackIterate(&car);) {
+		if (GetTrkType(car) == T_CAR) {
+			struct extraDataCar_t * xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
+			if (xx->trvTrk.trk == track) {
+				xx->trvTrk.trk=NULL;
+				xx->status = ST_NotOnTrack;
+			}
+		}
+	}
+
+}
+
+
+
+static BOOL_T drawCarEnable = TRUE;
+static BOOL_T noCarDraw = FALSE;
+
+static void DrawCar(
+        track_p car,
+        drawCmd_p d,
+        wDrawColor color)
+{
+	struct extraDataCar_t * xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
+	int dir;
+	vector_t coupler[2];
+	const struct extraDataCar_t * xx1;
+	int dir1;
+
+	if (drawCarEnable == FALSE) {
+		return;
+	}
+
+	if (d == &mapD) {
+		return;
+	}
+
+	if (noCarDraw) {
+		return;
+	}
+
+	if (hideTrainsInTunnels &&
+	    ((((xx->state&CAR_STATE_ONHIDENTRACK)!=0) && drawTunnel==0) ||
+	     (xx->trkLayer!=NOTALAYER && !GetLayerVisible(xx->trkLayer)))) {
+		return;
+	}
+
+	for (dir=0; dir<2; dir++) {
+		track_p car1;
+		coupler[dir].pos = xx->couplerPos[dir];
+
+		car1 = GetTrkEndTrk(car,dir);
+		if (car1) {
+			xx1 = GET_EXTRA_DATA(car1, T_CAR, extraDataCar_t);
+			dir1 = (GetTrkEndTrk(car1,0)==car)?0:1;
+			coupler[dir].angle = FindAngle(xx->couplerPos[dir], xx1->couplerPos[dir1]);
+		} else {
+			coupler[dir].angle = NormalizeAngle(xx->trvTrk.angle+(dir==0?0.0:180.0)-15.0);
+		}
+	}
+
+
+
+	CarItemDraw(d, xx->item, color, xx->direction, IsLocoMaster(xx), coupler,
+#ifdef CAR_CLEARANCE
+	            xx->pencils,
+#endif
+	            xx->trvTrk.trk);
+}
+
+
+static DIST_T DistanceCar(
+        track_p trk,
+        coOrd * pos)
+{
+	struct extraDataCar_t * xx = GET_EXTRA_DATA(trk, T_CAR, extraDataCar_t);
+	DIST_T dist;
+	coOrd ends[4];
+	coOrd size;
+
+	if (IsIgnored(xx)) {
+		return 10000.0;
+	}
+
+	if (hideTrainsInTunnels &&
+	    ((((xx->state&CAR_STATE_ONHIDENTRACK)!=0) && drawTunnel==0) ||
+	     (xx->trkLayer!=NOTALAYER && !GetLayerVisible(xx->trkLayer)))) {
+		return 10000.0;
+	}
+
+	CarItemSize(xx->item,
+	            &size);
+
+	size.x = CarItemCoupledLength(xx->item);  /* Coupling included */
+
+	coOrd carPos;
+	CarItemPos(xx->item,
+	           &carPos);
+
+	dist = FindDistance(*pos, carPos);        /* Basic distance to center */
+
+	if (dist < size.x/2.0
+	    +size.y/2.0) {       /* Crude circle to evaluate if "close" */
+
+		coOrd point = *pos;
+		point.x += -carPos.x;
+		point.y += -carPos.y;
+		Rotate(&point,zero,-(xx->trvTrk.angle+90.0));  /* Convert to simple coOrds */
+
+		for (int i=0; i<4; i++) {
+			ends[i].x = 0.0;
+			ends[i].y = 0.0;
+		}
+		ends[0].x =  size.x/2.0;
+		ends[0].y =  size.y/2.0;
+		ends[1].x = - size.x/2.0;
+		ends[1].y =   size.y/2.0;
+		ends[2].x =  - size.x/2.0;
+		ends[2].y =  - size.y/2.0;
+		ends[3].x =  size.x/2.0;
+		ends[3].y =  - size.y/2.0;
+
+
+		/*
+		 *      A |         B              | C
+		 *      --1------------------------0---
+		 *      D |         0.0            | E
+		 *      --2------------------------3---
+		 *      F |         G              | H
+		 */
+
+		if ((point.x >= ends[2].x) && (point.x <= ends[0].x) && (point.y >= ends[2].y)
+		    && (point.y <= ends[0].y)) {
+			dist = 0.0; /* center */
+			*pos = carPos;
+		} else {
+			if (point.x > ends[2].x && point.x < ends[0].x ) {
+				if (point.y > ends[0].y) {
+					dist = fabs(point.y - ends[0].y); /* B */
+					point.y = ends[0].y;
+				} else {
+					dist = fabs(point.y - ends[2].y); /* G */
+					point.y = ends[2].y;
+				}
+			} else if (point.y > ends[2].y && point.y < ends[0].y) {
+				if (point.x > ends[0].x) {
+					dist = fabs(point.x - ends[0].x);  /* E */
+					point.x = ends[0].x;
+				} else {
+					dist = fabs(point.x - ends[2].x);  /* D */
+					point.x = ends[2].x;
+				}
+			} else {   /* A,C,F,G */
+				for (int i=0; i<4; i++) {
+					if (dist>FindDistance(point,ends[i])) {
+						dist = FindDistance(point,ends[i]);
+						point = ends[i];
+					}
+				}
+			}
+			Rotate(&point,zero,(xx->trvTrk.angle+90.0));
+			point.x +=carPos.x;
+			point.y +=carPos.y;
+			*pos = point;
+		}
+
+	}
+
+	return dist;
+}
+
+static void SetCarBoundingBox(
+        track_p car)
+{
+	struct extraDataCar_t * xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
+	coOrd lo, hi, p[4];
+	int inx;
+	coOrd size;
+	/* TODO: should be bounding box of all pieces aligned on track */
+	CarItemSize(xx->item,
+	            &size);   /* TODO assumes xx->trvTrk.pos is the car center */
+	Translate(&p[0], xx->trvTrk.pos, xx->trvTrk.angle, size.x/2.0);
+	Translate(&p[1], p[0], xx->trvTrk.angle+90, size.y/2.0);
+	Translate(&p[0], p[0], xx->trvTrk.angle-90, size.y/2.0);
+	Translate(&p[2], xx->trvTrk.pos, xx->trvTrk.angle+180, size.x/2.0);
+	Translate(&p[3], p[2], xx->trvTrk.angle+90, size.y/2.0);
+	Translate(&p[2], p[2], xx->trvTrk.angle-90, size.y/2.0);
+	lo = hi = p[0];
+
+	for (inx = 1; inx < 4; inx++) {
+		if (p[inx].x < lo.x) {
+			lo.x = p[inx].x;
+		}
+
+		if (p[inx].y < lo.y) {
+			lo.y = p[inx].y;
+		}
+
+		if (p[inx].x > hi.x) {
+			hi.x = p[inx].x;
+		}
+
+		if (p[inx].y > hi.y) {
+			hi.y = p[inx].y;
+		}
+	}
+
+	SetBoundingBox(car, hi, lo);
+}
+
+
+track_p NewCar(
+        wIndex_t index,
+        carItem_p item,
+        coOrd pos,
+        ANGLE_T angle)
+{
+	track_p trk;
+	struct extraDataCar_t * xx;
+	trk = NewTrack(index, T_CAR, 2, sizeof(*xx));
+	/*SetEndPts( trk, 0 );*/
+	xx = GET_EXTRA_DATA(trk, T_CAR, extraDataCar_t);
+	/*SetTrkVisible( trk, IsVisible(xx) );*/
+	xx->item = item;
+	xx->trvTrk.pos = pos;
+	xx->trvTrk.angle = angle;
+	xx->state = 0;
+	SetCarBoundingBox(trk);
+	CarItemSetTrack(item, trk);
+	PlaceCar(trk);
+	return trk;
+}
+
+
+static void DeleteCar(
+        track_p trk)
+{
+	struct extraDataCar_t * xx = GET_EXTRA_DATA(trk, T_CAR, extraDataCar_t);
+	CarItemSetTrack(xx->item, NULL);
+}
+
+
+static BOOL_T ReadCar(
+        char * line)
+{
+	return CarItemRead(line);
+}
+
+
+static BOOL_T WriteCar(
+        track_p trk,
+        FILE * f)
+{
+	BOOL_T rc = TRUE;
+	return rc;
+}
+
+
+static void MoveCar(
+        track_p car,
+        coOrd pos)
+{
+	struct extraDataCar_t *xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
+	xx->trvTrk.pos.x += pos.x;
+	xx->trvTrk.pos.y += pos.y;
+	xx->trvTrk.trk = NULL;
+	PlaceCar(car);
+	SetCarBoundingBox(car);
+}
+
+
+static void RotateCar(
+        track_p car,
+        coOrd pos,
+        ANGLE_T angle)
+{
+	struct extraDataCar_t *xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
+	Rotate(&xx->trvTrk.pos, pos, angle);
+	xx->trvTrk.angle = NormalizeAngle(xx->trvTrk.angle + angle);
+	xx->trvTrk.trk = NULL;
+	PlaceCar(car);
+	SetCarBoundingBox(car);
+}
+
+
+static BOOL_T QueryCar(track_p trk, int query)
+{
+	switch (query) {
+	case Q_NODRAWENDPT:
+	case Q_ISTRAIN:
+		return TRUE;
+
+	default:
+		return FALSE;
+	}
+}
+
+static BOOL_T StoreCar(
+        track_p car,
+        void **data,
+        long * len)
+{
+
+	struct extraDataCar_t *xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
+	return StoreCarItem(xx->item,data,len);
+
+}
+
+static BOOL_T ReplayCar (track_p car, void *data,long len)
+{
+
+	struct extraDataCar_t *xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
+	return ReplayCarItem(xx->item,data,len);
+
+}
+
+
+static wBool_t CompareCar( track_cp trk1, track_cp trk2 )
+{
+	return TRUE;
+}
+
+
+static trackCmd_t carCmds = {
+	"CAR ",
+	DrawCar, /* draw */
+	DistanceCar, /* distance */
+	DescribeCar, /* describe */
+	DeleteCar, /* delete */
+	WriteCar, /* write */
+	ReadCar, /* read */
+	MoveCar, /* move */
+	RotateCar, /* rotate */
+	NULL, /* rescale */
+	NULL, /* audit */
+	NULL, /* getAngle */
+	NULL, /* split */
+	NULL, /* traverse */
+	NULL, /* enumerate */
+	NULL, /* redraw*/
+	NULL, /* trim*/
+	NULL, /* merge*/
+	NULL, /* modify */
+	NULL, /* getLength */
+	NULL, /* getParams */
+	NULL, /* moveEndPt */
+	QueryCar, /* query */
+	NULL, /* ungroup */
+	NULL, /* flip */
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	ReplayCar,
+	StoreCar,
+	NULL, /*activate*/
+	CompareCar
+};
+
+/*
+ *
+ */
+
+
+static int numTrainDlg;
+
+
+#define SLIDER_WIDTH			(20)
+#define SLIDER_HEIGHT			(200)
+#define SLIDER_THICKNESS		(10)
+#define MAX_SPEED				(100.0)
+
+typedef struct {
+	wControl_p win;
+	wIndex_t inx;
+	track_p train;
+	long direction;
+	long followMe;
+	long autoReverse;
+	coOrd pos;
+	char posS[STR_SHORT_SIZE];
+	DIST_T speed;
+	char speedS[10];
+	paramGroup_p trainPGp;
+} trainControlDlg_t, * trainControlDlg_p;
+static trainControlDlg_t * curTrainDlg;
+
+
+static void SpeedRedraw(wDraw_p, void *, wWinPix_t, wWinPix_t);
+static void SpeedAction(wAction_t, coOrd);
+static void CmdTrainExit(void * unused);
+
+drawCmd_t speedD = {
+	NULL,
+	&screenDrawFuncs,
+	0,
+	1.0,
+	0.0,
+	{ 0.0, 0.0 },
+	{ 0.0, 0.0 },
+	Pix2CoOrd,
+	CoOrd2Pix
+};
+static paramDrawData_t speedParamData = { SLIDER_WIDTH, SLIDER_HEIGHT, SpeedRedraw, SpeedAction, &speedD };
+
+typedef enum {
+	I_LIST,
+	I_STATUS,
+	I_POS,
+	I_SLIDER,
+	I_DIST,
+	I_ZERO,
+	I_GOTO,
+	I_FOLLOW,
+	I_AUTORVRS,
+	I_DIR,
+	I_STOP,
+	I_SPEED,
+	I_COUNT
+} trainParm_e;
+
+static paramData_t trainPLs[I_COUNT] = {
+	[I_LIST]     = { PD_LIST, NULL, "list", PDO_NOPREF|PDO_NOPSHUPD, NULL, NULL, 0 },
+	[I_STATUS]   = { PD_MESSAGE, NULL, "mess0", 0, I2VP(120) },
+	[I_POS]      = { PD_MESSAGE, NULL, "mess1", 0, I2VP(120) },
+	[I_SLIDER]   = { PD_DRAW, NULL, "speed", PDO_NOPSHUPD|PDO_DLGSETY, &speedParamData },
+	[I_DIST]     = { PD_STRING, NULL, "distance", 0, I2VP(20-SLIDER_WIDTH), NULL, BO_READONLY },
+	[I_ZERO]     = { PD_BUTTON, NULL, "zeroDistance", PDO_NOPSHUPD|PDO_NOPREF, NULL },
+	[I_GOTO]     = { PD_BUTTON, NULL, "goto", PDO_NOPSHUPD|PDO_NOPREF, NULL, NULL },
+	[I_FOLLOW]   = { PD_TOGGLE, NULL, "follow", PDO_NOPREF, NULL, NULL, BC_HORIZONTAL|BC_NOBORDER },
+	[I_AUTORVRS] = { PD_TOGGLE, NULL, "autoreverse", PDO_NOPREF, NULL, NULL, BC_HORIZONTAL|BC_NOBORDER },
+	[I_DIR]      = { PD_BUTTON, NULL, "direction", PDO_NOPREF, NULL, NULL, 0 },
+	[I_STOP]     = { PD_BUTTON, NULL, "stop", 0, NULL, NULL },
+	[I_SPEED]    = { PD_MESSAGE, NULL, "mess2", 0, I2VP(120) },
+};
+
+static paramGroup_t trainPG = { "train", PGO_FULLDIALOGFROMBUILDER, trainPLs, I_COUNT };
+
+
+typedef struct {
+	track_p loco;
+	BOOL_T running;
+} locoList_t;
+dynArr_t locoList_da;
+#define locoList(N) DYNARR_N( locoList_t, locoList_da, N )
+
+static wIndex_t FindLoco(
+        track_p loco)
+{
+	wIndex_t inx;
+
+	for (inx = 0; inx<locoList_da.cnt; inx++) {
+		if (locoList(inx).loco == loco) {
+			return inx;
+		}
+	}
+
+	return -1;
+}
+
+/**
+ * Update the speed display when running trains. Draw the slider in the
+ * correct position and update the odometer.
+ *
+ * \param d IN drawing area for slider
+ * \param context IN the dialog
+ * \param w, h IN unused?
+ */
+
+static void SpeedRedraw(
+        wDraw_p d,
+        void * context,
+        wWinPix_t w,
+        wWinPix_t h)
+{
+	wDrawPix_t y;
+	trainControlDlg_p dlg = (trainControlDlg_p)context;
+	struct extraDataCar_t * xx;
+	wDrawColor drawColor;
+	wDrawClear(d);
+
+	if (dlg == NULL || dlg->train == NULL) {
+		return;
+	}
+
+	xx = GET_EXTRA_DATA(dlg->train, T_CAR, extraDataCar_t);
+
+	if (xx->speed > MAX_SPEED) {
+		xx->speed = MAX_SPEED;
+	}
+
+	if (xx->speed < 0) {
+		xx->speed = 0;
+	}
+
+	y = (xx->speed/MAX_SPEED*((SLIDER_HEIGHT-SLIDER_THICKNESS))
+	     +SLIDER_THICKNESS/2.0);
+	drawColor  = wDrawFindColor(wRGB(160, 160, 160));
+	coOrd pos0, pos1, siz;
+	y /= speedD.dpi;
+	siz.x = SLIDER_WIDTH/speedD.dpi;
+	siz.y = SLIDER_THICKNESS/speedD.dpi;
+	pos0.x = 0.0;
+	pos0.y = y - siz.y/2.0;
+	DrawRectangle( &speedD, pos0, siz, drawColor, DRAW_FILL );
+	pos1.x = siz.x;
+	pos1.y = pos0.y;
+	DrawLine( &speedD, pos0, pos1, 1, drawColorBlack );
+	pos0.y = pos1.y = y;
+	DrawLine( &speedD, pos0, pos1, 3, drawColorRed );
+	pos0.y = pos1.y = y + siz.y/2.0;
+	DrawLine( &speedD, pos0, pos1, 1, drawColorBlack );
+	sprintf(dlg->speedS, "%3d %s",
+	        (int)(units==UNITS_ENGLISH?xx->speed:xx->speed*1.6),
+	        (units==UNITS_ENGLISH?"mph":"km/h"));
+	FormLoadMessage(dlg->trainPGp, I_SPEED, dlg->speedS);
+	LOG(log_trainPlayback, 3, ("Speed = %d\n", (int)xx->speed));
+}
+
+
+static void SpeedAction(
+        wAction_t action,
+        coOrd pos)
+{
+	trainControlDlg_p dlg = curTrainDlg;
+	struct extraDataCar_t * xx;
+	FLOAT_T speed;
+	BOOL_T startStop;
+
+	if (dlg == NULL || dlg->train == NULL) {
+		return;
+	}
+
+	xx = GET_EXTRA_DATA(dlg->train, T_CAR, extraDataCar_t);
+
+	switch (action) {
+	case C_DOWN:
+		InfoMessage("");
+		__attribute__((fallthrough));
+	case C_MOVE:
+	case C_UP:
+		TrainTimeEndPause();
+
+		if (IsOnTrack(xx)) {
+			speed = ((FLOAT_T)((pos.y*speedD.dpi)-SLIDER_THICKNESS/2.0))/
+			        (SLIDER_HEIGHT-SLIDER_THICKNESS)*MAX_SPEED;
+		} else {
+			speed = 0;
+		}
+
+		if (speed > MAX_SPEED) {
+			speed = MAX_SPEED;
+		}
+
+		if (speed < 0) {
+			speed = 0;
+		}
+
+		startStop = (xx->speed == 0) != (speed == 0);
+		xx->speed = speed;
+		SpeedRedraw((wDraw_p)dlg->trainPGp->paramPtr[I_SLIDER].control, dlg,
+		            SLIDER_WIDTH, SLIDER_HEIGHT);
+
+		if (startStop) {
+			if (xx->speed == 0) {
+				xx->status = ST_StopManual;
+			}
+
+			LocoListChangeEntry(dlg->train, dlg->train);
+		}
+
+		TrainTimeStartPause();
+
+		if (trainsState == TRAINS_IDLE) {
+			RestartTrains();
+		}
+
+		break;
+
+	default:
+		break;
+	}
+}
+
+
+static void ControllerDialogSync(
+        trainControlDlg_p dlg)
+{
+	struct extraDataCar_t * xx=NULL;
+	wIndex_t inx;
+	BOOL_T dir;
+	BOOL_T followMe;
+	BOOL_T autoReverse;
+//    coOrd pos;
+
+	if (dlg == NULL) {
+		return;
+	}
+
+	inx = wListGetIndex((wList_p)dlg->trainPGp->paramPtr[I_LIST].control);
+
+	if (dlg->train) {
+		if (inx >= 0 && inx < locoList_da.cnt &&
+		    dlg->train != locoList(inx).loco) {
+			inx = FindLoco(dlg->train);
+
+			if (inx >= 0) {
+				wListSetIndex((wList_p)dlg->trainPGp->paramPtr[I_LIST].control, inx);
+			}
+		}
+	} else {
+		wListSetIndex((wList_p)dlg->trainPGp->paramPtr[I_LIST].control, -1);
+	}
+
+	if (dlg->train) {
+		char * statusMsg;
+//        DIST_T speed;
+		xx = GET_EXTRA_DATA(dlg->train, T_CAR, extraDataCar_t);
+		dir = xx->direction==0?0:1;
+//        speed = xx->speed;
+//        pos = xx->trvTrk.pos;
+		followMe = followTrain == dlg->train;
+		autoReverse = xx->autoReverse;
+
+		if (xx->trvTrk.trk == NULL) {
+			if (xx->status == ST_Crashed) {
+				statusMsg = _("Crashed");
+			} else {
+				statusMsg = _("Not on Track");
+			}
+		} else if (xx->speed > 0) {
+			if (trainsState == TRAINS_STOP) {
+				statusMsg = _("Trains Paused");
+			} else {
+				statusMsg = _("Running");
+			}
+		} else {
+			switch (xx->status) {
+			case ST_EndOfTrack:
+				statusMsg = _("End of Track");
+				break;
+
+			case ST_OpenTurnout:
+				statusMsg = _("Open Turnout");
+				break;
+
+			case ST_StopManual:
+				statusMsg = _("Manual Stop");
+				break;
+
+			case ST_NoRoom:
+				statusMsg = _("No Room");
+				break;
+
+			case ST_Crashed:
+				statusMsg = _("Crashed");
+				break;
+
+			default:
+				statusMsg = _("Unknown Status");
+				break;
+			}
+		}
+
+		FormLoadMessage(dlg->trainPGp, I_STATUS, statusMsg);
+	} else {
+		dir = 0;
+		followMe = FALSE;
+		autoReverse = FALSE;
+		FormLoadMessage(dlg->trainPGp, I_STATUS, _("No trains"));
+	}
+
+	if (dlg->followMe != followMe) {
+		dlg->followMe = followMe;
+		FormLoadSingleControl(dlg->trainPGp, I_FOLLOW);
+	}
+
+	if (dlg->autoReverse != autoReverse) {
+		dlg->autoReverse = autoReverse;
+		FormLoadSingleControl(dlg->trainPGp, I_AUTORVRS);
+	}
+
+	if (dlg->direction != dir) {
+		dlg->direction = dir;
+		wButtonSetLabel((wButton_p)dlg->trainPGp->paramPtr[I_DIR].control,
+		                (dlg->direction?_("Reverse"):_("Forward")));
+	}
+
+	if (dlg->train) {
+		if (dlg->posS[0] == '\0' ||
+		    dlg->pos.x != xx->trvTrk.pos.x ||
+		    dlg->pos.y != xx->trvTrk.pos.y) {
+			long format;
+			dlg->pos = xx->trvTrk.pos;
+			format = GetDistanceFormat();
+			format &= ~DISTFMT_DECS;
+			sprintf(dlg->posS, "X:%s Y:%s",
+			        FormatDistanceEx(xx->trvTrk.pos.x, format),
+			        FormatDistanceEx(xx->trvTrk.pos.y, format));
+			FormLoadMessage(dlg->trainPGp, I_POS, dlg->posS);
+		}
+
+		if (dlg->speed != xx->speed) {
+			dlg->speed = xx->speed;
+			sprintf(dlg->speedS, "%3d",
+			        (int)(units==UNITS_ENGLISH?xx->speed:xx->speed*1.6));
+			FormLoadMessage(dlg->trainPGp, I_SPEED, dlg->speedS);
+			SpeedRedraw((wDraw_p)dlg->trainPGp->paramPtr[I_SLIDER].control, dlg,
+			            SLIDER_WIDTH, SLIDER_HEIGHT);
+		}
+
+		FormLoadMessage(dlg->trainPGp, I_DIST, FormatDistance(xx->distance));
+	} else {
+		if (dlg->posS[0] != '\0') {
+			dlg->posS[0] = '\0';
+			FormLoadMessage(dlg->trainPGp, I_POS, dlg->posS);
+		}
+
+		if (dlg->speed >= 0) {
+			dlg->speed = -1;
+			dlg->speedS[0] = '\0';
+			FormLoadMessage(dlg->trainPGp, I_SPEED, dlg->speedS);
+			wDrawClear((wDraw_p)dlg->trainPGp->paramPtr[I_SLIDER].control);
+		}
+
+		FormLoadMessage(dlg->trainPGp, I_DIST, "");
+	}
+}
+
+
+static void ControllerDialogSyncAll(void)
+{
+	if (curTrainDlg) {
+		ControllerDialogSync(curTrainDlg);
+	}
+}
+
+
+EXPORT void LocoListChangeEntry(
+        track_p oldLoco,
+        track_p newLoco)
+{
+	wIndex_t inx = -1;
+	struct extraDataCar_t * xx;
+
+	if (curTrainDlg == NULL) {
+		return;
+	}
+
+	if (oldLoco && (inx=FindLoco(oldLoco))>=0) {
+		if (newLoco) {
+			locoList(inx).loco = newLoco;
+			xx = GET_EXTRA_DATA(newLoco, T_CAR, extraDataCar_t);
+			locoList(inx).running = IsOnTrack(xx) && xx->speed > 0;
+			wListSetValues((wList_p)curTrainDlg->trainPGp->paramPtr[I_LIST].control, inx,
+			               CarItemNumber(xx->item), locoList(inx).running?goI:stopI, newLoco);
+		} else {
+			wListDelete((wList_p)curTrainDlg->trainPGp->paramPtr[I_LIST].control, inx);
+
+			for (; inx<locoList_da.cnt-1; inx++) {
+				locoList(inx) = locoList(inx+1);
+			}
+
+			locoList_da.cnt -= 1;
+
+			if (inx >= locoList_da.cnt) {
+				inx--;
+			}
+		}
+	} else if (newLoco) {
+		inx = locoList_da.cnt;
+		DYNARR_APPEND(locoList_t, locoList_da, 10);
+		locoList(inx).loco = newLoco;
+		xx = GET_EXTRA_DATA(newLoco, T_CAR, extraDataCar_t);
+		locoList(inx).running = IsOnTrack(xx) && xx->speed > 0;
+		wListAddValue((wList_p)curTrainDlg->trainPGp->paramPtr[I_LIST].control,
+		              CarItemNumber(xx->item), locoList(inx).running?goI:stopI, newLoco);
+	}
+
+	if (curTrainDlg->train == oldLoco) {
+		if (newLoco || locoList_da.cnt <= 0) {
+			curTrainDlg->train = newLoco;
+		} else {
+			curTrainDlg->train = wListGetItemContext((wList_p)
+			                     curTrainDlg->trainPGp->paramPtr[I_LIST].control, inx);
+		}
+	}
+
+	ControllerDialogSync(curTrainDlg);
+}
+
+
+static void LocoListInit(void)
+{
+	track_p train;
+	struct extraDataCar_t * xx;
+	DYNARR_RESET( locoList_t, locoList_da );
+
+	for (train=NULL; TrackIterate(&train);) {
+		if (GetTrkType(train) != T_CAR) {
+			continue;
+		}
+
+		xx = GET_EXTRA_DATA(train, T_CAR, extraDataCar_t);
+
+		if (!CarItemIsLoco(xx->item)) {
+			continue;
+		}
+
+		if (!IsLocoMaster(xx)) {
+			continue;
+		}
+
+		LocoListChangeEntry(NULL, train);
+	}
+}
+
+
+static void SetCurTrain(
+        track_p train)
+{
+	curTrainDlg->train = train;
+	ControllerDialogSync(curTrainDlg);
+}
+
+
+static void StopTrain(
+        track_p train,
+        trainStatus_e status)
+{
+	struct extraDataCar_t * xx;
+
+	if (train == NULL) {
+		return;
+	}
+
+	xx = GET_EXTRA_DATA(train, T_CAR, extraDataCar_t);
+	xx->speed = 0;
+	xx->status = status;
+	LocoListChangeEntry(train, train);
+}
+
+
+static void MoveMainWindow(
+        coOrd pos,
+        ANGLE_T angle)
+{
+	DIST_T dist;
+	static DIST_T factor = 0.5;
+	ANGLE_T angle1 = angle, angle2;
+
+	if (angle1 > 180.0) {
+		angle1 = 360.0 - angle1;
+	}
+
+	if (angle1 > 90.0) {
+		angle1 = 180.0 - angle1;
+	}
+
+	angle2 = R2D(atan2(mainD.size.x,mainD.size.y));
+
+	if (angle1 < angle2) {
+		dist = mainD.size.y/2.0/cos(D2R(angle1));
+	} else {
+		dist = mainD.size.x/2.0/cos(D2R(90.0-angle1));
+	}
+
+	dist *= factor;
+	Translate(&pos, pos, angle, dist);
+	mainD.orig.x = pos.x-mainD.size.x/2;;
+	mainD.orig.y = pos.y-mainD.size.y/2;;
+	panCenter = pos;
+	LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x,
+	                   panCenter.y ) );
+	MainLayout( TRUE, TRUE ); // MoveTrainWindow
+}
+
+
+static void SetTrainDirection(
+        track_p train)
+{
+	struct extraDataCar_t *xx, *xx0=GET_EXTRA_DATA(train, T_CAR, extraDataCar_t);
+	int dir0;
+	track_p car;
+	car = train;
+
+	for (dir0 = 0; dir0 < 2; dir0++) {
+		int dir;
+		dir = dir0;
+		WALK_CARS_START(car, xx, dir)
+
+		if (car != train) {
+			if (CarItemIsLoco(xx->item)) {
+				xx->direction = (dir==dir0?xx0->direction:!xx0->direction);
+			}
+		}
+
+		WALK_CARS_END(car, xx, dir)
+	}
+}
+
+
+static void ControllerDialogUpdate(
+        paramGroup_p pg,
+        int inx,
+        void * valueP)
+{
+	trainControlDlg_p dlg = curTrainDlg;
+	track_p train;
+	struct extraDataCar_t * xx;
+
+	if (dlg == NULL) {
+		return;
+	}
+
+	TrainTimeEndPause();
+
+	switch (inx) {
+	case I_LIST:
+		train = (track_p)wListGetItemContext((wList_p)pg->paramPtr[inx].control,
+		                                     (wIndex_t)*(long*)valueP);
+
+		if (train == NULL) {
+			return;
+		}
+
+		dlg->train = train;
+		ControllerDialogSync(dlg);
+		break;
+
+	case I_ZERO:
+		if (dlg->train == NULL) {
+			return;
+		}
+
+		TrainTimeEndPause();
+		xx = GET_EXTRA_DATA(dlg->train, T_CAR, extraDataCar_t);
+		xx->distance = 0.0;
+		FormLoadMessage(dlg->trainPGp, I_DIST, FormatDistance(xx->distance));
+		FormLoadSingleControl(curTrainDlg->trainPGp, I_DIST);
+		TrainTimeStartPause();
+		break;
+
+	case I_GOTO:
+		if (dlg->train == NULL) {
+			return;
+		}
+
+
+
+		TrainTimeEndPause();
+		xx = GET_EXTRA_DATA(dlg->train, T_CAR, extraDataCar_t);
+		followTrain = NULL;
+		dlg->followMe = FALSE;
+		FormLoadSingleControl(curTrainDlg->trainPGp, I_FOLLOW);
+		CarSetVisible(dlg->train);
+		MoveMainWindow(xx->trvTrk.pos, xx->trvTrk.angle);
+		trainHighlighted = dlg->train;
+		TrainTimeStartPause();
+		break;
+
+	case I_FOLLOW:
+		if (dlg->train == NULL) {
+			return;
+		}
+
+		if (*(long*)valueP) {
+			followTrain = dlg->train;
+			xx = GET_EXTRA_DATA(dlg->train, T_CAR, extraDataCar_t);
+
+			if (OFF_MAIND(xx->trvTrk.pos, xx->trvTrk.pos)) {
+				MoveMainWindow(xx->trvTrk.pos, xx->trvTrk.angle);
+			}
+
+			followCenter = mainCenter;
+		} else {
+			followTrain = NULL;
+		}
+
+		break;
+
+	case I_AUTORVRS:
+		if (dlg->train == NULL) {
+			return;
+		}
+
+		xx = GET_EXTRA_DATA(dlg->train, T_CAR, extraDataCar_t);
+		xx->autoReverse = *(long*)valueP!=0;
+		break;
+
+	case I_DIR:
+		if (dlg->train == NULL) {
+			return;
+		}
+
+		xx = GET_EXTRA_DATA(dlg->train, T_CAR, extraDataCar_t);
+		dlg->direction = xx->direction = !xx->direction;
+		wButtonSetLabel((wButton_p)pg->paramPtr[I_DIR].control,
+		                (dlg->direction?_("Reverse"):_("Forward")));
+		SetTrainDirection(dlg->train);
+		TempRedraw(); // ctrain: change direction
+		break;
+
+	case I_STOP:
+		if (dlg->train == NULL) {
+			return;
+		}
+
+		TrainTimeEndPause();
+		StopTrain(dlg->train, ST_StopManual);
+		TrainTimeStartPause();
+		break;
+
+	case -1:
+		/* Close window */
+		CmdTrainExit(NULL);
+		break;
+	default:
+		LOG( log_trainMove, 1, ( "unexpected inx %d in ControllerDialogUpdate\n",
+		                         inx ) )
+		break;
+	}
+
+	/*ControllerDialogSync( dlg );*/
+	TrainTimeStartPause();
+}
+
+
+static trainControlDlg_p CreateTrainControlDlg(void)
+{
+	trainControlDlg_p dlg;
+	char * title;
+	paramData_p PLp;
+	dlg = (trainControlDlg_p)MyMalloc(sizeof *dlg);
+	PLp = trainPLs;
+	dlg->posS[0] = '\0';
+	dlg->speedS[0] = '\0';
+	PLp[I_LIST].valueP = &dlg->inx;
+	PLp[I_LIST].context = dlg;
+	PLp[I_POS].valueP = &dlg->posS;
+	PLp[I_POS].context = dlg;
+	/*PLp[I_GOTO].valueP = NULL;*/
+	PLp[I_GOTO].context = dlg;
+	PLp[I_SLIDER].context = dlg;
+	PLp[I_SPEED].valueP = &dlg->speedS;
+	PLp[I_SPEED].context = dlg;
+	PLp[I_DIR].context = dlg;
+	/*PLp[I_STOP].valueP = NULL;*/
+	PLp[I_STOP].context = dlg;
+	PLp[I_FOLLOW].valueP = &dlg->followMe;
+	PLp[I_FOLLOW].context = dlg;
+	PLp[I_AUTORVRS].valueP = &dlg->autoReverse;
+	PLp[I_AUTORVRS].context = dlg;
+	title = MyStrdup(_("Train Control XXX"));
+	sprintf(title, _("Train Control %d"), ++numTrainDlg);
+	dlg->trainPGp = &trainPG;
+	dlg->win = FormCreateDialog(dlg->trainPGp, _("Train Control"),
+	                            NULL, NULL,
+	                            NULL, FormCancel_Null,
+	                            FALSE, 0, ControllerDialogUpdate);
+	speedD.size.x = SLIDER_WIDTH/speedD.dpi;
+	speedD.size.y = SLIDER_HEIGHT/speedD.dpi;
+	return dlg;
+}
+
+
+
+/*
+ * STATE INFO
+ */
+
+static struct {
+	STATE_T state;
+} Dtrain;
+
+
+long trainPause = 200;
+static void DrawAllCars(track_p trk)
+{
+	track_p car;
+	struct extraDataCar_t * xx;
+	coOrd size, lo, hi;
+	BOOL_T drawCarEnable1 = drawCarEnable;
+	drawCarEnable = TRUE;
+	wDrawDelayUpdate(mainD.d, TRUE);
+	wDrawRestoreImage(mainD.d);
+	DrawPositionIndicators();
+
+	for (car=NULL; TrackIterate(&car);) {
+		if (GetTrkType(car) == T_CAR) {
+			xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
+			CarItemSize(xx->item,
+			            &size);   /* TODO assumes xx->trvTrk.pos is the car center */
+			lo.x = xx->trvTrk.pos.x - size.x/2.0;
+			lo.y = xx->trvTrk.pos.y - size.x/2.0;
+			hi.x = lo.x + size.x;
+			hi.y = lo.y + size.x;
+
+			if (!OFF_MAIND(lo, hi)) {
+				DrawCar(car, &tempD, wDrawColorBlack);
+				if (car == trk) {
+					DrawCar(trk,&tempD,wDrawColorPreviewSelected);
+				}
+			}
+		}
+	}
+
+	wDrawDelayUpdate(mainD.d, FALSE);
+	drawCarEnable = drawCarEnable1;
+}
+
+
+static DIST_T GetTrainLength2(
+        track_p * car0,
+        BOOL_T * dir)
+{
+	DIST_T length = 0, carLength;
+	struct extraDataCar_t * xx;
+	WALK_CARS_START(*car0, xx, *dir)
+	carLength = CarItemCoupledLength(xx->item);
+
+	if (length == 0) {
+		length = carLength/2.0;    /* TODO assumes xx->trvTrk.pos is the car center */
+	} else {
+		length += carLength;
+	}
+
+	WALK_CARS_END(*car0, xx, *dir)
+	return length;
+}
+
+
+static DIST_T GetTrainLength(
+        track_p car0,
+        BOOL_T dir)
+{
+	return GetTrainLength2(&car0, &dir);
+}
+
+
+static void PlaceCar(
+        track_p car)
+{
+	struct extraDataCar_t *xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
+	DIST_T dists[2];
+	CarItemPlace(xx->item, &xx->trvTrk, dists);
+
+	CarItemFindCouplerMountPoint(xx->item, xx->trvTrk, xx->couplerPos);
+
+	coOrd tempPos;
+	ANGLE_T tempAng;
+	tempAng = xx->trvTrk.angle;
+	Translate( &tempPos, xx->trvTrk.pos, tempAng, dists[0] );
+	SetTrkEndPointSilent( car, 0, tempPos, tempAng );
+	tempAng = NormalizeAngle( tempAng+180.0 );
+	Translate( &tempPos, xx->trvTrk.pos, tempAng, dists[1] );
+	SetTrkEndPointSilent( car, 1, tempPos, tempAng );
+
+	LOG(log_trainMove, 4, ("%s @ [%0.3f,%0.3f] A%0.3f\n", CarItemNumber(xx->item),
+	                       xx->trvTrk.pos.x, xx->trvTrk.pos.y, xx->trvTrk.angle))
+	SetCarBoundingBox(car);
+	xx->state &= ~(CAR_STATE_ONHIDENTRACK);
+	xx->trkLayer = NOTALAYER;
+
+	if (xx->trvTrk.trk) {
+		if (!GetTrkVisible(xx->trvTrk.trk)) {
+			xx->state |= CAR_STATE_ONHIDENTRACK;
+		}
+
+		xx->trkLayer = GetTrkLayer(xx->trvTrk.trk);
+	}
+}
+
+
+static track_p FindCar(
+        coOrd * pos)
+{
+	coOrd pos0, pos1;
+	track_p trk, trk1;
+	DIST_T dist1 = DIST_INF, dist;
+	const struct extraDataCar_t * xx;
+	trk1 = NULL;
+
+	for (trk=NULL; TrackIterate(&trk);) {
+		if (GetTrkType(trk) == T_CAR) {
+			xx = GET_EXTRA_DATA(trk, T_CAR, extraDataCar_t);
+
+			if (IsIgnored(xx)) {
+				continue;
+			}
+
+			pos0 = *pos;
+
+			coOrd hi,lo;
+
+			GetBoundingBox(trk,&hi,&lo);
+
+			if (hi.x < pos0.x ||
+			    lo.x > pos0.x ||
+			    hi.y < pos0.y ||
+			    lo.y > pos0.y ) {
+				continue;
+			}
+
+			dist = DistanceCar(trk, &pos0);
+
+			if (dist < dist1) {
+				dist1 = dist;
+				trk1 = trk;
+				pos1 = pos0;
+			}
+		}
+	}
+
+	if (dist1 < trackGauge*2.0) {
+		*pos = pos1;
+		return trk1;
+	} else {
+		return NULL;
+	}
+}
+
+
+static track_p FindMasterLoco(
+        track_p train,
+        int * dirR)
+{
+	struct extraDataCar_t *xx0;
+	int dir;
+
+	for (dir = 0; dir<2; dir++) {
+		track_p car0;
+		int  dir0;
+		car0 = train;
+		dir0 = dir;
+		WALK_CARS_START(car0, xx0, dir0)
+
+		if (CarItemIsLoco(xx0->item) && IsLocoMaster(xx0)) {
+			if (dirR) {
+				*dirR = 1-dir0;
+			}
+
+			return car0;
+		}
+
+		WALK_CARS_END(car0, xx0, dir0)
+	}
+
+	return NULL;
+}
+
+
+static track_p PickMasterLoco(
+        track_p car,
+        int dir)
+{
+	track_p loco=NULL;
+	struct extraDataCar_t *xx;
+	WALK_CARS_START(car, xx, dir)
+
+	if (CarItemIsLoco(xx->item)) {
+		if (IsLocoMaster(xx)) {
+			return car;
+		}
+
+		if (loco == NULL) {
+			loco = car;
+		}
+	}
+
+	WALK_CARS_END(car, xx, dir)
+
+	if (loco == NULL) {
+		return NULL;
+	}
+
+	xx = GET_EXTRA_DATA(loco, T_CAR, extraDataCar_t);
+	SetLocoMaster(xx);
+	xx->speed = 0;
+	LOG(log_trainMove, 1, ("%s becomes master\n", CarItemNumber(xx->item)))
+	return loco;
+}
+
+
+EXPORT void UncoupleCars(
+        track_p car1,
+        int dir1 )
+{
+	track_p car2 = GetTrkEndTrk(car1,dir1);
+	if ( car2 == NULL ) {
+		return;
+	}
+	track_p loco;
+	int dir2;
+
+	if (GetTrkEndTrk(car2,0) == car1) {
+		dir2 = 0;
+	} else if (GetTrkEndTrk(car2,1) == car1) {
+		dir2 = 1;
+	} else {
+		ErrorMessage("uncoupleCars - not coupled");
+		return;
+	}
+
+	loco = FindMasterLoco(car1, NULL);
+	DisconnectTracks( car1, dir1, car2, dir2 );
+
+	if (loco) {
+		track_p  loco1, loco2;
+		loco1 = PickMasterLoco(car1, 1-dir1);
+
+		if (loco1 != loco) {
+			LocoListChangeEntry(NULL, loco1);
+		}
+
+		loco2 = PickMasterLoco(car2, 1-dir2);
+
+		if (loco2 != loco) {
+			LocoListChangeEntry(NULL, loco2);
+		}
+	}
+}
+
+static void CoupleCars(
+        track_p car1,
+        int dir1,
+        track_p car2,
+        int dir2)
+{
+	struct extraDataCar_t * xx1, * xx2;
+	track_p loco1, loco2;
+	track_p car;
+	int dir;
+	xx1 = GET_EXTRA_DATA(car1, T_CAR, extraDataCar_t);
+	xx2 = GET_EXTRA_DATA(car2, T_CAR, extraDataCar_t);
+
+	if (GetTrkEndTrk(car1,dir1) != NULL || GetTrkEndTrk(car2,dir2) != NULL) {
+		LOG(log_trainMove, 1, ("coupleCars - already coupled\n"))
+		return;
+	}
+
+	car = car1;
+	dir = 1-dir1;
+	WALK_CARS_START(car, xx1, dir)
+
+	if (car == car2) {
+		LOG(log_trainMove, 1, ("coupleCars - already coupled\n"))
+		ErrorMessage("Car coupling loop");
+		return;
+	}
+
+	WALK_CARS_END(car, xx1, dir)
+	car = car2;
+	dir = 1-dir2;
+	WALK_CARS_START(car, xx2, dir)
+
+	if (car == car1) {
+		LOG(log_trainMove, 1, ("coupleCars - already coupled\n"))
+		ErrorMessage("Car coupling loop");
+		return;
+	}
+
+	WALK_CARS_END(car, xx1, dir)
+	loco1 = FindMasterLoco(car1, NULL);
+	loco2 = FindMasterLoco(car2, NULL);
+	ConnectTracks( car1, dir1, car2, dir2 );
+
+	if (logTable(log_trainMove).level >= 2) {
+		LogPrintf("Coupling %s[%d] ", CarItemNumber(xx1->item), dir1);
+		LogPrintf(" and %s[%d]\n", CarItemNumber(xx2->item), dir2);
+	}
+
+	if ((loco1 != NULL && loco2 != NULL)) {
+		xx1 = GET_EXTRA_DATA(loco1, T_CAR, extraDataCar_t);
+		xx2 = GET_EXTRA_DATA(loco2, T_CAR, extraDataCar_t);
+
+		if (xx1->speed == 0) {
+			ClrLocoMaster(xx1);
+			LOG(log_trainMove, 2, ("%s loses master\n", CarItemNumber(xx1->item)))
+
+			if (followTrain == loco1) {
+				followTrain = loco2;
+			}
+
+			LocoListChangeEntry(loco1, NULL);
+			loco1 = loco2;
+		} else {
+			ClrLocoMaster(xx2);
+			xx1->speed = (xx1->speed + xx2->speed)/2.0;
+
+			if (xx1->speed < 0) {
+				xx1->speed = 0;
+			}
+
+			if (xx1->speed > 100) {
+				xx1->speed = 100;
+			}
+
+			LOG(log_trainMove, 2, ("%s loses master\n", CarItemNumber(xx2->item)))
+
+			if (followTrain == loco2) {
+				followTrain = loco1;
+			}
+
+			LocoListChangeEntry(loco2, NULL);
+		}
+
+		SetTrainDirection(loco1);
+	}
+}
+
+
+
+long crashDistFactor=60;
+static void PlaceCars(
+        track_p car0,
+        int dir0,
+        long crashSpeed,
+        BOOL_T crashFlip)
+{
+	struct extraDataCar_t *xx0 = GET_EXTRA_DATA(car0, T_CAR, extraDataCar_t), *xx;
+	int dir;
+	traverseTrack_t trvTrk;
+	DIST_T length;
+	track_p car_curr;
+	DIST_T flipflop = 1;
+
+	if (crashFlip) {
+		flipflop = -1;
+	}
+
+	dir = dir0;
+	trvTrk = xx0->trvTrk;
+
+	if (dir0) {
+		FlipTraverseTrack(&trvTrk);
+	}
+
+	length = CarItemCoupledLength(xx0->item)/2.0;
+	car_curr = car0;
+	ClrIgnored(xx0);
+	WALK_CARS_START(car_curr, xx, dir)
+
+	if (car_curr != car0) {
+		DIST_T  dist, length1;
+		ClrIgnored(xx);
+		length1 = CarItemCoupledLength(xx->item)/2.0;
+		dist = length + length1;
+		crashSpeed = crashSpeed*CRASHSPEEDDECAY/10;
+
+		if (crashSpeed > 0) {
+			dist -= dist * crashSpeed/crashDistFactor;
+		}
+
+		TraverseTrack2(&trvTrk, dist);
+		xx->trvTrk = trvTrk;
+
+		if (crashSpeed > 0) {
+			xx->trvTrk.angle = NormalizeAngle(xx->trvTrk.angle + flipflop*crashSpeed);
+			xx->trvTrk.trk = NULL;
+		}
+
+		flipflop = -flipflop;
+
+		if (dir != 0) {
+			FlipTraverseTrack(&xx->trvTrk);
+		}
+
+		PlaceCar(car_curr);
+		length = length1;
+	}
+
+	WALK_CARS_END(car_curr, xx, dir)
+}
+
+
+static void CrashTrain(
+        track_p car,
+        int dir,
+        traverseTrack_p trvTrkP,
+        long speed,
+        BOOL_T flip)
+{
+	track_p loco;
+	struct extraDataCar_t *xx;
+	loco = FindMasterLoco(car,NULL);
+
+	if (loco != NULL) {
+		StopTrain(loco, ST_Crashed);
+	}
+
+	xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
+	xx->trvTrk = *trvTrkP;
+
+	if (dir) {
+		FlipTraverseTrack(&xx->trvTrk);
+	}
+
+	PlaceCars(car, 1-dir, speed, flip);
+
+	if (flip) {
+		speed = - speed;
+	}
+
+	xx->trvTrk.angle = NormalizeAngle(xx->trvTrk.angle - speed);
+	xx->trvTrk.trk = NULL;
+	PlaceCar(car);
+}
+
+/*
+ * Check if this should couple or optionally if it should crash
+ * It will call couple or crash if needed.
+ * Returns TRUE if we should continue.
+ */
+static BOOL_T CheckCoupling(
+        track_p car0,
+        int dir00,
+        BOOL_T doCheckCrash)
+{
+	track_p car1;
+	struct extraDataCar_t *xx0, *xx1;
+	coOrd pos1;
+	DIST_T dist0, distc, dist=DIST_INF;
+	int dir0, dir1, dirl;
+	ANGLE_T angle;
+	traverseTrack_t trvTrk0, trvTrk1;
+	xx0 = xx1 = GET_EXTRA_DATA(car0, T_CAR, extraDataCar_t);
+	/* find length of train from loco to start and end */
+	dir0 = dir00;
+	dist0 = GetTrainLength2(&car0, &dir0);
+	trvTrk0 = xx0->trvTrk;
+
+	if (dir00) {
+		FlipTraverseTrack(&trvTrk0);
+	}
+
+	TraverseTrack2(&trvTrk0, dist0);
+	pos1 = trvTrk0.pos;
+	car1 = FindCar(&pos1);
+
+	if (!car1) {
+		return TRUE;
+	}
+
+	xx1 = GET_EXTRA_DATA(car1, T_CAR, extraDataCar_t);
+
+	if (!IsOnTrack(xx1)) {
+		return TRUE;
+	}
+
+	/* determine which EP of the found car to couple to */
+	angle = NormalizeAngle(trvTrk0.angle-xx1->trvTrk.angle);
+
+	if (angle > 90 && angle < 270) {
+		dir1 = 0;
+		angle = NormalizeAngle(angle+180);
+	} else {
+		dir1 = 1;
+	}
+
+	/* already coupled? */
+	if (GetTrkEndTrk(car1,dir1) != NULL) {
+		return TRUE;
+	}
+
+	/* are we close to aligned? Uses 45 degrees offset today */
+	/* It assumes that if the cars are aligned they could/should be coupled */
+	if (angle > COUPLERCONNECTIONANGLE && angle < 360.0-COUPLERCONNECTIONANGLE) {
+		return TRUE;
+	}
+
+	/* find pos of found end car's coupler, and dist btw couplers */
+	distc = CarItemCoupledLength(xx1->item);
+	/* pos1 is the end of the xx1 car (end car) */
+	Translate(&pos1, xx1->trvTrk.pos, xx1->trvTrk.angle+(dir1?180.0:0.0),
+	          distc/2.0);
+	dist = FindDistance(trvTrk0.pos, pos1);
+	/* How far away are the two ends?*/
+	if (dist < trackGauge/10) {
+		return TRUE;
+	}
+
+	/* not real close: are we overlapped? */
+	angle = FindAngle(trvTrk0.pos, pos1);
+	angle = NormalizeAngle(angle - trvTrk0.angle);
+
+	if (angle < 90 || angle > 270) {
+		return TRUE;
+	}
+
+	/* are we beyond the end of the found car? */
+	if (dist > distc) {
+		return TRUE;
+	}
+
+	/* are we on the same track? */
+	trvTrk1 = xx1->trvTrk;
+
+	if (dir1) {
+		FlipTraverseTrack(&trvTrk1);
+	}
+
+	/* Move second train back along track half a car length */
+	TraverseTrack2(&trvTrk1, distc/2.0-dist);
+	if ( trvTrk0.trk == NULL || trvTrk1.trk == NULL )
+		// fell off the end of track
+	{
+		return FALSE;
+	}
+
+	/* If tracks are not the same - dont couple */
+	if (trvTrk1.trk != trvTrk0.trk) {
+		return TRUE;
+	}
+
+	/* If this is further apart than 2 track gauges on a turnout, dont couple */
+	if (GetTrkType(trvTrk0.trk) == T_TURNOUT) {
+		if (dist > GetTrkGauge(trvTrk0.trk)*2) {
+			return TRUE;
+		}
+	}
+
+	/* Concluded we are hitting each other */
+
+	if (doCheckCrash) {
+		track_p loco1;
+		long speed, speed0, speed1;
+		speed0 = (long)xx0->speed;
+
+		if ((xx0->direction==0) != (dir00==0)) {
+			speed0 = - speed0;
+		}
+
+		loco1 = FindMasterLoco(car1, &dirl);
+		xx1 = NULL;
+
+		if (loco1) {
+			xx1 = GET_EXTRA_DATA(loco1, T_CAR, extraDataCar_t);
+			speed1 = (long)xx1->speed;
+
+			if (car1 == loco1) {
+				dirl = IsAligned(xx1->trvTrk.angle, FindAngle(trvTrk0.pos,
+				                 xx1->trvTrk.pos))?1:0;
+			}
+
+			if ((xx1->direction==1) != (dirl==1)) {
+				speed1 = -speed1;
+			}
+		} else {
+			speed1 = 0;
+		}
+
+		speed = labs(speed0 + speed1);
+		LOG(log_trainMove, 2, ("coupling speed=%ld\n", speed))
+
+		if (speed > maxCouplingSpeed) {
+			CrashTrain(car0, dir0, &trvTrk0, speed, FALSE);
+			CrashTrain(car1, dir1, &trvTrk1, speed, TRUE);
+			return FALSE;
+		}
+	}
+
+	if (dir00) {
+		dist = -dist;
+	}
+
+	TraverseTrack2(&xx0->trvTrk, dist);
+	CoupleCars(car0, dir0, car1, dir1);
+	LOG(log_trainMove, 3, ("  -> %0.3f\n", dist))
+	return TRUE;
+}
+
+
+static void PlaceTrain(
+        track_p car0,
+        BOOL_T doCheckCrash,
+        BOOL_T doCheckCoupling)
+{
+	track_p car_curr;
+	struct extraDataCar_t *xx0;
+	int dir0;
+	xx0 = GET_EXTRA_DATA(car0, T_CAR, extraDataCar_t);
+	LOG(log_trainMove, 2, ("  placeTrain: %s [%0.3f %0.3f] A%0.3f",
+	                       CarItemNumber(xx0->item), xx0->trvTrk.pos.x, xx0->trvTrk.pos.y,
+	                       xx0->trvTrk.angle))
+
+	for (dir0=0; dir0<2; dir0++) {
+		int dir;
+		struct extraDataCar_t  *xx;
+		car_curr = car0;
+		dir = dir0;
+		WALK_CARS_START(car_curr, xx, dir)
+		SetIgnored(xx);
+		WALK_CARS_END(car_curr, xx, dir);
+	}
+
+	/* check for coupling to other cars */
+	if (doCheckCoupling) {
+		if (xx0->trvTrk.trk) {
+			if (!CheckCoupling(car0, 0, doCheckCrash)) {
+				return;
+			}
+
+			if (!CheckCoupling(car0, 1, doCheckCrash)) {
+				return;
+			}
+		}
+	}
+
+	PlaceCar(car0);
+
+	for (dir0=0; dir0<2; dir0++) {
+		PlaceCars(car0, dir0, 0, FALSE);
+	}
+}
+
+
+static void PlaceTrainInit(
+        track_p car0,
+        track_p trk0,
+        coOrd pos0,
+        ANGLE_T angle0,
+        BOOL_T doCheckCoupling)
+{
+	struct extraDataCar_t * xx = GET_EXTRA_DATA(car0, T_CAR, extraDataCar_t);
+	xx->trvTrk.trk = trk0;
+	xx->trvTrk.dist = xx->trvTrk.length = -1;
+	xx->trvTrk.pos = pos0;
+	xx->trvTrk.angle = angle0;
+	PlaceTrain(car0, FALSE, doCheckCoupling);
+}
+
+
+static void FlipTrain(
+        track_p train)
+{
+	DIST_T d0, d1;
+	struct extraDataCar_t * xx;
+
+	if (train == NULL) {
+		return;
+	}
+
+	d0 = GetTrainLength(train, 0);
+	d1 = GetTrainLength(train, 1);
+	xx = GET_EXTRA_DATA(train, T_CAR, extraDataCar_t);
+	TraverseTrack2(&xx->trvTrk, d0-d1);
+	FlipTraverseTrack(&xx->trvTrk);
+	xx->trvTrk.length = -1;
+	PlaceTrain(train, FALSE, TRUE);
+}
+
+
+static BOOL_T MoveTrain(
+        track_p train,
+        long timeD)
+{
+	DIST_T ips, dist0, dist1;
+	struct extraDataCar_t *xx, *xx1;
+	traverseTrack_t trvTrk;
+	DIST_T length;
+	track_p car1;
+	int dir1;
+	int measured;		/* make sure the distance is only measured once per train */
+
+	if (train == NULL) {
+		return FALSE;
+	}
+
+	xx = GET_EXTRA_DATA(train, T_CAR, extraDataCar_t);
+
+	if (xx->speed <= 0) {
+		return FALSE;
+	}
+
+	ips = ((xx->speed*5280.0*12.0)/(60.0*60.0*GetScaleRatio(GetLayoutCurScale())));
+	dist0 = ips * timeD/1000.0;
+	length = GetTrainLength(train, xx->direction);
+	dist1 = length + dist0;
+	trvTrk = xx->trvTrk;
+
+	if (trvTrk.trk == NULL) {
+		return FALSE;
+	}
+
+	LOG(log_trainMove, 1,
+	    ("moveTrain: %s t%ld->%0.3f S%0.3f D%d [%0.3f %0.3f] A%0.3f T%d\n",
+	     CarItemNumber(xx->item), timeD, dist0, xx->speed, xx->direction,
+	     xx->trvTrk.pos.x, xx->trvTrk.pos.y, xx->trvTrk.angle,
+	     xx->trvTrk.trk?GetTrkIndex(xx->trvTrk.trk):-1))
+
+	if (xx->direction) {
+		FlipTraverseTrack(&trvTrk);
+	}
+
+	TraverseTrack(&trvTrk, &dist1);
+
+	if (dist1 > 0.0) {
+		if (dist1 > dist0) {
+			/*ErrorMessage( "%s no room: L%0.3f D%0.3f", CarItemNumber(xx->item), length, dist1 );*/
+			StopTrain(train, ST_NoRoom);
+			return FALSE;
+		} else {
+			dist0 -= dist1;
+			LOG(log_trainMove, 1, ("   %s STOP D%d [%0.3f %0.3f] A%0.3f D%0.3f\n",
+			                       CarItemNumber(xx->item), xx->direction, xx->trvTrk.pos.x, xx->trvTrk.pos.y,
+			                       xx->trvTrk.angle, dist0))
+		}
+
+		/*ErrorMessage( "%s stopped at End Of Track", CarItemNumber(xx->item) );*/
+		if (xx->autoReverse) {
+			xx->direction = !xx->direction;
+			SetTrainDirection(train);
+		} else {
+			if (xx->speed > maxCouplingSpeed) {
+				car1 = train;
+				dir1 = xx->direction;
+				GetTrainLength2(&car1, &dir1);
+				CrashTrain(car1, dir1, &trvTrk, (long)xx->speed, FALSE);
+				return TRUE;
+			} else {
+				if (trvTrk.trk
+				    && GetTrkEndPtCnt( trvTrk.trk ) > 1) {  //Test for null track after Traverse
+					StopTrain(train, ST_OpenTurnout );
+				} else {
+					StopTrain(train, ST_EndOfTrack);
+				}
+				return (FALSE);
+			}
+		}
+	}
+
+	trvTrk = xx->trvTrk;
+	TraverseTrack2(&xx->trvTrk, xx->direction==0?dist0:-dist0);
+	car1 = train;
+	dir1 = 0;
+	GetTrainLength2(&car1, &dir1);
+	dir1 = 1-dir1;
+	measured = FALSE;
+	WALK_CARS_START(car1, xx1, dir1);
+
+	if (CarItemIsLoco(xx1->item) && !measured) {
+		xx->distance += dist0;
+		measured = TRUE;
+	}
+
+	WALK_CARS_END(car1, xx1, dir1);
+
+	if (train == followTrain) {
+		if (followCenter.x != mainCenter.x ||
+		    followCenter.y != mainCenter.y) {
+			if (curTrainDlg->train == followTrain) {
+				curTrainDlg->followMe = FALSE;
+				FormLoadSingleControl(curTrainDlg->trainPGp, I_FOLLOW);
+			}
+
+			followTrain = NULL;
+		} else if (OFF_FOLLOW(xx->trvTrk.pos, xx->trvTrk.pos)) {
+			MoveMainWindow(xx->trvTrk.pos,
+			               NormalizeAngle(xx->trvTrk.angle+(xx->direction?180.0:0.0)));
+			followCenter = mainCenter;
+		}
+	}
+
+	PlaceTrain(train, TRUE, TRUE);
+	return TRUE;
+}
+
+
+static BOOL_T MoveTrains(long timeD)
+{
+	BOOL_T trains_moved = FALSE;
+	track_p train;
+	struct extraDataCar_t * xx;
+
+	for (train=NULL; TrackIterate(&train);) {
+		if (GetTrkType(train) != T_CAR) {
+			continue;
+		}
+
+		xx = GET_EXTRA_DATA(train, T_CAR, extraDataCar_t);
+
+		if (!CarItemIsLoco(xx->item)) {
+			continue;
+		}
+
+		if (!IsLocoMaster(xx)) {
+			continue;
+		}
+
+		if (xx->speed == 0) {
+			continue;
+		}
+
+		trains_moved |= MoveTrain(train, timeD);
+	}
+
+	ControllerDialogSyncAll();
+	TempRedraw(); // MoveTrains
+	return trains_moved;
+}
+
+
+static void MoveTrainsLoop(void)
+{
+	long time1, timeD;
+	static long time0 = 0;
+	trainsTimeoutPending = FALSE;
+
+	if (trainsState != TRAINS_RUN) {
+		time0 = 0;
+		return;
+	}
+
+	if (time0 == 0) {
+		time0 = wGetTimer();
+	}
+
+	time1 = wGetTimer();
+	timeD = time1-time0;
+	time0 = time1;
+
+	if (timeD > 1000) {
+		timeD = 1000;
+	}
+
+	if (MoveTrains(timeD)) {
+		wAlarm(trainPause, MoveTrainsLoop);
+		trainsTimeoutPending = TRUE;
+	} else {
+		time0 = 0;
+		trainsState = TRAINS_IDLE;
+		TrainTimeEndPause();
+	}
+}
+
+
+static void RestartTrains(void)
+{
+	if (trainsState != TRAINS_RUN) {
+		TrainTimeStartPause();
+	}
+
+	trainsState = TRAINS_RUN;
+
+	if (!trainsTimeoutPending) {
+		MoveTrainsLoop();
+	}
+}
+
+
+static long trainTime0 = 0;
+static long playbackTrainPause = 0;
+static drawCmd_t trainMovieD = {
+	NULL,
+	&screenDrawFuncs,
+	0,
+	16.0,
+	0,
+	{0,0}, {1,1},
+	Pix2CoOrd, CoOrd2Pix
+};
+static long trainMovieFrameDelay;
+static long trainMovieFrameNext;
+
+static void TrainTimeEndPause(void)
+{
+	if (recordF) {
+		if (trainTime0 != 0) {
+			long delay;
+			delay = wGetTimer()-trainTime0;
+
+			if (delay > 0) {
+				fprintf(recordF, "TRAINPAUSE %ld\n", delay);
+			}
+		}
+
+		trainTime0 = 0;
+	}
+}
+
+static void TrainTimeStartPause(void)
+{
+	if (trainTime0 == 0) {
+		trainTime0 = wGetTimer();
+	}
+}
+
+
+static void TrainTimeDoPause(char * line)
+{
+	BOOL_T drawCarEnable2;
+	playbackTrainPause = atol(line);
+	LOG(log_trainPlayback, 1, ("DoPause %ld\n", playbackTrainPause));
+	trainsState = TRAINS_RUN;
+
+	if (trainMovieFrameDelay > 0) {
+		drawCarEnable2 = drawCarEnable;
+		drawCarEnable = TRUE;
+		TakeSnapshot(&trainMovieD);
+		drawCarEnable = drawCarEnable2;
+		LOG(log_trainPlayback, 1, ("SNAP 0\n"));
+		trainMovieFrameNext = trainMovieFrameDelay;
+	}
+
+	/*MoveTrains();*/
+	while (playbackTrainPause > 0) {
+		if (playbackTrainPause > trainPause) {
+			wPause(trainPause);
+			MoveTrains(trainPause);
+			playbackTrainPause -= trainPause;
+
+			if (trainMovieFrameDelay > 0) {
+				trainMovieFrameNext -= trainPause;
+			}
+		} else {
+			wPause(playbackTrainPause);
+			MoveTrains(playbackTrainPause);
+
+			if (trainMovieFrameDelay > 0) {
+				trainMovieFrameNext -= playbackTrainPause;
+			}
+
+			playbackTrainPause = 0;
+		}
+
+		if (trainMovieFrameDelay > 0 &&
+		    trainMovieFrameNext <= 0) {
+			drawCarEnable2 = drawCarEnable;
+			drawCarEnable = TRUE;
+			TakeSnapshot(&trainMovieD);
+			drawCarEnable = drawCarEnable2;
+			LOG(log_trainPlayback, 1, ("SNAP %ld\n", trainMovieFrameNext));
+			trainMovieFrameNext = trainMovieFrameDelay;
+		}
+	}
+}
+
+
+static void TrainDoMovie(char * line)
+{
+	/* on/off, scale, orig, size */
+	long fps;
+
+	if (trainMovieD.dpi == 0) {
+		trainMovieD.dpi = mainD.dpi;
+	}
+
+	if (!GetArgs(line, "lfpp", &fps, &trainMovieD.scale, &trainMovieD.orig,
+	             &trainMovieD.size)) {
+		return;
+	}
+
+	if (fps > 0) {
+		trainMovieFrameDelay = 1000/fps;
+	} else {
+		trainMovieFrameDelay = 0;
+	}
+
+	trainMovieFrameNext = 0;
+}
+
+void AttachTrains(void)
+{
+	track_p car;
+	track_p loco;
+	struct extraDataCar_t * xx;
+	coOrd pos;
+	track_p trk;
+	ANGLE_T angle;
+	EPINX_T ep0, ep1;
+	int dir;
+
+	for (car=NULL; TrackIterate(&car);) {
+		ClrTrkBits(car, TB_CARATTACHED);
+
+		if (GetTrkType(car) != T_CAR) {
+			continue;
+		}
+
+		xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
+		ClrProcessed(xx);
+	}
+
+	for (car=NULL; TrackIterate(&car);) {
+		if (GetTrkType(car) != T_CAR) {
+			continue;
+		}
+
+		xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
+
+		if (IsProcessed(xx)) {
+			continue;
+		}
+
+		loco = FindMasterLoco(car, NULL);
+
+		if (loco != NULL) {
+			xx = GET_EXTRA_DATA(loco, T_CAR, extraDataCar_t);
+		} else {
+			loco = car;
+		}
+
+		pos = xx->trvTrk.pos;
+
+		if (xx->status == ST_Crashed) {
+			continue;
+		}
+
+		TRK_ITERATE(trk) {
+			if (trk == xx->trvTrk.trk) {
+				break;
+			}
+		}
+
+		if (trk!=NULL && !QueryTrack(trk, Q_ISTRACK)) {
+			trk = NULL;
+		}
+		if (trk==NULL || GetTrkDistance(trk,&pos)>trackGauge*2.0) {
+			// Suppress moving pos to turnout endPt
+			onTrackInSplit = TRUE;
+			trk = OnTrack2(&pos, FALSE, TRUE, FALSE, NULL);
+			onTrackInSplit = FALSE;
+		}
+
+		if (trk!=NULL) {
+			/*if ( trk == xx->trvTrk.trk )
+				continue;*/
+			angle = GetAngleAtPoint(trk, pos, &ep0, &ep1);
+
+			if (NormalizeAngle(xx->trvTrk.angle-angle+90) > 180) {
+				angle = NormalizeAngle(angle+180);
+			}
+
+			PlaceTrainInit(loco, trk, pos, angle, TRUE);
+		} else {
+			PlaceTrainInit(loco, NULL, xx->trvTrk.pos, xx->trvTrk.angle, FALSE);
+		}
+
+		dir = 0;
+		WALK_CARS_START(loco, xx, dir)
+		WALK_CARS_END(loco, xx, dir)
+		dir = 1-dir;
+		WALK_CARS_START(loco, xx, dir)
+		SetProcessed(xx);
+
+		if (xx->trvTrk.trk) {
+			SetTrkBits(xx->trvTrk.trk, TB_CARATTACHED);
+			xx->status = ST_StopManual;
+		} else {
+			xx->status = ST_NotOnTrack;
+		}
+
+		WALK_CARS_END(loco, xx, dir)
+	}
+
+	for (car=NULL; TrackIterate(&car);) {
+		if (GetTrkType(car) != T_CAR) {
+			continue;
+		}
+
+		xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
+		ClrProcessed(xx);
+	}
+}
+
+
+static void UpdateTrainAttachment(void)
+{
+	track_p trk;
+	struct extraDataCar_t * xx;
+
+	for (trk=NULL; TrackIterate(&trk);) {
+		ClrTrkBits(trk, TB_CARATTACHED);
+	}
+
+	for (trk=NULL; TrackIterate(&trk);) {
+		if (GetTrkType(trk) == T_CAR) {
+			xx = GET_EXTRA_DATA(trk, T_CAR, extraDataCar_t);
+
+			if (xx->trvTrk.trk != NULL) {
+				SetTrkBits(xx->trvTrk.trk, TB_CARATTACHED);
+			}
+		}
+	}
+}
+
+
+static BOOL_T TrainOnMovableTrack(
+        track_p trk,
+        track_p *trainR)
+{
+	track_p train;
+	const struct extraDataCar_t * xx;
+	int dir;
+
+	for (train=NULL; TrackIterate(&train);) {
+		if (GetTrkType(train) != T_CAR) {
+			continue;
+		}
+
+		xx = GET_EXTRA_DATA(train, T_CAR, extraDataCar_t);
+
+		if (IsOnTrack(xx)) {
+			if (xx->trvTrk.trk == trk) {
+				break;
+			}
+		}
+	}
+
+	*trainR = train;
+
+	if (train == NULL) {
+		return TRUE;
+	}
+
+	dir = 0;
+	WALK_CARS_START(train, xx, dir)
+	WALK_CARS_END(train, xx, dir)
+	dir = 1-dir;
+	WALK_CARS_START(train, xx, dir)
+
+	if (xx->trvTrk.trk != trk) {
+		ErrorMessage(MSG_CANT_MOVE_UNDER_TRAIN);
+		return FALSE;
+	}
+
+	WALK_CARS_END(train, xx, dir)
+	train = FindMasterLoco(train, NULL);
+
+	if (train != NULL) {
+		*trainR = train;
+	}
+
+	return TRUE;
+}
+
+/*
+ *
+ */
+
+#define DO_UNCOUPLE		(0)
+#define DO_FLIPCAR		(1)
+#define DO_FLIPTRAIN	(2)
+#define DO_DELCAR		(3)
+#define DO_DELTRAIN		(4)
+#define DO_MUMASTER		(5)
+#define DO_CHANGEDIR	(6)
+#define DO_STOP			(7)
+#ifdef CAR_CLEARANCE
+#define DO_PENCILS_ON   (8)
+#define DO_PENCILS_OFF  (9)
+#endif
+#define DO_DESCRIBE     (10)
+static track_p trainFuncCar;
+static coOrd trainFuncPos;
+static wButton_p trainPauseB;
+
+
+static STATUS_T CmdTrain(wAction_t action, coOrd pos)
+{
+	static track_p trk0, trk1;
+	static track_p currCar;
+	coOrd pos0, pos1;
+	static coOrd delta;
+	ANGLE_T angle1;
+	EPINX_T ep0, ep1;
+	int dir;
+	struct extraDataCar_t * xx=NULL;
+	char msg[STR_SIZE];
+
+	switch (action) {
+	case C_START:
+		/*UndoStart( "Trains", "Trains" );*/
+		UndoSuspend();
+		programMode = MODE_TRAIN;
+		drawCarEnable = FALSE;
+		doDrawTurnoutPosition = 1;
+		DoChangeNotification(CHANGE_PARAMS|CHANGE_TOOLBAR);
+
+		if (CarAvailableCount() <= 0) {
+			if (NoticeMessage(MSG_NO_CARS, _("Yes"), _("No")) > 0) {
+				DoCarDlg(NULL);
+				DoChangeNotification(CHANGE_PARAMS);
+			}
+		}
+		SetAllTrackSelect( FALSE );
+		EnableCommands();
+
+		if (curTrainDlg == NULL) {
+			curTrainDlg = CreateTrainControlDlg();
+		}
+
+		curTrainDlg->train = NULL;
+		wListClear((wList_p)curTrainDlg->trainPGp->paramPtr[I_LIST].control);
+		Dtrain.state = 0;
+		trk0 = NULL;
+		trainHighlighted = NULL;
+		DYNARR_SET(trkSeg_t, tempSegs_da, 8);
+		RestartTrains();
+		wButtonSetIcon(trainPauseB, (char*)goB);
+		trainTime0 = 0;
+		AttachTrains();
+		curTrainDlg->train = NULL;
+		curTrainDlg->speed = -1;
+		wDrawClear((wDraw_p)curTrainDlg->trainPGp->paramPtr[I_SLIDER].control);
+		LocoListInit();
+		ControllerDialogSync(curTrainDlg);
+		wShow(curTrainDlg->win);
+		wControlShow((wControl_p)newcarB, ToolbarIsGroupVisible(BG_TRAIN));
+		currCarItemPtr = NULL;
+		TempRedraw(); // CmdTrain C_START
+		return C_CONTINUE;
+
+	case wActionMove:
+
+		trainHighlighted = FindCar(&pos);
+
+		return C_CONTINUE;
+		break;
+
+
+	case C_TEXT:
+		return C_CONTINUE;
+
+	case C_DOWN:
+		/*trainEnable = FALSE;*/
+		InfoMessage("");
+
+		if (trainsState == TRAINS_RUN) {
+			trainsState = TRAINS_PAUSE;
+			TrainTimeEndPause();
+		}
+
+		pos0 = pos;
+
+		if (currCarItemPtr != NULL) {
+			DIST_T dist;
+			currCar = NewCar(-1, currCarItemPtr, zero, 0.0);
+			CarItemUpdate(currCarItemPtr);
+			HotBarCancel();
+
+			CHECK(currCar != NULL);
+
+			xx = GET_EXTRA_DATA(currCar, T_CAR, extraDataCar_t);
+#ifdef CAR_CLEARANCE
+			xx->pencils = FALSE;
+#endif
+			dist = CarItemCoupledLength(xx->item)/2.0;
+			Translate(&pos, xx->trvTrk.pos, xx->trvTrk.angle, dist);
+			SetTrkEndPoint(currCar, 0, pos, xx->trvTrk.angle);
+			Translate(&pos, xx->trvTrk.pos, xx->trvTrk.angle+180.0, dist);
+			SetTrkEndPoint(currCar, 1, pos, NormalizeAngle(xx->trvTrk.angle+180.0));
+			/*xx->state |= (xx->item->options&CAR_DESC_BITS);*/
+			ClrLocoMaster(xx);
+
+			if (CarItemIsLoco(xx->item)) {
+				SetLocoMaster(xx);
+				LocoListChangeEntry(NULL, currCar);
+			}
+
+			trk0 = OnTrack(&pos0, FALSE, TRUE);
+			if (trk0) {
+				xx->trvTrk.angle = GetAngleAtPoint(trk0, pos0, &ep0, &ep1);
+
+				if (NormalizeAngle(FindAngle(pos, pos0) - xx->trvTrk.angle) > 180.0) {
+					xx->trvTrk.angle = NormalizeAngle(xx->trvTrk.angle + 180);
+				}
+
+				xx->status = ST_StopManual;
+			} else {
+				xx->trvTrk.angle = 90;
+			}
+
+			PlaceTrainInit(currCar, trk0, pos0, xx->trvTrk.angle,
+			               (MyGetKeyState()&WKEY_SHIFT) == 0);
+			/*DrawCars( &tempD, currCar, TRUE );*/
+		} else {
+			currCar = FindCar(&pos);
+			delta.x = pos.x - pos0.x;
+			delta.y = pos.y - pos0.y;
+
+			if (logTable(log_trainMove).level >= 1) {
+				if (currCar) {
+					xx = GET_EXTRA_DATA(currCar, T_CAR, extraDataCar_t);
+					LogPrintf("selected %s\n", CarItemNumber(xx->item));
+
+					for (dir=0; dir<2; dir++) {
+						int dir1 = dir;
+						track_p car1 = currCar;
+						struct extraDataCar_t * xx1;
+						LogPrintf("dir=%d\n", dir1);
+						WALK_CARS_START(car1, xx1, dir1)
+						LogPrintf("  %s [%0.3f,%d]\n", CarItemNumber(xx1->item), xx1->trvTrk.angle,
+						          dir1);
+						WALK_CARS_END(car1, xx1, dir1)
+					}
+				}
+			}
+		}
+
+		if (currCar == NULL) {
+			return C_CONTINUE;
+		}
+
+		trainHighlighted = currCar;
+
+		trk0 = FindMasterLoco(currCar, NULL);
+
+		if (trk0) {
+			SetCurTrain(trk0);
+		}
+
+		return C_CONTINUE;
+
+	case C_MOVE:
+		if (currCar == NULL) {
+			return C_CONTINUE;
+		}
+
+		pos.x += delta.x;
+		pos.y += delta.y;
+		pos0 = pos;
+		xx = GET_EXTRA_DATA(currCar, T_CAR, extraDataCar_t);
+		trk0 = OnTrack(&pos0, FALSE, TRUE);
+
+		if (/*currCarItemPtr != NULL &&*/ trk0) {
+			angle1 = GetAngleAtPoint(trk0, pos0, &ep0, &ep1);
+
+			if (currCarItemPtr != NULL) {
+				if (NormalizeAngle(FindAngle(pos, pos0) - angle1) > 180.0) {
+					angle1 = NormalizeAngle(angle1 + 180);
+				}
+			} else {
+				if (NormalizeAngle(xx->trvTrk.angle - angle1 + 90.0) > 180.0) {
+					angle1 = NormalizeAngle(angle1 + 180);
+				}
+			}
+
+			xx->trvTrk.angle = angle1;
+		}
+
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
+		PlaceTrainInit(currCar, trk0, pos0, xx->trvTrk.angle,
+		               (MyGetKeyState()&WKEY_SHIFT) == 0);
+		ControllerDialogSync(curTrainDlg);
+		return C_CONTINUE;
+
+	case C_UP:
+		if (currCar != NULL) {
+			trk0 = FindMasterLoco(currCar, NULL);
+
+			if (trk0) {
+				xx = GET_EXTRA_DATA(trk0, T_CAR, extraDataCar_t);
+
+				if (!IsOnTrack(xx) || xx->speed <= 0) {
+					StopTrain(trk0, ST_StopManual);
+				}
+			}
+
+			Dtrain.state = 1;
+			ControllerDialogSync(curTrainDlg);
+		}
+
+		InfoDefaultControls();
+		currCar = trk0 = NULL;
+		currCarItemPtr = NULL;
+		trainHighlighted = NULL;
+
+		/*trainEnable = TRUE;*/
+		if (trainsState == TRAINS_PAUSE) {
+			RestartTrains();
+		}
+
+		return C_CONTINUE;
+
+	case C_LCLICK:
+		if (MyGetKeyState() & WKEY_SHIFT) {
+			pos0 = pos;
+			programMode = MODE_DESIGN;
+
+			trk0=OnTrack(&pos,FALSE,TRUE);
+			if (trk0 &&
+			    QueryTrack(trk0, Q_CAN_NEXT_POSITION) &&
+			    TrainOnMovableTrack(trk0, &trk1)) {
+				if (trk1) {
+					xx = GET_EXTRA_DATA(trk1, T_CAR, extraDataCar_t);
+					pos1 = xx->trvTrk.pos;
+					angle1 = xx->trvTrk.angle;
+				} else {
+					pos1 = pos0;
+					angle1 = 0;
+				}
+
+				AdvancePositionIndicator(trk0, pos0, &pos1, &angle1);
+
+				if (trk1) {
+					xx->trvTrk.pos = pos1;
+					xx->trvTrk.angle = angle1;
+					PlaceTrain(trk1, FALSE, TRUE);
+				}
+			}
+
+			programMode = MODE_TRAIN;
+			trk0 = NULL;
+			MainRedraw(); //CmdTrain: Make sure track is redrawn after switch thrown
+		} else {
+			trk0 = FindCar(&pos);
+
+			if (trk0 == NULL) {
+				return C_CONTINUE;
+			}
+
+			trainHighlighted = trk0;
+			DescribeTrack( trk0, msg, sizeof msg );
+			InfoMessage( msg );
+
+			trk0 = FindMasterLoco(trk0, NULL);
+
+			if (trk0 == NULL) {
+				return C_CONTINUE;
+			}
+
+			SetCurTrain(trk0);
+		}
+
+		return C_CONTINUE;
+
+	case C_RCLICK:
+		trainFuncPos = pos;
+		trainFuncCar = FindCar(&pos);
+
+		if (trainFuncCar == NULL ||
+		    GetTrkType(trainFuncCar) != T_CAR) {
+			return C_CONTINUE;
+		}
+
+		xx = GET_EXTRA_DATA(trainFuncCar, T_CAR, extraDataCar_t);
+#ifdef CAR_CLEARANCE
+		if (xx->pencils) {
+			wMenuPushEnable(trainPopupMI[DO_PENCILS_OFF], TRUE);
+			wMenuPushEnable(trainPopupMI[DO_PENCILS_ON], FALSE);
+		} else {
+			wMenuPushEnable(trainPopupMI[DO_PENCILS_OFF], FALSE);
+			wMenuPushEnable(trainPopupMI[DO_PENCILS_ON], TRUE);
+		}
+#endif
+
+		trk0 = FindMasterLoco(trainFuncCar,NULL);
+		dir = IsAligned(xx->trvTrk.angle, FindAngle(xx->trvTrk.pos,
+		                trainFuncPos)) ? 0 : 1;
+		wMenuPushEnable(trainPopupMI[DO_UNCOUPLE], GetTrkEndTrk(trainFuncCar,
+		                dir)!=NULL);
+		wMenuPushEnable(trainPopupMI[DO_MUMASTER], CarItemIsLoco(xx->item) &&
+		                !IsLocoMaster(xx));
+
+		if (trk0) {
+			xx = GET_EXTRA_DATA(trk0, T_CAR, extraDataCar_t);
+		}
+
+		wMenuPushEnable(trainPopupMI[DO_CHANGEDIR], trk0!=NULL);
+		wMenuPushEnable(trainPopupMI[DO_STOP], trk0!=NULL && xx->speed>0);
+		/*trainEnable = FALSE;*/
+		trainHighlighted = trk0;
+		trk0 = FindMasterLoco(trainFuncCar, NULL);
+
+		if (trk0) {
+			SetCurTrain(trk0);
+		}
+
+		if (!inPlayback) {
+			wMenuPopupShow(trainPopupM);
+		}
+
+		return C_CONTINUE;
+
+	case C_REDRAW:
+		wDrawSaveImage(mainD.d);
+		DrawAllCars(trainHighlighted);
+
+		// wWinPix_t w, h;
+		// wWinGetSize(mainW, &w, &h);
+		// w -= wControlGetPosX(newCarControls[0]) + 4;
+
+		// if (w > 20) {
+		// 	wListSetSize((wList_p)newCarControls[0], w,
+		// 	             wControlGetHeight(newCarControls[0]));
+		// }
+
+
+
+		return C_CONTINUE;
+
+	case C_CANCEL:
+		/*trainEnable = FALSE;*/
+		trainsState = TRAINS_STOP;
+		TrainTimeEndPause();
+		LOG(log_trainMove, 1, ("Train Cancel\n"))
+		Dtrain.state = 0;
+		doDrawTurnoutPosition = 0;
+		drawCarEnable = TRUE;
+		programMode = MODE_DESIGN;
+		UpdateTrainAttachment();
+		UndoResume();
+		DoChangeNotification(CHANGE_PARAMS|CHANGE_TOOLBAR);
+
+		if (curTrainDlg && curTrainDlg->win) {
+			wHide(curTrainDlg->win);
+		}
+
+		MainRedraw(); // CmdTrain: Exit
+		if ( curTrainDlg ) {
+			curTrainDlg->train = NULL;
+		}
+		trk0 = NULL;
+		trainHighlighted = NULL;
+		return C_CONTINUE;
+
+	case C_CONFIRM:
+
+		/*trainEnable = FALSE;*/
+		if (trainsState != TRAINS_STOP) {
+			trainsState = TRAINS_STOP;
+			wButtonSetIcon(trainPauseB, (char*)stopI);
+			TrainTimeEndPause();
+		}
+
+		currCar = NULL;
+		currCarItemPtr = NULL;
+		HotBarCancel();
+		InfoDefaultControls();
+		trk0 = NULL;
+		trainHighlighted = NULL;
+		return C_TERMINATE;
+	default:
+		LOG( log_trainMove, 1, ( "unexpected action %d in CmdTrain\n", action ) )
+		break;
+	}
+
+	return C_CONTINUE;
+}
+
+
+#ifdef LATER
+/*
+ *
+ */
+
+static STATUS_T CmdCarDescAction(
+        wAction_t action,
+        coOrd pos)
+{
+	return CmdTrain(action, pos);
+}
+#endif
+
+static void CmdTrainStopGo(void * unused)
+{
+	wIcon_p icon;
+
+	if (trainsState == TRAINS_STOP) {
+		icon = goB;
+		RestartTrains();
+	} else {
+		trainsState = TRAINS_STOP;
+		icon = stopB;
+		TrainTimeEndPause();
+	}
+
+	ControllerDialogSync(curTrainDlg);
+	wButtonSetIcon(trainPauseB, (char*)icon);
+
+	if (recordF) {
+		fprintf(recordF, "TRAINSTOPGO %s\n", trainsState==TRAINS_STOP?"STOP":"GO");
+	}
+}
+
+static void TrainStopGoPlayback(char * line)
+{
+	while (*line && isspace((unsigned char)*line)) {
+		line++;
+	}
+
+	if ((strcasecmp(line, "STOP") == 0) != (trainsState == TRAINS_STOP)) {
+		CmdTrainStopGo(NULL);
+	}
+}
+
+
+static void CmdTrainExit(void * unused)
+{
+	// Do the actual mode exit directly - Reset() no longer cancels the
+	// current command while programMode == MODE_TRAIN (see command.c), so
+	// leave train mode and hand curCommand back to the describe tool
+	// first; Reset() then only does its normal design-mode cleanup.
+	CmdTrain(C_CANCEL, zero);
+	SetCurrentCommand(describeCmdInx);
+	Reset();
+	InfoDefaultControls();
+}
+
+
+static void TrainFunc(
+        void * action)
+{
+	struct extraDataCar_t * xx, *xx1;
+	ANGLE_T angle;
+	int dir;
+	track_p loco;
+	track_p temp0, temp1;
+	coOrd pos0, pos1;
+	ANGLE_T angle0, angle1;
+	EPINX_T ep0, ep1;
+
+	if (trainFuncCar == NULL) {
+		fprintf(stderr, "trainFunc: trainFuncCar==NULL\n");
+		return;
+	}
+
+	xx = GET_EXTRA_DATA(trainFuncCar, T_CAR, extraDataCar_t);
+	angle = FindAngle(xx->trvTrk.pos, trainFuncPos);
+	angle = NormalizeAngle(angle-xx->trvTrk.angle);
+	dir = (angle>90&&angle<270);
+
+	switch (VP2L(action)) {
+	case DO_UNCOUPLE:
+		UncoupleCars( trainFuncCar, dir );
+		break;
+
+#ifdef CAR_CLEARANCE
+	case DO_PENCILS_ON:
+		xx->pencils = TRUE;
+		break;
+
+	case DO_PENCILS_OFF:
+		xx->pencils = FALSE;
+		break;
+#endif
+
+	case DO_FLIPCAR:
+		temp0 = GetTrkEndTrk(trainFuncCar,0);
+		pos0 = GetTrkEndPos(trainFuncCar,0);
+		angle0 = GetTrkEndAngle(trainFuncCar,0);
+		temp1 = GetTrkEndTrk(trainFuncCar,1);
+		pos1 = GetTrkEndPos(trainFuncCar,1);
+		angle1 = GetTrkEndAngle(trainFuncCar,1);
+
+		xx->direction = !xx->direction;
+		FlipTraverseTrack(&xx->trvTrk);
+		if ( temp0 ) {
+			ep0 = GetEndPtConnectedToMe( temp0, trainFuncCar );
+			DisconnectTracks( trainFuncCar, 0, temp0, ep0 );
+		}
+		if ( temp1 ) {
+			ep1 = GetEndPtConnectedToMe( temp1, trainFuncCar );
+			DisconnectTracks( trainFuncCar, 1, temp1, ep1 );
+		}
+		SetTrkEndPoint(trainFuncCar, 0, pos1, angle1);
+		SetTrkEndPoint(trainFuncCar, 1, pos0, angle0);
+		if ( temp1 ) {
+			ConnectTracks( trainFuncCar, 0, temp1, ep1 );
+		}
+		if ( temp0 ) {
+			ConnectTracks( trainFuncCar, 1, temp0, ep0 );
+		}
+
+		ControllerDialogSync(curTrainDlg);
+		PlaceCar(trainFuncCar);
+		break;
+
+	case DO_FLIPTRAIN:
+		FlipTrain(trainFuncCar);
+		/*PlaceTrain( trainFuncCar, xx->trk, xx->trvTrk.pos, xx->trvTrk.angle );*/
+		break;
+
+	case DO_DESCRIBE:
+		pos0 = trainFuncPos;
+		CmdDescribe(C_START, pos0);
+		CmdDescribe(C_DOWN, pos0);
+		CmdDescribe(C_UP, pos0);
+		break;
+
+	case DO_DELCAR:
+		CarItemShelve( xx->item );
+		break;
+
+	case DO_DELTRAIN:
+		dir = 0;
+		loco = FindMasterLoco(trainFuncCar, NULL);
+		WALK_CARS_START(trainFuncCar, xx, dir)
+		WALK_CARS_END(trainFuncCar, xx, dir)
+		dir = 1-dir;
+		temp0 = NULL;
+		WALK_CARS_START(trainFuncCar, xx, dir)
+
+		if (temp0) {
+			xx1 = GET_EXTRA_DATA(temp0, T_CAR, extraDataCar_t);
+			//temp0->deleted = TRUE;
+			DeleteTrack( temp0, FALSE );
+			CarItemUpdate(xx1->item);
+		}
+
+		temp0 = trainFuncCar;
+		WALK_CARS_END(trainFuncCar, xx, dir)
+
+		if (temp0) {
+			xx1 = GET_EXTRA_DATA(temp0, T_CAR, extraDataCar_t);
+			//temp0->deleted = TRUE;
+			DeleteTrack( temp0, FALSE );
+			CarItemUpdate(xx1->item);
+		}
+
+		if (loco) {
+			LocoListChangeEntry(loco, NULL);
+		}
+
+		HotBarCancel();
+		InfoDefaultControls();
+		break;
+
+	case DO_MUMASTER:
+		if (CarItemIsLoco(xx->item)) {
+			loco = FindMasterLoco(trainFuncCar, NULL);
+
+			if (loco != trainFuncCar) {
+				SetLocoMaster(xx);
+				LOG(log_trainMove, 1, ("%s gets master\n", CarItemNumber(xx->item)))
+
+				if (loco) {
+					xx1 = GET_EXTRA_DATA(loco, T_CAR, extraDataCar_t);
+					ClrLocoMaster(xx1);
+					LOG(log_trainMove, 1, ("%s looses master\n", CarItemNumber(xx1->item)))
+					xx->speed = xx1->speed;
+					xx1->speed = 0;
+				}
+
+				LocoListChangeEntry(loco, trainFuncCar);
+			}
+		}
+
+		break;
+
+	case DO_CHANGEDIR:
+		loco = FindMasterLoco(trainFuncCar, NULL);
+
+		if (loco) {
+			xx = GET_EXTRA_DATA(loco, T_CAR, extraDataCar_t);
+			xx->direction = !xx->direction;
+			SetTrainDirection(loco);
+			ControllerDialogSync(curTrainDlg);
+		}
+
+		break;
+
+	case DO_STOP:
+		loco = FindMasterLoco(trainFuncCar, NULL);
+
+		if (loco) {
+			StopTrain(loco, ST_StopManual);
+			ControllerDialogSync(curTrainDlg);
+		}
+
+		break;
+	default:
+		LOG( log_trainMove, 1, ( "unexpected VP2L(action) %d in TrainFunc\n",
+		                         VP2L(action) ) )
+		break;
+	}
+
+	MainRedraw();  //TrainFunc: Redraw if Train altered
+
+	if (trainsState == TRAINS_PAUSE) {
+		RestartTrains();
+	} else {
+	}
+}
+
+EXPORT wIndex_t trainCmdInx;
+
+void InitCmdTrain(wMenu_p menu)
+{
+	log_trainMove = LogFindIndex("trainMove");
+	log_trainPlayback = LogFindIndex("trainPlayback");
+	//trainPLs[I_ZERO].winLabel = (char*)CreateSymbolFromResource("zero.png");
+	FormRegister(&trainPG);
+	trainCmdInx = AddMenuButton(menu, CmdTrain, "cmdTrain", _("Run Trains"),
+	                            CreateToolbarIconFromResource("train.png"), LEVEL0_50,
+	                            IC_TOGGLE | IC_POPUP3|IC_LCLICK|IC_RCLICK|IC_WANT_MOVE, 0,
+	                            NULL);
+	stopI = CreateSymbolFromResource("reddot.png");
+	goI = CreateSymbolFromResource("greendot.png");
+	stopB = CreateSymbolFromResource("stop.png");
+	goB = CreateSymbolFromResource("go.png");
+	trainPauseB = AddToolbarButton("cmdTrainPause", stopB, IC_MODETRAIN_ONLY,
+	                               CmdTrainStopGo, NULL);
+	AddToolbarButton("cmdTrainExit", CreateToolbarIconFromResource("exit.png"),
+	                 IC_MODETRAIN_ONLY,
+	                 CmdTrainExit, NULL);
+	newcarB = AddToolbarButton("cmdTrainNewCar",
+	                           CreateToolbarIconFromResource("new-car.png"),
+	                           IC_MODETRAIN_ONLY, CarItemLoadList, NULL);
+	T_CAR = InitObject(&carCmds);
+
+	trainPopupM = MenuRegister("Train Commands");
+	trainPopupMI[DO_UNCOUPLE]   = wMenuPushCreate(trainPopupM, "", _("Uncouple"), 0,
+	                              TrainFunc, I2VP(DO_UNCOUPLE));
+	trainPopupMI[DO_FLIPCAR]    = wMenuPushCreate(trainPopupM, "", _("Flip Car"), 0,
+	                              TrainFunc, I2VP(DO_FLIPCAR));
+#ifdef CAR_CLEARANCE
+	trainPopupMI[DO_PENCILS_ON]	= wMenuPushCreate(trainPopupM, "",
+	                               _("Clearance Lines On"), 0,
+	                               TrainFunc, I2VP(DO_PENCILS_ON));
+	trainPopupMI[DO_PENCILS_OFF]	= wMenuPushCreate(trainPopupM, "",
+	                                _("Clearance Lines Off"), 0,
+	                                TrainFunc, I2VP(DO_PENCILS_OFF));
+#endif
+	trainPopupMI[DO_FLIPTRAIN]  = wMenuPushCreate(trainPopupM, "", _("Flip Train"),
+	                              0, TrainFunc, I2VP(DO_FLIPTRAIN));
+	trainPopupMI[DO_DESCRIBE] = wMenuPushCreate(trainPopupM, "", _("Properties"),
+	                            0, TrainFunc, I2VP(DO_DESCRIBE));
+	trainPopupMI[DO_MUMASTER]   = wMenuPushCreate(trainPopupM, "", _("MU Master"),
+	                              0, TrainFunc, I2VP(DO_MUMASTER));
+	trainPopupMI[DO_CHANGEDIR]  = wMenuPushCreate(trainPopupM, "",
+	                              _("Change Direction"), 0, TrainFunc, I2VP(DO_CHANGEDIR));
+	trainPopupMI[DO_STOP]       = wMenuPushCreate(trainPopupM, "", _("Stop"), 0,
+	                              TrainFunc, I2VP(DO_STOP));
+	wMenuSeparatorCreate(trainPopupM);
+	trainPopupMI[DO_DELCAR]     = wMenuPushCreate(trainPopupM, "", _("Remove Car"),
+	                              0, TrainFunc, I2VP(DO_DELCAR));
+	trainPopupMI[DO_DELTRAIN]   = wMenuPushCreate(trainPopupM, "",
+	                              _("Remove Train"), 0, TrainFunc, I2VP(DO_DELTRAIN));
+	AddPlaybackProc("TRAINSTOPGO", TrainStopGoPlayback, NULL);
+	AddPlaybackProc("TRAINPAUSE", TrainTimeDoPause, NULL);
+	AddPlaybackProc("TRAINMOVIE", TrainDoMovie, NULL);
+}
+

@@ -1,0 +1,79 @@
+VERSION 1
+DEMOINIT
+ORIG 6.000 0.000 0.000
+PARAMETER display description-fontsize 18
+REDRAW
+RESET
+MESSAGE
+Welcome to the XTrackCAD demonstration.
+
+This will show some the features of XTrackCAD in an automated presentation.  This window contains a number of controls and a message area (which I hope you are reading now). 
+
+The controls are:
+Step - advances to the next step of the demo.
+Next - skips ahead to the next demo.
+Quit - exits the demo and returns to XTrackCAD.
+Speed - controls the speed of the demo.
+
+Click Step now for the next message.
+=========================================
+END
+STEP
+CLEAR
+MESSAGE
+If this is the first time you have used the demo you may want to rearrange the windows so the demo window does not obscure the main window.
+
+You can move the demo window now by dragging on the title bar at the top of the window.  I suggest you move it to the top of your screen.
+=========================================
+END
+STEP
+CLEAR
+MESSAGE
+The various controls are disabled when it would be inappropiate to click on them.  When the demo is running the Step button is disabled.  When the demo is paused the Step button is enabled and you can click it when you are ready to view the next part of the demo.
+
+You can click on Quit to return to XTrackCAD at any time.
+
+You can adjust the speed of the demonstration with the Speed control.
+=========================================
+END
+STEP
+CLEAR
+DRAW 1 0.000000 0.000000 0.000000
+	L3 0 0.444444 0.000000 0.000000 0 72.000000 0.000000 0
+	END
+DRAW 2 0.000000 0.000000 0.000000
+	L3 0 0.444444 72.000000 0.000000 0 72.000000 24.000000 0
+	END
+DRAW 3 0.000000 0.000000 0.000000
+	L3 0 0.444444 72.000000 24.000000 0 0.000000 24.000000 0
+	END
+DRAW 4 0.000000 0.000000 0.000000
+	L3 0 0.444444 0.000000 24.000000 0 0.000000 0.000000 0
+	END
+DRAW 5 0.000000 0.000000 0.000000
+	L3 0 0.444444 0.000000 0.000000 0 72.000000 24.000000 0
+	END
+DRAW 6 0.000000 0.000000 0 0.000000
+	L3 0 0.444444 0.000000 24.000000 0 72.000000 0.000000 0
+	END
+REDRAW
+MESSAGE
+The demos are designed to fit within a certain sized window.
+
+For best results, change the size of the main XTrackCAD window so the box shape is completely visible.
+
+You can do this by clicking and dragging on a corner of the window.
+END
+MESSAGE
+=========================================
+END
+STEP
+CLEAR
+MESSAGE
+This is the end of the introductory demo.
+
+Please click Step for the next demo or click Quit to return to XTrackCAD.
+=========================================
+END
+STEP
+CLEAR

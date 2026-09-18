@@ -1,0 +1,37 @@
+VERSION 2
+DEMOINIT
+ORIG 8.000 0.000 0.000
+REDRAW
+RESET
+MESSAGE
+Straight tracks are created by selecting the first End-Point of the track.
+END
+STEP
+COMMAND Straight
+MOUSE 2 6.833 3.667
+MESSAGE
+_________________________________________
+
+Then the other End-Point is dragged to its final postion.
+END
+PAUSE 2000
+MOUSE 3 6.833 3.750
+MOUSE 3 36.000 9.667
+MESSAGE
+_________________________________________
+
+The left mouse button is released at the final end postion.
+END
+BIGPAUSE
+MOUSE 4 36.000 9.667
+MESSAGE
+=========================================
+END
+STEP
+REGRESSION START 10 Straight track
+STRAIGHT 1 0 0 0 0 DEMO 2
+	E4 6.833000 3.667000 258.375734 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 36.000000 9.667000 78.375734 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	END
+REGRESSION END
+CLEAR

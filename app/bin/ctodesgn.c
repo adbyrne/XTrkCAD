@@ -1,0 +1,3519 @@
+/* \file ctodesgn.c
+ *
+ * T_TURNOUT Designer
+ *
+ */
+
+/*  XTrkCad - Model Railroad CAD
+ *  Copyright (C) 2005 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+#include "ccurve.h"
+#include "compound.h"
+#include "cstraigh.h"
+#include "custom.h"
+#include "fileio.h"
+#include "form.h"
+
+#include "param.h"
+#include "track.h"
+#include "trkendpt.h"
+#include "ccornu.h"
+#include "cbezier.h"
+#include "misc.h"
+#include "common-ui.h"
+
+/** @logcmd @showrefby `cornuturnoutdesigner=n` `ctodesgn.c` */
+static int log_cornuturnoutdesigner;
+/** @logcmd @showrefby `turnoutdesigner=n` `ctodesgn.c` */
+static int log_turnoutdesigner;
+
+char tempCustom[4096];
+
+#define TURNOUTDESIGNER			"CTURNOUT DESIGNER"
+
+// Minimum Track Segment length
+#define MIN_TRACK_LENGTH (0.20)
+
+
+/*****************************************
+ *
+ *   TURNOUT DESIGNER
+ *
+ */
+
+
+#define NTO_REGULAR		(1)
+#define NTO_CURVED		(2)
+#define NTO_WYE			(3)
+#define NTO_3WAY		(4)
+#define NTO_CROSSING	(5)
+#define NTO_S_SLIP		(6)
+#define NTO_D_SLIP		(7)
+#define NTO_R_CROSSOVER	(8)
+#define NTO_L_CROSSOVER	(9)
+#define NTO_D_CROSSOVER	(10)
+#define NTO_STR_SECTION	(11)
+#define NTO_CRV_SECTION	(12)
+#define NTO_BUMPER		(13)
+#define NTO_TURNTABLE	(14)
+#define NTO_CORNU       (15)
+#define NTO_CORNUWYE    (16)
+#define NTO_CORNU3WAY   (17)
+
+
+static wControl_p newTurnW;
+
+#define DESIGNER_CANVAS_W  260
+#define DESIGNER_CANVAS_H  180
+static const double designerScale = 260.0 / 450.0;
+static double designerXOff = 0.0;
+static double designerYOff = 0.0;
+
+static void RedrawDesigner(wControl_p, void *, wWinPix_t, wWinPix_t);
+static void ClickDesigner(wAction_t, coOrd);
+
+static drawCmd_t designerD = {
+	NULL,
+	&screenDrawFuncs,
+	0,
+	1.0,
+	0.0,
+	{0.0, 0.0}, {0.0, 0.0},
+	Pix2CoOrd, CoOrd2Pix,
+	1.0
+};
+static paramDrawData_t designerDrawData = {
+	DESIGNER_CANVAS_W, DESIGNER_CANVAS_H,
+	RedrawDesigner, ClickDesigner, &designerD
+};
+
+static char * newTurnScaleName;
+static DIST_T newTurnTrackGauge;
+
+static DIST_T radii[20];
+static coOrd points[20];
+static double angles[20];
+
+
+
+
+/*********************************************************************
+ *
+ * Dialog Parameters
+ *
+ */
+
+static char newTurnManufacturer[STR_SIZE];
+static char newTurnRightDesc[STR_SIZE], newTurnLeftDesc[STR_SIZE];
+static char newTurnRightPartno[STR_SIZE], newTurnLeftPartno[STR_SIZE];
+static DIST_T newTurnRoadbedWidth;
+static LWIDTH_T newTurnRoadbedLineWidth = 0;
+static wDrawColor newTurnRoadbedColor;
+static long newTurnAngleMode = 0;
+static long newTurnSlipMode = 0;
+static char *newTurnAngleModeLabels[] = { N_("Frog #"), N_("Degrees"), NULL };
+static char *newTurnSlipModeLabels[] = { N_("Dual Path"), N_("Quad Path"), NULL };
+static int tdDescTotal = 0;
+
+static void NewTurnPrint( void * junk );
+
+static paramFloatRange_t r0d001_10000 = { 0.001, 10000, 80 };
+static paramFloatRange_t r0_10000 = { 0, 10000, 80 };
+static paramFloatRange_t r_10000_10000 = { -1000, 10000, 80 };
+static paramFloatRange_t r0d001_90 = { 0.001, 90, 80 };
+static paramFloatRange_t r_90_90 = { -90, 90, 80 };
+static paramFloatRange_t r0_100 = { 0, 100, 80 };
+static paramIntegerRange_t i0_100 = { 0, 100, 40 };
+
+static FLOAT_T tdVal[20];
+
+paramData_t turnDesignPLs[] = {
+#define I_REG_FIRST (0)
+	{ PD_FLOAT, tdVal+0, "td_reg_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Straight Length") },
+	{ PD_FLOAT, tdVal+1, "td_reg_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Diverging Length") },
+	{ PD_FLOAT, tdVal+2, "td_reg_off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+	{ PD_FLOAT, tdVal+3, "td_reg_ang2", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+
+	{ PD_FLOAT, tdVal+0, "td_crv_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Inner Length 1") },
+	{ PD_FLOAT, tdVal+1, "td_crv_off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+	{ PD_FLOAT, tdVal+2, "td_crv_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+	{ PD_FLOAT, tdVal+3, "td_crv_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Outer Length 2") },
+	{ PD_FLOAT, tdVal+4, "td_crv_off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+	{ PD_FLOAT, tdVal+5, "td_crv_ang2", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+
+	{ PD_FLOAT, tdVal+0, "td_corcrv_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Inner Length") },
+	{ PD_FLOAT, tdVal+1, "td_corcrv_off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+	{ PD_FLOAT, tdVal+2, "td_corcrv_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+	{ PD_FLOAT, tdVal+3, "td_corcrv_rad1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius ") },
+	{ PD_FLOAT, tdVal+4, "td_corcrv_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Outer Length") },
+	{ PD_FLOAT, tdVal+5, "td_corcrv_off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+	{ PD_FLOAT, tdVal+6, "td_corcrv_ang2", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+	{ PD_FLOAT, tdVal+7, "td_corcrv_rad2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius") },
+	{ PD_FLOAT, tdVal+8, "td_corcrv_len3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Toe Length") },
+	{ PD_FLOAT, tdVal+9, "td_corcrv_rad3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius") },
+
+	{ PD_FLOAT, tdVal+0, "td_wye_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Left Length") },
+	{ PD_FLOAT, tdVal+1, "td_wye_off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+	{ PD_FLOAT, tdVal+2, "td_wye_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+	// tdVal+3 placeholder for 3WAY center
+	{ PD_FLOAT, tdVal+4, "td_wye_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Right Length") },
+	{ PD_FLOAT, tdVal+5, "td_wye_off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+	{ PD_FLOAT, tdVal+6, "td_wye_ang2", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+
+	{ PD_FLOAT, tdVal+0, "td_corwye_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Left Length") },
+	{ PD_FLOAT, tdVal+1, "td_corwye_off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+	{ PD_FLOAT, tdVal+2, "td_corwye_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+	{ PD_FLOAT, tdVal+3, "td_corwye_rad1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius") },
+	// tdVal+4 to +7 placeholder for COR3WAY center
+
+	{ PD_FLOAT, tdVal+8, "td_corwye_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Right Length") },
+	{ PD_FLOAT, tdVal+9, "td_corwye_off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+	{ PD_FLOAT, tdVal+10, "td_corwye_ang2", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+	{ PD_FLOAT, tdVal+11, "td_corwye_rad2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius") },
+
+	{ PD_FLOAT, tdVal+12, "td_corwye_toeL", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Toe Length") },
+	{ PD_FLOAT, tdVal+13, "td_corwye_rad3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius") },
+
+	{ PD_FLOAT, tdVal+0, "td_3way_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Left Length") },
+	{ PD_FLOAT, tdVal+1, "td_3way_off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+	{ PD_FLOAT, tdVal+2, "td_3way_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+	{ PD_FLOAT, tdVal+3, "td_3way_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Center Length") },
+	{ PD_FLOAT, tdVal+4, "td_3way_len3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Right Length") },
+	{ PD_FLOAT, tdVal+5, "td_3way_off3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+	{ PD_FLOAT, tdVal+6, "td_3way_ang3", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+
+	{ PD_FLOAT, tdVal+0, "td_cor3way_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Left Length") },
+	{ PD_FLOAT, tdVal+1, "td_cor3way_off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+	{ PD_FLOAT, tdVal+2, "td_cor3way_ang1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+	{ PD_FLOAT, tdVal+3, "td_cor3way_rad1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius") },
+	{ PD_FLOAT, tdVal+4, "td_cor3way_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Center Length") },
+	{ PD_FLOAT, tdVal+5, "td_cor3way_off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Offset") },
+	{ PD_FLOAT, tdVal+6, "td_cor3way_ang2", PDO_DLGIGNORELABELWIDTH, &r_90_90, N_("Angle") },
+	{ PD_FLOAT, tdVal+7, "td_cor3way_rad2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius") },
+	{ PD_FLOAT, tdVal+8, "td_cor3way_len3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Right Length") },
+	{ PD_FLOAT, tdVal+9, "td_cor3way_off3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Offset") },
+	{ PD_FLOAT, tdVal+10, "td_cor3way_ang3", PDO_DLGIGNORELABELWIDTH, &r_90_90, N_("Angle") },
+	{ PD_FLOAT, tdVal+11, "td_cor3way_rad3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius") },
+	{ PD_FLOAT, tdVal+12, "td_cor3way_len4", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Toe Length") },
+	{ PD_FLOAT, tdVal+13, "td_cor3way_rad4", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius") },
+
+	{ PD_FLOAT, tdVal+0, "td_crossing_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length") },
+	{ PD_FLOAT, tdVal+1, "td_crossing_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length") },
+	{ PD_FLOAT, tdVal+2, "td_crossing_ang", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+
+	{ PD_FLOAT, tdVal+0, "td_sslip_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length") },
+	{ PD_FLOAT, tdVal+1, "td_sslip_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length") },
+	{ PD_FLOAT, tdVal+2, "td_sslip_ang", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+
+	{ PD_FLOAT, tdVal+0, "td_dslip_len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length") },
+	{ PD_FLOAT, tdVal+1, "td_dslip_len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length") },
+	{ PD_FLOAT, tdVal+2, "td_dslip_ang", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+
+	{ PD_FLOAT, tdVal+0, "td_rcross_len", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length") },
+	{ PD_FLOAT, tdVal+1, "td_rcross_off", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+
+	{ PD_FLOAT, tdVal+0, "td_lcross_len", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length") },
+	{ PD_FLOAT, tdVal+1, "td_lcross_off", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+
+	{ PD_FLOAT, tdVal+0, "td_dcross_len", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length") },
+	{ PD_FLOAT, tdVal+1, "td_dcross_off", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+
+	{ PD_FLOAT, tdVal+0, "td_strsect_len", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_(" Length") },
+	{ PD_FLOAT, tdVal+0, "td_crvsect_rad", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius") },
+	{ PD_FLOAT, tdVal+1, "td_crvsect_ang", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") }
+
+	,
+
+#define I_TOMANUF			(tdDescTotal)
+	{ PD_STRING, &newTurnManufacturer, "manuf", PDO_NOTBLANK, NULL, N_("Manufacturer"), 0, 0, sizeof(newTurnManufacturer)},
+#define I_TOLDESC			( I_TOMANUF + 1 )
+	{ PD_STRING, &newTurnLeftDesc, "desc1", PDO_NOTBLANK, NULL, N_("Left Description"), 0, 0, sizeof(newTurnLeftDesc)},
+	{ PD_STRING, &newTurnLeftPartno, "partno1", PDO_DLGHORZ | PDO_NOTBLANK, NULL, N_(" #"), 0, 0, sizeof(newTurnLeftPartno)},
+	{ PD_MESSAGE, NULL, "desc1_label", 0, NULL },
+	{ PD_MESSAGE, NULL, "partno1_label", 0, NULL },
+#define I_TORDESC			(I_TOLDESC + 4 )
+	{ PD_STRING, &newTurnRightDesc, "desc2", PDO_NOTBLANK, NULL, N_("Right Description"),0, 0, sizeof(newTurnRightDesc)},
+	{ PD_STRING, &newTurnRightPartno, "partno2", PDO_DLGHORZ | PDO_NOTBLANK, NULL, N_(" #"),0, 0, sizeof(newTurnRightPartno)},
+	{ PD_MESSAGE, NULL, "desc2_label", 0, NULL },
+	{ PD_MESSAGE, NULL, "partno2_label", 0, NULL },
+#define I_TOROADBED			(I_TORDESC + 4 )
+	{ PD_FLOAT, &newTurnRoadbedWidth, "roadbedWidth", PDO_DIM, &r0_100, N_("Roadbed Width") },
+	{ PD_LONG, &newTurnRoadbedLineWidth, "roadbedLineWidth", PDO_DLGHORZ, &i0_100, N_("Line Width") },
+	{ PD_COLORLIST, &newTurnRoadbedColor, "color", PDO_DLGHORZ|PDO_DLGBOXEND, NULL, N_("Color") },
+#define I_TOPRINT			(I_TOROADBED + 3 )
+	{ PD_BUTTON, NewTurnPrint, "print", PDO_DLGCMDBUTTON, NULL, N_("Print") },
+	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, N_("Print Setup") },
+#define I_TOANGMODE			( I_TOPRINT + 2 )
+	{ PD_RADIO, &newTurnAngleMode, "anglemode", 0, newTurnAngleModeLabels },
+	{ PD_MESSAGE, NULL, "anglemode_label", 0, NULL },
+#define I_TOSLIPMODE        ( I_TOANGMODE + 2 )
+	{ PD_RADIO, &newTurnSlipMode, "slippath", 0, newTurnSlipModeLabels },
+	{ PD_MESSAGE, NULL, "slippath_label", 0, NULL },
+#define I_TOCANVAS  (I_TOSLIPMODE + 2)
+	{ PD_DRAW, NULL, "designer-canvas", PDO_NOPSHUPD, &designerDrawData, NULL, 0 },
+};
+
+static paramGroup_t turnDesignPG = { "turnout-designer", PGO_FULLDIALOGFROMBUILDER, turnDesignPLs, COUNT( turnDesignPLs )  };
+
+
+// TODO random vars
+/* Copy non-track segs if there are any (Group & CustMgm/Edit) and user said yes. */
+static BOOL_T includeNontrackSegments = FALSE;
+
+static turnoutInfo_t * customTurnout1 = NULL, * customTurnout2 = NULL;
+
+
+/*********************************************************************
+ *
+ * Description Tables
+ *
+ */
+
+typedef struct {
+	PATHPTR_T paths;
+	char * segOrder;
+} toDesignSchema_t;
+
+typedef struct {
+	int type;
+	char * label;
+	const char * stackLabel;
+	int strCnt;
+	toDesignSchema_t * paths;
+	int angleModeCnt;
+	// Frog, Angle, Len, Radius, Offset
+	const char * sParamType;
+	int iDescFirst; // computed in InitNewTurn, based on sParamType
+	int lineCnt;
+	wLines_t *lines;
+} toDesignDesc_t;
+
+
+static wLines_t RegLines[] = {
+#include "toreg.lin"
+};
+static wLines_t CrvLines[] = {
+#include "tocrv.lin"
+};
+static wLines_t CornuLines[] = {
+#include "tocornu.lin"
+};
+static wLines_t WyeLines[] = {
+#include "towye.lin"
+};
+static wLines_t CornuWyeLines[] = {
+#include "tocornuwye.lin"
+};
+static wLines_t ThreewayLines[] = {
+#include "to3way.lin"
+};
+static wLines_t CornuThreewayLines[] = {
+#include "tocornu3way.lin"
+};
+static wLines_t CrossingLines[] = {
+#include "toxing.lin"
+};
+static wLines_t SingleSlipLines[] = {
+#include "tosslip.lin"
+};
+static wLines_t DoubleSlipLines[] = {
+#include "todslip.lin"
+};
+static wLines_t RightCrossoverLines[] = {
+#include "torcross.lin"
+};
+static wLines_t LeftCrossoverLines[] = {
+#include "tolcross.lin"
+};
+static wLines_t DoubleCrossoverLines[] = {
+#include "todcross.lin"
+};
+static wLines_t StrSectionLines[] = {
+#include "tostrsct.lin"
+};
+static wLines_t CrvSectionLines[] = {
+#include "tocrvsct.lin"
+};
+
+static signed char RegPaths[] = {
+	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 2, 0, 0,
+	'R', 'e', 'v', 'e', 'r', 's', 'e', 0, 1, 3, 4, 0, 0, 0
+};
+static toDesignSchema_t RegSchema = {
+	RegPaths,
+	"030" "310" "341" "420"
+};
+static toDesignDesc_t RegDesc = {
+	NTO_REGULAR,
+	N_("Regular Turnout"),
+	"td_reg_stack",
+	2,
+	&RegSchema, 1,
+	"LLOF",
+	0, COUNT(RegLines), RegLines
+};
+
+static signed char Crv1Paths[] = {
+	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 4, 5, 0, 0,
+	'R', 'e', 'v', 'e', 'r', 's', 'e', 0, 1, 2, 3, 0, 0, 0
+};
+static toDesignSchema_t Crv1Schema = {
+	Crv1Paths,
+	"030" "341" "410" "362" "620"
+};
+static signed char Crv2Paths[] = {
+	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 4, 5, 0, 0,
+	'R', 'e', 'v', 'e', 'r', 's', 'e', 0, 1, 6, 2, 3, 0, 0, 0
+};
+static toDesignSchema_t Crv2Schema = {
+	Crv2Paths,
+	"050" "341" "410" "562" "620" "530"
+};
+static signed char Crv3Paths[] = {
+	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 6, 4, 5, 0, 0,
+	'R', 'e', 'v', 'e', 'r', 's', 'e', 0, 1, 2, 3, 0, 0, 0
+};
+static toDesignSchema_t Crv3Schema = {
+	Crv3Paths,
+	"030" "341" "410" "562" "620" "350"
+};
+
+static toDesignDesc_t CrvDesc = {
+	NTO_CURVED,
+	N_("Curved Turnout"),
+	"td_crv_stack",
+	2,
+	&Crv1Schema, 1,
+	"LOFLOF",
+	0, COUNT(CrvLines), CrvLines
+};
+
+static signed char CornuPaths[] = {
+	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 4, 0, 0, 0,
+	'R', 'e', 'v', 'e', 'r', 's', 'e', 0, 1, 2, 0, 0, 0, 0
+};
+static toDesignSchema_t CornuSchema = {
+	CornuPaths,
+	"033" "343" "413"
+};
+
+static toDesignDesc_t CornuDesc = {
+	NTO_CORNU,
+	N_("Cornu Curved Turnout"),
+	"td_corcrv_stack",
+	2,
+	&CornuSchema, 1,
+	"LOFRLOFRLR",
+	0, COUNT(CornuLines), CornuLines
+};
+
+static signed char Wye1Paths[] = {
+	'L', 'e', 'f', 't', 0, 1, 2, 3, 0, 0,
+	'R', 'i', 'g', 'h', 't', 0, 1, 4, 5, 0, 0, 0
+};
+static toDesignSchema_t Wye1Schema = {
+	Wye1Paths,
+	"030" "341" "410" "362" "620"
+};
+static signed char Wye2Paths[] = {
+	'L', 'e', 'f', 't', 0, 1, 2, 3, 4, 0, 0,
+	'R', 'i', 'g', 'h', 't', 0, 1, 5, 6, 0, 0, 0
+};
+static toDesignSchema_t Wye2Schema = {
+	Wye2Paths,
+	"050" "530" "341" "410" "562" "620"
+};
+static signed char Wye3Paths[] = {
+	'L', 'e', 'f', 't', 0, 1, 2, 3, 0, 0,
+	'R', 'i', 'g', 'h', 't', 0, 1, 4, 5, 6, 0, 0, 0
+};
+static toDesignSchema_t Wye3Schema = {
+	Wye3Paths,
+	"030" "341" "410" "350" "562" "620"
+};
+static toDesignDesc_t WyeDesc = {
+	NTO_WYE,
+	N_("Wye Turnout"),
+	"td_wye_stack",
+	1,
+	NULL, 1,
+	"LOF-LOF",
+	0, COUNT(WyeLines), WyeLines
+};
+
+static signed char CornuWyePaths[] = {
+	'L', 'e', 'f', 't', 0, 1, 2, 3, 0, 0,
+	'R', 'i', 'g', 'h', 't', 0, 1, 4, 5, 0, 0, 0
+}; /* Not Used */
+static toDesignSchema_t CornuWyeSchema = {
+	CornuWyePaths,
+	"030" "341" "410" "362" "620"
+};  /* Not Used */
+static toDesignDesc_t CornuWyeDesc = {
+	NTO_CORNUWYE,
+	N_("Cornu Wye Turnout"),
+	"td_corwye_stack",
+	1,
+	NULL, 1,
+	"LOFR----LOFRLR",
+	0, COUNT(CornuWyeLines), CornuWyeLines
+};
+
+static signed char Tri1Paths[] = {
+	'L', 'e', 'f', 't', 0, 1, 2, 3, 0, 0,
+	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 6, 0, 0,
+	'R', 'i', 'g', 'h', 't', 0, 1, 4, 5, 0, 0, 0
+};
+static toDesignSchema_t Tri1Schema = {
+	Tri1Paths,
+	"030" "341" "410" "362" "620" "370"
+};
+static signed char Tri2Paths[] = {
+	'L', 'e', 'f', 't', 0, 1, 2, 3, 4, 0, 0,
+	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 2, 7, 0, 0,
+	'R', 'i', 'g', 'h', 't', 0, 1, 5, 6, 0, 0, 0
+};
+static toDesignSchema_t Tri2Schema = {
+	Tri2Paths,
+	"050" "530" "341" "410" "562" "620" "370"
+};
+static signed char Tri3Paths[] = {
+	'L', 'e', 'f', 't', 0, 1, 2, 3, 0, 0,
+	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 4, 7, 0, 0,
+	'R', 'i', 'g', 'h', 't', 0, 1, 4, 5, 6, 0, 0, 0
+};
+static toDesignSchema_t Tri3Schema = {
+	Tri3Paths,
+	"030" "341" "410" "350" "562" "620" "570"
+};
+static toDesignDesc_t ThreewayDesc = {
+	NTO_3WAY,
+	N_("3-way Turnout"),
+	"td_3way_stack",
+	1,
+	NULL, 1,
+	"LOFLLOF",
+	0, COUNT(ThreewayLines), ThreewayLines
+};
+
+static signed char CornuTriPaths[] = {
+	'L', 'e', 'f', 't', 0, 1, 2, 3, 0, 0,
+	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 6, 0, 0,
+	'R', 'i', 'g', 'h', 't', 0, 1, 4, 5, 0, 0, 0
+};
+static toDesignSchema_t CornuTriSchema = {
+	CornuTriPaths,
+	"030" "341" "410" "362" "620" "370"
+};
+static toDesignDesc_t CornuThreewayDesc = {
+	NTO_CORNU3WAY,
+	N_("Cornu 3-way Turnout"),
+	"td_cor3way_stack",
+	1,
+	NULL, 1,
+	"LOFRLOFRLOFRLR",
+	0, COUNT(CornuThreewayLines), CornuThreewayLines
+};
+
+static signed char CrossingPaths[] = {
+	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 0, 2, 0, 0, 0
+};
+static toDesignSchema_t CrossingSchema = {
+	CrossingPaths,
+	"010" "230"
+};
+static toDesignDesc_t CrossingDesc = {
+	NTO_CROSSING,
+	N_("Crossing"),
+	"td_crossing_stack",
+	1,
+	&CrossingSchema, 1,
+	"LLF",
+	0, COUNT(CrossingLines), CrossingLines
+};
+
+static signed char SingleSlipPaths[] = {
+	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 2, 0, 3, 4, 0, 0,
+	'R', 'e', 'v', 'e', 'r', 's', 'e', 0, 1, 5, 4, 0, 0, 0
+};
+static toDesignSchema_t SingleSlipSchema = {
+	SingleSlipPaths,
+	"040" "410" "250" "530" "451"
+};
+static toDesignDesc_t SingleSlipDesc = {
+	NTO_S_SLIP,
+	N_("Single Slipswitch"),
+	"td_sslip_stack",
+	1,
+	&SingleSlipSchema, 1,
+	"LLF",
+	0, COUNT(SingleSlipLines), SingleSlipLines
+};
+
+static signed char DoubleSlipPaths[] = {
+	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 2, 3, 0, 4, 5, 6, 0, 0,
+	'R', 'e', 'v', 'e', 'r', 's', 'e', 0, 1, 7, 6, 0, 4, 8, 3, 0, 0, 0
+};
+static signed char DoubleSlipPaths2[] = {
+	'C', 'r', 'o', 's', 's', '1', 0, 1, 2, 3, 0, 0,
+	'C', 'r', 'o', 's', 's', '2', 0, 4, 5, 6, 0, 0,
+	'S', 'l', 'i', 'p', '1', 0, 1, 7, 6, 0, 0,
+	'S', 'l', 'i', 'p', '2', 0, 4, 8, 3, 0, 0, 0
+};
+static toDesignSchema_t DoubleSlipSchema = {
+	DoubleSlipPaths,
+	"040" "460" "610" "270" "750" "530" "451" "762"
+};
+static toDesignSchema_t DoubleSlipSchema2 = {
+	DoubleSlipPaths2,
+	"040" "460" "610" "270" "750" "530" "451" "762"
+};
+static toDesignDesc_t DoubleSlipDesc = {
+	NTO_D_SLIP,
+	N_("Double Slipswitch"),
+	"td_dslip_stack",
+	1,
+	&DoubleSlipSchema, 1,
+	"LLF",
+	0, COUNT(DoubleSlipLines), DoubleSlipLines
+};
+
+static signed char RightCrossoverPaths[] = {
+	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 2, 0, 3, 4, 0, 0,
+	'R', 'e', 'v', 'e', 'r', 's', 'e', 0, 3, 5, 6, 7, 2, 0, 0, 0
+};
+static toDesignSchema_t RightCrossoverSchema = {
+	RightCrossoverPaths,
+	"060" "610" "280" "830" "892" "970" "761"
+};
+static toDesignDesc_t RightCrossoverDesc = {
+	NTO_R_CROSSOVER,
+	N_("Right Crossover"),
+	"td_rcross_stack",
+	1,
+	&RightCrossoverSchema, 0,
+	"LO",
+	0, COUNT(RightCrossoverLines), RightCrossoverLines
+};
+
+static signed char LeftCrossoverPaths[] = {
+	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 2, 0, 3, 4, 0, 0,
+	'R', 'e', 'v', 'e', 'r', 's', 'e', 0, 1, 5, 6, 7, 4, 0, 0, 0
+};
+static toDesignSchema_t LeftCrossoverSchema = {
+	LeftCrossoverPaths,
+	"040" "410" "2A0" "A30" "451" "5B0" "BA2"
+};
+static toDesignDesc_t LeftCrossoverDesc = {
+	NTO_L_CROSSOVER,
+	N_("Left Crossover"),
+	"td_lcross_stack",
+	1,
+	&LeftCrossoverSchema, 0,
+	"LO",
+	0, COUNT(LeftCrossoverLines), LeftCrossoverLines
+};
+
+static signed char DoubleCrossoverPaths[] = {
+	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 2, 3, 0, 4, 5, 6, 0, 0,
+	'R', 'e', 'v', 'e', 'r', 's', 'e', 0, 1, 7, 8, 9, 6, 0, 4, 10, 11, 12, 3, 0, 0, 0
+};
+static toDesignSchema_t DoubleCrossoverSchema = {
+	DoubleCrossoverPaths,
+	"040" "460" "610" "280" "8A0" "A30" "451" "5B0" "BA2" "892" "970" "761"
+};
+static toDesignDesc_t DoubleCrossoverDesc = {
+	NTO_D_CROSSOVER,
+	N_("Double Crossover"),
+	"td_dcross_stack",
+	1,
+	&DoubleCrossoverSchema, 0,
+	"LO",
+	0, COUNT(DoubleCrossoverLines), DoubleCrossoverLines
+};
+
+static signed char StrSectionPaths[] = {
+	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 0, 0, 0
+};
+static toDesignSchema_t StrSectionSchema = {
+	StrSectionPaths,
+	"010"
+};
+static toDesignDesc_t StrSectionDesc = {
+	NTO_STR_SECTION,
+	N_("Straight Section"),
+	"td_strsect_stack",
+	1,
+	&StrSectionSchema, 0,
+	"L",
+	0, COUNT(StrSectionLines), StrSectionLines
+};
+
+static signed char CrvSectionPaths[] = {
+	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 0, 0, 0
+};
+static toDesignSchema_t CrvSectionSchema = {
+	CrvSectionPaths,
+	"011"
+};
+static toDesignDesc_t CrvSectionDesc = {
+	NTO_CRV_SECTION,
+	N_("Curved Section"),
+	"td_crvsect_stack",
+	1,
+	&CrvSectionSchema, 0,
+	"LA",
+	0, COUNT(CrvSectionLines), CrvSectionLines
+};
+
+#ifdef LATER
+static signed char BumperPaths[] = {
+	'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 0, 0, 0
+};
+static toDesignSchema_t BumperSchema = {
+	BumperPaths,
+	"010"
+};
+static toDesignDesc_t BumperDesc = {
+	NTO_BUMPER,
+	N_("Bumper"),
+	"td_bumper_stack",
+	1,
+	&BumperSchema, 0
+};
+
+static signed char TurntablePaths[] = {
+	'1', 0, 1, 0, 0,
+	'2', 0, 2, 0, 0,
+	'3', 0, 3, 0, 0,
+	'4', 0, 4, 0, 0,
+	'5', 0, 5, 0, 0,
+	'6', 0, 6, 0, 0,
+	'7', 0, 7, 0, 0,
+	'8', 0, 8, 0, 0,
+	'9', 0, 9, 0, 0,
+	'1', '0', 0, 10, 0, 0,
+	'1', '1', 0, 11, 0, 0,
+	'1', '2', 0, 12, 0, 0,
+	'1', '3', 0, 13, 0, 0,
+	'1', '4', 0, 14, 0, 0,
+	'1', '5', 0, 15, 0, 0,
+	'1', '6', 0, 16, 0, 0,
+	'1', '7', 0, 17, 0, 0,
+	'1', '8', 0, 18, 0, 0,
+	'1', '9', 0, 19, 0, 0,
+	'2', '0', 0, 20, 0, 0,
+	'2', '1', 0, 21, 0, 0,
+	'2', '2', 0, 22, 0, 0,
+	'2', '3', 0, 23, 0, 0,
+	'2', '4', 0, 24, 0, 0,
+	'2', '5', 0, 25, 0, 0,
+	'2', '6', 0, 26, 0, 0,
+	'2', '7', 0, 27, 0, 0,
+	'2', '8', 0, 28, 0, 0,
+	'2', '9', 0, 29, 0, 0,
+	'3', '0', 0, 30, 0, 0,
+	'3', '1', 0, 31, 0, 0,
+	'3', '2', 0, 32, 0, 0,
+	'3', '3', 0, 33, 0, 0,
+	'3', '4', 0, 34, 0, 0,
+	'3', '5', 0, 35, 0, 0,
+	'3', '6', 0, 36, 0, 0,
+	'3', '7', 0, 37, 0, 0,
+	'3', '8', 0, 38, 0, 0,
+	'3', '9', 0, 39, 0, 0,
+	'4', '0', 0, 40, 0, 0,
+	'4', '1', 0, 41, 0, 0,
+	'4', '2', 0, 42, 0, 0,
+	'4', '3', 0, 43, 0, 0,
+	'4', '4', 0, 44, 0, 0,
+	'4', '5', 0, 45, 0, 0,
+	'4', '6', 0, 46, 0, 0,
+	'4', '7', 0, 47, 0, 0,
+	'4', '8', 0, 48, 0, 0,
+	'4', '9', 0, 49, 0, 0,
+	'5', '0', 0, 50, 0, 0,
+	'5', '1', 0, 51, 0, 0,
+	'5', '2', 0, 52, 0, 0,
+	'5', '3', 0, 53, 0, 0,
+	'5', '4', 0, 54, 0, 0,
+	'5', '5', 0, 55, 0, 0,
+	'5', '6', 0, 56, 0, 0,
+	'5', '7', 0, 57, 0, 0,
+	'5', '8', 0, 58, 0, 0,
+	'5', '9', 0, 59, 0, 0,
+	'6', '0', 0, 60, 0, 0,
+	'6', '1', 0, 61, 0, 0,
+	'6', '2', 0, 62, 0, 0,
+	'6', '3', 0, 63, 0, 0,
+	'6', '4', 0, 64, 0, 0,
+	'6', '5', 0, 65, 0, 0,
+	'6', '6', 0, 66, 0, 0,
+	'6', '7', 0, 67, 0, 0,
+	'6', '8', 0, 68, 0, 0,
+	'6', '9', 0, 69, 0, 0,
+	'7', '0', 0, 70, 0, 0,
+	'7', '1', 0, 71, 0, 0,
+	'7', '2', 0, 72, 0, 0,
+	0
+};
+static toDesignSchema_t TurntableSchema = {
+	TurntablePaths,
+	"010" "020" "030" "040" "050" "060" "070" "080" "090" "0A0" "0B0"
+};
+static toDesignDesc_t TurntableDesc = {
+	NTO_TURNTABLE,
+	N_("Turntable Section"),
+	"td_turntable_stack",
+	1,
+	&TurntableSchema, 0
+};
+#endif
+
+static toDesignDesc_t * curDesign;
+
+static toDesignDesc_t * designDescs[] = {
+	&RegDesc,
+	&CrvDesc,
+	&CornuDesc,
+	&WyeDesc,
+	&CornuWyeDesc,
+	&ThreewayDesc,
+	&CornuThreewayDesc,
+	&CrossingDesc,
+	&SingleSlipDesc,
+	&DoubleSlipDesc,
+	&RightCrossoverDesc,
+	&LeftCrossoverDesc,
+	&DoubleCrossoverDesc,
+	&StrSectionDesc,
+	&CrvSectionDesc
+};
+
+/**************************************************************************
+ *
+ *  Compute Roadbed
+ *
+ */
+
+int debugComputeRoadbed = 0;
+#ifdef LATER
+typedef struct {
+	int start;
+	unsigned long bits;
+	unsigned long mask;
+	int width;
+} searchTable_t;
+static searchTable_t searchTable[] = {
+	{ 0,    0xFFFF0000, 0xFFFF0000, 32000},
+	{ 32,   0x0000FFFF, 0x0000FFFF, 32000},
+
+	{ 16,   0x00FFFF00, 0x00FFFF00, 16},
+
+	{ 8,    0x0FF00000, 0x0FF00000, 8},
+	{ 24,   0x00000FF0, 0x00000FF0, 8},
+
+	{ 4,    0x3C000000, 0x3C000000, 4},
+	{ 12,   0x003C0000, 0x003C0000, 4},
+	{ 20,   0x00003C00, 0x00003C00, 4},
+	{ 28,   0x0000003C, 0x0000003C, 4},
+
+	{ 2,    0x60000000, 0x60000000, 2},
+	{ 6,    0x06000000, 0x06000000, 2},
+	{ 10,   0x00600000, 0x00600000, 2},
+	{ 14,   0x00060000, 0x00060000, 2},
+	{ 18,   0x00006000, 0x00006000, 2},
+	{ 22,   0x00000600, 0x00000600, 2},
+	{ 26,   0x00000060, 0x00000060, 2},
+	{ 30,   0x00000006, 0x00000006, 2},
+
+	{ 1,    0x40000000, 0x60000000, 1},
+	{ 3,    0x10000000, 0x30000000, 1},
+	{ 5,    0x04000000, 0x06000000, 1},
+	{ 7,    0x01000000, 0x03000000, 1},
+	{ 9,    0x00400000, 0x00600000, 1},
+	{ 11,   0x00100000, 0x00300000, 1},
+	{ 13,   0x00040000, 0x00060000, 1},
+	{ 15,   0x00010000, 0x00030000, 1},
+	{ 17,   0x00004000, 0x00006000, 1},
+	{ 19,   0x00001000, 0x00003000, 1},
+	{ 21,   0x00000400, 0x00000600, 1},
+	{ 23,   0x00000100, 0x00000300, 1},
+	{ 25,   0x00000040, 0x00000060, 1},
+	{ 27,   0x00000010, 0x00000030, 1},
+	{ 29,   0x00000004, 0x00000006, 1},
+	{ 31,   0x00000001, 0x00000003, 1}
+};
+#endif
+
+
+static double LineSegDistance( coOrd p, coOrd p0, coOrd p1 )
+{
+	double d, a;
+	coOrd pp, origin;
+	origin.x = origin.y = (POS_T)0.0;
+	d = FindDistance( p0, p1 );
+	a = FindAngle( p0, p1 );
+	pp.x = p.x-p0.x;
+	pp.y = p.y-p0.y;
+	Rotate( &pp, origin, -a );
+	if (pp.y < 0.0-EPSILON) {
+		return FindDistance( p, p0 );
+	} else if (pp.y > d+EPSILON ) {
+		return FindDistance( p, p1 );
+	} else {
+		return pp.x>=0? pp.x : -pp.x;
+	}
+}
+
+
+
+static double CircleSegDistance( coOrd p, coOrd c, double r, double a0,
+                                 double a1 )
+{
+	double d, d0, d1;
+	double a,aa;
+	coOrd p1;
+
+	d = FindDistance( c, p );
+	a = FindAngle( c, p );
+	aa = NormalizeAngle( a - a0 );
+	d -= r;
+	if ( aa <= a1 ) {
+		return d>=0 ? d : -d;
+	}
+	PointOnCircle( &p1, c, r, a0 );
+	d0 = FindDistance( p, p1 );
+	PointOnCircle( &p1, c, r, a0+a1 );
+	d1 = FindDistance( p, p1 );
+	if (d0 < d1) {
+		return d0;
+	} else {
+		return d1;
+	}
+}
+
+
+static BOOL_T HittestTurnoutRoadbed(
+        trkSeg_p segPtr,
+        int segCnt,
+        int segInx,
+        ANGLE_T side,
+        int fraction,
+        DIST_T roadbedWidth )
+{
+	ANGLE_T a;
+	DIST_T d;
+	int inx;
+	trkSeg_p sp;
+	coOrd p0, p1;
+	DIST_T dd;
+	int closest;
+
+	sp = &segPtr[segInx];
+	if (sp->type == SEG_STRTRK) {
+		d = FindDistance( sp->u.l.pos[0], sp->u.l.pos[1] );
+		a = FindAngle( sp->u.l.pos[0], sp->u.l.pos[1] );
+		d *= (fraction*2+1)/64.0;
+		Translate( &p0, sp->u.l.pos[0], a, d );
+		Translate( &p0, p0, a+side, roadbedWidth/2.0 );
+	} else {
+		d = sp->u.c.radius;
+		if ( d < 0 ) {
+			d = -d;
+			fraction = 31-fraction;
+		}
+		a = sp->u.c.a0 + sp->u.c.a1*(fraction*2+1)/64.0;
+		if (side>0) {
+			d += roadbedWidth/2.0;
+		} else {
+			d -= roadbedWidth/2.0;
+		}
+		PointOnCircle( &p0, sp->u.c.center, d, a );
+	}
+	dd = DIST_INF;
+	closest = -1;
+	for (inx=0; inx<segCnt; inx++) {
+		sp = &segPtr[inx];
+		p1 = p0;
+		switch( sp->type ) {
+		case SEG_STRTRK:
+			d = LineSegDistance( p1, sp->u.l.pos[0], sp->u.l.pos[1] );
+			break;
+		case SEG_CRVTRK:
+			d = CircleSegDistance( p1, sp->u.c.center, fabs(sp->u.c.radius), sp->u.c.a0,
+			                       sp->u.c.a1 );
+			break;
+		default:
+			continue;
+		}
+#ifdef LATER
+		if (inx==segInx) {
+			d *= .999;
+		}
+#endif
+		if ( d < dd ) {
+			dd = d;
+			closest = inx;
+		}
+	}
+	if (closest == segInx) {
+		return FALSE;
+	} else {
+		return TRUE;
+	}
+}
+
+#ifdef LATER
+EXPORT long ComputeTurnoutRoadbedSide(
+        trkSeg_p segPtr,
+        int segCnt,
+        int segInx,
+        ANGLE_T side,
+        DIST_T roadbedWidth )
+{
+	DIST_T length;
+	int rbw;
+	unsigned long res;
+	searchTable_t * p;
+	trkSeg_p sp;
+
+	sp = &segPtr[segInx];
+	if (sp->type == SEG_STRTRK) {
+		length = FindDistance( sp->u.l.pos[0], sp->u.l.pos[1] );
+	} else {
+		length = (fabs(sp->u.c.radius) + (side>0?roadbedWidth/2.0:-roadbedWidth/2.0) ) *
+		         2 * M_PI * sp->u.c.a1 / 360.0;
+	}
+	rbw = (int)(roadbedWidth/length*32/2);
+	/*printf( "L=%0.3f G=%0.3f [%0.3f %0.3f] RBW=%d\n", length, gapWidth, first, last, rbw );*/
+	res = 0xFF0000FF;
+	for ( p=searchTable; p<&searchTable[COUNT( searchTable )]; p++) {
+		if ( (p->width < rbw && res==0xFFFFFFFF) || res==0 ) {
+			break;
+		}
+		unsigned long res1 = (p->mask & res);
+		double where = p->start*length/32.0;
+		if (p->width >= rbw || (res1!=p->mask && res1!=0)) {
+			if (HittestTurnoutRoadbed(segPtr, segCnt, segInx, side, p->start)) {
+				res &= ~p->bits;
+				if (debugComputeRoadbed>=1) { printf( "res=%08lx *p={%02d %08lx %08lx %02d} res1=%08lx W=%0.3f HIT\n", res, p->start, p->bits, p->mask, p->width, res1, where ); }
+			} else {
+				res |= p->bits;
+				if (debugComputeRoadbed>=1) { printf( "res=%08lx *p={%02d %08lx %08lx %02d} res1=%08lx W=%0.3f MISS\n", res, p->start, p->bits, p->mask, p->width, res1, where ); }
+			}
+		} else {
+			if (debugComputeRoadbed>=2) { printf( "res=%08lx *p={%02d %08lx %08lx %02d} res1=%08lx W=%0.3f SKIP\n", res, p->start, p->bits, p->mask, p->width, res1, where ); }
+		}
+	}
+	if (debugComputeRoadbed>=1) { printf( "res=%08lx\n", res ); }
+	return res;
+}
+#endif
+
+
+EXPORT long ComputeTurnoutRoadbedSide(
+        trkSeg_p segPtr,
+        int segCnt,
+        int segInx,
+        ANGLE_T side,
+        DIST_T roadbedWidth )
+{
+	trkSeg_p sp;
+	DIST_T length;
+	int bitWidth;
+	unsigned long res, mask;
+	int hit0, inx0, inx1;
+	int i, j, k, hitx;
+
+	sp = &segPtr[segInx];
+	if (sp->type == SEG_STRTRK) {
+		length = FindDistance( sp->u.l.pos[0], sp->u.l.pos[1] );
+	} else {
+		length = (fabs(sp->u.c.radius) + (side>0?roadbedWidth/2.0:-roadbedWidth/2.0) ) *
+		         2 * M_PI * sp->u.c.a1 / 360.0;
+	}
+	bitWidth = (int)floor(roadbedWidth*32/length);
+	if ( bitWidth > 31 ) {
+		bitWidth = 31;
+	} else if ( bitWidth <= 0 ) {
+		bitWidth = 2;
+	}
+	res = 0;
+	mask = (1u<<bitWidth)-1;
+	hit0 = HittestTurnoutRoadbed( segPtr, segCnt, segInx, side, 0, roadbedWidth );
+	inx0 = 0;
+	inx1 = bitWidth;
+	if ( debugComputeRoadbed>=3 ) { printf( "bW=%d HT[0]=%d\n", bitWidth, hit0 ); }
+	while ( 1 ) {
+		if ( inx1 > 31 ) {
+			inx1 = 31;
+		}
+		int hit1 = HittestTurnoutRoadbed( segPtr, segCnt, segInx, side, inx1,
+		                                  roadbedWidth );
+		if ( debugComputeRoadbed>=3 ) { printf( "     HT[%d]=%d\n", inx1, hit1 ); }
+		if ( hit0 != hit1 ) {
+			i=inx0;
+			j=inx1;
+			while ( j-i >= 2 ) {
+				k = (i+j)/2;
+				hitx = HittestTurnoutRoadbed( segPtr, segCnt, segInx, side, k, roadbedWidth );
+				if ( debugComputeRoadbed>=3 ) { printf( "     .HT[%d]=%d\n", k, hitx ); }
+				if ( hitx == hit0 ) {
+					i = k;
+				} else {
+					j = k;
+				}
+			}
+			if ( !hit0 ) {
+				res |= ((1<<(i-inx0+1))-1)<<inx0;
+			} else {
+				res |= ((1<<(inx1-j))-1)<<j;
+			}
+		} else if ( !hit1 ) {
+			res |= mask;
+		}
+		if ( debugComputeRoadbed>=3 ) { printf( "  res=%lx\n", res ); }
+		if ( inx1 >= 31 ) {
+			if ( !hit1 ) {
+				res |= 0x80000000;
+			}
+			break;
+		}
+		mask <<= bitWidth;
+		inx0 = inx1;
+		inx1 += bitWidth;
+		hit0 = hit1;
+	}
+	if ( debugComputeRoadbed>=2 ) { printf( "S%d %c    res=%lx\n", segInx, side>0?'+':'-', res ); }
+	return (0xFFFFFFFF)&res;
+}
+
+
+static BOOL_T IsNear( coOrd p0, coOrd p1 )
+{
+	DIST_T d;
+	d = FindDistance( p0, p1 );
+	return d < 0.05;
+}
+
+
+static void AddRoadbedPieces(
+        int inx,
+        ANGLE_T side,
+        int first,
+        int last )
+{
+	DIST_T d0;
+	ANGLE_T a0, a1;
+	coOrd p0, p1;
+	trkSeg_p sp, sq;
+
+	if (last<=first) {
+		return;
+	}
+	sp = &tempSegs(inx);
+	if ( sp->type == SEG_STRTRK ) {
+		DIST_T d1;
+		d0 = FindDistance( sp->u.l.pos[0], sp->u.l.pos[1] );
+		a0 = FindAngle( sp->u.l.pos[0], sp->u.l.pos[1] );
+		d1 = d0*first/32.0;
+		Translate( &p0, sp->u.l.pos[0], a0, d1 );
+		Translate( &p0, p0, a0+side, newTurnRoadbedWidth/2.0 );
+		d1 = d0*last/32.0;
+		Translate( &p1, sp->u.l.pos[0], a0, d1 );
+		Translate( &p1, p1, a0+side, newTurnRoadbedWidth/2.0 );
+		if ( first==0 || last==32 ) {
+			for ( sq=&tempSegs(0); sq<&tempSegs(tempSegs_da.cnt); sq++ ) {
+				if ( sq->type == SEG_STRLIN ) {
+					a1 = FindAngle( sq->u.l.pos[0], sq->u.l.pos[1] );
+					a1 = NormalizeAngle( a1-a0+0.5 );
+					if ( first==0 ) {
+						if ( a1 < 1.0 && IsNear( p0, sq->u.l.pos[1] ) ) {
+							sq->u.l.pos[1] = p1;
+							return;
+						} else if ( a1 > 180.0 && a1 < 181.0 && IsNear( p0, sq->u.l.pos[0] ) ) {
+							sq->u.l.pos[0] = p1;
+							return;
+						}
+					}
+					if ( last==32 ) {
+						if ( a1 < 1.0 && IsNear( p1, sq->u.l.pos[0] ) ) {
+							sq->u.l.pos[0] = p0;
+							return;
+						} else if ( a1 > 180.0 && a1 < 181.0 && IsNear( p1, sq->u.l.pos[1] ) ) {
+							sq->u.l.pos[1] = p0;
+							return;
+						}
+					}
+				}
+			}
+		}
+	}
+	DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
+	sp = &tempSegs(inx);
+	sq = &tempSegs(tempSegs_da.cnt-1);
+	sq->lineWidth = newTurnRoadbedLineWidth;
+	sq->color = newTurnRoadbedColor;
+	if (sp->type == SEG_STRTRK) {
+		sq->type = SEG_STRLIN;
+		sq->u.l.pos[0] = p0;
+		sq->u.l.pos[1] = p1;
+	} else {
+		d0 = sp->u.c.radius;
+		if ( d0 > 0 ) {
+			a0 = NormalizeAngle( sp->u.c.a0 + sp->u.c.a1*first/32.0 );
+		} else {
+			d0 = -d0;
+			a0 = NormalizeAngle( sp->u.c.a0 + sp->u.c.a1*(32-last)/32.0 );
+		}
+		a1 = sp->u.c.a1*(last-first)/32.0;
+		if (side>0) {
+			d0 += newTurnRoadbedWidth/2.0;
+		} else {
+			d0 -= newTurnRoadbedWidth/2.0;
+		}
+		sq->type = SEG_CRVLIN;
+		sq->u.c.center = sp->u.c.center;
+		sq->u.c.radius = d0;
+		sq->u.c.a0 = a0;
+		sq->u.c.a1 = a1;
+	}
+}
+
+
+static void AddRoadbedToOneSide(
+        int trkCnt,
+        int inx,
+        ANGLE_T side )
+{
+	unsigned long res;
+
+	res = ComputeTurnoutRoadbedSide( &tempSegs(0), trkCnt, inx, side,
+	                                 newTurnRoadbedWidth );
+	if ( res == 0L ) {
+		return;
+	} else if ( res == 0xFFFFFFFF ) {
+		AddRoadbedPieces( inx, side, 0, 32 );
+	} else {
+		int b0, b1;
+		unsigned long res1;
+		for ( b0=0, res1=0x00000001; res1&&(res1&res); b0++,res1<<=1 );
+		for ( b1=32,res1=0x80000000; res1&&(res1&res); b1--,res1>>=1 );
+		AddRoadbedPieces( inx, side, 0, b0 );
+		AddRoadbedPieces( inx, side, b1, 32 );
+	}
+}
+
+
+static void AddRoadbed( void )
+{
+	int trkCnt, inx;
+	if ( newTurnRoadbedWidth < newTurnTrackGauge ) {
+		return;
+	}
+	trkCnt = tempSegs_da.cnt;
+	for ( inx=0; inx<trkCnt; inx++ ) {
+		trkSeg_p sp = &tempSegs(inx);
+		if ( sp->type!=SEG_STRTRK && sp->type!=SEG_CRVTRK ) {
+			continue;
+		}
+		AddRoadbedToOneSide( trkCnt, inx, +90 );
+		AddRoadbedToOneSide( trkCnt, inx, -90 );
+	}
+}
+
+
+/*********************************************************************
+ *
+ * LoadSegs - cornu
+ *
+ */
+
+/* For Bezier Segs we need to duplicate the subSegs Array as well */
+static void AppendSegs(dynArr_t * target, dynArr_t * source)
+{
+
+#define sourceSegs(N) DYNARR_N( trkSeg_t, *source, N )
+#define targetSegs(N) DYNARR_N( trkSeg_t, *target, N )
+
+	for (int i=0; i<source->cnt; i++) {
+		trkSeg_p src = &sourceSegs(i);
+		addSegBezier(target, src);
+	}
+}
+
+/* Bezier Segs will have subSegs Array - free it before resetting the array */
+static void ClearSegs(dynArr_t * target)
+{
+	for (int i=0; i<(*target).cnt; i++) {
+		if (targetSegs(i).type == SEG_BEZTRK) {
+			// Free DA if a BEZTRK
+			DYNARR_FREE( trkSeg_t, targetSegs(i).bezSegs );
+		} else {
+			// Otherwise just clear it
+			DYNARR_INIT( trkSeg_t, targetSegs(i).bezSegs );
+		}
+	}
+	DYNARR_RESET( trkSeg_t, *target );
+}
+
+static BOOL_T CallCornuNoBez(coOrd pos[2], coOrd center[2], ANGLE_T angle[2],
+                             DIST_T radius[2], dynArr_t * array_p)
+{
+
+	dynArr_t temp_array;
+	DYNARR_INIT(trkSeg_t,temp_array);
+
+	wBool_t rc = CallCornu0(pos,center,angle,radius, &temp_array, FALSE);
+
+	if (!rc) { return FALSE; }
+
+	for (int i=0; i<temp_array.cnt; i++) {
+		trkSeg_p from_seg = &DYNARR_N(trkSeg_t,temp_array,i);
+		if ((from_seg->type == SEG_BEZTRK) || (from_seg->type == SEG_BEZLIN)) {
+			for (int j=0; j<from_seg->bezSegs.cnt; j++) {
+				trkSeg_p sub_seg = &DYNARR_N(trkSeg_t,from_seg->bezSegs,j);
+				DYNARR_APPEND(trkSeg_t,*array_p,5);
+				trkSeg_p to_seg = &DYNARR_N(trkSeg_t,*array_p,(*array_p).cnt-1);
+				to_seg->u = sub_seg->u;
+				to_seg->type = sub_seg->type;
+				to_seg->color = wDrawColorBlack;
+				to_seg->lineWidth = sub_seg->lineWidth;
+			}
+		} else {
+			DYNARR_APPEND(trkSeg_t,*array_p,5);
+			trkSeg_p to_seg = &DYNARR_N(trkSeg_t,*array_p,(*array_p).cnt-1);
+			to_seg->u = from_seg->u;
+			to_seg->type = from_seg->type;
+			to_seg->color = wDrawColorBlack;
+			to_seg->lineWidth = from_seg->lineWidth;
+		}
+	}
+
+	ClearSegs(&temp_array);
+
+	return TRUE;
+}
+
+
+
+
+struct {
+	coOrd pos[10];
+	coOrd center[10];
+	DIST_T radius[10];
+	DIST_T angle[10];
+} cornuData;
+
+static coOrd end_points[20];
+static coOrd end_centers[20];
+static double end_arcs[20];
+static double end_angles[20];
+
+
+DIST_T end_length = MIN_TRACK_LENGTH;
+
+static toDesignSchema_t * LoadCurvedCornuSegs(
+        int tdType )
+{
+	trkSeg_p segPtr;
+	FLOAT_T newTurnToeL = tdVal[8];
+
+	// Adjust end_points to impose small fixed end segments
+
+	for (int i=0; i<3; i++) {
+		if (radii[i] == 0.0) {
+			Translate(&end_points[i], points[i], 90-angles[i]+(i==0?0:180), end_length);
+			end_angles[i] = angles[i];
+		} else {
+			Translate(&end_centers[i], points[i], -angles[i], radii[i]);
+			end_arcs[i] = (radii[i]>=0?1:-1)*R2D(end_length/fabs(radii[i]));
+			end_points[i] = points[i];
+			Rotate(&end_points[i],end_centers[i],(i>0?1:-1)*end_arcs[i]);
+			end_angles[i] = angles[i]-(i>0?1:-1)*end_arcs[i];
+		}
+		LOG( log_cornuturnoutdesigner, 1,
+		     ( "ctoDes0-%d: EP(%f,%f) NEP(%f,%f) EA(%f) NEA(%f) R(%f) ARC(%f) EC(%f,%f) \n",
+		       \
+		       i+1,points[i].x,points[i].y,end_points[i].x,end_points[i].y,angles[i],
+		       end_angles[i],radii[i],end_arcs[i], \
+		       end_centers[i].x,end_centers[i].y) );
+	}
+
+
+	cornuData.pos[0] = end_points[0]; /*Start*/
+	cornuData.pos[1] = end_points[2]; /*Outer*/
+	cornuData.pos[3] = end_points[2]; /*Outer for second time*/
+	cornuData.pos[5] = end_points[1]; /*Inner*/
+
+
+	if (radii[0] == 0.0) { /* Toe */
+		cornuData.center[0] = zero;
+	} else {
+		cornuData.center[0].x = end_points[0].x;
+		cornuData.center[0].y = end_points[0].y + radii[0];
+	}
+	if (radii[1] == 0.0) { /* Inner */
+		cornuData.center[5] = zero;
+	} else {
+		Translate(&cornuData.center[5], cornuData.pos[5], -end_angles[1], radii[1]);
+	}
+
+	if (radii[2] == 0.0) { /* Outer */
+		cornuData.center[1] = zero;
+	} else {
+		Translate(&cornuData.center[1], cornuData.pos[1], -end_angles[2], radii[2]);
+	}
+	cornuData.center[3] = cornuData.center[1];
+
+	cornuData.angle[0] = 270.0;
+	cornuData.angle[1] = 90.0-end_angles[2];
+	cornuData.angle[3] = 90.0-end_angles[2];
+	cornuData.angle[5] = 90.0-end_angles[1]; /*Inner*/
+
+	cornuData.radius[0] = fabs(radii[0]);
+	cornuData.radius[1] = fabs(radii[2]);
+	cornuData.radius[3] = fabs(radii[2]);
+	cornuData.radius[5] = fabs(radii[1]);        /*Inner*/
+
+	DYNARR_RESET( trkSeg_t, tempSegs_da );
+
+	/*Map out the full outer curve */
+
+	CallCornu0(&cornuData.pos[0],&cornuData.center[0],&cornuData.angle[0],
+	           &cornuData.radius[0],&tempSegs_da, FALSE);
+
+	/*Get ToeAngle/Radius/Center */
+	int inx,subSeg;
+	wBool_t back, neg;
+	DIST_T radius = 0.0;
+	coOrd center = {0,0};
+	coOrd pos;
+	// TODO newTurnToeL
+	pos.x = end_points[0].x+newTurnToeL-MIN_TRACK_LENGTH;
+	//pos.x = end_points[0].x+points[1].x-MIN_TRACK_LENGTH;
+	pos.y = end_points[0].y; 				/* This will be close to but not on the curve */
+	ANGLE_T angle = GetAngleSegs(tempSegs_da.cnt,&tempSegs(0),&pos,
+	                             &inx,NULL,&back,&subSeg,&neg);
+	segPtr = &DYNARR_N(trkSeg_t, tempSegs_da, inx);
+
+	if (segPtr->type == SEG_BEZTRK) {
+		segPtr = &DYNARR_N(trkSeg_t,segPtr->bezSegs,subSeg);
+	}
+
+	if (segPtr->type == SEG_STRTRK) {
+		radius = 0.0;
+		center = zero;
+	} else if (segPtr->type == SEG_CRVTRK) {
+		center = segPtr->u.c.center;
+		radius = fabs(segPtr->u.c.radius);
+	}
+	cornuData.pos[1] = pos;
+	cornuData.center[1] = center;
+	cornuData.angle[1] = angle;
+	cornuData.radius[1] = radius;
+	cornuData.pos[2] = pos;
+	cornuData.center[2] = center;
+	cornuData.angle[2] = NormalizeAngle(180.0+angle);
+	cornuData.radius[2] = radius;
+	cornuData.pos[4] = pos;
+	cornuData.center[4] = center;
+	cornuData.angle[4] = NormalizeAngle(180.0+angle);
+	cornuData.radius[4] = radius;
+
+	static dynArr_t cornuSegs_da;
+
+	ClearSegs(&tempSegs_da);
+	ClearSegs(&cornuSegs_da);
+
+	/* Override if at zero radius at base don't compute end */
+	if (cornuData.radius[0] == 0.0) {
+		DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
+		trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,tempSegs_da);
+		temp_p->type = SEG_STRTRK;
+		temp_p->color = wDrawColorBlack;
+		temp_p->lineWidth = 0.0;
+		temp_p->u.l.pos[0] = zero;
+		temp_p->u.l.pos[1] = cornuData.pos[1];
+		LOG( log_cornuturnoutdesigner, 1, ( "ctoDes1: P0(%f,%f) P1(%f,%f) \n", \
+		                                    temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,
+		                                    temp_p->u.l.pos[1].y  ) );
+	} else {
+		DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
+		trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,tempSegs_da);
+		temp_p->type = SEG_CRVTRK;
+		temp_p->color = wDrawColorBlack;
+		temp_p->lineWidth = 0.0;
+		temp_p->u.c.radius = -radii[0];
+		if (radii[0]>0.0) {
+			temp_p->u.c.a0 = FindAngle(end_centers[0],end_points[0]);
+		} else {
+			temp_p->u.c.a0 = FindAngle(end_centers[0],points[0]);
+		}
+		temp_p->u.c.a1 = fabs(end_arcs[0]);
+		temp_p->u.c.center = end_centers[0];
+		coOrd rp0,rp1;
+		Translate(&rp0,temp_p->u.c.center,temp_p->u.c.a0,temp_p->u.c.radius);
+		Translate(&rp1,temp_p->u.c.center,temp_p->u.c.a0+temp_p->u.c.a1,
+		          temp_p->u.c.radius);
+		LOG( log_cornuturnoutdesigner, 1,
+		     ( "ctoDes1: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f), EP(%f,%f) RP0(%f,%f) RP1(%f,%f)\n",
+		       \
+		       temp_p->u.c.radius,temp_p->u.c.a0,temp_p->u.c.a1,temp_p->u.c.center.x,
+		       temp_p->u.c.center.y, \
+		       points[0].x,points[0].y,end_points[0].x,end_points[0].y, \
+		       rp0.x,rp0.y,rp1.x,rp1.y) );
+
+		/* Base to Toe in tempSegs array */
+		CallCornuNoBez(&cornuData.pos[0],&cornuData.center[0],& cornuData.angle[0],
+		               &cornuData.radius[0],&tempSegs_da);
+	}
+
+	int ToeSeg = tempSegs_da.cnt;
+
+	/* Toe to Outer in cornuSegs array */
+	CallCornuNoBez(&cornuData.pos[2],&cornuData.center[2],&cornuData.angle[2],
+	               &cornuData.radius[2],&cornuSegs_da);
+	if (cornuData.radius[3] == 0.0) {
+		DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
+		trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
+		temp_p->type = SEG_STRTRK;
+		temp_p->color = wDrawColorBlack;
+		temp_p->lineWidth = 0.0;
+		temp_p->u.l.pos[0] = cornuData.pos[3];
+		temp_p->u.l.pos[1] = end_points[2];
+		LOG( log_cornuturnoutdesigner, 1, ( "ctoDes2: P0(%f,%f) P1(%f,%f) \n", \
+		                                    temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,
+		                                    temp_p->u.l.pos[1].y  ) );
+	} else {
+		DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
+		trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
+		temp_p->type = SEG_CRVTRK;
+		temp_p->color = wDrawColorBlack;
+		temp_p->lineWidth = 0.0;
+		temp_p->u.c.radius = -radii[2];
+		if (radii[2]>0) {
+			temp_p->u.c.a0 = FindAngle(end_centers[2],points[2]);
+		} else {
+			temp_p->u.c.a0 = FindAngle(end_centers[2],end_points[2]);
+		}
+		temp_p->u.c.a1 = fabs(end_arcs[2]);
+		temp_p->u.c.center = end_centers[2];
+		coOrd rp0,rp1;
+		Translate(&rp0,temp_p->u.c.center,temp_p->u.c.a0,temp_p->u.c.radius);
+		Translate(&rp1,temp_p->u.c.center,temp_p->u.c.a0+temp_p->u.c.a1,
+		          temp_p->u.c.radius);
+		LOG( log_cornuturnoutdesigner, 1,
+		     ( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) RP1(%f,%f)\n",
+		       \
+		       temp_p->u.c.radius,temp_p->u.c.a0,temp_p->u.c.a1,temp_p->u.c.center.x,
+		       temp_p->u.c.center.y, \
+		       points[2].x,points[2].y,end_points[2].x,end_points[2].y, \
+		       rp0.x,rp0.y,rp1.x,rp1.y) );
+	}
+
+	int OuterEndSeg = cornuSegs_da.cnt + ToeSeg;
+
+	/* Add to second cornu to tempSegs array */
+	AppendSegs(&tempSegs_da,&cornuSegs_da);
+
+	/* Get ready to reuse cornuSegs array*/
+	ClearSegs(&cornuSegs_da);
+
+	/* Toe to Inner in cornuSegs array*/
+	CallCornuNoBez(&cornuData.pos[4],&cornuData.center[4],&cornuData.angle[4],
+	               &cornuData.radius[4],&cornuSegs_da);
+
+	if (cornuData.radius[5] == 0.0) {
+		DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
+		trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
+		temp_p->type = SEG_STRTRK;
+		temp_p->color = wDrawColorBlack;
+		temp_p->lineWidth = 0.0;
+		temp_p->u.l.pos[0] = cornuData.pos[5];
+		temp_p->u.l.pos[1] = points[1];
+		LOG( log_cornuturnoutdesigner, 1, ( "ctoDes3: P0(%f,%f) P1(%f,%f) \n", \
+		                                    temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,
+		                                    temp_p->u.l.pos[1].y  ) );
+	} else {
+		DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
+		trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
+		temp_p->type = SEG_CRVTRK;
+		temp_p->color = wDrawColorBlack;
+		temp_p->lineWidth = 0.0;
+		temp_p->u.c.radius = -radii[1];
+		if (radii[1]>0) {
+			temp_p->u.c.a0 = FindAngle(end_centers[1],points[1]);
+		} else {
+			temp_p->u.c.a0 = FindAngle(end_centers[1],end_points[1]);
+		}
+		temp_p->u.c.a1 = fabs(end_arcs[1]);
+		temp_p->u.c.center = end_centers[1];
+		coOrd rp0,rp1;
+		Translate(&rp0,temp_p->u.c.center,temp_p->u.c.a0,temp_p->u.c.radius);
+		Translate(&rp1,temp_p->u.c.center,temp_p->u.c.a0+temp_p->u.c.a1,
+		          temp_p->u.c.radius);
+		LOG( log_cornuturnoutdesigner, 1,
+		     ( "ctoDes3: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) RP1(%f,%f)\n",
+		       \
+		       temp_p->u.c.radius,temp_p->u.c.a0,temp_p->u.c.a1,temp_p->u.c.center.x,
+		       temp_p->u.c.center.y, \
+		       points[1].x,points[1].y,end_points[1].x,end_points[1].y, \
+		       rp0.x,rp0.y,rp1.x,rp1.y) );
+	}
+
+	int InnerEndSeg = cornuSegs_da.cnt + OuterEndSeg;
+
+	/*Add Third Part to tempSegs Array */
+	AppendSegs(&tempSegs_da,&cornuSegs_da);
+
+
+	/* Safety - clear out cornu Array */
+	ClearSegs(&cornuSegs_da);
+
+	if (tempSegs_da.cnt >128 ) {
+		NoticeMessage( MSG_TODSGN_CORNU_TOO_COMPLEX, _("Ok"), NULL );
+		return NULL;
+	}
+
+	static char pathChar[512];
+	strcpy(pathChar,"Normal");  /* Also resets array */
+
+	wIndex_t pathLen = (wIndex_t)strlen(pathChar)+1;
+
+	for (int i=0; i<OuterEndSeg; i++) {
+		pathChar[pathLen] = i+1;
+		pathLen++;
+	}
+	pathChar[pathLen] = 0;
+	pathLen++;
+	pathChar[pathLen] = 0;
+	pathLen++;
+
+	sprintf(&pathChar[pathLen],"%s","Reverse");
+
+	pathLen += (wIndex_t)strlen(&pathChar[pathLen])+1;
+	for (int i=0; i<ToeSeg; i++) {
+		pathChar[pathLen] = i+1;
+		pathLen++;
+	}
+	for (int i=OuterEndSeg; i<InnerEndSeg; i++) {
+		pathChar[pathLen] = i+1;
+		pathLen++;
+	}
+	pathChar[pathLen] = 0;
+	pathLen++;
+	pathChar[pathLen] = 0;
+	pathLen++;
+	pathChar[pathLen] = 0;
+
+	CornuSchema.paths = (signed char *)pathChar;
+	return &CornuSchema;
+}
+
+
+static toDesignSchema_t * LoadWye3WayCornuSegs(
+        int tdType )
+{
+	trkSeg_p segPtr;
+
+	FLOAT_T newTurnToeR = tdVal[12];
+	FLOAT_T newTurnToeL = tdVal[13];
+
+	/*
+	 * Construct Wye and 3 Way Turnouts with Cornu curves
+	 * 1. Establish where the joint(s) (Toes) are by using the main curve
+	 * 2. Rebuild the segments into a single set using those points
+	 * 3. Build Path statements to suit the segments
+	 * ---------------------------------------------------------------------------------------------
+	 *                        7				CornuData. Cheat Sheet - segment array parts	 * ---------------------------------------------------------------------------------------------
+
+	 *           =============+				Note - 6-7 is at Toe2 and 8-9 at Toe1 if RH comes before LH
+	 *         //    Toe 2                       - Toe2 and Toe1 are the same (no 2-3) if co-incident
+	 * 0      6+    3  4                  5		 - Toe2, 2-3 and 4-5 all only exist for 3WAY not WYE
+	 * +=====+ +=====+ +==================+		 - If zero radius at 0, curve starts at Toe 1
+	 *       1 2      8+
+	 *      Toe 1      \\         9
+	 *                  =========+
+	 *
+	 * ---------------------------------------------------------------------------------------------
+	 */
+
+
+
+	for (int i=0; i<((tdType==NTO_CORNU3WAY)?4:3); i++) {
+		if (radii[i] == 0.0) {
+			if (i==2) {
+				Translate(&end_points[i], points[i], NormalizeAngle(90.0+angles[i]+180),
+				          end_length);
+			} else {
+				Translate(&end_points[i], points[i],
+				          NormalizeAngle(90.0-angles[i]+(i==0?0.0:180.0)), end_length);
+			}
+			end_angles[i] = angles[i];
+		} else {
+			if (i!=2) {
+				if (((i==0) && radii[0]>0.0) || ((i==1 || i==3) && radii[i]>0.0)) {
+					Translate(&end_centers[i], points[i], -angles[i], fabs(radii[i]));
+				} else {
+					Translate(&end_centers[i], points[i], angles[i]+180, fabs(radii[i]));
+				}
+				end_arcs[i] = (radii[i]>=0?1:-1)*R2D(end_length/fabs(radii[i]));
+			} else {
+				if (radii[2]>0.0) {
+					Translate(&end_centers[i], points[i], angles[i]+180, fabs(radii[i]));
+				} else {
+					Translate(&end_centers[i], points[i], -angles[i], fabs(radii[i]));
+				}
+				end_arcs[i] = (radii[i]>=0?-1:1)*R2D(end_length/fabs(radii[i]));
+			}
+			end_points[i] = points[i];
+			Rotate(&end_points[i],end_centers[i],end_arcs[i]);
+			end_angles[i] = angles[i]+end_arcs[i];
+		}
+		LOG( log_cornuturnoutdesigner, 1,
+		     ( "ctoDes0-%d: EP(%f,%f) NEP(%f,%f) EA(%f) NEA(%f) R(%f) ARC(%f) EC(%f,%f) \n",
+		       \
+		       i+1,points[i].x,points[i].y,end_points[i].x,end_points[i].y,angles[i],
+		       end_angles[i],radii[i],end_arcs[i], \
+		       end_centers[i].x,end_centers[i].y) );
+	}
+
+	wBool_t LH_main = TRUE, LH_first = TRUE;
+
+	cornuData.pos[0] = end_points[0]; /*Start*/
+	if (tdType == NTO_CORNU3WAY) {
+		if (newTurnToeR < newTurnToeL) { LH_first = FALSE; }
+		cornuData.pos[1] = end_points[3]; /*Center for First Time */
+		cornuData.pos[5] = end_points[3]; /*Center for last time*/
+// TODO
+//	} else if (newTurnRad1>=0.0)  {
+	} else if (radii[2]>=0.0)  {
+		cornuData.pos[1] = end_points[1];    /*Left is dominant curve */
+		newTurnToeR = newTurnToeL;
+	} else {
+		cornuData.pos[1] = end_points[2];    /*Right is dominant */
+		newTurnToeR = newTurnToeL;
+		LH_main = FALSE;
+	}
+
+	cornuData.pos[7] = end_points[1]; /*Left*/
+	cornuData.pos[9] = end_points[2]; /*Right*/
+	if (tdType == NTO_CORNU3WAY) {
+		cornuData.pos[5] = end_points[3]; /*Center */
+	}
+
+	if (radii[0] == 0.0) { /* Base */
+		cornuData.center[0] = zero;
+	} else {
+		cornuData.center[0].x = end_points[0].x;
+		cornuData.center[0].y = end_points[0].y + radii[0];
+	}
+	if (radii[1] == 0.0) { /* Left */
+		cornuData.center[7] = zero;
+	} else if (radii[1] >0.0) {
+		Translate(&cornuData.center[7], cornuData.pos[7], -end_angles[1], radii[1]);
+	} else {
+		Translate(&cornuData.center[7], cornuData.pos[7], 180.0+end_angles[1],
+		          radii[1]);
+	}
+
+	if (radii[2] == 0.0) { /* Right */
+		cornuData.center[9] = zero;
+	} else if (radii[2] >0.0) {
+		Translate(&cornuData.center[9], cornuData.pos[9], 180.0+end_angles[2],
+		          radii[2]);
+	} else {
+		Translate(&cornuData.center[9], cornuData.pos[9], -end_angles[2], radii[2]);
+	}
+
+	if (tdType == NTO_CORNU3WAY) {
+		if (radii[3] == 0.0) { /* Center */
+			cornuData.center[5] = zero;
+		} else if (radii[3] >0.0) {
+			Translate(&cornuData.center[5], cornuData.pos[5], -end_angles[3], radii[3]);
+		} else {
+			Translate(&cornuData.center[5], cornuData.pos[5], 180.0+end_angles[3],
+			          radii[3]);
+		}
+	}
+
+	/* Set up for calculation of Toe(s) */
+
+	if (tdType == NTO_CORNU3WAY) {
+		cornuData.center[1] =
+		        cornuData.center[5];	  /*For Toe1 calc  always use center */
+		cornuData.center[3] =
+		        cornuData.center[5];    /*For Toe2 calc  always use center*/
+	} else if (LH_main) {
+		cornuData.center[1] = cornuData.center[7];    /* Dominant Curve Left */
+	} else {
+		cornuData.center[1] = cornuData.center[9];        /* Right */
+	}
+
+	cornuData.angle[0] = 270.0;						 /*Always*/
+	if (tdType == NTO_CORNU3WAY) {
+		cornuData.angle[1] = 90.0-end_angles[3];
+		cornuData.angle[3] = 90.0-end_angles[3];
+		cornuData.angle[5] = 90.0-end_angles[3]; 		/* Only used for 3way */
+	} else if (LH_main) {
+		cornuData.angle[1] = 90.0-end_angles[1];
+	} else {
+		cornuData.angle[1] = 90.0+end_angles[2];
+	}
+	cornuData.angle[7] = 90.0-end_angles[1]; 			/*Left*/
+	cornuData.angle[9] = 90.0+end_angles[2]; 			/*Right*/
+
+	cornuData.radius[0] = fabs(radii[0]);
+	if (tdType == NTO_CORNU3WAY) {
+		cornuData.radius[1] = fabs(radii[3]);
+		cornuData.radius[3] = fabs(radii[3]);
+		cornuData.radius[5] = fabs(radii[3]);
+	} else if (LH_main) {
+		cornuData.radius[1] = fabs(radii[1]);
+	} else {
+		cornuData.radius[1] = fabs(radii[2]);
+	}
+	cornuData.radius[7] = fabs(radii[1]); 			/*Left*/
+	cornuData.radius[9] = fabs(radii[2]); 			/*Right*/
+
+	/* Ready to find Toe points */
+
+	DYNARR_RESET( trkSeg_t, tempSegs_da );
+	DIST_T radius = 0.0;
+	coOrd center = {0};
+	ANGLE_T angle;
+	int inx,subSeg;
+	wBool_t back, neg;
+	coOrd pos;
+
+	/* Override if a "Y" has zero radius at base to be a straight until the Toe
+	 * We set the start of the curve to be at the Toe position */
+	if (cornuData.radius[0] == 0.0) {
+		pos.x = end_points[0].x+(LH_first?newTurnToeL:newTurnToeR)-MIN_TRACK_LENGTH;
+		pos.y = end_points[0].y;
+		angle = 90.0;
+		radius = 0.0;
+		center = zero;
+
+	} else {
+		/*Find Toe 1 from curve */
+		CallCornu0(&cornuData.pos[0],&cornuData.center[0],&cornuData.angle[0],
+		           &cornuData.radius[0],&tempSegs_da, FALSE);
+
+		/*Get ToeAngle/Radius/Center for first toe */
+		pos.x = end_points[0].x+(LH_first?newTurnToeL:newTurnToeR);
+		pos.y = end_points[0].y; 				/* This will be close to but not on the curve */
+		angle = GetAngleSegs(tempSegs_da.cnt,&tempSegs(0),&pos,&inx,
+		                     NULL,&back,&subSeg,&neg);
+		segPtr = &DYNARR_N(trkSeg_t, tempSegs_da, inx);
+
+		if (segPtr->type == SEG_BEZTRK) {
+			segPtr = &DYNARR_N(trkSeg_t,segPtr->bezSegs,subSeg);
+		}
+
+		if (segPtr->type == SEG_STRTRK) {
+			radius = 0.0;
+			center = zero;
+		} else if (segPtr->type == SEG_CRVTRK) {
+			center = segPtr->u.c.center;
+			radius = fabs(segPtr->u.c.radius);
+		}
+	}
+
+	/* Set up 2-3 even if we don't use it */
+	cornuData.pos[1] = pos;
+	cornuData.center[1] = center;
+	cornuData.angle[1] = angle;
+	cornuData.radius[1] = radius;
+
+	cornuData.pos[2] = pos;
+	cornuData.center[2] = center;
+	cornuData.angle[2]  = NormalizeAngle(180.0+angle);
+	cornuData.radius[2] = radius;
+
+	if ((tdType == NTO_CORNU3WAY) && (newTurnToeR!=newTurnToeL)) {
+		if (LH_first) {
+			cornuData.pos[6] = pos;
+			cornuData.center[6] = center;
+			cornuData.angle[6] = NormalizeAngle(180.0+angle);
+			cornuData.radius[6] = radius;
+		} else {
+			cornuData.pos[8] = pos;
+			cornuData.center[8] = center;
+			cornuData.angle[8] = NormalizeAngle(180.0+angle);
+			cornuData.radius[8] = radius;
+		}
+	} else {   /* Just one toe */
+		cornuData.pos[8] = pos;
+		cornuData.center[8] = center;
+		cornuData.angle[8] = NormalizeAngle(180.0+angle);
+		cornuData.radius[8] = radius;
+
+		cornuData.pos[6] = pos;
+		cornuData.center[6] = center;
+		cornuData.angle[6] = NormalizeAngle(180.0+angle);
+		cornuData.radius[6] = radius;
+	}
+
+	if (tdType == NTO_CORNU3WAY) {
+		if (newTurnToeR!=newTurnToeL) {
+			/* Second Toe */
+			if (cornuData.radius[0] == 0.0) {
+				pos.x = end_points[0].x+(LH_first?newTurnToeR:newTurnToeL)-MIN_TRACK_LENGTH;
+				pos.y = 0.0;
+				angle = 90.0;
+				radius = 0.0;
+				center = zero;
+			} else {
+				pos.x = end_points[0].x+(LH_first?newTurnToeR:newTurnToeL);
+				pos.y = end_points[0].y; 				/* This will be close to but not on the curve */
+				angle = GetAngleSegs(tempSegs_da.cnt,&tempSegs(0),&pos,&inx,
+				                     NULL,&back,&subSeg,&neg);
+				segPtr = &DYNARR_N(trkSeg_t, tempSegs_da, inx);
+
+				if (segPtr->type == SEG_BEZTRK) {
+					segPtr = &DYNARR_N(trkSeg_t,segPtr->bezSegs,subSeg);
+				}
+
+				if (segPtr->type == SEG_STRTRK) {
+					radius = 0.0;
+					center = zero;
+				} else if (segPtr->type == SEG_CRVTRK) {
+					center = segPtr->u.c.center;
+					radius = fabs(segPtr->u.c.radius);
+				}
+			}
+			cornuData.pos[3] = pos;
+			cornuData.center[3] = center;
+			cornuData.angle[3] = angle;
+			cornuData.radius[3] = radius;
+
+			cornuData.pos[4] = pos;
+			cornuData.center[4] = center;
+			cornuData.angle[4] = NormalizeAngle(180.0+angle);
+			cornuData.radius[4] = radius;
+
+			if (LH_first) {
+				cornuData.pos[8] = pos;
+				cornuData.center[8] = center;
+				cornuData.angle[8] = NormalizeAngle(180.0+angle);
+				cornuData.radius[8] = radius;
+
+				cornuData.pos[4] = pos;
+				cornuData.center[4] = center;
+				cornuData.angle[4] = NormalizeAngle(180.0+angle);
+				cornuData.radius[4] = radius;
+			} else {
+				cornuData.pos[6] = pos;
+				cornuData.center[6] = center;
+				cornuData.angle[6] = NormalizeAngle(180.0+angle);
+				cornuData.radius[6] = radius;
+
+				cornuData.pos[4] = pos;
+				cornuData.center[4] = center;
+				cornuData.angle[4] = NormalizeAngle(180.0+angle);
+				cornuData.radius[4] = radius;
+			}
+		} else {   //Set next center start to same place
+			cornuData.pos[4] = pos;
+			cornuData.center[4] = center;
+			cornuData.angle[4] = NormalizeAngle(180.0+angle);
+			cornuData.radius[4] = radius;
+		}
+	}
+
+	static dynArr_t cornuSegs_da;
+
+	ClearSegs(&tempSegs_da);
+	ClearSegs(&cornuSegs_da);
+
+	int Toe1Seg = 0, Toe2Seg = 0, CenterEndSeg = 0, LeftEndSeg = 0, RightEndSeg = 0;
+
+	/* Override if at zero radius at base don't compute end */
+	if (cornuData.radius[0] == 0.0) {
+		DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
+		trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,tempSegs_da);
+		temp_p->type = SEG_STRTRK;
+		temp_p->color = wDrawColorBlack;
+		temp_p->lineWidth = 0.0;
+		temp_p->u.l.pos[0] = zero;
+		temp_p->u.l.pos[1] = cornuData.pos[0];
+		LOG( log_cornuturnoutdesigner, 1, ( "ctoDes1: P0(%f,%f) P1(%f,%f) \n", \
+		                                    temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,
+		                                    temp_p->u.l.pos[1].y  ) );
+	} else {
+		DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
+		trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,tempSegs_da);
+		temp_p->type = SEG_CRVTRK;
+		temp_p->color = wDrawColorBlack;
+		temp_p->lineWidth = 0.0;
+		temp_p->u.c.radius = fabs(radii[0]);;
+		if (radii[0]>0.0) {
+			temp_p->u.c.a0 = FindAngle(end_centers[0],end_points[0]);
+		} else {
+			temp_p->u.c.a0 = FindAngle(end_centers[0],points[0]);
+		}
+		temp_p->u.c.a1 = fabs(end_arcs[0]);
+		temp_p->u.c.center = end_centers[0];
+		coOrd rp0,rp1;
+		Translate(&rp0,temp_p->u.c.center,temp_p->u.c.a0,temp_p->u.c.radius);
+		Translate(&rp1,temp_p->u.c.center,temp_p->u.c.a0+temp_p->u.c.a1,
+		          temp_p->u.c.radius);
+		LOG( log_cornuturnoutdesigner, 1,
+		     ( "ctoDes1: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f), EP(%f,%f) RP0(%f,%f) RP1(%f,%f)\n",
+		       \
+		       temp_p->u.c.radius,temp_p->u.c.a0,temp_p->u.c.a1,temp_p->u.c.center.x,
+		       temp_p->u.c.center.y, \
+		       points[0].x,points[0].y,end_points[0].x,end_points[0].y, \
+		       rp0.x,rp0.y,rp1.x,rp1.y) ) ;
+	}
+	//If Radius zero, just a straight to the First Toe if offset
+	if (cornuData.radius[0] == 0.0) {
+		if ((cornuData.pos[0].x != cornuData.pos[1].x) ||
+		    (cornuData.pos[0].y != cornuData.pos[1].y)) {
+			DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
+			trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,tempSegs_da);
+			temp_p->type = SEG_STRTRK;
+			temp_p->color = wDrawColorBlack;
+			temp_p->lineWidth = 0.0;
+			temp_p->u.l.pos[0] = cornuData.pos[0];
+			temp_p->u.l.pos[1] = cornuData.pos[1];
+		}
+	} else if ((cornuData.pos[0].x != cornuData.pos[1].x) ||
+	           (cornuData.pos[0].y != cornuData.pos[1].y) ) {
+		CallCornuNoBez(&cornuData.pos[0],&cornuData.center[0],&cornuData.angle[0],
+		               &cornuData.radius[0],&tempSegs_da);
+	}
+
+	Toe1Seg = tempSegs_da.cnt;
+
+	if (tdType == NTO_CORNU3WAY) {
+		if (newTurnToeR!=newTurnToeL) {
+			/* Toe1 to Toe2 in tempSegs array */
+			if (cornuData.radius[0] == 0.0) {
+				DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
+				trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
+				temp_p->type = SEG_STRTRK;
+				temp_p->color = wDrawColorBlack;
+				temp_p->lineWidth = 0.0;
+				temp_p->u.l.pos[0] = cornuData.pos[2];
+				temp_p->u.l.pos[1] = cornuData.pos[3];
+			} else if ((cornuData.pos[2].x != cornuData.pos[3].x) ||
+			           (cornuData.pos[2].y != cornuData.pos[3].y) ) {
+				CallCornuNoBez(&cornuData.pos[2],&cornuData.center[2],&cornuData.angle[2],
+				               &cornuData.radius[2],&cornuSegs_da);
+			}
+
+			Toe2Seg = cornuSegs_da.cnt+Toe1Seg;
+			/* Add to second cornu to tempSegs array */
+			AppendSegs(&tempSegs_da,&cornuSegs_da);
+			/* Get ready to reuse cornuSegs array*/
+			ClearSegs(&cornuSegs_da);
+		} else {
+			Toe2Seg = Toe1Seg;				 //No Toe2
+		}
+		/* Toe2 to Center in cornuSegs array */
+		CallCornuNoBez(&cornuData.pos[4],&cornuData.center[4],&cornuData.angle[4],
+		               &cornuData.radius[4],&cornuSegs_da);
+
+		if (cornuData.radius[5] == 0.0) {
+			DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
+			trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
+			temp_p->type = SEG_STRTRK;
+			temp_p->color = wDrawColorBlack;
+			temp_p->lineWidth = 0.0;
+			temp_p->u.l.pos[0] = cornuData.pos[5];
+			temp_p->u.l.pos[1] = points[3];
+			LOG( log_cornuturnoutdesigner, 1, ( "ctoDes2: P0(%f,%f) P1(%f,%f) \n", \
+			                                    temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,
+			                                    temp_p->u.l.pos[1].y  )) ;
+		} else {
+			DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
+			trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
+			temp_p->type = SEG_CRVTRK;
+			temp_p->color = wDrawColorBlack;
+			temp_p->lineWidth = 0.0;
+			temp_p->u.c.radius = -radii[3];   //Assumed Left
+			if (radii[3]>0) {
+				temp_p->u.c.a0 = FindAngle(end_centers[3],points[3]);
+			} else {
+				temp_p->u.c.a0 = FindAngle(end_centers[3],end_points[3]);
+			}
+			temp_p->u.c.a1 = fabs(end_arcs[3]);
+			temp_p->u.c.center = end_centers[3];
+			coOrd rp0,rp1;
+			Translate(&rp0,temp_p->u.c.center,temp_p->u.c.a0,temp_p->u.c.radius);
+			Translate(&rp1,temp_p->u.c.center,temp_p->u.c.a0+temp_p->u.c.a1,
+			          temp_p->u.c.radius);
+			LOG( log_cornuturnoutdesigner, 1,
+			     ( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) RP1(%f,%f)\n",
+			       \
+			       temp_p->u.c.radius,temp_p->u.c.a0,temp_p->u.c.a1,temp_p->u.c.center.x,
+			       temp_p->u.c.center.y, \
+			       points[3].x,points[3].y,end_points[3].x,end_points[3].y, \
+			       rp0.x,rp0.y,rp1.x,rp1.y) );
+		}
+
+		CenterEndSeg = cornuSegs_da.cnt+Toe2Seg;
+		/* Add to second cornu to tempSegs array */
+		AppendSegs(&tempSegs_da,&cornuSegs_da);
+		/* Get ready to reuse cornuSegs array*/
+		ClearSegs(&cornuSegs_da);
+	} else {
+		CenterEndSeg = Toe2Seg = Toe1Seg;	//No Toe2, No Center
+	}
+
+	/* Left in cornuSegs array*/
+	CallCornuNoBez(&cornuData.pos[6],&cornuData.center[6],&cornuData.angle[6],
+	               &cornuData.radius[6],&cornuSegs_da);
+
+	if (cornuData.radius[7] == 0.0) {
+		DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
+		trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
+		temp_p->type = SEG_STRTRK;
+		temp_p->color = wDrawColorBlack;
+		temp_p->lineWidth = 0.0;
+		temp_p->u.l.pos[0] = cornuData.pos[7];
+		temp_p->u.l.pos[1] = points[1];
+		LOG( log_cornuturnoutdesigner, 1, ( "ctoDes2: P0(%f,%f) P1(%f,%f) \n", \
+		                                    temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,
+		                                    temp_p->u.l.pos[1].y  ) );
+	} else {
+		DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
+		trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
+		temp_p->type = SEG_CRVTRK;
+		temp_p->color = wDrawColorBlack;
+		temp_p->lineWidth = 0.0;
+		temp_p->u.c.radius = -radii[1];  //Negative relative to left
+		if (radii[1]>0) {
+			temp_p->u.c.a0 = FindAngle(end_centers[1],points[1]);
+		} else {
+			temp_p->u.c.a0 = FindAngle(end_centers[1],end_points[1]);
+		}
+		temp_p->u.c.a1 = fabs(end_arcs[1]);
+		temp_p->u.c.center = end_centers[1];
+		coOrd rp0,rp1;
+		Translate(&rp0,temp_p->u.c.center,temp_p->u.c.a0,temp_p->u.c.radius);
+		Translate(&rp1,temp_p->u.c.center,temp_p->u.c.a0+temp_p->u.c.a1,
+		          temp_p->u.c.radius);
+		LOG( log_cornuturnoutdesigner, 1,
+		     ( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) RP1(%f,%f)\n",
+		       \
+		       temp_p->u.c.radius,temp_p->u.c.a0,temp_p->u.c.a1,temp_p->u.c.center.x,
+		       temp_p->u.c.center.y, \
+		       points[1].x,points[1].y,end_points[1].x,end_points[1].y, \
+		       rp0.x,rp0.y,rp1.x,rp1.y) );
+	}
+
+	LeftEndSeg = cornuSegs_da.cnt+CenterEndSeg;
+
+	/* Add to second cornu to tempSegs array */
+	AppendSegs(&tempSegs_da,&cornuSegs_da);
+	/* Get ready to reuse cornuSegs array*/
+	ClearSegs(&cornuSegs_da);
+
+	/* Right in cornuSegs array*/
+	CallCornuNoBez(&cornuData.pos[8],&cornuData.center[8],&cornuData.angle[8],
+	               &cornuData.radius[8],&cornuSegs_da);
+
+	if (cornuData.radius[9] == 0.0) {
+		DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
+		trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
+		temp_p->type = SEG_STRTRK;
+		temp_p->color = wDrawColorBlack;
+		temp_p->lineWidth = 0.0;
+		temp_p->u.l.pos[0] = cornuData.pos[9];
+		temp_p->u.l.pos[1] = points[2];
+		LOG( log_cornuturnoutdesigner, 1, ( "ctoDes2: P0(%f,%f) P1(%f,%f) \n", \
+		                                    temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,
+		                                    temp_p->u.l.pos[1].y  ) );
+	} else {
+		DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
+		trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
+		temp_p->type = SEG_CRVTRK;
+		temp_p->color = wDrawColorBlack;
+		temp_p->lineWidth = 0.0;
+		temp_p->u.c.radius = radii[2];
+		if (radii[2]>0) {
+			temp_p->u.c.a0 = FindAngle(end_centers[2],cornuData.pos[9]);
+		} else {
+			temp_p->u.c.a0 = FindAngle(end_centers[2],end_points[2]);
+		}
+		temp_p->u.c.a1 = fabs(end_arcs[2]);
+		temp_p->u.c.center = end_centers[2];
+		coOrd rp0,rp1;
+		Translate(&rp0,temp_p->u.c.center,temp_p->u.c.a0,temp_p->u.c.radius);
+		Translate(&rp1,temp_p->u.c.center,temp_p->u.c.a0+temp_p->u.c.a1,
+		          temp_p->u.c.radius);
+		LOG( log_cornuturnoutdesigner, 1,
+		     ( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) RP1(%f,%f)\n",
+		       \
+		       temp_p->u.c.radius,temp_p->u.c.a0,temp_p->u.c.a1,temp_p->u.c.center.x,
+		       temp_p->u.c.center.y, \
+		       points[2].x,points[2].y,end_points[2].x,end_points[2].y, \
+		       rp0.x,rp0.y,rp1.x,rp1.y) );
+	}
+
+	RightEndSeg = cornuSegs_da.cnt+LeftEndSeg;
+
+	/*Add Third Part to tempSegs Array */
+	AppendSegs(&tempSegs_da,&cornuSegs_da);
+	/* Safety - clear out cornu Array */
+	ClearSegs(&cornuSegs_da);
+
+	if (tempSegs_da.cnt >128 ) {
+		NoticeMessage( MSG_TODSGN_CORNU_TOO_COMPLEX, _("Ok"), NULL );
+		return NULL;
+	}
+
+	/* Generate Paths */
+
+	wIndex_t pathLen;
+	static char pathChar[512];
+	if (tdType == NTO_CORNU3WAY) {
+		strcpy(pathChar,"Normal");  /* Also resets array */
+		pathLen = (wIndex_t)strlen(pathChar)+1;
+		for (int i=0; i<CenterEndSeg; i++) {
+			pathChar[pathLen] = i+1;
+			pathLen++;
+		}
+		pathChar[pathLen] = 0;
+		pathLen++;
+		pathChar[pathLen] = 0;
+		pathLen++;
+		sprintf(&pathChar[pathLen],"%s","Left");
+		pathLen += (wIndex_t)strlen(&pathChar[pathLen])+1;
+	} else {
+		strcpy(pathChar,"Left");
+		pathLen = (wIndex_t)strlen(pathChar)+1;
+	}
+	for (int i=0; i<Toe1Seg; i++) {
+		pathChar[pathLen] = i+1;
+		pathLen++;
+	}
+	if ((tdType == NTO_CORNU3WAY) && !LH_first && (newTurnToeR != newTurnToeL)) {
+		for (int i=Toe1Seg; i<Toe2Seg; i++) {
+			pathChar[pathLen] = i+1;
+			pathLen++;
+		}
+	}
+
+	for (int i=CenterEndSeg; i<LeftEndSeg; i++) {
+		pathChar[pathLen] = i+1;
+		pathLen++;
+	}
+
+	pathChar[pathLen] = 0;
+	pathLen++;
+	pathChar[pathLen] = 0;
+	pathLen++;
+
+	sprintf(&pathChar[pathLen],"%s","Right");
+	pathLen += (wIndex_t)strlen(&pathChar[pathLen])+1;
+
+	for (int i=0; i<Toe1Seg; i++) {
+		pathChar[pathLen] = i+1;
+		pathLen++;
+	}
+	if ((tdType == NTO_CORNU3WAY) && LH_first && (newTurnToeR != newTurnToeL)) {
+		for (int i=Toe1Seg; i<Toe2Seg; i++) {
+			pathChar[pathLen] = i+1;
+			pathLen++;
+		}
+	}
+	for (int i=LeftEndSeg; i<RightEndSeg; i++) {
+		pathChar[pathLen] = i+1;
+		pathLen++;
+	}
+	pathChar[pathLen] = 0;
+	pathLen++;
+	pathChar[pathLen] = 0;
+	pathLen++;
+	pathChar[pathLen] = 0;
+
+	toDesignSchema_t * pp =
+	        (tdType==NTO_CORNU3WAY ? &CornuTriSchema : &CornuWyeSchema );
+	pp->paths = (signed char *)pathChar;
+	return pp;
+}
+
+
+/*********************************************************************
+ *
+ * LoadSegs - non-cornu
+ *
+ */
+
+static BOOL_T ComputeCurve(
+        coOrd *p0, coOrd *p1, DIST_T *radius,
+        DIST_T len, DIST_T off, ANGLE_T angle )
+{
+	coOrd Pf;
+	coOrd Px, Pc;
+	DIST_T d;
+
+	Pf.x = len;
+	Pf.y = off;
+	p0->x = p0->y = 0.0;
+	/*lprintf( "Angle = %0.3f\n", angle );*/
+	FindIntersection( &Px, *p0, 90.0, Pf, 90.0-angle );
+	d = FindDistance( Px, Pf )-newTurnTrackGauge;
+	if (Px.x < newTurnTrackGauge || d < 0.0) {
+		NoticeMessage( MSG_TODSGN_NO_CONVERGE, _("Ok"), NULL );
+		return FALSE;
+	}
+	if (Px.x-newTurnTrackGauge < d) {
+		d = Px.x-newTurnTrackGauge;
+	}
+	*radius = d * cos( D2R(angle/2.0) ) / sin( D2R(angle/2.0) );
+
+	p0->x = Px.x - *radius * sin( D2R(angle/2.0) ) / cos( D2R(angle/2.0) );
+	Translate( &Pc, *p0, 0.0, *radius );
+	PointOnCircle( p1, Pc, *radius, 180.0-angle );
+
+	return TRUE;
+}
+
+
+static toDesignSchema_t * LoadSegs(
+        toDesignDesc_t * dp,
+        wBool_t bFirst )
+{
+	wIndex_t s;
+	int p0, p1;
+	DIST_T d;
+	static toDesignSchema_t * pp;
+	char *segOrder;
+	coOrd pos;
+	wIndex_t segCnt = 0;
+	pp = dp->paths;
+
+	DYNARR_RESET( trkSeg_t, tempSegs_da );
+
+	if (bFirst) {
+		// Handle Left or only
+		int tdInx = 0;
+		for ( const char *pPT = dp->sParamType; *pPT; pPT++, tdInx++ ) {
+			if ( *pPT == '-' ) { continue; }
+			LOG( log_turnoutdesigner, 1, ( "%0.3f ", tdVal[tdInx] ) );
+			if ( *pPT == 'F' &&
+			     newTurnAngleMode == 0 &&
+			     tdVal[tdInx] > 0 ) {
+				/* convert from Frog Num to degrees */
+				tdVal[tdInx] = R2D(asin(1.0 / tdVal[tdInx]));
+			}
+		}
+		LOG( log_turnoutdesigner, 1, ( "\n" ) );
+
+		TempEndPtsReset();
+		memset( points, 0, sizeof points );
+		memset( radii, 0, sizeof radii );
+		memset( angles, 0, sizeof angles );
+
+		switch (dp->type) {
+		case NTO_REGULAR:
+			TempEndPtsSet( 3 );
+			if ( !ComputeCurve( &points[3], &points[4], &radii[0],
+			                    tdVal[1], fabs(tdVal[2]), tdVal[3] ) ) {
+				return NULL;
+			}
+			radii[0] = - radii[0];
+			points[0].x = points[0].y = points[1].y = 0.0;
+			points[1].x = (tdVal[0]);
+			points[2].y = fabs(tdVal[2]);
+			points[2].x = (tdVal[1]);
+			SetEndPt( TempEndPt(0), points[0], 270.0 );
+			SetEndPt( TempEndPt(1), points[1], 90.0 );
+			SetEndPt( TempEndPt(2), points[2], 90.0-tdVal[3] );
+			break;
+
+		case NTO_CURVED:
+			TempEndPtsSet( 3 );
+			if ( !ComputeCurve( &points[3], &points[4], &radii[0],
+			                    tdVal[0], fabs(tdVal[1]), tdVal[2] ) ) {
+				return NULL;
+			}
+			if ( !ComputeCurve( &points[5], &points[6], &radii[1],
+			                    tdVal[3], fabs(tdVal[4]), tdVal[5] ) ) {
+				return NULL;
+			}
+			d = points[3].x - points[5].x;
+			if ( d < -MIN_TRACK_LENGTH ) {
+				pp = &Crv3Schema;
+			} else if ( d > MIN_TRACK_LENGTH ) {
+				pp = &Crv2Schema;
+			} else {
+				pp = &Crv1Schema;
+			}
+			radii[0] = - radii[0];
+			radii[1] = - radii[1];
+			points[0].x = points[0].y = 0.0;
+			points[1].y = fabs(tdVal[1]); points[1].x = tdVal[0];
+			points[2].y = fabs(tdVal[4]); points[2].x = tdVal[3];
+			SetEndPt( TempEndPt(0), points[0], 270.0 );
+			SetEndPt( TempEndPt(2), points[1], 90.0-tdVal[2] );
+			SetEndPt( TempEndPt(1), points[2], 90.0-tdVal[5] );
+			break;
+		case NTO_CORNU:
+			TempEndPtsSet( 3 );
+			radii[0] =  fabs(tdVal[9]);	// Toe
+			radii[1] =  fabs(tdVal[3]);	// Inner
+			radii[2] =  fabs(tdVal[7]);	// Outer
+			angles[0] = 0.0;		// Base
+			angles[1] = tdVal[2];		// Inner
+			angles[2] = tdVal[6];		// Outer
+			pp = &CornuSchema;
+			points[0].x = points[0].y = 0.0;
+			points[1].y = tdVal[1]; points[1].x = tdVal[0]; //Inner
+			points[2].y = tdVal[5]; points[2].x = tdVal[4]; //Outer
+
+			SetEndPt( TempEndPt(0), points[0], 270.0 );
+			SetEndPt( TempEndPt(2), points[1], 90.0-tdVal[2] );
+			SetEndPt( TempEndPt(1), points[2], 90.0-tdVal[6] );
+			pp = LoadCurvedCornuSegs( dp->type );
+			break;
+		case NTO_WYE:
+		case NTO_3WAY:
+			TempEndPtsSet( (dp->type==NTO_3WAY)?4:3 );
+			if ( !ComputeCurve( &points[3], &points[4], &radii[0],
+			                    tdVal[0], fabs(tdVal[1]), tdVal[2] ) ) {
+				return NULL;
+			}
+			if ( !ComputeCurve( &points[5], &points[6], &radii[1],
+			                    tdVal[4], fabs(tdVal[5]), tdVal[6] ) ) {
+				return NULL;
+			}
+			points[5].y = - points[5].y;
+			points[6].y = - points[6].y;
+			radii[0] = - radii[0];
+			points[0].x = points[0].y = 0.0;
+			points[1].y = fabs(tdVal[1]);
+			points[1].x = tdVal[0];
+			points[2].y = -fabs(tdVal[5]);
+			points[2].x = tdVal[4];
+			points[7].y = 0;
+			points[7].x = tdVal[3];
+			d = points[3].x - points[5].x;
+			if ( d < -MIN_TRACK_LENGTH ) {
+				pp = (dp->type==NTO_3WAY ? &Tri3Schema : &Wye3Schema );
+			} else if ( d > MIN_TRACK_LENGTH ) {
+				pp = (dp->type==NTO_3WAY ? &Tri2Schema : &Wye2Schema );
+			} else {
+				pp = (dp->type==NTO_3WAY ? &Tri1Schema : &Wye1Schema );
+			}
+			SetEndPt( TempEndPt(0), points[0], 270.0 );
+			SetEndPt( TempEndPt(1), points[1], 90.0-tdVal[2] );
+			SetEndPt( TempEndPt(2), points[2], 90.0+tdVal[6] );
+			if (dp->type == NTO_3WAY) {
+				SetEndPt( TempEndPt(3), points[7], 90.0 );
+			}
+			break;
+		case NTO_CORNUWYE:
+		case NTO_CORNU3WAY:
+			if ( dp->type == NTO_CORNU3WAY ) {
+				TempEndPtsSet( 4 );
+			} else {
+				TempEndPtsSet( 3 );
+			}
+			radii[0] = tdVal[7];   // Base
+			radii[1] = tdVal[3];   // Left
+			radii[2] = tdVal[11];  // Right
+			radii[3] = tdVal[13];  // Center
+			angles[0] = 0.0;	// Base
+			angles[1] = tdVal[2];	// Left
+			angles[2] = tdVal[10];	// Right
+			angles[3] = tdVal[6];	// Center
+			points[0].x = points[0].y = 0.0; //Base
+			points[1].y = tdVal[1];	//  Left
+			points[1].x = tdVal[0];
+			points[2].y = -tdVal[9]; // Right
+			points[2].x = tdVal[8];
+			if (dp->type==NTO_CORNU3WAY) {
+				points[3].y = tdVal[5]; // Center
+				points[3].x = tdVal[4];
+			}
+			SetEndPt( TempEndPt(0), points[0], 270.0 );
+
+			if (tdVal[3] < 0.0) { //newTurnRad0<0.0) {
+				SetEndPt( TempEndPt(1), points[1], 90.0+angles[1] );
+			} else {
+				SetEndPt( TempEndPt(1), points[1], 90.0-angles[1] );
+			}
+			if (tdVal[11] < 0.0) { //newTurnRad1<0.0) {
+				SetEndPt( TempEndPt(2), points[2], 90.0-angles[2] );
+			} else {
+				SetEndPt( TempEndPt(2), points[2], 90.0+angles[2] );
+			}
+			if (dp->type == NTO_CORNU3WAY) {
+				if (tdVal[7] < 0.0) {//newTurnRad3<0.0) {
+					SetEndPt( TempEndPt(3), points[3], 90.0+angles[3] );
+				} else {
+					SetEndPt( TempEndPt(3), points[3], 90.0-angles[3] );
+				}
+			}
+			pp = LoadWye3WayCornuSegs( dp->type );
+			if ( ! pp ) { return NULL; }
+			break;
+
+		case NTO_D_SLIP:
+		case NTO_S_SLIP:
+		case NTO_CROSSING:
+			TempEndPtsSet( 4 );
+			if (dp->type == NTO_D_SLIP) {
+				if  (newTurnSlipMode == 1) {
+					pp = &DoubleSlipSchema2;
+				} else {
+					pp = &DoubleSlipSchema;
+				}
+			}
+			points[0].x = points[0].y = points[1].y = 0.0;
+			points[1].x = tdVal[0];
+			pos.y = 0; pos.x = tdVal[0]/2.0;
+			coOrd cpos = pos;
+			Translate( &points[3], pos, 90.0+tdVal[2], tdVal[1]/2.0 );
+			points[2].y = - points[3].y;
+			points[2].x = pos.x-(points[3].x-pos.x);
+			if (dp->type != NTO_CROSSING) {
+				Translate( &pos, points[3], 90.0+tdVal[2], -newTurnTrackGauge );
+				if (!ComputeCurve( &points[4], &points[5], &radii[0],
+				                   pos.x, fabs(pos.y), tdVal[2] )) {
+					return NULL;
+				}
+				radii[1] = - radii[0];
+				points[5].y = - points[5].y;
+				points[6].y = 0; points[6].x = cpos.x-(points[4].x-cpos.x);
+				points[7].y = -points[5].y;
+				points[7].x = cpos.x-(points[5].x-cpos.x);
+			}
+			SetEndPt( TempEndPt(0), points[0], 270.0 );
+			SetEndPt( TempEndPt(1), points[1], 90.0 );
+			SetEndPt( TempEndPt(2), points[2], 270.0+tdVal[2] );
+			SetEndPt( TempEndPt(3), points[3], 90.0+tdVal[2] );
+			break;
+
+		case NTO_R_CROSSOVER:
+		case NTO_L_CROSSOVER:
+		case NTO_D_CROSSOVER:
+			TempEndPtsSet( 4 );
+			d = tdVal[0]/2.0 - newTurnTrackGauge;
+			if (d < 0.0) {
+				NoticeMessage( MSG_TODSGN_CROSSOVER_TOO_SHORT, _("Ok"), NULL );
+				return NULL;
+			}
+			ANGLE_T angle0 = R2D( atan2( fabs(tdVal[1]), d ) );
+			points[0].y = 0.0; points[0].x = 0.0;
+			points[1].y = 0.0; points[1].x = tdVal[0];
+			points[2].y = fabs(tdVal[1]); points[2].x = 0.0;
+			points[3].y = fabs(tdVal[1]); points[3].x = tdVal[0];
+			if (!ComputeCurve( &points[4], &points[5], &radii[1],
+			                   tdVal[0]/2.0, fabs(tdVal[1])/2.0, angle0 ) ) {
+				return NULL;
+			}
+			radii[0] = - radii[1];
+			points[6].y = 0.0; points[6].x = tdVal[0]-points[4].x;
+			points[7].y = points[5].y; points[7].x = tdVal[0]-points[5].x;
+			points[8].y = fabs(tdVal[1]); points[8].x = points[4].x;
+			points[9].y = fabs(tdVal[1])-points[5].y; points[9].x = points[5].x;
+			points[10].y = fabs(tdVal[1]); points[10].x = points[6].x;
+			points[11].y = points[9].y; points[11].x = points[7].x;
+			SetEndPt( TempEndPt(0), points[0], 270.0 );
+			SetEndPt( TempEndPt(1), points[1], 90.0 );
+			SetEndPt( TempEndPt(2), points[2], 270.0 );
+			SetEndPt( TempEndPt(3), points[3], 90.0 );
+			break;
+
+		case NTO_STR_SECTION:
+			TempEndPtsSet( 2 );
+			points[0].y = points[0].x = 0;
+			points[1].y = 0; points[1].x = tdVal[0];
+			SetEndPt( TempEndPt(0), points[0], 270.0 );
+			SetEndPt( TempEndPt(1), points[1], 90.0 );
+			break;
+
+		case NTO_CRV_SECTION:
+			TempEndPtsSet( 2 );
+			points[0].y = points[0].x = 0;
+			points[1].y = tdVal[0] * (1.0 - cos( D2R(tdVal[1]) ) );
+			points[1].x = tdVal[0] * sin( D2R(tdVal[1]) );
+			radii[0] = -tdVal[0];
+			SetEndPt( TempEndPt(0), points[0], 270.0 );
+			SetEndPt( TempEndPt(1), points[1], 90.0-tdVal[1] );
+			break;
+
+		case NTO_BUMPER:
+			TempEndPtsSet( 1 );
+			points[0].y = points[0].x = 0;
+			points[1].y = 0; points[1].x = tdVal[0];
+			SetEndPt( TempEndPt(0), points[0], 270.0 );
+			break;
+
+		default:
+			;
+		}
+//#ifdef LATER
+	} else {
+		switch (dp->type) {
+		case NTO_CURVED:
+			d = points[3].x - points[5].x;
+			if ( d < -MIN_TRACK_LENGTH ) {
+				pp = &Crv3Schema;
+			} else if ( d > MIN_TRACK_LENGTH ) {
+				pp = &Crv2Schema;
+			} else {
+				pp = &Crv1Schema;
+			}
+			break;
+
+		case NTO_CORNU:
+			pp = LoadCurvedCornuSegs( dp->type );
+			if ( ! pp ) { return NULL; }
+			break;
+		default:
+			LOG( log_turnoutdesigner, 1, ( "unexpected dp->type %d in LoadSegs\n",
+			                               dp->type ) )
+			break;
+		}
+//#endif
+	}
+
+	switch ( dp->type ) {
+	case NTO_CORNU:
+	case NTO_CORNUWYE:
+	case NTO_CORNU3WAY:
+		break;
+	default:
+		//
+		// Generate Segs
+		segOrder = pp->segOrder;
+		segCnt = (wIndex_t)strlen( segOrder );
+		CHECKMSG( segCnt%3 == 0, ( "%s", dp->label ) );
+		segCnt /= 3;
+		DYNARR_SET( trkSeg_t, tempSegs_da, segCnt );
+		memset( &tempSegs(0), 0, segCnt * sizeof tempSegs(0) );
+		for ( s=0; s<segCnt; s++ ) {
+			trkSeg_p segPtr = &tempSegs(s);
+			segPtr->color = wDrawColorBlack;
+			if (*segOrder <= '9') {
+				p0 = *segOrder++ - '0';
+			} else {
+				p0 = *segOrder++ - 'A' + 10;
+			}
+			if (*segOrder <= '9') {
+				p1 = *segOrder++ - '0';
+			} else {
+				p1 = *segOrder++ - 'A' + 10;
+			}
+			int p = *segOrder++ - '0';
+			if (p == 3) {
+				/* cornu */
+			} else if (p != 0) {
+				segPtr->type = SEG_CRVTRK;
+				ComputeCurvedSeg( segPtr, radii[p-1], points[p0], points[p1] );
+			} else {
+				segPtr->type = SEG_STRTRK;
+				segPtr->u.l.pos[0] = points[p0];
+				segPtr->u.l.pos[1] = points[p1];
+
+			}
+		}
+	}
+
+	AddRoadbed();
+
+	if ( CheckPaths( tempSegs_da.cnt, &tempSegs(0), pp->paths, dp->label ) < 0 ) {
+		return NULL;
+	}
+	return pp;
+}
+
+
+static void CopyNonTracks( turnoutInfo_t * to )
+{
+	trkSeg_p sp0;
+	for ( sp0=to->segs; sp0<&to->segs[to->segCnt]; sp0++ ) {
+		if ( sp0->type != SEG_STRTRK && sp0->type != SEG_CRVTRK
+		     && sp0->type != SEG_BEZTRK ) {
+			DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
+			tempSegs(tempSegs_da.cnt-1) = *sp0;
+		}
+	}
+}
+
+
+static drawCmd_t newTurnout_d = {
+	NULL,
+	&printDrawFuncs,
+	DC_PRINT,
+	1.0,
+	0.0,
+	{ 0.0, 0.0 },
+	{ 0.0, 0.0 },
+	Pix2CoOrd, CoOrd2Pix
+};
+
+static coOrd newTurnPrintOrig;
+static wFont_p newTurnPrintFont;
+static int newTurnPrintII, newTurnPrintJJ;
+
+#define NEWTURN_FONT_SCALE (0.6)			/**< all NewTurnPrint font sizes are 60% of their original value */
+#define NEWTURN_TITLE_FONTSIZE (40 * NEWTURN_FONT_SCALE)
+#define NEWTURN_SUBTITLE_FONTSIZE (20 * NEWTURN_FONT_SCALE)
+#define NEWTURN_DATA_FONTSIZE (16 * NEWTURN_FONT_SCALE)
+
+/**
+ * Per-page render callback invoked by the print backend (print.c) from the
+ * GtkPrintOperation "draw-page" signal, once the page cairo context and
+ * transform have already been established. Maps the linear page index back
+ * to its (i,j) grid cell and renders it.
+ *
+ * \param pageNr IN zero-based page index
+ * \param data IN unused
+ * \return TRUE to continue, FALSE to abort the job at the end of this page
+ */
+static wBool_t RenderNewTurnPage( int pageNr, void * data )
+{
+	coOrd pos, p0, p1;
+	EPINX_T ep;
+	coOrd strPos;
+	int i, j;
+
+	if ( pageNr < 0 || pageNr >= newTurnPrintII*newTurnPrintJJ ) {
+		return FALSE;
+	}
+	i = pageNr / newTurnPrintJJ;
+	j = pageNr % newTurnPrintJJ;
+
+	newTurnout_d.orig.x = newTurnPrintOrig.x + i*newTurnout_d.size.x;
+	newTurnout_d.orig.y = newTurnPrintOrig.y + j*newTurnout_d.size.y;
+
+	newTurnout_d.d = wPrintPageStart();
+	if ( newTurnout_d.d == NULL ) {
+		return FALSE;
+	}
+	newTurnout_d.dpi = wDrawGetDPI(newTurnout_d.d);
+	strPos.x = newTurnout_d.orig.x + 3.0;
+
+	sprintf( message, "%s", sProdName );
+	strPos.y = newTurnout_d.orig.y + 6.75;
+	DrawString( &newTurnout_d, strPos, 0.0, message, newTurnPrintFont,
+	            NEWTURN_TITLE_FONTSIZE, wDrawColorBlack );
+	sprintf( message, _("%s Designer"), _(curDesign->label) );
+	strPos.y -= 0.5;
+	DrawString( &newTurnout_d, strPos, 0.0, message, newTurnPrintFont,
+	            NEWTURN_SUBTITLE_FONTSIZE, wDrawColorBlack );
+	sprintf( message, _("%s %d x %d (of %d x %d)"), _("Page"), i+1, j+1,
+	         newTurnPrintII, newTurnPrintJJ );
+	strPos.y -= 0.5;
+	DrawString( &newTurnout_d, strPos, 0.0, message, newTurnPrintFont,
+	            NEWTURN_SUBTITLE_FONTSIZE, wDrawColorBlack );
+	strPos.y -= 0.10;
+	int tdInx = 0;
+	int iDescInx = curDesign->iDescFirst;
+	for ( const char *pPT = curDesign->sParamType; *pPT; pPT++, tdInx++ ) {
+		if ( *pPT == '-' ) { continue; }
+		const char * sLabel;
+		if ( *pPT == 'F' && newTurnAngleMode==0 ) {
+			sLabel = _("Frog #");
+		} else {
+			sLabel = turnDesignPLs[ iDescInx ].winLabel;
+		}
+		const char * sValue;
+		if ( *pPT == 'L' || *pPT == 'O' ) {
+			sValue = FormatDistance( tdVal[tdInx] );
+		} else {
+			sValue = FormatFloat( tdVal[tdInx] );
+		}
+		sprintf( message, "%s: %s", sLabel, sValue );
+		strPos.y -= 0.25;
+		DrawString( &newTurnout_d, strPos, 0.0, message, newTurnPrintFont,
+		            NEWTURN_DATA_FONTSIZE, wDrawColorBlack );
+		iDescInx++;
+	}
+	if (newTurnLeftDesc[0] || newTurnLeftPartno[0]) {
+		sprintf( message, "%s %s %s", newTurnManufacturer, newTurnLeftPartno,
+		         newTurnLeftDesc );
+		strPos.y -= 0.25;
+		DrawString( &newTurnout_d, strPos, 0.0, message, newTurnPrintFont,
+		            NEWTURN_DATA_FONTSIZE, wDrawColorBlack );
+	}
+	if (newTurnRightDesc[0] || newTurnRightPartno[0]) {
+		sprintf( message, "%s %s %s", newTurnManufacturer, newTurnRightPartno,
+		         newTurnRightDesc );
+		strPos.y -= 0.25;
+		DrawString( &newTurnout_d, strPos, 0.0, message, newTurnPrintFont,
+		            NEWTURN_DATA_FONTSIZE, wDrawColorBlack );
+	}
+
+	DrawRectangle( &newTurnout_d, newTurnout_d.orig, newTurnout_d.size,
+	               wDrawColorBlack, DRAW_CLOSED );
+
+	DrawSegsDA( &newTurnout_d, NULL, zero, 270.0, &tempSegs_da, newTurnTrackGauge,
+	            wDrawColorBlack, 0 );
+
+	for ( ep=0; ep<TempEndPtsCount(); ep++ ) {
+		pos.x = - GetEndPtPos( TempEndPt(ep) ).y;
+		pos.y = GetEndPtPos( TempEndPt(ep) ).x;
+		ANGLE_T angle = GetEndPtAngle( TempEndPt(ep) );
+		Translate( &p0, pos, angle+90+270.0,
+		           newTurnTrackGauge );
+		Translate( &p1, pos, angle+270+270.0,
+		           newTurnTrackGauge );
+		DrawLine( &newTurnout_d, p0, p1, 0, wDrawColorBlack );
+		Translate( &p0, pos, angle+270.0,
+		           newTurnout_d.size.y/2.0 );
+		DrawStraightTrack( &newTurnout_d, pos, p0,
+		                   angle+270.0,
+		                   NULL, wDrawColorBlack, 0 );
+	}
+
+	return wPrintPageEnd( newTurnout_d.d );
+}
+
+static void NewTurnPrint(
+        void * junk )
+{
+	WDOUBLE_T px, py;
+	double topMargin, rightMargin, bottomMargin, leftMargin;
+	int ii, jj;
+	coOrd orig, size;
+	const toDesignSchema_t * pp;
+	POS_T tmp;
+
+	pp=LoadSegs( curDesign, TRUE );
+	if (pp == NULL) {
+		return;
+	}
+	if (includeNontrackSegments && customTurnout1) {
+		CopyNonTracks( customTurnout1 );
+	}
+
+	GetSegBounds( zero, 0.0, tempSegs_da.cnt, &tempSegs(0), &orig, &size );
+	tmp = orig.x; orig.x = orig.y; orig.y = tmp;
+
+	newTurnPrintFont = wStandardFont( F_TIMES, FALSE, FALSE );
+	wPrintGetPageSize( &px, &py );
+	wPrintGetMargins( &topMargin, &rightMargin, &bottomMargin, &leftMargin );
+	px -= (leftMargin + rightMargin);
+	py -= (topMargin + bottomMargin);
+	newTurnout_d.size.x = px;
+	newTurnout_d.size.y = py;
+	ii = (int)(size.y/newTurnout_d.size.x)+1;
+	jj = (int)(size.x/newTurnout_d.size.y)+1;
+
+	orig.x = - ( size.y + orig.x + newTurnTrackGauge/2.0 + 0.5 );
+	orig.y -= (0.5);
+	newTurnPrintOrig = orig;
+	newTurnPrintII = ii;
+	newTurnPrintJJ = jj;
+
+	if ( !wPrintDocStart( sTurnoutDesignerW, ii*jj, NULL ) ) {
+		return;
+	}
+	wPrintDocSetPages( ii*jj, RenderNewTurnPage, NULL );
+	wPrintDocRun();
+	wPrintDocEnd();
+}
+
+
+static char * BuildTrimedTitle( char * cp, const char * sep, const char * sMfg,
+                                const char * sDesc, const char * sPartno )
+{
+	cp = Strcpytrimed( cp, sMfg, FALSE );
+	strcpy( cp, sep );
+	cp += strlen(cp);
+	cp = Strcpytrimed( cp, sDesc, FALSE );
+	strcpy( cp, sep );
+	cp += strlen(cp);
+	cp = Strcpytrimed( cp, sPartno, FALSE );
+	return cp;
+}
+
+
+//
+// Output definitons
+//
+static void OutputTurnoutDef(
+        toDesignDesc_t * dp,
+        toDesignSchema_t * pp,
+        wBool_t bFirst,
+        FILE * f,
+        turnoutInfo_t * customTurnout,
+        char * customInfoP	)
+{
+	BOOL_T foundR=FALSE;
+	turnoutInfo_t *to;
+
+	BuildTrimedTitle( tempCustom, "\t", newTurnManufacturer,
+	                  bFirst ? newTurnLeftDesc : newTurnRightDesc,
+	                  bFirst ? newTurnLeftPartno : newTurnRightPartno );
+
+	long options = 0;
+	if ( curDesign->type == NTO_D_SLIP && newTurnSlipMode == 1) {
+		options |= COMPOUND_OPTION_PATH_NOCOMBINE;
+	}
+
+	if (includeNontrackSegments && customTurnout) {
+		CopyNonTracks( customTurnout );
+	}
+	if ( customTurnout ) {
+		customTurnout->segCnt = 0;
+	}
+
+	to = CreateNewTurnout( newTurnScaleName, tempCustom,
+	                       tempSegs_da.cnt, &tempSegs(0),
+	                       pp->paths,
+	                       TempEndPtsCount(), TempEndPt(0),
+	                       FALSE, options );
+	to->customInfo = customInfoP;
+	if (f) {
+		fprintf( f, "TURNOUT %s \"%s\" %ld\n", newTurnScaleName, PutTitle(tempCustom),
+		         options );
+		fprintf( f, "\tU5 %s\n", customInfoP );
+		WriteCompoundPathsEndPtsSegs( f, pp->paths,
+		                              tempSegs_da.cnt, &tempSegs(0),
+		                              TempEndPtsCount(), TempEndPt(0) );
+	}
+
+	// foundR is never assigned TRUE anywhere (vestigial, no live setter);
+	// the replace-confirmation check works correctly via FindCompound() alone.
+	if ( bFirst &&
+	     customTurnout == NULL &&
+	     // cppcheck-suppress knownConditionTrueFalse
+	     ( foundR || FindCompound( FIND_TURNOUT, newTurnScaleName, message ) ) ) {
+		if ( !NoticeMessage( MSG_TODSGN_REPLACE, _("Yes"), _("No") ) ) {
+			return;
+		}
+	}
+}
+
+static void NewTurnOk( void * context )
+{
+	FILE * f;
+	toDesignSchema_t * pp;
+	char * cp;
+	char * customInfoP;
+
+	coOrd pos;
+	ANGLE_T angle;
+
+	SetCLocale();
+	//
+	// Generate segments and endPts
+	//
+	pp=LoadSegs( curDesign, TRUE );
+	if ( pp == NULL ) { return; }
+
+	f = OpenCustom("a");
+
+	//
+	// Build U line
+	//
+	memset( tempCustom, 0, sizeof tempCustom );
+	sprintf( tempCustom, "\"%s\" \"%s\" \"",
+	         curDesign->label, "" );
+	cp = tempCustom + strlen(tempCustom);
+	cp = Strcpytrimed( cp, newTurnManufacturer, TRUE );
+	strcpy( cp, "\" \"" );
+	cp += 3;
+	cp = Strcpytrimed( cp, newTurnLeftDesc, TRUE );
+	strcpy( cp, "\" \"" );
+	cp += 3;
+	cp = Strcpytrimed( cp, newTurnLeftPartno, TRUE );
+	strcpy( cp, "\"" );
+	cp += 1;
+	if (curDesign->type == NTO_REGULAR || curDesign->type == NTO_CURVED
+	    || curDesign->type == NTO_CORNU ) {
+		strcpy( cp, " \"" );
+		cp += 2;
+		cp = Strcpytrimed( cp, newTurnRightDesc, TRUE );
+		strcpy( cp, "\" \"" );
+		cp += 3;
+		cp = Strcpytrimed( cp, newTurnRightPartno, TRUE );
+		strcpy( cp, "\"" );
+		cp += 1;
+	}
+	CHECK( (size_t)(cp-tempCustom) <= sizeof tempCustom );
+
+	int tdInx = 0;
+	for ( const char * pPT = curDesign->sParamType; *pPT; pPT++, tdInx++ ) {
+		if ( *pPT == '-' ) { continue; }
+		sprintf( cp, " %0.6f", tdVal[tdInx] );
+		cp += strlen(cp);
+	}
+
+	sprintf( cp, " %0.6f %0.6f %lu", newTurnRoadbedWidth,
+	         newTurnRoadbedLineWidth, newTurnRoadbedColor );
+	customInfoP = MyStrdup( tempCustom );
+	strcpy( tempCustom, message );
+
+	OutputTurnoutDef(curDesign, pp, TRUE, f, customTurnout1, customInfoP );
+
+	//
+	// Handle Right handed turnouts
+	//
+	switch (curDesign->type) {
+	case NTO_REGULAR:
+	case NTO_CURVED:
+	case NTO_CORNU:
+		for ( int inx=0; inx<COUNT(points); inx++ ) {
+			points[inx].y = - points[inx].y;
+			radii[inx] = -radii[inx];
+			angles[inx] = -angles[inx];
+		}
+		LoadSegs( curDesign, FALSE );
+		//
+		// Flip endPts
+		if ( curDesign->type != NTO_REGULAR ) {
+			pos = GetEndPtPos(TempEndPt(1));
+			angle = GetEndPtAngle(TempEndPt(1));
+			pos.y = - pos.y;
+			angle = 180.0 - angle;
+			SetEndPt( TempEndPt(1), pos, angle );
+		}
+		pos = GetEndPtPos(TempEndPt(2));
+		angle = GetEndPtAngle(TempEndPt(2));
+		pos.y = - pos.y;
+		angle = 180.0 - angle;
+		SetEndPt( TempEndPt(2), pos, angle );
+		OutputTurnoutDef( curDesign, pp, FALSE, f, customTurnout2, customInfoP );
+		break;
+	default:
+		;
+	}
+	tempCustom[0] = '\0';
+
+	if (f) {
+		fclose(f);
+	}
+	SetUserLocale();
+	includeNontrackSegments = FALSE;
+	wHide( newTurnW );
+	DoChangeNotification( CHANGE_PARAMS );
+}
+
+
+
+static void RedrawDesigner(
+        wControl_p d,
+        void *ctx,
+        wWinPix_t canvasW,
+        wWinPix_t canvasH)
+{
+	int i;
+	wDrawPix_t cx, cy;
+	const wDrawPix_t R = 10;
+	char buf[12];
+	double x_min = 1e9, x_max = -1e9, y_min = 1e9, y_max = -1e9;
+	wWinPix_t actualW, actualH;
+
+	if (!designerD.d) { return; }
+	wDrawClear(designerD.d);
+	if (!curDesign || curDesign->lineCnt == 0) { return; }
+
+	/* use actual canvas size so centering is correct even when the
+	 * canvas is stretched taller than DESIGNER_CANVAS_H by the layout */
+	wDrawGetSize(designerD.d, &actualW, &actualH);
+	if (actualW <= 0) { actualW = DESIGNER_CANVAS_W; }
+	if (actualH <= 0) { actualH = DESIGNER_CANVAS_H; }
+
+	/* compute bounding box to center the drawing */
+	for (i = 0; i < curDesign->lineCnt; i++) {
+		const wLines_t *l = &curDesign->lines[i];
+		if (l->width == 2) { continue; }
+		double lx0 = l->x0 * designerScale, lx1 = l->x1 * designerScale;
+		double ly0 = l->y0 * designerScale, ly1 = l->y1 * designerScale;
+		if (lx0 < x_min) { x_min = lx0; } if (lx0 > x_max) { x_max = lx0; }
+		if (lx1 < x_min) { x_min = lx1; } if (lx1 > x_max) { x_max = lx1; }
+		if (ly0 < y_min) { y_min = ly0; } if (ly0 > y_max) { y_max = ly0; }
+		if (ly1 < y_min) { y_min = ly1; } if (ly1 > y_max) { y_max = ly1; }
+	}
+	/* INMAPY flips Y: screen_y = (H-1) - y_raw.
+	 * Center by shifting raw y so drawing midpoint maps to canvas midpoint. */
+	designerXOff = (actualW - (x_max + x_min)) / 2.0;
+	designerYOff = (actualH / 2.0 - 1.0) - (y_min + y_max) / 2.0;
+
+	for (i = 0; i < curDesign->lineCnt; i++) {
+		const wLines_t *l = &curDesign->lines[i];
+		if (l->width == 2) { continue; }
+		wDrawLine(designerD.d,
+		          (wDrawPix_t)(l->x0 * designerScale + designerXOff),
+		          (wDrawPix_t)(l->y0 * designerScale + designerYOff),
+		          (wDrawPix_t)(l->x1 * designerScale + designerXOff),
+		          (wDrawPix_t)(l->y1 * designerScale + designerYOff),
+		          l->width == 3 ? 2 : 1,
+		          wDrawLineSolid, wDrawColorBlack, 0);
+	}
+
+	for (i = 0; i < curDesign->lineCnt; i++) {
+		const wLines_t *l = &curDesign->lines[i];
+		if (l->width != 2) { continue; }
+		cx = (wDrawPix_t)(l->x0 * designerScale + designerXOff);
+		cy = (wDrawPix_t)(l->y0 * designerScale + designerYOff);
+		wDrawFilledCircle(designerD.d, cx, cy, R, wDrawColorBlue, 0);
+		sprintf(buf, "%d", l->x1 + 1);
+		{
+			wDrawPix_t tw, th, td, ta;
+			wDrawGetTextSize(&tw, &th, &td, &ta, designerD.d, buf, NULL, 9.0);
+			wDrawString(designerD.d, cx - tw/2, cy +td - th/2, 0.0,
+			            buf, NULL, 9.0, wDrawColorWhite, 0);
+		}
+	}
+}
+
+static void ClickDesigner(
+        wAction_t action,
+        coOrd pos)
+{
+	int i;
+	wDrawPix_t px, py, cx, cy, dx, dy;
+	const wDrawPix_t R = 10;
+
+	if (action != wActionLDown || !curDesign) { return; }
+	px = (wDrawPix_t)(pos.x * designerD.dpi / designerD.scale);
+	py = (wDrawPix_t)(pos.y * designerD.dpi / designerD.scale);
+	for (i = 0; i < curDesign->lineCnt; i++) {
+		const wLines_t *l = &curDesign->lines[i];
+		if (l->width != 2) { continue; }
+		cx = (wDrawPix_t)(l->x0 * designerScale + designerXOff);
+		cy = (wDrawPix_t)(l->y0 * designerScale + designerYOff);
+		dx = px - cx;
+		dy = py - cy;
+		if (dx*dx + dy*dy <= R*R) {
+			wControlSetFocus(
+			        turnDesignPLs[curDesign->iDescFirst + l->x1].control);
+			return;
+		}
+	}
+}
+
+static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
+{
+	if ( newTurnW == NULL ) {
+		newTurnW = FormCreateDialog( &turnDesignPG,
+		                             _("Turnout Designer"),
+		                             _("Ok"),
+		                             NewTurnOk,
+		                             _("Cancel"),
+		                             FormCancel_Current,
+		                             TRUE,
+		                             F_BLOCK,
+		                             NULL );
+	}
+	if ( curDesign != newDesign ) {
+		curDesign = newDesign;
+
+		RedrawDesigner(NULL, NULL, 0, 0);
+
+		// Show new stack
+		wStatusSetVisibleControlSet(  newTurnW, curDesign->stackLabel );
+
+		// Set title
+		sprintf( message, _("%s %s Designer"), sProdName, _(curDesign->label) );
+		wWinSetTitle( newTurnW, curDesign->label );
+
+		// Show or hide float controls
+		int iDescLast = curDesign->iDescFirst;
+		for ( const char * pPT = curDesign->sParamType; *pPT; pPT++ ) {
+			if ( *pPT == '-' ) { continue; }
+			iDescLast++;
+		}
+		for ( int inx = 0; inx<I_TOMANUF; inx++ ) {
+			paramData_p ptr = turnDesignPLs+inx;
+			ptr->bInvalid = FALSE;
+			if ( inx >= curDesign->iDescFirst &&
+			     inx < iDescLast ) {
+				ptr->bShown = TRUE;
+			} else {
+				ptr->bShown = FALSE;
+			}
+		}
+
+		// Show or hide angleMode and slipPath radio buttons and
+		// Descriptions
+		wControlShow( turnDesignPLs[I_TOSLIPMODE].control, FALSE );
+		wControlShow( turnDesignPLs[I_TOSLIPMODE+1].control, FALSE );
+		turnDesignPLs[I_TOSLIPMODE].bShown = FALSE;
+		turnDesignPLs[I_TOSLIPMODE].option |= PDO_DLGIGNORE;
+		wControlShow( turnDesignPLs[I_TOANGMODE].control, FALSE );
+		wControlShow( turnDesignPLs[I_TOANGMODE+1].control, FALSE );
+		turnDesignPLs[I_TOANGMODE].bShown = FALSE;
+		turnDesignPLs[I_TOANGMODE].option |= PDO_DLGIGNORE;
+		switch ( curDesign->type ) {
+		case NTO_S_SLIP:
+		case NTO_D_SLIP:
+			wControlShow( turnDesignPLs[I_TOSLIPMODE].control, TRUE );
+			wControlShow( turnDesignPLs[I_TOSLIPMODE+1].control, TRUE );
+			turnDesignPLs[I_TOSLIPMODE].bShown = TRUE;
+			turnDesignPLs[I_TOSLIPMODE].option &= ~PDO_DLGIGNORE;
+			__attribute__((fallthrough));
+		case NTO_REGULAR:
+		case NTO_CURVED:
+		case NTO_WYE:
+		case NTO_3WAY:
+		case NTO_CROSSING:
+		case NTO_CORNU:
+		case NTO_CORNUWYE:
+		case NTO_CORNU3WAY:
+			wControlShow( turnDesignPLs[I_TOANGMODE].control, TRUE );
+			wControlShow( turnDesignPLs[I_TOANGMODE+1].control, TRUE );
+			turnDesignPLs[I_TOANGMODE].bShown = TRUE;
+			turnDesignPLs[I_TOANGMODE].option &= ~PDO_DLGIGNORE;
+			break;
+		default:
+			LOG( log_turnoutdesigner, 1,
+			     ( "unexpected curDesign->type %d in SetupTurnoutDesignerW\n",
+			       curDesign->type ) )
+			break;
+		}
+		switch ( curDesign->type ) {
+		case NTO_REGULAR:
+		case NTO_CURVED:
+		case NTO_CORNU:
+			wControlShow( turnDesignPLs[I_TORDESC].control, TRUE );
+			wControlShow( turnDesignPLs[I_TORDESC+1].control, TRUE );
+			wControlShow( turnDesignPLs[I_TORDESC+2].control, TRUE );
+			wControlShow( turnDesignPLs[I_TORDESC+3].control, TRUE );
+			turnDesignPLs[I_TORDESC].bShown = TRUE;
+			turnDesignPLs[I_TORDESC].option &= ~PDO_DLGIGNORE;
+			wMessageSetValue( turnDesignPLs[I_TOLDESC+2].control, N_("Left Description") );
+			break;
+		default:
+			wControlShow( turnDesignPLs[I_TORDESC].control, FALSE );
+			wControlShow( turnDesignPLs[I_TORDESC+1].control, FALSE );
+			wControlShow( turnDesignPLs[I_TORDESC+2].control, FALSE );
+			wControlShow( turnDesignPLs[I_TORDESC+3].control, FALSE );
+			turnDesignPLs[I_TORDESC].bShown = FALSE;
+			turnDesignPLs[I_TORDESC].option |= PDO_DLGIGNORE;
+			wMessageSetValue( turnDesignPLs[I_TOLDESC+2].control, N_("Description") );
+			break;
+		}
+
+
+	}
+}
+
+
+static void ShowTurnoutDesigner( void * context )
+{
+	wBool_t sameTurnout = FALSE;
+	if (recordF) {
+		fprintf( recordF, TURNOUTDESIGNER " SHOW %s\n",
+		         ((toDesignDesc_t*)context)->label );
+	}
+	includeNontrackSegments = FALSE;
+	newTurnScaleName = curScaleName;
+	newTurnTrackGauge = trackGauge;
+	if (context && (curDesign == context)) {
+		sameTurnout = TRUE;
+	}
+	SetupTurnoutDesignerW( (toDesignDesc_t*)context );
+	if (!sameTurnout) {  /* Clear Values unless same as last time */
+		newTurnRightDesc[0] = '\0';
+		newTurnRightPartno[0] = '\0';
+		newTurnLeftDesc[0] = '\0';
+		newTurnLeftPartno[0] = '\0';
+		for ( int inx=0; inx < COUNT(tdVal); inx++ ) {
+			tdVal[inx] = 0.0;
+		}
+	}
+	FormLoadControls( &turnDesignPG );
+	FormGroupRecord( &turnDesignPG );
+	customTurnout1 = NULL;
+	customTurnout2 = NULL;
+	wShow( newTurnW );
+}
+
+// ShowTurnoutDesigner() is registered with a non-NULL context (dp), so the
+// playback dispatcher (macro.c) always calls it with that same pointer --
+// void*/char* are representation-identical, but this wrapper matches the
+// real playbackProc_p signature instead of casting through a mismatch.
+static void ShowTurnoutDesignerPlayback( char * data )
+{
+	ShowTurnoutDesigner( (void *) data );
+}
+
+
+
+/*********************************************************************
+ *
+ * Edit
+ *
+ */
+
+static BOOL_T NotClose( DIST_T d )
+{
+	return d < -0.001 || d > 0.001;
+}
+
+
+EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
+{
+	int i;
+	toDesignDesc_t * dp;
+	char * type, * name, *cp, *mfg, *descL, *partL, *descR, *partR;
+	long rgb;
+	trkSeg_p sp0, sp1;
+	BOOL_T segsDiff;
+	LWIDTH_T lineWidth;
+
+	memset( tdVal, 0, sizeof tdVal );
+	if ( ! GetArgs( to->customInfo, "qqqqqc", &type, &name, &mfg, &descL, &partL,
+	                &cp ) ) {
+		return;
+	}
+	for ( i=0; i<COUNT( designDescs ); i++ ) {
+		dp = designDescs[i];
+		if ( strcmp( type, dp->label ) == 0 ) {
+			break;
+		}
+	}
+	if ( i >= COUNT( designDescs ) ) {
+		return;
+	}
+
+	SetupTurnoutDesignerW(dp);
+	// to's only caller (dcmpnd.c) already dereferences to->endCnt/customInfo/
+	// title before calling EditCustomTurnout, so to can never be NULL here.
+	// cppcheck-suppress nullPointerRedundantCheck
+	newTurnTrackGauge = GetScaleTrackGauge( to->scaleInx );
+	// cppcheck-suppress nullPointerRedundantCheck
+	newTurnScaleName = GetScaleName( to->scaleInx );
+	strcpy( newTurnManufacturer, mfg );
+	strcpy( newTurnLeftDesc, descL );
+	strcpy( newTurnLeftPartno, partL );
+	if (dp->type == NTO_REGULAR || dp->type == NTO_CURVED
+	    || dp->type == NTO_CORNU) {
+		if ( ! GetArgs( cp, "qqc", &descR, &partR, &cp )) {
+			return;
+		}
+		strcpy( newTurnRightDesc, descR );
+		strcpy( newTurnRightPartno, partR );
+	} else {
+		descR = partR = "";
+	}
+
+	int tdInx = 0;
+	for ( const char * pPT = dp->sParamType; *pPT; pPT++, tdInx++ ) {
+		if ( *pPT == '-' ) { continue; }
+		if ( ! GetArgs( cp, "fc", tdVal+tdInx, &cp ) ) { return; }
+		if ( *pPT == 'F' && newTurnAngleMode == 0 && tdVal[tdInx] != 0.0 ) {
+			// Reset frog #
+			tdVal[tdInx] = round( 1024.0 / sin( D2R(tdVal[tdInx] ) ) ) / 1024;
+		}
+	}
+	rgb = 0;
+	if ( cp && GetArgs( cp, "ffl", &newTurnRoadbedWidth, &lineWidth, &rgb ) ) {
+		newTurnRoadbedColor = wDrawFindColor(rgb);
+		newTurnRoadbedLineWidth = lineWidth;
+	} else {
+		newTurnRoadbedWidth = 0;
+		newTurnRoadbedLineWidth = 0;
+		newTurnRoadbedColor = wDrawColorBlack;
+	}
+
+	customTurnout1 = to;
+	customTurnout2 = to1;
+
+	segsDiff = FALSE;
+	// cppcheck-suppress nullPointerRedundantCheck
+	// to's only caller (dcmpnd.c) already dereferences to->endCnt/customInfo/
+	// title before calling EditCustomTurnout, so to can never be NULL here;
+	// to->customInfo/scaleInx are also dereferenced unconditionally above.
+	if ( to ) {
+		LoadSegs( dp, TRUE );
+		segsDiff = FALSE;
+		if ( to->segCnt == tempSegs_da.cnt ) {
+			for ( sp0=to->segs,sp1=&tempSegs(0); (!segsDiff)
+			      && sp0<&to->segs[to->segCnt]; sp0++,sp1++ ) {
+				switch (sp0->type) {
+				case SEG_STRLIN:
+					if (sp0->type != sp1->type ||
+					    sp0->color != sp1->color ||
+					    NotClose(sp0->lineWidth-lineWidth) ||
+					    NotClose(sp0->u.l.pos[0].x-sp1->u.l.pos[0].x) ||
+					    NotClose(sp0->u.l.pos[0].y-sp1->u.l.pos[0].y) ||
+					    NotClose(sp0->u.l.pos[1].x-sp1->u.l.pos[1].x) ||
+					    NotClose(sp0->u.l.pos[1].y-sp1->u.l.pos[1].y) ) {
+						segsDiff = TRUE;
+					}
+					break;
+				case SEG_CRVLIN:
+					if (sp0->type != sp1->type ||
+					    sp0->color != sp1->color ||
+					    NotClose(sp0->lineWidth-lineWidth) ||
+					    NotClose(sp0->u.c.center.x-sp1->u.c.center.x) ||
+					    NotClose(sp0->u.c.center.y-sp1->u.c.center.y) ||
+					    NotClose(sp0->u.c.radius-sp1->u.c.radius) ||
+					    NotClose(sp0->u.c.a0-sp1->u.c.a0) ||
+					    NotClose(sp0->u.c.a1-sp1->u.c.a1) ) {
+						segsDiff = TRUE;
+					}
+					break;
+				case SEG_STRTRK:
+				case SEG_CRVTRK:
+				case SEG_BEZTRK:
+					break;
+				default:
+					segsDiff = TRUE;
+				}
+			}
+		} else {
+			for ( sp0=to->segs; (!segsDiff) && sp0<&to->segs[to->segCnt]; sp0++ ) {
+				if ( sp0->type != SEG_STRTRK && sp0->type != SEG_CRVTRK
+				     && sp0->type != SEG_BEZTRK) {
+					segsDiff = TRUE;
+				}
+			}
+		}
+	}
+	if ( (!segsDiff) && to1 && (dp->type==NTO_REGULAR||dp->type==NTO_CURVED
+	                            ||dp->type == NTO_CORNU) ) {
+		if ( dp->type==NTO_REGULAR ) {
+			points[2].y = - points[2].y;
+			radii[0] = - radii[0];
+		} else if (dp->type == NTO_CURVED) {
+			points[1].y = - points[1].y;
+			points[2].y = - points[2].y;
+			radii[0] = - radii[0];
+			radii[1] = - radii[1];
+		} else {
+			points[2].y = - points[2].y;
+			points[1].y = - points[1].y;
+			angles[1] = -angles[1];
+			angles[2] = -angles[2];
+			radii[0] = - radii[0];
+			radii[1] = - radii[1];
+		}
+		LoadSegs( dp, FALSE );
+		if ( dp->type==NTO_REGULAR ) {
+			points[2].y = - points[2].y;
+			radii[0] = - radii[0];
+		} else if (dp->type == NTO_CURVED) {
+			points[1].y = - points[1].y;
+			points[2].y = - points[2].y;
+			radii[0] = - radii[0];
+			radii[1] = - radii[1];
+		} else {
+			points[2].y = - points[2].y;
+			points[1].y = - points[1].y;
+			angles[1] = -angles[1];
+			angles[2] = -angles[2];
+			radii[0] = - radii[0];
+			radii[1] = - radii[1];
+		}
+		segsDiff = FALSE;
+		if ( to1->segCnt == tempSegs_da.cnt ) {
+			for ( sp0=to1->segs,sp1=&tempSegs(0); (!segsDiff)
+			      && sp0<&to1->segs[to1->segCnt]; sp0++,sp1++ ) {
+				switch (sp0->type) {
+				case SEG_STRLIN:
+					if (sp0->type != sp1->type ||
+					    sp0->color != sp1->color ||
+					    NotClose(sp0->lineWidth-lineWidth) ||
+					    NotClose(sp0->u.l.pos[0].x-sp1->u.l.pos[0].x) ||
+					    NotClose(sp0->u.l.pos[0].y-sp1->u.l.pos[0].y) ||
+					    NotClose(sp0->u.l.pos[1].x-sp1->u.l.pos[1].x) ||
+					    NotClose(sp0->u.l.pos[1].y-sp1->u.l.pos[1].y) ) {
+						segsDiff = TRUE;
+					}
+					break;
+				case SEG_CRVLIN:
+					if (sp0->type != sp1->type ||
+					    sp0->color != sp1->color ||
+					    NotClose(sp0->lineWidth-lineWidth) ||
+					    NotClose(sp0->u.c.center.x-sp1->u.c.center.x) ||
+					    NotClose(sp0->u.c.center.y-sp1->u.c.center.y) ||
+					    NotClose(sp0->u.c.radius-sp1->u.c.radius) ||
+					    NotClose(sp0->u.c.a0-sp1->u.c.a0) ||
+					    NotClose(sp0->u.c.a1-sp1->u.c.a1) ) {
+						segsDiff = TRUE;
+					}
+					break;
+				case SEG_STRTRK:
+				case SEG_CRVTRK:
+				case SEG_BEZTRK:
+					break;
+				default:
+					segsDiff = TRUE;
+				}
+			}
+		} else {
+			for ( sp0=to1->segs; (!segsDiff) && sp0<&to1->segs[to1->segCnt]; sp0++ ) {
+				if ( sp0->type != SEG_STRTRK && sp0->type != SEG_CRVTRK
+				     && sp0->type != SEG_BEZTRK) {
+					segsDiff = TRUE;
+				}
+			}
+		}
+	}
+
+	includeNontrackSegments = FALSE;
+	if ( segsDiff &&
+	     NoticeMessage( MSG_SEGMENTS_DIFFER, _("Yes"), _("No") ) > 0 ) {
+		includeNontrackSegments = TRUE;
+	}
+	/*if (recordF)
+		fprintf( recordF, TURNOUTDESIGNER " SHOW %s\n", dp->label );*/
+	if ( newTurnAngleMode == 0 ) {
+		// Reset frog #, again
+		int frogInx = 0;
+		for ( const char * pPT = dp->sParamType; *pPT; pPT++, frogInx++ ) {
+			if ( *pPT == '-' ) { continue; }
+			if ( *pPT == 'F' && tdVal[frogInx] != 0.0 ) {
+				tdVal[frogInx] = round( 1024.0 / sin( D2R(tdVal[frogInx] ) ) ) / 1024;
+			}
+		}
+	}
+	FormLoadControls( &turnDesignPG );
+	FormGroupRecord( &turnDesignPG );
+	wShow( newTurnW );
+}
+
+
+EXPORT void InitNewTurn( wMenu_p m )
+{
+	int i;
+	FormRegister( &turnDesignPG );
+
+	log_cornuturnoutdesigner = LogFindIndex( "cornuturnoutdesigner" );
+	log_turnoutdesigner = LogFindIndex( "turnoutdesigner" );
+
+	newTurnRoadbedColor = wDrawColorBlack;
+	includeNontrackSegments = FALSE;
+
+	for ( i=0; i<COUNT( designDescs ); i++ ) {
+		toDesignDesc_t * dp = designDescs[i];
+		wMenuPushCreate( m, NULL, _(dp->label), 0,
+		                 ShowTurnoutDesigner, dp );
+		sprintf( message, "%s SHOW %s", TURNOUTDESIGNER, dp->label );
+		AddPlaybackProc( message, ShowTurnoutDesignerPlayback, dp );
+		int iDescCount = 0;
+		for ( const char * pPT = dp->sParamType; *pPT; pPT++ ) {
+			if ( *pPT == '-' ) { continue; }
+			iDescCount++;
+		}
+		dp->iDescFirst = tdDescTotal;
+		tdDescTotal += iDescCount;
+		LOG( log_turnoutdesigner, 1, ("%d %d %s\n", dp->iDescFirst, iDescCount,
+		                              dp->label ) );
+
+	}
+}
+

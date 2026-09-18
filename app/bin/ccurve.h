@@ -1,0 +1,64 @@
+/** \file ccurve.h
+ * Definitions for curve commands
+ */
+
+/*  XTrkCad - Model Railroad CAD
+ *  Copyright (C) 2005 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+#ifndef HAVE_CCURVE_H
+#define HAVE_CCURVE_H
+
+#include "common.h"
+#include "track.h" //- curveType_e
+
+typedef struct {
+	curveType_e type;
+	coOrd curvePos;
+	coOrd pos1;
+	coOrd pos2;
+	DIST_T curveRadius;
+	ANGLE_T a0, a1;
+	BOOL_T negative;
+} curveData_t;
+
+#define crvCmdFromEP1			(0)
+#define crvCmdFromTangent		(1)
+#define crvCmdFromCenter		(2)
+#define crvCmdFromChord			(3)
+#define crvCmdFromCornu			(4)
+
+#define circleCmdFixedRadius	(0)
+#define circleCmdFromTangent	(1)
+#define circleCmdFromCenter		(2)
+
+typedef void (*curveMessageProc)( const char *, ... );
+STATUS_T CreateCurve( wAction_t, coOrd, BOOL_T, wDrawColor, DIST_T, long,
+                      dynArr_t *,curveMessageProc );
+int IsCurveCircle( track_p );
+DIST_T GetCurveRadius( track_p );
+void PlotCurve( long, coOrd, coOrd, coOrd, curveData_t *, BOOL_T, DIST_T );
+track_p NewCurvedTrack( coOrd, DIST_T, ANGLE_T, ANGLE_T, long );
+DIST_T CurveDescriptionDistance( coOrd, track_p, coOrd *, BOOL_T, BOOL_T * );
+STATUS_T CurveDescriptionMove( track_p, wAction_t, coOrd );
+BOOL_T GetCurveMiddle( track_p, coOrd * );
+int DrawArrowHeads(trkSeg_p sp, coOrd pos,	ANGLE_T angle, BOOL_T bidirectional,
+                   wDrawColor color );
+int DrawArrowHeadsArray(dynArr_t *anchor_array,coOrd pos,ANGLE_T angle,
+                        BOOL_T bidirectional,wDrawColor color );
+
+#endif // !HAVE_CCURVE_H

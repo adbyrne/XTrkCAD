@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="3.22" />
+  <object class="GtkDialog" id="reportsequipment">
+    <property name="can-focus">False</property>
+    <property name="border-width">12</property>
+    <property name="type-hint">dialog</property>
+    <property name="use-header-bar">0</property>
+    <property name="title" translatable="yes">Equipment Suitability Report</property>
+    <child type="action">
+      <object class="GtkButton" id="id_help">
+        <property name="use-underline">True</property>
+        <property name="label">_Help</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="refresh">
+        <property name="label" translatable="yes">_Refresh</property>
+        <property name="use-underline">True</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="print">
+        <property name="label" translatable="yes">_Print...</property>
+        <property name="use-underline">True</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="printsetup">
+        <property name="label" translatable="yes">Page Setup...</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="sensitive">True</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="save">
+        <property name="label" translatable="yes">_Save...</property>
+        <property name="use-underline">True</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="id_cancel">
+        <property name="use-underline">True</property>
+        <property name="can-default">True</property>
+        <property name="has-default">True</property>
+        <property name="label">_Done</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="GTK_RESPONSE_CANCEL" default="true">id_cancel</action-widget>
+      <action-widget response="GTK_RESPONSE_HELP">id_help</action-widget>
+      <action-widget response="1">print</action-widget>
+      <action-widget response="2">printsetup</action-widget>
+      <action-widget response="3">save</action-widget>
+      <action-widget response="4">refresh</action-widget>
+    </action-widgets>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can-focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">6</property>
+
+        <child>
+          <object class="GtkLabel" id="summary">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Summary</property>
+            <property name="xalign">0</property>
+            <property name="margin-bottom">6</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkScrolledWindow" id="list">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
+            <property name="min-content-height">300</property>
+            <property name="min-content-width">500</property>
+            <property name="shadow-type">in</property>
+            <child>
+              <object class="GtkTreeView" id="treeview">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="enable-grid-lines">vertical</property>
+                <property name="model">liststore</property>
+                <child>
+                  <object class="GtkTreeViewColumn" id="listclass">
+                    <property name="resizable">True</property>
+                    <property name="title" translatable="yes">Equipment Class</property>
+                    <child>
+                      <object class="GtkCellRendererText" />
+                      <attributes>
+                        <attribute name="text">3</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="listradius">
+                    <property name="resizable">True</property>
+                    <property name="title" translatable="yes">Min Radius</property>
+                    <child>
+                      <object class="GtkCellRendererText" />
+                      <attributes>
+                        <attribute name="text">4</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="liststatus">
+                    <property name="resizable">True</property>
+                    <property name="title" translatable="yes">Status</property>
+                    <child>
+                      <object class="GtkCellRendererText" />
+                      <attributes>
+                        <attribute name="text">5</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkListStore" id="liststore">
+    <columns>
+      <!-- column-name error_color -->
+      <column type="gboolean" />
+      <!-- column-name userdata -->
+      <column type="gpointer" />
+      <!-- column-name bitmap -->
+      <column type="GdkPixbuf" />
+      <!-- column-name class -->
+      <column type="gchararray" />
+      <!-- column-name radius -->
+      <column type="gchararray" />
+      <!-- column-name status -->
+      <column type="gchararray" />
+    </columns>
+  </object>
+</interface>

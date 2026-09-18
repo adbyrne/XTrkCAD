@@ -1,0 +1,105 @@
+# CMakeList for the LIB directory
+#
+# Include the subdirectories for params, examples and params
+# Generate and install a Readme.txt file from markdown if pandoc is available on the system
+# install desktop integration following freedesktop.org specification
+#
+project(lib C)
+
+add_subdirectory(params)
+
+install(FILES
+	COPYING
+	xtrkcad.xtq
+	xtrkcad.upd
+	DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
+	)
+
+# install parameter files
+install(DIRECTORY params
+		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
+		FILES_MATCHING
+		PATTERN "*.xtp")
+
+# install demos
+install(DIRECTORY demos
+		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
+		FILES_MATCHING
+		PATTERN "*.xtr")
+
+# install example layouts
+install(DIRECTORY examples
+		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
+		FILES_MATCHING
+		PATTERN "*.xtc")
+
+# install release documentation Readme and CHANGELOG
+# depends on pandoc
+#
+set( infile "${CMAKE_CURRENT_SOURCE_DIR}/Readme.md" )
+set( outfile "${CMAKE_CURRENT_BINARY_DIR}/Readme.txt" )
+set( changelogin "${CMAKE_CURRENT_SOURCE_DIR}/CHANGELOG.md" )
+set( changelogout "${CMAKE_CURRENT_BINARY_DIR}/CHANGELOG.txt" )
+
+if(PANDOC_FOUND)
+	add_custom_command(OUTPUT "${outfile}"
+					   COMMAND ${PANDOC_EXECUTABLE} "--from=Markdown" "--to=plain" "-o" ${outfile} ${infile}
+					   DEPENDS "${infile}"
+					  )
+	add_custom_target(CHANGELOG ALL DEPENDS ${changelogout})
+	add_custom_command(OUTPUT "${changelogout}"
+					   COMMAND ${PANDOC_EXECUTABLE} "--from=Markdown" "--to=plain" "-o" ${changelogout} ${changelogin}
+					   DEPENDS "${changelogin}"
+					  )
+	add_custom_target(Readme ALL DEPENDS ${outfile})
+	install(FILES ${outfile} ${changelogout}
+			DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
+			)
+else()
+	message(STATUS "Pandoc is not available on this system, Readme.txt and CHANGELOG.txt are not generated!")
+endif()
+
+if(UNIX AND NOT APPLE)
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad-setup.in ${CMAKE_CURRENT_BINARY_DIR}/xtrkcad-setup @ONLY)
+	install(PROGRAMS
+		${CMAKE_CURRENT_BINARY_DIR}/xtrkcad-setup
+		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
+		)
+	install(FILES
+		xtrkcad.png
+		DESTINATION "${XTRKCAD_SHARE_INSTALL_DIR}/pixmaps"
+		RENAME "${XTRKCAD_BIN}.png"
+		)
+	if (XTRKCAD_BUILD_FLATPAK)
+		install(FILES
+			xtrkcad.flatpak.desktop
+			DESTINATION "share/applications"
+			RENAME io.sourceforge.xtrkcad_fork.${XTRKCAD_BIN}.desktop
+			)
+		install(FILES
+			xtrkcad.xml
+			DESTINATION "share/mime/packages"
+			RENAME io.sourceforge.xtrkcad_fork.${XTRKCAD_BIN}.xml
+			)
+		install(FILES
+			xtrkcad.metainfo.xml
+			DESTINATION "share/metainfo"
+			RENAME io.sourceforge.xtrkcad_fork.${XTRKCAD_BIN}.metainfo.xml
+			)
+		install(FILES
+			xtrkcad_logo_128x128.svg
+			DESTINATION "share/icons/hicolor/scalable/apps"
+			RENAME io.sourceforge.xtrkcad_fork.${XTRKCAD_BIN}.svg
+			)
+	else()
+		configure_file(${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad.desktop.in ${CMAKE_CURRENT_BINARY_DIR}/${XTRKCAD_BIN}.desktop @ONLY)
+		install(FILES
+			${CMAKE_CURRENT_BINARY_DIR}/${XTRKCAD_BIN}.desktop
+			DESTINATION "${XTRKCAD_SHARE_INSTALL_DIR}/applications"
+			)
+		install(FILES
+			xtrkcad.xml
+			DESTINATION "${XTRKCAD_SHARE_INSTALL_DIR}/applications"
+			)
+	endif()
+endif()

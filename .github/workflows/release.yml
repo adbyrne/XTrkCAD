@@ -1,0 +1,988 @@
+name: Release (GTK3V2MAIN)
+
+# Builds Release packages on every push to GTK3V2MAIN where the build and
+# tests pass. Packages are uploaded as GitHub Actions artifacts (14-day
+# retention) on every push. When a version tag (v*.*.*) is pushed, a
+# permanent GitHub Release is also created with all packages attached.
+#
+# Two more things happen on every ordinary GTK3V2MAIN push (not on tags or
+# workflow_dispatch), giving stable links that never expire or change:
+#   - publish-latest-release rolls the packages into a single moving
+#     "latest-gtk3v2main" GitHub Release (prerelease, not marked "Latest").
+#   - deploy-pages redeploys Doxygen + the user guide to GitHub Pages.
+
+on:
+  push:
+    branches:
+      - GTK3V2MAIN
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      publish_temp_release:
+        description: 'Publish packages to a temporary, branch-named prerelease (for review branches — see publish-temp-release job)'
+        type: boolean
+        default: false
+      include_nsis:
+        description: 'Build NSIS installer (experimental — DLLs not yet bundled via CMake install)'
+        type: boolean
+        default: false
+      include_dmg:
+        description: 'Attempt self-contained DMG build (requires gtk-mac-bundler, may fail)'
+        type: boolean
+        default: false
+
+jobs:
+  # ── Linux x86-64 — DEB + RPM + STGZ ───────────────────────────────────────
+  package-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y \
+            cmake ninja-build \
+            libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev \
+            librsvg2-bin gettext xvfb doxygen \
+            dpkg-dev rpm
+
+      - name: Configure (Release)
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DXTRKCAD_TESTING=ON
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        # The ~47 individual per-demo regression tests (XTRKCAD_REGRESSION_TESTING's
+        # auto-detect default is ON here) are for local dev targeting only and are
+        # not self-contained standalone -- see app/bin/RegressionTests.cmake. Mirror
+        # ci-gtk3.yml: run everything else, then gate separately on the single-process
+        # RegressionSuite (label regression-ci).
+        run: |
+          xvfb-run ctest --test-dir build --output-on-failure -LE regression
+          ctest --test-dir build --output-on-failure -L regression-ci
+
+      - name: Package (DEB + RPM + STGZ + source archives)
+        run: |
+          cd build
+          cpack -G DEB
+          cpack -G RPM
+          cpack -G STGZ
+          cpack --config CPackSourceConfig.cmake -G TGZ
+          cpack --config CPackSourceConfig.cmake -G ZIP
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: packages-linux-x86_64
+          path: |
+            build/*.deb
+            build/*.rpm
+            build/*.sh
+            build/xtrkcad-source-*
+          retention-days: 14
+
+  # ── Linux ARM64 — DEB (Ubuntu 24.04) ──────────────────────────────────────
+  package-linux-arm64-ubuntu:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y \
+            cmake ninja-build \
+            libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev \
+            librsvg2-bin gettext xvfb doxygen \
+            dpkg-dev
+
+      - name: Configure (Release)
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DXTRKCAD_TESTING=ON
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        # See package-linux's Test step comment: the per-demo regression tests
+        # aren't self-contained standalone, so gate separately on RegressionSuite.
+        run: |
+          xvfb-run ctest --test-dir build --output-on-failure -LE regression
+          ctest --test-dir build --output-on-failure -L regression-ci
+
+      - name: Package (DEB)
+        run: cd build && cpack -G DEB
+
+      - name: Upload package
+        uses: actions/upload-artifact@v7
+        with:
+          name: packages-linux-arm64-ubuntu
+          path: build/*.deb
+          retention-days: 14
+
+  # ── Linux ARM64 — DEB (Debian 12 / Raspberry Pi OS Bookworm) ──────────────
+  # Built inside a debian:bookworm container so the generated DEB declares
+  # Debian 12 dependency versions.  Ubuntu 24.04 renames packages with a
+  # "t64" suffix (libgtk-3-0t64, libzip4t64, …) that do not exist on Debian
+  # 12 / Raspberry Pi OS, causing "unmet dependencies" errors there.
+  package-linux-arm64-debian:
+    runs-on: ubuntu-24.04-arm
+    container: debian:bookworm
+    steps:
+      - name: Install git (required by actions/checkout)
+        run: apt-get update -q && apt-get install -y git
+
+      - uses: actions/checkout@v7
+
+      - name: Install dependencies
+        run: |
+          apt-get install -y \
+            cmake ninja-build \
+            libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev \
+            librsvg2-bin gettext xvfb doxygen \
+            dpkg-dev file
+
+      - name: Configure (Release)
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DXTRKCAD_TESTING=ON
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        # See package-linux's Test step comment: the per-demo regression tests
+        # aren't self-contained standalone, so gate separately on RegressionSuite.
+        run: |
+          xvfb-run ctest --test-dir build --output-on-failure -LE regression
+          ctest --test-dir build --output-on-failure -L regression-ci
+
+      - name: Package (DEB)
+        run: |
+          cd build && cpack -G DEB
+          for f in xtrkcad-setup-*aarch64.deb; do
+            mv "$f" "${f%.aarch64.deb}-debian12.deb"
+          done
+
+      - name: Upload package
+        uses: actions/upload-artifact@v7
+        with:
+          name: packages-linux-arm64-debian
+          path: build/*.deb
+          retention-days: 14
+
+  # ── macOS ARM64 — tar.gz (Homebrew-dependent) + DMG (self-contained) ───────
+  package-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install dependencies
+        run: brew install ninja gtk+3 cmocka libzip librsvg doxygen
+
+      - name: Configure (Release)
+        run: |
+          GTK_PREFIX=$(brew --prefix gtk+3)
+          export PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
+          GTK_LDFLAGS=$(pkg-config --libs-only-L gtk+-3.0)
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DXTRKCAD_TESTING=ON \
+            -DCMAKE_PREFIX_PATH="$GTK_PREFIX;$(brew --prefix)" \
+            -DCMAKE_EXE_LINKER_FLAGS="$GTK_LDFLAGS" \
+            -DXTRKCAD_USE_APPLEHELP=OFF -DXTRKCAD_USE_BROWSER=ON
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Get version
+        run: |
+          MAJOR=$(awk -F'"' '/set\(XTRKCAD_MAJOR_VERSION/{print $2; exit}' ProgramVersion.cmake)
+          MINOR=$(awk -F'"' '/set\(XTRKCAD_MINOR_VERSION/{print $2; exit}' ProgramVersion.cmake)
+          PATCH=$(awk -F'"' '/set\(XTRKCAD_RELEASE_VERSION/{print $2; exit}' ProgramVersion.cmake)
+          MODIFIER=$(awk -F'"' '/set\(XTRKCAD_VERSION_MODIFIER/{print $2; exit}' ProgramVersion.cmake)
+          echo "XTRKCAD_VERSION=${MAJOR}.${MINOR}.${PATCH}${MODIFIER}" >> "$GITHUB_ENV"
+
+      - name: Create Homebrew-dependent archive
+        # Installs to a staging dir and tars it. Users must have the Homebrew
+        # prerequisites: brew install gtk+3 libzip librsvg
+        run: |
+          cmake --install build --prefix staging
+          tar -czf "xtrkcad-${XTRKCAD_VERSION}-macos-arm64.tar.gz" -C staging .
+
+      - name: Upload Homebrew archive
+        uses: actions/upload-artifact@v7
+        with:
+          name: packages-macos-arm64
+          path: xtrkcad-*-macos-arm64.tar.gz
+          retention-days: 14
+
+      - name: Build self-contained DMG
+        # Skipped on normal pushes — opt in via workflow_dispatch input.
+        # The DMG is unsigned; a volunteer with an Apple Developer account can
+        # sign and notarize it. gtk-mac-bundler is not a standard Homebrew
+        # formula so this step may fail even when opted in.
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.include_dmg == true }}
+        continue-on-error: true
+        run: |
+          brew install gtk-mac-bundler || true
+          cmake --install build --prefix bundle-staging
+          cd distribution/osx/gtk-bundle
+          bash xtrkcad-bundler.sh -i "${{ github.workspace }}/bundle-staging" \
+            -v "${XTRKCAD_VERSION}"
+
+      - name: Upload DMG (if built)
+        uses: actions/upload-artifact@v7
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.include_dmg == true }}
+        with:
+          name: packages-macos-arm64-dmg
+          path: "distribution/osx/gtk-bundle/xtrkcad-OSX-*.dmg"
+          retention-days: 14
+
+  # ── Windows x86-64 — ZIP (DLLs bundled) + NSIS installer ──────────────────
+  package-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: false
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-pkg-config
+            mingw-w64-x86_64-gtk3
+            mingw-w64-x86_64-zlib
+            mingw-w64-x86_64-libzip
+            mingw-w64-x86_64-mxml
+            mingw-w64-x86_64-librsvg
+            mingw-w64-x86_64-gettext
+            mingw-w64-x86_64-cmocka
+            mingw-w64-x86_64-ntldd-git
+            mingw-w64-x86_64-doxygen
+
+      - name: Get version
+        run: |
+          MAJOR=$(awk -F'"' '/set\(XTRKCAD_MAJOR_VERSION/{print $2; exit}' ProgramVersion.cmake)
+          MINOR=$(awk -F'"' '/set\(XTRKCAD_MINOR_VERSION/{print $2; exit}' ProgramVersion.cmake)
+          PATCH=$(awk -F'"' '/set\(XTRKCAD_RELEASE_VERSION/{print $2; exit}' ProgramVersion.cmake)
+          MODIFIER=$(awk -F'"' '/set\(XTRKCAD_VERSION_MODIFIER/{print $2; exit}' ProgramVersion.cmake)
+          echo "XTRKCAD_VERSION=${MAJOR}.${MINOR}.${PATCH}${MODIFIER}" >> "$GITHUB_ENV"
+
+      - name: Configure (Release)
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DXTRKCAD_TESTING=ON \
+            -DXTRKCAD_USE_GETTEXT=OFF
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Install to staging directory
+        run: cmake --install build --prefix "$(pwd)/staging"
+
+      - name: Collect GTK3 runtime DLLs
+        # Walk the binary's DLL dependencies and copy all MinGW64 DLLs.
+        # Also copy GTK3 runtime data (pixbuf loaders, GSettings schemas,
+        # icon theme) needed for a working installation.
+        run: |
+          STAGING="$(pwd)/staging"
+          BINARY="$STAGING/bin/xtrkcad-${XTRKCAD_VERSION}.exe"
+          MINGW=/mingw64
+
+          # Collect DLL dependencies (filter to MinGW64 only)
+          ntldd -R "$BINARY" \
+            | grep -i mingw64 \
+            | awk '{print $3}' \
+            | xargs -I{} cp -n "{}" "$STAGING/bin/" || true
+
+          # GTK3 pixbuf loaders (needed for SVG icons and PNG images)
+          GDK_VER=$(ls $MINGW/lib/gdk-pixbuf-2.0/)
+          mkdir -p "$STAGING/lib/gdk-pixbuf-2.0/$GDK_VER/loaders"
+          cp -r "$MINGW/lib/gdk-pixbuf-2.0/$GDK_VER/loaders.cache" \
+                "$STAGING/lib/gdk-pixbuf-2.0/$GDK_VER/" || true
+          cp "$MINGW/lib/gdk-pixbuf-2.0/$GDK_VER/loaders/"*.dll \
+             "$STAGING/lib/gdk-pixbuf-2.0/$GDK_VER/loaders/" 2>/dev/null || true
+
+          # GSettings compiled schemas (required by GTK3 on Windows)
+          mkdir -p "$STAGING/share/glib-2.0/schemas"
+          cp "$MINGW/share/glib-2.0/schemas/gschemas.compiled" \
+             "$STAGING/share/glib-2.0/schemas/" || true
+
+          # Hicolor icon theme (GTK3 fallback icons)
+          mkdir -p "$STAGING/share/icons"
+          cp -r "$MINGW/share/icons/hicolor" "$STAGING/share/icons/" || true
+
+      - name: Create ZIP archive
+        run: |
+          cd staging
+          cmake -E tar cf "../xtrkcad-${XTRKCAD_VERSION}-windows-x64.zip" \
+            --format=zip .
+
+      - name: Upload ZIP
+        uses: actions/upload-artifact@v7
+        with:
+          name: packages-windows-x64-zip
+          path: xtrkcad-*-windows-x64.zip
+          retention-days: 14
+
+      - name: Package NSIS installer
+        # Skipped on normal pushes — opt in via workflow_dispatch input.
+        # DLLs are not yet bundled via CMake install(); the ZIP (above) is
+        # the recommended Windows distributable until NSIS bundling is solved.
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.include_nsis == true }}
+        continue-on-error: true
+        run: |
+          cd build
+          cpack -G NSIS
+
+      - name: Upload NSIS installer (if built)
+        uses: actions/upload-artifact@v7
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.include_nsis == true }}
+        with:
+          name: packages-windows-x64-nsis
+          path: build/*.exe
+          retention-days: 14
+
+  # ── Doxygen documentation — built and uploaded on every push ──────────────
+  # Gives a browsable "latest docs" artifact without waiting for a version
+  # tag or for the Hg bug branches behind any given doc change to clear
+  # their SF review window and merge into GTK3V2MAIN -- this job tracks
+  # whatever's on the git mirror right now.
+  package-coverage:
+    # Published (not just PR-artifact) coverage report -- mirrors ci-gtk3.yml's
+    # `coverage` job (unit tests + full regression suite, branch coverage
+    # enabled; see that job's comment and .claude/devml-coverage-report-
+    # 2026-08-05.md for why unit-tests-only was found to be nearly
+    # meaningless: ~3,400 instrumented lines vs. ~64,000 once the regression
+    # suite actually runs the app). Kept as a separate job here (rather than
+    # reusing ci-gtk3.yml's artifact) since release.yml is a distinct
+    # workflow trigger (push/tag, not pull_request) with no access to a PR
+    # run's artifacts.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext xvfb lcov
+      - name: Configure with coverage flags
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
+            -DCMAKE_C_FLAGS="--coverage" -DCMAKE_EXE_LINKER_FLAGS="--coverage"
+      - name: Build
+        run: cmake --build build
+      - name: Run tests (unit + full regression suite)
+        run: xvfb-run ctest --test-dir build --output-on-failure
+      - name: Collect coverage
+        run: |
+          lcov --capture --directory build \
+               --output-file build/coverage.info \
+               --ignore-errors mismatch --rc branch_coverage=1
+          lcov --remove build/coverage.info \
+               '/usr/*' '*/build/*' '*/unittest/*' '*/tools/*' \
+               --output-file build/coverage-filtered.info \
+               --ignore-errors unused --rc branch_coverage=1
+          genhtml build/coverage-filtered.info \
+                  --output-directory coverage-html \
+                  --title "XTrkCAD coverage (GTK3, unit + regression suite)" \
+                  --rc branch_coverage=1
+          lcov --summary build/coverage-filtered.info --rc branch_coverage=1
+      - name: Archive coverage report
+        run: tar -czf xtrkcad-coverage.tar.gz -C coverage-html .
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v7
+        with:
+          name: xtrkcad-coverage-html
+          path: xtrkcad-coverage.tar.gz
+          retention-days: 14
+
+  package-cppcheck-deep:
+    # Published version of ci-gtk3.yml's report-only cppcheck-deep job -- see
+    # that job's comment for the suppression rationale (kept in sync by hand,
+    # both jobs run the same command).
+    #
+    # 2026-09-02: brought back in sync after drifting on TWO widenings that only
+    # landed in ci-gtk3.yml -- app/help + app/tools/listxtp.c (SF #701/#729-730,
+    # an older gap) and app/wlib/gtk3lib(+unix/) (this session's gate work). The
+    # published report had zero app/wlib findings as a result; see
+    # ci-gtk3.yml's cppcheck-deep job for the full app/wlib exclusion rationale.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install cppcheck
+        run: sudo apt-get update -q && sudo apt-get install -y cppcheck
+      - name: Run cppcheck (deep, non-fatal)
+        run: |
+          cppcheck \
+            --enable=warning,style,performance,portability \
+            --inline-suppr \
+            -j 4 \
+            --suppress=missingInclude \
+            --suppress=missingIncludeSystem \
+            --suppress=nullPointerOutOfMemory \
+            --suppress=nullPointerOutOfResources \
+            --suppress=nullPointerArithmeticOutOfMemory \
+            --suppress=syntaxError:app/bin/archive.c \
+            --suppress=syntaxError:app/bin/cturntbl.c \
+            --suppress=syntaxError:app/bin/directory.c \
+            --suppress=syntaxError:app/bin/paths.c \
+            --suppress=syntaxError:app/bin/utility.c \
+            --suppress=unknownMacro:app/bin/custom.c \
+            --suppress=unknownMacro:app/wlib/gtk3lib/stickytogglebutton.h \
+            --suppress=ctunullpointer:app/bin/track.c \
+            --suppress=uninitvar:app/bin/levenshtein.c \
+            --suppress=uninitvar:app/bin/problemrep.c \
+            --suppress=uninitvar:app/bin/paths.c \
+            --suppress=nullPointer:app/bin/partcatalog.c \
+            --suppress=missingReturn:app/bin/cturnout.c \
+            --suppress=ctuPointerArith:app/bin/cturnout.c \
+            --suppress=selfAssignment:app/bin/cdraw.c \
+            --suppress=selfAssignment:app/bin/drawgeom.c \
+            -I app/bin -I app/bin/include -I app/wlib/include -I app/wlib/gtk3lib \
+            app/bin/*.c app/dynstring/*.c \
+            app/help/*.c app/tools/listxtp.c \
+            app/wlib/gtk3lib/*.c app/wlib/gtk3lib/unix/*.c > cppcheck-deep.txt 2>&1 || true
+      - name: Format as HTML
+        run: |
+          mkdir -p report
+          tools/format-findings-report.sh cppcheck-deep.txt report/index.html \
+            "cppcheck-deep findings (GTK3V2MAIN)" bracketed \
+            "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/"
+      - name: Archive report
+        run: tar -czf xtrkcad-cppcheck-deep.tar.gz -C report .
+      - name: Upload report
+        uses: actions/upload-artifact@v7
+        with:
+          name: xtrkcad-cppcheck-deep-html
+          path: xtrkcad-cppcheck-deep.tar.gz
+          retention-days: 14
+
+  package-clang-tidy:
+    # Published version of ci-gtk3.yml's report-only clang-tidy job -- see
+    # that job's comment for scope rationale (kept in sync by hand, both
+    # jobs run the same command).
+    #
+    # 2026-09-02: added app/wlib/gtk3lib (with win32/wrapbox exclusions) to stay in sync
+    # with ci-gtk3.yml's widening -- had drifted, publishing a report with no app/wlib
+    # findings even after that job started scanning it.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build clang clang-tidy libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext
+      - name: Configure and build (need generated headers for clang-tidy to parse cleanly)
+        run: |
+          # -DCMAKE_C_COMPILER=clang (SF #693) -- see ci-gtk3.yml's matching job for the full
+          # rationale (kept in sync by hand): without it, CMAKE_C_COMPILER_ID resolves to gcc,
+          # which flips two Clang-conditional exemptions backwards and can abort the run early.
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_C_COMPILER=clang
+          cmake --build build
+      - name: Run clang-tidy (non-fatal)
+        run: |
+          # See ci-gtk3.yml's matching job: utility.c/misc.c are each legitimately compiled twice
+          # (two targets), so clang-tidy's "[N/139]" counter can exceed 139 -- expected, not a bug.
+          # --header-filter='.*/app/' rationale also in that job's comment (kept in sync by hand):
+          # without it, system headers (GTK/glib/atk) pulled in via plain -I dominate the report
+          # with unfixable noise -- 72% of raw findings, 2026-08-31 measurement.
+          # Vendored-header exclusion (uthash.h/utlist.h/cJSON.h, 199 findings/23% of what's left
+          # after the header-filter) and stringxtc.c (vendored, excluded from the file list below
+          # instead since it's a main file, not reached as a header) -- see ci-gtk3.yml's matching
+          # job for why this is a post-filter awk step below rather than --exclude-header-filter
+          # (that flag isn't supported by this runner's clang-tidy version; the invocation errored
+          # out silently under `|| true` and this job published a false "0 findings" report for its
+          # whole lifetime until this was found, 2026-08-31 -- kept in sync by hand).
+          mapfile -t FILES < <(find app/bin app/dynstring app/cornu app/help app/tools app/wlib/gtk3lib -name "*.c" | grep -v unittest | grep -vE 'bdf2xtp\.c|helphelper\.c|ppedit_gtk1\.c|app/tools/dirent\.c|app/bin/stringxtc\.c|app/wlib/gtk3lib/win32/|app/wlib/gtk3lib/wrapbox/')
+          clang-tidy --header-filter='.*/app/' --checks='-*,bugprone-*,performance-*,portability-*,-bugprone-easily-swappable-parameters' -p build "${FILES[@]}" > clang-tidy.txt 2>&1 || true
+          # compile_commands.json stores absolute paths, so clang-tidy emits
+          # diagnostics as e.g. "/home/runner/work/XTrkCAD/XTrkCAD/app/bin/foo.c:12:...".
+          # format-findings-report.sh expects repo-relative paths (like
+          # cppcheck/codespell/compiler-warnings already produce) -- strip the
+          # workspace prefix so its GitHub blob links resolve.
+          sed -i "s|${GITHUB_WORKSPACE}/||g" clang-tidy.txt
+          # Drop a finding block only when its own primary file:line:col (a warning:/error:
+          # line, never a note: continuation -- notes tracing a macro expansion back through
+          # uthash.h belong to a real finding in project code and must stay) is one of the
+          # three vendored headers.
+          awk 'BEGIN{keep=1} /^[^:]+:[0-9]+:[0-9]+: (warning|error):/ { keep = ($0 !~ /(uthash\.h|utlist\.h|cJSON\.h):[0-9]+:[0-9]+:/) } keep' clang-tidy.txt > clang-tidy.filtered.txt
+          mv clang-tidy.filtered.txt clang-tidy.txt
+      - name: Format as HTML
+        run: |
+          mkdir -p report
+          tools/format-findings-report.sh clang-tidy.txt report/index.html \
+            "clang-tidy findings (GTK3V2MAIN)" bracketed \
+            "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/"
+      - name: Archive report
+        run: tar -czf xtrkcad-clang-tidy.tar.gz -C report .
+      - name: Upload report
+        uses: actions/upload-artifact@v7
+        with:
+          name: xtrkcad-clang-tidy-html
+          path: xtrkcad-clang-tidy.tar.gz
+          retention-days: 14
+
+  package-codespell:
+    # Published version of ci-gtk3.yml's report-only codespell job -- see
+    # that job's comment for the exclusion/ignore-list rationale (kept in
+    # sync by hand, both jobs run the same command).
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install codespell
+        run: sudo apt-get update -q && sudo apt-get install -y codespell
+      - name: Run codespell (non-fatal)
+        run: |
+          codespell app/bin app/wlib \
+            --skip='*/wrapbox/*,*/halibut/*,*.ai' \
+            --ignore-words=.github/codespell-ignore.txt \
+            -q 3 > codespell.txt 2>&1 || true
+      - name: Format as HTML
+        run: |
+          mkdir -p report
+          tools/format-findings-report.sh codespell.txt report/index.html \
+            "codespell findings (GTK3V2MAIN)" codespell \
+            "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/"
+      - name: Archive report
+        run: tar -czf xtrkcad-codespell.tar.gz -C report .
+      - name: Upload report
+        uses: actions/upload-artifact@v7
+        with:
+          name: xtrkcad-codespell-html
+          path: xtrkcad-codespell.tar.gz
+          retention-days: 14
+
+  package-compiler-warnings:
+    # Published version of ci-gtk3.yml's report-only compiler-warnings job
+    # (Linux only -- the most complete/representative of the three platform
+    # variants; macos/windows stay PR-artifact-only for now).
+    #
+    # gettext added 2026-09-02: missing here (unlike every other Linux job in this file)
+    # caused the build to stall generating locale .mo files with no msgfmt available,
+    # running the job into its 15-minute timeout instead of failing fast -- see
+    # project_compiler_warnings_job_gettext_gap memory, first hit weeks earlier. Confirmed
+    # in a live Release run (job 33639582120, package-compiler-warnings cancelled at 15m19s).
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext
+      - name: Configure with -Wall -Wextra
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
+            -DCMAKE_C_FLAGS="-Wall -Wextra -Wno-unused-parameter"
+      - name: Build (warnings captured, non-fatal)
+        run: cmake --build build 2>&1 | tee build/warnings.txt || true
+      - name: Format as HTML
+        run: |
+          mkdir -p report
+          tools/format-findings-report.sh build/warnings.txt report/index.html \
+            "Compiler warnings, -Wall -Wextra (GTK3V2MAIN, Linux)" bracketed \
+            "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/"
+      - name: Archive report
+        run: tar -czf xtrkcad-compiler-warnings.tar.gz -C report .
+      - name: Upload report
+        uses: actions/upload-artifact@v7
+        with:
+          name: xtrkcad-compiler-warnings-html
+          path: xtrkcad-compiler-warnings.tar.gz
+          retention-days: 14
+
+  package-suppress-inventory:
+    # Inventory of every cppcheck-suppress/NOLINT(NEXTLINE) comment in
+    # app/bin (+ app/wlib/gtk3lib, added 2026-09-02 once cppcheck's own
+    # scope widened there -- see tools/scan-suppressions.sh's usage
+    # comment for why each root is scanned non-recursively), split into
+    # boilerplate (generic "confirmed via broad sampling" reasoning from
+    # a prior bulk-approval pass) vs. specific (individualized reasoning)
+    # vs. unreasoned (no reason found at all, checking inline "-- reason"
+    # text, a same-line trailing block comment, and comment lines
+    # immediately following the suppress line).
+    # A boilerplate suppress is the one most likely to be hiding a fully
+    # removable case -- see SF #749's ccornu.c `ep` discovery, found only
+    # because that one happened to get individually re-traced. Answers
+    # "are we actually done re-auditing, or did we just stop finding
+    # things" without re-deriving the count by hand each time.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Scan for suppress comments
+        run: tools/scan-suppressions.sh app/bin app/wlib/gtk3lib app/wlib/gtk3lib/unix > suppressions.txt
+      - name: Format as HTML
+        run: |
+          mkdir -p report
+          tools/format-findings-report.sh suppressions.txt report/index.html \
+            "Suppress inventory (GTK3V2MAIN)" bracketed \
+            "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/"
+      - name: Archive report
+        run: tar -czf xtrkcad-suppress-inventory.tar.gz -C report .
+      - name: Upload report
+        uses: actions/upload-artifact@v7
+        with:
+          name: xtrkcad-suppress-inventory-html
+          path: xtrkcad-suppress-inventory.tar.gz
+          retention-days: 14
+
+  package-docs:
+    runs-on: ubuntu-latest
+    env:
+      DOXYGEN_VERSION: 1.15.0
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y cmake ninja-build libgtk-3-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext
+
+      - name: Install pinned Doxygen ${{ env.DOXYGEN_VERSION }}
+        run: |
+          curl -sL -o doxygen.tar.gz "https://github.com/doxygen/doxygen/releases/download/Release_${DOXYGEN_VERSION//./_}/doxygen-${DOXYGEN_VERSION}.linux.bin.tar.gz"
+          tar xzf doxygen.tar.gz
+          echo "$PWD/doxygen-${DOXYGEN_VERSION}/bin" >> "$GITHUB_PATH"
+
+      - name: Configure
+        # XTRKCAD_USERGUIDE_URL overrides the dev guide's default (relative,
+        # same-build-tree) User Guide link with the real absolute URL this
+        # job's own Pages deployment below puts it at -- computed from this
+        # run's own repository context, not a hardcoded site/account, so it's
+        # correct for whichever fork's Actions is doing the deploying.
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DXTRKCAD_USE_DOXYGEN=ON -DXTRKCAD_TESTING=OFF \
+            -DXTRKCAD_USERGUIDE_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/userguide/"
+
+      - name: Build docs
+        run: cmake --build build --target docs-doxygen
+
+      - name: Archive docs
+        run: tar -czf xtrkcad-docs.tar.gz -C build/docs/doxygen/html .
+
+      - name: Upload docs
+        uses: actions/upload-artifact@v7
+        with:
+          name: xtrkcad-docs-html
+          path: xtrkcad-docs.tar.gz
+          retention-days: 14
+
+      - name: Build user guide
+        # help-html (app/doc/CMakeLists.txt) is normally part of the default
+        # 'all' target, but this job only builds docs-doxygen above, so it
+        # still needs building explicitly here (cmake resolves its
+        # msgfiles/Doxygen dependencies automatically). Real Doxygen-based
+        # build as of the Halibut -> Doxygen conversion (SF feature-requests
+        # #219, see .claude/halibut-doxygen-investigation-plan.md) -- no
+        # longer a CI-test-only step, no longer needs tools/but-to-doxygen.py
+        # (that was one-time bootstrap tooling; its output is now the
+        # committed source in app/doc/*.dox).
+        run: cmake --build build --target help-html
+
+      - name: Archive user guide
+        run: tar -czf xtrkcad-userguide.tar.gz -C build/app/doc/html .
+
+      - name: Upload user guide
+        uses: actions/upload-artifact@v7
+        with:
+          name: xtrkcad-userguide-html
+          path: xtrkcad-userguide.tar.gz
+          retention-days: 14
+
+  # ── GitHub Pages — Doxygen + user guide, redeployed on every push ─────────
+  # Gives stable, permanent URLs that always reflect the latest successful
+  # build, unlike the 14-day artifacts above (whose links change every run):
+  #   https://<owner>.github.io/<repo>/doxygen/
+  #   https://<owner>.github.io/<repo>/userguide/
+  # (<owner>/<repo> being whichever fork's Actions is doing the deploying.)
+  deploy-pages:
+    needs:
+      - package-docs
+      - package-coverage
+      - package-cppcheck-deep
+      - package-clang-tidy
+      - package-codespell
+      - package-compiler-warnings
+      - package-suppress-inventory
+    # Only ordinary GTK3V2MAIN pushes redeploy the live public site -- this
+    # job previously had no such guard despite this file's own header
+    # comment claiming one (found 2026-08-05 while wiring up the new
+    # package-* report jobs, needed a way to workflow_dispatch-test them
+    # without publishing untested branch content live). Matches
+    # publish-latest-release's existing guard below.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/GTK3V2MAIN'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+      actions: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Remove stale github-pages artifacts from earlier attempts
+        # actions/deploy-pages fetches the run's "github-pages" artifact by
+        # name and errors out ("Multiple artifacts named github-pages were
+        # unexpectedly found") if more than one exists. That happens
+        # whenever this job is re-run after a previous attempt already got
+        # as far as "Upload Pages artifact" -- e.g. attempt 1 uploads fine
+        # but then times out on GitHub's Pages backend (deployment_queued),
+        # and a re-run of just this job uploads a second one. Artifacts
+        # aren't cleaned up between attempts of the same run, so clear any
+        # pre-existing ones before uploading a fresh copy (found 2026-08-06,
+        # run 31105550052).
+        run: |
+          gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" \
+            --paginate --jq '.artifacts[] | select(.name=="github-pages") | .id' |
+          while read -r id; do
+            echo "Deleting stale github-pages artifact $id"
+            gh api -X DELETE "repos/${{ github.repository }}/actions/artifacts/$id"
+          done
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Download docs artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: 'xtrkcad-*-html'
+          path: downloaded
+
+      - name: Assemble Pages site
+        run: |
+          mkdir -p site/doxygen site/userguide site/coverage site/cppcheck-deep site/clang-tidy site/codespell site/compiler-warnings site/suppress-inventory
+          tar -xzf downloaded/xtrkcad-docs-html/xtrkcad-docs.tar.gz -C site/doxygen
+          tar -xzf downloaded/xtrkcad-userguide-html/xtrkcad-userguide.tar.gz -C site/userguide
+          tar -xzf downloaded/xtrkcad-coverage-html/xtrkcad-coverage.tar.gz -C site/coverage
+          tar -xzf downloaded/xtrkcad-cppcheck-deep-html/xtrkcad-cppcheck-deep.tar.gz -C site/cppcheck-deep
+          tar -xzf downloaded/xtrkcad-clang-tidy-html/xtrkcad-clang-tidy.tar.gz -C site/clang-tidy
+          tar -xzf downloaded/xtrkcad-codespell-html/xtrkcad-codespell.tar.gz -C site/codespell
+          tar -xzf downloaded/xtrkcad-compiler-warnings-html/xtrkcad-compiler-warnings.tar.gz -C site/compiler-warnings
+          tar -xzf downloaded/xtrkcad-suppress-inventory-html/xtrkcad-suppress-inventory.tar.gz -C site/suppress-inventory
+          cat > site/index.html <<'PAGEEOF'
+          <!doctype html>
+          <html lang="en">
+          <head><meta charset="utf-8"><title>XTrkCAD GTK3V2MAIN — Latest Docs</title></head>
+          <body>
+          <h1>XTrkCAD (GTK3V2MAIN) — Latest Documentation</h1>
+          <p>Redeployed automatically on every successful push to GTK3V2MAIN.</p>
+          <ul>
+            <li><a href="doxygen/">Developer documentation (Doxygen)</a></li>
+            <li><a href="userguide/">User guide</a></li>
+            <li><a href="${{ github.server_url }}/${{ github.repository }}/releases/tag/latest-gtk3v2main">Latest development build (packages)</a></li>
+          </ul>
+          <h2>Analysis reports</h2>
+          <p>Report-only, non-gating -- findings backlogs, not build failures. Each link back to the
+          exact commit's source on GitHub.</p>
+          <ul>
+            <li><a href="coverage/">Code coverage</a> (unit tests + full regression suite, branch coverage)</li>
+            <li><a href="cppcheck-deep/">cppcheck (deep)</a></li>
+            <li><a href="clang-tidy/">clang-tidy</a></li>
+            <li><a href="codespell/">codespell</a></li>
+            <li><a href="compiler-warnings/">Compiler warnings</a> (-Wall -Wextra, Linux)</li>
+            <li><a href="suppress-inventory/">Suppress inventory</a> (cppcheck-suppress/NOLINT comments, boilerplate vs. specific reasoning)</li>
+          </ul>
+          </body>
+          </html>
+          PAGEEOF
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
+
+  # ── "Latest" GitHub Release — rolling, tracks the newest GTK3V2MAIN push ──
+  # Unlike the artifacts above, this is one permanent, unchanging URL:
+  #   <server>/<owner>/<repo>/releases/tag/latest-gtk3v2main
+  # Only runs on ordinary GTK3V2MAIN pushes: version tags get their own
+  # permanent release via github-release below, and workflow_dispatch runs
+  # (which may opt into experimental NSIS/DMG builds) are excluded so those
+  # can't silently replace the normal rolling-release assets.
+  publish-latest-release:
+    needs: [package-linux, package-linux-arm64-ubuntu, package-linux-arm64-debian, package-macos, package-windows]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/GTK3V2MAIN'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: latest-gtk3v2main-release
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Download all packages
+        uses: actions/download-artifact@v8
+        with:
+          path: release-packages
+          merge-multiple: true
+
+      - name: Remove GitHub Pages deployment bundle
+        # actions/upload-pages-artifact (used by deploy-pages) also uploads a
+        # regular workflow artifact named "github-pages" whose file is always
+        # called artifact.tar — an opaque tarball of the whole Pages site,
+        # not a real package. With no name filter above, download-artifact
+        # pulls it in alongside the real packages; strip it out explicitly
+        # rather than relying on glob-pattern filtering syntax.
+        run: rm -f release-packages/artifact.tar
+
+      - name: List packages
+        run: find release-packages -type f | sort
+
+      - name: Update rolling 'latest-gtk3v2main' release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mapfile -t FILES < <(find release-packages -type f | sort)
+          gh release delete latest-gtk3v2main --yes --cleanup-tag || true
+          gh release create latest-gtk3v2main \
+            --title "GTK3V2MAIN — Latest Development Build" \
+            --target "${{ github.sha }}" \
+            --notes "$(printf '%s\n' \
+              '**Automatically updated on every successful push to GTK3V2MAIN.**' \
+              '' \
+              'This is an unstable development build, not a tagged release — for' \
+              "production use, see the [tagged releases](${{ github.server_url }}/${{ github.repository }}/releases)." \
+              '' \
+              "Built from commit ${{ github.sha }}." \
+              '' \
+              "[Doxygen developer docs](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/doxygen/) · [User guide](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/userguide/)")" \
+            --prerelease \
+            --latest=false \
+            "${FILES[@]}"
+
+  # ── Temporary review-branch release — opt-in via workflow_dispatch ────────
+  # For review branches not going into GTK3V2MAIN yet (e.g. a large,
+  # one-way removal like the Halibut -> Doxygen migration) but where
+  # reviewers want real installable packages, not just a source checkout.
+  # Explicit opt-in only (publish_temp_release input, default false) so an
+  # ordinary CI-proving workflow_dispatch run never publishes anything.
+  # Tag is branch-derived and deleted+recreated on every dispatch (same
+  # rolling pattern as publish-latest-release above), so re-running updates
+  # it in place instead of accumulating releases. This is NOT a substitute
+  # for the real latest-gtk3v2main rolling release or a tagged release --
+  # delete the tag once the branch merges or is abandoned (github-release
+  # and publish-latest-release are both unaffected by this job).
+  publish-temp-release:
+    needs: [package-linux, package-linux-arm64-ubuntu, package-linux-arm64-debian, package-macos, package-windows]
+    if: github.event_name == 'workflow_dispatch' && inputs.publish_temp_release == true
+    runs-on: ubuntu-latest
+    concurrency:
+      group: temp-release-${{ github.ref_name }}
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Download all packages
+        uses: actions/download-artifact@v8
+        with:
+          path: release-packages
+          merge-multiple: true
+
+      - name: Remove GitHub Pages deployment bundle
+        # See publish-latest-release's identical step above for why.
+        run: rm -f release-packages/artifact.tar
+
+      - name: List packages
+        run: find release-packages -type f | sort
+
+      - name: Compute temp release tag
+        run: |
+          # GitHub tag/release names are more permissive than this needs to
+          # be strict about -- branch names here are already tag-safe, but
+          # sanitize defensively (slashes are the one real risk, e.g. a
+          # future user/foo-branch).
+          SAFE_REF="$(echo '${{ github.ref_name }}' | tr '/' '-')"
+          echo "TEMP_TAG=temp-${SAFE_REF}" >> "$GITHUB_ENV"
+
+      - name: Update the temporary release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mapfile -t FILES < <(find release-packages -type f | sort)
+          gh release delete "$TEMP_TAG" --yes --cleanup-tag || true
+          gh release create "$TEMP_TAG" \
+            --title "TEMP — ${{ github.ref_name }} (review build, not for production)" \
+            --target "${{ github.sha }}" \
+            --notes "$(printf '%s\n' \
+              '**Temporary review build — not a real release.**' \
+              '' \
+              "Branch \`${{ github.ref_name }}\`, commit ${{ github.sha }}." \
+              'This tag is deleted and recreated on every dispatch of this workflow' \
+              'for this branch, and should itself be deleted once the branch merges' \
+              'or is abandoned. Not linked from anywhere permanent.')" \
+            --prerelease \
+            --latest=false \
+            "${FILES[@]}"
+
+  # ── GitHub Release — created only on version tags ──────────────────────────
+  github-release:
+    needs: [package-linux, package-linux-arm64-ubuntu, package-linux-arm64-debian, package-macos, package-windows, package-docs]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Download all packages
+        uses: actions/download-artifact@v8
+        with:
+          path: release-packages
+          merge-multiple: true
+
+      - name: Remove GitHub Pages deployment bundle
+        # See the same step in publish-latest-release above — the
+        # deploy-pages job's artifact isn't a real package.
+        run: rm -f release-packages/artifact.tar
+
+      - name: List packages
+        run: find release-packages -type f | sort
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          # Flatten all artifact subdirectories into a single file list
+          mapfile -t FILES < <(find release-packages -type f | sort)
+          gh release create "$TAG" \
+            --title "XTrkCAD ${TAG}" \
+            --generate-notes \
+            --draft \
+            "${FILES[@]}"

@@ -1,0 +1,46 @@
+#ifndef XTRKCAD_CONFIG_H
+#define XTRKCAD_CONFIG_H
+
+/*  XTrkCad - Model Railroad CAD
+ *  Copyright (C) 2005 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+
+#cmakedefine XTRKCAD_USE_GETTEXT
+#cmakedefine XTRKCAD_TESTING
+#cmakedefine XTRKCAD_CREATE_SVG 1
+#cmakedefine XTRKCAD_GTK3_WLIB
+
+// root path used for GTK resources, used in GTK3 library only
+#define XTRKCAD_RESOURCE_PATH "@XTRKCAD_BUILDER_ROOT@/"
+#define XTRKCAD_SYMBOLS_PATH "@XTRKCAD_SYMBOLS_ROOT@/"
+#define XTRKCAD_ICONS_PATH "@XTRKCAD_ICONS_ROOT@/"
+
+#define XTRKCAD_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@"
+#define XTRKCAD_SHARE_INSTALL_DIR "@XTRKCAD_SHARE_INSTALL_DIR@"
+#define XTRKCAD_PACKAGE "@XTRKCAD_PACKAGE@"
+#define XTRKCAD_VERSION "@XTRKCAD_VERSION@"
+#define XTRKCAD_FILE_VERSION "@XTRKCAD_FILE_VERSION@"
+#define XTRKCAD_VERSION_ID "@XTRKCAD_VERSION_ID@"
+#define XTRKCAD_PARAMVERSION (12)
+#define XTRKCAD_PARAMVERSIONVERSION "5.2.0"
+#define XTRKCAD_MINPARAMVERSION (1)
+
+#cmakedefine01 XTRKCAD_BUILD_FLATPAK
+#cmakedefine01 XTRKCAD_FLATPAK_NOVERSION
+
+#endif // !XTRKCAD_CONFIG_H

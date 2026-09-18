@@ -1,0 +1,33 @@
+#projectnumber {
+    display: block;
+    margin-top: .5em;
+}
+
+#projectnumber::before {
+    content: "";
+    display: none; /* saving visual space; use "display: block;" to show icon all the time */
+    width: 340px;
+    height: 100px;
+    margin-top: .5em;
+    background-image: url('xtrkcad_logo.gif');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-color: white;
+}
+
+#xtrkcad-logo {
+    margin-top: .5em;
+    background-color: white;
+    display: inline-block;
+    line-height: 0;
+}
+
+#xtrkcad-logo .image {
+    text-align: left;
+}
+
+#xtrkcad-logo img {
+    margin-left: 0;
+    display: block;
+}
+
