@@ -38,6 +38,10 @@
 #include "smalldlg.h"
 #include "common-ui.h"
 #include "ctrain.h"
+#include "include/dlayergroupui.h"
+#include "include/dmanagenotesui.h"
+#include "include/dprintexportfilter.h"
+#include "include/dselectlayers.h"
 
 #include "toolbar.h"
 #include "wlib.h"
@@ -1349,12 +1353,19 @@ EXPORT void CreateMenus(void)
 	                   ACCL_PRINTBM, OutputBitMapInit(), 0,
 	                   NULL);
 	MiscMenuItemCreate(fileM, NULL, "cmdExportDXF", _("Export DXF"),
-	                   ACCL_EXPORTDXF, DoExportDxf, IC_SELECTED,
+	                   ACCL_EXPORTDXF, DoExportDxf, 0,
 	                   NULL);
 #if XTRKCAD_CREATE_SVG
 	MiscMenuItemCreate( fileM, NULL, "cmdExportSVG", _("Export SVG"),
-	                    ACCL_EXPORTSVG, DoExportSVG, IC_SELECTED, NULL);
+	                    ACCL_EXPORTSVG, DoExportSVG, 0, NULL);
 #endif
+	/* SF #789: no IC_SELECTED above -- the shared Print/Export filter
+	 * (dprintexportfilter.h) is an alternative scope to canvas selection,
+	 * not an addition to it, so these must stay enabled with nothing
+	 * selected; DoExportDxf/DoExportSVG check for that case themselves. */
+	MiscMenuItemCreate(fileM, NULL, "cmdPrintExportFilter",
+	                   _("Filter Layers/Groups for Print/Export..."),
+	                   ACCL_PRINTEXPORTFILTER, DoPrintExportFilter, 0, NULL);
 	wMenuSeparatorCreate(fileM);
 
 	paramFilesCallback = ParamFilesInit();
@@ -1431,6 +1442,8 @@ EXPORT void CreateMenus(void)
 	                    ACCL_SELECTALL, SetAllTrackSelectCB, 0, I2VP(TRUE) );
 	MiscMenuItemCreate( editM, NULL, "cmdSelectCurrentLayer",
 	                    _("Select Current Layer"), ACCL_SETCURLAYER, SelectCurrentLayer, 0, NULL);
+	MiscMenuItemCreate( editM, NULL, "cmdSelectLayersGroups",
+	                    _("Select Layers/Groups ..."), 0L, InitSelectLayersDialog(), 0, NULL);
 	MiscMenuItemCreate( editM, NULL, "cmdSelectByIndex", _("Select By Index"), 0L,
 	                    StartIndexDialog, 0, &SelectByIndex );
 	MiscMenuItemCreate( editM, NULL, "cmdDeselectAll", _("&Deselect All"),
@@ -1763,6 +1776,10 @@ EXPORT void CreateMenus(void)
 
 	MiscMenuItemCreate(manageM, NULL, "cmdLayer", _("Layers ..."), ACCL_LAYERS,
 	                   InitLayersDialog(), 0, NULL);
+	MiscMenuItemCreate(manageM, NULL, "cmdLayerGroups", _("Layer Groups ..."),
+	                   ACCL_LAYERGROUPS, InitLayerGroupsDialog(), 0, NULL);
+	MiscMenuItemCreate(manageM, NULL, "cmdManagenotes", _("Notes ..."),
+	                   ACCL_MANAGENOTES, InitManageNotesDialog(), 0, NULL);
 	wMenuSeparatorCreate(manageM);
 
 	MiscMenuItemCreate(manageM, NULL, "cmdEnumerate", _("Parts &List ..."),
@@ -1792,6 +1809,9 @@ EXPORT void CreateMenus(void)
 	MiscMenuItemCreate(reportsM, NULL, "cmdReportsKinked",
 	                   _("&Kinked Joints ..."), ACCL_REPORTSKINKED,
 	                   ReportsKinkedJoints, 0, NULL);
+	MiscMenuItemCreate(reportsM, NULL, "cmdReportsNotes",
+	                   _("&Notes ..."), ACCL_REPORTSNOTES,
+	                   ReportsNotes, 0, NULL);
 
 	cmdGroup = BG_LAYER;
 
@@ -1824,7 +1844,8 @@ static void InitCmdExport(void)
 	                 IC_SELECTED | IC_ACCLKEY, DoExport, NULL);
 	AddToolbarButton("cmdExportDXF",
 	                 CreateToolbarIconFromResource("doc-export-dxf.png"),
-	                 IC_SELECTED | IC_ACCLKEY, DoExportDxf, I2VP(1));
+	                 IC_ACCLKEY, DoExportDxf,
+	                 I2VP(1)); // SF #789: no IC_SELECTED, see menu.c's file-menu registration
 	AddToolbarButton("cmdExportBmap",
 	                 CreateToolbarIconFromResource("doc-export-bmap.png"), IC_ACCLKEY,
 	                 OutputBitMapInit(), NULL);

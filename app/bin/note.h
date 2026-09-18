@@ -35,7 +35,8 @@
 enum noteCommands {
 	OP_NOTETEXT,
 	OP_NOTELINK,
-	OP_NOTEFILE
+	OP_NOTEFILE,
+	OP_NOTEJSON
 };
 
 /** hold the data for the note */
@@ -75,9 +76,19 @@ void ActivateFileNote(track_p trk);
 void NewTextNoteUI( coOrd );
 void DescribeTextNote(track_p trk, char * str, CSIZE_T len);
 
+/* jsonnoteui.c */
+void NewJsonNoteUI( coOrd );
+BOOL_T IsJsonNote(track_p trk);
+void DescribeJsonNote(track_p trk, char * str, CSIZE_T len);
+
 /* trknote.c */
 extern TRKTYP_T T_NOTE;
 //void NoteStateSave(track_p trk);
 track_p NewNote(wIndex_t index, coOrd p, enum noteCommands command );
+
+/* SF #800 phase 3: MANAGENOTES file-format line read/write, doc comment on
+ * the definition in trknote.c */
+void ReadNoteNames(char *line);
+BOOL_T WriteNoteNames(FILE *f);
 
 #endif // !HAVE_NOTE_H

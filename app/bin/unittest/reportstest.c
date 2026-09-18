@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include <dynstring.h>
+#include "cJSON.h"
 #include "../include/reports.h"
 
 static void test_empty_list(void **state)
@@ -741,6 +742,149 @@ static void test_kinked_multiple_rows(void **state)
 	DynStringFree(&out);
 }
 
+static void test_notes_empty_list(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 16);
+
+	ReportsFormatNoteList(&out, NULL, 0);
+
+	assert_string_equal(DynStringToCStr(&out), "");
+	DynStringFree(&out);
+}
+
+static void test_notes_single_row(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 64);
+	reportsNoteRow_t list[1] = {
+		{ REPORTS_NOTE_OP_JSON, "ROOT", "WP", "", 1, 5 }
+	};
+
+	ReportsFormatNoteList(&out, list, 1);
+
+	assert_string_equal(DynStringToCStr(&out),
+	                    "ROOT\n"
+	                    "  ID  5: WP                                            layer 1\n");
+	DynStringFree(&out);
+}
+
+/* Input deliberately out of Type-then-alphabetical order -- the formatter
+ * must regroup into Text/Weblink/Document first, then JSON's distinct
+ * \c group values sorted alphabetically ("ROOT" before "Station"), with a
+ * blank line between each non-empty group and none trailing the last one. */
+static void test_notes_all_groups_present(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 512);
+	reportsNoteRow_t list[5] = {
+		{ REPORTS_NOTE_OP_JSON, "Station", "MC", "", 1, 5 },
+		{ REPORTS_NOTE_OP_FILE, "", "", "a document note", 1, 3 },
+		{ REPORTS_NOTE_OP_JSON, "ROOT", "WP", "", 1, 4 },
+		{ REPORTS_NOTE_OP_LINK, "", "", "a weblink note", 1, 2 },
+		{ REPORTS_NOTE_OP_TEXT, "", "", "a plain text note", 1, 1 },
+	};
+
+	ReportsFormatNoteList(&out, list, 5);
+
+	assert_string_equal(DynStringToCStr(&out),
+	                    "Text Notes\n"
+	                    "  ID  1:              a plain text note                layer 1\n"
+	                    "\n"
+	                    "Weblink Notes\n"
+	                    "  ID  2:              a weblink note                   layer 1\n"
+	                    "\n"
+	                    "Document Notes\n"
+	                    "  ID  3:              a document note                  layer 1\n"
+	                    "\n"
+	                    "ROOT\n"
+	                    "  ID  4: WP                                            layer 1\n"
+	                    "\n"
+	                    "Station\n"
+	                    "  ID  5: MC                                            layer 1\n");
+	DynStringFree(&out);
+}
+
+/* A type/group absent entirely gets no heading, and exactly one blank
+ * line separates the two groups that do appear. */
+static void test_notes_skips_absent_group(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 128);
+	reportsNoteRow_t list[2] = {
+		{ REPORTS_NOTE_OP_JSON, "ROOT", "WP", "", 1, 1 },
+		{ REPORTS_NOTE_OP_LINK, "", "", "a link note", 1, 2 }
+	};
+
+	ReportsFormatNoteList(&out, list, 2);
+
+	assert_string_equal(DynStringToCStr(&out),
+	                    "Weblink Notes\n"
+	                    "  ID  2:              a link note                      layer 1\n"
+	                    "\n"
+	                    "ROOT\n"
+	                    "  ID  1: WP                                            layer 1\n");
+	DynStringFree(&out);
+}
+
+static void test_notes_resolve_group_empty_registry(void **state)
+{
+	(void) state;
+	cJSON *note = cJSON_Parse("{\"kind\":\"station\",\"spots\":{\"tank\":1}}");
+
+	/* No registry entries at all (SF #800 phase 2's own state, until
+	 * phase 3's Manage Notes dialog exists) -- every JSON Note falls
+	 * under "ROOT" regardless of its own field names. */
+	assert_string_equal(ReportsNoteResolveGroup(note, NULL, 0), "ROOT");
+
+	cJSON_Delete(note);
+}
+
+static void test_notes_resolve_group_matches_field_name(void **state)
+{
+	(void) state;
+	/* The motivating case: a note with an ad-hoc ROOT-level name and no
+	 * "kind" field that fits any fixed vocabulary at all -- grouping is
+	 * about which field *name* the note has, not any field's value. */
+	cJSON *note = cJSON_Parse("{\"spots\":{\"tank\":1,\"box\":2}}");
+	const char *registry[] = { "meta", "spots" };
+
+	assert_string_equal(ReportsNoteResolveGroup(note, registry, 2), "spots");
+
+	cJSON_Delete(note);
+}
+
+static void test_notes_resolve_group_no_match_falls_to_root(void **state)
+{
+	(void) state;
+	cJSON *note = cJSON_Parse("{\"kind\":\"station\",\"id\":\"WP\"}");
+	const char *registry[] = { "spots", "meta" };
+
+	/* Registry is non-empty, but neither registered name is one of this
+	 * note's own fields ("kind"/"id" aren't registered) -- falls to
+	 * "ROOT", same as the empty-registry case. */
+	assert_string_equal(ReportsNoteResolveGroup(note, registry, 2), "ROOT");
+
+	cJSON_Delete(note);
+}
+
+static void test_notes_resolve_group_registry_order_is_priority(void **state)
+{
+	(void) state;
+	/* A note with both registered names present -- the first name in
+	 * registry order wins, not the note's own key order. */
+	cJSON *note = cJSON_Parse("{\"spots\":{}, \"meta\":{}}");
+	const char *registry[] = { "meta", "spots" };
+
+	assert_string_equal(ReportsNoteResolveGroup(note, registry, 2), "meta");
+
+	cJSON_Delete(note);
+}
+
 int main(void)
 {
 	const struct CMUnitTest tests[] = {
@@ -794,6 +938,14 @@ int main(void)
 		cmocka_unit_test(test_kinked_empty_list),
 		cmocka_unit_test(test_kinked_single_row),
 		cmocka_unit_test(test_kinked_multiple_rows),
+		cmocka_unit_test(test_notes_empty_list),
+		cmocka_unit_test(test_notes_single_row),
+		cmocka_unit_test(test_notes_all_groups_present),
+		cmocka_unit_test(test_notes_skips_absent_group),
+		cmocka_unit_test(test_notes_resolve_group_empty_registry),
+		cmocka_unit_test(test_notes_resolve_group_matches_field_name),
+		cmocka_unit_test(test_notes_resolve_group_no_match_falls_to_root),
+		cmocka_unit_test(test_notes_resolve_group_registry_order_is_priority),
 	};
 	return cmocka_run_group_tests(tests, NULL, NULL);
 }

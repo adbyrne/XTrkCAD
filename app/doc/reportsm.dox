@@ -24,8 +24,14 @@ the Parts List (\ref cmdEnum) window.
 - \subpage cmdReportsgaps -- pairs of open track endpoints close enough
   to each other that they likely should be connected.
 
+- \subpage cmdReportsnotes -- every note on the layout, grouped by Type
+  (Text/Weblink/Document/JSON), then by name for JSON Notes registered
+  via Manage Notes.
+
 - \subpage cmdReportskinked -- already-connected track joints whose
   alignment has drifted out of tolerance.
+
+- \subpage cmdReportsfilter
 
 */
 
@@ -79,6 +85,10 @@ used to name and save the report to a text file.
 The <b>Print</b> button opens the <i>Print</i> dialog which is used to
 print the report.
 
+The <b>Filter...</b> button (\ref cmdReportsfilter) opens a dialog to scope
+this report to specific Layers/Groups (\ref cmdLayergroup) -- every layer
+is included by default.
+
 The <b>Done</b> button closes the <b>Unconnected Endpoints Report</b>
 window.
 
@@ -127,6 +137,10 @@ used to name and save the report to a text file.
 The <b>Print</b> button opens the <i>Print</i> dialog which is used to
 print the report.
 
+The <b>Filter...</b> button (\ref cmdReportsfilter) opens a dialog to scope
+this report to specific Layers/Groups (\ref cmdLayergroup) -- every layer
+is included by default.
+
 The <b>Done</b> button closes the <b>Turnout Density Report</b> window.
 
 */
@@ -165,6 +179,10 @@ used to name and save the report to a text file.
 The <b>Print</b> button opens the <i>Print</i> dialog which is used to
 print the report.
 
+The <b>Filter...</b> button (\ref cmdReportsfilter) opens a dialog to scope
+this report to specific Layers/Groups (\ref cmdLayergroup) -- every layer
+is included by default.
+
 The <b>Done</b> button closes the <b>Track Lengths Report</b> window.
 
 */
@@ -200,6 +218,10 @@ used to name and save the report to a text file.
 
 The <b>Print</b> button opens the <i>Print</i> dialog which is used to
 print the report.
+
+The <b>Filter...</b> button (\ref cmdReportsfilter) opens a dialog to scope
+this report to specific Layers/Groups (\ref cmdLayergroup) -- every layer
+is included by default.
 
 The <b>Done</b> button closes the <b>Curve Stats Report</b> window.
 
@@ -246,6 +268,10 @@ interactive list above (which keeps the fixed equipment-class order).
 
 The <b>Print</b> button opens the <i>Print</i> dialog which is used to
 print the report.
+
+The <b>Filter...</b> button (\ref cmdReportsfilter) opens a dialog to scope
+this report to specific Layers/Groups (\ref cmdLayergroup) -- every layer
+is included by default.
 
 The <b>Done</b> button closes the <b>Equipment Suitability Report</b>
 window.
@@ -304,6 +330,12 @@ used to name and save the report to a text file.
 The <b>Print</b> button opens the <i>Print</i> dialog which is used to
 print the report.
 
+The <b>Filter...</b> button (\ref cmdReportsfilter) opens a dialog to scope
+this report to specific Layers/Groups (\ref cmdLayergroup) -- every layer
+is included by default. A filtered-out endpoint is excluded from pairing
+entirely, so a pair only appears when both its endpoints' layers are
+included.
+
 The <b>Done</b> button closes the <b>Gaps Report</b> window.
 
 */
@@ -348,6 +380,118 @@ used to name and save the report to a text file.
 The <b>Print</b> button opens the <i>Print</i> dialog which is used to
 print the report.
 
+The <b>Filter...</b> button (\ref cmdReportsfilter) opens a dialog to scope
+this report to specific Layers/Groups (\ref cmdLayergroup) -- every layer
+is included by default. A kinked joint only appears when both of its two
+tracks' layers are included.
+
 The <b>Done</b> button closes the <b>Kinked Joints Report</b> window.
+
+*/
+
+/**
+\page cmdReportsnotes Notes Report
+
+The <b>Notes Report</b> command lists every note on the layout. Each row's
+<b>ROOT Names</b> column shows either the note's Type (<b>Text</b>,
+<b>Weblink</b>, or <b>Document</b>) or, for a note created via the
+<b>JSON Note</b> command (\ref cmdJsonNote), whichever of its own
+ROOT-level field names -- the <b>Name</b> half of a Name:Value pair added
+via the JSON Note dialog's structured field editor -- matches a name
+registered in <b>Manage Notes</b>. A JSON Note groups by which field
+<i>name</i> it uses, not by the value of any particular field, so a note
+with a <tt>"spots"</tt> field groups under <b>spots</b> once that name is
+registered, whether or not the note has any other recognized field at
+all. Any JSON Note matching no registered name shows <b>ROOT</b> instead
+-- every JSON Note, until at least one name has been registered. <b>ID</b>
+is the JSON body's <tt>"id"</tt> field (empty for a non-JSON note),
+<b>Name/Label</b> is its <tt>"name"</tt> or <tt>"label"</tt> field,
+whichever is present (empty if neither is), and <b>Layer</b> is the
+note's layer.
+
+A summary line above the list gives the number of notes found, updated
+whenever the report is generated or refreshed.
+
+The <b>Type</b> dropdown restricts the report to one note type at a time --
+Text, Weblink, Document, or JSON ("All Types" is the default, unfiltered
+view). The <b>ROOT Names</b> dropdown independently restricts the report
+to one registered name at a time ("All ROOT Names" is the default,
+unfiltered view); it only applies to JSON Notes matching a name
+registered via <b>Manage Notes</b>, so combining a Type filter of
+Text/Weblink/Document with a specific ROOT Names selection produces an
+empty list. Change either dropdown and click <b>Refresh</b> to re-run
+the report with the new scope.
+
+Selecting a row pans the <b>Main Canvas</b> (\ref mainW) to that note's
+position and draws a temporary open-circle indicator there, the same way
+the Gaps (\ref cmdReportsgaps) and Kinked Joints (\ref cmdReportskinked)
+reports do. The indicator is purely visual -- it's never saved with the
+layout and disappears as soon as the report window closes.
+
+The <b>Refresh</b> button recomputes the report in place -- useful after
+editing a note's JSON body elsewhere in the layout, without closing and
+reopening the report window.
+
+The <b>Save As...</b> button opens a <i>File Save</i> dialog window that's
+used to name and save the report to a text file.
+
+The <b>Print</b> button opens the <i>Print</i> dialog which is used to
+print the report.
+
+The <b>Layer Filter...</b> button (\ref cmdReportsfilter) opens a dialog to
+scope this report to specific Layers/Groups (\ref cmdLayergroup) -- every
+layer is included by default. This is a separate scope from the Type and
+ROOT Names dropdowns above, which filter by note content rather than
+layer.
+
+The <b>Done</b> button closes the <b>Notes Report</b> window.
+
+*/
+
+/**
+\page cmdReportsfilter Filter Layers/Groups
+
+![](dreportsfilter.png)
+
+The <b>Filter Layers/Groups</b> dialog scopes a report down to specific
+Layers and/or Layer Groups (\ref cmdLayergroup) -- one dialog shared by
+every report on the <b>Reports</b> menu (\ref reportsM), opened by that
+report's own <b>Filter...</b> button. Each report keeps its own,
+independent scope; changing one report's filter has no effect on any
+other.
+
+The <b>Layers</b> shuttle has two lists, <b>Available</b> and
+<b>Included</b>. Every named <b>Layer</b> appears in exactly one of the
+two: <b>Included</b> if it's currently in scope for the report,
+<b>Available</b> otherwise. By default every layer starts in
+<b>Available</b> -- an unfiltered report, covering the whole layout,
+exactly like before this dialog existed. Select one or more layers in
+either list (click, or Ctrl/Shift+click for several) and use the arrow
+buttons between the lists to move them: the right arrow includes the
+selected <b>Available</b> layers, the left arrow removes the selected
+<b>Included</b> layers, restoring them to <b>Available</b>. As soon as
+<b>Included</b> is empty again, the report goes back to covering every
+layer.
+
+The <b>Groups</b> list on the right shows every defined Layer Group
+(\ref cmdLayergroup). Select one or more and click <b>Add Group to
+Included</b> to move every one of their current members into
+<b>Included</b> in a single click -- a one-time snapshot of that group's
+membership, not a live link: editing the group's membership afterward has
+no effect on a filter already built from it, and the same layer can be
+included both directly and by an included group's membership with no
+difference in outcome. Each layer's row is still independently movable
+afterward, so you can include a whole group and then remove one of its
+layers, or start from a group and add a few more layers by hand.
+
+The <b>Clear Filter</b> button moves every layer back to <b>Available</b>
+in one click, restoring the unfiltered ("show every layer") state without
+shuttling each one back individually.
+
+Filter changes take effect the next time the report's own <b>Refresh</b>
+button is clicked -- the same way every other report change (editing
+track, changing a layer) already requires a <b>Refresh</b> to show up.
+
+The <b>Done</b> button closes the <b>Filter Layers/Groups</b> dialog.
 
 */

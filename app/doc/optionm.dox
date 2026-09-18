@@ -7,32 +7,23 @@
 
 The <b>Options Menu</b> shows commands to change configuration options.
 
-- <b>Colors</b> - Displays the Colors (\ref cmdRgbcolor) dialog.
+- <b>Colors</b> - Displays the Colors (\subpage cmdRgbcolor) dialog.
 
-- <b>Command</b> - Displays the Command Options (\ref cmdCmdopt) dialog.
+- <b>Command</b> - Displays the Command Options (\subpage cmdCmdopt) dialog.
 
-- <b>Display</b> - Displays the Display (\ref cmdDisplay) dialog.
+- <b>Display</b> - Displays the Display (\subpage cmdDisplay) dialog.
 
-- <b>Easement</b> - Displays the easement (\ref cmdEasement) dialog which controls how easements (spiral transition curves) are used to join tracks.
+- <b>Easement</b> - Displays the easement (\subpage cmdEasement) dialog which controls how easements (spiral transition curves) are used to join tracks.
 
-- <b>Fonts</b> - Displays the font selection (\ref fontSelW) dialog which selects the font used by the text (\ref cmdText) command.  This command is only available on UNIX based systems.
+- <b>Fonts</b> - Displays the font selection (\subpage fontSelW) dialog which selects the font used by the text (\ref cmdText) command.  This command is only available on UNIX based systems.
 
-- <b>Layout</b> - Displays the layout (\ref cmdLayout) dialog.
+- <b>Layout</b> - Displays the layout (\subpage cmdLayout) dialog.
 
-- <b>Preferences</b> - Displays the Preferences (\ref cmdPref) dialog.
+- <b>Preferences</b> - Displays the Preferences (\subpage cmdPref) dialog.
 
-- <b>Sticky</b> - Displays the Sticky Commands (\ref cmdSticky) dialog.
+- <b>Sticky</b> - Displays the Sticky Commands (\subpage cmdSticky) dialog.
 
 - <b>Debug</b> - Only shown when extra/developer buttons are enabled. Displays a dialog listing every debug log category with a level control for each, plus a Test Mallocs button, for developers investigating an issue.
-
-- \subpage cmdRgbcolor
-- \subpage cmdCmdopt
-- \subpage cmdDisplay
-- \subpage cmdEasement
-- \subpage fontSelW
-- \subpage cmdLayout
-- \subpage cmdPref
-- \subpage cmdSticky
 
 */
 
@@ -193,10 +184,8 @@ The <b>Easement</b> dialog is invoked from the Options (\ref optionM) menu.
 
 - Radio button group with <b>None</b>, <b>Sharp</b>, <b>Normal</b>, <b>Broad</b> and <b>Cornu</b>. Corresponding <b>Value</b>s for these buttons are 0, 0.5, 1.0, 2.0 and -1.0. Select <b>None</b> to turn easements off.
 
-For traditional fixed sharpness easements see \ref EasementsTraditional, for Cornu Easements see \ref EasementsCornu.
+For traditional fixed sharpness easements see \subpage EasementsTraditional, for Cornu Easements see \subpage EasementsCornu.
 
-- \subpage EasementsCornu
-- \subpage EasementsTraditional
 - \subpage EasementsSectional
 
 */

@@ -35,6 +35,8 @@
 #include "layout.h"
 #include "manifest.h"
 #include "misc.h"
+#include "note.h"
+#include "include/notenames.h"
 #include "param.h"
 #include "include/paramfile.h"
 #include "include/paramfilelist.h"
@@ -476,6 +478,10 @@ BOOL_T ReadTrackFile(
 			}
 		} else if (strncmp( paramLine, "LAYERS ", 7 ) == 0) {
 			ReadLayers( paramLine+7 );
+		} else if (strncmp( paramLine, "LAYERGROUP ", 11 ) == 0) {
+			ReadLayerGroups( paramLine+11 );
+		} else if (strncmp( paramLine, "MANAGENOTES ", 12 ) == 0) {
+			ReadNoteNames( paramLine+12 );
 		} else {
 			if (!old_skip) {
 				if (InputError(_("Unknown layout file object - skip until next good object?"),
@@ -496,6 +502,14 @@ BOOL_T ReadTrackFile(
 	if (paramFile) {
 		fclose(paramFile);
 		paramFile = NULL;
+	}
+
+	/* Layer Groups (SF #222 phase 0, SF #782): a full layout load whose
+	 * file predates Layer Groups gets its old per-layer Linked-Layers
+	 * data migrated into groups exactly once, here, after every LAYERS/
+	 * LAYERGROUP line has already been read. */
+	if ( full && paramVersion < 13 ) {
+		MigrateLayerLinksToGroups();
 	}
 
 	if ( ret ) {
@@ -547,6 +561,7 @@ int LoadTracks(
 	wSetCursor( mainD.d, wCursorWait );
 	ClearTracks();
 	ResetLayers();
+	NoteNameResetAll();
 	checkPtMark = changed = 0;
 	if (!data) {
 		LayoutBackGroundInit(
@@ -755,6 +770,7 @@ static BOOL_T DoSaveTracks(
 	rc &= fprintf(f, "ROOMSIZE %0.6f x %0.6f\n", mapD.size.x, mapD.size.y )>0;
 	rc &= fprintf(f, "SCALE %s\n", curScaleName )>0;
 	rc &= WriteLayers( f );
+	rc &= WriteNoteNames( f );
 	rc &= WriteMainNote( f );
 	rc &= WriteTracks( f, TRUE );
 	rc &= fprintf(f, "%s\n", END_TRK_FILE)>0;

@@ -29,6 +29,7 @@
 #include "form.h"
 #include "track.h"
 #include "common-ui.h"
+#include "include/dprintexportfilter.h"
 #include "include/form.h"
 
 #define PRINT_GAUDY		(0)
@@ -161,9 +162,10 @@ static paramData_t printPLs[] = {
 	/*22*/ { PD_BUTTON, DoPrintSetup, "setup", PDO_DLGCMDBUTTON, NULL, N_("Setup") },
 	/*23*/ { PD_BUTTON, SelectAllPages, "selall", 0, NULL, N_("Select All") },
 	/*24*/ { PD_BUTTON, PrintClear, "clear", 0, NULL, N_("Clear") },
-#define I_PAGECNT		(25)
-	/*25*/ { PD_MESSAGE, N_("0 pages"), "mess1", 0, I2VP(80) },
-	/*26*/ { PD_MESSAGE, N_("selected"), "mess2", 0, I2VP(80) }
+	/*25*/ { PD_BUTTON, DoPrintExportFilter, "filter", 0, NULL, N_("Filter Layers/Groups...") },
+#define I_PAGECNT		(26)
+	/*26*/ { PD_MESSAGE, N_("0 pages"), "mess1", 0, I2VP(80) },
+	/*27*/ { PD_MESSAGE, N_("selected"), "mess2", 0, I2VP(80) }
 };
 
 static paramGroup_t printPG = { "print", PGO_PREFMISCGROUP|PGO_FULLDIALOGFROMBUILDER, printPLs, COUNT( printPLs ) };

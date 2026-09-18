@@ -28,6 +28,7 @@
 #include "cundo.h"
 #include "custom.h"
 #include "draw.h"
+#include "include/dprintexportfilter.h"
 #include "fileio.h"
 #include "icons.h"
 #include "layout.h"
@@ -3240,7 +3241,13 @@ EXPORT void DrawTracks( drawCmd_p d, DIST_T scale, coOrd orig, coOrd size )
 		GetBoundingBox( trk, &hi, &lo );
 		if ( OFF_D( orig, size, lo, hi ) ||
 		     (d != &mapD && !GetLayerVisible( GetTrkLayer(trk) ) ) ||
-		     (d == &mapD && !GetLayerOnMap( GetTrkLayer(trk) ) ) ) {
+		     (d == &mapD && !GetLayerOnMap( GetTrkLayer(trk) ) ) ||
+		     /* SF #789: scope a print pass (never normal on-screen redraw) to
+		      * the shared Print/Export filter, on top of the usual layer-
+		      * visibility check, when the user has set one. */
+		     ((d->options&DC_PRINT) != 0 &&
+		      ReportsFilterActive(&printExportFilter) &&
+		      !ReportsFilterLayerIncluded(&printExportFilter, GetTrkLayer(trk))) ) {
 			continue;
 		}
 		currTracks++;
@@ -3270,9 +3277,18 @@ EXPORT void DrawTracks( drawCmd_p d, DIST_T scale, coOrd orig, coOrd size )
 EXPORT void DrawSelectedTracks( drawCmd_p d, BOOL_T all )
 {
 	track_cp trk;
+	/* SF #789: when the shared Print/Export filter is active, it replaces
+	 * the usual all-visible/selection scoping entirely (visible + in the
+	 * filter) rather than being combined with it -- the filter is the
+	 * primary scope once set, canvas selection only matters when no
+	 * filter is active. */
+	BOOL_T filterActive = ReportsFilterActive(&printExportFilter);
 
 	TRK_ITERATE( trk ) {
-		if ( (all && GetLayerVisible(GetTrkLayer(trk))) || GetTrkSelected( trk ) ) {
+		if ( filterActive
+		     ? (GetLayerVisible(GetTrkLayer(trk)) &&
+		        ReportsFilterLayerIncluded(&printExportFilter, GetTrkLayer(trk)))
+		     : ((all && GetLayerVisible(GetTrkLayer(trk))) || GetTrkSelected( trk )) ) {
 			DrawTrack( trk, d, wDrawColorBlack );
 		}
 	}

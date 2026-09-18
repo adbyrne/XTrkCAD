@@ -28,6 +28,7 @@
 #include "icons.h"
 #include "misc.h"
 #include "note.h"
+#include "include/notenames.h"
 #include "param.h"
 #include "track.h"
 #include "include/utf8convert.h"
@@ -36,7 +37,7 @@ static int log_trknote = -1;
 
 EXPORT TRKTYP_T T_NOTE = -1;
 
-static wDrawBitMap_p note_bm, link_bm, document_bm;
+static wDrawBitMap_p note_bm, link_bm, document_bm, json_bm;
 
 typedef struct {
 	char *icon;
@@ -50,6 +51,7 @@ static trknoteData_t noteTypes[] = {
 	{ "sticky-note.png", OP_NOTETEXT, N_("Text Note"), "cmdTextNote", ACCL_NOTE},
 	{ "sticky-link.png", OP_NOTELINK, N_("Weblink"), "cmdLinkNote", 0L},
 	{ "sticky-doc.png", OP_NOTEFILE, N_("Document"), "cmdFileNote", 0L},
+	{ "sticky-json.png", OP_NOTEJSON, N_("JSON Note"), "cmdJsonNote", 0L},
 };
 
 static long curNoteType;
@@ -112,12 +114,14 @@ static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 
 		if (xx->op == OP_NOTELINK ||(inDescribeCmd && curNoteType == OP_NOTELINK)) {
 			bm = link_bm;
+		} else if (xx->op == OP_NOTEFILE || (inDescribeCmd
+		                                     && curNoteType == OP_NOTEFILE)) {
+			bm = document_bm;
+		} else if (xx->op == OP_NOTEJSON || (inDescribeCmd
+		                                     && curNoteType == OP_NOTEJSON)) {
+			bm = json_bm;
 		} else {
-			if (xx->op == OP_NOTEFILE || (inDescribeCmd && curNoteType == OP_NOTEFILE)) {
-				bm = document_bm;
-			} else {
-				bm = note_bm;
-			}
+			bm = note_bm;
 		}
 		DrawBitMap(d, xx->pos, bm, color);
 	}
@@ -142,6 +146,7 @@ static void DeleteNote(track_p t)
 
 	switch (xx->op) {
 	case OP_NOTETEXT:
+	case OP_NOTEJSON:
 		if (xx->noteData.text) {
 			MyFree(xx->noteData.text);
 		}
@@ -220,6 +225,7 @@ static BOOL_T WriteNote(track_p t, FILE * f)
 	char *s[2] = { NULL, NULL };
 	switch (xx->op) {
 	case OP_NOTETEXT:
+	case OP_NOTEJSON:
 		s[0]=ConvertToEscapedText( xx->noteData.text );
 		break;
 	case OP_NOTELINK:
@@ -294,6 +300,7 @@ ReadTrackNote(char *line)
 		xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
 		switch (noteType) {
 		case OP_NOTETEXT:
+		case OP_NOTEJSON:
 			if ( !GetArgs( cp, "qc", &sText, &cp ) ) {
 				return FALSE;
 			}
@@ -374,6 +381,14 @@ ReadTrackNote(char *line)
 			xx->noteData.fileData.inArchive = FALSE;
 			break;
 		}
+		case OP_NOTEJSON:
+			/* Unreachable by construction: JSON Note postdates this legacy
+			 * pre-v12 multiline format entirely, and the bound check above
+			 * ("<= OP_NOTEFILE") already excludes it from noteType. Listed
+			 * explicitly (not via a catch-all default) so -Wswitch still
+			 * warns if a future op value is added here without a decision
+			 * being made about it. */
+			break;
 
 		}
 		MyFree(noteText);
@@ -424,12 +439,12 @@ static void DescribeNote(track_p trk, char * str, CSIZE_T len)
 {
 	if (IsLinkNote(trk)) {
 		DescribeLinkNote(trk, str, len);
+	} else if (IsFileNote(trk)) {
+		DescribeFileNote(trk, str, len);
+	} else if (IsJsonNote(trk)) {
+		DescribeJsonNote(trk, str, len);
 	} else {
-		if (IsFileNote(trk)) {
-			DescribeFileNote(trk, str, len);
-		} else {
-			DescribeTextNote(trk, str, len);
-		}
+		DescribeTextNote(trk, str, len);
 	}
 }
 
@@ -546,6 +561,9 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 		case OP_NOTEFILE:
 			NewFileNoteUI(pos);
 			break;
+		case OP_NOTEJSON:
+			NewJsonNoteUI(pos);
+			break;
 		default:
 			if ( log_trknote < 0 ) { log_trknote = LogFindIndex( "trknote" ); }
 			LOG( log_trknote, 1, ( "unexpected curNoteType %d in CmdNote\n", curNoteType ) )
@@ -565,6 +583,9 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 				break;
 			case OP_NOTEFILE:
 				DrawBitMap(&tempD, oldPos, document_bm, normalColor);
+				break;
+			case OP_NOTEJSON:
+				DrawBitMap(&tempD, oldPos, json_bm, normalColor);
 				break;
 			default:
 				if ( log_trknote < 0 ) { log_trknote = LogFindIndex( "trknote" ); }
@@ -587,12 +608,61 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 	return C_CONTINUE;
 }
 
+/**
+ * Parse a "MANAGENOTES ..." file-format line (SF #800 phase 3):
+ *   MANAGENOTES "\<name\>"
+ * registers \<name\> into the Manage Notes registry (notenames.h). A
+ * malformed line is silently ignored, same convention as ReadLayerGroups().
+ *
+ * The keyword is "MANAGENOTES", not the shorter "NOTENAME" originally
+ * used -- found live via Xvfb save/reload testing that ReadTrack()'s
+ * object-type dispatch (track.c) does a plain prefix strncmp() against
+ * every registered track type name with no word-boundary check, so a
+ * line starting with "NOTENAME " was silently swallowed by the "NOTE"
+ * track-object reader instead of ever reaching this function -- it tried
+ * to parse the remainder ("NAME \"kind\"") as NOTE's own numeric fields
+ * and failed with a confusing "expected integer" error. "MANAGENOTES"
+ * doesn't collide with any registered track type name.
+ *
+ * \param line IN the remainder of the line after "MANAGENOTES "
+ */
+void ReadNoteNames(char *line)
+{
+	char *name;
+
+	if (!GetArgs(line, "q", &name)) {
+		return;
+	}
+	NoteNameAdd(name);
+	MyFree(name);
+}
+
+/**
+ * Write every registered Manage Notes name (notenames.h) to the layout
+ * file as its own "MANAGENOTES" line (SF #800 phase 3).
+ *
+ * \param[in] f open file handle
+ * \return TRUE on success
+ */
+BOOL_T WriteNoteNames(FILE *f)
+{
+	BOOL_T rc = TRUE;
+
+	for (int i = 0; i < NoteNameCount(); i++) {
+		rc &= fprintf(f, "MANAGENOTES \"%s\"\n", NoteNameAt(i)) > 0;
+	}
+
+	return rc;
+}
+
 void InitTrkNote(wMenu_p menu)
 {
 	note_bm = wDrawBitMapCreate(mainD.d, 8, 8, XTRKCAD_SYMBOLS_PATH, "note.png");
 	link_bm = wDrawBitMapCreate(mainD.d, 8, 8, XTRKCAD_SYMBOLS_PATH, "link.png");
 	document_bm = wDrawBitMapCreate(mainD.d, 8, 8, XTRKCAD_SYMBOLS_PATH,
 	                                "clip.png");
+	json_bm = wDrawBitMapCreate(mainD.d, 8, 8, XTRKCAD_SYMBOLS_PATH,
+	                            "note-json.png");
 
 	ButtonGroupBegin(_("Notes"), "cmdNoteCmd", _("Add notes"));
 	for (int i = 0; i < NOTETYPESCOUNT; i++) {

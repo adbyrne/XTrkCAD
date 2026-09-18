@@ -7,7 +7,7 @@
 
 The <b>Edit Menu</b> shows commands affecting the <b>Main Canvas</b> (\ref mainW).
 
-- <i>Undo</i> \anchor idx_Undo_146  - Reverses the last command.  Up to the last ten commands can be undone.  If there are no commands that can be undone the <b>Undo</b> item is disabled.  The <b>Undo</b> command can also be invoked by the <b>Undo</b> button (\ref cmdUndo).
+- <i>Undo</i> \anchor idx_Undo_146  - Reverses the last command.  Up to the last ten commands can be undone.  If there are no commands that can be undone the <b>Undo</b> item is disabled.  The <b>Undo</b> command can also be invoked by the <b>Undo</b> button (\subpage cmdUndo).
 
 - <i>Redo</i> \anchor idx_Redo_147  - Undoes the last Undo command.  The <b>Redo</b> command can also be invoked by the <b>Redo</b> button (\ref cmdUndo).
 
@@ -28,7 +28,9 @@ The newly pasted parts are in <b>Selected</b> state and can easily be moved into
 
 - <i>Select Current Layer</i> \anchor idx_Select_Current_Layer_154  - selects all objects in the current Layer (\ref cmdLayer).
 
-- <i>Select By Index</i> \anchor idx_Select_By_Index_155  - selects object by index number (\ref cmdSelectIndex).
+- <i>Select Layers/Groups</i> - opens the Select Layers/Groups (\subpage cmdSelectlayers) dialog, for selecting or deselecting all objects on any number of Layers and/or Layer Groups (\ref cmdLayergroup) at once.
+
+- <i>Select By Index</i> \anchor idx_Select_By_Index_155  - selects object by index number (\subpage cmdSelectIndex).
 
 - <i>Deselect All</i> \anchor idx_Deselect_All_156  - unselects all objects on the layout. The same action can be achieved by pressing the ESC key.
 
@@ -55,7 +57,6 @@ The newly pasted parts are in <b>Selected</b> state and can easily be moved into
 
 For more information on working with selected objects, see the Select (\ref cmdSelect) command.
 
-- \subpage cmdSelectIndex
 - \subpage cmdAboveBelow
 - \subpage addshortcutkeys
 - \subpage cmdDelete
@@ -63,7 +64,6 @@ For more information on working with selected objects, see the Select (\ref cmdS
 - \subpage cmdTies
 - \subpage cmdBridge
 - \subpage cmdRoadbed
-- \subpage cmdUndo
 
 */
 
@@ -85,7 +85,31 @@ When an individual object is selected, its index number is displayed in the Info
 */
 
 /**
-\page cmdAboveBelow "Move To Front" and "Move to Back"  
+\page cmdSelectlayers Select Layers/Groups
+
+\anchor idx_Select_Layers_Groups_787
+
+![](dselectlayers.png)
+
+The <b>Select Layers/Groups</b> dialog selects or deselects all objects on any number of
+<b>Layers</b> (\ref cmdLayer) and/or <b>Layer Groups</b> (\ref cmdLayergroup) at once.
+
+The <b>Layers</b> list on the left and the <b>Groups</b> list on the right are independent;
+select any number of rows in either or both (click, or Ctrl/Shift+click for several). Selecting a
+<b>Layer Group</b> row does not select any individual <b>Layer</b> row -- the
+<b>Select</b>/<b>Deselect</b> buttons act on the union of every selected <b>Layer</b> plus every
+current member of every selected <b>Group</b> directly, without changing either list's selected
+rows. This means the two buttons can be used in sequence to fine-tune a selection: for example,
+selecting a group and clicking <b>Select</b>, then separately selecting one of that group's Layers
+and clicking <b>Deselect</b>, selects every Layer in the group except that one.
+
+An object cannot be selected if its Layer is frozen (see the <b>Layers</b> dialog, \ref cmdLayer);
+deselecting has no such restriction.
+
+*/
+
+/**
+\page cmdAboveBelow "Move To Front" and "Move to Back"
 
 \anchor idx_Move_To_Front_179
 \anchor idx_Move_To_Back_180

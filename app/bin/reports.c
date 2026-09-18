@@ -72,16 +72,21 @@
 
 #include "custom.h"
 #include <dynstring.h>
+#include "cJSON.h"
 #include "ccurve.h"
 #include "dlayer.h"
 #include "draw.h"
 #include "fileio.h"
 #include "layout.h"
 #include "form.h"
+#include "note.h"
 #include "paths.h"
 #include "scale.h"
+#include "shortentext.h"
 #include "track.h"
 #include "utility.h"
+#include "include/dreportsfilter.h"
+#include "include/notenames.h"
 #include "include/reports.h"
 
 /** Debug log category for manual/visual testing (`-d reports=1 -l <file>`)
@@ -180,6 +185,22 @@ static const char * reportsListTitles[] = {
 };
 static paramListData_t reportsListData = { 8, 300, 7, reportsListWidths, reportsListTitles };
 
+/** This report's layer/group scope -- see dreportsfilter.h. Zero-
+ * initialized, so unfiltered (every layer shown) until the user opens
+ * the Filter dialog and includes at least one layer. */
+static reportsFilter_t reportsFilter;
+
+/** "Filter..." button: open the shared Filter dialog against this
+ * report's own reportsFilter. The user clicks Refresh afterward (same as
+ * any other change) to see the new scope take effect.
+ *
+ * \param unused IN unused, required by the PD_BUTTON signature
+ */
+static void DoReportsFilter(void *unused)
+{
+	ShowReportsFilterDialog(&reportsFilter);
+}
+
 static paramData_t reportsPLs[] = {
 #define I_REPORTSSUMMARY (0)
 #define reportsSummary (reportsPLs[I_REPORTSSUMMARY].control)
@@ -191,6 +212,7 @@ static paramData_t reportsPLs[] = {
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsUnconnectedSaveOp },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsUnconnectedPrintOp },
 	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
+	{ PD_BUTTON, DoReportsFilter, "filter", 0, NULL, NULL, 0, NULL },
 };
 static paramGroup_t reportsPG = { "reports", PGO_FULLDIALOGFROMBUILDER, reportsPLs, COUNT( reportsPLs ) };
 
@@ -683,6 +705,9 @@ void ReportsUnconnectedEndpoints( void * unused )
 
 	TRK_ITERATE( trk ) {
 		EPINX_T ep;
+		if ( !ReportsFilterLayerIncluded( &reportsFilter, GetTrkLayer(trk) ) ) {
+			continue;
+		}
 		EPINX_T epCnt = GetTrkEndPtCnt(trk);
 		/* Turntable stalls are open by design (QueryTrack(trk,
 		 * Q_CAN_ADD_ENDPOINTS) -- same test the Gaps report uses to
@@ -784,6 +809,18 @@ static paramListData_t reportsTurnoutListData = { 8, 400, 6, reportsTurnoutListW
                                                   reportsTurnoutListTitles
                                                 };
 
+/** This report's layer/group scope -- see dreportsfilter.h. */
+static reportsFilter_t reportsTurnoutFilter;
+
+/** "Filter..." button -- see DoReportsFilter() above for the shared shape.
+ *
+ * \param unused IN unused, required by the PD_BUTTON signature
+ */
+static void DoReportsTurnoutFilter(void *unused)
+{
+	ShowReportsFilterDialog(&reportsTurnoutFilter);
+}
+
 static paramData_t reportsTurnoutPLs[] = {
 #define I_REPORTSTURNOUTSUMMARY (0)
 #define reportsTurnoutSummary (reportsTurnoutPLs[I_REPORTSTURNOUTSUMMARY].control)
@@ -795,6 +832,7 @@ static paramData_t reportsTurnoutPLs[] = {
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsTurnoutSaveOp },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsTurnoutPrintOp },
 	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
+	{ PD_BUTTON, DoReportsTurnoutFilter, "filter", 0, NULL, NULL, 0, NULL },
 };
 static paramGroup_t reportsTurnoutPG = { "reportsturnout", PGO_FULLDIALOGFROMBUILDER,
                                          reportsTurnoutPLs, COUNT( reportsTurnoutPLs )
@@ -898,6 +936,10 @@ void ReportsTurnoutDensity( void * unused )
 
 	TRK_ITERATE( trk ) {
 		unsigned int trkLayer = GetTrkLayer(trk);
+		DIST_T lengthFt;
+		if ( !ReportsFilterLayerIncluded( &reportsTurnoutFilter, trkLayer ) ) {
+			continue;
+		}
 		/* GetTrkLength(trk,0,1) reads endpoints 0 and 1 unconditionally
 		 * (track.c) -- TRK_ITERATE walks every object on the track list,
 		 * not just track with a real length (benchwork, notes, groups,
@@ -911,8 +953,8 @@ void ReportsTurnoutDensity( void * unused )
 		 * Matches the MCP reference's own guard
 		 * (TrackObject.length_model_inches(): "if len(eps) < 2: return
 		 * 0.0"), just not carried over into this port originally. */
-		DIST_T lengthFt = (GetTrkEndPtCnt(trk) >= 2) ?
-		                  GetTrkLength(trk, 0, 1) / 12.0 : 0.0;
+		lengthFt = (GetTrkEndPtCnt(trk) >= 2) ?
+		           GetTrkLength(trk, 0, 1) / 12.0 : 0.0;
 		BOOL_T isTurnout = (GetTrkType(trk) == T_TURNOUT);
 
 		if ( trkLayer < NUM_LAYERS ) {
@@ -1013,6 +1055,18 @@ static paramListData_t reportsTrackLenListData = { 8, 400, 6, reportsTrackLenLis
                                                    reportsTrackLenListTitles
                                                  };
 
+/** This report's layer/group scope -- see dreportsfilter.h. */
+static reportsFilter_t reportsTrackLenFilter;
+
+/** "Filter..." button -- see DoReportsFilter() above for the shared shape.
+ *
+ * \param unused IN unused, required by the PD_BUTTON signature
+ */
+static void DoReportsTrackLenFilter(void *unused)
+{
+	ShowReportsFilterDialog(&reportsTrackLenFilter);
+}
+
 static paramData_t reportsTrackLenPLs[] = {
 #define I_REPORTSTRACKLENSUMMARY (0)
 #define reportsTrackLenSummary (reportsTrackLenPLs[I_REPORTSTRACKLENSUMMARY].control)
@@ -1024,6 +1078,7 @@ static paramData_t reportsTrackLenPLs[] = {
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsTrackLenSaveOp },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsTrackLenPrintOp },
 	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
+	{ PD_BUTTON, DoReportsTrackLenFilter, "filter", 0, NULL, NULL, 0, NULL },
 };
 static paramGroup_t reportsTrackLenPG = { "reportstracklen", PGO_FULLDIALOGFROMBUILDER,
                                           reportsTrackLenPLs, COUNT( reportsTrackLenPLs )
@@ -1106,11 +1161,16 @@ void ReportsTrackLengths( void * unused )
 
 	TRK_ITERATE( trk ) {
 		unsigned int trkLayer = GetTrkLayer(trk);
+		DIST_T lengthFt;
+		BOOL_T isTurnout;
+		if ( !ReportsFilterLayerIncluded( &reportsTrackLenFilter, trkLayer ) ) {
+			continue;
+		}
 		/* Same guard as ReportsTurnoutDensity() -- see that function's
 		 * comment for the real crash this prevents. */
-		DIST_T lengthFt = (GetTrkEndPtCnt(trk) >= 2) ?
-		                  GetTrkLength(trk, 0, 1) / 12.0 : 0.0;
-		BOOL_T isTurnout = (GetTrkType(trk) == T_TURNOUT);
+		lengthFt = (GetTrkEndPtCnt(trk) >= 2) ?
+		           GetTrkLength(trk, 0, 1) / 12.0 : 0.0;
+		isTurnout = (GetTrkType(trk) == T_TURNOUT);
 
 		if ( trkLayer < NUM_LAYERS ) {
 			layerFeet[trkLayer] += lengthFt;
@@ -1196,6 +1256,18 @@ static paramListData_t reportsCurveListData = { 8, 300, 2, reportsCurveListWidth
                                                 reportsCurveListTitles
                                               };
 
+/** This report's layer/group scope -- see dreportsfilter.h. */
+static reportsFilter_t reportsCurveFilter;
+
+/** "Filter..." button -- see DoReportsFilter() above for the shared shape.
+ *
+ * \param unused IN unused, required by the PD_BUTTON signature
+ */
+static void DoReportsCurveFilter(void *unused)
+{
+	ShowReportsFilterDialog(&reportsCurveFilter);
+}
+
 static paramData_t reportsCurvePLs[] = {
 #define I_REPORTSCURVESUMMARY (0)
 #define reportsCurveSummary (reportsCurvePLs[I_REPORTSCURVESUMMARY].control)
@@ -1207,6 +1279,7 @@ static paramData_t reportsCurvePLs[] = {
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsCurveSaveOp },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsCurvePrintOp },
 	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
+	{ PD_BUTTON, DoReportsCurveFilter, "filter", 0, NULL, NULL, 0, NULL },
 };
 static paramGroup_t reportsCurvePG = { "reportscurvestats", PGO_FULLDIALOGFROMBUILDER,
                                        reportsCurvePLs, COUNT( reportsCurvePLs )
@@ -1287,6 +1360,9 @@ void ReportsCurveStats( void * unused )
 		const char *label;
 
 		if ( r <= 0.0 ) {
+			continue;
+		}
+		if ( !ReportsFilterLayerIncluded( &reportsCurveFilter, GetTrkLayer(trk) ) ) {
 			continue;
 		}
 		curveCount++;
@@ -1403,6 +1479,18 @@ static paramListData_t reportsEquipListData = { 8, 400, 3, reportsEquipListWidth
                                                 reportsEquipListTitles
                                               };
 
+/** This report's layer/group scope -- see dreportsfilter.h. */
+static reportsFilter_t reportsEquipFilter;
+
+/** "Filter..." button -- see DoReportsFilter() above for the shared shape.
+ *
+ * \param unused IN unused, required by the PD_BUTTON signature
+ */
+static void DoReportsEquipFilter(void *unused)
+{
+	ShowReportsFilterDialog(&reportsEquipFilter);
+}
+
 static paramData_t reportsEquipPLs[] = {
 #define I_REPORTSEQUIPSUMMARY (0)
 #define reportsEquipSummary (reportsEquipPLs[I_REPORTSEQUIPSUMMARY].control)
@@ -1414,6 +1502,7 @@ static paramData_t reportsEquipPLs[] = {
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsEquipSaveOp },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsEquipPrintOp },
 	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
+	{ PD_BUTTON, DoReportsEquipFilter, "filter", 0, NULL, NULL, 0, NULL },
 };
 static paramGroup_t reportsEquipPG = { "reportsequipment", PGO_FULLDIALOGFROMBUILDER,
                                        reportsEquipPLs, COUNT( reportsEquipPLs )
@@ -1492,6 +1581,9 @@ void ReportsEquipmentSuitability( void * unused )
 		DIST_T r = GetCurveRadius(trk);
 
 		if ( r < REPORTS_EQUIP_MIN_USABLE_RADIUS ) {
+			continue;
+		}
+		if ( !ReportsFilterLayerIncluded( &reportsEquipFilter, GetTrkLayer(trk) ) ) {
 			continue;
 		}
 		if ( !haveRadius || r < minR ) {
@@ -1584,6 +1676,18 @@ static paramListData_t reportsGapsListData = { 8, 400, 7, reportsGapsListWidths,
                                                reportsGapsListTitles
                                              };
 
+/** This report's layer/group scope -- see dreportsfilter.h. */
+static reportsFilter_t reportsGapsFilter;
+
+/** "Filter..." button -- see DoReportsFilter() above for the shared shape.
+ *
+ * \param unused IN unused, required by the PD_BUTTON signature
+ */
+static void DoReportsGapsFilter(void *unused)
+{
+	ShowReportsFilterDialog(&reportsGapsFilter);
+}
+
 static paramData_t reportsGapsPLs[] = {
 #define I_REPORTSGAPSSUMMARY (0)
 #define reportsGapsSummary (reportsGapsPLs[I_REPORTSGAPSSUMMARY].control)
@@ -1595,6 +1699,7 @@ static paramData_t reportsGapsPLs[] = {
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsGapsSaveOp },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsGapsPrintOp },
 	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
+	{ PD_BUTTON, DoReportsGapsFilter, "filter", 0, NULL, NULL, 0, NULL },
 };
 static paramGroup_t reportsGapsPG = { "reportsgaps", PGO_FULLDIALOGFROMBUILDER,
                                       reportsGapsPLs, COUNT( reportsGapsPLs )
@@ -1788,6 +1893,9 @@ void ReportsGaps( void * unused )
 				turntableCnt++;
 				continue;
 			}
+			if ( !ReportsFilterLayerIncluded( &reportsGapsFilter, GetTrkLayer(trk) ) ) {
+				continue;
+			}
 			{
 				reportsGapOpenEndPt_t *entry;
 				DYNARR_APPEND( reportsGapOpenEndPt_t, open_da, 10 );
@@ -1899,6 +2007,18 @@ static paramListData_t reportsKinkedListData = { 8, 400, 7, reportsKinkedListWid
                                                  reportsKinkedListTitles
                                                };
 
+/** This report's layer/group scope -- see dreportsfilter.h. */
+static reportsFilter_t reportsKinkedFilter;
+
+/** "Filter..." button -- see DoReportsFilter() above for the shared shape.
+ *
+ * \param unused IN unused, required by the PD_BUTTON signature
+ */
+static void DoReportsKinkedFilter(void *unused)
+{
+	ShowReportsFilterDialog(&reportsKinkedFilter);
+}
+
 static paramData_t reportsKinkedPLs[] = {
 #define I_REPORTSKINKEDSUMMARY (0)
 #define reportsKinkedSummary (reportsKinkedPLs[I_REPORTSKINKEDSUMMARY].control)
@@ -1910,6 +2030,7 @@ static paramData_t reportsKinkedPLs[] = {
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsKinkedSaveOp },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsKinkedPrintOp },
 	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
+	{ PD_BUTTON, DoReportsKinkedFilter, "filter", 0, NULL, NULL, 0, NULL },
 };
 static paramGroup_t reportsKinkedPG = { "reportskinked", PGO_FULLDIALOGFROMBUILDER,
                                         reportsKinkedPLs, COUNT( reportsKinkedPLs )
@@ -2048,6 +2169,14 @@ void ReportsKinkedJoints( void * unused )
 				 * have a reverse endpoint back to trk. Defensive only. */
 				continue;
 			}
+			/* A kinked joint spans two tracks that may be on different
+			 * layers -- only counted if BOTH sides are in scope, matching
+			 * ReportsGaps()'s equivalent "both endpoints must be included"
+			 * behavior for its own cross-track pairs. */
+			if ( !ReportsFilterLayerIncluded( &reportsKinkedFilter, GetTrkLayer(trk) ) ||
+			     !ReportsFilterLayerIncluded( &reportsKinkedFilter, GetTrkLayer(other) ) ) {
+				continue;
+			}
 
 			/* Same formula ConnectTracks() itself uses at connect-time
 			 * (track.c) -- a kinked joint is one that would fail that
@@ -2088,4 +2217,403 @@ void ReportsKinkedJoints( void * unused )
 	}
 
 	ReportsPopulateKinkedList();
+}
+
+/* ---------------------------------------------------------------------
+ * Notes Report (SF #799, part of the JSON Note umbrella SF #795).
+ * Interactive (click-to-navigate) as of #799's own follow-up, same
+ * grouped-by-category Save/Print text (ReportsFormatNoteList()) shape as
+ * Equipment Suitability above. Unlike every prior report, this one also
+ * has Type and ROOT Names filters (both PD_DROPLIST, rebuilt on each
+ * compute pass same as FillLayerList()'s own "rebuild on each
+ * invocation" convention) alongside the standard Layer Group filter.
+ * ------------------------------------------------------------------- */
+
+/** Tentative declaration -- same reason as reportsPG above. */
+static paramGroup_t reportsNotesPG;
+static void ReportsBuildNoteText(DynString *out);
+static void ReportsDlgUpdateNotes(paramGroup_p pg, int inx, void *valueP);
+static void ReportsCancelNotes(paramGroup_cp pg);
+
+static reportsDialog_t reportsNotesDlg = {
+	&reportsNotesPG, NULL, NULL, NULL,
+	ReportsBuildNoteText, ReportsNotes,
+	ReportsDlgUpdateNotes, ReportsCancelNotes
+};
+static reportsOpCtx_t reportsNotesRefreshOp = { &reportsNotesDlg, REPORTSOP_REFRESH };
+static reportsOpCtx_t reportsNotesSaveOp    = { &reportsNotesDlg, REPORTSOP_SAVE };
+static reportsOpCtx_t reportsNotesPrintOp   = { &reportsNotesDlg, REPORTSOP_PRINT };
+
+static wWinPix_t reportsNotesListWidths[] = { 90, 80, 220, 60 };
+static const char * reportsNotesListTitles[] = {
+	N_("ROOT Names"), N_("ID"), N_("Name/Label"), N_("Layer")
+};
+static paramListData_t reportsNotesListData = { 8, 400, 4, reportsNotesListWidths,
+                                                reportsNotesListTitles
+                                              };
+
+/** This report's layer/group scope -- see dreportsfilter.h. */
+static reportsFilter_t reportsNotesFilter;
+
+/** "Filter..." button -- see DoReportsFilter() above for the shared shape. */
+static void DoReportsNotesFilter(void *unused)
+{
+	(void)unused;
+	ShowReportsFilterDialog(&reportsNotesFilter);
+}
+
+/** ROOT Names filter (SF #800 phase 2): 0 = "All ROOT Names", 1..N map to
+ * the "Manage Notes" registry's own N registered names, in registry
+ * order -- built dynamically by ReportsPopulateNoteRootNamesFilter()
+ * every invocation, not a fixed list any more (that hardcoding is
+ * exactly what phase 2 removes). Only meaningful for Type "JSON" or "All
+ * Types" -- see `reportsNoteTypeFilterInx` below. SF #800 phase 3 (the
+ * "Manage Notes" dialog, dmanagenotesui.c) is what actually populates the
+ * registry these two functions read from (notenames.h); until the user
+ * registers a name there, NoteNameCount() is 0 and this dropdown shows
+ * just "All ROOT Names" -- the correct, expected empty-registry state,
+ * not a bug. */
+static long reportsNoteRootNamesFilterInx;
+
+/** Thin wrapper over NoteNameCount() (notenames.h) -- kept as its own
+ * function (not inlined into the filter-population/compute-pass call
+ * sites) so the registry's real storage can change without touching any
+ * call site here, only this definition. */
+static int ReportsManagedNameCount(void)
+{
+	return NoteNameCount();
+}
+
+/** Thin wrapper over NoteNameAt() (notenames.h) -- see
+ * ReportsManagedNameCount(). */
+static const char *ReportsManagedNameAt(int i)
+{
+	return NoteNameAt(i);
+}
+
+/** Type filter (SF #800 phase 1): 0 = "All Types", 1..4 map directly to
+ * `enum noteCommands` (OP_NOTETEXT..OP_NOTEJSON, note.h) -- a genuinely
+ * closed, fixed set (the four native note types), unlike the ROOT Names
+ * filter above, so hardcoding this list is fine. Independent of ROOT
+ * Names -- filtering to a non-JSON type still applies ROOT Names too (a
+ * non-JSON note's resolved group is only ever set for JSON notes, so
+ * combining e.g. Type=Weblink with a ROOT Names filter other than "All
+ * ROOT Names" yields an empty, if unsurprising, result). */
+static long reportsNoteTypeFilterInx;
+static const char * reportsNoteTypeFilterLabels[] = {
+	N_("All Types"), N_("Text"), N_("Weblink"), N_("Document"), N_("JSON")
+};
+
+static paramData_t reportsNotesPLs[] = {
+#define I_REPORTSNOTESSUMMARY (0)
+#define reportsNotesSummary (reportsNotesPLs[I_REPORTSNOTESSUMMARY].control)
+	{ PD_MESSAGE, "", "summary", 0, I2VP(37) },
+#define I_REPORTSNOTESTYPEFILTER (1)
+#define reportsNotesTypeFilter (reportsNotesPLs[I_REPORTSNOTESTYPEFILTER].control)
+	{ PD_DROPLIST, &reportsNoteTypeFilterInx, "typefilter", PDO_NOPREF | PDO_LISTINDEX, I2VP(110), NULL, 0 },
+#define I_REPORTSNOTESROOTNAMESFILTER (2)
+#define reportsNotesRootNamesFilter (reportsNotesPLs[I_REPORTSNOTESROOTNAMESFILTER].control)
+	{ PD_DROPLIST, &reportsNoteRootNamesFilterInx, "rootnamesfilter", PDO_NOPREF | PDO_LISTINDEX, I2VP(120), NULL, 0 },
+#define I_REPORTSNOTESLIST (3)
+#define reportsNotesList (reportsNotesPLs[I_REPORTSNOTESLIST].control)
+	{ PD_LIST, NULL, "list", PDO_DLGRESIZE, &reportsNotesListData, NULL, 0 },
+	{ PD_BUTTON, DoReportsOp, "refresh", 0, NULL, NULL, 0, &reportsNotesRefreshOp },
+	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsNotesSaveOp },
+	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsNotesPrintOp },
+	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
+	{ PD_BUTTON, DoReportsNotesFilter, "filter", 0, NULL, NULL, 0, NULL },
+};
+static paramGroup_t reportsNotesPG = { "reportsnotes", PGO_FULLDIALOGFROMBUILDER,
+                                       reportsNotesPLs, COUNT( reportsNotesPLs )
+                                     };
+
+/** The current Notes Report's rows, in TRK_ITERATE order (not grouped --
+ * ReportsFormatNoteList() does that grouping for the Save/Print
+ * text only, same as every other grouped-output report keeps its
+ * interactive list in a different order than its own Save/Print text).
+ * Kept alive for as long as the dialog might reference it via the list's
+ * per-row context pointers (this report is interactive -- click-to-
+ * navigate, same as Gaps/Kinked Joints), not just a plain local. */
+static dynArr_t reportsNotesList_da;
+
+/** TRUE while ReportsPopulateNoteList() is clearing/rebuilding
+ * reportsNotesList -- same re-entrancy guard as reportsPopulating (phase
+ * 1)/reportsGapsPopulating, required for any interactive report's list;
+ * see reportsPopulating's own doc comment for the real SF #772 crash this
+ * pattern exists to prevent. */
+static BOOL_T reportsNotesPopulating = FALSE;
+
+/** Populate the ROOT Names filter dropdown -- built from the "Manage
+ * Notes" registry (SF #800 phase 3, not built yet, so this is always
+ * just "All ROOT Names" for now), rebuilt on each invocation same as
+ * FillLayerList()'s own convention. */
+static void ReportsPopulateNoteRootNamesFilter(void)
+{
+	int i;
+	int count = ReportsManagedNameCount();
+
+	wListClear( reportsNotesRootNamesFilter );
+	wComboBoxAddValue( reportsNotesRootNamesFilter, _("All ROOT Names"), I2VP(0) );
+	for ( i = 0; i < count; i++ ) {
+		wComboBoxAddValue( reportsNotesRootNamesFilter, ReportsManagedNameAt(i),
+		                   I2VP(i + 1) );
+	}
+	if ( reportsNoteRootNamesFilterInx > count ) {
+		reportsNoteRootNamesFilterInx = 0;
+	}
+	wListSetIndex( reportsNotesRootNamesFilter,
+	               (int)reportsNoteRootNamesFilterInx );
+}
+
+/** Populate the Type filter dropdown -- fixed 5-entry list (SF #800 phase
+ * 1), rebuilt on each invocation same as the ROOT Names filter's own
+ * convention. */
+static void ReportsPopulateNoteTypeFilter(void)
+{
+	size_t i;
+
+	wListClear( reportsNotesTypeFilter );
+	for ( i = 0; i < sizeof reportsNoteTypeFilterLabels / sizeof
+	      reportsNoteTypeFilterLabels[0]; i++ ) {
+		wComboBoxAddValue( reportsNotesTypeFilter, _(reportsNoteTypeFilterLabels[i]),
+		                   I2VP((int)i) );
+	}
+	wListSetIndex( reportsNotesTypeFilter, (int)reportsNoteTypeFilterInx );
+}
+
+/** Populate the interactive list from reportsNotesList_da -- one row per
+ * note, tab-separated, each row's context set to that note's address so
+ * ReportsDlgUpdateNotes() can recover it on selection (interactive --
+ * click-to-navigate, same as Gaps/Kinked Joints/Unconnected Endpoints). */
+static void ReportsPopulateNoteList(void)
+{
+	int i;
+	/* id (63) + label (127) + group (63) + tabs/layer digits, with
+	 * headroom -- entry->group is a plain char[64] (reports.h), not a
+	 * short string literal like the Text/Weblink/Document branches, so
+	 * the compiler's worst-case bound is wider than it used to be. */
+	char row[320];
+
+	reportsNotesPopulating = TRUE;
+
+	wListClear( reportsNotesList );
+	for ( i = 0; i < reportsNotesList_da.cnt; i++ ) {
+		reportsNoteRow_t *entry = &DYNARR_N(reportsNoteRow_t, reportsNotesList_da, i);
+		/* Non-JSON: show the Type itself (a closed set). JSON: show the
+		 * resolved ROOT Names group ("ROOT" until SF #800 phase 3
+		 * registers real names) -- entry->group is only ever set for
+		 * JSON rows. */
+		const char *rootNamesStr = entry->type == REPORTS_NOTE_OP_TEXT ? _("Text") :
+		                           entry->type == REPORTS_NOTE_OP_LINK ? _("Weblink") :
+		                           entry->type == REPORTS_NOTE_OP_FILE ? _("Document") :
+		                           entry->group;
+
+		snprintf( row, sizeof row, "%s\t%s\t%s\t%u",
+		          rootNamesStr, entry->id, entry->label, entry->layer );
+		wListAddValue( reportsNotesList, row, NULL, entry );
+	}
+
+	reportsNotesPopulating = FALSE;
+}
+
+/** paramGroup_t changeProc for the Notes dialog -- selecting a row pans/
+ * indicates at that note's own position. Same guard/recovery shape as
+ * phase 1's ReportsDlgUpdate()/Gaps' ReportsDlgUpdateGaps(). */
+static void ReportsDlgUpdateNotes(paramGroup_p pg, int inx, void *valueP)
+{
+	wIndex_t sel;
+	reportsNoteRow_t *entry;
+	(void)pg;
+	(void)valueP;
+
+	if (inx != I_REPORTSNOTESLIST) {
+		return;
+	}
+	if (reportsNotesPopulating) {
+		return;
+	}
+
+	sel = wListGetIndex(reportsNotesList);
+	if (sel < 0) {
+		return;
+	}
+	entry = (reportsNoteRow_t *)wListGetItemContext(reportsNotesList, sel);
+	if (!entry) {
+		return;
+	}
+
+	if ( log_reports < 0 ) { log_reports = LogFindIndex( "reports" ); }
+	LOG( log_reports, 1,
+	     ( "reports: notes row %d selected -> note %d @ (%.3f,%.3f)\n",
+	       sel, entry->noteIndex, entry->pos.x, entry->pos.y ) )
+
+	ReportsSetIndicator(entry->pos, entry->scale);
+}
+
+/** paramActionCancelProc for the Notes dialog -- same shape as phase 1's
+ * ReportsCancel()/Gaps' ReportsCancelGaps(). */
+static void ReportsCancelNotes(paramGroup_cp pg)
+{
+	ReportsClearIndicator();
+	FormCancel_Current(pg);
+}
+
+/** Build the full formatted Notes Report text (header + Type/ROOT-Names-
+ * grouped table) fresh from reportsNotesList_da. Used only by
+ * ReportsRefreshPrintText() (Save/Print), same as every other report's
+ * own build-text function. */
+static void ReportsBuildNoteText(DynString *out)
+{
+	DynStringMalloc( out, 256 );
+	ReportsAddHeader( out, _("Notes Report") );
+
+	if ( reportsNotesList_da.cnt == 0 ) {
+		DynStringCatCStrs( out, "\n", _("No notes found."), "\n", NULL );
+	} else {
+		DynStringCatCStr( out, "\n" );
+		ReportsFormatNoteList( out, &DYNARR_N(reportsNoteRow_t,
+		                                      reportsNotesList_da, 0), reportsNotesList_da.cnt );
+	}
+}
+
+void ReportsNotes( void * unused )
+{
+	track_p trk;
+	/* Built once, not per-note -- the "Manage Notes" registry doesn't
+	 * change mid-compute. Always empty in SF #800 phase 2 (no registry
+	 * UI exists yet), so registeredNames is unused in practice, but
+	 * ReportsNoteResolveGroup() takes it as an explicit array (not
+	 * reports.c's own static state) so it stays CMocka-testable. */
+	const char *registeredNames[16];
+	int registeredCount = ReportsManagedNameCount();
+	int regI;
+	(void)unused;
+
+	if ( registeredCount > (int)(sizeof registeredNames / sizeof
+	                             registeredNames[0]) ) {
+		registeredCount = (int)(sizeof registeredNames / sizeof registeredNames[0]);
+	}
+	for ( regI = 0; regI < registeredCount; regI++ ) {
+		registeredNames[regI] = ReportsManagedNameAt(regI);
+	}
+
+	DYNARR_FREE( reportsNoteRow_t, reportsNotesList_da );
+	DYNARR_INIT( reportsNoteRow_t, reportsNotesList_da );
+
+	TRK_ITERATE( trk ) {
+		if ( GetTrkType(trk) != T_NOTE ) {
+			continue;
+		}
+		if ( !ReportsFilterLayerIncluded( &reportsNotesFilter, GetTrkLayer(trk) ) ) {
+			continue;
+		}
+
+		struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE,
+		                              extraDataNote_t );
+
+		/* Type filter (SF #800 phase 1): 0 = "All Types", 1..4 map
+		 * directly to enum noteCommands's OP_NOTETEXT..OP_NOTEJSON order
+		 * -- see reportsNoteTypeFilterLabels' own doc comment. Checked
+		 * before the more expensive JSON-group computation below. */
+		if ( reportsNoteTypeFilterInx > 0 &&
+		     (reportsNoteTypeFilterInx - 1) != (long)xx->op ) {
+			continue;
+		}
+
+		/* group is only ever set for a JSON note -- see reportsNoteRow_t's
+		 * own doc comment (reports.h). */
+		char group[64] = "";
+		char id[64] = "";
+		char label[128] = "";
+
+		if ( IsJsonNote(trk) ) {
+			cJSON *parsed = cJSON_Parse(xx->noteData.text);
+
+			if ( parsed != NULL && cJSON_IsObject(parsed) ) {
+				strncpy( group, ReportsNoteResolveGroup(parsed, registeredNames,
+				                                        registeredCount),
+				         sizeof group - 1 );
+
+				cJSON *idField = cJSON_GetObjectItemCaseSensitive(parsed, "id");
+				if ( idField && cJSON_IsString(idField) && idField->valuestring ) {
+					strncpy( id, idField->valuestring, sizeof id - 1 );
+				}
+
+				ReportsNoteExtractLabel(parsed, label, sizeof label);
+			} else {
+				/* parsed == NULL or not an object: shouldn't happen for a
+				 * note saved through jsonnoteui.c's own Validate-on-save
+				 * gate, but a hand-edited file could produce it -- falls
+				 * through as an ungrouped JSON note rather than an error,
+				 * same graceful-degradation precedent as
+				 * ReportsNoteResolveGroup()'s own no-registered-fields
+				 * case. */
+				strncpy( group, "ROOT", sizeof group - 1 );
+			}
+			if ( parsed ) {
+				cJSON_Delete(parsed);
+			}
+		} else {
+			/* Non-JSON note: group stays empty (grouped by Type alone),
+			 * id stays empty, label becomes a short raw-text preview --
+			 * matching DescribeTextNote()'s own status-line precedent.
+			 * Each legacy note type keeps its text in a different union
+			 * member. */
+			char *raw = xx->op == OP_NOTETEXT ? xx->noteData.text :
+			            xx->op == OP_NOTELINK ? xx->noteData.linkData.title :
+			            xx->op == OP_NOTEFILE ? xx->noteData.fileData.title : NULL;
+
+			if ( raw ) {
+				char *preview = MyMalloc(strlen(raw) + 1);
+				RemoveFormatChars(raw, preview);
+				EllipsizeString(preview, NULL, sizeof label - 1);
+				strncpy( label, preview, sizeof label - 1 );
+				MyFree(preview);
+			}
+		}
+
+		/* ROOT Names filter (SF #800 phase 2): only ever meaningful for
+		 * JSON notes -- a non-JSON note has no group, so any ROOT Names
+		 * filter but "All ROOT Names" excludes it, matching phase 1's
+		 * already-documented Type/ROOT-Names interaction.
+		 * reportsNoteRootNamesFilterInx - 1 indexes the (currently
+		 * always-empty) Manage Notes registry. */
+		if ( reportsNoteRootNamesFilterInx > 0 &&
+		     ( xx->op != OP_NOTEJSON ||
+		       strcmp( group, ReportsManagedNameAt((int)reportsNoteRootNamesFilterInx - 1) ) !=
+		       0 ) ) {
+			continue;
+		}
+
+		{
+			reportsNoteRow_t *row;
+			DYNARR_APPEND( reportsNoteRow_t, reportsNotesList_da, 10 );
+			row = &DYNARR_LAST( reportsNoteRow_t, reportsNotesList_da );
+			row->type = (int)xx->op;
+			strncpy( row->group, group, sizeof row->group - 1 );
+			strncpy( row->id, id, sizeof row->id - 1 );
+			strncpy( row->label, label, sizeof row->label - 1 );
+			row->layer = GetTrkLayer(trk) + 1;
+			row->noteIndex = GetTrkIndex(trk);
+			row->pos = xx->pos;
+			row->scale = GetTrkScale(trk);
+		}
+	}
+
+	{
+		char summary[160];
+
+		if ( log_reports < 0 ) { log_reports = LogFindIndex( "reports" ); }
+		LOG( log_reports, 1,
+		     ( "reports: Notes computed -- %d note(s)\n", (int) reportsNotesList_da.cnt ) )
+
+		ReportsShowDialog( &reportsNotesDlg, _("Notes Report") );
+		snprintf( summary, sizeof summary, _("%d note(s) found"),
+		          (int) reportsNotesList_da.cnt );
+		wMessageSetValue( reportsNotesSummary, summary );
+	}
+
+	ReportsPopulateNoteTypeFilter();
+	ReportsPopulateNoteRootNamesFilter();
+	ReportsPopulateNoteList();
 }

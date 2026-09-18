@@ -232,6 +232,16 @@ static struct { const char *dialogName; const char *page; } dialogHelpAliases[]
 	{ "drawModRect", "chgDraw" },
 	{ "drawModPoly", "polyModify" },
 
+	/* SF #782: the "enter a group name" modal (New/Rename) is a helper
+	 * popup of the Layer Groups dialog, not a separately documented
+	 * feature -- same page covers both. */
+	{ "layergroupname", "cmdLayergroup" },
+
+	/* SF #800 phase 3: the "enter a name" modal (Add) is a helper popup
+	 * of the Manage Notes dialog, same rationale as layergroupname
+	 * above. */
+	{ "managenotesname", "cmdManagenotes" },
+
 	{ NULL, NULL }
 };
 

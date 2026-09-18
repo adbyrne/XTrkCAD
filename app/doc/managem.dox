@@ -7,39 +7,38 @@
 
 The <b>Manage Menu</b> shows commands affecting the <b>Main Canvas</b> (\ref mainW).
 
-- <b>Car Inventory</b> - displays the dialog (\ref cmdCarinv) to update your list of cars and locomotives.
+- \subpage cmdCarinv -- update your list of cars and locomotives.
 
-- <b>Custom Defined Parts</b> - displays the <b>Custom Defined Parts</b> (\ref cmdCustmgm) dialog to manipulate custom turnout, structure and rolling stock designs.
+- \subpage cmdCustmgm -- manipulate custom turnout, structure and rolling
+  stock designs.
 
-- <b>Layout Control Elements</b> - display the <b>Layout Control Elements</b> (\ref cmdContmgm) dialog to manipulate blocks, turnout motors and signals.
+- \subpage cmdContmgm -- manipulate blocks, turnout motors and signals.
 
-- <b>Group</b> - creates a <b>Structure</b> or <b>Turnout</b> definition from the selected (\ref cmdSelect) objects. See the <b>Group</b> command (\ref cmdGroup) for details.
+- \subpage cmdGroup -- creates a Structure or Turnout definition from the
+  selected (\ref cmdSelect) objects.
 
-- <b>Layers</b> - displays the Layer (\ref cmdLayer) dialog.
-
-- <b>Parts List</b> - Invokes the Parts List (\ref cmdEnum) command.  This command produces a list of all selected turnouts and sectional tracks and the total length of flex-track.
-
-- <b>Price List</b> - Displays the <b>Price List</b> (\ref cmdPricelist) dialog to specify prices for tracks and structures.
-
-- <b>Train</b> - Run trains on the designed layout
-
-- <b>Turnout Designer</b> - displays a menu list of Turnout Designer (\ref cmdTurnoutNew) dialogs.
-
-- <b>Ungroup</b> - breaks apart any selected (\ref cmdSelect) turnouts and structures into their basic lines (\ref cmdDraw) and track segments.
-
-- <b>Update Turnout and Structures</b> - replaces (\ref cmdRefreshSpecial) any selected (\ref cmdSelect) <b>Turnouts</b> and <b>Structures</b> with the definitions from updated <b>parameter files</b> (\ref cmdPrmfile).
-
-- \subpage cmdCarinv
-- \subpage cmdCustmgm
-- \subpage cmdContmgm
-- \subpage cmdGroup
 - \subpage cmdLayer
-- \subpage cmdEnum
-- \subpage cmdPricelist
-- \subpage cmdTrain
-- \subpage cmdTurnoutNew
-- \subpage cmdRefreshSpecial
-- \subpage cmdUngroup
+
+- \subpage cmdLayergroup
+
+- \subpage cmdManagenotes
+
+- \subpage cmdEnum -- lists all selected turnouts and sectional tracks
+  and the total length of flex-track.
+
+- \subpage cmdPricelist -- specify prices for tracks and structures.
+
+- \subpage cmdTrain -- run trains on the designed layout.
+
+- \subpage cmdTurnoutNew -- a menu list of Turnout Designer dialogs.
+
+- \subpage cmdRefreshSpecial -- replaces any selected (\ref cmdSelect)
+  Turnouts and Structures with the definitions from updated parameter
+  files (\ref cmdPrmfile).
+
+- \subpage cmdUngroup -- breaks apart any selected (\ref cmdSelect)
+  turnouts and structures into their basic lines (\ref cmdDraw) and
+  track segments.
 
 */
 
@@ -58,7 +57,7 @@ Cars are placed on the layout by using the <b>Train Simulation</b> (\ref cmdTrai
 
 The <b>Find</b> button will center the <b>Main Window</b> (\ref mainW) on the selected car.  This button is only enabled for cars which are on the Layout (indicated by co-ordinates in the Location column).  If the car on a track that is hidden and <b>Trains on Hidden Track</b> (\ref cmdDisplay) is set to <b>Hide</b>, then the car (and any attached cars) will be made visible.
 
-The <b>Edit</b> button invokes the <b>Car</b> dialog (\ref cmdCarpart) to modify the selected car.  This button is disabled if more than one (or no) car is selected or if the selected car is on the Layout.  
+The <b>Edit</b> button invokes the <b>Car</b> dialog (\subpage cmdCarpart) to modify the selected car.  This button is disabled if more than one (or no) car is selected or if the selected car is on the Layout.  
 
 The <b>Add</b> button is to add a new Car. Refer to \ref faqsPrototype if an error occurs when attempting to add inventory to this list.
 
@@ -127,7 +126,6 @@ The <b>Import</b> and <b>Export</b> buttons read and write a <i>Comma-Separated-
 
 The <b>List</b> button creates a text file listing your inventory.
 
-- \subpage cmdCarpart
 - \subpage carpart
 - \subpage carprototype
 
@@ -406,7 +404,71 @@ Objects are drawn on the map window, if the Layer they are on has <b>On Map</b> 
 */
 
 /**
-\page cmdEnum Parts List 
+\page cmdLayergroup Layer Groups Dialog
+
+\anchor idx_Layer_Groups_Dialog_782
+
+![](dlayergroup.png)
+
+A <b>Layer Group</b> is a named collection of <b>Layers</b> (\ref cmdLayer). A <b>Layer</b> can
+belong to any, all, or none of the <b>Layer Groups</b> you define -- membership in one group has
+no effect on membership in any other. Groups are meant for acting on a meaningful subset of layers
+at once, for example every layer belonging to one level of a multi-level layout, or every layer
+that represents staging track regardless of level.
+
+The <b>Layer Groups</b> dialog has two parts. The <b>Groups</b> list on the left shows every
+defined group; select one to work with it. The <b>New...</b> button creates a new, empty group
+after asking for its name. The <b>Rename...</b> button changes the selected group's name. A group
+name must be unique -- <b>New...</b>/<b>Rename...</b> reject a name already used by another group,
+since every <b>Groups</b> list in the app identifies a group by its displayed name. The
+<b>Delete</b> button removes the selected group entirely (its member <b>Layers</b> are unaffected
+-- only the group itself goes away). The <b>Show Only</b> button hides every <b>Layer</b> except
+the selected group's members, a quick way to isolate one group's content on the <b>Main Window</b>
+(\ref mainW) without toggling each layer's visibility by hand; the current layer always stays
+visible even if it isn't a member of the group, matching the usual rule that the current layer
+can't be hidden.
+
+The right-hand side shows the selected group's membership as two lists, <b>Available</b> and
+<b>Included</b>. Every named <b>Layer</b> appears in exactly one of the two: <b>Included</b> if
+it's currently a member of the selected group, <b>Available</b> otherwise. Select one or more
+layers in either list (click, or Ctrl/Shift+click for several) and use the arrow buttons between
+the lists to move them: the right arrow adds the selected <b>Available</b> layers to the group,
+the left arrow removes the selected <b>Included</b> layers from it.
+
+If your layout file has layers using the older <b>Linked Layers</b> field (see the <b>Layers</b>
+dialog, \ref cmdLayer), opening that file automatically converts each layer's link list into a new,
+automatically-named group the first time the file is loaded -- the older field is retired once
+converted.
+
+*/
+
+/**
+\page cmdManagenotes Manage Notes Dialog
+
+\anchor idx_Manage_Notes_Dialog_800
+
+A JSON Note (\ref cmdJsonNote) stores a set of Name:Value pairs at its top ("ROOT") level -- for
+example a note might have a ROOT-level <tt>spots</tt> field, another might have <tt>meta</tt>. The
+<b>Manage Notes</b> dialog lets you register which of these ROOT-level names are meaningful to
+you, so the Notes Report (\ref cmdReportsnotes) can group and filter JSON Notes by them under its
+<b>ROOT Names</b> dropdown.
+
+The dialog shows the list of names you've registered so far. The <b>Add...</b> button registers a
+new name after asking you to type it. The <b>Delete</b> button removes the selected name from the
+registry -- this only affects grouping/filtering in the Notes Report; it does not change any
+note's own JSON content. The <b>Search for Names</b> button scans every JSON Note already in the
+layout for ROOT-level field names not yet registered and adds them automatically, reporting how
+many new names it found -- a convenient starting point if you already have JSON Notes using names
+you haven't registered yet.
+
+Until at least one name is registered, the Notes Report's <b>ROOT Names</b> dropdown only offers
+<b>All ROOT Names</b>, and every JSON Note is grouped under <b>ROOT</b> -- this is the expected
+state for a layout with nothing registered yet, not an error.
+
+*/
+
+/**
+\page cmdEnum Parts List
 
 \anchor idx_Parts_List_221
 \anchor idx_Enumerate_222

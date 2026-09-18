@@ -7,25 +7,25 @@
 
 The <b>Change Menu</b> has all functions related to modifying objects that exist on the layout drawing.
 
-- <i>Properties</i> \anchor idx_Properties_83  - sets <i>XTrackCAD</i> into <i>Property</i> mode. Whenever an object is clicked on while in this mode, the <b>Properties</b> dialog is opened. This dialog allows direct manipulation of settings such as the objects length, position or orientation. (\ref cmdDescribe).
+- <i>Properties</i> \anchor idx_Properties_83  - sets <i>XTrackCAD</i> into <i>Property</i> mode. Whenever an object is clicked on while in this mode, the <b>Properties</b> dialog is opened. This dialog allows direct manipulation of settings such as the objects length, position or orientation. (\subpage cmdDescribe).
 
-- <i>Select</i> \anchor idx_Select_84  - sets <i>XTrackCAD</i> into <i>Select</i> mode.  Whenever an object is clicked on while in this mode, this selection state of this object is reversed.  If an object was unselected it becomes selected, and vice versa. To unselect all objects press the ESC key, use <b>Deselect All</b> from the <b>Edit</b> (\ref editM) menu or <b>Deselect All</b> from the <b>Pop-up</b> menu (\ref mouseBcmd). (\ref cmdSelect).
+- <i>Select</i> \anchor idx_Select_84  - sets <i>XTrackCAD</i> into <i>Select</i> mode.  Whenever an object is clicked on while in this mode, this selection state of this object is reversed.  If an object was unselected it becomes selected, and vice versa. To unselect all objects press the ESC key, use <b>Deselect All</b> from the <b>Edit</b> (\ref editM) menu or <b>Deselect All</b> from the <b>Pop-up</b> menu (\ref mouseBcmd). (\subpage cmdSelect).
 
-- <i>Move</i> \anchor idx_Move_85  - move selected object(s). (\ref cmdMove).
+- <i>Move</i> \anchor idx_Move_85  - move selected object(s). (\subpage cmdMove).
 
-- <i>Rotate</i> \anchor idx_Rotate_86  - rotate selected object(s). (\ref cmdRotate).
+- <i>Rotate</i> \anchor idx_Rotate_86  - rotate selected object(s). (\subpage cmdRotate).
 
-- <i>Flip</i> \anchor idx_Flip_87  - turn selected object(s) over or around. (\ref cmdFlip).
+- <i>Flip</i> \anchor idx_Flip_87  - turn selected object(s) over or around. (\subpage cmdFlip).
 
 - <i>Loosen Tracks</i> \anchor idx_Loosen_Tracks_88  \anchor idx_Track_Loosen_89  - this command reverses the effect of Connect Two Tracks as applied to sectional track.
 
-- <i>Modify</i> \anchor idx_Modify_90  - modify an existing track, or lines. (\ref cmdModify).
+- <i>Modify</i> \anchor idx_Modify_90  - modify an existing track, or lines. (\subpage cmdModify).
 
 - ![](mjoin.png)
 
-- <b>Join</b> \anchor idx_Join_Lines_91  \anchor idx_Join_Track_92  \anchor idx_Track_Join_93  - connect two separate pieces of track or two lines. This command can be used to move one of the pieces of track to the endpoint of the other or to create a connection by laying a stretch of flex-track. (\ref cmdJoin).
+- <b>Join</b> \anchor idx_Join_Lines_91  \anchor idx_Join_Track_92  \anchor idx_Track_Join_93  - connect two separate pieces of track or two lines. This command can be used to move one of the pieces of track to the endpoint of the other or to create a connection by laying a stretch of flex-track. (\subpage cmdJoin).
 
-- <i>Connect Two Tracks</i> \anchor idx_Connect_Two_Tracks_94  \anchor idx_Track_Connect_95  - creates a connection between track pieces with an option to slightly move the select piece(s) and the pieces they connect to. (\ref cmdConnect).
+- <i>Connect Two Tracks</i> \anchor idx_Connect_Two_Tracks_94  \anchor idx_Track_Connect_95  - creates a connection between track pieces with an option to slightly move the select piece(s) and the pieces they connect to. (\subpage cmdConnect).
 
 - ![](msplit.png)
 
@@ -36,40 +36,26 @@ The (\ref cmdSplitTrack) command can be used in one of two ways;
 
   - disconnect turnouts or sectional track pieces at their point of connection.
 
-- <i>Move Description</i> \anchor idx_Move_Description_97  - move the endpoint description of a track piece to another location. (\ref cmdMoveLabel).
+- <i>Move Description</i> \anchor idx_Move_Description_97  - move the endpoint description of a track piece to another location. (\subpage cmdMoveLabel).
 
-- <i>Raise/Lower Elevations</i> \anchor idx_Raise_Lower_Elevations_98  - raise or lower elevation of selected tracks. (\ref cmdRaiseElev).
+- <i>Raise/Lower Elevations</i> \anchor idx_Raise_Lower_Elevations_98  - raise or lower elevation of selected tracks. (\subpage cmdRaiseElev).
 
-- <i>Elevation</i> \anchor idx_Elevation_99  - define an elevation at specified track location (\ref cmdElevation).
+- <i>Elevation</i> \anchor idx_Elevation_99  - define an elevation at specified track location (\subpage cmdElevation).
 
-- <i>Profile</i> \anchor idx_Profile_100  - display the elevation profile of a definable stretch of track (\ref cmdProfile).
+- <i>Profile</i> \anchor idx_Profile_100  - display the elevation profile of a definable stretch of track (\subpage cmdProfile).
 
 - <i>Clear Elevations</i> \anchor idx_Clear_Elevations_101  - remove elevation parameters from selected track(s).
 
 - <i>Recompute Elevations</i> \anchor idx_Recompute_Elevations_102  - performs a global re-computation of dynamic elevations. It should not be necessary to issue this command as elevations are recomputed as required.
 
-- <i>Change Scale</i> \anchor idx_Change_Scale_103  - change model scale and/or gauge of layout design. (\ref cmdRescale)
+- <i>Change Scale</i> \anchor idx_Change_Scale_103  - change model scale and/or gauge of layout design. (\subpage cmdRescale)
 
 - ![](mconvert.png)
 
-- <i>Convert</i> \anchor idx_Convert_104  - changes flex-tracks (Straight, Curve, Joint, Bezier) into a Smooth Cornu or vice versa. (\ref cmdConvert).
+- <i>Convert</i> \anchor idx_Convert_104  - changes flex-tracks (Straight, Curve, Joint, Bezier) into a Smooth Cornu or vice versa. (\subpage cmdConvert).
 
-- \subpage cmdRescale
 - \subpage clrElev
-- \subpage cmdConnect
-- \subpage cmdConvert
-- \subpage cmdElevation
-- \subpage cmdFlip
-- \subpage cmdJoin
-- \subpage cmdModify
-- \subpage cmdMove
-- \subpage cmdMoveLabel
 - \subpage cmdPan
-- \subpage cmdProfile
-- \subpage cmdDescribe
-- \subpage cmdRaiseElev
-- \subpage cmdRotate
-- \subpage cmdSelect
 - \subpage cmdSplit
 
 */
@@ -273,12 +259,10 @@ Certain turnouts, such as a Wye's, Three-Way or Crossings are symmetrical and th
 
 The <b>Join</b> command has two variatons,
 
-- (\ref cmdJoinTrack). Join Tracks by connecting them.
+- (\subpage cmdJoinTrack). Join Tracks by connecting them.
 
-- (\ref cmdJoinLine). Create a PolyLine from two Draw Objects or Close a PolyLine as a Polygon.
+- (\subpage cmdJoinLine). Create a PolyLine from two Draw Objects or Close a PolyLine as a Polygon.
 
-- \subpage cmdJoinLine
-- \subpage cmdJoinTrack
 - \subpage joinNormalEasment
 - \subpage joinCornu
 - \subpage cornuTrackPins
@@ -797,9 +781,9 @@ Successful use of this command requires selection of the object(s) to be moved b
 
 A move can be achieved using one of the following methods;
 
-- <i>Left+Drag</i> using the mouse. See \ref moveByMouse for detail.
+- <i>Left+Drag</i> using the mouse. See \subpage moveByMouse for detail.
 
-- Selecting fixed or specified amounts of translation in the X and Y directions using a <i>Right-Click</i> menu. See \ref moveByMenu for detail.
+- Selecting fixed or specified amounts of translation in the X and Y directions using a <i>Right-Click</i> menu. See \subpage moveByMenu for detail.
 
 During a Move of tracks, and <b>MagneticSnap</b> (\ref cmdMagneticSnap) is enabled, if one of the end-points of the selected objects is close to an open end of a unselected point, two anchors (an open an closed blue ball) will appear.
 This indicates that the two points will auto-join and that all the moved tracks will align to the unselected point if the Move is stopped.
@@ -808,9 +792,6 @@ This behaviour can be suppressed with <i>Alt</i>. If <b>MagneticSnap</b> is disa
 <b>Note:</b> If the moved track is connected but the track it is connect to is not moved, it will be disconnected, unless that track or the last selected track is a Cornu, in which case the Cornu concenred will be modified (if possible) to remain connected.
 
 <b>Note:</b> Cornu tracks connected to a turntable will be modified if it is moved or rotated. They remain connected at the point on the radius where they started, so it may be desireable to delete and redraw them if the rotation is large.
-
-- \subpage moveByMouse
-- \subpage moveByMenu
 
 */
 
@@ -1359,20 +1340,16 @@ Note that a Rotate command for a Draw object does not use the Rotation Origin of
 
 Rotation can be achieved using one of the following methods;
 
-- <i>Left+Drag</i> using the mouse. See \ref rotateByMouse for detail.
+- <i>Left+Drag</i> using the mouse. See \subpage rotateByMouse for detail.
 
-- Selecting fixed or specified degrees of rotation using a <i>Right-Click</i> menu. See \ref rotateByMenu for detail.
+- Selecting fixed or specified degrees of rotation using a <i>Right-Click</i> menu. See \subpage rotateByMenu for detail.
 
-- Aligning the selected object with another object on the layout. See \ref rotateByAlign for detail.
+- Aligning the selected object with another object on the layout. See \subpage rotateByAlign for detail.
 
 During Rotation of a track, if <b>MagneticSnap</b> (\ref cmdMagneticSnap) is enabled, if one of the end-points of the selected objects is close to an open end of a unselected point, two anchors (an open an closed blue ball) will appear.
 This indicates that the two points will auto-snap and the moved track will align to the unselected point if the Rotation is stopped. This does not happen if <i>Alt</i> is used.
 If <b>MagneticSnap</b> is disabled, the snap will only occur if <i>Alt</i> is held.
 Note that this also applies to \ref cmdMove.
-
-- \subpage rotateByMouse
-- \subpage rotateByMenu
-- \subpage rotateByAlign
 
 */
 
@@ -1583,11 +1560,9 @@ Notes:
 /**
 \page cmdSplit Split Commands
 
-There are two split commands, \ref cmdSplitTrack and \ref cmdSplitDraw.
+There are two split commands, \subpage cmdSplitTrack and \subpage cmdSplitDraw.
 
-- \subpage cmdSplitTrack
 - \subpage splitDisconnect
-- \subpage cmdSplitDraw
 - \subpage cmdTrimDraw
 
 */
@@ -1634,12 +1609,9 @@ A blue marker will show where a split will occur, but if the cursor is a near co
 
 For detail about;
 
-- Dividing a section of track into two connected pieces see \ref splitDivide.
+- Dividing a section of track into two connected pieces see \subpage splitDivide.
 
-- Creating block gaps at an existing joint see \ref splitBlockGap.
-
-- \subpage splitDivide
-- \subpage splitBlockGap
+- Creating block gaps at an existing joint see \subpage splitBlockGap.
 
 */
 

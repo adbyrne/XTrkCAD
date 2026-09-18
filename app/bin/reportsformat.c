@@ -31,6 +31,8 @@
 #include <string.h>
 #include <strings.h>
 
+#include "cJSON.h"
+
 #include "include/reports.h"
 
 void ReportsFormatEndPtNote(const reportsEndPt_t *entry, char *buf,
@@ -297,5 +299,196 @@ void ReportsFormatKinkedList(DynString *out, const reportsKinkedJoint_t *list,
 		         list[i].trackB, list[i].layerB, list[i].layerNameB,
 		         list[i].angleDelta);
 		DynStringCatCStr(out, line);
+	}
+}
+
+/* Notes Report (SF #799, restructured SF #800 phase 2) -- same
+ * grouped-subheading shape as ReportsFormatEquipmentList(), generalized
+ * further: Type first (a fixed, closed set), then within JSON notes,
+ * one heading per distinct \c group value actually present, sorted
+ * alphabetically rather than drawn from a fixed list -- see
+ * reportsNoteRow_t's own doc comment in reports.h. */
+
+static const struct {
+	int type;
+	const char *heading;
+} reportsNoteTypeGroups[] = {
+	{ REPORTS_NOTE_OP_TEXT, "Text Notes" },
+	{ REPORTS_NOTE_OP_LINK, "Weblink Notes" },
+	{ REPORTS_NOTE_OP_FILE, "Document Notes" },
+};
+
+static void ReportsFormatNoteRow(DynString *out, const reportsNoteRow_t *row)
+{
+	/* id (63 chars) + label (127 chars) + surrounding literal text, with
+	 * headroom -- both fields are already bounded by reportsNoteRow_t's
+	 * own array sizes, this just needs to be at least as large. */
+	char line[256];
+
+	snprintf(line, sizeof line, "  ID %2d: %-12s %-32s layer %u\n",
+	         row->noteIndex, row->id, row->label, row->layer);
+	DynStringCatCStr(out, line);
+}
+
+static void ReportsFormatNoteTypeGroup(DynString *out,
+                                       const reportsNoteRow_t *list, int count, int type,
+                                       const char *heading, BOOL_T *firstGroup)
+{
+	int i;
+	BOOL_T any = 0;
+
+	for (i = 0; i < count; i++) {
+		if (list[i].type != type) {
+			continue;
+		}
+		if (!any) {
+			if (!*firstGroup) {
+				DynStringCatCStr(out, "\n");
+			}
+			DynStringCatCStr(out, heading);
+			DynStringCatCStr(out, "\n");
+			any = 1;
+			*firstGroup = 0;
+		}
+		ReportsFormatNoteRow(out, &list[i]);
+	}
+}
+
+/** Collect the distinct \c group values present among \p list's JSON
+ * (REPORTS_NOTE_OP_JSON) rows into \p groups (caller-sized array of
+ * pointers into \p list's own storage -- valid only as long as \p list
+ * is), sorted alphabetically. Returns the count found, capped at
+ * \p maxGroups. */
+static int ReportsCollectJsonGroups(const reportsNoteRow_t *list, int count,
+                                    const char **groups, int maxGroups)
+{
+	int i, j, found = 0;
+
+	for (i = 0; i < count; i++) {
+		if (list[i].type != REPORTS_NOTE_OP_JSON) {
+			continue;
+		}
+		BOOL_T seen = 0;
+		for (j = 0; j < found; j++) {
+			if (strcmp(groups[j], list[i].group) == 0) {
+				seen = 1;
+				break;
+			}
+		}
+		if (!seen && found < maxGroups) {
+			groups[found++] = list[i].group;
+		}
+	}
+
+	/* Simple insertion sort -- found is at most a handful of distinct
+	 * group names per report, no need for anything fancier. */
+	for (i = 1; i < found; i++) {
+		const char *key = groups[i];
+		j = i - 1;
+		while (j >= 0 && strcmp(groups[j], key) > 0) {
+			groups[j + 1] = groups[j];
+			j--;
+		}
+		groups[j + 1] = key;
+	}
+
+	return found;
+}
+
+static void ReportsFormatNoteJsonGroup(DynString *out,
+                                       const reportsNoteRow_t *list, int count, const char *group,
+                                       BOOL_T *firstGroup)
+{
+	int i;
+	BOOL_T any = 0;
+
+	for (i = 0; i < count; i++) {
+		if (list[i].type != REPORTS_NOTE_OP_JSON || strcmp(list[i].group, group) != 0) {
+			continue;
+		}
+		if (!any) {
+			if (!*firstGroup) {
+				DynStringCatCStr(out, "\n");
+			}
+			DynStringCatCStr(out, group);
+			DynStringCatCStr(out, "\n");
+			any = 1;
+			*firstGroup = 0;
+		}
+		ReportsFormatNoteRow(out, &list[i]);
+	}
+}
+
+void ReportsFormatNoteList(DynString *out, const reportsNoteRow_t *list,
+                           int count)
+{
+	BOOL_T firstGroup = 1;
+	size_t i;
+	/* Headroom well beyond anything a real "Manage Notes" registry (SF
+	 * #800 phase 3) is likely to hold -- this just bounds a local array,
+	 * extra distinct names beyond this are silently omitted from the
+	 * Save/Print grouping (still present in the interactive list). */
+	const char *jsonGroups[64];
+	int jsonGroupCount;
+
+	for (i = 0; i < sizeof reportsNoteTypeGroups / sizeof
+	     reportsNoteTypeGroups[0]; i++) {
+		ReportsFormatNoteTypeGroup(out, list, count, reportsNoteTypeGroups[i].type,
+		                           reportsNoteTypeGroups[i].heading, &firstGroup);
+	}
+
+	jsonGroupCount = ReportsCollectJsonGroups(list, count, jsonGroups,
+	                 (int)(sizeof jsonGroups / sizeof jsonGroups[0]));
+	for (i = 0; i < (size_t)jsonGroupCount; i++) {
+		ReportsFormatNoteJsonGroup(out, list, count, jsonGroups[i], &firstGroup);
+	}
+}
+
+const char *ReportsNoteResolveGroup(cJSON *parsed,
+                                    const char * const *registeredNames, int registeredCount)
+{
+	cJSON *field;
+	int i;
+
+	/* No registry entries at all (SF #800 phase 2's own state, until
+	 * phase 3's Manage Notes dialog exists) -- every JSON Note falls
+	 * under "ROOT", the correct, expected interim state, not a bug.
+	 * Skip the scan entirely rather than let it fall through the loop
+	 * finding nothing every time. */
+	if (registeredCount <= 0 || registeredNames == NULL) {
+		return "ROOT";
+	}
+
+	/* cJSON_GetObjectItem walks a linked list, so scanning the note's own
+	 * (typically small, single-digit) field count once per registered
+	 * name is simplest correct approach; a registry large enough to make
+	 * this a real cost is not a realistic near-term scenario. */
+	for (i = 0; i < registeredCount; i++) {
+		field = cJSON_GetObjectItemCaseSensitive(parsed, registeredNames[i]);
+		if (field != NULL) {
+			return registeredNames[i];
+		}
+	}
+
+	return "ROOT";
+}
+
+void ReportsNoteExtractLabel(cJSON *parsed, char *buf, size_t bufSize)
+{
+	static const char *labelKeys[] = { "name", "label" };
+	size_t i;
+
+	if (bufSize == 0) {
+		return;
+	}
+	buf[0] = '\0';
+
+	for (i = 0; i < sizeof labelKeys / sizeof labelKeys[0]; i++) {
+		cJSON *field = cJSON_GetObjectItemCaseSensitive(parsed, labelKeys[i]);
+		if (field && cJSON_IsString(field) && field->valuestring) {
+			strncpy(buf, field->valuestring, bufSize - 1);
+			buf[bufSize - 1] = '\0';
+			return;
+		}
 	}
 }
