@@ -375,13 +375,9 @@ When in <b>Properties</b> (\ref cmdDescribe) mode, clicking on a <i>JSON
 Note</i> will display the <i>Property Sheet</i> to let you read or modify
 its JSON text.
 
-At normal zoom, a <i>JSON Note</i>'s on-canvas icon is visually distinct
-from a Text/Weblink/Document note's, the same as those note types are
-already distinct from each other. When zoomed in close enough that notes
-draw as a simplified marker instead of their normal icon, each note type
-now fills with a different color for the same reason -- so you can still
-tell a <i>JSON Note</i> apart from the other note types without clicking
-each one.
+On the canvas, a note draws as a small colored square, its fill color
+distinguishing a <i>JSON Note</i> from a Text/Weblink/Document note at a
+glance, without clicking each one.
 
 */
 
