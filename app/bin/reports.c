@@ -2509,7 +2509,8 @@ void ReportsNotes( void * unused )
 	 * DYNARR_FREE only releases the array buffer, not what individual rows
 	 * point to. */
 	for ( int freeI = 0; freeI < reportsNotesList_da.cnt; freeI++ ) {
-		char *rawJson = DYNARR_N( reportsNoteRow_t, reportsNotesList_da, freeI ).rawJson;
+		char *rawJson = DYNARR_N( reportsNoteRow_t, reportsNotesList_da,
+		                          freeI ).rawJson;
 		if ( rawJson ) {
 			MyFree(rawJson);
 		}

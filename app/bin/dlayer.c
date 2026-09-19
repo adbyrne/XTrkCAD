@@ -1196,10 +1196,12 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
 	layerMinRadius = layers[layer].minTrackRadius;
 	layerMaxGrade = layers[layer].maxTrackGrade;
 	layerTieData = layers[layer].tieData;
-	snprintf(layerObjectCountStr, sizeof(layerObjectCountStr), "%ld", layers[layer].objCount);
+	snprintf(layerObjectCountStr, sizeof(layerObjectCountStr), "%ld",
+	         layers[layer].objCount);
 	strcpy(layerName, layers[layer].name);
 	strcpy(settingsName, layers[layer].settingsName);
-	LayerGroupNamesForLayer((int)(layer + 1), layerGroupNamesStr, sizeof(layerGroupNamesStr));
+	LayerGroupNamesForLayer((int)(layer + 1), layerGroupNamesStr,
+	                        sizeof(layerGroupNamesStr));
 
 	layerSelected = layer;
 
@@ -1780,9 +1782,11 @@ static void LayerSelect(wIndex_t inx)
 	layerTieData.length = layers[inx].tieData.length;
 	layerTieData.width = layers[inx].tieData.width;
 	layerTieData.spacing = layers[inx].tieData.spacing;
-	snprintf(layerObjectCountStr, sizeof(layerObjectCountStr), "%ld", layers[inx].objCount);
+	snprintf(layerObjectCountStr, sizeof(layerObjectCountStr), "%ld",
+	         layers[inx].objCount);
 
-	LayerGroupNamesForLayer(inx + 1, layerGroupNamesStr, sizeof(layerGroupNamesStr));
+	LayerGroupNamesForLayer(inx + 1, layerGroupNamesStr,
+	                        sizeof(layerGroupNamesStr));
 
 	layerSelecting = TRUE;
 	FormLoadControls(&layerPG);
