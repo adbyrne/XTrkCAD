@@ -457,7 +457,7 @@ Only</b>/<b>Show All</b> are a temporary view filter, not a real change to the l
 view is never saved to the file, so you don't need to remember to click <b>Show All</b> before
 saving or closing, and reopening a saved file never comes back with layers still filtered down.
 Manually changing an individual layer's visibility (its <b>Layer Button</b> on the toolbar, or the
-<b>Visible</b> check-box on the <b>Layers</b> dialog, \ref cmdLayer) while a <b>Show Only</b> filter
+<b>Canvas</b> check-box on the <b>Layers</b> dialog's View tab, \ref cmdLayer) while a <b>Show Only</b> filter
 is active is a real change and is remembered/saved as usual, even after the filter is later
 cleared.
 
