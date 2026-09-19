@@ -129,13 +129,12 @@ Holding the <i>Control</i> key while panning will invert the value of this setti
 
     - <b>Pan/Zoom</b> \ref cmdPan button on the <b>Tool-bar</b>
 
-<b>Note:</b> If The scale 1:1 is reached, "Macro Zoom" mode can be entered using CTRL+PageDown - with repeated presses a scale of 10::1 is possible. 
+  <b>Note:</b> If The scale 1:1 is reached, "Macro Zoom" mode can be entered using CTRL+PageDown - with repeated presses a scale of 10::1 is possible.
 
   - When <b>Zooming</b>, the Main Canvas will retain the center of the display if
 <b>Constrain Drawing Area to Room Boundaries</b> is not set.
 Otherwise, as much of the room as possible is displayed, and any <b>grey</b> area will be to the right and above the room.
 
- 
   - Tracks will be drawn with two lines and ties if you zoom in. When the drawing scale is 1:1 a dashed centerline is also drawn for each track.
 
   - The ARROW keys move the <b>Canvas</b> left, right, up or down by half a screen. If Shift is used together with the arrow keys, the movement will be 1/20th of screen in the selected direction.

@@ -122,7 +122,7 @@ You can undo the effect of the <b>Connect</b> command by splitting (\ref splitDi
 \page cmdConvert Convert Tracks
 
 A drop down menu, which allows selection of the Convert Mode, is invoked from the down arrow button (![](bmenu.png)) located on the right side the Convert Tracks button.
-Dependent upon previous selection, the Convert Track button will look like ![](convertto.png) or ![](convertfrom.png).
+Dependent upon previous selection, the Convert Track button will look like ![](convertto.png) or ![](convertfrom.png) instead.
 
 - \subpage cmdConvertTo
 - \subpage cmdConvertFrom
