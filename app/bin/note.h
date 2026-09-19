@@ -39,6 +39,25 @@ enum noteCommands {
 	OP_NOTEJSON
 };
 
+/** SF #802 follow-on: the on-canvas marker shape for a note type, one of a
+ * user-configurable set (see trknote.c's NoteTypePrefLoad()/DrawNoteShape()).
+ * NOTE_SHAPE_SQUARE is the original/default shape (a square with one lopped
+ * corner) -- kept exactly as before so an unconfigured install looks
+ * unchanged. */
+enum noteShape {
+	NOTE_SHAPE_SQUARE,
+	NOTE_SHAPE_CIRCLE,
+	NOTE_SHAPE_DIAMOND,
+	NOTE_SHAPE_TRIANGLE,
+	NOTE_SHAPE_PENTAGON,
+	NOTE_SHAPE_HEXAGON,
+	NOTE_SHAPE_OCTAGON,
+	NOTE_SHAPE_STAR,
+	NOTE_SHAPE_CROSS,
+	NOTE_SHAPE_X,
+	NOTE_SHAPE_COUNT
+};
+
 /** hold the data for the note */
 typedef struct extraDataNote_t {
 	extraDataBase_t base;
@@ -90,5 +109,16 @@ track_p NewNote(wIndex_t index, coOrd p, enum noteCommands command );
  * the definition in trknote.c */
 void ReadNoteNames(char *line);
 BOOL_T WriteNoteNames(FILE *f);
+
+/* SF #802 follow-on: per-note-type color/shape properties -- accessors for
+ * the Manage Notes dialog's per-type tabs (dmanagenotesui.c), doc comments
+ * on the definitions in trknote.c. Persisted as an app preference, call
+ * NoteTypePrefSave() after any Set call the user should keep across
+ * sessions. */
+wDrawColor NoteTypeGetColor(enum noteCommands op);
+void NoteTypeSetColor(enum noteCommands op, wDrawColor color);
+enum noteShape NoteTypeGetShape(enum noteCommands op);
+void NoteTypeSetShape(enum noteCommands op, enum noteShape shape);
+void NoteTypePrefSave(void);
 
 #endif // !HAVE_NOTE_H
