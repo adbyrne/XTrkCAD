@@ -339,34 +339,56 @@ A Turntable can have many distinct paths but only one would be valid at any time
 
 \anchor idx_Layers_Dialog_220
 
-Each object is contained in a layer - which is a custom group of objects that do not have a particular visual order, but can be treated as a set for certain commands.  
-Objects which are created independently of other objects (such as straight tracks (\ref cmdStraight) or text (\ref cmdText)) are created in the current layer.  
+Each object is contained in a layer - which is a custom group of objects that do not have a particular visual order, but can be treated as a set for certain commands.
+Objects which are created independently of other objects (such as straight tracks (\ref cmdStraight) or text (\ref cmdText)) are created in the current layer.
 Objects which are associated with other objects (such as tracks created by the <b>Modify</b> (\ref cmdModify) or <b>Join</b> (\ref cmdJoin) commands) are created in the same layer as the associated object(s).
 
-The <b>Layers</b> dialog allows you to change various attributes of each of the 99 possible <b>layers</b>.
+The <b>Layers</b> dialog allows you to change various attributes of each of the 99 possible <b>layers</b>. Its settings are split across three tabs -- <b>View</b>, <b>Track</b>, and <b>Layers</b> -- described below.
 
-Attributes associated with a layout are stored within the associated layout file and apply only to the layout that's open at the time of a change. 
-It is possible to apply attributes from one layout file to another using the <b>Load</b> and <b>Save</b> buttons.
+Attributes associated with a layout are stored within the associated layout file and apply only to the layout that's open at the time of a change.
+It is possible to apply attributes from one layout file to another using the <b>Load</b> and <b>Save</b> buttons at the bottom of the dialog.
 
 ![](dlayers.png)
 
-The drop down list at the top of the dialog selects the <b>Layer</b> you are interested in. Frozen layers are preceeded by a `\*`, Module layers are proceeded by a `m`, non-empty layers are preceded by a `+` and empty layers by a `-`.
+The <b>Change settings for layer</b> drop down list at the top of the dialog selects the <b>Layer</b> you are editing. Frozen (<b>Lock</b>ed) layers are preceded by a `\*`, Module layers by an `m`, non-empty layers by a `+` and empty layers by a `-`.
+
+The <b>Settings when active</b> drop down, also always visible above the tabs, specifies a settings (.xset) filename in the XTrackCAD working directory that is loaded when this layer is made current. Only the values contained in the file will be set. If this name is blank the default values (all those in use when any layer with no settings file was last used) will be reloaded (or retained). The drop down lists all `.xset` files in that directory.
+
+<b>View tab</b>
 
 The <b>Name</b> edit box contains the name of the <b>Layer</b>.  This name is listed in the <b>Current Layer</b> drop down list on the <b>Tool-bar</b> (\ref mainW).  Also the <b>Name</b> is displayed as the balloon help for the corresponding <b>Layer Button</b>.
 
-The <b>Color</b> button specifies the color of tracks if either of the two <b>Color Layers</b> (\ref cmdDisplay) radio buttons on the <b>Display</b> dialog is checked and the <b>Use Color</b> button for this layer is checked.
+The <b>Use Layer Color</b> check-box, together with its <b>Select</b> color button, specifies the color of tracks if either of the two <b>Color Layers</b> (\ref cmdDisplay) radio buttons on the <b>Display</b> dialog is checked.
 
-The <b>Visible</b> check-box controls whether the <b>Layer</b> is drawn on the Main (\ref mainW) window.
+<b>Show Layer On</b> has two check-boxes: <b>Map</b> controls whether the <b>Layer</b> is drawn on the Map (\ref cmdMap) window, and <b>Canvas</b> controls whether it's drawn on the Main (\ref mainW) window.
 
-The <b>Frozen</b> check-box indicates that tracks in that <b>Layer</b> can not be modified or deleted.
+The <b>Lock</b> check-box indicates that tracks in that <b>Layer</b> can not be modified or deleted.
 
-The <b>On Map</b> check-box controls whether the <b>Layer</b> is drawn on the Map (\ref cmdMap) window.
+The <b>Module</b> check-box controls whether the <b>Layer</b> is selected/deselected and so moved or rotated as a group - this can be used to denote a track module in a modular layout - allowing the modules to be positioned as units.
+Objects in a Module Layer can not be individually modified.
+One way of getting a modules in is to build a library with <b>Export</b> and then <b>Import As Module</b> - this creates one layer per module, names it and sets the <b>Module</b> check-box.
 
-The <b>Module</b> check-box controls whether the <b>Layer</b> is selected/deselected and so moved or rotated as a group - this can be used to denote a track module in a modular layout - allowing the modules to be positioned as units. 
-Objects in a Module Layer can not be individually modified.  
-One way of getting a modules in is to build a library with <b>Export</b> and then <b>Import As Module</b> - this creates one layer per module, names it and sets the <b>Module</b> check-box.  
+The <b>Hide from toolbar</b> check-box selects if the <b>Layer</b> has a button to hide/show it. You may choose not to have a button if the layer is empty or if it is a sub-layer controlled by another layer.
 
-The <b>No Button</b> check-box selects if the <b>Layer</b> has a button to hide/show it. You may choose not to have a button if the layer is empty or if it is a sub-layer controlled by another layer.
+The <b>Inherit</b> check-box controls whether this layer uses the layout's own Scale, Gauge, Min Track Radius, Max Track Grade and tie dimensions (checked, the default) or the layer-specific overrides set on the <b>Track</b> tab (unchecked).
+
+The <b>Object Count</b> field displays the number of objects in the selected Layer.
+
+You cannot uncheck <b>Canvas</b> or check <b>Lock</b> for the <b>Current Layer</b>.
+
+<b>Track tab</b>
+
+These fields only take effect when this layer's <b>Inherit</b> check-box (View tab) is unchecked; otherwise the layer uses the layout's own values and these fields are ignored.
+
+<b>Scale</b> and <b>Gauge</b> set this layer's own modeling scale and gauge, independent of the rest of the layout -- useful for a layer holding equipment or track of a different scale (a display shelf, a different-gauge branch, and similar).
+
+<b>Min. Track Radius</b> and <b>Max Track Grade (%)</b> set this layer's own curve-radius and grade limits, used the same way as the layout-wide values (\ref cmdRescale) they override.
+
+<b>Tie Length</b>, <b>Width</b> and <b>Spacing</b> set this layer's own default tie dimensions for newly-drawn track.
+
+<b>Layers tab</b>
+
+The <b>Actions</b> group has three buttons: <b>Add Layer</b> creates a new layer, <b>Delete Layer</b> removes the selected layer, and <b>Default Values</b> resets the selected layer's settings (all tabs) to <i>XTrackCAD</i>'s defaults.
 
 The <b>Groups</b> field shows which <b>Layer Group(s)</b> (\ref cmdLayergroup) the selected layer
 currently belongs to, as a comma-separated list, or <tt>(none)</tt> if it isn't a member of any --
@@ -376,36 +398,31 @@ of layer numbers shown/hidden together with this one); that older mechanism is a
 converted into a <b>Layer Group</b> the first time a file that still uses it is opened, and this
 field then shows the resulting group membership instead.
 
-You cannot uncheck <b>Visible</b> or check <b>Frozen</b> for the <b>Current Layer</b>.
+<b>Settings for all Layers</b>
 
-The <b>Load Settings</b> specifies a settings (.xset) filename in the XTrackCAD working directory that is loaded when this layer is made current.  Only the values contained in the file will be set.
-If this name is blank the default values (all those in use when any layer that has no Load Settings file value was last used) will be reloaded (or retained). The dropbox contains all the names of files in that directory.
+These three buttons, at the bottom of the dialog below all three tabs, apply to every layer at once, not just the one selected above:
 
-The <b>Count</b> field displays the number of objects in the selected Layer.
-
-The <b>Save</b> button stores layer attributes in the `xtrkcad.ini` file so they may be loaded into an existing or new file. Once saved and unless reset to <i>XTrackCAD</i> <b>Default</b>, modified layer information is applied to each new file.
+The <b>Save</b> button stores every layer's attributes in the `xtrkcad.ini` file so they may be loaded into an existing or new file. Once saved and unless reset to <i>XTrackCAD</i> <b>Default</b>, modified layer information is applied to each new file.
 
 The <b>Load</b> button reads layer attributes from the `xtrkcad.ini` file then applies it to each layer of the current layout file.
 
-The <b>Defaults</b> button restores layer attributes to default <i>XTrackCAD</i> settings.
-
-The bottom of the dialog contains the <b>Number of Layer Buttons</b> integer edit box.  This controls the number of <b>Layer Buttons</b> displayed on the <b>Tool-bar</b> (\ref mainW). These buttons make it easy to switch between layers. The maximum number of <b>Layer Buttons</b> that can be displayed is 99.  Layers with "no-button" set do not count towards the Number of Layer Buttons.
+The <b>Defaults</b> button restores every layer's attributes to default <i>XTrackCAD</i> settings.
 
 ![](blayer.png)
 
-The <b>Layer Buttons</b> on the Tool-bar (\ref mainW) control which layer is the <b>current Layer</b> and which <b>Layers</b> are displayed on the Main Canvas. These buttons are a short cut for the <b>Visible</b> check-box on the <b>Layers</b> dialog for the corresponding layer.
+The <b>Layer Buttons</b> on the Tool-bar (\ref mainW) control which layer is the <b>current Layer</b> and which <b>Layers</b> are displayed on the Main Canvas. These buttons are a short cut for the <b>Canvas</b> check-box (View tab) on the <b>Layers</b> dialog for the corresponding layer.
 
 The current layer is selected by picking a value from the drop down layer list.  If the Layer you've selected was not visible, it will be shown.
 
 You can hide (or show if not visible) the different layers by pushing one of the <b>Layer Buttons</b> on the Toolbar (if you have configured the toolbar (\ref toolbarOpts) to show the Layer buttons).  If a layer is not visible then the corresponding layer button will be raised.  The active or current layer cannot be hidden.
 
-The color of each layer button shows the color that will be used to draw tracks or draw objects in that layer, if you have selected the <b>Color Layers</b> (\ref cmdDisplay) on the <b>Display</b> dialog. The <b>Use Color</b> button allows this layer to opt in or out - which can be usefu if you want to color other layers but a layer contains pre-colored objects (like Structures or Scenery).
- 
+The color of each layer button shows the color that will be used to draw tracks or draw objects in that layer, if you have selected the <b>Color Layers</b> (\ref cmdDisplay) on the <b>Display</b> dialog. The <b>Use Layer Color</b> check-box (View tab) allows this layer to opt in or out - which can be usefu if you want to color other layers but a layer contains pre-colored objects (like Structures or Scenery).
+
 Any selected objects are unselected when the Layer is set to not visible.  If a layer is not visible, you cannot select objects in the Layer.  It is as if the objects do not exist until you show the layer again.
 
 The <b>Move To Current Layer</b> command on Edit menu (\ref editM) will move all selected (\ref cmdSelect) tracks to the current Layer.
 
-Objects are drawn on the map window, if the Layer they are on has <b>On Map</b> checked.
+Objects are drawn on the map window, if the Layer they are on has <b>Map</b> (View tab, under <b>Show Layer On</b>) checked.
 
 */
 
@@ -440,7 +457,7 @@ Only</b>/<b>Show All</b> are a temporary view filter, not a real change to the l
 view is never saved to the file, so you don't need to remember to click <b>Show All</b> before
 saving or closing, and reopening a saved file never comes back with layers still filtered down.
 Manually changing an individual layer's visibility (its <b>Layer Button</b> on the toolbar, or the
-<b>Visible</b> check-box on the <b>Layers</b> dialog, \ref cmdLayer) while a <b>Show Only</b> filter
+<b>Canvas</b> check-box on the <b>Layers</b> dialog's View tab, \ref cmdLayer) while a <b>Show Only</b> filter
 is active is a real change and is remembered/saved as usual, even after the filter is later
 cleared.
 

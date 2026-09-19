@@ -105,10 +105,10 @@ The <b>Display</b> dialog contains items which control the display of objects on
 - <b>Car Labels</b> - controls the grouping and display of <b>Cars</b> on the <b>Hot Bar</b> (\ref cmdHotBar) during the <b>Train</b> (\ref cmdTrain) command.  This can be a combination of <b>Prototype</b>, <b>Manufacturer</b>, <b>Part Number</b> and <b>Item</b>.
 
 - <b>Color Tracks</b> - when set to layers, tracks are drawn with color of the layer (\ref cmdLayer) they belong to and not the normal track color.
-This can be disabled in the Layer dialog for each Layer by unchecking the <b>Use Color</b> checkbox.
+This can be disabled in the Layer dialog's View tab for each Layer by unchecking the <b>Use Layer Color</b> checkbox.
 
 - <b>Color Draws</b> - when set to layers, non-tracks (lines, table edges and structures) are drawn with color of the layer (\ref cmdLayer) they belong to rather than based on thier own object setting.
-This can be disabled in the Layer dialog for each Layer by unchecking the <b>Use Color</b> checkbox.
+This can be disabled in the Layer dialog's View tab for each Layer by unchecking the <b>Use Layer Color</b> checkbox.
 
 - <b>Constrain Drawing Area to Room Boundaries</b> - when Zooming and moving the Main Canvas (\ref mainW) may show areas beyond the boundaries of the room.
 Setting this option constrains the Main Canvas to minimize these areas (the <b>grey</b> area).
