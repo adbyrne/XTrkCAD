@@ -392,6 +392,8 @@ The <b>Done</b> button closes the <b>Kinked Joints Report</b> window.
 /**
 \page cmdReportsnotes Notes Report
 
+![](dreportsnotes.png)
+
 The <b>Notes Report</b> command lists every note on the layout. Each row's
 <b>ROOT Names</b> column shows either the note's Type (<b>Text</b>,
 <b>Weblink</b>, or <b>Document</b>) or, for a note created via the

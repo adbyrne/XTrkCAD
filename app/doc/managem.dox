@@ -467,6 +467,8 @@ The <b>Manage Notes</b> dialog has a tab for each of the four note types -- <b>T
 <b>Weblink</b>, <b>Document</b>, and <b>JSON</b> -- used to customize how that type's notes are
 marked on the layout, and, for JSON Notes, to register meaningful ROOT-level field names.
 
+![](dmanagenotes.png)
+
 Each tab has a <b>Color</b> picker and a <b>Shape</b> dropdown (one of Square, Circle, Diamond,
 Triangle, Pentagon, Hexagon, Octagon, Star, Cross, or X). These control the small marker drawn on
 the canvas for every note of that type (\ref cmdJsonNote and the other note commands), at any zoom
