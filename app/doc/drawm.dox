@@ -306,6 +306,8 @@ After releasing the mouse button, the <i>JSON Note Editor</i> dialog is
 displayed, with <b>Validate</b> and <b>Format</b> buttons alongside the text
 area.
 
+![](djsonnote.png)
+
 <b>Validate</b> checks that the current text is well-formed JSON <i>and</i>
 that it's a JSON object (<tt>{...}</tt>, not a bare array, string, number,
 or boolean) -- invalid text is highlighted and the <b>Done</b> button is
