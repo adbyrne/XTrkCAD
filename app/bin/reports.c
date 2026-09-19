@@ -2426,6 +2426,14 @@ static void ReportsDlgUpdateNotes(paramGroup_p pg, int inx, void *valueP)
 	(void)pg;
 	(void)valueP;
 
+	/* SF #802: the Type/ROOT Names filter dropdowns used to require a
+	 * separate manual Refresh click to take effect -- self-refresh here,
+	 * the same way Refresh's own REPORTSOP_REFRESH case does. */
+	if (inx == I_REPORTSNOTESTYPEFILTER || inx == I_REPORTSNOTESROOTNAMESFILTER) {
+		ReportsNotes(NULL);
+		return;
+	}
+
 	if (inx != I_REPORTSNOTESLIST) {
 		return;
 	}
@@ -2497,6 +2505,16 @@ void ReportsNotes( void * unused )
 		registeredNames[regI] = ReportsManagedNameAt(regI);
 	}
 
+	/* Free each row's owned rawJson before the backing array itself goes --
+	 * DYNARR_FREE only releases the array buffer, not what individual rows
+	 * point to. */
+	for ( int freeI = 0; freeI < reportsNotesList_da.cnt; freeI++ ) {
+		char *rawJson = DYNARR_N( reportsNoteRow_t, reportsNotesList_da,
+		                          freeI ).rawJson;
+		if ( rawJson ) {
+			MyFree(rawJson);
+		}
+	}
 	DYNARR_FREE( reportsNoteRow_t, reportsNotesList_da );
 	DYNARR_INIT( reportsNoteRow_t, reportsNotesList_da );
 
@@ -2525,8 +2543,17 @@ void ReportsNotes( void * unused )
 		char group[64] = "";
 		char id[64] = "";
 		char label[128] = "";
+		/* SF #802: the note's raw JSON text, captured for Save/Print output
+		 * only -- xx->noteData.text is the track's own persistent buffer,
+		 * still valid after cJSON_Delete(parsed) below (that only frees the
+		 * parsed tree, not the original text), but this row needs its own
+		 * copy since it must outlive this loop iteration. */
+		char *rawJson = NULL;
 
 		if ( IsJsonNote(trk) ) {
+			if ( xx->noteData.text ) {
+				rawJson = MyStrdup(xx->noteData.text);
+			}
 			cJSON *parsed = cJSON_Parse(xx->noteData.text);
 
 			if ( parsed != NULL && cJSON_IsObject(parsed) ) {
@@ -2582,6 +2609,7 @@ void ReportsNotes( void * unused )
 		     ( xx->op != OP_NOTEJSON ||
 		       strcmp( group, ReportsManagedNameAt((int)reportsNoteRootNamesFilterInx - 1) ) !=
 		       0 ) ) {
+			MyFree(rawJson);
 			continue;
 		}
 
@@ -2597,6 +2625,7 @@ void ReportsNotes( void * unused )
 			row->noteIndex = GetTrkIndex(trk);
 			row->pos = xx->pos;
 			row->scale = GetTrkScale(trk);
+			row->rawJson = rawJson;
 		}
 	}
 

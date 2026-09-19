@@ -241,6 +241,38 @@ void LayerGroupFormatMembers(int groupIdx, char *buf, size_t bufSize)
 	}
 }
 
+void LayerGroupNamesForLayer(int layerIdx, char *buf, size_t bufSize)
+{
+	if (bufSize == 0) {
+		return;
+	}
+	buf[0] = '\0';
+
+	char *cp = buf;
+	int found = 0;
+	for (int g = 0; g < LayerGroupCount(); g++) {
+		if (!LayerGroupHasMember(g, layerIdx)) {
+			continue;
+		}
+
+		int written;
+		if (found == 0) {
+			written = snprintf(cp, bufSize - (cp - buf), "%s", LayerGroupName(g));
+		} else {
+			written = snprintf(cp, bufSize - (cp - buf), ", %s", LayerGroupName(g));
+		}
+		if (written < 0 || (size_t) written >= bufSize - (cp - buf)) {
+			break;
+		}
+		cp += written;
+		found = 1;
+	}
+
+	if (!found) {
+		snprintf(buf, bufSize, "(none)");
+	}
+}
+
 void LayerGroupParseMembers(int groupIdx, const char *list)
 {
 	if (!GroupValid(groupIdx) || list == NULL) {

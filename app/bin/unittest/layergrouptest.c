@@ -274,6 +274,48 @@ static void test_format_members_invalid_group_is_empty(void **state)
 	assert_string_equal(buf, "");
 }
 
+/* SF #802: LayerGroupNamesForLayer() is the reverse lookup (layer -> its
+ * group(s)) the Manage Layers dialog's "Layers" tab uses -- no such lookup
+ * existed before this, only the forward direction (LayerGroupHasMember). */
+static void test_names_for_layer_none(void **state)
+{
+	(void) state;
+	LayerGroupResetAll();
+	char buf[128] = "unchanged";
+
+	LayerGroupNamesForLayer(3, buf, sizeof buf);
+
+	assert_string_equal(buf, "(none)");
+}
+
+static void test_names_for_layer_single_group(void **state)
+{
+	(void) state;
+	LayerGroupResetAll();
+	int g = LayerGroupCreate("Mainline");
+	LayerGroupAddMember(g, 3);
+	char buf[128];
+
+	LayerGroupNamesForLayer(3, buf, sizeof buf);
+
+	assert_string_equal(buf, "Mainline");
+}
+
+static void test_names_for_layer_multiple_groups(void **state)
+{
+	(void) state;
+	LayerGroupResetAll();
+	int level1 = LayerGroupCreate("Level 1");
+	int main_g = LayerGroupCreate("Main");
+	LayerGroupAddMember(level1, 3);
+	LayerGroupAddMember(main_g, 3);
+	char buf[128];
+
+	LayerGroupNamesForLayer(3, buf, sizeof buf);
+
+	assert_string_equal(buf, "Level 1, Main");
+}
+
 static void test_parse_members_round_trips_format(void **state)
 {
 	(void) state;
@@ -454,6 +496,9 @@ int main(void)
 		cmocka_unit_test(test_format_members_empty),
 		cmocka_unit_test(test_format_members_list),
 		cmocka_unit_test(test_format_members_invalid_group_is_empty),
+		cmocka_unit_test(test_names_for_layer_none),
+		cmocka_unit_test(test_names_for_layer_single_group),
+		cmocka_unit_test(test_names_for_layer_multiple_groups),
 		cmocka_unit_test(test_parse_members_round_trips_format),
 		cmocka_unit_test(test_parse_members_accepts_mixed_separators),
 		cmocka_unit_test(test_parse_members_replaces_existing),

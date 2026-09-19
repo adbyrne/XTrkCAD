@@ -626,6 +626,12 @@ typedef struct {
 	 * (reportstest.c) stay valid, zero-initialized by default. */
 	coOrd pos;
 	SCALEINX_T scale;
+	/** SF #802: the note's full raw JSON body (heap-allocated, owned by
+	 * this row), NULL for a non-JSON note. Save/Print output only -- the
+	 * on-screen table still shows just id/group/label. Caller must free
+	 * every row's rawJson before the backing array itself is freed/reset
+	 * (plain array-of-structs memory doesn't know about this pointer). */
+	char *rawJson;
 } reportsNoteRow_t;
 
 /**

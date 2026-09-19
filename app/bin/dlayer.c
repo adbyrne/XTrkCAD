@@ -184,8 +184,10 @@ static int oldColorMap[][3] = {
 
 static void DoLayerOp(void *data);
 void UpdateLayerDlg(unsigned int);
+static void LayerVisibilitySetReal(unsigned int inx);
 
 static BOOL_T IsLayerConfigured(unsigned int layerNumber);
+static BOOL_T LayerRealVisible(unsigned int layerNumber);
 static void InitializeLayers(void LayerInitFunc(void), int newCurrLayer);
 static void LayerPrefSave(void);
 static void LayerPrefLoad(void);
@@ -352,6 +354,7 @@ EXPORT void ApplyLayerVisibilityChange(unsigned int layer)
 		int l = DYNARR_N(int, layers[layer].layerLinkList, i) - 1;
 		if (l != (int)curLayer && l >= 0 && l < NUM_LAYERS) {
 			layers[l].visible = layers[layer].visible;
+			LayerVisibilitySetReal((unsigned int)l);
 		}
 	}
 
@@ -375,6 +378,7 @@ EXPORT void FlipLayer(void *layerVP)
 	}
 
 	layers[layer].visible = !layers[layer].visible;
+	LayerVisibilitySetReal(layer);
 	ApplyLayerVisibilityChange(layer);   /* propagates model + redraws */
 
 	/* update buttons for linked layers */
@@ -387,6 +391,44 @@ EXPORT void FlipLayer(void *layerVP)
 			}
 		}
 	}
+}
+
+/** SF #802: Show Only/Show All are a *session-only* view filter, not a real
+ * edit -- unlike every other layer property, their effect must never be
+ * what gets written to the .xtc file. layerVisibleSnapshot holds each
+ * layer's real (persisted) visibility from just before the filter was
+ * first applied; layers[inx].visible keeps being the single value
+ * rendering/toolbar-sync code already reads (no drawing code needs to
+ * change), but WriteLayers() writes the snapshot instead whenever the
+ * filter is active. A manual visibility change (FlipLayer(), the Manage
+ * Layers dialog's Visible checkbox) while the filter is active updates the
+ * snapshot too, via LayerVisibilitySetReal() -- a deliberate user action on
+ * a specific layer is real intent, not something Show All should later
+ * discard. */
+static BOOL_T layerVisibleSnapshot[NUM_LAYERS];
+static BOOL_T layerVisibilityOverrideActive = FALSE;
+
+/**
+ * Record a manual (real, persisted) visibility change for layer \p inx.
+ * Call this everywhere layers[inx].visible is set by direct user action
+ * (not by LayerGroupShowOnly()/LayerGroupShowAll() themselves) -- a no-op
+ * unless the session-only override is currently active.
+ */
+static void LayerVisibilitySetReal(unsigned int inx)
+{
+	if (layerVisibilityOverrideActive && inx < NUM_LAYERS) {
+		layerVisibleSnapshot[inx] = layers[inx].visible;
+	}
+}
+
+/**
+ * Reset the Show Only/Show All session-only override. Call on every fresh
+ * file load -- the filter must never carry over from a previously loaded
+ * file.
+ */
+EXPORT void LayerGroupVisibilityOverrideReset(void)
+{
+	layerVisibilityOverrideActive = FALSE;
 }
 
 /**
@@ -411,6 +453,13 @@ EXPORT void LayerGroupShowOnly(int groupIdx)
 		return;
 	}
 
+	if (!layerVisibilityOverrideActive) {
+		for (unsigned int inx = 0; inx < NUM_LAYERS; inx++) {
+			layerVisibleSnapshot[inx] = layers[inx].visible;
+		}
+		layerVisibilityOverrideActive = TRUE;
+	}
+
 	for (unsigned int inx = 0; inx < NUM_LAYERS; inx++) {
 		BOOL_T shouldBeVisible = LayerGroupHasMember(groupIdx, (int)(inx + 1)) ||
 		                         inx == curLayer;
@@ -428,6 +477,42 @@ EXPORT void LayerGroupShowOnly(int groupIdx)
 	}
 
 	DoRedraw();
+}
+
+/**
+ * SF #802: the inverse of LayerGroupShowOnly(). If the session-only filter
+ * is active, restores every layer to its real (pre-filter) visibility --
+ * not necessarily all-visible, if a layer was deliberately hidden before
+ * Show Only was ever used. If the filter isn't active, this is instead a
+ * plain "make everything visible" bulk edit (a real, persisted change,
+ * since there's no filter state to restore from).
+ *
+ * \return TRUE if this was a real, persisted edit (no filter was active to
+ *         restore from) -- the caller should only mark the file changed in
+ *         that case, never for a filter restore.
+ */
+EXPORT BOOL_T LayerGroupShowAll(void)
+{
+	BOOL_T restoring = layerVisibilityOverrideActive;
+
+	for (unsigned int inx = 0; inx < NUM_LAYERS; inx++) {
+		BOOL_T shouldBeVisible = restoring ? layerVisibleSnapshot[inx] : TRUE;
+
+		if (layers[inx].visible != shouldBeVisible) {
+			layers[inx].visible = shouldBeVisible;
+			/* CodeQL cpp/offset-use-before-range-check: range-check inx
+			 * against NUM_BUTTONS before any array access, even though
+			 * layers[inx] itself is already safe under the enclosing
+			 * for loop's inx < NUM_LAYERS bound. */
+			if (inx < NUM_BUTTONS && !layers[inx].button_off && layer_btns[inx]) {
+				wButtonSetBusy(layer_btns[inx], layers[inx].visible);
+			}
+		}
+	}
+
+	layerVisibilityOverrideActive = FALSE;
+	DoRedraw();
+	return !restoring;
 }
 
 static char lastSettings[STR_SHORT_SIZE];
@@ -579,6 +664,7 @@ static wDrawColor layerColorTab[COUNT(layerRawColorTab)];
 static wControl_p layerW;
 static char layerName[STR_SHORT_SIZE];
 static char layerLinkList[STR_LONG_SIZE];
+static char layerGroupNamesStr[STR_LONG_SIZE];
 static char settingsName[STR_SHORT_SIZE];
 static wDrawColor layerColor;
 static long layerUseColor = TRUE;
@@ -597,7 +683,7 @@ static DIST_T layerMinRadius;
 static ANGLE_T layerMaxGrade;
 static tieData_t layerTieData;
 
-static long layerObjectCount;
+static char layerObjectCountStr[32];
 static void LayerOk(void *unused);
 static BOOL_T layerRedrawMap = FALSE;
 
@@ -725,9 +811,12 @@ static paramData_t layerPLs[] = {
 	},
 #define I_LINKLIST (21)
 	{
-		PD_STRING, layerLinkList, "linkedlayers",
-		PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(25 - 5), N_("Linked Layers"), 0,
-		0, sizeof(layerLinkList)
+		/* SF #802: read-only display of this layer's Layer Group
+		 * membership -- repurposes the "Layers" tab's field that used to
+		 * edit the pre-Layer-Groups "Linked Layers" mechanism, now
+		 * superseded (see MigrateLayerLinksToGroups()). */
+		PD_MESSAGE, layerGroupNamesStr, "linkedlayers", PDO_NOPREF,
+		I2VP(25 - 5), N_("Groups"), 0
 	},
 #define I_SETTINGS (22)
 	{
@@ -736,7 +825,7 @@ static paramData_t layerPLs[] = {
 	},
 #define I_COUNT (23)
 	{
-		PD_MESSAGE, &layerObjectCount, "objectCount", PDO_DLGBOXEND, I2VP(20),
+		PD_MESSAGE, layerObjectCountStr, "objectCount", PDO_DLGBOXEND, I2VP(20),
 		N_("Object Count:"), 0, 0
 	},
 	{
@@ -1107,10 +1196,12 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
 	layerMinRadius = layers[layer].minTrackRadius;
 	layerMaxGrade = layers[layer].maxTrackGrade;
 	layerTieData = layers[layer].tieData;
-	layerObjectCount = layers[layer].objCount;
+	snprintf(layerObjectCountStr, sizeof(layerObjectCountStr), "%ld",
+	         layers[layer].objCount);
 	strcpy(layerName, layers[layer].name);
 	strcpy(settingsName, layers[layer].settingsName);
-	GetLayerLinkString(layer, layerLinkList);
+	LayerGroupNamesForLayer((int)(layer + 1), layerGroupNamesStr,
+	                        sizeof(layerGroupNamesStr));
 
 	layerSelected = layer;
 
@@ -1270,7 +1361,9 @@ static void LayerPrefSave(void)
 			if (layers[inx].onMap) {
 				flags |= LAYERPREF_ONMAP;
 			}
-			if (layers[inx].visible) {
+			/* SF #802: the real (persisted) value, never a temporary
+			 * Show Only/Show All filter override. */
+			if (LayerRealVisible(inx)) {
 				flags |= LAYERPREF_VISIBLE;
 			}
 			if (layers[inx].module) {
@@ -1566,9 +1659,6 @@ static void LayerUpdate(void)
 		layerModule = FALSE;
 		FormLoadSingleControl(&layerPG, I_MOD);
 	}
-	char oldLinkList[STR_LONG_SIZE];
-	GetLayerLinkString((int)layerSelected, oldLinkList);
-
 	// Truthy strcmp() usage below is intentional: non-zero ("different")
 	// correctly triggers SetFileChanged() in this OR-chain of dirty-checks.
 	// NOLINTNEXTLINE(bugprone-suspicious-string-compare)
@@ -1590,9 +1680,7 @@ static void LayerUpdate(void)
 	    layers[(int)layerSelected].tieData.width != layerTieData.width ||
 	    layers[(int)layerSelected].tieData.spacing != layerTieData.spacing ||
 	    // NOLINTNEXTLINE(bugprone-suspicious-string-compare)
-	    strcmp(layers[(int)layerSelected].settingsName, settingsName) ||
-	    // NOLINTNEXTLINE(bugprone-suspicious-string-compare)
-	    strcmp(oldLinkList, layerLinkList)) {
+	    strcmp(layers[(int)layerSelected].settingsName, settingsName)) {
 		SetFileChanged();
 	}
 
@@ -1636,6 +1724,7 @@ static void LayerUpdate(void)
 		FlipLayer(I2VP(layerSelected));
 	}
 	layers[(int)layerSelected].visible = (BOOL_T)layerVisible;
+	LayerVisibilitySetReal((unsigned int)layerSelected);
 	layers[(int)layerSelected].frozen = (BOOL_T)layerFrozen;
 	if (layers[(int)layerSelected].frozen) {
 		DeselectLayer(layerSelected);
@@ -1652,8 +1741,6 @@ static void LayerUpdate(void)
 	layers[(int)layerSelected].inherit = (BOOL_T)layerInherit;
 	strcpy(layers[(int)layerSelected].settingsName, settingsName);
 
-	PutLayerListArray((int)layerSelected, layerLinkList);
-
 	SetLayerHideButton(layerSelected, layerNoButton);
 
 	MainProc(mainW, wResize_e, NULL, NULL);
@@ -1669,8 +1756,6 @@ static void LayerUpdate(void)
 
 static void LayerSelect(wIndex_t inx)
 {
-	char objCountString[80];
-
 	LayerUpdate();
 
 	if (inx < 0 || inx >= NUM_LAYERS) {
@@ -1697,11 +1782,11 @@ static void LayerSelect(wIndex_t inx)
 	layerTieData.length = layers[inx].tieData.length;
 	layerTieData.width = layers[inx].tieData.width;
 	layerTieData.spacing = layers[inx].tieData.spacing;
-	layerObjectCount = layers[inx].objCount;
+	snprintf(layerObjectCountStr, sizeof(layerObjectCountStr), "%ld",
+	         layers[inx].objCount);
 
-	GetLayerLinkString(inx, layerLinkList);
-	snprintf(objCountString, sizeof(objCountString), "%ld", layers[inx].objCount);
-	FormLoadMessage(&layerPG, I_COUNT, objCountString);
+	LayerGroupNamesForLayer(inx + 1, layerGroupNamesStr,
+	                        sizeof(layerGroupNamesStr));
 
 	layerSelecting = TRUE;
 	FormLoadControls(&layerPG);
@@ -1728,6 +1813,10 @@ static void LayerSelect(wIndex_t inx)
 void ResetLayers(void)
 {
 	int inx;
+
+	/* SF #802: a fresh file load must never carry over a previous file's
+	 * Show Only/Show All session-only filter state. */
+	LayerGroupVisibilityOverrideReset();
 
 	/* Move these out of the loop */
 	SCALEINX_T scaleInx;
@@ -2221,9 +2310,20 @@ void MigrateLayerLinksToGroups(void)
  * \return TRUE if configured, FALSE if not
  */
 
+/** SF #802: the layer's real (persisted) visibility -- layers[inx].visible
+ * while no Show Only/Show All filter is active, or the pre-filter snapshot
+ * value while one is (see layerVisibleSnapshot's own doc comment). Always
+ * what gets checked/written for persistence purposes, never the filter's
+ * temporarily-displayed value. */
+static BOOL_T LayerRealVisible(unsigned int layerNumber)
+{
+	return layerVisibilityOverrideActive ? layerVisibleSnapshot[layerNumber] :
+	       layers[layerNumber].visible;
+}
+
 static BOOL_T IsLayerConfigured(unsigned int layerNumber)
 {
-	return (layers[layerNumber].name[0] || !layers[layerNumber].visible ||
+	return (layers[layerNumber].name[0] || !LayerRealVisible(layerNumber) ||
 	        layers[layerNumber].frozen || !layers[layerNumber].onMap ||
 	        layers[layerNumber].module || layers[layerNumber].button_off ||
 	        !layers[layerNumber].inherit ||
@@ -2258,7 +2358,7 @@ BOOL_T WriteLayers(FILE *f)
 			fprintf(f,
 			        "LAYERS %u %d %d %d %lu %d %d %d %d \"%s\" %d %d %.6f %.6f %.6f "
 			        "%.6f %.6f\n",
-			        inx, layers[inx].visible, layers[inx].frozen, layers[inx].onMap,
+			        inx, LayerRealVisible(inx), layers[inx].frozen, layers[inx].onMap,
 			        layers[inx].color, layers[inx].module,
 			        layers[inx].useColor ? 0 : 1, ColorFlags, layers[inx].button_off,
 			        PutTitle(layers[inx].name), layers[inx].inherit,

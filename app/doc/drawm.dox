@@ -375,6 +375,10 @@ When in <b>Properties</b> (\ref cmdDescribe) mode, clicking on a <i>JSON
 Note</i> will display the <i>Property Sheet</i> to let you read or modify
 its JSON text.
 
+On the canvas, a note draws as a small colored square, its fill color
+distinguishing a <i>JSON Note</i> from a Text/Weblink/Document note at a
+glance, without clicking each one.
+
 */
 
 /**

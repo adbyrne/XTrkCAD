@@ -89,10 +89,18 @@ static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 	coOrd p[5];
 
 
-	if ((d->options & DC_SIMPLE) || mainD.scale >= 16) {
+	{
 		//while the icon is moved, draw a square with a lopped off corner
 		//because CmdMove draws all selected object into tempSeg and
 		//tempSegDrawFuncs doesn't have a BitMap drawing func
+
+		/* SF #802: now used at every zoom, not just DC_SIMPLE/scale>=16 --
+		 * the bitmap-icon path below tints its icon with `color`, which
+		 * must keep conveying selection/layer-color state (DrawTrack(),
+		 * track.c), so it can't also carry a per-type color without a
+		 * redesign (a real per-type properties system is planned
+		 * separately). This path already separates the two: fill=type,
+		 * outline=color. */
 		int type[5];
 		DIST_T dist;
 		dist = 0.8 + 0.1*(mainD.scale-16)/4;
@@ -106,24 +114,24 @@ static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 		for (int i=0; i<5; i++) {
 			type[i] = 0;
 		}
-		DrawPoly(d, 5, p, type, color, 0, DRAW_CLOSED);
-		DrawPoly(d, 5, p, type, drawColorGold, 0, DRAW_FILL);
-	} else {
-		// draw a bitmap for static object
-		wDrawBitMap_p bm;
 
-		if (xx->op == OP_NOTELINK ||(inDescribeCmd && curNoteType == OP_NOTELINK)) {
-			bm = link_bm;
+		/* SF #802: fill varies by note op type -- previously every type
+		 * filled gold here, making a JSON/Weblink/Document note
+		 * indistinguishable from a plain Text note. */
+		wDrawColor fill;
+		if (xx->op == OP_NOTELINK || (inDescribeCmd && curNoteType == OP_NOTELINK)) {
+			fill = drawColorBlue;
 		} else if (xx->op == OP_NOTEFILE || (inDescribeCmd
 		                                     && curNoteType == OP_NOTEFILE)) {
-			bm = document_bm;
+			fill = drawColorDkGreen;
 		} else if (xx->op == OP_NOTEJSON || (inDescribeCmd
 		                                     && curNoteType == OP_NOTEJSON)) {
-			bm = json_bm;
+			fill = drawColorAqua;
 		} else {
-			bm = note_bm;
+			fill = drawColorGold;
 		}
-		DrawBitMap(d, xx->pos, bm, color);
+		DrawPoly(d, 5, p, type, color, 0, DRAW_CLOSED);
+		DrawPoly(d, 5, p, type, fill, 0, DRAW_FILL);
 	}
 }
 
