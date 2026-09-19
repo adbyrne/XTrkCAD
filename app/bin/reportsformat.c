@@ -328,6 +328,15 @@ static void ReportsFormatNoteRow(DynString *out, const reportsNoteRow_t *row)
 	snprintf(line, sizeof line, "  ID %2d: %-12s %-32s layer %u\n",
 	         row->noteIndex, row->id, row->label, row->layer);
 	DynStringCatCStr(out, line);
+
+	/* SF #802: the on-screen table only ever showed id/label/layer, never
+	 * the note's actual JSON body -- print it here, Save/Print output
+	 * only, indented under the row it belongs to. */
+	if (row->rawJson) {
+		DynStringCatCStr(out, "      ");
+		DynStringCatCStr(out, row->rawJson);
+		DynStringCatCStr(out, "\n");
+	}
 }
 
 static void ReportsFormatNoteTypeGroup(DynString *out,

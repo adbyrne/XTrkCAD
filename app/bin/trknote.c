@@ -106,8 +106,25 @@ static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 		for (int i=0; i<5; i++) {
 			type[i] = 0;
 		}
+
+		/* SF #802: vary the fill by note op type, same as the bitmap branch
+		 * below already does -- previously every type filled gold here,
+		 * making a JSON/Weblink/Document note indistinguishable from a
+		 * plain Text note at this zoom level. */
+		wDrawColor fill;
+		if (xx->op == OP_NOTELINK || (inDescribeCmd && curNoteType == OP_NOTELINK)) {
+			fill = drawColorBlue;
+		} else if (xx->op == OP_NOTEFILE || (inDescribeCmd
+		                                     && curNoteType == OP_NOTEFILE)) {
+			fill = drawColorDkGreen;
+		} else if (xx->op == OP_NOTEJSON || (inDescribeCmd
+		                                     && curNoteType == OP_NOTEJSON)) {
+			fill = drawColorAqua;
+		} else {
+			fill = drawColorGold;
+		}
 		DrawPoly(d, 5, p, type, color, 0, DRAW_CLOSED);
-		DrawPoly(d, 5, p, type, drawColorGold, 0, DRAW_FILL);
+		DrawPoly(d, 5, p, type, fill, 0, DRAW_FILL);
 	} else {
 		// draw a bitmap for static object
 		wDrawBitMap_p bm;

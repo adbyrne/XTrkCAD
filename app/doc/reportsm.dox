@@ -419,8 +419,10 @@ to one registered name at a time ("All ROOT Names" is the default,
 unfiltered view); it only applies to JSON Notes matching a name
 registered via <b>Manage Notes</b>, so combining a Type filter of
 Text/Weblink/Document with a specific ROOT Names selection produces an
-empty list. Change either dropdown and click <b>Refresh</b> to re-run
-the report with the new scope.
+empty list. Changing either dropdown re-runs the report with the new scope
+immediately, no <b>Refresh</b> click needed -- unlike the <b>Layer
+Filter...</b> button below, which still needs an explicit <b>Refresh</b>
+after closing its own dialog.
 
 Selecting a row pans the <b>Main Canvas</b> (\ref mainW) to that note's
 position and draws a temporary open-circle indicator there, the same way
@@ -433,10 +435,13 @@ editing a note's JSON body elsewhere in the layout, without closing and
 reopening the report window.
 
 The <b>Save As...</b> button opens a <i>File Save</i> dialog window that's
-used to name and save the report to a text file.
+used to name and save the report to a text file. Unlike the on-screen list,
+the saved text also includes each JSON Note's full JSON body, indented on
+its own line under that note's row.
 
 The <b>Print</b> button opens the <i>Print</i> dialog which is used to
-print the report.
+print the report -- the same JSON body text included in a saved file is
+also printed.
 
 The <b>Layer Filter...</b> button (\ref cmdReportsfilter) opens a dialog to
 scope this report to specific Layers/Groups (\ref cmdLayergroup) -- every

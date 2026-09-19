@@ -88,6 +88,13 @@ int LayerGroupMemberAt(int groupIdx, int i);
  * invalid or has no members. */
 void LayerGroupFormatMembers(int groupIdx, char *buf, size_t bufSize);
 
+/** Format the names of every group that 1-based layer index \p layerIdx
+ * belongs to as a comma-separated list into \p buf (size \p bufSize), e.g.
+ * "Mainline, Staging" -- for display only (SF #802: the Manage Layers
+ * dialog's "Layers" tab, showing a layer's group membership). Writes
+ * "(none)" if \p layerIdx belongs to no group, or is out of range. */
+void LayerGroupNamesForLayer(int layerIdx, char *buf, size_t bufSize);
+
 /** Parse a semicolon/comma/space-separated list of 1-based layer indices
  * from \p list (same format LayerGroupFormatMembers produces, and the same
  * parsing convention as PutLayerListArray) and add them to group

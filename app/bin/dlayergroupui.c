@@ -42,6 +42,7 @@ static void GroupNew(void *action);
 static void GroupRename(void *action);
 static void GroupDelete(void *action);
 static void GroupShowOnly(void *action);
+static void GroupShowAll(void *action);
 static void GroupAddLayers(void *action);
 static void GroupRemoveLayers(void *action);
 static void RefreshGroupList(void);
@@ -59,14 +60,16 @@ static paramData_t layerGroupPLs[] = {
 	{	PD_BUTTON, GroupDelete, "delete", 0, NULL, NULL },
 #define I_GROUPSHOWONLY	(4)
 	{	PD_BUTTON, GroupShowOnly, "showonly", 0, NULL, NULL },
-#define I_AVAILABLE	(5)
+#define I_GROUPSHOWALL	(5)
+	{	PD_BUTTON, GroupShowAll, "showall", 0, NULL, NULL },
+#define I_AVAILABLE	(6)
 #define availableL	(layerGroupPLs[I_AVAILABLE].control)
 	{	PD_LIST, NULL, "available", PDO_DLGRESETMARGIN|PDO_DLGRESIZE, NULL, NULL, BL_MANY },
-#define I_ADDLAYERS	(6)
+#define I_ADDLAYERS	(7)
 	{	PD_BUTTON, GroupAddLayers, "addlayer", 0, NULL, NULL },
-#define I_REMOVELAYERS	(7)
+#define I_REMOVELAYERS	(8)
 	{	PD_BUTTON, GroupRemoveLayers, "removelayer", 0, NULL, NULL },
-#define I_INCLUDED	(8)
+#define I_INCLUDED	(9)
 #define includedL	(layerGroupPLs[I_INCLUDED].control)
 	{	PD_LIST, NULL, "included", PDO_DLGRESETMARGIN|PDO_DLGRESIZE, NULL, NULL, BL_MANY },
 };
@@ -398,8 +401,30 @@ static void GroupShowOnly(void *action)
 	LOG(log_layergroups, 1, ("layergroups: show only group %d \"%s\"\n",
 	                         selectedGroup, LayerGroupName(selectedGroup)))
 
+	/* SF #802: Show Only is a session-only view filter, never a real edit
+	 * -- don't mark the file changed. */
 	LayerGroupShowOnly(selectedGroup);
-	changed++;
+	DoChangeNotification(CHANGE_LAYER);
+}
+
+/**
+ * "Show All" button: make every layer visible again (SF #802 -- the
+ * inverse of Show Only; unlike Show Only this doesn't depend on a group
+ * being selected, it always operates on every layer).
+ *
+ * \param action IN unused, required by the PD_BUTTON signature
+ */
+static void GroupShowAll(void *action)
+{
+	LOGLAYERGROUPS()
+	LOG(log_layergroups, 1, ("layergroups: show all layers\n"))
+
+	/* SF #802: only mark the file changed if this was a real edit (no
+	 * Show Only filter was active to restore from) -- restoring the filter
+	 * is session-only, never a real edit. */
+	if (LayerGroupShowAll()) {
+		changed++;
+	}
 	DoChangeNotification(CHANGE_LAYER);
 }
 

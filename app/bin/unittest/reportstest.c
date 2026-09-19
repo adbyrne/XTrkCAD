@@ -771,6 +771,33 @@ static void test_notes_single_row(void **state)
 	DynStringFree(&out);
 }
 
+/* SF #802: a JSON note's raw body must appear in Save/Print output, on its
+ * own indented line under the row -- previously it was captured nowhere,
+ * only id/label/layer ever made it into the row. A row with no rawJson
+ * (the non-JSON/legacy case, exercised by every other test in this file)
+ * must print nothing extra. */
+static void test_notes_prints_raw_json_body(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 128);
+	reportsNoteRow_t list[1] = {
+		{
+			.type = REPORTS_NOTE_OP_JSON, .group = "ROOT", .id = "WP",
+			.layer = 1, .noteIndex = 5,
+			.rawJson = "{\"kind\": \"station\", \"id\": \"WP\"}"
+		}
+	};
+
+	ReportsFormatNoteList(&out, list, 1);
+
+	assert_string_equal(DynStringToCStr(&out),
+	                    "ROOT\n"
+	                    "  ID  5: WP                                            layer 1\n"
+	                    "      {\"kind\": \"station\", \"id\": \"WP\"}\n");
+	DynStringFree(&out);
+}
+
 /* Input deliberately out of Type-then-alphabetical order -- the formatter
  * must regroup into Text/Weblink/Document first, then JSON's distinct
  * \c group values sorted alphabetically ("ROOT" before "Station"), with a
@@ -940,6 +967,7 @@ int main(void)
 		cmocka_unit_test(test_kinked_multiple_rows),
 		cmocka_unit_test(test_notes_empty_list),
 		cmocka_unit_test(test_notes_single_row),
+		cmocka_unit_test(test_notes_prints_raw_json_body),
 		cmocka_unit_test(test_notes_all_groups_present),
 		cmocka_unit_test(test_notes_skips_absent_group),
 		cmocka_unit_test(test_notes_resolve_group_empty_registry),

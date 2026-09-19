@@ -368,7 +368,13 @@ One way of getting a modules in is to build a library with <b>Export</b> and the
 
 The <b>No Button</b> check-box selects if the <b>Layer</b> has a button to hide/show it. You may choose not to have a button if the layer is empty or if it is a sub-layer controlled by another layer.
 
-The <b>Linked Layers</b> text box can contain a semi-colon-delimited set of layer numbers that will be shown and hidden along with this layer when its show/hidden state is changed. A blank means no layers are linked. The layers can have buttons or not.
+The <b>Groups</b> field shows which <b>Layer Group(s)</b> (\ref cmdLayergroup) the selected layer
+currently belongs to, as a comma-separated list, or <tt>(none)</tt> if it isn't a member of any --
+a read-only display; add or remove a layer's group membership from the <b>Layer Groups</b> dialog
+itself. This field used to be an editable <b>Linked Layers</b> text box (a semi-colon-delimited set
+of layer numbers shown/hidden together with this one); that older mechanism is automatically
+converted into a <b>Layer Group</b> the first time a file that still uses it is opened, and this
+field then shows the resulting group membership instead.
 
 You cannot uncheck <b>Visible</b> or check <b>Frozen</b> for the <b>Current Layer</b>.
 
@@ -422,11 +428,21 @@ after asking for its name. The <b>Rename...</b> button changes the selected grou
 name must be unique -- <b>New...</b>/<b>Rename...</b> reject a name already used by another group,
 since every <b>Groups</b> list in the app identifies a group by its displayed name. The
 <b>Delete</b> button removes the selected group entirely (its member <b>Layers</b> are unaffected
--- only the group itself goes away). The <b>Show Only</b> button hides every <b>Layer</b> except
-the selected group's members, a quick way to isolate one group's content on the <b>Main Window</b>
-(\ref mainW) without toggling each layer's visibility by hand; the current layer always stays
-visible even if it isn't a member of the group, matching the usual rule that the current layer
-can't be hidden.
+-- only the group itself goes away).
+
+The <b>Show Only</b> button hides every <b>Layer</b> except the selected group's members, a quick
+way to isolate one group's content on the <b>Main Window</b> (\ref mainW) without toggling each
+layer's visibility by hand; the current layer always stays visible even if it isn't a member of the
+group, matching the usual rule that the current layer can't be hidden. The <b>Show All</b> button
+undoes this, restoring every layer to whatever visibility it really had before <b>Show Only</b> was
+used -- not necessarily all visible, if you'd deliberately hidden a layer beforehand. <b>Show
+Only</b>/<b>Show All</b> are a temporary view filter, not a real change to the layout: the filtered
+view is never saved to the file, so you don't need to remember to click <b>Show All</b> before
+saving or closing, and reopening a saved file never comes back with layers still filtered down.
+Manually changing an individual layer's visibility (its <b>Layer Button</b> on the toolbar, or the
+<b>Visible</b> check-box on the <b>Layers</b> dialog, \ref cmdLayer) while a <b>Show Only</b> filter
+is active is a real change and is remembered/saved as usual, even after the filter is later
+cleared.
 
 The right-hand side shows the selected group's membership as two lists, <b>Available</b> and
 <b>Included</b>. Every named <b>Layer</b> appears in exactly one of the two: <b>Included</b> if
