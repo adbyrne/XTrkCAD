@@ -58,6 +58,115 @@ static long curNoteType;
 
 #define NOTETYPESCOUNT COUNT(noteTypes)
 
+/** SF #802 follow-on: user-configurable per-note-type visual properties
+ * (color + marker shape), edited via the Manage Notes dialog's per-type
+ * tabs. Indexed by enum noteCommands (OP_NOTETEXT..OP_NOTEJSON). Persisted
+ * as an app preference (NoteTypePrefLoad()/NoteTypePrefSave() below), not
+ * per-file data -- this is about the user's own visual convention for
+ * telling note types apart, not layout content. Defaults below match the
+ * fixed mapping originally shipped with SF #802, so an unconfigured
+ * install looks unchanged. */
+typedef struct {
+	wDrawColor color;
+	enum noteShape shape;
+} noteTypeProps_t;
+
+static noteTypeProps_t noteTypeProps[NOTETYPESCOUNT] = {
+	{ (wDrawColor)wRGB(255, 215, 0), NOTE_SHAPE_SQUARE },   /* OP_NOTETEXT: gold */
+	{ (wDrawColor)wRGB(0, 0, 255), NOTE_SHAPE_SQUARE },     /* OP_NOTELINK: blue */
+	{ (wDrawColor)wRGB(0, 128, 0), NOTE_SHAPE_SQUARE },     /* OP_NOTEFILE: dark green */
+	{ (wDrawColor)wRGB(0, 255, 255), NOTE_SHAPE_SQUARE },   /* OP_NOTEJSON: aqua */
+};
+
+#define NOTETYPEPREF_SECTION ("NoteTypes")
+
+/* Fixed, locale-independent preference-key prefixes, one per NOTETYPESCOUNT
+ * entry (index matches noteTypes[]/noteTypeProps[] order) -- deliberately
+ * NOT noteTypes[].cmdName, which is a translatable display string
+ * (N_("Text Note") etc.) and would change the persisted key per locale. */
+static const char *noteTypePrefKey[NOTETYPESCOUNT] = {
+	"Text", "Weblink", "Document", "Json"
+};
+
+/**
+ * Load noteTypeProps[] from the app preference file, overriding the
+ * built-in defaults above wherever the user has customized a type. Call
+ * once at startup (InitTrkNote()).
+ */
+static void NoteTypePrefLoad(void)
+{
+	long rgb, shape;
+
+	for (unsigned int i = 0; i < NOTETYPESCOUNT; i++) {
+		char key[32];
+		snprintf(key, sizeof key, "%s.Color", noteTypePrefKey[i]);
+		if (wPrefGetInteger(NOTETYPEPREF_SECTION, key, &rgb,
+		                    (long)noteTypeProps[i].color)) {
+			noteTypeProps[i].color = (wDrawColor)rgb;
+		}
+		snprintf(key, sizeof key, "%s.Shape", noteTypePrefKey[i]);
+		if (wPrefGetInteger(NOTETYPEPREF_SECTION, key, &shape,
+		                    (long)noteTypeProps[i].shape) &&
+		    shape >= 0 && shape < NOTE_SHAPE_COUNT) {
+			noteTypeProps[i].shape = (enum noteShape)shape;
+		}
+	}
+}
+
+/**
+ * Save noteTypeProps[] to the app preference file. Call after the Manage
+ * Notes dialog's per-type tabs are applied.
+ */
+EXPORT void NoteTypePrefSave(void)
+{
+	for (unsigned int i = 0; i < NOTETYPESCOUNT; i++) {
+		char key[32];
+		snprintf(key, sizeof key, "%s.Color", noteTypePrefKey[i]);
+		wPrefSetInteger(NOTETYPEPREF_SECTION, key, (long)noteTypeProps[i].color);
+		snprintf(key, sizeof key, "%s.Shape", noteTypePrefKey[i]);
+		wPrefSetInteger(NOTETYPEPREF_SECTION, key, (long)noteTypeProps[i].shape);
+	}
+}
+
+/* noteTypeProps[] is file-scope static -- these four accessors are the
+ * Manage Notes dialog's only way to read/write a type's color/shape,
+ * matching this codebase's general preference for a narrow accessor API
+ * over direct struct access (e.g. dlayergroup.c's LayerGroupHasMember()
+ * and friends). All four clamp an out-of-range \p op to OP_NOTETEXT/
+ * NOTE_SHAPE_SQUARE rather than reading/writing out of bounds. */
+EXPORT wDrawColor NoteTypeGetColor(enum noteCommands op)
+{
+	if (op < 0 || op >= (enum noteCommands)NOTETYPESCOUNT) {
+		op = OP_NOTETEXT;
+	}
+	return noteTypeProps[op].color;
+}
+
+EXPORT void NoteTypeSetColor(enum noteCommands op, wDrawColor color)
+{
+	if (op < 0 || op >= (enum noteCommands)NOTETYPESCOUNT) {
+		return;
+	}
+	noteTypeProps[op].color = color;
+}
+
+EXPORT enum noteShape NoteTypeGetShape(enum noteCommands op)
+{
+	if (op < 0 || op >= (enum noteCommands)NOTETYPESCOUNT) {
+		return NOTE_SHAPE_SQUARE;
+	}
+	return noteTypeProps[op].shape;
+}
+
+EXPORT void NoteTypeSetShape(enum noteCommands op, enum noteShape shape)
+{
+	if (op < 0 || op >= (enum noteCommands)NOTETYPESCOUNT || shape < 0 ||
+	    shape >= NOTE_SHAPE_COUNT) {
+		return;
+	}
+	noteTypeProps[op].shape = shape;
+}
+
 
 /*****************************************************************************
  * NOTE OBJECT
@@ -76,6 +185,110 @@ EXPORT track_p NewNote(wIndex_t index, coOrd p, enum noteCommands command )
 }
 
 /**
+ * Draw a note's on-canvas marker in the given shape: an outline in
+ * \p outlineColor (carries selection/layer-color state, resolved by the
+ * caller the same way it always has been) filled with \p fillColor (the
+ * note type's own configured color). The two are always two separate
+ * DrawPoly() passes -- outline first, then fill on top -- so a shape can
+ * gain a per-type fill color without losing the outline's existing
+ * meaning.
+ *
+ * \param d IN drawing environment
+ * \param center IN marker center (the note's position)
+ * \param dist IN marker "radius" (half-width for the square, true radius
+ *                for the round/polygon/star/cross shapes)
+ * \param shape IN which marker shape to draw
+ * \param outlineColor IN outline color
+ * \param fillColor IN fill color
+ */
+static void DrawNoteShape(drawCmd_p d, coOrd center, DIST_T dist,
+                          enum noteShape shape, wDrawColor outlineColor,
+                          wDrawColor fillColor)
+{
+	coOrd p[12];
+	int type[12];
+	int n;
+
+	switch (shape) {
+	case NOTE_SHAPE_CIRCLE:
+		DrawFillCircle(d, center, dist, fillColor);
+		DrawArc(d, center, dist, 0.0, 360.0, FALSE, 0, outlineColor);
+		return;
+
+	case NOTE_SHAPE_STAR:
+		/* 5-pointed star: 10 vertices alternating outer/inner radius. */
+		n = 10;
+		for (int i = 0; i < n; i++) {
+			PointOnCircle(&p[i], center, (i % 2 == 0) ? dist : dist * 0.4,
+			              i * 36.0);
+		}
+		break;
+
+	case NOTE_SHAPE_CROSS:
+	case NOTE_SHAPE_X: {
+		/* 12-vertex plus-sign outline; X is the same shape rotated 45
+		 * degrees around its own center. */
+		DIST_T arm = dist * 0.4;
+		n = 12;
+		p[0].x = arm;   p[0].y = dist;
+		p[1].x = arm;   p[1].y = arm;
+		p[2].x = dist;  p[2].y = arm;
+		p[3].x = dist;  p[3].y = -arm;
+		p[4].x = arm;   p[4].y = -arm;
+		p[5].x = arm;   p[5].y = -dist;
+		p[6].x = -arm;  p[6].y = -dist;
+		p[7].x = -arm;  p[7].y = -arm;
+		p[8].x = -dist; p[8].y = -arm;
+		p[9].x = -dist; p[9].y = arm;
+		p[10].x = -arm; p[10].y = arm;
+		p[11].x = -arm; p[11].y = dist;
+		for (int i = 0; i < n; i++) {
+			p[i].x += center.x;
+			p[i].y += center.y;
+			if (shape == NOTE_SHAPE_X) {
+				Rotate(&p[i], center, 45.0);
+			}
+		}
+		break;
+	}
+
+	case NOTE_SHAPE_SQUARE:
+	default:
+		if (shape == NOTE_SHAPE_DIAMOND || shape == NOTE_SHAPE_TRIANGLE ||
+		    shape == NOTE_SHAPE_PENTAGON || shape == NOTE_SHAPE_HEXAGON ||
+		    shape == NOTE_SHAPE_OCTAGON) {
+			/* regular polygon: N points evenly spaced around a circle. */
+			int sides = shape == NOTE_SHAPE_DIAMOND ? 4 :
+			            shape == NOTE_SHAPE_TRIANGLE ? 3 :
+			            shape == NOTE_SHAPE_PENTAGON ? 5 :
+			            shape == NOTE_SHAPE_HEXAGON ? 6 : 8;
+			n = sides;
+			for (int i = 0; i < n; i++) {
+				PointOnCircle(&p[i], center, dist, i * (360.0 / n));
+			}
+		} else {
+			/* NOTE_SHAPE_SQUARE (and any unrecognized value): the
+			 * original "square with a lopped-off corner" point set,
+			 * unchanged from before this shape system existed. */
+			n = 5;
+			p[0].x = p[1].x = center.x - dist;
+			p[2].x = p[3].x = p[4].x = center.x + dist;
+			p[1].y = p[2].y = center.y - dist;
+			p[3].y = p[4].y = p[0].y = center.y + dist;
+			p[3].y = p[3].y - (dist / 2);
+			p[4].x = p[4].x - (dist / 2);
+		}
+		break;
+	}
+
+	for (int i = 0; i < n; i++) {
+		type[i] = 0;
+	}
+	DrawPoly(d, n, p, type, outlineColor, 0, DRAW_CLOSED);
+	DrawPoly(d, n, p, type, fillColor, 0, DRAW_FILL);
+}
+
+/**
  * Draw the icon for a note into the drawing area
  *
  * \param t IN note
@@ -86,53 +299,23 @@ EXPORT track_p NewNote(wIndex_t index, coOrd p, enum noteCommands command )
 static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 {
 	struct extraDataNote_t *xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
-	coOrd p[5];
 
+	//while the icon is moved, draw a square with a lopped off corner
+	//because CmdMove draws all selected object into tempSeg and
+	//tempSegDrawFuncs doesn't have a BitMap drawing func
 
-	{
-		//while the icon is moved, draw a square with a lopped off corner
-		//because CmdMove draws all selected object into tempSeg and
-		//tempSegDrawFuncs doesn't have a BitMap drawing func
-
-		/* SF #802: now used at every zoom, not just DC_SIMPLE/scale>=16 --
-		 * the bitmap-icon path below tints its icon with `color`, which
-		 * must keep conveying selection/layer-color state (DrawTrack(),
-		 * track.c), so it can't also carry a per-type color without a
-		 * redesign (a real per-type properties system is planned
-		 * separately). This path already separates the two: fill=type,
-		 * outline=color. */
-		int type[5];
-		DIST_T dist;
-		dist = 0.8 + 0.1*(mainD.scale-16)/4;
-		p[0].x = p[1].x = xx->pos.x - dist;
-		p[2].x = p[3].x = p[4].x = xx->pos.x + dist;
-		p[1].y = p[2].y = xx->pos.y - dist;
-		p[3].y = p[4].y = p[0].y = xx->pos.y + dist;
-		p[3].y = p[3].y - (dist/2);
-		p[4].x = p[4].x - (dist/2);
-
-		for (int i=0; i<5; i++) {
-			type[i] = 0;
-		}
-
-		/* SF #802: fill varies by note op type -- previously every type
-		 * filled gold here, making a JSON/Weblink/Document note
-		 * indistinguishable from a plain Text note. */
-		wDrawColor fill;
-		if (xx->op == OP_NOTELINK || (inDescribeCmd && curNoteType == OP_NOTELINK)) {
-			fill = drawColorBlue;
-		} else if (xx->op == OP_NOTEFILE || (inDescribeCmd
-		                                     && curNoteType == OP_NOTEFILE)) {
-			fill = drawColorDkGreen;
-		} else if (xx->op == OP_NOTEJSON || (inDescribeCmd
-		                                     && curNoteType == OP_NOTEJSON)) {
-			fill = drawColorAqua;
-		} else {
-			fill = drawColorGold;
-		}
-		DrawPoly(d, 5, p, type, color, 0, DRAW_CLOSED);
-		DrawPoly(d, 5, p, type, fill, 0, DRAW_FILL);
+	/* SF #802 (+follow-on): drawn at every zoom, not just DC_SIMPLE/
+	 * scale>=16 -- `color` keeps conveying selection/layer-color state
+	 * (DrawTrack(), track.c), the note type's own color/shape come from
+	 * noteTypeProps[] instead, see DrawNoteShape()'s own doc comment. */
+	DIST_T dist = 0.8 + 0.1 * (mainD.scale - 16) / 4;
+	enum noteCommands op = inDescribeCmd ? (enum noteCommands)curNoteType : xx->op;
+	if (op < 0 || op >= (enum noteCommands)NOTETYPESCOUNT) {
+		op = OP_NOTETEXT;
 	}
+
+	DrawNoteShape(d, xx->pos, dist, noteTypeProps[op].shape, color,
+	              noteTypeProps[op].color);
 }
 
 static DIST_T DistanceNote(track_p t, coOrd * p)
@@ -685,4 +868,6 @@ void InitTrkNote(wMenu_p menu)
 	ButtonGroupEnd();
 
 	T_NOTE = InitObject(&noteCmds);
+
+	NoteTypePrefLoad();
 }

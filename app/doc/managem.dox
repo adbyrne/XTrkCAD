@@ -463,19 +463,31 @@ converted.
 
 \anchor idx_Manage_Notes_Dialog_800
 
-A JSON Note (\ref cmdJsonNote) stores a set of Name:Value pairs at its top ("ROOT") level -- for
-example a note might have a ROOT-level <tt>spots</tt> field, another might have <tt>meta</tt>. The
-<b>Manage Notes</b> dialog lets you register which of these ROOT-level names are meaningful to
-you, so the Notes Report (\ref cmdReportsnotes) can group and filter JSON Notes by them under its
-<b>ROOT Names</b> dropdown.
+The <b>Manage Notes</b> dialog has a tab for each of the four note types -- <b>Text</b>,
+<b>Weblink</b>, <b>Document</b>, and <b>JSON</b> -- used to customize how that type's notes are
+marked on the layout, and, for JSON Notes, to register meaningful ROOT-level field names.
 
-The dialog shows the list of names you've registered so far. The <b>Add...</b> button registers a
-new name after asking you to type it. The <b>Delete</b> button removes the selected name from the
-registry -- this only affects grouping/filtering in the Notes Report; it does not change any
-note's own JSON content. The <b>Search for Names</b> button scans every JSON Note already in the
-layout for ROOT-level field names not yet registered and adds them automatically, reporting how
-many new names it found -- a convenient starting point if you already have JSON Notes using names
-you haven't registered yet.
+Each tab has a <b>Color</b> picker and a <b>Shape</b> dropdown (one of Square, Circle, Diamond,
+Triangle, Pentagon, Hexagon, Octagon, Star, Cross, or X). These control the small marker drawn on
+the canvas for every note of that type (\ref cmdJsonNote and the other note commands), at any zoom
+level. The default is a gold Square for Text notes, blue for Weblink, dark green for Document, and
+aqua for JSON -- all Square -- matching the marker's original appearance, so an unconfigured
+install looks unchanged. Changes take effect immediately on <b>Done</b> and are remembered between
+sessions.
+
+A JSON Note (\ref cmdJsonNote) stores a set of Name:Value pairs at its top ("ROOT") level -- for
+example a note might have a ROOT-level <tt>spots</tt> field, another might have <tt>meta</tt>. In
+addition to its Color and Shape, the <b>JSON</b> tab lets you register which of these ROOT-level
+names are meaningful to you, so the Notes Report (\ref cmdReportsnotes) can group and filter JSON
+Notes by them under its <b>ROOT Names</b> dropdown.
+
+This part of the JSON tab shows the list of names you've registered so far. The <b>Add...</b>
+button registers a new name after asking you to type it. The <b>Delete</b> button removes the
+selected name from the registry -- this only affects grouping/filtering in the Notes Report; it
+does not change any note's own JSON content. The <b>Search for Names</b> button scans every JSON
+Note already in the layout for ROOT-level field names not yet registered and adds them
+automatically, reporting how many new names it found -- a convenient starting point if you already
+have JSON Notes using names you haven't registered yet.
 
 Until at least one name is registered, the Notes Report's <b>ROOT Names</b> dropdown only offers
 <b>All ROOT Names</b>, and every JSON Note is grouped under <b>ROOT</b> -- this is the expected

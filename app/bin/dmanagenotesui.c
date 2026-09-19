@@ -49,6 +49,23 @@ static void NameDelete(void *action);
 static void NameSearch(void *action);
 static void RefreshNameList(void);
 
+/** SF #802 follow-on: per-type Color/Shape tabs. One pair of bound
+ * variables per note type -- FormUpdate() (called in ManageNotesDone())
+ * pulls the live widget values into these before they're read back into
+ * trknote.c's noteTypeProps[] via NoteTypeSetColor()/NoteTypeSetShape().
+ * Shape is stored as a plain list index (PDO_LISTINDEX), matching
+ * enum noteShape's own ordering one-for-one -- see
+ * manageNotesShapeLabels[] below, which must stay in that same order. */
+static wDrawColor manageNotesTextColor, manageNotesWeblinkColor,
+       manageNotesDocColor, manageNotesJsonColor;
+static long manageNotesTextShape, manageNotesWeblinkShape,
+       manageNotesDocShape, manageNotesJsonShape;
+
+static const char *manageNotesShapeLabels[] = {
+	N_("Square"), N_("Circle"), N_("Diamond"), N_("Triangle"), N_("Pentagon"),
+	N_("Hexagon"), N_("Octagon"), N_("Star"), N_("Cross"), N_("X")
+};
+
 static paramData_t manageNotesPLs[] = {
 #define I_NAMELIST	(0)
 #define namesL		(manageNotesPLs[I_NAMELIST].control)
@@ -59,8 +76,49 @@ static paramData_t manageNotesPLs[] = {
 	{	PD_BUTTON, NameDelete, "delete", 0, NULL, NULL },
 #define I_NAMESEARCH	(3)
 	{	PD_BUTTON, NameSearch, "search", 0, NULL, NULL },
+#define I_TEXTCOLOR	(4)
+	{	PD_COLORLIST, &manageNotesTextColor, "textcolor", PDO_NOPREF, NULL, N_("Color") },
+#define I_TEXTSHAPE	(5)
+#define textShapeL	(manageNotesPLs[I_TEXTSHAPE].control)
+	{	PD_DROPLIST, &manageNotesTextShape, "textshape", PDO_NOPREF|PDO_LISTINDEX, I2VP(100), N_("Shape") },
+#define I_WEBLINKCOLOR	(6)
+	{	PD_COLORLIST, &manageNotesWeblinkColor, "weblinkcolor", PDO_NOPREF, NULL, N_("Color") },
+#define I_WEBLINKSHAPE	(7)
+#define weblinkShapeL	(manageNotesPLs[I_WEBLINKSHAPE].control)
+	{	PD_DROPLIST, &manageNotesWeblinkShape, "weblinkshape", PDO_NOPREF|PDO_LISTINDEX, I2VP(100), N_("Shape") },
+#define I_DOCCOLOR	(8)
+	{	PD_COLORLIST, &manageNotesDocColor, "doccolor", PDO_NOPREF, NULL, N_("Color") },
+#define I_DOCSHAPE	(9)
+#define docShapeL	(manageNotesPLs[I_DOCSHAPE].control)
+	{	PD_DROPLIST, &manageNotesDocShape, "docshape", PDO_NOPREF|PDO_LISTINDEX, I2VP(100), N_("Shape") },
+#define I_JSONCOLOR	(10)
+	{	PD_COLORLIST, &manageNotesJsonColor, "jsoncolor", PDO_NOPREF, NULL, N_("Color") },
+#define I_JSONSHAPE	(11)
+#define jsonShapeL	(manageNotesPLs[I_JSONSHAPE].control)
+	{	PD_DROPLIST, &manageNotesJsonShape, "jsonshape", PDO_NOPREF|PDO_LISTINDEX, I2VP(100), N_("Shape") },
 };
 static paramGroup_t manageNotesPG = { "managenotes", PGO_FULLDIALOGFROMBUILDER, manageNotesPLs, COUNT( manageNotesPLs ) };
+
+/**
+ * Populate one type tab's Shape drop-list with manageNotesShapeLabels[]
+ * and select \p current. Called once per tab, each time the dialog opens
+ * (RefreshNameList()'s own convention -- cheap, and keeps this in sync if
+ * the label set ever changes).
+ *
+ * \param control IN the tab's Shape PD_DROPLIST control
+ * \param current IN the shape index to select
+ */
+static void PopulateShapeList(wControl_p control, long current)
+{
+	size_t i;
+
+	wListClear(control);
+	for (i = 0; i < sizeof manageNotesShapeLabels / sizeof
+	     manageNotesShapeLabels[0]; i++) {
+		wComboBoxAddValue(control, _(manageNotesShapeLabels[i]), I2VP((int)i));
+	}
+	wListSetIndex(control, (int)current);
+}
 
 /* "Enter a name" dialog for Add -- same shape/rationale as
  * dlayergroupui.c's layerGroupNamePLs (see that file's header comment for
@@ -231,13 +289,34 @@ static void RefreshNameList(void)
 }
 
 /**
- * "Done" button: just hide the dialog. Add/Delete/Search all already
- * committed to the data model immediately when performed.
+ * "Done" button: apply the four type tabs' Color/Shape (Add/Delete/Search
+ * already committed to the data model immediately when performed, nothing
+ * more to do for those), then hide the dialog.
  *
  * \param junk IN unused, required by the FormCreateDialog() Ok-action signature
  */
 static void ManageNotesDone(void *junk)
 {
+	/* FormUpdate() pulls the live widget values (color buttons, shape
+	 * drop-lists) into the bound manageNotes*Color/manageNotes*Shape
+	 * variables -- same requirement as ManageNotesNameOk()'s own
+	 * FormUpdate() call above, see that function's header comment. */
+	FormUpdate(&manageNotesPG);
+
+	NoteTypeSetColor(OP_NOTETEXT, manageNotesTextColor);
+	NoteTypeSetShape(OP_NOTETEXT, (enum noteShape)manageNotesTextShape);
+	NoteTypeSetColor(OP_NOTELINK, manageNotesWeblinkColor);
+	NoteTypeSetShape(OP_NOTELINK, (enum noteShape)manageNotesWeblinkShape);
+	NoteTypeSetColor(OP_NOTEFILE, manageNotesDocColor);
+	NoteTypeSetShape(OP_NOTEFILE, (enum noteShape)manageNotesDocShape);
+	NoteTypeSetColor(OP_NOTEJSON, manageNotesJsonColor);
+	NoteTypeSetShape(OP_NOTEJSON, (enum noteShape)manageNotesJsonShape);
+	NoteTypePrefSave();
+
+	LOGMANAGENOTES()
+	LOG(log_managenotes, 1, ("managenotes: type properties applied\n"))
+
+	DoRedraw();
 	wHide(manageNotesPG.win);
 }
 
@@ -258,8 +337,23 @@ static void DoManageNotes(void *unused)
 		                 TRUE, F_RESIZE|F_RECALLSIZE|F_BLOCK, NULL);
 	}
 
+	/* load each tab's current type properties before FormLoadControls()
+	 * pushes these bound variables out to their widgets. */
+	manageNotesTextColor = NoteTypeGetColor(OP_NOTETEXT);
+	manageNotesTextShape = NoteTypeGetShape(OP_NOTETEXT);
+	manageNotesWeblinkColor = NoteTypeGetColor(OP_NOTELINK);
+	manageNotesWeblinkShape = NoteTypeGetShape(OP_NOTELINK);
+	manageNotesDocColor = NoteTypeGetColor(OP_NOTEFILE);
+	manageNotesDocShape = NoteTypeGetShape(OP_NOTEFILE);
+	manageNotesJsonColor = NoteTypeGetColor(OP_NOTEJSON);
+	manageNotesJsonShape = NoteTypeGetShape(OP_NOTEJSON);
+
 	FormLoadControls(&manageNotesPG);
 	FormGroupRecord(&manageNotesPG);
+	PopulateShapeList(textShapeL, manageNotesTextShape);
+	PopulateShapeList(weblinkShapeL, manageNotesWeblinkShape);
+	PopulateShapeList(docShapeL, manageNotesDocShape);
+	PopulateShapeList(jsonShapeL, manageNotesJsonShape);
 	RefreshNameList();
 	wShow(manageNotesPG.win);
 }
