@@ -134,9 +134,15 @@ EXPORT void NoteTypePrefSave(void)
  * over direct struct access (e.g. dlayergroup.c's LayerGroupHasMember()
  * and friends). All four clamp an out-of-range \p op to OP_NOTETEXT/
  * NOTE_SHAPE_SQUARE rather than reading/writing out of bounds. */
+/* (int) casts below: an enum with only non-negative enumerators may be
+ * given an unsigned underlying type by the compiler, making a bare
+ * `op < 0` a tautologically-false comparison -- GCC accepts this silently,
+ * Clang's -Wtautological-unsigned-enum-zero-compare (-Werror under CI)
+ * does not. Casting to a definitely-signed type keeps the bounds check
+ * genuinely portable instead of assuming a particular compiler's choice. */
 EXPORT wDrawColor NoteTypeGetColor(enum noteCommands op)
 {
-	if (op < 0 || op >= (enum noteCommands)NOTETYPESCOUNT) {
+	if ((int)op < 0 || op >= (enum noteCommands)NOTETYPESCOUNT) {
 		op = OP_NOTETEXT;
 	}
 	return noteTypeProps[op].color;
@@ -144,7 +150,7 @@ EXPORT wDrawColor NoteTypeGetColor(enum noteCommands op)
 
 EXPORT void NoteTypeSetColor(enum noteCommands op, wDrawColor color)
 {
-	if (op < 0 || op >= (enum noteCommands)NOTETYPESCOUNT) {
+	if ((int)op < 0 || op >= (enum noteCommands)NOTETYPESCOUNT) {
 		return;
 	}
 	noteTypeProps[op].color = color;
@@ -152,7 +158,7 @@ EXPORT void NoteTypeSetColor(enum noteCommands op, wDrawColor color)
 
 EXPORT enum noteShape NoteTypeGetShape(enum noteCommands op)
 {
-	if (op < 0 || op >= (enum noteCommands)NOTETYPESCOUNT) {
+	if ((int)op < 0 || op >= (enum noteCommands)NOTETYPESCOUNT) {
 		return NOTE_SHAPE_SQUARE;
 	}
 	return noteTypeProps[op].shape;
@@ -160,7 +166,7 @@ EXPORT enum noteShape NoteTypeGetShape(enum noteCommands op)
 
 EXPORT void NoteTypeSetShape(enum noteCommands op, enum noteShape shape)
 {
-	if (op < 0 || op >= (enum noteCommands)NOTETYPESCOUNT || shape < 0 ||
+	if ((int)op < 0 || op >= (enum noteCommands)NOTETYPESCOUNT || (int)shape < 0 ||
 	    shape >= NOTE_SHAPE_COUNT) {
 		return;
 	}
@@ -310,7 +316,7 @@ static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 	 * noteTypeProps[] instead, see DrawNoteShape()'s own doc comment. */
 	DIST_T dist = 0.8 + 0.1 * (mainD.scale - 16) / 4;
 	enum noteCommands op = inDescribeCmd ? (enum noteCommands)curNoteType : xx->op;
-	if (op < 0 || op >= (enum noteCommands)NOTETYPESCOUNT) {
+	if ((int)op < 0 || op >= (enum noteCommands)NOTETYPESCOUNT) {
 		op = OP_NOTETEXT;
 	}
 
