@@ -18,6 +18,8 @@ For <i>Turnouts</i>, see below for additional details on the <i>Active EndPoint<
 - \subpage Flex-track
 - \subpage hbStructures
 - \subpage hbTurnouts
+- \subpage cmdTurnoutHotBar
+- \subpage cmdStructureHotBar
 
 */
 
