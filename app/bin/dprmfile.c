@@ -65,7 +65,7 @@ static char * paramFileLabels[] = { N_("Show File Names"), NULL };
 static paramData_t paramFilePLs[] = {
 #define I_PRMFILLIST	(0)
 #define paramFileL				(paramFilePLs[I_PRMFILLIST].control)
-	{	PD_LIST, NULL, "inx", PDO_DLGRESIZE, &paramFileListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
+	{	PD_LIST, NULL, "inx", 0, &paramFileListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
 #define I_MESSAGE (1)
 	{ PD_MESSAGE, "", "message", 0, I2VP(37) },
 	{ PD_BUTTON, ParamFileSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL },

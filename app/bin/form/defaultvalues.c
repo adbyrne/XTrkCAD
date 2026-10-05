@@ -178,13 +178,16 @@ FormLoadDefaultValues(paramGroup_p pg)
 				break;
 			case PD_COLORLIST:
 			case PD_LONG:
-			case PD_SCALE:
 				if (!wPrefGetInteger(pg->nameStr, p->nameStr, p->valueP, *(long*)p->valueP)) {
 					wPrefGetInteger(prefSectAlternative, DynStringToCStr(&prefNameAlternative),
 					                p->valueP, *(long*)p->valueP);
 				}
 				break;
 			case PD_FLOAT:
+			case PD_SCALE:
+				/* PD_SCALE's valueP is always a double* (wScaleCreate's
+				 * contract), never an int/long*, so it must use the same
+				 * FLOAT_T path as PD_FLOAT here. */
 				if (!wPrefGetFloat(pg->nameStr, p->nameStr, (FLOAT_T*)p->valueP,
 				                   *(FLOAT_T*)p->valueP)) {
 					wPrefGetFloat(prefSectAlternative, DynStringToCStr(&prefNameAlternative),

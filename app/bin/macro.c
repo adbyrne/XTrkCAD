@@ -87,7 +87,7 @@ static paramData_t recordPLs[] = {
 #define I_RECTEXT (3)
 #define recordT (recordPLs[I_RECTEXT].control)
 	{
-		PD_TEXT, NULL, "text", PDO_NORECORD | PDO_DLGRESIZE, &recordTextData, NULL,
+		PD_TEXT, NULL, "text", PDO_NORECORD, &recordTextData, NULL,
 		0
 	}
 };
@@ -753,7 +753,7 @@ static paramData_t demoPLs[] = {
 #define I_DEMOTEXT (3)
 #define demoT (demoPLs[I_DEMOTEXT].control)
 	{
-		PD_TEXT, NULL, "text", PDO_NORECORD | PDO_DLGRESIZE, &demoTextData, NULL,
+		PD_TEXT, NULL, "text", PDO_NORECORD, &demoTextData, NULL,
 		BT_CHARUNITS | BO_READONLY
 	}
 };

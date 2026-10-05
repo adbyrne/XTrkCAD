@@ -750,6 +750,10 @@ jobs:
     #   - app/tools/dirent.c/dirent.h: vendored public-domain Win32 dirent
     #     shim (Kevlin Henney, 1997/2003), excluded via --exclude=dirent.c/
     #     --exclude=dirent.h now that app/tools is in this job's scope.
+    #   - app/bin/uthash.h: vendored (Troy D. Hanson). Upstream SF r7368+
+    #     replaced it with an unformatted newer release (and dropped the
+    #     gtk3lib copy); excluded via --exclude=uthash.h rather than
+    #     reformatting it away from Hg.
     #   - unittest/ dirs: excluded separately (see quality-plan-gtk3v2main.md
     #     Phase 0) — some unittest sources are deliberately non-conformant.
     #
@@ -782,6 +786,7 @@ jobs:
             --exclude=unittest \
             --exclude=dirent.c \
             --exclude=dirent.h \
+            --exclude=uthash.h \
             "app/bin/*.c" "app/bin/*.h" "app/wlib/*.c" "app/wlib/*.h" "app/help/*.c" "app/help/*.h" "app/tools/*.c" "app/tools/*.h" 2>&1 | grep '^Formatted' || true)
           if [ -n "$OUTPUT" ]; then
             echo "$OUTPUT"
@@ -823,6 +828,7 @@ jobs:
             --exclude=unittest \
             --exclude=dirent.c \
             --exclude=dirent.h \
+            --exclude=uthash.h \
             "app/bin/*.c" "app/bin/*.h" "app/wlib/*.c" "app/wlib/*.h" "app/help/*.c" "app/help/*.h" "app/tools/*.c" "app/tools/*.h" 2>&1 | grep '^Formatted' || true)
           if [ -n "$OUTPUT" ]; then
             echo "$OUTPUT"
@@ -867,6 +873,7 @@ jobs:
             --exclude=unittest \
             --exclude=dirent.c \
             --exclude=dirent.h \
+            --exclude=uthash.h \
             "app/bin/*.c" "app/bin/*.h" "app/wlib/*.c" "app/wlib/*.h" "app/help/*.c" "app/help/*.h" "app/tools/*.c" "app/tools/*.h" 2>&1 | grep '^Formatted' || true)
           if [ -n "$OUTPUT" ]; then
             echo "$OUTPUT"

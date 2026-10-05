@@ -141,8 +141,7 @@ track_p NewText( wIndex_t index, coOrd p, ANGLE_T angle, const char * text,
                  BOOL_T filled, wDrawColor bg_color);
 void LoadFontSizeList( wControl_p control, long fontSize);
 void UpdateFontSizeList( long *fontSizeR, wControl_p list,	wIndex_t listInx  );
-long GetFontSize(wIndex_t);
-long GetFontSizeIndex(long size);
+long GetStandardFontSize(long size);
 
 /* cnote.c */
 void ClearNote( void );

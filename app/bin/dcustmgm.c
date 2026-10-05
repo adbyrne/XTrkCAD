@@ -59,7 +59,7 @@ static paramListData_t customListData = { 10, 400, 5, customListWidths, customLi
 static paramData_t customPLs[] = {
 #define I_CUSTOMLIST	(0)
 #define customSelL		(customPLs[I_CUSTOMLIST].control)
-	{	PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN|PDO_DLGRESIZE|PDO_DLGBOXEND, &customListData, NULL, BL_MANY },
+	{	PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN|PDO_DLGBOXEND, &customListData, NULL, BL_MANY },
 #define I_CUSTOMNEWTYPE (1)
 	{   PD_MENU, &selectedType, "select_new", 0L, I2VP(150), NULL },
 #define I_CUSTOMNEW     (2)

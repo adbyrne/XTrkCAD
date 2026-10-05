@@ -39,7 +39,7 @@ static paramTextData_t textData = { 60, 10 };
 static paramData_t problemrepPLs[] = {
 #define I_PROBLEMREPPROGRESS				 (0)
 #define PROBLEMREP_T			(problemrepPLs[I_PROBLEMREPPROGRESS].control)
-	{   PD_TEXT, NULL, NULL, PDO_DLGRESIZE, &textData, NULL, BO_READONLY }
+	{   PD_TEXT, NULL, NULL, 0, &textData, NULL, BO_READONLY }
 };
 static paramGroup_t problemrepPG = { "problemdata", 0, problemrepPLs, COUNT(problemrepPLs) };
 

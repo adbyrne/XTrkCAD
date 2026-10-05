@@ -50,7 +50,7 @@ static paramTextData_t enumTextData = { 0, 0 };
 static paramData_t enumPLs[] = {
 #define I_ENUMTEXT		(0)
 #define enumT			(enumPLs[I_ENUMTEXT].control)
-	{   PD_TEXT, NULL, "text", PDO_DLGRESIZE, &enumTextData },
+	{   PD_TEXT, NULL, "text", 0, &enumTextData },
 	{   PD_BUTTON, DoEnumOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, I2VP(ENUMOP_SAVE) },
 	{   PD_BUTTON, DoEnumOp, "print", 0, NULL, NULL, 0, I2VP(ENUMOP_PRINT) },
 	{   PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },

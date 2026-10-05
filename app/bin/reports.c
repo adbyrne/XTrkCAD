@@ -207,7 +207,7 @@ static paramData_t reportsPLs[] = {
 	{ PD_MESSAGE, "", "summary", 0, I2VP(37) },
 #define I_REPORTSLIST (1)
 #define reportsList (reportsPLs[I_REPORTSLIST].control)
-	{ PD_LIST, NULL, "list", PDO_DLGRESIZE, &reportsListData, NULL, 0 },
+	{ PD_LIST, NULL, "list", 0, &reportsListData, NULL, 0 },
 	{ PD_BUTTON, DoReportsOp, "refresh", 0, NULL, NULL, 0, &reportsUnconnectedRefreshOp },
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsUnconnectedSaveOp },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsUnconnectedPrintOp },
@@ -827,7 +827,7 @@ static paramData_t reportsTurnoutPLs[] = {
 	{ PD_MESSAGE, "", "summary", 0, I2VP(37) },
 #define I_REPORTSTURNOUTLIST (1)
 #define reportsTurnoutList (reportsTurnoutPLs[I_REPORTSTURNOUTLIST].control)
-	{ PD_LIST, NULL, "list", PDO_DLGRESIZE, &reportsTurnoutListData, NULL, 0 },
+	{ PD_LIST, NULL, "list", 0, &reportsTurnoutListData, NULL, 0 },
 	{ PD_BUTTON, DoReportsOp, "refresh", 0, NULL, NULL, 0, &reportsTurnoutRefreshOp },
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsTurnoutSaveOp },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsTurnoutPrintOp },
@@ -1073,7 +1073,7 @@ static paramData_t reportsTrackLenPLs[] = {
 	{ PD_MESSAGE, "", "summary", 0, I2VP(37) },
 #define I_REPORTSTRACKLENLIST (1)
 #define reportsTrackLenList (reportsTrackLenPLs[I_REPORTSTRACKLENLIST].control)
-	{ PD_LIST, NULL, "list", PDO_DLGRESIZE, &reportsTrackLenListData, NULL, 0 },
+	{ PD_LIST, NULL, "list", 0, &reportsTrackLenListData, NULL, 0 },
 	{ PD_BUTTON, DoReportsOp, "refresh", 0, NULL, NULL, 0, &reportsTrackLenRefreshOp },
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsTrackLenSaveOp },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsTrackLenPrintOp },
@@ -1274,7 +1274,7 @@ static paramData_t reportsCurvePLs[] = {
 	{ PD_MESSAGE, "", "summary", 0, I2VP(37) },
 #define I_REPORTSCURVELIST (1)
 #define reportsCurveList (reportsCurvePLs[I_REPORTSCURVELIST].control)
-	{ PD_LIST, NULL, "list", PDO_DLGRESIZE, &reportsCurveListData, NULL, 0 },
+	{ PD_LIST, NULL, "list", 0, &reportsCurveListData, NULL, 0 },
 	{ PD_BUTTON, DoReportsOp, "refresh", 0, NULL, NULL, 0, &reportsCurveRefreshOp },
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsCurveSaveOp },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsCurvePrintOp },
@@ -1497,7 +1497,7 @@ static paramData_t reportsEquipPLs[] = {
 	{ PD_MESSAGE, "", "summary", 0, I2VP(37) },
 #define I_REPORTSEQUIPLIST (1)
 #define reportsEquipList (reportsEquipPLs[I_REPORTSEQUIPLIST].control)
-	{ PD_LIST, NULL, "list", PDO_DLGRESIZE, &reportsEquipListData, NULL, 0 },
+	{ PD_LIST, NULL, "list", 0, &reportsEquipListData, NULL, 0 },
 	{ PD_BUTTON, DoReportsOp, "refresh", 0, NULL, NULL, 0, &reportsEquipRefreshOp },
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsEquipSaveOp },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsEquipPrintOp },
@@ -1694,7 +1694,7 @@ static paramData_t reportsGapsPLs[] = {
 	{ PD_MESSAGE, "", "summary", 0, I2VP(37) },
 #define I_REPORTSGAPSLIST (1)
 #define reportsGapsList (reportsGapsPLs[I_REPORTSGAPSLIST].control)
-	{ PD_LIST, NULL, "list", PDO_DLGRESIZE, &reportsGapsListData, NULL, 0 },
+	{ PD_LIST, NULL, "list", 0, &reportsGapsListData, NULL, 0 },
 	{ PD_BUTTON, DoReportsOp, "refresh", 0, NULL, NULL, 0, &reportsGapsRefreshOp },
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsGapsSaveOp },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsGapsPrintOp },
@@ -2025,7 +2025,7 @@ static paramData_t reportsKinkedPLs[] = {
 	{ PD_MESSAGE, "", "summary", 0, I2VP(37) },
 #define I_REPORTSKINKEDLIST (1)
 #define reportsKinkedList (reportsKinkedPLs[I_REPORTSKINKEDLIST].control)
-	{ PD_LIST, NULL, "list", PDO_DLGRESIZE, &reportsKinkedListData, NULL, 0 },
+	{ PD_LIST, NULL, "list", 0, &reportsKinkedListData, NULL, 0 },
 	{ PD_BUTTON, DoReportsOp, "refresh", 0, NULL, NULL, 0, &reportsKinkedRefreshOp },
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsKinkedSaveOp },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsKinkedPrintOp },
@@ -2316,7 +2316,7 @@ static paramData_t reportsNotesPLs[] = {
 	{ PD_DROPLIST, &reportsNoteRootNamesFilterInx, "rootnamesfilter", PDO_NOPREF | PDO_LISTINDEX, I2VP(120), NULL, 0 },
 #define I_REPORTSNOTESLIST (3)
 #define reportsNotesList (reportsNotesPLs[I_REPORTSNOTESLIST].control)
-	{ PD_LIST, NULL, "list", PDO_DLGRESIZE, &reportsNotesListData, NULL, 0 },
+	{ PD_LIST, NULL, "list", 0, &reportsNotesListData, NULL, 0 },
 	{ PD_BUTTON, DoReportsOp, "refresh", 0, NULL, NULL, 0, &reportsNotesRefreshOp },
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsNotesSaveOp },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsNotesPrintOp },

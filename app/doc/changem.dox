@@ -44,9 +44,9 @@ The (\ref cmdSplitTrack) command can be used in one of two ways;
 
 - <i>Profile</i> \anchor idx_Profile_100  - display the elevation profile of a definable stretch of track (\subpage cmdProfile).
 
-- <i>Clear Elevations</i> \anchor idx_Clear_Elevations_101  - remove elevation parameters from selected track(s).
+- <i>Clear Elevations</i> \anchor idx_Clear_Elevations_101  - remove all elevation settings from the endpoints of the selected track(s). This is not the same as setting them to 0 (\ref clrElev).
 
-- <i>Recompute Elevations</i> \anchor idx_Recompute_Elevations_102  - performs a global re-computation of dynamic elevations. It should not be necessary to issue this command as elevations are recomputed as required.
+- <i>Recompute Elevations</i> \anchor idx_Recompute_Elevations_102  - recomputes all calculated (Computed and Grade) elevations of the whole layout from the defined elevations. It should not be necessary to issue this command as elevations are recomputed as required; use it if displayed elevations or grades look out of date.
 
 - <i>Change Scale</i> \anchor idx_Change_Scale_103  - change model scale and/or gauge of layout design. (\subpage cmdRescale)
 
@@ -83,9 +83,13 @@ If resizing by modeling scale then track dimensions, e.g., lengths and radii, wi
 /**
 \page clrElev Clear Elevations
 
-The <b>Clear Elevations</b> command is used to remove elevation points from selected track on the layout.
+The <b>Clear Elevations</b> command is used to remove elevation settings from selected track on the layout.
 
-Using the <b>Select</b> command, select the track that is to have its elevation settings cleared then select <b>Change&gt;Clear Elevations</b> from the menu  bar to clear elevations of selected track.
+Using the <b>Select</b> command, select the track that is to have its elevation settings cleared then select <b>Change&gt;Clear Elevations</b> from the menu bar to clear elevations of selected track.
+
+Every endpoint of the selected track is set to <b>None</b>: Defined elevations, Station names, and Computed or Grade labels are removed. Endpoints set to <b>Ignore</b> are left unchanged.
+
+Clearing an elevation is not the same as defining it as 0. A cleared endpoint no longer has an elevation of its own; its height is computed from the remaining Defined elevations of the connected track, if there are any. To set a height of 0, use the <b>Elevation</b> command (\ref cmdElevation) and choose <b>Defined</b>.
 
 */
 

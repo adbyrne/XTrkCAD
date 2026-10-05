@@ -387,6 +387,8 @@ static void SensorEditOk ( void * junk )
 	track_p trk;
 	sensorData_p xx;
 
+	FormFetchData( &sensorEditPG );
+
 	if (sensorEditTrack == NULL) {
 		UndoStart( _("Create Sensor"), "Create Sensor");
 		trk = NewTrack(0, T_SENSOR, 0, sizeof(sensorData_t));

@@ -58,7 +58,7 @@ static char searchUiQuery[MAXQUERYLENGTH];
 
 static paramData_t searchUiPLs[] = {
 #define I_QUERYSTRING  (0)
-	{ PD_STRING, searchUiQuery, "query", PDO_ENTER | PDO_NOPREF | PDO_STRINGLIMITLENGTH | PDO_DLGRESIZE, I2VP(34), "", 0, 0, MAXQUERYLENGTH-1 },
+	{ PD_STRING, searchUiQuery, "query", PDO_ENTER | PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(34), "", 0, 0, MAXQUERYLENGTH-1 },
 #define I_SEARCHBUTTON (1)
 	{ PD_BUTTON, SearchUiDoSearch, "find", PDO_DLGHORZ, 0, NULL,  BO_ICON, NULL },
 #define I_CLEARBUTTON (2)
@@ -70,7 +70,7 @@ static paramData_t searchUiPLs[] = {
 #define I_STATISTICS (5)
 	{ PD_MESSAGE, "", "searchstat", PDO_DLGBOXEND, I2VP(370) },
 #define I_RESULTLIST	(6)
-	{	PD_LIST, NULL, "inx", PDO_NOPREF | PDO_DLGRESIZE, &searchUiListData, NULL, BL_DUP | BL_SETSTAY | BL_MANY},
+	{	PD_LIST, NULL, "inx", PDO_NOPREF, &searchUiListData, NULL, BL_DUP | BL_SETSTAY | BL_MANY},
 #define I_APPLYBUTTON	(7)
 	{	PD_BUTTON, SearchUiApply, "apply", PDO_DLGCMDBUTTON, NULL},
 #define I_SELECTALLBUTTON (8)

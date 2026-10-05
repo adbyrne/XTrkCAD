@@ -69,7 +69,7 @@ static const char *manageNotesShapeLabels[] = {
 static paramData_t manageNotesPLs[] = {
 #define I_NAMELIST	(0)
 #define namesL		(manageNotesPLs[I_NAMELIST].control)
-	{	PD_LIST, NULL, "names", PDO_DLGRESETMARGIN|PDO_DLGRESIZE, NULL, NULL, 0 },
+	{	PD_LIST, NULL, "names", PDO_DLGRESETMARGIN, NULL, NULL, 0 },
 #define I_NAMENEW	(1)
 	{	PD_BUTTON, NameNew, "new", 0, NULL, NULL },
 #define I_NAMEDELETE	(2)

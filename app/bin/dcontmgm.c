@@ -77,7 +77,7 @@ static void ControlDone( void * action );
 static paramData_t controlPLs[] = {
 #define I_CONTROLLIST	(0)
 #define controlSelL		(controlPLs[I_CONTROLLIST].control)
-	{	PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN|PDO_DLGRESIZE, NULL, NULL, BL_MANY},
+	{	PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN, NULL, NULL, BL_MANY},
 #define I_CONTROLEDIT	(1)
 	{	PD_BUTTON, ControlEdit, "edit", PDO_DLGCMDBUTTON, NULL, NULL },
 #define I_CONTROLDEL		(2)
@@ -184,7 +184,7 @@ static void ControlDelete( void * action )
 
 	UndoEnd();
 
-	DoChangeNotification( CHANGE_PARAMS );
+	DoChangeNotification( CHANGE_PARAMS|CHANGE_MAIN );
 }
 
 static void ControlDone( void * action )

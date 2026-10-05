@@ -425,6 +425,8 @@ static void ControlEditOk ( void * junk )
 	track_p trk;
 	controlData_p xx;
 
+	FormFetchData( &controlEditPG );
+
 	if (controlEditTrack == NULL) {
 		UndoStart( _("Create Control"), "Create Control");
 		trk = NewTrack(0, T_CONTROL, 0, sizeof(controlData_t));

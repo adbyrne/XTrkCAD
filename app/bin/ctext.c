@@ -83,6 +83,43 @@ enum TEXT_POSITION {
 #define RETURN_CHAR '\015'
 #define DEFAULT_TEXT_ANGLE 0.0
 #define FONT_SAMPLE_TEXT "Aquilp"
+#define READABLE_SCREEN_SIZE 12.0	// points on screen
+
+static long textToolSize = -1;	// size last set by this tool, -1 if none yet
+
+/**
+ * Remember the label size for the next label and future sessions
+ *
+ * \param size IN font size
+ */
+static void SetTextToolSize( long size )
+{
+	textToolSize = size;
+	wSetSelectedFontSize((wFontSize_t)size);
+	wPrefSetInteger("text", "size", size);
+}
+
+/**
+ * Font size for the next label: one chosen in the Fonts dialog since the tool
+ * last set it, else the last size used; on first use, the standard size that
+ * shows as about READABLE_SCREEN_SIZE points at the current zoom (label sizes
+ * are layout sizes, divided by the zoom on screen)
+ *
+ * \return font size
+ */
+static long GetTextToolSize( void )
+{
+	long size = (long)wSelectedFontSize();
+	if ( textToolSize > 0 && size != textToolSize ) {
+		return size;
+	}
+	if ( !wPrefGetInteger("text", "size", &size, 0) || size <= 0 ) {
+		size = GetStandardFontSize(
+		               (long)(READABLE_SCREEN_SIZE * mainD.scale + 0.5) );
+	}
+	SetTextToolSize( size );
+	return size;
+}
 
 static STATUS_T CmdText( wAction_t action, coOrd pos )
 {
@@ -103,12 +140,12 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		if (textPD.control == NULL) {
 			FormRegister(&textPG);
 			FormCreateControls(&textPG);
-			LoadFontSizeList(textPD.control, Dt.size);
-
-			Dt.size = GetFontSize((long int)Dt.fontSizeInx);
 		}
-		Dt.size = (long)wSelectedFontSize();
-		Dt.fontSizeInx = GetFontSizeIndex(Dt.size);
+		Dt.size = GetTextToolSize();
+		// (Re)load so a non-standard size gets its own entry; fontSizeInx must be
+		// the resulting combo index, not a fontSizeList index
+		LoadFontSizeList(textPD.control, Dt.size);
+		Dt.fontSizeInx = wListGetIndex(textPD.control);
 		FormLoadControls(&textPG);
 		FormGroupRecord( &textPG );
 
@@ -117,7 +154,11 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		InfoSetControls(mainW, textPG.nameStr);
 		return C_CONTINUE;
 	case C_DOWN:
-		Dt.size = GetFontSize((long int)Dt.fontSizeInx);
+		// fontSizeInx is a combo index (-1 for a typed-in size, and shifted by
+		// any non-standard size LoadFontSizeList inserted), not a fontSizeList
+		// index, so resolve it through the item context like the Describe dialog
+		UpdateFontSizeList(&Dt.size, textPD.control, (wIndex_t)Dt.fontSizeInx);
+		SetTextToolSize(Dt.size);
 		Dt.pos = pos;
 		Dt.cursPos0.y = Dt.cursPos1.y = pos.y + Dt.lastLineOffset;
 		Dt.cursPos0.x = Dt.cursPos1.x = pos.x + Dt.lastLineLen;
