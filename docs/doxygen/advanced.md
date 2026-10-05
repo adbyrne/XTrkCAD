@@ -73,9 +73,10 @@ your run, not a copy of it.
 - **`cppcheck`** — cppcheck's default check set only, `--error-exitcode=1`.
 - **`astyle-check`** — AStyle 3.6.13 (built from source, pinned — an unpinned version once
   produced different formatting for identical input, SF #638) dry-run conformance to
-  `app/lib/astylerc`, scoped to `app/bin`/`app/wlib` only. Vendored code
-  (`app/wlib/gtk3lib/wrapbox/`, `app/tools/halibut/`) and `unittest/` directories are excluded by
-  design.
+  `app/lib/astylerc`, scoped to `app/bin`, `app/wlib`, `app/help`, and `app/tools`. Vendored code
+  (`app/wlib/gtk3lib/wrapbox/`, the `app/tools/dirent.c`/`dirent.h` Win32 shim, and
+  `app/bin/uthash.h`, an unmodified upstream uthash release) and `unittest/` directories are
+  excluded by design.
 - **`fuzz-getargs`** — a bounded-time libFuzzer regression run of the `fuzz_getargs` harness (not
   continuous fuzzing; catches regressions in previously-fixed `GetArgs()` bugs like SF #645).
 
