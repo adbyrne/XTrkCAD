@@ -22,6 +22,8 @@ name: Hg sync (default)
 # xtrkcad-sf-sync script.
 
 on:
+  push:   # TEMPORARY: registers the workflow for testing; remove before merge
+    branches: [ci-hg-sync-default]
   schedule:
     - cron: '23 10 * * *'   # daily, 10:23 UTC
   workflow_dispatch:
