@@ -254,7 +254,7 @@ anything else in this table.
 
 | Tool | Pin status | Currently tested (as of 2026-07-18 — unpinned rows drift as CI runner images update) |
 |------|-----------|------------------------------------------|
-| Doxygen | pinned | 1.15.0, all platforms |
+| Doxygen | pinned | 1.15.0 (upstream Linux binary) for the dev-guide jobs (`ci-gtk3.yml`'s `doxygen`, `release.yml`'s `package-docs`). The packaging jobs build the User Guide with the OS package instead: apt/Homebrew (unpinned) on Linux/macOS; MSYS2 `mingw-w64-x86_64-doxygen` pinned to 1.16.1-4 in `package-windows`, since 1.18.0-3 aborts on the User Guide build (`std::system_error`, 2026-10-05) |
 | AStyle | pinned | 3.6.13, all platforms (built from source, not the OS package) |
 | CMake | floor/ceiling only (`3.20`–`4.0`) | 3.28.3 (Linux), 4.3.3 (Windows/MSYS2) |
 | cppcheck | unpinned | 2.13.0 (Ubuntu 24.04) |

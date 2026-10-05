@@ -145,5 +145,9 @@ See the \subpage building "Building and Testing" page for local build steps per 
 CI details, tool-version pins, and advanced checks (sanitizers, valgrind, the regression
 demo-playback suite, debug logging).
 
+See the \subpage development-process page for how Mercurial branches and the SF
+trackers are used during development: release, feature, and bugfix branches, and where bugs
+and feature requests are filed.
+
 See the \subpage advanced page for setting up CI on your own GitHub fork and the process/lessons
 behind this project's static-analysis triage work.
