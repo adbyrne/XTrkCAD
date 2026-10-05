@@ -60,6 +60,14 @@ This branch's CI is `.github/workflows/ci-gtk3.yml` (`ci.yml` covers the GTK2 `%
 directly for exact command lines; this is a map of what each job checks and whether it can fail
 your run, not a copy of it.
 
+On `%main`, `hg-sync-default.yml` also mirrors SourceForge Hg `default` into git `%main` every
+day. It diffs from the last synced Hg node, which is recorded as an `Hg-Node:` commit trailer,
+and applies the result to a `test/upstream-default-*` branch. It runs `ci.yml` there and
+fast-forwards `%main` only if CI passes; a conflict or failure opens a GitHub issue instead.
+Its pushes use `GITHUB_TOKEN`, which never triggers push-event workflows, so it starts `ci.yml`
+through `workflow_dispatch`. `GTK3V2MAIN` is still synced by hand for now, since it carries
+git-only work that can't simply mirror Hg.
+
 ## Gating jobs (a failure here fails the run)
 
 - **`doxygen`** — builds this documentation with the pinned Doxygen 1.15.0 and `WARN_AS_ERROR`;
