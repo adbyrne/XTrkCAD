@@ -7,6 +7,9 @@ on:
   pull_request:
     branches:
       - main
+  # Started by hg-sync-default.yml: its pushes use GITHUB_TOKEN, which never
+  # triggers push-event workflows, but a workflow_dispatch it sends does.
+  workflow_dispatch:
 
 jobs:
   doxygen:
