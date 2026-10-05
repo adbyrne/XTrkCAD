@@ -224,6 +224,40 @@ hg -R xtrkcad-hg merge && hg -R xtrkcad-hg commit -m "merge: ..."   # if needed
 hg -R xtrkcad-hg push                     # default → SourceForge
 ```
 
+## Hg development process (adopted 2026-10-05)
+
+Follows Martin Fischer's *Development Process Specification* (dev guide page
+`docs/doxygen/development-process.md`, `\page development-process`). Adopted for our own work on
+2026-10-05; replaces the earlier "every fix gets a `bug-NNN` branch, push it, set `needs-review`,
+wait out a review window" norm.
+
+**Tracking — where an issue gets written down:**
+- SF `bugs` tracker: **user-visible bugs only**, described from the user's perspective.
+- SF `feature-requests` tracker: new features and ideas (not `bugs`, as Layer Groups/JSON Note
+  were).
+- Problems we find ourselves while developing (a feature's own teething bugs, dev-only findings,
+  fixes we're unsure of): **don't** file them in the general `bugs` tracker. Fix them on the
+  feature branch, or raise them on the **dev mailing list** — that's where review requests go
+  too (drafts in `.claude/devml-drafts/`).
+
+**Branches** (`GTK3V2MAIN` is the release branch for 5.4.0):
+- **Localized fix** (one or a few places — missing init, small logic fix): commit directly on
+  `GTK3V2MAIN`, no branch.
+- **Broad-impact fix** (wider implications, e.g. a FormAPI change): `fix-<NNN>-<desc>-gtk3`.
+- **Feature**: `feature-<NNN>-<desc>-gtk3`, branched from `GTK3V2MAIN`; every commit for the
+  feature stays on it until it's verified complete.
+- Housekeeping: `chore-<desc>-gtk3`.
+- `<NNN>` is the SF ticket number when one exists (file it first); leave it out otherwise.
+  Matches Martin's own `feature-/fix-/chore-…-gtk3` names.
+- Once verified, **we merge the branch into `GTK3V2MAIN` ourselves, then close it**
+  (`hg update <branch> && hg commit --close-branch -m "close <branch>"`), then push. There's no
+  `needs-review` waiting window for fixes. Exception: if we're unsure of a fix, ask for review on
+  the dev mailing list before merging.
+
+**Unchanged:** git first — git PR, CI green, PR merged, and only then commit/merge in Hg and push
+to SF (`hg push -b <branch>` scoping still applies). Holds the user sets explicitly (e.g. the
+Layer Groups / JSON Note dev-ML review hold) stay in force until the user lifts them.
+
 ## Build
 
 Requires CMake ≥ 3.20 and `rsvg-convert` (replaces Inkscape for SVG→PNG; no D-Bus needed). Out-of-source builds are mandatory.
