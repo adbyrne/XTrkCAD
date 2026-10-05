@@ -51,7 +51,7 @@ static void RefreshShuttleLists(int groupIdx);
 static paramData_t layerGroupPLs[] = {
 #define I_GROUPLIST	(0)
 #define groupsL		(layerGroupPLs[I_GROUPLIST].control)
-	{	PD_LIST, NULL, "groups", PDO_DLGRESETMARGIN|PDO_DLGRESIZE, NULL, NULL, 0 },
+	{	PD_LIST, NULL, "groups", PDO_DLGRESETMARGIN, NULL, NULL, 0 },
 #define I_GROUPNEW	(1)
 	{	PD_BUTTON, GroupNew, "new", 0, NULL, NULL },
 #define I_GROUPRENAME	(2)
@@ -64,14 +64,14 @@ static paramData_t layerGroupPLs[] = {
 	{	PD_BUTTON, GroupShowAll, "showall", 0, NULL, NULL },
 #define I_AVAILABLE	(6)
 #define availableL	(layerGroupPLs[I_AVAILABLE].control)
-	{	PD_LIST, NULL, "available", PDO_DLGRESETMARGIN|PDO_DLGRESIZE, NULL, NULL, BL_MANY },
+	{	PD_LIST, NULL, "available", PDO_DLGRESETMARGIN, NULL, NULL, BL_MANY },
 #define I_ADDLAYERS	(7)
 	{	PD_BUTTON, GroupAddLayers, "addlayer", 0, NULL, NULL },
 #define I_REMOVELAYERS	(8)
 	{	PD_BUTTON, GroupRemoveLayers, "removelayer", 0, NULL, NULL },
 #define I_INCLUDED	(9)
 #define includedL	(layerGroupPLs[I_INCLUDED].control)
-	{	PD_LIST, NULL, "included", PDO_DLGRESETMARGIN|PDO_DLGRESIZE, NULL, NULL, BL_MANY },
+	{	PD_LIST, NULL, "included", PDO_DLGRESETMARGIN, NULL, NULL, BL_MANY },
 };
 static paramGroup_t layerGroupPG = { "layergroup", PGO_FULLDIALOGFROMBUILDER, layerGroupPLs, COUNT( layerGroupPLs ) };
 

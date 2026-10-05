@@ -2316,7 +2316,7 @@ static paramData_t reportsNotesPLs[] = {
 	{ PD_DROPLIST, &reportsNoteRootNamesFilterInx, "rootnamesfilter", PDO_NOPREF | PDO_LISTINDEX, I2VP(120), NULL, 0 },
 #define I_REPORTSNOTESLIST (3)
 #define reportsNotesList (reportsNotesPLs[I_REPORTSNOTESLIST].control)
-	{ PD_LIST, NULL, "list", PDO_DLGRESIZE, &reportsNotesListData, NULL, 0 },
+	{ PD_LIST, NULL, "list", 0, &reportsNotesListData, NULL, 0 },
 	{ PD_BUTTON, DoReportsOp, "refresh", 0, NULL, NULL, 0, &reportsNotesRefreshOp },
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsNotesSaveOp },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsNotesPrintOp },

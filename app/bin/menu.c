@@ -1378,26 +1378,32 @@ EXPORT void CreateMenus(void)
 	wMenuSeparatorCreate(fileM);
 
 	wMenu_p importM = wMenuMenuCreate(fileM, "menuImport", _("_Import"));
-	MiscMenuItemCreate(importM, NULL, "cmdImport", _("_XTrackCAD Import (xti) ..."), ACCL_IMPORT,
+	MiscMenuItemCreate(importM, NULL, "cmdImport", _("_XTrackCAD Import (xti) ..."),
+	                   ACCL_IMPORT,
 	                   DoImportObjects, 0, I2VP(0));
-	MiscMenuItemCreate(importM, NULL, "cmdImportModule", _("XTrackCAD _Module (xti) ..."),
+	MiscMenuItemCreate(importM, NULL, "cmdImportModule",
+	                   _("XTrackCAD _Module (xti) ..."),
 	                   ACCL_IMPORT_MOD,
 	                   DoImportModule, 0, I2VP(1));
-	MiscMenuItemCreate(importM, NULL, "cmdImportDxf", _("_Drawing Interchange Format (dxf) ..."),
+	MiscMenuItemCreate(importM, NULL, "cmdImportDxf",
+	                   _("_Drawing Interchange Format (dxf) ..."),
 	                   ACCL_IMPORT_DXF,
 	                   DoImportDxf, 0, I2VP(1));
 
 	wMenu_p exportM = wMenuMenuCreate(fileM, "menuExport", _("E_xport"));
-	MiscMenuItemCreate(exportM, NULL, "cmdExport", _("_XTrackCAD Export (xti)..."), ACCL_EXPORT,
+	MiscMenuItemCreate(exportM, NULL, "cmdExport", _("_XTrackCAD Export (xti)..."),
+	                   ACCL_EXPORT,
 	                   DoExport, IC_SELECTED, NULL);
 	MiscMenuItemCreate(exportM, NULL, "cmdOutputbitmap", _("_Bitmap (jpg, png)..."),
 	                   ACCL_PRINTBM, OutputBitMapInit(), 0,
 	                   NULL);
-	MiscMenuItemCreate(exportM, NULL, "cmdExportDXF", _("_Drawing Interchange Format (dxf)..."),
+	MiscMenuItemCreate(exportM, NULL, "cmdExportDXF",
+	                   _("_Drawing Interchange Format (dxf)..."),
 	                   ACCL_EXPORTDXF, DoExportDxf, 0,
 	                   NULL);
 #if XTRKCAD_CREATE_SVG
-	MiscMenuItemCreate( exportM, NULL, "cmdExportSVG", _("_Scalable Vector Graphics (svg)..."),
+	MiscMenuItemCreate( exportM, NULL, "cmdExportSVG",
+	                    _("_Scalable Vector Graphics (svg)..."),
 	                    ACCL_EXPORTSVG, DoExportSVG, 0, NULL);
 #endif
 

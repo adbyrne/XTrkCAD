@@ -70,17 +70,17 @@ static void FilterClear(void *action);
 static paramData_t reportsFilterPLs[] = {
 #define I_AVAILABLE	(0)
 #define availableL	(reportsFilterPLs[I_AVAILABLE].control)
-	{	PD_LIST, NULL, "available", PDO_DLGRESETMARGIN|PDO_DLGRESIZE, NULL, NULL, BL_MANY },
+	{	PD_LIST, NULL, "available", PDO_DLGRESETMARGIN, NULL, NULL, BL_MANY },
 #define I_ADDLAYERS	(1)
 	{	PD_BUTTON, FilterAddLayers, "addlayer", 0, NULL, NULL },
 #define I_REMOVELAYERS	(2)
 	{	PD_BUTTON, FilterRemoveLayers, "removelayer", 0, NULL, NULL },
 #define I_INCLUDED	(3)
 #define includedL	(reportsFilterPLs[I_INCLUDED].control)
-	{	PD_LIST, NULL, "included", PDO_DLGRESETMARGIN|PDO_DLGRESIZE, NULL, NULL, BL_MANY },
+	{	PD_LIST, NULL, "included", PDO_DLGRESETMARGIN, NULL, NULL, BL_MANY },
 #define I_GROUPLIST	(4)
 #define groupsL		(reportsFilterPLs[I_GROUPLIST].control)
-	{	PD_LIST, NULL, "groups", PDO_DLGRESETMARGIN|PDO_DLGRESIZE, NULL, NULL, BL_MANY },
+	{	PD_LIST, NULL, "groups", PDO_DLGRESETMARGIN, NULL, NULL, BL_MANY },
 #define I_ADDGROUP	(5)
 	{	PD_BUTTON, FilterAddGroup, "addgroup", 0, NULL, NULL },
 #define I_CLEAR	(6)

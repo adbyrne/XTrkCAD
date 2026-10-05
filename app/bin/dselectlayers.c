@@ -55,10 +55,10 @@ static void DoDeselect(void *action);
 static paramData_t selectLayersPLs[] = {
 #define I_LAYERLIST	(0)
 #define layersL		(selectLayersPLs[I_LAYERLIST].control)
-	{	PD_LIST, NULL, "layers", PDO_DLGRESETMARGIN|PDO_DLGRESIZE, NULL, NULL, BL_MANY },
+	{	PD_LIST, NULL, "layers", PDO_DLGRESETMARGIN, NULL, NULL, BL_MANY },
 #define I_GROUPLIST	(1)
 #define groupsL		(selectLayersPLs[I_GROUPLIST].control)
-	{	PD_LIST, NULL, "groups", PDO_DLGRESETMARGIN|PDO_DLGRESIZE, NULL, NULL, BL_MANY },
+	{	PD_LIST, NULL, "groups", PDO_DLGRESETMARGIN, NULL, NULL, BL_MANY },
 #define I_SELECT	(2)
 	{	PD_BUTTON, DoSelect, "select", 0, NULL, NULL },
 #define I_DESELECT	(3)
