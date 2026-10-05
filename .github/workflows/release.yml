@@ -279,6 +279,18 @@ jobs:
             mingw-w64-x86_64-ntldd-git
             mingw-w64-x86_64-doxygen
 
+      # MSYS2's doxygen package is rolling: 1.18.0-3 (landed between the
+      # 2026-09-19 and 2026-10-05 runs) aborts on the User Guide build with
+      # "terminate called after throwing an instance of 'std::system_error'
+      # what(): Invalid argument". Pin the last version that built cleanly
+      # here, the same way the Linux doxygen jobs pin DOXYGEN_VERSION.
+      - name: Pin MSYS2 Doxygen package
+        env:
+          MSYS2_DOXYGEN_PKG_VERSION: 1.16.1-4
+        run: |
+          pacman -U --noconfirm "https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-doxygen-${MSYS2_DOXYGEN_PKG_VERSION}-any.pkg.tar.zst"
+          doxygen --version
+
       - name: Get version
         run: |
           MAJOR=$(awk -F'"' '/set\(XTRKCAD_MAJOR_VERSION/{print $2; exit}' ProgramVersion.cmake)
