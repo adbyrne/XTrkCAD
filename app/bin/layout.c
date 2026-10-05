@@ -90,6 +90,15 @@ static paramFloatRange_t r360_360 = { -360, 360 };
 static paramFloatRange_t rN_9999999 = { -99999, 99999 };
 static paramIntegerRange_t i0_100 = { 0, 100 };
 
+/**
+ * @brief Double-typed shadow of thisLayout.props.backgroundScreen for the
+ * "Screen" PD_SCALE control. wScaleCreate()/ScaleValueChanged() (gtk3lib)
+ * always read and write through a double*, so the widget cannot be bound
+ * directly to the int-typed backgroundScreen field. Kept in sync with
+ * backgroundScreen by SetLayoutBackGroundScreen().
+*/
+static double backgroundScreenScale;
+
 static void SettingsWrite( void  );
 static void SettingsRead( void  );
 static void ImageFileClear(void* unused);
@@ -317,6 +326,7 @@ void SetLayoutBackGroundAngle(ANGLE_T angle)
 void SetLayoutBackGroundScreen(int screen)
 {
 	thisLayout.props.backgroundScreen = screen;
+	backgroundScreenScale = (double)screen;
 
 }
 
@@ -717,7 +727,7 @@ static paramData_t layoutPLs[] = {
 #define BACKGROUNDWIDTH (13)
 	{ PD_FLOAT, &thisLayout.props.backgroundSize, "backgroundWidth", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r0_9999999, NULL, 0, I2VP(CHANGE_BACKGROUND) },
 #define BACKGROUNDSCREEN (14)
-	{ PD_SCALE, &thisLayout.props.backgroundScreen, "backgroundScreen", PDO_NOPSHUPD, &i0_100, NULL, 0, I2VP(CHANGE_BACKGROUND) },
+	{ PD_SCALE, &backgroundScreenScale, "backgroundScreen", PDO_NOPSHUPD, &i0_100, NULL, 0, I2VP(CHANGE_BACKGROUND) },
 #define BACKGROUNDANGLE (15)
 	{ PD_FLOAT, &thisLayout.props.backgroundAngle, "backgroundAngle", PDO_NOPSHUPD | PDO_DRAW | PDO_DLGBOXEND, &r360_360, NULL, 0, I2VP(CHANGE_BACKGROUND) },
 	{ PD_MESSAGE, N_("Named Settings File"), "settings", PDO_DLGRESETMARGIN, I2VP(180) },
@@ -961,7 +971,7 @@ LayoutDlgUpdate(
 		MainRedraw();
 	}
 	if (inx == BACKGROUNDSCREEN) {
-		SetLayoutBackGroundScreen(*(int *)valueP);
+		SetLayoutBackGroundScreen((int)(*(double *)valueP));
 		MainRedraw();
 	}
 	if (inx == BACKGROUNDANGLE) {
@@ -990,7 +1000,7 @@ LayoutBackGroundLoad(void)
 	              0.0);
 	long screen_long;
 	wPrefGetInteger("layout", "BackgroundScreen", &screen_long, 0L);
-	thisLayout.props.backgroundScreen = screen_long;
+	SetLayoutBackGroundScreen((int)screen_long);
 	wPrefGetFloat("layout", "BackgroundSize", &thisLayout.props.backgroundSize,
 	              0.0);
 }

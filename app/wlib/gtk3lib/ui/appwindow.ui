@@ -294,17 +294,16 @@
                     </child>
                     <child>
                       <object class="GtkComboBox" id="fontsize">
-                        <property name="can-focus">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="entry-text-column">3</property>
+                        <property name="has-entry">True</property>
                         <property name="model">fontsizeList</property>
                         <property name="visible">True</property>
-                        <child>
-                          <object class="GtkCellRendererText">
+                        <child internal-child="entry">
+                          <object class="GtkEntry">
+                            <property name="can-focus">True</property>
                             <property name="width-chars">5</property>
                           </object>
-                          <!-- Custom child fragments -->
-                          <attributes>
-                            <attribute name="text">3</attribute>
-                          </attributes>
                         </child>
                       </object>
                       <packing>

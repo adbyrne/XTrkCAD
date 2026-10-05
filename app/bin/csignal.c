@@ -509,7 +509,7 @@ static paramData_t signalEditPLs[] = {
 	/*4*/ { PD_LONG,   &signalEditHeadCount, "headCount", PDO_NOPREF, &r1_3, NULL },
 #define I_SIGNALASPECTLIST (5)
 #define aspectSelL (signalEditPLs[I_SIGNALASPECTLIST].control)
-	/*5*/ { PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN|PDO_DLGRESIZE, &aspectListData, NULL, BL_MANY },
+	/*5*/ { PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN, &aspectListData, NULL, BL_MANY },
 #define I_SIGNALASPECTEDIT (6)
 	/*6*/ { PD_BUTTON, AspectEdit, "edit", PDO_DLGCMDBUTTON, NULL, NULL },
 #define I_SIGNALASPECTADD (7)

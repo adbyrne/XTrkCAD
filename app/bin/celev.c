@@ -25,7 +25,6 @@
 #include "custom.h"
 #include "fileio.h"
 #include "icons.h"
-#include "param.h"
 #include "track.h"
 #include "ccurve.h"
 #include "include/form.h"
@@ -527,8 +526,8 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		InfoMessage( "" );
 		return C_TERMINATE;
 	case C_CANCEL:
-		elevTrk = NULL;
 		DoElevUpdate( NULL, 1, NULL );
+		elevTrk = NULL;
 		wHide( elevW );
 		InfoMessage( "" );
 		return C_TERMINATE;

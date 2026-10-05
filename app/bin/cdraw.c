@@ -93,20 +93,20 @@ EXPORT void LoadFontSizeList(
 	wFlush();
 }
 
-long GetFontSize(wIndex_t inx)
+/**
+ * Round a font size up to the next standard size in the list
+ *
+ * \param size IN wanted font size
+ * \return smallest standard size >= size, or the largest standard size
+ */
+long GetStandardFontSize(long size)
 {
-	return(fontSizeList[inx]);
-}
-
-long GetFontSizeIndex(long size)
-{
-	int i;
-	for (i = 0; i < COUNT( fontSizeList ); i++) {
-		if (fontSizeList[i] == size) {
-			return(i);
+	for (int i = 0; i < COUNT( fontSizeList ); i++) {
+		if (fontSizeList[i] >= size) {
+			return(fontSizeList[i]);
 		}
 	}
-	return(-1);
+	return(fontSizeList[COUNT( fontSizeList ) - 1]);
 }
 
 EXPORT void UpdateFontSizeList(
@@ -666,19 +666,25 @@ static void UpdateDraw( track_p trk, int drawDescInx, descUpdate_t * descUpd,
 		return;
 	}
 	segPtr = &xx->segs[drawSegInx];
-	// drawDescInx == -1 means no specific field changed (e.g. dialog-open callback with
-	// nothing to commit yet) -- distinct from drawSegInx above. Do NOT add a
-	// `segPtr->type != SEG_TEXT` guard here: this switch below handles field commits for
-	// every drawn-object type (SEG_STRLIN/SEG_DIMLIN/SEG_BENCH/SEG_TBLEDGE/SEG_CRVLIN/...),
-	// not just text. A prior "cleanup" (SF #664, Hg r6745) hoisted such a guard out of a
-	// narrow drawSegInx==-1-only branch to run unconditionally here, which silently broke
-	// Describe-field commits for every non-text object -- undetected for ~2 weeks because
-	// -T regression testing was unusable at the time (see GTK3 issue #26).
-	if ( drawDescInx == -1 ) { return; }
-
-	CHECK( drawDescInx >= 0 && drawDescInx < curDescCnt );
-
-	int inx = curDescMap[drawDescInx];
+	// drawDescInx == -1 means the Describe dialog is finishing (Done, or another
+	// object clicked) -- distinct from drawSegInx above. Do NOT add a
+	// `segPtr->type != SEG_TEXT` guard ahead of the switch below: it handles field
+	// commits for every drawn-object type (SEG_STRLIN/SEG_DIMLIN/SEG_BENCH/...), not
+	// just text. A prior "cleanup" (SF #664, Hg r6798) hoisted such a guard out of
+	// this -1-only branch to run unconditionally, which silently broke Describe-field
+	// commits for every non-text object (GTK3 issue #26).
+	int inx;
+	if ( drawDescInx == -1 ) {
+		// The multi-line text widget only sets its "changed" flag, it never fires
+		// the per-field callback, so text edits are only ever committed here.
+		if ( segPtr->type != SEG_TEXT || DrawDescGetControl(TX) == NULL ) {
+			return;
+		}
+		inx = TX;
+	} else {
+		CHECK( drawDescInx >= 0 && drawDescInx < curDescCnt );
+		inx = curDescMap[drawDescInx];
+	}
 
 	UndrawNewTrack( trk );
 	coOrd pt;
@@ -1417,6 +1423,20 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	drawData.oldAngle = drawData.rotate_angle;
 	drawData.oldOrigin = drawData.origin;
 
+	// DoDescribe's FormLoadControls applies drawData.fontSizeInx to the font
+	// size list as the previous text left it, and LoadFontSizeList below fires
+	// a real "changed" too: both commit through UpdateDraw(TS) and can clobber
+	// u.t.fontSize (e.g. to 4, the list's first entry). Keep the list's current
+	// index so the load is a no-op, and snapshot the size to restore it after
+	// the reload (cf. the BE snapshot below, GTK3 issue #22).
+	FONTSIZE_T textFontSize = 0;
+	if ( segPtr->type==SEG_TEXT ) {
+		textFontSize = segPtr->u.t.fontSize;
+		if ( DrawDescGetControl(TS) != NULL ) {
+			drawData.fontSizeInx = wListGetIndex( DrawDescGetControl(TS) );
+		}
+	}
+
 	DoDescribe( title, trk, curDescData, UpdateDraw );
 	if ( segPtr->type==SEG_BENCH && DrawDescGetControl(BE)!=NULL
 	     && DrawDescGetControl(OR)!=NULL) {
@@ -1462,7 +1482,14 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		wListSetIndex(DrawDescGetControl(DS), drawData.dimenSize );
 	}
 	if ( segPtr->type==SEG_TEXT && DrawDescGetControl(TS)!=NULL ) {
-		LoadFontSizeList(DrawDescGetControl(TS), (long)segPtr->u.t.fontSize );
+		LoadFontSizeList(DrawDescGetControl(TS), (long)textFontSize );
+		drawData.fontSizeInx = wListGetIndex( DrawDescGetControl(TS) );
+		if ( segPtr->u.t.fontSize != textFontSize ) {
+			UndrawNewTrack( trk );
+			segPtr->u.t.fontSize = textFontSize;
+			ComputeDrawBoundingBox( trk );
+			DrawNewTrack( trk );
+		}
 	}
 }
 

@@ -101,9 +101,6 @@ typedef enum {
 #define PDO_DLGIGNOREX			(1L<<27)
 #define PDO_DLGUNDERCMDBUTT		(1L<<28)
 #define PDO_DLGCMDBUTTON		(1L<<29)	/**< arrange button on the right with the default buttons */
-#define PDO_DLGRESIZEW			(1L<<30)
-#define PDO_DLGRESIZEH			(1L<<31)
-#define PDO_DLGRESIZE			(PDO_DLGRESIZEW|PDO_DLGRESIZEH)
 
 #define LIST_NODATASTORE			(1L<<4)		/**< do not automatically create a liststore */
 

@@ -146,7 +146,7 @@ static void DoAddElev(void * unused);
 static paramFloatRange_t rn1000_1000 = { -1000.0, 1000.0 };
 static paramData_t addElevPLs[] = { {
 		PD_FLOAT, &addElevValueV, "value",
-		PDO_NOPREF|PDO_DIM, &rn1000_1000,
+		PDO_NOPREF|PDO_DIM, &rn1000_1000, N_("Raise/lower by:"),
 	}
 };
 static paramGroup_t addElevPG = { "addElev", 0, addElevPLs, COUNT( addElevPLs ) };
@@ -166,9 +166,9 @@ static void ShowAddElevations(void * unused)
 	}
 	if (addElevW == NULL)
 		addElevW = FormCreateDialog(&addElevPG,
-		                            NULL,
-		                            NULL, DoAddElev,
-		                            NULL, FormCancel_Current, FALSE, 0, NULL);
+		                            MakeWindowTitle(_("Raise/Lower Elevations")),
+		                            _("Ok"), DoAddElev,
+		                            _("Cancel"), FormCancel_Current, FALSE, 0, NULL);
 	wShow(addElevW);
 }
 
@@ -412,8 +412,18 @@ EXPORT void SelectFont(void * unused)
 EXPORT long stickySet = 0;
 static wControl_p stickyW;
 static const char * stickyLabels[MAX_STICKY_GROUPS + 1];
+// Stable per-group persistence key (a command's or button group's helpKey),
+// parallel to stickyLabels. Indexed by stickyIndex, which is only a stable
+// identifier within one run -- the bit position it maps to can shift across
+// builds whenever a command's IC_STICKY flag changes (see SF #591 / commit
+// 6080), so the ini file is keyed by this string, never by stickyIndex.
+static const char * stickyKeys[MAX_STICKY_GROUPS + 1];
+
+// Sticky button tracking
+static int stickyCnt = 0;
+
 static paramData_t stickyPLs[] = { {
-		PD_TOGGLE, &stickySet, "set", PDO_NOPSHUPD,
+		PD_TOGGLE, &stickySet, "set", PDO_NOPSHUPD|PDO_NOPREF,
 		stickyLabels, "", 0
 	}
 };
@@ -422,6 +432,17 @@ static paramGroup_t stickyPG = { "sticky", PGO_RECORD, stickyPLs,COUNT( stickyPL
 static void StickyOk(void * unused)
 {
 	long changes = GetChanges( &stickyPG );
+
+	// stickyPLs' "set" field is PDO_NOPREF, so the generic dialog Ok
+	// handler never persists stickySet as a raw bitmask (its bit meaning
+	// isn't stable across builds). Persist per-key instead.
+	for (int i = 0; i < stickyCnt; i++) {
+		if (stickyKeys[i]) {
+			wPrefSetInteger("sticky", stickyKeys[i], (stickySet >> i) & 1L);
+		}
+	}
+	wPrefFlush(NULL);
+
 	wHide(stickyW);
 	DoChangeNotification(changes);
 }
@@ -725,10 +746,6 @@ static const char *buttonGroupMenuTitle = NULL;
 static const char *buttonGroupHelpKey = NULL;
 static const char *buttonGroupStickyLabel = NULL;
 
-
-// Sticky button tracking
-static int stickyCnt = 0;
-
 // Static menu state for button groups
 static wMenu_p commandsSubmenu = NULL;
 static wMenu_p popup1Submenu = NULL;
@@ -821,11 +838,15 @@ static wBool_t CreateButtonGroupSubmenus(wMenu_p menu, long options)
  * \param options Option flags
  * \param newButtonGroup TRUE if this is a new button group
  * \param nameStr Button name
+ * \param helpKey Stable help key for this button (never NULL, see
+ *        AddMenuButton); used as the persistence key when this call
+ *        allocates a new sticky group, in place of buttonGroupHelpKey
  * \param stickyIndexOut OUT Index of sticky group (if created)
  * \return Sticky mask for this button, or 0 if not sticky
  */
 static long SetupStickyBehavior(long options, wBool_t newButtonGroup,
-                                const char *nameStr, int *stickyIndexOut)
+                                const char *nameStr, const char *helpKey,
+                                int *stickyIndexOut)
 {
 	// Not a sticky button
 	if (!(options & IC_STICKY)) {
@@ -833,9 +854,10 @@ static long SetupStickyBehavior(long options, wBool_t newButtonGroup,
 	}
 
 	int stickyIndex;
+	wBool_t allocating = (buttonGroupPopupM == NULL || newButtonGroup);
 
 	// Check if we need to start a new sticky group
-	if (buttonGroupPopupM == NULL || newButtonGroup) {
+	if (allocating) {
 		// Validate we haven't exceeded maximum groups
 		if (stickyCnt >= MAX_STICKY_GROUPS) {
 			fprintf(stderr, "ERROR: Exceeded maximum sticky groups (%d)\n",
@@ -864,9 +886,27 @@ static long SetupStickyBehavior(long options, wBool_t newButtonGroup,
 	// Calculate sticky mask
 	long stickyMask = 1L << stickyIndex;
 
-	// Set initial sticky state (default is sticky unless IC_INITNOTSTICKY)
-	if ((options & IC_INITNOTSTICKY) == 0) {
-		stickySet |= stickyMask;
+	if (allocating) {
+		// Persist/restore by stable key, not by stickyIndex: the bit
+		// position a command gets here can shift across builds whenever
+		// any earlier-registered command's IC_STICKY flag is added or
+		// removed (this has happened, see SF #591 / commit 6080), which
+		// would otherwise silently misapply a stale saved bitmask to the
+		// wrong commands -- including ones that opted out via
+		// IC_INITNOTSTICKY.
+		const char *key = (buttonGroupPopupM != NULL && buttonGroupHelpKey != NULL)
+		                  ? buttonGroupHelpKey : helpKey;
+		stickyKeys[stickyIndex] = key;
+
+		long onOff = (options & IC_INITNOTSTICKY) == 0;
+		if (key) {
+			wPrefGetInteger("sticky", key, &onOff, onOff);
+		}
+		if (onOff) {
+			stickySet |= stickyMask;
+		} else {
+			stickySet &= ~stickyMask;
+		}
 	}
 
 	if (stickyIndexOut) {
@@ -1014,7 +1054,7 @@ EXPORT wIndex_t AddMenuButton(wMenu_p menu, procCommand_t command,
 	if (nameStr[0] != '\0') {
 		int stickyIndex;
 		stickyMask = SetupStickyBehavior(options, newButtonGroup, nameStr,
-		                                 &stickyIndex);
+		                                 helpKey, &stickyIndex);
 	}
 
 	// ========================================================================
@@ -1336,29 +1376,31 @@ EXPORT void CreateMenus(void)
 	                 IC_MODETRAIN_TOO, PrintSetupMenuCB, I2VP(0));
 
 	wMenuSeparatorCreate(fileM);
-	MiscMenuItemCreate(fileM, NULL, "cmdImport", _("&Import"), ACCL_IMPORT,
+
+	wMenu_p importM = wMenuMenuCreate(fileM, "menuImport", _("_Import"));
+	MiscMenuItemCreate(importM, NULL, "cmdImport", _("_XTrackCAD Import (xti) ..."), ACCL_IMPORT,
 	                   DoImportObjects, 0, I2VP(0));
-	MiscMenuItemCreate(fileM, NULL, "cmdImportModule", _("Import &Module"),
+	MiscMenuItemCreate(importM, NULL, "cmdImportModule", _("XTrackCAD _Module (xti) ..."),
 	                   ACCL_IMPORT_MOD,
 	                   DoImportModule, 0, I2VP(1));
-	MiscMenuItemCreate(fileM, NULL, "cmdImportDxf", _("Import &Dxf"),
+	MiscMenuItemCreate(importM, NULL, "cmdImportDxf", _("_Drawing Interchange Format (dxf) ..."),
 	                   ACCL_IMPORT_DXF,
 	                   DoImportDxf, 0, I2VP(1));
 
-	wMenuSeparatorCreate(fileM);
-
-	MiscMenuItemCreate(fileM, NULL, "cmdExport", _("E&xport"), ACCL_EXPORT,
+	wMenu_p exportM = wMenuMenuCreate(fileM, "menuExport", _("E_xport"));
+	MiscMenuItemCreate(exportM, NULL, "cmdExport", _("_XTrackCAD Export (xti)..."), ACCL_EXPORT,
 	                   DoExport, IC_SELECTED, NULL);
-	MiscMenuItemCreate(fileM, NULL, "cmdOutputbitmap", _("Export to &Bitmap"),
+	MiscMenuItemCreate(exportM, NULL, "cmdOutputbitmap", _("_Bitmap (jpg, png)..."),
 	                   ACCL_PRINTBM, OutputBitMapInit(), 0,
 	                   NULL);
-	MiscMenuItemCreate(fileM, NULL, "cmdExportDXF", _("Export DXF"),
+	MiscMenuItemCreate(exportM, NULL, "cmdExportDXF", _("_Drawing Interchange Format (dxf)..."),
 	                   ACCL_EXPORTDXF, DoExportDxf, 0,
 	                   NULL);
 #if XTRKCAD_CREATE_SVG
-	MiscMenuItemCreate( fileM, NULL, "cmdExportSVG", _("Export SVG"),
+	MiscMenuItemCreate( exportM, NULL, "cmdExportSVG", _("_Scalable Vector Graphics (svg)..."),
 	                    ACCL_EXPORTSVG, DoExportSVG, 0, NULL);
 #endif
+
 	/* SF #789: no IC_SELECTED above -- the shared Print/Export filter
 	 * (dprintexportfilter.h) is an alternative scope to canvas selection,
 	 * not an addition to it, so these must stay enabled with nothing
@@ -1651,7 +1693,8 @@ EXPORT void CreateMenus(void)
 	MiscMenuItemCreate(changeM, NULL, "cmdClearElevations",
 	                   _("Clear Elevations"), ACCL_CLRELEV,
 	                   ClearElevations, IC_SELECTED, NULL);
-	MiscMenuItemCreate(changeM, NULL, "cmdElevation", _("Recompute Elevations"),
+	MiscMenuItemCreate(changeM, NULL, "cmdRecomputeElevations",
+	                   _("Recompute Elevations"),
 	                   0, RecomputeElevations, 0, NULL);
 	FormRegister(&addElevPG);
 
@@ -1829,7 +1872,10 @@ EXPORT void CreateMenus(void)
 
 	ToolbarLayout(NULL);
 
-	wPrefGetInteger( "sticky", "set", &stickySet, stickySet );
+	// stickySet is already correctly populated per-key by each
+	// SetupStickyBehavior() call above; stickyPLs' "set" field is
+	// PDO_NOPREF so FormRegister won't reload/clobber it from the legacy
+	// raw-bitmask "sticky"/"set" ini key.
 	FormRegister(&stickyPG);
 	RegisterChangeNotification( StickyChange );
 }

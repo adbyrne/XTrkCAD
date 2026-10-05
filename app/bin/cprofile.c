@@ -719,7 +719,7 @@ static void CloseProfileWindow(paramGroup_p pg, int event, void *data);
 
 static paramDrawData_t profileDrawData = { 300, 150, RedrawProfileW, SelProfileW, &screenProfileD };
 static paramData_t profilePLs[] = {
-	{	PD_DRAW, NULL, "canvas", PDO_DLGRESIZE, &profileDrawData },
+	{	PD_DRAW, NULL, "canvas", 0, &profileDrawData },
 #define I_PROFILEMSG			(1)
 	{	PD_MESSAGE, NULL, "message", PDO_DLGIGNOREX, I2VP(300) },
 #define I_CHANGEBUTTON 2

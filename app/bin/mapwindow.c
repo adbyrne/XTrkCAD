@@ -82,7 +82,7 @@ EXPORT drawCmd_t mapD = {
 static paramDrawData_t mapDrawData = { 50, 50, MapRedraw, DoMapPan, &mapD };
 static paramGroup_t mapPG;
 static paramData_t mapPLs[] = {
-	{	PD_DRAW, NULL, "canvas", PDO_DLGRESIZE, &mapDrawData, .group = &mapPG }
+	{	PD_DRAW, NULL, "canvas", 0, &mapDrawData, .group = &mapPG }
 };
 
 #define MAPCANVASCONTROL mapPLs[0].control

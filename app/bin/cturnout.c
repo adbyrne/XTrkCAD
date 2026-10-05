@@ -93,10 +93,10 @@ static paramDrawData_t turnoutDrawData = { 490, 200, RedrawTurnout, SelTurnoutEn
 static paramData_t turnoutPLs[] = {
 #define I_LIST		(0)
 #define turnoutListL    (turnoutPLs[I_LIST].control)
-	{   PD_LIST, &turnoutInx, "list", PDO_NOPREF | PDO_DLGRESIZEW, &listData, NULL, BL_DUP },
+	{   PD_LIST, &turnoutInx, "list", PDO_NOPREF, &listData, NULL, BL_DUP },
 #define I_DRAW		(1)
 #define turnoutDrawD    (turnoutPLs[I_DRAW].control)
-	{   PD_DRAW, NULL, "canvas", PDO_NOPSHUPD | PDO_DLGUNDERCMDBUTT | PDO_DLGRESIZE, &turnoutDrawData, NULL, 0 },
+	{   PD_DRAW, NULL, "canvas", PDO_NOPSHUPD | PDO_DLGUNDERCMDBUTT, &turnoutDrawData, NULL, 0 },
 #define I_NEW		(2)
 #define turnoutNewM     (turnoutPLs[I_NEW].control)
 	{   PD_BUTTON, NULL, "new", PDO_DLGCMDBUTTON, NULL, N_("New") },

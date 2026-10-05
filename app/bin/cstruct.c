@@ -71,9 +71,9 @@ static paramDrawData_t structureDrawData = { 490, 200, RedrawStructure, NULL, &s
 static paramData_t structurePLs[] = {
 #define I_LIST	(0)
 #define structureListL	(structurePLs[I_LIST].control)
-	{	PD_LIST, &structureInx, "list", PDO_NOPREF|PDO_DLGRESIZEW, &listData, NULL, BL_DUP },
+	{	PD_LIST, &structureInx, "list", PDO_NOPREF, &listData, NULL, BL_DUP },
 #define I_DRAW	(1)
-	{	PD_DRAW, NULL, "canvas", PDO_NOPSHUPD|PDO_DLGUNDERCMDBUTT|PDO_DLGRESIZE, &structureDrawData, NULL, 0 },
+	{	PD_DRAW, NULL, "canvas", PDO_NOPSHUPD|PDO_DLGUNDERCMDBUTT, &structureDrawData, NULL, 0 },
 #define I_HIDE	(2)
 	{	PD_TOGGLE, &hideStructureWindow, "hide", PDO_DLGCMDBUTTON, hideLabels, NULL, BC_NOBORDER },
 #define I_MSGSCALE		(3)

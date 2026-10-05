@@ -25,7 +25,7 @@
 #include "tcornu.h"
 #include "cundo.h"
 #include "elevjoin.h"
-#include "param.h"
+#include "include/form.h"
 #include "shrtpath.h"
 #include "track.h"
 #include "common-ui.h"
@@ -641,7 +641,8 @@ static void RedrawCompGradeElev( track_p trk, EPINX_T ep )
 	int mode;
 	track_p trk1;
 	mode = GetTrkEndElevMode( trk, ep );
-	if ( mode == ELEV_COMP || mode == ELEV_GRADE ) {
+	if ( ( mode == ELEV_COMP || mode == ELEV_GRADE ) &&
+	     labelScale >= mainD.scale ) {
 		coOrd pos = GetTrkEndPos( trk, ep );
 		if (!OFF_MAIND( pos, pos ) ) {
 			trk1=GetTrkEndTrk(trk,ep);

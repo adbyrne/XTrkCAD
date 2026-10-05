@@ -52,7 +52,7 @@ static paramFloatRange_t priceListFlexData = { 0.0, 999.99, 80 };
 static paramData_t priceListPLs[] = {
 #define I_PRICELSLIST			(0)
 #define priceListSelL			(priceListPLs[I_PRICELSLIST].control)
-	{	PD_LIST, NULL, "inx", PDO_DLGRESIZE|PDO_NOPREF|PDO_NOPSHUPD, NULL, NULL, BL_NODATASTORE},
+	{	PD_LIST, NULL, "inx", PDO_NOPREF|PDO_NOPSHUPD, NULL, NULL, BL_NODATASTORE},
 #define I_PRICELSFLEXLEN		(1)
 	{	PD_FLOAT, &priceListFlexLengthV, "flexlen", PDO_NOPREF/*|PDO_NOPSHUPD*/|PDO_DIM, &priceListFlexData, NULL },
 #define I_PRICELSFLEXCOST		(2)

@@ -45,7 +45,7 @@ static paramData_t tipPLs[] = {
 #define I_TIPTEXT		(1)
 #define tipT			(tipPLs[I_TIPTEXT].control)
 	{   PD_MESSAGE, NULL, "mess1", .group=&tipPG },
-	{   PD_TEXT, NULL, "text", PDO_DLGRESIZE, &tipTextData, .group=&tipPG },
+	{   PD_TEXT, NULL, "text", 0, &tipTextData, .group=&tipPG },
 	{   PD_BUTTON, ShowTip, "prev", 0, NULL, NULL, 0L, I2VP(SHOWTIP_FORCESHOW | SHOWTIP_PREVTIP), .group=&tipPG },
 #define I_TIPPREV (2)
 	{   PD_BUTTON, ShowTip, "next", 0, NULL, NULL, 0L, I2VP(SHOWTIP_FORCESHOW | SHOWTIP_NEXTTIP), .group=&tipPG },

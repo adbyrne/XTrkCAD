@@ -151,13 +151,13 @@ static void RefreshSkip( void * junk );
 static paramListData_t refreshSpecialListData = { 30, 600, 0, NULL, NULL };
 static paramData_t refreshSpecialPLs[] = {
 #define REFRESH_M1		(0)
-	{ PD_MESSAGE, NULL, NULL, 0/*PDO_DLGRESIZEW*/, I2VP(380) },
+	{ PD_MESSAGE, NULL, NULL, 0, I2VP(380) },
 #define REFRESH_M2		(1)
-	{ PD_MESSAGE, NULL, NULL, 0/*PDO_DLGRESIZEW*/, I2VP(380) },
+	{ PD_MESSAGE, NULL, NULL, 0, I2VP(380) },
 #define REFRESH_S		(2)
-	{ PD_MESSAGE, NULL, NULL, 0/*PDO_DLGRESIZEW*/, I2VP(380) },
+	{ PD_MESSAGE, NULL, NULL, 0, I2VP(380) },
 #define REFRESH_L		(3)
-	{ PD_LIST, &refreshSpecialInx, "list", PDO_LISTINDEX|PDO_NOPREF|PDO_DLGRESIZE, &refreshSpecialListData, NULL, BO_READONLY },
+	{ PD_LIST, &refreshSpecialInx, "list", PDO_LISTINDEX|PDO_NOPREF, &refreshSpecialListData, NULL, BO_READONLY },
 	{ PD_BUTTON, RefreshSkip, "skip", PDO_DLGCMDBUTTON, NULL, N_("Skip") }
 };
 static paramGroup_t refreshSpecialPG = { "refreshSpecial", 0, refreshSpecialPLs, COUNT( refreshSpecialPLs ) };

@@ -659,11 +659,9 @@ static void GridButtonUpdate( long mode0 )
 		FormLoadSingleControl( &gridPG, I_VERTENABLE );
 	}
 
-//	ToggleSetInMenuToolbar(snapGridEnableMI, snapGridEnable_b, grid.Horz.Enable
-//	                       || grid.Vert.Enable);
-
-	//ToggleSetInMenuToolbar(snapGridShowMI, snapGridShow_b, (wBool_t)grid.Show);
-//	wToggleGroupSetActive(TOGGLEGRP_GRID_SHOW, grid.Show);
+	wToggleGroupSetActive(TOGGLEGRP_GRID_ENABLE,
+	                      grid.Horz.Enable || grid.Vert.Enable);
+	wToggleGroupSetActive(TOGGLEGRP_GRID_SHOW, grid.Show);
 
 	if ( mode0&CHK_SHOW ) {
 		RedrawGrid();
@@ -822,9 +820,21 @@ EXPORT wIndex_t InitGrid( wMenu_p menu )
 }
 
 
+/*
+ * SnapGridEnable/SnapGridShow run from the toggle group's notify::active, so
+ * they must take the new state from the group rather than invert grid.*:
+ * GridButtonUpdate() pushes grid.* back into the group, which notifies again.
+ * Inverting turned that into an endless on/off loop whenever GridButtonUpdate
+ * had to override the request (e.g. enable with zero spacing on a fresh
+ * profile, which hung startup).
+ */
 EXPORT void SnapGridEnable( void * unused )
 {
-	grid.Vert.Enable = grid.Horz.Enable = !(grid.Vert.Enable || grid.Horz.Enable);
+	wBool_t enable = wToggleGroupGetActive(TOGGLEGRP_GRID_ENABLE);
+	if ( enable == (grid.Vert.Enable || grid.Horz.Enable) ) {
+		return;
+	}
+	grid.Vert.Enable = grid.Horz.Enable = enable;
 	GridButtonUpdate((CHK_HENABLE | CHK_VENABLE));
 	FormSaveDefaultValues(&gridPG);
 }
@@ -832,18 +842,13 @@ EXPORT void SnapGridEnable( void * unused )
 
 EXPORT void SnapGridShow(void* unused)
 {
-	grid.Show = !grid.Show;
-
+	wBool_t show = wToggleGroupGetActive(TOGGLEGRP_GRID_SHOW);
+	if ( show == (grid.Show != FALSE) ) {
+		return;
+	}
+	grid.Show = show;
 	GridButtonUpdate(CHK_SHOW);
 	FormSaveDefaultValues(&gridPG);
-	// static int inTransition = FALSE;
-
-	// if (!inTransition) {
-	// 	inTransition = TRUE;
-	// 	grid.Show = !grid.Show;
-	// 	GridButtonUpdate(CHK_SHOW);
-	// 	inTransition = FALSE;
-	// }
 }
 
 EXPORT void InitSnapGridButtons( void )
