@@ -80,6 +80,25 @@ hg -R /home/abyrne/XTrkCAD/xtrkcad-hg-gtk3v2main update GTK3V2MAIN
 If `status` isn't clean, stop and reconcile the in-progress work first rather than pulling on top
 of it.
 
+**`incoming` can't see a working copy that was pulled but never updated.** It only lists
+changesets the repo doesn't have yet, so it reports "no changes found" even when the working copy
+is sitting on an older revision. Confirmed 2026-10-05: r7365–r7401 were already pulled into
+`xtrkcad-hg-gtk3v2main`, but its working copy was still at r7364, and both `incoming` checks
+came back clean. Also check that the working copy is at the branch tip:
+
+```sh
+H=/home/abyrne/XTrkCAD/xtrkcad-hg-gtk3v2main
+[ "$(hg -R $H id -i -r GTK3V2MAIN)" = "$(hg -R $H id -i)" ] || echo "WORKING COPY NOT AT GTK3V2MAIN TIP (or has uncommitted changes)"
+```
+
+If it's behind and `status` is clean, `hg -R $H update GTK3V2MAIN`.
+
+**A `skipped — … has uncommitted local changes` line in the pending file means the sync script
+found the git worktree dirty, and that includes untracked files.** Confirmed 2026-10-02 to
+2026-10-05: one untracked doc file in `xtrkcad-git-gtk3` (`docs/development-process-specification.md`)
+made three daily runs skip in a row. Commit, move, or remove the file, and keep the git worktrees
+clean between sessions.
+
 If either of the two checks above (SF vs. `xtrkcad-hg`, pending file) surfaces something, tell the user which branches have new SF changes and ask:
 **"Upstream SF changes are pending — want me to compile and test them locally, then push to
 GitHub CI?"**
@@ -108,6 +127,36 @@ ctest --test-dir build-gtk3v2main --output-on-failure
 
 For default-branch changes (rare) use `build/` instead.
 
+**Several pending entries, or a "needs manual merge" entry:** don't replay each saved patch one
+by one. Make one diff covering the whole range, from the last Hg revision already synced into git
+to the current branch tip, and apply that to a fresh test branch. This is what was done
+2026-10-05, when five pending entries became one diff and PR #218:
+
+```sh
+hg -R xtrkcad-hg-gtk3v2main diff --git -r <last-synced-node> -r GTK3V2MAIN \
+    > .claude/patches/upstream-gtk3v2main-r<A>-r<B>.diff
+git -C xtrkcad-git-gtk3 checkout -b test/upstream-gtk3v2main-YYYY-MM-DD GTK3V2MAIN
+git -C xtrkcad-git-gtk3 apply --reject ../.claude/patches/upstream-gtk3v2main-r<A>-r<B>.diff
+```
+
+Use `--reject`, not `--3way`. Hg diffs don't carry git blob IDs, so `--3way` always fails with
+"repository lacks the necessary blob" and falls back anyway. Resolve each `*.rej` hunk by hand
+and keep any git-only changes it collides with (held features, SF #789/#803-style git-ahead
+edits). Open the PR with an explicit `--base GTK3V2MAIN`.
+
+**A clean Hg build doesn't prove the git branch builds.** Git `GTK3V2MAIN` carries git-only
+code (held features) that an upstream API change can break even though Hg itself compiles fine.
+Confirmed 2026-10-05: upstream removed `PDO_DLGRESIZE`, Hg built and tested clean, and the git
+test branch failed CI because Layer Groups, Notes, and Reports dialogs still used the flag.
+Before pushing the test branch, build it locally in a scratch build dir, and run the astyle gate
+with the same `--exclude` list as `ci-gtk3.yml`'s `astyle-check`:
+
+```sh
+cmake -B <scratch>/build-git -S xtrkcad-git-gtk3 -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
+cmake --build <scratch>/build-git -- -k 0
+ctest --test-dir <scratch>/build-git -LE regression
+```
+
 ### 2 — Fix any compile errors
 
 - Edit files in `xtrkcad-hg-gtk3v2main/` (the Hg source for GTK3V2MAIN).
@@ -125,11 +174,12 @@ hg -R xtrkcad-hg-gtk3v2main diff > /tmp/local-fixes.diff
 
 # Apply to the git test branch
 BRANCH=$(grep -oP "test/upstream-\S+" /home/abyrne/XTrkCAD/.claude/sf-sync-pending | head -1)
-git -C xtrkcad-git checkout "$BRANCH"
-git -C xtrkcad-git apply /tmp/local-fixes.diff
-git -C xtrkcad-git add -u
-git -C xtrkcad-git commit -m "fix: local compile fixes for upstream SF sync"
-git -C xtrkcad-git push
+# GTK3V2MAIN lives in the xtrkcad-git-gtk3 worktree; use xtrkcad-git for default/main syncs
+git -C xtrkcad-git-gtk3 checkout "$BRANCH"
+git -C xtrkcad-git-gtk3 apply /tmp/local-fixes.diff
+git -C xtrkcad-git-gtk3 add -u
+git -C xtrkcad-git-gtk3 commit -m "fix: local compile fixes for upstream SF sync"
+git -C xtrkcad-git-gtk3 push
 ```
 
 If the build was already clean (no fixes needed), skip step 3 — CI is already running on the
@@ -190,6 +240,20 @@ rm /home/abyrne/XTrkCAD/.claude/sf-sync-pending
 - If the patch required manual conflict resolution (the sync script saved a `.diff` to
   `.claude/patches/` instead of creating a branch), handle that first before compiling, and run
   step 4's verification afterward — this is exactly the case that most often leaves files behind.
+- **While held git-only work keeps verify-sync at FAIL, compare drift before and after the sync
+  instead of reading the raw FAIL list.** Archive Hg at the old and new synced revisions
+  (`hg archive -r <node> -I app`) and git at the merge commit's first parent and at the merge
+  commit itself (`git archive`), then `diff -rq` each pair. The sync is clean when both pairs
+  list the same files and any file whose drift content changed is explained by a deliberate
+  edit. Done 2026-10-05: 92 files before and 92 after; only `menu.c` (astyle line wrapping) and
+  `reports.c` (`PDO_DLGRESIZE` removal) changed.
+- **Merging into git `GTK3V2MAIN` triggers `release.yml`**, which republishes the
+  `latest-gtk3v2main` prerelease packages. PR CI never runs `release.yml`, so check that the
+  post-merge Release run finishes green. Its packaging jobs use rolling OS packages that can
+  break with no change on our side: 2026-10-05, MSYS2 doxygen 1.18.0-3 crashed
+  `package-windows`, fixed by pinning 1.16.1-4. When a PR changes `release.yml`, validate it
+  before merging with `gh workflow run release.yml --ref <branch>`. Any workflow change also
+  needs a matching dev-guide update (`docs/doxygen/building.md`, `advanced.md`).
 
 ---
 
@@ -224,6 +288,40 @@ hg -R xtrkcad-hg merge && hg -R xtrkcad-hg commit -m "merge: ..."   # if needed
 hg -R xtrkcad-hg push                     # default → SourceForge
 ```
 
+## Hg development process (adopted 2026-10-05)
+
+Follows Martin Fischer's *Development Process Specification* (dev guide page
+`docs/doxygen/development-process.md`, `\page development-process`). Adopted for our own work on
+2026-10-05; replaces the earlier "every fix gets a `bug-NNN` branch, push it, set `needs-review`,
+wait out a review window" norm.
+
+**Tracking — where an issue gets written down:**
+- SF `bugs` tracker: **user-visible bugs only**, described from the user's perspective.
+- SF `feature-requests` tracker: new features and ideas (not `bugs`, as Layer Groups/JSON Note
+  were).
+- Problems we find ourselves while developing (a feature's own teething bugs, dev-only findings,
+  fixes we're unsure of): **don't** file them in the general `bugs` tracker. Fix them on the
+  feature branch, or raise them on the **dev mailing list** — that's where review requests go
+  too (drafts in `.claude/devml-drafts/`).
+
+**Branches** (`GTK3V2MAIN` is the release branch for 5.4.0):
+- **Localized fix** (one or a few places — missing init, small logic fix): commit directly on
+  `GTK3V2MAIN`, no branch.
+- **Broad-impact fix** (wider implications, e.g. a FormAPI change): `fix-<NNN>-<desc>-gtk3`.
+- **Feature**: `feature-<NNN>-<desc>-gtk3`, branched from `GTK3V2MAIN`; every commit for the
+  feature stays on it until it's verified complete.
+- Housekeeping: `chore-<desc>-gtk3`.
+- `<NNN>` is the SF ticket number when one exists (file it first); leave it out otherwise.
+  Matches Martin's own `feature-/fix-/chore-…-gtk3` names.
+- Once verified, **we merge the branch into `GTK3V2MAIN` ourselves, then close it**
+  (`hg update <branch> && hg commit --close-branch -m "close <branch>"`), then push. There's no
+  `needs-review` waiting window for fixes. Exception: if we're unsure of a fix, ask for review on
+  the dev mailing list before merging.
+
+**Unchanged:** git first — git PR, CI green, PR merged, and only then commit/merge in Hg and push
+to SF (`hg push -b <branch>` scoping still applies). Holds the user sets explicitly (e.g. the
+Layer Groups / JSON Note dev-ML review hold) stay in force until the user lifts them.
+
 ## Build
 
 Requires CMake ≥ 3.20 and `rsvg-convert` (replaces Inkscape for SVG→PNG; no D-Bus needed). Out-of-source builds are mandatory.
@@ -252,10 +350,10 @@ Unit tests use [CMocka](https://cmocka.org/). Test sources: `app/bin/unittest/` 
 
 - **default branch**: 9 tests pass (`ctest --test-dir build`) — corrected 2026-08-29, was
   documented as 8 (a stale count; verified via `ctest -N`, includes `DXFOutputTest`)
-- **GTK3V2MAIN branch**: 74 tests pass (`ctest --test-dir build-gtk3v2main`) — corrected
-  2026-09-08, was stale at 64 (2026-08-29 count); the suite grew further since then (`ReportsTest`,
-  `ElevJoinTest`, etc. — verified via 3 separate `ctest --output-on-failure` runs this session, all
-  100% pass)
+- **GTK3V2MAIN branch**: 75 tests pass in the Hg tree (`ctest --test-dir build-gtk3v2main`,
+  r7401). The git tree has 78, because it also carries tests for git-only held work (Layer
+  Groups, JSON Note). Counts verified with `ctest -N` on 2026-10-05. The previous figures were
+  74 (2026-09-08) and 64 (2026-08-29).
 
 ```sh
 ctest --test-dir build                  # default branch
