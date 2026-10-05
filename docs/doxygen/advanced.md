@@ -35,11 +35,23 @@ below work as written.
 4. Watch the run at `https://github.com/$GITHUB_USER/XTrkCAD/actions`, or with
    `gh run watch` if you have the `gh` CLI authenticated.
 
-`release.yml`'s `package-docs` and release-packaging jobs are deliberately scoped to pushes on
-`GTK3V2MAIN`/`main` specifically (see that workflow's own `on:` block) — they won't fire on an
-arbitrary feature branch on your fork. That's expected: those two jobs build release artifacts
-for the project maintainer's own release process, not per-developer CI, so there's nothing to set
-up for them here.
+`release.yml`'s `package-docs` and release-packaging jobs only run automatically on pushes to
+`GTK3V2MAIN` and on `v*.*.*` release tags (see that workflow's own `on:` block). They won't fire on
+an arbitrary feature branch on your fork. That's expected: those jobs build release artifacts for
+the project maintainer's own release process, not per-developer CI, so there's nothing to set up
+for them here.
+
+Pull-request CI never runs `release.yml`, so a change to that workflow, or to anything only its
+packaging jobs exercise, isn't tested until it has already merged. To test it first, start the
+workflow by hand on your branch:
+
+```sh
+gh workflow run release.yml --ref your-branch-name
+```
+
+This runs every packaging and report job against your branch without publishing anything. Its
+optional `publish_temp_release` input publishes the packages to a temporary prerelease named
+after the branch, for someone to review.
 
 # CI tooling overview {#ci-tooling-overview}
 
