@@ -3,10 +3,11 @@
  * "Invalid JSON" message can say where parsing stopped and, for the common
  * invisible culprits, why.
  *
- * Deliberately standalone (no dependency on cJSON, common.h, or wlib): it
- * takes the failed text plus the error position cJSON_ParseWithOpts()
- * reported, so it links and CMocka-tests the same lightweight way as
- * notenames.c -- see unittest/jsonnoteerrortest.c.
+ * Deliberately light (no dependency on common.h or wlib, and only
+ * jsonnoteerror.c itself uses cJSON): it takes the failed text plus the
+ * error position cJSON_ParseWithOpts() reported, so it links and
+ * CMocka-tests the same lightweight way as notenames.c -- see
+ * unittest/jsonnoteerrortest.c.
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -40,7 +41,17 @@ typedef enum {
 	JSONNOTEERR_EMPTY,		/**< text is empty or only whitespace */
 	JSONNOTEERR_UNEXPECTED_END,	/**< text ends before the JSON is complete */
 	JSONNOTEERR_TYPOGRAPHIC_QUOTE,	/**< curly/low quote instead of a plain " */
-	JSONNOTEERR_NONBREAKING_SPACE	/**< U+00A0 instead of an ordinary space */
+	JSONNOTEERR_NONBREAKING_SPACE,	/**< U+00A0 instead of an ordinary space */
+	JSONNOTEERR_MISSING_COMMA,	/**< two items with no comma between them */
+	JSONNOTEERR_MISSING_COLON,	/**< object key not followed by ':' */
+	JSONNOTEERR_TRAILING_COMMA,	/**< comma right before a closing } or ] */
+	JSONNOTEERR_SINGLE_QUOTE,	/**< 'text' instead of "text" */
+	JSONNOTEERR_UNQUOTED_KEY,	/**< object key without double quotes */
+	JSONNOTEERR_BAD_BACKSLASH,	/**< backslash not starting a valid escape,
+					 *   e.g. a Windows path C:\\data */
+	JSONNOTEERR_WRONG_LITERAL,	/**< True/False/None/undefined/NaN... */
+	JSONNOTEERR_COMMENT,		/**< // or / * comment -- JSON has none */
+	JSONNOTEERR_TRAILING_CONTENT	/**< more text after the object */
 } jsonNoteErrorCause_e;
 
 /** Where and why parsing stopped. */
@@ -51,6 +62,11 @@ typedef struct {
 	/** Text starting at the error position, up to the end of that line,
 	 * cut on a UTF-8 character boundary. Empty at end of text. */
 	char snippet[JSONNOTEERROR_SNIPPET_SIZE];
+	/** For MISSING_COMMA / MISSING_COLON: where the missing character
+	 * belongs (just after the previous item). For TRAILING_COMMA: the
+	 * stray comma. Otherwise the same as line/column. */
+	int hintLine;
+	int hintColumn;
 } jsonNoteErrorInfo_t;
 
 /**
@@ -64,5 +80,17 @@ typedef struct {
  */
 void JsonNoteLocateError(const char *text, const char *errPtr,
                          jsonNoteErrorInfo_t *info);
+
+/**
+ * Find a key that appears more than once in the same object, anywhere in
+ * \p root. Duplicates are valid JSON, but lookups use only the first, so
+ * the later value silently does nothing.
+ *
+ * \param root IN parsed JSON (a cJSON *, passed as void * so this header
+ *        stays independent of cJSON.h)
+ * \return the first duplicated key name found, or NULL if none; points
+ *         into \p root, so it's valid while \p root is
+ */
+const char *JsonNoteFindDuplicateKey(const void *root);
 
 #endif /* JSONNOTEERROR_H */

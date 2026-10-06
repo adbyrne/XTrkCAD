@@ -20,13 +20,13 @@
 #include "../include/jsonnoteerror.h"
 #include "cJSON.h"
 
-/** Parse \p text the way JsonNoteIsValid() does, require that it fails,
- * and locate the error. */
+/** Parse \p text the way JsonNoteIsValid() does (nothing allowed after
+ * the object), require that it fails, and locate the error. */
 static void
 locate(const char *text, jsonNoteErrorInfo_t *info)
 {
 	const char *end = NULL;
-	cJSON *parsed = cJSON_ParseWithOpts(text, &end, 0);
+	cJSON *parsed = cJSON_ParseWithOpts(text, &end, 1);
 	assert_null(parsed);
 	JsonNoteLocateError(text, end, info);
 }
@@ -104,15 +104,18 @@ static void test_nonbreaking_space(void **state)
 	assert_int_equal(info.column, 6);
 }
 
-static void test_trailing_comma_is_generic(void **state)
+static void test_trailing_comma(void **state)
 {
 	(void) state;
 	jsonNoteErrorInfo_t info;
 	locate("{\"a\": 1,}", &info);
 
-	assert_int_equal(info.cause, JSONNOTEERR_GENERIC);
+	assert_int_equal(info.cause, JSONNOTEERR_TRAILING_COMMA);
 	assert_int_equal(info.line, 1);
 	assert_string_equal(info.snippet, "}");
+	/* hint points at the stray comma */
+	assert_int_equal(info.hintLine, 1);
+	assert_int_equal(info.hintColumn, 8);
 }
 
 static void test_missing_comma_reports_later_line(void **state)
@@ -121,11 +124,153 @@ static void test_missing_comma_reports_later_line(void **state)
 	jsonNoteErrorInfo_t info;
 	locate("{\n  \"a\": 1\n  \"b\": 2\n}", &info);
 
-	assert_int_equal(info.cause, JSONNOTEERR_GENERIC);
+	assert_int_equal(info.cause, JSONNOTEERR_MISSING_COMMA);
 	assert_int_equal(info.line, 3);
 	assert_int_equal(info.column, 3);
 	/* snippet stops at the end of the line */
 	assert_string_equal(info.snippet, "\"b\": 2");
+	/* the comma belongs right after the 1 on line 2 ("  \"a\": 1", so
+	 * the 1 is column 8) */
+	assert_int_equal(info.hintLine, 2);
+	assert_int_equal(info.hintColumn, 9);
+}
+
+static void test_missing_comma_after_each_value_type(void **state)
+{
+	(void) state;
+	jsonNoteErrorInfo_t info;
+	static const char *const cases[] = {
+		"{\"a\": \"x\" \"b\": 1}",	/* after a string */
+		"{\"a\": true \"b\": 1}",	/* after a literal */
+		"{\"a\": {} \"b\": 1}",	/* after a nested object */
+		"{\"a\": [1] \"b\": 1}",	/* after a nested array */
+		"[1 2]",			/* between array numbers */
+		"[\"a\" \"b\"]",		/* between array strings */
+	};
+	for (size_t i = 0; i < sizeof cases / sizeof cases[0]; i++) {
+		locate(cases[i], &info);
+		assert_int_equal(info.cause, JSONNOTEERR_MISSING_COMMA);
+	}
+}
+
+static void test_missing_colon(void **state)
+{
+	(void) state;
+	jsonNoteErrorInfo_t info;
+	locate("{\"a\" 1}", &info);
+
+	assert_int_equal(info.cause, JSONNOTEERR_MISSING_COLON);
+	assert_int_equal(info.column, 6);
+	/* the colon belongs right after "a" */
+	assert_int_equal(info.hintColumn, 5);
+
+	/* a later key, after a comma, is still a key */
+	locate("{\"a\":1, \"b\" 2}", &info);
+	assert_int_equal(info.cause, JSONNOTEERR_MISSING_COLON);
+}
+
+static void test_single_quotes(void **state)
+{
+	(void) state;
+	jsonNoteErrorInfo_t info;
+	/* cJSON stops one character past the quote; report the quote itself */
+	locate("{'a': 1}", &info);
+
+	assert_int_equal(info.cause, JSONNOTEERR_SINGLE_QUOTE);
+	assert_int_equal(info.column, 2);
+	assert_int_equal(info.hintColumn, 2);
+
+	/* as a value too */
+	locate("{\"a\": 'x'}", &info);
+	assert_int_equal(info.cause, JSONNOTEERR_SINGLE_QUOTE);
+	assert_int_equal(info.column, 7);
+}
+
+static void test_unquoted_key(void **state)
+{
+	(void) state;
+	jsonNoteErrorInfo_t info;
+	/* cJSON stops one character into the word; report its start */
+	locate("{kind: \"x\"}", &info);
+	assert_int_equal(info.cause, JSONNOTEERR_UNQUOTED_KEY);
+	assert_int_equal(info.column, 2);
+
+	locate("{\"a\": 1, id: 2}", &info);
+	assert_int_equal(info.cause, JSONNOTEERR_UNQUOTED_KEY);
+	assert_int_equal(info.column, 10);
+}
+
+static void test_windows_path_backslash(void **state)
+{
+	(void) state;
+	jsonNoteErrorInfo_t info;
+	locate("{\"file\": \"C:\\data\\yard.xtc\"}", &info);
+
+	assert_int_equal(info.cause, JSONNOTEERR_BAD_BACKSLASH);
+	assert_int_equal(info.column, 13);
+}
+
+static void test_wrong_literals(void **state)
+{
+	(void) state;
+	jsonNoteErrorInfo_t info;
+	static const char *const cases[] = {
+		"{\"a\": True}", "{\"a\": False}", "{\"a\": None}",
+		"{\"a\": NULL}", "{\"a\": undefined}", "{\"a\": NaN}",
+	};
+	for (size_t i = 0; i < sizeof cases / sizeof cases[0]; i++) {
+		locate(cases[i], &info);
+		assert_int_equal(info.cause, JSONNOTEERR_WRONG_LITERAL);
+		assert_int_equal(info.column, 7);
+	}
+}
+
+static void test_comments(void **state)
+{
+	(void) state;
+	jsonNoteErrorInfo_t info;
+	locate("{\"a\": 1 // note\n}", &info);
+	assert_int_equal(info.cause, JSONNOTEERR_COMMENT);
+	assert_int_equal(info.column, 9);
+
+	locate("{\"a\": 1 /* note */}", &info);
+	assert_int_equal(info.cause, JSONNOTEERR_COMMENT);
+
+	locate("// note\n{\"a\": 1}", &info);
+	assert_int_equal(info.cause, JSONNOTEERR_COMMENT);
+	assert_int_equal(info.line, 1);
+}
+
+static void test_content_after_the_object(void **state)
+{
+	(void) state;
+	jsonNoteErrorInfo_t info;
+	locate("{\"a\": 1} {\"b\": 2}", &info);
+	assert_int_equal(info.cause, JSONNOTEERR_TRAILING_CONTENT);
+	assert_int_equal(info.column, 10);
+
+	locate("{\"a\": 1}\noops", &info);
+	assert_int_equal(info.cause, JSONNOTEERR_TRAILING_CONTENT);
+	assert_int_equal(info.line, 2);
+}
+
+static void test_duplicate_keys(void **state)
+{
+	(void) state;
+	cJSON *root = cJSON_Parse("{\"id\": \"WP\", \"kind\": \"x\", \"id\": \"QM\"}");
+	assert_non_null(root);
+	assert_string_equal(JsonNoteFindDuplicateKey(root), "id");
+	cJSON_Delete(root);
+
+	/* nested objects are checked too */
+	root = cJSON_Parse("{\"a\": {\"x\": 1, \"x\": 2}}");
+	assert_string_equal(JsonNoteFindDuplicateKey(root), "x");
+	cJSON_Delete(root);
+
+	/* the same key in two different objects is fine */
+	root = cJSON_Parse("{\"a\": {\"x\": 1}, \"b\": {\"x\": 2}, \"t\": [{\"x\": 3}]}");
+	assert_null(JsonNoteFindDuplicateKey(root));
+	cJSON_Delete(root);
 }
 
 static void test_unterminated_object(void **state)
@@ -185,8 +330,17 @@ int main(void)
 		cmocka_unit_test(test_german_low_quote),
 		cmocka_unit_test(test_curly_closing_quote_found_elsewhere),
 		cmocka_unit_test(test_nonbreaking_space),
-		cmocka_unit_test(test_trailing_comma_is_generic),
+		cmocka_unit_test(test_trailing_comma),
 		cmocka_unit_test(test_missing_comma_reports_later_line),
+		cmocka_unit_test(test_missing_comma_after_each_value_type),
+		cmocka_unit_test(test_missing_colon),
+		cmocka_unit_test(test_single_quotes),
+		cmocka_unit_test(test_unquoted_key),
+		cmocka_unit_test(test_windows_path_backslash),
+		cmocka_unit_test(test_wrong_literals),
+		cmocka_unit_test(test_comments),
+		cmocka_unit_test(test_content_after_the_object),
+		cmocka_unit_test(test_duplicate_keys),
 		cmocka_unit_test(test_unterminated_object),
 		cmocka_unit_test(test_column_counts_characters_not_bytes),
 		cmocka_unit_test(test_snippet_never_splits_a_character),

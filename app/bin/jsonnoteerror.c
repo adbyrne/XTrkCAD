@@ -22,6 +22,7 @@
 
 #include <string.h>
 
+#include "cJSON.h"
 #include "include/jsonnoteerror.h"
 
 /** TRUE for a UTF-8 continuation byte (10xxxxxx). */
@@ -83,6 +84,170 @@ EndsInsideSomething(const char *text, size_t len)
 	return inString || depth > 0;
 }
 
+/** What the parser expects next inside the innermost open container. */
+typedef enum {
+	EXPECT_VALUE,		/**< a value (top level, after ':' or '[' or ',' in an array) */
+	EXPECT_KEY,		/**< an object key (after '{' or ',' in an object) */
+	EXPECT_COLON,		/**< ':' after an object key */
+	EXPECT_COMMA_OR_CLOSE	/**< ',' or the closing bracket, after a complete value */
+} jsonExpect_e;
+
+#define JSON_SCAN_MAX_DEPTH 64
+
+/** Result of scanning up to the error position. */
+typedef struct {
+	int valid;		/**< FALSE if the scan couldn't follow the text */
+	jsonExpect_e expect;	/**< expectation at the error position */
+	int afterComma;		/**< the last token before the position was ',' */
+	size_t lastTokenEnd;	/**< offset just past the last complete token */
+	size_t lastComma;	/**< offset of that ',' when afterComma */
+	int depth;		/**< nesting depth at the error position */
+} jsonScan_t;
+
+/**
+ * Follow the JSON structure from the start of \p text up to \p pos, closely
+ * enough to say what the parser expected at \p pos. This only has to track
+ * nesting and the key/colon/value/comma rhythm, not validate anything.
+ *
+ * \param text IN the text
+ * \param pos IN offset to scan up to
+ * \param scan OUT the result
+ */
+static void
+ScanTo(const char *text, size_t pos, jsonScan_t *scan)
+{
+	char stack[JSON_SCAN_MAX_DEPTH];	/* '{' or '[' */
+	jsonExpect_e expect[JSON_SCAN_MAX_DEPTH + 1];
+	int depth = 0;
+	size_t i = 0;
+
+	memset(scan, 0, sizeof *scan);
+	expect[0] = EXPECT_VALUE;
+
+	while (i < pos) {
+		char c = text[i];
+		if ((unsigned char)c <= ' ') {
+			i++;
+			continue;
+		}
+		scan->afterComma = 0;
+		if (c == '"') {
+			i++;
+			while (i < pos && text[i] != '"') {
+				i += (text[i] == '\\' && i + 1 < pos) ? 2 : 1;
+			}
+			if (i >= pos) {
+				return;		/* position is inside a string */
+			}
+			i++;
+			expect[depth] = (expect[depth] == EXPECT_KEY) ? EXPECT_COLON
+			                : EXPECT_COMMA_OR_CLOSE;
+		} else if (c == '{' || c == '[') {
+			if (depth >= JSON_SCAN_MAX_DEPTH) {
+				return;
+			}
+			stack[depth++] = c;
+			expect[depth] = (c == '{') ? EXPECT_KEY : EXPECT_VALUE;
+			i++;
+		} else if (c == '}' || c == ']') {
+			if (depth == 0) {
+				return;
+			}
+			depth--;
+			expect[depth] = EXPECT_COMMA_OR_CLOSE;
+			i++;
+		} else if (c == ':') {
+			expect[depth] = EXPECT_VALUE;
+			i++;
+		} else if (c == ',') {
+			expect[depth] = (depth > 0 && stack[depth - 1] == '{') ? EXPECT_KEY
+			                : EXPECT_VALUE;
+			scan->afterComma = 1;
+			scan->lastComma = i;
+			i++;
+		} else {
+			/* number or true/false/null: consume the whole word */
+			size_t wordStart = i;
+			while (i < pos && ((text[i] >= '0' && text[i] <= '9')
+			                   || (text[i] >= 'a' && text[i] <= 'z')
+			                   || (text[i] >= 'A' && text[i] <= 'Z')
+			                   || text[i] == '.' || text[i] == '+' || text[i] == '-')) {
+				i++;
+			}
+			if (i == wordStart) {
+				return;		/* not a character this scan understands */
+			}
+			expect[depth] = EXPECT_COMMA_OR_CLOSE;
+		}
+		if (!scan->afterComma) {
+			scan->lastTokenEnd = i;
+		}
+	}
+	scan->valid = 1;
+	scan->depth = depth;
+	scan->expect = expect[depth];
+}
+
+/** TRUE for a character that can be part of a bare word (key or literal). */
+static int
+IsWordChar(char c)
+{
+	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
+	       || (c >= '0' && c <= '9') || c == '_';
+}
+
+/** TRUE if the bare word at \p p is a literal from another language that
+ * people write in place of JSON's true/false/null. */
+static int
+IsWrongLiteral(const char *p)
+{
+	static const char *const words[] = {
+		"True", "TRUE", "False", "FALSE", "None", "NULL", "Null", "nil",
+		"undefined", "NaN", "Infinity",
+	};
+	size_t n = 0;
+	while (IsWordChar(p[n])) {
+		n++;
+	}
+	for (size_t i = 0; i < sizeof words / sizeof words[0]; i++) {
+		if (strlen(words[i]) == n && strncmp(p, words[i], n) == 0) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
+/** TRUE if \p c can start a JSON value. */
+static int
+StartsValue(char c)
+{
+	return c == '"' || c == '{' || c == '[' || c == '-'
+	       || (c >= '0' && c <= '9') || c == 't' || c == 'f' || c == 'n';
+}
+
+/**
+ * Convert a byte offset to a 1-based line and character column.
+ *
+ * \param text IN the text
+ * \param pos IN byte offset
+ * \param line OUT line
+ * \param column OUT column, counting characters rather than bytes
+ */
+static void
+LineColumn(const char *text, size_t pos, int *line, int *column)
+{
+	*line = 1;
+	*column = 1;
+	for (size_t i = 0; i < pos; i++) {
+		if (text[i] == '\n') {
+			(*line)++;
+			*column = 1;
+		} else if (!IS_UTF8_CONT(text[i])) {
+			(*column)++;
+		}
+	}
+}
+
 void
 JsonNoteLocateError(const char *text, const char *errPtr,
                     jsonNoteErrorInfo_t *info)
@@ -98,6 +263,12 @@ JsonNoteLocateError(const char *text, const char *errPtr,
 	/* cJSON's error position is on the offending character or just past
 	 * its first byte, so back up to the start of a multi-byte character. */
 	while (pos > 0 && pos < len && IS_UTF8_CONT(text[pos])) {
+		pos--;
+	}
+	/* ...and inside a bare word (an unquoted key) it can stop one character
+	 * in, so back up to the start of the word. */
+	while (pos > 0 && pos < len && IsWordChar(text[pos])
+	       && IsWordChar(text[pos - 1])) {
 		pos--;
 	}
 
@@ -128,10 +299,50 @@ JsonNoteLocateError(const char *text, const char *errPtr,
 	while (firstNonBlank < len && (unsigned char)text[firstNonBlank] <= ' ') {
 		firstNonBlank++;
 	}
+	size_t hint = pos;
+	jsonScan_t scan;
+	if (firstNonBlank < len && pos < len) {
+		ScanTo(text, pos, &scan);
+	} else {
+		scan.valid = 0;
+	}
+
 	if (firstNonBlank == len) {
 		info->cause = JSONNOTEERR_EMPTY;
 	} else if (pos < len && ClassifyChar(text + pos) != JSONNOTEERR_GENERIC) {
 		info->cause = ClassifyChar(text + pos);
+	} else if (pos < len && text[pos] == '/' && (text[pos + 1] == '/'
+	                || text[pos + 1] == '*')) {
+		info->cause = JSONNOTEERR_COMMENT;
+	} else if (pos < len && text[pos] == '\\') {
+		info->cause = JSONNOTEERR_BAD_BACKSLASH;
+	} else if (pos < len && (text[pos] == '\'' || (pos > 0
+	                         && text[pos - 1] == '\''))) {
+		/* cJSON stops on, or one past, a single quote */
+		info->cause = JSONNOTEERR_SINGLE_QUOTE;
+		if (text[pos] != '\'') {
+			pos--;
+		}
+		hint = pos;
+	} else if (scan.valid && scan.depth == 0
+	           && scan.expect == EXPECT_COMMA_OR_CLOSE) {
+		info->cause = JSONNOTEERR_TRAILING_CONTENT;
+	} else if (scan.valid && (text[pos] == '}' || text[pos] == ']')
+	           && scan.afterComma) {
+		info->cause = JSONNOTEERR_TRAILING_COMMA;
+		hint = scan.lastComma;
+	} else if (scan.valid && scan.expect == EXPECT_COMMA_OR_CLOSE
+	           && StartsValue(text[pos])) {
+		info->cause = JSONNOTEERR_MISSING_COMMA;
+		hint = scan.lastTokenEnd;
+	} else if (scan.valid && scan.expect == EXPECT_COLON && text[pos] != ':') {
+		info->cause = JSONNOTEERR_MISSING_COLON;
+		hint = scan.lastTokenEnd;
+	} else if (scan.valid && scan.expect == EXPECT_KEY && IsWordChar(text[pos])) {
+		info->cause = JSONNOTEERR_UNQUOTED_KEY;
+	} else if (scan.valid && scan.expect == EXPECT_VALUE
+	           && IsWrongLiteral(text + pos)) {
+		info->cause = JSONNOTEERR_WRONG_LITERAL;
 	} else {
 		info->cause = endedEarly ? JSONNOTEERR_UNEXPECTED_END
 		              : JSONNOTEERR_GENERIC;
@@ -140,21 +351,14 @@ JsonNoteLocateError(const char *text, const char *errPtr,
 			if (c != JSONNOTEERR_GENERIC) {
 				info->cause = c;
 				pos = i;
+				hint = i;
 				break;
 			}
 		}
 	}
 
-	info->line = 1;
-	info->column = 1;
-	for (size_t i = 0; i < pos; i++) {
-		if (text[i] == '\n') {
-			info->line++;
-			info->column = 1;
-		} else if (!IS_UTF8_CONT(text[i])) {
-			info->column++;
-		}
-	}
+	LineColumn(text, pos, &info->line, &info->column);
+	LineColumn(text, hint, &info->hintLine, &info->hintColumn);
 
 	/* Snippet: from the error position to the end of its line, cut so it
 	 * never ends partway through a multi-byte character. */
@@ -167,4 +371,37 @@ JsonNoteLocateError(const char *text, const char *errPtr,
 	}
 	memcpy(info->snippet, text + pos, n);
 	info->snippet[n] = '\0';
+}
+
+/**
+ * Recursive worker for JsonNoteFindDuplicateKey().
+ *
+ * \param node IN object or array to check, including its children
+ * \return the first duplicated key, or NULL
+ */
+static const char *
+FindDuplicateIn(const cJSON *node)
+{
+	for (const cJSON *a = node ? node->child : NULL; a != NULL; a = a->next) {
+		if (cJSON_IsObject(node) && a->string != NULL) {
+			for (const cJSON *b = a->next; b != NULL; b = b->next) {
+				if (b->string != NULL && strcmp(a->string, b->string) == 0) {
+					return a->string;
+				}
+			}
+		}
+		if (cJSON_IsObject(a) || cJSON_IsArray(a)) {
+			const char *dup = FindDuplicateIn(a);
+			if (dup != NULL) {
+				return dup;
+			}
+		}
+	}
+	return NULL;
+}
+
+const char *
+JsonNoteFindDuplicateKey(const void *root)
+{
+	return FindDuplicateIn((const cJSON *)root);
 }
