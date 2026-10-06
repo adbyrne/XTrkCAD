@@ -48,7 +48,15 @@ jobs:
         run: cmake --build build --target docs-doxygen
 
   c-tests-linux:
-    runs-on: ubuntu-latest
+    # ubuntu-latest moves to Ubuntu 26 on 2026-10-19; the ubuntu-24.04 entry
+    # keeps the current LTS covered after that. The default entry keeps the
+    # plain "c-tests-linux" check name.
+    name: ${{ matrix.os == 'ubuntu-latest' && 'c-tests-linux' || format('c-tests-linux ({0})', matrix.os) }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
       - name: Install dependencies
