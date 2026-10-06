@@ -311,13 +311,18 @@ Follows Martin Fischer's *Development Process Specification* (dev guide page
 wait out a review window" norm.
 
 **Tracking — where an issue gets written down:**
-- SF `bugs` tracker: **user-visible bugs only**, described from the user's perspective.
-- SF `feature-requests` tracker: new features and ideas (not `bugs`, as Layer Groups/JSON Note
-  were).
-- Problems we find ourselves while developing (a feature's own teething bugs, dev-only findings,
-  fixes we're unsure of): **don't** file them in the general `bugs` tracker. Fix them on the
-  feature branch, or raise them on the **dev mailing list** — that's where review requests go
-  too (drafts in `.claude/devml-drafts/`).
+- **SF "Development Issues" tracker** (`https://sourceforge.net/p/xtrkcad-fork/gtk3issues/`,
+  REST mount point `gtk3issues`): **every new ticket we create goes here**, whether it's a
+  feature, a bug we found, or a broad-impact fix. It was renamed from the GTK3 issues tracker
+  on 2026-10-06. It's only visible to signed-in project members, so anonymous REST calls and
+  the public tool list don't show it. `~/.config/xtrkcad-dev/sf-ticket.py` hardcodes
+  `TRACKER = "bugs"`; override it when creating tickets (see the SF API memory).
+- SF `bugs` tracker: **user-submitted bugs only**. Don't file our own tickets there. Existing
+  tickets we already filed there (Layer Groups, JSON Note, and so on) stay where they are.
+- SF `feature-requests` tracker: user-submitted ideas, not ours.
+- Problems found while developing a feature are fixed on its branch without a ticket. Review
+  requests, and fixes we're unsure of, go to the **dev mailing list** (drafts in
+  `.claude/devml-drafts/`).
 
 **Branches** (`GTK3V2MAIN` is the release branch for 5.4.0):
 - **Localized fix** (one or a few places — missing init, small logic fix): commit directly on
@@ -326,7 +331,8 @@ wait out a review window" norm.
 - **Feature**: `feature-<NNN>-<desc>-gtk3`, branched from `GTK3V2MAIN`; every commit for the
   feature stays on it until it's verified complete.
 - Housekeeping: `chore-<desc>-gtk3`.
-- `<NNN>` is the SF ticket number when one exists (file it first); leave it out otherwise.
+- `<NNN>` is the Development Issues ticket number when one exists (file it first); leave it out
+  otherwise. Those numbers are separate from the `bugs` tracker's (#33 there isn't #33 here).
   Matches Martin's own `feature-/fix-/chore-…-gtk3` names.
 - Once verified, **we merge the branch into `GTK3V2MAIN` ourselves, then close it**
   (`hg update <branch> && hg commit --close-branch -m "close <branch>"`), then push. There's no
