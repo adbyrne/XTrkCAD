@@ -393,8 +393,8 @@ JsonFieldSelectedObject(cJSON *root)
 /**
  * Report a structured-field-editor error via the Name field's tooltip/
  * hilite, matching JsonNoteValidate()'s error-reporting mechanism for the
- * main text field. Does not touch FormDialogOkActive -- Save/Delete on this
- * row never blocks the dialog's own OK button, they simply refuse to act.
+ * main text field. Does not touch FormDialogOkActive -- Add/Update/Delete on
+ * this row never block the dialog's own OK button, they simply refuse to act.
  *
  * \param msg IN user-facing reason
  */
@@ -408,7 +408,45 @@ JsonFieldReportError(const char *msg)
 }
 
 /**
- * Shared Save/Delete implementation for the structured field editor. The
+ * Label the structured field editor's add-or-update button for what it will
+ * actually do: "Add" when Name isn't on the selected Object yet, "Update"
+ * when it is. It's still one upsert action (see JsonFieldSave()); only the
+ * wording changes, because "Save" means "store to file" elsewhere in
+ * XTrkCAD (dev-ML #4404). Falls back to "Add" while the text is invalid or
+ * Name is empty.
+ */
+static void
+JsonFieldUpdateAddLabel(void)
+{
+	static int showingUpdate = -1;	/* unknown until the first call */
+	int update = FALSE;
+
+	FormFetchData(&jsonNotePG);
+	if (jsonNoteData.fieldName[0] != '\0') {
+		int len = wTextGetSize(jsonTextEntry);
+		char *buf = MyMalloc(len + 2);
+		wTextGetText(jsonTextEntry, buf, len);
+		cJSON *root = cJSON_ParseWithOpts(buf, NULL, TRUE);
+		MyFree(buf);
+		if (root != NULL && cJSON_IsObject(root)) {
+			cJSON *obj = JsonFieldSelectedObject(root);
+			update = obj != NULL
+			         && cJSON_GetObjectItemCaseSensitive(obj, jsonNoteData.fieldName) != NULL;
+		}
+		cJSON_Delete(root);
+	}
+
+	if (update != showingUpdate) {
+		wButtonSetLabel(jsonNotePLs[I_JSONSAVE].control,
+		                update ? _("_Update") : _("_Add"));
+		showingUpdate = update;
+		JSONNOTE_LOG("jsonfield: button now %s for '%s'\n",
+		             update ? "Update" : "Add", jsonNoteData.fieldName);
+	}
+}
+
+/**
+ * Shared Add/Update/Delete implementation for the structured field editor. The
  * multi-line JSON text box is the single source of truth for the note's
  * content at all times -- this control never maintains its own parallel
  * data model. Every call re-parses the text box's *current* contents with
@@ -418,7 +456,7 @@ JsonFieldReportError(const char *msg)
  * (JsonNoteLengthOk()), and Validate-on-save all operate purely on that
  * text and require no changes to support this control.
  *
- * The value field is untyped: on Save, an entered value that parses as a
+ * The value field is untyped: on Add/Update, an entered value that parses as a
  * bare JSON literal (a number, true, false, or null) is stored as that
  * literal; anything else -- including text that merely looks like a quoted
  * JSON string -- is stored as-is as a JSON string. Arrays, nested-object
@@ -523,7 +561,7 @@ JsonFieldApplyEdit(BOOL_T isDelete)
 	wTextClear(jsonTextEntry);
 	wTextAppend(jsonTextEntry, pretty);
 	JSONNOTE_LOG("jsonfield: %s '%s' on object #%ld, %d bytes\n",
-	             isDelete ? "deleted" : "saved", name, jsonNoteData.fieldObjectInx,
+	             isDelete ? "deleted" : "added/updated", name, jsonNoteData.fieldObjectInx,
 	             (int)strlen(pretty));
 	cJSON_free(pretty);
 
@@ -558,11 +596,12 @@ JsonFieldApplyEdit(BOOL_T isDelete)
 }
 
 /**
- * Callback for the structured field editor's Save button (add-or-update,
- * an upsert -- there is no separate Add-only/Update-only action, since
- * distinguishing them would need the same existence check either way and
- * upsert removes an entire class of "wrong button for this key" user
- * error). See JsonFieldApplyEdit()'s doc comment for the full contract.
+ * Callback for the structured field editor's Add/Update button (an upsert --
+ * there is no separate Add-only/Update-only action, since distinguishing
+ * them would need the same existence check either way and upsert removes an
+ * entire class of "wrong button for this key" user error; the label only
+ * says which one this click will do, see JsonFieldUpdateAddLabel()). See
+ * JsonFieldApplyEdit()'s doc comment for the full contract.
  *
  * \param junk unused
  */
@@ -633,6 +672,8 @@ JsonNoteValidate(void *junk)
 			cJSON_Delete(root);
 		}
 	}
+	/* The text, and so whether Name already exists, may have changed. */
+	JsonFieldUpdateAddLabel();
 }
 
 /**
@@ -708,6 +749,10 @@ JsonDlgUpdate(paramGroup_p pg, int inx, void *valueP)
 	switch (inx) {
 	case I_TEXT:
 		JsonNoteValidate(NULL);
+		break;
+	case I_JSONOBJ:
+	case I_JSONNAME:
+		JsonFieldUpdateAddLabel();
 		break;
 	case I_ORIGX:
 	case I_ORIGY:

@@ -306,7 +306,7 @@
                 <property name="spacing">6</property>
                 <child>
                   <object class="GtkButton" id="jsonfieldsave">
-                    <property name="label" translatable="yes">_Save</property>
+                    <property name="label" translatable="yes">_Add</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
