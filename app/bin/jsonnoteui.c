@@ -23,6 +23,7 @@
 #include "cJSON.h"
 #include "custom.h"
 #include "dynstring.h"
+#include "include/jsonnoteerror.h"
 #include "misc.h"
 #include "note.h"
 #include "form.h"
@@ -135,6 +136,8 @@ static paramData_t jsonNotePLs[] = {
 	/*9*/ { PD_BUTTON, JsonFieldSave, "jsonfieldsave", 0L, NULL },
 #define I_JSONDELETE (10)
 	/*10*/ { PD_BUTTON, JsonFieldDelete, "jsonfielddelete", PDO_DLGHORZ, NULL },
+#define I_JSONSTATUS (11)
+	/*11*/ { PD_MESSAGE, "", "jsonstatus", 0, I2VP(50) },
 };
 
 static paramGroup_t jsonNotePG = { "jsonNote", PGO_FULLDIALOGFROMBUILDER, jsonNotePLs, COUNT( jsonNotePLs ) };
@@ -151,42 +154,176 @@ BOOL_T IsJsonNote(track_p trk)
 }
 
 /**
+ * Turn a parse failure into a short status message saying where parsing
+ * stopped (and, for recognised mistakes, what's wrong), plus a longer
+ * suggestion for the text box's tooltip. The status is shown in the dialog
+ * itself so the reason is visible without hovering (dev-ML #4404).
+ *
+ * \param text IN the text that failed to parse
+ * \param errPtr IN where cJSON_ParseWithOpts() stopped
+ * \param tip OUT suggested fix, for the tooltip
+ * \return the status message; both strings are in static buffers valid
+ *         until the next call
+ */
+static const char *
+JsonNoteDescribeError(const char *text, const char *errPtr, const char **tip)
+{
+	static char msg[256];
+	static char tipBuf[400];
+	jsonNoteErrorInfo_t info;
+	const char *what = NULL;
+	const char *fix = NULL;
+
+	JsonNoteLocateError(text, errPtr, &info);
+	switch (info.cause) {
+	case JSONNOTEERR_EMPTY:
+		snprintf(msg, sizeof msg, "%s", _("Empty -- enter a JSON object"));
+		snprintf(tipBuf, sizeof tipBuf, "%s",
+		         _("A JSON Note holds one JSON object, e.g. {\"kind\": \"station\", \"id\": \"WP\"}."));
+		*tip = tipBuf;
+		return msg;
+	case JSONNOTEERR_UNEXPECTED_END:
+		snprintf(msg, sizeof msg, "%s", _("Invalid JSON: the text ends too soon"));
+		snprintf(tipBuf, sizeof tipBuf, "%s",
+		         _("Every { needs a matching }, every [ a matching ], and every string a closing \". Check the end of the text."));
+		*tip = tipBuf;
+		return msg;
+	case JSONNOTEERR_TYPOGRAPHIC_QUOTE:
+		what = _("typographic (curly) quote");
+		fix = _("Word processors and email programs replace \" with curly quotes. Retype the quote here as a plain \".");
+		break;
+	case JSONNOTEERR_NONBREAKING_SPACE:
+		what = _("non-breaking space");
+		fix = _("Text copied from web pages can contain non-breaking spaces. Delete it and type an ordinary space.");
+		break;
+	case JSONNOTEERR_SINGLE_QUOTE:
+		what = _("single quote");
+		fix = _("JSON strings and keys need double quotes: \"text\", not 'text'.");
+		break;
+	case JSONNOTEERR_MISSING_COMMA:
+		snprintf(msg, sizeof msg,
+		         _("Invalid JSON at line %d, column %d: missing comma before this?"),
+		         info.line, info.column);
+		snprintf(tipBuf, sizeof tipBuf,
+		         _("Items in an object or array are separated by commas. Add a comma at line %d, column %d, after the previous item."),
+		         info.hintLine, info.hintColumn);
+		*tip = tipBuf;
+		return msg;
+	case JSONNOTEERR_MISSING_COLON:
+		snprintf(msg, sizeof msg,
+		         _("Invalid JSON at line %d, column %d: missing colon after the key?"),
+		         info.line, info.column);
+		snprintf(tipBuf, sizeof tipBuf,
+		         _("Each key is followed by a colon and its value: \"key\": value. Add a colon at line %d, column %d."),
+		         info.hintLine, info.hintColumn);
+		*tip = tipBuf;
+		return msg;
+	case JSONNOTEERR_TRAILING_COMMA:
+		snprintf(msg, sizeof msg,
+		         _("Invalid JSON at line %d, column %d: comma before the closing bracket"),
+		         info.hintLine, info.hintColumn);
+		snprintf(tipBuf, sizeof tipBuf, "%s",
+		         _("JSON doesn't allow a comma after the last item in an object or array. Delete that comma."));
+		*tip = tipBuf;
+		return msg;
+	case JSONNOTEERR_UNQUOTED_KEY:
+		what = _("key without double quotes");
+		fix = _("Object keys must be in double quotes: {\"kind\": \"station\"}, not {kind: \"station\"}.");
+		break;
+	case JSONNOTEERR_BAD_BACKSLASH:
+		what = _("backslash");
+		fix = _("Inside a string, a backslash starts an escape such as \\n. For a Windows path, double each backslash (C:\\\\data) or use forward slashes (C:/data).");
+		break;
+	case JSONNOTEERR_WRONG_LITERAL:
+		what = _("not a JSON value");
+		fix = _("JSON's literal values are lowercase true, false and null. Words such as True, None or undefined, and NaN, aren't valid; quote them if they're meant as text.");
+		break;
+	case JSONNOTEERR_COMMENT:
+		what = _("comment");
+		fix = _("JSON has no comments. Remove the // or /* */ text, or keep the information as a field, e.g. \"comment\": \"...\".");
+		break;
+	case JSONNOTEERR_TRAILING_CONTENT:
+		what = _("text after the object");
+		fix = _("A JSON Note holds exactly one object. Put everything inside the outer { }, or use a separate note.");
+		break;
+	default:
+		snprintf(msg, sizeof msg, _("Invalid JSON at line %d, column %d, near: %s"),
+		         info.line, info.column, info.snippet);
+		snprintf(tipBuf, sizeof tipBuf, "%s",
+		         _("Check the text at that position. Common causes: a misspelled value, a missing quote, or an extra or missing bracket."));
+		*tip = tipBuf;
+		return msg;
+	}
+	snprintf(msg, sizeof msg, _("Invalid JSON at line %d, column %d: %s"),
+	         info.line, info.column, what);
+	snprintf(tipBuf, sizeof tipBuf, "%s", fix);
+	*tip = tipBuf;
+	return msg;
+}
+
+/**
  * Read the dialog's current text and report whether it's a valid JSON
  * *object* (not just valid JSON -- MCP's own note dispatch, and this
  * feature's whole premise, both require an object; a bare array/string/
  * number/bool/null would silently parse but then vanish from every
  * downstream report with no error surfaced anywhere) and within the
- * length this feature can safely round-trip.
+ * length this feature can safely round-trip. Nothing may follow the
+ * object: a lenient parse would silently drop it on save.
  *
- * \param errMsg OUT set to a user-facing reason when returning FALSE; left
- *        untouched when returning TRUE
+ * \param msg OUT short status for the dialog: the reason when returning
+ *        FALSE; "Valid JSON object" or a duplicate-key warning when TRUE
+ * \param tip OUT (may be NULL) longer suggestion for the tooltip
  * \return TRUE if the current text is acceptable to save
  */
 static BOOL_T
-JsonNoteIsValid(const char **errMsg)
+JsonNoteIsValid(const char **msg, const char **tip)
 {
+	static char warnMsg[256];
+	static char warnTip[300];
+	const char *ignoredTip;
+	if (tip == NULL) {
+		tip = &ignoredTip;
+	}
+
 	int len = wTextGetSize(jsonTextEntry);
 	char *buf = MyMalloc(len + 2);
 	wTextGetText(jsonTextEntry, buf, len);
 
 	if (!JsonNoteLengthOk(buf, len)) {
 		MyFree(buf);
-		*errMsg = _("Too long -- would risk a crash reopening this file");
+		*msg = _("Too long -- would risk a crash reopening this file");
+		*tip = _("Split the information across several notes.");
 		return FALSE;
 	}
 
 	const char *errPtr = NULL;
-	cJSON *parsed = cJSON_ParseWithOpts(buf, &errPtr, FALSE);
-	MyFree(buf);
+	cJSON *parsed = cJSON_ParseWithOpts(buf, &errPtr, TRUE);
 
 	if (parsed == NULL) {
-		*errMsg = _("Invalid JSON");
+		*msg = JsonNoteDescribeError(buf, errPtr, tip);
+		MyFree(buf);
 		return FALSE;
 	}
+	MyFree(buf);
 	if (!cJSON_IsObject(parsed)) {
 		cJSON_Delete(parsed);
-		*errMsg = _("Must be a JSON object, e.g. {\"kind\": \"...\"} -- not an array/string/number");
+		*msg = _("Must be a JSON object, e.g. {\"kind\": \"...\"} -- not an array/string/number");
+		*tip = _("Wrap the content in { } and give it a key, e.g. {\"items\": [1, 2]}.");
 		return FALSE;
+	}
+
+	const char *dup = JsonNoteFindDuplicateKey(parsed);
+	if (dup != NULL) {
+		snprintf(warnMsg, sizeof warnMsg,
+		         _("Valid, but key \"%s\" appears twice"), dup);
+		snprintf(warnTip, sizeof warnTip,
+		         _("Only the first \"%s\" is used; later ones are ignored. Remove or rename the duplicate."),
+		         dup);
+		*msg = warnMsg;
+		*tip = warnTip;
+	} else {
+		*msg = _("Valid JSON object");
+		*tip = _("Format re-indents the text. Done saves the note.");
 	}
 	cJSON_Delete(parsed);
 	return TRUE;
@@ -304,7 +441,7 @@ JsonFieldApplyEdit(BOOL_T isDelete)
 	FormFetchData(&jsonNotePG);
 
 	const char *errMsg = NULL;
-	if (!JsonNoteIsValid(&errMsg)) {
+	if (!JsonNoteIsValid(&errMsg, NULL)) {
 		JsonFieldReportError(errMsg);
 		return;
 	}
@@ -464,19 +601,26 @@ static void
 JsonNoteValidate(void *junk)
 {
 	(void)junk;
-	const char *errMsg = NULL;
+	const char *msg = NULL;
+	const char *tip = NULL;
 	paramData_p p = &jsonNotePLs[I_TEXT];
 
-	if (!JsonNoteIsValid(&errMsg)) {
-		JSONNOTE_LOG("jsonnote: invalid -- %s\n", errMsg);
+	/* The status line says what's wrong (always visible); hovering over
+	 * the text box shows a suggested fix. The tooltip is also reset when
+	 * the text is valid, so it never keeps showing a fixed error. */
+	if (!JsonNoteIsValid(&msg, &tip)) {
+		JSONNOTE_LOG("jsonnote: invalid -- %s | tip: %s\n", msg, tip);
 		p->bInvalid = TRUE;
-		wTooltipSetText(p->control, errMsg);
+		wTooltipSetText(p->control, tip);
 		wControlHilite(p->control, TRUE);
+		wMessageSetValue(jsonNotePLs[I_JSONSTATUS].control, msg);
 		FormDialogOkActive(&jsonNotePG, FALSE);
 	} else {
-		JSONNOTE_LOG("jsonnote: valid\n");
+		JSONNOTE_LOG("jsonnote: valid -- %s\n", msg);
 		p->bInvalid = FALSE;
+		wTooltipSetText(p->control, tip);
 		wControlHilite(p->control, FALSE);
+		wMessageSetValue(jsonNotePLs[I_JSONSTATUS].control, msg);
 		FormDialogOkActive(&jsonNotePG, TRUE);
 
 		int len = wTextGetSize(jsonTextEntry);
@@ -513,7 +657,9 @@ JsonNoteFormat(void *junk)
 		return;
 	}
 
-	cJSON *parsed = cJSON_Parse(buf);
+	/* Strict, like Validate: a lenient parse would pretty-print only the
+	 * first object and silently drop anything after it. */
+	cJSON *parsed = cJSON_ParseWithOpts(buf, NULL, TRUE);
 	MyFree(buf);
 
 	if (parsed == NULL || !cJSON_IsObject(parsed)) {
@@ -541,13 +687,10 @@ JsonNoteFormat(void *junk)
 	JSONNOTE_LOG("jsonnote: Format applied, %d bytes\n", (int)strlen(pretty));
 	cJSON_free(pretty);
 
-	/* The now-formatted text is still valid (Format never changes meaning,
-	 * only whitespace) -- clear any stale invalid state directly rather
-	 * than re-running the parse a third time. */
-	paramData_p p = &jsonNotePLs[I_TEXT];
-	p->bInvalid = FALSE;
-	wControlHilite(p->control, FALSE);
-	FormDialogOkActive(&jsonNotePG, TRUE);
+	/* Re-validate the formatted text: it's still valid (Format only changes
+	 * whitespace), but this also refreshes the status line, the tooltip, and
+	 * any duplicate-key warning instead of leaving a stale message. */
+	JsonNoteValidate(junk);
 }
 
 /**
@@ -600,7 +743,7 @@ JsonEditOK(void *junk)
 	 * Without this check, a user who types invalid JSON and clicks Done
 	 * directly (never clicking Validate first) could save invalid JSON. */
 	const char *errMsg = NULL;
-	if (!JsonNoteIsValid(&errMsg)) {
+	if (!JsonNoteIsValid(&errMsg, NULL)) {
 		JsonNoteValidate(junk);
 		return;
 	}
@@ -677,11 +820,9 @@ CreateEditJsonNote(char *title, const char *textData)
 	FormLoadControls(&jsonNotePG);
 	descTitle = title;
 
-	/* Reflect the just-loaded text's validity immediately -- an existing
+	/* Reflect the just-loaded text's validity immediately: an existing
 	 * note's text is always valid JSON (it couldn't have been saved
-	 * otherwise), but a freshly-created note's placeholder text (below)
-	 * is not, and should show as such rather than looking accidentally OK
-	 * until the user's first edit. */
+	 * otherwise), and so is a new note's starter template (below). */
 	JsonNoteValidate(NULL);
 
 	wShow(jsonNoteW);
@@ -755,8 +896,12 @@ void DescribeJsonNote(track_p trk, char * str, CSIZE_T len)
  */
 void NewJsonNoteUI(coOrd pos )
 {
+	/* A valid starter object to fill in, not an instruction sentence:
+	 * Validate passes on the default text, and the template shows the
+	 * expected shape, including a key with several values (dev-ML #4404).
+	 * JSON syntax, so not translated. */
 	const char *tmpPtrText =
-	        _("Replace this text with a JSON object, e.g. {\"kind\": \"station\", \"id\": \"WP\"}");
+	        "{\n\t\"kind\":\t\"\",\n\t\"id\":\t\"\",\n\t\"tags\":\t[\"\", \"\"]\n}";
 
 	jsonNoteData.pos = pos;
 	jsonNoteData.layer = curLayer;

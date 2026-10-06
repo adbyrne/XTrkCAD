@@ -314,6 +314,36 @@ or boolean) -- invalid text is highlighted and the <b>Done</b> button is
 disabled until it's fixed, the same way an invalid document path already
 blocks Done on the Document Editor (\ref cmdFileNote).
 
+The line next to the buttons says what's wrong and where: the line and
+column at which the text stops being valid JSON. <b>Hover the mouse over the
+text box</b> for a suggestion on how to fix it. These common mistakes are
+recognised and named:
+
+- typographic (curly) quotes, which word processors and email programs put in
+  place of plain <tt>&quot;</tt> quotes
+- non-breaking spaces, often copied along with text from a web page
+- single quotes (<tt>'text'</tt>) instead of double quotes
+- keys without quotes (<tt>{kind: "station"}</tt>)
+- a missing comma between two items -- reported on the line <i>after</i> the
+  one that needs the comma; the hover tip gives the exact place
+- a missing colon after a key
+- a comma after the last item, just before the closing <tt>}</tt> or <tt>]</tt>
+- a backslash that doesn't start a valid escape, most often a Windows path
+  such as <tt>C:\\data</tt>; write <tt>C:\\\\data</tt> or <tt>C:/data</tt> instead
+- <tt>True</tt>, <tt>False</tt>, <tt>None</tt>, <tt>undefined</tt> and similar
+  words from other languages; JSON uses lowercase <tt>true</tt>,
+  <tt>false</tt> and <tt>null</tt>
+- comments (<tt>//</tt> or <tt>/</tt><tt>* *</tt><tt>/</tt>), which JSON doesn't have
+- more text after the closing <tt>}</tt>: a note holds exactly one object
+
+If the same key appears twice in one object, the text is still accepted, but
+the status line warns about it: only the first value is used.
+
+A new JSON Note starts with a small template that is already valid, showing a
+key with several values (<tt>"tags"</tt>, an array):
+<tt>{"kind": "", "id": "", "tags": ["", ""]}</tt>. Fill in the values, or
+replace it.
+
 <b>Format</b> pretty-prints the current text (re-indents it for
 readability) if it's currently valid; if not, it reports the same error
 <b>Validate</b> would.
