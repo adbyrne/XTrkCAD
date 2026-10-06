@@ -87,10 +87,14 @@ keep tracking that group afterward, and each row stays independently movable.
   group index across any user-visible gap where Manage Layer Groups could plausibly run
   concurrently (i.e. basically any modeless dialog) -- re-resolve by name, or refresh the whole
   list, instead.
-- **The current layer can never be excluded from "Show Only".** `LayerGroupShowOnly()`
-  (`dlayer.c`) always keeps `curLayer` visible regardless of group membership, matching the
-  existing rule that the current layer can't be hidden -- a new group-driven visibility action
-  should preserve this, not just apply group membership literally.
+- **The current layer can never be hidden by "Show Only" or "Show Not".** Both buttons go
+  through one shared filter in `dlayer.c` (`LayerGroupShowOnly()`/`LayerGroupShowNot()` ->
+  `LayerGroupApplyFilter()`), and the per-layer rule lives in the unit-tested
+  `LayerGroupFilterShows()` (`dlayergroup.c`): it always keeps `curLayer` visible, matching the
+  existing rule that the current layer can't be hidden. A new group-driven visibility action
+  should reuse that rule rather than apply group membership literally. Show Not (dev-ML #4404,
+  added after phase 2) is the mirror of Show Only: it hides the group and shows everything else,
+  under the same session-only snapshot that Show All restores.
 
 # See also
 

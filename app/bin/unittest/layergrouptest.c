@@ -474,6 +474,40 @@ static void test_migrate_names_avoid_existing_groups(void **state)
 	assert_string_equal(LayerGroupName(1), "Group 2");
 }
 
+static void test_filter_show_only(void **state)
+{
+	(void) state;
+	LayerGroupResetAll();
+	int g = LayerGroupCreate("Mainline");
+	LayerGroupAddMember(g, 2);
+
+	assert_int_equal(LayerGroupFilterShows(g, 2, 0, 1), 1);	/* member */
+	assert_int_equal(LayerGroupFilterShows(g, 3, 0, 1), 0);	/* not a member */
+	assert_int_equal(LayerGroupFilterShows(g, 3, 1, 1), 1);	/* current layer */
+}
+
+static void test_filter_show_not_mirrors_show_only(void **state)
+{
+	(void) state;
+	LayerGroupResetAll();
+	int g = LayerGroupCreate("Staging");
+	LayerGroupAddMember(g, 2);
+
+	assert_int_equal(LayerGroupFilterShows(g, 2, 0, 0), 0);	/* member hidden */
+	assert_int_equal(LayerGroupFilterShows(g, 3, 0, 0), 1);	/* others shown */
+	/* the current layer stays visible even when it's in the hidden group */
+	assert_int_equal(LayerGroupFilterShows(g, 2, 1, 0), 1);
+}
+
+static void test_filter_invalid_group_hides_nothing_extra(void **state)
+{
+	(void) state;
+	LayerGroupResetAll();
+	/* no such group: nothing is a member, so Show Not shows every layer */
+	assert_int_equal(LayerGroupFilterShows(5, 1, 0, 0), 1);
+	assert_int_equal(LayerGroupFilterShows(5, 1, 0, 1), 0);
+}
+
 int main(void)
 {
 	const struct CMUnitTest tests[] = {
@@ -508,6 +542,9 @@ int main(void)
 		cmocka_unit_test(test_migrate_mutual_link_dedupes_to_one_group),
 		cmocka_unit_test(test_migrate_multiple_distinct_groups),
 		cmocka_unit_test(test_migrate_names_avoid_existing_groups),
+		cmocka_unit_test(test_filter_show_only),
+		cmocka_unit_test(test_filter_show_not_mirrors_show_only),
+		cmocka_unit_test(test_filter_invalid_group_hides_nothing_extra),
 	};
 	return cmocka_run_group_tests(tests, NULL, NULL);
 }

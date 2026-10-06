@@ -42,6 +42,7 @@ static void GroupNew(void *action);
 static void GroupRename(void *action);
 static void GroupDelete(void *action);
 static void GroupShowOnly(void *action);
+static void GroupShowNot(void *action);
 static void GroupShowAll(void *action);
 static void GroupAddLayers(void *action);
 static void GroupRemoveLayers(void *action);
@@ -72,6 +73,8 @@ static paramData_t layerGroupPLs[] = {
 #define I_INCLUDED	(9)
 #define includedL	(layerGroupPLs[I_INCLUDED].control)
 	{	PD_LIST, NULL, "included", PDO_DLGRESETMARGIN, NULL, NULL, BL_MANY },
+#define I_GROUPSHOWNOT	(10)
+	{	PD_BUTTON, GroupShowNot, "shownot", 0, NULL, NULL },
 };
 static paramGroup_t layerGroupPG = { "layergroup", PGO_FULLDIALOGFROMBUILDER, layerGroupPLs, COUNT( layerGroupPLs ) };
 
@@ -147,6 +150,7 @@ static void LayerGroupNameOk(void *junk)
 		FormControlActive(&layerGroupPG, I_GROUPRENAME, TRUE);
 		FormControlActive(&layerGroupPG, I_GROUPDELETE, TRUE);
 		FormControlActive(&layerGroupPG, I_GROUPSHOWONLY, TRUE);
+		FormControlActive(&layerGroupPG, I_GROUPSHOWNOT, TRUE);
 	} else {
 		char oldName[LAYERGROUP_NAME_SIZE];
 		strncpy(oldName, LayerGroupName(layerGroupNameTarget), sizeof oldName - 1);
@@ -255,6 +259,7 @@ static void RefreshGroupList(void)
 	FormControlActive(&layerGroupPG, I_GROUPRENAME, newSelected >= 0);
 	FormControlActive(&layerGroupPG, I_GROUPDELETE, newSelected >= 0);
 	FormControlActive(&layerGroupPG, I_GROUPSHOWONLY, newSelected >= 0);
+	FormControlActive(&layerGroupPG, I_GROUPSHOWNOT, newSelected >= 0);
 	RefreshShuttleLists(newSelected);
 }
 
@@ -408,6 +413,29 @@ static void GroupShowOnly(void *action)
 }
 
 /**
+ * "Show Not" button: the mirror of Show Only (dev-ML #4404) -- hide the
+ * selected group's members and show every other layer (LayerGroupShowNot()
+ * in dlayer.c, which also keeps the current layer visible). A no-op if no
+ * group is selected.
+ *
+ * \param action IN unused, required by the PD_BUTTON signature
+ */
+static void GroupShowNot(void *action)
+{
+	int selectedGroup = wListGetIndex(groupsL);
+	if (selectedGroup < 0) {
+		return;
+	}
+
+	LOGLAYERGROUPS()
+	LOG(log_layergroups, 1, ("layergroups: show not group %d \"%s\"\n",
+	                         selectedGroup, LayerGroupName(selectedGroup)))
+	/* Same session-only view filter as Show Only -- not a real edit. */
+	LayerGroupShowNot(selectedGroup);
+	DoChangeNotification(CHANGE_LAYER);
+}
+
+/**
  * "Show All" button: make every layer visible again (SF #802 -- the
  * inverse of Show Only; unlike Show Only this doesn't depend on a group
  * being selected, it always operates on every layer).
@@ -446,6 +474,7 @@ static wBool_t LayerGroupDlgUpdate(paramGroup_p pg, int inx, void *valueP)
 		FormControlActive(&layerGroupPG, I_GROUPRENAME, selectedGroup >= 0);
 		FormControlActive(&layerGroupPG, I_GROUPDELETE, selectedGroup >= 0);
 		FormControlActive(&layerGroupPG, I_GROUPSHOWONLY, selectedGroup >= 0);
+		FormControlActive(&layerGroupPG, I_GROUPSHOWNOT, selectedGroup >= 0);
 		RefreshShuttleLists(selectedGroup);
 	}
 	return FALSE;
