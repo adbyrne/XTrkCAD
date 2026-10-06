@@ -247,10 +247,14 @@ XTRKCADGTKLIB=/tmp/xtrkcad-scratch/share/xtrkcad-gtk /tmp/xtrkcad-scratch/bin/xt
 # Tool versions
 
 Doxygen and AStyle are explicitly version-pinned in CI; everything else uses whatever the CI
-runner image currently provides. The AStyle pin exists specifically because an unpinned version
-once produced different formatting output for identical input (SF #638) — if you're chasing a
-formatting or doc-generation mismatch against CI, matching these two matters more than matching
-anything else in this table.
+runner image currently provides. Most Linux jobs run on `ubuntu-latest`, which GitHub moves from
+Ubuntu 24.04 to Ubuntu 26 on 2026-10-19. `c-tests-linux` also runs on a pinned `ubuntu-24.04`
+runner (`c-tests-linux (ubuntu-24.04)`) so the current LTS stays covered after that;
+`astyle-check` and `c-tests-arm64` were already pinned to 24.04. The versions below are the
+24.04 ones. The AStyle pin exists specifically because an unpinned version once produced
+different formatting output for identical input (SF #638) — if you're chasing a formatting or
+doc-generation mismatch against CI, matching these two matters more than matching anything else
+in this table.
 
 | Tool | Pin status | Currently tested (as of 2026-07-18 — unpinned rows drift as CI runner images update) |
 |------|-----------|------------------------------------------|

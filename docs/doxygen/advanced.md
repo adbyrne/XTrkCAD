@@ -72,9 +72,9 @@ git-only work that can't simply mirror Hg.
 
 - **`doxygen`** — builds this documentation with the pinned Doxygen 1.15.0 and `WARN_AS_ERROR`;
   any warning (a broken `\ref`, a stale `@param`, an unresolved anchor) fails the job.
-- **`c-tests-linux`, `c-tests-arm64`, `c-tests-linux-clang`, `c-tests-macos`,
-  `c-tests-windows-msys2`, `c-tests-sanitizers`, `c-tests-valgrind`** — build plus `ctest` across
-  compilers (GCC, Clang, AppleClang, MinGW GCC), platforms, and architectures, plus ASan/UBSan and
+- **`c-tests-linux`, `c-tests-linux (ubuntu-24.04)`, `c-tests-arm64`, `c-tests-linux-clang`,
+  `c-tests-macos`, `c-tests-windows-msys2`, `c-tests-sanitizers`, `c-tests-valgrind`** — build
+  plus `ctest` across compilers (GCC, Clang, AppleClang, MinGW GCC), platforms, and architectures, plus ASan/UBSan and
   Valgrind runs (`PreferenceTest` and `MRUListTest` excluded from both — see
   \ref advanced-optional-local-checks "Advanced/optional local checks" in the
   \ref index "Developer Documentation" page for why). All pass `-LE regression` so the demo
