@@ -1,0 +1,260 @@
+name: Hg sync (default)
+
+# Daily mirror of SourceForge Hg `default` into git `main`.
+#
+# git `main` is a pure mirror of Hg `default` (xtrkcad-verify-sync PASS), so
+# each run:
+#   1. clones Hg `default` anonymously over SF's read-only URL;
+#   2. diffs from the last Hg node already synced (the newest `Hg-Node:`
+#      commit trailer on `main`, else SEED_NODE) to the current tip;
+#   3. applies that diff to a fresh test/upstream-default-* branch, commits
+#      it with a new `Hg-Node:` trailer, pushes, and runs ci.yml on it;
+#   4. if CI passes, fast-forwards `main` to the test branch, runs ci.yml on
+#      `main`, and deletes the test branch together with its runs.
+# A patch that won't apply, a failed CI run, or a `main` that moved in the
+# meantime stops the run and opens (or reuses) a GitHub issue instead.
+#
+# Pushes made with GITHUB_TOKEN never trigger push-event workflows, so CI is
+# started with an explicit workflow_dispatch (which GITHUB_TOKEN may send).
+#
+# GTK3V2MAIN is not handled here: git GTK3V2MAIN carries held git-only work,
+# so it can't simply mirror Hg yet. It's still synced by the local
+# xtrkcad-sf-sync script.
+
+on:
+  schedule:
+    - cron: '23 10 * * *'   # daily, 10:23 UTC
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Compute and apply the diff, but push nothing'
+        type: boolean
+        default: false
+      promote:
+        description: 'Fast-forward main once CI passes'
+        type: boolean
+        default: true
+      from_node:
+        description: 'Testing: Hg node to diff from instead of the last synced one'
+        type: string
+        default: ''
+      to_node:
+        description: 'Testing: Hg node to diff to instead of the default tip'
+        type: string
+        default: ''
+      target_branch:
+        description: 'Testing: sync into this scratch branch instead of main'
+        type: string
+        default: ''
+
+permissions:
+  contents: write
+  actions: write
+  issues: write
+
+concurrency:
+  group: hg-sync-default
+  cancel-in-progress: false
+
+env:
+  HG_URL: http://hg.code.sf.net/p/xtrkcad-fork/xtrkcad
+  HG_BRANCH: default
+  GIT_BRANCH: ${{ inputs.target_branch || 'main' }}
+  # Hg `default` node that git `main` was verified byte-identical to
+  # (xtrkcad-verify-sync PASS, 2026-10-05). Only used until the first sync
+  # commit carries an `Hg-Node:` trailer.
+  SEED_NODE: 8ec70fc79f47b4a51f5966128c70c8c4f38df59a
+  GH_TOKEN: ${{ github.token }}
+  DRY_RUN: ${{ inputs.dry_run || false }}
+  PROMOTE: ${{ github.event_name == 'schedule' || inputs.promote }}
+  FROM_NODE: ${{ inputs.from_node }}
+  TO_NODE: ${{ inputs.to_node }}
+
+jobs:
+  sync:
+    runs-on: ubuntu-24.04
+    # Waits for ci.yml twice (test branch, then main); cppcheck alone can
+    # take ~40 minutes.
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.GIT_BRANCH }}
+          fetch-depth: 0
+
+      - name: Install Mercurial
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq mercurial
+          hg --version | head -1
+
+      - name: Define helpers
+        run: |
+          cat > "$RUNNER_TEMP/helpers.sh" <<'EOF'
+          # Open an issue titled $1 with body $2, unless an open one with
+          # that exact title already exists; then fail the step.
+          fail_with_issue() {
+            local title="$1" body="$2"
+            body="$body
+
+          Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            if [ "$DRY_RUN" = true ]; then
+              echo "::error::$title (dry run, no issue opened)"
+              exit 1
+            fi
+            existing=$(gh issue list --state open --search "\"$title\" in:title" \
+              --json number,title --jq ".[] | select(.title == \"$title\") | .number" | head -1)
+            if [ -n "$existing" ]; then
+              gh issue comment "$existing" --body "$body"
+            else
+              gh issue create --title "$title" --body "$body"
+            fi
+            echo "::error::$title"
+            exit 1
+          }
+          EOF
+
+      - name: Find new upstream changesets
+        id: find
+        run: |
+          set -euo pipefail
+          . "$RUNNER_TEMP/helpers.sh"
+
+          hg clone -q -U -b "$HG_BRANCH" "$HG_URL" "$RUNNER_TEMP/hg"
+          HG="hg -R $RUNNER_TEMP/hg"
+
+          heads=$($HG heads -T '{node}\n' "$HG_BRANCH" | wc -l)
+          [ "$heads" = 1 ] || fail_with_issue "Hg sync (default): $heads open heads on Hg $HG_BRANCH" \
+            "Hg \`$HG_BRANCH\` has $heads heads, so there's no single tip to sync. Merge them upstream, or sync by hand."
+
+          tip=$($HG log -r "${TO_NODE:-$HG_BRANCH}" -T '{node}')
+
+          if [ -n "$FROM_NODE" ]; then
+            last="$FROM_NODE"
+          else
+            last=$(git log "origin/$GIT_BRANCH" --format='%(trailers:key=Hg-Node,valueonly)' | grep -m1 . || true)
+            last="${last:-$SEED_NODE}"
+          fi
+          last=$($HG log -r "$last" -T '{node}' 2>/dev/null) || fail_with_issue \
+            "Hg sync (default): last synced node $last not found in Hg" \
+            "The newest \`Hg-Node:\` trailer on \`$GIT_BRANCH\` (or SEED_NODE) names a changeset Hg \`$HG_BRANCH\` doesn't have. Was history rewritten upstream?"
+
+          [ -n "$($HG log -r "$last and ancestors($tip)" -T x)" ] || fail_with_issue \
+            "Hg sync (default): last synced node ${last:0:12} is not an ancestor of ${tip:0:12}" \
+            "The last synced Hg node isn't in the history of the current \`$HG_BRANCH\` tip, so a diff between them wouldn't be an upstream update."
+
+          echo "last=$last" >> "$GITHUB_OUTPUT"
+          echo "tip=$tip" >> "$GITHUB_OUTPUT"
+          if [ "$last" = "$tip" ]; then
+            echo "Up to date: git $GIT_BRANCH already matches Hg $HG_BRANCH at ${tip:0:12}."
+            echo "new=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "new=true" >> "$GITHUB_OUTPUT"
+
+          # .github/ is git-only (CI lives here); GITHUB_TOKEN can't push
+          # workflow-file changes anyway.
+          $HG diff --git -r "$last" -r "$tip" -X 'path:.github' > "$RUNNER_TEMP/upstream.diff"
+          $HG log -r "only($tip, $last)" -T '{node|short} {author|person}: {desc|firstline}\n' \
+            > "$RUNNER_TEMP/changesets.txt"
+          echo "count=$(wc -l < "$RUNNER_TEMP/changesets.txt")" >> "$GITHUB_OUTPUT"
+          echo "Hg $HG_BRANCH ${last:0:12} -> ${tip:0:12}:"
+          cat "$RUNNER_TEMP/changesets.txt"
+          git apply --stat "$RUNNER_TEMP/upstream.diff" || true
+
+      - name: Apply to a test branch
+        id: apply
+        if: steps.find.outputs.new == 'true'
+        env:
+          LAST: ${{ steps.find.outputs.last }}
+          TIP: ${{ steps.find.outputs.tip }}
+          COUNT: ${{ steps.find.outputs.count }}
+        run: |
+          set -euo pipefail
+          . "$RUNNER_TEMP/helpers.sh"
+
+          branch="test/upstream-default-$(date -u +%F)-${TIP:0:12}"
+          git checkout -q -b "$branch" "origin/$GIT_BRANCH"
+
+          if [ -s "$RUNNER_TEMP/upstream.diff" ] && \
+             ! git apply --index "$RUNNER_TEMP/upstream.diff" 2> "$RUNNER_TEMP/apply.err"; then
+            cat "$RUNNER_TEMP/apply.err"
+            fail_with_issue "Hg sync (default): upstream ${TIP:0:12} doesn't apply to $GIT_BRANCH" \
+              "Hg \`$HG_BRANCH\` ${LAST:0:12} -> ${TIP:0:12} ($COUNT changesets) doesn't apply cleanly to git \`$GIT_BRANCH\`, so git and Hg have drifted. The diff is attached to the run as the \`upstream-diff\` artifact.
+
+          \`\`\`
+          $(head -40 "$RUNNER_TEMP/apply.err")
+          \`\`\`"
+          fi
+
+          {
+            echo "upstream($HG_BRANCH): sync SF Hg $HG_BRANCH to ${TIP:0:12} ($COUNT changesets)"
+            echo
+            head -60 "$RUNNER_TEMP/changesets.txt"
+            [ "$COUNT" -le 60 ] || echo "... and $((COUNT - 60)) more"
+            echo
+            echo "Hg-Node: $TIP"
+          } > "$RUNNER_TEMP/msg.txt"
+          git -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -q --allow-empty -F "$RUNNER_TEMP/msg.txt"
+          git log -1 --stat | head -60
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+
+      - name: Keep the diff
+        if: always() && steps.find.outputs.new == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: upstream-diff
+          path: |
+            ${{ runner.temp }}/upstream.diff
+            ${{ runner.temp }}/changesets.txt
+          if-no-files-found: ignore
+
+      - name: Push and run CI on the test branch
+        if: steps.apply.outputs.branch != '' && env.DRY_RUN != 'true'
+        env:
+          BRANCH: ${{ steps.apply.outputs.branch }}
+          TIP: ${{ steps.find.outputs.tip }}
+        run: |
+          set -euo pipefail
+          . "$RUNNER_TEMP/helpers.sh"
+
+          git push -q origin "$BRANCH"
+          gh workflow run ci.yml --ref "$BRANCH"
+          run_id=""
+          for _ in $(seq 1 30); do
+            sleep 10
+            run_id=$(gh run list --workflow ci.yml --branch "$BRANCH" --event workflow_dispatch \
+              -L 1 --json databaseId --jq '.[0].databaseId // empty')
+            [ -n "$run_id" ] && break
+          done
+          [ -n "$run_id" ] || fail_with_issue "Hg sync (default): CI never started for ${TIP:0:12}" \
+            "Dispatched ci.yml on \`$BRANCH\`, but no run appeared within 5 minutes."
+          echo "CI run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/$run_id"
+          if ! gh run watch "$run_id" --exit-status --interval 60 > /dev/null; then
+            fail_with_issue "Hg sync (default): CI failed for upstream ${TIP:0:12}" \
+              "ci.yml failed on \`$BRANCH\` (run ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/$run_id). \`$GIT_BRANCH\` was left unchanged; the test branch is kept for inspection."
+          fi
+
+      - name: Fast-forward the target branch and run its CI
+        if: steps.apply.outputs.branch != '' && env.DRY_RUN != 'true' && env.PROMOTE == 'true'
+        env:
+          BRANCH: ${{ steps.apply.outputs.branch }}
+          TIP: ${{ steps.find.outputs.tip }}
+        run: |
+          set -euo pipefail
+          . "$RUNNER_TEMP/helpers.sh"
+
+          git fetch -q origin "$GIT_BRANCH"
+          git merge-base --is-ancestor "origin/$GIT_BRANCH" HEAD || fail_with_issue \
+            "Hg sync (default): $GIT_BRANCH moved while syncing ${TIP:0:12}" \
+            "\`$GIT_BRANCH\` gained commits while CI ran, so \`$BRANCH\` can't be fast-forwarded onto it. Rebase or merge the test branch by hand."
+          git push -q origin "HEAD:refs/heads/$GIT_BRANCH"
+          echo "$GIT_BRANCH fast-forwarded to $(git rev-parse --short HEAD) (Hg ${TIP:0:12})."
+          gh workflow run ci.yml --ref "$GIT_BRANCH"
+
+          # The test branch's content now lives on main; drop it and its runs.
+          gh run list --branch "$BRANCH" -L 100 --json databaseId --jq '.[].databaseId' |
+            while read -r id; do gh api -X DELETE "repos/$GITHUB_REPOSITORY/actions/runs/$id" || true; done
+          git push -q origin --delete "$BRANCH"

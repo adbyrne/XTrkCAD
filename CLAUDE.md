@@ -99,6 +99,21 @@ found the git worktree dirty, and that includes untracked files.** Confirmed 202
 made three daily runs skip in a row. Commit, move, or remove the file, and keep the git worktrees
 clean between sessions.
 
+**Hg `default` → git `main` is synced on GitHub, not locally (since 2026-10-05).**
+`.github/workflows/hg-sync-default.yml` (on `main`) runs daily at 10:23 UTC. It clones Hg
+`default` anonymously from SF's read-only URL and diffs from the last synced node, which is the
+newest `Hg-Node:` commit trailer on `main`. It applies the diff to a
+`test/upstream-default-*` branch and runs `ci.yml` there. If CI passes, it fast-forwards `main`,
+runs `main`'s CI, and deletes the test branch together with its runs. If the patch won't apply,
+CI fails, or `main` moved in the meantime, it opens a GitHub issue titled
+`Hg sync (default): …` and leaves `main` alone. At session start, run
+`gh issue list --repo adbyrne/XTrkCAD --search "Hg sync in:title"`, and treat a `default` hit
+from the `incoming` check above as something the workflow will pick up, not as local work. The
+local `xtrkcad-sf-sync` script handles only `GTK3V2MAIN` now. Run it by hand with
+`gh workflow run hg-sync-default.yml`. For testing, the inputs are `dry_run`, `promote`,
+`from_node`, `to_node`, and `target_branch` (a scratch branch instead of `main`). `GTK3V2MAIN`
+gets the same treatment once the held git-only features have merged into Hg.
+
 If either of the two checks above (SF vs. `xtrkcad-hg`, pending file) surfaces something, tell the user which branches have new SF changes and ask:
 **"Upstream SF changes are pending — want me to compile and test them locally, then push to
 GitHub CI?"**
