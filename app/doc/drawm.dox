@@ -314,6 +314,17 @@ or boolean) -- invalid text is highlighted and the <b>Done</b> button is
 disabled until it's fixed, the same way an invalid document path already
 blocks Done on the Document Editor (\ref cmdFileNote).
 
+The line next to the buttons says what's wrong: the line and column where
+the text stops being valid JSON, with the text found there. Two common
+problems are named directly because they're hard to see: typographic
+(curly) quotes, which word processors and email programs substitute for
+plain <tt>"</tt> quotes, and non-breaking spaces, which often come along
+when text is copied from a web page. Replace them with plain quotes and
+ordinary spaces.
+
+A new JSON Note starts with a small template, <tt>{"kind": "", "id": ""}</tt>,
+that is already valid; fill in the values or replace it.
+
 <b>Format</b> pretty-prints the current text (re-indents it for
 readability) if it's currently valid; if not, it reports the same error
 <b>Validate</b> would.

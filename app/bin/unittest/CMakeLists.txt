@@ -377,6 +377,23 @@ target_link_libraries(notenamestest PRIVATE ${LIBS})
 
 add_test(NoteNamesTest notenamestest)
 
+# jsonnoteerror.c is standalone like notenames.c above; the test links the
+# real cJSON so every case uses the parser's own error positions.
+add_executable(jsonnoteerrortest
+	jsonnoteerrortest.c
+	../jsonnoteerror.c
+)
+
+target_include_directories(jsonnoteerrortest PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
+    ${CMAKE_SOURCE_DIR}/app/cJSON
+)
+
+target_link_libraries(jsonnoteerrortest PRIVATE cJSON ${LIBS})
+
+add_test(JsonNoteErrorTest jsonnoteerrortest)
+
 set_target_properties(
 	dxfformattest
 	shortentest
@@ -393,12 +410,13 @@ set_target_properties(
 	elevjointest
 	layergrouptest
 	notenamestest
+	jsonnoteerrortest
  	PROPERTIES FOLDER UnitTests
  )
 
 if(XTRKCAD_SANITIZE AND UNIX)
 	set(SANITIZE_FLAGS -fsanitize=address,undefined -fno-omit-frame-pointer)
-	foreach(t dxfformattest shortentest defaultstest pathstest utilitytest beziertest cornutest undostreamtest carstest carregistrytest careditlogictest reportstest elevjointest layergrouptest notenamestest)
+	foreach(t dxfformattest shortentest defaultstest pathstest utilitytest beziertest cornutest undostreamtest carstest carregistrytest careditlogictest reportstest elevjointest layergrouptest notenamestest jsonnoteerrortest)
 		target_compile_options(${t} PRIVATE ${SANITIZE_FLAGS})
 		target_link_options(${t} PRIVATE ${SANITIZE_FLAGS})
 	endforeach()

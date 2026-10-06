@@ -23,6 +23,7 @@
 #include "cJSON.h"
 #include "custom.h"
 #include "dynstring.h"
+#include "include/jsonnoteerror.h"
 #include "misc.h"
 #include "note.h"
 #include "form.h"
@@ -135,6 +136,8 @@ static paramData_t jsonNotePLs[] = {
 	/*9*/ { PD_BUTTON, JsonFieldSave, "jsonfieldsave", 0L, NULL },
 #define I_JSONDELETE (10)
 	/*10*/ { PD_BUTTON, JsonFieldDelete, "jsonfielddelete", PDO_DLGHORZ, NULL },
+#define I_JSONSTATUS (11)
+	/*11*/ { PD_MESSAGE, "", "jsonstatus", 0, I2VP(50) },
 };
 
 static paramGroup_t jsonNotePG = { "jsonNote", PGO_FULLDIALOGFROMBUILDER, jsonNotePLs, COUNT( jsonNotePLs ) };
@@ -148,6 +151,50 @@ BOOL_T IsJsonNote(track_p trk)
 	                                    extraDataNote_t );
 
 	return(xx->op == OP_NOTEJSON );
+}
+
+/**
+ * Turn a parse failure into a message that says where parsing stopped and,
+ * for the usual invisible culprits (curly quotes, non-breaking spaces), why.
+ * Shown in the dialog's status line, not just the text box's tooltip, so
+ * the reason is visible without hovering (dev-ML #4404).
+ *
+ * \param text IN the text that failed to parse
+ * \param errPtr IN where cJSON_ParseWithOpts() stopped
+ * \return the message, in a static buffer valid until the next call
+ */
+static const char *
+JsonNoteDescribeError(const char *text, const char *errPtr)
+{
+	static char msg[256];
+	jsonNoteErrorInfo_t info;
+
+	JsonNoteLocateError(text, errPtr, &info);
+	switch (info.cause) {
+	case JSONNOTEERR_EMPTY:
+		snprintf(msg, sizeof msg, "%s",
+		         _("Empty -- enter a JSON object, e.g. {\"kind\": \"station\"}"));
+		break;
+	case JSONNOTEERR_UNEXPECTED_END:
+		snprintf(msg, sizeof msg, "%s",
+		         _("Invalid JSON: the text ends too soon -- check for a missing }, ] or closing quote"));
+		break;
+	case JSONNOTEERR_TYPOGRAPHIC_QUOTE:
+		snprintf(msg, sizeof msg,
+		         _("Invalid JSON at line %d, column %d: typographic (curly) quote -- use a plain \" instead"),
+		         info.line, info.column);
+		break;
+	case JSONNOTEERR_NONBREAKING_SPACE:
+		snprintf(msg, sizeof msg,
+		         _("Invalid JSON at line %d, column %d: non-breaking space -- use an ordinary space instead"),
+		         info.line, info.column);
+		break;
+	default:
+		snprintf(msg, sizeof msg, _("Invalid JSON at line %d, column %d, near: %s"),
+		         info.line, info.column, info.snippet);
+		break;
+	}
+	return msg;
 }
 
 /**
@@ -177,12 +224,13 @@ JsonNoteIsValid(const char **errMsg)
 
 	const char *errPtr = NULL;
 	cJSON *parsed = cJSON_ParseWithOpts(buf, &errPtr, FALSE);
-	MyFree(buf);
 
 	if (parsed == NULL) {
-		*errMsg = _("Invalid JSON");
+		*errMsg = JsonNoteDescribeError(buf, errPtr);
+		MyFree(buf);
 		return FALSE;
 	}
+	MyFree(buf);
 	if (!cJSON_IsObject(parsed)) {
 		cJSON_Delete(parsed);
 		*errMsg = _("Must be a JSON object, e.g. {\"kind\": \"...\"} -- not an array/string/number");
@@ -472,11 +520,14 @@ JsonNoteValidate(void *junk)
 		p->bInvalid = TRUE;
 		wTooltipSetText(p->control, errMsg);
 		wControlHilite(p->control, TRUE);
+		wMessageSetValue(jsonNotePLs[I_JSONSTATUS].control, errMsg);
 		FormDialogOkActive(&jsonNotePG, FALSE);
 	} else {
 		JSONNOTE_LOG("jsonnote: valid\n");
 		p->bInvalid = FALSE;
 		wControlHilite(p->control, FALSE);
+		wMessageSetValue(jsonNotePLs[I_JSONSTATUS].control,
+		                 _("Valid JSON object"));
 		FormDialogOkActive(&jsonNotePG, TRUE);
 
 		int len = wTextGetSize(jsonTextEntry);
@@ -677,11 +728,9 @@ CreateEditJsonNote(char *title, const char *textData)
 	FormLoadControls(&jsonNotePG);
 	descTitle = title;
 
-	/* Reflect the just-loaded text's validity immediately -- an existing
+	/* Reflect the just-loaded text's validity immediately: an existing
 	 * note's text is always valid JSON (it couldn't have been saved
-	 * otherwise), but a freshly-created note's placeholder text (below)
-	 * is not, and should show as such rather than looking accidentally OK
-	 * until the user's first edit. */
+	 * otherwise), and so is a new note's starter template (below). */
 	JsonNoteValidate(NULL);
 
 	wShow(jsonNoteW);
@@ -755,8 +804,10 @@ void DescribeJsonNote(track_p trk, char * str, CSIZE_T len)
  */
 void NewJsonNoteUI(coOrd pos )
 {
-	const char *tmpPtrText =
-	        _("Replace this text with a JSON object, e.g. {\"kind\": \"station\", \"id\": \"WP\"}");
+	/* A valid starter object to fill in, not an instruction sentence:
+	 * Validate passes on the default text, and the template shows the
+	 * expected shape (dev-ML #4404). JSON syntax, so not translated. */
+	const char *tmpPtrText = "{\n\t\"kind\":\t\"\",\n\t\"id\":\t\"\"\n}";
 
 	jsonNoteData.pos = pos;
 	jsonNoteData.layer = curLayer;

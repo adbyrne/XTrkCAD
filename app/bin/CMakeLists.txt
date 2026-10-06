@@ -195,6 +195,7 @@ target_sources(xtrkcad-lib
     getargs.c
     icons.c
     i18n.c
+    jsonnoteerror.c
     jsonnoteui.c
     layout.c
     levenshtein.c
@@ -270,6 +271,7 @@ target_sources(xtrkcad-lib
     mapwindow.h
     menu.h
     misc.h
+    include/jsonnoteerror.h
     include/notenames.h
     note.h
     paths.h
