@@ -431,6 +431,8 @@ EXPORT void LayerGroupVisibilityOverrideReset(void)
 	layerVisibilityOverrideActive = FALSE;
 }
 
+static void LayerGroupApplyFilter(int groupIdx, BOOL_T showGroup);
+
 /**
  * Show every layer that's a member of layer group \p groupIdx and hide
  * every other layer, in one pass (SF #782 phase-0 scope item: a fast
@@ -449,6 +451,34 @@ EXPORT void LayerGroupVisibilityOverrideReset(void)
  */
 EXPORT void LayerGroupShowOnly(int groupIdx)
 {
+	LayerGroupApplyFilter(groupIdx, TRUE);
+}
+
+/**
+ * The mirror of LayerGroupShowOnly() (dev-ML #4404): hide every layer that's
+ * a member of layer group \p groupIdx and show every other layer. Same
+ * session-only filter -- Show All restores the real visibility, and the
+ * current layer always stays visible.
+ *
+ * \param groupIdx IN group to hide; a negative or out-of-range index is a
+ *                    no-op
+ */
+EXPORT void LayerGroupShowNot(int groupIdx)
+{
+	LayerGroupApplyFilter(groupIdx, FALSE);
+}
+
+/**
+ * Shared body of LayerGroupShowOnly()/LayerGroupShowNot(): apply the
+ * session-only view filter for group \p groupIdx, snapshotting the real
+ * visibility first if no filter is active yet. Which layers end up visible
+ * is decided by LayerGroupFilterShows() (dlayergroup.c, unit-tested).
+ *
+ * \param groupIdx IN group the filter is based on; out of range is a no-op
+ * \param showGroup IN TRUE to show only the group, FALSE to show all but it
+ */
+static void LayerGroupApplyFilter(int groupIdx, BOOL_T showGroup)
+{
 	if (groupIdx < 0 || groupIdx >= LayerGroupCount()) {
 		return;
 	}
@@ -461,8 +491,8 @@ EXPORT void LayerGroupShowOnly(int groupIdx)
 	}
 
 	for (unsigned int inx = 0; inx < NUM_LAYERS; inx++) {
-		BOOL_T shouldBeVisible = LayerGroupHasMember(groupIdx, (int)(inx + 1)) ||
-		                         inx == curLayer;
+		BOOL_T shouldBeVisible = LayerGroupFilterShows(groupIdx, (int)(inx + 1),
+		                         inx == curLayer, showGroup) != 0;
 
 		if (layers[inx].visible != shouldBeVisible) {
 			layers[inx].visible = shouldBeVisible;

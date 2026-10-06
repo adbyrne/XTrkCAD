@@ -73,6 +73,15 @@ int LayerGroupRemoveMember(int groupIdx, int layerIdx);
  * else 0 (including when \p groupIdx is invalid). */
 int LayerGroupHasMember(int groupIdx, int layerIdx);
 
+/** Visibility layer \p layerIdx (1-based) gets from a Show Only or Show Not
+ * view filter on group \p groupIdx. Show Only (\p showGroup nonzero) shows
+ * the group's members and hides every other layer; Show Not (\p showGroup
+ * zero) is its mirror, hiding the members and showing every other layer.
+ * The current layer (\p isCurrentLayer nonzero) always stays visible, since
+ * it can never be hidden. Returns 1 for visible, 0 for hidden. */
+int LayerGroupFilterShows(int groupIdx, int layerIdx, int isCurrentLayer,
+                          int showGroup);
+
 /** Number of members in group \p groupIdx, or -1 if the index is invalid. */
 int LayerGroupMemberCount(int groupIdx);
 

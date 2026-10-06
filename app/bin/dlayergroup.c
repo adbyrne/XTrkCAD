@@ -425,3 +425,13 @@ int LayerGroupMigrateFromLinkLists(int layerCount,
 
 	return created;
 }
+
+int LayerGroupFilterShows(int groupIdx, int layerIdx, int isCurrentLayer,
+                          int showGroup)
+{
+	if (isCurrentLayer) {
+		return 1;
+	}
+	int member = LayerGroupHasMember(groupIdx, layerIdx) != 0;
+	return showGroup ? member : !member;
+}

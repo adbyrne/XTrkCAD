@@ -50,6 +50,7 @@ BOOL_T WriteLayers( FILE * );
 void ReadLayerGroups( char * );
 void MigrateLayerLinksToGroups( void );
 void LayerGroupShowOnly( int groupIdx );
+void LayerGroupShowNot( int groupIdx );
 BOOL_T LayerGroupShowAll( void );
 void LayerGroupVisibilityOverrideReset( void );
 char * FormatLayerName(unsigned int layerNumber);

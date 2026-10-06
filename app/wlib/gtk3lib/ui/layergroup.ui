@@ -217,6 +217,20 @@
                               </packing>
                             </child>
                             <child>
+                              <object class="GtkButton" id="shownot">
+                                <property name="label" translatable="yes">Show Not</property>
+                                <property name="tooltip-text" translatable="yes">Hide this group's layers; show every other layer</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child>
                               <object class="GtkButton" id="showall">
                                 <property name="label" translatable="yes">Show All</property>
                                 <property name="tooltip-text" translatable="yes">Make every layer visible again</property>
@@ -227,7 +241,7 @@
                               <packing>
                                 <property name="expand">True</property>
                                 <property name="fill">True</property>
-                                <property name="position">1</property>
+                                <property name="position">2</property>
                               </packing>
                             </child>
                           </object>
