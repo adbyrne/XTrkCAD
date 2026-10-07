@@ -11,6 +11,7 @@ add_executable(dxfformattest
 target_include_directories(dxfformattest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 target_link_libraries(dxfformattest
+                      PRIVATE
                       dynstring
 					 ${LIBS})
 
@@ -29,6 +30,7 @@ target_include_directories(pathstest PRIVATE
 )
 
 target_link_libraries(pathstest
+                      PRIVATE
                       dynstring
 					  xtrkcad-wlib
 					  ${LIBS})
@@ -47,7 +49,7 @@ target_include_directories(defaultstest PRIVATE
     ${CMAKE_SOURCE_DIR}/app/wlib/include
 )
 
-target_link_libraries(defaultstest
+target_link_libraries(defaultstest PRIVATE
 					  ${LIBS})
 
 add_test(DefaultsTest defaultstest)
@@ -62,6 +64,7 @@ add_executable(shortentest
 target_include_directories(shortentest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 target_link_libraries(shortentest
+					PRIVATE
 					${LIBS})
 
 add_test(ShortenTest shortentest)
@@ -78,9 +81,9 @@ target_include_directories(utilitytest PRIVATE
     ${CMAKE_SOURCE_DIR}/app/wlib/include
 )
 
-target_link_libraries(utilitytest ${LIBS})
+target_link_libraries(utilitytest PRIVATE ${LIBS})
 if(UNIX)
-    target_link_libraries(utilitytest m)
+    target_link_libraries(utilitytest PRIVATE m)
 endif()
 
 add_test(UtilityTest utilitytest)
@@ -97,9 +100,9 @@ target_include_directories(beziertest PRIVATE
     ${CMAKE_SOURCE_DIR}/app/wlib/include
 )
 
-target_link_libraries(beziertest ${LIBS})
+target_link_libraries(beziertest PRIVATE ${LIBS})
 if(UNIX)
-    target_link_libraries(beziertest m)
+    target_link_libraries(beziertest PRIVATE m)
 endif()
 
 add_test(BezierTest beziertest)
@@ -116,9 +119,9 @@ target_include_directories(cornutest PRIVATE
     ${CMAKE_SOURCE_DIR}/app/wlib/include
 )
 
-target_link_libraries(cornutest ${LIBS})
+target_link_libraries(cornutest PRIVATE ${LIBS})
 if(UNIX)
-    target_link_libraries(cornutest m)
+    target_link_libraries(cornutest PRIVATE m)
 endif()
 
 add_test(CornuTest cornutest)
@@ -135,7 +138,7 @@ target_include_directories(undostreamtest PRIVATE
     ${CMAKE_SOURCE_DIR}/app/wlib/include
 )
 
-target_link_libraries(undostreamtest ${LIBS})
+target_link_libraries(undostreamtest PRIVATE ${LIBS})
 
 add_test(UndoStreamTest undostreamtest)
 
