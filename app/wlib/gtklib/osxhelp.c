@@ -129,6 +129,7 @@ void wHelp(const char * topic)
 
 	if (buffer.length>255) {
 		printf("Help Topic too long %s", buffer.page);
+		free(buffer.page);
 		return;
 	}
 
@@ -140,6 +141,7 @@ void wHelp(const char * topic)
 				kill(pidOfChild, SIGKILL);        /* tidy up on next call */
 			}
 			handleOfPipe = 0;
+			free(buffer.page);
 			return;
 		}
 
