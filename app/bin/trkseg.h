@@ -107,6 +107,23 @@ typedef struct trkSeg_t * trkSeg_p;
 #define SEG_DIMLIN		('M')
 #define SEG_TBLEDGE		('Q')
 
+/** TRUE if a segment is one of the four "track" types (straight, curve,
+ * turntable joint, or bezier track) -- real connectivity geometry, as
+ * opposed to their decorative-line counterparts (SEG_STRLIN/SEG_CRVLIN/
+ * SEG_BEZLIN) or anything else in the SEG_* list above (SEG_POLY,
+ * SEG_BENCH, SEG_TEXT, SEG_TBLEDGE, ...). SegProc()'s dispatch
+ * (trkseg.c) actually handles seven types total -- the four here plus
+ * their three decorative-line counterparts -- but has no case at all
+ * for the rest, and CHECKMSG(FALSE, ...)-aborts the whole program if
+ * given one. This macro is deliberately narrower than "everything
+ * SegProc() accepts": code walking a turnout/compound part's own PATH
+ * (GetParamsTurnout(), cturnout.c) wants real connectivity only, not
+ * decorative outline segments, and that PATH data can legitimately (or,
+ * on a malformed part, accidentally) reference either kind -- confirmed
+ * via a real crash, SF #778. Check this (or handle the decorative-line
+ * types explicitly) before passing a segment to SegProc() from data
+ * that isn't guaranteed track-only; don't assume every segment
+ * encountered is walkable. */
 #define IsSegTrack( S ) ( (S)->type == SEG_STRTRK || (S)->type == SEG_CRVTRK || (S)->type == SEG_JNTTRK || (S)->type == SEG_BEZTRK)
 
 extern dynArr_t tempSegs_da;
