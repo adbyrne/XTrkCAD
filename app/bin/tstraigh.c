@@ -638,8 +638,8 @@ static BOOL_T SplitStraight( track_p trk, coOrd pos, EPINX_T ep,
 {
 	track_p trk1;
 
-	trk1 = NewStraightTrack( 1-ep?GetTrkEndPos(trk,ep):pos,
-	                         1-ep?pos:GetTrkEndPos(trk,ep) );
+	trk1 = NewStraightTrack( (1-ep)?GetTrkEndPos(trk,ep):pos,
+	                         (1-ep)?pos:GetTrkEndPos(trk,ep) );
 	DIST_T height;
 	int opt;
 	GetTrkEndElev(trk,ep,&opt,&height);
