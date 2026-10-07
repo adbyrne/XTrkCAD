@@ -2124,8 +2124,8 @@ static BOOL_T GetParamsDraw( int inx, track_p trk, coOrd pos,
 		if (fabs(xx->segs[0].u.c.radius) > 0.5) {
 			double min_angle = R2D(2*acos(1.0-(0.025/fabs(
 			                xx->segs[0].u.c.radius))));    //Error max is 0.025" (SF #550 --
-			                //0.1" produced a visibly faceted polyline once committed as real
-			                //editable geometry, not just a rendering subdivision)
+			//0.1" produced a visibly faceted polyline once committed as real
+			//editable geometry, not just a rendering subdivision)
 			int number = (int) ceil(xx->segs[0].u.c.a1/min_angle);
 			double arc_size = xx->segs[0].u.c.a1/number;
 			for (int i=0; i<=number; i++) {
@@ -2186,7 +2186,7 @@ static BOOL_T GetParamsDraw( int inx, track_p trk, coOrd pos,
 				if (fabs(segPtr->u.c.radius) > 0.2) {
 					double min_angle = 360*acos(1.0-(0.025/fabs(
 					                segPtr->u.c.radius)))/M_PI;    //Error max is 0.025"
-					                //(SF #550, see the matching comment above)
+					//(SF #550, see the matching comment above)
 					int number = (int)ceil(segPtr->u.c.a1/min_angle);
 					double arc_size = segPtr->u.c.a1/number;
 					for (int j=1-first; j<number; j++) {
