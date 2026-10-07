@@ -156,7 +156,19 @@ EXPORT int InputError(
 	va_end( ap );
 	if (showLine) {
 		*mp++ = '\n';
-		strcpy( mp, paramLine );
+		/* paramLine is read via fgets() from the file being loaded (up to
+		 * STR_HUGE_SIZE bytes) -- an untrusted, potentially adversarial or
+		 * corrupt-file-controlled length. message[] is a fixed-size buffer
+		 * already partially filled above by the header/msg text, and a
+		 * further strcat() of a fixed prompt follows this block -- bound
+		 * the copy to what's actually left (reserving headroom for that
+		 * trailing prompt) instead of trusting paramLine to fit. */
+		size_t bufSize = sizeof(message);
+		size_t used = (size_t)(mp - message);
+		size_t reserve = 128; /* headroom for the trailing "continue?" prompt */
+		size_t avail = (used + reserve < bufSize) ? bufSize - used - reserve : 0;
+		strncpy( mp, paramLine, avail );
+		mp[avail] = '\0';
 	}
 	strcat( mp, _("\nDo you want to continue?") );
 	if (!(ret = wNoticeEx( NT_ERROR, message, _("Continue"), _("Stop") ))) {
@@ -384,7 +396,14 @@ EXPORT BOOL_T GetArgs(
 							*ps++ = '\"';
 						} else {
 							*ps = '\0';
-							cp++;
+							/* *++cp above may have already landed on the
+							 * terminating NUL (closing quote was the last
+							 * byte of input) -- only advance past it if
+							 * there's more to consume, or this reads one
+							 * byte past the buffer. */
+							if (*cp) {
+								cp++;
+							}
 							break;
 						}
 					} else {
