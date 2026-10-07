@@ -1814,7 +1814,13 @@ static void GroupOk( void * unused )
 			EnableCommands();
 		}
 	}
-	if (f) { fclose(f); }
+	if (f) {
+		if ( !rc ) {
+			NoticeMessage( MSG_WRITE_FAILURE, _("Ok"), NULL, strerror(errno),
+			               _("Custom") );
+		}
+		fclose(f);
+	}
 	DoChangeNotification( CHANGE_PARAMS );
 	wHide( groupW );
 	wDrawDelayUpdate( mainD.d, FALSE );
