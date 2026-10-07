@@ -511,17 +511,40 @@ extern wIndex_t describeCmdInx;
 extern BOOL_T inDescribeCmd;
 extern BOOL_T descUndoStarted;
 extern char * descTitle;
-typedef enum { DESC_NULL, DESC_POS, DESC_POS3D, DESC_FLOAT, DESC_ANGLE, DESC_LONG, DESC_COLOR, DESC_DIM, DESC_PIVOT, DESC_LAYER, DESC_STRING, DESC_TEXT, DESC_LIST, DESC_EDITABLELIST, DESC_BOXED } descType;
+typedef enum {
+	DESC_NULL,
+	DESC_POS,	/**< X,Y entry pair on one row */
+	/** X,Y,Z entry triple on one row; Z is stored at valueP2.
+	 * Z can be made read-only (DESC_Z_RO) or hidden (DESC_Z_IGNORE), and
+	 * stays editable when X,Y are DESC_RO.
+	 * \warning No track type uses this yet, so the code path (including
+	 * the DESC_CHANGE3 refresh step) has never been run.
+	 * \todo Candidate for an X,Y,Z tab order per end point in the
+	 * Bezier/Cornu/Compound Describe dialogs. Field indices then shift,
+	 * and the demo scripts address Describe fields by index. */
+	DESC_POS3D,
+	DESC_FLOAT,
+	DESC_ANGLE,
+	DESC_LONG,
+	DESC_COLOR,
+	DESC_DIM,
+	DESC_PIVOT,
+	DESC_LAYER,
+	DESC_STRING,
+	DESC_TEXT,
+	DESC_LIST,
+	DESC_EDITABLELIST,
+	DESC_BOXED
+} descType;
 #define DESC_RO			(1<<0)
 #define DESC_IGNORE		(1<<1)
 #define DESC_NOREDRAW	(1<<2)
-#define DESC_CHANGE3    (1<<3)
+#define DESC_CHANGE3    (1<<3)	/**< DESC_POS3D only: refresh Z control */
 #define DESC_CHANGE2    (1<<4)
-#define DESC_Z_RO       (1<<5)
-#define DESC_Z_IGNORE   (1<<6)
+#define DESC_Z_RO       (1<<5)	/**< DESC_POS3D only: Z read-only */
+#define DESC_Z_IGNORE   (1<<6)	/**< DESC_POS3D only: Z hidden */
 #define DESC_CHANGE		(1<<8)
 typedef enum { DESC_PIVOT_FIRST, DESC_PIVOT_MID, DESC_PIVOT_SECOND, DESC_PIVOT_NONE } descPivot_t;
-#define DESC_PIVOT_1
 typedef struct {
 	descType type;
 	char * label;
@@ -530,8 +553,8 @@ typedef struct {
 	int mode;
 	wControl_p control0;
 	wControl_p control1;
-	wControl_p control2;
-	void * valueP2;
+	wControl_p control2;	/**< DESC_POS3D only: Z control */
+	void * valueP2;		/**< DESC_POS3D only: Z value */
 } descData_t, * descData_p;
 typedef void (*descUpdate_t)( track_p, int, descData_p, BOOL_T );
 void DoDescribe( char *, track_p, descData_p, descUpdate_t );

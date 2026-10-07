@@ -22,7 +22,6 @@
 
 #include "common.h"
 #include "cundo.h"
-#include "param.h"
 #include "fileio.h"
 #include "icons.h"
 #include "cselect.h"
@@ -34,8 +33,6 @@
 
 /** @logcmd @showrefby `describe=n` `cdescribe.c` */
 static int log_describe = 0;
-
-int bOldDescribe = FALSE;
 
 static paramGroup_t * describePG;
 EXPORT wIndex_t describeCmdInx;
@@ -57,9 +54,16 @@ static char descTitleBuf[STR_SIZE];	/* backing store for descTitle */
 
 static wMenu_p descPopupM;
 
-static unsigned int
-editableLayerList[NUM_LAYERS];		/**< list of non-frozen layers */
-static int * layerValue;		/**pointer to current Layer (int *) */
+/**
+ * The Layer dropdown does not list every layer, so its index is not a layer
+ * number: descLayerMap[] maps each dropdown index to its layer. The dropdown
+ * edits descLayerInx, which DescribeApplyLayer() applies on Done (the control
+ * is PDO_NOPSHACT, see GTK3 Issue 14). The track type's layer field is left
+ * holding a real layer number.
+ */
+static unsigned int descLayerMap[NUM_LAYERS];
+static int descLayerCnt;		/**< number of entries in descLayerMap */
+static wIndex_t descLayerInx;		/**< dropdown index */
 
 static paramFloatRange_t rdata = { 0, 0, 10, PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW };
 static paramIntegerRange_t idata = { 0, 0, 10, PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW };
@@ -69,44 +73,29 @@ static char * boxLabels[] = { "", NULL };
 
 
 /**
- * A mapping table is used to map the index in the dropdown list to the layer
- * number. While usually this is a 1:1 translation, the values differ if there
- * are frozen layer. Frozen layers are not shown in the dropdown list.
- */
-
-static void CreateEditableLayersList()
-{
-	int i = 0;
-	int j = 0;
-
-	while (i < NUM_LAYERS) {
-		if (!GetLayerFrozen(i)) {
-			editableLayerList[j++] = i;
-		}
-
-		i++;
-	}
-}
-
-/**
- * Search a layer in the list of editable layers.
+ * Fill descLayerMap with the layers the dropdown offers: the track's own
+ * layer only if it is frozen (read-only), otherwise every layer that is not
+ * frozen.
  *
- * \param[in] layer layer to search
- * \return the index into the list
+ * \param layer IN the track's layer
+ * \param ro IN TRUE if the track's layer is frozen
+ * \return the dropdown index of \a layer
  */
-
-static int
-SearchEditableLayerList(unsigned int layer)
+static wIndex_t BuildDescLayerMap(unsigned int layer, BOOL_T ro)
 {
-	int i;
+	wIndex_t inx = 0;
 
-	for (i = 0; i < NUM_LAYERS; i++) {
-		if (editableLayerList[i] == layer) {
-			return (i);
+	descLayerCnt = 0;
+	for (unsigned int l = 0; l < NUM_LAYERS; l++) {
+		if (ro ? (l != layer) : GetLayerFrozen(l)) {
+			continue;
 		}
+		if (l == layer) {
+			inx = descLayerCnt;
+		}
+		descLayerMap[descLayerCnt++] = l;
 	}
-
-	return (-1);
+	return inx;
 }
 
 static void DrawDescHilite(BOOL_T selected)
@@ -122,6 +111,22 @@ static void DrawDescHilite(BOOL_T selected)
 	              DRAW_TRANSPARENT);
 }
 
+/**
+ * Set the highlight rectangle to the track's bounding box plus descBorder.
+ *
+ * \param trk IN track to highlight
+ */
+static void SetDescHiliteBox(track_p trk)
+{
+	coOrd hi, lo;
+
+	GetBoundingBox(trk, &hi, &lo);
+	descOrig.x = lo.x - descBorder;
+	descOrig.y = lo.y - descBorder;
+	descSize.x = hi.x - lo.x + 2*descBorder;
+	descSize.y = hi.y - lo.y + 2*descBorder;
+}
+
 
 
 static void DescribeUpdate(
@@ -129,7 +134,6 @@ static void DescribeUpdate(
         int inx,
         void * data)
 {
-	coOrd hi, lo;
 	descData_p ddp;
 
 	if (inx < 0) {
@@ -139,7 +143,8 @@ static void DescribeUpdate(
 	ddp = (descData_p)pg->paramPtr[inx].context;
 
 	if ((ddp->mode&(DESC_RO|DESC_IGNORE)) != 0) {
-		/* For POS3D: allow Z (control2) edit even when XY is RO */
+		/* For POS3D: allow Z (control2) edit even when XY is RO.
+		 * DESC_POS3D: untested, see track.h */
 		if (ddp->type != DESC_POS3D || pg->paramPtr[inx].control != ddp->control2
 		    || (ddp->mode & DESC_Z_IGNORE)) {
 			return;
@@ -153,29 +158,24 @@ static void DescribeUpdate(
 	LOG( log_describe, 3, ( "DescribeUpdate( %s %d:%s\n",
 	                        pg->nameStr, inx, (inx >= 0)?(ddp->label): ""));
 
+	if (!descTrk) {
+		// A late focus-out after Done: must not open an undo that
+		// nothing would close.
+		return;
+	}
+
 	if (!descUndoStarted) {
 		UndoStart( descTitle, "Change Track" );
 		descUndoStarted = TRUE;
-	}
-
-	if (!descTrk) {
-		return;    // In case timer pops after OK
 	}
 
 	UndoModify(descTrk);
 	descUpdateFunc(descTrk, (int)(ddp-descData), descData, FALSE);
 
 	if (descTrk) {
-		GetBoundingBox(descTrk, &hi, &lo);
 		if ((ddp->mode&DESC_NOREDRAW) == 0) {
-			descOrig = lo;
-			descSize = hi;
-			descOrig.x -= descBorder;
-			descOrig.y -= descBorder;
-			descSize.x -= descOrig.x-descBorder;
-			descSize.y -= descOrig.y-descBorder;
+			SetDescHiliteBox(descTrk);
 		}
-
 
 		if (OFF_D(mapD.orig, mapD.size, descOrig, descSize)) {
 			ErrorMessage(MSG_MOVE_OUT_OF_BOUNDS);
@@ -219,20 +219,54 @@ static void DescribeUpdate(
 }
 
 
+/**
+ * Move the described track to the layer picked in the dropdown, if that
+ * differs from its current layer, as part of the Describe undo.
+ */
+static void DescribeApplyLayer(void)
+{
+	for (descData_p ddp = descData; ddp->type != DESC_NULL; ddp++) {
+		if (ddp->type != DESC_LAYER) {
+			continue;
+		}
+		if ((ddp->mode & (DESC_RO|DESC_IGNORE)) != 0
+		    || descLayerInx < 0 || descLayerInx >= descLayerCnt) {
+			return;
+		}
+		unsigned int layer = descLayerMap[descLayerInx];
+		if (layer == GetTrkLayer(descTrk)) {
+			return;
+		}
+		if (!descUndoStarted) {
+			UndoStart( descTitle, "Change Track" );
+			descUndoStarted = TRUE;
+		}
+		UndoModify(descTrk);
+		SetTrkLayer(descTrk, layer);
+		return;
+	}
+}
+
+
 EXPORT void DescribeDone(void * junk)
 {
+	if (descTrk && describePG && describePG->win
+	    && wWinIsVisible(describePG->win)) {
+		// Dialog buttons act on button-press, before GTK moves the
+		// focus. A field still being edited would then only be
+		// committed by a focus-out after descTrk is cleared, and its
+		// value lost. Moving the focus now commits it while descTrk
+		// is still valid.
+		wControlSetFocus((wControl_p)describePG->cancelB);
+	}
+
 	if (descTrk) {
 		CHECK(!IsTrackDeleted(descTrk));
+		DescribeApplyLayer();
 		// TODO_CANCEL last arg could be true
 		if ( descUpdateFunc && descTrk && GetTrkType(descTrk) != T_NOTE ) {
 			descUpdateFunc(descTrk, -1, descData, !descUndoStarted);
 		}
-		if (layerValue && *layerValue>=0) {
-			SetTrkLayer(descTrk,
-			            editableLayerList[*layerValue]);
-		}
-		// wipe out reference
-		layerValue = NULL;
 		descTrk = NULL;
 	}
 
@@ -316,8 +350,7 @@ static paramData_p CreateDescribeField(
 
 static paramGroup_p CreateDescribeDialog(
         char * sTitle,
-        descData_p data,
-        descUpdate_t update)
+        descData_p data)
 {
 	// Create a param group
 	DYNARR_APPEND( paramGroup_p, descGroup_da, 10)
@@ -340,7 +373,7 @@ static paramGroup_p CreateDescribeDialog(
 			// Point to 2nd double of a coOrd
 			pdp->valueP = (char *)pdp[-1].valueP + offsetof( coOrd, y );
 			break;
-		case DESC_POS3D:
+		case DESC_POS3D:	/* untested, see track.h */
 			pdp = CreateDescribeField( PD_FLOAT, pg, ddp );
 			pdp->option |= PDO_SAMEROW | PDO_NEWSAMEROW;
 			pdp->context = (void*)ddp;
@@ -379,6 +412,7 @@ static paramGroup_p CreateDescribeDialog(
 		case DESC_LAYER:
 			pdp = CreateDescribeField( PD_COMBOLIST, pg, ddp );
 			pdp->option |= PDO_LISTINDEX|PDO_NOPSHACT;
+			pdp->valueP = &descLayerInx;
 			break;
 		case DESC_STRING:
 			pdp = CreateDescribeField( PD_STRING, pg, ddp );
@@ -419,7 +453,8 @@ static paramGroup_p CreateDescribeDialog(
 }
 
 
-void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
+void DoDescribe(char * title, track_p track, descData_p data,
+                descUpdate_t update)
 {
 
 	if (!inDescribeCmd) {
@@ -450,7 +485,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 
 	if ( pg == NULL ) {
 		// No: Create a new dialog for it
-		pg = CreateDescribeDialog( MyStrdup( sKey ), data, update);
+		pg = CreateDescribeDialog( MyStrdup( sKey ), data );
 		FormCreateDialog( pg, sTitle,
 		                  //_("Done"), DescribeDone,
 		                  NULL, NULL,
@@ -490,8 +525,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 		LOG( log_describe, 2, ( "Desc Done\n" ) );
 	}
 
-	CreateEditableLayersList();
-	descTrk = trk;
+	descTrk = track;
 	descData = data;
 	descUpdateFunc = update;
 
@@ -499,7 +533,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 	int inx;
 	descData_p ddp;
 	int ro_mode;
-	ro_mode = (GetLayerFrozen(GetTrkLayer(trk))?DESC_RO:0);
+	ro_mode = (GetLayerFrozen(GetTrkLayer(track))?DESC_RO:0);
 
 	if (ro_mode) {
 		LOG( log_describe, 3, ( "DoDescribe-RO-layer: %s\n", sKey ) );
@@ -537,7 +571,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 			wControlActive(ddp->control1,
 			               (ddp->mode&DESC_RO)?FALSE:TRUE);
 			break;
-		case DESC_POS3D:
+		case DESC_POS3D:	/* untested, see track.h */
 			wControlShow( ddp->control1, TRUE );
 			wControlActive(ddp->control1,
 			               (ddp->mode&DESC_RO)?FALSE:TRUE);
@@ -548,28 +582,16 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 
 		case DESC_LAYER:
 			wListClear((wList_p)ddp->control0);  // Rebuild list on each invocation
-
-			if (ro_mode) {
+			descLayerInx = BuildDescLayerMap(*(unsigned int *)ddp->valueP,
+			                                 ro_mode);
+			for (inx = 0; inx < descLayerCnt; inx++) {
 				char *layerFormattedName;
-				layerFormattedName = FormatLayerName(*(int *)(ddp->valueP));
-				wComboBoxAddValue((wList_p)ddp->control0, layerFormattedName, I2VP(inx));
+				layerFormattedName = FormatLayerName(descLayerMap[inx]);
+				wComboBoxAddValue((wList_p)ddp->control0, layerFormattedName,
+				                  I2VP(inx));
 				free(layerFormattedName);
-				*(int *)(ddp->valueP) = 0;
-				layerValue = (int *)(ddp->valueP);
-				wControlActive(ddp->control0, FALSE);
-			} else {
-				for (inx = 0; inx<NUM_LAYERS; inx++) {
-					char *layerFormattedName;
-					layerFormattedName = FormatLayerName(editableLayerList[inx]);
-					wComboBoxAddValue((wList_p)ddp->control0, layerFormattedName, I2VP(inx));
-					free(layerFormattedName);
-				}
-
-				*(int *)(ddp->valueP) = SearchEditableLayerList(*(int *)(ddp->valueP));
-				layerValue = (int *)(ddp->valueP);
-				wControlActive(ddp->control0, TRUE);
 			}
-
+			wControlActive(ddp->control0, !ro_mode);
 			break;
 
 		default:
@@ -579,7 +601,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 
 	describePG = pg;
 	FormLoadControls(describePG);
-	sprintf(message, "%s (T%d)", sTitle, GetTrkIndex(trk));
+	sprintf(message, "%s (T%d)", sTitle, GetTrkIndex(track));
 	wWinSetTitle(describePG->win, message);
 	wShow(describePG->win);
 }
@@ -646,17 +668,10 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 			return C_CONTINUE;
 		}
 		if (GetLayerFrozen(GetTrkLayer(trk)) && !(MyGetKeyState()& WKEY_SHIFT)) {
-			InfoMessage("Track is Frozen, Add Shift to Describe");
+			InfoMessage(_("Track is Frozen, Add Shift to Describe"));
 			trk = NULL;
 			return C_CONTINUE;
 		}
-		if (describePG && describePG->win && wWinIsVisible(describePG->win)
-		    && descTrk) {
-			// finish update
-			descUpdateFunc(descTrk, -1, descData, TRUE);
-			descTrk = NULL;
-		}
-
 		descBorder = mainD.scale*0.1;
 
 		if (descBorder < trackGauge) {
@@ -664,11 +679,7 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 		}
 
 		inDescribeCmd = TRUE;
-		GetBoundingBox(trk, &descSize, &descOrig);
-		descOrig.x -= descBorder;
-		descOrig.y -= descBorder;
-		descSize.x -= descOrig.x-descBorder;
-		descSize.y -= descOrig.y-descBorder;
+		SetDescHiliteBox(trk);
 		descNeedDrawHilite = TRUE;
 		DescribeTrack(trk, msg, 255);
 		inDescribeCmd = FALSE;
@@ -687,14 +698,7 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 		if (describePG && describePG->win && wWinIsVisible(describePG->win)
 		    && descTrk) {
 			descNeedDrawHilite = TRUE;
-			coOrd lo,hi;
-			GetBoundingBox(descTrk,&hi,&lo);
-			descOrig = lo;
-			descSize = hi;
-			descOrig.x -= descBorder;
-			descOrig.y -= descBorder;
-			descSize.x -= descOrig.x-descBorder;
-			descSize.y -= descOrig.y-descBorder;
+			SetDescHiliteBox(descTrk);
 
 			DrawDescHilite(TRUE);
 
