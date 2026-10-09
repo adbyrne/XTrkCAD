@@ -204,13 +204,22 @@ fi
 
 if test "x$GTK_DEBUG_GDB" != x; then
     gdb --args "$XTRKCAD_BUNDLE/Contents/MacOS/XtrkCAD-bin" "$@"
-else
-    if `tty -s`; then
-        $XTRKCAD_BUNDLE/Contents/MacOS/XtrkCAD-bin "$@"
+elif test "x$GTK_DEBUG_LLDB" != x; then
+    # lldb wants encoding part of these variables
+    base_locale="${LANG%%.*}"
+
+    if locale -a | grep -Fxq "${base_locale}.UTF-8"; then
+        LANG="${base_locale}.UTF-8"
+        LC_MESSAGES=$LANG
+        LC_ALL=$LANG
     else
-        nohup "$XTRKCAD_BUNDLE/Contents/MacOS/XtrkCAD-bin" "$@" >/dev/null &
+        LANG=C
+        LC_MESSAGES=$LANG
+        LC_ALL=$LANG
     fi
+
+    lldb "$XTRKCAD_BUNDLE/Contents/MacOS/XtrkCAD-bin" -- "$@"
+
+else
+    exec "$XTRKCAD_BUNDLE/Contents/MacOS/XtrkCAD-bin" "$@"
 fi
-
-echo "XTrackCAD: Finishing $0"
-
