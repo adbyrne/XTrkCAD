@@ -244,7 +244,7 @@
 		{"line": "carpart-isLoco", "contents": "Is the Car a Locomotive?" },
 		{"line": "carpart-partno-list", "contents": "Part Number and Description" },
 		{"line": "carpart-partno", "contents": "Manufacturer Part Number" },
-		{"line": "carpart-import", "contents": "Use the Selected figure as the car image" },
+		{"line": "carpart-import", "contents": "Use the selected figure as the car image. Draw the figure and select it on the layout before opening this dialog" },
 		{"line": "carpart-reset", "contents": "Use the default figure as the car image" },
 		{"line": "carpart-desc", "contents": "Optional description of the Car Part" },
 		{"line": "carpart-flip", "contents": "Flip car image" },

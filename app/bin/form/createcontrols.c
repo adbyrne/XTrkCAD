@@ -155,10 +155,29 @@ static void ListPush(wIndex_t inx, const char* val, wIndex_t op,
 
 
 
+/**
+ * Re-evaluate the Ok button of a field's dialog from every field's
+ * bInvalid state. Used both when a push leaves a field invalid (disable)
+ * and when a previously invalid field becomes valid again (re-enable):
+ * without the latter, a dialog with no changeProc to re-gate Ok keeps it
+ * disabled for good after a single bad entry.
+ *
+ * \param p IN the field that was just pushed
+ */
+
+static void RegateOk(paramData_p p)
+{
+	if (p->group->okB) {
+		wControlActive((wControl_p)p->group->okB,
+		               FormCheckInputs(p->group, (wControl_p)p->group->okB));
+	}
+}
+
 static void IntegerPush(const char* value, void* dp)
 {
 	paramData_p p = (paramData_p)dp;
 	long valL;
+	wBool_t wasInvalid = p->bInvalid;
 
 	// const char* value;
 
@@ -183,23 +202,22 @@ static void IntegerPush(const char* value, void* dp)
 		 * just this one), so it also covers other fields left invalid by
 		 * this same early-return path, and it sets the Ok button's tooltip
 		 * to explain why. */
-		if (p->group->okB) {
-			wControlActive((wControl_p)p->group->okB,
-			               FormCheckInputs(p->group, (wControl_p)p->group->okB));
-		}
+		RegateOk(p);
 		return;
 	}
 
 	if (!FormIntegerRangeCheck(p, valL)) {
-		if (p->group->okB) {
-			wControlActive((wControl_p)p->group->okB,
-			               FormCheckInputs(p->group, (wControl_p)p->group->okB));
-		}
+		RegateOk(p);
 		return;
 	}
 
 	p->bInvalid = FALSE;
 	wControlHilite(p->control, p->bInvalid);
+	if (wasInvalid) {
+		/* Re-gate before changeProc so the dialog's own cross-field
+		 * validation still has the final word on Ok. */
+		RegateOk(p);
+	}
 
 	// entry fields are pushed on focus-out even when the user didn't edit
 	// anything (e.g. focus moves away because a dialog tab was switched or
@@ -227,6 +245,7 @@ static void FloatPush(const char* value, void * dp)
 {
 	paramData_p p = (paramData_p)dp;
 	FLOAT_T valF;
+	wBool_t wasInvalid = p->bInvalid;
 
 	//if (strlen(val) == 1 && val[strlen(val) - 1] == '\n') {
 	//	value = wEntryGetValue(p->control);
@@ -243,21 +262,19 @@ static void FloatPush(const char* value, void * dp)
 		 * Ok (and its tooltip) from every field's bInvalid, since changeProc
 		 * never runs for a value we refuse to write into the dialog's bound
 		 * variable. */
-		if (p->group->okB) {
-			wControlActive((wControl_p)p->group->okB,
-			               FormCheckInputs(p->group, (wControl_p)p->group->okB));
-		}
+		RegateOk(p);
 		return;
 	}
 
 	if (!FormFloatRangeCheck(p, valF)) {
-		if (p->group->okB) {
-			wControlActive((wControl_p)p->group->okB,
-			               FormCheckInputs(p->group, (wControl_p)p->group->okB));
-		}
+		RegateOk(p);
 		return;
 	}
 	p->bInvalid = FALSE;
+	if (wasInvalid) {
+		/* See IntegerPush: re-gate before changeProc. */
+		RegateOk(p);
+	}
 
 	if (DO_MACRO_RECORD(p)) {
 		FormMacroRecord("PARAMETER %s %s %f\n", p->group->nameStr, p->nameStr, valF);
@@ -278,6 +295,7 @@ static bool StringPush(const char* val, void* dp)
 	paramData_p p = (paramData_p)dp;
 	// const char* value;
 	wBool_t result = FALSE;
+	wBool_t wasInvalid = p->bInvalid;
 
 	if (DO_MACRO_RECORD(p)) {
 		FormMacroRecord("PARAMETER %s %s %s\n", p->group->nameStr, p->nameStr, val);
@@ -297,12 +315,17 @@ static bool StringPush(const char* val, void* dp)
 
 	// Cast away const - validation functions modify the string (strip whitespace)
 	if(!FormStringCheckValue(p, (char*)val)) {
+		RegateOk(p);
 		return(TRUE);
 	}
 
 	FormStringGetValue(p, (char*)val);
 	p->bInvalid = FALSE;
 	wControlHilite(p->control, p->bInvalid);
+	if (wasInvalid) {
+		/* See IntegerPush: re-gate before changeProc. */
+		RegateOk(p);
+	}
 
 	if ((p->option & PDO_NOPSHACT) == 0 && p->group->changeProc)
 		// CAST_AWAY_CONST: param 3 should be const but its a big change

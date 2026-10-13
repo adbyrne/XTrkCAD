@@ -2913,12 +2913,19 @@ static void NewTurnOk( void * context )
 	coOrd pos;
 	ANGLE_T angle;
 
+	/* pick up a field still being edited (Ok acts before its focus-out);
+	 * done in the user locale, before switching to C for the file */
+	FormFetchData( &turnDesignPG );
+
 	SetCLocale();
 	//
 	// Generate segments and endPts
 	//
 	pp=LoadSegs( curDesign, TRUE );
-	if ( pp == NULL ) { return; }
+	if ( pp == NULL ) {
+		SetUserLocale();
+		return;
+	}
 
 	f = OpenCustom("a");
 
@@ -3137,11 +3144,15 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 		for ( int inx = 0; inx<I_TOMANUF; inx++ ) {
 			paramData_p ptr = turnDesignPLs+inx;
 			ptr->bInvalid = FALSE;
+			/* designs share the tdVal[] slots: a hidden design's stale
+			 * entry must not be fetched over the visible one's value */
 			if ( inx >= curDesign->iDescFirst &&
 			     inx < iDescLast ) {
 				ptr->bShown = TRUE;
+				ptr->option &= ~PDO_DLGIGNORE;
 			} else {
 				ptr->bShown = FALSE;
+				ptr->option |= PDO_DLGIGNORE;
 			}
 		}
 
@@ -3192,6 +3203,8 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 			wControlShow( turnDesignPLs[I_TORDESC+3].control, TRUE );
 			turnDesignPLs[I_TORDESC].bShown = TRUE;
 			turnDesignPLs[I_TORDESC].option &= ~PDO_DLGIGNORE;
+			turnDesignPLs[I_TORDESC+1].bShown = TRUE;
+			turnDesignPLs[I_TORDESC+1].option &= ~PDO_DLGIGNORE;
 			wMessageSetValue( turnDesignPLs[I_TOLDESC+2].control, N_("Left Description") );
 			break;
 		default:
@@ -3201,6 +3214,10 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 			wControlShow( turnDesignPLs[I_TORDESC+3].control, FALSE );
 			turnDesignPLs[I_TORDESC].bShown = FALSE;
 			turnDesignPLs[I_TORDESC].option |= PDO_DLGIGNORE;
+			/* partno2 is required (PDO_NOTBLANK) too: a hidden, blank one
+			 * must not block Ok for single-part designs */
+			turnDesignPLs[I_TORDESC+1].bShown = FALSE;
+			turnDesignPLs[I_TORDESC+1].option |= PDO_DLGIGNORE;
 			wMessageSetValue( turnDesignPLs[I_TOLDESC+2].control, N_("Description") );
 			break;
 		}
@@ -3274,8 +3291,12 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 	LWIDTH_T lineWidth;
 
 	memset( tdVal, 0, sizeof tdVal );
+	/* customInfo is written in the C locale (NewTurnOk): parse it the same
+	 * way, or e.g. a German strtod() stops at the '.' of "7.086614" */
+	SetCLocale();
 	if ( ! GetArgs( to->customInfo, "qqqqqc", &type, &name, &mfg, &descL, &partL,
 	                &cp ) ) {
+		SetUserLocale();
 		return;
 	}
 	for ( i=0; i<COUNT( designDescs ); i++ ) {
@@ -3285,10 +3306,14 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 		}
 	}
 	if ( i >= COUNT( designDescs ) ) {
+		SetUserLocale();
 		return;
 	}
 
+	/* the dialog itself (number formatting) uses the user locale */
+	SetUserLocale();
 	SetupTurnoutDesignerW(dp);
+	SetCLocale();
 	// to's only caller (dcmpnd.c) already dereferences to->endCnt/customInfo/
 	// title before calling EditCustomTurnout, so to can never be NULL here.
 	// cppcheck-suppress nullPointerRedundantCheck
@@ -3301,6 +3326,7 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 	if (dp->type == NTO_REGULAR || dp->type == NTO_CURVED
 	    || dp->type == NTO_CORNU) {
 		if ( ! GetArgs( cp, "qqc", &descR, &partR, &cp )) {
+			SetUserLocale();
 			return;
 		}
 		strcpy( newTurnRightDesc, descR );
@@ -3312,7 +3338,10 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 	int tdInx = 0;
 	for ( const char * pPT = dp->sParamType; *pPT; pPT++, tdInx++ ) {
 		if ( *pPT == '-' ) { continue; }
-		if ( ! GetArgs( cp, "fc", tdVal+tdInx, &cp ) ) { return; }
+		if ( ! GetArgs( cp, "fc", tdVal+tdInx, &cp ) ) {
+			SetUserLocale();
+			return;
+		}
 		if ( *pPT == 'F' && newTurnAngleMode == 0 && tdVal[tdInx] != 0.0 ) {
 			// Reset frog #
 			tdVal[tdInx] = round( 1024.0 / sin( D2R(tdVal[tdInx] ) ) ) / 1024;
@@ -3327,6 +3356,7 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 		newTurnRoadbedLineWidth = 0;
 		newTurnRoadbedColor = wDrawColorBlack;
 	}
+	SetUserLocale();
 
 	customTurnout1 = to;
 	customTurnout2 = to1;

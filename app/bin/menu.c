@@ -1718,28 +1718,28 @@ EXPORT void CreateMenus(void)
 	/*
 	 * OPTION MENU
 	 */
-	MiscMenuItemCreate(optionM, NULL, "cmdLayout", _("L&ayout ..."),
+	MiscMenuItemCreate(optionM, NULL, "cmdLayout", _("L&ayout..."),
 	                   ACCL_LAYOUTW, LayoutInit(), IC_MODETRAIN_TOO, NULL);
-	MiscMenuItemCreate(optionM, NULL, "cmdDisplay", _("&Display ..."),
+	MiscMenuItemCreate(optionM, NULL, "cmdDisplay", _("&Display..."),
 	                   ACCL_DISPLAYW, DisplayInit(), IC_MODETRAIN_TOO, NULL);
-	MiscMenuItemCreate(optionM, NULL, "cmdCmdopt", _("Co&mmand ..."),
+	MiscMenuItemCreate(optionM, NULL, "cmdCmdopt", _("Co&mmand..."),
 	                   ACCL_CMDOPTW, CmdoptInit(), IC_MODETRAIN_TOO, NULL);
-	MiscMenuItemCreate(optionM, NULL, "cmdEasement", _("&Easements ..."),
+	MiscMenuItemCreate(optionM, NULL, "cmdEasement", _("&Easements..."),
 	                   ACCL_EASEW, DoEasementRedir,
 	                   IC_MODETRAIN_TOO, NULL);
-	MiscMenuItemCreate(optionM, NULL, "fontSelW", _("&Fonts ..."), ACCL_FONTW,
+	MiscMenuItemCreate(optionM, NULL, "fontSelW", _("&Fonts..."), ACCL_FONTW,
 	                   SelectFont, IC_MODETRAIN_TOO, NULL);
-	MiscMenuItemCreate(optionM, NULL, "cmdSticky", _("Stic&ky ..."),
+	MiscMenuItemCreate(optionM, NULL, "cmdSticky", _("Stic&ky..."),
 	                   ACCL_STICKY, DoSticky, IC_MODETRAIN_TOO,
 	                   NULL);
 	if (extraButtons) {
 		menuPLs[menuPG.paramCnt].context = debugW;
-		MiscMenuItemCreate(optionM, NULL, "cmdDebug", _("&Debug ..."), 0,
+		MiscMenuItemCreate(optionM, NULL, "cmdDebug", _("&Debug..."), 0,
 		                   DebugInit, IC_MODETRAIN_TOO, NULL);
 	}
-	MiscMenuItemCreate(optionM, NULL, "cmdPref", _("&Preferences ..."),
+	MiscMenuItemCreate(optionM, NULL, "cmdPref", _("&Preferences..."),
 	                   ACCL_PREFERENCES, PrefInit(), IC_MODETRAIN_TOO, NULL);
-	MiscMenuItemCreate(optionM, NULL, "cmdColor", _("&Colors ..."), ACCL_COLORW,
+	MiscMenuItemCreate(optionM, NULL, "cmdColor", _("&Colors..."), ACCL_COLORW,
 	                   ColorInit(), IC_MODETRAIN_TOO, NULL);
 
 	/*
@@ -1803,9 +1803,9 @@ EXPORT void CreateMenus(void)
 	                        _("Tur&nout Designer...")));
 
 	MiscMenuItemCreate(manageM, NULL, "cmdContmgm",
-	                   _("Layout &Control Elements"), ACCL_CONTMGM,
+	                   _("Layout &Control Elements..."), ACCL_CONTMGM,
 	                   ControlMgrInit(), 0, NULL);
-	MiscMenuItemCreate(manageM, NULL, "cmdGroup", _("&Group"), ACCL_GROUP,
+	MiscMenuItemCreate(manageM, NULL, "cmdGroup", _("&Group..."), ACCL_GROUP,
 	                   DoGroup, IC_SELECTED, NULL);
 	MiscMenuItemCreate(manageM, NULL, "cmdUngroup", _("&Ungroup"), ACCL_UNGROUP,
 	                   DoUngroup, IC_SELECTED, NULL);
@@ -1817,21 +1817,21 @@ EXPORT void CreateMenus(void)
 	                   _("Update Turnouts and Structures"), 0,
 	                   DoRefreshCompound, 0, NULL);
 
-	MiscMenuItemCreate(manageM, NULL, "cmdCarInventory", _("Car Inventory"),
+	MiscMenuItemCreate(manageM, NULL, "cmdCarInventory", _("Car Inventory..."),
 	                   ACCL_CARINV, DoCarDlg, IC_MODETRAIN_TOO,
 	                   NULL);
 
 	wMenuSeparatorCreate(manageM);
 
-	MiscMenuItemCreate(manageM, NULL, "cmdLayer", _("Layers ..."), ACCL_LAYERS,
+	MiscMenuItemCreate(manageM, NULL, "cmdLayer", _("Layers..."), ACCL_LAYERS,
 	                   InitLayersDialog(), 0, NULL);
-	MiscMenuItemCreate(manageM, NULL, "cmdLayerGroups", _("Layer Groups ..."),
+	MiscMenuItemCreate(manageM, NULL, "cmdLayerGroups", _("Layer Groups..."),
 	                   ACCL_LAYERGROUPS, InitLayerGroupsDialog(), 0, NULL);
-	MiscMenuItemCreate(manageM, NULL, "cmdManagenotes", _("Notes ..."),
+	MiscMenuItemCreate(manageM, NULL, "cmdManagenotes", _("Notes..."),
 	                   ACCL_MANAGENOTES, InitManageNotesDialog(), 0, NULL);
 	wMenuSeparatorCreate(manageM);
 
-	MiscMenuItemCreate(manageM, NULL, "cmdEnumerate", _("Parts &List ..."),
+	MiscMenuItemCreate(manageM, NULL, "cmdEnumerate", _("Parts &List..."),
 	                   ACCL_PARTSLIST, EnumerateTracks, 0,
 	                   NULL);
 	MiscMenuItemCreate(manageM, NULL, "cmdPricelist", _("Price List..."),

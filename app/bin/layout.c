@@ -811,6 +811,12 @@ static void LayoutOk(void * unused)
 static void LayoutCancel( wControl_p unused)
 {
 	// thisLayout.props = *(thisLayout.copyOfLayoutProps);
+	// The background position, size, angle and screen are applied while the
+	// dialog is open (live preview, see LayoutDlgUpdate), so put them back.
+	SetLayoutBackGroundPos(thisLayout.copyOfLayoutProps->backgroundPos);
+	SetLayoutBackGroundSize(thisLayout.copyOfLayoutProps->backgroundSize);
+	SetLayoutBackGroundAngle(thisLayout.copyOfLayoutProps->backgroundAngle);
+	SetLayoutBackGroundScreen(thisLayout.copyOfLayoutProps->backgroundScreen);
 	const char* curr = DynStringToCStr(&thisLayout.backgroundFileName);
 	const char* prev = DynStringToCStr(&thisLayout.copyBackgroundFileName);
 	if ((curr == NULL && prev != NULL) || (curr != NULL && prev == NULL)
@@ -926,6 +932,12 @@ LayoutDlgUpdate(
         int inx,
         void * valueP)
 {
+	if (inx < 0) {
+		// window closed: same as Cancel
+		LayoutCancel(NULL);
+		return(TRUE);
+	}
+
 	/* did the scale change ? */
 	if (inx == SCALEINX) {
 		char prefString[130];

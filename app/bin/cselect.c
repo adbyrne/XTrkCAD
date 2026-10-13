@@ -3341,6 +3341,23 @@ static void CallPushModify(void * unused)
 	return;
 }
 
+/** Track currently under the cursor while Select is the active command
+ * (set on every wActionMove, not just C_DOWN) -- see ClearSelect(). */
+static track_p trk = NULL;
+
+/**
+ * Reset the Select command's cursor-tracking state. \c trk is set on every
+ * mouse move over a track and is otherwise never cleared, so after a file
+ * load it can point at a track ClearTracks() already freed; the post-load
+ * redraw (LoadTracks -> Reset -> DoRedraw -> CmdSelect's \c C_REDRAW) then
+ * draws that stale track. Same problem and fix as ClearDescribe() (SF #785).
+ * Called from ClearTracks().
+ */
+EXPORT void ClearSelect(void)
+{
+	trk = NULL;
+}
+
 static STATUS_T CmdSelect(
         wAction_t action,
         coOrd pos )
@@ -3352,7 +3369,6 @@ static STATUS_T CmdSelect(
 
 
 	STATUS_T rc=C_CONTINUE;
-	static track_p trk = NULL;
 //	typedef enum {NOSHOW,SHOWMOVE,SHOWROTATE,SHOWMODIFY,SHOWACTIVATE} showType;
 //	static showType showMode;
 

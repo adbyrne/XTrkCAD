@@ -14,9 +14,9 @@ DESC=Jackson & Sharp Coach
 LENGTH=25.5
 WIDTH=5.0
 #
-PART=AM54-010BX%Bumble Bee Single Stripe%Undec%Undec
-PART=AM54-010GX%Dark Green%Undec%Undec
-PART=AM54-010RX%Red%Undec%Undec
+PART=AM54-010BX%Bumble Bee Single Stripe%Undecorated%Undec
+PART=AM54-010GX%Dark Green%Undecorated%Undec
+PART=AM54-010RX%Red%Undecorated%Undec
 #
 PART=AM54-011A%Green%D&RGW%257
 PART=AM54-011B%Green%D&RGW%281
@@ -58,9 +58,9 @@ DESC=Jackson & Sharp Combine
 LENGTH=25.5
 WIDTH=5.0
 #
-PART=AM54-020BX%Bumble Bee Yellow%Undec%Undec
-PART=AM54-020GX%Green%Undec%Undec
-PART=AM54-020RX%Red%Undec%Undec
+PART=AM54-020BX%Bumble Bee Yellow%Undecorated%Undec
+PART=AM54-020GX%Green%Undecorated%Undec
+PART=AM54-020RX%Red%Undecorated%Undec
 #
 PART=AM54-021A%Green%D&RGW%202
 PART=AM54-021B%Green%D&RGW%210
@@ -97,7 +97,7 @@ DESC=Drop-Bottom Gondola
 LENGTH=21.75
 WIDTH=5.5
 #
-PART=AM20-501X%Data Only%Undec%Data Only
+PART=AM20-501X%Data Only%Undecorated%Data Only
 #
 PART=AM20-502A%Moffat Logo%D&RG%706
 PART=AM20-502B%Moffat Logo%D&RG%714
@@ -201,7 +201,7 @@ DESC=3-Bay Hopper
 LENGTH=18.38
 WIDTH=4.75
 #
-PART=AM20-301X%Black%Undec%Undec
+PART=AM20-301X%Black%Undecorated%Undec
 #
 PART=AM20-302A%Black%EBT%870
 PART=AM20-302B%Black%EBT%872
@@ -233,8 +233,8 @@ DESC=Tank Car
 LENGTH=19.5
 WIDTH=5.0
 #
-PART=AM2208-01%Silver Data Only%Undec%Undec
-PART=AM2208-02%Black Data Only%Undec%Undec
+PART=AM2208-01%Silver Data Only%Undecorated%Undec
+PART=AM2208-02%Black Data Only%Undecorated%Undec
 #
 PART=AM2208-03%Conoco Silver%%8
 PART=AM2208-04%Conoco Silver%%9
@@ -260,7 +260,7 @@ DESC=Logging Car
 LENGTH=23.5
 WIDTH=5.0
 #
-PART=AM32-150x%Long%Undec%Undec
+PART=AM32-150x%Long%Undecorated%Undec
 #
 PART=AM32-151A%Long%WSLC%11
 PART=AM32-151B%Long%WSLC%12
@@ -302,7 +302,7 @@ DESC=Logging Car
 LENGTH=19.0
 WIDTH=5.0
 #
-PART=AM2216-01%Short%Undec%Undec
+PART=AM2216-01%Short%Undecorated%Undec
 #
 PART=AM2216-02%Short%WSLC%35
 PART=AM2216-03%Short%WSLC%36

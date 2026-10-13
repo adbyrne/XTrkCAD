@@ -532,8 +532,7 @@
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkCheckButton" id="display-constrainmain">
-                        <property name="label" translatable="yes">Constrain drawing area to room
-                          boundaries</property>
+                        <property name="label" translatable="yes">Constrain drawing area to room&#10;boundaries</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -940,8 +939,7 @@
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkCheckButton">
-                        <property name="label" translatable="yes">Dont hide system cursor when
-                          program cursor is active</property>
+                        <property name="label" translatable="yes">Don't hide system cursor when&#10;program cursor is active</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>

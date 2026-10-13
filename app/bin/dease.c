@@ -72,6 +72,10 @@ static paramFloatRange_t r0_100 = { 0.0, 100.0, 60 };
 static paramFloatRange_t r0_200 = { 0.0, 200.0, 60 };
 static paramFloatRange_t r0_10 = { 0.0, 10.0, 60 };
 static long easeM;
+/** TRUE while SetEasement() loads the radio group: setting it from code
+ * fires its "toggled" signal, which must not be taken as a user choice
+ * (that would replace a typed value by the preset). */
+static wBool_t easeLoading = FALSE;
 static paramData_t easementPLs[] = {
 #define I_EASEVAL		(0)
 	{	PD_FLOAT, &easementVal, "val", PDO_NOPSHUPD, &r0n1_100, N_("Value") },
@@ -154,11 +158,13 @@ static void SetEasement(
 	easeR = (floor(easeR*100.0))/100.0;
 	easementVal = val;
 	if (easementW && wWinIsVisible(easementW)) {
+		easeLoading = TRUE;
 		FormLoadControls( &easementPG );
 		if (update) {
 			easeM = selVal;
 			FormLoadSingleControl( &easementPG, I_EASESEL );
 		}
+		easeLoading = FALSE;
 	}
 	/*ParamChange( &easeValPD );*/
 
@@ -215,10 +221,14 @@ static void EasementDlgUpdate(
 {
 	switch (inx) {
 	case I_EASEVAL:
-		SetEasement( *(FLOAT_T*)valueP, I2VP(1) );
+		// a typed value keeps the radio group as it is; only a click on a
+		// radio button applies a preset
+		SetEasement( *(FLOAT_T*)valueP, I2VP(FALSE) );
 		break;
 	case I_EASESEL:
-		EasementSel( *(long*)valueP );
+		if ( !easeLoading ) {
+			EasementSel( *(long*)valueP );
+		}
 		break;
 	default:
 		if ( log_dease < 0 ) { log_dease = LogFindIndex( "dease" ); }

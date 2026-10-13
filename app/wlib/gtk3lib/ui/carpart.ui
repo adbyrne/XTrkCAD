@@ -272,16 +272,10 @@
                                     <property name="visible">True</property>
                                     <child>
                                       <object class="GtkComboBox" id="road">
-                                        <property name="can-focus">False</property>
+                                        <property name="entry-text-column">3</property>
+                                        <property name="has-entry">True</property>
                                         <property name="model">road-store</property>
                                         <property name="visible">True</property>
-                                        <child>
-                                          <object class="GtkCellRendererText" id="road-text"/>
-                                          <!-- Custom child fragments -->
-                                          <attributes>
-                                            <attribute name="text">3</attribute>
-                                          </attributes>
-                                        </child>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
@@ -704,7 +698,7 @@
                                     <property name="valign">start</property>
                                     <property name="visible">True</property>
                                     <child>
-                                      <object class="GtkToggleButton" id="flip">
+                                      <object class="GtkButton" id="flip">
                                         <property name="can-focus">True</property>
                                         <property name="label" translatable="yes">Flip</property>
                                         <property name="receives-default">True</property>
@@ -717,7 +711,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkToggleButton" id="reset">
+                                      <object class="GtkButton" id="reset">
                                         <property name="can-focus">True</property>
                                         <property name="label" translatable="yes">Reset</property>
                                         <property name="receives-default">True</property>
@@ -730,7 +724,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkToggleButton" id="import">
+                                      <object class="GtkButton" id="import">
                                         <property name="can-focus">True</property>
                                         <property name="label" translatable="yes">Import</property>
                                         <property name="receives-default">True</property>

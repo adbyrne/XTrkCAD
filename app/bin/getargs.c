@@ -43,6 +43,9 @@
  * Show an error message if problems occur during loading of a param or layout file.
  * The user has the choice to cancel the operation or to continue. If operation is
  * canceled the open file is closed.
+ * When no file is being read (paramFile is NULL, e.g. GetArgs() on stored
+ * part data), only the error is shown, with an Ok button, and FALSE is
+ * returned.
  *
  * \param[in] msg error message
  * \param[in] showLine set to true if current line should be included in error message
@@ -59,6 +62,18 @@ EXPORT int InputError(
 	va_list ap;
 	char * mp = message;
 	int ret;
+
+	if ( paramFile == NULL ) {
+		/* Not loading a file (e.g. GetArgs() on stored part data):
+		 * paramFileName/paramLineNum/paramLine are left over from the last
+		 * load, and there is nothing to continue or stop -- just report. */
+		mp += sprintf( message, "%s\n", _("Error reading stored data:") );
+		va_start( ap, showLine );
+		vsprintf( mp, msg, ap );
+		va_end( ap );
+		wNoticeWithIcon( NT_ERROR, message, _("Ok"), NULL );
+		return FALSE;
+	}
 
 	mp += sprintf( message, "INPUT ERROR: %s:%d\n",
 	               paramFileName, paramLineNum );

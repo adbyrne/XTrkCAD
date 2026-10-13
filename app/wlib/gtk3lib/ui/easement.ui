@@ -190,7 +190,8 @@
                     <child>
                       <object class="GtkEntry" id="r">
                         <property name="visible">True</property>
-                        <property name="can-focus">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can-focus">False</property>
                         <property name="valign">center</property>
                         <property name="width-chars">10</property>
                         <property name="xalign">1</property>
@@ -227,7 +228,8 @@
                     <child>
                       <object class="GtkEntry" id="x">
                         <property name="visible">True</property>
-                        <property name="can-focus">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can-focus">False</property>
                         <property name="valign">center</property>
                         <property name="width-chars">10</property>
                         <property name="xalign">1</property>
@@ -264,7 +266,8 @@
                     <child>
                       <object class="GtkEntry" id="l">
                         <property name="visible">True</property>
-                        <property name="can-focus">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can-focus">False</property>
                         <property name="valign">center</property>
                         <property name="width-chars">10</property>
                         <property name="xalign">1</property>

@@ -27,11 +27,11 @@
 #include "custom.h"
 #include "fileio.h"
 #include "layout.h"
-#include "param.h"
 #include "track.h"
 #include "paramfile.h"
 #include "common-ui.h"
 #include "form.h"
+#include "icons.h"
 
 #include "include/cars.h"
 #include "listelem.h"
@@ -63,7 +63,7 @@ EXPORT BOOL_T CarCustomSave(
  */
 
 EXPORT carItem_p currCarItemPtr;
-EXPORT long carHotbarModeInx = 1;
+EXPORT wIndex_t carHotbarModeInx = 1;
 static long carHotbarModes[] = { 0x0002, 0x0012, 0x0312, 0x4312, 0x0021, 0x0321, 0x4321 };
 static long carHotbarContents[] = { 0x0005, 0x0002, 0x0012, 0x0012, 0x0001, 0x0021, 0x0021 };
 
@@ -120,6 +120,11 @@ EXPORT void AddHotBarCarDesc(void)
 
 	LOG(log_carList, 1, ("AddHotBarCarDesc/load carItemHB: carItemHB.cnt:%d\n",
 	                     carItemInfo_da.cnt));
+	// an older build could save -1 here (Display dialog Ok with the Car
+	// Labels list untouched), which would index past carHotbarModes
+	if (carHotbarModeInx < 0 || carHotbarModeInx >= COUNT(carHotbarModes)) {
+		carHotbarModeInx = 1;
+	}
 	DYNARR_SET(carItem_t*, carItemHotbar_da, carItemInfo_da.cnt);
 	memcpy(&carItemHotbar(0), &carItemInfo(0),
 	       carItemInfo_da.cnt * sizeof carItemHotbar(0));
@@ -367,8 +372,10 @@ EXPORT int CarAvailableCount( void )
 {
 	wIndex_t inx;
 	int cnt = 0;
-	for ( inx=0; inx < carItemHotbar_da.cnt; inx ++ ) {
-		carItem_t * item = carItemHotbar(inx);
+	// count the inventory itself: carItemHotbar is only filled once the
+	// hotbar is built in train mode, and Run Trains checks before that
+	for ( inx=0; inx < carItemInfo_da.cnt; inx ++ ) {
+		carItem_t * item = carItemInfo(inx);
 		if (FIT_NONE == CompatibleScale( FIT_CAR, item->scaleInx,
 		                                 GetLayoutCurScale())) {
 			continue;
@@ -469,9 +476,6 @@ EXPORT void InitCarDlg( void )
 
 
 
-//#include "bitmaps/carpart.image1"
-//#include "bitmaps/carproto.image1"
-
 EXPORT void CarCustMgmLoad( void )
 {
 	long parentX, partX, protoX;
@@ -480,10 +484,10 @@ EXPORT void CarCustMgmLoad( void )
 	static wIcon_p carprotoI = NULL;
 
 	if ( carpartI == NULL ) {
-		//carpartI = wIconCreatePixMap( carpart_image1 );
+		carpartI = CreateSymbolFromResource( "carpart.png" );
 	}
 	if ( carprotoI == NULL ) {
-		//carprotoI = wIconCreatePixMap( carproto_image1 );
+		carprotoI = CreateSymbolFromResource( "carproto.png" );
 	}
 
 	for ( parentX=0; parentX<carPartParent_da.cnt; parentX++ ) {
@@ -502,9 +506,7 @@ EXPORT void CarCustMgmLoad( void )
 		if ( carProtoP->paramFileIndex != PARAM_CUSTOM ) {
 			continue;
 		}
-		if (carProtoP->paramFileIndex == PARAM_CUSTOM) {
-			CustMgmLoad( carprotoI, CarProtoCustMgmProc, carProtoP );
-		}
+		CustMgmLoad( carprotoI, CarProtoCustMgmProc, carProtoP );
 	}
 }
 

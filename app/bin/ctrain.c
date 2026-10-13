@@ -2607,6 +2607,14 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 
 	switch (action) {
 	case C_START:
+		// without cars there is nothing to run: offer the Car Inventory
+		// and stay in design mode
+		if (CarAvailableCount() <= 0) {
+			if (NoticeMessage(MSG_NO_CARS, _("Yes"), _("No")) > 0) {
+				DoCarDlg(NULL);
+			}
+			return C_TERMINATE;
+		}
 		/*UndoStart( "Trains", "Trains" );*/
 		UndoSuspend();
 		programMode = MODE_TRAIN;
@@ -2614,12 +2622,6 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 		doDrawTurnoutPosition = 1;
 		DoChangeNotification(CHANGE_PARAMS|CHANGE_TOOLBAR);
 
-		if (CarAvailableCount() <= 0) {
-			if (NoticeMessage(MSG_NO_CARS, _("Yes"), _("No")) > 0) {
-				DoCarDlg(NULL);
-				DoChangeNotification(CHANGE_PARAMS);
-			}
-		}
 		SetAllTrackSelect( FALSE );
 		EnableCommands();
 
@@ -3219,7 +3221,7 @@ void InitCmdTrain(wMenu_p menu)
 	log_trainPlayback = LogFindIndex("trainPlayback");
 	//trainPLs[I_ZERO].winLabel = (char*)CreateSymbolFromResource("zero.png");
 	FormRegister(&trainPG);
-	trainCmdInx = AddMenuButton(menu, CmdTrain, "cmdTrain", _("Run Trains"),
+	trainCmdInx = AddMenuButton(menu, CmdTrain, "cmdTrain", _("Run Trains..."),
 	                            CreateToolbarIconFromResource("train.png"), LEVEL0_50,
 	                            IC_TOGGLE | IC_POPUP3|IC_LCLICK|IC_RCLICK|IC_WANT_MOVE, 0,
 	                            NULL);

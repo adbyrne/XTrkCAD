@@ -544,6 +544,9 @@ static void SignalEditOk ( void * junk )
 	signalData_p xx;
 	wIndex_t ia;
 
+	/* pick up a field still being edited (Ok acts before its focus-out) */
+	FormFetchData( &signalEditPG );
+
 	if (signalCreate_P) {
 		UndoStart( _("Create Signal"), "Create Signal");
 		trk = NewTrack(0, T_SIGNAL, 0,
@@ -629,6 +632,8 @@ static wBool_t SignalEditDlgUpdate (paramGroup_p pg, int inx, void *valueP )
 
 static void aspectEditOK ( void * junk )
 {
+	FormFetchData( &aspectEditPG );
+
 	if (signalAspectEditIndex < 0) {
 		DYNARR_APPEND( signalAspect_p *, signalAspect_da, 10 );
 		signalAspect(signalAspect_da.cnt-1).aspectName = MyStrdup(signalAspectEditName);
@@ -678,6 +683,11 @@ static void EditAspectDialog ( wIndex_t inx )
 		                                TRUE,
 		                                F_BLOCK,NULL);
 	}
+	/* one dialog serves both adding a new aspect and editing one */
+	wWinSetTitle( aspectEditW,
+	              MakeWindowTitle( inx < 0 ? _("Add aspect") : _("Edit aspect") ) );
+	wButtonSetLabel( (wControl_p)aspectEditPG.okB,
+	                 inx < 0 ? _("_Add") : _("_Done") );
 	FormLoadControls( &aspectEditPG );
 	wShow( aspectEditW );
 }

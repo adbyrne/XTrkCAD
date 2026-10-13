@@ -736,12 +736,74 @@ wIndex_t wListAddValue(
 	return(rowCount);
 }
 
-void
-wlibTreeViewEdited(GtkWidget* renderer, const char* path, const char* new_text,
-                   void (*cb)( int row, const char *text))
+/**
+ * State for an editable cell column: the user's edited callback plus the
+ * cell editor of the edit in progress, see wlibTreeViewEditingCanceled().
+ */
+typedef struct {
+	void (*cb)(int row, const char *text);
+	GtkCellEditable *editable;   /**< editor of the edit in progress */
+	char *path;                  /**< row of the edit in progress */
+} cellEditState_t;
+
+static void
+wlibCellEditEnd(cellEditState_t *state)
 {
+	if (state->editable) {
+		g_object_unref(state->editable);
+		state->editable = NULL;
+	}
+	g_free(state->path);
+	state->path = NULL;
+}
+
+static void
+wlibTreeViewEdited(GtkWidget* renderer, const char* path, const char* new_text,
+                   cellEditState_t *state)
+{
+	wlibCellEditEnd(state);
 	// for a simple listbox the path is the current row
-	(*cb)(atoi(path), new_text);
+	(*state->cb)(atoi(path), new_text);
+}
+
+static void
+wlibTreeViewEditingStarted(GtkCellRenderer *renderer, GtkCellEditable *editable,
+                           const char *path, cellEditState_t *state)
+{
+	wlibCellEditEnd(state);
+	state->editable = g_object_ref(editable);
+	state->path = g_strdup(path);
+}
+
+/**
+ * GTK3's text cell renderer treats losing focus (clicking a dialog button,
+ * another field or another row) as *cancelling* the edit, so the typed
+ * value never reaches "edited" and is silently lost. Commit it instead;
+ * only an explicit Escape really cancels.
+ */
+static void
+wlibTreeViewEditingCanceled(GtkCellRenderer *renderer, cellEditState_t *state)
+{
+	gboolean escaped = FALSE;
+	GdkEvent *event = gtk_get_current_event();
+
+	if (event) {
+		escaped = event->type == GDK_KEY_PRESS &&
+		          event->key.keyval == GDK_KEY_Escape;
+		gdk_event_free(event);
+	}
+
+	if (!escaped && state->editable && state->path &&
+	    GTK_IS_ENTRY(state->editable)) {
+		char *text = g_strdup(gtk_entry_get_text(GTK_ENTRY(state->editable)));
+		int row = atoi(state->path);
+
+		wlibCellEditEnd(state);
+		(*state->cb)(row, text);
+		g_free(text);
+		return;
+	}
+	wlibCellEditEnd(state);
 }
 
 /**
@@ -773,9 +835,15 @@ wListSetStore(wControl_p list, DataStore *store)
 	if (store->edited) {
 
 		GtkWidget *renderer = wlibWidgetFromIdWarn(list->parent, store->editable);
+		cellEditState_t *state = g_new0(cellEditState_t, 1);
 
+		state->cb = (void (*)(int, const char *))store->edited;
 		g_signal_connect( renderer, "edited", (GCallback)wlibTreeViewEdited,
-		                  store->edited);
+		                  state);
+		g_signal_connect( renderer, "editing-started",
+		                  (GCallback)wlibTreeViewEditingStarted, state);
+		g_signal_connect( renderer, "editing-canceled",
+		                  (GCallback)wlibTreeViewEditingCanceled, state);
 	}
 
 }

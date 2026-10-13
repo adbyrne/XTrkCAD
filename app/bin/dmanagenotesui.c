@@ -362,7 +362,7 @@ static void DoManageNotes(void *unused)
  * One-time setup for the Manage Notes feature's menu wiring: registers
  * both this dialog's paramGroup_t and the name-entry sub-dialog's, and
  * returns the callback to hand to MiscMenuItemCreate() for the
- * "Manage Notes ..." menu item.
+ * "Manage Notes..." menu item.
  *
  * \return callback that shows the dialog when the menu item is chosen
  */
