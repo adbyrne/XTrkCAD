@@ -217,6 +217,12 @@ FlexSaveCost(const char* scale)
 
 static void PriceListOk( void * action )
 {
+	/* Done acts on button press, before focus leaves a price cell still
+	 * being edited: move focus first so that edit is committed (see
+	 * wlibTreeViewEditingCanceled), then fetch the flex fields. */
+	wControlSetFocus( (wControl_p)priceListPG.okB );
+	FormFetchData( &priceListPG );
+
 	PriceListSave();
 	FlexSaveCost(curScaleName);
 

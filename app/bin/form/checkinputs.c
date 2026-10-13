@@ -70,11 +70,37 @@ FormErrorState( paramData_p p, wBool_t valid, const char *reason )
 	}
 }
 
+/**
+ * Reject an empty (or all-blank) number entry. A blank number field used
+ * to be silently taken as 0 while still showing blank.
+ *
+ * \param p     parameter definition
+ * \param value entered text
+ * \return TRUE if the entry is not blank (or during demo playback)
+ */
+static wBool_t
+CheckNumberNotBlank(paramData_p p, const char *value)
+{
+	while (isspace((unsigned char)*value)) {
+		value++;
+	}
+	if (*value == '\0' && !inPlayback) {
+		p->bInvalid = TRUE;
+		ShowErrorMessage(p, _("Value cannot be blank"));
+		return FALSE;
+	}
+	return TRUE;
+}
+
 unsigned long
 FormIntegerGetValue(paramData_p data, const char *enteredValue)
 {
 	char* cp;
 	unsigned long value;
+
+	if (!CheckNumberNotBlank(data, enteredValue)) {
+		return 0;
+	}
 
 	value = strtol(enteredValue, &cp, 10);
 
@@ -165,6 +191,10 @@ FLOAT_T FormFloatGetValue(paramData_p data, const char *enteredValue)
 {
 	FLOAT_T value;
 	wBool_t valid;
+
+	if (!CheckNumberNotBlank(data, enteredValue)) {
+		return 0.0;
+	}
 
 	if (data->option & PDO_DIM) {
 		value = FormDecodeDistance(enteredValue, &valid);
@@ -368,6 +398,9 @@ long FormUpdate(
 		switch (p->type) {
 		case PD_LONG:
 			stringV = wEntryGetValue(p->control);
+			if (!CheckNumberNotBlank(p, stringV)) {
+				break;
+			}
 			longV = atol(stringV);
 			if (!FormIntegerRangeCheck(p, longV)) {
 				break;
@@ -439,6 +472,9 @@ long FormUpdate(
 			break;
 		case PD_FLOAT:
 			stringV = wEntryGetValue(p->control);
+			if (!CheckNumberNotBlank(p, stringV)) {
+				break;
+			}
 			if (p->option & PDO_DIM) {
 				floatV = FormDecodeDistance(stringV, &valid);
 			} else {

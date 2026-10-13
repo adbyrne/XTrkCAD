@@ -138,7 +138,9 @@ roadnameMap_p LoadRoadnameList(
 	if (roadnameTab->len == 0) {
 		return NULL;
 	}
-	if (TabStringCmp("undecorated", roadnameTab) == 0) {
+	/* the label may also arrive translated, from older custom files */
+	if (TabStringCmp("undecorated", roadnameTab) == 0 ||
+	    TabStringCmp(_("Undecorated"), roadnameTab) == 0) {
 		return NULL;
 	}
 

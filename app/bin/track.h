@@ -562,6 +562,7 @@ void DescribeDone( void * );
 BOOL_T UpdateDescStraight( int, int, int, int, int, descData_p, long );
 STATUS_T CmdDescribe(wAction_t,coOrd);
 void ClearDescribe( void );
+void ClearSelect( void );
 
 
 /* compound.c */
@@ -618,7 +619,7 @@ void MenuMode( void * moveVP );
 /* chotbar.c */
 extern long showFlexTrack;
 extern long hotBarLabels;
-extern long carHotbarModeInx;
+extern wIndex_t carHotbarModeInx;
 extern DIST_T curBarScale;
 void InitHotBar( void );
 void HideHotBar( void );

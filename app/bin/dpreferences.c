@@ -78,7 +78,7 @@ static paramData_t prefPLs[] = {
 	{ PD_LONG, &maxCouplingSpeed, "coupling-speed-max", PDO_NOPSHUPD, &i10_100, N_("Max Coupling Speed"), 0 },
 	{ PD_TOGGLE, &enableAudio, "setaudio", PDO_NOPSHUPD, enableAudioLabels, "", BC_HORIZONTAL },
 #define I_SHOWFLEXTRACK (10)
-	{ PD_TOGGLE, &showFlexTrack, "showflextrack", PDO_NOPSHUPD, enableFlexTrackLabels, "", BC_HORIZONTAL},
+	{ PD_TOGGLE, &showFlexTrack, "showflextrack", PDO_NOPSHUPD, enableFlexTrackLabels, "", BC_HORIZONTAL, I2VP(CHANGE_PARAMS | CHANGE_TOOLBAR) },
 	{ PD_LONG, &dragPixels, "dragpixels", PDO_NOPSHUPD | PDO_DRAW, &i1_1000, N_("Drag Distance") },
 	{ PD_LONG, &dragTimeout, "dragtimeout", PDO_NOPSHUPD | PDO_DRAW, &i1_1000, N_("Drag Timeout") },
 	{ PD_LONG, &minGridSpacing, "mingridspacing", PDO_NOPSHUPD | PDO_DRAW, &i1_100, N_("Min Grid Spacing"), 0, 0 },
@@ -215,12 +215,45 @@ static void UpdateMeasureFmt()
 	}
 }
 
+/**
+ * Settings the dialog writes while it is open, so that its own fields can
+ * follow (units and length format reformat the dimension fields, the
+ * checkpoint and autosave fields depend on each other). Saved when the
+ * dialog opens and put back by Cancel, so that nothing changes before Ok.
+ */
+static struct {
+	long units;
+	long distanceFormatInx;
+	long checkPtInterval;
+	long autosaveChkPoints;
+} prefSaved;
+
+static void PrefSave(void)
+{
+	prefSaved.units = units;
+	prefSaved.distanceFormatInx = distanceFormatInx;
+	prefSaved.checkPtInterval = checkPtInterval;
+	prefSaved.autosaveChkPoints = autosaveChkPoints;
+}
+
+static void PrefRestore(void)
+{
+	units = prefSaved.units;
+	distanceFormatInx = prefSaved.distanceFormatInx;
+	checkPtInterval = prefSaved.checkPtInterval;
+	autosaveChkPoints = prefSaved.autosaveChkPoints;
+}
+
 static void OptionDlgUpdate(
         paramGroup_p pg,
         int inx,
         void* valueP)
 {
-	if (inx < 0) { return; }
+	if (inx < 0) {
+		// window closed: same as Cancel
+		PrefRestore();
+		return;
+	}
 
 	switch (inx) {
 	case I_UNITS:
@@ -230,7 +263,7 @@ static void OptionDlgUpdate(
 		UpdateMeasureFmt();
 		break;
 	case I_SHOWFLEXTRACK:
-		DoChangeNotification(CHANGE_PARAMS | CHANGE_TOOLBAR);
+		// applied by PrefOk, through the field's change mask
 		break;
 	case I_CHECKPOINTFREQUENCY:
 		checkPtInterval = *(long*)valueP;
@@ -304,15 +337,22 @@ static void PrefOk(void* junk)
 
 
 
+static void PrefCancel(paramGroup_cp group)
+{
+	PrefRestore();
+	FormCancel_Current(group);
+}
+
 static void DoPref(void* junk)
 {
 	if (prefW == NULL) {
 		prefW = FormCreateDialog(&prefPG, MakeWindowTitle(_("Preferences")),
 		                         _("Ok"),PrefOk,
-		                         _("Cancel"), FormCancel_Restore,
+		                         _("Cancel"), FormCancel_Custom(PrefCancel),
 		                         TRUE, 0, OptionDlgUpdate);
 		LoadDistanceFormatList(units);
 	}
+	PrefSave();
 	FormLoadControls(&prefPG);
 	displayUnits = units;
 	wShow(prefW);

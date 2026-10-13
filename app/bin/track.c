@@ -1097,6 +1097,7 @@ EXPORT void ClearTracks( void )
 	UndoClear();
 	ClearNote();
 	ClearDescribe();
+	ClearSelect();
 	for (curr = to_first; curr; curr=next) {
 		next = curr->next;
 		FreeTrack( curr );

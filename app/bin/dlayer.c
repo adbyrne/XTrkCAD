@@ -33,6 +33,7 @@
 #include "include/stringxtc.h"
 #include "include/toolbar.h"
 #include "layout.h"
+#include "mapwindow.h"
 #include "menu.h"
 #include "paths.h"
 #include "track.h"
@@ -713,7 +714,8 @@ static DIST_T layerMinRadius;
 static ANGLE_T layerMaxGrade;
 static tieData_t layerTieData;
 
-static char layerObjectCountStr[32];
+/* PD_MESSAGE shows its valueP as text, so the count is kept formatted */
+static char layerObjectCountStr[24];
 static void LayerOk(void *unused);
 static BOOL_T layerRedrawMap = FALSE;
 
@@ -881,6 +883,29 @@ static paramData_t layerPLs[] = {
 static paramGroup_t layerPG = {"layer", PGO_FULLDIALOGFROMBUILDER, layerPLs,
                                COUNT(layerPLs)
                               };
+
+/**
+ * Fill the Gauge combo with the gauges of the scale currently shown for
+ * the selected layer, so that the gauge index loaded next by
+ * FormLoadControls() refers to the right list.
+ */
+static void LoadLayerGaugeList(void)
+{
+	if (layerPLs[I_GAUGE].control) {
+		LoadGaugeList(layerPLs[I_GAUGE].control, layerScaleDescInx);
+	}
+}
+
+/**
+ * Format a layer's object count for the "Object Count" label.
+ *
+ * \param layer IN layer whose count is shown
+ */
+static void SetLayerObjectCountStr(unsigned int layer)
+{
+	snprintf(layerObjectCountStr, sizeof(layerObjectCountStr), "%ld",
+	         layers[layer].objCount);
+}
 
 /**
  * Reload the listbox showing the current catalog
@@ -1226,8 +1251,7 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
 	layerMinRadius = layers[layer].minTrackRadius;
 	layerMaxGrade = layers[layer].maxTrackGrade;
 	layerTieData = layers[layer].tieData;
-	snprintf(layerObjectCountStr, sizeof(layerObjectCountStr), "%ld",
-	         layers[layer].objCount);
+	SetLayerObjectCountStr(layer);
 	strcpy(layerName, layers[layer].name);
 	strcpy(settingsName, layers[layer].settingsName);
 	LayerGroupNamesForLayer((int)(layer + 1), layerGroupNamesStr,
@@ -1240,9 +1264,7 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
 	LoadLayerLists();
 
 	/* Sync Scale and lists */
-	if (gaugeL) {
-		wListSetIndex(gaugeL, layerGaugeInx);
-	}
+	LoadLayerGaugeList();
 
 	/* force update of the 'manage layers' dialogbox */
 	if (layerL) {
@@ -1533,8 +1555,8 @@ static void LayerPrefLoad(void)
 			                GetLayoutCurScale());
 			layerGetInteger(inx, LAYERPREF_USECOLOR, &layers[inx].useColor, TRUE);
 
-			layers[inx].scaleDescInx = 0;
-			layers[inx].gaugeInx = 0;
+			GetScaleGauge(layers[inx].scaleInx, &layers[inx].scaleDescInx,
+			              &layers[inx].gaugeInx);
 
 			layerGetFloat(inx, LAYERPREF_MINRADIUS, &layers[inx].minTrackRadius,
 			              GetLayoutMinTrackRadius());
@@ -1777,6 +1799,7 @@ static void LayerUpdate(void)
 
 	if (layerRedrawMap) {
 		DoRedraw();
+		MapRefresh();
 	} else if (redraw) {
 		RedrawLayer(layerSelected, TRUE);
 	}
@@ -1812,11 +1835,11 @@ static void LayerSelect(wIndex_t inx)
 	layerTieData.length = layers[inx].tieData.length;
 	layerTieData.width = layers[inx].tieData.width;
 	layerTieData.spacing = layers[inx].tieData.spacing;
-	snprintf(layerObjectCountStr, sizeof(layerObjectCountStr), "%ld",
-	         layers[inx].objCount);
+	SetLayerObjectCountStr(inx);
 
 	LayerGroupNamesForLayer(inx + 1, layerGroupNamesStr,
 	                        sizeof(layerGroupNamesStr));
+	LoadLayerGaugeList();
 
 	layerSelecting = TRUE;
 	FormLoadControls(&layerPG);
@@ -1930,9 +1953,10 @@ void ResetLayers(void)
 
 	LoadLayerLists();
 
+	SetLayerObjectCountStr(0);
+
 	if (layerL) {
 		FormLoadControls(&layerPG);
-		// FormLoadMessage(&layerPG, I_COUNT, "0");
 	}
 }
 
@@ -1979,9 +2003,10 @@ void RestoreLayers(void)
 		}
 	}
 
+	SetLayerObjectCountStr(layerSelected);
+
 	if (layerL) {
 		FormLoadControls(&layerPG);
-		// FormLoadMessage(&layerPG, I_COUNT, "0");
 	}
 
 	LoadLayerLists();

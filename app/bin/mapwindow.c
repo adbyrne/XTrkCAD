@@ -354,6 +354,17 @@ void MapChangeScale()
 	}
 }
 
+/**
+ * Redraw the map window's content, e.g. after a layer's "show on map"
+ * setting changed. MainRedraw() only repaints the main canvas.
+ */
+void MapRefresh(void)
+{
+	if (mapD.d) {
+		MapRedraw(mapD.d, NULL, 0, 0);
+	}
+}
+
 wBool_t MapGetVisiblePref(void)
 {
 

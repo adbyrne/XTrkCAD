@@ -94,6 +94,8 @@ typedef struct {
 
 static BOOL_T AnyHILIGHT = FALSE;
 
+static void ControlUnHilightAll( void );
+
 static wBool_t ControlDlgUpdate(
         paramGroup_p pg,
         int inx,
@@ -103,6 +105,11 @@ static wBool_t ControlDlgUpdate(
 	wIndex_t selcnt = wListGetSelectedCount( controlPLs[0].control );
 	wIndex_t linx, lcnt;
 
+	if ( inx < 0 ) {
+		/* window closed via the title bar: same clean-up as Done */
+		ControlUnHilightAll();
+		return FALSE;
+	}
 	if ( inx != I_CONTROLLIST ) { return FALSE; }
 
 	lcnt = wListGetCount( controlPLs[0].control );
@@ -187,7 +194,11 @@ static void ControlDelete( void * action )
 	DoChangeNotification( CHANGE_PARAMS|CHANGE_MAIN );
 }
 
-static void ControlDone( void * action )
+/**
+ * Remove the canvas highlight from every element that was highlighted
+ * from the list.
+ */
+static void ControlUnHilightAll( void )
 {
 	contMgmContext_p context = NULL;
 
@@ -199,7 +210,13 @@ static void ControlDone( void * action )
 			context = (contMgmContext_p)wListGetItemContext( controlSelL, linx );
 			context->proc( CONTMGM_UN_HILIGHT, context->data );
 		}
+		AnyHILIGHT = FALSE;
 	}
+}
+
+static void ControlDone( void * action )
+{
+	ControlUnHilightAll();
 	wHide( controlPG.win );
 }
 
@@ -268,7 +285,7 @@ static void DoControlMgr( void * junk )
 		FormCreateDialog( &controlPG,
 		                  MakeWindowTitle(_("Manage Layout Control Elements")),
 		                  NULL, ControlDone,
-		                  NULL, FormCancel_Current,
+		                  NULL, FormCancel_Null,
 		                  TRUE, F_RESIZE|F_RECALLSIZE|F_BLOCK,
 		                  ControlDlgUpdate );
 	} else {

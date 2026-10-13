@@ -522,7 +522,7 @@ static void DoLayerGroups(void *unused)
  * (a missing FormRegister() on the latter crashed CreateControl() the
  * first time GroupNew()/GroupRename() ran -- found live via Xvfb
  * click-through testing, SF #782) and returns the callback to hand to
- * MiscMenuItemCreate() for the "Layer Groups ..." menu item.
+ * MiscMenuItemCreate() for the "Layer Groups..." menu item.
  *
  * \return callback that shows the dialog when the menu item is chosen
  */

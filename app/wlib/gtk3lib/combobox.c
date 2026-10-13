@@ -231,6 +231,10 @@ void wComboBoxSetIndex(wControl_p b, int val)
 	}
 	gtk_combo_box_set_active(combo, val);
 	g_signal_handlers_unblock_by_func(combo, G_CALLBACK(ComboBoxChanged), b);
+	/* ComboBoxChanged was blocked, so record the selection here: without
+	 * it wListGetIndex() keeps returning the previous (initially -1) index
+	 * for a combo the user never touched. */
+	CONTROL_GET_ATTRIBUTES_PTR(b, list)->last = val;
 }
 
 

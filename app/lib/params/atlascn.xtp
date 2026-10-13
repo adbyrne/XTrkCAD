@@ -207,7 +207,7 @@ CARPART N "Atlas	Caboose, Ext Vision		30291	Northern Pacific	NP	" 0 30100 2.931 
 CARPART N "Atlas	Caboose, Ext Vision	Rapido Coupler	30302	Reading	RDG	94101" 0 30100 2.931 0.750 0 0 2.198 3.331 8535808
 CARPART N "Atlas	Caboose, Ext Vision	Micro-Trains Coupler	30309	Reading	RDG	94101" 0 30100 2.931 0.750 0 0 2.198 3.331 8535808
 CARPART N "Atlas	Caboose, Ext Vision	Rapido Coupler	30312	Soo Line	SOO	5" 0 30100 2.931 0.750 0 0 2.198 3.331 8535808
-CARPART N "Atlas	Caboose, Ext Vision	Micro-Trains Coupler	30319	Roo Line		5" 0 30100 2.931 0.750 0 0 2.198 3.331 8535808
+CARPART N "Atlas	Caboose, Ext Vision	Micro-Trains Coupler	30319	Soo Line		5" 0 30100 2.931 0.750 0 0 2.198 3.331 8535808
 CARPART N "Atlas	Caboose, Ext Vision		30329	Grand Trunk Western	GTW	" 0 30100 2.931 0.750 0 0 2.198 3.331 8535808
 CARPART N "Atlas	Caboose, Ext Vision	Rapido Coupler	30332	Great Northern (Red)		X-104" 0 30100 2.931 0.750 0 0 2.198 3.331 8535808
 CARPART N "Atlas	Caboose, Ext Vision	Micro-Trains Coupler	30339	Great Northern (Red)		X-104" 0 30100 2.931 0.750 0 0 2.198 3.331 8535808
@@ -293,7 +293,7 @@ CARPART N "Atlas	Caboose, NE-6	NH Style	33472	Family Lines		1077" 0 30100 2.475 
 CARPART N "Atlas	Caboose, NE-6	NH Style	33481	New Haven	NH	C-649" 0 30100 2.475 0.750 0 0 1.856 2.875 8535808
 CARPART N "Atlas	Caboose, NE-6	NH Style	33482	New Haven	NH	C-673" 0 30100 2.475 0.750 0 0 1.856 2.875 8535808
 CARPART N "Atlas	Caboose, NE-6	NH Style	33491	New Haven	NH	C-701 " 0 30100 2.475 0.750 0 0 1.856 2.875 8535808
-CARPART N "Atlas	Caboose, NE-6	NH Style	33492	New Have		C-702" 0 30100 2.475 0.750 0 0 1.856 2.875 8535808
+CARPART N "Atlas	Caboose, NE-6	NH Style	33492	New Haven		C-702" 0 30100 2.475 0.750 0 0 1.856 2.875 8535808
 CARPART N "Atlas	Caboose, NE-6	NH Style	33501	Pittsburgh & Lake Erie	P&LE	531" 0 30100 2.475 0.750 0 0 1.856 2.875 8535808
 CARPART N "Atlas	Caboose, NE-6	NH Style	33511	Susquehanna		111" 0 30100 2.475 0.750 0 0 1.856 2.875 8535808
 CARPART N "Atlas	Caboose, NE-6	NH Style	33512	Susquehanna		119" 0 30100 2.475 0.750 0 0 1.856 2.875 8535808
@@ -334,7 +334,7 @@ CARPART N "Atlas	Box, 40'	Plug Door	33101	Delaware & Hudson	D&H	" 0 30100 3.041 
 CARPART N "Atlas	Box, 40'	Plug Door	33102	Delaware & Hudson	D&H	20062" 0 30100 3.041 0.750 0 0 2.281 3.441 8535808
 CARPART N "Atlas	Box, 40'	Plug Door	33103	Delaware & Hudson	D&H	20060" 0 30100 3.041 0.750 0 0 2.281 3.441 8535808
 CARPART N "Atlas	Box, 40'	Plug Door	33104	Delaware & Hudson	D&H	20067" 0 30100 3.041 0.750 0 0 2.281 3.441 8535808
-CARPART N "Atlas	Box, 40'	Plug Door	33121	Chattahoocee Industrial Railroad		" 0 30100 3.041 0.750 0 0 2.281 3.441 8535808
+CARPART N "Atlas	Box, 40'	Plug Door	33121	Chattahoochee Industrial Railroad		" 0 30100 3.041 0.750 0 0 2.281 3.441 8535808
 CARPART N "Atlas	Box, 40'	Plug Door	33161	Milwaukee Road	MILW	" 0 30100 3.041 0.750 0 0 2.281 3.441 8535808
 CARPART N "Atlas	Box, 40'	Plug Door	33163	Milwaukee Road	MILW	9081" 0 30100 3.041 0.750 0 0 2.281 3.441 8535808
 CARPART N "Atlas	Box, 40'	Plug Door	33164	Milwaukee Road	MILW	9091" 0 30100 3.041 0.750 0 0 2.281 3.441 8535808
@@ -383,7 +383,7 @@ CARPART N "Atlas	Box, 40'	Plug Door	33341	Soo Line	SOO	137702" 0 30100 3.041 0.7
 CARPART N "Atlas	Box, 40'	Plug Door	33342	Soo Line	SOO	137724" 0 30100 3.041 0.750 0 0 2.281 3.441 8535808
 CARPART N "Atlas	Box, 40'	Plug Door	33343	Soo Line	SOO	137744" 0 30100 3.041 0.750 0 0 2.281 3.441 8535808
 CARPART N "Atlas	Box, 40'	Plug Door	33344	Soo Line	SOO	137738" 0 30100 3.041 0.750 0 0 2.281 3.441 8535808
-CARPART N "Atlas	Box, 40'	Plug Door	33351	Canadian Nationa		290936" 0 30100 3.041 0.750 0 0 2.281 3.441 8535808
+CARPART N "Atlas	Box, 40'	Plug Door	33351	Canadian National		290936" 0 30100 3.041 0.750 0 0 2.281 3.441 8535808
 CARPART N "Atlas	Box, 40'	Plug Door	33352	Canadian National	CN	290962" 0 30100 3.041 0.750 0 0 2.281 3.441 8535808
 CARPART N "Atlas	Box, 40'	Plug Door	33353	Canadian National	CN	290941" 0 30100 3.041 0.750 0 0 2.281 3.441 8535808
 CARPART N "Atlas	Box, 40'	Plug Door	33361	Canadian National	CN	290018 " 0 30100 3.041 0.750 0 0 2.281 3.441 8535808
@@ -657,7 +657,7 @@ CARPART N "Atlas	Box, 50'	Staggered Double-Door Automated Railway	36402	Union Pa
 CARPART N "Atlas	Box, 50'	ACF Precision Design	45000			 " 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
 CARPART N "Atlas	Box, 50'	ACF Precision Design	45001	Chicago & North Western	CNW	154102" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
 CARPART N "Atlas	Box, 50'	ACF Precision Design	45002	Chicago & North Western	CNW	154836" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
-CARPART N "Atlas	Box, 50'	ACF Precision Design	45011	Illinois Centra		11379" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
+CARPART N "Atlas	Box, 50'	ACF Precision Design	45011	Illinois Central		11379" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
 CARPART N "Atlas	Box, 50'	ACF Precision Design	45012	Illinois Central	IC	11393" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
 CARPART N "Atlas	Box, 50'	ACF Precision Design	45013	Illinois Central	IC	11353" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
 CARPART N "Atlas	Box, 50'	ACF Precision Design	45014	Illinois Central	IC	11371" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
@@ -714,7 +714,7 @@ CARPART N "Atlas	Box, 50'	ACF Precision Design Ribside	45321	Chicago & North Wes
 CARPART N "Atlas	Box, 50'	ACF Precision Design Ribside	45322	Chicago & North Western	CNW	155088" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
 CARPART N "Atlas	Box, 50'	ACF Precision Design Ribside	45331	Conrail	CR	208070" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
 CARPART N "Atlas	Box, 50'	ACF Precision Design Ribside	45332	Conrail	CR	208071" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
-CARPART N "Atlas	Box, 50'	ACF Precision Design Ribside	45341	Penn Centra		166653" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
+CARPART N "Atlas	Box, 50'	ACF Precision Design Ribside	45341	Penn Central		166653" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
 CARPART N "Atlas	Box, 50'	ACF Precision Design Ribside	45342	Penn Central	PC	166665" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
 CARPART N "Atlas	Box, 53'	Evans Double Plug Door	31000			" 0 30100 3.975 0.750 0 0 2.981 4.375 8535808
 CARPART N "Atlas	Box, 53'	Evans Double Plug Door	31002	British Columbia Railway	BCR	800447" 0 30100 3.975 0.750 0 0 2.981 4.375 8535808
@@ -789,8 +789,8 @@ CARPART N "Atlas	Box, 53'	Evans Double Plug Door	31351	Doniphan Kensett & Searcy
 CARPART N "Atlas	Box, 53'	Evans Double Plug Door	31352	Doniphan Kensett & Searcy		776227" 0 30100 3.975 0.750 0 0 2.981 4.375 8535808
 CARPART N "Atlas	Box, 53'	Evans Double Plug Door	31361	Masonite		200" 0 30100 3.975 0.750 0 0 2.981 4.375 8535808
 CARPART N "Atlas	Box, 53'	Evans Double Plug Door	31362	Masonite		220" 0 30100 3.975 0.750 0 0 2.981 4.375 8535808
-CARPART N "Atlas	Box, 53'	Evans Double Plug Door	31371	Mccloud River		12100" 0 30100 3.975 0.750 0 0 2.981 4.375 8535808
-CARPART N "Atlas	Box, 53'	Evans Double Plug Door	31372	Mccloud River		12107" 0 30100 3.975 0.750 0 0 2.981 4.375 8535808
+CARPART N "Atlas	Box, 53'	Evans Double Plug Door	31371	McCloud River		12100" 0 30100 3.975 0.750 0 0 2.981 4.375 8535808
+CARPART N "Atlas	Box, 53'	Evans Double Plug Door	31372	McCloud River		12107" 0 30100 3.975 0.750 0 0 2.981 4.375 8535808
 CARPART N "Atlas	Box, 60'	Single Door Auto Parts Box Car	1021	Special Atlas 50th Anniversary Scheme		" 0 30100 4.550 0.750 0 0 3.412 4.950 8535808
 CARPART N "Atlas	Box, 60'	Double-Door Auto Parts	3380			" 0 30100 4.550 0.750 0 0 3.412 4.950 8535808
 CARPART N "Atlas	Box, 60'	ACF Auto Parts, Double-Door	36800			" 0 30100 4.550 0.750 0 0 3.412 4.950 8535808
@@ -910,14 +910,14 @@ CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41437	Pacific Fruit Express	PFE	
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41438	Pacific Fruit Express	PFE	35333" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41448	Phenix Cheese		3603" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41449	Phenix Cheese		3604" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
-CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41450	Boote'S Hatcheries		90534" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
-CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41451	Boote'S Hatcheries		90535" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
+CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41450	Boote's Hatcheries		90534" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
+CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41451	Boote's Hatcheries		90535" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41452	Brookside Creamery		1833" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41453	Brookside Creamery		1835" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41454	Del Maiz Niblets		12311" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41455	Del Maiz Niblets		12312" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
-CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41456	Fruit Growers'S Express		35204" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
-CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41457	Fruit Growers'S Express		35291" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
+CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41456	Fruit Growers Express		35204" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
+CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41457	Fruit Growers Express		35291" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41458	Milwaukee Road	MILW	85210" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41459	Milwaukee Road	MILW	85213" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41460	North Western		15305" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
@@ -931,16 +931,16 @@ CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41469	Boston & Maine	B&M	13138" 
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41470	Canadian National	CN	46242" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41471	Canadian National	CN	46248" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41472	Eatmor Cranberries		14020" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
-CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41473	Eatmor Cranberrie		14021" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
-CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41474	Our Mother'S Coco		15630" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
+CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41473	Eatmor Cranberries		14021" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
+CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41474	Our Mother's Cocoa		15630" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41475	Western Fruit Express		71286" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41476	Western Fruit Express		71299" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41477	Western Fruit Express		72065" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41478	Western Fruit Express		72178" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41479	Bangor & Aroostook		6514" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41480	Bangor & Aroostook		6517" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
-CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41481	Borden'S Fine Cheeses		85350" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
-CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41482	Borden'S Fine Cheeses		85353" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
+CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41481	Borden's Fine Cheeses		85350" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
+CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41482	Borden's Fine Cheeses		85353" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41483	Canadian Pacific	CP	288330" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41484	Canadian Pacific	CP	288339" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41485	Coors		5405" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
@@ -1104,9 +1104,9 @@ CARPART N "Atlas	Tank, 40'	Tank Car, 14,000 Gallon Kaolin	34800			" 0 30100 3.00
 CARPART N "Atlas	Tank, 40'	Tank Car, 14,000 Gallon Kaolin	34801	Engelhard		1" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
 CARPART N "Atlas	Tank, 40'	Tank Car, 14,000 Gallon Kaolin	34802	Engelhard		2" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
 CARPART N "Atlas	Tank, 40'	Tank Car, 14,000 Gallon Kaolin	34803	Engelhard		3" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
-CARPART N "Atlas	Tank, 40'	Tank Car, 14,000 Gallon Kaolin	34804	Englehard		71969" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
-CARPART N "Atlas	Tank, 40'	Tank Car, 14,000 Gallon Kaolin	34805	Englehard		71964" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
-CARPART N "Atlas	Tank, 40'	Tank Car, 14,000 Gallon Kaolin	34806	Englehard		71993" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
+CARPART N "Atlas	Tank, 40'	Tank Car, 14,000 Gallon Kaolin	34804	Engelhard		71969" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
+CARPART N "Atlas	Tank, 40'	Tank Car, 14,000 Gallon Kaolin	34805	Engelhard		71964" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
+CARPART N "Atlas	Tank, 40'	Tank Car, 14,000 Gallon Kaolin	34806	Engelhard		71993" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
 CARPART N "Atlas	Tank, 40'	Tank Car, 14,000 Gallon Kaolin	34812	Georgia Kaolin		" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
 CARPART N "Atlas	Tank, 40'	Tank Car, 14,000 Gallon Kaolin	34814	Georgia Kaolin		78785" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
 CARPART N "Atlas	Tank, 40'	Tank Car, 14,000 Gallon Kaolin	34815	Georgia Kaolin		75781" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
@@ -1224,7 +1224,7 @@ CARPART N "Atlas	Tank, 65'	33,000 Gallon, LPG	37005	Acfx		17440" 0 30100 4.875 0
 CARPART N "Atlas	Tank, 65'	33,000 Gallon, LPG	37013	Pyrofax Gas		17004" 0 30100 4.875 0.750 0 0 3.656 5.275 8535808
 CARPART N "Atlas	Tank, 65'	33,000 Gallon, LPG	37014	Pyrofax Gas		17001" 0 30100 4.875 0.750 0 0 3.656 5.275 8535808
 CARPART N "Atlas	Tank, 65'	33,000 Gallon, LPG	37015	Pyrofax Gas		17002" 0 30100 4.875 0.750 0 0 3.656 5.275 8535808
-CARPART N "Atlas	Tank, 65'	33,000 Gallon, LPG	37023	Shipper'S Car Line		17070" 0 30100 4.875 0.750 0 0 3.656 5.275 8535808
+CARPART N "Atlas	Tank, 65'	33,000 Gallon, LPG	37023	Shipper's Car Line		17070" 0 30100 4.875 0.750 0 0 3.656 5.275 8535808
 CARPART N "Atlas	Tank, 65'	33,000 Gallon, LPG	37033	Suburban Propane		1320" 0 30100 4.875 0.750 0 0 3.656 5.275 8535808
 CARPART N "Atlas	Tank, 65'	33,000 Gallon, LPG	37034	Suburban Propane		1310" 0 30100 4.875 0.750 0 0 3.656 5.275 8535808
 CARPART N "Atlas	Tank, 65'	33,000 Gallon, LPG	37035	Suburban Propane		1319" 0 30100 4.875 0.750 0 0 3.656 5.275 8535808
@@ -1346,7 +1346,7 @@ CARPART N "Atlas	Flat, 50'	Piggyback with 40' Trailer	37723	Chicago & Northweste
 CARPART N "Atlas	Flat, 50'	Piggyback with 40' Trailer	37731	Missouri Pacific	MP	" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Flat, 50'	Piggyback with 40' Trailer	37741	Pennsylvania	PRR	475499" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Flat, 50'	Piggyback with 40' Trailer	37742	Pennsylvania	PRR	475494" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
-CARPART N "Atlas	Flat, 50'	Piggyback with 40' Trailer	37743	Pennsylvani		475490" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
+CARPART N "Atlas	Flat, 50'	Piggyback with 40' Trailer	37743	Pennsylvania		475490" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Flat, 50'	Piggyback with 40' Trailer	37751	Atchison Topeka & Santa Fe	ATSF	92753" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Flat, 50'	Piggyback with 40' Trailer	37752	Santa Fe	SF	92755" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Flat, 50'	Piggyback with 40' Trailer	37753	Santa Fe	SF	92758" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
@@ -1576,7 +1576,7 @@ CARPART N "Atlas	Hopper, Covered, 35'	PS-2, 2 Bay	3163	Soo Line	SOO	" 0 30100 2.
 CARPART N "Atlas	Hopper, Covered, 35'	PS-2, 2 Bay	3166	Denver & Rio Grande Western	DRGW	" 0 30100 2.663 0.750 0 0 1.997 3.063 8535808
 CARPART N "Atlas	Hopper, Covered, 35'	PS-2, 2 Bay	3167	Elgin Joliet & Eastern	EJ&E	" 0 30100 2.663 0.750 0 0 1.997 3.063 8535808
 CARPART N "Atlas	Hopper, Covered, 35'	PS-2, 2 Bay	3168	Imco Services		" 0 30100 2.663 0.750 0 0 1.997 3.063 8535808
-CARPART N "Atlas	Hopper, Covered, 35'	PS-2, 2 Bay	3169	Kerr Mcgee		" 0 30100 2.663 0.750 0 0 1.997 3.063 8535808
+CARPART N "Atlas	Hopper, Covered, 35'	PS-2, 2 Bay	3169	Kerr-McGee		" 0 30100 2.663 0.750 0 0 1.997 3.063 8535808
 CARPART N "Atlas	Hopper, Covered, 35'	PS-2, 2 Bay	3174	CG		" 0 30100 2.663 0.750 0 0 1.997 3.063 8535808
 CARPART N "Atlas	Hopper, Covered, 35'	PS-2, 2 Bay	3175	Great Northern	GN	" 0 30100 2.663 0.750 0 0 1.997 3.063 8535808
 CARPART N "Atlas	Hopper, Covered, 35'	PS-2, 2 Bay	3176	Penn Central	PC	" 0 30100 2.663 0.750 0 0 1.997 3.063 8535808
@@ -1598,7 +1598,7 @@ CARPART N "Atlas	Hopper, Covered, 35'	PS-2, 2 Bay	31621	Lehigh & New England		31
 CARPART N "Atlas	Hopper, Covered, 35'	PS-2, 2 Bay	31641	Southern	SOU	300174" 0 30100 2.663 0.750 0 0 1.997 3.063 8535808
 CARPART N "Atlas	Hopper, Covered, 35'	PS-2, 2 Bay	31642	Southern	SOU	900170" 0 30100 2.663 0.750 0 0 1.997 3.063 8535808
 CARPART N "Atlas	Hopper, Covered, 35'	PS-2, 2 Bay	31651	Southern Pacific	SP	401292" 0 30100 2.663 0.750 0 0 1.997 3.063 8535808
-CARPART N "Atlas	Hopper, Covered, 35'	PS-2, 2 Bay	31652	Southern Pacifi		31793" 0 30100 2.663 0.750 0 0 1.997 3.063 8535808
+CARPART N "Atlas	Hopper, Covered, 35'	PS-2, 2 Bay	31652	Southern Pacific		31793" 0 30100 2.663 0.750 0 0 1.997 3.063 8535808
 CARPART N "Atlas	Hopper, Covered, 35'	PS-2, 2 Bay	31661	Denver & Rio Grande Western	DRGW	18333" 0 30100 2.663 0.750 0 0 1.997 3.063 8535808
 CARPART N "Atlas	Hopper, Covered, 35'	PS-2, 2 Bay	31662	Denver & Rio Grande Western	DRGW	31802" 0 30100 2.663 0.750 0 0 1.997 3.063 8535808
 CARPART N "Atlas	Hopper, Covered, 35'	PS-2, 2 Bay	31682	Imco		41011 " 0 30100 2.663 0.750 0 0 1.997 3.063 8535808
@@ -1652,7 +1652,7 @@ CARPART N "Atlas	Hopper, Covered, 35'	PS-2, 2 Bay	31922	Jersey Central		846" 0 3
 CARPART N "Atlas	Hopper, Covered, 35'	PS-2, 2 Bay	31931	Pennsylvania	PRR	258043" 0 30100 2.663 0.750 0 0 1.997 3.063 8535808
 CARPART N "Atlas	Hopper, Covered, 35'	PS-2, 2 Bay	31932	Pennsylvania	PRR	258058" 0 30100 2.663 0.750 0 0 1.997 3.063 8535808
 CARPART N "Atlas	Hopper, Covered, 35'	PS-2, 2 Bay	31941	Pittsburgh & Lake Erie	P&LE	1661" 0 30100 2.663 0.750 0 0 1.997 3.063 8535808
-CARPART N "Atlas	Hopper, Covered, 35'	PS-2, 2 Bay	31942	Pittsburgh & Lake Eri		1664" 0 30100 2.663 0.750 0 0 1.997 3.063 8535808
+CARPART N "Atlas	Hopper, Covered, 35'	PS-2, 2 Bay	31942	Pittsburgh & Lake Erie		1664" 0 30100 2.663 0.750 0 0 1.997 3.063 8535808
 CARPART N "Atlas	Hopper, Covered, 40'	GATX Airslide(R)	3850			" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
 CARPART N "Atlas	Hopper, Covered, 40'	GATX Airslide(R)	3861	Conrail	CR	" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
 CARPART N "Atlas	Hopper, Covered, 40'	GATX Airslide(R)	38511	Atchison Topeka & Santa Fe	ATSF	" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
@@ -1707,7 +1707,7 @@ CARPART N "Atlas	Hopper, Centerflow, 40'	ACF 2-Bay	39032	Burlington Northern	BN	
 CARPART N "Atlas	Hopper, Centerflow, 40'	ACF 2-Bay	39033	Burlington Northern	BN	435696" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
 CARPART N "Atlas	Hopper, Centerflow, 40'	ACF 2-Bay	39034	Burlington Northern	BN	435697" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
 CARPART N "Atlas	Hopper, Centerflow, 40'	ACF 2-Bay	39041	Great Northern	GN	173855" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
-CARPART N "Atlas	Hopper, Centerflow, 40'	ACF 2-Bay	39042	Great Norther		173856" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
+CARPART N "Atlas	Hopper, Centerflow, 40'	ACF 2-Bay	39042	Great Northern		173856" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
 CARPART N "Atlas	Hopper, Centerflow, 40'	ACF 2-Bay	39051	Union Pacific	UP	219687" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
 CARPART N "Atlas	Hopper, Centerflow, 40'	ACF 2-Bay	39052	Union Pacific	UP	219686" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
 CARPART N "Atlas	Hopper, Centerflow, 40'	ACF 2-Bay	39061	Seaboard		" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
@@ -1882,7 +1882,7 @@ CARPART N "Atlas	Hopper, 45'	3-Bay, 90 Ton w/Load	32821	Lake Erie Franklin & Cla
 CARPART N "Atlas	Hopper, 45'	3-Bay, 90 Ton w/Load	32822	Lake Erie Franklin & Clarion		3974" 0 30100 3.375 0.750 0 0 2.531 3.775 8535808
 CARPART N "Atlas	Hopper, 45'	3-Bay, 90 Ton w/Load	32823	Lake Erie Franklin & Clarion		3971" 0 30100 3.375 0.750 0 0 2.531 3.775 8535808
 CARPART N "Atlas	Hopper, 45'	3-Bay, 90 Ton w/Load	32824	Lake Erie Franklin & Clarion		3969" 0 30100 3.375 0.750 0 0 2.531 3.775 8535808
-CARPART N "Atlas	Hopper, 45'	3-Bay, 90 Ton w/Load	32825	Lake Erie Franklin & Clario		3975" 0 30100 3.375 0.750 0 0 2.531 3.775 8535808
+CARPART N "Atlas	Hopper, 45'	3-Bay, 90 Ton w/Load	32825	Lake Erie Franklin & Clarion		3975" 0 30100 3.375 0.750 0 0 2.531 3.775 8535808
 CARPART N "Atlas	Hopper, 45'	3-Bay, 90 Ton w/Load	32831	Norfolk Southern	NS	" 0 30100 3.375 0.750 0 0 2.531 3.775 8535808
 CARPART N "Atlas	Hopper, 45'	3-Bay, 90 Ton w/Load	32832	Norfolk Southern	NS	144681" 0 30100 3.375 0.750 0 0 2.531 3.775 8535808
 CARPART N "Atlas	Hopper, 45'	3-Bay, 90 Ton w/Load	32833	Norfolk Southern	NS	144684" 0 30100 3.375 0.750 0 0 2.531 3.775 8535808
@@ -1975,7 +1975,7 @@ CARPART N "Atlas	Hopper, Centerflow, 50'	ACF 4-Bay	39571	Chessie		" 0 30100 3.90
 CARPART N "Atlas	Hopper, Centerflow, 50'	ACF 4-Bay	39621	Chemplex Plastics		315" 0 30100 3.900 0.750 0 0 2.925 4.300 8535808
 CARPART N "Atlas	Hopper, Centerflow, 50'	ACF 4-Bay	39622	Chemplex Plastics		337" 0 30100 3.900 0.750 0 0 2.925 4.300 8535808
 CARPART N "Atlas	Hopper, Centerflow, 50'	ACF 4-Bay	39641	Arco Polymers		" 0 30100 3.900 0.750 0 0 2.925 4.300 8535808
-CARPART N "Atlas	Hopper, Centerflow, 50'	ACF 4-Bay	39651	Citco		" 0 30100 3.900 0.750 0 0 2.925 4.300 8535808
+CARPART N "Atlas	Hopper, Centerflow, 50'	ACF 4-Bay	39651	Citgo		" 0 30100 3.900 0.750 0 0 2.925 4.300 8535808
 CARPART N "Atlas	Hopper, Centerflow, 50'	ACF 4-Bay	39652	Citgo		5233" 0 30100 3.900 0.750 0 0 2.925 4.300 8535808
 CARPART N "Atlas	Hopper, Centerflow, 50'	ACF 4-Bay	39653	Citgo		5279" 0 30100 3.900 0.750 0 0 2.925 4.300 8535808
 CARPART N "Atlas	Hopper, Centerflow, 50'	ACF 4-Bay	39663	Dupont		36707" 0 30100 3.900 0.750 0 0 2.925 4.300 8535808
@@ -1985,7 +1985,7 @@ CARPART N "Atlas	Hopper, Centerflow, 50'	ACF 4-Bay	39664	Dupont		36730" 0 30100 
 CARPART N "Atlas	Hopper, Centerflow, 50'	ACF 4-Bay	39671	Family Lines		260020" 0 30100 3.900 0.750 0 0 2.925 4.300 8535808
 CARPART N "Atlas	Hopper, Centerflow, 50'	ACF 4-Bay	39672	Family Lines		260022" 0 30100 3.900 0.750 0 0 2.925 4.300 8535808
 CARPART N "Atlas	Hopper, Centerflow, 50'	ACF 4-Bay	39681	Hercules		50496" 0 30100 3.900 0.750 0 0 2.925 4.300 8535808
-CARPART N "Atlas	Hopper, Centerflow, 50'	ACF 4-Bay	39682	Hercule		50503" 0 30100 3.900 0.750 0 0 2.925 4.300 8535808
+CARPART N "Atlas	Hopper, Centerflow, 50'	ACF 4-Bay	39682	Hercules		50503" 0 30100 3.900 0.750 0 0 2.925 4.300 8535808
 CARPART N "Atlas	Hopper, Centerflow, 50'	ACF 4-Bay	39691	Honeymead		56312" 0 30100 3.900 0.750 0 0 2.925 4.300 8535808
 CARPART N "Atlas	Hopper, Centerflow, 50'	ACF 4-Bay	39692	Honeymead		56315" 0 30100 3.900 0.750 0 0 2.925 4.300 8535808
 CARPART N "Atlas	Hopper, Centerflow, 50'	ACF 4-Bay	39701	Novamont		55700" 0 30100 3.900 0.750 0 0 2.925 4.300 8535808

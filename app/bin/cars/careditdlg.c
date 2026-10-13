@@ -470,6 +470,21 @@ static void CarDlgRedraw(
 
 
 extern dynArr_t roadnameMap_da;
+/**
+ * Check whether a road name means "undecorated": empty, or the
+ * "Undecorated" label in English or in the user's language (typed into
+ * the editable Road combo, or left over in older custom files).
+ *
+ * \param roadname IN road name to check
+ * \return TRUE if the road name stands for "undecorated"
+ */
+static BOOL_T IsUndecoratedRoadname( const char * roadname )
+{
+	return roadname[0] == '\0' ||
+	       strcasecmp( roadname, "undecorated" ) == 0 ||
+	       strcasecmp( roadname, _("Undecorated") ) == 0;
+}
+
 static void CarDlgLoadRoadnameList( void )
 /* Loads RoadnameList.
  * Set carDlgRoadnameInx to entry matching carDlgRoadnameStr (if found)
@@ -835,9 +850,12 @@ static void CarDlgLoadPart(
 		CarDlgLoadRoadnameList();
 		TabStringCpy( carDlgRepmarkStr, &tabs[T_REPMARK] );
 	} else {
+		/* Undecorated: the combo shows its "Undecorated" row (index 0),
+		 * the stored value stays empty. A reporting mark is allowed
+		 * without a road name, so keep it. */
 		carDlgRoadnameInx = 0;
-		strcpy( carDlgRoadnameStr, _("Undecorated") );
-		carDlgRepmarkStr[0] = '\0';
+		carDlgRoadnameStr[0] = '\0';
+		TabStringCpy( carDlgRepmarkStr, &tabs[T_REPMARK] );
 	}
 	TabStringCpy( carDlgNumberStr, &tabs[T_NUMBER] );
 	carDlgBodyColor = partP->color;
@@ -1990,6 +2008,7 @@ static void CarDlgUpdate(
 		break;
 
 	case I_CD_REPMARK:
+		carDlgChanged++;
 		carDlgRepmarkTouched = TRUE;
 		break;
 
@@ -2815,14 +2834,11 @@ static void CarDlgOk( void * unused )
 		}
 	}
 
-	/* A catalog part being created/edited (directly at S_PART, or via an
-	 * S_ITEM commit that auto-creates one -- including the nested Model
-	 * commit popped above) carries no repmark for an "undecorated" roadname. */
-	if ( ( S_PART || ( S_ITEM && ( carDlgManufInx < 0 || carDlgPartnoInx < 0 ) &&
-	                   carDlgPartnoStr[0] ) ) &&
-	     strcasecmp( carDlgRoadnameStr, "undecorated" ) == 0 ) {
+	/* "Undecorated" is stored as an empty road name -- never as the
+	 * (possibly translated) display text. The reporting mark is kept: a
+	 * mark without a road name is allowed. */
+	if ( IsUndecoratedRoadname( carDlgRoadnameStr ) ) {
 		carDlgRoadnameStr[0] = '\0';
-		carDlgRepmarkStr[0] = '\0';
 	}
 
 	/* ---- build the commit plan ------------------------------------------ */
