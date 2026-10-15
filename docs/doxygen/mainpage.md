@@ -93,7 +93,7 @@ Four categories, each with a different mechanism:
 - **System/environmental errors** — out-of-memory and similar. Exit as soon as possible rather
   than trying to continue in a state that can't be trusted.
 
-## `GetArgs()` extensibility
+## <tt>%GetArgs()</tt> extensibility
 
 Most track-segment and endpoint records are read with `GetArgs()` (`app/bin/getargs.c`), using a
 format-code string similar to `scanf()`. Two format codes make the on-disk format
