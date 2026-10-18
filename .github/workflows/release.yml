@@ -32,13 +32,20 @@ on:
         type: boolean
         default: false
 
+# macOS and Windows runners are pinned too (not macos-latest/windows-latest).
+# DEVELOPER_DIR pins Xcode, and with it AppleClang, on the macOS jobs; it has
+# no effect elsewhere. MinGW GCC is pinned per job with pacman -U (see "Pin
+# MinGW GCC"). Homebrew and the rest of MSYS2 can't be pinned and still roll.
+env:
+  DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+
 jobs:
   # ── Linux x86-64 — DEB + RPM + STGZ ───────────────────────────────────────
   # Every job in this file is pinned to ubuntu-24.04 rather than ubuntu-latest
   # (Ubuntu 26.04 from 2026-10-19). Packages built on the older LTS still
   # install on the newer one, but not the other way round (glibc/GTK symbol
   # versions), and the QA jobs below must match ci-gtk3.yml's pinned tool
-  # versions. ci-gtk3-ubuntu2604.yml previews 26.04.
+  # versions. ci-gtk3-preview.yml previews the next images.
   package-linux:
     runs-on: ubuntu-24.04
     steps:
@@ -211,7 +218,7 @@ jobs:
 
   # ── macOS ARM64 — tar.gz (Homebrew-dependent) + DMG (self-contained) ───────
   package-macos:
-    runs-on: macos-latest
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v7
 
@@ -282,7 +289,7 @@ jobs:
 
   # ── Windows x86-64 — ZIP (DLLs bundled) + NSIS installer ──────────────────
   package-windows:
-    runs-on: windows-latest
+    runs-on: windows-2025
     defaults:
       run:
         shell: msys2 {0}
@@ -313,6 +320,16 @@ jobs:
       # "terminate called after throwing an instance of 'std::system_error'
       # what(): Invalid argument". Pin the last version that built cleanly
       # here, the same way the Linux doxygen jobs pin DOXYGEN_VERSION.
+      - name: Pin MinGW GCC
+        # pacman -U the exact gcc/gcc-libs pair, the same way release.yml pins
+        # MSYS2 doxygen, so new GCC warnings only arrive when we bump this.
+        env:
+          MSYS2_GCC_PKG_VERSION: 16.2.0-6
+        run: |
+          pacman -U --noconfirm \
+            "https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-gcc-libs-${MSYS2_GCC_PKG_VERSION}-any.pkg.tar.zst" \
+            "https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-gcc-${MSYS2_GCC_PKG_VERSION}-any.pkg.tar.zst"
+          gcc --version | head -1
       - name: Pin MSYS2 Doxygen package
         env:
           MSYS2_DOXYGEN_PKG_VERSION: 1.16.1-4

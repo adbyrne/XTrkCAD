@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # The gating cppcheck run: cppcheck's default check set, failing on any
 # finding. Shared by ci-gtk3.yml's cppcheck job (the gate, on ubuntu-24.04)
-# and ci-gtk3-ubuntu2604.yml's preview of the same check on a newer cppcheck,
+# and ci-gtk3-preview.yml's preview of the same check on a newer cppcheck,
 # so both always use the same scope and suppression list. See the comment on
 # ci-gtk3.yml's cppcheck job for why each scope entry and suppression exists.
 #

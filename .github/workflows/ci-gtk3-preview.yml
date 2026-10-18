@@ -1,4 +1,4 @@
-name: CI (GTK3V2MAIN, Ubuntu 26.04 preview)
+name: CI (GTK3V2MAIN, toolchain preview)
 on:
   push:
     branches:
@@ -8,13 +8,16 @@ on:
     branches:
       - GTK3V2MAIN
 
-# ci-gtk3.yml is the gate and stays pinned to ubuntu-24.04. This workflow runs
-# the toolchain-sensitive jobs on Ubuntu 26.04 (newer GCC, Clang, cppcheck and
-# GTK) so breakage shows up here before ci-gtk3.yml moves over. It's
-# advisory: a failure here is something to fix or ticket, not a merge blocker.
-# Once it's consistently clean, move ci-gtk3.yml's runners to ubuntu-26.04
-# and retire this file. Jobs mirror their ci-gtk3.yml namesakes -- keep the
-# two in step when changing either.
+# ci-gtk3.yml is the gate, with every runner and compiler pinned. This workflow
+# runs the toolchain-sensitive jobs on the next images so breakage shows up
+# here before ci-gtk3.yml moves over:
+#   - Ubuntu 26.04, x64 and arm64 (newer GCC, Clang, cppcheck and GTK)
+#   - Xcode 27 preview image on macOS (next AppleClang)
+#   - Windows 11 on ARM via MSYS2 CLANGARM64 (a platform we don't ship yet)
+# It's advisory: a failure here is something to fix or ticket, not a merge
+# blocker. When a preview is consistently clean, move ci-gtk3.yml's pin to it.
+# Jobs mirror their ci-gtk3.yml namesakes -- keep the two in step when
+# changing either.
 
 jobs:
   c-tests-linux:
@@ -151,3 +154,70 @@ jobs:
         with:
           name: compiler-warnings-gtk3-linux-ubuntu2604
           path: build/warnings.txt
+
+  c-tests-macos-xcode27:
+    # Xcode 27 is a preview image on GitHub (label xcode-27); ci-gtk3.yml's
+    # c-tests-macos uses macos-26 with Xcode 26.6.
+    runs-on: xcode-27
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - name: Toolchain versions
+        run: sw_vers; xcodebuild -version; clang --version | head -1
+      - name: Install dependencies
+        run: brew install ninja gtk+3 cmocka libzip librsvg
+      - name: Configure
+        run: |
+          GTK_PREFIX=$(brew --prefix gtk+3)
+          PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
+          export PKG_CONFIG_PATH
+          GTK_LDFLAGS=$(pkg-config --libs-only-L gtk+-3.0)
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
+            -DCMAKE_PREFIX_PATH="$GTK_PREFIX;$(brew --prefix)" \
+            -DCMAKE_EXE_LINKER_FLAGS="$GTK_LDFLAGS" \
+            -DXTRKCAD_USE_APPLEHELP=OFF -DXTRKCAD_USE_BROWSER=ON
+      - name: Build
+        run: cmake --build build
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  c-tests-windows-arm64:
+    # Windows 11 on ARM (Snapdragon laptops), built with MSYS2's CLANGARM64
+    # environment, which packages GTK3 and every dependency we use. Mirrors
+    # ci-gtk3.yml's c-tests-windows-msys2 apart from the toolchain (Clang,
+    # not MinGW GCC).
+    runs-on: windows-11-arm
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: CLANGARM64
+          update: false
+          install: >-
+            mingw-w64-clang-aarch64-clang
+            mingw-w64-clang-aarch64-cmake
+            mingw-w64-clang-aarch64-ninja
+            mingw-w64-clang-aarch64-pkgconf
+            mingw-w64-clang-aarch64-gtk3
+            mingw-w64-clang-aarch64-zlib
+            mingw-w64-clang-aarch64-libzip
+            mingw-w64-clang-aarch64-mxml
+            mingw-w64-clang-aarch64-librsvg
+            mingw-w64-clang-aarch64-gettext-tools
+            mingw-w64-clang-aarch64-cmocka
+      - name: Toolchain versions
+        run: clang --version | head -1; pkg-config --modversion gtk+-3.0
+      - name: Configure
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DXTRKCAD_TESTING=ON \
+            -DXTRKCAD_USE_GETTEXT=OFF
+      - name: Build
+        run: cmake --build build --parallel
+      - name: Test
+        run: ctest --test-dir build --output-on-failure

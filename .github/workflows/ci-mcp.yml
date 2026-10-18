@@ -24,7 +24,7 @@ jobs:
   mcp-tests:
     strategy:
       matrix:
-        os: [ubuntu-24.04, ubuntu-26.04, macos-latest, windows-latest]
+        os: [ubuntu-24.04, ubuntu-26.04, macos-26, windows-2025]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:

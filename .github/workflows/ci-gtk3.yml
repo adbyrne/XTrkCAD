@@ -10,8 +10,16 @@ on:
 
 # Linux jobs are pinned to ubuntu-24.04, not ubuntu-latest (Ubuntu 26.04 from
 # 2026-10-19), so cppcheck/clang-tidy/GCC/Clang versions only change when we
-# choose. ci-gtk3-ubuntu2604.yml runs the toolchain-sensitive jobs on 26.04
-# as a preview; move this file to 26.04 once that preview is clean.
+# choose. ci-gtk3-preview.yml runs the toolchain-sensitive jobs on the next
+# images (Ubuntu 26.04, Xcode 27, Windows on ARM); move a pin forward once its
+# preview is clean.
+
+# macOS and Windows runners are pinned too (not macos-latest/windows-latest).
+# DEVELOPER_DIR pins Xcode, and with it AppleClang, on the macOS jobs; it has
+# no effect elsewhere. MinGW GCC is pinned per job with pacman -U (see "Pin
+# MinGW GCC"). Homebrew and the rest of MSYS2 can't be pinned and still roll.
+env:
+  DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
 
 jobs:
   doxygen:
@@ -258,7 +266,7 @@ jobs:
         run: xvfb-run ctest --test-dir build --output-on-failure -LE regression
 
   c-tests-macos:
-    runs-on: macos-latest
+    runs-on: macos-26
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
@@ -283,7 +291,7 @@ jobs:
     # GTK3 on Windows via MSYS2/MinGW64 — replaces the old mswlib/MSVC job.
     # mswlib was removed from GTK3V2MAIN in SF r6508; Windows now builds
     # against GTK3 directly using the official GTK Windows runtime (MSYS2).
-    runs-on: windows-latest
+    runs-on: windows-2025
     timeout-minutes: 30
     defaults:
       run:
@@ -306,6 +314,16 @@ jobs:
             mingw-w64-x86_64-librsvg
             mingw-w64-x86_64-gettext
             mingw-w64-x86_64-cmocka
+      - name: Pin MinGW GCC
+        # pacman -U the exact gcc/gcc-libs pair, the same way release.yml pins
+        # MSYS2 doxygen, so new GCC warnings only arrive when we bump this.
+        env:
+          MSYS2_GCC_PKG_VERSION: 16.2.0-6
+        run: |
+          pacman -U --noconfirm \
+            "https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-gcc-libs-${MSYS2_GCC_PKG_VERSION}-any.pkg.tar.zst" \
+            "https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-gcc-${MSYS2_GCC_PKG_VERSION}-any.pkg.tar.zst"
+          gcc --version | head -1
       - name: Configure
         run: |
           cmake -B build -G Ninja \
@@ -425,7 +443,7 @@ jobs:
         run: sudo apt-get update -q && sudo apt-get install -y cppcheck
       - name: Run cppcheck
         # Scope and suppressions live in the script, shared with
-        # ci-gtk3-ubuntu2604.yml's preview job.
+        # ci-gtk3-preview.yml's preview job.
         run: tools/cppcheck-gate.sh
 
   cppcheck-deep:
@@ -821,7 +839,7 @@ jobs:
     # rather than astyle-version differences. Kept report-only since a
     # disagreement here would still point to a toolchain quirk unrelated to
     # the PR's actual content.
-    runs-on: macos-latest
+    runs-on: macos-26
     timeout-minutes: 20
     env:
       ASTYLE_VERSION: 3.6.13
@@ -858,7 +876,7 @@ jobs:
     # mingw-w64-x86_64-astyle via pacman; switched 2026-07-14 to build the
     # same pinned ASTYLE_VERSION from source (see astyle-check's comment)
     # so all three astyle jobs run the identical version.
-    runs-on: windows-latest
+    runs-on: windows-2025
     timeout-minutes: 30
     defaults:
       run:
@@ -872,6 +890,16 @@ jobs:
           msystem: MINGW64
           update: false
           install: mingw-w64-x86_64-gcc make
+      - name: Pin MinGW GCC
+        # pacman -U the exact gcc/gcc-libs pair, the same way release.yml pins
+        # MSYS2 doxygen, so new GCC warnings only arrive when we bump this.
+        env:
+          MSYS2_GCC_PKG_VERSION: 16.2.0-6
+        run: |
+          pacman -U --noconfirm \
+            "https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-gcc-libs-${MSYS2_GCC_PKG_VERSION}-any.pkg.tar.zst" \
+            "https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-gcc-${MSYS2_GCC_PKG_VERSION}-any.pkg.tar.zst"
+          gcc --version | head -1
       - name: Build astyle ${{ env.ASTYLE_VERSION }} from source
         run: |
           curl -sL -o astyle.tar.bz2 "https://sourceforge.net/projects/astyle/files/astyle/astyle%20${ASTYLE_VERSION%.*}/astyle-${ASTYLE_VERSION}.tar.bz2/download"
@@ -963,7 +991,7 @@ jobs:
 
   compiler-warnings-macos:
     # Report-only: captures -Wall -Wextra output on macOS/clang as an artifact.
-    runs-on: macos-latest
+    runs-on: macos-26
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
@@ -1000,7 +1028,7 @@ jobs:
 
   compiler-warnings-windows:
     # Report-only: captures -Wall -Wextra output on Windows/MinGW64 as an artifact.
-    runs-on: windows-latest
+    runs-on: windows-2025
     timeout-minutes: 30
     defaults:
       run:
@@ -1022,6 +1050,16 @@ jobs:
             mingw-w64-x86_64-mxml
             mingw-w64-x86_64-librsvg
             mingw-w64-x86_64-cmocka
+      - name: Pin MinGW GCC
+        # pacman -U the exact gcc/gcc-libs pair, the same way release.yml pins
+        # MSYS2 doxygen, so new GCC warnings only arrive when we bump this.
+        env:
+          MSYS2_GCC_PKG_VERSION: 16.2.0-6
+        run: |
+          pacman -U --noconfirm \
+            "https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-gcc-libs-${MSYS2_GCC_PKG_VERSION}-any.pkg.tar.zst" \
+            "https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-gcc-${MSYS2_GCC_PKG_VERSION}-any.pkg.tar.zst"
+          gcc --version | head -1
       - name: Configure with -Wall -Wextra
         run: |
           cmake -B build -G Ninja \

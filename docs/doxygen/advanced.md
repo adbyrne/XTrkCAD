@@ -56,7 +56,7 @@ after the branch, for someone to review.
 # CI tooling overview {#ci-tooling-overview}
 
 This branch's CI is `.github/workflows/ci-gtk3.yml` (`ci.yml` covers the GTK2 `%main` branch,
-`ci-gtk3-ubuntu2604.yml`, `ci-mcp.yml`, `codeql.yml` and `release.yml` are separate workflows —
+`ci-gtk3-preview.yml`, `ci-mcp.yml`, `codeql.yml` and `release.yml` are separate workflows —
 see below). Read the workflow file
 directly for exact command lines; this is a map of what each job checks and whether it can fail
 your run, not a copy of it.
@@ -117,16 +117,23 @@ git-only work that can't simply mirror Hg.
   `-Wall -Wextra` build output as an artifact on each platform.
 - **`coverage`** — generates an lcov HTML report and uploads it as an artifact.
 
-## Ubuntu 26.04 preview (advisory)
+## Toolchain preview (advisory)
 
-Every Linux job in `ci-gtk3.yml` is pinned to `ubuntu-24.04`, so a runner image update can't
-change tool versions under us. `ci-gtk3-ubuntu2604.yml` runs on the same triggers and repeats
-the toolchain-sensitive jobs on `ubuntu-26.04` and `ubuntu-26.04-arm`: `c-tests-linux`,
-`c-tests-linux-clang`, `c-tests-arm64`, `regression-gtk3`, `c-tests-sanitizers`, the gating
-`cppcheck` check (through the same `tools/cppcheck-gate.sh`), and report-only
-`compiler-warnings` (artifact `compiler-warnings-gtk3-linux-ubuntu2604`). A failure there
-doesn't block a merge, but it does need fixing or a ticket. Once the preview is consistently
-clean, `ci-gtk3.yml` moves to 26.04 and the preview file is retired. Its jobs mirror their
+`ci-gtk3.yml` pins its runner images and compilers (see \ref building "Building and Testing"'s
+tool-version table), so an image update can't change tool versions under us.
+`ci-gtk3-preview.yml` runs on the same triggers and repeats the toolchain-sensitive jobs on the
+next images:
+
+- **Ubuntu 26.04** (`ubuntu-26.04`, `ubuntu-26.04-arm`): `c-tests-linux`, `c-tests-linux-clang`,
+  `c-tests-arm64`, `regression-gtk3`, `c-tests-sanitizers`, the gating `cppcheck` check (through
+  the same `tools/cppcheck-gate.sh`), and report-only `compiler-warnings` (artifact
+  `compiler-warnings-gtk3-linux-ubuntu2604`).
+- **Xcode 27** (`c-tests-macos-xcode27`, GitHub's `xcode-27` preview image): the next AppleClang.
+- **Windows 11 on ARM** (`c-tests-windows-arm64`, `windows-11-arm`): MSYS2's `CLANGARM64`
+  environment. It's a platform we don't ship packages for yet.
+
+A failure there doesn't block a merge, but it does need fixing or a ticket. When a preview is
+consistently clean, move `ci-gtk3.yml`'s pin forward to it. The preview jobs mirror their
 `ci-gtk3.yml` namesakes, so change both together.
 
 Every report-only job's findings land as a downloadable artifact on the workflow run's summary
