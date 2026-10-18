@@ -468,7 +468,7 @@ static void EditControlDialog()
 		                                 NULL, ControlEditOk,
 		                                 NULL, FormCancel_Current,
 		                                 TRUE,
-		                                 F_BLOCK,
+		                                 F_MODAL,
 		                                 NULL );
 	}
 	if (controlEditTrack == NULL) {

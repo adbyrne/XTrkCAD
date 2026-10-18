@@ -122,6 +122,39 @@ void wWinSetAspectRatio(wControl_p win, wWinPix_t x, wWinPix_t y)
 }
 
 /**
+ * Applies F_MODAL to dialog \a win before it is shown: modal unless demo
+ * playback is running (the playback engine must still reach the other
+ * windows), and transient for the window it was opened from, so a dialog
+ * opened from another dialog stays on top of it.
+ *
+ * \param win IN dialog window
+ */
+
+static void SetModal(
+        wControl_p win)
+{
+	struct window *w = CONTROL_GET_ATTRIBUTES_PTR(win, window);
+	gboolean modal = (w->option & F_MODAL) && gtkBlockEnabled;
+
+	gtk_window_set_modal(GTK_WINDOW(win->widget), modal);
+	if (!modal) {
+		return;
+	}
+
+	GList *toplevels = gtk_window_list_toplevels();
+	for (GList *l = toplevels; l; l = l->next) {
+		GtkWindow *opener = GTK_WINDOW(l->data);
+		if (opener != GTK_WINDOW(win->widget) &&
+		    gtk_window_get_window_type(opener) == GTK_WINDOW_TOPLEVEL &&
+		    gtk_window_is_active(opener)) {
+			gtk_window_set_transient_for(GTK_WINDOW(win->widget), opener);
+			break;
+		}
+	}
+	g_list_free(toplevels);
+}
+
+/**
  * Shows or hides window \a win.
  *
  * \param win IN window
@@ -134,13 +167,35 @@ void wWinShow(
 {
 	wBool_t newState = show & ~DONTGRABFOCUS;
 	if (newState) {
-
+		if (win->type == W_DIALOG) {
+			SetModal(win);
+		}
 		gtk_widget_show(win->widget);
 
 	} else {
 		gtk_widget_hide(win->widget);
 	}
 
+}
+
+/**
+ * Waits until the (already shown) modal window \a win is hidden again.
+ * Used by callers that need the dialog's result before they can continue.
+ * During demo playback nothing waits, so the caller sees the dialog's
+ * initial state (as with GTK2's F_BLOCK).
+ *
+ * \param win IN window, created with F_MODAL and shown with wShow()
+ */
+
+void wWinRunModal(
+        wControl_p win)
+{
+	if (!gtkBlockEnabled) {
+		return;
+	}
+	while (gtk_widget_get_visible(win->widget)) {
+		gtk_main_iteration();
+	}
 }
 
 /**

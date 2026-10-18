@@ -190,8 +190,8 @@ static void DoDeselect(void *action)
  * CHANGE_LAYER notification callback: this dialog's Layers and Groups lists
  * are only ever populated when it's shown (RefreshLayerList()/
  * RefreshGroupsList() in DoSelectLayersDialog()), not on every relevant
- * edit -- and it's non-modal (F_BLOCK is unimplemented on GTK3, see
- * dialog.c's wWinDialogCreate()), so the Manage > Layer Groups dialog can be
+ * edit -- and it's non-modal (created without F_MODAL, see
+ * gtk3lib/window.c's SetModal()), so the Manage > Layer Groups dialog can be
  * open and edited at the same time. Left unrefreshed, a Groups-list row's
  * cached group index can point at a *different* group than the one displayed
  * after a group elsewhere is deleted (LayerGroupDelete() shifts every later
@@ -226,7 +226,7 @@ static void DoSelectLayersDialog(void *unused)
 	if (selectLayersPG.win == NULL) {
 		FormCreateDialog(&selectLayersPG, MakeWindowTitle(_("Select Layers/Groups")),
 		                 NULL, NULL, NULL, FormCancel_Current,
-		                 TRUE, F_RESIZE|F_RECALLSIZE|F_BLOCK, NULL);
+		                 TRUE, F_RESIZE|F_RECALLSIZE, NULL);
 		RegisterChangeNotification(SelectLayersChangeNotify);
 	}
 

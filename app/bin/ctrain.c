@@ -29,7 +29,6 @@
 #include "fileio.h"
 #include "icons.h"
 #include "layout.h"
-#include "param.h"
 #include "track.h"
 #include "common-ui.h"
 #include "form.h"

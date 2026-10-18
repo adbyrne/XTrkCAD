@@ -26,7 +26,6 @@
 #include "fileio.h"
 #include "form.h"
 #include "layout.h"
-#include "param.h"
 #include "paths.h"
 #include "track.h"
 #include "common-ui.h"

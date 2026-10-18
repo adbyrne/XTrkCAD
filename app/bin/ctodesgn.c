@@ -29,7 +29,6 @@
 #include "fileio.h"
 #include "form.h"
 
-#include "param.h"
 #include "track.h"
 #include "trkendpt.h"
 #include "ccornu.h"
@@ -3120,7 +3119,7 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 		                             _("Cancel"),
 		                             FormCancel_Current,
 		                             TRUE,
-		                             F_BLOCK,
+		                             0,
 		                             NULL );
 	}
 	if ( curDesign != newDesign ) {

@@ -27,7 +27,6 @@
 #include <string.h>
 
 #include <wlib.h>
-#include <param.h>
 #include <dynarray.h>
 #include <form.h>
 #include "formprivate.h"
@@ -302,7 +301,6 @@ wControl_p FormCreateDialog(
 		cancelProc = NULL;
 	}
 	group->cancelProc = cancelProc;
-	group->layoutProc = NULL;
 	group->changeProc = changeProc;
 	group->winOption = winOption;
 
@@ -331,7 +329,7 @@ wControl_p FormCreateDialog(
 		                               0, ButtonCancel, group);
 	}
 	if (needHelpButton) {
-		/* SF #730: GetDialogHelpTopic() (app/bin/paramwrapper.c) applies the
+		/* SF #730: GetDialogHelpTopic() (above) applies the
 		 * same "cmd" + Capitalize(name) default this used to compute inline,
 		 * plus a small alias table for the minority of dialogs it doesn't
 		 * fit. */

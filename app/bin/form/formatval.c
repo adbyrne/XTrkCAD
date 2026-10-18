@@ -26,7 +26,7 @@
 #include <wlib.h>
 #include "common.h"
 
-#include "param.h"
+#include "form.h"
 
 #define N_STRING (10)
 static int formatStringInx;					//Index ahead in case of overwrite

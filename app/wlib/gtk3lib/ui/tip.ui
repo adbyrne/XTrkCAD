@@ -115,6 +115,10 @@
                     <property name="editable">False</property>
                     <property name="visible">True</property>
                     <property name="wrap-mode">word</property>
+                    <property name="left-margin">8</property>
+                    <property name="right-margin">8</property>
+                    <property name="top-margin">6</property>
+                    <property name="bottom-margin">6</property>
                   </object>
                 </child>
               </object>

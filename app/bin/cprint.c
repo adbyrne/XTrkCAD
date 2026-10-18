@@ -25,7 +25,6 @@
 #include "fileio.h"
 #include "icons.h"
 #include "layout.h"
-#include "param.h"
 #include "form.h"
 #include "track.h"
 #include "common-ui.h"
@@ -721,7 +720,7 @@ static void DoPrintMargin( void )
 		                                    MakeWindowTitle(_("Print Margins")),
 		                                    _("Ok"), DoPrintMarginOk,
 		                                    NULL, FormCancel_Null,
-		                                    TRUE, F_BLOCK, PrintMarginDlgUpdate );
+		                                    TRUE, F_MODAL, PrintMarginDlgUpdate );
 		if ( customMarginWin == NULL ) {
 			return;
 		}

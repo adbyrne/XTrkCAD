@@ -33,7 +33,7 @@
 #include "fileio.h"
 #include "layout.h"
 #include "icons.h"
-#include "param.h"
+#include "form.h"
 #include "cjoin.h"
 #include "misc.h"
 #include "common-ui.h"

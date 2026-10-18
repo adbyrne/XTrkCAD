@@ -41,7 +41,6 @@ extern wControl_p zoomDownB;
 extern wControl_p zoomExtentsB;
 extern wControl_p mapShowB;
 extern wControl_p mapShowMI;
-extern wControl_p winList_mi;
 extern wControl_p fileList_ml;
 extern wMenuToggle_p snapGridEnableMI;
 extern wMenuToggle_p snapGridShowMI;

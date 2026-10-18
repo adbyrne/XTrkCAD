@@ -102,7 +102,10 @@ static int entryFocusOutEvent(
 	struct entry* entry = CONTROL_GET_ATTRIBUTES_PTR(b, entry);
 	bool isFalse = FALSE;
 
-	if (event->in == FALSE) {
+	/* only commit while the dialog is shown: the focus-out that follows
+	 * hiding the dialog (Cancel, Escape, window close) must not apply the
+	 * pending edit */
+	if (event->in == FALSE && gtk_widget_is_visible(widget)) {
 		if (entry->action) {
 			const char* s;
 			s = gtk_entry_get_text(GTK_ENTRY(b->widget));

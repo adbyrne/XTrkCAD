@@ -70,7 +70,7 @@ do 'testjoin psplot 10 10 40 1 | lpr -Ppostscript'
 #include "cundo.h"
 #include "fileio.h"
 #include "layout.h"
-#include "param.h"
+#include "form.h"
 #include "common-ui.h"
 
 static TRKTYP_T T_EASEMENT = -1;

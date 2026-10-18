@@ -247,6 +247,15 @@ wWinDialogCreate(wControl_p parent,
 	} else {
 		dialog = wlibCreateWindowFromBuilder(winDialog, "basicdialog", option);
 
+		/*
+		 * The builder makes the still hidden id_ok the default widget and
+		 * gtk_dialog_map() would give it the focus. Dialogs without an OK
+		 * button would keep the focus on that unrealized widget, and every
+		 * key event raises a Gtk-CRITICAL. wButtonCreate() makes id_ok the
+		 * default again once an OK button is really requested.
+		 */
+		gtk_window_set_default(GTK_WINDOW(dialog), NULL);
+
 		if (option & F_RESIZE) {
 			gtk_window_set_resizable(GTK_WINDOW(dialog), TRUE);
 		}

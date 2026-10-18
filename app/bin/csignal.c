@@ -681,7 +681,7 @@ static void EditAspectDialog ( wIndex_t inx )
 		                                NULL, aspectEditOK,
 		                                NULL, FormCancel_Current,
 		                                TRUE,
-		                                F_BLOCK,NULL);
+		                                F_MODAL,NULL);
 	}
 	/* one dialog serves both adding a new aspect and editing one */
 	wWinSetTitle( aspectEditW,
@@ -757,7 +757,7 @@ static void EditSignalDialog()
 		                                NULL, SignalEditOk,
 		                                NULL, FormCancel_Custom( SignalEditCancel ),
 		                                TRUE,
-		                                F_RESIZE|F_RECALLSIZE|F_BLOCK,
+		                                F_RESIZE|F_RECALLSIZE|F_MODAL,
 		                                SignalEditDlgUpdate );
 	}
 	if (signalCreate_P) {

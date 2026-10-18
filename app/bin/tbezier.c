@@ -41,7 +41,7 @@
 #include "ccurve.h"
 #include "cstraigh.h"
 #include "cjoin.h"
-#include "param.h"
+#include "form.h"
 #include "cundo.h"
 #include "layout.h"
 #include "fileio.h"

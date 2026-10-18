@@ -22,7 +22,6 @@
  */
 
 #include <wlib.h>
-//#include <param.h>
 #include <form.h>
 #include "formprivate.h"
 #include <dynstring.h>
@@ -274,6 +273,15 @@ static void FloatPush(const char* value, void * dp)
 	if (wasInvalid) {
 		/* See IntegerPush: re-gate before changeProc. */
 		RegateOk(p);
+	}
+
+	// see IntegerPush: skip unchanged values on focus-out. Compare the text,
+	// not the parsed number: the entry shows a rounded value, writing it
+	// back would silently drop the precision of the stored one.
+	if (p->valueP &&
+	    strcmp(value, FormFloatFormat(p, *(FLOAT_T*)(p->valueP))) == 0) {
+		wControlHilite(p->control, p->bInvalid);
+		return;
 	}
 
 	if (DO_MACRO_RECORD(p)) {

@@ -190,6 +190,7 @@ static void LayerVisibilitySetReal(unsigned int inx);
 static BOOL_T IsLayerConfigured(unsigned int layerNumber);
 static BOOL_T LayerRealVisible(unsigned int layerNumber);
 static void InitializeLayers(void LayerInitFunc(void), int newCurrLayer);
+static void LayerInfoScale(void);
 static void LayerPrefSave(void);
 static void LayerPrefLoad(void);
 
@@ -606,6 +607,8 @@ void SetCurrLayer(wIndex_t inx, const char *name, wIndex_t op,
 		}
 	}
 
+	LayerInfoScale();
+
 	if (recordF) {
 		fprintf(recordF, "SETCURRLAYER %d\n", inx);
 	}
@@ -958,6 +961,15 @@ static int LoadFileListLoad(Catalog *catalog, const char *name)
 #define gaugeL (layerPLs[I_GAUGE].control)
 
 /**
+ * Show the scale/gauge of the current layer in the status bar. That is the
+ * layer's own scale if it doesn't inherit the layout defaults.
+ */
+static void LayerInfoScale(void)
+{
+	InfoScaleGauge(GetScaleName(GetLayerScale(curLayer)));
+}
+
+/**
  * @brief Reload Layer parameters if changes
  * @param changes
  */
@@ -967,6 +979,9 @@ static void LayerChange(long changes)
 		if (layerW != NULL && wWinIsVisible(layerW)) {
 			FormLoadControls(&layerPG);
 		}
+	if (changes & (CHANGE_SCALE | CHANGE_LAYER)) {
+		LayerInfoScale();
+	}
 }
 
 void GetLayerLinkString(int inx, char *list)
@@ -1805,6 +1820,8 @@ static void LayerUpdate(void)
 	}
 
 	layerRedrawMap = FALSE;
+
+	LayerInfoScale();
 }
 
 static void LayerSelect(wIndex_t inx)

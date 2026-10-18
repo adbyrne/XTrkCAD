@@ -686,7 +686,7 @@ static void NewBlockDialog()
 		                           NULL, BlockOk,
 		                           NULL, FormCancel_Current,
 		                           TRUE,
-		                           F_BLOCK, NULL );
+		                           F_MODAL, NULL );
 		blockD.dpi = mainD.dpi;
 	}
 	FormLoadControls( &blockPG );
@@ -859,7 +859,7 @@ static void EditBlock (track_p trk)
 		                               MakeWindowTitle(_("Edit block")),
 		                               NULL, BlockEditOk,
 		                               NULL, FormCancel_Current,
-		                               TRUE, F_BLOCK,
+		                               TRUE, F_MODAL,
 		                               NULL );
 	}
 	FormLoadControls( &blockEditPG );

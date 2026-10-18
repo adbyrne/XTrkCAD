@@ -73,8 +73,6 @@ onStartup; /**< controls behaviour after startup: load last layout if zero, else
 static int verbose = 0;
 #endif /* XTRKCAD_TESTBUILD_NO_WMAIN */
 
-static BOOL_T inMainW = TRUE;
-
 EXPORT long units = 0;				/**< measurement units: 0 = English, 1 = metric */
 
 EXPORT long labelScale = 8;
@@ -533,22 +531,6 @@ EXPORT void DoClear(void * unused)
 	Confirm(_("Clear"), DoClearAfter);
 }
 
-
-
-
-
-EXPORT void DoShowWindow(int index, const char * name, void * data)
-{
-	if (data == mapW) {
-		MapWindowShow(TRUE);
-		// if (mapVisible == FALSE) {
-		// 	MapWindowShow( TRUE);
-		// 	return;
-		// }
-	}
-	wWinShow((wControl_p) data, TRUE);
-}
-
 static dynArr_t demoWindows_da;
 #define demoWindows(N) DYNARR_N( wControl_p, demoWindows_da, N )
 
@@ -577,12 +559,6 @@ EXPORT void wShow(wControl_p win)
 			demoWindows(inx) = win;
 		}
 	}
-	if (win != mainW) {
-		char const *title = wWinGetTitle(win);
-		if(title && *title) {
-			wMenuListAdd(winList_mi, -1, title, win);
-		}
-	}
 	wWinShow(win, TRUE);
 }
 
@@ -591,11 +567,6 @@ EXPORT void wHide(wControl_p win)
 	wWinShow(win, FALSE);
 	wWinSetBusy(win, FALSE);
 
-	/**  \todo what is the purpose of the following condition? */
-	if (inMainW && win == aboutW) {
-		return;
-	}
-	wMenuListDelete(winList_mi, wWinGetTitle(win));
 	FormResetInvalid( win );
 	if (inPlayback)
 		for (int inx = 0; inx < demoWindows_da.cnt; inx++)
@@ -618,7 +589,6 @@ EXPORT void DefaultProc(wControl_p win, winProcEvent e, const void * data)
 {
 	switch (e) {
 	case wClose_e:
-		wMenuListDelete(winList_mi, wWinGetTitle(win));
 		if (data != NULL) {
 			ConfirmReset( FALSE);
 		}
@@ -1119,7 +1089,6 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	ChangeHotBar(CHANGE_SCALE|CHANGE_PARAMS);
 	wWinShow(mainW, TRUE);
 
-	inMainW = FALSE;
 	if ( bRunTests ) {
 		int nFail = RegressionTestAll(testTarget);
 		if ( nFail == 0 ) {

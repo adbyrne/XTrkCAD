@@ -610,7 +610,7 @@ static void NewSwitchMotorDialog(track_p trk)
 		                                 NULL, SwitchMotorOk,
 		                                 NULL, FormCancel_Current,
 		                                 TRUE,
-		                                 F_BLOCK, NULL );
+		                                 F_MODAL, NULL );
 		switchmotorD.dpi = mainD.dpi;
 	}
 	FormLoadControls( &switchmotorPG );
@@ -694,7 +694,7 @@ static void EditSwitchMotor (track_p trk)
 		                                     NULL, SwitchMotorEditOk,
 		                                     NULL, FormCancel_Current,
 		                                     TRUE,
-		                                     F_BLOCK, NULL );
+		                                     F_MODAL, NULL );
 	}
 	FormLoadControls( &switchmotorEditPG );
 	sprintf( message, _("Edit switch motor %d"), GetTrkIndex(trk) );

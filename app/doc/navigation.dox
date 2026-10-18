@@ -57,9 +57,7 @@ Most windows can be opened, closed, resized, minimized, and moved around the scr
 
     - Options (\ref optionM)
 
-    - Macro (\ref macroM)
-
-    - Window (\ref windowM) and;
+    - Macro (\ref macroM) and;
 
     - Help (\ref helpM) menu buttons.
 
@@ -215,7 +213,7 @@ You can also Right+Drag (\ref windowTerms) on the Map window to set the origin a
 
 The size of the <i>Map Window</i> changes when you change the Room Size (see \ref cmdLayout).  You can also change the Map Scale (\ref cmdDisplay) on the Display (\ref cmdDisplay) dialog to change the size of the <i>Map Window</i>.
 
-If you close the <i>Map Window</i>, you can reopen it by the <i>Window</i> menu.
+If you close the <i>Map Window</i>, you can reopen it with <b>View&gt;Show/Hide Map</b> (\ref viewM) or the Map button on the toolbar.
 
 Visibility of the <i>Map Window</i> can be toggled by pressing <i>Ctrl+Space</i>
 

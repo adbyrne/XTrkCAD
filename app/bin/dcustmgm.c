@@ -20,6 +20,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include <sys/stat.h>
+
 #include "custom.h"
 #include "fileio.h"
 #include "form.h"
@@ -224,6 +226,7 @@ static paramGroup_t custMgmContentsPG = { "contents", 0, custMgmContentsPLs, COU
 
 static void CustMgmContentsOk( void * junk )
 {
+	FormFetchData( &custMgmContentsPG );
 	custMgmProceed = TRUE;
 	wHide( custMgmContentsPG.win );
 }
@@ -242,7 +245,8 @@ static int CustomDoExport(
         char ** fileName,
         void * data )
 {
-	int rc;
+	BOOL_T needContents = TRUE;
+	struct stat fileStat;
 	wIndex_t selcnt = wListGetSelectedCount(customPLs[0].control );
 	wIndex_t inx, cnt;
 	custMgmContext_p context = NULL;
@@ -255,26 +259,27 @@ static int CustomDoExport(
 	}
 
 	SetCurrentPath( CUSTOMPATHKEY, fileName[ 0 ] );
-	rc = access( fileName[ 0 ], F_OK );
-	if ( rc != -1 ) {
-		rc = access( fileName[ 0 ], W_OK );
-		if ( rc == -1 ) {
+	if ( stat( fileName[ 0 ], &fileStat ) == 0 ) {
+		if ( access( fileName[ 0 ], W_OK ) == -1 ) {
 			NoticeMessage( MSG_CUSTMGM_CANT_WRITE, _("Ok"), NULL, fileName[ 0 ] );
 			return FALSE;
 		}
-		custMgmProceed = TRUE;
-	} else {
+		// an existing but empty file still needs its CONTENTS line
+		needContents = ( fileStat.st_size == 0 );
+	}
+	if ( needContents ) {
 		if ( custMgmContentsPG.win == NULL ) {
 			FormCreateDialog( &custMgmContentsPG, MakeWindowTitle(_("Contents Label")),
 			                  _("Ok"), CustMgmContentsOk,
 			                  _("Cancel"), FormCancel_Current,
-			                  TRUE, F_BLOCK, NULL);
+			                  TRUE, F_MODAL, NULL);
 		}
 		custMgmProceed = FALSE;
 		wShow( custMgmContentsPG.win );
-	}
-	if ( !custMgmProceed ) {
-		return FALSE;
+		wWinRunModal( custMgmContentsPG.win );
+		if ( !custMgmProceed ) {
+			return FALSE;
+		}
 	}
 	customMgmF = fopen( fileName[ 0 ], "a" );
 	if ( customMgmF == NULL ) {
@@ -284,7 +289,7 @@ static int CustomDoExport(
 
 	SetCLocale();
 
-	if (rc == -1) {
+	if ( needContents ) {
 #ifdef UTFCONVERT
 		char *contents = MyStrdup(custMgmContentsStr);
 		contents = Convert2UTF8(contents);
@@ -295,31 +300,52 @@ static int CustomDoExport(
 #endif // UTFCONVERT
 	}
 
-	cnt = wListGetCount(customPLs[0].control );
-	for ( inx=0; inx<cnt; inx++ ) {
-		if ( !wListGetItemSelected(customPLs[0].control, inx ) ) {
+	/*
+	 * Collect the selection before changing the list: removing a selected
+	 * row moves the selection on to the next row, so testing the selection
+	 * while deleting would move every following definition as well.
+	 */
+	wIndex_t * moved = MyMalloc( selcnt * sizeof *moved );
+	wIndex_t movedCnt = 0;
+	BOOL_T ok = TRUE;
+
+	cnt = wListGetCount( customSelL );
+	for ( inx=0; inx<cnt && movedCnt<selcnt; inx++ ) {
+		if ( wListGetItemSelected( customSelL, inx ) ) {
+			moved[movedCnt++] = inx;
+		}
+	}
+	for ( wIndex_t m=0; m<movedCnt; m++ ) {
+		context = (custMgmContext_p)wListGetItemContext( customSelL, moved[m] );
+		if ( context == NULL ) {
+			moved[m] = -1;
 			continue;
 		}
-		context = (custMgmContext_p)wListGetItemContext( customSelL, inx );
-		if ( context == NULL ) { continue; }
 		if (!context->proc( CUSTMGM_DO_COPYTO, context->data )) {
 			NoticeMessage( MSG_WRITE_FAILURE, _("Ok"), NULL, strerror(errno),
 			               fileName[ 0 ] );
-			fclose( customMgmF );
-			SetUserLocale();
-			return FALSE;
+			movedCnt = m;
+			ok = FALSE;
+			break;
 		}
 		context->proc( CUSTMGM_DO_DELETE, context->data );
 		MyFree( context );
-		wListDelete( customSelL, inx );
-		inx--;
-		cnt--;
 	}
+	// remove from the bottom up, so the remaining indices stay valid
+	for ( wIndex_t m=movedCnt-1; m>=0; m-- ) {
+		if ( moved[m] >= 0 ) {
+			wListDelete( customSelL, moved[m] );
+		}
+	}
+	MyFree( moved );
+	wListSetIndex( customSelL, -1 );
+
 	fclose( customMgmF );
 	SetUserLocale();
+	// also after a failure: the definitions written so far are now only there
 	LoadParamFile( 1, fileName, NULL );
 	DoChangeNotification( CHANGE_PARAMS );
-	return TRUE;
+	return ok;
 }
 
 
@@ -445,7 +471,7 @@ static void DoCustomMgr( void * junk )
 		FormCreateDialog( &customPG, MakeWindowTitle(_("Manage custom designed parts")),
 		                  _("Done"), CustomDone,
 		                  NULL, NULL,
-		                  TRUE, F_RESIZE|F_RECALLSIZE|F_BLOCK,
+		                  TRUE, F_RESIZE|F_RECALLSIZE,
 		                  CustomDlgUpdate );
 		SelectNew(I2VP(I_NEWPART));
 		//selectedType = 0;

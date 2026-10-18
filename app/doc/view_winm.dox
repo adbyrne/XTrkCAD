@@ -134,19 +134,3 @@ Pressing the middle Zoom button on the Tool Bar pop-ups a list of Zoom factors t
 - See <b>Main Window Overview</b> (\ref mainW) for details on how to <b>Pan</b> the <b>Main Canvas</b>.
 
 */
-
-/**
-\page windowM Window Menu
-
-![](mwindow.png)
-
-The <b>Window Menu</b> typically contains selections for bringing any open window into view. It's used as follows;
-
-- <i>XTrackCAD</i> permits multiple dialog windows to be open at any one time. When a large number of windows are open it can become difficult to locate and bring a specific window into focus. Use the <b>Window Menu</b> function to select and bring the desired window to the top of the screen.
-
-- ![](openwindows.png)
-
-- Apart from bringing the <b>Map Window</b> (\ref cmdMap) to the foreground, the <b>Map</b> menu item can also be used to re-opened a closed <b>Map Window</b>.
-
-*/
-

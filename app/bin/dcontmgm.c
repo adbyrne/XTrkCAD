@@ -286,7 +286,7 @@ static void DoControlMgr( void * junk )
 		                  MakeWindowTitle(_("Manage Layout Control Elements")),
 		                  NULL, ControlDone,
 		                  NULL, FormCancel_Null,
-		                  TRUE, F_RESIZE|F_RECALLSIZE|F_BLOCK,
+		                  TRUE, F_RESIZE|F_RECALLSIZE,
 		                  ControlDlgUpdate );
 	} else {
 		wListClear( controlSelL );

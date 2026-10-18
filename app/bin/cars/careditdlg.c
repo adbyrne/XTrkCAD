@@ -27,7 +27,6 @@
 #include "custom.h"
 #include "fileio.h"
 #include "layout.h"
-#include "param.h"
 #include "track.h"
 #include "paramfile.h"
 #include "common-ui.h"
@@ -3092,7 +3091,7 @@ void DoCarPartDlg( void )
 		                  _("Add"), CarDlgOk,
 		                  NULL, FormCancel_Custom( CarDlgCancel ),
 		                  TRUE,
-		                  F_BLOCK|F_RESIZE|F_RECALLSIZE|PD_F_ALT_CANCELLABEL,
+		                  F_RESIZE|F_RECALLSIZE|PD_F_ALT_CANCELLABEL,
 		                  CarDlgUpdate );
 
 		if ( carDlgDim.carWidth==0 ) {

@@ -37,8 +37,8 @@
 #include "xtrkcad-config.h"
 
 static void buttonClick(GtkWidget *widget, gpointer value);
-static void buttonPress(GtkWidget *widget, GdkEventButton *event,
-                        gpointer value);
+static gboolean buttonPress(GtkWidget *widget, GdkEventButton *event,
+                            gpointer value);
 /* Forward declarations */
 static void splitButtonDropdownClick(GtkWidget *widget, gpointer data);
 static void ApplySplitButtonStyle(GtkWidget *splitButton);
@@ -100,14 +100,37 @@ void wlibButtonDoAction(wControl_p bb)
 }
 
 /**
- * Signal handler for button click
- * \param widget IN the control or NULL for autorepeat
- * \param value IN the button handle (same as control???)
+ * Signal handler for button click. For dialog buttons this is the keyboard
+ * path (Space/Enter on the button, mnemonic): mouse presses are handled
+ * completely in buttonPress() and never get here.
+ *
+ * \param widget IN the button
+ * \param value IN the button control
  */
 
 static void buttonClick(GtkWidget *widget, gpointer value)
 {
 	struct button *b = CONTROL_GET_ATTRIBUTES_PTR(((wControl_p)value), button);
+
+	if (b->quiet) {
+		/* wlib changed the pressed state itself (wButtonSetBusy) */
+		return;
+	}
+	if (GTK_IS_TOGGLE_BUTTON(widget)) {
+		/* activation toggled the pressed look, undo that */
+		GtkToggleButton *tb = GTK_TOGGLE_BUTTON(widget);
+		b->quiet++;
+		gtk_toggle_button_set_active(tb, !gtk_toggle_button_get_active(tb));
+		b->quiet--;
+	}
+	if (b->commitFirst && !gtk_widget_has_focus(widget)) {
+		/* mnemonic: commit the field being edited first */
+		gtk_widget_grab_focus(widget);
+		if (!gtk_widget_is_sensitive(widget)) {
+			return;
+		}
+	}
+
 	if (b->recursion) {
 		if (wlibRecursionTrace) {
 			printf("Recursion: buttonClick\n");
@@ -122,8 +145,22 @@ static void buttonClick(GtkWidget *widget, gpointer value)
 	}
 }
 
-static void buttonPress(GtkWidget *widget, GdkEventButton *event,
-                        gpointer value)
+/**
+ * Signal handler for button press. The action runs on press (not on
+ * "clicked": wButtonSetBusy() emits "clicked" when it changes a button's
+ * pressed state). Before the action, a dialog button takes the focus, so
+ * the field being edited is committed and validated first; if that made
+ * the button insensitive, the action is skipped. Cancel buttons don't
+ * take the focus: Cancel must not commit a pending edit.
+ *
+ * \param widget IN the button
+ * \param event IN the press event
+ * \param value IN the button control
+ * \return TRUE, the press is fully handled here
+ */
+
+static gboolean buttonPress(GtkWidget *widget, GdkEventButton *event,
+                            gpointer value)
 {
 	UpdateModifierKeyStateFromButton(event);
 	struct button *b = CONTROL_GET_ATTRIBUTES_PTR(((wControl_p)value), button);
@@ -131,7 +168,14 @@ static void buttonPress(GtkWidget *widget, GdkEventButton *event,
 		if (wlibRecursionTrace) {
 			printf("Recursion: buttonPress\n");
 		}
-		return;
+		return TRUE;
+	}
+
+	if (b->commitFirst && !gtk_widget_has_focus(widget)) {
+		gtk_widget_grab_focus(widget);
+		if (!gtk_widget_is_sensitive(widget)) {
+			return TRUE;
+		}
 	}
 
 	if (b->action) {
@@ -139,6 +183,7 @@ static void buttonPress(GtkWidget *widget, GdkEventButton *event,
 		b->action(((wControl_p)value)->context);
 		b->recursion--;
 	}
+	return TRUE;
 }
 
 #define REPEAT_INITIAL_DELAY 500
@@ -281,6 +326,11 @@ wControl_p wButtonCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
 		if (labelStr) {
 			wButtonSetLabel(b, labelStr);
 		}
+		/* basicdialog starts without a default, see wWinDialogCreate() */
+		if ((option & BB_DEFAULT) && !ISDEFINEDINBUILDER(parent)) {
+			gtk_widget_set_can_default(b->widget, TRUE);
+			gtk_window_set_default(GTK_WINDOW(parent->widget), b->widget);
+		}
 	} else {
 		b->widget = GTK_WIDGET(gtk_toggle_button_new());
 
@@ -318,7 +368,12 @@ wControl_p wButtonCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
 	} else {
 		g_signal_connect(G_OBJECT(b->widget), "button-press-event",
 		                 G_CALLBACK(buttonPress), b);
+		/* keyboard activation only, see buttonClick() */
+		g_signal_connect(G_OBJECT(b->widget), "clicked",
+		                 G_CALLBACK(buttonClick), b);
 	}
+	button->commitFirst = (parent->type == W_DIALOG) &&
+	                      !(option & BB_CANCEL);
 
 	if (option & BO_REPEAT) {
 		SetAutoRepeat(b);

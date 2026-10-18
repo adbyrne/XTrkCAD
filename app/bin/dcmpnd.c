@@ -242,7 +242,7 @@ EXPORT BOOL_T RefreshCompound(
 		                  MakeWindowTitle(_("Refresh Turnout/Structure")),
 		                  _("Ok"), RefreshSpecialOk,
 		                  NULL, RefreshSpecialCancel,
-		                  TRUE, F_BLOCK|F_RESIZE|F_RECALLSIZE, NULL );
+		                  TRUE, F_MODAL|F_RESIZE|F_RECALLSIZE, NULL );
 	}
 	FormLoadMessage( &refreshSpecialPG, REFRESH_M1,
 	                 _("Choose a Turnout/Structure to replace:") );
@@ -264,8 +264,10 @@ EXPORT BOOL_T RefreshCompound(
 	FormatCompoundTitle( listLabels, xx->title );
 	FormLoadMessage( &refreshSpecialPG, REFRESH_S, message );
 	while (1) {
+		refreshSpecialInx = -1;
 		wListSetIndex( (wList_p)refreshSpecialPLs[REFRESH_L].control, -1 );
 		wShow( refreshSpecialPG.win );
+		wWinRunModal( refreshSpecialPG.win );
 		if ( refreshSpecialInx < 0 ) {
 			if ( refreshReturnVal ) {
 				DYNARR_APPEND( refreshSpecial_t, refreshSpecial_da, 10 );
@@ -431,7 +433,7 @@ static int CompoundCustMgmProc(
 				                  MakeWindowTitle(_("Rename Object")),
 				                  _("Ok"), RenameOk,
 				                  N_("Cancel"), FormCancel_Current,
-				                  TRUE, F_BLOCK, NULL);
+				                  TRUE, F_MODAL, NULL);
 			}
 			FormLoadControls( &renamePG );
 			wShow( renamePG.win );

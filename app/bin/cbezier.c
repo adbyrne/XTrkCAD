@@ -52,7 +52,7 @@
 #include "cjoin.h"
 #include "common.h"
 #include "track.h"
-#include "param.h"
+#include "form.h"
 #include "fileio.h"
 #include "layout.h"
 #include "cundo.h"

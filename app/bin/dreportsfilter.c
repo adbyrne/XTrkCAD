@@ -238,8 +238,8 @@ static void FilterClear(void *action)
  * CHANGE_LAYER notification callback: this dialog's Available/Included and
  * Groups lists are only ever populated when it's shown (RefreshFilterShuttle()/
  * RefreshFilterGroupsList() in ShowReportsFilterDialog()), not on every
- * relevant edit -- and it's non-modal (F_BLOCK is unimplemented on GTK3, see
- * dialog.c's wWinDialogCreate()), so the Manage > Layer Groups dialog can be
+ * relevant edit -- and it's non-modal (created without F_MODAL, see
+ * gtk3lib/window.c's SetModal()), so the Manage > Layer Groups dialog can be
  * open and edited at the same time. Left unrefreshed, a Groups-list row's
  * cached group index can point at a *different* group than the one displayed
  * after a group elsewhere is deleted (LayerGroupDelete() shifts every later
@@ -282,7 +282,7 @@ void ShowReportsFilterDialog(reportsFilter_t *filter)
 		FormRegister(&reportsFilterPG);
 		FormCreateDialog(&reportsFilterPG, MakeWindowTitle(_("Filter Layers/Groups")),
 		                 NULL, NULL, NULL, FormCancel_Current,
-		                 TRUE, F_RESIZE|F_RECALLSIZE|F_BLOCK, NULL);
+		                 TRUE, F_RESIZE|F_RECALLSIZE, NULL);
 		RegisterChangeNotification(ReportsFilterChangeNotify);
 	}
 

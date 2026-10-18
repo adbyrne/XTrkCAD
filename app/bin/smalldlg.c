@@ -73,7 +73,7 @@ static void CreateTipW( void )
 	char * cp;
 
 	tipW = FormCreateDialog(&tipPG, MakeWindowTitle(_("Tip of the Day")),
-	                        NULL, FormButtonOk,
+	                        NULL, FormOk_Null,
 	                        NULL, NULL,
 	                        FALSE,
 	                        F_CENTER, NULL );
@@ -205,15 +205,15 @@ void ShowTip( void * flagsVP )
 		"\n\nXTrackCAD is Copyright 2003 by Sillub Technology and 2017" \
 		" by Bob Blackwell, Martin Fischer, Adam Richards and Russell Shilling.\n" \
 		"\nIcons by: Tango Desktop Project (http://tango.freedesktop.org)\n" \
-		"\nSome icons by Yusuke Kamiyamane." \
+		"\nSome icons by Yusuke Kamiyamane. " \
 		"Licensed under a Creative Commons Attribution 3.0 License.\n" \
-		"\nContributions by: Robert Heller, Mikko Nissinen," \
-		"Timothy M. Shead,  Daniel Luis Spagnol" \
+		"\nContributions by: Robert Heller, Mikko Nissinen, " \
+		"Timothy M. Shead, Daniel Luis Spagnol" \
 		"\nParameter Files by: Ralph Boyd, Dwayne Ward\n" \
 		"\nThe following software is distributed with XTrackCAD\n\n" \
 		"Cornu Algorithm and Implementation by: Raph Levien" \
 		"\n\nuthash, utlist Copyright notice:" \
-		"\nCopyright (c) 2005-2015, Troy D. Hanson http://troydhanson.github.com/uthash/" \
+		"\nCopyright (c) 2003-2026, Troy D. Hanson https://troydhanson.github.io/uthash/" \
 		"\nAll rights reserved." \
 		"\n\ncJSON: Copyright (c) 2009-2017 Dave Gamble and cJSON contributors" \
 		"\n\nlibzip:  Copyright(C) 1999 - 2019 Dieter Baron and Thomas Klausner\n" \

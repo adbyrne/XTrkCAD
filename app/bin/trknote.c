@@ -29,7 +29,7 @@
 #include "misc.h"
 #include "note.h"
 #include "include/notenames.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "include/utf8convert.h"
 

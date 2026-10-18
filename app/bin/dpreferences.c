@@ -27,7 +27,6 @@
 #include <form.h>
 #include "i18n.h"
 #include "messages.h"
-#include "param.h"
 #include "track.h"
 
 static int log_dpreferences = -1;

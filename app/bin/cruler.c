@@ -24,7 +24,7 @@
 #include "cselect.h"
 #include "fileio.h"
 #include "icons.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "misc.h"
 

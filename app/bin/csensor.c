@@ -425,7 +425,7 @@ static void EditSensorDialog()
 		                                NULL, SensorEditOk,
 		                                NULL, FormCancel_Current,
 		                                TRUE,
-		                                F_BLOCK,
+		                                F_MODAL,
 		                                NULL );
 	}
 	if (sensorEditTrack == NULL) {

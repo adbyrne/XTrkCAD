@@ -96,7 +96,6 @@ extern void DoClear( void * unused );
 void ToggleSetInMenuToolbar(wControl_p menuItem, wControl_p toolbarButton,
                             wBool_t newState);
 
-extern void DoShowWindow(int index, const char * name, void * data);
 
 extern void wShow( wControl_p window);
 extern void wHide( wControl_p window );

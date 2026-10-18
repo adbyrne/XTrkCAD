@@ -293,6 +293,7 @@ void PanMenuEnter(void * modeVP);
 void InitCmdZoom(wMenu_p, wMenu_p, wMenu_p, wMenu_p);
 
 void InfoScale(void);
+void InfoScaleGauge(const char *scaleName);
 void InfoPos(coOrd position);
 void SetMessage(char *infotext);
 void SetInfoBar(void);

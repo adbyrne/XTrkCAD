@@ -23,7 +23,7 @@
 #include "cundo.h"
 #include "drawgeom.h"
 #include "fileio.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "common-ui.h"
 
