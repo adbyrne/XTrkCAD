@@ -30,6 +30,11 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v10.0.1
+        with:
+          # Pin the interpreter: uv otherwise picks the newest Python that
+          # satisfies requires-python, and macos-latest moved to 3.15, which
+          # rpds-py (via PyO3, max 3.14) can't build for (2026-10-18).
+          python-version: "3.14"
       - name: Run MCP tests
         working-directory: mcp
         run: uv run --extra dev pytest -q
