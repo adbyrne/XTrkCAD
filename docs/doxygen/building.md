@@ -7,8 +7,9 @@ anything itself.
 
 The commands below are what CI actually runs, with the CI-only bits called out — a local desktop
 build doesn't need everything CI needs. The full, authoritative CI configuration lives in
-`.github/workflows/` (`ci-gtk3.yml` for this branch, plus `ci.yml` for the GTK2 `main` branch,
-`codeql.yml`, and `release.yml`) — worth reading directly if you have a GitHub account and want
+`.github/workflows/` (`ci-gtk3.yml` for this branch, `ci-gtk3-preview.yml` for its
+next-toolchain preview, plus `ci.yml` for the GTK2 `main` branch, `ci-mcp.yml`, `codeql.yml`, and
+`release.yml`) — worth reading directly if you have a GitHub account and want
 more detail than the summary below, e.g. exact job-by-job dependency lists or the release
 packaging steps. If you're working purely from the SourceForge/Hg checkout, these files are
 still present in this tree even though Mercurial itself doesn't run them — GitHub Actions only
@@ -246,27 +247,35 @@ XTRKCADGTKLIB=/tmp/xtrkcad-scratch/share/xtrkcad-gtk /tmp/xtrkcad-scratch/bin/xt
 
 # Tool versions
 
-Doxygen and AStyle are explicitly version-pinned in CI; everything else uses whatever the CI
-runner image currently provides. Most Linux jobs run on `ubuntu-latest`, which GitHub moves from
-Ubuntu 24.04 to Ubuntu 26 on 2026-10-19. `c-tests-linux` also runs on a pinned `ubuntu-24.04`
-runner (`c-tests-linux (ubuntu-24.04)`) so the current LTS stays covered after that;
-`astyle-check` and `c-tests-arm64` were already pinned to 24.04. The versions below are the
-24.04 ones. The AStyle pin exists specifically because an unpinned version once produced
+CI pins its runner images and the compilers that gate a build. Every Linux job in
+`ci-gtk3.yml`, `release.yml` and `codeql.yml` runs on `ubuntu-24.04` (or `ubuntu-24.04-arm`)
+rather than `ubuntu-latest`, which GitHub moved to Ubuntu 26.04 on 2026-10-19. The Ubuntu image
+fixes cppcheck, clang-tidy, GCC and Clang, so they only change when we move the runners on
+purpose. macOS jobs run on `macos-26` with Xcode selected through `DEVELOPER_DIR` (which fixes
+AppleClang), and Windows jobs run on `windows-2025` with MinGW GCC installed at an exact MSYS2
+package version. Homebrew and the rest of MSYS2 (GTK, CMake, libzip and so on) can't be pinned
+and still update on their own schedule. `ci-gtk3-preview.yml` runs the toolchain-sensitive jobs
+on the next images ahead of a move (see \ref ci-tooling-overview "CI tooling overview"). The
+`c-tests-debian` jobs and `release.yml`'s `package-linux-debian` jobs build inside
+`debian:bookworm` and `debian:trixie` containers, so they get those releases' own GCC 12/14,
+CMake and GTK. The AStyle pin exists specifically because an unpinned version once produced
 different formatting output for identical input (SF #638) — if you're chasing a formatting or
 doc-generation mismatch against CI, matching these two matters more than matching anything else
 in this table.
 
-| Tool | Pin status | Currently tested (as of 2026-07-18 — unpinned rows drift as CI runner images update) |
+| Tool | Pin status | Currently tested (as of 2026-10-18 — unpinned rows drift as packages update) |
 |------|-----------|------------------------------------------|
 | Doxygen | pinned | 1.15.0 (upstream Linux binary) for the dev-guide jobs (`ci-gtk3.yml`'s `doxygen`, `release.yml`'s `package-docs`). The packaging jobs build the User Guide with the OS package instead: apt/Homebrew (unpinned) on Linux/macOS; MSYS2 `mingw-w64-x86_64-doxygen` pinned to 1.16.1-4 in `package-windows`, since 1.18.0-3 aborts on the User Guide build (`std::system_error`, 2026-10-05) |
 | AStyle | pinned | 3.6.13, all platforms (built from source, not the OS package) |
-| CMake | floor/ceiling only (`3.20`–`4.0`) | 3.28.3 (Linux), 4.3.3 (Windows/MSYS2) |
-| cppcheck | unpinned | 2.13.0 (Ubuntu 24.04) |
-| clang-tidy | unpinned | 18.0 (Ubuntu 24.04) |
-| GCC (Linux) | unpinned | 13.3.0 (Ubuntu 24.04.4 LTS) |
-| Clang (Linux) | unpinned | 18.0 (Ubuntu 24.04) |
-| AppleClang (macOS) | unpinned | 21.0.0.21000101 (macOS 26.4) |
-| MinGW GCC (Windows) | unpinned | 16.1.0 (via MSYS2) |
+| Python (`ci-mcp.yml`) | pinned | 3.14, all platforms (via `setup-uv`). Unpinned, uv picked macOS's 3.15, which `rpds-py`'s PyO3 build can't target yet |
+| CMake | floor/ceiling only (`3.20`–`4.0`) | 3.28.3 (Linux), 4.4.x (Windows/MSYS2), Homebrew current (macOS) |
+| cppcheck | pinned (runner) | 2.13.0 (Ubuntu 24.04) |
+| clang-tidy | pinned (runner) | 18.0 (Ubuntu 24.04) |
+| GCC (Linux) | pinned (runner) | 13.3.0 (Ubuntu 24.04.4 LTS) |
+| Clang (Linux) | pinned (runner) | 18.0 (Ubuntu 24.04) |
+| Runner images | pinned | `ubuntu-24.04`, `ubuntu-24.04-arm`, `macos-26`, `windows-2025` |
+| AppleClang (macOS) | pinned (Xcode) | Xcode 26.6, Clang 21.0.0 (`DEVELOPER_DIR`) |
+| MinGW GCC (Windows) | pinned | 16.2.0-6 (MSYS2 `gcc`/`gcc-libs`, installed with `pacman -U`) |
 
 To reproduce the pinned Doxygen build locally rather than whatever version your package manager
 provides:
