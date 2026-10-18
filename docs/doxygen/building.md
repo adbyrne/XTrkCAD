@@ -265,8 +265,8 @@ in this table.
 
 | Tool | Pin status | Currently tested (as of 2026-10-18 — unpinned rows drift as packages update) |
 |------|-----------|------------------------------------------|
-| Doxygen | pinned | 1.15.0 (upstream Linux binary) for the dev-guide jobs (`ci-gtk3.yml`'s `doxygen`, `release.yml`'s `package-docs`). The packaging jobs build the User Guide with the OS package instead: apt/Homebrew (unpinned) on Linux/macOS; MSYS2 `mingw-w64-x86_64-doxygen` pinned to 1.16.1-4 in `package-windows`, since 1.18.0-3 aborts on the User Guide build (`std::system_error`, 2026-10-05) |
-| AStyle | pinned | 3.6.13, all platforms (built from source, not the OS package) |
+| Doxygen | pinned | 1.15.0 (upstream Linux binary, `.github/actions/setup-doxygen`) for the dev-guide jobs (`ci-gtk3.yml`'s `doxygen` and `help-links-check`, `release.yml`'s `package-docs`). The packaging jobs build the User Guide with the OS package instead: apt/Homebrew (unpinned) on Linux/macOS; MSYS2 `mingw-w64-x86_64-doxygen` pinned to 1.16.1-4 in `package-windows`, since 1.18.0-3 aborts on the User Guide build (`std::system_error`, 2026-10-05) |
+| AStyle | pinned | 3.6.13, all platforms (built from source, not the OS package; version set in `tools/astyle-check.sh`) |
 | Python (`ci-mcp.yml`) | pinned | 3.14, all platforms (via `setup-uv`). Unpinned, uv picked macOS's 3.15, which `rpds-py`'s PyO3 build can't target yet |
 | CMake | floor/ceiling only (`3.20`–`4.0`) | 3.28.3 (Linux), 4.4.x (Windows/MSYS2), Homebrew current (macOS) |
 | cppcheck | pinned (runner) | 2.13.0 (Ubuntu 24.04) |
@@ -274,8 +274,8 @@ in this table.
 | GCC (Linux) | pinned (runner) | 13.3.0 (Ubuntu 24.04.4 LTS) |
 | Clang (Linux) | pinned (runner) | 18.0 (Ubuntu 24.04) |
 | Runner images | pinned | `ubuntu-24.04`, `ubuntu-24.04-arm`, `macos-26`, `windows-2025` |
-| AppleClang (macOS) | pinned (Xcode) | Xcode 26.6, Clang 21.0.0 (`DEVELOPER_DIR`) |
-| MinGW GCC (Windows) | pinned | 16.2.0-6 (MSYS2 `gcc`/`gcc-libs`, installed with `pacman -U`) |
+| AppleClang (macOS) | pinned (Xcode) | Xcode 26.6, Clang 21.0.0 (`.github/actions/select-xcode`) |
+| MinGW GCC (Windows) | pinned | 16.2.0-6 (MSYS2 `gcc`/`gcc-libs`, installed with `pacman -U` by `.github/actions/msys2-pin-gcc`) |
 
 To reproduce the pinned Doxygen build locally rather than whatever version your package manager
 provides:
@@ -298,4 +298,11 @@ curl -sL -o astyle.tar.bz2 \
 tar xjf astyle.tar.bz2
 make -C "astyle-${ASTYLE_VERSION}/build/gcc" -j"$(nproc)"
 export PATH="$PWD/astyle-${ASTYLE_VERSION}/build/gcc/bin:$PATH"
+```
+
+Then run the same check as the `astyle-check` gate from the repository root. It warns if your
+astyle isn't the pinned version:
+
+```sh
+tools/astyle-check.sh
 ```

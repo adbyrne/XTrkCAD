@@ -1,0 +1,244 @@
+name: GTK3 toolchain jobs (reusable)
+
+# The toolchain-sensitive build/test jobs, written once and called twice:
+# ci-gtk3.yml calls it with the pinned runners (the gate), and
+# ci-gtk3-preview.yml calls it with the next images (advisory). Moving a pin
+# forward means changing the caller's inputs, not copying jobs between files.
+
+on:
+  workflow_call:
+    inputs:
+      ubuntu:
+        description: Ubuntu version for the x64 and arm64 runners (ubuntu-<v>, ubuntu-<v>-arm).
+        type: string
+        default: '24.04'
+      macos-runner:
+        description: macOS runner label.
+        type: string
+        default: macos-26
+      pin-xcode:
+        description: Select the pinned Xcode (.github/actions/select-xcode); false keeps the image default.
+        type: boolean
+        default: true
+      windows-runner:
+        description: Windows runner label.
+        type: string
+        default: windows-2025
+      msystem:
+        description: MSYS2 environment (MINGW64 for x64, CLANGARM64 for Windows on ARM).
+        type: string
+        default: MINGW64
+      cc-package:
+        description: MSYS2 compiler package for that environment (gcc or clang).
+        type: string
+        default: gcc
+      pin-mingw-gcc:
+        description: Pin MinGW GCC (.github/actions/msys2-pin-gcc); MINGW64 only.
+        type: boolean
+        default: true
+
+jobs:
+  c-tests-linux:
+    name: c-tests-linux (ubuntu-${{ inputs.ubuntu }})
+    runs-on: ubuntu-${{ inputs.ubuntu }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/apt-deps
+      - name: Toolchain versions
+        run: gcc --version | head -1; cmake --version | head -1; pkg-config --modversion gtk+-3.0
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
+      - name: Build
+        run: cmake --build build
+      - name: Test
+        # GTK3 issue #26's demo-playback regression suite has its own job
+        # (regression-gtk3) -- exclude it here so it doesn't get picked up by
+        # XTRKCAD_REGRESSION_TESTING's auto-detect default and slow this job down.
+        run: xvfb-run ctest --test-dir build --output-on-failure -LE regression
+
+  c-tests-linux-clang:
+    name: c-tests-linux-clang (ubuntu-${{ inputs.ubuntu }})
+    runs-on: ubuntu-${{ inputs.ubuntu }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/apt-deps
+        with:
+          extra: clang
+      - name: Toolchain versions
+        run: clang --version | head -1
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DCMAKE_C_COMPILER=clang
+      - name: Build
+        run: cmake --build build
+      - name: Test
+        # See c-tests-linux: regression-gtk3 covers the GTK3 issue #26 suite.
+        run: xvfb-run ctest --test-dir build --output-on-failure -LE regression
+
+  c-tests-arm64:
+    # Native ARM64 runner -- same architecture as Raspberry Pi 3/4/5.
+    name: c-tests-arm64 (ubuntu-${{ inputs.ubuntu }}-arm)
+    runs-on: ubuntu-${{ inputs.ubuntu }}-arm
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/apt-deps
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
+      - name: Build
+        run: cmake --build build
+      - name: Test
+        # See c-tests-linux: regression-gtk3 covers the GTK3 issue #26 suite.
+        run: xvfb-run ctest --test-dir build --output-on-failure -LE regression
+
+  regression-gtk3:
+    # GTK3 issue #26's demo-playback regression suite (RegressionTestAll(), the
+    # -T flag). Split into its own job rather than folded into c-tests-linux so
+    # the fast unit-test feedback loop there isn't held up by this job's ~9
+    # minute single-process playback baseline. Gates on the RegressionSuite
+    # ctest target only (label regression-ci) -- not the ~47 individual
+    # per-demo tests also registered by XTRKCAD_REGRESSION_TESTING, which exist
+    # for local dev targeting (`ctest -R Regression.dmease.xtr`) and would
+    # multiply per-test process/X-session startup overhead in CI. Those run in
+    # ci-gtk3.yml's regression-gtk3-standalone.
+    name: regression-gtk3 (ubuntu-${{ inputs.ubuntu }})
+    runs-on: ubuntu-${{ inputs.ubuntu }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/apt-deps
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_REGRESSION_TESTING=ON
+      - name: Build
+        run: cmake --build build
+      - name: Regression suite
+        run: ctest --test-dir build -L regression-ci --output-on-failure -VV
+
+  c-tests-sanitizers:
+    name: c-tests-sanitizers (ubuntu-${{ inputs.ubuntu }})
+    runs-on: ubuntu-${{ inputs.ubuntu }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/apt-deps
+        with:
+          extra: clang
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_SANITIZE=ON -DCMAKE_C_COMPILER=clang
+      - name: Build
+        run: cmake --build build
+      - name: Test
+        env:
+          ASAN_OPTIONS: "abort_on_error=1:detect_leaks=1"
+          UBSAN_OPTIONS: "abort_on_error=1:print_stacktrace=1"
+        # PreferenceTest and MRUListTest (SF #794) both require a GTK3 display
+        # and trigger GTK3 internal allocations that ASAN flags as leaks. Both
+        # are covered by c-tests-linux, which runs under xvfb-run.
+        # -LE regression: keeps this job's fast unit-test feedback loop from
+        # being held up by the ~3 minute sanitizer-instrumented playback run --
+        # see ci-gtk3.yml's regression-gtk3-sanitizers, which covers it separately.
+        run: ctest --test-dir build --output-on-failure -E "PreferenceTest|MRUListTest" -LE regression
+
+  cppcheck:
+    # The gate: cppcheck's default (error-only) check set, --error-exitcode=1.
+    # Scope and suppressions live in tools/cppcheck-gate.sh.
+    #
+    # app/help + app/tools/listxtp.c added SF #701/#729-730 follow-up (bug-tracker.md Action
+    # Queue item 22) -- these directories were never in scope for any QA job. app/tools/dirent.c
+    # is a vendored public-domain Win32 dirent shim (Kevlin Henney, 1997/2003), excluded the same
+    # way app/wlib/gtk3lib/wrapbox/ and app/wlib/gtk3lib/win32/ are out of scope by construction
+    # (non-recursive glob never reaches those subdirs, same treatment as app/bin/unittest/).
+    #
+    # app/wlib/gtk3lib(+unix/) added 2026-09-02 (queued since the app/bin shadowVariable/for-loop
+    # gates landed -- see project memory). --inline-suppr added at the same time so the existing
+    # `//cppcheck-suppress memleakOnRealloc` comment on drawcairo.c's realloc actually takes
+    # effect here (it already worked in cppcheck-deep, which had --inline-suppr already; the
+    # gating job didn't, so widening scope surfaced it as a hard error). unknownMacro on
+    # stickytogglebutton.h is cppcheck not understanding the GObject G_DECLARE_FINAL_TYPE macro,
+    # same category as the existing custom.c suppression. A real memleak on osxhelp.c's
+    # (APPLE-only, not built on this Linux runner) early-return paths was fixed directly rather
+    # than suppressed.
+    name: cppcheck (ubuntu-${{ inputs.ubuntu }})
+    runs-on: ubuntu-${{ inputs.ubuntu }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/apt-deps
+        with:
+          base: 'false'
+          extra: cppcheck
+      - name: Run cppcheck
+        run: tools/cppcheck-gate.sh
+
+  c-tests-macos:
+    name: c-tests-macos (${{ inputs.macos-runner }})
+    runs-on: ${{ inputs.macos-runner }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - if: inputs.pin-xcode
+        uses: ./.github/actions/select-xcode
+      - name: Toolchain versions
+        run: sw_vers; xcodebuild -version; clang --version | head -1
+      - name: Install dependencies
+        run: brew install ninja gtk+3 cmocka libzip librsvg
+      - name: Configure
+        run: |
+          GTK_PREFIX=$(brew --prefix gtk+3)
+          PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
+          export PKG_CONFIG_PATH
+          GTK_LDFLAGS=$(pkg-config --libs-only-L gtk+-3.0)
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
+            -DCMAKE_PREFIX_PATH="$GTK_PREFIX;$(brew --prefix)" \
+            -DCMAKE_EXE_LINKER_FLAGS="$GTK_LDFLAGS" \
+            -DXTRKCAD_USE_APPLEHELP=OFF -DXTRKCAD_USE_BROWSER=ON
+      - name: Build
+        run: cmake --build build
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  c-tests-windows:
+    # GTK3 on Windows via MSYS2 -- replaces the old mswlib/MSVC job. mswlib was
+    # removed from GTK3V2MAIN in SF r6508; Windows now builds against GTK3
+    # directly using the official GTK Windows runtime (MSYS2). pacboy's ":p"
+    # suffix expands each package to the selected environment's prefix
+    # (mingw-w64-x86_64-*, mingw-w64-clang-aarch64-*).
+    name: c-tests-windows (${{ inputs.windows-runner }}, ${{ inputs.msystem }})
+    runs-on: ${{ inputs.windows-runner }}
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ inputs.msystem }}
+          update: false
+          pacboy: >-
+            ${{ inputs.cc-package }}:p
+            cmake:p
+            ninja:p
+            pkgconf:p
+            gtk3:p
+            zlib:p
+            libzip:p
+            mxml:p
+            librsvg:p
+            gettext-tools:p
+            cmocka:p
+      - if: inputs.pin-mingw-gcc
+        uses: ./.github/actions/msys2-pin-gcc
+      - name: Toolchain versions
+        run: ${{ inputs.cc-package }} --version | head -1; pkg-config --modversion gtk+-3.0
+      - name: Configure
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DXTRKCAD_TESTING=ON \
+            -DXTRKCAD_USE_GETTEXT=OFF
+      - name: Build
+        run: cmake --build build --parallel
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
