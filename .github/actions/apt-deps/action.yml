@@ -1,0 +1,33 @@
+name: Install GTK3 build dependencies (apt)
+description: >-
+  Installs the apt packages a Linux GTK3 build needs, plus any extras. Works
+  on the hosted Ubuntu runners (through sudo) and in the Debian containers
+  (as root). One list for every Linux job, so a missing package (like the
+  gettext gap that once stalled compiler-warnings) gets fixed everywhere.
+inputs:
+  extra:
+    description: Additional space-separated apt packages.
+    default: ''
+  base:
+    description: >-
+      Install the standard GTK3 build set. Set to 'false' for jobs that only
+      need a single tool, such as cppcheck or codespell.
+    default: 'true'
+runs:
+  using: composite
+  steps:
+    - name: apt-get install
+      shell: bash
+      env:
+        BASE: ${{ inputs.base }}
+        EXTRA: ${{ inputs.extra }}
+      run: |
+        SUDO=""
+        if [ "$(id -u)" -ne 0 ]; then SUDO=sudo; fi
+        PKGS=""
+        if [ "$BASE" = true ]; then
+          PKGS="cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext xvfb xauth"
+        fi
+        $SUDO apt-get update -q
+        # shellcheck disable=SC2086 # word splitting is intended
+        $SUDO apt-get install -y $PKGS $EXTRA

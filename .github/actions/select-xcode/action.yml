@@ -1,0 +1,23 @@
+name: Select the pinned Xcode
+description: >-
+  Points DEVELOPER_DIR at a specific Xcode for the rest of the job, which
+  pins AppleClang. The default here is the one place the macOS jobs' Xcode
+  version is set.
+inputs:
+  version:
+    description: Xcode version installed on the runner image, e.g. 26.6.
+    default: '26.6'
+runs:
+  using: composite
+  steps:
+    - name: Select Xcode ${{ inputs.version }}
+      shell: bash
+      env:
+        XCODE_VERSION: ${{ inputs.version }}
+      run: |
+        DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
+        if [ ! -d "$DIR" ]; then
+          echo "::error::Xcode ${XCODE_VERSION} isn't installed on this runner image."
+          exit 1
+        fi
+        echo "DEVELOPER_DIR=$DIR" >> "$GITHUB_ENV"

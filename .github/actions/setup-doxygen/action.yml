@@ -1,0 +1,21 @@
+name: Install the pinned Doxygen
+description: >-
+  Installs Doxygen from the official prebuilt Linux binary rather than the
+  apt package, which drifts with the runner image (the same reason astyle is
+  pinned, SF #638). The default here is the one place the dev-guide
+  Doxygen version is set.
+inputs:
+  version:
+    description: Doxygen release, e.g. 1.15.0.
+    default: '1.15.0'
+runs:
+  using: composite
+  steps:
+    - name: Install Doxygen ${{ inputs.version }}
+      shell: bash
+      env:
+        DOXYGEN_VERSION: ${{ inputs.version }}
+      run: |
+        curl -sL -o doxygen.tar.gz "https://github.com/doxygen/doxygen/releases/download/Release_${DOXYGEN_VERSION//./_}/doxygen-${DOXYGEN_VERSION}.linux.bin.tar.gz"
+        tar xzf doxygen.tar.gz
+        echo "$PWD/doxygen-${DOXYGEN_VERSION}/bin" >> "$GITHUB_PATH"

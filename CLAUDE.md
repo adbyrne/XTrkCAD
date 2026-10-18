@@ -163,13 +163,15 @@ edits). Open the PR with an explicit `--base GTK3V2MAIN`.
 code (held features) that an upstream API change can break even though Hg itself compiles fine.
 Confirmed 2026-10-05: upstream removed `PDO_DLGRESIZE`, Hg built and tested clean, and the git
 test branch failed CI because Layer Groups, Notes, and Reports dialogs still used the flag.
-Before pushing the test branch, build it locally in a scratch build dir, and run the astyle gate
-with the same `--exclude` list as `ci-gtk3.yml`'s `astyle-check`:
+It happened again 2026-10-18, when upstream removed `F_BLOCK` and five git-only dialogs still
+used it. Before pushing the test branch, build it locally in a scratch build dir, and run
+`tools/astyle-check.sh`, the same script as `ci-gtk3.yml`'s `astyle-check` gate:
 
 ```sh
 cmake -B <scratch>/build-git -S xtrkcad-git-gtk3 -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
 cmake --build <scratch>/build-git -- -k 0
 ctest --test-dir <scratch>/build-git -LE regression
+(cd xtrkcad-git-gtk3 && tools/astyle-check.sh)
 ```
 
 ### 2 — Fix any compile errors

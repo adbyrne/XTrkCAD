@@ -8,216 +8,33 @@ on:
     branches:
       - GTK3V2MAIN
 
-# ci-gtk3.yml is the gate, with every runner and compiler pinned. This workflow
-# runs the toolchain-sensitive jobs on the next images so breakage shows up
+# ci-gtk3.yml is the gate, with every runner and compiler pinned. This
+# workflow runs the same shared jobs on the next images so breakage shows up
 # here before ci-gtk3.yml moves over:
-#   - Ubuntu 26.04, x64 and arm64 (newer GCC, Clang, cppcheck and GTK)
+#   - Ubuntu 26.04, x64 and arm64 (newer GCC, Clang, cppcheck, clang-tidy
+#     and GTK), including the report-only QA jobs, so new tool findings show
+#     up before the pin moves
 #   - Xcode 27 preview image on macOS (next AppleClang)
 #   - Windows 11 on ARM via MSYS2 CLANGARM64 (a platform we don't ship yet)
 # It's advisory: a failure here is something to fix or ticket, not a merge
-# blocker. When a preview is consistently clean, move ci-gtk3.yml's pin to it.
-# Jobs mirror their ci-gtk3.yml namesakes -- keep the two in step when
-# changing either.
+# blocker. To move a pin forward, copy the input here into ci-gtk3.yml's call
+# (or change the reusable workflow's default).
 
 jobs:
-  c-tests-linux:
-    runs-on: ubuntu-26.04
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v7
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -q
-          sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext xvfb
-      - name: Toolchain versions
-        run: gcc --version | head -1; cmake --version | head -1; pkg-config --modversion gtk+-3.0
-      - name: Configure
-        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
-      - name: Build
-        run: cmake --build build
-      - name: Test
-        run: xvfb-run ctest --test-dir build --output-on-failure -LE regression
+  toolchain:
+    uses: ./.github/workflows/gtk3-toolchain.yml
+    with:
+      ubuntu: '26.04'
+      macos-runner: xcode-27
+      pin-xcode: false
+      windows-runner: windows-11-arm
+      msystem: CLANGARM64
+      cc-package: clang
+      pin-mingw-gcc: false
 
-  c-tests-linux-clang:
-    runs-on: ubuntu-26.04
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v7
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -q
-          sudo apt-get install -y cmake ninja-build clang libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext xvfb
-      - name: Toolchain versions
-        run: clang --version | head -1
-      - name: Configure
-        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DCMAKE_C_COMPILER=clang
-      - name: Build
-        run: cmake --build build
-      - name: Test
-        run: xvfb-run ctest --test-dir build --output-on-failure -LE regression
-
-  c-tests-arm64:
-    # Native ARM64, same architecture as Raspberry Pi 3/4/5.
-    runs-on: ubuntu-26.04-arm
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v7
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -q
-          sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext xvfb
-      - name: Configure
-        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
-      - name: Build
-        run: cmake --build build
-      - name: Test
-        run: xvfb-run ctest --test-dir build --output-on-failure -LE regression
-
-  regression-gtk3:
-    # The demo-playback RegressionSuite, as in ci-gtk3.yml. A newer GTK can
-    # change event and layout timing that the unit tests never exercise.
-    runs-on: ubuntu-26.04
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v7
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -q
-          sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext xvfb
-      - name: Configure
-        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_REGRESSION_TESTING=ON
-      - name: Build
-        run: cmake --build build
-      - name: Regression suite
-        run: ctest --test-dir build -L regression-ci --output-on-failure -VV
-
-  c-tests-sanitizers:
-    runs-on: ubuntu-26.04
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v7
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -q
-          sudo apt-get install -y cmake ninja-build clang libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext xvfb
-      - name: Configure
-        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_SANITIZE=ON -DCMAKE_C_COMPILER=clang
-      - name: Build
-        run: cmake --build build
-      - name: Test
-        env:
-          ASAN_OPTIONS: "abort_on_error=1:detect_leaks=1"
-          UBSAN_OPTIONS: "abort_on_error=1:print_stacktrace=1"
-        # Same exclusions as ci-gtk3.yml's c-tests-sanitizers (SF #794).
-        run: ctest --test-dir build --output-on-failure -E "PreferenceTest|MRUListTest" -LE regression
-
-  cppcheck:
-    # The same gating check as ci-gtk3.yml's cppcheck job, on 26.04's newer
-    # cppcheck: anything new it reports has to be fixed or suppressed before
-    # ci-gtk3.yml can move to 26.04.
-    runs-on: ubuntu-26.04
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v7
-      - name: Install cppcheck
-        run: sudo apt-get update -q && sudo apt-get install -y cppcheck
-      - name: Run cppcheck
-        run: tools/cppcheck-gate.sh
-
-  compiler-warnings:
-    # Report-only, as in ci-gtk3.yml: previews the -Wall -Wextra warnings
-    # 26.04's GCC adds, for comparison with the compiler-warnings-gtk3-linux
-    # artifact from ci-gtk3.yml.
-    runs-on: ubuntu-26.04
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v7
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -q
-          sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext
-      - name: Configure with -Wall -Wextra
-        run: |
-          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
-            -DCMAKE_C_FLAGS="-Wall -Wextra -Wno-unused-parameter"
-      - name: Build (warnings captured, non-fatal)
-        run: cmake --build build 2>&1 | tee build/warnings.txt || true
-      - name: Summarise warnings
-        run: |
-          COUNT=$(grep -c ': warning:' build/warnings.txt || echo 0)
-          echo "Total warnings: $COUNT"
-          echo ""
-          echo "=== By warning flag ==="
-          grep ': warning:' build/warnings.txt | grep -oE '\[-W[^]]+\]' | sort | uniq -c | sort -rn || true
-      - name: Upload warning log
-        uses: actions/upload-artifact@v7
-        with:
-          name: compiler-warnings-gtk3-linux-ubuntu2604
-          path: build/warnings.txt
-
-  c-tests-macos-xcode27:
-    # Xcode 27 is a preview image on GitHub (label xcode-27); ci-gtk3.yml's
-    # c-tests-macos uses macos-26 with Xcode 26.6.
-    runs-on: xcode-27
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v7
-      - name: Toolchain versions
-        run: sw_vers; xcodebuild -version; clang --version | head -1
-      - name: Install dependencies
-        run: brew install ninja gtk+3 cmocka libzip librsvg
-      - name: Configure
-        run: |
-          GTK_PREFIX=$(brew --prefix gtk+3)
-          PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
-          export PKG_CONFIG_PATH
-          GTK_LDFLAGS=$(pkg-config --libs-only-L gtk+-3.0)
-          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
-            -DCMAKE_PREFIX_PATH="$GTK_PREFIX;$(brew --prefix)" \
-            -DCMAKE_EXE_LINKER_FLAGS="$GTK_LDFLAGS" \
-            -DXTRKCAD_USE_APPLEHELP=OFF -DXTRKCAD_USE_BROWSER=ON
-      - name: Build
-        run: cmake --build build
-      - name: Test
-        run: ctest --test-dir build --output-on-failure
-
-  c-tests-windows-arm64:
-    # Windows 11 on ARM (Snapdragon laptops), built with MSYS2's CLANGARM64
-    # environment, which packages GTK3 and every dependency we use. Mirrors
-    # ci-gtk3.yml's c-tests-windows-msys2 apart from the toolchain (Clang,
-    # not MinGW GCC).
-    runs-on: windows-11-arm
-    timeout-minutes: 30
-    defaults:
-      run:
-        shell: msys2 {0}
-    steps:
-      - uses: actions/checkout@v7
-      - uses: msys2/setup-msys2@v2
-        with:
-          msystem: CLANGARM64
-          update: false
-          install: >-
-            mingw-w64-clang-aarch64-clang
-            mingw-w64-clang-aarch64-cmake
-            mingw-w64-clang-aarch64-ninja
-            mingw-w64-clang-aarch64-pkgconf
-            mingw-w64-clang-aarch64-gtk3
-            mingw-w64-clang-aarch64-zlib
-            mingw-w64-clang-aarch64-libzip
-            mingw-w64-clang-aarch64-mxml
-            mingw-w64-clang-aarch64-librsvg
-            mingw-w64-clang-aarch64-gettext-tools
-            mingw-w64-clang-aarch64-cmocka
-      - name: Toolchain versions
-        run: clang --version | head -1; pkg-config --modversion gtk+-3.0
-      - name: Configure
-        run: |
-          cmake -B build -G Ninja \
-            -DCMAKE_BUILD_TYPE=Debug \
-            -DXTRKCAD_TESTING=ON \
-            -DXTRKCAD_USE_GETTEXT=OFF
-      - name: Build
-        run: cmake --build build --parallel
-      - name: Test
-        run: ctest --test-dir build --output-on-failure
+  qa:
+    uses: ./.github/workflows/gtk3-qa-reports.yml
+    with:
+      runner: ubuntu-26.04
+      coverage: false
+      artifact-suffix: -ubuntu2604

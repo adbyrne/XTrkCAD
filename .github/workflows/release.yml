@@ -32,33 +32,25 @@ on:
         type: boolean
         default: false
 
-# macOS and Windows runners are pinned too (not macos-latest/windows-latest).
-# DEVELOPER_DIR pins Xcode, and with it AppleClang, on the macOS jobs; it has
-# no effect elsewhere. MinGW GCC is pinned per job with pacman -U (see "Pin
-# MinGW GCC"). Homebrew and the rest of MSYS2 can't be pinned and still roll.
-env:
-  DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+# Runners and compilers are pinned the same way as ci-gtk3.yml (see its
+# header): ubuntu-24.04(-arm), macos-26 with .github/actions/select-xcode,
+# windows-2025 with .github/actions/msys2-pin-gcc. The report jobs come from
+# gtk3-qa-reports.yml, shared with ci-gtk3.yml, so they can't drift apart.
 
 jobs:
   # ── Linux x86-64 — DEB + RPM + STGZ ───────────────────────────────────────
-  # Every job in this file is pinned to ubuntu-24.04 rather than ubuntu-latest
+  # Every Linux job is pinned to ubuntu-24.04 rather than ubuntu-latest
   # (Ubuntu 26.04 from 2026-10-19). Packages built on the older LTS still
   # install on the newer one, but not the other way round (glibc/GTK symbol
-  # versions), and the QA jobs below must match ci-gtk3.yml's pinned tool
-  # versions. ci-gtk3-preview.yml previews the next images.
+  # versions). ci-gtk3-preview.yml previews the next images.
   package-linux:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -q
-          sudo apt-get install -y \
-            cmake ninja-build \
-            libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev \
-            librsvg2-bin gettext xvfb doxygen \
-            dpkg-dev rpm
+      - uses: ./.github/actions/apt-deps
+        with:
+          extra: doxygen dpkg-dev rpm
 
       - name: Configure (Release)
         run: |
@@ -105,14 +97,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -q
-          sudo apt-get install -y \
-            cmake ninja-build \
-            libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev \
-            librsvg2-bin gettext xvfb doxygen \
-            dpkg-dev
+      - uses: ./.github/actions/apt-deps
+        with:
+          extra: doxygen dpkg-dev
 
       - name: Configure (Release)
         run: |
@@ -178,13 +165,9 @@ jobs:
         # xtrkcad-setup-5.4.0-1-debian12.deb, with no hash).
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      - name: Install dependencies
-        run: |
-          apt-get install -y \
-            cmake ninja-build \
-            libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev \
-            librsvg2-bin gettext xvfb xauth doxygen \
-            dpkg-dev file
+      - uses: ./.github/actions/apt-deps
+        with:
+          extra: doxygen dpkg-dev file
 
       - name: Configure (Release)
         run: |
@@ -221,6 +204,7 @@ jobs:
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v7
+      - uses: ./.github/actions/select-xcode
 
       - name: Install dependencies
         run: brew install ninja gtk+3 cmocka libzip librsvg doxygen
@@ -315,21 +299,14 @@ jobs:
             mingw-w64-x86_64-ntldd-git
             mingw-w64-x86_64-doxygen
 
+      - uses: ./.github/actions/msys2-pin-gcc
+
       # MSYS2's doxygen package is rolling: 1.18.0-3 (landed between the
       # 2026-09-19 and 2026-10-05 runs) aborts on the User Guide build with
       # "terminate called after throwing an instance of 'std::system_error'
       # what(): Invalid argument". Pin the last version that built cleanly
-      # here, the same way the Linux doxygen jobs pin DOXYGEN_VERSION.
-      - name: Pin MinGW GCC
-        # pacman -U the exact gcc/gcc-libs pair, the same way release.yml pins
-        # MSYS2 doxygen, so new GCC warnings only arrive when we bump this.
-        env:
-          MSYS2_GCC_PKG_VERSION: 16.2.0-6
-        run: |
-          pacman -U --noconfirm \
-            "https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-gcc-libs-${MSYS2_GCC_PKG_VERSION}-any.pkg.tar.zst" \
-            "https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-gcc-${MSYS2_GCC_PKG_VERSION}-any.pkg.tar.zst"
-          gcc --version | head -1
+      # here, the same way the Linux doxygen jobs pin theirs
+      # (.github/actions/setup-doxygen).
       - name: Pin MSYS2 Doxygen package
         env:
           MSYS2_DOXYGEN_PKG_VERSION: 1.16.1-4
@@ -424,257 +401,14 @@ jobs:
           path: build/*.exe
           retention-days: 14
 
-  # ── Doxygen documentation — built and uploaded on every push ──────────────
-  # Gives a browsable "latest docs" artifact without waiting for a version
-  # tag or for the Hg bug branches behind any given doc change to clear
-  # their SF review window and merge into GTK3V2MAIN -- this job tracks
-  # whatever's on the git mirror right now.
-  package-coverage:
-    # Published (not just PR-artifact) coverage report -- mirrors ci-gtk3.yml's
-    # `coverage` job (unit tests + full regression suite, branch coverage
-    # enabled; see that job's comment and .claude/devml-coverage-report-
-    # 2026-08-05.md for why unit-tests-only was found to be nearly
-    # meaningless: ~3,400 instrumented lines vs. ~64,000 once the regression
-    # suite actually runs the app). Kept as a separate job here (rather than
-    # reusing ci-gtk3.yml's artifact) since release.yml is a distinct
-    # workflow trigger (push/tag, not pull_request) with no access to a PR
-    # run's artifacts.
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v7
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -q
-          sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext xvfb lcov
-      - name: Configure with coverage flags
-        run: |
-          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
-            -DCMAKE_C_FLAGS="--coverage" -DCMAKE_EXE_LINKER_FLAGS="--coverage"
-      - name: Build
-        run: cmake --build build
-      - name: Run tests (unit + full regression suite)
-        run: xvfb-run ctest --test-dir build --output-on-failure
-      - name: Collect coverage
-        run: |
-          lcov --capture --directory build \
-               --output-file build/coverage.info \
-               --ignore-errors mismatch --rc branch_coverage=1
-          lcov --remove build/coverage.info \
-               '/usr/*' '*/build/*' '*/unittest/*' '*/tools/*' \
-               --output-file build/coverage-filtered.info \
-               --ignore-errors unused --rc branch_coverage=1
-          genhtml build/coverage-filtered.info \
-                  --output-directory coverage-html \
-                  --title "XTrkCAD coverage (GTK3, unit + regression suite)" \
-                  --rc branch_coverage=1
-          lcov --summary build/coverage-filtered.info --rc branch_coverage=1
-      - name: Archive coverage report
-        run: tar -czf xtrkcad-coverage.tar.gz -C coverage-html .
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v7
-        with:
-          name: xtrkcad-coverage-html
-          path: xtrkcad-coverage.tar.gz
-          retention-days: 14
-
-  package-cppcheck-deep:
-    # Published version of ci-gtk3.yml's report-only cppcheck-deep job -- see
-    # that job's comment for the suppression rationale (kept in sync by hand,
-    # both jobs run the same command).
-    #
-    # 2026-09-02: brought back in sync after drifting on TWO widenings that only
-    # landed in ci-gtk3.yml -- app/help + app/tools/listxtp.c (SF #701/#729-730,
-    # an older gap) and app/wlib/gtk3lib(+unix/) (this session's gate work). The
-    # published report had zero app/wlib findings as a result; see
-    # ci-gtk3.yml's cppcheck-deep job for the full app/wlib exclusion rationale.
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v7
-      - name: Install cppcheck
-        run: sudo apt-get update -q && sudo apt-get install -y cppcheck
-      - name: Run cppcheck (deep, non-fatal)
-        run: |
-          cppcheck \
-            --enable=warning,style,performance,portability \
-            --inline-suppr \
-            -j 4 \
-            --suppress=missingInclude \
-            --suppress=missingIncludeSystem \
-            --suppress=nullPointerOutOfMemory \
-            --suppress=nullPointerOutOfResources \
-            --suppress=nullPointerArithmeticOutOfMemory \
-            --suppress=syntaxError:app/bin/archive.c \
-            --suppress=syntaxError:app/bin/cturntbl.c \
-            --suppress=syntaxError:app/bin/directory.c \
-            --suppress=syntaxError:app/bin/paths.c \
-            --suppress=syntaxError:app/bin/utility.c \
-            --suppress=unknownMacro:app/bin/custom.c \
-            --suppress=unknownMacro:app/wlib/gtk3lib/stickytogglebutton.h \
-            --suppress=ctunullpointer:app/bin/track.c \
-            --suppress=uninitvar:app/bin/levenshtein.c \
-            --suppress=uninitvar:app/bin/problemrep.c \
-            --suppress=uninitvar:app/bin/paths.c \
-            --suppress=nullPointer:app/bin/partcatalog.c \
-            --suppress=missingReturn:app/bin/cturnout.c \
-            --suppress=ctuPointerArith:app/bin/cturnout.c \
-            --suppress=selfAssignment:app/bin/cdraw.c \
-            --suppress=selfAssignment:app/bin/drawgeom.c \
-            -I app/bin -I app/bin/include -I app/wlib/include -I app/wlib/gtk3lib \
-            app/bin/*.c app/dynstring/*.c \
-            app/help/*.c app/tools/listxtp.c \
-            app/wlib/gtk3lib/*.c app/wlib/gtk3lib/unix/*.c > cppcheck-deep.txt 2>&1 || true
-      - name: Format as HTML
-        run: |
-          mkdir -p report
-          tools/format-findings-report.sh cppcheck-deep.txt report/index.html \
-            "cppcheck-deep findings (GTK3V2MAIN)" bracketed \
-            "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/"
-      - name: Archive report
-        run: tar -czf xtrkcad-cppcheck-deep.tar.gz -C report .
-      - name: Upload report
-        uses: actions/upload-artifact@v7
-        with:
-          name: xtrkcad-cppcheck-deep-html
-          path: xtrkcad-cppcheck-deep.tar.gz
-          retention-days: 14
-
-  package-clang-tidy:
-    # Published version of ci-gtk3.yml's report-only clang-tidy job -- see
-    # that job's comment for scope rationale (kept in sync by hand, both
-    # jobs run the same command).
-    #
-    # 2026-09-02: added app/wlib/gtk3lib (with win32/wrapbox exclusions) to stay in sync
-    # with ci-gtk3.yml's widening -- had drifted, publishing a report with no app/wlib
-    # findings even after that job started scanning it.
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v7
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -q
-          sudo apt-get install -y cmake ninja-build clang clang-tidy libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext
-      - name: Configure and build (need generated headers for clang-tidy to parse cleanly)
-        run: |
-          # -DCMAKE_C_COMPILER=clang (SF #693) -- see ci-gtk3.yml's matching job for the full
-          # rationale (kept in sync by hand): without it, CMAKE_C_COMPILER_ID resolves to gcc,
-          # which flips two Clang-conditional exemptions backwards and can abort the run early.
-          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_C_COMPILER=clang
-          cmake --build build
-      - name: Run clang-tidy (non-fatal)
-        run: |
-          # See ci-gtk3.yml's matching job: utility.c/misc.c are each legitimately compiled twice
-          # (two targets), so clang-tidy's "[N/139]" counter can exceed 139 -- expected, not a bug.
-          # --header-filter='.*/app/' rationale also in that job's comment (kept in sync by hand):
-          # without it, system headers (GTK/glib/atk) pulled in via plain -I dominate the report
-          # with unfixable noise -- 72% of raw findings, 2026-08-31 measurement.
-          # Vendored-header exclusion (uthash.h/utlist.h/cJSON.h, 199 findings/23% of what's left
-          # after the header-filter) and stringxtc.c (vendored, excluded from the file list below
-          # instead since it's a main file, not reached as a header) -- see ci-gtk3.yml's matching
-          # job for why this is a post-filter awk step below rather than --exclude-header-filter
-          # (that flag isn't supported by this runner's clang-tidy version; the invocation errored
-          # out silently under `|| true` and this job published a false "0 findings" report for its
-          # whole lifetime until this was found, 2026-08-31 -- kept in sync by hand).
-          mapfile -t FILES < <(find app/bin app/dynstring app/cornu app/help app/tools app/wlib/gtk3lib -name "*.c" | grep -v unittest | grep -vE 'bdf2xtp\.c|helphelper\.c|ppedit_gtk1\.c|app/tools/dirent\.c|app/bin/stringxtc\.c|app/wlib/gtk3lib/win32/|app/wlib/gtk3lib/wrapbox/')
-          clang-tidy --header-filter='.*/app/' --checks='-*,bugprone-*,performance-*,portability-*,-bugprone-easily-swappable-parameters' -p build "${FILES[@]}" > clang-tidy.txt 2>&1 || true
-          # compile_commands.json stores absolute paths, so clang-tidy emits
-          # diagnostics as e.g. "/home/runner/work/XTrkCAD/XTrkCAD/app/bin/foo.c:12:...".
-          # format-findings-report.sh expects repo-relative paths (like
-          # cppcheck/codespell/compiler-warnings already produce) -- strip the
-          # workspace prefix so its GitHub blob links resolve.
-          sed -i "s|${GITHUB_WORKSPACE}/||g" clang-tidy.txt
-          # Drop a finding block only when its own primary file:line:col (a warning:/error:
-          # line, never a note: continuation -- notes tracing a macro expansion back through
-          # uthash.h belong to a real finding in project code and must stay) is one of the
-          # three vendored headers.
-          awk 'BEGIN{keep=1} /^[^:]+:[0-9]+:[0-9]+: (warning|error):/ { keep = ($0 !~ /(uthash\.h|utlist\.h|cJSON\.h):[0-9]+:[0-9]+:/) } keep' clang-tidy.txt > clang-tidy.filtered.txt
-          mv clang-tidy.filtered.txt clang-tidy.txt
-      - name: Format as HTML
-        run: |
-          mkdir -p report
-          tools/format-findings-report.sh clang-tidy.txt report/index.html \
-            "clang-tidy findings (GTK3V2MAIN)" bracketed \
-            "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/"
-      - name: Archive report
-        run: tar -czf xtrkcad-clang-tidy.tar.gz -C report .
-      - name: Upload report
-        uses: actions/upload-artifact@v7
-        with:
-          name: xtrkcad-clang-tidy-html
-          path: xtrkcad-clang-tidy.tar.gz
-          retention-days: 14
-
-  package-codespell:
-    # Published version of ci-gtk3.yml's report-only codespell job -- see
-    # that job's comment for the exclusion/ignore-list rationale (kept in
-    # sync by hand, both jobs run the same command).
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7
-      - name: Install codespell
-        run: sudo apt-get update -q && sudo apt-get install -y codespell
-      - name: Run codespell (non-fatal)
-        run: |
-          codespell app/bin app/wlib \
-            --skip='*/wrapbox/*,*/halibut/*,*.ai' \
-            --ignore-words=.github/codespell-ignore.txt \
-            -q 3 > codespell.txt 2>&1 || true
-      - name: Format as HTML
-        run: |
-          mkdir -p report
-          tools/format-findings-report.sh codespell.txt report/index.html \
-            "codespell findings (GTK3V2MAIN)" codespell \
-            "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/"
-      - name: Archive report
-        run: tar -czf xtrkcad-codespell.tar.gz -C report .
-      - name: Upload report
-        uses: actions/upload-artifact@v7
-        with:
-          name: xtrkcad-codespell-html
-          path: xtrkcad-codespell.tar.gz
-          retention-days: 14
-
-  package-compiler-warnings:
-    # Published version of ci-gtk3.yml's report-only compiler-warnings job
-    # (Linux only -- the most complete/representative of the three platform
-    # variants; macos/windows stay PR-artifact-only for now).
-    #
-    # gettext added 2026-09-02: missing here (unlike every other Linux job in this file)
-    # caused the build to stall generating locale .mo files with no msgfmt available,
-    # running the job into its 15-minute timeout instead of failing fast -- see
-    # project_compiler_warnings_job_gettext_gap memory, first hit weeks earlier. Confirmed
-    # in a live Release run (job 33639582120, package-compiler-warnings cancelled at 15m19s).
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v7
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -q
-          sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext
-      - name: Configure with -Wall -Wextra
-        run: |
-          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
-            -DCMAKE_C_FLAGS="-Wall -Wextra -Wno-unused-parameter"
-      - name: Build (warnings captured, non-fatal)
-        run: cmake --build build 2>&1 | tee build/warnings.txt || true
-      - name: Format as HTML
-        run: |
-          mkdir -p report
-          tools/format-findings-report.sh build/warnings.txt report/index.html \
-            "Compiler warnings, -Wall -Wextra (GTK3V2MAIN, Linux)" bracketed \
-            "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/"
-      - name: Archive report
-        run: tar -czf xtrkcad-compiler-warnings.tar.gz -C report .
-      - name: Upload report
-        uses: actions/upload-artifact@v7
-        with:
-          name: xtrkcad-compiler-warnings-html
-          path: xtrkcad-compiler-warnings.tar.gz
-          retention-days: 14
+  # ── Analysis reports for GitHub Pages ─────────────────────────────────────
+  # coverage, cppcheck-deep, clang-tidy, codespell and compiler-warnings as
+  # xtrkcad-<tool>-html artifacts, from the same job definitions ci-gtk3.yml
+  # runs on every PR (gtk3-qa-reports.yml). deploy-pages unpacks them.
+  qa-reports:
+    uses: ./.github/workflows/gtk3-qa-reports.yml
+    with:
+      html: true
 
   package-suppress-inventory:
     # Inventory of every cppcheck-suppress/NOLINT(NEXTLINE) comment in
@@ -712,23 +446,19 @@ jobs:
           path: xtrkcad-suppress-inventory.tar.gz
           retention-days: 14
 
+  # ── Doxygen documentation — built and uploaded on every push ──────────────
+  # Gives a browsable "latest docs" artifact without waiting for a version
+  # tag or for the Hg bug branches behind any given doc change to clear
+  # their SF review window and merge into GTK3V2MAIN -- this job tracks
+  # whatever's on the git mirror right now.
   package-docs:
     runs-on: ubuntu-24.04
-    env:
-      DOXYGEN_VERSION: 1.15.0
     steps:
       - uses: actions/checkout@v7
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -q
-          sudo apt-get install -y cmake ninja-build libgtk-3-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext
+      - uses: ./.github/actions/apt-deps
 
-      - name: Install pinned Doxygen ${{ env.DOXYGEN_VERSION }}
-        run: |
-          curl -sL -o doxygen.tar.gz "https://github.com/doxygen/doxygen/releases/download/Release_${DOXYGEN_VERSION//./_}/doxygen-${DOXYGEN_VERSION}.linux.bin.tar.gz"
-          tar xzf doxygen.tar.gz
-          echo "$PWD/doxygen-${DOXYGEN_VERSION}/bin" >> "$GITHUB_PATH"
+      - uses: ./.github/actions/setup-doxygen
 
       - name: Configure
         # XTRKCAD_USERGUIDE_URL overrides the dev guide's default (relative,
@@ -784,11 +514,7 @@ jobs:
   deploy-pages:
     needs:
       - package-docs
-      - package-coverage
-      - package-cppcheck-deep
-      - package-clang-tidy
-      - package-codespell
-      - package-compiler-warnings
+      - qa-reports
       - package-suppress-inventory
     # Only ordinary GTK3V2MAIN pushes redeploy the live public site -- this
     # job previously had no such guard despite this file's own header

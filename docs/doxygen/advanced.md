@@ -61,6 +61,25 @@ see below). Read the workflow file
 directly for exact command lines; this is a map of what each job checks and whether it can fail
 your run, not a copy of it.
 
+No job definition is kept as a hand-made copy of another, because copies drifted more than once.
+The shared pieces:
+
+- **`gtk3-toolchain.yml`** (a reusable workflow) holds the toolchain-sensitive build/test jobs:
+  `c-tests-linux`, `c-tests-linux-clang`, `c-tests-arm64`, `regression-gtk3`,
+  `c-tests-sanitizers`, `cppcheck`, `c-tests-macos` and `c-tests-windows`. `ci-gtk3.yml` calls it
+  with the pinned runners and `ci-gtk3-preview.yml` with the next ones.
+- **`gtk3-qa-reports.yml`** (a reusable workflow) holds the report-only analysis jobs. `ci-gtk3.yml`
+  calls it for plain-text PR artifacts, `release.yml` for the published HTML reports, and
+  `ci-gtk3-preview.yml` on the next Ubuntu.
+- **`.github/actions/`** holds composite actions for repeated steps: `apt-deps` (the Linux package
+  list), `select-xcode`, `msys2-pin-gcc` and `setup-doxygen`. Each pinned version is set once, as
+  the action's default.
+- **`tools/cppcheck-gate.sh`** and **`tools/astyle-check.sh`** hold the two gate commands. Run
+  them locally from the repository root.
+
+A job from a reusable workflow shows in the checks list as `<caller job> / <job name>`, e.g.
+`toolchain / c-tests-linux (ubuntu-24.04)` or `qa / clang-tidy`.
+
 On `%main`, `hg-sync-default.yml` also mirrors SourceForge Hg `default` into git `%main` every
 day. It diffs from the last synced Hg node, which is recorded as an `Hg-Node:` commit trailer,
 and applies the result to a `test/upstream-default-*` branch. It runs `ci.yml` there and
@@ -74,7 +93,7 @@ git-only work that can't simply mirror Hg.
 - **`doxygen`** — builds this documentation with the pinned Doxygen 1.15.0 and `WARN_AS_ERROR`;
   any warning (a broken `\ref`, a stale `@param`, an unresolved anchor) fails the job.
 - **`c-tests-linux`, `c-tests-arm64`, `c-tests-debian`, `c-tests-linux-clang`,
-  `c-tests-macos`, `c-tests-windows-msys2`, `c-tests-sanitizers`, `c-tests-valgrind`** — build
+  `c-tests-macos`, `c-tests-windows`, `c-tests-sanitizers`, `c-tests-valgrind`** — build
   plus `ctest` across compilers (GCC, Clang, AppleClang, MinGW GCC), platforms, and architectures, plus ASan/UBSan and
   Valgrind runs (`PreferenceTest` and `MRUListTest` excluded from both — see
   \ref advanced-optional-local-checks "Advanced/optional local checks" in the
@@ -94,13 +113,15 @@ git-only work that can't simply mirror Hg.
   `c-tests-sanitizers` excludes regression (`-LE regression`) and `regression-gtk3` isn't
   sanitizer-instrumented, so the combination that found SF #675/#677–#680 previously only happened
   when someone ran it locally — see the "Static tools and a live sanitizer run" bullet below.
-- **`cppcheck`** — cppcheck's default check set only, `--error-exitcode=1`.
+- **`cppcheck`** — cppcheck's default check set only, `--error-exitcode=1`
+  (`tools/cppcheck-gate.sh`).
 - **`astyle-check`** — AStyle 3.6.13 (built from source, pinned — an unpinned version once
   produced different formatting for identical input, SF #638) dry-run conformance to
   `app/lib/astylerc`, scoped to `app/bin`, `app/wlib`, `app/help`, and `app/tools`. Vendored code
   (`app/wlib/gtk3lib/wrapbox/`, the `app/tools/dirent.c`/`dirent.h` Win32 shim, and
   `app/bin/uthash.h`, an unmodified upstream uthash release) and `unittest/` directories are
-  excluded by design.
+  excluded by design. The command, version and exclude list live in `tools/astyle-check.sh`;
+  run it locally before pushing.
 - **`fuzz-getargs`** — a bounded-time libFuzzer regression run of the `fuzz_getargs` harness (not
   continuous fuzzing; catches regressions in previously-fixed `GetArgs()` bugs like SF #645).
 
@@ -108,8 +129,8 @@ git-only work that can't simply mirror Hg.
 
 - **`cppcheck-deep`** — cppcheck's full check set, beyond the gating job's defaults.
 - **`clang-tidy`** — a conservative `bugprone-*`/`performance-*`/`portability-*` check-set.
-- **`codespell`** — scans comments, strings, and identifiers in `app/bin`/`app/wlib` for common
-  misspellings.
+- **`codespell`** — scans comments, strings, and identifiers in `app/bin`, `app/wlib`,
+  `app/help` and `app/tools` for common misspellings.
 - **`astyle-check-macos`, `astyle-check-windows`** — compare each platform's from-source-built
   astyle output against Linux's, to catch astyle itself behaving differently per OS (not code
   formatting drift — that's what the gating `astyle-check` job is for).
@@ -121,20 +142,20 @@ git-only work that can't simply mirror Hg.
 
 `ci-gtk3.yml` pins its runner images and compilers (see \ref building "Building and Testing"'s
 tool-version table), so an image update can't change tool versions under us.
-`ci-gtk3-preview.yml` runs on the same triggers and repeats the toolchain-sensitive jobs on the
-next images:
+`ci-gtk3-preview.yml` runs on the same triggers and calls the same two reusable workflows with
+the next images:
 
-- **Ubuntu 26.04** (`ubuntu-26.04`, `ubuntu-26.04-arm`): `c-tests-linux`, `c-tests-linux-clang`,
-  `c-tests-arm64`, `regression-gtk3`, `c-tests-sanitizers`, the gating `cppcheck` check (through
-  the same `tools/cppcheck-gate.sh`), and report-only `compiler-warnings` (artifact
-  `compiler-warnings-gtk3-linux-ubuntu2604`).
-- **Xcode 27** (`c-tests-macos-xcode27`, GitHub's `xcode-27` preview image): the next AppleClang.
-- **Windows 11 on ARM** (`c-tests-windows-arm64`, `windows-11-arm`): MSYS2's `CLANGARM64`
-  environment. It's a platform we don't ship packages for yet.
+- **Ubuntu 26.04** (`ubuntu-26.04`, `ubuntu-26.04-arm`): every Linux job in
+  `gtk3-toolchain.yml`, plus the QA reports except coverage. Their plain-text artifacts carry a
+  `-ubuntu2604` suffix, so newer cppcheck, clang-tidy and GCC findings can be compared before the
+  pin moves.
+- **Xcode 27** (`c-tests-macos` on GitHub's `xcode-27` preview image): the next AppleClang.
+- **Windows 11 on ARM** (`c-tests-windows` on `windows-11-arm`, MSYS2 `CLANGARM64`): a platform
+  we don't ship packages for yet.
 
 A failure there doesn't block a merge, but it does need fixing or a ticket. When a preview is
-consistently clean, move `ci-gtk3.yml`'s pin forward to it. The preview jobs mirror their
-`ci-gtk3.yml` namesakes, so change both together.
+consistently clean, move the pin forward by changing `ci-gtk3.yml`'s call (or the reusable
+workflow's default input).
 
 Every report-only job's findings land as a downloadable artifact on the workflow run's summary
 page (Actions tab → the run → Artifacts); each job's own "Upload findings"/"Upload warning log"
@@ -145,9 +166,8 @@ Five of these (`coverage`, `cppcheck-deep`, `clang-tidy`, `codespell`, `compiler
 additionally published as permanent, browsable HTML at
 `$GITHUB_USER.github.io/XTrkCAD` (GitHub Pages' default project-page URL for whichever fork's
 Actions is doing the deploying), redeployed on every push to
-`GTK3V2MAIN` by `release.yml`'s `package-coverage`/`package-cppcheck-deep`/`package-clang-tidy`/
-`package-codespell`/`package-compiler-warnings` jobs (separate from the `ci-gtk3.yml` jobs of the
-same underlying command, which stay PR-artifact-only for fast per-PR feedback). The four plain-text
+`GTK3V2MAIN` by `release.yml`'s `qa-reports` job. That job calls `gtk3-qa-reports.yml` with
+`html: true`, so the published reports come from the same job definitions as the PR artifacts. The four plain-text
 tools are formatted into grouped, linkable HTML by `tools/format-findings-report.sh` — see below.
 
 ### Reproducing a report locally
@@ -168,7 +188,7 @@ genhtml build/coverage-filtered.info --output-directory coverage-html --rc branc
 ```
 
 `cppcheck-deep`/`clang-tidy`/`codespell` each run their own analysis command straight from
-`ci-gtk3.yml`'s (or `release.yml`'s, identical) job definition — copy the `run:` step verbatim,
+their job definition in `gtk3-qa-reports.yml` — copy the `run:` step verbatim,
 it needs no CI-specific setup. `compiler-warnings` is just `cmake --build` with
 `-DCMAKE_C_FLAGS="-Wall -Wextra -Wno-unused-parameter"` piped through `tee`. `clang-tidy`'s own
 configure step passes `-DCMAKE_C_COMPILER=clang` (SF #693) — reproducing it locally needs `clang`
