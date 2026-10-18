@@ -135,6 +135,8 @@ struct button {
 	guint timeout_id;
 	enum TIMER_STATE timer_state;
 	int recursion;
+	wBool_t commitFirst;	/**< commit the focused field before the action */
+	int quiet;	/**< >0 while wlib itself changes the pressed state */
 };
 
 struct choice {

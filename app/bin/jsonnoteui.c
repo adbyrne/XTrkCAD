@@ -838,7 +838,7 @@ CreateEditJsonNote(char *title, const char *textData)
 		jsonNoteW = FormCreateDialog(&jsonNotePG, "",
 		                             _("Done"), JsonEditOK,
 		                             _("Cancel"), FormCancel_Current,
-		                             TRUE, F_BLOCK,
+		                             TRUE, F_MODAL,
 		                             JsonDlgUpdate);
 	}
 

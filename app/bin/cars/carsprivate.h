@@ -3,7 +3,7 @@
 
 #include "common.h"
 #include "draw.h"
-#include "param.h"
+#include "form.h"
 #include "tabstring.h"
 
 // transform_pt.c

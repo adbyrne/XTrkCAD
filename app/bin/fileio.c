@@ -37,7 +37,6 @@
 #include "misc.h"
 #include "note.h"
 #include "include/notenames.h"
-#include "param.h"
 #include "include/paramfile.h"
 #include "include/paramfilelist.h"
 #include "paths.h"

@@ -25,23 +25,33 @@
 #include <form.h>
 #include "formprivate.h"
 
+/**
+ * Format a value the way a PD_FLOAT entry displays it.
+ *
+ * \param entry IN the float control
+ * \param value IN the value to format
+ * \return the formatted text, a short-lived buffer of the Format* functions
+ */
+
+char *
+FormFloatFormat(paramData_p entry, FLOAT_T value)
+{
+	if (entry->option & PDO_DIM) {
+		if (entry->option & PDO_SMALLDIM) {
+			return FormatSmallDistance(value);
+		}
+		return FormatDistance(value);
+	}
+	if (entry->option & PDO_ANGLE) {
+		value = NormalizeAngle((angleSystem == ANGLE_POLAR) ? value : -value);
+	}
+	return FormatFloat(value);
+}
+
 static void
 LoadFloatEntry(paramData_p entry, FLOAT_T value)
 {
-	char* formattedString;
-	if (entry->option & PDO_DIM) {
-		if (entry->option & PDO_SMALLDIM) {
-			formattedString = FormatSmallDistance(value);
-		} else {
-			formattedString = FormatDistance(value);
-		}
-	} else {
-		if (entry->option & PDO_ANGLE) {
-			value = NormalizeAngle((angleSystem == ANGLE_POLAR) ? value : -value);
-		}
-		formattedString = FormatFloat(value);
-	}
-	wEntrySetValue(entry->control, formattedString);
+	wEntrySetValue(entry->control, FormFloatFormat(entry, value));
 }
 
 static void

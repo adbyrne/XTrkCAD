@@ -1870,7 +1870,7 @@ EXPORT void DoGroup( void * unused )
 		groupW = FormCreateDialog( &groupPG, MakeWindowTitle(_("Group Objects")),
 		                           _("Ok"), GroupOk,
 		                           _("Cancel"), FormCancel_Current,
-		                           TRUE, F_BLOCK, NULL);
+		                           TRUE, F_MODAL, NULL);
 		groupD.dpi = mainD.dpi;
 	}
 	if (isTurnout) {

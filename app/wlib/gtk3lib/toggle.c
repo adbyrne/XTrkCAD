@@ -313,7 +313,9 @@ void wButtonSetBusy(wControl_p bb, int newState)
 	currentState = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
 	if (currentState != newState) {
 		ignoreClick = true;
+		bb->attributes.button.quiet++;
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), newState);
+		bb->attributes.button.quiet--;
 		ignoreClick = false;
 	}
 }

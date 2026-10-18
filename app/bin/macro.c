@@ -34,7 +34,6 @@
 #include "include/toolbar.h"
 #include "layout.h"
 #include "misc.h"
-#include "param.h"
 #include "paths.h"
 #include "track.h"
 #include "version.h"
@@ -48,7 +47,6 @@ static void DemoInitValues(void);
 
 /** @logcmd @showrefby `playbackcursor=n` `macro.c` */
 static int log_playbackCursor = 0;
-EXPORT BOOL_T paramTogglePlaybackHilite;
 /** @logcmd @showrefby `playback=n` `macro.c` */
 static int log_playback = 0;
 
@@ -284,7 +282,7 @@ EXPORT void DoRecord(void *context)
 {
 	if (recordW == NULL) {
 		char *title = MakeWindowTitle(_("Record"));
-		recordW = FormCreateDialog(&recordPG, title, _("Finish"), FormButtonOk,
+		recordW = FormCreateDialog(&recordPG, title, _("Finish"), FormOk_Null,
 		                           NULL, NULL, FALSE, F_RESIZE, NULL);
 		recordFile_fs = wFilSelCreate(mainW, FS_SAVE, 0, title, sRecordFilePattern,
 		                              StartRecord, NULL);
@@ -1168,7 +1166,6 @@ static void PlaybackSetup(void)
 	Reset();
 	paramVersion = -1;
 	playbackColor = wDrawColorBlack;
-	paramTogglePlaybackHilite = FALSE;
 	CompoundClearDemoDefns();
 	SaveLayers();
 	nRegressionFail = 0;
@@ -1221,7 +1218,6 @@ static void Playback(void)
 			if (log_visualdiff > 0 && paramFileName != NULL) {
 				SaveVisualDiffSnapshot(paramFileName, "final");
 			}
-			paramTogglePlaybackHilite = FALSE;
 			CloseDemoWindows();
 			if (paramFile) {
 				fclose(paramFile);
@@ -1301,7 +1297,6 @@ static void Playback(void)
 		// string (fgets + Stripcr()), so no OOB read risk either way.
 		// NOLINTNEXTLINE(bugprone-not-null-terminated-result)
 		if (strncmp(paramLine, "STEP", 5) == 0) {
-			paramTogglePlaybackHilite = TRUE;
 			wWinTop(demoW);
 			demoWinOnTop = TRUE;
 			didPause = FALSE;
@@ -1366,10 +1361,8 @@ static void Playback(void)
 			DoRedraw();
 			/*DoChangeNotification( CHANGE_ALL );*/
 		} else if (strncmp(paramLine, "COMMAND ", 8) == 0) {
-			paramTogglePlaybackHilite = FALSE;
 			PlaybackCommand(paramLine, paramLineNum);
 		} else if (strncmp(paramLine, "RESET", 5) == 0) {
-			paramTogglePlaybackHilite = TRUE;
 			InfoMessage("Esc Key Pressed");
 			ConfirmReset(TRUE);
 		} else if (strncmp(paramLine, "VERSION", 7) == 0) {
@@ -1415,7 +1408,6 @@ static void Playback(void)
 			DoRedraw();
 
 		} else if (strncmp(paramLine, "PAUSE ", 6) == 0) {
-			paramTogglePlaybackHilite = TRUE;
 			didPause = TRUE;
 
 			if (!GetArgs(paramLine + 6, "l", &timeout)) {
@@ -1433,7 +1425,6 @@ static void Playback(void)
 				demoWinOnTop = FALSE;
 			}
 		} else if (strncmp(paramLine, "BIGPAUSE ", 6) == 0) {
-			paramTogglePlaybackHilite = TRUE;
 			didPause = FALSE;
 
 			if (playbackTimer == 0) {

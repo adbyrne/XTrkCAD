@@ -482,7 +482,9 @@ tool's message alone.
   silently kept reporting success because a stale ccache-cached object satisfied the link. Found
   during SF #730; see \ref ci-tooling-overview "CI tooling overview" above for the general ccache
   gotcha. If a change to `paramwrapper.c` ever seems to have no effect, this is why — verify with
-  `nm <binary> | grep <symbol>` before assuming the edit landed.
+  `nm <binary> | grep <symbol>` before assuming the edit landed. (`paramwrapper.c` has since been
+  removed, together with `param.h`, whose live definitions moved into `form.h`; the lesson about
+  unbuilt files and stale ccache objects still applies.)
 - **A UI event-handler case statement that looks live but is permanently unreachable.**
   `app/wlib/gtk3lib/dialog.c` has a `GTK_RESPONSE_HELP` switch case inside a function meant to
   handle a `GtkDialog`'s "response" signal — but `wWinDialogCreate()` (the only place a dialog

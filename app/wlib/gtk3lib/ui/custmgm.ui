@@ -36,6 +36,11 @@
                     <property name="enable-grid-lines">vertical</property>
                     <property name="model">liststore</property>
                     <property name="visible">True</property>
+                    <child internal-child="selection">
+                      <object class="GtkTreeSelection">
+                        <property name="mode">multiple</property>
+                      </object>
+                    </child>
                     <child>
                       <object class="GtkTreeViewColumn" id="icon">
                         <property name="resizable">True</property>

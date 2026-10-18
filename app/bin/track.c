@@ -32,7 +32,7 @@
 #include "fileio.h"
 #include "icons.h"
 #include "layout.h"
-#include "param.h"
+#include "form.h"
 #include "paths.h"
 #include "track.h"
 #include "trackx.h"

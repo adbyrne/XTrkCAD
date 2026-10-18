@@ -334,7 +334,7 @@ static void DoManageNotes(void *unused)
 	if (manageNotesPG.win == NULL) {
 		FormCreateDialog(&manageNotesPG, MakeWindowTitle(_("Manage Notes")),
 		                 NULL, ManageNotesDone, NULL, FormCancel_Current,
-		                 TRUE, F_RESIZE|F_RECALLSIZE|F_BLOCK, NULL);
+		                 TRUE, F_RESIZE|F_RECALLSIZE, NULL);
 	}
 
 	/* load each tab's current type properties before FormLoadControls()

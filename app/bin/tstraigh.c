@@ -24,7 +24,7 @@
 #include "cundo.h"
 #include "fileio.h"
 #include "layout.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "common-ui.h"
 

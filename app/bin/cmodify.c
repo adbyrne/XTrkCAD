@@ -27,7 +27,7 @@
 #include "cstraigh.h"
 #include "cundo.h"
 #include "fileio.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "drawgeom.h"
 #include "common.h"

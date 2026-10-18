@@ -118,7 +118,7 @@ typedef bool (*wWinCallBack_p)(wControl_p control, winProcEvent event,
 #define F_AUTOSIZE (1L << 1)
 #define F_HEADER (1L << 2)
 #define F_RESIZE (1L << 3)
-#define F_BLOCK (1L << 4)
+#define F_MODAL (1L << 4)	/**< modal while shown, except during demo playback */
 #define F_MENUBAR (1L << 5)
 #define F_NOTAB (1L << 8)
 #define F_RECALLPOS (1L << 9)
@@ -551,6 +551,7 @@ void wWinSetBusy(wControl_p win, wBool_t busy);
 const char *wWinGetTitle(wControl_p window);
 void wWinTop(wControl_p window);
 void wWinBlockEnable(wBool_t);
+void wWinRunModal(wControl_p win);
 void wSetGeometry(wControl_p win, wWinPix_t min_width, wWinPix_t max_width,
                   wWinPix_t min_height, wWinPix_t max_height,
                   wWinPix_t base_width, wWinPix_t base_height,

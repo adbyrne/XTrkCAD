@@ -30,7 +30,6 @@
 #include "form.h"
 #include "cselect.h"
 #include "icons.h"
-#include "param.h"
 #include "track.h"
 #include "cbezier.h"
 #include "ccornu.h"

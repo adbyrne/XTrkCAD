@@ -32,8 +32,11 @@
 #define XLABEL "X: "
 #define YLABEL "Y: "
 #define ZOOMLABEL "Zoom: "
+#define ZOOMWIDEST "1024:1"	/**< widest zoom value, see zoomList in draw.c */
+#define SCALELABEL "Scale: "
 
 static struct {
+	wControl_p gauge_m;
 	wControl_p scale_m;
 	wControl_p posX_m;
 	wControl_p posY_m;
@@ -96,6 +99,7 @@ SetInfoMessageHeight(wControl_p label)
 
 void InitInfoBar(void)
 {
+	infoD.gauge_m = wStatusCreate(mainW, "infoBarGauge", SCALELABEL);
 	infoD.scale_m = wStatusCreate(mainW, "infoBarScale", ZOOMLABEL);
 	infoD.posX_m = wStatusCreate(mainW,  "infoBarPosX", XLABEL);
 	infoD.posY_m = wStatusCreate(mainW, "infoBarPosY", YLABEL);
@@ -103,7 +107,7 @@ void InitInfoBar(void)
 
 	SetInfoMessageHeight(infoD.info_m);
 
-	SetInfoPositionLength(infoD.posX_m, ZOOMLABEL);
+	wMessageSetLength(infoD.scale_m, strlen(ZOOMLABEL) + strlen(ZOOMWIDEST));
 	SetInfoPositionLength(infoD.posX_m, XLABEL);
 	SetInfoPositionLength(infoD.posY_m, YLABEL);
 }
@@ -133,6 +137,22 @@ void InfoScale(void)
 	}
 
 	wStatusSetValue(infoD.scale_m, zoomString);
+}
+
+/**
+ * Show the layout's current scale/gauge (e.g. "HOn3") in the status bar.
+ *
+ * \param scaleName IN name of the current scale, as used in the layout file
+ */
+
+void InfoScaleGauge(const char *scaleName)
+{
+	char scaleString[sizeof(SCALELABEL) + 40];
+
+	snprintf(scaleString, sizeof(scaleString), "%s%s", SCALELABEL,
+	         scaleName ? scaleName : "");
+
+	wStatusSetValue(infoD.gauge_m, scaleString);
 }
 
 #define POSSTRINGLEN 20

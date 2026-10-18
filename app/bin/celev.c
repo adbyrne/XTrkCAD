@@ -123,7 +123,7 @@ static void CreateSplitAnchor(coOrd pos, track_p t)
 
 
 #if 0
-void static CreateMoveAnchor(coOrd pos)
+static void CreateMoveAnchor(coOrd pos)
 {
 	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
 	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,0,TRUE,

@@ -471,7 +471,6 @@ SetScale( void )
 
 	SetScaleDescGauge(newScaleInx);
 
-
 	if (!inPlayback) {
 		wPrefSetString( "misc", "scale", curScaleName );
 	}
@@ -1087,7 +1086,7 @@ EXPORT void DoRescale( void * unused )
 		FormCreateDialog( &rescalePG, NULL,
 		                  _("Ok"), RescaleDlgOk,
 		                  _("Cancel"), FormCancel_Current,
-		                  TRUE, F_BLOCK, RescaleDlgUpdate);
+		                  TRUE, F_MODAL, RescaleDlgUpdate);
 		LoadScaleList(rescalePLs[I_RESCALE_TO_SCALE].control );
 		LoadGaugeList(rescalePLs[I_RESCALE_TO_GAUGE].control,
 		              GetLayoutCurScaleDesc() ); /* set correct gauge list here */

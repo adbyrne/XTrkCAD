@@ -183,7 +183,7 @@
             <property name="spacing">6</property>
             <property name="visible">True</property>
             <child>
-              <object class="GtkLabel" id="infoBarScale">
+              <object class="GtkLabel" id="infoBarGauge">
                 <property name="can-focus">False</property>
                 <property name="single-line-mode">True</property>
                 <property name="visible">True</property>
@@ -198,6 +198,21 @@
               </packing>
             </child>
             <child>
+              <object class="GtkLabel" id="infoBarScale">
+                <property name="can-focus">False</property>
+                <property name="single-line-mode">True</property>
+                <property name="visible">True</property>
+                <style>
+                  <class name="statusbar"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkLabel" id="infoBarPosX">
                 <property name="can-focus">False</property>
                 <property name="visible">True</property>
@@ -208,7 +223,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">1</property>
+                <property name="position">2</property>
               </packing>
             </child>
             <child>
@@ -222,7 +237,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">2</property>
+                <property name="position">3</property>
               </packing>
             </child>
             <child>
@@ -1514,8 +1529,8 @@
                       <object class="GtkComboBox" id="newcarsel">
                         <property name="can-focus">True</property>
                         <property name="hexpand">True</property>
-                        <property name="visible">True</property>
                         <property name="model">newcarlist</property>
+                        <property name="visible">True</property>
                         <child>
                           <object class="GtkCellRendererText">
                             <property name="max-width-chars">0</property>
@@ -1578,7 +1593,7 @@
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
-                <property name="position">3</property>
+                <property name="position">4</property>
               </packing>
             </child>
             <style>

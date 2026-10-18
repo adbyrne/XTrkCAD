@@ -68,7 +68,6 @@ wControl_p mapShowB;
 static wControl_p magnetsB;
 EXPORT wControl_p mapShowMI;
 static wMenuToggle_p magnetsMI;
-EXPORT wControl_p winList_mi;
 wControl_p fileList_ml;
 EXPORT wMenuToggle_p snapGridEnableMI;
 EXPORT wMenuToggle_p snapGridShowMI;
@@ -1198,7 +1197,7 @@ static void ZoomChooserButtonCB(void *context)
 EXPORT void CreateMenus(void)
 {
 	log_menu =  LogFindIndex( "menu" );
-	wMenu_p fileM, editM, viewM, optionM, windowM, macroM, helpM,
+	wMenu_p fileM, editM, viewM, optionM, macroM, helpM,
 	        manageM, addM, changeM, drawM, reportsM;
 	wMenu_p zoomM, zoomSubM;
 
@@ -1216,7 +1215,6 @@ EXPORT void CreateMenus(void)
 	reportsM = wMenuBarAdd(mainW, "menuReports", _("_Reports"));
 	optionM = wMenuBarAdd(mainW, "menuOption", _("_Options"));
 	macroM = wMenuBarAdd(mainW, "menuMacro", _("Mac_ro"));
-	windowM = wMenuBarAdd(mainW, "menuWindow", _("_Window"));
 	helpM = wMenuBarAdd(mainW, "menuHelp", _("_Help"));
 
 	/*
@@ -1751,17 +1749,6 @@ EXPORT void CreateMenus(void)
 	                DoPlayBack, NULL);
 
 	/*
-	 * WINDOW MENU
-	 */
-
-#define MAX_ENTRIES_IN_WINDOWLIST 25
-
-	winList_mi = wMenuListCreate(windowM, "menuWindow", NEWEST_TOP,
-	                             MAX_ENTRIES_IN_WINDOWLIST,
-	                             DoShowWindow);
-	wMenuListAdd(winList_mi, 0, _("Main window"), mainW);
-
-	/*
 	 * HELP MENU
 	 */
 
@@ -1775,7 +1762,7 @@ EXPORT void CreateMenus(void)
 	messageList_ml = wMenuListCreate(messageListM, "messageListM", NEWEST_TOP, 10,
 	                                 ShowMessageHelp);
 	wMenuListAdd(messageList_ml, 0, _(MESSAGE_LIST_EMPTY), NULL);
-	wMenuPushCreate(helpM, "menuHelpProblemrep", _("Collect Problem Info"), 0,
+	wMenuPushCreate(helpM, "menuHelpProblemrep", _("Collect Problem Info..."), 0,
 	                DoProblemCollect, NULL);
 
 	/* tip of the day */

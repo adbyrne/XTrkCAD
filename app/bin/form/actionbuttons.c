@@ -29,24 +29,12 @@
 #include "formprivate.h"
 
 
-void FormButtonOk(paramGroup_p group)
+/* OK button without own action: ButtonOk() checks the inputs, saves the
+ * defaults and hides the dialog, nothing else needs to be done
+ */
+EXPORT void FormOk_Null(
+        paramGroup_p group)
 {
-	// wFlush();
-	// LOG(log_form, 1, ("FormButtonOk: %s\n", group->nameStr));
-	// if (!FormCheckInputs(group, (wControl_p)group->okB)) {
-	// 	return;
-	// }
-	// if (group->nameStr) {
-	// 	FormMacroRecord("PARAMETER %s %s\n", group->nameStr, "ok");
-	// }
-
-	// // if (group->okProc) {
-	// // 	group->okProc(group);
-	// // }
-
-	// wFlush();
-
-	LOG(log_form, 1, ("FormButtonOk -> Ok\n"));
 }
 
 void FormDialogOkActive(
@@ -104,15 +92,4 @@ EXPORT void FormCancel_Restore(
 EXPORT void FormCancel_Null(
         paramGroup_cp group)
 {
-}
-
-EXPORT void FormButtonCancel(void* groupVP)
-{
-	paramGroup_p group = groupVP;
-	if (group->nameStr) {
-		FormMacroRecord("PARAMETER %s %s\n", group->nameStr, "cancel");
-	}
-	if (group->cancelProc) {
-		group->cancelProc(group->win);
-	}
 }

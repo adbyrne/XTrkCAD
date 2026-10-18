@@ -165,9 +165,13 @@ static void CarItemHotbarUpdate(
         paramGroup_p pg,
         int inx,
         void* data);
-static paramGroup_t newCarPG = { "newCar", PGO_FULLDIALOGFROMBUILDER, newCarPLs, COUNT(newCarPLs),
-                                 NULL, NULL, NULL, 0L, CarItemHotbarUpdate
-                               };
+static paramGroup_t newCarPG = {
+	.nameStr = "newCar",
+	.options = PGO_FULLDIALOGFROMBUILDER,
+	.paramPtr = newCarPLs,
+	.paramCnt = COUNT(newCarPLs),
+	.changeProc = CarItemHotbarUpdate
+};
 EXPORT wControl_p newCarControls[2];
 static char newCarLabel1[STR_SIZE];
 #ifdef TODO_UNUSED

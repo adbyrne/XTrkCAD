@@ -250,7 +250,7 @@ static void CreateEditFileDialog(char * windowTitle)
 		fileNoteW = FormCreateDialog(&fileNotePG, NULL,
 		                             _("Done"), FileEditOK,
 		                             _("Cancel"), FormCancel_Current,
-		                             TRUE, F_BLOCK,
+		                             TRUE, F_MODAL,
 		                             FileDlgUpdate);
 	}
 

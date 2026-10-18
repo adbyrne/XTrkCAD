@@ -24,7 +24,7 @@
 #include "common.h"
 #include "common-ui.h"
 #include "fileio.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "trkendpt.h"
 #include "trkendptx.h"

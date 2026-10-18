@@ -83,8 +83,8 @@ static paramGroup_t layerGroupPG = { "layergroup", PGO_FULLDIALOGFROMBUILDER, la
  * builder .ui needed for a dialog this simple).
  *
  * wShow()/FormCreateDialog() do NOT pump a nested event loop in this
- * codebase's GTK3 backend -- F_BLOCK is defined but never consumed
- * anywhere in app/wlib/gtk3lib (confirmed by grep), so a synchronous
+ * codebase's GTK3 backend -- even F_MODAL only makes the window modal,
+ * it doesn't block the caller (see window.c's SetModal()), so a synchronous
  * "show it, then immediately read a confirmed-by-the-user flag" design
  * (the shape this file originally copied from dcustmgm.c's
  * CustomDoExport/custMgmContentsPG) always reads the flag before the
@@ -506,7 +506,7 @@ static void DoLayerGroups(void *unused)
 	if (layerGroupPG.win == NULL) {
 		FormCreateDialog(&layerGroupPG, MakeWindowTitle(_("Layer Groups")),
 		                 NULL, LayerGroupDone, NULL, FormCancel_Current,
-		                 TRUE, F_RESIZE|F_RECALLSIZE|F_BLOCK,
+		                 TRUE, F_RESIZE|F_RECALLSIZE,
 		                 LayerGroupDlgUpdate);
 	}
 

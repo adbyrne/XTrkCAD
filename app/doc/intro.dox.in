@@ -505,7 +505,7 @@ This section lists some things that can improve the performance of <i>XTrackCAD<
 
 - To speed up initialization, remove unused parameter files (See <b>Parameter Files</b> dialog - \ref cmdPrmfile).
 
-- Close the <b>Map</b> window if you don't need it to move about the layout.  The <b>Window</b> (\ref windowM) menu can be used reopen the Map window.
+- Close the <b>Map</b> window if you don't need it to move about the layout.  The <b>View&gt;Show/Hide Map</b> (\ref viewM) menu item can be used to reopen the Map window.
 
 - On the <b>Display</b> dialog (\ref cmdDisplay) turn off drawing <b>Endpoints</b>, decrease the <b>Two Rail Scale</b>, increase <b>Min Grid Spacing</b>, set <b>Draw Ties</b> to <b>None</b> and turn off <b>Live Map</b>.
 

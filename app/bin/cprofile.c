@@ -26,7 +26,6 @@
 #include "layout.h"
 #include "icons.h"
 #include "misc.h"
-#include "param.h"
 #include "shrtpath.h"
 #include "track.h"
 #include "common-ui.h"

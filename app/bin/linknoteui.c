@@ -167,7 +167,7 @@ CreateEditLinkDialog(char *title)
 		linkNoteW = FormCreateDialog(&linkNotePG,"",
 		                             _("Done"), LinkEditOK,
 		                             _("Cancel"), FormCancel_Current,
-		                             TRUE, F_BLOCK,
+		                             TRUE, F_MODAL,
 		                             LinkDlgUpdate);
 	}
 
