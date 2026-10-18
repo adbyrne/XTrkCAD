@@ -56,7 +56,8 @@ after the branch, for someone to review.
 # CI tooling overview {#ci-tooling-overview}
 
 This branch's CI is `.github/workflows/ci-gtk3.yml` (`ci.yml` covers the GTK2 `%main` branch,
-`codeql.yml` and `release.yml` are separate workflows — see below). Read the workflow file
+`ci-gtk3-ubuntu2604.yml`, `ci-mcp.yml`, `codeql.yml` and `release.yml` are separate workflows —
+see below). Read the workflow file
 directly for exact command lines; this is a map of what each job checks and whether it can fail
 your run, not a copy of it.
 
@@ -72,13 +73,16 @@ git-only work that can't simply mirror Hg.
 
 - **`doxygen`** — builds this documentation with the pinned Doxygen 1.15.0 and `WARN_AS_ERROR`;
   any warning (a broken `\ref`, a stale `@param`, an unresolved anchor) fails the job.
-- **`c-tests-linux`, `c-tests-linux (ubuntu-24.04)`, `c-tests-arm64`, `c-tests-linux-clang`,
+- **`c-tests-linux`, `c-tests-arm64`, `c-tests-debian`, `c-tests-linux-clang`,
   `c-tests-macos`, `c-tests-windows-msys2`, `c-tests-sanitizers`, `c-tests-valgrind`** — build
   plus `ctest` across compilers (GCC, Clang, AppleClang, MinGW GCC), platforms, and architectures, plus ASan/UBSan and
   Valgrind runs (`PreferenceTest` and `MRUListTest` excluded from both — see
   \ref advanced-optional-local-checks "Advanced/optional local checks" in the
   \ref index "Developer Documentation" page for why). All pass `-LE regression` so the demo
-  regression suite (see `regression-gtk3` below) isn't picked up here too.
+  regression suite (see `regression-gtk3` below) isn't picked up here too. `c-tests-debian` runs
+  in `debian:bookworm` and `debian:trixie` containers on amd64 and arm64. The arm64 entries stand
+  in for Raspberry Pi OS on a Pi 3/4/5, and Bookworm's older GCC 12, CMake 3.25 and GTK 3.24.38
+  catch code that only builds on newer toolchains.
 - **`regression-gtk3`** — replays the full demo suite (`RegressionTestAll()`, the `-T` flag) in
   one process via the `RegressionSuite` `ctest` target (see
   \ref advanced-optional-local-checks "Advanced/optional local checks" in the
@@ -112,6 +116,18 @@ git-only work that can't simply mirror Hg.
 - **`compiler-warnings`, `compiler-warnings-macos`, `compiler-warnings-windows`** — captures
   `-Wall -Wextra` build output as an artifact on each platform.
 - **`coverage`** — generates an lcov HTML report and uploads it as an artifact.
+
+## Ubuntu 26.04 preview (advisory)
+
+Every Linux job in `ci-gtk3.yml` is pinned to `ubuntu-24.04`, so a runner image update can't
+change tool versions under us. `ci-gtk3-ubuntu2604.yml` runs on the same triggers and repeats
+the toolchain-sensitive jobs on `ubuntu-26.04` and `ubuntu-26.04-arm`: `c-tests-linux`,
+`c-tests-linux-clang`, `c-tests-arm64`, `regression-gtk3`, `c-tests-sanitizers`, the gating
+`cppcheck` check (through the same `tools/cppcheck-gate.sh`), and report-only
+`compiler-warnings` (artifact `compiler-warnings-gtk3-linux-ubuntu2604`). A failure there
+doesn't block a merge, but it does need fixing or a ticket. Once the preview is consistently
+clean, `ci-gtk3.yml` moves to 26.04 and the preview file is retired. Its jobs mirror their
+`ci-gtk3.yml` namesakes, so change both together.
 
 Every report-only job's findings land as a downloadable artifact on the workflow run's summary
 page (Actions tab → the run → Artifacts); each job's own "Upload findings"/"Upload warning log"
@@ -170,27 +186,15 @@ just want the grouped local HTML view. The `coverage` report doesn't go through 
 already produces its own linked, per-line HTML.
 
 The gating `cppcheck` job (default/error-only severity, distinct from the report-only
-`cppcheck-deep` above) isn't documented anywhere else, unlike `cppcheck-deep` — reproduce it the
-same "copy the `run:` step verbatim" way:
+`cppcheck-deep` above) runs `tools/cppcheck-gate.sh`, which holds its scope and suppression list.
+Run it from the repository root to reproduce the job:
 
 ```sh
-cppcheck --error-exitcode=1 -j 4 \
-    --suppress=missingInclude --suppress=missingIncludeSystem \
-    --suppress=nullPointerOutOfMemory --suppress=nullPointerOutOfResources \
-    --suppress=nullPointerArithmeticOutOfMemory \
-    --suppress=syntaxError:app/bin/archive.c --suppress=syntaxError:app/bin/cturntbl.c \
-    --suppress=syntaxError:app/bin/directory.c --suppress=syntaxError:app/bin/paths.c \
-    --suppress=syntaxError:app/bin/utility.c --suppress=unknownMacro:app/bin/custom.c \
-    --suppress=ctunullpointer:app/bin/track.c --suppress=uninitvar:app/bin/levenshtein.c \
-    --suppress=uninitvar:app/bin/problemrep.c --suppress=uninitvar:app/bin/paths.c \
-    --suppress=nullPointer:app/bin/partcatalog.c --suppress=missingReturn:app/bin/cturnout.c \
-    --suppress=ctuPointerArith:app/bin/cturnout.c \
-    -I app/bin -I app/bin/include -I app/wlib/include \
-    app/bin/*.c app/dynstring/*.c app/help/*.c app/tools/listxtp.c
+tools/cppcheck-gate.sh
 ```
 
-(`ci-gtk3.yml` is the source of truth for this list — re-copy it if the two ever drift, rather
-than trusting this snapshot indefinitely.) The remaining gating jobs — `astyle-check`, the
+Results depend on the cppcheck version. CI uses Ubuntu 24.04's (see \ref building "Building and
+Testing"'s tool-version table). The remaining gating jobs — `astyle-check`, the
 `ctest` unit/regression suite, and `docs-doxygen` itself — are just this project's everyday
 build/test/format loop rather than anything CI-specific, and are already documented in full on the
 \ref building "Building and Testing" page and in the project's `CLAUDE.md` Code Formatting

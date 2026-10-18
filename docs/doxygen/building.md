@@ -7,8 +7,9 @@ anything itself.
 
 The commands below are what CI actually runs, with the CI-only bits called out — a local desktop
 build doesn't need everything CI needs. The full, authoritative CI configuration lives in
-`.github/workflows/` (`ci-gtk3.yml` for this branch, plus `ci.yml` for the GTK2 `main` branch,
-`codeql.yml`, and `release.yml`) — worth reading directly if you have a GitHub account and want
+`.github/workflows/` (`ci-gtk3.yml` for this branch, `ci-gtk3-ubuntu2604.yml` for its Ubuntu
+26.04 preview, plus `ci.yml` for the GTK2 `main` branch, `ci-mcp.yml`, `codeql.yml`, and
+`release.yml`) — worth reading directly if you have a GitHub account and want
 more detail than the summary below, e.g. exact job-by-job dependency lists or the release
 packaging steps. If you're working purely from the SourceForge/Hg checkout, these files are
 still present in this tree even though Mercurial itself doesn't run them — GitHub Actions only
@@ -247,11 +248,15 @@ XTRKCADGTKLIB=/tmp/xtrkcad-scratch/share/xtrkcad-gtk /tmp/xtrkcad-scratch/bin/xt
 # Tool versions
 
 Doxygen and AStyle are explicitly version-pinned in CI; everything else uses whatever the CI
-runner image currently provides. Most Linux jobs run on `ubuntu-latest`, which GitHub moves from
-Ubuntu 24.04 to Ubuntu 26 on 2026-10-19. `c-tests-linux` also runs on a pinned `ubuntu-24.04`
-runner (`c-tests-linux (ubuntu-24.04)`) so the current LTS stays covered after that;
-`astyle-check` and `c-tests-arm64` were already pinned to 24.04. The versions below are the
-24.04 ones. The AStyle pin exists specifically because an unpinned version once produced
+runner image currently provides. Every Linux job in `ci-gtk3.yml`, `release.yml` and
+`codeql.yml` runs on a pinned `ubuntu-24.04` (or `ubuntu-24.04-arm`) runner rather than
+`ubuntu-latest`, which GitHub moved to Ubuntu 26.04 on 2026-10-19. That pin makes the OS image
+itself a pinned tool version: cppcheck, clang-tidy, GCC and Clang only change when we move the
+runners on purpose. `ci-gtk3-ubuntu2604.yml` runs the toolchain-sensitive jobs on
+`ubuntu-26.04` ahead of that move (see \ref ci-tooling-overview "CI tooling overview"). The
+`c-tests-debian` jobs and `release.yml`'s `package-linux-debian` jobs build inside
+`debian:bookworm` and `debian:trixie` containers, so they get those releases' own GCC 12/14,
+CMake and GTK. The versions below are the Ubuntu 24.04 ones. The AStyle pin exists specifically because an unpinned version once produced
 different formatting output for identical input (SF #638) — if you're chasing a formatting or
 doc-generation mismatch against CI, matching these two matters more than matching anything else
 in this table.

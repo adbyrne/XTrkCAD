@@ -8,6 +8,11 @@ on:
     branches:
       - GTK3V2MAIN
 
+# Linux jobs are pinned to ubuntu-24.04, not ubuntu-latest (Ubuntu 26.04 from
+# 2026-10-19), so cppcheck/clang-tidy/GCC/Clang versions only change when we
+# choose. ci-gtk3-ubuntu2604.yml runs the toolchain-sensitive jobs on 26.04
+# as a preview; move this file to 26.04 once that preview is clean.
+
 jobs:
   doxygen:
     # Doxygen is pinned to DOXYGEN_VERSION (official prebuilt Linux binary,
@@ -25,7 +30,7 @@ jobs:
     # remaining pre-existing @param/return-type doc gaps triaged or
     # suppressed first (see .claude/doxygen-triage-plan.md; down to 402 as
     # of 2026-07-17, from an original 930).
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
       DOXYGEN_VERSION: 1.15.0
@@ -89,7 +94,7 @@ jobs:
     #
     # GTK3V2MAIN only: default/GTK2 still uses Halibut, which resolves help
     # topics differently -- same scoping as SF #728.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
       DOXYGEN_VERSION: 1.15.0
@@ -114,15 +119,7 @@ jobs:
         run: python3 app/doc/check_help_links.py . build/app/doc/html
 
   c-tests-linux:
-    # ubuntu-latest moves to Ubuntu 26 on 2026-10-19; the ubuntu-24.04 entry
-    # keeps the current LTS covered after that. The default entry keeps the
-    # plain "c-tests-linux" check name.
-    name: ${{ matrix.os == 'ubuntu-latest' && 'c-tests-linux' || format('c-tests-linux ({0})', matrix.os) }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, ubuntu-24.04]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
@@ -149,7 +146,7 @@ jobs:
     # per-demo tests also registered by XTRKCAD_REGRESSION_TESTING, which exist
     # for local dev targeting (`ctest -R Regression.dmease.xtr`) and would
     # multiply per-test process/X-session startup overhead in CI.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
@@ -177,7 +174,7 @@ jobs:
     # in this file, even though it duplicates the build regression-gtk3
     # already does -- keeps each job simple and independently rerunnable,
     # at the cost of some redundant build time.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
@@ -210,8 +207,41 @@ jobs:
         # See c-tests-linux: regression-gtk3 covers the GTK3 issue #26 suite.
         run: xvfb-run ctest --test-dir build --output-on-failure -LE regression
 
+  c-tests-debian:
+    # Debian 12/13 containers on amd64 and arm64 -- the arm64 entries are
+    # Raspberry Pi OS Bookworm/Trixie on a Pi 3/4/5. Catches older-toolchain
+    # breakage (Bookworm: GCC 12, CMake 3.25, GTK 3.24.38) before merge
+    # rather than in release.yml's package-linux-debian afterwards.
+    name: c-tests-debian (${{ matrix.debian }}, ${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        debian: [bookworm, trixie]
+        arch: [amd64, arm64]
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    container: debian:${{ matrix.debian }}
+    timeout-minutes: 20
+    steps:
+      - name: Install git (required by actions/checkout)
+        run: apt-get update -q && apt-get install -y git
+      - uses: actions/checkout@v7
+      - name: Install dependencies
+        run: apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext xvfb xauth
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
+      - name: Build
+        run: cmake --build build
+      - name: Test
+        # See c-tests-linux: regression-gtk3 covers the GTK3 issue #26 suite.
+        run: xvfb-run ctest --test-dir build --output-on-failure -LE regression
+
   c-tests-linux-clang:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
@@ -288,7 +318,7 @@ jobs:
         run: ctest --test-dir build --output-on-failure
 
   c-tests-sanitizers:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
@@ -325,7 +355,7 @@ jobs:
     # would multiply per-demo cold-start overhead under ASan instrumentation
     # for unproven additional benefit; can be revisited if that job's own
     # cold-start code path ever needs sanitizer coverage too.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
@@ -344,7 +374,7 @@ jobs:
         run: ctest --test-dir build -L regression-ci --output-on-failure -VV
 
   c-tests-valgrind:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
@@ -387,41 +417,16 @@ jobs:
     # same category as the existing custom.c suppression below. A real memleak on osxhelp.c's
     # (APPLE-only, not built on this Linux runner) early-return paths was fixed directly rather
     # than suppressed.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
       - name: Install cppcheck
         run: sudo apt-get update -q && sudo apt-get install -y cppcheck
       - name: Run cppcheck
-        run: |
-          cppcheck \
-            --error-exitcode=1 \
-            --inline-suppr \
-            -j 4 \
-            --suppress=missingInclude \
-            --suppress=missingIncludeSystem \
-            --suppress=nullPointerOutOfMemory \
-            --suppress=nullPointerOutOfResources \
-            --suppress=nullPointerArithmeticOutOfMemory \
-            --suppress=syntaxError:app/bin/archive.c \
-            --suppress=syntaxError:app/bin/cturntbl.c \
-            --suppress=syntaxError:app/bin/directory.c \
-            --suppress=syntaxError:app/bin/paths.c \
-            --suppress=syntaxError:app/bin/utility.c \
-            --suppress=unknownMacro:app/bin/custom.c \
-            --suppress=unknownMacro:app/wlib/gtk3lib/stickytogglebutton.h \
-            --suppress=ctunullpointer:app/bin/track.c \
-            --suppress=uninitvar:app/bin/levenshtein.c \
-            --suppress=uninitvar:app/bin/problemrep.c \
-            --suppress=uninitvar:app/bin/paths.c \
-            --suppress=nullPointer:app/bin/partcatalog.c \
-            --suppress=missingReturn:app/bin/cturnout.c \
-            --suppress=ctuPointerArith:app/bin/cturnout.c \
-            -I app/bin -I app/bin/include -I app/wlib/include -I app/wlib/gtk3lib \
-            app/bin/*.c app/dynstring/*.c \
-            app/help/*.c app/tools/listxtp.c \
-            app/wlib/gtk3lib/*.c app/wlib/gtk3lib/unix/*.c
+        # Scope and suppressions live in the script, shared with
+        # ci-gtk3-ubuntu2604.yml's preview job.
+        run: tools/cppcheck-gate.sh
 
   cppcheck-deep:
     # Report-only: the gating `cppcheck` job above only runs cppcheck's default
@@ -448,7 +453,7 @@ jobs:
     #
     # app/wlib/gtk3lib(+unix/) added 2026-09-02, same scope/exclusions as the gating `cppcheck`
     # job above (queued since the app/bin shadowVariable/for-loop gates landed).
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
@@ -554,7 +559,7 @@ jobs:
     #
     # NOTE (2026-08-31): this exclusion was originally implemented via
     # --exclude-header-filter, which is broken on this job's actual runner --
-    # ubuntu-latest's apt clang-tidy package predates the flag entirely and
+    # ubuntu-24.04's apt clang-tidy package predates the flag entirely and
     # exits immediately with "Unknown command line argument", and the `|| true`
     # on the invocation swallowed that failure silently, leaving
     # clang-tidy.txt with just the two-line error and the job reporting a
@@ -574,7 +579,7 @@ jobs:
     # must stay. Verified against a full local run: 902 raw findings (current
     # baseline) -> 711 after this filter, with zero remaining primary
     # (warning:/error:) lines pointing at the three vendored headers.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
@@ -672,7 +677,7 @@ jobs:
     # item 22) -- being directory-based this also now scans messages.in/tooltiptext.json/
     # xtrkcad.tip (real content) and mkimage1/mkimage3/HACKING (low-value but harmless);
     # app/tools/dirent.c/dirent.h skipped as vendored, same as the other two jobs above.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
@@ -711,7 +716,7 @@ jobs:
     # docs-irrelevant change (e.g. a timeout bump) from one that actually needs a
     # devguide update, so false positives are expected and fine -- it's a prompt for a
     # human judgment call, not a verdict.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     if: github.event_name == 'pull_request'
     steps:
@@ -903,7 +908,7 @@ jobs:
     # Including it here would make this job permanently red on a known,
     # already-tracked issue instead of being a useful gate against new
     # regressions.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
@@ -926,7 +931,7 @@ jobs:
     # caused the build to stall generating locale .mo files with no msgfmt available,
     # running the job into its 15-minute timeout instead of failing fast -- see
     # project_compiler_warnings_job_gettext_gap memory, first hit weeks earlier.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
@@ -1057,7 +1062,7 @@ jobs:
     # branch inside it never took the true path once). See
     # .claude/devml-coverage-report-2026-08-05.md (sent to the dev mailing
     # list) for the full writeup.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
