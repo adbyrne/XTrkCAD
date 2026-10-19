@@ -52,7 +52,6 @@ else(WIN32)
 		/usr/local/lib
 		/sw/lib
 		/opt/local/lib
-		${CMAKE_CURRENT_SOURCE_DIR}/app/tools/lib/linux
 	)
   else()
     find_library(LIBZIP_LIBRARY

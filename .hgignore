@@ -1,14 +1,30 @@
 # hg uses this global ignore file for all tree-wide ignores
+syntax: glob
 .DS_Store
 .project
 .settings.json
 build/
 build32/
+build-*/
 .vs/
 _CPack_Packages/
-syntax: glob
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
 *.mo
-.vscode/launch.json
-.vscode/c_cpp_properties.json
+*.xpm
+*.image1
+*.image3
+.vscode/
+.idea/
 *.flatpak
 .cache/
+.*.swp
+*~
+Thumbs.db
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+*.egg-info/

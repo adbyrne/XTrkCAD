@@ -1,5 +1,5 @@
 [Desktop Entry]
-Name=XTrackCAD
+Name=XTrackCAD @XTRKCAD_FILE_VERSION@
 Comment=Design model railroad layouts
 Exec=run-xtrkcad.sh %f
 MimeType=application/x-xtrkcad;

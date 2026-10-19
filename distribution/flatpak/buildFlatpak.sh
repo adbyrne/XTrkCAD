@@ -14,7 +14,7 @@ DEBUG=no
 #####################################################################
 usage() {
 	cat <<EOF
-Usage: $ME [-d]
+Usage: $ME [-d [ --hash ] ]
 
 This script creates a flatpak from this source. The flatpak will end
 up in the build directory of root of this source tree.
@@ -28,7 +28,7 @@ Pre-requisities:
     xdg-desktop-portal-gtk (log out or reboot after install)
 
 Options:
-  -d    do a debug build
+  -d    do a debug build (with optional hash in version string)
 EOF
 	exit 1
 }
@@ -87,6 +87,14 @@ if [ "$1" = "-d" ]; then
 	BUILD_FROM=$(hg log -r . -T 'Debug XtrackCad build from {branch} {rev}:{node|short}')
 	sed -i "s/^#define DESCRIPTION .*/#define DESCRIPTION N_(\"${BUILD_FROM}.\")/" ../app/bin/smalldlg.c
 	BUILD_TYPE="-DCMAKE_BUILD_TYPE=Debug"
+	if [[ "$2" == "--hash" ]]; then
+		BUILD_TYPE="${BUILD_TYPE} -DXTRKCAD_APPEND_SRC_HASH=ON"
+	else
+		BUILD_TYPE="${BUILD_TYPE} -DXTRKCAD_APPEND_SRC_HASH=OFF"
+		if [ -n "$2" ]; then
+			echo "WARNING: ignoring unknown option $2"
+		fi
+	fi
 fi
 
 #####################################################################
