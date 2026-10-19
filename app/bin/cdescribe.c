@@ -453,6 +453,18 @@ static paramGroup_p CreateDescribeDialog(
 }
 
 
+/*
+ * Closing the dialog must commit pending edits (e.g. the Text field, which
+ * is only read on "Done"). In Properties mode Reset() reaches DescribeDone()
+ * via CmdDescribe(C_CANCEL), but not when the dialog was opened from the
+ * Select command's popup menu.
+ */
+static void DescribeCancel(paramGroup_cp group)
+{
+	DescribeDone(NULL);
+	FormCancel_Reset(group);
+}
+
 void DoDescribe(char * title, track_p track, descData_p data,
                 descUpdate_t update)
 {
@@ -489,7 +501,7 @@ void DoDescribe(char * title, track_p track, descData_p data,
 		FormCreateDialog( pg, sTitle,
 		                  //_("Done"), DescribeDone,
 		                  NULL, NULL,
-		                  _("Done"), FormCancel_Reset,
+		                  _("Done"), DescribeCancel,
 		                  TRUE,
 		                  F_RECALLPOS|PD_F_ALT_CANCELLABEL,
 		                  DescribeUpdate);

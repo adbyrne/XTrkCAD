@@ -1818,7 +1818,10 @@ EXPORT STATUS_T AdjustCornuCurve(
 			}
 			for (int i=0; i<2; i++) {
 				if (Da.trk[i]
-				    && !(QueryTrack(Da.trk[i],Q_CAN_ADD_ENDPOINTS))) {        // Not Turntable
+				    && !(QueryTrack(Da.trk[i],Q_CAN_ADD_ENDPOINTS))        // Not Turntable
+				    && Da.ep[i] >= 0
+				    && GetTrkEndPtCnt(Da.trk[i]) ==
+				    2) {                  // Not Turnout - no "other end"
 					if (FindDistance(Da.pos[i],GetTrkEndPos(Da.trk[i],1-Da.ep[i])) < minLength) {
 						wBeep();
 						InfoMessage(
@@ -2095,7 +2098,10 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos,
 		}
 		for (int i=0; i<2; i++) {
 			if (Da.trk[i] &&
-			    !(QueryTrack(Da.trk[i],Q_CAN_ADD_ENDPOINTS))) {        // Not Turntable
+			    !(QueryTrack(Da.trk[i],Q_CAN_ADD_ENDPOINTS)) &&        // Not Turntable
+			    Da.ep[i] >= 0 &&
+			    GetTrkEndPtCnt(Da.trk[i]) ==
+			    2) {                     // Not Turnout - no "other end"
 				if (FindDistance(Da.pos[i],GetTrkEndPos(Da.trk[i],1-Da.ep[i])) < minLength) {
 					wBeep();
 					InfoMessage(
