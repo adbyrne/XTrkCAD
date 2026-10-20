@@ -395,7 +395,7 @@ EXPORT void FlipLayer(void *layerVP)
 	}
 }
 
-/** SF #802: Show Only/Show All are a *session-only* view filter, not a real
+/** SF #802: Show Only/Hide Only are a *session-only* view filter, not a real
  * edit -- unlike every other layer property, their effect must never be
  * what gets written to the .xtc file. layerVisibleSnapshot holds each
  * layer's real (persisted) visibility from just before the filter was
@@ -405,7 +405,7 @@ EXPORT void FlipLayer(void *layerVP)
  * filter is active. A manual visibility change (FlipLayer(), the Manage
  * Layers dialog's Visible checkbox) while the filter is active updates the
  * snapshot too, via LayerVisibilitySetReal() -- a deliberate user action on
- * a specific layer is real intent, not something Show All should later
+ * a specific layer is real intent, not something Restore View should later
  * discard. */
 static BOOL_T layerVisibleSnapshot[NUM_LAYERS];
 static BOOL_T layerVisibilityOverrideActive = FALSE;
@@ -424,7 +424,7 @@ static void LayerVisibilitySetReal(unsigned int inx)
 }
 
 /**
- * Reset the Show Only/Show All session-only override. Call on every fresh
+ * Reset the Show Only/Hide Only session-only override. Call on every fresh
  * file load -- the filter must never carry over from a previously loaded
  * file.
  */
@@ -459,7 +459,7 @@ EXPORT void LayerGroupShowOnly(int groupIdx)
 /**
  * The mirror of LayerGroupShowOnly() (dev-ML #4404): hide every layer that's
  * a member of layer group \p groupIdx and show every other layer. Same
- * session-only filter -- Show All restores the real visibility, and the
+ * session-only filter -- Restore View restores the real visibility, and the
  * current layer always stays visible.
  *
  * \param groupIdx IN group to hide; a negative or out-of-range index is a
@@ -1429,7 +1429,7 @@ static void LayerPrefSave(void)
 				flags |= LAYERPREF_ONMAP;
 			}
 			/* SF #802: the real (persisted) value, never a temporary
-			 * Show Only/Show All filter override. */
+			 * Show Only/Hide Only filter override. */
 			if (LayerRealVisible(inx)) {
 				flags |= LAYERPREF_VISIBLE;
 			}
@@ -1885,7 +1885,7 @@ void ResetLayers(void)
 	int inx;
 
 	/* SF #802: a fresh file load must never carry over a previous file's
-	 * Show Only/Show All session-only filter state. */
+	 * Show Only/Hide Only session-only filter state. */
 	LayerGroupVisibilityOverrideReset();
 
 	/* Move these out of the loop */
@@ -2383,7 +2383,7 @@ void MigrateLayerLinksToGroups(void)
  */
 
 /** SF #802: the layer's real (persisted) visibility -- layers[inx].visible
- * while no Show Only/Show All filter is active, or the pre-filter snapshot
+ * while no Show Only/Hide Only filter is active, or the pre-filter snapshot
  * value while one is (see layerVisibleSnapshot's own doc comment). Always
  * what gets checked/written for persistence purposes, never the filter's
  * temporarily-displayed value. */

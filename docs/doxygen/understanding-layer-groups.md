@@ -87,14 +87,45 @@ keep tracking that group afterward, and each row stays independently movable.
   group index across any user-visible gap where Manage Layer Groups could plausibly run
   concurrently (i.e. basically any modeless dialog) -- re-resolve by name, or refresh the whole
   list, instead.
-- **The current layer can never be hidden by "Show Only" or "Show Not".** Both buttons go
-  through one shared filter in `dlayer.c` (`LayerGroupShowOnly()`/`LayerGroupShowNot()` ->
+- **The buttons were renamed after review; the code kept the old names.** Martin's #4404 review
+  asked for Show All / Show Only / Show Not. Ken's testing (dev-ML #4490) showed that "Show All"
+  read as "make every layer visible", so he never found the view restore he was asking for. The
+  labels became **Show Only / Hide Only / Restore View**, positive actions throughout. The
+  functions (`LayerGroupShowOnly()`, `LayerGroupShowNot()`, `LayerGroupShowAll()`) and the `.ui`
+  widget IDs (`showonly`, `shownot`, `showall`) still use the old names.
+- **The current layer can never be hidden by Show Only or Hide Only.** Both buttons go through
+  one shared filter in `dlayer.c` (`LayerGroupShowOnly()`/`LayerGroupShowNot()` ->
   `LayerGroupApplyFilter()`), and the per-layer rule lives in the unit-tested
   `LayerGroupFilterShows()` (`dlayergroup.c`): it always keeps `curLayer` visible, matching the
   existing rule that the current layer can't be hidden. A new group-driven visibility action
-  should reuse that rule rather than apply group membership literally. Show Not (dev-ML #4404,
-  added after phase 2) is the mirror of Show Only: it hides the group and shows everything else,
-  under the same session-only snapshot that Show All restores.
+  should reuse that rule rather than apply group membership literally. Hide Only (dev-ML #4404,
+  added after phase 2) is the mirror of Show Only: it hides the group and shows everything else.
+- **The filter is a snapshot, not a stack.** The first Show Only or Hide Only copies every
+  layer's real visibility into `layerVisibleSnapshot[]` and sets
+  `layerVisibilityOverrideActive`. Further Show Only / Hide Only clicks, on any group, change
+  `layers[].visible` but leave the snapshot alone, so Restore View (`LayerGroupShowAll()`) always
+  returns to the view from before the *first* filter, never to the previous step. Hide Only is
+  the mirror of the group, not an undo of Show Only: Show Only G1 then Hide Only G1 shows the
+  complement of G1, not the starting view. A "Current View" preset group is therefore not
+  needed (it was suggested in #4490); the snapshot already is one. With no filter active there's
+  nothing to restore, so `LayerGroupShowAll()` makes every layer visible and returns `TRUE`, and
+  only then does the dialog mark the file changed.
+- **What stays real while a filter is active.** `layers[].visible` is the one value that drawing
+  and the toolbar read, so filtered layers really are hidden. But `WriteLayers()` writes the
+  snapshot, so the filter never reaches the file, and `ResetLayers()` (New, Open) ends it. A
+  deliberate change to one layer, through `FlipLayer()` or the Layers dialog's Canvas check-box,
+  goes through `LayerVisibilitySetReal()`, which updates the snapshot as well, so Restore View
+  keeps it.
+- **Every programmatic change to `layers[].visible` must also set that layer's toolbar
+  button.** The layer buttons are GTK toggles. A click flips the button's own state before
+  `FlipLayer()` runs, so `FlipLayer()` only updates the buttons of *linked* layers, never the
+  layer it flipped. Code that changes visibility any other way has to call
+  `wButtonSetBusy(layer_btns[l], layers[l].visible)` itself, guarded by `l < NUM_BUTTONS`,
+  `!layers[l].button_off` and `layer_btns[l]`, as `LayerGroupApplyFilter()` and
+  `LayerGroupShowAll()` do. Otherwise the button shows the opposite of the layer, and every later
+  click does the opposite of what the user sees. `SetCurrLayer()` missed this when it unhid a
+  hidden layer picked as the current layer, an old bug in plain layers that predates Layer Groups
+  (found through #4490).
 
 # See also
 

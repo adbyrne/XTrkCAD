@@ -450,24 +450,44 @@ since every <b>Groups</b> list in the app identifies a group by its displayed na
 Three buttons control which <b>Layers</b> are visible on the <b>Main Window</b> (\ref mainW),
 without toggling each layer's visibility by hand:
 
-- <b>Show Only</b> shows the selected group's members and hides every other <b>Layer</b>, a quick
-  way to isolate one group's content.
-- <b>Show Not</b> is its mirror: it hides the selected group's members and shows every other
+- <b>Show Only</b> shows only the selected group's members and hides every other <b>Layer</b>, a
+  quick way to isolate one group's content.
+- <b>Hide Only</b> is its mirror: it hides only the selected group's members and shows every other
   <b>Layer</b>, a quick way to see everything except one group.
-- <b>Show All</b> undoes either of them, restoring every layer to whatever visibility it really
-  had before <b>Show Only</b> or <b>Show Not</b> was used -- not necessarily all visible, if you'd
-  deliberately hidden a layer beforehand.
+- <b>Restore View</b> undoes either of them. It gives every layer back the visibility it had
+  before you first used <b>Show Only</b> or <b>Hide Only</b>. That's your own view, not
+  necessarily every layer: a layer you'd hidden yourself beforehand stays hidden.
 
-With <b>Show Only</b> and <b>Show Not</b> the current layer always stays visible, even when the
-filter would hide it, matching the usual rule that the current layer can't be hidden. They are a
-temporary view filter, not a real change to the layout: the filtered view is never saved to the
-file, so you don't need to remember to click <b>Show All</b> before saving or closing, and
-reopening a saved file never comes back with layers still filtered. You can switch directly
-between <b>Show Only</b>, <b>Show Not</b> and different groups; <b>Show All</b> still restores the
-visibility from before the first of them. Manually changing an individual layer's visibility (its
-<b>Layer Button</b> on the toolbar, or the <b>Canvas</b> check-box on the <b>Layers</b> dialog's
-View tab, \ref cmdLayer) while a filter is active is a real change and is remembered/saved as
-usual, even after the filter is later cleared.
+<b>Show Only</b> and <b>Hide Only</b> are a temporary view filter, not a real change to the
+layout. While a filter is in use:
+
+- You can switch directly between <b>Show Only</b> and <b>Hide Only</b>, and between groups, as
+  often as you like. <b>Restore View</b> always goes back to the view from before the
+  <b>first</b> of them, not to the previous step.
+- The current layer always stays visible, even when the filter would hide it, matching the usual
+  rule that the current layer can't be hidden.
+- The filtered view is never saved. Saving or closing the file writes each layer's own visibility,
+  so you don't need to click <b>Restore View</b> first, and reopening a saved file never comes
+  back with layers still filtered. Opening another file, or starting a new one, ends the filter.
+- Changing one layer's visibility by hand (its <b>Layer Button</b> on the toolbar, or the
+  <b>Canvas</b> check-box on the <b>Layers</b> dialog's View tab, \ref cmdLayer) is a real change.
+  It's kept, and <b>Restore View</b> doesn't undo it.
+
+If no filter is in use, <b>Restore View</b> has no earlier view to go back to. It then shows every
+<b>Layer</b>, and that is a real change to the layout.
+
+For example, take layers L1, L2, L3 and L4 with L2 hidden, and two groups: G1 holds L1 and L3,
+G2 holds L3 and L4. The current layer is a fifth layer that's in neither group, so it stays
+visible throughout and is left out below.
+
+- Select G1 and click <b>Show Only</b>: L1 and L3 are shown, L2 and L4 are hidden.
+- Click <b>Hide Only</b>: now L1 and L3 are hidden and L2 and L4 shown. <b>Hide Only</b> acts on
+  the group, not on the view you started from, so it doesn't bring you back.
+- Select G2 and click <b>Show Only</b>: L3 and L4 are shown.
+- Click <b>Restore View</b>: you're back where you began, with L1, L3 and L4 shown and L2 hidden.
+
+You don't need a group for the view you want to come back to. <b>Restore View</b> remembers it
+for you.
 
 The right-hand side shows the selected group's membership as two lists, <b>Available</b> and
 <b>Included</b>. Every named <b>Layer</b> appears in exactly one of the two: <b>Included</b> if

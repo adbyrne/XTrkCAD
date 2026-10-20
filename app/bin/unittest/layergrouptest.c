@@ -503,7 +503,7 @@ static void test_filter_invalid_group_hides_nothing_extra(void **state)
 {
 	(void) state;
 	LayerGroupResetAll();
-	/* no such group: nothing is a member, so Show Not shows every layer */
+	/* no such group: nothing is a member, so Hide Only shows every layer */
 	assert_int_equal(LayerGroupFilterShows(5, 1, 0, 0), 1);
 	assert_int_equal(LayerGroupFilterShows(5, 1, 0, 1), 0);
 }
