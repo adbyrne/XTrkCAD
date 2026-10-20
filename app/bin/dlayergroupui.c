@@ -413,7 +413,8 @@ static void GroupShowOnly(void *action)
 }
 
 /**
- * "Show Not" button: the mirror of Show Only (dev-ML #4404) -- hide the
+ * "Hide Only" button (labelled "Show Not" before dev-ML #4490): the mirror
+ * of Show Only (dev-ML #4404) -- hide the
  * selected group's members and show every other layer (LayerGroupShowNot()
  * in dlayer.c, which also keeps the current layer visible). A no-op if no
  * group is selected.
@@ -428,7 +429,7 @@ static void GroupShowNot(void *action)
 	}
 
 	LOGLAYERGROUPS()
-	LOG(log_layergroups, 1, ("layergroups: show not group %d \"%s\"\n",
+	LOG(log_layergroups, 1, ("layergroups: hide only group %d \"%s\"\n",
 	                         selectedGroup, LayerGroupName(selectedGroup)))
 	/* Same session-only view filter as Show Only -- not a real edit. */
 	LayerGroupShowNot(selectedGroup);
@@ -436,16 +437,19 @@ static void GroupShowNot(void *action)
 }
 
 /**
- * "Show All" button: make every layer visible again (SF #802 -- the
- * inverse of Show Only; unlike Show Only this doesn't depend on a group
- * being selected, it always operates on every layer).
+ * "Restore View" button (labelled "Show All" before dev-ML #4490): undo
+ * Show Only/Hide Only by giving every layer back the visibility it had
+ * before the first of them (LayerGroupShowAll() in dlayer.c). With no
+ * filter active it instead makes every layer visible, as a real edit.
+ * Unlike Show Only it doesn't depend on a group being selected; it always
+ * operates on every layer.
  *
  * \param action IN unused, required by the PD_BUTTON signature
  */
 static void GroupShowAll(void *action)
 {
 	LOGLAYERGROUPS()
-	LOG(log_layergroups, 1, ("layergroups: show all layers\n"))
+	LOG(log_layergroups, 1, ("layergroups: restore view\n"))
 
 	/* SF #802: only mark the file changed if this was a real edit (no
 	 * Show Only filter was active to restore from) -- restoring the filter
