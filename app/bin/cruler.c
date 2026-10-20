@@ -23,9 +23,12 @@
 #include "cundo.h"
 #include "cselect.h"
 #include "fileio.h"
-#include "param.h"
+#include "icons.h"
+#include "form.h"
 #include "track.h"
 #include "misc.h"
+
+static int log_cruler = -1;
 
 #define AN_OFF (0)
 #define AN_FIRST (1)
@@ -108,10 +111,14 @@ static STATUS_T CmdAngle( wAction_t action, coOrd pos )
 			break;
 		case AN_ON:
 			An.state = AN_OFF;
-		/* falls through */
+			__attribute__((fallthrough));
 		case AN_FIRST:
 		case AN_SECOND:
 			An.state = AN_OFF;
+			break;
+		default:
+			if ( log_cruler < 0 ) { log_cruler = LogFindIndex( "cruler" ); }
+			LOG( log_cruler, 1, ( "unexpected An.state %d in CmdAngle\n", An.state ) )
 			break;
 		}
 		return C_CONTINUE;
@@ -128,6 +135,10 @@ static STATUS_T CmdAngle( wAction_t action, coOrd pos )
 			An.pos2 = pos;
 			An.state = AN_SECOND;
 			InfoMessage( "Drag Angle" );
+			break;
+		default:
+			if ( log_cruler < 0 ) { log_cruler = LogFindIndex( "cruler" ); }
+			LOG( log_cruler, 1, ( "unexpected An.state %d in CmdAngle\n", An.state ) )
 			break;
 		}
 		return C_CONTINUE;
@@ -182,6 +193,10 @@ static STATUS_T CmdAngle( wAction_t action, coOrd pos )
 	case C_CANCEL:
 		return C_TERMINATE;
 
+	default:
+		if ( log_cruler < 0 ) { log_cruler = LogFindIndex( "cruler" ); }
+		LOG( log_cruler, 1, ( "unexpected action %d in CmdAngle\n", action ) )
+		break;
 	}
 	return C_CONTINUE;
 
@@ -298,6 +313,10 @@ static STATUS_T CmdRuler( wAction_t action, coOrd pos )
 		case DR_ON:
 			Dr.state = DR_OFF;
 			break;
+		default:
+			if ( log_cruler < 0 ) { log_cruler = LogFindIndex( "cruler" ); }
+			LOG( log_cruler, 1, ( "unexpected Dr.state %d in CmdRuler\n", Dr.state ) )
+			break;
 		}
 		return C_CONTINUE;
 
@@ -327,6 +346,10 @@ static STATUS_T CmdRuler( wAction_t action, coOrd pos )
 
 	case C_CANCEL:
 		return C_TERMINATE;
+	default:
+		if ( log_cruler < 0 ) { log_cruler = LogFindIndex( "cruler" ); }
+		LOG( log_cruler, 1, ( "unexpected action %d in CmdRuler\n", action ) )
+		break;
 	}
 
 	return C_CONTINUE;
@@ -382,18 +405,14 @@ STATUS_T ModifyRuler(
 	return C_CONTINUE;
 }
 
-
-#include "bitmaps/ruler.image3"
-#include "bitmaps/protractor.image3"
-
 void InitCmdRuler( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Measurement"), "cmdMeasureSetCmd", _("Measurement") );
 	AddMenuButton( menu, CmdRuler, "cmdRuler", _("Ruler"),
-	               wIconCreatePixMap(ruler_image3[iconSize]), LEVEL0,
+	               CreateToolbarIconFromResource("ruler.png"), LEVEL0,
 	               IC_STICKY|IC_POPUP|IC_NORESTART, ACCL_RULER, NULL );
 	AddMenuButton( menu, CmdAngle, "cmdAngle", _("Protractor"),
-	               wIconCreatePixMap(protractor_image3[iconSize]), LEVEL0,
+	               CreateToolbarIconFromResource("protractor.png"), LEVEL0,
 	               IC_STICKY|IC_POPUP|IC_NORESTART, ACCL_ANGLE, NULL );
 	ButtonGroupEnd();
 }

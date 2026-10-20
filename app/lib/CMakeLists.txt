@@ -10,7 +10,6 @@ add_subdirectory(params)
 
 install(FILES
 	COPYING
-	logo.bmp
 	xtrkcad.xtq
 	xtrkcad.upd
 	DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
@@ -61,39 +60,42 @@ else()
 endif()
 
 if(UNIX AND NOT APPLE)
-    install(PROGRAMS
-        xdg-open xtrkcad-setup
-        DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
-        )
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad-setup.in ${CMAKE_CURRENT_BINARY_DIR}/xtrkcad-setup @ONLY)
+	install(PROGRAMS
+		${CMAKE_CURRENT_BINARY_DIR}/xtrkcad-setup
+		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
+		)
 	install(FILES
 		xtrkcad.png
 		DESTINATION "${XTRKCAD_SHARE_INSTALL_DIR}/pixmaps"
+		RENAME "${XTRKCAD_BIN}.png"
 		)
-    if (XTRKCAD_BUILD_FLATPAK)
+	if (XTRKCAD_BUILD_FLATPAK)
 		install(FILES
 			xtrkcad.flatpak.desktop
 			DESTINATION "share/applications"
-			RENAME io.sourceforge.xtrkcad_fork.xtrkcad.desktop
+			RENAME io.sourceforge.xtrkcad_fork.${XTRKCAD_BIN}.desktop
 			)
 		install(FILES
 			xtrkcad.xml
-			DESTINATION "share/applications"
+			DESTINATION "share/mime/packages"
+			RENAME io.sourceforge.xtrkcad_fork.${XTRKCAD_BIN}.xml
 			)
 		install(FILES
 			xtrkcad.metainfo.xml
 			DESTINATION "share/metainfo"
-			RENAME io.sourceforge.xtrkcad_fork.xtrkcad.metainfo.xml
+			RENAME io.sourceforge.xtrkcad_fork.${XTRKCAD_BIN}.metainfo.xml
 			)
 		install(FILES
 			xtrkcad_logo_128x128.svg
 			DESTINATION "share/icons/hicolor/scalable/apps"
-			RENAME io.sourceforge.xtrkcad_fork.xtrkcad.svg
+			RENAME io.sourceforge.xtrkcad_fork.${XTRKCAD_BIN}.svg
 			)
 	else()
+		configure_file(${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad.desktop.in ${CMAKE_CURRENT_BINARY_DIR}/${XTRKCAD_BIN}.desktop @ONLY)
 		install(FILES
-			xtrkcad${XTRKCAD_BETA}.desktop
+			${CMAKE_CURRENT_BINARY_DIR}/${XTRKCAD_BIN}.desktop
 			DESTINATION "${XTRKCAD_SHARE_INSTALL_DIR}/applications"
-			RENAME xtrkcad.desktop
 			)
 		install(FILES
 			xtrkcad.xml

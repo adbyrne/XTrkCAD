@@ -1,0 +1,191 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 1.0.2 -->
+<interface>
+  <!-- interface-name printMargin.ui -->
+  <requires lib="gtk+" version="3.22"/>
+  <object class="GtkDialog" id="printMargin">
+    <property name="border-width">12</property>
+    <property name="can-focus">False</property>
+    <property name="has-resize-grip">True</property>
+    <property name="title">Print Margins</property>
+    <property name="type-hint">dialog</property>
+    <property name="use-header-bar">0</property>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">12</property>
+        <property name="visible">True</property>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">6</property>
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkGrid" id="layoutgrid">
+                <property name="can-focus">False</property>
+                <property name="column-spacing">12</property>
+                <property name="row-spacing">6</property>
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label">╭</property>
+                    <property name="visible">True</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="marginT">
+                    <property name="halign">center</property>
+                    <property name="input-purpose">number</property>
+                    <property name="placeholder-text">Top</property>
+                    <property name="visible">True</property>
+                    <property name="width-chars">6</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">1</property>
+                    <property name="top-attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label">╮</property>
+                    <property name="visible">True</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">2</property>
+                    <property name="top-attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="marginL">
+                    <property name="halign">center</property>
+                    <property name="input-purpose">number</property>
+                    <property name="placeholder-text">Left</property>
+                    <property name="visible">True</property>
+                    <property name="width-chars">6</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="hexpand">True</property>
+                    <property name="label">Page</property>
+                    <property name="vexpand">True</property>
+                    <property name="visible">True</property>
+                    <property name="width-chars">10</property>
+                    <style>
+                      <class name="dim-label"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="left-attach">1</property>
+                    <property name="top-attach">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="marginR">
+                    <property name="halign">center</property>
+                    <property name="input-purpose">number</property>
+                    <property name="placeholder-text">Right</property>
+                    <property name="visible">True</property>
+                    <property name="width-chars">6</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">2</property>
+                    <property name="top-attach">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label">╰</property>
+                    <property name="visible">True</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="marginB">
+                    <property name="halign">center</property>
+                    <property name="input-purpose">number</property>
+                    <property name="placeholder-text">Bottom</property>
+                    <property name="visible">True</property>
+                    <property name="width-chars">6</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">1</property>
+                    <property name="top-attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label">╯</property>
+                    <property name="visible">True</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">2</property>
+                    <property name="top-attach">2</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="printerName">
+                <property name="halign">start</property>
+                <property name="label">Printer	</property>
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="marginReset">
+                <property name="expand">True</property>
+                <property name="halign">start</property>
+                <property name="label">Reset</property>
+                <property name="margin-top">6</property>
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="id_help">
+        <property name="label">_Help</property>
+        <property name="use-underline">True</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="id_ok">
+        <property name="can-default">True</property>
+        <property name="label">_Done</property>
+        <property name="use-underline">True</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="GTK_RESPONSE_HELP">id_help</action-widget>
+      <action-widget response="GTK_RESPONSE_OK">id_ok</action-widget>
+    </action-widgets>
+  </object>
+</interface>

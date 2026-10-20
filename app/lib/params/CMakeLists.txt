@@ -30,15 +30,15 @@ set(infiles
 foreach(infile ${infiles})
     # Generate output file name
     cmake_path(REPLACE_EXTENSION infile
-                "xtp" 
+                "xtp"
                 OUTPUT_VARIABLE outfile
     )
     # Custom command to do the processing
     add_custom_command(
         OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${outfile}"
-        DEPENDS "${infile}" mkcarpart 
+        DEPENDS "${infile}" mkcarpart
         COMMAND $<TARGET_FILE:mkcarpart> "${infile}" "${CMAKE_CURRENT_BINARY_DIR}/${outfile}"
-        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" 
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     )
     target_sources(xtpfiles
         PRIVATE
@@ -59,7 +59,6 @@ set_target_properties(
 )
 
 set(infiles
-    "fallerho.struct"
     "revell.struct"
 )
 
@@ -67,19 +66,19 @@ set(infiles
 foreach(infile ${infiles})
     # Generate output file name
     cmake_path(REPLACE_EXTENSION infile
-                "xtp" 
+                "xtp"
                 OUTPUT_VARIABLE outfile
     )
-    cmake_path(ABSOLUTE_PATH 
+    cmake_path(ABSOLUTE_PATH
                 outfile
-                BASE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}" 
+                BASE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
     )
 
     add_custom_command(
         OUTPUT "${outfile}"
         COMMAND $<TARGET_FILE:mkstruct> "${infile}" "${outfile}"
         DEPENDS "${infile}" mkstruct
-		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" 
+		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     )
 
     target_sources(xtpfiles

@@ -29,11 +29,14 @@
 #include "dynstring.h"
 #include "misc.h"
 #include "paths.h"
-#include "include/utf8convert.h"
+#include "utf8convert.h"
 #include "common-ui.h"
 #include "fileio.h"
 
+/** @logcmd @showrefby `zip=n` `archive.c` — per-entry detail while unpacking a zip archive
+ * (`UnpackArchiveFor`) */
 int log_zip = 0;
+static BOOL_T log_zipInitted = FALSE;
 
 //char *
 //NativeToUtf8(const char *nativeString)
@@ -84,7 +87,7 @@ int log_zip = 0;
 /**
  * Create the full path for temporary directories used in zip archive operations
  *
- * \param archive operation
+ * \param op archive operation
  * \return pointer to full path, must be free'd by caller
  */
 
@@ -123,9 +126,9 @@ GetZipDirectoryName(enum ArchiveOps op)
 /*****************************************************************************
  * Add directory to archive
  *
- * \param IN zip 		The open zip archive handle
- * \param IN dir_path 	The path to add
- * \param IN prefix 	The prefix in the archive
+ * \param[in] zip 		The open zip archive handle
+ * \param[in] dir_path 	The path to add
+ * \param[in] prefix 	The prefix in the archive
  *
  * \returns 	TRUE if OK
  */
@@ -156,7 +159,8 @@ BOOL_T AddDirectoryToArchive(
 	}
 
 	// if not possible to read the directory for this user
-	if ((dir = opendir(dir_path)) == NULL) {
+	dir = opendir(dir_path);
+	if (dir == NULL) {
 		NoticeMessage(MSG_OPEN_DIR_FAIL,
 		              _("Continue"), NULL, dir_path);
 		return FALSE;
@@ -237,8 +241,8 @@ BOOL_T AddDirectoryToArchive(
 /***********************************************************************
  * Create Archive
  *
- * \param IN dir_path The place to create the archive
- * \param IN fileName The name of the archive
+ * \param[in] dir_path The place to create the archive
+ * \param[in] fileName The name of the archive
  *
  * \return TRUE if ok
  */
@@ -265,7 +269,8 @@ BOOL_T CreateArchive(
 
 	MyFree(archive);
 
-	if ((za = zip_open(archiveUtf8, ZIP_CREATE, &err)) == NULL) {
+	za = zip_open(archiveUtf8, ZIP_CREATE, &err);
+	if (za == NULL) {
 		zip_error_init_with_code(&error, err);
 		NoticeMessage(MSG_ZIP_CREATE_FAIL, _("Continue"), NULL, archiveUtf8,
 		              zip_error_strerror(&error));
@@ -315,9 +320,9 @@ BOOL_T CreateArchive(
 /**************************************************************************
  * Unpack_Archive_for
  *
- * \param IN pathName the name of the archive
- * \param IN fileName just the filename and extension of the layout
- * \param IN tempDir The directory to use to unpack into
+ * \param[in] pathName the name of the archive
+ * \param[in] fileName just the filename and extension of the layout
+ * \param[in] tempDir The directory to use to unpack into
  *
  * \returns TRUE if all worked
  */
@@ -339,13 +344,18 @@ BOOL_T UnpackArchiveFor(
 	FILE  *fd;
 	long long sum;
 
+	if ( !log_zipInitted ) {
+		log_zip = LogFindIndex( "zip" );
+		log_zipInitted = TRUE;
+	}
 	char *destBuffer = MyStrdup(pathName);
 #ifdef UTFCONVERT
 	destBuffer = Convert2UTF8(destBuffer);
 #endif // UTFCONVERT
 
 
-	if ((za = zip_open(destBuffer, 0, &err)) == NULL) {
+	za = zip_open(destBuffer, 0, &err);
+	if (za == NULL) {
 		zip_error_init_with_code(&error, err);
 		NoticeMessage(MSG_ZIP_OPEN_FAIL, _("Continue"), NULL, pathName,
 		              zip_error_strerror(&error));
@@ -407,7 +417,7 @@ BOOL_T UnpackArchiveFor(
 				}
 
 				sum = 0;
-				while (sum != sb.size) {
+				while (sum != (long long)sb.size) {
 					len = zip_fread(zf, buf, 100);
 					if (len < 0) {
 						NoticeMessage(MSG_ZIP_READ_FAIL, _("Continue"), NULL, dirName, &sb.name[0]);

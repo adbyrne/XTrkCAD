@@ -1,8 +1,5 @@
-/*
- * $Header: /home/dave/Source/xtrkcad_5_1_2a/app/bin/RCS/cjoin.c,v 1.3 2019/07/24 15:11:51 dave Exp $
- *
- * JOINS
- *
+/*****************************************************************//**
+ * \file   cjoin.c
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -23,21 +20,20 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-
-
 #include "track.h"
 #include "ccurve.h"
 #include "cstraigh.h"
 #include "cjoin.h"
 #include "ccornu.h"
-#include "param.h"
+#include <form.h>
 #include "cundo.h"
 #include "cselect.h"
 #include "fileio.h"
 #include "common-ui.h"
+#include "icons.h"
 
 static BOOL_T debug = 0;
-/** @logcmd @showrefby join=n cjoin.c */
+/** @logcmd @showrefby `join=n` `cjoin.c` */
 static int log_join = 0;
 typedef struct {
 	curveType_e type;
@@ -56,7 +52,6 @@ static struct {
 		TRKTYP_T realType;
 		track_p trk;
 		coOrd pos;
-		EPINX_T ep;
 		trackParams_t params;
 	} inp[2];
 	joinRes_t jRes;
@@ -137,9 +132,6 @@ static BOOL_T JoinWithStraight(
 		d = FindDistance( pos1, Px );
 		k = NormalizeAngle( FindAngle(pos1, Px) - a1 );
 		c = (b > 180.0) ? (360.0-b) : b;
-		if (k < 90.0 && k > 270.0) {
-			c += 180.0;
-		}
 		LOG( log_join, 3, ("     Px=[%0.3f %0.3f] b=%0.3f c=%0.3f d=%0.3f k=%0.3f\n",
 		                   Px.x, Px.y, b, c, d, k ) )
 		res->arcR = d * sin(D2R(c/2.0))/cos(D2R(c/2.0));
@@ -188,8 +180,7 @@ static BOOL_T JoinWithCurve(
  */
 {
 	coOrd p1, pt;
-	DIST_T d, r;
-	ANGLE_T a, aa, A0, A1;
+	ANGLE_T a, aa;
 
 	/* Compute angle of line connecting endPoints: */
 	Translate( &p1, pos1, a1, -r0 );
@@ -222,13 +213,14 @@ static BOOL_T JoinWithCurve(
 
 	} else {
 		/* Curve: */
-		d = FindDistance( p1, pos0 ) / 2.0;
-		r = d/cos(D2R(a));
+		DIST_T d = FindDistance( p1, pos0 ) / 2.0;
+		DIST_T r = d/cos(D2R(a));
 		Translate( &res->arcP, p1, a1, r );
 		res->arcR = r-r0;
 		LOG( log_join, 3,
 		     ("     Curved d=%0.3f C=[%0.3f %0.3f], r=%0.3f a=%0.3f arcR=%0.3f\n",
 		      d, res->arcP.x, res->arcP.y, r, a, res->arcR ) )
+		ANGLE_T A0, A1;
 		if ( (ep0==0) == (res->arcR<0) ) {
 			A1 = 180 + 2*a;
 			A0 = a1;
@@ -314,6 +306,9 @@ static STATUS_T AdjustJoint(
 		} else {
 			pc = Dj.inp[0].params.arcP;
 		}
+		// JoinWithCurve() always returns TRUE; failure is signaled via
+		// Dj.jRes.type == curveTypeNone instead, checked by the caller.
+		// cppcheck-suppress knownConditionTrueFalse
 		if (!JoinWithCurve( pc, Dj.inp[0].params.arcR,
 		                    Dj.inp[0].params.ep, p1, normalAngle, &Dj.jRes )) {
 			return FALSE;
@@ -328,6 +323,9 @@ static STATUS_T AdjustJoint(
 		} else {
 			p0 = Dj.inp[0].params.lineOrig;
 		}
+		// JoinWithStraight() always returns TRUE; failure is signaled via
+		// Dj.jRes.type == curveTypeNone instead, checked by the caller.
+		// cppcheck-suppress knownConditionTrueFalse
 		if (!JoinWithStraight( p0, Dj.inp[0].params.angle, p1, Dj.inp[1].params.angle,
 		                       &Dj.jRes )) {
 			return FALSE;
@@ -405,7 +403,8 @@ static STATUS_T DoMoveToJoin( coOrd pos )
 		ErrorMessage( MSG_NO_SELECTED_TRK );
 		return C_CONTINUE;
 	}
-	if ( (Dj.inp[Dj.joinMoveState].trk = OnTrack( &pos, TRUE, TRUE )) == NULL ) {
+	Dj.inp[Dj.joinMoveState].trk = OnTrack( &pos, TRUE, TRUE );
+	if ( Dj.inp[Dj.joinMoveState].trk == NULL ) {
 		return C_CONTINUE;
 	}
 	// if (Dj.joinMoveState == 0 && !CheckTrackLayerSilent( Dj.inp[Dj.joinMoveState].trk ) )
@@ -456,14 +455,11 @@ static struct {
 	int joinMoveState;
 	track_p curr_line;
 	struct {
-		TRKTYP_T realType;
 		track_p line;
 		coOrd pos;
 		coOrd end;
 		int cnt;
 	} inp[2];
-	joinRes_t jRes;
-	coOrd inp_pos[2];
 	dynArr_t anchors_da;
 	trackParams_t params;
 	dynArr_t newLine;
@@ -552,20 +548,20 @@ static STATUS_T CmdJoinLine(
 			DYNARR_LAST(trkSeg_t,Dl.newLine).lineWidth = 0;
 			DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.polyType = POLYLINE;
 			DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts = MyMalloc(sizeof(
-			                        pts_t)*Dl.params.nodes.cnt);
+			                pts_t)*Dl.params.nodes.cnt);
 			DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.cnt = Dl.params.nodes.cnt;
 			if (Dl.params.ep) {
 				//Copy in reverse as we want this point to be last
 				for (int i=Dl.params.nodes.cnt-1,j=0; i>=0; i--,j++) {
 					DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[j].pt = DYNARR_N(coOrd,Dl.params.nodes,
-					                i);
+					        i);
 					DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[j].pt_type = wPolyLineStraight;
 				}
 			} else {
 				//Copy forwards to end up with this point last
 				for (int i=0; i<Dl.params.nodes.cnt; i++) {
 					DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[i].pt = DYNARR_N(coOrd,Dl.params.nodes,
-					                i);
+					        i);
 					DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[i].pt_type = wPolyLineStraight;
 				}
 			}
@@ -590,31 +586,31 @@ static STATUS_T CmdJoinLine(
 			Dl.inp[1].pos = Dl.params.lineOrig;
 			Dl.inp[1].end = Dl.params.lineEnd;
 			int old_cnt = DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.cnt;
-			BOOL_T join_near = FALSE;
 			if (Dl.inp[1].line == Dl.inp[0].line) {
 				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts = MyRealloc(DYNARR_LAST(trkSeg_t,
-				                Dl.newLine).u.p.pts,sizeof(pts_t)*(old_cnt+1));
+				        Dl.newLine).u.p.pts,sizeof(pts_t)*(old_cnt+1));
 				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[old_cnt] = DYNARR_LAST(trkSeg_t,
-				                Dl.newLine).u.p.pts[0];   // Joined up Polygon
+				        Dl.newLine).u.p.pts[0];   // Joined up Polygon
 				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.cnt += 1;
 			} else {
+				BOOL_T join_near = FALSE;
 				if (IsClose(FindDistance(Dl.inp[0].pos,Dl.inp[1].pos))) {
 					join_near = TRUE;
 				}
 				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts = MyRealloc(DYNARR_LAST(trkSeg_t,
-				                Dl.newLine).u.p.pts,sizeof(pts_t)*(old_cnt+Dl.params.nodes.cnt-join_near));
+				        Dl.newLine).u.p.pts,sizeof(pts_t)*(old_cnt+Dl.params.nodes.cnt-join_near));
 				if (Dl.params.ep) {
 					//Copy forwards as this point is first
 					for (int i=join_near,j=old_cnt; i<Dl.params.nodes.cnt; i++,j++) {
 						DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[j].pt = DYNARR_N(coOrd,Dl.params.nodes,
-						                i);
+						        i);
 						DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[j].pt_type = wPolyLineStraight;
 					}
 				} else {
 					//Copy backwards as this point is last
 					for (int i=Dl.params.nodes.cnt-join_near-1,j=old_cnt; i>=0; i--,j++) {
 						DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[j].pt = DYNARR_N(coOrd,Dl.params.nodes,
-						                i);
+						        i);
 						DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[j].pt_type = wPolyLineStraight;
 					}
 				}
@@ -708,19 +704,20 @@ void AnchorPoint(coOrd center)
 static DIST_T desired_radius = 0.0;
 
 static paramFloatRange_t r_0_10000 = { 0.0, 100000.0 };
+
 static paramData_t joinPLs[] = {
 #define joinRadPD (joinPLs[0])
 #define joinRadI 0
 	{	PD_FLOAT, &desired_radius, "radius", PDO_DIM, &r_0_10000, N_("Desired Radius") }
 };
-static paramGroup_t joinPG = { "joinfixed", 0, joinPLs, COUNT( joinPLs ) };
+static paramGroup_t joinPG = { "joinfixed", PGO_FULLDIALOGFROMBUILDER, joinPLs, COUNT( joinPLs ) };
 
 
 
 BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0,
                          ANGLE_T an1)
 {
-	coOrd point1,point2;
+	coOrd point1 = zero,point2 = zero;
 	switch ( Dj.inp[1].params.type ) {
 	case curveTypeCurve:
 		if (Dj.inp[0].params.type == curveTypeStraight) {
@@ -728,7 +725,7 @@ BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0,
 			//Offset curve by desired_radius
 			DIST_T newR1;
 			newR1 = Dj.inp[1].params.arcR + desired_radius*((fabs(an1
-			                -Dj.inp[1].params.arcA0)<1.0)?1:-1);
+			        -Dj.inp[1].params.arcA0)<1.0)?1:-1);
 			if (newR1<=0.0) {
 				if (debug) { InfoMessage("Zero Radius C1"); }
 				return FALSE;
@@ -752,7 +749,7 @@ BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0,
 			//Offset curve by desired_radius
 			DIST_T newR0;
 			newR0 = Dj.inp[0].params.arcR + desired_radius*((fabs(an0
-			                -Dj.inp[0].params.arcA0)<1.0)?1:-1);
+			        -Dj.inp[0].params.arcA0)<1.0)?1:-1);
 			if (newR0<=0.0) {
 				if (debug) { InfoMessage("Zero Radius C0"); }
 				return FALSE;
@@ -764,7 +761,7 @@ BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0,
 			}
 			DIST_T newR1;
 			newR1 = Dj.inp[1].params.arcR + desired_radius*((fabs(an1
-			                -Dj.inp[1].params.arcA0)<1.0)?1:-1);
+			        -Dj.inp[1].params.arcA0)<1.0)?1:-1);
 			if (newR1<=0.0) {
 				if (debug) { InfoMessage("Zero Radius C1"); }
 				return FALSE;
@@ -809,7 +806,7 @@ BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0,
 			//Offset curve by desired_radius
 			DIST_T newR0;
 			newR0 = Dj.inp[0].params.arcR + desired_radius*((fabs(an0
-			                -Dj.inp[0].params.arcA0)<1.0)?1:-1);
+			        -Dj.inp[0].params.arcA0)<1.0)?1:-1);
 			if (newR0<=0.0) {
 				if (debug) { InfoMessage("Zero Radius C0"); }
 				return FALSE;
@@ -888,7 +885,7 @@ static STATUS_T CmdJoin(
  * Join 2 tracks.
  */
 {
-	DIST_T d=0, l;
+	DIST_T l;
 	coOrd off, p1;
 	EPINX_T ep;
 	track_p trk=NULL;
@@ -896,18 +893,16 @@ static STATUS_T CmdJoin(
 	STATUS_T rc;
 	ANGLE_T normalAngle=0;
 	EPINX_T inx;
-	ANGLE_T a, a1;
 	DIST_T eR[2];
 	BOOL_T ok;
-	wControl_p controls[2];
-	char * labels[1];
 	trkSeg_p p;
 
 	switch (action&0xFF) {
 
 	case C_START:
 		if (joinPLs[0].control==NULL) {
-			ParamCreateControls(&joinPG, NULL);
+			FormRegister(&joinPG);
+			FormCreateControls(&joinPG);
 		}
 		if (selectedTrackCount==0) {
 			InfoMessage( _("Left click - join with track") );
@@ -919,7 +914,7 @@ static STATUS_T CmdJoin(
 		Dj.state = 0;
 		Dj.joinMoveState = 0;
 		Dj.cornuMode = FALSE;
-		/*ParamGroupRecord( &easementPG );*/
+		/*FormGroupRecord( &easementPG );*/
 		infoSubst = FALSE;
 		anchor_trk = NULL;
 		if (easementVal < 0.0) {
@@ -936,7 +931,8 @@ static STATUS_T CmdJoin(
 			return CmdCornu(action, pos);
 		}
 		if ( Dj.state >= 2) { return C_CONTINUE; }
-		if ( (trk = OnTrack( &pos, FALSE, TRUE )) == NULL) {
+		trk = OnTrack( &pos, FALSE, TRUE );
+		if ( trk == NULL) {
 			return C_CONTINUE;
 		}
 		if (!CheckTrackLayer( trk ) ) {
@@ -988,7 +984,8 @@ static STATUS_T CmdJoin(
 		Dj.joinMoveState = 0;
 		/* Populate (Dj.inp[0]) and check for connecting abutting tracks */
 		if (Dj.state == 0) {
-			if ( (Dj.inp[0].trk = OnTrack( &pos, TRUE, TRUE )) == NULL) {
+			Dj.inp[0].trk = OnTrack( &pos, TRUE, TRUE );
+			if ( Dj.inp[0].trk == NULL) {
 				return C_CONTINUE;
 			}
 			if (!CheckTrackLayer( Dj.inp[0].trk ) ) {
@@ -1008,21 +1005,18 @@ static STATUS_T CmdJoin(
 				}
 			}
 			Dj.inp[0].realType = GetTrkType(Dj.inp[0].trk);
-			InfoMessage( _("Select 2nd track") );
 			Dj.state = 1;
 			sprintf(message, "desired_radius-%s", curScaleName);
 			wPrefGetFloat("misc", message, &desired_radius, desired_radius);
-			controls[0] = joinRadPD.control;
-			controls[1] = NULL;
-			labels[0] = N_("Desired Radius");
-			InfoSubstituteControls(controls, labels);
+			InfoSetControls(mainW, joinPG.nameStr);
 			infoSubst = TRUE;
 			joinRadPD.option |= PDO_NORECORD;
-			ParamLoadControls(&joinPG);
-			ParamGroupRecord(&joinPG);
+			FormLoadControls(&joinPG);
+			FormGroupRecord(&joinPG);
 			return C_CONTINUE;
 		} else {
-			if ( (Dj.inp[1].trk = OnTrack( &pos, FALSE, TRUE )) == NULL) {
+			Dj.inp[1].trk = OnTrack( &pos, FALSE, TRUE );
+			if ( Dj.inp[1].trk == NULL) {
 				return C_CONTINUE;
 			}
 			if (!CheckTrackLayer( Dj.inp[1].trk ) ) {
@@ -1037,7 +1031,7 @@ static STATUS_T CmdJoin(
 				return C_CONTINUE;
 			}
 			if (infoSubst) {
-				InfoSubstituteControls(NULL, NULL);
+				InfoDefaultControls();
 			}
 			infoSubst = FALSE;
 
@@ -1059,7 +1053,6 @@ static STATUS_T CmdJoin(
 			if ( (Dj.inp[0].params.ep >=0) &&
 			     (GetTrkEndTrk(Dj.inp[0].trk,Dj.inp[0].params.ep) != NULL)) {
 				if (GetTrkEndTrk(Dj.inp[0].trk,Dj.inp[0].params.ep) != Dj.inp[1].trk) {
-					only_merge = TRUE;
 					ErrorMessage( MSG_TRK_ALREADY_CONN, _("First") );
 					return C_CONTINUE;
 				}
@@ -1067,7 +1060,6 @@ static STATUS_T CmdJoin(
 			if ( (Dj.inp[1].params.ep >= 0) &&
 			     (GetTrkEndTrk(Dj.inp[1].trk,Dj.inp[1].params.ep) != NULL)) {
 				if (GetTrkEndTrk(Dj.inp[1].trk,Dj.inp[1].params.ep) != Dj.inp[0].trk) {
-					only_merge = TRUE;
 					ErrorMessage( MSG_TRK_ALREADY_CONN, _("Second") );
 					return C_CONTINUE;
 				}
@@ -1081,9 +1073,7 @@ static STATUS_T CmdJoin(
 			}
 			rc = C_CONTINUE;
 			if ( MergeTracks( Dj.inp[0].trk, Dj.inp[0].params.ep,
-			                  Dj.inp[1].trk, Dj.inp[1].params.ep ) ) {
-				rc = C_TERMINATE;
-			} else if (only_merge) {
+			                  Dj.inp[1].trk, Dj.inp[1].params.ep ) || only_merge ) {
 				rc = C_TERMINATE;
 			} else if ( Dj.inp[0].params.ep >= 0 && Dj.inp[1].params.ep >= 0 ) {
 				if ( Dj.inp[0].params.type == curveTypeStraight &&
@@ -1109,7 +1099,7 @@ static STATUS_T CmdJoin(
 			Dj.state = 2;
 			Dj.jRes.flip = FALSE;
 		}
-		/* falls through */
+		__attribute__((fallthrough));
 		
 	case C_MOVE:
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
@@ -1146,12 +1136,12 @@ static STATUS_T CmdJoin(
 		   ) {
 			ANGLE_T na0=0.0,na1=0.0;
 //			coOrd end0, end1;
-			ANGLE_T a0,a1;
 //			end0 = GetTrkEndPos(Dj.inp[0].trk,Dj.inp[0].params.ep);
 //			end1 = GetTrkEndPos(Dj.inp[1].trk,Dj.inp[1].params.ep);
 			if (Dj.inp[0].params.type == curveTypeStraight) {
-				a0 = DifferenceBetweenAngles(Dj.inp[0].params.angle,FindAngle(Dj.jRes.pos[0],
-				                             pos));
+				ANGLE_T a0 = DifferenceBetweenAngles(Dj.inp[0].params.angle,
+				                                     FindAngle(Dj.jRes.pos[0],
+				                                             pos));
 				na0 = NormalizeAngle( Dj.inp[0].params.angle +
 				                      ((a0>0.0)?90.0:-90.0));
 			} else {
@@ -1162,8 +1152,8 @@ static STATUS_T CmdJoin(
 			}
 			//Now Second Line offset
 			if (Dj.inp[1].params.type == curveTypeStraight) {
-				a1 = DifferenceBetweenAngles(Dj.inp[1].params.angle,FindAngle(pos,
-				                             Dj.jRes.pos[0]));
+				ANGLE_T a1 = DifferenceBetweenAngles(Dj.inp[1].params.angle,FindAngle(pos,
+				                                     Dj.jRes.pos[0]));
 				na1 = NormalizeAngle( Dj.inp[1].params.angle +
 				                      ((a1>0.0)?90.0:-90.0));
 			} else {
@@ -1276,7 +1266,7 @@ static STATUS_T CmdJoin(
 		if ( Dj.jointD[0].x!=0.0 || Dj.jointD[1].x!=0.0 ) {
 
 			/* Compute the transition-curve, hopefully twice is enough */
-			a1 = Dj.inp[1].params.angle + (Dj.jointD[1].negate?-90.0:+90.0);
+			ANGLE_T a1 = Dj.inp[1].params.angle + (Dj.jointD[1].negate?-90.0:+90.0);
 			if ((!AdjustJoint( TRUE, a1, eR, normalAngle )) ||
 			    (!AdjustJoint( TRUE, a1, eR, normalAngle )) ) {
 				goto errorReturn;
@@ -1294,83 +1284,92 @@ static STATUS_T CmdJoin(
 			}
 		}
 
-		switch ( Dj.inp[0].params.type ) {
-		case curveTypeStraight:
-			FindPos( &off, &beyond, Dj.inp_pos[0], Dj.inp[0].params.lineOrig,
-			         Dj.inp[0].params.angle, DIST_INF );
-			if (beyond < 0.0) {
-				InfoMessage(_("Beyond end of 1st track"));
+		{
+			DIST_T d;
+			switch ( Dj.inp[0].params.type ) {
+			case curveTypeStraight:
+				FindPos( &off, &beyond, Dj.inp_pos[0], Dj.inp[0].params.lineOrig,
+				         Dj.inp[0].params.angle, DIST_INF );
+				if (beyond < 0.0) {
+					InfoMessage(_("Beyond end of 1st track"));
+					goto errorReturn;
+					/*Dj.jRes.type = curveTypeNone;
+					return C_CONTINUE;*/
+				}
+				d = FindDistance( Dj.inp_pos[0], Dj.inp[0].params.lineOrig );
+				break;
+			case curveTypeCurve:
+				if (IsCurveCircle(Dj.inp[0].trk)) {
+					d = DIST_INF;
+				} else {
+					ANGLE_T a = FindAngle( Dj.inp[0].params.arcP, Dj.inp_pos[0] );
+					ANGLE_T a1;
+					if (Dj.inp[0].params.ep == 0) {
+						a1 = NormalizeAngle( Dj.inp[0].params.arcA0+Dj.inp[0].params.arcA1-a );
+					} else {
+						a1 = NormalizeAngle( a-Dj.inp[0].params.arcA0 );
+					}
+					d = Dj.inp[0].params.arcR * a1 * 2.0*M_PI/360.0;
+				}
+				break;
+			case curveTypeCornu:
+			case curveTypeBezier:
+			case curveTypeNone:
+				InfoMessage( _("First Track Type not supported for non-Cornu Join") );
+				goto errorReturn;
+			default:
+				CHECKMSG( FALSE, ( "cmdJoin - unknown type[0] %d",
+				                   (int)(Dj.inp[0].params.type) ) );
+			}
+			d -= Dj.jointD[0].d0;
+			if ( d <= minLength ) {
+				ErrorMessage( MSG_TRK_TOO_SHORT, _("First "), PutDim(fabs(minLength-d)) );
 				goto errorReturn;
 				/*Dj.jRes.type = curveTypeNone;
 				return C_CONTINUE;*/
 			}
-			d = FindDistance( Dj.inp_pos[0], Dj.inp[0].params.lineOrig );
-			break;
-		case curveTypeCurve:
-			if (IsCurveCircle(Dj.inp[0].trk)) {
-				d = DIST_INF;
-			} else {
-				a = FindAngle( Dj.inp[0].params.arcP, Dj.inp_pos[0] );
-				if (Dj.inp[0].params.ep == 0) {
-					a1 = NormalizeAngle( Dj.inp[0].params.arcA0+Dj.inp[0].params.arcA1-a );
-				} else {
-					a1 = NormalizeAngle( a-Dj.inp[0].params.arcA0 );
-				}
-				d = Dj.inp[0].params.arcR * a1 * 2.0*M_PI/360.0;
-			}
-			break;
-		case curveTypeCornu:
-		case curveTypeBezier:
-		case curveTypeNone:
-			InfoMessage( _("First Track Type not supported for non-Cornu Join") );
-			goto errorReturn;
-		default:
-			CHECKMSG( FALSE, ( "cmdJoin - unknown type[0] %d",
-			                   (int)(Dj.inp[0].params.type) ) );
-		}
-		d -= Dj.jointD[0].d0;
-		if ( d <= minLength ) {
-			ErrorMessage( MSG_TRK_TOO_SHORT, _("First "), PutDim(fabs(minLength-d)) );
-			goto errorReturn;
-			/*Dj.jRes.type = curveTypeNone;
-			return C_CONTINUE;*/
 		}
 
-		switch ( Dj.inp[1].params.type ) {
-		case curveTypeStraight:
-			d = FindDistance( Dj.inp_pos[1], Dj.inp[1].params.lineOrig );
-			break;
-		case curveTypeCurve:
-			if (IsCurveCircle(Dj.inp[1].trk)) {
-				d = DIST_INF;
-			} else {
-				a = FindAngle( Dj.inp[1].params.arcP, Dj.inp_pos[1] );
-				if (Dj.inp[1].params.ep == 0) {
-					a1 = NormalizeAngle( Dj.inp[1].params.arcA0+Dj.inp[1].params.arcA1-a );
+		{
+			DIST_T d;
+			switch ( Dj.inp[1].params.type ) {
+			case curveTypeStraight:
+				d = FindDistance( Dj.inp_pos[1], Dj.inp[1].params.lineOrig );
+				break;
+			case curveTypeCurve:
+				if (IsCurveCircle(Dj.inp[1].trk)) {
+					d = DIST_INF;
 				} else {
-					a1 = NormalizeAngle( a-Dj.inp[1].params.arcA0 );
+					ANGLE_T a = FindAngle( Dj.inp[1].params.arcP, Dj.inp_pos[1] );
+					ANGLE_T a1;
+					if (Dj.inp[1].params.ep == 0) {
+						a1 = NormalizeAngle( Dj.inp[1].params.arcA0+Dj.inp[1].params.arcA1-a );
+					} else {
+						a1 = NormalizeAngle( a-Dj.inp[1].params.arcA0 );
+					}
+					d = Dj.inp[1].params.arcR * a1 * 2.0*M_PI/360.0;
 				}
-				d = Dj.inp[1].params.arcR * a1 * 2.0*M_PI/360.0;
+				break;
+			case curveTypeCornu:
+			case curveTypeBezier:
+			case curveTypeNone:
+				InfoMessage( _("Second Track Type not supported for non-Cornu Join") );
+				goto errorReturn;
+			default:
+				CHECKMSG( FALSE, ( "cmdJoin - unknown type[1]", Dj.inp[1].params.type ) );
 			}
-			break;
-		case curveTypeCornu:
-		case curveTypeBezier:
-		case curveTypeNone:
-			InfoMessage( _("Second Track Type not supported for non-Cornu Join") );
-			goto errorReturn;
-		default:
-			CHECKMSG( FALSE, ( "cmdJoin - unknown type[1]", Dj.inp[1].params.type ) );
-		}
-		d -= Dj.jointD[1].d0;
-		if ( d <= minLength ) {
-			ErrorMessage( MSG_TRK_TOO_SHORT, _("Second "), PutDim(fabs(minLength-d)) );
-			goto errorReturn;
-			/*Dj.jRes.type = curveTypeNone;
-			return C_CONTINUE;*/
+			d -= Dj.jointD[1].d0;
+			if ( d <= minLength ) {
+				ErrorMessage( MSG_TRK_TOO_SHORT, _("Second "), PutDim(fabs(minLength-d)) );
+				goto errorReturn;
+				/*Dj.jRes.type = curveTypeNone;
+				return C_CONTINUE;*/
+			}
 		}
 
 		l = Dj.jointD[0].d0 + Dj.jointD[1].d0;
 		if ( l > 0.0 ) {
+			DIST_T d = 0;
 			if ( Dj.jRes.type == curveTypeCurve ) {
 				d = Dj.jRes.arcR * Dj.jRes.arcA1 * 2.0*M_PI/360.0;
 			} else if ( Dj.jRes.type == curveTypeStraight ) {
@@ -1397,8 +1396,8 @@ static STATUS_T CmdJoin(
 				if (IsCurveCircle( Dj.inp[ep].trk )) {
 					break;
 				}
-				a = FindAngle( Dj.inp[ep].params.arcP, Dj.inp_pos[ep] );
-				a1 = NormalizeAngle( a-Dj.inp[ep].params.arcA0 );
+				ANGLE_T a = FindAngle( Dj.inp[ep].params.arcP, Dj.inp_pos[ep] );
+				ANGLE_T a1 = NormalizeAngle( a-Dj.inp[ep].params.arcA0 );
 				if (a1 <= Dj.inp[ep].params.arcA1) {
 					break;
 				}
@@ -1466,7 +1465,7 @@ errorReturn:
 			}
 		}
 		if (Dj.state == 1) {
-			InfoMessage( _("Select 2nd track") );
+			//InfoMessage( _("Select 2nd track") );
 			return C_CONTINUE;
 		}
 		tempSegs(0).color = drawColorBlack;
@@ -1515,7 +1514,7 @@ errorReturn:
 		DrawNewTrack( Dj.inp[1].trk );
 		DrawNewTrack( trk );
 		if (infoSubst) {
-			InfoSubstituteControls(NULL, NULL);
+			InfoDefaultControls();
 		}
 		infoSubst = FALSE;
 		return rc;
@@ -1523,7 +1522,7 @@ errorReturn:
 	case C_CANCEL:
 		SetAllTrackSelect( FALSE );
 		if (infoSubst) {
-			InfoSubstituteControls(NULL, NULL);
+			InfoDefaultControls();
 		}
 		infoSubst = FALSE;
 		break;
@@ -1550,37 +1549,38 @@ errorReturn:
 			return CmdCornu(action,pos);
 		}
 		if (infoSubst) {
-			InfoSubstituteControls(NULL, NULL);
+			InfoDefaultControls();
 		}
 		infoSubst = FALSE;
+		break;
 
+	default:
+		LOG( log_join, 1, ( "unexpected action&0xFF %d in CmdJoin\n", action&0xFF ) )
+		break;
 	}
 
 
 	return C_CONTINUE;
 
 }
-
+
 /*****************************************************************************
  *
  * INITIALIZATION
  *
  */
 
-#include "bitmaps/join.image3"
-#include "bitmaps/join-line.image3"
-
 void InitCmdJoin( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Join"), "cmdJoinSetCmd", _("Join") );
 	AddMenuButton( menu, CmdJoin, "cmdJoinTrack", _("Join Track"),
-	               wIconCreatePixMap(join_image3[iconSize]), LEVEL0_50,
+	               CreateToolbarIconFromResource("join.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
 	AddMenuButton( menu, CmdJoinLine, "cmdJoinLine", _("Join Lines"),
-	               wIconCreatePixMap(join_line_image3[iconSize]), LEVEL0_50,
+	               CreateToolbarIconFromResource("join-line.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
 	ButtonGroupEnd();
-	/** @logcmd @showrefby join=n cjoin.c Log Join Lines and Tracks command */
+	/** @logcmd @showrefby `join=n` `cjoin.c` — Log Join Lines and Tracks command */
 	log_join = LogFindIndex( "join" );
 }
 

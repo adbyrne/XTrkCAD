@@ -1,0 +1,607 @@
+/**
+* \file   text.c
+* \brief  Multi line text entry widget
+*
+* \author mf
+* \date   May 2024
+*/
+
+/*  XTrkCad - Model Railroad CAD
+ *  Copyright (C) 2005 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+#include <stdio.h>
+#include <math.h>
+
+#define GTK_DISABLE_SINGLE_INCLUDES
+#define GDK_DISABLE_DEPRECATED
+#define GTK_DISABLE_DEPRECATED
+#define GSEAL_ENABLE
+
+#include <gtk/gtk.h>
+#include <gdk/gdk.h>
+
+#include "i18n.h"
+#include "gtkint.h"
+
+struct PrintData {
+	wControl_p	tb;
+	gint lines_per_page;
+	gdouble font_size;
+	gchar** lines;
+	gint total_lines;
+	gint total_pages;
+};
+
+#define HEADER_HEIGHT 20.0
+#define HEADER_GAP 8.5
+
+/*
+ *****************************************************************************
+ *
+ * Multi-line Text Boxes
+ *
+ *****************************************************************************
+ */
+
+
+/**
+ * Reset a text entry by clearing text and resetting the readonly and the
+ * change flag.
+ *
+ * \param bt IN text entry
+ */
+
+void wTextClear(wControl_p bt)
+{
+	GtkTextBuffer* tb;
+	tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->attributes.text.text));
+	gtk_text_buffer_set_text(tb, "", -1);
+
+	if (bt->attributes.text.option & BO_READONLY) {
+		gtk_text_view_set_editable(GTK_TEXT_VIEW(bt->attributes.text.text), FALSE);
+	}
+	bt->attributes.text.changed = FALSE;
+}
+
+/**
+ * Append text to the end of the entry field's text buffer.
+ *
+ * \param bt IN text buffer
+ * \param text IN text to append
+ */
+
+void wTextAppend(wControl_p bt,
+                 const char* text)
+{
+	GtkTextBuffer* tb;
+	GtkTextIter ti1;
+	GtkTextMark* tm;
+
+	if (bt->attributes.text.text == 0) {
+		abort();
+	}
+
+	tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->attributes.text.text));
+	// convert to utf-8
+	text = wlibConvertInput(text);
+	// append to end of buffer
+	gtk_text_buffer_get_end_iter(tb, &ti1);
+	gtk_text_buffer_insert(tb, &ti1, text, -1);
+
+	if (bt->attributes.text.option & BT_TOP) {
+		// and scroll to start of text
+		gtk_text_buffer_get_start_iter(tb, &ti1);
+	} else {
+		// and scroll to end of text
+		gtk_text_buffer_get_end_iter(tb, &ti1);
+	}
+	tm = gtk_text_buffer_create_mark(tb, NULL, &ti1, TRUE);
+	gtk_text_view_scroll_mark_onscreen(GTK_TEXT_VIEW(bt->attributes.text.text), tm);
+	gtk_text_buffer_delete_mark(tb, tm);
+
+	bt->attributes.text.changed = FALSE;
+}
+
+
+/**
+ * Get the text from a text buffer
+ * The caller is responsible for free'ing the allocated storage.
+ *
+ * \param bt IN the text widget
+ * \return    pointer to the converted text
+ */
+
+static char* wlibGetText(wControl_p bt)
+{
+	GtkTextBuffer* tb;
+	GtkTextIter ti1, ti2;
+	char* cp;
+
+	if (bt->attributes.text.text == 0) {
+		abort();
+	}
+
+	tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->attributes.text.text));
+	gtk_text_buffer_get_bounds(tb, &ti1, &ti2);
+	cp = gtk_text_buffer_get_text(tb, &ti1, &ti2, FALSE);
+
+	return cp;
+}
+
+/**
+ * Save the text from the widget to a file
+ *
+ * \param bt IN the text widget
+ * \param fileName IN name of save file
+ * \return    TRUE is success, FALSE if not
+ */
+
+wBool_t wTextSave(wControl_p bt, const char* fileName)
+{
+	FILE* f;
+	char* cp;
+	f = fopen(fileName, "w");
+
+	if (f == NULL) {
+		wNoticeWithIcon(NT_ERROR, fileName, "Ok", NULL);
+		return FALSE;
+	}
+
+	cp = wlibGetText(bt);
+	fwrite(cp, 1, strlen(cp), f);
+	free(cp);
+	fclose(f);
+	return TRUE;
+}
+
+gdouble
+CalcLineHeight(GtkPrintContext *context)
+{
+	// Create a temporary layout to measure text height
+	PangoLayout* layout = gtk_print_context_create_pango_layout(context);
+
+	pango_layout_set_font_description(layout,
+	                                  pango_font_description_from_string("Monospace 10"));
+
+	pango_layout_set_text(layout, "Sample", -1);
+
+	int text_height;
+	pango_layout_get_size(layout, NULL, &text_height);
+	gdouble line_height = (gdouble)text_height / PANGO_SCALE;
+
+	return(line_height);
+}
+
+/**
+ * Begin the printing by retrieving the contents of the text box and
+ * count the lines of text.
+ *
+ * \param operation IN the GTK print operation
+ * \param context IN print context
+ * \param pd IN attributes structure for user attributes
+ */
+
+static void
+begin_print(GtkPrintOperation* operation,
+            GtkPrintContext* context,
+            struct PrintData* pd)
+{
+	gchar* contents;
+	gdouble height;
+	gdouble line_height;
+
+	contents = wlibGetText(pd->tb);
+	pd->lines = g_strsplit(contents, "\n", 0);
+	/* Count the total number of lines in the file. */
+	/* ignore the header lines */
+	pd->total_lines = 6;
+
+	while (pd->lines[pd->total_lines] != NULL) {
+		pd->total_lines++;
+	}
+
+	/* Based on the height of the page and font size, calculate how many lines can be
+	* rendered on a single page. A padding of 3 is placed between lines as well.
+	* Space for page header, table header and footer lines is subtracted from the total size
+	*/
+	height = gtk_print_context_get_height(context);
+
+	line_height = CalcLineHeight(context);
+
+	pd->lines_per_page = (gint)floor(height / line_height);
+	pd->total_pages = (pd->total_lines - 1) / pd->lines_per_page + 1;
+	gtk_print_operation_set_n_pages(operation, pd->total_pages);
+}
+
+/**
+ * Draw the page, which includes a header with the file name and page number along
+ * with one page of text with a font of "Monospace 10".
+ *
+ * \param operation IN the GTK print operation
+ * \param context IN print context
+ * \param page_nr IN page to print
+ * \param pd IN attributes structure for user attributes
+ *
+ *
+ */
+
+static void
+draw_page(GtkPrintOperation* operation,
+          GtkPrintContext* context,
+          gint page_nr,
+          struct PrintData* pd)
+{
+	cairo_t* cr;
+	PangoLayout* layout;
+	gdouble width, text_height, height;
+	gint line, i, text_width, layout_height;
+	PangoFontDescription* desc;
+	gchar* page_str;
+
+	cr = gtk_print_context_get_cairo_context(context);
+	width = gtk_print_context_get_width(context);
+
+	layout = gtk_print_context_create_pango_layout(context);
+	desc = pango_font_description_from_string("Monospace 10");
+
+	/*
+	 * render the header line with document type parts list on left and
+	 * first line of layout title on right
+	 */
+	pango_layout_set_font_description(layout, desc);
+	pango_layout_set_width(layout, -1);
+
+	pango_layout_set_text(layout, pd->lines[0], -1);
+	pango_layout_get_size(layout, NULL, &layout_height);
+	text_height = (gdouble)layout_height / PANGO_SCALE;
+
+	cairo_move_to(cr, 0, 0);								// headline
+	pango_layout_set_alignment(layout, PANGO_ALIGN_LEFT);
+	pango_cairo_show_layout(cr, layout);
+
+	pango_layout_set_text(layout, pd->lines[1], -1);		// layout title
+	cairo_rel_move_to(cr, 0, text_height*2);
+	pango_cairo_show_layout(cr, layout);
+
+	pango_layout_set_text(layout, pd->lines[2], -1);		// layout subtitle
+	cairo_rel_move_to(cr, 0, text_height);
+	pango_cairo_show_layout(cr, layout);
+
+	/* Render the column header */
+	cairo_rel_move_to(cr, 0, text_height*2);
+	pango_layout_set_text(layout, pd->lines[5], -1);
+	pango_cairo_show_layout(cr, layout);
+
+	cairo_rel_move_to(cr, 0, text_height);
+	pango_layout_set_text(layout, pd->lines[6], -1);
+	pango_cairo_show_layout(cr, layout);
+
+	/* Render the page text with the specified font and size. */
+	cairo_rel_move_to(cr, 0, text_height);
+	line = page_nr * pd->lines_per_page + 8;
+
+	for (i = 0; i < pd->lines_per_page && line < pd->total_lines; i++) {
+		pango_layout_set_text(layout, pd->lines[line], -1);
+		pango_cairo_show_layout(cr, layout);
+		cairo_rel_move_to(cr, 0, text_height);
+		line++;
+	}
+
+	/*
+	 * Render the footer line with date on the left and page number
+	 * on the right
+	 */
+	pango_layout_set_text(layout, pd->lines[3], -1); 	// date
+	pango_layout_set_width(layout, -1);
+	pango_layout_set_alignment(layout, PANGO_ALIGN_LEFT);
+	pango_layout_get_size(layout, NULL, &layout_height);
+	text_height = (gdouble)layout_height / PANGO_SCALE;
+	height = gtk_print_context_get_height(context);
+	cairo_move_to(cr, 0, height - ((HEADER_HEIGHT - text_height) / 2));
+	pango_cairo_show_layout(cr, layout);
+	page_str = g_strdup_printf(_("%d of %d"), page_nr + 1,
+	                           pd->total_pages);  // page number
+	pango_layout_set_text(layout, page_str, -1);
+	pango_layout_get_size(layout, &text_width, NULL);
+	pango_layout_set_alignment(layout, PANGO_ALIGN_RIGHT);
+	cairo_move_to(cr, width - (text_width / PANGO_SCALE),
+	              height - ((HEADER_HEIGHT - text_height) / 2));
+	pango_cairo_show_layout(cr, layout);
+	g_free(page_str);
+	g_object_unref(layout);
+	pango_font_description_free(desc);
+}
+
+/**
+ * Clean up after the printing operation since it is done.
+ *
+ * \param operation IN the GTK print operation
+ * \param context IN print context
+ * \param pd IN attributes structure for user attributes
+ *
+ *
+ */
+static void
+end_print(GtkPrintOperation* operation,
+          GtkPrintContext* context,
+          struct PrintData* pd)
+{
+	g_strfreev(pd->lines);
+	g_free(pd);
+}
+
+/**
+ * Print the content of a multi line text box. This function is only used
+ * for printing the parts list. So it makes some assumptions on the structure
+ * and the content. Change if the multi line entry is changed.
+ * The deprecated gtk_text is not supported by this function.
+ *
+ * Thanks to Andrew Krause's book for a good starting point.
+ *
+ * \param bt IN the text field
+ * \return    TRUE on success, FALSE on error
+ */
+
+wBool_t wTextPrint(
+        wControl_p bt)
+{
+	GtkPrintOperation* operation;
+	GError* error = NULL;
+	struct PrintData* attributes;
+
+	/* Create a new print operation */
+	operation = gtk_print_operation_new();
+	attributes = g_malloc0(sizeof(struct PrintData));
+	if (attributes) {
+		gint res;
+		attributes->font_size = 10.0;
+		attributes->tb = bt;
+
+		g_signal_connect(G_OBJECT(operation), "begin_print",
+		                 G_CALLBACK(begin_print), (gpointer)attributes);
+		g_signal_connect(G_OBJECT(operation), "draw_page",
+		                 G_CALLBACK(draw_page), (gpointer)attributes);
+		g_signal_connect(G_OBJECT(operation), "end_print",
+		                 G_CALLBACK(end_print), (gpointer)attributes);
+
+		/* Run the default print operation that will print the selected file. */
+		res = gtk_print_operation_run(operation,
+		                              GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
+		                              GTK_WINDOW(wlibAppWinGetMain()), &error);
+
+		/* If the print operation was accepted, save the new print settings. */
+		if (res == GTK_PRINT_OPERATION_RESULT_APPLY) {
+			//WlibSaveSettings(operation);
+		}
+		/* Otherwise, report that the print operation has failed. */
+		else {
+			if (error) {
+				GtkWidget* dialog;
+
+				dialog = gtk_message_dialog_new(GTK_WINDOW(wlibAppWinGetMain()),
+				                                GTK_DIALOG_DESTROY_WITH_PARENT,
+				                                GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+				                                "%s", error->message);
+				g_error_free(error);
+				gtk_dialog_run(GTK_DIALOG(dialog));
+				gtk_widget_destroy(dialog);
+			}
+		}
+
+		return TRUE;
+	} else {
+		return(FALSE);
+	}
+
+}
+
+
+/**
+ * Get the total memory required for the text
+ *
+ * \param bt IN the text widget
+ * \return    length of string including terminating \0
+ */
+
+int wTextGetSize(wControl_p bt)
+{
+	char* cp = wlibGetText(bt);
+	int len = (int)strlen(cp) + 1;
+	g_free(cp);
+	return len;
+}
+
+/**
+ * Get the entered text. If the entered text is longer than the passed buffer,
+ * it is truncated and zero terminated.
+ *
+ * \param bt IN the text widget
+ * \param text IN the buffer
+ * \param len IN maximum number of bytes to return, including '\0'
+ */
+
+void wTextGetText(wControl_p bt, char* text, int len)
+{
+	char* cp;
+	cp = wlibGetText(bt);
+	strncpy(text, cp, len);
+	text[len - 1] = '\0';
+	g_free(cp);
+}
+
+/**
+ * Set the  read-only state of the text entry
+ *
+ * \param bt IN the text widget
+ * \param ro IN read only flag
+ */
+
+void wTextSetReadonly(wControl_p bt, wBool_t ro)
+{
+	gtk_text_view_set_editable(GTK_TEXT_VIEW(bt->attributes.text.text	), !ro);
+
+}
+
+/**
+ * check whether text has been modified
+ *
+ * \param bt IN the text widget
+ * \return    TRUE of changed, FALSE otherwise
+ */
+
+wBool_t wTextGetModified(wControl_p bt)
+{
+	return bt->attributes.text.changed;
+}
+
+/**
+ * set the size of the text widget
+ *
+ * \param bt IN the text widget
+ * \param w IN width
+ * \param h IN height
+ */
+
+void wTextSetSize(wControl_p bt, wWinPix_t w, wWinPix_t h)
+{
+	gtk_widget_set_size_request(bt->widget, w, h);
+
+}
+
+/**
+ * set the position of the text widget ????
+ *
+ * \param bt IN the text widget
+ * \param pos IN position
+ */
+
+void wTextSetPosition(wControl_p bt, int pos)
+{
+	/* \TODO TextSetPosition */
+}
+
+/**
+ * signal handler for changed signal
+ *
+ * \param widget IN
+ * \param bt IN text entry field
+ */
+
+static void textChanged(GtkWidget* widget, wControl_p bt)
+{
+	if (bt == 0) {
+		return;
+	}
+
+	bt->attributes.text.changed = TRUE;
+}
+
+/**
+ * Create a multiline text entry field
+ *
+ * When used with builder, the multiline text widget has to be placed inside
+ * a scrolledwindow with id scrollwindow.
+ *
+ * ### Usage in dialogs, created by
+ *
+ * - runtime: no
+ * - builder: yes
+ *
+ * ### Options
+ * BO_READONLY
+ * : set entry field to read only
+ * : use properties 'cursor-visible' and 'editable in builder definitions for same
+ *
+ * \param parent IN parent window
+ * \param x IN x position
+ * \param y IN y position
+ * \param helpStr IN balloon help string
+ * \param labelStr IN Button label ???
+ * \param option IN
+ * \param width IN
+ * \param height IN
+ * \return 	bb handle for created text widget
+ *
+ * \todo Options BT_HSCROLL, BT_CHARUNITS, BT_FIXEDFONT, BT_TOP
+ */
+
+wControl_p
+wTextCreate(wControl_p parent,
+            wWinPix_t	x,
+            wWinPix_t	y,
+            const char* helpStr,
+            const char* labelStr,
+            long	option,
+            wWinPix_t	width,
+            wWinPix_t	height)
+{
+	wControl_p bt;
+	struct text* tcontrol;
+	GtkTextBuffer* tb;
+	// create the widget
+	bt = wlibControlNew(B_TEXT, parent, helpStr, NULL);
+	tcontrol = CONTROL_GET_ATTRIBUTES_PTR(bt, text);
+
+	if (ISDEFINEDINBUILDER(parent)) {
+		bt->widget = wlibWidgetFromIdWarn(parent, "scrollwindow");
+		tcontrol->text = wlibWidgetFromIdWarn(parent, helpStr);
+
+	} else {
+		// create a scroll window with scroll bars that are automatically created
+		bt->widget = gtk_scrolled_window_new(NULL, NULL);
+		gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(bt->widget),
+		                               GTK_POLICY_AUTOMATIC,
+		                               GTK_POLICY_AUTOMATIC);
+
+		gtk_scrolled_window_set_propagate_natural_width(GTK_SCROLLED_WINDOW(bt->widget),
+		                TRUE);
+		gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(bt->widget),
+		                                    GTK_SHADOW_IN);
+
+		// create a text view and place it inside the scroll widget
+		tcontrol->text = gtk_text_view_new();
+
+		if (!tcontrol->text) {
+			abort();
+		}
+
+		// configure read-only mode
+		if (option & BO_READONLY) {
+			gtk_text_view_set_editable(GTK_TEXT_VIEW(tcontrol->text), FALSE);
+			gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(tcontrol->text), FALSE);
+		}
+		wTextSetSize(bt, width, height);
+
+		gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(tcontrol->text), GTK_WRAP_WORD);
+		gtk_container_add(GTK_CONTAINER(bt->widget), tcontrol->text);
+
+		wlibBasicGridAttach(parent, bt->widget, x, y, 1, 1);
+	}
+
+	tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(tcontrol->text));
+	g_signal_connect(G_OBJECT(tb), "changed", G_CALLBACK(textChanged), bt);
+
+	// show the widgets
+	gtk_widget_show_all(tcontrol->text);
+	gtk_widget_show_all(bt->widget);
+
+	tcontrol->option = option;
+
+	// done, return the finished widget
+	return bt;
+}

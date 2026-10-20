@@ -44,6 +44,7 @@
 #define IC_PLAYBACK_PUSH        (1<<16)
 #define IC_WANT_MODKEYS         (1<<17)
 #define IC_POPUP3				(1<<18)
+#define IC_TOGGLE				(1<<19)
 
 
 /*
@@ -104,12 +105,22 @@ const char * GetCurCommandName( void );
 EXPORT bool IsCommandEnabled(long mode, long options);
 void EnableCommands( void );
 wIndex_t GetCurrentCommand(void);
+void SetCurrentCommand(wIndex_t inx);
 void Reset( void );
 wBool_t DoCurCommand( wAction_t, coOrd );
 int ConfirmReset( BOOL_T );
 void DoCommandB( void * );
 BOOL_T CommandEnabled( wIndex_t );
-#define NUM_CMDMENUS (4)
+
+// Menu indices for command menu array
+enum {
+	MENU_BUTTONGROUP = 0,  // Popup menu within button group
+	MENU_MAIN = 1,         // Main menu entry
+	MENU_POPUP1 = 2,       // First context popup
+	MENU_POPUP2 = 3,       // Second context popup
+	NUM_CMDMENUS
+};
+//#define NUM_CMDMENUS (4)
 BOOL_T IsCurCommandSticky(void);
 void ResetIfNotSticky( void );
 void CommandInit( void );

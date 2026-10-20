@@ -30,7 +30,12 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 find_package(PkgConfig)
-pkg_check_modules(GTK_UNIX_PRINT gtk+-unix-print-2.0)
+IF(XTRKCAD_USE_GTK3)
+	pkg_check_modules(GTK_UNIX_PRINT gtk+-unix-print-3.0)
+ELSE(XTRKCAD_USE_GTK3)
+	pkg_check_modules(GTK_UNIX_PRINT gtk+-unix-print-2.0)
+ENDIF(XTRKCAD_USE_GTK3)
+
 set(VERSION_OK TRUE)
 
 if (GTK_UNIX_PRINT_VERSION)

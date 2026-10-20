@@ -22,7 +22,7 @@
 
 #include "common.h"
 #include "fileio.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "trkendpt.h"
 #include "misc.h"
@@ -31,6 +31,13 @@
 #include "cjoin.h"
 #include "include/utf8convert.h"
 
+// working segments
+dynArr_t tempSegs_da;
+
+static int log_trkseg = -1;
+
+// U5 - custom info line - reordedd values
+BOOL_T customLineReorder;
 
 /*****************************************************************************
  *
@@ -83,10 +90,9 @@ EXPORT coOrd GetSegEndPt(
         BOOL_T bounds,
         ANGLE_T * angleR )
 {
-	coOrd pos;
+	coOrd pos = zero;
 	ANGLE_T angle, a, a0, a1 = 0.0;
 	DIST_T r;
-	POS_T x0, y0, x1, y1;
 
 	switch (segPtr->type) {
 	case SEG_STRTRK:
@@ -110,10 +116,10 @@ EXPORT coOrd GetSegEndPt(
 			angle = NormalizeAngle( a-90 );
 		}
 		if (bounds) {
-			x0 = r * sin(D2R(a0));
-			x1 = r * sin(D2R(a0+a1));
-			y0 = r * cos(D2R(a0));
-			y1 = r * cos(D2R(a0+a1));
+			POS_T x0 = r * sin(D2R(a0));
+			POS_T x1 = r * sin(D2R(a0+a1));
+			POS_T y0 = r * cos(D2R(a0));
+			POS_T y1 = r * cos(D2R(a0+a1));
 			if (ep == 0) {
 				pos.x = segPtr->u.c.center.x + (((a0<=270.0)&&(a0+a1>=270.0)) ?
 				                                (-r) : min(x0,x1));
@@ -157,7 +163,7 @@ EXPORT coOrd GetSegEndPt(
 /**
  * Calculate the bounding box for a string.
  *
- * \param coOrd IN position of text
+ * \param pos IN position of text
  * \param angle IN text angle
  * \param str IN the string
  * \param fs IN size of font
@@ -223,10 +229,8 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle,
                            coOrd *lo, coOrd *hi )
 {
 	int inx;
-	coOrd p0, p1, pBez, pc;
-	ANGLE_T a0, a1;
+	coOrd p0, p1, pBez;
 	coOrd width;
-	DIST_T radius;
 	LWIDTH_T lwidth;
 
 	width = zero;
@@ -269,10 +273,11 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle,
 		     (segPtr->type == SEG_CRVLIN) ) {
 			/* TODO: be more precise about curved line width */
 			width.x = width.y = lwidth;
+			coOrd pc;
 			REORIGIN( pc, segPtr->u.c.center, angle, xlat );
-			a0 = NormalizeAngle( segPtr->u.c.a0 + angle );
-			a1 = segPtr->u.c.a1;
-			radius = fabs(segPtr->u.c.radius);
+			ANGLE_T a0 = NormalizeAngle( segPtr->u.c.a0 + angle );
+			ANGLE_T a1 = segPtr->u.c.a1;
+			DIST_T radius = fabs(segPtr->u.c.radius);
 			if ( a1 >= 360.0 ) {
 				lo->x = pc.x - radius;
 				lo->y = pc.y - radius;
@@ -308,15 +313,15 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle,
 			width.y = lwidth * fabs(sin(D2R(FindAngle(p0, p1))));
 		} else if ( segPtr->type == SEG_BENCH ) {
 			width.x = BenchGetWidth( segPtr->u.l.option ) * fabs(cos( D2R( FindAngle(p0,
-			                p1) ) ) ) / 2.0;
+			          p1) ) ) ) / 2.0;
 			width.y = BenchGetWidth( segPtr->u.l.option ) * fabs(sin( D2R( FindAngle(p0,
-			                p1) ) ) ) / 2.0;
+			          p1) ) ) ) / 2.0;
 		}
 		break;
 	case SEG_POLY:
 		/* TODO: be more precise about poly line width */
 		width.x = width.y = lwidth;
-	/* falls through */
+		__attribute__((fallthrough));
 	case SEG_FILPOLY:
 		for (inx=0; inx<segPtr->u.p.cnt; inx++ ) {
 			REORIGIN( p0, segPtr->u.p.pts[inx].pt, angle, xlat )
@@ -483,6 +488,10 @@ EXPORT void MoveSegs(
 			}
 			FixUpBezierSeg(s->u.b.pos,s,s->type == SEG_BEZTRK);
 			break;
+		default:
+			if ( log_trkseg < 0 ) { log_trkseg = LogFindIndex( "trkseg" ); }
+			LOG( log_trkseg, 1, ( "unexpected seg type %d in MoveSegs\n", s->type ) )
+			break;
 		}
 	}
 }
@@ -535,6 +544,10 @@ EXPORT void RotateSegs(
 			Rotate( &s->u.b.pos[3], orig, angle );
 			FixUpBezierSeg(s->u.b.pos,s,s->type == SEG_BEZTRK);
 			break;
+		default:
+			if ( log_trkseg < 0 ) { log_trkseg = LogFindIndex( "trkseg" ); }
+			LOG( log_trkseg, 1, ( "unexpected seg type %d in RotateSegs\n", s->type ) )
+			break;
 		}
 	}
 }
@@ -561,7 +574,7 @@ EXPORT void FlipSegs(
 			break;
 		case SEG_CRVTRK:
 			s->u.c.radius = - s->u.c.radius;
-		/* falls through */
+			__attribute__((fallthrough));
 		case SEG_CRVLIN:
 		case SEG_FILCRCL:
 			s->u.c.center.y = -s->u.c.center.y;
@@ -596,6 +609,10 @@ EXPORT void FlipSegs(
 			s->u.b.pos[2].y = -s->u.b.pos[2].y;
 			s->u.b.pos[3].y = -s->u.b.pos[3].y;
 			FixUpBezierSeg(s->u.b.pos,s,s->type == SEG_BEZTRK);
+			break;
+		default:
+			if ( log_trkseg < 0 ) { log_trkseg = LogFindIndex( "trkseg" ); }
+			LOG( log_trkseg, 1, ( "unexpected seg type %d in FlipSegs\n", s->type ) )
 			break;
 		}
 	}
@@ -668,6 +685,10 @@ EXPORT void RescaleSegs(
 
 			break;
 
+		default:
+			if ( log_trkseg < 0 ) { log_trkseg = LogFindIndex( "trkseg" ); }
+			LOG( log_trkseg, 1, ( "unexpected seg type %d in RescaleSegs\n", s->type ) )
+			break;
 		}
 	}
 }
@@ -830,7 +851,7 @@ EXPORT DIST_T DistanceSegs(
 				hi.x /= 2.0;
 				hi.y /= 2.0;
 				dd = 0.1*FindDistance(hi, p1)/FindDistance(lo,
-				                hi);  // Proportion to mean that the closer we to the center or the smaller the target in overlapping cases, the more likely we pick it
+				        hi);  // Proportion to mean that the closer we to the center or the smaller the target in overlapping cases, the more likely we pick it
 				break;
 			}
 			hi.x /= 2.0;   // rough center of rectangle
@@ -987,8 +1008,7 @@ static void Hsv2rgb(
         hsv_t	hsv,
         long	*rgb )
 {
-	int i;
-	FLOAT_T f, w, q, t, r=0, g=0, b=0;
+	FLOAT_T r=0, g=0, b=0;
 
 	if (hsv.s == 0.0) {
 		hsv.s = 0.000001;
@@ -1003,11 +1023,11 @@ static void Hsv2rgb(
 			hsv.h = 0.0;
 		}
 		hsv.h = hsv.h / 60.0;
-		i = (int) hsv.h;
-		f = hsv.h - i;
-		w = hsv.v * (1.0 - hsv.s);
-		q = hsv.v * (1.0 - (hsv.s * f));
-		t = hsv.v * (1.0 - (hsv.s * (1.0 - f)));
+		int i = (int) hsv.h;
+		FLOAT_T f = hsv.h - i;
+		FLOAT_T w = hsv.v * (1.0 - hsv.s);
+		FLOAT_T q = hsv.v * (1.0 - (hsv.s * f));
+		FLOAT_T t = hsv.v * (1.0 - (hsv.s * (1.0 - f)));
 
 		switch (i) {
 		case 0:
@@ -1040,6 +1060,10 @@ static void Hsv2rgb(
 			g = w;
 			b = q;
 			break;
+		default:
+			if ( log_trkseg < 0 ) { log_trkseg = LogFindIndex( "trkseg" ); }
+			LOG( log_trkseg, 1, ( "unexpected hue sector %d in Hsv2rgb\n", i ) )
+			break;
 		}
 	}
 	*rgb = wRGB( (int)(r*255), (int)(g*255), (int)(b*255) );
@@ -1051,32 +1075,32 @@ static void Rgb2hsv(
         hsv_t	*hsv )
 {
 	FLOAT_T r, g, b;
-	FLOAT_T max, min, delta;
+	FLOAT_T rgbMax, rgbMin;
 
 	r = ((rgb>>16)&0xFF)/255.0;
 	g = ((rgb>>8)&0xFF)/255.0;
 	b = ((rgb)&0xFF)/255.0;
 
-	max = r;
-	if (g > max) {
-		max = g;
+	rgbMax = r;
+	if (g > rgbMax) {
+		rgbMax = g;
 	}
-	if (b > max) {
-		max = b;
-	}
-
-	min = r;
-	if (g < min) {
-		min = g;
-	}
-	if (b < min) {
-		min = b;
+	if (b > rgbMax) {
+		rgbMax = b;
 	}
 
-	hsv->v = max;
+	rgbMin = r;
+	if (g < rgbMin) {
+		rgbMin = g;
+	}
+	if (b < rgbMin) {
+		rgbMin = b;
+	}
 
-	if (max != 0.0) {
-		hsv->s = (max - min) / max;
+	hsv->v = rgbMax;
+
+	if (rgbMax != 0.0) {
+		hsv->s = (rgbMax - rgbMin) / rgbMax;
 	} else {
 		hsv->s = 0.0;
 	}
@@ -1084,13 +1108,13 @@ static void Rgb2hsv(
 	if (hsv->s == 0.0) {
 		hsv->h = -1.0;
 	} else {
-		delta = max - min;
+		FLOAT_T delta = rgbMax - rgbMin;
 
-		if (r == max) {
+		if (r == rgbMax) {
 			hsv->h = (g - b) / delta;
-		} else if (g == max) {
+		} else if (g == rgbMax) {
 			hsv->h = 2.0 + (b - r) / delta;
-		} else if (b == max) {
+		} else if (b == rgbMax) {
 			hsv->h = 4.0 + (r - g) / delta;
 		}
 
@@ -1193,9 +1217,7 @@ EXPORT BOOL_T ReadSegs( void )
 	long rgb;
 	int i;
 	DIST_T elev0, elev1;
-	BOOL_T hasElev;
 	BOOL_T isPolyV1, isPolyV2;
-	BOOL_T improvedEnds;
 	char type;
 	char * plain_text;
 	long option;
@@ -1210,8 +1232,8 @@ EXPORT BOOL_T ReadSegs( void )
 	AppendPath(0);	// End of all paths
 	while ( rc && ((cp = GetNextLine()) != NULL) ) {
 		while (isspace(*cp)) { cp++; }
-		hasElev = FALSE;
-		improvedEnds = FALSE;
+		BOOL_T hasElev = FALSE;
+		BOOL_T improvedEnds = FALSE;
 		if ( IsEND( END_SEGS ) ) {
 			return TRUE;
 		}
@@ -1237,8 +1259,11 @@ EXPORT BOOL_T ReadSegs( void )
 			if ( iVersion >= 4 ) {
 				improvedEnds = isPolyV2 = TRUE;
 			}
-			if ( iVersion > 4 ) {
-				InputError( "Invalid segment version number, maximum is %d", TRUE, 4 );
+			if ( iVersion >= 5 ) {
+				customLineReorder = TRUE;
+			}
+			if ( iVersion > 5 ) {
+				InputError( "Invalid segment version number, maximum is %d", TRUE, 5 );
 				break;
 			}
 		}
@@ -1511,7 +1536,7 @@ EXPORT BOOL_T WriteSegsEnd(
 	BOOL_T rc = TRUE;
 	long option;
 	char * escaped_text;
-	char* trackText;
+	const char* trackText;
 #ifdef UTFCONVERT
 	char* out = NULL;
 #endif
@@ -1519,34 +1544,34 @@ EXPORT BOOL_T WriteSegsEnd(
 	for ( i=0; i<segCnt; i++ ) {
 		switch ( segs[i].type ) {
 		case SEG_STRTRK:
-			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f %0.6f\n",
+			rc &= fprintf( f, "\t%c %lu %0.6f %0.6f %0.6f %0.6f %0.6f\n",
 			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.l.pos[0].x, segs[i].u.l.pos[0].y,
 			               segs[i].u.l.pos[1].x, segs[i].u.l.pos[1].y ) > 0;
 			break;
 		case SEG_STRLIN:
 		case SEG_TBLEDGE:
-			rc &= fprintf( f, "\t%c3 %ld %0.6f %0.6f %0.6f 0 %0.6f %0.6f 0\n",
+			rc &= fprintf( f, "\t%c3 %lu %0.6f %0.6f %0.6f 0 %0.6f %0.6f 0\n",
 			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.l.pos[0].x, segs[i].u.l.pos[0].y,
 			               segs[i].u.l.pos[1].x, segs[i].u.l.pos[1].y ) > 0;
 			break;
 		case SEG_DIMLIN:
-			rc &= fprintf( f, "\t%c3 %ld %0.6f %0.6f %0.6f 0 %0.6f %0.6f 0 %ld\n",
+			rc &= fprintf( f, "\t%c3 %lu %0.6f %0.6f %0.6f 0 %0.6f %0.6f 0 %ld\n",
 			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.l.pos[0].x, segs[i].u.l.pos[0].y,
 			               segs[i].u.l.pos[1].x, segs[i].u.l.pos[1].y,
 			               segs[i].u.l.option ) > 0;
 			break;
 		case SEG_BENCH:
-			rc &= fprintf( f, "\t%c3 %ld %0.6f %0.6f %0.6f 0 %0.6f %0.6f 0 %ld\n",
+			rc &= fprintf( f, "\t%c3 %lu %0.6f %0.6f %0.6f 0 %0.6f %0.6f 0 %ld\n",
 			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.l.pos[0].x, segs[i].u.l.pos[0].y,
 			               segs[i].u.l.pos[1].x, segs[i].u.l.pos[1].y,
 			               BenchOutputOption(segs[i].u.l.option) ) > 0;
 			break;
 		case SEG_CRVTRK:
-			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f\n",
+			rc &= fprintf( f, "\t%c %lu %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f\n",
 			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.c.radius,
 			               segs[i].u.c.center.x, segs[i].u.c.center.y,
@@ -1556,7 +1581,7 @@ EXPORT BOOL_T WriteSegsEnd(
 			option = (segs[i].u.j.negate?1:0) + (segs[i].u.j.flip?2:0) +
 			         (segs[i].u.j.Scurve?4:0);
 			rc &= fprintf( f,
-			               "\t%c %ld %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %ld\n",
+			               "\t%c %lu %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %ld\n",
 			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.j.pos.x, segs[i].u.j.pos.y,
 			               segs[i].u.j.angle,
@@ -1569,7 +1594,7 @@ EXPORT BOOL_T WriteSegsEnd(
 		case SEG_BEZTRK:
 		case SEG_BEZLIN:
 			rc &= fprintf( f,
-			               "\t%c3 %ld %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f\n",
+			               "\t%c3 %lu %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f\n",
 			               segs[i].type, wDrawGetRGB(segs[i].color),
 			               segs[i].lineWidth,
 			               segs[i].u.l.pos[0].x, segs[i].u.l.pos[0].y,
@@ -1582,7 +1607,7 @@ EXPORT BOOL_T WriteSegsEnd(
 			rc &= fprintf(f,"\tSUBSEND\n");
 			break;
 		case SEG_CRVLIN:
-			rc &= fprintf( f, "\t%c3 %ld %0.6f %0.6f %0.6f %0.6f 0 %0.6f %0.6f\n",
+			rc &= fprintf( f, "\t%c3 %lu %0.6f %0.6f %0.6f %0.6f 0 %0.6f %0.6f\n",
 			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.c.radius,
 			               segs[i].u.c.center.x, segs[i].u.c.center.y,
@@ -1590,7 +1615,7 @@ EXPORT BOOL_T WriteSegsEnd(
 
 			break;
 		case SEG_FILCRCL:
-			rc &= fprintf( f, "\t%c3 %ld %0.6f %0.6f %0.6f %0.6f 0\n",
+			rc &= fprintf( f, "\t%c3 %lu %0.6f %0.6f %0.6f %0.6f 0\n",
 			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.c.radius,
 			               segs[i].u.c.center.x, segs[i].u.c.center.y ) > 0;
@@ -1598,7 +1623,7 @@ EXPORT BOOL_T WriteSegsEnd(
 		case SEG_POLY:
 		case SEG_FILPOLY:
 // TODO: to be consistent, we should add a dummy 0 for elev. See ReadSegs/SEG_POLY
-			rc &= fprintf( f, "\t%c4 %ld %0.6f %d %d \n",
+			rc &= fprintf( f, "\t%c4 %lu %0.6f %d %d \n",
 			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.p.cnt, segs[i].u.p.polyType ) > 0;
 			for ( j=0; j<segs[i].u.p.cnt; j++ )
@@ -1618,7 +1643,7 @@ EXPORT BOOL_T WriteSegsEnd(
 			trackText = segs[i].u.t.string;
 #endif // UTFCONVERT
 			escaped_text = ConvertToEscapedText(trackText);
-			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %d %0.6f \"%s\" %d %ld\n",
+			rc &= fprintf( f, "\t%c %lu %0.6f %0.6f %0.6f %d %0.6f \"%s\" %d %lu\n",
 			               segs[i].type, wDrawGetRGB(segs[i].color),
 			               segs[i].u.t.pos.x, segs[i].u.t.pos.y, segs[i].u.t.angle,
 			               segs[i].u.t.boxed, segs[i].u.t.fontSize,
@@ -1628,6 +1653,11 @@ EXPORT BOOL_T WriteSegsEnd(
 			MyFree(out);
 #endif
 			break;
+		default:
+			if ( log_trkseg < 0 ) { log_trkseg = LogFindIndex( "trkseg" ); }
+			LOG( log_trkseg, 1, ( "unexpected seg type %d in WriteSegsEnd\n",
+			                      segs[i].type ) )
+			break;
 		}
 	}
 	if (writeEnd) { rc &= fprintf( f, "\t%s\n", END_SEGS )>0; }
@@ -1635,6 +1665,27 @@ EXPORT BOOL_T WriteSegsEnd(
 }
 
 
+/**
+ * Dispatch a segment-geometry operation (distance/length/draw/etc., see
+ * segProc_e) to the type-specific implementation for `segPtr`. Handles
+ * seven of the SEG_* types (trkseg.h): the four real track types
+ * (SEG_STRTRK/SEG_CRVTRK/SEG_JNTTRK/SEG_BEZTRK) and their three
+ * decorative-line counterparts (SEG_STRLIN/SEG_CRVLIN/SEG_BEZLIN, drawn
+ * the same way but not real connectivity geometry). Anything else in
+ * the SEG_* list (SEG_POLY, SEG_BENCH, SEG_TEXT, SEG_TBLEDGE, ...) has
+ * no case here at all and CHECKMSG(FALSE, ...)-aborts the whole
+ * program -- this is a genuine "should never happen" assertion, not a
+ * graceful fallback, so callers walking a segment array from data that
+ * isn't guaranteed to only contain these seven types (e.g. a turnout/
+ * compound part's own PATH -- see IsSegTrack()'s doc comment and
+ * GetParamsTurnout(), cturnout.c) must filter first, not assume every
+ * segment they encounter is safe to pass here. Confirmed via a real
+ * crash report, SF #778.
+ *
+ * \param[in] cmd which operation to perform
+ * \param[in] segPtr the segment; must be one of the seven types above
+ * \param[in,out] data operation-specific input/output, see segProcData_t
+ */
 EXPORT void SegProc(
         segProc_e cmd,
         trkSeg_p segPtr,
@@ -1772,7 +1823,7 @@ EXPORT void DrawSegsO(
         wDrawColor color,
         long options )
 {
-	wIndex_t i, j;
+	wIndex_t i;
 	coOrd p0, p1, p2, p3, c;
 	ANGLE_T a0;
 	wDrawColor color1, color2;
@@ -1855,8 +1906,16 @@ EXPORT void DrawSegsO(
 						// DrawLine( d, p0, p1, (wDrawWidth)floor(3.0/BASE_DPI*d->dpi+0.5), color );
 						DrawLine(d, p0, p1, 3, color);
 						break;
+					default:
+						if ( log_trkseg < 0 ) { log_trkseg = LogFindIndex( "trkseg" ); }
+						LOG( log_trkseg, 1, ( "unexpected seg type %d in DrawSegsO\n", segPtr->type ) )
+						break;
 					}
 				}
+				break;
+			default:
+				if ( log_trkseg < 0 ) { log_trkseg = LogFindIndex( "trkseg" ); }
+				LOG( log_trkseg, 1, ( "unexpected seg type %d in DrawSegsO\n", segPtr->type ) )
 				break;
 			}
 			break;
@@ -1964,6 +2023,11 @@ EXPORT void DrawSegsO(
 					}
 					DrawLine( d, p0, p1, (d->options&DC_THICK)?thick:w, color1 );
 					break;
+				default:
+					if ( log_trkseg < 0 ) { log_trkseg = LogFindIndex( "trkseg" ); }
+					LOG( log_trkseg, 1, ( "unexpected seg type %d in DrawSegsO bezier subseg\n",
+					                      tempPtr->type ) )
+					break;
 				}
 			}
 			break;
@@ -1989,7 +2053,7 @@ EXPORT void DrawSegsO(
 			coOrd *tempPts = malloc(sizeof(coOrd)*segPtr->u.p.cnt);
 			int *tempTypes = malloc(sizeof(int)*segPtr->u.p.cnt);
 //				coOrd tempPts[segPtr->u.p.cnt];
-			for (j=0; j<segPtr->u.p.cnt; j++) {
+			for (int j=0; j<segPtr->u.p.cnt; j++) {
 				REORIGIN( tempPts[j], segPtr->u.p.pts[j].pt, angle, orig );
 				tempTypes[j] = segPtr->u.p.pts[j].pt_type;
 			}
@@ -2047,6 +2111,10 @@ EXPORT void DrawSegsO(
 				         FALSE, bThick?thick:(wDrawWidth)0, color1 );
 			}
 			break;
+		default:
+			if ( log_trkseg < 0 ) { log_trkseg = LogFindIndex( "trkseg" ); }
+			LOG( log_trkseg, 1, ( "unexpected seg type %d in DrawSegsO\n", segPtr->type ) )
+			break;
 		}
 	}
 }
@@ -2098,14 +2166,14 @@ EXPORT void CleanSegs(dynArr_t * seg_p)
 {
 	if (seg_p->cnt ==0) { return; }
 	for (int i=0; i<seg_p->cnt; i++) {
-		trkSeg_t t = DYNARR_N(trkSeg_t,* seg_p,i);
-		if (t.type == SEG_BEZLIN || t.type == SEG_BEZTRK) {
-			DYNARR_FREE( trkSeg_t, t.bezSegs );
+		trkSeg_p t = &DYNARR_N(trkSeg_t,* seg_p,i);
+		if (t->type == SEG_BEZLIN || t->type == SEG_BEZTRK) {
+			DYNARR_FREE( trkSeg_t, t->bezSegs );
 		}
-		if (t.type == SEG_POLY || t.type == SEG_FILPOLY) {
-			if (t.u.p.pts) { MyFree(t.u.p.pts); }
-			t.u.p.cnt = 0;
-			t.u.p.pts = NULL;
+		if (t->type == SEG_POLY || t->type == SEG_FILPOLY) {
+			if (t->u.p.pts) { MyFree(t->u.p.pts); }
+			t->u.p.cnt = 0;
+			t->u.p.pts = NULL;
 		}
 	}
 
@@ -2222,13 +2290,11 @@ EXPORT wBool_t CompareSegs(
 		// EndPts
 		case SEG_UNCEP:
 		case SEG_CONEP:
-			break;
 		// Turnout/Struct
 		case SEG_PATH:
 		case SEG_SPEC:
 		case SEG_CUST:
 		case SEG_DOFF:
-			break;
 		default:
 			break;
 		}

@@ -50,10 +50,11 @@ void TabStringExtract(
 			tabs[inx].len = (unsigned long)(next - string);
 			string = next + 1;
 		} else {
-			if (string)
+			if (string) {
 				tabs[inx].len = (unsigned long)strlen(string);
-			else
+			} else {
 				tabs[inx].len = 0;
+			}
 			string += tabs[inx].len;
 		}
 	}
@@ -86,11 +87,11 @@ char* TabStringCpy(
 
 
 int TabStringCmp(
-        char* src,
-        tabString_t* tab)
+        const char* src,
+        const tabString_t* tab)
 {
-	size_t srclen = strlen(src);
-	size_t len = srclen;
+	int srclen = (int)strlen(src);
+	int len = srclen;
 	int rc;
 	if (len > tab->len) {
 		len = tab->len;
@@ -112,13 +113,13 @@ int TabStringCmp(
  */
 
 long TabGetLong(
-	const tabString_t* tab)
+        const tabString_t* tab)
 {
 	long val = 0;
 	// Buffer large enough for a 64-bit integer string plus sign.
 	char buf[21];
 
-	if (tab->len > 0 && tab->len < sizeof(buf)) {
+	if (tab->len > 0 && tab->len < (int)sizeof(buf)) {
 		memcpy(buf, tab->ptr, tab->len);
 		buf[tab->len] = '\0';
 		val = atol(buf);
@@ -133,14 +134,14 @@ long TabGetLong(
  */
 
 FLOAT_T TabGetFloat(
-	const tabString_t* tab)
+        const tabString_t* tab)
 {
 	if (!tab || tab->len == 0) {
 		return 0.0;
 	}
 	// A buffer for floating point numbers. 40 chars should be sufficient.
 	char buf[40];
-	if (tab->len >= sizeof(buf)) {
+	if (tab->len >= (int)sizeof(buf)) {
 		// String too long, handle as error.
 		return 0.0;
 	}

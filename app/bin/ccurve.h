@@ -50,6 +50,7 @@ typedef void (*curveMessageProc)( const char *, ... );
 STATUS_T CreateCurve( wAction_t, coOrd, BOOL_T, wDrawColor, DIST_T, long,
                       dynArr_t *,curveMessageProc );
 int IsCurveCircle( track_p );
+DIST_T GetCurveRadius( track_p );
 void PlotCurve( long, coOrd, coOrd, coOrd, curveData_t *, BOOL_T, DIST_T );
 track_p NewCurvedTrack( coOrd, DIST_T, ANGLE_T, ANGLE_T, long );
 DIST_T CurveDescriptionDistance( coOrd, track_p, coOrd *, BOOL_T, BOOL_T * );

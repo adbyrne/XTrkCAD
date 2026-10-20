@@ -2,14 +2,21 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**Since 2026-10-20 there is one development line.** Upstream (Martin Fischer) merged
+`GTK3V2MAIN` into Hg `default` at r7748 ("Make GTK3 branch the default") and closed
+`GTK3V2MAIN` at r7749. Git followed: `main` is the GTK3 line (PR #240), and the last GTK2 state of
+`main` is the `gtk2-final` tag. GTK2 is no longer our concern, in CI or anywhere else (user,
+2026-10-20). Hg `v5.3.1` is Martin's GTK2 hotfix branch. Anything below that still says
+`GTK3V2MAIN` is history, not a branch to use.
+
 ## Session startup — SSH agent check
 
 The SourceForge Hg remote (`hg.code.sf.net`) requires the passphrase-protected key
-`~/.ssh/id_ed25519`. Non-interactive SSH (the weekly sync timer, or any `hg pull`/`push` run by
-Claude) cannot supply the passphrase, so the key must already be loaded in the user's
-`ssh-agent`. Check at the start of every session by comparing fingerprints — `ssh-add -l` prints
-each loaded key's *comment* field (which may not be the filename; e.g. this key's comment is the
-user's email, not `id_ed25519`), so grepping for the filename string gives a false "NOT LOADED":
+`~/.ssh/id_ed25519`. Non-interactive SSH (any `hg pull`/`push` run by Claude) cannot supply the
+passphrase, so the key must already be loaded in the user's `ssh-agent`. Check at the start of
+every session by comparing fingerprints — `ssh-add -l` prints each loaded key's *comment* field
+(which may not be the filename; e.g. this key's comment is the user's email, not `id_ed25519`), so
+grepping for the filename string gives a false "NOT LOADED":
 
 ```sh
 ssh-add -l | grep -qF "$(ssh-keygen -lf ~/.ssh/id_ed25519.pub | awk '{print $2}')" || echo "NOT LOADED"
@@ -18,255 +25,125 @@ ssh-add -l | grep -qF "$(ssh-keygen -lf ~/.ssh/id_ed25519.pub | awk '{print $2}'
 If not loaded, ask the user to run (via `!` so it's interactive and can prompt for the
 passphrase): `ssh-add ~/.ssh/id_ed25519`. Don't attempt `hg pull`/`push` against the SF remote
 until this succeeds — it will otherwise fail with `Permission denied (publickey,keyboard-interactive)`,
-which looks like an SF-side credential problem but usually isn't (see incident 2026-07-11 below).
+which looks like an SF-side credential problem but usually isn't (incident 2026-07-11).
 
 ## Session startup — upstream sync check
 
-**At the start of every session**, do a live, read-only check against SF — don't just trust the
-`sf-sync-pending` file (see below for why). This costs a few seconds and never mutates anything:
+**At the start of every session**, do a live, read-only check against SF:
 
 ```sh
-hg -R /home/abyrne/XTrkCAD/xtrkcad-hg incoming -b GTK3V2MAIN -b default \
+hg -R /home/abyrne/XTrkCAD/xtrkcad-hg incoming -b default \
     --template '{rev}:{node|short} {branch} {author|person}: {desc|firstline}\n'
 ```
 
 (Exit code 1 with "no changes found" means nothing pending — that's success, not an error. Use
-`-b BRANCH` flags, not a `-r "branch(...) or branch(...)"` revset — `hg incoming -r` resolves its
-argument against the *remote* peer, which doesn't support revset function syntax and aborts with
-`abort: unknown revision`; confirmed 2026-08-29.) Also
-still check the pending file, since it can carry a manual-merge note the live check above won't
-show (e.g. a patch the sync script couldn't auto-apply, saved under `.claude/patches/`):
-
-```sh
-cat /home/abyrne/XTrkCAD/.claude/sf-sync-pending   # non-empty = a prior run left something for you
-```
-
-**Why both, not just the pending file:** the weekly `xtrkcad-sf-sync` timer (Monday 08:00) is the
-only thing that writes that file, and it has repeatedly failed silently between runs — 24
-`hg pull` failures logged in `.claude/sf-sync.log` as of 2026-08-29, almost all
-`Could not resolve hostname hg.code.sf.net` (DNS not up yet at boot, despite
-`network-online.target`). A failed run doesn't retry until the following Monday and doesn't touch
-the pending file, so a whole week of upstream commits (including straight-to-`GTK3V2MAIN`
-merges from other contributors, e.g. Martin Fischer) can land invisibly — confirmed 2026-08-29
-when a live check found six unflagged `GTK3V2MAIN` merge/topic-branch commits (SF #719, #721,
-#729/#730) that the pending file said nothing about. The live check above is the fix: it asks SF
-directly every session instead of trusting a periodic job's last output.
-
-**Also check the second hop — the GTK3V2MAIN working copy vs. its own local mirror.**
-`xtrkcad-hg-gtk3v2main` (where GTK3V2MAIN edits actually happen) pulls from `xtrkcad-hg` locally,
-not from SF directly, so the SF-vs-`xtrkcad-hg` check above can come back completely clean while
-`xtrkcad-hg-gtk3v2main` is still behind `xtrkcad-hg` itself. Confirmed 2026-09-03: `xtrkcad-hg`
-was byte-for-byte synced with SF (a merge had already landed in both), but
-`xtrkcad-hg-gtk3v2main` was 2 changesets behind `xtrkcad-hg` — this read as "SF is broken/has an
-unreconciled conflict" until traced back to a stale working copy. Check every session,
-unconditionally (not just when the SF check above finds something):
-
-```sh
-hg -R /home/abyrne/XTrkCAD/xtrkcad-hg-gtk3v2main incoming -b GTK3V2MAIN \
-    --template '{rev}:{node|short} {branch} {author|person}: {desc|firstline}\n'
-```
-
-If it reports anything, just pull and update immediately — no need to ask first. This is a
-same-machine, local-to-local sync of content that's already vetted (either it's the user's own
-prior work pushed up from this same working copy, or upstream SF content the user already
-approved pulling into `xtrkcad-hg` via the check above), so there's nothing new here to review:
-
-```sh
-hg -R /home/abyrne/XTrkCAD/xtrkcad-hg-gtk3v2main status   # must be clean before pulling
-hg -R /home/abyrne/XTrkCAD/xtrkcad-hg-gtk3v2main pull
-hg -R /home/abyrne/XTrkCAD/xtrkcad-hg-gtk3v2main update GTK3V2MAIN
-```
-
-If `status` isn't clean, stop and reconcile the in-progress work first rather than pulling on top
-of it.
+`-b BRANCH`, not a `-r "branch(...)"` revset — `hg incoming -r` resolves its argument against the
+*remote* peer, which doesn't support revset function syntax and aborts with
+`abort: unknown revision`; confirmed 2026-08-29.) Leave out `-b` to also see other contributors'
+topic branches (e.g. Martin's `fix-…-gtk3`), which is useful context but not something to sync.
 
 **`incoming` can't see a working copy that was pulled but never updated.** It only lists
-changesets the repo doesn't have yet, so it reports "no changes found" even when the working copy
-is sitting on an older revision. Confirmed 2026-10-05: r7365–r7401 were already pulled into
-`xtrkcad-hg-gtk3v2main`, but its working copy was still at r7364, and both `incoming` checks
-came back clean. Also check that the working copy is at the branch tip:
+changesets the repo doesn't have yet. Confirmed 2026-10-05 and again 2026-10-20 (`xtrkcad-hg` sat
+on old GTK2 r7675 with 1368 pulled changesets pending). Also check the working copy is at the
+`default` tip:
 
 ```sh
-H=/home/abyrne/XTrkCAD/xtrkcad-hg-gtk3v2main
-[ "$(hg -R $H id -i -r GTK3V2MAIN)" = "$(hg -R $H id -i)" ] || echo "WORKING COPY NOT AT GTK3V2MAIN TIP (or has uncommitted changes)"
+H=/home/abyrne/XTrkCAD/xtrkcad-hg
+hg -R $H summary | head -3        # branch: must be default unless you're on a topic branch on purpose
+[ "$(hg -R $H id -i -r default)" = "$(hg -R $H id -i)" ] || echo "WORKING COPY NOT AT default TIP (or has uncommitted changes)"
 ```
 
-If it's behind and `status` is clean, `hg -R $H update GTK3V2MAIN`.
+If it's behind and `hg -R $H status` is clean, `hg -R $H pull && hg -R $H update default`.
 
-**A `skipped — … has uncommitted local changes` line in the pending file means the sync script
-found the git worktree dirty, and that includes untracked files.** Confirmed 2026-10-02 to
-2026-10-05: one untracked doc file in `xtrkcad-git-gtk3` (`docs/development-process-specification.md`)
-made three daily runs skip in a row. Commit, move, or remove the file, and keep the git worktrees
-clean between sessions.
-
-**Hg `default` → git `main` is synced on GitHub, not locally (since 2026-10-05).**
-`.github/workflows/hg-sync-default.yml` (on `main`) runs daily at 10:23 UTC. It clones Hg
-`default` anonymously from SF's read-only URL and diffs from the last synced node, which is the
-newest `Hg-Node:` commit trailer on `main`. It applies the diff to a
-`test/upstream-default-*` branch and runs `ci.yml` there. If CI passes, it fast-forwards `main`,
-runs `main`'s CI, and deletes the test branch together with its runs. If the patch won't apply,
-CI fails, or `main` moved in the meantime, it opens a GitHub issue titled
+**Hg `default` → git `main` is synced on GitHub, not locally.**
+`.github/workflows/hg-sync-default.yml` runs daily at 10:23 UTC. It clones Hg `default`
+anonymously from SF's read-only URL and diffs from the last synced node, which is the newest
+`Hg-Node:` commit trailer on `main` (PR #240's merge commit carries r7752). It applies the diff
+to a `test/upstream-default-*` branch and runs `ci-gtk3.yml` there. If CI passes, it
+fast-forwards `main`, runs `main`'s CI, and deletes the test branch together with its runs. If
+a file's change is already on `main` (our git-first changes, once they land in Hg), it's skipped
+and listed in the sync commit. If the rest won't apply, CI fails, or `main` moved in the
+meantime, it opens a GitHub issue titled
 `Hg sync (default): …` and leaves `main` alone. At session start, run
-`gh issue list --repo adbyrne/XTrkCAD --search "Hg sync in:title"`, and treat a `default` hit
-from the `incoming` check above as something the workflow will pick up, not as local work. The
-local `xtrkcad-sf-sync` script handles only `GTK3V2MAIN` now. Run it by hand with
-`gh workflow run hg-sync-default.yml`. For testing, the inputs are `dry_run`, `promote`,
-`from_node`, `to_node`, and `target_branch` (a scratch branch instead of `main`). `GTK3V2MAIN`
-gets the same treatment once the held git-only features have merged into Hg.
+`gh issue list --repo adbyrne/XTrkCAD --search "Hg sync in:title"`. A `default` hit from the
+`incoming` check above is something the workflow will pick up, not local work. Run it by hand
+with `gh workflow run hg-sync-default.yml`; for testing, the inputs are `dry_run`, `promote`,
+`from_node`, `to_node`, and `target_branch` (a scratch branch instead of `main`).
 
-If either of the two checks above (SF vs. `xtrkcad-hg`, pending file) surfaces something, tell the user which branches have new SF changes and ask:
-**"Upstream SF changes are pending — want me to compile and test them locally, then push to
-GitHub CI?"**
+**The local `xtrkcad-sf-sync` timer is retired** (disabled 2026-10-20). It only handled
+`GTK3V2MAIN`, which no longer exists. `.claude/sf-sync-pending` is no longer written; ignore it.
 
-If yes, run the following workflow (note step 0, needed only when the live check above found
-things the pending file didn't already know about):
+### When the sync workflow opens an issue
 
-### 0 — Pull if the live check found changes the pending file didn't
+The usual cause is an upstream change colliding with a git-only file or hunk (astyle fixes, git
+CI descriptions in the dev guide, held features). Handle it by hand:
 
 ```sh
-hg -R xtrkcad-hg pull
-hg -R xtrkcad-hg-gtk3v2main pull
-```
-
-Then continue at step 1. (If `sf-sync-pending` already covered it — the normal case — the Hg
-working copies are already up to date and this step is a no-op.)
-
-### 1 — Local compile (Linux GTK3)
-
-The Hg working copies are already updated by the weekly sync script. Just rebuild:
-
-```sh
-cmake --build build-gtk3v2main 2>&1 | tee /tmp/build-gtk3v2main.log
-ctest --test-dir build-gtk3v2main --output-on-failure
-```
-
-For default-branch changes (rare) use `build/` instead.
-
-**Several pending entries, or a "needs manual merge" entry:** don't replay each saved patch one
-by one. Make one diff covering the whole range, from the last Hg revision already synced into git
-to the current branch tip, and apply that to a fresh test branch. This is what was done
-2026-10-05, when five pending entries became one diff and PR #218:
-
-```sh
-hg -R xtrkcad-hg-gtk3v2main diff --git -r <last-synced-node> -r GTK3V2MAIN \
-    > .claude/patches/upstream-gtk3v2main-r<A>-r<B>.diff
-git -C xtrkcad-git-gtk3 checkout -b test/upstream-gtk3v2main-YYYY-MM-DD GTK3V2MAIN
-git -C xtrkcad-git-gtk3 apply --reject ../.claude/patches/upstream-gtk3v2main-r<A>-r<B>.diff
+hg -R xtrkcad-hg pull && hg -R xtrkcad-hg update default
+hg -R xtrkcad-hg diff --git -r <last-synced-node> -r default \
+    > .claude/patches/upstream-default-r<A>-r<B>.diff
+git -C xtrkcad-git checkout -b test/upstream-default-YYYY-MM-DD origin/main
+git -C xtrkcad-git apply --reject ../.claude/patches/upstream-default-r<A>-r<B>.diff
 ```
 
 Use `--reject`, not `--3way`. Hg diffs don't carry git blob IDs, so `--3way` always fails with
-"repository lacks the necessary blob" and falls back anyway. Resolve each `*.rej` hunk by hand
-and keep any git-only changes it collides with (held features, SF #789/#803-style git-ahead
-edits). Open the PR with an explicit `--base GTK3V2MAIN`.
+"repository lacks the necessary blob" and falls back anyway. Resolve each `*.rej` hunk by hand,
+keep any git-only change it collides with, and end the commit message with an
+`Hg-Node: <full node>` trailer so the workflow resumes from there. Open the PR with
+`--base main`.
 
-**A clean Hg build doesn't prove the git branch builds.** Git `GTK3V2MAIN` carries git-only
-code (held features) that an upstream API change can break even though Hg itself compiles fine.
-Confirmed 2026-10-05: upstream removed `PDO_DLGRESIZE`, Hg built and tested clean, and the git
-test branch failed CI because Layer Groups, Notes, and Reports dialogs still used the flag.
-Before pushing the test branch, build it locally in a scratch build dir, and run the astyle gate
-with the same `--exclude` list as `ci-gtk3.yml`'s `astyle-check`:
+**A clean Hg build doesn't prove the git branch builds.** Git can carry git-only code that an
+upstream API change breaks even though Hg compiles fine. This happened 2026-10-05
+(`PDO_DLGRESIZE` removed) and 2026-10-18 (`F_BLOCK` removed). Before pushing, build in a scratch
+dir and run `tools/astyle-check.sh`, the same script as `ci-gtk3.yml`'s `astyle-check` gate:
 
 ```sh
-cmake -B <scratch>/build-git -S xtrkcad-git-gtk3 -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
+cmake -B <scratch>/build-git -S xtrkcad-git -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
 cmake --build <scratch>/build-git -- -k 0
 ctest --test-dir <scratch>/build-git -LE regression
+(cd xtrkcad-git && tools/astyle-check.sh)
 ```
 
-### 2 — Fix any compile errors
+### Verify the git tree actually matches Hg before declaring a sync done
 
-- Edit files in `xtrkcad-hg-gtk3v2main/` (the Hg source for GTK3V2MAIN).
-- Rebuild until clean and all tests pass.
-- Keep fixes minimal — only what's needed to compile against the upstream changes.
-
-### 3 — Carry fixes into the git test branch and push
-
-The sync script already pushed a `test/upstream-{branch}-YYYY-MM-DD` branch to GitHub with the
-raw upstream diff applied. If the local build needed fixes, apply them to that branch too:
+**Never update `bug-tracker.md`'s "Hg Branches" table to `✅ rNNNN — synced` because a diff
+applied cleanly.** A clean `git apply` only proves *that patch's* hunks landed. It says nothing
+about files a *previous* sync failed to bring forward (2026-07-09 incident: git fell behind Hg for
+weeks while the tracker claimed full sync). Run the verification script:
 
 ```sh
-# Get a diff of what was fixed in Hg
-hg -R xtrkcad-hg-gtk3v2main diff > /tmp/local-fixes.diff
-
-# Apply to the git test branch
-BRANCH=$(grep -oP "test/upstream-\S+" /home/abyrne/XTrkCAD/.claude/sf-sync-pending | head -1)
-# GTK3V2MAIN lives in the xtrkcad-git-gtk3 worktree; use xtrkcad-git for default/main syncs
-git -C xtrkcad-git-gtk3 checkout "$BRANCH"
-git -C xtrkcad-git-gtk3 apply /tmp/local-fixes.diff
-git -C xtrkcad-git-gtk3 add -u
-git -C xtrkcad-git-gtk3 commit -m "fix: local compile fixes for upstream SF sync"
-git -C xtrkcad-git-gtk3 push
+xtrkcad-verify-sync xtrkcad-hg default xtrkcad-git main          # the defaults; can be omitted
+xtrkcad-verify-sync xtrkcad-hg "" xtrkcad-git feature-layergroups-jsonnote   # a feature branch
 ```
 
-If the build was already clean (no fixes needed), skip step 3 — CI is already running on the
-branch that the sync script pushed.
+**Never pass bare `tip` as the Hg revision.** In a multi-branch Hg repo `tip` is the newest
+changeset repo-wide, which can be another contributor's branch (`KensTest` inflated a 2026-08-14
+check to 375 bogus differences). The script maps git `main` to Hg `default`, and any other git
+ref to the Hg branch of the same name or that name plus `-gtk3` (Hg topic branches still carry
+the suffix). It refuses to compare across a branch mismatch. It also diffs the **local** git ref,
+so fast-forward it first (`git -C xtrkcad-git pull --ff-only`).
 
-### 4 — Verify the git tree actually matches Hg before declaring the sync done
-
-**Never update `bug-tracker.md`'s "Hg Branches" table to `✅ rNNNN — synced` based on the diff
-having applied cleanly.** A clean `git apply` only proves *that patch's* hunks landed — it says
-nothing about files a *previous* sync silently failed to bring forward. That gap is exactly what
-caused the 2026-07-09 incident: git's GTK3V2MAIN quietly fell behind Hg in the gtk3lib
-control-struct/basic-draw family and several `app/bin` files for weeks while the tracker kept
-claiming full sync.
-
-Run the verification script instead:
-
-```sh
-xtrkcad-verify-sync xtrkcad-hg-gtk3v2main GTK3V2MAIN xtrkcad-git-gtk3 GTK3V2MAIN
-# for the default/GTK2 branch: xtrkcad-verify-sync xtrkcad-hg default xtrkcad-git main
-```
-
-**Always pass the Hg branch name explicitly (as shown above), never bare `tip`.** In a
-multi-branch Hg repo, `tip` means the single most-recently-committed revision *repo-wide*, not
-"the tip of the branch you're comparing" — if another contributor's unrelated branch (their own
-feature work, e.g. `KensTest`/`newtrainrun`) happens to be more recently committed, `tip` silently
-resolves there instead, producing a huge bogus diff that looks like real drift but isn't (this is
-exactly what inflated the 2026-08-14 `default`-branch check to "375 unexpected differences" — the
-real number was 2). The script now refuses to compare across a branch mismatch and exits with an
-error explaining the fix, but avoid tripping it in the first place by never using `tip`.
-
-It archives both trees and diffs every file under `app/`, filtered against the maintained
-allowlist at `.claude/sync-exceptions.txt`. `PASS` means the git tree is byte-for-byte identical
-to Hg except for documented, deliberate exceptions — only then is it safe to write the `✅ rNNNN`
-line. On `FAIL`, either reconcile the listed files or, if the difference is genuinely intentional
-(e.g. a feature port that's blocked, or local test coverage never contributed upstream), add it
-to `sync-exceptions.txt` with a reason comment — don't silently ignore the failure.
-
-**A large FAIL isn't necessarily a new problem.** Files belonging to git-merged-but-not-yet-Hg-merged
-`needs-review` tickets (bug-tracker.md's SF Bugs table — e.g. #732/#733/#734 as of 2026-08-29) will
-show up here every time until each clears its own review window; that's expected, temporary drift,
-not something to add to `sync-exceptions.txt` (which is for *permanent* deliberate divergences).
-Before reconciling or exception-listing anything, check whether the file is already explained by an
-open `needs-review` row — confirmed useful 2026-08-29 when a 67-file FAIL turned out to be ~44
-already-tracked pending-review files + 14 already-decided-against glade retirement + only 2
-genuinely new gaps (Ken Shaffer's flatpak/doc-branding work, untouched by git since Aug 10/25).
-Categorize file-by-file with `hg log -r "file('path')"` vs `git log -- path` (compare dates/authors,
-not just presence of a diff) rather than assuming every FAIL entry needs action.
-
-### 5 — Clear the pending file
-
-```sh
-rm /home/abyrne/XTrkCAD/.claude/sf-sync-pending
-```
+It archives both trees and diffs the **whole tree** (since 2026-10-19; `--app-only` gives the old
+`app/`-only scope), labelling each entry `differs`, `hg-only` or `git-only`. Results are filtered
+against `.claude/sync-exceptions-<git-ref>.txt` if it exists, otherwise
+`.claude/sync-exceptions.txt` (used for `main` and feature branches; the old GTK2 list is
+archived as `sync-exceptions-gtk2-final.txt.archived`). Entries are paths or bash patterns
+(`.github/*`). The script also lists exceptions that matched nothing; remove those unless the
+exceptions file's comment says the entry only applies to some refs. `PASS` means the git tree is
+byte-for-byte identical to Hg except for documented, deliberate exceptions — only then is it safe
+to write the `✅ rNNNN` line. On `FAIL`, reconcile the listed files, or, if the difference is
+genuinely intentional and permanent, add it to the exceptions file with a reason comment.
+Categorize file by file with `hg log -r "file('path')"` vs `git log -- path` (compare dates and
+authors, not just presence of a diff) rather than assuming every FAIL entry needs action.
 
 ### Notes
-- The test branch is for integration testing only — do **not** merge it into `main`/`GTK3V2MAIN`
-  until CI is green and the changes are reviewed.
-- If the patch required manual conflict resolution (the sync script saved a `.diff` to
-  `.claude/patches/` instead of creating a branch), handle that first before compiling, and run
-  step 4's verification afterward — this is exactly the case that most often leaves files behind.
-- **While held git-only work keeps verify-sync at FAIL, compare drift before and after the sync
-  instead of reading the raw FAIL list.** Archive Hg at the old and new synced revisions
-  (`hg archive -r <node> -I app`) and git at the merge commit's first parent and at the merge
-  commit itself (`git archive`), then `diff -rq` each pair. The sync is clean when both pairs
-  list the same files and any file whose drift content changed is explained by a deliberate
-  edit. Done 2026-10-05: 92 files before and 92 after; only `menu.c` (astyle line wrapping) and
-  `reports.c` (`PDO_DLGRESIZE` removal) changed.
-- **Merging into git `GTK3V2MAIN` triggers `release.yml`**, which republishes the
-  `latest-gtk3v2main` prerelease packages. PR CI never runs `release.yml`, so check that the
-  post-merge Release run finishes green. Its packaging jobs use rolling OS packages that can
-  break with no change on our side: 2026-10-05, MSYS2 doxygen 1.18.0-3 crashed
-  `package-windows`, fixed by pinning 1.16.1-4. When a PR changes `release.yml`, validate it
+- Test branches are for integration testing only — do **not** merge into `main` until CI is
+  green and the changes are reviewed.
+- **Merging into git `main` triggers `release.yml`**, which republishes the `latest-main`
+  prerelease packages and redeploys GitHub Pages. PR CI never runs `release.yml`, so check that
+  the post-merge Release run finishes green. Its packaging jobs use rolling OS packages that can
+  break with no change on our side (2026-10-05: MSYS2 doxygen 1.18.0-3 crashed
+  `package-windows`, fixed by pinning 1.16.1-4). When a PR changes `release.yml`, validate it
   before merging with `gh workflow run release.yml --ref <branch>`. Any workflow change also
   needs a matching dev-guide update (`docs/doxygen/building.md`, `advanced.md`).
 
@@ -275,117 +152,111 @@ rm /home/abyrne/XTrkCAD/.claude/sf-sync-pending
 ## Project Layout (`/home/abyrne/XTrkCAD/`)
 
 ```
-.claude/                   Development working files — plans, notes, sf-sync-pending (not committed)
+.claude/                   Development working files — plans, notes, patches, sync exceptions (not committed)
 docs/                      Project documentation not required in any repo
-xtrkcad-hg/                Hg working copy — default branch, remote = SourceForge
-xtrkcad-hg-gtk3v2main/     Hg working copy — GTK3V2MAIN branch, cloned from xtrkcad-hg
-xtrkcad-git/               Git repo — main branch (GTK2), pushed to github.com/adbyrne/XTrkCAD
-xtrkcad-git-gtk3/          Git worktree — GTK3V2MAIN branch (same .git as xtrkcad-git)
-build/                     Out-of-source CMake build for default branch (source: xtrkcad-hg)
-build-gtk3v2main/          Out-of-source CMake build for GTK3V2MAIN branch (source: xtrkcad-hg-gtk3v2main)
-CLAUDE.md                  This file — committed into xtrkcad-git (main) and xtrkcad-git-gtk3 (GTK3V2MAIN)
+xtrkcad-hg/                Hg working copy — default branch (GTK3) and our topic branches, remote = SourceForge
+xtrkcad-git/               Git repo — main branch (GTK3), pushed to github.com/adbyrne/XTrkCAD
+build/                     Out-of-source CMake build (source: xtrkcad-hg)
+CLAUDE.md                  This file — also committed into xtrkcad-git (main)
 ```
+
+Retired 2026-10-20, kept until the switch has settled (delete only with the user's OK):
+`xtrkcad-hg-gtk3v2main/` (clone of the closed GTK3V2MAIN branch), `xtrkcad-git-gtk3/` (git
+worktree of the frozen git `GTK3V2MAIN` branch) and `build-gtk3v2main/`.
 
 ## SourceForge / Mercurial remote
 
-Both Hg repos push via SSH. The HTTP endpoint returns 400 errors and is not used.
+`xtrkcad-hg` pushes via SSH. The HTTP endpoint returns 400 errors and is not used.
 
 - **SourceForge username**: `adbyrne1905`
 - **SSH key**: `~/.ssh/id_ed25519` (registered at SF Account → SSH Settings)
 - `xtrkcad-hg` remote: `ssh://adbyrne1905@hg.code.sf.net/p/xtrkcad-fork/xtrkcad`
-- `xtrkcad-hg-gtk3v2main` remote: `xtrkcad-hg` (local) — push there first, then push `xtrkcad-hg` to SF
 
 Push sequence:
 ```sh
-hg -R xtrkcad-hg-gtk3v2main push          # GTK3V2MAIN → local default repo
-hg -R xtrkcad-hg pull                     # pull any upstream SF changes
+hg -R xtrkcad-hg pull                          # pick up upstream SF changes first
 hg -R xtrkcad-hg merge && hg -R xtrkcad-hg commit -m "merge: ..."   # if needed
-hg -R xtrkcad-hg push                     # default → SourceForge
+hg -R xtrkcad-hg push -b <branch>              # always scope with -b; bare push sends every local branch
 ```
 
 ## Hg development process (adopted 2026-10-05)
 
 Follows Martin Fischer's *Development Process Specification* (dev guide page
-`docs/doxygen/development-process.md`, `\page development-process`). Adopted for our own work on
-2026-10-05; replaces the earlier "every fix gets a `bug-NNN` branch, push it, set `needs-review`,
-wait out a review window" norm.
+`docs/doxygen/development-process.md`, `\page development-process`).
 
 **Tracking — where an issue gets written down:**
 - **SF "Development Issues" tracker** (`https://sourceforge.net/p/xtrkcad-fork/gtk3issues/`,
   REST mount point `gtk3issues`): **every new ticket we create goes here**, whether it's a
-  feature, a bug we found, or a broad-impact fix. It was renamed from the GTK3 issues tracker
-  on 2026-10-06. It's only visible to signed-in project members, so anonymous REST calls and
-  the public tool list don't show it. `~/.config/xtrkcad-dev/sf-ticket.py` hardcodes
-  `TRACKER = "bugs"`; override it when creating tickets (see the SF API memory).
-- SF `bugs` tracker: **user-submitted bugs only**. Don't file our own tickets there. Existing
-  tickets we already filed there (Layer Groups, JSON Note, and so on) stay where they are.
+  feature, a bug we found, or a broad-impact fix. It's only visible to signed-in project members,
+  so anonymous REST calls and the public tool list don't show it.
+  `~/.config/xtrkcad-dev/sf-ticket.py` hardcodes `TRACKER = "bugs"`; override it when creating
+  tickets (see the SF API memory).
+- SF `bugs` tracker: **user-submitted bugs only**. Don't file our own tickets there.
 - SF `feature-requests` tracker: user-submitted ideas, not ours.
 - Problems found while developing a feature are fixed on its branch without a ticket. Review
   requests, and fixes we're unsure of, go to the **dev mailing list** (drafts in
   `.claude/devml-drafts/`).
 
-**Branches** (`GTK3V2MAIN` is the release branch for 5.4.0):
+**Branches** (`default` is the release branch for 5.4.0):
 - **Localized fix** (one or a few places — missing init, small logic fix): commit directly on
-  `GTK3V2MAIN`, no branch.
+  `default`, no branch.
 - **Broad-impact fix** (wider implications, e.g. a FormAPI change): `fix-<NNN>-<desc>-gtk3`.
-- **Feature**: `feature-<NNN>-<desc>-gtk3`, branched from `GTK3V2MAIN`; every commit for the
+- **Feature**: `feature-<NNN>-<desc>-gtk3`, branched from `default`; every commit for the
   feature stays on it until it's verified complete.
 - Housekeeping: `chore-<desc>-gtk3`.
 - `<NNN>` is the Development Issues ticket number when one exists (file it first); leave it out
-  otherwise. Those numbers are separate from the `bugs` tracker's (#33 there isn't #33 here).
-  Matches Martin's own `feature-/fix-/chore-…-gtk3` names.
-- Once verified, **we merge the branch into `GTK3V2MAIN` ourselves, then close it**
-  (`hg update <branch> && hg commit --close-branch -m "close <branch>"`), then push. There's no
-  `needs-review` waiting window for fixes. Exception: if we're unsure of a fix, ask for review on
-  the dev mailing list before merging.
+  otherwise. The `-gtk3` suffix stays: Martin still uses it after the switch
+  (`fix-toolbar-button-reset-gtk3`, 2026-10-20). Git branch names drop it.
+- Once verified, **we merge the branch into `default` ourselves, then close it**
+  (`hg update <branch> && hg commit --close-branch -m "close <branch>"`), then push. Exception:
+  if we're unsure of a fix, ask for review on the dev mailing list before merging.
 
 **Unchanged:** git first — git PR, CI green, PR merged, and only then commit/merge in Hg and push
-to SF (`hg push -b <branch>` scoping still applies). Holds the user sets explicitly (e.g. the
-Layer Groups / JSON Note dev-ML review hold) stay in force until the user lifts them.
+to SF (`hg push -b <branch>`). Holds the user sets explicitly (e.g. the Layer Groups / JSON Note
+dev-ML review hold) stay in force until the user lifts them.
+
+**Held feature (2026-10-20):** Hg `feature-layergroups-jsonnote-gtk3` (r7754 merges `default`
+r7752; not pushed to SF yet) ↔ git `feature-layergroups-jsonnote`, draft PR #241. It isn't on
+git `main`. Don't merge either side until upstream merges it in Hg.
 
 ## Build
 
-Requires CMake ≥ 3.20 and `rsvg-convert` (replaces Inkscape for SVG→PNG; no D-Bus needed). Out-of-source builds are mandatory.
-
-- **default branch** requires GTK+ 2.0 (`gtk2-devel`)
-- **GTK3V2MAIN branch** requires GTK+ 3.0 (`gtk3-devel`)
+Requires CMake ≥ 3.20, GTK+ 3.0 (`gtk3-devel`) and `rsvg-convert` (replaces Inkscape for
+SVG→PNG; no D-Bus needed). Out-of-source builds are mandatory.
 
 ```sh
-# default branch (GTK2)
-cmake -B build -S xtrkcad-hg -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
+cmake -B build -S xtrkcad-hg -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_APPEND_SRC_HASH=ON
 cmake --build build
-
-# GTK3V2MAIN branch (GTK3)
-cmake -B build-gtk3v2main -S xtrkcad-hg-gtk3v2main -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
-cmake --build build-gtk3v2main
 ```
 
 Useful CMake options:
 - `-DXTRKCAD_TESTING=ON` — build unit tests (auto-enabled when CMocka is found)
 - `-DXTRKCAD_USE_DOXYGEN=ON` — generate Doxygen internals docs
 - `-DXTRKCAD_CREATE_SVG=1` — SVG export (requires MiniXML; found automatically)
+- `-DXTRKCAD_APPEND_SRC_HASH=ON` — also give untagged dev builds' *filenames/install paths*
+  (binary name, work/prefs dir, packages) their own short VCS hash, instead of each new dev
+  build overwriting the previous one in place. (The internal/compiled-in version string always
+  carries the hash regardless of this flag — see the Version section's "dev-build hash suffix"
+  note.) Defaults OFF (matches the historic single-overwriting dev install) except under CI,
+  where it defaults ON automatically. Always pass it explicitly for local builds, as shown above.
 
 ## Tests
 
-Unit tests use [CMocka](https://cmocka.org/). Test sources: `app/bin/unittest/` and `app/dynstring/unittest/`.
-
-- **default branch**: 9 tests pass (`ctest --test-dir build`) — corrected 2026-08-29, was
-  documented as 8 (a stale count; verified via `ctest -N`, includes `DXFOutputTest`)
-- **GTK3V2MAIN branch**: 75 tests pass in the Hg tree (`ctest --test-dir build-gtk3v2main`,
-  r7401). The git tree has 78, because it also carries tests for git-only held work (Layer
-  Groups, JSON Note). Counts verified with `ctest -N` on 2026-10-05. The previous figures were
-  74 (2026-09-08) and 64 (2026-08-29).
+Unit tests use [CMocka](https://cmocka.org/). Test sources: `app/bin/unittest/` and
+`app/dynstring/unittest/`. Hg `default` has 75 tests, 17 of them outside the `regression` label
+(r7752, `ctest -N`, 2026-10-20). The feature branch has 79: Layer Groups and JSON Note add 4.
+The full run including the regression demo-playback suite takes ~10 minutes; run it in the
+background.
 
 ```sh
-ctest --test-dir build                  # default branch
-ctest --test-dir build-gtk3v2main       # GTK3V2MAIN branch
-ctest --test-dir build -R pathstest     # run a single test by name
+ctest --test-dir build                       # everything, incl. regression
+ctest --test-dir build -LE regression        # unit tests only
+ctest --test-dir build -R pathstest          # run a single test by name
 ctest --test-dir build --output-on-failure
 ```
 
-**GTK3V2MAIN-specific note**: `common.h` on that branch includes `dynarray.h` from
-`app/bin/include/` — any new test target that pulls in `common.h` must add
-`${CMAKE_CURRENT_SOURCE_DIR}/../include` to its `target_include_directories`.
+`common.h` includes `dynarray.h` from `app/bin/include/` — any new test target that pulls in
+`common.h` must add `${CMAKE_CURRENT_SOURCE_DIR}/../include` to its `target_include_directories`.
 
 ## Doxygen
 
@@ -397,7 +268,9 @@ cmake --build build --target docs-doxygen   # note: NOT --target doc
 
 ## Code Formatting
 
-AStyle enforces style. Config: `app/lib/astylerc` (1TBS, tab=8, max 80 cols, C mode).
+AStyle enforces style. Config: `app/lib/astylerc` (1TBS, tab=8, max 80 cols, C mode). In git,
+run `tools/astyle-check.sh` from the repo root — the same script as CI's `astyle-check` gate,
+with the same vendored-code exclusions.
 
 ```sh
 astyle --options=xtrkcad-hg/app/lib/astylerc <file.c>
@@ -420,14 +293,13 @@ Built as `xtrkcad-lib`. Nearly all application logic lives here:
 - **Undo/redo**: `cundo.c`
 - **Scale definitions**: `scale.c`
 - **Car/consist management**: `cars/` subdirectory
+- **Reports**: `reports.c/h` — the `Reports` menu (SF #217)
 
 ### `app/wlib/` — UI abstraction layer (`xtrkcad-wlib`)
 
-Platform UI toolkit wrapper. Two backends:
-- `gtklib/` — GTK+ 2.0 (Linux/macOS)
-- `mswlib/` — Win32 (Windows)
-
-All application code calls `wlib` APIs — never GTK/Win32 directly.
+Platform UI toolkit wrapper. The only backend is `gtk3lib/` (GTK+ 3) on Linux, macOS and
+Windows alike; the old Win32 backend `mswlib/` has been removed. All application code calls
+`wlib` APIs — never GTK directly.
 
 ### `app/cornu/` — Spiro/Cornu curve library
 
@@ -454,20 +326,45 @@ Used only at build time:
   1997/2003), Windows-only build of `listxtp`
 - `mkimage1`/`mkimage3` — shell scripts converting `.png` bitmaps to `.image1`/`.image3`
 
-(`cnvdsgn.c` actually lives in `app/bin/`, not here — corrected 2026-08-28; `pngtoxpm` doesn't
-exist anywhere in the current tree. `bdf2xtp.c`, formerly also in `app/bin/`, was removed as
-orphaned/unbuilt dead code — SF #735, confirmed by dev-ML consensus 2026-09-11.)
+(`cnvdsgn.c` lives in `app/bin/`, not here. `bdf2xtp.c` was removed as orphaned dead code —
+SF #735.)
+
+### `mcp/` — MCP server (git only)
+
+Python package for layout analysis and report generation; CI in `ci-mcp.yml`. Not in Hg.
 
 ## Version
 
-Current development version: **5.3.2Dev** (`ProgramVersion.cmake`) on `default`/`main`
-(GTK2). Binary named `xtrkcad-beta` when `XTRKCAD_VERSION_MODIFIER` matches `^Beta`,
-`xtrkcad` otherwise.
+Current version: **5.4.0** (`ProgramVersion.cmake`, no modifier). To cut a release:
+`git tag v5.4.0 && git push origin v5.4.0` — GitHub Actions (`release.yml`) automatically builds
+packages and creates a draft GitHub Release. Every push to `main` also refreshes the rolling
+`latest-main` prerelease.
 
-**GTK3V2MAIN branch only:** version is **5.4.0** (GTK3 successor release; no modifier),
-tracked independently from the GTK2 default branch's 5.3.x line. To cut a release:
-`git tag v5.4.0 && git push origin v5.4.0` — GitHub Actions (`release.yml`) automatically
-builds packages and creates a draft GitHub Release.
+**Dev-build hash suffix:** `ProgramVersion.cmake` (SF #712) produces two version strings on every
+build that is *not* the exact commit a `v<version>` tag points at. Detected automatically at
+configure time from either a git or an Hg checkout. A tagged release build drops the suffix from
+both and keeps the plain three-part version.
+
+- `XTRKCAD_VERSION` — always gets a fourth, dot-separated short-VCS-hash component (e.g.
+  `5.4.0.8b67f185`). Compiled into the binary (`xtrkcad-config.h`'s `XTRKCAD_VERSION` macro) and
+  used for internal, non-filesystem values: the About/`--version` string and misc.c's
+  stored-preference "is this a new build since last run" check.
+- `XTRKCAD_FILE_VERSION` — only gets the hash suffix when the `XTRKCAD_APPEND_SRC_HASH` CMake
+  option is on. Used everywhere the version becomes part of a filename or path: `XTRKCAD_BIN`
+  (installed binary name), the runtime work/prefs directory (`custom.c`'s `sProdNameLower`), and
+  every CPack/packaging filename, install directory, and bundle-identity field under
+  `distribution/`.
+
+The option defaults OFF locally (a local build's filename/install path stays fixed across
+commits, and each new build overwrites the last) and ON under CI (GitHub Actions' built-in `CI`
+env var), so concurrent jobs and artifacts never collide. After tagging a release, bump
+`XTRKCAD_RELEASE_VERSION` (and `XTRKCAD_VERSION_MODIFIER`, if used) for the next dev cycle.
+
+**To build one specific past commit:** `git checkout <hash>` (or `hg update -r <hash>`) in the
+source tree, then explicitly reconfigure — `cmake -B build -S xtrkcad-hg` — before
+`cmake --build`. CMake only re-runs its configure step when a file it tracks (`CMakeLists.txt`,
+`ProgramVersion.cmake`) changed on disk, so a `cmake --build`-only rebuild after switching
+commits silently keeps the previous commit's hash.
 
 ## File Formats
 

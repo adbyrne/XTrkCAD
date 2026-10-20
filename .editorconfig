@@ -8,8 +8,14 @@ indent_size = 8
 
 [*.{c,cpp,h}]
 max_line_length = 80
+indent_style = tab
+indent_size = 8
 
 [*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+[*.{yml,yaml}.in]
 indent_style = space
 indent_size = 2
 

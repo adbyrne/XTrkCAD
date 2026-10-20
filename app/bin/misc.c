@@ -28,8 +28,9 @@
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
+#include "form.h"
 #include "layout.h"
-#include "param.h"
+#include "mapwindow.h"
 #include "include/paramfilelist.h"
 #include "paths.h"
 #include "smalldlg.h"
@@ -38,6 +39,8 @@
 #include "common-ui.h"
 
 #include <inttypes.h>
+
+static int log_misc = -1;
 
 #define DEFAULT_SCALE ("N")
 
@@ -48,11 +51,11 @@
  *
  */
 
-EXPORT int iconSize = 0;
+EXPORT long iconSize = 0;
 
 EXPORT wWinPix_t displayWidth;
 EXPORT wWinPix_t displayHeight;
-EXPORT wWin_p mainW;
+EXPORT wControl_p mainW;
 
 EXPORT char message[STR_HUGE_SIZE];
 static char message2[STR_LONG_SIZE];
@@ -68,8 +71,6 @@ onStartup; /**< controls behaviour after startup: load last layout if zero, else
 
 static int verbose = 0;
 
-static BOOL_T inMainW = TRUE;
-
 EXPORT long units = 0;				/**< measurement units: 0 = English, 1 = metric */
 
 EXPORT long labelScale = 8;
@@ -82,221 +83,6 @@ EXPORT long dontHideCursor = 0;
 EXPORT long hideSelectionWindow = 0;
 #endif
 
-
-/****************************************************************************
- *
- * MEMORY ALLOCATION
- *
- */
-
-static size_t totalMallocs = 0;
-static size_t totalMalloced = 0;
-static size_t totalRealloced = 0;
-static size_t totalReallocs = 0;
-static size_t totalFreeed = 0;
-static size_t totalFrees = 0;
-
-static void * StorageLog;
-
-typedef struct slog_t {
-	void * storage_p;
-	size_t storage_size;
-	BOOL_T freed;
-} slog_t, * slog_p;
-
-static int StorageLogCurrent = 0;
-
-
-#define LOG_SIZE 1000000
-
-
-static unsigned long guard0 = 0xDEADBEEF;
-static unsigned long guard1 = 0xAF00BA8A;
-static int log_malloc;
-
-static void RecordMalloc(void * p, size_t size)
-{
-
-
-	if (!StorageLog) { StorageLog = malloc(sizeof(slog_t)*LOG_SIZE); }
-	slog_p log_p = StorageLog;
-	if (StorageLogCurrent<LOG_SIZE) {
-		log_p[StorageLogCurrent].storage_p = p;
-		log_p[StorageLogCurrent].storage_size = size;
-		StorageLogCurrent++;
-	} else {
-		printf("Storage Log size exceeded, wrapped\n");
-		log_p[0].storage_p = p;
-		log_p[0].storage_size = size;
-		StorageLogCurrent = 1;
-	}
-}
-
-static void RecordMyFree(void *p)
-{
-	slog_p log_p = StorageLog;
-	if (log_p) {
-		for (int i=0; i<StorageLogCurrent; i++) {
-			if (!log_p[i].freed && log_p[i].storage_p == p) {
-				log_p[i].freed = TRUE;
-			}
-		}
-	}
-}
-
-#define SLOG_FMT "0x%.12" PRIxPTR
-
-EXPORT BOOL_T TestMallocs()
-{
-	size_t oldSize;
-	size_t testedMallocs = 0;
-	void * old;
-	slog_p log_p = StorageLog;
-	BOOL_T rc = TRUE;
-	if (log_p) {
-		for (int i=0; i<StorageLogCurrent; i++) {
-			if (log_p[i].freed) { continue; }
-			old = log_p[i].storage_p;
-			oldSize = log_p[i].storage_size;
-			if (*(unsigned long*) ((char*) old - sizeof(unsigned long)) != guard0) {
-				LogPrintf("Guard 0 hosed, " SLOG_FMT " size: %llu \n", (uintptr_t)old, oldSize);
-				rc = FALSE;
-			}
-			if (*(unsigned long*) ((char*) old + oldSize) != guard1) {
-				LogPrintf("Guard 1 hosed, " SLOG_FMT " size: %llu \n", (uintptr_t)old, oldSize);
-				rc = FALSE;
-			}
-			testedMallocs++;
-		}
-	}
-	LogPrintf("Tested: %llu Mallocs: %llu Total Malloced: %llu Freed: %llu Total Freed: %llu \n",
-	          testedMallocs, totalMallocs, totalMalloced, totalFrees, totalFreeed);
-	return rc;
-}
-
-/**
- * Allocate memory
- *
- * Allocated memory has 'guard' values, before and after to detect overruns.
- * Aborts on allocation failure.
- *
- * \param size IN amount of memory to allocate
- *
- * \return Pointer to allocated memory - never NULL
- */
-
-EXPORT void * MyMalloc(size_t size)
-{
-	void * p;
-	totalMallocs++;
-	totalMalloced += size;
-	p = malloc((size_t) size + sizeof(size_t) + 2 * sizeof(unsigned long));
-	if ( p == NULL ) {
-		// We're hosed, get out of town
-		lprintf( "malloc(%ld) failed\n", size );
-		abort();
-	}
-
-	LOG1(log_malloc,
-	     ( "  Malloc(%ld) = " SLOG_FMT " (" SLOG_FMT "-" SLOG_FMT ")\n",
-	       size, (size_t)((char*)p+sizeof (size_t) + sizeof (unsigned long)),
-	       (size_t)p,
-	       (size_t)((char*)p+size+sizeof (size_t) + 2 * sizeof(unsigned long))));
-
-	*(size_t*) p = (size_t) size;
-	p = (char*) p + sizeof(size_t);
-	*(unsigned long*) p = guard0;
-	p = (char*) p + sizeof(unsigned long);
-	*(unsigned long*) ((char*) p + size) = guard1;
-	memset(p, 0, (size_t )size);
-	if (extraButtons) {
-		RecordMalloc(p,size);
-	}
-	return p;
-}
-
-/**
- * Reallocate memory
- *
- * Allocated memory has 'guard' values, before and after to detect overruns.
- * Aborts on allocation failure.
- *
- * \param old IN existing pointer to allocated memory
- * \param size IN amount of memory to allocate
- *
- * \return Pointer to reallocated memory - never NULL
- */
-
-EXPORT void * MyRealloc(void * old, size_t size)
-{
-	size_t oldSize;
-	void * new;
-	if (old == NULL) {
-		return MyMalloc(size);
-	}
-	totalReallocs++;
-	totalRealloced += size;
-	CHECKMSG( (*(unsigned long*) ((char*) old - sizeof(unsigned long)) == guard0),
-	          ("Guard0 is hosed") );
-	oldSize = *(size_t*) ((char*) old - sizeof(unsigned long) - sizeof(size_t));
-	CHECKMSG( (*(unsigned long*) ((char*) old + oldSize) == guard1),
-	          ( "Guard1 is hosed" ) );
-
-	LOG1(log_malloc, ("  Realloc (" SLOG_FMT ",%ld) was %d\n", (size_t)old, size,
-	                  oldSize ))
-
-	if ((long) oldSize == size) {
-		return old;
-	}
-	new = MyMalloc(size);
-	memcpy(new, old, min((size_t )size, oldSize));
-	MyFree(old);
-	return new;
-}
-
-EXPORT void MyFree(void * ptr)
-{
-	size_t oldSize;
-	totalFrees++;
-	if (ptr==NULL) {
-		return;
-	}
-	CHECKMSG( (*(unsigned long*) ((char*) ptr - sizeof(unsigned long)) == guard0),
-	          ( "Guard0 is hosed") );
-	oldSize = *(size_t*) ((char*) ptr - sizeof(unsigned long)
-	                      - sizeof(size_t));
-	CHECKMSG( (*(unsigned long*) ((char*) ptr + oldSize) == guard1),
-	          ( "Guard1 is hosed" ) );
-
-	LOG1(log_malloc,
-	     ("  Free %ld at " SLOG_FMT " (" SLOG_FMT "-" SLOG_FMT ")\n",
-	      oldSize,
-	      (size_t)ptr,
-	      (size_t)((char*)ptr-sizeof *(size_t*)0-sizeof *(long*)0),
-	      (size_t)((char*)ptr+oldSize+sizeof *(long*)0)));
-
-	totalFreeed += oldSize;
-	free((char*) ptr - sizeof *(long*) 0 - sizeof *(size_t*) 0);
-	if (extraButtons) {
-		RecordMyFree(ptr);
-	}
-}
-
-EXPORT void * memdup(void * src, size_t size)
-{
-	void * p;
-	p = MyMalloc(size);
-	memcpy(p, src, size);
-	return p;
-}
-
-EXPORT char * MyStrdup(const char * str)
-{
-	char * ret;
-	ret = (char*) MyMalloc(strlen(str) + 1);
-	strcpy(ret, str);
-	return ret;
-}
 
 
 /****************************************************************************
@@ -320,16 +106,15 @@ EXPORT char * ConvertToEscapedText(const char * text)
 	while (text[text_i]) {
 		switch (text[text_i]) {
 		case '\n':
-			add++;
-			break;
 		case '\t':
-			add++;
-			break;
 		case '\\':
-			add++;
-			break;
 		case '\"':
 			add++;
+			break;
+		default:
+			if ( log_misc < 0 ) { log_misc = LogFindIndex( "misc" ); }
+			LOG( log_misc, 1, ( "unexpected text[text_i] %d in ConvertToEscapedText\n",
+			                    text[text_i] ) )
 			break;
 		}
 		text_i++;
@@ -396,9 +181,12 @@ EXPORT char * ConvertFromEscapedText(const char * text)
 	char * cout = MyMalloc(strlen(text) + 1);  //always equal to or shorter than
 	int text_i = 0;
 	int cout_i = 0;
-	int c;
 	while (text[text_i]) {
-		c = text[text_i];
+		// c is only ever compared against '\\'/'n'/'t' (all <0x80, so
+		// sign-extension can't cause a false match) and later truncated
+		// back to a single byte, reproducing the original bit pattern.
+		// NOLINTNEXTLINE(bugprone-signed-char-misuse)
+		int c = text[text_i];
 		switch (state) {
 		case CHARACTER:
 			if (c == '\\') {
@@ -423,6 +211,10 @@ EXPORT char * ConvertFromEscapedText(const char * text)
 				cout[cout_i] = '\t';
 				cout_i++;
 				break;	// TAB
+			default:
+				if ( log_misc < 0 ) { log_misc = LogFindIndex( "misc" ); }
+				LOG( log_misc, 1, ( "unexpected c %d in ConvertFromEscapedText\n", c ) )
+				break;
 			}
 			state = CHARACTER;
 			break;
@@ -475,7 +267,6 @@ EXPORT const char * AbortMessage(
  * \param iLineNumber IN line number of fault
  * \param sMsg IN extra message with additional info
  *
- * \return No return
  */
 EXPORT void AbortProg(
         const char * sCond,
@@ -486,12 +277,19 @@ EXPORT void AbortProg(
 	static BOOL_T abort2 = FALSE;
 	snprintf( message, sizeof message, "%s: %s:%d %s", sCond, sFileName,
 	          iLineNumber, sMsg?sMsg:"" );
+	if (bRunTests) {
+		// Headless regression run: a modal dialog here would hang forever
+		// waiting for a click that never comes. Log and abort() instead,
+		// matching the interactive "ABORT" choice below.
+		lprintf( "CHECK FAILED: %s\n", message );
+		abort();
+	}
 	if (abort2) {
-		wNoticeEx( NT_ERROR, message, _("ABORT"), NULL);
+		wNoticeWithIcon( NT_ERROR, message, _("ABORT"), NULL);
 	} else {
 		abort2 = TRUE;  // no 2nd chance
 		strcat(message, _("\nDo you want to save your layout?"));
-		int rc = wNoticeEx( NT_ERROR, message, _("Ok"), _("ABORT"));
+		int rc = wNoticeWithIcon( NT_ERROR, message, _("Ok"), _("ABORT"));
 		if (rc) {
 			DoSaveAs(abort);
 		} else {
@@ -523,7 +321,6 @@ EXPORT char * Strcpytrimed(char * dst, const char * src, BOOL_T double_quotes)
 	return dst;
 }
 
-// ??? Referenced from gtklib.browserhelp.c ???
 static char * directory;
 
 EXPORT wBool_t CheckHelpTopicExists(const char * topic)
@@ -606,7 +403,7 @@ EXPORT void ErrorMessage(const char * format, ...)
 	format = ParseMessage(format);
 	vsnprintf(message2, 1020, format, ap);
 	va_end(ap);
-	InfoSubstituteControls( NULL, NULL);
+	InfoDefaultControls();
 	SetMessage(message2);
 	wBeep();
 	inError = TRUE;
@@ -635,7 +432,7 @@ EXPORT int NoticeMessage2(int playbackRC, const char * format, const char * yes,
 	format = ParseMessage(format);
 	vsnprintf(message2, 1020, format, ap);
 	va_end(ap);
-	return wNoticeEx( NT_INFORMATION, message2, yes, no);
+	return wNoticeWithIcon( NT_INFORMATION, message2, yes, no);
 }
 
 
@@ -660,7 +457,7 @@ EXPORT bool Confirm(char * label2, doSaveCallBack_p after)
 	if (changed) {
 		rc = wNotice3(_("Save changes to the layout design before closing?\n\n"
 		                "If you don't save now, your unsaved changes will be discarded."),
-		              _("&Save"), _("&Cancel"), _("&Don't Save"));
+		              _("_Save"), _("_Cancel"), _("_Don't Save"));
 	}
 
 	switch (rc) {
@@ -673,6 +470,10 @@ EXPORT bool Confirm(char * label2, doSaveCallBack_p after)
 		//LayoutBackGroundInit(FALSE);
 		//LayoutBackGroundSave();
 		DoSave(after);
+		break;
+	default:
+		if ( log_misc < 0 ) { log_misc = LogFindIndex( "misc" ); }
+		LOG( log_misc, 1, ( "unexpected rc %d in Confirm\n", rc ) )
 		break;
 	}
 	return(rc != 0);
@@ -728,54 +529,17 @@ EXPORT void DoClear(void * unused)
 	Confirm(_("Clear"), DoClearAfter);
 }
 
-/**
- * Toggle visibility state of map window.
- */
-
-EXPORT void MapWindowToggleShow(void * unused)
-{
-	MapWindowShow(!mapVisible);
-}
-
-/**
- * Set visibility state of map window.
- *
- * \param state IN TRUE if visible, FALSE if hidden
- */
-
-EXPORT void MapWindowShow(int state)
-{
-	mapVisible = state;
-	wPrefSetInteger("misc", "mapVisible", mapVisible);
-	wMenuToggleSet(mapShowMI, mapVisible);
-
-	wWinShow(mapW, mapVisible | DONTGRABFOCUS);
-	if (mapVisible) {
-		DoChangeNotification(CHANGE_MAP);
-	}
-
-	wButtonSetBusy(mapShowB, (wBool_t) mapVisible);
-}
-
-
-EXPORT void DoShowWindow(int index, const char * name, void * data)
-{
-	if (data == mapW) {
-		if (mapVisible == FALSE) {
-			MapWindowShow( TRUE);
-			return;
-		}
-	}
-	wWinShow((wWin_p) data, TRUE);
-}
-
 static dynArr_t demoWindows_da;
-#define demoWindows(N) DYNARR_N( wWin_p, demoWindows_da, N )
+#define demoWindows(N) DYNARR_N( wControl_p, demoWindows_da, N )
 
-EXPORT void wShow(wWin_p win)
+EXPORT void wShow(wControl_p win)
 {
-	int inx;
+	if(!win) {
+		return;
+	}
+
 	if (inPlayback && win != demoW) {
+		int inx;
 		wWinSetBusy(win, TRUE);
 		for (inx = 0; inx < demoWindows_da.cnt; inx++)
 			if ( demoWindows(inx) == win) {
@@ -787,30 +551,23 @@ EXPORT void wShow(wWin_p win)
 					break;
 				}
 			if (inx >= demoWindows_da.cnt) {
-				DYNARR_APPEND(wWin_p, demoWindows_da, 10);
+				DYNARR_APPEND(wControl_p, demoWindows_da, 10);
 				inx = demoWindows_da.cnt - 1;
 			}
 			demoWindows(inx) = win;
 		}
 	}
-	if (win != mainW) {
-		wMenuListAdd(winList_mi, -1, wWinGetTitle(win), win);
-	}
 	wWinShow(win, TRUE);
 }
 
-EXPORT void wHide(wWin_p win)
+EXPORT void wHide(wControl_p win)
 {
-	int inx;
 	wWinShow(win, FALSE);
 	wWinSetBusy(win, FALSE);
-	if (inMainW && win == aboutW) {
-		return;
-	}
-	wMenuListDelete(winList_mi, wWinGetTitle(win));
-	ParamResetInvalid( win );
+
+	FormResetInvalid( win );
 	if (inPlayback)
-		for (inx = 0; inx < demoWindows_da.cnt; inx++)
+		for (int inx = 0; inx < demoWindows_da.cnt; inx++)
 			if ( demoWindows(inx) == win) {
 				demoWindows(inx) = NULL;
 			}
@@ -823,18 +580,16 @@ EXPORT void CloseDemoWindows(void)
 		if ( demoWindows(inx) != NULL) {
 			wHide(demoWindows(inx));
 		}
-	DYNARR_RESET( wWin_p, demoWindows_da );
+	DYNARR_RESET( wControl_p, demoWindows_da );
 }
 
-EXPORT void DefaultProc(wWin_p win, winProcEvent e, void * data)
+EXPORT void DefaultProc(wControl_p win, winProcEvent e, const void * data)
 {
 	switch (e) {
 	case wClose_e:
-		wMenuListDelete(winList_mi, wWinGetTitle(win));
 		if (data != NULL) {
 			ConfirmReset( FALSE);
 		}
-		wWinDoCancel(win);
 		break;
 	default:
 		break;
@@ -925,7 +680,7 @@ static char * accelKeyNames[] = { "Del", "Ins", "Home", "End", "Pgup", "Pgdn",
 static void SetAccelKeys()
 {
 	for ( int iAccelKey = 0; iAccelKey < COUNT( aAccelKeys ); iAccelKey++ ) {
-		struct accelKey_s * akP = &aAccelKeys[iAccelKey];
+		const struct accelKey_s * akP = &aAccelKeys[iAccelKey];
 		int eKey = akP->eKey;
 		int iMode = akP->iMode;
 		const char * sPrefValue = wPrefGetString("accelKey", akP->sPrefName);
@@ -1010,22 +765,26 @@ InitAudio()
 	wSetAudio(enableAudio);
 }
 
-EXPORT wWin_p wMain(int argc, char * argv[])
+/* TRUE while running under -T (regression tests). Assertion/abort handlers
+ * check this to skip blocking modal dialogs that would otherwise hang a
+ * headless run forever waiting for a click that never comes. */
+EXPORT BOOL_T bRunTests = FALSE;
+
+EXPORT wControl_p wMain(int argc, char * argv[])
 {
 	int c;
 	int resumeWork;
+	int versionChanged;
 	char * logFileName = NULL;
+	/** @logcmd @showrefby `init=n` `misc.c` */
 	int log_init = 0;
 	int initialZoom = 0;
 	char * initialFile = NULL;
 	const char * pref;
-	coOrd roomSize;
-	/*	long oldToolbarMax;
-		long newToolbarMax; */
 	char *cp;
 	char buffer[STR_SIZE];
 	unsigned int i;
-	BOOL_T bRunTests = FALSE;
+	const char *testTarget = NULL;
 
 	strcpy(buffer, sProdNameLower);
 
@@ -1046,7 +805,7 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	opterr = 0;
 	LogSet("dummy",0);
 
-	while ((c = getopt(argc, argv, "vl:d:c:mVT")) != -1)
+	while ((c = getopt(argc, argv, "vl:d:c:mVT::")) != -1)
 		switch (c) {
 		case 'c': /* configuration name */
 			/* test for valid filename */
@@ -1095,9 +854,10 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 			printf("Version: %s\n",XTRKCAD_VERSION);
 			exit(0);
 			break;
-		case 'T': // run tests
+		case 'T': // run tests, optionally scoped to a comma-separated demo list (-Tdemo1,demo2)
 			LogSet( "regression", 2 );
 			bRunTests = TRUE;
+			testTarget = optarg;
 			break;
 		default:
 			CHECK(FALSE);
@@ -1109,7 +869,7 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	extraButtons = (getenv(sEnvExtra) != NULL);
 	LogOpen(logFileName);
 	log_init = LogFindIndex("init");
-	log_malloc = LogFindIndex("malloc");
+	SetMallocLog();
 
 	LOG1(log_init, ( "initCustom\n" ))
 	InitCustom();
@@ -1124,7 +884,8 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	wGetDisplaySize(&displayWidth, &displayHeight);
 	mainW = wWinMainCreate(buffer, (displayWidth * 2) / 3,
 	                       (displayHeight * 2) / 3, "xtrkcadW", message, "main",
-	                       F_RESIZE | F_MENUBAR | F_NOTAB | F_RECALLPOS | F_RECALLSIZE | F_HIDE, MainProc,
+	                       F_DEFINEDINBUILDER | F_RESIZE | F_MENUBAR | F_NOTAB | F_RECALLPOS | F_RECALLSIZE
+	                       | F_HIDE, MainProc,
 	                       NULL);
 	if (mainW == NULL) {
 		return NULL;
@@ -1135,8 +896,6 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	InitAppDefaults();
 
 	InitAudio();
-
-	ToolbarLoadConfig();
 	/*	newToolbarMax = (1 << BG_COUNT) - 1;
 		wPrefGetInteger("misc", "toolbarset", &toolbarSet, newToolbarMax);
 		wPrefGetInteger("misc", "max-toolbarset", &oldToolbarMax, 0);
@@ -1155,6 +914,7 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 
 	if (!initialFile) {
 		WDOUBLE_T tmp;
+		coOrd roomSize;
 		LOG1(log_init, ( "set roomsize\n" ))
 		wPrefGetFloat("draw", "roomsizeX", &tmp, 96.0);
 		roomSize.x = tmp;
@@ -1168,19 +928,21 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	 */
 	LOG1(log_init, ( "initColor\n" ))
 	InitColor();
-	LOG1(log_init, ( "initInfoBar\n" ))
+	LOG1(log_init, ("initInfoBar\n"))
 	InitInfoBar();
-	wSetSplashInfo("Scale Init...");
-	LOG1(log_init, ( "ScaleInit\n" ))
-	ScaleInit();
 	wPrefGetInteger( "draw", "label-when", &labelWhen, labelWhen );
 
 
 	wSetSplashInfo(_("Initializing commands"));
-	LOG1(log_init, ( "paramInit\n" ))
-	ParamInit();
+	LOG1(log_init, ( "FormInit\n" ))
+	FormInit();
+	wSetSplashInfo("Scale Init...");
+	LOG1(log_init, ( "ScaleInit\n" ))
+	ScaleInit();
 	LOG1(log_init, ( "initTrkTrack\n" ))
 	InitTrkTrack();
+	LOG1(log_init, ("drawInit\n"))
+	DrawInit(initialZoom);
 
 	/*
 	 * MENUS
@@ -1203,16 +965,12 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	/*
 	 * TIDY UP
 	 */
-	if (ToolbarIsGroupVisible(BG_HOTBAR)) {
-		LayoutHotBar( NULL );
-	} else {
-		LayoutHotBar( NULL );   /* Must run once to set it up */
-		HideHotBar();           /* Then hide */
-	}
-	LOG1(log_init, ( "drawInit\n" ))
-	DrawInit(initialZoom);
 	MainProc( mainW, wResize_e, NULL, NULL );
 
+	LayoutHotBar(NULL);
+	if (!ToolbarIsGroupVisible(BG_HOTBAR)) {
+		HideHotBar();           /* Then hide */
+	}
 	MacroInit();
 
 	/*
@@ -1229,14 +987,12 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	}
 
 	/* initialize the layers */
-	LOG1(log_init, ("DefaultLayerProperties"));
-	DefaultLayerProperties();
+	// LOG1(log_init, ("DefaultLayerProperties"));
+	// DefaultLayerProperties();
 
 	// LOG1(log_init, ("!ParamFileListInit()\n"))
 
 	CommandInit();
-	LOG1(log_init, ( "Reset\n" ))
-	Reset();
 
 	/*
 	 * SCALE
@@ -1250,7 +1006,12 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	if ( pref == NULL || DoSetScale( pref ) == FALSE ) {
 		// if preferred scale was not set (eg. during initial run), initialize to a default value
 		DoSetScale( DEFAULT_SCALE );
+		ChangeHotBar(CHANGE_SCALE);
 	}
+
+	/* initialize the layers */
+	LOG1(log_init, ("DefaultLayerProperties"));
+	DefaultLayerProperties();
 
 	/* see whether last layout should be reopened on startup */
 	wPrefGetInteger("DialogItem", "pref-onstartup", &onStartup, 0);
@@ -1265,8 +1026,6 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	wSetSplashInfo(_("Initialization complete"));
 	DoChangeNotification( CHANGE_MAIN | CHANGE_MAP);
 
-	wWinShow(mainW, TRUE);
-	wWinShow(mapW, mapVisible | DONTGRABFOCUS);
 	wDestroySplash();
 
 	/* this has to be called before ShowTip() */
@@ -1274,21 +1033,25 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 
 	/* Compare the program version and display Beta warning if appropriate */
 	pref = wPrefGetString("misc", "version");
-	if((!pref) || (strcmp(pref,XTRKCAD_VERSION) != 0)) {
-		if(strstr(XTRKCAD_VERSION,"Beta") != NULL) {
-			NoticeMessage(MSG_BETA_NOTICE, _("Ok"),NULL, XTRKCAD_VERSION);
-		}
-		//else {
-		//    NoticeMessage(_("New version welcome..."),_("Ok"),NULL);
-		//}
+	versionChanged = (!pref) || (strcmp(pref, XTRKCAD_VERSION) != 0);
+
+	if (versionChanged) {
 		wPrefSetString("misc", "version", XTRKCAD_VERSION);
+	}
+
+	if (versionChanged && strstr(XTRKCAD_VERSION, "Beta") != NULL) {
+		NoticeMessage(MSG_BETA_NOTICE, _("Ok"), NULL, XTRKCAD_VERSION);
 	} else {
 		ShowTip(SHOWTIP_NEXTTIP);
 	}
 
 	/* check for existing checkpoint file */
 	resumeWork = FALSE;
-	if (ExistsCheckpoint()) {
+	if (!bRunTests && ExistsCheckpoint()) {
+		// Headless regression run: OfferCheckpoint()'s modal would hang
+		// forever waiting for a click that never comes, if a prior -T run
+		// against this same $HOME left a checkpoint behind. -T mode never
+		// wants to resume a prior session's work anyway.
 		resumeWork = OfferCheckpoint();
 	}
 
@@ -1314,10 +1077,13 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 		}
 
 	}
+
 	MainRedraw();
-	inMainW = FALSE;
+	ChangeHotBar(CHANGE_SCALE|CHANGE_PARAMS);
+	wWinShow(mainW, TRUE);
+
 	if ( bRunTests ) {
-		int nFail = RegressionTestAll();
+		int nFail = RegressionTestAll(testTarget);
 		if ( nFail == 0 ) {
 			lprintf( "Regression Tests Pass\n" );
 			exit( 0 );

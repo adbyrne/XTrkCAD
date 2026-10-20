@@ -1,0 +1,221 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 0.96.3 -->
+<interface>
+  <!-- interface-name elev.glade -->
+  <requires lib="gtk+" version="3.22"/>
+  <object class="GtkDialog" id="elev">
+    <property name="border-width">6</property>
+    <property name="can-focus">False</property>
+    <property name="resizable">False</property>
+    <property name="type-hint">dialog</property>
+    <property name="use-header-bar">0</property>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="margin-top">12</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="id_help">
+        <property name="label">_Help</property>
+        <property name="use-underline">True</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="id_cancel">
+        <property name="can-default">True</property>
+        <property name="label">_Done</property>
+        <property name="use-underline">True</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="border-width">18</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">6</property>
+        <property name="visible">True</property>
+        <child>
+          <object class="GtkGrid">
+            <property name="column-spacing">12</property>
+            <property name="row-homogeneous">True</property>
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkEntry" id="value">
+                <property name="can-focus">True</property>
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="station">
+                <property name="can-focus">True</property>
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">5</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="computed">
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes"> 0	</property>
+                <property name="track-visited-links">False</property>
+                <property name="visible">True</property>
+                <property name="xalign">0.0</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="grade">
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes"> 0 %	</property>
+                <property name="track-visited-links">False</property>
+                <property name="visible">True</property>
+                <property name="xalign">0.0</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox" id="mode">
+                <property name="can-focus">False</property>
+                <property name="homogeneous">True</property>
+                <property name="orientation">vertical</property>
+                <property name="spacing">8</property>
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkRadioButton" id="modegroup">
+                    <property name="active">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="draw-indicator">True</property>
+                    <property name="label" translatable="yes">None</property>
+                    <property name="receives-default">False</property>
+                    <property name="visible">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkRadioButton" id="Defined">
+                    <property name="active">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="draw-indicator">True</property>
+                    <property name="group">modegroup</property>
+                    <property name="label" translatable="yes">Defined</property>
+                    <property name="receives-default">False</property>
+                    <property name="visible">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkRadioButton" id="Hidden">
+                    <property name="active">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="draw-indicator">True</property>
+                    <property name="group">modegroup</property>
+                    <property name="label" translatable="yes">Hidden</property>
+                    <property name="receives-default">False</property>
+                    <property name="visible">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkRadioButton" id="Computed">
+                    <property name="active">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="draw-indicator">True</property>
+                    <property name="group">modegroup</property>
+                    <property name="label" translatable="yes">Computed</property>
+                    <property name="receives-default">False</property>
+                    <property name="visible">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkRadioButton" id="Grade">
+                    <property name="active">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="group">modegroup</property>
+                    <property name="label" translatable="yes">Grade</property>
+                    <property name="receives-default">False</property>
+                    <property name="visible">True</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkRadioButton" id="Station">
+                    <property name="active">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="draw-indicator">True</property>
+                    <property name="group">modegroup</property>
+                    <property name="label" translatable="yes">Station</property>
+                    <property name="receives-default">False</property>
+                    <property name="visible">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">5</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkRadioButton">
+                    <property name="active">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="draw-indicator">True</property>
+                    <property name="group">modegroup</property>
+                    <property name="label" translatable="yes">Ignore</property>
+                    <property name="receives-default">False</property>
+                    <property name="visible">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">6</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="height">7</property>
+                <property name="left-attach">0</property>
+                <property name="top-attach">0</property>
+              </packing>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="GTK_RESPONSE_HELP">id_help</action-widget>
+      <action-widget response="GTK_RESPONSE_OK">id_cancel</action-widget>
+    </action-widgets>
+  </object>
+</interface>

@@ -59,9 +59,7 @@ wBool_t IsParamValid(
 {
 	if (fileInx == PARAM_DEMO) {
 		return (curDemo >= 0);
-	} else if (fileInx == PARAM_CUSTOM) {
-		return TRUE;
-	} else if (fileInx == PARAM_LAYOUT) {
+	} else if (fileInx == PARAM_CUSTOM || fileInx == PARAM_LAYOUT) {
 		return TRUE;
 	} else if (fileInx >= 0 && fileInx < paramFileInfo_da.cnt) {
 		return (!paramFileInfo(fileInx).deleted);
@@ -76,7 +74,7 @@ char *GetParamFileDir(void)
 }
 
 void
-SetParamFileDir(char *fullPath)
+SetParamFileDir(const char *fullPath)
 {
 	SetCurrentPath(PARAMETERPATHKEY, fullPath);
 }
@@ -96,6 +94,11 @@ char * GetParamFileContents(
 bool IsParamFileDeleted(int inx)
 {
 	return paramFileInfo(inx).deleted;
+}
+
+bool IsParamFileValid(int inx)
+{
+	return paramFileInfo(inx).valid;
 }
 
 bool IsParamFileFavorite(int inx)
@@ -125,20 +128,18 @@ void ParamCheckSumLine(char * line)
  * Set the compatibility state of a parameter file
  *
  * \param index parameter file number in list
- * \return
  */
 
 void SetParamFileState(int index)
 {
 	enum paramFileState state = PARAMFILE_NOTUSABLE;
-	enum paramFileState newState;
 	SCALEINX_T scale = GetLayoutCurScale();
 
 	//Set yet?
 	if (scale>=0) {
 		for (int i = 0; i < COMPATIBILITYCHECKSCOUNT && state < PARAMFILE_FIT &&
 		     state != PARAMFILE_UNLOADED; i++) {
-			newState = (*GetCompatibility[i])(index, scale);
+			enum paramFileState newState = (*GetCompatibility[i])(index, scale);
 			if (newState > state || newState == PARAMFILE_UNLOADED) {
 				state = newState;
 			}
@@ -205,7 +206,7 @@ ReloadDeletedParamFile(int fileindex)
 	curParamFileIndex = fileindex;
 	paramFileInfo(curParamFileIndex).valid = TRUE;
 	paramFileInfo(curParamFileIndex).deleted = !ReadParams(0, NULL,
-	                paramFileInfo(curParamFileIndex).name);
+	        paramFileInfo(curParamFileIndex).name);
 	paramFileInfo(curParamFileIndex).contents = MyStrdup(curContents);
 
 	SetParamFileState(curParamFileIndex);
@@ -275,10 +276,8 @@ bool ReadParams(
 			goto nextLine;
 		}
 		ParamCheckSumLine(paramLine);
-		if (paramLine[0] == '#') {
-			/* comment */
-		} else if (paramLine[0] == 0) {
-			/* empty paramLine */
+		if (paramLine[0] == '#' || paramLine[0] == 0) {
+			/* comment or empty paramLine */
 		} else if (strncmp(paramLine, "INCLUDE ", 8) == 0) {
 			cp = &paramLine[8];
 			while (*cp && isspace((unsigned char)*cp)) {

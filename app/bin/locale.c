@@ -33,6 +33,7 @@
 static char* sUserLocale = NULL;	// current user locale
 static long lCLocale = 0;		// locale state: > 0 C locale, <= 0 user locale
 static long nCLocale = 0;		// total # of setlocals calls
+/** @logcmd @showrefby `locale=n` `locale.c` */
 static int log_locale = 0;		// logging
 
 

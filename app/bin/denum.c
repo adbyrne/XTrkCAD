@@ -20,14 +20,20 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include <stdlib.h>
+#include <time.h>
+
 #include "custom.h"
+#include <dynstring.h>
 #include "fileio.h"
 #include "layout.h"
-#include "param.h"
+#include "form.h"
 #include "paths.h"
 #include "track.h"
 
-static wWin_p enumW;
+static int log_denum = -1;
+
+static wControl_p enumW;
 
 #define ENUMOP_SAVE		(1)
 #define ENUMOP_PRINT	(5)
@@ -40,27 +46,25 @@ static void DoEnumOp( void * data );
 static long enableListPrices;
 static long enableListIndexes;
 
-static paramTextData_t enumTextData = { 80, 24 };
-static char * priceLabels[] = { N_("Prices"), NULL };
-static char * indexLabels[] = { N_("Indexes"), NULL };
+static paramTextData_t enumTextData = { 0, 0 };
 static paramData_t enumPLs[] = {
 #define I_ENUMTEXT		(0)
-#define enumT			((wText_p)enumPLs[I_ENUMTEXT].control)
-	{   PD_TEXT, NULL, "text", PDO_DLGRESIZE, &enumTextData, NULL, BT_CHARUNITS|BT_FIXEDFONT },
-	{   PD_BUTTON, DoEnumOp, "save", PDO_DLGCMDBUTTON, NULL, N_("Save As ..."), 0, I2VP(ENUMOP_SAVE) },
-	{   PD_BUTTON, DoEnumOp, "print", 0, NULL, N_("Print"), 0, I2VP(ENUMOP_PRINT) },
-	{   PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, N_("Print Setup"), 0, NULL },
+#define enumT			(enumPLs[I_ENUMTEXT].control)
+	{   PD_TEXT, NULL, "text", 0, &enumTextData },
+	{   PD_BUTTON, DoEnumOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, I2VP(ENUMOP_SAVE) },
+	{   PD_BUTTON, DoEnumOp, "print", 0, NULL, NULL, 0, I2VP(ENUMOP_PRINT) },
+	{   PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
 #define I_ENUMLISTPRICE	(4)
-	{   PD_TOGGLE, &enableListPrices, "list-prices", PDO_DLGRESETMARGIN, priceLabels, NULL, BC_HORZ|BC_NOBORDER },
+	{   PD_TOGGLE, &enableListPrices, "list-prices" },
 #define I_ENUMLISTINDEXES  (5)
-	{   PD_TOGGLE, &enableListIndexes, "list-indexes", PDO_DLGRESETMARGIN, indexLabels, NULL, BC_HORZ|BC_NOBORDER }
+	{   PD_TOGGLE, &enableListIndexes, "list-indexes" }
 };
-static paramGroup_t enumPG = { "enum", 0, enumPLs, COUNT( enumPLs ) };
+static paramGroup_t enumPG = { "enum", PGO_FULLDIALOGFROMBUILDER, enumPLs, COUNT( enumPLs ) };
 
 static struct wFilSel_t * enumFile_fs;
 
 
-static int count_utf8_chars(char *s)
+static int count_utf8_chars(const char *s)
 {
 	int i = 0, j = 0;
 	while (s[i]) {
@@ -95,7 +99,12 @@ static void DoEnumOp(
 		break;
 	case ENUMOP_CLOSE:
 		wHide( enumW );
-		ParamUpdate( &enumPG );
+		FormUpdate( &enumPG );
+		break;
+	default:
+		if ( log_denum < 0 ) { log_denum = LogFindIndex( "denum" ); }
+		LOG( log_denum, 1, ( "unexpected VP2L(data) %d in DoEnumOp\n", VP2L(data) ) )
+		break;
 	}
 }
 
@@ -116,15 +125,15 @@ static FLOAT_T enumerateTotal;
 void EnumerateList(
         long count,
         FLOAT_T price,
-        char * desc,
-        char * indexes )
+        const char * desc,
+        const char * indexes )
 {
-	char * cp;
-	size_t len;
 	sprintf( message, "%*ld | %s\n", count_utf8_chars(_("Count")), count, desc );
 	if (enableListPrices) {
+		char * cp;
+		long len;
 		cp = message + strlen( message )-1;
-		len = enumerateMaxDescLen-strlen(desc);
+		len = (long)enumerateMaxDescLen-(long)strlen(desc);
 		if (len<0) { len = 0; }
 		memset( cp, ' ', len );
 		cp += len;
@@ -141,77 +150,130 @@ void EnumerateList(
 	wTextAppend( enumT, message );
 }
 
+void
+AddDateString(DynString* output)
+{
+	const struct tm *tm;
+	time_t currentTime;
+	size_t length = 8;
+	char* formatted = malloc(length);
+
+	time(&currentTime);
+	tm = localtime(&currentTime);
+
+	while (!strftime(formatted, length, "%x\n\n", tm)) {
+		char *tmp;
+		length *= 2;
+		tmp = realloc(formatted, length);
+		if (!tmp) {
+			free(formatted);
+			return;
+		}
+		formatted = tmp;
+	}
+
+	DynStringCatCStr(output, formatted);
+
+	free(formatted);
+}
+
+void
+CreateTableFooter(void)
+{
+	char* line = malloc(STR_SIZE);
+	char* cp;
+
+	memset(line, '\0', STR_SIZE);
+	memset(line, '-', strlen(_("Count")) + 1);
+	strcpy(line + strlen(_("Count")) + 1, "+");
+	cp = line + strlen(line);
+	memset(cp, '-', enumerateMaxDescLen + 2);
+	if (enableListPrices) {
+		strcpy(cp + enumerateMaxDescLen + 2, "+-");
+		memset(cp + enumerateMaxDescLen + 4, '-', max(7, strlen(_("Each"))));
+		strcat(cp, "-+-");
+		memset(line + strlen(line), '-', max(9, strlen(_("Extended"))));
+		*(line + strlen(line)) = '\n';
+	} else {
+		*(cp + enumerateMaxDescLen + 2) = '\n';
+		*(cp + enumerateMaxDescLen + 3) = '\0';
+	}
+	wTextAppend(enumT, line);
+
+	free(line);
+}
+
+static void
+CreateHeader(void)
+{
+	DynString headerLine;
+	DynStringMalloc(&headerLine, 256);
+
+	DynStringPrintf(&headerLine, _("%s Parts List\n"), sProdName);
+
+	if (*GetLayoutTitle()) {
+		DynStringCatCStrs(&headerLine, GetLayoutTitle(), "\n", NULL);
+	}
+	if (*GetLayoutSubtitle()) {
+		DynStringCatCStrs(&headerLine, GetLayoutSubtitle(), "\n", NULL);
+	}
+
+	AddDateString(&headerLine);
+
+	wTextAppend(enumT, DynStringToCStr(&headerLine));
+
+	DynStringFree(&headerLine);
+}
+
+static void
+CreateTableHeader(void)
+{
+	DynString line;
+	enumerateTotal = 0.0;
+
+	DynStringMalloc(&line, 80);
+
+	if (count_utf8_chars(_("Description")) > enumerateMaxDescLen) {
+		enumerateMaxDescLen = count_utf8_chars(_("Description"));
+	}
+
+	if (enableListPrices) {
+		DynStringPrintf(&line, "%s | %-*s | %-*s | %-*s\n",
+		                _("Count"),
+		                enumerateMaxDescLen, _("Description"),
+		                (int)max(7,	count_utf8_chars(_("Each"))), _("Each"),
+		                (int)max(9,	count_utf8_chars(_("Extended"))), _("Extended"));
+	} else {
+		DynStringPrintf(&line, "%s | %-*s\n", _("Count"), enumerateMaxDescLen,
+		                _("Description"));
+	}
+
+	wTextAppend(enumT, DynStringToCStr(&line));
+
+	CreateTableFooter();
+
+	DynStringFree(&line);
+}
+
 void EnumerateStart(void)
 {
-	time_t clock;
-	struct tm *tm;
-	char * cp;
 
 	if (enumW == NULL) {
-		ParamRegister( &enumPG );
-		enumW = ParamCreateDialog( &enumPG, MakeWindowTitle(_("Parts List")), NULL,
-		                           NULL, ParamCancel_Current, TRUE, NULL, F_RESIZE, EnumDlgUpdate );
+		FormRegister( &enumPG );
+		enumW = FormCreateDialog( &enumPG, MakeWindowTitle(_("Parts List")),
+		                          NULL, NULL,
+		                          NULL, FormCancel_Current,
+		                          TRUE, F_RESIZE,
+		                          EnumDlgUpdate);
 		enumFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Parts List"),
 		                             sPartsListFilePattern, DoEnumSave, NULL );
 	}
 
 	wTextClear( enumT );
 
-	sprintf( message, _("%s Parts List\n\n"), sProdName);
-	wTextAppend( enumT, message );
+	CreateHeader();
+	CreateTableHeader();
 
-	message[0] = '\0';
-	cp = message;
-	if ( *GetLayoutTitle() ) {
-		strcpy( cp, GetLayoutTitle() );
-		cp += strlen(cp);
-		*cp++ = '\n';
-	}
-	if ( *GetLayoutSubtitle() ) {
-		strcpy( cp, GetLayoutSubtitle());
-		cp += strlen(cp);
-		*cp++ = '\n';
-	}
-	if ( cp > message ) {
-		*cp++ = '\n';
-		*cp++ = '\0';
-		wTextAppend( enumT, message );
-	}
-
-	time(&clock);
-	tm = localtime(&clock);
-	strftime( message, STR_LONG_SIZE, "%x\n", tm );
-	wTextAppend( enumT, message );
-
-	enumerateTotal = 0.0;
-
-	if( count_utf8_chars( _("Description")) > enumerateMaxDescLen ) {
-		enumerateMaxDescLen = count_utf8_chars( _("Description" ));
-	}
-
-	/* create the table header */
-	sprintf( message, "%s | %-*s", _("Count"), enumerateMaxDescLen,
-	         _("Description"));
-
-	if( enableListPrices ) {
-		sprintf( message+strlen(message), " | %-*s | %-*s\n", (int) max( 7,
-		                count_utf8_chars( _("Each"))), _("Each"), (int) max( 9,
-		                                count_utf8_chars(_("Extended"))), _("Extended"));
-	} else {
-		strcat( message, "\n" );
-	}
-	wTextAppend( enumT, message );
-
-	/* underline the header */
-	cp = message;
-	while( *cp && *cp != '\n' )
-		if( *cp == '|' ) {
-			*cp++ = '+';
-		} else {
-			*cp++ = '-';
-		}
-
-	wTextAppend( enumT, message );
 }
 /**
  * End of parts list. Print the footer line and the totals if necessary.
@@ -222,30 +284,16 @@ void EnumerateStart(void)
 
 void EnumerateEnd(void)
 {
-	size_t len;
-	char * cp;
 	ScaleLengthEnd();
 
-	memset( message, '\0', STR_LONG_SIZE );
-	memset( message, '-', strlen(_("Count")) + 1 );
-	strcpy( message + strlen(_("Count")) + 1, "+");
-	cp = message+strlen(message);
-	memset( cp, '-', enumerateMaxDescLen+2 );
-	if (enableListPrices) {
-		strcpy( cp+enumerateMaxDescLen+2, "+-" );
-		memset( cp+enumerateMaxDescLen+4, '-', max( 7, strlen( _("Each"))));
-		strcat( cp, "-+-");
-		memset( message+strlen( message ), '-', max( 9, strlen(_("Extended"))));
-		*(message + strlen( message )) = '\n';
-	} else {
-		*(cp+enumerateMaxDescLen+2) = '\n';
-		*(cp+enumerateMaxDescLen+3) = '\0';
-	}
-	wTextAppend( enumT, message );
+	CreateTableFooter();
 
+	/**  \todo Fix layout of summary line, why -3? */
 	if (enableListPrices) {
+		size_t len;
+		char * cp;
 		len = strlen( message ) - strlen( _("Total")) - max( 9,
-		                strlen(_("Extended"))) - 4 ;
+		        strlen(_("Extended"))) - 3 ;
 		memset ( message, ' ', len );
 		cp = message+len;
 		sprintf( cp, ("%s |%9.2f\n"), _("Total"), enumerateTotal );
@@ -253,6 +301,6 @@ void EnumerateEnd(void)
 	}
 	wTextSetPosition( enumT, 0 );
 
-	ParamLoadControls( &enumPG );
+	FormLoadControls( &enumPG );
 	wShow( enumW );
 }

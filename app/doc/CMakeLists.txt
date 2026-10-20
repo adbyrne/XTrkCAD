@@ -1,168 +1,97 @@
 project(doc C)
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/intro.but.in ${CMAKE_CURRENT_BINARY_DIR}/intro.but)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/hhc.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/hhc.cmake @ONLY)
+# Doxygen is an external tool, unlike the vendored (self-building, always
+# available) Halibut compiler this replaced -- most dev/test CI jobs have no
+# reason to install it, so this must degrade gracefully rather than fail
+# every ordinary configure. Jobs that ship a real package (release.yml's
+# package-linux/-macos/-windows/-linux-arm64-*) install Doxygen explicitly
+# since the User Guide is a real part of what they package.
+find_package(Doxygen QUIET)
 
-#
-# Create directory for the html stage
+if(DOXYGEN_FOUND)
+	# intro.dox.in is a template: CMake substitutes "@XTRKCAD_VERSION@" via
+	# configure_file() into the real intro.dox that Doxygen compiles, same
+	# mechanism this file used for intro.but.in -> intro.but before the
+	# Halibut -> Doxygen conversion (SF feature-requests #219).
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/intro.dox.in ${CMAKE_CURRENT_BINARY_DIR}/intro.dox @ONLY)
 
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html)
+	# The Doxygen PROJECT_ICON configuration option was introduced in version
+	# 1.10.0. Disable that line in Doxyfile if the Doxygen version is before 1.10.0.
+	execute_process(COMMAND ${DOXYGEN_EXECUTABLE} "--version" OUTPUT_VARIABLE _Doxygen_VERSION ERROR_QUIET)
+	STRING(STRIP "${_Doxygen_VERSION}" _Doxygen_VERSION)
+	set(Doxygen_VERSION "${_Doxygen_VERSION}" CACHE STRING "Doxygen Version")
 
-add_custom_target(helpsystem)
-set_target_properties(
-   helpsystem
-   PROPERTIES FOLDER HelpDocs
-)
-
-target_sources(helpsystem
-	PRIVATE
-	${CMAKE_CURRENT_BINARY_DIR}/intro.but
-	${CMAKE_CURRENT_SOURCE_DIR}/addm.but
-	${CMAKE_CURRENT_SOURCE_DIR}/changem.but
-	${CMAKE_CURRENT_SOURCE_DIR}/drawm.but
-	${CMAKE_CURRENT_SOURCE_DIR}/editm.but
-	${CMAKE_CURRENT_SOURCE_DIR}/filem.but
-	${CMAKE_CURRENT_SOURCE_DIR}/helpm.but
-	${CMAKE_CURRENT_SOURCE_DIR}/hotbar.but
-	${CMAKE_CURRENT_SOURCE_DIR}/macrom.but
-	${CMAKE_CURRENT_SOURCE_DIR}/managem.but
-	${CMAKE_CURRENT_SOURCE_DIR}/optionm.but
-	${CMAKE_CURRENT_SOURCE_DIR}/statusbar.but
-	${CMAKE_CURRENT_SOURCE_DIR}/view_winm.but
-	${CMAKE_CURRENT_SOURCE_DIR}/navigation.but
-	${CMAKE_CURRENT_SOURCE_DIR}/appendix.but
-	${messagefile_BINARY_DIR}/messages.but
-	${CMAKE_CURRENT_SOURCE_DIR}/upgrade.but
-	${CMAKE_CURRENT_SOURCE_DIR}/warranty.but
-)
-
-#
-# messages.but is generated in a different directory scope, CMake must not check for existance
-set_source_files_properties(${messagefile_BINARY_DIR}/messages.but
-	PROPERTIES 
-	GENERATED True)
-
-# Add a custom command for cleaning the HTML staging directory
-add_custom_target(clean-html
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
-	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/clean-html.cmake
-)
-
-# If we're using the GTK back-end, just generate "vanilla" HTML help files for use with gtkhtml
-if(XTRKCAD_USE_GTK)
-
-	if (APPLE)
-		target_sources(helpsystem
-			PRIVATE 
-			${CMAKE_CURRENT_SOURCE_DIR}/osxconf.but)
+	if ("${Doxygen_VERSION}" VERSION_LESS "1.10")
+	   set(HAVE_DOXYGEN_PROJECT_ICON "# ")
 	else()
-		target_sources(helpsystem 
-			PRIVATE
-			${CMAKE_CURRENT_SOURCE_DIR}/linconf.but)
+	   set(HAVE_DOXYGEN_PROJECT_ICON "")
 	endif()
 
-	get_target_property(halibut_sources helpsystem SOURCES)
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+
+	file(GLOB doc_DOX_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.dox)
 
 	add_custom_command(
 		OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/html/index.html
-		DEPENDS halibut ${halibut_sources}
-		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
-		COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/clean-html.cmake
-		COMMAND halibut ${halibut_sources}
-		)
+		DEPENDS
+			${doc_DOX_SOURCES}
+			${CMAKE_CURRENT_BINARY_DIR}/intro.dox
+			${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+			msgfiles
+		COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+		COMMENT "Building the XTrkCAD User Guide (Doxygen)"
+	)
 
-	add_custom_target(help-html ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/html/index.html msgfiles)
+	add_custom_target(help-html ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/html/index.html)
+	set_target_properties(
+	   help-html
+	   PROPERTIES FOLDER HelpDocs
+	)
 
 	install(
 		DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
 		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
-		)
-
-	install(
-		DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/png.d
-		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/html
-		)
-
-	install(
-		FILES xtrkcad_lin.css
-		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/html
-        )
-# Copy the help files to the Help bundle if Apple
-	if (APPLE)
-        add_custom_command(
-        	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/html/XTrackCAD.helpindex
-        	DEPENDS help-html ${halibut_sources}
-        	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
-        	COMMAND hiutil -Cf XTrackCAD.helpindex -gva -e "IndexPage.html" -e "toc.html" ${CMAKE_CURRENT_BINARY_DIR}/html
-        )
-
-        add_custom_target(help-index ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/html/XTrackCAD.helpindex)
-
-        install(
-            DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html/
-            DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/XTrackCAD.help/Contents/Resources/en.lproj
-        )
-        install(
-            DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/png.d
-            DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/XTrackCAD.help/Contents/Resources/en.lproj
-        )
-	    install(
-	        FILES xtrkcad_osx.css
-		    DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/XTrackCAD.help/Contents/Resources/en.lproj/sty
 	)
-    endif()
 
-# Otherwise, we're using the Win32 back-end, so generate a compiled HTML help file
-else()
-    find_package(HTMLHelp)
+	# SF #729/#730: verifies every runtime wHelp() topic (command-context F1
+	# help and per-dialog Help buttons) resolves to a real page in the User
+	# Guide that just got built above. Only registered when XTRKCAD_TESTING is
+	# on, matching every other ctest -- help-html itself builds regardless
+	# (Doxygen-found is its only gate), so this stays available to run by hand
+	# even in a non-testing configure.
+	if(XTRKCAD_TESTING)
+		find_package(Python3 QUIET COMPONENTS Interpreter)
+		if(Python3_FOUND)
+			add_test(
+				NAME HelpLinksCheck
+				COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/check_help_links.py
+					${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/html
+			)
+		else()
+			message(STATUS "Python3 not found -- HelpLinksCheck ctest will not be registered")
+		endif()
+	endif()
 
-    if("${HTML_HELP_COMPILER}" STRGREATER "")
-        target_sources(helpsystem
-                    PRIVATE
-                    ${CMAKE_CURRENT_SOURCE_DIR}/chmconf.but
-        )
-    	file(GLOB IMAGE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/png.d/*)
-
-		#
-		# Use the Microsoft HTML Help Workshop to create a chm file
-		# 
-		# Clean the working directory
-		# Copy the image files and the CSS
-		# Create the sources for the Help Workshop using halibut
-		# Build the chm file
-		# Add the chm file to the installation 
-
-		add_custom_target(help-chm ALL DEPENDS ${halibut_sources})
-		set_target_properties(
-			help-chm
-			PROPERTIES FOLDER HelpDocs
-		)
-		get_target_property(halibut_sources helpsystem SOURCES)
-		
-		# hhc exits with non-zero code even on success
-		# workaround is to create an external cmake script that
-		# invokes hhc and handle its specific exit code
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/hhc.cmake.in"
-					   "${CMAKE_CURRENT_BINARY_DIR}/hhc.cmake"
-						@ONLY)	
-
-		add_dependencies(help-chm halibut helpsystem)
+	# Apple Help Book packaging (XTRKCAD_USE_APPLEHELP) is a separate, non-default
+	# help viewer from the browser-based wHelp() the real release ships on every
+	# platform including macOS (XTRKCAD_USE_APPLEHELP=OFF in release.yml, see
+	# app/wlib/gtk3lib/CMakeLists.txt) -- only build/install the Help Book bundle
+	# when that viewer is actually enabled, not on every APPLE build.
+	if (APPLE AND XTRKCAD_USE_APPLEHELP)
 		add_custom_command(
-			TARGET help-chm
-			POST_BUILD
+			OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/html/XTrackCAD.helpindex
+			DEPENDS help-html
 			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
-			COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/clean-html.cmake
-			COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/png.d ${CMAKE_CURRENT_BINARY_DIR}/html/png.d
-			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad_win.css ${CMAKE_CURRENT_BINARY_DIR}/html
-			COMMAND halibut ${halibut_sources}
-			COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/hhc.cmake
+			COMMAND hiutil -Cf XTrackCAD.helpindex -gva -e "index.html" ${CMAKE_CURRENT_BINARY_DIR}/html
 		)
+
+		add_custom_target(help-index ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/html/XTrackCAD.helpindex)
 
 		install(
-			FILES ${CMAKE_CURRENT_BINARY_DIR}/html/xtrkcad.chm
-			DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
+			DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html/
+			DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/XTrackCAD.help/Contents/Resources/en.lproj
 		)
-	else()
-		message(STATUS "HTML Help Workshop not found! CHM Help will not be created.")	
 	endif()
+else()
+	message(STATUS "Doxygen not found -- the User Guide (help-html target) will not be built or installed")
 endif()

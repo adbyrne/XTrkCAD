@@ -11,6 +11,7 @@ extern dynArr_t paramFileInfo_da;
 void ParamCheckSumLine(char * line);
 wBool_t IsParamValid(int fileInx);
 bool IsParamFileDeleted(int fileInx);
+bool IsParamFileValid(int fileInx);
 bool IsParamFileFavorite(int fileInx);
 void SetParamFileState(int index);
 int ReadParamFile(const char *fileName);
@@ -22,14 +23,14 @@ char * GetParamFileContents(int fileInx);
 bool ReadParams(long key, const char * dirName, const char * fileName);
 
 #define CONTENTSCOMMAND "CONTENTS"
-char *GetParameterFileContent(char *file);
+char *GetParameterFileContent(const char *file);
 
 #define TURNOUTCOMMAND "TURNOUT"
 #define STRUCTURECOMMAND "STRUCTURE"
 #define CARCOMMAND 		"CARPART"
 #define CARPROTOCOMMAND "CARPROTO"
 
-char * GetParameterFileScale(char *file);
+char * GetParameterFileScale(const char *file);
 
 
 #endif // !HAVE_PARAMFILE_H

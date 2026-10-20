@@ -23,9 +23,7 @@
 #include "custom.h"
 #include "fileio.h"
 #include "paths.h"
-#include "track.h"
 #include "common-ui.h"
-
 
 /****************************************************************************
  *
@@ -101,7 +99,7 @@ EXPORT void LogClose( void )
 	logFile = NULL;
 }
 
-EXPORT void LogSet( char * name, int level )
+EXPORT void LogSet( const char * name, int level )
 {
 	LogInit();
 	DYNARR_APPEND( logTable_t, logTable_da, 10 );

@@ -25,12 +25,12 @@
 
 #include "common.h"
 
-extern wButton_p backgroundB;		/** background visibility control */
+extern wControl_p backgroundB;		/** background visibility control */
 void SetLayoutFullPath(const char *fileName);
 void LoadLayoutMinRadiusPref(char *scaleName, double defaultValue);
 void LoadLayoutMaxGradePref(char *scaleName, double defaultValue);
-void SetLayoutTitle(char *title);
-void SetLayoutSubtitle(char *title);
+void SetLayoutTitle(const char *title);
+void SetLayoutSubtitle(const char *title);
 void SetLayoutMinTrackRadius(DIST_T radius);
 void SetLayoutMaxTrackGrade(ANGLE_T angle);
 void SetLayoutRoomSize(coOrd size);
@@ -63,6 +63,7 @@ coOrd GetLayoutBackGroundPos(void);
 ANGLE_T GetLayoutBackGroundAngle(void);
 int GetLayoutBackGroundScreen(void);
 int GetLayoutBackGroundVisible(void);
+void SetLayoutBackGroundVisible(BOOL_T visible);
 bool HasBackGround(void);
 void LayoutBackGroundInit(BOOL_T clear);
 void LayoutBackGroundLoad(void);

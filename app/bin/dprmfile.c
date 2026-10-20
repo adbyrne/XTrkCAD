@@ -23,23 +23,16 @@
 #include "custom.h"
 #include "dynstring.h"
 #include "fileio.h"
-#include "param.h"
+#include "icons.h"
+#include "form.h"
 #include "include/paramfile.h"
 #include "include/paramfilelist.h"
 #include "paths.h"
 #include "track.h"
 
+static int log_dprmfile = -1;
+
 static struct wFilSel_t * paramFile_fs;
-
-
-#include "bitmaps/greendot.image1"
-#include "bitmaps/greydot.image1"
-#include "bitmaps/yellowdot.image1"
-#include "bitmaps/reddot.image1"
-#include "bitmaps/greenstar.image1"
-#include "bitmaps/greystar.image1"
-#include "bitmaps/yellowstar.image1"
-#include "bitmaps/redstar.image1"
 
 #define FAVORITE_PARAM 1
 #define STANDARD_PARAM 0
@@ -52,7 +45,7 @@ static struct wFilSel_t * paramFile_fs;
 
 static wIcon_p indicatorIcons[ 2 ][PARAMFILE_MAXSTATE];
 
-static wWin_p paramFileW;
+static wControl_p paramFileW;
 
 static long paramFileSel = 0;
 
@@ -62,30 +55,31 @@ static void ParamUnloadSelectedFiles(void * action);
 static void ParamFileBrowse(void * junk);
 static void ParamFileSelectAll(void * junk);
 
-static paramListData_t paramFileListData = { 15, 370 };
+static wWinPix_t paramFileWidths[] = {20, 40};
+static char* paramFileTitles[] = {N_("Content"), N_("Path")};
+
+static paramListData_t paramFileListData = { 15, 370, 2, paramFileWidths, paramFileTitles };
+#ifdef TODO_UNUSED
 static char * paramFileLabels[] = { N_("Show File Names"), NULL };
+#endif
 static paramData_t paramFilePLs[] = {
 #define I_PRMFILLIST	(0)
-#define paramFileL				((wList_p)paramFilePLs[I_PRMFILLIST].control)
-	{	PD_LIST, NULL, "inx", PDO_NOPREF | PDO_DLGRESIZE, &paramFileListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
-#define I_PRMFILTOGGLE	(1)
-	{	PD_TOGGLE, &paramFileSel, "mode", 0, paramFileLabels, NULL, BC_HORZ|BC_NOBORDER },
-#define I_MESSAGE (2)
-	{ PD_MESSAGE, "", NULL, 0, I2VP(370) },
-	{	PD_BUTTON, ParamFileSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
-#define I_PRMFILEFAVORITE (4)
-	{   PD_BUTTON, ParamFileFavorite, "favorite", PDO_DLGCMDBUTTON, I2VP(TRUE), N_("Favorite")},
+#define paramFileL				(paramFilePLs[I_PRMFILLIST].control)
+	{	PD_LIST, NULL, "inx", 0, &paramFileListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
+#define I_MESSAGE (1)
+	{ PD_MESSAGE, "", "message", 0, I2VP(37) },
+	{ PD_BUTTON, ParamFileSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL },
+#define I_PRMFILEFAVORITE (3)
+	{   PD_BUTTON, ParamFileFavorite, "favorite", PDO_DLGCMDBUTTON, I2VP(TRUE)},
 	{	PD_BUTTON, ParamUnloadSelectedFiles, "unload", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_UNLOAD), 0L, FALSE },
-	{   PD_BUTTON, ParamRefreshSelectedFiles, "refresh", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_REFRESH), 0L, FALSE },
-	{	PD_BUTTON, DoSearchParams, "find", 0, NULL, N_("Library...") },
-	{	PD_BUTTON, ParamFileBrowse, "browse", 0, NULL, N_("Browse...") },
-
-
+	{   PD_BUTTON, ParamRefreshSelectedFiles, "reload", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_REFRESH), 0L, FALSE },
+	{	PD_BUTTON, DoSearchParams, "find", 0, NULL },
+	{	PD_BUTTON, ParamFileBrowse, "browse", 0, NULL },
 };
 
-static paramGroup_t paramFilePG = { "prmfile", 0, paramFilePLs, COUNT( paramFilePLs ) };
+static paramGroup_t paramFilePG = { "prmfile", PGO_FULLDIALOGFROMBUILDER, paramFilePLs, COUNT( paramFilePLs ) };
 
-#define MESSAGETEXT ((wMessage_p)paramFilePLs[I_MESSAGE].control)
+#define MESSAGETEXT (paramFilePLs[I_MESSAGE].control)
 
 static dynArr_t *sortFiles;
 
@@ -105,6 +99,11 @@ CompareParameterFiles(const void *index1, const void *index2)
 	paramFileInfo_t paramFile2 = DYNARR_N(paramFileInfo_t, (*sortFiles),
 	                                      *(int*)index2);
 
+	if (!paramFile1.valid || !paramFile2.valid) {
+		// Unloaded entries have freed name/contents (see UnloadParamFile()) --
+		// never touch them, just group by validity so qsort stays well-defined.
+		return (paramFile2.valid - paramFile1.valid);
+	}
 	if (paramFile2.trackState != paramFile1.trackState) {
 		return (paramFile2.trackState - paramFile1.trackState);
 	} else {
@@ -143,6 +142,7 @@ void ParamFileListLoad(int paramFileCnt,  dynArr_t *paramFiles)
 	DynString description;
 	DynStringMalloc(&description, STR_SHORT_SIZE);
 	int *sortedIndex = MyMalloc(sizeof(int)*paramFileCnt);
+	/** @logcmd @showrefby `params=n` `dprmfile.c` */
 	int log_params = LogFindIndex("params");
 
 	SortParamFileList(paramFileCnt, paramFiles, sortedIndex);
@@ -155,15 +155,21 @@ void ParamFileListLoad(int paramFileCnt,  dynArr_t *paramFiles)
 		                                sortedIndex[ i ]);
 		if (paramFileInfo.valid) {
 			DynStringClear(&description);
+			// paramFileSel is a never-wired-up display-mode toggle (always 0);
+			// !paramFileSel is always true by construction, not a bug.
 			DynStringCatCStr(&description,
+			                 // cppcheck-suppress knownConditionTrueFalse
 			                 ((!paramFileSel) && paramFileInfo.contents) ?
 			                 paramFileInfo.contents :
 			                 paramFileInfo.name);
 
-			wListAddValue(paramFileL,
-			              DynStringToCStr(&description),
-			              indicatorIcons[ paramFileInfo.favorite ][paramFileInfo.trackState],
-			              I2VP(sortedIndex[i]));
+			wListAddValueVar(paramFileL,
+			                 indicatorIcons[paramFileInfo.favorite][paramFileInfo.trackState],
+			                 I2VP(sortedIndex[i]),
+			                 paramFileInfo.contents,
+			                 paramFileInfo.name,
+			                 NULL);
+			;
 
 			LOG1(log_params, ("ParamFileListLoad: = %s: %d\n", paramFileInfo.contents,
 			                  paramFileInfo.trackState))
@@ -174,11 +180,16 @@ void ParamFileListLoad(int paramFileCnt,  dynArr_t *paramFiles)
 	MyFree(sortedIndex);
 }
 
+/**
+ * \todo remove workaround for initial path. Problem was possibly caused by a bug in the Windows
+ * glib implementation. Action: retest with a current (late 2024 version)
+ * See https://gitlab.gnome.org/GNOME/glib/-/issues/3279
+ */
 
 static void ParamFileBrowse(void * junk)
 {
 	wMessageSetValue(MESSAGETEXT, "");
-	wFilSelect(paramFile_fs, GetParamFileDir());
+	wFilSelect(paramFile_fs, /*GetParamFileDir()*/ ".");
 	return;
 }
 
@@ -208,7 +219,7 @@ static void UpdateParamFileButton(void)
 
 	// walk through the whole list box
 	for (inx=0; inx<cnt; inx++) {
-		if (wListGetItemSelected((wList_p)paramFileL, inx)) {
+		if (wListGetItemSelected(paramFileL, inx)) {
 			// if item is selected, get status
 			fileInx = (wIndex_t)VP2L(wListGetItemContext(paramFileL, inx));
 
@@ -239,7 +250,7 @@ UpdateParamFileProperties( bool newState)
 
 	// walk through the whole list box
 	for (inx = 0; inx < cnt; inx++) {
-		if (wListGetItemSelected((wList_p)paramFileL, inx)) {
+		if (wListGetItemSelected(paramFileL, inx)) {
 			fileInx = (wIndex_t)VP2L(wListGetItemContext(paramFileL, inx));
 			SetParamFileFavorite(fileInx, newState);
 		}
@@ -250,8 +261,7 @@ UpdateParamFileProperties( bool newState)
 /**
  * Mark selected files as favorite
  *
- * \param favorite IN FALSE = remove, TRUE = set favorite
- * \return
+ * \param setFavorite IN FALSE = remove, TRUE = set favorite
  */
 
 static void ParamFileFavorite(void * setFavorite)
@@ -279,7 +289,7 @@ ParamChangeSelectedFiles(unsigned paramFileChange)
 	cnt = wListGetCount(paramFileL);
 
 	for (inx = 0; inx < cnt; inx++) {
-		if (wListGetItemSelected((wList_p)paramFileL, inx)) {
+		if (wListGetItemSelected(paramFileL, inx)) {
 			fileInx = (wIndex_t)VP2L(wListGetItemContext(paramFileL, inx));
 
 			switch (paramFileChange) {
@@ -311,7 +321,6 @@ ParamChangeSelectedFiles(unsigned paramFileChange)
  * Refresh selected files.
  *
  * \param action IN FALSE = unload, TRUE = reload parameter files
- * \return
  */
 
 static void ParamRefreshSelectedFiles(void * action)
@@ -353,7 +362,6 @@ static void ParamUnloadSelectedFiles(void * action)
  * Select all files in the list and set action button
  *
  * \param junk IN ignored
- * \return
  */
 
 static void ParamFileSelectAll(void *junk)
@@ -368,7 +376,7 @@ static void ParamFileOk(void * junk)
 	SearchUiOk(junk);
 
 	DoChangeNotification(CHANGE_PARAMS);
-	wHide(paramFileW);
+	//wHide(paramFileW);
 }
 
 
@@ -381,8 +389,9 @@ static void ParamFileDlgUpdate(
 	case I_PRMFILLIST:
 		UpdateParamFileButton();
 		break;
-	case I_PRMFILTOGGLE:
-		DoChangeNotification(CHANGE_PARAMS);
+	default:
+		if ( log_dprmfile < 0 ) { log_dprmfile = LogFindIndex( "dprmfile" ); }
+		LOG( log_dprmfile, 1, ( "unexpected inx %d in ParamFileDlgUpdate\n", inx ) )
 		break;
 	}
 }
@@ -409,33 +418,41 @@ void DoParamFiles(void * junk)
 	void * data;
 
 	if (paramFileW == NULL) {
-		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_UNLOADED ] = wIconCreatePixMap(
-		                        greydot_image1);
-		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_NOTUSABLE ] = wIconCreatePixMap(
-		                        reddot_image1);
-		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_COMPATIBLE ] = wIconCreatePixMap(
-		                        yellowdot_image1);
-		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_FIT] = wIconCreatePixMap(
-		                        greendot_image1);
-		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_UNLOADED ] = wIconCreatePixMap(
-		                        greystar_image1);
-		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_NOTUSABLE ] = wIconCreatePixMap(
-		                        redstar_image1);
-		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_COMPATIBLE ] = wIconCreatePixMap(
-		                        yellowstar_image1);
-		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_FIT ] = wIconCreatePixMap(
-		                        greenstar_image1);
+		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_UNLOADED ] =
+		        CreateSymbolFromResource(
+		                "greydot.png");
+		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_NOTUSABLE ] =
+		        CreateSymbolFromResource(
+		                "reddot.png");
+		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_COMPATIBLE ] =
+		        CreateSymbolFromResource(
+		                "yellowdot.png");
+		indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_FIT] =
+		        CreateSymbolFromResource("greendot.png");
+		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_UNLOADED ] =
+		        CreateSymbolFromResource(
+		                "greystar.png");
+		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_NOTUSABLE ] =
+		        CreateSymbolFromResource(
+		                "redstar.png");
+		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_COMPATIBLE ] =
+		        CreateSymbolFromResource(
+		                "yellowstar.png");
+		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_FIT ] = CreateSymbolFromResource(
+		                "greenstar.png");
 
-		ParamRegister(&paramFilePG);
+		FormRegister(&paramFilePG);
 
-		paramFileW = ParamCreateDialog(&paramFilePG,
-		                               MakeWindowTitle(_("Parameter Files")), _("Done"), ParamFileOk, ParamCancel_Null,
-		                               TRUE, NULL, F_RESIZE | F_RECALLSIZE, ParamFileDlgUpdate);
-		paramFile_fs = wFilSelCreate(mainW, FS_LOAD, FS_MULTIPLEFILES,
+		paramFileW = FormCreateDialog(&paramFilePG,
+		                              MakeWindowTitle(_("Parameter Files")),
+		                              _("Done"), ParamFileOk,
+		                              NULL, NULL,
+		                              TRUE, F_RESIZE | F_RECALLSIZE, ParamFileDlgUpdate);
+		paramFile_fs = wFilSelCreate(mainW, FS_LOAD, FSO_MULTIPLEFILES,
 		                             _("Load Parameters"), _("Parameter files (*.xtp)|*.xtp"), LoadParamFile, NULL);
 	}
-	ParamLoadControls(&paramFilePG);
-	ParamGroupRecord(&paramFilePG);
+	FormLoadControls(&paramFilePG);
+	FormGroupRecord(&paramFilePG);
 	if ((wListGetValues(paramFileL, NULL, 0, NULL, &data))>=0) {
 		UpdateParamFileButton();
 	}

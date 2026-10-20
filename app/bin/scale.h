@@ -44,15 +44,15 @@ BOOL_T DoSetScale( const char * );
 
 void ScaleLengthIncrement( SCALEINX_T, DIST_T );
 void ScaleLengthEnd( void );
-void LoadScaleList( wList_p );
-void LoadGaugeList( wList_p, SCALEDESCINX_T );
+void LoadScaleList( wControl_p list );
+void LoadGaugeList( wControl_p list, SCALEDESCINX_T scale);
 
 typedef enum {FIT_STRUCTURE, FIT_TURNOUT, FIT_CAR} SCALE_FIT_TYPE_T;
 typedef enum {FIT_NONE, FIT_COMPATIBLE, FIT_EXACT} SCALE_FIT_T;
 SCALE_FIT_T CompatibleScale( SCALE_FIT_TYPE_T, SCALEINX_T, SCALEINX_T );
 
-SCALE_FIT_T FindScaleCompatible(SCALE_FIT_TYPE_T type, char * scale1,
-                                char * scale2);
+SCALE_FIT_T FindScaleCompatible(SCALE_FIT_TYPE_T type, const char * scale1,
+                                const char * scale2);
 
 BOOL_T DoAllSetScaleDesc( void );
 

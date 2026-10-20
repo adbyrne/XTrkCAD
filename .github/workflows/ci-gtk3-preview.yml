@@ -1,0 +1,40 @@
+name: CI (toolchain preview)
+on:
+  push:
+    branches:
+      - main
+      - test/**
+  pull_request:
+    branches:
+      - main
+
+# ci-gtk3.yml is the gate, with every runner and compiler pinned. This
+# workflow runs the same shared jobs on the next images so breakage shows up
+# here before ci-gtk3.yml moves over:
+#   - Ubuntu 26.04, x64 and arm64 (newer GCC, Clang, cppcheck, clang-tidy
+#     and GTK), including the report-only QA jobs, so new tool findings show
+#     up before the pin moves
+#   - Xcode 27 preview image on macOS (next AppleClang)
+#   - Windows 11 on ARM via MSYS2 CLANGARM64 (a platform we don't ship yet)
+# It's advisory: a failure here is something to fix or ticket, not a merge
+# blocker. To move a pin forward, copy the input here into ci-gtk3.yml's call
+# (or change the reusable workflow's default).
+
+jobs:
+  toolchain:
+    uses: ./.github/workflows/gtk3-toolchain.yml
+    with:
+      ubuntu: '26.04'
+      macos-runner: xcode-27
+      pin-xcode: false
+      windows-runner: windows-11-arm
+      msystem: CLANGARM64
+      cc-package: clang
+      pin-mingw-gcc: false
+
+  qa:
+    uses: ./.github/workflows/gtk3-qa-reports.yml
+    with:
+      runner: ubuntu-26.04
+      coverage: false
+      artifact-suffix: -ubuntu2604

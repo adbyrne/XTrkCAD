@@ -20,12 +20,14 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include <string.h>
 #include <dynstring.h>
-#include "track.h"
-#include "common.h"
 #include "misc.h"
 #include "uthash.h"
 #include "paths.h"
+
+#define PATHS_SECTION "paths"
+#define PATH_TYPE_SIZE	10
 
 struct pathTable {
 	char type[ PATH_TYPE_SIZE]; 			/**< type of path */
@@ -38,13 +40,10 @@ static struct pathTable *paths;
 static void AddPath(const char *type, char*path);
 static struct pathTable *FindPath(const char *type);
 
-#define PATHS_SECTION "paths"
-
 /**
 * Find the path for a given type in the hash table
 *
 * \param type IN the searched type
-* \param entry OUT the table entry
 * \return
 */
 
@@ -53,6 +52,7 @@ FindPath(const char *type)
 {
 	struct pathTable *entry;
 	/* cppcheck-suppress uninitvar */ /* uthash macro initializes internal fields */
+	// NOLINTNEXTLINE(bugprone-casting-through-void) -- vendored uthash.h macro
 	HASH_FIND_STR(paths, type, entry);
 	return (entry);
 }
@@ -93,7 +93,6 @@ AddPath(const char *type, char*path)
  *
  * \param pathType IN file type
  * \param fileName IN fully qualified filename
- * \return
  *
  */
 
@@ -125,7 +124,7 @@ void SetCurrentPath(
  * 4. the user's home directory as default
  * Search is finished when one of the options returns a valid path
  *
- * \param IN pathType the type
+ * \param[in] pathType the type
  * \return pointer to path of NULL if not existing
  */
 
@@ -247,4 +246,28 @@ MakeFullpath(char **str, ...)
 	*str = strdup(DynStringToCStr(&path));
 	DynStringFree(&path);
 	va_end(valist);
+}
+
+/**
+ * Add the default extension to a filename if it doesn'thave an extension.
+ *
+ * \param	filename the filename, the extension while be appended. Make sure that the buffer is large enough.
+ * \param	default_ext	the extension to add if none is present
+ *
+ */
+void AddDefaultExtension(char *filename, const char *default_ext)
+{
+	const char *dot = strrchr(filename, '.');
+	char *slash = strrchr(filename, '/');
+	char *backslash = strrchr(filename, '\\');
+
+	// Find the last path separator (if any)
+	const char *last_sep = (slash > backslash) ? slash : backslash;
+
+	// Check if dot exists and comes after the last path separator
+	// (to avoid treating directories like "folder.name" as having extensions)
+	if (dot == NULL || (last_sep != NULL && dot < last_sep)) {
+		// No extension found, add the default
+		strcat(filename, default_ext);
+	}
 }

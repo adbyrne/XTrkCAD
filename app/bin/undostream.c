@@ -69,6 +69,9 @@ void Rprintf(
 	va_start( ap, format );
 	vsprintf( buff, format, ap );
 	va_end( ap );
+	// cppcheck-suppress knownConditionTrueFalse
+	// rbuff_record is a never-wired-up debug toggle (always 0); the
+	// ring-buffer echo-to-console path is currently always disabled.
 	if (rbuff_record >= 1) {
 		lprintf( buff );
 	}
@@ -87,11 +90,19 @@ void Rprintf(
  *
  */
 
+/** @logcmd @showrefby `undo=n` `undostream.c` — undo/redo ring-buffer stream I/O
+ * (`ReadStream`/`WriteStream`/`TrimStream`/`TruncateStream`); a separate registration from
+ * `cundo.c`'s own `undo` category, but the same name, so one `-d undo=n` drives both */
 static int log_undo = 0;
+
+void InitUndoStream( void )
+{
+	log_undo = LogFindIndex( "undo" );
+}
 
 BOOL_T ReadStream( stream_t * stream, void * ptr, int size )
 {
-	size_t binx, boff, brem;
+	long binx, boff, brem;
 	streamBlocks_p blk;
 	if ( stream->curr+size > stream->end ) {
 		UndoFail( "Overrun on stream", (uintptr_t)(stream->curr+size), __FILE__,
@@ -125,7 +136,7 @@ BOOL_T ReadStream( stream_t * stream, void * ptr, int size )
 
 BOOL_T WriteStream( stream_p stream, void * ptr, int size )
 {
-	size_t binx, boff, brem;
+	long binx, boff, brem;
 	streamBlocks_p blk;
 	LOG( log_undo, 5,
 	     ( "WriteStream( , "SLOG_FMT", %d ) %ld "SLOG_FMT" "SLOG_FMT"\n", (uintptr_t)ptr,
@@ -165,8 +176,7 @@ BOOL_T WriteStream( stream_p stream, void * ptr, int size )
 
 BOOL_T TrimStream( stream_p stream, uintptr_t off )
 {
-	size_t binx, cnt, inx;
-	streamBlocks_p blk;
+	long binx, cnt, inx;
 	LOG( log_undo, 3, ( "    TrimStream( , %ld )\n", off ) )
 	binx = off/BSTREAM_SIZE;
 	cnt = binx-stream->startBInx;
@@ -179,7 +189,7 @@ BOOL_T TrimStream( stream_p stream, uintptr_t off )
 		return TRUE;
 	}
 	for (inx=0; inx<cnt; inx++) {
-		blk = DYNARR_N( streamBlocks_p, stream->stream_da, inx );
+		streamBlocks_p blk = DYNARR_N( streamBlocks_p, stream->stream_da, inx );
 		MyFree( blk );
 	}
 	for (inx=cnt; inx<stream->stream_da.cnt; inx++ ) {
@@ -196,9 +206,8 @@ BOOL_T TrimStream( stream_p stream, uintptr_t off )
 void ClearStream( stream_p stream )
 {
 	long inx;
-	streamBlocks_p blk;
 	for (inx=0; inx<stream->stream_da.cnt; inx++) {
-		blk = DYNARR_N( streamBlocks_p, stream->stream_da, inx );
+		streamBlocks_p blk = DYNARR_N( streamBlocks_p, stream->stream_da, inx );
 		MyFree( blk );
 	}
 	DYNARR_FREE( streamBlocks_p, stream->stream_da );
@@ -209,8 +218,7 @@ void ClearStream( stream_p stream )
 
 BOOL_T TruncateStream( stream_p stream, uintptr_t off )
 {
-	size_t binx, boff, cnt, inx;
-	streamBlocks_p blk;
+	long binx, boff, cnt, inx;
 	LOG( log_undo, 3, ( "TruncateStream( , %ld )\n", off ) )
 	binx = off/BSTREAM_SIZE;
 	boff = off%BSTREAM_SIZE;
@@ -229,7 +237,7 @@ BOOL_T TruncateStream( stream_p stream, uintptr_t off )
 		return TRUE;
 	}
 	for (inx=binx; inx<stream->stream_da.cnt; inx++) {
-		blk = DYNARR_N( streamBlocks_p, stream->stream_da, inx );
+		streamBlocks_p blk = DYNARR_N( streamBlocks_p, stream->stream_da, inx );
 		MyFree( blk );
 	}
 	DYNARR_SET( streamBlocks_p, stream->stream_da, (wIndex_t)binx );

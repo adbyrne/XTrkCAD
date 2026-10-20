@@ -197,13 +197,14 @@ msgstr "Le bras de commande 1 est trop court, veuillez réessayer"
 #: ../bin/csensor.c:160 ../bin/csensor.c:389 ../bin/csignal.c:236
 #: ../bin/csignal.c:499 ../bin/csignal.c:510 ../bin/csignal.c:536
 #: ../bin/cswitchmotor.c:89 ../bin/cswitchmotor.c:108 ../bin/cswitchmotor.c:228
-#: ../bin/dcontmgm.c:79 ../bin/dlayer.c:543
+#: ../bin/dcontmgm.c:79 ../bin/dlayer.c:543 ../wlib/gtk3lib/ui/contmgm.ui:100
+#: ../wlib/gtk3lib/ui/signaledit.ui:65
 msgid "Name"
 msgstr "Nom"
 
 #: ../bin/cblock.c:111 ../bin/cblock.c:123 ../bin/cblock.c:170
 #: ../bin/csensor.c:162 ../bin/csensor.c:395 ../bin/csignal.c:499
-#: ../bin/csignal.c:538
+#: ../bin/csignal.c:538 ../wlib/gtk3lib/ui/signaledit.ui:209
 msgid "Script"
 msgstr "Script"
 
@@ -229,6 +230,36 @@ msgstr "Segments"
 #: ../bin/ctodesgn.c:744 ../bin/ctrain.c:182 ../bin/tbezier.c:296
 #: ../bin/tcornu.c:332 ../bin/tcurve.c:404 ../bin/tstraigh.c:91
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:186
+#: ../wlib/gtk3lib/ui/appwindow.ui:1210
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:73
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:125
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:256
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:305
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:394
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:520
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:604
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:672
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:763
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:852
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:978
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1062
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1130
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1235
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1246
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1346
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1430
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1473
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1528
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1722
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1753
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1839
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1889
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1957
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1993
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:2075
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:2144
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:2213
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:2282
 msgid "Length"
 msgstr "Longueur"
 
@@ -323,7 +354,7 @@ msgstr "La section de voie doit avoir un nom !"
 msgid "Block is discontiguous!"
 msgstr "La section de voie est discontinue !"
 
-#: ../bin/cblock.c:626
+#: ../bin/cblock.c:626 ../wlib/gtk3lib/ui/block.ui:7
 msgid "Create block"
 msgstr "Créer un bloc"
 
@@ -387,7 +418,7 @@ msgstr "Supprimer la section de voie %s"
 msgid "Modify Block"
 msgstr "Modifier le bloc"
 
-#: ../bin/cblock.c:863
+#: ../bin/cblock.c:863 ../wlib/gtk3lib/ui/blockedit.ui:7
 msgid "Edit block"
 msgstr "Editer le bloc"
 
@@ -511,7 +542,7 @@ msgstr "Aucun point de fin valable sur cette voie"
 msgid "Track is different scale"
 msgstr "La voie a une échelle différente"
 
-#: ../bin/ccornu.c:1794
+#: ../bin/ccornu.c:1794 ../wlib/gtk3lib/ui/appwindow.ui:637
 msgid ""
 "Pick on point to adjust it along track - Delete to remove, Enter to confirm, "
 "ESC to abort"
@@ -836,6 +867,18 @@ msgstr "Différence d'élévation"
 #: ../bin/ctodesgn.c:489 ../bin/ctodesgn.c:696 ../bin/tbezier.c:285
 #: ../bin/tbezier.c:292 ../bin/tcornu.c:326 ../bin/tcurve.c:401
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:187
+#: ../wlib/gtk3lib/ui/appwindow.ui:1269 ../wlib/gtk3lib/ui/appwindow.ui:1328
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:457
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:553
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:615
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:915
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1011
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1073
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1419
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1506
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1517
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1539
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:2330
 msgid "Radius"
 msgstr "Rayon"
 
@@ -849,7 +892,7 @@ msgstr "Séparation angulaire"
 
 #: ../bin/ccurve.c:730 ../bin/celev.c:43 ../bin/compound.c:740
 #: ../bin/tbezier.c:297 ../bin/tcornu.c:333 ../bin/tcurve.c:408
-#: ../bin/tease.c:534 ../bin/tstraigh.c:93
+#: ../bin/tease.c:534 ../bin/tstraigh.c:93 ../wlib/gtk3lib/ui/elev.ui:168
 msgid "Grade"
 msgstr "Pente"
 
@@ -982,10 +1025,12 @@ msgid "Control"
 msgstr "Contrôle"
 
 #: ../bin/ccontrol.c:427 ../bin/csensor.c:391 ../bin/csignal.c:512
+#: ../wlib/gtk3lib/ui/signaledit.ui:103
 msgid "Origin X"
 msgstr "Origine X"
 
 #: ../bin/ccontrol.c:429 ../bin/csensor.c:393 ../bin/csignal.c:514
+#: ../wlib/gtk3lib/ui/signaledit.ui:135
 msgid "Origin Y"
 msgstr "Origine Y"
 
@@ -1035,12 +1080,14 @@ msgstr "Angle CW"
 
 #: ../bin/cdraw.c:561 ../bin/cdraw.c:1582 ../bin/cdraw.c:1705
 #: ../bin/cprint.c:131 ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:185
+#: ../wlib/gtk3lib/ui/appwindow.ui:1470
 msgid "Height"
 msgstr "Hauteur"
 
 #: ../bin/cdraw.c:562 ../bin/cdraw.c:1580 ../bin/cdraw.c:1704
 #: ../bin/cdraw.c:2845 ../bin/cdraw.c:3110 ../bin/ctrain.c:183
 #: ../bin/dcar.c:2344 ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:192
+#: ../wlib/gtk3lib/ui/appwindow.ui:1446 ../wlib/gtk3lib/ui/carpart.ui:497
 msgid "Width"
 msgstr "Largeur"
 
@@ -1053,7 +1100,7 @@ msgid "Point Count"
 msgstr "Nombre de points"
 
 #: ../bin/cdraw.c:565 ../bin/cdraw.c:2823 ../bin/ctodesgn.c:209
-#: ../bin/tbezier.c:299
+#: ../bin/tbezier.c:299 ../wlib/gtk3lib/ui/turnout-designer.ui:2548
 msgid "Line Width"
 msgstr "Épaisseur de trait"
 
@@ -1065,7 +1112,8 @@ msgstr "Type de ligne"
 #: ../bin/cdraw.c:567 ../bin/cdraw.c:2825 ../bin/cdraw.c:2827
 #: ../bin/cdraw.c:2927 ../bin/cdraw.c:2960 ../bin/cmisc.c:121 ../bin/ctext.c:67
 #: ../bin/ctext.c:145 ../bin/ctodesgn.c:210 ../bin/dcar.c:2340
-#: ../bin/dlayer.c:545 ../bin/doption.c:591
+#: ../bin/dlayer.c:545 ../bin/doption.c:591 ../wlib/gtk3lib/ui/carpart.ui:343
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:2589
 msgid "Color"
 msgstr "Couleur"
 
@@ -1206,12 +1254,12 @@ msgid "%s(%d) Layer=%d"
 msgstr "%s(%d) Calque=%d"
 
 #: ../bin/cdraw.c:1355 ../bin/cdraw.c:2930 ../bin/compound.c:1156
-#: ../bin/doption.c:96 ../bin/tbezier.c:519
+#: ../bin/doption.c:96 ../bin/tbezier.c:519 ../wlib/gtk3lib/ui/display.ui:419
 msgid "Solid"
 msgstr "Solide"
 
 #: ../bin/cdraw.c:1356 ../bin/cdraw.c:2932 ../bin/compound.c:1157
-#: ../bin/doption.c:93 ../bin/tbezier.c:520
+#: ../bin/doption.c:93 ../bin/tbezier.c:520 ../wlib/gtk3lib/ui/display.ui:193
 msgid "Dash"
 msgstr "Tiret"
 
@@ -1266,6 +1314,27 @@ msgstr "Grand"
 #: ../bin/ctodesgn.c:539 ../bin/ctodesgn.c:564 ../bin/ctodesgn.c:697
 #: ../bin/ctrain.c:181 ../bin/tease.c:529
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:183
+#: ../wlib/gtk3lib/ui/appwindow.ui:1234 ../wlib/gtk3lib/ui/appwindow.ui:1293
+#: ../wlib/gtk3lib/ui/print.ui:612 ../wlib/gtk3lib/ui/reports.ui:168
+#: ../wlib/gtk3lib/ui/signaledit.ui:114
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:149
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:235
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:327
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:436
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:542
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:714
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:785
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:894
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1000
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1172
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1268
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1388
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1462
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1495
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1764
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1900
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:2028
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:2352
 msgid "Angle"
 msgstr "Angle"
 
@@ -1286,7 +1355,7 @@ msgstr "Angle de rotation"
 msgid "Rot Center X,Y"
 msgstr "Rot Centre X,Y"
 
-#: ../bin/cdraw.c:1692
+#: ../bin/cdraw.c:1692 ../wlib/gtk3lib/ui/appwindow.ui:1387
 msgid "Seg Lth"
 msgstr "Long. segmt"
 
@@ -1329,6 +1398,7 @@ msgid "%s Line Width"
 msgstr "%s épaisseur"
 
 #: ../bin/cdraw.c:2928 ../bin/dcar.c:2313 ../bin/dcar.c:4694 ../bin/dcar.c:4700
+#: ../wlib/gtk3lib/ui/carinv.ui:75 ../wlib/gtk3lib/ui/carinv.ui:396
 msgid "Type"
 msgstr "Type"
 
@@ -1596,27 +1666,30 @@ msgstr "De l'origine au milieu - 'm'"
 
 #: ../bin/celev.c:42 ../bin/cprint.c:117 ../bin/cprofile.c:1531
 #: ../bin/csplit.c:201 ../bin/csplit.c:210 ../bin/dease.c:68
-#: ../bin/doption.c:94 ../bin/doption.c:96
+#: ../bin/doption.c:94 ../bin/doption.c:96 ../wlib/gtk3lib/ui/display.ui:248
+#: ../wlib/gtk3lib/ui/display.ui:388 ../wlib/gtk3lib/ui/easement.ui:88
+#: ../wlib/gtk3lib/ui/elev.ui:105 ../wlib/gtk3lib/ui/print.ui:499
 msgid "None"
 msgstr "Aucun"
 
-#: ../bin/celev.c:42
+#: ../bin/celev.c:42 ../wlib/gtk3lib/ui/elev.ui:121
 msgid "Defined"
 msgstr "Défini.e"
 
-#: ../bin/celev.c:42
+#: ../bin/celev.c:42 ../wlib/gtk3lib/ui/elev.ui:137
 msgid "Hidden"
 msgstr "Caché"
 
-#: ../bin/celev.c:43
+#: ../bin/celev.c:43 ../wlib/gtk3lib/ui/elev.ui:153
 msgid "Computed"
 msgstr "Calculé"
 
-#: ../bin/celev.c:43
+#: ../bin/celev.c:43 ../wlib/gtk3lib/ui/elev.ui:179
 msgid "Station"
 msgstr "Gare"
 
 #: ../bin/celev.c:43 ../bin/cprofile.c:1529 ../bin/dcmpnd.c:71
+#: ../wlib/gtk3lib/ui/elev.ui:195
 msgid "Ignore"
 msgstr "Ignoré"
 
@@ -1735,6 +1808,10 @@ msgstr ""
 #: ../bin/dcar.c:2305 ../bin/dcar.c:4694 ../bin/dcar.c:4700 ../bin/dcmpnd.c:483
 #: ../bin/dcustmgm.c:45 ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:417
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:656
+#: ../wlib/gtk3lib/ui/carinv.ui:63 ../wlib/gtk3lib/ui/carinv.ui:372
+#: ../wlib/gtk3lib/ui/carpart.ui:153 ../wlib/gtk3lib/ui/custmgm.ui:54
+#: ../wlib/gtk3lib/ui/pricelist.ui:81 ../wlib/gtk3lib/ui/structure.ui:91
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:2410 ../wlib/gtk3lib/ui/turnout.ui:73
 msgid "Manufacturer"
 msgstr "Fabricant"
 
@@ -1746,10 +1823,16 @@ msgstr "Fabricant"
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:418
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:650
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:651
+#: ../wlib/gtk3lib/ui/carinv.ui:81 ../wlib/gtk3lib/ui/carinv.ui:408
+#: ../wlib/gtk3lib/ui/carpart.ui:249 ../wlib/gtk3lib/ui/custmgm.ui:93
+#: ../wlib/gtk3lib/ui/pricelist.ui:69 ../wlib/gtk3lib/ui/searchgui.ui:242
+#: ../wlib/gtk3lib/ui/structure.ui:113 ../wlib/gtk3lib/ui/turnout.ui:95
 msgid "Description"
 msgstr "Description"
 
 #: ../bin/cgroup.c:702 ../bin/dcmpnd.c:485
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:2476
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:2488
 msgid "#"
 msgstr "#"
 
@@ -1847,7 +1930,7 @@ msgstr "Cliquez sur un point d'extrémité sélectionné"
 msgid "unselected"
 msgstr "non sélectionné"
 
-#: ../bin/cjoin.c:438 ../bin/cprint.c:162
+#: ../bin/cjoin.c:438 ../bin/cprint.c:162 ../wlib/gtk3lib/ui/print.ui:794
 msgid "selected"
 msgstr "sélectionnée-s"
 
@@ -1882,6 +1965,7 @@ msgstr ""
 "raccorder"
 
 #: ../bin/cjoin.c:1011 ../bin/cjoin.c:1469 ../bin/cjoin.c:1476
+#: ../wlib/gtk3lib/ui/appwindow.ui:566
 msgid "Select 2nd track"
 msgstr "Sélectionner une 2nd voie"
 
@@ -1946,7 +2030,7 @@ msgstr "Verrou"
 msgid "Select track to describe +Shift for Frozen"
 msgstr "Sélectionnez la voie à parcourir + Maj pour geler"
 
-#: ../bin/cmisc.c:691 ../bin/doption.c:245
+#: ../bin/cmisc.c:691 ../bin/doption.c:245 ../wlib/gtk3lib/ui/cmdopt.ui:94
 msgid "Properties"
 msgstr "Propriétés"
 
@@ -2002,6 +2086,7 @@ msgid "Pan center - 'c'"
 msgstr "Centre du panoramique - 'c'"
 
 #: ../bin/cnote.c:67 ../bin/textnoteui.c:47 ../bin/trknote.c:52
+#: ../wlib/gtk3lib/ui/carpart.ui:1054 ../wlib/gtk3lib/ui/reports.ui:180
 msgid "Note"
 msgstr "Remarque"
 
@@ -2068,7 +2153,11 @@ msgstr "Origine : X,Y"
 
 #: ../bin/compound.c:746 ../bin/cstruct.c:65 ../bin/cturnout.c:84
 #: ../bin/dcar.c:4694 ../bin/dcar.c:4700 ../bin/dcustmgm.c:46
-#: ../bin/doption.c:99 ../bin/doption.c:100
+#: ../bin/doption.c:99 ../bin/doption.c:100 ../wlib/gtk3lib/ui/carinv.ui:69
+#: ../wlib/gtk3lib/ui/carinv.ui:384 ../wlib/gtk3lib/ui/custmgm.ui:80
+#: ../wlib/gtk3lib/ui/display.ui:746 ../wlib/gtk3lib/ui/display.ui:811
+#: ../wlib/gtk3lib/ui/display.ui:875 ../wlib/gtk3lib/ui/pricelist.ui:93
+#: ../wlib/gtk3lib/ui/structure.ui:102 ../wlib/gtk3lib/ui/turnout.ui:84
 msgid "Part No"
 msgstr "Référence N°"
 
@@ -2095,7 +2184,9 @@ msgstr "%s (%d) Calque= %d %s"
 
 #: ../bin/cparalle.c:49 ../bin/cparalle.c:98 ../bin/cparalle.c:140
 #: ../bin/ctodesgn.c:600 ../bin/ctodesgn.c:626 ../bin/ctodesgn.c:651
-#: ../bin/tcurve.c:403
+#: ../bin/tcurve.c:403 ../wlib/gtk3lib/ui/turnout-designer.ui:2097
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:2166
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:2235
 msgid "Separation"
 msgstr "Séparation"
 
@@ -2140,15 +2231,18 @@ msgstr "Paysage"
 #: ../bin/cprint.c:111 ../bin/cswitchmotor.c:90 ../bin/cswitchmotor.c:109
 #: ../bin/cswitchmotor.c:229 ../bin/dbench.c:75 ../bin/dease.c:68
 #: ../bin/doption.c:93 ../bin/doption.c:95 ../bin/macro.c:1416
+#: ../wlib/gtk3lib/ui/display.ui:209 ../wlib/gtk3lib/ui/display.ui:318
+#: ../wlib/gtk3lib/ui/easement.ui:119 ../wlib/gtk3lib/ui/turnout-designer.ui:95
 msgid "Normal"
 msgstr "Normal"
 
 #: ../bin/cprint.c:111 ../bin/cswitchmotor.c:91 ../bin/cswitchmotor.c:110
 #: ../bin/cswitchmotor.c:230 ../bin/ctrain.c:1011 ../bin/ctrain.c:1324
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:110
 msgid "Reverse"
 msgstr "Inversé"
 
-#: ../bin/cprint.c:112
+#: ../bin/cprint.c:112 ../wlib/gtk3lib/ui/print.ui:278
 msgid "Engineering Data"
 msgstr "Données d'ingénierie"
 
@@ -2156,7 +2250,7 @@ msgstr "Données d'ingénierie"
 msgid "Registration Marks (in 1:1 scale only)"
 msgstr "Aides au positionnement (à l'échelle 1:1 uniquement)"
 
-#: ../bin/cprint.c:114
+#: ../bin/cprint.c:114 ../wlib/gtk3lib/ui/print.ui:304
 msgid "Page Numbers"
 msgstr "Numéro de page"
 
@@ -2165,14 +2259,15 @@ msgid "Ignore Page Margins"
 msgstr "Impression sans marge"
 
 #: ../bin/cprint.c:116 ../bin/csnap.c:733 ../bin/doption.c:559
+#: ../wlib/gtk3lib/ui/print.ui:356 ../wlib/gtk3lib/ui/rgbcolor.ui:215
 msgid "Snap Grid"
 msgstr "Grille magnétique"
 
-#: ../bin/cprint.c:117
+#: ../bin/cprint.c:117 ../wlib/gtk3lib/ui/print.ui:470
 msgid "Layout Edge"
 msgstr "Bord de Layout"
 
-#: ../bin/cprint.c:117
+#: ../bin/cprint.c:117 ../wlib/gtk3lib/ui/print.ui:484
 msgid "Every Page"
 msgstr "Chaque page"
 
@@ -2184,7 +2279,7 @@ msgstr "Rayon droit"
 msgid "Centerline below Scale 1:1"
 msgstr "Imprime l'axe central \"en dessous de l'échelle 1:1\""
 
-#: ../bin/cprint.c:128
+#: ../bin/cprint.c:128 ../wlib/gtk3lib/ui/print.ui:31
 msgid "Print Scale"
 msgstr "Echelle d'impression"
 
@@ -2204,7 +2299,7 @@ msgstr "Copie Ecran"
 msgid "Page Format"
 msgstr "Format de la page"
 
-#: ../bin/cprint.c:134
+#: ../bin/cprint.c:134 ../wlib/gtk3lib/ui/print.ui:193
 msgid "Print Order"
 msgstr "Ordre d'impression"
 
@@ -2224,16 +2319,18 @@ msgstr "    Largeur"
 msgid "Margins"
 msgstr "Marges"
 
-#: ../bin/cprint.c:153 ../bin/cturntbl.c:274
+#: ../bin/cprint.c:153 ../bin/cturntbl.c:274 ../wlib/gtk3lib/ui/print.ui:555
 msgid "Origin: X"
 msgstr "Origine : X"
 
-#: ../bin/cprint.c:154 ../bin/csnap.c:549
+#: ../bin/cprint.c:154 ../bin/csnap.c:549 ../wlib/gtk3lib/ui/print.ui:577
+#: ../wlib/gtk3lib/ui/reports.ui:156
 msgid "Y"
 msgstr "Y"
 
 #: ../bin/cprint.c:155 ../bin/cprint.c:631 ../bin/cprofile.c:706
-#: ../bin/dcar.c:2325
+#: ../bin/dcar.c:2325 ../wlib/gtk3lib/ui/carpart.ui:722
+#: ../wlib/gtk3lib/ui/print.ui:599
 msgid "Reset"
 msgstr "Remise à zéro"
 
@@ -2242,15 +2339,16 @@ msgid "Setup"
 msgstr "Configuration"
 
 #: ../bin/cprint.c:158 ../bin/cselect.c:3675 ../bin/menu.c:974
+#: ../wlib/gtk3lib/ui/print.ui:808
 msgid "Select All"
 msgstr "Tout sélectionner"
 
 #: ../bin/cprint.c:159 ../bin/cprofile.c:708 ../bin/layout.c:671
-#: ../bin/misc.c:725
+#: ../bin/misc.c:725 ../wlib/gtk3lib/ui/print.ui:823
 msgid "Clear"
 msgstr "Effacer"
 
-#: ../bin/cprint.c:161
+#: ../bin/cprint.c:161 ../wlib/gtk3lib/ui/print.ui:780
 msgid "0 pages"
 msgstr "0 pages"
 
@@ -2625,6 +2723,7 @@ msgstr "Sélectionner une voie"
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/v5_3_0_beta1/app/lib/xtrkcad.xtq:439
 #: ../bin/cselect.c:3627 ../bin/dcar.c:1765 ../bin/doption.c:245
 #: ../../../../build/v_5_3_0_beta1/app/i18n/custmsg.h:1190
+#: ../wlib/gtk3lib/ui/cmdopt.ui:109 ../wlib/gtk3lib/ui/layer.ui:288
 msgid "Select"
 msgstr "Sélectionner"
 
@@ -2773,6 +2872,7 @@ msgstr "Rotation"
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/v5_3_0_beta1/app/lib/xtrkcad.xtq:485
 #: ../bin/cselect.c:3810 ../bin/dcar.c:2327
 #: ../../../../build/v_5_3_0_beta1/app/i18n/custmsg.h:1282
+#: ../wlib/gtk3lib/ui/carpart.ui:709
 msgid "Flip"
 msgstr "Miroir"
 
@@ -2820,7 +2920,7 @@ msgstr "Activer"
 msgid "Vert"
 msgstr "Vertical"
 
-#: ../bin/csnap.c:547 ../bin/dease.c:78
+#: ../bin/csnap.c:547 ../bin/dease.c:78 ../wlib/gtk3lib/ui/reports.ui:144
 msgid "X"
 msgstr "X"
 
@@ -2862,10 +2962,18 @@ msgid "No Track to Split"
 msgstr "Pas de voie à scinder"
 
 #: ../bin/csplit.c:203 ../bin/dbench.c:65 ../bin/dbench.c:77
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:735
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:936
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1193
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1654
 msgid "Left"
 msgstr "Gauche"
 
 #: ../bin/csplit.c:205 ../bin/dbench.c:66 ../bin/dbench.c:76
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:749
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:964
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1221
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1682
 msgid "Right"
 msgstr "Droit"
 
@@ -2943,19 +3051,19 @@ msgstr "(%d [%s]): Calque =%u, %d se dirige à %0.3f,%0.3f A%0.3f"
 msgid "Signal"
 msgstr "Signal"
 
-#: ../bin/csignal.c:518
+#: ../bin/csignal.c:518 ../wlib/gtk3lib/ui/signaledit.ui:156
 msgid "Number of Heads"
 msgstr "Nombre de têtes"
 
-#: ../bin/csignal.c:523
+#: ../bin/csignal.c:523 ../wlib/gtk3lib/ui/signaledit.ui:241
 msgid "Edit Aspect"
 msgstr "Modifier un état"
 
-#: ../bin/csignal.c:525
+#: ../bin/csignal.c:525 ../wlib/gtk3lib/ui/signaledit.ui:229
 msgid "Add Aspect"
 msgstr "Ajouter un état"
 
-#: ../bin/csignal.c:527
+#: ../bin/csignal.c:527 ../wlib/gtk3lib/ui/signaledit.ui:253
 msgid "Delete Aspect"
 msgstr "Effacer un état"
 
@@ -3012,7 +3120,7 @@ msgid "Straight Track"
 msgstr "Voie droite"
 
 #: ../bin/cstruct.c:67 ../bin/cturnout.c:86 ../bin/doption.c:93
-#: ../bin/doption.c:250
+#: ../bin/doption.c:250 ../wlib/gtk3lib/ui/display.ui:178
 msgid "Hide"
 msgstr "Cacher"
 
@@ -3090,7 +3198,7 @@ msgstr "Placer %s et mettre en position"
 msgid "Point Sense"
 msgstr "Sens des aiguilles"
 
-#: ../bin/cswitchmotor.c:112
+#: ../bin/cswitchmotor.c:112 ../wlib/gtk3lib/ui/switchmotoredit.ui:164
 msgid "Turnout Number"
 msgstr "Numéro de rapport d'aiguillage"
 
@@ -3171,11 +3279,11 @@ msgstr "Créer un texte"
 msgid "Fonts..."
 msgstr "Polices ..."
 
-#: ../bin/ctodesgn.c:139
+#: ../bin/ctodesgn.c:139 ../wlib/gtk3lib/ui/turnout-designer.ui:2638
 msgid "Frog #"
 msgstr "Cœur N° #"
 
-#: ../bin/ctodesgn.c:139
+#: ../bin/ctodesgn.c:139 ../wlib/gtk3lib/ui/turnout-designer.ui:2653
 msgid "Degrees"
 msgstr "Degrés"
 
@@ -3193,11 +3301,25 @@ msgstr "Quadruple voie"
 #: ../bin/ctodesgn.c:350 ../bin/ctodesgn.c:351 ../bin/ctodesgn.c:395
 #: ../bin/ctodesgn.c:398 ../bin/ctodesgn.c:428 ../bin/ctodesgn.c:430
 #: ../bin/ctodesgn.c:477 ../bin/ctodesgn.c:481 ../bin/ctodesgn.c:484
-#: ../bin/ctodesgn.c:742
+#: ../bin/ctodesgn.c:742 ../wlib/gtk3lib/ui/turnout-designer.ui:137
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:214
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:316
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:415
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:531
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:693
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:774
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:873
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:989
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1151
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1257
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1367
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1451
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1484
 msgid "Offset"
 msgstr "Écart"
 
 #: ../bin/ctodesgn.c:203 ../bin/ctodesgn.c:3204 ../bin/ctodesgn.c:3205
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:2432
 msgid "Left Description"
 msgstr "Description gauche"
 
@@ -3206,10 +3328,11 @@ msgid " #"
 msgstr " #"
 
 #: ../bin/ctodesgn.c:206 ../bin/ctodesgn.c:3203
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:2444
 msgid "Right Description"
 msgstr "Description droite"
 
-#: ../bin/ctodesgn.c:208
+#: ../bin/ctodesgn.c:208 ../wlib/gtk3lib/ui/turnout-designer.ui:2521
 msgid "Roadbed Width"
 msgstr "Largeur de balast"
 
@@ -3343,7 +3466,7 @@ msgstr "Longueur intérieure"
 msgid "Center Angle"
 msgstr "Angle Intérieur"
 
-#: ../bin/ctodesgn.c:481 ../bin/dcar.c:2348
+#: ../bin/ctodesgn.c:481 ../bin/dcar.c:2348 ../wlib/gtk3lib/ui/carpart.ui:545
 msgid "Center Offset"
 msgstr "Décalage interne"
 
@@ -3405,6 +3528,7 @@ msgstr "Section Butoir"
 
 #: ../bin/ctodesgn.c:742 ../bin/denum.c:124 ../bin/denum.c:193
 #: ../bin/denum.c:230 ../bin/denum.c:231
+#: ../wlib/gtk3lib/ui/reportscurvestats.ui:120
 msgid "Count"
 msgstr "Qté"
 
@@ -3438,7 +3562,7 @@ msgstr "Page"
 msgid "Frog Number"
 msgstr "N° de coeur"
 
-#: ../bin/ctodesgn.c:3147
+#: ../bin/ctodesgn.c:3147 ../wlib/gtk3lib/ui/turnout-designer.ui:10
 msgid "Turnout Designer"
 msgstr "Conception d'aiguillage"
 
@@ -3448,6 +3572,8 @@ msgid "%s %s Designer"
 msgstr "%s concepteur de %s"
 
 #: ../bin/ctrain.c:179 ../bin/dcar.c:2360 ../bin/dcar.c:4694 ../bin/dcar.c:4700
+#: ../wlib/gtk3lib/ui/carinv.ui:51 ../wlib/gtk3lib/ui/carinv.ui:348
+#: ../wlib/gtk3lib/ui/carpart.ui:794
 msgid "Index"
 msgstr "Index"
 
@@ -3460,25 +3586,26 @@ msgstr "Numéros de voiture"
 msgid "Car"
 msgstr "Véhicule"
 
-#: ../bin/ctrain.c:728
+#: ../bin/ctrain.c:728 ../wlib/gtk3lib/ui/train.ui:110
 msgid "Follow"
 msgstr "Suivre"
 
-#: ../bin/ctrain.c:729
+#: ../bin/ctrain.c:729 ../wlib/gtk3lib/ui/train.ui:136
 msgid "Auto Reverse"
 msgstr "Inversion automatique"
 
-#: ../bin/ctrain.c:748 ../bin/dcar.c:5686
+#: ../bin/ctrain.c:748 ../bin/dcar.c:5686 ../wlib/gtk3lib/ui/train.ui:155
 msgid "Find"
 msgstr "Chercher"
 
 #: ../bin/ctrain.c:754 ../bin/ctrain.c:1011 ../bin/ctrain.c:1324
+#: ../wlib/gtk3lib/ui/train.ui:167
 msgid "Forward"
 msgstr "Avant"
 
 #: ../bin/ctrain.c:756 ../bin/ctrain.c:3235 ../bin/dcar.c:5093
 #: ../bin/dcar.c:5103 ../bin/dcar.c:5225 ../bin/fileio.c:224 ../bin/macro.c:64
-#: ../bin/track.c:1366
+#: ../bin/track.c:1366 ../wlib/gtk3lib/ui/train.ui:179
 msgid "Stop"
 msgstr "Stop"
 
@@ -3581,6 +3708,8 @@ msgid "Remove Train"
 msgstr "Supprimer le train"
 
 #: ../bin/cturnout.c:97 ../bin/dcar.c:2382 ../bin/dcar.c:2386
+#: ../wlib/gtk3lib/ui/carpart.ui:116 ../wlib/gtk3lib/ui/carpart.ui:179
+#: ../wlib/gtk3lib/ui/carpart.ui:229
 msgid "New"
 msgstr "Nouveau"
 
@@ -3872,7 +4001,7 @@ msgstr "inclure"
 msgid "Resolution "
 msgstr "Échelle de résolution"
 
-#: ../bin/dbitmap.c:265
+#: ../bin/dbitmap.c:265 ../wlib/gtk3lib/ui/outputbitmap.ui:173
 msgid "dpi"
 msgstr "points par pouce"
 
@@ -3931,11 +4060,11 @@ msgstr ""
 msgid "Export to bitmap"
 msgstr "Exporter en bitmap"
 
-#: ../bin/dcar.c:45
+#: ../bin/dcar.c:45 ../wlib/gtk3lib/ui/carpart.ui:590
 msgid "Truck"
 msgstr "Bogies"
 
-#: ../bin/dcar.c:45
+#: ../bin/dcar.c:45 ../wlib/gtk3lib/ui/carpart.ui:605
 msgid "Body"
 msgstr "Structure"
 
@@ -4008,15 +4137,17 @@ msgstr "Information"
 msgid "Customize"
 msgstr "Personnaliser"
 
-#: ../bin/dcar.c:2296
+#: ../bin/dcar.c:2296 ../wlib/gtk3lib/ui/carpart.ui:880
 msgid "Sequential"
 msgstr "Séquentiel"
 
-#: ../bin/dcar.c:2296
+#: ../bin/dcar.c:2296 ../wlib/gtk3lib/ui/carpart.ui:864
 msgid "Repeated"
 msgstr "Répété"
 
 #: ../bin/dcar.c:2307 ../bin/dcar.c:2309 ../bin/dcar.c:5838
+#: ../wlib/gtk3lib/ui/carpart.ui:63 ../wlib/gtk3lib/ui/custmgm.ui:178
+#: ../wlib/gtk3lib/ui/custmgm.ui:275
 msgid "Prototype"
 msgstr "Prototype"
 
@@ -4027,6 +4158,7 @@ msgstr "Référence"
 #: ../bin/dcar.c:2317 ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:419
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:659
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:660
+#: ../wlib/gtk3lib/ui/carpart.ui:201
 msgid "Part Number"
 msgstr "Référence N°"
 
@@ -4034,7 +4166,7 @@ msgstr "Référence N°"
 msgid "Loco?"
 msgstr "Loco ?"
 
-#: ../bin/dcar.c:2323 ../bin/dcar.c:4734
+#: ../bin/dcar.c:2323 ../bin/dcar.c:4734 ../wlib/gtk3lib/ui/carpart.ui:735
 msgid "Import"
 msgstr "Importation"
 
@@ -4042,7 +4174,7 @@ msgstr "Importation"
 msgid "Mode"
 msgstr "Mode"
 
-#: ../bin/dcar.c:2334
+#: ../bin/dcar.c:2334 ../wlib/gtk3lib/ui/carpart.ui:364
 msgid "Road"
 msgstr "Compagnie ferroviaire"
 
@@ -4054,23 +4186,23 @@ msgstr "Sigle"
 msgid "Number"
 msgstr "Nombre"
 
-#: ../bin/dcar.c:2342
+#: ../bin/dcar.c:2342 ../wlib/gtk3lib/ui/carpart.ui:473
 msgid "Car Length"
 msgstr "Longueur hors tampons"
 
-#: ../bin/dcar.c:2346
+#: ../bin/dcar.c:2346 ../wlib/gtk3lib/ui/carpart.ui:521
 msgid "Truck Centers"
 msgstr "Centre des bogies"
 
-#: ../bin/dcar.c:2350
+#: ../bin/dcar.c:2350 ../wlib/gtk3lib/ui/carpart.ui:569
 msgid "Coupler Mount"
 msgstr "Support d'attelage"
 
-#: ../bin/dcar.c:2352
+#: ../bin/dcar.c:2352 ../wlib/gtk3lib/ui/carpart.ui:626
 msgid "Coupled Length"
 msgstr "Longueur de couplage"
 
-#: ../bin/dcar.c:2354 ../bin/dcar.c:4564
+#: ../bin/dcar.c:2354 ../bin/dcar.c:4564 ../wlib/gtk3lib/ui/carpart.ui:650
 msgid "Coupler Length"
 msgstr "Longueur de l'attelage"
 
@@ -4079,32 +4211,37 @@ msgid "Purchase Price"
 msgstr "Prix d'achat"
 
 #: ../bin/dcar.c:2364 ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:266
+#: ../wlib/gtk3lib/ui/carpart.ui:993
 msgid "Current Price"
 msgstr "Prix actuel"
 
 #: ../bin/dcar.c:2366 ../bin/dcar.c:4696 ../bin/dcar.c:4702
+#: ../wlib/gtk3lib/ui/carinv.ui:111 ../wlib/gtk3lib/ui/carinv.ui:468
+#: ../wlib/gtk3lib/ui/carpart.ui:1016
 msgid "Condition"
 msgstr "Condition"
 
-#: ../bin/dcar.c:2368
+#: ../bin/dcar.c:2368 ../wlib/gtk3lib/ui/carpart.ui:907
 msgid "Purchase Date"
 msgstr "Date d'achat"
 
-#: ../bin/dcar.c:2370 ../bin/dcar.c:4702
+#: ../bin/dcar.c:2370 ../bin/dcar.c:4702 ../wlib/gtk3lib/ui/carinv.ui:123
+#: ../wlib/gtk3lib/ui/carpart.ui:965
 msgid "Service Date"
 msgstr "Date de service"
 
-#: ../bin/dcar.c:2372
+#: ../bin/dcar.c:2372 ../wlib/gtk3lib/ui/carpart.ui:823
 msgid "Quantity"
 msgstr "Quantité"
 
-#: ../bin/dcar.c:2374
+#: ../bin/dcar.c:2374 ../wlib/gtk3lib/ui/carpart.ui:846
 msgid "Numbers"
 msgstr "Nombres"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/v5_3_0_beta1/app/lib/xtrkcad.xtq:487
 #: ../bin/dcar.c:2376 ../bin/dcar.c:4697 ../bin/trknote.c:594
 #: ../../../../build/v_5_3_0_beta1/app/i18n/custmsg.h:1286
+#: ../wlib/gtk3lib/ui/carinv.ui:516
 msgid "Notes"
 msgstr "Remarques"
 
@@ -4158,7 +4295,7 @@ msgstr "Nouvelle fiche véhicule à l'échelle %s"
 msgid "Update %s Scale Car Part"
 msgstr "Mettre à jour %s la pièce de véhicule à l'échelle"
 
-#: ../bin/dcar.c:3317
+#: ../bin/dcar.c:3317 ../wlib/gtk3lib/ui/carinv.ui:141
 msgid "New Prototype"
 msgstr "Nouveau prototype"
 
@@ -4243,47 +4380,51 @@ msgstr "Nouvelle fiche de véhicule"
 
 #: ../bin/dcar.c:4694 ../bin/dcar.c:4700 ../bin/dcustmgm.c:46
 #: ../bin/dlayer.c:561 ../bin/layout.c:662 ../bin/scale.c:845
+#: ../wlib/gtk3lib/ui/carinv.ui:57 ../wlib/gtk3lib/ui/carinv.ui:360
+#: ../wlib/gtk3lib/ui/custmgm.ui:67
 msgid "Scale"
 msgstr "Échelle"
 
 #: ../bin/dcar.c:4695 ../bin/dcar.c:4701
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:488
+#: ../wlib/gtk3lib/ui/carinv.ui:87 ../wlib/gtk3lib/ui/carinv.ui:420
 msgid "Roadname"
 msgstr "Compagnie ferroviaire"
 
-#: ../bin/dcar.c:4695
+#: ../bin/dcar.c:4695 ../wlib/gtk3lib/ui/carinv.ui:432
 msgid "Rep Marks"
 msgstr "Numéros de voiture"
 
-#: ../bin/dcar.c:4695
+#: ../bin/dcar.c:4695 ../wlib/gtk3lib/ui/carinv.ui:444
 msgid "Purc Price"
 msgstr "Prix d'achat"
 
-#: ../bin/dcar.c:4696 ../bin/dcar.c:4702
+#: ../bin/dcar.c:4696 ../bin/dcar.c:4702 ../wlib/gtk3lib/ui/carinv.ui:105
+#: ../wlib/gtk3lib/ui/carinv.ui:456
 msgid "Curr Price"
 msgstr "Prix act"
 
-#: ../bin/dcar.c:4696
+#: ../bin/dcar.c:4696 ../wlib/gtk3lib/ui/carinv.ui:480
 msgid "Purc Date"
 msgstr "Date d'achat"
 
-#: ../bin/dcar.c:4696
+#: ../bin/dcar.c:4696 ../wlib/gtk3lib/ui/carinv.ui:492
 msgid "Srvc Date"
 msgstr "Date de service"
 
-#: ../bin/dcar.c:4697
+#: ../bin/dcar.c:4697 ../wlib/gtk3lib/ui/carinv.ui:504
 msgid "Locat'n"
 msgstr "Lieu"
 
-#: ../bin/dcar.c:4701
+#: ../bin/dcar.c:4701 ../wlib/gtk3lib/ui/carinv.ui:93
 msgid "RepMarks"
 msgstr "Sigles"
 
-#: ../bin/dcar.c:4701
+#: ../bin/dcar.c:4701 ../wlib/gtk3lib/ui/carinv.ui:99
 msgid "Purch Price"
 msgstr "Prix d'achat"
 
-#: ../bin/dcar.c:4702
+#: ../bin/dcar.c:4702 ../wlib/gtk3lib/ui/carinv.ui:117
 msgid "Purch Date"
 msgstr "Date d'achat"
 
@@ -4292,12 +4433,14 @@ msgid "Sort By"
 msgstr "Trier par"
 
 #: ../bin/dcar.c:4728 ../bin/dcustmgm.c:58 ../bin/dcustmgm.c:98
-#: ../bin/dcontmgm.c:88
+#: ../bin/dcontmgm.c:88 ../wlib/gtk3lib/ui/contmgm.ui:139
+#: ../wlib/gtk3lib/ui/custmgm.ui:121
 msgid "Edit"
 msgstr "Editer"
 
 #: ../bin/dcar.c:4732 ../bin/dcar.c:5654 ../bin/dcustmgm.c:60
-#: ../bin/dcontmgm.c:90 ../bin/menu.c:992
+#: ../bin/dcontmgm.c:90 ../bin/menu.c:992 ../wlib/gtk3lib/ui/contmgm.ui:152
+#: ../wlib/gtk3lib/ui/custmgm.ui:147
 msgid "Delete"
 msgstr "Effacer"
 
@@ -4388,6 +4531,8 @@ msgstr "Choisissez un aiguillage/bâtiment à remplacer :"
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/v5_3_0_beta1/app/lib/xtrkcad.xtq:457
 #: ../bin/dcmpnd.c:436 ../bin/doption.c:94
 #: ../../../../build/v_5_3_0_beta1/app/i18n/custmsg.h:1226
+#: ../wlib/gtk3lib/ui/display.ui:263 ../wlib/gtk3lib/ui/reportstracklen.ui:144
+#: ../wlib/gtk3lib/ui/reportsturnout.ui:144
 msgid "Turnouts"
 msgstr "Aiguillages"
 
@@ -4419,7 +4564,7 @@ msgstr "Déplacer vers"
 msgid "Rename"
 msgstr "Renommer"
 
-#: ../bin/dcustmgm.c:186
+#: ../bin/dcustmgm.c:186 ../wlib/gtk3lib/ui/prmfile.ui:196
 msgid "Label"
 msgstr "Étiquette"
 
@@ -4439,7 +4584,7 @@ msgstr "Fichier de Paramètres (*.xtp)|*.xtp"
 msgid "Manage custom designed parts"
 msgstr "Gérer les matériels prototypes"
 
-#: ../bin/dcontmgm.c:80
+#: ../bin/dcontmgm.c:80 ../wlib/gtk3lib/ui/contmgm.ui:112
 msgid "Tracks"
 msgstr "Voies"
 
@@ -4456,15 +4601,15 @@ msgstr "Éléments de contrôle"
 msgid "Manage Layout Control Elements"
 msgstr "Gérer les contrôles du plan"
 
-#: ../bin/dease.c:68
+#: ../bin/dease.c:68 ../wlib/gtk3lib/ui/easement.ui:104
 msgid "Sharp"
 msgstr "Etroit"
 
-#: ../bin/dease.c:68
+#: ../bin/dease.c:68 ../wlib/gtk3lib/ui/easement.ui:134
 msgid "Broad"
 msgstr "Large"
 
-#: ../bin/dease.c:68
+#: ../bin/dease.c:68 ../wlib/gtk3lib/ui/easement.ui:149
 msgid "Cornu"
 msgstr "Cornu"
 
@@ -4500,7 +4645,7 @@ msgstr "Sauver sous ..."
 msgid "Each"
 msgstr "L'unité"
 
-#: ../bin/denum.c:152 ../bin/denum.c:154
+#: ../bin/denum.c:152 ../bin/denum.c:154 ../wlib/gtk3lib/ui/enum.ui:10
 msgid "Parts List"
 msgstr "Nomenclature"
 
@@ -4653,59 +4798,62 @@ msgstr "Calques"
 msgid "Show/Hide Background"
 msgstr "Montrer/cacher l'image d'arrière plan"
 
-#: ../bin/doption.c:92
+#: ../bin/doption.c:92 ../wlib/gtk3lib/ui/display.ui:1021
 msgid "Auto Pan"
 msgstr "Panoramique auto"
 
-#: ../bin/doption.c:94
+#: ../bin/doption.c:94 ../wlib/gtk3lib/ui/display.ui:279
 msgid "All"
 msgstr "Tout"
 
-#: ../bin/doption.c:95
+#: ../bin/doption.c:95 ../wlib/gtk3lib/ui/display.ui:333
 msgid "Thick"
 msgstr "Épais"
 
-#: ../bin/doption.c:95
+#: ../bin/doption.c:95 ../wlib/gtk3lib/ui/display.ui:349
 msgid "Exception"
 msgstr "Exception"
 
-#: ../bin/doption.c:96
+#: ../bin/doption.c:96 ../wlib/gtk3lib/ui/display.ui:403
 msgid "Outline"
 msgstr "Contour"
 
-#: ../bin/doption.c:97
+#: ../bin/doption.c:97 ../wlib/gtk3lib/ui/display.ui:458
 msgid "Off"
 msgstr "De"
 
-#: ../bin/doption.c:97
+#: ../bin/doption.c:97 ../wlib/gtk3lib/ui/display.ui:473
 msgid "On"
 msgstr "On"
 
-#: ../bin/doption.c:98
+#: ../bin/doption.c:98 ../wlib/gtk3lib/ui/display.ui:602
 msgid "Track Descriptions"
 msgstr "Descriptions de voies"
 
-#: ../bin/doption.c:98
+#: ../bin/doption.c:98 ../wlib/gtk3lib/ui/display.ui:617
 msgid "Lengths"
 msgstr "Longueurs"
 
-#: ../bin/doption.c:98
+#: ../bin/doption.c:98 ../wlib/gtk3lib/ui/display.ui:632
 msgid "EndPt Elevations"
 msgstr "Elévations des bouts de voies"
 
-#: ../bin/doption.c:98
+#: ../bin/doption.c:98 ../wlib/gtk3lib/ui/display.ui:647
 msgid "Track Elevations"
 msgstr "Elévations de voies"
 
-#: ../bin/doption.c:98
+#: ../bin/doption.c:98 ../wlib/gtk3lib/ui/display.ui:662
+#: ../wlib/gtk3lib/ui/reportstracklen.ui:156
 msgid "Cars"
 msgstr "Véhicules"
 
-#: ../bin/doption.c:99 ../bin/doption.c:100
+#: ../bin/doption.c:99 ../bin/doption.c:100 ../wlib/gtk3lib/ui/display.ui:760
+#: ../wlib/gtk3lib/ui/display.ui:825 ../wlib/gtk3lib/ui/display.ui:889
 msgid "Descr"
 msgstr "Descr"
 
-#: ../bin/doption.c:100
+#: ../bin/doption.c:100 ../wlib/gtk3lib/ui/display.ui:797
+#: ../wlib/gtk3lib/ui/display.ui:861
 msgid "Manuf"
 msgstr "Fabric"
 
@@ -4713,11 +4861,11 @@ msgstr "Fabric"
 msgid "Object"
 msgstr "Objet"
 
-#: ../bin/doption.c:103
+#: ../bin/doption.c:103 ../wlib/gtk3lib/ui/display.ui:996
 msgid "Live Map"
 msgstr "Carte en direct"
 
-#: ../bin/doption.c:104
+#: ../bin/doption.c:104 ../wlib/gtk3lib/ui/display.ui:1100
 msgid "Hide Trains On Hidden Track"
 msgstr "Masquer les trains sur voie cachée"
 
@@ -4734,67 +4882,67 @@ msgstr ""
 msgid "Color Track"
 msgstr "Couleur de la voie"
 
-#: ../bin/doption.c:111
+#: ../bin/doption.c:111 ../wlib/gtk3lib/ui/display.ui:112
 msgid "Color Draw"
 msgstr "Couleur du dessin"
 
-#: ../bin/doption.c:112
+#: ../bin/doption.c:112 ../wlib/gtk3lib/ui/display.ui:164
 msgid "Draw Tunnel"
 msgstr "Dessin des tunnels"
 
-#: ../bin/doption.c:113
+#: ../bin/doption.c:113 ../wlib/gtk3lib/ui/display.ui:234
 msgid "Draw EndPts"
 msgstr "Dessin des bouts de voie"
 
-#: ../bin/doption.c:114
+#: ../bin/doption.c:114 ../wlib/gtk3lib/ui/display.ui:304
 msgid "Draw Unconnected EndPts"
 msgstr "Dessin des voies non connectées"
 
-#: ../bin/doption.c:115
+#: ../bin/doption.c:115 ../wlib/gtk3lib/ui/display.ui:374
 msgid "Draw Ties"
 msgstr "Dessin des traverses"
 
-#: ../bin/doption.c:116
+#: ../bin/doption.c:116 ../wlib/gtk3lib/ui/display.ui:444
 msgid "Draw Centers"
 msgstr "Dessin des centres"
 
-#: ../bin/doption.c:117
+#: ../bin/doption.c:117 ../wlib/gtk3lib/ui/display.ui:498
 msgid "Two Rail Scale"
 msgstr "Échelle pour 2 voies"
 
-#: ../bin/doption.c:118
+#: ../bin/doption.c:118 ../wlib/gtk3lib/ui/display.ui:1044
 msgid "Map Scale"
 msgstr "Échelle de la carte de navigation"
 
-#: ../bin/doption.c:124
+#: ../bin/doption.c:124 ../wlib/gtk3lib/ui/display.ui:586
 msgid "Label Enable"
 msgstr "Étiquettes activées"
 
-#: ../bin/doption.c:125
+#: ../bin/doption.c:125 ../wlib/gtk3lib/ui/display.ui:686
 msgid "Label Scale"
 msgstr "Échelle d'étiquette"
 
-#: ../bin/doption.c:126
+#: ../bin/doption.c:126 ../wlib/gtk3lib/ui/display.ui:710
 msgid "Label Font Size"
 msgstr "Taille de police des étiquettes"
 
-#: ../bin/doption.c:127
+#: ../bin/doption.c:127 ../wlib/gtk3lib/ui/display.ui:733
 msgid "Hot Bar Labels"
 msgstr "Etiquettes barre rapide"
 
-#: ../bin/doption.c:128
+#: ../bin/doption.c:128 ../wlib/gtk3lib/ui/display.ui:783
 msgid "Layout Labels"
 msgstr "Etiquettes de calques"
 
-#: ../bin/doption.c:129
+#: ../bin/doption.c:129 ../wlib/gtk3lib/ui/display.ui:847
 msgid "List Labels"
 msgstr "Liste des étiquettes"
 
-#: ../bin/doption.c:132
+#: ../bin/doption.c:132 ../wlib/gtk3lib/ui/display.ui:911
 msgid "Car Labels"
 msgstr "Etiquettes des véhicules"
 
-#: ../bin/doption.c:133
+#: ../bin/doption.c:133 ../wlib/gtk3lib/ui/display.ui:1123
 msgid "Train Update Delay"
 msgstr "Délai de mise à jour du train"
 
@@ -4858,7 +5006,7 @@ msgstr "Normal : Liste de cde, Maj. : Options de cde"
 msgid "Normal: Command Options, Shift: Command List"
 msgstr "Normal : Options de cde, Maj.: Liste de cde"
 
-#: ../bin/doption.c:255
+#: ../bin/doption.c:255 ../wlib/gtk3lib/ui/cmdopt.ui:55
 msgid "Default Command"
 msgstr "Commande par défaut"
 
@@ -4866,15 +5014,15 @@ msgstr "Commande par défaut"
 msgid "Hide Selection Window"
 msgstr "Masquer la fenêtre de sélection"
 
-#: ../bin/doption.c:259
+#: ../bin/doption.c:259 ../wlib/gtk3lib/ui/cmdopt.ui:68
 msgid "Right Click"
 msgstr "Clic droit"
 
-#: ../bin/doption.c:260
+#: ../bin/doption.c:260 ../wlib/gtk3lib/ui/cmdopt.ui:81
 msgid "Select Mode"
 msgstr "Mode sélection"
 
-#: ../bin/doption.c:286
+#: ../bin/doption.c:286 ../wlib/gtk3lib/ui/cmdopt.ui:5
 msgid "Command Options"
 msgstr "Options de commande"
 
@@ -5094,53 +5242,54 @@ msgstr "999.9m"
 msgid "Preferences"
 msgstr "Préférences"
 
-#: ../bin/doption.c:560
+#: ../bin/doption.c:560 ../wlib/gtk3lib/ui/rgbcolor.ui:235
 msgid "Marker"
 msgstr "Marqueur"
 
-#: ../bin/doption.c:561
+#: ../bin/doption.c:561 ../wlib/gtk3lib/ui/rgbcolor.ui:255
 msgid "Border"
 msgstr "Bordure"
 
-#: ../bin/doption.c:562
+#: ../bin/doption.c:562 ../wlib/gtk3lib/ui/rgbcolor.ui:275
 msgid "Primary Axis"
 msgstr "Axe primaire"
 
-#: ../bin/doption.c:563
+#: ../bin/doption.c:563 ../wlib/gtk3lib/ui/rgbcolor.ui:295
 msgid "Secondary Axis"
 msgstr "Axe secondaire"
 
-#: ../bin/doption.c:564
+#: ../bin/doption.c:564 ../wlib/gtk3lib/ui/rgbcolor.ui:68
 msgid "Normal Track"
 msgstr "Voie normale"
 
-#: ../bin/doption.c:565
+#: ../bin/doption.c:565 ../wlib/gtk3lib/ui/rgbcolor.ui:88
 msgid "Selected Track"
 msgstr "Voie sélectionnée"
 
-#: ../bin/doption.c:566
+#: ../bin/doption.c:566 ../wlib/gtk3lib/ui/rgbcolor.ui:315
 msgid "Profile Path"
 msgstr "Profil de voie"
 
-#: ../bin/doption.c:567
+#: ../bin/doption.c:567 ../wlib/gtk3lib/ui/rgbcolor.ui:108
 msgid "Exception Track"
 msgstr "Voie non conforme"
 
-#: ../bin/doption.c:568
+#: ../bin/doption.c:568 ../wlib/gtk3lib/ui/rgbcolor.ui:128
 msgid "Track Ties"
 msgstr "Traverses de voies"
 
-#: ../bin/doption.c:569
+#: ../bin/doption.c:569 ../wlib/gtk3lib/ui/rgbcolor.ui:168
 #, fuzzy
 msgid "Bridge Base"
 msgstr "Raccorder les voies "
 
-#: ../bin/doption.c:570
+#: ../bin/doption.c:570 ../wlib/gtk3lib/ui/rgbcolor.ui:148
 #, fuzzy
 msgid "Track Roadbed"
 msgstr "Rayon de voie min"
 
-#: ../bin/dpricels.c:42
+#: ../bin/dpricels.c:42 ../wlib/gtk3lib/ui/carpart.ui:935
+#: ../wlib/gtk3lib/ui/pricelist.ui:105
 msgid "Price"
 msgstr "Prix"
 
@@ -5152,7 +5301,7 @@ msgstr "Voie FLEX"
 msgid "costs"
 msgstr "coûts"
 
-#: ../bin/dpricels.c:166
+#: ../bin/dpricels.c:166 ../wlib/gtk3lib/ui/pricelist.ui:5
 msgid "Price List"
 msgstr "Liste de prix"
 
@@ -5231,7 +5380,7 @@ msgstr ""
 msgid "Zoom Out Program Value %ld:1 set, Shift+PageUp to use"
 msgstr "Zoom programmé Valeur supérieure %ld : 1, à utiliser avec Maj+Pg.Préc"
 
-#: ../bin/draw.c:3281
+#: ../bin/draw.c:3281 ../wlib/gtk3lib/ui/display.ui:1079
 msgid "Map"
 msgstr "Carte de navigation"
 
@@ -5442,7 +5591,8 @@ msgstr " (R/O)"
 msgid "Unknown layout file object - skip until next good object?"
 msgstr "Objet inconnu de fichier de plan - passer au prochain bon objet ?"
 
-#: ../bin/fileio.c:835 ../bin/fileio.c:1022
+#: ../bin/fileio.c:835 ../bin/fileio.c:1022 ../wlib/gtk3lib/ui/reports.ui:108
+#: ../wlib/gtk3lib/ui/rgbcolor.ui:53
 msgid "Track"
 msgstr "Voie"
 
@@ -5790,7 +5940,7 @@ msgstr "Barre rapide"
 msgid "Change Elevations"
 msgstr "Modifier les élévations"
 
-#: ../bin/menu.c:250
+#: ../bin/menu.c:250 ../wlib/gtk3lib/ui/appwindow.ui:1081
 msgid "Angle:"
 msgstr "Angle:"
 
@@ -6510,7 +6660,8 @@ msgstr "Saisie invalide, veuillez corriger le(s) champ(s) en surbrillance"
 msgid "Help"
 msgstr "Aide"
 
-#: ../bin/paramfile.c:258
+#: ../bin/paramfile.c:258 ../wlib/gtk3lib/ui/prmfile.ui:98
+#: ../wlib/gtk3lib/ui/train.ui:217
 msgid "Parameter"
 msgstr "Paramètre"
 
@@ -6603,7 +6754,7 @@ msgstr "Ne pas redimensionner la voie"
 msgid "Rescale by:"
 msgstr "Changer d'échelle par :"
 
-#: ../bin/scale.c:860
+#: ../bin/scale.c:860 ../wlib/gtk3lib/ui/rescale.ui:58
 msgid "From:"
 msgstr "De :"
 
@@ -6629,7 +6780,7 @@ msgstr ""
 msgid "Show tips at start"
 msgstr "Afficher les conseils au démarrage"
 
-#: ../bin/smalldlg.c:51
+#: ../bin/smalldlg.c:51 ../wlib/gtk3lib/ui/tip.ui:48
 msgid "Did you know..."
 msgstr "Saviez-vous que ..."
 
@@ -7423,11 +7574,11 @@ msgstr ""
 #: ../../../../build/v_5_3_0_beta1/app/help/messages.h:61
 #, c-format
 msgid ""
-"MSG_JOIN_DIFFER_ELEV\tJoining tracks with differing elevations (N."
-"NNN)\tJoining tracks with differing elevations (%0.2f)"
+"MSG_JOIN_DIFFER_ELEV\tJoining tracks with differing elevations (N.NNN)"
+"\tJoining tracks with differing elevations (%0.2f)"
 msgstr ""
-"MSG_JOIN_DIFFER_ELEV\tJonction de voies d’élévation différentes (N."
-"NNN)\tJonction de voies d’élévation différentes (%0.2f)"
+"MSG_JOIN_DIFFER_ELEV\tJonction de voies d’élévation différentes (N.NNN)"
+"\tJonction de voies d’élévation différentes (%0.2f)"
 
 #: ../../../../build/v_5_3_0_beta1/app/help/messages.h:62
 msgid "MSG_TRK_DESC_NOT_VISIBLE\tLabel description is hidden"
@@ -15340,6 +15491,8 @@ msgid "Layer list"
 msgstr "Liste des calques"
 
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:432
+#: ../wlib/gtk3lib/ui/reports.ui:132 ../wlib/gtk3lib/ui/reportstracklen.ui:120
+#: ../wlib/gtk3lib/ui/reportsturnout.ui:120
 msgid "Layer Name"
 msgstr "Nom du calque"
 
@@ -16341,6 +16494,1116 @@ msgstr "Choisissez une imprimante"
 #: ../../../../build/v_5_3_0_beta1/app/help/bllnhlp.c:693
 msgid "Print test page"
 msgstr "Impression de la page de test"
+
+#: ../wlib/gtk3lib/ui/appwindow.ui:251
+msgid "Diameter:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/appwindow.ui:286
+msgid "Font size:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/appwindow.ui:319 ../wlib/gtk3lib/ui/appwindow.ui:866
+msgid "Color:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/appwindow.ui:343
+msgid "Boxed:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/appwindow.ui:378
+msgid "Filled:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/appwindow.ui:413
+msgid "Bg color:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/appwindow.ui:448 ../wlib/gtk3lib/ui/appwindow.ui:507
+msgid "Separation:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/appwindow.ui:472
+msgid "Radius factor:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/appwindow.ui:542
+msgid "Desired radius:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/appwindow.ui:589
+msgid "End Angle:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/appwindow.ui:613
+msgid "End Radius:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/appwindow.ui:660
+msgid "Circle Radius:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/appwindow.ui:695
+msgid "Desired Radius:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/appwindow.ui:730
+msgid "Line Width:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/appwindow.ui:754
+msgid "Line Color:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/appwindow.ui:831
+msgid "Fill Color:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/appwindow.ui:939 ../wlib/gtk3lib/ui/appwindow.ui:998
+msgid "Length: "
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/appwindow.ui:963 ../wlib/gtk3lib/ui/appwindow.ui:1022
+msgid "Angle: "
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/appwindow.ui:1057 ../wlib/gtk3lib/ui/appwindow.ui:1116
+msgid "Radius:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/appwindow.ui:1151
+msgid "Line Length:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/appwindow.ui:1175
+msgid "Rel. Angle:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/appwindow.ui:1352
+msgid "X3"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/appwindow.ui:1411
+msgid "Reg Ang"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/appwindow.ui:1551
+msgid "label text"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/aspectedit.ui:50 ../wlib/gtk3lib/ui/block.ui:92
+#: ../wlib/gtk3lib/ui/blockedit.ui:104 ../wlib/gtk3lib/ui/controledit.ui:48
+#: ../wlib/gtk3lib/ui/layer.ui:62 ../wlib/gtk3lib/ui/sensoredit.ui:51
+#: ../wlib/gtk3lib/ui/switchmotor.ui:99
+#: ../wlib/gtk3lib/ui/switchmotoredit.ui:112
+msgid "_Name"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/aspectedit.ui:103 ../wlib/gtk3lib/ui/block.ui:78
+#: ../wlib/gtk3lib/ui/blockedit.ui:90 ../wlib/gtk3lib/ui/sensoredit.ui:102
+msgid "_Script"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/aspectedit.ui:116
+msgid "_Aspect Index"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/block.ui:12 ../wlib/gtk3lib/ui/blockedit.ui:12
+msgid "_Cancel"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/block.ui:19 ../wlib/gtk3lib/ui/blockedit.ui:19
+msgid "_Help"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/block.ui:26
+msgid "C_reate"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/blockedit.ui:26
+msgid "_Done"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/blockedit.ui:118
+msgid "S_egments"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/carinv.ui:134
+msgid "New Car"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/carinv.ui:148
+msgid "New Catalog Model"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/carinv.ui:179
+msgid "_Sort by"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/carinv.ui:546
+msgid "_Find"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/carinv.ui:560
+msgid "_Add"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/carinv.ui:572
+msgid "_Edit"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/carinv.ui:586
+msgid "_Delete"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/carinv.ui:614
+msgid "Import..."
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/carinv.ui:627
+msgid "Export ..."
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/carinv.ui:640
+msgid "Save..."
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/carinv.ui:658
+msgid "+ Sort"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/carpart.ui:295
+msgid "RepMark"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/carpart.ui:318
+msgid "No."
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/cmdopt.ui:137
+msgid "Normal: Command List, +Shift: Command Options"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/cmdopt.ui:153
+msgid "Normal: Command Options, +Shift: Command List"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/cmdopt.ui:182
+msgid "Single Item Selected, +Ctrl to Add to Selection"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/cmdopt.ui:198
+msgid "Add to Selection, +Ctrl Single Item Selected"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/cmdopt.ui:225
+msgid "Clicking empty space clears Selection"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/controledit.ui:90
+msgid "Orig _X"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/controledit.ui:104
+msgid "_On Script"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/controledit.ui:142
+msgid "Orig _Y"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/controledit.ui:156
+msgid "O_ff Script"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/custmgm.ui:134
+msgid "Move To..."
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/custmgm.ui:283
+msgid "Catalog Model"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/demo.ui:80
+msgid "S_peed"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/display.ui:60
+msgid "Color Tracks"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/display.ui:74
+msgid "Track color"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/display.ui:88 ../wlib/gtk3lib/ui/display.ui:140
+msgid "Layer color"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/display.ui:126
+msgid "Object color"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/display.ui:521 ../wlib/gtk3lib/ui/grid.ui:100
+#: ../wlib/gtk3lib/ui/grid.ui:128
+msgid " "
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/display.ui:535
+msgid ""
+"Constrain drawing area to room\n"
+"                          boundaries"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/display.ui:567
+msgid "Drawing"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/display.ui:943
+msgid ""
+"Dont hide system cursor when\n"
+"                          program cursor is active"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/display.ui:975
+msgid "Labels"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/display.ui:1153
+msgid "Train Running"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/easement.ui:50
+msgid "Value:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/easement.ui:182
+msgid "R:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/easement.ui:219
+msgid "X:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/easement.ui:256
+msgid "L:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/elev.ui:70
+msgid " 0\t"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/elev.ui:83
+msgid " 0 %\t"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/enum.ui:20 ../wlib/gtk3lib/ui/reports.ui:28
+#: ../wlib/gtk3lib/ui/reportscurvestats.ui:28
+#: ../wlib/gtk3lib/ui/reportsequipment.ui:28
+#: ../wlib/gtk3lib/ui/reportsgaps.ui:28 ../wlib/gtk3lib/ui/reportskinked.ui:28
+#: ../wlib/gtk3lib/ui/reportstracklen.ui:28
+#: ../wlib/gtk3lib/ui/reportsturnout.ui:28
+msgid "_Print..."
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/enum.ui:29 ../wlib/gtk3lib/ui/reports.ui:37
+#: ../wlib/gtk3lib/ui/reportscurvestats.ui:37
+#: ../wlib/gtk3lib/ui/reportsequipment.ui:37
+#: ../wlib/gtk3lib/ui/reportsgaps.ui:37 ../wlib/gtk3lib/ui/reportskinked.ui:37
+#: ../wlib/gtk3lib/ui/reportstracklen.ui:37
+#: ../wlib/gtk3lib/ui/reportsturnout.ui:37
+msgid "Page Setup..."
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/enum.ui:38 ../wlib/gtk3lib/ui/reports.ui:46
+#: ../wlib/gtk3lib/ui/reportscurvestats.ui:46
+#: ../wlib/gtk3lib/ui/reportsequipment.ui:46
+#: ../wlib/gtk3lib/ui/reportsgaps.ui:46 ../wlib/gtk3lib/ui/reportskinked.ui:46
+#: ../wlib/gtk3lib/ui/reportstracklen.ui:46
+#: ../wlib/gtk3lib/ui/reportsturnout.ui:46
+msgid "_Save..."
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/enum.ui:107
+msgid "Show Prices"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/enum.ui:121
+msgid "Show Indexes"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/fileNote.ui:52 ../wlib/gtk3lib/ui/linkNote.ui:50
+#: ../wlib/gtk3lib/ui/textNote.ui:76
+msgid "Pos. _X"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/fileNote.ui:65 ../wlib/gtk3lib/ui/linkNote.ui:63
+#: ../wlib/gtk3lib/ui/textNote.ui:89
+msgid "Pos. _Y"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/fileNote.ui:105 ../wlib/gtk3lib/ui/linkNote.ui:102
+#: ../wlib/gtk3lib/ui/textNote.ui:128 ../wlib/gtk3lib/ui/toolbar.ui:289
+msgid "_Layer"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/fileNote.ui:138 ../wlib/gtk3lib/ui/linkNote.ui:134
+msgid "_Title"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/fileNote.ui:152
+msgid "_Filename"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/fileNote.ui:196
+msgid "_Select"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/fileNote.ui:210
+msgid "_Open"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/grid.ui:55
+msgid "_Spacing"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/grid.ui:69
+msgid "_Divisions"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/grid.ui:83
+msgid "_Enable"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/grid.ui:218 ../wlib/gtk3lib/ui/turnout-designer.ui:1785
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1861
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1979
+msgid "Horizontal"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/grid.ui:231
+msgid "Vertical"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/grid.ui:262
+msgid "_X"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/grid.ui:303 ../wlib/gtk3lib/ui/layout.ui:409
+msgid "_Y"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/grid.ui:343 ../wlib/gtk3lib/ui/layout.ui:311
+msgid "_Angle"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/grid.ui:398
+msgid "Zero Position"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/grid.ui:412
+msgid "Show _Grid"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/group.ui:53
+msgid "_Manufacturer"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/group.ui:67
+msgid "Number of segments"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/group.ui:90
+msgid "_Description"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/group.ui:119
+msgid "Part _No."
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/group.ui:161
+msgid "_Turntable/TransferTable/DblSlipSwitch?"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/group.ui:180
+msgid "_Replace existing group"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/group.ui:199
+msgid "Origin X, Y"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/layer.ui:87
+msgid "Show Layer On"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/layer.ui:143
+msgid " Object Count:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/layer.ui:449 ../wlib/gtk3lib/ui/layout.ui:536
+msgid "Max Track _Grade (%)"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/layout.ui:86
+msgid "Room _Width"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/layout.ui:100
+msgid "_Height"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/layout.ui:138
+msgid "Layout _Title"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/layout.ui:164
+msgid "S_ubtitle"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/layout.ui:179 ../wlib/gtk3lib/ui/rescale.ui:195
+msgid "_Scale"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/layout.ui:214
+msgid "_Gauge"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/layout.ui:250
+msgid "Layout Data"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/layout.ui:269
+msgid "_Image"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/layout.ui:283
+msgid "Position _X"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/layout.ui:297
+msgid "Si_ze"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/layout.ui:325
+msgid "Scree_n"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/layout.ui:354
+msgid "_Browse ...."
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/layout.ui:368
+msgid "_Clear"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/layout.ui:491
+msgid "Background"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/layout.ui:511
+msgid "Min Track _Radius"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/layout.ui:565
+msgid "Restrictions"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/layout.ui:597
+msgid "Project Settings"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/layout.ui:608
+msgid "_Save As..."
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/layout.ui:624 ../wlib/gtk3lib/ui/searchgui.ui:296
+msgid "_Load"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/linkNote.ui:147
+msgid "_URL"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/linkNote.ui:191
+msgid "_Open..."
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/outputbitmap.ui:59
+msgid "_Title of trackplan"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/outputbitmap.ui:74
+msgid "_Outline"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/outputbitmap.ui:90
+msgid "_Center line of track"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/outputbitmap.ui:105
+msgid "_Background image"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/outputbitmap.ui:128
+msgid "Include in bitmap"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/outputbitmap.ui:142
+msgid "_Resolution"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/outputbitmap.ui:192
+msgid "Size of bitmap"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/outputbitmap.ui:205 ../wlib/gtk3lib/ui/searchgui.ui:202
+msgid "label"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/pricelist.ui:141
+msgid "Flex track length"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/pricelist.ui:166
+msgid "costs:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/print.ui:45
+msgid "1"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/print.ui:57
+msgid "S_napshot"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/print.ui:72
+msgid "Page _Width"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/print.ui:95
+msgid "_Max"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/print.ui:111
+msgid "Page _Height"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/print.ui:135
+msgid "Page _Format"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/print.ui:155
+msgid "P_ortrait"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/print.ui:172
+msgid "_Landscape"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/print.ui:212
+msgid "_Normal"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/print.ui:229
+msgid "_Reverse"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/print.ui:253
+msgid "Page Setup"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/print.ui:330
+msgid "Registration Marks"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/print.ui:382
+msgid "Centerline Below Scale 1:1"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/print.ui:421 ../wlib/gtk3lib/ui/structure.ui:198
+msgid "Width:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/print.ui:452
+msgid "Print Rulers:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/print.ui:522
+msgid "Content"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/print.ui:635
+msgid "<b>Placement</b>"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/print.ui:665
+msgid "Page Margins"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/print.ui:683
+msgid "Ignore "
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/print.ui:704
+msgid "Set Margins"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/print.ui:718
+msgid "<b>Margins</b>"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/print.ui:737
+msgid "Advanced"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/print.ui:756
+msgid "Print details"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/print.ui:838
+msgid "Printer _Setup"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/prmfile.ui:32
+msgid "_Library..."
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/prmfile.ui:39
+msgid "_Browse..."
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/prmfile.ui:110
+msgid "Full path"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/prmfile.ui:137
+msgid "Select _All"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/prmfile.ui:150
+msgid "_Reload"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/prmfile.ui:162
+msgid "_Unload"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/prmfile.ui:174
+msgid "Book_mark"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/profile.ui:57
+msgid "C_lear"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/profile.ui:66 ../wlib/gtk3lib/ui/toolbar.ui:80
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:2768
+msgid "_Print"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/profile.ui:78
+msgid "C_hange"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/profile.ui:90
+msgid "_Reset"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/profile.ui:128
+msgid "<b>Drag to change elevation</b>"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/record.ui:76
+msgid "_Stop"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/record.ui:90
+msgid "_Message"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/record.ui:104
+msgid "_End"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/reports.ui:9 ../wlib/gtk3lib/ui/reportsgaps.ui:9
+#: ../wlib/gtk3lib/ui/reportskinked.ui:9
+msgid "Report"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/reports.ui:19 ../wlib/gtk3lib/ui/reportscurvestats.ui:19
+#: ../wlib/gtk3lib/ui/reportsequipment.ui:19
+#: ../wlib/gtk3lib/ui/reportsgaps.ui:19 ../wlib/gtk3lib/ui/reportskinked.ui:19
+#: ../wlib/gtk3lib/ui/reportstracklen.ui:19
+#: ../wlib/gtk3lib/ui/reportsturnout.ui:19
+msgid "_Refresh"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/reports.ui:80 ../wlib/gtk3lib/ui/reportscurvestats.ui:80
+#: ../wlib/gtk3lib/ui/reportsequipment.ui:80
+#: ../wlib/gtk3lib/ui/reportsgaps.ui:80 ../wlib/gtk3lib/ui/reportskinked.ui:80
+#: ../wlib/gtk3lib/ui/reportstracklen.ui:80
+#: ../wlib/gtk3lib/ui/reportsturnout.ui:80
+msgid "Summary"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/reports.ui:120 ../wlib/gtk3lib/ui/reportstracklen.ui:108
+#: ../wlib/gtk3lib/ui/reportsturnout.ui:108
+msgid "Layer #"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/reportscurvestats.ui:9
+msgid "Curve Stats Report"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/reportscurvestats.ui:108
+msgid "Range"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/reportsequipment.ui:9
+msgid "Equipment Suitability Report"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/reportsequipment.ui:108
+msgid "Equipment Class"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/reportsequipment.ui:120
+msgid "Min Radius"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/reportsequipment.ui:132
+msgid "Status"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/reportsgaps.ui:108
+#: ../wlib/gtk3lib/ui/reportskinked.ui:108
+msgid "Track A"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/reportsgaps.ui:120
+#: ../wlib/gtk3lib/ui/reportskinked.ui:120
+msgid "Layer A #"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/reportsgaps.ui:132
+#: ../wlib/gtk3lib/ui/reportskinked.ui:132
+msgid "Layer A Name"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/reportsgaps.ui:144
+#: ../wlib/gtk3lib/ui/reportskinked.ui:144
+msgid "Track B"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/reportsgaps.ui:156
+#: ../wlib/gtk3lib/ui/reportskinked.ui:156
+msgid "Layer B #"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/reportsgaps.ui:168
+#: ../wlib/gtk3lib/ui/reportskinked.ui:168
+msgid "Layer B Name"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/reportsgaps.ui:180
+msgid "Gap (in)"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/reportskinked.ui:180
+msgid "Angle Diff (deg)"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/reportstracklen.ui:9
+msgid "Track Lengths Report"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/reportstracklen.ui:132
+#: ../wlib/gtk3lib/ui/reportsturnout.ui:132
+msgid "Feet"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/reportstracklen.ui:168
+msgid "% Total"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/reportsturnout.ui:9
+msgid "Turnout Density Report"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/reportsturnout.ui:156
+msgid "Density/100ft"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/reportsturnout.ui:168
+msgid "Flag"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/rescale.ui:8
+msgid "Change scale"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/rescale.ui:69 ../wlib/gtk3lib/ui/rescale.ui:131
+msgid "/"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/rescale.ui:80
+msgid "To:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/rescale.ui:145
+msgid "_Keep track positions\t"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/rescale.ui:214
+msgid "Ratio:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/rescale.ui:252
+msgid "_Ratio"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/rgbcolor.ui:200
+msgid "Drawing Area"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/rgbcolor.ui:335
+msgid "Report Indicator"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/searchgui.ui:58
+msgid "Enter search criteria"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/searchgui.ui:136
+msgid "Match Any"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/searchgui.ui:152
+msgid "Match compatible"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/searchgui.ui:169
+msgid "Match exactly"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/searchgui.ui:254
+msgid "Full Path"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/searchgui.ui:282 ../wlib/gtk3lib/ui/toolbar.ui:347
+msgid "_Select All"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/sensoredit.ui:89
+msgid "Origin _X"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/sensoredit.ui:137
+msgid "Origin _Y"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/signaledit.ui:197
+msgid "Aspect"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/structure.ui:54
+msgid "_Hide window while placing item on layout"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/structure.ui:173
+msgid "Scale:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/structure.ui:222
+msgid "Height:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/switchmotor.ui:112
+#: ../wlib/gtk3lib/ui/switchmotoredit.ui:125
+msgid "Script _Straight"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/switchmotor.ui:125
+#: ../wlib/gtk3lib/ui/switchmotoredit.ui:138
+msgid "Script _Diverge"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/switchmotor.ui:138
+#: ../wlib/gtk3lib/ui/switchmotoredit.ui:151
+msgid "Script _Query"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/tip.ui:166
+msgid "_Show tip at startup"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/toolbar.ui:65
+msgid "_File"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/toolbar.ui:95
+msgid "_Import/Export"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/toolbar.ui:110
+msgid "_Zoom"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/toolbar.ui:125
+msgid "_Undo"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/toolbar.ui:140
+msgid "_Easement"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/toolbar.ui:155
+msgid "_Snap Grid"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/toolbar.ui:170
+msgid "_Track Creation"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/toolbar.ui:185
+msgid "Layout _Control"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/toolbar.ui:200
+msgid "Track _Modification"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/toolbar.ui:215
+msgid "_Properties/Select"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/toolbar.ui:230
+msgid "Trac_k"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/toolbar.ui:245
+msgid "Train"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/toolbar.ui:259
+msgid "_Draw Elements"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/toolbar.ui:274
+msgid "_Ruler"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/toolbar.ui:304
+msgid "_Hot Bar"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/toolbar.ui:334
+msgid "_Invert Selection"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/toolbar.ui:362
+msgid "Layer _Buttons:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/toolwindow.ui:28
+msgid "_Radius"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/toolwindow.ui:51
+msgid "page0"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/toolwindow.ui:65
+msgid "Line _Width"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/toolwindow.ui:79
+msgid "_Color"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/toolwindow.ui:112
+msgid "page1"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/toolwindow.ui:122
+msgid "Draw Object"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/toolwindow.ui:123
+msgid "Settings"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/train.ui:44
+msgid "0"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/train.ui:70
+msgid "Train ID:"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/train.ui:84
+msgid "X: 2, Y: 3"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/train.ui:239
+msgid "Speed: 0.0"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:277
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:478
+msgid "Outer"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:291
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:506
+msgid "Inner"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:492
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:950
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1640
+msgid "Toe"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1207
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1668
+msgid "Center"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1799
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:1875
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:2004
+msgid "Diagonal"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:2619
+msgid "Angle Mode"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:2697
+msgid "Slip Path"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:2716
+msgid "Dual"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/turnout-designer.ui:2732
+msgid "Quad"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/turnout.ui:136
+msgid "Pick active end"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/turnout.ui:152
+msgid "_Hide window while placing track on layout"
+msgstr ""
+
+#: ../wlib/gtk3lib/ui/turnout.ui:169
+msgid "Create"
+msgstr ""
 
 #~ msgid "Plain Text"
 #~ msgstr "Texte simple"

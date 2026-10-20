@@ -37,7 +37,20 @@
 
 
 char * sProdName = Product;
-char * sProdNameLower = product;
+
+/**
+ * \var sProdNameLower
+ * Lowercase product name
+ *
+ * For local flatpak builds, this should not contain any periods.
+ *
+ * For flathub flatpak builds, this should only be "xtrkcad".
+ */
+#if XTRKCAD_BUILD_FLATPAK
+char * sProdNameLower = product XTRKCAD_VERSION_ID;
+#else
+char * sProdNameLower = product "-" XTRKCAD_FILE_VERSION;
+#endif
 char * sProdNameUpper = PRODUCT;
 
 char * sEnvExtra = PRODUCT "EXTRA";
@@ -66,6 +79,7 @@ char * sRecordFilePattern = NULL;
 char * sNoteFilePattern = NULL;
 char * sLogFilePattern = NULL;
 char * sPartsListFilePattern = NULL;
+char * sReportsFilePattern = NULL;
 
 char * sVersion = Version;
 int iParamVersion = PARAMVERSION;
@@ -73,7 +87,7 @@ int iMinParamVersion = MINPARAMVERSION;
 long lParamKey = PARAMKEY;
 
 
-EXPORT char * MakeWindowTitle( char * name )
+EXPORT char * MakeWindowTitle( const char * name )
 {
 	static char title[STR_SHORT_SIZE];
 	sprintf( title, "%s", name );
@@ -202,6 +216,10 @@ void InitCustom( void )
 		sprintf(buf, _("%s PartsList Files (*.txt)|*.txt"), Product);
 		sPartsListFilePattern = strdup(buf);
 	}
+	if (sReportsFilePattern == NULL) {
+		sprintf(buf, _("%s Report Files (*.txt)|*.txt"), Product);
+		sReportsFilePattern = strdup(buf);
+	}
 
 	free(buf);
 }
@@ -249,5 +267,9 @@ void CleanupCustom( void )
 	if (sPartsListFilePattern) {
 		free(sPartsListFilePattern);
 		sPartsListFilePattern = NULL;
+	}
+	if (sReportsFilePattern) {
+		free(sReportsFilePattern);
+		sReportsFilePattern = NULL;
 	}
 }

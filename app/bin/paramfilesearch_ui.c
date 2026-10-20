@@ -22,7 +22,7 @@
 
 #include "custom.h"
 #include "dynstring.h"
-#include "param.h"
+#include "form.h"
 #include "include/partcatalog.h"
 #include "paths.h"
 #include "include/paramfilelist.h"
@@ -31,13 +31,15 @@
 #include "directory.h"
 #include "layout.h"
 
+static int log_paramfilesearch_ui = -1;
+
 static ParameterLib *trackLibrary;			/**< Track Library          */
 static Catalog currentCat;					/**< catalog being shown    */
 
 /* define the search / browse dialog */
 
 static void SearchUiDefault(void);
-static void SearchUiApply(wWin_p junk);
+static void SearchUiApply(wControl_p junk);
 static void SearchUiSelectAll(void *junk);
 static void SearchUiDoSearch(void *junk);
 static void SearchUiClearFilter(void *ptr);
@@ -47,48 +49,46 @@ static long searchFitMode = 0;
 static paramListData_t searchUiListData = { 10, 370, 0 };
 #define MAXQUERYLENGTH 250
 static char searchUiQuery[MAXQUERYLENGTH];
-static char * searchUiLabels[] = { N_("Show File Names"), NULL };
+//static char * searchUiLabels[] = { N_("Show File Names"), NULL };
 // Note these are defined in the same order as FIT_ANY, FIT_COMPATIBLE, FIT_EXACT
-static char * searchFitLabels[] = { N_("Fit Any"), N_("Fit Compatible"), N_("Fit Exact"), NULL};
+//static char * searchFitLabels[] = { N_("Fit Any"), N_("Fit Compatible"), N_("Fit Exact"), NULL};
 
 
 #define QUERYPROMPTSTRING "Enter at least one search word"
 
 static paramData_t searchUiPLs[] = {
 #define I_QUERYSTRING  (0)
-	{ PD_STRING, searchUiQuery, "query", PDO_ENTER | PDO_NOPREF | PDO_STRINGLIMITLENGTH | PDO_DLGRESIZE, I2VP(340), "", 0, 0, MAXQUERYLENGTH-1 },
+	{ PD_STRING, searchUiQuery, "query", PDO_ENTER | PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(34), "", 0, 0, MAXQUERYLENGTH-1 },
 #define I_SEARCHBUTTON (1)
 	{ PD_BUTTON, SearchUiDoSearch, "find", PDO_DLGHORZ, 0, NULL,  BO_ICON, NULL },
 #define I_CLEARBUTTON (2)
 	{ PD_BUTTON, SearchUiClearFilter, "clearfilter", PDO_DLGHORZ, 0, NULL,  BO_ICON, NULL },
 #define I_FITRADIO	(3)
-	{	PD_RADIO, &searchFitMode, "fit", PDO_NOPREF | PDO_DLGBOXEND, searchFitLabels, NULL, BC_HORZ|BC_NOBORDER },
+	{	PD_RADIO, &searchFitMode, "fit", PDO_NOPREF | PDO_DLGBOXEND, /*searchFitLabels*/NULL, NULL, BC_HORIZONTAL | BC_NOBORDER},
 #define I_MESSAGE (4)
-	{ PD_MESSAGE, N_(QUERYPROMPTSTRING), NULL, 0, I2VP(370) },
+	{ PD_MESSAGE, N_(QUERYPROMPTSTRING), "messagetext", 0, (void *)370 },
 #define I_STATISTICS (5)
-	{ PD_MESSAGE, "", NULL, PDO_DLGBOXEND, I2VP(370) },
+	{ PD_MESSAGE, "", "searchstat", PDO_DLGBOXEND, I2VP(370) },
 #define I_RESULTLIST	(6)
-	{	PD_LIST, NULL, "inx", PDO_NOPREF | PDO_DLGRESIZE, &searchUiListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
-#define I_MODETOGGLE	(7)
-	{	PD_TOGGLE, &searchUiMode, "mode", PDO_DLGBOXEND, searchUiLabels, NULL, BC_HORZ|BC_NOBORDER },
-#define I_APPLYBUTTON	(8)
-	{	PD_BUTTON, SearchUiApply, "apply", PDO_DLGCMDBUTTON, NULL, N_("Add") },
-#define I_SELECTALLBUTTON (9)
-	{	PD_BUTTON, SearchUiSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
+	{	PD_LIST, NULL, "inx", PDO_NOPREF, &searchUiListData, NULL, BL_DUP | BL_SETSTAY | BL_MANY},
+#define I_APPLYBUTTON	(7)
+	{	PD_BUTTON, SearchUiApply, "apply", PDO_DLGCMDBUTTON, NULL},
+#define I_SELECTALLBUTTON (8)
+	{	PD_BUTTON, SearchUiSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL},
 };
 
-#define SEARCHBUTTON ((wButton_p)searchUiPLs[I_SEARCHBUTTON].control)
-#define CLEARBUTTON ((wButton_p)searchUiPLs[I_CLEARBUTTON].control)
-#define RESULTLIST	 ((wList_p)searchUiPLs[I_RESULTLIST].control)
-#define APPLYBUTTON  ((wButton_p)searchUiPLs[I_APPLYBUTTON].control)
-#define SELECTALLBUTTON  ((wButton_p)searchUiPLs[I_SELECTALLBUTTON].control)
-#define MESSAGETEXT ((wMessage_p)searchUiPLs[I_MESSAGE].control)
-#define QUERYSTRING ((wString_p)searchUiPLs[I_QUERYSTRING].control)
-#define SEARCHSTAT ((wMessage_p)searchUiPLs[I_STATISTICS].control)
-#define FITRADIO ((wChoice_p)searchUiPLs[I_FITRADIO].control)
+#define SEARCHBUTTON (searchUiPLs[I_SEARCHBUTTON].control)
+#define CLEARBUTTON (searchUiPLs[I_CLEARBUTTON].control)
+#define RESULTLIST	 (searchUiPLs[I_RESULTLIST].control)
+#define APPLYBUTTON  (searchUiPLs[I_APPLYBUTTON].control)
+#define SELECTALLBUTTON  (searchUiPLs[I_SELECTALLBUTTON].control)
+#define MESSAGETEXT (searchUiPLs[I_MESSAGE].control)
+#define QUERYSTRING ( searchUiPLs[I_QUERYSTRING].control)
+#define SEARCHSTAT (searchUiPLs[I_STATISTICS].control)
+#define FITRADIO (searchUiPLs[I_FITRADIO].control)
 
-static paramGroup_t searchUiPG = { "searchgui", 0, searchUiPLs, COUNT( searchUiPLs ) };
-static wWin_p searchUiW;
+static paramGroup_t searchUiPG = { "searchgui", PGO_FULLDIALOGFROMBUILDER, searchUiPLs, COUNT( searchUiPLs ) };
+static wControl_p searchUiW;
 
 #define FILESECTION "file"
 #define PARAMDIRECTORY "paramdir"
@@ -124,7 +124,10 @@ int SearchFileListLoad(Catalog *catalog)
 	DynString description;
 	DynStringMalloc(&description, STR_SHORT_SIZE);
 
-	wControlShow((wControl_p)RESULTLIST, FALSE);
+	if (!RESULTLIST) {
+		return(0);
+	}
+	wControlShow(RESULTLIST, FALSE);
 	wListClear(RESULTLIST);
 
 	DL_FOREACH(head, catalogEntry) {
@@ -132,7 +135,7 @@ int SearchFileListLoad(Catalog *catalog)
 			if (catalogEntry->tag && searchFitMode != 0) {
 				char * type_copy = MyStrdup(catalogEntry->tag);
 				char * cp = type_copy;
-				char * type = strtok(cp, " \t");
+				const char * type = strtok(cp, " \t");
 				SCALE_FIT_TYPE_T fit_type = FIT_STRUCTURE;
 				if (strcmp(type,TURNOUTCOMMAND) == 0) {
 					fit_type = FIT_TURNOUT;
@@ -141,7 +144,7 @@ int SearchFileListLoad(Catalog *catalog)
 				} else if ((strcmp(type,CARCOMMAND)==0) || (strcmp(type,CARPROTOCOMMAND)==0)) {
 					fit_type = FIT_CAR;
 				}
-				char * scale = strtok(NULL, " \t\n");
+				const char * scale = strtok(NULL, " \t\n");
 				if (scale) {
 					SCALEINX_T scale1 = LookupScale(scale);
 					SCALEINX_T scale2 = GetLayoutCurScale();
@@ -155,15 +158,22 @@ int SearchFileListLoad(Catalog *catalog)
 				MyFree(type_copy);
 			}
 			DynStringClear(&description);
+			// searchUiMode is a never-wired-up display-mode toggle (always 0);
+			// !searchUiMode is always true by construction, not a bug.
 			DynStringCatCStr(&description,
+			                 // cppcheck-suppress knownConditionTrueFalse
 			                 ((!searchUiMode) && catalogEntry->contents) ?
 			                 catalogEntry->contents :
 			                 catalogEntry->fullFileName[i]);
 
-			wListAddValue(RESULTLIST,
-			              DynStringToCStr(&description),
-			              NULL,
-			              catalogEntry->fullFileName[i]);
+			wListAddValueVar(RESULTLIST,
+			                 NULL,
+			                 catalogEntry->fullFileName[i],
+			                 catalogEntry->contents,
+			                 catalogEntry->fullFileName[i],
+			                 NULL);
+
+
 		}
 	}
 
@@ -185,14 +195,15 @@ static void SearchUiDefault(void)
 
 	int matches = SearchFileListLoad(
 	                      trackLibrary->catalog);  //Start with system files
-	wStringSetValue(QUERYSTRING, "");
-
-	wMessageSetValue(MESSAGETEXT, _(QUERYPROMPTSTRING));
-	DynStringMalloc(&dsSummary, 16);
-	DynStringPrintf(&dsSummary, _("%u parameter files in library. %d Fit Scale."),
-	                CountCatalogEntries(trackLibrary->catalog), matches);
-	wMessageSetValue(SEARCHSTAT, DynStringToCStr(&dsSummary));
-	DynStringFree(&dsSummary);
+	wEntrySetValue(QUERYSTRING, "");
+	if (MESSAGETEXT && SEARCHSTAT) {
+		wMessageSetValue(MESSAGETEXT, _(QUERYPROMPTSTRING));
+		DynStringMalloc(&dsSummary, 16);
+		DynStringPrintf(&dsSummary, _("%u parameter files in library. %d Fit Scale."),
+		                CountCatalogEntries(trackLibrary->catalog), matches);
+		wMessageSetValue(SEARCHSTAT, DynStringToCStr(&dsSummary));
+		DynStringFree(&dsSummary);
+	}
 
 	wControlActive((wControl_p)CLEARBUTTON, FALSE);
 }
@@ -230,7 +241,6 @@ SearchUILoadResults(void)
  * If there is at least one selected file, Apply is enabled
  * If there are entries in the list, Select All is enabled
  *
- * \return
  */
 
 static void UpdateSearchUiButton(void)
@@ -279,18 +289,17 @@ char * StringTrim(char *s)
 
 static void SearchUiDoSearch(void * ptr)
 {
-	unsigned result;
 	SearchResult *currentResults = MyMalloc(sizeof(SearchResult));
 	char * search;
 
 	ClearCurrentCatalog();
 
-	strcpy(searchUiQuery, wStringGetValue((wString_p)
-	                                      searchUiPG.paramPtr[I_QUERYSTRING].control));
+	strcpy(searchUiQuery, wEntryGetValue(
+	               searchUiPG.paramPtr[I_QUERYSTRING].control));
 	search = StringTrim(searchUiQuery);
 
 	if (search[0]) {
-		result = SearchLibrary(trackLibrary, search, currentResults);
+		unsigned result = SearchLibrary(trackLibrary, search, currentResults);
 
 		if (result) {
 
@@ -339,7 +348,6 @@ SearchUiClearFilter(void *ptr)
  * Select all files in the list
  *
  * \param junk IN ignored
- * \return
  */
 
 static void SearchUiSelectAll(void *junk)
@@ -367,7 +375,7 @@ void SearchUiOk(void * junk)
  * \param junk IN/OUT ignored
  */
 
-static void SearchUiApply(wWin_p junk)
+static void SearchUiApply(wControl_p junk)
 {
 	SearchUILoadResults();
 }
@@ -381,37 +389,36 @@ static void SearchUiApply(wWin_p junk)
  * \param valueP IN ignored
  */
 
-static void SearchUiDlgUpdate(
+static wBool_t SearchUiDlgUpdate(
         paramGroup_p pg,
         int inx,
         void * valueP)
 {
 	switch (inx) {
 	case I_QUERYSTRING:
-		if (pg->paramPtr[inx].enter_pressed) {
-			strcpy( searchUiQuery, wStringGetValue((wString_p)pg->paramPtr[inx].control) );
-			SearchUiDoSearch(NULL);
-		}
+//		if (pg->paramPtr[inx].enter_pressed) {
+		strcpy( searchUiQuery, wEntryGetValue( pg->paramPtr[inx].control) );
+		SearchUiDoSearch(NULL);
+//		}
 		break;
 	case I_RESULTLIST:
 		UpdateSearchUiButton();
 		break;
 	case I_FITRADIO:
-		strcpy( searchUiQuery, wStringGetValue((wString_p)
-		                                       pg->paramPtr[I_QUERYSTRING].control) );
+		strcpy( searchUiQuery, wEntryGetValue( pg->paramPtr[I_QUERYSTRING].control) );
 		SearchUiDoSearch(NULL);
-		break;
-	case I_MODETOGGLE:
-		if (currentCat.head) {
-			SearchFileListLoad(&currentCat);
-		} else {
-			SearchFileListLoad(trackLibrary->catalog);
-		}
 		break;
 	case -1:
 		SearchUiOk(valueP);
 		break;
+	default:
+		if ( log_paramfilesearch_ui < 0 ) { log_paramfilesearch_ui = LogFindIndex( "paramfilesearch_ui" ); }
+		LOG( log_paramfilesearch_ui, 1, ( "unexpected inx %d in SearchUiDlgUpdate\n",
+		                                  inx ) )
+		break;
 	}
+
+	return(TRUE);
 }
 
 /**
@@ -427,7 +434,7 @@ static char *
 GetParamsPath()
 {
 	char * params_path;
-	char *params_pref;
+	const char *params_pref;
 	params_pref = wPrefGetString(FILESECTION, PARAMDIRECTORY);
 
 	if (!params_pref) {
@@ -437,9 +444,6 @@ GetParamsPath()
 	}
 	return (params_path);
 }
-
-#include "bitmaps/funnel.image1"
-#include "bitmaps/funnelclear.image1"
 
 /**
  * Create and open the search dialog.
@@ -456,35 +460,28 @@ void DoSearchParams(void * junk)
 		trackLibrary = CreateLibrary(paramsDir);
 		free(paramsDir);
 
-		searchUiPLs[I_SEARCHBUTTON].winLabel = (char *)wIconCreatePixMap(funnel_image1);
-		searchUiPLs[I_CLEARBUTTON].winLabel = (char *)wIconCreatePixMap(
-		                funnelclear_image1);
-
 		searchFitMode = FIT_COMPATIBLE;  //Default to "Any" after startup
 
-		ParamRegister(&searchUiPG);
+		FormRegister(&searchUiPG);
 
+		searchUiW = FormCreateDialog(&searchUiPG,
+		                             MakeWindowTitle(_("Choose parameter files")),
+		                             _("Done"), FormCancel_Current,
+		                             NULL, NULL,
+		                             TRUE, F_RESIZE | F_RECALLSIZE, SearchUiDlgUpdate);
 
-
-		searchUiW = ParamCreateDialog(&searchUiPG,
-		                              MakeWindowTitle(_("Choose parameter files")), _("Done"), NULL,
-		                              ParamCancel_Current,
-		                              TRUE, NULL, F_RESIZE | F_RECALLSIZE, SearchUiDlgUpdate);
-
-
-		wControlActive((wControl_p)APPLYBUTTON, FALSE);
-		wControlActive((wControl_p)SELECTALLBUTTON, FALSE);
+		wControlActive(APPLYBUTTON, FALSE);
+		wControlActive(SELECTALLBUTTON, FALSE);
 	}
 
-	wControlActive((wControl_p)FITRADIO, TRUE);
+	wControlActive(FITRADIO, TRUE);
 
-	ParamLoadControls(&searchUiPG);
-	ParamGroupRecord(&searchUiPG);
-
+	FormLoadControls(&searchUiPG);
+	FormGroupRecord(&searchUiPG);
 
 	if (!trackLibrary) {
-		wControlActive((wControl_p)SEARCHBUTTON, FALSE);
-		wControlActive((wControl_p)QUERYSTRING, FALSE);
+		wControlActive(SEARCHBUTTON, FALSE);
+		wControlActive(QUERYSTRING, FALSE);
 		wMessageSetValue(MESSAGETEXT,
 		                 _("No system parameter files found, search is disabled."));
 	} else {

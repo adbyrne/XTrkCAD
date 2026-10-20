@@ -20,11 +20,12 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include <sys/stat.h>
+
 #include "custom.h"
 #include "fileio.h"
-#include "param.h"
+#include "form.h"
 #include "paths.h"
-#include "track.h"
 #include "include/paramfilelist.h"
 #include "common-ui.h"
 #include "ctrain.h"
@@ -32,14 +33,25 @@
 #include "include/utf8convert.h"
 #endif
 
+static int log_dcustmgm = -1;
+
 static void CustomEdit( void * action );
 static void CustomDelete( void * action );
 static void CustomExport( void * action );
 static void CustomDone( void * action );
-static void CustomNewCar( void * action );
+static void SelectNew(void *context );
 
+#ifdef TODO_UNUSED
 static const char * customTypes[] = { "Car Part", "Car Prototype", NULL };
+#endif
 static wIndex_t selectedType;
+
+/* Guards CustomDlgUpdate against GTK's synchronous selection-changed signal,
+ * which can fire re-entrantly out of wListClear() (via gtk_list_store_clear)
+ * while a row is selected. LoadCustomMgmList() frees every row's context
+ * before clearing the list; without this guard, that re-entrant call reads
+ * an already-freed context and crashes. */
+static BOOL_T custMgmLoading = FALSE;
 
 static wWinPix_t customListWidths[] = { 18, 100, 30, 80, 220 };
 static const char * customListTitles[] = { "", N_("Manufacturer"),
@@ -48,20 +60,25 @@ static const char * customListTitles[] = { "", N_("Manufacturer"),
 static paramListData_t customListData = { 10, 400, 5, customListWidths, customListTitles };
 static paramData_t customPLs[] = {
 #define I_CUSTOMLIST	(0)
-#define customSelL		((wList_p)customPLs[I_CUSTOMLIST].control)
-	{	PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN|PDO_DLGRESIZE|PDO_DLGBOXEND, &customListData, NULL, BL_MANY },
+#define customSelL		(customPLs[I_CUSTOMLIST].control)
+	{	PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN|PDO_DLGBOXEND, &customListData, NULL, BL_MANY },
 #define I_CUSTOMNEWTYPE (1)
-	{   PD_DROPLIST, &selectedType, "newtype", PDO_DLGRESETMARGIN | PDO_LISTINDEX, I2VP(150), N_("Create a new ") },
+	{   PD_MENU, &selectedType, "select_new", 0L, I2VP(150), NULL },
 #define I_CUSTOMNEW     (2)
-	{   PD_BUTTON, CustomNewCar, "newcar", PDO_DLGHORZ| PDO_DLGBOXEND, NULL, N_("Go") },
+	{   PD_BUTTON, NULL, "newcar", PDO_DLGHORZ| PDO_DLGBOXEND, NULL },
 #define I_CUSTOMEDIT	(3)
-	{	PD_BUTTON, CustomEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
+	{	PD_BUTTON, CustomEdit, "edit", PDO_DLGCMDBUTTON, NULL},
 #define I_CUSTOMDEL		(4)
-	{	PD_BUTTON, CustomDelete, "delete", 0, NULL, N_("Delete") },
+	{	PD_BUTTON, CustomDelete, "delete", 0, NULL},
 #define I_CUSTOMCOPYTO	(5)
-	{	PD_BUTTON, CustomExport, "export", 0, NULL, N_("Move To") },
+	{	PD_BUTTON, CustomExport, "export", 0, NULL},
+#define I_NEWPROTO	(6)
+	{	PD_MENUITEM, SelectNew, "newproto", .context = I2VP(I_NEWPROTO)},
+#define I_NEWPART (7)
+	{	PD_MENUITEM, SelectNew, "newpart", .context = I2VP(I_NEWPART)},
 } ;
-static paramGroup_t customPG = { "custmgm", 0, customPLs, COUNT( customPLs ) };
+
+static paramGroup_t customPG = { "custmgm", PGO_FULLDIALOGFROMBUILDER, customPLs, COUNT( customPLs ) };
 
 
 typedef struct {
@@ -71,55 +88,58 @@ typedef struct {
 } custMgmContext_t, *custMgmContext_p;
 
 
-static void CustomDlgUpdate(
+static wBool_t CustomDlgUpdate(
         paramGroup_p pg,
         int inx,
         void *valueP )
 {
 	custMgmContext_p context = NULL;
-	wIndex_t selcnt = wListGetSelectedCount( (wList_p)customPLs[0].control );
-	wIndex_t linx, lcnt;
+	wIndex_t selcnt;
 
-	if ( inx == I_CUSTOMNEW ) {
-		lcnt = wListGetCount( (wList_p)pg->paramPtr[I_CUSTOMNEWTYPE].control );
-	}
+	if ( custMgmLoading ) { return(TRUE); }
 
-	if ( inx != I_CUSTOMLIST ) { return; }
+	selcnt = wListGetSelectedCount(customPLs[I_CUSTOMLIST].control );
+
+	if ( inx != I_CUSTOMLIST ) { return(TRUE); }
+
 	if ( selcnt == 1 ) {
-		lcnt = wListGetCount( (wList_p)pg->paramPtr[inx].control );
-		for ( linx=0;
-		      linx<lcnt && wListGetItemSelected( (wList_p)customPLs[0].control,
-		                      linx ) != TRUE;
-		      linx++ );
-		if ( linx < lcnt ) {
-			context = (custMgmContext_p)wListGetItemContext( (wList_p)
-			                pg->paramPtr[inx].control, linx );
-			wButtonSetLabel( (wButton_p)customPLs[I_CUSTOMEDIT].control,
-			                 context->proc( CUSTMGM_CAN_EDIT, context->data )?_("Edit"):_("Rename") );
-			ParamControlActive( &customPG, I_CUSTOMEDIT, TRUE );
-		} else {
-			ParamControlActive( &customPG, I_CUSTOMEDIT, FALSE );
+		wIndex_t lcnt = wListGetCount(pg->paramPtr[inx].control );
+
+		for (int linx = 0; linx < lcnt; linx++) {
+			if (wListGetItemSelected(customPLs[I_CUSTOMLIST].control, linx)) {
+				context = (custMgmContext_p)wListGetItemContext(
+				                  pg->paramPtr[I_CUSTOMLIST].control, linx);
+				if (context == NULL) {
+					continue;
+				}
+
+				wButtonSetLabel(customPLs[I_CUSTOMEDIT].control,
+				                context->proc(CUSTMGM_CAN_EDIT, context->data) ? _("Edit") : _("Rename"));
+				FormControlActive(&customPG, I_CUSTOMEDIT, TRUE);
+			}
 		}
 	} else {
-		ParamControlActive( &customPG, I_CUSTOMEDIT, FALSE );
+		FormControlActive( &customPG, I_CUSTOMEDIT, FALSE );
 	}
-	ParamControlActive( &customPG, I_CUSTOMDEL, selcnt>0 );
-	ParamControlActive( &customPG, I_CUSTOMCOPYTO, selcnt>0 );
+	FormControlActive( &customPG, I_CUSTOMDEL, selcnt>0 );
+	FormControlActive( &customPG, I_CUSTOMCOPYTO, selcnt>0 );
+
+	return(TRUE);
 }
 
 
 static void CustomEdit( void * action )
 {
 	custMgmContext_p context = NULL;
-	wIndex_t selcnt = wListGetSelectedCount( (wList_p)customPLs[0].control );
+	wIndex_t selcnt = wListGetSelectedCount(customPLs[0].control );
 	wIndex_t inx, cnt;
 
 	if ( selcnt != 1 ) {
 		return;
 	}
-	cnt = wListGetCount( (wList_p)customPLs[0].control );
+	cnt = wListGetCount(customPLs[0].control );
 	for ( inx=0;
-	      inx<cnt && wListGetItemSelected( (wList_p)customPLs[0].control, inx ) != TRUE;
+	      inx<cnt && wListGetItemSelected(customPLs[0].control, inx ) != TRUE;
 	      inx++ );
 	if ( inx >= cnt ) {
 		return;
@@ -135,24 +155,37 @@ static void CustomEdit( void * action )
 #endif
 }
 
-static void CustomNewCar( void * action )
+static void
+SelectNew(void *context)
 {
+	unsigned index = (unsigned)VP2L(context);
+	void(*handler)(void) = NULL;
+	const char *label;
+	paramData_p menuItem = customPLs+index;
 
-	switch(selectedType) {
-	case 1:                 // car prototype
-		CarDlgAddProto();
+	// get selected function
+	switch(index) {
+	case I_NEWPART:
+		handler = CarDlgAddDesc;
 		break;
-	case 0:                 // car part
-		CarDlgAddDesc();
+	case I_NEWPROTO:
+		handler = CarDlgAddProto;
 		break;
 	default:
+		if ( log_dcustmgm < 0 ) { log_dcustmgm = LogFindIndex( "dcustmgm" ); }
+		LOG( log_dcustmgm, 1, ( "unexpected index %d in SelectNew\n", index ) )
 		break;
 	}
+	label = wMenuGetLabel(menuItem->control);
+
+	// configure the button
+	wButtonSetLabel((customPLs+I_CUSTOMNEW)->control, label);
+	customPLs[I_CUSTOMNEW].valueP = handler;
 }
 
 static void CustomDelete( void * action )
 {
-	wIndex_t selcnt = wListGetSelectedCount( (wList_p)customPLs[0].control );
+	wIndex_t selcnt = wListGetSelectedCount(customPLs[I_CUSTOMLIST].control );
 	wIndex_t inx, cnt;
 	custMgmContext_p context = NULL;
 
@@ -163,18 +196,22 @@ static void CustomDelete( void * action )
 	                       selcnt ) ) ) {
 		return;
 	}
-	cnt = wListGetCount( (wList_p)customPLs[0].control );
+
+	cnt = wListGetCount(customPLs[I_CUSTOMLIST].control );
 	for ( inx=0; inx<cnt; inx++ ) {
-		if ( !wListGetItemSelected( (wList_p)customPLs[0].control, inx ) ) {
+		if ( !wListGetItemSelected(customPLs[I_CUSTOMLIST].control, inx ) ) {
 			continue;
 		}
 		context = (custMgmContext_p)wListGetItemContext( customSelL, inx );
+		if ( context == NULL ) {
+			continue;
+		}
 		context->proc( CUSTMGM_DO_DELETE, context->data );
 		MyFree( context );
-		wListDelete( customSelL, inx );
-		inx--;
-		cnt--;
 	}
+
+	wListDeleteSelected(customPLs[I_CUSTOMLIST].control);
+
 	DoChangeNotification( CHANGE_PARAMS );
 }
 
@@ -183,12 +220,13 @@ EXPORT FILE * customMgmF;
 static char custMgmContentsStr[STR_SIZE];
 static BOOL_T custMgmProceed;
 static paramData_t custMgmContentsPLs[] = {
-	{ PD_STRING, custMgmContentsStr, "label", PDO_NOTBLANK, I2VP(400), N_("Label"), 0, 0, sizeof(custMgmContentsStr)}
+	{ PD_STRING, custMgmContentsStr, "label", PDO_NOTBLANK, I2VP(40), N_("Label"), 0, 0, sizeof(custMgmContentsStr)}
 };
 static paramGroup_t custMgmContentsPG = { "contents", 0, custMgmContentsPLs, COUNT( custMgmContentsPLs ) };
 
 static void CustMgmContentsOk( void * junk )
 {
+	FormFetchData( &custMgmContentsPG );
 	custMgmProceed = TRUE;
 	wHide( custMgmContentsPG.win );
 }
@@ -207,8 +245,9 @@ static int CustomDoExport(
         char ** fileName,
         void * data )
 {
-	int rc;
-	wIndex_t selcnt = wListGetSelectedCount( (wList_p)customPLs[0].control );
+	BOOL_T needContents = TRUE;
+	struct stat fileStat;
+	wIndex_t selcnt = wListGetSelectedCount(customPLs[0].control );
 	wIndex_t inx, cnt;
 	custMgmContext_p context = NULL;
 
@@ -220,24 +259,27 @@ static int CustomDoExport(
 	}
 
 	SetCurrentPath( CUSTOMPATHKEY, fileName[ 0 ] );
-	rc = access( fileName[ 0 ], F_OK );
-	if ( rc != -1 ) {
-		rc = access( fileName[ 0 ], W_OK );
-		if ( rc == -1 ) {
+	if ( stat( fileName[ 0 ], &fileStat ) == 0 ) {
+		if ( access( fileName[ 0 ], W_OK ) == -1 ) {
 			NoticeMessage( MSG_CUSTMGM_CANT_WRITE, _("Ok"), NULL, fileName[ 0 ] );
 			return FALSE;
 		}
-		custMgmProceed = TRUE;
-	} else {
+		// an existing but empty file still needs its CONTENTS line
+		needContents = ( fileStat.st_size == 0 );
+	}
+	if ( needContents ) {
 		if ( custMgmContentsPG.win == NULL ) {
-			ParamCreateDialog( &custMgmContentsPG, MakeWindowTitle(_("Contents Label")),
-			                   _("Ok"), CustMgmContentsOk, ParamCancel_Current, TRUE, NULL, F_BLOCK, NULL );
+			FormCreateDialog( &custMgmContentsPG, MakeWindowTitle(_("Contents Label")),
+			                  _("Ok"), CustMgmContentsOk,
+			                  _("Cancel"), FormCancel_Current,
+			                  TRUE, F_MODAL, NULL);
 		}
 		custMgmProceed = FALSE;
 		wShow( custMgmContentsPG.win );
-	}
-	if ( !custMgmProceed ) {
-		return FALSE;
+		wWinRunModal( custMgmContentsPG.win );
+		if ( !custMgmProceed ) {
+			return FALSE;
+		}
 	}
 	customMgmF = fopen( fileName[ 0 ], "a" );
 	if ( customMgmF == NULL ) {
@@ -247,7 +289,7 @@ static int CustomDoExport(
 
 	SetCLocale();
 
-	if (rc == -1) {
+	if ( needContents ) {
 #ifdef UTFCONVERT
 		char *contents = MyStrdup(custMgmContentsStr);
 		contents = Convert2UTF8(contents);
@@ -258,31 +300,52 @@ static int CustomDoExport(
 #endif // UTFCONVERT
 	}
 
-	cnt = wListGetCount( (wList_p)customPLs[0].control );
-	for ( inx=0; inx<cnt; inx++ ) {
-		if ( !wListGetItemSelected( (wList_p)customPLs[0].control, inx ) ) {
+	/*
+	 * Collect the selection before changing the list: removing a selected
+	 * row moves the selection on to the next row, so testing the selection
+	 * while deleting would move every following definition as well.
+	 */
+	wIndex_t * moved = MyMalloc( selcnt * sizeof *moved );
+	wIndex_t movedCnt = 0;
+	BOOL_T ok = TRUE;
+
+	cnt = wListGetCount( customSelL );
+	for ( inx=0; inx<cnt && movedCnt<selcnt; inx++ ) {
+		if ( wListGetItemSelected( customSelL, inx ) ) {
+			moved[movedCnt++] = inx;
+		}
+	}
+	for ( wIndex_t m=0; m<movedCnt; m++ ) {
+		context = (custMgmContext_p)wListGetItemContext( customSelL, moved[m] );
+		if ( context == NULL ) {
+			moved[m] = -1;
 			continue;
 		}
-		context = (custMgmContext_p)wListGetItemContext( customSelL, inx );
-		if ( context == NULL ) { continue; }
 		if (!context->proc( CUSTMGM_DO_COPYTO, context->data )) {
 			NoticeMessage( MSG_WRITE_FAILURE, _("Ok"), NULL, strerror(errno),
 			               fileName[ 0 ] );
-			fclose( customMgmF );
-			SetUserLocale();
-			return FALSE;
+			movedCnt = m;
+			ok = FALSE;
+			break;
 		}
 		context->proc( CUSTMGM_DO_DELETE, context->data );
 		MyFree( context );
-		wListDelete( customSelL, inx );
-		inx--;
-		cnt--;
 	}
+	// remove from the bottom up, so the remaining indices stay valid
+	for ( wIndex_t m=movedCnt-1; m>=0; m-- ) {
+		if ( moved[m] >= 0 ) {
+			wListDelete( customSelL, moved[m] );
+		}
+	}
+	MyFree( moved );
+	wListSetIndex( customSelL, -1 );
+
 	fclose( customMgmF );
 	SetUserLocale();
+	// also after a failure: the definitions written so far are now only there
 	LoadParamFile( 1, fileName, NULL );
 	DoChangeNotification( CHANGE_PARAMS );
-	return TRUE;
+	return ok;
 }
 
 
@@ -331,60 +394,25 @@ static void LoadCustomMgmList( void )
 {
 	wIndex_t curInx, cnt=0;
 	long tempL;
-	custMgmContext_p context;
-#ifdef LATER
-	custMgmContext_t curContext;
-#endif
 
-	curInx = wListGetIndex( customSelL );
-#ifdef LATER
-	curContext.proc = NULL;
-	curContext.data = NULL;
-	curContext.icon = NULL;
-#endif
-	if ( curInx >= 0 ) {
-		context = (custMgmContext_p)wListGetItemContext( customSelL, curInx );
-#ifdef LATER
-		if ( context != NULL ) {
-			curContext = *context;
-		}
-#endif
-	}
+	custMgmLoading = TRUE;
+
 	cnt = wListGetCount( customSelL );
 	for ( curInx=0; curInx<cnt; curInx++ ) {
-		context = (custMgmContext_p)wListGetItemContext( customSelL, curInx );
+		custMgmContext_p context = (custMgmContext_p)wListGetItemContext( customSelL,
+		                           curInx );
 		if ( context ) {
 			MyFree( context );
 		}
 	}
-	curInx = wListGetIndex( customSelL );
 	wControlShow( (wControl_p)customSelL, FALSE );
 	wListClear( customSelL );
 
 	CompoundCustMgmLoad();
 	CarCustMgmLoad();
 
-#ifdef LATER
-	curInx = 0;
-	cnt = wListGetCount( customSelL );
-	if ( curContext.proc != NULL ) {
-		for ( curInx=0; curInx<cnt; curInx++ ) {
-			context = (custMgmContext_p)wListGetItemContext( customSelL, curInx );
-			if ( context &&
-			     context->proc == curContext.proc &&
-			     context->data == curContext.data ) {
-				break;
-			}
-		}
-	}
-	if ( curInx >= cnt ) {
-		curInx = (cnt>0?0:-1);
-	}
-
-	wListSetIndex( customSelL, curInx );
-	tempL = curInx;
-#endif
 	tempL = -1;
+	custMgmLoading = FALSE;
 	CustomDlgUpdate( &customPG, I_CUSTOMLIST, &tempL );
 	wControlShow( (wControl_p)customSelL, TRUE );
 }
@@ -392,6 +420,8 @@ static void LoadCustomMgmList( void )
 
 static void CustMgmChange( long changes )
 {
+	wIndex_t selcnt;
+
 	if (changes) {
 		if (changed) {
 			changed = checkPtMark = 1;
@@ -402,32 +432,57 @@ static void CustMgmChange( long changes )
 		return;
 	}
 
+	if ( CarCustMgmChanged() ) {
+		/* A new custom prototype/catalog part was created elsewhere (e.g. the
+		 * car editor's "+" icon flow) -- the shortcut below only patches the
+		 * currently selected row's title, so it would never surface a brand
+		 * new entry while one happens to be selected here. Force a full
+		 * rebuild instead. */
+		LoadCustomMgmList();
+		return;
+	}
+
+	selcnt = wListGetSelectedCount(customPLs[0].control);
+	if (selcnt) {
+		for (int i = 0; i < wListGetCount(customPG.paramPtr[I_CUSTOMLIST].control);
+		     i++) {
+			if (wListGetItemSelected(customPLs[0].control, i)) {
+				custMgmContext_p context = (custMgmContext_p)wListGetItemContext(customSelL, i);
+				if (context == NULL) {
+					break;
+				}
+				context->proc(CUSTMGM_GET_TITLE, context->data);
+				wListSetValues(customPG.paramPtr[I_CUSTOMLIST].control, i, message, NULL, NULL);
+				break;
+			}
+		}
+		return;
+	}
 	LoadCustomMgmList();
 }
 
-
 static void DoCustomMgr( void * junk )
 {
+#ifdef TODO_UNUSED
 	int i = 0;
+#endif
 
 	if (customPG.win == NULL) {
-		ParamCreateDialog( &customPG,
-		                   MakeWindowTitle(_("Manage custom designed parts")), _("Done"), CustomDone,
-		                   ParamCancel_Null, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK,
-		                   CustomDlgUpdate );
-		while(customTypes[ i ] != NULL) {
-			wListAddValue( ((wList_p)customPLs[I_CUSTOMNEWTYPE].control),
-			               customTypes[ i++ ], NULL, NULL );
-		}
-		selectedType = 0;
-		wListSetIndex( ((wList_p)customPLs[I_CUSTOMNEWTYPE].control), selectedType);
+		FormCreateDialog( &customPG, MakeWindowTitle(_("Manage custom designed parts")),
+		                  _("Done"), CustomDone,
+		                  NULL, NULL,
+		                  TRUE, F_RESIZE|F_RECALLSIZE,
+		                  CustomDlgUpdate );
+		SelectNew(I2VP(I_NEWPART));
+		//selectedType = 0;
+		// wComboBoxSetIndex( (customPLs[I_CUSTOMNEWTYPE].control), selectedType);
 
 	} else {
 		wListClear( customSelL );
 	}
 
-	/*ParamLoadControls( &customPG );*/
-	/*ParamGroupRecord( &customPG );*/
+	/*FormLoadControls( &customPG );*/
+	/*FormGroupRecord( &customPG );*/
 	LoadCustomMgmList();
 	wShow( customPG.win );
 }
@@ -435,8 +490,8 @@ static void DoCustomMgr( void * junk )
 
 EXPORT addButtonCallBack_t CustomMgrInit( void )
 {
-	ParamRegister( &customPG );
-	ParamRegister( &custMgmContentsPG );
+	FormRegister( &customPG );
+	FormRegister( &custMgmContentsPG );
 	RegisterChangeNotification( CustMgmChange );
 	return &DoCustomMgr;
 }

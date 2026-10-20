@@ -125,7 +125,7 @@ void SetPaths( track_p trk, PATHPTR_T paths );
 PATHPTR_T GetCurrPath( track_p trk );
 long GetCurrPathIndex( track_p trk );
 void SetCurrPathIndex( track_p trk, long position );
-PATHPTR_T GetParamPaths( turnoutInfo_t * to );
+PATHPTR_T GetParamPaths( const turnoutInfo_t * to );
 void SetParamPaths( turnoutInfo_t * to, PATHPTR_T paths );
 
 #define FIND_TURNOUT	(1<<11)
@@ -137,8 +137,8 @@ void ParseCompoundTitle( char *, char **, int *, char **, int *, char **,
                          int * );
 void FormatCompoundTitle( long, char *);
 void ComputeCompoundBoundingBox( track_p);
-turnoutInfo_t * FindCompound( long, char *, char * );
-char * CompoundGetTitle( turnoutInfo_t * );
+turnoutInfo_t * FindCompound( long, const char *, const char * );
+char * CompoundGetTitle( const turnoutInfo_t * );
 void CompoundListLoadData( wList_p, turnoutInfo_t *, long );
 void CompoundClearDemoDefns( void );
 void SetDescriptionOrig( track_p );
@@ -146,7 +146,7 @@ void DrawCompoundDescription( track_p, drawCmd_p, wDrawColor );
 DIST_T DistanceCompound( track_p, coOrd * );
 void DescribeCompound( track_p, char *, CSIZE_T );
 void DeleteCompound( track_p );
-track_p NewCompound( TRKTYP_T, TRKINX_T, coOrd, ANGLE_T, char *, EPINX_T,
+track_p NewCompound( TRKTYP_T, TRKINX_T, coOrd, ANGLE_T, const char *, EPINX_T,
                      trkEndPt_p, PATHPTR_T, wIndex_t, trkSeg_p );
 BOOL_T WriteCompound( track_p, FILE * );
 BOOL_T ReadCompound( char *, TRKTYP_T );
@@ -164,7 +164,7 @@ void DoGroup( void * unused );
 
 /* dcmpnd.c */
 void DoRefreshCompound( void * unused );
-wIndex_t FindListItemByContext( wList_p, void *);
+wIndex_t FindListItemByContext( wControl_p control, const void *context);
 
 
 /* cturnout.c */
@@ -175,10 +175,12 @@ BOOL_T SplitTurnoutCheck(track_p,coOrd,EPINX_T ep,track_p *,EPINX_T *,EPINX_T *,
 void GetSegInxEP( signed char, int *, EPINX_T * );
 void SetSegInxEP( signed char *, int, EPINX_T) ;
 wIndex_t CheckPaths( wIndex_t, trkSeg_p, PATHPTR_T, char* );
-turnoutInfo_t * CreateNewTurnout( char *, char *, wIndex_t, trkSeg_p, PATHPTR_T,
+turnoutInfo_t * CreateNewTurnout( const char *, const char *, wIndex_t,
+                                  trkSeg_p, PATHPTR_T,
                                   EPINX_T, trkEndPt_p, wBool_t, long );
 void DeleteTurnoutParams(int fileInx);
-turnoutInfo_t * TurnoutAdd( long, SCALEINX_T, wList_p, coOrd *, EPINX_T );
+turnoutInfo_t* TurnoutAdd(long mode, SCALEINX_T scale, wControl_p list,
+                          coOrd* maxDim, EPINX_T epCnt);
 STATUS_T CmdTurnoutAction( wAction_t, coOrd );
 BOOL_T ConnectAdjustableTracks( track_p trk1, EPINX_T ep1, track_p trk2,
                                 EPINX_T ep2 );
@@ -192,11 +194,13 @@ void EditCustomTurnout( turnoutInfo_t *, turnoutInfo_t * );
 long ComputeTurnoutRoadbedSide( trkSeg_p, int, int, ANGLE_T, DIST_T );
 
 /* cstruct.c */
-turnoutInfo_t * CreateNewStructure( char *, char *, wIndex_t, trkSeg_p,
+turnoutInfo_t * CreateNewStructure( const char *, const char *, wIndex_t,
+                                    trkSeg_p,
                                     BOOL_T );
 enum paramFileState	GetStructureCompatibility(int paramFileIndex,
                 SCALEINX_T scaleIndex);
-turnoutInfo_t * StructAdd( long, SCALEINX_T, wList_p, coOrd * );
+turnoutInfo_t* StructAdd(long mode, SCALEINX_T scale, wControl_p list,
+                         coOrd* maxDim);
 STATUS_T CmdStructureAction( wAction_t, coOrd );
 BOOL_T StructLoadCarDescList( wList_p );
 void DeleteStructures(int fileIndex);

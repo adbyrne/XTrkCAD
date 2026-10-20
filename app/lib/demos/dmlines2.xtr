@@ -91,9 +91,9 @@ RESET
 MESSAGE
 We also draw Polylines and filled shapes.
 END
-PARAMETER draw linewidth 0.027777
-PARAMETER draw linecolor 11591910
 COMMAND DrawPolyline
+PARAMETER linestyle linewidth 0.027777
+PARAMETER linestyle linecolor 11591910
 STEP
 MESSAGE
 _________________________________________
@@ -101,9 +101,9 @@ _________________________________________
 A Polyline is drawn by dragging to place each of the point in the Polyline.
 END
 STEP
-PARAMETER draw linecolor 0
-PARAMETER draw linewidth 0.041667
-PARAMETER draw linecolor 32768
+PARAMETER linestyle linecolor 0
+PARAMETER linestyle linewidth 0.041667
+PARAMETER linestyle linecolor 32768
 MOUSE 2 0.64 6.07
 MOUSE 4 0.64 6.07
 MOUSE 2 1.17 7.25
@@ -135,7 +135,7 @@ _________________________________________
 A filled Polygon is drawn in the same way.
 END
 COMMAND DrawFilledPolygon
-PARAMETER draw linecolor 65280
+PARAMETER linestyle linecolor 65280
 STEP
 MOUSE 2 0.579 6.211
 MOUSE 4 0.579 6.211
@@ -185,7 +185,7 @@ _________________________________________
 Filled Boxes and Circles work the same as line Boxes and Circles.
 END
 COMMAND DrawFilledCircleCenter
-PARAMETER draw linecolor 16776960
+PARAMETER linestyle linecolor 16776960
 BIGPAUSE
 MOUSE 2 7.360 6.45333
 MOUSE 3 7.87 5.92

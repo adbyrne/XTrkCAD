@@ -1,0 +1,26 @@
+# SF #730: dialog "Help" buttons with no matching User Guide page yet.
+# One bare paramGroup_t dialog name per line -- FormCreateDialog()'s Help
+# button (app/bin/form/dialog.c) requests "cmd" + Capitalize(name) by
+# default, so this list is names where that computed page doesn't exist.
+# Remove an entry the moment its dialog gets an alias-table entry in
+# dialogHelpAliases[] (same file) pointing at an existing page, or a new
+# page of its own -- app/doc/check_help_links.py fails the build if an
+# entry here actually already resolves, so this list can't silently go
+# stale in the other direction either.
+#
+# SF #730 is the tracking ticket for the batch plan below.
+# Batches 1-4 (31 of 36 originally-tracked dialogs resolved, all via
+# aliasing to real existing content -- zero new pages authored) landed.
+# These final 5 are deliberately left unaliased: traced each one's
+# creation and confirmed none of them ever calls FormCreateDialog() --
+# only FormCreateControls(), embedding them as inline status-bar controls
+# rather than a real popup dialog. Their Help button literally never
+# exists to click, so there's nothing to fix here (yet -- if one of these
+# is ever changed to a real dialog, this check will immediately flag it).
+
+filledobject
+linestyle
+misc
+pier
+
+drawModCircle

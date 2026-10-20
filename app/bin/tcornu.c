@@ -46,13 +46,14 @@
 #include "cstraigh.h"
 #include "cjoin.h"
 #include "common.h"
-#include "param.h"
+#include "form.h"
 #include "cundo.h"
 #include "layout.h"
 #include "fileio.h"
 
 EXPORT TRKTYP_T T_CORNU = -1;
 
+/** @logcmd @showrefby `Cornu=n` `tcornu.c` */
 static int log_cornu = 0;
 
 static DIST_T GetLengthCornu( track_p );
@@ -66,7 +67,7 @@ static DIST_T GetLengthCornu( track_p );
 /*
  * Run after any changes to the Cornu points
  */
-void SetUpCornuParmFromTracks(track_p trk[2],cornuParm_t * cp,
+void SetUpCornuParmFromTracks(track_p const trk[2],cornuParm_t * cp,
                               struct extraDataCornu_t* xx)
 {
 	if (!trk[0]) {
@@ -215,11 +216,6 @@ DIST_T CornuDescriptionDistance(
 	return FindDistance( p1, pos );
 }
 
-typedef struct {
-	coOrd pos;
-	ANGLE_T angle;
-} pos_angle_t;
-
 static void DrawCornuDescription(
         track_p trk,
         drawCmd_p d,
@@ -309,9 +305,6 @@ static struct {
 	DIST_T maxRateOfChange;
 	ANGLE_T windingAngle;
 	unsigned int layerNumber;
-	dynArr_t segs;
-	long lineWidth;
-	wDrawColor color;
 } cornData;
 
 typedef enum { P0, A0, R0, C0, Z0, P1, A1, R1, C1, Z1, RA, RR, WA, LN, GR, LY } cornuDesc_e;
@@ -358,7 +351,7 @@ static void UpdateCornu( track_p trk, int inx, descData_p descUpd,
 		cornData.center[0] = xx->c[0];
 		cornuDesc[P0].mode |= DESC_CHANGE;
 		cornuDesc[C0].mode |= DESC_CHANGE;
-	/* falls through */
+		__attribute__((fallthrough));
 	case P1:
 		if (GetTrkEndTrk(trk,1)) { break; }
 		updateEndPts = TRUE;
@@ -529,7 +522,7 @@ static void DescribeCornu( track_p trk, char * str, CSIZE_T len )
 	cornuDesc[WA].mode = DESC_RO;
 	cornuDesc[LY].mode = DESC_NOREDRAW;
 
-	DoDescribe( _("Cornu Track"), trk, cornuDesc, UpdateCornu );
+	DoDescribe( N_("Cornu Track"), trk, cornuDesc, UpdateCornu );
 
 }
 
@@ -604,7 +597,7 @@ static BOOL_T WriteCornu( track_p t, FILE * f )
 	bits = GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0)|
 	       (GetTrkRoadbed(t)?1<<4:0);
 	rc &= fprintf(f,
-	              "%s %d %d %ld 0 0 %s %d %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f \n",
+	              "%s %d %u %ld 0 0 %s %d %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f \n",
 	              "CORNU",GetTrkIndex(t), GetTrkLayer(t), (long)options,
 	              GetTrkScaleName(t), bits,
 	              xx->pos[0].x, xx->pos[0].y,
@@ -917,13 +910,15 @@ BOOL_T MoveCornuEndPt ( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d0 )
 			UndrawNewTrack( trk2 );
 			DeleteTrack(trk2,TRUE);
 		}
-		struct extraDataCornu_t *xx = GET_EXTRA_DATA(*trk, T_CORNU, extraDataCornu_t);
+		const struct extraDataCornu_t *xx = GET_EXTRA_DATA(*trk, T_CORNU,
+		                                    extraDataCornu_t);
 		SetTrkEndPoint( *trk, *ep, *ep?xx->pos[1]:xx->pos[0], *ep?xx->a[1]:xx->a[0] );
 		DrawNewTrack( *trk );
 		return TRUE;
 	}
 	return FALSE;
 }
+/** @logcmd @showrefby `traverseCornu=n` `tcornu.c` */
 static int log_traverseCornu = 0;
 /*
  * TraverseCornu is used to position a train/car.
@@ -1053,7 +1048,8 @@ static BOOL_T EnumerateCornu( track_p trk )
 {
 
 	if (trk != NULL) {
-		struct extraDataCornu_t *xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
+		const struct extraDataCornu_t *xx = GET_EXTRA_DATA(trk, T_CORNU,
+		                                    extraDataCornu_t);
 		DIST_T d;
 		d = max(CornuOffsetLength(xx->arcSegs,-GetTrkGauge(trk)/2.0),
 		        CornuOffsetLength(xx->arcSegs,GetTrkGauge(trk)/2.0));
@@ -1233,15 +1229,12 @@ static BOOL_T QueryCornu( track_p trk, int query )
 		return TRUE;
 		break;
 	case Q_EXCEPTION: {
-		struct extraDataCornu_t * xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
+		const struct extraDataCornu_t * xx = GET_EXTRA_DATA(trk, T_CORNU,
+		                                     extraDataCornu_t);
 		return fabs(xx->minCurveRadius) < (GetLayoutMinTrackRadius()-EPSILON);
 	}
 	case Q_IS_CORNU:
-		return TRUE;
-		break;
 	case Q_ISTRACK:
-		return TRUE;
-		break;
 	case Q_CAN_PARALLEL:
 		return TRUE;
 		break;
@@ -1484,10 +1477,10 @@ EXPORT BOOL_T RebuildCornu (track_p trk)
 
 static wBool_t CompareCornu( track_cp trk1, track_cp trk2 )
 {
-	struct extraDataCornu_t *xx1 = GET_EXTRA_DATA( trk1, T_CORNU,
-	                               extraDataCornu_t );
-	struct extraDataCornu_t *xx2 = GET_EXTRA_DATA( trk2, T_CORNU,
-	                               extraDataCornu_t );
+	const struct extraDataCornu_t *xx1 = GET_EXTRA_DATA( trk1, T_CORNU,
+	                                     extraDataCornu_t );
+	const struct extraDataCornu_t *xx2 = GET_EXTRA_DATA( trk2, T_CORNU,
+	                                     extraDataCornu_t );
 	char * cp = message + strlen(message);
 	REGRESS_CHECK_POS( "Pos[0]", xx1, xx2, pos[0] )
 	REGRESS_CHECK_POS( "Pos[1]", xx1, xx2, pos[1] )

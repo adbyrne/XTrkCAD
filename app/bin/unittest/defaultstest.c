@@ -3,13 +3,17 @@
 */
 
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stddef.h>
-#include <string.h>
-#include <stdio.h>
+#include <stdint.h>
 #include <setjmp.h>
+
 #include <cmocka.h>
 
-#include "common.h"
+#include <string.h>
+#include <stdio.h>
+
+//#include "../common.h"
 
 #include "../appdefaults.c"
 

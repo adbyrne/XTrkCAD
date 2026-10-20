@@ -1,0 +1,469 @@
+/** \file font.c
+ * Font selection and loading.
+ */
+
+/*  XTrkCad - Model Railroad CAD
+ *  Copyright (C) 2005 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+#include <math.h>
+
+#define GTK_DISABLE_SINGLE_INCLUDES
+#define GDK_DISABLE_DEPRECATED
+#define GTK_DISABLE_DEPRECATED
+#define GSEAL_ENABLE
+
+#include <gtk/gtk.h>
+#include <gdk/gdk.h>
+
+#include "wlib.h"
+#include "gtkint.h"
+#include "i18n.h"
+
+/*
+ * Macro for debug purposes. Possible debug macro values:
+ *
+ *   0 - no messages to console (use this value when building in release mode)
+ *   1 - send errors
+ *   2 - send details
+ *   3 - send more details
+ */
+#define WLIB_FONT_DEBUG 0
+
+#define SAMPLETEXT  "AbCdE0129!@$&()[]{}"
+
+static GtkWidget *fontSelectionDialog;
+
+
+/*****************************************************************************
+ * FONT HANDLERS
+ */
+
+#define FW_MEDIUM	(0)
+#define FW_BOLD		(1)
+#define FS_REGULAR	(0)
+#define FS_ITALIC	(1)
+
+/* absoluteFontSize was introduced to keep the font size information synchron
+ * between the Dt.size of ctext.c and it's drop list on the status bar and
+ * the font size coming from the gtk font dialog which is located in this file */
+int absoluteFontSize = 18;
+
+struct wFont_t {
+	PangoFontDescription *fontDescription;
+};
+
+static wFont_p standardFonts[F_MONO-F_TIMES+1][2][2];
+static wFont_p curFont = NULL;
+
+/**
+ * Callback for font selection dialog
+ *
+ * \param thisfontSelectionDialog IN dialog
+ * \param response IN response code from dialog
+ * \param attributes IN unused
+ */
+
+static void fontSelectionDialogCallback(GtkFontChooserDialog
+                                        *thisfontSelectionDialog, gint response, gpointer attributes)
+{
+	if (response == GTK_RESPONSE_APPLY || response == GTK_RESPONSE_OK) {
+		gchar *fontName;
+
+		fontName = gtk_font_chooser_get_font(GTK_FONT_CHOOSER(thisfontSelectionDialog));
+		wPrefSetString("font", "name", fontName);
+		pango_font_description_free(curFont->fontDescription);
+		curFont->fontDescription = pango_font_description_from_string(fontName);
+		absoluteFontSize = (pango_font_description_get_size(
+		                            curFont->fontDescription))/PANGO_SCALE;
+#if WLIB_FONT_DEBUG >= 2
+		fprintf(stderr, "new font selection:\n");
+		fprintf(stderr, "  font name \"%s\"\n", fontName);
+		fprintf(stderr, "  font size is %d\n",
+		        pango_font_description_get_size(curFont->fontDescription)/PANGO_SCALE);
+		fprintf(stderr, "  font size is absolute %d\n",
+		        pango_font_description_get_size_is_absolute(curFont->fontDescription));
+#endif
+		g_free(fontName);
+	}
+
+	if (response == GTK_RESPONSE_OK || response == GTK_RESPONSE_CANCEL) {
+		gtk_widget_hide(GTK_WIDGET(thisfontSelectionDialog));
+	}
+}
+
+static wBool_t fontInitted = FALSE;
+
+/**
+ * \todo F_TIMES and F_HELV are serif respective sans serif fonts. Change define to make names consistent
+ * with meaning.
+ */
+
+#define DEFAULTFONTSANS "Sans 18"
+
+static wBool_t fontInit()
+{
+	const char *fontNames[] = {
+		"Serif Normal 18",
+		"Serif Italic 18",
+		"Serif Bold 18",
+		"Serif Bold Italic 18",
+		"Sans 18",
+		"Sans Italic 18",
+		"Sans Bold 18",
+		"Sans Bold Italic 18",
+		"Monospace 18",
+		"Monospace Italic 18",
+		"Monospace Bold 18",
+		"Monospace Bold Italic 18",
+	};
+	int s = 0;
+	int i, j, k;
+
+	for (i = F_TIMES; i <= F_MONO; ++i) {
+		for (j = FW_MEDIUM; j <= FW_BOLD; ++j) {
+			for (k = FS_REGULAR; k <= FS_ITALIC; ++k) {
+				PangoFontDescription *fontDescription = pango_font_description_from_string(
+				                fontNames[s++]);
+				wFont_p standardFont = (wFont_p) malloc(sizeof(struct wFont_t));
+
+				if(standardFont) {
+					standardFont->fontDescription = fontDescription;
+					standardFonts[i-F_TIMES][j][k] = standardFont;
+				} else {
+					fprintf(stderr, "Failed to allocate memory for standardFont. Aborting...\n");
+					abort();
+				}
+			}
+		}
+	}
+
+	if (curFont == NULL) {
+		curFont = (wFont_p) malloc(sizeof(struct wFont_t));
+
+		if (curFont == NULL) {
+			return FALSE;
+		}
+
+		const char *fontName = wPrefGetStringBasic("font", "name");
+		curFont->fontDescription = pango_font_description_from_string(
+		                                   fontName ? fontName : DEFAULTFONTSANS);
+		absoluteFontSize = (int) PANGO_PIXELS(pango_font_description_get_size(
+		                curFont->fontDescription));
+	}
+
+	fontInitted = TRUE;
+	return TRUE;
+}
+
+#define FONTSIZE_TO_PANGOSIZE(fs) ((gint) ((fs) + .5))
+
+/**
+ * Create a Pango layout with a specified font and font size
+ *
+ * \param widget IN
+ * \param cairo IN cairo context
+ * \param fp IN font
+ * \param fs IN size
+ * \param s IN ???
+ * \param width_p OUT width of layout
+ * \param height_p OUT height of layout
+ * \param ascent_p OUT ascent of layout
+ * \param descent_p OUT descent of layout
+ * \param baseline_p OUT baseline of layout
+ * \return    the created Pango layout
+ */
+
+PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget,
+                                       void *cairo,
+                                       wFont_p fp,
+                                       wFontSize_t fs,
+                                       const char *s,
+                                       wDrawPix_t *width_p,
+                                       wDrawPix_t *height_p,
+                                       wDrawPix_t *ascent_p,
+                                       wDrawPix_t *descent_p,
+                                       wDrawPix_t *baseline_p)
+{
+
+	g_assert(cairo!=NULL);
+
+	if (!fontInitted) {
+		fontInit();
+	}
+
+	PangoLayout *layout = NULL;
+	const gchar *utf8 = wlibConvertInput(s);
+
+	layout = pango_cairo_create_layout((cairo_t *) cairo);
+	pango_layout_set_text(layout, utf8, -1);
+
+	PangoFontDescription *fontDescription = (fp ? fp : curFont)->fontDescription;
+	PangoContext *context;
+	PangoFontMetrics *metrics;
+	/* set attributes */
+	pango_font_description_set_size(fontDescription,
+	                                FONTSIZE_TO_PANGOSIZE(fs) * PANGO_SCALE);
+	pango_layout_set_font_description(layout, fontDescription);
+	/* get layout measures */
+	gint width_i, height_i;
+	pango_layout_get_size(layout, &width_i, &height_i);
+	*width_p = width_i / PANGO_SCALE;
+	*height_p = height_i / PANGO_SCALE;
+	/* A print/export drawable has no backing widget. The width/height above come
+	 * from the layout and need no widget, but the ascent/descent metrics below
+	 * need a PangoContext. Derive it from the cairo target's font map when there
+	 * is no widget, otherwise gtk_widget_create_pango_context(NULL) fails and the
+	 * metrics (and callers such as wDrawGetTextSize / DrawRuler label alignment)
+	 * get bad values. */
+	if (widget) {
+		context = gtk_widget_create_pango_context(widget);
+	} else {
+		context = pango_cairo_create_context((cairo_t *) cairo);
+	}
+	metrics = pango_context_get_metrics(context, fontDescription,
+	                                    pango_context_get_language(context));
+	*baseline_p = pango_layout_get_baseline(layout) / PANGO_SCALE;
+	*ascent_p  = pango_font_metrics_get_ascent(metrics) / PANGO_SCALE;
+	*descent_p = pango_font_metrics_get_descent(metrics) / PANGO_SCALE;
+	pango_font_metrics_unref(metrics);
+	g_object_unref(context);
+#if WLIB_FONT_DEBUG >= 3
+	fprintf(stderr, "font layout created:\n");
+	fprintf(stderr, "  widget:         %p\n", widget);
+	//fprintf(stderr, "  font description:%p\n", fp);
+	fprintf(stderr, "  font size:      %f\n", fs);
+	fprintf(stderr, "  layout text:    \"%s\" (utf8)\n", utf8);
+	fprintf(stderr, "  layout width:   %d\n", *width_p);
+	fprintf(stderr, "  layout height:  %d\n", *height_p);
+	fprintf(stderr, "  layout ascent:  %d (pixels)\n", *ascent_p);
+	fprintf(stderr, "  layout descent: %d (pixels)\n", *descent_p);
+#endif
+	return layout;
+}
+
+/**
+ * Destroy a previously allocated  Pango layout
+ */
+
+void wlibFontDestroyPangoLayout(PangoLayout *layout)
+{
+	g_object_ref_sink(layout);
+	g_object_unref(layout);
+}
+
+/**
+ * Initialize font attributes
+ */
+
+void wInitializeFonts()
+{
+	if (!fontInitted) {
+		fontInit();
+	}
+}
+
+/**
+ * Initialize and run the font dialog
+ *
+ * \param title IN dialog box title
+ */
+
+void wSelectFont(
+        const char * title)
+{
+	if (!fontInitted) {
+		fontInit();
+	}
+
+	if (fontSelectionDialog == NULL) {
+		fontSelectionDialog = gtk_font_chooser_dialog_new( _("Font Select"), NULL);
+		gtk_window_set_position(GTK_WINDOW(fontSelectionDialog), GTK_WIN_POS_MOUSE);
+		gtk_window_set_modal(GTK_WINDOW(fontSelectionDialog), TRUE);
+		gtk_font_chooser_set_preview_text(GTK_FONT_CHOOSER(
+		                fontSelectionDialog), SAMPLETEXT);
+		g_signal_connect(G_OBJECT(fontSelectionDialog), "response",
+		                 G_CALLBACK(fontSelectionDialogCallback), NULL);
+		g_signal_connect(G_OBJECT(fontSelectionDialog), "destroy",
+		                 G_CALLBACK(gtk_widget_destroyed), &fontSelectionDialog);
+	}
+
+	if (curFont != NULL) {
+		gchar *fontName;
+
+		/* the curFont description contains the latest font info
+		 * which is depended on the current scale
+		 * overwrite it with the absoluteFontSize */
+		pango_font_description_set_size(curFont->fontDescription,
+		                                FONTSIZE_TO_PANGOSIZE(absoluteFontSize) * PANGO_SCALE);
+		fontName = pango_font_description_to_string(curFont->fontDescription);
+		gtk_font_chooser_set_font(GTK_FONT_CHOOSER(fontSelectionDialog), fontName);
+		g_free(fontName);
+	}
+
+	gtk_widget_show(fontSelectionDialog);
+}
+
+/**
+ * Get the current font
+ *
+ * \return    describe the return value
+ */
+
+static wFont_p wlibSelectedFont(void)
+{
+	if (!fontInitted) {
+		fontInit();
+	}
+
+	return curFont;
+}
+
+int
+wFontGetCharWidth(wControl_p control, wFont_p font, double size)
+{
+	PangoFontDescription *fontDescription = font->fontDescription;
+	PangoFontMetrics *metrics;
+	PangoContext *context;
+	int width;
+
+	context = gtk_widget_get_pango_context(control->widget);
+	/* set attributes */
+	pango_font_description_set_size(fontDescription,
+	                                FONTSIZE_TO_PANGOSIZE(size) * PANGO_SCALE);
+
+	metrics = pango_context_get_metrics(context, fontDescription,
+	                                    NULL);
+
+	width = pango_font_metrics_get_approximate_digit_width(metrics) / PANGO_SCALE;
+
+	pango_font_metrics_unref(metrics);
+	//g_object_unref(context);
+
+	return width;
+}
+
+
+int
+wFontGetCharHeight(wControl_p control, wFont_p font, double size)
+{
+	PangoFontDescription *fontDescription = font->fontDescription;
+	PangoFontMetrics *metrics;
+	PangoContext *context;
+	int height;
+
+	context = gtk_widget_get_pango_context(control->widget);
+	/* set attributes */
+	pango_font_description_set_size(fontDescription,
+	                                FONTSIZE_TO_PANGOSIZE(size) * PANGO_SCALE);
+
+	metrics = pango_context_get_metrics(context, fontDescription,
+	                                    NULL);
+
+	height = (pango_font_metrics_get_ascent(metrics) +
+	          pango_font_metrics_get_descent(metrics)) / PANGO_SCALE;
+
+	pango_font_metrics_unref(metrics);
+	//g_object_unref(context);
+
+	return height;
+}
+
+
+/**
+ * Get the default font size
+ *
+ * \return    describe the return value
+ */
+
+wFontSize_t wSelectedFontSize(void)
+{
+	if (!fontInitted) {
+		fontInit();
+	}
+
+#if WLIB_FONT_DEBUG >= 3
+	fprintf(stderr, "the font size of current font description is: %d\n",
+	        pango_font_description_get_size(curFont->fontDescription)/PANGO_SCALE);
+	fprintf(stderr, "the font size of absoluteFontSize is: %d\n",absoluteFontSize);
+#endif
+	return absoluteFontSize;
+}
+
+/**
+ * Set the default font size
+ *
+ * \param size IN font size
+ */
+
+void wSetSelectedFontSize(wFontSize_t size)
+{
+	absoluteFontSize = lround(size);
+}
+
+/**
+ * get the Pango font description as a string from a font definition.
+ * If the font definition is NULL, a default font is return. This is
+ * the current font if one is set. If not the first font from the font
+ * list is returned.
+ *
+ * \param fp IN the font definition
+ * \return    the font description
+ */
+
+const char *wlibFontTranslate(wFont_p fp)
+{
+	static gchar *fontName = NULL;
+
+	if (fontName != NULL) {
+		g_free(fontName);
+	}
+
+	if (!fontInitted) {
+		fontInit();
+	}
+
+	if (fp == NULL) {
+		fp = wlibSelectedFont();
+	}
+
+	if (fp == NULL) {
+		fp = standardFonts[0][FW_MEDIUM][FS_REGULAR];
+	}
+
+	fontName = pango_font_description_to_string(fp->fontDescription);
+#if WLIB_FONT_DEBUG >= 2
+	fprintf(stderr, "font translation: ");
+	fprintf(stderr, "  \"%s\"\n", fontName);
+#endif
+	return (const char *) fontName;
+}
+
+/**
+ * Return description for one of the standard fonts
+ *
+ * \return
+ */
+
+wFont_p wStandardFont(int face, wBool_t bold, wBool_t italic)
+{
+	if (!fontInitted) {
+		fontInit();
+	}
+
+	return standardFonts[face-F_TIMES][bold][italic];
+}

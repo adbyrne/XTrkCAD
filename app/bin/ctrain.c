@@ -27,10 +27,11 @@
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
+#include "icons.h"
 #include "layout.h"
-#include "param.h"
 #include "track.h"
 #include "common-ui.h"
+#include "form.h"
 
 #include "include/toolbar.h"
 
@@ -109,7 +110,9 @@ static void DrawAllCars(track_p);
 static void TrainTimeEndPause(void);
 static void TrainTimeStartPause(void);
 
+/** @logcmd @showrefby `trainMove=n` `ctrain.c` */
 static int log_trainMove;
+/** @logcmd @showrefby `trainPlayback=n` `ctrain.c` */
 static int log_trainPlayback;
 
 static track_p trainHighlighted;
@@ -120,13 +123,15 @@ static void PlaceCar(track_p);
 #define WALK_CARS_START( CAR, XX, DIR ) \
 	while (1) { \
 		(XX) = GET_EXTRA_DATA(CAR, T_CAR, extraDataCar_t);\
+		(void)(XX);\
 		{ \
 
 #define WALK_CARS_END( CAR, XX, DIR ) \
 		} \
 		{ \
 			track_p walk_cars_temp1; \
-			if ( (walk_cars_temp1=GetTrkEndTrk(CAR,DIR)) == NULL ) break; \
+			walk_cars_temp1=GetTrkEndTrk(CAR,DIR); \
+			if ( walk_cars_temp1 == NULL ) break; \
 			(DIR)=(GetTrkEndTrk(walk_cars_temp1,0)==(CAR)?1:0); \
 			(CAR)=walk_cars_temp1; \
 		} \
@@ -197,19 +202,22 @@ static void UpdateCar(
         descData_p descUpd,
         BOOL_T needUndoStart)
 {
-	unsigned int max_str;
 	struct extraDataCar_t *xx = GET_EXTRA_DATA(trk, T_CAR, extraDataCar_t);
 	if (inx == -1) {
 		BOOL_T numberChanged;
 		const char * cp;
+		unsigned int max_str;
 		numberChanged = FALSE;
 
-		cp = wStringGetValue((wString_p)carDesc[NM].control0);
+		// cppcheck-suppress nullPointerRedundantCheck
+		// wEntryGetValue() wraps gtk_entry_get_text(), which per GTK's
+		// contract never returns NULL (empty string at worst).
+		cp = wEntryGetValue( carDesc[NM].control0);
 		max_str = sizeof(carData.number);
-		if (max_str && strlen(cp)>max_str) {
+		if (strlen(cp)>max_str) {
 			NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_str-1);
 		}
-		if (cp && strcmp(CarItemNumber(xx->item), cp) != 0) {
+		if (strcmp(CarItemNumber(xx->item), cp) != 0) {
 			numberChanged = TRUE;
 			carData.number[0] = '\0';
 			strncat(carData.number, cp, max_str - 1);
@@ -234,8 +242,6 @@ static void UpdateCar(
 
 	switch (inx) {
 	case NM:
-		break;
-
 	default:
 		break;
 	}
@@ -250,12 +256,13 @@ static void DescribeCar(
         CSIZE_T len)
 {
 	struct extraDataCar_t *xx = GET_EXTRA_DATA(trk, T_CAR, extraDataCar_t);
-	char * cp;
+	const char * cp;
+	char descBuf[STR_LONG_SIZE];
 	coOrd size;
 	CarItemSize(xx->item, &size);
 	carData.length = size.x;
 	carData.width = size.y;
-	cp = CarItemDescribe(xx->item, 0, &carData.index);
+	cp = CarItemDescribe(xx->item, 0, &carData.index, descBuf);
 
 	carData.number[0] = '\0';
 	strncat(carData.number, CarItemNumber(xx->item),
@@ -264,7 +271,7 @@ static void DescribeCar(
 	strncat(str, cp, len - 1);
 	carData.pos = xx->trvTrk.pos;
 	carData.angle = xx->trvTrk.angle;
-	cp = CarItemDescribe(xx->item, -1, NULL);
+	cp = CarItemDescribe(xx->item, -1, NULL, descBuf);
 	carData.desc[0] = '\0';
 	strncat(carData.desc, cp, sizeof(carData.desc) - 1);
 
@@ -275,7 +282,7 @@ static void DescribeCar(
 	                                carDesc[WD].mode = DESC_RO;
 	carDesc[DE].mode = DESC_RO;
 	carDesc[NM].mode = 0;
-	DoDescribe(_("Car"), trk, carDesc, UpdateCar);
+	DoDescribe(N_("Car"), trk, carDesc, UpdateCar);
 }
 
 
@@ -350,7 +357,7 @@ static void DrawCar(
 	struct extraDataCar_t * xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
 	int dir;
 	vector_t coupler[2];
-	struct extraDataCar_t * xx1;
+	const struct extraDataCar_t * xx1;
 	int dir1;
 
 	if (drawCarEnable == FALSE) {
@@ -375,7 +382,8 @@ static void DrawCar(
 		track_p car1;
 		coupler[dir].pos = xx->couplerPos[dir];
 
-		if ((car1 = GetTrkEndTrk(car,dir))) {
+		car1 = GetTrkEndTrk(car,dir);
+		if (car1) {
 			xx1 = GET_EXTRA_DATA(car1, T_CAR, extraDataCar_t);
 			dir1 = (GetTrkEndTrk(car1,0)==car)?0:1;
 			coupler[dir].angle = FindAngle(xx->couplerPos[dir], xx1->couplerPos[dir1]);
@@ -612,7 +620,6 @@ static BOOL_T QueryCar(track_p trk, int query)
 {
 	switch (query) {
 	case Q_NODRAWENDPT:
-		return TRUE;
 	case Q_ISTRAIN:
 		return TRUE;
 
@@ -699,7 +706,7 @@ static int numTrainDlg;
 #define MAX_SPEED				(100.0)
 
 typedef struct {
-	wWin_p win;
+	wControl_p win;
 	wIndex_t inx;
 	track_p train;
 	long direction;
@@ -730,43 +737,39 @@ drawCmd_t speedD = {
 	CoOrd2Pix
 };
 static paramDrawData_t speedParamData = { SLIDER_WIDTH, SLIDER_HEIGHT, SpeedRedraw, SpeedAction, &speedD };
-#ifndef WINDOWS
-static paramListData_t listData = { 3, 120 };
-#endif
-static char * trainFollowMeLabels[] = { N_("Follow"), NULL };
-static char * trainAutoReverseLabels[] = { N_("Auto Reverse"), NULL };
-static paramData_t trainPLs[] = {
-#define I_LIST				(0)
-#ifdef WINDOWS
-	/*0*/ { PD_DROPLIST, NULL, "list", PDO_NOPREF|PDO_NOPSHUPD, I2VP(120), NULL, 0 },
-#else
-	/*0*/ { PD_LIST, NULL, "list", PDO_NOPREF|PDO_NOPSHUPD, &listData, NULL, 0 },
-#endif
-#define I_STATUS			(1)
-	{ PD_MESSAGE, NULL, NULL, 0, I2VP(120) },
-#define I_POS				(2)
-	{ PD_MESSAGE, NULL, NULL, 0, I2VP(120) },
-#define I_SLIDER			(3)
-	{ PD_DRAW, NULL, "speed", PDO_NOPSHUPD|PDO_DLGSETY, &speedParamData },
-#define I_DIST				(4)
-	{ PD_STRING, NULL, "distance", PDO_DLGNEWCOLUMN, I2VP(100-SLIDER_WIDTH), NULL, BO_READONLY },
-#define I_ZERO				(5)
-	{ PD_BUTTON, NULL, "zeroDistance", PDO_NOPSHUPD|PDO_NOPREF|PDO_DLGHORZ, NULL, NULL, BO_ICON },
-#define I_GOTO				(6)
-	{ PD_BUTTON, NULL, "goto", PDO_NOPSHUPD|PDO_NOPREF|PDO_DLGWIDE, NULL, N_("Find") },
-#define I_FOLLOW			(7)
-	{ PD_TOGGLE, NULL, "follow", PDO_NOPREF|PDO_DLGWIDE, trainFollowMeLabels, NULL, BC_HORZ|BC_NOBORDER },
-#define I_AUTORVRS			(8)
-	{ PD_TOGGLE, NULL, "autoreverse", PDO_NOPREF, trainAutoReverseLabels, NULL, BC_HORZ|BC_NOBORDER },
-#define I_DIR				(9)
-	{ PD_BUTTON, NULL, "direction", PDO_NOPREF|PDO_DLGWIDE, NULL, N_("Forward"), 0 },
-#define I_STOP				(10)
-	{ PD_BUTTON, NULL, "stop", PDO_DLGWIDE, NULL, N_("Stop") },
-#define I_SPEED				(11)
-	{ PD_MESSAGE, NULL, NULL, PDO_DLGIGNOREX, I2VP(120) }
+
+typedef enum {
+	I_LIST,
+	I_STATUS,
+	I_POS,
+	I_SLIDER,
+	I_DIST,
+	I_ZERO,
+	I_GOTO,
+	I_FOLLOW,
+	I_AUTORVRS,
+	I_DIR,
+	I_STOP,
+	I_SPEED,
+	I_COUNT
+} trainParm_e;
+
+static paramData_t trainPLs[I_COUNT] = {
+	[I_LIST]     = { PD_LIST, NULL, "list", PDO_NOPREF|PDO_NOPSHUPD, NULL, NULL, 0 },
+	[I_STATUS]   = { PD_MESSAGE, NULL, "mess0", 0, I2VP(120) },
+	[I_POS]      = { PD_MESSAGE, NULL, "mess1", 0, I2VP(120) },
+	[I_SLIDER]   = { PD_DRAW, NULL, "speed", PDO_NOPSHUPD|PDO_DLGSETY, &speedParamData },
+	[I_DIST]     = { PD_STRING, NULL, "distance", 0, I2VP(20-SLIDER_WIDTH), NULL, BO_READONLY },
+	[I_ZERO]     = { PD_BUTTON, NULL, "zeroDistance", PDO_NOPSHUPD|PDO_NOPREF, NULL },
+	[I_GOTO]     = { PD_BUTTON, NULL, "goto", PDO_NOPSHUPD|PDO_NOPREF, NULL, NULL },
+	[I_FOLLOW]   = { PD_TOGGLE, NULL, "follow", PDO_NOPREF, NULL, NULL, BC_HORIZONTAL|BC_NOBORDER },
+	[I_AUTORVRS] = { PD_TOGGLE, NULL, "autoreverse", PDO_NOPREF, NULL, NULL, BC_HORIZONTAL|BC_NOBORDER },
+	[I_DIR]      = { PD_BUTTON, NULL, "direction", PDO_NOPREF, NULL, NULL, 0 },
+	[I_STOP]     = { PD_BUTTON, NULL, "stop", 0, NULL, NULL },
+	[I_SPEED]    = { PD_MESSAGE, NULL, "mess2", 0, I2VP(120) },
 };
 
-static paramGroup_t trainPG = { "train", 0, trainPLs, COUNT( trainPLs ) };
+static paramGroup_t trainPG = { "train", PGO_FULLDIALOGFROMBUILDER, trainPLs, I_COUNT };
 
 
 typedef struct {
@@ -795,9 +798,8 @@ static wIndex_t FindLoco(
  * correct position and update the odometer.
  *
  * \param d IN drawing area for slider
- * \param d IN the dialog
+ * \param context IN the dialog
  * \param w, h IN unused?
- * \return    describe the return value
  */
 
 static void SpeedRedraw(
@@ -827,7 +829,7 @@ static void SpeedRedraw(
 	}
 
 	y = (xx->speed/MAX_SPEED*((SLIDER_HEIGHT-SLIDER_THICKNESS))
-	     +SLIDER_THICKNESS/2);
+	     +SLIDER_THICKNESS/2.0);
 	drawColor  = wDrawFindColor(wRGB(160, 160, 160));
 	coOrd pos0, pos1, siz;
 	y /= speedD.dpi;
@@ -846,7 +848,7 @@ static void SpeedRedraw(
 	sprintf(dlg->speedS, "%3d %s",
 	        (int)(units==UNITS_ENGLISH?xx->speed:xx->speed*1.6),
 	        (units==UNITS_ENGLISH?"mph":"km/h"));
-	ParamLoadMessage(dlg->trainPGp, I_SPEED, dlg->speedS);
+	FormLoadMessage(dlg->trainPGp, I_SPEED, dlg->speedS);
 	LOG(log_trainPlayback, 3, ("Speed = %d\n", (int)xx->speed));
 }
 
@@ -869,13 +871,13 @@ static void SpeedAction(
 	switch (action) {
 	case C_DOWN:
 		InfoMessage("");
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_MOVE:
 	case C_UP:
 		TrainTimeEndPause();
 
 		if (IsOnTrack(xx)) {
-			speed = ((FLOAT_T)((pos.y*speedD.dpi)-SLIDER_THICKNESS/2))/
+			speed = ((FLOAT_T)((pos.y*speedD.dpi)-SLIDER_THICKNESS/2.0))/
 			        (SLIDER_HEIGHT-SLIDER_THICKNESS)*MAX_SPEED;
 		} else {
 			speed = 0;
@@ -933,7 +935,7 @@ static void ControllerDialogSync(
 	inx = wListGetIndex((wList_p)dlg->trainPGp->paramPtr[I_LIST].control);
 
 	if (dlg->train) {
-		if (inx >= 0 && inx < locoList_da.cnt && dlg->train &&
+		if (inx >= 0 && inx < locoList_da.cnt &&
 		    dlg->train != locoList(inx).loco) {
 			inx = FindLoco(dlg->train);
 
@@ -995,22 +997,22 @@ static void ControllerDialogSync(
 			}
 		}
 
-		ParamLoadMessage(dlg->trainPGp, I_STATUS, statusMsg);
+		FormLoadMessage(dlg->trainPGp, I_STATUS, statusMsg);
 	} else {
 		dir = 0;
 		followMe = FALSE;
 		autoReverse = FALSE;
-		ParamLoadMessage(dlg->trainPGp, I_STATUS, _("No trains"));
+		FormLoadMessage(dlg->trainPGp, I_STATUS, _("No trains"));
 	}
 
 	if (dlg->followMe != followMe) {
 		dlg->followMe = followMe;
-		ParamLoadControl(dlg->trainPGp, I_FOLLOW);
+		FormLoadSingleControl(dlg->trainPGp, I_FOLLOW);
 	}
 
 	if (dlg->autoReverse != autoReverse) {
 		dlg->autoReverse = autoReverse;
-		ParamLoadControl(dlg->trainPGp, I_AUTORVRS);
+		FormLoadSingleControl(dlg->trainPGp, I_AUTORVRS);
 	}
 
 	if (dlg->direction != dir) {
@@ -1030,33 +1032,33 @@ static void ControllerDialogSync(
 			sprintf(dlg->posS, "X:%s Y:%s",
 			        FormatDistanceEx(xx->trvTrk.pos.x, format),
 			        FormatDistanceEx(xx->trvTrk.pos.y, format));
-			ParamLoadMessage(dlg->trainPGp, I_POS, dlg->posS);
+			FormLoadMessage(dlg->trainPGp, I_POS, dlg->posS);
 		}
 
 		if (dlg->speed != xx->speed) {
 			dlg->speed = xx->speed;
 			sprintf(dlg->speedS, "%3d",
 			        (int)(units==UNITS_ENGLISH?xx->speed:xx->speed*1.6));
-			ParamLoadMessage(dlg->trainPGp, I_SPEED, dlg->speedS);
+			FormLoadMessage(dlg->trainPGp, I_SPEED, dlg->speedS);
 			SpeedRedraw((wDraw_p)dlg->trainPGp->paramPtr[I_SLIDER].control, dlg,
 			            SLIDER_WIDTH, SLIDER_HEIGHT);
 		}
 
-		ParamLoadMessage(dlg->trainPGp, I_DIST, FormatDistance(xx->distance));
+		FormLoadMessage(dlg->trainPGp, I_DIST, FormatDistance(xx->distance));
 	} else {
 		if (dlg->posS[0] != '\0') {
 			dlg->posS[0] = '\0';
-			ParamLoadMessage(dlg->trainPGp, I_POS, dlg->posS);
+			FormLoadMessage(dlg->trainPGp, I_POS, dlg->posS);
 		}
 
 		if (dlg->speed >= 0) {
 			dlg->speed = -1;
 			dlg->speedS[0] = '\0';
-			ParamLoadMessage(dlg->trainPGp, I_SPEED, dlg->speedS);
+			FormLoadMessage(dlg->trainPGp, I_SPEED, dlg->speedS);
 			wDrawClear((wDraw_p)dlg->trainPGp->paramPtr[I_SLIDER].control);
 		}
 
-		ParamLoadMessage(dlg->trainPGp, I_DIST, "");
+		FormLoadMessage(dlg->trainPGp, I_DIST, "");
 	}
 }
 
@@ -1269,8 +1271,8 @@ static void ControllerDialogUpdate(
 		TrainTimeEndPause();
 		xx = GET_EXTRA_DATA(dlg->train, T_CAR, extraDataCar_t);
 		xx->distance = 0.0;
-		ParamLoadMessage(dlg->trainPGp, I_DIST, FormatDistance(xx->distance));
-		ParamLoadControl(curTrainDlg->trainPGp, I_DIST);
+		FormLoadMessage(dlg->trainPGp, I_DIST, FormatDistance(xx->distance));
+		FormLoadSingleControl(curTrainDlg->trainPGp, I_DIST);
 		TrainTimeStartPause();
 		break;
 
@@ -1285,7 +1287,7 @@ static void ControllerDialogUpdate(
 		xx = GET_EXTRA_DATA(dlg->train, T_CAR, extraDataCar_t);
 		followTrain = NULL;
 		dlg->followMe = FALSE;
-		ParamLoadControl(curTrainDlg->trainPGp, I_FOLLOW);
+		FormLoadSingleControl(curTrainDlg->trainPGp, I_FOLLOW);
 		CarSetVisible(dlg->train);
 		MoveMainWindow(xx->trvTrk.pos, xx->trvTrk.angle);
 		trainHighlighted = dlg->train;
@@ -1348,6 +1350,10 @@ static void ControllerDialogUpdate(
 		/* Close window */
 		CmdTrainExit(NULL);
 		break;
+	default:
+		LOG( log_trainMove, 1, ( "unexpected inx %d in ControllerDialogUpdate\n",
+		                         inx ) )
+		break;
 	}
 
 	/*ControllerDialogSync( dlg );*/
@@ -1383,8 +1389,10 @@ static trainControlDlg_p CreateTrainControlDlg(void)
 	title = MyStrdup(_("Train Control XXX"));
 	sprintf(title, _("Train Control %d"), ++numTrainDlg);
 	dlg->trainPGp = &trainPG;
-	dlg->win = ParamCreateDialog(dlg->trainPGp, _("Train Control"), NULL, NULL,
-	                             ParamCancel_Null, FALSE, NULL, 0, ControllerDialogUpdate);
+	dlg->win = FormCreateDialog(dlg->trainPGp, _("Train Control"),
+	                            NULL, NULL,
+	                            NULL, FormCancel_Null,
+	                            FALSE, 0, ControllerDialogUpdate);
 	speedD.size.x = SLIDER_WIDTH/speedD.dpi;
 	speedD.size.y = SLIDER_HEIGHT/speedD.dpi;
 	return dlg;
@@ -1398,7 +1406,6 @@ static trainControlDlg_p CreateTrainControlDlg(void)
 
 static struct {
 	STATE_T state;
-	coOrd pos0;
 } Dtrain;
 
 
@@ -1506,7 +1513,7 @@ static track_p FindCar(
 	coOrd pos0, pos1;
 	track_p trk, trk1;
 	DIST_T dist1 = DIST_INF, dist;
-	struct extraDataCar_t * xx;
+	const struct extraDataCar_t * xx;
 	trk1 = NULL;
 
 	for (trk=NULL; TrackIterate(&trk);) {
@@ -2011,14 +2018,12 @@ static void PlaceTrain(
 	LOG(log_trainMove, 2, ("  placeTrain: %s [%0.3f %0.3f] A%0.3f",
 	                       CarItemNumber(xx0->item), xx0->trvTrk.pos.x, xx0->trvTrk.pos.y,
 	                       xx0->trvTrk.angle))
-	car_curr = car0;
 
 	for (dir0=0; dir0<2; dir0++) {
 		int dir;
 		struct extraDataCar_t  *xx;
 		car_curr = car0;
 		dir = dir0;
-		xx = xx0;
 		WALK_CARS_START(car_curr, xx, dir)
 		SetIgnored(xx);
 		WALK_CARS_END(car_curr, xx, dir);
@@ -2026,15 +2031,15 @@ static void PlaceTrain(
 
 	/* check for coupling to other cars */
 	if (doCheckCoupling) {
-		if (xx0->trvTrk.trk)
+		if (xx0->trvTrk.trk) {
 			if (!CheckCoupling(car0, 0, doCheckCrash)) {
 				return;
 			}
 
-		if (xx0->trvTrk.trk)
 			if (!CheckCoupling(car0, 1, doCheckCrash)) {
 				return;
 			}
+		}
 	}
 
 	PlaceCar(car0);
@@ -2181,7 +2186,7 @@ static BOOL_T MoveTrain(
 		    followCenter.y != mainCenter.y) {
 			if (curTrainDlg->train == followTrain) {
 				curTrainDlg->followMe = FALSE;
-				ParamLoadControl(curTrainDlg->trainPGp, I_FOLLOW);
+				FormLoadSingleControl(curTrainDlg->trainPGp, I_FOLLOW);
 			}
 
 			followTrain = NULL;
@@ -2317,7 +2322,7 @@ static void TrainTimeStartPause(void)
 }
 
 
-static BOOL_T TrainTimeDoPause(char * line)
+static void TrainTimeDoPause(char * line)
 {
 	BOOL_T drawCarEnable2;
 	playbackTrainPause = atol(line);
@@ -2364,12 +2369,10 @@ static BOOL_T TrainTimeDoPause(char * line)
 			trainMovieFrameNext = trainMovieFrameDelay;
 		}
 	}
-
-	return TRUE;
 }
 
 
-static BOOL_T TrainDoMovie(char * line)
+static void TrainDoMovie(char * line)
 {
 	/* on/off, scale, orig, size */
 	long fps;
@@ -2380,7 +2383,7 @@ static BOOL_T TrainDoMovie(char * line)
 
 	if (!GetArgs(line, "lfpp", &fps, &trainMovieD.scale, &trainMovieD.orig,
 	             &trainMovieD.size)) {
-		return FALSE;
+		return;
 	}
 
 	if (fps > 0) {
@@ -2390,7 +2393,6 @@ static BOOL_T TrainDoMovie(char * line)
 	}
 
 	trainMovieFrameNext = 0;
-	return TRUE;
 }
 
 void AttachTrains(void)
@@ -2524,7 +2526,7 @@ static BOOL_T TrainOnMovableTrack(
         track_p *trainR)
 {
 	track_p train;
-	struct extraDataCar_t * xx;
+	const struct extraDataCar_t * xx;
 	int dir;
 
 	for (train=NULL; TrackIterate(&train);) {
@@ -2600,11 +2602,18 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 	EPINX_T ep0, ep1;
 	int dir;
 	struct extraDataCar_t * xx=NULL;
-	wWinPix_t w, h;
 	char msg[STR_SIZE];
 
 	switch (action) {
 	case C_START:
+		// without cars there is nothing to run: offer the Car Inventory
+		// and stay in design mode
+		if (CarAvailableCount() <= 0) {
+			if (NoticeMessage(MSG_NO_CARS, _("Yes"), _("No")) > 0) {
+				DoCarDlg(NULL);
+			}
+			return C_TERMINATE;
+		}
 		/*UndoStart( "Trains", "Trains" );*/
 		UndoSuspend();
 		programMode = MODE_TRAIN;
@@ -2612,12 +2621,6 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 		doDrawTurnoutPosition = 1;
 		DoChangeNotification(CHANGE_PARAMS|CHANGE_TOOLBAR);
 
-		if (CarAvailableCount() <= 0) {
-			if (NoticeMessage(MSG_NO_CARS, _("Yes"), _("No")) > 0) {
-				DoCarDlg(NULL);
-				DoChangeNotification(CHANGE_PARAMS);
-			}
-		}
 		SetAllTrackSelect( FALSE );
 		EnableCommands();
 
@@ -2632,7 +2635,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 		trainHighlighted = NULL;
 		DYNARR_SET(trkSeg_t, tempSegs_da, 8);
 		RestartTrains();
-		wButtonSetLabel(trainPauseB, (char*)goB);
+		wButtonSetIcon(trainPauseB, (char*)goB);
 		trainTime0 = 0;
 		AttachTrains();
 		curTrainDlg->train = NULL;
@@ -2693,7 +2696,8 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 				LocoListChangeEntry(NULL, currCar);
 			}
 
-			if ((trk0 = OnTrack(&pos0, FALSE, TRUE))) {
+			trk0 = OnTrack(&pos0, FALSE, TRUE);
+			if (trk0) {
 				xx->trvTrk.angle = GetAngleAtPoint(trk0, pos0, &ep0, &ep1);
 
 				if (NormalizeAngle(FindAngle(pos, pos0) - xx->trvTrk.angle) > 180.0) {
@@ -2721,7 +2725,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 					for (dir=0; dir<2; dir++) {
 						int dir1 = dir;
 						track_p car1 = currCar;
-						struct extraDataCar_t * xx1 = GET_EXTRA_DATA(car1, T_CAR, extraDataCar_t);
+						struct extraDataCar_t * xx1;
 						LogPrintf("dir=%d\n", dir1);
 						WALK_CARS_START(car1, xx1, dir1)
 						LogPrintf("  %s [%0.3f,%d]\n", CarItemNumber(xx1->item), xx1->trvTrk.angle,
@@ -2795,7 +2799,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 			ControllerDialogSync(curTrainDlg);
 		}
 
-		InfoSubstituteControls(NULL, NULL);
+		InfoDefaultControls();
 		currCar = trk0 = NULL;
 		currCarItemPtr = NULL;
 		trainHighlighted = NULL;
@@ -2812,7 +2816,8 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 			pos0 = pos;
 			programMode = MODE_DESIGN;
 
-			if ((trk0=OnTrack(&pos,FALSE,TRUE)) &&
+			trk0=OnTrack(&pos,FALSE,TRUE);
+			if (trk0 &&
 			    QueryTrack(trk0, Q_CAN_NEXT_POSITION) &&
 			    TrainOnMovableTrack(trk0, &trk1)) {
 				if (trk1) {
@@ -2910,13 +2915,14 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 		wDrawSaveImage(mainD.d);
 		DrawAllCars(trainHighlighted);
 
-		wWinGetSize(mainW, &w, &h);
-		w -= wControlGetPosX(newCarControls[0]) + 4;
+		// wWinPix_t w, h;
+		// wWinGetSize(mainW, &w, &h);
+		// w -= wControlGetPosX(newCarControls[0]) + 4;
 
-		if (w > 20) {
-			wListSetSize((wList_p)newCarControls[0], w,
-			             wControlGetHeight(newCarControls[0]));
-		}
+		// if (w > 20) {
+		// 	wListSetSize((wList_p)newCarControls[0], w,
+		// 	             wControlGetHeight(newCarControls[0]));
+		// }
 
 
 
@@ -2952,17 +2958,20 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 		/*trainEnable = FALSE;*/
 		if (trainsState != TRAINS_STOP) {
 			trainsState = TRAINS_STOP;
-			wButtonSetLabel(trainPauseB, (char*)stopI);
+			wButtonSetIcon(trainPauseB, (char*)stopI);
 			TrainTimeEndPause();
 		}
 
 		currCar = NULL;
 		currCarItemPtr = NULL;
 		HotBarCancel();
-		InfoSubstituteControls(NULL, NULL);
+		InfoDefaultControls();
 		trk0 = NULL;
 		trainHighlighted = NULL;
 		return C_TERMINATE;
+	default:
+		LOG( log_trainMove, 1, ( "unexpected action %d in CmdTrain\n", action ) )
+		break;
 	}
 
 	return C_CONTINUE;
@@ -2982,17 +2991,6 @@ static STATUS_T CmdCarDescAction(
 }
 #endif
 
-#include "bitmaps/train.image3"
-#include "bitmaps/exit.image3"
-#include "bitmaps/new-car.image3"
-#include "bitmaps/go.image3"
-#include "bitmaps/stop.image3"
-
-#include "bitmaps/zero.image1"
-#include "bitmaps/greendot.image1"
-#include "bitmaps/reddot.image1"
-
-
 static void CmdTrainStopGo(void * unused)
 {
 	wIcon_p icon;
@@ -3007,14 +3005,14 @@ static void CmdTrainStopGo(void * unused)
 	}
 
 	ControllerDialogSync(curTrainDlg);
-	wButtonSetLabel(trainPauseB, (char*)icon);
+	wButtonSetIcon(trainPauseB, (char*)icon);
 
 	if (recordF) {
 		fprintf(recordF, "TRAINSTOPGO %s\n", trainsState==TRAINS_STOP?"STOP":"GO");
 	}
 }
 
-static BOOL_T TrainStopGoPlayback(char * line)
+static void TrainStopGoPlayback(char * line)
 {
 	while (*line && isspace((unsigned char)*line)) {
 		line++;
@@ -3023,15 +3021,19 @@ static BOOL_T TrainStopGoPlayback(char * line)
 	if ((strcasecmp(line, "STOP") == 0) != (trainsState == TRAINS_STOP)) {
 		CmdTrainStopGo(NULL);
 	}
-
-	return TRUE;
 }
 
 
 static void CmdTrainExit(void * unused)
 {
+	// Do the actual mode exit directly - Reset() no longer cancels the
+	// current command while programMode == MODE_TRAIN (see command.c), so
+	// leave train mode and hand curCommand back to the describe tool
+	// first; Reset() then only does its normal design-mode cleanup.
+	CmdTrain(C_CANCEL, zero);
+	SetCurrentCommand(describeCmdInx);
 	Reset();
-	InfoSubstituteControls(NULL, NULL);
+	InfoDefaultControls();
 }
 
 
@@ -3150,7 +3152,7 @@ static void TrainFunc(
 		}
 
 		HotBarCancel();
-		InfoSubstituteControls(NULL, NULL);
+		InfoDefaultControls();
 		break;
 
 	case DO_MUMASTER:
@@ -3196,6 +3198,10 @@ static void TrainFunc(
 		}
 
 		break;
+	default:
+		LOG( log_trainMove, 1, ( "unexpected VP2L(action) %d in TrainFunc\n",
+		                         VP2L(action) ) )
+		break;
 	}
 
 	MainRedraw();  //TrainFunc: Redraw if Train altered
@@ -3212,23 +3218,23 @@ void InitCmdTrain(wMenu_p menu)
 {
 	log_trainMove = LogFindIndex("trainMove");
 	log_trainPlayback = LogFindIndex("trainPlayback");
-	trainPLs[I_ZERO].winLabel = (char*)wIconCreatePixMap(zero_image1);
-	ParamRegister(&trainPG);
-	trainCmdInx = AddMenuButton(menu, CmdTrain, "cmdTrain", _("Run Trains"),
-	                            wIconCreatePixMap(train_image3[iconSize]), LEVEL0_50,
-	                            IC_POPUP3|IC_LCLICK|IC_RCLICK|IC_WANT_MOVE, 0,
+	//trainPLs[I_ZERO].winLabel = (char*)CreateSymbolFromResource("zero.png");
+	FormRegister(&trainPG);
+	trainCmdInx = AddMenuButton(menu, CmdTrain, "cmdTrain", _("Run Trains..."),
+	                            CreateToolbarIconFromResource("train.png"), LEVEL0_50,
+	                            IC_TOGGLE | IC_POPUP3|IC_LCLICK|IC_RCLICK|IC_WANT_MOVE, 0,
 	                            NULL);
-	stopI = wIconCreatePixMap(reddot_image1);
-	goI = wIconCreatePixMap(greendot_image1);
-	stopB = wIconCreatePixMap(stop_image3[iconSize]);
-	goB = wIconCreatePixMap(go_image3[iconSize]);
+	stopI = CreateSymbolFromResource("reddot.png");
+	goI = CreateSymbolFromResource("greendot.png");
+	stopB = CreateSymbolFromResource("stop.png");
+	goB = CreateSymbolFromResource("go.png");
 	trainPauseB = AddToolbarButton("cmdTrainPause", stopB, IC_MODETRAIN_ONLY,
 	                               CmdTrainStopGo, NULL);
-	AddToolbarButton("cmdTrainExit", wIconCreatePixMap(exit_image3[iconSize]),
+	AddToolbarButton("cmdTrainExit", CreateToolbarIconFromResource("exit.png"),
 	                 IC_MODETRAIN_ONLY,
 	                 CmdTrainExit, NULL);
 	newcarB = AddToolbarButton("cmdTrainNewCar",
-	                           wIconCreatePixMap(new_car_image3[iconSize]),
+	                           CreateToolbarIconFromResource("new-car.png"),
 	                           IC_MODETRAIN_ONLY, CarItemLoadList, NULL);
 	T_CAR = InitObject(&carCmds);
 
@@ -3239,11 +3245,11 @@ void InitCmdTrain(wMenu_p menu)
 	                              TrainFunc, I2VP(DO_FLIPCAR));
 #ifdef CAR_CLEARANCE
 	trainPopupMI[DO_PENCILS_ON]	= wMenuPushCreate(trainPopupM, "",
-	                                  _("Clearance Lines On"), 0,
-	                                  TrainFunc, I2VP(DO_PENCILS_ON));
+	                               _("Clearance Lines On"), 0,
+	                               TrainFunc, I2VP(DO_PENCILS_ON));
 	trainPopupMI[DO_PENCILS_OFF]	= wMenuPushCreate(trainPopupM, "",
-	                                  _("Clearance Lines Off"), 0,
-	                                  TrainFunc, I2VP(DO_PENCILS_OFF));
+	                                _("Clearance Lines Off"), 0,
+	                                TrainFunc, I2VP(DO_PENCILS_OFF));
 #endif
 	trainPopupMI[DO_FLIPTRAIN]  = wMenuPushCreate(trainPopupM, "", _("Flip Train"),
 	                              0, TrainFunc, I2VP(DO_FLIPTRAIN));
@@ -3260,8 +3266,8 @@ void InitCmdTrain(wMenu_p menu)
 	                              0, TrainFunc, I2VP(DO_DELCAR));
 	trainPopupMI[DO_DELTRAIN]   = wMenuPushCreate(trainPopupM, "",
 	                              _("Remove Train"), 0, TrainFunc, I2VP(DO_DELTRAIN));
-	AddPlaybackProc("TRAINSTOPGO", (playbackProc_p)TrainStopGoPlayback, NULL);
-	AddPlaybackProc("TRAINPAUSE", (playbackProc_p)TrainTimeDoPause, NULL);
-	AddPlaybackProc("TRAINMOVIE", (playbackProc_p)TrainDoMovie, NULL);
+	AddPlaybackProc("TRAINSTOPGO", TrainStopGoPlayback, NULL);
+	AddPlaybackProc("TRAINPAUSE", TrainTimeDoPause, NULL);
+	AddPlaybackProc("TRAINMOVIE", TrainDoMovie, NULL);
 }
 

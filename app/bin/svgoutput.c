@@ -249,19 +249,19 @@ static void SvgDrawFillPoly(
         wDrawColor color, wDrawWidth width, drawFill_e fillStyle)
 {
 	int i;
-	double *points = malloc((cnt + 1) * 2 * sizeof(double));
+	double *points = malloc((size_t)(cnt + 1) * 2 * sizeof(double));
 	CHECK( points );
 
 	unsigned lineOpt = SvgDrawGetLineStyle(d);
 
 	for (i = 0; i < cnt; i++) {
-		points[i * 2] = pts[i].x;
-		points[i * 2 + 1] = roomSize.y - pts[i].y;
+		points[(ptrdiff_t)i * 2] = pts[i].x;
+		points[(ptrdiff_t)i * 2 + 1] = roomSize.y - pts[i].y;
 	}
 
 	if (fillStyle == DRAW_CLOSED || fillStyle == DRAW_FILL) {
-		points[i * 2] = points[0];
-		points[i * 2 + 1] = points[1];
+		points[(ptrdiff_t)i * 2] = points[0];
+		points[(ptrdiff_t)i * 2 + 1] = points[1];
 		cnt++;
 	}
 
@@ -301,7 +301,7 @@ static void SvgDrawFillCircle(drawCmd_p d, coOrd center, DIST_T radius,
  * \param  corner1 The first corner.
  * \param  corner2 The second corner.
  * \param  color   The color.
- * \param  pattern Specifies the pattern.
+ * \param  fillOpt Specifies the fill option.
  */
 
 static void
@@ -341,7 +341,7 @@ static drawCmd_t svgD = {
  */
 
 static char *
-CreateValidId(char *base)
+CreateValidId(const char *base)
 {
 	const char *idHead = "id";
 	char *out = MyMalloc(strlen(idHead) + strlen(base) + 1);
@@ -377,7 +377,7 @@ CreateValidId(char *base)
 
 static char * SvgGetId(void)
 {
-	char *fileName = GetLayoutFilename();
+	const char *fileName = GetLayoutFilename();
 	char *id = NULL;
 
 	if (fileName) {
@@ -399,7 +399,7 @@ static char * SvgGetId(void)
 
 static void SvgSetTitle(drawCmd_p d)
 {
-	char *tmp = GetLayoutTitle();
+	const char *tmp = GetLayoutTitle();
 	char *title;
 
 	if (tmp) {

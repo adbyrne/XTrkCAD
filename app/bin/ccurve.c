@@ -22,19 +22,21 @@
 
 #include "ccurve.h"
 
-#include "cjoin.h"
+//#include "cjoin.h"
 #include "cstraigh.h"
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
+#include "form.h"
 #include "cselect.h"
-
-#include "param.h"
+#include "icons.h"
 #include "track.h"
 #include "cbezier.h"
 #include "ccornu.h"
 #include "layout.h"
 #include "common-ui.h"
+
+static int log_ccurve = -1;
 
 /*
  * STATE INFO
@@ -54,7 +56,6 @@ static struct {
 	BOOL_T lock0;
 	coOrd middle;
 	coOrd end0;
-	coOrd end1;
 } Da;
 
 static long curveMode;
@@ -180,6 +181,10 @@ EXPORT STATUS_T CreateCurve(
 		case crvCmdFromChord:
 			message(_("Drag from one to other end of chord") );
 			break;
+		default:
+			if ( log_ccurve < 0 ) { log_ccurve = LogFindIndex( "ccurve" ); }
+			LOG( log_ccurve, 1, ( "unexpected curveMode %d in CreateCurve\n", curveMode ) )
+			break;
 		}
 		return C_CONTINUE;
 	case C_DOWN:
@@ -197,7 +202,8 @@ EXPORT STATUS_T CreateCurve(
 			if ((mode == crvCmdFromEP1 || mode == crvCmdFromTangent
 			     || (mode == crvCmdFromChord))  &&
 			    ((MyGetKeyState() & WKEY_ALT) == 0 ) == magneticSnap) {
-				if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
+				t = OnTrack(&p, FALSE, TRUE);
+				if (t != NULL) {
 					EPINX_T ep = PickUnconnectedEndPointSilent(p, t);
 					if (ep != -1) {
 						if (GetTrkScale(t) != (char)GetLayoutCurScale()) {
@@ -213,7 +219,8 @@ EXPORT STATUS_T CreateCurve(
 				}
 			}
 		} else {
-			if (((t = OnTrack(&p, FALSE, FALSE)) != NULL) && IsClose(FindDistance(p,pos))) {
+			t = OnTrack(&p, FALSE, FALSE);
+			if (t != NULL && IsClose(FindDistance(p,pos))) {
 				if (!IsTrack(t)) {
 					pos = p;
 					found = TRUE;
@@ -245,7 +252,6 @@ EXPORT STATUS_T CreateCurve(
 			else { message(_("Drag along curve start") ); }
 			break;
 		case crvCmdFromTangent:
-			Da.create_state = FIRSTEND_DEF;
 			tempSegs(0).type = SEG_STRLIN;
 			tempSegs(0).color = color;
 			Da.create_state = CENTER_DEF;
@@ -273,6 +279,10 @@ EXPORT STATUS_T CreateCurve(
 			else {
 				message( _("Drag to other end of chord") );
 			}
+			break;
+		default:
+			if ( log_ccurve < 0 ) { log_ccurve = LogFindIndex( "ccurve" ); }
+			LOG( log_ccurve, 1, ( "unexpected mode %d in CreateCurve\n", mode ) )
 			break;
 		}
 		tempSegs(0).u.l.pos[0] = tempSegs(0).u.l.pos[1] = pos;
@@ -368,6 +378,10 @@ EXPORT STATUS_T CreateCurve(
 				                     TRUE, wDrawColorBlue );
 			}
 			break;
+		default:
+			if ( log_ccurve < 0 ) { log_ccurve = LogFindIndex( "ccurve" ); }
+			LOG( log_ccurve, 1, ( "unexpected mode %d in CreateCurve\n", mode ) )
+			break;
 		}
 		return C_CONTINUE;
 	case C_UP:
@@ -413,6 +427,10 @@ EXPORT STATUS_T CreateCurve(
 				DYNARR_N(trkSeg_t,*anchor_array,i).color = drawColorRed;
 			}
 			break;
+		default:
+			if ( log_ccurve < 0 ) { log_ccurve = LogFindIndex( "ccurve" ); }
+			LOG( log_ccurve, 1, ( "unexpected mode %d in CreateCurve\n", mode ) )
+			break;
 		}
 		//message( _("Drag on Red arrows to adjust curve") );
 		return C_CONTINUE;
@@ -430,9 +448,9 @@ static paramFloatRange_t r_0_10000 = { 0.0, 100000.0 };
 static paramData_t curvePLs[] = {
 #define curveRadPD (curvePLs[0])
 #define curveRadI 0
-	{	PD_FLOAT, &desired_radius, "radius", PDO_DIM, &r_0_10000, N_("Desired Radius") }
+	{	PD_FLOAT, &desired_radius, "fixedradius", PDO_DIM, &r_0_10000, N_("Desired Radius") }
 };
-static paramGroup_t curvePG = { "curvefixed", 0, curvePLs, COUNT( curvePLs ) };
+static paramGroup_t curvePG = { "curvefixed", PGO_FULLDIALOGFROMBUILDER, curvePLs, COUNT( curvePLs ) };
 
 static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 {
@@ -440,11 +458,8 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 	DIST_T d;
 	static int segCnt;
 	STATUS_T rc = C_CONTINUE;
-	wControl_p controls[2];
-	char * labels[1];
 	static BOOL_T lock;
 	static coOrd movePos;
-
 
 	switch (action) {
 
@@ -455,10 +470,9 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		Da.pos0 = pos;
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		segCnt = 0;
-		STATUS_T rcode;
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (curvePLs[0].control==NULL) {
-			ParamCreateControls(&curvePG, NULL);
+			FormCreateControls(&curvePG);
 		}
 		SetAllTrackSelect(FALSE);
 		return CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode,
@@ -469,8 +483,8 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			if (lock) { pos = movePos; }
 			Da.pos0 = Da.pos1 = pos;
 			Da.state = 0;
-			rcode = CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode,
-			                     &anchors_da, InfoMessage );
+			STATUS_T rcode = CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode,
+			                              &anchors_da, InfoMessage );
 			segCnt = tempSegs_da.cnt ;
 			if (!Da.down) { Da.state = -1; }
 			return rcode;
@@ -479,7 +493,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		if (infoSubst) {
 			sprintf(message, "desired_radius-%s", curScaleName);
 			wPrefSetFloat("misc", message, desired_radius);
-			InfoSubstituteControls(NULL, NULL);
+			InfoDefaultControls();
 		}
 		infoSubst = FALSE;
 		//This is where the user could adjust - if we allow that?
@@ -492,7 +506,8 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		if ((Da.state<0) && (curveMode != crvCmdFromCenter)) {
 			DYNARR_RESET(trkSeg_t,anchors_da);
 			if (((MyGetKeyState() & WKEY_ALT)==0) == magneticSnap) {
-				if ((t=OnTrack(&pos,FALSE,TRUE))!= NULL) {
+				t=OnTrack(&pos,FALSE,TRUE);
+				if (t != NULL) {
 					if (GetTrkGauge(t) == GetScaleTrackGauge(GetLayoutCurScale())) {
 						EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
 						if (ep != -1) {
@@ -591,14 +606,13 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			return CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode,
 			                    &anchors_da, InfoMessage );
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_UP:
 		if (Da.state<0) { return C_CONTINUE; }
 		if (Da.state == 0 && ((curveMode != crvCmdFromChord)
 		                      || (curveMode == crvCmdFromChord && !Da.trk))) {
-			//SnapPos( &pos );
-			//Da.pos1 = pos;
-			if ((d = FindDistance(Da.pos0,Da.pos1))<minLength) {
+			d = FindDistance(Da.pos0,Da.pos1);
+			if (d<minLength) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
 				return C_TERMINATE;
 			}
@@ -610,20 +624,15 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 
 			sprintf(message, "desired_radius-%s", curScaleName);
 			wPrefGetFloat("misc", message, &desired_radius, desired_radius);
-			controls[0] = curveRadPD.control;
-			controls[1] = NULL;
-			labels[0] = N_("Desired Radius");
-			InfoSubstituteControls(controls, labels);
+			InfoSetControls(mainW, curvePG.nameStr);
 			infoSubst = TRUE;
 			curveRadPD.option |= PDO_NORECORD;
-			ParamLoadControls(&curvePG);
-			ParamGroupRecord(&curvePG);
-			//InfoMessage( _("Drag on Red arrows to adjust curve") );
-
+			FormLoadControls(&curvePG);
+			FormGroupRecord(&curvePG);
 			return C_CONTINUE;
 		} else if ((curveMode == crvCmdFromChord && Da.state == 0 && Da.trk)) {
-			pos = Da.middle;
-			if ((d = FindDistance(Da.pos0,Da.pos1))<minLength) {
+			d = FindDistance(Da.pos0,Da.pos1);
+			if (d<minLength) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
 				return C_TERMINATE;
 			}
@@ -635,7 +644,8 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		Da.state = -1;
 		DYNARR_RESET(trkSeg_t,anchors_da);          // No More anchors for this one
 		if (Da.curveData.type == curveTypeStraight) {
-			if ((d = FindDistance( Da.pos0, Da.curveData.pos1 )) < minLength) {
+			d = FindDistance( Da.pos0, Da.curveData.pos1 );
+			if (d < minLength) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
 				return C_TERMINATE;
 			}
@@ -647,8 +657,8 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			}
 			UndoEnd();
 		} else if (Da.curveData.type == curveTypeCurve) {
-			if ((d = Da.curveData.curveRadius * Da.curveData.a1 *2.0*M_PI/360.0) <
-			    minLength) {
+			d = Da.curveData.curveRadius * Da.curveData.a1 *2.0*M_PI/360.0;
+			if (d < minLength) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
 				return C_TERMINATE;
 			}
@@ -686,6 +696,10 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		segCnt = 0;
 		return C_CONTINUE;
 
+	default:
+		if ( log_ccurve < 0 ) { log_ccurve = LogFindIndex( "ccurve" ); }
+		LOG( log_ccurve, 1, ( "unexpected action %d in CmdCurve\n", action ) )
+		break;
 	}
 
 	return C_CONTINUE;
@@ -707,7 +721,7 @@ struct helixData_s helixDataCur = { 5, 0.0, 0.0, 18.0, 0.0, 0.0 };
 struct helixData_s helixDataOld = { 5, 0.0, 0.0, 18.0, 0.0, 0.0 };
 
 static DIST_T origVertSep = 0.0;
-static wWin_p helixW;
+static wControl_p helixW;
 #define H_ELEV			(0)
 #define H_RADIUS		(1)
 #define H_TURNS			(2)
@@ -719,7 +733,7 @@ static int h_clock;
 
 EXPORT long circleMode;
 
-static void ComputeHelix( paramGroup_p, int, void * );
+static wBool_t ComputeHelix( paramGroup_cp, int, void * );
 
 static paramFloatRange_t r0_360 = { 0, 360 };
 static paramFloatRange_t r0_1000000 = { 0, 1000000 };
@@ -737,16 +751,16 @@ static paramData_t helixPLs[] = {
 #define I_HELIXMSG		(6)
 	{ PD_MESSAGE, N_("Total Length"), NULL, PDO_DLGRESETMARGIN, I2VP(200) }
 };
-static paramGroup_t helixPG = { "helix", PGO_PREFMISCGROUP, helixPLs, COUNT( helixPLs ) };
+static paramGroup_t helixPG = { "helix", PGO_PREFMISCGROUP/*|PGO_FULLDIALOGFROMBUILDER*/, helixPLs, COUNT( helixPLs ) };
 
 static paramData_t circleRadiusPLs[] = {
-	{ PD_FLOAT, &circleRadius, "radius", PDO_DIM, &r1_10000 }
+	{ PD_FLOAT, &circleRadius, "circleradius", PDO_DIM, &r1_10000 }
 };
-static paramGroup_t circleRadiusPG = { "circle", 0, circleRadiusPLs, COUNT( circleRadiusPLs ) };
+static paramGroup_t circleRadiusPG = { "circle", PGO_FULLDIALOGFROMBUILDER, circleRadiusPLs, COUNT( circleRadiusPLs ) };
 
 
-static void ComputeHelix(
-        paramGroup_p pg,
+static wBool_t ComputeHelix(
+        paramGroup_cp pg,
         int h_inx,
         void * data )
 {
@@ -754,9 +768,9 @@ static void ComputeHelix(
 	DIST_T length;
 	long updates = 0;
 	if ( h_inx < 0 || h_inx >= COUNT( h_orders ) ) {
-		return;
+		return TRUE;
 	}
-	ParamLoadData( &helixPG );
+	FormFetchData( &helixPG );
 	totTurns = helixDataCur.turns + helixDataCur.angSep/360.0;
 	length = totTurns * helixDataCur.radius * (2 * M_PI);
 	h_orders[h_inx] = ++h_clock;
@@ -795,6 +809,10 @@ static void ComputeHelix(
 	case H_GRADE:
 	case H_RADIUS:
 		break;
+	default:
+		if ( log_ccurve < 0 ) { log_ccurve = LogFindIndex( "ccurve" ); }
+		LOG( log_ccurve, 1, ( "unexpected h_inx %d in ComputeHelix\n", h_inx ) )
+		break;
 	}
 	if ( totTurns > 0.0 ) {
 		if ( h_orders[H_RADIUS]>=h_orders[H_GRADE] ||
@@ -815,7 +833,7 @@ static void ComputeHelix(
 	length = totTurns * helixDataCur.radius * (2 * M_PI);
 	for ( h_inx=0; updates; h_inx++,updates>>=1 ) {
 		if ( (updates&1) ) {
-			ParamLoadControl( &helixPG, h_inx );
+			FormLoadSingleControl( &helixPG, h_inx );
 		}
 	}
 	if (length > 0.0) {
@@ -823,7 +841,8 @@ static void ComputeHelix(
 	} else {
 		strcpy( message, "                           " );
 	}
-	ParamLoadMessage( &helixPG, I_HELIXMSG, message );
+	FormLoadMessage( &helixPG, I_HELIXMSG, message );
+	return TRUE;
 }
 
 
@@ -832,7 +851,7 @@ static void ChangeHelixW( long changes )
 	if ( (changes & CHANGE_UNITS) &&
 	     helixW != NULL &&
 	     wWinIsVisible(helixW) ) {
-		ParamLoadControls( &helixPG );
+		FormLoadControls( &helixPG );
 		ComputeHelix( NULL, 6, NULL );
 	}
 }
@@ -844,41 +863,43 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 {
 	track_p t;
 	static coOrd pos0;
-	wControl_p controls[2];
-	char * labels[1];
 
 	switch (action) {
 
 	case C_START:
 		if (helix) {
 			if (helixW == NULL) {
-				helixW = ParamCreateDialog(&helixPG, MakeWindowTitle(_("Helix")), NULL, NULL,
-				                           ParamCancel_Current, TRUE, NULL, 0, ComputeHelix);
+				helixW = FormCreateDialog(&helixPG, MakeWindowTitle(_("Helix")),
+				                          NULL, NULL,
+				                          _("Cancel"), FormCancel_Current,
+				                          TRUE, 0, ComputeHelix);
 			}
 			helixDataCur = helixDataOld;
-			ParamLoadControls(&helixPG);
-			ParamGroupRecord(&helixPG);
+			FormLoadControls(&helixPG);
+			FormGroupRecord(&helixPG);
 			ComputeHelix(NULL, 6, NULL);
 			wShow(helixW);
 			memset(h_orders, 0, sizeof h_orders);
 			h_clock = 0;
 		} else {
-			ParamLoadControls(&circleRadiusPG);
-			ParamGroupRecord(&circleRadiusPG);
+			FormLoadControls(&circleRadiusPG);
+			FormGroupRecord(&circleRadiusPG);
 			switch (circleMode) {
 			case circleCmdFixedRadius:
-				controls[0] = circleRadiusPLs[0].control;
-				controls[1] = NULL;
-				labels[0] = N_("Circle Radius");
-				InfoSubstituteControls(controls, labels);
+				InfoSetControls(mainW, circleRadiusPG.nameStr);
 				break;
 			case circleCmdFromTangent:
-				InfoSubstituteControls(NULL, NULL);
+				InfoDefaultControls();
 				InfoMessage(_("Click on Circle Edge"));
 				break;
 			case circleCmdFromCenter:
-				InfoSubstituteControls(NULL, NULL);
+				InfoDefaultControls();
 				InfoMessage(_("Click on Circle Center"));
+				break;
+			default:
+				if ( log_ccurve < 0 ) { log_ccurve = LogFindIndex( "ccurve" ); }
+				LOG( log_ccurve, 1, ( "unexpected circleMode %d in CmdCircleCommon\n",
+				                      circleMode ) )
 				break;
 			}
 		}
@@ -896,10 +917,10 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 				ErrorMessage(MSG_HELIX_TURNS_GTR_0);
 				return C_ERROR;
 			}
-			ParamLoadData(&helixPG);
+			FormFetchData(&helixPG);
 			helixDataOld = helixDataCur;
 		} else {
-			ParamLoadData(&circleRadiusPG);
+			FormFetchData(&circleRadiusPG);
 			switch (circleMode) {
 			case circleCmdFixedRadius:
 				if (circleRadius <= 0.0) {
@@ -908,12 +929,17 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 				}
 				break;
 			case circleCmdFromTangent:
-				InfoSubstituteControls(NULL, NULL);
+				InfoDefaultControls();
 				InfoMessage(_("Drag to Center"));
 				break;
 			case circleCmdFromCenter:
-				InfoSubstituteControls(NULL, NULL);
+				InfoDefaultControls();
 				InfoMessage(_("Drag to Edge"));
+				break;
+			default:
+				if ( log_ccurve < 0 ) { log_ccurve = LogFindIndex( "ccurve" ); }
+				LOG( log_ccurve, 1, ( "unexpected circleMode %d in CmdCircleCommon\n",
+				                      circleMode ) )
 				break;
 			}
 		}
@@ -939,6 +965,11 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 			case circleCmdFromTangent:
 				circleRadius = FindDistance(tempSegs(0).u.c.center, pos0);
 				InfoMessage(_("Radius=%s"), FormatDistance(circleRadius));
+				break;
+			default:
+				if ( log_ccurve < 0 ) { log_ccurve = LogFindIndex( "ccurve" ); }
+				LOG( log_ccurve, 1, ( "unexpected circleMode %d in CmdCircleCommon\n",
+				                      circleMode ) )
 				break;
 			}
 		}
@@ -983,7 +1014,7 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 		if (helix) {
 			wHide( helixW );
 		} else {
-			InfoSubstituteControls( NULL, NULL );
+			InfoDefaultControls();
 		}
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		return C_TERMINATE;
@@ -997,7 +1028,7 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 		if (helix) {
 			wHide( helixW );
 		} else {
-			InfoSubstituteControls( NULL, NULL );
+			InfoDefaultControls();
 		}
 		return C_CONTINUE;
 
@@ -1020,55 +1051,49 @@ static STATUS_T CmdHelix( wAction_t action, coOrd pos )
 {
 	return CmdCircleCommon( action, pos, TRUE );
 }
-
-#include "bitmaps/curved-end.image3"
-#include "bitmaps/curved-tangent.image3"
-#include "bitmaps/curved-middle.image3"
-#include "bitmaps/curved-chord.image3"
-#include "bitmaps/bezier-track.image3"
-#include "bitmaps/cornu.image3"
-#include "bitmaps/circle.image3"
-#include "bitmaps/circle-tangent.image3"
-#include "bitmaps/circle-center.image3"
+
+
 
 EXPORT void InitCmdCurve( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Curve Track"), "cmdCurveSetCmd", _("Curve Tracks") );
 	AddMenuButton( menu, CmdCurve, "cmdCurveEndPt", _("Curve from End-Pt"),
-	               wIconCreatePixMap( curved_end_image3[iconSize] ), LEVEL0_50,
+	               CreateToolbarIconFromResource( "curved-end.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE1, I2VP(0) );
 	AddMenuButton( menu, CmdCurve, "cmdCurveTangent", _("Curve from Tangent"),
-	               wIconCreatePixMap( curved_tangent_image3[iconSize] ), LEVEL0_50,
+	               CreateToolbarIconFromResource( "curved-tangent.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE2, I2VP(1) );
 	AddMenuButton( menu, CmdCurve, "cmdCurveCenter", _("Curve from Center"),
-	               wIconCreatePixMap( curved_middle_image3[iconSize] ), LEVEL0_50,
+	               CreateToolbarIconFromResource( "curved-middle.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE3, I2VP(2) );
 	AddMenuButton( menu, CmdCurve, "cmdCurveChord", _("Curve from Chord"),
-	               wIconCreatePixMap( curved_chord_image3[iconSize] ), LEVEL0_50,
+	               CreateToolbarIconFromResource( "curved-chord.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE4, I2VP(3) );
 	AddMenuButton( menu, CmdBezCurve, "cmdBezier", _("Bezier Curve"),
-	               wIconCreatePixMap( bezier_track_image3[iconSize] ), LEVEL0_50,
+	               CreateToolbarIconFromResource( "bezier-track.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_BEZIER, I2VP(bezCmdCreateTrack) );
 	AddMenuButton( menu, CmdCornu, "cmdCornu", _("Cornu Curve"),
-	               wIconCreatePixMap( cornu_image3[iconSize] ), LEVEL0_50,
+	               CreateToolbarIconFromResource( "cornu.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CORNU, I2VP(cornuCmdCreateTrack));
 	ButtonGroupEnd();
 
 	ButtonGroupBegin( _("Circle Track"), "cmdCircleSetCmd", _("Circle Tracks") );
 	AddMenuButton( menu, CmdCircle, "cmdCircleFixedRadius",
-	               _("Fixed Radius Circle"), wIconCreatePixMap( circle_image3[iconSize] ),
+	               _("Fixed Radius Circle"), CreateToolbarIconFromResource( "circle.png"),
 	               LEVEL0_50,
 	               IC_STICKY|IC_POPUP2, ACCL_CIRCLE1, I2VP(0) );
 	AddMenuButton( menu, CmdCircle, "cmdCircleTangent", _("Circle from Tangent"),
-	               wIconCreatePixMap( circle_tangent_image3[iconSize] ), LEVEL0_50,
+	               CreateToolbarIconFromResource( "circle-tangent.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2, ACCL_CIRCLE2, I2VP(1) );
 	AddMenuButton( menu, CmdCircle, "cmdCircleCenter", _("Circle from Center"),
-	               wIconCreatePixMap( circle_center_image3[iconSize] ), LEVEL0_50,
+	               CreateToolbarIconFromResource( "circle-center.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2, ACCL_CIRCLE3, I2VP(2) );
 	ButtonGroupEnd();
 
-	ParamRegister( &circleRadiusPG );
-	ParamCreateControls( &circleRadiusPG, NULL );
+	FormRegister( &circleRadiusPG );
+	FormCreateControls( &circleRadiusPG);
+
+	FormRegister(&curvePG);
 
 }
 
@@ -1076,14 +1101,13 @@ EXPORT void InitCmdCurve( wMenu_p menu )
 * Append the helix command to the pulldown menu. The helix doesn't use an icon, so it is only
 * available through the pulldown
 *
-* \param varname1 IN pulldown menu
-* \return
+* \param menu IN pulldown menu
 */
 
 void InitCmdHelix(wMenu_p menu)
 {
 	AddMenuButton(menu, CmdHelix, "cmdHelix", _("Helix"), NULL, LEVEL0_50,
 	              IC_STICKY|IC_INITNOTSTICKY|IC_POPUP2, ACCL_HELIX, NULL);
-	ParamRegister(&helixPG);
+	FormRegister(&helixPG);
 	RegisterChangeNotification(ChangeHelixW);
 }

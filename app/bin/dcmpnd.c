@@ -24,7 +24,8 @@
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-#include "param.h"
+#include "icons.h"
+#include "form.h"
 #include "include/paramfile.h"
 #include "shrtpath.h"
 #include "track.h"
@@ -32,6 +33,7 @@
 #include "common-ui.h"
 #include "cselect.h"
 
+static int log_dcmpnd = -1;
 
 /*****************************************************************************
  *
@@ -105,13 +107,13 @@ static BOOL_T RefreshCompound1(
 		if ( ep > 0 && epCnt == 2 &&
 		     CheckCompoundEndPoint( trk, 1, to, 1, TRUE ) ) {
 			flip = TRUE;
-		} else if ( ep > 0 && epCnt == 3 &&
-		            CheckCompoundEndPoint( trk, 1, to, 2, FALSE ) &&
-		            CheckCompoundEndPoint( trk, 2, to, 1, FALSE ) ) {
-		} else if ( ep > 0 && epCnt == 4 &&
-		            CheckCompoundEndPoint( trk, 1, to, 3, FALSE ) &&
-		            CheckCompoundEndPoint( trk, 2, to, 2, FALSE ) &&
-		            CheckCompoundEndPoint( trk, 3, to, 1, FALSE ) ) {
+		} else if ( ( ep > 0 && epCnt == 3 &&
+		              CheckCompoundEndPoint( trk, 1, to, 2, FALSE ) &&
+		              CheckCompoundEndPoint( trk, 2, to, 1, FALSE ) ) ||
+		            ( ep > 0 && epCnt == 4 &&
+		              CheckCompoundEndPoint( trk, 1, to, 3, FALSE ) &&
+		              CheckCompoundEndPoint( trk, 2, to, 2, FALSE ) &&
+		              CheckCompoundEndPoint( trk, 3, to, 1, FALSE ) ) ) {
 		} else {
 			return FALSE;
 		}
@@ -143,22 +145,20 @@ typedef struct {
 } refreshSpecial_t;
 static dynArr_t refreshSpecial_da;
 #define refreshSpecial(N) DYNARR_N( refreshSpecial_t, refreshSpecial_da, N )
-static wIndex_t refreshSpecialInx;
+static long refreshSpecialInx;
 static BOOL_T refreshReturnVal;
 static void RefreshSkip( void * junk );
-static void RefreshDone( void * junk );
 static paramListData_t refreshSpecialListData = { 30, 600, 0, NULL, NULL };
 static paramData_t refreshSpecialPLs[] = {
 #define REFRESH_M1		(0)
-	{ PD_MESSAGE, NULL, NULL, 0/*PDO_DLGRESIZEW*/, I2VP(380) },
+	{ PD_MESSAGE, NULL, NULL, 0, I2VP(380) },
 #define REFRESH_M2		(1)
-	{ PD_MESSAGE, NULL, NULL, 0/*PDO_DLGRESIZEW*/, I2VP(380) },
+	{ PD_MESSAGE, NULL, NULL, 0, I2VP(380) },
 #define REFRESH_S		(2)
-	{ PD_MESSAGE, NULL, NULL, 0/*PDO_DLGRESIZEW*/, I2VP(380) },
+	{ PD_MESSAGE, NULL, NULL, 0, I2VP(380) },
 #define REFRESH_L		(3)
-	{ PD_LIST, &refreshSpecialInx, "list", PDO_LISTINDEX|PDO_NOPREF|PDO_DLGRESIZE, &refreshSpecialListData, NULL, BO_READONLY },
-	{ PD_BUTTON, RefreshSkip, "skip", PDO_DLGCMDBUTTON, NULL, N_("Skip") },
-	{ PD_BUTTON, RefreshDone, "done", PDO_DLGCMDBUTTON, NULL, N_("Done") }
+	{ PD_LIST, &refreshSpecialInx, "list", PDO_LISTINDEX|PDO_NOPREF, &refreshSpecialListData, NULL, BO_READONLY },
+	{ PD_BUTTON, RefreshSkip, "skip", PDO_DLGCMDBUTTON, NULL, N_("Skip") }
 };
 static paramGroup_t refreshSpecialPG = { "refreshSpecial", 0, refreshSpecialPLs, COUNT( refreshSpecialPLs ) };
 static void RefreshSpecialOk(
@@ -166,12 +166,12 @@ static void RefreshSpecialOk(
 {
 	wHide( refreshSpecialPG.win );
 }
-static void RefreshDone(
-        void * junk )
+static void RefreshSpecialCancel(
+        paramGroup_cp group )
 {
 	refreshSpecialInx = -1;
 	refreshReturnVal = FALSE;
-	wHide( refreshSpecialPG.win );
+	wHide( group->win );
 }
 static void RefreshSkip(
         void * junk )
@@ -180,7 +180,7 @@ static void RefreshSkip(
 	wHide( refreshSpecialPG.win );
 }
 
-static BOOL_T RefreshCompound(
+EXPORT BOOL_T RefreshCompound(
         track_p trk,
         BOOL_T junk )
 {
@@ -196,6 +196,7 @@ static BOOL_T RefreshCompound(
 		for ( inx=0; inx<refreshSpecial_da.cnt; inx++ )
 			if ( refreshSpecial(inx).name != NULL &&
 			     refreshSpecial(inx).to == NULL ) {
+				MyFree( refreshSpecial(inx).name );
 				refreshSpecial(inx).name = NULL;
 			}
 		return FALSE;
@@ -229,20 +230,23 @@ static BOOL_T RefreshCompound(
 			}
 		}
 	}
-	if ( ( to = FindCompound( FIND_TURNOUT|FIND_STRUCT, NULL, xx->title ) ) != NULL
+	to = FindCompound( FIND_TURNOUT|FIND_STRUCT, NULL, xx->title );
+	if ( to != NULL
 	     &&
 	     RefreshCompound1( trk, to ) ) {
 		return TRUE;
 	}
 	if ( refreshSpecialPG.win == NULL ) {
-		ParamRegister( &refreshSpecialPG );
-		ParamCreateDialog( &refreshSpecialPG,
-		                   MakeWindowTitle(_("Refresh Turnout/Structure")), _("Replace"), RefreshSpecialOk,
-		                   ParamCancel_Null, TRUE, NULL, F_BLOCK|F_RESIZE|F_RECALLSIZE, NULL );
+		FormRegister( &refreshSpecialPG );
+		FormCreateDialog( &refreshSpecialPG,
+		                  MakeWindowTitle(_("Refresh Turnout/Structure")),
+		                  _("Ok"), RefreshSpecialOk,
+		                  NULL, RefreshSpecialCancel,
+		                  TRUE, F_MODAL|F_RESIZE|F_RECALLSIZE, NULL );
 	}
-	ParamLoadMessage( &refreshSpecialPG, REFRESH_M1,
-	                  _("Choose a Turnout/Structure to replace:") );
-	ParamLoadMessage( &refreshSpecialPG, REFRESH_M2, "" );
+	FormLoadMessage( &refreshSpecialPG, REFRESH_M1,
+	                 _("Choose a Turnout/Structure to replace:") );
+	FormLoadMessage( &refreshSpecialPG, REFRESH_M2, "" );
 	refreshSpecialInx = -1;
 	wListClear( (wList_p)refreshSpecialPLs[REFRESH_L].control );
 	if ( GetTrkEndPtCnt(trk) > 0 ) {
@@ -258,10 +262,12 @@ static BOOL_T RefreshCompound(
 		return FALSE;
 	}
 	FormatCompoundTitle( listLabels, xx->title );
-	ParamLoadMessage( &refreshSpecialPG, REFRESH_S, message );
+	FormLoadMessage( &refreshSpecialPG, REFRESH_S, message );
 	while (1) {
+		refreshSpecialInx = -1;
 		wListSetIndex( (wList_p)refreshSpecialPLs[REFRESH_L].control, -1 );
 		wShow( refreshSpecialPG.win );
+		wWinRunModal( refreshSpecialPG.win );
 		if ( refreshSpecialInx < 0 ) {
 			if ( refreshReturnVal ) {
 				DYNARR_APPEND( refreshSpecial_t, refreshSpecial_da, 10 );
@@ -271,7 +277,7 @@ static BOOL_T RefreshCompound(
 			return refreshReturnVal;
 		}
 		to = (turnoutInfo_t*)wListGetItemContext( (wList_p)
-		                refreshSpecialPLs[REFRESH_L].control, refreshSpecialInx );
+		        refreshSpecialPLs[REFRESH_L].control, refreshSpecialInx );
 		if ( to != NULL &&
 		     RefreshCompound1( trk, to ) ) {
 			DYNARR_APPEND( refreshSpecial_t, refreshSpecial_da, 10 );
@@ -283,27 +289,27 @@ static BOOL_T RefreshCompound(
 			}
 			return TRUE;
 		}
-		ParamLoadMessage( &refreshSpecialPG, REFRESH_M1, message );
-		ParamLoadMessage( &refreshSpecialPG, REFRESH_M2,
-		                  _("Choose another Turnout/Structure to replace:") );
+		FormLoadMessage( &refreshSpecialPG, REFRESH_M1, message );
+		FormLoadMessage( &refreshSpecialPG, REFRESH_M2,
+		                 _("Choose another Turnout/Structure to replace:") );
 	}
 }
 
-EXPORT void DoRefreshCompound( void * unused )
+EXPORT void DoRefreshCompound(void* unused)
 {
 	if (SelectedTracksAreFrozen()) {
 		return;
 	}
 	refreshSpecialInx = -1;
 	refreshReturnVal = FALSE;
-	if (selectedTrackCount>0) {
-		UndoStart( _("Refresh Compound"), "refresh compound" );
-		DoSelectedTracks( RefreshCompound );
-		RefreshCompound( NULL, FALSE );
+	if (selectedTrackCount > 0) {
+		UndoStart(_("Refresh Compound"), "refresh compound");
+		DoSelectedTracks(RefreshCompound);
+		RefreshCompound(NULL, FALSE);
 		UndoEnd();
 		MainRedraw(); // DoRefreshCompound
 	} else {
-		ErrorMessage( MSG_NO_SELECTED_TRK );
+		ErrorMessage(MSG_NO_SELECTED_TRK);
 	}
 }
 
@@ -321,9 +327,9 @@ static char renamePartno[STR_SIZE];
 static turnoutInfo_t * renameTo;
 
 static paramData_t renamePLs[] = {
-	/*0*/ { PD_STRING, renameManuf, "manuf", PDO_NOPREF | PDO_NOTBLANK, I2VP(350), N_("Manufacturer"), 0, 0, sizeof(renameManuf)},
-	/*1*/ { PD_STRING, renameDesc, "desc", PDO_NOPREF | PDO_NOTBLANK, I2VP(230), N_("Description"), 0, 0, sizeof(renameDesc)},
-	/*2*/ { PD_STRING, renamePartno, "partno", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGIGNORELABELWIDTH | PDO_NOTBLANK, I2VP(100), N_("#"), 0, 0, sizeof(renamePartno)}
+	/*0*/ { PD_STRING, renameManuf, "manuf", PDO_NOPREF | PDO_NOTBLANK, I2VP(40), N_("Manufacturer"), 0, 0, sizeof(renameManuf)},
+	/*1*/ { PD_STRING, renameDesc, "desc", PDO_NOPREF | PDO_NOTBLANK, I2VP(40), N_("Description"), 0, 0, sizeof(renameDesc)},
+	/*2*/ { PD_STRING, renamePartno, "partno", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGIGNORELABELWIDTH | PDO_NOTBLANK, I2VP(10), N_("#"), 0, 0, sizeof(renamePartno)}
 };
 static paramGroup_t renamePG = { "rename", 0, renamePLs, COUNT( renamePLs ) };
 
@@ -365,6 +371,7 @@ EXPORT BOOL_T CompoundCustomSave(
 
 static void RenameOk( void * junk )
 {
+	FormFetchData( &renamePG );
 	sprintf( message, "%s\t%s\t%s", renameManuf, renameDesc, renamePartno );
 	if ( renameTo->title ) {
 		MyFree( renameTo->title );
@@ -381,7 +388,6 @@ static int CompoundCustMgmProc(
 {
 	turnoutInfo_t * to = (turnoutInfo_t*)data;
 	turnoutInfo_t * to2=NULL;
-	int inx;
 	char * mP, *pP, *nP;
 	int mL, pL, nL;
 	BOOL_T rc = TRUE;
@@ -415,17 +421,24 @@ static int CompoundCustMgmProc(
 		if ( to->endCnt == 0 || to->customInfo==NULL )	{
 			renameTo = to;
 			ParseCompoundTitle( to->title, &mP, &mL, &pP, &pL, &nP, &nL );
+			if ( mL > (int)sizeof renameManuf - 1 ) { mL = (int)sizeof renameManuf - 1; }
+			if ( pL > (int)sizeof renameDesc - 1 ) { pL = (int)sizeof renameDesc - 1; }
+			if ( nL > (int)sizeof renamePartno - 1 ) { nL = (int)sizeof renamePartno - 1; }
 			strncpy( renameManuf, mP, mL ); renameManuf[mL] = 0;
 			strncpy( renameDesc, pP, pL ); renameDesc[pL] = 0;
 			strncpy( renamePartno, nP, nL ); renamePartno[nL] = 0;
 			if ( !renamePG.win ) {
-				ParamRegister( &renamePG );
-				ParamCreateDialog( &renamePG, MakeWindowTitle(_("Rename Object")), _("Ok"),
-				                   RenameOk, ParamCancel_Current, TRUE, NULL, F_BLOCK, NULL );
+				FormRegister( &renamePG );
+				FormCreateDialog( &renamePG,
+				                  MakeWindowTitle(_("Rename Object")),
+				                  _("Ok"), RenameOk,
+				                  N_("Cancel"), FormCancel_Current,
+				                  TRUE, F_MODAL, NULL);
 			}
-			ParamLoadControls( &renamePG );
+			FormLoadControls( &renamePG );
 			wShow( renamePG.win );
 		} else {
+			int inx;
 			for (inx=0; inx<turnoutInfo_da.cnt && to!=turnoutInfo(inx); inx++);
 			if ( inx > 0 &&
 			     turnoutInfo(inx-1)->customInfo &&
@@ -447,16 +460,16 @@ static int CompoundCustMgmProc(
 		return TRUE;
 	case CUSTMGM_GET_TITLE:
 		ParseCompoundTitle( to->title, &mP, &mL, &pP, &pL, &nP, &nL );
-		sprintf( message, "\t%.*s\t%s\t%.*s\t%.*s", mL, mP, GetScaleName(to->scaleInx),
+		sprintf( message, "%.*s\t%s\t%.*s\t%.*s", mL, mP, GetScaleName(to->scaleInx),
 		         nL, nP, pL, pP );
 		return TRUE;
+	default:
+		if ( log_dcmpnd < 0 ) { log_dcmpnd = LogFindIndex( "dcmpnd" ); }
+		LOG( log_dcmpnd, 1, ( "unexpected cmd %d in CompoundCustMgmProc\n", cmd ) )
+		break;
 	}
 	return FALSE;
 }
-
-
-#include "bitmaps/turnout.image3"
-#include "bitmaps/building.image3"
 
 EXPORT void CompoundCustMgmLoad( void )
 {
@@ -466,10 +479,10 @@ EXPORT void CompoundCustMgmLoad( void )
 	static wIcon_p structI = NULL;
 
 	if ( turnoutI == NULL ) {
-		turnoutI = wIconCreatePixMap( turnout_image3[0] );
+		turnoutI = CreateToolbarIconFromResource( "turnout.png");
 	}
 	if ( structI == NULL ) {
-		structI = wIconCreatePixMap( building_image3[0] );
+		structI = CreateToolbarIconFromResource( "building.png");
 	}
 
 	for ( inx=0; inx<turnoutInfo_da.cnt; inx++ ) {
@@ -493,8 +506,8 @@ EXPORT void CompoundCustMgmLoad( void )
  */
 
 wIndex_t FindListItemByContext(
-        wList_p listP,
-        void * context )
+        wControl_p listP,
+        const void * context )
 {
 	if ( listP == NULL ) {
 		return -1;
@@ -503,7 +516,7 @@ wIndex_t FindListItemByContext(
 		return -1;
 	}
 	for ( wIndex_t inx = 0; inx < wListGetCount( listP ); ++inx ) {
-		void * itemContext = wListGetItemContext( listP, inx );
+		const void * itemContext = wListGetItemContext( listP, inx );
 		if ( itemContext != NULL ) {
 			if ( itemContext == context ) {
 				return inx;

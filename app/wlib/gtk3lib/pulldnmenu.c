@@ -1,0 +1,703 @@
+/** \file menu.c
+ * Menu creation and handling.
+ */
+
+/*  XTrkCad - Model Railroad CAD
+ *  Copyright (C) 2005 Dave Bullis, 2012 Martin Fischer
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+
+#include <gdk/gdkkeysyms.h>
+
+#include "gtkint.h"
+#include "i18n.h"
+
+/*
+ *****************************************************************************
+ *
+ * Menus
+ *
+ *****************************************************************************
+ */
+
+/**
+ * Handle activate event for menu items.
+ *
+ * \param widget IN widget that emitted the signal
+ * \param value  IN application context
+ */
+
+static void pushMenuItem(
+        GtkWidget * widget,
+        gpointer value )
+{
+	wControl_p m = (wControl_p)value;
+	struct menuitem *mi = CONTROL_GET_ATTRIBUTES_PTR(m, menuitem);
+
+	switch( m->type ) {
+	case M_PUSH:
+	case M_TOGGLE:
+		if(mi->action) {
+			mi->action( m->context );
+		}
+		break;
+	case M_RADIO:
+		/* NOTE: action is only called when radio button is activated,
+		not when deactivated */
+		if( gtk_check_menu_item_get_active((GtkCheckMenuItem *)widget ) == TRUE ) {
+			mi->action(m->context);
+		}
+		break;
+	case M_MENU:
+		return;
+	default:
+		fprintf(stderr," Oops menu\n");
+		return;
+	}
+
+}
+
+/**
+ * Add a accelerator key to a widget
+ *
+ * @param menu_item IN owning widget
+ * @param acclKey   IN the accelerator key
+ */
+
+static void setAcclKey( GtkWidget* menu_item, int acclKey)
+{
+	int mask = 0;
+	GtkAccelGroup* accel_group = wlibAppWinGetAccelGroup();
+
+	if (acclKey & WALT) {
+		mask |= GDK_MOD1_MASK;
+	}
+	if (acclKey & WSHIFT) {
+		mask |= GDK_SHIFT_MASK;
+		switch ((acclKey & 0xFF)) {
+		case '0':
+			acclKey += ')' - '0';
+			break;
+		case '1':
+			acclKey += '!' - '1';
+			break;
+		case '2':
+			acclKey += '@' - '2';
+			break;
+		case '3':
+			acclKey += '#' - '3';
+			break;
+		case '4':
+			acclKey += '$' - '4';
+			break;
+		case '5':
+			acclKey += '%' - '5';
+			break;
+		case '6':
+			acclKey += '^' - '6';
+			break;
+		case '7':
+			acclKey += '&' - '7';
+			break;
+		case '8':
+			acclKey += '*' - '8';
+			break;
+		case '9':
+			acclKey += '(' - '9';
+			break;
+		case '`':
+			acclKey += '~' - '`';
+			break;
+		case '-':
+			acclKey += '_' - '-';
+			break;
+		case '=':
+			acclKey += '+' - '=';
+			break;
+		case '\\':
+			acclKey += '|' - '\\';
+			break;
+		case '[':
+			acclKey += '{' - '[';
+			break;
+		case ']':
+			acclKey += '}' - ']';
+			break;
+		case ';':
+			acclKey += ':' - ';';
+			break;
+		case '\'':
+			acclKey += '"' - '\'';
+			break;
+		case ',':
+			acclKey += '<' - ',';
+			break;
+		case '.':
+			acclKey += '>' - '.';
+			break;
+		case '/':
+			acclKey += '?' - '/';
+			break;
+		default:
+			break;
+		}
+	}
+	if (acclKey & WCTL) {
+		mask |= GDK_CONTROL_MASK;
+	}
+
+	gtk_widget_add_accelerator(menu_item,
+	                           "activate",
+	                           accel_group,
+	                           acclKey & 0xFF, mask, GTK_ACCEL_VISIBLE);
+}
+
+static char *
+ChangeToUnderscore(const char *label)
+{
+	char *labelcopy = NULL;
+
+	if(label) {
+		labelcopy = g_strdup(label);
+		g_strdelimit(labelcopy, "&", '_');
+	}
+	return(labelcopy);
+}
+
+/**
+ * Create a new menu element, add to the parent menu and to help
+ *
+ * \param m 		IN parent menu
+ * \param mi		IN menu item properties
+ * \param mtype 	IN type of new entry
+ * \param helpStr 	IN help topic
+ * \param labelStr 	IN display label
+ * \param acclKey 	IN accelerator key
+ */
+
+static void CreateMenuItem(
+        wControl_p m,
+        wControl_p mi,
+        wType_e mtype,
+        const char * helpStr,
+        const char * labelStr,
+        int acclKey )
+{
+	// create a modifyable copy of the label
+	char *labelcopy = ChangeToUnderscore(labelStr);
+
+	switch ( mtype ) {
+	case M_SEPARATOR:
+		mi->widget = gtk_separator_menu_item_new();
+		break;
+	case M_TOGGLE: {
+		unsigned long handler_id;
+		mi->widget = gtk_check_menu_item_new_with_mnemonic(
+		                     wlibConvertInput(labelcopy));
+		handler_id = g_signal_connect(mi->widget, "toggled", G_CALLBACK(pushMenuItem),
+		                              mi);
+		g_object_set_data(G_OBJECT(mi->widget), "handler-id",
+		                  GUINT_TO_POINTER(handler_id));
+	}
+	break;
+	case M_RADIO:
+		mi->widget = gtk_radio_menu_item_new_with_mnemonic(
+		                     m->attributes.menu.radioGroup,
+		                     wlibConvertInput(labelcopy));
+		m->attributes.menu.radioGroup = gtk_radio_menu_item_get_group (
+		                                        GTK_RADIO_MENU_ITEM ( mi->widget ));
+		g_signal_connect(mi->widget, "activate", G_CALLBACK(pushMenuItem),
+		                 mi);
+		break;
+	case M_PUSH:
+		if(m->attributes.menu.option == F_DEFINEDINBUILDER) {
+			mi->widget = wlibWidgetFromIdWarn(m->parent, helpStr);
+		} else {
+			mi->widget = gtk_menu_item_new_with_mnemonic(
+			                     wlibConvertInput(labelcopy));
+		}
+		g_signal_connect(mi->widget, "activate",G_CALLBACK(pushMenuItem),
+		                 mi);
+		break;
+
+	default:
+		g_abort();
+		break;
+	}
+
+	g_free(labelcopy);
+
+	if (mi->widget) {
+		if (acclKey) {
+			setAcclKey(mi->widget, acclKey);
+		}
+
+		if(!gtk_widget_get_parent(mi->widget)) {
+			gtk_menu_shell_append(GTK_MENU_SHELL(m->widget), mi->widget);
+		}
+		gtk_widget_show(GTK_WIDGET(mi->widget));
+	}
+	struct menuitem * menuitem = CONTROL_GET_ATTRIBUTES_PTR(mi, menuitem);
+	menuitem->label = (char*) labelStr;
+	menuitem->type = mtype;
+	// this is  a linked list of all menu items belonging to a specific menu
+	// is used for demo mode MENU command
+	if (m) {
+		struct menu * menu = CONTROL_GET_ATTRIBUTES_PTR(m, menu);
+		if (menu->first == NULL) {
+			menu->first = mi;
+		} else {
+			CONTROL_GET_ATTRIBUTES_PTR(menu->last, menuitem)->next = mi;
+		}
+		menu->last = mi;
+	}
+
+	if (helpStr != NULL) {
+		wlibAddTooltip( mi->widget, NULL, helpStr );
+	}
+
+	return;
+}
+
+/*-----------------------------------------------------------------*/
+/**
+ * Create a radio button as a menu entry
+ *
+ * \param m 		IN menu to be extended
+ * \param helpStr 	IN reference into help
+ * \param labelStr 	IN text for entry
+ * \param acclKey 	IN accelerator key to add
+ * \param action 	IN callback function
+ * \param context	IN application context
+ * \return menu entry
+ */
+
+wControl_p wMenuRadioCreate(
+        wControl_p m,
+        const char * helpStr,
+        const char * labelStr,
+        long acclKey,
+        wMenuCallBack_p action,
+        void 	*context )
+{
+	struct menuitem* menuitem;
+
+	wControl_p mi = wlibControlNew(M_RADIO, m, helpStr, context);
+	menuitem = CONTROL_GET_ATTRIBUTES_PTR(mi, menuitem);
+	menuitem->action = action;
+
+	CreateMenuItem( m, mi, M_RADIO, helpStr, labelStr, acclKey );
+
+	return mi;
+}
+
+/**
+ * Set radio button active
+ *
+ * \param mi 		IN menu entry for radio button
+ */
+
+void wMenuRadioSetActive(
+        wControl_p mi )
+{
+	gtk_check_menu_item_set_active( (GtkCheckMenuItem *)mi->widget, TRUE );
+}
+
+/*
+ * push buttons in menu
+ */
+
+/**
+ * Create a menu entry
+ *
+ * \param m 		IN menu to be extended
+ * \param helpStr 	IN reference into help
+ * \param labelStr 	IN text for entry
+ * \param acclKey 	IN accelerator key to add
+ * \param action 	IN callback function
+ * \param context 	IN application context
+ * \return menu entry
+ */
+
+wControl_p wMenuPushCreate(
+        wControl_p m,
+        const char * helpStr,
+        const char * labelStr,
+        long acclKey,
+        wMenuCallBack_p action,
+        void 	*context )
+{
+	struct menuitem* menuitem;
+
+	wControl_p mi = wlibControlNew(M_PUSH, m, helpStr, context);
+	menuitem = CONTROL_GET_ATTRIBUTES_PTR(mi, menuitem);
+	menuitem->action = action;
+
+	CreateMenuItem( m, mi, M_PUSH, helpStr, labelStr, acclKey);
+	mi->context = context;
+
+	return mi;
+}
+
+/**
+ * Enable menu entry
+ *
+ * \param mi 		IN menu entry
+ * \param enable 	IN new state
+ */
+
+void wMenuPushEnable(
+        wControl_p mi,
+        wBool_t enable )
+{
+	gtk_widget_set_sensitive( GTK_WIDGET( mi->widget ), enable );
+}
+
+
+/*-----------------------------------------------------------------*/
+/**
+ * Create a submenu
+ *
+ * \param m 		IN menu to be extended
+ * \param helpStr 	IN reference into help
+ * \param labelStr 	IN text for entry
+ * \return menu entry
+ */
+
+wControl_p wMenuMenuCreate(
+        wControl_p m,
+        const char * helpStr,
+        const char * labelStr )
+{
+	wControl_p mm;
+	struct menu *menu;
+	GtkWidget* submenu;
+	GtkWidget* menuitem;
+	char *label;
+
+	mm = wlibControlNew(M_SUBMENU, m, helpStr, NULL);
+	menu = CONTROL_GET_ATTRIBUTES_PTR(mm, menu);
+	menu->radioGroup = NULL;
+
+	label = ChangeToUnderscore( labelStr );
+	menuitem = gtk_menu_item_new_with_mnemonic(wlibConvertInput(label));
+
+	submenu = gtk_menu_new();
+	gtk_menu_item_set_submenu( GTK_MENU_ITEM( menuitem ), submenu );
+
+	gtk_menu_shell_append(GTK_MENU_SHELL(m->widget), menuitem);
+	gtk_widget_show(GTK_WIDGET(menuitem));
+
+	mm->widget = submenu;
+
+	g_free(label);
+	return mm;
+}
+
+
+/*-----------------------------------------------------------------*/
+/**
+ * Create a menu separator
+ *
+ * \param m 		IN menu entry
+ */
+
+void wMenuSeparatorCreate(
+        wControl_p m )
+{
+	wControl_p mi = wlibControlNew(M_SEPARATOR, m, NULL, NULL );
+
+	CreateMenuItem( m, mi, M_SEPARATOR, NULL, "", 0);
+}
+
+
+/*
+ * Toggle buttons in menu
+ */
+/**
+ * Create a check box as part of a menu
+ *
+ * \param m 		IN menu to be extended
+ * \param helpStr 	IN reference into help
+ * \param labelStr 	IN text for entry
+ * \param acclKey 	IN acceleratoor key to add
+ * \param set 		IN initial state
+ * \param action 	IN callback function
+ * \param context 	IN application context
+ * \return menu entry
+ */
+
+wControl_p wMenuToggleCreate(
+        wControl_p m,
+        const char * helpStr,
+        const char * labelStr,
+        long acclKey,
+        wBool_t set,
+        wMenuCallBack_p action,
+        void * context )
+{
+	struct menuitem *menuitem;
+
+	wControl_p mt = wlibControlNew(M_TOGGLE, m, helpStr, context);
+	menuitem = CONTROL_GET_ATTRIBUTES_PTR(mt, menuitem);
+	menuitem->action = NULL;
+
+	CreateMenuItem(m, mt, M_TOGGLE, helpStr, labelStr, acclKey );
+
+	wMenuToggleSet( mt, set );
+
+	menuitem->action = action;
+
+
+	return mt;
+}
+
+/**
+ * Get the state of a menu check box
+ *
+ * \param mt 		IN menu to be extended
+ * \return current state
+ */
+
+wBool_t wMenuToggleGet(
+        wControl_p mt )
+{
+	return gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM( mt->widget ));
+}
+
+/**
+ * Set a menu check box active / inactive
+ *
+ * \param mt 		IN menu to be extended
+ * \param set 		IN new state
+ * \return previous state
+ */
+
+wBool_t wMenuToggleSet(
+        wControl_p mt,
+        wBool_t set )
+{
+	wBool_t oldState;
+	if (mt==NULL) { return 0; }
+
+	oldState = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM( mt->widget ));
+
+	if(oldState != set ) {
+		gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(mt->widget ), set );
+	}
+
+	return oldState;
+}
+
+/**
+ * Enable menu entry containing a check box
+ *
+ * \param mt 		IN menu entry
+ * \param enable 	IN new state
+ */
+
+void wMenuToggleEnable(
+        wControl_p mt,
+        wBool_t enable )
+{
+	gtk_widget_set_sensitive ( GTK_WIDGET( mt->widget ), enable );
+}
+
+
+/*-----------------------------------------------------------------*/
+
+/* Set the text for a menu (unimplemented, kept commented out)
+ *
+ * \param m 		IN menu entry
+ * \param labelStr 	IN new text
+ */
+
+// void wMenuSetLabel( wMenu_p m, const char * labelStr)
+// {
+// 	printf("%s:%d Not implemented!", __FILE__, __LINE__);
+// //	 wlibSetLabel( m->oc.widget, m->option, labelStr, &m->labelG, &m->imageG );
+// }
+
+/**
+ * Get the text for a menu entry
+ *
+ * \param menuitem IN menu entry
+ * \return  pointer to menu label
+ */
+
+const char *
+wMenuGetLabel(wControl_p menuitem)
+{
+	g_assert( menuitem != NULL);
+
+	return gtk_menu_item_get_label(menuitem->widget);
+}
+
+/**
+ * Create a pulldown menu
+ *
+ * ### Usage in dialogs
+ *
+ * - Runtime: no
+ * - Builder: yes
+ *
+ * ### Options
+ *
+ * \param parent 	IN parent window
+ * \param x 		IN x position
+ * \param y 		IN y position
+ * \param helpStr 	IN help anchor string
+ * \param labelStr  IN label for menu
+ * \param option    IN options (Whatever they are)
+ * \return pointer to the created menu
+ */
+
+wMenu_p wMenuCreate(
+        wControl_p	parent,
+        wWinPix_t	x,
+        wWinPix_t	y,
+        const char 	* helpStr,
+        const char	* labelStr,
+        long	option )
+{
+	struct menu *menu;
+	wMenu_p m = wlibControlNew(M_MENU, parent, helpStr, NULL);
+	menu = CONTROL_GET_ATTRIBUTES_PTR(m, menu);
+
+	menu->radioGroup = NULL;
+	menu->traceFunc = NULL;
+	menu->traceData = NULL;
+
+	if (ISDEFINEDINBUILDER(parent)) {
+		m->widget = wlibWidgetFromIdWarn(parent, helpStr);
+		m->attributes.menu.option = F_DEFINEDINBUILDER;
+	}
+
+	wlibAddTooltip(m->widget, parent->name, helpStr);
+
+	return m;
+}
+
+/**
+ * Add a drop-down menu to the menu bar.
+ *
+ * \param w 		IN main window handle
+ * \param helpStr 	IN unused (should be help topic )
+ * \param labelStr 	IN label for the drop-down menu
+ * \return    pointer to the created drop-down menu
+ */
+
+wControl_p wMenuBarAdd(
+        wControl_p w,
+        const char * helpStr,
+        const char * labelStr )
+{
+	wControl_p m;
+	struct menu* menu;
+	GtkWidget *menuItem;
+
+	m = wlibControlNew(M_SUBMENU, NULL, helpStr, NULL);
+	menu = CONTROL_GET_ATTRIBUTES_PTR(m, menu);
+	menu->radioGroup = NULL;
+
+	menuItem = gtk_menu_item_new_with_mnemonic(labelStr);
+	gtk_menu_shell_append(GTK_MENU_SHELL(w->attributes.window.menubar), menuItem);
+
+	m->widget = gtk_menu_new();
+	gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuItem), m->widget );
+
+	gtk_widget_show(menuItem);
+
+	/* TODO: why is help not supported here? */
+	/*gtkAddHelpString( m->panel_item, helpStr );*/
+	return m;
+}
+
+/*-----------------------------------------------------------------*/
+
+/**
+ *
+ *
+ * \param m 	IN
+ * \param func 	IN
+ * \param attributes 	IN
+ */
+
+void wMenuSetTraceCallBack(
+        wControl_p m,
+        wMenuTraceCallBack_p func,
+        void * attributes )
+{
+	struct menu* menu = CONTROL_GET_ATTRIBUTES_PTR(m, menu);
+	menu->traceFunc = func;
+	menu->traceData = attributes;
+}
+
+/**
+ * automatic playback functionality
+ *
+ * \param m 	IN
+ * \param label IN
+ * \return    describe the return value
+ */
+
+wBool_t wMenuAction(
+        wControl_p m,
+        const char * label )
+{
+	const struct menu* menu = CONTROL_GET_ATTRIBUTES_PTR(m, menu);
+	struct menuitem * menuitem;
+	for ( wControl_p mi = menu->first;
+	      mi != NULL;
+	      mi = menuitem->next ) {
+		menuitem = CONTROL_GET_ATTRIBUTES_PTR(mi, menuitem);
+		if ( strcmp( menuitem->label, label ) == 0 ) {
+			switch( menuitem->type ) {
+			case M_SEPARATOR:
+				break;
+			case M_PUSH:
+				if ( gtk_widget_get_sensitive( GTK_WIDGET( mi->widget ) ) ) {
+					menuitem->action( mi->context );
+				} else {
+					wBeep();
+				}
+				break;
+			case M_TOGGLE:
+				if ( gtk_widget_get_sensitive( GTK_WIDGET( mi->widget ) ) ) {
+					menuitem->set = !menuitem->set;
+					menuitem->action( mi->context );
+				} else {
+					wBeep();
+				}
+				break;
+			case M_MENU:
+				break;
+
+			default:
+				fprintf(stderr, "Oops: wMenuAction\n");
+				break;
+			}
+			return TRUE;
+		}
+	}
+	return FALSE;
+}

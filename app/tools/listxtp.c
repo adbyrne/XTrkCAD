@@ -33,17 +33,17 @@
 #define FALSE 0
 #define MAX_FILES 500
 #ifdef _WIN32
-	#define WIKIFORMATOPTION "/w"
-	#pragma warning( disable : 4996 )
+#define WIKIFORMATOPTION "/w"
+#pragma warning( disable : 4996 )
 #else
-	#define WIKIFORMATOPTION "-w"
+#define WIKIFORMATOPTION "-w"
 #endif
 
 #define CONTENTSCOMMAND "CONTENTS"
 
 #ifndef WIN32
-	#define stricmp strcasecmp
-	#define strnicmp strncasecmp
+#define stricmp strcasecmp
+#define strnicmp strncasecmp
 #endif // !WIN32
 
 /*
@@ -53,8 +53,8 @@
 int
 Compare( const void *s1, const void * s2 )
 {
-	char *str1 = *(char **)s1;
-	char *str2 = *(char **)s2;
+	const char *str1 = *(char **)s1;
+	const char *str2 = *(char **)s2;
 
 	return( strcmp( str1, str2 ));
 }
@@ -67,7 +67,7 @@ main( int argc, char **argv )
 	char buffer1[ 512 ];
 	int found;
 	DIR *d;
-	struct dirent *ent;
+	const struct dirent *ent;
 	FILE *fh;
 	struct stat buf;
 	char filename[ 256 ];
@@ -78,8 +78,8 @@ main( int argc, char **argv )
 	int bWiki = FALSE;
 
 	/*
-		this is a fast hack: there is one optional argument 
-		if this was found, set the flag and remove it from the array. 
+		this is a fast hack: there is one optional argument
+		if this was found, set the flag and remove it from the array.
 		As there is a maximum of one more argument, one simple assignment should be enough.
 	*/
 
@@ -92,7 +92,7 @@ main( int argc, char **argv )
 		argc--;
 	}
 
-	/* 
+	/*
 	 * only other argument is the name of the directory to search through
 	 */
 	if( argc == 2 ) {
@@ -117,8 +117,7 @@ main( int argc, char **argv )
 	/*
 	 * get all files from the directory
 	 */
-	while((ent = readdir(d)))
-	{
+	while((ent = readdir(d))) {
 		/*
 		 * create full file name and get the state for that file
 		 */
@@ -134,12 +133,13 @@ main( int argc, char **argv )
 		/*
 		 * ignore any directories
 		 */
-		if( buf.st_mode & S_IFDIR )
+		if( buf.st_mode & S_IFDIR ) {
 			continue;
+		}
 
 		/*
 		 * open the file and search for a line beginning with CONTENTS
-		 */ 
+		 */
 		found = FALSE;
 		fh = fopen( filename, "rt" );
 		if( fh ) {
@@ -185,8 +185,9 @@ main( int argc, char **argv )
 	for( i = 0; i < cnt; i++) {
 		if( bWiki ) {
 			printf("~-\"\"%s\"\"\n", results[ i ] );
-			if( (i < cnt - 1) && *results[ i ] != *results[ i + 1 ] )
+			if( (i < cnt - 1) && *results[ i ] != *results[ i + 1 ] ) {
 				printf( "\n" );
+			}
 		} else {
 			printf( "%s\n", results[ i ]);
 		}

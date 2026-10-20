@@ -1,29 +1,48 @@
-#!/bin/bash
-if [ $# -ne 1 ] ; then
-	echo "$0 <BLDDIR>/distribution/flatpak"
-	echo "Create source tar ball, with .xpm3 files"
+#!/usr/bin/env bash
+
+if [ "$1" = "-h" ]; then
+	echo "$0"
+	echo "Create source tar ball in build directory"
 	echo "Run from <SRCDIR>/distribution/flatpak"
 	echo "Computes sha256 checksum which must be updated in manifest file"
 	exit 0
 fi
 
-SRCDIR=`pwd`
-BLDDIR=$1
+SRCDIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+cd -- "$SRCDIR"
+BLDDIR=build
 
 cd ../..
-if [ -f $HOME/.tarignore ]; then
-    # get list of excludes from a file
-    tar cf ${BLDDIR}/source.tar --exclude-from=$HOME/.tarignore .
+
+BUILD_TYPE="-DCMAKE_BUILD_TYPE=Debug"
+if command -v ninja >/dev/null 2>&1 && [ ! -s Makefile ]; then
+	cmake $BUILD_TYPE -DXTRKCAD_BUILD_FLATPAK=1 -G Ninja -B $BLDDIR -S .
 else
-    tar cf ${BLDDIR}/source.tar --exclude-vcs --exclude=build --exclude-vcs-ignores .
+	cmake $BUILD_TYPE -DXTRKCAD_BUILD_FLATPAK=1 -B $BLDDIR -S .
 fi
-# current flatpak builds everything, so these additions not necessary
-#cd $BLDDIR/../../app/bin
-#tar rf ${BLDDIR}/source.tar ./bitmaps
+hg revert -C app/lib/xtrkcad.metainfo.xml 2>/dev/null
+hg revert -C app/lib/xtrkcad.flatpak.desktop 2>/dev/null
+
+TODAY=$(date --utc '+%Z %Y-%m-%d %H:00')
+TAROPTS='--sort=name --mtime="$TODAY" --owner=0 --group=0 --numeric-owner --format=gnu'
+if [ -f $HOME/.tarignore ]; then
+	# get list of excludes from a file
+	eval tar cf ${BLDDIR}/source.tar $TAROPTS --exclude-from=$HOME/.tarignore .
+else
+	eval tar cf ${BLDDIR}/source.tar $TAROPTS --exclude-vcs --exclude=$BLDDIR --exclude-vcs-ignores .
+fi
 
 cd $BLDDIR
 rm -f source.tar.gz
 # -n zeros the timestamp so repeated runs yield the same checksum
 gzip -n source.tar
 echo "Update manifest.yaml with this sha256 checksum here and in git repo (tbd)"
-sha256sum source.tar.gz
+# rename by version
+if [ -f xtrkcad-config.h ]; then
+	VERSION=$(grep "#define XTRKCAD_VERSION " xtrkcad-config.h | cut -d" " -f3 | tr -d '"')
+	mv source.tar.gz source-${VERSION}.tar.gz
+	sha256sum source-${VERSION}.tar.gz
+else
+	echo "$BLDDIR/xtrkcad-config.h not found, so cannot get version"
+	sha256sum source.tar.gz
+fi

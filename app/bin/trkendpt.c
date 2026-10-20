@@ -24,11 +24,13 @@
 #include "common.h"
 #include "common-ui.h"
 #include "fileio.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "trkendpt.h"
 #include "trkendptx.h"
 #include "draw.h"
+
+static int log_trkendpt = -1;
 
 
 /************************************************************************
@@ -126,7 +128,7 @@ EXPORT EPINX_T TempEndPtsCount( void )
 
 EXPORT trkEndPt_p TempEndPt( EPINX_T ep )
 {
-	CHECK( ep < tempEndPts_da.cnt );
+	CHECK( ep >= 0 && ep < tempEndPts_da.cnt );
 	return &DYNARR_N( trkEndPt_t, tempEndPts_da, ep );
 }
 
@@ -160,7 +162,7 @@ EXPORT void SwapEndPts(
 
 EXPORT void SetTrkEndPoint( track_p trk, EPINX_T ep, coOrd pos, ANGLE_T angle )
 {
-	CHECK( ep < GetTrkEndPtCnt(trk) );
+	CHECK( ep >= 0 && ep < GetTrkEndPtCnt(trk) );
 	// check  setTrkEndPoint: endPt is not connected
 	CHECK( GetEndPtTrack( GetTrkEndPt( trk, ep ) ) == NULL );
 	SetEndPt( GetTrkEndPt( trk, ep ), pos, angle );
@@ -170,42 +172,70 @@ EXPORT void SetTrkEndPoint( track_p trk, EPINX_T ep, coOrd pos, ANGLE_T angle )
 EXPORT void SetTrkEndPointSilent( track_p trk, EPINX_T ep, coOrd pos,
                                   ANGLE_T angle )
 {
-	CHECK( ep < GetTrkEndPtCnt(trk) );
+	CHECK( ep >= 0 && ep < GetTrkEndPtCnt(trk) );
 	SetEndPt( GetTrkEndPt( trk, ep ), pos, angle );
 }
 
 
+/**
+ * Position of one of a track's endpoints, in layout coordinates.
+ *
+ * \param[in] trk the track
+ * \param[in] ep endpoint index, 0 <= ep < GetTrkEndPtCnt(trk)
+ * \return the endpoint's position
+ */
+
 EXPORT coOrd GetTrkEndPos( track_p trk, EPINX_T ep )
 {
-	CHECK( ep < GetTrkEndPtCnt(trk) );
+	CHECK( ep >= 0 && ep < GetTrkEndPtCnt(trk) );
 	return GetTrkEndPt(trk,ep)->pos;
 }
 
 
+/**
+ * Direction a track's endpoint points, in degrees.
+ *
+ * \param[in] trk the track
+ * \param[in] ep endpoint index, 0 <= ep < GetTrkEndPtCnt(trk)
+ * \return the endpoint's angle
+ */
+
 EXPORT ANGLE_T GetTrkEndAngle( track_p trk, EPINX_T ep )
 {
-	CHECK( ep < GetTrkEndPtCnt(trk) );
+	CHECK( ep >= 0 && ep < GetTrkEndPtCnt(trk) );
 	return GetTrkEndPt(trk,ep)->angle;
 }
 
 
+/**
+ * The track connected to one of a track's endpoints, if any. This is the
+ * canonical "is this endpoint open?" check used throughout the codebase
+ * (e.g. ConnectAllEndPts()) and by the Reports feature's unconnected-
+ * endpoints report: a NULL return means the endpoint is unconnected/open,
+ * not an error.
+ *
+ * \param[in] trk the track
+ * \param[in] ep endpoint index, 0 <= ep < GetTrkEndPtCnt(trk)
+ * \return the connected track, or NULL if the endpoint is open
+ */
+
 EXPORT track_p GetTrkEndTrk( track_p trk, EPINX_T ep )
 {
-	CHECK( ep < GetTrkEndPtCnt(trk) );
+	CHECK( ep >= 0 && ep < GetTrkEndPtCnt(trk) );
 	return GetTrkEndPt(trk,ep)->track;
 }
 
 
 EXPORT long GetTrkEndOption( track_p trk, EPINX_T ep )
 {
-	CHECK( ep < GetTrkEndPtCnt(trk) );
+	CHECK( ep >= 0 && ep < GetTrkEndPtCnt(trk) );
 	return GetTrkEndPt(trk,ep)->option;
 }
 
 
 EXPORT long SetTrkEndOption( track_p trk, EPINX_T ep, long option )
 {
-	CHECK( ep < GetTrkEndPtCnt(trk) );
+	CHECK( ep >= 0 && ep < GetTrkEndPtCnt(trk) );
 	return GetTrkEndPt(trk,ep)->option = option;
 }
 
@@ -215,10 +245,9 @@ EXPORT long SetTrkEndOption( track_p trk, EPINX_T ep, long option )
  */
 
 EXPORT void SetTrkEndElev( track_p trk, EPINX_T ep, int option, DIST_T height,
-                           char * station )
+                           const char * station )
 {
 	track_p trk1;
-	EPINX_T ep1;
 	trkEndPt_p epp = GetTrkEndPt( trk, ep );
 	epp->elev.option = option;
 	epp->elev.cacheSet = FALSE;
@@ -230,8 +259,9 @@ EXPORT void SetTrkEndElev( track_p trk, EPINX_T ep, int option, DIST_T height,
 		}
 		epp->elev.u.name = MyStrdup(station);
 	}
-	if ( (trk1=GetTrkEndTrk(trk, ep)) != NULL ) {
-		ep1 = GetEndPtConnectedToMe( trk1, trk );
+	trk1=GetTrkEndTrk(trk, ep);
+	if ( trk1 != NULL ) {
+		EPINX_T ep1 = GetEndPtConnectedToMe( trk1, trk );
 		if (ep1 >= 0) {
 			trkEndPt_p epp1 = GetTrkEndPt( trk1, ep1 );
 			epp1->elev.option = option;
@@ -291,6 +321,9 @@ static BOOL_T bCacheElev = TRUE;
 EXPORT BOOL_T GetTrkEndElevCachedHeight (track_p trk, EPINX_T e,
                 DIST_T * height, DIST_T * grade)
 {
+	// cppcheck-suppress knownConditionTrueFalse
+	// bCacheElev is never set FALSE anywhere in the codebase (no debug
+	// toggle wired up); the cache is unconditionally enabled by design.
 	if ( ! bCacheElev ) {
 		return FALSE;
 	}
@@ -346,7 +379,8 @@ EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep,
 	     (elev->option&ELEV_VISIBLE)==0 ) {
 		return;
 	}
-	if ( (trk1=GetTrkEndTrk(trk,ep)) && GetTrkIndex(trk1)<GetTrkIndex(trk) ) {
+	trk1=GetTrkEndTrk(trk,ep);
+	if ( trk1 && GetTrkIndex(trk1)<GetTrkIndex(trk) ) {
 		return;
 	}
 
@@ -425,7 +459,8 @@ EXPORT DIST_T EndPtDescriptionDistance(
 	if (((e->option&ELEV_VISIBLE)==0) && !show_hidden) {
 		return DIST_INF;
 	}
-	if ((trk1=GetTrkEndTrk(trk,ep)) && GetTrkIndex(trk1)<GetTrkIndex(trk)) {
+	trk1=GetTrkEndTrk(trk,ep);
+	if (trk1 && GetTrkIndex(trk1)<GetTrkIndex(trk)) {
 		return DIST_INF;
 	}
 	if ((e->option&ELEV_VISIBLE)==0) {					//Hidden - disregard offset
@@ -464,13 +499,14 @@ EXPORT STATUS_T EndPtDescriptionMove(
 //		p1 = pos;
 		e->option |= ELEV_VISIBLE; //Make sure we make visible
 		DrawEndElev( &mainD, trk, ep, wDrawColorWhite );
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_MOVE:
 	case C_UP:
 //		p1 = pos;
 		e->doff.x = (pos.x-p0.x);
 		e->doff.y = (pos.y-p0.y);
-		if ((trk1=GetTrkEndTrk(trk,ep))) {
+		trk1=GetTrkEndTrk(trk,ep);
+		if (trk1) {
 			EPINX_T ep1 = GetEndPtConnectedToMe(trk1,trk);
 			trkEndPt_p epp = GetTrkEndPt( trk1, ep1 );
 //			e1 = &trk1->endPt[GetEndPtConnectedToMe(trk1,trk)].elev;
@@ -484,6 +520,11 @@ EXPORT STATUS_T EndPtDescriptionMove(
 
 	case C_REDRAW:
 		DrawEndElev( &tempD, trk, ep, drawColorPreviewSelected );
+		break;
+	default:
+		if ( log_trkendpt < 0 ) { log_trkendpt = LogFindIndex( "trkendpt" ); }
+		LOG( log_trkendpt, 1, ( "unexpected action %d in EndPtDescriptionMove\n",
+		                        action ) )
 		break;
 	}
 	return C_CONTINUE;
