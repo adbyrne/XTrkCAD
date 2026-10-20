@@ -249,7 +249,7 @@ left visible in the `cppcheck-deep`/`clang-tidy` report-only artifacts instead �
 
 `ProgramVersion.cmake` defines `XTRKCAD_VERSION` from three plain numbers
 (`XTRKCAD_MAJOR_VERSION.XTRKCAD_MINOR_VERSION.XTRKCAD_RELEASE_VERSION`, plus an optional
-`XTRKCAD_VERSION_MODIFIER` suffix like `Dev`), then — on this branch only — extends it with two
+`XTRKCAD_VERSION_MODIFIER` suffix like `Dev`), then extends it with two
 more layers so that different builds of the `default` branch can coexist on one machine instead of silently
 overwriting each other.
 

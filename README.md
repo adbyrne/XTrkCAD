@@ -32,7 +32,8 @@ whichever fork's Actions did the deploying. See
   (replaces Inkscape for bitmap generation), CMocka shared library, and
   forward compatibility with CMake 4.x.
 - **GTK3 migration** — porting the `wlib` UI abstraction layer off GTK+ 2.0 (deprecated,
-  end-of-life) onto GTK+ 3.
+  end-of-life) onto GTK+ 3. Done: upstream made the GTK3 line its default branch on
+  2026-10-20.
 - **New features** — improvements and fixes worth contributing back upstream,
   developed here first.
 
