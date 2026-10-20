@@ -228,13 +228,13 @@ files, param files, locale `.mo` files — via `wGetAppLibDir()`
 `<binary-dir>/../share/xtrkcad-gtk` relative to the running executable, then falls back to
 `/usr/share`/`/usr/local/share`. None of that layout exists in a raw out-of-source build
 directory — those files are placed only by CMake's `install()` rules, not by `cmake --build` — so
-running `build-gtk3v2main/app/bin/xtrkcad` directly fails to find them. Do a real (scratch)
+running `build/app/bin/xtrkcad` directly fails to find them. Do a real (scratch)
 install first:
 
 ```sh
-cmake --build build-gtk3v2main
-cmake --install build-gtk3v2main --prefix build-gtk3v2main/install
-build-gtk3v2main/install/bin/xtrkcad -d join=3
+cmake --build build
+cmake --install build --prefix build/install
+build/install/bin/xtrkcad -d join=3
 ```
 
 With `--prefix` placed one level above `bin/` like this, the `../share/xtrkcad-gtk` relative
@@ -242,7 +242,7 @@ lookup finds everything automatically. If the scratch prefix lives somewhere els
 `/tmp`), point `XTRKCADGTKLIB` at the installed `share/xtrkcad-gtk` directory explicitly:
 
 ```sh
-cmake --install build-gtk3v2main --prefix /tmp/xtrkcad-scratch
+cmake --install build --prefix /tmp/xtrkcad-scratch
 XTRKCADGTKLIB=/tmp/xtrkcad-scratch/share/xtrkcad-gtk /tmp/xtrkcad-scratch/bin/xtrkcad -d join=3
 ```
 
