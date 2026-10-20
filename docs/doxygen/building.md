@@ -7,9 +7,9 @@ anything itself.
 
 The commands below are what CI actually runs, with the CI-only bits called out — a local desktop
 build doesn't need everything CI needs. The full, authoritative CI configuration lives in
-`.github/workflows/` (`ci-gtk3.yml` for this branch, `ci-gtk3-preview.yml` for its
-next-toolchain preview, plus `ci.yml` for the GTK2 `main` branch, `ci-mcp.yml`, `codeql.yml`, and
-`release.yml`) — worth reading directly if you have a GitHub account and want
+`.github/workflows/` (`ci-gtk3.yml` for the main CI, `ci-gtk3-preview.yml` for its
+next-toolchain preview, plus `ci-mcp.yml`, `codeql.yml`, `release.yml`, and
+`hg-sync-default.yml`) — worth reading directly if you have a GitHub account and want
 more detail than the summary below, e.g. exact job-by-job dependency lists or the release
 packaging steps. If you're working purely from the SourceForge/Hg checkout, these files are
 still present in this tree even though Mercurial itself doesn't run them — GitHub Actions only
