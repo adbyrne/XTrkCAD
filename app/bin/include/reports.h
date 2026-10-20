@@ -567,15 +567,14 @@ void ReportsKinkedJoints(void *unused);
  * (the "Name" in a structured field editor Name:Value pair, SF #798) is
  * registered via the "Manage Notes" function, or "ROOT" if none of its
  * own field names are registered (SF #800 phase 2; phase 1 added the
- * Type filter, phase 3 will add the Manage Notes dialog itself, not
- * built yet, so every JSON note falls under "ROOT" for now). This is
+ * Type filter and phase 3 the Manage Notes dialog). This is
  * deliberately about which field *names* a note happens to use, not the
  * value of any particular field (in particular, not tied to a "kind"
  * field specifically) -- matches the original motivating case, real
  * notes using ad-hoc ROOT-level names ("spots", "meta", "message") with
  * no "kind" field at all. Interactive (click-to-navigate) as of #799's
- * own follow-up. GTK3V2MAIN only, same Layer Groups/PARAMVERSION-13
- * dependency as the rest of JSON Note.
+ * own follow-up. Same Layer Groups/PARAMVERSION-13 dependency as the
+ * rest of JSON Note.
  * ------------------------------------------------------------------- */
 
 /** Mirrors note.h's \c enum \c noteCommands values (0=text, 1=link,
