@@ -252,8 +252,8 @@ CI pins its runner images and the compilers that gate a build. Every Linux job i
 `ci-gtk3.yml`, `release.yml` and `codeql.yml` runs on `ubuntu-24.04` (or `ubuntu-24.04-arm`)
 rather than `ubuntu-latest`, which GitHub moved to Ubuntu 26.04 on 2026-10-19. The Ubuntu image
 fixes cppcheck, clang-tidy, GCC and Clang, so they only change when we move the runners on
-purpose. macOS jobs run on `macos-26` with Xcode selected through `DEVELOPER_DIR` (which fixes
-AppleClang), and Windows jobs run on `windows-2025` with MinGW GCC installed at an exact MSYS2
+purpose. macOS jobs run on `macos-26` (Apple Silicon), plus `macos-26-intel` for the Intel
+package in `release.yml`, with Xcode selected through `DEVELOPER_DIR` (which fixes AppleClang), and Windows jobs run on `windows-2025` with MinGW GCC installed at an exact MSYS2
 package version. Homebrew and the rest of MSYS2 (GTK, CMake, libzip and so on) can't be pinned
 and still update on their own schedule. `ci-gtk3-preview.yml` runs the toolchain-sensitive jobs
 on the next images ahead of a move (see \ref ci-tooling-overview "CI tooling overview"). The
@@ -274,7 +274,7 @@ in this table.
 | clang-tidy | pinned (runner) | 18.0 (Ubuntu 24.04) |
 | GCC (Linux) | pinned (runner) | 13.3.0 (Ubuntu 24.04.4 LTS) |
 | Clang (Linux) | pinned (runner) | 18.0 (Ubuntu 24.04) |
-| Runner images | pinned | `ubuntu-24.04`, `ubuntu-24.04-arm`, `macos-26`, `windows-2025` |
+| Runner images | pinned | `ubuntu-24.04`, `ubuntu-24.04-arm`, `macos-26`, `macos-26-intel` (Intel package), `windows-2025` |
 | AppleClang (macOS) | pinned (Xcode) | Xcode 26.6, Clang 21.0.0 (`.github/actions/select-xcode`) |
 | MinGW GCC (Windows) | pinned | 16.2.0-6 (MSYS2 `gcc`/`gcc-libs`, installed with `pacman -U` by `.github/actions/msys2-pin-gcc`) |
 
