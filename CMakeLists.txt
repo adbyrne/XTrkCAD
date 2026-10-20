@@ -135,7 +135,7 @@ set(XTRKCAD_LOCALE_INSTALL_DIR "share/locale")
 # XTRKCAD_BIN is the single source of truth for this build's identity: the
 # installed binary name, package name, desktop file name, and (via the same
 # XTRKCAD_FILE_VERSION string reused in app/bin/custom.c) the runtime
-# work/prefs directory name. Embedding the version lets multiple GTK3V2MAIN
+# work/prefs directory name. Embedding the version lets multiple
 # point releases install side by side and run simultaneously without
 # colliding. XTRKCAD_FILE_VERSION (ProgramVersion.cmake) also carries a
 # dev-build hash suffix on untagged builds when XTRKCAD_APPEND_SRC_HASH is
