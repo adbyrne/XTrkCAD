@@ -33,8 +33,9 @@ on:
         default: false
 
 # Runners and compilers are pinned the same way as ci-gtk3.yml (see its
-# header): ubuntu-24.04(-arm), macos-26 with .github/actions/select-xcode,
-# windows-2025 with .github/actions/msys2-pin-gcc. The report jobs come from
+# header): ubuntu-24.04(-arm), macos-26 and macos-26-intel with
+# .github/actions/select-xcode, windows-2025 with
+# .github/actions/msys2-pin-gcc. The report jobs come from
 # gtk3-qa-reports.yml, shared with ci-gtk3.yml, so they can't drift apart.
 
 jobs:
@@ -199,9 +200,21 @@ jobs:
           path: build/*.deb
           retention-days: 14
 
-  # ── macOS ARM64 — tar.gz (Homebrew-dependent) + DMG (self-contained) ───────
+  # ── macOS ARM64 + Intel x86-64 — tar.gz (Homebrew-dependent) + DMG ────────
+  # Intel Macs stay in use (macOS 26 is their last release, but they keep
+  # running it; Oct 2026 user poll: 6 Intel vs 10 Apple Silicon), so both
+  # architectures get a package. Same macOS and Xcode on both runners.
   package-macos:
-    runs-on: macos-26
+    name: package-macos (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            runner: macos-26
+          - arch: x86_64
+            runner: macos-26-intel
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/select-xcode
@@ -240,13 +253,13 @@ jobs:
         # prerequisites: brew install gtk+3 libzip librsvg
         run: |
           cmake --install build --prefix staging
-          tar -czf "xtrkcad-${XTRKCAD_VERSION}-macos-arm64.tar.gz" -C staging .
+          tar -czf "xtrkcad-${XTRKCAD_VERSION}-macos-${{ matrix.arch }}.tar.gz" -C staging .
 
       - name: Upload Homebrew archive
         uses: actions/upload-artifact@v7
         with:
-          name: packages-macos-arm64
-          path: xtrkcad-*-macos-arm64.tar.gz
+          name: packages-macos-${{ matrix.arch }}
+          path: xtrkcad-*-macos-${{ matrix.arch }}.tar.gz
           retention-days: 14
 
       - name: Build self-contained DMG
@@ -267,7 +280,7 @@ jobs:
         uses: actions/upload-artifact@v7
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.include_dmg == true }}
         with:
-          name: packages-macos-arm64-dmg
+          name: packages-macos-${{ matrix.arch }}-dmg
           path: "distribution/osx/gtk-bundle/xtrkcad-OSX-*.dmg"
           retention-days: 14
 
