@@ -849,6 +849,21 @@
                 <property name="position">4</property>
               </packing>
             </child>
+            <child>
+              <object class="GtkToggleButton" id="filter">
+                <property name="can-focus">True</property>
+                <property name="label" translatable="yes">Filter Layers/Groups...</property>
+                <property name="margin-start">6</property>
+                <property name="receives-default">True</property>
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack-type">end</property>
+                <property name="position">5</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>

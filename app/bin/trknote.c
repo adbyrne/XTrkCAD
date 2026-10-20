@@ -28,6 +28,7 @@
 #include "icons.h"
 #include "misc.h"
 #include "note.h"
+#include "include/notenames.h"
 #include "form.h"
 #include "track.h"
 #include "include/utf8convert.h"
@@ -36,7 +37,7 @@ static int log_trknote = -1;
 
 EXPORT TRKTYP_T T_NOTE = -1;
 
-static wDrawBitMap_p note_bm, link_bm, document_bm;
+static wDrawBitMap_p note_bm, link_bm, document_bm, json_bm;
 
 typedef struct {
 	char *icon;
@@ -50,11 +51,127 @@ static trknoteData_t noteTypes[] = {
 	{ "sticky-note.png", OP_NOTETEXT, N_("Text Note"), "cmdTextNote", ACCL_NOTE},
 	{ "sticky-link.png", OP_NOTELINK, N_("Weblink"), "cmdLinkNote", 0L},
 	{ "sticky-doc.png", OP_NOTEFILE, N_("Document"), "cmdFileNote", 0L},
+	{ "sticky-json.png", OP_NOTEJSON, N_("JSON Note"), "cmdJsonNote", 0L},
 };
 
 static long curNoteType;
 
 #define NOTETYPESCOUNT COUNT(noteTypes)
+
+/** SF #802 follow-on: user-configurable per-note-type visual properties
+ * (color + marker shape), edited via the Manage Notes dialog's per-type
+ * tabs. Indexed by enum noteCommands (OP_NOTETEXT..OP_NOTEJSON). Persisted
+ * as an app preference (NoteTypePrefLoad()/NoteTypePrefSave() below), not
+ * per-file data -- this is about the user's own visual convention for
+ * telling note types apart, not layout content. Defaults below match the
+ * fixed mapping originally shipped with SF #802, so an unconfigured
+ * install looks unchanged. */
+typedef struct {
+	wDrawColor color;
+	enum noteShape shape;
+} noteTypeProps_t;
+
+static noteTypeProps_t noteTypeProps[NOTETYPESCOUNT] = {
+	{ (wDrawColor)wRGB(255, 215, 0), NOTE_SHAPE_SQUARE },   /* OP_NOTETEXT: gold */
+	{ (wDrawColor)wRGB(0, 0, 255), NOTE_SHAPE_SQUARE },     /* OP_NOTELINK: blue */
+	{ (wDrawColor)wRGB(0, 128, 0), NOTE_SHAPE_SQUARE },     /* OP_NOTEFILE: dark green */
+	{ (wDrawColor)wRGB(0, 255, 255), NOTE_SHAPE_SQUARE },   /* OP_NOTEJSON: aqua */
+};
+
+#define NOTETYPEPREF_SECTION ("NoteTypes")
+
+/* Fixed, locale-independent preference-key prefixes, one per NOTETYPESCOUNT
+ * entry (index matches noteTypes[]/noteTypeProps[] order) -- deliberately
+ * NOT noteTypes[].cmdName, which is a translatable display string
+ * (N_("Text Note") etc.) and would change the persisted key per locale. */
+static const char *noteTypePrefKey[NOTETYPESCOUNT] = {
+	"Text", "Weblink", "Document", "Json"
+};
+
+/**
+ * Load noteTypeProps[] from the app preference file, overriding the
+ * built-in defaults above wherever the user has customized a type. Call
+ * once at startup (InitTrkNote()).
+ */
+static void NoteTypePrefLoad(void)
+{
+	long rgb, shape;
+
+	for (unsigned int i = 0; i < NOTETYPESCOUNT; i++) {
+		char key[32];
+		snprintf(key, sizeof key, "%s.Color", noteTypePrefKey[i]);
+		if (wPrefGetInteger(NOTETYPEPREF_SECTION, key, &rgb,
+		                    (long)noteTypeProps[i].color)) {
+			noteTypeProps[i].color = (wDrawColor)rgb;
+		}
+		snprintf(key, sizeof key, "%s.Shape", noteTypePrefKey[i]);
+		if (wPrefGetInteger(NOTETYPEPREF_SECTION, key, &shape,
+		                    (long)noteTypeProps[i].shape) &&
+		    shape >= 0 && shape < NOTE_SHAPE_COUNT) {
+			noteTypeProps[i].shape = (enum noteShape)shape;
+		}
+	}
+}
+
+/**
+ * Save noteTypeProps[] to the app preference file. Call after the Manage
+ * Notes dialog's per-type tabs are applied.
+ */
+EXPORT void NoteTypePrefSave(void)
+{
+	for (unsigned int i = 0; i < NOTETYPESCOUNT; i++) {
+		char key[32];
+		snprintf(key, sizeof key, "%s.Color", noteTypePrefKey[i]);
+		wPrefSetInteger(NOTETYPEPREF_SECTION, key, (long)noteTypeProps[i].color);
+		snprintf(key, sizeof key, "%s.Shape", noteTypePrefKey[i]);
+		wPrefSetInteger(NOTETYPEPREF_SECTION, key, (long)noteTypeProps[i].shape);
+	}
+}
+
+/* noteTypeProps[] is file-scope static -- these four accessors are the
+ * Manage Notes dialog's only way to read/write a type's color/shape,
+ * matching this codebase's general preference for a narrow accessor API
+ * over direct struct access (e.g. dlayergroup.c's LayerGroupHasMember()
+ * and friends). All four clamp an out-of-range \p op to OP_NOTETEXT/
+ * NOTE_SHAPE_SQUARE rather than reading/writing out of bounds. */
+/* (int) casts below: an enum with only non-negative enumerators may be
+ * given an unsigned underlying type by the compiler, making a bare
+ * `op < 0` a tautologically-false comparison -- GCC accepts this silently,
+ * Clang's -Wtautological-unsigned-enum-zero-compare (-Werror under CI)
+ * does not. Casting to a definitely-signed type keeps the bounds check
+ * genuinely portable instead of assuming a particular compiler's choice. */
+EXPORT wDrawColor NoteTypeGetColor(enum noteCommands op)
+{
+	if ((int)op < 0 || op >= (enum noteCommands)NOTETYPESCOUNT) {
+		op = OP_NOTETEXT;
+	}
+	return noteTypeProps[op].color;
+}
+
+EXPORT void NoteTypeSetColor(enum noteCommands op, wDrawColor color)
+{
+	if ((int)op < 0 || op >= (enum noteCommands)NOTETYPESCOUNT) {
+		return;
+	}
+	noteTypeProps[op].color = color;
+}
+
+EXPORT enum noteShape NoteTypeGetShape(enum noteCommands op)
+{
+	if ((int)op < 0 || op >= (enum noteCommands)NOTETYPESCOUNT) {
+		return NOTE_SHAPE_SQUARE;
+	}
+	return noteTypeProps[op].shape;
+}
+
+EXPORT void NoteTypeSetShape(enum noteCommands op, enum noteShape shape)
+{
+	if ((int)op < 0 || op >= (enum noteCommands)NOTETYPESCOUNT || (int)shape < 0 ||
+	    shape >= NOTE_SHAPE_COUNT) {
+		return;
+	}
+	noteTypeProps[op].shape = shape;
+}
 
 
 /*****************************************************************************
@@ -74,6 +191,110 @@ EXPORT track_p NewNote(wIndex_t index, coOrd p, enum noteCommands command )
 }
 
 /**
+ * Draw a note's on-canvas marker in the given shape: an outline in
+ * \p outlineColor (carries selection/layer-color state, resolved by the
+ * caller the same way it always has been) filled with \p fillColor (the
+ * note type's own configured color). The two are always two separate
+ * DrawPoly() passes -- outline first, then fill on top -- so a shape can
+ * gain a per-type fill color without losing the outline's existing
+ * meaning.
+ *
+ * \param d IN drawing environment
+ * \param center IN marker center (the note's position)
+ * \param dist IN marker "radius" (half-width for the square, true radius
+ *                for the round/polygon/star/cross shapes)
+ * \param shape IN which marker shape to draw
+ * \param outlineColor IN outline color
+ * \param fillColor IN fill color
+ */
+static void DrawNoteShape(drawCmd_p d, coOrd center, DIST_T dist,
+                          enum noteShape shape, wDrawColor outlineColor,
+                          wDrawColor fillColor)
+{
+	coOrd p[12];
+	int type[12];
+	int n;
+
+	switch (shape) {
+	case NOTE_SHAPE_CIRCLE:
+		DrawFillCircle(d, center, dist, fillColor);
+		DrawArc(d, center, dist, 0.0, 360.0, FALSE, 0, outlineColor);
+		return;
+
+	case NOTE_SHAPE_STAR:
+		/* 5-pointed star: 10 vertices alternating outer/inner radius. */
+		n = 10;
+		for (int i = 0; i < n; i++) {
+			PointOnCircle(&p[i], center, (i % 2 == 0) ? dist : dist * 0.4,
+			              i * 36.0);
+		}
+		break;
+
+	case NOTE_SHAPE_CROSS:
+	case NOTE_SHAPE_X: {
+		/* 12-vertex plus-sign outline; X is the same shape rotated 45
+		 * degrees around its own center. */
+		DIST_T arm = dist * 0.4;
+		n = 12;
+		p[0].x = arm;   p[0].y = dist;
+		p[1].x = arm;   p[1].y = arm;
+		p[2].x = dist;  p[2].y = arm;
+		p[3].x = dist;  p[3].y = -arm;
+		p[4].x = arm;   p[4].y = -arm;
+		p[5].x = arm;   p[5].y = -dist;
+		p[6].x = -arm;  p[6].y = -dist;
+		p[7].x = -arm;  p[7].y = -arm;
+		p[8].x = -dist; p[8].y = -arm;
+		p[9].x = -dist; p[9].y = arm;
+		p[10].x = -arm; p[10].y = arm;
+		p[11].x = -arm; p[11].y = dist;
+		for (int i = 0; i < n; i++) {
+			p[i].x += center.x;
+			p[i].y += center.y;
+			if (shape == NOTE_SHAPE_X) {
+				Rotate(&p[i], center, 45.0);
+			}
+		}
+		break;
+	}
+
+	case NOTE_SHAPE_SQUARE:
+	default:
+		if (shape == NOTE_SHAPE_DIAMOND || shape == NOTE_SHAPE_TRIANGLE ||
+		    shape == NOTE_SHAPE_PENTAGON || shape == NOTE_SHAPE_HEXAGON ||
+		    shape == NOTE_SHAPE_OCTAGON) {
+			/* regular polygon: N points evenly spaced around a circle. */
+			int sides = shape == NOTE_SHAPE_DIAMOND ? 4 :
+			            shape == NOTE_SHAPE_TRIANGLE ? 3 :
+			            shape == NOTE_SHAPE_PENTAGON ? 5 :
+			            shape == NOTE_SHAPE_HEXAGON ? 6 : 8;
+			n = sides;
+			for (int i = 0; i < n; i++) {
+				PointOnCircle(&p[i], center, dist, i * (360.0 / n));
+			}
+		} else {
+			/* NOTE_SHAPE_SQUARE (and any unrecognized value): the
+			 * original "square with a lopped-off corner" point set,
+			 * unchanged from before this shape system existed. */
+			n = 5;
+			p[0].x = p[1].x = center.x - dist;
+			p[2].x = p[3].x = p[4].x = center.x + dist;
+			p[1].y = p[2].y = center.y - dist;
+			p[3].y = p[4].y = p[0].y = center.y + dist;
+			p[3].y = p[3].y - (dist / 2);
+			p[4].x = p[4].x - (dist / 2);
+		}
+		break;
+	}
+
+	for (int i = 0; i < n; i++) {
+		type[i] = 0;
+	}
+	DrawPoly(d, n, p, type, outlineColor, 0, DRAW_CLOSED);
+	DrawPoly(d, n, p, type, fillColor, 0, DRAW_FILL);
+}
+
+/**
  * Draw the icon for a note into the drawing area
  *
  * \param t IN note
@@ -84,43 +305,23 @@ EXPORT track_p NewNote(wIndex_t index, coOrd p, enum noteCommands command )
 static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 {
 	struct extraDataNote_t *xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
-	coOrd p[5];
 
+	//while the icon is moved, draw a square with a lopped off corner
+	//because CmdMove draws all selected object into tempSeg and
+	//tempSegDrawFuncs doesn't have a BitMap drawing func
 
-	if ((d->options & DC_SIMPLE) || mainD.scale >= 16) {
-		//while the icon is moved, draw a square with a lopped off corner
-		//because CmdMove draws all selected object into tempSeg and
-		//tempSegDrawFuncs doesn't have a BitMap drawing func
-		int type[5];
-		DIST_T dist;
-		dist = 0.8 + 0.1*(mainD.scale-16)/4;
-		p[0].x = p[1].x = xx->pos.x - dist;
-		p[2].x = p[3].x = p[4].x = xx->pos.x + dist;
-		p[1].y = p[2].y = xx->pos.y - dist;
-		p[3].y = p[4].y = p[0].y = xx->pos.y + dist;
-		p[3].y = p[3].y - (dist/2);
-		p[4].x = p[4].x - (dist/2);
-
-		for (int i=0; i<5; i++) {
-			type[i] = 0;
-		}
-		DrawPoly(d, 5, p, type, color, 0, DRAW_CLOSED);
-		DrawPoly(d, 5, p, type, drawColorGold, 0, DRAW_FILL);
-	} else {
-		// draw a bitmap for static object
-		wDrawBitMap_p bm;
-
-		if (xx->op == OP_NOTELINK ||(inDescribeCmd && curNoteType == OP_NOTELINK)) {
-			bm = link_bm;
-		} else {
-			if (xx->op == OP_NOTEFILE || (inDescribeCmd && curNoteType == OP_NOTEFILE)) {
-				bm = document_bm;
-			} else {
-				bm = note_bm;
-			}
-		}
-		DrawBitMap(d, xx->pos, bm, color);
+	/* SF #802 (+follow-on): drawn at every zoom, not just DC_SIMPLE/
+	 * scale>=16 -- `color` keeps conveying selection/layer-color state
+	 * (DrawTrack(), track.c), the note type's own color/shape come from
+	 * noteTypeProps[] instead, see DrawNoteShape()'s own doc comment. */
+	DIST_T dist = 0.8 + 0.1 * (mainD.scale - 16) / 4;
+	enum noteCommands op = inDescribeCmd ? (enum noteCommands)curNoteType : xx->op;
+	if ((int)op < 0 || op >= (enum noteCommands)NOTETYPESCOUNT) {
+		op = OP_NOTETEXT;
 	}
+
+	DrawNoteShape(d, xx->pos, dist, noteTypeProps[op].shape, color,
+	              noteTypeProps[op].color);
 }
 
 static DIST_T DistanceNote(track_p t, coOrd * p)
@@ -142,6 +343,7 @@ static void DeleteNote(track_p t)
 
 	switch (xx->op) {
 	case OP_NOTETEXT:
+	case OP_NOTEJSON:
 		if (xx->noteData.text) {
 			MyFree(xx->noteData.text);
 		}
@@ -220,6 +422,7 @@ static BOOL_T WriteNote(track_p t, FILE * f)
 	char *s[2] = { NULL, NULL };
 	switch (xx->op) {
 	case OP_NOTETEXT:
+	case OP_NOTEJSON:
 		s[0]=ConvertToEscapedText( xx->noteData.text );
 		break;
 	case OP_NOTELINK:
@@ -294,6 +497,7 @@ ReadTrackNote(char *line)
 		xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
 		switch (noteType) {
 		case OP_NOTETEXT:
+		case OP_NOTEJSON:
 			if ( !GetArgs( cp, "qc", &sText, &cp ) ) {
 				return FALSE;
 			}
@@ -374,6 +578,14 @@ ReadTrackNote(char *line)
 			xx->noteData.fileData.inArchive = FALSE;
 			break;
 		}
+		case OP_NOTEJSON:
+			/* Unreachable by construction: JSON Note postdates this legacy
+			 * pre-v12 multiline format entirely, and the bound check above
+			 * ("<= OP_NOTEFILE") already excludes it from noteType. Listed
+			 * explicitly (not via a catch-all default) so -Wswitch still
+			 * warns if a future op value is added here without a decision
+			 * being made about it. */
+			break;
 
 		}
 		MyFree(noteText);
@@ -424,12 +636,12 @@ static void DescribeNote(track_p trk, char * str, CSIZE_T len)
 {
 	if (IsLinkNote(trk)) {
 		DescribeLinkNote(trk, str, len);
+	} else if (IsFileNote(trk)) {
+		DescribeFileNote(trk, str, len);
+	} else if (IsJsonNote(trk)) {
+		DescribeJsonNote(trk, str, len);
 	} else {
-		if (IsFileNote(trk)) {
-			DescribeFileNote(trk, str, len);
-		} else {
-			DescribeTextNote(trk, str, len);
-		}
+		DescribeTextNote(trk, str, len);
 	}
 }
 
@@ -546,6 +758,9 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 		case OP_NOTEFILE:
 			NewFileNoteUI(pos);
 			break;
+		case OP_NOTEJSON:
+			NewJsonNoteUI(pos);
+			break;
 		default:
 			if ( log_trknote < 0 ) { log_trknote = LogFindIndex( "trknote" ); }
 			LOG( log_trknote, 1, ( "unexpected curNoteType %d in CmdNote\n", curNoteType ) )
@@ -565,6 +780,9 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 				break;
 			case OP_NOTEFILE:
 				DrawBitMap(&tempD, oldPos, document_bm, normalColor);
+				break;
+			case OP_NOTEJSON:
+				DrawBitMap(&tempD, oldPos, json_bm, normalColor);
 				break;
 			default:
 				if ( log_trknote < 0 ) { log_trknote = LogFindIndex( "trknote" ); }
@@ -587,12 +805,61 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 	return C_CONTINUE;
 }
 
+/**
+ * Parse a "MANAGENOTES ..." file-format line (SF #800 phase 3):
+ *   MANAGENOTES "\<name\>"
+ * registers \<name\> into the Manage Notes registry (notenames.h). A
+ * malformed line is silently ignored, same convention as ReadLayerGroups().
+ *
+ * The keyword is "MANAGENOTES", not the shorter "NOTENAME" originally
+ * used -- found live via Xvfb save/reload testing that ReadTrack()'s
+ * object-type dispatch (track.c) does a plain prefix strncmp() against
+ * every registered track type name with no word-boundary check, so a
+ * line starting with "NOTENAME " was silently swallowed by the "NOTE"
+ * track-object reader instead of ever reaching this function -- it tried
+ * to parse the remainder ("NAME \"kind\"") as NOTE's own numeric fields
+ * and failed with a confusing "expected integer" error. "MANAGENOTES"
+ * doesn't collide with any registered track type name.
+ *
+ * \param line IN the remainder of the line after "MANAGENOTES "
+ */
+void ReadNoteNames(char *line)
+{
+	char *name;
+
+	if (!GetArgs(line, "q", &name)) {
+		return;
+	}
+	NoteNameAdd(name);
+	MyFree(name);
+}
+
+/**
+ * Write every registered Manage Notes name (notenames.h) to the layout
+ * file as its own "MANAGENOTES" line (SF #800 phase 3).
+ *
+ * \param[in] f open file handle
+ * \return TRUE on success
+ */
+BOOL_T WriteNoteNames(FILE *f)
+{
+	BOOL_T rc = TRUE;
+
+	for (int i = 0; i < NoteNameCount(); i++) {
+		rc &= fprintf(f, "MANAGENOTES \"%s\"\n", NoteNameAt(i)) > 0;
+	}
+
+	return rc;
+}
+
 void InitTrkNote(wMenu_p menu)
 {
 	note_bm = wDrawBitMapCreate(mainD.d, 8, 8, XTRKCAD_SYMBOLS_PATH, "note.png");
 	link_bm = wDrawBitMapCreate(mainD.d, 8, 8, XTRKCAD_SYMBOLS_PATH, "link.png");
 	document_bm = wDrawBitMapCreate(mainD.d, 8, 8, XTRKCAD_SYMBOLS_PATH,
 	                                "clip.png");
+	json_bm = wDrawBitMapCreate(mainD.d, 8, 8, XTRKCAD_SYMBOLS_PATH,
+	                            "note-json.png");
 
 	ButtonGroupBegin(_("Notes"), "cmdNoteCmd", _("Add notes"));
 	for (int i = 0; i < NOTETYPESCOUNT; i++) {
@@ -607,4 +874,6 @@ void InitTrkNote(wMenu_p menu)
 	ButtonGroupEnd();
 
 	T_NOTE = InitObject(&noteCmds);
+
+	NoteTypePrefLoad();
 }
