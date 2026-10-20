@@ -173,8 +173,24 @@ jobs:
           branch="test/upstream-default-$(date -u +%F)-${TIP:0:12}"
           git checkout -q -b "$branch" "origin/$GIT_BRANCH"
 
-          if [ -s "$RUNNER_TEMP/upstream.diff" ] && \
-             ! git apply --index "$RUNNER_TEMP/upstream.diff" 2> "$RUNNER_TEMP/apply.err"; then
+          # Apply file by file. Our process is git first, so an Hg change can
+          # already be on main; a file whose diff reverse-applies cleanly is
+          # skipped as already present instead of failing the whole sync.
+          : > "$RUNNER_TEMP/apply.err"
+          : > "$RUNNER_TEMP/already.txt"
+          if [ -s "$RUNNER_TEMP/upstream.diff" ]; then
+            sed -n 's|^diff --git a/.* b/||p' "$RUNNER_TEMP/upstream.diff" | sort -u > "$RUNNER_TEMP/files.txt"
+            while IFS= read -r f; do
+              if git apply --index --include="$f" "$RUNNER_TEMP/upstream.diff" 2>> "$RUNNER_TEMP/apply.err"; then
+                :
+              elif git apply --reverse --check --include="$f" "$RUNNER_TEMP/upstream.diff" 2> /dev/null; then
+                echo "$f" >> "$RUNNER_TEMP/already.txt"
+              else
+                echo "FAILED: $f" >> "$RUNNER_TEMP/apply.err"
+              fi
+            done < "$RUNNER_TEMP/files.txt"
+          fi
+          if grep -q '^FAILED: ' "$RUNNER_TEMP/apply.err"; then
             cat "$RUNNER_TEMP/apply.err"
             fail_with_issue "Hg sync (default): upstream ${TIP:0:12} doesn't apply to $GIT_BRANCH" \
               "Hg \`$HG_BRANCH\` ${LAST:0:12} -> ${TIP:0:12} ($COUNT changesets) doesn't apply cleanly to git \`$GIT_BRANCH\`, so git and Hg have drifted. The diff is attached to the run as the \`upstream-diff\` artifact.
@@ -189,6 +205,11 @@ jobs:
             echo
             head -60 "$RUNNER_TEMP/changesets.txt"
             [ "$COUNT" -le 60 ] || echo "... and $((COUNT - 60)) more"
+            if [ -s "$RUNNER_TEMP/already.txt" ]; then
+              echo
+              echo "Already on $GIT_BRANCH (landed git first), skipped:"
+              sed 's/^/  /' "$RUNNER_TEMP/already.txt"
+            fi
             echo
             echo "Hg-Node: $TIP"
           } > "$RUNNER_TEMP/msg.txt"

@@ -61,7 +61,9 @@ anonymously from SF's read-only URL and diffs from the last synced node, which i
 `Hg-Node:` commit trailer on `main` (PR #240's merge commit carries r7752). It applies the diff
 to a `test/upstream-default-*` branch and runs `ci-gtk3.yml` there. If CI passes, it
 fast-forwards `main`, runs `main`'s CI, and deletes the test branch together with its runs. If
-the patch won't apply, CI fails, or `main` moved in the meantime, it opens a GitHub issue titled
+a file's change is already on `main` (our git-first changes, once they land in Hg), it's skipped
+and listed in the sync commit. If the rest won't apply, CI fails, or `main` moved in the
+meantime, it opens a GitHub issue titled
 `Hg sync (default): …` and leaves `main` alone. At session start, run
 `gh issue list --repo adbyrne/XTrkCAD --search "Hg sync in:title"`. A `default` hit from the
 `incoming` check above is something the workflow will pick up, not local work. Run it by hand
